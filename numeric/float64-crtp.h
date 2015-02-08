@@ -61,10 +61,10 @@ LowerFloat64 operator"" _l(long double);
 UpperFloat64 operator"" _u(long double);
 ApprxFloat64 operator"" _a(long double);
 
-Void Float::set_rounding_to_nearest();
-Void Float::set_rounding_downward();
-Void Float::set_rounding_upward();
-Void Float::set_rounding_toward_zero();
+Void Float64::set_rounding_to_nearest();
+Void Float64::set_rounding_downward();
+Void Float64::set_rounding_upward();
+Void Float64::set_rounding_toward_zero();
 
 template<class N> inline N& operator+=(NumberObject<N>& n1, const NumberObject<N>& n2) {
     n1.upcast()=n1.upcast()+n2.upcast(); return n1.upcast(); }

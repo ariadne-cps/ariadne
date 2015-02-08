@@ -52,7 +52,7 @@ static const Int TOP_MARGIN = 10;
 static const Int RIGHT_MARGIN = 10;
 
 
-StringType str(Float x) {
+StringType str(Float64 x) {
     StringStream ss;
     ss << x;
     return ss.str();

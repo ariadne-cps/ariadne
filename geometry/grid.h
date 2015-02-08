@@ -66,13 +66,13 @@ class Grid {
     explicit Grid(Nat d);
 
     //! Construct from a dimension and a spacing in each direction.
-    explicit Grid(Nat d, RawFloat l);
+    explicit Grid(Nat d, RawFloat64 l);
 
     //! Construct from a vector of offsets.
-    explicit Grid(const Vector<RawFloat>& lengths);
+    explicit Grid(const Vector<RawFloat64>& lengths);
 
     //! Construct from a centre point and a vector of offsets.
-    explicit Grid(const Vector<RawFloat>& origin, const Vector<RawFloat>& lengths);
+    explicit Grid(const Vector<RawFloat64>& origin, const Vector<RawFloat64>& lengths);
 
     //! Copy constructor. Copies a reference to the grid data.
     Grid(const Grid& g);
@@ -87,10 +87,10 @@ class Grid {
     Bool operator!=(const Grid& g) const;
 
     //! The origin of the grid.
-    const Vector<RawFloat>& origin() const;
+    const Vector<RawFloat64>& origin() const;
 
     //! The strides between successive integer points.
-    const Vector<RawFloat>& lengths() const;
+    const Vector<RawFloat64>& lengths() const;
 
     //! Write to an output stream.
     friend OutputStream& operator<<(OutputStream& os, const Grid& g);
@@ -113,7 +113,7 @@ class Grid {
     ExactBox box(const GridCell& cell) const;
   private:
     // Create new data
-    Void _create(const Vector<RawFloat>& o, const Vector<RawFloat>& l);
+    Void _create(const Vector<RawFloat64>& o, const Vector<RawFloat64>& l);
   private:
     // Pointer to data. We can test grids for equality using reference semantics since data is a constant.
     std::shared_ptr<Data> _data;

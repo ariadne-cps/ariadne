@@ -155,7 +155,7 @@ template<class X> Void Expansion<X>::combine_terms() {
         while(adv!=end && curr->key()==adv->key()) { curr->data()+=adv->data(); ++adv; } ++curr; }
     this->resize(curr-this->begin()); }
 
-template<> Void Expansion<ExactFloat>::combine_terms() { ARIADNE_NOT_IMPLEMENTED; }
+template<> Void Expansion<ExactFloat64>::combine_terms() { ARIADNE_NOT_IMPLEMENTED; }
 template<> Void Expansion<ExactInterval>::combine_terms() { ARIADNE_NOT_IMPLEMENTED; }
 
 template<class X> Void Expansion<X>::graded_sort() {
@@ -251,9 +251,9 @@ Expansion<X> Expansion<X>::_embed(SizeType before_size, SizeType after_size) con
     return r;
 }
 
-template<class X> Expansion<RawFloat>& Expansion<X>::raw() { return reinterpret_cast<Expansion<RawFloat>&>(*this); }
+template<class X> Expansion<RawFloat64>& Expansion<X>::raw() { return reinterpret_cast<Expansion<RawFloat64>&>(*this); }
 
-template<class X> Expansion<RawFloat>const& Expansion<X>::raw() const { return reinterpret_cast<Expansion<RawFloat>const&>(*this); }
+template<class X> Expansion<RawFloat64>const& Expansion<X>::raw() const { return reinterpret_cast<Expansion<RawFloat64>const&>(*this); }
 
 
 template<class X>

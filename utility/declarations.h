@@ -60,12 +60,12 @@ class String;
 class Tribool;
 
 
-typedef ErrorFloat ValidatedNormType;
-typedef ApproximateFloat ApproximateNormType;
+typedef ErrorFloat64 ValidatedNormType;
+typedef ApproximateFloat64 ApproximateNormType;
 
-typedef ErrorFloat NormType; // FIXME: Remove this typedef
-typedef ErrorFloat ErrorType; // FIXME: Remove this typedef
-typedef ApproximateFloat ApproximateErrorType; // FIXME: Remove this typedef
+typedef ErrorFloat64 NormType; // FIXME: Remove this typedef
+typedef ErrorFloat64 ErrorType; // FIXME: Remove this typedef
+typedef ApproximateFloat64 ApproximateErrorType; // FIXME: Remove this typedef
 
 template<class I> struct CanonicalNumberTypedef;
 template<> struct CanonicalNumberTypedef<ExactTag> { typedef ExactNumber Type; };
@@ -110,11 +110,11 @@ typedef Box<ApproximateInterval> ApproximateBox;
 
 typedef Vector<Rational> RationalVector;
 typedef Vector<Real> RealVector;
-typedef Vector<Float> FloatVector;
-typedef Vector<RawFloat> RawFloatVector;
-typedef Vector<ApproximateFloat> ApproximateFloatVector;
-typedef Vector<ValidatedFloat> ValidatedFloatVector;
-typedef Vector<ExactFloat> ExactFloatVector;
+typedef Vector<Float64> FloatVector;
+typedef Vector<RawFloat64> RawFloatVector;
+typedef Vector<ApproximateFloat64> ApproximateFloatVector;
+typedef Vector<ValidatedFloat64> ValidatedFloatVector;
+typedef Vector<ExactFloat64> ExactFloatVector;
 
 typedef Vector<ExactInterval> ExactIntervalVector;
 typedef Vector<UpperInterval> UpperIntervalVector;
@@ -127,11 +127,11 @@ typedef Vector<ExactNumber> ExactVector;
 
 typedef Matrix<Rational> RationalMatrix;
 typedef Matrix<Real> RealMatrix;
-typedef Matrix<RawFloat> RawFloatMatrix;
-typedef Matrix<Float> FloatMatrix;
-typedef Matrix<ApproximateFloat> ApproximateFloatMatrix;
-typedef Matrix<ValidatedFloat> ValidatedFloatMatrix;
-typedef Matrix<ExactFloat> ExactFloatMatrix;
+typedef Matrix<RawFloat64> RawFloatMatrix;
+typedef Matrix<Float64> FloatMatrix;
+typedef Matrix<ApproximateFloat64> ApproximateFloatMatrix;
+typedef Matrix<ValidatedFloat64> ValidatedFloatMatrix;
+typedef Matrix<ExactFloat64> ExactFloatMatrix;
 
 typedef Point<ApproximateNumber> ApproximatePoint;
 typedef Point<ValidatedNumber> ValidatedPoint;

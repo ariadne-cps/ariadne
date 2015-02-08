@@ -82,16 +82,16 @@ UpperInterval emulrng(const RawFloatVector& x, const RawFloatVector& z) {
     return emulrng(reinterpret_cast<ExactFloatVector const&>(x),reinterpret_cast<ExactFloatVector const&>(z));
 }
 
-UpperFloat total_widths(const UpperBox& bx) {
-    UpperFloat res=0u;
+UpperFloat64 total_widths(const UpperBox& bx) {
+    UpperFloat64 res=0u;
     for(Nat i=0; i!=bx.size(); ++i) {
         res+=(bx[i].width());
     }
     return res;
 }
 
-UpperFloat average_width(const UpperBox& bx) {
-    UpperFloat res=0u;
+UpperFloat64 average_width(const UpperBox& bx) {
+    UpperFloat64 res=0u;
     for(Nat i=0; i!=bx.size(); ++i) {
         if(definitely(bx[i].lower()>bx[i].upper())) { return -infty; }
         res+=bx[i].width();
@@ -99,28 +99,28 @@ UpperFloat average_width(const UpperBox& bx) {
     return res/bx.size();
 }
 
-UpperFloat maximum_scaled_width(const UpperBox& bx, const Vector<ExactFloat>& sf) {
-    UpperFloat res=0u;
+UpperFloat64 maximum_scaled_width(const UpperBox& bx, const Vector<ExactFloat64>& sf) {
+    UpperFloat64 res=0u;
     for(Nat i=0; i!=bx.size(); ++i) {
         res=max(bx[i].width()/sf[i],res);
     }
     return res;
 }
 
-UpperFloat average_scaled_width(const UpperBox& bx, const Vector<ExactFloat>& sf) {
-    UpperFloat res=0u;
+UpperFloat64 average_scaled_width(const UpperBox& bx, const Vector<ExactFloat64>& sf) {
+    UpperFloat64 res=0u;
     for(Nat i=0; i!=bx.size(); ++i) {
         res+=(bx[i].width()/sf[i]);
     }
     return res/bx.size();
 }
 
-Float maximum_scaled_width(const UpperBox& bx, const Vector<Float>& sf) {
-    return maximum_scaled_width(bx,reinterpret_cast<Vector<ExactFloat>const&>(sf)).raw();
+Float64 maximum_scaled_width(const UpperBox& bx, const Vector<Float64>& sf) {
+    return maximum_scaled_width(bx,reinterpret_cast<Vector<ExactFloat64>const&>(sf)).raw();
 }
 
-Float average_scaled_width(const UpperBox& bx, const Vector<Float>& sf) {
-    return average_scaled_width(bx,reinterpret_cast<Vector<ExactFloat>const&>(sf)).raw();
+Float64 average_scaled_width(const UpperBox& bx, const Vector<Float64>& sf) {
+    return average_scaled_width(bx,reinterpret_cast<Vector<ExactFloat64>const&>(sf)).raw();
 }
 
 } // namespace
@@ -208,9 +208,9 @@ Void procedure_constraint_adjoin_outer_approximation_recursion(
 
     UpperBox bbox = apply(f,domain);
 
-    Float domwdth = average_width(domain).raw();
-    Float bbxwdth = average_scaled_width(bbox,paving.grid().lengths()).raw();
-    Float clwdth = average_scaled_width(cell_box,paving.grid().lengths()).raw();
+    Float64 domwdth = average_width(domain).raw();
+    Float64 bbxwdth = average_scaled_width(bbox,paving.grid().lengths()).raw();
+    Float64 clwdth = average_scaled_width(cell_box,paving.grid().lengths()).raw();
 
     ARIADNE_LOG(2,"\nconstraint_adjoin_outer_approximation(...)\n");
     ARIADNE_LOG(2,"   splt="<<splt<<" dpth="<<cell.tree_depth()<<" max_dpth="<<max_dpth<<"\n");
@@ -228,8 +228,8 @@ Void procedure_constraint_adjoin_outer_approximation_recursion(
     // Try to prove disjointness
     const ExactBox& old_domain=domain;
     ExactBox new_domain=old_domain;
-    Float olddomwdth = average_width(domain).raw();
-    Float newdomwdth = olddomwdth;
+    Float64 olddomwdth = average_width(domain).raw();
+    Float64 newdomwdth = olddomwdth;
 
     static const double ACCEPTABLE_REDUCTION_FACTOR = 0.75;
 
@@ -285,8 +285,8 @@ Void procedure_constraint_adjoin_outer_approximation_recursion(
     // It seems that a more efficient algorithm results if the domain
     // is only split if the bounding box is much larger, so we preferentiably
     // split the cell unless the bounding box is 4 times as large
-    Float bbxmaxwdth = maximum_scaled_width(bbox,scalings).raw();
-    Float clmaxwdth = maximum_scaled_width(cell_box,scalings).raw();
+    Float64 bbxmaxwdth = maximum_scaled_width(bbox,scalings).raw();
+    Float64 clmaxwdth = maximum_scaled_width(cell_box,scalings).raw();
 
     if( (bbxmaxwdth > 4.0*clmaxwdth) || (cell.tree_depth()>=max_dpth && (bbxmaxwdth > clmaxwdth)) ) {
         Pair<Nat,double> lipsch = lipschitz_index_and_error(f,new_domain);
@@ -320,7 +320,7 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
     static const double XSIGMA = 0.125;
     static const double TERR = -1.0/((1<<e)*1024.0);
     static const double XZMIN = 1.0/(1<<16);
-    static const Float inf = Ariadne::inf;
+    static const Float64 inf = Ariadne::inf;
 
     // Set up the classes used for constraint propagation and
     // optimisation using the Kuhn-Tucker conditions
@@ -335,12 +335,12 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
     ARIADNE_LOG(2,"  x0="<<x<<", y0="<<y<<"\n");
 
     ExactPoint z(x.size());
-    ExactFloat t;
+    ExactFloat64 t;
 
-    Vector<ApproximateFloat>& ax=reinterpret_cast<Vector<ApproximateFloat>&>(x);
-    Vector<ApproximateFloat>& ay=reinterpret_cast<Vector<ApproximateFloat>&>(y);
-    Vector<ApproximateFloat> az=reinterpret_cast<Vector<ApproximateFloat>&>(z);
-    ApproximateFloat at=reinterpret_cast<ApproximateFloat&>(t);
+    Vector<ApproximateFloat64>& ax=reinterpret_cast<Vector<ApproximateFloat64>&>(x);
+    Vector<ApproximateFloat64>& ay=reinterpret_cast<Vector<ApproximateFloat64>&>(y);
+    Vector<ApproximateFloat64> az=reinterpret_cast<Vector<ApproximateFloat64>&>(z);
+    ApproximateFloat64 at=reinterpret_cast<ApproximateFloat64&>(t);
 
     if(r.superset(b)) {
         ARIADNE_LOG(2,"  Cell already in set\n");
@@ -387,7 +387,7 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
         ay=midpoint(d);
         ax=ApproximateFloatVector(x.size(),1.0/x.size());
     }
-    ax = ApproximateFloat(1-XSIGMA)*ax + Vector<ApproximateFloat>(x.size(),XSIGMA/x.size());
+    ax = ApproximateFloat64(1-XSIGMA)*ax + Vector<ApproximateFloat64>(x.size(),XSIGMA/x.size());
 
     //assert(t>=-1000);
 
@@ -403,16 +403,16 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
         EffectiveScalarFunction zero_function=EffectiveScalarFunction::zero(m);
         EffectiveVectorFunction identity_function=EffectiveVectorFunction::identity(m);
         ScalarTaylorFunction txg(domain,zero_function,sweeper);
-        ValidatedFloat cnst=0;
+        ValidatedFloat64 cnst=0;
         for(Nat j=0; j!=n; ++j) {
-            txg = txg - (ValidatedFloat(x[j])-ValidatedFloat(x[n+j]))*ScalarTaylorFunction(domain,ValidatedScalarFunction(fg[j]),sweeper);
+            txg = txg - (ValidatedFloat64(x[j])-ValidatedFloat64(x[n+j]))*ScalarTaylorFunction(domain,ValidatedScalarFunction(fg[j]),sweeper);
             cnst += (bx[j].upper()*x[j]-bx[j].lower()*x[n+j]);
         }
         for(Nat i=0; i!=m; ++i) {
-            txg = txg - (ValidatedFloat(x[2*n+i])-ValidatedFloat(x[2*n+m+i]))*ScalarTaylorFunction(domain,ValidatedScalarFunction(identity_function[i]),sweeper);
+            txg = txg - (ValidatedFloat64(x[2*n+i])-ValidatedFloat64(x[2*n+m+i]))*ScalarTaylorFunction(domain,ValidatedScalarFunction(identity_function[i]),sweeper);
             cnst += (d[i].upper()*x[2*n+i]-d[i].lower()*x[2*n+m+i]);
         }
-        txg = ValidatedFloat(cnst) + txg;
+        txg = ValidatedFloat64(cnst) + txg;
 
         ARIADNE_LOG(6,"    txg="<<txg<<"\n");
 
@@ -444,7 +444,7 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
     if(t<=0.0_exact && UpperBox(apply(f,d)).radius()>b.box().radius()) {
         ARIADNE_LOG(2,"  Splitting domain\n");
         Pair<ExactBox,ExactBox> sd=d.split();
-        ax = ApproximateFloat(1-XSIGMA)*ax + Vector<ApproximateFloat>(ax.size(),XSIGMA/x.size());
+        ax = ApproximateFloat64(1-XSIGMA)*ax + Vector<ApproximateFloat64>(ax.size(),XSIGMA/x.size());
         ay=midpoint(sd.first);
         hotstarted_constraint_adjoin_outer_approximation_recursion(r, sd.first, f,g, c, b, x, y, e);
         ay = midpoint(sd.second);
@@ -475,8 +475,8 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
     // When making a new starting primal point, need to move components away from zero
     // This constant shows how far away from zero the points are
     static const double XSIGMA = 0.125;
-    static const ExactFloat TERR ( -1.0/((1<<e)*1024.0) );
-    static const Float inf = Ariadne::inf;
+    static const ExactFloat64 TERR ( -1.0/((1<<e)*1024.0) );
+    static const Float64 inf = Ariadne::inf;
 
     const Nat m=fg.argument_size();
     const Nat n=fg.result_size();
@@ -486,13 +486,13 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
     ConstraintSolver solver;
     NonlinearInteriorPointOptimiser optimiser;
 
-    ExactFloat t;
+    ExactFloat64 t;
     ExactPoint z(x.size());
 
     ApproximateFloatVector& ax=reinterpret_cast<ApproximateFloatVector&>(x);
     ApproximateFloatVector& ay=reinterpret_cast<ApproximateFloatVector&>(y);
     ApproximateFloatVector& az=reinterpret_cast<ApproximateFloatVector&>(z);
-    ApproximateFloat& at=reinterpret_cast<ApproximateFloat&>(t);
+    ApproximateFloat64& at=reinterpret_cast<ApproximateFloat64&>(t);
 
     if(r.superset(b)) {
         return;
@@ -515,7 +515,7 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
         // Use the computed dual variables to try to make a scalar function which is negative over the entire domain.
         // This should be easier than using all constraints separately
         ScalarTaylorFunction xg=ScalarTaylorFunction::zero(d,sweeper);
-        ValidatedFloat cnst=0;
+        ValidatedFloat64 cnst=0;
         for(Nat j=0; j!=n; ++j) {
             xg = xg - (x[j]-x[n+j])*ScalarTaylorFunction(d,fg[j],sweeper);
             cnst += (bx[j].upper()*x[j]-bx[j].lower()*x[n+j]);
@@ -547,10 +547,10 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
         //Pair<ExactBox,ExactBox> sd=solver.split(List<EffectiveConstraint>(1u,constraint),d);
         ARIADNE_LOG(4,"  Splitting domain\n");
         Pair<ExactBox,ExactBox> sd=split(d);
-        ExactPoint nx = make_exact(ApproximateFloat(1.0-XSIGMA)*ax + Vector<ApproximateFloat>(x.size(),XSIGMA/x.size()));
+        ExactPoint nx = make_exact(ApproximateFloat64(1.0-XSIGMA)*ax + Vector<ApproximateFloat64>(x.size(),XSIGMA/x.size()));
         ExactPoint ny = midpoint(sd.first);
         hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(r, sd.first, fg, c, b, nx, ny, e);
-        nx = make_exact(ApproximateFloat(1.0-XSIGMA)*x + Vector<ApproximateFloat>(x.size(),XSIGMA/x.size()));
+        nx = make_exact(ApproximateFloat64(1.0-XSIGMA)*x + Vector<ApproximateFloat64>(x.size(),XSIGMA/x.size()));
         ny = midpoint(sd.second);
         hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(r, sd.second, fg, c, b, x, ny, e);
     }
@@ -561,10 +561,10 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
     } else {
         ARIADNE_LOG(4,"  Splitting cell; t="<<t<<"\n");
         Pair<GridCell,GridCell> sb = b.split();
-        ExactPoint sx = make_exact(ApproximateFloat(1-XSIGMA)*x + Vector<ApproximateFloat>(x.size(),XSIGMA/x.size()));
+        ExactPoint sx = make_exact(ApproximateFloat64(1-XSIGMA)*x + Vector<ApproximateFloat64>(x.size(),XSIGMA/x.size()));
         ExactPoint sy = y;
         hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(r,d,fg,c,sb.first,sx,sy,e);
-        sx = make_exact(ApproximateFloat(1-XSIGMA)*x + Vector<ApproximateFloat>(x.size(),XSIGMA/x.size()));
+        sx = make_exact(ApproximateFloat64(1-XSIGMA)*x + Vector<ApproximateFloat64>(x.size(),XSIGMA/x.size()));
         sy = y;
         hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(r,d,fg,c,sb.second,sx,sy,e);
     }
@@ -616,7 +616,7 @@ constraint_adjoin_outer_approximation(PavingInterface& p, const ExactBox& d, con
 
     ExactPoint y=midpoint(d);
     const Nat l=(d.size()+f.result_size()+g.result_size())*2;
-    ExactPoint x(l); for(Nat k=0; k!=l; ++k) { x[k]=ExactFloat(1.0/l); }
+    ExactPoint x(l); for(Nat k=0; k!=l; ++k) { x[k]=ExactFloat64(1.0/l); }
 
     ::hotstarted_constraint_adjoin_outer_approximation_recursion(p,d,f,g,rc,b,x,y,e);
 }
@@ -647,7 +647,7 @@ Void optimal_constraint_adjoin_outer_approximation(PavingInterface& p, const Exa
 
     ExactPoint y=midpoint(d);
     const Nat l=(d.size()+f.result_size()+g.result_size())*2;
-    ExactPoint x(l); for(Nat k=0; k!=l; ++k) { x[k]=ExactFloat(1.0/l); }
+    ExactPoint x(l); for(Nat k=0; k!=l; ++k) { x[k]=ExactFloat64(1.0/l); }
 
     VectorTaylorFunction fg;
     const VectorTaylorFunction* tfptr;

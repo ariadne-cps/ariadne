@@ -46,23 +46,23 @@ namespace {
 
 namespace Ariadne {
 
-static const ExactFloat zero=0;
+static const ExactFloat64 zero=0;
 
-inline auto operator+(Int n, ValidatedFloat x) -> decltype(ExactFloat(n)+x) { return ExactFloat(n)+x; }
-inline auto operator-(Int n, ValidatedFloat x) -> decltype(ExactFloat(n)-x) { return ExactFloat(n)-x; }
-inline auto operator/(ExactFloat x, Nat n) -> decltype(x/ExactFloat(n)) { return x/ExactFloat(n); }
+inline auto operator+(Int n, ValidatedFloat64 x) -> decltype(ExactFloat64(n)+x) { return ExactFloat64(n)+x; }
+inline auto operator-(Int n, ValidatedFloat64 x) -> decltype(ExactFloat64(n)-x) { return ExactFloat64(n)-x; }
+inline auto operator/(ExactFloat64 x, Nat n) -> decltype(x/ExactFloat64(n)) { return x/ExactFloat64(n); }
 
-inline auto operator> (LowerFloat x, Real r) -> decltype(x> ValidatedFloat(r)) { return x> ValidatedFloat(r); }
-inline auto operator>=(LowerFloat x, Real r) -> decltype(x>=ValidatedFloat(r)) { return x>=ValidatedFloat(r); }
-inline auto operator> (UpperFloat x, Real r) -> decltype(x> ValidatedFloat(r)) { return x> ValidatedFloat(r); }
-inline auto operator<=(UpperFloat x, Real r) -> decltype(x<=ValidatedFloat(r)) { return x<=ValidatedFloat(r); }
+inline auto operator> (LowerFloat64 x, Real r) -> decltype(x> ValidatedFloat64(r)) { return x> ValidatedFloat64(r); }
+inline auto operator>=(LowerFloat64 x, Real r) -> decltype(x>=ValidatedFloat64(r)) { return x>=ValidatedFloat64(r); }
+inline auto operator> (UpperFloat64 x, Real r) -> decltype(x> ValidatedFloat64(r)) { return x> ValidatedFloat64(r); }
+inline auto operator<=(UpperFloat64 x, Real r) -> decltype(x<=ValidatedFloat64(r)) { return x<=ValidatedFloat64(r); }
 
 typedef Integer Natural;
 
 static const DiscreteEvent final_event("_tmax_");
 static const DiscreteEvent step_event("_h_");
 
-typedef Vector<ExactFloat> ExactFloatVector;
+typedef Vector<ExactFloat64> ExactFloatVector;
 typedef Vector<ExactInterval> ExactIntervalVector;
 
 OutputStream& operator<<(OutputStream& os, const HybridTerminationCriterion& termination) {
@@ -519,7 +519,7 @@ ValidatedVectorFunctionModel
 HybridEvolverBase::
 _compute_flow(EffectiveVectorFunction dynamic,
               ExactBox const& initial_box,
-              const ExactFloat& maximum_step_size) const
+              const ExactFloat64& maximum_step_size) const
 {
     ARIADNE_LOG(7,"HybridEvolverBase::_compute_flow(...)\n");
 
@@ -532,7 +532,7 @@ _compute_flow(EffectiveVectorFunction dynamic,
     // We then restrict to the time domain [0,h] since this can make evaluation
     // more accurate, and the time domain might be used explicitly for the domain
     // of the resulting set.
-    ExactFloat step_size=maximum_step_size;
+    ExactFloat64 step_size=maximum_step_size;
     ValidatedVectorFunctionModel flow_model=integrator.flow_step(dynamic,initial_box,step_size.raw());
 
     ARIADNE_LOG(6,"twosided_flow_model="<<flow_model<<"\n");
@@ -728,12 +728,12 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
         }
     }
     if(!crossings.empty()) {
-        Map<DiscreteEvent,Tuple<CrossingKind,UpperInterval,ErrorFloat> > crossing_log_data;
+        Map<DiscreteEvent,Tuple<CrossingKind,UpperInterval,ErrorFloat64> > crossing_log_data;
         for (Map<DiscreteEvent,CrossingData>::ConstIterator crossing_iter=crossings.begin(); crossing_iter!=crossings.end(); ++crossing_iter) {
             DiscreteEvent event=crossing_iter->first;
             CrossingKind crossing_kind=crossing_iter->second.crossing_kind;
             UpperInterval crossing_time_range(-infty,+infty);
-            ErrorFloat crossing_time_error=0u;
+            ErrorFloat64 crossing_time_error=0u;
             if (crossing_kind==CrossingKind::TRANSVERSE) {
                 crossing_time_range=crossing_iter->second.crossing_time.range();
                 crossing_time_error=crossing_iter->second.crossing_time.error();
@@ -962,7 +962,7 @@ _apply_guard(List<HybridEnclosure>& sets,
                 switch(semantics) {
                     case UPPER_SEMANTICS:
                         for(Nat i=0; i!=n; ++i) {
-                            ValidatedFloat alpha=ExactFloat(i+1)/n;
+                            ValidatedFloat64 alpha=ExactFloat64(i+1)/n;
                             ValidatedScalarFunctionModel intermediate_guard
                                 = compose( guard_function, unchecked_compose( flow, join(starting_state, alpha*elapsed_time) ) );
                             set.new_parameter_constraint(event, intermediate_guard <= zero);
@@ -1132,7 +1132,7 @@ _evolution_step(EvolutionData& evolution_data,
     ARIADNE_LOG(4,"guards="<<guard_functions<<"\n");
 
     // Compute flow and actual time step size used
-    const FlowFunctionModel flow_model=this->_compute_flow(dynamic,starting_bounding_box,ExactFloat(this->configuration().maximum_step_size()));
+    const FlowFunctionModel flow_model=this->_compute_flow(dynamic,starting_bounding_box,ExactFloat64(this->configuration().maximum_step_size()));
     ARIADNE_LOG(4,"flow_model.domain()="<<flow_model.domain()<<" flow_model.range()="<<flow_model.range()<<"\n");
 
     // Compute possibly active urgent events with increasing guards, and crossing times
@@ -1417,7 +1417,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
 {
     // Compute the evolution time for the given step.
     ARIADNE_LOG(7,"HybridEvolverBase::_estimate_timing(...)\n");
-    const ExactFloat step_size=static_cast<ExactFloat>(flow.domain()[flow.domain().size()-1].upper());
+    const ExactFloat64 step_size=static_cast<ExactFloat64>(flow.domain()[flow.domain().size()-1].upper());
     TimingData result;
     result.step_kind=StepKind::CONSTANT_EVOLUTION_TIME;
     result.finishing_kind=FinishingKind::STRADDLE_FINAL_TIME;
@@ -1425,7 +1425,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
     result.final_time=final_time;
     result.evolution_time_domain=ExactInterval(zero,step_size);
     result.evolution_time_coordinate=this->function_factory().create_identity(result.evolution_time_domain);
-    result.parameter_dependent_evolution_time=this->function_factory().create_constant(initial_set.parameter_domain(),ExactFloat(result.step_size));
+    result.parameter_dependent_evolution_time=this->function_factory().create_constant(initial_set.parameter_domain(),ExactFloat64(result.step_size));
     ARIADNE_LOG(8,"  timing_data="<<result<<"\n");
     return result;
 }
@@ -1493,7 +1493,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
     ARIADNE_LOG(7,"GeneralHybridEvolver::_estimate_timing(...)\n");
 
     const Nat n = flow.result_size();
-    const ExactFloat step_size=flow.domain()[flow.domain().size()-1].upper();
+    const ExactFloat64 step_size=flow.domain()[flow.domain().size()-1].upper();
 
     TimingData result;
     result.step_size=flow.step_size();
@@ -1537,16 +1537,16 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
                 // Within one time step we can go beyond final time
                 result.step_kind=StepKind::CONSTANT_EVOLUTION_TIME;
                 result.finishing_kind=FinishingKind::AFTER_FINAL_TIME;
-                temporal_evolution_time=ValidatedFloat(step_size); //   remaining_time_range.upper();
+                temporal_evolution_time=ValidatedFloat64(step_size); //   remaining_time_range.upper();
             } else {
                 result.step_kind=StepKind::CONSTANT_FINISHING_TIME;
                 result.finishing_kind=FinishingKind::AT_FINAL_TIME;
-                temporal_evolution_time=ValidatedFloat(final_time)-time_identity;
+                temporal_evolution_time=ValidatedFloat64(final_time)-time_identity;
             }
         } else {
             result.step_kind=StepKind::CONSTANT_EVOLUTION_TIME;
             result.finishing_kind=FinishingKind::STRADDLE_FINAL_TIME;
-            temporal_evolution_time=ValidatedFloat(step_size);
+            temporal_evolution_time=ValidatedFloat64(step_size);
         }
     } else if(remaining_time_range.upper()<=result.step_size) {
         // The rest of the evolution can be computed within a single time step.
@@ -1555,10 +1555,10 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         // This knowledge is required to be given combinarially, since
         // specifying the final time as a constant Function is not
         // exact if the final_time parameter is not exactly representable as
-        // a ExactFloat
+        // a ExactFloat64
         result.step_kind=StepKind::CONSTANT_FINISHING_TIME;
         result.finishing_kind=FinishingKind::AT_FINAL_TIME;
-        temporal_evolution_time=ValidatedFloat(final_time)-time_identity;
+        temporal_evolution_time=ValidatedFloat64(final_time)-time_identity;
     } else if(remaining_time_range.lower()<=step_size && ALLOW_CREEP) {
         // Some of the evolved points can be evolved to the final time in a single step
         // The evolution is performed over a step size which moves points closer to the final time, but does not cross.
@@ -1567,21 +1567,21 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         // This method ensures that points do not pass the final time after the transition.
         result.step_kind=StepKind::SPACETIME_DEPENDENT_FINISHING_TIME;
         result.finishing_kind=FinishingKind::BEFORE_FINAL_TIME;
-        ExactFloat sf=1;
+        ExactFloat64 sf=1;
         while(remaining_time_range.upper()*sf>step_size) { sf = half(sf); }
-        temporal_evolution_time= ValidatedFloat(sf)*(ValidatedFloat(final_time)-time_identity);
+        temporal_evolution_time= ValidatedFloat64(sf)*(ValidatedFloat64(final_time)-time_identity);
     } else { // remaining_time_range.lower()>step_size)
         // As far as timing goes, perform the evolution over a full time step
         result.step_kind=StepKind::CONSTANT_EVOLUTION_TIME;
         result.finishing_kind=FinishingKind::BEFORE_FINAL_TIME;
-        temporal_evolution_time=ExactFloat(result.step_size);
+        temporal_evolution_time=ExactFloat64(result.step_size);
     }
 
     ARIADNE_LOG(7,"finishing_kind="<<result.finishing_kind<<"\n");
     ARIADNE_LOG(7,"temporal_evolution_time="<<temporal_evolution_time<<"\n");
 
 
-    ValidatedScalarFunctionModel spacial_evolution_time=this->function_factory().create_constant(space_domain,ExactFloat(step_size));
+    ValidatedScalarFunctionModel spacial_evolution_time=this->function_factory().create_constant(space_domain,ExactFloat64(step_size));
 
     // Select one of GUARD_CREEP or TIME_CREEP
     static const Bool GUARD_CREEP=true;
@@ -1630,7 +1630,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
                     ARIADNE_LOG(6,std::setprecision(18)<<"crossing_time_range="<<crossing_time_range<<", crossing_time_range .upper()="<<crossing_time_range.upper()<<", step_size="<<step_size<<"\n");
                     EffectiveScalarFunction guard=transitions[event].guard_function;
                     ValidatedVectorFunctionModel identity=this->function_factory().create_identity(crossing_time.domain());
-                    ValidatedScalarFunctionModel step_time=crossing_time*zero+ExactFloat(step_size);
+                    ValidatedScalarFunctionModel step_time=crossing_time*zero+ExactFloat64(step_size);
                     ARIADNE_LOG(6,"full flow="<<compose(flow,join(identity,step_time))<<"\n");
                     ARIADNE_LOG(6,"guard range at crossing time="<<compose(guard,compose(flow,join(initial_set.space_function(),compose(crossing_time,initial_set.space_function())))).range()<<"\n");
                     ARIADNE_LOG(6,"guard range at crossing time="<<compose(guard,compose(flow,join(identity,crossing_time))).range());
@@ -1671,9 +1671,9 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
                 // Modify the crossing time function to be the smallest possible; this ensures that the evaluation time is
                 // essentially exact
                 ValidatedScalarFunctionModel lower_crossing_time=crossing_iter->second.crossing_time;
-                ErrorFloat crossing_time_error=lower_crossing_time.error();
+                ErrorFloat64 crossing_time_error=lower_crossing_time.error();
                 lower_crossing_time.set_error(0u);
-                lower_crossing_time-=ExactFloat(crossing_time_error.raw());
+                lower_crossing_time-=ExactFloat64(crossing_time_error.raw());
 
                 // One possibility is to use quadratic restrictions
                 //   If 0<=x<=2h, then x(1-x/4h)<=min(x,h)
@@ -1723,8 +1723,8 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         ValidatedVectorFunctionModel space_projection=flow*zero;
         for(Nat i=0; i!=n; ++i) { space_projection[i]=space_projection[i]+identity_function[i]; }
 
-        //static const ExactFloat CREEP_MAXIMUM=ExactFloat(1.0);
-        static const ExactFloat CREEP_MAXIMUM=ExactFloat(15.0/16);
+        //static const ExactFloat64 CREEP_MAXIMUM=ExactFloat64(1.0);
+        static const ExactFloat64 CREEP_MAXIMUM=ExactFloat64(15.0/16);
         spacial_evolution_time=this->function_factory().create_constant(flow.space_domain(),flow.step_size()*CREEP_MAXIMUM);
 
         for(Map<DiscreteEvent,CrossingData>::Iterator crossing_iter=crossings.begin();
@@ -1740,9 +1740,9 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
                 ARIADNE_ASSERT(guard_range.lower()<zero);
                 UpperInterval guard_derivative_range = compose(lie_derivative(guard_function,dynamic),flow).range();
 
-                //ExactFloat alpha=numeric_cast<ExactFloat>(1+flow.step_size()*guard_derivative_range.lower()/guard_range.lower());
-                ValidatedFloat alpha_val=(1+flow.step_size()*make_exact(guard_derivative_range.lower())/make_exact(guard_range.lower()));
-                ExactFloat alpha=make_exact(alpha_val);
+                //ExactFloat64 alpha=numeric_cast<ExactFloat64>(1+flow.step_size()*guard_derivative_range.lower()/guard_range.lower());
+                ValidatedFloat64 alpha_val=(1+flow.step_size()*make_exact(guard_derivative_range.lower())/make_exact(guard_range.lower()));
+                ExactFloat64 alpha=make_exact(alpha_val);
                 assert(alpha_val.value()==alpha);
                 ARIADNE_LOG(6,"  step_size: "<<flow.step_size()<<", guard_range: "<<guard_range<<", guard_derivative_range: "<<guard_derivative_range<<", alpha: "<<alpha<<"\n");
                 if(alpha>0 && alpha<=1) {
@@ -1786,7 +1786,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
     }
 
 
-    ValidatedScalarFunctionModel evolution_time = embed(spacial_evolution_time,time_domain) * embed(space_domain,temporal_evolution_time/ExactFloat(step_size));
+    ValidatedScalarFunctionModel evolution_time = embed(spacial_evolution_time,time_domain) * embed(space_domain,temporal_evolution_time/ExactFloat64(step_size));
     ValidatedScalarFunctionModel finishing_time=evolution_time+time_coordinate;
 
     ARIADNE_LOG(7,"evolution_time="<<(evolution_time)<<"\n");
@@ -1810,11 +1810,11 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
             // Corresponds to setting omega(smin)=tau(smin)+h, omega(smax)=tau(smax)+h/2
             // Taking omega(s)=a tau(s) + b, we obtain
             //   a=1-h/2(tmax-tmin);  b=h(tmax-tmin/2)/(tmax-tmin) = (2tmax-tmin)a
-            ExactFloat h=result.step_size;
-            ExactFloat tmin=make_exact(starting_time_range.lower());
-            ExactFloat tmax=make_exact(starting_time_range.upper());
-            ValidatedFloat a=1-(half(h)/(tmax-tmin));
-            ValidatedFloat b=h*(tmax-half(tmin))/(tmax-tmin);
+            ExactFloat64 h=result.step_size;
+            ExactFloat64 tmin=make_exact(starting_time_range.lower());
+            ExactFloat64 tmax=make_exact(starting_time_range.upper());
+            ValidatedFloat64 a=1-(half(h)/(tmax-tmin));
+            ValidatedFloat64 b=h*(tmax-half(tmin))/(tmax-tmin);
             result.parameter_dependent_finishing_time=a*starting_time_function+b;
         }
         ARIADNE_LOG(7,"Unwinding to time "<<result.parameter_dependent_finishing_time<<"\n");

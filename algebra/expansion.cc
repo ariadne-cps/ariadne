@@ -28,22 +28,22 @@
 #include "geometry/interval.h"
 
 namespace Ariadne {
-    template class Expansion<Float>;
-    template class Expansion<ExactFloat>;
-    template class Expansion<ValidatedFloat>;
-    template class Expansion<ApproximateFloat>;
+    template class Expansion<Float64>;
+    template class Expansion<ExactFloat64>;
+    template class Expansion<ValidatedFloat64>;
+    template class Expansion<ApproximateFloat64>;
     template class Expansion<UpperInterval>;
     template class Expansion<ExactInterval>;
 
-    template class SortedExpansion<Float,GradedKeyLess>;
-    template class SortedExpansion<ApproximateFloat,GradedKeyLess>;
-    template class SortedExpansion<ValidatedFloat,GradedKeyLess>;
+    template class SortedExpansion<Float64,GradedKeyLess>;
+    template class SortedExpansion<ApproximateFloat64,GradedKeyLess>;
+    template class SortedExpansion<ValidatedFloat64,GradedKeyLess>;
     template class SortedExpansion<UpperInterval,GradedKeyLess>;
 
-    template class SortedExpansion<Float,ReverseLexicographicKeyLess>;
-    template class SortedExpansion<ExactFloat,ReverseLexicographicKeyLess>;
-    template class SortedExpansion<ValidatedFloat,ReverseLexicographicKeyLess>;
-    template class SortedExpansion<ApproximateFloat,ReverseLexicographicKeyLess>;
+    template class SortedExpansion<Float64,ReverseLexicographicKeyLess>;
+    template class SortedExpansion<ExactFloat64,ReverseLexicographicKeyLess>;
+    template class SortedExpansion<ValidatedFloat64,ReverseLexicographicKeyLess>;
+    template class SortedExpansion<ApproximateFloat64,ReverseLexicographicKeyLess>;
     template class SortedExpansion<UpperInterval,ReverseLexicographicKeyLess>;
     template class SortedExpansion<ExactInterval,ReverseLexicographicKeyLess>;
 }

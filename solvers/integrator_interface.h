@@ -68,10 +68,10 @@ class IntegratorInterface
     //! of \f$\dt{x}=f(x)\f$ starting in \f$D\f$  for time step \f$h\leq h_{\max}\f$.
     //! <br>
     //! Arguments: \f$f\f$ is the \a vector_field, \f$D\f$ is the \a state_domain and \f$h_{\max}\f$ is the \a maximum_time_step.
-    virtual Pair<ExactFloat,UpperBox>
+    virtual Pair<ExactFloat64,UpperBox>
     flow_bounds(const ValidatedVectorFunction& vector_field,
                 const ExactBox& state_domain,
-                const RawFloat& maximum_time_step) const = 0;
+                const RawFloat64& maximum_time_step) const = 0;
 
     //! \brief Compute a validated version \f$\hat{\phi}\f$ of the flow \f$\phi(x,t)\f$ satisfying \f$\dt{\phi}(x,t)=f(\phi(x,t))\f$ for \f$x\in D\f$ and \f$t\in[0,h]\f$, where \f$h\f$ is a time step which is taken to be equal to \f$h_\mathrm{sug}\f$ if possible. The value of \f$h_\mathrm{sug}\f$ is overwritten with \f$h\f$, the actual time step used.
     //! <br>
@@ -81,7 +81,7 @@ class IntegratorInterface
     virtual ValidatedVectorFunctionModel
     flow_step(const ValidatedVectorFunction& vector_field,
               const ExactBox& state_domain,
-              RawFloat& suggested_time_step) const = 0;
+              RawFloat64& suggested_time_step) const = 0;
 
     //! \brief Solve \f$\dt{\phi}(x,t)=f(\phi(x,t))\f$ for \f$x\in D\f$ and \f$t\in[0,h]\f$, assuming that the flow remains in \f$B\f$.
     //! If the flow does not remain in \f$B\f$, then \f$\hat{\phi}(x,t)\f$ may not be a bound for \f$\phi(x,t)\f$ if \f$\exists \tau\in[0,t],\ \phi(x,\tau)\not\in B\f$.
@@ -95,7 +95,7 @@ class IntegratorInterface
     virtual ValidatedVectorFunctionModel
     flow_step(const ValidatedVectorFunction& vector_field,
               const ExactBox& state_domain,
-              const ExactFloat& time_step,
+              const ExactFloat64& time_step,
               const UpperBox& state_bounding_box) const = 0;
 
     //! \brief Solve \f$\dt{\phi}(x,t)=f(\phi(x,t))\f$ for initial conditions in \f$x\in D\f$ over the interval \f$[0,t_f]\f$.

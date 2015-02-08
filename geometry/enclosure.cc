@@ -78,7 +78,7 @@ static const Nat verbosity = 0u;
 
 template<class T> StringType str(const T& t) { StringStream ss; ss<<t; return ss.str(); }
 
-typedef Vector<Float> RawFloatVector;
+typedef Vector<Float64> RawFloatVector;
 typedef Vector<ExactInterval> ExactIntervalVector;
 
 namespace {
@@ -92,8 +92,8 @@ ExactInterval make_domain(const IntervalSet& ivl) {
     Ariadne::RoundingModeType rnd=Ariadne::get_rounding_mode();
     ExactInterval dom_lower_ivl=make_exact_interval(ivl.lower());
     ExactInterval dom_upper_ivl=make_exact_interval(ivl.upper());
-    Float dom_lower=dom_lower_ivl.lower().raw();
-    Float dom_upper=dom_upper_ivl.upper().raw();
+    Float64 dom_lower=dom_lower_ivl.lower().raw();
+    Float64 dom_upper=dom_upper_ivl.upper().raw();
     Ariadne::set_rounding_downward();
     float flt_dom_lower=numeric_cast<double>(dom_lower);
     while(double(flt_dom_lower)>dom_lower) {
@@ -118,12 +118,12 @@ ValidatedVectorFunctionModel make_identity(const BoxSet& bx, const ValidatedFunc
         ExactInterval dom_lower_ivl=make_exact_interval(bx[i].lower());
         ExactInterval dom_upper_ivl=make_exact_interval(bx[i].upper());
         // Convert to single-precision values
-        Float dom_lower_flt=numeric_cast<float>(bx[i].lower());
-        Float dom_upper_flt=numeric_cast<float>(bx[i].upper());
-        Float::set_rounding_upward();
-        Float err=max( max(dom_upper_ivl.upper().raw()-dom_upper_flt,dom_upper_flt-dom_upper_ivl.lower().raw()),
+        Float64 dom_lower_flt=numeric_cast<float>(bx[i].lower());
+        Float64 dom_upper_flt=numeric_cast<float>(bx[i].upper());
+        Float64::set_rounding_upward();
+        Float64 err=max( max(dom_upper_ivl.upper().raw()-dom_upper_flt,dom_upper_flt-dom_upper_ivl.lower().raw()),
                        max(dom_lower_ivl.upper().raw()-dom_lower_flt,dom_lower_flt-dom_lower_ivl.lower().raw()) );
-        Float::set_rounding_to_nearest();
+        Float64::set_rounding_to_nearest();
         dom[i]=ExactInterval(dom_lower_flt,dom_upper_flt);
         errs[i]=err;
     }
@@ -382,7 +382,7 @@ Void Enclosure::substitute(Nat j, ValidatedScalarFunctionModel v)
                        this->_check();
 }
 
-Void Enclosure::substitute(Nat j, Float c)
+Void Enclosure::substitute(Nat j, Float64 c)
 {
     this->_space_function = Ariadne::partial_evaluate(this->_space_function,j,c);
     for(List<ValidatedScalarFunctionModel>::Iterator iter=this->_negative_constraints.begin(); iter!=this->_negative_constraints.end(); ++iter) {
@@ -447,10 +447,10 @@ Void Enclosure::apply_flow(ValidatedVectorFunction flow, ExactInterval time)
 }
 */
 
-Void Enclosure::apply_fixed_evolve_step(ValidatedVectorFunction flow, ExactFloat time)
+Void Enclosure::apply_fixed_evolve_step(ValidatedVectorFunction flow, ExactFloat64 time)
 {
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->dimension()+1u,"dimension="<<this->dimension()<<", flow="<<flow);
-    ValidatedScalarFunctionModel evolve_time_function=this->function_factory().create_constant(this->domain(),ExactFloat(time));
+    ValidatedScalarFunctionModel evolve_time_function=this->function_factory().create_constant(this->domain(),ExactFloat64(time));
     this->_space_function=compose(flow,join(this->_space_function,evolve_time_function));
     this->_time_function=this->_time_function + evolve_time_function;
     this->_dwell_time_function=this->_dwell_time_function + evolve_time_function;
@@ -505,8 +505,8 @@ Void Enclosure::apply_full_reach_step(ValidatedVectorFunctionModel phi)
     // tau'(s) = tau(s)+t
     ARIADNE_ASSERT(phi.result_size()==this->dimension());
     ARIADNE_ASSERT(phi.argument_size()==this->dimension()+1);
-    Float h=phi.domain()[phi.result_size()].upper().raw();
-    ValidatedScalarFunctionModel elps=this->function_factory().create_constant(this->domain(),ExactFloat(h));
+    Float64 h=phi.domain()[phi.result_size()].upper().raw();
+    ValidatedScalarFunctionModel elps=this->function_factory().create_constant(this->domain(),ExactFloat64(h));
     this->apply_parameter_reach_step(phi,elps);
 }
 
@@ -525,7 +525,7 @@ Void Enclosure::apply_parameter_reach_step(ValidatedVectorFunctionModel phi, Val
     ARIADNE_ASSERT(phi.result_size()==this->dimension());
     ARIADNE_ASSERT(phi.argument_size()==this->dimension()+1);
     ARIADNE_ASSERT(elps.argument_size()==this->number_of_parameters());
-    Float h=phi.domain()[phi.result_size()].upper().raw();
+    Float64 h=phi.domain()[phi.result_size()].upper().raw();
     ExactBox parameter_domain=this->parameter_domain();
     ExactInterval time_domain=ExactInterval(0,h);
     ValidatedScalarFunctionModel time_function=this->function_factory().create_identity(time_domain);
@@ -671,7 +671,7 @@ UpperBox Enclosure::bounding_box() const {
     return this->_space_function.codomain().bounding_box();
 }
 
-ErrorFloat Enclosure::radius() const {
+ErrorFloat64 Enclosure::radius() const {
     return this->bounding_box().radius();
 }
 
@@ -772,7 +772,7 @@ Void Enclosure::reduce() const
 
 
 
-Matrix<Float> nonlinearities_zeroth_order(const ValidatedVectorFunction& f, const ExactBox& dom);
+Matrix<Float64> nonlinearities_zeroth_order(const ValidatedVectorFunction& f, const ExactBox& dom);
 Pair<Nat,double> nonlinearity_index_and_error(const ValidatedVectorFunction& function, const ExactBox& domain);
 Pair<Nat,double> lipschitz_index_and_error(const ValidatedVectorFunction& function, const ExactBox& domain);
 
@@ -807,9 +807,9 @@ Enclosure::splitting_index_zeroth_order() const
     // Compute the column of the matrix which has the norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
     Nat jmax=this->number_of_parameters();
-    Float max_column_norm=0.0;
+    Float64 max_column_norm=0.0;
     for(Nat j=0; j!=this->number_of_parameters(); ++j) {
-        Float column_norm=0.0;
+        Float64 column_norm=0.0;
         for(Nat i=0; i!=this->dimension(); ++i) {
             column_norm+=mag(jacobian[i][j]).raw();
         }
@@ -827,17 +827,17 @@ Enclosure::splitting_index_zeroth_order() const
 Pair<Enclosure,Enclosure>
 Enclosure::split_first_order() const
 {
-    Matrix<Float> nonlinearities=Ariadne::nonlinearities_zeroth_order(this->_space_function,this->_reduced_domain);
+    Matrix<Float64> nonlinearities=Ariadne::nonlinearities_zeroth_order(this->_space_function,this->_reduced_domain);
 
     // Compute the row of the nonlinearities Array which has the highest norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
     Nat imax=nonlinearities.row_size();
     Nat jmax_in_row_imax=nonlinearities.column_size();
-    Float max_row_sum=0.0;
+    Float64 max_row_sum=0.0;
     for(Nat i=0; i!=nonlinearities.row_size(); ++i) {
         Nat jmax=nonlinearities.column_size();
-        Float row_sum=0.0;
-        Float max_mag_j_in_i=0.0;
+        Float64 row_sum=0.0;
+        Float64 max_mag_j_in_i=0.0;
         for(Nat j=0; j!=nonlinearities.column_size(); ++j) {
             row_sum+=mag(nonlinearities[i][j]);
             if(mag(nonlinearities[i][j])>max_mag_j_in_i) {
@@ -1019,7 +1019,7 @@ uniform_error_recondition()
     List<Nat> large_error_indices;
 
     for(Nat i=0; i!=this->_space_function.result_size(); ++i) {
-        Float error=this->_space_function.get(i).error().raw();
+        Float64 error=this->_space_function.get(i).error().raw();
         if(error > MAXIMUM_ERROR) {
             large_error_indices.append(i);
         }
@@ -1027,7 +1027,7 @@ uniform_error_recondition()
 
     ExactBox error_domains(large_error_indices.size());
     for(Nat i=0; i!=large_error_indices.size(); ++i) {
-        Float error=this->_space_function.get(large_error_indices[i]).error().raw();
+        Float64 error=this->_space_function.get(large_error_indices[i]).error().raw();
         error_domains[i]=ExactInterval(-error,+error);
     }
     error_domains=ExactBox(large_error_indices.size(),ExactInterval(-1,+1));
@@ -1041,10 +1041,10 @@ uniform_error_recondition()
     }
 
     for(Nat i=0; i!=large_error_indices.size(); ++i) {
-        Float error=this->_space_function.get(large_error_indices[i]).error().raw();
+        Float64 error=this->_space_function.get(large_error_indices[i]).error().raw();
         if(error > MAXIMUM_ERROR) {
             this->_space_function[i].set_error(0u);
-            this->_space_function[i] = this->_space_function.get(i) + this->function_factory().create_coordinate(this->_domain,k)*ValidatedFloat(+error);
+            this->_space_function[i] = this->_space_function.get(i) + this->function_factory().create_coordinate(this->_domain,k)*ValidatedFloat64(+error);
             ++k;
         }
     }
@@ -1058,7 +1058,7 @@ uniform_error_recondition()
 // In TaylorModel code file
 Array<SizeType> complement(SizeType nmax, Array<SizeType> vars);
 
-TaylorModel<Validated,Float> recondition(const TaylorModel<Validated,Float>& tm, Array<SizeType>& discarded_variables, SizeType number_of_error_variables, SizeType index_of_error)
+TaylorModel<Validated,Float64> recondition(const TaylorModel<Validated,Float64>& tm, Array<SizeType>& discarded_variables, SizeType number_of_error_variables, SizeType index_of_error)
 {
     for(SizeType i=0; i!=discarded_variables.size()-1; ++i) {
         ARIADNE_PRECONDITION(discarded_variables[i]<discarded_variables[i+1]);
@@ -1074,26 +1074,26 @@ TaylorModel<Validated,Float> recondition(const TaylorModel<Validated,Float>& tm,
     Array<SizeType> kept_variables=complement(number_of_variables,discarded_variables);
 
     // Construct result and reserve memory
-    TaylorModel<Validated,Float> r(number_of_kept_variables+number_of_error_variables,tm.sweeper());
+    TaylorModel<Validated,Float64> r(number_of_kept_variables+number_of_error_variables,tm.sweeper());
     r.expansion().reserve(tm.number_of_nonzeros()+1u);
     MultiIndex ra(number_of_kept_variables+number_of_error_variables);
 
     // Set the uniform error of the original model
     // If index_of_error == number_of_error_variables, then the error is kept as a uniform error bound
-    ErrorFloat* error_ptr;
+    ErrorFloat64* error_ptr;
     if(number_of_error_variables==index_of_error) {
         error_ptr = &r.error();
     } else {
         ra[number_of_kept_variables+index_of_error]=1;
         r.expansion().append(ra,make_exact(tm.error()));
         ra[number_of_kept_variables+index_of_error]=0;
-        error_ptr = reinterpret_cast<ErrorFloat*>(&r.begin()->data());
+        error_ptr = reinterpret_cast<ErrorFloat64*>(&r.begin()->data());
     }
-    ErrorFloat& error=*error_ptr;
+    ErrorFloat64& error=*error_ptr;
 
-    for(TaylorModel<Validated,Float>::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
+    for(TaylorModel<Validated,Float64>::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
         MultiIndex const& xa=iter->key();
-        ExactFloat const& xv=iter->data();
+        ExactFloat64 const& xv=iter->data();
         Bool keep=true;
         for(SizeType k=0; k!=number_of_discarded_variables; ++k) {
             if(xa[discarded_variables[k]]!=0) {
@@ -1109,12 +1109,12 @@ TaylorModel<Validated,Float> recondition(const TaylorModel<Validated,Float>& tm,
             r.expansion().append(ra,xv);
         }
     }
-    Float::set_rounding_to_nearest();
+    Float64::set_rounding_to_nearest();
 
     return r;
 }
 
-TaylorModel<Validated,Float> recondition(const TaylorModel<Validated,Float>& tm, Array<SizeType>& discarded_variables, SizeType number_of_error_variables) {
+TaylorModel<Validated,Float64> recondition(const TaylorModel<Validated,Float64>& tm, Array<SizeType>& discarded_variables, SizeType number_of_error_variables) {
     return recondition(tm,discarded_variables,number_of_error_variables,number_of_error_variables);
 }
 
@@ -1139,7 +1139,7 @@ Enclosure::kuhn_recondition()
 
     const VectorTaylorFunction& function=dynamic_cast<const VectorTaylorFunction&>(this->space_function().reference());
     const Vector<ValidatedTaylorModel>& models = function.models();
-    Matrix<Float> dependencies(this->dimension(),this->number_of_parameters());
+    Matrix<Float64> dependencies(this->dimension(),this->number_of_parameters());
     for(SizeType i=0; i!=dependencies.row_size(); ++i) {
         for(ValidatedTaylorModel::ConstIterator iter=models[i].begin(); iter!=models[i].end(); ++iter) {
             for(SizeType j=0; j!=dependencies.column_size(); ++j) {
@@ -1149,14 +1149,14 @@ Enclosure::kuhn_recondition()
             }
         }
     }
-    Array< Pair<Float,SizeType> > column_max_dependencies(this->number_of_parameters());
+    Array< Pair<Float64,SizeType> > column_max_dependencies(this->number_of_parameters());
     for(SizeType j=0; j!=dependencies.column_size(); ++j) {
-        column_max_dependencies[j] = make_pair(Float(0.0),SizeType(j));
+        column_max_dependencies[j] = make_pair(Float64(0.0),SizeType(j));
         for(SizeType i=0; i!=dependencies.row_size(); ++i) {
             column_max_dependencies[j].first=std::max(column_max_dependencies[j].first,dependencies[i][j]);
         }
     }
-    std::sort(column_max_dependencies.begin(),column_max_dependencies.end(),std::greater< Pair<Float,SizeType> >());
+    std::sort(column_max_dependencies.begin(),column_max_dependencies.end(),std::greater< Pair<Float64,SizeType> >());
 
     Array<SizeType> kept_parameters(number_of_kept_parameters);
     Array<SizeType> discarded_parameters(number_of_discarded_parameters);
@@ -1389,8 +1389,8 @@ Enclosure::affine_approximation() const
     //if(set._zero_constraints.size()>0) { set._solve_zero_constraints(); }
     this->_check();
 
-    Vector<Float> h(nx);
-    Matrix<Float> G(nx,np);
+    Vector<Float64> h(nx);
+    Matrix<Float64> G(nx,np);
     for(Nat i=0; i!=nx; ++i) {
         ValidatedScalarFunctionModel component=set._space_function[i];
         h[i]=component.model().value();
@@ -1400,8 +1400,8 @@ Enclosure::affine_approximation() const
     }
     ValidatedAffineConstrainedImageSet result(G,h);
 
-    Vector<Float> a(np);
-    Float b;
+    Vector<Float64> a(np);
+    Float64 b;
 
     for(ConstIterator iter=set._negative_constraints.begin();
             iter!=set._negative_constraints.end(); ++iter) {
@@ -1424,13 +1424,13 @@ Enclosure::affine_approximation() const
 
 /*
 struct ValidatedAffineModel {
-    Float _c; Vector<Float> _g; Float _e;
-    ValidatedAffineModel(Float c, const Vector<Float>& g, Float e) : _c(c), _g(g), _e(e) { }
+    Float64 _c; Vector<Float64> _g; Float64 _e;
+    ValidatedAffineModel(Float64 c, const Vector<Float64>& g, Float64 e) : _c(c), _g(g), _e(e) { }
 };
 
 ValidatedAffineModel _affine_model(const ValidatedTaylorModel& tm) {
-    ValidatedAffineModel result(0.0,Vector<Float>(tm.argument_size(),0.0),tm.error());
-    Float::set_rounding_upward();
+    ValidatedAffineModel result(0.0,Vector<Float64>(tm.argument_size(),0.0),tm.error());
+    Float64::set_rounding_upward();
     for(ValidatedTaylorModel::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
         if(iter->key().degree()>=2) { result._e+=abs(iter->data()); }
         else if(iter->key().degree()==0) {result. _c=iter->data(); }
@@ -1440,7 +1440,7 @@ ValidatedAffineModel _affine_model(const ValidatedTaylorModel& tm) {
             }
         }
     }
-    Float::set_rounding_to_nearest();
+    Float64::set_rounding_to_nearest();
     return result;
 }
 */

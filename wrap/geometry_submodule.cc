@@ -62,7 +62,7 @@ struct from_python_dict<ExactInterval> {
         boost::python::list lst=dct.items();
         assert(boost::python::len(lst)==1);
         Void* storage = ((converter::rvalue_from_python_storage<ExactInterval>*)data)->storage.bytes;
-        new (storage) ExactInterval(boost::python::extract<Float>(lst[0][0]),boost::python::extract<Float>(lst[0][1]));
+        new (storage) ExactInterval(boost::python::extract<Float64>(lst[0][0]),boost::python::extract<Float64>(lst[0][1]));
         data->convertible = storage;
     }
 };
@@ -77,7 +77,7 @@ struct from_python_list<ExactInterval> {
         boost::python::list lst = boost::python::extract<boost::python::list>(obj_ptr);
         assert(boost::python::len(lst)==2);
         Void* storage = ((converter::rvalue_from_python_storage<ExactInterval>*)data)->storage.bytes;
-        new (storage) ExactInterval(boost::python::extract<Float>(lst[0]),boost::python::extract<Float>(lst[1]));
+        new (storage) ExactInterval(boost::python::extract<Float64>(lst[0]),boost::python::extract<Float64>(lst[1]));
         data->convertible = storage;
     }
 };
@@ -92,10 +92,10 @@ struct from_python<ExactPoint> {
         ExactPoint pt;
         if(xtup.check()) {
             boost::python::tuple tup=xtup(); pt=ExactPoint(len(tup));
-            for(Int i=0; i!=len(tup); ++i) { pt[i]=ExactFloat(extract<Float>(tup[i])); }
+            for(Int i=0; i!=len(tup); ++i) { pt[i]=ExactFloat64(extract<Float64>(tup[i])); }
         } else if(xlst.check()) {
             boost::python::list lst=xlst(); pt=ExactPoint(len(lst));
-            for(Int i=0; i!=len(lst); ++i) { pt[i]=ExactFloat(extract<Float>(lst[i])); }
+            for(Int i=0; i!=len(lst); ++i) { pt[i]=ExactFloat64(extract<Float64>(lst[i])); }
         }
         Void* storage = ((converter::rvalue_from_python_storage<ExactInterval>*)data)->storage.bytes;
         new (storage) ExactPoint(pt);
@@ -146,9 +146,9 @@ struct to_python< ListSet< HybridBasicSet<ES> > > {
     static const PyTypeObject* get_pytype() { return &PyDict_Type; }
 };
 
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ValidatedFloat>& x);
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ValidatedFloat64>& x);
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ExactInterval>& x) {
-    return os << PythonRepresentation<ValidatedFloat>(ValidatedFloat(x.reference()));
+    return os << PythonRepresentation<ValidatedFloat64>(ValidatedFloat64(x.reference()));
 }
 
 
@@ -256,11 +256,11 @@ Void export_point()
 {
     class_<ExactPoint,bases<DrawableInterface>> point_class("ExactPoint",init<ExactPoint>());
     point_class.def(init<Nat>());
-    point_class.def("__getitem__", &__getitem__<ExactPoint,Int,ExactFloat>);
+    point_class.def("__getitem__", &__getitem__<ExactPoint,Int,ExactFloat64>);
     point_class.def(self_ns::str(self));
 
     from_python<ExactPoint>();
-    implicitly_convertible<Vector<ExactFloat>,ExactPoint>();
+    implicitly_convertible<Vector<ExactFloat64>,ExactPoint>();
 
 }
 
@@ -277,11 +277,11 @@ Void export_interval()
     class_< ExactInterval > interval_class("ExactInterval");
     interval_class.def(init<double>());
     interval_class.def(init<double,double>());
-    interval_class.def(init<Float,Float>());
+    interval_class.def(init<Float64,Float64>());
     interval_class.def(init<Real,Real>());
     interval_class.def(init<Decimal>());
     interval_class.def(init<Dyadic>());
-    interval_class.def(init<Float>());
+    interval_class.def(init<Float64>());
 
     interval_class.def(init<Rational>());
     interval_class.def(init<Rational,Rational>());
@@ -293,7 +293,7 @@ Void export_interval()
     interval_class.def("midpoint", &ExactInterval::midpoint);
     interval_class.def("radius", &ExactInterval::radius);
     interval_class.def("width", &ExactInterval::width);
-    interval_class.def("contains", (Bool(*)(ExactInterval,Float)) &contains);
+    interval_class.def("contains", (Bool(*)(ExactInterval,Float64)) &contains);
     interval_class.def("empty", (Bool(ExactInterval::*)()const) &ExactInterval::empty);
     interval_class.def(boost::python::self_ns::str(self));
 
@@ -323,7 +323,7 @@ Void export_box()
     box_class.def("__eq__", (Bool(*)(const Vector<ExactInterval>&,const Vector<ExactInterval>&)) &operator==);
     box_class.def("dimension", (Nat(ExactBox::*)()const) &ExactBox::dimension);
     box_class.def("centre", (ExactPoint(ExactBox::*)()const) &ExactBox::centre);
-    box_class.def("radius", (Float(ExactBox::*)()const) &ExactBox::radius);
+    box_class.def("radius", (Float64(ExactBox::*)()const) &ExactBox::radius);
     box_class.def("separated", (Tribool(ExactBox::*)(const ExactBox&)const) &ExactBox::separated);
     box_class.def("overlaps", (Tribool(ExactBox::*)(const ExactBox&)const) &ExactBox::overlaps);
     box_class.def("covers", (Tribool(ExactBox::*)(const ExactBox&)const) &ExactBox::covers);
@@ -360,8 +360,8 @@ Pair<Zonotope,Zonotope> split_pair(const Zonotope& z) {
 Void export_zonotope()
 {
     class_<Zonotope,bases<CompactSetInterface,OpenSetInterface,DrawableInterface> > zonotope_class("Zonotope",init<Zonotope>());
-    zonotope_class.def(init< Vector<ExactFloat>, Matrix<ExactFloat>, Vector<ErrorFloat> >());
-    zonotope_class.def(init< Vector<ExactFloat>, Matrix<ExactFloat> >());
+    zonotope_class.def(init< Vector<ExactFloat64>, Matrix<ExactFloat64>, Vector<ErrorFloat64> >());
+    zonotope_class.def(init< Vector<ExactFloat64>, Matrix<ExactFloat64> >());
     zonotope_class.def(init< ExactBox >());
     zonotope_class.def("centre",&Zonotope::centre,return_value_policy<copy_const_reference>());
     zonotope_class.def("generators",&Zonotope::generators,return_value_policy<copy_const_reference>());
@@ -399,11 +399,11 @@ Void export_polytope()
 
 Void export_curve()
 {
-    to_python< Pair<const ExactFloat,ExactPoint> >();
+    to_python< Pair<const ExactFloat64,ExactPoint> >();
 
     class_<InterpolatedCurve,bases<DrawableInterface> > interpolated_curve_class("InterpolatedCurve",init<InterpolatedCurve>());
-    interpolated_curve_class.def(init<ExactFloat,ExactPoint>());
-    interpolated_curve_class.def("insert", (Void(InterpolatedCurve::*)(const ApproximateFloat&, const Point<ApproximateFloat>&)) &InterpolatedCurve::insert);
+    interpolated_curve_class.def(init<ExactFloat64,ExactPoint>());
+    interpolated_curve_class.def("insert", (Void(InterpolatedCurve::*)(const ApproximateFloat64&, const Point<ApproximateFloat64>&)) &InterpolatedCurve::insert);
     interpolated_curve_class.def("__iter__",boost::python::range(&InterpolatedCurve::begin,&InterpolatedCurve::end));
     interpolated_curve_class.def(self_ns::str(self));
 
@@ -417,10 +417,10 @@ Void export_affine_set()
 
     class_<ValidatedAffineConstrainedImageSet,bases<CompactSetInterface,DrawableInterface> >
         affine_set_class("ValidatedAffineConstrainedImageSet",init<ValidatedAffineConstrainedImageSet>());
-    affine_set_class.def(init<Vector<ExactInterval>, Matrix<ExactFloat>, Vector<ExactFloat> >());
-    affine_set_class.def(init<Matrix<ExactFloat>, Vector<ExactFloat> >());
-    affine_set_class.def("new_parameter_constraint", (Void(ValidatedAffineConstrainedImageSet::*)(const Constraint<Affine<ValidatedFloat>,ValidatedFloat>&)) &ValidatedAffineConstrainedImageSet::new_parameter_constraint);
-    affine_set_class.def("new_constraint", (Void(ValidatedAffineConstrainedImageSet::*)(const Constraint<AffineModel<ValidatedFloat>,ValidatedFloat>&)) &ValidatedAffineConstrainedImageSet::new_constraint);
+    affine_set_class.def(init<Vector<ExactInterval>, Matrix<ExactFloat64>, Vector<ExactFloat64> >());
+    affine_set_class.def(init<Matrix<ExactFloat64>, Vector<ExactFloat64> >());
+    affine_set_class.def("new_parameter_constraint", (Void(ValidatedAffineConstrainedImageSet::*)(const Constraint<Affine<ValidatedFloat64>,ValidatedFloat64>&)) &ValidatedAffineConstrainedImageSet::new_parameter_constraint);
+    affine_set_class.def("new_constraint", (Void(ValidatedAffineConstrainedImageSet::*)(const Constraint<AffineModel<ValidatedFloat64>,ValidatedFloat64>&)) &ValidatedAffineConstrainedImageSet::new_constraint);
     affine_set_class.def("dimension", &ValidatedAffineConstrainedImageSet::dimension);
     affine_set_class.def("bounded", &ValidatedAffineConstrainedImageSet::bounded);
     affine_set_class.def("empty", &ValidatedAffineConstrainedImageSet::empty);

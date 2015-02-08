@@ -55,7 +55,7 @@ Polytope polytope(const Polytope& p);
 ExactPoint baricentre(const Polytope& p);
 
 Polytope& reduce2d(Polytope& p);
-Float slope2d(const ExactPoint& pt1, const ExactPoint& pt2);
+Float64 slope2d(const ExactPoint& pt1, const ExactPoint& pt2);
 
 
 //! A polytope in Euclidean space, defined by a list of extreme points.

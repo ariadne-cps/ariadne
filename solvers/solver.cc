@@ -67,17 +67,17 @@ jacobian2(const Vector<ValidatedTaylorModel>& f, const Vector<ValidatedNumber>& 
 }
 
 // Compute the Jacobian over the unit domain
-Matrix<ExactFloat>
+Matrix<ExactFloat64>
 jacobian2_value(const Vector<ValidatedTaylorModel>& f)
 {
     const Nat rs=f.size();
     const Nat fas=f.zero_element().argument_size();
     const Nat has=fas-rs;
-    Matrix<ExactFloat> J(rs,rs);
+    Matrix<ExactFloat64> J(rs,rs);
     MultiIndex a(fas);
     for(Nat i=0; i!=rs; ++i) {
         for(Nat j=0; j!=rs; ++j) {
-            a[has+j]=1; const ExactFloat x=f[i][a]; J[i][j]=x; a[has+j]=0;
+            a[has+j]=1; const ExactFloat64 x=f[i][a]; J[i][j]=x; a[has+j]=0;
         }
     }
     return J;
@@ -96,7 +96,7 @@ jacobian2_range(const Vector<ValidatedTaylorModel>& f)
             for(Nat k=0; k!=rs; ++k) {
                 const Nat c=iter->key()[has+k];
                 if(c>0) {
-                    const ExactFloat& x=iter->data();
+                    const ExactFloat64& x=iter->data();
                     if(iter->key().degree()==1) { J[i][k]+=x; }
                     else { J[i][k]+=ValidatedNumber(-1,1)*x*c; }
                     //std::cerr<<"  J="<<J<<" i="<<i<<" a="<<iter->key()<<" k="<<k<<" c="<<c<<" x="<<x<<std::endl;
@@ -116,13 +116,13 @@ static const Bool ALLOW_PARTIAL_FUNCTION = true;
 
 FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory();
 
-ValidatedVectorFunctionModel operator*(const Matrix<ExactFloat>& A,const ValidatedVectorFunctionModel& v) {
+ValidatedVectorFunctionModel operator*(const Matrix<ExactFloat64>& A,const ValidatedVectorFunctionModel& v) {
     ARIADNE_ASSERT(v.size()!=0);
     ValidatedVectorFunctionModel r(A.row_size(),v[0].create_zero());
     for(Nat i=0; i!=r.size(); ++i) {
         ValidatedScalarFunctionModel t=r[i];
         for(Nat j=0; j!=v.size(); ++j) {
-            t+=ExactFloat(A[i][j])*v[j];
+            t+=ExactFloat64(A[i][j])*v[j];
         }
         r[i]=t;
     }
@@ -142,8 +142,8 @@ ValidatedVectorFunctionModel operator*(const Matrix<ValidatedNumber>& A,const Va
     return r;
 }
 
-ErrorFloat sup_error(const ValidatedVectorFunctionModel& x) {
-    ErrorFloat r=0u;
+ErrorFloat64 sup_error(const ValidatedVectorFunctionModel& x) {
+    ErrorFloat64 r=0u;
     for(Nat i=0; i!=x.size(); ++i) { r=std::max(r,x[i].error()); }
     return r;
 }
@@ -218,7 +218,7 @@ SolverBase::solve_all(const ValidatedVectorFunction& f,
     // Create result set
     Set< Vector<ValidatedNumber> > r;
 
-    Vector<ValidatedFloat> x=make_singleton(bx);
+    Vector<ValidatedFloat64> x=make_singleton(bx);
 
     // Test for no solution
     const Vector<ValidatedNumber> z(bx.size());
@@ -324,7 +324,7 @@ SolverBase::zero(const ValidatedVectorFunction& f,
     if(!consistent(f.evaluate(r),Vector<ValidatedNumber>(f.result_size()))) {
         ARIADNE_THROW(NoSolutionException,"SolverBase::zero","No result found in "<<bx<<"; f("<<r<<") is inconsistent with zero");
     } else {
-        UpperFloat widen=ExactFloat(Float::eps())*sup_error(r);
+        UpperFloat64 widen=ExactFloat64(Float64::eps())*sup_error(r);
         r+=Vector<ValidatedNumber>(r.size(),ValidatedNumber(-widen,+widen));
         nr=this->step(f,r);
         if(refines(nr,r)) {
@@ -449,7 +449,7 @@ IntervalNewtonSolver::step(const ValidatedVectorFunction& f,
 {
     ARIADNE_LOG(4,"Testing for root in "<<x<<"\n");
     ARIADNE_LOG(5,"  e="<<sup_error(x)<<"  x="<<x<<"\n");
-    Vector<ExactFloat> m(make_exact(x));
+    Vector<ExactFloat64> m(make_exact(x));
     ARIADNE_LOG(5,"  m="<<m<<"\n");
     Vector<ValidatedNumber> im(m);
     Vector<ValidatedNumber> w=f.evaluate(im);
@@ -472,7 +472,7 @@ KrawczykSolver::step(const ValidatedVectorFunction& f,
     Matrix<ValidatedNumber> I=Matrix<ValidatedNumber>::identity(x.size());
     ARIADNE_LOG(4,"Testing for root in "<<x<<"\n");
     ARIADNE_LOG(5,"  e="<<sup_error(x)<<"  x="<<x<<"\n");
-    Vector<ExactFloat> m(make_exact(x));
+    Vector<ExactFloat64> m(make_exact(x));
     ARIADNE_LOG(5,"  m="<<m<<"\n");
     Vector<ValidatedNumber> im(m);
     Vector<ValidatedNumber> fm=f.evaluate(im);
@@ -498,7 +498,7 @@ FactoredKrawczykSolver::step(const ValidatedVectorFunction& f,
     Matrix<ValidatedNumber> I=Matrix<ValidatedNumber>::identity(x.size());
     ARIADNE_LOG(4,"Testing for root in "<<x<<"\n");
     ARIADNE_LOG(5,"  e="<<sup_error(x)<<"  x="<<x<<"\n");
-    Vector<ExactFloat> m(make_exact(x));
+    Vector<ExactFloat64> m(make_exact(x));
     ARIADNE_LOG(5,"  m="<<m<<"\n");
     Vector<ValidatedNumber> im(m);
     Vector<ValidatedNumber> fm=f.evaluate(im);
@@ -568,10 +568,10 @@ IntervalNewtonSolver::implicit_step(const ValidatedVectorFunction& f,
 
     ValidatedVectorFunctionModel dh(n,z);
     if(n==1) {
-        if(contains(rngJ[0][0],ExactFloat(0.0))) {
+        if(contains(rngJ[0][0],ExactFloat64(0.0))) {
             ARIADNE_THROW(SingularJacobianException,"IntervalNewtonSolver","D2f(P,X)="<<rngJ[0][0]<<" which contains zero.");
         }
-        if(contains(J[0][0].range(),ExactFloat(0.0))) {
+        if(contains(J[0][0].range(),ExactFloat64(0.0))) {
             dh[0]=fidmh[0]/make_singleton(rngJ[0][0]);
         } else {
             dh[0]=fidmh[0]/J[0][0];
@@ -602,7 +602,7 @@ KrawczykSolver::implicit_step(const ValidatedVectorFunction& f,
     ValidatedVectorFunctionModel mx(x);
     for(Nat i=0; i!=mx.size(); ++i) { mx[i].set_error(0u); }
     ARIADNE_LOG(5,"    mx="<<mx<<"\n");
-    Vector<ErrorFloat> ex(nx);
+    Vector<ErrorFloat64> ex(nx);
     for(Nat i=0; i!=nx; ++i) { ex[i]=x[i].error(); }
     Vector<ValidatedNumber> eix=make_bounds(ex);
     ARIADNE_LOG(5,"    ex="<<ex<<"\n");
@@ -695,8 +695,8 @@ IntervalNewtonSolver::implicit(const ValidatedScalarFunction& f,
         ARIADNE_LOG(6,"dh="<<dh<<"\n");
         ARIADNE_LOG(6,"dh.range()="<<dh.range()<<"\n");
         ARIADNE_LOG(8,"norm(dh)="<<norm(dh)<<", h.error()="<<h.error()<<"\n");
-        ErrorFloat herr=h.error();
-        ErrorFloat dhnrm=norm(dh);
+        ErrorFloat64 herr=h.error();
+        ErrorFloat64 dhnrm=norm(dh);
         // Prefer to check refinement using norm of dh, since this is faster
         // if(refines(nh,h)) { refinement=true; }
         if(dhnrm<=herr) { refinement=true; }

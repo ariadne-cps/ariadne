@@ -40,7 +40,7 @@
 
 namespace Ariadne {
 
-class Float;
+class Float64;
 class ExactInterval;
 
 template<class X> class Vector;

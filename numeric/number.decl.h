@@ -74,13 +74,13 @@ using ApproximateNumber=Number<Approximate>;
 
 namespace Ariadne {
 
-using ExactNumber=ExactFloat;
+using ExactNumber=ExactFloat64;
 using EffectiveNumber=Real;
-using ValidatedNumber=ValidatedFloat;
-using UpperNumber=UpperFloat;
-using LowerNumber=LowerFloat;
-using ApproximateNumber=ApproximateFloat;
-using PositiveUpperNumber=PositiveUpperFloat;
+using ValidatedNumber=ValidatedFloat64;
+using UpperNumber=UpperFloat64;
+using LowerNumber=LowerFloat64;
+using ApproximateNumber=ApproximateFloat64;
+using PositiveUpperNumber=PositiveUpperFloat64;
 
 } // namespace Ariadne
 

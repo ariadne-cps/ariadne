@@ -115,7 +115,7 @@ ValidatedTaylorModel& ivlscal(ValidatedTaylorModel& x, const ExactInterval& ivl)
     return x*=ivl;
 }
 
-ValidatedTaylorModel& fscal(ValidatedTaylorModel& x, const Float& c) {
+ValidatedTaylorModel& fscal(ValidatedTaylorModel& x, const Float64& c) {
     return x*=c;
 }
 
@@ -167,7 +167,7 @@ Void profile(Nat ntries, const char* name, const T& run)
 
     double total_time = tm.elapsed();
     double average_time_in_microseconds = 1000000*(total_time/ntries);
-    Float error = res.error();
+    Float64 error = res.error();
     unsigned Int size = res.number_of_nonzeros();
 
     std::cout << std::setw(20) << std::left << name << std::right
@@ -181,7 +181,7 @@ Int main(Int argc, const char* argv[]) {
     Nat ntries=20;
     if(argc>1) { ntries=atoi(argv[1]); }
 
-    Vector<Float> c={1.0,2.0};
+    Vector<Float64> c={1.0,2.0};
     Int i;
 
     TrivialSweeper trivial_sweeper;
@@ -203,7 +203,7 @@ Int main(Int argc, const char* argv[]) {
 
 
     ExactInterval ivl(0.33,0.49);
-    Float cnst=0.41;
+    Float64 cnst=0.41;
     ValidatedTaylorModel x(3,threshold_sweeper);
     ValidatedTaylorModel y(3,threshold_sweeper);
 
@@ -220,7 +220,7 @@ Int main(Int argc, const char* argv[]) {
     threshold_sweeper = ThresholdSweeper(1e-3);
     y.set_sweeper(threshold_sweeper);
 
-    ValidatedTaylorModel z(Expansion<Float>({ {{0,0,0},1.0}, {{1,0,0},0.5}, {{0,1,0},-0.25}, {{0,0,1},0.625} }),0.0,threshold_sweeper);
+    ValidatedTaylorModel z(Expansion<Float64>({ {{0,0,0},1.0}, {{1,0,0},0.5}, {{0,1,0},-0.25}, {{0,0,1},0.625} }),0.0,threshold_sweeper);
 
     std::cout << std::setw(20) << std::left << "name" << std::right
               << std::setw(11) << "time(us)"

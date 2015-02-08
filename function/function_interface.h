@@ -109,7 +109,7 @@ class FunctionInterface<ApproximateTag,D,C>
   public:
     virtual Result<ApproximateNumber> _evaluate(const Argument<ApproximateNumber>& x) const = 0;
     virtual Result<Differential<ApproximateNumber>> _evaluate(const Argument< Differential<ApproximateNumber> >& x) const = 0;
-    virtual Result<TaylorModel<Approximate,Float>> _evaluate(const Argument< TaylorModel<Approximate,Float> >& x) const = 0;
+    virtual Result<TaylorModel<Approximate,Float64>> _evaluate(const Argument< TaylorModel<Approximate,Float64> >& x) const = 0;
     virtual Result<Formula<ApproximateNumber>> _evaluate(const Argument< Formula<ApproximateNumber> >& x) const = 0;
     virtual Result<Algebra<ApproximateNumber>> _evaluate(const Argument< Algebra<ApproximateNumber> >& x) const = 0;
 
@@ -135,13 +135,13 @@ class FunctionInterface<ValidatedTag,D,C>
     using FunctionInterface<AP,D,C>::_evaluate;
     virtual Result<ValidatedNumber> _evaluate(const Argument<ValidatedNumber>& x) const = 0;
     virtual Result<Differential<ValidatedNumber>> _evaluate(const Argument< Differential<ValidatedNumber> >& x) const = 0;
-    virtual Result<TaylorModel<Validated,Float>> _evaluate(const Argument< TaylorModel<Validated,Float> >& x) const = 0;
+    virtual Result<TaylorModel<Validated,Float64>> _evaluate(const Argument< TaylorModel<Validated,Float64> >& x) const = 0;
     virtual Result<Formula<ValidatedNumber>> _evaluate(const Argument< Formula<ValidatedNumber> >& x) const = 0;
     virtual Result<Algebra<ValidatedNumber>> _evaluate(const Argument< Algebra<ValidatedNumber> >& x) const = 0;
 
-    inline Result<ValidatedNumber> _evaluate(const Argument<ExactFloat>& x) const {
+    inline Result<ValidatedNumber> _evaluate(const Argument<ExactFloat64>& x) const {
         return this->_evaluate(Argument<ValidatedNumber>(x)); }
-    inline Result<Differential<ValidatedNumber>> _evaluate(const Argument<Differential<ExactFloat>>& x) const {
+    inline Result<Differential<ValidatedNumber>> _evaluate(const Argument<Differential<ExactFloat64>>& x) const {
         return this->_evaluate(Argument<Differential<ValidatedNumber>>(x)); }
 
     virtual FunctionInterface<P,D,C>* _clone() const = 0;

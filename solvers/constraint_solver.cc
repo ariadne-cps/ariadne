@@ -45,12 +45,12 @@
 
 namespace Ariadne {
 
-typedef Vector<ApproximateFloat> ApproximateFloatVector;
-typedef Vector<ExactFloat> ExactFloatVector;
+typedef Vector<ApproximateFloat64> ApproximateFloatVector;
+typedef Vector<ExactFloat64> ExactFloatVector;
 
 inline Sweeper default_sweeper() { return Sweeper(); }
 
-Sign sign(const Float& x) {
+Sign sign(const Float64& x) {
     if(x>0) { return NEGATIVE; }
     else if(x<0) {  return POSITIVE; }
     else { return ZERO; }
@@ -64,7 +64,7 @@ Sign sign(const ExactInterval& ivl) {
 
 
 OutputStream& operator<<(OutputStream& os, const EffectiveConstraint& c) {
-    static const Float inf = Ariadne::inf;
+    static const Float64 inf = Ariadne::inf;
     if(c.bounds().lower()==c.bounds().upper()) { return os << c.function() << "==" << c.bounds().upper(); }
     if(c.bounds().upper()==infty) { return os << c.bounds().lower() << "<=" << c.function(); }
     if(c.bounds().lower()==-infty) { return os << c.function() << "<=" << c.bounds().upper(); }
@@ -93,7 +93,7 @@ Pair<Tribool,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, cons
 
     static const double XSIGMA=0.125;
     static const double TERR=-1.0/(1<<10);
-    static const Float inf = Ariadne::inf;
+    static const Float64 inf = Ariadne::inf;
 
     ARIADNE_LOG(4,"domain="<<domain<<"\nfunction="<<function<<"\ncodomain="<<codomain<<"\n");
 
@@ -116,11 +116,11 @@ Pair<Tribool,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, cons
     const Nat l=(m+n)*2; // The total number of lagrange multipliers
 
     ApproximateFloatVector point(m); // The point in the domain which is the current test point
-    ApproximateFloat violation; // An upper bound on amount by which the constraints are violated by the test point
+    ApproximateFloat64 violation; // An upper bound on amount by which the constraints are violated by the test point
     ApproximateFloatVector multipliers(l); // The lagrange multipliers for the constraints
     ApproximateFloatVector slack(l); // The slack between the test point and the violated constraints
 
-    ApproximateFloat& t=violation; ApproximateFloatVector& x=multipliers; ApproximateFloatVector& y=point; ApproximateFloatVector& z=slack; // Aliases for the main quantities used
+    ApproximateFloat64& t=violation; ApproximateFloatVector& x=multipliers; ApproximateFloatVector& y=point; ApproximateFloatVector& z=slack; // Aliases for the main quantities used
     const ExactBox& d=domain; const ValidatedVectorFunction& fn=function; const ExactBox& c=codomain; // Aliases for the main quantities used
     VectorTaylorFunction tfn(d,fn,default_sweeper());
 
@@ -149,7 +149,7 @@ Pair<Tribool,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, cons
         // Probably disjoint, so try to prove this
         ExactBox subdomain=domain;
 
-        Vector<ExactFloat> x_exact=make_exact(x);
+        Vector<ExactFloat64> x_exact=make_exact(x);
         // Use the computed dual variables to try to make a scalar function which is negative over the entire domain.
         // This should be easier than using all constraints separately
         ScalarTaylorFunction txg=ScalarTaylorFunction::zero(d,default_sweeper());
@@ -184,10 +184,10 @@ Pair<Tribool,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, cons
         //Pair<ExactBox,ExactBox> sd=solver.split(List<EffectiveConstraint>(1u,constraint),d);
         ARIADNE_LOG(4,"  Splitting domain\n");
         Pair<ExactBox,ExactBox> sd=d.split();
-        Vector<ApproximateFloat> nx = ApproximateFloat(1.0-XSIGMA)*x + Vector<ApproximateFloat>(x.size(),XSIGMA/x.size());
-        Vector<ApproximateFloat> ny = midpoint(sd.first);
+        Vector<ApproximateFloat64> nx = ApproximateFloat64(1.0-XSIGMA)*x + Vector<ApproximateFloat64>(x.size(),XSIGMA/x.size());
+        Vector<ApproximateFloat64> ny = midpoint(sd.first);
         Tribool result=this->feasible(sd.first, fn, c).first;
-        nx = ApproximateFloat(1.0-XSIGMA)*x + Vector<ApproximateFloat>(x.size(),XSIGMA/x.size());
+        nx = ApproximateFloat64(1.0-XSIGMA)*x + Vector<ApproximateFloat64>(x.size(),XSIGMA/x.size());
         ny = midpoint(sd.second);
         result = result || this->feasible(sd.second, fn, c).first;
         return make_pair(result,ExactPoint());
@@ -205,11 +205,11 @@ Bool ConstraintSolver::reduce(UpperBox& domain, const ValidatedVectorFunction& f
 
     if(definitely(domain.empty())) { return true; }
 
-    Float domain_magnitude=0.0;
+    Float64 domain_magnitude=0.0;
     for(Nat j=0; j!=domain.size(); ++j) {
         domain_magnitude+=domain[j].width().raw();
     }
-    Float old_domain_magnitude=domain_magnitude;
+    Float64 old_domain_magnitude=domain_magnitude;
 
     do {
         this->hull_reduce(domain,function,codomain);
@@ -248,11 +248,11 @@ Bool ConstraintSolver::reduce(UpperBox& domain, const List<ValidatedConstraint>&
 
     if(definitely(domain.empty())) { return true; }
 
-    Float domain_magnitude=0.0;
+    Float64 domain_magnitude=0.0;
     for(Nat j=0; j!=domain.size(); ++j) {
         domain_magnitude+=domain[j].width().raw();
     }
-    Float old_domain_magnitude=domain_magnitude;
+    Float64 old_domain_magnitude=domain_magnitude;
 
     do {
         for(Nat i=0; i!=constraints.size(); ++i) {
@@ -324,14 +324,14 @@ Bool ConstraintSolver::monotone_reduce(UpperBox& domain, const ValidatedScalarFu
 
     ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(ExactBox domain): function="<<function<<", bounds="<<bounds<<", domain="<<domain<<", variable="<<variable<<", derivative="<<derivative<<"\n");
 
-    ExactFloat splitpoint;
+    ExactFloat64 splitpoint;
     UpperInterval lower=domain[variable];
     UpperInterval upper=domain[variable];
     Vector<UpperInterval> slice=domain;
     Vector<UpperInterval> subdomain=domain;
 
     static const Int MAX_STEPS=3;
-    const Float size = lower.width().raw() / (1<<MAX_STEPS);
+    const Float64 size = lower.width().raw() / (1<<MAX_STEPS);
     do {
         // Apply Newton contractor on lower and upper strips
         if(lower.width().raw()>size) {
@@ -405,8 +405,8 @@ Bool ConstraintSolver::box_reduce(UpperBox& domain, const ValidatedScalarFunctio
     // Try to reduce the size of the set by "shaving" off along a coordinate axis
     //
     UpperInterval interval=domain[variable];
-    RawFloat l=interval.lower().raw();
-    RawFloat u=interval.upper().raw();
+    RawFloat64 l=interval.lower().raw();
+    RawFloat64 u=interval.upper().raw();
     ExactInterval subinterval;
     UpperInterval new_interval(interval);
     Vector<UpperInterval> slice=domain;
@@ -484,7 +484,7 @@ Tribool ConstraintSolver::check_feasibility(const ExactBox& d, const ValidatedVe
         if(y[i]<d[i].lower() || y[i]>d[i].upper()) { return false; }
     }
 
-    Vector<ValidatedFloat> fy=f(Vector<ValidatedFloat>(y));
+    Vector<ValidatedFloat64> fy=f(Vector<ValidatedFloat64>(y));
     ARIADNE_LOG(4,"d="<<d<<" f="<<f<<", c="<<c<<"\n  y="<<y<<", f(y)="<<fy<<"\n");
     Tribool result=true;
     for(Nat j=0; j!=fy.size(); ++j) {

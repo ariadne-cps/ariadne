@@ -42,7 +42,7 @@
 
 namespace Ariadne {
 
-typedef Vector<Float> RawFloatVector;
+typedef Vector<Float64> RawFloatVector;
 typedef Vector<ExactInterval> ExactIntervalVector;
 
 
@@ -64,20 +64,20 @@ struct LinearProgram {
 };
 
 
-ValidatedAffineConstraint operator<=(const ValidatedFloat& l, const ValidatedAffine& a) { return ValidatedAffineConstraint(l,a,+infty); }
-ValidatedAffineConstraint operator<=(const ValidatedAffine& a, const ValidatedFloat& u) { return ValidatedAffineConstraint(-infty,a,u); }
-ValidatedAffineConstraint operator==(const ValidatedAffine& a, const ValidatedFloat& b) { return ValidatedAffineConstraint(b,a,b); }
+ValidatedAffineConstraint operator<=(const ValidatedFloat64& l, const ValidatedAffine& a) { return ValidatedAffineConstraint(l,a,+infty); }
+ValidatedAffineConstraint operator<=(const ValidatedAffine& a, const ValidatedFloat64& u) { return ValidatedAffineConstraint(-infty,a,u); }
+ValidatedAffineConstraint operator==(const ValidatedAffine& a, const ValidatedFloat64& b) { return ValidatedAffineConstraint(b,a,b); }
 
-ValidatedAffineConstraint operator<=(const ValidatedAffineConstraint& c, const ValidatedFloat& u) {
+ValidatedAffineConstraint operator<=(const ValidatedAffineConstraint& c, const ValidatedFloat64& u) {
     ARIADNE_ASSERT(c.upper_bound()==infty);
     return ValidatedAffineConstraint(c.lower_bound(),c.function(),u);
 }
 
-ValidatedAffineModelConstraint operator<=(const ValidatedFloat& l, const ValidatedAffineModel& a) { return ValidatedAffineModelConstraint(l,a,+infty); }
-ValidatedAffineModelConstraint operator<=(const ValidatedAffineModel& a, const ValidatedFloat& u) { return ValidatedAffineModelConstraint(-infty,a,u); }
-ValidatedAffineModelConstraint operator==(const ValidatedAffineModel& a, const ValidatedFloat& b) { return ValidatedAffineModelConstraint(b,a,b); }
+ValidatedAffineModelConstraint operator<=(const ValidatedFloat64& l, const ValidatedAffineModel& a) { return ValidatedAffineModelConstraint(l,a,+infty); }
+ValidatedAffineModelConstraint operator<=(const ValidatedAffineModel& a, const ValidatedFloat64& u) { return ValidatedAffineModelConstraint(-infty,a,u); }
+ValidatedAffineModelConstraint operator==(const ValidatedAffineModel& a, const ValidatedFloat64& b) { return ValidatedAffineModelConstraint(b,a,b); }
 
-ValidatedAffineModelConstraint operator<=(const ValidatedAffineModelConstraint& c, const ValidatedFloat& u) {
+ValidatedAffineModelConstraint operator<=(const ValidatedAffineModelConstraint& c, const ValidatedFloat64& u) {
     ARIADNE_ASSERT(c.upper_bound()==infty);
     return ValidatedAffineModelConstraint(c.lower_bound(),c.function(),u);
 }
@@ -130,17 +130,17 @@ ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Vec
 {
 }
 
-ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const ExactBox& D, const Matrix<ExactFloat>& G, const Vector<ExactFloat>& h)
+ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const ExactBox& D, const Matrix<ExactFloat64>& G, const Vector<ExactFloat64>& h)
 {
     this->construct(D,G,h);
 }
 
-ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Matrix<ExactFloat>& G, const Vector<ExactFloat>& h)
+ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Matrix<ExactFloat64>& G, const Vector<ExactFloat64>& h)
 {
     this->construct(Vector<ExactInterval>(G.column_size(),ExactInterval(-1,+1)),G,h);
 }
 
-Void ValidatedAffineConstrainedImageSet::construct(const ExactBox& D, const Matrix<ExactFloat>& G, const Vector<ExactFloat>& h)
+Void ValidatedAffineConstrainedImageSet::construct(const ExactBox& D, const Matrix<ExactFloat64>& G, const Vector<ExactFloat64>& h)
 {
     ARIADNE_ASSERT_MSG(G.row_size()==h.size() && G.row_size()>0,"G="<<G<<", h="<<h);
     this->_domain=D;
@@ -228,7 +228,7 @@ UpperBox ValidatedAffineConstrainedImageSet::bounding_box() const {
 Tribool ValidatedAffineConstrainedImageSet::separated(const ExactBox& bx) const {
     ARIADNE_PRECONDITION_MSG(this->dimension()==bx.dimension(),"set="<<*this<<", box="<<bx);
     ExactBox wbx=widen(bx);
-    LinearProgram<Float> lp;
+    LinearProgram<Float64> lp;
     this->construct_linear_program(lp);
     for(Nat i=0; i!=bx.size(); ++i) {
         lp.l[i]=sub_down(wbx[i].lower().raw(),this->_space_models[i].error().raw());
@@ -239,7 +239,7 @@ Tribool ValidatedAffineConstrainedImageSet::separated(const ExactBox& bx) const 
     try {
         InteriorPointSolver optimiser;
         feasible=optimiser.feasible(lp.l,lp.u,lp.A,lp.b);
-        //feasible=SimplexSolver<Float>().hotstarted_feasible(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x,lp.y);
+        //feasible=SimplexSolver<Float64>().hotstarted_feasible(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x,lp.y);
     }
     catch(DegenerateFeasibilityProblemException e) {
         feasible=indeterminate;
@@ -265,7 +265,7 @@ ValidatedAffineConstrainedImageSet::outer_approximation(const Grid& g, Int d) co
 }
 
 
-Void ValidatedAffineConstrainedImageSet::_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<Float>& lp, const Vector<Float>& errors, GridCell& cell, Int depth)
+Void ValidatedAffineConstrainedImageSet::_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<Float64>& lp, const Vector<Float64>& errors, GridCell& cell, Int depth)
 {
 
     // No need to check if cell is already part of the set
@@ -288,7 +288,7 @@ Void ValidatedAffineConstrainedImageSet::_adjoin_outer_approximation_to(PavingIn
     Int maximum_tree_depth=depth*cell.dimension();
 
     // Check for disjointness using linear program
-    //Tribool feasible=SimplexSolver<Float>().hotstarted_feasible(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x,lp.y);
+    //Tribool feasible=SimplexSolver<Float64>().hotstarted_feasible(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x,lp.y);
     InteriorPointSolver optimiser;
     Tribool feasible=optimiser.feasible(lp.l,lp.u,lp.A,lp.b);
     //feasible=verify_feasibility(lp.A,lp.b,lp.l,lp.u,lp.vt);
@@ -312,7 +312,7 @@ Void ValidatedAffineConstrainedImageSet::_adjoin_outer_approximation_to(PavingIn
 
 
 Void
-ValidatedAffineConstrainedImageSet::construct_linear_program(LinearProgram<Float>& lp) const
+ValidatedAffineConstrainedImageSet::construct_linear_program(LinearProgram<Float64>& lp) const
 {
     // Set up linear programming problem.
     // We have parameter e and point x, which need to satisfy
@@ -399,9 +399,9 @@ ValidatedAffineConstrainedImageSet::adjoin_outer_approximation_to(PavingInterfac
     GridCell bounding_cell=GridCell::smallest_enclosing_primary_cell(this->bounding_box(),paving.grid());
 
     // Create linear program
-    LinearProgram<Float> lp;
+    LinearProgram<Float64> lp;
     this->construct_linear_program(lp);
-    Vector<Float> errors(this->dimension());
+    Vector<Float64> errors(this->dimension());
     for(Nat i=0; i!=this->dimension(); ++i) {
         errors[i]=this->_space_models[i].error().raw();
     }
@@ -411,9 +411,9 @@ ValidatedAffineConstrainedImageSet::adjoin_outer_approximation_to(PavingInterfac
 
 
 
-Void ValidatedAffineConstrainedImageSet::_robust_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<Float>& lp, const Vector<Float>& errors, GridCell& cell, Int depth)
+Void ValidatedAffineConstrainedImageSet::_robust_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<Float64>& lp, const Vector<Float64>& errors, GridCell& cell, Int depth)
 {
-    SimplexSolver<Float> lpsolver;
+    SimplexSolver<Float64> lpsolver;
 
     const Nat nx=cell.dimension();
     const Nat nc=lp.A.row_size()-nx;
@@ -471,7 +471,7 @@ Void
 ValidatedAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const {
     ARIADNE_ASSERT(this->dimension()==paving.dimension());
 
-    SimplexSolver<Float> lpsolver;
+    SimplexSolver<Float64> lpsolver;
 
     GridCell bounding_cell=GridCell::smallest_enclosing_primary_cell(this->bounding_box(),paving.grid());
 
@@ -492,7 +492,7 @@ ValidatedAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingI
     const Nat nc=this->number_of_constraints();
 
     // Create linear program
-    LinearProgram<Float> lp;
+    LinearProgram<Float64> lp;
     lp.A.resize(nx+nc,nx+ne+nc+1u);
     lp.b.resize(nx+nc);
     lp.c.resize(nx+ne+nc+1u);
@@ -571,9 +571,9 @@ ValidatedAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingI
         lp.vt[ne+i]=BASIS;
         lp.p[i]=ne+i;
     }
-    lp.B=Matrix<Float>::identity(nx+nc);
+    lp.B=Matrix<Float64>::identity(nx+nc);
 
-    Vector<Float> errors(this->dimension());
+    Vector<Float64> errors(this->dimension());
     for(Nat i=0; i!=this->dimension(); ++i) {
         errors[i]=this->_space_models[i].error().raw();
     }
@@ -600,12 +600,12 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
 {
     ARIADNE_LOG(3,"ValidatedAffineConstrainedImageSet::boundary("<<xind<<","<<yind<<"): self="<<*this<<"\n");
 
-    SimplexSolver<Float> lpsolver;
+    SimplexSolver<Float64> lpsolver;
     PerturbationGenerator eps;
 
     static const Int MAX_STEPS=1000;
     static const double ERROR_TOLERANCE = std::numeric_limits<float>::epsilon();
-    static const Float inf = Ariadne::inf;
+    static const Float64 inf = Ariadne::inf;
 
     const SizeType nx=_domain.size();
     const SizeType ne=2u;
@@ -617,20 +617,20 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
     AffineModel<ValidatedNumber> const& ya=this->_space_models[yind];
 
     // The set is given by (x,y)=Gs+h, where As=b and l<=s<=u
-    Matrix<Float> G=Matrix<Float>::zero(2,np);
-    for(Nat j=0; j!=nx; ++j) { G[0][j]=numeric_cast<RawFloat>(xa.gradient(j))+eps(); G[1][j]=numeric_cast<RawFloat>(ya.gradient(j))+eps(); }
+    Matrix<Float64> G=Matrix<Float64>::zero(2,np);
+    for(Nat j=0; j!=nx; ++j) { G[0][j]=numeric_cast<RawFloat64>(xa.gradient(j))+eps(); G[1][j]=numeric_cast<RawFloat64>(ya.gradient(j))+eps(); }
     G[0][nx+0]=xa.error().raw()+std::abs(eps()); G[1][nx+1]=ya.error().raw()+std::abs(eps());
-    Vector<Float> h(2);
-    h[0]=numeric_cast<RawFloat>(xa.value()); h[1]=numeric_cast<RawFloat>(ya.value());
+    Vector<Float64> h(2);
+    h[0]=numeric_cast<RawFloat64>(xa.value()); h[1]=numeric_cast<RawFloat64>(ya.value());
     ARIADNE_LOG(5,"G="<<G<<" h="<<h<<"\n");
 
     // Set up linear programming problem Ax=b; l<=x<=u
     // Since the parameter domain is given by cl<=Ay+b+/-e<=cu, -1<=y<=+1, introduce slack variables z such that z-Ay=b, with cl-e<=z<=cu+e
 
-    Matrix<Float> A(nc,np);
-    Vector<Float> b(nc);
-    Vector<Float> l(np);
-    Vector<Float> u(np);
+    Matrix<Float64> A(nc,np);
+    Vector<Float64> b(nc);
+    Vector<Float64> l(np);
+    Vector<Float64> u(np);
 
     for(Nat j=0; j!=nx; ++j) {
         l[j]=-1.0+eps();
@@ -644,10 +644,10 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
             A[i][j] = 0.0;
         }
         A[i][nx+i]=1.0;
-        Float fb=this->_constraint_models[i].function().value().raw();
-        Float fe=this->_constraint_models[i].function().error().raw();
-        Float cl=this->_constraint_models[i].lower_bound().value().raw();
-        Float cu=this->_constraint_models[i].upper_bound().value().raw();
+        Float64 fb=this->_constraint_models[i].function().value().raw();
+        Float64 fe=this->_constraint_models[i].function().error().raw();
+        Float64 cl=this->_constraint_models[i].lower_bound().value().raw();
+        Float64 cu=this->_constraint_models[i].upper_bound().value().raw();
         b[i]=fb;
         l[nx+i]=cl-fe;
         u[nx+i]=cu+fe;
@@ -668,8 +668,8 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
     List<Point2d> vertices;
 
     // Set up simplex algorithm working variables
-    Array<Slackness> vt(0); Array<SizeType> p(nc); Matrix<Float> B(nc,nc);
-    Vector<Float> x(np); Vector<Float> y(nc);
+    Array<Slackness> vt(0); Array<SizeType> p(nc); Matrix<Float64> B(nc,nc);
+    Vector<Float64> x(np); Vector<Float64> y(nc);
 
     // Find an initial feasible point
     Tribool feasible = lpsolver.hotstarted_feasible(l,u,A,b, vt, p,B, x,y);
@@ -679,7 +679,7 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
     // If problem not feasible, then set is empty; return empty list
     if(!possibly(feasible)) { return vertices; }
 
-    Vector<Float> c(np,0.0);
+    Vector<Float64> c(np,0.0);
     for(Nat j=0; j!=np; ++j) { c[j]=G[0][j]; }
 
     // Find a point on the boundary; choose the point minimising the spacial x-coordinate
@@ -696,13 +696,13 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
     Int STEPS=0;
     Array<Slackness> initial_variable_type=vt;
 
-    Vector<Float> pt=G*x+h; // The current point in space
-    Vector<Float> last_vec({0.0,-1.0}); // The direction in space of the last step along the boundary
+    Vector<Float64> pt=G*x+h; // The current point in space
+    Vector<Float64> last_vec({0.0,-1.0}); // The direction in space of the last step along the boundary
                                         // Should be set orthogonal to the direction (+1,0) which is minimised in finding first boundary point
-    Vector<Float> best_next_vec(2);
-    Vector<Float> trial_vec(2);
-    Vector<Float> Aj(nc); // The jth column of A
-    Vector<Float> BAj(nc); // The jth column of A
+    Vector<Float64> best_next_vec(2);
+    Vector<Float64> trial_vec(2);
+    Vector<Float64> Aj(nc); // The jth column of A
+    Vector<Float64> BAj(nc); // The jth column of A
 
     Nat last_exiting_variable=np; // Last variable to exit the basis
 
@@ -711,7 +711,7 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
 
     do {
         ++STEPS;
-        Float cot_theta_max=-inf;
+        Float64 cot_theta_max=-inf;
         Nat s=np; // The index giving the variable x[p[s]] to enter the basis
 
         // Compute direction the point Gx moves in when variable x[j]=x[p[k]] enters the basis
@@ -726,7 +726,7 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
                 BAj=B*Aj;
 
                 // Compute the direction the point in space moves for x[j] entering the basis
-                Vector<Float> d(np,0.0); // The direction x moves in in changing the basis
+                Vector<Float64> d(np,0.0); // The direction x moves in in changing the basis
                 d[j] = (vt[j]==LOWER ? +1 : -1);
                 for(Nat i=0; i!=nc; ++i) {
                     d[p[i]]=-BAj[i]*d[j];
@@ -738,9 +738,9 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
                 //   positive means an obtuse angle i.e. the same general direction.
                 // cross compares whether we turn to the left or the right.
                 // Since we traverse the boundary anticlockwise, cross should be positive.
-                Float dot=last_vec[0]*trial_vec[0]+last_vec[1]*trial_vec[1];
-                Float cross=last_vec[0]*trial_vec[1]-last_vec[1]*trial_vec[0];
-                Float cot_theta=dot/cross;
+                Float64 dot=last_vec[0]*trial_vec[0]+last_vec[1]*trial_vec[1];
+                Float64 cross=last_vec[0]*trial_vec[1]-last_vec[1]*trial_vec[0];
+                Float64 cot_theta=dot/cross;
                 ARIADNE_LOG(5,"  k="<<k<<" p[k]="<<p[k]<<" d="<<d<<" trial_vec="<<trial_vec<<" last_vec="<<last_vec<<
                               " dot="<<dot<<" cross="<<cross<<" cot="<<cot_theta<<"\n");
 

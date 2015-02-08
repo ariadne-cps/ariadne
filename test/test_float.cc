@@ -85,7 +85,7 @@ TestFloat::test()
 
 
 // Test that the type implements all operations of
-// the Float concept without testing correctness
+// the Float64 concept without testing correctness
 Void
 TestFloat::test_concept()
 {
@@ -93,10 +93,10 @@ TestFloat::test_concept()
     Int n=1;
     Nat m=1;
     double d=1;
-    Float x=1;
+    Float64 x=1;
 
     // Constructors
-    x=Float(); x=Float(n); x=Float(m); x=Float(d); x=Float(x);
+    x=Float64(); x=Float64(n); x=Float64(m); x=Float64(d); x=Float64(x);
 
     // Assignment
     x=n; x=m; x=d; x=x;
@@ -122,7 +122,7 @@ TestFloat::test_concept()
 
     x=med_near(x,x); x=rad_up(x,x);
 
-    // Mixed Float/Int arithmetic
+    // Mixed Float64/Int arithmetic
     x=mul_approx(n,x); x=mul_down(n,x); x=mul_up(n,x); // x=mul_chop(n,x);
     x=mul_approx(m,x); x=mul_down(m,x); x=mul_up(m,x); // x=mul_chop(m,x);
     x=mul_approx(x,n); x=mul_down(x,n); x=mul_up(x,n); // x=mul_chop(x,n);
@@ -130,7 +130,7 @@ TestFloat::test_concept()
     x=div_approx(x,n); x=div_down(x,n); x=div_up(x,n); // x=div_chop(x,n);
     x=div_approx(x,m); x=div_down(x,m); x=div_up(x,m); // x=div_chop(x,m);
 
-    // Mixed Float/double arithmetic
+    // Mixed Float64/double arithmetic
     x=mul_approx(d,x); x=mul_approx(x,d); x=div_approx(x,d);
 
     // Reset x to 1
@@ -151,21 +151,21 @@ TestFloat::test_concept()
     b=(x==x); b=(x!=x); b=(x<=x); b=(x>=x); b=(x<x); b=(x>x);
 
     // Rounding mode
-    Float::set_rounding_to_nearest();
-    Float::set_rounding_downward();
-    Float::set_rounding_upward();
-    Float::set_rounding_toward_zero();
+    Float64::set_rounding_to_nearest();
+    Float64::set_rounding_downward();
+    Float64::set_rounding_upward();
+    Float64::set_rounding_toward_zero();
 
-    Float::set_rounding_mode(Float::to_nearest);
-    Float::set_rounding_mode(Float::downward);
-    Float::set_rounding_mode(Float::upward);
-    Float::set_rounding_mode(Float::toward_zero);
+    Float64::set_rounding_mode(Float64::to_nearest);
+    Float64::set_rounding_mode(Float64::downward);
+    Float64::set_rounding_mode(Float64::upward);
+    Float64::set_rounding_mode(Float64::toward_zero);
 
-    Float::RoundingModeType rnd=Float::get_rounding_mode();
-    Float::set_rounding_mode(rnd);
+    Float64::RoundingModeType rnd=Float64::get_rounding_mode();
+    Float64::set_rounding_mode(rnd);
 
-    // Precision
-    Float::PrecisionType pr=Float::get_default_precision();
+    // Precision64
+    Float64::PrecisionType pr=Float64::get_default_precision();
     pr=x.precision();
     x.set_precision(pr);
 
@@ -177,13 +177,13 @@ TestFloat::test_class()
 {
     cout << __PRETTY_FUNCTION__ << endl;
     // Construct from an Int
-    Float f1(2);
+    Float64 f1(2);
     ARIADNE_TEST_ASSERT(f1==2);
     // Construct from a double
-    Float f2(1.25);
+    Float64 f2(1.25);
     ARIADNE_TEST_ASSERT(f2==1.25);
     // Copy constructor
-    Float f3(f2);
+    Float64 f3(f2);
     ARIADNE_TEST_ASSERT(f3==f2);
 
     // Assign from an Int
@@ -207,28 +207,28 @@ TestFloat::test_conversion()
     // Convert from integers
     Int n;
     n=std::numeric_limits<Int>::min();
-    ARIADNE_TEST_ASSERT(Float(n)==n);
+    ARIADNE_TEST_ASSERT(Float64(n)==n);
     n=std::numeric_limits<Int>::max();
-    ARIADNE_TEST_ASSERT(Float(n)==n);
+    ARIADNE_TEST_ASSERT(Float64(n)==n);
     n=std::numeric_limits<Nat>::max();
-    ARIADNE_TEST_ASSERT(Float(n)==n);
+    ARIADNE_TEST_ASSERT(Float64(n)==n);
 
     // Convert to a rational
-    ARIADNE_TEST_EQUAL(Rational(Float(1.0)),Rational(1));
-    ARIADNE_TEST_EQUAL(Rational(Float(2.25)),Rational(9,4));
+    ARIADNE_TEST_EQUAL(Rational(Float64(1.0)),Rational(1));
+    ARIADNE_TEST_EQUAL(Rational(Float64(2.25)),Rational(9,4));
 
     // Convert from a rational
     Int num=1; Int den=3;
     Rational q(1,3);
-    ARIADNE_TEST_COMPARE(Rational(Float(q,Float::downward)),<,q);
-    ARIADNE_TEST_COMPARE(Rational(Float(Rational(num,den),Float::upward)),>,q);
-    ARIADNE_TEST_COMPARE(Float(Rational(num,den),Float::downward),<,Float(Rational(num,den),Float::upward));
+    ARIADNE_TEST_COMPARE(Rational(Float64(q,Float64::downward)),<,q);
+    ARIADNE_TEST_COMPARE(Rational(Float64(Rational(num,den),Float64::upward)),>,q);
+    ARIADNE_TEST_COMPARE(Float64(Rational(num,den),Float64::downward),<,Float64(Rational(num,den),Float64::upward));
 
     // Convert from a negative rational
     num=-2; den=5;
-    ARIADNE_TEST_COMPARE(Rational(Float(q,Float::downward)),<,q);
-    ARIADNE_TEST_COMPARE(Rational(Float(q,Float::upward)),>,q);
-    ARIADNE_TEST_COMPARE(Float(q,Float::downward),<,Float(q,Float::upward));
+    ARIADNE_TEST_COMPARE(Rational(Float64(q,Float64::downward)),<,q);
+    ARIADNE_TEST_COMPARE(Rational(Float64(q,Float64::upward)),>,q);
+    ARIADNE_TEST_COMPARE(Float64(q,Float64::downward),<,Float64(q,Float64::upward));
 
 };
 
@@ -239,7 +239,7 @@ TestFloat::test_stream()
     cout << __PRETTY_FUNCTION__ << endl;
 
     stringstream ss("1.25 -2.25 42:2 375e1 2.35e1");
-    Float f1,f2,f3,f4,f5;
+    Float64 f1,f2,f3,f4,f5;
     ss >> f1;
     cout << f1 << endl;
     ARIADNE_TEST_ASSERT(f1==1.25);
@@ -279,7 +279,7 @@ TestFloat::test_comparison()
 {
     cout << __PRETTY_FUNCTION__ << endl;
 
-    Float f1(1.25); Float f2(-1.25); Float f3(-2.25); Float f4(1.25);
+    Float64 f1(1.25); Float64 f2(-1.25); Float64 f3(-2.25); Float64 f4(1.25);
 
     // Test comparison of two equal numbers
     ARIADNE_TEST_ASSERT(f1==f4); ARIADNE_TEST_ASSERT(!(f1!=f4));
@@ -383,7 +383,7 @@ TestFloat::test_arithmetic()
     static const double eps = std::numeric_limits<double>::epsilon();
 
     // Set next_up some variables
-    Float f1(1.25); Float f2(2.25); Float f3(-3.25); Float f4; Float f5;
+    Float64 f1(1.25); Float64 f2(2.25); Float64 f3(-3.25); Float64 f4; Float64 f5;
 
     // Minimum (this should always remain exact)
     f4=min(f1,f2);
@@ -434,17 +434,17 @@ TestFloat::test_arithmetic()
     cout << f3 << " <= " << f1 << " + " << f2 << " <= " << f4 << endl;
     ARIADNE_TEST_ASSERT(f3<=3.5); ARIADNE_TEST_ASSERT(f4>=3.5);
     // Addition
-    ARIADNE_TEST_COMPARE(add_up(Float(1.0),Float(eps/2)),>,1.0);
-    ARIADNE_TEST_COMPARE(add_down(Float(1.0),Float(eps)),>,1.0);
-    if(add_down(Float(1.0),Float(eps/2)) != Float(1.0)) {
+    ARIADNE_TEST_COMPARE(add_up(Float64(1.0),Float64(eps/2)),>,1.0);
+    ARIADNE_TEST_COMPARE(add_down(Float64(1.0),Float64(eps)),>,1.0);
+    if(add_down(Float64(1.0),Float64(eps/2)) != Float64(1.0)) {
         ARIADNE_TEST_WARN("Results of floating-point operations stored to higher-precision in registers than memory.");
-        ARIADNE_TEST_COMPARE(add_down(Float(1.0),Float(eps/(1<<11))),>,Float(1.0));
+        ARIADNE_TEST_COMPARE(add_down(Float64(1.0),Float64(eps/(1<<11))),>,Float64(1.0));
     }
-    ARIADNE_TEST_COMPARE(add_down(Float(1.0),Float(eps/(1<<12))),==,Float(1.0));
-    Float one_add_down_half_epsilon=add_down(Float(1.0),Float(eps/2));
-    ARIADNE_TEST_COMPARE(one_add_down_half_epsilon,==,Float(1.0));
-    ARIADNE_TEST_EQUAL(Float(1.0),1.0);
-    ARIADNE_TEST_COMPARE(Float(1.0),==,1.0);
+    ARIADNE_TEST_COMPARE(add_down(Float64(1.0),Float64(eps/(1<<12))),==,Float64(1.0));
+    Float64 one_add_down_half_epsilon=add_down(Float64(1.0),Float64(eps/2));
+    ARIADNE_TEST_COMPARE(one_add_down_half_epsilon,==,Float64(1.0));
+    ARIADNE_TEST_EQUAL(Float64(1.0),1.0);
+    ARIADNE_TEST_COMPARE(Float64(1.0),==,1.0);
 
 
     // Subtraction (this should remain exact here)
@@ -464,23 +464,23 @@ TestFloat::test_arithmetic()
     f4=div_up(f1,f2);
     f5=div_approx(f1,f2);
     cout << f3 << " <= " << f1 << " / " << f2 << " <= " << f4 << endl;
-    Float five = 5;
-    Float nine = 9;
+    Float64 five = 5;
+    Float64 nine = 9;
 
-    Float expected_five_ninths_up=0.55555555555555558023;
-    Float::set_rounding_downward();
+    Float64 expected_five_ninths_up=0.55555555555555558023;
+    Float64::set_rounding_downward();
     ARIADNE_TEST_COMPARE(five/nine,<,expected_five_ninths_up);
     ARIADNE_TEST_COMPARE(div(five,nine),<,expected_five_ninths_up);
-    Float five_divby_nine_down=five;
+    Float64 five_divby_nine_down=five;
     five_divby_nine_down/=nine;
     ARIADNE_TEST_COMPARE(five_divby_nine_down,<,expected_five_ninths_up);
 
-    Float::set_rounding_to_nearest();
-    ARIADNE_TEST_COMPARE(div_down(Float(5.0),Float(9.0)),<,div_up(Float(5.0),Float(9.0)));
-    ARIADNE_TEST_COMPARE(div_down(Float(5),Float(9)),<,div_up(Float(5),Float(9)));
+    Float64::set_rounding_to_nearest();
+    ARIADNE_TEST_COMPARE(div_down(Float64(5.0),Float64(9.0)),<,div_up(Float64(5.0),Float64(9.0)));
+    ARIADNE_TEST_COMPARE(div_down(Float64(5),Float64(9)),<,div_up(Float64(5),Float64(9)));
     ARIADNE_TEST_COMPARE(div_down(five,nine),<,div_up(five,nine));
-    Float five_ninths_down = div_down(five,nine);
-    Float five_ninths_up = div_up(five,nine);
+    Float64 five_ninths_down = div_down(five,nine);
+    Float64 five_ninths_up = div_up(five,nine);
     ARIADNE_TEST_COMPARE(five_ninths_down, < , five_ninths_up);
     ARIADNE_TEST_COMPARE(mul_down(five_ninths_down,nine), < , five);
     ARIADNE_TEST_COMPARE(mul_up(five_ninths_up,nine), > , five);
@@ -499,7 +499,7 @@ TestFloat::test_arithmetic()
     //ARIADNE_TEST_ASSERT(Rational(f4)>Rational(16,25));
 
     // Floor and ceiling
-    f2=Float(-3.25); f3=Float(-2);
+    f2=Float64(-3.25); f3=Float64(-2);
 
     ARIADNE_TEST_ASSERT(floor(f1)==1); ARIADNE_TEST_ASSERT(ceil(f1)==2);
     ARIADNE_TEST_ASSERT(floor(f2)==-4); ARIADNE_TEST_ASSERT(ceil(f2)==-3);
@@ -517,19 +517,19 @@ TestFloat::test_arithmetic()
     ARIADNE_TEST_ASSERT(i3==-4); ARIADNE_TEST_ASSERT(i4==-3);
 
     // Check interval conversions
-    Float z(0); Float o(1); Float t(3);
+    Float64 z(0); Float64 o(1); Float64 t(3);
 
-    Float odtd=div_down(o,t);
-    Float odtu=div_up(o,t);
+    Float64 odtd=div_down(o,t);
+    Float64 odtu=div_up(o,t);
     cout << odtd << " <= 1/3 <= " << odtu << endl;
     ARIADNE_TEST_COMPARE(odtd,<,odtu);
-    // Regression test to catch errors when Float result is not assigned to a variable
+    // Regression test to catch errors when Float64 result is not assigned to a variable
     cout << div_down(o,t) << " <= 1/3 <= " << div_up(o,t) << endl;
     ARIADNE_TEST_COMPARE(div_down(o,t),<,div_up(o,t));
 
-    ARIADNE_TEST_COMPARE(med_near(Float(2),Float(3)),==,2.5);
-    ARIADNE_TEST_COMPARE(rad_up(Float(2),Float(3)),>=,0.5);
-    ARIADNE_TEST_COMPARE(rad_up(Float(2),Float(3)),<=,0.5000000000000002);
+    ARIADNE_TEST_COMPARE(med_near(Float64(2),Float64(3)),==,2.5);
+    ARIADNE_TEST_COMPARE(rad_up(Float64(2),Float64(3)),>=,0.5);
+    ARIADNE_TEST_COMPARE(rad_up(Float64(2),Float64(3)),<=,0.5000000000000002);
 
     // The following line should not compile
     // f5=f1+f2;
@@ -545,7 +545,7 @@ TestFloat::test_function()
     cout << setprecision(20);
 
     // Set up some variables
-    Float x; Float ra; Float rl; Float ru;
+    Float64 x; Float64 ra; Float64 rl; Float64 ru;
 
     x=1;
     ra=exp(x);
@@ -574,15 +574,15 @@ TestFloat::test_cosine()
 
 {
     //3.14159265358979323846264338327950288419716939937510
-    static const Float pi_down=3.1415926535897931;
+    static const Float64 pi_down=3.1415926535897931;
     //static const double pi_approx=3.1415926535897931;
-    static const Float pi_up=3.1415926535897936;
+    static const Float64 pi_up=3.1415926535897936;
 
-    static const Float third_pi_down=1.0471975511965976;
-    static const Float third_pi_up=1.0471975511965979;
+    static const Float64 third_pi_down=1.0471975511965976;
+    static const Float64 third_pi_up=1.0471975511965979;
 
-    Float::set_rounding_mode(Float::upward);
-    ARIADNE_TEST_EQUAL(cos(Float(0.0)),1.0);
+    Float64::set_rounding_mode(Float64::upward);
+    ARIADNE_TEST_EQUAL(cos(Float64(0.0)),1.0);
     ARIADNE_TEST_COMPARE(cos(third_pi_down),>,0.5);
     ARIADNE_TEST_COMPARE(sqr(cos(pi_down/4)),>,0.5);
     ARIADNE_TEST_COMPARE(cos(pi_down/2),>,0.0);
@@ -594,8 +594,8 @@ TestFloat::test_cosine()
     ARIADNE_TEST_COMPARE(cos(3*pi_down),>,-1.0);
     ARIADNE_TEST_COMPARE(cos(3*pi_up),>,-1.0);
 
-    Float::set_rounding_mode(Float::downward);
-    ARIADNE_TEST_EQUAL(cos(Float(0.0)),1.0);
+    Float64::set_rounding_mode(Float64::downward);
+    ARIADNE_TEST_EQUAL(cos(Float64(0.0)),1.0);
     ARIADNE_TEST_COMPARE(cos(third_pi_up),<,0.5);
     ARIADNE_TEST_COMPARE(sqr(cos(pi_up/4)),<,0.5);
     ARIADNE_TEST_COMPARE(cos(pi_down/2),>=,0.0);
@@ -607,13 +607,13 @@ TestFloat::test_cosine()
     ARIADNE_TEST_COMPARE(cos(3*pi_down),==,-1.0);
     ARIADNE_TEST_COMPARE(cos(3*pi_up),==,-1.0);
 
-    static const Float one=1.0;
-    Float::set_rounding_mode(Float::upward);
-    Float sin_rnd_up_one=sin(one);
-    Float::set_rounding_mode(Float::downward);
-    Float sin_rnd_down_one=sin(one);
-    Float::set_rounding_mode(Float::to_nearest);
-    Float sin_rnd_approx_one=sin(one);
+    static const Float64 one=1.0;
+    Float64::set_rounding_mode(Float64::upward);
+    Float64 sin_rnd_up_one=sin(one);
+    Float64::set_rounding_mode(Float64::downward);
+    Float64 sin_rnd_down_one=sin(one);
+    Float64::set_rounding_mode(Float64::to_nearest);
+    Float64 sin_rnd_approx_one=sin(one);
     ARIADNE_TEST_COMPARE(sin_rnd_down_one,<=,sin_rnd_approx_one);
     ARIADNE_TEST_COMPARE(sin_rnd_approx_one,<=,sin_rnd_up_one);
     ARIADNE_TEST_COMPARE(sin_rnd_down_one,< ,sin_rnd_up_one);

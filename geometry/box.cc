@@ -37,33 +37,33 @@
 
 namespace Ariadne {
 
-Vector<ValidatedFloat>const& make_singleton(const Vector<ExactInterval>& ivlv) {
-    return reinterpret_cast<Vector<ValidatedFloat>const&>(ivlv);
+Vector<ValidatedFloat64>const& make_singleton(const Vector<ExactInterval>& ivlv) {
+    return reinterpret_cast<Vector<ValidatedFloat64>const&>(ivlv);
 }
 
-Vector<ValidatedFloat>const& make_singleton(const Vector<UpperInterval>& ivlv) {
-    return reinterpret_cast<Vector<ValidatedFloat>const&>(ivlv);
+Vector<ValidatedFloat64>const& make_singleton(const Vector<UpperInterval>& ivlv) {
+    return reinterpret_cast<Vector<ValidatedFloat64>const&>(ivlv);
 }
 
 
-Bool element(const Vector<ExactFloat>& v1, const Vector<ExactInterval>& v2)
+Bool element(const Vector<ExactFloat64>& v1, const Vector<ExactInterval>& v2)
 {
     return contains(v2,v1);
 }
 
-Bool element(const Vector<ValidatedFloat>& v1, const Vector<ExactInterval>& v2)
-{
-    return contains(v2,v1);
-}
-
-
-Bool element(const Vector<ApproximateFloat>& v1, const Vector<ExactInterval>& v2)
+Bool element(const Vector<ValidatedFloat64>& v1, const Vector<ExactInterval>& v2)
 {
     return contains(v2,v1);
 }
 
 
-Bool contains(const Vector<ExactInterval>& v1, const Vector<ExactFloat>& v2)
+Bool element(const Vector<ApproximateFloat64>& v1, const Vector<ExactInterval>& v2)
+{
+    return contains(v2,v1);
+}
+
+
+Bool contains(const Vector<ExactInterval>& v1, const Vector<ExactFloat64>& v2)
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
     for(SizeType i=0; i!=v1.size(); ++i) {
@@ -72,7 +72,7 @@ Bool contains(const Vector<ExactInterval>& v1, const Vector<ExactFloat>& v2)
     return true;
 }
 
-Bool contains(const Vector<ExactInterval>& v1, const Vector<ValidatedFloat>& v2)
+Bool contains(const Vector<ExactInterval>& v1, const Vector<ValidatedFloat64>& v2)
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
     for(SizeType i=0; i!=v1.size(); ++i) {
@@ -81,7 +81,7 @@ Bool contains(const Vector<ExactInterval>& v1, const Vector<ValidatedFloat>& v2)
     return true;
 }
 
-Bool contains(const Vector<ExactInterval>& v1, const Vector<ApproximateFloat>& v2)
+Bool contains(const Vector<ExactInterval>& v1, const Vector<ApproximateFloat64>& v2)
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
     for(SizeType i=0; i!=v1.size(); ++i) {
@@ -158,7 +158,7 @@ Bool empty(const Vector<ExactInterval>& v)
 
 Nat irmax(const Vector<ExactInterval>& v) {
     Nat imw(0);
-    Float mw=v[0].width().raw();
+    Float64 mw=v[0].width().raw();
     for(Nat i=1; i!=v.size(); ++i) {
         if(v[i].width().raw()>mw) { imw=i; mw=v[i].width().raw(); }
     }
@@ -169,14 +169,14 @@ Nat irmax(const Vector<ExactInterval>& v) {
 Vector<ExactInterval> split(const Vector<ExactInterval>& v, Nat k, Tribool lr) {
     ARIADNE_ASSERT(k<v.size());
     Vector<ExactInterval> r(v);
-    Float c=v[k].centre().raw();
+    Float64 c=v[k].centre().raw();
     if(definitely(lr==true)) {
         r[k].set_upper(c);
     } else if(definitely(lr==false)) {
         r[k].set_lower(c);
     } else {
-        Float cl=(3*v[k].lower().raw()+v[k].upper().raw())/4;
-        Float cu=(v[k].lower().raw()+3*v[k].upper().raw())/4;
+        Float64 cl=(3*v[k].lower().raw()+v[k].upper().raw())/4;
+        Float64 cu=(v[k].lower().raw()+3*v[k].upper().raw())/4;
         r[k].set_lower(cl);
         r[k].set_upper(cu);
     }
@@ -186,7 +186,7 @@ Vector<ExactInterval> split(const Vector<ExactInterval>& v, Nat k, Tribool lr) {
 Pair< Vector<ExactInterval>, Vector<ExactInterval> > split(const Vector<ExactInterval>& v, Nat k) {
     ARIADNE_ASSERT(k<v.size());
     Pair< Vector<ExactInterval>, Vector<ExactInterval> > r(v,v);
-    Float c=v[k].centre().raw();
+    Float64 c=v[k].centre().raw();
     r.first[k].set_upper(c);
     r.second[k].set_lower(c);
     return r;
@@ -202,34 +202,34 @@ Pair< Vector<ExactInterval>, Vector<ExactInterval> > split(const Vector<ExactInt
 
 
 
-Vector<ExactFloat> midpoint(const Vector<ExactInterval>& v)
+Vector<ExactFloat64> midpoint(const Vector<ExactInterval>& v)
 {
-    Vector<ExactFloat> r(v.size());
+    Vector<ExactFloat64> r(v.size());
     for(SizeType i=0; i!=v.size(); ++i) {
         r[i]=v[i].centre();
     }
     return r;
 }
 
-Vector<ExactFloat> lower_bounds(const Vector<ExactInterval>& v)
+Vector<ExactFloat64> lower_bounds(const Vector<ExactInterval>& v)
 {
-    Vector<ExactFloat> r(v.size());
+    Vector<ExactFloat64> r(v.size());
     for(SizeType i=0; i!=v.size(); ++i) {
         r[i]=v[i].lower();
     }
     return r;
 }
 
-Vector<ExactFloat> upper_bounds(const Vector<ExactInterval>& v)
+Vector<ExactFloat64> upper_bounds(const Vector<ExactInterval>& v)
 {
-    Vector<ExactFloat> r(v.size());
+    Vector<ExactFloat64> r(v.size());
     for(SizeType i=0; i!=v.size(); ++i) {
         r[i]=v[i].upper();
     }
     return r;
 }
 
-Vector<ExactInterval> hull(const Vector<ExactFloat>& v1, const Vector<ExactFloat>& v2)
+Vector<ExactInterval> hull(const Vector<ExactFloat64>& v1, const Vector<ExactFloat64>& v2)
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
     Vector<ExactInterval> r(v1.size());
@@ -239,7 +239,7 @@ Vector<ExactInterval> hull(const Vector<ExactFloat>& v1, const Vector<ExactFloat
     return r;
 }
 
-Vector<ExactInterval> hull(const Vector<ExactInterval>& v1, const Vector<ExactFloat>& v2)
+Vector<ExactInterval> hull(const Vector<ExactInterval>& v1, const Vector<ExactFloat64>& v2)
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
     Vector<ExactInterval> r(v1.size());

@@ -52,7 +52,7 @@ ExactInterval widen(ExactInterval x)
     double xl=x.lower().get_d();
     double xu=x.upper().get_d();
     const double m=std::numeric_limits<float>::min();
-    Float::set_rounding_upward();
+    Float64::set_rounding_upward();
     volatile double wu=xu+m;
     volatile double mwl=-xl+m;
     volatile double wl=-mwl;
@@ -95,7 +95,7 @@ ExactInterval trunc(ExactInterval x)
 
 ExactInterval trunc(ExactInterval x, Nat n)
 {
-    ExactInterval e=ExactInterval(ExactFloat(std::pow(2.0,52-(Int)n)));
+    ExactInterval e=ExactInterval(ExactFloat64(std::pow(2.0,52-(Int)n)));
     UpperInterval y=x+e;
     UpperInterval r=y-e;
     return ExactInterval(r.lower_raw(),r.upper_raw());
@@ -103,7 +103,7 @@ ExactInterval trunc(ExactInterval x, Nat n)
 
 
 
-ExactInterval::ExactInterval(const Float& x) : ExactInterval(x,x) { }
+ExactInterval::ExactInterval(const Float64& x) : ExactInterval(x,x) { }
 
 ExactInterval::ExactInterval(const Dyadic& b) : ExactInterval(b.operator Rational()) { }
 
@@ -121,21 +121,21 @@ ExactInterval::ExactInterval(const Rational& ql, const Rational& qu) : l(ql.get_
 }
 
 ExactInterval::ExactInterval(const Real& lower, const Real& upper)
-    : l(ValidatedFloat(lower).lower().raw()), u(ValidatedFloat(upper).upper().raw()) {
+    : l(ValidatedFloat64(lower).lower().raw()), u(ValidatedFloat64(upper).upper().raw()) {
 }
 
 OutputStream&
 operator<<(OutputStream& os, const ExactInterval& ivl)
 {
     //if(ivl.lower()==ivl.upper().raw()) { return os << "{" << std::setprecision(ExactInterval::output_precision) << ivl.lower().raw().get_d() << ; }
-    Float::RoundingModeType rnd=Float::get_rounding_mode();
+    Float64::RoundingModeType rnd=Float64::get_rounding_mode();
     os << '{';
-    Float::set_rounding_downward();
+    Float64::set_rounding_downward();
     os << std::showpoint << std::setprecision(ExactInterval::output_precision) << ivl.lower().raw().get_d();
     os << ':';
-    Float::set_rounding_upward();
+    Float64::set_rounding_upward();
     os << std::showpoint << std::setprecision(ExactInterval::output_precision) << ivl.upper().raw().get_d();
-    Float::set_rounding_mode(rnd);
+    Float64::set_rounding_mode(rnd);
     os << '}';
     return os;
 
@@ -202,7 +202,7 @@ operator<<(OutputStream& os, const ExactInterval& ivl)
 InputStream&
 operator>>(InputStream& is, ExactInterval& ivl)
 {
-    Float l,u;
+    Float64 l,u;
     char cl,cm,cr;
     is >> cl >> l >> cm >> u >> cr;
     ARIADNE_ASSERT(is);

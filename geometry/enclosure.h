@@ -141,12 +141,12 @@ class Enclosure
     //! Requires that \f$v(D_1,\ldots,D_{j-1},D_{j+1}\ldots,D_n) \subset D_j\f$ where \f$D\f$ is the domain.
     Void substitute(Nat j, ValidatedScalarFunctionModel v);
     //! \brief Substitutes the expression \f$x_j=c\f$ into the function and constraints.
-    Void substitute(Nat j, Float c);
+    Void substitute(Nat j, Float64 c);
 
     //! \brief Apply the map \f$r\f$ to the map \f$f\f$.
     Void apply_map(ValidatedVectorFunction r);
     //! \brief Apply the flow \f$\phi(x,h)\f$ to the map \f$f\f$.
-    Void apply_fixed_evolve_step(ValidatedVectorFunction phi, ExactFloat h);
+    Void apply_fixed_evolve_step(ValidatedVectorFunction phi, ExactFloat64 h);
     //! \brief Apply the flow \f$xi'(s)=\phi(\xi(s),\epsilon(\xi(s)))\f$, \f$\tau'(s)=\tau(s)+\epsilon(\xi(s))\f$.
     Void apply_space_evolve_step(ValidatedVectorFunction phi, ValidatedScalarFunction elps);
     //! \brief Apply the flow \f$xi'(s)=\phi(\xi(s),\epsilon(\xi(s),\tau(s)))\f$, \f$\tau'(s)=\tau(s)+\epsilon(\xi(s),\tau(s))\f$.
@@ -163,7 +163,7 @@ class Enclosure
     Void apply_parameter_reach_step(ValidatedVectorFunctionModel phi, ValidatedScalarFunction elps);
 /*
     //! \brief Apply the flow \f$\phi(x,t)\f$ for \f$t\in[0,h]\f$
-    Void apply_reach_step(ValidatedVectorFunction phi, Float h);
+    Void apply_reach_step(ValidatedVectorFunction phi, Float64 h);
     //! \brief Apply the flow \f$\phi(x,t)\f$ for \f$t\in[0,\max(h,\epsilon(x))]\f$
     Void apply_reach_step(ValidatedVectorFunction phi, ValidatedScalarFunction elps);
 */
@@ -210,7 +210,7 @@ class Enclosure
     //! \brief A point in the image of the <em>unconstrained</em> parameter domain.
     ExactPoint centre() const;
     //! \brief An over-approximation to the radius of the set.
-    ErrorFloat radius() const;
+    ErrorFloat64 radius() const;
     //! \brief Returns \c true if the set is definitely bounded.
     Tribool bounded() const;
     //! \brief Returns \c true if the set is provably empty.

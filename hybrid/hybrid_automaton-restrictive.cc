@@ -992,7 +992,7 @@ Grid
 CompositionalHybridAutomaton::grid(DiscreteLocation location) const
 {
     List<RealVariable> variables=this->state_variables(location);
-    Vector<Float> lengths(variables.size());
+    Vector<Float64> lengths(variables.size());
     for(Nat i=0; i!=variables.size(); ++i) {
         lengths[i]=variables[i].resolution();
     }

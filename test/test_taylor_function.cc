@@ -42,10 +42,10 @@ using namespace std;
 using namespace Ariadne;
 
 Vector<Real> e(Nat n, Nat i) { return Vector<Real>::unit(n,i); }
-Polynomial<Float> p(Nat n, Nat j) { return Polynomial<Float>::variable(n,j); }
+Polynomial<Float64> p(Nat n, Nat j) { return Polynomial<Float64>::variable(n,j); }
 ScalarTaylorFunction t(ExactBox d, Nat j,Sweeper swp) { return ScalarTaylorFunction::coordinate(d,j,swp); }
 
-template<class X> Vector< Expansion<X> > operator*(const Expansion<X>& e, const Vector<Float> v) {
+template<class X> Vector< Expansion<X> > operator*(const Expansion<X>& e, const Vector<Float64> v) {
     Vector< Expansion<X> > r(v.size(),Expansion<X>(e.argument_size()));
     for(Nat i=0; i!=r.size(); ++i) { ARIADNE_ASSERT(v[i]==0.0 || v[i]==1.0); if(v[i]==1.0) { r[i]=e; } }
     return r;
@@ -73,8 +73,8 @@ class TestScalarTaylorFunction
     Void test_generic();
   private:
     ExactBox d(SizeType n) { return Vector<ExactInterval>(n,ExactInterval(-1,+1)); }
-    typedef Expansion<RawFloat> e;
-    typedef TaylorModel<Validated,Float> TM;
+    typedef Expansion<RawFloat64> e;
+    typedef TaylorModel<Validated,Float64> TM;
 };
 
 
@@ -107,10 +107,10 @@ Void TestScalarTaylorFunction::test_concept()
 {
     static_assert(IsAlgebra<ScalarTaylorFunction>::value,"");
 
-    const ExactFloat f=0;
-    const ValidatedFloat i;
-    const Vector<ExactFloat> vf;
-    const Vector<ValidatedFloat> vi;
+    const ExactFloat64 f=0;
+    const ValidatedFloat64 i;
+    const Vector<ExactFloat64> vf;
+    const Vector<ValidatedFloat64> vi;
     const ScalarTaylorFunction  t;
     ScalarTaylorFunction tr;
 
@@ -152,8 +152,8 @@ Void TestScalarTaylorFunction::test_constructors()
 Void TestScalarTaylorFunction::test_create()
 {
     ExactBox D={{-0.5,0.5},{-1.0,2.0}};
-    ExactFloat c1=1;
-    ExactFloat c2=2;
+    ExactFloat64 c1=1;
+    ExactFloat64 c2=2;
     ScalarTaylorFunction pf1=ScalarTaylorFunction::constant(D,c1,swp);
     ScalarTaylorFunction pf2=ScalarTaylorFunction::constant(D,c2,swp);
     ValidatedScalarFunctionModel fm1=pf1;
@@ -187,9 +187,9 @@ Void TestScalarTaylorFunction::test_approximation()
 
 Void TestScalarTaylorFunction::test_evaluate()
 {
-    Vector<ValidatedFloat> iv({{0.25,0.5},{-0.75,-0.5}});
+    Vector<ValidatedFloat64> iv({{0.25,0.5},{-0.75,-0.5}});
     ScalarTaylorFunction tv(d(2),e(2,2,{1.0,2.0,3.0,4.0,5.0,6.0}),0.25,swp);
-    ARIADNE_TEST_EQUAL(evaluate(tv,iv),ValidatedFloat(-0.375000,3.43750));
+    ARIADNE_TEST_EQUAL(evaluate(tv,iv),ValidatedFloat64(-0.375000,3.43750));
 }
 
 Void TestScalarTaylorFunction::test_gradient()
@@ -202,8 +202,8 @@ Void TestScalarTaylorFunction::test_gradient()
     ExactBox domain2={{-0.5,+0.5},{-0.25,+0.25}};
     ExactBox domain3={{-0.25,+0.75},{0.0,+0.50}};
 
-    Vector<ValidatedFloat> point1=Vector<ValidatedFloat>{0,0};
-    Vector<ValidatedFloat> point2=Vector<ValidatedFloat>{0,0.25_exact};
+    Vector<ValidatedFloat64> point1=Vector<ValidatedFloat64>{0,0};
+    Vector<ValidatedFloat64> point2=Vector<ValidatedFloat64>{0,0.25_exact};
 
     ARIADNE_TEST_EQUAL(ScalarTaylorFunction(domain1,quadratic,swp).gradient(point1),quadratic.gradient(point1));
     ARIADNE_TEST_EQUAL(ScalarTaylorFunction(domain1,quadratic,swp).gradient(point2),quadratic.gradient(point2));
@@ -222,10 +222,10 @@ Void TestScalarTaylorFunction::test_arithmetic()
     ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp)-(-3), ScalarTaylorFunction(d(1),e(1,2, {4.0,-2.0,3.0}), 0.75, swp));
     ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp)*(-3), ScalarTaylorFunction(d(1),e(1,2, {-3.0,6.0,-9.0}), 2.25, swp));
     ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp)/(-4), ScalarTaylorFunction(d(1),e(1,2, {-0.25,0.5,-0.75}), 0.1875, swp));
-    ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp)+ValidatedFloat(-1,2), ScalarTaylorFunction(d(1),e(1,2, {1.5,-2.0,3.0}), 2.25, swp));
-    ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp)-ValidatedFloat(-1,2), ScalarTaylorFunction(d(1),e(1,2, {0.5,-2.0,3.0}), 2.25, swp));
-    ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp)*ValidatedFloat(-1,2), ScalarTaylorFunction(d(1),e(1,2, {0.5,-1.0,1.5}), 10.5, swp));
-    ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp)/ValidatedFloat(0.25,2.0), ScalarTaylorFunction(d(1),e(1,2, {2.25,-4.5,6.75}), 13.5, swp));
+    ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp)+ValidatedFloat64(-1,2), ScalarTaylorFunction(d(1),e(1,2, {1.5,-2.0,3.0}), 2.25, swp));
+    ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp)-ValidatedFloat64(-1,2), ScalarTaylorFunction(d(1),e(1,2, {0.5,-2.0,3.0}), 2.25, swp));
+    ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp)*ValidatedFloat64(-1,2), ScalarTaylorFunction(d(1),e(1,2, {0.5,-1.0,1.5}), 10.5, swp));
+    ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp)/ValidatedFloat64(0.25,2.0), ScalarTaylorFunction(d(1),e(1,2, {2.25,-4.5,6.75}), 13.5, swp));
     ARIADNE_TEST_EQUAL(+ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp), ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp));
     ARIADNE_TEST_EQUAL(-ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp), ScalarTaylorFunction(d(1),e(1,2, {-1.0,2.0,-3.0}), 0.75, swp));
 
@@ -279,7 +279,7 @@ Void TestScalarTaylorFunction::test_antiderivative()
     ScalarTaylorFunction h=compose(g,VectorTaylorFunction({c,s}));
 
     Vector<ExactInterval> hdom=h.domain();
-    Vector<ValidatedFloat> domv(reinterpret_cast<Vector<ValidatedFloat>const&>(hdom));
+    Vector<ValidatedFloat64> domv(reinterpret_cast<Vector<ValidatedFloat64>const&>(hdom));
     ARIADNE_ASSERT(mag(h(domv))<1e-8);
 
 }
@@ -287,8 +287,8 @@ Void TestScalarTaylorFunction::test_antiderivative()
 Void TestScalarTaylorFunction::test_conversion() {
     // Test conversion between ordinary functions and Taylor functions.
     ExactBox D={{-0.5,0.5},{-1.0,2.0}};
-    Vector<ExactFloat> pt={-0.25_exact,0.25_exact};
-    Vector<ValidatedFloat> ipt(pt);
+    Vector<ExactFloat64> pt={-0.25_exact,0.25_exact};
+    Vector<ValidatedFloat64> ipt(pt);
     EffectiveVectorFunction x=EffectiveVectorFunction::identity(2);
 
     EffectiveScalarFunction f=(1-x[0]*x[0]-x[1]/2);
@@ -299,14 +299,14 @@ Void TestScalarTaylorFunction::test_conversion() {
 
     // Conversion to TaylorFunction should be exact in second component
     ARIADNE_TEST_BINARY_PREDICATE(refines,f(ipt),tf(ipt));
-    ARIADNE_TEST_BINARY_PREDICATE(refines,tf(ipt),f(ipt)+ValidatedFloat(-1e-15,1e-15));
+    ARIADNE_TEST_BINARY_PREDICATE(refines,tf(ipt),f(ipt)+ValidatedFloat64(-1e-15,1e-15));
 }
 
 Void TestScalarTaylorFunction::test_generic() {
     ExactBox D={{-0.5,0.5},{-1.0,2.0}};
-    ExactFloat c0=0;
-    ExactFloat c1=2;
-    ExactFloat c2=3;
+    ExactFloat64 c0=0;
+    ExactFloat64 c1=2;
+    ExactFloat64 c2=3;
     ScalarTaylorFunction pf0=ScalarTaylorFunction::constant(D,c0,swp);
     ScalarTaylorFunction pf1=ScalarTaylorFunction::constant(D,c1,swp);
     ScalarTaylorFunction pf2=ScalarTaylorFunction::constant(D,c2,swp);
@@ -327,7 +327,7 @@ Void TestScalarTaylorFunction::test_generic() {
 }
 
 /*
-VectorTaylorFunction henon(const VectorTaylorFunction& x, const Vector<ExactFloat>& p)
+VectorTaylorFunction henon(const VectorTaylorFunction& x, const Vector<ExactFloat64>& p)
 {
     VectorTaylorFunction r(2,2,x.degree()); henon(r,x,p); return r;
 }
@@ -374,17 +374,17 @@ TestVectorTaylorFunction::test()
     ARIADNE_TEST_CALL(test_domain());
 }
 
-Bool operator==(Expansion<ExactFloat> const& e1, Expansion<RawFloat> const& e2) {
-    return reinterpret_cast<Expansion<RawFloat>const&>(e1)==e2;
+Bool operator==(Expansion<ExactFloat64> const& e1, Expansion<RawFloat64> const& e2) {
+    return reinterpret_cast<Expansion<RawFloat64>const&>(e1)==e2;
 }
 
 Void TestVectorTaylorFunction::test_constructors()
 {
-    Vector< Expansion<RawFloat> > expansion(2);
-    expansion[0]=Expansion<RawFloat>({ {{0,0},1.125}, {{1,0},-0.75}, {{0,1},0.0625}, {{2,0},-0.25} });
-    expansion[1]=Expansion<RawFloat>({ {{0,0},0.750}, {{1,0},0.50} });
+    Vector< Expansion<RawFloat64> > expansion(2);
+    expansion[0]=Expansion<RawFloat64>({ {{0,0},1.125}, {{1,0},-0.75}, {{0,1},0.0625}, {{2,0},-0.25} });
+    expansion[1]=Expansion<RawFloat64>({ {{0,0},0.750}, {{1,0},0.50} });
     expansion[0].reverse_lexicographic_sort(); expansion[1].reverse_lexicographic_sort();
-    Vector< RawFloat > errors(2);
+    Vector< RawFloat64 > errors(2);
 
     ExactBox domain={{0.25,1.25},{0.5,1.0}};
     EffectiveVectorFunction x=EffectiveVectorFunction::identity(2);
@@ -394,7 +394,7 @@ Void TestVectorTaylorFunction::test_constructors()
     ARIADNE_TEST_EQUAL(henon_model.models()[0].expansion(),expansion[0])
     ARIADNE_TEST_EQUAL(henon_model.models()[1].expansion(),expansion[1])
 
-    Vector<ValidatedFloat> e0(e(2,0)); Vector<ValidatedFloat> e1(e(2,1));
+    Vector<ValidatedFloat64> e0(e(2,0)); Vector<ValidatedFloat64> e1(e(2,1));
 
     VectorTaylorFunction t=VectorTaylorFunction::identity(domain,swp);
     //VectorTaylorFunction variables_model((1.5-t[0]*t[0]+0.25*t[1])*e0+t[0]*e1);
@@ -406,24 +406,24 @@ Void TestVectorTaylorFunction::test_constructors()
 
 Void TestVectorTaylorFunction::test_restrict()
 {
-    Vector<RawFloat> unit0={1};
+    Vector<RawFloat64> unit0={1};
 
     ExactBox domain1={{-1.0,+1.0},{-1.0,+1.0}};
-    Expansion<RawFloat> expansion1(2,3, {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0});
+    Expansion<RawFloat64> expansion1(2,3, {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0});
     Vector<ExactInterval> subdomain1={{-0.25,0.75},{-0.5,0.0}};
-    Expansion<RawFloat> subexpansion1(2,3, {1.031250, 1.812500,0.625000, 1.812500,0.562500,0.0468750,
+    Expansion<RawFloat64> subexpansion1(2,3, {1.031250, 1.812500,0.625000, 1.812500,0.562500,0.0468750,
                                              0.875000,0.500000,0.281250,0.156250});
-    Vector<RawFloat> error1={0.0};
+    Vector<RawFloat64> error1={0.0};
     VectorTaylorFunction function1(domain1,expansion1*unit0,error1,swp);
     VectorTaylorFunction restricted_function1(subdomain1,subexpansion1*unit0,error1,swp);
     ARIADNE_TEST_EQUAL(restriction(function1,subdomain1),restricted_function1);
 
     ExactBox domain2={{-1.0,+1.0}};
-    Expansion<RawFloat> expansion2={{{0},0.0},{{1},1.0} };
-    Vector<RawFloat> error2={0.125};
+    Expansion<RawFloat64> expansion2={{{0},0.0},{{1},1.0} };
+    Vector<RawFloat64> error2={0.125};
     Vector<ExactInterval> subdomain2={{3e-16,1.0}};
-    Expansion<RawFloat> subexpansion2={{{0},0.50000000000000022},{{1},0.49999999999999989}};
-    Vector<RawFloat> suberror2={0.12500000000000008};
+    Expansion<RawFloat64> subexpansion2={{{0},0.50000000000000022},{{1},0.49999999999999989}};
+    Vector<RawFloat64> suberror2={0.12500000000000008};
     VectorTaylorFunction function2(domain2,expansion2*unit0,error2,swp);
     VectorTaylorFunction restricted_function2(subdomain2,subexpansion2*unit0,suberror2,swp);
     ARIADNE_TEST_EQUAL(restriction(function2,subdomain2),restricted_function2);
@@ -444,12 +444,12 @@ Void TestVectorTaylorFunction::test_jacobian()
     ExactBox domain1={{-1.0,+1.0},{-1.0,+1.0}};
     ExactBox domain2={{-0.5,+0.5},{-0.25,+0.25}};
     ExactBox domain3={{-0.25,+0.75},{0.0,+0.50}};
-    //Vector<ApproximateFloat> point1={0.0,0.0};
-    //Vector<ApproximateFloat> point2={0.5,0.25};
-    Vector<ValidatedFloat> point1=Vector<ValidatedFloat>{0,0};
-    Vector<ValidatedFloat> point2=Vector<ValidatedFloat>{0,0.25_exact};
-    //Vector<ExactFloat> point1=Vector<ExactFloat>{0.0,0.0};
-    //Vector<ExactFloat> point2=Vector<ExactFloat>{0.5,0.25};
+    //Vector<ApproximateFloat64> point1={0.0,0.0};
+    //Vector<ApproximateFloat64> point2={0.5,0.25};
+    Vector<ValidatedFloat64> point1=Vector<ValidatedFloat64>{0,0};
+    Vector<ValidatedFloat64> point2=Vector<ValidatedFloat64>{0,0.25_exact};
+    //Vector<ExactFloat64> point1=Vector<ExactFloat64>{0.0,0.0};
+    //Vector<ExactFloat64> point2=Vector<ExactFloat64>{0.5,0.25};
     ARIADNE_TEST_EQUAL(VectorTaylorFunction(domain1,henon,swp).jacobian(point1),henon.jacobian(point1));
     ARIADNE_TEST_EQUAL(VectorTaylorFunction(domain1,henon,swp).jacobian(point2),henon.jacobian(point2));
     ARIADNE_TEST_EQUAL(VectorTaylorFunction(domain2,henon,swp).jacobian(point1),henon.jacobian(point1));
@@ -486,29 +486,29 @@ Void TestVectorTaylorFunction::test_antiderivative()
     SizeType index0=0;
     SizeType index1=1;
 
-    Vector<RawFloat> unit0={1};
+    Vector<RawFloat64> unit0={1};
     ExactBox domain1={{-1,+1},{-1,+1}};
-    Expansion<RawFloat> expansion1={{{0,0},3.0}};
+    Expansion<RawFloat64> expansion1={{{0,0},3.0}};
     VectorTaylorFunction function1(domain1,expansion1*unit0,swp);
-    Expansion<RawFloat> aexpansion1={{{0,1},3.0}};
+    Expansion<RawFloat64> aexpansion1={{{0,1},3.0}};
     VectorTaylorFunction antiderivative1(domain1,aexpansion1*unit0,swp);
     ARIADNE_TEST_EQUAL(antiderivative(function1,index1),antiderivative1);
 
     ExactBox domain2={{-0.25,0.75},{0.0,0.5}};
-    Expansion<RawFloat> expansion2={{{0,0},3.0}};
+    Expansion<RawFloat64> expansion2={{{0,0},3.0}};
     VectorTaylorFunction function2(domain2,expansion2*unit0,swp);
-    Expansion<RawFloat> aexpansion2={{{0,1},0.75}};
+    Expansion<RawFloat64> aexpansion2={{{0,1},0.75}};
     VectorTaylorFunction antiderivative2(domain2,aexpansion2*unit0,swp);
     ARIADNE_TEST_EQUAL(antiderivative(function2,index1),antiderivative2);
 
     ExactBox domain3={{-0.25,0.75},{0.0,0.5}};
-    Expansion<RawFloat> expansion3={{{0,0},1.0},{{1,0},2.0},{{0,1},3.0},{{2,0},4.0},{{1,1},5.0},{{0,2},6.0}};
+    Expansion<RawFloat64> expansion3={{{0,0},1.0},{{1,0},2.0},{{0,1},3.0},{{2,0},4.0},{{1,1},5.0},{{0,2},6.0}};
     VectorTaylorFunction function3(domain3,expansion3*unit0,swp);
-    Expansion<RawFloat> aexpansion30={{{1,0},0.5},{{2,0},0.5},{{1,1},1.5},{{3,0},0.66666666666666663},{{2,1},1.25},{{1,2},3.0}};
-    Vector<Float> aerror30={5.5511151231257827e-17};
+    Expansion<RawFloat64> aexpansion30={{{1,0},0.5},{{2,0},0.5},{{1,1},1.5},{{3,0},0.66666666666666663},{{2,1},1.25},{{1,2},3.0}};
+    Vector<Float64> aerror30={5.5511151231257827e-17};
     VectorTaylorFunction antiderivative30(domain3,aexpansion30*unit0,aerror30,swp);
     ARIADNE_TEST_EQUAL(antiderivative(function3,index0),antiderivative30);
-    Expansion<RawFloat> aexpansion31={{{0,1},0.25},{{1,1},0.5},{{0,2},0.375},{{2,1},1.0},{{1,2},0.625},{{0,3},0.5}};
+    Expansion<RawFloat64> aexpansion31={{{0,1},0.25},{{1,1},0.5},{{0,2},0.375},{{2,1},1.0},{{1,2},0.625},{{0,3},0.5}};
     VectorTaylorFunction antiderivative31(domain3,aexpansion31*unit0,swp);
     ARIADNE_TEST_EQUAL(antiderivative(function3,index1),antiderivative31);
 
@@ -554,9 +554,9 @@ Void TestVectorTaylorFunction::test_conversion()
 {
     // Test conversion between ordinary functions and Taylor functions.
     ExactBox D={{-0.5,0.5},{-1.0,2.0}};
-    Vector<RawFloat> pt={-0.25,0.25};
-    Vector<ValidatedFloat> ipt(pt);
-    Vector<ApproximateFloat> apt(pt);
+    Vector<RawFloat64> pt={-0.25,0.25};
+    Vector<ValidatedFloat64> ipt(pt);
+    Vector<ApproximateFloat64> apt(pt);
     EffectiveVectorFunction x=EffectiveVectorFunction::identity(2);
 
     EffectiveVectorFunction h={1-x[0]*x[0]-x[1]/2,x[0]+Real(0)};
@@ -596,12 +596,12 @@ Void TestVectorTaylorFunction::test_domain()
     ScalarTaylorFunction t3(D1,2+(x0+x1)*(x0+x1),swp);
     ARIADNE_TEST_EQUAL(compose(t2,t1),t3);
 
-    Vector<ValidatedFloat> x={{1.0,1.0},{0.5,1.5}};
+    Vector<ValidatedFloat64> x={{1.0,1.0},{0.5,1.5}};
     ARIADNE_TEST_PRINT(x);
-    ARIADNE_TEST_EQUAL(evaluate(t2,x),ValidatedFloat(2.25,4.25));
+    ARIADNE_TEST_EQUAL(evaluate(t2,x),ValidatedFloat64(2.25,4.25));
 
     // Ensure evaluation and composition throw errors when expected
-    Vector<ValidatedFloat> xe={{0.875,1.125},{0.5,1.5}};
+    Vector<ValidatedFloat64> xe={{0.875,1.125},{0.5,1.5}};
     ARIADNE_TEST_THROWS(t2(xe),DomainException);
     ARIADNE_TEST_THROWS(evaluate(t2,xe),DomainException);
 
@@ -610,11 +610,11 @@ Void TestVectorTaylorFunction::test_domain()
     ARIADNE_TEST_THROWS(vt2(xe),DomainException);
     ARIADNE_TEST_THROWS(evaluate(vt2,xe),DomainException);
 
-    VectorTaylorFunction te1=t1; te1[0]=te1[0]+ValidatedFloat(-0.125,+0.125);
+    VectorTaylorFunction te1=t1; te1[0]=te1[0]+ValidatedFloat64(-0.125,+0.125);
     ARIADNE_TEST_THROWS(compose(t2,te1),DomainException);
     ARIADNE_TEST_THROWS(compose(vt2,te1),DomainException);
 
-    ARIADNE_TEST_EQUAL(unchecked_evaluate(t2,xe),ValidatedFloat(2.25,4.25));
+    ARIADNE_TEST_EQUAL(unchecked_evaluate(t2,xe),ValidatedFloat64(2.25,4.25));
 
     // Regression test for printing functions with trivial domain component
     ExactBox D4={{1.0,1.0},{0.0,2.0}};
@@ -651,22 +651,22 @@ Void TestTaylorFunctionFactory::test_create()
     TaylorFunctionFactory factory(sweeper);
 
     Vector<ExactInterval> dom={{-1,+1},{0.5,3.5}};
-    Vector<ValidatedFloat> args=reinterpret_cast<Vector<ValidatedFloat>const&>(dom);
+    Vector<ValidatedFloat64> args=reinterpret_cast<Vector<ValidatedFloat64>const&>(dom);
 
     ScalarTaylorFunction stf=factory.create(dom, EffectiveScalarFunction::zero(dom.size()) );
     ARIADNE_TEST_PRINT(stf);
     ARIADNE_TEST_EQUALS(&stf.sweeper(),&sweeper);
-    ARIADNE_TEST_EQUALS(stf(args),ValidatedFloat(0.0));
-    ARIADNE_TEST_EQUALS(evaluate(stf,args),ValidatedFloat(0.0));
+    ARIADNE_TEST_EQUALS(stf(args),ValidatedFloat64(0.0));
+    ARIADNE_TEST_EQUALS(evaluate(stf,args),ValidatedFloat64(0.0));
 
     VectorTaylorFunction vtf=factory.create(dom, EffectiveVectorFunction::identity(dom.size()) );
     ARIADNE_TEST_PRINT(vtf);
 
     // Test evaluation gives a superset with small additional error
-    Vector<ValidatedFloat> errs(2,ValidatedFloat(-1e-15,+1e-15));
+    Vector<ValidatedFloat64> errs(2,ValidatedFloat64(-1e-15,+1e-15));
     ARIADNE_TEST_BINARY_PREDICATE(refines,args,vtf(args));
-    ARIADNE_TEST_BINARY_PREDICATE(refines,vtf(args),Vector<ValidatedFloat>(args+errs));
-    Vector<ValidatedFloat> pt(2); pt[0]=ValidatedFloat(0.2); pt[1]=ValidatedFloat(1.25);
+    ARIADNE_TEST_BINARY_PREDICATE(refines,vtf(args),Vector<ValidatedFloat64>(args+errs));
+    Vector<ValidatedFloat64> pt(2); pt[0]=ValidatedFloat64(0.2); pt[1]=ValidatedFloat64(1.25);
     ARIADNE_TEST_BINARY_PREDICATE(refines,pt,vtf(pt));
 }
 

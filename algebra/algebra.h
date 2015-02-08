@@ -87,14 +87,14 @@ template<class X> class NormedAlgebra
     //! \brief A value \a c minimising |a-c|.
     typename AlgebraTraits<X>::ValueType average() const { return _ptr->average(); }
     //! \brief The tolerance used to determine the truncation error when applying an analytic function.
-    Float tolerance() const { return _ptr->tolerance(); }
+    Float64 tolerance() const { return _ptr->tolerance(); }
     //! \brief A value \c r such that \c |a-c1|<=r.
     typename AlgebraTraits<X>::NormType radius() const { return _ptr->radius(); }
     NormedAlgebra<X> create_zero() const { return NormedAlgebra<X>(_ptr->_create()); }
     NormedAlgebra<X> create_constant(X c) const { return NormedAlgebra<X>(_ptr->_create_constant(c)); }
-    NormedAlgebra<X> create_ball(ErrorFloat r) const { return NormedAlgebra<X>(_ptr->_create_ball(r)); }
-    NormedAlgebra<X> create_ball(ApproximateFloat r) const {
-        return create_ball(ErrorFloat(r.raw())); }
+    NormedAlgebra<X> create_ball(ErrorFloat64 r) const { return NormedAlgebra<X>(_ptr->_create_ball(r)); }
+    NormedAlgebra<X> create_ball(ApproximateFloat64 r) const {
+        return create_ball(ErrorFloat64(r.raw())); }
     NormedAlgebra<X> create() const { return NormedAlgebra<X>(_ptr->_create()); }
     NormedAlgebra<X> clone() const { return NormedAlgebra<X>(_ptr->_clone()); }
     Void clear() { this->imul(0); }

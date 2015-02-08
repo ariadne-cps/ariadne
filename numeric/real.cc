@@ -51,53 +51,53 @@ typedef Real::Interface RealInterface;
 struct Real::Interface {
   public:
     virtual ~Interface() = default;
-    virtual BoundFloat _value() const = 0;
+    virtual BoundedFloat64 _value() const = 0;
     virtual BoundFloat64 _evaluate(Precision64) const = 0;
     virtual BoundFloatMP _evaluate(PrecisionMP) const = 0;
   public:
     virtual OutputStream& _write(OutputStream& os) const = 0;
 };
 
-template<class O, class... AS> struct RealWrapper : virtual RealInterface, ExpressionTemplate<O,AS...>, BoundFloat {
+template<class O, class... AS> struct RealWrapper : virtual RealInterface, ExpressionTemplate<O,AS...>, BoundedFloat64 {
     RealWrapper(O o, AS... as) : ExpressionTemplate<O,AS...>(o,as...)
-        , BoundFloat(static_cast<ExpressionTemplate<O,AS...>const&>(*this).operator BoundFloat()) { }
-    virtual BoundFloat _value() const { return static_cast<BoundFloat const&>(*this); }
+        , BoundedFloat64(static_cast<ExpressionTemplate<O,AS...>const&>(*this).operator BoundedFloat64()) { }
+    virtual BoundedFloat64 _value() const { return static_cast<BoundedFloat64 const&>(*this); }
     //virtual BoundFloat64 _evaluate(Precision64 pr) const { ExpressionTemplate<O,AS...> const& self=*this; return self(pr); }
     //virtual BoundFloatMP _evaluate(PrecisionMP pr) const { ExpressionTemplate<O,AS...> const& self=*this; return self(pr); }
-    virtual BoundFloat64 _evaluate(Precision64 pr) const {  return static_cast<BoundFloat>(*this); }
+    virtual BoundFloat64 _evaluate(Precision64 pr) const {  return static_cast<BoundedFloat64>(*this); }
     virtual BoundFloatMP _evaluate(PrecisionMP pr) const {  ARIADNE_NOT_IMPLEMENTED; }
     virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<ExpressionTemplate<O,AS...> const&>(*this); }
 };
 
-template<class X> struct RealConstant : RealInterface, BoundFloat {
+template<class X> struct RealConstant : RealInterface, BoundedFloat64 {
     X _c;
   public:
-    RealConstant(X const& x) : BoundFloat(x), _c(x) { }
-    virtual BoundFloat _value() const { return static_cast<BoundFloat const&>(*this); }
-    virtual BoundFloat64 _evaluate(Precision64 pr) const { return static_cast<BoundFloat>(*this); }
+    RealConstant(X const& x) : BoundedFloat64(x), _c(x) { }
+    virtual BoundedFloat64 _value() const { return static_cast<BoundedFloat64 const&>(*this); }
+    virtual BoundFloat64 _evaluate(Precision64 pr) const { return static_cast<BoundedFloat64>(*this); }
     virtual BoundFloatMP _evaluate(PrecisionMP pr) const { ARIADNE_NOT_IMPLEMENTED; }
     virtual OutputStream& _write(OutputStream& os) const { return os << this->_c; }
 };
 
-template<> struct RealConstant<Integer> : RealInterface, BoundFloat {
+template<> struct RealConstant<Integer> : RealInterface, BoundedFloat64 {
     typedef Integer X;
      X _c;
   public:
-    RealConstant(X const& x) : BoundFloat(x), _c(x) { }
-    virtual BoundFloat _value() const { return static_cast<BoundFloat const&>(*this); }
-    virtual BoundFloat64 _evaluate(Precision64 pr) const { return static_cast<BoundFloat>(*this); }
+    RealConstant(X const& x) : BoundedFloat64(x), _c(x) { }
+    virtual BoundedFloat64 _value() const { return static_cast<BoundedFloat64 const&>(*this); }
+    virtual BoundFloat64 _evaluate(Precision64 pr) const { return static_cast<BoundedFloat64>(*this); }
     virtual BoundFloatMP _evaluate(PrecisionMP pr) const { ARIADNE_NOT_IMPLEMENTED; }
     virtual OutputStream& _write(OutputStream& os) const { return os << this->_c; }
 };
 
-template<> struct RealConstant<BoundFloat> : RealInterface, BoundFloat {
-    typedef BoundFloat X;
+template<> struct RealConstant<BoundedFloat64> : RealInterface, BoundedFloat64 {
+    typedef BoundedFloat64 X;
   public:
-    RealConstant(X const& x) : BoundFloat(x) { }
-    virtual BoundFloat _value() const { return static_cast<BoundFloat const&>(*this); }
-    virtual BoundFloat64 _evaluate(Precision64 pr) const { return static_cast<BoundFloat>(*this); }
+    RealConstant(X const& x) : BoundedFloat64(x) { }
+    virtual BoundedFloat64 _value() const { return static_cast<BoundedFloat64 const&>(*this); }
+    virtual BoundFloat64 _evaluate(Precision64 pr) const { return static_cast<BoundedFloat64>(*this); }
     virtual BoundFloatMP _evaluate(PrecisionMP pr) const { ARIADNE_NOT_IMPLEMENTED; }
-    virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<BoundFloat const&>(*this); }
+    virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<BoundedFloat64 const&>(*this); }
 };
 
 template<class O, class... A> inline Real make_real(O o, A... a) {
@@ -109,29 +109,29 @@ inline Real::Real(SharedPointer<RealInterface> p) : _ptr(p) { }
 
 // FIXME: Is this necessary?
 Real::Real(double l, double a, double u)
-    : Real(std::make_shared<RealConstant<BoundFloat>>(BoundFloat(l,u)))
+    : Real(std::make_shared<RealConstant<BoundedFloat64>>(BoundedFloat64(l,u)))
 {
 }
 
 // FIXME: Is this necessary?
 Real::Real(double x)
-    : Real(std::make_shared<RealConstant<BoundFloat>>(BoundFloat(x)))
+    : Real(std::make_shared<RealConstant<BoundedFloat64>>(BoundedFloat64(x)))
 {
 }
 
 Real::Real(Dyadic const& d) : Real(Rational(d)) { }
 Real::Real(Decimal const& d) : Real(Rational(d)) { }
 
-UpperFloat Real::upper() const { return this->_ptr->_value(); }
-LowerFloat Real::lower() const { return this->_ptr->_value(); }
-ApproximateFloat Real::approx() const { return this->_ptr->_value(); }
+UpperFloat64 Real::upper() const { return this->_ptr->_value(); }
+LowerFloat64 Real::lower() const { return this->_ptr->_value(); }
+ApproximateFloat64 Real::approx() const { return this->_ptr->_value(); }
 
 double Real::get_d() const { return this->approx().get_d(); }
 
-ValidatedFloat::ValidatedFloat(Real const& x) : ValidatedFloat(x.lower(),x.upper()) { }
-UpperFloat::UpperFloat(Real const& x) : UpperFloat(x.upper()) { }
-LowerFloat::LowerFloat(Real const& x) : LowerFloat(x.lower()) { }
-ApproximateFloat::ApproximateFloat(Real const& x) : ApproximateFloat(x.approx()) { }
+ValidatedFloat64::ValidatedFloat64(Real const& x) : ValidatedFloat64(x.lower(),x.upper()) { }
+UpperFloat64::UpperFloat64(Real const& x) : UpperFloat64(x.upper()) { }
+LowerFloat64::LowerFloat64(Real const& x) : LowerFloat64(x.lower()) { }
+ApproximateFloat64::ApproximateFloat64(Real const& x) : ApproximateFloat64(x.approx()) { }
 
 Real::Real(std::uint64_t m, Void*) : Real(std::make_shared<RealConstant<Integer>>(m)) { }
 Real::Real(std::int64_t n, Void*) : Real(std::make_shared<RealConstant<Integer>>(n)) { }
@@ -139,7 +139,7 @@ Real::Real(std::int64_t n, Void*) : Real(std::make_shared<RealConstant<Integer>>
 Real::Real() : Real(std::make_shared<RealConstant<Integer>>(0)) { }
 Real::Real(Integer const& x) : Real(std::make_shared<RealConstant<Integer>>(x)) { }
 Real::Real(Rational const& x) : Real(std::make_shared<RealConstant<Rational>>(x)) { }
-Real::Real(ExactFloat x) : Real(std::make_shared<RealConstant<ExactFloat>>(x)) { }
+Real::Real(ExactFloat64 x) : Real(std::make_shared<RealConstant<ExactFloat64>>(x)) { }
 
 Real add(Real x1, Real x2) { return make_real(Add(),x1,x2); }
 Real sub(Real x1, Real x2) { return make_real(Sub(),x1,x2); }
@@ -163,7 +163,7 @@ Real abs(Real x) { return make_real(Abs(),x); }
 Real max(Real x1, Real x2) { return make_real(Max(),x1,x2); }
 Real min(Real x1, Real x2) { return make_real(Min(),x1,x2); }
 
-ErrorFloat mag(Real x) { return mag(static_cast<BoundFloat>(x)); }
+ErrorFloat64 mag(Real x) { return mag(static_cast<BoundedFloat64>(x)); }
 
 Real operator+(Real x) { return make_real(Pos(),x); }
 Real operator-(Real x) { return make_real(Neg(),x); }
@@ -180,8 +180,8 @@ OutputStream& operator<<(OutputStream& os, Real const& x) { return x._ptr->_writ
 
 Bool same(Real x1, Real x2) { ARIADNE_NOT_IMPLEMENTED; }
 
-NegSierpinski eq(Real x1, Real x2) { return BoundFloat(x1)==BoundFloat(x2); }
-Tribool lt(Real x1, Real x2) { return BoundFloat(x1)< BoundFloat(x2); }
+NegSierpinski eq(Real x1, Real x2) { return BoundedFloat64(x1)==BoundedFloat64(x2); }
+Tribool lt(Real x1, Real x2) { return BoundedFloat64(x1)< BoundedFloat64(x2); }
 
 template<class O, class... ARGS> struct LogicalWrapper;
 

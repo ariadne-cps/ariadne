@@ -44,7 +44,7 @@
 
 namespace Ariadne {
 
-typedef Float Time;
+typedef Float64 Time;
 
 template<class ES> class Orbit;
 

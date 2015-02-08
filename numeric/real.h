@@ -75,14 +75,14 @@ class Real
     Real(Decimal const& d);
     Real(Rational const& q);
 
-    explicit Real(ExactFloat x);
+    explicit Real(ExactFloat64 x);
 
     operator Number<Effective>() const;
 
     // Extract floating-point properties
-    UpperFloat upper() const;
-    LowerFloat lower() const;
-    ApproximateFloat approx() const;
+    UpperFloat64 upper() const;
+    LowerFloat64 lower() const;
+    ApproximateFloat64 approx() const;
     double get_d() const;
 
     // Extract arbitrarily accurate approximations
@@ -113,7 +113,7 @@ class Real
     friend Real min(Real,Real);
     friend Real abs(Real);
 
-    friend ErrorFloat mag(Real);
+    friend ErrorFloat64 mag(Real);
 
     friend NegSierpinski eq(Real,Real);
     friend Tribool lt(Real,Real);

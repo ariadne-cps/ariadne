@@ -60,7 +60,7 @@ typedef Procedure<ValidatedNumber> ValidatedProcedure;
 
 template<class P,class F> class TaylorModel;
 template<class M> class VectorFunctionPatch;
-typedef VectorFunctionPatch<TaylorModel<Validated,Float>> VectorTaylorFunction;
+typedef VectorFunctionPatch<TaylorModel<Validated,Float64>> VectorTaylorFunction;
 
 template<class X> struct FeasibilityState {
     X t;
@@ -117,7 +117,7 @@ class ConstraintSolver
     //! with \a multipliers innner product \a codomain, centering at \a centre.
     //! Reduces \f$(\lambda\cdot f)(X) \cap (\lambda\cdot C)\f$, evaluating \f$g(x)=g(x^*)+Dg(X) (X-x^*)\f$.
     Bool lyapunov_reduce(UpperBox& domain, const VectorTaylorFunction& function, const ExactBox& codomain,
-                         Vector<ExactFloat> centre, Vector<ExactFloat> multpliers) const;
+                         Vector<ExactFloat64> centre, Vector<ExactFloat64> multpliers) const;
     Bool lyapunov_reduce(UpperBox& domain, const VectorTaylorFunction& function, const ExactBox& codomain,
                          Vector<ApproximateNumber> centre, Vector<ApproximateNumber> multpliers) const;
     //! \brief Try to enforce hull consistency by reducing a constraint with respect to one variable.

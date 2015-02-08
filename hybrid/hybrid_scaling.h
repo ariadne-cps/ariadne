@@ -49,7 +49,7 @@ class HybridScalingInterface
   public:
     //!
     virtual HybridScalingInterface* clone() const = 0;
-    virtual ExactFloat scaling(const DiscreteLocation& loc, const RealVariable& var) const = 0;
+    virtual ExactFloat64 scaling(const DiscreteLocation& loc, const RealVariable& var) const = 0;
     virtual Void write(OutputStream& os) const = 0;
 };
 inline OutputStream& operator<<(OutputStream& os, const HybridScalingInterface& hsc) { hsc.write(os); return os; }
@@ -64,39 +64,39 @@ class HybridScaling
     HybridScaling(const HybridScalingInterface& ref) : _ptr(ref.clone()) { }
     operator const HybridScalingInterface& () const { return *this->_ptr; }
     operator HybridScalingInterface& () { return *this->_ptr; }
-    ExactFloat scaling(const DiscreteLocation& loc, const RealVariable& var) const { return this->_ptr->scaling(loc,var); }
+    ExactFloat64 scaling(const DiscreteLocation& loc, const RealVariable& var) const { return this->_ptr->scaling(loc,var); }
   public:
-    HybridScaling(const Map<Identifier,ExactFloat>& scalings);
-    HybridScaling(const InitializerList<Pair<RealVariable,Float>>& scalings);
+    HybridScaling(const Map<Identifier,ExactFloat64>& scalings);
+    HybridScaling(const InitializerList<Pair<RealVariable,Float64>>& scalings);
 };
 
 class SimpleHybridScaling
     : public HybridScalingInterface
 {
-    Map<Identifier,ExactFloat> _scalings;
+    Map<Identifier,ExactFloat64> _scalings;
   public:
     SimpleHybridScaling() : _scalings() { }
-    SimpleHybridScaling(const Map<Identifier,ExactFloat>& scalings) : _scalings(scalings) { }
-    SimpleHybridScaling(const InitializerList<Pair<RealVariable,Float>>& scalings);
-    Void set_scaling(const RealVariable& var, ExactFloat res) { ARIADNE_ASSERT(res>0.0); _scalings[var.name()]=res; }
+    SimpleHybridScaling(const Map<Identifier,ExactFloat64>& scalings) : _scalings(scalings) { }
+    SimpleHybridScaling(const InitializerList<Pair<RealVariable,Float64>>& scalings);
+    Void set_scaling(const RealVariable& var, ExactFloat64 res) { ARIADNE_ASSERT(res>0.0); _scalings[var.name()]=res; }
     virtual SimpleHybridScaling* clone() const { return new SimpleHybridScaling(*this); }
-    virtual ExactFloat scaling(const DiscreteLocation& loc, const RealVariable& var) const {
-        return (this->_scalings.has_key(var.name())) ? this->_scalings[var.name()] : ExactFloat(1.0); }
+    virtual ExactFloat64 scaling(const DiscreteLocation& loc, const RealVariable& var) const {
+        return (this->_scalings.has_key(var.name())) ? this->_scalings[var.name()] : ExactFloat64(1.0); }
     virtual Void write(OutputStream& os) const { os << "HybridScaling( " << this->_scalings << " )"; }
 };
 
-inline Pair<RealVariable,Float> operator|(const RealVariable& var, Float scal) {
-    return Pair<RealVariable,Float>(var,scal); }
+inline Pair<RealVariable,Float64> operator|(const RealVariable& var, Float64 scal) {
+    return Pair<RealVariable,Float64>(var,scal); }
 
-inline HybridScaling::HybridScaling(const Map<Identifier,ExactFloat>& scalings)
+inline HybridScaling::HybridScaling(const Map<Identifier,ExactFloat64>& scalings)
     : _ptr(new SimpleHybridScaling(scalings)) { }
 
-inline HybridScaling::HybridScaling(const InitializerList<Pair<RealVariable,Float>>& scalings)
+inline HybridScaling::HybridScaling(const InitializerList<Pair<RealVariable,Float64>>& scalings)
     : _ptr(new SimpleHybridScaling(scalings)) { }
 
-inline SimpleHybridScaling::SimpleHybridScaling(const InitializerList<Pair<RealVariable,Float>>& scalings) {
+inline SimpleHybridScaling::SimpleHybridScaling(const InitializerList<Pair<RealVariable,Float64>>& scalings) {
     for(auto iter=scalings.begin(); iter!=scalings.end(); ++iter) {
-        this->_scalings.insert(iter->first.name(),ExactFloat(iter->second));
+        this->_scalings.insert(iter->first.name(),ExactFloat64(iter->second));
     }
 }
 

@@ -41,10 +41,10 @@ inline Nat compute_polynomial_data_size(Nat rs, Nat as, Nat d) { return rs*Ariad
 namespace Ariadne {
 
 // FIXME: Ensure all valid arithmetic and comparisons are defined!
-inline auto operator==(ValidatedFloat x, Int n) -> decltype(x==ExactFloat(n)) { return x==ExactFloat(n); }
-inline auto operator!=(ValidatedFloat x, Int n) -> decltype(x!=ExactFloat(n)) { return x!=ExactFloat(n); }
-inline auto operator> (ValidatedFloat x, Int n) -> decltype(x> ExactFloat(n)) { return x> ExactFloat(n); }
-inline auto operator*=(ApproximateFloat x, Int n) -> decltype(x*=ApproximateFloat(n)) { return x*=ApproximateFloat(n); }
+inline auto operator==(ValidatedFloat64 x, Int n) -> decltype(x==ExactFloat64(n)) { return x==ExactFloat64(n); }
+inline auto operator!=(ValidatedFloat64 x, Int n) -> decltype(x!=ExactFloat64(n)) { return x!=ExactFloat64(n); }
+inline auto operator> (ValidatedFloat64 x, Int n) -> decltype(x> ExactFloat64(n)) { return x> ExactFloat64(n); }
+inline auto operator*=(ApproximateFloat64 x, Int n) -> decltype(x*=ApproximateFloat64(n)) { return x*=ApproximateFloat64(n); }
 
 template<class X>
 struct to_python_dict< Ariadne::Expansion<X>  > {
@@ -315,21 +315,21 @@ export_differential_vector(const char* name)
     def("lie_derivative", (DV(*)(const DV&,const DV&))&lie_derivative);
 }
 
-template Void export_differential< Differential<ApproximateFloat> >(const char*);
-template Void export_differential< Differential<ValidatedFloat> >(const char*);
+template Void export_differential< Differential<ApproximateFloat64> >(const char*);
+template Void export_differential< Differential<ValidatedFloat64> >(const char*);
 
-template Void export_differential_vector< Differential<ApproximateFloat> >(const char*);
-template Void export_differential_vector< Differential<ValidatedFloat> >(const char*);
+template Void export_differential_vector< Differential<ApproximateFloat64> >(const char*);
+template Void export_differential_vector< Differential<ValidatedFloat64> >(const char*);
 
 Void differentiation_submodule()
 {
-    to_python_dict < Expansion<ApproximateFloat> >();
-    to_python_dict < Expansion<ValidatedFloat> >();
+    to_python_dict < Expansion<ApproximateFloat64> >();
+    to_python_dict < Expansion<ValidatedFloat64> >();
 
-    export_differential< Differential<ApproximateFloat> >("ApproximateDifferential");
-    export_differential< Differential<ValidatedFloat> >("ValidatedDifferential");
+    export_differential< Differential<ApproximateFloat64> >("ApproximateDifferential");
+    export_differential< Differential<ValidatedFloat64> >("ValidatedDifferential");
 
-    export_differential_vector< Differential<ApproximateFloat> >("ApproximateDifferentialVector");
-    export_differential_vector< Differential<ValidatedFloat> >("ValidatedDifferentialVector");
+    export_differential_vector< Differential<ApproximateFloat64> >("ApproximateDifferentialVector");
+    export_differential_vector< Differential<ValidatedFloat64> >("ValidatedDifferentialVector");
 }
 

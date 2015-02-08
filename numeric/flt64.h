@@ -50,14 +50,14 @@ namespace Ariadne {
 
 Void set_default_rounding();
 
-Void Float::set_rounding_to_nearest();
-Void Float::set_rounding_downward();
-Void Float::set_rounding_upward();
-Void Float::set_rounding_toward_zero();
+Void Float64::set_rounding_to_nearest();
+Void Float64::set_rounding_downward();
+Void Float64::set_rounding_upward();
+Void Float64::set_rounding_toward_zero();
 
 typedef unsigned short RoundingModeType;
-RoundingModeType Float::get_rounding_mode();
-Void Float::set_rounding_mode(RoundingModeType);
+RoundingModeType Float64::get_rounding_mode();
+Void Float64::set_rounding_mode(RoundingModeType);
 
 extern const RoundingModeType ROUND_NEAR;
 extern const RoundingModeType ROUND_DOWN;
@@ -78,16 +78,16 @@ template<class Z, EnableIf<IsIntegral<Z>> =dummy> Z integer_cast(Flt64);
 //! These classes
 //!
 //! Default arithmetic operations are approximate, and comparisons are exact, so this class is \em unsafe.
-//! %Rounded operations on \b Float classes are provided using the \c _down
+//! %Rounded operations on \b Float64 classes are provided using the \c _down
 //! and \c _up suffixes. %Approximate arithmetic without control of the
 //! rounding mode can be specified by the \c _approx rounding suffix, or \c _near if round-to-nearest is available.
 //! %Exact arithmetic can be specified explicitly using the \c _exact rounding suffix.
 //!
-//! Since the raw \b Float classes represent unsafe values, they cannot be converted to other numbers.
-//! The exception is conversion to \b ApproximateFloat classes, since these represent approximate values with no control of the error.
-//! Since the raw \b Float classes are used as the implementation of the safe \c Float classes,
+//! Since the raw \b Float64 classes represent unsafe values, they cannot be converted to other numbers.
+//! The exception is conversion to \b ApproximateFloat64 classes, since these represent approximate values with no control of the error.
+//! Since the raw \b Float64 classes are used as the implementation of the safe \c Float64 classes,
 //! they are valid arguments to constructors, but these constructors are all declared \c explicit.
-//! Comparison of raw \b %Float data and other numbers is performed as if the %Float object were an \b %ApproximateFloat.
+//! Comparison of raw \b %Float64 data and other numbers is performed as if the %Float64 object were an \b %ApproximateFloat64.
 //!
 //! When testing, it is often useful to perform comparisons with \c %Flt64 or \c double values.
 //! Although care must be taken, since compiler rounding may change the truth of certain comparisons.
@@ -110,13 +110,13 @@ class Flt64 {
     static Flt64 eps();
     static Flt64 inf();
 
-    static Void Float::set_rounding_mode(RoundingModeType);
-    static RoundingModeType Float::get_rounding_mode();
+    static Void Float64::set_rounding_mode(RoundingModeType);
+    static RoundingModeType Float64::get_rounding_mode();
 
-    static Void Float::set_rounding_to_nearest();
-    static Void Float::set_rounding_downward();
-    static Void Float::set_rounding_upward();
-    static Void Float::set_rounding_toward_zero();
+    static Void Float64::set_rounding_to_nearest();
+    static Void Float64::set_rounding_downward();
+    static Void Float64::set_rounding_upward();
+    static Void Float64::set_rounding_toward_zero();
 
     friend inline Flt64 operator+(Flt64 x) { return Flt64{+x.d}; }
     friend inline Flt64 operator-(Flt64 x) { return Flt64{-x.d}; }

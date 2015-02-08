@@ -52,8 +52,8 @@ enum class SplitPart : char { LOWER, MIDDLE, UPPER };
 template<class T1, class T2> struct Product;
 
 template<class P, class F> class TaylorModel;
-typedef TaylorModel<Approximate,Float> ApproximateTaylorModel;
-typedef TaylorModel<Validated,Float> ValidatedTaylorModel;
+typedef TaylorModel<Approximate,Float64> ApproximateTaylorModel;
+typedef TaylorModel<Validated,Float64> ValidatedTaylorModel;
 
 template<class P, class F> struct IsScalar< TaylorModel<P,F> > { static const Bool value = true; };
 template<class P, class F> struct IsAlgebra< TaylorModel<P,F> > { static const Bool value = true; };
@@ -77,9 +77,9 @@ class TaylorModel<Validated,F>
     : public NormedAlgebraMixin<TaylorModel<Validated,F>,ValidatedNumber>
 {
   public:
-    typedef ExactFloat CoefficientType;
-    typedef ErrorFloat ErrorType;
-    typedef ErrorFloat NormType;
+    typedef ExactFloat64 CoefficientType;
+    typedef ErrorFloat64 ErrorType;
+    typedef ErrorFloat64 NormType;
     typedef ReverseLexicographicKeyLess ComparisonType;
     typedef SortedExpansion<CoefficientType,ComparisonType> ExpansionType;
 
@@ -118,7 +118,7 @@ class TaylorModel<Validated,F>
     TaylorModel<Validated,F>(SizeType as, Sweeper swp);
     //! \brief Construct from a map giving the expansion, a constant giving the error, and an accuracy parameter.
     TaylorModel<Validated,F>(const Expansion<CoefficientType>& f, const ErrorType& e, Sweeper swp);
-    TaylorModel<Validated,F>(const Expansion<RawFloat>& f, const RawFloat& e, Sweeper swp);
+    TaylorModel<Validated,F>(const Expansion<RawFloat64>& f, const RawFloat64& e, Sweeper swp);
     //! \brief Fast swap with another Taylor model.
     Void swap(TaylorModel<Validated,F>& tm);
     //! \brief The zero element of the algebra of Taylor models, with the same number of arguments and accuracy parameters.
@@ -225,7 +225,7 @@ class TaylorModel<Validated,F>
 
 
     //! \brief A value \c e such that analytic functions are evaluated to a tolerance of \c e. Equal to the sweep threshold.
-    RawFloat tolerance() const;
+    RawFloat64 tolerance() const;
 
 
     //! \brief Set the error of the expansion.
@@ -419,7 +419,7 @@ class TaylorModel<Validated,F>
     OutputStream& str(OutputStream&) const;
     OutputStream& repr(OutputStream&) const;
   public: // FIXME: Should be private
-    Void _set_error(const RawFloat& ne) { ARIADNE_ASSERT(ne>=0); this->_error=ErrorType(ne); }
+    Void _set_error(const RawFloat64& ne) { ARIADNE_ASSERT(ne>=0); this->_error=ErrorType(ne); }
     Void _append(MultiIndex const& a, CoefficientType const& v) { this->_expansion.append(a,v); }
     static Bool _consistent(const TaylorModel<Validated,F>& tm1, const TaylorModel<Validated,F>& tm2);
     static Bool _inconsistent(const TaylorModel<Validated,F>& tm1, const TaylorModel<Validated,F>& tm2);
@@ -440,7 +440,7 @@ class TaylorModel<Validated,F>
     static ApproximateNumber _evaluate(const TaylorModel<Validated,F>& x, Vector<ApproximateNumber> const& v);
 };
 
-Covector<ValidatedNumber> gradient(const TaylorModel<Validated,Float>& x, const Vector<ValidatedNumber>& v);
+Covector<ValidatedNumber> gradient(const TaylorModel<Validated,Float64>& x, const Vector<ValidatedNumber>& v);
 
 
 
@@ -453,14 +453,14 @@ class TaylorModel<Approximate,F>
     : public NormedAlgebraMixin<TaylorModel<Approximate,F>,ApproximateNumber>
 {
   public:
-    typedef ApproximateFloat CoefficientType;
+    typedef ApproximateFloat64 CoefficientType;
     typedef ApproximateErrorType ErrorType;
     typedef ReverseLexicographicKeyLess ComparisonType;
     typedef SortedExpansion<CoefficientType,ComparisonType> ExpansionType;
 
     typedef ExactInterval CodomainType;
     typedef ApproximateInterval RangeType;
-    typedef ApproximateFloat NormType;
+    typedef ApproximateFloat64 NormType;
 
     //! \brief The type used for the coefficients.
     typedef ApproximateNumber NumericType;
@@ -587,7 +587,7 @@ class TaylorModel<Approximate,F>
     //! \brief An approximation to the average value of the function.
     virtual CoefficientType average() const;
     //! \brief The tolerance to which analytic functions should be computed.
-    virtual RawFloat tolerance() const;
+    virtual RawFloat64 tolerance() const;
     //! \brief The radius of the ball containing the functions.
     virtual NormType radius() const;
     //! \brief Write to an output stream.
@@ -723,8 +723,8 @@ template<class P, class F> typename TaylorModel<P,F>::NormType norm(const Vector
 
 template<class F> Matrix<ValidatedNumber> jacobian(const Vector<TaylorModel<Validated,F>>& x, const Vector<ValidatedNumber>& y);
 template<class F> Matrix<ValidatedNumber> jacobian(const Vector<TaylorModel<Validated,F>>& x, const Vector<ValidatedNumber>& y, Array<SizeType>& p);
-template<class F> Matrix<ExactFloat> jacobian_value(const Vector<TaylorModel<Validated,F>>& x);
-template<class F> Matrix<ExactFloat> jacobian_value(const Vector<TaylorModel<Validated,F>>& x, const Array<SizeType>& p);
+template<class F> Matrix<ExactFloat64> jacobian_value(const Vector<TaylorModel<Validated,F>>& x);
+template<class F> Matrix<ExactFloat64> jacobian_value(const Vector<TaylorModel<Validated,F>>& x, const Array<SizeType>& p);
 template<class F> Matrix<UpperInterval> jacobian_range(const Vector<TaylorModel<Validated,F>>& x);
 template<class F> Matrix<UpperInterval> jacobian_range(const Vector<TaylorModel<Validated,F>>& x, const Array<SizeType>& p);
 

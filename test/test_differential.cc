@@ -182,11 +182,11 @@ class TestDifferential {
 
     Void test_gradient() {
         // Regression test based on errors in Henon evaluation.
-        Vector<ApproximateFloat> x={0.875,-0.125};
-        Vector< Differential<ApproximateFloat> > dx=Differential<ApproximateFloat>::variables(1u,x);
-        Differential<ApproximateFloat> dfx=1.5-dx[0]*dx[0]-0.25*dx[1];
+        Vector<ApproximateFloat64> x={0.875,-0.125};
+        Vector< Differential<ApproximateFloat64> > dx=Differential<ApproximateFloat64>::variables(1u,x);
+        Differential<ApproximateFloat64> dfx=1.5-dx[0]*dx[0]-0.25*dx[1];
         ARIADNE_TEST_PRINT(dfx);
-        Covector<ApproximateFloat> g = dfx.gradient();
+        Covector<ApproximateFloat64> g = dfx.gradient();
         ARIADNE_TEST_PRINT(g);
         ARIADNE_TEST_EQUALS(g[0],-1.75);
         ARIADNE_TEST_EQUALS(g[1],-0.25);
@@ -194,13 +194,13 @@ class TestDifferential {
 
     Void test_hessian() {
         // Test Hessian matrix of
-        ApproximateFloat a00=1.5; ApproximateFloat a01=2.5; ApproximateFloat a11=3.5;
+        ApproximateFloat64 a00=1.5; ApproximateFloat64 a01=2.5; ApproximateFloat64 a11=3.5;
         double x0=0.875; double x1=-1.25;
-        Vector<ApproximateFloat> x={x0,x1};
-        Vector< Differential<ApproximateFloat> > dx=Differential<ApproximateFloat>::variables(2u,x);
-        Differential<ApproximateFloat> dfx=a00*dx[0]*dx[0]+a01*dx[0]*dx[1]+a11*dx[1]*dx[1];
+        Vector<ApproximateFloat64> x={x0,x1};
+        Vector< Differential<ApproximateFloat64> > dx=Differential<ApproximateFloat64>::variables(2u,x);
+        Differential<ApproximateFloat64> dfx=a00*dx[0]*dx[0]+a01*dx[0]*dx[1]+a11*dx[1]*dx[1];
         ARIADNE_TEST_PRINT(dfx);
-        Matrix<ApproximateFloat> H = dfx.hessian();
+        Matrix<ApproximateFloat64> H = dfx.hessian();
         ARIADNE_TEST_PRINT(H);
         ARIADNE_TEST_EQUAL(H[0][1],H[1][0]);
         ARIADNE_TEST_EQUALS(H[0][0],a00*2);
@@ -284,7 +284,7 @@ class TestDifferentialVector {
 
     Void test_jacobian() {
         DifferentialVectorType dv(0u,2u,3u);
-        Matrix<ApproximateFloat> J=dv.jacobian();
+        Matrix<ApproximateFloat64> J=dv.jacobian();
         ARIADNE_TEST_EQUALS(J.row_size(),dv.result_size());
         ARIADNE_TEST_EQUALS(J.column_size(),dv.argument_size());
     }
@@ -322,7 +322,7 @@ class TestDifferentialVector {
         DifferentialVectorType x(2,2,2);
         x[0][MultiIndex::unit(2,0)]=1; x[1][MultiIndex::unit(2,1)]=1;
         cout << "x=" << x << endl;
-        Vector<ApproximateFloat> p(2); p[0]=1.5; p[1]=0.375;
+        Vector<ApproximateFloat64> p(2); p[0]=1.5; p[1]=0.375;
         double ahxp[12]={ 1.5, 0.0, -0.375, -1.0, 0.0, 0.0,   0.0, 1.0, 0.0, 0.0, 0.0, 0.0 };
         DifferentialVectorType hxp(2,2,2,ahxp);
         ARIADNE_TEST_EQUAL(henon(x,p),hxp);
@@ -330,7 +330,7 @@ class TestDifferentialVector {
 };
 
 Int main() {
-    TestDifferential< Differential<ApproximateFloat> > tf;
-    TestDifferentialVector< Differential<ApproximateFloat> > tfv;
+    TestDifferential< Differential<ApproximateFloat64> > tf;
+    TestDifferentialVector< Differential<ApproximateFloat64> > tfv;
     return ARIADNE_TEST_FAILURES;
 }

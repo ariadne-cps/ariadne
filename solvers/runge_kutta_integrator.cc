@@ -35,7 +35,7 @@
 
 namespace Ariadne {
 
-inline auto operator*(double s, ApproximateFloatVector v) -> decltype(ApproximateFloat(s)*v) { return ApproximateFloat(s)*v; }
+inline auto operator*(double s, ApproximateFloatVector v) -> decltype(ApproximateFloat64(s)*v) { return ApproximateFloat64(s)*v; }
 
 RungeKutta4Integrator::RungeKutta4Integrator(double step_size)
     : _step_size(step_size)
@@ -43,7 +43,7 @@ RungeKutta4Integrator::RungeKutta4Integrator(double step_size)
 }
 
 ApproximateFloatVector
-RungeKutta4Integrator::step(const ApproximateVectorFunctionInterface& f, const ApproximateFloatVector& x, const ApproximateFloat& h) const
+RungeKutta4Integrator::step(const ApproximateVectorFunctionInterface& f, const ApproximateFloatVector& x, const ApproximateFloat64& h) const
 {
     ApproximateFloatVector k1=f.evaluate(x);
     ApproximateFloatVector k2=f.evaluate(ApproximateFloatVector(x+(h/2)*k1));
@@ -53,13 +53,13 @@ RungeKutta4Integrator::step(const ApproximateVectorFunctionInterface& f, const A
     return x+(h/6)*(k1+2.0*k3+2.0*k4+k2);
 }
 
-List< Pair<ApproximateFloat,ApproximateFloatVector> >
-RungeKutta4Integrator::evolve(const ApproximateVectorFunctionInterface& f, const ApproximateFloatVector& x0, const ApproximateFloat& tmax) const
+List< Pair<ApproximateFloat64,ApproximateFloatVector> >
+RungeKutta4Integrator::evolve(const ApproximateVectorFunctionInterface& f, const ApproximateFloatVector& x0, const ApproximateFloat64& tmax) const
 {
-    static const ApproximateFloat h=this->_step_size;
+    static const ApproximateFloat64 h=this->_step_size;
 
-    List< Pair<ApproximateFloat,ApproximateFloatVector> > res;
-    ApproximateFloat t=0.0;
+    List< Pair<ApproximateFloat64,ApproximateFloatVector> > res;
+    ApproximateFloat64 t=0.0;
     ApproximateFloatVector x=x0;
 
     res.push_back(make_pair(t,x));

@@ -55,9 +55,9 @@ class CurveInterface;
 class CurveInterface
 {
   public:
-    typedef ApproximateFloat ParameterType;
-    typedef Point<ApproximateFloat> PointType;
-    typedef Vector<ApproximateFloat> TangentVectorType;
+    typedef ApproximateFloat64 ParameterType;
+    typedef Point<ApproximateFloat64> PointType;
+    typedef Vector<ApproximateFloat64> TangentVectorType;
   public:
     /*! \brief Destructor. */
     virtual ~CurveInterface() { };
@@ -137,14 +137,14 @@ class InterpolatedCurve
     /*! \brief Create a curve with a single point \a pt at parameter value \a s. */
     InterpolatedCurve(ParameterType s, const PointType& pt)
         : _points() { this->insert(s,pt); }
-    InterpolatedCurve(const RawFloat& s, const Vector<RawFloat>& pt)
+    InterpolatedCurve(const RawFloat64& s, const Vector<RawFloat64>& pt)
         : _points() { this->insert(s,pt); }
     /*! \brief Create a segment from \a pt0 at parameter value 0 to \a pt1 at parameter value 1. */
     InterpolatedCurve(const PointType& pt0, const PointType& pt1)
         : _points() { this->insert(0,pt0); this->insert(1,pt1); }
     /*! \brief Insert a point with parameter value \a s and spacial value \a pt. */
     Void insert(const ParameterType& s, const PointType& pt);
-    Void insert(const RawFloat& s, const Vector<RawFloat>& pt);
+    Void insert(const RawFloat64& s, const Vector<RawFloat64>& pt);
 
     /*! \brief The number of segments in the curve. */
     SizeType size() const { return this->_points.size(); }

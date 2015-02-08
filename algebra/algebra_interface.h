@@ -46,24 +46,24 @@ template<class X> class SymbolicAlgebra;
 
 template<class X> struct AlgebraTraits;
 
-template<> struct AlgebraTraits<ApproximateFloat> {
-    typedef ApproximateFloat ValueType;
+template<> struct AlgebraTraits<ApproximateFloat64> {
+    typedef ApproximateFloat64 ValueType;
     typedef ApproximateInterval RangeType;
-    typedef ApproximateFloat NormType;
+    typedef ApproximateFloat64 NormType;
     typedef ApproximateNumber NumericType;
 };
 
-template<> struct AlgebraTraits<ValidatedFloat> {
-    typedef ExactFloat ValueType;
+template<> struct AlgebraTraits<ValidatedFloat64> {
+    typedef ExactFloat64 ValueType;
     typedef UpperInterval RangeType;
-    typedef ErrorFloat NormType;
+    typedef ErrorFloat64 NormType;
     typedef ValidatedNumber NumericType;
 };
 
 template<> struct AlgebraTraits<Real> {
-    typedef ExactFloat ValueType;
+    typedef ExactFloat64 ValueType;
     typedef UpperInterval RangeType;
-    typedef ErrorFloat NormType;
+    typedef ErrorFloat64 NormType;
     typedef Real NumericType;
 };
 
@@ -120,7 +120,7 @@ template<class X> class NormedAlgebraInterface
     virtual NormedAlgebraInterface<X>* _create_ball(ErrorType r) const = 0;
 
     //! \brief A value \c e such that analytic functions are evaluated to a tolerance of \c e.
-    virtual RawFloat tolerance() const = 0;
+    virtual RawFloat64 tolerance() const = 0;
     //! \brief A value \c c such that \c |a-c1| is approximately minimised.
     virtual ValueType average() const = 0;
     //! \brief A value \c c such that \c |a-c1| is approximately minimised.

@@ -241,8 +241,8 @@ typedef int I; typedef double D;
 typedef Integer Z; typedef Rational Q; typedef Real R;
 typedef Number<Exact> ExN; typedef Number<Effective> EfN; typedef Number<Validated> VaN;
 typedef Number<Upper> UpN; typedef Number<Lower> LoN; typedef Number<Approximate> ApN;
-typedef ExactFloat ExF; typedef MetricFloat MeF; typedef BoundedFloat BoF;
-typedef UpperFloat UpF; typedef LowerFloat LoF; typedef ApproximateFloat ApF;
+typedef ExactFloat64 ExF; typedef MetricFloat64 MeF; typedef BoundedFloat64 BoF;
+typedef UpperFloat64 UpF; typedef LowerFloat64 LoF; typedef ApproximateFloat64 ApF;
 
 typedef decltype(declval<ExF>() + declval<ExF>()) VaF;
 typedef decltype(declval<UpF>() * declval<UpF>()) PrF;
@@ -256,7 +256,7 @@ class CheckNumeric
   public:
     void check();
   private:
-    typedef SafeSumType<ExactFloat,ExactFloat> ExactFloatArithmeticType;
+    typedef SafeSumType<ExactFloat64,ExactFloat64> ExactFloatArithmeticType;
 
     void notifications();
     void check_conversions();
@@ -286,7 +286,7 @@ String to_str(bool b) { return b?"true":"false"; }
 
 void CheckNumeric::notifications()
 {
-    // Operations on ExactFloat: display what is being used.
+    // Operations on ExactFloat64: display what is being used.
     ARIADNE_TEST_NOTIFY(String("Conversion double -> ApproximateNumber: ")+to_str(IsConvertible<double,ApproximateNumber>::value));
     ARIADNE_TEST_NOTIFY(String("Conversion double -> ApproximateFloat64: ")+to_str(IsConvertible<double,ApproximateFloat64>::value));
     ARIADNE_TEST_NOTIFY(String("Conversion double -> ExactFloat64: ")+to_str(IsConvertible<double,ExactFloat64>::value));
@@ -294,14 +294,14 @@ void CheckNumeric::notifications()
     ARIADNE_TEST_NOTIFY(String("Construction double -> ExactFloat64: ")+to_str(IsConstructible<ExactFloat64,double>::value));
     ARIADNE_TEST_NOTIFY(String("Conversion int -> ExactFloat64: ")+to_str(IsConvertible<int,ExactFloat64>::value));
     ARIADNE_TEST_NOTIFY(String("Construction Integer -> ExactFloat64: ")+to_str(IsConstructible<ExactFloat64,Integer>::value));
-    ARIADNE_TEST_NOTIFY((String("ExactFloat + ExactFloat -> ")+class_name<SafeSumType<ExactFloat,ExactFloat>>()));
+    ARIADNE_TEST_NOTIFY((String("ExactFloat64 + ExactFloat64 -> ")+class_name<SafeSumType<ExactFloat64,ExactFloat64>>()));
     ARIADNE_TEST_NOTIFY((String("Integer + double -> ")+class_name<SafeSumType<Integer,double>>()));
     ARIADNE_TEST_NOTIFY((String("ExactNumber + double -> ")+class_name<SafeSumType<ExactNumber,double>>()));
     ARIADNE_TEST_NOTIFY((String("ApproximateNumber + double -> ")+class_name<SafeSumType<ApproximateNumber,double>>()));
-    ARIADNE_TEST_NOTIFY((String("ExactFloat + double -> ")+class_name<SafeSumType<ExactFloat,double>>()));
-    ARIADNE_TEST_NOTIFY((String("MetricFloat + BoundedFloat -> ")+class_name<SafeSumType<MetricFloat,BoundedFloat>>()));
+    ARIADNE_TEST_NOTIFY((String("ExactFloat64 + double -> ")+class_name<SafeSumType<ExactFloat64,double>>()));
+    ARIADNE_TEST_NOTIFY((String("MetricFloat64 + BoundedFloat64 -> ")+class_name<SafeSumType<MetricFloat64,BoundedFloat64>>()));
     ARIADNE_TEST_NOTIFY((String("UpperNumber * UpperNumber -> ")+class_name<SafeProductType<UpperNumber,UpperNumber>>()));
-    ARIADNE_TEST_NOTIFY((String("UpperFloat * UpperFloat -> ")+class_name<SafeProductType<UpperFloat,UpperFloat>>()));
+    ARIADNE_TEST_NOTIFY((String("UpperFloat64 * UpperFloat64 -> ")+class_name<SafeProductType<UpperFloat64,UpperFloat64>>()));
     ARIADNE_TEST_NOTIFY((String("Rational == double -> ")+class_name<SafeEqualsType<Rational,double>>()));
     ARIADNE_TEST_NOTIFY((String("Rational < double -> ")+class_name<SafeLessType<Rational,double>>()));
 
@@ -312,7 +312,7 @@ void CheckNumeric::check_conversions() {
     // Cid is conversion, Eid is explicit construction, Nid is no construction
 
     // Conversions involving int
-    chk<ErrorFloat,Cid,uint>(); chk<ErrorFloat,Eid,int>(); chk<ErrorFloat,Eid,double>();
+    chk<ErrorFloat64,Cid,uint>(); chk<ErrorFloat64,Eid,int>(); chk<ErrorFloat64,Eid,double>();
 
     // Concrete numbers
     chk<D,Cid,D>(); chk<D,Cid,I>(); chk<D,Nid,Z>(); chk<D,Nid,Q>(); chk<D,Nid,R>();
@@ -344,7 +344,7 @@ void CheckNumeric::check_conversions() {
     chk<Q,Nid,ExN>(); chk<Q,Nid,EfN>(); chk<Q,Nid,VaN>(); chk<Q,Nid,UpN>(); chk<Q,Nid,LoN>(); chk<Q,Nid,ApN>();
     chk<R,Nid,ExN>(); chk<R,Nid,EfN>(); chk<R,Nid,VaN>(); chk<R,Nid,UpN>(); chk<R,Nid,LoN>(); chk<R,Nid,ApN>();
 
-    // Float numbers
+    // Float64 numbers
     chk<ExF,Cid,ExF>(); chk<ExF,Nid,MeF>(); chk<ExF,Nid,BoF>(); chk<ExF,Nid,UpF>(); chk<ExF,Nid,LoF>(); chk<ExF,Nid,ApF>();
     chk<MeF,Cid,ExF>(); chk<MeF,Cid,MeF>(); chk<MeF,Cid,BoF>(); chk<MeF,Nid,UpF>(); chk<MeF,Nid,LoF>(); chk<MeF,Nid,ApF>();
     chk<BoF,Cid,ExF>(); chk<BoF,Cid,MeF>(); chk<BoF,Cid,BoF>(); chk<BoF,Nid,UpF>(); chk<BoF,Nid,LoF>(); chk<BoF,Nid,ApF>();
@@ -352,7 +352,7 @@ void CheckNumeric::check_conversions() {
     chk<LoF,Cid,ExF>(); chk<LoF,Cid,MeF>(); chk<LoF,Cid,BoF>(); chk<LoF,Nid,UpF>(); chk<LoF,Cid,LoF>(); chk<LoF,Nid,ApF>();
     chk<ApF,Cid,ExF>(); chk<ApF,Cid,MeF>(); chk<ApF,Cid,BoF>(); chk<ApF,Cid,UpF>(); chk<ApF,Cid,LoF>(); chk<ApF,Cid,ApF>();
 
-    // Mixed Float # Generic and Generic # Float
+    // Mixed Float64 # Generic and Generic # Float64
     chk<ExF,Nid,ExN>(); chk<ExF,Nid,EfN>(); chk<ExF,Nid,VaN>(); chk<ExF,Nid,UpN>(); chk<ExF,Nid,LoN>(); chk<ExF,Nid,ApN>();
     chk<MeF,Eid,ExN>(); chk<MeF,Eid,EfN>(); chk<MeF,Eid,VaN>(); chk<MeF,Nid,UpN>(); chk<MeF,Nid,LoN>(); chk<MeF,Nid,ApN>();
     chk<BoF,Eid,ExN>(); chk<BoF,Eid,EfN>(); chk<BoF,Eid,VaN>(); chk<BoF,Nid,UpN>(); chk<BoF,Nid,LoN>(); chk<BoF,Nid,ApN>();
@@ -367,7 +367,7 @@ void CheckNumeric::check_conversions() {
     chk<LoN,Cid,ExF>(); chk<LoN,Cid,MeF>(); chk<LoN,Cid,BoF>(); chk<LoN,Nid,UpF>(); chk<LoN,Cid,LoF>(); chk<LoN,Nid,ApF>();
     chk<ApN,Cid,ExF>(); chk<ApN,Cid,MeF>(); chk<ApN,Cid,BoF>(); chk<ApN,Cid,UpF>(); chk<ApN,Cid,LoF>(); chk<ApN,Cid,ApF>();
 
-    // Mixed Float # Concrete and Concrete # Float
+    // Mixed Float64 # Concrete and Concrete # Float64
     chk<ExF,Eid,D>(); chk<ExF,Cid,I>(); chk<ExF,Eid,Z>(); chk<ExF,Nid,Q>(); chk<ExF,Nid,R>();
     chk<MeF,Eid,D>(); chk<MeF,Cid,I>(); chk<MeF,Eid,Z>(); chk<MeF,Eid,Q>(); chk<MeF,Eid,R>();
     chk<BoF,Eid,D>(); chk<BoF,Cid,I>(); chk<BoF,Eid,Z>(); chk<BoF,Eid,Q>(); chk<BoF,Eid,R>();
@@ -413,7 +413,7 @@ void CheckNumeric::check_addition() {
     chk<ExN,Plus,Q,ExN>(); chk<EfN,Plus,Q,EfN>(); chk<VaN,Plus,Q,VaN>(); chk<UpN,Plus,Q,UpN>(); chk<LoN,Plus,Q,LoN>(); chk<ApN,Plus,Q,ApN>();
     chk<EfN,Plus,R,ExN>(); chk<EfN,Plus,R,EfN>(); chk<VaN,Plus,R,VaN>(); chk<UpN,Plus,R,UpN>(); chk<LoN,Plus,R,LoN>(); chk<ApN,Plus,R,ApN>();
 
-    // Float numbers
+    // Float64 numbers
     chk<VaF,Plus,ExF,ExF>(); chk<MeF,Plus,ExF,MeF>(); chk<BoF,Plus,ExF,BoF>(); chk<UpF,Plus,ExF,UpF>(); chk<LoF,Plus,ExF,LoF>(); chk<ApF,Plus,ExF,ApF>();
     chk<MeF,Plus,MeF,ExF>(); chk<MeF,Plus,MeF,MeF>(); chk<VaF,Plus,MeF,BoF>(); chk<UpF,Plus,MeF,UpF>(); chk<LoF,Plus,MeF,LoF>(); chk<ApF,Plus,MeF,ApF>();
     chk<BoF,Plus,BoF,ExF>(); chk<VaF,Plus,BoF,MeF>(); chk<BoF,Plus,BoF,BoF>(); chk<UpF,Plus,BoF,UpF>(); chk<LoF,Plus,BoF,LoF>(); chk<ApF,Plus,BoF,ApF>();
@@ -421,7 +421,7 @@ void CheckNumeric::check_addition() {
     chk<LoF,Plus,LoF,ExF>(); chk<LoF,Plus,LoF,MeF>(); chk<LoF,Plus,LoF,BoF>(); chk<ApF,Plus,LoF,UpF>(); chk<LoF,Plus,LoF,LoF>(); chk<ApF,Plus,LoF,ApF>();
     chk<ApF,Plus,ApF,ExF>(); chk<ApF,Plus,ApF,MeF>(); chk<ApF,Plus,ApF,BoF>(); chk<ApF,Plus,ApF,UpF>(); chk<ApF,Plus,ApF,LoF>(); chk<ApF,Plus,ApF,ApF>();
 
-    // Mixed Float # Generic and Generic # Float
+    // Mixed Float64 # Generic and Generic # Float64
     chk<VaF,Plus,ExF,ExN>(); chk<VaF,Plus,ExF,EfN>(); chk<VaF,Plus,ExF,VaN>(); chk<UpF,Plus,ExF,UpN>(); chk<LoF,Plus,ExF,LoN>(); chk<ApF,Plus,ExF,ApN>();
     chk<MeF,Plus,MeF,ExN>(); chk<MeF,Plus,MeF,EfN>(); chk<MeF,Plus,MeF,VaN>(); chk<UpF,Plus,MeF,UpN>(); chk<LoF,Plus,MeF,LoN>(); chk<ApF,Plus,MeF,ApN>();
     chk<BoF,Plus,BoF,ExN>(); chk<BoF,Plus,BoF,EfN>(); chk<BoF,Plus,BoF,VaN>(); chk<UpF,Plus,BoF,UpN>(); chk<LoF,Plus,BoF,LoN>(); chk<ApF,Plus,BoF,ApN>();
@@ -436,7 +436,7 @@ void CheckNumeric::check_addition() {
     chk<LoF,Plus,LoN,ExF>(); chk<LoF,Plus,LoN,MeF>(); chk<LoF,Plus,LoN,BoF>(); chk<ApF,Plus,LoN,UpF>(); chk<LoF,Plus,LoN,LoF>(); chk<ApF,Plus,LoN,ApF>();
     chk<ApF,Plus,ApN,ExF>(); chk<ApF,Plus,ApN,MeF>(); chk<ApF,Plus,ApN,BoF>(); chk<ApF,Plus,ApN,UpF>(); chk<ApF,Plus,ApN,LoF>(); chk<ApF,Plus,ApN,ApF>();
 
-    // Mixed Float # Concrete and Concrete # Float
+    // Mixed Float64 # Concrete and Concrete # Float64
     chk<ApF,Plus,ExF,D>(); chk<VaF,Plus,ExF,I>(); chk<VaF,Plus,ExF,Z>(); chk<VaF,Plus,ExF,Q>(); chk<VaF,Plus,ExF,R>();
     chk<ApF,Plus,MeF,D>(); chk<MeF,Plus,MeF,I>(); chk<MeF,Plus,MeF,Z>(); chk<MeF,Plus,MeF,Q>(); chk<MeF,Plus,MeF,R>();
     chk<ApF,Plus,BoF,D>(); chk<BoF,Plus,BoF,I>(); chk<BoF,Plus,BoF,Z>(); chk<BoF,Plus,BoF,Q>(); chk<BoF,Plus,BoF,R>();
@@ -483,7 +483,7 @@ void CheckNumeric::check_subtraction() {
     chk<ExN,Minus,Q,ExN>(); chk<EfN,Minus,Q,EfN>(); chk<VaN,Minus,Q,VaN>(); chk<LoN,Minus,Q,UpN>(); chk<UpN,Minus,Q,LoN>(); chk<ApN,Minus,Q,ApN>();
     chk<EfN,Minus,R,ExN>(); chk<EfN,Minus,R,EfN>(); chk<VaN,Minus,R,VaN>(); chk<LoN,Minus,R,UpN>(); chk<UpN,Minus,R,LoN>(); chk<ApN,Minus,R,ApN>();
 
-    // Float numbers
+    // Float64 numbers
     chk<VaF,Minus,ExF,ExF>(); chk<MeF,Minus,ExF,MeF>(); chk<BoF,Minus,ExF,BoF>(); chk<LoF,Minus,ExF,UpF>(); chk<UpF,Minus,ExF,LoF>(); chk<ApF,Minus,ExF,ApF>();
     chk<MeF,Minus,MeF,ExF>(); chk<MeF,Minus,MeF,MeF>(); chk<VaF,Minus,MeF,BoF>(); chk<LoF,Minus,MeF,UpF>(); chk<UpF,Minus,MeF,LoF>(); chk<ApF,Minus,MeF,ApF>();
     chk<BoF,Minus,BoF,ExF>(); chk<VaF,Minus,BoF,MeF>(); chk<BoF,Minus,BoF,BoF>(); chk<LoF,Minus,BoF,UpF>(); chk<UpF,Minus,BoF,LoF>(); chk<ApF,Minus,BoF,ApF>();
@@ -491,7 +491,7 @@ void CheckNumeric::check_subtraction() {
     chk<LoF,Minus,LoF,ExF>(); chk<LoF,Minus,LoF,MeF>(); chk<LoF,Minus,LoF,BoF>(); chk<LoF,Minus,LoF,UpF>(); chk<ApF,Minus,LoF,LoF>(); chk<ApF,Minus,LoF,ApF>();
     chk<ApF,Minus,ApF,ExF>(); chk<ApF,Minus,ApF,MeF>(); chk<ApF,Minus,ApF,BoF>(); chk<ApF,Minus,ApF,UpF>(); chk<ApF,Minus,ApF,LoF>(); chk<ApF,Minus,ApF,ApF>();
 
-    // Mixed Float # Generic and Generic # Float
+    // Mixed Float64 # Generic and Generic # Float64
     chk<VaF,Minus,ExF,ExN>(); chk<VaF,Minus,ExF,EfN>(); chk<VaF,Minus,ExF,VaN>(); chk<LoF,Minus,ExF,UpN>(); chk<UpF,Minus,ExF,LoN>(); chk<ApF,Minus,ExF,ApN>();
     chk<MeF,Minus,MeF,ExN>(); chk<MeF,Minus,MeF,EfN>(); chk<MeF,Minus,MeF,VaN>(); chk<LoF,Minus,MeF,UpN>(); chk<UpF,Minus,MeF,LoN>(); chk<ApF,Minus,MeF,ApN>();
     chk<BoF,Minus,BoF,ExN>(); chk<BoF,Minus,BoF,EfN>(); chk<BoF,Minus,BoF,VaN>(); chk<LoF,Minus,BoF,UpN>(); chk<UpF,Minus,BoF,LoN>(); chk<ApF,Minus,BoF,ApN>();
@@ -506,7 +506,7 @@ void CheckNumeric::check_subtraction() {
     chk<LoF,Minus,LoN,ExF>(); chk<LoF,Minus,LoN,MeF>(); chk<LoF,Minus,LoN,BoF>(); chk<LoF,Minus,LoN,UpF>(); chk<ApF,Minus,LoN,LoF>(); chk<ApF,Minus,LoN,ApF>();
     chk<ApF,Minus,ApN,ExF>(); chk<ApF,Minus,ApN,MeF>(); chk<ApF,Minus,ApN,BoF>(); chk<ApF,Minus,ApN,UpF>(); chk<ApF,Minus,ApN,LoF>(); chk<ApF,Minus,ApN,ApF>();
 
-    // Mixed Float # Concrete and Concrete # Float
+    // Mixed Float64 # Concrete and Concrete # Float64
     chk<ApF,Minus,ExF,D>(); chk<VaF,Minus,ExF,I>(); chk<VaF,Minus,ExF,Z>(); chk<VaF,Minus,ExF,Q>(); chk<VaF,Minus,ExF,R>();
     chk<ApF,Minus,MeF,D>(); chk<MeF,Minus,MeF,I>(); chk<MeF,Minus,MeF,Z>(); chk<MeF,Minus,MeF,Q>(); chk<MeF,Minus,MeF,R>();
     chk<ApF,Minus,BoF,D>(); chk<BoF,Minus,BoF,I>(); chk<BoF,Minus,BoF,Z>(); chk<BoF,Minus,BoF,Q>(); chk<BoF,Minus,BoF,R>();
@@ -553,7 +553,7 @@ void CheckNumeric::check_multiplication() {
     chk<ExN,Times,Q,ExN>(); chk<EfN,Times,Q,EfN>(); chk<VaN,Times,Q,VaN>(); chk<UpN,Times,Q,UpN>(); chk<LoN,Times,Q,LoN>(); chk<ApN,Times,Q,ApN>();
     chk<EfN,Times,R,ExN>(); chk<EfN,Times,R,EfN>(); chk<VaN,Times,R,VaN>(); chk<UpN,Times,R,UpN>(); chk<LoN,Times,R,LoN>(); chk<ApN,Times,R,ApN>();
 
-    // Float numbers
+    // Float64 numbers
     chk<VaF,Times,ExF,ExF>(); chk<MeF,Times,ExF,MeF>(); chk<BoF,Times,ExF,BoF>(); chk<UpF,Times,ExF,UpF>(); chk<LoF,Times,ExF,LoF>(); chk<ApF,Times,ExF,ApF>();
     chk<MeF,Times,MeF,ExF>(); chk<MeF,Times,MeF,MeF>(); chk<VaF,Times,MeF,BoF>(); chk<UpF,Times,MeF,UpF>(); chk<LoF,Times,MeF,LoF>(); chk<ApF,Times,MeF,ApF>();
     chk<BoF,Times,BoF,ExF>(); chk<VaF,Times,BoF,MeF>(); chk<BoF,Times,BoF,BoF>(); chk<UpF,Times,BoF,UpF>(); chk<LoF,Times,BoF,LoF>(); chk<ApF,Times,BoF,ApF>();
@@ -561,7 +561,7 @@ void CheckNumeric::check_multiplication() {
     chk<LoF,Times,LoF,ExF>(); chk<LoF,Times,LoF,MeF>(); chk<LoF,Times,LoF,BoF>(); chk<ApF,Times,LoF,UpF>(); chk<LoF,Times,LoF,LoF>(); chk<ApF,Times,LoF,ApF>();
     chk<ApF,Times,ApF,ExF>(); chk<ApF,Times,ApF,MeF>(); chk<ApF,Times,ApF,BoF>(); chk<ApF,Times,ApF,UpF>(); chk<ApF,Times,ApF,LoF>(); chk<ApF,Times,ApF,ApF>();
 
-    // Mixed Float # Generic and Generic # Float
+    // Mixed Float64 # Generic and Generic # Float64
     chk<VaF,Times,ExF,ExN>(); chk<VaF,Times,ExF,EfN>(); chk<VaF,Times,ExF,VaN>(); chk<UpF,Times,ExF,UpN>(); chk<LoF,Times,ExF,LoN>(); chk<ApF,Times,ExF,ApN>();
     chk<MeF,Times,MeF,ExN>(); chk<MeF,Times,MeF,EfN>(); chk<MeF,Times,MeF,VaN>(); chk<UpF,Times,MeF,UpN>(); chk<LoF,Times,MeF,LoN>(); chk<ApF,Times,MeF,ApN>();
     chk<BoF,Times,BoF,ExN>(); chk<BoF,Times,BoF,EfN>(); chk<BoF,Times,BoF,VaN>(); chk<UpF,Times,BoF,UpN>(); chk<LoF,Times,BoF,LoN>(); chk<ApF,Times,BoF,ApN>();
@@ -576,7 +576,7 @@ void CheckNumeric::check_multiplication() {
     chk<LoF,Times,LoN,ExF>(); chk<LoF,Times,LoN,MeF>(); chk<LoF,Times,LoN,BoF>(); chk<ApF,Times,LoN,UpF>(); chk<LoF,Times,LoN,LoF>(); chk<ApF,Times,LoN,ApF>();
     chk<ApF,Times,ApN,ExF>(); chk<ApF,Times,ApN,MeF>(); chk<ApF,Times,ApN,BoF>(); chk<ApF,Times,ApN,UpF>(); chk<ApF,Times,ApN,LoF>(); chk<ApF,Times,ApN,ApF>();
 
-    // Mixed Float # Concrete and Concrete # Float
+    // Mixed Float64 # Concrete and Concrete # Float64
     chk<ApF,Times,ExF,D>(); chk<VaF,Times,ExF,I>(); chk<VaF,Times,ExF,Z>(); chk<VaF,Times,ExF,Q>(); chk<VaF,Times,ExF,R>();
     chk<ApF,Times,MeF,D>(); chk<MeF,Times,MeF,I>(); chk<MeF,Times,MeF,Z>(); chk<MeF,Times,MeF,Q>(); chk<MeF,Times,MeF,R>();
     chk<ApF,Times,BoF,D>(); chk<BoF,Times,BoF,I>(); chk<BoF,Times,BoF,Z>(); chk<BoF,Times,BoF,Q>(); chk<BoF,Times,BoF,R>();
@@ -624,7 +624,7 @@ void CheckNumeric::check_division() {
     chk<ExN,Divides,Q,ExN>(); chk<EfN,Divides,Q,EfN>(); chk<VaN,Divides,Q,VaN>(); chk<LoN,Divides,Q,UpN>(); chk<UpN,Divides,Q,LoN>(); chk<ApN,Divides,Q,ApN>();
     chk<EfN,Divides,R,ExN>(); chk<EfN,Divides,R,EfN>(); chk<VaN,Divides,R,VaN>(); chk<LoN,Divides,R,UpN>(); chk<UpN,Divides,R,LoN>(); chk<ApN,Divides,R,ApN>();
 
-    // Float numbers
+    // Float64 numbers
     chk<VaF,Divides,ExF,ExF>(); chk<MeF,Divides,ExF,MeF>(); chk<BoF,Divides,ExF,BoF>(); chk<LoF,Divides,ExF,UpF>(); chk<UpF,Divides,ExF,LoF>(); chk<ApF,Divides,ExF,ApF>();
     chk<MeF,Divides,MeF,ExF>(); chk<MeF,Divides,MeF,MeF>(); chk<VaF,Divides,MeF,BoF>(); chk<LoF,Divides,MeF,UpF>(); chk<UpF,Divides,MeF,LoF>(); chk<ApF,Divides,MeF,ApF>();
     chk<BoF,Divides,BoF,ExF>(); chk<VaF,Divides,BoF,MeF>(); chk<BoF,Divides,BoF,BoF>(); chk<LoF,Divides,BoF,UpF>(); chk<UpF,Divides,BoF,LoF>(); chk<ApF,Divides,BoF,ApF>();
@@ -632,7 +632,7 @@ void CheckNumeric::check_division() {
     chk<LoF,Divides,LoF,ExF>(); chk<LoF,Divides,LoF,MeF>(); chk<LoF,Divides,LoF,BoF>(); chk<LoF,Divides,LoF,UpF>(); chk<ApF,Divides,LoF,LoF>(); chk<ApF,Divides,LoF,ApF>();
     chk<ApF,Divides,ApF,ExF>(); chk<ApF,Divides,ApF,MeF>(); chk<ApF,Divides,ApF,BoF>(); chk<ApF,Divides,ApF,UpF>(); chk<ApF,Divides,ApF,LoF>(); chk<ApF,Divides,ApF,ApF>();
 
-    // Mixed Float # Generic and Generic # Float
+    // Mixed Float64 # Generic and Generic # Float64
     chk<VaF,Divides,ExF,ExN>(); chk<VaF,Divides,ExF,EfN>(); chk<VaF,Divides,ExF,VaN>(); chk<LoF,Divides,ExF,UpN>(); chk<UpF,Divides,ExF,LoN>(); chk<ApF,Divides,ExF,ApN>();
     chk<MeF,Divides,MeF,ExN>(); chk<MeF,Divides,MeF,EfN>(); chk<MeF,Divides,MeF,VaN>(); chk<LoF,Divides,MeF,UpN>(); chk<UpF,Divides,MeF,LoN>(); chk<ApF,Divides,MeF,ApN>();
     chk<BoF,Divides,BoF,ExN>(); chk<BoF,Divides,BoF,EfN>(); chk<BoF,Divides,BoF,VaN>(); chk<LoF,Divides,BoF,UpN>(); chk<UpF,Divides,BoF,LoN>(); chk<ApF,Divides,BoF,ApN>();
@@ -647,7 +647,7 @@ void CheckNumeric::check_division() {
     chk<LoF,Divides,LoN,ExF>(); chk<LoF,Divides,LoN,MeF>(); chk<LoF,Divides,LoN,BoF>(); chk<LoF,Divides,LoN,UpF>(); chk<ApF,Divides,LoN,LoF>(); chk<ApF,Divides,LoN,ApF>();
     chk<ApF,Divides,ApN,ExF>(); chk<ApF,Divides,ApN,MeF>(); chk<ApF,Divides,ApN,BoF>(); chk<ApF,Divides,ApN,UpF>(); chk<ApF,Divides,ApN,LoF>(); chk<ApF,Divides,ApN,ApF>();
 
-    // Mixed Float # Concrete and Concrete # Float
+    // Mixed Float64 # Concrete and Concrete # Float64
     chk<ApF,Divides,ExF,D>(); chk<VaF,Divides,ExF,I>(); chk<VaF,Divides,ExF,Z>(); chk<VaF,Divides,ExF,Q>(); chk<VaF,Divides,ExF,R>();
     chk<ApF,Divides,MeF,D>(); chk<MeF,Divides,MeF,I>(); chk<MeF,Divides,MeF,Z>(); chk<MeF,Divides,MeF,Q>(); chk<MeF,Divides,MeF,R>();
     chk<ApF,Divides,BoF,D>(); chk<BoF,Divides,BoF,I>(); chk<BoF,Divides,BoF,Z>(); chk<BoF,Divides,BoF,Q>(); chk<BoF,Divides,BoF,R>();
@@ -676,12 +676,12 @@ void CheckNumeric::check_equality() {
         ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<EffectiveNumber,double>,LowerLogic)
         ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ExactNumber,double>,ExactLogic)
 
-        ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ExactFloat,double>,ExactLogic)
-        ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<MetricFloat,double>,ValidatedLogic)
-        ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<BoundFloat,double>,ValidatedLogic)
-        ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<UpperFloat,double>,LowerLogic)
-        ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<LowerFloat,double>,LowerLogic)
-        ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ApproximateFloat,double>,ApproximateLogic)
+        ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ExactFloat64,double>,ExactLogic)
+        ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<MetricFloat64,double>,ValidatedLogic)
+        ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<BoundedFloat64,double>,ValidatedLogic)
+        ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<UpperFloat64,double>,LowerLogic)
+        ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<LowerFloat64,double>,LowerLogic)
+        ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ApproximateFloat64,double>,ApproximateLogic)
     } else {
         ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<Integer,double>,ApproximateLogic)
         ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<Rational,double>,ApproximateLogic)
@@ -692,12 +692,12 @@ void CheckNumeric::check_equality() {
         ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<EffectiveNumber,double>,ApproximateLogic)
         ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ExactNumber,double>,ApproximateLogic)
 
-        ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ExactFloat,double>,ApproximateLogic)
-        ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<MetricFloat,double>,ApproximateLogic)
-        ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<BoundFloat,double>,ApproximateLogic)
-        ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<UpperFloat,double>,ApproximateLogic)
-        ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<LowerFloat,double>,ApproximateLogic)
-        ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ApproximateFloat,double>,ApproximateLogic)
+        ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ExactFloat64,double>,ApproximateLogic)
+        ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<MetricFloat64,double>,ApproximateLogic)
+        ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<BoundedFloat64,double>,ApproximateLogic)
+        ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<UpperFloat64,double>,ApproximateLogic)
+        ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<LowerFloat64,double>,ApproximateLogic)
+        ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ApproximateFloat64,double>,ApproximateLogic)
     }
 
     // Concrete user classes
@@ -756,107 +756,107 @@ void CheckNumeric::check_equality() {
     // Numerical Flt classes
 
     // Test mixed equality with int
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ExactFloat,int>,ExactLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<MetricFloat,int>,ValidatedLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<BoundFloat,int>,ValidatedLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<UpperFloat,int>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<LowerFloat,int>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ApproximateFloat,int>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ExactFloat64,int>,ExactLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<MetricFloat64,int>,ValidatedLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<BoundedFloat64,int>,ValidatedLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<UpperFloat64,int>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<LowerFloat64,int>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ApproximateFloat64,int>,ApproximateLogic)
 
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ExactFloat,Integer>,ExactLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<MetricFloat,Integer>,ValidatedLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<BoundFloat,Integer>,ValidatedLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<UpperFloat,Integer>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<LowerFloat,Integer>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ApproximateFloat,Integer>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ExactFloat,Rational>,ExactLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<MetricFloat,Rational>,ValidatedLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<BoundFloat,Rational>,ValidatedLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<UpperFloat,Rational>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<LowerFloat,Rational>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ApproximateFloat,Rational>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ExactFloat,Real>,LowerLogic)     // TODO: Should these return LowerLogic or ValidatedLogic
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<MetricFloat,Real>,LowerLogic) // Rationale for is that Real really is "Effective", so should never test for equality
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<BoundFloat,Real>,LowerLogic)    // Against is that Real is sufficiently "Concrete"
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<UpperFloat,Real>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<LowerFloat,Real>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ApproximateFloat,Real>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ExactFloat64,Integer>,ExactLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<MetricFloat64,Integer>,ValidatedLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<BoundedFloat64,Integer>,ValidatedLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<UpperFloat64,Integer>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<LowerFloat64,Integer>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ApproximateFloat64,Integer>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ExactFloat64,Rational>,ExactLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<MetricFloat64,Rational>,ValidatedLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<BoundedFloat64,Rational>,ValidatedLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<UpperFloat64,Rational>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<LowerFloat64,Rational>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ApproximateFloat64,Rational>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ExactFloat64,Real>,LowerLogic)     // TODO: Should these return LowerLogic or ValidatedLogic
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<MetricFloat64,Real>,LowerLogic) // Rationale for is that Real really is "Effective", so should never test for equality
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<BoundedFloat64,Real>,LowerLogic)    // Against is that Real is sufficiently "Concrete"
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<UpperFloat64,Real>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<LowerFloat64,Real>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ApproximateFloat64,Real>,ApproximateLogic)
 
     // User numeric types
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ExactFloat,ExactFloat>,ExactLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ExactFloat,MetricFloat>,ValidatedLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ExactFloat,BoundFloat>,ValidatedLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ExactFloat,UpperFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ExactFloat,LowerFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ExactFloat,ApproximateFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<MetricFloat,ExactFloat>,ValidatedLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<MetricFloat,MetricFloat>,ValidatedLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<MetricFloat,BoundFloat>,ValidatedLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<MetricFloat,UpperFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<MetricFloat,LowerFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<MetricFloat,ApproximateFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<BoundFloat,ExactFloat>,ValidatedLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<BoundFloat,MetricFloat>,ValidatedLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<BoundFloat,BoundFloat>,ValidatedLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<BoundFloat,UpperFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<BoundFloat,LowerFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<BoundFloat,ApproximateFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<UpperFloat,ExactFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<UpperFloat,MetricFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<UpperFloat,BoundFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<UpperFloat,UpperFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<UpperFloat,LowerFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<UpperFloat,ApproximateFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<LowerFloat,ExactFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<LowerFloat,MetricFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<LowerFloat,BoundFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<LowerFloat,UpperFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<LowerFloat,LowerFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<LowerFloat,ApproximateFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ApproximateFloat,ExactFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ApproximateFloat,MetricFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ApproximateFloat,BoundFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ApproximateFloat,UpperFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ApproximateFloat,LowerFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ApproximateFloat,ApproximateFloat>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ExactFloat64,ExactFloat64>,ExactLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ExactFloat64,MetricFloat64>,ValidatedLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ExactFloat64,BoundedFloat64>,ValidatedLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ExactFloat64,UpperFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ExactFloat64,LowerFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ExactFloat64,ApproximateFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<MetricFloat64,ExactFloat64>,ValidatedLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<MetricFloat64,MetricFloat64>,ValidatedLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<MetricFloat64,BoundedFloat64>,ValidatedLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<MetricFloat64,UpperFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<MetricFloat64,LowerFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<MetricFloat64,ApproximateFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<BoundedFloat64,ExactFloat64>,ValidatedLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<BoundedFloat64,MetricFloat64>,ValidatedLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<BoundedFloat64,BoundedFloat64>,ValidatedLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<BoundedFloat64,UpperFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<BoundedFloat64,LowerFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<BoundedFloat64,ApproximateFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<UpperFloat64,ExactFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<UpperFloat64,MetricFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<UpperFloat64,BoundedFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<UpperFloat64,UpperFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<UpperFloat64,LowerFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<UpperFloat64,ApproximateFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<LowerFloat64,ExactFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<LowerFloat64,MetricFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<LowerFloat64,BoundedFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<LowerFloat64,UpperFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<LowerFloat64,LowerFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<LowerFloat64,ApproximateFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ApproximateFloat64,ExactFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ApproximateFloat64,MetricFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ApproximateFloat64,BoundedFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ApproximateFloat64,UpperFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ApproximateFloat64,LowerFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ApproximateFloat64,ApproximateFloat64>,ApproximateLogic)
 
     // Require reduction of concrete number paradigm
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ExactNumber,ExactFloat>,ExactLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<EffectiveNumber,ExactFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ValidatedNumber,ExactFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<UpperNumber,ExactFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<LowerNumber,ExactFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ApproximateNumber,ExactFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ExactNumber,MetricFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<EffectiveNumber,MetricFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ValidatedNumber,MetricFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<UpperNumber,MetricFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<LowerNumber,MetricFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ApproximateNumber,MetricFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ExactNumber,BoundFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<EffectiveNumber,BoundFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ValidatedNumber,BoundFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<UpperNumber,BoundFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<LowerNumber,BoundFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ApproximateNumber,BoundFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ExactNumber,UpperFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<EffectiveNumber,UpperFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ValidatedNumber,UpperFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<UpperNumber,UpperFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<LowerNumber,UpperFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ApproximateNumber,UpperFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ExactNumber,LowerFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<EffectiveNumber,LowerFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ValidatedNumber,LowerFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<UpperNumber,LowerFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<LowerNumber,LowerFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ApproximateNumber,LowerFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ExactNumber,ApproximateFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<EffectiveNumber,ApproximateFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ValidatedNumber,ApproximateFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<UpperNumber,ApproximateFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<LowerNumber,ApproximateFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ApproximateNumber,ApproximateFloat>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ExactNumber,ExactFloat64>,ExactLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<EffectiveNumber,ExactFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ValidatedNumber,ExactFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<UpperNumber,ExactFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<LowerNumber,ExactFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ApproximateNumber,ExactFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ExactNumber,MetricFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<EffectiveNumber,MetricFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ValidatedNumber,MetricFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<UpperNumber,MetricFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<LowerNumber,MetricFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ApproximateNumber,MetricFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ExactNumber,BoundedFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<EffectiveNumber,BoundedFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ValidatedNumber,BoundedFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<UpperNumber,BoundedFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<LowerNumber,BoundedFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ApproximateNumber,BoundedFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ExactNumber,UpperFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<EffectiveNumber,UpperFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ValidatedNumber,UpperFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<UpperNumber,UpperFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<LowerNumber,UpperFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ApproximateNumber,UpperFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ExactNumber,LowerFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<EffectiveNumber,LowerFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ValidatedNumber,LowerFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<UpperNumber,LowerFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<LowerNumber,LowerFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ApproximateNumber,LowerFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ExactNumber,ApproximateFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<EffectiveNumber,ApproximateFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ValidatedNumber,ApproximateFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<UpperNumber,ApproximateFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<LowerNumber,ApproximateFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeEqualsType<ApproximateNumber,ApproximateFloat64>,ApproximateLogic)
 }
 
 void CheckNumeric::check_comparison() {
@@ -874,12 +874,12 @@ void CheckNumeric::check_comparison() {
         ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<EffectiveNumber,double>,EffectiveLogic)
         ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ExactNumber,double>,ExactLogic)
 
-        ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ExactFloat,double>,ExactLogic)
-        ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<MetricFloat,double>,ValidatedLogic)
-        ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<BoundFloat,double>,ValidatedLogic)
-        ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<UpperFloat,double>,UpperLogic)
-        ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<LowerFloat,double>,LowerLogic)
-        ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ApproximateFloat,double>,ApproximateLogic)
+        ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ExactFloat64,double>,ExactLogic)
+        ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<MetricFloat64,double>,ValidatedLogic)
+        ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<BoundedFloat64,double>,ValidatedLogic)
+        ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<UpperFloat64,double>,UpperLogic)
+        ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<LowerFloat64,double>,LowerLogic)
+        ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ApproximateFloat64,double>,ApproximateLogic)
     } else {
         ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<Integer,double>,ApproximateLogic)
         ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<Rational,double>,ApproximateLogic)
@@ -890,12 +890,12 @@ void CheckNumeric::check_comparison() {
         ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<EffectiveNumber,double>,ApproximateLogic)
         ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ExactNumber,double>,ApproximateLogic)
 
-        ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ExactFloat,double>,ApproximateLogic)
-        ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<MetricFloat,double>,ApproximateLogic)
-        ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<BoundFloat,double>,ApproximateLogic)
-        ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<UpperFloat,double>,ApproximateLogic)
-        ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<LowerFloat,double>,ApproximateLogic)
-        ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ApproximateFloat,double>,ApproximateLogic)
+        ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ExactFloat64,double>,ApproximateLogic)
+        ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<MetricFloat64,double>,ApproximateLogic)
+        ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<BoundedFloat64,double>,ApproximateLogic)
+        ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<UpperFloat64,double>,ApproximateLogic)
+        ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<LowerFloat64,double>,ApproximateLogic)
+        ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ApproximateFloat64,double>,ApproximateLogic)
     }
 
     // Test mixed equality with int
@@ -908,12 +908,12 @@ void CheckNumeric::check_comparison() {
     ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<EffectiveNumber,int>,EffectiveLogic)
     ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ExactNumber,int>,ExactLogic)
 
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ExactFloat,int>,ExactLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<MetricFloat,int>,ValidatedLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<BoundFloat,int>,ValidatedLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<UpperFloat,int>,UpperLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<LowerFloat,int>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ApproximateFloat,int>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ExactFloat64,int>,ExactLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<MetricFloat64,int>,ValidatedLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<BoundedFloat64,int>,ValidatedLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<UpperFloat64,int>,UpperLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<LowerFloat64,int>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ApproximateFloat64,int>,ApproximateLogic)
 
     // Concrete user classes
     ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<Integer,Integer>,ExactLogic)
@@ -961,100 +961,100 @@ void CheckNumeric::check_comparison() {
 
     // Numerical Flt classes
 
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ExactFloat,Integer>,ExactLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<MetricFloat,Integer>,ValidatedLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<BoundFloat,Integer>,ValidatedLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<UpperFloat,Integer>,UpperLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<LowerFloat,Integer>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ApproximateFloat,Integer>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ExactFloat,Rational>,ExactLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<MetricFloat,Rational>,ValidatedLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<BoundFloat,Rational>,ValidatedLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<UpperFloat,Rational>,UpperLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<LowerFloat,Rational>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ApproximateFloat,Rational>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ExactFloat,Real>,EffectiveLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<MetricFloat,Real>,ValidatedLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<BoundFloat,Real>,ValidatedLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<UpperFloat,Real>,UpperLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<LowerFloat,Real>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ApproximateFloat,Real>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ExactFloat64,Integer>,ExactLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<MetricFloat64,Integer>,ValidatedLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<BoundedFloat64,Integer>,ValidatedLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<UpperFloat64,Integer>,UpperLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<LowerFloat64,Integer>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ApproximateFloat64,Integer>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ExactFloat64,Rational>,ExactLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<MetricFloat64,Rational>,ValidatedLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<BoundedFloat64,Rational>,ValidatedLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<UpperFloat64,Rational>,UpperLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<LowerFloat64,Rational>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ApproximateFloat64,Rational>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ExactFloat64,Real>,EffectiveLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<MetricFloat64,Real>,ValidatedLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<BoundedFloat64,Real>,ValidatedLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<UpperFloat64,Real>,UpperLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<LowerFloat64,Real>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ApproximateFloat64,Real>,ApproximateLogic)
 
     // User numeric types
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ExactFloat,ExactFloat>,ExactLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ExactFloat,MetricFloat>,ValidatedLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ExactFloat,BoundFloat>,ValidatedLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ExactFloat,UpperFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ExactFloat,LowerFloat>,UpperLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ExactFloat,ApproximateFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<MetricFloat,ExactFloat>,ValidatedLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<MetricFloat,MetricFloat>,ValidatedLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<MetricFloat,BoundFloat>,ValidatedLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<MetricFloat,UpperFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<MetricFloat,LowerFloat>,UpperLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<MetricFloat,ApproximateFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<BoundFloat,ExactFloat>,ValidatedLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<BoundFloat,MetricFloat>,ValidatedLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<BoundFloat,BoundFloat>,ValidatedLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<BoundFloat,UpperFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<BoundFloat,LowerFloat>,UpperLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<BoundFloat,ApproximateFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<UpperFloat,ExactFloat>,UpperLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<UpperFloat,MetricFloat>,UpperLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<UpperFloat,BoundFloat>,UpperLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<UpperFloat,UpperFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<UpperFloat,LowerFloat>,UpperLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<UpperFloat,ApproximateFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<LowerFloat,ExactFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<LowerFloat,MetricFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<LowerFloat,BoundFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<LowerFloat,UpperFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<LowerFloat,LowerFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<LowerFloat,ApproximateFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ApproximateFloat,ExactFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ApproximateFloat,MetricFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ApproximateFloat,BoundFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ApproximateFloat,UpperFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ApproximateFloat,LowerFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ApproximateFloat,ApproximateFloat>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ExactFloat64,ExactFloat64>,ExactLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ExactFloat64,MetricFloat64>,ValidatedLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ExactFloat64,BoundedFloat64>,ValidatedLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ExactFloat64,UpperFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ExactFloat64,LowerFloat64>,UpperLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ExactFloat64,ApproximateFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<MetricFloat64,ExactFloat64>,ValidatedLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<MetricFloat64,MetricFloat64>,ValidatedLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<MetricFloat64,BoundedFloat64>,ValidatedLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<MetricFloat64,UpperFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<MetricFloat64,LowerFloat64>,UpperLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<MetricFloat64,ApproximateFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<BoundedFloat64,ExactFloat64>,ValidatedLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<BoundedFloat64,MetricFloat64>,ValidatedLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<BoundedFloat64,BoundedFloat64>,ValidatedLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<BoundedFloat64,UpperFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<BoundedFloat64,LowerFloat64>,UpperLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<BoundedFloat64,ApproximateFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<UpperFloat64,ExactFloat64>,UpperLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<UpperFloat64,MetricFloat64>,UpperLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<UpperFloat64,BoundedFloat64>,UpperLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<UpperFloat64,UpperFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<UpperFloat64,LowerFloat64>,UpperLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<UpperFloat64,ApproximateFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<LowerFloat64,ExactFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<LowerFloat64,MetricFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<LowerFloat64,BoundedFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<LowerFloat64,UpperFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<LowerFloat64,LowerFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<LowerFloat64,ApproximateFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ApproximateFloat64,ExactFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ApproximateFloat64,MetricFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ApproximateFloat64,BoundedFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ApproximateFloat64,UpperFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ApproximateFloat64,LowerFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ApproximateFloat64,ApproximateFloat64>,ApproximateLogic)
 
     // Require reduction of concrete number paradigm
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ExactNumber,ExactFloat>,ExactLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<EffectiveNumber,ExactFloat>,EffectiveLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ValidatedNumber,ExactFloat>,ValidatedLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<UpperNumber,ExactFloat>,UpperLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<LowerNumber,ExactFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ApproximateNumber,ExactFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ExactNumber,MetricFloat>,ValidatedLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<EffectiveNumber,MetricFloat>,ValidatedLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ValidatedNumber,MetricFloat>,ValidatedLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<UpperNumber,MetricFloat>,UpperLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<LowerNumber,MetricFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ApproximateNumber,MetricFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ExactNumber,BoundFloat>,ValidatedLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<EffectiveNumber,BoundFloat>,ValidatedLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ValidatedNumber,BoundFloat>,ValidatedLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<UpperNumber,BoundFloat>,UpperLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<LowerNumber,BoundFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ApproximateNumber,BoundFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ExactNumber,UpperFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<EffectiveNumber,UpperFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ValidatedNumber,UpperFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<UpperNumber,UpperFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<LowerNumber,UpperFloat>,LowerLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ApproximateNumber,UpperFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ExactNumber,LowerFloat>,UpperLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<EffectiveNumber,LowerFloat>,UpperLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ValidatedNumber,LowerFloat>,UpperLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<UpperNumber,LowerFloat>,UpperLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<LowerNumber,LowerFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ApproximateNumber,LowerFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ExactNumber,ApproximateFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<EffectiveNumber,ApproximateFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ValidatedNumber,ApproximateFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<UpperNumber,ApproximateFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<LowerNumber,ApproximateFloat>,ApproximateLogic)
-    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ApproximateNumber,ApproximateFloat>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ExactNumber,ExactFloat64>,ExactLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<EffectiveNumber,ExactFloat64>,EffectiveLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ValidatedNumber,ExactFloat64>,ValidatedLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<UpperNumber,ExactFloat64>,UpperLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<LowerNumber,ExactFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ApproximateNumber,ExactFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ExactNumber,MetricFloat64>,ValidatedLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<EffectiveNumber,MetricFloat64>,ValidatedLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ValidatedNumber,MetricFloat64>,ValidatedLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<UpperNumber,MetricFloat64>,UpperLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<LowerNumber,MetricFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ApproximateNumber,MetricFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ExactNumber,BoundedFloat64>,ValidatedLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<EffectiveNumber,BoundedFloat64>,ValidatedLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ValidatedNumber,BoundedFloat64>,ValidatedLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<UpperNumber,BoundedFloat64>,UpperLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<LowerNumber,BoundedFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ApproximateNumber,BoundedFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ExactNumber,UpperFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<EffectiveNumber,UpperFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ValidatedNumber,UpperFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<UpperNumber,UpperFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<LowerNumber,UpperFloat64>,LowerLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ApproximateNumber,UpperFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ExactNumber,LowerFloat64>,UpperLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<EffectiveNumber,LowerFloat64>,UpperLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ValidatedNumber,LowerFloat64>,UpperLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<UpperNumber,LowerFloat64>,UpperLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<LowerNumber,LowerFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ApproximateNumber,LowerFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ExactNumber,ApproximateFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<EffectiveNumber,ApproximateFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ValidatedNumber,ApproximateFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<UpperNumber,ApproximateFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<LowerNumber,ApproximateFloat64>,ApproximateLogic)
+    ARIADNE_TEST_EQUIVALENT_TYPE(SafeLessType<ApproximateNumber,ApproximateFloat64>,ApproximateLogic)
 }
 
 

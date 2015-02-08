@@ -85,7 +85,7 @@ class TestIntegrator
         EffectiveVectorFunction f={o*2,o*3};
         ARIADNE_TEST_PRINT(f);
         ExactBox d={ExactInterval(0.0,1.0),ExactInterval(-0.5,1.5)};
-        Float h=0.25;
+        Float64 h=0.25;
         ValidatedVectorFunctionModel flow=integrator_ptr->flow_step(f,d,h);
         EffectiveVectorFunction expected_flow={x0+2*t,y0+3*t};
         ARIADNE_TEST_PRINT(flow);
@@ -97,7 +97,7 @@ class TestIntegrator
     Void test_quadratic_flow() {
         EffectiveVectorFunction f={o,x};
         ExactBox d={ExactInterval(0.0,1.0),ExactInterval(-0.5,1.5)};
-        Float h=0.25;
+        Float64 h=0.25;
         ValidatedVectorFunctionModel flow=integrator_ptr->flow_step(f,d,h);
         EffectiveVectorFunction expected_flow={x0+t,y0+x0*t+t*t/2};
         ARIADNE_TEST_PRINT(f);
@@ -110,7 +110,7 @@ class TestIntegrator
     Void test_linear() {
         EffectiveVectorFunction f={x,-y};
         ExactBox d={ExactInterval(-0.25,0.25),ExactInterval(-0.25,0.25)};
-        Float h=0.25;
+        Float64 h=0.25;
         ValidatedVectorFunctionModel flow=integrator_ptr->flow_step(f,d,h);
         EffectiveVectorFunction expected_flow={x0*(1+t+t*t/2+t*t*t/6+t*t*t*t/24),y0*(1-t+t*t/2-t*t*t/6+t*t*t*t/24)};
         ARIADNE_TEST_PRINT(f);
@@ -124,7 +124,7 @@ class TestIntegrator
         Real half(0.5);
         EffectiveVectorFunction f={-half*x-y,x-half*y};
         ExactBox d={ExactInterval(0.75,1.25),ExactInterval(-0.25,0.25)};
-        Float h=0.25;
+        Float64 h=0.25;
         ValidatedVectorFunctionModel flow=integrator_ptr->flow_step(f,d,h);
         EffectiveVectorFunction expected_flow={exp(-half*t)*(x0*cos(t)-y0*sin(t)),exp(-half*t)*(x0*sin(t)+y0*cos(t))};
         ARIADNE_TEST_PRINT(f);
@@ -159,9 +159,9 @@ class TestIntegrator
         EffectiveVectorFunction f={x*(o-x)};
         //ExactIntervalVector d=(ExactInterval(0.25,0.5),ExactInterval(-0.25,0.25));
         ExactBox d={ExactInterval(0.25,0.5)};
-        Float h=0.5;
+        Float64 h=0.5;
         //ExactIntervalVector d(1u,ExactInterval(-0.125,+0.125));
-        //Float h=0.125;
+        //Float64 h=0.125;
         ValidatedVectorFunctionModel flow=integrator_ptr->flow_step(f,d,h);
         VectorTaylorFunction taylor_flow=dynamic_cast<VectorTaylorFunction&>(flow.reference());
         //EffectiveVectorFunction expected_flow( (x0+x0*(1-x0)*t+x0*(1-x0)*(1-2*x0)/2*t*t, y0+t) );

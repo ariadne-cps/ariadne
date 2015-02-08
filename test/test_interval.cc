@@ -40,7 +40,7 @@ using namespace std;
 class TestInterval
 {
     typedef ExactInterval I;
-    typedef Float R;
+    typedef Float64 R;
   public:
     Void test();
   private:
@@ -83,8 +83,8 @@ TestInterval::test_concept()
     Int n=1;
     Nat m=1;
     double d=1;
-    ExactFloat x=1;
-    Float a,b;
+    ExactFloat64 x=1;
+    Float64 a,b;
     ExactInterval i;
     UpperInterval j;
 
@@ -147,9 +147,9 @@ TestInterval::test_correct_rounded_arithmetic()
 Void
 TestInterval::test_accurate_rounded_arithmetic()
 {
-    const Float min=Float::min();
-    const Float eps=Float::eps();
-    const Float x=1.5;
+    const Float64 min=Float64::min();
+    const Float64 eps=Float64::eps();
+    const Float64 x=1.5;
 
     ARIADNE_TEST_EQUAL(UpperInterval(x)+UpperInterval(min),UpperInterval(x,x+eps));
     ARIADNE_TEST_EQUAL(UpperInterval(x)-UpperInterval(min),UpperInterval(x-eps,x));
@@ -157,13 +157,13 @@ TestInterval::test_accurate_rounded_arithmetic()
     ARIADNE_TEST_EQUAL(UpperInterval(1)/UpperInterval(3),UpperInterval(0.33333333333333331,0.33333333333333337));
     ARIADNE_TEST_EQUAL(UpperInterval(2)/UpperInterval(5),UpperInterval(0.39999999999999997,0.40000000000000002));
 
-    ARIADNE_TEST_EQUAL(UpperInterval(x)+Float(min),UpperInterval(x,x+eps));
-    ARIADNE_TEST_EQUAL(UpperInterval(x)-Float(min),UpperInterval(x-eps,x));
-    ARIADNE_TEST_EQUAL(UpperInterval(1+eps,1+2*eps)*Float(1+eps),UpperInterval(1+2*eps,1+4*eps));
-    ARIADNE_TEST_EQUAL(UpperInterval(1+3*eps,1+5*eps)/Float(1+eps),UpperInterval(1+eps,1+4*eps));
+    ARIADNE_TEST_EQUAL(UpperInterval(x)+Float64(min),UpperInterval(x,x+eps));
+    ARIADNE_TEST_EQUAL(UpperInterval(x)-Float64(min),UpperInterval(x-eps,x));
+    ARIADNE_TEST_EQUAL(UpperInterval(1+eps,1+2*eps)*Float64(1+eps),UpperInterval(1+2*eps,1+4*eps));
+    ARIADNE_TEST_EQUAL(UpperInterval(1+3*eps,1+5*eps)/Float64(1+eps),UpperInterval(1+eps,1+4*eps));
 
-    ARIADNE_TEST_EQUAL(Float(min)-UpperInterval(x),UpperInterval(-x,eps-x));
-    ARIADNE_TEST_EQUAL(Float(1+5*eps)/UpperInterval(1+2*eps,1+3*eps),UpperInterval(1+eps,1+3*eps));
+    ARIADNE_TEST_EQUAL(Float64(min)-UpperInterval(x),UpperInterval(-x,eps-x));
+    ARIADNE_TEST_EQUAL(Float64(1+5*eps)/UpperInterval(1+2*eps,1+3*eps),UpperInterval(1+eps,1+3*eps));
 
     ARIADNE_TEST_EQUAL(sqr(UpperInterval(1-eps,1+eps)),UpperInterval(1-4*eps/2,1+3*eps));
 
@@ -265,10 +265,10 @@ Void
 TestInterval::test_constructors()
 {
 
-    Float zero=0;
+    Float64 zero=0;
 
     // Construct from pair
-    ExactInterval ivld1(Float(1.125),Float(2.25));
+    ExactInterval ivld1(Float64(1.125),Float64(2.25));
     ARIADNE_TEST_ASSERT(ivld1.lower().raw()==1.125); ARIADNE_TEST_ASSERT(ivld1.upper().raw()==2.25);
 
     // Default constructor
@@ -296,9 +296,9 @@ TestInterval::test_constructors()
     ARIADNE_TEST_COMPARE(make_exact(ivld5.upper()),>,Rational(1,3));
 
     // Exact constructor from a single value
-    ExactInterval ivld6(Float(1.25));
-    ARIADNE_TEST_EQUAL(ivld6.lower().raw(),Float(1.25));
-    ARIADNE_TEST_EQUAL(ivld6.upper().raw(),Float(1.25));
+    ExactInterval ivld6(Float64(1.25));
+    ARIADNE_TEST_EQUAL(ivld6.lower().raw(),Float64(1.25));
+    ARIADNE_TEST_EQUAL(ivld6.upper().raw(),Float64(1.25));
 
     // Empty interval
     ExactInterval ivld7;
@@ -364,13 +364,13 @@ Void TestInterval::test_comparison() {
     ExactInterval& ivl1ref=ivl1;
     ivl1ref=ExactInterval(5.25,7.375);
     cout << "ivl1ref=" << ivl1ref << endl;
-    ARIADNE_TEST_ASSERT(ivl1ref.lower().raw()==Float(5.25));
+    ARIADNE_TEST_ASSERT(ivl1ref.lower().raw()==Float64(5.25));
 }
 
 Void TestInterval::test_aliasing() {
 
-    Float x2=1.5;
-    Float x3=2.25;
+    Float64 x2=1.5;
+    Float64 x3=2.25;
 
     UpperInterval ivl1;
     UpperInterval ivl2(1.5,2.25);

@@ -51,8 +51,8 @@ namespace Ariadne {
 class Real;
 
 template<class X> inline const char* python_name(const char* name);
-template<> inline const char* python_name<Float>(const char* name) {
-    return (StringType("Float")+name).c_str(); }
+template<> inline const char* python_name<Float64>(const char* name) {
+    return (StringType("Float64")+name).c_str(); }
 template<> inline const char* python_name<Integer>(const char* name) {
     return (StringType("Integer")+name).c_str(); }
 template<> inline const char* python_name<Rational>(const char* name) {
@@ -60,14 +60,14 @@ template<> inline const char* python_name<Rational>(const char* name) {
 template<> inline const char* python_name<Real>(const char* name) {
     return (StringType("Real")+name).c_str(); }
 
-template<> inline const char* python_name<ExactFloat>(const char* name) {
-    return (StringType("ExactFloat")+name).c_str(); }
-template<> inline const char* python_name<ValidatedFloat>(const char* name) {
-    return (StringType("ValidatedFloat")+name).c_str(); }
-template<> inline const char* python_name<UpperFloat>(const char* name) {
-    return (StringType("UpperFloat")+name).c_str(); }
-template<> inline const char* python_name<ApproximateFloat>(const char* name) {
-    return (StringType("ApproximateFloat")+name).c_str(); }
+template<> inline const char* python_name<ExactFloat64>(const char* name) {
+    return (StringType("ExactFloat64")+name).c_str(); }
+template<> inline const char* python_name<ValidatedFloat64>(const char* name) {
+    return (StringType("ValidatedFloat64")+name).c_str(); }
+template<> inline const char* python_name<UpperFloat64>(const char* name) {
+    return (StringType("UpperFloat64")+name).c_str(); }
+template<> inline const char* python_name<ApproximateFloat64>(const char* name) {
+    return (StringType("ApproximateFloat64")+name).c_str(); }
 
 template<> inline const char* python_name<ExactInterval>(const char* name) {
     return (StringType("ExactInterval")+name).c_str(); }

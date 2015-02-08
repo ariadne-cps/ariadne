@@ -63,14 +63,14 @@ class EvolutionProfiler;
  * The actual evolution steps are performed by the VectorFieldEvolver class.
  */
 class VectorFieldEvolver
-    : public EvolverBase< VectorField, Enclosure, Float >
+    : public EvolverBase< VectorField, Enclosure, Float64 >
     , public Loggable
 {
   public:
     typedef VectorFieldEvolverConfiguration ConfigurationType;
     typedef VectorField SystemType;
-    typedef Float TimeType;
-    typedef Float TerminationType;
+    typedef Float64 TimeType;
+    typedef Float64 TerminationType;
     typedef Enclosure EnclosureType;
     typedef Pair<TimeType, EnclosureType> TimedEnclosureType;
     typedef Orbit<EnclosureType> OrbitType;

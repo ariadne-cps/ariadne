@@ -37,9 +37,9 @@ namespace Ariadne {
 template<class T1, class T2> class Pair;
 template<class T> class List;
 
-class ApproximateFloat;
+class ApproximateFloat64;
 template<class X> class Vector;
-typedef Vector<ApproximateFloat> ApproximateFloatVector;
+typedef Vector<ApproximateFloat64> ApproximateFloatVector;
 template<class P> class VectorFunctionInterface;
 typedef VectorFunctionInterface<ApproximateTag> ApproximateVectorFunctionInterface;
 
@@ -49,10 +49,10 @@ class RungeKutta4Integrator
     RungeKutta4Integrator(double step_size);
 
     ApproximateFloatVector
-    step(const ApproximateVectorFunctionInterface& f, const ApproximateFloatVector& x, const ApproximateFloat& h) const;
+    step(const ApproximateVectorFunctionInterface& f, const ApproximateFloatVector& x, const ApproximateFloat64& h) const;
 
-    List< Pair<ApproximateFloat,ApproximateFloatVector> >
-    evolve(const ApproximateVectorFunctionInterface& f, const ApproximateFloatVector& x0, const ApproximateFloat& tmax) const;
+    List< Pair<ApproximateFloat64,ApproximateFloatVector> >
+    evolve(const ApproximateVectorFunctionInterface& f, const ApproximateFloatVector& x0, const ApproximateFloat64& tmax) const;
   private:
     double _step_size;
 };

@@ -37,15 +37,15 @@
 using std::cout; using std::cerr; using std::endl;
 using namespace Ariadne;
 
-Vector<ExactFloat> v(Nat n, Nat i) { return Vector<ExactFloat>::unit(n,i); }
-ValidatedTaylorModel ctm(Nat m, double c, Sweeper swp) { return ValidatedTaylorModel::constant(m,ExactFloat(c),swp); }
-ValidatedTaylorModel ctm(Nat m, Sweeper swp) { return ValidatedTaylorModel::constant(m,ExactFloat(1.0),swp); }
+Vector<ExactFloat64> v(Nat n, Nat i) { return Vector<ExactFloat64>::unit(n,i); }
+ValidatedTaylorModel ctm(Nat m, double c, Sweeper swp) { return ValidatedTaylorModel::constant(m,ExactFloat64(c),swp); }
+ValidatedTaylorModel ctm(Nat m, Sweeper swp) { return ValidatedTaylorModel::constant(m,ExactFloat64(1.0),swp); }
 //ValidatedTaylorModel tm(Nat m, Nat i, Sweeper swp) { return ValidatedTaylorModel::coordinate(m,i,swp); }
 
 // Allow addition and multiplication by double
-template<class D, EnableIf<IsSame<D,double>> =dummy> ValidatedTaylorModel operator+(D d, ValidatedTaylorModel tm) { return ExactFloat(d)+tm; }
-template<class D, EnableIf<IsSame<D,double>> =dummy> ValidatedTaylorModel operator-(D d, ValidatedTaylorModel tm) { return ExactFloat(d)-tm; }
-template<class D, EnableIf<IsSame<D,double>> =dummy> ValidatedTaylorModel operator*(D d, ValidatedTaylorModel tm) { return ExactFloat(d)*tm; }
+template<class D, EnableIf<IsSame<D,double>> =dummy> ValidatedTaylorModel operator+(D d, ValidatedTaylorModel tm) { return ExactFloat64(d)+tm; }
+template<class D, EnableIf<IsSame<D,double>> =dummy> ValidatedTaylorModel operator-(D d, ValidatedTaylorModel tm) { return ExactFloat64(d)-tm; }
+template<class D, EnableIf<IsSame<D,double>> =dummy> ValidatedTaylorModel operator*(D d, ValidatedTaylorModel tm) { return ExactFloat64(d)*tm; }
 
 // Allow carat for power
 ValidatedTaylorModel operator^(ValidatedTaylorModel tm, Nat m) { return pow(tm,m); }
@@ -64,8 +64,8 @@ template<class A> void display_difference(A const& res, A const& exp) {
 class TestTaylorModel
 {
     typedef MultiIndex MI;
-    typedef Expansion<Float> E;
-    typedef Polynomial<Float> P;
+    typedef Expansion<Float64> E;
+    typedef Polynomial<Float64> P;
     typedef ValidatedTaylorModel T;
   public:
     Sweeper swp;
@@ -108,8 +108,8 @@ Void TestTaylorModel::test()
     std::cerr<<std::setprecision(18);
     std::cout<<std::setprecision(18);
     std::clog<<std::setprecision(18);
-    ExactFloat::set_output_precision(18);
-    ValidatedFloat::set_output_precision(18);
+    ExactFloat64::set_output_precision(18);
+    ValidatedFloat64::set_output_precision(18);
 
     ARIADNE_TEST_CALL(test_constructors());
     ARIADNE_TEST_CALL(test_predicates());
@@ -130,10 +130,10 @@ Void TestTaylorModel::test()
 
 Void TestTaylorModel::test_concept()
 {
-    const ExactFloat f=0;
-    const ValidatedFloat i;
-    const Vector<ExactFloat> vf;
-    const Vector<ValidatedFloat> vi;
+    const ExactFloat64 f=0;
+    const ValidatedFloat64 i;
+    const Vector<ExactFloat64> vf;
+    const Vector<ValidatedFloat64> vi;
     const ValidatedTaylorModel  t(0,swp);
     ValidatedTaylorModel tr(0,swp);
 
@@ -184,7 +184,7 @@ Void TestTaylorModel::test_predicates()
     ARIADNE_TEST_BINARY_PREDICATE(not refines,tv3,tv1);
     ARIADNE_TEST_BINARY_PREDICATE(refines,tv4,tv1);
 
-    ExactFloat h(0.5);
+    ExactFloat64 h(0.5);
     ARIADNE_TEST_BINARY_PREDICATE(consistent,1+2*x+3*y+e*3/4,1+2*x+3*y+e*3/4);
     ARIADNE_TEST_BINARY_PREDICATE(consistent,1+e*3/4,2+e/4);
     ARIADNE_TEST_BINARY_PREDICATE(not consistent,x-(x^3)*2/3+e/(3.0_exact+pow(h,20)),z);
@@ -224,9 +224,9 @@ Void TestTaylorModel::test_unscale()
 
 Void TestTaylorModel::test_evaluate()
 {
-    Vector<ValidatedFloat> iv={{0.25,0.5},{-0.75,-0.5}};
+    Vector<ValidatedFloat64> iv={{0.25,0.5},{-0.75,-0.5}};
     ValidatedTaylorModel tv=1+2*x+3*y+4*(x^2)+5*(x*y)+6*(y^2)+e/2;
-    ARIADNE_TEST_EQUAL(evaluate(tv,iv),ValidatedFloat(-1,1));
+    ARIADNE_TEST_EQUAL(evaluate(tv,iv),ValidatedFloat64(-1,1));
 }
 
 
@@ -243,10 +243,10 @@ Void TestTaylorModel::test_arithmetic()
     ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)-(-3), ValidatedTaylorModel(E(1,2, {4.0,-2.0,3.0}), 0.75,swp));
     ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)*(-3), ValidatedTaylorModel(E(1,2, {-3.0,6.0,-9.0}), 2.25,swp));
     ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)/(-4), ValidatedTaylorModel(E(1,2, {-0.25,0.5,-0.75}), 0.1875,swp));
-    ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)+ValidatedFloat(-1,2), ValidatedTaylorModel(E(1,2, {1.5,-2.0,3.0}), 2.25,swp));
-    ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)-ValidatedFloat(-1,2), ValidatedTaylorModel(E(1,2, {0.5,-2.0,3.0}), 2.25,swp));
-    ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)*ValidatedFloat(-1,2), ValidatedTaylorModel(E(1,2, {0.5,-1.0,1.5}), 10.5,swp));
-    ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)/ValidatedFloat(0.25,2.0), ValidatedTaylorModel(E(1,2, {2.25,-4.5,6.75}), 13.5,swp));
+    ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)+ValidatedFloat64(-1,2), ValidatedTaylorModel(E(1,2, {1.5,-2.0,3.0}), 2.25,swp));
+    ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)-ValidatedFloat64(-1,2), ValidatedTaylorModel(E(1,2, {0.5,-2.0,3.0}), 2.25,swp));
+    ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)*ValidatedFloat64(-1,2), ValidatedTaylorModel(E(1,2, {0.5,-1.0,1.5}), 10.5,swp));
+    ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)/ValidatedFloat64(0.25,2.0), ValidatedTaylorModel(E(1,2, {2.25,-4.5,6.75}), 13.5,swp));
     ARIADNE_TEST_EQUAL(+ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp), ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp));
     ARIADNE_TEST_EQUAL(-ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp), ValidatedTaylorModel(E(1,2, {-1.0,2.0,-3.0}), 0.75,swp));
     ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)+ValidatedTaylorModel(E(1,2, {3.0,2.0,-4.0}),0.5,swp), ValidatedTaylorModel(E(1,2, {4.0,0.0,-1.0}), 1.25,swp));
@@ -268,7 +268,7 @@ Void TestTaylorModel::test_arithmetic()
     ARIADNE_TEST_EQUAL(pow(t,2),t*t);
     ARIADNE_TEST_EQUAL(pow(t,3),t*t*t);
 
-    ValidatedTaylorModel tm_inf(Expansion<Float>(2),+inf,swp);
+    ValidatedTaylorModel tm_inf(Expansion<Float64>(2),+inf,swp);
     ValidatedTaylorModel tm_zero_times_inf=0*tm_inf;
     if(isnan(tm_zero_times_inf.error().get_d())) {
         ARIADNE_TEST_WARN("Multiplying 0+/-inf by 0 yields 0+/-NaN");
@@ -299,7 +299,7 @@ Void TestTaylorModel::test_functions()
     ValidatedTaylorModel x=ValidatedTaylorModel::coordinate(1,0,swp);
     ValidatedTaylorModel hx=x/2;
     ValidatedTaylorModel ophx=1+x/2;
-    ValidatedFloat e(-1,+1);
+    ValidatedFloat64 e(-1,+1);
 
     ARIADNE_TEST_PRINT(exp(x));
     ARIADNE_TEST_PRINT(sin(x));
@@ -307,9 +307,9 @@ Void TestTaylorModel::test_functions()
     ARIADNE_TEST_PRINT(x.tolerance());
 
     // Expected tolerance based on sweeper characteristics
-    static const ExactFloat xtol=ExactFloat(x.tolerance());
-    static const ValidatedFloat tol=xtol*ValidatedFloat(-1,+1);
-    ExactFloat LAXITY=1;
+    static const ExactFloat64 xtol=ExactFloat64(x.tolerance());
+    static const ValidatedFloat64 tol=xtol*ValidatedFloat64(-1,+1);
+    ExactFloat64 LAXITY=1;
 
     // exp, sin and cos have error bound e^N/N!*(1+1/N), where e is bound for |x| N is the first term omitted
     // Error bound for rec is e^(N-1); log is e^(N-1)/N; sqrt is ???, where e is bound for |x-1|
@@ -347,21 +347,21 @@ Void TestTaylorModel::test_functions()
 
     ARIADNE_TEST_BINARY_PREDICATE(refines,rec(3*ophx),expected_rec_ophx/3);
     ARIADNE_TEST_BINARY_PREDICATE(refines,sqrt(9*ophx),expected_sqrt_ophx*3);
-    ARIADNE_TEST_BINARY_PREDICATE(refines,log(3*ophx),expected_log_ophx+log(ExactFloat(3)));
+    ARIADNE_TEST_BINARY_PREDICATE(refines,log(3*ophx),expected_log_ophx+log(ExactFloat64(3)));
 
-    Nat rn=3; ExactFloat c(2); ExactFloat r(rn);
+    Nat rn=3; ExactFloat64 c(2); ExactFloat64 r(rn);
     ARIADNE_TEST_PRINT(c);
     ARIADNE_TEST_PRINT(r);
     ARIADNE_TEST_BINARY_PREDICATE(refines,exp(c+r*hx),exp(c)*pow(expected_exp_hx,rn)+tol);
     ARIADNE_TEST_BINARY_PREDICATE(refines,sin(c+hx),sin(c)*expected_cos_hx+cos(c)*expected_sin_hx+tol);
     ARIADNE_TEST_BINARY_PREDICATE(refines,cos(c+hx),cos(c)*expected_cos_hx-sin(c)*expected_sin_hx+tol);
 
-    c=ExactFloat(10);
+    c=ExactFloat64(10);
     ARIADNE_TEST_BINARY_PREDICATE(refines,sin(c+hx),sin(c)*expected_cos_hx+cos(c)*expected_sin_hx+LAXITY*tol);
     ARIADNE_TEST_BINARY_PREDICATE(refines,cos(c+hx),cos(c)*expected_cos_hx-sin(c)*expected_sin_hx+LAXITY*tol);
 
     // Test exponential based at log2; exp(log(2)+x/2)=2*exp(x/2)
-    ExactFloat log2_apprx(0.693147);
+    ExactFloat64 log2_apprx(0.693147);
     ARIADNE_TEST_BINARY_PREDICATE(refines,exp(log2_apprx+x/2),
                                   2*(1+hx+(hx^2)/2+(hx^3)/6+(hx^4)/24+(hx^5)/120+(hx^6)/720)+e*6/100000);
 }
@@ -388,12 +388,12 @@ Void TestTaylorModel::test_refinement()
     ARIADNE_TEST_EQUAL(refinement(1-x*3/4+(x^3)*3+(x^4)*13/4+e/2,1+(x^2)/4+(x^3)*2+(x^4)*3+e),1-x*5/8+(x^3)*11/4+(x^4)*13/4+e/2);
 
     // Test refinement with roundoff errors
-    ARIADNE_TEST_EQUAL(refinement(ExactFloat(2.0/3)*x+e/2,ExactFloat(6.0/5)*x+e/4),
-        ExactFloat(1.05833333333333335)*x+ExactFloat(0.108333333333333393)*e);
+    ARIADNE_TEST_EQUAL(refinement(ExactFloat64(2.0/3)*x+e/2,ExactFloat64(6.0/5)*x+e/4),
+        ExactFloat64(1.05833333333333335)*x+ExactFloat64(0.108333333333333393)*e);
 
     // Code below computes expected values for second test
-    // Float xv=2./3; Float xe=1./2; Float yv=6./5; Float ye=1./4;
-    // Float rl=sub_down(yv,ye); Float ru=add_up(xv,xe); Float rv=add_near(rl,ru)/2; Float re=sub_up(ru,rl)/2;
+    // Float64 xv=2./3; Float64 xe=1./2; Float64 yv=6./5; Float64 ye=1./4;
+    // Float64 rl=sub_down(yv,ye); Float64 ru=add_up(xv,xe); Float64 rv=add_near(rl,ru)/2; Float64 re=sub_up(ru,rl)/2;
     // std::cerr << std::setprecision(18) << "xv="<<xv<<" yv="<<yv<<" rl="<<rl<<" ru="<<ru<<" rv="<<rv<<" re="<<re<<"\n";
 
 
@@ -418,7 +418,7 @@ Void TestTaylorModel::test_split()
 
 Void TestTaylorModel::test_antiderivative()
 {
-    ValidatedFloat unit_interval(-1,+1);
+    ValidatedFloat64 unit_interval(-1,+1);
     ValidatedTaylorModel tm=ValidatedTaylorModel::constant(2,1,swp);
     ValidatedTaylorModel atm=antiderivative(tm,1);
 
@@ -431,11 +431,11 @@ Void TestTaylorModel::test_antiderivative()
     ARIADNE_TEST_EQUAL(antiderivative((x^2)*(y^4)*15/2,1),(x^2)*(y^5)*3/2);
 
     ValidatedTaylorModel x=ValidatedTaylorModel::coordinate(1,0,swp);
-    ValidatedTaylorModel e=ValidatedTaylorModel::zero(1,swp)+ValidatedFloat(-1,+1);
+    ValidatedTaylorModel e=ValidatedTaylorModel::zero(1,swp)+ValidatedFloat64(-1,+1);
     ARIADNE_TEST_EQUAL(antiderivative(2.0*x*x,0),0.66666666666666663*x*x*x+5.5511151231257827021e-17*e);
     ARIADNE_TEST_EQUAL(antiderivative(2.0*x*x+e,0),0.66666666666666663*x*x*x+1.0000000000000002*e);
-    ARIADNE_TEST_EQUAL(antiderivative(2*(x^2),0),ExactFloat(0.66666666666666663)*(x^3)+ExactFloat(5.5511151231257827021e-17)*e);
-    ARIADNE_TEST_EQUAL(antiderivative(2*(x^2)+e,0),ExactFloat(0.66666666666666663)*(x^3)+ExactFloat(1.0000000000000002)*e);
+    ARIADNE_TEST_EQUAL(antiderivative(2*(x^2),0),ExactFloat64(0.66666666666666663)*(x^3)+ExactFloat64(5.5511151231257827021e-17)*e);
+    ARIADNE_TEST_EQUAL(antiderivative(2*(x^2)+e,0),ExactFloat64(0.66666666666666663)*(x^3)+ExactFloat64(1.0000000000000002)*e);
 
     // Regression test
     ValidatedTaylorModel t1({ {{0,0},1.}, {{1,0},2.}, {{0,1},3.}, {{2,0},4.}, {{1,1},5.}, {{0,2},6.} }, 0., swp);

@@ -410,7 +410,7 @@ class GridTreeSubset
     /*! \brief this function takes the interval width and computes how many binary subdivisions
      * one has to make in order to have sub-intervals of the width <= \a theMaxWidth
      */
-    Nat compute_number_subdiv( Float theWidth, const Float theMaxWidth) const;
+    Nat compute_number_subdiv( Float64 theWidth, const Float64 theMaxWidth) const;
 
     /*! \brief This method checks whether the set defined by \a pCurrentNode is a superset
      *  of \a theBox, in case when it is known that the cell corresponding to the root of
@@ -573,7 +573,7 @@ class GridTreeSubset
      * cells size is <= \a theMaxCellWidth. Note that, the disabled cells are
      * not subdivided.
      */
-    Void subdivide( Float theMaxCellWidth );
+    Void subdivide( Float64 theMaxCellWidth );
 
     /*! \brief Recombines the subdivisions, for instance if all subcells of a cell are
      * enabled/disabled then they are put together.
@@ -1643,7 +1643,7 @@ inline GridTreeSubset::~GridTreeSubset() {
     //corresponding Paving object
 }
 
-inline Nat GridTreeSubset::compute_number_subdiv( Float theWidth, const Float theMaxWidth) const{
+inline Nat GridTreeSubset::compute_number_subdiv( Float64 theWidth, const Float64 theMaxWidth) const{
     //Compute the minimum number of subdivisions N as:
     //   minimum N : ( theWidth / 2^{N} ) <= theMaxWidth
     //This is equivalent to (because all values are positive)
@@ -1659,11 +1659,11 @@ inline Nat GridTreeSubset::compute_number_subdiv( Float theWidth, const Float th
     //then it might become very inaccurate, and in case require more subdivisions than needed.
     //NOTE: We need base 2 logarithm, we get it by the rule: log_a(b)/log_a(c) = log_c(a)
     //PIETER COLLINS:
-    //NOTE: Float now uses approximate operators by default
+    //NOTE: Float64 now uses approximate operators by default
     Nat result = 0;
     if ( theWidth > theMaxWidth ){
         //result = (Nat) ceil( div_approx( log_approx( div_approx( theWidth, theMaxWidth ) ) , log_approx( R(2.0) ) ) );
-        result = integer_cast<Nat>(ceil( div( log( div( theWidth, theMaxWidth ) ) , log( Float(2.0) ) ) ) );
+        result = integer_cast<Nat>(ceil( div( log( div( theWidth, theMaxWidth ) ) , log( Float64(2.0) ) ) ) );
     }
     return result;
 }

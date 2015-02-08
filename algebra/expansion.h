@@ -49,7 +49,7 @@ namespace Ariadne {
 typedef MultiIndex::WordType WordType;
 
 template<class X> class Expansion;
-typedef Expansion<Float> FloatExpansion;
+typedef Expansion<Float64> FloatExpansion;
 
 
 
@@ -244,8 +244,8 @@ class Expansion
         explicit Expansion(const Expansion<XX>& p);
 
     // DEPRECTATED Conversions to raw type
-    Expansion<RawFloat>& raw();
-    Expansion<RawFloat>const& raw() const;
+    Expansion<RawFloat64>& raw();
+    Expansion<RawFloat64>const& raw() const;
 
     Void swap(Expansion<X>& other);
 

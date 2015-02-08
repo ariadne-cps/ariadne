@@ -140,10 +140,10 @@ struct from_python< Matrix<X> >
     }
 };
 
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ApproximateFloat>& repr);
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ValidatedFloat>& repr);
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ExactFloat>& repr);
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<RawFloat>& repr);
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ApproximateFloat64>& repr);
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ValidatedFloat64>& repr);
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ExactFloat64>& repr);
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<RawFloat64>& repr);
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Rational>& repr);
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Real>& repr);
 
@@ -232,34 +232,34 @@ template<class X> Void export_vector()
 }
 
 
-template<> Void export_vector<ExactFloat>()
+template<> Void export_vector<ExactFloat64>()
 {
-    class_< Vector<ExactFloat> > exact_vector_class("ExactFloatVector",init< Vector<ExactFloat> >());
-    export_vector_class<ExactFloat>(exact_vector_class);
+    class_< Vector<ExactFloat64> > exact_vector_class("ExactFloatVector",init< Vector<ExactFloat64> >());
+    export_vector_class<ExactFloat64>(exact_vector_class);
 }
 
-template<> Void export_vector<ValidatedFloat>()
+template<> Void export_vector<ValidatedFloat64>()
 {
-    class_< Vector<ValidatedFloat> > validated_vector_class("ValidatedFloatVector",init< Vector<ValidatedFloat> >());
-    export_vector_class<ValidatedFloat>(validated_vector_class);
-    export_vector_conversion<ValidatedFloat,ExactFloat>(validated_vector_class);
-    export_vector_arithmetic<ValidatedFloat,ValidatedFloat,ValidatedFloat>(validated_vector_class);
-    def("norm",&__norm__<ValidatedFloat>);
-    def("dot", &__dot__<ValidatedFloat>);
+    class_< Vector<ValidatedFloat64> > validated_vector_class("ValidatedFloatVector",init< Vector<ValidatedFloat64> >());
+    export_vector_class<ValidatedFloat64>(validated_vector_class);
+    export_vector_conversion<ValidatedFloat64,ExactFloat64>(validated_vector_class);
+    export_vector_arithmetic<ValidatedFloat64,ValidatedFloat64,ValidatedFloat64>(validated_vector_class);
+    def("norm",&__norm__<ValidatedFloat64>);
+    def("dot", &__dot__<ValidatedFloat64>);
 
-    implicitly_convertible< Vector<ExactFloat>, Vector<ValidatedFloat> >();
+    implicitly_convertible< Vector<ExactFloat64>, Vector<ValidatedFloat64> >();
 }
 
-template<> Void export_vector<ApproximateFloat>()
+template<> Void export_vector<ApproximateFloat64>()
 {
-    class_< Vector<ApproximateFloat> > approximate_vector_class("RawFloatVector",init< Vector<ApproximateFloat> >());
-    export_vector_class<ApproximateFloat>(approximate_vector_class);
-    export_vector_conversion<ApproximateFloat,ValidatedFloat>(approximate_vector_class);
-    export_vector_arithmetic<ApproximateFloat,ApproximateFloat,ApproximateFloat>(approximate_vector_class);
-    //export_vector_arithmetic<ValidatedFloat,ApproximateFloat,ValidatedFloat>(approximate_vector_class);
-    approximate_vector_class.def("__rmul__",__rmul__< Vector<ApproximateFloat>, Vector<ApproximateFloat>, ApproximateFloat >);
-    approximate_vector_class.def("__mul__",__mul__< Vector<ApproximateFloat>, Vector<ApproximateFloat>, ApproximateFloat >);
-    approximate_vector_class.def("__div__",__div__< Vector<ApproximateFloat>, Vector<ApproximateFloat>, ApproximateFloat >);
+    class_< Vector<ApproximateFloat64> > approximate_vector_class("RawFloatVector",init< Vector<ApproximateFloat64> >());
+    export_vector_class<ApproximateFloat64>(approximate_vector_class);
+    export_vector_conversion<ApproximateFloat64,ValidatedFloat64>(approximate_vector_class);
+    export_vector_arithmetic<ApproximateFloat64,ApproximateFloat64,ApproximateFloat64>(approximate_vector_class);
+    //export_vector_arithmetic<ValidatedFloat64,ApproximateFloat64,ValidatedFloat64>(approximate_vector_class);
+    approximate_vector_class.def("__rmul__",__rmul__< Vector<ApproximateFloat64>, Vector<ApproximateFloat64>, ApproximateFloat64 >);
+    approximate_vector_class.def("__mul__",__mul__< Vector<ApproximateFloat64>, Vector<ApproximateFloat64>, ApproximateFloat64 >);
+    approximate_vector_class.def("__div__",__div__< Vector<ApproximateFloat64>, Vector<ApproximateFloat64>, ApproximateFloat64 >);
 }
 
 
@@ -331,44 +331,44 @@ template<class X> Void export_matrix()
 
 }
 
-template<> Void export_matrix<ExactFloat>()
+template<> Void export_matrix<ExactFloat64>()
 {
-    class_< Matrix<ExactFloat> > matrix_class(python_name<ExactFloat>("Matrix"),no_init);
+    class_< Matrix<ExactFloat64> > matrix_class(python_name<ExactFloat64>("Matrix"),no_init);
     matrix_class.def(init<PivotMatrix>());
-    export_matrix_class<ExactFloat>(matrix_class);
+    export_matrix_class<ExactFloat64>(matrix_class);
 }
 
-template<> Void export_matrix<ValidatedFloat>()
+template<> Void export_matrix<ValidatedFloat64>()
 {
-    class_< Matrix<ValidatedFloat> > matrix_class(python_name<ValidatedFloat>("Matrix"),no_init);
-    export_matrix_class<ValidatedFloat>(matrix_class);
-    export_matrix_conversion<ValidatedFloat,ExactFloat>(matrix_class);
-    export_matrix_arithmetic<ValidatedFloat,ValidatedFloat,ValidatedFloat>(matrix_class);
-    //export_matrix_arithmetic<ValidatedFloat,ValidatedFloat,ApproximateFloat>(matrix_class);
-    def("gs_inverse", (Matrix<ValidatedFloat>(*)(const Matrix<ValidatedFloat>&)) &gs_inverse);
-    def("lu_inverse", (Matrix<ValidatedFloat>(*)(const Matrix<ValidatedFloat>&)) &lu_inverse);
-    def("gs_solve", (Vector<ValidatedFloat>(*)(const Matrix<ValidatedFloat>&,const Vector<ValidatedFloat>&)) &gs_solve);
-    def("gs_solve", (Matrix<ValidatedFloat>(*)(const Matrix<ValidatedFloat>&,const Matrix<ValidatedFloat>&)) &gs_solve);
-    def("lu_solve", (Matrix<ValidatedFloat>(*)(const Matrix<ValidatedFloat>&,const Matrix<ValidatedFloat>&)) &lu_solve);
+    class_< Matrix<ValidatedFloat64> > matrix_class(python_name<ValidatedFloat64>("Matrix"),no_init);
+    export_matrix_class<ValidatedFloat64>(matrix_class);
+    export_matrix_conversion<ValidatedFloat64,ExactFloat64>(matrix_class);
+    export_matrix_arithmetic<ValidatedFloat64,ValidatedFloat64,ValidatedFloat64>(matrix_class);
+    //export_matrix_arithmetic<ValidatedFloat64,ValidatedFloat64,ApproximateFloat64>(matrix_class);
+    def("gs_inverse", (Matrix<ValidatedFloat64>(*)(const Matrix<ValidatedFloat64>&)) &gs_inverse);
+    def("lu_inverse", (Matrix<ValidatedFloat64>(*)(const Matrix<ValidatedFloat64>&)) &lu_inverse);
+    def("gs_solve", (Vector<ValidatedFloat64>(*)(const Matrix<ValidatedFloat64>&,const Vector<ValidatedFloat64>&)) &gs_solve);
+    def("gs_solve", (Matrix<ValidatedFloat64>(*)(const Matrix<ValidatedFloat64>&,const Matrix<ValidatedFloat64>&)) &gs_solve);
+    def("lu_solve", (Matrix<ValidatedFloat64>(*)(const Matrix<ValidatedFloat64>&,const Matrix<ValidatedFloat64>&)) &lu_solve);
 
-    def("triangular_decomposition",&triangular_decomposition<ValidatedFloat>);
-    def("orthogonal_decomposition", &orthogonal_decomposition<ValidatedFloat>);
+    def("triangular_decomposition",&triangular_decomposition<ValidatedFloat64>);
+    def("orthogonal_decomposition", &orthogonal_decomposition<ValidatedFloat64>);
 
-    //implicitly_convertible< Matrix<ApproximateFloat>, Matrix<ValidatedFloat> >();
+    //implicitly_convertible< Matrix<ApproximateFloat64>, Matrix<ValidatedFloat64> >();
 }
 
-template<> Void export_matrix<ApproximateFloat>()
+template<> Void export_matrix<ApproximateFloat64>()
 {
-    class_< Matrix<ApproximateFloat> > matrix_class(python_name<ApproximateFloat>("Matrix"),no_init);
-    export_matrix_class<ApproximateFloat>(matrix_class);
-    export_matrix_conversion<ApproximateFloat,ValidatedFloat>(matrix_class);
-    export_matrix_arithmetic<ApproximateFloat,ApproximateFloat,ApproximateFloat>(matrix_class);
-    //export_matrix_arithmetic<ValidatedFloat,ApproximateFloat,ValidatedFloat>(matrix_class);
+    class_< Matrix<ApproximateFloat64> > matrix_class(python_name<ApproximateFloat64>("Matrix"),no_init);
+    export_matrix_class<ApproximateFloat64>(matrix_class);
+    export_matrix_conversion<ApproximateFloat64,ValidatedFloat64>(matrix_class);
+    export_matrix_arithmetic<ApproximateFloat64,ApproximateFloat64,ApproximateFloat64>(matrix_class);
+    //export_matrix_arithmetic<ValidatedFloat64,ApproximateFloat64,ValidatedFloat64>(matrix_class);
 
-    def("triangular_decomposition",&triangular_decomposition<ApproximateFloat>);
-    def("orthogonal_decomposition", &orthogonal_decomposition<ApproximateFloat>);
-    def("row_norms",(Vector<ApproximateFloat>(*)(const Matrix<ApproximateFloat>&)) &row_norms<ApproximateFloat>);
-    def("normalise_rows",(Matrix<ApproximateFloat>(*)(const Matrix<ApproximateFloat>&)) &normalise_rows<ApproximateFloat>);
+    def("triangular_decomposition",&triangular_decomposition<ApproximateFloat64>);
+    def("orthogonal_decomposition", &orthogonal_decomposition<ApproximateFloat64>);
+    def("row_norms",(Vector<ApproximateFloat64>(*)(const Matrix<ApproximateFloat64>&)) &row_norms<ApproximateFloat64>);
+    def("normalise_rows",(Matrix<ApproximateFloat64>(*)(const Matrix<ApproximateFloat64>&)) &normalise_rows<ApproximateFloat64>);
 
     def("triangular_factor",&triangular_factor);
     def("triangular_multiplier", &triangular_multiplier);
@@ -403,7 +403,7 @@ template<class X> Void export_diagonal_matrix()
 Void export_pivot_matrix()
 {
 
-    implicitly_convertible< PivotMatrix, Matrix<ExactFloat> >();
+    implicitly_convertible< PivotMatrix, Matrix<ExactFloat64> >();
 
     class_<PivotMatrix> pivot_matrix_class("PivotMatrix",no_init);
     pivot_matrix_class.def("__str__",&__cstr__<PivotMatrix>);
@@ -411,26 +411,26 @@ Void export_pivot_matrix()
 }
 
 
-template Void export_vector<ApproximateFloat>();
-template Void export_vector<ValidatedFloat>();
-template Void export_matrix<ApproximateFloat>();
-template Void export_matrix<ValidatedFloat>();
+template Void export_vector<ApproximateFloat64>();
+template Void export_vector<ValidatedFloat64>();
+template Void export_matrix<ApproximateFloat64>();
+template Void export_matrix<ValidatedFloat64>();
 
-template Void export_diagonal_matrix<ApproximateFloat>();
+template Void export_diagonal_matrix<ApproximateFloat64>();
 
 template Void export_vector<Rational>();
 template Void export_matrix<Rational>();
 
 
 Void linear_algebra_submodule() {
-    export_vector<ApproximateFloat>();
-    export_vector<ValidatedFloat>();
+    export_vector<ApproximateFloat64>();
+    export_vector<ValidatedFloat64>();
 
-    export_matrix<ApproximateFloat>();
-    export_matrix<ValidatedFloat>();
+    export_matrix<ApproximateFloat64>();
+    export_matrix<ValidatedFloat64>();
 
     export_pivot_matrix();
-    export_diagonal_matrix<ApproximateFloat>();
+    export_diagonal_matrix<ApproximateFloat64>();
 
     export_vector<Rational>();
     export_matrix<Rational>();

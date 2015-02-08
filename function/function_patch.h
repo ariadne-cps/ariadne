@@ -125,8 +125,8 @@ template<class M> class FunctionPatch
     //! \brief Construct a FunctionPatch<M> over the domain \a d, based on the scaled model \a m.
     explicit FunctionPatch(const DomainType& d, const ModelType& m);
 
-    explicit FunctionPatch(const ExactBox& d, const Expansion<ExactFloat>& p, const ErrorFloat& e, const Sweeper& swp);
-    explicit FunctionPatch(const ExactBox& d, const Expansion<RawFloat>& p, const RawFloat& e, const Sweeper& swp);
+    explicit FunctionPatch(const ExactBox& d, const Expansion<ExactFloat64>& p, const ErrorFloat64& e, const Sweeper& swp);
+    explicit FunctionPatch(const ExactBox& d, const Expansion<RawFloat64>& p, const RawFloat64& e, const Sweeper& swp);
 
     explicit FunctionPatch(const ScalarFunctionModel<ValidatedTag>& f);
     FunctionPatch& operator=(const ScalarFunctionModel<ValidatedTag>& f);
@@ -201,7 +201,7 @@ template<class M> class FunctionPatch
     const CoefficientType gradient_value(SizeType i) const { return make_exact(this->_model.gradient_value(i)/this->_domain[i].radius()); }
 
     //! \brief A polynomial representation.
-    Polynomial<ValidatedFloat> polynomial() const;
+    Polynomial<ValidatedFloat64> polynomial() const;
     //! \brief A multivalued function equal to the model on the domain.
     ScalarFunctionType<M> function() const;
 
@@ -256,7 +256,7 @@ template<class M> class FunctionPatch
 
     //@{
     /*! \name Accuracy parameters. */
-    //! \copydoc TaylorModel<ValidatedFloat>::set_sweeper()
+    //! \copydoc TaylorModel<ValidatedFloat64>::set_sweeper()
     Void set_sweeper(const Sweeper& swp) { this->_model.set_sweeper(swp); }
     //@}
 
@@ -320,7 +320,7 @@ template<class M> FunctionPatch<M> refinement(const FunctionPatch<M>& x1, const 
 template<class M> NormType norm(const FunctionPatch<M>& f);
 
 // Differential algebra
-template<class M> FunctionPatch<M> antiderivative(const FunctionPatch<M>& x, SizeType k, ExactFloat c);
+template<class M> FunctionPatch<M> antiderivative(const FunctionPatch<M>& x, SizeType k, ExactFloat64 c);
 template<class M> FunctionPatch<M> antiderivative(const FunctionPatch<M>& x, SizeType k);
 template<class M> FunctionPatch<M> derivative(const FunctionPatch<M>& x, SizeType k);
 
@@ -392,24 +392,24 @@ template<class M> class VectorFunctionPatch
 
     /*! \brief Construct from a domain and the expansion. */
     VectorFunctionPatch<M>(const ExactBox& domain,
-                         const Vector<Expansion<ExactFloat>>& expansion,
+                         const Vector<Expansion<ExactFloat64>>& expansion,
                          Sweeper swp);
 
     /*! \brief Construct from a domain, and expansion and errors. */
     VectorFunctionPatch<M>(const ExactBox& domain,
-                         const Vector<Expansion<ExactFloat>>& expansion,
-                         const Vector<ErrorFloat>& error,
+                         const Vector<Expansion<ExactFloat64>>& expansion,
+                         const Vector<ErrorFloat64>& error,
                          Sweeper swp);
 
     /*! \brief Construct from a domain, and expansion and errors. */
     VectorFunctionPatch<M>(const ExactBox& domain,
-                         const Vector<Expansion<RawFloat>>& expansion,
-                         const Vector<RawFloat>& error,
+                         const Vector<Expansion<RawFloat64>>& expansion,
+                         const Vector<RawFloat64>& error,
                          Sweeper swp);
 
     /*! \brief Construct from a domain, and expansion and errors. */
     VectorFunctionPatch<M>(const ExactBox& domain,
-                         const Vector<Expansion<RawFloat>>& expansion,
+                         const Vector<Expansion<RawFloat64>>& expansion,
                          Sweeper swp);
 
     /*! \brief Construct from a domain and the models. */
@@ -457,7 +457,7 @@ template<class M> class VectorFunctionPatch
     const Vector<ModelType>& models() const;
     Vector<ModelType>& models();
     /*! \brief The data used to define the centre of the Taylor models. */
-    const Vector<Expansion<ExactFloat>> expansions() const;
+    const Vector<Expansion<ExactFloat64>> expansions() const;
 
     /*! \brief The \a i<sup>th</sup> Taylor model used to define the function. */
     const ModelType& model(SizeType i) const;
@@ -504,7 +504,7 @@ template<class M> class VectorFunctionPatch
     static VectorFunctionPatch<M> projection(const ExactBox& d, SizeType imin, SizeType imax, Sweeper swp);
 
     /*! \brief Convert to an interval polynomial. */
-    Vector<Polynomial<ValidatedFloat>> polynomials() const;
+    Vector<Polynomial<ValidatedFloat64>> polynomials() const;
     /*! \brief The vector of roundoff/truncation errors of each component. */
     Vector<ErrorType> const errors() const;
     /*! \brief The maximum roundoff/truncation error of the components. */
@@ -613,7 +613,7 @@ template<class M> VectorFunctionPatch<M> derivative(const VectorFunctionPatch<M>
 //! \brief Antiderivative of \a f with respect to variable \a k.
 template<class M> VectorFunctionPatch<M> antiderivative(const VectorFunctionPatch<M>& f, SizeType k);
 //! \brief Antiderivative of \a f with respect to variable \a k, taking value \c 0 when \a x[k]=c.
-template<class M> VectorFunctionPatch<M> antiderivative(const VectorFunctionPatch<M>& f, SizeType k, ExactFloat c);
+template<class M> VectorFunctionPatch<M> antiderivative(const VectorFunctionPatch<M>& f, SizeType k, ExactFloat64 c);
 
 template<class M> NormType norm(const VectorFunctionPatch<M>& f);
 template<class M> NormType distance(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2);
@@ -848,7 +848,7 @@ template<class M> FunctionPatch<M> partial_evaluate(const FunctionPatch<M>& te, 
 
 
 
-template<class M> FunctionPatch<M> antiderivative(const FunctionPatch<M>& f, SizeType k, ExactFloat c) {
+template<class M> FunctionPatch<M> antiderivative(const FunctionPatch<M>& f, SizeType k, ExactFloat64 c) {
     ARIADNE_ASSERT(k<f.argument_size());
     ARIADNE_ASSERT(contains(f.domain()[k],c));
 
@@ -892,15 +892,15 @@ template<class M> FunctionPatch<M> refinement(const FunctionPatch<M>& tv1, const
     return FunctionPatch<M>(tv1.domain(),refinement(tv1.model(),tv2.model()));
 }
 
-template<class M> ErrorFloat norm(const FunctionPatch<M>& f) {
+template<class M> ErrorFloat64 norm(const FunctionPatch<M>& f) {
     return norm(f.model());
 }
 
-template<class M> ErrorFloat distance(const FunctionPatch<M>& f1, const FunctionPatch<M>& f2) {
+template<class M> ErrorFloat64 distance(const FunctionPatch<M>& f1, const FunctionPatch<M>& f2) {
     return norm(f1-f2);
 }
 
-template<class M> ErrorFloat distance(const FunctionPatch<M>& f1, const ValidatedScalarFunction& f2) {
+template<class M> ErrorFloat64 distance(const FunctionPatch<M>& f1, const ValidatedScalarFunction& f2) {
     return distance(f1,FunctionPatch<M>(f1.domain(),f2,f1.sweeper()));
 }
 
@@ -934,27 +934,27 @@ template<class M> Bool check(const Vector<FunctionPatch<M>>& tv)
     return true;
 }
 
-template<class M> Vector<Expansion<ExactFloat>> expansion(const Vector<FunctionPatch<M>>& x)
+template<class M> Vector<Expansion<ExactFloat64>> expansion(const Vector<FunctionPatch<M>>& x)
 {
-    Vector< Expansion<ExactFloat> > r(x.size());
+    Vector< Expansion<ExactFloat64> > r(x.size());
     for(SizeType i=0; i!=x.size(); ++i) {
         r[i]=x[i].expansion();
     }
     return r;
 }
 
-template<class M> Vector<ErrorFloat> error(const Vector<FunctionPatch<M>>& x)
+template<class M> Vector<ErrorFloat64> error(const Vector<FunctionPatch<M>>& x)
 {
-    Vector<ErrorFloat> r(x.size());
+    Vector<ErrorFloat64> r(x.size());
     for(SizeType i=0; i!=x.size(); ++i) {
         r[i]=x[i].error();
     }
     return r;
 }
 
-template<class M> Vector<ExactFloat> value(const Vector<FunctionPatch<M>>& x)
+template<class M> Vector<ExactFloat64> value(const Vector<FunctionPatch<M>>& x)
 {
-    Vector<ExactFloat> r(x.size());
+    Vector<ExactFloat64> r(x.size());
     for(SizeType i=0; i!=x.size(); ++i) {
         r[i]=x[i].value();
     }
@@ -1220,7 +1220,7 @@ template<class M> VectorFunctionPatch<M> operator-(const VectorFunctionPatch<M>&
     return VectorFunctionPatch<M>(f.domain(),Vector<M>(f.models()-c));
 }
 
-template<class M> VectorFunctionPatch<M> operator*(const Matrix<Float>& A, const VectorFunctionPatch<M>& f)
+template<class M> VectorFunctionPatch<M> operator*(const Matrix<Float64>& A, const VectorFunctionPatch<M>& f)
 {
     ARIADNE_PRECONDITION(A.column_size()==f.size());
     Vector<M> models(A.row_size(),M(f.argument_size(),f.sweeper()));
@@ -1374,19 +1374,19 @@ template<class M> VectorFunctionPatch<M> antiderivative(const VectorFunctionPatc
 
 
 
-template<class M> ErrorFloat norm(const VectorFunctionPatch<M>& f) {
-    ErrorFloat res=0u;
+template<class M> ErrorFloat64 norm(const VectorFunctionPatch<M>& f) {
+    ErrorFloat64 res=0u;
     for(SizeType i=0; i!=f.result_size(); ++i) {
         res=max(res,norm(f[i]));
     }
     return res;
 }
 
-template<class M> ErrorFloat distance(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2) {
+template<class M> ErrorFloat64 distance(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2) {
     return norm(f1-f2);
 }
 
-template<class M> ErrorFloat distance(const VectorFunctionPatch<M>& f1, const ValidatedVectorFunction& f2) {
+template<class M> ErrorFloat64 distance(const VectorFunctionPatch<M>& f1, const ValidatedVectorFunction& f2) {
     return distance(f1,VectorFunctionPatch<M>(f1.domain(),f2,f1.sweeper()));
 }
 

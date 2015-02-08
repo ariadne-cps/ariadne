@@ -42,38 +42,26 @@ class TwoExp;
 class Precision64;
 class PrecisionMP;
 
-typedef Float64 Float;
-typedef Precision64 Precision;
+typedef Float64 Float64;
+typedef Precision64 Precision64;
 
-using RawFloat = Float;
-class ExactFloat;
-class ValidatedFloat;
-class UpperFloat;
-class LowerFloat;
-class ApproximateFloat;
-class PositiveUpperFloat;
-using MetricFloat = ValidatedFloat;
-using BoundedFloat = ValidatedFloat;
-using ErrorFloat = PositiveUpperFloat;
-using BoundFloat = BoundedFloat;
-using MetrcFloat = MetricFloat;
-using ApprxFloat = ApproximateFloat;
-
-template<class P> class FloatTemplate;
-
-template<class P> class Float64Template;
-typedef ExactFloat ExactFloat64;
-typedef ValidatedFloat ValidatedFloat64;
-typedef UpperFloat UpperFloat64;
-typedef LowerFloat LowerFloat64;
-typedef ApproximateFloat ApproximateFloat64;
-typedef PositiveUpperFloat PositiveUpperFloat64;
+using RawFloat64 = Float64;
+class ExactFloat64;
+class ValidatedFloat64;
+class UpperFloat64;
+class LowerFloat64;
+class ApproximateFloat64;
+class PositiveUpperFloat64;
 using MetricFloat64 = ValidatedFloat64;
 using BoundedFloat64 = ValidatedFloat64;
 using ErrorFloat64 = PositiveUpperFloat64;
 using BoundFloat64 = BoundedFloat64;
 using MetrcFloat64 = MetricFloat64;
 using ApprxFloat64 = ApproximateFloat64;
+
+template<class P> class FloatTemplate;
+
+template<class P> class Float64Template;
 
 template<class P> class FloatMPTemplate;
 using ApproximateFloatMP = FloatMPTemplate<Approximate>;
@@ -93,18 +81,18 @@ template<> struct IsNumber<double> : True { };
 
 template<class X> struct IsFloat : False { };
 template<> struct IsFloat<double> : True { };
-template<> struct IsFloat<ExactFloat> : True { };
-template<> struct IsFloat<ValidatedFloat> : True { };
-template<> struct IsFloat<UpperFloat> : True { };
-template<> struct IsFloat<LowerFloat> : True { };
-template<> struct IsFloat<ApproximateFloat> : True { };
+template<> struct IsFloat<ExactFloat64> : True { };
+template<> struct IsFloat<ValidatedFloat64> : True { };
+template<> struct IsFloat<UpperFloat64> : True { };
+template<> struct IsFloat<LowerFloat64> : True { };
+template<> struct IsFloat<ApproximateFloat64> : True { };
 
 template<class T> struct IsNumber;
-template<> struct IsNumber<ExactFloat> : True { };
-template<> struct IsNumber<ValidatedFloat> : True { };
-template<> struct IsNumber<UpperFloat> : True { };
-template<> struct IsNumber<LowerFloat> : True { };
-template<> struct IsNumber<ApproximateFloat> : True { };
+template<> struct IsNumber<ExactFloat64> : True { };
+template<> struct IsNumber<ValidatedFloat64> : True { };
+template<> struct IsNumber<UpperFloat64> : True { };
+template<> struct IsNumber<LowerFloat64> : True { };
+template<> struct IsNumber<ApproximateFloat64> : True { };
 
 } // namespace Ariadne
 

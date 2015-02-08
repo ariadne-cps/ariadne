@@ -39,7 +39,7 @@ inline ExactInterval make_interval(ApproximateNumber x) { return ExactInterval(x
 inline ExactInterval make_interval(ExactNumber x) { return ExactInterval(x.raw()); }
 
 template<class X> Point<X>::Point(InitializerList<double> lst)
-    : Vector<X>(Vector<Float>(Vector<double>(lst)))
+    : Vector<X>(Vector<Float64>(Vector<double>(lst)))
 {
 }
 
@@ -54,7 +54,7 @@ template<class X> Point<X>* Point<X>::clone() const {
 
 template<class X> ExactBox Point<X>::bounding_box() const {
     ExactBox r(this->dimension());
-    UpperInterval e(-Float::eps(),+Float::eps());
+    UpperInterval e(-Float64::eps(),+Float64::eps());
     for(Nat i=0; i!=this->dimension(); ++i) {
         r[i]=make_exact_interval(make_exact((*this)[i])+e); }
     return r;
@@ -71,12 +71,12 @@ template class Point<ApproximateNumber>;
 
 ExactPoint make_point(const StringType& str)
 {
-    std::vector<Float> lst;
+    std::vector<Float64> lst;
     StringStream ss(str);
     read_sequence(ss,lst,'(',')',',');
-    Vector<Float> vec(lst);
+    Vector<Float64> vec(lst);
 
-    return ExactPoint(Vector<ExactFloat>(vec));
+    return ExactPoint(Vector<ExactFloat64>(vec));
 }
 
 } //namespace Ariadne

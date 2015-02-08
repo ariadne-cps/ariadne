@@ -69,14 +69,14 @@ inline Bool operator< (Rational q, Int n) { return q< Rational(n); }
 inline Bool operator==(Rational q, double n) { return q==Rational(n); }
 Rational midpoint(Rational const& q) { return q; }
 
-inline auto operator<=(ValidatedFloat x1, Int x2) -> decltype(x1<=ValidatedFloat(x2)) { return x1<=ValidatedFloat(x2); }
-inline auto operator>=(ValidatedFloat x1, Int x2) -> decltype(x1>=ValidatedFloat(x2)) { return x1>=ValidatedFloat(x2); }
-inline auto operator< (ValidatedFloat x1, Int x2) -> decltype(x1< ValidatedFloat(x2)) { return x1< ValidatedFloat(x2); }
-inline auto operator> (ValidatedFloat x1, Int x2) -> decltype(x1> ValidatedFloat(x2)) { return x1> ValidatedFloat(x2); }
+inline auto operator<=(ValidatedFloat64 x1, Int x2) -> decltype(x1<=ValidatedFloat64(x2)) { return x1<=ValidatedFloat64(x2); }
+inline auto operator>=(ValidatedFloat64 x1, Int x2) -> decltype(x1>=ValidatedFloat64(x2)) { return x1>=ValidatedFloat64(x2); }
+inline auto operator< (ValidatedFloat64 x1, Int x2) -> decltype(x1< ValidatedFloat64(x2)) { return x1< ValidatedFloat64(x2); }
+inline auto operator> (ValidatedFloat64 x1, Int x2) -> decltype(x1> ValidatedFloat64(x2)) { return x1> ValidatedFloat64(x2); }
 
 template<class X> struct RigorousNumericsTraits { typedef X Type; };
-template<> struct RigorousNumericsTraits<Float> { typedef UpperInterval Type; };
-//template<> struct RigorousNumericsTraits<Float> { typedef ValidatedFloat Type; };
+template<> struct RigorousNumericsTraits<Float64> { typedef UpperInterval Type; };
+//template<> struct RigorousNumericsTraits<Float64> { typedef ValidatedFloat64 Type; };
 template<class X> using RigorousNumericType = typename RigorousNumericsTraits<X>::Type;
 
 // Extend an Array of size m to an Array of size n
@@ -425,11 +425,11 @@ compute_c(const SizeType m, const Vector<X>& xl, const Vector<X>& xu, const Arra
     return c;
 }
 
-template<> Vector<Float>
-compute_c(const SizeType m, const Vector<Float>& xl, const Vector<Float>& xu, const Array<SizeType>& p, const Vector<UpperInterval>& x)
+template<> Vector<Float64>
+compute_c(const SizeType m, const Vector<Float64>& xl, const Vector<Float64>& xu, const Array<SizeType>& p, const Vector<UpperInterval>& x)
 {
     const SizeType n=x.size();
-    Vector<Float> c(n);
+    Vector<Float64> c(n);
     for(SizeType k=0; k!=m; ++k) {
         SizeType j=p[k];
         if(possibly(x[j]<=xl[j])) { c[j]=-1; }
@@ -552,7 +552,7 @@ template<class X,class XX,class XXX>
 Vector<XX>
 compute_z(const Matrix<X>& A, const Vector<XXX>& c, const Array<SizeType>& p, const Vector<XX>& y)
 {
-    const ExactFloat CUTOFF_THRESHOLD(1e-10);
+    const ExactFloat64 CUTOFF_THRESHOLD(1e-10);
     const SizeType m=A.row_size();
     const SizeType n=A.column_size();
     Vector<XX> z(n);
@@ -725,10 +725,10 @@ compute_rt(const Vector<X>& xl, const Vector<X>& xu, const Array<Slackness>& vt,
     return make_pair(r,t);
 }
 
-Pair<SizeType,RigorousNumericType<Float>>
-compute_rt(const Vector<Float>& xl, const Vector<Float>& xu, const Array<Slackness>& vt, const Array<SizeType>& p, const Vector<RigorousNumericType<Float>>& x, const Vector<RigorousNumericType<Float>>& d, const SizeType s)
+Pair<SizeType,RigorousNumericType<Float64>>
+compute_rt(const Vector<Float64>& xl, const Vector<Float64>& xu, const Array<Slackness>& vt, const Array<SizeType>& p, const Vector<RigorousNumericType<Float64>>& x, const Vector<RigorousNumericType<Float64>>& d, const SizeType s)
 {
-    typedef Float X;
+    typedef Float64 X;
     typedef RigorousNumericType<X> XX;
     const X inf=Ariadne::inf;
 
@@ -1476,7 +1476,7 @@ SimplexSolver<X>::hotstarted_minimise(const Vector<X>& c, const Vector<X>& xl, c
 
 
 
-template class SimplexSolver<Float>;
+template class SimplexSolver<Float64>;
 
 //inline UpperInterval operator+(const UpperInterval& ivl, const Rational& q) { return ivl+UpperInterval(q); }
 //inline UpperInterval operator+(const Rational& q, const UpperInterval& ivl) { return UpperInterval(q)+ivl; }

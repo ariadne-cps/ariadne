@@ -81,9 +81,9 @@ class Zonotope
     , public DrawableInterface
 {
   private:
-    Vector<Float> _centre;
-    Matrix<Float> _generators;
-    Vector<Float> _error;
+    Vector<Float64> _centre;
+    Matrix<Float64> _generators;
+    Vector<Float64> _error;
   public:
     //@{
     //! \name Constructors and destructors
@@ -97,13 +97,13 @@ class Zonotope
     explicit Zonotope(Nat d, Nat m);
 
     /*! \brief Construct from centre, generators, and a uniform error term. */
-    explicit Zonotope(const Vector<Float>& c, const Matrix<Float>& G, const Vector<Float>& e);
+    explicit Zonotope(const Vector<Float64>& c, const Matrix<Float64>& G, const Vector<Float64>& e);
     /*! \brief Construct from centre and generators. */
-    explicit Zonotope(const Vector<Float>& c, const Matrix<Float>& G);
+    explicit Zonotope(const Vector<Float64>& c, const Matrix<Float64>& G);
     /*! \brief Construct from interval centre and a generator matrix. */
-    explicit Zonotope(const Vector<ExactInterval>& c, const Matrix<Float>& G);
+    explicit Zonotope(const Vector<ExactInterval>& c, const Matrix<Float64>& G);
     /*! \brief Construct from centre and an interval generator matrix. */
-    explicit Zonotope(const Vector<Float>& c, const Matrix<ExactInterval>& G);
+    explicit Zonotope(const Vector<Float64>& c, const Matrix<ExactInterval>& G);
     /*! \brief Construct from an interval centre and an interval generator matrix. */
     explicit Zonotope(const Vector<ExactInterval>& c, const Matrix<ExactInterval>& G);
 
@@ -114,7 +114,7 @@ class Zonotope
     /*! \brief Construct a zonotope of dimension \a d with \a m generators from raw data.
      *  The data format is (c0,G00,G01,...,G0m,e0,c1,G10,...,G1m,e1,...).
      */
-    explicit Zonotope(InitializerList< std::tuple<Float,InitializerList<Float>,Float> > lst);
+    explicit Zonotope(InitializerList< std::tuple<Float64,InitializerList<Float64>,Float64> > lst);
 
 
     /*! \brief Convert from a box. */
@@ -146,19 +146,19 @@ class Zonotope
     Vector<ExactInterval> domain() const;
 
     /*! \brief The centre. */
-    const Vector<Float>& centre() const;
+    const Vector<Float64>& centre() const;
 
     /*! \brief The matrix of principle directions. */
-    const Matrix<Float>& generators() const;
+    const Matrix<Float64>& generators() const;
 
     /*! \brief The uniform error bound. */
-    const Vector<Float>& error() const;
+    const Vector<Float64>& error() const;
 
     /*! \brief A bounding box for the set. */
     UpperBox bounding_box() const;
 
     /*! \brief The radius of the set in the supremum norm. */
-    Float radius() const;
+    Float64 radius() const;
 
     /*! \brief Test if the set contains a point. */
     Tribool contains(const ExactPoint& pt) const;
@@ -218,7 +218,7 @@ class Zonotope
 
 Tribool empty(const Zonotope& z);
 Tribool bounded(const Zonotope& z);
-Float radius(const Zonotope& z);
+Float64 radius(const Zonotope& z);
 ExactBox bounding_box(const Zonotope& z);
 
 

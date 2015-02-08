@@ -32,7 +32,7 @@ namespace Ariadne {
 struct Factorial {
     Nat _n;
     Factorial(Nat n) : _n(n) { }
-    operator ValidatedFloat() { ValidatedFloat r=1; for(Nat i=1; i<=_n; ++i) { r*=i; } return r; }
+    operator ValidatedFloat64() { ValidatedFloat64 r=1; for(Nat i=1; i<=_n; ++i) { r*=i; } return r; }
 };
 
 template<class A> EnableIfGradedAlgebra<A>
@@ -54,12 +54,12 @@ compose(const Series<typename A::NumericType>& x, const A& y)
 template<class X> class TaylorSeries;
 
 template<class A> EnableIfNormedAlgebra<A>
-_compose(const TaylorSeries<ValidatedFloat>& ts, const A& tv, double eps)
+_compose(const TaylorSeries<ValidatedFloat64>& ts, const A& tv, double eps)
 {
     //std::cerr<<"_compose(TaylorSeries,A,Error)\n";
     //std::cerr<<"\n  ts="<<ts<<"\n  tv="<<tv<<"\n";
-    ExactFloat& vref=const_cast<ExactFloat&>(tv.value());
-    ExactFloat vtmp=vref;
+    ExactFloat64& vref=const_cast<ExactFloat64&>(tv.value());
+    ExactFloat64 vtmp=vref;
     vref=0;
     A r(tv.argument_size());
     r+=ts[ts.degree()];
@@ -77,7 +77,7 @@ _compose(const TaylorSeries<ValidatedFloat>& ts, const A& tv, double eps)
 }
 
 template<class A> EnableIfNormedAlgebra<A>
-compose(const TaylorSeries<ValidatedFloat>& ts, const A& tm)
+compose(const TaylorSeries<ValidatedFloat64>& ts, const A& tm)
 {
     return _compose(ts,tm,tm.tolerance());
 }
@@ -92,12 +92,12 @@ _compose1(const AnalyticFunction& fn, const A& tm, double eps)
     static const Nat DEGREE=18;
     static const double TRUNCATION_ERROR=1e-8;
     Nat d=DEGREE;
-    ExactFloat c=tm.value();
-    ValidatedFloat r=tm.range();
-    Series<ValidatedFloat> centre_series=fn.series(ValidatedFloat(c));
-    Series<ValidatedFloat> range_series=fn.series(r);
+    ExactFloat64 c=tm.value();
+    ValidatedFloat64 r=tm.range();
+    Series<ValidatedFloat64> centre_series=fn.series(ValidatedFloat64(c));
+    Series<ValidatedFloat64> range_series=fn.series(r);
 
-    Float truncation_error_estimate=mag(range_series[d])*pow(mag(r-c),d);
+    Float64 truncation_error_estimate=mag(range_series[d])*pow(mag(r-c),d);
     if(truncation_error_estimate>TRUNCATION_ERROR) {
         ARIADNE_WARN("Truncation error estimate "<<truncation_error_estimate
                      <<" is greater than maximum allowable truncation error "<<TRUNCATION_ERROR<<"\n");
@@ -123,17 +123,17 @@ template<class A> EnableIfNormedAlgebra<A>
 _compose2(const AnalyticFunction& fn, const A& tm, double eps)
 {
     static const Nat DEGREE=20;
-    static const Float TRUNCATION_ERROR=1e-8;
+    static const Float64 TRUNCATION_ERROR=1e-8;
     Nat d=DEGREE;
-    ExactFloat c=tm.value();
-    ValidatedFloat r=tm.range();
-    Series<ValidatedFloat> centre_series=fn.series(ValidatedFloat(c));
-    Series<ValidatedFloat> range_series=fn.series(r);
+    ExactFloat64 c=tm.value();
+    ValidatedFloat64 r=tm.range();
+    Series<ValidatedFloat64> centre_series=fn.series(ValidatedFloat64(c));
+    Series<ValidatedFloat64> range_series=fn.series(r);
 
     //std::cerr<<"c="<<c<<" r="<<r<<" r-c="<<r-c<<" e="<<mag(r-c)<<"\n";
     //std::cerr<<"cs[d]="<<centre_series[d]<<" rs[d]="<<range_series[d]<<"\n";
     //std::cerr<<"cs="<<centre_series<<"\nrs="<<range_series<<"\n";
-    ErrorFloat truncation_error=mag(range_series[d]-centre_series[d])*pow(mag(r-c),d);
+    ErrorFloat64 truncation_error=mag(range_series[d]-centre_series[d])*pow(mag(r-c),d);
     //std::cerr<<"te="<<truncation_error<<"\n";
     if(truncation_error.raw()>TRUNCATION_ERROR) {
         ARIADNE_WARN("Truncation error estimate "<<truncation_error
@@ -147,7 +147,7 @@ _compose2(const AnalyticFunction& fn, const A& tm, double eps)
         res=centre_series[d-i-1]+x*res;
         res.sweep(eps);
     }
-    res+=ValidatedFloat(-truncation_error,+truncation_error);
+    res+=ValidatedFloat64(-truncation_error,+truncation_error);
     return res;
 }
 
@@ -157,26 +157,26 @@ _compose2(const AnalyticFunction& fn, const A& tm, double eps)
 // error. This method is better than _compose2 since the truncation error is
 // assumed at the ends of the intervals
 template<class A> EnableIfNormedAlgebra<A>
-_compose3(const AnalyticFunction& fn, const A& tm, Float eps)
+_compose3(const AnalyticFunction& fn, const A& tm, Float64 eps)
 {
     static const Nat DEGREE=20;
-    static const Float TRUNCATION_ERROR=1e-8;
+    static const Float64 TRUNCATION_ERROR=1e-8;
     Nat d=DEGREE;
-    ExactFloat c=tm.value();
-    ValidatedFloat r=tm.range();
-    Series<ValidatedFloat> centre_series=fn.series(ValidatedFloat(c));
-    Series<ValidatedFloat> range_series=fn.series(r);
+    ExactFloat64 c=tm.value();
+    ValidatedFloat64 r=tm.range();
+    Series<ValidatedFloat64> centre_series=fn.series(ValidatedFloat64(c));
+    Series<ValidatedFloat64> range_series=fn.series(r);
 
     //std::cerr<<"c="<<c<<" r="<<r<<" r-c="<<r-c<<" e="<<mag(r-c)<<"\n";
     //std::cerr<<"cs[d]="<<centre_series[d]<<" rs[d]="<<range_series[d]<<"\n";
     //std::cerr<<"cs="<<centre_series<<"\nrs="<<range_series<<"\n";
-    ValidatedFloat se=range_series[d]-centre_series[d];
-    ValidatedFloat e=r-c;
-    ValidatedFloat p=pow(e,d-1);
-    p=ValidatedFloat(-(-p.lower()*(-e.lower())),p.upper()*e.upper());
+    ValidatedFloat64 se=range_series[d]-centre_series[d];
+    ValidatedFloat64 e=r-c;
+    ValidatedFloat64 p=pow(e,d-1);
+    p=ValidatedFloat64(-(-p.lower()*(-e.lower())),p.upper()*e.upper());
     //std::cerr<<"se="<<se<<" e="<<e<<" p="<<p<<std::endl;
     // FIXME: Here we assume the dth derivative of f is monotone increasing
-    Float truncation_error=max(-(-se.lower()*(-p.lower())),se.upper()*p.upper()).raw();
+    Float64 truncation_error=max(-(-se.lower()*(-p.lower())),se.upper()*p.upper()).raw();
     //std::cerr<<"te="<<truncation_error<<"\n";
     if(truncation_error>TRUNCATION_ERROR) {
         ARIADNE_WARN("Truncation error estimate "<<truncation_error
@@ -190,13 +190,13 @@ _compose3(const AnalyticFunction& fn, const A& tm, Float eps)
         res=centre_series[d-i-1]+x*res;
         //res.sweep(eps);
     }
-    res+=ValidatedFloat(-truncation_error,+truncation_error);
+    res+=ValidatedFloat64(-truncation_error,+truncation_error);
     return res;
 }
 
 
 template<class A> EnableIfNormedAlgebra<A>
-_compose(const AnalyticFunction& fn, const A& tm, Float eps)
+_compose(const AnalyticFunction& fn, const A& tm, Float64 eps)
 {
     return _compose3(fn,tm,eps);
 }
@@ -212,7 +212,7 @@ _compose(const AnalyticFunction& fn, const A& tm, Float eps)
 namespace {
 inline Int pow2(Nat k) { return 1<<k; }
 inline Int powm1(Nat k) { return (k%2) ? -1 : +1; }
-double rec_fac_up(Nat n) { Float::set_rounding_upward(); double r=1; for(Nat i=1; i<=n; ++i) { r/=i; } return r; }
+double rec_fac_up(Nat n) { Float64::set_rounding_upward(); double r=1; for(Nat i=1; i<=n; ++i) { r/=i; } return r; }
 }
 
 template<class A> EnableIfNormedAlgebra<A>
@@ -231,7 +231,7 @@ sqrt(const A& x)
         ARIADNE_THROW(DomainException,"log(A x)","x="<<x<<"\n");
     }
 
-    ErrorFloat eps=mag(rad/avg);
+    ErrorFloat64 eps=mag(rad/avg);
     ARIADNE_DEBUG_ASSERT(eps<1);
 
     Series<X> sqrt_series=Series<X>::sqrt(X(1));
@@ -263,12 +263,12 @@ rec(const A& x)
         ARIADNE_THROW(DivideByZeroException,"rec(A x)","x="<<x<<"\n");
     }
 
-    ErrorFloat eps=mag(rad/avg);
+    ErrorFloat64 eps=mag(rad/avg);
     ARIADNE_DEBUG_ASSERT(eps<1);
 
     // Compute the degree and truncation error
     Nat d=integer_cast<Nat>((log((1-eps)*tol)/log(eps))+1);
-    ErrorFloat te=pow(eps,d)/(1-eps);
+    ErrorFloat64 te=pow(eps,d)/(1-eps);
 
     A y=1-x/avg;
     A z=x.create();
@@ -296,11 +296,11 @@ log(const A& x)
         ARIADNE_THROW(DomainException,"log(A x)","x="<<x<<"\n");
     }
 
-    ErrorFloat eps=mag(rad/avg);
+    ErrorFloat64 eps=mag(rad/avg);
     ARIADNE_DEBUG_ASSERT(eps<1);
 
     Nat d=integer_cast<Nat>((log((1-eps)*tol)/log(eps)+1));
-    ErrorFloat trunc_err=pow(eps,d)/(1-eps)/d;
+    ErrorFloat64 trunc_err=pow(eps,d)/(1-eps)/d;
 
     A y=x/avg-X(1);
     A z=x.create();
@@ -326,8 +326,8 @@ template<class A> EnableIfNormedAlgebra<A> exp(const A& x)
 
     // Scale to unit interval
     Nat sfp=0; // A number such that 2^sfp>rad(x.range())
-    while(ExactFloat(two_exp(sfp))<rad) { ++sfp; }
-    ExactFloat sf=two_exp(sfp);
+    while(ExactFloat64(two_exp(sfp))<rad) { ++sfp; }
+    ExactFloat64 sf=two_exp(sfp);
     A y = (x-avg)/sf;
     auto yrad=rad*mag(sf);
 
@@ -370,7 +370,7 @@ sin(const A& x)
     auto avg=x.average();
     auto rad=x.radius();
     auto rng=avg.pm(rad);
-    Int n=integer_cast<Int>(floor( (avg/ApproximateFloat(pi)+1)/2 ));
+    Int n=integer_cast<Int>(floor( (avg/ApproximateFloat64(pi)+1)/2 ));
 
     A y=x-(2*n)*X(pi);
 
@@ -409,8 +409,8 @@ cos(const A& x)
     auto avg=x.average();
     auto rad=x.radius();
 
-    Float two_pi_approx=2*pi_approx();
-    Int n=integer_cast<Int>(floor( (avg/ApproximateFloat(pi)+1)/2 ));
+    Float64 two_pi_approx=2*pi_approx();
+    Int n=integer_cast<Int>(floor( (avg/ApproximateFloat64(pi)+1)/2 ));
 
     A y=x-(2*n)*X(pi);
 
@@ -450,9 +450,9 @@ asin(const A& x)
 /*
     static const Nat DEG=18;
     typedef typename A::NumericType X;
-    Float xavg = x.average();
-    Float xrad = x.radius();
-    ValidatedFloat xrng = xavg + ValidatedFloat(-xrad,+xrad);
+    Float64 xavg = x.average();
+    Float64 xrad = x.radius();
+    ValidatedFloat64 xrng = xavg + ValidatedFloat64(-xrad,+xrad);
     return compose(TaylorSeries(DEG,&Series<X>::asin,xavg,xrng),x);
 */
 }
@@ -464,9 +464,9 @@ acos(const A& x)
 /*
     static const Nat DEG=18;
     typedef typename A::NumericType X;
-    Float xavg = x.average();
-    Float xrad = x.radius();
-    ValidatedFloat xrng = xavg + ValidatedFloat(-xrad,+xrad);
+    Float64 xavg = x.average();
+    Float64 xrad = x.radius();
+    ValidatedFloat64 xrng = xavg + ValidatedFloat64(-xrad,+xrad);
     return compose(TaylorSeries(DEG,&Series<X>::acos,xavg,xrng),x);
 */
 }
@@ -478,9 +478,9 @@ atan(const A& x)
 /*
     static const Nat DEG=18;
     typedef typename A::NumericType X;
-    Float xavg = x.average();
-    Float xrad = x.radius();
-    ValidatedFloat xrng = xavg + ValidatedFloat(-xrad,+xrad);
+    Float64 xavg = x.average();
+    Float64 xrad = x.radius();
+    ValidatedFloat64 xrng = xavg + ValidatedFloat64(-xrad,+xrad);
     return compose(TaylorSeries(DEG,&Series<X>::atan,xavg,xrng),x);
 */
 }

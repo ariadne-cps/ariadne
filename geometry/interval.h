@@ -76,9 +76,9 @@ struct SizeOne { operator SizeType() const { return 1u; } };
 //! Alternatives \c midpoint(ivl) and \c radius(ivl) are also provided.
 //! Note that \c midpoint and \c radius return approximations to the true midpoint and radius of the interval. If \f$m\f$ and \f$r\f$ are the returned midpoint and radius of the interval \f$[l,u]\f$, the using exact arithmetic, we guarentee \f$m-r\leq l\f$ and \f$m+r\geq u\f$
 //!
-//! To test if an interval contains a point or another interval, use \c encloses(ExactInterval,Float) or \c encloses(ExactInterval,ExactInterval).
+//! To test if an interval contains a point or another interval, use \c encloses(ExactInterval,Float64) or \c encloses(ExactInterval,ExactInterval).
 //! The test \c refines(ExactInterval,ExactInterval) can also be used.
-//! \sa Float
+//! \sa Float64
 //!
 //! \par Python interface
 //!
@@ -107,23 +107,23 @@ class ExactInterval {
     //! \brief Copy constructor.
     ExactInterval(const ExactInterval& i) : l(i.l), u(i.u) { }
     //! \brief Convert from a floating-point number with an exact representation.
-    explicit ExactInterval(const ExactFloat& x) : l(x.raw()), u(x.raw()) { }
+    explicit ExactInterval(const ExactFloat64& x) : l(x.raw()), u(x.raw()) { }
     //! \brief Convert from a dyadic number.
     explicit ExactInterval(const Dyadic& x);
     //! \brief Convert from a decimal number.
     explicit ExactInterval(const Decimal& x);
     //! \brief Convert from a raw float number.
-    explicit ExactInterval(const Float& x);
+    explicit ExactInterval(const Float64& x);
 
     //! \brief Convert to a floating-point approximation.
-    explicit operator Float () const { return half_exact(add_near(l.raw(),u.raw())); }
+    explicit operator Float64 () const { return half_exact(add_near(l.raw(),u.raw())); }
     //! \brief Convert from a floating-point number with an exact representation.
-    explicit operator ValidatedFloat () const { return ValidatedFloat(this->lower(),this->upper()); }
+    explicit operator ValidatedFloat64 () const { return ValidatedFloat64(this->lower(),this->upper()); }
 
     //! \brief Create from explicitly given lower and upper bounds. Yields the interval \a [lower,upper].
-    ExactInterval(const Float& lower, const Float& upper) : l(lower), u(upper) { }
+    ExactInterval(const Float64& lower, const Float64& upper) : l(lower), u(upper) { }
     //! \brief Convert from a floating-point number with an exact representation.
-    ExactInterval(const ExactFloat& lower, const ExactFloat& upper) : l(lower.raw()), u(upper.raw()) { }
+    ExactInterval(const ExactFloat64& lower, const ExactFloat64& upper) : l(lower.raw()), u(upper.raw()) { }
     //! \brief Create from explicitly given lower and upper bounds. Yields the interval \a [lower,upper].
     ExactInterval(const Real& lower, const Real& upper);
 
@@ -134,27 +134,27 @@ class ExactInterval {
     SizeOne dimension() const { return SizeOne(); }
 
     //! \brief The lower bound of the interval.
-    const Float& lower_value() const { return l; }
-    const Float& lower_raw() const { return l; }
+    const Float64& lower_value() const { return l; }
+    const Float64& lower_raw() const { return l; }
     //! \brief The upper bound of the interval.
-    const Float& upper_value() const { return u; }
-    const Float& upper_raw() const { return u; }
+    const Float64& upper_value() const { return u; }
+    const Float64& upper_raw() const { return u; }
 
     //! \brief The lower bound of the interval.
-    const ExactFloat& lower() const { return reinterpret_cast<ExactFloat const&>(l); }
+    const ExactFloat64& lower() const { return reinterpret_cast<ExactFloat64 const&>(l); }
     //! \brief The upper bound of the interval.
-    const ExactFloat& upper() const { return reinterpret_cast<ExactFloat const&>(u); }
+    const ExactFloat64& upper() const { return reinterpret_cast<ExactFloat64 const&>(u); }
     //! \brief The midpoint of the interval.
-    const ValidatedFloat midpoint() const { return half(this->lower()+this->upper()); }
+    const ValidatedFloat64 midpoint() const { return half(this->lower()+this->upper()); }
     //! \brief The radius of the interval.
-    const ValidatedFloat radius() const { return half(this->upper()-this->lower()); }
+    const ValidatedFloat64 radius() const { return half(this->upper()-this->lower()); }
     //! \brief An over-approximation to the width of the interval.
-    const ErrorFloat width() const { return ErrorFloat(sub_up(u,l)); }
+    const ErrorFloat64 width() const { return ErrorFloat64(sub_up(u,l)); }
 
     //! \brief An approximation to the midpoint of the interval.
-    const ExactFloat centre() const { return ExactFloat(half(add_near(l,u))); }
+    const ExactFloat64 centre() const { return ExactFloat64(half(add_near(l,u))); }
     //! \brief An over-approximation to the distance between the centre and the endpoints.
-    const ErrorFloat error() const { Float c=half(add_near(l,u)); return ErrorFloat(max(sub_up(u,c),sub_up(c,l))); }
+    const ErrorFloat64 error() const { Float64 c=half(add_near(l,u)); return ErrorFloat64(max(sub_up(u,c),sub_up(c,l))); }
 
     //! \brief Tests if the interval is empty.
     Bool empty() const { return l>u; }
@@ -163,17 +163,17 @@ class ExactInterval {
 
     //! \brief Sets the interval to a "canonical" empty interval \a [1,0].
     Void set_empty() { l=+std::numeric_limits< double >::infinity(); u=-std::numeric_limits< double >::infinity(); }
-    Void set_lower(const ExactFloat& lower) { l=lower.raw(); }
+    Void set_lower(const ExactFloat64& lower) { l=lower.raw(); }
         // ARIADNE_ASSERT(lower<=this->u);
-    Void set_upper(const ExactFloat& upper) { u=upper.raw(); }
+    Void set_upper(const ExactFloat64& upper) { u=upper.raw(); }
         // ARIADNE_ASSERT(this->l<=upper);
-    Void set(const ExactFloat& lower, const ExactFloat& upper) { l=lower.raw(); u=upper.raw(); }
+    Void set(const ExactFloat64& lower, const ExactFloat64& upper) { l=lower.raw(); u=upper.raw(); }
         // ARIADNE_ASSERT(lower<=upper);
-    Void set_lower(const Float& lower) { l=lower; }
+    Void set_lower(const Float64& lower) { l=lower; }
         // ARIADNE_ASSERT(lower<=this->u);
-    Void set_upper(const Float& upper) { u=upper; }
+    Void set_upper(const Float64& upper) { u=upper; }
         // ARIADNE_ASSERT(this->l<=upper);
-    Void set(const Float& lower, const Float& upper) { l=lower; u=upper; }
+    Void set(const Float64& lower, const Float64& upper) { l=lower; u=upper; }
         // ARIADNE_ASSERT(lower<=upper);
   public:
     //! \brief Extract a double-precision point approximation to the value represented by the interval.
@@ -181,20 +181,20 @@ class ExactInterval {
     static Nat output_precision;
     static Void set_output_precision(Nat p) { output_precision=p; }
   private:
-    Float l, u;
+    Float64 l, u;
 };
 
 OutputStream& operator<<(OutputStream& os, const ExactInterval& ivl);
 
-inline ValidatedFloat midpoint(ExactInterval i) {
+inline ValidatedFloat64 midpoint(ExactInterval i) {
     return i.midpoint();
 }
 
-inline ValidatedFloat radius(ExactInterval i) {
+inline ValidatedFloat64 radius(ExactInterval i) {
     return i.radius();
 }
 
-inline ErrorFloat width(ExactInterval i) {
+inline ErrorFloat64 width(ExactInterval i) {
     return i.width();
 }
 
@@ -226,26 +226,26 @@ inline ExactInterval hull(ExactInterval i1, ExactInterval i2) {
 }
 
 //! \related ExactInterval \brief The hull of an interval and a point, equal to the smallest interval containing both.
-inline ExactInterval hull(ExactInterval i1, ExactFloat x2) {
+inline ExactInterval hull(ExactInterval i1, ExactFloat64 x2) {
     return ExactInterval(min(i1.lower_raw(),x2.raw()),max(i1.upper_raw(),x2.raw()));
 }
 
 //! \related ExactInterval \brief The hull of two points, equal to the smallest interval containing both.
-inline ExactInterval hull(ExactFloat x1, ExactFloat x2) {
+inline ExactInterval hull(ExactFloat64 x1, ExactFloat64 x2) {
     return ExactInterval(min(x1.raw(),x2.raw()),max(x1.raw(),x2.raw()));
 }
 
 
 //! \related ExactInterval \brief Test if the interval \a I contains the number \a x.
-inline Bool contains(ExactInterval i, ExactFloat x) { return i.lower_raw()<=x.raw() && x.raw()<=i.upper_raw(); }
-inline Bool contains(ExactInterval i, ValidatedFloat x) { return i.lower_raw()<=x.lower_raw() && x.upper_raw()<=i.upper_raw(); }
-inline Bool contains(ExactInterval i, ApproximateFloat x) { return i.lower_raw()<=x.raw() && x.raw()<=i.upper_raw(); }
-inline Bool contains(ExactInterval i, RawFloat x) { return i.lower_raw()<=x && x<=i.upper_raw(); }
+inline Bool contains(ExactInterval i, ExactFloat64 x) { return i.lower_raw()<=x.raw() && x.raw()<=i.upper_raw(); }
+inline Bool contains(ExactInterval i, ValidatedFloat64 x) { return i.lower_raw()<=x.lower_raw() && x.upper_raw()<=i.upper_raw(); }
+inline Bool contains(ExactInterval i, ApproximateFloat64 x) { return i.lower_raw()<=x.raw() && x.raw()<=i.upper_raw(); }
+inline Bool contains(ExactInterval i, RawFloat64 x) { return i.lower_raw()<=x && x<=i.upper_raw(); }
 
-inline Bool element(ExactFloat x, ExactInterval i) { return i.lower_raw()<=x.raw() && x.raw()<=i.upper_raw(); }
-inline Bool element(ValidatedFloat x, ExactInterval i) { return i.lower_raw()<=x.lower_raw() && x.upper_raw()<=i.upper_raw(); }
-inline Bool element(ApproximateFloat x, ExactInterval i) { return i.lower_raw()<=x.raw() && x.raw()<=i.upper_raw(); }
-inline Bool element(RawFloat x, ExactInterval i) { return i.lower_raw()<=x && x<=i.upper_raw(); }
+inline Bool element(ExactFloat64 x, ExactInterval i) { return i.lower_raw()<=x.raw() && x.raw()<=i.upper_raw(); }
+inline Bool element(ValidatedFloat64 x, ExactInterval i) { return i.lower_raw()<=x.lower_raw() && x.upper_raw()<=i.upper_raw(); }
+inline Bool element(ApproximateFloat64 x, ExactInterval i) { return i.lower_raw()<=x.raw() && x.raw()<=i.upper_raw(); }
+inline Bool element(RawFloat64 x, ExactInterval i) { return i.lower_raw()<=x && x<=i.upper_raw(); }
 
 //! \related ExactInterval \brief Test if the interval \a I1 is a subset of \a I2.
 inline Bool subset(ExactInterval i1, ExactInterval i2) { return i1.lower_raw()>=i2.lower_raw() && i1.upper_raw()<=i2.upper_raw(); }
@@ -279,58 +279,58 @@ class UpperInterval {
     explicit UpperInterval() : l(0.0), u(0.0) { }
     //! \brief Construct a singleton interval.
     // FIXME: Should make explicit, but this interferes with role as a numeric type
-    template<class F, EnableIf<IsSame<F,Float>> =dummy> UpperInterval(F point) : l(point), u(point) { }
+    template<class F, EnableIf<IsSame<F,Float64>> =dummy> UpperInterval(F point) : l(point), u(point) { }
     // FIXME: Should make explicit, but this interferes with role as a numeric type
     template<class N, EnableIf<IsIntegral<N>> = dummy> UpperInterval(N n) : l(n), u(n) { }
     // FIXME: Should make explicit, but this interferes with role as a numeric type
     template<class D, EnableIf<IsFloatingPoint<D>> =dummy> explicit UpperInterval(D point) : l(point), u(point) { }
     //! \brief Create from explicitly given lower and upper bounds. Yields the interval \a [lower,upper].
-    explicit UpperInterval(Float lower, Float upper) : l(lower), u(upper) { }
+    explicit UpperInterval(Float64 lower, Float64 upper) : l(lower), u(upper) { }
     template<class N, EnableIf<IsIntegral<N>> = dummy> UpperInterval(N lower, N upper) : l(lower), u(upper) { }
 
     //! \brief Construct an over-approximating interval.
-    UpperInterval(LowerFloat lower, UpperFloat upper) : UpperInterval(lower.raw(),upper.raw()) { }
+    UpperInterval(LowerFloat64 lower, UpperFloat64 upper) : UpperInterval(lower.raw(),upper.raw()) { }
     //! \brief Convert from an exact interval.
     UpperInterval(ExactInterval ivl) : UpperInterval(ivl.lower_raw(),ivl.upper_raw()) { }
 
     //! \brief Construct a singleton interval.
-    UpperInterval(ExactFloat point) : l(point.raw()), u(point.raw()) { }
-    UpperInterval(ValidatedFloat point) : l(point.lower_raw()), u(point.upper_raw()) { }
-    UpperInterval(Real point) : UpperInterval(ValidatedFloat(point)) { }
+    UpperInterval(ExactFloat64 point) : l(point.raw()), u(point.raw()) { }
+    UpperInterval(ValidatedFloat64 point) : l(point.lower_raw()), u(point.upper_raw()) { }
+    UpperInterval(Real point) : UpperInterval(ValidatedFloat64(point)) { }
 
     //! \brief Set the lower bound of the interval.
-    Void set_lower(LowerFloat lower) { l=lower.raw(); }
+    Void set_lower(LowerFloat64 lower) { l=lower.raw(); }
     //! \brief Set the upper bound of the interval.
-    Void set_upper(UpperFloat upper) { u=upper.raw(); }
+    Void set_upper(UpperFloat64 upper) { u=upper.raw(); }
 
     //! \brief The lower bound of the interval.
-    const Float& lower_raw() const { return l; }
+    const Float64& lower_raw() const { return l; }
     //! \brief The upper bound of the interval.
-    const Float& upper_raw() const { return u; }
+    const Float64& upper_raw() const { return u; }
 
     //! \brief The lower bound of the interval.
-    const LowerFloat& lower() const { return reinterpret_cast<LowerFloat const&>(l); }
+    const LowerFloat64& lower() const { return reinterpret_cast<LowerFloat64 const&>(l); }
     //! \brief The upper bound of the interval.
-    const UpperFloat& upper() const { return reinterpret_cast<UpperFloat const&>(u); }
+    const UpperFloat64& upper() const { return reinterpret_cast<UpperFloat64 const&>(u); }
     //! \brief The midpoint of the interval.
-    const ApproximateFloat midpoint() const { return half(this->lower()+this->upper()); }
-    const ExactFloat centre() const { return make_exact(half(this->lower()+this->upper())); }
+    const ApproximateFloat64 midpoint() const { return half(this->lower()+this->upper()); }
+    const ExactFloat64 centre() const { return make_exact(half(this->lower()+this->upper())); }
     //! \brief An over-approximation to the width of the interval.
-    const PositiveUpperFloat width() const { return PositiveUpperFloat((this->upper()-this->lower()).raw()); }
+    const PositiveUpperFloat64 width() const { return PositiveUpperFloat64((this->upper()-this->lower()).raw()); }
     //! \brief The radius of the interval.
-    const PositiveUpperFloat radius() const { return half(this->width()); }
+    const PositiveUpperFloat64 radius() const { return half(this->width()); }
 
-    explicit operator ValidatedFloat() const { return ValidatedFloat(l,u); }
+    explicit operator ValidatedFloat64() const { return ValidatedFloat64(l,u); }
 
     Tribool empty() const { return Tribool(l>u) || Tribool(indeterminate); }
 
-    friend const ApproximateFloat midpoint(UpperInterval const& ivl) {
+    friend const ApproximateFloat64 midpoint(UpperInterval const& ivl) {
         return ivl.midpoint(); }
     friend Bool empty(UpperInterval const& ivl) {
         return (ivl.l>ivl.u); }
     friend Bool bounded(UpperInterval const& ivl) {
         return -inf.raw()<ivl.lower_raw() && ivl.upper_raw()<+inf.raw(); }
-    friend Bool contains(UpperInterval const& ivl, ExactFloat const& x) {
+    friend Bool contains(UpperInterval const& ivl, ExactFloat64 const& x) {
         return ivl.lower_raw() <= x.raw() && x.raw() <= ivl.upper_raw(); }
     friend Tribool inside(UpperInterval const& ivl1, ExactInterval const& ivl2) {
         return (ivl1.lower_raw()>ivl2.lower_raw() && ivl1.upper_raw()<ivl2.upper_raw()) || Tribool(indeterminate); }
@@ -349,18 +349,18 @@ class UpperInterval {
     friend UpperInterval intersection(UpperInterval const& ivl1, UpperInterval const& ivl2) {
         return UpperInterval(max(ivl1.l,ivl2.l),min(ivl1.u,ivl2.u)); }
     friend UpperInterval widen(UpperInterval x) {
-        return UpperInterval(sub_down(x.lower_raw(),Float::min()),add_up(x.upper_raw(),Float::max())); }
+        return UpperInterval(sub_down(x.lower_raw(),Float64::min()),add_up(x.upper_raw(),Float64::max())); }
     friend OutputStream& operator<<(OutputStream& os, UpperInterval const& ivl) {
         return os << ExactInterval(ivl.lower_raw(),ivl.upper_raw()); }
   private:
-    Float l, u;
+    Float64 l, u;
 };
 
 template<class R, class A> inline R numeric_cast(A const&);
-template<> inline UpperInterval numeric_cast(const Float& a) { return UpperInterval(a,a); }
-template<> inline Float numeric_cast(const UpperInterval& a) { return midpoint(a).raw(); }
+template<> inline UpperInterval numeric_cast(const Float64& a) { return UpperInterval(a,a); }
+template<> inline Float64 numeric_cast(const UpperInterval& a) { return midpoint(a).raw(); }
 
-const ApproximateFloat midpoint(UpperInterval const& ivl);
+const ApproximateFloat64 midpoint(UpperInterval const& ivl);
 Bool bounded(UpperInterval const& ivl);
 Bool contains(UpperInterval const& ivl, ExactNumber const& x);
 Bool refines(UpperInterval const& ivl1, UpperInterval const& ivl2);
@@ -384,11 +384,11 @@ ExactInterval trunc(ExactInterval);
 ExactInterval trunc(ExactInterval, Nat eps);
 
 //! \related ExactInterval \brief The nearest representable number to the midpoint of the interval.
-inline Float med(ExactInterval i) { return half_exact(add_near(i.lower_raw(),i.upper_raw())); }
+inline Float64 med(ExactInterval i) { return half_exact(add_near(i.lower_raw(),i.upper_raw())); }
 //! \related ExactInterval \brief An over-approximation to the radius of the interval.
-inline Float rad(ExactInterval i) { return half_exact(sub_up(i.upper_raw(),i.lower_raw())); }
+inline Float64 rad(ExactInterval i) { return half_exact(sub_up(i.upper_raw(),i.lower_raw())); }
 //! \related ExactInterval \brief An over-approximation to the width of the interval.
-inline ExactFloat diam(ExactInterval i) { return ExactFloat(sub_up(i.upper_raw(),i.lower_raw())); }
+inline ExactFloat64 diam(ExactInterval i) { return ExactFloat64(sub_up(i.upper_raw(),i.lower_raw())); }
 
 //! \related UpperInterval \brief The interval of possible maximum values. Yields the interval between \c i1.upper_raw() and \c i2.upper_raw().
 inline UpperInterval max(UpperInterval i1,UpperInterval i2);
@@ -444,13 +444,13 @@ UpperInterval asin(UpperInterval);
 UpperInterval acos(UpperInterval);
 UpperInterval atan(UpperInterval);
 
-inline ValidatedFloat make_singleton(UpperInterval const& ivl) { return ValidatedFloat(ivl.lower(),ivl.upper()); }
-inline UpperInterval make_interval(ValidatedFloat const& x) { return UpperInterval(x.lower(),x.upper()); }
+inline ValidatedFloat64 make_singleton(UpperInterval const& ivl) { return ValidatedFloat64(ivl.lower(),ivl.upper()); }
+inline UpperInterval make_interval(ValidatedFloat64 const& x) { return UpperInterval(x.lower(),x.upper()); }
 
 //! \related UpperInterval \brief The magnitude of the interval \a I. Yields \f$ \max\{ |x|\,\mid\,x\in I \}\f$.
-inline PositiveUpperFloat mag(UpperInterval i) { return PositiveUpperFloat(max(abs(i.lower_raw()),abs(i.upper_raw()))); }
+inline PositiveUpperFloat64 mag(UpperInterval i) { return PositiveUpperFloat64(max(abs(i.lower_raw()),abs(i.upper_raw()))); }
 //! \related UpperInterval \brief The mignitude of the interval \a I. Yields \f$ \min\{ |x|\,\mid\,x\in I \}\f$.
-inline LowerFloat mig(UpperInterval i) { return LowerFloat(min(Float(0),min(abs(i.lower_raw()),abs(i.upper_raw())))); }
+inline LowerFloat64 mig(UpperInterval i) { return LowerFloat64(min(Float64(0),min(abs(i.lower_raw()),abs(i.upper_raw())))); }
 
 inline UpperInterval max(UpperInterval i1, UpperInterval i2) {
     return make_interval(max(make_singleton(i1),make_singleton(i2))); }
@@ -595,25 +595,25 @@ class ApproximateInterval {
   public:
     typedef Approximate Paradigm;
     explicit ApproximateInterval() : l(0.0), u(0.0) { }
-    explicit ApproximateInterval(Float point) : l(point), u(point) { }
-    explicit ApproximateInterval(Float lower, Float upper) : l(lower), u(upper) { }
-    explicit ApproximateInterval(ApproximateFloat point) : l(point.raw()), u(point.raw()) { }
-    explicit ApproximateInterval(ApproximateFloat lower, ApproximateFloat upper) : l(lower.raw()), u(upper.raw()) { }
+    explicit ApproximateInterval(Float64 point) : l(point), u(point) { }
+    explicit ApproximateInterval(Float64 lower, Float64 upper) : l(lower), u(upper) { }
+    explicit ApproximateInterval(ApproximateFloat64 point) : l(point.raw()), u(point.raw()) { }
+    explicit ApproximateInterval(ApproximateFloat64 lower, ApproximateFloat64 upper) : l(lower.raw()), u(upper.raw()) { }
     ApproximateInterval(ExactInterval ivl) : l(ivl.lower_raw()), u(ivl.upper_raw()) { }
     ApproximateInterval(UpperInterval ivl) : l(ivl.lower_raw()), u(ivl.upper_raw()) { }
-    Float const& lower_raw() const { return l; }
-    Float const& upper_raw() const { return l; }
-    ApproximateFloat lower() const { return ApproximateFloat(l); }
-    ApproximateFloat upper() const { return ApproximateFloat(u); }
-    ApproximateFloat midpoint() const { return ApproximateFloat((l+u)/2); }
-    ApproximateFloat radius() const { return ApproximateFloat((u-l)/2); }
-    ApproximateFloat width() const { return ApproximateFloat(u-l); }
-    friend Bool contains(ApproximateInterval const& ivl, ApproximateFloat const& x) {
+    Float64 const& lower_raw() const { return l; }
+    Float64 const& upper_raw() const { return l; }
+    ApproximateFloat64 lower() const { return ApproximateFloat64(l); }
+    ApproximateFloat64 upper() const { return ApproximateFloat64(u); }
+    ApproximateFloat64 midpoint() const { return ApproximateFloat64((l+u)/2); }
+    ApproximateFloat64 radius() const { return ApproximateFloat64((u-l)/2); }
+    ApproximateFloat64 width() const { return ApproximateFloat64(u-l); }
+    friend Bool contains(ApproximateInterval const& ivl, ApproximateFloat64 const& x) {
         return ivl.lower_raw()<=x.raw() && x.raw()<=ivl.upper_raw(); }
     friend OutputStream& operator<<(OutputStream& os, const ApproximateInterval& ivl) {
         return os << ExactInterval(ivl.lower_raw(),ivl.upper_raw()); }
   private:
-    Float l, u;
+    Float64 l, u;
 };
 
 

@@ -225,7 +225,7 @@ Void test_binary_tree() {
 Void test_grid_paving_cursor(){
 
     //Allocate the Grid
-    Grid theGrid( Vector<Float>({-0.25, 0.25, 1.5}), Vector<Float>({0.25, 0.25, 0.25}) );
+    Grid theGrid( Vector<Float64>({-0.25, 0.25, 1.5}), Vector<Float64>({0.25, 0.25, 0.25}) );
 
     //Define the higth of the primary root cell.
     const Nat theHeight = 2;
@@ -358,7 +358,7 @@ Void test_grid_paving_const_iterator(){
     std::vector< GridCell *> expected_result( 8 );
 
     //Allocate the Grid
-    Grid theGrid( Vector<Float>({-0.25, 0.25}), Vector<Float>({0.25, 0.25}) );
+    Grid theGrid( Vector<Float64>({-0.25, 0.25}), Vector<Float64>({0.25, 0.25}) );
 
     //Define the higth of the primary root cell.
     const Nat theHeight = 2;
@@ -505,8 +505,8 @@ Void test_grid_paving_const_iterator(){
 Void test_grid_sub_paving_one(){
 
     //Allocate the Grid, one Dimension
-    Vector<Float> originOne(1); originOne.set(0, 0.0);
-    Vector<Float> lengthsOne(1); lengthsOne.set(0, 0.5);
+    Vector<Float64> originOne(1); originOne.set(0, 0.0);
+    Vector<Float64> lengthsOne(1); lengthsOne.set(0, 0.5);
     const Grid theOneDimGrid( originOne, lengthsOne );
 
     //Define the higth of the primary root cell.
@@ -585,7 +585,7 @@ Void test_grid_sub_paving_one(){
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Test Mincing operations of GridTreeSubset on the two dimensional Grid");
     //Allocate the Grid, one Dimension
-    const Grid theTwoDimGrid( Vector<Float>({-0.25, 0.5}), Vector<Float>({0.25, 0.5}) );
+    const Grid theTwoDimGrid( Vector<Float64>({-0.25, 0.5}), Vector<Float64>({0.25, 0.5}) );
 
     //Create the GridTreeSubset
     GridTreeSubset theGridSPTwoDim( theTwoDimGrid, theHeight, thePathToSubPavingRoot, pRootTreeNode );
@@ -716,7 +716,7 @@ Void test_grid_sub_paving_three() {
 
 Void test_grid_paving(){
     //Create a trivial 4-dimensional Grid
-    Grid trivialFourDimGrid( Vector<Float>({0.0,0.0,0.0,0.0}), Vector<Float>({1.0,1.0,1.0,1.0}) );
+    Grid trivialFourDimGrid( Vector<Float64>({0.0,0.0,0.0,0.0}), Vector<Float64>({1.0,1.0,1.0,1.0}) );
 
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Test allocation of a trivial GridTreeSet");
@@ -740,7 +740,7 @@ Void test_grid_paving(){
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Test GridTreeSet (Grid, ExactBox) constructor");
     //Allocate the Grid, one Dimension
-    const Grid theTwoDimGrid( Vector<Float>({-0.25,0.5}), Vector<Float>({0.25,0.5}) );
+    const Grid theTwoDimGrid( Vector<Float64>({-0.25,0.5}), Vector<Float64>({0.25,0.5}) );
     //Note: the box is related to the grid, but not to the original space
     GridTreeSet theTwoDimPaving( theTwoDimGrid, make_box("[0,1.5]x[-1.5,3.5]") );
     ARIADNE_PRINT_TEST_COMMENT("The resulting GridTreeSet: ");
@@ -774,7 +774,7 @@ Void test_grid_paving(){
 
     // !!!
     //Create a trivial 2-dimensional Grid
-    Grid trivialTwoDimGrid( Vector<Float>({0.0,0.0}), Vector<Float>({1.0,1.0}) );
+    Grid trivialTwoDimGrid( Vector<Float64>({0.0,0.0}), Vector<Float64>({1.0,1.0}) );
     ARIADNE_PRINT_TEST_CASE_TITLE("Test GridTreeSet::restrict_to_height( const Nat theHeight )");
     GridTreeSet initialTreeSetOne( trivialTwoDimGrid, 2, make_binary_word("1111001000100"), make_binary_word("10010001") );
     GridTreeSet initialTreeSetOneCopyOne( initialTreeSetOne );
@@ -832,7 +832,7 @@ Void test_grid_cell(){
     ARIADNE_PRINT_TEST_COMMENT( "Dimension: 1, topCellHeight: 2, bottomCellHeight: 2" );
     ARIADNE_TEST_EQUAL( expected_result , theBinaryPath );
 
-    Grid theGrid( Vector<Float>({0.0,0.0}), Vector<Float>({1.0,1.0}) );
+    Grid theGrid( Vector<Float64>({0.0,0.0}), Vector<Float64>({1.0,1.0}) );
     //pFirstCell_01 == pSecondCell_01
     GridCell * pFirstCell_01 = new GridCell( theGrid, 0, make_binary_word("01") );
     GridCell * pSecondCell_01 = new GridCell( theGrid, 1, make_binary_word("1101") );

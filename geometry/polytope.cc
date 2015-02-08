@@ -75,7 +75,7 @@ Polytope::write(OutputStream& os) const
 
 
 
-Float
+Float64
 slope2d(const ExactPoint& pt1, const ExactPoint& pt2)
 {
     ARIADNE_ASSERT(pt1.dimension()==2 && pt2.dimension()==2);

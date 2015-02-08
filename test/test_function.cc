@@ -78,7 +78,7 @@ Void TestFunction::test_concept()
     //Polynomial<Real> p;
     //EffectiveScalarFunction pf(p);
 
-    //Vector<ApproximateFloat> b; Matrix<ApproximateFloat> A;
+    //Vector<ApproximateFloat64> b; Matrix<ApproximateFloat64> A;
     //VectorAffineFunction aff(A,b);
 
 }
@@ -90,7 +90,7 @@ Void TestFunction::test_scalar_function()
     ARIADNE_TEST_NAMED_CONSTRUCT(EffectiveScalarFunction,y,coordinate(3,1));
 
     ARIADNE_TEST_CONSTRUCT(EffectiveScalarFunction,f,(o+x*y));
-    ARIADNE_TEST_CONSTRUCT(Vector<ApproximateFloat>,p,({2.0,3.0,5.0}));
+    ARIADNE_TEST_CONSTRUCT(Vector<ApproximateFloat64>,p,({2.0,3.0,5.0}));
     ARIADNE_TEST_EQUAL(f(p),7.0);
 
     ARIADNE_TEST_PRINT(cos(f));
@@ -111,7 +111,7 @@ Void TestFunction::test_vector_function()
     EffectiveVectorFunction& id_ref=id;
     ARIADNE_TEST_PRINT(id_ref[0]);
 
-    Vector<ApproximateFloat> v={2.0,3.0,5.0};
+    Vector<ApproximateFloat64> v={2.0,3.0,5.0};
 
     ARIADNE_TEST_CONSTRUCT(EffectiveVectorFunction,f,(id));
     ARIADNE_TEST_EQUAL(f(v),v);
@@ -145,11 +145,11 @@ Void TestFunction::test_differentiation()
 
     EffectiveScalarFunction af=3*x-2*y+1;
     EffectiveScalarFunction daf=af.derivative(1);
-    ARIADNE_TEST_EQUAL(daf.evaluate(Vector<ApproximateFloat>{2.4,1.3}),-2.0_exact);
+    ARIADNE_TEST_EQUAL(daf.evaluate(Vector<ApproximateFloat64>{2.4,1.3}),-2.0_exact);
 
-    ARIADNE_TEST_EQUAL(x.derivative(0).evaluate(Vector<ApproximateFloat>{2.4,1.3}),1.0_exact);
-    ARIADNE_TEST_EQUAL(x.derivative(0).evaluate(Vector<ValidatedFloat>{{2.4,2.4},{1.3,1.3}}),1.0_exact);
-    ARIADNE_TEST_EQUAL(x.derivative(1).evaluate(Vector<ApproximateFloat>{2.4, 1.3}),0.0_exact);
+    ARIADNE_TEST_EQUAL(x.derivative(0).evaluate(Vector<ApproximateFloat64>{2.4,1.3}),1.0_exact);
+    ARIADNE_TEST_EQUAL(x.derivative(0).evaluate(Vector<ValidatedFloat64>{{2.4,2.4},{1.3,1.3}}),1.0_exact);
+    ARIADNE_TEST_EQUAL(x.derivative(1).evaluate(Vector<ApproximateFloat64>{2.4, 1.3}),0.0_exact);
 
 }
 

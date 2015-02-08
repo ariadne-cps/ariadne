@@ -140,11 +140,11 @@ template<class P> class Number
         explicit operator FloatTemplate<PP>() const { return this->get(PP()); }
 
     //! \brief Get the value of the number as a double-precision type
-    template<class PP> FloatTemplate<PP> get(PP par, Precision const& prec) const { return pointer()->_get(PP(),prec); }
+    template<class PP> FloatTemplate<PP> get(PP par, Precision64 const& prec) const { return pointer()->_get(PP(),prec); }
 
     //! \brief Get the value of the number represented by \a X with the same precision paramters as \a p.
     template<class PP, EnableIf<IsWeaker<PP,P>> = dummy>
-        FloatTemplate<PP> get(PP p, Precision const& pr) const { return this->ref()._get(p); }
+        FloatTemplate<PP> get(PP p, Precision64 const& pr) const { return this->ref()._get(p); }
 
 
     friend Number<P> operator+(Number<P> y) { return pos(y); }

@@ -35,7 +35,7 @@
 #include "algebra/matrix.h"
 
 namespace Ariadne {
-typedef Matrix<ApproximateFloat> ApproximateFloatMatrix;
+typedef Matrix<ApproximateFloat64> ApproximateFloatMatrix;
 }
 
 using namespace std;
@@ -60,15 +60,15 @@ TestMatrix::test()
 Void
 TestMatrix::test_concept()
 {
-    ApproximateFloat fx(1);
-    ValidatedFloat ix(1);
-    ExactFloat ex(1);
-    Vector<ApproximateFloat> fv;
-    Vector<ValidatedFloat> iv;
-    Vector<ExactFloat> ev;
-    Matrix<ApproximateFloat> fA;
-    Matrix<ValidatedFloat> iA;
-    Matrix<ExactFloat> eA;
+    ApproximateFloat64 fx(1);
+    ValidatedFloat64 ix(1);
+    ExactFloat64 ex(1);
+    Vector<ApproximateFloat64> fv;
+    Vector<ValidatedFloat64> iv;
+    Vector<ExactFloat64> ev;
+    Matrix<ApproximateFloat64> fA;
+    Matrix<ValidatedFloat64> iA;
+    Matrix<ExactFloat64> eA;
 
     fv=fv+fv; iv=ev+ev; iv=ev+iv; iv=iv+ev; iv=iv+iv;
     fv=fv-fv; iv=ev-ev; iv=ev-iv; iv=iv-ev; iv=iv-iv;
@@ -92,18 +92,18 @@ TestMatrix::test_concept()
 Void
 TestMatrix::test_misc()
 {
-    ApproximateFloat x=2.25;
-    ValidatedFloat ix(1.5,2.25);
-    ApproximateFloat Aptr[9]={-1.0,3.0,1.0, -1.0,1.0,2.0, 2.0,1.0,1.0};
-    ValidatedFloat iAptr[4]={-1,3, -1,1};
+    ApproximateFloat64 x=2.25;
+    ValidatedFloat64 ix(1.5,2.25);
+    ApproximateFloat64 Aptr[9]={-1.0,3.0,1.0, -1.0,1.0,2.0, 2.0,1.0,1.0};
+    ValidatedFloat64 iAptr[4]={-1,3, -1,1};
 
-    Matrix<ApproximateFloat> A0;
+    Matrix<ApproximateFloat64> A0;
     ARIADNE_TEST_PRINT(A0);
-    Matrix<ApproximateFloat> A1(3,2);
+    Matrix<ApproximateFloat64> A1(3,2);
     ARIADNE_TEST_PRINT(A1);
-    Matrix<ApproximateFloat> A2(3,3,Aptr);
+    Matrix<ApproximateFloat64> A2(3,3,Aptr);
     ARIADNE_TEST_PRINT(A2);
-    Matrix<ApproximateFloat> A3({{-1.0,3.0,1.0}, {-1.0,1.0,2.0}, {2.0,1.0,1.0}});
+    Matrix<ApproximateFloat64> A3({{-1.0,3.0,1.0}, {-1.0,1.0,2.0}, {2.0,1.0,1.0}});
     ARIADNE_TEST_PRINT(A3);
 
     for(SizeType i=0; i!=A2.row_size(); ++i) {
@@ -123,9 +123,9 @@ TestMatrix::test_misc()
     A1.at(1,0)=2.0;
     ARIADNE_TEST_EQUALS(A1[1][0],2.0);
 
-    A0=Matrix<ApproximateFloat>::zero(2,3);
+    A0=Matrix<ApproximateFloat64>::zero(2,3);
     ARIADNE_TEST_PRINT(A0);
-    A1=Matrix<ApproximateFloat>::identity(4);
+    A1=Matrix<ApproximateFloat64>::identity(4);
     ARIADNE_TEST_PRINT(A1);
 
     typedef ApproximateFloatMatrix MatrixType;

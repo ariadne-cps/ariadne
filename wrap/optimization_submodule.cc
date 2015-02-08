@@ -95,11 +95,11 @@ Void export_constraint()
 
 Void export_interior_point_solver()
 {
-    to_python< Ariadne::Tuple< Vector<Float>, Vector<Float>, Vector<Float> > >();
+    to_python< Ariadne::Tuple< Vector<Float64>, Vector<Float64>, Vector<Float64> > >();
 
     class_<InteriorPointSolver> interior_point_solver_class("InteriorPointSolver",init<>());
     interior_point_solver_class.def("minimise", &InteriorPointSolver::minimise);
-    interior_point_solver_class.def("feasible", (Tribool(InteriorPointSolver::*)(const Vector<Float>&,const Vector<Float>&, const Matrix<Float>&,const Vector<Float>&)const) &InteriorPointSolver::feasible);
+    interior_point_solver_class.def("feasible", (Tribool(InteriorPointSolver::*)(const Vector<Float64>&,const Vector<Float64>&, const Matrix<Float64>&,const Vector<Float64>&)const) &InteriorPointSolver::feasible);
     interior_point_solver_class.def("validate_feasibility", &InteriorPointSolver::validate_feasibility);
 }
 
@@ -141,7 +141,7 @@ Void optimization_submodule() {
     export_constraint();
     export_array<SizeType>("SizeArray");
     export_internal_array<Slackness>("SlacknessArray");
-    export_simplex_solver<Float>();
+    export_simplex_solver<Float64>();
     export_simplex_solver<Rational>();
     export_interior_point_solver();
     export_constraint_solver();

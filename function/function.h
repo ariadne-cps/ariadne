@@ -543,25 +543,25 @@ inline Vector<Differential<UpperInterval>> apply_derivative(VectorFunction<Valid
 
 
 inline Covector<UpperInterval> gradient_range(ValidatedScalarFunction const& f, const Vector<UpperInterval>& x) {
-    return static_cast<Covector<UpperInterval>>(static_cast<Covector<ValidatedFloat>>(gradient(f,reinterpret_cast<Vector<ValidatedFloat>const&>(x)))); }
+    return static_cast<Covector<UpperInterval>>(static_cast<Covector<ValidatedFloat64>>(gradient(f,reinterpret_cast<Vector<ValidatedFloat64>const&>(x)))); }
 inline Matrix<UpperInterval> jacobian_range(ValidatedVectorFunction const& f, const Vector<UpperInterval>& x) {
-    return static_cast<Matrix<UpperInterval>>(static_cast<Matrix<ValidatedFloat>>(jacobian(f,reinterpret_cast<Vector<ValidatedFloat>const&>(x)))); }
+    return static_cast<Matrix<UpperInterval>>(static_cast<Matrix<ValidatedFloat64>>(jacobian(f,reinterpret_cast<Vector<ValidatedFloat64>const&>(x)))); }
 
 /*
 inline Matrix<UpperInterval> jacobian(VectorFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {
-    return static_cast<Matrix<UpperInterval>>(f.jacobian(reinterpret_cast<Vector<ValidatedFloat>const&>(x))); }
+    return static_cast<Matrix<UpperInterval>>(f.jacobian(reinterpret_cast<Vector<ValidatedFloat64>const&>(x))); }
 inline Matrix<UpperInterval> jacobian(VectorFunction<ValidatedTag>const& f, const Vector<ExactInterval>& x) {
-    return static_cast<Matrix<UpperInterval>>(f.jacobian(reinterpret_cast<Vector<ValidatedFloat>const&>(x))); }
+    return static_cast<Matrix<UpperInterval>>(f.jacobian(reinterpret_cast<Vector<ValidatedFloat64>const&>(x))); }
 inline Matrix<UpperInterval> jacobian_range(VectorFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {
-    return static_cast<Matrix<UpperInterval>>(f.jacobian(reinterpret_cast<Vector<ValidatedFloat>const&>(x))); }
+    return static_cast<Matrix<UpperInterval>>(f.jacobian(reinterpret_cast<Vector<ValidatedFloat64>const&>(x))); }
 
 // FIXME: Needed to override templated gradient and jacobian
 inline Covector<UpperInterval> gradient(ScalarFunction<EffectiveTag>const& f, const Vector<UpperInterval>& x) {
-    return static_cast<Covector<UpperInterval>>(gradient(f,reinterpret_cast<Vector<ValidatedFloat>const&>(x))); }
+    return static_cast<Covector<UpperInterval>>(gradient(f,reinterpret_cast<Vector<ValidatedFloat64>const&>(x))); }
 inline Covector<UpperInterval> gradient(ScalarFunction<EffectiveTag>const& f, const Vector<ExactInterval>& x) {
     return gradient(f,static_cast<Vector<UpperInterval>>(x)); }
 inline Matrix<UpperInterval> jacobian(VectorFunction<EffectiveTag>const& f, const Vector<UpperInterval>& x) {
-    return static_cast<Matrix<UpperInterval>>(f.jacobian(reinterpret_cast<Vector<ValidatedFloat>const&>(x))); }
+    return static_cast<Matrix<UpperInterval>>(f.jacobian(reinterpret_cast<Vector<ValidatedFloat64>const&>(x))); }
 inline Matrix<UpperInterval> jacobian(VectorFunction<EffectiveTag>const& f, const Vector<ExactInterval>& x) {
     return jacobian(f,static_cast<Vector<UpperInterval>>(x)); }
 */

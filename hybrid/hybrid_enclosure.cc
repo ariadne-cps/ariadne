@@ -272,7 +272,7 @@ Void HybridEnclosure::apply_reset(DiscreteEvent event, DiscreteLocation target, 
     this->_set.apply_map(map);
 }
 
-Void HybridEnclosure::apply_fixed_evolve_step(const ValidatedVectorFunctionModel& phi, const ExactFloat& elps)
+Void HybridEnclosure::apply_fixed_evolve_step(const ValidatedVectorFunctionModel& phi, const ExactFloat64& elps)
 {
     this->_set.apply_fixed_evolve_step(phi,elps);
 }
@@ -332,7 +332,7 @@ Void HybridEnclosure::set_time(ValidatedScalarFunction time)
 }
 
 
-Void HybridEnclosure::set_maximum_time(DiscreteEvent event, Float final_time)
+Void HybridEnclosure::set_maximum_time(DiscreteEvent event, Float64 final_time)
 {
     this->_set.new_negative_parameter_constraint(this->time_function()-ValidatedNumber(final_time)); // Deprecated
 }
@@ -341,7 +341,7 @@ Void HybridEnclosure::new_time_step_bound(DiscreteEvent event, ValidatedScalarFu
     ARIADNE_NOT_IMPLEMENTED; // Deprecated
 }
 
-Void HybridEnclosure::set_step_time(ExactFloat time)
+Void HybridEnclosure::set_step_time(ExactFloat64 time)
 {
     ARIADNE_NOT_IMPLEMENTED; // Deprecated
 }

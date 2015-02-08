@@ -35,112 +35,112 @@
 
 namespace Ariadne {
 
-Nat ApproximateFloat::output_precision = 4;
-Nat ValidatedFloat::output_precision = 8;
-Nat ExactFloat::output_precision = 16;
+Nat ApproximateFloat64::output_precision = 4;
+Nat ValidatedFloat64::output_precision = 8;
+Nat ExactFloat64::output_precision = 16;
 
-const ExactFloat infty = ExactFloat(Float::inf());
+const ExactFloat64 infty = ExactFloat64(Float64::inf());
 
 
-ExactFloat::ExactFloat(Integer const& z)
+ExactFloat64::ExactFloat64(Integer const& z)
     : v(z.get_si())
 {
     int n=z.get_si();
     ARIADNE_PRECONDITION(z==n);
 }
 
-ExactFloat make_exact(Real const& r) {
-    ApproximateFloat a(r); return ExactFloat(a.raw());
+ExactFloat64 make_exact(Real const& r) {
+    ApproximateFloat64 a(r); return ExactFloat64(a.raw());
 }
 
-OutputStream& operator<<(OutputStream& os, ExactFloat const& x) {
-    os << std::showpoint << std::setprecision(ExactFloat::output_precision) << x.raw();
+OutputStream& operator<<(OutputStream& os, ExactFloat64 const& x) {
+    os << std::showpoint << std::setprecision(ExactFloat64::output_precision) << x.raw();
     return os;
 }
 
 
-ValidatedFloat::ValidatedFloat(Number<Validated> const& x) {
+ValidatedFloat64::ValidatedFloat64(Number<Validated> const& x) {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-ValidatedFloat widen(ValidatedFloat const& x)
+ValidatedFloat64 widen(ValidatedFloat64 const& x)
 {
-    Float::RoundingModeType rm=Float::get_rounding_mode();
-    const Float& xl=x.lower_raw();
-    const Float& xu=x.upper_raw();
-    const Float m=std::numeric_limits<float>::min();
-    Float::set_rounding_upward();
-    Float wu=add(xu,m);
-    Float mwl=add(neg(xl),m);
-    Float wl=neg(mwl);
-    Float::set_rounding_mode(rm);
+    Float64::RoundingModeType rm=Float64::get_rounding_mode();
+    const Float64& xl=x.lower_raw();
+    const Float64& xu=x.upper_raw();
+    const Float64 m=std::numeric_limits<float>::min();
+    Float64::set_rounding_upward();
+    Float64 wu=add(xu,m);
+    Float64 mwl=add(neg(xl),m);
+    Float64 wl=neg(mwl);
+    Float64::set_rounding_mode(rm);
     assert(wl<xl); assert(wu>xu);
-    return ValidatedFloat(wl,wu);
+    return ValidatedFloat64(wl,wu);
 }
 
-ValidatedFloat narrow(ValidatedFloat const& x)
+ValidatedFloat64 narrow(ValidatedFloat64 const& x)
 {
-    Float::RoundingModeType rm=Float::get_rounding_mode();
-    const Float& xl=x.lower_raw();
-    const Float& xu=x.upper_raw();
-    const Float m=std::numeric_limits<float>::min();
-    Float::set_rounding_upward();
-    Float mnu=add(neg(xu),m);
-    Float nu=neg(mnu);
-    Float nl=add(xl,m);
-    Float::set_rounding_mode(rm);
+    Float64::RoundingModeType rm=Float64::get_rounding_mode();
+    const Float64& xl=x.lower_raw();
+    const Float64& xu=x.upper_raw();
+    const Float64 m=std::numeric_limits<float>::min();
+    Float64::set_rounding_upward();
+    Float64 mnu=add(neg(xu),m);
+    Float64 nu=neg(mnu);
+    Float64 nl=add(xl,m);
+    Float64::set_rounding_mode(rm);
     assert(xl<nl); assert(nu<xu);
-    return ValidatedFloat(nl,nu);
+    return ValidatedFloat64(nl,nu);
 }
 
-ValidatedFloat trunc(ValidatedFloat const& x)
+ValidatedFloat64 trunc(ValidatedFloat64 const& x)
 {
-    Float::RoundingModeType rm=Float::get_rounding_mode();
+    Float64::RoundingModeType rm=Float64::get_rounding_mode();
     const double& xl=x.lower_raw().get_d();
     const double& xu=x.upper_raw().get_d();
     // Use machine epsilon instead of minimum to move away from zero
     const float fm=std::numeric_limits<float>::epsilon();
     volatile float tu=xu;
-    if(tu<xu) { Float::set_rounding_upward(); tu+=fm; }
+    if(tu<xu) { Float64::set_rounding_upward(); tu+=fm; }
     volatile float tl=xl;
-    if(tl>xl) { Float::set_rounding_downward(); tl-=fm; }
-    Float::set_rounding_mode(rm);
+    if(tl>xl) { Float64::set_rounding_downward(); tl-=fm; }
+    Float64::set_rounding_mode(rm);
     assert(tl<=xl); assert(tu>=xu);
-    return ValidatedFloat(double(tl),double(tu));
+    return ValidatedFloat64(double(tl),double(tu));
 }
 
-ValidatedFloat trunc(ValidatedFloat const& x, Nat n)
+ValidatedFloat64 trunc(ValidatedFloat64 const& x, Nat n)
 {
-    ValidatedFloat e=ValidatedFloat(std::pow(2.0,52-(Int)n));
-    ValidatedFloat y=x+e;
+    ValidatedFloat64 e=ValidatedFloat64(std::pow(2.0,52-(Int)n));
+    ValidatedFloat64 y=x+e;
     return y-e;
 }
 
-ValidatedFloat rec(ValidatedFloat const& x)
+ValidatedFloat64 rec(ValidatedFloat64 const& x)
 {
-    const Float& xl=x.lower_raw();
-    const Float& xu=x.upper_raw();
-    Float rl,ru;
+    const Float64& xl=x.lower_raw();
+    const Float64& xu=x.upper_raw();
+    Float64 rl,ru;
     if(xl>0 || xu<0) {
         rl=rec_down(xu);
         ru=rec_up(xl);
     } else {
         rl=-inf;
         ru=+inf;
-        ARIADNE_THROW(DivideByZeroException,"ValidatedFloat rec(ValidatedFloat ivl)","ivl="<<x);
+        ARIADNE_THROW(DivideByZeroException,"ValidatedFloat64 rec(ValidatedFloat64 ivl)","ivl="<<x);
     }
-    return ValidatedFloat(rl,ru);
+    return ValidatedFloat64(rl,ru);
 }
 
 
-ValidatedFloat mul(ValidatedFloat const& x1, ValidatedFloat const& x2)
+ValidatedFloat64 mul(ValidatedFloat64 const& x1, ValidatedFloat64 const& x2)
 {
-    const Float& x1l=x1.lower_raw();
-    const Float& x1u=x1.upper_raw();
-    const Float& i2l=x2.lower_raw();
-    const Float& i2u=x2.upper_raw();
-    Float rl,ru;
-    Float::RoundingModeType rnd=Float::get_rounding_mode();
+    const Float64& x1l=x1.lower_raw();
+    const Float64& x1u=x1.upper_raw();
+    const Float64& i2l=x2.lower_raw();
+    const Float64& i2u=x2.upper_raw();
+    Float64 rl,ru;
+    Float64::RoundingModeType rnd=Float64::get_rounding_mode();
     if(x1l>=0) {
         if(i2l>=0) {
             rl=mul_down(x1l,i2l); ru=mul_up(x1u,i2u);
@@ -164,47 +164,47 @@ ValidatedFloat mul(ValidatedFloat const& x1, ValidatedFloat const& x2)
         } else if(i2u<=0) {
             rl=mul_down(x1u,i2l); ru=mul_up(x1l,i2l);
         } else {
-            Float::set_rounding_downward();
+            Float64::set_rounding_downward();
             rl=min(mul(x1u,i2l),mul(x1l,i2u));
-            Float::set_rounding_upward();
+            Float64::set_rounding_upward();
             ru=max(mul(x1l,i2l),mul(x1u,i2u));
         }
     }
-    Float::set_rounding_mode(rnd);
-    return ValidatedFloat(rl,ru);
+    Float64::set_rounding_mode(rnd);
+    return ValidatedFloat64(rl,ru);
 }
 
 
-ValidatedFloat mul(ValidatedFloat const& x1, ExactFloat const& x2)
+ValidatedFloat64 mul(ValidatedFloat64 const& x1, ExactFloat64 const& x2)
 {
-    Float::RoundingModeType rnd=Float::get_rounding_mode();
-    const Float& x1l=x1.lower_raw();
-    const Float& x1u=x1.upper_raw();
-    const Float& x2v=x2.raw();
-    Float rl,ru;
+    Float64::RoundingModeType rnd=Float64::get_rounding_mode();
+    const Float64& x1l=x1.lower_raw();
+    const Float64& x1u=x1.upper_raw();
+    const Float64& x2v=x2.raw();
+    Float64 rl,ru;
     if(x2>=0) {
         rl=mul_down(x1l,x2v); ru=mul_up(x1u,x2v);
     } else {
         rl=mul_down(x1u,x2v); ru=mul_up(x1l,x2v);
     }
-    Float::set_rounding_mode(rnd);
-    return ValidatedFloat(rl,ru);
+    Float64::set_rounding_mode(rnd);
+    return ValidatedFloat64(rl,ru);
 }
 
 
-ValidatedFloat mul(ExactFloat const& x1, ValidatedFloat const& x2) {
+ValidatedFloat64 mul(ExactFloat64 const& x1, ValidatedFloat64 const& x2) {
     return mul(x2,x1);
 }
 
 
-ValidatedFloat div(ValidatedFloat const& x1, ValidatedFloat const& x2)
+ValidatedFloat64 div(ValidatedFloat64 const& x1, ValidatedFloat64 const& x2)
 {
-    Float::RoundingModeType rnd=Float::get_rounding_mode();
-    const Float& x1l=x1.lower_raw();
-    const Float& x1u=x1.upper_raw();
-    const Float& i2l=x2.lower_raw();
-    const Float& i2u=x2.upper_raw();
-    Float rl,ru;
+    Float64::RoundingModeType rnd=Float64::get_rounding_mode();
+    const Float64& x1l=x1.lower_raw();
+    const Float64& x1u=x1.upper_raw();
+    const Float64& i2l=x2.lower_raw();
+    const Float64& i2u=x2.upper_raw();
+    Float64 rl,ru;
     if(i2l>0) {
         if(x1l>=0) {
             rl=div_down(x1l,i2u); ru=div_up(x1u,i2l);
@@ -224,62 +224,62 @@ ValidatedFloat div(ValidatedFloat const& x1, ValidatedFloat const& x2)
         }
     }
     else {
-        // ARIADNE_THROW(DivideByZeroException,"ValidatedFloat div(ValidatedFloat ivl1, ValidatedFloat ivl2)","ivl1="<<x1<<", ivl2="<<x2);
-        rl=-Float::inf();
-        ru=+Float::inf();
+        // ARIADNE_THROW(DivideByZeroException,"ValidatedFloat64 div(ValidatedFloat64 ivl1, ValidatedFloat64 ivl2)","ivl1="<<x1<<", ivl2="<<x2);
+        rl=-Float64::inf();
+        ru=+Float64::inf();
     }
-    Float::set_rounding_mode(rnd);
-    return ValidatedFloat(rl,ru);
+    Float64::set_rounding_mode(rnd);
+    return ValidatedFloat64(rl,ru);
 }
 
 
 
-ValidatedFloat div(ValidatedFloat const& x1, ExactFloat const& x2)
+ValidatedFloat64 div(ValidatedFloat64 const& x1, ExactFloat64 const& x2)
 {
-    Float::RoundingModeType rnd=Float::get_rounding_mode();
-    const Float& x1l=x1.lower_raw();
-    const Float& x1u=x1.upper_raw();
-    const Float& x2v=x2.raw();
-    Float rl,ru;
+    Float64::RoundingModeType rnd=Float64::get_rounding_mode();
+    const Float64& x1l=x1.lower_raw();
+    const Float64& x1u=x1.upper_raw();
+    const Float64& x2v=x2.raw();
+    Float64 rl,ru;
     if(x2v>0) {
         rl=div_down(x1l,x2v); ru=div_up(x1u,x2v);
     } else if(x2v<0) {
         rl=div_down(x1u,x2v); ru=div_up(x1l,x2v);
     } else {
-        rl=-Float::inf();
-        ru=+Float::inf();
+        rl=-Float64::inf();
+        ru=+Float64::inf();
     }
-    Float::set_rounding_mode(rnd);
-    return ValidatedFloat(rl,ru);
+    Float64::set_rounding_mode(rnd);
+    return ValidatedFloat64(rl,ru);
 }
 
 
-ValidatedFloat div(ExactFloat const& x1, ValidatedFloat const& x2)
+ValidatedFloat64 div(ExactFloat64 const& x1, ValidatedFloat64 const& x2)
 {
-    Float::RoundingModeType rnd=Float::get_rounding_mode();
-    const Float& x1v=x1.raw();
-    const Float& i2l=x2.lower_raw();
-    const Float& i2u=x2.upper_raw();
-    Float rl,ru;
+    Float64::RoundingModeType rnd=Float64::get_rounding_mode();
+    const Float64& x1v=x1.raw();
+    const Float64& i2l=x2.lower_raw();
+    const Float64& i2u=x2.upper_raw();
+    Float64 rl,ru;
     if(i2l<=0 && i2u>=0) {
-        ARIADNE_THROW(DivideByZeroException,"ValidatedFloat div(Float const& x1, ValidatedFloat ivl2)","x1="<<x1<<", ivl2="<<x2);
-        rl=-Float::inf();
-        ru=+Float::inf();
+        ARIADNE_THROW(DivideByZeroException,"ValidatedFloat64 div(Float64 const& x1, ValidatedFloat64 ivl2)","x1="<<x1<<", ivl2="<<x2);
+        rl=-Float64::inf();
+        ru=+Float64::inf();
     } else if(x1v>=0) {
         rl=div_down(x1v,i2u); ru=div_up(x1v,i2l);
     } else {
         rl=div_down(x1v,i2l); ru=div_up(x1v,i2u);
     }
-    Float::set_rounding_mode(rnd);
-    return ValidatedFloat(rl,ru);
+    Float64::set_rounding_mode(rnd);
+    return ValidatedFloat64(rl,ru);
 }
 
-ValidatedFloat sqr(ValidatedFloat const& x)
+ValidatedFloat64 sqr(ValidatedFloat64 const& x)
 {
-    Float::RoundingModeType rnd=Float::get_rounding_mode();
-    const Float& xl=x.lower_raw();
-    const Float& xu=x.upper_raw();
-    Float rl,ru;
+    Float64::RoundingModeType rnd=Float64::get_rounding_mode();
+    const Float64& xl=x.lower_raw();
+    const Float64& xu=x.upper_raw();
+    Float64 rl,ru;
     if(xl>0.0) {
         rl=mul_down(xl,xl);
         ru=mul_up(xu,xu);
@@ -288,69 +288,69 @@ ValidatedFloat sqr(ValidatedFloat const& x)
         ru=mul_up(xl,xl);
     } else {
         rl=nul(xl);
-        Float ru1=mul_up(xl,xl);
-        Float ru2=mul_up(xu,xu);
+        Float64 ru1=mul_up(xl,xl);
+        Float64 ru2=mul_up(xu,xu);
         ru=max(ru1,ru2);
     }
-    Float::set_rounding_mode(rnd);
-    return ValidatedFloat(rl,ru);
+    Float64::set_rounding_mode(rnd);
+    return ValidatedFloat64(rl,ru);
 }
 
 
 
 
-ValidatedFloat pow(ValidatedFloat const& x, Int n) {
+ValidatedFloat64 pow(ValidatedFloat64 const& x, Int n) {
     if(n<0) { return pow(rec(x),Nat(-n)); }
     else return pow(x,Nat(n));
 }
 
-ValidatedFloat pow(ValidatedFloat const& x, Nat m) {
-    ValidatedFloat y = x;
+ValidatedFloat64 pow(ValidatedFloat64 const& x, Nat m) {
+    ValidatedFloat64 y = x;
     if(m%2==0) { y=abs(x); }
-    Float rl=pow_down(y.lower_raw(),m);
-    Float ru=pow_up(y.upper_raw(),m);
-    return ValidatedFloat(rl,ru);
+    Float64 rl=pow_down(y.lower_raw(),m);
+    Float64 ru=pow_up(y.upper_raw(),m);
+    return ValidatedFloat64(rl,ru);
 }
 
 
 
-ValidatedFloat sqrt(ValidatedFloat const& x) {
-    return ValidatedFloat(sqrt_down(x.lower_raw()),sqrt_up(x.upper_raw()));
+ValidatedFloat64 sqrt(ValidatedFloat64 const& x) {
+    return ValidatedFloat64(sqrt_down(x.lower_raw()),sqrt_up(x.upper_raw()));
 }
 
-ValidatedFloat exp(ValidatedFloat const& x) {
-    return ValidatedFloat(exp_down(x.lower_raw()),exp_up(x.upper_raw()));
+ValidatedFloat64 exp(ValidatedFloat64 const& x) {
+    return ValidatedFloat64(exp_down(x.lower_raw()),exp_up(x.upper_raw()));
 }
 
-ValidatedFloat log(ValidatedFloat const& x) {
-    return ValidatedFloat(log_down(x.lower_raw()),log_up(x.upper_raw()));
+ValidatedFloat64 log(ValidatedFloat64 const& x) {
+    return ValidatedFloat64(log_down(x.lower_raw()),log_up(x.upper_raw()));
 }
 
 
-ValidatedFloat pi_val() { return ValidatedFloat(pi_down(),pi_up()); }
+ValidatedFloat64 pi_val() { return ValidatedFloat64(pi_down(),pi_up()); }
 
 
-ValidatedFloat sin(ValidatedFloat const& x)
+ValidatedFloat64 sin(ValidatedFloat64 const& x)
 {
     return cos(x-half(pi_val()));
 }
 
-ValidatedFloat cos(ValidatedFloat const& x)
+ValidatedFloat64 cos(ValidatedFloat64 const& x)
 {
     ARIADNE_ASSERT(x.lower_raw()<=x.upper_raw());
-    Float::RoundingModeType rnd = Float::get_rounding_mode();
+    Float64::RoundingModeType rnd = Float64::get_rounding_mode();
 
-    static const ExactFloat two(2);
+    static const ExactFloat64 two(2);
 
-    if(x.error().raw()>2*pi_down()) { return ValidatedFloat(-1.0,+1.0); }
+    if(x.error().raw()>2*pi_down()) { return ValidatedFloat64(-1.0,+1.0); }
 
-    Float n=floor(x.lower_raw()/(2*pi_approx())+0.5);
-    ValidatedFloat y=x-two*ExactFloat(n)*pi_val();
+    Float64 n=floor(x.lower_raw()/(2*pi_approx())+0.5);
+    ValidatedFloat64 y=x-two*ExactFloat64(n)*pi_val();
 
     ARIADNE_ASSERT(y.lower_raw()<=pi_up());
     ARIADNE_ASSERT(y.upper_raw()>=-pi_up());
 
-    Float rl,ru;
+    Float64 rl,ru;
     if(y.lower_raw()<=-pi_down()) {
         if(y.upper_raw()<=0.0) { rl=-1.0; ru=cos_up(y.upper_raw()); }
         else { rl=-1.0; ru=+1.0; }
@@ -366,68 +366,68 @@ ValidatedFloat cos(ValidatedFloat const& x)
         assert(false);
     }
 
-    Float::set_rounding_mode(rnd);
-    return ValidatedFloat(rl,ru);
+    Float64::set_rounding_mode(rnd);
+    return ValidatedFloat64(rl,ru);
 }
 
-ValidatedFloat tan(ValidatedFloat const& x) {
+ValidatedFloat64 tan(ValidatedFloat64 const& x) {
     return mul(sin(x),rec(cos(x)));
 }
 
-ValidatedFloat asin(ValidatedFloat const& x) {
+ValidatedFloat64 asin(ValidatedFloat64 const& x) {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-ValidatedFloat acos(ValidatedFloat const& x) {
+ValidatedFloat64 acos(ValidatedFloat64 const& x) {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-ValidatedFloat atan(ValidatedFloat const& x) {
+ValidatedFloat64 atan(ValidatedFloat64 const& x) {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
 
-ValidatedFloat::ValidatedFloat(const Dyadic& b) : ValidatedFloat(b.operator Rational()) { }
+ValidatedFloat64::ValidatedFloat64(const Dyadic& b) : ValidatedFloat64(b.operator Rational()) { }
 
-ValidatedFloat::ValidatedFloat(const Decimal& d) : ValidatedFloat(d.operator Rational()) { }
+ValidatedFloat64::ValidatedFloat64(const Decimal& d) : ValidatedFloat64(d.operator Rational()) { }
 
 
-ValidatedFloat::ValidatedFloat(const Integer& z) : ValidatedFloat(Rational(z)) {
+ValidatedFloat64::ValidatedFloat64(const Integer& z) : ValidatedFloat64(Rational(z)) {
 }
 
-ValidatedFloat::ValidatedFloat(const Rational& q) : ValidatedFloat(q,q) {
+ValidatedFloat64::ValidatedFloat64(const Rational& q) : ValidatedFloat64(q,q) {
 }
 
-ValidatedFloat::ValidatedFloat(const Rational& ql, const Rational& qu) : l(ql.get_d()), u(qu.get_d())  {
+ValidatedFloat64::ValidatedFloat64(const Rational& ql, const Rational& qu) : l(ql.get_d()), u(qu.get_d())  {
     while(Rational(l)>ql) { l=next_down(l); }
     while(Rational(u)<qu) { u=next_up(u); }
 }
 
-ValidatedFloat ExactFloat::pm(ErrorFloat e) const {
-    ExactFloat const& v=*this; return ValidatedFloat(v-e,v+e);
+ValidatedFloat64 ExactFloat64::pm(ErrorFloat64 e) const {
+    ExactFloat64 const& v=*this; return ValidatedFloat64(v-e,v+e);
 }
 
 OutputStream&
-operator<<(OutputStream& os, const ValidatedFloat& ivl)
+operator<<(OutputStream& os, const ValidatedFloat64& ivl)
 {
-    //if(ivl.lower_raw()==ivl.upper_raw()) { return os << "{" << std::setprecision(ValidatedFloat::output_precision) << ivl.lower_raw().get_d() << ; }
-    Float::RoundingModeType rnd=Float::get_rounding_mode();
+    //if(ivl.lower_raw()==ivl.upper_raw()) { return os << "{" << std::setprecision(ValidatedFloat64::output_precision) << ivl.lower_raw().get_d() << ; }
+    Float64::RoundingModeType rnd=Float64::get_rounding_mode();
     os << '{';
-    Float::set_rounding_downward();
-    os << std::showpoint << std::setprecision(ValidatedFloat::output_precision) << ivl.lower().get_d();
+    Float64::set_rounding_downward();
+    os << std::showpoint << std::setprecision(ValidatedFloat64::output_precision) << ivl.lower().get_d();
     os << ':';
-    Float::set_rounding_upward();
-    os << std::showpoint << std::setprecision(ValidatedFloat::output_precision) << ivl.upper().get_d();
-    Float::set_rounding_mode(rnd);
+    Float64::set_rounding_upward();
+    os << std::showpoint << std::setprecision(ValidatedFloat64::output_precision) << ivl.upper().get_d();
+    Float64::set_rounding_mode(rnd);
     os << '}';
     return os;
 
 }
 
 InputStream&
-operator>>(InputStream& is, ValidatedFloat& x)
+operator>>(InputStream& is, ValidatedFloat64& x)
 {
-    Float l,u;
+    Float64 l,u;
     char cl,cm,cr;
     is >> cl >> l >> cm >> u >> cr;
     ARIADNE_ASSERT(is);
@@ -439,164 +439,164 @@ operator>>(InputStream& is, ValidatedFloat& x)
 }
 
 
-UpperFloat::UpperFloat(Number<Upper> const& x) {
+UpperFloat64::UpperFloat64(Number<Upper> const& x) {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
 
-OutputStream& operator<<(OutputStream& os, UpperFloat const& x) {
-    Float::RoundingModeType rnd=Float::get_rounding_mode();
-    Float::set_rounding_upward();
-    os << std::showpoint << std::setprecision(ValidatedFloat::output_precision) << x.raw();
-    Float::set_rounding_mode(rnd);
+OutputStream& operator<<(OutputStream& os, UpperFloat64 const& x) {
+    Float64::RoundingModeType rnd=Float64::get_rounding_mode();
+    Float64::set_rounding_upward();
+    os << std::showpoint << std::setprecision(ValidatedFloat64::output_precision) << x.raw();
+    Float64::set_rounding_mode(rnd);
     return os;
 }
 
-UpperFloat sqr(UpperFloat const& x) {
+UpperFloat64 sqr(UpperFloat64 const& x) {
     ARIADNE_PRECONDITION(x.raw()>=0.0);
-    return UpperFloat(mul_up(x.raw(),x.raw()));
+    return UpperFloat64(mul_up(x.raw(),x.raw()));
 }
 
-UpperFloat mul(UpperFloat const& x1, UpperFloat const& x2) {
+UpperFloat64 mul(UpperFloat64 const& x1, UpperFloat64 const& x2) {
     ARIADNE_PRECONDITION(x1.raw()>=0.0 && x2.raw() >= 0.0);
-    return UpperFloat(mul_up(x1.raw(),x2.raw()));
+    return UpperFloat64(mul_up(x1.raw(),x2.raw()));
 }
 
-UpperFloat div(UpperFloat const& x1, LowerFloat const& x2) {
+UpperFloat64 div(UpperFloat64 const& x1, LowerFloat64 const& x2) {
     ARIADNE_PRECONDITION(x1.raw()>=0.0 && x2.raw() > 0.0);
-    return UpperFloat(div_up(x1.raw(),x2.raw()));
+    return UpperFloat64(div_up(x1.raw(),x2.raw()));
 }
 
-UpperFloat pow(UpperFloat const& x, Nat n) {
+UpperFloat64 pow(UpperFloat64 const& x, Nat n) {
     ARIADNE_PRECONDITION(x.raw()>=0.0);
-    return UpperFloat(pow_up(x.raw(),n));
+    return UpperFloat64(pow_up(x.raw(),n));
 }
 
 
-UpperFloat rec(LowerFloat const& x) {
-    return UpperFloat(rec_up(x.raw()));
+UpperFloat64 rec(LowerFloat64 const& x) {
+    return UpperFloat64(rec_up(x.raw()));
 }
 
-UpperFloat sqrt(UpperFloat const& x) {
-    return UpperFloat(sqrt_up(x.raw()));
+UpperFloat64 sqrt(UpperFloat64 const& x) {
+    return UpperFloat64(sqrt_up(x.raw()));
 }
 
-UpperFloat exp(UpperFloat const& x) {
-    return UpperFloat(exp_up(x.raw()));
+UpperFloat64 exp(UpperFloat64 const& x) {
+    return UpperFloat64(exp_up(x.raw()));
 }
 
-UpperFloat log(UpperFloat const& x) {
-    return UpperFloat(log_up(x.raw()));
+UpperFloat64 log(UpperFloat64 const& x) {
+    return UpperFloat64(log_up(x.raw()));
 }
 
-template<> Int integer_cast(UpperFloat const& x) { return static_cast<Int>(x.u.get_d()); }
-template<> Nat integer_cast(UpperFloat const& x) { return static_cast<Nat>(x.u.get_d()); }
+template<> Int integer_cast(UpperFloat64 const& x) { return static_cast<Int>(x.u.get_d()); }
+template<> Nat integer_cast(UpperFloat64 const& x) { return static_cast<Nat>(x.u.get_d()); }
 
 
 
 
-PositiveUpperFloat operator+(PositiveUpperFloat const& x1, PositiveUpperFloat const& x2) {
-    return PositiveUpperFloat(add_up(x1.raw(),x2.raw()));
+PositiveUpperFloat64 operator+(PositiveUpperFloat64 const& x1, PositiveUpperFloat64 const& x2) {
+    return PositiveUpperFloat64(add_up(x1.raw(),x2.raw()));
 }
 
-PositiveUpperFloat operator-(PositiveUpperFloat const& x1, LowerFloat const& x2) {
+PositiveUpperFloat64 operator-(PositiveUpperFloat64 const& x1, LowerFloat64 const& x2) {
     ARIADNE_PRECONDITION(x1.raw()>=x2.raw());
-    return PositiveUpperFloat(sub_up(x1.raw(),x2.raw()));
+    return PositiveUpperFloat64(sub_up(x1.raw(),x2.raw()));
 }
 
-PositiveUpperFloat operator*(PositiveUpperFloat const& x1, PositiveUpperFloat const& x2) {
-    return PositiveUpperFloat(mul_up(x1.raw(),x2.raw()));
+PositiveUpperFloat64 operator*(PositiveUpperFloat64 const& x1, PositiveUpperFloat64 const& x2) {
+    return PositiveUpperFloat64(mul_up(x1.raw(),x2.raw()));
 }
 
-PositiveUpperFloat operator/(PositiveUpperFloat const& x1, LowerFloat const& x2) {
+PositiveUpperFloat64 operator/(PositiveUpperFloat64 const& x1, LowerFloat64 const& x2) {
     ARIADNE_PRECONDITION(x2.raw()>=0);
-    return PositiveUpperFloat(div_up(x1.raw(),x2.raw()));
+    return PositiveUpperFloat64(div_up(x1.raw(),x2.raw()));
 }
 
-PositiveUpperFloat pow(PositiveUpperFloat const& x, Nat m) {
-    return PositiveUpperFloat(pow_up(x.raw(),m));
+PositiveUpperFloat64 pow(PositiveUpperFloat64 const& x, Nat m) {
+    return PositiveUpperFloat64(pow_up(x.raw(),m));
 }
 
-PositiveUpperFloat half(PositiveUpperFloat const& x) {
-    return PositiveUpperFloat(half(x.raw()));
+PositiveUpperFloat64 half(PositiveUpperFloat64 const& x) {
+    return PositiveUpperFloat64(half(x.raw()));
 }
 
 
-LowerFloat::LowerFloat(Number<Lower> const& x) {
+LowerFloat64::LowerFloat64(Number<Lower> const& x) {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-LowerFloat mul(LowerFloat const& x1, LowerFloat const& x2) {
+LowerFloat64 mul(LowerFloat64 const& x1, LowerFloat64 const& x2) {
     ARIADNE_PRECONDITION(x1.raw()>=0 && x2.raw()>=0);
-    return LowerFloat(mul_down(x1.raw(),x2.raw()));
+    return LowerFloat64(mul_down(x1.raw(),x2.raw()));
 }
 
-LowerFloat div(LowerFloat const& x1, UpperFloat const& x2) {
+LowerFloat64 div(LowerFloat64 const& x1, UpperFloat64 const& x2) {
     //ARIADNE_PRECONDITION_MSG(x1.raw()>=0 && x2.raw()>=0,"x1="<<x1<<", x2="<<x2);
-    return LowerFloat(div_down(x1.raw(),x2.raw()));
+    return LowerFloat64(div_down(x1.raw(),x2.raw()));
 }
 
-LowerFloat rec(UpperFloat const& x) {
-    return LowerFloat(rec_down(x.raw()));
+LowerFloat64 rec(UpperFloat64 const& x) {
+    return LowerFloat64(rec_down(x.raw()));
 }
 
-LowerFloat sqrt(LowerFloat const& x) {
-    return LowerFloat(sqrt_down(x.raw()));
+LowerFloat64 sqrt(LowerFloat64 const& x) {
+    return LowerFloat64(sqrt_down(x.raw()));
 }
 
-LowerFloat exp(LowerFloat const& x) {
-    return LowerFloat(exp_down(x.raw()));
+LowerFloat64 exp(LowerFloat64 const& x) {
+    return LowerFloat64(exp_down(x.raw()));
 }
 
-LowerFloat log(LowerFloat const& x) {
-    return LowerFloat(log_down(x.raw()));
+LowerFloat64 log(LowerFloat64 const& x) {
+    return LowerFloat64(log_down(x.raw()));
 }
 
-OutputStream& operator<<(OutputStream& os, LowerFloat const& x) {
-    Float::RoundingModeType rnd=Float::get_rounding_mode();
-    Float::set_rounding_downward();
-    os << std::showpoint << std::setprecision(ValidatedFloat::output_precision) << x.raw();
-    Float::set_rounding_mode(rnd);
+OutputStream& operator<<(OutputStream& os, LowerFloat64 const& x) {
+    Float64::RoundingModeType rnd=Float64::get_rounding_mode();
+    Float64::set_rounding_downward();
+    os << std::showpoint << std::setprecision(ValidatedFloat64::output_precision) << x.raw();
+    Float64::set_rounding_mode(rnd);
     return os;
 }
 
-template<> Int integer_cast(LowerFloat const& x) { return static_cast<Int>(x.l.get_d()); }
-template<> Nat integer_cast(LowerFloat const& x) { return static_cast<Nat>(x.l.get_d()); }
+template<> Int integer_cast(LowerFloat64 const& x) { return static_cast<Int>(x.l.get_d()); }
+template<> Nat integer_cast(LowerFloat64 const& x) { return static_cast<Nat>(x.l.get_d()); }
 
 
 
-//ExactFloat inf = ExactFloat(std::numeric_limits< double >::infinity());
-ApproximateFloat::ApproximateFloat(Dyadic const& b) : ApproximateFloat(b.operator Rational()) { }
-ApproximateFloat::ApproximateFloat(Decimal const& d) : ApproximateFloat(d.operator Rational()) { }
+//ExactFloat64 inf = ExactFloat64(std::numeric_limits< double >::infinity());
+ApproximateFloat64::ApproximateFloat64(Dyadic const& b) : ApproximateFloat64(b.operator Rational()) { }
+ApproximateFloat64::ApproximateFloat64(Decimal const& d) : ApproximateFloat64(d.operator Rational()) { }
 
-ApproximateFloat::ApproximateFloat(Number<Approximate> const& x) { ARIADNE_NOT_IMPLEMENTED; }
+ApproximateFloat64::ApproximateFloat64(Number<Approximate> const& x) { ARIADNE_NOT_IMPLEMENTED; }
 
-ExactFloat::operator Rational() const {
+ExactFloat64::operator Rational() const {
     return Rational(this->get_d());
 }
 
-ApproximateFloat::ApproximateFloat(Rational const& q) : ApproximateFloat(q.get_d()) {
+ApproximateFloat64::ApproximateFloat64(Rational const& q) : ApproximateFloat64(q.get_d()) {
 }
 
-OutputStream& operator<<(OutputStream& os, ApproximateFloat const& x) {
-    return os << std::showpoint << std::setprecision(ApproximateFloat::output_precision) << x.raw();
+OutputStream& operator<<(OutputStream& os, ApproximateFloat64 const& x) {
+    return os << std::showpoint << std::setprecision(ApproximateFloat64::output_precision) << x.raw();
 }
 
-template<> Int integer_cast(ApproximateFloat const& x) { return static_cast<Int>(x.a.get_d()); }
-template<> Nat integer_cast(ApproximateFloat const& x) { return static_cast<Nat>(x.a.get_d()); }
+template<> Int integer_cast(ApproximateFloat64 const& x) { return static_cast<Int>(x.a.get_d()); }
+template<> Nat integer_cast(ApproximateFloat64 const& x) { return static_cast<Nat>(x.a.get_d()); }
 
 
 
 
-ApproximateFloat create_float(Number<Approximate> x) { return ApproximateFloat(x); }
-LowerFloat create_float(Number<Lower> x) { return LowerFloat(x); }
-UpperFloat create_float(Number<Upper> x) { return UpperFloat(x); }
-ValidatedFloat create_float(Number<Validated> x) { return ValidatedFloat(x); }
-ValidatedFloat create_float(Number<Effective> x) { return ValidatedFloat(x); }
-ValidatedFloat create_float(Number<Exact> x) { return ValidatedFloat(x); }
-ValidatedFloat create_float(Real r) { return ValidatedFloat(r); }
-ValidatedFloat create_float(Rational q) { return ValidatedFloat(q); }
-ExactFloat create_float(Integer z) { return ExactFloat(z); }
+ApproximateFloat64 create_float(Number<Approximate> x) { return ApproximateFloat64(x); }
+LowerFloat64 create_float(Number<Lower> x) { return LowerFloat64(x); }
+UpperFloat64 create_float(Number<Upper> x) { return UpperFloat64(x); }
+ValidatedFloat64 create_float(Number<Validated> x) { return ValidatedFloat64(x); }
+ValidatedFloat64 create_float(Number<Effective> x) { return ValidatedFloat64(x); }
+ValidatedFloat64 create_float(Number<Exact> x) { return ValidatedFloat64(x); }
+ValidatedFloat64 create_float(Real r) { return ValidatedFloat64(r); }
+ValidatedFloat64 create_float(Rational q) { return ValidatedFloat64(q); }
+ExactFloat64 create_float(Integer z) { return ExactFloat64(z); }
 
 
 

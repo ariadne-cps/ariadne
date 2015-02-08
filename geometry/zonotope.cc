@@ -45,8 +45,8 @@
 
 namespace Ariadne {
 
-inline Vector<Float> add_approx(const Vector<Float>& v1, const Vector<Float>& v2) { return v1+v2; }
-inline Vector<Float> sub_approx(const Vector<Float>& v1, const Vector<Float>& v2) { return v1-v2; }
+inline Vector<Float64> add_approx(const Vector<Float64>& v1, const Vector<Float64>& v2) { return v1+v2; }
+inline Vector<Float64> sub_approx(const Vector<Float64>& v1, const Vector<Float64>& v2) { return v1-v2; }
 
 template<class X> class LinearProgram {
   public:
@@ -57,7 +57,7 @@ template<class X> class LinearProgram {
 
 template<class BS>
 ListSet<BS>
-subdivide(const BS& bs, const Float& r)
+subdivide(const BS& bs, const Float64& r)
 {
     ListSet<BS> result;
     ListSet<BS> working(bs);
@@ -75,7 +75,7 @@ subdivide(const BS& bs, const Float& r)
 
 
 Void
-accumulate(Float& value, Float& error, Nat n, const Float* aptr, const Float* bptr)
+accumulate(Float64& value, Float64& error, Nat n, const Float64* aptr, const Float64* bptr)
 {
     ExactInterval v=ExactInterval(value);
     for(Nat i=0; i!=n; ++i) {
@@ -85,12 +85,12 @@ accumulate(Float& value, Float& error, Nat n, const Float* aptr, const Float* bp
     error=add_up(error,v.radius().raw());
 }
 
-Vector<Float>
+Vector<Float64>
 row_norms(const Matrix<ExactInterval>& A)
 {
     Nat const& m=A.row_size();
     Nat const& n=A.column_size();
-    Vector<Float> e(m);
+    Vector<Float64> e(m);
     for(Nat i=0; i!=m; ++i) {
         for(Nat j=0; j!=n; ++j) {
             e[i]=add_up(e[i],mag(A[i][j]));
@@ -99,12 +99,12 @@ row_norms(const Matrix<ExactInterval>& A)
     return e;
 }
 
-Vector<Float>
+Vector<Float64>
 row_errors(const Matrix<ExactInterval>& A)
 {
     Nat const& m=A.row_size();
     Nat const& n=A.column_size();
-    Vector<Float> e(m);
+    Vector<Float64> e(m);
     for(Nat i=0; i!=m; ++i) {
         for(Nat j=0; j!=n; ++j) {
             e[i]=add_up(e[i],A[i][j].radius().raw());
@@ -113,10 +113,10 @@ row_errors(const Matrix<ExactInterval>& A)
     return e;
 }
 
-Vector<Float>
+Vector<Float64>
 errors(const Vector<ExactInterval>& pt)
 {
-    Vector<Float> result(pt.size());
+    Vector<Float64> result(pt.size());
     for(Nat i=0; i!=pt.size(); ++i) {
         result[i]=pt[i].radius().raw();
     }
@@ -124,11 +124,11 @@ errors(const Vector<ExactInterval>& pt)
 }
 
 
-Vector<Float>
+Vector<Float64>
 row_errors(const Vector<ExactInterval>& pt, const Matrix<ExactInterval>& A)
 {
     assert(pt.size()==A.row_size());
-    Vector<Float> result(pt.size());
+    Vector<Float64> result(pt.size());
     for(Nat i=0; i!=A.row_size(); ++i) {
         result[i]=pt[i].radius().raw();
         for(Nat j=0; j!=A.column_size(); ++j) {
@@ -138,10 +138,10 @@ row_errors(const Vector<ExactInterval>& pt, const Matrix<ExactInterval>& A)
     return result;
 }
 
-Vector<Float>
-add_up(const Vector<Float>& v1, const Vector<Float>& v2)
+Vector<Float64>
+add_up(const Vector<Float64>& v1, const Vector<Float64>& v2)
 {
-    Vector<Float> result;
+    Vector<Float64> result;
     for(Nat i=0; i!=v1.size(); ++i) {
         result[i]=add_up(v1[i],v2[i]);
     }
@@ -149,7 +149,7 @@ add_up(const Vector<Float>& v1, const Vector<Float>& v2)
 }
 
 Tribool
-norm_grtr(const Vector<Float>& v1, const Vector<Float>& v2)
+norm_grtr(const Vector<Float64>& v1, const Vector<Float64>& v2)
 {
     return norm(v1)>norm(v2);
 }
@@ -182,10 +182,10 @@ Zonotope::Zonotope(Nat d, Nat m)
 {
 }
 
-Zonotope::Zonotope(InitializerList< std::tuple<Float,InitializerList<Float>,Float> > lst)
+Zonotope::Zonotope(InitializerList< std::tuple<Float64,InitializerList<Float64>,Float64> > lst)
     : _centre(lst.size()), _generators(lst.size(),lst.size()==0?0u:std::get<1>(*lst.begin()).size()), _error(lst.size())
 {
-    for(InitializerList< std::tuple<Float,InitializerList<Float>,Float> >::ConstIterator aff_iter=lst.begin();
+    for(InitializerList< std::tuple<Float64,InitializerList<Float64>,Float64> >::ConstIterator aff_iter=lst.begin();
         aff_iter!=lst.end(); ++aff_iter)
     {
         Nat i=aff_iter-lst.begin();
@@ -199,7 +199,7 @@ Zonotope::Zonotope(InitializerList< std::tuple<Float,InitializerList<Float>,Floa
 }
 
 
-Zonotope::Zonotope(const Vector<Float>& c, const Matrix<Float>& G, const Vector<Float>& e)
+Zonotope::Zonotope(const Vector<Float64>& c, const Matrix<Float64>& G, const Vector<Float64>& e)
     : _centre(c), _generators(G), _error(e)
 {
     assert(c.size()==G.row_size());
@@ -207,21 +207,21 @@ Zonotope::Zonotope(const Vector<Float>& c, const Matrix<Float>& G, const Vector<
 }
 
 
-Zonotope::Zonotope(const Vector<Float>& c, const Matrix<Float>& G)
+Zonotope::Zonotope(const Vector<Float64>& c, const Matrix<Float64>& G)
     : _centre(c), _generators(G), _error(c.size())
 {
     assert(c.size()==G.row_size());
 }
 
 
-Zonotope::Zonotope(const Vector<ExactInterval>& c, const Matrix<Float>& G)
+Zonotope::Zonotope(const Vector<ExactInterval>& c, const Matrix<Float64>& G)
     : _centre(midpoint(c)), _generators(G), _error(errors(c))
 {
     assert(c.size()==G.row_size());
 }
 
 
-Zonotope::Zonotope(const Vector<Float>& c, const Matrix<ExactInterval>& G)
+Zonotope::Zonotope(const Vector<Float64>& c, const Matrix<ExactInterval>& G)
     : _centre(c), _generators(midpoint(G)), _error(row_errors(G))
 {
     assert(c.size()==G.row_size());
@@ -281,21 +281,21 @@ Zonotope::number_of_generators() const
 }
 
 
-const Vector<Float>&
+const Vector<Float64>&
 Zonotope::centre() const
 {
     return this->_centre;
 }
 
 
-const Matrix<Float>&
+const Matrix<Float64>&
 Zonotope::generators() const
 {
     return this->_generators;
 }
 
 
-const Vector<Float>&
+const Vector<Float64>&
 Zonotope::error() const
 {
     return this->_error;
@@ -324,7 +324,7 @@ Zonotope::bounding_box() const
 }
 
 
-Float
+Float64
 Zonotope::radius() const
 {
     return Ariadne::radius(this->bounding_box());
@@ -379,7 +379,7 @@ bounded(const Zonotope& z)
 
 
 
-Float
+Float64
 radius(const Zonotope& z)
 {
     return Ariadne::radius(z.bounding_box());
@@ -413,16 +413,16 @@ split(const Zonotope& z)
 
     Nat d=z.dimension();
     Nat m=z.number_of_generators();
-    Vector<Float> const& c=z.centre();
-    Matrix<Float> const& G=z.generators();
-    Vector<Float> const& e=z.error();
+    Vector<Float64> const& c=z.centre();
+    Matrix<Float64> const& G=z.generators();
+    Vector<Float64> const& e=z.error();
 
-    Array<Float> norms(m,0);
+    Array<Float64> norms(m,0);
     for(Nat j=0; j!=m; ++j) {
-        norms[j]=norm(Vector<Float>(column(G,j)));
+        norms[j]=norm(Vector<Float64>(column(G,j)));
     }
 
-    Float max_norm=0;
+    Float64 max_norm=0;
     Nat longest_generator=0;
     for(Nat j=0; j<m; ++j) {
         if(norms[j]>max_norm) {
@@ -438,22 +438,22 @@ split(const Zonotope& z)
     }
 
     if(longest_generator<m) {
-        Matrix<Float> new_generators=z.generators();
+        Matrix<Float64> new_generators=z.generators();
         Nat j=longest_generator;
         for(Nat i=0; i!=d; ++i) {
             new_generators[i][j]=div_up(new_generators[i][j],2);
         }
 
-        Vector<Float> v=column(new_generators,j);
-        Vector<Float> new_centre=sub_approx(c,v);
+        Vector<Float64> v=column(new_generators,j);
+        Vector<Float64> new_centre=sub_approx(c,v);
         result.adjoin(Zonotope(new_centre,new_generators,e));
         new_centre=add_approx(c,v);
         result.adjoin(Zonotope(new_centre,new_generators,e));
     } else {
         Nat k=longest_generator-m;
-        Vector<Float> new_centre = z.centre();
-        const Matrix<Float>& new_generators = z.generators();
-        Vector<Float> new_error=e;
+        Vector<Float64> new_centre = z.centre();
+        const Matrix<Float64>& new_generators = z.generators();
+        Vector<Float64> new_error=e;
         new_error[k]=div_up(new_error[k],2);
         new_centre[k]=add_approx(z.centre()[k],new_error[k]);
         result.adjoin(Zonotope(new_centre,new_generators,new_error));
@@ -471,9 +471,9 @@ Zonotope::Zonotope(const ExactBox& r)
     : _centre(r.size()), _generators(r.size(),r.size()), _error(r.size())
 {
     Nat d=r.size();
-    Vector<Float>& c=this->_centre;
-    Matrix<Float>& G=this->_generators;
-    Vector<Float>& e=this->_error;
+    Vector<Float64>& c=this->_centre;
+    Matrix<Float64>& G=this->_generators;
+    Vector<Float64>& e=this->_error;
     for(Nat i=0; i!=d; ++i) {
         c[i]=med_approx(r[i].lower().raw(),r[i].upper().raw());
         for(Nat j=0; j!=d; ++j) {
@@ -515,7 +515,7 @@ error_free_over_approximation(const Zonotope& z)
     for(Nat i=0; i!=d; ++i) {
         if(z.error()[i]!=0) { ++e; }
     }
-    Matrix<Float> nG(d,m+e);
+    Matrix<Float64> nG(d,m+e);
     project(nG,range(0,d),range(0,m))=z.generators();
 
     Nat j=m;
@@ -540,15 +540,15 @@ orthogonal_over_approximation(const Zonotope& z)
     typedef ExactInterval I;
     Zonotope ez=error_free_over_approximation(z);
 
-    const Vector<Float>& c=ez.centre();
-    const Matrix<Float>& G=ez.generators();
+    const Vector<Float64>& c=ez.centre();
+    const Matrix<Float64>& G=ez.generators();
 
-    Matrix<Float> aQ,aR;
+    Matrix<Float64> aQ,aR;
     make_lpair(aQ,aR)=qr_approx(G);
 
     Matrix<ExactInterval> aQinv=inverse(aQ);
     Matrix<ExactInterval> iR=aQinv*G;
-    DiagonalMatrix<Float> aD(::row_norms(iR));
+    DiagonalMatrix<Float64> aD(::row_norms(iR));
 
     Matrix<ExactInterval> niG=aQ*aD;
 
@@ -570,15 +570,15 @@ cascade_over_approximation(const Zonotope& z, Nat cs)
     Nat nb=z.number_of_generators()/z.dimension(); // number of generator blocks
 
 
-    const Matrix<Float>& G=z.generators();
-    Array<Float> norms(nb);
+    const Matrix<Float64>& G=z.generators();
+    Array<Float64> norms(nb);
     for(Nat i=0; i!=nb; ++i) {
-        norms[i]=Ariadne::norm(Matrix<Float>(project(G,range(0,d),range(i*d,(i+1)*d))));
+        norms[i]=Ariadne::norm(Matrix<Float64>(project(G,range(0,d),range(i*d,(i+1)*d))));
     }
 
     // Compute the new number of blocks
     Nat nnb=cs;
-    Float sum=0;
+    Float64 sum=0;
     for(Nat i=nb-1; i!=0; --i) {
         sum=add_approx(sum,norms[i]);
         if(sum>norms[i-1]) {
@@ -587,10 +587,10 @@ cascade_over_approximation(const Zonotope& z, Nat cs)
     }
     nnb=min(nnb,cs);
     // Reduce generators
-    Matrix<Float> rG(d,d*nnb);
+    Matrix<Float64> rG(d,d*nnb);
     project(rG,range(0,d),range(0,d*(nnb-1)))=project(G,range(0,d),range(0,d*(nnb-1)));
     for(Nat i=0; i!=d; ++i) {
-        Float& err=rG[i][d*(nnb-1)+i];
+        Float64& err=rG[i][d*(nnb-1)+i];
         for(Nat j=d*(nnb-1); j!=G.column_size(); ++j) {
             err=add_up(err,abs(G[i][j]));
         }
@@ -605,14 +605,14 @@ orthogonal_over_approximation(const Zonotope& z)
 {
 
     Zonotope r=error_free_over_approximation(z);
-    Matrix<Float> J=r.generators();
+    Matrix<Float64> J=r.generators();
 
     const Nat m=J.row_size();
     const Nat n=J.column_size();
 
-    Matrix<Float> R(m,n);
+    Matrix<Float64> R(m,n);
 
-    Array<Float> column_norm_squares(n);
+    Array<Float64> column_norm_squares(n);
 
     for(Nat j=0; j!=n; ++j) { }
 
@@ -620,11 +620,11 @@ orthogonal_over_approximation(const Zonotope& z)
 // Choose
 }
 
-Tuple< Matrix<Float>, Matrix<Float>, PivotMatrix > orthogonal_decomposition(const Matrix<Float>& A, Bool allow_pivoting=true) {
-    Matrix<ApproximateFloat> approximate_matrix=reinterpret_cast<Matrix<ApproximateFloat>const&>(A);
-    Tuple< Matrix<ApproximateFloat>, Matrix<ApproximateFloat>, PivotMatrix >
+Tuple< Matrix<Float64>, Matrix<Float64>, PivotMatrix > orthogonal_decomposition(const Matrix<Float64>& A, Bool allow_pivoting=true) {
+    Matrix<ApproximateFloat64> approximate_matrix=reinterpret_cast<Matrix<ApproximateFloat64>const&>(A);
+    Tuple< Matrix<ApproximateFloat64>, Matrix<ApproximateFloat64>, PivotMatrix >
         approximate_decomposition=orthogonal_decomposition(approximate_matrix);
-    return reinterpret_cast<Tuple<Matrix<Float>, Matrix<Float>, PivotMatrix >const&>(approximate_decomposition);
+    return reinterpret_cast<Tuple<Matrix<Float64>, Matrix<Float64>, PivotMatrix >const&>(approximate_decomposition);
 }
 
 
@@ -632,29 +632,29 @@ Zonotope
 orthogonal_approximation(const Zonotope& z)
 {
 
-    Vector<Float> c=z.centre();
-    Matrix<Float> J=z.generators();
-    Vector<Float> e=z.error();
+    Vector<Float64> c=z.centre();
+    Matrix<Float64> J=z.generators();
+    Vector<Float64> e=z.error();
 
     const Nat m=J.row_size();
     const Nat n=J.column_size();
 
-    Matrix<Float> G(m,m+m);
+    Matrix<Float64> G(m,m+m);
 
-    Matrix< Float > Q;
-    Matrix< Float > R;
+    Matrix< Float64 > Q;
+    Matrix< Float64 > R;
     PivotMatrix P;
     make_ltuple(Q,R,P)=orthogonal_decomposition(J,false);
 
     ARIADNE_ASSERT(norm(FloatMatrix(Q*R-J))<1e-8);
 
     for(Nat i=0; i!=m;++i) {
-        Float a=0;
+        Float64 a=0;
         for(Nat j=i; j!=n; ++j) {
             a+=abs(R[i][j]);
         }
         for(Nat k=0; k!=m; ++k) {
-            Float b=Q[k][i]*a;
+            Float64 b=Q[k][i]*a;
             G[k][i]=b;
         }
     }
@@ -680,7 +680,7 @@ orthogonal_over_approximation(const Zonotope<R,R>& z)
 
     QRMatrix< ExactInterval > QR(oaz.generators());
     ExactPoint< ExactInterval > c(oaz.centre());
-    Matrix<Float> G(z.size(),z.number_of_generators());
+    Matrix<Float64> G(z.size(),z.number_of_generators());
 
     Matrix< ExactInterval > q=QR.Q();
     Matrix< ExactInterval > r=QR.R();
@@ -706,7 +706,7 @@ orthogonal_over_approximation(const Zonotope<ExactInterval,R>& z)
 
     QRMatrix< ExactInterval > QR(oaz.generators());
     ExactPoint< ExactInterval > c(oaz.centre());
-    Matrix<Float> G(z.size(),z.number_of_generators());
+    Matrix<Float64> G(z.size(),z.number_of_generators());
 
     Matrix< ExactInterval > q=QR.Q();
     Matrix< ExactInterval > r=QR.R();
@@ -732,7 +732,7 @@ orthogonal_over_approximation(const Zonotope< ExactInterval >& z)
 
     QRMatrix< ExactInterval > QR(oaz.generators());
     ExactPoint< ExactInterval > c(oaz.centre());
-    Matrix<Float> G(z.size(),z.number_of_generators());
+    Matrix<Float64> G(z.size(),z.number_of_generators());
 
     Matrix< ExactInterval > q=QR.Q();
     Matrix< ExactInterval > r=QR.R();
@@ -810,8 +810,8 @@ operator<<(OutputStream& os, const Zonotope& z)
 InputStream&
 operator>>(InputStream& is, Zonotope& z)
 {
-    Vector<Float> centre;
-    Matrix<Float> generators;
+    Vector<Float64> centre;
+    Matrix<Float64> generators;
     char c0,c1,c2;
     is >> c0 >> centre >> c1 >> generators >> c2;
     z = Zonotope(centre,generators);
@@ -846,14 +846,14 @@ separated(const Zonotope& z, const ExactBox& bx)
     SizeType d=z.dimension();
     SizeType ng=z.number_of_generators();
     Vector<ExactInterval> ebx=bx+ExactInterval(-1,1)*make_exact(z.error());
-    const Vector<Float>& zc=z.centre();
-    const Matrix<Float>& zG=z.generators();
-    Matrix<Float> A(d,d+ng);
-    Vector<Float> b(d);
-    Vector<Float> xl(d+ng);
-    Vector<Float> xu(d+ng);
+    const Vector<Float64>& zc=z.centre();
+    const Matrix<Float64>& zG=z.generators();
+    Matrix<Float64> A(d,d+ng);
+    Vector<Float64> b(d);
+    Vector<Float64> xl(d+ng);
+    Vector<Float64> xu(d+ng);
 
-    project(A,range(0,d),range(0,d))=Matrix<Float>::identity(d);
+    project(A,range(0,d),range(0,d))=Matrix<Float64>::identity(d);
     project(A,range(0,d),range(d,d+ng))=zG;
     b=zc;
     for(SizeType j=0; j!=d; ++j) {
@@ -865,7 +865,7 @@ separated(const Zonotope& z, const ExactBox& bx)
         xu[d+j]=+1;
     }
 
-    return ! SimplexSolver<Float>().feasible(xl,xu,A,b);
+    return ! SimplexSolver<Float64>().feasible(xl,xu,A,b);
 }
 
 
@@ -881,20 +881,20 @@ separated(const Zonotope& z1, const Zonotope& z2)
     SizeType d=z1.dimension();
     SizeType ng1=z1.number_of_generators();
     SizeType ng2=z2.number_of_generators();
-    const Vector<Float>& c1=z1.centre();
-    const Matrix<Float>& G1=z1.generators();
-    const Vector<Float>& c2=z2.centre();
-    const Matrix<Float>& G2=z2.generators();
+    const Vector<Float64>& c1=z1.centre();
+    const Matrix<Float64>& G1=z1.generators();
+    const Vector<Float64>& c2=z2.centre();
+    const Matrix<Float64>& G2=z2.generators();
 
-    Matrix<Float> A(d,ng1+ng2);
-    Vector<Float> b(c1-c2);
-    Vector<Float> xl(ng1+ng2,-1.0);
-    Vector<Float> xu(ng1+ng2,+1.0);
+    Matrix<Float64> A(d,ng1+ng2);
+    Vector<Float64> b(c1-c2);
+    Vector<Float64> xl(ng1+ng2,-1.0);
+    Vector<Float64> xu(ng1+ng2,+1.0);
 
     project(A,range(0,d),range(0,ng1))=G1;
     project(A,range(0,d),range(ng1,ng1+ng2))=G2;
 
-    return ! SimplexSolver<Float>().feasible(xl,xu,A,b);
+    return ! SimplexSolver<Float64>().feasible(xl,xu,A,b);
 }
 
 
@@ -903,16 +903,16 @@ separated(const Zonotope& z1, const Zonotope& z2)
 Tribool
 contains(const Zonotope& z, const ExactPoint& pt)
 {
-    //std::clog << "Zonotope::contains(const Vector<Float>& )" << std::endl;
+    //std::clog << "Zonotope::contains(const Vector<Float64>& )" << std::endl;
     assert(z.dimension()==pt.dimension());
     Nat m=z.number_of_generators();
 
-    const Matrix<Float>& A=z.generators();
-    Vector<Float> b=pt-z.centre();
-    Vector<Float> xl(m,-1.0);
-    Vector<Float> xu(m,1.0);
+    const Matrix<Float64>& A=z.generators();
+    Vector<Float64> b=pt-z.centre();
+    Vector<Float64> xl(m,-1.0);
+    Vector<Float64> xu(m,1.0);
 
-    Tribool result=SimplexSolver<Float>().feasible(xl,xu,A,b);
+    Tribool result=SimplexSolver<Float64>().feasible(xl,xu,A,b);
     return result;
 }
 
@@ -928,9 +928,9 @@ Void Zonotope::draw(CanvasInterface& c, const Projection2d& p) const {
     const Zonotope& z=*this;
     Nat ix=p.x_coordinate(); Nat iy=p.y_coordinate();
 
-    const Vector<Float>& zc=z.centre();
-    const Matrix<Float>& zg=z.generators();
-    const Vector<Float>& ze=z.error();
+    const Vector<Float64>& zc=z.centre();
+    const Matrix<Float64>& zg=z.generators();
+    const Vector<Float64>& ze=z.error();
 
     double eps=1.0/(1ul<<31);
     Point2d pc(zc[ix],zc[iy]);

@@ -91,7 +91,7 @@ Void TestContinuousEvolution::test() const
     typedef Enclosure EnclosureType;
 
     // Set up the evolution parameters and grid
-    Float time(3.0);
+    Float64 time(3.0);
     double step_size(0.5);
     double enclosure_radius(0.25);
 
@@ -161,7 +161,7 @@ Void TestContinuousEvolution::failure_test() const
     typedef Enclosure EnclosureType;
 
     // Set up the evolution parameters and grid
-    Float time(0.5);
+    Float64 time(0.5);
     double step_size(0.01);
     double enclosure_radius(0.25);
 

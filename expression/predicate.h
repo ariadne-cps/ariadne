@@ -49,7 +49,7 @@ class PredicateInterface {
     typedef std::size_t SizeType;
 
     virtual SizeType argument_size() const = 0;
-    virtual Tribool evaluate(const Vector<Float>& x) const = 0;
+    virtual Tribool evaluate(const Vector<Float64>& x) const = 0;
     virtual Tribool evaluate(const Vector<ValidatedNumber>& x) const = 0;
 };
 
@@ -72,8 +72,8 @@ class ExpressionPredicate
     Bool operator<(const ExpressionPredicate& p) const {
         return (_expression.pointer()) < (const Void*)(p._expression.pointer()); }
     SizeType argument_size() const { return _expression.argument_size(); }
-    Tribool evaluate(const Vector<Float>& x) const {
-        Float value=_expression.evaluate(x)*_sign;
+    Tribool evaluate(const Vector<Float64>& x) const {
+        Float64 value=_expression.evaluate(x)*_sign;
         if(value<0) { return true; }
         else if(value>0) { return false; }
         else { return indeterminate; } }
@@ -113,7 +113,7 @@ class DisjunctivePredicate
         for(Nat i=0; i!=p.size(); ++i) { (*this) |= p[i]; } return *this; }
 
     virtual SizeType argument_size() const;
-    virtual Tribool evaluate(const Vector<Float>& x) const;
+    virtual Tribool evaluate(const Vector<Float64>& x) const;
     virtual Tribool evaluate(const Vector<ValidatedNumber>& x) const;
 
   private:
@@ -138,7 +138,7 @@ class ConjunctiveNormalFormPredicate
         for(Nat i=0; i!=_cnf.size(); ++i) { _cnf[i] |= p; } return *this; }
 
     virtual SizeType argument_size() const;
-    virtual Tribool evaluate(const Vector<Float>& x) const;
+    virtual Tribool evaluate(const Vector<Float64>& x) const;
     virtual Tribool evaluate(const Vector<ValidatedNumber>& x) const;
   private:
     std::vector<DisjunctivePredicate> _cnf;

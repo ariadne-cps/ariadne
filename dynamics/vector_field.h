@@ -42,7 +42,7 @@ class VectorField
 {
   public:
     //! \brief The type used to represent time.
-    typedef Float TimeType;
+    typedef Float64 TimeType;
     //! \brief The type used to represent real numbers.
     typedef Real RealType ;
     //! \brief The type used to describe the state space.

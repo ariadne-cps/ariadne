@@ -31,7 +31,7 @@ namespace Ariadne {
 
 
 Tribool
-separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float& eps)
+separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float64& eps)
 {
     ExactBox bb=make_exact_box(ls.bounding_box());
     if(definitely(bb.empty())) { return true; }
@@ -40,7 +40,7 @@ separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Fl
 
 
 Tribool
-overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float& eps)
+overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float64& eps)
 {
     ExactBox bb=make_exact_box(ls.bounding_box());
     if(definitely(bb.empty())) { return false; }
@@ -49,7 +49,7 @@ overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Floa
 
 
 Tribool
-inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float& eps)
+inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float64& eps)
 {
     ExactBox bb=make_exact_box(ls.bounding_box());
     if(definitely(bb.empty())) { return true; }
@@ -58,7 +58,7 @@ inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float
 
 
 Tribool
-overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBox& bx, const Float& eps)
+overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBox& bx, const Float64& eps)
 {
     if(definitely(ls.separated(bx))) {
         return false;
@@ -86,7 +86,7 @@ overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Exac
 
 
 Tribool
-inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBox& bx, const Float& eps)
+inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBox& bx, const Float64& eps)
 {
     if(definitely(ls.separated(bx) || rs.separated(bx))) {
         return true;
@@ -107,7 +107,7 @@ inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Exact
 
 
 Tribool
-separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBox& bx, const Float& eps)
+separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBox& bx, const Float64& eps)
 {
     if(definitely(ls.separated(bx) || rs.separated(bx))) {
         return true;
@@ -130,7 +130,7 @@ separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Ex
 
 
 Tribool
-overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const ExactBox& bx, const Float& eps)
+overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const ExactBox& bx, const Float64& eps)
 {
     if(definitely(ovs.overlaps(bx))) {
         if(definitely(ops.covers(bx))) {
@@ -153,7 +153,7 @@ overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const ExactBo
 
 
 Tribool
-inside(const ClosedSetInterface& cls, const OpenSetInterface& ops, const ExactBox& bx, const Float& eps)
+inside(const ClosedSetInterface& cls, const OpenSetInterface& ops, const ExactBox& bx, const Float64& eps)
 {
     if(definitely(cls.separated(bx) || ops.covers(bx))) {
         return true;
@@ -172,7 +172,7 @@ inside(const ClosedSetInterface& cls, const OpenSetInterface& ops, const ExactBo
 
 
 Tribool
-separated(const ClosedSetInterface& cls1, const ClosedSetInterface& cls2, const ExactBox& bx, const Float& eps)
+separated(const ClosedSetInterface& cls1, const ClosedSetInterface& cls2, const ExactBox& bx, const Float64& eps)
 {
     if(definitely(cls1.separated(bx) || cls2.separated(bx))) {
         return true;

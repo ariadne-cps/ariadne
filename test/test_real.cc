@@ -38,7 +38,7 @@ using namespace std;
 using namespace Ariadne;
 
 Tribool operator==(const Real& x1, double x2) {
-    return BoundFloat(x1)==BoundFloat(x2);
+    return BoundedFloat64(x1)==BoundedFloat64(x2);
 }
 
 class TestReal
@@ -54,7 +54,7 @@ class TestReal
 
 void TestReal::test()
 {
-    ApproximateFloat::set_output_precision(18);
+    ApproximateFloat64::set_output_precision(18);
 //    ARIADNE_TEST_CALL(test_concept());
     ARIADNE_TEST_CALL(test_constructors());
     ARIADNE_TEST_CALL(test_arithmetic());
@@ -96,7 +96,7 @@ void TestReal::test_constructors() {
 }
 
 void TestReal::test_arithmetic() {
-    ApprxFloat::set_output_precision(18);
+    ApproximateFloat64::set_output_precision(18);
     Real x(2.5_exact);
     Real y(4.0_exact);
     ARIADNE_TEST_EQUALS(x, 2.5);
@@ -120,9 +120,9 @@ void TestReal::test_arithmetic() {
 }
 
 void TestReal::test_transcendental() {
-    ApproximateFloat eps=std::numeric_limits<double>::epsilon();
+    ApproximateFloat64 eps=std::numeric_limits<double>::epsilon();
     Real x(2.5_exact);
-    ApproximateFloat ax(x);
+    ApproximateFloat64 ax(x);
     ARIADNE_TEST_EQUALS(sqrt(Real(4)),2.0);
     ARIADNE_TEST_EQUALS(exp(Real(0)),1.0);
     ARIADNE_TEST_EQUALS(log(Real(1)),0.0);

@@ -43,10 +43,10 @@ namespace Ariadne {
 class Dyadic;
 
 //! \ingroup NumericModule
-//! \related Float, ExactInterval
+//! \related Float64, ExactInterval
 //! \brief A floating-point number, which is taken to represent the \em exact value of a real quantity.
 class Dyadic {
-    RawFloat _x;
+    RawFloat64 _x;
   public:
     //! \brief Default constructor creates the number 0 (zero).
     Dyadic() : _x(0) { }
@@ -59,11 +59,11 @@ class Dyadic {
     //! by comparing the input with it's single-precision approximation.
     explicit Dyadic(double x) : _x(x) { }
     //! \brief Explicit construction from an approximate floating-point value.
-    explicit Dyadic(const RawFloat& x) : _x(x) { }
+    explicit Dyadic(const RawFloat64& x) : _x(x) { }
     //! \brief Convert to a rational number.
     explicit operator Rational () const;
     //! \brief The approximate floating-point number with the same value.
-    RawFloat value() const { return _x; }
+    RawFloat64 value() const { return _x; }
     //! \brief A double-precision approximateion.
     double get_d() const { return _x.get_d(); }
     friend Dyadic operator"" _bin(long double x);

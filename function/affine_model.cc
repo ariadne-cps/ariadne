@@ -44,40 +44,40 @@ ValidatedAffineModel operator+(const ValidatedAffineModel& a1, const ValidatedAf
         r[i]=ValidatedAffineModel::CoefficientType(a1[i].raw()+a2[i].raw());
     }
 
-    Float::set_rounding_upward();
+    Float64::set_rounding_upward();
 
-    RawFloat te=0.0;
+    RawFloat64 te=0.0;
     for(Nat j=0; j!=n; ++j) {
-        RawFloat mrjl = (-a1.gradient(j).raw())-a2.gradient(j).raw();
-        RawFloat  rju = ( a1.gradient(j).raw())+a2.gradient(j).raw();
+        RawFloat64 mrjl = (-a1.gradient(j).raw())-a2.gradient(j).raw();
+        RawFloat64  rju = ( a1.gradient(j).raw())+a2.gradient(j).raw();
         te+=(rju+mrjl);
     }
-    RawFloat mrl = (-a1.value().raw())-a2.value().raw();
-    RawFloat  ru = ( a1.value().raw())+a2.value().raw();
+    RawFloat64 mrl = (-a1.value().raw())-a2.value().raw();
+    RawFloat64  ru = ( a1.value().raw())+a2.value().raw();
     te += (ru+mrl);
 
-    RawFloat re=0.0;
+    RawFloat64 re=0.0;
     r.set_error( ErrorType(te/2 + (a1.error().raw()+a2.error().raw()) ) );
 
-    Float::set_rounding_to_nearest();
+    Float64::set_rounding_to_nearest();
 
     return r;
 }
 
 ValidatedAffineModel operator+(const ValidatedNumber& c, const ValidatedAffineModel& a) {
     ValidatedAffineModel r=a;
-    RawFloat cm=c.value().raw();
+    RawFloat64 cm=c.value().raw();
     r.set_value( static_cast<ValidatedAffineModel::CoefficientType>( cm + a.value().raw() ) );
 
-    Float::set_rounding_upward();
+    Float64::set_rounding_upward();
 
-    RawFloat mrl = (-a.value().raw())-cm;
-    RawFloat  ru = ( a.value().raw())+cm;
-    RawFloat te = (ru+mrl)/2;
+    RawFloat64 mrl = (-a.value().raw())-cm;
+    RawFloat64  ru = ( a.value().raw())+cm;
+    RawFloat64 te = (ru+mrl)/2;
 
     r.set_error( ValidatedAffineModel::ErrorType( a.error().raw() + max(c.upper().raw()-cm,cm-c.lower().raw()) + te) );
 
-    Float::set_rounding_to_nearest();
+    Float64::set_rounding_to_nearest();
 
     return r;
 }
@@ -88,27 +88,27 @@ ValidatedAffineModel operator+(const ValidatedAffineModel& a, const ValidatedNum
 
 ValidatedAffineModel operator*(const ValidatedNumber& c, const ValidatedAffineModel& a) {
     Nat n=a.argument_size();
-    RawFloat cm=c.value().raw();
+    RawFloat64 cm=c.value().raw();
     ValidatedAffineModel r(n);
     r=ValidatedAffineModel::CoefficientType(a.value().raw()*cm);
     for(Nat i=0; i!=n; ++i) {
         r[i].raw()=a[i].raw()*cm;
     }
 
-    Float::set_rounding_upward();
+    Float64::set_rounding_upward();
 
-    RawFloat te=0.0;
+    RawFloat64 te=0.0;
     for(Nat j=0; j!=n; ++j) {
-        RawFloat mca=(-cm)*a.gradient(j).raw();
-        RawFloat ca= cm*a.gradient(j).raw();
+        RawFloat64 mca=(-cm)*a.gradient(j).raw();
+        RawFloat64 ca= cm*a.gradient(j).raw();
         te+=(ca+mca);
     }
-    RawFloat mca=(-cm)*a.value().raw();
-    RawFloat ca= cm*a.value().raw();
+    RawFloat64 mca=(-cm)*a.value().raw();
+    RawFloat64 ca= cm*a.value().raw();
 
-    RawFloat re=0.0;
+    RawFloat64 re=0.0;
     if(c.lower()!=c.upper()) {
-        RawFloat ce=max(c.upper().raw()-cm,cm-c.lower().raw());
+        RawFloat64 ce=max(c.upper().raw()-cm,cm-c.lower().raw());
         for(Nat j=0; j!=n; ++j) {
             re+=abs(a.gradient(j).raw()*ce);
         }
@@ -116,7 +116,7 @@ ValidatedAffineModel operator*(const ValidatedNumber& c, const ValidatedAffineMo
 
     r.set_error(ValidatedAffineModel::ErrorType(abs(cm)*a.error().raw() + ((ca+mca) + te)/2 + re));
 
-    Float::set_rounding_to_nearest();
+    Float64::set_rounding_to_nearest();
 
     return r;
 }
@@ -131,22 +131,22 @@ ValidatedAffineModel affine_model(const ValidatedAffine& a) {
     for(Nat j=0; j!=a.argument_size(); ++j) {
         am[j] = midpoint(a[j]);
     }
-    Float::set_rounding_upward();
-    RawFloat e = 0.0;
+    Float64::set_rounding_upward();
+    RawFloat64 e = 0.0;
     for(Nat j=0; j!=a.argument_size(); ++j) {
         e += max(a.gradient(j).upper().raw()-am.gradient(j).raw(),am.gradient(j).raw()-a.gradient(j).lower().raw());
     }
     e += max(a.value().upper().raw()-am.value().raw(),am.value().raw()-a.value().lower().raw());
     am.set_error(ValidatedAffineModel::ErrorType(e));
-    Float::set_rounding_to_nearest();
+    Float64::set_rounding_to_nearest();
     return am;
 }
 
 ValidatedAffineModel affine_model(const ValidatedTaylorModel& taylor_model) {
     ValidatedAffineModel affine_model(taylor_model.argument_size());
 
-    Float::RoundingModeType rnd=Float::get_rounding_mode();
-    Float::set_rounding_upward();
+    Float64::RoundingModeType rnd=Float64::get_rounding_mode();
+    Float64::set_rounding_upward();
     for(ValidatedTaylorModel::ConstIterator iter=taylor_model.begin(); iter!=taylor_model.end(); ++iter) {
         if(iter->key().degree()>=2) {
             affine_model.set_error(mag(iter->data())+affine_model.error());
@@ -162,7 +162,7 @@ ValidatedAffineModel affine_model(const ValidatedTaylorModel& taylor_model) {
         }
     }
     affine_model.set_error(taylor_model.error()+affine_model.error());
-    Float::set_rounding_mode(rnd);
+    Float64::set_rounding_mode(rnd);
 
     return affine_model;
 }

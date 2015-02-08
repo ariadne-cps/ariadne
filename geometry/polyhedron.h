@@ -72,7 +72,7 @@ class Polyhedron
     template<class XX> Polyhedron(Nat d, Nat nc, const XX* data);
 
     //! \brief Construct the polyhedron defined by the matrix equations \f$Ax\leq b\f$.
-    explicit Polyhedron(const Matrix<Float>& A, const Vector<Float>& b);
+    explicit Polyhedron(const Matrix<Float64>& A, const Vector<Float64>& b);
 
     //! \brief Convert from a box.
     explicit Polyhedron(const ExactBox& bx);
@@ -92,9 +92,9 @@ class Polyhedron
     //! \brief The number of constraints.
     SizeType number_of_constraints() const { return this->b().size(); }
     //! \brief The matrix \f$A\f$ in the inequalities \f$Ax\leq b\f$.
-    Matrix<Float> A() const;
+    Matrix<Float64> A() const;
     //! \brief The vector \f$b\f$ in the inequalities \f$Ax\leq b\f$.
-    Vector<Float> b() const;
+    Vector<Float64> b() const;
     //@}
 
 
@@ -146,8 +146,8 @@ class Polyhedron
     OutputStream& write(OutputStream& os) const;
     //@}
   private:
-    Matrix<Float> _A;
-    Vector<Float> _b;
+    Matrix<Float64> _A;
+    Vector<Float64> _b;
 };
 
 

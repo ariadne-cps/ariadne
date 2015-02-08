@@ -38,10 +38,10 @@ enum Piece { left=0, right=1, middle=2 };
 
 inline
 Nat irmax(const ExactBox& bx) {
-    Float dmax=0.0;
+    Float64 dmax=0.0;
     Nat imax=0;
     for(Nat i=0; i!=bx.size(); ++i) {
-        Float d=bx[i].width().raw();
+        Float64 d=bx[i].width().raw();
         if(d>dmax) {
             imax=i;
             dmax=d;
@@ -50,17 +50,17 @@ Nat irmax(const ExactBox& bx) {
     return imax;
 }
 
-inline ExactFloat mid(ExactFloat l, ExactFloat u) {
-    return ExactFloat(med_approx(l.raw(),u.raw()));
+inline ExactFloat64 mid(ExactFloat64 l, ExactFloat64 u) {
+    return ExactFloat64(med_approx(l.raw(),u.raw()));
 }
 
 inline
 ExactBox split(const ExactBox& bx, Nat i, Piece lr) {
     ExactBox result(bx);
     ExactInterval& ivl=result[i];
-    const ExactFloat& l=ivl.lower();
-    const ExactFloat& u=ivl.upper();
-    ExactFloat c=mid(l,u);
+    const ExactFloat64& l=ivl.lower();
+    const ExactFloat64& u=ivl.upper();
+    ExactFloat64 c=mid(l,u);
     if(lr==middle) {
         ivl.set(mid(l,c),mid(c,u));
     } else {
@@ -74,7 +74,7 @@ inline
 Pair<ExactBox,ExactBox> split(const ExactBox& bx, Nat i)
 {
     Pair<ExactBox,ExactBox> result(bx,bx);
-    ExactFloat c=mid(bx[i].lower(),bx[i].upper());
+    ExactFloat64 c=mid(bx[i].lower(),bx[i].upper());
     result.first[i].set_upper(c);
     result.second[i].set_lower(c);
     return result;
@@ -95,7 +95,7 @@ Pair<ExactBox,ExactBox> split(const ExactBox& bx) {
 
 template<class F>
 Tribool
-separated(const ExactBox& d, const F& f, const ExactBox& b, const RawFloat& eps)
+separated(const ExactBox& d, const F& f, const ExactBox& b, const RawFloat64& eps)
 {
 
     ExactBox fd=f.evaluate(d);
@@ -121,7 +121,7 @@ separated(const ExactBox& d, const F& f, const ExactBox& b, const RawFloat& eps)
 
 template<class F>
 Tribool
-inside(const ExactBox& d, const F& f, const ExactBox& b, const RawFloat& eps)
+inside(const ExactBox& d, const F& f, const ExactBox& b, const RawFloat64& eps)
 {
 
     ExactBox fd=f.evaluate(d);
@@ -174,45 +174,45 @@ DS remove_supersets(const DS& ls)
 
 
 //! \brief Tests if \a ls overlaps \a rs, to a tolerance of \a eps.
-Tribool overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float& eps);
+Tribool overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float64& eps);
 
 //! \brief Tests if \a ls is a inside of \a rs, to a tolerance of \a eps.
-Tribool inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float& eps);
+Tribool inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float64& eps);
 
 //! \brief Tests if \a ls is disjoint from \a rs, to a tolerance of \a eps.
-Tribool separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float& eps);
+Tribool separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float64& eps);
 
 
 //! \brief Tests if \a ovs overlaps \a ops, to a tolerance of \a eps.
-Tribool overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const Float& eps);
+Tribool overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const Float64& eps);
 
 //! \brief Tests if \a cps is a inside of \a ops, to a tolerance of \a eps.
-Tribool inside(const CompactSetInterface& cps, const OpenSetInterface& ops, const Float& eps);
+Tribool inside(const CompactSetInterface& cps, const OpenSetInterface& ops, const Float64& eps);
 
 //! \brief Tests if \a cps is disjoint from \a cls, to a tolerance of \a eps.
-Tribool separated(const CompactSetInterface& cps, const ClosedSetInterface& cls, const Float& eps);
+Tribool separated(const CompactSetInterface& cps, const ClosedSetInterface& cls, const Float64& eps);
 
 
 
 
 //! \brief Tests if the intersection of \a ls and \a bx overlaps \a rs, to a tolerance of \a eps.
-Tribool overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBox& bx, const Float& eps);
+Tribool overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBox& bx, const Float64& eps);
 
 //! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
-Tribool inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBox& bx, const Float& eps);
+Tribool inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBox& bx, const Float64& eps);
 
 //! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
-Tribool separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBox& bx, const Float& eps);
+Tribool separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBox& bx, const Float64& eps);
 
 
 //! \brief Tests if the intersection of \a ls and \a bx overlaps \a rs, to a tolerance of \a eps.
-Tribool overlap(const OvertSetInterface& ls, const OpenSetInterface& rs, const ExactBox& bx, const Float& eps);
+Tribool overlap(const OvertSetInterface& ls, const OpenSetInterface& rs, const ExactBox& bx, const Float64& eps);
 
 //! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
-Tribool inside(const ClosedSetInterface& ls, const OpenSetInterface& rs, const ExactBox& bx, const Float& eps);
+Tribool inside(const ClosedSetInterface& ls, const OpenSetInterface& rs, const ExactBox& bx, const Float64& eps);
 
 //! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
-Tribool separated(const ClosedSetInterface& ls, const ClosedSetInterface& rs, const ExactBox& bx, const Float& eps);
+Tribool separated(const ClosedSetInterface& ls, const ClosedSetInterface& rs, const ExactBox& bx, const Float64& eps);
 
 
 } // namespace Ariadne

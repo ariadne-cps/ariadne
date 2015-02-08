@@ -26,13 +26,13 @@
 
 namespace Ariadne {
 
-template class Series<ValidatedFloat>;
+template class Series<ValidatedFloat64>;
 
-template class TaylorModel<Validated,Float>;
-template int instantiate_transcendental<TaylorModel<Validated,Float>>();
-template int instantiate_ordered<TaylorModel<Validated,Float>>();
+template class TaylorModel<Validated,Float64>;
+template int instantiate_transcendental<TaylorModel<Validated,Float64>>();
+template int instantiate_ordered<TaylorModel<Validated,Float64>>();
 
-template class TaylorModel<Approximate,Float>;
-template int instantiate_transcendental<TaylorModel<Approximate,Float>>();
+template class TaylorModel<Approximate,Float64>;
+template int instantiate_transcendental<TaylorModel<Approximate,Float64>>();
 
 } // namespace Ariadne

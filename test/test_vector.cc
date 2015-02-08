@@ -60,14 +60,14 @@ TestVector::test()
 Void
 TestVector::test_concept()
 {
-    ApproximateFloat ax(1);
-    ValidatedFloat ix(1);
-    ExactFloat ex(1);
-    Vector<ApproximateFloat> av;
-    Vector<ValidatedFloat> iv;
-    Vector<ExactFloat> ev;
+    ApproximateFloat64 ax(1);
+    ValidatedFloat64 ix(1);
+    ExactFloat64 ex(1);
+    Vector<ApproximateFloat64> av;
+    Vector<ValidatedFloat64> iv;
+    Vector<ExactFloat64> ev;
 
-    iv=Vector<ValidatedFloat>(ev);
+    iv=Vector<ValidatedFloat64>(ev);
 
     av=av+av;
     iv=ev+ev;
@@ -117,11 +117,11 @@ TestVector::test_arithmetic()
     ARIADNE_TEST_EQUAL( - RawFloatVector({2.0,-3.0,5.0}) , RawFloatVector({-2.0,+3.0,-5.0}) );
     ARIADNE_TEST_EQUAL( RawFloatVector({2.0,-3.0,5.0}) + RawFloatVector({1.25,2.75,-3.5}), RawFloatVector({3.25,-0.25,1.5}) );
     ARIADNE_TEST_EQUAL( RawFloatVector({2.0,-3.0,5.0}) - RawFloatVector({1.25,2.75,-3.5}), RawFloatVector({0.75,-5.75,8.5}) );
-    ARIADNE_TEST_EQUAL( Float(4.0) * RawFloatVector({2.0,-3.0,5.0}), RawFloatVector({8.0,-12.0,20.0}) );
-    ARIADNE_TEST_EQUAL( RawFloatVector({2.0,-3.0,5.0}) * Float(4.0), RawFloatVector({8.0,-12.0,20.0}) );
-    ARIADNE_TEST_EQUAL( RawFloatVector({2.0,-3.0,5.0}) / Float(4.0), RawFloatVector({0.5,-0.75,1.25}) );
+    ARIADNE_TEST_EQUAL( Float64(4.0) * RawFloatVector({2.0,-3.0,5.0}), RawFloatVector({8.0,-12.0,20.0}) );
+    ARIADNE_TEST_EQUAL( RawFloatVector({2.0,-3.0,5.0}) * Float64(4.0), RawFloatVector({8.0,-12.0,20.0}) );
+    ARIADNE_TEST_EQUAL( RawFloatVector({2.0,-3.0,5.0}) / Float64(4.0), RawFloatVector({0.5,-0.75,1.25}) );
 
-    ARIADNE_TEST_EQUAL( sup_norm(RawFloatVector({2.0,-3.0,1.0})), Float(3.0) )
+    ARIADNE_TEST_EQUAL( sup_norm(RawFloatVector({2.0,-3.0,1.0})), Float64(3.0) )
 }
 
 
@@ -130,62 +130,62 @@ TestVector::test_misc()
 {
 
     Int n=3;
-    ApproximateFloat vptr[3]={-4.0,3.0,1.0};
-    ApproximateFloat x=1.5;
+    ApproximateFloat64 vptr[3]={-4.0,3.0,1.0};
+    ApproximateFloat64 x=1.5;
 
-    Vector<ApproximateFloat> v0;
+    Vector<ApproximateFloat64> v0;
     cout << "v0.size()=" << v0.size() << endl;
     cout << "v0=" << flush; cout << v0 << endl;
     ARIADNE_TEST_NOTIFY("Constructor Vector<X>(SizeType, const X*) is unsafe and has been removed.");
-    Array<ApproximateFloat> a1(vptr,vptr+3);
-    Vector<ApproximateFloat> v1(a1);
+    Array<ApproximateFloat64> a1(vptr,vptr+3);
+    Vector<ApproximateFloat64> v1(a1);
     cout << "v1=" << v1 << endl;
-    Vector<ApproximateFloat> v2=Vector<ApproximateFloat>({2.375,4.25,-1.25});
+    Vector<ApproximateFloat64> v2=Vector<ApproximateFloat64>({2.375,4.25,-1.25});
     cout << "v2=" << v2 << endl;
     cout << "norm(v1)=" << norm(v1) << "  norm(v2)=" << norm(v2) << endl;
     assert(norm(v1)==4);
     assert(norm(v2)==4.25);
 
-    Vector<ApproximateFloat> v3(1);
+    Vector<ApproximateFloat64> v3(1);
     cout << "v3=" << v3 << endl;
-    Vector<ApproximateFloat> v4=v2;
+    Vector<ApproximateFloat64> v4=v2;
     cout << "v4=" << v4 << endl;
-    Vector<ApproximateFloat> v5={-4.0,3.0,1.0};
+    Vector<ApproximateFloat64> v5={-4.0,3.0,1.0};
     cout << "v5=" << v5 << endl;
     assert(v1==v5);
     cout << endl;
 
-    Vector<ApproximateFloat> vf0;
-    v1=Vector<ApproximateFloat>({0.25,-1.5});
-    v2=Vector<ApproximateFloat>({-0.5,2.25});
+    Vector<ApproximateFloat64> vf0;
+    v1=Vector<ApproximateFloat64>({0.25,-1.5});
+    v2=Vector<ApproximateFloat64>({-0.5,2.25});
     vf0=-v1;
     cout << vf0 << " = -" << v1 << endl;
-    vf0=Vector<ApproximateFloat>(v1)+v2;
+    vf0=Vector<ApproximateFloat64>(v1)+v2;
     cout << vf0 << " = " << v1 << " + " << v2 << endl;
-    vf0=Vector<ApproximateFloat>(v1)-v2;
+    vf0=Vector<ApproximateFloat64>(v1)-v2;
     cout << vf0 << " = " << v1 << " - " << v2 << endl;
-    vf0=x*Vector<ApproximateFloat>(v2);
+    vf0=x*Vector<ApproximateFloat64>(v2);
     cout << vf0 << " = " << x << " * " << v2 << endl;
-    vf0=Vector<ApproximateFloat>(v1)*x;
+    vf0=Vector<ApproximateFloat64>(v1)*x;
     cout << vf0 << " = " << v1 << " * " << x << endl;
-    vf0=Vector<ApproximateFloat>(v1)/x;
+    vf0=Vector<ApproximateFloat64>(v1)/x;
     cout << vf0 << " = " << v1 << " / " << x << endl;
     cout << endl;
 
-    Vector< ValidatedFloat > iv1=Vector<ValidatedFloat>({ValidatedFloat{0.984375,1.015625},{2.25,2.375},{4.0,4.375},{-0.03125,0.015625}});
+    Vector< ValidatedFloat64 > iv1=Vector<ValidatedFloat64>({ValidatedFloat64{0.984375,1.015625},{2.25,2.375},{4.0,4.375},{-0.03125,0.015625}});
     cout << "iv1=" << iv1 << endl;
     cout << "norm(iv1)=" << norm(iv1) << endl;
     cout << "norm(iv1).upper()=" << norm(iv1).upper() << endl;
 
-    Vector< ValidatedFloat > iv2=Vector<ValidatedFloat>({{-1,1},{-1,1}});
+    Vector< ValidatedFloat64 > iv2=Vector<ValidatedFloat64>({{-1,1},{-1,1}});
     cout << "iv2=" << iv2 << endl;
-    Vector< ValidatedFloat > iv3(3);
+    Vector< ValidatedFloat64 > iv3(3);
     cout << "iv3=" << iv3 << endl;
-    iv3=Vector<ValidatedFloat>({{4.25,4.25},{2.375,2.375}});
+    iv3=Vector<ValidatedFloat64>({{4.25,4.25},{2.375,2.375}});
     cout << "iv3=" << iv3 << endl;
-    ValidatedFloat ix=ValidatedFloat(-2,1);
+    ValidatedFloat64 ix=ValidatedFloat64(-2,1);
 
-    Vector< ValidatedFloat > iv0;
+    Vector< ValidatedFloat64 > iv0;
     cout << "iv0=" << iv0 << endl;
     iv1=iv0;
     cout << "iv1=" << iv1 << endl;
@@ -193,9 +193,9 @@ TestVector::test_misc()
     cout << "iv1=" << iv1 << endl;
     cout << endl;
 
-    ValidatedFloat ix2=iv2[0];
-    ValidatedFloat ix3=iv3[0];
-    ValidatedFloat ix1=ix2+ix3;
+    ValidatedFloat64 ix2=iv2[0];
+    ValidatedFloat64 ix3=iv3[0];
+    ValidatedFloat64 ix1=ix2+ix3;
     ix1=ix2+ix3;
 
     cout << "iv2=" << iv2 << ", iv3=" << iv3 << endl;
@@ -207,13 +207,13 @@ TestVector::test_misc()
     cout << iv1 << " = " << ix << " * " << iv3 << endl;
     iv1=iv2*ix;
     cout << iv1 << " = " << iv2 << " * " << ix << endl;
-    ix=ValidatedFloat(1,2);
+    ix=ValidatedFloat64(1,2);
     iv1=iv2/ix;
     cout << iv1 << " = " << iv2 << " / " << ix << endl;
     cout << endl;
 
-    Vector<ExactFloat> ev1(reinterpret_cast<Vector<ExactFloat>const&>(v1));
-    ExactFloat ex(reinterpret_cast<ExactFloat const&>(x));
+    Vector<ExactFloat64> ev1(reinterpret_cast<Vector<ExactFloat64>const&>(v1));
+    ExactFloat64 ex(reinterpret_cast<ExactFloat64 const&>(x));
     iv0=iv1+ev1;
     cout << iv0 << " = " << iv1 << " + " << ev1 << endl;
     iv0=ev1+iv1;
@@ -237,22 +237,22 @@ TestVector::test_misc()
 
     iv0=ev1;
     iv0/=ix;
-    iv0=Vector<ValidatedFloat>({2,1});
-    iv1=Vector<ValidatedFloat>({0,1});
+    iv0=Vector<ValidatedFloat64>({2,1});
+    iv1=Vector<ValidatedFloat64>({0,1});
     /*
-      ARIADNE_TEST_ASSERT( (iv0+=Vector<ValidatedFloat>("[0,1]")) == Vector<ValidatedFloat>("[2,2]") );
-      ARIADNE_TEST_ASSERT( (iv0-=Vector<ValidatedFloat>("[0,1]")) == Vector<ValidatedFloat>("[2,1]") );
-      ARIADNE_TEST_ASSERT( (iv0*=2) == Vector<ValidatedFloat>("[4,2]") );
-      ARIADNE_TEST_ASSERT( (iv0/=4) == Vector<ValidatedFloat>("[1,0.5]") );
+      ARIADNE_TEST_ASSERT( (iv0+=Vector<ValidatedFloat64>("[0,1]")) == Vector<ValidatedFloat64>("[2,2]") );
+      ARIADNE_TEST_ASSERT( (iv0-=Vector<ValidatedFloat64>("[0,1]")) == Vector<ValidatedFloat64>("[2,1]") );
+      ARIADNE_TEST_ASSERT( (iv0*=2) == Vector<ValidatedFloat64>("[4,2]") );
+      ARIADNE_TEST_ASSERT( (iv0/=4) == Vector<ValidatedFloat64>("[1,0.5]") );
     */
 
     /*
       cout << "test_vector_slice" << endl;
-      v1=Vector<ApproximateFloat>("[-1.25,0.75,-0.5,-4.25,2.375]");
+      v1=Vector<ApproximateFloat64>("[-1.25,0.75,-0.5,-4.25,2.375]");
       cout << v1 << endl;
-      VectorSlice<ApproximateFloat> vs1(2,v1.begin()+2,2);
+      VectorSlice<ApproximateFloat64> vs1(2,v1.begin()+2,2);
       cout << vs1 << endl;
-      VectorSlice<ApproximateFloat> vs2(2,v1.begin(),3);
+      VectorSlice<ApproximateFloat64> vs2(2,v1.begin(),3);
       cout << vs2 << endl;
 
       iv1=vs1+vs2;

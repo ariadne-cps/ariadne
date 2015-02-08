@@ -30,17 +30,17 @@
 
 namespace Ariadne {
 
-template class Polynomial<Float>;
-template class Polynomial<ApproximateFloat>;
-template class Polynomial<ValidatedFloat>;
+template class Polynomial<Float64>;
+template class Polynomial<ApproximateFloat64>;
+template class Polynomial<ValidatedFloat64>;
 template class Polynomial<UpperInterval>;
 
-template<> Void Polynomial<ExactFloat>::cleanup() { }
+template<> Void Polynomial<ExactFloat64>::cleanup() { }
 
-template Polynomial<ExactFloat>::Polynomial(SizeType);
-template Expansion<ExactFloat>& Polynomial<ExactFloat>::expansion();
-template OutputStream& Polynomial<ExactFloat>::_write(OutputStream&) const;
-template OutputStream& Polynomial<ExactFloat>::_write(OutputStream&, List<String> const&) const;
+template Polynomial<ExactFloat64>::Polynomial(SizeType);
+template Expansion<ExactFloat64>& Polynomial<ExactFloat64>::expansion();
+template OutputStream& Polynomial<ExactFloat64>::_write(OutputStream&) const;
+template OutputStream& Polynomial<ExactFloat64>::_write(OutputStream&, List<String> const&) const;
 
 } //namespace Ariadne
 

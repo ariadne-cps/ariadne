@@ -71,7 +71,7 @@ class TestOptimiser
         ValidatedFloatVector x_optimal=optimiser->minimise(f,D,g,C);
         ARIADNE_TEST_BINARY_PREDICATE(element,x_optimal,D);
         ARIADNE_TEST_BINARY_PREDICATE(element,g(x_optimal),C);
-        ExactFloat required_accuracy(1e-8);
+        ExactFloat64 required_accuracy(1e-8);
         //ARIADNE_TEST_LESS(norm(x_optimal),required_accuracy);
     }
 
@@ -86,7 +86,7 @@ class TestOptimiser
         ExactBox D=ExactBox{{-1.0,2.0},{-3.0,5.0}};
         ARIADNE_TEST_PRINT(Ariadne::make_tuple(f,D,g,C));
 
-        ExactFloat required_accuracy(1e-7);
+        ExactFloat64 required_accuracy(1e-7);
         ValidatedFloatVector x_optimal=optimiser->minimise(f,D,g,C);
         ARIADNE_TEST_BINARY_PREDICATE(element,x_optimal,D);
         ARIADNE_TEST_LESS(norm(g(x_optimal)),required_accuracy);
@@ -108,7 +108,7 @@ class TestOptimiser
         ValidatedFloatVector x_optimal=optimiser->minimise(f,D,g,C);
         ARIADNE_TEST_BINARY_PREDICATE(element,x_optimal,D);
         ARIADNE_TEST_BINARY_PREDICATE(element,g(x_optimal),C);
-        ExactFloat required_accuracy(1e-6);
+        ExactFloat64 required_accuracy(1e-6);
         //ARIADNE_TEST_LESS(norm(x_optimal),required_accuracy);
     }
 
@@ -126,7 +126,7 @@ class TestOptimiser
         ARIADNE_TEST_PRINT(C);
 
         ValidatedFloatVector x_optimal=optimiser->minimise(f,D,gh,C);
-        ExactFloat required_accuracy(1e-8);
+        ExactFloat64 required_accuracy(1e-8);
         ARIADNE_TEST_LESS(norm(h(x_optimal)),required_accuracy);
     }
 
@@ -188,7 +188,7 @@ class TestOptimiser
         ARIADNE_TEST_CONSTRUCT( ValidatedFloatVector, X3, ({{0.30,0.40},{0.65,0.68}}) );
         ARIADNE_TEST_ASSERT( definitely(optimiser->contains_feasible_point(D,g,C,X3)) );
 
-        ARIADNE_TEST_CONSTRUCT(ExactFloatVector, x2, ({ExactFloat(0.35),ExactFloat(0.655)}) );
+        ARIADNE_TEST_CONSTRUCT(ExactFloatVector, x2, ({ExactFloat64(0.35),ExactFloat64(0.655)}) );
         ARIADNE_TEST_ASSERT( optimiser->validate_feasibility(D,g,C,x2) );
     }
 

@@ -47,8 +47,8 @@ using namespace Ariadne;
 using namespace std;
 
 namespace Ariadne {
-Void serialize(boost::archive::text_oarchive& a, Float& flt, const unsigned int v);
-Void serialize(boost::archive::text_iarchive& a, Float& flt, const unsigned int v);
+Void serialize(boost::archive::text_oarchive& a, Float64& flt, const unsigned int v);
+Void serialize(boost::archive::text_iarchive& a, Float64& flt, const unsigned int v);
 }
 
 class TestSerialization
@@ -80,25 +80,25 @@ class TestSerialization
 
     Void test_numeric() {
 
-        const Float nan = 0.0/0.0;
-        const Float inf = 1.0/0.0;
+        const Float64 nan = 0.0/0.0;
+        const Float64 inf = 1.0/0.0;
 
         std::ofstream ofs("test_serialization-numeric.txt");
         boost::archive::text_oarchive txtoa(ofs);
 
         double xary[] = { 0.0, 1.0, 4.2, 1e-72, 1.2e+72 };
-        const Array<Float> oxary(xary,xary+5);
+        const Array<Float64> oxary(xary,xary+5);
         for(Nat i=0; i!=oxary.size(); ++i) { txtoa << oxary[i]; }
 
         // Test output of special values
         ARIADNE_TEST_TRY( txtoa << inf );
         txtoa << static_cast<const double&>(1.0);
         ARIADNE_TEST_TRY( txtoa << nan );
-        ARIADNE_TEST_TRY( txtoa << static_cast<const Float&>(-inf) );
+        ARIADNE_TEST_TRY( txtoa << static_cast<const Float64&>(-inf) );
 
         ofs.close();
 
-        Array<Float> ixary(oxary.size());
+        Array<Float64> ixary(oxary.size());
         std::ifstream ifs("test_serialization-numeric.txt");
         boost::archive::text_iarchive txtia(ifs);
 
@@ -107,7 +107,7 @@ class TestSerialization
             ARIADNE_TEST_EQUALS(ixary[i],oxary[i]);
         }
 
-        Float input_nan, input_inf, input_one;
+        Float64 input_nan, input_inf, input_one;
         // Test input of constant "inf"
         try {
             txtia >> input_inf;

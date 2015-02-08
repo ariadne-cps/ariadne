@@ -50,20 +50,20 @@ class C1TaylorFunction;
 class C1TaylorSeries
 {
   public:
-    std::vector<Float> _coefficients;
-    Float _zero_error;
-    Float _uniform_error;
-    Float _derivative_error;
+    std::vector<Float64> _coefficients;
+    Float64 _zero_error;
+    Float64 _uniform_error;
+    Float64 _derivative_error;
   private:
     C1TaylorSeries(Nat d);
   public:
     C1TaylorSeries();
-    static C1TaylorSeries constant(Float);
+    static C1TaylorSeries constant(Float64);
     static C1TaylorSeries coordinate();
   public:
     ExactInterval domain() const;
     Nat degree() const;
-    Void sweep(Float threshold);
+    Void sweep(Float64 threshold);
   public:
     friend C1TaylorSeries& operator+=(C1TaylorSeries&, ValidatedNumber);
     friend C1TaylorSeries& operator*=(C1TaylorSeries&, ValidatedNumber);
@@ -79,26 +79,26 @@ class C1TaylorFunction
   public:
     typedef ExactInterval NumericType;
   public:
-    Expansion<Float> _expansion;
-    Float _zero_error;
-    Float _uniform_error;
-    Array<Float> _derivative_errors;
+    Expansion<Float64> _expansion;
+    Float64 _zero_error;
+    Float64 _uniform_error;
+    Array<Float64> _derivative_errors;
   private:
   public:
     C1TaylorFunction() { };
     C1TaylorFunction(Nat as);
   public:
-    static C1TaylorFunction constant(Nat as, Float c);
+    static C1TaylorFunction constant(Nat as, Float64 c);
     static C1TaylorFunction coordinate(Nat as, Nat ind);
   public:
     ExactBox domain() const;
     Nat argument_size() const;
-    Void sweep(Float threshold);
+    Void sweep(Float64 threshold);
     C1TaylorFunction& operator=(ExactInterval c);
     Void clear();
   public:
-    friend C1TaylorFunction& operator+=(C1TaylorFunction& f, Float c);
-    friend C1TaylorFunction& operator*=(C1TaylorFunction& f, Float c);
+    friend C1TaylorFunction& operator+=(C1TaylorFunction& f, Float64 c);
+    friend C1TaylorFunction& operator*=(C1TaylorFunction& f, Float64 c);
     friend C1TaylorFunction operator+(C1TaylorFunction f1, C1TaylorFunction f2);
     friend C1TaylorFunction operator*(C1TaylorFunction f1, C1TaylorFunction f2);
     friend ValidatedNumber evaluate(C1TaylorFunction f, Vector<ValidatedNumber> x);

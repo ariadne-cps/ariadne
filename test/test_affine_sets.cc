@@ -38,7 +38,7 @@ using namespace Ariadne;
 using namespace std;
 
 struct ExactFloatVector2d : ExactFloatVector, Vector2d {
-    ExactFloatVector2d(double x, double y) : ExactFloatVector{ExactFloat(x),ExactFloat(y)}, Vector2d(x,y) { }
+    ExactFloatVector2d(double x, double y) : ExactFloatVector{ExactFloat64(x),ExactFloat64(y)}, Vector2d(x,y) { }
 };
 
 struct Polytope2d
@@ -77,8 +77,8 @@ static const Colour colour(0.5,1.0,1.0);
 static const Colour expected_colour(1.0,0.25,0.25);
 
 namespace Ariadne {
-ExactFloat operator"" _ex (long double x) { return ExactFloat((double)x); }
-ValidatedFloat operator/(Int n1, ExactFloat x2) { return ExactFloat(n1)/x2; }
+ExactFloat64 operator"" _ex (long double x) { return ExactFloat64((double)x); }
+ValidatedFloat64 operator/(Int n1, ExactFloat64 x2) { return ExactFloat64(n1)/x2; }
 }
 
 class TestAffineSet
@@ -89,7 +89,7 @@ class TestAffineSet
     Vector< ValidatedAffineFunction > x;
     ValidatedAffineConstrainedImageSet set;
   public:
-    TestAffineSet() : set(Matrix<ExactFloat>(2,2),Vector<ExactFloat>(2)) { }
+    TestAffineSet() : set(Matrix<ExactFloat64>(2,2),Vector<ExactFloat64>(2)) { }
 
     Void test_pure_constraint() {
         figure.clear();

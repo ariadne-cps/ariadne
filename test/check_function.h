@@ -144,14 +144,14 @@ template<class F> void CheckFunctionConcept<F>::check_evaluable_concept()
 
     if(IsWeaker<Approximate,P>::value) {
         ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ApproximateNumber>, Return<ApproximateNumber>>);
-        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ApproximateFloat>, Return<ApproximateFloat>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ApproximateFloat64>, Return<ApproximateFloat64>>);
         ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ApproximateNumber>, Return<ApproximateNumber>>);
     }
 
     if(IsWeaker<Validated,P>::value) {
         ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ValidatedNumber>, Return<ValidatedNumber>>);
-        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<BoundedFloat>, Return<BoundedFloat>>);
-        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ValidatedFloat>, Return<ValidatedFloat>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<BoundedFloat64>, Return<BoundedFloat64>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ValidatedFloat64>, Return<ValidatedFloat64>>);
     }
 
     if(IsWeaker<Effective,P>::value) {
@@ -170,15 +170,15 @@ template<class F> void CheckFunctionConcept<F>::check_differentiable_concept()
     ARIADNE_TEST_STATIC_ASSERT(HasDerivative<F,SizeType,Return<F>>);
 
     if(IsWeaker<Approximate,P>::value) {
-        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<Differential<ApproximateFloat>>, Return<Differential<ApproximateFloat>>>);
-        ARIADNE_TEST_STATIC_ASSERT(HasGradientMethod<F,Vector<ApproximateFloat>, Return<Covector<ApproximateFloat>>>);
-        ARIADNE_TEST_STATIC_ASSERT(HasDifferentialMethod<F,Vector<ApproximateFloat>, Return<Differential<ApproximateFloat>>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<Differential<ApproximateFloat64>>, Return<Differential<ApproximateFloat64>>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasGradientMethod<F,Vector<ApproximateFloat64>, Return<Covector<ApproximateFloat64>>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasDifferentialMethod<F,Vector<ApproximateFloat64>, Return<Differential<ApproximateFloat64>>>);
     }
 
     if(IsWeaker<Validated,P>::value) {
-        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<Differential<BoundedFloat>>, Return<Differential<BoundedFloat>>>);
-        ARIADNE_TEST_STATIC_ASSERT(HasGradientMethod<F,Vector<BoundedFloat>, Return<Covector<BoundedFloat>>>);
-        ARIADNE_TEST_STATIC_ASSERT(HasDifferentialMethod<F,Vector<BoundedFloat>, Return<Differential<BoundedFloat>>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<Differential<BoundedFloat64>>, Return<Differential<BoundedFloat64>>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasGradientMethod<F,Vector<BoundedFloat64>, Return<Covector<BoundedFloat64>>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasDifferentialMethod<F,Vector<BoundedFloat64>, Return<Differential<BoundedFloat64>>>);
     }
 
     if(IsWeaker<Effective,P>::value) {
@@ -249,20 +249,20 @@ template<class F> void CheckVectorFunctionConcept<F>::check_evaluable_concept()
 
     if(IsWeaker<Approximate,P>::value) {
         ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ApproximateNumber>, Return<Vector<ApproximateNumber>>>);
-        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ApproximateFloat>, Return<Vector<ApproximateFloat>>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ApproximateFloat64>, Return<Vector<ApproximateFloat64>>>);
 
         ARIADNE_TEST_STATIC_ASSERT(HasEvaluate<F,Vector<ApproximateNumber>, Return<Vector<ApproximateNumber>>>);
-        ARIADNE_TEST_STATIC_ASSERT(HasEvaluate<F,Vector<ApproximateFloat>, Return<Vector<ApproximateFloat>>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasEvaluate<F,Vector<ApproximateFloat64>, Return<Vector<ApproximateFloat64>>>);
     }
 
     if(IsWeaker<Validated,P>::value) {
         ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ValidatedNumber>, Return<Vector<ValidatedNumber>>>);
-        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<BoundedFloat>, Return<Vector<BoundedFloat>>>);
-        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ValidatedFloat>, Return<Vector<ValidatedFloat>>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<BoundedFloat64>, Return<Vector<BoundedFloat64>>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ValidatedFloat64>, Return<Vector<ValidatedFloat64>>>);
 
         ARIADNE_TEST_STATIC_ASSERT(HasEvaluate<F,Vector<ValidatedNumber>, Return<Vector<ValidatedNumber>>>);
-        ARIADNE_TEST_STATIC_ASSERT(HasEvaluate<F,Vector<BoundedFloat>, Return<Vector<BoundedFloat>>>);
-        ARIADNE_TEST_STATIC_ASSERT(HasEvaluate<F,Vector<ValidatedFloat>, Return<Vector<ValidatedFloat>>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasEvaluate<F,Vector<BoundedFloat64>, Return<Vector<BoundedFloat64>>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasEvaluate<F,Vector<ValidatedFloat64>, Return<Vector<ValidatedFloat64>>>);
 
     }
 
@@ -680,20 +680,20 @@ void CheckFunctionConcept::check_scalar_function()
 
     // Check creation of arithmetical functions
     ARIADNE_TEST_CONSTRUCT(ExactFunction,f,(o+x*y));
-    ARIADNE_TEST_CONSTRUCT(Vector<ApproximateFloat>,p,({2.0,3.0,5.0}));
+    ARIADNE_TEST_CONSTRUCT(Vector<ApproximateFloat64>,p,({2.0,3.0,5.0}));
     ARIADNE_TEST_EQUALS(f(p),7.0);
 
     // Check evaluation on vectors
     ARIADNE_TEST_EQUALS(f(Vector<Real>{2,3,5}),7);
-    ARIADNE_TEST_EQUALS(f(Vector<ValidatedFloat>{2.0_x,3.0_x,5.0_x}),7.0_x);
-    ARIADNE_TEST_EQUALS(f(Vector<ApproximateFloat>{2.0,3.0,5.0}),7.0);
+    ARIADNE_TEST_EQUALS(f(Vector<ValidatedFloat64>{2.0_x,3.0_x,5.0_x}),7.0_x);
+    ARIADNE_TEST_EQUALS(f(Vector<ApproximateFloat64>{2.0,3.0,5.0}),7.0);
 
     ARIADNE_TEST_EQUALS(evaluate(f,Vector<Real>{2,3,5}),7);
-    ARIADNE_TEST_EQUALS(evaluate(f,Vector<ValidatedFloat>{2.0_x,3.0_x,5.0_x}),7.0_x);
-    ARIADNE_TEST_EQUALS(evaluate(f,Vector<ApproximateFloat>{2.0,3.0,5.0}),7.0);
+    ARIADNE_TEST_EQUALS(evaluate(f,Vector<ValidatedFloat64>{2.0_x,3.0_x,5.0_x}),7.0_x);
+    ARIADNE_TEST_EQUALS(evaluate(f,Vector<ApproximateFloat64>{2.0,3.0,5.0}),7.0);
 
     // Check mixed arithmetic
-    Vector<ApproximateFloat> z(3);
+    Vector<ApproximateFloat64> z(3);
     ARIADNE_TEST_NAMED_CONSTRUCT(ExactFunction,ef,constant(3,1));
     ARIADNE_TEST_NAMED_CONSTRUCT(ValidatedFunction,vf,constant(3,2));
     ARIADNE_TEST_NAMED_CONSTRUCT(ApproximateFunction,af,constant(3,4));
@@ -756,9 +756,9 @@ void CheckFunctionConcept::check_vector_function()
     ExactVectorFunction& fr=f;
     ARIADNE_TEST_PRINT(fr[0]);
 
-    ARIADNE_TEST_EQUAL(f[0](Vector<ApproximateFloat>{2.0,3.0,5.0}),2.0);
+    ARIADNE_TEST_EQUAL(f[0](Vector<ApproximateFloat64>{2.0,3.0,5.0}),2.0);
     ARIADNE_TEST_EXECUTE(f[0]=f[1]);
-    ARIADNE_TEST_EQUAL(f[0](Vector<ApproximateFloat>{2.0,3.0,5.0}),3.0);
+    ARIADNE_TEST_EQUAL(f[0](Vector<ApproximateFloat64>{2.0,3.0,5.0}),3.0);
 
     ExactVectorFunction x=ExactVectorFunction::identity(2);
     ExactFunction x0=x[0];
@@ -812,11 +812,11 @@ void CheckFunctionConcept::check_differentiation()
 
     ExactFunction af=3*x-2*y+1;
     ExactFunction daf=af.derivative(1);
-    ARIADNE_TEST_EQUAL(evaluate(daf,Vector<ApproximateFloat>{2.4,1.3}),-2.0);
+    ARIADNE_TEST_EQUAL(evaluate(daf,Vector<ApproximateFloat64>{2.4,1.3}),-2.0);
 
-    ARIADNE_TEST_EQUAL(evaluate(x.derivative(0),Vector<ApproximateFloat>{2.4,1.3}),1.0);
-    ARIADNE_TEST_EQUAL(evaluate(x.derivative(0),Vector<ValidatedFloat>{2.4_x,1.3_x}),1.0_x);
-    ARIADNE_TEST_EQUAL(evaluate(x.derivative(1),Vector<ApproximateFloat>{2.4, 1.3}),0.0);
+    ARIADNE_TEST_EQUAL(evaluate(x.derivative(0),Vector<ApproximateFloat64>{2.4,1.3}),1.0);
+    ARIADNE_TEST_EQUAL(evaluate(x.derivative(0),Vector<ValidatedFloat64>{2.4_x,1.3_x}),1.0_x);
+    ARIADNE_TEST_EQUAL(evaluate(x.derivative(1),Vector<ApproximateFloat64>{2.4, 1.3}),0.0);
 
 }
 */

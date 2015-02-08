@@ -57,7 +57,7 @@ extern Int global_verbosity;
 Int verbosity=global_verbosity;
 
 
-Void ddconv(std::vector< Vector<Float> >&, const std::vector< Vector<Float> >&);
+Void ddconv(std::vector< Vector<Float64> >&, const std::vector< Vector<Float64> >&);
 
 Polyhedron polyhedron(const ExactBox& bx);
 Polyhedron polyhedron(const Polytope& p);
@@ -77,7 +77,7 @@ Polyhedron::Polyhedron(Nat d)
 }
 
 
-Polyhedron::Polyhedron(const Matrix<Float>& A, const Vector<Float>& b)
+Polyhedron::Polyhedron(const Matrix<Float64>& A, const Vector<Float64>& b)
     : _A(A), _b(b)
 {
     ARIADNE_ASSERT_MSG(A.column_size()==b.size(),"Invalid sizes of A="<<A<<" and b="<<b<<" for polyhedral constraints");
@@ -110,13 +110,13 @@ Polyhedron* Polyhedron::clone() const
 
 
 
-Matrix<Float>
+Matrix<Float64>
 Polyhedron::A() const
 {
     return this->_A;
 }
 
-Vector<Float>
+Vector<Float64>
 Polyhedron::b() const
 {
     return this->_b;
@@ -173,10 +173,10 @@ intersection(const Polyhedron& plhd1, const Polyhedron& plhd2)
     Nat d=plhd1.dimension();
     SizeType nc1=plhd1.number_of_constraints();
     SizeType nc2=plhd2.number_of_constraints();
-    Matrix<Float> A(nc1+nc2,d);
+    Matrix<Float64> A(nc1+nc2,d);
     project(A,range(0,nc1),range(0,d)) = plhd1.A();
     project(A,range(nc1,nc1+nc2),range(0,d)) = plhd1.A();
-    Vector<Float> b=join(plhd1.b(),plhd2.b());
+    Vector<Float64> b=join(plhd1.b(),plhd2.b());
     return Polyhedron(A,b);
 }
 
@@ -214,8 +214,8 @@ OutputStream&
 Polyhedron::write(OutputStream& os) const
 {
     //return os << "Polyhedron( A=" << this->A() << ", b=" << this->b() << " )";
-    const Matrix<Float> A=this->A();
-    const Vector<Float> b=this->b();
+    const Matrix<Float64> A=this->A();
+    const Vector<Float64> b=this->b();
     os << "Polyhedron( constraints=";
     Nat d=this->dimension();
     SizeType nc=this->number_of_constraints();
@@ -234,11 +234,11 @@ Polyhedron::write(OutputStream& os) const
 InputStream&
 operator>>(InputStream& is, Polyhedron& p)
 {
-    std::vector< std::vector<Float> > Alst;
-    std::vector< Float > Blst;
+    std::vector< std::vector<Float64> > Alst;
+    std::vector< Float64 > Blst;
 
-    std::vector<Float> a;
-    Float b;
+    std::vector<Float64> a;
+    Float64 b;
 
     char c;
     is >> c;
@@ -257,8 +257,8 @@ operator>>(InputStream& is, Polyhedron& p)
 
     SizeType m=Alst.size();
     SizeType n=Alst[0].size();
-    Matrix<Float> A(m,n);
-    Vector<Float> B(m);
+    Matrix<Float64> A(m,n);
+    Vector<Float64> B(m);
     for(Nat i=0; i!=m; ++i) {
         for(SizeType j=0; j!=n; ++j) {
             A[i][j]=Alst[i][j];

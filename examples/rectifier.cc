@@ -26,9 +26,9 @@ template<class SET> Void plot(const char* filename, const Int& xaxis, const Int&
         // Gets the number of times each variable interval would be divided by 2
         Int numDivisions = MAX_GRID_DEPTH / numVariables;
         // Gets the step in the x direction, by 1/2^(numDivisions+h), where h is 1 if the step is to be further divided by 2, 0 otherwise
-        Float step_x = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > xaxis) ? 1 : 0)));
+        Float64 step_x = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > xaxis) ? 1 : 0)));
         // Initiates the x position to the bounding box left bound
-        Float pos_x = bbox[0].lower().raw();
+        Float64 pos_x = bbox[0].lower().raw();
         // Sets the rectangle 2-nd interval to the corresponding bounding box interval (while the >2 intervals are kept at [0,0])
         rect[yaxis] = bbox[1];
         // While between the interval
@@ -40,8 +40,8 @@ template<class SET> Void plot(const char* filename, const Int& xaxis, const Int&
         }
 
         // Repeats for the rectangles in the y direction
-        Float step_y = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > yaxis) ? 1 : 0)));
-        Float pos_y = bbox[1].lower().raw();
+        Float64 step_y = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > yaxis) ? 1 : 0)));
+        Float64 pos_y = bbox[1].lower().raw();
         rect[xaxis] = bbox[0];
         while (pos_y < bbox[1].upper().raw())
         {
@@ -235,7 +235,7 @@ Int main(Int argc, const char* argv[])
     HybridReachabilityAnalyser analyser(evolver);
     analyser.parameters().lock_to_grid_time = LOCK_TOGRID_TIME;
     analyser.parameters().maximum_grid_depth= MAX_GRID_DEPTH;
-    rectifier.set_grid(Grid(Vector<Float>(3, 0.25/dp[1], 1.0, 0.5)));
+    rectifier.set_grid(Grid(Vector<Float64>(3, 0.25/dp[1], 1.0, 0.5)));
     std::cout <<  analyser.parameters() << std::endl;
 
     analyser.verbosity=VERBOSITY;

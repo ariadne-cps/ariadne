@@ -101,7 +101,7 @@ class OvertSetInterface
     //! Sets \f$A\f$ and \f$B\f$ \em overlap if \f$A^\circ \cap B^\circ \neq \emptyset\f$.
     virtual Tribool overlaps(const ExactBox& bx) const = 0;
     //! \brief Tests if \a ovs overlaps \a ops, to a tolerance of \a eps.
-    friend Tribool overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const RawFloat& eps);
+    friend Tribool overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const RawFloat64& eps);
 };
 
 //! \ingroup GeometryModule SetInterfaceSubModule
@@ -116,9 +116,9 @@ class OpenSetInterface
     //! A set \f$A\f$ \em covers \f$B\f$ if \f$A^\circ \supset \overline{B}\f$.
     virtual Tribool covers(const ExactBox& bx) const = 0;
     //! \brief Tests if \a ovs overlaps \a ops, to a tolerance of \a eps.
-    friend Tribool overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const RawFloat& eps);
+    friend Tribool overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const RawFloat64& eps);
     //! \brief Tests if \a ls is a inside of \a rs, to a tolerance of \a eps.
-    friend Tribool inside(const CompactSetInterface& ls, const OpenSetInterface& rs, const RawFloat& eps);
+    friend Tribool inside(const CompactSetInterface& ls, const OpenSetInterface& rs, const RawFloat64& eps);
 };
 
 //! \ingroup GeometryModule SetInterfaceSubModule
@@ -133,7 +133,7 @@ class ClosedSetInterface
     //! A set \f$A\f$ is \em separated from \f$B\f$ if \f$\,\overline{\!A} \cap \overline{B} = \emptyset\f$.
     virtual Tribool separated(const ExactBox& bx) const = 0;
     //! \brief Tests if \a cps is disjoint from \a cls, to a tolerance of \a eps.
-    friend Tribool separated(const CompactSetInterface& cps, const ClosedSetInterface& cls, const RawFloat& eps);
+    friend Tribool separated(const CompactSetInterface& cps, const ClosedSetInterface& cls, const RawFloat64& eps);
 };
 
 //! \ingroup GeometryModule SetInterfaceSubModule
@@ -146,9 +146,9 @@ class CompactSetInterface
     virtual CompactSetInterface* clone() const = 0;
     //virtual Tribool empty() const = 0;
     //! \brief Tests if \a ls is a inside of \a rs, to a tolerance of \a eps.
-    friend Tribool inside(const CompactSetInterface& ls, const OpenSetInterface& rs, const RawFloat& eps);
+    friend Tribool inside(const CompactSetInterface& ls, const OpenSetInterface& rs, const RawFloat64& eps);
     //! \brief Tests if \a cps is disjoint from \a cls, to a tolerance of \a eps.
-    friend Tribool separated(const CompactSetInterface& cps, const ClosedSetInterface& cls, const RawFloat& eps);
+    friend Tribool separated(const CompactSetInterface& cps, const ClosedSetInterface& cls, const RawFloat64& eps);
 
 };
 
@@ -160,12 +160,12 @@ class RegularSetInterface
 {
     virtual RegularSetInterface* clone() const = 0;
     //! \brief Tests if \a ls overlaps \a rs, to a tolerance of \a eps.
-    friend Tribool overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const RawFloat& eps);
+    friend Tribool overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const RawFloat64& eps);
 
     //! \brief Tests if \a ls is a inside of \a rs, to a tolerance of \a eps.
-    friend Tribool inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const RawFloat& eps);
+    friend Tribool inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const RawFloat64& eps);
     //! \brief Tests if \a ls is disjoint from \a rs, to a tolerance of \a eps.
-    friend Tribool separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const RawFloat& eps);
+    friend Tribool separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const RawFloat64& eps);
 };
 
 
@@ -180,12 +180,12 @@ class LocatedSetInterface
 {
     virtual LocatedSetInterface* clone() const = 0;
     //! \brief Tests if \a ls overlaps \a rs, to a tolerance of \a eps.
-    friend Tribool overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const RawFloat& eps);
+    friend Tribool overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const RawFloat64& eps);
 
     //! \brief Tests if \a ls is a inside of \a rs, to a tolerance of \a eps.
-    friend Tribool inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const RawFloat& eps);
+    friend Tribool inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const RawFloat64& eps);
     //! \brief Tests if \a ls is disjoint from \a rs, to a tolerance of \a eps.
-    friend Tribool separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const RawFloat& eps);
+    friend Tribool separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const RawFloat64& eps);
 };
 
 //! \ingroup GeometryModule SetInterfaceSubModule

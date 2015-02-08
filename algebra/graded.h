@@ -68,11 +68,11 @@ make_expression(Op op, const A1& a1, const A2& a2, const A3& a3) {
 
 
 
-Bool compatible(const Float& x1, const Float& x2) { return true; }
+Bool compatible(const Float64& x1, const Float64& x2) { return true; }
 template<class X> Bool compatible(const Polynomial<X>& x1, const Polynomial<X>& x2) { return x1.argument_size()==x2.argument_size(); }
 template<class X> Bool compatible(const Differential<X>& x1, const Differential<X>& x2) { return x1.argument_size()==x2.argument_size(); }
 
-Float create(const Float& x) { return Float(0); }
+Float64 create(const Float64& x) { return Float64(0); }
 ExactInterval create(const ExactInterval& x) { return ExactInterval(0); }
 template<class X> Polynomial<X> create(const Polynomial<X>& x) { return Polynomial<X>(x.argument_size()); }
 template<class X> Differential<X> create(const Differential<X>& x) { return Differential<X>(x.argument_size(),x.degree()); }
@@ -103,7 +103,7 @@ template<class A> OutputStream& operator<<(OutputStream& os, const Graded<A>& g)
     os << "}";
     return os;
 }
-template<> OutputStream& operator<<(OutputStream& os, const Graded<Float>& g) {
+template<> OutputStream& operator<<(OutputStream& os, const Graded<Float64>& g) {
     if(g.size()==0) { return os << "G[-]{}"; }
     os << "G[" << g.degree() << "]{";
     Bool nonzero=false;
@@ -376,14 +376,14 @@ template<class A> ClosureExpression<AntiDiff,Graded<A> > antidifferential(const 
 }
 
 
-Pair<List<Float>,Float> midpoint_error(const Graded<ExactInterval>& x) {
-    List<Float> m(x.degree()+1);
-    Float e;
+Pair<List<Float64>,Float64> midpoint_error(const Graded<ExactInterval>& x) {
+    List<Float64> m(x.degree()+1);
+    Float64 e;
     for(Nat i=0; i<=x.degree(); ++i) {
-        m[i]=static_cast<Float>(midpoint(x[i]));
+        m[i]=static_cast<Float64>(midpoint(x[i]));
         e=add_up(e,max(sub_up(m[i],x[i].lower_raw()),sub_up(x[i].upper_raw(),m[i])));
     }
-    return Pair<List<Float>,Float>(m,e);
+    return Pair<List<Float64>,Float64>(m,e);
 }
 
 

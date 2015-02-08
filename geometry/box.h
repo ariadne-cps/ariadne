@@ -84,8 +84,8 @@ Vector<ExactInterval> hull(const Vector<ExactInterval>& v1, const Vector<ExactNu
 Vector<ExactInterval> hull(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2);
 Vector<ExactInterval> intersection(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2);
 Vector<ExactNumber> midpoint(const Vector<ExactInterval>& v);
-Vector<ExactFloat> lower_bounds(const Vector<ExactInterval>& v);
-Vector<ExactFloat> upper_bounds(const Vector<ExactInterval>& v);
+Vector<ExactFloat64> lower_bounds(const Vector<ExactInterval>& v);
+Vector<ExactFloat64> upper_bounds(const Vector<ExactInterval>& v);
 PositiveUpperNumber radius(const Vector<ExactInterval>& z);
 PositiveUpperNumber volume(const Vector<ExactInterval>& z);
 
@@ -164,7 +164,7 @@ template<> class Box<ExactInterval>
     Box<ExactInterval>(InitializerList<ExactInterval> lst);
 
     explicit Box<ExactInterval>(Nat d, ExactInterval ivl) : Vector<ExactInterval>(d,ivl) { }
-    Box<ExactInterval>(const Vector<ExactFloat>& pvec) : Vector<ExactInterval>(pvec) { }
+    Box<ExactInterval>(const Vector<ExactFloat64>& pvec) : Vector<ExactInterval>(pvec) { }
     Box<ExactInterval>(const Vector<ExactInterval>& ivec) : Vector<ExactInterval>(ivec) { }
     Box<ExactInterval>(const List<ExactInterval>& ilst) : Vector<ExactInterval>(ilst) { }
 
@@ -370,7 +370,7 @@ template<> class Box<UpperInterval>
     Box<UpperInterval>(Vector<UpperInterval>const& vec) : Vector<UpperInterval>(vec) { }
     template<class E> Box<UpperInterval>(const VectorExpression<E>& t) : Vector<UpperInterval>(t) { }
 
-    Box<UpperInterval>(const Vector<ValidatedFloat>& vec) : Vector<UpperInterval>(vec) { }
+    Box<UpperInterval>(const Vector<ValidatedFloat64>& vec) : Vector<UpperInterval>(vec) { }
 
     //! The unit box \f$[-1,1]^n\f$ in \a n dimensions.
     static UpperBox unit_box(Nat n) {
@@ -549,7 +549,7 @@ inline ApproximatePoint midpoint(const UpperBox& bx) {
     return midpoint(static_cast<Vector<UpperInterval>const&>(bx));
 }
 
-inline PositiveUpperFloat radius(const UpperBox& bx) {
+inline PositiveUpperFloat64 radius(const UpperBox& bx) {
     return bx.radius();
 }
 
@@ -566,7 +566,7 @@ inline Bool contains(const ApproximateBox& abx, ApproximatePoint apt) {
     return true;
 }
 
-inline ApproximateBox widen(const UpperBox& bx, ApproximateFloat eps) {
+inline ApproximateBox widen(const UpperBox& bx, ApproximateFloat64 eps) {
     ApproximateBox r(bx.dimension());
     for(Nat i=0; i!=bx.size(); ++i) {
         r[i]=ApproximateInterval(bx[i].lower()-eps,bx[i].upper()+eps);

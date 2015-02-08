@@ -40,7 +40,7 @@
 using namespace Ariadne;
 using namespace std;
 
-typedef Vector<ValidatedFloat> ValidatedFloatVector;
+typedef Vector<ValidatedFloat64> ValidatedFloatVector;
 
 class TestSolver
 {
@@ -78,7 +78,7 @@ class TestSolver
         EffectiveVectorFunction f;
         ValidatedVectorFunctionModel h;
         EffectiveVectorFunction e;
-        ExactFloat tol;
+        ExactFloat64 tol;
 
         // Test solution of x-a=0. This should be very easy to solve.
         p=ExactIntervalVector({ExactInterval(-0.25,0.25)});

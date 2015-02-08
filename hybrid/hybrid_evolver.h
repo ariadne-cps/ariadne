@@ -53,7 +53,7 @@ namespace Ariadne {
 template<class X> class FunctionModelFactoryInterface;
 typedef FunctionModelFactoryInterface<ValidatedTag> ValidatedFunctionModelFactoryInterface;
 
-typedef Map< DiscreteLocation, Vector<ExactFloat> > HybridExactFloatVector;
+typedef Map< DiscreteLocation, Vector<ExactFloat64> > HybridExactFloatVector;
 
 class IntegratorInterface;
 class SolverInterface;
@@ -67,7 +67,7 @@ class FlowFunctionModel
 {
   public:
     FlowFunctionModel(const ValidatedVectorFunctionModel& f) : ValidatedVectorFunctionModel(f) { }
-    ExactFloat step_size() const { return make_exact(this->time_domain().upper()); }
+    ExactFloat64 step_size() const { return make_exact(this->time_domain().upper()); }
     ExactInterval time_domain() const { return this->domain()[this->domain().size()-1]; }
     ExactBox space_domain() const { return ExactBox(project(this->domain(),Ariadne::range(0,this->domain().size()-1))); }
     ExactBox const codomain() const { return this->ValidatedVectorFunctionModel::codomain(); }
@@ -248,7 +248,7 @@ class HybridEvolverBase
     ValidatedVectorFunctionModel
     _compute_flow(EffectiveVectorFunction vector_field,
                   ExactBox const& initial_set,
-                  const ExactFloat& maximum_step_size) const;
+                  const ExactFloat64& maximum_step_size) const;
 
     //! \brief Compute the active events for the \a flow \f$\phi\f$ with
     //! time step \f$h\f$ starting in the given \a starting_set \f$S\f$.
@@ -616,7 +616,7 @@ struct TimingData
     StepKind step_kind; //!< The kind of step taken in the evolution
     FinishingKind finishing_kind; //!< The relationship between the finishing time of the step, and the final time of the evolution trace.
     Real final_time; //!< The time \f$t_{\max}\f$ specified as the final time of the evolution trace.
-    ExactFloat step_size; //!< The maximum step size \f$h\f$ allowed by the computed flow function.
+    ExactFloat64 step_size; //!< The maximum step size \f$h\f$ allowed by the computed flow function.
     ValidatedScalarFunctionModel spacetime_dependent_evolution_time;
         //!< The evolution time \f$\varepsilon(x,t)\f$ used in a \a SPACETIME_DEPENDENT_EVOLUTION_TIME step.
     ValidatedScalarFunctionModel spacetime_dependent_finishing_time;

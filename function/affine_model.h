@@ -44,26 +44,26 @@
 namespace Ariadne {
 
 template<class X> class Affine;
-typedef Affine<Float> FloatAffine;
+typedef Affine<Float64> FloatAffine;
 typedef Affine<ExactInterval> IntervalAffine;
 typedef Affine<ApproximateNumber> ApproximateAffine;
 typedef Affine<ValidatedNumber> ValidatedAffine;
 
 template<class X> class AffineModel;
-typedef AffineModel<Float> FloatAffineModel;
+typedef AffineModel<Float64> FloatAffineModel;
 typedef AffineModel<ApproximateNumber> ApproximateAffineModel;
 typedef AffineModel<ValidatedNumber> ValidatedAffineModel;
 
 template<class P, class F> class TaylorModel;
-typedef TaylorModel<Approximate,Float> ApproximateTaylorModel;
-typedef TaylorModel<Validated,Float> ValidatedTaylorModel;
+typedef TaylorModel<Approximate,Float64> ApproximateTaylorModel;
+typedef TaylorModel<Validated,Float64> ValidatedTaylorModel;
 
 
 AffineModel<ValidatedNumber> affine_model(const Affine<ValidatedNumber>& affine);
 AffineModel<ValidatedNumber> affine_model(const Affine<EffectiveNumber>& affine);
-AffineModel<ValidatedNumber> affine_model(const TaylorModel<Validated,Float>& taylor_model);
+AffineModel<ValidatedNumber> affine_model(const TaylorModel<Validated,Float64>& taylor_model);
 AffineModel<ValidatedNumber> affine_model(const ExactBox& domain, const ValidatedScalarFunction& function);
-Vector< AffineModel<ValidatedNumber> > affine_models(const Vector< TaylorModel<Validated,Float> >& taylor_models);
+Vector< AffineModel<ValidatedNumber> > affine_models(const Vector< TaylorModel<Validated,Float64> >& taylor_models);
 Vector< AffineModel<ValidatedNumber> > affine_models(const ExactBox& domain, const ValidatedVectorFunction& function);
 
 //! An affine expression \f$f:\R^n\rightarrow\R\f$ given by \f$f(x) \approx \sum_{i=0}^{n-1} a_i x_i + b\f$.
@@ -71,7 +71,7 @@ template<>
 class AffineModel<ApproximateNumber>
 {
   public:
-    typedef ApproximateFloat CoefficientType;
+    typedef ApproximateFloat64 CoefficientType;
 
     explicit AffineModel() : _c(), _g() { }
     explicit AffineModel(Nat n) : _c(0.0), _g(n,0.0) { }
@@ -131,36 +131,36 @@ template<>
 class AffineModel<ValidatedNumber>
 {
   public:
-    typedef ExactFloat CoefficientType;
-    typedef ErrorFloat ErrorType;
+    typedef ExactFloat64 CoefficientType;
+    typedef ErrorFloat64 ErrorType;
 
     explicit AffineModel() : _c(), _g() { }
-    explicit AffineModel(Nat n) : _c(0.0), _g(n,ExactFloat(0.0)), _e(0u) { }
-    explicit AffineModel(const ExactFloat& c, const Covector<ExactFloat>& g, const ErrorFloat& e) : _c(c), _g(g), _e(e) { }
-    explicit AffineModel(ExactFloat c, InitializerList<ExactFloat> g) : _c(c), _g(g), _e(0u) { }
+    explicit AffineModel(Nat n) : _c(0.0), _g(n,ExactFloat64(0.0)), _e(0u) { }
+    explicit AffineModel(const ExactFloat64& c, const Covector<ExactFloat64>& g, const ErrorFloat64& e) : _c(c), _g(g), _e(e) { }
+    explicit AffineModel(ExactFloat64 c, InitializerList<ExactFloat64> g) : _c(c), _g(g), _e(0u) { }
 
-    AffineModel<ValidatedNumber>& operator=(const ExactFloat& c) {
+    AffineModel<ValidatedNumber>& operator=(const ExactFloat64& c) {
         this->_c=c; for(Nat i=0; i!=this->_g.size(); ++i) { this->_g[i]=0; } this->_e=0u; return *this; }
-    static AffineModel<ValidatedNumber> constant(Nat n, const ExactFloat& c) {
-        return AffineModel<ValidatedNumber>(c,Covector<ExactFloat>(n,0),ErrorFloat(0u)); }
+    static AffineModel<ValidatedNumber> constant(Nat n, const ExactFloat64& c) {
+        return AffineModel<ValidatedNumber>(c,Covector<ExactFloat64>(n,0),ErrorFloat64(0u)); }
     static AffineModel<ValidatedNumber> variable(Nat n, Nat j) {
-        return AffineModel<ValidatedNumber>(0,Covector<ExactFloat>::unit(n,j),0u); }
+        return AffineModel<ValidatedNumber>(0,Covector<ExactFloat64>::unit(n,j),0u); }
 
 
-    const Covector<ExactFloat>& a() const { return this->_g; }
-    const ExactFloat& b() const { return this->_c; }
-    const ErrorFloat& e() const { return this->_e; }
+    const Covector<ExactFloat64>& a() const { return this->_g; }
+    const ExactFloat64& b() const { return this->_c; }
+    const ErrorFloat64& e() const { return this->_e; }
 
-    ExactFloat& operator[](Nat i) { return this->_g[i]; }
-    const ExactFloat& operator[](Nat i) const { return this->_g[i]; }
-    const Covector<ExactFloat>& gradient() const { return this->_g; }
-    const ExactFloat& gradient(Nat i) const { return this->_g[i]; }
-    const ExactFloat& value() const { return this->_c; }
-    const ErrorFloat& error() const { return this->_e; }
+    ExactFloat64& operator[](Nat i) { return this->_g[i]; }
+    const ExactFloat64& operator[](Nat i) const { return this->_g[i]; }
+    const Covector<ExactFloat64>& gradient() const { return this->_g; }
+    const ExactFloat64& gradient(Nat i) const { return this->_g[i]; }
+    const ExactFloat64& value() const { return this->_c; }
+    const ErrorFloat64& error() const { return this->_e; }
 
-    Void set_value(const ExactFloat& c) { _c=c; }
-    Void set_gradient(Nat j, const ExactFloat& g) { _g[j]=g; }
-    Void set_error(const ErrorFloat& e) { _e=e; }
+    Void set_value(const ExactFloat64& c) { _c=c; }
+    Void set_gradient(Nat j, const ExactFloat64& g) { _g[j]=g; }
+    Void set_error(const ErrorFloat64& e) { _e=e; }
 
     Void resize(Nat n) { this->_g.resize(n); }
 
@@ -174,9 +174,9 @@ class AffineModel<ValidatedNumber>
     }
 
   private:
-    ExactFloat _c;
-    Covector<ExactFloat> _g;
-    ErrorFloat _e;
+    ExactFloat64 _c;
+    Covector<ExactFloat64> _g;
+    ErrorFloat64 _e;
 };
 
 //! \relates AffineModel
@@ -214,7 +214,7 @@ OutputStream& operator<<(OutputStream& os, const AffineModel<ValidatedNumber>& f
 
 //! \relates AffineModel
 //! \brief Create from a Taylor model.
-AffineModel<ValidatedNumber> affine_model(const TaylorModel<Validated,Float>& tm);
+AffineModel<ValidatedNumber> affine_model(const TaylorModel<Validated,Float64>& tm);
 
 
 

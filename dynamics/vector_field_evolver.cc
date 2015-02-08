@@ -141,7 +141,7 @@ _evolution(EnclosureListType& final_sets,
         working_sets.pop_back();
         TimeType current_time=current_timed_set.first;
         EnclosureType current_set_model=current_timed_set.second;
-        UpperFloat current_set_radius=radius(current_set_model.bounding_box());
+        UpperFloat64 current_set_radius=radius(current_set_model.bounding_box());
         if(current_time>=maximum_time) {
             final_sets.adjoin(current_set_model);
         } else if(UPPER_SEMANTICS && ENABLE_SUBDIVISIONS
@@ -216,9 +216,9 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     const FunctionType& dynamic=_sys_ptr->function();
 
     // Set evolution parameters
-    const Float maximum_step_size=this->_configuration->maximum_step_size();
-    //const Float maximum_bounds_diameter=this->_parameters->maximum_enclosure_radius*2;
-    //const Float zero_time=0.0;
+    const Float64 maximum_step_size=this->_configuration->maximum_step_size();
+    //const Float64 maximum_bounds_diameter=this->_parameters->maximum_enclosure_radius*2;
+    //const Float64 zero_time=0.0;
 
     // Get bounding boxes for time and space bounding_box
     ExactBox current_set_bounds=make_exact_box(current_set_model.bounding_box());
@@ -229,11 +229,11 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     // TODO: Modify this for general integrator interface
     //TaylorPicardIntegrator const* taylor_integrator=dynamic_cast<const TaylorPicardIntegrator*>(this->_integrator.operator->());
     IntegratorInterface const* integrator=this->_integrator.operator->();
-    Float step_size=maximum_step_size;
+    Float64 step_size=maximum_step_size;
     FlowModelType flow_model=integrator->flow_step(dynamic,current_set_bounds,step_size);
     ARIADNE_LOG(4,"step_size = "<<step_size<<"\n");
     ARIADNE_LOG(6,"flow_model = "<<flow_model<<"\n");
-    FlowModelType flow_step_model=partial_evaluate(flow_model,flow_model.domain().size()-1u,ExactFloat(step_size));
+    FlowModelType flow_step_model=partial_evaluate(flow_model,flow_model.domain().size()-1u,ExactFloat64(step_size));
     ARIADNE_LOG(6,"flow_step_model = "<<flow_step_model<<"\n");
 
     // Compute the integration time model

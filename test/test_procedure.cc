@@ -104,25 +104,25 @@ Void TestProcedure::test_construct_from_formula()
     Vector< ApproximateProcedure > p(f);
     ARIADNE_TEST_PRINT(p);
 
-    p0+=ApproximateFloat(5);
+    p0+=ApproximateFloat64(5);
     ARIADNE_TEST_PRINT(p0);
 }
 
 Void TestProcedure::test_construct_from_expansion()
 {
     {
-        Expansion<ApproximateFloat> e({ {{0,0},1.0}, {{1,0},2.0}, {{0,2},3.0}, {{1,4},4.0} });
+        Expansion<ApproximateFloat64> e({ {{0,0},1.0}, {{1,0},2.0}, {{0,2},3.0}, {{1,4},4.0} });
         ARIADNE_TEST_PRINT(e);
         e.reverse_lexicographic_sort();
         ARIADNE_TEST_PRINT(e);
         ApproximateProcedure p(e);
         ARIADNE_TEST_PRINT(p);
-        Vector<ApproximateFloat> x={2.0,3.0};
+        Vector<ApproximateFloat64> x={2.0,3.0};
         ARIADNE_TEST_EQUAL(evaluate(p,x),simple_evaluate(e,x));
     }
 
     {
-        Expansion<ApproximateFloat> e({ {{0,0},1.0}, {{1,0},2.0}, {{0,1},3.0}, {{2,0},4.0}, {{1,1},5.0}, {{0,2},6.0} });
+        Expansion<ApproximateFloat64> e({ {{0,0},1.0}, {{1,0},2.0}, {{0,1},3.0}, {{2,0},4.0}, {{1,1},5.0}, {{0,2},6.0} });
         e.reverse_lexicographic_sort();
         ApproximateProcedure p(e);
         ARIADNE_TEST_PRINT(p);
@@ -141,7 +141,7 @@ Void TestProcedure::test_evaluate()
     p.new_unary_instruction(OperatorCode::SQRT,4u);
     ARIADNE_TEST_PRINT(p);
 
-    Vector<ApproximateFloat> x={3.0,4.0};
+    Vector<ApproximateFloat64> x={3.0,4.0};
     ARIADNE_TEST_PRINT(x);
 
     ARIADNE_TEST_EQUALS(evaluate(p,x),5.0);

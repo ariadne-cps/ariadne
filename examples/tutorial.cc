@@ -300,7 +300,7 @@ Void compute_reachable_sets_with_serialisation(const CompositeHybridAutomaton& h
     // The intermediate set is stored to an archive file and used to build the initial set for the reach step
     // Note that because of peculiarities in the Boost serialization library,
     // the object to be serialized must be declared const.
-    Float tlower=0.25; Float tupper=0.75;
+    Float64 tlower=0.25; Float64 tupper=0.75;
     HybridTime transient_time(tlower,4);
     HybridTime recurrent_time(tupper-tlower,16);
 

@@ -133,7 +133,7 @@ _evolution(EnclosureListType& final_sets,
         working_sets.pop_back();
         EnclosureType initial_enclosure=current_set.second;
         TimeType initial_time=current_set.first;
-        UpperFloat initial_set_radius=radius(initial_enclosure.bounding_box());
+        UpperFloat64 initial_set_radius=radius(initial_enclosure.bounding_box());
         if(initial_time>=maximum_time) {
             final_sets.adjoin(EnclosureType(initial_enclosure));
         } else if(UPPER_SEMANTICS && ENABLE_SUBDIVISIONS

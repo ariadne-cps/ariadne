@@ -45,34 +45,34 @@ class AnalyticFunction;
 // and is valid within the entire radius of convergence
 template<class X> class TaylorSeries;
 
-template<> class TaylorSeries<ValidatedFloat> {
+template<> class TaylorSeries<ValidatedFloat64> {
     ExactInterval _domain;
-    Array<ExactFloat> _expansion;
-    ErrorFloat _error;
+    Array<ExactFloat64> _expansion;
+    ErrorFloat64 _error;
   public:
     TaylorSeries(const ExactInterval& dom, DegreeType deg) : _domain(dom), _expansion(deg+1), _error(0u) { }
 
-    TaylorSeries(const ExactInterval& domain, const ExactFloat& centre, DegreeType degree,
+    TaylorSeries(const ExactInterval& domain, const ExactFloat64& centre, DegreeType degree,
                  AnalyticFunction const& function);
 
-    template<class OP> TaylorSeries(OP unary_operator, const ExactInterval& domain, const ExactFloat& centre, DegreeType degree);
+    template<class OP> TaylorSeries(OP unary_operator, const ExactInterval& domain, const ExactFloat64& centre, DegreeType degree);
 
     DegreeType degree() const { return _expansion.size()-1; }
-    ExactFloat const& operator[](DegreeType i) const { return _expansion[i]; }
-    Array<ExactFloat> expansion() const { return _expansion; }
-    ErrorFloat error() const { return _error; }
-    Void sweep(ExactFloat threshold);
+    ExactFloat64 const& operator[](DegreeType i) const { return _expansion[i]; }
+    Array<ExactFloat64> expansion() const { return _expansion; }
+    ErrorFloat64 error() const { return _error; }
+    Void sweep(ExactFloat64 threshold);
 
-    friend OutputStream& operator<<(OutputStream&, TaylorSeries<ValidatedFloat> const&);
+    friend OutputStream& operator<<(OutputStream&, TaylorSeries<ValidatedFloat64> const&);
 };
 
 
 template<class OP> inline
-TaylorSeries<ValidatedFloat>::TaylorSeries(OP unary_operator, const ExactInterval& domain, const ExactFloat& centre, DegreeType degree)
+TaylorSeries<ValidatedFloat64>::TaylorSeries(OP unary_operator, const ExactInterval& domain, const ExactFloat64& centre, DegreeType degree)
     : _domain(domain), _expansion(degree+1), _error(0u)
 {
-    Series<ValidatedNumber> centre_series=Series<ValidatedFloat>(unary_operator,ValidatedNumber(centre));
-    Series<ValidatedNumber> range_series=Series<ValidatedFloat>(unary_operator,ValidatedNumber(domain));
+    Series<ValidatedNumber> centre_series=Series<ValidatedFloat64>(unary_operator,ValidatedNumber(centre));
+    Series<ValidatedNumber> range_series=Series<ValidatedFloat64>(unary_operator,ValidatedNumber(domain));
     for(DegreeType i=0; i!=degree; ++i) {
         this->_expansion[i]=centre_series[i].value();
         this->_error+=mag(centre_series[i]-this->_expansion[i]);
@@ -84,7 +84,7 @@ TaylorSeries<ValidatedFloat>::TaylorSeries(OP unary_operator, const ExactInterva
 
 
 inline
-Void TaylorSeries<ValidatedFloat>::sweep(ExactFloat threshold) {
+Void TaylorSeries<ValidatedFloat64>::sweep(ExactFloat64 threshold) {
     for(DegreeType i=0; i<=degree(); ++i) {
         if(mag(_expansion[i])<=threshold) {
             _error+=mag(_expansion[i]);
@@ -94,7 +94,7 @@ Void TaylorSeries<ValidatedFloat>::sweep(ExactFloat threshold) {
 }
 
 inline
-OutputStream& operator<<(OutputStream& os, const TaylorSeries<ValidatedFloat>& ts) {
+OutputStream& operator<<(OutputStream& os, const TaylorSeries<ValidatedFloat64>& ts) {
     return os<<"TS("<<ts._expansion<<"+/-"<<ts._error<<")";
 }
 

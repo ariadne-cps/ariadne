@@ -79,7 +79,7 @@ template<class F> TaylorModel<Validated,F>::TaylorModel(const Expansion<Coeffici
     this->cleanup();
 }
 
-template<class F> TaylorModel<Validated,F>::TaylorModel(const Expansion<Float>& f, const Float& e, Sweeper swp)
+template<class F> TaylorModel<Validated,F>::TaylorModel(const Expansion<Float64>& f, const Float64& e, Sweeper swp)
     : TaylorModel(reinterpret_cast<Expansion<CoefficientType>const&>(f),reinterpret_cast<ErrorType const&>(e),swp)
 {
 }
@@ -140,7 +140,7 @@ template<class F> DegreeType TaylorModel<Validated,F>::degree() const {
 
 template<class F> TaylorModel<Validated,F>& TaylorModel<Validated,F>::operator=(const ValidatedNumber& c) {
     this->_expansion.clear();
-    ExactFloat m=c.value();
+    ExactFloat64 m=c.value();
     if(m!=0) {
         this->_expansion.append(MultiIndex::zero(this->argument_size()),m);
     }
@@ -152,125 +152,125 @@ template<class F> TaylorModel<Validated,F>& TaylorModel<Validated,F>::operator=(
 namespace { // Internal code for arithmetic
 
 struct ValidatedApproximateFloat {
-    ValidatedFloat _v; ApproximateFloat _a;
-    ValidatedApproximateFloat(ValidatedFloat x) : _v(x), _a(x) { }
-    LowerFloat lower() const { return _v.lower(); }
-    ApproximateFloat middle() const { return _a; }
-    UpperFloat upper() const { return _v.upper(); }
-    Float const& lower_raw() const { return _v.lower_raw(); }
-    Float const& middle_raw() const { return _a.raw(); }
-    Float const& upper_raw() const { return _v.upper_raw(); }
+    ValidatedFloat64 _v; ApproximateFloat64 _a;
+    ValidatedApproximateFloat(ValidatedFloat64 x) : _v(x), _a(x) { }
+    LowerFloat64 lower() const { return _v.lower(); }
+    ApproximateFloat64 middle() const { return _a; }
+    UpperFloat64 upper() const { return _v.upper(); }
+    Float64 const& lower_raw() const { return _v.lower_raw(); }
+    Float64 const& middle_raw() const { return _a.raw(); }
+    Float64 const& upper_raw() const { return _v.upper_raw(); }
 };
 
-ExactFloat add_err(ExactFloat const& x1, ExactFloat const& x2, ErrorFloat& e) {
-    ExactFloat mx1=-x1;
-    Float::set_rounding_to_nearest();
-    ExactFloat r(x1.raw() + x2.raw());
-    Float::set_rounding_upward();
-    Float u=x1.raw()+x2.raw();
-    Float ml=mx1.raw()-x2.raw();
+ExactFloat64 add_err(ExactFloat64 const& x1, ExactFloat64 const& x2, ErrorFloat64& e) {
+    ExactFloat64 mx1=-x1;
+    Float64::set_rounding_to_nearest();
+    ExactFloat64 r(x1.raw() + x2.raw());
+    Float64::set_rounding_upward();
+    Float64 u=x1.raw()+x2.raw();
+    Float64 ml=mx1.raw()-x2.raw();
     e.raw() += (u+ml)/2;
     return r;
 }
 
-ExactFloat add_err(ExactFloat const& x, ValidatedApproximateFloat const& c, ErrorFloat& e) {
-    Float const& xv=x.raw();
-    Float const& cl=c.lower_raw();
-    Float const& cm=c.middle_raw();
-    Float const& cu=c.upper_raw();
-    Float& re=e.raw();
-    Float::set_rounding_to_nearest();
-    Float rv=xv+cm;
-    Float::set_rounding_upward();
-    Float u=xv+cu;
-    Float ml=(-xv)-cl;
+ExactFloat64 add_err(ExactFloat64 const& x, ValidatedApproximateFloat const& c, ErrorFloat64& e) {
+    Float64 const& xv=x.raw();
+    Float64 const& cl=c.lower_raw();
+    Float64 const& cm=c.middle_raw();
+    Float64 const& cu=c.upper_raw();
+    Float64& re=e.raw();
+    Float64::set_rounding_to_nearest();
+    Float64 rv=xv+cm;
+    Float64::set_rounding_upward();
+    Float64 u=xv+cu;
+    Float64 ml=(-xv)-cl;
     re += (u+ml)/2;
-    return ExactFloat(rv);
+    return ExactFloat64(rv);
 }
 
-ExactFloat sub_err(ExactFloat const& x1, ExactFloat const& x2, ErrorFloat& e) {
-    ExactFloat mx1=-x1;
-    Float::set_rounding_to_nearest();
-    ExactFloat r(x1.raw() - x2.raw());
-    Float::set_rounding_upward();
-    Float u=x1.raw()-x2.raw();
-    Float ml=mx1.raw()+x2.raw();
+ExactFloat64 sub_err(ExactFloat64 const& x1, ExactFloat64 const& x2, ErrorFloat64& e) {
+    ExactFloat64 mx1=-x1;
+    Float64::set_rounding_to_nearest();
+    ExactFloat64 r(x1.raw() - x2.raw());
+    Float64::set_rounding_upward();
+    Float64 u=x1.raw()-x2.raw();
+    Float64 ml=mx1.raw()+x2.raw();
     e.raw() += (u+ml)/2;
     return r;
 }
 
-ExactFloat mul_no_err(ExactFloat const& x1, ExactFloat const& x2) {
-    Float::set_rounding_to_nearest();
-    ExactFloat r(x1.raw() * x2.raw());
-    Float::set_rounding_upward();
+ExactFloat64 mul_no_err(ExactFloat64 const& x1, ExactFloat64 const& x2) {
+    Float64::set_rounding_to_nearest();
+    ExactFloat64 r(x1.raw() * x2.raw());
+    Float64::set_rounding_upward();
     return r;
 }
 
-ExactFloat mul_err(ExactFloat const& x1, ExactFloat const& x2, ErrorFloat& e) {
-    ExactFloat mx1=-x1;
-    Float::set_rounding_to_nearest();
-    ExactFloat r(x1.raw() * x2.raw());
-    Float::set_rounding_upward();
-    Float u=x1.raw()*x2.raw();
-    Float ml=mx1.raw()*x2.raw();
+ExactFloat64 mul_err(ExactFloat64 const& x1, ExactFloat64 const& x2, ErrorFloat64& e) {
+    ExactFloat64 mx1=-x1;
+    Float64::set_rounding_to_nearest();
+    ExactFloat64 r(x1.raw() * x2.raw());
+    Float64::set_rounding_upward();
+    Float64 u=x1.raw()*x2.raw();
+    Float64 ml=mx1.raw()*x2.raw();
     e.raw() += (u+ml)/2;
     return r;
 }
 
-ExactFloat mul_err(ExactFloat const& x, ValidatedApproximateFloat const& c, ErrorFloat& e) {
-    Float const& xv=x.raw();
-    Float const& cu=c.upper_raw();
-    Float const& cm=c.middle_raw();
-    Float const& cl=c.lower_raw();
-    Float& re=e.raw();
-    Float::set_rounding_to_nearest();
-    Float rv=xv*cm;
-    Float::set_rounding_upward();
-    Float u,ml;
+ExactFloat64 mul_err(ExactFloat64 const& x, ValidatedApproximateFloat const& c, ErrorFloat64& e) {
+    Float64 const& xv=x.raw();
+    Float64 const& cu=c.upper_raw();
+    Float64 const& cm=c.middle_raw();
+    Float64 const& cl=c.lower_raw();
+    Float64& re=e.raw();
+    Float64::set_rounding_to_nearest();
+    Float64 rv=xv*cm;
+    Float64::set_rounding_upward();
+    Float64 u,ml;
     if(xv>=0) {
-        Float mcl=-cl;
+        Float64 mcl=-cl;
         u=xv*cu;
         ml=xv*mcl;
     } else {
-        Float mcu=-cu;
+        Float64 mcu=-cu;
         u=xv*cl;
         ml=xv*mcu;
     }
     re+=(u+ml)/2;
-    return ExactFloat(rv);
+    return ExactFloat64(rv);
 }
 
-ExactFloat fma_err(ExactFloat const& x, ValidatedApproximateFloat const& c, ExactFloat y, ErrorFloat& e) {
-    Float const& xv=x.raw();
-    Float const& cu=c.upper_raw();
-    Float const& cm=c.middle_raw();
-    Float const& cl=c.lower_raw();
-    Float const& yv=y.raw();
-    Float& re=e.raw();
-    Float::set_rounding_to_nearest();
-    Float rv=xv+cm*yv;
-    Float::set_rounding_upward();
-    Float u,ml;
+ExactFloat64 fma_err(ExactFloat64 const& x, ValidatedApproximateFloat const& c, ExactFloat64 y, ErrorFloat64& e) {
+    Float64 const& xv=x.raw();
+    Float64 const& cu=c.upper_raw();
+    Float64 const& cm=c.middle_raw();
+    Float64 const& cl=c.lower_raw();
+    Float64 const& yv=y.raw();
+    Float64& re=e.raw();
+    Float64::set_rounding_to_nearest();
+    Float64 rv=xv+cm*yv;
+    Float64::set_rounding_upward();
+    Float64 u,ml;
     if(yv>=0) {
-        Float mcl=-cl;
+        Float64 mcl=-cl;
         u=cu*yv+xv;
         ml=mcl*yv-xv;
     } else {
-        Float mcu=-cu;
+        Float64 mcu=-cu;
         u=cl*yv+xv;
         ml=mcu*yv-xv;
     }
     re+=(u+ml)/2;
-    return ExactFloat(rv);
+    return ExactFloat64(rv);
 }
 
-ExactFloat div_err(ExactFloat const& x1, ExactFloat const& x2, ErrorFloat& e) {
-    ExactFloat mx1=-x1;
-    Float::set_rounding_to_nearest();
-    ExactFloat r(x1.raw() / x2.raw());
-    Float::set_rounding_upward();
-    Float u=x1.raw()/x2.raw();
-    Float ml=mx1.raw()/x2.raw();
+ExactFloat64 div_err(ExactFloat64 const& x1, ExactFloat64 const& x2, ErrorFloat64& e) {
+    ExactFloat64 mx1=-x1;
+    Float64::set_rounding_to_nearest();
+    ExactFloat64 r(x1.raw() / x2.raw());
+    Float64::set_rounding_upward();
+    Float64 u=x1.raw()/x2.raw();
+    Float64 ml=mx1.raw()/x2.raw();
     e.raw() += (u+ml)/2;
     return r;
 }
@@ -286,38 +286,38 @@ template<class F> Void _neg(TaylorModel<Validated,F>& r)
 
 template<class F> Void _scal(TaylorModel<Validated,F>& r, const TwoExp& c)
 {
-    if(ExactFloat(c)==1) { return; }
+    if(ExactFloat64(c)==1) { return; }
     for(typename TaylorModel<Validated,F>::Iterator riter=r.begin(); riter!=r.end(); ++riter) {
         riter->data()*=c;
     }
-    r.error()*=ErrorFloat(c);
+    r.error()*=ErrorFloat64(c);
  }
 
 
 
-template<class F> Void _scal(TaylorModel<Validated,F>& r, const ExactFloat& c) {
-    ErrorFloat e=0u; // The maximum accumulated error
+template<class F> Void _scal(TaylorModel<Validated,F>& r, const ExactFloat64& c) {
+    ErrorFloat64 e=0u; // The maximum accumulated error
     for(typename TaylorModel<Validated,F>::Iterator riter=r.begin(); riter!=r.end(); ++riter) {
         riter->data() = mul_err(riter->data(),c,e);
     }
-    ErrorFloat& re=r.error();
+    ErrorFloat64& re=r.error();
     re*=abs(c);
     re+=e;
 }
 
-template<class F> Void _scal(TaylorModel<Validated,F>& r, const ValidatedFloat& c)
+template<class F> Void _scal(TaylorModel<Validated,F>& r, const ValidatedFloat64& c)
 {
-    //std::cerr<<"TaylorModel<Validated,F>::scal(ValidatedFloat c) c="<<c<<std::endl;
+    //std::cerr<<"TaylorModel<Validated,F>::scal(ValidatedFloat64 c) c="<<c<<std::endl;
     ARIADNE_DEBUG_ASSERT(r.error().raw()>=0);
 
     if(r.error().raw()==inf) {
         r.expansion().clear(); return;
     }
 
-    ErrorFloat e=0u;
+    ErrorFloat64 e=0u;
     ValidatedApproximateFloat clmu=c;
     for(typename TaylorModel<Validated,F>::Iterator riter=r.begin(); riter!=r.end(); ++riter) {
-        ExactFloat& rv=riter->data();
+        ExactFloat64& rv=riter->data();
         rv=mul_err(rv,clmu,e);
     }
     r.error()*=mag(c);
@@ -342,7 +342,7 @@ template<class F> inline Void _incr(TaylorModel<Validated,F>& r, SizeType j) {
 }
 
 
-template<class F> inline Void _acc(TaylorModel<Validated,F>& r, const ExactFloat& c) {
+template<class F> inline Void _acc(TaylorModel<Validated,F>& r, const ExactFloat64& c) {
     // Compute self+=c
     ARIADNE_DEBUG_ASSERT(r.error().raw()>=0);
     if(c==0) { return; }
@@ -351,8 +351,8 @@ template<class F> inline Void _acc(TaylorModel<Validated,F>& r, const ExactFloat
     } else if((r.end()-1)->key().degree()>0) {
         r.expansion().append(MultiIndex(r.argument_size()),c);
     } else {
-        ExactFloat& rv=(r.end()-1)->data();
-        ErrorFloat& re=r.error();
+        ExactFloat64& rv=(r.end()-1)->data();
+        ErrorFloat64& re=r.error();
         rv=add_err(rv,c,re);
     }
     ARIADNE_DEBUG_ASSERT(r.error().raw()>=0);
@@ -361,7 +361,7 @@ template<class F> inline Void _acc(TaylorModel<Validated,F>& r, const ExactFloat
 
 
 
-template<class F> inline Void _acc(TaylorModel<Validated,F>& r, const ValidatedFloat& c)
+template<class F> inline Void _acc(TaylorModel<Validated,F>& r, const ValidatedFloat64& c)
 {
     // Compute self+=c
     ARIADNE_DEBUG_ASSERT_MSG(r.error().raw()>=0,r);
@@ -383,8 +383,8 @@ template<class F> inline Void _acc(TaylorModel<Validated,F>& r, const ValidatedF
         r._append(MultiIndex(r.argument_size()),0);
     }
 
-    ExactFloat& rv=(r.end()-1)->data();
-    ErrorFloat& re=r.error();
+    ExactFloat64& rv=(r.end()-1)->data();
+    ErrorFloat64& re=r.error();
     rv=add_err(rv,c,re);
 
     ARIADNE_DEBUG_ASSERT_MSG(r.error().raw()>=0,r);
@@ -399,7 +399,7 @@ template<class F> inline Void _acc(TaylorModel<Validated,F>& r, const ValidatedF
 template<class F> inline Void _add(TaylorModel<Validated,F>& r, const TaylorModel<Validated,F>& x, const TaylorModel<Validated,F>& y)
 {
     ARIADNE_PRECONDITION(r.number_of_nonzeros()==0);
-    ErrorFloat e=0u;
+    ErrorFloat64 e=0u;
     typename TaylorModel<Validated,F>::ConstIterator xiter=x.begin();
     typename TaylorModel<Validated,F>::ConstIterator yiter=y.begin();
     while(xiter!=x.end() && yiter!=y.end()) {
@@ -425,9 +425,9 @@ template<class F> inline Void _add(TaylorModel<Validated,F>& r, const TaylorMode
         ++yiter;
     }
 
-    Float::set_rounding_upward();
+    Float64::set_rounding_upward();
     r.error()=(x.error()+y.error())+e;
-    Float::set_rounding_to_nearest();
+    Float64::set_rounding_to_nearest();
 
     ARIADNE_DEBUG_ASSERT(r.error().raw()>=0);
 }
@@ -442,7 +442,7 @@ template<class F> inline Void _acc(TaylorModel<Validated,F>& r, const TaylorMode
 template<class F> inline Void _sub(TaylorModel<Validated,F>& r, const TaylorModel<Validated,F>& x, const TaylorModel<Validated,F>& y)
 {
     ARIADNE_PRECONDITION(r.number_of_nonzeros()==0);
-    ErrorFloat e=0u;
+    ErrorFloat64 e=0u;
     typename TaylorModel<Validated,F>::ConstIterator xiter=x.begin();
     typename TaylorModel<Validated,F>::ConstIterator yiter=y.begin();
     while(xiter!=x.end() && yiter!=y.end()) {
@@ -468,53 +468,53 @@ template<class F> inline Void _sub(TaylorModel<Validated,F>& r, const TaylorMode
         ++yiter;
     }
 
-    Float::set_rounding_upward();
+    Float64::set_rounding_upward();
     r.error()=(x.error()+y.error())+e;
-    Float::set_rounding_to_nearest();
+    Float64::set_rounding_to_nearest();
 
     ARIADNE_DEBUG_ASSERT(r.error().raw()>=0);
 }
 
 
-template<class F> inline Void _sma(TaylorModel<Validated,F>& r, const TaylorModel<Validated,F>& x, const ValidatedFloat& c, const TaylorModel<Validated,F>& y)
+template<class F> inline Void _sma(TaylorModel<Validated,F>& r, const TaylorModel<Validated,F>& x, const ValidatedFloat64& c, const TaylorModel<Validated,F>& y)
 {
     ARIADNE_ASSERT_MSG(c.lower().raw()<=c.upper().raw(),c);
     ARIADNE_ASSERT_MSG(x.error().raw()>=0,"x="<<x);
     ARIADNE_ASSERT_MSG(y.error().raw()>=0,"y="<<y);
 
-    VOLATILE Float u,ml,myv;
-    ErrorFloat te=0u; // Twice the maximum accumulated error
-    ErrorFloat err=0u; // Twice the maximum accumulated error
+    VOLATILE Float64 u,ml,myv;
+    ErrorFloat64 te=0u; // Twice the maximum accumulated error
+    ErrorFloat64 err=0u; // Twice the maximum accumulated error
     ValidatedApproximateFloat clmu=c;
 
     // Compute r=x+y, assuming r is empty
-    Float::set_rounding_upward();
+    Float64::set_rounding_upward();
     typename TaylorModel<Validated,F>::ConstIterator xiter=x.begin();
     typename TaylorModel<Validated,F>::ConstIterator yiter=y.begin();
     while(xiter!=x.end() && yiter!=y.end()) {
         if(xiter->key()<yiter->key()) {
-            const ExactFloat& xv=xiter->data();
+            const ExactFloat64& xv=xiter->data();
             r.expansion().append(xiter->key(),xv);
             ++xiter;
         } else if(yiter->key()<xiter->key()) {
-            const ExactFloat& yv=yiter->data();
+            const ExactFloat64& yv=yiter->data();
             r.expansion().append(yiter->key(),mul_err(yv,c,err));
             ++yiter;
         } else {
-            const ExactFloat& xv=xiter->data();
-            const ExactFloat& yv=yiter->data();
+            const ExactFloat64& xv=xiter->data();
+            const ExactFloat64& yv=yiter->data();
             r.expansion().append(xiter->key(),fma_err(xv,clmu,yv,err));
             ++xiter; ++yiter;
         }
     }
 
     while(xiter!=x.end()) {
-        const ExactFloat& xv=xiter->data();
+        const ExactFloat64& xv=xiter->data();
         r.expansion().append(xiter->key(),xv);
         ++xiter;
     }
     while(yiter!=y.end()) {
-        const ExactFloat& yv=yiter->data();
+        const ExactFloat64& yv=yiter->data();
         r.expansion().append(yiter->key(),mul_err(yv,clmu,err));
         ++yiter;
     }
@@ -537,16 +537,16 @@ template<class F> inline Void _mul(TaylorModel<Validated,F>& r, const TaylorMode
     TaylorModel<Validated,F> s(as,r.sweeper());
     MultiIndex ta(as);
     for(typename TaylorModel<Validated,F>::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-        ErrorFloat te=0u; // trucation error
-        ErrorFloat re=0u; // roundoff error
+        ErrorFloat64 te=0u; // trucation error
+        ErrorFloat64 re=0u; // roundoff error
         const MultiIndex& xa=xiter->key();
-        const ExactFloat& xv=xiter->data();
-        ErrorFloat mag_xv=mag(xv);
+        const ExactFloat64& xv=xiter->data();
+        ErrorFloat64 mag_xv=mag(xv);
         for(typename TaylorModel<Validated,F>::ConstIterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
             const MultiIndex& ya=yiter->key();
-            const ExactFloat& yv=yiter->data();
+            const ExactFloat64& yv=yiter->data();
             ta=xa+ya;
-            ExactFloat tv=mul_no_err(xv,yv);
+            ExactFloat64 tv=mul_no_err(xv,yv);
             if(r.sweeper().discard(ta,tv.raw())) {
                 te+=mag_xv*mag(yv);
             } else {
@@ -565,19 +565,19 @@ template<class F> inline Void _mul(TaylorModel<Validated,F>& r, const TaylorMode
         t.error()=0u;
     }
 
-    ErrorFloat xs=0u;
+    ErrorFloat64 xs=0u;
     for(typename TaylorModel<Validated,F>::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         xs+=mag(xiter->data());
     }
 
-    ErrorFloat ys=0u;
+    ErrorFloat64 ys=0u;
     for(typename TaylorModel<Validated,F>::ConstIterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
         ys+=mag(yiter->data());
     }
 
-    ErrorFloat& re=r.error();
-    const ErrorFloat& xe=x.error();
-    const ErrorFloat& ye=y.error();
+    ErrorFloat64& re=r.error();
+    const ErrorFloat64& xe=x.error();
+    const ErrorFloat64& ye=y.error();
     re+=xs*ye+ys*xe+xe*ye;
 
     return;
@@ -638,13 +638,13 @@ template<class F> TaylorModel<Validated,F>& TaylorModel<Validated,F>::unique()
     typename TaylorModel<Validated,F>::ConstIterator advanced =this->begin();
     typename TaylorModel<Validated,F>::ConstIterator end =this->end();
     typename TaylorModel<Validated,F>::Iterator current=this->begin();
-    ErrorFloat e=0u;
+    ErrorFloat64 e=0u;
     while(advanced!=end) {
         current->key()=advanced->key();
-        ExactFloat rv=advanced->data();
+        ExactFloat64 rv=advanced->data();
         ++advanced;
         while(advanced!=end && advanced->key()==current->key()) {
-            const ExactFloat& xv=advanced->data();
+            const ExactFloat64& xv=advanced->data();
             rv=add_err(rv,xv,e);
         }
         current->data()=rv;
@@ -684,7 +684,7 @@ template<class F> TaylorModel<Validated,F>& TaylorModel<Validated,F>::clobber() 
 
 // Accuracy control
 
-template<class F> Float TaylorModel<Validated,F>::tolerance() const {
+template<class F> Float64 TaylorModel<Validated,F>::tolerance() const {
     const ThresholdSweeper* ptr=dynamic_cast<const ThresholdSweeper*>(&static_cast<const SweeperInterface&>(this->_sweeper));
     if(ptr) {
         return ptr->sweep_threshold();
@@ -714,10 +714,10 @@ template<class F> ExactInterval TaylorModel<Validated,F>::codomain() const
 template<class F> UpperInterval TaylorModel<Validated,F>::range() const {
     const TaylorModel<Validated,F>& tm=*this;
     const SizeType as=tm.argument_size();
-    ExactFloat constant_term=0;
-    Array<ExactFloat> linear_terms(as,0);
-    Array<ExactFloat> quadratic_terms(as,0);
-    ErrorFloat err=0u;
+    ExactFloat64 constant_term=0;
+    Array<ExactFloat64> linear_terms(as,0);
+    Array<ExactFloat64> quadratic_terms(as,0);
+    ErrorFloat64 err=0u;
     for(auto iter=tm.begin(); iter!=tm.end(); ++iter) {
         if(iter->key().degree()==0) {
             constant_term=iter->data();
@@ -735,15 +735,15 @@ template<class F> UpperInterval TaylorModel<Validated,F>::range() const {
         }
     }
     err=err+tm.error();
-    ValidatedFloat r(constant_term-err,constant_term+err);
-    const ValidatedFloat unit_ivl(-1,+1);
+    ValidatedFloat64 r(constant_term-err,constant_term+err);
+    const ValidatedFloat64 unit_ivl(-1,+1);
     // If the ratio b/a is very large, then roundoff error can cause a significant
     // additional error. We compute both |a|+|b| and a([-1,+1]+b/2a)-b^2/4a and take best bound
     for(SizeType j=0; j!=as; ++j) {
-        const ExactFloat& a=quadratic_terms[j];
-        const ExactFloat& b=linear_terms[j];
-        ValidatedFloat ql=abs(a)*unit_ivl + abs(b)*unit_ivl;
-        ValidatedFloat qf=a*(sqr(unit_ivl+b/a/2))-sqr(b)/a/4;
+        const ExactFloat64& a=quadratic_terms[j];
+        const ExactFloat64& b=linear_terms[j];
+        ValidatedFloat64 ql=abs(a)*unit_ivl + abs(b)*unit_ivl;
+        ValidatedFloat64 qf=a*(sqr(unit_ivl+b/a/2))-sqr(b)/a/4;
         r += refinement(ql,qf); // NOTE: ql must be the first term in case of NaN in qf
     }
     return UpperInterval(r);
@@ -752,14 +752,14 @@ template<class F> UpperInterval TaylorModel<Validated,F>::range() const {
 
 template<class F> UpperInterval TaylorModel<Validated,F>::gradient_range(SizeType j) const {
     SizeType as=this->argument_size();
-    ValidatedFloat g(0,0);
+    ValidatedFloat64 g(0,0);
     for(typename TaylorModel<Validated,F>::ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
         MultiIndex const& a=iter->key();
         const Nat c=a[j];
         if(c>0) {
-            const ExactFloat& x=iter->data();
+            const ExactFloat64& x=iter->data();
             if(a.degree()==1) { g+=x; }
-            else { g+=ValidatedFloat(-1,1)*x*c; }
+            else { g+=ValidatedFloat64(-1,1)*x*c; }
         }
     }
     return UpperInterval(g);
@@ -767,15 +767,15 @@ template<class F> UpperInterval TaylorModel<Validated,F>::gradient_range(SizeTyp
 
 template<class F> Covector<UpperInterval> TaylorModel<Validated,F>::gradient_range() const {
     SizeType as=this->argument_size();
-    Covector<ValidatedFloat> g(this->argument_size(),ValidatedFloat(0,0));
+    Covector<ValidatedFloat64> g(this->argument_size(),ValidatedFloat64(0,0));
     for(typename TaylorModel<Validated,F>::ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
         MultiIndex const& a=iter->key();
-        const ExactFloat& x=iter->data();
+        const ExactFloat64& x=iter->data();
         for(SizeType j=0; j!=this->argument_size(); ++j) {
             const Nat c=a[j];
             if(c>0) {
                 if(a.degree()==1) { g[j]+=x; }
-                else { g[j]+=ValidatedFloat(-1,1)*x*c; }
+                else { g[j]+=ValidatedFloat64(-1,1)*x*c; }
             }
         }
     }
@@ -799,7 +799,7 @@ template<class F> TaylorModel<Validated,F> max(const TaylorModel<Validated,F>& x
     } else if(definitely(yr.lower()>=xr.upper())) {
         return y;
     } else {
-        return ((x+y)+abs(x-y))/ExactFloat(2);
+        return ((x+y)+abs(x-y))/ExactFloat64(2);
     }
 }
 
@@ -812,7 +812,7 @@ template<class F> TaylorModel<Validated,F> min(const TaylorModel<Validated,F>& x
     } else if(definitely(yr.upper()<=xr.lower())) {
         return y;
     } else {
-        return ((x+y)-abs(x-y))/ExactFloat(2);
+        return ((x+y)-abs(x-y))/ExactFloat64(2);
     }
 }
 
@@ -830,15 +830,15 @@ template<class F> TaylorModel<Validated,F> abs(const TaylorModel<Validated,F>& x
         static const Dbl p[n]={0.0112167620474, 5.6963263292747541, -31.744583789655049, 100.43002481377681, -162.01366698662306, 127.45243493284417, -38.829743345344667};
         static const Dbl err=0.035;
         TaylorModel<Validated,F> r(x.argument_size(),x.sweeper());
-        ExactFloat xmag=make_exact(mag(xr));
+        ExactFloat64 xmag=make_exact(mag(xr));
         TaylorModel<Validated,F> s=x/xmag;
         s=sqr(s);
-        r=static_cast<ExactFloat>(p[n-1]);
+        r=static_cast<ExactFloat64>(p[n-1]);
         for(Nat i=0; i!=(n-1); ++i) {
             Nat j=(n-2)-i;
-            r=s*r+static_cast<ExactFloat>(p[j]);
+            r=s*r+static_cast<ExactFloat64>(p[j]);
         }
-        r+=ValidatedFloat(-err,+err);
+        r+=ValidatedFloat64(-err,+err);
         return r*xmag;
     }
 }
@@ -878,11 +878,11 @@ template<class X> class TaylorSeries;
 
 
 template<class F> TaylorModel<Validated,F>
-compose(const TaylorSeries<ValidatedFloat>& ts, const TaylorModel<Validated,F>& tv)
+compose(const TaylorSeries<ValidatedFloat64>& ts, const TaylorModel<Validated,F>& tv)
 {
     Sweeper threshold_sweeper(new ThresholdSweeper(MACHINE_EPSILON));
-    ExactFloat& vref=const_cast<ExactFloat&>(tv.value());
-    ExactFloat vtmp=vref;
+    ExactFloat64& vref=const_cast<ExactFloat64&>(tv.value());
+    ExactFloat64 vtmp=vref;
     vref=0;
     TaylorModel<Validated,F> r(tv.argument_size(),tv.sweeper());
     r+=ts[ts.degree()];
@@ -908,10 +908,10 @@ compose(const AnalyticFunction& fn, const TaylorModel<Validated,F>& tm) {
     std::cerr<<"\n\nfn="<<fn<<"\ntm="<<tm<<"\n";
 
     static const DegreeType MAX_DEGREE=20;
-    static const Float MAX_TRUNCATION_ERROR=MACHINE_EPSILON;
+    static const Float64 MAX_TRUNCATION_ERROR=MACHINE_EPSILON;
     SweeperInterface const& sweeper=tm.sweeper();
 
-    Float max_truncation_error=MAX_TRUNCATION_ERROR;
+    Float64 max_truncation_error=MAX_TRUNCATION_ERROR;
     ThresholdSweeper const* threshold_sweeper_ptr = dynamic_cast<ThresholdSweeper const*>(&sweeper);
     if(threshold_sweeper_ptr) { max_truncation_error=threshold_sweeper_ptr->sweep_threshold(); }
 
@@ -922,20 +922,20 @@ compose(const AnalyticFunction& fn, const TaylorModel<Validated,F>& tm) {
     std::cerr<<"max_truncation_error="<<max_truncation_error<<"\nmax_degree="<<(uint)max_degree<<"\n";
 
     Nat d=max_degree;
-    ExactFloat c=tm.value();
-    ValidatedFloat r=make_singleton(tm.range());
-    Series<ValidatedFloat> centre_series=fn.series(c);
-    Series<ValidatedFloat> range_series=fn.series(r);
+    ExactFloat64 c=tm.value();
+    ValidatedFloat64 r=make_singleton(tm.range());
+    Series<ValidatedFloat64> centre_series=fn.series(c);
+    Series<ValidatedFloat64> range_series=fn.series(r);
     std::cerr<<"c="<<c<<"\nr="<<r<<"\n";
     std::cerr<<"cs="<<centre_series<<"\nrs="<<range_series<<"\n";
 
 
-    ErrorFloat se=mag(range_series[d]-centre_series[d]);
-    ErrorFloat e=mag(r-c);
-    ErrorFloat p=pow(e,d);
+    ErrorFloat64 se=mag(range_series[d]-centre_series[d]);
+    ErrorFloat64 e=mag(r-c);
+    ErrorFloat64 p=pow(e,d);
     std::cerr<<"se="<<se<<"\ne="<<e<<"\np="<<p<<"\n";
     // FIXME: Here we assume the dth derivative of f is monotone increasing
-    ErrorFloat truncation_error=se*p;
+    ErrorFloat64 truncation_error=se*p;
     std::cerr<<"truncation_error="<<truncation_error<<"\n\n";
     if(truncation_error.raw()>max_truncation_error) {
         ARIADNE_WARN("Truncation error estimate "<<truncation_error
@@ -949,7 +949,7 @@ compose(const AnalyticFunction& fn, const TaylorModel<Validated,F>& tm) {
         res=centre_series[d-i-1]+x*res;
         // Don't sweep here...
     }
-    res+=ValidatedFloat(-truncation_error,+truncation_error);
+    res+=ValidatedFloat64(-truncation_error,+truncation_error);
     return res;
 }
 
@@ -984,7 +984,7 @@ template<class F> TaylorModel<Validated,F> TaylorModel<Validated,F>::_embed_erro
     MultiIndex ra(as+1u);
 
     // The new error term is first in reverse lexicographic order.
-    ExactFloat err_coef=make_exact(tm.error());
+    ExactFloat64 err_coef=make_exact(tm.error());
     ra[as]=1;
     rtm._append(ra,err_coef);
     ra[as]=0;
@@ -992,7 +992,7 @@ template<class F> TaylorModel<Validated,F> TaylorModel<Validated,F>::_embed_erro
     // Copy new terms
     for(typename TaylorModel<Validated,F>::ConstIterator iter=tm.expansion().begin(); iter!=tm.expansion().end(); ++iter) {
         MultiIndex const& xa=iter->key();
-        ExactFloat const& xv=iter->data();
+        ExactFloat64 const& xv=iter->data();
         for(SizeType j=0; j!=as; ++j) { ra[j]=xa[j]; }
         rtm._append(ra,xv);
     }
@@ -1019,10 +1019,10 @@ template<class F> TaylorModel<Validated,F> TaylorModel<Validated,F>::_discard_va
     // Set the uniform error of the original model
     // If index_of_error == number_of_error_variables, then the error is kept as a uniform error bound
     MultiIndex ra(number_of_kept_variables);
-    ErrorFloat derr=0u; // Magnitude of discarded terms
+    ErrorFloat64 derr=0u; // Magnitude of discarded terms
     for(typename TaylorModel<Validated,F>::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
         MultiIndex const& xa=iter->key();
-        ExactFloat const& xv=iter->data();
+        ExactFloat64 const& xv=iter->data();
         Bool keep=true;
         for(SizeType k=0; k!=number_of_discarded_variables; ++k) {
             if(xa[discarded_variables[k]]!=0) {
@@ -1056,10 +1056,10 @@ template<class F> Void TaylorModel<Validated,F>::antidifferentiate(SizeType k) {
     TaylorModel<Validated,F>& x=*this;
     ARIADNE_PRECONDITION(k<x.argument_size());
 
-    ErrorFloat e=0u;
+    ErrorFloat64 e=0u;
     for(typename TaylorModel<Validated,F>::Iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         MultiIndex& xa=xiter->key();
-        ExactFloat& xv=xiter->data();
+        ExactFloat64& xv=xiter->data();
         xa[k]+=1;
         Nat c=xa[k];
         xv=div_err(xv,c,e);
@@ -1083,15 +1083,15 @@ template<class F> Void TaylorModel<Validated,F>::differentiate(SizeType k) {
     this->clobber();
 
     TaylorModel<Validated,F>& r=*this;
-    ErrorFloat& re=r.error();
+    ErrorFloat64& re=r.error();
     typename TaylorModel<Validated,F>::Iterator riter=r.begin();
     for(typename TaylorModel<Validated,F>::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         MultiIndex const& xa=xiter->key();
-        ExactFloat const& xv=xiter->data();
+        ExactFloat64 const& xv=xiter->data();
         Nat c=xa[k];
         if(c!=0) {
             MultiIndex& ra=riter->key();
-            ExactFloat& rv=riter->data();
+            ExactFloat64& rv=riter->data();
             ra=xa; ra[k]-=1;
             rv=mul_err(xv,c,re);
             ++riter;
@@ -1109,13 +1109,13 @@ template<class F> TaylorModel<Validated,F> derivative(const TaylorModel<Validate
 
     ARIADNE_ASSERT(k<x.argument_size());
 
-    MultiIndex ra(x.argument_size()); ExactFloat rv; Nat c;
+    MultiIndex ra(x.argument_size()); ExactFloat64 rv; Nat c;
 
     TaylorModel<Validated,F> r(x.argument_size(),x.sweeper());
-    ErrorFloat& re=r.error();
+    ErrorFloat64& re=r.error();
     for(typename TaylorModel<Validated,F>::Iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         MultiIndex const& xa=xiter->key();
-        ExactFloat const& xv=xiter->data();
+        ExactFloat64 const& xv=xiter->data();
         c=xa[k];
         if(c!=0) {
             ra=xa;
@@ -1154,7 +1154,7 @@ template<class F> Covector<ValidatedNumber> TaylorModel<Validated,F>::_gradient(
 
 template<class F> TaylorModel<Validated,F>
 TaylorModel<Validated,F>::_compose(TaylorModel<Validated,F> const& x, Vector<TaylorModel<Validated,F>> const& y) {
-    return horner_evaluate(x.expansion(),y)+ValidatedFloat(-x.error(),+x.error());
+    return horner_evaluate(x.expansion(),y)+ValidatedFloat64(-x.error(),+x.error());
 }
 
 template<class F> Void TaylorModel<Validated,F>::unscale(ExactInterval const& ivl) {
@@ -1249,7 +1249,7 @@ template<class F> TaylorModel<Validated,F> TaylorModel<Validated,F>::_split(cons
     // This can be done exactly
     for(typename TaylorModel<Validated,F>::Iterator iter=r.begin(); iter!=r.end(); ++iter) {
         const uchar ak=iter->key()[k];
-        ExactFloat& c=iter->data();
+        ExactFloat64& c=iter->data();
         c/=two_exp(ak);
     }
 
@@ -1262,13 +1262,13 @@ template<class F> TaylorModel<Validated,F> TaylorModel<Validated,F>::_split(cons
     Array<TaylorModel<Validated,F>> ary(deg+1,TaylorModel<Validated,F>(as,swp));
     for(typename TaylorModel<Validated,F>::ConstIterator iter=r.begin(); iter!=r.end(); ++iter) {
         MultiIndex a=iter->key();
-        const ExactFloat& c=iter->data();
+        const ExactFloat64& c=iter->data();
         uchar ak=a[k];
         a[k]=0u;
         ary[ak].expansion().append(a,c);
     }
 
-    ErrorFloat re=r.error();
+    ErrorFloat64 re=r.error();
     r.clear();
     r.set_error(re);
 
@@ -1298,7 +1298,7 @@ template<class F> typename TaylorModel<Validated,F>::CoefficientType TaylorModel
 }
 
 template<class F> typename TaylorModel<Validated,F>::NormType TaylorModel<Validated,F>::radius() const {
-    ErrorFloat r=0u;
+    ErrorFloat64 r=0u;
     for(typename TaylorModel<Validated,F>::ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
         if(iter->key().degree()!=0) {
             r+=mag(iter->data());
@@ -1309,7 +1309,7 @@ template<class F> typename TaylorModel<Validated,F>::NormType TaylorModel<Valida
 }
 
 template<class F> typename TaylorModel<Validated,F>::NormType TaylorModel<Validated,F>::norm() const {
-    ErrorFloat r=0u;
+    ErrorFloat64 r=0u;
     for(typename TaylorModel<Validated,F>::ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
         r+=mag(iter->data());
     }
@@ -1347,12 +1347,12 @@ template<class F> Bool TaylorModel<Validated,F>::_inconsistent(const TaylorModel
 template<class F> TaylorModel<Validated,F> TaylorModel<Validated,F>::_refinement(const TaylorModel<Validated,F>& x, const TaylorModel<Validated,F>& y) {
     TaylorModel<Validated,F> r(x.argument_size(),x.sweeper());
 
-    ErrorFloat max_error=0u;
+    ErrorFloat64 max_error=0u;
 
-    const ErrorFloat& xe=x.error();
-    const ErrorFloat& ye=y.error();
-    ExactFloat rv,xv,yv;
-    Float xu,yu,mxl,myl,u,ml;
+    const ErrorFloat64& xe=x.error();
+    const ErrorFloat64& ye=y.error();
+    ExactFloat64 rv,xv,yv;
+    Float64 xu,yu,mxl,myl,u,ml;
     MultiIndex a;
 
     typename TaylorModel<Validated,F>::ConstIterator xiter=x.begin();
@@ -1390,7 +1390,7 @@ template<class F> TaylorModel<Validated,F> TaylorModel<Validated,F>::_refinement
             ++yiter;
         }
 
-        ValidatedFloat rve=refinement( xv.pm(xe), yv.pm(ye) );
+        ValidatedFloat64 rve=refinement( xv.pm(xe), yv.pm(ye) );
         if(rve.error().raw()<0.0) {
             ARIADNE_THROW(IntersectionException,"refinement(TaylorModel<Validated,F>,TaylorModel<Validated,F>)",x<<" and "<<y<<" are inconsistent.");
         }
@@ -1422,7 +1422,7 @@ template<class F> OutputStream& TaylorModel<Validated,F>::str(OutputStream& os) 
 
     //os << "TaylorModel<Validated,F>";
     os << "TM["<<tm.argument_size()<<"](";
-    Expansion<ExactFloat> e=tm.expansion();
+    Expansion<ExactFloat64> e=tm.expansion();
     e.graded_sort();
     e.write(os,variable_names);
     return os << "+/-" << tm.error() << ")";
@@ -1502,31 +1502,31 @@ jacobian(const Vector<TaylorModel<Validated,F>>& f, const Vector<ValidatedNumber
 }
 
 // Compute the Jacobian at the origin
-template<class F> Matrix<ExactFloat>
+template<class F> Matrix<ExactFloat64>
 jacobian_value(const Vector<TaylorModel<Validated,F>>& f) {
     SizeType rs=f.size();
     SizeType as=f.zero_element().argument_size();
-    Matrix<ExactFloat> J(rs,as);
+    Matrix<ExactFloat64> J(rs,as);
     MultiIndex a(as);
     for(SizeType i=0; i!=rs; ++i) {
         for(SizeType j=0; j!=as; ++j) {
-            a[j]=1; const ExactFloat x=f[i][a]; J[i][j]=x; a[j]=0;
+            a[j]=1; const ExactFloat64 x=f[i][a]; J[i][j]=x; a[j]=0;
         }
     }
     return J;
 }
 
 // Compute the Jacobian at the origin with respect to the variables args.
-template<class F> Matrix<ExactFloat>
+template<class F> Matrix<ExactFloat64>
 jacobian_value(const Vector<TaylorModel<Validated,F>>& f, const Array<SizeType>& p) {
     const SizeType rs=f.size();
     const SizeType as=f.zero_element().argument_size();
     const SizeType ps=p.size();
-    Matrix<ExactFloat> J(rs,ps);
+    Matrix<ExactFloat64> J(rs,ps);
     MultiIndex a(as);
     for(SizeType i=0; i!=rs; ++i) {
         for(SizeType k=0; k!=ps; ++k) {
-            SizeType j=p[k]; a[j]=1; const ExactFloat x=f[i][a]; J[i][k]=x; a[j]=0;
+            SizeType j=p[k]; a[j]=1; const ExactFloat64 x=f[i][a]; J[i][k]=x; a[j]=0;
         }
     }
     return J;
@@ -1539,16 +1539,16 @@ template<class F> Matrix<UpperInterval>
 jacobian_range(const Vector<TaylorModel<Validated,F>>& f) {
     SizeType rs=f.size();
     SizeType as=f.zero_element().argument_size();
-    Matrix<ValidatedFloat> J(rs,as);
+    Matrix<ValidatedFloat64> J(rs,as);
     for(SizeType i=0; i!=rs; ++i) {
         for(typename TaylorModel<Validated,F>::ConstIterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
             MultiIndex const& a=iter->key();
             for(SizeType k=0; k!=as; ++k) {
                 const Nat c=a[k];
                 if(c>0) {
-                    const ExactFloat& x=iter->data();
+                    const ExactFloat64& x=iter->data();
                     if(a.degree()==1) { J[i][k]+=x; }
-                    else { J[i][k]+=ValidatedFloat(-1,1)*x*c; }
+                    else { J[i][k]+=ValidatedFloat64(-1,1)*x*c; }
                 }
             }
         }
@@ -1562,7 +1562,7 @@ jacobian_range(const Vector<TaylorModel<Validated,F>>& f, const Array<SizeType>&
     SizeType rs=f.size();
     SizeType as=f.zero_element().argument_size();
     SizeType ps=p.size();
-    Matrix<ValidatedFloat> J(rs,ps);
+    Matrix<ValidatedFloat64> J(rs,ps);
     for(SizeType i=0; i!=rs; ++i) {
         for(typename TaylorModel<Validated,F>::ConstIterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
             MultiIndex const& a=iter->key();
@@ -1570,9 +1570,9 @@ jacobian_range(const Vector<TaylorModel<Validated,F>>& f, const Array<SizeType>&
                 SizeType j=p[k];
                 const Nat c=a[j];
                 if(c>0) {
-                    const ExactFloat& x=iter->data();
+                    const ExactFloat64& x=iter->data();
                     if(a.degree()==1) { J[i][k]+=x; }
-                    else { J[i][k]+=ValidatedFloat(-1,1)*x*c; }
+                    else { J[i][k]+=ValidatedFloat64(-1,1)*x*c; }
                 }
             }
         }
@@ -1600,7 +1600,7 @@ template<class F> TaylorModel<Approximate,F>::TaylorModel(SizeType as, Sweeper s
 {
 }
 
-template<class F> TaylorModel<Approximate,F> TaylorModel<Approximate,F>::create_constant(ApproximateFloat c) const {
+template<class F> TaylorModel<Approximate,F> TaylorModel<Approximate,F>::create_constant(ApproximateFloat64 c) const {
     TaylorModel<Approximate,F> r(this->argument_size(),this->_sweeper);
     r._expansion.append(MultiIndex::zero(this->argument_size()),c);
 }
@@ -1610,7 +1610,7 @@ template<class F> TaylorModel<Approximate,F> TaylorModel<Approximate,F>::create_
 }
 
 
-template<class F> Void TaylorModel<Approximate,F>::iadd(const ApproximateFloat& c)
+template<class F> Void TaylorModel<Approximate,F>::iadd(const ApproximateFloat64& c)
 {
     // Compute self+=c
     TaylorModel<Approximate,F>& x=*this;
@@ -1620,12 +1620,12 @@ template<class F> Void TaylorModel<Approximate,F>::iadd(const ApproximateFloat& 
     } else if((x._expansion.end()-1)->key().degree()>0) {
         x._expansion.append(MultiIndex(x.argument_size()),c);
     } else {
-        ApproximateFloat& rv=(x._expansion.end()-1)->data();
+        ApproximateFloat64& rv=(x._expansion.end()-1)->data();
         rv+=c;
     }
 }
 
-template<class F> Void TaylorModel<Approximate,F>::imul(const ApproximateFloat& c)
+template<class F> Void TaylorModel<Approximate,F>::imul(const ApproximateFloat64& c)
 {
     // Compute self*=c
     if(c==0) { this->clear(); return; }
@@ -1637,7 +1637,7 @@ template<class F> Void TaylorModel<Approximate,F>::imul(const ApproximateFloat& 
 
 
 
-template<class F> Void TaylorModel<Approximate,F>::isma(const ApproximateFloat& c, const TaylorModel<Approximate,F>& y)
+template<class F> Void TaylorModel<Approximate,F>::isma(const ApproximateFloat64& c, const TaylorModel<Approximate,F>& y)
 {
     const TaylorModel<Approximate,F>& x=*this;
     ARIADNE_ASSERT_MSG(x.argument_size()==y.argument_size(),"x="<<x<<", y="<<y);
@@ -1719,7 +1719,7 @@ template<class F> Void TaylorModel<Approximate,F>::unscale(ExactInterval const& 
 
 
 template<class F> typename TaylorModel<Approximate,F>::NormType TaylorModel<Approximate,F>::norm() const {
-    ApproximateFloat r=0.0;
+    ApproximateFloat64 r=0.0;
     for(auto iter=this->_expansion.begin(); iter!=this->_expansion.end(); ++iter) {
         r+=mag(iter->data());
     }
@@ -1731,7 +1731,7 @@ template<class F> typename TaylorModel<Approximate,F>::CoefficientType TaylorMod
 }
 
 template<class F> typename TaylorModel<Approximate,F>::NormType TaylorModel<Approximate,F>::radius() const {
-    ApproximateFloat r=0.0;
+    ApproximateFloat64 r=0.0;
     for(auto iter=this->_expansion.begin(); iter!=this->_expansion.end(); ++iter) {
         if(iter->key().degree()!=0) {
             r+=mag(iter->data());
@@ -1741,12 +1741,12 @@ template<class F> typename TaylorModel<Approximate,F>::NormType TaylorModel<Appr
 }
 
 template<class F> ApproximateInterval TaylorModel<Approximate,F>::range() const {
-    ApproximateFloat av=this->average();
-    ApproximateFloat rad=this->radius();
+    ApproximateFloat64 av=this->average();
+    ApproximateFloat64 rad=this->radius();
     return ApproximateInterval(av-rad,av+rad);
 }
 
-template<class F> Float TaylorModel<Approximate,F>::tolerance() const {
+template<class F> Float64 TaylorModel<Approximate,F>::tolerance() const {
     return dynamic_cast<const ThresholdSweeper&>(static_cast<const SweeperInterface&>(this->_sweeper)).sweep_threshold();
 }
 

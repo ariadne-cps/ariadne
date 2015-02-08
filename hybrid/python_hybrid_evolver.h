@@ -96,7 +96,7 @@ class PythonHybridEvolver
     typedef ContinuousEvolutionParameters EvolutionParametersType;
     typedef MonolithicHybridAutomaton::TimeType TimeType;
     typedef Int IntegerType;
-    typedef Float RealType;
+    typedef Float64 RealType;
     typedef List<DiscreteEvent> EventListType;
     typedef MonolithicHybridAutomaton SystemType;
     typedef TaylorConstrainedImageSet ContinuousEnclosureType;
@@ -104,7 +104,7 @@ class PythonHybridEvolver
     typedef HybridEnclosureType EnclosureType;
     typedef Orbit<EnclosureType> OrbitType;
     typedef ListSet<EnclosureType> EnclosureListType;
-    typedef Float ContinuousTimeType;
+    typedef Float64 ContinuousTimeType;
   public:
 
     //! \brief Default constructor.

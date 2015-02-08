@@ -47,38 +47,38 @@ namespace Ariadne {
 
 template<class M> Void _set_scaling(FunctionPatch<M>& x, const ExactInterval& ivl, SizeType j)
 {
-    Float::RoundingModeType rounding_mode=Float::get_rounding_mode();
-    Float::set_rounding_upward();
-    const Float& l=ivl.lower().raw();
-    const Float& u=ivl.upper().raw();
-    VOLATILE Float pc=u; pc+=l;
-    VOLATILE Float nc=-u; nc-=l;
-    VOLATILE Float pg=u; pg-=l;
-    VOLATILE Float ng=l; ng-=u;
+    Float64::RoundingModeType rounding_mode=Float64::get_rounding_mode();
+    Float64::set_rounding_upward();
+    const Float64& l=ivl.lower().raw();
+    const Float64& u=ivl.upper().raw();
+    VOLATILE Float64 pc=u; pc+=l;
+    VOLATILE Float64 nc=-u; nc-=l;
+    VOLATILE Float64 pg=u; pg-=l;
+    VOLATILE Float64 ng=l; ng-=u;
     x.error()=ErrorType((pc+nc+pg+ng)/4);
-    Float::set_rounding_to_nearest();
+    Float64::set_rounding_to_nearest();
     MultiIndex a(x.argument_size());
     x.expansion().raw().append(a,(l+u)/2);
     ++a[j];
     x.expansion().raw().append(a,(l+u)/2);
-    Float::set_rounding_mode(rounding_mode);
+    Float64::set_rounding_mode(rounding_mode);
 }
 
 
 
-inline OutputStream& operator<<(OutputStream& os, const Representation<Float>& flt_repr)
+inline OutputStream& operator<<(OutputStream& os, const Representation<Float64>& flt_repr)
 {
-    const Float& flt=*flt_repr.pointer;
+    const Float64& flt=*flt_repr.pointer;
     Int precision=os.precision(); std::ios_base::fmtflags flags = os.flags();
     os.precision(17); os.setf(std::ios_base::showpoint);
-    os << "Float(" << flt << ")";
+    os << "Float64(" << flt << ")";
     os.precision(precision); os.flags(flags);
     return os;
 }
 
-inline OutputStream& operator<<(OutputStream& os, const Representation<PositiveUpperFloat>& flt_repr)
+inline OutputStream& operator<<(OutputStream& os, const Representation<PositiveUpperFloat64>& flt_repr)
 {
-    return os << reinterpret_cast<Representation<Float>const&>(flt_repr);
+    return os << reinterpret_cast<Representation<Float64>const&>(flt_repr);
 }
 
 inline OutputStream& operator<<(OutputStream& os, const Representation<ExactInterval>& ivl_repr)
@@ -92,13 +92,13 @@ inline OutputStream& operator<<(OutputStream& os, const Representation<ExactInte
 }
 
 
-inline OutputStream& operator<<(OutputStream& os, const Representation< Expansion<Float> >& exp_repr)
+inline OutputStream& operator<<(OutputStream& os, const Representation< Expansion<Float64> >& exp_repr)
 {
-    const Expansion<Float>& exp=*exp_repr.pointer;
+    const Expansion<Float64>& exp=*exp_repr.pointer;
     Int precision=os.precision(); std::ios_base::fmtflags flags = os.flags();
     os.precision(17); os.setf(std::ios_base::showpoint);
-    os << "Expansion<Float>(" << exp.argument_size() << "," << exp.number_of_nonzeros();
-    for(Expansion<Float>::ConstIterator iter=exp.begin(); iter!=exp.end(); ++iter) {
+    os << "Expansion<Float64>(" << exp.argument_size() << "," << exp.number_of_nonzeros();
+    for(Expansion<Float64>::ConstIterator iter=exp.begin(); iter!=exp.end(); ++iter) {
         for(SizeType j=0; j!=iter->key().size(); ++j) {
             os << "," << Nat(iter->key()[j]);
         }
@@ -109,12 +109,12 @@ inline OutputStream& operator<<(OutputStream& os, const Representation< Expansio
     return os;
 }
 
-inline OutputStream& operator<<(OutputStream& os, const Representation< Expansion<ExactFloat> >& exp_repr) {
-    return os << reinterpret_cast<Expansion<Float>const&>(exp_repr);
+inline OutputStream& operator<<(OutputStream& os, const Representation< Expansion<ExactFloat64> >& exp_repr) {
+    return os << reinterpret_cast<Expansion<Float64>const&>(exp_repr);
 }
 
-inline OutputStream& operator<<(OutputStream& os, const Representation< Expansion<ApproximateFloat> >& exp_repr) {
-    return os << reinterpret_cast<Expansion<Float>const&>(exp_repr);
+inline OutputStream& operator<<(OutputStream& os, const Representation< Expansion<ApproximateFloat64> >& exp_repr) {
+    return os << reinterpret_cast<Expansion<Float64>const&>(exp_repr);
 }
 
 template<class X> inline OutputStream& operator<<(OutputStream& os, const Representation< Vector<X> >& vec_repr)
@@ -177,12 +177,12 @@ template<class M> FunctionPatch<M>::FunctionPatch(const ExactBox& d, Sweeper swp
 {
 }
 
-template<class M> FunctionPatch<M>::FunctionPatch(const ExactBox& d, const Expansion<RawFloat>& p, const RawFloat& e, const Sweeper& swp)
+template<class M> FunctionPatch<M>::FunctionPatch(const ExactBox& d, const Expansion<RawFloat64>& p, const RawFloat64& e, const Sweeper& swp)
     : _domain(d), _model(p,e,swp)
 {
 }
 
-template<class M> FunctionPatch<M>::FunctionPatch(const ExactBox& d, const Expansion<ExactFloat>& p, const ErrorFloat& e, const Sweeper& swp)
+template<class M> FunctionPatch<M>::FunctionPatch(const ExactBox& d, const Expansion<ExactFloat64>& p, const ErrorFloat64& e, const Sweeper& swp)
     : _domain(d), _model(p,e,swp)
 {
 }
@@ -304,35 +304,35 @@ template<class M> Void FunctionPatch<M>::restrict(const ExactBox& dom) {
 
 
 
-inline Bool operator==(ExactFloat x1, Int n2) { return x1.raw()==Float(n2); }
-inline Bool operator==(ValidatedFloat x1, Int n2) { return x1.upper_raw()==Float(n2) && x1.lower_raw()==Float(n2); }
-inline Bool operator==(ApproximateFloat x1, Int n2) { return x1.raw()==Float(n2); }
+inline Bool operator==(ExactFloat64 x1, Int n2) { return x1.raw()==Float64(n2); }
+inline Bool operator==(ValidatedFloat64 x1, Int n2) { return x1.upper_raw()==Float64(n2) && x1.lower_raw()==Float64(n2); }
+inline Bool operator==(ApproximateFloat64 x1, Int n2) { return x1.raw()==Float64(n2); }
 
-inline Bool operator!=(ExactFloat x1, Int n2) { return x1.raw()!=Float(n2); }
-inline Bool operator!=(ValidatedFloat x1, Int n2) { return x1.upper_raw()!=Float(n2) || x1.lower_raw()!=Float(n2); }
-inline Bool operator!=(ApproximateFloat x1, Int n2) { return x1.raw()!=Float(n2); }
+inline Bool operator!=(ExactFloat64 x1, Int n2) { return x1.raw()!=Float64(n2); }
+inline Bool operator!=(ValidatedFloat64 x1, Int n2) { return x1.upper_raw()!=Float64(n2) || x1.lower_raw()!=Float64(n2); }
+inline Bool operator!=(ApproximateFloat64 x1, Int n2) { return x1.raw()!=Float64(n2); }
 
-inline Bool operator> (ExactFloat x1, Int n2) { return x1.raw()> Float(n2); }
-inline Bool operator> (ValidatedFloat x1, Int n2) { return x1.lower_raw()> Float(n2); }
-inline Bool operator> (ApproximateFloat x1, Int n2) { return x1.raw()> Float(n2); }
+inline Bool operator> (ExactFloat64 x1, Int n2) { return x1.raw()> Float64(n2); }
+inline Bool operator> (ValidatedFloat64 x1, Int n2) { return x1.lower_raw()> Float64(n2); }
+inline Bool operator> (ApproximateFloat64 x1, Int n2) { return x1.raw()> Float64(n2); }
 
-template<class M> Polynomial<ValidatedFloat> FunctionPatch<M>::polynomial() const
+template<class M> Polynomial<ValidatedFloat64> FunctionPatch<M>::polynomial() const
 {
-    Vector<Polynomial<ValidatedFloat> > pid=Polynomial<NumericType>::coordinates(this->argument_size());
-    return horner_evaluate(this->expansion(),unscale(pid,this->domain()))+ValidatedFloat(-this->error(),+this->error());
+    Vector<Polynomial<ValidatedFloat64> > pid=Polynomial<NumericType>::coordinates(this->argument_size());
+    return horner_evaluate(this->expansion(),unscale(pid,this->domain()))+ValidatedFloat64(-this->error(),+this->error());
 
-    Polynomial<ValidatedFloat> z(this->argument_size());
-    Polynomial<ValidatedFloat> p;//=Ariadne::polynomial(this->model());
+    Polynomial<ValidatedFloat64> z(this->argument_size());
+    Polynomial<ValidatedFloat64> p;//=Ariadne::polynomial(this->model());
 
-    Vector<Polynomial<ValidatedFloat> > s(this->argument_size(),z);
+    Vector<Polynomial<ValidatedFloat64> > s(this->argument_size(),z);
     for(SizeType j=0; j!=this->argument_size(); ++j) {
         ExactInterval const& domj=this->domain()[j];
         if(domj.width()<=0) {
             ARIADNE_ASSERT(this->domain()[j].width()==0);
-            s[j]=Polynomial<ValidatedFloat>::constant(this->argument_size(),0);
+            s[j]=Polynomial<ValidatedFloat64>::constant(this->argument_size(),0);
         } else {
             //s[j]=Ariadne::polynomial(ModelType::unscaling(this->argument_size(),j,this->domain()[j],this->sweeper()));
-            s[j]=(Polynomial<ValidatedFloat>::coordinate(this->argument_size(),j)-domj.midpoint())/domj.radius();
+            s[j]=(Polynomial<ValidatedFloat64>::coordinate(this->argument_size(),j)-domj.midpoint())/domj.radius();
         }
     }
 
@@ -395,8 +395,8 @@ template<class M> Covector<NumericType<M>> FunctionPatch<M>::gradient(const Vect
 
 
 template<class M> OutputStream& FunctionPatch<M>::write(OutputStream& os) const {
-    Polynomial<ValidatedFloat> p=this->polynomial();
-    Polynomial<ApproximateFloat> ap=p;
+    Polynomial<ValidatedFloat64> p=this->polynomial();
+    Polynomial<ApproximateFloat64> ap=p;
     os << "FP" << this->domain();
     os << "(";
     os << ap;
@@ -430,7 +430,7 @@ template<class M> OutputStream& operator<<(OutputStream& os, const Representatio
 template<class M> OutputStream& operator<<(OutputStream& os, const ModelRepresentation<FunctionPatch<M>>& frepr)
 {
     FunctionPatch<M> const& f=*frepr.pointer;
-    Float truncatation_error = 0.0;
+    Float64 truncatation_error = 0.0;
     os << "<"<<f.domain()<<"\n";
     for(ModelType::ConstIterator iter=f.begin(); iter!=f.end(); ++iter) {
         if(abs(iter->data())>frepr.threshold) { truncatation_error+=abs(iter->data()); }
@@ -457,10 +457,10 @@ template<class M> OutputStream& operator<<(OutputStream& os, const PolynomialRep
     FunctionPatch<M> truncated_function = function;
     truncated_function.clobber();
     truncated_function.sweep(ThresholdSweeper(frepr.threshold));
-    ErrorFloat truncatation_error = truncated_function.error();
+    ErrorFloat64 truncatation_error = truncated_function.error();
     truncated_function.clobber();
-    Polynomial<ValidatedFloat> validated_polynomial_function=polynomial(truncated_function);
-    Polynomial<ExactFloat> polynomial_function = midpoint(validated_polynomial_function);
+    Polynomial<ValidatedFloat64> validated_polynomial_function=polynomial(truncated_function);
+    Polynomial<ExactFloat64> polynomial_function = midpoint(validated_polynomial_function);
     if(frepr.names.empty()) { os << polynomial_function; }
     else { os << named_argument_repr(polynomial_function,frepr.names); }
     os << "+/-" << truncatation_error << "+/-" << function.error();
@@ -521,8 +521,8 @@ template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBox& d,
 }
 
 template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBox& d,
-                                           const Vector<Expansion<ExactFloat>>& f,
-                                           const Vector<ErrorFloat>& e,
+                                           const Vector<Expansion<ExactFloat64>>& f,
+                                           const Vector<ErrorFloat64>& e,
                                            Sweeper swp)
     : _domain(d), _models(f.size(),ModelType(d.size(),swp))
 {
@@ -534,25 +534,25 @@ template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBox& d,
 }
 
 template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBox& d,
-                                           const Vector<Expansion<ExactFloat>>& f,
+                                           const Vector<Expansion<ExactFloat64>>& f,
                                            Sweeper swp)
-    : VectorFunctionPatch<M>(d,f,Vector<ErrorFloat>(f.size()),swp)
+    : VectorFunctionPatch<M>(d,f,Vector<ErrorFloat64>(f.size()),swp)
 {
 }
 
 template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBox& d,
-                                           const Vector<Expansion<RawFloat>>& f,
-                                           const Vector<RawFloat>& e,
+                                           const Vector<Expansion<RawFloat64>>& f,
+                                           const Vector<RawFloat64>& e,
                                            Sweeper swp)
-    : VectorFunctionPatch<M>(d,reinterpret_cast<Vector<Expansion<ExactFloat>>const&>(f),
-                           reinterpret_cast<Vector<ErrorFloat>const&>(e),swp)
+    : VectorFunctionPatch<M>(d,reinterpret_cast<Vector<Expansion<ExactFloat64>>const&>(f),
+                           reinterpret_cast<Vector<ErrorFloat64>const&>(e),swp)
 {
 }
 
 template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBox& d,
-                                           const Vector<Expansion<RawFloat>>& f,
+                                           const Vector<Expansion<RawFloat64>>& f,
                                            Sweeper swp)
-    : VectorFunctionPatch<M>(d,reinterpret_cast<Vector<Expansion<ExactFloat>>const&>(f),Vector<ErrorFloat>(f.size()),swp)
+    : VectorFunctionPatch<M>(d,reinterpret_cast<Vector<Expansion<ExactFloat64>>const&>(f),Vector<ErrorFloat64>(f.size()),swp)
 {
 }
 
@@ -652,18 +652,18 @@ template<class M> VectorFunctionPatch<M> VectorFunctionPatch<M>::projection(cons
 }
 
 
-template<class M> Vector<Polynomial<ValidatedFloat>> VectorFunctionPatch<M>::polynomials() const
+template<class M> Vector<Polynomial<ValidatedFloat64>> VectorFunctionPatch<M>::polynomials() const
 {
-    Vector<Polynomial<ValidatedFloat> > p(this->result_size(),Polynomial<ValidatedFloat>(this->argument_size()));
+    Vector<Polynomial<ValidatedFloat64> > p(this->result_size(),Polynomial<ValidatedFloat64>(this->argument_size()));
     for(SizeType i=0; i!=this->result_size(); ++i) {
         p[i]=static_cast<FunctionPatch<M>>((*this)[i]).polynomial();
     }
     return p;
 }
 
-template<class M> Vector<Expansion<ExactFloat>> const VectorFunctionPatch<M>::expansions() const
+template<class M> Vector<Expansion<ExactFloat64>> const VectorFunctionPatch<M>::expansions() const
 {
-    Vector<Expansion<ExactFloat>> e(this->result_size(),Expansion<ExactFloat>(this->argument_size()));
+    Vector<Expansion<ExactFloat64>> e(this->result_size(),Expansion<ExactFloat64>(this->argument_size()));
     for(SizeType i=0; i!=this->result_size(); ++i) {
         e[i]=this->models()[i].expansion();
     }
@@ -672,7 +672,7 @@ template<class M> Vector<Expansion<ExactFloat>> const VectorFunctionPatch<M>::ex
 
 template<class M> Vector<typename VectorFunctionPatch<M>::ErrorType> const VectorFunctionPatch<M>::errors() const
 {
-    Vector<ErrorFloat> e(this->result_size());
+    Vector<ErrorFloat64> e(this->result_size());
     for(SizeType i=0; i!=this->result_size(); ++i) {
         e[i]=this->models()[i].error();
     }
@@ -681,7 +681,7 @@ template<class M> Vector<typename VectorFunctionPatch<M>::ErrorType> const Vecto
 
 template<class M> typename VectorFunctionPatch<M>::ErrorType const VectorFunctionPatch<M>::error() const
 {
-    ErrorFloat e=0u;
+    ErrorFloat64 e=0u;
     for(SizeType i=0; i!=this->result_size(); ++i) {
         e=max(e,this->models()[i].error());
     }
@@ -747,7 +747,7 @@ template<class M> const UpperBox VectorFunctionPatch<M>::range() const
 
 template<class M> const Vector<typename VectorFunctionPatch<M>::CoefficientType> VectorFunctionPatch<M>::centre() const
 {
-    Vector<ExactFloat> result(this->result_size());
+    Vector<ExactFloat64> result(this->result_size());
     for(SizeType i=0; i!=result.size(); ++i) {
         result[i]=this->_models[i].value();
     }

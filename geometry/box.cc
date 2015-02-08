@@ -282,7 +282,7 @@ PositiveUpperNumber volume(const Vector<ExactInterval>& v)
 {
     PositiveUpperNumber r=1u;
     for(SizeType i=0; i!=v.size(); ++i) {
-        r*=diam(v[i]);
+        r*=cast_positive(diam(v[i]));
     }
     return r;
 }

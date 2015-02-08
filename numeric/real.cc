@@ -41,11 +41,6 @@
 
 namespace Ariadne {
 
-template<> class FloatMPTemplate<Approximate> { };
-template<> class FloatMPTemplate<Lower> { };
-template<> class FloatMPTemplate<Upper> { };
-template<> class FloatMPTemplate<Bounded> { public: operator FloatMPTemplate<Upper>() { } operator FloatMPTemplate<Lower>() { } };
-
 typedef Real::Interface RealInterface;
 
 struct Real::Interface {
@@ -128,10 +123,17 @@ ApproximateFloat64 Real::approx() const { return this->_ptr->_value(); }
 
 double Real::get_d() const { return this->approx().get_d(); }
 
-ValidatedFloat64::ValidatedFloat64(Real const& x) : ValidatedFloat64(x.lower(),x.upper()) { }
-UpperFloat64::UpperFloat64(Real const& x) : UpperFloat64(x.upper()) { }
-LowerFloat64::LowerFloat64(Real const& x) : LowerFloat64(x.lower()) { }
-ApproximateFloat64::ApproximateFloat64(Real const& x) : ApproximateFloat64(x.approx()) { }
+/*
+template<class PR> Float<Validated,PR>::Float(Real const& x) : Float<Validated,PR>(x.lower(),x.upper()) { }
+template<class PR> Float<Upper,PR>::Float(Real const& x) : Float<Upper,PR>(x.upper()) { }
+template<class PR> Float<Lower,PR>::Float(Real const& x) : Float<Lower,PR>(x.lower()) { }
+template<class PR> Float<Approximate,PR>::Float(Real const& x) : Float<Approximate,PR>(x.approx()) { }
+*/
+
+template<> Float<Validated,Precision64>::Float(Real const& x) : Float<Validated,Precision64>(x.lower(),x.upper()) { }
+template<> Float<Upper,Precision64>::Float(Real const& x) : Float<Upper,Precision64>(x.upper()) { }
+template<> Float<Lower,Precision64>::Float(Real const& x) : Float<Lower,Precision64>(x.lower()) { }
+template<> Float<Approximate,Precision64>::Float(Real const& x) : Float<Approximate,Precision64>(x.approx()) { }
 
 Real::Real(std::uint64_t m, Void*) : Real(std::make_shared<RealConstant<Integer>>(m)) { }
 Real::Real(std::int64_t n, Void*) : Real(std::make_shared<RealConstant<Integer>>(n)) { }

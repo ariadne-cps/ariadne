@@ -89,28 +89,30 @@ template<class X> struct DeclareNumericOperators {
 //! For example, while <c>%Float64(3.25)</c> is represented exactly, <c>%Float64(3.3)</c> has a value of \f$3.2999999999999998224\ldots\f$.
 //! \note In the future, the construction of a \c %Float64 from a string literal may be supported.
 //! \sa ExactInterval, Real, ExactFloat64
-class ApproximateFloat64 {
+template<class PR> class Float<Approximate,PR> {
+    typedef Approximate P; typedef RawFloatType<PR> FLT;
   public:
     typedef Approximate Paradigm;
     typedef ApproximateFloat64 NumericType;
   public:
-    ApproximateFloat64() : a() { }
-    template<class N, EnableIf<IsIntegral<N>> =dummy> ApproximateFloat64(N n) : a(n) { }
-    template<class D, EnableIf<IsFloatingPoint<D>> =dummy> ApproximateFloat64(D x) : a(x) { }
-    explicit ApproximateFloat64(Float64 const& x) : a(x) { }
-    explicit ApproximateFloat64(const Dyadic& d);
-    explicit ApproximateFloat64(const Decimal& d);
+    Float<Approximate,PR>() : a() { }
+    template<class N, EnableIf<IsIntegral<N>> =dummy> Float<Approximate,PR>(N n) : a(n) { }
+    template<class D, EnableIf<IsFloatingPoint<D>> =dummy> Float<Approximate,PR>(D x) : a(x) { }
+    explicit Float<Approximate,PR>(Float64 const& x) : a(x) { }
+    explicit Float<Approximate,PR>(const Dyadic& d);
+    explicit Float<Approximate,PR>(const Decimal& d);
 
-    explicit ApproximateFloat64(const Integer& z);
-    explicit ApproximateFloat64(const Rational& q);
-    explicit ApproximateFloat64(const Real& r);
-    explicit ApproximateFloat64(const Number<Approximate>& x);
+    explicit Float<Approximate,PR>(const Integer& z);
+    explicit Float<Approximate,PR>(const Rational& q);
+    explicit Float<Approximate,PR>(const Real& r);
+    explicit Float<Approximate,PR>(const Number<Approximate>& x);
+    Float<Approximate,PR>(const Number<Approximate>& x, PR pr);
     operator Number<Approximate> () const;
 
-    ApproximateFloat64(ExactFloat64 const& x);
-    ApproximateFloat64(ValidatedFloat64 const& x);
-    ApproximateFloat64(UpperFloat64 const& x);
-    ApproximateFloat64(LowerFloat64 const& x);
+    Float<Approximate,PR>(Float<Exact,PR> const& x);
+    Float<Approximate,PR>(Float<Validated,PR> const& x);
+    Float<Approximate,PR>(Float<Upper,PR> const& x);
+    Float<Approximate,PR>(Float<Lower,PR> const& x);
 
     explicit operator Float64 () const { return this->a; }
     Float64 const& raw() const { return this->a; }
@@ -118,14 +120,256 @@ class ApproximateFloat64 {
     double get_d() const { return this->a.get_d(); }
   public:
     static Void set_output_precision(Nat p) { output_precision=p; }
-    ApproximateFloat64 pm(ApproximateFloat64 e) { return *this; }
+    Float<Approximate,PR> pm(Float<Approximate,PR> e) { return *this; }
   private: public:
     static Nat output_precision;
     Float64 a;
 };
 
+
+//! \ingroup NumericModule
+//! \brief Floating-point lower bounds for real numbers.
+template<class PR> class Float<Lower,PR> {
+    typedef Lower P; typedef RawFloatType<PR> FLT;
+  public:
+    typedef Lower Paradigm;
+    typedef Float<Lower,PR> NumericType;
+  public:
+    Float<Lower,PR>() : l(0.0) { }
+    template<class N, EnableIf<IsIntegral<N>> = dummy> Float<Lower,PR>(N n) : l(n) { }
+    template<class X, EnableIf<IsFloatingPoint<X>> = dummy> explicit Float<Lower,PR>(X x) : l(x) { }
+    explicit Float<Lower,PR>(Float64 const& x) : l(x) { }
+
+    Float<Lower,PR>(Float<Validated,PR> const& x);
+    Float<Lower,PR>(Float<Exact,PR> const& x);
+
+    explicit Float<Lower,PR>(const Number<Lower>& x);
+    Float<Lower,PR>(const Number<Lower>& x, PR pr);
+    operator Number<Lower> () const;
+
+    explicit Float<Lower,PR>(const Real& x);
+    explicit Float<Lower,PR>(const Rational& x);
+    explicit Float<Lower,PR>(const Integer& x);
+
+    Float64 const& raw() const { return l; }
+    Float64& raw() { return l; }
+    double get_d() const { return l.get_d(); }
+  private: public:
+    static Nat output_precision;
+    Float64 l;
+};
+
+
+//! \ingroup NumericModule
+//! \brief Floating-point upper bounds for real numbers.
+template<class PR> class Float<Upper,PR> {
+    typedef Upper P; typedef RawFloatType<PR> FLT;
+  public:
+    typedef Upper Paradigm;
+    typedef Float<Upper,PR> NumericType;
+  public:
+    Float<Upper,PR>() : u(0.0) { }
+    template<class N, EnableIf<IsIntegral<N>> = dummy> Float<Upper,PR>(N n) : u(n) { }
+    template<class X, EnableIf<IsFloatingPoint<X>> = dummy> explicit Float<Upper,PR>(X x) : u(x) { }
+
+    explicit Float<Upper,PR>(Float64 const& x) : u(x) { }
+
+    Float<Upper,PR>(Float<Validated,PR> const& x);
+    Float<Upper,PR>(Float<Exact,PR> const& x);
+
+    explicit Float<Upper,PR>(const Real& x);
+    explicit Float<Upper,PR>(const Rational& x);
+    explicit Float<Upper,PR>(const Integer& x);
+    explicit Float<Upper,PR>(const Number<Upper>& x);
+
+    Float<Upper,PR>(const Number<Upper>& x, PR pr);
+    operator Number<Upper> () const;
+
+    Float64 const& raw() const { return u; }
+    Float64& raw() { return u; }
+    double get_d() const { return u.get_d(); }
+  private: public:
+    static Nat output_precision;
+    Float64 u;
+};
+
+
+
+//! \ingroup NumericModule
+//! \brief Validated bounds on a number with floating-point endpoints supporting outwardly-rounded arithmetic.
+//! \details
+//! Note that <c>%ValidatedFloat64(3.3)</c> yields the singleton interval \f$[3.2999999999999998224,3.2999999999999998224]\f$ (the constant is first interpreted by the C++ compiler to give a C++ \c double, whereas <c>%ValidatedFloat64("3.3")</c> yields the interval \f$[3.2999999999999998224,3.3000000000000002665]\f$ enclosing \f$3.3\f$.
+//!
+//! Comparison tests on \c ValidatedFloat64 use the idea that an interval represents a single number with an unknown value.
+//! Hence the result is of type \c Tribool, which can take values { \c True, \c False, \c Indeterminate }.
+//! Hence a test \f$[l_1,u_1]\leq [l_2,u_2]\f$ returns \c True if \f$u_1\leq u_2\f$, since in this case \f$x_1\leq x_2\f$ whenever \f$x_1\in[l_1,u_2]\f$ and \f$x_2\in[l_2,u_2]\f$, \c False if \f$l_1>u_2\f$, since in this case we know \f$x_1>x_2\f$, and \c Indeterminate otherwise, since in this case we can find \f$x_1,x_2\f$ making the result either true or false.
+//! In the case of equality, the comparison \f$[l_1,u_1]\f$==\f$[l_2,u_2]\f$ only returns \c True if both intervals are singletons, since otherwise we can find values making the result either true of false.
+//!
+//! To obtain the lower and upper bounds of an interval, use \c ivl.lower() and \c ivl.upper().
+//! To obtain the midpoint and radius, use \c ivl.midpoint() and \c ivl.radius().
+//! Alternatives \c midpoint(ivl) and \c radius(ivl) are also provided.
+//! Note that \c midpoint and \c radius return approximations to the true midpoint and radius of the interval. If \f$m\f$ and \f$r\f$ are the returned midpoint and radius of the interval \f$[l,u]\f$, the using exact arithmetic, we guarentee \f$m-r\leq l\f$ and \f$m+r\geq u\f$
+//!
+//! To test if an interval contains a point or another interval, use \c encloses(ValidatedFloat64,Float64) or \c encloses(ValidatedFloat64,ValidatedFloat64).
+//! The test \c refines(ValidatedFloat64,ValidatedFloat64) can also be used.
+//! \sa Float64
+//!
+//! \par Python interface
+//!
+//! In the Python interface, %Ariadne intervals can be constructed from Python literals of the form \c {a:b} or (deprecated) \c [a,b] .
+//! The former is preferred, as it cannot be confused with literals for other classes such as Vector and Array types.
+//! Automatic conversion is used to convert ValidatedFloat64 literals of the form \c {a,b} to an ValidatedFloat64 in functions.
+//!
+//! Care must be taken when defining intervals using floating-point coefficients, since values are first converted to the nearest
+//! representable value by the Python interpreter. <br><br>
+//! \code
+//!   ValidatedFloat64({1.1:2.3}) # Create the interval [1.1000000000000001, 2.2999999999999998]
+//!   ValidatedFloat64({2.5:4.25}) # Create the interval [2.5, 4.25], which can be represented exactly
+//!   ValidatedFloat64([2.5,4.25]) # Alternative syntax for creating the interval [2.5, 4.25]
+//! \endcode
+template<class PR> class Float<Validated,PR> {
+    typedef Validated P; typedef RawFloatType<PR> FLT;
+  public:
+    typedef Validated Paradigm;
+    typedef Float<Validated,PR> NumericType;
+  public:
+    Float<Validated,PR>() : l(0.0), u(0.0) { }
+    template<class N, EnableIf<IsIntegral<N>> = dummy> Float<Validated,PR>(N n) : l(n), u(n) { }
+    template<class X, EnableIf<IsFloatingPoint<X>> = dummy> explicit Float<Validated,PR>(X x) : l(x), u(x) { }
+    explicit Float<Validated,PR>(Float64 const& x) : l(x), u(x) { }
+
+    Float<Validated,PR>(Float<Exact,PR> const& x);
+
+    explicit Float<Validated,PR>(const Dyadic& x);
+    explicit Float<Validated,PR>(const Decimal& x);
+    explicit Float<Validated,PR>(const Integer& z);
+    explicit Float<Validated,PR>(const Rational& q);
+    explicit Float<Validated,PR>(const Real& x);
+    explicit Float<Validated,PR>(const Number<Validated>& x);
+    Float<Validated,PR>(const Number<Validated>& x, PR pr);
+    operator Number<Validated> () const;
+
+    template<class N1, class N2, EnableIf<And<IsIntegral<N1>,IsIntegral<N2>>> =dummy>
+        Float<Validated,PR>(N1 lower, N2 upper) : l(lower), u(upper) { }
+    Float<Validated,PR>(Float64 const& lower, Float64 const& upper) : l(lower), u(upper) { }
+    Float<Validated,PR>(Float<Lower,PR> const& lower, Float<Upper,PR> const& upper) : l(lower.raw()), u(upper.raw()) { }
+    Float<Validated,PR>(const Rational& lower, const Rational& upper);
+
+    Float64 const& lower_raw() const { return l; }
+    Float64 const& upper_raw() const { return u; }
+    double get_d() const { return (l.get_d()+u.get_d())/2; }
+
+    Float<Lower,PR> lower() const { return Float<Lower,PR>(l); }
+    Float<Upper,PR> upper() const { return Float<Upper,PR>(u); }
+    const Float<Exact,PR> value() const;
+    const Float<PositiveUpper,PR> error() const;
+
+    // DEPRECATED
+    explicit operator Float64 () const { return (l+u)/2; }
+    friend Float<Exact,PR> midpoint(Float<Validated,PR> const& x);
+  public:
+    static Nat output_precision;
+    static Void set_output_precision(Nat p) { output_precision=p; }
+  private: public:
+    Float64 l, u;
+};
+
+
+
+//! \ingroup NumericModule
+//! \related Float64, ValidatedFloat64
+//! \brief A floating-point number, which is taken to represent the \em exact value of a real quantity.
+template<class PR> class Float<Exact,PR> {
+    typedef Exact P; typedef RawFloatType<PR> FLT;
+  public:
+    typedef Exact Paradigm;
+    typedef Float<Exact,PR> NumericType;
+
+    Float<Exact,PR>() : v(0) { }
+    template<class N, EnableIf<IsIntegral<N>> =dummy> Float<Exact,PR>(N n) : v(n) { }
+    template<class X, EnableIf<IsFloatingPoint<X>> =dummy> explicit Float<Exact,PR>(X x) : v(x) { }
+
+    explicit Float<Exact,PR>(Float64 const& x) : v(x) { }
+
+    explicit Float<Exact,PR>(const Integer& z);
+    explicit Float<Exact,PR>(const Integer& z, PR pr);
+    explicit operator Rational () const;
+    operator Number<Exact> () const;
+    explicit operator Float64 () const { return v; }
+
+    Float64 const& raw() const { return v; }
+    Float64& raw() { return v; }
+    double get_d() const { return v.get_d(); }
+
+    Float<Validated,PR> pm(Float<Error,PR> e) const;
+  public:
+    static Nat output_precision;
+    static Void set_output_precision(Nat p) { output_precision=p; }
+  private: public:
+    Float64 v;
+};
+
+template<class PR> inline const Float<Exact,PR> Float<Validated,PR>::value() const {
+    return Float<Exact,PR>(med_near(this->l,this->u)); }
+
+template<class PR> inline const Float<Error,PR> Float<Validated,PR>::error() const {
+    Float64 v=med_near(this->l,this->u); return Float<Error,PR>(max(sub_up(this->u,v),sub_up(v,this->l))); }
+
+
+template<class PR> class Float<PositiveExact,PR> : public Float<Exact,PR> {
+  public:
+    Float<PositiveExact,PR>() : Float<Exact,PR>() { }
+    template<class M, EnableIf<IsIntegral<M>>, EnableIf<IsUnsigned<M>> =dummy>
+        Float<PositiveExact,PR>(M m) : Float<Exact,PR>(m) { }
+    explicit Float<PositiveExact,PR>(RawFloatType<PR> const& x) : Float<Exact,PR>(x) { }
+    explicit Float<PositiveExact,PR>(Float<Exact,PR> const& x) : Float<Exact,PR>(x) { }
+};
+
+template<class PR> class Float<PositiveUpper,PR> : public Float<Upper,PR> {
+  public:
+    Float<PositiveUpper,PR>() : Float<Upper,PR>() { }
+    explicit Float<PositiveUpper,PR>(RawFloatType<PR> const& x) : Float<Upper,PR>(x) { ARIADNE_PRECONDITION(x>=0); }
+    explicit Float<PositiveUpper,PR>(Float<Upper,PR> const& x) : Float<Upper,PR>(x) { }
+    template<class M, EnableIf<IsUnsigned<M>> =dummy> Float<PositiveUpper,PR>(M m) : Float<Upper,PR>(m) { }
+    template<class F, EnableIf<IsSame<F,Float<Upper,PR>>> =dummy>
+        explicit Float<PositiveUpper,PR>(F const& x) : Float<Upper,PR>(x) { }
+    Float<PositiveUpper,PR>(Float<PositiveExact,PR> const& x) : Float<Upper,PR>(x) { }
+};
+
+template<class PR> class Float<PositiveLower,PR> : public Float<Lower,PR> {
+  public:
+    Float<PositiveLower,PR>() : Float<Lower,PR>() { }
+    template<class M, EnableIf<IsSigned<M>> =dummy>
+        Float<PositiveLower,PR>(M m) : Float<Lower,PR>(m) { }
+    explicit Float<PositiveLower,PR>(RawFloatType<PR> const& x) : Float<Lower,PR>(x) { }
+    explicit Float<PositiveLower,PR>(Float<Lower,PR> const& x) : Float<Lower,PR>(x) { }
+    Float<PositiveLower,PR>(Float<PositiveExact,PR> const& x) : Float<Lower,PR>(x) { }
+};
+
+template<class PR> class Float<PositiveApproximate,PR> : public Float<Approximate,PR> {
+  public:
+    Float<PositiveApproximate,PR>() : Float<Approximate,PR>() { }
+    template<class M, EnableIf<IsSigned<M>> =dummy>
+        Float<PositiveApproximate,PR>(M m) : Float<Approximate,PR>(m) { }
+    explicit Float<PositiveApproximate,PR>(RawFloatType<PR> const& x) : Float<Approximate,PR>(x) { }
+    explicit Float<PositiveApproximate,PR>(Float<Approximate,PR> const& x) : Float<Approximate,PR>(x) { }
+    Float<PositiveApproximate,PR>(Float<PositiveLower,PR> const& x) : Float<Approximate,PR>(x) { }
+    Float<PositiveApproximate,PR>(Float<PositiveUpper,PR> const& x) : Float<Approximate,PR>(x) { }
+    Float<PositiveApproximate,PR>(Float<PositiveExact,PR> const& x) : Float<Approximate,PR>(x) { }
+};
+
+template<class PR> inline Float<PositiveUpper,PR> cast_positive(Float<Upper,PR> const& x) {
+    return Float<PositiveUpper,PR>(x); }
+
+template<class PR> inline Float<PositiveExact,PR> cast_positive(Float<Exact,PR> const& x) {
+    return Float<PositiveExact,PR>(x); }
+
 template<class R, class A> R integer_cast(const A& a);
 
+template<> Float<Validated,Precision64>::Float(Real const& x);
+template<> Float<Upper,Precision64>::Float(Real const& x);
+template<> Float<Lower,Precision64>::Float(Real const& x);
+template<> Float<Approximate,Precision64>::Float(Real const& x);
 
 inline ApproximateFloat64 floor(ApproximateFloat64 const& x) { return ApproximateFloat64(floor(x.a)); }
 inline ApproximateFloat64 ceil(ApproximateFloat64 const& x) { return ApproximateFloat64(ceil(x.a)); }
@@ -180,69 +424,6 @@ inline Bool operator> (ApproximateFloat64 const& x1, ApproximateFloat64 const& x
 OutputStream& operator<<(OutputStream& os, ApproximateFloat64 const& x);
 InputStream& operator>>(InputStream& is, ApproximateFloat64& x);
 
-
-
-//! \ingroup NumericModule
-//! \brief Floating-point lower bounds for real numbers.
-class LowerFloat64 {
-  public:
-    typedef Lower Paradigm;
-    typedef LowerFloat64 NumericType;
-  public:
-    LowerFloat64() : l(0.0) { }
-    template<class N, EnableIf<IsIntegral<N>> = dummy> LowerFloat64(N n) : l(n) { }
-    template<class X, EnableIf<IsFloatingPoint<X>> = dummy> explicit LowerFloat64(X x) : l(x) { }
-    explicit LowerFloat64(Float64 const& x) : l(x) { }
-
-    LowerFloat64(ValidatedFloat64 const& x);
-    LowerFloat64(ExactFloat64 const& x);
-
-    explicit LowerFloat64(const Number<Lower>& x);
-    operator Number<Lower> () const;
-
-    explicit LowerFloat64(const Real& x);
-    explicit LowerFloat64(const Rational& x);
-    explicit LowerFloat64(const Integer& x);
-
-    Float64 const& raw() const { return l; }
-    Float64& raw() { return l; }
-    double get_d() const { return l.get_d(); }
-  private: public:
-    static Nat output_precision;
-    Float64 l;
-};
-
-
-//! \ingroup NumericModule
-//! \brief Floating-point upper bounds for real numbers.
-class UpperFloat64 {
-  public:
-    typedef Upper Paradigm;
-    typedef UpperFloat64 NumericType;
-  public:
-    UpperFloat64() : u(0.0) { }
-    template<class N, EnableIf<IsIntegral<N>> = dummy> UpperFloat64(N n) : u(n) { }
-    template<class X, EnableIf<IsFloatingPoint<X>> = dummy> explicit UpperFloat64(X x) : u(x) { }
-
-    explicit UpperFloat64(Float64 const& x) : u(x) { }
-
-    UpperFloat64(ValidatedFloat64 const& x);
-    UpperFloat64(ExactFloat64 const& x);
-
-    explicit UpperFloat64(const Real& x);
-    explicit UpperFloat64(const Rational& x);
-    explicit UpperFloat64(const Integer& x);
-    explicit UpperFloat64(const Number<Upper>& x);
-
-    operator Number<Upper> () const;
-
-    Float64 const& raw() const { return u; }
-    Float64& raw() { return u; }
-    double get_d() const { return u.get_d(); }
-  private: public:
-    static Nat output_precision;
-    Float64 u;
-};
 
 
 inline LowerFloat64 max(LowerFloat64 const& x1, LowerFloat64 const& x2) { return LowerFloat64(max_exact(x1.l,x2.l)); }
@@ -319,83 +500,6 @@ InputStream& operator>>(InputStream& is, UpperFloat64& x);
 
 
 
-//! \ingroup NumericModule
-//! \brief Validated bounds on a number with floating-point endpoints supporting outwardly-rounded arithmetic.
-//! \details
-//! Note that <c>%ValidatedFloat64(3.3)</c> yields the singleton interval \f$[3.2999999999999998224,3.2999999999999998224]\f$ (the constant is first interpreted by the C++ compiler to give a C++ \c double, whereas <c>%ValidatedFloat64("3.3")</c> yields the interval \f$[3.2999999999999998224,3.3000000000000002665]\f$ enclosing \f$3.3\f$.
-//!
-//! Comparison tests on \c ValidatedFloat64 use the idea that an interval represents a single number with an unknown value.
-//! Hence the result is of type \c Tribool, which can take values { \c True, \c False, \c Indeterminate }.
-//! Hence a test \f$[l_1,u_1]\leq [l_2,u_2]\f$ returns \c True if \f$u_1\leq u_2\f$, since in this case \f$x_1\leq x_2\f$ whenever \f$x_1\in[l_1,u_2]\f$ and \f$x_2\in[l_2,u_2]\f$, \c False if \f$l_1>u_2\f$, since in this case we know \f$x_1>x_2\f$, and \c Indeterminate otherwise, since in this case we can find \f$x_1,x_2\f$ making the result either true or false.
-//! In the case of equality, the comparison \f$[l_1,u_1]\f$==\f$[l_2,u_2]\f$ only returns \c True if both intervals are singletons, since otherwise we can find values making the result either true of false.
-//!
-//! To obtain the lower and upper bounds of an interval, use \c ivl.lower() and \c ivl.upper().
-//! To obtain the midpoint and radius, use \c ivl.midpoint() and \c ivl.radius().
-//! Alternatives \c midpoint(ivl) and \c radius(ivl) are also provided.
-//! Note that \c midpoint and \c radius return approximations to the true midpoint and radius of the interval. If \f$m\f$ and \f$r\f$ are the returned midpoint and radius of the interval \f$[l,u]\f$, the using exact arithmetic, we guarentee \f$m-r\leq l\f$ and \f$m+r\geq u\f$
-//!
-//! To test if an interval contains a point or another interval, use \c encloses(ValidatedFloat64,Float64) or \c encloses(ValidatedFloat64,ValidatedFloat64).
-//! The test \c refines(ValidatedFloat64,ValidatedFloat64) can also be used.
-//! \sa Float64
-//!
-//! \par Python interface
-//!
-//! In the Python interface, %Ariadne intervals can be constructed from Python literals of the form \c {a:b} or (deprecated) \c [a,b] .
-//! The former is preferred, as it cannot be confused with literals for other classes such as Vector and Array types.
-//! Automatic conversion is used to convert ValidatedFloat64 literals of the form \c {a,b} to an ValidatedFloat64 in functions.
-//!
-//! Care must be taken when defining intervals using floating-point coefficients, since values are first converted to the nearest
-//! representable value by the Python interpreter. <br><br>
-//! \code
-//!   ValidatedFloat64({1.1:2.3}) # Create the interval [1.1000000000000001, 2.2999999999999998]
-//!   ValidatedFloat64({2.5:4.25}) # Create the interval [2.5, 4.25], which can be represented exactly
-//!   ValidatedFloat64([2.5,4.25]) # Alternative syntax for creating the interval [2.5, 4.25]
-//! \endcode
-class ValidatedFloat64 {
-  public:
-    typedef Validated Paradigm;
-    typedef ValidatedFloat64 NumericType;
-  public:
-    ValidatedFloat64() : l(0.0), u(0.0) { }
-    template<class N, EnableIf<IsIntegral<N>> = dummy> ValidatedFloat64(N n) : l(n), u(n) { }
-    template<class X, EnableIf<IsFloatingPoint<X>> = dummy> explicit ValidatedFloat64(X x) : l(x), u(x) { }
-    explicit ValidatedFloat64(Float64 const& x) : l(x), u(x) { }
-
-    ValidatedFloat64(ExactFloat64 const& x);
-
-    explicit ValidatedFloat64(const Dyadic& x);
-    explicit ValidatedFloat64(const Decimal& x);
-    explicit ValidatedFloat64(const Integer& z);
-    explicit ValidatedFloat64(const Rational& q);
-    explicit ValidatedFloat64(const Real& x);
-    explicit ValidatedFloat64(const Number<Validated>& x);
-    operator Number<Validated> () const;
-
-    template<class N1, class N2, EnableIf<And<IsIntegral<N1>,IsIntegral<N2>>> =dummy>
-        ValidatedFloat64(N1 lower, N2 upper) : l(lower), u(upper) { }
-    ValidatedFloat64(Float64 const& lower, Float64 const& upper) : l(lower), u(upper) { }
-    ValidatedFloat64(LowerFloat64 const& lower, UpperFloat64 const& upper) : l(lower.raw()), u(upper.raw()) { }
-    ValidatedFloat64(const Rational& lower, const Rational& upper);
-
-    Float64 const& lower_raw() const { return l; }
-    Float64 const& upper_raw() const { return u; }
-    double get_d() const { return (l.get_d()+u.get_d())/2; }
-
-    LowerFloat64 lower() const { return LowerFloat64(l); }
-    UpperFloat64 upper() const { return UpperFloat64(u); }
-    const ExactFloat64 value() const;
-    const PositiveUpperFloat64 error() const;
-
-    // DEPRECATED
-    explicit operator Float64 () const { return (l+u)/2; }
-    friend ExactFloat64 midpoint(ValidatedFloat64 const& x);
-  public:
-    static Nat output_precision;
-    static Void set_output_precision(Nat p) { output_precision=p; }
-  private: public:
-    Float64 l, u;
-};
-
 ValidatedFloat64 max(ValidatedFloat64 const& x1, ValidatedFloat64 const& x2);
 ValidatedFloat64 min(ValidatedFloat64 const& x1, ValidatedFloat64 const& x2);
 ValidatedFloat64 abs(ValidatedFloat64 const& x);
@@ -439,36 +543,6 @@ OutputStream& operator<<(OutputStream& os, ValidatedFloat64 const& x);
 InputStream& operator>>(InputStream& is, ValidatedFloat64& x);
 
 
-//! \ingroup NumericModule
-//! \related Float64, ValidatedFloat64
-//! \brief A floating-point number, which is taken to represent the \em exact value of a real quantity.
-class ExactFloat64 {
-  public:
-    typedef Exact Paradigm;
-    typedef ExactFloat64 NumericType;
-
-    ExactFloat64() : v(0) { }
-    template<class N, EnableIf<IsIntegral<N>> =dummy> ExactFloat64(N n) : v(n) { }
-    template<class X, EnableIf<IsFloatingPoint<X>> =dummy> explicit ExactFloat64(X x) : v(x) { }
-
-    explicit ExactFloat64(Float64 const& x) : v(x) { }
-
-    explicit ExactFloat64(const Integer& z);
-    explicit operator Rational () const;
-    operator Number<Exact> () const;
-    explicit operator Float64 () const { return v; }
-
-    Float64 const& raw() const { return v; }
-    Float64& raw() { return v; }
-    double get_d() const { return v.get_d(); }
-
-    ValidatedFloat64 pm(ErrorFloat64 e) const;
-  public:
-    static Nat output_precision;
-    static Void set_output_precision(Nat p) { output_precision=p; }
-  private: public:
-    Float64 v;
-};
 
 extern const ExactFloat64 infty;
 inline ExactFloat64 operator"" _exact(long double lx) { double x=lx; assert(x==lx); return ExactFloat64(x); }
@@ -592,56 +666,18 @@ inline Bool operator< (const Rational& q, ExactFloat64 const& x) { return q< Rat
 inline Bool operator> (const Rational& q, ExactFloat64 const& x) { return q> Rational(x); }
 
 
-class PositiveExactFloat : public ExactFloat64 {
-  public:
-    PositiveExactFloat() : ExactFloat64() { }
-    template<class M, EnableIf<IsIntegral<M>>, EnableIf<IsUnsigned<M>> =dummy>
-        PositiveExactFloat(M m) : ExactFloat64(m) { }
-    explicit PositiveExactFloat(Float64 const& x) : ExactFloat64(x) { }
-};
-
-class PositiveUpperFloat64 : public UpperFloat64 {
-  public:
-    PositiveUpperFloat64() : UpperFloat64() { }
-    explicit PositiveUpperFloat64(Float64 const& x) : UpperFloat64(x) { ARIADNE_PRECONDITION(x>=0); }
-    template<class M, EnableIf<IsUnsigned<M>> =dummy> PositiveUpperFloat64(M m) : UpperFloat64(m) { }
-    template<class F, EnableIf<IsSame<F,UpperFloat64>> =dummy>
-        explicit PositiveUpperFloat64(F const& x) : UpperFloat64(x) { }
-    PositiveUpperFloat64(PositiveExactFloat const& x) : UpperFloat64(x) { }
-};
-
-class PositiveLowerFloat : public LowerFloat64 {
-  public:
-    PositiveLowerFloat() : LowerFloat64() { }
-    template<class M, EnableIf<IsSigned<M>> =dummy>
-        PositiveLowerFloat(M m) : LowerFloat64(m) { }
-    explicit PositiveLowerFloat(Float64 const& x) : LowerFloat64(x) { }
-    PositiveLowerFloat(PositiveExactFloat const& x) : LowerFloat64(x) { }
-};
-
-class PositiveApproximateFloat : public ApproximateFloat64 {
-  public:
-    PositiveApproximateFloat() : ApproximateFloat64() { }
-    template<class M, EnableIf<IsSigned<M>> =dummy>
-        PositiveApproximateFloat(M m) : ApproximateFloat64(m) { }
-    explicit PositiveApproximateFloat(Float64 const& x) : ApproximateFloat64(x) { }
-    PositiveApproximateFloat(PositiveLowerFloat const& x) : ApproximateFloat64(x) { }
-    PositiveApproximateFloat(PositiveUpperFloat64 const& x) : ApproximateFloat64(x) { }
-    PositiveApproximateFloat(PositiveExactFloat const& x) : ApproximateFloat64(x) { }
-};
-
-inline PositiveExactFloat mag(ExactFloat64 const& x) {
-    return PositiveExactFloat(abs(x.raw())); }
+inline PositiveExactFloat64 mag(ExactFloat64 const& x) {
+    return PositiveExactFloat64(abs(x.raw())); }
 // FIXME: Unsafe since x may be negative
 inline PositiveUpperFloat64 mag(UpperFloat64 const& x) {
     return PositiveUpperFloat64(abs(x.raw())); }
 inline PositiveUpperFloat64 mag(ValidatedFloat64 const& x) {
     return PositiveUpperFloat64(max(neg(x.lower_raw()),x.upper_raw())); }
-inline PositiveLowerFloat mig(ValidatedFloat64 const& x) {
+inline PositiveLowerFloat64 mig(ValidatedFloat64 const& x) {
     Float64 r=max(x.lower_raw(),neg(x.upper_raw()));
-    return PositiveLowerFloat(max(r,nul(r))); }
-inline PositiveApproximateFloat mag(ApproximateFloat64 const& x) {
-    return PositiveApproximateFloat(abs(x.raw())); }
+    return PositiveLowerFloat64(max(r,nul(r))); }
+inline PositiveApproximateFloat64 mag(ApproximateFloat64 const& x) {
+    return PositiveApproximateFloat64(abs(x.raw())); }
 
 
 inline ValidatedFloat64 make_bounds(PositiveUpperFloat64 const& e) {
@@ -658,31 +694,31 @@ inline PositiveUpperFloat64 error(ValidatedFloat64 const& x) {
 
 
 
-inline ApproximateFloat64::ApproximateFloat64(LowerFloat64 const& x) : a(x.raw()) {
+template<class PR> inline Float<Approximate,PR>::Float(Float<Lower,PR> const& x) : a(x.raw()) {
 }
 
-inline ApproximateFloat64::ApproximateFloat64(UpperFloat64 const& x) : a(x.raw()) {
+template<class PR> inline Float<Approximate,PR>::Float(Float<Upper,PR> const& x) : a(x.raw()) {
 }
 
-inline ApproximateFloat64::ApproximateFloat64(ValidatedFloat64 const& x) : a(half_exact(add_near(x.lower_raw(),x.upper_raw()))) {
+template<class PR> inline Float<Approximate,PR>::Float(Float<Validated,PR> const& x) : a(half_exact(add_near(x.lower_raw(),x.upper_raw()))) {
 }
 
-inline ApproximateFloat64::ApproximateFloat64(ExactFloat64 const& x) : a(x.raw()) {
+template<class PR> inline Float<Approximate,PR>::Float(Float<Exact,PR> const& x) : a(x.raw()) {
 }
 
-inline LowerFloat64::LowerFloat64(ValidatedFloat64 const& x) : l(x.lower_raw()) {
+template<class PR> inline Float<Lower,PR>::Float(Float<Validated,PR> const& x) : l(x.lower_raw()) {
 }
 
-inline LowerFloat64::LowerFloat64(ExactFloat64 const& x) : l(x.raw()) {
+template<class PR> inline Float<Lower,PR>::Float(Float<Exact,PR> const& x) : l(x.raw()) {
 }
 
-inline UpperFloat64::UpperFloat64(ValidatedFloat64 const& x) : u(x.upper_raw()) {
+template<class PR> inline Float<Upper,PR>::Float(Float<Validated,PR> const& x) : u(x.upper_raw()) {
 }
 
-inline UpperFloat64::UpperFloat64(ExactFloat64 const& x) : u(x.raw()) {
+template<class PR> inline Float<Upper,PR>::Float(Float<Exact,PR> const& x) : u(x.raw()) {
 }
 
-inline ValidatedFloat64::ValidatedFloat64(ExactFloat64 const& x) : l(x.raw()), u(x.raw()) {
+template<class PR> inline Float<Validated,PR>::Float(Float<Exact,PR> const& x) : l(x.raw()), u(x.raw()) {
 }
 
 
@@ -704,12 +740,6 @@ inline Bool same(ExactFloat64 const& x1, ExactFloat64 const& x2) {
 
 
 
-
-inline const ExactFloat64 ValidatedFloat64::value() const {
-    return ExactFloat64(med_near(this->l,this->u)); }
-
-inline const ErrorFloat64 ValidatedFloat64::error() const {
-    Float64 v=med_near(this->l,this->u); return ErrorFloat64(max(sub_up(this->u,v),sub_up(v,this->l))); }
 
 inline ExactFloat64 midpoint(ValidatedFloat64 const& x) { return x.value(); }
 

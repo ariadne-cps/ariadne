@@ -135,16 +135,15 @@ template<class P> class Number
     template<class X, EnableIf<IsWeaker<P,ParadigmTag<X>>> =dummy, EnableIf<IsConvertible<X,Number<ParadigmTag<X>>>> = dummy>
         Number<P>(X const & x) : Number<P>(x.operator Number<ParadigmTag<X>>()) { }
 
-    // Explicit conversions to floating-point types
-    template<class PP, EnableIf<And<IsWeaker<PP,P>,Not<IsWeaker<Effective,PP>>>> = dummy>
-        explicit operator FloatTemplate<PP>() const { return this->get(PP()); }
-
-    //! \brief Get the value of the number as a double-precision type
-    template<class PP> FloatTemplate<PP> get(PP par, Precision64 const& prec) const { return pointer()->_get(PP(),prec); }
-
-    //! \brief Get the value of the number represented by \a X with the same precision paramters as \a p.
-    template<class PP, EnableIf<IsWeaker<PP,P>> = dummy>
-        FloatTemplate<PP> get(PP p, Precision64 const& pr) const { return this->ref()._get(p); }
+    //! \brief Get the value of the number as a double-precision floating-point type
+    template<class WP, EnableIf<IsWeaker<WP,P>> =dummy>
+    Float<WP,Precision64> get() const { return pointer()->_get(WP()); }
+    //! \brief Get the value of the number as a double-precision floating-point type
+    template<class WP, EnableIf<IsWeaker<WP,P>> =dummy>
+    Float<WP,Precision64> get(WP par, Precision64 const& prec) const { return pointer()->_get(WP()); }
+    //! \brief Get the value of the number as a multiple-precision floating-point type
+    template<class WP, EnableIf<IsWeaker<WP,P>> =dummy>
+    Float<WP,PrecisionMP> get(WP par, PrecisionMP const& prec) const { return pointer()->_get(WP(),prec); }
 
 
     friend Number<P> operator+(Number<P> y) { return pos(y); }

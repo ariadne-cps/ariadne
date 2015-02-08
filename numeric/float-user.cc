@@ -35,19 +35,83 @@
 
 namespace Ariadne {
 
-Nat ApproximateFloat64::output_precision = 4;
-Nat ValidatedFloat64::output_precision = 8;
-Nat ExactFloat64::output_precision = 16;
+template<> Nat ApproximateFloat64::output_precision = 4;
+template<> Nat ValidatedFloat64::output_precision = 8;
+template<> Nat ExactFloat64::output_precision = 16;
 
 const ExactFloat64 infty = ExactFloat64(Float64::inf());
 
-
-ExactFloat64::ExactFloat64(Integer const& z)
+template<class PR> Float<Exact,PR>::Float(Integer const& z)
     : v(z.get_si())
 {
     int n=z.get_si();
     ARIADNE_PRECONDITION(z==n);
 }
+
+template<class PR> Float<Validated,PR>::Float(Number<Validated> const& x)
+    : Float(x.get(Validated(),FLT::get_default_precision())) {
+}
+
+template<class PR> Float<Validated,PR>::Float(Number<Validated> const& x, PR pr)
+    : Float(x.get(Validated(),pr)) {
+}
+
+template<class PR> Float<Upper,PR>::Float(Number<Upper> const& x, PR pr)
+    : Float(x.get(Upper(),pr)) {
+}
+
+template<class PR> Float<Lower,PR>::Float(Number<Lower> const& x, PR pr)
+    : Float(x.get(Lower(),pr)) {
+}
+
+template<class PR> Float<Approximate,PR>::Float(Number<Approximate> const& x, PR pr)
+    : Float(x.get(Approximate(),pr)) {
+}
+
+
+template<class PR> Float<Validated,PR>::Float(const Dyadic& b) : Float<Validated,PR>(b.operator Rational()) { }
+
+template<class PR> Float<Validated,PR>::Float(const Decimal& d) : Float<Validated,PR>(d.operator Rational()) { }
+
+
+template<class PR> Float<Validated,PR>::Float(const Integer& z) : Float<Validated,PR>(Rational(z)) {
+}
+
+template<class PR> Float<Validated,PR>::Float(const Rational& q) : Float<Validated,PR>(q,q) {
+}
+
+template<class PR> Float<Validated,PR>::Float(const Rational& ql, const Rational& qu) : l(ql.get_d()), u(qu.get_d())  {
+    while(Rational(l)>ql) { l=next_down(l); }
+    while(Rational(u)<qu) { u=next_up(u); }
+}
+
+template<class PR> Float<Validated,PR> Float<Exact,PR>::pm(Float<Error,PR> e) const {
+    Float<Exact,PR> const& v=*this; return Float<Validated,PR>(v-e,v+e);
+}
+
+template<class PR> Float<Upper,PR>::Float(Number<Upper> const& x) {
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+
+template<class PR> Float<Lower,PR>::Float(Number<Lower> const& x) {
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+//Float<Exact,PR> inf = Float<Exact,PR>(std::numeric_limits< double >::infinity());
+template<class PR> Float<Approximate,PR>::Float(Dyadic const& b) : Float<Approximate,PR>(b.operator Rational()) { }
+template<class PR> Float<Approximate,PR>::Float(Decimal const& d) : Float<Approximate,PR>(d.operator Rational()) { }
+
+template<class PR> Float<Approximate,PR>::Float(Number<Approximate> const& x) { ARIADNE_NOT_IMPLEMENTED; }
+
+template<class PR> Float<Exact,PR>::operator Rational() const {
+    return Rational(this->get_d());
+}
+
+template<class PR> Float<Approximate,PR>::Float(Rational const& q) : Float<Approximate,PR>(q.get_d()) {
+}
+
+
 
 ExactFloat64 make_exact(Real const& r) {
     ApproximateFloat64 a(r); return ExactFloat64(a.raw());
@@ -58,10 +122,6 @@ OutputStream& operator<<(OutputStream& os, ExactFloat64 const& x) {
     return os;
 }
 
-
-ValidatedFloat64::ValidatedFloat64(Number<Validated> const& x) {
-    ARIADNE_NOT_IMPLEMENTED;
-}
 
 ValidatedFloat64 widen(ValidatedFloat64 const& x)
 {
@@ -387,26 +447,6 @@ ValidatedFloat64 atan(ValidatedFloat64 const& x) {
 }
 
 
-ValidatedFloat64::ValidatedFloat64(const Dyadic& b) : ValidatedFloat64(b.operator Rational()) { }
-
-ValidatedFloat64::ValidatedFloat64(const Decimal& d) : ValidatedFloat64(d.operator Rational()) { }
-
-
-ValidatedFloat64::ValidatedFloat64(const Integer& z) : ValidatedFloat64(Rational(z)) {
-}
-
-ValidatedFloat64::ValidatedFloat64(const Rational& q) : ValidatedFloat64(q,q) {
-}
-
-ValidatedFloat64::ValidatedFloat64(const Rational& ql, const Rational& qu) : l(ql.get_d()), u(qu.get_d())  {
-    while(Rational(l)>ql) { l=next_down(l); }
-    while(Rational(u)<qu) { u=next_up(u); }
-}
-
-ValidatedFloat64 ExactFloat64::pm(ErrorFloat64 e) const {
-    ExactFloat64 const& v=*this; return ValidatedFloat64(v-e,v+e);
-}
-
 OutputStream&
 operator<<(OutputStream& os, const ValidatedFloat64& ivl)
 {
@@ -436,11 +476,6 @@ operator>>(InputStream& is, ValidatedFloat64& x)
     ARIADNE_ASSERT(cr==']' || cr==')');
     x.l=l; x.u=u;
     return is;
-}
-
-
-UpperFloat64::UpperFloat64(Number<Upper> const& x) {
-    ARIADNE_NOT_IMPLEMENTED;
 }
 
 
@@ -522,9 +557,6 @@ PositiveUpperFloat64 half(PositiveUpperFloat64 const& x) {
 }
 
 
-LowerFloat64::LowerFloat64(Number<Lower> const& x) {
-    ARIADNE_NOT_IMPLEMENTED;
-}
 
 LowerFloat64 mul(LowerFloat64 const& x1, LowerFloat64 const& x2) {
     ARIADNE_PRECONDITION(x1.raw()>=0 && x2.raw()>=0);
@@ -564,20 +596,6 @@ template<> Int integer_cast(LowerFloat64 const& x) { return static_cast<Int>(x.l
 template<> Nat integer_cast(LowerFloat64 const& x) { return static_cast<Nat>(x.l.get_d()); }
 
 
-
-//ExactFloat64 inf = ExactFloat64(std::numeric_limits< double >::infinity());
-ApproximateFloat64::ApproximateFloat64(Dyadic const& b) : ApproximateFloat64(b.operator Rational()) { }
-ApproximateFloat64::ApproximateFloat64(Decimal const& d) : ApproximateFloat64(d.operator Rational()) { }
-
-ApproximateFloat64::ApproximateFloat64(Number<Approximate> const& x) { ARIADNE_NOT_IMPLEMENTED; }
-
-ExactFloat64::operator Rational() const {
-    return Rational(this->get_d());
-}
-
-ApproximateFloat64::ApproximateFloat64(Rational const& q) : ApproximateFloat64(q.get_d()) {
-}
-
 OutputStream& operator<<(OutputStream& os, ApproximateFloat64 const& x) {
     return os << std::showpoint << std::setprecision(ApproximateFloat64::output_precision) << x.raw();
 }
@@ -598,6 +616,11 @@ ValidatedFloat64 create_float(Real r) { return ValidatedFloat64(r); }
 ValidatedFloat64 create_float(Rational q) { return ValidatedFloat64(q); }
 ExactFloat64 create_float(Integer z) { return ExactFloat64(z); }
 
+template class Float<Approximate,Precision64>;
+template class Float<Lower,Precision64>;
+template class Float<Upper,Precision64>;
+template class Float<Validated,Precision64>;
+template class Float<Exact,Precision64>;
 
 
 } // namespace Ariadne

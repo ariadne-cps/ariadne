@@ -595,7 +595,7 @@ differential_space_time_flow_step(const ValidatedVectorFunction& f, const ExactB
                     coef=biter->data();
                 }
                 ExactFloat64 x=coef.value();
-                UpperFloat64 e=coef.error();
+                ErrorFloat64 e=coef.error();
                 error+=e;
                 expansion.append(a,x);
             }

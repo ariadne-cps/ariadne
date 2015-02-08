@@ -677,8 +677,11 @@ template<class X> inline Vector<ExactType<X>> make_exact(const Vector<X>& v) {
     return std::move(r);
 }
 
-class ExactFloat64;
-class ApproximateFloat64;
+template<class P, class PR> class Float;
+class Precision64;
+class Exact; class Approximate;
+typedef Float<Exact,Precision64> ExactFloat64;
+typedef Float<Approximate,Precision64> ApproximateFloat64;
 inline Vector<ExactFloat64>const& make_exact(Vector<ApproximateFloat64>const& v) {
     return reinterpret_cast<Vector<ExactFloat64>const&>(v);
 }

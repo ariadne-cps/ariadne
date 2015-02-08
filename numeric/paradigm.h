@@ -69,7 +69,6 @@ template<class T> using Paradigm = typename T::Paradigm;
 template<class T> using ParadigmTag = typename T::Paradigm;
 
 struct Exact;
-struct Error;
 struct Effective;
 struct EffectiveUpper;
 struct EffectiveLower;
@@ -79,6 +78,15 @@ struct ValidatedBounded;
 struct ValidatedUpper;
 struct ValidatedLower;
 struct Approximate;
+struct PositiveExact;
+struct PositiveValidated;
+struct PositiveValidatedUpper;
+struct PositiveValidatedLower;
+struct PositiveApproximate;
+using PositiveUpper=PositiveValidatedUpper;
+using PositiveLower=PositiveValidatedLower;
+
+using Error=PositiveUpper;
 using Metric=ValidatedMetric;
 using Bounded=ValidatedBounded;
 using Upper=ValidatedUpper;
@@ -123,14 +131,6 @@ struct Exact {
 };
 
 //! \ingroup ParadigmSubModule
-//! \brief A tag meaning that the object represents an upper bound for a positive quantity.
-struct Error {
-    static const ParadigmCode code = ParadigmCode::ERROR;
-    Error() { }
-    typedef ValidatedUpper NextWeakerParadigm;
-};
-
-//! \ingroup ParadigmSubModule
 //! \brief A tag meaning that the object represents a quantity exactly, but equality is undecidable.
 struct Effective {
     static const ParadigmCode code = ParadigmCode::EFFECTIVE;
@@ -152,6 +152,13 @@ struct EffectiveLower {
     static const ParadigmCode code = ParadigmCode::EFFECTIVE_LOWER;
     EffectiveLower() { } EffectiveLower(Exact) { } EffectiveLower(Effective) { }
     typedef ValidatedLower NextWeakerParadigm;
+};
+
+//! \ingroup ParadigmSubModule
+//! \brief A tag meaning that the object represents an upper bound for a positive quantity.
+struct PositiveValidatedUpper {
+    static const ParadigmCode code = ParadigmCode::ERROR;
+    PositiveValidatedUpper() { }
 };
 
 //! \ingroup ParadigmSubModule

@@ -39,6 +39,8 @@
 
 #include "float.h"
 
+#include "number_wrapper.h"
+
 namespace Ariadne {
 
 typedef Real::Interface RealInterface;
@@ -76,7 +78,7 @@ template<class X> struct RealConstant : RealInterface, BoundedFloat64 {
 
 template<> struct RealConstant<Integer> : RealInterface, BoundedFloat64 {
     typedef Integer X;
-     X _c;
+    X _c;
   public:
     RealConstant(X const& x) : BoundedFloat64(x), _c(x) { }
     virtual BoundedFloat64 _value() const { return static_cast<BoundedFloat64 const&>(*this); }
@@ -274,6 +276,10 @@ UpperFloatMP UpperReal::operator() (PrecisionMP pr) const {
     return this->_ptr->_evaluate(pr);
 }
 
+Real::operator Number<Effective> () const {
+    ARIADNE_NOT_IMPLEMENTED;
+    //Number<Effective>(new NumberWrapper<Real>(*this));
+}
 
 } // namespace Ariadne
 

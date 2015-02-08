@@ -90,20 +90,19 @@ template<class X> struct DeclareNumericOperators {
 //! \note In the future, the construction of a \c %Float64 from a string literal may be supported.
 //! \sa ExactInterval, Real, ExactFloat64
 template<class PR> class Float<Approximate,PR> {
-    typedef Approximate P; typedef RawFloatType<PR> FLT;
+    typedef Approximate P; typedef RawFloat<PR> FLT;
   public:
     typedef Approximate Paradigm;
-    typedef ApproximateFloat64 NumericType;
+    typedef Float<Approximate,PR> NumericType;
+    typedef FLT RawFloatType;
     typedef PR PrecisionType;
   public:
-    Float<Approximate,PR>() : a() { }
-    template<class N, EnableIf<IsIntegral<N>> =dummy> Float<Approximate,PR>(N n) : a(n) { }
-    template<class D, EnableIf<IsFloatingPoint<D>> =dummy> Float<Approximate,PR>(D x) : a(x) { }
-    explicit Float<Approximate,PR>(Float64 const& x) : a(x) { }
+    Float<Approximate,PR>() : _a(0.0) { }
+    explicit Float<Approximate,PR>(RawFloatType const& a) : _a(a) { }
+    template<class N, EnableIf<IsIntegral<N>> =dummy> Float<Approximate,PR>(N n) : _a(n) { }
+    template<class D, EnableIf<IsFloatingPoint<D>> =dummy> Float<Approximate,PR>(D x) : _a(x) { }
     explicit Float<Approximate,PR>(const Dyadic& d);
     explicit Float<Approximate,PR>(const Decimal& d);
-
-    explicit Float<Approximate,PR>(const Integer& z);
     explicit Float<Approximate,PR>(const Rational& q);
     explicit Float<Approximate,PR>(const Real& r);
     explicit Float<Approximate,PR>(const Number<Approximate>& x);
@@ -111,38 +110,42 @@ template<class PR> class Float<Approximate,PR> {
     operator Number<Approximate> () const;
 
     Float<Approximate,PR>(Float<Exact,PR> const& x);
+    Float<Approximate,PR>(Float<Metric,PR> const& x);
     Float<Approximate,PR>(Float<Validated,PR> const& x);
     Float<Approximate,PR>(Float<Upper,PR> const& x);
     Float<Approximate,PR>(Float<Lower,PR> const& x);
 
-    PrecisionType precision() const { return a.precision(); }
-    explicit operator Float64 () const { return this->a; }
-    Float64 const& raw() const { return this->a; }
-    Float64& raw() { return this->a; }
-    double get_d() const { return this->a.get_d(); }
+    PrecisionType precision() const { return _a.precision(); }
+    explicit operator RawFloatType () const { return this->_a; }
+    RawFloatType const& raw() const { return this->_a; }
+    RawFloatType& raw() { return this->_a; }
+    double get_d() const { return this->_a.get_d(); }
   public:
     static Void set_output_precision(Nat p) { output_precision=p; }
-    Float<Approximate,PR> pm(Float<Approximate,PR> e) { return *this; }
+    Float<Approximate,PR> pm(Float<Approximate,PR> _e) { return *this; }
   private: public:
     static Nat output_precision;
-    Float64 a;
+    RawFloatType _a;
 };
 
 
 //! \ingroup NumericModule
 //! \brief Floating-point lower bounds for real numbers.
 template<class PR> class Float<Lower,PR> {
-    typedef Lower P; typedef RawFloatType<PR> FLT;
+    typedef Lower P; typedef RawFloat<PR> FLT;
   public:
     typedef Lower Paradigm;
     typedef Float<Lower,PR> NumericType;
+    typedef FLT RawFloatType;
     typedef PR PrecisionType;
   public:
-    Float<Lower,PR>() : l(0.0) { }
-    template<class N, EnableIf<IsIntegral<N>> = dummy> Float<Lower,PR>(N n) : l(n) { }
-    template<class X, EnableIf<IsFloatingPoint<X>> = dummy> explicit Float<Lower,PR>(X x) : l(x) { }
-    explicit Float<Lower,PR>(Float64 const& x) : l(x) { }
+    Float<Lower,PR>() : _l(0.0) { }
+    explicit Float<Lower,PR>(RawFloatType const& l) : _l(l) { }
 
+    template<class N, EnableIf<IsIntegral<N>> = dummy> Float<Lower,PR>(N n) : _l(n) { }
+    template<class X, EnableIf<IsFloatingPoint<X>> = dummy> explicit Float<Lower,PR>(X x) : _l(x) { }
+
+    Float<Lower,PR>(Float<Metric,PR> const& x);
     Float<Lower,PR>(Float<Validated,PR> const& x);
     Float<Lower,PR>(Float<Exact,PR> const& x);
 
@@ -154,32 +157,35 @@ template<class PR> class Float<Lower,PR> {
     explicit Float<Lower,PR>(const Rational& x);
     explicit Float<Lower,PR>(const Integer& x);
 
-    PrecisionType precision() const { return l.precision(); }
-    Float64 const& raw() const { return l; }
-    Float64& raw() { return l; }
-    double get_d() const { return l.get_d(); }
+    PrecisionType precision() const { return _l.precision(); }
+    RawFloatType const& raw() const { return _l; }
+    RawFloatType& raw() { return _l; }
+    double get_d() const { return _l.get_d(); }
   private: public:
     static Nat output_precision;
-    Float64 l;
+    RawFloatType _l;
 };
 
 
 //! \ingroup NumericModule
 //! \brief Floating-point upper bounds for real numbers.
 template<class PR> class Float<Upper,PR> {
-    typedef Upper P; typedef RawFloatType<PR> FLT;
+    typedef Upper P; typedef RawFloat<PR> FLT;
   public:
     typedef Upper Paradigm;
     typedef Float<Upper,PR> NumericType;
+    typedef FLT RawFloatType;
     typedef PR PrecisionType;
   public:
-    Float<Upper,PR>() : u(0.0) { }
-    template<class N, EnableIf<IsIntegral<N>> = dummy> Float<Upper,PR>(N n) : u(n) { }
-    template<class X, EnableIf<IsFloatingPoint<X>> = dummy> explicit Float<Upper,PR>(X x) : u(x) { }
+    Float<Upper,PR>() : _u(0.0) { }
+    explicit Float<Upper,PR>(RawFloatType const& u) : _u(u) { }
 
-    explicit Float<Upper,PR>(Float64 const& x) : u(x) { }
+    template<class N, EnableIf<IsIntegral<N>> = dummy> Float<Upper,PR>(N n) : _u(n) { }
+    template<class X, EnableIf<IsFloatingPoint<X>> = dummy> explicit Float<Upper,PR>(X x) : _u(x) { }
+
 
     Float<Upper,PR>(Float<Validated,PR> const& x);
+    Float<Upper,PR>(Float<Metric,PR> const& x);
     Float<Upper,PR>(Float<Exact,PR> const& x);
 
     explicit Float<Upper,PR>(const Real& x);
@@ -190,13 +196,13 @@ template<class PR> class Float<Upper,PR> {
     Float<Upper,PR>(const Number<Upper>& x, PR pr);
     operator Number<Upper> () const;
 
-    PrecisionType precision() const { return u.precision(); }
-    Float64 const& raw() const { return u; }
-    Float64& raw() { return u; }
-    double get_d() const { return u.get_d(); }
+    PrecisionType precision() const { return _u.precision(); }
+    RawFloatType const& raw() const { return _u; }
+    RawFloatType& raw() { return _u; }
+    double get_d() const { return _u.get_d(); }
   private: public:
     static Nat output_precision;
-    Float64 u;
+    RawFloatType _u;
 };
 
 
@@ -204,27 +210,26 @@ template<class PR> class Float<Upper,PR> {
 //! \ingroup NumericModule
 //! \brief Validated bounds on a number with floating-point endpoints supporting outwardly-rounded arithmetic.
 //! \details
-//! Note that <c>%ValidatedFloat64(3.3)</c> yields the singleton interval \f$[3.2999999999999998224,3.2999999999999998224]\f$ (the constant is first interpreted by the C++ compiler to give a C++ \c double, whereas <c>%ValidatedFloat64("3.3")</c> yields the interval \f$[3.2999999999999998224,3.3000000000000002665]\f$ enclosing \f$3.3\f$.
+//! Note that direct construction from a floating-point number is prohibited, since <c>%ValidatedFloat64(3.3)</c> would the singleton interval \f$[3.2999999999999998224,3.2999999999999998224]\f$ (the constant is first interpreted by the C++ compiler to give a C++ \c double, whereas <c>%ValidatedFloat64(3.3_decimal)</c> yields the interval \f$[3.2999999999999998224,3.3000000000000002665]\f$ enclosing \f$3.3\f$.
 //!
-//! Comparison tests on \c ValidatedFloat64 use the idea that an interval represents a single number with an unknown value.
+//! Comparison tests on \c ValidatedFloat use the idea that an interval represents a single number with an unknown value.
 //! Hence the result is of type \c Tribool, which can take values { \c True, \c False, \c Indeterminate }.
-//! Hence a test \f$[l_1,u_1]\leq [l_2,u_2]\f$ returns \c True if \f$u_1\leq u_2\f$, since in this case \f$x_1\leq x_2\f$ whenever \f$x_1\in[l_1,u_2]\f$ and \f$x_2\in[l_2,u_2]\f$, \c False if \f$l_1>u_2\f$, since in this case we know \f$x_1>x_2\f$, and \c Indeterminate otherwise, since in this case we can find \f$x_1,x_2\f$ making the result either true or false.
-//! In the case of equality, the comparison \f$[l_1,u_1]\f$==\f$[l_2,u_2]\f$ only returns \c True if both intervals are singletons, since otherwise we can find values making the result either true of false.
+//! Hence a test \f$[\underline{x},\overline{x}]\leq [\underline{y},\overline{y}]\f$ returns \c True if \f$\overline{x}\leq \underline{y}\f$, since in this case \f$x\leq x\f$ whenever \f$x_1\in[\underline{x},\overline{x}]\f$ and \f$y\in[\underline{y},\overline{y}]\f$, \c False if \f$\underline{x}>\overline{y}\f$, since in this case we know \f$x>y\f$, and \c Indeterminate otherwise, since in this case we can find \f$x,y\f$ making the result either true or false.
+//! In the case of equality, the comparison \f$[\underline{x},\overline{x}]\f$==\f$[\underline{y},\overline{y}]\f$ only returns \c True if both intervals are singletons, since otherwise we can find values making the result either true of false.
+//! To test equality of representation, use \c same(x,y)
 //!
-//! To obtain the lower and upper bounds of an interval, use \c ivl.lower() and \c ivl.upper().
-//! To obtain the midpoint and radius, use \c ivl.midpoint() and \c ivl.radius().
-//! Alternatives \c midpoint(ivl) and \c radius(ivl) are also provided.
-//! Note that \c midpoint and \c radius return approximations to the true midpoint and radius of the interval. If \f$m\f$ and \f$r\f$ are the returned midpoint and radius of the interval \f$[l,u]\f$, the using exact arithmetic, we guarentee \f$m-r\leq l\f$ and \f$m+r\geq u\f$
+//! To obtain the lower and upper bounds of the possible values, use \c x.lower() and \c x.upper().
+//! To obtain a best estimate of the value, use \c x.value(), which has an error at most \a x.error().
+//! If \f$v\f$ and \f$e\f$ are the returned value and error for the bounds \f$[l,u]\f$, then it is guaranteed that \f$v-e\leq l\f$ and \f$v+e\geq u\f$ in exact arithmetic.
 //!
-//! To test if an interval contains a point or another interval, use \c encloses(ValidatedFloat64,Float64) or \c encloses(ValidatedFloat64,ValidatedFloat64).
-//! The test \c refines(ValidatedFloat64,ValidatedFloat64) can also be used.
-//! \sa Float64
+//! To test if the bounds contain a number , use \c models(ValidatedFloat,ExactFloat), and to test if bounds are inconsistent use \c inconsistent(x,y), and to test if \c x provides a better approximation, use \c refines(x,y).
+//! \sa Float64, FloatMP
 //!
 //! \par Python interface
 //!
-//! In the Python interface, %Ariadne intervals can be constructed from Python literals of the form \c {a:b} or (deprecated) \c [a,b] .
+//! In the Python interface, %Ariadne validated bounds can be constructed from Python literals of the form \c {a:b} or (deprecated) \c [a,b] .
 //! The former is preferred, as it cannot be confused with literals for other classes such as Vector and Array types.
-//! Automatic conversion is used to convert ValidatedFloat64 literals of the form \c {a,b} to an ValidatedFloat64 in functions.
+//! Automatic conversion is used to convert ValidatedFloat literals of the form \c {a,b} to an ValidatedFloat in functions.
 //!
 //! Care must be taken when defining intervals using floating-point coefficients, since values are first converted to the nearest
 //! representable value by the Python interpreter. <br><br>
@@ -234,18 +239,23 @@ template<class PR> class Float<Upper,PR> {
 //!   ValidatedFloat64([2.5,4.25]) # Alternative syntax for creating the interval [2.5, 4.25]
 //! \endcode
 template<class PR> class Float<Validated,PR> {
-    typedef Validated P; typedef RawFloatType<PR> FLT;
+    typedef Validated P; typedef RawFloat<PR> FLT;
   public:
     typedef Validated Paradigm;
     typedef Float<Validated,PR> NumericType;
+    typedef FLT RawFloatType;
     typedef PR PrecisionType;
   public:
-    Float<Validated,PR>() : l(0.0), u(0.0) { }
-    template<class N, EnableIf<IsIntegral<N>> = dummy> Float<Validated,PR>(N n) : l(n), u(n) { }
-    template<class X, EnableIf<IsFloatingPoint<X>> = dummy> explicit Float<Validated,PR>(X x) : l(x), u(x) { }
-    explicit Float<Validated,PR>(Float64 const& x) : l(x), u(x) { }
+    Float<Validated,PR>() : _l(0.0), _u(0.0) { }
+    explicit Float<Validated,PR>(RawFloatType const& v) : _l(v), _u(v) { }
+    Float<Validated,PR>(RawFloatType const& l, RawFloatType const& u) : _l(l), _u(u) { }
+    Float<Validated,PR>(Float<Lower,PR> const& lower, Float<Upper,PR> const& upper) : _l(lower.raw()), _u(upper.raw()) { }
+
+    template<class N, EnableIf<IsIntegral<N>> = dummy> Float<Validated,PR>(N n) : _l(n), _u(n) { }
+    template<class X, EnableIf<IsFloatingPoint<X>> = dummy> explicit Float<Validated,PR>(X x) : _l(x), _u(x) { }
 
     Float<Validated,PR>(Float<Exact,PR> const& x);
+    Float<Validated,PR>(Float<Metric,PR> const& x);
 
     explicit Float<Validated,PR>(const Dyadic& x);
     explicit Float<Validated,PR>(const Decimal& x);
@@ -257,74 +267,112 @@ template<class PR> class Float<Validated,PR> {
     operator Number<Validated> () const;
 
     template<class N1, class N2, EnableIf<And<IsIntegral<N1>,IsIntegral<N2>>> =dummy>
-        Float<Validated,PR>(N1 lower, N2 upper) : l(lower), u(upper) { }
-    Float<Validated,PR>(Float64 const& lower, Float64 const& upper) : l(lower), u(upper) { }
-    Float<Validated,PR>(Float<Lower,PR> const& lower, Float<Upper,PR> const& upper) : l(lower.raw()), u(upper.raw()) { }
-    Float<Validated,PR>(const Rational& lower, const Rational& upper);
+        Float<Validated,PR>(N1 lower, N2 upper) : _l(lower), _u(upper) { }
 
-    Float64 const& lower_raw() const { return l; }
-    Float64 const& upper_raw() const { return u; }
-    double get_d() const { return (l.get_d()+u.get_d())/2; }
+    Float<Lower,PR> const lower() const { return Float<Lower,PR>(lower_raw()); }
+    Float<Upper,PR> const upper() const { return Float<Upper,PR>(upper_raw()); }
+    Float<Exact,PR> const value() const;
+    Float<Error,PR> const error() const;
 
-    Float<Lower,PR> lower() const { return Float<Lower,PR>(l); }
-    Float<Upper,PR> upper() const { return Float<Upper,PR>(u); }
-    const Float<Exact,PR> value() const;
-    const Float<PositiveUpper,PR> error() const;
+    RawFloatType const& lower_raw() const { return _l; }
+    RawFloatType const& upper_raw() const { return _u; }
+    RawFloatType const value_raw() const { return half(add_near(_l,_u)); }
+    RawFloatType const error_raw() const { RawFloatType v=value_raw(); return max(sub_up(_u,v),sub_up(v,_l)); }
+    double get_d() const { return value_raw().get_d(); }
 
-    PrecisionType precision() const { ARIADNE_DEBUG_ASSERT(l.precision()==u.precision()); return u.precision(); }
+    PrecisionType precision() const { ARIADNE_DEBUG_ASSERT(_l.precision()==_u.precision()); return _u.precision(); }
 
     // DEPRECATED
-    explicit operator Float64 () const { return (l+u)/2; }
+    explicit operator RawFloatType () const { return value_raw(); }
     friend Float<Exact,PR> midpoint(Float<Validated,PR> const& x);
   public:
     static Nat output_precision;
     static Void set_output_precision(Nat p) { output_precision=p; }
   private: public:
-    Float64 l, u;
+    RawFloatType _l, _u;
 };
 
 
+template<class PR> class Float<Metric,PR> {
+    typedef Metric P; typedef RawFloat<PR> FLT;
+  public:
+    typedef Metric Paradigm;
+    typedef Float<Metric,PR> NumericType;
+    typedef FLT RawFloatType;
+    typedef PR PrecisionType;
+  public:
+    Float<Metric,PR>() : _v(0.0), _e(0.0) { }
+    explicit Float<Metric,PR>(RawFloatType const& v) : _v(v), _e(0.0) { }
+    Float<Metric,PR>(RawFloatType const& v, RawFloatType const& e) : _v(v), _e(e) { }
+    Float<Metric,PR>(Float<Exact,PR> const& value, Float<Error,PR> const& error) : _v(value.raw()), _e(error.raw()) { }
+    Float<Metric,PR>(Float<Lower,PR> const& lower, Float<Upper,PR> const& upper) =  delete;
+
+    Float<Metric,PR>(Float<Exact,PR> const& x);
+
+    explicit Float<Metric,PR>(const Integer& z);
+    explicit Float<Metric,PR>(const Rational& q);
+    explicit Float<Metric,PR>(const Real& x);
+    explicit Float<Metric,PR>(const Number<Validated>& x);
+    Float<Metric,PR>(const Number<Validated>& x, PR pr);
+    operator Number<Metric> () const;
+
+    Float<Lower,PR> const lower() const { return Float<Lower,PR>(lower_raw()); }
+    Float<Upper,PR> const upper() const { return Float<Upper,PR>(upper_raw()); }
+    Float<Exact,PR> const value() const;
+    Float<Error,PR> const error() const;
+
+    RawFloatType const lower_raw() const { return sub_down(_v,_e); }
+    RawFloatType const upper_raw() const { return add_up(_v,_e); }
+    RawFloatType const& value_raw() const { return _v; }
+    RawFloatType const& error_raw() const { return _e; }
+    double get_d() const { return _v.get_d(); }
+
+    PrecisionType precision() const { return _v.precision(); }
+  private: public:
+    RawFloatType _v, _e;
+};
 
 //! \ingroup NumericModule
 //! \related Float64, ValidatedFloat64
 //! \brief A floating-point number, which is taken to represent the \em exact value of a real quantity.
 template<class PR> class Float<Exact,PR> {
-    typedef Exact P; typedef RawFloatType<PR> FLT;
+    typedef Exact P; typedef RawFloat<PR> FLT;
   public:
     typedef Exact Paradigm;
     typedef Float<Exact,PR> NumericType;
+    typedef FLT RawFloatType;
     typedef PR PrecisionType;
   public:
-    Float<Exact,PR>() : v(0) { }
-    template<class N, EnableIf<IsIntegral<N>> =dummy> Float<Exact,PR>(N n) : v(n) { }
-    template<class X, EnableIf<IsFloatingPoint<X>> =dummy> explicit Float<Exact,PR>(X x) : v(x) { }
+    Float<Exact,PR>() : _v(0.0) { }
+    explicit Float<Exact,PR>(RawFloatType const& v) : _v(v) { }
+    template<class N, EnableIf<IsIntegral<N>> =dummy> Float<Exact,PR>(N n) : _v(n) { }
+    template<class X, EnableIf<IsFloatingPoint<X>> =dummy> explicit Float<Exact,PR>(X x) : _v(x) { }
 
-    explicit Float<Exact,PR>(Float64 const& x) : v(x) { }
 
     explicit Float<Exact,PR>(const Integer& z);
     explicit Float<Exact,PR>(const Integer& z, PR pr);
     explicit operator Rational () const;
     operator Number<Exact> () const;
-    explicit operator Float64 () const { return v; }
+    explicit operator RawFloatType () const { return _v; }
 
-    PrecisionType precision() const { return v.precision(); }
-    Float64 const& raw() const { return v; }
-    Float64& raw() { return v; }
-    double get_d() const { return v.get_d(); }
+    PrecisionType precision() const { return _v.precision(); }
+    RawFloatType const& raw() const { return _v; }
+    RawFloatType& raw() { return _v; }
+    double get_d() const { return _v.get_d(); }
 
-    Float<Validated,PR> pm(Float<Error,PR> e) const;
+    Float<Validated,PR> pm(Float<Error,PR> _e) const;
   public:
     static Nat output_precision;
     static Void set_output_precision(Nat p) { output_precision=p; }
   private: public:
-    Float64 v;
+    RawFloatType _v;
 };
 
 template<class PR> inline const Float<Exact,PR> Float<Validated,PR>::value() const {
-    return Float<Exact,PR>(med_near(this->l,this->u)); }
+    return Float<Exact,PR>(med_near(this->_l,this->_u)); }
 
 template<class PR> inline const Float<Error,PR> Float<Validated,PR>::error() const {
-    Float64 v=med_near(this->l,this->u); return Float<Error,PR>(max(sub_up(this->u,v),sub_up(v,this->l))); }
+    RawFloat<PR> _v=med_near(this->_l,this->_u); return Float<Error,PR>(max(sub_up(this->_u,_v),sub_up(_v,this->_l))); }
 
 
 template<class PR> class Float<PositiveExact,PR> : public Float<Exact,PR> {
@@ -332,14 +380,14 @@ template<class PR> class Float<PositiveExact,PR> : public Float<Exact,PR> {
     Float<PositiveExact,PR>() : Float<Exact,PR>() { }
     template<class M, EnableIf<IsIntegral<M>>, EnableIf<IsUnsigned<M>> =dummy>
         Float<PositiveExact,PR>(M m) : Float<Exact,PR>(m) { }
-    explicit Float<PositiveExact,PR>(RawFloatType<PR> const& x) : Float<Exact,PR>(x) { }
+    explicit Float<PositiveExact,PR>(RawFloat<PR> const& x) : Float<Exact,PR>(x) { }
     explicit Float<PositiveExact,PR>(Float<Exact,PR> const& x) : Float<Exact,PR>(x) { }
 };
 
 template<class PR> class Float<PositiveUpper,PR> : public Float<Upper,PR> {
   public:
     Float<PositiveUpper,PR>() : Float<Upper,PR>() { }
-    explicit Float<PositiveUpper,PR>(RawFloatType<PR> const& x) : Float<Upper,PR>(x) { ARIADNE_PRECONDITION(x>=0); }
+    explicit Float<PositiveUpper,PR>(RawFloat<PR> const& x) : Float<Upper,PR>(x) { ARIADNE_PRECONDITION(x>=0); }
     explicit Float<PositiveUpper,PR>(Float<Upper,PR> const& x) : Float<Upper,PR>(x) { }
     template<class M, EnableIf<IsUnsigned<M>> =dummy> Float<PositiveUpper,PR>(M m) : Float<Upper,PR>(m) { }
     template<class F, EnableIf<IsSame<F,Float<Upper,PR>>> =dummy>
@@ -352,7 +400,7 @@ template<class PR> class Float<PositiveLower,PR> : public Float<Lower,PR> {
     Float<PositiveLower,PR>() : Float<Lower,PR>() { }
     template<class M, EnableIf<IsSigned<M>> =dummy>
         Float<PositiveLower,PR>(M m) : Float<Lower,PR>(m) { }
-    explicit Float<PositiveLower,PR>(RawFloatType<PR> const& x) : Float<Lower,PR>(x) { }
+    explicit Float<PositiveLower,PR>(RawFloat<PR> const& x) : Float<Lower,PR>(x) { }
     explicit Float<PositiveLower,PR>(Float<Lower,PR> const& x) : Float<Lower,PR>(x) { }
     Float<PositiveLower,PR>(Float<PositiveExact,PR> const& x) : Float<Lower,PR>(x) { }
 };
@@ -362,7 +410,7 @@ template<class PR> class Float<PositiveApproximate,PR> : public Float<Approximat
     Float<PositiveApproximate,PR>() : Float<Approximate,PR>() { }
     template<class M, EnableIf<IsSigned<M>> =dummy>
         Float<PositiveApproximate,PR>(M m) : Float<Approximate,PR>(m) { }
-    explicit Float<PositiveApproximate,PR>(RawFloatType<PR> const& x) : Float<Approximate,PR>(x) { }
+    explicit Float<PositiveApproximate,PR>(RawFloat<PR> const& x) : Float<Approximate,PR>(x) { }
     explicit Float<PositiveApproximate,PR>(Float<Approximate,PR> const& x) : Float<Approximate,PR>(x) { }
     Float<PositiveApproximate,PR>(Float<PositiveLower,PR> const& x) : Float<Approximate,PR>(x) { }
     Float<PositiveApproximate,PR>(Float<PositiveUpper,PR> const& x) : Float<Approximate,PR>(x) { }
@@ -375,44 +423,44 @@ template<class PR> inline Float<PositiveUpper,PR> cast_positive(Float<Upper,PR> 
 template<class PR> inline Float<PositiveExact,PR> cast_positive(Float<Exact,PR> const& x) {
     return Float<PositiveExact,PR>(x); }
 
-template<class R, class A> R integer_cast(const A& a);
+template<class R, class A> R integer_cast(const A& _a);
 
 template<> Float<Validated,Precision64>::Float(Real const& x);
 template<> Float<Upper,Precision64>::Float(Real const& x);
 template<> Float<Lower,Precision64>::Float(Real const& x);
 template<> Float<Approximate,Precision64>::Float(Real const& x);
 
-inline ApproximateFloat64 floor(ApproximateFloat64 const& x) { return ApproximateFloat64(floor(x.a)); }
-inline ApproximateFloat64 ceil(ApproximateFloat64 const& x) { return ApproximateFloat64(ceil(x.a)); }
+inline ApproximateFloat64 floor(ApproximateFloat64 const& x) { return ApproximateFloat64(floor(x._a)); }
+inline ApproximateFloat64 ceil(ApproximateFloat64 const& x) { return ApproximateFloat64(ceil(x._a)); }
 
-inline ApproximateFloat64 abs(ApproximateFloat64 const& x) { return ApproximateFloat64(abs_exact(x.a)); }
-inline ApproximateFloat64 max(ApproximateFloat64 const& x, ApproximateFloat64 y) { return ApproximateFloat64(max_exact(x.a,y.a)); }
-inline ApproximateFloat64 min(ApproximateFloat64 const& x, ApproximateFloat64 y) { return ApproximateFloat64(min_exact(x.a,y.a)); }
+inline ApproximateFloat64 abs(ApproximateFloat64 const& x) { return ApproximateFloat64(abs_exact(x._a)); }
+inline ApproximateFloat64 max(ApproximateFloat64 const& x, ApproximateFloat64 y) { return ApproximateFloat64(max_exact(x._a,y._a)); }
+inline ApproximateFloat64 min(ApproximateFloat64 const& x, ApproximateFloat64 y) { return ApproximateFloat64(min_exact(x._a,y._a)); }
 
-inline ApproximateFloat64 nul(ApproximateFloat64 const& x) { return ApproximateFloat64(nul_exact(x.a)); }
-inline ApproximateFloat64 pos(ApproximateFloat64 const& x) { return ApproximateFloat64(pos_exact(x.a)); }
-inline ApproximateFloat64 neg(ApproximateFloat64 const& x) { return ApproximateFloat64(neg_exact(x.a)); }
-inline ApproximateFloat64 half(ApproximateFloat64 const& x) { return ApproximateFloat64(half_exact(x.a)); }
-inline ApproximateFloat64 sqr(ApproximateFloat64 const& x) { return ApproximateFloat64(mul_near(x.a,x.a)); }
-inline ApproximateFloat64 rec(ApproximateFloat64 const& x) { return ApproximateFloat64(div_near(1.0,x.a)); }
+inline ApproximateFloat64 nul(ApproximateFloat64 const& x) { return ApproximateFloat64(nul_exact(x._a)); }
+inline ApproximateFloat64 pos(ApproximateFloat64 const& x) { return ApproximateFloat64(pos_exact(x._a)); }
+inline ApproximateFloat64 neg(ApproximateFloat64 const& x) { return ApproximateFloat64(neg_exact(x._a)); }
+inline ApproximateFloat64 half(ApproximateFloat64 const& x) { return ApproximateFloat64(half_exact(x._a)); }
+inline ApproximateFloat64 sqr(ApproximateFloat64 const& x) { return ApproximateFloat64(mul_near(x._a,x._a)); }
+inline ApproximateFloat64 rec(ApproximateFloat64 const& x) { return ApproximateFloat64(div_near(1.0,x._a)); }
 
-inline ApproximateFloat64 add(ApproximateFloat64 const& x1, ApproximateFloat64 const& x2) { return ApproximateFloat64(add_near(x1.a,x2.a)); }
-inline ApproximateFloat64 sub(ApproximateFloat64 const& x1, ApproximateFloat64 const& x2) { return ApproximateFloat64(sub_near(x1.a,x2.a)); }
-inline ApproximateFloat64 mul(ApproximateFloat64 const& x1, ApproximateFloat64 const& x2) { return ApproximateFloat64(mul_near(x1.a,x2.a)); }
-inline ApproximateFloat64 div(ApproximateFloat64 const& x1, ApproximateFloat64 const& x2) { return ApproximateFloat64(div_near(x1.a,x2.a)); }
+inline ApproximateFloat64 add(ApproximateFloat64 const& x1, ApproximateFloat64 const& x2) { return ApproximateFloat64(add_near(x1._a,x2._a)); }
+inline ApproximateFloat64 sub(ApproximateFloat64 const& x1, ApproximateFloat64 const& x2) { return ApproximateFloat64(sub_near(x1._a,x2._a)); }
+inline ApproximateFloat64 mul(ApproximateFloat64 const& x1, ApproximateFloat64 const& x2) { return ApproximateFloat64(mul_near(x1._a,x2._a)); }
+inline ApproximateFloat64 div(ApproximateFloat64 const& x1, ApproximateFloat64 const& x2) { return ApproximateFloat64(div_near(x1._a,x2._a)); }
 
-inline ApproximateFloat64 pow(ApproximateFloat64 const& x, Nat m) { return ApproximateFloat64(pow_approx(x.a,m)); }
-inline ApproximateFloat64 pow(ApproximateFloat64 const& x, Int n) { return ApproximateFloat64(pow_approx(x.a,n)); }
+inline ApproximateFloat64 pow(ApproximateFloat64 const& x, Nat m) { return ApproximateFloat64(pow_approx(x._a,m)); }
+inline ApproximateFloat64 pow(ApproximateFloat64 const& x, Int n) { return ApproximateFloat64(pow_approx(x._a,n)); }
 
-inline ApproximateFloat64 sqrt(ApproximateFloat64 const& x) { return ApproximateFloat64(sqrt_approx(x.a)); }
-inline ApproximateFloat64 exp(ApproximateFloat64 const& x) { return ApproximateFloat64(exp_approx(x.a)); }
-inline ApproximateFloat64 log(ApproximateFloat64 const& x) { return ApproximateFloat64(log_approx(x.a)); }
-inline ApproximateFloat64 sin(ApproximateFloat64 const& x) { return ApproximateFloat64(sin_approx(x.a)); }
-inline ApproximateFloat64 cos(ApproximateFloat64 const& x) { return ApproximateFloat64(cos_approx(x.a)); }
-inline ApproximateFloat64 tan(ApproximateFloat64 const& x) { return ApproximateFloat64(tan_approx(x.a)); }
-inline ApproximateFloat64 asin(ApproximateFloat64 const& x) { return ApproximateFloat64(asin_approx(x.a)); }
-inline ApproximateFloat64 acos(ApproximateFloat64 const& x) { return ApproximateFloat64(acos_approx(x.a)); }
-inline ApproximateFloat64 atan(ApproximateFloat64 const& x) { return ApproximateFloat64(atan_approx(x.a)); }
+inline ApproximateFloat64 sqrt(ApproximateFloat64 const& x) { return ApproximateFloat64(sqrt_approx(x._a)); }
+inline ApproximateFloat64 exp(ApproximateFloat64 const& x) { return ApproximateFloat64(exp_approx(x._a)); }
+inline ApproximateFloat64 log(ApproximateFloat64 const& x) { return ApproximateFloat64(log_approx(x._a)); }
+inline ApproximateFloat64 sin(ApproximateFloat64 const& x) { return ApproximateFloat64(sin_approx(x._a)); }
+inline ApproximateFloat64 cos(ApproximateFloat64 const& x) { return ApproximateFloat64(cos_approx(x._a)); }
+inline ApproximateFloat64 tan(ApproximateFloat64 const& x) { return ApproximateFloat64(tan_approx(x._a)); }
+inline ApproximateFloat64 asin(ApproximateFloat64 const& x) { return ApproximateFloat64(asin_approx(x._a)); }
+inline ApproximateFloat64 acos(ApproximateFloat64 const& x) { return ApproximateFloat64(acos_approx(x._a)); }
+inline ApproximateFloat64 atan(ApproximateFloat64 const& x) { return ApproximateFloat64(atan_approx(x._a)); }
 
 inline ApproximateFloat64 operator+(ApproximateFloat64 const& x) { return pos(x); }
 inline ApproximateFloat64 operator-(ApproximateFloat64 const& x) { return neg(x); }
@@ -420,35 +468,35 @@ inline ApproximateFloat64 operator+(ApproximateFloat64 const& x1, ApproximateFlo
 inline ApproximateFloat64 operator-(ApproximateFloat64 const& x1, ApproximateFloat64 const& x2) { return sub(x1,x2); }
 inline ApproximateFloat64 operator*(ApproximateFloat64 const& x1, ApproximateFloat64 const& x2) { return mul(x1,x2); }
 inline ApproximateFloat64 operator/(ApproximateFloat64 const& x1, ApproximateFloat64 const& x2) { return div(x1,x2); }
-inline ApproximateFloat64& operator+=(ApproximateFloat64& x1, ApproximateFloat64 const& x2) { x1.a+=x2.a; return x1; }
-inline ApproximateFloat64& operator-=(ApproximateFloat64& x1, ApproximateFloat64 const& x2) { x1.a-=x2.a; return x1; }
-inline ApproximateFloat64& operator*=(ApproximateFloat64& x1, ApproximateFloat64 const& x2) { x1.a*=x2.a; return x1; }
-inline ApproximateFloat64& operator/=(ApproximateFloat64& x1, ApproximateFloat64 const& x2) { x1.a/=x2.a; return x1; }
+inline ApproximateFloat64& operator+=(ApproximateFloat64& x1, ApproximateFloat64 const& x2) { x1._a+=x2._a; return x1; }
+inline ApproximateFloat64& operator-=(ApproximateFloat64& x1, ApproximateFloat64 const& x2) { x1._a-=x2._a; return x1; }
+inline ApproximateFloat64& operator*=(ApproximateFloat64& x1, ApproximateFloat64 const& x2) { x1._a*=x2._a; return x1; }
+inline ApproximateFloat64& operator/=(ApproximateFloat64& x1, ApproximateFloat64 const& x2) { x1._a/=x2._a; return x1; }
 
-inline Bool operator==(ApproximateFloat64 const& x1, ApproximateFloat64 const& x2) { return x1.a==x2.a; }
-inline Bool operator!=(ApproximateFloat64 const& x1, ApproximateFloat64 const& x2) { return x1.a!=x2.a; }
-inline Bool operator<=(ApproximateFloat64 const& x1, ApproximateFloat64 const& x2) { return x1.a<=x2.a; }
-inline Bool operator>=(ApproximateFloat64 const& x1, ApproximateFloat64 const& x2) { return x1.a>=x2.a; }
-inline Bool operator< (ApproximateFloat64 const& x1, ApproximateFloat64 const& x2) { return x1.a< x2.a; }
-inline Bool operator> (ApproximateFloat64 const& x1, ApproximateFloat64 const& x2) { return x1.a> x2.a; }
+inline Bool operator==(ApproximateFloat64 const& x1, ApproximateFloat64 const& x2) { return x1._a==x2._a; }
+inline Bool operator!=(ApproximateFloat64 const& x1, ApproximateFloat64 const& x2) { return x1._a!=x2._a; }
+inline Bool operator<=(ApproximateFloat64 const& x1, ApproximateFloat64 const& x2) { return x1._a<=x2._a; }
+inline Bool operator>=(ApproximateFloat64 const& x1, ApproximateFloat64 const& x2) { return x1._a>=x2._a; }
+inline Bool operator< (ApproximateFloat64 const& x1, ApproximateFloat64 const& x2) { return x1._a< x2._a; }
+inline Bool operator> (ApproximateFloat64 const& x1, ApproximateFloat64 const& x2) { return x1._a> x2._a; }
 
 OutputStream& operator<<(OutputStream& os, ApproximateFloat64 const& x);
 InputStream& operator>>(InputStream& is, ApproximateFloat64& x);
 
 
 
-inline LowerFloat64 max(LowerFloat64 const& x1, LowerFloat64 const& x2) { return LowerFloat64(max_exact(x1.l,x2.l)); }
-inline LowerFloat64 min(LowerFloat64 const& x1, LowerFloat64 const& x2) { return LowerFloat64(min_exact(x1.l,x2.l)); }
+inline LowerFloat64 max(LowerFloat64 const& x1, LowerFloat64 const& x2) { return LowerFloat64(max_exact(x1._l,x2._l)); }
+inline LowerFloat64 min(LowerFloat64 const& x1, LowerFloat64 const& x2) { return LowerFloat64(min_exact(x1._l,x2._l)); }
 
-inline LowerFloat64 nul(LowerFloat64 const& x) { return LowerFloat64(pos_exact(x.l)); }
-inline LowerFloat64 pos(LowerFloat64 const& x) { return LowerFloat64(pos_exact(x.l)); }
-inline LowerFloat64 neg(UpperFloat64 const& x) { return LowerFloat64(neg_exact(x.u)); }
-inline LowerFloat64 half(LowerFloat64 const& x) { return LowerFloat64(half_exact(x.l)); }
+inline LowerFloat64 nul(LowerFloat64 const& x) { return LowerFloat64(pos_exact(x._l)); }
+inline LowerFloat64 pos(LowerFloat64 const& x) { return LowerFloat64(pos_exact(x._l)); }
+inline LowerFloat64 neg(UpperFloat64 const& x) { return LowerFloat64(neg_exact(x._u)); }
+inline LowerFloat64 half(LowerFloat64 const& x) { return LowerFloat64(half_exact(x._l)); }
 LowerFloat64 sqr(LowerFloat64 const& x);
 LowerFloat64 rec(UpperFloat64 const& x);
 
-inline LowerFloat64 add(LowerFloat64 const& x1, LowerFloat64 const& x2) { return LowerFloat64(add_down(x1.l,x2.l)); }
-inline LowerFloat64 sub(LowerFloat64 const& x1, UpperFloat64 const& x2) { return LowerFloat64(sub_down(x1.l,x2.u)); }
+inline LowerFloat64 add(LowerFloat64 const& x1, LowerFloat64 const& x2) { return LowerFloat64(add_down(x1._l,x2._l)); }
+inline LowerFloat64 sub(LowerFloat64 const& x1, UpperFloat64 const& x2) { return LowerFloat64(sub_down(x1._l,x2._u)); }
 LowerFloat64 mul(LowerFloat64 const& x1, LowerFloat64 const& x2);
 LowerFloat64 div(LowerFloat64 const& x1, UpperFloat64 const& x2);
 LowerFloat64 pow(LowerFloat64 const& x, Nat m);
@@ -472,18 +520,18 @@ inline LowerFloat64& operator/=(LowerFloat64& x1, UpperFloat64 const& x2) { retu
 OutputStream& operator<<(OutputStream& os, LowerFloat64 const& x);
 InputStream& operator>>(InputStream& is, LowerFloat64& x);
 
-inline UpperFloat64 max(UpperFloat64 const& x1, UpperFloat64 const& x2) { return UpperFloat64(max_exact(x1.u,x2.u)); }
-inline UpperFloat64 min(UpperFloat64 const& x1, UpperFloat64 const& x2) { return UpperFloat64(min_exact(x1.u,x2.u)); }
+inline UpperFloat64 max(UpperFloat64 const& x1, UpperFloat64 const& x2) { return UpperFloat64(max_exact(x1._u,x2._u)); }
+inline UpperFloat64 min(UpperFloat64 const& x1, UpperFloat64 const& x2) { return UpperFloat64(min_exact(x1._u,x2._u)); }
 
-inline UpperFloat64 nul(UpperFloat64 const& x) { return UpperFloat64(pos_exact(x.u)); }
-inline UpperFloat64 pos(UpperFloat64 const& x) { return UpperFloat64(pos_exact(x.u)); }
-inline UpperFloat64 neg(LowerFloat64 const& x) { return UpperFloat64(neg_exact(x.l)); }
-inline UpperFloat64 half(UpperFloat64 const& x) { return UpperFloat64(half_exact(x.u)); }
+inline UpperFloat64 nul(UpperFloat64 const& x) { return UpperFloat64(pos_exact(x._u)); }
+inline UpperFloat64 pos(UpperFloat64 const& x) { return UpperFloat64(pos_exact(x._u)); }
+inline UpperFloat64 neg(LowerFloat64 const& x) { return UpperFloat64(neg_exact(x._l)); }
+inline UpperFloat64 half(UpperFloat64 const& x) { return UpperFloat64(half_exact(x._u)); }
 UpperFloat64 sqr(UpperFloat64 const& x);
 UpperFloat64 rec(LowerFloat64 const& x);
 
-inline UpperFloat64 add(UpperFloat64 const& x1, UpperFloat64 const& x2) { return UpperFloat64(add_up(x1.u,x2.u)); }
-inline UpperFloat64 sub(UpperFloat64 const& x1, LowerFloat64 const& x2) { return UpperFloat64(sub_up(x1.u,x2.l)); }
+inline UpperFloat64 add(UpperFloat64 const& x1, UpperFloat64 const& x2) { return UpperFloat64(add_up(x1._u,x2._u)); }
+inline UpperFloat64 sub(UpperFloat64 const& x1, LowerFloat64 const& x2) { return UpperFloat64(sub_up(x1._u,x2._l)); }
 UpperFloat64 mul(UpperFloat64 const& x1, UpperFloat64 const& x2);
 UpperFloat64 div(UpperFloat64 const& x1, LowerFloat64 const& x2);
 UpperFloat64 pow(UpperFloat64 const& x, Nat m);
@@ -559,14 +607,14 @@ extern const ExactFloat64 infty;
 inline ExactFloat64 operator"" _exact(long double lx) { double x=lx; assert(x==lx); return ExactFloat64(x); }
 inline TwoExp::operator ExactFloat64 () const { return ExactFloat64(this->get_d()); }
 
-inline ExactFloat64 max(ExactFloat64 const& x1,  ExactFloat64 const& x2) { return ExactFloat64(max(x1.v,x2.v)); }
-inline ExactFloat64 min(ExactFloat64 const& x1,  ExactFloat64 const& x2) { return ExactFloat64(min(x1.v,x2.v)); }
-inline ExactFloat64 abs(ExactFloat64 const& x) { return ExactFloat64(abs(x.v)); }
+inline ExactFloat64 max(ExactFloat64 const& x1,  ExactFloat64 const& x2) { return ExactFloat64(max(x1._v,x2._v)); }
+inline ExactFloat64 min(ExactFloat64 const& x1,  ExactFloat64 const& x2) { return ExactFloat64(min(x1._v,x2._v)); }
+inline ExactFloat64 abs(ExactFloat64 const& x) { return ExactFloat64(abs(x._v)); }
 
-inline ExactFloat64 nul(ExactFloat64 const& x) { return ExactFloat64(nul(x.v)); }
-inline ExactFloat64 pos(ExactFloat64 const& x) { return ExactFloat64(pos(x.v)); }
-inline ExactFloat64 neg(ExactFloat64 const& x) { return ExactFloat64(neg(x.v)); }
-inline ExactFloat64 half(ExactFloat64 const& x) { return ExactFloat64(half(x.v)); }
+inline ExactFloat64 nul(ExactFloat64 const& x) { return ExactFloat64(nul(x._v)); }
+inline ExactFloat64 pos(ExactFloat64 const& x) { return ExactFloat64(pos(x._v)); }
+inline ExactFloat64 neg(ExactFloat64 const& x) { return ExactFloat64(neg(x._v)); }
+inline ExactFloat64 half(ExactFloat64 const& x) { return ExactFloat64(half(x._v)); }
 
 inline ValidatedFloat64 sqr(ExactFloat64 const& x);
 inline ValidatedFloat64 rec(ExactFloat64 const& x);
@@ -691,8 +739,8 @@ inline PositiveApproximateFloat64 mag(ApproximateFloat64 const& x) {
     return PositiveApproximateFloat64(abs(x.raw())); }
 
 
-inline ValidatedFloat64 make_bounds(PositiveUpperFloat64 const& e) {
-    return ValidatedFloat64(-e.raw(),+e.raw());
+inline ValidatedFloat64 make_bounds(PositiveUpperFloat64 const& _e) {
+    return ValidatedFloat64(-_e.raw(),+_e.raw());
 }
 
 inline ExactFloat64 value(ValidatedFloat64 const& x) {
@@ -705,31 +753,31 @@ inline PositiveUpperFloat64 error(ValidatedFloat64 const& x) {
 
 
 
-template<class PR> inline Float<Approximate,PR>::Float(Float<Lower,PR> const& x) : a(x.raw()) {
+template<class PR> inline Float<Approximate,PR>::Float(Float<Lower,PR> const& x) : _a(x.raw()) {
 }
 
-template<class PR> inline Float<Approximate,PR>::Float(Float<Upper,PR> const& x) : a(x.raw()) {
+template<class PR> inline Float<Approximate,PR>::Float(Float<Upper,PR> const& x) : _a(x.raw()) {
 }
 
-template<class PR> inline Float<Approximate,PR>::Float(Float<Validated,PR> const& x) : a(half_exact(add_near(x.lower_raw(),x.upper_raw()))) {
+template<class PR> inline Float<Approximate,PR>::Float(Float<Validated,PR> const& x) : _a(half_exact(add_near(x.lower_raw(),x.upper_raw()))) {
 }
 
-template<class PR> inline Float<Approximate,PR>::Float(Float<Exact,PR> const& x) : a(x.raw()) {
+template<class PR> inline Float<Approximate,PR>::Float(Float<Exact,PR> const& x) : _a(x.raw()) {
 }
 
-template<class PR> inline Float<Lower,PR>::Float(Float<Validated,PR> const& x) : l(x.lower_raw()) {
+template<class PR> inline Float<Lower,PR>::Float(Float<Validated,PR> const& x) : _l(x.lower_raw()) {
 }
 
-template<class PR> inline Float<Lower,PR>::Float(Float<Exact,PR> const& x) : l(x.raw()) {
+template<class PR> inline Float<Lower,PR>::Float(Float<Exact,PR> const& x) : _l(x.raw()) {
 }
 
-template<class PR> inline Float<Upper,PR>::Float(Float<Validated,PR> const& x) : u(x.upper_raw()) {
+template<class PR> inline Float<Upper,PR>::Float(Float<Validated,PR> const& x) : _u(x.upper_raw()) {
 }
 
-template<class PR> inline Float<Upper,PR>::Float(Float<Exact,PR> const& x) : u(x.raw()) {
+template<class PR> inline Float<Upper,PR>::Float(Float<Exact,PR> const& x) : _u(x.raw()) {
 }
 
-template<class PR> inline Float<Validated,PR>::Float(Float<Exact,PR> const& x) : l(x.raw()), u(x.raw()) {
+template<class PR> inline Float<Validated,PR>::Float(Float<Exact,PR> const& x) : _l(x.raw()), _u(x.raw()) {
 }
 
 
@@ -1001,23 +1049,23 @@ inline ValidatedFloat64 operator/(ExactFloat64 const& x1, ValidatedFloat64 const
 */
 
 // Standard equality operators
-//! \related ValidatedFloat64 \brief Tests if \a x1 provides tighter bounds than \a x2.
+//! \related ValidatedFloat64 \brief Tests if \_a x1 provides tighter bounds than \_a x2.
 inline Bool refines(ValidatedFloat64 const& x1, ValidatedFloat64 const& x2) {
     return x1.lower_raw()>=x2.lower_raw() && x1.upper_raw()<=x2.upper_raw(); }
 
-//! \related ValidatedFloat64 \brief The common refinement of \a x1 and \a x2.
+//! \related ValidatedFloat64 \brief The common refinement of \_a x1 and \_a x2.
 inline ValidatedFloat64 refinement(ValidatedFloat64 const& x1, ValidatedFloat64 const& x2) {
     return ValidatedFloat64(max(x1.lower_raw(),x2.lower_raw()),min(x1.upper_raw(),x2.upper_raw())); }
 
-//! \related ValidatedFloat64 \brief Tests if \a x1 and \a x2 are consistent with representing the same number.
+//! \related ValidatedFloat64 \brief Tests if \_a x1 and \_a x2 are consistent with representing the same number.
 inline Bool consistent(ValidatedFloat64 const& x1, ValidatedFloat64 const& x2) {
     return x1.lower_raw()<=x2.upper_raw() && x1.upper_raw()>=x2.lower_raw(); }
 
-//! \related ValidatedFloat64 \brief  Tests if \a x1 and \a x2 are inconsistent with representing the same number.
+//! \related ValidatedFloat64 \brief  Tests if \_a x1 and \_a x2 are inconsistent with representing the same number.
 inline Bool inconsistent(ValidatedFloat64 const& x1, ValidatedFloat64 const& x2) {
     return not consistent(x1,x2); }
 
-//! \related ValidatedFloat64 \brief  Tests if \a x1 is a model for the exact value \a x2. number.
+//! \related ValidatedFloat64 \brief  Tests if \_a x1 is a model for the exact value \_a x2. number.
 inline Bool models(ValidatedFloat64 const& x1, ExactFloat64 const& x2) {
     return x1.lower_raw()<=x2.raw() && x1.upper_raw()>=x2.raw(); }
 
@@ -1067,8 +1115,8 @@ template<class N, EnableIf<IsIntegral<N>> =dummy> inline Tribool operator< (Vali
 template<class N, EnableIf<IsIntegral<N>> =dummy> inline Tribool operator> (ValidatedFloat64 const& x1, N n2) { return x1> ValidatedFloat64(n2); }
 
 #ifdef ARIADNE_ENABLE_SERIALIZATION
-  template<class A> Void serialize(A& a, ValidatedFloat64& ivl, const Nat version) {
-    a & ivl.lower_raw() & ivl.upper_raw(); }
+  template<class A> Void serialize(A& _a, ValidatedFloat64& ivl, const Nat version) {
+    _a & ivl.lower_raw() & ivl.upper_raw(); }
 #endif
 
 OutputStream& operator<<(OutputStream&, ValidatedFloat64 const&);
@@ -1092,6 +1140,7 @@ template<class PR> inline  Float<Validated,PR> make_float(Number<Validated> cons
 template<class PR> inline  Float<Validated,PR> make_float(Number<Effective> const& y, PR pr) { return Float<Validated,PR>(y,pr); }
 template<class PR> inline  Float<Validated,PR> make_float(Number<Exact> const& y, PR pr) { return Float<Validated,PR>(y,pr); }
 template<class PR> inline  Float<Validated,PR> make_float(Real const& y, PR pr) { return Float<Validated,PR>(y,pr); }
+template<class PR> inline  Float<Validated,PR> make_float(Rational const& y, PR pr) { return Float<Validated,PR>(y,pr); }
 
 template<class X> struct IsGenericNumber : IsConvertible<X,Real> { };
 template<> struct IsGenericNumber<Real> : True { };

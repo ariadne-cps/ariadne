@@ -42,7 +42,7 @@ template<> Nat ExactFloat64::output_precision = 16;
 const ExactFloat64 infty = ExactFloat64(Float64::inf());
 
 template<class PR> Float<Exact,PR>::Float(Integer const& z)
-    : v(z.get_si())
+    : _v(z.get_si())
 {
     int n=z.get_si();
     ARIADNE_PRECONDITION(z==n);
@@ -77,16 +77,13 @@ template<class PR> Float<Validated,PR>::Float(const Decimal& d) : Float<Validate
 template<class PR> Float<Validated,PR>::Float(const Integer& z) : Float<Validated,PR>(Rational(z)) {
 }
 
-template<class PR> Float<Validated,PR>::Float(const Rational& q) : Float<Validated,PR>(q,q) {
+template<class PR> Float<Validated,PR>::Float(const Rational& q) : _l(q.get_d()), _u(_l)  {
+    while(Rational(_l)>q) { _l=next_down(_l); }
+    while(Rational(_u)<q) { _u=next_up(_u); }
 }
 
-template<class PR> Float<Validated,PR>::Float(const Rational& ql, const Rational& qu) : l(ql.get_d()), u(qu.get_d())  {
-    while(Rational(l)>ql) { l=next_down(l); }
-    while(Rational(u)<qu) { u=next_up(u); }
-}
-
-template<class PR> Float<Validated,PR> Float<Exact,PR>::pm(Float<Error,PR> e) const {
-    Float<Exact,PR> const& v=*this; return Float<Validated,PR>(v-e,v+e);
+template<class PR> Float<Validated,PR> Float<Exact,PR>::pm(Float<Error,PR> _e) const {
+    Float<Exact,PR> const& _v=*this; return Float<Validated,PR>(_v-_e,_v+_e);
 }
 
 template<class PR> Float<Upper,PR>::Float(Number<Upper> const& x) {
@@ -114,7 +111,7 @@ template<class PR> Float<Approximate,PR>::Float(Rational const& q) : Float<Appro
 
 
 ExactFloat64 make_exact(Real const& r) {
-    ApproximateFloat64 a(r); return ExactFloat64(a.raw());
+    ApproximateFloat64 _a(r); return ExactFloat64(_a.raw());
 }
 
 OutputStream& operator<<(OutputStream& os, ExactFloat64 const& x) {
@@ -171,9 +168,9 @@ ValidatedFloat64 trunc(ValidatedFloat64 const& x)
 
 ValidatedFloat64 trunc(ValidatedFloat64 const& x, Nat n)
 {
-    ValidatedFloat64 e=ValidatedFloat64(std::pow(2.0,52-(Int)n));
-    ValidatedFloat64 y=x+e;
-    return y-e;
+    ValidatedFloat64 _e=ValidatedFloat64(std::pow(2.0,52-(Int)n));
+    ValidatedFloat64 y=x+_e;
+    return y-_e;
 }
 
 ValidatedFloat64 rec(ValidatedFloat64 const& x)
@@ -467,14 +464,14 @@ operator<<(OutputStream& os, const ValidatedFloat64& ivl)
 InputStream&
 operator>>(InputStream& is, ValidatedFloat64& x)
 {
-    Float64 l,u;
+    Float64 _l,_u;
     char cl,cm,cr;
-    is >> cl >> l >> cm >> u >> cr;
+    is >> cl >> _l >> cm >> _u >> cr;
     ARIADNE_ASSERT(is);
     ARIADNE_ASSERT(cl=='[' || cl=='(');
     ARIADNE_ASSERT(cm==':' || cm==',' || cm==';');
     ARIADNE_ASSERT(cr==']' || cr==')');
-    x.l=l; x.u=u;
+    x._l=_l; x._u=_u;
     return is;
 }
 
@@ -524,8 +521,8 @@ UpperFloat64 log(UpperFloat64 const& x) {
     return UpperFloat64(log_up(x.raw()));
 }
 
-template<> Int integer_cast(UpperFloat64 const& x) { return static_cast<Int>(x.u.get_d()); }
-template<> Nat integer_cast(UpperFloat64 const& x) { return static_cast<Nat>(x.u.get_d()); }
+template<> Int integer_cast(UpperFloat64 const& x) { return static_cast<Int>(x._u.get_d()); }
+template<> Nat integer_cast(UpperFloat64 const& x) { return static_cast<Nat>(x._u.get_d()); }
 
 
 
@@ -592,16 +589,16 @@ OutputStream& operator<<(OutputStream& os, LowerFloat64 const& x) {
     return os;
 }
 
-template<> Int integer_cast(LowerFloat64 const& x) { return static_cast<Int>(x.l.get_d()); }
-template<> Nat integer_cast(LowerFloat64 const& x) { return static_cast<Nat>(x.l.get_d()); }
+template<> Int integer_cast(LowerFloat64 const& x) { return static_cast<Int>(x._l.get_d()); }
+template<> Nat integer_cast(LowerFloat64 const& x) { return static_cast<Nat>(x._l.get_d()); }
 
 
 OutputStream& operator<<(OutputStream& os, ApproximateFloat64 const& x) {
     return os << std::showpoint << std::setprecision(ApproximateFloat64::output_precision) << x.raw();
 }
 
-template<> Int integer_cast(ApproximateFloat64 const& x) { return static_cast<Int>(x.a.get_d()); }
-template<> Nat integer_cast(ApproximateFloat64 const& x) { return static_cast<Nat>(x.a.get_d()); }
+template<> Int integer_cast(ApproximateFloat64 const& x) { return static_cast<Int>(x._a.get_d()); }
+template<> Nat integer_cast(ApproximateFloat64 const& x) { return static_cast<Nat>(x._a.get_d()); }
 
 
 

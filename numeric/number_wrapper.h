@@ -85,8 +85,8 @@ template<class O, class A1> class UnaryOperator : public UnaryOperatorInterface 
 };
 
 
-template<class O, class P> class UnaryOperator<O,Float64<P>> : public UnaryOperatorInterface {
-    typedef Float64<P> A1;
+template<class O, class P> class UnaryOperator<O,Float64Template<P>> : public UnaryOperatorInterface {
+    typedef Float64Template<P> A1;
     O _op; A1 _arg1;
   public:
     UnaryOperator(A1 a1) : _arg1(a1) { }
@@ -102,8 +102,8 @@ template<class O, class P> class UnaryOperator<O,Float64<P>> : public UnaryOpera
     virtual NumberInterface* _compute(ApprxFloatMP a2) const { assert(false); }
 };
 
-template<class O, class P> class UnaryOperator<O,FloatMP<P>> : public UnaryOperatorInterface {
-    typedef FloatMP<P> A1;
+template<class O, class P> class UnaryOperator<O,FloatMPTemplate<P>> : public UnaryOperatorInterface {
+    typedef FloatMPTemplate<P> A1;
     O _op; A1 _arg1;
   public:
     UnaryOperator(A1 a1) : _arg1(a1) { }
@@ -221,6 +221,7 @@ template<class X> class NumberWrapper
     virtual ParadigmCode _paradigm() const { return P::code; }
     virtual String _class_name() const { return class_name<X>(); }
     virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<const X&>(*this); }
+    virtual OutputStream& write(OutputStream& os) const { return os << static_cast<const X&>(*this); }
     virtual NumberInterface* _apply(const UnaryOperatorInterface& o) const { return o._compute(static_cast<const X&>(*this)); }
 
   private:

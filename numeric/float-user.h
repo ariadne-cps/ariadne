@@ -94,6 +94,7 @@ template<class PR> class Float<Approximate,PR> {
   public:
     typedef Approximate Paradigm;
     typedef ApproximateFloat64 NumericType;
+    typedef PR PrecisionType;
   public:
     Float<Approximate,PR>() : a() { }
     template<class N, EnableIf<IsIntegral<N>> =dummy> Float<Approximate,PR>(N n) : a(n) { }
@@ -114,6 +115,7 @@ template<class PR> class Float<Approximate,PR> {
     Float<Approximate,PR>(Float<Upper,PR> const& x);
     Float<Approximate,PR>(Float<Lower,PR> const& x);
 
+    PrecisionType precision() const { return a.precision(); }
     explicit operator Float64 () const { return this->a; }
     Float64 const& raw() const { return this->a; }
     Float64& raw() { return this->a; }
@@ -134,6 +136,7 @@ template<class PR> class Float<Lower,PR> {
   public:
     typedef Lower Paradigm;
     typedef Float<Lower,PR> NumericType;
+    typedef PR PrecisionType;
   public:
     Float<Lower,PR>() : l(0.0) { }
     template<class N, EnableIf<IsIntegral<N>> = dummy> Float<Lower,PR>(N n) : l(n) { }
@@ -151,6 +154,7 @@ template<class PR> class Float<Lower,PR> {
     explicit Float<Lower,PR>(const Rational& x);
     explicit Float<Lower,PR>(const Integer& x);
 
+    PrecisionType precision() const { return l.precision(); }
     Float64 const& raw() const { return l; }
     Float64& raw() { return l; }
     double get_d() const { return l.get_d(); }
@@ -167,6 +171,7 @@ template<class PR> class Float<Upper,PR> {
   public:
     typedef Upper Paradigm;
     typedef Float<Upper,PR> NumericType;
+    typedef PR PrecisionType;
   public:
     Float<Upper,PR>() : u(0.0) { }
     template<class N, EnableIf<IsIntegral<N>> = dummy> Float<Upper,PR>(N n) : u(n) { }
@@ -185,6 +190,7 @@ template<class PR> class Float<Upper,PR> {
     Float<Upper,PR>(const Number<Upper>& x, PR pr);
     operator Number<Upper> () const;
 
+    PrecisionType precision() const { return u.precision(); }
     Float64 const& raw() const { return u; }
     Float64& raw() { return u; }
     double get_d() const { return u.get_d(); }
@@ -232,6 +238,7 @@ template<class PR> class Float<Validated,PR> {
   public:
     typedef Validated Paradigm;
     typedef Float<Validated,PR> NumericType;
+    typedef PR PrecisionType;
   public:
     Float<Validated,PR>() : l(0.0), u(0.0) { }
     template<class N, EnableIf<IsIntegral<N>> = dummy> Float<Validated,PR>(N n) : l(n), u(n) { }
@@ -264,6 +271,8 @@ template<class PR> class Float<Validated,PR> {
     const Float<Exact,PR> value() const;
     const Float<PositiveUpper,PR> error() const;
 
+    PrecisionType precision() const { ARIADNE_DEBUG_ASSERT(l.precision()==u.precision()); return u.precision(); }
+
     // DEPRECATED
     explicit operator Float64 () const { return (l+u)/2; }
     friend Float<Exact,PR> midpoint(Float<Validated,PR> const& x);
@@ -284,7 +293,8 @@ template<class PR> class Float<Exact,PR> {
   public:
     typedef Exact Paradigm;
     typedef Float<Exact,PR> NumericType;
-
+    typedef PR PrecisionType;
+  public:
     Float<Exact,PR>() : v(0) { }
     template<class N, EnableIf<IsIntegral<N>> =dummy> Float<Exact,PR>(N n) : v(n) { }
     template<class X, EnableIf<IsFloatingPoint<X>> =dummy> explicit Float<Exact,PR>(X x) : v(x) { }
@@ -297,6 +307,7 @@ template<class PR> class Float<Exact,PR> {
     operator Number<Exact> () const;
     explicit operator Float64 () const { return v; }
 
+    PrecisionType precision() const { return v.precision(); }
     Float64 const& raw() const { return v; }
     Float64& raw() { return v; }
     double get_d() const { return v.get_d(); }
@@ -1074,35 +1085,35 @@ PositiveUpperFloat64 half(PositiveUpperFloat64 const& x);
 
 inline ErrorFloat64 operator"" _error(long double lx) { double x=lx; assert(x==lx); return ErrorFloat64(Float64(x)); }
 
-inline ApproximateFloat64 create_float(Number<Approximate> const& x) { return ApproximateFloat64(x); }
-inline LowerFloat64 create_float(LowerFloat64 const& x) { return LowerFloat64(x); }
-inline UpperFloat64 create_float(Number<Upper> const& x) { return UpperFloat64(x); }
-inline ValidatedFloat64 create_float(Number<Validated> const& x) { return ValidatedFloat64(x); }
-inline ValidatedFloat64 create_float(Number<Effective> const& x) { return ValidatedFloat64(x); }
-inline ValidatedFloat64 create_float(Number<Exact> const& x) { return ValidatedFloat64(x); }
-inline ValidatedFloat64 create_float(Real const& x) { return ValidatedFloat64(x); }
+template<class PR> inline  Float<Approximate,PR> make_float(Number<Approximate> const& y, PR pr) { return Float<Approximate,PR>(y,pr); }
+template<class PR> inline  Float<Lower,PR> make_float(Float<Lower,PR> const& y, PR pr) { return Float<Lower,PR>(y,pr); }
+template<class PR> inline  Float<Upper,PR> make_float(Number<Upper> const& y, PR pr) { return Float<Upper,PR>(y,pr); }
+template<class PR> inline  Float<Validated,PR> make_float(Number<Validated> const& y, PR pr) { return Float<Validated,PR>(y,pr); }
+template<class PR> inline  Float<Validated,PR> make_float(Number<Effective> const& y, PR pr) { return Float<Validated,PR>(y,pr); }
+template<class PR> inline  Float<Validated,PR> make_float(Number<Exact> const& y, PR pr) { return Float<Validated,PR>(y,pr); }
+template<class PR> inline  Float<Validated,PR> make_float(Real const& y, PR pr) { return Float<Validated,PR>(y,pr); }
 
 template<class X> struct IsGenericNumber : IsConvertible<X,Real> { };
 template<> struct IsGenericNumber<Real> : True { };
 template<class P> struct IsGenericNumber<Number<P>> : True { };
 
 template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumber<Y>> =dummy> auto
-operator+(X const& x, Y const& y) -> decltype(x+create_float(y)) { return x+create_float(y); }
+operator+(X const& x, Y const& y) -> decltype(x+make_float(y,x.precision())) { return x+make_float(y,x.precision()); }
 template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumber<Y>> =dummy> auto
-operator-(X const& x, Y const& y) -> decltype(x-create_float(y)) { return x-create_float(y); }
+operator-(X const& x, Y const& y) -> decltype(x-make_float(y,x.precision())) { return x-make_float(y,x.precision()); }
 template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumber<Y>> =dummy> auto
-operator*(X const& x, Y const& y) -> decltype(x*create_float(y)) { return x*create_float(y); }
+operator*(X const& x, Y const& y) -> decltype(x*make_float(y,x.precision())) { return x*make_float(y,x.precision()); }
 template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumber<Y>> =dummy> auto
-operator/(X const& x, Y const& y) -> decltype(x/create_float(y)) { return x/create_float(y); }
+operator/(X const& x, Y const& y) -> decltype(x/make_float(y,x.precision())) { return x/make_float(y,x.precision()); }
 
 template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumber<Y>> =dummy> auto
-operator+(Y const& y, X const& x) -> decltype(create_float(y,x.raw().precision())+x) { return create_float(y)+x; }
+operator+(Y const& y, X const& x) -> decltype(make_float(y,x.raw().precision())+x) { return make_float(y,x.precision())+x; }
 template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumber<Y>> =dummy> auto
-operator-(Y const& y, X const& x) -> decltype(create_float(y)-x) { return create_float(y)-x; }
+operator-(Y const& y, X const& x) -> decltype(make_float(y,x.precision())-x) { return make_float(y,x.precision())-x; }
 template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumber<Y>> =dummy> auto
-operator*(Y const& y, X const& x) -> decltype(create_float(y)*x) { return create_float(y)*x; }
+operator*(Y const& y, X const& x) -> decltype(make_float(y,x.precision())*x) { return make_float(y,x.precision())*x; }
 template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumber<Y>> =dummy> auto
-operator/(Y const& y, X const& x) -> decltype(create_float(y)/x) { return create_float(y)/x; }
+operator/(Y const& y, X const& x) -> decltype(make_float(y,x.precision())/x) { return make_float(y,x.precision())/x; }
 
 
 } // namespace Ariadne

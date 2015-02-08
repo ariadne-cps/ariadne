@@ -47,8 +47,8 @@ typedef Float64 RawFloat64;
 class Rational;
 
 
-class Precision64 {
-};
+class Precision64 { };
+inline constexpr bool operator==(Precision64, Precision64) { return true; }
 
 using RoundingMode64 = RoundingModeType;
 

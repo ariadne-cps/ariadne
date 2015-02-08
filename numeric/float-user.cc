@@ -606,15 +606,15 @@ template<> Nat integer_cast(ApproximateFloat64 const& x) { return static_cast<Na
 
 
 
-ApproximateFloat64 create_float(Number<Approximate> x) { return ApproximateFloat64(x); }
-LowerFloat64 create_float(Number<Lower> x) { return LowerFloat64(x); }
-UpperFloat64 create_float(Number<Upper> x) { return UpperFloat64(x); }
-ValidatedFloat64 create_float(Number<Validated> x) { return ValidatedFloat64(x); }
-ValidatedFloat64 create_float(Number<Effective> x) { return ValidatedFloat64(x); }
-ValidatedFloat64 create_float(Number<Exact> x) { return ValidatedFloat64(x); }
-ValidatedFloat64 create_float(Real r) { return ValidatedFloat64(r); }
-ValidatedFloat64 create_float(Rational q) { return ValidatedFloat64(q); }
-ExactFloat64 create_float(Integer z) { return ExactFloat64(z); }
+ApproximateFloat64 make_float(Number<Approximate> x) { return ApproximateFloat64(x); }
+LowerFloat64 make_float(Number<Lower> x) { return LowerFloat64(x); }
+UpperFloat64 make_float(Number<Upper> x) { return UpperFloat64(x); }
+ValidatedFloat64 make_float(Number<Validated> x) { return ValidatedFloat64(x); }
+ValidatedFloat64 make_float(Number<Effective> x) { return ValidatedFloat64(x); }
+ValidatedFloat64 make_float(Number<Exact> x) { return ValidatedFloat64(x); }
+ValidatedFloat64 make_float(Real r) { return ValidatedFloat64(r); }
+ValidatedFloat64 make_float(Rational q) { return ValidatedFloat64(q); }
+ExactFloat64 make_float(Integer z) { return ExactFloat64(z); }
 
 template class Float<Approximate,Precision64>;
 template class Float<Lower,Precision64>;

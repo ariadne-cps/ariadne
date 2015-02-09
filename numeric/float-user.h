@@ -111,7 +111,7 @@ template<class PR> class Float<Approximate,PR> {
 
     Float<Approximate,PR>(Float<Exact,PR> const& x);
     Float<Approximate,PR>(Float<Metric,PR> const& x);
-    Float<Approximate,PR>(Float<Validated,PR> const& x);
+    Float<Approximate,PR>(Float<Bounded,PR> const& x);
     Float<Approximate,PR>(Float<Upper,PR> const& x);
     Float<Approximate,PR>(Float<Lower,PR> const& x);
 
@@ -145,8 +145,8 @@ template<class PR> class Float<Lower,PR> {
     template<class N, EnableIf<IsIntegral<N>> = dummy> Float<Lower,PR>(N n) : _l(n) { }
     template<class X, EnableIf<IsFloatingPoint<X>> = dummy> explicit Float<Lower,PR>(X x) : _l(x) { }
 
+    Float<Lower,PR>(Float<Bounded,PR> const& x);
     Float<Lower,PR>(Float<Metric,PR> const& x);
-    Float<Lower,PR>(Float<Validated,PR> const& x);
     Float<Lower,PR>(Float<Exact,PR> const& x);
 
     explicit Float<Lower,PR>(const Number<Lower>& x);
@@ -184,7 +184,7 @@ template<class PR> class Float<Upper,PR> {
     template<class X, EnableIf<IsFloatingPoint<X>> = dummy> explicit Float<Upper,PR>(X x) : _u(x) { }
 
 
-    Float<Upper,PR>(Float<Validated,PR> const& x);
+    Float<Upper,PR>(Float<Bounded,PR> const& x);
     Float<Upper,PR>(Float<Metric,PR> const& x);
     Float<Upper,PR>(Float<Exact,PR> const& x);
 
@@ -238,36 +238,34 @@ template<class PR> class Float<Upper,PR> {
 //!   ValidatedFloat64({2.5:4.25}) # Create the interval [2.5, 4.25], which can be represented exactly
 //!   ValidatedFloat64([2.5,4.25]) # Alternative syntax for creating the interval [2.5, 4.25]
 //! \endcode
-template<class PR> class Float<Validated,PR> {
-    typedef Validated P; typedef RawFloat<PR> FLT;
+template<class PR> class Float<Bounded,PR> {
+    typedef Bounded P; typedef RawFloat<PR> FLT;
   public:
-    typedef Validated Paradigm;
-    typedef Float<Validated,PR> NumericType;
+    typedef Bounded Paradigm;
+    typedef Float<Bounded,PR> NumericType;
     typedef FLT RawFloatType;
     typedef PR PrecisionType;
   public:
-    Float<Validated,PR>() : _l(0.0), _u(0.0) { }
-    explicit Float<Validated,PR>(RawFloatType const& v) : _l(v), _u(v) { }
-    Float<Validated,PR>(RawFloatType const& l, RawFloatType const& u) : _l(l), _u(u) { }
-    Float<Validated,PR>(Float<Lower,PR> const& lower, Float<Upper,PR> const& upper) : _l(lower.raw()), _u(upper.raw()) { }
+    Float<Bounded,PR>() : _l(0.0), _u(0.0) { }
+    explicit Float<Bounded,PR>(RawFloatType const& v) : _l(v), _u(v) { }
+    Float<Bounded,PR>(RawFloatType const& l, RawFloatType const& u) : _l(l), _u(u) { }
+    Float<Bounded,PR>(Float<Lower,PR> const& lower, Float<Upper,PR> const& upper) : _l(lower.raw()), _u(upper.raw()) { }
+    template<class N1, class N2, EnableIf<And<IsIntegral<N1>,IsIntegral<N2>>> = dummy> Float<Bounded,PR>(N1 n1, N2 n2) : _l(n1), _u(n2) { }
 
-    template<class N, EnableIf<IsIntegral<N>> = dummy> Float<Validated,PR>(N n) : _l(n), _u(n) { }
-    template<class X, EnableIf<IsFloatingPoint<X>> = dummy> explicit Float<Validated,PR>(X x) : _l(x), _u(x) { }
+    template<class N, EnableIf<IsIntegral<N>> = dummy> Float<Bounded,PR>(N n) : _l(n), _u(n) { }
+    template<class X, EnableIf<IsFloatingPoint<X>> = dummy> explicit Float<Bounded,PR>(X x) : _l(x), _u(x) { }
 
-    Float<Validated,PR>(Float<Exact,PR> const& x);
-    Float<Validated,PR>(Float<Metric,PR> const& x);
+    Float<Bounded,PR>(Float<Metric,PR> const& x);
+    Float<Bounded,PR>(Float<Exact,PR> const& x);
 
-    explicit Float<Validated,PR>(const Dyadic& x);
-    explicit Float<Validated,PR>(const Decimal& x);
-    explicit Float<Validated,PR>(const Integer& z);
-    explicit Float<Validated,PR>(const Rational& q);
-    explicit Float<Validated,PR>(const Real& x);
-    explicit Float<Validated,PR>(const Number<Validated>& x);
-    Float<Validated,PR>(const Number<Validated>& x, PR pr);
+    explicit Float<Bounded,PR>(const Dyadic& x);
+    explicit Float<Bounded,PR>(const Decimal& x);
+    explicit Float<Bounded,PR>(const Integer& z);
+    explicit Float<Bounded,PR>(const Rational& q);
+    explicit Float<Bounded,PR>(const Real& x);
+    explicit Float<Bounded,PR>(const Number<Validated>& x);
+    Float<Bounded,PR>(const Number<Validated>& x, PR pr);
     operator Number<Validated> () const;
-
-    template<class N1, class N2, EnableIf<And<IsIntegral<N1>,IsIntegral<N2>>> =dummy>
-        Float<Validated,PR>(N1 lower, N2 upper) : _l(lower), _u(upper) { }
 
     Float<Lower,PR> const lower() const { return Float<Lower,PR>(lower_raw()); }
     Float<Upper,PR> const upper() const { return Float<Upper,PR>(upper_raw()); }
@@ -284,7 +282,7 @@ template<class PR> class Float<Validated,PR> {
 
     // DEPRECATED
     explicit operator RawFloatType () const { return value_raw(); }
-    friend Float<Exact,PR> midpoint(Float<Validated,PR> const& x);
+    friend Float<Exact,PR> midpoint(Float<Bounded,PR> const& x);
   public:
     static Nat output_precision;
     static Void set_output_precision(Nat p) { output_precision=p; }
@@ -307,6 +305,7 @@ template<class PR> class Float<Metric,PR> {
     Float<Metric,PR>(Float<Exact,PR> const& value, Float<Error,PR> const& error) : _v(value.raw()), _e(error.raw()) { }
     Float<Metric,PR>(Float<Lower,PR> const& lower, Float<Upper,PR> const& upper) =  delete;
 
+    Float<Metric,PR>(Float<Bounded,PR> const& x);
     Float<Metric,PR>(Float<Exact,PR> const& x);
 
     explicit Float<Metric,PR>(const Integer& z);
@@ -314,7 +313,7 @@ template<class PR> class Float<Metric,PR> {
     explicit Float<Metric,PR>(const Real& x);
     explicit Float<Metric,PR>(const Number<Validated>& x);
     Float<Metric,PR>(const Number<Validated>& x, PR pr);
-    operator Number<Metric> () const;
+    operator Number<Validated> () const;
 
     Float<Lower,PR> const lower() const { return Float<Lower,PR>(lower_raw()); }
     Float<Upper,PR> const upper() const { return Float<Upper,PR>(upper_raw()); }
@@ -360,7 +359,7 @@ template<class PR> class Float<Exact,PR> {
     RawFloatType& raw() { return _v; }
     double get_d() const { return _v.get_d(); }
 
-    Float<Validated,PR> pm(Float<Error,PR> _e) const;
+    Float<Metric,PR> pm(Float<Error,PR> _e) const;
   public:
     static Nat output_precision;
     static Void set_output_precision(Nat p) { output_precision=p; }
@@ -368,10 +367,10 @@ template<class PR> class Float<Exact,PR> {
     RawFloatType _v;
 };
 
-template<class PR> inline const Float<Exact,PR> Float<Validated,PR>::value() const {
+template<class PR> inline const Float<Exact,PR> Float<Bounded,PR>::value() const {
     return Float<Exact,PR>(med_near(this->_l,this->_u)); }
 
-template<class PR> inline const Float<Error,PR> Float<Validated,PR>::error() const {
+template<class PR> inline const Float<Error,PR> Float<Bounded,PR>::error() const {
     RawFloat<PR> _v=med_near(this->_l,this->_u); return Float<Error,PR>(max(sub_up(this->_u,_v),sub_up(_v,this->_l))); }
 
 
@@ -425,7 +424,8 @@ template<class PR> inline Float<PositiveExact,PR> cast_positive(Float<Exact,PR> 
 
 template<class R, class A> R integer_cast(const A& _a);
 
-template<> Float<Validated,Precision64>::Float(Real const& x);
+template<> Float<Metric,Precision64>::Float(Real const& x);
+template<> Float<Bounded,Precision64>::Float(Real const& x);
 template<> Float<Upper,Precision64>::Float(Real const& x);
 template<> Float<Lower,Precision64>::Float(Real const& x);
 template<> Float<Approximate,Precision64>::Float(Real const& x);
@@ -759,25 +759,34 @@ template<class PR> inline Float<Approximate,PR>::Float(Float<Lower,PR> const& x)
 template<class PR> inline Float<Approximate,PR>::Float(Float<Upper,PR> const& x) : _a(x.raw()) {
 }
 
-template<class PR> inline Float<Approximate,PR>::Float(Float<Validated,PR> const& x) : _a(half_exact(add_near(x.lower_raw(),x.upper_raw()))) {
+template<class PR> inline Float<Approximate,PR>::Float(Float<Bounded,PR> const& x) : _a(x.value_raw()) {
 }
 
 template<class PR> inline Float<Approximate,PR>::Float(Float<Exact,PR> const& x) : _a(x.raw()) {
 }
 
-template<class PR> inline Float<Lower,PR>::Float(Float<Validated,PR> const& x) : _l(x.lower_raw()) {
+template<class PR> inline Float<Lower,PR>::Float(Float<Bounded,PR> const& x) : _l(x.lower_raw()) {
 }
 
 template<class PR> inline Float<Lower,PR>::Float(Float<Exact,PR> const& x) : _l(x.raw()) {
 }
 
-template<class PR> inline Float<Upper,PR>::Float(Float<Validated,PR> const& x) : _u(x.upper_raw()) {
+template<class PR> inline Float<Upper,PR>::Float(Float<Bounded,PR> const& x) : _u(x.upper_raw()) {
 }
 
 template<class PR> inline Float<Upper,PR>::Float(Float<Exact,PR> const& x) : _u(x.raw()) {
 }
 
-template<class PR> inline Float<Validated,PR>::Float(Float<Exact,PR> const& x) : _l(x.raw()), _u(x.raw()) {
+template<class PR> inline Float<Bounded,PR>::Float(Float<Metric,PR> const& x) : _l(x.lower_raw()), _u(x.upper_raw()) {
+}
+
+template<class PR> inline Float<Bounded,PR>::Float(Float<Exact,PR> const& x) : _l(x.raw()), _u(x.raw()) {
+}
+
+template<class PR> inline Float<Metric,PR>::Float(Float<Bounded,PR> const& x) : _v(x.value_raw()), _e(x.error_raw()) {
+}
+
+template<class PR> inline Float<Metric,PR>::Float(Float<Exact,PR> const& x) : _v(x.raw()), _e(0.0) {
 }
 
 
@@ -1136,11 +1145,11 @@ inline ErrorFloat64 operator"" _error(long double lx) { double x=lx; assert(x==l
 template<class PR> inline  Float<Approximate,PR> make_float(Number<Approximate> const& y, PR pr) { return Float<Approximate,PR>(y,pr); }
 template<class PR> inline  Float<Lower,PR> make_float(Float<Lower,PR> const& y, PR pr) { return Float<Lower,PR>(y,pr); }
 template<class PR> inline  Float<Upper,PR> make_float(Number<Upper> const& y, PR pr) { return Float<Upper,PR>(y,pr); }
-template<class PR> inline  Float<Validated,PR> make_float(Number<Validated> const& y, PR pr) { return Float<Validated,PR>(y,pr); }
-template<class PR> inline  Float<Validated,PR> make_float(Number<Effective> const& y, PR pr) { return Float<Validated,PR>(y,pr); }
-template<class PR> inline  Float<Validated,PR> make_float(Number<Exact> const& y, PR pr) { return Float<Validated,PR>(y,pr); }
-template<class PR> inline  Float<Validated,PR> make_float(Real const& y, PR pr) { return Float<Validated,PR>(y,pr); }
-template<class PR> inline  Float<Validated,PR> make_float(Rational const& y, PR pr) { return Float<Validated,PR>(y,pr); }
+template<class PR> inline  Float<Bounded,PR> make_float(Number<Validated> const& y, PR pr) { return Float<Bounded,PR>(y,pr); }
+template<class PR> inline  Float<Bounded,PR> make_float(Number<Effective> const& y, PR pr) { return Float<Bounded,PR>(y,pr); }
+template<class PR> inline  Float<Bounded,PR> make_float(Number<Exact> const& y, PR pr) { return Float<Bounded,PR>(y,pr); }
+template<class PR> inline  Float<Bounded,PR> make_float(Real const& y, PR pr) { return Float<Bounded,PR>(y,pr); }
+template<class PR> inline  Float<Bounded,PR> make_float(Rational const& y, PR pr) { return Float<Bounded,PR>(y,pr); }
 
 template<class X> struct IsGenericNumber : IsConvertible<X,Real> { };
 template<> struct IsGenericNumber<Real> : True { };

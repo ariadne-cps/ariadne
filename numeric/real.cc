@@ -126,13 +126,15 @@ ApproximateFloat64 Real::approx() const { return this->_ptr->_value(); }
 double Real::get_d() const { return this->approx().get_d(); }
 
 /*
-template<class PR> Float<Validated,PR>::Float(Real const& x) : Float<Validated,PR>(x.lower(),x.upper()) { }
+template<class PR> Float<Metric,PR>::Float(Real const& x) : Float<Metric,PR>(x.lower(),x.upper()) { }
+template<class PR> Float<Bounded,PR>::Float(Real const& x) : Float<Bounded,PR>(x.lower(),x.upper()) { }
 template<class PR> Float<Upper,PR>::Float(Real const& x) : Float<Upper,PR>(x.upper()) { }
 template<class PR> Float<Lower,PR>::Float(Real const& x) : Float<Lower,PR>(x.lower()) { }
 template<class PR> Float<Approximate,PR>::Float(Real const& x) : Float<Approximate,PR>(x.approx()) { }
 */
 
-template<> Float<Validated,Precision64>::Float(Real const& x) : Float<Validated,Precision64>(x.lower(),x.upper()) { }
+template<> Float<Metric,Precision64>::Float(Real const& x) : Float<Metric,Precision64>(x.approx().raw(),max(sub_up(x.upper().raw(),x.approx().raw()),sub_up(x.approx().raw(),x.lower().raw()))) { }
+template<> Float<Bounded,Precision64>::Float(Real const& x) : Float<Bounded,Precision64>(x.lower(),x.upper()) { }
 template<> Float<Upper,Precision64>::Float(Real const& x) : Float<Upper,Precision64>(x.upper()) { }
 template<> Float<Lower,Precision64>::Float(Real const& x) : Float<Lower,Precision64>(x.lower()) { }
 template<> Float<Approximate,Precision64>::Float(Real const& x) : Float<Approximate,Precision64>(x.approx()) { }

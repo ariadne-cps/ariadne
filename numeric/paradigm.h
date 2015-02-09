@@ -216,7 +216,8 @@ struct Approximate {
     static const ParadigmCode code = ParadigmCode::APPROXIMATE;
     Approximate() { } Approximate(Exact) { }
     Approximate(Effective) { } Approximate(EffectiveUpper) { } Approximate(EffectiveLower) { }
-    Approximate(Validated) { }Approximate(ValidatedBounded) { } Approximate(ValidatedMetric) { } Approximate(ValidatedUpper) { } Approximate(ValidatedLower) { }
+    Approximate(Validated) { } Approximate(ValidatedBounded) { } Approximate(ValidatedMetric) { }
+    Approximate(ValidatedUpper) { } Approximate(ValidatedLower) { }
     typedef Void NextWeakerParadigm;
 };
 
@@ -236,6 +237,7 @@ Approximate equality_paradigm(Approximate,Approximate);
 ValidatedLower equality_paradigm(ValidatedLower,ValidatedUpper);
 ValidatedLower equality_paradigm(ValidatedUpper,ValidatedLower);
 ValidatedLower equality_paradigm(Validated,Validated);
+ValidatedLower equality_paradigm(ValidatedBounded,ValidatedBounded);
 ValidatedLower equality_paradigm(ValidatedMetric,ValidatedMetric);
 ValidatedLower equality_paradigm(Effective,Effective);
 Exact equality_paradigm(Exact,Exact);

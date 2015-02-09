@@ -48,12 +48,12 @@ template<class PR> Float<Exact,PR>::Float(Integer const& z)
     ARIADNE_PRECONDITION(z==n);
 }
 
-template<class PR> Float<Validated,PR>::Float(Number<Validated> const& x)
-    : Float(x.get(Validated(),FLT::get_default_precision())) {
+template<class PR> Float<Bounded,PR>::Float(Number<Validated> const& x)
+    : Float(x.get(Bounded(),FLT::get_default_precision())) {
 }
 
-template<class PR> Float<Validated,PR>::Float(Number<Validated> const& x, PR pr)
-    : Float(x.get(Validated(),pr)) {
+template<class PR> Float<Bounded,PR>::Float(Number<Validated> const& x, PR pr)
+    : Float(x.get(Bounded(),pr)) {
 }
 
 template<class PR> Float<Upper,PR>::Float(Number<Upper> const& x, PR pr)
@@ -69,21 +69,21 @@ template<class PR> Float<Approximate,PR>::Float(Number<Approximate> const& x, PR
 }
 
 
-template<class PR> Float<Validated,PR>::Float(const Dyadic& b) : Float<Validated,PR>(b.operator Rational()) { }
+template<class PR> Float<Bounded,PR>::Float(const Dyadic& b) : Float<Bounded,PR>(b.operator Rational()) { }
 
-template<class PR> Float<Validated,PR>::Float(const Decimal& d) : Float<Validated,PR>(d.operator Rational()) { }
+template<class PR> Float<Bounded,PR>::Float(const Decimal& d) : Float<Bounded,PR>(d.operator Rational()) { }
 
 
-template<class PR> Float<Validated,PR>::Float(const Integer& z) : Float<Validated,PR>(Rational(z)) {
+template<class PR> Float<Bounded,PR>::Float(const Integer& z) : Float<Bounded,PR>(Rational(z)) {
 }
 
-template<class PR> Float<Validated,PR>::Float(const Rational& q) : _l(q.get_d()), _u(_l)  {
+template<class PR> Float<Bounded,PR>::Float(const Rational& q) : _l(q.get_d()), _u(_l)  {
     while(Rational(_l)>q) { _l=next_down(_l); }
     while(Rational(_u)<q) { _u=next_up(_u); }
 }
 
-template<class PR> Float<Validated,PR> Float<Exact,PR>::pm(Float<Error,PR> _e) const {
-    Float<Exact,PR> const& _v=*this; return Float<Validated,PR>(_v-_e,_v+_e);
+template<class PR> Float<Metric,PR> Float<Exact,PR>::pm(Float<Error,PR> _e) const {
+    Float<Exact,PR> const& _v=*this; return Float<Metric,PR>(_v,_e);
 }
 
 template<class PR> Float<Upper,PR>::Float(Number<Upper> const& x) {
@@ -616,7 +616,8 @@ ExactFloat64 make_float(Integer z) { return ExactFloat64(z); }
 template class Float<Approximate,Precision64>;
 template class Float<Lower,Precision64>;
 template class Float<Upper,Precision64>;
-template class Float<Validated,Precision64>;
+template class Float<Bounded,Precision64>;
+template class Float<Metric,Precision64>;
 template class Float<Exact,Precision64>;
 
 

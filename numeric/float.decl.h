@@ -35,24 +35,29 @@ namespace Ariadne {
 class Real;
 class TwoExp;
 
-class Float64;
-class FloatMP;
-class TwoExp;
-
 class Precision64;
 class PrecisionMP;
 
+class Float64;
+class FloatMP;
+
 using RawFloat64 = Float64;
 using RawFloatMP = FloatMP;
+
+//template<class PR> struct FloatTypedef;
+//template<> struct FloatTypedef<Precision64> { typedef Float64 Type; };
+//template<> struct FloatTypedef<PrecisionMP> { typedef FloatMP Type; };
+//template<class PR> using RawFloat = typename FloatTypedef<PR>::Type;
+
+RawFloat64 make_raw_float(Precision64);
+RawFloatMP make_raw_float(PrecisionMP);
+template<class PR> using RawFloat = decltype(make_raw_float(declval<PR>()));
+
 
 template<class P, class PR> class Float;
 template<class P, class PR> using FloatTemplate = Float<P,PR>;
 template<class P> using Float64Template = Float<P,Precision64>;
 template<class P> using FloatMPTemplate = Float<P,PrecisionMP>;
-
-RawFloat64 make_raw_float(Precision64);
-RawFloatMP make_raw_float(PrecisionMP);
-template<class PR> using RawFloat = decltype(make_raw_float(declval<PR>()));
 
 using ApproximateFloat64 = Float<Approximate,Precision64>;
 using LowerFloat64 = Float<Lower,Precision64>;

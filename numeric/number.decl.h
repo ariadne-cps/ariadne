@@ -60,6 +60,11 @@ template<> struct IsNumber<Integer>;
 template<> struct IsNumber<Rational>;
 template<> struct IsNumber<Real>;
 
+template<class X> struct IsGenericNumber : IsConvertible<X,Real> { };
+template<> struct IsGenericNumber<Real> : True { };
+template<class P> struct IsGenericNumber<Number<P>> : True { };
+
+
 /*
 using ExactNumber=Number<Exact>;
 using EffectiveNumber=Number<Effective>;

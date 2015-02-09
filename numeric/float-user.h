@@ -430,8 +430,17 @@ template<> Float<Upper,Precision64>::Float(Real const& x);
 template<> Float<Lower,Precision64>::Float(Real const& x);
 template<> Float<Approximate,Precision64>::Float(Real const& x);
 
+template<class P1, class P2, class PR> inline auto
+operator+(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> Float<Widen<Weaker<P1,P2>>,PR>;
 
+template<class P1, class P2, class PR> inline auto
+operator-(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> Float<Widen<Weaker<P1,Opposite<P2>>>,PR>;
 
+template<class P1, class P2, class PR> inline auto
+operator*(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> Float<Widen<Weaker<P1,P2>>,PR>;
+
+template<class P1, class P2, class PR> inline auto
+operator/(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> Float<Widen<Weaker<P1,Opposite<P2>>>,PR>;
 
 ApproximateFloat64 floor(ApproximateFloat64 const& x);
 ApproximateFloat64 ceil(ApproximateFloat64 const& x);
@@ -869,15 +878,27 @@ template<class N, EnableIf<IsIntegral<N>> =dummy> Bool operator< (ExactFloat64 c
 template<class N, EnableIf<IsIntegral<N>> =dummy> Bool operator> (ExactFloat64 const& x1, N n2) { return x1.raw()> n2; }
 
 
-template<class PR> inline  Float<Approximate,PR> make_float(Number<Approximate> const& y, PR pr) { return Float<Approximate,PR>(y,pr); }
-template<class PR> inline  Float<Lower,PR> make_float(Float<Lower,PR> const& y, PR pr) { return Float<Lower,PR>(y,pr); }
-template<class PR> inline  Float<Upper,PR> make_float(Number<Upper> const& y, PR pr) { return Float<Upper,PR>(y,pr); }
-template<class PR> inline  Float<Bounded,PR> make_float(Number<Validated> const& y, PR pr) { return Float<Bounded,PR>(y,pr); }
-template<class PR> inline  Float<Bounded,PR> make_float(Number<Effective> const& y, PR pr) { return Float<Bounded,PR>(y,pr); }
-template<class PR> inline  Float<Bounded,PR> make_float(Number<Exact> const& y, PR pr) { return Float<Bounded,PR>(y,pr); }
-template<class PR> inline  Float<Bounded,PR> make_float(Real const& y, PR pr) { return Float<Bounded,PR>(y,pr); }
-template<class PR> inline  Float<Bounded,PR> make_float(Rational const& y, PR pr) { return Float<Bounded,PR>(y,pr); }
+template<class PR> inline Float<Approximate,PR> make_float(Number<Approximate> const& y, PR pr) { return Float<Approximate,PR>(y,pr); }
+template<class PR> inline Float<Lower,PR> make_float(Float<Lower,PR> const& y, PR pr) { return Float<Lower,PR>(y,pr); }
+template<class PR> inline Float<Upper,PR> make_float(Number<Upper> const& y, PR pr) { return Float<Upper,PR>(y,pr); }
+template<class PR> inline Float<Bounded,PR> make_float(Number<Validated> const& y, PR pr) { return Float<Bounded,PR>(y,pr); }
+template<class PR> inline Float<Bounded,PR> make_float(Number<Effective> const& y, PR pr) { return Float<Bounded,PR>(y,pr); }
+template<class PR> inline Float<Bounded,PR> make_float(Number<Exact> const& y, PR pr) { return Float<Bounded,PR>(y,pr); }
+template<class PR> inline Float<Bounded,PR> make_float(Real const& y, PR pr) { return Float<Bounded,PR>(y,pr); }
+template<class PR> inline Float<Bounded,PR> make_float(Rational const& y, PR pr) { return Float<Bounded,PR>(y,pr); }
+template<class PR> inline Float<Exact,PR> make_float(Integer const& y, PR pr) { return Float<Exact,PR>(y,pr); }
+template<class N, class PR, EnableIf<IsIntegral<N>> =dummy> inline Float<Exact,PR> make_float(N const& y, PR pr) { return Float<Exact,PR>(y,pr); }
+template<class D, class PR, EnableIf<IsFloatingPoint<D>> =dummy> inline Float<Exact,PR> make_float(D const& y, PR pr) { return Float<Approximate,PR>(y,pr); }
 
+// FIXME: Currently needed for mixed operations with builtin floats; should change (based on double being an ApproximateNumber)
+template<class D, class Y, EnableIf<IsFloatingPoint<D>> =dummy, EnableIf<IsNumber<Y>> =dummy> auto operator+(D d, Y y) -> ApproximateFloat64;
+template<class D, class Y, EnableIf<IsFloatingPoint<D>> =dummy, EnableIf<IsNumber<Y>> =dummy> auto operator+(Y y, D d) -> ApproximateFloat64;
+template<class D, class Y, EnableIf<IsFloatingPoint<D>> =dummy, EnableIf<IsNumber<Y>> =dummy> auto operator-(D d, Y y) -> ApproximateFloat64;
+template<class D, class Y, EnableIf<IsFloatingPoint<D>> =dummy, EnableIf<IsNumber<Y>> =dummy> auto operator-(Y y, D d) -> ApproximateFloat64;
+template<class D, class Y, EnableIf<IsFloatingPoint<D>> =dummy, EnableIf<IsNumber<Y>> =dummy> auto operator*(D d, Y y) -> ApproximateFloat64;
+template<class D, class Y, EnableIf<IsFloatingPoint<D>> =dummy, EnableIf<IsNumber<Y>> =dummy> auto operator*(Y y, D d) -> ApproximateFloat64;
+template<class D, class Y, EnableIf<IsFloatingPoint<D>> =dummy, EnableIf<IsNumber<Y>> =dummy> auto operator/(D d, Y y) -> ApproximateFloat64;
+template<class D, class Y, EnableIf<IsFloatingPoint<D>> =dummy, EnableIf<IsNumber<Y>> =dummy> auto operator/(Y y, D d) -> ApproximateFloat64;
 
 template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumber<Y>> =dummy> auto
 operator+(X const& x, Y const& y) -> decltype(x+make_float(y,x.precision())) { return x+make_float(y,x.precision()); }
@@ -889,7 +910,7 @@ template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumber
 operator/(X const& x, Y const& y) -> decltype(x/make_float(y,x.precision())) { return x/make_float(y,x.precision()); }
 
 template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumber<Y>> =dummy> auto
-operator+(Y const& y, X const& x) -> decltype(make_float(y,x.raw().precision())+x) { return make_float(y,x.precision())+x; }
+operator+(Y const& y, X const& x) -> decltype(make_float(y,x.precision())+x) { return make_float(y,x.precision())+x; }
 template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumber<Y>> =dummy> auto
 operator-(Y const& y, X const& x) -> decltype(make_float(y,x.precision())-x) { return make_float(y,x.precision())-x; }
 template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumber<Y>> =dummy> auto

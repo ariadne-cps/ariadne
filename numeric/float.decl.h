@@ -106,13 +106,11 @@ using MetrcFloatMP = MetricFloatMP;
 using ApprxFloatMP = ApproximateFloatMP;
 */
 
-template<> struct IsNumber<double> : True { };
-
 template<class X> struct IsFloat : False { };
 template<class P, class PR> struct IsFloat<Float<P,PR>> : True { };
-template<> struct IsFloat<double> : True { };
 
 template<class T> struct IsNumber;
+template<> struct IsNumber<double> : True { };
 template<class P, class PR> struct IsNumber<Float<P,PR>> : True { };
 
 } // namespace Ariadne

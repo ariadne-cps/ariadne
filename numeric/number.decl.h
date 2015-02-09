@@ -44,6 +44,9 @@ class DivideByZeroError : public std::runtime_error {
 template<class X> struct IsNumber;
 template<class P=Void> class Number;
 
+typedef uint Nat;
+typedef int Int;
+
 class Nat32;
 class Nat64;
 class Int32;
@@ -56,6 +59,7 @@ class Integer;
 class Rational;
 class Real;
 
+template<> struct IsNumber<Int>;
 template<> struct IsNumber<Integer>;
 template<> struct IsNumber<Rational>;
 template<> struct IsNumber<Real>;

@@ -48,14 +48,14 @@ class Plus;
 
 namespace Detail {
 
+#ifndef ARIADNE_COMPILE_TIME_CHECK
 template<class OP, class X1, class X2, class = Fallback> struct SafeTypedef {
     typedef Fallback Type; };
 template<class OP, class X1, class X2> struct SafeTypedef<OP,X1,X2, EnableIf<IsConvertible<decltype(declval<OP>()(declval<X1>(),declval<X2>())),DontCare>,Fallback>> {
     typedef decltype(declval<OP>()(declval<X1>(),declval<X2>()) ) Type; };
-
-/*
+#else // ARIADNE_COMPILE_TIME_CHECK
 template<class OP, class X1, class X2> struct SafeTypedef { typedef decltype( OP()(declval<X1>(),declval<X2>()) ) Type; };
-*/
+#endif
 
 template<class X, class = Fallback> struct SafeNegationTypedef { typedef Fallback Type; };
 template<class X> struct SafeNegationTypedef<X, EnableIf<IsConvertible<decltype(-declval<X>()),DontCare>,Fallback>> { typedef decltype(-declval<X>()) Type; };
@@ -117,11 +117,21 @@ void output_check_result(Bool p, String e, String r, String op, String a1, Strin
 }
 
 // Check if the result of OP(A1,A2) has expected type E
+#ifndef ARIADNE_COMPILE_TIME_CHECK
 template<class E, class OP, class A1, class A2> void chk() {
     typedef SafeType<OP,A1,A2> R;
     Bool p=IsSame<R,E>();
     output_check_result(p,class_name<E>(),class_name<R>(),op_name<OP>(),class_name<A1>(),class_name<A2>());
 }
+#else
+template<class E, class R, class OP, class A1, class A2> void sm() {
+    static_assert(IsSame<E, R>::value,"");
+}
+template<class E, class OP, class A1, class A2> void chk() {
+    typedef SafeType<OP,A1,A2> R;
+    sm<E,R,OP,A1,A2>();
+}
+#endif
 
 void output_check_explicitly_constructible_result(Bool p, String t, String f, Bool c) {
     std::cout << "Checking " << t << " is constructible from " << f << ":";
@@ -224,7 +234,7 @@ ARIADNE_CLASS_NAME(Number<Exact>)
 ARIADNE_CLASS_NAME(ApproximateFloat64);
 ARIADNE_CLASS_NAME(LowerFloat64);
 ARIADNE_CLASS_NAME(UpperFloat64);
-ARIADNE_CLASS_NAME(ValidatedFloat64);
+ARIADNE_CLASS_NAME(BoundedFloat64);
 ARIADNE_CLASS_NAME(MetricFloat64);
 ARIADNE_CLASS_NAME(ErrorFloat64);
 ARIADNE_CLASS_NAME(ExactFloat64);
@@ -232,7 +242,8 @@ ARIADNE_CLASS_NAME(ExactFloat64);
 ARIADNE_CLASS_NAME(ApproximateFloatMP);
 ARIADNE_CLASS_NAME(LowerFloatMP);
 ARIADNE_CLASS_NAME(UpperFloatMP);
-ARIADNE_CLASS_NAME(ValidatedFloatMP);
+ARIADNE_CLASS_NAME(BoundedFloatMP);
+ARIADNE_CLASS_NAME(MetricFloatMP);
 ARIADNE_CLASS_NAME(ErrorFloatMP);
 ARIADNE_CLASS_NAME(ExactFloatMP);
 

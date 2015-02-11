@@ -233,6 +233,11 @@ ValidatedUpper weaker_paradigm(ValidatedUpper,ValidatedUpper);
 ValidatedLower weaker_paradigm(ValidatedLower,ValidatedLower);
 Approximate weaker_paradigm(Approximate,Approximate);
 
+template<class P1, class P2, EnableIf<And<IsSame<P1,Metric>,IsSame<P2,Bounded>>> =dummy>
+ValidatedBounded weaker_paradigm(P1,P2);
+template<class P1, class P2, EnableIf<And<IsSame<P1,Bounded>,IsSame<P2,Metric>>> =dummy>
+ValidatedBounded weaker_paradigm(P1,P2);
+
 Approximate equality_paradigm(Approximate,Approximate);
 ValidatedLower equality_paradigm(ValidatedLower,ValidatedUpper);
 ValidatedLower equality_paradigm(ValidatedUpper,ValidatedLower);

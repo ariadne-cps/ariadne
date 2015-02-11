@@ -45,28 +45,68 @@ template<class X> auto operator>=(X const& x, double d) -> decltype(x>=ExactFloa
     template<class A, class = Fallback> struct Has_##method_to_check : False { }; \
     template<class A> struct Has_##method_to_check<A, EnableIf<IsDefined<decltype(declval<A>().method_to_check())>,Fallback>> : True { }; \
 
-struct OperatorPositive { template<class A> auto operator()(A a) const -> decltype(+a) { return +a; } };
-struct OperatorNegative { template<class A> auto operator()(A a) const -> decltype(-a) { return -a; } };
-struct OperatorNegate { template<class A> auto operator()(A a) const -> decltype(-a) { return -a; } };
-struct OperatorUnaryPlus { template<class A> auto operator()(A a) const -> decltype(+a) { return +a; } };
-struct OperatorUnaryMinus { template<class A> auto operator()(A a) const -> decltype(-a) { return -a; } };
-struct OperatorPlus { template<class A1, class A2> auto operator()(A1 a1, A2 a2) const -> decltype(a1+a2) { return a1+a2; } };
-struct OperatorMinus { template<class A1, class A2> auto operator()(A1 a1, A2 a2) const -> decltype(a1-a2) { return a1-a2; } };
-struct OperatorTimes { template<class A1, class A2> auto operator()(A1 a1, A2 a2) const -> decltype(a1*a2) { return a1*a2; } };
-struct OperatorDivides { template<class A1, class A2> auto operator()(A1 a1, A2 a2) const -> decltype(a1/a2) { return a1/a2; } };
+struct OperatorPlus {
+    template<class A> auto operator()(A a) const -> decltype(+a) { return +a; }
+    template<class A1, class A2> auto operator()(A1 a1, A2 a2) const -> decltype(a1+a2) { return a1+a2; }
+};
+struct OperatorMinus {
+    template<class A> auto operator()(A a) const -> decltype(-a) { return -a; }
+    template<class A1, class A2> auto operator()(A1 a1, A2 a2) const -> decltype(a1-a2) { return a1-a2; }
+};
+struct OperatorTimes {
+    template<class A1, class A2> auto operator()(A1 a1, A2 a2) const -> decltype(a1*a2) { return a1*a2; }
+};
+struct OperatorDivides {
+    template<class A1, class A2> auto operator()(A1 a1, A2 a2) const -> decltype(a1/a2) { return a1/a2; }
+};
 
 struct OperatorAnd { template<class A1, class A2> auto operator()(A1 a1, A2 a2) const -> decltype(a1 && a2) { return a1 && a2; } };
 struct OperatorOr { template<class A1, class A2> auto operator()(A1 a1, A2 a2) const -> decltype(a1 || a2) { return a1 || a2; } };
 struct OperatorNot { template<class A> auto operator()(A a) const -> decltype(!a) { return !a; } };
 
 struct OperatorEqual { template<class A1, class A2> auto operator()(A1 a1, A2 a2) const -> decltype(a1==a2) { return a1==a2; } };
+struct OperatorEquals { template<class A1, class A2> auto operator()(A1 a1, A2 a2) const -> decltype(a1==a2) { return a1==a2; } };
 struct OperatorLess { template<class A1, class A2> auto operator()(A1 a1, A2 a2) const -> decltype(a1< a2) { return a1< a2; } };
 
-template<class T1, class T2, class = Fallback> struct IsEqualityComparible : False { };
-template<class T1, class T2> struct IsEqualityComparible<T1,T2,EnableIf<IsDefined<decltype(declval<T1&>()==declval<T2&>())>,Fallback>> : True { };
+namespace Detail {
+#ifndef ARIADNE_COMPILE_TIME_CHECK
+template<class F, class A1, class = Fallback> struct SafeUnaryTypedef {
+    typedef Fallback Type; };
+template<class F, class A1>
+struct SafeUnaryTypedef<F,A1, EnableIf<IsConvertible<decltype(declval<F>()(declval<A1>())),DontCare>,Fallback>> {
+    typedef decltype(declval<F>()(declval<A1>()) ) Type; };
+//template<class F, class A1> struct SafeUnaryTypedef<F,A1, EnableIf<IsDefined<ResultOf(F(A1))>,Fallback>> {
+//    typedef ResultOf(F(A1)) Type; };
+template<class F, class A1, class A2, class = Fallback> struct SafeBinaryTypedef {
+    typedef Fallback Type; };
+template<class F, class A1, class A2>
+struct SafeBinaryTypedef<F,A1,A2, EnableIf<IsConvertible<decltype(declval<F>()(declval<A1>(),declval<A2>())),DontCare>,Fallback>> {
+    typedef decltype(declval<F>()(declval<A1>(),declval<A2>()) ) Type; };
+//template<class F, class A1, class A2> struct SafeBinaryTypedef<F,A1,A2, EnableIf<IsDefined<ResultOf(F(A1,A2))>,Fallback>> {
+//    typedef ResultOf(F(A1,A2)) Type; };
+template<class F, class A1, class A2, class A3, class = Fallback> struct SafeTernaryTypedef {
+    typedef Fallback Type; };
+template<class F, class A1, class A2, class A3>
+struct SafeTernaryTypedef<F,A1,A2,A3, EnableIf<IsConvertible<decltype(declval<F>()(declval<A1>(),declval<A2>(),declval<A3>())),DontCare>,Fallback>> {
+    typedef decltype(declval<F>()(declval<A1>(),declval<A2>(),declval<A3>()) ) Type; };
+//template<class F, class A1, class A2, class A3> struct SafeTernaryTypedef<F,A1,A2,A3, EnableIf<IsDefined<ResultOf(F(A1,A2,A3))>,Fallback>> {
+//    typedef ResultOf(F(A1,A2,A3)) Type; };
+template<class F, class... AS> struct SafeTypedef;
+template<class F, class A1> struct SafeTypedef<F,A1> : SafeUnaryTypedef<F,A1> { };
+template<class F, class A1, class A2> struct SafeTypedef<F,A1,A2> : SafeBinaryTypedef<F,A1,A2> { };
+template<class F, class A1, class A2, class A3> struct SafeTypedef<F,A1,A2,A3> : SafeTernaryTypedef<F,A1,A2,A3> { };
+#else // ARIADNE_COMPILE_TIME_CHECK
+template<class F, class... AS> struct SafeTypedef { typedef ResultOf<F(AS...)> Type; };
+template<class F, class A1> struct SafeTypedef<F,A1> {
+    typedef decltype(declval<F>()(declval<A1>())) Type; };
+template<class F, class A1, class A2> struct SafeTypedef<F,A1,A2> {
+    typedef decltype(declval<F>()(declval<A1>(),declval<A2>())) Type; };
+template<class F, class A1, class A2, class A3> struct SafeTypedef<F,A1,A2,A3> {
+    typedef decltype(declval<F>()(declval<A1>(),declval<A2>(),declval<A3>())) Type; };
+#endif
+} //namespace Detail
 
-template<class T1, class T2, class = Fallback> struct IsLessThanCompartible : False { };
-template<class T1, class T2> struct IsLessThanCompartible<T1,T2,EnableIf<IsDefined<decltype(declval<T1>()<declval<T2>())>,Fallback>> : True { };
+template<class F, class... AS> using SafeType = typename Detail::SafeTypedef<F,AS...>::Type;
 
 template<class R, class Op, class A, class = Fallback> struct HasUnaryOperatorReturning : False { };
 template<class R, class Op, class A> struct HasUnaryOperatorReturning<R,Op,A,EnableIf<IsConvertible<ResultOf<Op(A)>,R>,Fallback>> : True { };
@@ -90,6 +130,8 @@ template<class Op, class A1, class A2> struct HasOperator<Op,A1,A2,Void> : HasBi
 template<class Op, class A> struct HasOperator<Op,A,Void> : HasUnaryOperator<Op,A> { };
 template<class Op, class A1, class A2, class R> struct HasOperator<Op,A1,A2,Return<R>> : HasBinaryOperatorReturning<R,Op,A1,A2> { };
 template<class Op, class A, class R> struct HasOperator<Op,A,Return<R>> : HasUnaryOperatorReturning<R,Op,A> { };
+
+template<class T> struct Expect { template<class U, EnableIf<IsSame<T,U>> =dummy> Expect<T>& operator=(U const&) { return *this; } };
 
 //} // namespace Test
 //using namespace Test;

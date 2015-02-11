@@ -50,6 +50,13 @@ s/Variable<String>/StringVariable/g
 s/Variable<Integer>/IntegerVariable/g
 s/Variable<Real>/RealVariable/g
 
+s/Number<\(\w*\)>/\1Number/g
+s/Float<\(\w\w*\), Precision\(..\)>/\1Float\2/g
+s/ValidatedMetric/Metric/g
+s/ValidatedBounded/Bounded/g
+s/ValidatedLower/Lower/g
+s/ValidatedUpper/Upper/g
+
 s/Box<\(\w*\)Interval>/\1Box/g
 
 s/\/usr\/lib\/gcc\/.*\/include\/c++\/.\..\..\///g

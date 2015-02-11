@@ -29,19 +29,18 @@ using namespace Ariadne;
 
 namespace Ariadne {
 
-template<class X, class N, class R=Return<DontCare>, class = Fallback> struct HasPow : False { };
-template<class X, class N, class R> struct HasPow<X,N,Return<R>,EnableIf<IsConvertible<decltype(pow(declval<X&>(),declval<N&>())),R>,Fallback>> : True { };
 
-//template<typename Op, typename T, typename = Fallback> struct HasUnaryOperator : False { };
-//template<typename Op, typename T> struct HasUnaryOperator<Op,T,EnableIf<True,decltype(Op()(declval<T&>()),Fallback())>> : True { };
-//template<typename Op, typename T1, typename T2, typename = Fallback>  struct HasBinaryOperator : False { };
-//template<typename Op, typename T1, typename T2>  struct HasBinaryOperator<Op,T1,T2,EnableIf<True,decltype(Op()(declval<T1>(),declval<T2>()),Fallback())>> : True { };
+template<class T1, class T2> struct IsEqualityComparible : HasBinaryOperator<Equal,T1,T2> { };
+template<class T1, class T2> struct IsLessThanCompartible : HasBinaryOperator<Less,T1,T2> { };
+
+template<class X, class N, class R=Return<DontCare>, class = Fallback> struct HasPow : IsConvertible<SafeType<Pow,X,N>,R> { };
+
 
 template<class N> class CheckNumberConcepts {
   public:
     void check_signed_concept() {
-        ARIADNE_TEST_STATIC_ASSERT(HasOperatorReturning<N,OperatorPositive,N>);
-        ARIADNE_TEST_STATIC_ASSERT(HasOperatorReturning<N,OperatorNegative,N>);
+        ARIADNE_TEST_STATIC_ASSERT(HasOperatorReturning<N,OperatorPlus,N>);
+        ARIADNE_TEST_STATIC_ASSERT(HasOperatorReturning<N,OperatorMinus,N>);
         ARIADNE_TEST_STATIC_ASSERT(HasOperator<Pos,N,Return<N>>);
         ARIADNE_TEST_STATIC_ASSERT(HasOperator<Neg,N,Return<N>>);
     }
@@ -61,7 +60,7 @@ template<class N> class CheckNumberConcepts {
         check_semiring_concept();
         check_signed_concept();
         ARIADNE_TEST_STATIC_ASSERT(IsConstructible<N,int>);
-        ARIADNE_TEST_STATIC_ASSERT(HasOperator<OperatorNegate,N>);
+        ARIADNE_TEST_STATIC_ASSERT(HasOperator<OperatorMinus,N>);
         ARIADNE_TEST_STATIC_ASSERT(HasOperator<OperatorMinus,N,N>);
         ARIADNE_TEST_STATIC_ASSERT(HasOperator<Neg,N>);
         ARIADNE_TEST_STATIC_ASSERT(HasOperator<Sub,N,N>);

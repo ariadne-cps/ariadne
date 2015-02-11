@@ -35,6 +35,7 @@ namespace Ariadne {
 typedef void Void;
 typedef bool Bool;
 
+
 using std::declval;
 
 using True = std::true_type;
@@ -73,22 +74,21 @@ template<class T> using IsSigned = std::is_signed<T>;
 template<class T> using IsUnsigned = std::is_unsigned<T>;
 template<class T> using IsFloatingPoint = std::is_floating_point<T>;
 
-template<class T> using ResultOf = typename std::result_of<T>::type;
+template<class SIG> using ResultOf = typename std::result_of<SIG>::type;
 
 template<class T1, class T2, class T3> using AreSame = And<IsSame<T1,T2>,IsSame<T2,T3>>;
 
-template<class T> struct IsDefined : True { };
+struct Fallback { };
+struct DontCare { template<class T> DontCare(T); };
+template<class R> struct Return { };
+struct Any { };
+
+template<class T> struct IsDefined : IsConvertible<T,DontCare> { };
 template<class T=void> struct IsSomething : True { };
 template<> struct IsSomething<void> : False { };
 
 template<class T> struct Self { typedef T Type; };
 template<class T> using SelfType = typename Self<T>::Type;
-
-struct Fallback { };
-//struct DontCare { template<class T> DontCare(const T&); };
-struct DontCare { template<class T> DontCare(T); };
-template<class R> struct Return { };
-struct Any { };
 
 template<class F, class A, class R=DontCare, class=Fallback> struct IsCallable : False { };
 template<class F, class A, class R> struct IsCallable<F,A,R, EnableIf<IsConvertible<decltype(declval<F>()(declval<A>())),R>,Fallback>> : True { };

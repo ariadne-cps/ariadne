@@ -51,6 +51,22 @@ using namespace Ariadne;
 
 namespace Ariadne {
 
+template<class IVL>
+IVL __bxgetitem__(const Box<IVL>& bx, Int i)
+{
+    if(i<0) { i+=bx.size(); }
+    ARIADNE_ASSERT_MSG(0<=i && uint(i)<bx.size(),"bx="<<bx<<" i="<<i);
+    return bx[i];
+}
+
+
+template<class IVL>
+void __bxsetitem__(Box<IVL>& bx, int i, const IVL& x)
+{
+    if(i<0) { i+=bx.size(); }
+    ARIADNE_ASSERT(0<=i && uint(i)<bx.size());
+    bx[i]=x;
+}
 
 template<>
 struct from_python_dict<ExactInterval> {
@@ -322,6 +338,8 @@ void export_box()
     class_<ExactBox,bases<CompactSetInterface,OpenSetInterface,Vector<ExactInterval>,DrawableInterface > > box_class("ExactBox",init<ExactBox>());
     box_class.def(init<uint>());
     box_class.def(init< Vector<ExactInterval> >());
+    box_class.def("__setitem__", &__bxsetitem__<ExactInterval>);
+    box_class.def("__getitem__", &__bxgetitem__<ExactInterval>);
     box_class.def("__eq__", (bool(*)(const Vector<ExactInterval>&,const Vector<ExactInterval>&)) &operator==);
     box_class.def("dimension", (uint(ExactBox::*)()const) &ExactBox::dimension);
     box_class.def("centre", (ExactPoint(ExactBox::*)()const) &ExactBox::centre);
@@ -497,6 +515,7 @@ void export_constrained_image_set()
 
 void geometry_submodule() {
     export_set_interface();
+    export_interval();
     export_point();
     export_box();
 //    export_zonotope();

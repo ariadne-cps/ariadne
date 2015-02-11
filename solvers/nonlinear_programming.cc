@@ -134,16 +134,6 @@ Vector<X> emul(const Vector<X>& x, const Vector<X>& z) {
     Vector<X> r(x.size()); for(Nat i=0; i!=r.size(); ++i) { r[i]=x[i]*z[i]; } return r;
 }
 
-inline
-Vector<UpperInterval> emul(const Vector<UpperInterval>& x, const Vector<Float64>& z) {
-    Vector<UpperInterval> r(x.size()); for(Nat i=0; i!=r.size(); ++i) { r[i]=x[i]*z[i]; } return r;
-}
-
-inline
-Vector<UpperInterval> emul(const Vector<Float64>& x, const Vector<UpperInterval>& z) {
-    Vector<UpperInterval> r(x.size()); for(Nat i=0; i!=r.size(); ++i) { r[i]=x[i]*z[i]; } return r;
-}
-
 template<class X, class XX> inline
 Vector<X> ediv(const Vector<X>& x, const Vector<XX>& z) {
     Vector<X> r(x.size()); for(Nat i=0; i!=r.size(); ++i) { r[i]=x[i]/z[i]; } return r;
@@ -541,7 +531,7 @@ contains_feasible_point(ExactBox D, ValidatedVectorFunction g, ExactBox C, Valid
     ARIADNE_LOG(7,"ge="<<ge<<", ce="<<ce<<"\n");
 
     // FIXME: Carefully change this code!
-    UpperIntervalMatrix ivlA=jacobian_range(ge,X);
+    ValidatedFloatMatrix ivlA=jacobian(ge,X);
     ARIADNE_LOG(7,"ivlA="<<ivlA<<"\n");
     ApproximateFloatVector fltD(X.size());
     for(Nat i=0; i!=X.size(); ++i) { fltD[i]=rec(sqr(X[i].error())); }
@@ -551,10 +541,10 @@ contains_feasible_point(ExactBox D, ValidatedVectorFunction g, ExactBox C, Valid
     ApproximateFloatMatrix fltL = ApproximateFloatDiagonalMatrix(fltD.array())*transpose(fltA);
     ARIADNE_LOG(7,"L="<<fltL<<"\n");
 
-    UpperIntervalMatrix ivlS = ivlA * make_exact(fltL);
+    ValidatedFloatMatrix ivlS = ivlA * make_exact(fltL);
     ARIADNE_LOG(7,"ivlS="<<ivlS<<"\n");
 
-    UpperIntervalMatrix ivlR = inverse(ivlS);
+    ValidatedFloatMatrix ivlR = inverse(ivlS);
     try {
         ivlR=inverse(ivlS);
     }
@@ -750,7 +740,7 @@ is_infeasibility_certificate(ExactBox D, ValidatedVectorFunction g, ExactBox C, 
     }
     ValidatedNumber iygx = tyg(make_singleton(D));
 
-    UpperInterval iyC = 0;
+    UpperInterval iyC(0,0);
     for(Nat i=0; i!=n; ++i) {
         iyC+=y[i]*C[i];
     }

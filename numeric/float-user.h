@@ -430,6 +430,7 @@ template<> Float<Upper,Precision64>::Float(Real const& x);
 template<> Float<Lower,Precision64>::Float(Real const& x);
 template<> Float<Approximate,Precision64>::Float(Real const& x);
 
+#ifdef ARIADNE_TEMPLATED_FLOAT
 template<class P1, class P2, class PR> inline auto
 operator+(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> Float<Widen<Weaker<P1,P2>>,PR>;
 
@@ -441,6 +442,7 @@ operator*(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> Float<Widen<Weaker<
 
 template<class P1, class P2, class PR> inline auto
 operator/(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> Float<Widen<Weaker<P1,Opposite<P2>>>,PR>;
+#endif
 
 ApproximateFloat64 floor(ApproximateFloat64 const& x);
 ApproximateFloat64 ceil(ApproximateFloat64 const& x);

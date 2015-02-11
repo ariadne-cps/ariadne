@@ -278,11 +278,8 @@ class UpperInterval {
     //! \brief Default constructor yields the singleton zero interval \a [0,0].
     explicit UpperInterval() : l(0.0), u(0.0) { }
     //! \brief Construct a singleton interval.
-    // FIXME: Should make explicit, but this interferes with role as a numeric type
-    template<class F, EnableIf<IsSame<F,Float64>> =dummy> UpperInterval(F point) : l(point), u(point) { }
-    // FIXME: Should make explicit, but this interferes with role as a numeric type
-    template<class N, EnableIf<IsIntegral<N>> = dummy> UpperInterval(N n) : l(n), u(n) { }
-    // FIXME: Should make explicit, but this interferes with role as a numeric type
+    template<class F, EnableIf<IsSame<F,Float64>> =dummy> explicit UpperInterval(F point) : l(point), u(point) { }
+    template<class N, EnableIf<IsIntegral<N>> = dummy> explicit UpperInterval(N point) : l(point), u(point) { }
     template<class D, EnableIf<IsFloatingPoint<D>> =dummy> explicit UpperInterval(D point) : l(point), u(point) { }
     //! \brief Create from explicitly given lower and upper bounds. Yields the interval \a [lower,upper].
     explicit UpperInterval(Float64 lower, Float64 upper) : l(lower), u(upper) { }
@@ -294,9 +291,11 @@ class UpperInterval {
     UpperInterval(ExactInterval ivl) : UpperInterval(ivl.lower_raw(),ivl.upper_raw()) { }
 
     //! \brief Construct a singleton interval.
-    UpperInterval(ExactFloat64 point) : l(point.raw()), u(point.raw()) { }
-    UpperInterval(ValidatedFloat64 point) : l(point.lower_raw()), u(point.upper_raw()) { }
-    UpperInterval(Real point) : UpperInterval(ValidatedFloat64(point)) { }
+    explicit UpperInterval(ExactFloat64 point) : l(point.raw()), u(point.raw()) { }
+    explicit UpperInterval(ValidatedFloat64 point) : l(point.lower_raw()), u(point.upper_raw()) { }
+    explicit UpperInterval(Real point) : UpperInterval(ValidatedFloat64(point)) { }
+
+    UpperInterval& operator=(ValidatedFloat64 point) { l=point.lower_raw(); u=point.upper_raw(); }
 
     //! \brief Set the lower bound of the interval.
     Void set_lower(LowerFloat64 lower) { l=lower.raw(); }
@@ -580,6 +579,31 @@ inline Tribool operator<=(UpperInterval i1, UpperInterval i2) {
     else if(i1.lower_raw()> i2.upper_raw()) { return false; }
     else { return indeterminate; }
 }
+
+// Mixed operations
+inline UpperInterval operator+(UpperInterval i1, ValidatedFloat64 x2) { return i1+make_interval(x2); }
+inline UpperInterval operator-(UpperInterval i1, ValidatedFloat64 x2) { return i1-make_interval(x2); }
+inline UpperInterval operator*(UpperInterval i1, ValidatedFloat64 x2) { return i1*make_interval(x2); }
+inline UpperInterval operator/(UpperInterval i1, ValidatedFloat64 x2) { return i1/make_interval(x2); }
+inline UpperInterval operator+(ValidatedFloat64 x1, UpperInterval i2) { return make_interval(x1)+i2; }
+inline UpperInterval operator-(ValidatedFloat64 x1, UpperInterval i2) { return make_interval(x1)-i2; }
+inline UpperInterval operator*(ValidatedFloat64 x1, UpperInterval i2) { return make_interval(x1)*i2; }
+inline UpperInterval operator/(ValidatedFloat64 x1, UpperInterval i2) { return make_interval(x1)/i2; }
+inline UpperInterval& operator+=(UpperInterval& i1, ValidatedFloat64 x2) { return i1+=make_interval(x2); }
+inline UpperInterval& operator-=(UpperInterval& i1, ValidatedFloat64 x2) { return i1-=make_interval(x2); }
+inline UpperInterval& operator*=(UpperInterval& i1, ValidatedFloat64 x2) { return i1*=make_interval(x2); }
+inline UpperInterval& operator/=(UpperInterval& i1, ValidatedFloat64 x2) { return i1/=make_interval(x2); }
+inline Tribool operator==(UpperInterval i1, ValidatedFloat64 x2) { return i1==make_interval(x2); }
+inline Tribool operator!=(UpperInterval i1, ValidatedFloat64 x2) { return i1!=make_interval(x2); }
+inline Tribool operator<=(UpperInterval i1, ValidatedFloat64 x2) { return i1<=make_interval(x2); }
+inline Tribool operator>=(UpperInterval i1, ValidatedFloat64 x2) { return i1>=make_interval(x2); }
+inline Tribool operator< (UpperInterval i1, ValidatedFloat64 x2) { return i1< make_interval(x2); }
+inline Tribool operator> (UpperInterval i1, ValidatedFloat64 x2) { return i1> make_interval(x2); }
+
+inline UpperInterval hull(UpperInterval i1, ValidatedFloat64 x2) { return hull(i1,make_interval(x2)); }
+inline UpperInterval hull(ValidatedFloat64 x1, UpperInterval i2) { return hull(make_interval(x1),i2); }
+inline UpperInterval hull(ValidatedFloat64 x1, ValidatedFloat64 x2) { return hull(make_interval(x1),make_interval(x2)); }
+
 
 #ifdef ARIADNE_ENABLE_SERIALIZATION
   template<class A> Void serialize(A& a, ExactInterval& ivl, const Nat version) {

@@ -73,7 +73,7 @@ ValidatedProcedure make_procedure(const ValidatedScalarFunction& f) {
 }
 
 UpperInterval emulrng(const ExactFloatVector& x, const ExactFloatVector& z) {
-    UpperInterval r=mul(x[0],z[0]);
+    UpperInterval r=make_interval(mul(x[0],z[0]));
     for(Nat i=0; i!=x.size(); ++i) { r=hull(mul(x[i],z[i]),r); }
     return r;
 }

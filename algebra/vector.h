@@ -496,7 +496,7 @@ template<class X> inline auto sup_norm(const Vector<X>& v) -> decltype(mag(declv
 
 template<class X1, class X2> inline auto dot(const Vector<X1>& v1, const Vector<X2>& v2) -> decltype(v1[0]*v2[0]+v1[0]*v2[0]) {
     ARIADNE_PRECONDITION(v1.size()==v2.size());
-    decltype(declval<X1>()*declval<X2>()+declval<X1>()*declval<X2>()) r=0u;
+    decltype(declval<X1>()*declval<X2>()+declval<X1>()*declval<X2>()) r(0u);
     for(SizeType i=0; i!=v1.size(); ++i) {
         r+=v1[i]*v2[i];
     }

@@ -778,7 +778,7 @@ Nat GridAbstractCell::smallest_enclosing_primary_cell_height( const UpperBox& th
     Vector<ExactInterval> theLatticeBox( theBox.size() );
     //Convert the box to theGrid coordinates
     for( Nat i = 0; i != theBox.size(); ++i ) {
-        theLatticeBox[i] = make_exact_interval( ( theBox[i] - theGrid.origin()[i] ) / theGrid.lengths()[i] );
+        theLatticeBox[i] = make_exact_interval( ( theBox[i] - make_exact(theGrid.origin()[i])) / make_exact(theGrid.lengths()[i]) );
     }
     //Compute and return the smallest primary cell, enclosing this box on the grid
     return smallest_enclosing_primary_cell_height( theLatticeBox );

@@ -114,6 +114,10 @@ class InteriorPointSolver
 
 
 
+template<class X> struct RigorousNumericsTraits { typedef X Type; };
+template<> struct RigorousNumericsTraits<ExactFloat64> { typedef ValidatedFloat64 Type; };
+template<class X> using RigorousNumericType = typename RigorousNumericsTraits<X>::Type;
+
 //! \relates SimplexSolver \brief The type of variable; lower bounded, upper bounded, basic, or fixed (upper and lower bounded).
 enum Slackness { LOWER=-1, BASIS=0, UPPER=+1, FIXED=+2 };
 OutputStream& operator<<(OutputStream& os, Slackness t);
@@ -124,19 +128,20 @@ template<class X>
 class SimplexSolver
     : public Loggable
 {
+    typedef RigorousNumericType<X> XX;
   public:
 
     //! \ingroup LinearProgrammingModule
     //! Solve the linear programming problem \f$\min cx \text{ s.t. } Ax=b;\ l\leq x\leq u\f$.
     //! Returns the optimal vector. Throws an error if the problem is infeasible.
-    Vector<X>
+    Vector<XX>
     minimise(const Vector<X>& c, const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b) const;
 
     //! \ingroup LinearProgrammingModule
     //! Solve the linear programming problem \f$\min cx \text{ s.t. } Ax=b;\ l\leq x\leq u\f$.
     //! Returns the optimal vector. Throws an error if the problem is infeasible.
     //! Uses starting variable types \a vt.
-    Vector<X>
+    Vector<XX>
     hotstarted_minimise(const Vector<X>& c, const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
                         Array<Slackness>& vt) const;
 
@@ -144,9 +149,9 @@ class SimplexSolver
     //! Solve the linear programming problem \f$\min cx \text{ s.t. } Ax=b;\ l\leq x\leq u\f$.
     //! Returns the optimal vector. Throws an error if the problem is infeasible.
     //! Uses starting variable types vt, permutation p and inverse basic matrix B.
-    Vector<X>
+    Vector<XX>
     hotstarted_minimise(const Vector<X>& c, const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
-                        Array<Slackness>& vt, Array<SizeType>& p, Matrix<X>& B) const;
+                        Array<Slackness>& vt, Array<SizeType>& p, Matrix<XX>& B) const;
 
     //! \ingroup LinearProgrammingModule
     //! Test if there exists a point \f$x\f$ with \f$0 \leq x\f$ and \f$Ax=b\f$.
@@ -177,7 +182,7 @@ class SimplexSolver
     //! The values of \a x and \a y are output parameters, giving access to the final primal and dual variables.
     Tribool
     hotstarted_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
-                        Array<Slackness>& vt, Array<SizeType>& p, Matrix<X>& B, Vector<X>& x, Vector<X>& y) const;
+                        Array<Slackness>& vt, Array<SizeType>& p, Matrix<XX>& B, Vector<XX>& x, Vector<XX>& y) const;
 
 
 
@@ -202,18 +207,18 @@ class SimplexSolver
 
     //! \ingroup LinearProgrammingModule
     //! Compute a permutation \f$p\f$ such that \f$p_{0},\ldots,p_{m-1}\f$ are the basis variables of \f$A\f$, and the inverse matrix \f$A_B^{-1}\f$.
-    Pair< Array<SizeType>, Matrix<X> >
+    Pair< Array<SizeType>, Matrix<XX> >
     compute_basis(const Matrix<X>& A) const;
 
     //! \ingroup LinearProgrammingModule
     //! Compute the point corresponding to the given Array of variable types.
-    Vector<X>
+    Vector<XX>
     compute_x(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b, const Array<Slackness>& vt) const;
 
     //! \ingroup LinearProgrammingModule
     //! Perform a single step of the standard linear programming problem, updating the variable type Array \a vt, the ordered variable Array \a p, the inverse basis matrix \a B and the variables \a x.
     Bool lpstep(const Vector<X>& c, const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
-                Array<Slackness>& vt, Array<SizeType>& p, Matrix<X>& B, Vector<X>& x) const;
+                Array<Slackness>& vt, Array<SizeType>& p, Matrix<XX>& B, Vector<XX>& x) const;
 
     //! \ingroup LinearProgrammingModule
     //! Perform a step of the simplex algorithm, choosing basic variable \a s to exit the basis.
@@ -223,7 +228,7 @@ class SimplexSolver
     //! Returns \a r where x[p[r]] was the variable entering the basis.
     //!  If r=m, then no step performed
     SizeType lpstep(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
-                  Array<Slackness>& vt, Array<SizeType>& p, Matrix<X>& B, Vector<X>& x, SizeType s) const;
+                  Array<Slackness>& vt, Array<SizeType>& p, Matrix<XX>& B, Vector<XX>& x, SizeType s) const;
 
     //! \ingroup LinearProgrammingModule
     //! Perform a step of the simplex algorithm for a feasibility computation using validated (interval) arithmetic.
@@ -243,18 +248,18 @@ class SimplexSolver
     //!   - x[j]=l[j] if j==LOWER and x[j]=u[j] if j==UPPER
     //!   - Ax=b
     Void consistency_check(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
-                           const Array<Slackness>& vt, const Array<SizeType>& p, const Matrix<X>& B, const Vector<X>& x) const;
+                           const Array<Slackness>& vt, const Array<SizeType>& p, const Matrix<XX>& B, const Vector<XX>& x) const;
 
     //! \brief Check that B is the inverse of the matrix with columns A[p[0],...,A[p[m-1]].
-    Void consistency_check(const Matrix<X>& A, const Array<SizeType>& p, const Matrix<X>& B) const;
+    Void consistency_check(const Matrix<X>& A, const Array<SizeType>& p, const Matrix<XX>& B) const;
     //! \brief Check that Ax=b
-    Void consistency_check(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& x) const;
+    Void consistency_check(const Matrix<X>& A, const Vector<X>& b, const Vector<XX>& x) const;
     //! \brief Check that the basic variable Array p is consistent with the variable type Array vt.
     //! Returns the number of basic variables.
     SizeType consistency_check(const Array<Slackness>& vt, const Array<SizeType>& p) const;
   private:
     Tribool _feasible(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
-                      Array<Slackness>& vt, Array<SizeType>& p, Matrix<X>& B, Vector<X>& x) const;
+                      Array<Slackness>& vt, Array<SizeType>& p, Matrix<XX>& B, Vector<XX>& x) const;
 
 
 };

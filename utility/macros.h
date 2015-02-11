@@ -78,7 +78,7 @@ bool decide(bool);
 #ifndef NDEBUG
 #define ARIADNE_DEBUG_ASSERT(expression) \
     { \
-        bool result = (expression); \
+        bool result = decide(expression); \
         if(!result) { \
             ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<__FUNCTION__,"Assertion `" << #expression << "' failed.\n"); \
         } \
@@ -92,7 +92,7 @@ bool decide(bool);
 
 #define ARIADNE_PRECONDITION_MSG(expression,error)             \
     { \
-        bool result = (expression); \
+        bool result = decide(expression); \
         if(!result) { \
             ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Precondition `" << #expression << "' failed.\n"<<"  "<<error<<"\n"); \
         } \
@@ -100,7 +100,7 @@ bool decide(bool);
 
 #define ARIADNE_PRECONDITION(expression)             \
     { \
-        bool result = (expression); \
+        bool result = decide(expression); \
         if(!result) { \
             ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Precondition `" << #expression << "' failed.\n"); \
         } \
@@ -109,7 +109,7 @@ bool decide(bool);
 #ifndef NDEBUG
 #define ARIADNE_DEBUG_PRECONDITION(expression) \
     { \
-        bool result = (expression); \
+        bool result = decide(expression); \
         if(!result) { \
             ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<__FUNCTION__,"Precondition `" << #expression << "' failed.\n"); \
         } \
@@ -127,7 +127,7 @@ bool decide(bool);
 
 #define ARIADNE_ASSERT_MSG(expression,error)             \
     { \
-        bool result = (expression); \
+        bool result = decide(expression); \
         if(!result) { \
             ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Assertion `" << #expression << "' failed.\n"<<"  "<<error<<"\n"); \
         } \
@@ -135,7 +135,7 @@ bool decide(bool);
 
 #define ARIADNE_ASSERT_EQUAL(expression1,expression2)    \
     { \
-        bool result = ((expression1) == (expression2));       \
+        bool result = decide((expression1) == (expression2));       \
         if(!result) { \
             ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Assertion `" << #expression1 << "==" << #expression2 << "' failed.\n"<<"  "<<expression1<<" != "<<expression2<<"\n"); \
         } \

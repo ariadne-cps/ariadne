@@ -444,8 +444,9 @@ Void ValidatedAffineConstrainedImageSet::_robust_adjoin_outer_approximation_to(P
     while(!done && lp.x[ne+nx+nc]<0.0) {
         done=lpsolver.lpstep(lp.c,lp.l,lp.u,lp.A,lp.b,lp.vt,lp.p,lp.B,lp.x);
     }
-    Vector<UpperInterval> x=lpsolver.compute_x(lp.l,lp.u,lp.A,lp.b,lp.vt);
-    if(x[ne+nx+nc].upper()<0.0) { return; } // No feasible solution
+    // FIXME: Should be rigorous!
+    Vector<Float64> x=lpsolver.compute_x(lp.l,lp.u,lp.A,lp.b,lp.vt);
+    if(x[ne+nx+nc]<0.0) { return; } // No feasible solution
 
     //feasible=verify_feasibility(lp.A,lp.b,lp.l,lp.u,lp.vt);
     //if(!feasible) { return; }

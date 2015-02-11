@@ -210,38 +210,38 @@ evaluate(const Function<P,D,C>& f, const ElementType<D,X>& x) -> decltype(f(x)) 
 
 template<class P, class C, class X> inline auto
 differential(const Function<P,IntervalDomain,C>& f, const X& x, DegreeType d)
-    -> ElementType<C,Differential<ArithmeticType<Number<P>,X>>> {
-    auto dx=Differential<ArithmeticType<X,Number<P>>>::identity(d,x); return f(dx);
+    -> ElementType<C,Differential<ArithmeticType<CanonicalNumberType<P>,X>>> {
+    auto dx=Differential<ArithmeticType<X,CanonicalNumberType<P>>>::identity(d,x); return f(dx);
 }
 
 template<class P, class C, class X> inline auto
 differential(const Function<P,BoxDomain,C>& f, const Vector<X>& x, DegreeType d)
-    -> ElementType<C,Differential<ArithmeticType<Number<P>,X>>> {
-    auto dx=Differential<ArithmeticType<X,Number<P>>>::identity(d,x); return f(dx);
+    -> ElementType<C,Differential<ArithmeticType<CanonicalNumberType<P>,X>>> {
+    auto dx=Differential<ArithmeticType<X,CanonicalNumberType<P>>>::identity(d,x); return f(dx);
 }
 
 /*
 template<class P, class D, class C, class X> inline auto
 differential(const Function<P,D,C>& f, const ElementType<D,X>& x, DegreeType d)
-    -> ElementType<C,Differential<ArithmeticType<Number<P>,X>>> {
+    -> ElementType<C,Differential<ArithmeticType<CanonicalNumberType<P>,X>>> {
     auto dx=Differential<X>::create_identity(x,d); return f(dx);
 }
 */
 
 
-template<class P, class X> ArithmeticType<Number<P>,X>
+template<class P, class X> ArithmeticType<CanonicalNumberType<P>,X>
 derivative(const ScalarUnivariateFunction<P>& f, const X& x) {
     return differential(f,x,1u).gradient(); }
 
-template<class P, class X> Vector<ArithmeticType<Number<P>,X>>
+template<class P, class X> Vector<ArithmeticType<CanonicalNumberType<P>,X>>
 tangent(const VectorUnivariateFunction<P>& f, const X& x) {
     return column(differential(f,x,1u).jacobian(),0u); }
 
-template<class P, class X> Covector<ArithmeticType<Number<P>,X>>
+template<class P, class X> Covector<ArithmeticType<CanonicalNumberType<P>,X>>
 gradient(const ScalarMultivariateFunction<P>& f, const Vector<X>& x) {
     return differential(f,x,1u).gradient(); }
 
-template<class P, class X> Matrix<ArithmeticType<Number<P>,X>>
+template<class P, class X> Matrix<ArithmeticType<CanonicalNumberType<P>,X>>
 jacobian(const VectorMultivariateFunction<P>& f, const Vector<X>& x) {
     return differential(f,x,1u).jacobian(); }
 

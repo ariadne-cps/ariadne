@@ -615,6 +615,24 @@ ValidatedFloat64& operator/=(ValidatedFloat64& x1, ValidatedFloat64 const& x2);
 OutputStream& operator<<(OutputStream& os, ValidatedFloat64 const& x);
 InputStream& operator>>(InputStream& is, ValidatedFloat64& x);
 
+MetricFloat64 operator+(MetricFloat64 const& x);
+MetricFloat64 operator-(MetricFloat64 const& x);
+MetricFloat64 operator+(MetricFloat64 const& x1, MetricFloat64 const& x2);
+MetricFloat64 operator-(MetricFloat64 const& x1, MetricFloat64 const& x2);
+MetricFloat64 operator*(MetricFloat64 const& x1, MetricFloat64 const& x2);
+MetricFloat64 operator/(MetricFloat64 const& x1, MetricFloat64 const& x2);
+MetricFloat64& operator+=(MetricFloat64& x1, MetricFloat64 const& x2);
+MetricFloat64& operator-=(MetricFloat64& x1, MetricFloat64 const& x2);
+MetricFloat64& operator*=(MetricFloat64& x1, MetricFloat64 const& x2);
+MetricFloat64& operator/=(MetricFloat64& x1, MetricFloat64 const& x2);
+
+Boolean operator==(ExactFloat64 const& x1, ExactFloat64 const& x2);
+Boolean operator!=(ExactFloat64 const& x1, ExactFloat64 const& x2);
+Boolean operator<=(ExactFloat64 const& x1, ExactFloat64 const& x2);
+Boolean operator>=(ExactFloat64 const& x1, ExactFloat64 const& x2);
+Boolean operator< (ExactFloat64 const& x1, ExactFloat64 const& x2);
+Boolean operator> (ExactFloat64 const& x1, ExactFloat64 const& x2);
+
 
 
 extern const ExactFloat64 infty;
@@ -884,10 +902,10 @@ template<class PR> inline Float<Approximate,PR> make_float(Number<Approximate> c
 template<class PR> inline Float<Lower,PR> make_float(Number<Lower> const& y, PR pr) { return Float<Lower,PR>(y,pr); }
 template<class PR> inline Float<Upper,PR> make_float(Number<Upper> const& y, PR pr) { return Float<Upper,PR>(y,pr); }
 template<class PR> inline Float<Bounded,PR> make_float(Number<Validated> const& y, PR pr) { return Float<Bounded,PR>(y,pr); }
-template<class PR> inline Float<Metric,PR> make_float(Number<Effective> const& y, PR pr) { return Float<Metric,PR>(y,pr); }
-template<class PR> inline Float<Metric,PR> make_float(Number<Exact> const& y, PR pr) { return Float<Metric,PR>(y,pr); }
-template<class PR> inline Float<Metric,PR> make_float(Real const& y, PR pr) { return Float<Bounded,PR>(y,pr); }
-template<class PR> inline Float<Metric,PR> make_float(Rational const& y, PR pr) { return Float<Bounded,PR>(y,pr); }
+template<class PR> inline Float<Bounded,PR> make_float(Number<Effective> const& y, PR pr) { return Float<Bounded,PR>(y,pr); }
+template<class PR> inline Float<Bounded,PR> make_float(Number<Exact> const& y, PR pr) { return Float<Bounded,PR>(y,pr); }
+template<class PR> inline Float<Bounded,PR> make_float(Real const& y, PR pr) { return Float<Bounded,PR>(y,pr); }
+template<class PR> inline Float<Bounded,PR> make_float(Rational const& y, PR pr) { return Float<Bounded,PR>(y,pr); }
 template<class PR> inline Float<Exact,PR> make_float(Integer const& y, PR pr) { return Float<Exact,PR>(y,pr); }
 template<class N, class PR, EnableIf<IsIntegral<N>> =dummy> inline Float<Exact,PR> make_float(N const& y, PR pr) { return Float<Exact,PR>(y,pr); }
 template<class D, class PR, EnableIf<IsFloatingPoint<D>> =dummy> inline Float<Exact,PR> make_float(D const& y, PR pr) { return Float<Approximate,PR>(y,pr); }

@@ -227,8 +227,8 @@ Effective weaker_paradigm(Effective,Effective);
 EffectiveUpper weaker_paradigm(EffectiveUpper,EffectiveUpper);
 EffectiveLower weaker_paradigm(EffectiveLower,EffectiveLower);
 Validated weaker_paradigm(Validated,Validated);
-Validated weaker_paradigm(ValidatedMetric,ValidatedMetric);
-Validated weaker_paradigm(ValidatedBounded,ValidatedBounded);
+ValidatedMetric weaker_paradigm(ValidatedMetric,ValidatedMetric);
+ValidatedBounded weaker_paradigm(ValidatedBounded,ValidatedBounded);
 ValidatedUpper weaker_paradigm(ValidatedUpper,ValidatedUpper);
 ValidatedLower weaker_paradigm(ValidatedLower,ValidatedLower);
 Approximate weaker_paradigm(Approximate,Approximate);
@@ -261,7 +261,9 @@ Approximate error_paradigm(ValidatedLower);
 Approximate error_paradigm(Approximate);
 
 template<class T> T widen_paradigm(T);
-ValidatedBounded widen_paradigm(Exact);
+ValidatedMetric widen_paradigm(Exact);
+ValidatedMetric widen_paradigm(Effective);
+ValidatedBounded widen_paradigm(Validated);
 
 }
 

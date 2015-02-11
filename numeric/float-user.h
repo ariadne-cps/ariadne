@@ -615,16 +615,6 @@ ValidatedFloat64& operator/=(ValidatedFloat64& x1, ValidatedFloat64 const& x2);
 OutputStream& operator<<(OutputStream& os, ValidatedFloat64 const& x);
 InputStream& operator>>(InputStream& is, ValidatedFloat64& x);
 
-MetricFloat64 operator+(MetricFloat64 const& x);
-MetricFloat64 operator-(MetricFloat64 const& x);
-MetricFloat64 operator+(MetricFloat64 const& x1, MetricFloat64 const& x2);
-MetricFloat64 operator-(MetricFloat64 const& x1, MetricFloat64 const& x2);
-MetricFloat64 operator*(MetricFloat64 const& x1, MetricFloat64 const& x2);
-MetricFloat64 operator/(MetricFloat64 const& x1, MetricFloat64 const& x2);
-MetricFloat64& operator+=(MetricFloat64& x1, MetricFloat64 const& x2);
-MetricFloat64& operator-=(MetricFloat64& x1, MetricFloat64 const& x2);
-MetricFloat64& operator*=(MetricFloat64& x1, MetricFloat64 const& x2);
-MetricFloat64& operator/=(MetricFloat64& x1, MetricFloat64 const& x2);
 
 Boolean operator==(ExactFloat64 const& x1, ExactFloat64 const& x2);
 Boolean operator!=(ExactFloat64 const& x1, ExactFloat64 const& x2);
@@ -872,9 +862,16 @@ PositiveUpperFloat64 operator+(PositiveUpperFloat64 const& x1, PositiveUpperFloa
 PositiveUpperFloat64 operator-(PositiveUpperFloat64 const& x1, LowerFloat64 const& x2);
 PositiveUpperFloat64 operator*(PositiveUpperFloat64 const& x1, PositiveUpperFloat64 const& x2);
 PositiveUpperFloat64 operator/(PositiveUpperFloat64 const& x1, LowerFloat64 const& x2);
+PositiveUpperFloat64 operator+(PositiveUpperFloat64 const& x1, PositiveUpperFloat64 const& x2);
 PositiveUpperFloat64 pow(PositiveUpperFloat64 const& x, Nat m);
 PositiveUpperFloat64 half(PositiveUpperFloat64 const& x);
 
+template<class M, EnableIf<IsUnsigned<M>> =dummy> PositiveUpperFloat64 operator+(PositiveUpperFloat64 const& x, M m) {
+    return x+PositiveUpperFloat64(m); }
+template<class M, EnableIf<IsUnsigned<M>> =dummy> PositiveUpperFloat64 operator*(PositiveUpperFloat64 const& x, M m) {
+    return x*PositiveUpperFloat64(m); }
+template<class M, EnableIf<IsUnsigned<M>> =dummy> PositiveUpperFloat64 operator/(PositiveUpperFloat64 const& x, M m) {
+    return x/LowerFloat64(m); }
 
 ErrorFloat64 operator"" _error(long double lx);
 
@@ -911,14 +908,22 @@ template<class N, class PR, EnableIf<IsIntegral<N>> =dummy> inline Float<Exact,P
 template<class D, class PR, EnableIf<IsFloatingPoint<D>> =dummy> inline Float<Exact,PR> make_float(D const& y, PR pr) { return Float<Approximate,PR>(y,pr); }
 
 // FIXME: Currently needed for mixed operations with builtin floats; should change (based on double being an ApproximateNumber)
-template<class D, class Y, EnableIf<IsFloatingPoint<D>> =dummy, EnableIf<IsNumber<Y>> =dummy> auto operator+(D d, Y y) -> ApproximateFloat64;
-template<class D, class Y, EnableIf<IsFloatingPoint<D>> =dummy, EnableIf<IsNumber<Y>> =dummy> auto operator+(Y y, D d) -> ApproximateFloat64;
-template<class D, class Y, EnableIf<IsFloatingPoint<D>> =dummy, EnableIf<IsNumber<Y>> =dummy> auto operator-(D d, Y y) -> ApproximateFloat64;
-template<class D, class Y, EnableIf<IsFloatingPoint<D>> =dummy, EnableIf<IsNumber<Y>> =dummy> auto operator-(Y y, D d) -> ApproximateFloat64;
-template<class D, class Y, EnableIf<IsFloatingPoint<D>> =dummy, EnableIf<IsNumber<Y>> =dummy> auto operator*(D d, Y y) -> ApproximateFloat64;
-template<class D, class Y, EnableIf<IsFloatingPoint<D>> =dummy, EnableIf<IsNumber<Y>> =dummy> auto operator*(Y y, D d) -> ApproximateFloat64;
-template<class D, class Y, EnableIf<IsFloatingPoint<D>> =dummy, EnableIf<IsNumber<Y>> =dummy> auto operator/(D d, Y y) -> ApproximateFloat64;
-template<class D, class Y, EnableIf<IsFloatingPoint<D>> =dummy, EnableIf<IsNumber<Y>> =dummy> auto operator/(Y y, D d) -> ApproximateFloat64;
+template<class D, class Y, EnableIf<IsFloatingPoint<D>> =dummy, EnableIf<IsNumber<Y>> =dummy> auto operator+(D d, Y y) -> ApproximateFloat64 {
+    return ApproximateFloat64(d)+y; }
+template<class D, class Y, EnableIf<IsFloatingPoint<D>> =dummy, EnableIf<IsNumber<Y>> =dummy> auto operator-(D d, Y y) -> ApproximateFloat64 {
+    return ApproximateFloat64(d)-y; }
+template<class D, class Y, EnableIf<IsFloatingPoint<D>> =dummy, EnableIf<IsNumber<Y>> =dummy> auto operator*(D d, Y y) -> ApproximateFloat64 {
+    return ApproximateFloat64(d)*y; }
+template<class D, class Y, EnableIf<IsFloatingPoint<D>> =dummy, EnableIf<IsNumber<Y>> =dummy> auto operator/(D d, Y y) -> ApproximateFloat64 {
+    return ApproximateFloat64(d)/y; }
+template<class D, class Y, EnableIf<IsFloatingPoint<D>> =dummy, EnableIf<IsNumber<Y>> =dummy> auto operator+(Y y, D d) -> ApproximateFloat64 {
+    return y+ApproximateFloat64(d); }
+template<class D, class Y, EnableIf<IsFloatingPoint<D>> =dummy, EnableIf<IsNumber<Y>> =dummy> auto operator-(Y y, D d) -> ApproximateFloat64 {
+    return y-ApproximateFloat64(d); }
+template<class D, class Y, EnableIf<IsFloatingPoint<D>> =dummy, EnableIf<IsNumber<Y>> =dummy> auto operator*(Y y, D d) -> ApproximateFloat64 {
+    return y*ApproximateFloat64(d); }
+template<class D, class Y, EnableIf<IsFloatingPoint<D>> =dummy, EnableIf<IsNumber<Y>> =dummy> auto operator/(Y y, D d) -> ApproximateFloat64 {
+    return y/ApproximateFloat64(d); }
 
 template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumber<Y>> =dummy> auto
 operator+(X const& x, Y const& y) -> decltype(x+make_float(y,x.precision())) { return x+make_float(y,x.precision()); }

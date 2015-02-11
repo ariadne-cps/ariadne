@@ -47,6 +47,13 @@ template<class PR> Float<Exact,PR>::Float(Integer const& z)
     ARIADNE_PRECONDITION(z==n);
 }
 
+template<class PR> Float<Exact,PR>::Float(Integer const& z, PR pr)
+    : _v(z.get_si(),pr)
+{
+    int n=z.get_si();
+    ARIADNE_PRECONDITION(z==n);
+}
+
 template<class PR> Float<Bounded,PR>::Float(Number<Validated> const& x)
     : Float(x.get(Bounded(),FLT::get_default_precision())) {
 }

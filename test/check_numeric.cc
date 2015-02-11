@@ -139,9 +139,9 @@ template<class E, class OP, class... AS> Check<E,OP,AS...>::Check() {
 template<class E, class  R , class OP, class... AS> void sm() {
     static_assert(IsSame<E,  R >::value,"");
 }
-template<class E, class OP, class... AS Check<E,OP,AS...>::Check() {
-    typedef SafeType<OP,A1,A2>  R ;
-    sm<E, R ,OP,A1,A2>();
+template<class E, class OP, class... AS> Check<E,OP,AS...>::Check() {
+    typedef SafeType<OP,AS...>  R ;
+    sm<E, R ,OP,AS...>();
 }
 #endif
 
@@ -256,6 +256,7 @@ template<class  R , class X> void chk(Cid) { check_convertible< R ,X>(); }
 template<class  R , class X> void chk(Eid) { check_explicitly_constructible< R ,X>(); }
 template<class  R , class X> void chk(Nid) { check_not_constructible< R ,X>(); }
 
+template<class T> String class_name() { return "Unknown"; }
 
 #define ARIADNE_CLASS_NAME(Class) \
     template<> String class_name<Class>() { return #Class; }

@@ -40,6 +40,8 @@
 
 namespace Ariadne {
 
+template<class X> class Positive;
+
 template<class X> struct DeclareNumericOperators {
     X nul(X const& x);
     X pos(X const& x);
@@ -430,19 +432,126 @@ template<> Float<Upper,Precision64>::Float(Real const& x);
 template<> Float<Lower,Precision64>::Float(Real const& x);
 template<> Float<Approximate,Precision64>::Float(Real const& x);
 
+
+//#define ARIADNE_TEMPLATED_FLOAT
 #ifdef ARIADNE_TEMPLATED_FLOAT
-template<class P1, class P2, class PR> inline auto
+template<class P, class PR> auto
+operator+(Float<P,PR> const& x) -> Float<P,PR>;
+
+template<class P, class PR> auto
+operator-(Float<P,PR> const& x) -> Float<Opposite<P>,PR>;
+
+template<class P1, class P2, class PR> auto
 operator+(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> Float<Widen<Weaker<P1,P2>>,PR>;
 
-template<class P1, class P2, class PR> inline auto
+template<class P1, class P2, class PR> auto
 operator-(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> Float<Widen<Weaker<P1,Opposite<P2>>>,PR>;
 
-template<class P1, class P2, class PR> inline auto
+template<class P1, class P2, class PR> auto
 operator*(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> Float<Widen<Weaker<P1,P2>>,PR>;
 
-template<class P1, class P2, class PR> inline auto
+template<class P1, class P2, class PR> auto
 operator/(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> Float<Widen<Weaker<P1,Opposite<P2>>>,PR>;
-#endif
+
+template<class P1, class P2, class PR> auto
+operator+=(Float<P1,PR>& x1, Float<P2,PR> const& x2) -> decltype(x1=x1+x2);
+
+template<class P1, class P2, class PR> auto
+operator-=(Float<P1,PR>& x1, Float<P2,PR> const& x2) -> decltype(x1=x1+x2);
+
+template<class P1, class P2, class PR> auto
+operator*=(Float<P1,PR>& x1, Float<P2,PR> const& x2) -> decltype(x1=x1+x2);
+
+template<class P1, class P2, class PR> auto
+operator/=(Float<P1,PR>& x1, Float<P2,PR> const& x2) -> decltype(x1=x1+x2);
+
+
+template<class P1, class P2, class PR> auto
+max(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> Float<Weaker<P1,P2>,PR>;
+template<class P, class PR> auto
+max(Float<P,PR> const& x1, Float<P,PR> const& x2) -> Float<P,PR>;
+
+template<class P1, class P2, class PR> auto
+min(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> Float<Weaker<P1,P2>,PR>;
+template<class P, class PR> auto
+max(Float<P,PR> const& x1, Float<P,PR> const& x2) -> Float<P,PR>;
+
+template<class P, class PR> auto
+abs(Float<P,PR> const& x) -> Float<Weaker<P,Opposite<P>>,PR>;
+
+
+template<class P, class PR> auto
+nul(Float<P,PR> const&) -> Float<P,PR>;
+template<class P, class PR> auto
+pos(Float<P,PR> const&) -> Float<P,PR>;
+template<class P, class PR> auto
+neg(Float<P,PR> const&) -> Float<Opposite<P>,PR>;
+template<class P, class PR> auto
+half(Float<P,PR> const&) -> Float<P,PR>;
+template<class P, class PR> auto
+sqr(Float<P,PR> const&) -> Float<P,PR>;
+template<class P, class PR> auto
+rec(Float<P,PR> const&) -> Float<Widen<Opposite<P>>,PR>;
+
+template<class P, class PR> auto
+add(Float<P,PR> const&, Float<P,PR> const&) -> Float<P,PR>;
+template<class P, class PR> auto
+sub(Float<P,PR> const&, Float<Opposite<P>,PR> const&) -> Float<P,PR>;
+template<class P, class PR> auto
+mul(Float<P,PR> const&, Float<P,PR> const&) -> Float<P,PR>;
+template<class P, class PR> auto
+div(Float<P,PR> const&, Float<Opposite<P>,PR> const&) -> Float<P,PR>;
+
+template<class P, class PR> auto
+pow(Float<P,PR> const&, Nat m) -> Float<P,PR>;
+template<class P, class PR> auto
+pow(Float<P,PR> const&, Int n) -> Float<P,PR>;
+
+template<class P, class PR> auto
+sqrt(Float<P,PR> const&) -> Float<P,PR>;
+template<class P, class PR> auto
+exp(Float<P,PR> const&) -> Float<P,PR>;
+template<class P, class PR> auto
+log(Float<P,PR> const&) -> Float<P,PR>;
+template<class P, class PR> auto
+sin(Float<P,PR> const&) -> Float<P,PR>;
+template<class P, class PR> auto
+cos(Float<P,PR> const&) -> Float<P,PR>;
+template<class P, class PR> auto
+tan(Float<P,PR> const&) -> Float<P,PR>;
+template<class P, class PR> auto
+asin(Float<P,PR> const&) -> Float<P,PR>;
+template<class P, class PR> auto
+acos(Float<P,PR> const&) -> Float<P,PR>;
+template<class P, class PR> auto
+atan(Float<P,PR> const&) -> Float<P,PR>;
+
+template<class PR> auto mag(Float<Approximate,PR> const& x) -> Float<PositiveApproximate,PR>;
+template<class PR> auto mag(Float<Lower,PR> const& x) -> Float<PositiveLower,PR>;
+template<class PR> auto mag(Float<Upper,PR> const& x) -> Float<PositiveUpper,PR>;
+template<class PR> auto mag(Float<Bounded,PR> const& x) -> Float<PositiveUpper,PR>;
+template<class PR> auto mag(Float<Exact,PR> const& x) -> Float<PositiveExact,PR>;
+
+template<class P, class PR> auto is_zero(Float<P,PR> const&) -> Logical<Weaker<P,Opposite<P>>>;
+template<class P, class PR> auto is_positive(Float<P,PR> const&) -> Logical<Opposite<P>>;
+
+template<class P1, class P2, class PR> auto
+operator==(Float<P1,PR> const&, Float<P2,PR> const&) -> decltype(is_zero(declval<Float<Weaker<P1,Opposite<P2>>,PR>>()));
+template<class P1, class P2, class PR> auto
+operator!=(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> decltype(not (x1==x2));
+template<class P1, class P2, class PR> auto
+operator<=(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> decltype(is_positive(declval<Float<Weaker<Opposite<P1>,P2>,PR>>()));
+template<class P1, class P2, class PR> auto
+operator>=(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> decltype(x2<=x1);
+template<class P1, class P2, class PR> auto
+operator< (Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> decltype(not (x2<=x1));
+template<class P1, class P2, class PR> auto
+operator> (Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> decltype(not (x1<=x2));
+
+template<class P, class PR> auto
+operator<<(OutputStream& os, Float<P,PR> const&) -> OutputStream&;
+
+#else
 
 ApproximateFloat64 floor(ApproximateFloat64 const& x);
 ApproximateFloat64 ceil(ApproximateFloat64 const& x);
@@ -801,33 +910,6 @@ ValidatedFloat64 med(ValidatedFloat64 const& x);
 ValidatedFloat64 rad(ValidatedFloat64 const& x);
 
 
-/*
-ValidatedFloat64 operator+(ValidatedFloat64 const& x1, ExactFloat64 const& x2);
-ValidatedFloat64 operator-(ValidatedFloat64 const& x1, ExactFloat64 const& x2);
-ValidatedFloat64 operator*(ValidatedFloat64 const& x1, ExactFloat64 const& x2);
-ValidatedFloat64 operator/(ValidatedFloat64 const& x1, ExactFloat64 const& x2);
-ValidatedFloat64 operator+(ExactFloat64 const& x1, ValidatedFloat64 const& x2);
-ValidatedFloat64 operator-(ExactFloat64 const& x1, ValidatedFloat64 const& x2);
-ValidatedFloat64 operator*(ExactFloat64 const& x1, ValidatedFloat64 const& x2);
-ValidatedFloat64 operator/(ExactFloat64 const& x1, ValidatedFloat64 const& x2);
-*/
-
-// Standard equality operators
-//! \related ValidatedFloat64 \brief Tests if \_a x1 provides tighter bounds than \_a x2.
-Bool refines(ValidatedFloat64 const& x1, ValidatedFloat64 const& x2);
-
-//! \related ValidatedFloat64 \brief The common refinement of \_a x1 and \_a x2.
-ValidatedFloat64 refinement(ValidatedFloat64 const& x1, ValidatedFloat64 const& x2);
-
-//! \related ValidatedFloat64 \brief Tests if \_a x1 and \_a x2 are consistent with representing the same number.
-Bool consistent(ValidatedFloat64 const& x1, ValidatedFloat64 const& x2);
-
-//! \related ValidatedFloat64 \brief  Tests if \_a x1 and \_a x2 are inconsistent with representing the same number.
-Bool inconsistent(ValidatedFloat64 const& x1, ValidatedFloat64 const& x2);
-
-//! \related ValidatedFloat64 \brief  Tests if \_a x1 is a model for the exact value \_a x2. number.
-Bool models(ValidatedFloat64 const& x1, ExactFloat64 const& x2);
-
 // Standard equality operators
 //! \related ValidatedFloat64 \brief Equality operator. Tests equality of intervals as geometric objects, so \c [0,1]==[0,1] returns \c true.
 Bool operator==(ValidatedFloat64 const& x1, ValidatedFloat64 const& x2);
@@ -849,10 +931,6 @@ Tribool operator>=(ValidatedFloat64 const& x1, ValidatedFloat64 const& x2);
 
 //! \related ValidatedFloat64 \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
 Tribool operator<=(ValidatedFloat64 const& x1, ValidatedFloat64 const& x2);
-
-#ifdef ARIADNE_ENABLE_SERIALIZATION
-  template<class A> Void serialize(A& _a, ValidatedFloat64& ivl, const Nat version);
-#endif
 
 OutputStream& operator<<(OutputStream&, ValidatedFloat64 const&);
 InputStream& operator>>(InputStream&, ValidatedFloat64&);
@@ -877,22 +955,25 @@ ErrorFloat64 operator"" _error(long double lx);
 
 
 
+#endif
 
 
 
-template<class N, EnableIf<IsIntegral<N>> =dummy> Tribool operator==(ValidatedFloat64 const& x1, N n2) { return x1==ValidatedFloat64(n2); }
-template<class N, EnableIf<IsIntegral<N>> =dummy> Tribool operator!=(ValidatedFloat64 const& x1, N n2) { return x1!=ValidatedFloat64(n2); }
-template<class N, EnableIf<IsIntegral<N>> =dummy> Tribool operator<=(ValidatedFloat64 const& x1, N n2) { return x1<=ValidatedFloat64(n2); }
-template<class N, EnableIf<IsIntegral<N>> =dummy> Tribool operator>=(ValidatedFloat64 const& x1, N n2) { return x1>=ValidatedFloat64(n2); }
-template<class N, EnableIf<IsIntegral<N>> =dummy> Tribool operator< (ValidatedFloat64 const& x1, N n2) { return x1< ValidatedFloat64(n2); }
-template<class N, EnableIf<IsIntegral<N>> =dummy> Tribool operator> (ValidatedFloat64 const& x1, N n2) { return x1> ValidatedFloat64(n2); }
+// Standard equality operators
+//! \related ValidatedFloat64 \brief Tests if \_a x1 provides tighter bounds than \_a x2.
+Bool refines(ValidatedFloat64 const& x1, ValidatedFloat64 const& x2);
 
-template<class N, EnableIf<IsIntegral<N>> =dummy> Bool operator==(ExactFloat64 const& x1, N n2) { return x1.raw()==n2; }
-template<class N, EnableIf<IsIntegral<N>> =dummy> Bool operator!=(ExactFloat64 const& x1, N n2) { return x1.raw()!=n2; }
-template<class N, EnableIf<IsIntegral<N>> =dummy> Bool operator<=(ExactFloat64 const& x1, N n2) { return x1.raw()<=n2; }
-template<class N, EnableIf<IsIntegral<N>> =dummy> Bool operator>=(ExactFloat64 const& x1, N n2) { return x1.raw()>=n2; }
-template<class N, EnableIf<IsIntegral<N>> =dummy> Bool operator< (ExactFloat64 const& x1, N n2) { return x1.raw()< n2; }
-template<class N, EnableIf<IsIntegral<N>> =dummy> Bool operator> (ExactFloat64 const& x1, N n2) { return x1.raw()> n2; }
+//! \related ValidatedFloat64 \brief The common refinement of \_a x1 and \_a x2.
+ValidatedFloat64 refinement(ValidatedFloat64 const& x1, ValidatedFloat64 const& x2);
+
+//! \related ValidatedFloat64 \brief Tests if \_a x1 and \_a x2 are consistent with representing the same number.
+Bool consistent(ValidatedFloat64 const& x1, ValidatedFloat64 const& x2);
+
+//! \related ValidatedFloat64 \brief  Tests if \_a x1 and \_a x2 are inconsistent with representing the same number.
+Bool inconsistent(ValidatedFloat64 const& x1, ValidatedFloat64 const& x2);
+
+//! \related ValidatedFloat64 \brief  Tests if \_a x1 is a model for the exact value \_a x2. number.
+Bool models(ValidatedFloat64 const& x1, ExactFloat64 const& x2);
 
 
 template<class PR> inline Float<Approximate,PR> make_float(Number<Approximate> const& y, PR pr) { return Float<Approximate,PR>(y,pr); }
@@ -906,24 +987,6 @@ template<class PR> inline Float<Bounded,PR> make_float(Rational const& y, PR pr)
 template<class PR> inline Float<Exact,PR> make_float(Integer const& y, PR pr) { return Float<Exact,PR>(y,pr); }
 template<class N, class PR, EnableIf<IsIntegral<N>> =dummy> inline Float<Exact,PR> make_float(N const& y, PR pr) { return Float<Exact,PR>(y,pr); }
 template<class D, class PR, EnableIf<IsFloatingPoint<D>> =dummy> inline Float<Exact,PR> make_float(D const& y, PR pr) { return Float<Approximate,PR>(y,pr); }
-
-// FIXME: Currently needed for mixed operations with builtin floats; should change (based on double being an ApproximateNumber)
-template<class D, class Y, EnableIf<IsFloatingPoint<D>> =dummy, EnableIf<IsNumber<Y>> =dummy> auto operator+(D d, Y y) -> ApproximateFloat64 {
-    return ApproximateFloat64(d)+y; }
-template<class D, class Y, EnableIf<IsFloatingPoint<D>> =dummy, EnableIf<IsNumber<Y>> =dummy> auto operator-(D d, Y y) -> ApproximateFloat64 {
-    return ApproximateFloat64(d)-y; }
-template<class D, class Y, EnableIf<IsFloatingPoint<D>> =dummy, EnableIf<IsNumber<Y>> =dummy> auto operator*(D d, Y y) -> ApproximateFloat64 {
-    return ApproximateFloat64(d)*y; }
-template<class D, class Y, EnableIf<IsFloatingPoint<D>> =dummy, EnableIf<IsNumber<Y>> =dummy> auto operator/(D d, Y y) -> ApproximateFloat64 {
-    return ApproximateFloat64(d)/y; }
-template<class D, class Y, EnableIf<IsFloatingPoint<D>> =dummy, EnableIf<IsNumber<Y>> =dummy> auto operator+(Y y, D d) -> ApproximateFloat64 {
-    return y+ApproximateFloat64(d); }
-template<class D, class Y, EnableIf<IsFloatingPoint<D>> =dummy, EnableIf<IsNumber<Y>> =dummy> auto operator-(Y y, D d) -> ApproximateFloat64 {
-    return y-ApproximateFloat64(d); }
-template<class D, class Y, EnableIf<IsFloatingPoint<D>> =dummy, EnableIf<IsNumber<Y>> =dummy> auto operator*(Y y, D d) -> ApproximateFloat64 {
-    return y*ApproximateFloat64(d); }
-template<class D, class Y, EnableIf<IsFloatingPoint<D>> =dummy, EnableIf<IsNumber<Y>> =dummy> auto operator/(Y y, D d) -> ApproximateFloat64 {
-    return y/ApproximateFloat64(d); }
 
 template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumber<Y>> =dummy> auto
 operator+(X const& x, Y const& y) -> decltype(x+make_float(y,x.precision())) { return x+make_float(y,x.precision()); }
@@ -943,7 +1006,31 @@ operator*(Y const& y, X const& x) -> decltype(make_float(y,x.precision())*x) { r
 template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumber<Y>> =dummy> auto
 operator/(Y const& y, X const& x) -> decltype(make_float(y,x.precision())/x) { return make_float(y,x.precision())/x; }
 
+template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumber<Y>> =dummy> auto
+operator==(X const& x, Y const& y) -> decltype(x==make_float(y,x.precision())) { return x==make_float(y,x.precision()); }
+template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumber<Y>> =dummy> auto
+operator!=(X const& x, Y const& y) -> decltype(x!=make_float(y,x.precision())) { return x!=make_float(y,x.precision()); }
+template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumber<Y>> =dummy> auto
+operator<=(X const& x, Y const& y) -> decltype(x<=make_float(y,x.precision())) { return x<=make_float(y,x.precision()); }
+template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumber<Y>> =dummy> auto
+operator>=(X const& x, Y const& y) -> decltype(x>=make_float(y,x.precision())) { return x>=make_float(y,x.precision()); }
+template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumber<Y>> =dummy> auto
+operator< (X const& x, Y const& y) -> decltype(x< make_float(y,x.precision())) { return x< make_float(y,x.precision()); }
+template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumber<Y>> =dummy> auto
+operator> (X const& x, Y const& y) -> decltype(x> make_float(y,x.precision())) { return x> make_float(y,x.precision()); }
 
+template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumber<Y>> =dummy> auto
+operator==(Y const& y, X const& x) -> decltype(make_float(y,x.precision())==x) { return make_float(y,x.precision())==x; }
+template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumber<Y>> =dummy> auto
+operator!=(Y const& y, X const& x) -> decltype(make_float(y,x.precision())!=x) { return make_float(y,x.precision())!=x; }
+template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumber<Y>> =dummy> auto
+operator<=(Y const& y, X const& x) -> decltype(make_float(y,x.precision())<=x) { return make_float(y,x.precision())<=x; }
+template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumber<Y>> =dummy> auto
+operator>=(Y const& y, X const& x) -> decltype(make_float(y,x.precision())>=x) { return make_float(y,x.precision())>=x; }
+template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumber<Y>> =dummy> auto
+operator< (Y const& y, X const& x) -> decltype(make_float(y,x.precision())< x) { return make_float(y,x.precision())< x; }
+template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumber<Y>> =dummy> auto
+operator> (Y const& y, X const& x) -> decltype(make_float(y,x.precision())> x) { return make_float(y,x.precision())> x; }
 
 
 ExactFloat64 make_exact(const Real& x);

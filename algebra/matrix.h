@@ -449,6 +449,18 @@ template<class X> template<class M, EnableIf<And<IsMatrixExpression<M>,IsConvert
     this->operator=(A);
 }
 
+template<class X> template<class M, EnableIf<And<IsMatrixExpression<M>,IsConstructible<X,typename M::ScalarType>,Not<IsConvertible<typename M::ScalarType,X>>>>>
+Matrix<X>::Matrix(const M& A) : Matrix(A.row_size(),A.column_size(),X(A.zero_element()))
+{
+    this->resize(A.row_size(),A.column_size());
+    for(SizeType i=0; i!=this->row_size(); ++i) {
+        for(SizeType j=0; j!=this->column_size(); ++j) {
+            this->at(i,j)=X(A.get(i,j));
+        }
+    }
+}
+
+
 template<class X> template<class M, EnableIf<And<IsMatrixExpression<M>,IsConvertible<typename M::ScalarType,X>>>> Matrix<X>& Matrix<X>::operator=(const M& A) {
     this->resize(A.row_size(),A.column_size());
     for(SizeType i=0; i!=this->row_size(); ++i) {

@@ -40,6 +40,9 @@ static const int verbosity=0;
 
 namespace Ariadne {
 
+template<class X1, class X2, EnableIf<IsSame<X1,RawFloat64>> =dummy, EnableIf<IsSame<X2,ExactFloat64>> =dummy>
+    bool operator<(X1 x1, X2 x2) { return x1<x2.raw(); }
+
 // Threshold for matrix diagonal elements below which it may be considered singular
 static const double SINGULARITY_THRESHOLD = std::numeric_limits<double>::epsilon();
 
@@ -1474,6 +1477,7 @@ SimplexSolver<X>::hotstarted_minimise(const Vector<X>& c, const Vector<X>& xl, c
 
 
 
+template class SimplexSolver<RawFloat64>;
 template class SimplexSolver<ApproximateFloat64>;
 template class SimplexSolver<ExactFloat64>;
 template class SimplexSolver<Rational>;

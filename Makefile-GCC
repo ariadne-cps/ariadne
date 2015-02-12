@@ -17,7 +17,7 @@ LIB_NUMERIC_SRC = \
 
 TEST_NUMERIC_SRC = \
 	check_numeric.cc \
-	test_integer.cc test_rational.cc test_real.cc \
+	test_logical.cc test_integer.cc test_rational.cc test_real.cc \
 	test_float.cc test_validated_float.cc \
 
 LIB_ALGEBRA_SRC = \
@@ -296,6 +296,9 @@ bin/check_numeric: $(TESTS_OBJ_DIR)/check_numeric.o
 
 bin/check_function: $(TESTS_OBJ_DIR)/check_function.o
 	$(CXX) $< $(LINK_FLAGS) -o $@
+
+bin/test_logical: $(TESTS_OBJ_DIR)/test_logical.o  libariadne-numeric.so
+	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_NUMERIC_LIB) $(LINK_LIBS) -o $@
 
 bin/test_integer: $(TESTS_OBJ_DIR)/test_integer.o  libariadne-numeric.so
 	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_NUMERIC_LIB) $(LINK_LIBS) -o $@

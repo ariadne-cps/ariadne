@@ -36,16 +36,55 @@ typedef Void Void;
 
 class ParadigmError { };
 
-enum class ParadigmCode : char {
-    ERROR, EXACT,
-    EFFECTIVE, EFFECTIVE_UPPER, EFFECTIVE_LOWER,
-    VALIDATED, METRIC, BOUNDED, UPPER, LOWER,
-    APPROXIMATE, RAW
+enum class ParadigmCode : short {
+    APPROXIMATE_FLAG=1,
+    LOWER_FLAG=2,
+    UPPER_FLAG=4,
+    METRIC_FLAG=8,
+    EFFECTIVE_FLAG=16,
+    EXACT_FLAG=32,
+    POSITIVE_FLAG=64,
+
+    RAW=0,
+    APPROXIMATE=ParadigmCode::APPROXIMATE_FLAG,
+    LOWER=ParadigmCode::LOWER_FLAG|ParadigmCode::APPROXIMATE,
+    UPPER=ParadigmCode::UPPER_FLAG|ParadigmCode::APPROXIMATE,
+    BOUNDED=ParadigmCode::LOWER|ParadigmCode::UPPER,
+    METRIC=ParadigmCode::METRIC_FLAG|ParadigmCode::APPROXIMATE,
+    VALIDATED=ParadigmCode::BOUNDED|ParadigmCode::METRIC,
+    EFFECTIVE_UNINFORMATIVE=ParadigmCode::EFFECTIVE_FLAG,
+    EFFECTIVE_LOWER=ParadigmCode::EFFECTIVE_FLAG|ParadigmCode::LOWER,
+    EFFECTIVE_UPPER=ParadigmCode::EFFECTIVE_FLAG|ParadigmCode::UPPER,
+    EFFECTIVE=ParadigmCode::EFFECTIVE_FLAG|ParadigmCode::BOUNDED|ParadigmCode::METRIC,
+    EXACT=ParadigmCode::EXACT_FLAG|ParadigmCode::EFFECTIVE,
+
+    POSITIVE_APPROXIMATE=ParadigmCode::POSITIVE_FLAG|ParadigmCode::APPROXIMATE,
+    POSITIVE_LOWER=ParadigmCode::POSITIVE_FLAG|ParadigmCode::LOWER,
+    POSITIVE_UPPER=ParadigmCode::POSITIVE_FLAG|ParadigmCode::UPPER,
+    POSITIVE_EFFECTIVE_UPPER=ParadigmCode::POSITIVE_FLAG|ParadigmCode::EFFECTIVE_UPPER,
+    POSITIVE_EXACT=ParadigmCode::POSITIVE_FLAG|ParadigmCode::EXACT,
 };
+inline constexpr ParadigmCode operator^(ParadigmCode p1, ParadigmCode p2) {
+    return ParadigmCode(static_cast<char>(p1) ^ static_cast<char>(p2)); }
+inline constexpr ParadigmCode operator&(ParadigmCode p1, ParadigmCode p2) {
+    return ParadigmCode(static_cast<char>(p1) & static_cast<char>(p2)); }
+inline constexpr ParadigmCode operator|(ParadigmCode p1, ParadigmCode p2) {
+    return ParadigmCode(static_cast<char>(p1) | static_cast<char>(p2)); }
+inline constexpr ParadigmCode operator!(ParadigmCode p) {
+    return ParadigmCode(!static_cast<char>(p)); }
+inline constexpr bool operator>=(ParadigmCode p1, ParadigmCode p2) {
+    return p2 == (p1&p2); }
+inline constexpr ParadigmCode strengthen(ParadigmCode p) {
+    return (p >= ParadigmCode::BOUNDED) or (p >= ParadigmCode::METRIC) ? (p | ParadigmCode::VALIDATED) : p; }
+constexpr bool is_weaker(ParadigmCode p1, ParadigmCode p2) {
+    return (p1 & strengthen(p2)) == p1; }
+constexpr ParadigmCode next_weaker(ParadigmCode p) {
+    return is_weaker(ParadigmCode::EFFECTIVE_UNINFORMATIVE,p) ? (p & ParadigmCode::VALIDATED) : ParadigmCode::APPROXIMATE; }
+
 
 //! \defgroup ParadigmSubModule Computational Paradigms
 //!   \ingroup LogicModule
-//! \brief Tag classes describing the computational paradigm.
+//! \brief Tag classes describing the information provided by a type.
 //! \details In order to indicate the kind of guarantees on the approximation provided by a concrete object,
 //!   every type in %Ariadne has an associated Paradigm tag.
 //!
@@ -57,6 +96,7 @@ enum class ParadigmCode : char {
 //! the Builtin tag is used to describe these objects.
 //! %Builtin objects should be immediately converted to %Ariadne objects in user code.
 
+template<ParadigmCode CODE> struct InformationLevel { static constexpr ParadigmCode code() { return CODE; } };
 
 //! \ingroup ParadigmSubModule
 //! \brief The <em>computational paradigm</em> supported by the object.
@@ -68,176 +108,109 @@ template<class T> using Paradigm = typename T::Paradigm;
 //! \brief The <em>computational paradigm</em> supported by the object. Equivalent to Paradigm<T>.
 template<class T> using ParadigmTag = typename T::Paradigm;
 
-struct Exact;
-struct Effective;
-struct EffectiveUpper;
-struct EffectiveLower;
-struct Validated;
-struct ValidatedMetric;
-struct ValidatedBounded;
-struct ValidatedUpper;
-struct ValidatedLower;
-struct Approximate;
-struct PositiveExact;
-struct PositiveValidated;
-struct PositiveValidatedUpper;
-struct PositiveValidatedLower;
-struct PositiveApproximate;
-using PositiveUpper=PositiveValidatedUpper;
-using PositiveLower=PositiveValidatedLower;
-
-using Error=PositiveUpper;
-using Metric=ValidatedMetric;
-using Bounded=ValidatedBounded;
-using Upper=ValidatedUpper;
-using Lower=ValidatedLower;
-
-using Valid=Validated;
-using Metrc=ValidatedMetric;
-using Bound=ValidatedBounded;
-using Apprx=Approximate;
-
-using ExactTag = Exact;
-using ErrorTag = Error;
-using EffectiveTag = Effective;
-using EffectiveUpperTag = EffectiveUpper;
-using EffectiveLowerTag = EffectiveLower;
-using ValidatedTag = Validated;
-using ValidatedMetricTag = ValidatedMetric;
-using ValidatedBoundedTag = ValidatedBounded;
-using ValidatedUpperTag = ValidatedUpper;
-using ValidatedLowerTag = ValidatedLower;
-using MetricTag = Metric;
-using BoundedTag = Bounded;
-using UpperTag = Upper;
-using LowerTag = Lower;
-using ApproximateTag = Approximate;
 
 //! \ingroup ParadigmSubModule
 //! \brief A tag meaning that the object is of a builtin type. Such objects should be converted to %Ariadne internal types before use.
-struct Builtin { Builtin() { } };
+struct Builtin : InformationLevel<ParadigmCode::RAW>  { };
 
 //! \ingroup ParadigmSubModule
 //! \brief A tag meaning that the object decribes raw data. Such objects should not be used in high-level code, as they probably do not provide safe guarantees on their values.
-struct Raw { Raw() { } static const ParadigmCode code = ParadigmCode::RAW; };
+struct Raw : InformationLevel<ParadigmCode::RAW>  { };
 
 //! \ingroup ParadigmSubModule
 //! \brief A tag meaning that the object represents a quantity exactly, and equality is decidable.
 //! Only available for discrete types i.e. elements of countable spaces, or for computational types such as floating-point numbers.
-struct Exact {
-    static const ParadigmCode code = ParadigmCode::EXACT;
-    Exact() { }
-    typedef Effective NextWeakerParadigm;
-};
+struct Exact : InformationLevel<ParadigmCode::EXACT>  { };
 
 //! \ingroup ParadigmSubModule
 //! \brief A tag meaning that the object represents a quantity exactly, but equality is undecidable.
-struct Effective {
-    static const ParadigmCode code = ParadigmCode::EFFECTIVE;
-    Effective() { } Effective(Exact) { }
-    typedef Validated NextWeakerParadigm;
-};
+struct Effective : InformationLevel<ParadigmCode::EFFECTIVE>  { };
 
 //! \ingroup ParadigmSubModule
-//! \brief A tag meaning that the object represents upper bounds to a quantity arbitrarily accurately.
-struct EffectiveUpper {
-    static const ParadigmCode code = ParadigmCode::EFFECTIVE_UPPER;
-    EffectiveUpper() { } EffectiveUpper(Exact) { } EffectiveUpper(Effective) { }
-    typedef ValidatedUpper NextWeakerParadigm;
-};
+//! \brief A tag meaning that the object represents a quantity exactly, but only convergent upper bounds can be computed.
+struct EffectiveUpper : InformationLevel<ParadigmCode::EFFECTIVE_UPPER>  { };
 
 //! \ingroup ParadigmSubModule
-//! \brief A tag meaning that the object represents a quantity exactly, but equality is undecidable.
-struct EffectiveLower {
-    static const ParadigmCode code = ParadigmCode::EFFECTIVE_LOWER;
-    EffectiveLower() { } EffectiveLower(Exact) { } EffectiveLower(Effective) { }
-    typedef ValidatedLower NextWeakerParadigm;
-};
+//! \brief A tag meaning that the object represents a quantity exactly, but only convergent lower bounds can be computed.
+struct EffectiveLower : InformationLevel<ParadigmCode::EFFECTIVE_LOWER>  { };
 
 //! \ingroup ParadigmSubModule
-//! \brief A tag meaning that the object represents an upper bound for a positive quantity.
-struct PositiveValidatedUpper {
-    static const ParadigmCode code = ParadigmCode::ERROR;
-    PositiveValidatedUpper() { }
-};
+//! \brief A tag meaning that the object represents a quantity exactly, but no information can be extracted in finite time.
+struct EffectiveUninformative : InformationLevel<ParadigmCode::EFFECTIVE_UNINFORMATIVE>  { };
 
 //! \ingroup ParadigmSubModule
 //! \brief A tag meaning that the object represents an approximation to a quantity with a bound on the error in some metric, or lower and upper bounds on a quantity.
-struct Validated {
-    static const ParadigmCode code = ParadigmCode::VALIDATED;
-    Validated() { } Validated(Exact) { } Validated(Effective) { } Validated(ValidatedMetric); Validated(ValidatedBounded);
-    typedef Approximate NextWeakerParadigm;
-};
+struct Validated : InformationLevel<ParadigmCode::VALIDATED>  { };
 
 //! \ingroup ParadigmSubModule
 //! \brief A tag meaning that the object provides an approximation with a bound on the metric error.
 //! For numbers, a specialisation of Validated.
-struct ValidatedMetric {
-    static const ParadigmCode code = ParadigmCode::METRIC;
-    ValidatedMetric() { } ValidatedMetric(Exact) { } ValidatedMetric(Effective) { }
-    ValidatedMetric(Validated) { } ValidatedMetric(ValidatedBounded);
-    typedef Approximate NextWeakerParadigm;
-};
+struct Metric : InformationLevel<ParadigmCode::METRIC>  { };
 
 //! \ingroup ParadigmSubModule
 //! \brief A tag meaning that the object provides lower and upper bounds for a quantity.
 //! For numbers, is a specialisation of Validated.
-struct ValidatedBounded {
-    static const ParadigmCode code = ParadigmCode::BOUNDED;
-    ValidatedBounded() { } ValidatedBounded(Exact) { } ValidatedBounded(Effective) { }
-    ValidatedBounded(Validated) { } ValidatedBounded(ValidatedMetric);
-    typedef Approximate NextWeakerParadigm;
-};
-
-inline Validated::Validated(ValidatedMetric) { }
-inline Validated::Validated(ValidatedBounded) { }
-inline ValidatedMetric::ValidatedMetric(ValidatedBounded) { }
-inline ValidatedBounded::ValidatedBounded(ValidatedMetric) { }
+struct Bounded : InformationLevel<ParadigmCode::BOUNDED>  { };
 
 //! \ingroup ParadigmSubModule
 //! \brief A tag meaning that the object provides an upper bound for a quantity.
-struct ValidatedUpper {
-    static const ParadigmCode code = ParadigmCode::UPPER;
-    ValidatedUpper() { } ValidatedUpper(Exact) { } ValidatedUpper(Effective) { } ValidatedUpper(EffectiveUpper) { }
-    ValidatedUpper(Validated) { } ValidatedUpper(ValidatedMetric) { } ValidatedUpper(ValidatedBounded) { }
-};
+struct Upper : InformationLevel<ParadigmCode::UPPER>  { };
 
 //! \ingroup ParadigmSubModule
 //! \brief A tag meaning that the object provides a lower bound for a quantity.
-struct ValidatedLower {
-    static const ParadigmCode code = ParadigmCode::LOWER;
-    ValidatedLower() { } ValidatedLower(Exact) { } ValidatedLower(Effective) { } ValidatedLower(EffectiveLower) { }
-    ValidatedLower(Validated) { } ValidatedLower(ValidatedMetric) { } ValidatedLower(ValidatedBounded) { }
-};
+struct Lower : InformationLevel<ParadigmCode::LOWER>  { };
 
 //! \ingroup ParadigmSubModule
 //! \brief A tag meaning that the object provides an approximation to a quantity with no guarantees on the error.
-struct Approximate {
-    static const ParadigmCode code = ParadigmCode::APPROXIMATE;
-    Approximate() { } Approximate(Exact) { }
-    Approximate(Effective) { } Approximate(EffectiveUpper) { } Approximate(EffectiveLower) { }
-    Approximate(Validated) { } Approximate(ValidatedBounded) { } Approximate(ValidatedMetric) { }
-    Approximate(ValidatedUpper) { } Approximate(ValidatedLower) { }
-    typedef Void NextWeakerParadigm;
-};
+struct Approximate : InformationLevel<ParadigmCode::APPROXIMATE>  { };
+
+
+//! \ingroup ParadigmSubModule
+//! \brief A tag meaning that the object represents an upper bound for a positive quantity.
+struct PositiveUpper;
+
+struct PositiveApproximate : InformationLevel<ParadigmCode::POSITIVE_APPROXIMATE>  { };
+struct PositiveLower : InformationLevel<ParadigmCode::POSITIVE_LOWER>  { };
+struct PositiveUpper : InformationLevel<ParadigmCode::POSITIVE_UPPER>  { };
+struct PositiveEffectiveUpper : InformationLevel<ParadigmCode::POSITIVE_EFFECTIVE_UPPER>  { };
+struct PositiveExact : InformationLevel<ParadigmCode::POSITIVE_EXACT>  { };
+
+using ValidatedLower = Lower;
+using ValidatedUpper = Upper;
+using ValidatedBounded = Bounded;
+using ValidatedMetric = Metric;
+using Error = PositiveUpper;
+
+using ApproximateTag = Approximate;
+using LowerTag = Lower;
+using UpperTag = Upper;
+using BoundedTag = Bounded;
+using MetricTag = Metric;
+using ValidatedTag = Validated;
+using EffectiveLowerTag = EffectiveLower;
+using EffectiveUpperTag = EffectiveUpper;
+using EffectiveTag = Effective;
+using ExactTag = Exact;
+using ErrorTag = Error;
+
+template<ParadigmCode PC> struct InformationTraits { };
+template<> struct InformationTraits<ParadigmCode::RAW> { typedef Void Paradigm; };
+template<> struct InformationTraits<ParadigmCode::APPROXIMATE> { typedef Approximate Paradigm; };
+template<> struct InformationTraits<ParadigmCode::LOWER> { typedef Lower Paradigm; };
+template<> struct InformationTraits<ParadigmCode::UPPER> { typedef Upper Paradigm; };
+template<> struct InformationTraits<ParadigmCode::BOUNDED> { typedef Bounded Paradigm; };
+template<> struct InformationTraits<ParadigmCode::METRIC> { typedef Metric Paradigm; };
+template<> struct InformationTraits<ParadigmCode::VALIDATED> { typedef Validated Paradigm; };
+template<> struct InformationTraits<ParadigmCode::EFFECTIVE_LOWER> { typedef EffectiveLower Paradigm; };
+template<> struct InformationTraits<ParadigmCode::EFFECTIVE_UPPER> { typedef EffectiveUpper Paradigm; };
+template<> struct InformationTraits<ParadigmCode::EFFECTIVE> { typedef Effective Paradigm; };
+template<> struct InformationTraits<ParadigmCode::EXACT> { typedef Exact Paradigm; };
+template<> struct InformationTraits<ParadigmCode::POSITIVE_APPROXIMATE> { typedef PositiveApproximate Paradigm; };
+template<> struct InformationTraits<ParadigmCode::POSITIVE_UPPER> { typedef PositiveUpper Paradigm; };
+template<> struct InformationTraits<ParadigmCode::POSITIVE_EXACT> { typedef PositiveExact Paradigm; };
+template<ParadigmCode PC> using ParadigmClass = typename InformationTraits<PC>::Paradigm;
 
 namespace Detail {
-Exact weaker_paradigm(Exact,Exact);
-Effective weaker_paradigm(Effective,Effective);
-EffectiveUpper weaker_paradigm(EffectiveUpper,EffectiveUpper);
-EffectiveLower weaker_paradigm(EffectiveLower,EffectiveLower);
-Validated weaker_paradigm(Validated,Validated);
-ValidatedMetric weaker_paradigm(ValidatedMetric,ValidatedMetric);
-ValidatedBounded weaker_paradigm(ValidatedBounded,ValidatedBounded);
-ValidatedUpper weaker_paradigm(ValidatedUpper,ValidatedUpper);
-ValidatedLower weaker_paradigm(ValidatedLower,ValidatedLower);
-Approximate weaker_paradigm(Approximate,Approximate);
-
-template<class P1, class P2, EnableIf<And<IsSame<P1,Metric>,IsSame<P2,Bounded>>> =dummy>
-ValidatedBounded weaker_paradigm(P1,P2);
-template<class P1, class P2, EnableIf<And<IsSame<P1,Bounded>,IsSame<P2,Metric>>> =dummy>
-ValidatedBounded weaker_paradigm(P1,P2);
-
 Approximate equality_paradigm(Approximate,Approximate);
 ValidatedLower equality_paradigm(ValidatedLower,ValidatedUpper);
 ValidatedLower equality_paradigm(ValidatedUpper,ValidatedLower);
@@ -272,21 +245,47 @@ ValidatedBounded widen_paradigm(Validated);
 
 }
 
+template<bool b> using BooleanConstant = std::integral_constant<bool,b>;
+
 //! \ingroup ParadigmSubModule
 //! \brief Inherits from \c TrueType if \a P is a paradigm tag class.
-template<class P> struct IsParadigm : IsConvertible<P,Approximate> { };
+template<class P> struct IsParadigm : IsSame<decltype(P::code()),ParadigmCode> { };
 //! \brief Inherits from \c TrueType if paradigm \a P1 is weaker than \a P2.
-template<class P1, class P2> struct IsWeaker : IsConvertible<P2,P1> { };
+template<class P1, class P2> struct IsWeaker : BooleanConstant<is_weaker(P1::code(),P2::code())> { };
+
 //! \brief Inherits from \c TrueType if paradigm \a P1 is stronger than \a P2.
-template<class P1, class P2> struct IsStronger : IsConvertible<P1,P2> { };
+template<class P1, class P2> struct IsStronger : IsWeaker<P2,P1> { };
+
+template<class P1, class P2=P1> struct ParadigmTraits {
+    using Weaker = typename InformationTraits<P1::code()&P2::code()>::Paradigm;
+    using Stronger = typename InformationTraits<P1::code()&P2::code()>::Paradigm;
+};
+
+template<class P> struct ParadigmTraits<P,P> {
+    using Weaker = typename InformationTraits<P::code()>::Paradigm;
+    using Stronger = typename InformationTraits<P::code()>::Paradigm;
+    using NextWeaker = typename InformationTraits<next_weaker(P::code())>::Paradigm;
+};
+
+template<> struct ParadigmTraits<Approximate,Approximate> {
+  private:
+    typedef Approximate P;
+  public:
+    using Weaker = typename InformationTraits<P::code()>::Paradigm;
+    using Stronger = typename InformationTraits<P::code()>::Paradigm;
+    using NextWeaker = Void;
+};
 
 //! \ingroup ParadigmSubModule
 //! \brief The strongest paradigm which is weaker than both paradigms \a P1 and \a P2.
-template<class P1, class P2> using Weaker = decltype(Detail::weaker_paradigm(declval<P1>(),declval<P2>()));
-
+template<class P1, class P2> using Weaker = typename ParadigmTraits<P1,P2>::Weaker;
+//! \ingroup ParadigmSubModule
+//! \brief The weakest paradigm which is stronger than both paradigms \a P1 and \a P2.
+template<class P1, class P2> using Stronger = typename ParadigmTraits<P1,P2>::Stronger;
 //! \ingroup ParadigmSubModule
 //! \brief The strongest paradigm which is strictly weaker than \a P. If \a P is \c ValidatedBounded, is defined as \c Approximate.
-template<class P> using Weaken = typename P::NextWeakerParadigm;
+template<class P> using NextWeaker = typename ParadigmTraits<P>::NextWeaker;
+template<class P> using Weaken = typename ParadigmTraits<P>::NextWeaker;
 
 
 

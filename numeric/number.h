@@ -98,7 +98,7 @@ template<class P1, class P2> using DisableIfWeaker = DisableIf<IsWeaker<P1,P2>>;
 // Number
 template<class P> class Number
 {
-    static_assert(IsConvertible<P,Approximate>::value,"P must be a paradigm");
+    static_assert(IsParadigm<P>::value,"P must be a paradigm");
     template<class PP> friend class Number;
     template<class X> using IsGettableAs = And<IsNumber<X>,IsWeaker<typename X::Paradigm,P>,Not<IsSame<typename X::Paradigm,Exact>>>;
   private:

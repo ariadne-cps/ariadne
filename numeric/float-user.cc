@@ -1344,7 +1344,8 @@ template<class A1, class A2, typename F> int address(F const& f) {
   return 0; //  return (int) (R(*)(A1 const&,A2 const&) f;
 }
 
-template<class P, class PR> int instantiate_float() {
+template<class P, class PR> std::size_t instantiate_float() {
+    using std::size_t;
     typedef OutputStream OS;
     typedef Float<P,PR> X;
     typedef Float<P,PR> const& XCRef;
@@ -1352,22 +1353,22 @@ template<class P, class PR> int instantiate_float() {
     typedef decltype(operator!=(declval<X>(),declval<X>())) XNE;
     typedef decltype(operator<=(declval<X>(),declval<X>())) XL;
 
-    return (int)(X(*)(XCRef,XCRef))&max + (int)(X(*)(XCRef,XCRef))&min + (int)(X(*)(XCRef))&abs
-         + (int)(X(*)(XCRef,XCRef))&add + (int)(X(*)(XCRef,XCRef))&sub + (int)(X(*)(XCRef,XCRef))&mul + (int)(X(*)(XCRef,XCRef))&div
-         + (int)(X(*)(XCRef))&nul + (int)(X(*)(XCRef))&pos + (int)(X(*)(XCRef))&neg
-         + (int)(X(*)(XCRef))&sqr + (int)(X(*)(XCRef))&rec + (int)(X(*)(XCRef))&half
-         + (int)(X(*)(XCRef,Int))&pow + (int)(X(*)(XCRef,Nat))&pow
-         + (int)(X(*)(XCRef))&sqrt + (int)(X(*)(XCRef))&exp  + (int)(X(*)(XCRef))&log
-         + (int)(X(*)(XCRef))&sin  + (int)(X(*)(XCRef))&cos  + (int)(X(*)(XCRef))&tan
-         + (int)(X(*)(XCRef))&asin + (int)(X(*)(XCRef))&acos + (int)(X(*)(XCRef))&atan
-         + (int)(decltype(mag(declval<X>()))(*)(XCRef))&mag
-         + ((int)(XE(*)(XCRef,XCRef))&operator==) + ((int)(XNE(*)(XCRef,XCRef))&operator!=)
-         + ((int)(XL(*)(XCRef,XCRef))&operator<=) + ((int)(XL(*)(XCRef,XCRef))&operator>=)
-         + ((int)(XL(*)(XCRef,XCRef))&operator< ) + ((int)(XL(*)(XCRef,XCRef))&operator> )
-         + (int)(OS&(*)(OS&,XCRef))operator<<;
+    return (size_t)(X(*)(XCRef,XCRef))&max + (size_t)(X(*)(XCRef,XCRef))&min + (size_t)(X(*)(XCRef))&abs
+         + (size_t)(X(*)(XCRef,XCRef))&add + (size_t)(X(*)(XCRef,XCRef))&sub + (size_t)(X(*)(XCRef,XCRef))&mul + (size_t)(X(*)(XCRef,XCRef))&div
+         + (size_t)(X(*)(XCRef))&nul + (size_t)(X(*)(XCRef))&pos + (size_t)(X(*)(XCRef))&neg
+         + (size_t)(X(*)(XCRef))&sqr + (size_t)(X(*)(XCRef))&rec + (size_t)(X(*)(XCRef))&half
+         + (size_t)(X(*)(XCRef,Int))&pow + (size_t)(X(*)(XCRef,Nat))&pow
+         + (size_t)(X(*)(XCRef))&sqrt + (size_t)(X(*)(XCRef))&exp  + (size_t)(X(*)(XCRef))&log
+         + (size_t)(X(*)(XCRef))&sin  + (size_t)(X(*)(XCRef))&cos  + (size_t)(X(*)(XCRef))&tan
+         + (size_t)(X(*)(XCRef))&asin + (size_t)(X(*)(XCRef))&acos + (size_t)(X(*)(XCRef))&atan
+         + (size_t)(decltype(mag(declval<X>()))(*)(XCRef))&mag
+         + ((size_t)(XE(*)(XCRef,XCRef))&operator==) + ((size_t)(XNE(*)(XCRef,XCRef))&operator!=)
+         + ((size_t)(XL(*)(XCRef,XCRef))&operator<=) + ((size_t)(XL(*)(XCRef,XCRef))&operator>=)
+         + ((size_t)(XL(*)(XCRef,XCRef))&operator< ) + ((size_t)(XL(*)(XCRef,XCRef))&operator> )
+         + (size_t)(OS&(*)(OS&,XCRef))operator<<;
 }
 
-template<class PR> int instantiate_floats() {
+template<class PR> std::size_t instantiate_floats() {
     return instantiate_float<Approximate,PR>()
         + instantiate_float<Bounded,PR>()
 //        + instantiate_float<Metric,PR>()
@@ -1375,7 +1376,7 @@ template<class PR> int instantiate_floats() {
         ;
 }
 
-template int instantiate_floats<Precision64>();
+template std::size_t instantiate_floats<Precision64>();
 template OutputStream& operator<<(OutputStream&, ExactFloat64 const&);
 template InputStream& operator>>(InputStream&, BoundedFloat64&);
 template Bool same(BoundedFloat64 const&, BoundedFloat64 const&);

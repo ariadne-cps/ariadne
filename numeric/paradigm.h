@@ -364,6 +364,7 @@ template<class P> using Inverted = decltype(Detail::invert_paradigm(declval<P>()
 template<class P> using Opposite = decltype(Detail::negate_paradigm(declval<P>()));
 template<class P> using Generic = decltype(Detail::strengthen_paradigm(declval<P>()));
 template<class P> using Unsigned = decltype(Detail::unsigned_paradigm(declval<P>()));
+template<class P> using Unorder = Weaker<P,Opposite<P>>;
 
 //! \ingroup ParadigmSubModule
 //! \brief The paradigm obtained by widening a type due to roundoff error.

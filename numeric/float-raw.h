@@ -92,6 +92,9 @@ inline Float64 sin_down(Float64 const& x) { return sin(x,downward); }
 inline Float64 cos_up(Float64 const& x) { return cos(x,upward); }
 inline Float64 cos_down(Float64 const& x) { return cos(x,downward); }
 
+inline Float64 atan_up(Float64 const& x) { return atan(x,upward); }
+inline Float64 atan_down(Float64 const& x) { return atan(x,downward); }
+
 
 /*
 inline Float64 max_exact(Float64 const& x1, Float64 const& x2) { return max(x1,x2); }

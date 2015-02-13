@@ -255,6 +255,8 @@ template<class PR> Float<Lower,PR> max(Float<Lower,PR> const& x1, Float<Lower,PR
     return Float<Lower,PR>(max_exact(x1._l,x2._l)); }
 template<class PR> Float<Lower,PR> min(Float<Lower,PR> const& x1, Float<Lower,PR> const& x2) {
     return Float<Lower,PR>(min_exact(x1._l,x2._l)); }
+template<class PR> Float<Approximate,PR> abs(Float<Lower,PR> const& x) {
+    return abs(Float<Approximate,PR>(x)); }
 
 template<class PR> Float<Lower,PR> nul(Float<Lower,PR> const& x) {
     return Float<Lower,PR>(pos_exact(x._l)); }
@@ -271,6 +273,9 @@ template<class PR> Float<Lower,PR> rec(Float<Upper,PR> const& x) {
 template<class PR> Float<Lower,PR> add(Float<Lower,PR> const& x1, Float<Lower,PR> const& x2) {
     return Float<Lower,PR>(add_down(x1._l,x2._l)); }
 
+template<class PR> Float<Approximate,PR> sub(Float<Lower,PR> const& x1, Float<Lower,PR> const& x2) {
+    return Float<Upper,PR>(sub_near(x1._l,x2._l)); }
+
 template<class PR> Float<Lower,PR> sub(Float<Lower,PR> const& x1, Float<Upper,PR> const& x2) {
     return Float<Lower,PR>(sub_down(x1._l,x2._u)); }
 
@@ -283,6 +288,8 @@ template<class PR> Float<Lower,PR> div(Float<Lower,PR> const& x1, Float<Upper,PR
 
 template<class PR> Float<Lower,PR> pow(Float<Lower,PR> const& x, Nat m);
 
+template<class PR> Float<Approximate,PR> pow(Float<Lower,PR> const& x, Int n);
+
 template<class PR> Float<Lower,PR> sqrt(Float<Lower,PR> const& x) {
     return Float<Lower,PR>(sqrt_down(x.raw())); }
 
@@ -291,6 +298,9 @@ template<class PR> Float<Lower,PR> exp(Float<Lower,PR> const& x) {
 
 template<class PR> Float<Lower,PR> log(Float<Lower,PR> const& x) {
     return Float<Lower,PR>(log_down(x.raw())); }
+
+template<class PR> Float<Lower,PR> atan(Float<Lower,PR> const& x) {
+    return Float<Lower,PR>(atan_down(x.raw())); }
 
 template<class PR> Float<Lower,PR> operator+(Float<Lower,PR> const& x) { return pos(x); }
 template<class PR> Float<Lower,PR> operator-(Float<Upper,PR> const& x) { return neg(x); }
@@ -321,7 +331,8 @@ template<class PR> Float<Upper,PR> max(Float<Upper,PR> const& x1, Float<Upper,PR
 template<class PR> Float<Upper,PR> min(Float<Upper,PR> const& x1, Float<Upper,PR> const& x2) {
     return Float<Upper,PR>(min_exact(x1._u,x2._u)); }
 
-template<class PR> Float<Upper,PR> abs(Float<Upper,PR> const& x) = delete;
+template<class PR> Float<Approximate,PR> abs(Float<Upper,PR> const& x) {
+    return abs(Float<Approximate,PR>(x)); }
 
 template<class PR> Float<Upper,PR> nul(Float<Upper,PR> const& x) {
     return Float<Upper,PR>(pos_exact(x._u)); }
@@ -343,6 +354,9 @@ template<class PR> Float<Upper,PR> rec(Float<Lower,PR> const& x) {
 template<class PR> Float<Upper,PR> add(Float<Upper,PR> const& x1, Float<Upper,PR> const& x2) {
     return Float<Upper,PR>(add_up(x1._u,x2._u)); }
 
+template<class PR> Float<Approximate,PR> sub(Float<Upper,PR> const& x1, Float<Upper,PR> const& x2) {
+    return Float<Upper,PR>(sub_near(x1._u,x2._u)); }
+
 template<class PR> Float<Upper,PR> sub(Float<Upper,PR> const& x1, Float<Lower,PR> const& x2) {
     return Float<Upper,PR>(sub_up(x1._u,x2._l)); }
 
@@ -351,6 +365,8 @@ template<class PR> Float<Upper,PR> mul(Float<Upper,PR> const& x1, Float<Upper,PR
 template<class PR> Float<Upper,PR> div(Float<Upper,PR> const& x1, Float<Lower,PR> const& x2);
 
 template<class PR> Float<Upper,PR> pow(Float<Upper,PR> const& x, Nat m);
+
+template<class PR> Float<Approximate,PR> pow(Float<Upper,PR> const& x, Int m);
 
 template<class PR> Float<Upper,PR> sqrt(Float<Upper,PR> const& x) {
     return Float<Upper,PR>(sqrt_up(x.raw())); }
@@ -1199,11 +1215,11 @@ template<class P, class PR> Float<Widen<P>,PR> pow(Float<P,PR> const& x, Int n) 
 template<class P, class PR> Float<Widen<P>,PR> sqrt(Float<P,PR> const& x) { return sqrt<PR>(x); }
 template<class P, class PR> Float<Widen<P>,PR> exp(Float<P,PR> const& x) { return exp<PR>(x); }
 template<class P, class PR> Float<Widen<P>,PR> log(Float<P,PR> const& x) { return log<PR>(x); }
-template<class P, class PR> Float<Widen<P>,PR> sin(Float<P,PR> const& x) { return sin<PR>(x); }
-template<class P, class PR> Float<Widen<P>,PR> cos(Float<P,PR> const& x) { return cos<PR>(x); }
-template<class P, class PR> Float<Widen<P>,PR> tan(Float<P,PR> const& x) { return tan<PR>(x); }
-template<class P, class PR> Float<Widen<P>,PR> asin(Float<P,PR> const& x) { return asin<PR>(x); }
-template<class P, class PR> Float<Widen<P>,PR> acos(Float<P,PR> const& x) { return acos<PR>(x); }
+template<class P, class PR> Float<Widen<Unorder<P>>,PR> sin(Float<P,PR> const& x) { return sin<PR>(x); }
+template<class P, class PR> Float<Widen<Unorder<P>>,PR> cos(Float<P,PR> const& x) { return cos<PR>(x); }
+template<class P, class PR> Float<Widen<Unorder<P>>,PR> tan(Float<P,PR> const& x) { return tan<PR>(x); }
+template<class P, class PR> Float<Widen<Unorder<P>>,PR> asin(Float<P,PR> const& x) { return asin<PR>(x); }
+template<class P, class PR> Float<Widen<Unorder<P>>,PR> acos(Float<P,PR> const& x) { return acos<PR>(x); }
 template<class P, class PR> Float<Widen<P>,PR> atan(Float<P,PR> const& x) { return atan<PR>(x); }
 
 template<class P, class PR> OutputStream& operator<<(OutputStream& os, Float<P,PR> const& x) {
@@ -1238,9 +1254,13 @@ template<class P, class PR> std::size_t instantiate_float() {
     typedef Float<P,PR> X;
     typedef Float<P,PR> const& XCRef;
 
-    typedef Float<Negated<P>,PR> NEGX;
-    typedef Float<Inverted<P>,PR> INVX;
+    typedef X const& Xcr;
+    typedef Float<Negated<P>,PR> const& NEGXcr;
+    typedef Float<Inverted<P>,PR> const& INVXcr;
+
+    typedef decltype(neg(declval<X>())) NEGX;
     typedef decltype(abs(declval<X>())) ABSX;
+    typedef decltype(sub(declval<X>(),declval<X>())) WUX;
     typedef decltype(add(declval<X>(),declval<X>())) WX;
 
     typedef decltype(mag(declval<X>())) MAGX;
@@ -1249,25 +1269,27 @@ template<class P, class PR> std::size_t instantiate_float() {
     typedef decltype(operator!=(declval<X>(),declval<X>())) XNE;
     typedef decltype(operator<=(declval<X>(),declval<X>())) XL;
 
-    return (size_t)(X(*)(XCRef,XCRef))&max + (size_t)(X(*)(XCRef,XCRef))&min + (size_t)(ABSX(*)(XCRef))&abs
-         + (size_t)(WX(*)(X const&,X const&))&add + (size_t)(WX(*)(X const&,NEGX const&))&sub
-         + (size_t)(WX(*)(X const&,X const&))&mul + (size_t)(WX(*)(X const&,INVX const&))&div
-         + (size_t)(X(*)(XCRef))&nul + (size_t)(X(*)(XCRef))&pos + (size_t)(NEGX(*)(XCRef))&neg
-         + (size_t)(WX(*)(XCRef))&sqr + (size_t)(WX(*)(XCRef))&rec + (size_t)(INVX(*)(XCRef))&half
-         + (size_t)(WX(*)(XCRef,Int))&pow + (size_t)(WX(*)(XCRef,Nat))&pow
-         + (size_t)(WX(*)(XCRef))&sqrt + (size_t)(WX(*)(XCRef))&exp  + (size_t)(WX(*)(XCRef))&log
-         + (size_t)(WX(*)(XCRef))&sin  + (size_t)(WX(*)(XCRef))&cos  + (size_t)(WX(*)(XCRef))&tan
-         + (size_t)(WX(*)(XCRef))&asin + (size_t)(WX(*)(XCRef))&acos + (size_t)(WX(*)(XCRef))&atan
-         + (size_t)(MAGX(*)(XCRef))&mag
-         + ((size_t)(XE(*)(XCRef,XCRef))&operator==) + ((size_t)(XNE(*)(XCRef,XCRef))&operator!=)
-         + ((size_t)(XL(*)(XCRef,XCRef))&operator<=) + ((size_t)(XL(*)(XCRef,XCRef))&operator>=)
-         + ((size_t)(XL(*)(XCRef,XCRef))&operator< ) + ((size_t)(XL(*)(XCRef,XCRef))&operator> )
-         + (size_t)(OS&(*)(OS&,XCRef)) operator<<;
+    return (size_t)(X(*)(Xcr,Xcr))&max + (size_t)(X(*)(Xcr,Xcr))&min + (size_t)(ABSX(*)(Xcr))&abs
+         + (size_t)(WX(*)(Xcr,Xcr))&add + (size_t)(WX(*)(Xcr,NEGXcr))&sub
+         + (size_t)(WX(*)(Xcr,Xcr))&mul + (size_t)(WX(*)(Xcr,INVXcr))&div
+         + (size_t)(X(*)(Xcr))&nul + (size_t)(X(*)(Xcr))&pos + (size_t)(NEGX(*)(Xcr))&neg
+         + (size_t)(WX(*)(Xcr))&sqr + (size_t)(WX(*)(INVXcr))&rec + (size_t)(X(*)(Xcr))&half
+         + (size_t)(WUX(*)(Xcr,Int))&pow + (size_t)(WX(*)(Xcr,Nat))&pow
+         + (size_t)(WX(*)(Xcr))&sqrt + (size_t)(WX(*)(Xcr))&exp  + (size_t)(WX(*)(Xcr))&log
+         + (size_t)(WUX(*)(Xcr))&sin  + (size_t)(WUX(*)(Xcr))&cos  + (size_t)(WUX(*)(Xcr))&tan
+         + (size_t)(WUX(*)(Xcr))&asin + (size_t)(WUX(*)(Xcr))&acos + (size_t)(WX(*)(Xcr))&atan
+         + (size_t)(MAGX(*)(Xcr))&mag
+         + ((size_t)(XE(*)(Xcr,Xcr))&operator==) + ((size_t)(XNE(*)(Xcr,Xcr))&operator!=)
+         + ((size_t)(XL(*)(Xcr,Xcr))&operator<=) + ((size_t)(XL(*)(Xcr,Xcr))&operator>=)
+         + ((size_t)(XL(*)(Xcr,Xcr))&operator< ) + ((size_t)(XL(*)(Xcr,Xcr))&operator> )
+         + (size_t)(OS&(*)(OS&,Xcr)) operator<<;
 
 }
 
 template<class PR> std::size_t instantiate_floats() {
     return instantiate_float<Approximate,PR>()
+        + instantiate_float<Lower,PR>()
+        + instantiate_float<Upper,PR>()
         + instantiate_float<Bounded,PR>()
 //        + instantiate_float<Metric,PR>()
         + instantiate_float<Exact,PR>();

@@ -33,6 +33,7 @@ struct Factorial {
     Nat _n;
     Factorial(Nat n) : _n(n) { }
     operator ValidatedFloat64() { ValidatedFloat64 r=1; for(Nat i=1; i<=_n; ++i) { r*=i; } return r; }
+    friend ValidatedFloat64 rec(Factorial x) { return rec(ValidatedFloat64(x)); }
 };
 
 template<class A> EnableIfGradedAlgebra<A>
@@ -236,7 +237,7 @@ sqrt(const A& x)
 
     Series<X> sqrt_series=Series<X>::sqrt(X(1));
     Nat d=integer_cast<Int>((log((1-eps)*tol)/log(eps)+1));
-    auto trunc_err=pow(eps,d)/(1-eps)*mag(sqrt_series[d]);
+    auto trunc_err=pow(eps,d)/mig(1-eps)*mag(sqrt_series[d]);
 
     A y=x/avg-1;
     A z=x.create();
@@ -263,12 +264,12 @@ rec(const A& x)
         ARIADNE_THROW(DivideByZeroException,"rec(A x)","x="<<x<<"\n");
     }
 
-    ErrorFloat64 eps=mag(rad/avg);
+    auto eps=mag(rad/avg);
     ARIADNE_DEBUG_ASSERT(eps<1);
 
     // Compute the degree and truncation error
     Nat d=integer_cast<Nat>((log((1-eps)*tol)/log(eps))+1);
-    ErrorFloat64 te=pow(eps,d)/(1-eps);
+    auto te=pow(eps,d)/mig(1-eps);
 
     A y=1-x/avg;
     A z=x.create();
@@ -296,11 +297,11 @@ log(const A& x)
         ARIADNE_THROW(DomainException,"log(A x)","x="<<x<<"\n");
     }
 
-    ErrorFloat64 eps=mag(rad/avg);
+    auto eps=mag(rad/avg);
     ARIADNE_DEBUG_ASSERT(eps<1);
 
     Nat d=integer_cast<Nat>((log((1-eps)*tol)/log(eps)+1));
-    ErrorFloat64 trunc_err=pow(eps,d)/(1-eps)/d;
+    auto trunc_err=pow(eps,d)/mig(1-eps)/d;
 
     A y=x/avg-X(1);
     A z=x.create();
@@ -326,18 +327,19 @@ template<class A> EnableIfNormedAlgebra<A> exp(const A& x)
 
     // Scale to unit interval
     Nat sfp=0; // A number such that 2^sfp>rad(x.range())
-    while(ExactFloat64(two_exp(sfp))<rad) { ++sfp; }
+    while(decide(ExactFloat64(two_exp(sfp))<rad)) { ++sfp; }
     ExactFloat64 sf=two_exp(sfp);
     A y = (x-avg)/sf;
     auto yrad=rad*mag(sf);
 
     // Find the required degree
     Nat deg = 0;
-    auto trunc_err=pow(yrad,0u)*2u;
+    auto trunc_err=pow(yrad,0u);
+    trunc_err*=2u;
     do {
         ++deg;
         trunc_err=pow(yrad,deg)*mag(rec(Factorial(deg))*(deg+1u)/deg);
-    } while(trunc_err>tol);
+    } while(decide(trunc_err>tol));
 
     A z=x.create_constant(1);
     for(Nat i=0; i!=deg; ++i) {
@@ -370,7 +372,7 @@ sin(const A& x)
     auto avg=x.average();
     auto rad=x.radius();
     auto rng=avg.pm(rad);
-    Int n=integer_cast<Int>(floor( (avg/ApproximateFloat64(pi)+1)/2 ));
+    Int n=integer_cast<Int>( round(avg/pi) );
 
     A y=x-(2*n)*X(pi);
 
@@ -382,7 +384,7 @@ sin(const A& x)
     do {
         ++deg;
         trunc_err=pow(rad,deg)*mag(rec(Factorial(deg))*(deg+1u)/deg);
-    } while(trunc_err>tol);
+    } while(decide(trunc_err>tol));
 
     // Compute x(1-y/6+y^2/120-y^3/5040+... = x(1-y/6*(1-y/20*(1-y/42*...)
     A z=x.create_constant(1);
@@ -410,7 +412,7 @@ cos(const A& x)
     auto rad=x.radius();
 
     Float64 two_pi_approx=2*pi_approx();
-    Int n=integer_cast<Int>(floor( (avg/ApproximateFloat64(pi)+1)/2 ));
+    Int n=integer_cast<Int>( round(avg/pi) );
 
     A y=x-(2*n)*X(pi);
 
@@ -422,7 +424,7 @@ cos(const A& x)
     do {
         ++deg;
         trunc_err=pow(rad,deg)*mag(rec(Factorial(deg))*(deg+1)/deg);
-    } while(trunc_err>tol);
+    } while(decide(trunc_err>tol));
 
     // Compute 1-y/2+y^2/24-y^3/720+... = (1-y/2*(1-y/12*(1-y/30*...)
     A z=x.create_constant(1);

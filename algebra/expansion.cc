@@ -33,7 +33,6 @@ namespace Ariadne {
     template class Expansion<ValidatedFloat64>;
     template class Expansion<ApproximateFloat64>;
     template class Expansion<UpperInterval>;
-    template class Expansion<ExactInterval>;
 
     template class SortedExpansion<Float64,GradedKeyLess>;
     template class SortedExpansion<ApproximateFloat64,GradedKeyLess>;
@@ -45,7 +44,6 @@ namespace Ariadne {
     template class SortedExpansion<ValidatedFloat64,ReverseLexicographicKeyLess>;
     template class SortedExpansion<ApproximateFloat64,ReverseLexicographicKeyLess>;
     template class SortedExpansion<UpperInterval,ReverseLexicographicKeyLess>;
-    template class SortedExpansion<ExactInterval,ReverseLexicographicKeyLess>;
 }
 
 #include "algebra/differential.h"

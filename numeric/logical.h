@@ -70,11 +70,19 @@ inline LogicalValue check(LogicalValue l) { return l; }
 
 OutputStream& operator<<(OutputStream& os, LogicalValue b);
 
+template<class P> class LogicalFacade {
+};
+
+template<> class LogicalFacade<Exact> {
+  public:
+    operator Bool () const;
+};
 
 //!  \ingroup LogicalTypes
 //!  \brief A logical variable for the paradigm \a P, which must be %Exact, %Validated, %Upper, %Lower or %Approximate.
 //!  Used as a base of named logical types Boolean, Tribool, Sierpinski and Fuzzy. Implemented in terms of LogicalValue.
 template<class P> class Logical
+    : public LogicalFacade<P>
 {
     template<class PP> friend class Logical;
     LogicalValue _v;
@@ -90,14 +98,15 @@ template<class P> class Logical
     //! \brief Convert to a builtin boolean value. Calls the decide() function.
     // TODO: This should be explicit (except for Boolean)
 
-    // explicit operator Bool () const { return decide(this->_v); }
-
     //! \brief Equality of two logical values.
     friend inline Logical<P> operator==(Logical<P> l1, Logical<P> l2) { return Logical<P>(equal(l1._v,l2._v)); }
     friend inline Logical<P> operator!=(Logical<P> l1, Logical<P> l2) { return Logical<P>(negation(equal(l1._v,l2._v))); }
     //! \brief %Logical disjunction.
     friend inline Logical<P> operator&&(Logical<P> l1, Logical<P> l2) { return Logical<P>(disjunction(l1._v,l2._v)); }
     //! \brief %Logical conjunction.
+    friend inline Logical<P> operator||(Logical<P> l1, Bool b2) { return l1 || Logical<P>(b2); }
+    friend inline Logical<P> operator||(Bool b1, Logical<P> l2) { return Logical<P>(b1) || l2; }
+
     friend inline Logical<P> operator||(Logical<P> l1, Logical<P> l2) { return Logical<P>(conjunction(l1._v,l2._v)); }
     //! \brief %Logical exclusive or.
     friend inline Logical<P> operator^(Logical<P> l1, Logical<P> l2) { return Logical<P>(negation(equal(l1._v,l2._v))); }
@@ -120,10 +129,12 @@ template<class P> class Logical
     friend inline Bool same(Logical<P> l1, Logical<P> l2) { return l1._v == l2._v; }
     //! \brief Write to an output stream.
     friend inline OutputStream& operator<<(OutputStream& os, Logical<P> l) { return os << l._v; }
+
   private:
     friend class Tribool;
 };
 
+inline LogicalFacade<Exact>::operator Bool () const { return decide(static_cast<Logical<Exact>const&>(*this)); }
 
 template<> inline Logical<Exact>::Logical(LogicalValue v)
      : _v(v) { assert(v==LogicalValue::FALSE || v==LogicalValue::TRUE); }

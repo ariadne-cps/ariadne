@@ -235,6 +235,14 @@ inline ExactInterval hull(ExactFloat64 x1, ExactFloat64 x2) {
     return ExactInterval(min(x1.raw(),x2.raw()),max(x1.raw(),x2.raw()));
 }
 
+inline Bool operator==(ExactInterval i1, ExactInterval i2) {
+    return equal(i1,i2);
+}
+
+inline Bool operator!=(ExactInterval i1, ExactInterval i2) {
+    return !equal(i1,i2);
+}
+
 
 //! \related ExactInterval \brief Test if the interval \a I contains the number \a x.
 inline Bool contains(ExactInterval i, ExactFloat64 x) { return i.lower_raw()<=x.raw() && x.raw()<=i.upper_raw(); }
@@ -268,6 +276,12 @@ inline Bool inside(ExactInterval i1, ExactInterval i2) { return i1.lower_raw()>i
 //! \related ExactInterval \brief Test if the interior of the interval \a I1 is a superset of the (closed) interval \a I2.
 inline Bool covers(ExactInterval i1, ExactInterval i2) { return i1.lower_raw()<i2.lower_raw() && i1.upper_raw()>i2.upper_raw(); }
 
+
+class UpperInterval;
+inline ValidatedFloat64 make_singleton(UpperInterval const& ivl);
+inline UpperInterval make_interval(ValidatedFloat64 const& x);
+
+extern const UpperInterval pi_ivl;
 
 //! \brief An over-approximation to an interval set.
 class UpperInterval {
@@ -351,6 +365,170 @@ class UpperInterval {
         return UpperInterval(sub_down(x.lower_raw(),Float64::min()),add_up(x.upper_raw(),Float64::max())); }
     friend OutputStream& operator<<(OutputStream& os, UpperInterval const& ivl) {
         return os << ExactInterval(ivl.lower_raw(),ivl.upper_raw()); }
+
+
+    friend inline ValidatedFloat64 make_singleton(UpperInterval const& ivl) { return ValidatedFloat64(ivl.lower(),ivl.upper()); }
+    friend inline UpperInterval make_interval(ValidatedFloat64 const& x) { return UpperInterval(x.lower(),x.upper()); }
+
+    //! \related UpperInterval \brief The interval of possible maximum values. Yields the interval between \c i1.upper_raw() and \c i2.upper_raw().
+    friend inline UpperInterval max(UpperInterval i1, UpperInterval i2) {
+        return make_interval(max(make_singleton(i1),make_singleton(i2))); }
+    //! \related UpperInterval \brief The interval of possible minimum values. Yields the interval between \c i1.lower() and \c i2.lower().
+    friend inline UpperInterval min(UpperInterval i1, UpperInterval i2) {
+        return make_interval(min(make_singleton(i1),make_singleton(i2))); }
+    //! \related UpperInterval \brief The interval of possible absolute values. Yields \f$\{ |x| \mid x\in I\}\f$.
+    friend inline UpperInterval abs(UpperInterval i) {
+        return make_interval(abs(make_singleton(i))); }
+
+    //! \related UpperInterval \brief Unary plus function. Yields the identity \f$I=\{+x | x\in I\}\f$.
+    friend inline UpperInterval pos(UpperInterval i) {
+        return make_interval(pos(make_singleton(i))); }
+    //! \related UpperInterval \brief Unary negation function. Yields the exact interval \f$\{-x | x\in I\}\f$.
+    friend inline UpperInterval neg(UpperInterval i) {
+        return make_interval(neg(make_singleton(i))); }
+    //! \related UpperInterval \brief Unary square function. Yields an over-approximation to \f$\{ x^2 \mid x\in I\}\f$.
+    //! Note that if \a I contains positive and negative values, \c sqr(I) is tighter than \c I*I .
+    friend UpperInterval sqr(UpperInterval i) {
+        return make_interval(sqr(make_singleton(i))); }
+    //! \related UpperInterval \brief Unary reciprocal function. Yields an over-approximation to \f$\{ 1/x \mid x\in I\}\f$.
+    //! Yields \f$[-\infty,+\infty]\f$ if \a I contains \a 0 in its interior, and an interval containing \f$[1/u,+\infty]\f$ if \a I=[0,u] .
+    friend UpperInterval rec(UpperInterval i) {
+        return make_interval(rec(make_singleton(i))); }
+
+    //! \related UpperInterval \brief Binary addition function. Yields an over-approximation to \f$\{ x_1+x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$.
+    friend inline UpperInterval add(UpperInterval i1, UpperInterval i2) {
+        return make_interval(add(make_singleton(i1),make_singleton(i2))); }
+    //! \related UpperInterval \brief Subtraction function. Yields an over-approximation to \f$\{ x_1-x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$.
+    friend inline UpperInterval sub(UpperInterval i1, UpperInterval i2) {
+        return make_interval(sub(make_singleton(i1),make_singleton(i2))); }
+    //! \related UpperInterval \brief Binary multiplication function. Yields an over-approximation to \f$\{ x_1\times x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$.
+    friend UpperInterval mul(UpperInterval i1, UpperInterval i2) {
+        return make_interval(mul(make_singleton(i1),make_singleton(i2))); }
+    //! \related UpperInterval \brief Division function. Yields an over-approximation to \f$\{ x_1 \div x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$.
+    friend UpperInterval div(UpperInterval i1, UpperInterval i2) {
+        return make_interval(div(make_singleton(i1),make_singleton(i2))); }
+
+
+    //! \related UpperInterval \brief Positive integer power function. Yields an over-approximation to \f$\{ x^m \mid x\in I\}\f$.
+    friend UpperInterval pow(UpperInterval i, Nat m) {
+        return make_interval(pow(make_singleton(i),m)); }
+    //! \related UpperInterval \brief %Integer power function. Yields an over-approximation to \f$\{ x^n \mid x\in I\}\f$.
+    friend UpperInterval pow(UpperInterval i, Int n) {
+        return make_interval(pow(make_singleton(i),n)); }
+
+    //! \related UpperInterval \brief Square-root function. Yields an over-approximation to \f$\{ \sqrt{x} \mid x\in I\}\f$.
+    //! Requires \c I.lower()>=0 .
+    friend UpperInterval sqrt(UpperInterval i) {
+        return make_interval(sqrt(make_singleton(i))); }
+    //! \related UpperInterval \brief Exponential function. Yields an over-approximation to \f$\{ \exp{x} \mid x\in I\}\f$.
+    friend UpperInterval exp(UpperInterval i) {
+        return make_interval(exp(make_singleton(i))); }
+    //! \related UpperInterval \brief Natural logarithm function. Yields an over-approximation to \f$\{ \log{x} \mid x\in I\}\f$.
+    //! Requires \c I.lower()>0 .
+    friend UpperInterval log(UpperInterval i) {
+        return make_interval(log(make_singleton(i))); }
+
+    //! \related UpperInterval \brief Sine function. Yields an over-approximation to \f$\{ \sin{x} \mid x\in I\}\f$.
+    friend UpperInterval sin(UpperInterval i) {
+        return make_interval(sin(make_singleton(i))); }
+    //! \related UpperInterval \brief Cosine function. Yields an over-approximation to \f$\{ \cos{x} \mid x\in I\}\f$.
+    friend UpperInterval cos(UpperInterval i) {
+        return make_interval(cos(make_singleton(i))); }
+    //! \related UpperInterval \brief Tangent function. Yields an over-approximation to \f$\{ \tan{x} \mid x\in I\}\f$.
+    friend UpperInterval tan(UpperInterval i) {
+        return make_interval(tan(make_singleton(i))); }
+    //! \related UpperInterval \brief Interse tangent function. Yields an over-approximation to \f$\{ \atan{x} \mid x\in I\}\f$.
+    friend UpperInterval atan(UpperInterval i) {
+        return make_interval(atan(make_singleton(i))); }
+
+    //! \related UpperInterval \brief The magnitude of the interval \a I. Yields \f$ \max\{ |x|\,\mid\,x\in I \}\f$.
+    friend inline PositiveUpperFloat64 mag(UpperInterval i) { return PositiveUpperFloat64(max(abs(i.lower_raw()),abs(i.upper_raw()))); }
+    //! \related UpperInterval \brief The mignitude of the interval \a I. Yields \f$ \min\{ |x|\,\mid\,x\in I \}\f$.
+    friend inline LowerFloat64 mig(UpperInterval i) { return LowerFloat64(min(Float64(0),min(abs(i.lower_raw()),abs(i.upper_raw())))); }
+
+    //! \related UpperInterval \brief Unary plus operator. Should be implemented exactly and yield \f$\{ +x \mid x\in I\}\f$.
+    friend inline UpperInterval operator+(const UpperInterval& i) { return pos(i); }
+    //! \related UpperInterval \brief Unary negation operator. Should be implemented exactly and yield \f$\{ -x \mid x\in I\}\f$.
+    friend inline UpperInterval operator-(const UpperInterval& i) { return neg(i); }
+    //! \related UpperInterval \brief Binary addition operator. Guaranteed to yield an over approximation to \f$\{ x_1+x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$.
+    friend inline UpperInterval operator+(const UpperInterval& i1, const UpperInterval& i2) { return add(i1,i2); }
+    //! \related UpperInterval \brief Binary addition operator. Guaranteed to yield an over approximation to \f$\{ x_1-x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$.
+    friend inline UpperInterval operator-(const UpperInterval& i1, const UpperInterval& i2) { return sub(i1,i2); }
+    //! \related UpperInterval \brief Binary addition operator. Guaranteed to yield an over approximation to \f$\{ x_1*x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$.
+    friend inline UpperInterval operator*(const UpperInterval& i1, const UpperInterval& i2) { return mul(i1,i2); }
+    //! \related UpperInterval \brief Binary addition operator. Guaranteed to yield an over approximation to \f$\{ x_1/x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$. Yields \f$[-\infty,+\infty]\f$ if \f$0\in I_2\f$.
+    friend inline UpperInterval operator/(const UpperInterval& i1, const UpperInterval& i2) { return div(i1,i2); };
+
+    //! \related UpperInterval \brief Inplace addition operator.
+    friend inline UpperInterval& operator+=(UpperInterval& i1, const UpperInterval& i2) { i1=add(i1,i2); return i1; }
+    //! \related UpperInterval \brief Inplace subtraction operator.
+    friend inline UpperInterval& operator-=(UpperInterval& i1, const UpperInterval& i2) { i1=sub(i1,i2); return i1; }
+    //! \related UpperInterval \brief Inplace multiplication operator.
+    friend inline UpperInterval& operator*=(UpperInterval& i1, const UpperInterval& i2) { i1=mul(i1,i2); return i1; }
+    //! \related UpperInterval \brief Inplace division operator.
+    friend inline UpperInterval& operator/=(UpperInterval& i1, const UpperInterval& i2) { i1=div(i1,i2); return i1; }
+
+    // Standard equality operators
+    //! \related UpperInterval \brief Equality operator. Tests equality of intervals as geometric objects, so \c [0,1]==[0,1] returns \c true.
+    friend inline Bool operator==(const UpperInterval& i1, const UpperInterval& i2) { return i1.lower_raw()==i2.lower_raw() && i1.upper_raw()==i2.upper_raw(); }
+    //! \related UpperInterval \brief Inequality operator. Tests equality of intervals as geometric objects, so \c [0,2]!=[1,3] returns \c true,
+    //! even though the intervals possibly represent the same exact real value.
+    friend inline Bool operator!=(const UpperInterval& i1, const UpperInterval& i2) { return i1.lower_raw()!=i2.lower_raw() || i1.upper_raw()!=i2.upper_raw(); }
+
+    // Boost-style Tribool (in)equality operators
+    //inline Tribool operator==(const UpperInterval& i1, const UpperInterval& i2) {
+    //  if(i1.lower_raw()>i2.upper_raw() || i1.upper_raw()<i2.lower_raw()) { return false; } else if(i1.lower_raw()==i2.upper_raw() && i1.upper_raw()==i2.lower_raw()) { return true; } else { return indeterminate; } }
+    //inline Tribool operator!=(const UpperInterval& i1, const UpperInterval& i2) { return !(i1==i2); }
+
+    //! \related UpperInterval \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
+    //! Hence \c [1.0,3.0]>[0.0,2.0] yields \c indeterminate since the first interval could represent the number 1.25 and the second 1.75.
+    friend inline Tribool operator> (UpperInterval i1, UpperInterval i2) {
+        if(i1.lower_raw()> i2.upper_raw()) { return true; }
+        else if(i1.upper_raw()<=i2.lower_raw()) { return false; }
+        else { return indeterminate; }
+    }
+
+    //! \related UpperInterval \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
+    friend inline Tribool operator< (UpperInterval i1, UpperInterval i2) {
+        if(i1.upper_raw()< i2.lower_raw()) { return true; }
+        else if(i1.lower_raw()>=i2.upper_raw()) { return false; }
+        else { return indeterminate; }
+    }
+
+    //! \related UpperInterval \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
+    friend inline Tribool operator>=(UpperInterval i1, UpperInterval i2) {
+        if(i1.lower_raw()>=i2.upper_raw()) { return true; }
+        else if(i1.upper_raw()< i2.lower_raw()) { return false; }
+        else { return indeterminate; }
+    }
+
+    //! \related UpperInterval \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
+    friend inline Tribool operator<=(UpperInterval i1, UpperInterval i2) {
+        if(i1.upper_raw()<=i2.lower_raw()) { return true; }
+        else if(i1.lower_raw()> i2.upper_raw()) { return false; }
+        else { return indeterminate; }
+    }
+
+    // Mixed operations
+    friend inline UpperInterval operator+(UpperInterval i1, ValidatedFloat64 x2) { return i1+make_interval(x2); }
+    friend inline UpperInterval operator-(UpperInterval i1, ValidatedFloat64 x2) { return i1-make_interval(x2); }
+    friend inline UpperInterval operator*(UpperInterval i1, ValidatedFloat64 x2) { return i1*make_interval(x2); }
+    friend inline UpperInterval operator/(UpperInterval i1, ValidatedFloat64 x2) { return i1/make_interval(x2); }
+    friend inline UpperInterval operator+(ValidatedFloat64 x1, UpperInterval i2) { return make_interval(x1)+i2; }
+    friend inline UpperInterval operator-(ValidatedFloat64 x1, UpperInterval i2) { return make_interval(x1)-i2; }
+    friend inline UpperInterval operator*(ValidatedFloat64 x1, UpperInterval i2) { return make_interval(x1)*i2; }
+    friend inline UpperInterval operator/(ValidatedFloat64 x1, UpperInterval i2) { return make_interval(x1)/i2; }
+    friend inline UpperInterval& operator+=(UpperInterval& i1, ValidatedFloat64 x2) { return i1+=make_interval(x2); }
+    friend inline UpperInterval& operator-=(UpperInterval& i1, ValidatedFloat64 x2) { return i1-=make_interval(x2); }
+    friend inline UpperInterval& operator*=(UpperInterval& i1, ValidatedFloat64 x2) { return i1*=make_interval(x2); }
+    friend inline UpperInterval& operator/=(UpperInterval& i1, ValidatedFloat64 x2) { return i1/=make_interval(x2); }
+    friend inline Tribool operator==(UpperInterval i1, ValidatedFloat64 x2) { return i1==make_interval(x2); }
+    friend inline Tribool operator!=(UpperInterval i1, ValidatedFloat64 x2) { return i1!=make_interval(x2); }
+    friend inline Tribool operator<=(UpperInterval i1, ValidatedFloat64 x2) { return i1<=make_interval(x2); }
+    friend inline Tribool operator>=(UpperInterval i1, ValidatedFloat64 x2) { return i1>=make_interval(x2); }
+    friend inline Tribool operator< (UpperInterval i1, ValidatedFloat64 x2) { return i1< make_interval(x2); }
+    friend inline Tribool operator> (UpperInterval i1, ValidatedFloat64 x2) { return i1> make_interval(x2); }
+
   private:
     Float64 l, u;
 };
@@ -388,217 +566,6 @@ inline Float64 med(ExactInterval i) { return half_exact(add_near(i.lower_raw(),i
 inline Float64 rad(ExactInterval i) { return half_exact(sub_up(i.upper_raw(),i.lower_raw())); }
 //! \related ExactInterval \brief An over-approximation to the width of the interval.
 inline ExactFloat64 diam(ExactInterval i) { return ExactFloat64(sub_up(i.upper_raw(),i.lower_raw())); }
-
-//! \related UpperInterval \brief The interval of possible maximum values. Yields the interval between \c i1.upper_raw() and \c i2.upper_raw().
-inline UpperInterval max(UpperInterval i1,UpperInterval i2);
-//! \related UpperInterval \brief The interval of possible minimum values. Yields the interval between \c i1.lower() and \c i2.lower().
-inline UpperInterval min(UpperInterval,UpperInterval);
-//! \related UpperInterval \brief The interval of possible absolute values. Yields \f$\{ |x| \mid x\in I\}\f$.
-inline UpperInterval abs(UpperInterval);
-
-//! \related UpperInterval \brief Unary plus function. Yields the identity \f$I=\{+x | x\in I\}\f$.
-inline UpperInterval pos(UpperInterval i);
-//! \related UpperInterval \brief Unary negation function. Yields the exact interval \f$\{-x | x\in I\}\f$.
-inline UpperInterval neg(UpperInterval i);
-//! \related UpperInterval \brief Unary square function. Yields an over-approximation to \f$\{ x^2 \mid x\in I\}\f$.
-//! Note that if \a I contains positive and negative values, \c sqr(I) is tighter than \c I*I .
-UpperInterval sqr(UpperInterval i);
-//! \related UpperInterval \brief Unary reciprocal function. Yields an over-approximation to \f$\{ 1/x \mid x\in I\}\f$.
-//! Yields \f$[-\infty,+\infty]\f$ if \a I contains \a 0 in its interior, and an interval containing \f$[1/u,+\infty]\f$ if \a I=[0,u] .
-UpperInterval rec(UpperInterval i);
-
-//! \related UpperInterval \brief Binary addition function. Yields an over-approximation to \f$\{ x_1+x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$.
-inline UpperInterval add(UpperInterval, UpperInterval);
-//! \related UpperInterval \brief Subtraction function. Yields an over-approximation to \f$\{ x_1-x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$.
-inline UpperInterval sub(UpperInterval, UpperInterval);
-//! \related UpperInterval \brief Binary multiplication function. Yields an over-approximation to \f$\{ x_1\times x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$.
-UpperInterval mul(UpperInterval, UpperInterval);
-//! \related UpperInterval \brief Division function. Yields an over-approximation to \f$\{ x_1 \div x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$.
-UpperInterval div(UpperInterval, UpperInterval);
-
-extern const UpperInterval pi_ivl;
-
-
-//! \related UpperInterval \brief Positive integer power function. Yields an over-approximation to \f$\{ x^m \mid x\in I\}\f$.
-UpperInterval pow(UpperInterval i, Nat m);
-//! \related UpperInterval \brief %Integer power function. Yields an over-approximation to \f$\{ x^n \mid x\in I\}\f$.
-UpperInterval pow(UpperInterval i, Int n);
-
-//! \related UpperInterval \brief Square-root function. Yields an over-approximation to \f$\{ \sqrt{x} \mid x\in I\}\f$.
-//! Requires \c I.lower()>=0 .
-UpperInterval sqrt(UpperInterval);
-//! \related UpperInterval \brief Exponential function. Yields an over-approximation to \f$\{ \exp{x} \mid x\in I\}\f$.
-UpperInterval exp(UpperInterval);
-//! \related UpperInterval \brief Natural logarithm function. Yields an over-approximation to \f$\{ \log{x} \mid x\in I\}\f$.
-//! Requires \c I.lower()>0 .
-UpperInterval log(UpperInterval);
-
-//! \related UpperInterval \brief Sine function. Yields an over-approximation to \f$\{ \sin{x} \mid x\in I\}\f$.
-UpperInterval sin(UpperInterval);
-//! \related UpperInterval \brief Cosine function. Yields an over-approximation to \f$\{ \sin{x} \mid x\in I\}\f$.
-UpperInterval cos(UpperInterval);
-//! \related UpperInterval \brief Tangent function. Yields an over-approximation to \f$\{ \sin{x} \mid x\in I\}\f$.
-UpperInterval tan(UpperInterval);
-UpperInterval asin(UpperInterval);
-UpperInterval acos(UpperInterval);
-UpperInterval atan(UpperInterval);
-
-inline ValidatedFloat64 make_singleton(UpperInterval const& ivl) { return ValidatedFloat64(ivl.lower(),ivl.upper()); }
-inline UpperInterval make_interval(ValidatedFloat64 const& x) { return UpperInterval(x.lower(),x.upper()); }
-
-//! \related UpperInterval \brief The magnitude of the interval \a I. Yields \f$ \max\{ |x|\,\mid\,x\in I \}\f$.
-inline PositiveUpperFloat64 mag(UpperInterval i) { return PositiveUpperFloat64(max(abs(i.lower_raw()),abs(i.upper_raw()))); }
-//! \related UpperInterval \brief The mignitude of the interval \a I. Yields \f$ \min\{ |x|\,\mid\,x\in I \}\f$.
-inline LowerFloat64 mig(UpperInterval i) { return LowerFloat64(min(Float64(0),min(abs(i.lower_raw()),abs(i.upper_raw())))); }
-
-inline UpperInterval max(UpperInterval i1, UpperInterval i2) {
-    return make_interval(max(make_singleton(i1),make_singleton(i2))); }
-
-inline UpperInterval min(UpperInterval i1, UpperInterval i2) {
-    return make_interval(min(make_singleton(i1),make_singleton(i2))); }
-
-inline UpperInterval abs(UpperInterval i) {
-    return make_interval(abs(make_singleton(i))); }
-
-inline UpperInterval pos(UpperInterval i) {
-    return make_interval(pos(make_singleton(i))); }
-
-inline UpperInterval neg(UpperInterval i) {
-    return make_interval(neg(make_singleton(i))); }
-
-inline UpperInterval sqr(UpperInterval i) {
-    return make_interval(sqr(make_singleton(i))); }
-
-inline UpperInterval add(UpperInterval i1, UpperInterval i2) {
-    return make_interval(add(make_singleton(i1),make_singleton(i2))); }
-
-inline UpperInterval sub(UpperInterval i1, UpperInterval i2) {
-    return make_interval(sub(make_singleton(i1),make_singleton(i2))); }
-
-inline UpperInterval mul(UpperInterval i1, UpperInterval i2) {
-    return make_interval(mul(make_singleton(i1),make_singleton(i2))); }
-
-inline UpperInterval div(UpperInterval i1, UpperInterval i2) {
-    return make_interval(div(make_singleton(i1),make_singleton(i2))); }
-
-inline UpperInterval pow(UpperInterval i, Nat m) {
-    return make_interval(pow(make_singleton(i),m)); }
-
-inline UpperInterval pow(UpperInterval i, Int n) {
-    return make_interval(pow(make_singleton(i),n)); }
-
-inline UpperInterval rec(UpperInterval i) {
-    return make_interval(rec(make_singleton(i))); }
-
-inline UpperInterval sqrt(UpperInterval i) {
-    return make_interval(sqrt(make_singleton(i))); }
-
-inline UpperInterval exp(UpperInterval i) {
-    return make_interval(exp(make_singleton(i))); }
-
-inline UpperInterval log(UpperInterval i) {
-    return make_interval(log(make_singleton(i))); }
-
-inline UpperInterval sin(UpperInterval i) {
-    return make_interval(sin(make_singleton(i))); }
-
-inline UpperInterval cos(UpperInterval i) {
-    return make_interval(cos(make_singleton(i))); }
-
-inline UpperInterval tan(UpperInterval i) {
-    return make_interval(tan(make_singleton(i))); }
-
-inline UpperInterval asin(UpperInterval i) {
-    return make_interval(asin(make_singleton(i))); }
-
-inline UpperInterval acos(UpperInterval i) {
-    return make_interval(acos(make_singleton(i))); }
-
-inline UpperInterval atan(UpperInterval i) {
-    return make_interval(atan(make_singleton(i))); }
-
-//! \related UpperInterval \brief Unary plus operator. Should be implemented exactly and yield \f$\{ +x \mid x\in I\}\f$.
-inline UpperInterval operator+(const UpperInterval& i) { return pos(i); }
-//! \related UpperInterval \brief Unary negation operator. Should be implemented exactly and yield \f$\{ -x \mid x\in I\}\f$.
-inline UpperInterval operator-(const UpperInterval& i) { return neg(i); }
-//! \related UpperInterval \brief Binary addition operator. Guaranteed to yield an over approximation to \f$\{ x_1+x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$.
-inline UpperInterval operator+(const UpperInterval& i1, const UpperInterval& i2) { return add(i1,i2); }
-//! \related UpperInterval \brief Binary addition operator. Guaranteed to yield an over approximation to \f$\{ x_1-x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$.
-inline UpperInterval operator-(const UpperInterval& i1, const UpperInterval& i2) { return sub(i1,i2); }
-//! \related UpperInterval \brief Binary addition operator. Guaranteed to yield an over approximation to \f$\{ x_1*x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$.
-inline UpperInterval operator*(const UpperInterval& i1, const UpperInterval& i2) { return mul(i1,i2); }
-//! \related UpperInterval \brief Binary addition operator. Guaranteed to yield an over approximation to \f$\{ x_1/x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$. Yields \f$[-\infty,+\infty]\f$ if \f$0\in I_2\f$.
-inline UpperInterval operator/(const UpperInterval& i1, const UpperInterval& i2) { return div(i1,i2); };
-
-//! \related UpperInterval \brief Inplace addition operator.
-inline UpperInterval& operator+=(UpperInterval& i1, const UpperInterval& i2) { i1=add(i1,i2); return i1; }
-//! \related UpperInterval \brief Inplace subtraction operator.
-inline UpperInterval& operator-=(UpperInterval& i1, const UpperInterval& i2) { i1=sub(i1,i2); return i1; }
-//! \related UpperInterval \brief Inplace multiplication operator.
-inline UpperInterval& operator*=(UpperInterval& i1, const UpperInterval& i2) { i1=mul(i1,i2); return i1; }
-//! \related UpperInterval \brief Inplace division operator.
-inline UpperInterval& operator/=(UpperInterval& i1, const UpperInterval& i2) { i1=div(i1,i2); return i1; }
-
-// Standard equality operators
-//! \related UpperInterval \brief Equality operator. Tests equality of intervals as geometric objects, so \c [0,1]==[0,1] returns \c true.
-inline Bool operator==(const UpperInterval& i1, const UpperInterval& i2) { return i1.lower_raw()==i2.lower_raw() && i1.upper_raw()==i2.upper_raw(); }
-//! \related UpperInterval \brief Inequality operator. Tests equality of intervals as geometric objects, so \c [0,2]!=[1,3] returns \c true,
-//! even though the intervals possibly represent the same exact real value.
-inline Bool operator!=(const UpperInterval& i1, const UpperInterval& i2) { return i1.lower_raw()!=i2.lower_raw() || i1.upper_raw()!=i2.upper_raw(); }
-
-// Boost-style Tribool (in)equality operators
-//inline Tribool operator==(const UpperInterval& i1, const UpperInterval& i2) {
-//  if(i1.lower_raw()>i2.upper_raw() || i1.upper_raw()<i2.lower_raw()) { return false; } else if(i1.lower_raw()==i2.upper_raw() && i1.upper_raw()==i2.lower_raw()) { return true; } else { return indeterminate; } }
-//inline Tribool operator!=(const UpperInterval& i1, const UpperInterval& i2) { return !(i1==i2); }
-
-//! \related UpperInterval \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
-//! Hence \c [1.0,3.0]>[0.0,2.0] yields \c indeterminate since the first interval could represent the number 1.25 and the second 1.75.
-inline Tribool operator> (UpperInterval i1, UpperInterval i2) {
-    if(i1.lower_raw()> i2.upper_raw()) { return true; }
-    else if(i1.upper_raw()<=i2.lower_raw()) { return false; }
-    else { return indeterminate; }
-}
-
-//! \related UpperInterval \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
-inline Tribool operator< (UpperInterval i1, UpperInterval i2) {
-    if(i1.upper_raw()< i2.lower_raw()) { return true; }
-    else if(i1.lower_raw()>=i2.upper_raw()) { return false; }
-    else { return indeterminate; }
-}
-
-//! \related UpperInterval \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
-inline Tribool operator>=(UpperInterval i1, UpperInterval i2) {
-    if(i1.lower_raw()>=i2.upper_raw()) { return true; }
-    else if(i1.upper_raw()< i2.lower_raw()) { return false; }
-    else { return indeterminate; }
-}
-
-//! \related UpperInterval \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
-inline Tribool operator<=(UpperInterval i1, UpperInterval i2) {
-    if(i1.upper_raw()<=i2.lower_raw()) { return true; }
-    else if(i1.lower_raw()> i2.upper_raw()) { return false; }
-    else { return indeterminate; }
-}
-
-// Mixed operations
-inline UpperInterval operator+(UpperInterval i1, ValidatedFloat64 x2) { return i1+make_interval(x2); }
-inline UpperInterval operator-(UpperInterval i1, ValidatedFloat64 x2) { return i1-make_interval(x2); }
-inline UpperInterval operator*(UpperInterval i1, ValidatedFloat64 x2) { return i1*make_interval(x2); }
-inline UpperInterval operator/(UpperInterval i1, ValidatedFloat64 x2) { return i1/make_interval(x2); }
-inline UpperInterval operator+(ValidatedFloat64 x1, UpperInterval i2) { return make_interval(x1)+i2; }
-inline UpperInterval operator-(ValidatedFloat64 x1, UpperInterval i2) { return make_interval(x1)-i2; }
-inline UpperInterval operator*(ValidatedFloat64 x1, UpperInterval i2) { return make_interval(x1)*i2; }
-inline UpperInterval operator/(ValidatedFloat64 x1, UpperInterval i2) { return make_interval(x1)/i2; }
-inline UpperInterval& operator+=(UpperInterval& i1, ValidatedFloat64 x2) { return i1+=make_interval(x2); }
-inline UpperInterval& operator-=(UpperInterval& i1, ValidatedFloat64 x2) { return i1-=make_interval(x2); }
-inline UpperInterval& operator*=(UpperInterval& i1, ValidatedFloat64 x2) { return i1*=make_interval(x2); }
-inline UpperInterval& operator/=(UpperInterval& i1, ValidatedFloat64 x2) { return i1/=make_interval(x2); }
-inline Tribool operator==(UpperInterval i1, ValidatedFloat64 x2) { return i1==make_interval(x2); }
-inline Tribool operator!=(UpperInterval i1, ValidatedFloat64 x2) { return i1!=make_interval(x2); }
-inline Tribool operator<=(UpperInterval i1, ValidatedFloat64 x2) { return i1<=make_interval(x2); }
-inline Tribool operator>=(UpperInterval i1, ValidatedFloat64 x2) { return i1>=make_interval(x2); }
-inline Tribool operator< (UpperInterval i1, ValidatedFloat64 x2) { return i1< make_interval(x2); }
-inline Tribool operator> (UpperInterval i1, ValidatedFloat64 x2) { return i1> make_interval(x2); }
 
 inline UpperInterval hull(UpperInterval i1, ValidatedFloat64 x2) { return hull(i1,make_interval(x2)); }
 inline UpperInterval hull(ValidatedFloat64 x1, UpperInterval i2) { return hull(make_interval(x1),i2); }

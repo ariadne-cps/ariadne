@@ -379,8 +379,10 @@ template<class PR> inline const Float<Error,PR> Float<Bounded,PR>::error() const
 template<class PR> class Float<PositiveExact,PR> : public Float<Exact,PR> {
   public:
     Float<PositiveExact,PR>() : Float<Exact,PR>() { }
-    template<class M, EnableIf<IsIntegral<M>>, EnableIf<IsUnsigned<M>> =dummy>
+    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy>
         Float<PositiveExact,PR>(M m) : Float<Exact,PR>(m) { }
+    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy>
+        Float<PositiveExact,PR>(M m, PR pr) : Float<Exact,PR>(m,pr) { }
     explicit Float<PositiveExact,PR>(RawFloat<PR> const& x) : Float<Exact,PR>(x) { }
     explicit Float<PositiveExact,PR>(Float<Exact,PR> const& x) : Float<Exact,PR>(x) { }
 };
@@ -388,9 +390,10 @@ template<class PR> class Float<PositiveExact,PR> : public Float<Exact,PR> {
 template<class PR> class Float<PositiveUpper,PR> : public Float<Upper,PR> {
   public:
     Float<PositiveUpper,PR>() : Float<Upper,PR>() { }
-    explicit Float<PositiveUpper,PR>(RawFloat<PR> const& x) : Float<Upper,PR>(x) { ARIADNE_PRECONDITION(x>=0); }
+    explicit Float<PositiveUpper,PR>(RawFloat<PR> const& x) : Float<Upper,PR>(x) {
+        ARIADNE_PRECONDITION_MSG(!(x<0),"x="<<x); }
     explicit Float<PositiveUpper,PR>(Float<Upper,PR> const& x) : Float<Upper,PR>(x) { }
-    template<class M, EnableIf<IsUnsigned<M>> =dummy> Float<PositiveUpper,PR>(M m) : Float<Upper,PR>(m) { }
+    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy> Float<PositiveUpper,PR>(M m) : Float<Upper,PR>(m) { }
     template<class F, EnableIf<IsSame<F,Float<Upper,PR>>> =dummy>
         explicit Float<PositiveUpper,PR>(F const& x) : Float<Upper,PR>(x) { }
     Float<PositiveUpper,PR>(Float<PositiveExact,PR> const& x) : Float<Upper,PR>(x) { }
@@ -399,7 +402,7 @@ template<class PR> class Float<PositiveUpper,PR> : public Float<Upper,PR> {
 template<class PR> class Float<PositiveLower,PR> : public Float<Lower,PR> {
   public:
     Float<PositiveLower,PR>() : Float<Lower,PR>() { }
-    template<class M, EnableIf<IsSigned<M>> =dummy>
+    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy>
         Float<PositiveLower,PR>(M m) : Float<Lower,PR>(m) { }
     explicit Float<PositiveLower,PR>(RawFloat<PR> const& x) : Float<Lower,PR>(x) { }
     explicit Float<PositiveLower,PR>(Float<Lower,PR> const& x) : Float<Lower,PR>(x) { }
@@ -409,7 +412,7 @@ template<class PR> class Float<PositiveLower,PR> : public Float<Lower,PR> {
 template<class PR> class Float<PositiveApproximate,PR> : public Float<Approximate,PR> {
   public:
     Float<PositiveApproximate,PR>() : Float<Approximate,PR>() { }
-    template<class M, EnableIf<IsSigned<M>> =dummy>
+    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy>
         Float<PositiveApproximate,PR>(M m) : Float<Approximate,PR>(m) { }
     explicit Float<PositiveApproximate,PR>(RawFloat<PR> const& x) : Float<Approximate,PR>(x) { }
     explicit Float<PositiveApproximate,PR>(Float<Approximate,PR> const& x) : Float<Approximate,PR>(x) { }
@@ -434,36 +437,44 @@ template<> Float<Approximate,Precision64>::Float(Real const& x);
 
 
 //#define ARIADNE_TEMPLATED_FLOAT
+
 #ifdef ARIADNE_TEMPLATED_FLOAT
+
 template<class P, class PR> auto
 operator+(Float<P,PR> const& x) -> Float<P,PR>;
 
 template<class P, class PR> auto
-operator-(Float<P,PR> const& x) -> Float<Opposite<P>,PR>;
+operator-(Float<P,PR> const& x) -> Float<Negated<P>,PR>;
 
 template<class P1, class P2, class PR> auto
 operator+(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> Float<Widen<Weaker<P1,P2>>,PR>;
 
 template<class P1, class P2, class PR> auto
-operator-(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> Float<Widen<Weaker<P1,Opposite<P2>>>,PR>;
+operator-(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> Float<Widen<Weaker<P1,Negated<P2>>>,PR>;
 
 template<class P1, class P2, class PR> auto
 operator*(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> Float<Widen<Weaker<P1,P2>>,PR>;
 
 template<class P1, class P2, class PR> auto
-operator/(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> Float<Widen<Weaker<P1,Opposite<P2>>>,PR>;
+operator/(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> Float<Widen<Weaker<P1,Inverted<P2>>>,PR>;
 
-template<class P1, class P2, class PR> auto
-operator+=(Float<P1,PR>& x1, Float<P2,PR> const& x2) -> decltype(x1=x1+x2);
+template<class P, class PR> auto
+operator*(Float<P,PR> const& x1, TwoExp x2) -> Float<P,PR>;
 
-template<class P1, class P2, class PR> auto
-operator-=(Float<P1,PR>& x1, Float<P2,PR> const& x2) -> decltype(x1=x1+x2);
+template<class P, class PR> auto
+operator/(Float<P,PR> const& x1, TwoExp x2) -> Float<P,PR>;
 
-template<class P1, class P2, class PR> auto
-operator*=(Float<P1,PR>& x1, Float<P2,PR> const& x2) -> decltype(x1=x1+x2);
+template<class P1, class Y2, class PR> auto
+operator+=(Float<P1,PR>& x1, Y2 const& y2) -> decltype(x1=x1+y2);
 
-template<class P1, class P2, class PR> auto
-operator/=(Float<P1,PR>& x1, Float<P2,PR> const& x2) -> decltype(x1=x1+x2);
+template<class P1, class Y2, class PR> auto
+operator-=(Float<P1,PR>& x1, Y2 const& y2) -> decltype(x1=x1-y2);
+
+template<class P1, class Y2, class PR> auto
+operator*=(Float<P1,PR>& x1, Y2 const& y2) -> decltype(x1=x1*y2);
+
+template<class P1, class Y2, class PR> auto
+operator/=(Float<P1,PR>& x1, Y2 const& y2) -> decltype(x1=x1/y2);
 
 
 template<class P1, class P2, class PR> auto
@@ -479,19 +490,22 @@ max(Float<P,PR> const& x1, Float<P,PR> const& x2) -> Float<P,PR>;
 template<class P, class PR> auto
 abs(Float<P,PR> const& x) -> Float<Weaker<P,Opposite<P>>,PR>;
 
+template<class P, class PR> auto
+floor(Float<P,PR> const& x) -> Float<P,PR>;
+
 
 template<class P, class PR> auto
 nul(Float<P,PR> const&) -> Float<P,PR>;
 template<class P, class PR> auto
 pos(Float<P,PR> const&) -> Float<P,PR>;
 template<class P, class PR> auto
-neg(Float<P,PR> const&) -> Float<Opposite<P>,PR>;
+neg(Float<P,PR> const&) -> Float<Negated<P>,PR>;
 template<class P, class PR> auto
 half(Float<P,PR> const&) -> Float<P,PR>;
 template<class P, class PR> auto
 sqr(Float<P,PR> const&) -> Float<P,PR>;
 template<class P, class PR> auto
-rec(Float<P,PR> const&) -> Float<Widen<Opposite<P>>,PR>;
+rec(Float<P,PR> const&) -> Float<Widen<Inverted<P>>,PR>;
 
 template<class P, class PR> auto
 add(Float<P,PR> const&, Float<P,PR> const&) -> Float<P,PR>;
@@ -527,13 +541,22 @@ template<class P, class PR> auto
 atan(Float<P,PR> const&) -> Float<P,PR>;
 
 template<class PR> auto mag(Float<Approximate,PR> const& x) -> Float<PositiveApproximate,PR>;
-template<class PR> auto mag(Float<Lower,PR> const& x) -> Float<PositiveLower,PR>;
+template<class PR> auto mag(Float<Lower,PR> const& x) -> Float<PositiveApproximate,PR>;
 template<class PR> auto mag(Float<Upper,PR> const& x) -> Float<PositiveUpper,PR>;
 template<class PR> auto mag(Float<Bounded,PR> const& x) -> Float<PositiveUpper,PR>;
+template<class PR> auto mag(Float<Metric,PR> const& x) -> Float<PositiveUpper,PR>;
 template<class PR> auto mag(Float<Exact,PR> const& x) -> Float<PositiveExact,PR>;
+
+template<class PR> auto mig(Float<Approximate,PR> const& x) -> Float<PositiveApproximate,PR>;
+template<class PR> auto mig(Float<Lower,PR> const& x) -> Float<PositiveLower,PR>;
+template<class PR> auto mig(Float<Upper,PR> const& x) -> Float<PositiveApproximate,PR>;
+template<class PR> auto mig(Float<Bounded,PR> const& x) -> Float<PositiveLower,PR>;
+template<class PR> auto mig(Float<Metric,PR> const& x) -> Float<PositiveLower,PR>;
+template<class PR> auto mig(Float<Exact,PR> const& x) -> Float<PositiveExact,PR>;
 
 template<class P, class PR> auto is_zero(Float<P,PR> const&) -> Logical<Weaker<P,Opposite<P>>>;
 template<class P, class PR> auto is_positive(Float<P,PR> const&) -> Logical<Opposite<P>>;
+template<class P, class PR> auto same(Float<P,PR> const&, Float<P,PR> const&) -> Bool;
 
 template<class P1, class P2, class PR> auto
 operator==(Float<P1,PR> const&, Float<P2,PR> const&) -> decltype(is_zero(declval<Float<Weaker<P1,Opposite<P2>>,PR>>()));
@@ -550,6 +573,31 @@ operator> (Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> decltype(not (x1<=
 
 template<class P, class PR> auto
 operator<<(OutputStream& os, Float<P,PR> const&) -> OutputStream&;
+
+template<class P1, class P2, class PR> Float<Weaker<P1,P2>,PR> w(Float<P1,PR> x1, Float<P2,PR> x2) {
+    return Float<Weaker<P1,P2>,PR>(x1); }
+
+template<class P, class PR> auto
+floor(Float<P,PR> const& x) -> Float<P,PR>;
+
+template<class P, class PR> auto
+round(Float<P,PR> const& x) -> Float<P,PR>;
+
+extern const Float<Exact,Precision64> infty;
+
+inline void foo() {
+    typedef Precision64 PR;
+    Float<Exact,PR> exf; Float<Metric,PR> mef; Float<Bounded,PR> bof;
+    Float<Upper,PR> upf; Float<Lower,PR> lof; Float<Approximate,PR> apf;
+    exf=w(exf,exf); mef=w(exf,mef); bof=w(exf,bof); upf=w(exf,upf); lof=w(exf,lof); apf=w(exf,apf);
+    mef=w(mef,exf); mef=w(mef,mef); bof=w(mef,bof); upf=w(mef,upf); lof=w(mef,lof); apf=w(mef,apf);
+    bof=w(bof,exf); bof=w(bof,mef); bof=w(bof,bof); upf=w(bof,upf); lof=w(bof,lof); apf=w(bof,apf);
+    upf=w(upf,exf); upf=w(upf,mef); upf=w(upf,bof); upf=w(upf,upf); apf=w(upf,lof); apf=w(upf,apf);
+    lof=w(lof,exf); lof=w(lof,mef); lof=w(lof,bof); apf=w(lof,upf); lof=w(lof,lof); apf=w(lof,apf);
+    apf=w(apf,exf); apf=w(apf,mef); apf=w(apf,bof); apf=w(apf,upf); apf=w(apf,lof); apf=w(apf,apf);
+    Float<PositiveUpper,PR> pupf(upf);
+    pupf-lof;
+}
 
 #else
 
@@ -735,7 +783,6 @@ Boolean operator> (ExactFloat64 const& x1, ExactFloat64 const& x2);
 
 
 extern const ExactFloat64 infty;
-ExactFloat64 operator"" _exact(long double lx);
 
 ExactFloat64 max(ExactFloat64 const& x1,  ExactFloat64 const& x2);
 ExactFloat64 min(ExactFloat64 const& x1,  ExactFloat64 const& x2);
@@ -795,12 +842,18 @@ Boolean operator>=(ExactFloat64 const& x1, ExactFloat64 const& x2);
 Boolean operator< (ExactFloat64 const& x1, ExactFloat64 const& x2);
 Boolean operator> (ExactFloat64 const& x1, ExactFloat64 const& x2);
 
-template<class N, EnableIf<IsIntegral<N>> =dummy> Bool operator==(ExactFloat64 const& x1, N n2);
-template<class N, EnableIf<IsIntegral<N>> =dummy> Bool operator!=(ExactFloat64 const& x1, N n2);
-template<class N, EnableIf<IsIntegral<N>> =dummy> Bool operator<=(ExactFloat64 const& x1, N n2);
-template<class N, EnableIf<IsIntegral<N>> =dummy> Bool operator>=(ExactFloat64 const& x1, N n2);
-template<class N, EnableIf<IsIntegral<N>> =dummy> Bool operator< (ExactFloat64 const& x1, N n2);
-template<class N, EnableIf<IsIntegral<N>> =dummy> Bool operator> (ExactFloat64 const& x1, N n2);
+template<class N, EnableIf<IsIntegral<N>> =dummy> Bool operator==(ExactFloat64 const& x1, N n2) {
+    return x1 == ExactFloat64(n2); }
+template<class N, EnableIf<IsIntegral<N>> =dummy> Bool operator!=(ExactFloat64 const& x1, N n2) {
+    return x1 != ExactFloat64(n2); }
+template<class N, EnableIf<IsIntegral<N>> =dummy> Bool operator<=(ExactFloat64 const& x1, N n2) {
+    return x1 <= ExactFloat64(n2); }
+template<class N, EnableIf<IsIntegral<N>> =dummy> Bool operator>=(ExactFloat64 const& x1, N n2) {
+    return x1>=ExactFloat64(n2); }
+template<class N, EnableIf<IsIntegral<N>> =dummy> Bool operator< (ExactFloat64 const& x1, N n2) {
+    return x1 <  ExactFloat64(n2); }
+template<class N, EnableIf<IsIntegral<N>> =dummy> Bool operator> (ExactFloat64 const& x1, N n2) {
+    return x1 >  ExactFloat64(n2); }
 
 OutputStream& operator<<(OutputStream& os, ExactFloat64 const& x);
 
@@ -820,21 +873,18 @@ Bool operator>=(const Rational& q, ExactFloat64 const& x);
 Bool operator< (const Rational& q, ExactFloat64 const& x);
 Bool operator> (const Rational& q, ExactFloat64 const& x);
 
+ValidatedFloat64 round(ValidatedFloat64 const&);
+ApproximateFloat64 round(ApproximateFloat64 const&);
 
 PositiveExactFloat64 mag(ExactFloat64 const& x);
 // FIXME: Unsafe since x may be negative
 PositiveUpperFloat64 mag(UpperFloat64 const& x);
 PositiveUpperFloat64 mag(ValidatedFloat64 const& x);
-PositiveLowerFloat64 mig(ValidatedFloat64 const& x);
 PositiveApproximateFloat64 mag(ApproximateFloat64 const& x);
 
-
-ValidatedFloat64 make_bounds(PositiveUpperFloat64 const& _e);
-
-ExactFloat64 value(ValidatedFloat64 const& x);
-
-PositiveUpperFloat64 error(ValidatedFloat64 const& x);
-
+PositiveLowerFloat64 mig(ValidatedFloat64 const& x);
+PositiveLowerFloat64 mig(LowerFloat64 const& x);
+PositiveApproximateFloat64 mig(ApproximateFloat64 const& x);
 
 
 Bool same(ApproximateFloat64 const& x1, ApproximateFloat64 const& x2);
@@ -851,7 +901,7 @@ Bool same(ExactFloat64 const& x1, ExactFloat64 const& x2);
 
 
 
-ExactFloat64 midpoint(ValidatedFloat64 const& x);
+
 
 
 
@@ -943,6 +993,7 @@ PositiveUpperFloat64 operator/(PositiveUpperFloat64 const& x1, LowerFloat64 cons
 PositiveUpperFloat64 operator+(PositiveUpperFloat64 const& x1, PositiveUpperFloat64 const& x2);
 PositiveUpperFloat64 pow(PositiveUpperFloat64 const& x, Nat m);
 PositiveUpperFloat64 half(PositiveUpperFloat64 const& x);
+PositiveUpperFloat64 max(PositiveUpperFloat64 const& x1, PositiveUpperFloat64 const& x2);
 
 template<class M, EnableIf<IsUnsigned<M>> =dummy> PositiveUpperFloat64 operator+(PositiveUpperFloat64 const& x, M m) {
     return x+PositiveUpperFloat64(m); }
@@ -951,12 +1002,22 @@ template<class M, EnableIf<IsUnsigned<M>> =dummy> PositiveUpperFloat64 operator*
 template<class M, EnableIf<IsUnsigned<M>> =dummy> PositiveUpperFloat64 operator/(PositiveUpperFloat64 const& x, M m) {
     return x/LowerFloat64(m); }
 
-ErrorFloat64 operator"" _error(long double lx);
-
 
 
 #endif
 
+// Validated operations
+ValidatedFloat64 make_bounds(PositiveUpperFloat64 const& _e);
+ExactFloat64 value(BoundedFloat64 const& x);
+PositiveUpperFloat64 error(BoundedFloat64 const& x);
+ExactFloat64 value(MetricFloat64 const& x);
+PositiveUpperFloat64 error(MetricFloat64 const& x);
+
+
+// Literals operations
+ExactFloat64 operator"" _exact(long double lx);
+ErrorFloat64 operator"" _error(long double lx);
+MetricFloat64 operator"" _near(long double lx);
 
 
 // Standard equality operators
@@ -985,8 +1046,9 @@ template<class PR> inline Float<Bounded,PR> make_float(Number<Exact> const& y, P
 template<class PR> inline Float<Bounded,PR> make_float(Real const& y, PR pr) { return Float<Bounded,PR>(y,pr); }
 template<class PR> inline Float<Bounded,PR> make_float(Rational const& y, PR pr) { return Float<Bounded,PR>(y,pr); }
 template<class PR> inline Float<Exact,PR> make_float(Integer const& y, PR pr) { return Float<Exact,PR>(y,pr); }
-template<class N, class PR, EnableIf<IsIntegral<N>> =dummy> inline Float<Exact,PR> make_float(N const& y, PR pr) { return Float<Exact,PR>(y,pr); }
-template<class D, class PR, EnableIf<IsFloatingPoint<D>> =dummy> inline Float<Exact,PR> make_float(D const& y, PR pr) { return Float<Approximate,PR>(y,pr); }
+template<class N, class PR, EnableIf<IsSignedIntegral<N>> =dummy> inline Float<Exact,PR> make_float(N const& y, PR pr) { return Float<Exact,PR>(y,pr); }
+template<class M, class PR, EnableIf<IsUnsignedIntegral<M>> =dummy> inline Float<PositiveExact,PR> make_float(M const& y, PR pr) { return Float<PositiveExact,PR>(y,pr); }
+template<class D, class PR, EnableIf<IsFloatingPoint<D>> =dummy> inline Float<Approximate,PR> make_float(D const& y, PR pr) { return Float<Approximate,PR>(y,pr); }
 
 template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumber<Y>> =dummy> auto
 operator+(X const& x, Y const& y) -> decltype(x+make_float(y,x.precision())) { return x+make_float(y,x.precision()); }

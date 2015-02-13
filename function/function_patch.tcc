@@ -327,7 +327,7 @@ template<class M> Polynomial<ValidatedFloat64> FunctionPatch<M>::polynomial() co
     Vector<Polynomial<ValidatedFloat64> > s(this->argument_size(),z);
     for(SizeType j=0; j!=this->argument_size(); ++j) {
         ExactInterval const& domj=this->domain()[j];
-        if(domj.width()<=0) {
+        if(domj.lower()>=domj.upper()) {
             ARIADNE_ASSERT(this->domain()[j].width()==0);
             s[j]=Polynomial<ValidatedFloat64>::constant(this->argument_size(),0);
         } else {

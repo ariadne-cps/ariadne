@@ -79,7 +79,12 @@ inline constexpr ParadigmCode strengthen(ParadigmCode p) {
 constexpr bool is_weaker(ParadigmCode p1, ParadigmCode p2) {
     return (p1 & strengthen(p2)) == p1; }
 constexpr ParadigmCode next_weaker(ParadigmCode p) {
-    return is_weaker(ParadigmCode::EFFECTIVE_UNINFORMATIVE,p) ? (p & ParadigmCode::VALIDATED) : ParadigmCode::APPROXIMATE; }
+    return is_weaker(ParadigmCode::EFFECTIVE_FLAG,p) ? (p & ParadigmCode::VALIDATED) : ParadigmCode::APPROXIMATE; }
+constexpr ParadigmCode widen(ParadigmCode p) {
+    return p & ParadigmCode::VALIDATED; }
+constexpr ParadigmCode positive(ParadigmCode p) {
+    return p | ParadigmCode::POSITIVE_FLAG; }
+
 
 
 //! \defgroup ParadigmSubModule Computational Paradigms
@@ -179,6 +184,8 @@ using ValidatedLower = Lower;
 using ValidatedUpper = Upper;
 using ValidatedBounded = Bounded;
 using ValidatedMetric = Metric;
+using PositiveValidatedLower = PositiveLower;
+using PositiveValidatedUpper = PositiveUpper;
 using Error = PositiveUpper;
 
 using ApproximateTag = Approximate;
@@ -229,6 +236,25 @@ ValidatedLower negate_paradigm(ValidatedUpper);
 ValidatedUpper negate_paradigm(ValidatedLower);
 Approximate negate_paradigm(Approximate);
 
+Approximate negate_paradigm(PositiveApproximate);
+ValidatedLower negate_paradigm(PositiveValidatedUpper);
+ValidatedUpper negate_paradigm(PositiveValidatedLower);
+Exact negate_paradigm(PositiveExact);
+
+Exact invert_paradigm(Exact);
+Effective invert_paradigm(Effective);
+Validated invert_paradigm(Validated);
+ValidatedBounded invert_paradigm(ValidatedBounded);
+ValidatedMetric invert_paradigm(ValidatedMetric);
+ValidatedLower invert_paradigm(ValidatedUpper);
+ValidatedUpper invert_paradigm(ValidatedLower);
+Approximate invert_paradigm(Approximate);
+
+PositiveApproximate invert_paradigm(PositiveApproximate);
+PositiveValidatedLower invert_paradigm(PositiveValidatedUpper);
+PositiveValidatedUpper invert_paradigm(PositiveValidatedLower);
+PositiveExact invert_paradigm(PositiveExact);
+
 ValidatedUpper error_paradigm(Exact);
 ValidatedUpper error_paradigm(Effective);
 ValidatedUpper error_paradigm(Validated);
@@ -239,8 +265,8 @@ Approximate error_paradigm(ValidatedLower);
 Approximate error_paradigm(Approximate);
 
 template<class T> T widen_paradigm(T);
-ValidatedMetric widen_paradigm(Exact);
-ValidatedMetric widen_paradigm(Effective);
+ValidatedBounded widen_paradigm(Exact);
+ValidatedBounded widen_paradigm(Effective);
 ValidatedBounded widen_paradigm(Validated);
 
 }
@@ -259,6 +285,36 @@ template<class P1, class P2> struct IsStronger : IsWeaker<P2,P1> { };
 template<class P1, class P2=P1> struct ParadigmTraits {
     using Weaker = typename InformationTraits<P1::code()&P2::code()>::Paradigm;
     using Stronger = typename InformationTraits<P1::code()&P2::code()>::Paradigm;
+};
+
+template<> struct ParadigmTraits<Metric,Bounded> {
+    using Weaker = typename InformationTraits<ParadigmCode::BOUNDED>::Paradigm;
+    using Stronger = typename InformationTraits<ParadigmCode::METRIC>::Paradigm;
+};
+
+template<> struct ParadigmTraits<Bounded,Metric> {
+    using Weaker = ParadigmClass<ParadigmCode::BOUNDED>;
+    using Stronger = ParadigmClass<ParadigmCode::METRIC>;
+};
+
+template<> struct ParadigmTraits<Metric,Upper> {
+    using Weaker = typename InformationTraits<ParadigmCode::UPPER>::Paradigm;
+    using Stronger = typename InformationTraits<ParadigmCode::METRIC>::Paradigm;
+};
+
+template<> struct ParadigmTraits<Upper,Metric> {
+    using Weaker = ParadigmClass<ParadigmCode::UPPER>;
+    using Stronger = ParadigmClass<ParadigmCode::METRIC>;
+};
+
+template<> struct ParadigmTraits<Metric,Lower> {
+    using Weaker = typename InformationTraits<ParadigmCode::LOWER>::Paradigm;
+    using Stronger = typename InformationTraits<ParadigmCode::METRIC>::Paradigm;
+};
+
+template<> struct ParadigmTraits<Lower,Metric> {
+    using Weaker = ParadigmClass<ParadigmCode::LOWER>;
+    using Stronger = ParadigmClass<ParadigmCode::METRIC>;
 };
 
 template<class P> struct ParadigmTraits<P,P> {
@@ -292,6 +348,7 @@ template<class P> using Weaken = typename ParadigmTraits<P>::NextWeaker;
 //! \ingroup ParadigmSubModule
 //! \brief The paradigm associated with the negation of an object.
 template<class P> using Negated = decltype(Detail::negate_paradigm(declval<P>()));
+template<class P> using Inverted = decltype(Detail::invert_paradigm(declval<P>()));
 template<class P> using Opposite = decltype(Detail::negate_paradigm(declval<P>()));
 
 //! \ingroup ParadigmSubModule

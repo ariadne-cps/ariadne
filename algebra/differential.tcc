@@ -406,7 +406,7 @@ Differential<X>& Differential<X>::_iadd(Differential<X>& x, const X& c)
 template<class X>
 Differential<X>& Differential<X>::_imul(Differential<X>& x, const X& c)
 {
-    if(c==static_cast<X>(0)) {
+    if(decide(c==static_cast<X>(0))) {
         x.clear();
     } else {
         for(auto iter=x.begin(); iter!=x.end(); ++iter) {
@@ -516,7 +516,7 @@ Differential<X> Differential<X>::_div(const Differential<X>& x, const Differenti
 template<class X> Differential<X> Differential<X>::_min(const Differential<X>& x1, const Differential<X>& x2) {
     // FIXME: Maybe need different code for validated and approximate paradigms
     ARIADNE_ASSERT_MSG(x1.argument_size()==x2.argument_size(),"x1="<<x1<<" x2="<<x2);
-    if(x1.value()==x2.value()) {
+    if(decide(x1.value()==x2.value())) {
         ARIADNE_THROW(std::runtime_error,"min(Differential<X> x1, Differential<X> x2)","x1[0]==x2[0]");
     }
     return decide(x1.value()<x2.value()) ? x1 : x2;
@@ -525,7 +525,7 @@ template<class X> Differential<X> Differential<X>::_min(const Differential<X>& x
 
 template<class X> Differential<X> Differential<X>::_max(const Differential<X>& x1,const Differential<X>& x2) {
     ARIADNE_ASSERT_MSG(x1.argument_size()==x2.argument_size(),"x1="<<x1<<" x2="<<x2);
-    if(x1.value()==x2.value()) {
+    if(decide(x1.value()==x2.value())) {
         ARIADNE_THROW(std::runtime_error,"max(Differential<X> x1, Differential<X> x2)","x1[0]==x2[0]");
     }
     return decide(x1.value()>x2.value()) ? x1 : x2;

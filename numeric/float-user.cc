@@ -121,6 +121,7 @@ template<class PR> Float<Approximate,PR>::Float(Rational const& q) : Float<Appro
 
 ApproximateFloat64 floor(ApproximateFloat64 const& x) { return ApproximateFloat64(floor(x._a)); }
 ApproximateFloat64 ceil(ApproximateFloat64 const& x) { return ApproximateFloat64(ceil(x._a)); }
+ApproximateFloat64 round(ApproximateFloat64 const& x) { return ApproximateFloat64(round(x._a)); }
 
 ApproximateFloat64 abs(ApproximateFloat64 const& x) { return ApproximateFloat64(abs_exact(x._a)); }
 ApproximateFloat64 max(ApproximateFloat64 const& x, ApproximateFloat64 y) { return ApproximateFloat64(max_exact(x._a,y._a)); }
@@ -381,12 +382,15 @@ PositiveUpperFloat64 mag(UpperFloat64 const& x) {
     return PositiveUpperFloat64(abs(x.raw())); }
 PositiveUpperFloat64 mag(ValidatedFloat64 const& x) {
     return PositiveUpperFloat64(max(neg(x.lower_raw()),x.upper_raw())); }
-PositiveLowerFloat64 mig(ValidatedFloat64 const& x) {
-    Float64 r=max(x.lower_raw(),neg(x.upper_raw()));
-    return PositiveLowerFloat64(max(r,nul(r))); }
 PositiveApproximateFloat64 mag(ApproximateFloat64 const& x) {
     return PositiveApproximateFloat64(abs(x.raw())); }
 
+PositiveLowerFloat64 mig(ValidatedFloat64 const& x) {
+    Float64 r=max(x.lower_raw(),neg(x.upper_raw()));
+    return PositiveLowerFloat64(max(r,nul(r))); }
+PositiveLowerFloat64 mig(LowerFloat64 const& x) {
+    Float64 r=min(x.raw(),neg(x.raw()));
+    return PositiveLowerFloat64(max(r,nul(r))); }
 
 ValidatedFloat64 make_bounds(PositiveUpperFloat64 const& _e) {
     return ValidatedFloat64(-_e.raw(),+_e.raw());
@@ -464,6 +468,10 @@ ExactFloat64 midpoint(ValidatedFloat64 const& x) { return x.value(); }
 
 
 
+ValidatedFloat64 round(ValidatedFloat64 const& x)
+{
+    return ValidatedFloat64(round(x.lower_raw()),round(x.upper_raw()));
+}
 
 ValidatedFloat64 max(ValidatedFloat64 const& x1, ValidatedFloat64 const& x2)
 {
@@ -780,6 +788,8 @@ PositiveUpperFloat64 operator*(PositiveUpperFloat64 const& x1, PositiveUpperFloa
 PositiveUpperFloat64 operator/(PositiveUpperFloat64 const& x1, LowerFloat64 const& x2);
 PositiveUpperFloat64 pow(PositiveUpperFloat64 const& x, Nat m);
 PositiveUpperFloat64 half(PositiveUpperFloat64 const& x);
+PositiveUpperFloat64 max(PositiveUpperFloat64 const& x1, PositiveUpperFloat64 const& x2) {
+    return PositiveUpperFloat64(max(x1.raw(),x2.raw())); }
 
 
 ErrorFloat64 operator"" _error(long double lx) { double x=lx; assert(x==lx); return ErrorFloat64(Float64(x)); }
@@ -1119,6 +1129,9 @@ ValidatedFloat64 acos(ValidatedFloat64 const& x) {
 ValidatedFloat64 atan(ValidatedFloat64 const& x) {
     ARIADNE_NOT_IMPLEMENTED;
 }
+
+template<> Int integer_cast(ValidatedFloat64 const& x) { return static_cast<Int>(x.value_raw().get_d()); }
+template<> Nat integer_cast(ValidatedFloat64 const& x) { return static_cast<Nat>(x.value_raw().get_d()); }
 
 
 OutputStream&

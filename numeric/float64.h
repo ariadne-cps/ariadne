@@ -125,6 +125,7 @@ class Float64 {
 
     friend Float64 floor(Float64 x);
     friend Float64 ceil(Float64 x);
+    friend Float64 round(Float64 x);
 
     friend Float64 nul(Float64 x);
     friend Float64 half(Float64 x);
@@ -317,6 +318,7 @@ inline Bool isnan(Float64 x) { return std::isnan(x.dbl); }
 // Discontinuous integer-valued functions
 inline Float64 floor(Float64 x) { return std::floor(x.dbl); }
 inline Float64 ceil(Float64 x) { return std::ceil(x.dbl); }
+inline Float64 round(Float64 x) { return std::round(x.dbl); }
 
 } // namespace Ariadne
 

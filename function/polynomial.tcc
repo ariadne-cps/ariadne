@@ -157,7 +157,7 @@ template<class X>
 Polynomial<X>& Polynomial<X>::truncate(DegreeType d) {
     Polynomial<X> r(this->argument_size());
     for(typename Polynomial<X>::ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
-        if(iter->key().degree()<=d && iter->data()!=X(0)) {
+        if(iter->key().degree()<=d && decide(iter->data()!=X(0))) {
             r._append(iter->key(),iter->data());
         }
     }

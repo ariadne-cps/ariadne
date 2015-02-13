@@ -81,9 +81,6 @@ class Int64 {
     int64_t get_si() const { return _n; }
 };
 
-using std::min;
-using std::max;
-
 uint32_t fac(uint8_t n);
 uint16_t fac(uint16_t n);
 uint32_t fac(uint32_t n);

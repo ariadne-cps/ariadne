@@ -63,6 +63,7 @@ typedef bool Dummy; static const bool dummy=false;
 template<class P, typename V=Dummy> using EnableIf = typename std::enable_if<P::value,V>::type;
 template<class P, typename V=Dummy> using DisableIf = typename std::enable_if<not P::value,V>::type;
 
+template<class T, T V> using IntegralConstant = std::integral_constant<T,V>;
 template<class T1, class T2> using IsSame = std::is_same<T1,T2>;
 template<class T, class U> using IsConvertible = std::is_convertible<T,U>;
 template<class T, class... U> using IsConstructible = std::is_constructible<T,U...>;
@@ -73,6 +74,8 @@ template<class T> using IsIntegral = std::is_integral<T>;
 template<class T> using IsSigned = std::is_signed<T>;
 template<class T> using IsUnsigned = std::is_unsigned<T>;
 template<class T> using IsFloatingPoint = std::is_floating_point<T>;
+template<class T> using IsSignedIntegral = std::integral_constant<bool,std::is_integral<T>::value and std::is_signed<T>::value>;
+template<class T> using IsUnsignedIntegral = std::integral_constant<bool,std::is_integral<T>::value and std::is_unsigned<T>::value>;
 
 template<class SIG> using ResultOf = typename std::result_of<SIG>::type;
 

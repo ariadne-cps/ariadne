@@ -175,12 +175,13 @@ class TaylorModel<Validated,F>
     //@{
     /*! \name Comparison operators. */
     //! \brief Equality operator. Tests equality of representation, including error term.
+    friend Bool same(const TaylorModel<Validated,F>& tm1, const TaylorModel<Validated,F>& tm2) {
+        return same(tm1._expansion, tm2._expansion) && same(tm1._error, tm2._error); }
     Bool operator==(const TaylorModel<Validated,F>& sd) const {
-        return this->_expansion==sd._expansion && this->_error == sd._error; }
+        return same(*this,sd); }
     //! \brief Inequality operator.
     Bool operator!=(const TaylorModel<Validated,F>& sd) const {
-        return !(*this==sd); }
-    //! \brief Comparison with another Taylor model.
+        return !same(*this,sd); }
     Tribool operator<(const TaylorModel<Validated,F>& sd) const {
         return (sd-*this)>0; }
     //! \brief Comparison with another Taylor model.

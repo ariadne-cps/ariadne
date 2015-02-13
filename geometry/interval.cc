@@ -95,7 +95,7 @@ ExactInterval trunc(ExactInterval x)
 
 ExactInterval trunc(ExactInterval x, Nat n)
 {
-    ExactInterval e=ExactInterval(ExactFloat64(std::pow(2.0,52-(Int)n)));
+    UpperInterval e=UpperInterval(ExactFloat64(std::pow(2.0,52-(Int)n)));
     UpperInterval y=x+e;
     UpperInterval r=y-e;
     return ExactInterval(r.lower_raw(),r.upper_raw());

@@ -86,7 +86,7 @@ struct DataLess {
 };
 
 struct DataIsZero {
-    template<class X> Bool operator()(const ExpansionValue<X>& v) { return v.data()==static_cast<X>(0); }
+    template<class X> Bool operator()(const ExpansionValue<X>& v) { return decide(v.data()==static_cast<X>(0)); }
 };
 
 struct KeyEquals {
@@ -249,6 +249,7 @@ class Expansion
 
     Void swap(Expansion<X>& other);
 
+    template<class XX> friend Bool same(const Expansion<XX>& self, const Expansion<XX>& other);
     Bool operator==(const Expansion<X>& other) const;
     Bool operator!=(const Expansion<X>& other) const;
 
@@ -315,6 +316,7 @@ class Expansion
   private:
     template<class T> friend Expansion<T> embed(SizeType, Expansion<T> const&, SizeType);
     Expansion<X> _embed(SizeType before_size, SizeType after_size) const;
+    Bool _same(Expansion<X> const& other) const;
   public:
     OutputStream& write(OutputStream& os, const Array<StringType>& variables) const;
     OutputStream& write_polynomial(OutputStream& os) const;
@@ -373,6 +375,9 @@ template<class X, class CMP> inline const X& SortedExpansion<X,CMP>::operator[](
 template<class X, class CMP> inline SortedExpansionValueReference<X,CMP> SortedExpansion<X,CMP>::operator[](const MultiIndex& a) {
     return SortedExpansionValueReference<X,CMP>(*this,a); }
 
+template<class X> inline Bool same(const Expansion<X>& self, const Expansion<X>& other) {
+    return self._same(other);
+}
 
 template<class X> inline Expansion<X> embed(SizeType before_size, Expansion<X> const& x, SizeType after_size) {
     return x._embed(before_size,after_size);

@@ -132,7 +132,7 @@ template<class F> Void TaylorModel<Validated,F>::clear() {
 template<class F> DegreeType TaylorModel<Validated,F>::degree() const {
     DegreeType deg=0u;
     for(auto iter=this->begin(); iter!=this->end(); ++iter) {
-        deg=max(deg,iter->key().degree());
+        deg=std::max(deg,iter->key().degree());
     }
     return deg;
 }
@@ -1335,13 +1335,13 @@ template<class F> Bool TaylorModel<Validated,F>::_refines(const TaylorModel<Vali
 template<class F> Bool TaylorModel<Validated,F>::_consistent(const TaylorModel<Validated,F>& tm1, const TaylorModel<Validated,F>& tm2)
 {
     ARIADNE_PRECONDITION(tm1.argument_size()==tm2.argument_size());
-    return (Ariadne::norm(tm1-tm2) <= (tm1.error()+tm2.error())*2u);
+    return (Ariadne::norm(tm1-tm2).raw() <= (tm1.error()+tm2.error()).raw()*2u);
 }
 
 template<class F> Bool TaylorModel<Validated,F>::_inconsistent(const TaylorModel<Validated,F>& tm1, const TaylorModel<Validated,F>& tm2)
 {
     ARIADNE_PRECONDITION(tm1.argument_size()==tm2.argument_size());
-    return (Ariadne::mag(tm1.value()-tm2.value()) > (tm1.error()+tm2.error()));
+    return (Ariadne::mag(tm1.value()-tm2.value()).raw() > (tm1.error()+tm2.error()).raw());
 }
 
 template<class F> TaylorModel<Validated,F> TaylorModel<Validated,F>::_refinement(const TaylorModel<Validated,F>& x, const TaylorModel<Validated,F>& y) {
@@ -1614,7 +1614,7 @@ template<class F> Void TaylorModel<Approximate,F>::iadd(const ApproximateFloat64
 {
     // Compute self+=c
     TaylorModel<Approximate,F>& x=*this;
-    if(c==0) { return; }
+    if(decide(c==0)) { return; }
     if(x._expansion.empty()) {
         x._expansion.append(MultiIndex(x.argument_size()),c);
     } else if((x._expansion.end()-1)->key().degree()>0) {
@@ -1628,8 +1628,8 @@ template<class F> Void TaylorModel<Approximate,F>::iadd(const ApproximateFloat64
 template<class F> Void TaylorModel<Approximate,F>::imul(const ApproximateFloat64& c)
 {
     // Compute self*=c
-    if(c==0) { this->clear(); return; }
-    if(c==1) { return; }
+    if(decide(c==0)) { this->clear(); return; }
+    if(decide(c==1)) { return; }
     for(ExpansionType::Iterator iter=this->_expansion.begin(); iter!=this->_expansion.end(); ++iter) {
         iter->data() *= c;
     }

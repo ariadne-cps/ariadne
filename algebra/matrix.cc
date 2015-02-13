@@ -32,7 +32,6 @@
 #include "numeric/rational.h"
 #include "algebra/vector.h"
 #include "algebra/covector.h"
-#include "geometry/interval.h"
 
 #include "matrix.tcc"
 
@@ -151,7 +150,7 @@ template<> Matrix<BoundedFloat64> dd_solve(const Matrix<BoundedFloat64>& A, cons
                 rci=rci-mag(A[i][j] );
             }
         }
-        if(rci<=0) {
+        if(possibly(rci<=0)) {
             ARIADNE_THROW(std::runtime_error,"dd_solve(Matrix<BoundedFloat64> A, Matrix<BoundedFloat64> B)",
                           "Matrix A="<<A<<" is not diagonally-dominant.");
         }
@@ -183,7 +182,7 @@ template<> Void gs_step(const Matrix<BoundedFloat64>& A, const Vector<BoundedFlo
                 ri-=A[i][k]*x[k];
             }
         }
-        if(A[i][i].lower()>0 || A[i][i].upper()<0) {
+        if(definitely(A[i][i].lower()>0 || A[i][i].upper()<0)) {
             ri/=A[i][i];
             x[i]=refinement(x[i],ri);
         }
@@ -220,7 +219,7 @@ template<> Matrix<BoundedFloat64> gs_solve(const Matrix<BoundedFloat64>& A, cons
                         Rij-=JA[i][k]*R[k][j];
                     }
                 }
-                if(JA[i][i].lower()>0 || JA[i][i].upper()<0) {
+                if(definitely(JA[i][i].lower()>0 || JA[i][i].upper()<0)) {
                     Rij/=JA[i][i];
                     R[i][j]=refinement(R[i][j],Rij);
                 }
@@ -455,7 +454,6 @@ triangular_decomposition(const Matrix<X>& A)
 
 }
 
-using std::min;
 // Returns a matrix R such that A=OR where O is a square matrix with
 // orthogonal rows and the sum of the absolute values of the rows of R are
 // at most one.
@@ -480,7 +478,7 @@ triangular_factor(const Matrix<ApproximateFloat64>& A)
 
     Vector<X> u(m);
 
-    for(SizeType k=0; k!=min(m,n); ++k) {
+    for(SizeType k=0; k!=std::min(m,n); ++k) {
         //std::cerr<<"k="<<k<<" R="<<R<<std::endl;
 
         Bool pivoting=true;
@@ -496,7 +494,7 @@ triangular_factor(const Matrix<ApproximateFloat64>& A)
             // Find largest column norm
             SizeType l=k; X cnsmax=cns[k];
             for(SizeType j=k+1; j!=n; ++j) {
-                if(cns[j]>cnsmax) {
+                if(decide(cns[j]>cnsmax)) {
                     l=j; cnsmax=cns[j];
                 }
             }
@@ -523,7 +521,7 @@ triangular_factor(const Matrix<ApproximateFloat64>& A)
         for(SizeType i=k; i!=m; ++i) {
             u[i]=R[i][k];
         }
-        if(u[k]>=0) { u[k]+=nrma; }
+        if(decide(u[k]>=0)) { u[k]+=nrma; }
         else { u[k]-=nrma; }
 
         // Compute -2/u.u
@@ -591,10 +589,10 @@ triangular_multiplier(const Matrix<ApproximateFloat64>& A)
 
     Matrix<X> T(n,m); for(SizeType i=0; i!=m; ++i) { T[i][i]=1.0; }
 
-    for(SizeType i=0; i!=m; ++i) { assert(R[i][i]!=0.0); }
+    for(SizeType i=0; i!=m; ++i) { assert(R[i][i].raw()!=0.0); }
 
     for(SizeType k=m-1; k!=SizeType(-1); --k) {
-        X r=1.0/R[k][k];
+        X r=1/R[k][k];
         for(SizeType i=0; i!=k; ++i) {
             X s=R[i][k]*r;
             for(SizeType j=k; j!=m; ++j) {
@@ -665,7 +663,7 @@ orthogonal_decomposition(const Matrix<X>& A, Bool allow_pivoting)
         Q[i][i]=one;
     }
 
-    for(SizeType k=0; k!=min(m,n); ++k) {
+    for(SizeType k=0; k!=std::min(m,n); ++k) {
         //std::cerr<<"k="<<k<<" Q="<<Q<<" R="<<R<<std::flush;
 
         if(allow_pivoting) {
@@ -677,7 +675,7 @@ orthogonal_decomposition(const Matrix<X>& A, Bool allow_pivoting)
                 for(SizeType i=k; i!=m; ++i) {
                     column_norm+=abs(R[i][j]);
                 }
-                if(column_norm>max_column_norm) {
+                if(decide(column_norm>max_column_norm)) {
                     pivot_column=j;
                     max_column_norm=column_norm;
                 }
@@ -707,7 +705,7 @@ orthogonal_decomposition(const Matrix<X>& A, Bool allow_pivoting)
         for(SizeType i=k; i!=m; ++i) {
             u[i]=R[i][k];
         }
-        if(u[k]>=0) { u[k]+=nrma; }
+        if(decide(u[k]>=0)) { u[k]+=nrma; }
         else { u[k]-=nrma; }
 
         // Compute -2/u.u
@@ -738,7 +736,7 @@ orthogonal_decomposition(const Matrix<X>& A, Bool allow_pivoting)
         for(SizeType i=k+1; i!=m; ++i) {
             R[i][k]=zero;
         }
-        if(u[k]>=0) { R[k][k]=-nrma; } else { R[k][k]=nrma; }
+        if(decide(u[k]>=0)) { R[k][k]=-nrma; } else { R[k][k]=nrma; }
 
         // Update Q'=QH = Q(I-2uu'/u'u)
         // For each row q, compute q-=2u(u.q)/(u.u)
@@ -770,7 +768,7 @@ orthogonal_decomposition(const Matrix<X>& A)
 
     Array<X> p(n);
 
-    for(SizeType c=0; c!=min(m,n); ++c) {
+    for(SizeType c=0; c!=std::min(m,n); ++c) {
 
         // Find a pivot column
         SizeType pivot_column=c;
@@ -888,12 +886,6 @@ template Tuple<Matrix<BoundedFloat64>,Matrix<BoundedFloat64>> orthogonal_decompo
 
 template class Matrix<ExactFloat64>;
 
-template class Matrix<UpperInterval>;
-template Matrix<SingletonType<UpperInterval>> make_singleton(Matrix<UpperInterval> const&);
-template Matrix<MidpointType<UpperInterval>> midpoint(Matrix<UpperInterval> const&);
-template Matrix<UpperInterval> inverse(const Matrix<UpperInterval>&);
-template Vector<UpperInterval> solve(const Matrix<UpperInterval>&, const Vector<UpperInterval>&);
-
 template class Matrix<Real>;
 
 template PositiveUpperFloat64 sup_norm(const Matrix<BoundedFloat64>& A);
@@ -908,5 +900,15 @@ template Vector<Rational> solve(const Matrix<Rational>&, const Vector<Rational>&
 Rational midpoint(Rational);
 template<> Matrix<Rational> midpoint(Matrix<Rational> const& A) { return A; }
 
+} // namespace Ariadne
+
+#include "geometry/interval.h"
+
+namespace Ariadne {
+template class Matrix<UpperInterval>;
+template Matrix<SingletonType<UpperInterval>> make_singleton(Matrix<UpperInterval> const&);
+template Matrix<MidpointType<UpperInterval>> midpoint(Matrix<UpperInterval> const&);
+template Matrix<UpperInterval> inverse(const Matrix<UpperInterval>&);
+template Vector<UpperInterval> solve(const Matrix<UpperInterval>&, const Vector<UpperInterval>&);
 } // namespace Ariadne
 

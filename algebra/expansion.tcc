@@ -54,7 +54,7 @@ template<class X> Expansion<X>::Expansion(SizeType as, DegreeType deg, Initializ
     auto iter = lst.begin();
     while(a.degree()<=deg) {
         x=*iter;
-        if(x!=X(0)) { this->append(a,x); }
+        if(decide(x!=X(0))) { this->append(a,x); }
         ++a;
         ++iter;
     }
@@ -71,7 +71,7 @@ template<class X> Expansion<X>::Expansion(SizeType as, InitializerList<PairType<
     {
         a=iter->first;
         x=iter->second;
-        if(x!=X(0)) { this->append(a,x); }
+        if(decide(x!=X(0))) { this->append(a,x); }
     }
 }
 
@@ -86,15 +86,18 @@ template<class X> Void Expansion<X>::swap(Expansion<X>& other) {
 }
 
 
-template<class X> Bool Expansion<X>::operator==(const Expansion<X>& other) const {
-    if(this->argument_size()!=other.argument_size()) { return false; }
-    if(this->number_of_nonzeros()!=other.number_of_nonzeros()) { return false; }
-    ConstIterator self_iter=this->begin(); ConstIterator other_iter=other.begin();
-    while(self_iter!=this->end()) {
-        if(self_iter->key()!=other_iter->key() || self_iter->data()!=other_iter->data()) { return false; }
+template<class X> Bool Expansion<X>::_same(const Expansion<X>& other) const {
+    const Expansion<X>& self=*this;
+    if(self.argument_size()!=other.argument_size()) { return false; }
+    if(self.number_of_nonzeros()!=other.number_of_nonzeros()) { return false; }
+    ConstIterator self_iter=self.begin(); ConstIterator other_iter=other.begin();
+    while(self_iter!=self.end()) {
+        if(self_iter->key()!=other_iter->key() || decide(self_iter->data()!=other_iter->data())) { return false; }
         ++self_iter; ++other_iter; }
     return true;
 }
+
+template<class X> Bool Expansion<X>::operator==(const Expansion<X>& other) const { return same(*this,other); }
 
 template<class X> Bool Expansion<X>::operator!=(const Expansion<X>& other) const { return !this->operator==(other); }
 
@@ -272,9 +275,9 @@ OutputStream& Expansion<X>::write(OutputStream& os, const Array<std::string>& va
             first_term=false;
             Bool first_factor=true;
             if(decide(v<X(0))) { os<<"-"; }
-            if(abs(v)!=X(1) || a.degree()==0) { os<<abs(v); first_factor=false; }
+            if(decide(abs(v)!=X(1)) || a.degree()==0) { os<<abs(v); first_factor=false; }
             for(Nat j=0; j!=a.size(); ++j) {
-                if(a[j]!=0) {
+                if(decide(a[j]!=0)) {
                     if(first_factor) { first_factor=false; } else { os <<"*"; }
                     os<<variable_names[j]; if(a[j]!=1) { os<<"^"<<Int(a[j]); }
                 }

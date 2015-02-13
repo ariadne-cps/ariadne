@@ -107,7 +107,7 @@ ValidatedAffineModel operator*(const ValidatedNumber& c, const ValidatedAffineMo
     RawFloat64 ca= cm*a.value().raw();
 
     RawFloat64 re=0.0;
-    if(c.lower()!=c.upper()) {
+    if(c.lower_raw()!=c.upper_raw()) {
         RawFloat64 ce=max(c.upper().raw()-cm,cm-c.lower().raw());
         for(Nat j=0; j!=n; ++j) {
             re+=abs(a.gradient(j).raw()*ce);

@@ -255,6 +255,11 @@ PositiveValidatedLower invert_paradigm(PositiveValidatedUpper);
 PositiveValidatedUpper invert_paradigm(PositiveValidatedLower);
 PositiveExact invert_paradigm(PositiveExact);
 
+template<class T> T strengthen_paradigm(T);
+Validated strengthen_paradigm(ValidatedBounded);
+Validated strengthen_paradigm(ValidatedMetric);
+
+
 ValidatedUpper error_paradigm(Exact);
 ValidatedUpper error_paradigm(Effective);
 ValidatedUpper error_paradigm(Validated);
@@ -268,6 +273,13 @@ template<class T> T widen_paradigm(T);
 ValidatedBounded widen_paradigm(Exact);
 ValidatedBounded widen_paradigm(Effective);
 ValidatedBounded widen_paradigm(Validated);
+
+template<class T> T unsigned_paradigm(T);
+PositiveExact unsigned_paradigm(Exact);
+PositiveEffectiveUpper unsigned_paradigm(EffectiveUpper);
+PositiveValidatedUpper unsigned_paradigm(ValidatedUpper);
+PositiveValidatedLower unsigned_paradigm(ValidatedLower);
+PositiveApproximate unsigned_paradigm(Approximate);
 
 }
 
@@ -350,7 +362,8 @@ template<class P> using Weaken = typename ParadigmTraits<P>::NextWeaker;
 template<class P> using Negated = decltype(Detail::negate_paradigm(declval<P>()));
 template<class P> using Inverted = decltype(Detail::invert_paradigm(declval<P>()));
 template<class P> using Opposite = decltype(Detail::negate_paradigm(declval<P>()));
-template<class P> using Generic = decltype(strengthen(declval<P>()));
+template<class P> using Generic = decltype(Detail::strengthen_paradigm(declval<P>()));
+template<class P> using Unsigned = decltype(Detail::unsigned_paradigm(declval<P>()));
 
 //! \ingroup ParadigmSubModule
 //! \brief The paradigm obtained by widening a type due to roundoff error.

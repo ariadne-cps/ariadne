@@ -91,8 +91,8 @@ Pair<Tribool,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, cons
 Pair<Tribool,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, const ValidatedVectorFunction& function, const ExactBox& codomain) const
 {
 
-    static const double XSIGMA=0.125;
-    static const double TERR=-1.0/(1<<10);
+    static const ExactFloat64 XSIGMA=0.125_exact;
+    static const ExactFloat64 TERR=-1.0_exact*two_exp(-10);
     static const Float64 inf = Ariadne::inf;
 
     ARIADNE_LOG(4,"domain="<<domain<<"\nfunction="<<function<<"\ncodomain="<<codomain<<"\n");
@@ -137,7 +137,7 @@ Pair<Tribool,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, cons
     for(Nat i=0; i!=12; ++i) {
         ARIADNE_LOG(4,"    t="<<t<<", y="<<y<<", x="<<x<<", z="<<z<<"\n");
         optimiser.feasibility_step(d,fn,c,x,y,z,t);
-        if(t>=TERR) {
+        if(decide(t>=TERR)) {
             ARIADNE_LOG(4,"t="<<t<<", y="<<y<<", x="<<x<<", z="<<z<<"\n");
             if(definitely(this->check_feasibility(domain,function,codomain,make_exact(point)))) { return make_pair(true,make_exact(point)); }
             else { ARIADNE_LOG(2,"f(y)="<<fn(make_exact(y))<<"\n"); return make_pair(indeterminate,make_exact(point)); }
@@ -145,7 +145,7 @@ Pair<Tribool,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, cons
     }
     ARIADNE_LOG(4,"  t="<<t<<", y="<<y<<", x="<<x<<", z="<<z<<"\n");
 
-    if(t<TERR) {
+    if(decide(t<TERR)) {
         // Probably disjoint, so try to prove this
         ExactBox subdomain=domain;
 
@@ -184,7 +184,7 @@ Pair<Tribool,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, cons
         //Pair<ExactBox,ExactBox> sd=solver.split(List<EffectiveConstraint>(1u,constraint),d);
         ARIADNE_LOG(4,"  Splitting domain\n");
         Pair<ExactBox,ExactBox> sd=d.split();
-        Vector<ApproximateFloat64> nx = ApproximateFloat64(1.0-XSIGMA)*x + Vector<ApproximateFloat64>(x.size(),XSIGMA/x.size());
+        Vector<ApproximateFloat64> nx = ApproximateFloat64(1.0_approx-XSIGMA)*x + Vector<ApproximateFloat64>(x.size(),XSIGMA/x.size());
         Vector<ApproximateFloat64> ny = midpoint(sd.first);
         Tribool result=this->feasible(sd.first, fn, c).first;
         nx = ApproximateFloat64(1.0-XSIGMA)*x + Vector<ApproximateFloat64>(x.size(),XSIGMA/x.size());
@@ -400,7 +400,7 @@ Bool ConstraintSolver::box_reduce(UpperBox& domain, const ValidatedScalarFunctio
 {
     ARIADNE_LOG(2,"ConstraintSolver::box_reduce(ExactBox domain): function="<<function<<", bounds="<<bounds<<", domain="<<domain<<", variable="<<variable<<"\n");
 
-    if(domain[variable].lower() == domain[variable].upper()) { return false; }
+    if(definitely(domain[variable].lower() >= domain[variable].upper())) { return false; }
 
     // Try to reduce the size of the set by "shaving" off along a coordinate axis
     //

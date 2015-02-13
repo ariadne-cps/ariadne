@@ -106,12 +106,12 @@ Bool eneg(const Vector<X>& x) {
 
 template<class X, class XX> inline
 Bool egtr(const Vector<X>& x, const XX& s) {
-    for(Nat i=0; i!=x.size(); ++i) { if(x[i]<=s) { return false; } } return true;
+    for(Nat i=0; i!=x.size(); ++i) { if(decide(x[i]<=s)) { return false; } } return true;
 }
 
 template<class X, class XX> inline
 Bool elss(const Vector<X>& x, const XX& s) {
-    for(Nat i=0; i!=x.size(); ++i) { if(x[i]>=s) { return false; } } return true;
+    for(Nat i=0; i!=x.size(); ++i) { if(decide(x[i]>=s)) { return false; } } return true;
 }
 
 template<class X> inline
@@ -825,7 +825,7 @@ minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, Exact
             throw InfeasibleProblemException();
         }
         ApproximateFloat64 fx=f(x);
-        if(abs(fx-oldfx)<VALUE_TOLERANCE && norm(oldx-x)<STATE_TOLERANCE) {
+        if(probably(mag(fx-oldfx)<VALUE_TOLERANCE) && probably(norm(oldx-x)<STATE_TOLERANCE)) {
             break;
         }
         if(v.mu<MU_MIN) {
@@ -1340,7 +1340,7 @@ minimisation_step(const ApproximateScalarFunction& f, const ExactBox& d, const A
         neww = w - alpha * dw;
         if (contains(d,make_exact(newx)) && contains(c,make_exact(neww))) { success = true; }
         else { alpha *= ALPHA_SCALE_FACTOR; }
-        if(alpha<MINIMUM_ALPHA) { throw NearBoundaryOfFeasibleDomainException(); }
+        if(probably(alpha<MINIMUM_ALPHA)) { throw NearBoundaryOfFeasibleDomainException(); }
     } while(!success);
     ARIADNE_LOG(9,"alpha="<<alpha<<"\n");
 
@@ -1376,7 +1376,7 @@ feasible(ExactBox d, ValidatedVectorFunction g, ExactBox c) const
     for(Nat i=0; i!=12; ++i) {
         ARIADNE_LOG(4,"  t="<<t<<", y="<<y<<", g(y)="<<g(y)<<", x="<<x<<", z="<<z<<"\n");
         this->feasibility_step(d,g,c,x,y);
-        if(t>0) {
+        if(probably(t>0)) {
             ARIADNE_LOG(2,"  y="<<y<<", g(y)="<<g(y)<<"\n");
             if(this->is_feasible_point(d,g,c,make_exact(y))) {
                 return true;
@@ -1673,7 +1673,7 @@ compute_mu(const ExactBox& D, const ApproximateVectorFunction& g, const ExactBox
         else if(C[i].lower()==-infty) { mu += lambda[i] * (gx[i] - C[i].upper()); }
         else if(C[i].upper()==+infty) { mu += lambda[i] * (gx[i] - C[i].lower()); }
         else { // std::cerr<<"FIXME: Compute mu for bounded constraint\n";
-            if (lambda[i] <=0.0) { mu += lambda[i] * (gx[i] - C[i].upper()); }
+            if ( decide(lambda[i] <=0.0) ) { mu += lambda[i] * (gx[i] - C[i].upper()); }
             else { mu += lambda[i] * (gx[i] - C[i].lower()); }
         }
     }
@@ -2027,7 +2027,7 @@ feasible(ExactBox D, ValidatedVectorFunction h) const
         this->feasibility_step(D,h,x,y);
     }
 
-    if(norm(h(x))<1e-10) { return true; }
+    if( decide(norm(h(x))<1e-10) ) { return true; }
 
     if(!contains(UpperInterval(dot(UpperIntervalVector(make_exact(y)),apply(h,D))),ExactFloat64(0.0))) { return false; }
 
@@ -2092,17 +2092,15 @@ feasibility_step(const ExactBox& D, const ApproximateVectorFunction& h,
 
 Tribool PenaltyFunctionOptimiser::
 check_feasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
-                     ExactFloatVector fltx, ExactFloatVector flty) const
+                     ExactFloatVector x, ExactFloatVector y) const
 {
     ARIADNE_PRECONDITION(D.size()==g.argument_size());
     ARIADNE_PRECONDITION(C.size()==g.result_size());
-    ARIADNE_PRECONDITION(fltx.size()==D.size());
-    ARIADNE_PRECONDITION(flty.size()==C.size());
+    ARIADNE_PRECONDITION(x.size()==D.size());
+    ARIADNE_PRECONDITION(y.size()==C.size());
     ARIADNE_LOG(2,"check_feasibility\n");
     ARIADNE_LOG(3,"D="<<D<<" C="<<C<<"\n");
 
-    ValidatedFloatVector x(fltx);
-    ValidatedFloatVector y(flty);
     ValidatedFloatVector gx=g(x);
     ARIADNE_LOG(3,"x="<<x<<" y="<<y<<" g(x)="<<gx<<"\n");
 
@@ -2110,7 +2108,7 @@ check_feasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
 
     List<Nat> equalities;
     for(Nat j=0; j!=C.size(); ++j) {
-        if(gx[j].upper()<C[j].lower() || gx[j].lower()>C[j].upper()) {
+        if( definitely(gx[j].upper()<C[j].lower() || gx[j].lower()>C[j].upper()) ) {
             return false;
         }
         if(C[j].lower()==C[j].upper()) {
@@ -2130,10 +2128,10 @@ check_feasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
             c[i] = C[equalities[i]].lower();
         }
         ARIADNE_LOG(5,"g="<<g<<"\n");
-        ARIADNE_LOG(5,"h="<<h<<" c="<<c<<" h(x)-c="<<ValidatedFloatVector(h(fltx)-c)<<"\n");
+        ARIADNE_LOG(5,"h="<<h<<" c="<<c<<" h(x)-c="<<(h(x)-c)<<"\n");
 
         ValidatedFloatVector W(h.result_size(),ValidatedFloat64(-1e-8,1e-8));
-        ValidatedFloatMatrix AT = transpose(midpoint(h.jacobian(fltx)));
+        ValidatedFloatMatrix AT = transpose(midpoint(h.jacobian(x)));
         ValidatedFloatVector B = x+AT*W;
         ValidatedFloatMatrix IA = h.jacobian(B);
         ARIADNE_LOG(5,"AT="<<AT<<" IA="<<IA<<"\n");

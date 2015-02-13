@@ -137,14 +137,14 @@ _evolution(EnclosureListType& final_sets,
         if(initial_time>=maximum_time) {
             final_sets.adjoin(EnclosureType(initial_enclosure));
         } else if(UPPER_SEMANTICS && ENABLE_SUBDIVISIONS
-                  && (initial_set_radius>this->_configuration->maximum_enclosure_radius())) {
+                  && decide(initial_set_radius>this->_configuration->maximum_enclosure_radius())) {
             // Subdivide
             List<EnclosureType> subdivisions=subdivide(initial_enclosure);
             for(Nat i=0; i!=subdivisions.size(); ++i) {
                 EnclosureType const& subdivided_enclosure=subdivisions[i];
                 working_sets.push_back(make_pair(initial_time,subdivided_enclosure));
             }
-        } else if(LOWER_SEMANTICS && ENABLE_PREMATURE_TERMINATION && initial_set_radius>this->_configuration->maximum_enclosure_radius()) {
+        } else if(LOWER_SEMANTICS && ENABLE_PREMATURE_TERMINATION && decide(initial_set_radius>this->_configuration->maximum_enclosure_radius())) {
             ARIADNE_WARN("Terminating lower evolution at time " << initial_time
                          << " and set " << initial_enclosure << " due to maximum radius being exceeded.");
         } else {

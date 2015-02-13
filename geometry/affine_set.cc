@@ -654,12 +654,12 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
         u[nx+i]=cu+fe;
     }
 
-    if(xa.error()==0.0) {
+    if(xa.error().raw()==0.0) {
         l[nx+nc]=0.0; u[nx+nc]=0.0;
     } else {
         l[nx+nc]=-1.0; u[nx+nc]=+1.0;
     }
-    if(ya.error()==0.0) {
+    if(ya.error().raw()==0.0) {
         l[nx+nc+1]=0.0; u[nx+nc+1]=0.0;
     } else {
         l[nx+nc+1]=-1.0; u[nx+nc+1]=+1.0;

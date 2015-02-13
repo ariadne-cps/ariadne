@@ -464,7 +464,7 @@ Nat BinaryTreeNode::depth() const {
     if( ! this->is_leaf() ){
         //If the node is not a leaf, compute the depth of the sub-trees and take the maximum + 1
         //Note that, both left and right sub-nodes must exist, by to the way we construct the tree
-        result = max(this->left_node()->depth(), this->right_node()->depth() ) + 1;
+        result = std::max(this->left_node()->depth(), this->right_node()->depth() ) + 1;
     } else {
         //If the node is a leaf then the depth of the sub-tree is zero
         result = 0;

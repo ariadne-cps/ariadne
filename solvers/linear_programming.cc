@@ -205,8 +205,8 @@ validate_feasibility(const Vector<Float64>& xl, const Vector<Float64>& xu,
     }
     for(Nat i=0; i!=x.size(); ++i) {
         Float64 neg_xui = -xu[i];
-        if(z[i].upper()>0.0) { mx += z[i].upper().raw() * neg_xui; }
-        if(z[i].lower()<0.0) { mx += z[i].lower().raw() * xl[i]; }
+        if(z[i].upper().raw()>0.0) { mx += z[i].upper().raw() * neg_xui; }
+        if(z[i].lower().raw()<0.0) { mx += z[i].lower().raw() * xl[i]; }
     }
     Float64::set_rounding_to_nearest();
     if(mx>0.0) { return false; }

@@ -1702,8 +1702,8 @@ inline UpperBox GridTreeSubset::bounding_box() const {
     for( ; iter!=this->end(); ++iter) {
         UpperBox cell = iter->box();
         for(Nat i = 0; i < cell.dimension(); ++i) {
-            if(cell[i].lower() < bbox[i].lower()) bbox[i].set_lower(cell[i].lower());
-            if(cell[i].upper() > bbox[i].upper()) bbox[i].set_upper(cell[i].upper());
+            if(cell[i].lower_raw() < bbox[i].lower_raw()) bbox[i].set_lower(cell[i].lower());
+            if(cell[i].upper_raw() > bbox[i].upper_raw()) bbox[i].set_upper(cell[i].upper());
         }
     }
 

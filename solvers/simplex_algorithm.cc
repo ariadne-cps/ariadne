@@ -419,8 +419,8 @@ compute_c(const SizeType m, const Vector<X>& xl, const Vector<X>& xu, const Arra
     Vector<X> c(n);
     for(SizeType k=0; k!=m; ++k) {
         SizeType j=p[k];
-        if((x[j]<=xl[j])) { c[j]=-1; }
-        else if((x[j]>=xu[j])) { c[j]=+1; }
+        if(decide(x[j]<=xl[j])) { c[j]=-1; }
+        else if(decide(x[j]>=xu[j])) { c[j]=+1; }
     }
     return c;
 }
@@ -1038,7 +1038,7 @@ SimplexSolver<X>::lpstep(const Vector<X>& xl, const Vector<X>& xu, const Matrix<
         } else {
             SizeType pr=p[r];
             ARIADNE_ASSERT(x[pr]==xl[pr] || x[pr]==xu[pr]);
-            if(x[pr]==xl[pr]) { vt[pr]=LOWER; } else { vt[pr]=UPPER; }
+            if(decide(x[pr]==xl[pr])) { vt[pr]=LOWER; } else { vt[pr]=UPPER; }
         }
 
         std::swap(p[r],p[s]);
@@ -1311,7 +1311,7 @@ SimplexSolver<X>::verify_feasibility(const Vector<X>& xl, const Vector<X>& xu, c
 
     // Ensure singleton constraints for x are non-basic
     for(SizeType j=0; j!=n; ++j) {
-        if(xl[j]==xu[j]) { ARIADNE_ASSERT(!(vt[j]==BASIS));}
+        if(decide(xl[j]==xu[j])) { ARIADNE_ASSERT(!(vt[j]==BASIS));}
     }
 
     {

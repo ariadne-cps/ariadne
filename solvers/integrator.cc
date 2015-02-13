@@ -219,7 +219,7 @@ IntegratorBase::flow(const ValidatedVectorFunction& vf, const ExactBox& dx0, con
     ExactFloat64 t=make_exact(tminl);
     List<ValidatedVectorFunctionModel> result;
 
-    while(t<tmaxu) {
+    while(possibly(t<tmax)) {
         ExactBox dx=evolve_function.codomain();
         ExactFloat64 h=make_exact(tmaxu-t);
         UpperBox bx;

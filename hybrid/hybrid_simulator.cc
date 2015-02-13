@@ -105,7 +105,7 @@ HybridSimulator::orbit(const HybridAutomatonInterface& system, const HybridPoint
         Bool enabled=false;
         DiscreteEvent event;
         for(Map<DiscreteEvent,EffectiveScalarFunction>::ConstIterator guard_iter=guards.begin(); guard_iter!=guards.end(); ++guard_iter) {
-            if(evaluate(guard_iter->second,point)>0) {
+            if(probably(evaluate(guard_iter->second,point)>0)) {
                 enabled=true;
                 event=guard_iter->first;
                 break;

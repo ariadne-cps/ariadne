@@ -168,7 +168,7 @@ Void subdivision_adjoin_outer_approximation_recursion(PavingInterface& paving, c
         iter!=constraints.end(); ++iter)
     {
         UpperInterval constraint_range=apply(iter->function(),subdomain);
-        if(constraint_range.lower() > iter->bounds().upper() || constraint_range.upper() < iter->bounds().lower() ) { return; }
+        if( definitely(constraint_range.lower() > iter->bounds().upper() || constraint_range.upper() < iter->bounds().lower() ) ) { return; }
     }
 
     UpperBox range=apply(function,subdomain);
@@ -375,7 +375,7 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
         ARIADNE_LOG(6,", x="<<ax<<", y="<<ay<<", z="<<az<<"\n");
         ARIADNE_LOG(6,"  x.z="<<emulrng(x,z)<<"\n");
         if(t>0) { break; }
-        if(emulrng(x,z).upper()<XZMIN) { break; }
+        if(definitely(emulrng(x,z).upper()<XZMIN)) { break; }
     }
     ARIADNE_LOG(4,"\n  t="<<t<<"\n  y="<<y<<"\n    x="<<x<<"\n    z="<<z<<"\n");
     ARIADNE_LOG(2,"  t="<<t<<", y="<<y<<"\n");
@@ -441,7 +441,7 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
         }
     }
 
-    if(t<=0.0_exact && UpperBox(apply(f,d)).radius()>b.box().radius()) {
+    if(decide(t<=0.0_exact) && decide(UpperBox(apply(f,d)).radius()>b.box().radius()) ) {
         ARIADNE_LOG(2,"  Splitting domain\n");
         Pair<ExactBox,ExactBox> sd=d.split();
         ax = ApproximateFloat64(1-XSIGMA)*ax + Vector<ApproximateFloat64>(ax.size(),XSIGMA/x.size());

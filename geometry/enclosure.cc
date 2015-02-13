@@ -247,11 +247,11 @@ Enclosure::Enclosure(const ExactBox& box, const ValidatedFunctionModelFactoryInt
     : _function_factory_ptr(factory.clone())
 {
     // Ensure domain elements have nonempty radius
-    const float min_float=std::numeric_limits<float>::min();
+    const ExactFloat64 min_float(std::numeric_limits<float>::min());
     List<Nat> proper_coordinates;
     proper_coordinates.reserve(box.dimension());
     for(Nat i=0; i!=box.dimension(); ++i) {
-        if(box[i].width()>=min_float) {
+        if(decide(box[i].width()>=min_float)) {
             proper_coordinates.append(i);
         }
     }
@@ -304,7 +304,7 @@ Enclosure::Enclosure(const ExactBox& domain, const ValidatedVectorFunction& func
     const double min=std::numeric_limits<double>::min();
     this->_domain=domain;
     for(Nat i=0; i!=this->_domain.size(); ++i) {
-        if(this->_domain[i].width()==0) {
+        if(decide(this->_domain[i].width()==0)) {
             this->_domain[i]=widen(this->_domain[i]);
         }
     }
@@ -332,7 +332,7 @@ Enclosure::Enclosure(const ExactBox& domain, const ValidatedVectorFunction& spac
     const double min=std::numeric_limits<double>::min();
     this->_domain=domain;
     for(Nat i=0; i!=this->_domain.size(); ++i) {
-        if(this->_domain[i].width()==0) {
+        if(decide(this->_domain[i].width()==0)) {
             this->_domain[i]=widen(this->_domain[i]);
         }
     }
@@ -360,8 +360,8 @@ Enclosure::Enclosure(const ExactBox& domain, const ValidatedVectorFunction& spac
 Tribool Enclosure::satisfies(ValidatedScalarFunction constraint) const
 {
     UpperInterval constraint_range=apply(constraint,this->codomain());
-    if(constraint_range.upper()<0.0) { return false; }
-    if(constraint_range.lower()>0.0) { return true; }
+    if(definitely(constraint_range.upper()<0)) { return false; }
+    if(definitely(constraint_range.lower()>0)) { return true; }
     return Tribool(indeterminate);
 }
 

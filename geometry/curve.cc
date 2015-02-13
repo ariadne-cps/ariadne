@@ -146,7 +146,7 @@ InterpolatedCurve::draw(CanvasInterface& c, const Projection2d& p) const
         pt=join(iter->second,iter->first);
         c.line_to(pt[xi],pt[yi]);
     }
-    if(this->begin()->second==(this->end())->second) {
+    if( decide(this->begin()->second==(this->end())->second) ) {
         c.fill();
     } else {
         c.stroke();

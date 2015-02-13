@@ -400,7 +400,7 @@ template<class M> OutputStream& FunctionPatch<M>::write(OutputStream& os) const 
     os << "FP" << this->domain();
     os << "(";
     os << ap;
-    if(this->error()>0.0) { os << "+/-" << this->error(); }
+    if(this->error().raw()>0.0) { os << "+/-" << this->error(); }
     os << ")";
     return os;
 }

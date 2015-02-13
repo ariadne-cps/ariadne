@@ -566,7 +566,7 @@ _compute_active_events(EffectiveVectorFunction const& dynamic,
         ARIADNE_LOG(8,"event="<<event<<", guard="<<guard_function<<", flow_derivative="<<lie_derivative(guard_function,dynamic)<<"\n");
         // First try a simple test based on the bounding box
         UpperInterval guard_range=apply(guard_function,reach_set.space_bounding_box());
-        if(guard_range.upper()>=zero) {
+        if(possibly(guard_range.upper()>=zero)) {
             // Now make a set containing the complement of the constraint,
             // and test for emptiness. If the set is empty, then the guard is
             // not satisfied anywhere.
@@ -618,7 +618,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
         // This is given by the Lie derivative at a point x, defined as $L_{f}g(x) = (\nabla g\cdot f)(x)$
         EffectiveScalarFunction derivative=lie_derivative(guard,dynamic);
         UpperInterval derivative_range=apply(derivative,flow_bounds);
-        if(derivative_range.lower()>zero) {
+        if(possibly(derivative_range.lower()>zero)) {
             // If the derivative $L_{f}g$is strictly positive over the bounding box for the flow,
             // then the guard function is strictly increasing.
             // There is at most one crossing with the guard, and the time of this
@@ -628,7 +628,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
             ValidatedScalarFunctionModel crossing_time;
             try {
                 crossing_time=solver.implicit(compose(guard,flow),flow_spacial_domain,flow_time_domain);
-                if(crossing_time.error()>1e-8) { ARIADNE_LOG(2,event<<": crossing_time: error="<<crossing_time.error()<<", range="<<crossing_time.range()<<"\n"); }
+                if(decide(crossing_time.error()>1e-8)) { ARIADNE_LOG(2,event<<": crossing_time: error="<<crossing_time.error()<<", range="<<crossing_time.range()<<"\n"); }
                 crossings[event]=CrossingData(CrossingKind::TRANSVERSE,crossing_time);
                 ARIADNE_LOG(8,"crossing_time="<<crossing_time<<"\n");
             }
@@ -649,7 +649,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                 ARIADNE_FAIL_MSG("ERROR!!");
                 crossings[event]=CrossingData(CrossingKind::INCREASING);
             }
-        } else if(derivative_range.upper()<zero) {
+        } else if(definitely(derivative_range.upper()<zero)) {
             // If the derivative is strictly negative over the bounding box for the flow,
             // then the guard function is strictly decreasing.
             // This means that the event is either initially active, or does not occur.
@@ -663,7 +663,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
             UpperInterval second_derivative_bounds_range=apply(second_derivative,flow_bounds);
             UpperInterval second_derivative_flow_range=compose(second_derivative,flow).range();
             UpperInterval second_derivative_range=intersection(second_derivative_bounds_range,second_derivative_flow_range);
-            if(second_derivative_range.lower()>zero) {
+            if(definitely(second_derivative_range.lower()>zero)) {
                 // If the second derivative is positive, then either
                 //    (i) the event is immediately active
                 //   (ii) the event is never active, or
@@ -676,7 +676,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                 // we do know that in (iii), the event occurs when $t>0$ and
                 // $g(\phi(x_0,t))=0$. The crossing time is not computed.
                 crossings[event]=CrossingData(CrossingKind::CONVEX);
-            } else if(second_derivative_range.upper()<zero) {
+            } else if(definitely(second_derivative_range.upper()<zero)) {
                 // If the second derivative is negative, then the guard
                 // values $g(x(t))$ are concave along flow lines. There are
                 // four main cases:
@@ -707,7 +707,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                 // time is $(g(\phi(x_0,t))<=0 /\ t<=\mu(x_0)) \/ g(\phi(x_0,\mu(x_0)))<=0$
                 try {
                     ValidatedScalarFunctionModel critical_time=solver.implicit(compose(derivative,flow),flow_spacial_domain,flow_time_domain);
-                    if(critical_time.error()>1e-8) { ARIADNE_LOG(2,event<<": critical_time: error="<<critical_time.error()<<", range="<<critical_time.range()<<"\n"); }
+                    if(decide(critical_time.error()>1e-8)) { ARIADNE_LOG(2,event<<": critical_time: error="<<critical_time.error()<<", range="<<critical_time.range()<<"\n"); }
                     crossings[event]=CrossingData(CrossingKind::GRAZING);
                     crossings[event].critical_time=critical_time;
                 }
@@ -824,7 +824,7 @@ _apply_guard_step(HybridEnclosure& set,
                 case CrossingKind::TRANSVERSE:
                     step_time=unchecked_compose(crossing_data.crossing_time,starting_state);
                     // If the jump step might occur after the final evolution time, then introduce constraint that this does not happen
-                    if(timing_data.step_kind!=StepKind::CONSTANT_EVOLUTION_TIME && (step_time-timing_data.parameter_dependent_evolution_time).range().upper()>zero) {
+                    if(timing_data.step_kind!=StepKind::CONSTANT_EVOLUTION_TIME && possibly((step_time-timing_data.parameter_dependent_evolution_time).range().upper()>zero)) {
                         jump_set.new_parameter_constraint(step_event,step_time<=timing_data.parameter_dependent_evolution_time);
                     }
                     jump_set.apply_evolve_step(flow,unchecked_compose(crossing_data.crossing_time,starting_state));
@@ -1020,7 +1020,7 @@ _evolution_in_mode(EvolutionData& evolution_data,
     HybridEnclosure initial_set=evolution_data.initial_sets.back(); evolution_data.initial_sets.pop_back();
     ARIADNE_LOG(4,"initial_set="<<initial_set<<"\n\n");
 
-    if(initial_set.time_range().lower()>=final_time) {
+    if(definitely(initial_set.time_range().lower()>=final_time)) {
         ARIADNE_WARN("initial_set.time_range()="<<initial_set.time_range()<<" which exceeds final time="<<final_time<<"\n");
         return;
     }
@@ -1086,7 +1086,7 @@ _evolution_step(EvolutionData& evolution_data,
         return;
     }
 
-    if(starting_set.time_range().lower() >= final_time) {
+    if(definitely(starting_set.time_range().lower() >= final_time)) {
         ARIADNE_WARN("starting_set.time_range()="<<starting_set.time_range()<<" which exceeds final time="<<final_time<<"\n");
         return;
     }
@@ -1101,7 +1101,7 @@ _evolution_step(EvolutionData& evolution_data,
 
     // Test to see if set requires reconditioning
     if(this->_configuration_ptr->enable_reconditioning() &&
-            norm(starting_set.space_function().errors()) > this->_configuration_ptr->maximum_spacial_error()) {
+            possibly(norm(starting_set.space_function().errors()) > this->_configuration_ptr->maximum_spacial_error())) {
         HybridEnclosure reconditioned_set=starting_set;
         reconditioned_set.recondition();
         evolution_data.working_sets.append(reconditioned_set);
@@ -1109,7 +1109,7 @@ _evolution_step(EvolutionData& evolution_data,
     }
 
     // Handle a set that is too large, based on semantics
-    if (starting_bounding_box.radius() > this->_configuration_ptr->maximum_enclosure_radius()) {
+    if (possibly(starting_bounding_box.radius() > this->_configuration_ptr->maximum_enclosure_radius())) {
         if (evolution_data.semantics == LOWER_SEMANTICS) {
             ARIADNE_LOG(1,"\r  too large, discarding\n");
             return;
@@ -1281,9 +1281,9 @@ _apply_evolution_step(EvolutionData& evolution_data,
             HybridEnclosure& evolve_set=*evolve_set_iter;
             HybridEnclosure& next_working_set=*next_working_set_iter;
             UpperInterval evolve_set_time_range=evolve_set.time_range();
-            if(evolve_set_time_range.lower()>timing_data.final_time) {
+            if(definitely(evolve_set_time_range.lower()>timing_data.final_time)) {
                 // Do nothing, since evolve set is past final time is definitely empty
-            } else if(evolve_set_time_range.upper()<=timing_data.final_time) {
+            } else if(definitely(evolve_set_time_range.upper()<=timing_data.final_time)) {
                 // No need to introduce timing constraints
                 if(!definitely(evolve_set.empty())) {
                     ARIADNE_LOG(4,"evolve_set="<<evolve_set<<"\n");
@@ -1294,7 +1294,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
                 }
             } else {
                 // Bound time if necessary
-                if(evolve_set_time_range.upper()>timing_data.final_time) {
+                if(possibly(evolve_set_time_range.upper()>timing_data.final_time)) {
                     evolve_set.bound_time(timing_data.final_time);
                 }
                 // Only continue evolution if the time-bounded evolve set is nonempty;
@@ -1314,7 +1314,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
         {
             HybridEnclosure& reach_set=*reach_set_iter;
             //reach_set.continuous_set().reduce();
-            if(reach_set.time_range().upper()>timing_data.final_time) {
+            if(possibly(reach_set.time_range().upper()>timing_data.final_time)) {
                 HybridEnclosure final_set=reach_set;
                 final_set.set_time(timing_data.final_time);
                 if(timing_data.finishing_kind!=FinishingKind::BEFORE_FINAL_TIME && !definitely(final_set.empty())) {
@@ -1364,7 +1364,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
 
         // Apply maximum time bound, as this will be applied after the next flow step
         for(List<HybridEnclosure>::Iterator jump_set_iter=jump_sets.begin(); jump_set_iter!=jump_sets.end(); ++jump_set_iter) {
-            if(jump_set.time_range().upper()>timing_data.final_time) {
+            if(possibly(jump_set.time_range().upper()>timing_data.final_time)) {
                 jump_set.bound_time(timing_data.final_time);
                 if(definitely(not jump_set.empty())) { ARIADNE_WARN("Explicitly bounding time in jump set\n"); }
             }
@@ -1529,10 +1529,10 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
     // The time-dependent part of the evolution time
     ValidatedScalarFunctionModel temporal_evolution_time=this->function_factory().create_zero(ExactIntervalVector(1u,time_domain));
 
-    if(remaining_time_range.lower()<zero) {
+    if(definitely(remaining_time_range.lower()<zero)) {
         // Some of the points may already have reached the final time.
         // Don't try anything fancy, just do a simple constant time step.
-        if(remaining_time_range.upper()<=step_size) {
+        if(definitely(remaining_time_range.upper()<=step_size)) {
             if(false) {
                 // Within one time step we can go beyond final time
                 result.step_kind=StepKind::CONSTANT_EVOLUTION_TIME;
@@ -1548,7 +1548,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
             result.finishing_kind=FinishingKind::STRADDLE_FINAL_TIME;
             temporal_evolution_time=ValidatedFloat64(step_size);
         }
-    } else if(remaining_time_range.upper()<=result.step_size) {
+    } else if(definitely(remaining_time_range.upper()<=result.step_size)) {
         // The rest of the evolution can be computed within a single time step.
         // The finishing kind is given as AT_FINAL_TIME so that the evolution algorithm
         // knows that the evolved set does not need to be evolved further.
@@ -1559,7 +1559,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         result.step_kind=StepKind::CONSTANT_FINISHING_TIME;
         result.finishing_kind=FinishingKind::AT_FINAL_TIME;
         temporal_evolution_time=ValidatedFloat64(final_time)-time_identity;
-    } else if(remaining_time_range.lower()<=step_size && ALLOW_CREEP) {
+    } else if(possibly(remaining_time_range.lower()<=step_size) && ALLOW_CREEP) {
         // Some of the evolved points can be evolved to the final time in a single step
         // The evolution is performed over a step size which moves points closer to the final time, but does not cross.
 
@@ -1568,7 +1568,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         result.step_kind=StepKind::SPACETIME_DEPENDENT_FINISHING_TIME;
         result.finishing_kind=FinishingKind::BEFORE_FINAL_TIME;
         ExactFloat64 sf=1;
-        while(remaining_time_range.upper()*sf>step_size) { sf = half(sf); }
+        while(possibly(remaining_time_range.upper()*sf>step_size)) { sf = half(sf); }
         temporal_evolution_time= ValidatedFloat64(sf)*(ValidatedFloat64(final_time)-time_identity);
     } else { // remaining_time_range.lower()>step_size)
         // As far as timing goes, perform the evolution over a full time step
@@ -1621,7 +1621,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
                 ARIADNE_LOG(6,"  crossing_time_range="<<crossing_iter->second.crossing_time.range()<<"\n");
                 const ValidatedScalarFunctionModel& crossing_time=crossing_iter->second.crossing_time;
                 UpperInterval crossing_time_range=crossing_time.range();
-                if(Ariadne::is_blocking(event_kind) && crossing_time_range.upper()<step_size) {
+                if(Ariadne::is_blocking(event_kind) && definitely(crossing_time_range.upper()<step_size)) {
                     // NOTE: Use strict comparison here so that guard is fully crossed
                     // In principle this is not necessary, but this would involve testing
                     // to ensure that the evolved set is not propagated
@@ -1637,12 +1637,12 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
                     ARIADNE_LOG(6,"No creep; event "<<crossing_iter->first<<" completely taken\n");
                     creep=false;
                     break;
-                } else if(crossing_time_range.lower()<=zero) {
+                } else if(possibly(crossing_time_range.lower()<=zero)) {
                     // This event is already partially active, so carry on with a full step
                     ARIADNE_LOG(6,"No creep; event "<<crossing_iter->first<<" already partially active\n");
                     creep=false;
                     break;
-                } else if(crossing_time_range.lower()>=step_size) {
+                } else if(definitely(crossing_time_range.lower()>=step_size)) {
                     ARIADNE_LOG(6,"Event "<<crossing_iter->first<<" is not actually reached\n");
                     //crossings.erase(pending_erase_crossing_iter);
                 } else {
@@ -1797,13 +1797,13 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
     result.parameter_dependent_finishing_time=unchecked_compose(finishing_time,join(starting_space_function,starting_time_function));
 
     // Test to see if it is possible to unwind crossings
-    if(this->ALLOW_UNWIND && crossings.empty() && (starting_time_range.lower()<starting_time_range.upper())
+    if(this->ALLOW_UNWIND && crossings.empty() && (starting_time_range.lower().raw()<starting_time_range.upper().raw())
             && result.step_kind==StepKind::CONSTANT_EVOLUTION_TIME && result.finishing_kind==FinishingKind::BEFORE_FINAL_TIME) {
         ARIADNE_LOG(6,"Possible unwind step; starting_time_range="<<starting_time_range<<", step_size="<<step_size<<"\n");
         // Try to unwind the evolution time to a constant
         result.step_kind=StepKind::PARAMETER_DEPENDENT_FINISHING_TIME;
         result.finishing_kind=FinishingKind::BEFORE_FINAL_TIME;
-        if(starting_time_range.width()*2<step_size) {
+        if(decide(starting_time_range.width()*2<step_size)) {
             result.parameter_dependent_finishing_time=this->function_factory().create_constant(initial_set.parameter_domain(),make_exact(starting_time_range.lower())+step_size);
         } else {
             // Try to reduce the time interval by half the step size

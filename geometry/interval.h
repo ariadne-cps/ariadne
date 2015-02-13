@@ -437,6 +437,12 @@ class UpperInterval {
     //! \related UpperInterval \brief Tangent function. Yields an over-approximation to \f$\{ \tan{x} \mid x\in I\}\f$.
     friend UpperInterval tan(UpperInterval i) {
         return make_interval(tan(make_singleton(i))); }
+    //! \related UpperInterval \brief Interse sine function. Yields an over-approximation to \f$\{ \asin{x} \mid x\in I\}\f$.
+    friend UpperInterval asin(UpperInterval i) {
+        return make_interval(asin(make_singleton(i))); }
+    //! \related UpperInterval \brief Interse cosine function. Yields an over-approximation to \f$\{ \acos{x} \mid x\in I\}\f$.
+    friend UpperInterval acos(UpperInterval i) {
+        return make_interval(acos(make_singleton(i))); }
     //! \related UpperInterval \brief Interse tangent function. Yields an over-approximation to \f$\{ \atan{x} \mid x\in I\}\f$.
     friend UpperInterval atan(UpperInterval i) {
         return make_interval(atan(make_singleton(i))); }
@@ -532,6 +538,15 @@ class UpperInterval {
   private:
     Float64 l, u;
 };
+
+inline UpperInterval operator+(UpperInterval i1, ValidatedFloat64 x2);
+inline UpperInterval operator-(UpperInterval i1, ValidatedFloat64 x2);
+inline UpperInterval operator*(UpperInterval i1, ValidatedFloat64 x2);
+inline UpperInterval operator/(UpperInterval i1, ValidatedFloat64 x2);
+inline UpperInterval operator+(ValidatedFloat64 x1, UpperInterval i2);
+inline UpperInterval operator-(ValidatedFloat64 x1, UpperInterval i2);
+inline UpperInterval operator*(ValidatedFloat64 x1, UpperInterval i2);
+inline UpperInterval operator/(ValidatedFloat64 x1, UpperInterval i2);
 
 template<class R, class A> inline R numeric_cast(A const&);
 template<> inline UpperInterval numeric_cast(const Float64& a) { return UpperInterval(a,a); }

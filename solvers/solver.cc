@@ -144,7 +144,7 @@ ValidatedVectorFunctionModel operator*(const Matrix<ValidatedNumber>& A,const Va
 
 ErrorFloat64 sup_error(const ValidatedVectorFunctionModel& x) {
     ErrorFloat64 r=0u;
-    for(Nat i=0; i!=x.size(); ++i) { r=std::max(r,x[i].error()); }
+    for(Nat i=0; i!=x.size(); ++i) { r=max(r,x[i].error()); }
     return r;
 }
 
@@ -269,7 +269,7 @@ SolverBase::solve_all(const ValidatedVectorFunction& f,
 
     if(need_to_split) {
         // If sup_error is too small, assume solution is not verified
-        if(sup_error(make_singleton(bx))<this->maximum_error()) {
+        if(definitely(sup_error(make_singleton(bx))<this->maximum_error())) {
             if(!invertible_jacobian) {
                 ARIADNE_WARN("Cannot verify solution in "<<bx<<" with f="<<f(make_singleton(bx))<<"); "
                              <<"Jacobian "<<f.jacobian(nx)<<" is not invertible; "
@@ -297,7 +297,7 @@ Vector<ValidatedNumber>
 SolverBase::zero(const ValidatedVectorFunction& f,
                  const ExactBox& bx) const
 {
-    const double& e=this->maximum_error();
+    const ExactFloat64 e=this->maximum_error();
     Nat n=this->maximum_number_of_steps();
     ARIADNE_LOG(1,"verbosity="<<verbosity<<"\n");
     Vector<ValidatedNumber> r=make_singleton(bx);
@@ -311,7 +311,7 @@ SolverBase::zero(const ValidatedVectorFunction& f,
             has_solution=true;
         }
 
-        if(has_solution && sup_error(nr) < e) {
+        if(has_solution && definitely(sup_error(nr) < e)) {
             return nr;
         }
 
@@ -355,7 +355,7 @@ SolverBase::implicit(const ValidatedVectorFunction& f,
     ARIADNE_ASSERT(f.argument_size()==ip.size()+ix.size());
 
     const Nat n=ix.size();
-    const double err=this->maximum_error();
+    const ExactFloat64 err=this->maximum_error();
 
     ValidatedVectorFunctionModel id(this->function_factory().create_identity(ip));
     ValidatedVectorFunctionModel h(this->function_factory().create_constants(ip,make_singleton(ix)));
@@ -410,7 +410,7 @@ SolverBase::implicit(const ValidatedVectorFunction& f,
         }
 
         steps_remaining=steps_remaining-1;
-        if( (number_unrefined==0) && ( (steps_remaining==0) || ((sup_error(nh)<err) && (sup_error(fnh)<err)) ) ) {
+        if( (number_unrefined==0) && ( (steps_remaining==0) || (definitely(sup_error(nh)<err) && definitely(sup_error(fnh)<err)) ) ) {
             return h;
         }
     }

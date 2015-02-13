@@ -435,25 +435,23 @@ template<> Float<Upper,Precision64>::Float(Real const& x);
 template<> Float<Lower,Precision64>::Float(Real const& x);
 template<> Float<Approximate,Precision64>::Float(Real const& x);
 
+template<class T, class F, EnableIf<Not<IsSame<T,F>>> =dummy> T convert(F const& x) { return T(x); }
+template<class T> T const& convert(T const& x) { return x; }
 
 #define ARIADNE_TEMPLATED_FLOAT
 
 #ifdef ARIADNE_TEMPLATED_FLOAT
 
+template<class T> using NumericType = typename T::NumericType;
+
 typedef Widen<Exact> Widened;
 
-template<class P1, class P2, class PR> auto
-max(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> Float<Weaker<P1,P2>,PR>;
 template<class P, class PR> auto
 max(Float<P,PR> const& x1, Float<P,PR> const& x2) -> Float<P,PR>;
-
-template<class P1, class P2, class PR> auto
-min(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> Float<Weaker<P1,P2>,PR>;
 template<class P, class PR> auto
 min(Float<P,PR> const& x1, Float<P,PR> const& x2) -> Float<P,PR>;
-
 template<class P, class PR> auto
-abs(Float<P,PR> const& x) -> Float<Weaker<P,Opposite<P>>,PR>;
+abs(Float<P,PR> const& x) -> Float<Weaker<P,Negated<P>>,PR>;
 
 template<class P, class PR> auto
 floor(Float<P,PR> const& x) -> Float<P,PR>;
@@ -468,84 +466,99 @@ neg(Float<P,PR> const&) -> Float<Negated<P>,PR>;
 template<class P, class PR> auto
 half(Float<P,PR> const&) -> Float<P,PR>;
 template<class P, class PR> auto
-sqr(Float<P,PR> const&) -> Float<P,PR>;
+sqr(Float<P,PR> const&) -> Float<Widen<P>,PR>;
 template<class P, class PR> auto
 rec(Float<P,PR> const&) -> Float<Widen<Inverted<P>>,PR>;
 
 template<class P, class PR> auto
-add(Float<P,PR> const&, Float<P,PR> const&) -> Float<P,PR>;
+add(Float<P,PR> const&, Float<P,PR> const&) -> Float<Widen<P>,PR>;
 template<class P, class PR> auto
-sub(Float<P,PR> const&, Float<Opposite<P>,PR> const&) -> Float<P,PR>;
+sub(Float<P,PR> const&, Float<Negated<P>,PR> const&) -> Float<Widen<P>,PR>;
 template<class P, class PR> auto
-mul(Float<P,PR> const&, Float<P,PR> const&) -> Float<P,PR>;
+mul(Float<P,PR> const&, Float<P,PR> const&) -> Float<Widen<P>,PR>;
 template<class P, class PR> auto
-div(Float<P,PR> const&, Float<Opposite<P>,PR> const&) -> Float<P,PR>;
+div(Float<P,PR> const&, Float<Inverted<P>,PR> const&) -> Float<Widen<P>,PR>;
 
 template<class P, class PR> auto
-pow(Float<P,PR> const&, Nat m) -> Float<P,PR>;
+pow(Float<P,PR> const&, Nat m) -> Float<Widen<P>,PR>;
 template<class P, class PR> auto
-pow(Float<P,PR> const&, Int n) -> Float<P,PR>;
+pow(Float<P,PR> const&, Int n) -> Float<Widen<P>,PR>;
 
 template<class P, class PR> auto
-sqrt(Float<P,PR> const&) -> Float<P,PR>;
+sqrt(Float<P,PR> const&) -> Float<Widen<P>,PR>;
 template<class P, class PR> auto
-exp(Float<P,PR> const&) -> Float<P,PR>;
+exp(Float<P,PR> const&) -> Float<Widen<P>,PR>;
 template<class P, class PR> auto
-log(Float<P,PR> const&) -> Float<P,PR>;
+log(Float<P,PR> const&) -> Float<Widen<P>,PR>;
 template<class P, class PR> auto
-sin(Float<P,PR> const&) -> Float<P,PR>;
+sin(Float<P,PR> const&) -> Float<Widen<P>,PR>;
 template<class P, class PR> auto
-cos(Float<P,PR> const&) -> Float<P,PR>;
+cos(Float<P,PR> const&) -> Float<Widen<P>,PR>;
 template<class P, class PR> auto
-tan(Float<P,PR> const&) -> Float<P,PR>;
+tan(Float<P,PR> const&) -> Float<Widen<P>,PR>;
 template<class P, class PR> auto
-asin(Float<P,PR> const&) -> Float<P,PR>;
+asin(Float<P,PR> const&) -> Float<Widen<P>,PR>;
 template<class P, class PR> auto
-acos(Float<P,PR> const&) -> Float<P,PR>;
+acos(Float<P,PR> const&) -> Float<Widen<P>,PR>;
 template<class P, class PR> auto
-atan(Float<P,PR> const&) -> Float<P,PR>;
+atan(Float<P,PR> const&) -> Float<Widen<P>,PR>;
 
-template<class PR> auto mag(Float<Approximate,PR> const& x) -> Float<PositiveApproximate,PR>;
-template<class PR> auto mag(Float<Lower,PR> const& x) -> Float<PositiveApproximate,PR>;
-template<class PR> auto mag(Float<Upper,PR> const& x) -> Float<PositiveUpper,PR>;
-template<class PR> auto mag(Float<Bounded,PR> const& x) -> Float<PositiveUpper,PR>;
-template<class PR> auto mag(Float<Metric,PR> const& x) -> Float<PositiveUpper,PR>;
-template<class PR> auto mag(Float<Exact,PR> const& x) -> Float<PositiveExact,PR>;
+template<class P, class PR> auto
+floor(Float<P,PR> const& x) -> Float<P,PR>;
 
-template<class PR> auto mig(Float<Approximate,PR> const& x) -> Float<PositiveApproximate,PR>;
-template<class PR> auto mig(Float<Lower,PR> const& x) -> Float<PositiveLower,PR>;
-template<class PR> auto mig(Float<Upper,PR> const& x) -> Float<PositiveApproximate,PR>;
-template<class PR> auto mig(Float<Bounded,PR> const& x) -> Float<PositiveLower,PR>;
-template<class PR> auto mig(Float<Metric,PR> const& x) -> Float<PositiveLower,PR>;
-template<class PR> auto mig(Float<Exact,PR> const& x) -> Float<PositiveExact,PR>;
+template<class P, class PR> auto
+round(Float<P,PR> const& x) -> Float<P,PR>;
+
+template<class P, class PR> auto mag(Float<P,PR> const& x) -> Float<Unsigned<Weaker<P,Upper>>,PR>;
+template<class P, class PR> auto mig(Float<P,PR> const& x) -> Float<Unsigned<Weaker<P,Lower>>,PR>;
 
 template<class P, class PR> auto is_zero(Float<P,PR> const&) -> Logical<Weaker<P,Opposite<P>>>;
 template<class P, class PR> auto is_positive(Float<P,PR> const&) -> Logical<Opposite<P>>;
 template<class P, class PR> auto same(Float<P,PR> const&, Float<P,PR> const&) -> Bool;
 
-template<class P, class PR> auto leq(Float<P,PR> const& x1, Float<P,PR> const& x2) -> Logical<Generic<Weaker<P,Opposite<P>>>>;
+template<class P, class PR> auto eq(Float<P,PR> const& x1, Float<Negated<P>,PR> const& x2) -> Logical<Weaker<P,Negated<P>>>;
+template<class P, class PR> auto leq(Float<P,PR> const& x1, Float<Negated<P>,PR> const& x2) -> Logical<Generic<P>>;
+
+
+template<class P1, class P2, class PR> auto
+max(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> Float<Weaker<P1,P2>,PR> {
+    typedef Float<Weaker<P1,P2>,PR> R;
+    return max(convert<R>(x1),convert<R>(x2)); }
+
+template<class P1, class P2, class PR> auto
+min(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> Float<Weaker<P1,P2>,PR> {
+    typedef Weaker<P1,P2> P0; typedef Float<P0,PR> X0;
+    Float<P0,PR> rx1(x1); Float<P0,PR> rx2(x2); return min(rx1,rx2); }
+
 
 template<class P, class PR> auto
-operator+(Float<P,PR> const& x) -> Float<P,PR>;
+operator+(Float<P,PR> const& x) -> Float<P,PR> {
+    return pos(x); }
 
 template<class P, class PR> auto
-operator-(Float<P,PR> const& x) -> Float<Negated<P>,PR>;
+operator-(Float<P,PR> const& x) -> Float<Negated<P>,PR> {
+    return neg(x); }
 
 template<class P1, class P2, class PR> auto
 operator+(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> Float<Widen<Weaker<P1,P2>>,PR> {
-    typedef Widen<Weaker<P1,P2>> P0; return add(Float<P0,PR>(x1),Float<P0,PR>(x2)); }
+    typedef Widen<Weaker<P1,P2>> P0; typedef Float<P0,PR> R;
+    return add(convert<Float<P0,PR>>(x1),convert<Float<P0,PR>>(x2)); }
 
 template<class P1, class P2, class PR> auto
 operator-(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> Float<Widen<Weaker<P1,Negated<P2>>>,PR> {
-    typedef Widen<Weaker<P1,Negated<P2>>> P0; return sub(Float<P0,PR>(x1),Float<Negated<P0>,PR>(x2)); }
+    typedef Widen<Weaker<P1,Negated<P2>>> P0; typedef Float<P0,PR> R;
+    return sub(convert<R>(x1),convert<Float<Negated<P0>,PR>>(x2)); }
 
 template<class P1, class P2, class PR> auto
 operator*(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> Float<Widen<Weaker<P1,P2>>,PR> {
-    typedef Widen<Weaker<P1,P2>> P0; return mul(Float<P0,PR>(x1),Float<P0,PR>(x2)); }
+    typedef Float<Widen<Weaker<P1,P2>>,PR> R;
+    return mul(convert<R>(x1),convert<R>(x2)); }
 
 template<class P1, class P2, class PR> auto
 operator/(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> Float<Widen<Weaker<P1,Inverted<P2>>>,PR> {
-    typedef Widen<Weaker<P1,Inverted<P2>>> P0; return div(Float<P0,PR>(x1),Float<Inverted<P0>,PR>(x2)); }
+    typedef Widen<Weaker<P1,Inverted<P2>>> P0; typedef Float<P0,PR> R;
+    return div(convert<R>(x1),convert<Float<Inverted<P0>,PR>>(x2)); }
+
 
 template<class P, class PR> auto
 operator*(Float<P,PR> const& x1, TwoExp x2) -> Float<P,PR>;
@@ -566,11 +579,13 @@ template<class P1, class Y2, class PR> auto
 operator/=(Float<P1,PR>& x1, Y2 const& y2) -> decltype(x1=x1/y2);
 
 template<class P1, class P2, class PR> auto
-operator==(Float<P1,PR> const&, Float<P2,PR> const&) -> decltype(is_zero(declval<Float<Weaker<P1,Opposite<P2>>,PR>>()));
+operator==(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> decltype(is_zero(declval<Float<Weaker<P1,Opposite<P2>>,PR>>())) {
+    typedef Weaker<P1,Opposite<P2>> WP1; typedef Opposite<WP1> WP2; typedef Float<WP1,PR> X1; typedef Float<WP2,PR> X2;
+    return eq(convert<X1>(x1),convert<X2>(x2)); }
 template<class P1, class P2, class PR> auto
 operator!=(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> decltype(not (x1==x2));
 template<class P1, class P2, class PR> auto
-operator<=(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> decltype(is_positive(declval<Float<Weaker<Opposite<P1>,P2>,PR>>()));
+operator<=(Float<P1,PR> const& x1, Float<P2,PR> const& x2) ->  decltype(is_positive(declval<Float<Weaker<Opposite<P1>,P2>,PR>>()));
 template<class P1, class P2, class PR> auto
 operator>=(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> decltype(x2<=x1);
 template<class P1, class P2, class PR> auto
@@ -581,63 +596,14 @@ operator> (Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> decltype(not (x1<=
 template<class P, class PR> auto
 operator<<(OutputStream& os, Float<P,PR> const&) -> OutputStream&;
 
-template<class P1, class P2, class PR> Float<Weaker<P1,P2>,PR> w(Float<P1,PR> x1, Float<P2,PR> x2) {
-    return Float<Weaker<P1,P2>,PR>(x1); }
-
 template<class P, class PR> auto
-floor(Float<P,PR> const& x) -> Float<P,PR>;
+operator>>(InputStream& is, Float<P,PR>&) -> InputStream&;
 
-template<class P, class PR> auto
-round(Float<P,PR> const& x) -> Float<P,PR>;
-
-
-template<class PR> auto nul(Float<Bounded,PR> const&) -> Float<Bounded,PR>;
-template<class PR> auto pos(Float<Bounded,PR> const&) -> Float<Bounded,PR>;
-template<class PR> auto neg(Float<Bounded,PR> const&) -> Float<Bounded,PR>;
-template<class PR> auto sqr(Float<Bounded,PR> const&) -> Float<Bounded,PR>;
-template<class PR> auto rec(Float<Bounded,PR> const&) -> Float<Bounded,PR>;
-template<class PR> auto half(Float<Bounded,PR> const&) -> Float<Bounded,PR>;
-template<class PR> auto add(Float<Bounded,PR> const&, Float<Bounded,PR> const&) -> Float<Bounded,PR>;
-template<class PR> auto sub(Float<Bounded,PR> const&, Float<Bounded,PR> const&) -> Float<Bounded,PR>;
-template<class PR> auto mul(Float<Bounded,PR> const&, Float<Bounded,PR> const&) -> Float<Bounded,PR>;
-template<class PR> auto div(Float<Bounded,PR> const&, Float<Bounded,PR> const&) -> Float<Bounded,PR>;
-template<class PR> auto pow(Float<Bounded,PR> const&, Nat m) -> Float<Bounded,PR>;
-template<class PR> auto pow(Float<Bounded,PR> const&, Int n) -> Float<Bounded,PR>;
-
-template<class PR> auto max(Float<Bounded,PR> const&, Float<Bounded,PR> const&) -> Float<Bounded,PR>;
-template<class PR> auto min(Float<Bounded,PR> const&, Float<Bounded,PR> const&) -> Float<Bounded,PR>;
-template<class PR> auto abs(Float<Bounded,PR> const&) -> Float<Bounded,PR>;
-
-template<class PR> auto sqrt(Float<Bounded,PR> const&) -> Float<Bounded,PR>;
-template<class PR> auto exp(Float<Bounded,PR> const&) -> Float<Bounded,PR>;
-template<class PR> auto log(Float<Bounded,PR> const&) -> Float<Bounded,PR>;
-template<class PR> auto sin(Float<Bounded,PR> const&) -> Float<Bounded,PR>;
-template<class PR> auto cos(Float<Bounded,PR> const&) -> Float<Bounded,PR>;
-template<class PR> auto tan(Float<Bounded,PR> const&) -> Float<Bounded,PR>;
-template<class PR> auto asin(Float<Bounded,PR> const&) -> Float<Bounded,PR>;
-template<class PR> auto acos(Float<Bounded,PR> const&) -> Float<Bounded,PR>;
-template<class PR> auto atan(Float<Bounded,PR> const&) -> Float<Bounded,PR>;
-
-template<class PR> auto mag(Float<Bounded,PR> const&) -> Float<PositiveUpper,PR>;
-
-template<class PR> auto is_zero(Float<Bounded,PR> const&) -> Logical<Validated>;
-template<class PR> auto is_positive(Float<Bounded,PR> const&) -> Logical<Validated>;
-template<class PR> auto leq(Float<Bounded,PR> const& x1, Float<Bounded,PR> const& x2) -> Logical<Validated>;
-template<class PR> auto same(Float<Bounded,PR> const&, Float<Bounded,PR> const&) -> Bool;
-
-template<class PR> auto operator==(Float<Bounded,PR> const&,Float<Bounded,PR> const&) -> decltype(is_zero(declval<Float<Bounded,PR>>()));
-template<class PR> auto operator!=(Float<Bounded,PR> const&,Float<Bounded,PR> const&) -> decltype(not is_zero(declval<Float<Bounded,PR>>()));
-template<class PR> auto operator<=(Float<Bounded,PR> const&,Float<Bounded,PR> const&) -> decltype(is_positive(declval<Float<Bounded,PR>>()));
-template<class PR> auto operator>=(Float<Bounded,PR> const&,Float<Bounded,PR> const&) -> decltype(is_positive(declval<Float<Bounded,PR>>()));
-template<class PR> auto operator< (Float<Bounded,PR> const&,Float<Bounded,PR> const&) -> decltype(is_positive(declval<Float<Bounded,PR>>()));
-template<class PR> auto operator> (Float<Bounded,PR> const&,Float<Bounded,PR> const&) -> decltype(is_positive(declval<Float<Bounded,PR>>()));
-
-template<class PR> auto operator<<(OutputStream& os, Float<Bounded,PR> const& x) -> OutputStream&;
-template<class PR> auto operator>>(InputStream& is, Float<Bounded,PR>& x) -> InputStream&;
-
-template<class PR> auto operator<<(OutputStream& os, Float<Exact,PR> const& x) -> OutputStream&;
 
 extern const Float<Exact,Precision64> infty;
+
+template<class P1, class P2, class PR> Float<Weaker<P1,P2>,PR> w(Float<P1,PR> x1, Float<P2,PR> x2) {
+    return Float<Weaker<P1,P2>,PR>(x1); }
 
 inline void foo() {
     typedef Precision64 PR;

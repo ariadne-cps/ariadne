@@ -272,7 +272,7 @@ TestValidatedFloat::test_constructors()
     if(xd2.lower_raw()>xd2.upper_raw()) {
         ARIADNE_TEST_WARN("ValidatedFloat64 default constructor returns an empty set.");
     } else {
-        ARIADNE_TEST_ASSERT((Bool)(xd2==ValidatedFloat64(zero,zero)));
+        ARIADNE_TEST_BINARY_PREDICATE(same,xd2,ValidatedFloat64(zero,zero));
     }
 
     // Constructor with approximations

@@ -350,6 +350,7 @@ template<class P> using Weaken = typename ParadigmTraits<P>::NextWeaker;
 template<class P> using Negated = decltype(Detail::negate_paradigm(declval<P>()));
 template<class P> using Inverted = decltype(Detail::invert_paradigm(declval<P>()));
 template<class P> using Opposite = decltype(Detail::negate_paradigm(declval<P>()));
+template<class P> using Generic = decltype(strengthen(declval<P>()));
 
 //! \ingroup ParadigmSubModule
 //! \brief The paradigm obtained by widening a type due to roundoff error.

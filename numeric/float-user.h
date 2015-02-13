@@ -1072,6 +1072,9 @@ PositiveUpperFloat64 error(MetricFloat64 const& x);
 ExactFloat64 operator"" _exact(long double lx);
 ErrorFloat64 operator"" _error(long double lx);
 MetricFloat64 operator"" _near(long double lx);
+UpperFloat64 operator"" _upper(long double lx);
+LowerFloat64 operator"" _lower(long double lx);
+ApproximateFloat64 operator"" _approx(long double lx);
 
 
 // Standard equality operators

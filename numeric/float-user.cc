@@ -41,9 +41,52 @@ template<class PR> Nat Float<Exact,PR>::output_precision = 16;
 
 const Float<Exact,Precision64> infty = Float<Exact,Precision64>(Float64::inf());
 
-Float<Error,Precision64> operator"" _error(long double lx) { double x=lx; assert(x==lx); return Float<Error,Precision64>(Float64(x)); }
-Float<Exact,Precision64> operator"" _exact(long double lx) { double x=lx; assert(x==lx); return Float<Exact,Precision64>(x); }
-TwoExp::operator Float<Exact,Precision64> () const { return Float<Exact,Precision64>(this->get_d()); }
+Float<Error,Precision64> operator"" _error(long double lx) {
+    double x=lx;
+    assert(x==lx);
+    return Float<Error,Precision64>(Float64(x));
+}
+
+Float<Exact,Precision64> operator"" _exact(long double lx) {
+    double x=lx;
+    assert(x==lx);
+    return Float<Exact,Precision64>(x);
+}
+
+Float<Metric,Precision64> operator"" _near(long double lx) {
+    volatile double x=lx;
+    volatile long double le=std::abs((long double)x-lx);
+    volatile double e=le;
+    while(e<le) { e*=(1+std::numeric_limits<double>::epsilon()); }
+    return Float<Metric,Precision64>(x,e);
+}
+
+Float<Upper,Precision64> operator"" _upper(long double lx) {
+    static const double eps = std::numeric_limits<double>::epsilon();
+    static const double min = std::numeric_limits<double>::min();
+    double x=lx;
+    if(x<lx) { x+=min; }
+    while (x<lx) { x+=std::abs(x)*eps; }
+    return Float<Upper,Precision64>(x);
+}
+
+Float<Lower,Precision64> operator"" _lower(long double lx) {
+    static const double eps = std::numeric_limits<double>::epsilon();
+    static const double min = std::numeric_limits<double>::min();
+    double x=lx;
+    if(x>lx) { x-=min; }
+    while (x>lx) { x-=std::abs(x)*eps; }
+    return Float<Lower,Precision64>(x);
+}
+
+Float<Approximate,Precision64> operator"" _approx(long double lx) {
+    double x=lx;
+    return Float<Approximate,Precision64>(x);
+}
+
+TwoExp::operator Float<Exact,Precision64> () const {
+    return Float<Exact,Precision64>(this->get_d());
+}
 
 
 template<class PR> Float<Approximate,PR> max_impl(Float<Approximate,PR> const& x1, Float<Approximate,PR> const& x2) {

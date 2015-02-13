@@ -60,6 +60,7 @@ enum class LogicalValue : char {
 
 inline Bool definitely(const LogicalValue& l) { return l==LogicalValue::TRUE; }
 inline Bool possibly(const LogicalValue& l) { return l!=LogicalValue::FALSE; }
+inline Bool probably(const LogicalValue& l) { return l==LogicalValue::TRUE || l==LogicalValue::LIKELY; };
 inline Bool decide(const LogicalValue& l) { return l==LogicalValue::TRUE || l==LogicalValue::LIKELY; };
 
 LogicalValue equal(LogicalValue l1, LogicalValue l2);
@@ -118,6 +119,9 @@ template<class P> class Logical
     //! \brief Returns \c true only if \a l represents the result of a logical predicate which may be true.
     //!  Returns \c false  only for the value LogicalValue::FALSE.
     friend inline Bool possibly(Logical<P> l) { return l._v != LogicalValue::FALSE; }
+    //! \brief Converts the logical value into a true/false boolean context.
+    //! Returns \c true for LogicalValue::TRUE or LogicalValue::LIKELY.
+    friend inline Bool probably(Logical<P> l) { return l._v >= LogicalValue::LIKELY; }
     //! \brief Converts the logical value into a true/false boolean context.
     //! Returns \c true for LogicalValue::TRUE or LogicalValue::LIKELY.
     //! Note that decide(indeterminate) is false.

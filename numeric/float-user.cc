@@ -35,6 +35,7 @@
 
 namespace Ariadne {
 
+
 template<class PR> Nat Float<Approximate,PR>::output_precision = 4;
 template<class PR> Nat Float<Bounded,PR>::output_precision;
 template<class PR> Nat Float<Exact,PR>::output_precision = 16;
@@ -158,6 +159,41 @@ template<class PR> Float<Exact,PR>::operator Rational() const {
 }
 
 
+template<class PR> Float<Approximate,PR>::Float(Float<Lower,PR> const& x) : _a(x.raw()) {
+}
+
+template<class PR> Float<Approximate,PR>::Float(Float<Upper,PR> const& x) : _a(x.raw()) {
+}
+
+template<class PR> Float<Approximate,PR>::Float(Float<Bounded,PR> const& x) : _a(x.value_raw()) {
+}
+
+template<class PR> Float<Approximate,PR>::Float(Float<Exact,PR> const& x) : _a(x.raw()) {
+}
+
+template<class PR> Float<Lower,PR>::Float(Float<Bounded,PR> const& x) : _l(x.lower_raw()) {
+}
+
+template<class PR> Float<Lower,PR>::Float(Float<Exact,PR> const& x) : _l(x.raw()) {
+}
+
+template<class PR> Float<Upper,PR>::Float(Float<Bounded,PR> const& x) : _u(x.upper_raw()) {
+}
+
+template<class PR> Float<Upper,PR>::Float(Float<Exact,PR> const& x) : _u(x.raw()) {
+}
+
+template<class PR> Float<Bounded,PR>::Float(Float<Metric,PR> const& x) : _l(x.lower_raw()), _u(x.upper_raw()) {
+}
+
+template<class PR> Float<Bounded,PR>::Float(Float<Exact,PR> const& x) : _l(x.raw()), _u(x.raw()) {
+}
+
+template<class PR> Float<Metric,PR>::Float(Float<Bounded,PR> const& x) : _v(x.value_raw()), _e(x.error_raw()) {
+}
+
+template<class PR> Float<Metric,PR>::Float(Float<Exact,PR> const& x) : _v(x.raw()), _e(0.0) {
+}
 
 
 
@@ -223,9 +259,9 @@ template<class PR> Float<Approximate,PR> acos(Float<Approximate,PR> const& x) {
 template<class PR> Float<Approximate,PR> atan(Float<Approximate,PR> const& x) {
     return Float<Approximate,PR>(atan_approx(x._a)); }
 
-template<class PR> Fuzzy eq(Float<Approximate,PR> const& x1, Float<Approximate,PR> const& x2) {
+template<class PR> Logical<Approximate> eq(Float<Approximate,PR> const& x1, Float<Approximate,PR> const& x2) {
     return x1._a==x2._a; }
-template<class PR> Fuzzy leq(Float<Approximate,PR> const& x1, Float<Approximate,PR> const& x2) {
+template<class PR> Logical<Approximate> leq(Float<Approximate,PR> const& x1, Float<Approximate,PR> const& x2) {
     return x1._a<=x2._a; }
 
 template<class PR> Float<Approximate,PR> operator+(Float<Approximate,PR> const& x) { return pos(x); }
@@ -247,7 +283,8 @@ template<class PR> Fuzzy operator< (Float<Approximate,PR> const& x1, Float<Appro
 template<class PR> Fuzzy operator> (Float<Approximate,PR> const& x1, Float<Approximate,PR> const& x2) { return x1._a> x2._a; }
 
 template<class PR> OutputStream& operator<<(OutputStream& os, Float<Approximate,PR> const& x);
-template<class PR> InputStream& operator>>(InputStream& is, Float<Approximate,PR>& x);
+template<class PR> InputStream& operator>>(InputStream& is, Float<Approximate,PR>& x) {
+    is >> x._a; return is; }
 
 
 
@@ -286,9 +323,12 @@ template<class PR> Float<Lower,PR> mul(Float<Lower,PR> const& x1, Float<Lower,PR
 template<class PR> Float<Lower,PR> div(Float<Lower,PR> const& x1, Float<Upper,PR> const& x2) {
     return Float<Lower,PR>(div_down(x1.raw(),x2.raw())); }
 
-template<class PR> Float<Lower,PR> pow(Float<Lower,PR> const& x, Nat m);
+template<class PR> Float<Lower,PR> pow(Float<Lower,PR> const& x, Nat m) {
+    ARIADNE_PRECONDITION(x.raw()>=0);
+    return Float<Lower,PR>(pow_down(x.raw(),m)); }
 
-template<class PR> Float<Approximate,PR> pow(Float<Lower,PR> const& x, Int n);
+template<class PR> Float<Approximate,PR> pow(Float<Lower,PR> const& x, Int n) {
+    return pow(Float<Approximate,PR>(x),n); }
 
 template<class PR> Float<Lower,PR> sqrt(Float<Lower,PR> const& x) {
     return Float<Lower,PR>(sqrt_down(x.raw())); }
@@ -301,6 +341,16 @@ template<class PR> Float<Lower,PR> log(Float<Lower,PR> const& x) {
 
 template<class PR> Float<Lower,PR> atan(Float<Lower,PR> const& x) {
     return Float<Lower,PR>(atan_down(x.raw())); }
+
+template<class PR> Logical<Lower> eq(Float<Lower,PR> const& x1, Float<Upper,PR> const& x2) {
+    if(x1._l>x2._u) { return false; }
+    else { return Logical<Lower>(LogicalValue::INDETERMINATE); }
+}
+
+template<class PR> Logical<Lower> leq(Float<Lower,PR> const& x1, Float<Upper,PR> const& x2) {
+    if(x1._l>x2._u) { return false; }
+    else { return Logical<Lower>(LogicalValue::LIKELY); }
+}
 
 template<class PR> Float<Lower,PR> operator+(Float<Lower,PR> const& x) { return pos(x); }
 template<class PR> Float<Lower,PR> operator-(Float<Upper,PR> const& x) { return neg(x); }
@@ -364,9 +414,12 @@ template<class PR> Float<Upper,PR> mul(Float<Upper,PR> const& x1, Float<Upper,PR
 
 template<class PR> Float<Upper,PR> div(Float<Upper,PR> const& x1, Float<Lower,PR> const& x2);
 
-template<class PR> Float<Upper,PR> pow(Float<Upper,PR> const& x, Nat m);
+template<class PR> Float<Upper,PR> pow(Float<Upper,PR> const& x, Nat m) {
+    ARIADNE_PRECONDITION(x.raw()>=0);
+    return Float<Upper,PR>(pow_up(x._u,m)); }
 
-template<class PR> Float<Approximate,PR> pow(Float<Upper,PR> const& x, Int m);
+template<class PR> Float<Approximate,PR> pow(Float<Upper,PR> const& x, Int n) {
+    return pow(Float<Approximate,PR>(x),n); }
 
 template<class PR> Float<Upper,PR> sqrt(Float<Upper,PR> const& x) {
     return Float<Upper,PR>(sqrt_up(x.raw())); }
@@ -380,8 +433,17 @@ template<class PR> Float<Upper,PR> log(Float<Upper,PR> const& x) {
 template<class PR> Float<Upper,PR> atan(Float<Upper,PR> const& x) {
     return Float<Upper,PR>(atan_up(x.raw())); }
 
-template<class PR> Int integer_cast(Float<Upper,PR> const& x) { return static_cast<Int>(x._u.get_d()); }
-template<class PR> Nat integer_cast(Float<Upper,PR> const& x) { return static_cast<Nat>(x._u.get_d()); }
+template<class PR> Logical<Lower> eq(Float<Upper,PR> const& x1, Float<Lower,PR> const& x2) {
+    if(x1._u<x2._l) { return false; }
+    else { return Logical<Lower>(LogicalValue::INDETERMINATE); }
+}
+
+template<class PR> Logical<Upper> leq(Float<Upper,PR> const& x1, Float<Lower,PR> const& x2) {
+    if(x1._u<=x2._l) { return true; }
+    else { return Logical<Upper>(LogicalValue::UNLIKELY); }
+}
+
+template<class PR> Integer integer_cast(Float<Upper,PR> const& x) { return Integer(static_cast<int>(x._u.get_d())); }
 
 template<class PR> Float<Upper,PR> operator+(Float<Upper,PR> const& x) { return pos(x); }
 template<class PR> Float<Upper,PR> operator-(Float<Lower,PR> const& x) { return neg(x); }
@@ -720,8 +782,9 @@ template<class PR> Float<Bounded,PR> trunc(Float<Bounded,PR> const& x, Nat n)
     return y-_e;
 }
 
-template<class PR> Int integer_cast(Float<Bounded,PR> const& x) { return static_cast<Int>(x.value_raw().get_d()); }
-template<class PR> Nat integer_cast(Float<Bounded,PR> const& x) { return static_cast<Nat>(x.value_raw().get_d()); }
+template<class PR> Integer integer_cast(Float<Bounded,PR> const& x) {
+    return Integer(static_cast<int>(x.value_raw().get_d()));
+}
 
 template<class PR> auto is_zero(Float<Bounded,PR> const& x) -> Logical<Validated> {
     if(x.lower_raw()>0.0 || x.upper_raw()<0.0) { return false; }
@@ -906,11 +969,11 @@ template<class PR> Float<Bounded,PR> mul(Float<Exact,PR> const& x1, Float<Exact,
 template<class PR> Float<Bounded,PR> div(Float<Exact,PR> const& x1, Float<Exact,PR> const& x2) {
     return Float<Bounded,PR>(div_down(x1._v,x2._v),div_up(x1._v,x2._v)); }
 
-template<class PR> Float<Bounded,PR> pow(Float<Exact,PR> const& x1, Nat m2) {
-    return pow(Float<Bounded,PR>(x1),m2); }
+template<class PR> Float<Bounded,PR> pow(Float<Exact,PR> const& x, Nat m) {
+    return pow(Float<Bounded,PR>(x),m); }
 
-template<class PR> Float<Bounded,PR> pow(Float<Exact,PR> const& x1, Int n2) {
-    return pow(Float<Bounded,PR>(x1),n2); }
+template<class PR> Float<Bounded,PR> pow(Float<Exact,PR> const& x, Int n) {
+    return pow(Float<Bounded,PR>(x),n); }
 
 template<class PR> Float<Bounded,PR> med(Float<Exact,PR> const& x1, Float<Exact,PR> const& x2) {
     return add(half(x1),half(x2)); }
@@ -945,6 +1008,12 @@ template<class PR> Float<Bounded,PR> acos(Float<Exact,PR> const& x) {
 template<class PR> Float<Bounded,PR> atan(Float<Exact,PR> const& x) {
     return atan(Float<Bounded,PR>(x)); }
 
+template<class PR> Logical<Exact> eq(Float<Exact,PR> const& x1, Float<Exact,PR> const& x2) {
+    return x1._v == x2._v; }
+
+template<class PR> Logical<Exact> leq(Float<Exact,PR> const& x1, Float<Exact,PR> const& x2) {
+    return x1._v <= x2._v; }
+
 template<class PR> Float<Exact,PR> operator+(Float<Exact,PR> const& x) { return pos(x); }
 template<class PR> Float<Exact,PR> operator-(Float<Exact,PR> const& x) { return neg(x); }
 template<class PR> Float<Bounded,PR> operator+(Float<Exact,PR> const& x1,  Float<Exact,PR> const& x2) { return add(x1,x2); }
@@ -968,8 +1037,25 @@ template<class PR> Boolean operator>=(Float<Exact,PR> const& x1, Float<Exact,PR>
 template<class PR> Boolean operator< (Float<Exact,PR> const& x1, Float<Exact,PR> const& x2) { return x1.raw()< x2.raw(); }
 template<class PR> Boolean operator> (Float<Exact,PR> const& x1, Float<Exact,PR> const& x2) { return x1.raw()> x2.raw(); }
 
-template<class PR> OutputStream& operator<<(OutputStream& os, Float<Exact,PR> const& x);
-template<class PR> InputStream& operator>>(InputStream& is, Float<Exact,PR>& x);
+template<class PR> OutputStream& operator<<(OutputStream& os, Float<Exact,PR> const& x) {
+    return os << std::setprecision(Float<Exact,PR>::output_precision) << x.raw();
+}
+
+template<class PR> InputStream& operator>>(InputStream& is, Float<Exact,PR>& x) {
+    ARIADNE_NOT_IMPLEMENTED;
+    auto v = nul(x._v);
+    is >> v;
+    ARIADNE_ASSERT(is);
+    x._v=v;
+    return is;
+}
+
+template<class PR> Integer integer_cast(Float<Exact,PR> const& x) {
+    Integer z=static_cast<int>(x._v.get_d());
+    ARIADNE_ASSERT(z==x);
+    return std::move(z);
+}
+
 
 template<class PR> Float<Exact,PR> make_exact(const Real& x);
 
@@ -1020,58 +1106,6 @@ template<class PR> Float<PositiveUpper,PR> error(Float<Bounded,PR> const& x) {
 
 
 
-template<class PR> Float<Approximate,PR>::Float(Float<Lower,PR> const& x) : _a(x.raw()) {
-}
-
-template<class PR> Float<Approximate,PR>::Float(Float<Upper,PR> const& x) : _a(x.raw()) {
-}
-
-template<class PR> Float<Approximate,PR>::Float(Float<Bounded,PR> const& x) : _a(x.value_raw()) {
-}
-
-template<class PR> Float<Approximate,PR>::Float(Float<Exact,PR> const& x) : _a(x.raw()) {
-}
-
-template<class PR> Float<Lower,PR>::Float(Float<Bounded,PR> const& x) : _l(x.lower_raw()) {
-}
-
-template<class PR> Float<Lower,PR>::Float(Float<Exact,PR> const& x) : _l(x.raw()) {
-}
-
-template<class PR> Float<Upper,PR>::Float(Float<Bounded,PR> const& x) : _u(x.upper_raw()) {
-}
-
-template<class PR> Float<Upper,PR>::Float(Float<Exact,PR> const& x) : _u(x.raw()) {
-}
-
-template<class PR> Float<Bounded,PR>::Float(Float<Metric,PR> const& x) : _l(x.lower_raw()), _u(x.upper_raw()) {
-}
-
-template<class PR> Float<Bounded,PR>::Float(Float<Exact,PR> const& x) : _l(x.raw()), _u(x.raw()) {
-}
-
-template<class PR> Float<Metric,PR>::Float(Float<Bounded,PR> const& x) : _v(x.value_raw()), _e(x.error_raw()) {
-}
-
-template<class PR> Float<Metric,PR>::Float(Float<Exact,PR> const& x) : _v(x.raw()), _e(0.0) {
-}
-
-
-template<class PR> Bool same(Float<Approximate,PR> const& x1, Float<Approximate,PR> const& x2) {
-    return x1.raw()==x2.raw(); }
-
-template<class PR> Bool same(Float<Lower,PR> const& x1, Float<Lower,PR> const& x2) {
-    return x1.raw()==x2.raw(); }
-
-template<class PR> Bool same(Float<Upper,PR> const& x1, Float<Upper,PR> const& x2) {
-    return x1.raw()==x2.raw(); }
-
-template<class PR> Bool same(Float<Bounded,PR> const& x1, Float<Bounded,PR> const& x2) {
-    return x1.lower_raw()==x2.lower_raw() && x1.upper_raw()==x2.upper_raw(); }
-
-template<class PR> Bool same(Float<Exact,PR> const& x1, Float<Exact,PR> const& x2) {
-    return x1.raw()==x2.raw(); }
-
 
 
 #ifdef ARIADNE_ENABLE_SERIALIZATION
@@ -1079,151 +1113,48 @@ template<class PR, class A> Void serialize(A& _a, Float<Bounded,PR>& x, const Na
     _a & x.lower_raw() & x.upper_raw(); }
 #endif
 
-template<class PR> OutputStream& operator<<(OutputStream&, Float<Bounded,PR> const&);
-template<class PR> InputStream& operator>>(InputStream&, Float<Bounded,PR>&);
 
+template<class PR, class P> Float<P,PR> max(Float<P,PR> const& x1, Float<P,PR> const& x2) { return max<PR>(x1,x2); }
+template<class PR, class P> Float<P,PR> min(Float<P,PR> const& x1, Float<P,PR> const& x2) { return min<PR>(x1,x2); }
+template<class PR, class P> Float<Weaker<P,Negated<P>>,PR> abs(Float<P,PR> const& x) { return abs<PR>(x); }
+template<class PR, class P> Float<Unsigned<Weaker<P,Upper>>,PR> mag(Float<P,PR> const& x) { return mag<PR>(x); }
+template<class PR, class P> Float<Unsigned<Weaker<P,Lower>>,PR> mig(Float<P,PR> const& x) { return mig<PR>(x); }
 
-template<class PR> Float<PositiveUpper,PR> operator+(Float<PositiveUpper,PR> const& x1, Float<PositiveUpper,PR> const& x2);
-template<class PR> Float<PositiveUpper,PR> operator-(Float<PositiveUpper,PR> const& x1, Float<Lower,PR> const& x2);
-template<class PR> Float<PositiveUpper,PR> operator*(Float<PositiveUpper,PR> const& x1, Float<PositiveUpper,PR> const& x2);
-template<class PR> Float<PositiveUpper,PR> operator/(Float<PositiveUpper,PR> const& x1, Float<Lower,PR> const& x2);
-template<class PR> Float<PositiveUpper,PR> pow(Float<PositiveUpper,PR> const& x, Nat m);
-template<class PR> Float<PositiveUpper,PR> half(Float<PositiveUpper,PR> const& x);
-template<class PR> Float<PositiveUpper,PR> max(Float<PositiveUpper,PR> const& x1, Float<PositiveUpper,PR> const& x2) {
-    return Float<PositiveUpper,PR>(max(x1.raw(),x2.raw())); }
+template<class PR, class P> Float<P,PR> nul(Float<P,PR> const& x) { return nul<PR>(x); }
+template<class PR, class P> Float<P,PR> pos(Float<P,PR> const& x) { return pos<PR>(x); }
+template<class PR, class P> Float<Negated<P>,PR> neg(Float<P,PR> const& x) { return neg<PR>(x); }
+template<class PR, class P> Float<P,PR> half(Float<P,PR> const& x) { return half<PR>(x); }
+template<class PR, class P> Float<Widen<P>,PR> sqr(Float<P,PR> const& x) { return sqr<PR>(x); }
+template<class PR, class P> Float<Widen<Inverted<P>>,PR> rec(Float<P,PR> const& x) { return rec<PR>(x); }
 
+template<class PR, class P> Float<Widen<P>,PR> add(Float<P,PR> const& x1, Float<P,PR> const& x2) { return add<PR>(x1,x2); }
+template<class PR, class P> Float<Widen<P>,PR> sub(Float<P,PR> const& x1, Float<Negated<P>,PR> const& x2) { return sub<PR>(x1,x2); }
+template<class PR, class P> Float<Widen<P>,PR> mul(Float<P,PR> const& x1, Float<P,PR> const& x2) { return mul<PR>(x1,x2); }
+template<class PR, class P> Float<Widen<P>,PR> div(Float<P,PR> const& x1, Float<Inverted<P>,PR> const& x2) { return div<PR>(x1,x2); }
 
+template<class PR, class P> Float<Widen<P>,PR> pow(Float<P,PR> const& x, Nat m) { return pow<PR>(x,m); }
+template<class PR, class P> Float<Widen<Unorder<P>>,PR> pow(Float<P,PR> const& x, Int n) { return pow<PR>(x,n); }
 
-template<class PR> Float<Exact,PR> make_exact(Real const& r) {
-    Float<Approximate,PR> _a(r); return Float<Exact,PR>(_a.raw());
-}
+template<class PR, class P> Float<Widen<P>,PR> sqrt(Float<P,PR> const& x) { return sqrt<PR>(x); }
+template<class PR, class P> Float<Widen<P>,PR> exp(Float<P,PR> const& x) { return exp<PR>(x); }
+template<class PR, class P> Float<Widen<P>,PR> log(Float<P,PR> const& x) { return log<PR>(x); }
+template<class PR, class P> Float<Widen<Unorder<P>>,PR> sin(Float<P,PR> const& x) { return sin<PR>(x); }
+template<class PR, class P> Float<Widen<Unorder<P>>,PR> cos(Float<P,PR> const& x) { return cos<PR>(x); }
+template<class PR, class P> Float<Widen<Unorder<P>>,PR> tan(Float<P,PR> const& x) { return tan<PR>(x); }
+template<class PR, class P> Float<Widen<Unorder<P>>,PR> asin(Float<P,PR> const& x) { return asin<PR>(x); }
+template<class PR, class P> Float<Widen<Unorder<P>>,PR> acos(Float<P,PR> const& x) { return acos<PR>(x); }
+template<class PR, class P> Float<Widen<P>,PR> atan(Float<P,PR> const& x) { return atan<PR>(x); }
 
-template<class PR> OutputStream& operator<<(OutputStream& os, Float<Exact,PR> const& x) {
-    os << std::showpoint << std::setprecision(Float<Exact,PR>::output_precision) << x.raw();
-    return os;
-}
+template<class PR, class P> Integer integer_cast(Float<P,PR> const& x) { return integer_cast<PR>(x); }
 
+template<class PR, class P> Bool same(Float<P,PR> const& x1, Float<P,PR> const& x2) { return same<PR>(x1,x2); }
 
+template<class PR, class P> FloatEqualsType<PR,P,Negated<P>> eq(Float<P,PR> const& x1, Float<Negated<P>,PR> const& x2) { return eq<PR>(x1,x2); }
+template<class PR, class P> FloatLessType<PR,P,Negated<P>> leq(Float<P,PR> const& x1, Float<Negated<P>,PR> const& x2) { return leq<PR>(x1,x2); }
 
-template<class PR> Float<PositiveUpper,PR> operator+(Float<PositiveUpper,PR> const& x1, Float<PositiveUpper,PR> const& x2) {
-    return Float<PositiveUpper,PR>(add_up(x1.raw(),x2.raw()));
-}
+template<class PR, class P> OutputStream& operator<<(OutputStream& os, Float<P,PR> const& x) { return operator<<(os,x); }
 
-template<class PR> Float<PositiveUpper,PR> operator-(Float<PositiveUpper,PR> const& x1, Float<Lower,PR> const& x2) {
-    ARIADNE_PRECONDITION(x1.raw()>=x2.raw());
-    return Float<PositiveUpper,PR>(sub_up(x1.raw(),x2.raw()));
-}
-
-template<class PR> Float<PositiveUpper,PR> operator*(Float<PositiveUpper,PR> const& x1, Float<PositiveUpper,PR> const& x2) {
-    return Float<PositiveUpper,PR>(mul_up(x1.raw(),x2.raw()));
-}
-
-template<class PR> Float<PositiveUpper,PR> operator/(Float<PositiveUpper,PR> const& x1, Float<Lower,PR> const& x2) {
-    ARIADNE_PRECONDITION(x2.raw()>=0);
-    return Float<PositiveUpper,PR>(div_up(x1.raw(),x2.raw()));
-}
-
-template<class PR> Float<PositiveUpper,PR> pow(Float<PositiveUpper,PR> const& x, Nat m) {
-    return Float<PositiveUpper,PR>(pow_up(x.raw(),m));
-}
-
-template<class PR> Float<PositiveUpper,PR> half(Float<PositiveUpper,PR> const& x) {
-    return Float<PositiveUpper,PR>(half(x.raw()));
-}
-
-
-
-
-template<class PR> OutputStream& operator<<(OutputStream& os, Float<Upper,PR> const& x) {
-    Float64::RoundingModeType rnd=Float64::get_rounding_mode();
-    Float64::set_rounding_upward();
-    os << std::showpoint << std::setprecision(Float<Bounded,PR>::output_precision) << x.raw();
-    Float64::set_rounding_mode(rnd);
-    return os;
-}
-
-template<class PR> Float<Upper,PR> sqr(Float<Upper,PR> const& x) {
-    ARIADNE_PRECONDITION(x.raw()>=0.0);
-    return Float<Upper,PR>(mul_up(x.raw(),x.raw()));
-}
-
-template<class PR> Float<Upper,PR> mul(Float<Upper,PR> const& x1, Float<Upper,PR> const& x2) {
-    ARIADNE_PRECONDITION(x1.raw()>=0.0 && x2.raw() >= 0.0);
-    return Float<Upper,PR>(mul_up(x1.raw(),x2.raw()));
-}
-
-template<class PR> Float<Upper,PR> div(Float<Upper,PR> const& x1, Float<Lower,PR> const& x2) {
-    ARIADNE_PRECONDITION(x1.raw()>=0.0 && x2.raw() > 0.0);
-    return Float<Upper,PR>(div_up(x1.raw(),x2.raw()));
-}
-
-template<class PR> Float<Upper,PR> pow(Float<Upper,PR> const& x, Nat n) {
-    ARIADNE_PRECONDITION(x.raw()>=0.0);
-    return Float<Upper,PR>(pow_up(x.raw(),n));
-}
-
-
-template<class PR> Int integer_cast(Float<Lower,PR> const& x) { return static_cast<Int>(x._l.get_d()); }
-template<class PR> Nat integer_cast(Float<Lower,PR> const& x) { return static_cast<Nat>(x._l.get_d()); }
-
-
-template<class PR> OutputStream& operator<<(OutputStream& os, Float<Approximate,PR> const& x) {
-    return os << std::showpoint << std::setprecision(Float<Approximate,PR>::output_precision) << x.raw();
-}
-
-template<class PR> Int integer_cast(Float<Approximate,PR> const& x) { return static_cast<Int>(x._a.get_d()); }
-template<class PR> Nat integer_cast(Float<Approximate,PR> const& x) { return static_cast<Nat>(x._a.get_d()); }
-
-
-
-// Operations relating to validated operations
-
-//! \related Float<Bounded,PR> \brief Tests if \_a x1 provides tighter bounds than \_a x2.
-template<class PR> Bool refines(Float<Bounded,PR> const& x1, Float<Bounded,PR> const& x2) {
-    return x1.lower_raw()>=x2.lower_raw() && x1.upper_raw()<=x2.upper_raw(); }
-
-//! \related Float<Bounded,PR> \brief The common refinement of \_a x1 and \_a x2.
-template<class PR> Float<Bounded,PR> refinement(Float<Bounded,PR> const& x1, Float<Bounded,PR> const& x2) {
-    return Float<Bounded,PR>(max(x1.lower_raw(),x2.lower_raw()),min(x1.upper_raw(),x2.upper_raw())); }
-
-//! \related Float<Bounded,PR> \brief Tests if \_a x1 and \_a x2 are consistent with representing the same number.
-template<class PR> Bool consistent(Float<Bounded,PR> const& x1, Float<Bounded,PR> const& x2) {
-    return x1.lower_raw()<=x2.upper_raw() && x1.upper_raw()>=x2.lower_raw(); }
-
-//! \related Float<Bounded,PR> \brief  Tests if \_a x1 and \_a x2 are inconsistent with representing the same number.
-template<class PR> Bool inconsistent(Float<Bounded,PR> const& x1, Float<Bounded,PR> const& x2) {
-    return not consistent(x1,x2); }
-
-//! \related Float<Bounded,PR> \brief  Tests if \_a x1 is a model for the exact value \_a x2. number.
-template<class PR> Bool models(Float<Bounded,PR> const& x1, Float<Exact,PR> const& x2) {
-    return x1.lower_raw()<=x2.raw() && x1.upper_raw()>=x2.raw(); }
-
-
-
-template<class P, class PR> Float<P,PR> max(Float<P,PR> const& x1, Float<P,PR> const& x2) { return max<PR>(x1,x2); }
-template<class P, class PR> Float<P,PR> min(Float<P,PR> const& x1, Float<P,PR> const& x2) { return min<PR>(x1,x2); }
-template<class P, class PR> Float<P,PR> abs(Float<P,PR> const& x) { return abs<PR>(x); }
-
-template<class P, class PR> Float<Widen<P>,PR> add(Float<P,PR> const& x1, Float<P,PR> const& x2) { return add<PR>(x1,x2); }
-template<class P, class PR> Float<Widen<P>,PR> sub(Float<P,PR> const& x1, Float<Negated<P>,PR> const& x2) { return sub<PR>(x1,x2); }
-template<class P, class PR> Float<Widen<P>,PR> mul(Float<P,PR> const& x1, Float<P,PR> const& x2) { return mul<PR>(x1,x2); }
-template<class P, class PR> Float<Widen<P>,PR> div(Float<P,PR> const& x1, Float<Inverted<P>,PR> const& x2) { return div<PR>(x1,x2); }
-
-template<class P, class PR> Float<Widen<P>,PR> pow(Float<P,PR> const& x, Nat m) { return pow<PR>(x,m); }
-template<class P, class PR> Float<Widen<P>,PR> pow(Float<P,PR> const& x, Int n) { return pow<PR>(x,n); }
-
-template<class P, class PR> Float<Widen<P>,PR> sqrt(Float<P,PR> const& x) { return sqrt<PR>(x); }
-template<class P, class PR> Float<Widen<P>,PR> exp(Float<P,PR> const& x) { return exp<PR>(x); }
-template<class P, class PR> Float<Widen<P>,PR> log(Float<P,PR> const& x) { return log<PR>(x); }
-template<class P, class PR> Float<Widen<Unorder<P>>,PR> sin(Float<P,PR> const& x) { return sin<PR>(x); }
-template<class P, class PR> Float<Widen<Unorder<P>>,PR> cos(Float<P,PR> const& x) { return cos<PR>(x); }
-template<class P, class PR> Float<Widen<Unorder<P>>,PR> tan(Float<P,PR> const& x) { return tan<PR>(x); }
-template<class P, class PR> Float<Widen<Unorder<P>>,PR> asin(Float<P,PR> const& x) { return asin<PR>(x); }
-template<class P, class PR> Float<Widen<Unorder<P>>,PR> acos(Float<P,PR> const& x) { return acos<PR>(x); }
-template<class P, class PR> Float<Widen<P>,PR> atan(Float<P,PR> const& x) { return atan<PR>(x); }
-
-template<class P, class PR> OutputStream& operator<<(OutputStream& os, Float<P,PR> const& x) {
-    return operator<<(os,x); }
+template<class PR, class P> InputStream& operator>>(InputStream& is, Float<P,PR>& x) { return operator>>(is,x); }
 
 
 
@@ -1251,6 +1182,7 @@ template Float<Upper,PrecisionMP>::Float(Float<Bounded,PrecisionMP>const&);
 template<class P, class PR> std::size_t instantiate_float() {
     using std::size_t;
     typedef OutputStream OS;
+    typedef OutputStream IS;
     typedef Float<P,PR> X;
     typedef Float<P,PR> const& XCRef;
 
@@ -1260,30 +1192,31 @@ template<class P, class PR> std::size_t instantiate_float() {
 
     typedef decltype(neg(declval<X>())) NEGX;
     typedef decltype(abs(declval<X>())) ABSX;
-    typedef decltype(sub(declval<X>(),declval<X>())) WUX;
     typedef decltype(add(declval<X>(),declval<X>())) WX;
+    typedef decltype(sub(declval<X>(),declval<X>())) WUX;
 
     typedef decltype(mag(declval<X>())) MAGX;
 
-    typedef decltype(operator==(declval<X>(),declval<X>())) XE;
-    typedef decltype(operator!=(declval<X>(),declval<X>())) XNE;
-    typedef decltype(operator<=(declval<X>(),declval<X>())) XL;
+    typedef decltype(eq(declval<X>(),declval<NEGX>())) XE;
+    typedef decltype(leq(declval<X>(),declval<NEGX>())) XL;
 
-    return (size_t)(X(*)(Xcr,Xcr))&max + (size_t)(X(*)(Xcr,Xcr))&min + (size_t)(ABSX(*)(Xcr))&abs
-         + (size_t)(WX(*)(Xcr,Xcr))&add + (size_t)(WX(*)(Xcr,NEGXcr))&sub
-         + (size_t)(WX(*)(Xcr,Xcr))&mul + (size_t)(WX(*)(Xcr,INVXcr))&div
-         + (size_t)(X(*)(Xcr))&nul + (size_t)(X(*)(Xcr))&pos + (size_t)(NEGX(*)(Xcr))&neg
-         + (size_t)(WX(*)(Xcr))&sqr + (size_t)(WX(*)(INVXcr))&rec + (size_t)(X(*)(Xcr))&half
-         + (size_t)(WUX(*)(Xcr,Int))&pow + (size_t)(WX(*)(Xcr,Nat))&pow
-         + (size_t)(WX(*)(Xcr))&sqrt + (size_t)(WX(*)(Xcr))&exp  + (size_t)(WX(*)(Xcr))&log
-         + (size_t)(WUX(*)(Xcr))&sin  + (size_t)(WUX(*)(Xcr))&cos  + (size_t)(WUX(*)(Xcr))&tan
-         + (size_t)(WUX(*)(Xcr))&asin + (size_t)(WUX(*)(Xcr))&acos + (size_t)(WX(*)(Xcr))&atan
-         + (size_t)(MAGX(*)(Xcr))&mag
-         + ((size_t)(XE(*)(Xcr,Xcr))&operator==) + ((size_t)(XNE(*)(Xcr,Xcr))&operator!=)
-         + ((size_t)(XL(*)(Xcr,Xcr))&operator<=) + ((size_t)(XL(*)(Xcr,Xcr))&operator>=)
-         + ((size_t)(XL(*)(Xcr,Xcr))&operator< ) + ((size_t)(XL(*)(Xcr,Xcr))&operator> )
-         + (size_t)(OS&(*)(OS&,Xcr)) operator<<;
-
+    return (size_t)(X(*)(Xcr,Xcr))&max<PR,P> + (size_t)(X(*)(Xcr,Xcr))&min<PR,P> + (size_t)(ABSX(*)(Xcr))&abs<PR,P>
+         + (size_t)(WX(*)(Xcr,Xcr))&add<PR,P> + (size_t)(WX(*)(Xcr,NEGXcr))&sub<PR,P>
+         + (size_t)(WX(*)(Xcr,Xcr))&mul<PR,P> + (size_t)(WX(*)(Xcr,INVXcr))&div<PR,P>
+         + (size_t)(X(*)(Xcr))&nul<PR,P> + (size_t)(X(*)(Xcr))&pos<PR,P> + (size_t)(NEGX(*)(Xcr))&neg<PR,P>
+         + (size_t)(WX(*)(Xcr))&sqr<PR,P> + (size_t)(WX(*)(INVXcr))&rec<PR,P> + (size_t)(X(*)(Xcr))&half<PR,P>
+         + (size_t)(WX(*)(Xcr,Nat))&pow<PR,P>
+         + (size_t)(WUX(*)(Xcr,Int))&pow<PR,P>
+         + (size_t)(WX(*)(Xcr))&sqrt<PR,P> + (size_t)(WX(*)(Xcr))&exp<PR,P>  + (size_t)(WX(*)(Xcr))&log<PR,P>
+         + (size_t)(WUX(*)(Xcr))&sin<PR,P>  + (size_t)(WUX(*)(Xcr))&cos<PR,P>  + (size_t)(WUX(*)(Xcr))&tan<PR,P>
+         + (size_t)(WUX(*)(Xcr))&asin<PR,P> + (size_t)(WUX(*)(Xcr))&acos<PR,P> + (size_t)(WX(*)(Xcr))&atan<PR,P>
+         + (size_t)(MAGX(*)(Xcr))&mag<PR,P>
+         + (size_t)(XE(*)(Xcr,NEGXcr))&eq<PR,P>
+         + (size_t)(XL(*)(Xcr,NEGXcr))&leq<PR,P>
+         + (size_t)(OS&(*)(OS&,Xcr)) &operator<< <PR,P> + (size_t)(IS&(*)(IS&,X&)) &operator>> <PR,P>
+         + (size_t)(Bool(*)(Xcr,Xcr)) &same<PR,P>
+         + (size_t)(Integer(*)(Xcr)) &integer_cast<PR,P>
+        ;
 }
 
 template<class PR> std::size_t instantiate_floats() {
@@ -1299,7 +1232,7 @@ template<class PR> std::size_t instantiate_floats() {
 template std::size_t instantiate_floats<Precision64>();
 template OutputStream& operator<<(OutputStream&, ExactFloat64 const&);
 template InputStream& operator>>(InputStream&, BoundedFloat64&);
-template Bool same(BoundedFloat64 const&, BoundedFloat64 const&);
+//template Bool same<Precision64,Bounded>(BoundedFloat64 const&, BoundedFloat64 const&);
 
 
 } // namespace Ariadne

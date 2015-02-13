@@ -86,7 +86,7 @@ TaylorSeries<ValidatedFloat64>::TaylorSeries(OP unary_operator, const ExactInter
 inline
 Void TaylorSeries<ValidatedFloat64>::sweep(ExactFloat64 threshold) {
     for(DegreeType i=0; i<=degree(); ++i) {
-        if(mag(_expansion[i])<=threshold) {
+        if(definitely(mag(_expansion[i])<=threshold)) {
             _error+=mag(_expansion[i]);
             _expansion[i]=0;
         }

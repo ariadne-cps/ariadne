@@ -108,6 +108,8 @@ using ApprxFloatMP = ApproximateFloatMP;
 
 template<class X> struct IsFloat : False { };
 template<class P, class PR> struct IsFloat<Float<P,PR>> : True { };
+template<> struct IsFloat<Dbl> : False { };
+
 
 template<class T> struct IsNumber;
 template<> struct IsNumber<double> : True { };

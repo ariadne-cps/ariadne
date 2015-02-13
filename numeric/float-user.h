@@ -1036,7 +1036,6 @@ Bool inconsistent(ValidatedFloat64 const& x1, ValidatedFloat64 const& x2);
 //! \related ValidatedFloat64 \brief  Tests if \_a x1 is a model for the exact value \_a x2. number.
 Bool models(ValidatedFloat64 const& x1, ExactFloat64 const& x2);
 
-
 template<class PR> inline Float<Approximate,PR> make_float(Number<Approximate> const& y, PR pr) { return Float<Approximate,PR>(y,pr); }
 template<class PR> inline Float<Lower,PR> make_float(Number<Lower> const& y, PR pr) { return Float<Lower,PR>(y,pr); }
 template<class PR> inline Float<Upper,PR> make_float(Number<Upper> const& y, PR pr) { return Float<Upper,PR>(y,pr); }

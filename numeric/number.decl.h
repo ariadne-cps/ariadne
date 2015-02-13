@@ -46,6 +46,7 @@ template<class P=Void> class Number;
 
 typedef uint Nat;
 typedef int Int;
+typedef double Dbl;
 
 class Nat32;
 class Nat64;
@@ -66,6 +67,7 @@ template<> struct IsNumber<Real>;
 
 template<class X> struct IsGenericNumber : IsConvertible<X,Real> { };
 template<> struct IsGenericNumber<Real> : True { };
+template<> struct IsGenericNumber<Dbl> : True { };
 template<class P> struct IsGenericNumber<Number<P>> : True { };
 
 

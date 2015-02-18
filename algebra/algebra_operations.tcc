@@ -237,7 +237,7 @@ sqrt(const A& x)
 
     Series<X> sqrt_series=Series<X>::sqrt(X(1));
     Nat d=integer_cast<Int>((log((1-eps)*tol)/log(eps)+1));
-    auto trunc_err=pow(eps,d)/mig(1-eps)*mag(sqrt_series[d]);
+    auto trunc_err=pow(eps,d)/cast_positive(1-eps)*mag(sqrt_series[d]);
 
     A y=x/avg-1;
     A z=x.create();
@@ -260,7 +260,7 @@ rec(const A& x)
     auto avg=make_exact(x.average());
     auto rad=make_exact(x.radius());
 
-    if(decide(rad>=mig(avg))) {
+    if(decide(rad>=avg)) {
         ARIADNE_THROW(DivideByZeroException,"rec(A x)","x="<<x<<"\n");
     }
 
@@ -269,7 +269,7 @@ rec(const A& x)
 
     // Compute the degree and truncation error
     Nat d=integer_cast<Nat>((log((1-eps)*tol)/log(eps))+1);
-    auto te=pow(eps,d)/mig(1-eps);
+    auto te=pow(eps,d)/cast_positive(1-eps);
 
     A y=1-x/avg;
     A z=x.create();
@@ -301,7 +301,7 @@ log(const A& x)
     ARIADNE_DEBUG_ASSERT(eps<1);
 
     Nat d=integer_cast<Nat>((log((1-eps)*tol)/log(eps)+1));
-    auto trunc_err=pow(eps,d)/mig(1-eps)/d;
+    auto trunc_err=pow(eps,d)/cast_positive(1-eps)/d;
 
     A y=x/avg-X(1);
     A z=x.create();

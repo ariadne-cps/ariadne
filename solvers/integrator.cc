@@ -898,7 +898,7 @@ AffineIntegrator::flow_step(const ValidatedVectorFunction& f, const ExactBox& do
     Float64::set_rounding_upward();
     Vector<ErrorFloat64> rad(n+1,0u);
     for(Nat i=0; i!=n; ++i) {
-        rad[i] = mag(max(dom[i].upper()-mid[i].lower(),mid[i].upper()-dom[i].lower()));
+        rad[i] = cast_positive(max(dom[i].upper()-mid[i].lower(),mid[i].upper()-dom[i].lower()));
     }
     rad[n] = mag(h);
 

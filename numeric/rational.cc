@@ -33,6 +33,7 @@
 
 #include "rational.h"
 #include "logical.h"
+#include "number.h"
 #include "integer.h"
 #include "sign.h"
 #include <limits>
@@ -380,6 +381,10 @@ Boolean eq(Rational const& q1, Float64 const& x2) {
 
 Comparison cmp(Rational const& q1, Float64 const& x2) {
     return cmp(q1,Rational(x2));
+}
+
+Rational::operator Number<Exact>() const {
+    ARIADNE_NOT_IMPLEMENTED;
 }
 
 

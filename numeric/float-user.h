@@ -388,6 +388,12 @@ template<class PR> inline const Float<Exact,PR> Float<Bounded,PR>::value() const
 template<class PR> inline const Float<Error,PR> Float<Bounded,PR>::error() const {
     RawFloat<PR> _v=med_near(this->_l,this->_u); return Float<Error,PR>(max(sub_up(this->_u,_v),sub_up(_v,this->_l))); }
 
+template<class PR> inline Float<Exact,PR> value(Float<Bounded,PR> const& x) {
+    return x.value(); }
+
+template<class PR> inline Float<Error,PR> error(Float<Bounded,PR> const& x) {
+    return x.error(); }
+
 
 template<class PR> class Float<PositiveExact,PR> : public Float<Exact,PR> {
   public:
@@ -411,6 +417,8 @@ template<class PR> class Float<PositiveUpper,PR> : public Float<Upper,PR> {
         explicit Float<PositiveUpper,PR>(F const& x) : Float<Upper,PR>(x) { }
     Float<PositiveUpper,PR>(Float<PositiveExact,PR> const& x) : Float<Upper,PR>(x) { }
 };
+template<class PR> Float<PositiveUpper,PR> abs(Float<PositiveUpper,PR> const&);
+template<class PR> Float<Upper,PR> log(Float<PositiveUpper,PR> const&);
 
 template<class PR> class Float<PositiveLower,PR> : public Float<Lower,PR> {
   public:
@@ -434,11 +442,20 @@ template<class PR> class Float<PositiveApproximate,PR> : public Float<Approximat
     Float<PositiveApproximate,PR>(Float<PositiveExact,PR> const& x) : Float<Approximate,PR>(x) { }
 };
 
+template<class PR> inline Float<PositiveApproximate,PR> cast_positive(Float<Approximate,PR> const& x) {
+    return Float<PositiveApproximate,PR>(x); }
+
+template<class PR> inline Float<PositiveLower,PR> cast_positive(Float<Lower,PR> const& x) {
+    return Float<PositiveLower,PR>(x); }
+
 template<class PR> inline Float<PositiveUpper,PR> cast_positive(Float<Upper,PR> const& x) {
     return Float<PositiveUpper,PR>(x); }
 
 template<class PR> inline Float<PositiveExact,PR> cast_positive(Float<Exact,PR> const& x) {
     return Float<PositiveExact,PR>(x); }
+
+template<class PR> inline OutputStream& operator<<(OutputStream& os, Float<PositiveApproximate,PR> const& x) {
+    return os << static_cast<Float<Approximate,PR>const&>(x); }
 
 template<class R, class A> R integer_cast(const A& _a);
 
@@ -518,8 +535,17 @@ floor(Float<P,PR> const& x) -> Float<P,PR>;
 template<class PR, class P> auto
 round(Float<P,PR> const& x) -> Float<P,PR>;
 
-template<class PR, class P> auto mag(Float<P,PR> const& x) -> Float<Unsigned<Weaker<P,Upper>>,PR>;
-template<class PR, class P> auto mig(Float<P,PR> const& x) -> Float<Unsigned<Weaker<P,Lower>>,PR>;
+//template<class PR, class P> auto mag(Float<P,PR> const& x) -> Float<Unsigned<Weaker<P,Upper>>,PR>;
+//template<class PR, class P> auto mig(Float<P,PR> const& x) -> Float<Unsigned<Weaker<P,Lower>>,PR>;
+template<class PR> auto mag(Float<Exact,PR> const& x) -> Float<PositiveExact,PR>;
+template<class PR> auto mag(Float<Bounded,PR> const& x) -> Float<PositiveUpper,PR>;
+template<class PR> auto mag(Float<Approximate,PR> const& x) -> Float<PositiveApproximate,PR>;
+template<class PR> auto mig(Float<Exact,PR> const& x) -> Float<PositiveExact,PR>;
+template<class PR> auto mig(Float<Bounded,PR> const& x) -> Float<PositiveLower,PR>;
+template<class PR> auto mig(Float<Approximate,PR> const& x) -> Float<PositiveApproximate,PR>;
+
+template<class PR> auto mag(Float<PositiveUpper,PR> const& x) -> Float<PositiveUpper,PR>;
+template<class PR> auto mig(Float<PositiveLower,PR> const& x) -> Float<PositiveLower,PR>;
 
 template<class PR, class P> auto is_zero(Float<P,PR> const&) -> Logical<Weaker<P,Opposite<P>>>;
 template<class PR, class P> auto is_positive(Float<P,PR> const&) -> Logical<Opposite<P>>;
@@ -583,15 +609,15 @@ operator+=(Float<P1,PR>& x1, Y2 const& y2) -> decltype(x1=x1+y2) {
 
 template<class P1, class Y2, class PR> auto
 operator-=(Float<P1,PR>& x1, Y2 const& y2) -> decltype(x1=x1-y2) {
-    return x1=x1+y2; }
+    return x1=x1-y2; }
 
 template<class P1, class Y2, class PR> auto
 operator*=(Float<P1,PR>& x1, Y2 const& y2) -> decltype(x1=x1*y2) {
-    return x1=x1+y2; }
+    return x1=x1*y2; }
 
 template<class P1, class Y2, class PR> auto
 operator/=(Float<P1,PR>& x1, Y2 const& y2) -> decltype(x1=x1/y2) {
-    return x1=x1+y2; }
+    return x1=x1/y2; }
 
 template<class PR, class P1, class P2> auto
 operator==(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> FloatEqualsType<PR,P1,P2> {
@@ -645,12 +671,6 @@ inline void foo() {
     pupf-lof;
 }
 
-// Validated operations
-ValidatedFloat64 make_bounds(PositiveUpperFloat64 const& _e);
-ExactFloat64 value(BoundedFloat64 const& x);
-PositiveUpperFloat64 error(BoundedFloat64 const& x);
-ExactFloat64 value(MetricFloat64 const& x);
-PositiveUpperFloat64 error(MetricFloat64 const& x);
 
 
 // Literals operations
@@ -662,21 +682,26 @@ LowerFloat64 operator"" _lower(long double lx);
 ApproximateFloat64 operator"" _approx(long double lx);
 
 
-// Standard equality operators
-//! \related ValidatedFloat64 \brief Tests if \_a x1 provides tighter bounds than \_a x2.
-Bool refines(ValidatedFloat64 const& x1, ValidatedFloat64 const& x2);
+// Validated operations
+template<class PR> Float<Bounded,PR> make_bounds(Float<Error,PR> const& e) {
+    return Float<Bounded,PR>(-e.raw(),+e.raw()); }
 
-//! \related ValidatedFloat64 \brief The common refinement of \_a x1 and \_a x2.
-ValidatedFloat64 refinement(ValidatedFloat64 const& x1, ValidatedFloat64 const& x2);
+//! \related Float, Validated \brief Tests if \_a x1 provides tighter bounds than \_a x2.
+template<class PR> Bool refines(Float<Bounded,PR> const& x1, Float<Bounded,PR> const& x2);
 
-//! \related ValidatedFloat64 \brief Tests if \_a x1 and \_a x2 are consistent with representing the same number.
-Bool consistent(ValidatedFloat64 const& x1, ValidatedFloat64 const& x2);
+//! \related Float, Validated \brief The common refinement of \_a x1 and \_a x2.
+template<class PR> Float<Bounded,PR> refinement(Float<Bounded,PR> const& x1, Float<Bounded,PR> const& x2);
+template<class PR> Float<Metric,PR> refinement(Float<Metric,PR> const& x1, Float<Metric,PR> const& x2);
 
-//! \related ValidatedFloat64 \brief  Tests if \_a x1 and \_a x2 are inconsistent with representing the same number.
-Bool inconsistent(ValidatedFloat64 const& x1, ValidatedFloat64 const& x2);
+//! \related Float, Validated \brief Tests if \_a x1 and \_a x2 are consistent with representing the same number.
+template<class PR> Bool consistent(Float<Bounded,PR> const& x1, Float<Bounded,PR> const& x2);
 
-//! \related ValidatedFloat64 \brief  Tests if \_a x1 is a model for the exact value \_a x2. number.
-Bool models(ValidatedFloat64 const& x1, ExactFloat64 const& x2);
+//! \related Float, Validated \brief  Tests if \_a x1 and \_a x2 are inconsistent with representing the same number.
+template<class PR> Bool inconsistent(Float<Bounded,PR> const& x1, Float<Bounded,PR> const& x2);
+
+//! \related Float, Validated \brief  Tests if \_a x1 is a model for the exact value \_a x2. number.
+template<class PR> Bool models(Float<Bounded,PR> const& x1, Float<Exact,PR> const& x2);
+
 
 template<class PR> inline Float<Approximate,PR> make_float(Number<Approximate> const& y, PR pr) { return Float<Approximate,PR>(y,pr); }
 template<class PR> inline Float<Lower,PR> make_float(Number<Lower> const& y, PR pr) { return Float<Lower,PR>(y,pr); }

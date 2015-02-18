@@ -94,9 +94,9 @@ template<class V> void CheckVectorConcept<V>::check_vector_concept() {
     ARIADNE_TEST_STATIC_ASSERT( HasZeroElementMethod<const V,S> );
     ARIADNE_TEST_STATIC_ASSERT( HasSubscriptingMethod<const V,SizeType,S> );
     ARIADNE_TEST_STATIC_ASSERT( HasSubscriptingMethod<V,SizeType,S> );
-    ARIADNE_TEST_STATIC_ASSERT( HasOperator<OperatorPositive,V> );
-    ARIADNE_TEST_STATIC_ASSERT( HasOperator<OperatorPositive,V,Return<V>> );
-    ARIADNE_TEST_STATIC_ASSERT( HasOperator<OperatorNegative,V,Return<V>> );
+    ARIADNE_TEST_STATIC_ASSERT( HasOperator<OperatorPlus,V> );
+    ARIADNE_TEST_STATIC_ASSERT( HasOperator<OperatorPlus,V,Return<V>> );
+    ARIADNE_TEST_STATIC_ASSERT( HasOperator<OperatorMinus,V,Return<V>> );
     ARIADNE_TEST_STATIC_ASSERT( HasOperator<OperatorPlus,V,V,Return<V>> );
     ARIADNE_TEST_STATIC_ASSERT( HasOperator<OperatorMinus,V,V,Return<V>> );
     ARIADNE_TEST_STATIC_ASSERT( HasOperator<OperatorTimes,S,V,Return<V>> );
@@ -145,9 +145,9 @@ template<class A> void CheckAlgebraConcept<A>::check_algebra_concept()
     ARIADNE_TEST_STATIC_ASSERT(IsSame<decltype(declval<A>().create_zero()),A>);
 
     ARIADNE_TEST_STATIC_ASSERT(IsConvertible<A,A>);
-    ARIADNE_TEST_STATIC_ASSERT(HasOperator<OperatorUnaryPlus,A>);
-    ARIADNE_TEST_STATIC_ASSERT(HasOperator<OperatorUnaryPlus,A,Return<A>>);
-    ARIADNE_TEST_STATIC_ASSERT(HasOperator<OperatorUnaryMinus,A,Return<A>>);
+    ARIADNE_TEST_STATIC_ASSERT(HasOperator<OperatorPlus,A>);
+    ARIADNE_TEST_STATIC_ASSERT(HasOperator<OperatorPlus,A,Return<A>>);
+    ARIADNE_TEST_STATIC_ASSERT(HasOperator<OperatorMinus,A,Return<A>>);
     ARIADNE_TEST_STATIC_ASSERT(HasOperator<OperatorPlus,A,A>);
     ARIADNE_TEST_STATIC_ASSERT(HasOperator<OperatorPlus,A,A,Return<A>>);
     ARIADNE_TEST_STATIC_ASSERT(HasOperator<OperatorMinus,A,A,Return<A>>);

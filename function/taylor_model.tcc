@@ -743,8 +743,12 @@ template<class F> UpperInterval TaylorModel<Validated,F>::range() const {
         const ExactFloat64& a=quadratic_terms[j];
         const ExactFloat64& b=linear_terms[j];
         ValidatedFloat64 ql=abs(a)*unit_ivl + abs(b)*unit_ivl;
-        ValidatedFloat64 qf=a*(sqr(unit_ivl+b/a/2))-sqr(b)/a/4;
-        r += refinement(ql,qf); // NOTE: ql must be the first term in case of NaN in qf
+        if(a!=0) { // Explicitly test for zero
+            ValidatedFloat64 qf=a*(sqr(unit_ivl+b/a/2))-sqr(b)/a/4;
+            r += refinement(ql,qf); // NOTE: ql must be the first term in case of NaN in qf
+        } else {
+            r += ql;
+        }
     }
     return UpperInterval(r);
 }
@@ -1169,7 +1173,6 @@ template<class F> Void TaylorModel<Validated,F>::unscale(ExactInterval const& iv
     // restricted to the point and this is
     // The motivation for mapping to everything is that any function on the
     // resulting interval should be independent of the unneeded component
-
     TaylorModel<Validated,F>& tm=*this;
     ARIADNE_ASSERT_MSG(ivl.lower()<=ivl.upper(),"Cannot unscale TaylorModel<Validated,F> "<<tm<<" from empty interval "<<ivl);
 

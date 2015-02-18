@@ -37,7 +37,7 @@
 using namespace std;
 using namespace Ariadne;
 
-Tribool operator==(const Real& x1, double x2) {
+auto operator==(const Real& x1, double x2) -> decltype(x1==ExactFloat64(x2)) {
     return BoundedFloat64(x1)==BoundedFloat64(x2);
 }
 

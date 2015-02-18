@@ -143,8 +143,8 @@ TestVector::test_misc()
     Vector<ApproximateFloat64> v2=Vector<ApproximateFloat64>({2.375,4.25,-1.25});
     cout << "v2=" << v2 << endl;
     cout << "norm(v1)=" << norm(v1) << "  norm(v2)=" << norm(v2) << endl;
-    assert(norm(v1)==4);
-    assert(norm(v2)==4.25);
+    ARIADNE_TEST_EQUAL(norm(v1).raw(),4);
+    ARIADNE_TEST_EQUAL(norm(v2).raw(),4.25);
 
     Vector<ApproximateFloat64> v3(1);
     cout << "v3=" << v3 << endl;
@@ -152,7 +152,7 @@ TestVector::test_misc()
     cout << "v4=" << v4 << endl;
     Vector<ApproximateFloat64> v5={-4.0,3.0,1.0};
     cout << "v5=" << v5 << endl;
-    assert(v1==v5);
+    ARIADNE_TEST_EQUAL(v1,v5);
     cout << endl;
 
     Vector<ApproximateFloat64> vf0;

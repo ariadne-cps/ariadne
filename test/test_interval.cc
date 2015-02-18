@@ -262,7 +262,7 @@ Void TestInterval::regression_tests() {
         ARIADNE_TEST_COMPARE(cosx.lower(),>,-1e-14);
         ARIADNE_TEST_COMPARE(cosx.upper(),>,0.0);
         ARIADNE_TEST_COMPARE(cosx.upper(),<,+1e-14);
-        ARIADNE_TEST_ASSERT(cosx.lower()<cosx.upper());
+        ARIADNE_TEST_ASSERT(cosx.lower().raw()<cosx.upper().raw());
     }
 
 }

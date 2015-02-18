@@ -148,26 +148,26 @@ TestValidatedFloat::test_accurate_rounded_arithmetic()
     const double min=std::numeric_limits<double>::min();
     const double eps=std::numeric_limits<double>::epsilon();
 
-    ARIADNE_TEST_EQUAL(ValidatedFloat64(1.5)+ValidatedFloat64(min),ValidatedFloat64(1.5,1.5+eps));
-    ARIADNE_TEST_EQUAL(ValidatedFloat64(1.5)-ValidatedFloat64(min),ValidatedFloat64(1.5-eps,1.5));
-    ARIADNE_TEST_EQUAL(ValidatedFloat64(1+eps,1+2*eps)*ValidatedFloat64(1+eps,1+3*eps),ValidatedFloat64(1+2*eps,1+6*eps));
-    ARIADNE_TEST_EQUAL(ValidatedFloat64(1)/ValidatedFloat64(3),ValidatedFloat64(0.33333333333333331,0.33333333333333337));
-    ARIADNE_TEST_EQUAL(ValidatedFloat64(2)/ValidatedFloat64(5),ValidatedFloat64(0.39999999999999997,0.40000000000000002));
+    ARIADNE_TEST_SAME(ValidatedFloat64(1.5)+ValidatedFloat64(min),ValidatedFloat64(1.5,1.5+eps));
+    ARIADNE_TEST_SAME(ValidatedFloat64(1.5)-ValidatedFloat64(min),ValidatedFloat64(1.5-eps,1.5));
+    ARIADNE_TEST_SAME(ValidatedFloat64(1+eps,1+2*eps)*ValidatedFloat64(1+eps,1+3*eps),ValidatedFloat64(1+2*eps,1+6*eps));
+    ARIADNE_TEST_SAME(ValidatedFloat64(1)/ValidatedFloat64(3),ValidatedFloat64(0.33333333333333331,0.33333333333333337));
+    ARIADNE_TEST_SAME(ValidatedFloat64(2)/ValidatedFloat64(5),ValidatedFloat64(0.39999999999999997,0.40000000000000002));
 
-    ARIADNE_TEST_EQUAL(ValidatedFloat64(1.5)+ExactFloat64(min),ValidatedFloat64(1.5,1.5+eps));
-    ARIADNE_TEST_EQUAL(ValidatedFloat64(1.5)-ExactFloat64(min),ValidatedFloat64(1.5-eps,1.5));
-    ARIADNE_TEST_EQUAL(ValidatedFloat64(1+eps,1+2*eps)*ExactFloat64(1+eps),ValidatedFloat64(1+2*eps,1+4*eps));
-    ARIADNE_TEST_EQUAL(ValidatedFloat64(1+3*eps,1+5*eps)/ExactFloat64(1+eps),ValidatedFloat64(1+eps,1+4*eps));
+    ARIADNE_TEST_SAME(ValidatedFloat64(1.5)+ExactFloat64(min),ValidatedFloat64(1.5,1.5+eps));
+    ARIADNE_TEST_SAME(ValidatedFloat64(1.5)-ExactFloat64(min),ValidatedFloat64(1.5-eps,1.5));
+    ARIADNE_TEST_SAME(ValidatedFloat64(1+eps,1+2*eps)*ExactFloat64(1+eps),ValidatedFloat64(1+2*eps,1+4*eps));
+    ARIADNE_TEST_SAME(ValidatedFloat64(1+3*eps,1+5*eps)/ExactFloat64(1+eps),ValidatedFloat64(1+eps,1+4*eps));
 
-    ARIADNE_TEST_EQUAL(ExactFloat64(min)-ValidatedFloat64(1.5),ValidatedFloat64(-1.5,eps-1.5));
-    ARIADNE_TEST_EQUAL(ExactFloat64(1+5*eps)/ValidatedFloat64(1+2*eps,1+3*eps),ValidatedFloat64(1+eps,1+3*eps));
+    ARIADNE_TEST_SAME(ExactFloat64(min)-ValidatedFloat64(1.5),ValidatedFloat64(-1.5,eps-1.5));
+    ARIADNE_TEST_SAME(ExactFloat64(1+5*eps)/ValidatedFloat64(1+2*eps,1+3*eps),ValidatedFloat64(1+eps,1+3*eps));
 
-    ARIADNE_TEST_EQUAL(sqr(ValidatedFloat64(1-eps,1+eps)),ValidatedFloat64(1-4*eps/2,1+3*eps));
+    ARIADNE_TEST_SAME(sqr(ValidatedFloat64(1-eps,1+eps)),ValidatedFloat64(1-4*eps/2,1+3*eps));
 
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(3,5),-1),ValidatedFloat64(0.19999999999999998,0.33333333333333337));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(3,5),-2),ValidatedFloat64(0.039999999999999986955,0.11111111111111114658));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(3,5),-1),ValidatedFloat64(0.19999999999999998,0.33333333333333337));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(3,5),-2),ValidatedFloat64(0.039999999999999986955,0.11111111111111114658));
 
-    ARIADNE_TEST_EQUAL(rec(ValidatedFloat64(1+2*eps,1+5*eps)),ValidatedFloat64(1-10*eps/2,1-3*eps/2));
+    ARIADNE_TEST_SAME(rec(ValidatedFloat64(1+2*eps,1+5*eps)),ValidatedFloat64(1-10*eps/2,1-3*eps/2));
 
 }
 
@@ -176,84 +176,84 @@ TestValidatedFloat::test_accurate_rounded_arithmetic()
 Void
 TestValidatedFloat::test_exact_rounded_arithmetic()
 {
-    ARIADNE_TEST_EQUAL(ValidatedFloat64(5,7)+ValidatedFloat64(2,4),ValidatedFloat64(7,11));
-    ARIADNE_TEST_EQUAL(ValidatedFloat64(5,7)-ValidatedFloat64(2,6),ValidatedFloat64(-1,5));
+    ARIADNE_TEST_SAME(ValidatedFloat64(5,7)+ValidatedFloat64(2,4),ValidatedFloat64(7,11));
+    ARIADNE_TEST_SAME(ValidatedFloat64(5,7)-ValidatedFloat64(2,6),ValidatedFloat64(-1,5));
 
-    ARIADNE_TEST_EQUAL(ValidatedFloat64(5,7)*ValidatedFloat64(2,4),ValidatedFloat64(10,28));
-    ARIADNE_TEST_EQUAL(ValidatedFloat64(5,7)*ValidatedFloat64(-2,4),ValidatedFloat64(-14,28));
-    ARIADNE_TEST_EQUAL(ValidatedFloat64(5,7)*ValidatedFloat64(-4,-2),ValidatedFloat64(-28,-10));
-    ARIADNE_TEST_EQUAL(ValidatedFloat64(-7,5)*ValidatedFloat64(2,4),ValidatedFloat64(-28,20));
-    ARIADNE_TEST_EQUAL(ValidatedFloat64(-7,5)*ValidatedFloat64(-2,4),ValidatedFloat64(-28,20));
-    ARIADNE_TEST_EQUAL(ValidatedFloat64(-7,5)*ValidatedFloat64(-4,-2),ValidatedFloat64(-20,28));
-    ARIADNE_TEST_EQUAL(ValidatedFloat64(-7,-5)*ValidatedFloat64(2,4),ValidatedFloat64(-28,-10));
-    ARIADNE_TEST_EQUAL(ValidatedFloat64(-7,-5)*ValidatedFloat64(-2,4),ValidatedFloat64(-28,14));
-    ARIADNE_TEST_EQUAL(ValidatedFloat64(-7,-5)*ValidatedFloat64(-4,-2),ValidatedFloat64(10,28));
+    ARIADNE_TEST_SAME(ValidatedFloat64(5,7)*ValidatedFloat64(2,4),ValidatedFloat64(10,28));
+    ARIADNE_TEST_SAME(ValidatedFloat64(5,7)*ValidatedFloat64(-2,4),ValidatedFloat64(-14,28));
+    ARIADNE_TEST_SAME(ValidatedFloat64(5,7)*ValidatedFloat64(-4,-2),ValidatedFloat64(-28,-10));
+    ARIADNE_TEST_SAME(ValidatedFloat64(-7,5)*ValidatedFloat64(2,4),ValidatedFloat64(-28,20));
+    ARIADNE_TEST_SAME(ValidatedFloat64(-7,5)*ValidatedFloat64(-2,4),ValidatedFloat64(-28,20));
+    ARIADNE_TEST_SAME(ValidatedFloat64(-7,5)*ValidatedFloat64(-4,-2),ValidatedFloat64(-20,28));
+    ARIADNE_TEST_SAME(ValidatedFloat64(-7,-5)*ValidatedFloat64(2,4),ValidatedFloat64(-28,-10));
+    ARIADNE_TEST_SAME(ValidatedFloat64(-7,-5)*ValidatedFloat64(-2,4),ValidatedFloat64(-28,14));
+    ARIADNE_TEST_SAME(ValidatedFloat64(-7,-5)*ValidatedFloat64(-4,-2),ValidatedFloat64(10,28));
 
-    ARIADNE_TEST_EQUAL(ValidatedFloat64(5,7)/ValidatedFloat64(2,4),ValidatedFloat64(1.25,3.50));
-    ARIADNE_TEST_EQUAL(ValidatedFloat64(5,7)/ValidatedFloat64(-4,-2),ValidatedFloat64(-3.50,-1.25));
-    ARIADNE_TEST_EQUAL(ValidatedFloat64(-7,5)/ValidatedFloat64(2,4),ValidatedFloat64(-3.50,2.50));
-    ARIADNE_TEST_EQUAL(ValidatedFloat64(-7,5)/ValidatedFloat64(-4,-2),ValidatedFloat64(-2.50,3.5));
-    ARIADNE_TEST_EQUAL(ValidatedFloat64(-7,-5)/ValidatedFloat64(2,4),ValidatedFloat64(-3.50,-1.25));
-    ARIADNE_TEST_EQUAL(ValidatedFloat64(-7,-5)/ValidatedFloat64(-4,-2),ValidatedFloat64(1.25,3.50));
+    ARIADNE_TEST_SAME(ValidatedFloat64(5,7)/ValidatedFloat64(2,4),ValidatedFloat64(1.25,3.50));
+    ARIADNE_TEST_SAME(ValidatedFloat64(5,7)/ValidatedFloat64(-4,-2),ValidatedFloat64(-3.50,-1.25));
+    ARIADNE_TEST_SAME(ValidatedFloat64(-7,5)/ValidatedFloat64(2,4),ValidatedFloat64(-3.50,2.50));
+    ARIADNE_TEST_SAME(ValidatedFloat64(-7,5)/ValidatedFloat64(-4,-2),ValidatedFloat64(-2.50,3.5));
+    ARIADNE_TEST_SAME(ValidatedFloat64(-7,-5)/ValidatedFloat64(2,4),ValidatedFloat64(-3.50,-1.25));
+    ARIADNE_TEST_SAME(ValidatedFloat64(-7,-5)/ValidatedFloat64(-4,-2),ValidatedFloat64(1.25,3.50));
 
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(5,7),0u),ValidatedFloat64(1,1));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(-5,7),0u),ValidatedFloat64(1,1));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(-7,5),0u),ValidatedFloat64(1,1));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(-7,-5),0u),ValidatedFloat64(1,1));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(5,7),1u),ValidatedFloat64(5,7));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(-5,7),1u),ValidatedFloat64(-5,7));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(-7,5),1u),ValidatedFloat64(-7,5));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(-7,-5),1u),ValidatedFloat64(-7,-5));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(5,7),2u),ValidatedFloat64(25,49));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(-5,7),2u),ValidatedFloat64(0,49));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(-7,5),2u),ValidatedFloat64(0,49));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(-7,-5),2u),ValidatedFloat64(25,49));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(5,7),3u),ValidatedFloat64(125,343));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(-5,7),3u),ValidatedFloat64(-125,343));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(-7,5),3u),ValidatedFloat64(-343,125));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(-7,-5),3u),ValidatedFloat64(-343,-125));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(5,7),4u),ValidatedFloat64(625,2401));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(-5,7),4u),ValidatedFloat64(0,2401));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(-7,5),4u),ValidatedFloat64(0,2401));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(-7,-5),4u),ValidatedFloat64(625,2401));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(5,7),0u),ValidatedFloat64(1,1));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(-5,7),0u),ValidatedFloat64(1,1));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(-7,5),0u),ValidatedFloat64(1,1));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(-7,-5),0u),ValidatedFloat64(1,1));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(5,7),1u),ValidatedFloat64(5,7));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(-5,7),1u),ValidatedFloat64(-5,7));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(-7,5),1u),ValidatedFloat64(-7,5));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(-7,-5),1u),ValidatedFloat64(-7,-5));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(5,7),2u),ValidatedFloat64(25,49));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(-5,7),2u),ValidatedFloat64(0,49));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(-7,5),2u),ValidatedFloat64(0,49));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(-7,-5),2u),ValidatedFloat64(25,49));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(5,7),3u),ValidatedFloat64(125,343));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(-5,7),3u),ValidatedFloat64(-125,343));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(-7,5),3u),ValidatedFloat64(-343,125));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(-7,-5),3u),ValidatedFloat64(-343,-125));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(5,7),4u),ValidatedFloat64(625,2401));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(-5,7),4u),ValidatedFloat64(0,2401));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(-7,5),4u),ValidatedFloat64(0,2401));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(-7,-5),4u),ValidatedFloat64(625,2401));
 
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(5,7),0),ValidatedFloat64(1,1));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(-7,5),0),ValidatedFloat64(1,1));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(-7,-5),0),ValidatedFloat64(1,1));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(5,7),1),ValidatedFloat64(5,7));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(-5,7),1),ValidatedFloat64(-5,7));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(-7,5),1),ValidatedFloat64(-7,5));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(-7,-5),1),ValidatedFloat64(-7,-5));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(5,7),2),ValidatedFloat64(25,49));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(-5,7),2),ValidatedFloat64(0,49));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(-7,5),2),ValidatedFloat64(0,49));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(-7,-5),2),ValidatedFloat64(25,49));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(5,7),3),ValidatedFloat64(125,343));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(-5,7),3),ValidatedFloat64(-125,343));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(-7,5),3),ValidatedFloat64(-343,125));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(-7,-5),3),ValidatedFloat64(-343,-125));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(5,7),4),ValidatedFloat64(625,2401));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(-5,7),4),ValidatedFloat64(0,2401));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(-7,5),4),ValidatedFloat64(0,2401));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(-7,-5),4),ValidatedFloat64(625,2401));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(5,7),5),ValidatedFloat64(3125,16807));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(-5,7),5),ValidatedFloat64(-3125,16807));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(-7,5),5),ValidatedFloat64(-16807,3125));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(-7,-5),5),ValidatedFloat64(-16807,-3125));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(5,7),7),ValidatedFloat64(78125,823543));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(-5,7),7),ValidatedFloat64(-78125,823543));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(-7,5),7),ValidatedFloat64(-823543,78125));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(-7,-5),7),ValidatedFloat64(-823543,-78125));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(5,7),0),ValidatedFloat64(1,1));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(-7,5),0),ValidatedFloat64(1,1));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(-7,-5),0),ValidatedFloat64(1,1));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(5,7),1),ValidatedFloat64(5,7));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(-5,7),1),ValidatedFloat64(-5,7));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(-7,5),1),ValidatedFloat64(-7,5));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(-7,-5),1),ValidatedFloat64(-7,-5));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(5,7),2),ValidatedFloat64(25,49));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(-5,7),2),ValidatedFloat64(0,49));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(-7,5),2),ValidatedFloat64(0,49));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(-7,-5),2),ValidatedFloat64(25,49));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(5,7),3),ValidatedFloat64(125,343));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(-5,7),3),ValidatedFloat64(-125,343));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(-7,5),3),ValidatedFloat64(-343,125));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(-7,-5),3),ValidatedFloat64(-343,-125));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(5,7),4),ValidatedFloat64(625,2401));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(-5,7),4),ValidatedFloat64(0,2401));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(-7,5),4),ValidatedFloat64(0,2401));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(-7,-5),4),ValidatedFloat64(625,2401));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(5,7),5),ValidatedFloat64(3125,16807));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(-5,7),5),ValidatedFloat64(-3125,16807));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(-7,5),5),ValidatedFloat64(-16807,3125));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(-7,-5),5),ValidatedFloat64(-16807,-3125));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(5,7),7),ValidatedFloat64(78125,823543));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(-5,7),7),ValidatedFloat64(-78125,823543));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(-7,5),7),ValidatedFloat64(-823543,78125));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(-7,-5),7),ValidatedFloat64(-823543,-78125));
 
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(2,4),-1),ValidatedFloat64(0.25,0.5));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(-4,-2),-1),ValidatedFloat64(-0.5,-0.25));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(2,4),-2),ValidatedFloat64(0.0625,0.25));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(-4,-2),-2),ValidatedFloat64(0.0625,0.25));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(2,4),-3),ValidatedFloat64(0.015625,0.125));
-    ARIADNE_TEST_EQUAL(pow(ValidatedFloat64(-4,-2),-3),ValidatedFloat64(-0.125,-0.015625));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(2,4),-1),ValidatedFloat64(0.25,0.5));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(-4,-2),-1),ValidatedFloat64(-0.5,-0.25));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(2,4),-2),ValidatedFloat64(0.0625,0.25));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(-4,-2),-2),ValidatedFloat64(0.0625,0.25));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(2,4),-3),ValidatedFloat64(0.015625,0.125));
+    ARIADNE_TEST_SAME(pow(ValidatedFloat64(-4,-2),-3),ValidatedFloat64(-0.125,-0.015625));
 
-    ARIADNE_TEST_EQUAL(rec(ValidatedFloat64(2,4)),ValidatedFloat64(0.25,0.50));
-    ARIADNE_TEST_EQUAL(rec(ValidatedFloat64(-4,-2)),ValidatedFloat64(-0.50,-0.25));
+    ARIADNE_TEST_SAME(rec(ValidatedFloat64(2,4)),ValidatedFloat64(0.25,0.50));
+    ARIADNE_TEST_SAME(rec(ValidatedFloat64(-4,-2)),ValidatedFloat64(-0.50,-0.25));
 }
 
 
@@ -348,7 +348,8 @@ Void TestValidatedFloat::test_comparison() {
     ValidatedFloat64 ivl1(1.125,2.25);
     ValidatedFloat64 ivl2=ivl1;
 
-    ARIADNE_TEST_ASSERT(ivl1==ivl2);
+    ARIADNE_TEST_ASSERT(!definitely(ivl1==ivl2));
+    ARIADNE_TEST_ASSERT(possibly(ivl1==ivl2));
     ValidatedFloat64& ivl1ref=ivl1;
     ivl1ref=ValidatedFloat64(5.25,7.375);
     cout << "ivl1ref=" << ivl1ref << endl;

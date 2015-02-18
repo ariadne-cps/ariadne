@@ -270,11 +270,11 @@ Void TestTaylorModel::test_arithmetic()
 
     ValidatedTaylorModel tm_inf(Expansion<Float64>(2),+inf,swp);
     ValidatedTaylorModel tm_zero_times_inf=0*tm_inf;
-    if(isnan(tm_zero_times_inf.error().get_d())) {
+    if(isnan(tm_zero_times_inf.error().raw())) {
         ARIADNE_TEST_WARN("Multiplying 0+/-inf by 0 yields 0+/-NaN");
-    } else if(tm_zero_times_inf.error()==+infty) {
+    } else if(tm_zero_times_inf.error().raw()==+inf) {
         ARIADNE_TEST_WARN("Multiplying 0+/-inf by 0 yields 0+/-inf");
-    } else if(tm_zero_times_inf.error()==0) {
+    } else if(tm_zero_times_inf.error().raw()==0.0) {
         ARIADNE_TEST_PRINT("Multiplying 0+/-inf by 0 yields 0+/-0");
     }
 }

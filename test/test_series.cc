@@ -27,6 +27,22 @@
 
 #include "test.h"
 
+namespace Ariadne {
+template<class T> Bool same(List<T> const& lst1, List<T> const& lst2) {
+    if(lst1.size()!=lst2.size()) { return false; }
+    for(SizeType i=0; i!=lst1.size(); ++i) {
+        if(!same(lst1[i],lst2[i])) { return false; }
+    }
+    return true;
+    auto iter1=lst1.begin();
+    auto iter2=lst2.begin();
+    for(; iter1!=lst1.end(); ++iter1, ++iter2) {
+        if(not same(*iter1,*iter2)) { return false; }
+    }
+    return true;
+}
+} // namespace Ariadne
+
 using namespace Ariadne;
 
 class TestSeries
@@ -117,7 +133,7 @@ class TestSeries
     void test_analytic_function() {
         Rec rec_operator;
         ARIADNE_TEST_CONSTRUCT( AnalyticFunction, rec_function, (rec_operator) );
-        ARIADNE_TEST_EQUAL( rec_function.series(0.5).coefficients(5), Series<ApproximateFloat64>(Rec(),0.5).coefficients(5) );
+        ARIADNE_TEST_SAME( rec_function.series(0.5).coefficients(5), Series<ApproximateFloat64>(Rec(),0.5).coefficients(5) );
     }
 };
 

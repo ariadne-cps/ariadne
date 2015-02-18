@@ -147,7 +147,7 @@ class TestConstrainedImageSet
         while(!stack.empty()) {
             ExactBox bx=stack.back();
             stack.pop_back();
-            if(bx.radius()>=0.125) {
+            if(bx.radius().raw()>=0.125) {
                 Pair<ExactBox,ExactBox> sbx=bx.split();
                 stack.append(sbx.first); stack.append(sbx.second);
             } else {

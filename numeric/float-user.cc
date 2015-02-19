@@ -33,6 +33,8 @@
 #include "numeric/rational.h"
 #include "numeric/real.h"
 
+#include "numeric/number_wrapper.h"
+
 namespace Ariadne {
 
 
@@ -91,6 +93,18 @@ TwoExp::operator Float<Exact,Precision64> () const {
 }
 
 
+template<class PR> Float<Bounded,PR>::Float(Real const& x)
+    : Float(x(FLT::get_default_precision())) {
+}
+
+template<class PR> Float<Bounded,PR>::Float(Rational const& q, PR pr)
+    : Float(Real(q),pr) {
+}
+
+template<class PR> Float<Bounded,PR>::Float(Real const& x, PR pr)
+    : Float(x(pr)) {
+}
+
 template<class PR> Float<Bounded,PR>::Float(Number<Validated> const& x)
     : Float(x.get(Bounded(),FLT::get_default_precision())) {
 }
@@ -113,6 +127,7 @@ template<class PR> Float<Approximate,PR>::Float(Number<Approximate> const& x, PR
 
 template<class PR> Float<Approximate,PR>::operator Number<Approximate>() const {
     ARIADNE_NOT_IMPLEMENTED;
+    //Number<Approximate>(new NumberWrapper<Float<Approximate,PR>>(*this));
 }
 
 
@@ -433,10 +448,16 @@ template<class PR> Float<Upper,PR> sub(Float<Upper,PR> const& x1, Float<Lower,PR
     return Float<Upper,PR>(sub_up(x1._u,x2._l)); }
 
 template<class PR> Float<Upper,PR> mul(Float<Upper,PR> const& x1, Float<Upper,PR> const& x2) {
-    ARIADNE_ASSERT(false); return Float<Upper,PR>(mul_up(x1._u,x2._u)); }
+//    ARIADNE_WARN("Multiplying UpperFloat "<<x1<<" with UpperFloat "<<x2<<" is unsafe");
+    ARIADNE_PRECONDITION(x1.raw()>=0);
+    ARIADNE_PRECONDITION(x2.raw()>=0);
+    return Float<Upper,PR>(mul_up(x1._u,x2._u)); }
 
 template<class PR> Float<Upper,PR> div(Float<Upper,PR> const& x1, Float<Lower,PR> const& x2) {
-    ARIADNE_ASSERT(false); return Float<Upper,PR>(div_up(x1._u,x2._l)); }
+//    ARIADNE_WARN("Dividing UpperFloat "<<x1<<" by LowerFloat "<<x2<<" is unsafe");
+    ARIADNE_PRECONDITION(x1.raw()>=0);
+    ARIADNE_PRECONDITION(x2.raw()>=0);
+    return Float<Upper,PR>(div_up(x1._u,x2._l)); }
 
 template<class PR> Float<Upper,PR> pow(Float<Upper,PR> const& x, Nat m) {
     ARIADNE_PRECONDITION(x.raw()>=0);
@@ -554,11 +575,11 @@ template<class PR> Float<Bounded,PR> sqr(Float<Bounded,PR> const& x) {
 }
 
 template<class PR> Float<Bounded,PR> rec(Float<Bounded,PR> const& x) {
-    if(x._l>0 || x._u<0) {
+    if(x._l>=0 || x._u<=0) {
         return Float<Bounded,PR>(rec_down(x._u),rec_up(x._l));
     } else {
         RawFloat<PR> rl=-inf; RawFloat<PR> ru=+inf;
-        ARIADNE_THROW(DivideByZeroException,"BoundedFloat rec(BoundedFloat x)","x="<<x);
+        //ARIADNE_THROW(DivideByZeroException,"BoundedFloat rec(BoundedFloat x)","x="<<x);
         return Float<Bounded,PR>(-inf,+inf);
     }
 }
@@ -610,7 +631,7 @@ template<class PR> Float<Bounded,PR> div(Float<Bounded,PR> const& x1, Float<Boun
     const Float64& x1l=x1.lower_raw(); const Float64& x1u=x1.upper_raw();
     const Float64& i2l=x2.lower_raw(); const Float64& i2u=x2.upper_raw();
     Float64 rl,ru;
-    if(i2l>0) {
+    if(i2l>=0) {
         if(x1l>=0) {
             rl=div_down(x1l,i2u); ru=div_up(x1u,i2l);
         } else if(x1u<=0) {
@@ -619,7 +640,7 @@ template<class PR> Float<Bounded,PR> div(Float<Bounded,PR> const& x1, Float<Boun
             rl=div_down(x1l,i2l); ru=div_up(x1u,i2l);
         }
     }
-    else if(i2u<0) {
+    else if(i2u<=0) {
         if(x1l>=0) {
             rl=div_down(x1u,i2u); ru=div_up(x1l,i2l);
         } else if(x1u<=0) {
@@ -629,7 +650,7 @@ template<class PR> Float<Bounded,PR> div(Float<Bounded,PR> const& x1, Float<Boun
         }
     }
     else {
-        ARIADNE_THROW(DivideByZeroException,"BoundedFloat div(BoundedFloat x1, BoundedFloat x2)","x1="<<x1<<", x2="<<x2);
+        //ARIADNE_THROW(DivideByZeroException,"BoundedFloat div(BoundedFloat x1, BoundedFloat x2)","x1="<<x1<<", x2="<<x2);
         rl=-Float64::inf();
         ru=+Float64::inf();
     }

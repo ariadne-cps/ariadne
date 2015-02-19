@@ -279,6 +279,8 @@ template<class PR> class Float<Bounded,PR> {
     explicit Float<Bounded,PR>(const Rational& q);
     explicit Float<Bounded,PR>(const Real& x);
     explicit Float<Bounded,PR>(const Number<Validated>& x);
+    Float<Bounded,PR>(const Rational& q, PR pr);
+    Float<Bounded,PR>(const Real& x, PR pr);
     Float<Bounded,PR>(const Number<Validated>& x, PR pr);
     operator Number<Validated> () const;
 
@@ -704,6 +706,7 @@ template<class PR> Bool models(Float<Bounded,PR> const& x1, Float<Exact,PR> cons
 
 
 template<class PR> inline Float<Approximate,PR> make_float(Number<Approximate> const& y, PR pr) { return Float<Approximate,PR>(y,pr); }
+template<class PR> Float<Approximate,PR> make_float(Number<Approximate> const& y, PR pr);
 template<class PR> inline Float<Lower,PR> make_float(Number<Lower> const& y, PR pr) { return Float<Lower,PR>(y,pr); }
 template<class PR> inline Float<Upper,PR> make_float(Number<Upper> const& y, PR pr) { return Float<Upper,PR>(y,pr); }
 template<class PR> inline Float<Bounded,PR> make_float(Number<Validated> const& y, PR pr) { return Float<Bounded,PR>(y,pr); }
@@ -714,7 +717,8 @@ template<class PR> inline Float<Bounded,PR> make_float(Rational const& y, PR pr)
 template<class PR> inline Float<Exact,PR> make_float(Integer const& y, PR pr) { return Float<Exact,PR>(y,pr); }
 template<class N, class PR, EnableIf<IsSignedIntegral<N>> =dummy> inline Float<Exact,PR> make_float(N const& y, PR pr) { return Float<Exact,PR>(y,pr); }
 template<class M, class PR, EnableIf<IsUnsignedIntegral<M>> =dummy> inline Float<PositiveExact,PR> make_float(M const& y, PR pr) { return Float<PositiveExact,PR>(y,pr); }
-template<class D, class PR, EnableIf<IsFloatingPoint<D>> =dummy> inline Float<Approximate,PR> make_float(D const& y, PR pr) { return Float<Approximate,PR>(y,pr); }
+template<class D, class PR, EnableIf<IsFloatingPoint<D>> =dummy> Float<Approximate,PR> make_float(D const& y, PR pr){
+    return Float<Approximate,PR>(RawFloat<PR>(y,pr)); }
 
 template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumber<Y>> =dummy> auto
 operator+(X const& x, Y const& y) -> decltype(x+make_float(y,x.precision())) { return x+make_float(y,x.precision()); }

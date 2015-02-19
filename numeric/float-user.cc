@@ -1373,6 +1373,10 @@ template<class PR> Float<Lower,PR> neg(Float<PositiveUpper,PR> const& x) {
     return Float<Lower,PR>(neg(x._u));
 }
 
+template<class PR> Float<PositiveUpper,PR> rec(Float<PositiveLower,PR> const& x) {
+    return Float<PositiveLower,PR>(rec_up(x._l));
+}
+
 template<class PR> Float<PositiveUpper,PR> half(Float<PositiveUpper,PR> const& x) {
     return Float<PositiveUpper,PR>(half(x._u));
 }
@@ -1404,6 +1408,12 @@ template<class PR> Float<Upper,PR> log(Float<PositiveUpper,PR> const& x) {
 template<class PR> OutputStream& operator<<(OutputStream& os, Float<PositiveUpper,PR> const& x) {
     return os << static_cast<Float<Upper,PR>const&>(x);
 }
+
+
+template<class PR> Float<PositiveLower,PR> rec(Float<PositiveUpper,PR> const& x) {
+    return Float<PositiveLower,PR>(rec_down(x._u));
+}
+
 
 template PositiveExactFloat64 mig<Precision64>(ExactFloat64 const&);
 template PositiveLowerFloat64 mig<Precision64>(BoundedFloat64 const&);

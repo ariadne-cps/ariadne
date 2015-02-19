@@ -260,8 +260,8 @@ rec(const A& x)
     auto avg=make_exact(x.average());
     auto rad=make_exact(x.radius());
 
-    if(decide(rad>=avg)) {
-        ARIADNE_THROW(DivideByZeroException,"rec(A x)","x="<<x<<"\n");
+    if(decide(rad>=abs(avg))) {
+        ARIADNE_THROW(DivideByZeroException,"rec(A x)","x="<<x<<", avg="<<avg<<", rad="<<rad<<"\n");
     }
 
     auto eps=mag(rad/avg);

@@ -668,7 +668,8 @@ class HybridEvolverBaseConfiguration : public ConfigurationInterface
 {
   public:
     typedef Nat UnsignedIntType;
-    typedef double RealType;
+    typedef ExactFloat64 RealType;
+    typedef double RawRealType;
 
   protected:
 
@@ -707,16 +708,16 @@ class HybridEvolverBaseConfiguration : public ConfigurationInterface
 
     const RealType& flow_accuracy() const { return _flow_accuracy; }
     //! \brief Construct the _integrator of the evolver, then set the _flow_accuracy.
-    Void set_flow_accuracy(const RealType value);
+    Void set_flow_accuracy(const RawRealType value);
 
     const RealType& maximum_step_size() const { return _maximum_step_size; }
-    Void set_maximum_step_size(const RealType value) { _maximum_step_size = value; }
+    Void set_maximum_step_size(const RawRealType value) { _maximum_step_size = RealType(value); }
 
     const RealType& maximum_enclosure_radius() const { return _maximum_enclosure_radius; }
-    Void set_maximum_enclosure_radius(const RealType value) { _maximum_enclosure_radius = value; }
+    Void set_maximum_enclosure_radius(const RawRealType value) { _maximum_enclosure_radius = RealType(value); }
 
     const RealType& maximum_spacial_error() const { return _maximum_spacial_error; }
-    Void set_maximum_spacial_error(const RealType value) { _maximum_spacial_error = value; }
+    Void set_maximum_spacial_error(const RawRealType value) { _maximum_spacial_error = RealType(value); }
 
     const Bool& enable_reconditioning() const { return _enable_reconditioning; }
     Void set_enable_reconditioning(const Bool value) { _enable_reconditioning = value; }

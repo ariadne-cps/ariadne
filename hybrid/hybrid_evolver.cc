@@ -1102,6 +1102,7 @@ _evolution_step(EvolutionData& evolution_data,
     // Test to see if set requires reconditioning
     if(this->_configuration_ptr->enable_reconditioning() &&
             possibly(norm(starting_set.space_function().errors()) > this->_configuration_ptr->maximum_spacial_error())) {
+        ARIADNE_LOG(4," reconditioning: errors "<<starting_set.space_function().errors()<<"\n");
         HybridEnclosure reconditioned_set=starting_set;
         reconditioned_set.recondition();
         evolution_data.working_sets.append(reconditioned_set);
@@ -1443,10 +1444,10 @@ HybridEvolverBaseConfiguration::HybridEvolverBaseConfiguration(HybridEvolverBase
 }
 
 Void
-HybridEvolverBaseConfiguration::set_flow_accuracy(const RealType value)
+HybridEvolverBaseConfiguration::set_flow_accuracy(const RawRealType value)
 {
     _evolver._integrator_ptr=std::shared_ptr<TaylorSeriesIntegrator>(new TaylorSeriesIntegrator(MaximumError(value)));
-    _flow_accuracy = value;
+    _flow_accuracy = static_cast<RealType>(value);
 }
 
 

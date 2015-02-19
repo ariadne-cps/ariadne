@@ -446,7 +446,9 @@ Bool ConstraintSolver::box_reduce(UpperBox& domain, const ValidatedScalarFunctio
     }
 
     // The set cannot be empty, since a nonempty slice has been found in the upper pass.
-    ARIADNE_ASSERT(new_interval.upper()!=new_interval.lower());
+    // Note that the interval is an UpperInterval, so non-emptiness of the approximated set cannot be guaranteed,
+    // but emptiness would be verified
+    ARIADNE_ASSERT(not definitely(new_interval.empty()));
 
     domain[variable]=new_interval;
 

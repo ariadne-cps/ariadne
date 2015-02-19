@@ -764,6 +764,19 @@ operator< (Y const& y, X const& x) -> decltype(make_float(y,x.precision())< x) {
 template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumber<Y>> =dummy> auto
 operator> (Y const& y, X const& x) -> decltype(make_float(y,x.precision())> x) { return make_float(y,x.precision())> x; }
 
+template<class PR> auto operator==(Float<Exact,PR> const& x, Rational const& q) -> decltype(Rational(x)==q) { return Rational(x)==q; }
+template<class PR> auto operator!=(Float<Exact,PR> const& x, Rational const& q) -> decltype(Rational(x)!=q) { return Rational(x)!=q; }
+template<class PR> auto operator<=(Float<Exact,PR> const& x, Rational const& q) -> decltype(Rational(x)<=q) { return Rational(x)<=q; }
+template<class PR> auto operator>=(Float<Exact,PR> const& x, Rational const& q) -> decltype(Rational(x)>=q) { return Rational(x)>=q; }
+template<class PR> auto operator< (Float<Exact,PR> const& x, Rational const& q) -> decltype(Rational(x)< q) { return Rational(x)< q; }
+template<class PR> auto operator> (Float<Exact,PR> const& x, Rational const& q) -> decltype(Rational(x)> q) { return Rational(x)> q; }
+
+template<class PR> auto operator==(Rational const& q, Float<Exact,PR> const& x) -> decltype(q==Rational(x)) { return q==Rational(x); }
+template<class PR> auto operator!=(Rational const& q, Float<Exact,PR> const& x) -> decltype(q!=Rational(x)) { return q!=Rational(x); }
+template<class PR> auto operator<=(Rational const& q, Float<Exact,PR> const& x) -> decltype(q<=Rational(x)) { return q<=Rational(x); }
+template<class PR> auto operator>=(Rational const& q, Float<Exact,PR> const& x) -> decltype(q>=Rational(x)) { return q>=Rational(x); }
+template<class PR> auto operator< (Rational const& q, Float<Exact,PR> const& x) -> decltype(q< Rational(x)) { return q< Rational(x); }
+template<class PR> auto operator> (Rational const& q, Float<Exact,PR> const& x) -> decltype(q> Rational(x)) { return q> Rational(x); }
 
 ExactFloat64 make_exact(const Real& x);
 

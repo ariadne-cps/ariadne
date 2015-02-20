@@ -189,7 +189,7 @@ Void TestScalarTaylorFunction::test_evaluate()
 {
     Vector<ValidatedFloat64> iv({{0.25,0.5},{-0.75,-0.5}});
     ScalarTaylorFunction tv(d(2),e(2,2,{1.0,2.0,3.0,4.0,5.0,6.0}),0.25,swp);
-    ARIADNE_TEST_EQUAL(evaluate(tv,iv),ValidatedFloat64(-0.375000,3.43750));
+    ARIADNE_TEST_SAME(evaluate(tv,iv),ValidatedFloat64(-0.375000,3.43750));
 }
 
 Void TestScalarTaylorFunction::test_gradient()
@@ -598,7 +598,7 @@ Void TestVectorTaylorFunction::test_domain()
 
     Vector<ValidatedFloat64> x={{1.0,1.0},{0.5,1.5}};
     ARIADNE_TEST_PRINT(x);
-    ARIADNE_TEST_EQUAL(evaluate(t2,x),ValidatedFloat64(2.25,4.25));
+    ARIADNE_TEST_SAME(evaluate(t2,x),ValidatedFloat64(2.25,4.25));
 
     // Ensure evaluation and composition throw errors when expected
     Vector<ValidatedFloat64> xe={{0.875,1.125},{0.5,1.5}};
@@ -614,7 +614,7 @@ Void TestVectorTaylorFunction::test_domain()
     ARIADNE_TEST_THROWS(compose(t2,te1),DomainException);
     ARIADNE_TEST_THROWS(compose(vt2,te1),DomainException);
 
-    ARIADNE_TEST_EQUAL(unchecked_evaluate(t2,xe),ValidatedFloat64(2.25,4.25));
+    ARIADNE_TEST_SAME(unchecked_evaluate(t2,xe),ValidatedFloat64(2.25,4.25));
 
     // Regression test for printing functions with trivial domain component
     ExactBox D4={{1.0,1.0},{0.0,2.0}};

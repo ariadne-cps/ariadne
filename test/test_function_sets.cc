@@ -168,6 +168,13 @@ class TestConstrainedImageSet
         figure.draw(set);
         figure.write("test_function_set-separated");
         figure.clear();
+
+
+        // Regression test
+        EffectiveConstrainedImageSet quadratic_set(BoxSet(ExactIntervalVector({{-1.0,1.0},{-1.0,1.0}})));
+        quadratic_set.apply( {2*x[0]+x[1]+x[0]*x[0]/4,x[0]+x[1]} );
+        ExactBox box{{0.750000,1.00000},{0.00000,0.250000}};
+        ARIADNE_TEST_ASSERT(not definitely(set.separated(box)));
     }
 
     Void test_approximation() {

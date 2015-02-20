@@ -163,9 +163,9 @@ Void TestTaylorModel::test_constructors()
     ARIADNE_TEST_CONSTRUCT(ValidatedTaylorModel,tv1,(E(2,3, {1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0}), 0.25, swp));
     ARIADNE_TEST_CONSTRUCT(ValidatedTaylorModel,tv2,(E({ {{0,0},1.0}, {{1,0},2.0}, {{0,1},3.0}, {{2,0},4.0}, {{1,1},5.0}, {{0,2},6.0}, {{3,0},7.0}, {{2,1},8.0}, {{1,2},9.0}, {{0,3},10.0} }), 0.25, swp));
 
-    ARIADNE_ASSERT_EQUAL(tv1.value(),1.0_exact);
-    ARIADNE_ASSERT_EQUAL(tv1.error(),0.25_exact);
-    ARIADNE_ASSERT_EQUAL(tv1.norm(),55.25_exact);
+    ARIADNE_ASSERT_EQUAL(tv1.value().raw(),1.0);
+    ARIADNE_ASSERT_EQUAL(tv1.error().raw(),0.25);
+    ARIADNE_ASSERT_EQUAL(tv1.norm().raw(),55.25);
 
     ARIADNE_ASSERT_EQUAL(tv2,tv1);
 }

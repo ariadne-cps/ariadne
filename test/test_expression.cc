@@ -129,7 +129,7 @@ class TestExpression {
         RealExpression e4=exp(c+x);
         EffectiveScalarFunction f4=make_function(e4,{x,y,z});
         ARIADNE_TEST_PRINT(f4);
-        ARIADNE_TEST_EQUAL(f4.evaluate(tv), exp(tc+tx));
+        ARIADNE_TEST_ASSERT(possibly((f4.evaluate(tv) == exp(tc+tx)).check(Effort(0))));
 
         //ARIADNE_TEST_EVALUATE(EffectiveVectorFunction((x+y,y+z*z),(x,y,z))[0]);
         //ARIADNE_TEST_EQUAL(EffectiveVectorFunction((x+y,y+z*z),(x,y,z))[0],EffectiveScalarFunction(x+y,(x,y,z)));

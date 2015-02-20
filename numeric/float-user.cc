@@ -39,7 +39,7 @@ namespace Ariadne {
 
 
 template<class PR> Nat Float<Approximate,PR>::output_precision = 4;
-template<class PR> Nat Float<Bounded,PR>::output_precision;
+template<class PR> Nat Float<Bounded,PR>::output_precision=8;
 template<class PR> Nat Float<Exact,PR>::output_precision = 16;
 
 const Float<Exact,Precision64> infty = Float<Exact,Precision64>(Float64::inf());
@@ -745,7 +745,7 @@ template<class PR> Float<Bounded,PR> acos(Float<Bounded,PR> const& x) {
 }
 
 template<class PR> Float<Bounded,PR> atan(Float<Bounded,PR> const& x) {
-    ARIADNE_NOT_IMPLEMENTED;
+    return Float<Bounded,PR>(atan_down(x._l),atan_up(x._u));
 }
 
 
@@ -1316,6 +1316,8 @@ template<class PR> std::size_t instantiate_floats() {
 }
 
 template std::size_t instantiate_floats<Precision64>();
+//template std::size_t instantiate_floats<PrecisionMP>();
+
 //template Bool same<Precision64,Bounded>(BoundedFloat64 const&, BoundedFloat64 const&);
 
 template ExactFloat64 operator* <Precision64,Exact>(ExactFloat64 const&, TwoExp);

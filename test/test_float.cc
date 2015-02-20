@@ -53,6 +53,7 @@ class TestFloat
     Void test_rounding();
     Void test_arithmetic();
     Void test_cosine();
+    Void test_arctan();
     Void test_function();
 };
 
@@ -78,6 +79,7 @@ TestFloat::test()
     ARIADNE_TEST_CALL(test_rounding());
     ARIADNE_TEST_CALL(test_arithmetic());
     ARIADNE_TEST_CALL(test_cosine());
+    ARIADNE_TEST_CALL(test_arctan());
     ARIADNE_TEST_CALL(test_function());
 }
 
@@ -617,4 +619,58 @@ TestFloat::test_cosine()
     ARIADNE_TEST_COMPARE(sin_rnd_down_one,<=,sin_rnd_approx_one);
     ARIADNE_TEST_COMPARE(sin_rnd_approx_one,<=,sin_rnd_up_one);
     ARIADNE_TEST_COMPARE(sin_rnd_down_one,< ,sin_rnd_up_one);
+}
+
+Void
+TestFloat::test_arctan()
+
+{
+    //3.14159265358979323846264338327950288419716939937510
+    static const Float64 pi_down=3.1415926535897931;
+  //static const Float64 pi_near=3.1415926535897931;
+    static const Float64 pi_up  =3.1415926535897936;
+
+    static const Float64 atan_quarter_down=0.244978663126864143;
+    static const Float64 atan_quarter_near=0.244978663126864154;
+    static const Float64 atan_quarter_up  =0.244978663126864171;
+
+    static const Float64 third_pi_down=1.0471975511965976;
+    static const Float64 third_pi_up  =1.0471975511965979;
+
+    static const Float64 sqrt_three_down=1.732050807568877193;
+    static const Float64 sqrt_three_near=1.732050807568877294;
+    static const Float64 sqrt_three_up  =1.732050807568877415;
+
+    static const Float64 zero=0.0;
+    static const Float64 one=1.0;
+    static const Float64 eps=Float64::eps();
+
+    Float64::set_rounding_mode(Float64::upward);
+    ARIADNE_TEST_EQUAL(atan(zero),zero);
+    ARIADNE_TEST_COMPARE(atan(one),>=,pi_up/4);
+    ARIADNE_TEST_COMPARE(atan(-one),>=,-pi_down/4);
+    ARIADNE_TEST_COMPARE(atan(one/4),>=,atan_quarter_up);
+    ARIADNE_TEST_COMPARE(atan(-one/4),>=,-atan_quarter_down);
+    ARIADNE_TEST_COMPARE(atan(sqrt_three_up),>=,third_pi_up);
+    ARIADNE_TEST_COMPARE(atan(-sqrt_three_down),>=,-third_pi_down);
+    ARIADNE_TEST_COMPARE(atan(1/sqrt_three_down),>=,third_pi_up/2);
+    ARIADNE_TEST_COMPARE(atan(-1/sqrt_three_up),>=,-third_pi_down/2);
+
+    Float64::set_rounding_mode(Float64::downward);
+    ARIADNE_TEST_EQUAL(atan(zero),zero);
+    ARIADNE_TEST_COMPARE(atan(one),<=,pi_down/4);
+    ARIADNE_TEST_COMPARE(atan(-one),<=,-pi_up/4);
+    ARIADNE_TEST_COMPARE(atan(one/4),<=,atan_quarter_down);
+    ARIADNE_TEST_COMPARE(atan(-one/4),<=,-atan_quarter_up);
+    ARIADNE_TEST_COMPARE(atan(sqrt_three_down),<=,third_pi_down);
+    ARIADNE_TEST_COMPARE(atan(-sqrt_three_up),<=,-third_pi_up);
+    ARIADNE_TEST_COMPARE(atan(1/sqrt_three_up),<=,third_pi_down/2);
+    ARIADNE_TEST_COMPARE(atan(-1/sqrt_three_down),<=,-third_pi_up/2);
+
+
+    ARIADNE_TEST_COMPARE(atan(one)-pi_up/4,<=,eps);
+    ARIADNE_TEST_COMPARE(atan(one/4)-atan_quarter_up,<=,eps/2);
+    ARIADNE_TEST_COMPARE(atan(sqrt_three_up)-third_pi_up,<=,4*eps);
+    ARIADNE_TEST_COMPARE(atan(1/sqrt_three_down)-third_pi_up/2,<=,eps);
+
 }

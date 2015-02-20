@@ -574,8 +574,83 @@ double tan_rnd_series(double x) {
     return r;
 }
 
+double atan_rnd_series(double x) {
+    // atan(x) = \sum_{n=0}^{\infty} (-1)^n/(2n+1) x^{2n+1}
+    assert(std::abs(x)<0.5);
+    volatile double c,s,w,r;
+    if(x>=0) {
+        Int n=16;
+        s=x*x;
+        w=double(1.0/(2*n+1));
+        for(Int i=n-1; i>=0; --i) {
+            double sgn=(i%2 ? -1.0 : 1.0);
+            c=double(sgn/(2*i+1));
+            w=c+s*w;
+        }
+        r=x*w;
+    } else {
+        Int n=16;
+        s=(-x)*x; s=-s;
+        w=double(-1.0/(2*n+1));
+        for(Int i=n; i>=0; --i) {
+            double sgn=(i%2 ? 1.0 : -1.0);
+            c=double(sgn/(2*i+1));
+            w=c+s*w;
+        }
+        r=x*(-w);
+    }
+  //  std::cerr<<" {atan_rnd_series("<<x<<")="<<r<<"} ";
+    return r;
+}
+
+double neg_rec_rnd(double x) { return (-1.0)/x; }
+
 double atan_rnd(double x) {
-    ARIADNE_NOT_IMPLEMENTED;
+    // use range reduction
+    // atan(-x) = -atan(x)
+    // atan(1/x) = pi/2 - arctan(x) for x>0
+    // atan(1/x) = -pi/2 - arctan(x) for x<0
+    //
+    // atan(x) = sgn(x)*pi/2 + arctan(-1/x)
+    // atan(x) = atan(c) + atan((x-c)/(1+x*c))
+    // atan(x) = 2*atan(c) where c = x/(1+sqrt(1+x^2))
+
+    // For x in [0,1], perform range reduction twice
+    // First, take c=sqrt(2)-1, reducing x to [0,c]
+
+    if(x>1.0) { return pi_rnd()/2+atan_rnd(-1.0/x); }
+    if(x<-1.0) { return -pi_rnd()/2+atan_rnd(-1.0/x); }
+
+    // set c=sqrt(2)-1 for maximal range reduction
+//    static const long double c=53.0/128;
+//    static const double atan_c=0.392570135011829;
+    static const long double c=0.414213562373095048801689l;
+    static const long double d     =0.198912367379658006911598l;
+    static const long double atan_c=0.392699081698724154807830l;
+    static const long double atan_d=0.196349540849362077403915l;
+
+    volatile long double neg_c=-c;
+    volatile long double neg_d=-d;
+
+    if(x>c) {
+        volatile double t=-1.0+neg_c*x;
+        volatile double r=-1.0/t;
+        return atan_c + atan_rnd((x-c)*r);
+    } else if(x<-c) {
+        volatile double t=-1.0+c*x;
+        volatile double r=-1.0/t;
+        return -atan_c + atan_rnd((x+c)*r);
+    } else if(x>d) {
+        volatile double t=-1.0+neg_d*x;
+        volatile double r=-1.0/t;
+        return atan_d + atan_rnd_series((x-d)*r);
+    } else if(x<-d) {
+        volatile double t=-1.0+d*x;
+        volatile double r=-1.0/t;
+        return -atan_d + atan_rnd((x+d)*r);
+    }
+    return atan_rnd_series(x);
+
 }
 
 

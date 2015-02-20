@@ -181,6 +181,7 @@ template<> class Logical<Effective>
     template<class B, EnableIf<IsSame<B,Bool>> =dummy> Logical(B b) : Logical(Logical<Exact>(b)) { }
     Logical<Effective>(Logical<Exact> l);
     Logical<Validated> check(Effort e) const { return Logical<Validated>(Ariadne::check(_v,e)); }
+    friend Logical<Validated> check(Logical<Effective> l, Effort e) { return Logical<Validated>(Ariadne::check(l._v,e)); }
     friend Bool decide(Logical<Effective> l, Effort e=Effort::get_default()) { return decide(l.check(e)); }
     friend Bool definitely(Logical<Effective> l, Effort e=Effort::get_default()) { return definitely(l.check(e)); }
     friend Bool possibly(Logical<Effective> l, Effort e=Effort::get_default()) { return possibly(l.check(e)); }
@@ -194,6 +195,7 @@ template<> class Logical<EffectiveUpper>
     explicit Logical<EffectiveUpper>(SharedPointer<const LogicalInterface> p) : _v(p) { }
     Logical<EffectiveUpper>(Logical<Effective> l) : _v(l._v) { }
     Logical<ValidatedUpper> check(Effort e) const { return Logical<ValidatedUpper>(Ariadne::check(_v,e)); }
+    friend Logical<ValidatedUpper> check(Logical<EffectiveUpper> l, Effort e) { return Logical<ValidatedUpper>(Ariadne::check(l._v,e)); }
     friend Bool decide(Logical<EffectiveUpper> l, Effort e=Effort::get_default()) { return decide(l.check(e)); }
 };
 
@@ -205,6 +207,7 @@ template<> class Logical<EffectiveLower>
     Logical<EffectiveLower>(SharedPointer<const LogicalInterface> p) : _v(p) { }
     Logical<EffectiveLower>(Logical<Effective> l) : _v(l._v) { }
     Logical<ValidatedLower> check(Effort e) const { return Logical<ValidatedLower>(Ariadne::check(_v,e)); }
+    friend Logical<ValidatedLower> check(Logical<EffectiveLower> l, Effort e) { return Logical<ValidatedLower>(Ariadne::check(l._v,e)); }
     friend Bool decide(Logical<EffectiveLower> l, Effort e=Effort::get_default()) { return decide(l.check(e)); }
 };
 

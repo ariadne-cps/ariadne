@@ -237,6 +237,14 @@ BoundFloatMP Real::operator() (PrecisionMP pr) const {
     return this->_ptr->_evaluate(pr);
 }
 
+BoundFloat64 Real::get(Precision64 pr) const {
+    return this->_ptr->_evaluate(pr);
+}
+
+BoundFloatMP Real::get(PrecisionMP pr) const {
+    return this->_ptr->_evaluate(pr);
+}
+
 BoundFloatMP Real::evaluate(Accuracy accuracy) const {
     ARIADNE_NOT_IMPLEMENTED;
 /*
@@ -269,12 +277,28 @@ LowerFloatMP LowerReal::operator() (PrecisionMP pr) const {
     return this->_ptr->_evaluate(pr);
 }
 
+LowerFloat64 LowerReal::get(Precision64 pr) const {
+    return this->_ptr->_evaluate(pr);
+}
+
+LowerFloatMP LowerReal::get(PrecisionMP pr) const {
+    return this->_ptr->_evaluate(pr);
+}
+
 
 UpperFloat64 UpperReal::operator() (Precision64 pr) const {
     return this->_ptr->_evaluate(pr);
 }
 
 UpperFloatMP UpperReal::operator() (PrecisionMP pr) const {
+    return this->_ptr->_evaluate(pr);
+}
+
+UpperFloat64 UpperReal::get(Precision64 pr) const {
+    return this->_ptr->_evaluate(pr);
+}
+
+UpperFloatMP UpperReal::get(PrecisionMP pr) const {
     return this->_ptr->_evaluate(pr);
 }
 

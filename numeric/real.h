@@ -88,6 +88,8 @@ class Real
     // Extract arbitrarily accurate approximations
     BoundFloat64 operator() (Precision64 pr) const;
     BoundFloatMP operator() (PrecisionMP pr) const;
+    BoundFloat64 get(Precision64 pr) const;
+    BoundFloatMP get(PrecisionMP pr) const;
     BoundFloatMP evaluate(Accuracy acc) const;
 
     // Non-templated to allow conversions
@@ -178,6 +180,8 @@ class LowerReal
   public:
     LowerFloat64 operator() (Precision64 pr) const;
     LowerFloatMP operator() (PrecisionMP pr) const;
+    LowerFloat64 get(Precision64 pr) const;
+    LowerFloatMP get(PrecisionMP pr) const;
 };
 
 //! \ingroup UserNumberSubModule
@@ -194,6 +198,8 @@ class UpperReal
   public:
     UpperFloat64 operator() (Precision64 pr) const;
     UpperFloatMP operator() (PrecisionMP pr) const;
+    UpperFloat64 get(Precision64 pr) const;
+    UpperFloatMP get(PrecisionMP pr) const;
 };
 
 } // namespace Ariadne

@@ -575,7 +575,8 @@ template<class PR> Float<Bounded,PR> sqr(Float<Bounded,PR> const& x) {
 }
 
 template<class PR> Float<Bounded,PR> rec(Float<Bounded,PR> const& x) {
-    if(x._l>=0 || x._u<=0) {
+    // IMPORTANT: Need to be careful when one of the bounds is 0, since if xl=-0.0 and xu>0, then 1/xl=-inf
+    if(x._l>0 || x._u<0) {
         return Float<Bounded,PR>(rec_down(x._u),rec_up(x._l));
     } else {
         RawFloat<PR> rl=-inf; RawFloat<PR> ru=+inf;
@@ -629,24 +630,26 @@ template<class PR> Float<Bounded,PR> mul(Float<Bounded,PR> const& x1, Float<Boun
 
 template<class PR> Float<Bounded,PR> div(Float<Bounded,PR> const& x1, Float<Bounded,PR> const& x2) {
     const Float64& x1l=x1.lower_raw(); const Float64& x1u=x1.upper_raw();
-    const Float64& i2l=x2.lower_raw(); const Float64& i2u=x2.upper_raw();
+    const Float64& x2l=x2.lower_raw(); const Float64& x2u=x2.upper_raw();
     Float64 rl,ru;
-    if(i2l>=0) {
+
+    // IMPORTANT: Need to be careful when one of the bounds is 0, since if x2l=-0.0 and x1u>0, then x2l>=0 but x1u/x2l=-inf
+    if(x2l>0) {
         if(x1l>=0) {
-            rl=div_down(x1l,i2u); ru=div_up(x1u,i2l);
+            rl=div_down(x1l,x2u); ru=div_up(x1u,x2l);
         } else if(x1u<=0) {
-            rl=div_down(x1l,i2l); ru=div_up(x1u,i2u);
+            rl=div_down(x1l,x2l); ru=div_up(x1u,x2u);
         } else {
-            rl=div_down(x1l,i2l); ru=div_up(x1u,i2l);
+            rl=div_down(x1l,x2l); ru=div_up(x1u,x2l);
         }
     }
-    else if(i2u<=0) {
+    else if(x2u<0) {
         if(x1l>=0) {
-            rl=div_down(x1u,i2u); ru=div_up(x1l,i2l);
+            rl=div_down(x1u,x2u); ru=div_up(x1l,x2l);
         } else if(x1u<=0) {
-            rl=div_down(x1u,i2l); ru=div_up(x1l,i2u);
+            rl=div_down(x1u,x2l); ru=div_up(x1l,x2u);
         } else {
-            rl=div_down(x1u,i2u); ru=div_up(x1l,i2u);
+            rl=div_down(x1u,x2u); ru=div_up(x1l,x2u);
         }
     }
     else {
@@ -962,7 +965,7 @@ template<class PR> Float<Bounded,PR> div(Float<Bounded,PR> const& x1, Float<Exac
     } else if(x2v<0) {
         rl=div_down(x1u,x2v); ru=div_up(x1l,x2v);
     } else {
-        ARIADNE_THROW(DivideByZeroException,"BoundedFloat div(BoundedFloat const& x1, ExactFloat x2)","x1="<<x1<<", x2="<<x2);
+        //ARIADNE_THROW(DivideByZeroException,"BoundedFloat div(BoundedFloat const& x1, ExactFloat x2)","x1="<<x1<<", x2="<<x2);
         rl=-Float64::inf();
         ru=+Float64::inf();
     }
@@ -977,7 +980,7 @@ template<class PR> Float<Bounded,PR> div(Float<Exact,PR> const& x1, Float<Bounde
     const Float64& i2u=x2.upper_raw();
     Float64 rl,ru;
     if(i2l<=0 && i2u>=0) {
-        ARIADNE_THROW(DivideByZeroException,"BoundedFloat div(ExactFloat const& x1, BoundedFloat x2)","x1="<<x1<<", x2="<<x2);
+        //ARIADNE_THROW(DivideByZeroException,"BoundedFloat div(ExactFloat const& x1, BoundedFloat x2)","x1="<<x1<<", x2="<<x2);
         rl=-Float64::inf();
         ru=+Float64::inf();
     } else if(x1v>=0) {

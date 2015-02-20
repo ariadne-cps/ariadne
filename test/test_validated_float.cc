@@ -317,7 +317,7 @@ Void TestValidatedFloat::test_class()
     ARIADNE_TEST_EQUAL(ValidatedFloat64(div_down(-1,3),div_up(2,3)).lower().raw(),-0.33333333333333337034);
     ARIADNE_TEST_EQUAL(ValidatedFloat64(div_down(-1,3),div_up(2,3)).upper().raw(),0.66666666666666674068);
     ARIADNE_TEST_EQUAL(ValidatedFloat64(div_down(-1,3),div_up(2,3)).value().raw(),0.16666666666666668517);
-    ARIADNE_TEST_EQUAL(ValidatedFloat64(div_down(-1,3),div_up(2,3)).error().raw(),0.50000000000000011102)
+    ARIADNE_TEST_EQUAL(ValidatedFloat64(div_down(-1,3),div_up(2,3)).error().raw(),0.50000000000000011102);
 }
 
 Void TestValidatedFloat::test_input()
@@ -444,6 +444,13 @@ Void TestValidatedFloat::regression_tests() {
         ARIADNE_TEST_ASSERT(cosx.lower_raw()<cosx.upper_raw());
     }
 
+    // Regression test for dividing by interval with lower endpoint -0.0 or upper endpoint +0.0
+
+    ARIADNE_TEST_EQUAL((ValidatedFloat64(1.0,2.0)/ValidatedFloat64(-0.0,1.0)).upper_raw(),+inf);
+    ARIADNE_TEST_EQUAL((ValidatedFloat64(1.0,2.0)/ValidatedFloat64(-1.0,+0.0)).lower_raw(),-inf);
+
+    ARIADNE_TEST_EQUAL(rec(ValidatedFloat64(-0.0,+1.0)).upper_raw(),+inf);
+    ARIADNE_TEST_EQUAL(rec(ValidatedFloat64(-1.0,+0.0)).lower_raw(),-inf);
 }
 
 Int main() {

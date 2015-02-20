@@ -192,7 +192,7 @@ int test_case_counter = 0;
 #define ARIADNE_TEST_ASSERT(expression)                                 \
     {                                                                   \
         std::cout << #expression << ": " << std::flush;                 \
-        Tribool result = (expression);                                     \
+        auto result = (expression);                                     \
         if(definitely(result)) {                                                    \
             std::cout << "true\n" << std::endl;                         \
         } else if(possibly(result)) {                                   \

@@ -48,8 +48,10 @@ class TestReal
   private:
     void test_concept();
     void test_constructors();
+    void test_conversions();
     void test_arithmetic();
     void test_transcendental();
+    void test_comparison();
 };
 
 void TestReal::test()
@@ -57,8 +59,10 @@ void TestReal::test()
     ApproximateFloat64::set_output_precision(18);
 //    ARIADNE_TEST_CALL(test_concept());
     ARIADNE_TEST_CALL(test_constructors());
+    ARIADNE_TEST_CALL(test_conversions());
     ARIADNE_TEST_CALL(test_arithmetic());
     ARIADNE_TEST_CALL(test_transcendental());
+    ARIADNE_TEST_CALL(test_comparison());
 }
 
 void TestReal::test_concept() {
@@ -73,22 +77,32 @@ void TestReal::test_concept() {
     y=sin(x); y=cos(x); y=tan(x);
 }
 
+void TestReal::test_conversions() {
+    Real one=1;
+    Real pi=4*atan(one);
+    auto pi_dp=pi(Precision64());
+//    auto pi_mp=pi(PrecisionMP(2));
+    ARIADNE_TEST_PRINT(pi_dp);
+//    ARIADNE_TEST_PRINT(pi_mp);
+
+}
+
 void TestReal::test_constructors() {
     ARIADNE_TEST_CONSTRUCT(Real,xv, );
-    ARIADNE_TEST_EQUALS(xv.lower(),0);
-    ARIADNE_TEST_EQUALS(xv.approx(),0);
-    ARIADNE_TEST_EQUALS(xv.upper(),0);
+    ARIADNE_TEST_EQUALS(xv.lower().raw(),0);
+    ARIADNE_TEST_EQUALS(xv.approx().raw(),0);
+    ARIADNE_TEST_EQUALS(xv.upper().raw(),0);
     ARIADNE_TEST_CONSTRUCT(Real,xz,(1));
-    ARIADNE_TEST_EQUALS(xz.lower(),1);
-    ARIADNE_TEST_EQUALS(xz.approx(),1);
-    ARIADNE_TEST_EQUALS(xz.upper(),1);
+    ARIADNE_TEST_EQUALS(xz.lower().raw(),1);
+    ARIADNE_TEST_EQUALS(xz.approx().raw(),1);
+    ARIADNE_TEST_EQUALS(xz.upper().raw(),1);
     ARIADNE_TEST_CONSTRUCT(Real,xe,(1.5_exact));
-    ARIADNE_TEST_EQUALS(xe.lower(),1.5);
-    ARIADNE_TEST_EQUALS(xe.approx(),1.5);
-    ARIADNE_TEST_EQUALS(xe.upper(),1.5);
+    ARIADNE_TEST_EQUALS(xe.lower().raw(),1.5);
+    ARIADNE_TEST_EQUALS(xe.approx().raw(),1.5);
+    ARIADNE_TEST_EQUALS(xe.upper().raw(),1.5);
     ARIADNE_TEST_CONSTRUCT(Real,xlau,(3.14159,3.141593,3.14160));
     ARIADNE_TEST_CONSTRUCT(Real,xn,(1.1_q));
-    ARIADNE_TEST_COMPARE(Rational(make_exact(xn.lower())),<,Rational(11,10));
+    ARIADNE_TEST_COMPARE(Rational(xn.lower().raw()),<,Rational(11,10));
     ARIADNE_TEST_COMPARE(Rational(xn.upper().raw()),>,Rational(11,10));
     ARIADNE_TEST_CONSTRUCT(Real,xq,(Rational(11,10)));
     ARIADNE_TEST_COMPARE(Rational(xq.lower().raw()),<,Rational(11,10));
@@ -133,6 +147,32 @@ void TestReal::test_transcendental() {
     ARIADNE_TEST_WITHIN(cos(x),cos(ax),eps);
     ARIADNE_TEST_WITHIN(tan(x),tan(ax),eps);
     //ARIADNE_TEST_WITHIN(atan(x),atan(ax),eps);
+}
+
+void TestReal::test_comparison() {
+    Effort effort(0);
+    Real one=1;
+    Real e=exp(one);
+    Real pi=Ariadne::pi;
+    Real elogpi=e*log(pi);
+//    ARIADNE_TEST_SAME(e,e);
+//    ARIADNE_TEST_EQUALS(log(e),one);
+    ARIADNE_TEST_ASSERT(possibly(check(log(e)==one,effort)));
+    ARIADNE_TEST_ASSERT(possibly((log(e)==one).check(effort)));
+
+    ARIADNE_TEST_PRINT(pi.get(Precision64()));
+    ARIADNE_TEST_PRINT(e*log(pi).get(Precision64()));
+
+    ARIADNE_TEST_ASSERT(not check(pi==elogpi,effort));
+    ARIADNE_TEST_ASSERT(check(pi!=elogpi,effort));
+    ARIADNE_TEST_ASSERT(check(elogpi< pi,effort));
+    ARIADNE_TEST_ASSERT(check(elogpi<=pi,effort));
+    ARIADNE_TEST_ASSERT(not check(elogpi> pi,effort));
+    ARIADNE_TEST_ASSERT(not check(elogpi>=pi,effort));
+
+    Rational zero=0;
+    ARIADNE_TEST_ASSERT(check(e*log(pi)-pi<zero,effort));
+
 }
 
 

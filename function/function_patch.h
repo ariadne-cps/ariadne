@@ -70,6 +70,9 @@ template<class A> A operator-(const GenericType<A>& ga1, const A& ca2) { return 
 template<class A> A operator*(const GenericType<A>& ga1, const A& ca2) { return ca2.create(ga1)+ca2; }
 template<class A> A operator/(const GenericType<A>& ga1, const A& ca2) { return ca2.create(ga1)+ca2; }
 
+inline ApproximateFloat64 convert_error_to_bounds(const PositiveApproximateFloat64& e) { return ApproximateFloat64(0.0); }
+inline ValidatedFloat64 convert_error_to_bounds(const PositiveUpperFloat64& e) { return ValidatedFloat64(-e.raw(),+e.raw()); }
+
 
 
 /*! \ingroup FunctionModelSubModule
@@ -292,7 +295,7 @@ template<class M> class FunctionPatch
     template<class T> Void _compute(T& r, const Vector<T>& a) const {
         typedef typename T::NumericType R;
         r=Ariadne::horner_evaluate(this->_model.expansion(),Ariadne::unscale(a,this->_domain))
-            + convert_error<R>(this->_model.error());
+            + convert_error_to_bounds(this->_model.error());
     }
   private:
     FunctionPatch<M>* _derivative(SizeType j) const;

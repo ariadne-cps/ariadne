@@ -39,6 +39,7 @@ template<class A, class X> class AlgebraMixin
     typedef X NumericType;
   public:
     virtual AlgebraInterface<X>* _create() const { return new A(static_cast<const A&>(*this).A::create()); }
+    virtual AlgebraInterface<X>* _create_constant(X const& c) const { return new A(static_cast<const A&>(*this).A::create_constant(c)); }
     virtual AlgebraInterface<X>* _clone() const { return new A(static_cast<const A&>(*this)); }
     virtual Void _iadd(const X& c) { static_cast<A*>(this)->A::iadd(c); }
     virtual Void _imul(const X& c) { static_cast<A*>(this)->A::imul(c); }

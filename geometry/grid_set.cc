@@ -1339,7 +1339,7 @@ double GridTreeSubset::measure() const {
     for(ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
         result+=iter->box().measure().raw();
     }
-    return approx_cast<double>(result);
+    return numeric_cast<double>(result);
 }
 
 

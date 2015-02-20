@@ -229,25 +229,25 @@ template<class X> inline Formula<X> cos(const Formula<X>& f) { return make_formu
 template<class X> inline Formula<X> tan(const Formula<X>& f) { return make_formula(Tan(),f); }
 template<class X> inline Formula<X> atan(const Formula<X>& f) { return make_formula(Atan(),f); }
 
-template<class X, class R> inline EnableIfNumeric<R,Formula<X> > operator+(Formula<X> f, R c) { return f + make_formula<X>(c); }
-template<class X, class R> inline EnableIfNumeric<R,Formula<X> > operator-(Formula<X> f, R c) { return f - make_formula<X>(c); }
-template<class X, class R> inline EnableIfNumeric<R,Formula<X> > operator*(Formula<X> f, R c) { return f * make_formula<X>(c); }
-template<class X, class R> inline EnableIfNumeric<R,Formula<X> > operator/(Formula<X> f, R c) { return f / make_formula<X>(c); }
-template<class X, class R> inline EnableIfNumeric<R,Formula<X> > operator+(R c, Formula<X> f) { return make_formula<X>(c) + f; }
-template<class X, class R> inline EnableIfNumeric<R,Formula<X> > operator-(R c, Formula<X> f) { return make_formula<X>(c) - f; }
-template<class X, class R> inline EnableIfNumeric<R,Formula<X> > operator*(R c, Formula<X> f) { return make_formula<X>(c) * f; }
-template<class X, class R> inline EnableIfNumeric<R,Formula<X> > operator/(R c, Formula<X> f) { return make_formula<X>(c) / f; }
-template<class X, class R> inline EnableIfNumeric<R,Formula<X> >& operator+=(Formula<X>& f, const R& c) { return f+=make_formula<X>(c); }
-template<class X, class R> inline EnableIfNumeric<R,Formula<X> >& operator*=(Formula<X>& f, const R& c) { return f*=make_formula<X>(c); }
+template<class X, class R> inline EnableIfNumber<R,Formula<X> > operator+(Formula<X> f, R c) { return f + make_formula<X>(c); }
+template<class X, class R> inline EnableIfNumber<R,Formula<X> > operator-(Formula<X> f, R c) { return f - make_formula<X>(c); }
+template<class X, class R> inline EnableIfNumber<R,Formula<X> > operator*(Formula<X> f, R c) { return f * make_formula<X>(c); }
+template<class X, class R> inline EnableIfNumber<R,Formula<X> > operator/(Formula<X> f, R c) { return f / make_formula<X>(c); }
+template<class X, class R> inline EnableIfNumber<R,Formula<X> > operator+(R c, Formula<X> f) { return make_formula<X>(c) + f; }
+template<class X, class R> inline EnableIfNumber<R,Formula<X> > operator-(R c, Formula<X> f) { return make_formula<X>(c) - f; }
+template<class X, class R> inline EnableIfNumber<R,Formula<X> > operator*(R c, Formula<X> f) { return make_formula<X>(c) * f; }
+template<class X, class R> inline EnableIfNumber<R,Formula<X> > operator/(R c, Formula<X> f) { return make_formula<X>(c) / f; }
+template<class X, class R> inline EnableIfNumber<R,Formula<X> >& operator+=(Formula<X>& f, const R& c) { return f+=make_formula<X>(c); }
+template<class X, class R> inline EnableIfNumber<R,Formula<X> >& operator*=(Formula<X>& f, const R& c) { return f*=make_formula<X>(c); }
 
 
 // Make a constant of type T with value c based on a prototype vector v
-template<class X, class T> inline T make_constant(const X& c, const Vector<T>& v, EnableIf< Not< IsNumeric<T> >, Void >* =0 ) {
+template<class X, class T> inline T make_constant(const X& c, const Vector<T>& v, EnableIf< Not< IsNumber<T> >, Void >* =0 ) {
     return v.zero_element()+numeric_cast<typename T::NumericType>(c);
 }
 
 // Make a constant of type T with value c based on a prototype vector v
-template<class X, class T> inline T make_constant(const X& c, const Vector<T>& v, EnableIf<IsNumeric<T>,Void>* = 0) {
+template<class X, class T> inline T make_constant(const X& c, const Vector<T>& v, EnableIf<IsNumber<T>,Void>* = 0) {
     return v.zero_element()+numeric_cast<T>(c);
 }
 

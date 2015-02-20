@@ -101,7 +101,7 @@ class UnivariateFirstDifferential
 
 
 template<class X, class R>
-EnableIfNumeric<R,UnivariateFirstDifferential<X>&>
+EnableIfNumber<R,UnivariateFirstDifferential<X>&>
 operator+=(UnivariateFirstDifferential<X>& x, const R& c)
 {
     x._value+=static_cast<X>(c);
@@ -109,7 +109,7 @@ operator+=(UnivariateFirstDifferential<X>& x, const R& c)
 }
 
 template<class X, class R>
-EnableIfNumeric<R,UnivariateFirstDifferential<X>&>
+EnableIfNumber<R,UnivariateFirstDifferential<X>&>
 operator-=(UnivariateFirstDifferential<X>& x, const R& c)
 {
     x._value-=static_cast<X>(c);
@@ -117,7 +117,7 @@ operator-=(UnivariateFirstDifferential<X>& x, const R& c)
 }
 
 template<class X, class R>
-EnableIfNumeric<R,UnivariateFirstDifferential<X>&>
+EnableIfNumber<R,UnivariateFirstDifferential<X>&>
 operator*=(UnivariateFirstDifferential<X>& x, const R& c)
 {
     x._value*=static_cast<X>(c);
@@ -127,7 +127,7 @@ operator*=(UnivariateFirstDifferential<X>& x, const R& c)
 
 
 template<class X, class R>
-EnableIfNumeric<R,UnivariateFirstDifferential<X>&>
+EnableIfNumber<R,UnivariateFirstDifferential<X>&>
 operator/=(UnivariateFirstDifferential<X>& x, const R& c)
 {
     x._value/=static_cast<X>(c);
@@ -136,35 +136,35 @@ operator/=(UnivariateFirstDifferential<X>& x, const R& c)
 }
 
 template<class X, class R>
-EnableIfNumeric<R,UnivariateFirstDifferential<X> >
+EnableIfNumber<R,UnivariateFirstDifferential<X> >
 operator+(const UnivariateFirstDifferential<X>& x, const R& c)
 {
     UnivariateFirstDifferential<X> r(x); r+=X(c); return r;
 }
 
 template<class X, class R>
-EnableIfNumeric<R,UnivariateFirstDifferential<X> >
+EnableIfNumber<R,UnivariateFirstDifferential<X> >
 operator+(const R& c, const UnivariateFirstDifferential<X>& x)
 {
     UnivariateFirstDifferential<X> r(x); r+=X(c); return r;
 }
 
 template<class X, class R>
-EnableIfNumeric<R,UnivariateFirstDifferential<X> >
+EnableIfNumber<R,UnivariateFirstDifferential<X> >
 operator-(const UnivariateFirstDifferential<X>& x, const R& c)
 {
     UnivariateFirstDifferential<X> r(x); r-=X(c); return r;
 }
 
 template<class X, class R>
-EnableIfNumeric<R,UnivariateFirstDifferential<X> >
+EnableIfNumber<R,UnivariateFirstDifferential<X> >
 operator-(const R& c, const UnivariateFirstDifferential<X>& x)
 {
     UnivariateFirstDifferential<X> r(-x); r+=X(c); return r;
 }
 
 template<class X, class R>
-EnableIfNumeric<R,UnivariateFirstDifferential<X> >
+EnableIfNumber<R,UnivariateFirstDifferential<X> >
 operator*(const UnivariateFirstDifferential<X>& x, const R& c)
 {
     UnivariateFirstDifferential<X> r(x); r*=X(c); return r;
@@ -178,21 +178,21 @@ operator*(const UnivariateFirstDifferential<X>& x, const Int& c)
 }
 
 template<class X, class R>
-EnableIfNumeric<R,UnivariateFirstDifferential<X> >
+EnableIfNumber<R,UnivariateFirstDifferential<X> >
 operator*(const R& c, const UnivariateFirstDifferential<X>& x)
 {
     UnivariateFirstDifferential<X> r(x); r*=X(c); return r;
 }
 
 template<class X, class R>
-EnableIfNumeric<R,UnivariateFirstDifferential<X> >
+EnableIfNumber<R,UnivariateFirstDifferential<X> >
 operator/(const UnivariateFirstDifferential<X>& x, const R& c)
 {
     UnivariateFirstDifferential<X> r(x); r/=X(c); return r;
 }
 
 template<class X, class R>
-EnableIfNumeric<R,UnivariateFirstDifferential<X> >
+EnableIfNumber<R,UnivariateFirstDifferential<X> >
 operator/(const R& c, const UnivariateFirstDifferential<X>& x)
 {
     UnivariateFirstDifferential<X> r(rec(x)); r*=X(c); return r;
@@ -433,7 +433,7 @@ operator<=(const UnivariateFirstDifferential<X>& x, const UnivariateFirstDiffere
 
 
 template<class X, class R>
-EnableIfNumeric<R,Bool>
+EnableIfNumber<R,Bool>
 operator>=(const UnivariateFirstDifferential<X>& x, const R& c)
 {
     return x._value>=static_cast<X>(c);
@@ -441,28 +441,28 @@ operator>=(const UnivariateFirstDifferential<X>& x, const R& c)
 
 
 template<class X, class R>
-EnableIfNumeric<R,Bool>
+EnableIfNumber<R,Bool>
 operator<=(const UnivariateFirstDifferential<X>& x, const R& c)
 {
     return x._value<=static_cast<X>(c);
 }
 
 template<class X, class R>
-EnableIfNumeric<R,Bool>
+EnableIfNumber<R,Bool>
 operator> (const UnivariateFirstDifferential<X>& x, const R& c)
 {
     return x._value> static_cast<X>(c);
 }
 
 template<class X, class R>
-EnableIfNumeric<R,Bool>
+EnableIfNumber<R,Bool>
 operator< (const UnivariateFirstDifferential<X>& x, const R& c)
 {
     return x._value< static_cast<X>(c);
 }
 
 template<class X, class R>
-EnableIfNumeric<R,Bool>
+EnableIfNumber<R,Bool>
 operator>=(const R& c, const UnivariateFirstDifferential<X>& x)
 {
     return static_cast<X>(c)>=x._value;
@@ -470,21 +470,21 @@ operator>=(const R& c, const UnivariateFirstDifferential<X>& x)
 
 
 template<class X, class R>
-EnableIfNumeric<R,Bool>
+EnableIfNumber<R,Bool>
 operator<=(const R& c, const UnivariateFirstDifferential<X>& x)
 {
     return static_cast<X>(c)<=x._value;
 }
 
 template<class X, class R>
-EnableIfNumeric<R,Bool>
+EnableIfNumber<R,Bool>
 operator> (const R& c, const UnivariateFirstDifferential<X>& x)
 {
     return static_cast<X>(c)> x._value;
 }
 
 template<class X, class R>
-EnableIfNumeric<R,Bool>
+EnableIfNumber<R,Bool>
 operator< (const R& c, const UnivariateFirstDifferential<X>& x)
 {
     return static_cast<X>(c)< x._value;
@@ -581,7 +581,7 @@ const X UnivariateSecondDifferential<X>::_zero=X(0);
 
 
 template<class X, class R>
-EnableIfNumeric<R,UnivariateSecondDifferential<X>&>
+EnableIfNumber<R,UnivariateSecondDifferential<X>&>
 operator+=(UnivariateSecondDifferential<X>& x, const R& c)
 {
     x._value+=static_cast<X>(c);
@@ -589,7 +589,7 @@ operator+=(UnivariateSecondDifferential<X>& x, const R& c)
 }
 
 template<class X, class R>
-EnableIfNumeric<R,UnivariateSecondDifferential<X>&>
+EnableIfNumber<R,UnivariateSecondDifferential<X>&>
 operator-=(UnivariateSecondDifferential<X>& x, const R& c)
 {
     x._value-=static_cast<X>(c);
@@ -597,7 +597,7 @@ operator-=(UnivariateSecondDifferential<X>& x, const R& c)
 }
 
 template<class X, class R>
-EnableIfNumeric<R,UnivariateSecondDifferential<X>&>
+EnableIfNumber<R,UnivariateSecondDifferential<X>&>
 operator*=(UnivariateSecondDifferential<X>& x, const R& c)
 {
     x._value*=static_cast<X>(c);
@@ -608,7 +608,7 @@ operator*=(UnivariateSecondDifferential<X>& x, const R& c)
 
 
 template<class X, class R>
-EnableIfNumeric<R,UnivariateSecondDifferential<X>&>
+EnableIfNumber<R,UnivariateSecondDifferential<X>&>
 operator/=(UnivariateSecondDifferential<X>& x, const R& c)
 {
     x._value/=static_cast<X>(c);
@@ -618,28 +618,28 @@ operator/=(UnivariateSecondDifferential<X>& x, const R& c)
 }
 
 template<class X, class R>
-EnableIfNumeric<R,UnivariateSecondDifferential<X> >
+EnableIfNumber<R,UnivariateSecondDifferential<X> >
 operator+(const UnivariateSecondDifferential<X>& x, const R& c)
 {
     UnivariateSecondDifferential<X> r(x); r+=X(c); return r;
 }
 
 template<class X, class R>
-EnableIfNumeric<R,UnivariateSecondDifferential<X> >
+EnableIfNumber<R,UnivariateSecondDifferential<X> >
 operator+(const R& c, const UnivariateSecondDifferential<X>& x)
 {
     UnivariateSecondDifferential<X> r(x); r+=X(c); return r;
 }
 
 template<class X, class R>
-EnableIfNumeric<R,UnivariateSecondDifferential<X> >
+EnableIfNumber<R,UnivariateSecondDifferential<X> >
 operator-(const UnivariateSecondDifferential<X>& x, const R& c)
 {
     UnivariateSecondDifferential<X> r(x); r-=X(c); return r;
 }
 
 template<class X, class R>
-EnableIfNumeric<R,UnivariateSecondDifferential<X> >
+EnableIfNumber<R,UnivariateSecondDifferential<X> >
 operator-(const R& c, const UnivariateSecondDifferential<X>& x)
 {
     UnivariateSecondDifferential<X> r(-x); r+=X(c); return r;
@@ -647,28 +647,28 @@ operator-(const R& c, const UnivariateSecondDifferential<X>& x)
 
 template<class X, class R>
 
-EnableIfNumeric<R,UnivariateSecondDifferential<X> >
+EnableIfNumber<R,UnivariateSecondDifferential<X> >
 operator*(const UnivariateSecondDifferential<X>& x, const R& c)
 {
     UnivariateSecondDifferential<X> r(x); r*=X(c); return r;
 }
 
 template<class X, class R>
-EnableIfNumeric<R,UnivariateSecondDifferential<X> >
+EnableIfNumber<R,UnivariateSecondDifferential<X> >
 operator*(const R& c, const UnivariateSecondDifferential<X>& x)
 {
     UnivariateSecondDifferential<X> r(x); r*=X(c); return r;
 }
 
 template<class X, class R>
-EnableIfNumeric<R,UnivariateSecondDifferential<X> >
+EnableIfNumber<R,UnivariateSecondDifferential<X> >
 operator/(const UnivariateSecondDifferential<X>& x, const R& c)
 {
     UnivariateSecondDifferential<X> r(x); r/=X(c); return r;
 }
 
 template<class X, class R>
-EnableIfNumeric<R,UnivariateSecondDifferential<X> >
+EnableIfNumber<R,UnivariateSecondDifferential<X> >
 operator/(const R& c, const UnivariateSecondDifferential<X>& x)
 {
     UnivariateSecondDifferential<X> r(rec(x)); r*=X(c); return r;
@@ -877,7 +877,7 @@ UnivariateSecondDifferential<X> tan(const UnivariateSecondDifferential<X>& x)
 }
 
 template<class X, class R>
-EnableIfNumeric<R,Bool>
+EnableIfNumber<R,Bool>
 operator>=(const UnivariateSecondDifferential<X>& x, const R& c)
 {
     return x._value>=static_cast<X>(c);
@@ -885,28 +885,28 @@ operator>=(const UnivariateSecondDifferential<X>& x, const R& c)
 
 
 template<class X, class R>
-EnableIfNumeric<R,Bool>
+EnableIfNumber<R,Bool>
 operator<=(const UnivariateSecondDifferential<X>& x, const R& c)
 {
     return x._value<=static_cast<X>(c);
 }
 
 template<class X, class R>
-EnableIfNumeric<R,Bool>
+EnableIfNumber<R,Bool>
 operator> (const UnivariateSecondDifferential<X>& x, const R& c)
 {
     return x._value> static_cast<X>(c);
 }
 
 template<class X, class R>
-EnableIfNumeric<R,Bool>
+EnableIfNumber<R,Bool>
 operator< (const UnivariateSecondDifferential<X>& x, const R& c)
 {
     return x._value< static_cast<X>(c);
 }
 
 template<class X, class R>
-EnableIfNumeric<R,Bool>
+EnableIfNumber<R,Bool>
 operator>=(const R& c, const UnivariateSecondDifferential<X>& x)
 {
     return static_cast<X>(c)>=x._value;
@@ -914,21 +914,21 @@ operator>=(const R& c, const UnivariateSecondDifferential<X>& x)
 
 
 template<class X, class R>
-EnableIfNumeric<R,Bool>
+EnableIfNumber<R,Bool>
 operator<=(const R& c, const UnivariateSecondDifferential<X>& x)
 {
     return static_cast<X>(c)<=x._value;
 }
 
 template<class X, class R>
-EnableIfNumeric<R,Bool>
+EnableIfNumber<R,Bool>
 operator> (const R& c, const UnivariateSecondDifferential<X>& x)
 {
     return static_cast<X>(c)> x._value;
 }
 
 template<class X, class R>
-EnableIfNumeric<R,Bool>
+EnableIfNumber<R,Bool>
 operator< (const R& c, const UnivariateSecondDifferential<X>& x)
 {
     return static_cast<X>(c)< x._value;

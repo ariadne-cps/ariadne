@@ -495,11 +495,11 @@ Void ExactBox::draw(CanvasInterface& c, const Projection2d& p) const
 {
     Nat ix=p.x_coordinate(); Nat iy=p.y_coordinate();
     ExactInterval x=(*this)[ix]; ExactInterval y=(*this)[iy];
-    c.move_to(approx_cast<double>(x.lower()),approx_cast<double>(y.lower()));
-    c.line_to(approx_cast<double>(x.upper()),approx_cast<double>(y.lower()));
-    c.line_to(approx_cast<double>(x.upper()),approx_cast<double>(y.upper()));
-    c.line_to(approx_cast<double>(x.lower()),approx_cast<double>(y.upper()));
-    c.line_to(approx_cast<double>(x.lower()),approx_cast<double>(y.lower()));
+    c.move_to(numeric_cast<double>(x.lower()),numeric_cast<double>(y.lower()));
+    c.line_to(numeric_cast<double>(x.upper()),numeric_cast<double>(y.lower()));
+    c.line_to(numeric_cast<double>(x.upper()),numeric_cast<double>(y.upper()));
+    c.line_to(numeric_cast<double>(x.lower()),numeric_cast<double>(y.upper()));
+    c.line_to(numeric_cast<double>(x.lower()),numeric_cast<double>(y.lower()));
     c.fill();
 }
 

@@ -57,6 +57,7 @@ template<class X> class Algebra
     Algebra<X> create() const { return Algebra<X>(_ptr->_create()); }
     Algebra<X> clone() const { return Algebra<X>(_ptr->_clone()); }
     Algebra<X> create_zero() const { return Algebra<X>(_ptr->_create()); }
+    Algebra<X> create_constant(X const& c) const { return Algebra<X>(_ptr->_create_constant(c)); }
     OutputStream& write(OutputStream& os) const { return _ptr->write(os); }
   public:
     Void iadd(const X& c) { _ptr->_iadd(c); }

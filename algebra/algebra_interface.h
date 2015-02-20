@@ -90,6 +90,8 @@ template<class X> class AlgebraInterface
     virtual AlgebraInterface<X>* _clone() const = 0;
     //! \brief Create the zero element in the same algebra as the current object.
     virtual AlgebraInterface<X>* _create() const = 0;
+    //! \brief Create a constant multiple of the unit element in the same algebra as the current object.
+    virtual AlgebraInterface<X>* _create_constant(X const& c) const = 0;
 
     //! \brief Add a constant numerical scalar \c r+=c .
     virtual Void _iadd(const X& c) = 0;

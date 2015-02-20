@@ -39,9 +39,9 @@
 #include "numeric/paradigm.h"
 #include "utility/prototype.h"
 
+#include "logical.decl.h"
 #include "number.decl.h"
 #include "float.decl.h"
-#include "logical.decl.h"
 
 #include "number_interface.h"
 

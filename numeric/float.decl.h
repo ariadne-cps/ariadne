@@ -112,7 +112,7 @@ template<> struct IsFloat<Dbl> : False { };
 
 
 template<class T> struct IsNumber;
-template<> struct IsNumber<double> : True { };
+template<> struct IsNumber<Dbl> : True { };
 template<class P, class PR> struct IsNumber<Float<P,PR>> : True { };
 
 } // namespace Ariadne

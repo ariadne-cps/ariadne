@@ -203,7 +203,7 @@ const X FirstDifferential<X>::_zero=X(0);
 
 
 template<class X, class R>
-EnableIfNumeric<R,FirstDifferential<X>&>
+EnableIfNumber<R,FirstDifferential<X>&>
 operator+=(FirstDifferential<X>& x, const R& c)
 {
     x._value+=static_cast<X>(c);
@@ -211,7 +211,7 @@ operator+=(FirstDifferential<X>& x, const R& c)
 }
 
 template<class X, class R>
-EnableIfNumeric<R,FirstDifferential<X>&>
+EnableIfNumber<R,FirstDifferential<X>&>
 operator-=(FirstDifferential<X>& x, const R& c)
 {
     x._value-=static_cast<X>(c);
@@ -219,7 +219,7 @@ operator-=(FirstDifferential<X>& x, const R& c)
 }
 
 template<class X, class R>
-EnableIfNumeric<R,FirstDifferential<X>&>
+EnableIfNumber<R,FirstDifferential<X>&>
 operator*=(FirstDifferential<X>& x, const R& c)
 {
     x._value*=static_cast<X>(c);
@@ -229,7 +229,7 @@ operator*=(FirstDifferential<X>& x, const R& c)
 
 
 template<class X, class R>
-EnableIfNumeric<R,FirstDifferential<X>&>
+EnableIfNumber<R,FirstDifferential<X>&>
 operator/=(FirstDifferential<X>& x, const R& c)
 {
     x._value/=static_cast<X>(c);
@@ -238,35 +238,35 @@ operator/=(FirstDifferential<X>& x, const R& c)
 }
 
 template<class X, class R>
-EnableIfNumeric<R,FirstDifferential<X> >
+EnableIfNumber<R,FirstDifferential<X> >
 operator+(const FirstDifferential<X>& x, const R& c)
 {
     FirstDifferential<X> r(x); r+=X(c); return r;
 }
 
 template<class X, class R>
-EnableIfNumeric<R,FirstDifferential<X> >
+EnableIfNumber<R,FirstDifferential<X> >
 operator+(const R& c, const FirstDifferential<X>& x)
 {
     FirstDifferential<X> r(x); r+=X(c); return r;
 }
 
 template<class X, class R>
-EnableIfNumeric<R,FirstDifferential<X> >
+EnableIfNumber<R,FirstDifferential<X> >
 operator-(const FirstDifferential<X>& x, const R& c)
 {
     FirstDifferential<X> r(x); r-=X(c); return r;
 }
 
 template<class X, class R>
-EnableIfNumeric<R,FirstDifferential<X> >
+EnableIfNumber<R,FirstDifferential<X> >
 operator-(const R& c, const FirstDifferential<X>& x)
 {
     FirstDifferential<X> r(-x); r+=X(c); return r;
 }
 
 template<class X, class R>
-EnableIfNumeric<R,FirstDifferential<X> >
+EnableIfNumber<R,FirstDifferential<X> >
 operator*(const FirstDifferential<X>& x, const R& c)
 {
     FirstDifferential<X> r(x); r*=X(c); return r;
@@ -280,21 +280,21 @@ operator*(const FirstDifferential<X>& x, const Int& c)
 }
 
 template<class X, class R>
-EnableIfNumeric<R,FirstDifferential<X> >
+EnableIfNumber<R,FirstDifferential<X> >
 operator*(const R& c, const FirstDifferential<X>& x)
 {
     FirstDifferential<X> r(x); r*=X(c); return r;
 }
 
 template<class X, class R>
-EnableIfNumeric<R,FirstDifferential<X> >
+EnableIfNumber<R,FirstDifferential<X> >
 operator/(const FirstDifferential<X>& x, const R& c)
 {
     FirstDifferential<X> r(x); r/=X(c); return r;
 }
 
 template<class X, class R>
-EnableIfNumeric<R,FirstDifferential<X> >
+EnableIfNumber<R,FirstDifferential<X> >
 operator/(const R& c, const FirstDifferential<X>& x)
 {
     FirstDifferential<X> r(rec(x)); r*=X(c); return r;
@@ -537,7 +537,7 @@ operator<=(const FirstDifferential<X>& x, const FirstDifferential<X>& y)
 
 
 template<class X, class R>
-EnableIfNumeric<R,Bool>
+EnableIfNumber<R,Bool>
 operator>=(const FirstDifferential<X>& x, const R& c)
 {
     return x._value>=static_cast<X>(c);
@@ -545,7 +545,7 @@ operator>=(const FirstDifferential<X>& x, const R& c)
 
 
 template<class X, class R>
-EnableIfNumeric<R,Bool>
+EnableIfNumber<R,Bool>
 operator<=(const FirstDifferential<X>& x, const R& c)
 {
     return x._value<=static_cast<X>(c);
@@ -712,21 +712,21 @@ const X SecondDifferential<X>::_zero=X(0);
 
 
 template<class X, class R>
-EnableIfNumeric<R,SecondDifferential<X>&>
+EnableIfNumber<R,SecondDifferential<X>&>
 operator+=(SecondDifferential<X>& x, const R& c)
 {
     x._value+=static_cast<X>(c);
 }
 
 template<class X, class R>
-EnableIfNumeric<R,SecondDifferential<X>&>
+EnableIfNumber<R,SecondDifferential<X>&>
 operator-=(SecondDifferential<X>& x, const R& c)
 {
     x._value-=static_cast<X>(c);
 }
 
 template<class X, class R>
-EnableIfNumeric<R,SecondDifferential<X>&>
+EnableIfNumber<R,SecondDifferential<X>&>
 operator*=(SecondDifferential<X>& x, const R& c)
 {
     x._value*=static_cast<X>(c);
@@ -736,7 +736,7 @@ operator*=(SecondDifferential<X>& x, const R& c)
 
 
 template<class X, class R>
-EnableIfNumeric<R,SecondDifferential<X>&>
+EnableIfNumber<R,SecondDifferential<X>&>
 operator/=(SecondDifferential<X>& x, const R& c)
 {
     x._value/=static_cast<X>(c);
@@ -745,28 +745,28 @@ operator/=(SecondDifferential<X>& x, const R& c)
 }
 
 template<class X, class R>
-EnableIfNumeric<R,SecondDifferential<X> >
+EnableIfNumber<R,SecondDifferential<X> >
 operator+(const SecondDifferential<X>& x, const R& c)
 {
     SecondDifferential<X> r(x); r+=X(c); return r;
 }
 
 template<class X, class R>
-EnableIfNumeric<R,SecondDifferential<X> >
+EnableIfNumber<R,SecondDifferential<X> >
 operator+(const R& c, const SecondDifferential<X>& x)
 {
     SecondDifferential<X> r(x); r+=X(c); return r;
 }
 
 template<class X, class R>
-EnableIfNumeric<R,SecondDifferential<X> >
+EnableIfNumber<R,SecondDifferential<X> >
 operator-(const SecondDifferential<X>& x, const R& c)
 {
     SecondDifferential<X> r(x); r-=X(c); return r;
 }
 
 template<class X, class R>
-EnableIfNumeric<R,SecondDifferential<X> >
+EnableIfNumber<R,SecondDifferential<X> >
 operator-(const R& c, const SecondDifferential<X>& x)
 {
     SecondDifferential<X> r(-x); r+=X(c); return r;
@@ -774,28 +774,28 @@ operator-(const R& c, const SecondDifferential<X>& x)
 
 template<class X, class R>
 
-EnableIfNumeric<R,SecondDifferential<X> >
+EnableIfNumber<R,SecondDifferential<X> >
 operator*(const SecondDifferential<X>& x, const R& c)
 {
     SecondDifferential<X> r(x); r*=X(c); return r;
 }
 
 template<class X, class R>
-EnableIfNumeric<R,SecondDifferential<X> >
+EnableIfNumber<R,SecondDifferential<X> >
 operator*(const R& c, const SecondDifferential<X>& x)
 {
     SecondDifferential<X> r(x); r*=X(c); return r;
 }
 
 template<class X, class R>
-EnableIfNumeric<R,SecondDifferential<X> >
+EnableIfNumber<R,SecondDifferential<X> >
 operator/(const SecondDifferential<X>& x, const R& c)
 {
     SecondDifferential<X> r(x); r/=X(c); return r;
 }
 
 template<class X, class R>
-EnableIfNumeric<R,SecondDifferential<X> >
+EnableIfNumber<R,SecondDifferential<X> >
 operator/(const R& c, const SecondDifferential<X>& x)
 {
     SecondDifferential<X> r(rec(x)); r*=X(c); return r;

@@ -30,8 +30,8 @@
 
 #include <stdexcept>
 
+#include "utility/metaprogramming.h"
 #include "numeric/paradigm.h"
-#include "is_number.h"
 
 namespace Ariadne {
 
@@ -41,8 +41,8 @@ class DivideByZeroError : public std::runtime_error {
     using std::runtime_error::runtime_error;
 };
 
-template<class X> struct IsNumber;
-template<class P=Void> class Number;
+template<class X> struct IsNumber : False { };
+template<class X, class T> using EnableIfNumber = EnableIf<IsNumber<X>,T>;
 
 typedef uint Nat;
 typedef int Int;
@@ -60,7 +60,12 @@ class Integer;
 class Rational;
 class Real;
 
+template<class P=Void> class Number;
+
+template<> struct IsNumber<Nat>;
 template<> struct IsNumber<Int>;
+template<> struct IsNumber<Dbl>;
+
 template<> struct IsNumber<Integer>;
 template<> struct IsNumber<Rational>;
 template<> struct IsNumber<Real>;

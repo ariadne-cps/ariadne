@@ -269,6 +269,11 @@ template<class M> FunctionPatch<M> FunctionPatch<M>::create_zero() const
     return FunctionPatch<M>(this->domain(),this->_model.sweeper());
 }
 
+template<class M> FunctionPatch<M> FunctionPatch<M>::create_constant(NumericType const& c) const
+{
+    return FunctionPatch<M>::constant(this->domain(),c,this->_model.sweeper());
+}
+
 template<class M> FunctionPatch<M> FunctionPatch<M>::create(GenericType const& f) const
 {
     return FunctionPatch<M>(this->domain(),f,this->_model.sweeper());
@@ -837,7 +842,7 @@ template<class M> template<class T> Void VectorFunctionPatch<M>::_compute(Vector
     Vector<T> sx=Ariadne::unscale(a,f._domain);
     for(SizeType i=0; i!=r.size(); ++i) {
         T ri=Ariadne::evaluate(this->_models[i].expansion(),sx);
-        X e=convert_error<X>(this->_models[i].error());
+        X e=convert_error_to_bounds(this->_models[i].error());
         r[i]=ri+e;
     }
 }

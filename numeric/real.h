@@ -36,7 +36,6 @@
 #include "numeric/logical.decl.h"
 #include "numeric/number.decl.h"
 #include "numeric/float.decl.h"
-#include "numeric/is_number.h"
 
 namespace Ariadne {
 

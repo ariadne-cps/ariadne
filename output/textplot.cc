@@ -123,7 +123,7 @@ Void TextPlot::_draw(const std::vector<ExactPoint>& pts) {
 
 Void TextPlot::draw(const ExactPoint& pt) {
     for(Nat i = 0; i < pt.dimension(); i++) {
-        this->_fstream << approx_cast<double>(pt[i]) << " ";
+        this->_fstream << numeric_cast<double>(pt[i]) << " ";
     }
     this->_fstream << std::endl;
 }

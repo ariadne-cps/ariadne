@@ -144,19 +144,6 @@ Void TestInterval::test_class()
     ARIADNE_TEST_EQUAL(ExactInterval(-0.25,0.50).error().raw(),0.375)
     ARIADNE_TEST_EQUAL(ExactInterval(-0.25,0.50).width().raw(),0.75);
 
-    // Tests for inexact operations
-    ARIADNE_TEST_EQUAL(ExactInterval(-1./3,2./3).lower().raw(),-0.33333333333333331483);
-    ARIADNE_TEST_EQUAL(ExactInterval(-1./3,2./3).upper().raw(),0.66666666666666662966);
-    ARIADNE_TEST_EQUAL(ExactInterval(-1./3,2./3).centre().raw(),0.16666666666666665741);
-    ARIADNE_TEST_EQUAL(ExactInterval(-1./3,2./3).error().raw(),0.5)
-    ARIADNE_TEST_EQUAL(ExactInterval(-1./3,2./3).width().raw(),1.0);
-
-    // Tests for inexact operations
-    ARIADNE_TEST_EQUAL(ExactInterval(div_down(-1,3),div_up(2,3)).lower().raw(),-0.33333333333333337034);
-    ARIADNE_TEST_EQUAL(ExactInterval(div_down(-1,3),div_up(2,3)).upper().raw(),0.66666666666666674068);
-    ARIADNE_TEST_EQUAL(ExactInterval(div_down(-1,3),div_up(2,3)).centre().raw(),0.16666666666666668517);
-    ARIADNE_TEST_EQUAL(ExactInterval(div_down(-1,3),div_up(2,3)).error().raw(),0.50000000000000011102)
-    ARIADNE_TEST_EQUAL(ExactInterval(div_down(-1,3),div_up(2,3)).width().raw(),1.000000000000000222);
 }
 
 Void TestInterval::test_input()

@@ -177,6 +177,12 @@ double FloatMP::get_d() const {
     return mpfr_get_d(this->_mpfr,get_rounding_mode());
 }
 
+FloatMP FloatMP::inf(PrecisionMP pr) {
+    FloatMP x(pr);
+    mpfr_set_inf(x._mpfr,+1);
+    return std::move(x);
+}
+
 FloatMP operator+(FloatMP const& x) {
     return x;
 }
@@ -307,6 +313,14 @@ FloatMP cos(FloatMP const& x, FloatMP::RoundingModeType rnd) {
 
 FloatMP tan(FloatMP const& x, FloatMP::RoundingModeType rnd) {
     FloatMP r(x.precision(),NoInit()); mpfr_tan(r._mpfr,x._mpfr,rnd); return std::move(r);
+}
+
+FloatMP asin(FloatMP const& x, FloatMP::RoundingModeType rnd) {
+    FloatMP r(x.precision(),NoInit()); mpfr_asin(r._mpfr,x._mpfr,rnd); return std::move(r);
+}
+
+FloatMP acos (FloatMP const& x, FloatMP::RoundingModeType rnd) {
+    FloatMP r(x.precision(),NoInit()); mpfr_acos (r._mpfr,x._mpfr,rnd); return std::move(r);
 }
 
 FloatMP atan(FloatMP const& x, FloatMP::RoundingModeType rnd) {

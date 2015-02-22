@@ -46,55 +46,126 @@ inline Float64 max_exact(Float64 x1, Float64 x2) { return max(x1,x2); }
 inline Float64 min_exact(Float64 x1, Float64 x2) { return min(x1,x2); }
 inline Float64 abs_exact(Float64 x) { return abs(x); }
 
-inline Float64 add_approx(Float64 x1, Float64 x2) { return add(x1,x2,to_nearest); }
-inline Float64 add_near(Float64 x1, Float64 x2) { return add(x1,x2,to_nearest); }
-inline Float64 add_up(Float64 x1, Float64 x2) { return add(x1,x2,upward); }
-inline Float64 add_down(Float64 x1, Float64 x2) { return add(x1,x2,downward); }
 
-inline Float64 sub_approx(Float64 x1, Float64 x2) { return sub(x1,x2,to_nearest); }
-inline Float64 sub_near(Float64 x1, Float64 x2) { return sub(x1,x2,to_nearest); }
-inline Float64 sub_up(Float64 x1, Float64 x2) { return sub(x1,x2,upward); }
-inline Float64 sub_down(Float64 x1, Float64 x2) { return sub(x1,x2,downward); }
+inline Float64 add_approx(Float64 x1, Float64 x2) { return add(x1,x2,Float64::to_nearest); }
+inline Float64 add_near(Float64 x1, Float64 x2) { return add(x1,x2,Float64::to_nearest); }
+inline Float64 add_up(Float64 x1, Float64 x2) { return add(x1,x2,Float64::upward); }
+inline Float64 add_down(Float64 x1, Float64 x2) { return add(x1,x2,Float64::downward); }
 
-inline Float64 mul_approx(Float64 x1, Float64 x2) { return mul(x1,x2,to_nearest); }
-inline Float64 mul_near(Float64 x1, Float64 x2) { return mul(x1,x2,to_nearest); }
-inline Float64 mul_up(Float64 x1, Float64 x2) { return mul(x1,x2,upward); }
-inline Float64 mul_down(Float64 x1, Float64 x2) { return mul(x1,x2,downward); }
+inline Float64 sub_approx(Float64 x1, Float64 x2) { return sub(x1,x2,Float64::to_nearest); }
+inline Float64 sub_near(Float64 x1, Float64 x2) { return sub(x1,x2,Float64::to_nearest); }
+inline Float64 sub_up(Float64 x1, Float64 x2) { return sub(x1,x2,Float64::upward); }
+inline Float64 sub_down(Float64 x1, Float64 x2) { return sub(x1,x2,Float64::downward); }
 
-inline Float64 div_approx(Float64 x1, Float64 x2) { return div(x1,x2,to_nearest); }
-inline Float64 div_near(Float64 x1, Float64 x2) { return div(x1,x2,to_nearest); }
-inline Float64 div_up(Float64 x1, Float64 x2) { return div(x1,x2,upward); }
-inline Float64 div_down(Float64 x1, Float64 x2) { return div(x1,x2,downward); }
+inline Float64 mul_approx(Float64 x1, Float64 x2) { return mul(x1,x2,Float64::to_nearest); }
+inline Float64 mul_near(Float64 x1, Float64 x2) { return mul(x1,x2,Float64::to_nearest); }
+inline Float64 mul_up(Float64 x1, Float64 x2) { return mul(x1,x2,Float64::upward); }
+inline Float64 mul_down(Float64 x1, Float64 x2) { return mul(x1,x2,Float64::downward); }
 
-inline Float64 pow_approx(Float64 x, Int n) { return pow(x,n,to_nearest); }
-inline Float64 pow_up(Float64 x, Int n) { return pow(x,n,upward); }
-inline Float64 pow_down(Float64 x, Int n) { return pow(x,n,downward); }
+inline Float64 div_approx(Float64 x1, Float64 x2) { return div(x1,x2,Float64::to_nearest); }
+inline Float64 div_near(Float64 x1, Float64 x2) { return div(x1,x2,Float64::to_nearest); }
+inline Float64 div_up(Float64 x1, Float64 x2) { return div(x1,x2,Float64::upward); }
+inline Float64 div_down(Float64 x1, Float64 x2) { return div(x1,x2,Float64::downward); }
+
+inline Float64 pow_approx(Float64 x, Int n) { return pow(x,n,Float64::to_nearest); }
+inline Float64 pow_up(Float64 x, Int n) { return pow(x,n,Float64::upward); }
+inline Float64 pow_down(Float64 x, Int n) { return pow(x,n,Float64::downward); }
 
 inline Float64 next_down(Float64 x) { return sub_down(x,Float64::min()); }
 inline Float64 next_up(Float64 x) { return add_up(x,Float64::min()); }
 
-inline Float64 rec_approx(Float64 x) { return rec(x,to_nearest); }
-inline Float64 rec_up(Float64 x) { return rec(x,upward); }
-inline Float64 rec_down(Float64 x) { return rec(x,downward); }
+inline Float64 rec_approx(Float64 x) { return rec(x,Float64::to_nearest); }
+inline Float64 rec_up(Float64 x) { return rec(x,Float64::upward); }
+inline Float64 rec_down(Float64 x) { return rec(x,Float64::downward); }
 
-inline Float64 sqrt_up(Float64 const& x) { return sqrt(x,upward); }
-inline Float64 sqrt_down(Float64 const& x) { return sqrt(x,downward); }
+inline Float64 sqrt_up(Float64 const& x) { return sqrt(x,Float64::upward); }
+inline Float64 sqrt_down(Float64 const& x) { return sqrt(x,Float64::downward); }
 
-inline Float64 exp_up(Float64 const& x) { return exp(x,upward); }
-inline Float64 exp_down(Float64 const& x) { return exp(x,downward); }
+inline Float64 exp_up(Float64 const& x) { return exp(x,Float64::upward); }
+inline Float64 exp_down(Float64 const& x) { return exp(x,Float64::downward); }
 
-inline Float64 log_up(Float64 const& x) { return log(x,upward); }
-inline Float64 log_down(Float64 const& x) { return log(x,downward); }
+inline Float64 log_up(Float64 const& x) { return log(x,Float64::upward); }
+inline Float64 log_down(Float64 const& x) { return log(x,Float64::downward); }
 
-inline Float64 sin_up(Float64 const& x) { return sin(x,upward); }
-inline Float64 sin_down(Float64 const& x) { return sin(x,downward); }
+inline Float64 sin_up(Float64 const& x) { return sin(x,Float64::upward); }
+inline Float64 sin_down(Float64 const& x) { return sin(x,Float64::downward); }
 
-inline Float64 cos_up(Float64 const& x) { return cos(x,upward); }
-inline Float64 cos_down(Float64 const& x) { return cos(x,downward); }
+inline Float64 cos_up(Float64 const& x) { return cos(x,Float64::upward); }
+inline Float64 cos_down(Float64 const& x) { return cos(x,Float64::downward); }
 
-inline Float64 atan_up(Float64 const& x) { return atan(x,upward); }
-inline Float64 atan_down(Float64 const& x) { return atan(x,downward); }
+inline Float64 atan_up(Float64 const& x) { return atan(x,Float64::upward); }
+inline Float64 atan_down(Float64 const& x) { return atan(x,Float64::downward); }
 
+inline Float64 pi_up(Precision64 const& pr) { return Float64::pi(pr,Float64::upward); }
+inline Float64 pi_approx(Precision64 const& pr) { return Float64::pi(pr,Float64::to_nearest); }
+inline Float64 pi_down(Precision64 const& pr) { return Float64::pi(pr,Float64::downward); }
+
+
+inline FloatMP nul_exact(FloatMP x) { return nul(x); }
+inline FloatMP pos_exact(FloatMP x) { return pos(x); }
+inline FloatMP neg_exact(FloatMP x) { return neg(x); }
+inline FloatMP half_exact(FloatMP x) { return half(x); }
+
+inline FloatMP max_exact(FloatMP x1, FloatMP x2) { return max(x1,x2); }
+inline FloatMP min_exact(FloatMP x1, FloatMP x2) { return min(x1,x2); }
+inline FloatMP abs_exact(FloatMP x) { return abs(x); }
+
+
+inline FloatMP add_approx(FloatMP const& x1, FloatMP const& x2) { return add(x1,x2,FloatMP::to_nearest); }
+inline FloatMP add_near(FloatMP const& x1, FloatMP const& x2) { return add(x1,x2,FloatMP::to_nearest); }
+inline FloatMP add_up(FloatMP const& x1, FloatMP const& x2) { return add(x1,x2,FloatMP::upward); }
+inline FloatMP add_down(FloatMP const& x1, FloatMP const& x2) { return add(x1,x2,FloatMP::downward); }
+
+inline FloatMP sub_approx(FloatMP const& x1, FloatMP const& x2) { return sub(x1,x2,FloatMP::to_nearest); }
+inline FloatMP sub_near(FloatMP const& x1, FloatMP const& x2) { return sub(x1,x2,FloatMP::to_nearest); }
+inline FloatMP sub_up(FloatMP const& x1, FloatMP const& x2) { return sub(x1,x2,FloatMP::upward); }
+inline FloatMP sub_down(FloatMP const& x1, FloatMP const& x2) { return sub(x1,x2,FloatMP::downward); }
+
+inline FloatMP mul_approx(FloatMP const& x1, FloatMP const& x2) { return mul(x1,x2,FloatMP::to_nearest); }
+inline FloatMP mul_near(FloatMP const& x1, FloatMP const& x2) { return mul(x1,x2,FloatMP::to_nearest); }
+inline FloatMP mul_up(FloatMP const& x1, FloatMP const& x2) { return mul(x1,x2,FloatMP::upward); }
+inline FloatMP mul_down(FloatMP const& x1, FloatMP const& x2) { return mul(x1,x2,FloatMP::downward); }
+
+inline FloatMP div_approx(FloatMP const& x1, FloatMP const& x2) { return div(x1,x2,FloatMP::to_nearest); }
+inline FloatMP div_near(FloatMP const& x1, FloatMP const& x2) { return div(x1,x2,FloatMP::to_nearest); }
+inline FloatMP div_up(FloatMP const& x1, FloatMP const& x2) { return div(x1,x2,FloatMP::upward); }
+inline FloatMP div_down(FloatMP const& x1, FloatMP const& x2) { return div(x1,x2,FloatMP::downward); }
+
+inline FloatMP pow_approx(FloatMP const& x, Int n) { return pow(x,n,FloatMP::to_nearest); }
+inline FloatMP pow_up(FloatMP const& x, Int n) { return pow(x,n,FloatMP::upward); }
+inline FloatMP pow_down(FloatMP const& x, Int n) { return pow(x,n,FloatMP::downward); }
+
+inline FloatMP next_down(FloatMP const& x) { return sub_down(x,FloatMP::min()); }
+inline FloatMP next_up(FloatMP const& x) { return add_up(x,FloatMP::min()); }
+
+inline FloatMP rec_approx(FloatMP const& x) { return rec(x,FloatMP::to_nearest); }
+inline FloatMP rec_up(FloatMP const& x) { return rec(x,FloatMP::upward); }
+inline FloatMP rec_down(FloatMP const& x) { return rec(x,FloatMP::downward); }
+
+inline FloatMP sqrt_up(FloatMP const& x) { return sqrt(x,FloatMP::upward); }
+inline FloatMP sqrt_down(FloatMP const& x) { return sqrt(x,FloatMP::downward); }
+
+inline FloatMP exp_up(FloatMP const& x) { return exp(x,FloatMP::upward); }
+inline FloatMP exp_down(FloatMP const& x) { return exp(x,FloatMP::downward); }
+
+inline FloatMP log_up(FloatMP const& x) { return log(x,FloatMP::upward); }
+inline FloatMP log_down(FloatMP const& x) { return log(x,FloatMP::downward); }
+
+inline FloatMP sin_up(FloatMP const& x) { return sin(x,FloatMP::upward); }
+inline FloatMP sin_down(FloatMP const& x) { return sin(x,FloatMP::downward); }
+
+inline FloatMP cos_up(FloatMP const& x) { return cos(x,FloatMP::upward); }
+inline FloatMP cos_down(FloatMP const& x) { return cos(x,FloatMP::downward); }
+
+inline FloatMP atan_up(FloatMP const& x) { return atan(x,FloatMP::upward); }
+inline FloatMP atan_down(FloatMP const& x) { return atan(x,FloatMP::downward); }
+
+inline FloatMP pi_up(PrecisionMP const& pr) { return FloatMP::pi(pr,FloatMP::upward); }
+inline FloatMP pi_approx(PrecisionMP const& pr) { return FloatMP::pi(pr,FloatMP::to_nearest); }
+inline FloatMP pi_down(PrecisionMP const& pr) { return FloatMP::pi(pr,FloatMP::downward); }
+
+inline FloatMP med_near(FloatMP x1, FloatMP x2) { return half(add_near(x1,x2)); }
+inline FloatMP rad_up(FloatMP x1, FloatMP x2) { return half(sub_up(x2,x1)); }
 
 /*
 inline Float64 max_exact(Float64 const& x1, Float64 const& x2) { return max(x1,x2); }

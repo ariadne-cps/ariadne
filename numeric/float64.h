@@ -95,10 +95,10 @@ class Float64 {
     Precision64 precision() const;
     Void set_precision(Precision64);
   public:
-    static Float64 inf();
-    static Float64 max();
-    static Float64 eps();
-    static Float64 min();
+    static Float64 inf(Precision64 pr = get_default_precision());
+    static Float64 max(Precision64 pr = get_default_precision());;
+    static Float64 eps(Precision64 pr = get_default_precision());
+    static Float64 min(Precision64 pr = get_default_precision());
   public:
     //! \brief Default constructor creates an uninitialised number.
     Float64() : dbl() { }
@@ -109,7 +109,7 @@ class Float64 {
     Float64(const Float64& x) : dbl(x.dbl) { }
 
     //! \brief Construct from a rational number with given rounding
-    explicit Float64(const Rational& q, RoundingModeType rnd);
+    explicit Float64(const Rational& q, RoundingModeType rnd, PrecisionType pr=get_default_precision());
     //! \brief Convert to a rational number.
     explicit operator Rational () const;
   public:

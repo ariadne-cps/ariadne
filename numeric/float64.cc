@@ -663,7 +663,7 @@ const Float64::RoundingModeType Float64::to_nearest = Ariadne::to_nearest;
 
 const Float64::RoundingModeType Float64::toward_zero = Ariadne::toward_zero;
 
-Float64::Float64(Rational const& q, RoundingModeType rnd)
+Float64::Float64(Rational const& q, RoundingModeType rnd, PrecisionType)
     : Float64(q.get_d())
 {
     RoundingModeType old_rnd=get_rounding_mode();
@@ -738,10 +738,10 @@ Float64::PrecisionType Float64::get_default_precision() { return Float64::Precis
 Float64::PrecisionType Float64::precision() const { return Float64::PrecisionType(); }
 Void Float64::set_precision(Float64::PrecisionType) { }
 
-Float64 Float64::min() { return std::numeric_limits<double>::min(); }
-Float64 Float64::max() { return std::numeric_limits<double>::max(); }
-Float64 Float64::eps() { return std::numeric_limits<double>::epsilon(); }
-Float64 Float64::inf() { return std::numeric_limits<double>::infinity(); }
+Float64 Float64::min(PrecisionType) { return std::numeric_limits<double>::min(); }
+Float64 Float64::max(PrecisionType) { return std::numeric_limits<double>::max(); }
+Float64 Float64::eps(PrecisionType) { return std::numeric_limits<double>::epsilon(); }
+Float64 Float64::inf(PrecisionType) { return std::numeric_limits<double>::infinity(); }
 
 template<> Nat integer_cast<Nat,Float64>(Float64 const& x) { return x.dbl; }
 template<> Int integer_cast<Int,Float64>(Float64 const& x) { return x.dbl; }

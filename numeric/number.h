@@ -121,10 +121,10 @@ template<class P> class Number
     Number() : Number(Integer(0)) { }
 
     // Construct from a Number of a weaker paradigm
-    template<class PP, EnableIf<IsWeaker<P,PP>> = dummy> Number(const Number<PP>& y) : Number<P>(y.handle()) { }
+    template<class SP, EnableIf<IsWeaker<P,SP>> = dummy> Number(const Number<SP>& y) : Number<P>(y.handle()) { }
 
     // Disable construction from a Number of a non-weaker paradigm
-   // template<class PP, DisableIfWeaker<P,PP> =dummy> Number(const Number<PP>& y) = delete;
+   // template<class SP, DisableIfWeaker<P,SP> =dummy> Number(const Number<PP>& y) = delete;
 
     // Construct from a builtin integer
     template<class N, EnableIf<IsIntegral<N>> =dummy> Number(const N& n) : Number<P>(Integer(n)) { }
@@ -137,13 +137,20 @@ template<class P> class Number
 
     //! \brief Get the value of the number as a double-precision floating-point type
     template<class WP, EnableIf<IsWeaker<WP,P>> =dummy>
-    Float<WP,Precision64> get() const { return pointer()->_get(WP()); }
+    Float<WP,Precision64> get(WP par) const { return pointer()->_get(WP()); }
     //! \brief Get the value of the number as a double-precision floating-point type
     template<class WP, EnableIf<IsWeaker<WP,P>> =dummy>
     Float<WP,Precision64> get(WP par, Precision64 const& prec) const { return pointer()->_get(WP()); }
     //! \brief Get the value of the number as a multiple-precision floating-point type
     template<class WP, EnableIf<IsWeaker<WP,P>> =dummy>
     Float<WP,PrecisionMP> get(WP par, PrecisionMP const& prec) const { return pointer()->_get(WP(),prec); }
+
+    //! \brief Get the value of the number as a double-precision floating-point type
+    Float<P,Precision64> get() const { return pointer()->_get(WP()); }
+    //! \brief Get the value of the number as a double-precision floating-point type
+    Float<P,Precision64> get(Precision64 const& prec) const { return pointer()->_get(WP()); }
+    //! \brief Get the value of the number as a multiple-precision floating-point type
+    Float<P,PrecisionMP> get(PrecisionMP const& prec) const { return pointer()->_get(WP(),prec); }
 
 
     friend Number<P> operator+(Number<P> y) { return pos(y); }

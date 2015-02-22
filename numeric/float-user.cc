@@ -134,7 +134,7 @@ template<class PR> Float<Approximate,PR>::operator Number<Approximate>() const {
 template<class PR> Float<Exact,PR>::Float(Integer const& z) : Float(z,RawFloatType::get_default_precision()) { }
 
 template<class PR> Float<Exact,PR>::Float(Integer const& z, PR pr)
-    : _v(Rational(z),RawFloatType::to_nearest)
+    : _v(Rational(z),RawFloat<PR>::to_nearest,pr)
 {
     Rational q(_v);
     ARIADNE_PRECONDITION(z==q);
@@ -305,10 +305,10 @@ template<class PR> Fuzzy operator< (Float<Approximate,PR> const& x1, Float<Appro
 template<class PR> Fuzzy operator> (Float<Approximate,PR> const& x1, Float<Approximate,PR> const& x2) { return x1._a> x2._a; }
 
 template<class PR> OutputStream& operator<<(OutputStream& os, Float<Approximate,PR> const& x) {
-    Float64::RoundingModeType rnd=Float64::get_rounding_mode();
-    Float64::set_rounding_to_nearest();
+    typename RawFloat<PR>::RoundingModeType rnd=RawFloat<PR>::get_rounding_mode();
+    RawFloat<PR>::set_rounding_to_nearest();
     os << std::showpoint << std::setprecision(Float<Approximate,PR>::output_precision) << x.raw();
-    Float64::set_rounding_mode(rnd);
+    RawFloat<PR>::set_rounding_mode(rnd);
     return os;
 }
 
@@ -398,10 +398,10 @@ template<class PR> Float<Lower,PR>& operator*=(Float<Lower,PR>& x1, Float<Lower,
 template<class PR> Float<Lower,PR>& operator/=(Float<Lower,PR>& x1, Float<Upper,PR> const& x2) { return x1=x1/x2; }
 
 template<class PR> OutputStream& operator<<(OutputStream& os, Float<Lower,PR> const& x) {
-    Float64::RoundingModeType rnd=Float64::get_rounding_mode();
-    Float64::set_rounding_downward();
+    typename RawFloat<PR>::RoundingModeType rnd=RawFloat<PR>::get_rounding_mode();
+    RawFloat<PR>::set_rounding_downward();
     os << std::showpoint << std::setprecision(Float<Bounded,PR>::output_precision) << x.raw();
-    Float64::set_rounding_mode(rnd);
+    RawFloat<PR>::set_rounding_mode(rnd);
     return os;
 }
 
@@ -505,10 +505,10 @@ template<class PR> Float<Upper,PR>& operator*=(Float<Upper,PR>& x1, Float<Upper,
 template<class PR> Float<Upper,PR>& operator/=(Float<Upper,PR>& x1, Float<Lower,PR> const& x2) { return x1=x1/x2; }
 
 template<class PR> OutputStream& operator<<(OutputStream& os, Float<Upper,PR> const& x) {
-    Float64::RoundingModeType rnd=Float64::get_rounding_mode();
-    Float64::set_rounding_upward();
+    typename RawFloat<PR>::RoundingModeType rnd=RawFloat<PR>::get_rounding_mode();
+    RawFloat<PR>::set_rounding_upward();
     os << std::showpoint << std::setprecision(Float<Bounded,PR>::output_precision) << x.raw();
-    Float64::set_rounding_mode(rnd);
+    RawFloat<PR>::set_rounding_mode(rnd);
     return os;
 }
 
@@ -541,7 +541,7 @@ template<class PR> Float<Bounded,PR> abs(Float<Bounded,PR> const& x) {
     } else if(x.upper_raw()<=0) {
         return Float<Bounded,PR>(neg(x.upper_raw()),neg(x.lower_raw()));
     } else {
-        return Float<Bounded,PR>(static_cast<Float64>(0.0),max(neg(x.lower_raw()),x.upper_raw()));
+        return Float<Bounded,PR>(static_cast<RawFloat<PR>>(0.0),max(neg(x.lower_raw()),x.upper_raw()));
     }
 }
 
@@ -562,8 +562,8 @@ template<class PR> Float<Bounded,PR> half(Float<Bounded,PR> const& x) {
 }
 
 template<class PR> Float<Bounded,PR> sqr(Float<Bounded,PR> const& x) {
-    const Float64& xl=x.lower_raw(); const Float64& xu=x.upper_raw();
-    Float64 rl,ru;
+    const RawFloat<PR>& xl=x.lower_raw(); const RawFloat<PR>& xu=x.upper_raw();
+    RawFloat<PR> rl,ru;
     if(xl>0.0) {
         rl=mul_down(xl,xl); ru=mul_up(xu,xu);
     } else if(xu<0.0) {
@@ -579,6 +579,7 @@ template<class PR> Float<Bounded,PR> rec(Float<Bounded,PR> const& x) {
     if(x._l>0 || x._u<0) {
         return Float<Bounded,PR>(rec_down(x._u),rec_up(x._l));
     } else {
+        RawFloat<PR> inf=RawFloat<PR>::inf(x.precision());
         RawFloat<PR> rl=-inf; RawFloat<PR> ru=+inf;
         //ARIADNE_THROW(DivideByZeroException,"BoundedFloat rec(BoundedFloat x)","x="<<x);
         return Float<Bounded,PR>(-inf,+inf);
@@ -594,10 +595,10 @@ template<class PR> Float<Bounded,PR> sub(Float<Bounded,PR> const& x1, Float<Boun
 }
 
 template<class PR> Float<Bounded,PR> mul(Float<Bounded,PR> const& x1, Float<Bounded,PR> const& x2) {
-    const Float64& x1l=x1._l; const Float64& x1u=x1._u;
-    const Float64& x2l=x2._l; const Float64& x2u=x2._u;
-    Float64 rl,ru;
-    Float64::RoundingModeType rnd=Float64::get_rounding_mode();
+    const RawFloat<PR>& x1l=x1._l; const RawFloat<PR>& x1u=x1._u;
+    const RawFloat<PR>& x2l=x2._l; const RawFloat<PR>& x2u=x2._u;
+    RawFloat<PR> rl,ru;
+    typename RawFloat<PR>::RoundingModeType rnd=RawFloat<PR>::get_rounding_mode();
     if(x1l>=0) {
         if(x2l>=0) {
             rl=mul_down(x1l,x2l); ru=mul_up(x1u,x2u);
@@ -629,9 +630,9 @@ template<class PR> Float<Bounded,PR> mul(Float<Bounded,PR> const& x1, Float<Boun
 }
 
 template<class PR> Float<Bounded,PR> div(Float<Bounded,PR> const& x1, Float<Bounded,PR> const& x2) {
-    const Float64& x1l=x1.lower_raw(); const Float64& x1u=x1.upper_raw();
-    const Float64& x2l=x2.lower_raw(); const Float64& x2u=x2.upper_raw();
-    Float64 rl,ru;
+    const RawFloat<PR>& x1l=x1.lower_raw(); const RawFloat<PR>& x1u=x1.upper_raw();
+    const RawFloat<PR>& x2l=x2.lower_raw(); const RawFloat<PR>& x2u=x2.upper_raw();
+    RawFloat<PR> rl,ru;
 
     // IMPORTANT: Need to be careful when one of the bounds is 0, since if x2l=-0.0 and x1u>0, then x2l>=0 but x1u/x2l=-inf
     if(x2l>0) {
@@ -654,8 +655,8 @@ template<class PR> Float<Bounded,PR> div(Float<Bounded,PR> const& x1, Float<Boun
     }
     else {
         //ARIADNE_THROW(DivideByZeroException,"BoundedFloat div(BoundedFloat x1, BoundedFloat x2)","x1="<<x1<<", x2="<<x2);
-        rl=-Float64::inf();
-        ru=+Float64::inf();
+        rl=-RawFloat<PR>::inf();
+        ru=+RawFloat<PR>::inf();
     }
     return Float<Bounded,PR>(rl,ru);
 }
@@ -673,8 +674,8 @@ template<class PR> Float<Bounded,PR> pow(Float<Bounded,PR> const& x, Int n) {
 template<class PR> Float<Bounded,PR> pow(Float<Bounded,PR> const& x, Nat m) {
     Float<Bounded,PR> y = x;
     if(m%2==0) { y=abs(x); }
-    Float64 rl=pow_down(y.lower_raw(),m);
-    Float64 ru=pow_up(y.upper_raw(),m);
+    RawFloat<PR> rl=pow_down(y.lower_raw(),m);
+    RawFloat<PR> ru=pow_up(y.upper_raw(),m);
     return Float<Bounded,PR>(rl,ru);
 }
 
@@ -692,46 +693,46 @@ template<class PR> Float<Bounded,PR> log(Float<Bounded,PR> const& x) {
 }
 
 
-template<class PR> Float<Bounded,PR> pi_val() { return Float<Bounded,PR>(pi_down(),pi_up()); }
-
+template<class PR> Float<Bounded,PR> pi_val(PR pr) { return Float<Bounded,PR>(pi_down(pr),pi_up(pr)); }
 
 template<class PR> Float<Bounded,PR> sin(Float<Bounded,PR> const& x)
 {
-    return cos(x-half(pi_val<PR>()));
+    return cos(x-half(pi_val<PR>(x.precision())));
 }
 
 template<class PR> Float<Bounded,PR> cos(Float<Bounded,PR> const& x)
 {
     ARIADNE_ASSERT(x.lower_raw()<=x.upper_raw());
-    Float64::RoundingModeType rnd = Float64::get_rounding_mode();
+    typename RawFloat<PR>::RoundingModeType rnd = RawFloat<PR>::get_rounding_mode();
+    PR prec=x.precision();
 
     static const Float<Exact,PR> two(2);
 
-    if(x.error().raw()>2*pi_down()) { return Float<Bounded,PR>(-1.0,+1.0); }
+    if(x.error().raw()>2*pi_down(prec)) { return Float<Bounded,PR>(-1.0,+1.0); }
 
-    Float64 n=floor(x.lower_raw()/(2*pi_approx())+0.5);
-    Float<Bounded,PR> y=x-two*Float<Exact,PR>(n)*pi_val<PR>();
+    auto n=floor(x.lower_raw()/(2*pi_approx(prec))+0.5);
+    Float<Bounded,PR> y=x-two*Float<Exact,PR>(n)*pi_val<PR>(x.precision());
 
-    ARIADNE_ASSERT(y.lower_raw()<=pi_up());
-    ARIADNE_ASSERT(y.upper_raw()>=-pi_up());
+    ARIADNE_ASSERT(y.lower_raw()<=pi_up(prec));
+    ARIADNE_ASSERT(y.upper_raw()>=-pi_up(prec));
 
-    Float64 rl,ru;
-    if(y.lower_raw()<=-pi_down()) {
+    RawFloat<PR> rl,ru;
+    if(y.lower_raw()<=-pi_down(prec)) {
         if(y.upper_raw()<=0.0) { rl=-1.0; ru=cos_up(y.upper_raw()); }
         else { rl=-1.0; ru=+1.0; }
     } else if(y.lower_raw()<=0.0) {
         if(y.upper_raw()<=0.0) { rl=cos_down(y.lower_raw()); ru=cos_up(y.upper_raw()); }
-        else if(y.upper_raw()<=pi_down()) { rl=cos_down(max(-y.lower_raw(),y.upper_raw())); ru=+1.0; }
+        else if(y.upper_raw()<=pi_down(prec)) { rl=cos_down(max(-y.lower_raw(),y.upper_raw())); ru=+1.0; }
         else { rl=-1.0; ru=+1.0; }
-    } else if(y.lower_raw()<=pi_up()) {
-        if(y.upper_raw()<=pi_down()) { rl=cos_down(y.upper_raw()); ru=cos_up(y.lower_raw()); }
-        else if(y.upper_raw()<=2*pi_down()) { rl=-1.0; ru=cos_up(min(y.lower_raw(),sub_down(2*pi_down(),y.upper_raw()))); }
+    } else if(y.lower_raw()<=pi_up(prec)) {
+        if(y.upper_raw()<=pi_down(prec)) { rl=cos_down(y.upper_raw()); ru=cos_up(y.lower_raw()); }
+        else if(y.upper_raw()<=2*pi_down(prec)) { rl=-1.0; ru=cos_up(min(y.lower_raw(),sub_down(2*pi_down(prec),y.upper_raw()))); }
         else { rl=-1.0; ru=+1.0; }
     } else {
         assert(false);
     }
 
-    Float64::set_rounding_mode(rnd);
+    RawFloat<PR>::set_rounding_mode(rnd);
     return Float<Bounded,PR>(rl,ru);
 }
 
@@ -792,46 +793,46 @@ template<class PR> Logical<Validated> operator> (Float<Bounded,PR> const& x1, Fl
 
 template<class PR> Float<Bounded,PR> widen(Float<Bounded,PR> const& x)
 {
-    Float64::RoundingModeType rm=Float64::get_rounding_mode();
-    const Float64& xl=x.lower_raw();
-    const Float64& xu=x.upper_raw();
-    const Float64 m=std::numeric_limits<float>::min();
-    Float64::set_rounding_upward();
-    Float64 wu=add(xu,m);
-    Float64 mwl=add(neg(xl),m);
-    Float64 wl=neg(mwl);
-    Float64::set_rounding_mode(rm);
+    typename RawFloat<PR>::RoundingModeType rm=RawFloat<PR>::get_rounding_mode();
+    const RawFloat<PR>& xl=x.lower_raw();
+    const RawFloat<PR>& xu=x.upper_raw();
+    const RawFloat<PR> m=std::numeric_limits<float>::min();
+    RawFloat<PR>::set_rounding_upward();
+    RawFloat<PR> wu=add(xu,m);
+    RawFloat<PR> mwl=add(neg(xl),m);
+    RawFloat<PR> wl=neg(mwl);
+    RawFloat<PR>::set_rounding_mode(rm);
     assert(wl<xl); assert(wu>xu);
     return Float<Bounded,PR>(wl,wu);
 }
 
 template<class PR> Float<Bounded,PR> narrow(Float<Bounded,PR> const& x)
 {
-    Float64::RoundingModeType rm=Float64::get_rounding_mode();
-    const Float64& xl=x.lower_raw();
-    const Float64& xu=x.upper_raw();
-    const Float64 m=std::numeric_limits<float>::min();
-    Float64::set_rounding_upward();
-    Float64 mnu=add(neg(xu),m);
-    Float64 nu=neg(mnu);
-    Float64 nl=add(xl,m);
-    Float64::set_rounding_mode(rm);
+    typename RawFloat<PR>::RoundingModeType rm=RawFloat<PR>::get_rounding_mode();
+    const RawFloat<PR>& xl=x.lower_raw();
+    const RawFloat<PR>& xu=x.upper_raw();
+    const RawFloat<PR> m=std::numeric_limits<float>::min();
+    RawFloat<PR>::set_rounding_upward();
+    RawFloat<PR> mnu=add(neg(xu),m);
+    RawFloat<PR> nu=neg(mnu);
+    RawFloat<PR> nl=add(xl,m);
+    RawFloat<PR>::set_rounding_mode(rm);
     assert(xl<nl); assert(nu<xu);
     return Float<Bounded,PR>(nl,nu);
 }
 
 template<class PR> Float<Bounded,PR> trunc(Float<Bounded,PR> const& x)
 {
-    Float64::RoundingModeType rm=Float64::get_rounding_mode();
+    typename RawFloat<PR>::RoundingModeType rm=RawFloat<PR>::get_rounding_mode();
     const double& xl=x.lower_raw().get_d();
     const double& xu=x.upper_raw().get_d();
     // Use machine epsilon instead of minimum to move away from zero
     const float fm=std::numeric_limits<float>::epsilon();
     volatile float tu=xu;
-    if(tu<xu) { Float64::set_rounding_upward(); tu+=fm; }
+    if(tu<xu) { RawFloat<PR>::set_rounding_upward(); tu+=fm; }
     volatile float tl=xl;
-    if(tl>xl) { Float64::set_rounding_downward(); tl-=fm; }
-    Float64::set_rounding_mode(rm);
+    if(tl>xl) { RawFloat<PR>::set_rounding_downward(); tl-=fm; }
+    RawFloat<PR>::set_rounding_mode(rm);
     assert(tl<=xl); assert(tu>=xu);
     return Float<Bounded,PR>(double(tl),double(tu));
 }
@@ -868,14 +869,14 @@ template<class PR> Bool same(Float<Bounded,PR> const& x1, Float<Bounded,PR> cons
 template<class PR> OutputStream& operator<<(OutputStream& os, const Float<Bounded,PR>& x)
 {
     //if(x.lower_raw()==x.upper_raw()) { return os << "{" << std::setprecision(Float<Bounded,PR>::output_precision) << x.lower_raw().get_d() << ; }
-    Float64::RoundingModeType rnd=Float64::get_rounding_mode();
+    typename RawFloat<PR>::RoundingModeType rnd=RawFloat<PR>::get_rounding_mode();
     os << '{';
-    Float64::set_rounding_downward();
+    RawFloat<PR>::set_rounding_downward();
     os << std::showpoint << std::setprecision(Float<Bounded,PR>::output_precision) << x.lower().get_d();
     os << ':';
-    Float64::set_rounding_upward();
+    RawFloat<PR>::set_rounding_upward();
     os << std::showpoint << std::setprecision(Float<Bounded,PR>::output_precision) << x.upper().get_d();
-    Float64::set_rounding_mode(rnd);
+    RawFloat<PR>::set_rounding_mode(rnd);
     os << '}';
     return os;
 
@@ -883,7 +884,7 @@ template<class PR> OutputStream& operator<<(OutputStream& os, const Float<Bounde
 
 template<class PR> InputStream& operator>>(InputStream& is, Float<Bounded,PR>& x)
 {
-    Float64 _l,_u;
+    RawFloat<PR> _l,_u;
     char cl,cm,cr;
     is >> cl >> _l >> cm >> _u >> cr;
     ARIADNE_ASSERT(is);
@@ -930,9 +931,9 @@ template<class PR> Float<Bounded,PR> sub(Float<Exact,PR> const& x1, Float<Bounde
 }
 
 template<class PR> Float<Bounded,PR> mul(Float<Bounded,PR> const& x1, Float<Exact,PR> const& x2) {
-    const Float64& x1l=x1.lower_raw(); const Float64& x1u=x1.upper_raw();
-    const Float64& x2v=x2.raw();
-    Float64 rl,ru;
+    const RawFloat<PR>& x1l=x1.lower_raw(); const RawFloat<PR>& x1u=x1.upper_raw();
+    const RawFloat<PR>& x2v=x2.raw();
+    RawFloat<PR> rl,ru;
     if(x2v>=0.0) {
         rl=mul_down(x1l,x2v); ru=mul_up(x1u,x2v);
     } else {
@@ -943,9 +944,9 @@ template<class PR> Float<Bounded,PR> mul(Float<Bounded,PR> const& x1, Float<Exac
 
 
 template<class PR> Float<Bounded,PR> mul(Float<Exact,PR> const& x1, Float<Bounded,PR> const& x2) {
-    const Float64& x1v=x1.raw();
-    const Float64& x2l=x2.lower_raw(); const Float64& x2u=x2.upper_raw();
-    Float64 rl,ru;
+    const RawFloat<PR>& x1v=x1.raw();
+    const RawFloat<PR>& x2l=x2.lower_raw(); const RawFloat<PR>& x2u=x2.upper_raw();
+    RawFloat<PR> rl,ru;
     if(x1v>=0.0) {
         rl=mul_down(x1v,x2l); ru=mul_up(x1v,x2u);
     } else {
@@ -956,18 +957,18 @@ template<class PR> Float<Bounded,PR> mul(Float<Exact,PR> const& x1, Float<Bounde
 
 template<class PR> Float<Bounded,PR> div(Float<Bounded,PR> const& x1, Float<Exact,PR> const& x2)
 {
-    const Float64& x1l=x1.lower_raw();
-    const Float64& x1u=x1.upper_raw();
-    const Float64& x2v=x2.raw();
-    Float64 rl,ru;
+    const RawFloat<PR>& x1l=x1.lower_raw();
+    const RawFloat<PR>& x1u=x1.upper_raw();
+    const RawFloat<PR>& x2v=x2.raw();
+    RawFloat<PR> rl,ru;
     if(x2v>0) {
         rl=div_down(x1l,x2v); ru=div_up(x1u,x2v);
     } else if(x2v<0) {
         rl=div_down(x1u,x2v); ru=div_up(x1l,x2v);
     } else {
         //ARIADNE_THROW(DivideByZeroException,"BoundedFloat div(BoundedFloat const& x1, ExactFloat x2)","x1="<<x1<<", x2="<<x2);
-        rl=-Float64::inf();
-        ru=+Float64::inf();
+        rl=-RawFloat<PR>::inf();
+        ru=+RawFloat<PR>::inf();
     }
     return Float<Bounded,PR>(rl,ru);
 }
@@ -975,14 +976,14 @@ template<class PR> Float<Bounded,PR> div(Float<Bounded,PR> const& x1, Float<Exac
 
 template<class PR> Float<Bounded,PR> div(Float<Exact,PR> const& x1, Float<Bounded,PR> const& x2)
 {
-    const Float64& x1v=x1.raw();
-    const Float64& i2l=x2.lower_raw();
-    const Float64& i2u=x2.upper_raw();
-    Float64 rl,ru;
+    const RawFloat<PR>& x1v=x1.raw();
+    const RawFloat<PR>& i2l=x2.lower_raw();
+    const RawFloat<PR>& i2u=x2.upper_raw();
+    RawFloat<PR> rl,ru;
     if(i2l<=0 && i2u>=0) {
         //ARIADNE_THROW(DivideByZeroException,"BoundedFloat div(ExactFloat const& x1, BoundedFloat x2)","x1="<<x1<<", x2="<<x2);
-        rl=-Float64::inf();
-        ru=+Float64::inf();
+        rl=-RawFloat<PR>::inf();
+        ru=+RawFloat<PR>::inf();
     } else if(x1v>=0) {
         rl=div_down(x1v,i2u); ru=div_up(x1v,i2l);
     } else {
@@ -1155,7 +1156,7 @@ template<class PR> Float<PositiveLower,PR> mig(Float<PositiveLower,PR> const& x)
 template<class PR> Float<PositiveExact,PR> mig(Float<Exact,PR> const& x) {
     return Float<PositiveExact,PR>(abs(x.raw())); }
 template<class PR> Float<PositiveLower,PR> mig(Float<Bounded,PR> const& x) {
-    Float64 r=max(x.lower_raw(),neg(x.upper_raw()));
+    RawFloat<PR> r=max(x.lower_raw(),neg(x.upper_raw()));
     return Float<PositiveLower,PR>(max(r,nul(r))); }
 template<class PR> Float<PositiveApproximate,PR> mig(Float<Approximate,PR> const& x) {
     return Float<PositiveApproximate,PR>(abs(x.raw())); }
@@ -1319,7 +1320,7 @@ template<class PR> std::size_t instantiate_floats() {
 }
 
 template std::size_t instantiate_floats<Precision64>();
-//template std::size_t instantiate_floats<PrecisionMP>();
+template std::size_t instantiate_floats<PrecisionMP>();
 
 //template Bool same<Precision64,Bounded>(BoundedFloat64 const&, BoundedFloat64 const&);
 
@@ -1337,6 +1338,7 @@ template BoundedFloat64 refinement(BoundedFloat64 const&, BoundedFloat64 const&)
 template Bool same(BoundedFloat64 const&, BoundedFloat64 const&);
 
 template MetricFloat64 refinement(MetricFloat64 const&, MetricFloat64 const&);
+template OutputStream& operator<<(OutputStream&, MetricFloat64 const&);
 
 template<> Nat integer_cast<Nat,ApproximateFloat64>(ApproximateFloat64 const& x) {
     return std::round(x.get_d()); }

@@ -39,12 +39,21 @@ class TestParadigm
     Void test_concept();
 };
 
+class TestLogical
+{
+  public:
+    Void test();
+  private:
+    Void test_conversion_to_bool();
+};
+
 
 Int main() {
     std::cout<<std::setprecision(20);
     std::cerr<<std::setprecision(20);
 
     ARIADNE_TEST_CLASS(TestParadigm,TestParadigm());
+    ARIADNE_TEST_CLASS(TestLogical,TestLogical());
 
     return ARIADNE_TEST_FAILURES;
 }
@@ -55,9 +64,6 @@ TestParadigm::test()
 {
     ARIADNE_TEST_CALL(test_concept());
 }
-
-
-
 
 // Test that the type implements all operations of
 // the Float64 concept without testing correctness
@@ -99,4 +105,28 @@ TestParadigm::test_concept()
     ARIADNE_TEST_STATIC_ASSERT(IsSame<Weaken<Effective>,Validated>);
     ARIADNE_TEST_STATIC_ASSERT(IsSame<Weaken<Validated>,Approximate>);
     ARIADNE_TEST_STATIC_ASSERT(IsSame<Weaken<Approximate>,Void>);
+}
+
+Void
+TestLogical::test()
+{
+    ARIADNE_TEST_CALL(test_conversion_to_bool());
+}
+
+Void
+TestLogical::test_conversion_to_bool()
+{
+    ARIADNE_TEST_STATIC_ASSERT(IsConvertible<Logical<Exact>,Bool>);
+    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<Logical<Effective>,Bool>>);
+    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<Logical<EffectiveUpper>,Bool>>);
+    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<Logical<EffectiveLower>,Bool>>);
+    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<Logical<Validated>,Bool>>);
+    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<Logical<Upper>,Bool>>);
+    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<Logical<Lower>,Bool>>);
+    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<Logical<Approximate>,Bool>>);
+    ARIADNE_TEST_STATIC_ASSERT(IsConvertible<Boolean,Bool>);
+    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<Tribool,Bool>>);
+    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<Sierpinski,Bool>>);
+    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<NegSierpinski,Bool>>);
+    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<Fuzzy,Bool>>);
 }

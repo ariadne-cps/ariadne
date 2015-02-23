@@ -742,6 +742,7 @@ Float64 Float64::min(PrecisionType) { return std::numeric_limits<double>::min();
 Float64 Float64::max(PrecisionType) { return std::numeric_limits<double>::max(); }
 Float64 Float64::eps(PrecisionType) { return std::numeric_limits<double>::epsilon(); }
 Float64 Float64::inf(PrecisionType) { return std::numeric_limits<double>::infinity(); }
+Float64 Float64::nan(PrecisionType) { return std::numeric_limits<double>::quiet_NaN(); }
 
 template<> Nat integer_cast<Nat,Float64>(Float64 const& x) { return x.dbl; }
 template<> Int integer_cast<Int,Float64>(Float64 const& x) { return x.dbl; }

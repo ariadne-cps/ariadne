@@ -1269,6 +1269,7 @@ template<class PR> OutputStream& operator<<(OutputStream& os, Float<PositiveUppe
 
 template<class PR> Float<PositiveLower,PR> mig(Float<PositiveLower,PR> const& x) {
     return Float<PositiveLower,PR>(abs(x._l)); }
+
 template<class PR> Float<PositiveLower,PR> rec(Float<PositiveUpper,PR> const& x) {
     return Float<PositiveLower,PR>(rec_down(x._u));
 }
@@ -1366,6 +1367,9 @@ template class Float<Exact,Precision64>;
 template Float<Lower,PrecisionMP>::Float(Float<Bounded,PrecisionMP>const&);
 template Float<Upper,PrecisionMP>::Float(Float<Bounded,PrecisionMP>const&);
 
+template<class T> class Dynamic { public: virtual ~Dynamic() = default; };
+template<class T> String mangled_class_name() { Dynamic<T>* p; return typeid(p).name(); }
+
 template<class P, class PR> std::size_t instantiate_float() {
     using std::size_t;
     typedef OutputStream OS;
@@ -1445,10 +1449,11 @@ template<class PR> std::size_t instantiate_floats() {
 template std::size_t instantiate_floats<Precision64>();
 template std::size_t instantiate_floats<PrecisionMP>();
 
-//template Bool same<Precision64,Bounded>(BoundedFloat64 const&, BoundedFloat64 const&);
-
 template ExactFloat64 operator* <Precision64,Exact>(ExactFloat64 const&, TwoExp);
 template ExactFloat64 operator/ <Precision64,Exact>(ExactFloat64 const&, TwoExp);
+
+template PositiveUpperFloat64 abs(PositiveUpperFloat64 const&);
+template PositiveUpperFloatMP abs(PositiveUpperFloatMP const&);
 
 template BoundedFloat64 round<Precision64,Bounded>(BoundedFloat64 const&);
 template ApproximateFloat64 round<Precision64,Approximate>(ApproximateFloat64 const&);

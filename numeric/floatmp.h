@@ -83,6 +83,7 @@ class FloatMP {
     static Void set_default_precision(PrecisionType prec);
     static PrecisionType get_default_precision();
   public:
+    static FloatMP nan(PrecisionType=get_default_precision());
     static FloatMP inf(PrecisionType=get_default_precision());
     static FloatMP max(PrecisionType=get_default_precision());
     static FloatMP eps(PrecisionType=get_default_precision());
@@ -153,8 +154,19 @@ class FloatMP {
     friend FloatMP mag(FloatMP const& x, RoundingModeType=get_rounding_mode());
 
     friend Bool is_nan(FloatMP const& x);
+    friend Bool is_inf(FloatMP const& x);
 
     friend Comparison cmp(FloatMP const& x1, FloatMP const& x2);
+
+    // Mixed operations
+    friend FloatMP add(FloatMP const& x1, Dbl x2, RoundingModeType=get_rounding_mode());
+    friend FloatMP sub(FloatMP const& x1, Dbl x2, RoundingModeType=get_rounding_mode());
+    friend FloatMP mul(FloatMP const& x1, Dbl x2, RoundingModeType=get_rounding_mode());
+    friend FloatMP div(FloatMP const& x1, Dbl x2, RoundingModeType=get_rounding_mode());
+    friend FloatMP add(Dbl x1, FloatMP const& x2, RoundingModeType=get_rounding_mode());
+    friend FloatMP sub(Dbl x1, FloatMP const& x2, RoundingModeType=get_rounding_mode());
+    friend FloatMP mul(Dbl x1, FloatMP const& x2, RoundingModeType=get_rounding_mode());
+    friend FloatMP div(Dbl x1, FloatMP const& x2, RoundingModeType=get_rounding_mode());
 
     // Operators
     friend FloatMP operator+(FloatMP const& x);
@@ -177,6 +189,17 @@ class FloatMP {
 
     friend OutputStream& operator<<(OutputStream& os, FloatMP const&);
     friend InputStream& operator>>(InputStream& is, FloatMP&);
+
+    // Mixed operators
+    friend FloatMP operator+(FloatMP const& x1, Dbl x2);
+    friend FloatMP operator-(FloatMP const& x1, Dbl x2);
+    friend FloatMP operator*(FloatMP const& x1, Dbl x2);
+    friend FloatMP operator/(FloatMP const& x1, Dbl x2);
+    friend FloatMP operator+(Dbl x1, FloatMP const& x2);
+    friend FloatMP operator-(Dbl x1, FloatMP const& x2);
+    friend FloatMP operator*(Dbl x1, FloatMP const& x2);
+    friend FloatMP operator/(Dbl x1, FloatMP const& x2);
+
 };
 
 template<class R, class A> R integer_cast(const A& a);

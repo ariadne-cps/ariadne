@@ -95,6 +95,7 @@ class Float64 {
     Precision64 precision() const;
     Void set_precision(Precision64);
   public:
+    static Float64 nan(Precision64 pr = get_default_precision());
     static Float64 inf(Precision64 pr = get_default_precision());
     static Float64 max(Precision64 pr = get_default_precision());;
     static Float64 eps(Precision64 pr = get_default_precision());
@@ -102,6 +103,7 @@ class Float64 {
   public:
     //! \brief Default constructor creates an uninitialised number.
     Float64() : dbl() { }
+    Float64(Precision64) : dbl() { }
     //! \brief Convert from a built-in double-precision floating-point number.
     Float64(double x) : dbl(x) { }
     Float64(double x, Precision64) : dbl(x) { }

@@ -277,7 +277,6 @@ TestValidatedFloat::test_constructors()
 
     // Constructor with approximations
     ValidatedFloat64 xd3(Rational(21,10));
-    cout<<xd3<<std::endl;
     ARIADNE_TEST_COMPARE(Rational(xd3.lower_raw()),<,Rational(21,10));
     ARIADNE_TEST_COMPARE(Rational(xd3.upper_raw()),>,Rational(21,10));
 

@@ -420,7 +420,6 @@ template<class PR> class Float<PositiveUpper,PR> : public Float<Upper,PR> {
     Float<PositiveUpper,PR>(Float<PositiveExact,PR> const& x) : Float<Upper,PR>(x) { }
 };
 template<class PR> Float<PositiveUpper,PR> abs(Float<PositiveUpper,PR> const&);
-template<class PR> Float<Upper,PR> log(Float<PositiveUpper,PR> const&);
 
 template<class PR> class Float<PositiveLower,PR> : public Float<Lower,PR> {
   public:
@@ -517,7 +516,7 @@ sqrt(Float<P,PR> const&) -> Float<Widen<P>,PR>;
 template<class PR, class P> auto
 exp(Float<P,PR> const&) -> Float<Widen<P>,PR>;
 template<class PR, class P> auto
-log(Float<P,PR> const&) -> Float<Widen<P>,PR>;
+log(Float<P,PR> const&) -> Float<Widen<Signed<P>>,PR>;
 template<class PR, class P> auto
 sin(Float<P,PR> const&) -> Float<Widen<Unorder<P>>,PR>;
 template<class PR, class P> auto
@@ -537,17 +536,8 @@ floor(Float<P,PR> const& x) -> Float<P,PR>;
 template<class PR, class P> auto
 round(Float<P,PR> const& x) -> Float<P,PR>;
 
-//template<class PR, class P> auto mag(Float<P,PR> const& x) -> Float<Unsigned<Weaker<P,Upper>>,PR>;
-//template<class PR, class P> auto mig(Float<P,PR> const& x) -> Float<Unsigned<Weaker<P,Lower>>,PR>;
-template<class PR> auto mag(Float<Exact,PR> const& x) -> Float<PositiveExact,PR>;
-template<class PR> auto mag(Float<Bounded,PR> const& x) -> Float<PositiveUpper,PR>;
-template<class PR> auto mag(Float<Approximate,PR> const& x) -> Float<PositiveApproximate,PR>;
-template<class PR> auto mig(Float<Exact,PR> const& x) -> Float<PositiveExact,PR>;
-template<class PR> auto mig(Float<Bounded,PR> const& x) -> Float<PositiveLower,PR>;
-template<class PR> auto mig(Float<Approximate,PR> const& x) -> Float<PositiveApproximate,PR>;
-
-template<class PR> auto mag(Float<PositiveUpper,PR> const& x) -> Float<PositiveUpper,PR>;
-template<class PR> auto mig(Float<PositiveLower,PR> const& x) -> Float<PositiveLower,PR>;
+template<class PR, class P> auto mag(Float<P,PR> const& x) -> Float<Unsigned<Weaker<P,Upper>>,PR>;
+template<class PR, class P> auto mig(Float<P,PR> const& x) -> Float<Unsigned<Weaker<P,Lower>>,PR>;
 
 template<class PR, class P> auto is_zero(Float<P,PR> const&) -> Logical<Weaker<P,Opposite<P>>>;
 template<class PR, class P> auto is_positive(Float<P,PR> const&) -> Logical<Opposite<P>>;
@@ -658,21 +648,6 @@ extern const Float<Exact,Precision64> infty;
 
 template<class P1, class P2, class PR> Float<Weaker<P1,P2>,PR> w(Float<P1,PR> x1, Float<P2,PR> x2) {
     return Float<Weaker<P1,P2>,PR>(x1); }
-
-inline void foo() {
-    typedef Precision64 PR;
-    Float<Exact,PR> exf; Float<Metric,PR> mef; Float<Bounded,PR> bof;
-    Float<Upper,PR> upf; Float<Lower,PR> lof; Float<Approximate,PR> apf;
-    exf=w(exf,exf); mef=w(exf,mef); bof=w(exf,bof); upf=w(exf,upf); lof=w(exf,lof); apf=w(exf,apf);
-    mef=w(mef,exf); mef=w(mef,mef); bof=w(mef,bof); upf=w(mef,upf); lof=w(mef,lof); apf=w(mef,apf);
-    bof=w(bof,exf); bof=w(bof,mef); bof=w(bof,bof); upf=w(bof,upf); lof=w(bof,lof); apf=w(bof,apf);
-    upf=w(upf,exf); upf=w(upf,mef); upf=w(upf,bof); upf=w(upf,upf); apf=w(upf,lof); apf=w(upf,apf);
-    lof=w(lof,exf); lof=w(lof,mef); lof=w(lof,bof); apf=w(lof,upf); lof=w(lof,lof); apf=w(lof,apf);
-    apf=w(apf,exf); apf=w(apf,mef); apf=w(apf,bof); apf=w(apf,upf); apf=w(apf,lof); apf=w(apf,apf);
-    Float<PositiveUpper,PR> pupf(upf);
-    pupf-lof;
-}
-
 
 
 // Literals operations

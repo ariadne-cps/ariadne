@@ -281,6 +281,13 @@ PositiveValidatedUpper unsigned_paradigm(ValidatedUpper);
 PositiveValidatedLower unsigned_paradigm(ValidatedLower);
 PositiveApproximate unsigned_paradigm(Approximate);
 
+template<class T> T signed_paradigm(T);
+Exact signed_paradigm(PositiveExact);
+EffectiveUpper signed_paradigm(PositiveEffectiveUpper);
+ValidatedUpper signed_paradigm(PositiveValidatedUpper);
+ValidatedLower signed_paradigm(PositiveValidatedLower);
+Approximate signed_paradigm(PositiveApproximate);
+
 }
 
 template<bool b> using BooleanConstant = std::integral_constant<bool,b>;
@@ -364,6 +371,7 @@ template<class P> using Inverted = decltype(Detail::invert_paradigm(declval<P>()
 template<class P> using Opposite = decltype(Detail::negate_paradigm(declval<P>()));
 template<class P> using Generic = decltype(Detail::strengthen_paradigm(declval<P>()));
 template<class P> using Unsigned = decltype(Detail::unsigned_paradigm(declval<P>()));
+template<class P> using Signed = decltype(Detail::signed_paradigm(declval<P>()));
 template<class P> using Unorder = Weaker<P,Opposite<P>>;
 
 //! \ingroup ParadigmSubModule

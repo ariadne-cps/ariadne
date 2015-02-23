@@ -44,7 +44,10 @@ class TestLogical
   public:
     Void test();
   private:
+    Void test_concept();
     Void test_conversion_to_bool();
+    Void test_conversion();
+    Void test_disjunction();
 };
 
 
@@ -111,6 +114,29 @@ Void
 TestLogical::test()
 {
     ARIADNE_TEST_CALL(test_conversion_to_bool());
+    ARIADNE_TEST_CALL(test_conversion());
+}
+
+Void
+TestLogical::test_concept()
+{
+    // Check to see if we can perform operations on computational and specification logical types
+    Logical<Exact> xl(true);
+    Logical<Effective> el(true);
+    Logical<Validated> vl(true);
+    Effort eff(0);
+
+    vl=el.check(eff);
+    vl=check(el,eff);
+
+    vl=indeterminate;
+    vl=Logical<Validated>(LogicalValue::LIKELY);
+
+    xl = xl && xl;
+    el = xl && el;
+    vl = xl && vl;
+    el = el && el;
+    vl = vl && vl;
 }
 
 Void
@@ -124,9 +150,43 @@ TestLogical::test_conversion_to_bool()
     ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<Logical<Upper>,Bool>>);
     ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<Logical<Lower>,Bool>>);
     ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<Logical<Approximate>,Bool>>);
+
     ARIADNE_TEST_STATIC_ASSERT(IsConvertible<Boolean,Bool>);
     ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<Tribool,Bool>>);
     ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<Sierpinski,Bool>>);
     ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<NegSierpinski,Bool>>);
     ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<Fuzzy,Bool>>);
 }
+
+Void
+TestLogical::test_conversion()
+{
+    if(IsConvertible<Logical<Effective>,Logical<Validated>>::value) {
+        ARIADNE_TEST_NOTIFY("Effective logical types may be converted to values using default Effort.");
+    } else if(IsConvertible<Logical<Effective>,Logical<Validated>>::value) {
+        ARIADNE_TEST_NOTIFY("Effective logical types may be explicitly converted to values using default Effort.");
+    } else {
+        ARIADNE_TEST_NOTIFY("Effective logical types cannot be converted to values; the Effort used must be specified.");
+    }
+
+    try {
+        if(decide(indeterminate)) {
+            ARIADNE_TEST_NOTIFY("decide(...) is true on INDETERMINATE value.");
+        } else {
+            ARIADNE_TEST_NOTIFY("decide(...) is false on INDETERMINATE value.");
+        }
+    } catch(...) {
+        ARIADNE_TEST_NOTIFY("decide(...) is throws error on INDETERMINATE value.");
+    }
+
+    ARIADNE_TEST_CONSTRUCT(Logical<Validated>,vl,(LogicalValue::LIKELY))
+    ARIADNE_TEST_EQUAL(definitely(vl),false);
+    ARIADNE_TEST_EQUAL(possibly(vl),true);
+    ARIADNE_TEST_EQUAL(decide(vl),true);
+
+    ARIADNE_TEST_CONSTRUCT(Logical<Validated>,vi,(LogicalValue::INDETERMINATE))
+    ARIADNE_TEST_EQUAL(definitely(vl),false);
+    ARIADNE_TEST_EQUAL(possibly(vl),true);
+}
+
+

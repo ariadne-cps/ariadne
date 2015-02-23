@@ -27,10 +27,17 @@
 
 #include "utility/stdlib.h"
 #include "utility/string.h"
+#include "expression/templates.h"
 
 #include "logical.h"
 
 namespace Ariadne {
+
+namespace{
+inline LogicalValue operator!(LogicalValue lv) { return negation(lv); }
+inline LogicalValue operator&&(LogicalValue lv1, LogicalValue lv2) { return disjunction(lv1,lv2); }
+inline LogicalValue operator||(LogicalValue lv1, LogicalValue lv2) { return conjunction(lv1,lv2); }
+} // namespace
 
 class LogicalConstant : public LogicalInterface {
     LogicalValue _v;
@@ -38,6 +45,42 @@ class LogicalConstant : public LogicalInterface {
     LogicalConstant(LogicalValue v) : _v(v) { };
     virtual LogicalValue _check(Effort e) const { return _v; }
     virtual OutputStream& _write(OutputStream& os) const { return os << this->_v; }
+};
+
+template<class OP, class... ARGS> struct LogicalExpression;
+
+template<class OP, class ARG> struct LogicalExpression<OP,ARG>
+    : virtual LogicalInterface, ExpressionTemplate<OP,ARG>
+{
+    using ExpressionTemplate<OP,ARG>::ExpressionTemplate;
+    virtual LogicalValue _check(Effort e) const { return this->_op(check(this->_arg,e)); }
+    virtual OutputStream& _write(OutputStream& os) const {
+        return os << static_cast<ExpressionTemplate<OP,ARG>const&>(*this); }
+};
+
+template<class OP, class ARG1, class ARG2> struct LogicalExpression<OP,ARG1,ARG2>
+    : virtual LogicalInterface, ExpressionTemplate<OP,ARG1,ARG2>
+{
+    using ExpressionTemplate<OP,ARG1,ARG2>::ExpressionTemplate;
+    virtual LogicalValue _check(Effort e) const { return this->_op(check(this->_arg1,e),check(this->_arg2,e)); }
+    virtual OutputStream& _write(OutputStream& os) const {
+        return os << static_cast<ExpressionTemplate<OP,ARG1,ARG2>const&>(*this); }
+};
+
+LogicalHandle::LogicalHandle(LogicalValue l)
+    : _ptr(std::make_shared<LogicalConstant>(l)) {
+}
+
+LogicalHandle disjunction(LogicalHandle l1, LogicalHandle l2) {
+    return LogicalHandle(std::make_shared<LogicalExpression<AndOp,LogicalHandle,LogicalHandle>>(AndOp(),l1,l2));
+};
+
+LogicalHandle conjunction(LogicalHandle l1, LogicalHandle l2) {
+    return LogicalHandle(std::make_shared<LogicalExpression<OrOp,LogicalHandle,LogicalHandle>>(OrOp(),l1,l2));
+};
+
+LogicalHandle negation(LogicalHandle l) {
+    return LogicalHandle(std::make_shared<LogicalExpression<NotOp,LogicalHandle>>(NotOp(),l));
 };
 
 LogicalValue equal(LogicalValue l1, LogicalValue l2) {

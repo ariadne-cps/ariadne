@@ -44,9 +44,6 @@ class Effort {
 };
 
 template<class P> class Logical;
-template<> class Logical<Effective>;
-
-
 
 //!  \ingroup LogicalTypes
 //! \brief An enumeration containing the possible values of a logical variable.
@@ -71,6 +68,32 @@ inline LogicalValue check(LogicalValue l) { return l; }
 
 OutputStream& operator<<(OutputStream& os, LogicalValue b);
 
+class LogicalHandle;
+LogicalValue check(LogicalHandle const& l, Effort e=Effort::get_default());
+
+class LogicalInterface {
+    friend LogicalValue check(LogicalHandle const& l, Effort e);
+    friend OutputStream& operator<<(OutputStream& os, LogicalHandle const& l);
+  public:
+    virtual ~LogicalInterface() = default;
+  private:
+    virtual LogicalValue _check(Effort) const = 0;
+    virtual OutputStream& _write(OutputStream&) const = 0;
+};
+
+class LogicalHandle {
+    SharedPointer<const LogicalInterface> _ptr;
+  public:
+    explicit LogicalHandle(SharedPointer<const LogicalInterface> p) : _ptr(p) { }
+    explicit LogicalHandle(LogicalValue v);
+    friend LogicalHandle disjunction(LogicalHandle l1, LogicalHandle l2);
+    friend LogicalHandle conjunction(LogicalHandle l1, LogicalHandle l2);
+    friend LogicalHandle negation(LogicalHandle l);
+    friend LogicalValue check(LogicalHandle const& l, Effort e) { return l._ptr->_check(e); }
+    friend OutputStream& operator<<(OutputStream& os, LogicalHandle const& l) { return l._ptr->_write(os); }
+};
+
+
 template<class P> class LogicalFacade {
 };
 
@@ -78,6 +101,9 @@ template<> class LogicalFacade<Exact> {
   public:
     operator Bool () const;
 };
+
+
+template<> class Logical<Effective>;
 
 //!  \ingroup LogicalTypes
 //!  \brief A logical variable for the paradigm \a P, which must be %Exact, %Validated, %Upper, %Lower or %Approximate.
@@ -150,27 +176,6 @@ template<> inline Logical<Lower>::Logical(LogicalValue v)
     : _v(v==LogicalValue::TRUE?LogicalValue::LIKELY:v) { }
 template<> inline Logical<Approximate>::Logical(LogicalValue v)
     : _v(v==LogicalValue::TRUE?LogicalValue::LIKELY:v==LogicalValue::FALSE?LogicalValue::UNLIKELY:v) { }
-class LogicalHandle;
-LogicalValue check(LogicalHandle const& l, Effort e=Effort::get_default());
-
-class LogicalInterface {
-    friend LogicalValue check(LogicalHandle const& l, Effort e);
-    friend OutputStream& operator<<(OutputStream& os, LogicalHandle const& l);
-  public:
-    virtual ~LogicalInterface() = default;
-  private:
-    virtual LogicalValue _check(Effort) const = 0;
-    virtual OutputStream& _write(OutputStream&) const = 0;
-};
-
-class LogicalHandle {
-    SharedPointer<const LogicalInterface> _ptr;
-  public:
-    explicit LogicalHandle(SharedPointer<const LogicalInterface> p) : _ptr(p) { }
-    explicit LogicalHandle(LogicalValue v);
-    friend LogicalValue check(LogicalHandle const& l, Effort e) { return l._ptr->_check(e); }
-    friend OutputStream& operator<<(OutputStream& os, LogicalHandle const& l) { return l._ptr->_write(os); }
-};
 
 template<> class Logical<Effective>
 {
@@ -178,10 +183,17 @@ template<> class Logical<Effective>
     template<class P> friend class Logical;
   public:
     explicit Logical<Effective>(SharedPointer<const LogicalInterface> p) : _v(p) { }
+    explicit Logical<Effective>(LogicalHandle h) : _v(h) { }
     template<class B, EnableIf<IsSame<B,Bool>> =dummy> Logical(B b) : Logical(Logical<Exact>(b)) { }
-    Logical<Effective>(Logical<Exact> l);
+    Logical<Effective>(Logical<Exact> l) : _v(static_cast<LogicalValue>(l)) { };
     Logical<Validated> check(Effort e) const { return Logical<Validated>(Ariadne::check(_v,e)); }
     friend Logical<Validated> check(Logical<Effective> l, Effort e) { return Logical<Validated>(Ariadne::check(l._v,e)); }
+    friend Logical<Effective> operator&&(Logical<Effective> l1, Logical<Effective> l2) {
+        return Logical<Effective>(disjunction(l1._v,l2._v)); }
+    friend Logical<Effective> operator||(Logical<Effective> l1, Logical<Effective> l2) {
+        return Logical<Effective>(conjunction(l1._v,l2._v)); }
+    friend Logical<Effective> operator!(Logical<Effective> l) {
+        return Logical<Effective>(negation(l._v)); }
     friend Bool decide(Logical<Effective> l, Effort e=Effort::get_default()) { return decide(l.check(e)); }
     friend Bool definitely(Logical<Effective> l, Effort e=Effort::get_default()) { return definitely(l.check(e)); }
     friend Bool possibly(Logical<Effective> l, Effort e=Effort::get_default()) { return possibly(l.check(e)); }

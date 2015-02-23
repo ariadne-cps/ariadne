@@ -355,6 +355,9 @@ inline double sub_opp(double x, double y) { volatile double t=(-x)+y; return -t;
 inline double mul_opp(double x, double y) { volatile double t=(-x)*y; return -t; }
 inline double div_opp(double x, double y) { volatile double t=(-x)/y; return -t; }
 
+double neg_rec_rnd(double x) { return (-1.0)/(volatile double&)x; }
+double neg_rec_opp(double x) { volatile double t=1.0/x; return -t; }
+
 
 double cos_rnd(double x) {
     const double pi_rnd=Ariadne::pi_rnd();
@@ -577,33 +580,21 @@ double tan_rnd_series(double x) {
 double atan_rnd_series(double x) {
     // atan(x) = \sum_{n=0}^{\infty} (-1)^n/(2n+1) x^{2n+1}
     assert(std::abs(x)<0.5);
-    volatile double c,s,w,r;
+    static const long long int c[19]={ 1LL, -3LL, 5LL, -7LL, 9LL, -11LL, 13LL, -15LL, 17LL, -19LL, 21LL, -23LL, 25LL, -27LL, 29LL, -31LL, 33LL, -35LL, 37LL };
+
+    volatile double s,w,r;
     if(x>=0) {
-        Int n=16;
-        s=x*x;
-        w=double(1.0/(2*n+1));
-        for(Int i=n-1; i>=0; --i) {
-            double sgn=(i%2 ? -1.0 : 1.0);
-            c=double(sgn/(2*i+1));
-            w=c+s*w;
-        }
+        s=mul_rnd(x,x);
+        w=horner_rnd(18,s,c);
         r=x*w;
     } else {
-        Int n=16;
-        s=(-x)*x; s=-s;
-        w=double(-1.0/(2*n+1));
-        for(Int i=n; i>=0; --i) {
-            double sgn=(i%2 ? 1.0 : -1.0);
-            c=double(sgn/(2*i+1));
-            w=c+s*w;
-        }
-        r=x*(-w);
+        s=mul_opp(x,x);
+        w=horner_opp(17,s,c);
+        r=x*w;
     }
   //  std::cerr<<" {atan_rnd_series("<<x<<")="<<r<<"} ";
     return r;
 }
-
-double neg_rec_rnd(double x) { return (-1.0)/x; }
 
 double atan_rnd(double x) {
     // use range reduction
@@ -616,18 +607,25 @@ double atan_rnd(double x) {
     // atan(x) = 2*atan(c) where c = x/(1+sqrt(1+x^2))
 
     // For x in [0,1], perform range reduction twice
-    // First, take c=sqrt(2)-1, reducing x to [0,c]
+    // First, take c=sqrt(2)-1~=0.4142, reducing x to [0,c]
+    // Then, take d=c/(1+sqrt(1+c^2))~=0.1989, reducing x to [0,d]
 
     if(x>1.0) { return pi_rnd()/2+atan_rnd(-1.0/x); }
-    if(x<-1.0) { return -pi_rnd()/2+atan_rnd(-1.0/x); }
+    if(x<-1.0) { return -pi_opp()/2+atan_rnd(-1.0/x); }
 
-    // set c=sqrt(2)-1 for maximal range reduction
-//    static const long double c=53.0/128;
-//    static const double atan_c=0.392570135011829;
-    static const long double c=0.414213562373095048801689l;
-    static const long double d     =0.198912367379658006911598l;
-    static const long double atan_c=0.392699081698724154807830l;
-    static const long double atan_d=0.196349540849362077403915l;
+    // The values below are closest values for c=sqrt(2)-1 and d=c/(1+sqrt(1+c^2))
+    //  static const long double c=0.414213562373095048801689l;
+    //  static const long double d=0.198912367379658006911598l;
+    //  static const long double atan_c=0.392699081698724154807830l;
+    //  static const long double atan_d=0.196349540849362077403915l;
+
+    // TODO: Check if method below is sound i.e. error in c does not give error in result
+    // The values below are can be taked as exact values for approximately given c and d
+    static const double atan_c=0.392699081698724139;
+    static const double atan_d=0.196349540849362077;
+
+    static const long double c=0.41421356237309503087445222702100977585359942167997360229492187500l;
+    static const long double d=0.198912367379657998957341417944899575331874075345695018768310546875l;
 
     volatile long double neg_c=-c;
     volatile long double neg_d=-d;
@@ -639,7 +637,7 @@ double atan_rnd(double x) {
     } else if(x<-c) {
         volatile double t=-1.0+c*x;
         volatile double r=-1.0/t;
-        return -atan_c + atan_rnd((x+c)*r);
+        return (-atan_c) + atan_rnd((x+c)*r);
     } else if(x>d) {
         volatile double t=-1.0+neg_d*x;
         volatile double r=-1.0/t;
@@ -647,7 +645,7 @@ double atan_rnd(double x) {
     } else if(x<-d) {
         volatile double t=-1.0+d*x;
         volatile double r=-1.0/t;
-        return -atan_d + atan_rnd((x+d)*r);
+        return (-atan_d) + atan_rnd((x+d)*r);
     }
     return atan_rnd_series(x);
 

@@ -396,6 +396,12 @@ template<class PR> inline Float<Exact,PR> value(Float<Bounded,PR> const& x) {
 template<class PR> inline Float<Error,PR> error(Float<Bounded,PR> const& x) {
     return x.error(); }
 
+template<class PR> inline const Float<Exact,PR> Float<Metric,PR>::value() const {
+    return Float<Exact,PR>(this->_v); }
+
+template<class PR> inline const Float<Error,PR> Float<Metric,PR>::error() const {
+    return Float<Error,PR>(this->_e); }
+
 
 template<class PR> class Float<PositiveExact,PR> : public Float<Exact,PR> {
   public:
@@ -509,7 +515,7 @@ div(Float<P,PR> const&, Float<Inverted<P>,PR> const&) -> Float<Widen<P>,PR>;
 template<class PR, class P> auto
 pow(Float<P,PR> const&, Nat m) -> Float<Widen<P>,PR>;
 template<class PR, class P> auto
-pow(Float<P,PR> const&, Int n) -> Float<Widen<Unorder<P>>,PR>;
+pow(Float<P,PR> const&, Int n) -> Float<Widen<Undirect<P>>,PR>;
 
 template<class PR, class P> auto
 sqrt(Float<P,PR> const&) -> Float<Widen<P>,PR>;

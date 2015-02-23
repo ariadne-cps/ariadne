@@ -926,6 +926,133 @@ template<class PR> InputStream& operator>>(InputStream& is, Float<Bounded,PR>& x
 
 
 
+
+template<class PR> Float<Metric,PR> nul(Float<Metric,PR> const& x) {
+    return Float<Metric,PR>(nul(x._v),nul(x._e));
+}
+
+template<class PR> Float<Metric,PR> pos(Float<Metric,PR> const& x) {
+    return Float<Metric,PR>(pos(x._v),x._e);
+}
+
+template<class PR> Float<Metric,PR> neg(Float<Metric,PR> const& x) {
+    return Float<Metric,PR>(neg(x._v),x._e);
+}
+
+template<class PR> Float<Metric,PR> half(Float<Metric,PR> const& x) {
+    return Float<Metric,PR>(half(x._v),half(x._e));
+}
+
+template<class PR> Float<Metric,PR> sqr(Float<Metric,PR> const& x) {
+    Float<Metric,PR> r=x*x;
+    if(r._e>r._v) {
+        r._e=half(add_up(r._e,r._v));
+        r._v=r._e;
+    }
+    return r;
+}
+
+template<class PR> Float<Metric,PR> rec(Float<Metric,PR> const& x) {
+    auto ru=rec_up(add_down(x._v,x._e));
+    auto rl=rec_down(add_down(x._v,x._e));
+    auto re=half(sub_up(ru,rl));
+    auto rv=half(add_near(rl,ru));
+    return Float<Metric,PR>(rv,re);
+}
+
+template<class PR> Float<Metric,PR> add(Float<Metric,PR> const& x, Float<Metric,PR> y) {
+    auto rv=add_near(x._v,y._v);
+    auto ru=add_up(x._v,y._v);
+    auto rl=add_down(x._v,y._v);
+    auto re=add_up(half(sub_up(ru,rl)),add_up(x._e,y._e));
+    return Float<Metric,PR>(rv,re);
+}
+
+template<class PR> Float<Metric,PR> sub(Float<Metric,PR> const& x, Float<Metric,PR> y) {
+    auto rv=sub_near(x._v,y._v);
+    auto ru=sub_up(x._v,y._v);
+    auto rl=sub_down(x._v,y._v);
+    auto re=add_up(half(sub_up(ru,rl)),add_up(x._e,y._e));
+    return Float<Metric,PR>(rv,re);
+}
+
+template<class PR> Float<Metric,PR> mul(Float<Metric,PR> const& x, Float<Metric,PR> y) {
+    auto rv=mul_near(x._v,y._v);
+    auto ru=mul_up(x._v,y._v);
+    auto rl=mul_down(x._v,y._v);
+    auto re1=add_up(half(sub_up(ru,rl)),mul_up(x._e,y._e));
+    auto re2=add_up(mul_up(abs(x._v),y._e),mul_up(x._e,abs(y._v)));
+    auto re=add_up(re1,re2);
+    return Float<Metric,PR>(rv,re);
+}
+
+template<class PR> Float<Metric,PR> div(Float<Metric,PR> const& x, Float<Metric,PR> y) {
+    return x*rec(y);
+}
+
+template<class PR> Float<Metric,PR> pow(Float<Metric,PR> const& x, Nat m) {
+    return Float<Metric,PR>(pow(Float<Bounded,PR>(x),m));
+}
+
+template<class PR> Float<Metric,PR> pow(Float<Metric,PR> const& x, Int n) {
+    return Float<Metric,PR>(pow(Float<Bounded,PR>(x),n));
+}
+
+template<class PR> Float<Metric,PR> sqrt(Float<Metric,PR> const& x) {
+    return Float<Metric,PR>(sqrt(Float<Bounded,PR>(x)));
+}
+
+template<class PR> Float<Metric,PR> exp(Float<Metric,PR> const& x) {
+    return Float<Metric,PR>(exp(Float<Bounded,PR>(x)));
+}
+
+template<class PR> Float<Metric,PR> log(Float<Metric,PR> const& x) {
+    return Float<Metric,PR>(log(Float<Bounded,PR>(x)));
+}
+
+template<class PR> Float<Metric,PR> sin(Float<Metric,PR> const& x) {
+    return Float<Metric,PR>(sin(Float<Bounded,PR>(x)));
+}
+
+template<class PR> Float<Metric,PR> cos(Float<Metric,PR> const& x) {
+    return Float<Metric,PR>(cos(Float<Bounded,PR>(x)));
+}
+
+template<class PR> Float<Metric,PR> tan(Float<Metric,PR> const& x) {
+    return Float<Metric,PR>(tan(Float<Bounded,PR>(x)));
+}
+
+template<class PR> Float<Metric,PR> asin(Float<Metric,PR> const& x) {
+    return Float<Metric,PR>(asin(Float<Bounded,PR>(x)));
+}
+
+template<class PR> Float<Metric,PR> acos(Float<Metric,PR> const& x) {
+    return Float<Metric,PR>(acos(Float<Bounded,PR>(x)));
+}
+
+template<class PR> Float<Metric,PR> atan(Float<Metric,PR> const& x) {
+    return Float<Metric,PR>(atan(Float<Bounded,PR>(x)));
+}
+
+
+template<class PR> Float<Metric,PR> abs(Float<Metric,PR> const& x) {
+    if(x._e<abs(x._v)) { return x; }
+    else { auto rv=half(abs(x._v)+x._e); return Float<Metric,PR>(rv,rv); }
+}
+
+template<class PR> Float<Metric,PR> max(Float<Metric,PR> const& x1, Float<Metric,PR> const& x2) {
+    return half((x1+x2)+abs(x1-x2));
+}
+
+template<class PR> Float<Metric,PR> min(Float<Metric,PR> const& x1, Float<Metric,PR> const& x2) {
+    return half((x1+x2)-abs(x1-x2));
+}
+
+template<class PR> OutputStream& operator<<(OutputStream& os, Float<Metric,PR> const& x) {
+    return os << x.value() << x.error();
+}
+
+
 // Mixed Bounded - Exact operations
 template<class PR> Float<Bounded,PR> add(Float<Bounded,PR> const& x1, Float<Exact,PR> const& x2) {
     return Float<Bounded,PR>(add_down(x1._l,x2._v),add_up(x1._u,x2._v));
@@ -1004,6 +1131,9 @@ template<class PR> Float<Bounded,PR> div(Float<Exact,PR> const& x1, Float<Bounde
     }
     return Float<Bounded,PR>(rl,ru);
 }
+
+
+
 
 
 
@@ -1258,6 +1388,10 @@ template<class PR> Float<PositiveUpper,PR> pow(Float<PositiveUpper,PR> const& x,
     return Float<PositiveUpper,PR>(pow_up(x._u,m));
 }
 
+template<class PR> Float<PositiveApproximate,PR> pow(Float<PositiveUpper,PR> const& x, Int n) {
+    return Float<PositiveApproximate,PR>(pow_approx(x._u,n));
+}
+
 template<class PR> Float<Upper,PR> log(Float<PositiveUpper,PR> const& x) {
     return Float<Upper,PR>(log_up(x._u));
 }
@@ -1388,6 +1522,9 @@ template<class P, class PR> std::size_t instantiate_float() {
     typedef decltype(add(declval<X>(),declval<X>())) WX;
     typedef decltype(sub(declval<X>(),declval<X>())) WUX;
 
+    typedef decltype(pow(declval<X>(),declval<Nat>())) POWNX;
+    typedef decltype(pow(declval<X>(),declval<Int>())) POWZX;
+
     typedef decltype(exp(declval<X>())) PX;
     typedef decltype(log(declval<X>())) SX;
 
@@ -1411,8 +1548,8 @@ template<class P, class PR> std::size_t instantiate_float() {
          + (size_t)(WX(*)(Xcr))&sqr<PR,P>
          + (size_t)(WX(*)(INVXcr))&rec<PR,P>
          + (size_t)(X(*)(Xcr))&half<PR,P>
-         + (size_t)(WX(*)(Xcr,Nat))&pow<PR,P>
-         + (size_t)(WUX(*)(Xcr,Int))&pow<PR,P>
+         + (size_t)(POWNX(*)(Xcr,Nat))&pow<PR,P>
+         + (size_t)(POWZX(*)(Xcr,Int))&pow<PR,P>
 
          + (size_t)(WX(*)(Xcr))&sqrt<PR,P>
          + (size_t)(PX(*)(Xcr))&exp<PR,P>
@@ -1440,7 +1577,7 @@ template<class PR> std::size_t instantiate_floats() {
         + instantiate_float<Lower,PR>()
         + instantiate_float<Upper,PR>()
         + instantiate_float<Bounded,PR>()
-//        + instantiate_float<Metric,PR>()
+        + instantiate_float<Metric,PR>()
         + instantiate_float<Exact,PR>()
         + instantiate_float<PositiveUpper,PR>()
         ;

@@ -140,7 +140,7 @@ template<class P> class Number
     Float<WP,Precision64> get(WP par) const { return pointer()->_get(WP()); }
     //! \brief Get the value of the number as a double-precision floating-point type
     template<class WP, EnableIf<IsWeaker<WP,P>> =dummy>
-    Float<WP,Precision64> get(WP par, Precision64 const& prec) const { return pointer()->_get(WP()); }
+    Float<WP,Precision64> get(WP par, Precision64 const& prec) const { return pointer()->_get(WP(),prec); }
     //! \brief Get the value of the number as a multiple-precision floating-point type
     template<class WP, EnableIf<IsWeaker<WP,P>> =dummy>
     Float<WP,PrecisionMP> get(WP par, PrecisionMP const& prec) const { return pointer()->_get(WP(),prec); }

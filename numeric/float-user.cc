@@ -103,8 +103,24 @@ template<class PR> Float<Exact,PR>::Float(Rational const& q, PR pr)
 }
 */
 
+template<class PR> Float<Exact,PR>::operator Number<Exact>() const {
+    return Number<Exact>(new NumberWrapper<Float<Exact,PR>>(*this));
+}
+
 template<class PR> Float<Metric,PR>::Float(Rational const& q, PR pr)
     : _v(RawFloat<PR>(q,RawFloat<PR>::to_nearest,pr)), _e(abs(Rational(_v)-q),RawFloat<PR>::upward,pr) {
+}
+
+template<class PR> Float<Metric,PR>::Float(Number<Validated> const& x)
+    : Float(x.get(Metric(),RawFloat<PR>::get_default_precision())) {
+}
+
+template<class PR> Float<Metric,PR>::Float(Number<Validated> const& x, PR pr)
+    : Float(x.get(Metric(),pr)) {
+}
+
+template<class PR> Float<Metric,PR>::operator Number<Validated>() const {
+    return Number<Validated>(new NumberWrapper<Float<Metric,PR>>(*this));
 }
 
 template<class PR> Float<Bounded,PR>::Float(Real const& x)
@@ -127,6 +143,10 @@ template<class PR> Float<Bounded,PR>::Float(Number<Validated> const& x, PR pr)
     : Float(x.get(Bounded(),pr)) {
 }
 
+template<class PR> Float<Bounded,PR>::operator Number<Validated>() const {
+    return Number<Validated>(new NumberWrapper<Float<Bounded,PR>>(*this));
+}
+
 template<class PR> Float<Upper,PR>::Float(Rational const& q)
     : Float(Float<Bounded,PR>(q)) {
 }
@@ -137,6 +157,10 @@ template<class PR> Float<Upper,PR>::Float(Rational const& q, PR pr)
 
 template<class PR> Float<Upper,PR>::Float(Number<Upper> const& x, PR pr)
     : Float(x.get(Upper(),pr)) {
+}
+
+template<class PR> Float<Upper,PR>::operator Number<Upper>() const {
+    return Number<Upper>(new NumberWrapper<Float<Upper,PR>>(*this));
 }
 
 template<class PR> Float<Lower,PR>::Float(Rational const& q)
@@ -151,6 +175,10 @@ template<class PR> Float<Lower,PR>::Float(Number<Lower> const& x, PR pr)
     : Float(x.get(Lower(),pr)) {
 }
 
+template<class PR> Float<Lower,PR>::operator Number<Lower>() const {
+    return Number<Lower>(new NumberWrapper<Float<Lower,PR>>(*this));
+}
+
 template<class PR> Float<Approximate,PR>::Float(Rational const& q, PR pr)
     : Float(Float<Bounded,PR>(q,pr)) {
 }
@@ -160,8 +188,7 @@ template<class PR> Float<Approximate,PR>::Float(Number<Approximate> const& x, PR
 }
 
 template<class PR> Float<Approximate,PR>::operator Number<Approximate>() const {
-    ARIADNE_NOT_IMPLEMENTED;
-    //Number<Approximate>(new NumberWrapper<Float<Approximate,PR>>(*this));
+    return Number<Approximate>(new NumberWrapper<Float<Approximate,PR>>(*this));
 }
 
 
@@ -221,16 +248,25 @@ template<class PR> Float<Approximate,PR>::Float(Float<Upper,PR> const& x) : _a(x
 template<class PR> Float<Approximate,PR>::Float(Float<Bounded,PR> const& x) : _a(x.value_raw()) {
 }
 
+template<class PR> Float<Approximate,PR>::Float(Float<Metric,PR> const& x) : _a(x.value_raw()) {
+}
+
 template<class PR> Float<Approximate,PR>::Float(Float<Exact,PR> const& x) : _a(x.raw()) {
 }
 
 template<class PR> Float<Lower,PR>::Float(Float<Bounded,PR> const& x) : _l(x.lower_raw()) {
 }
 
+template<class PR> Float<Lower,PR>::Float(Float<Metric,PR> const& x) : _l(x.lower_raw()) {
+}
+
 template<class PR> Float<Lower,PR>::Float(Float<Exact,PR> const& x) : _l(x.raw()) {
 }
 
 template<class PR> Float<Upper,PR>::Float(Float<Bounded,PR> const& x) : _u(x.upper_raw()) {
+}
+
+template<class PR> Float<Upper,PR>::Float(Float<Metric,PR> const& x) : _u(x.upper_raw()) {
 }
 
 template<class PR> Float<Upper,PR>::Float(Float<Exact,PR> const& x) : _u(x.raw()) {
@@ -996,7 +1032,7 @@ template<class PR> Float<Metric,PR> sqr(Float<Metric,PR> const& x) {
 
 template<class PR> Float<Metric,PR> rec(Float<Metric,PR> const& x) {
     auto ru=rec_up(add_down(x._v,x._e));
-    auto rl=rec_down(add_down(x._v,x._e));
+    auto rl=rec_down(add_up(x._v,x._e));
     auto re=half(sub_up(ru,rl));
     auto rv=half(add_near(rl,ru));
     return Float<Metric,PR>(rv,re);
@@ -1552,28 +1588,13 @@ template class Float<Bounded,Precision64>;
 template class Float<Metric,Precision64>;
 template class Float<Exact,Precision64>;
 
-/*
 template class Float<Approximate,PrecisionMP>;
 template class Float<Lower,PrecisionMP>;
 template class Float<Upper,PrecisionMP>;
 template class Float<Bounded,PrecisionMP>;
 template class Float<Metric,PrecisionMP>;
 template class Float<Exact,PrecisionMP>;
-*/
 
-template Float<Approximate,PrecisionMP>::Float(Rational const&, PrecisionMP);
-template Float<Lower,PrecisionMP>::Float(Rational const&, PrecisionMP);
-template Float<Upper,PrecisionMP>::Float(Rational const&, PrecisionMP);
-template Float<Bounded,PrecisionMP>::Float(Rational const&, PrecisionMP);
-template Float<Metric,PrecisionMP>::Float(Rational const&, PrecisionMP);
-//template Float<Exact,PrecisionMP>::Float(Rational const&, PrecisionMP);
-
-template Float<Lower,PrecisionMP>::Float(Rational const&);
-template Float<Upper,PrecisionMP>::Float(Rational const&);
-template Float<Bounded,PrecisionMP>::Float(Rational const&);
-
-template Float<Lower,PrecisionMP>::Float(Float<Bounded,PrecisionMP>const&);
-template Float<Upper,PrecisionMP>::Float(Float<Bounded,PrecisionMP>const&);
 
 template<class T> class Dynamic { public: virtual ~Dynamic() = default; };
 template<class T> String mangled_class_name() { Dynamic<T>* p; return typeid(p).name(); }
@@ -1691,5 +1712,17 @@ ExactFloat64 midpoint(BoundedFloat64 const& x) { return x.value(); }
 
 template Float<Widen<PositiveApproximate>,Precision64> mul<Precision64,PositiveApproximate>(Float<PositiveApproximate,Precision64> const& x1, Float<PositiveApproximate,Precision64> const& x2);
 
+template<> String class_name<ApproximateFloat64>() { return "ApproximateFloat64"; }
+template<> String class_name<LowerFloat64>() { return "LowerFloat64"; }
+template<> String class_name<UpperFloat64>() { return "UpperFloat64"; }
+template<> String class_name<BoundedFloat64>() { return "BoundedFloat64"; }
+template<> String class_name<MetricFloat64>() { return "MetricFloat64"; }
+template<> String class_name<ExactFloat64>() { return "ExactFloat64"; }
+template<> String class_name<ApproximateFloatMP>() { return "ApproximateFloatMP"; }
+template<> String class_name<LowerFloatMP>() { return "LowerFloatMP"; }
+template<> String class_name<UpperFloatMP>() { return "UpperFloatMP"; }
+template<> String class_name<BoundedFloatMP>() { return "BoundedFloatMP"; }
+template<> String class_name<MetricFloatMP>() { return "MetricFloatMP"; }
+template<> String class_name<ExactFloatMP>() { return "ExactFloatMP"; }
 
 } // namespace Ariadne

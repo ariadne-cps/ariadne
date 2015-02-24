@@ -36,10 +36,13 @@ typedef Void Void;
 
 class ParadigmError { };
 
-enum class ParadigmCode : short {
+typedef unsigned short ParadigmCodeType;
+
+enum class ParadigmCode : ParadigmCodeType {
     APPROXIMATE_FLAG=1,
     LOWER_FLAG=2,
     UPPER_FLAG=4,
+    BOUNDS_FLAGS=LOWER_FLAG|UPPER_FLAG,
     METRIC_FLAG=8,
     EFFECTIVE_FLAG=16,
     EXACT_FLAG=32,
@@ -61,29 +64,57 @@ enum class ParadigmCode : short {
     POSITIVE_APPROXIMATE=ParadigmCode::POSITIVE_FLAG|ParadigmCode::APPROXIMATE,
     POSITIVE_LOWER=ParadigmCode::POSITIVE_FLAG|ParadigmCode::LOWER,
     POSITIVE_UPPER=ParadigmCode::POSITIVE_FLAG|ParadigmCode::UPPER,
+    POSITIVE_BOUNDED=ParadigmCode::BOUNDED|ParadigmCode::POSITIVE_FLAG,
+    POSITIVE_METRIC=ParadigmCode::METRIC|ParadigmCode::POSITIVE_FLAG,
+    POSITIVE_VALIDATED=ParadigmCode::BOUNDED|ParadigmCode::METRIC|ParadigmCode::POSITIVE_FLAG,
     POSITIVE_EFFECTIVE_UPPER=ParadigmCode::POSITIVE_FLAG|ParadigmCode::EFFECTIVE_UPPER,
     POSITIVE_EXACT=ParadigmCode::POSITIVE_FLAG|ParadigmCode::EXACT,
 };
 inline constexpr ParadigmCode operator^(ParadigmCode p1, ParadigmCode p2) {
-    return ParadigmCode(static_cast<char>(p1) ^ static_cast<char>(p2)); }
+    return ParadigmCode(static_cast<ParadigmCodeType>(p1) ^ static_cast<ParadigmCodeType>(p2)); }
 inline constexpr ParadigmCode operator&(ParadigmCode p1, ParadigmCode p2) {
-    return ParadigmCode(static_cast<char>(p1) & static_cast<char>(p2)); }
+    return ParadigmCode(static_cast<ParadigmCodeType>(p1) & static_cast<ParadigmCodeType>(p2)); }
 inline constexpr ParadigmCode operator|(ParadigmCode p1, ParadigmCode p2) {
-    return ParadigmCode(static_cast<char>(p1) | static_cast<char>(p2)); }
+    return ParadigmCode(static_cast<ParadigmCodeType>(p1) | static_cast<ParadigmCodeType>(p2)); }
 inline constexpr ParadigmCode operator!(ParadigmCode p) {
-    return ParadigmCode(!static_cast<char>(p)); }
+    return ParadigmCode(~static_cast<ParadigmCodeType>(p)); }
 inline constexpr bool operator>=(ParadigmCode p1, ParadigmCode p2) {
     return p2 == (p1&p2); }
+
 inline constexpr ParadigmCode strengthen(ParadigmCode p) {
     return (p >= ParadigmCode::BOUNDED) or (p >= ParadigmCode::METRIC) ? (p | ParadigmCode::VALIDATED) : p; }
 constexpr bool is_weaker(ParadigmCode p1, ParadigmCode p2) {
     return (p1 & strengthen(p2)) == p1; }
 constexpr ParadigmCode next_weaker(ParadigmCode p) {
     return is_weaker(ParadigmCode::EFFECTIVE_FLAG,p) ? (p & ParadigmCode::VALIDATED) : ParadigmCode::APPROXIMATE; }
-constexpr ParadigmCode widen(ParadigmCode p) {
-    return p & ParadigmCode::VALIDATED; }
-constexpr ParadigmCode positive(ParadigmCode p) {
+
+constexpr Bool is_exact(ParadigmCode p) {
+    return (p >= ParadigmCode::EXACT_FLAG) ; }
+constexpr Bool is_effective(ParadigmCode p) {
+    return (p >= ParadigmCode::EFFECTIVE_FLAG) ; }
+constexpr Bool is_validated(ParadigmCode p) {
+    return (p >= ParadigmCode::BOUNDS_FLAGS) xor (p >= ParadigmCode::METRIC_FLAG); }
+constexpr Bool is_directed(ParadigmCode p) {
+    return Bool(p & ParadigmCode::LOWER_FLAG) xor Bool(p & ParadigmCode::UPPER_FLAG); }
+constexpr Bool is_unsigned(ParadigmCode p) {
+    return Bool(p | ParadigmCode::POSITIVE_FLAG); }
+constexpr ParadigmCode unsign(ParadigmCode p) {
     return p | ParadigmCode::POSITIVE_FLAG; }
+constexpr ParadigmCode sign(ParadigmCode p) {
+    return p & !ParadigmCode::POSITIVE_FLAG; }
+constexpr ParadigmCode opposite(ParadigmCode p) {
+    return is_directed(p) ? p ^ ParadigmCode::BOUNDS_FLAGS : p; }
+constexpr ParadigmCode undirect(ParadigmCode p) {
+    return is_directed(p) ? p & !ParadigmCode::BOUNDS_FLAGS : p; }
+constexpr ParadigmCode negate(ParadigmCode p) {
+    return sign(is_directed(p) ? p ^ ParadigmCode::BOUNDS_FLAGS : p); }
+constexpr ParadigmCode invert(ParadigmCode p) {
+    return is_directed(p) ? (is_unsigned(p) ? opposite(p) : undirect(p)) : p; }
+constexpr ParadigmCode widen(ParadigmCode p) {
+    return Bool(p & ParadigmCode::EFFECTIVE_FLAG) ? p & ParadigmCode::POSITIVE_BOUNDED : p; }
+//    return Bool(p & ParadigmCode::EFFECTIVE_FLAG) ? p & ParadigmCode::POSITIVE_METRIC : p; }
+constexpr ParadigmCode null(ParadigmCode p) {
+    return is_exact(p) ? sign(p) : is_validated(p) ? p & ParadigmCode::LOWER : p & ParadigmCode::APPROXIMATE; }
 
 
 
@@ -213,82 +244,10 @@ template<> struct InformationTraits<ParadigmCode::EFFECTIVE_UPPER> { typedef Eff
 template<> struct InformationTraits<ParadigmCode::EFFECTIVE> { typedef Effective Paradigm; };
 template<> struct InformationTraits<ParadigmCode::EXACT> { typedef Exact Paradigm; };
 template<> struct InformationTraits<ParadigmCode::POSITIVE_APPROXIMATE> { typedef PositiveApproximate Paradigm; };
+template<> struct InformationTraits<ParadigmCode::POSITIVE_LOWER> { typedef PositiveLower Paradigm; };
 template<> struct InformationTraits<ParadigmCode::POSITIVE_UPPER> { typedef PositiveUpper Paradigm; };
 template<> struct InformationTraits<ParadigmCode::POSITIVE_EXACT> { typedef PositiveExact Paradigm; };
 template<ParadigmCode PC> using ParadigmClass = typename InformationTraits<PC>::Paradigm;
-
-namespace Detail {
-Approximate equality_paradigm(Approximate,Approximate);
-ValidatedLower equality_paradigm(ValidatedLower,ValidatedUpper);
-ValidatedLower equality_paradigm(ValidatedUpper,ValidatedLower);
-ValidatedLower equality_paradigm(Validated,Validated);
-ValidatedLower equality_paradigm(ValidatedBounded,ValidatedBounded);
-ValidatedLower equality_paradigm(ValidatedMetric,ValidatedMetric);
-ValidatedLower equality_paradigm(Effective,Effective);
-Exact equality_paradigm(Exact,Exact);
-
-Exact negate_paradigm(Exact);
-Effective negate_paradigm(Effective);
-Validated negate_paradigm(Validated);
-ValidatedBounded negate_paradigm(ValidatedBounded);
-ValidatedMetric negate_paradigm(ValidatedMetric);
-ValidatedLower negate_paradigm(ValidatedUpper);
-ValidatedUpper negate_paradigm(ValidatedLower);
-Approximate negate_paradigm(Approximate);
-
-Approximate negate_paradigm(PositiveApproximate);
-ValidatedLower negate_paradigm(PositiveValidatedUpper);
-ValidatedUpper negate_paradigm(PositiveValidatedLower);
-Exact negate_paradigm(PositiveExact);
-
-Exact invert_paradigm(Exact);
-Effective invert_paradigm(Effective);
-Validated invert_paradigm(Validated);
-ValidatedBounded invert_paradigm(ValidatedBounded);
-ValidatedMetric invert_paradigm(ValidatedMetric);
-ValidatedLower invert_paradigm(ValidatedUpper);
-ValidatedUpper invert_paradigm(ValidatedLower);
-Approximate invert_paradigm(Approximate);
-
-PositiveApproximate invert_paradigm(PositiveApproximate);
-PositiveValidatedLower invert_paradigm(PositiveValidatedUpper);
-PositiveValidatedUpper invert_paradigm(PositiveValidatedLower);
-PositiveExact invert_paradigm(PositiveExact);
-
-template<class T> T strengthen_paradigm(T);
-Validated strengthen_paradigm(ValidatedBounded);
-Validated strengthen_paradigm(ValidatedMetric);
-
-
-ValidatedUpper error_paradigm(Exact);
-ValidatedUpper error_paradigm(Effective);
-ValidatedUpper error_paradigm(Validated);
-ValidatedUpper error_paradigm(ValidatedMetric);
-ValidatedUpper error_paradigm(ValidatedBounded);
-ValidatedUpper error_paradigm(ValidatedUpper);
-Approximate error_paradigm(ValidatedLower);
-Approximate error_paradigm(Approximate);
-
-template<class T> T widen_paradigm(T);
-ValidatedBounded widen_paradigm(Exact);
-ValidatedBounded widen_paradigm(Effective);
-ValidatedBounded widen_paradigm(Validated);
-
-template<class T> T unsigned_paradigm(T);
-PositiveExact unsigned_paradigm(Exact);
-PositiveEffectiveUpper unsigned_paradigm(EffectiveUpper);
-PositiveValidatedUpper unsigned_paradigm(ValidatedUpper);
-PositiveValidatedLower unsigned_paradigm(ValidatedLower);
-PositiveApproximate unsigned_paradigm(Approximate);
-
-template<class T> T signed_paradigm(T);
-Exact signed_paradigm(PositiveExact);
-EffectiveUpper signed_paradigm(PositiveEffectiveUpper);
-ValidatedUpper signed_paradigm(PositiveValidatedUpper);
-ValidatedLower signed_paradigm(PositiveValidatedLower);
-Approximate signed_paradigm(PositiveApproximate);
-
-}
 
 template<bool b> using BooleanConstant = std::integral_constant<bool,b>;
 
@@ -363,27 +322,18 @@ template<class P> using NextWeaker = typename ParadigmTraits<P>::NextWeaker;
 template<class P> using Weaken = typename ParadigmTraits<P>::NextWeaker;
 
 
-
-//! \ingroup ParadigmSubModule
-//! \brief The paradigm associated with the negation of an object.
-template<class P> using Negated = decltype(Detail::negate_paradigm(declval<P>()));
-template<class P> using Inverted = decltype(Detail::invert_paradigm(declval<P>()));
-template<class P> using Opposite = decltype(Detail::negate_paradigm(declval<P>()));
-template<class P> using Generic = decltype(Detail::strengthen_paradigm(declval<P>()));
-template<class P> using Unsigned = decltype(Detail::unsigned_paradigm(declval<P>()));
-template<class P> using Signed = decltype(Detail::signed_paradigm(declval<P>()));
-template<class P> using Unorder = Weaker<P,Opposite<P>>;
-
-//! \ingroup ParadigmSubModule
-//! \brief The paradigm obtained by widening a type due to roundoff error.
-template<class P> using Widen = decltype(Detail::widen_paradigm(declval<P>()));
-
-template<class P1, class P2=Negated<P1>> using Equality = decltype(Detail::equality_paradigm(declval<P1>(),declval<P2>()));
-
-template<class P> using Errors = decltype(Detail::error_paradigm(declval<P>()));
-
+template<class P> using Opposite = ParadigmClass<opposite(P::code())>;
+template<class P> using Negated = ParadigmClass<negate(P::code())>;
+template<class P> using Inverted = ParadigmClass<invert(P::code())>;
+template<class P> using Generic = ParadigmClass<strengthen(P::code())>;
+template<class P> using Unsigned = ParadigmClass<unsign(P::code())>;
+template<class P> using Signed = ParadigmClass<sign(P::code())>;
+template<class P> using Widen = ParadigmClass<widen(P::code())>;
+template<class P> using Unorder = ParadigmClass<undirect(P::code())>;
+template<class P> using Undirect = ParadigmClass<undirect(P::code())>;
+template<class P> using Null = ParadigmClass<null(P::code())>;
 template<class P1, class P2=Negated<P1>> using LessThan = Weaker<P1,Negated<P2>>;
-
+template<class P1, class P2=Negated<P1>> using Equality = Null<Weaker<P1,Negated<P2>>>;
 
 } // namespace Ariadne
 

@@ -305,9 +305,19 @@ OutputStream& operator<<(OutputStream& os, FloatMP const& x) {
 }
 
 InputStream& operator>>(InputStream& is, FloatMP& x) {
-    String str;
-    is >> str;
+    char c;
+    std::string str;
+    c=is.get();
+    while( c==' ' or c=='\t' or c=='\n' ) {
+        c=is.get();
+    }
+    while( (c>='0' and c<='9') or c=='+' or c=='-' or c=='.' or c=='e' ) {
+        str.push_back(c);
+        c=is.get();
+    }
+    is.putback(c);
     mpfr_set_str(x._mpfr,str.c_str(),0,MPFR_RNDN);
+    return is;
 }
 
 //Integer floor(FloatMP const& x) {

@@ -36,9 +36,13 @@
 
 #include "test.h"
 
+namespace Ariadne {
+template<> String class_name<Precision64>() { return "Precision64"; }
+template<> String class_name<PrecisionMP>() { return "PrecisionMP"; }
+} // namespace Ariadne
+
 using namespace std;
 using namespace Ariadne;
-
 
 template<class PR>
 class TestFloat
@@ -321,22 +325,22 @@ TestFloat<PR>::test_stream()
 {
     cout << __PRETTY_FUNCTION__ << endl;
 
-    stringstream ss("1.25 -2.25 42:2 375e1 2.35e1");
+    stringstream ss("1.25 -2.25 42 2.375e1 2.35e1");
     RawFloat<PR> f1,f2,f3,f4,f5;
     ss >> f1;
     cout << f1 << endl;
-    ARIADNE_TEST_ASSERT(f1==1.25);
+    ARIADNE_TEST_EQUALS(f1,1.25);
     ss >> f2;
     cout << f2 << endl;
-    ARIADNE_TEST_ASSERT(f2==-2.25);
+    ARIADNE_TEST_EQUALS(f2,-2.25);
     ss >> f3;
     cout << f3 << endl;
-    ARIADNE_TEST_ASSERT(f3==42.0);
+    ARIADNE_TEST_EQUALS(f3,42.0);
     try {
         ss >> f4;
         cout << f4 << endl;
         if(f4!=23.75) {
-            ARIADNE_TEST_WARN("Cannot create float from string literal in exponential form 2.375e1");
+            ARIADNE_TEST_WARN("Cannot create Float<"<<class_name<PR>()<<"> from string literal in exponential form 2.375e1");
         }
     }
     catch(std::exception& e) {
@@ -347,7 +351,7 @@ TestFloat<PR>::test_stream()
         ss >> f5;
         cout << f5 << endl;
         if(f4!=23.5) {
-            ARIADNE_TEST_WARN("Cannot create float from string literal in exponential form 2.35e1");
+            ARIADNE_TEST_WARN("Cannot create Float<"<<class_name<PR>()<<"> from string literal in exponential form 2.35e1");
         }
     }
     catch(std::exception& e) {
@@ -794,7 +798,6 @@ TestFloat<Precision64>::test_arctan()
     ARIADNE_TEST_COMPARE(atan(-1/sqrt_three_down)*6,<=,-pi_up);
     ARIADNE_TEST_COMPARE(atan(+one/4),<=,atan_quarter_down);
     ARIADNE_TEST_COMPARE(atan(-one/4),<=,-atan_quarter_up);
-
 
     ARIADNE_TEST_COMPARE(atan(one)*4-pi_up,<=,4*eps);
     ARIADNE_TEST_COMPARE(atan(sqrt_three_up)*3-pi_up,<=,4*eps);

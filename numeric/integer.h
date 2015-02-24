@@ -44,14 +44,6 @@ namespace Ariadne {
 
 /************  Ints ********************************************************/
 
-template<class X> struct IsNumber;
-
-class Boolean;
-class Integer;
-class Rational;
-
-template<class P> class Number;
-
 class Nat32 {
     uint32_t _n;
   public:

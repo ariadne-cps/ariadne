@@ -208,6 +208,24 @@ template<class P> class Number
     friend Number<SP> operator/(Number<SP>, Number<SP>);
 };
 
+template<class N, class D, EnableIf<IsGenericNumber<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
+operator+(N const& y1, D const& d2) -> decltype(y1+Number<Approximate>(d2)) { y1+Number<Approximate>(d2); }
+template<class N, class D, EnableIf<IsGenericNumber<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
+operator-(N const& y1, D const& d2) -> decltype(y1-Number<Approximate>(d2)) { y1-Number<Approximate>(d2); }
+template<class N, class D, EnableIf<IsGenericNumber<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
+operator*(N const& y1, D const& d2) -> decltype(y1*Number<Approximate>(d2)) { y1*Number<Approximate>(d2); }
+template<class N, class D, EnableIf<IsGenericNumber<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
+operator/(N const& y1, D const& d2) -> decltype(y1/Number<Approximate>(d2)) { y1/Number<Approximate>(d2); }
+template<class N, class D, EnableIf<IsGenericNumber<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
+operator+(D const& d1, N const& y2) -> decltype(Number<Approximate>(d1)+y2) { Number<Approximate>(d1)+y2; }
+template<class N, class D, EnableIf<IsGenericNumber<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
+operator-(D const& d1, N const& y2) -> decltype(Number<Approximate>(d1)-y2) { Number<Approximate>(d1)-y2; }
+template<class N, class D, EnableIf<IsGenericNumber<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
+operator*(D const& d1, N const& y2) -> decltype(Number<Approximate>(d1)*y2) { Number<Approximate>(d1)*y2; }
+template<class N, class D, EnableIf<IsGenericNumber<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
+operator/(D const& d1, N const& y2) -> decltype(Number<Approximate>(d1)/y2) { Number<Approximate>(d1)/y2; }
+
+
 template<class R> struct IsConcreteNumber : IsConvertible<R,Real> { };
 
 template<class R, class P, EnableIf<IsConcreteNumber<R>> =dummy> auto operator+(R const& r1, Number<P> const& y2) -> decltype(Number<Paradigm<R>>(r1)+y2) {

@@ -113,14 +113,17 @@ template<class PR> class Float<Approximate,PR> {
     typedef PR PrecisionType;
   public:
     Float<Approximate,PR>() : _a(0.0) { }
+    Float<Approximate,PR>(PrecisionType pr) : _a(0.0,pr) { }
     explicit Float<Approximate,PR>(RawFloatType const& a) : _a(a) { }
     template<class N, EnableIf<IsIntegral<N>> =dummy> Float<Approximate,PR>(N n) : _a(n) { }
     template<class D, EnableIf<IsFloatingPoint<D>> =dummy> Float<Approximate,PR>(D x) : _a(x) { }
+    explicit Float<Approximate,PR>(const Integer& z);
     explicit Float<Approximate,PR>(const Dyadic& d);
     explicit Float<Approximate,PR>(const Decimal& d);
     explicit Float<Approximate,PR>(const Rational& q);
     explicit Float<Approximate,PR>(const Real& r);
     explicit Float<Approximate,PR>(const Number<Approximate>& x);
+    Float<Approximate,PR>(const Rational& q, PR pr);
     Float<Approximate,PR>(const Number<Approximate>& x, PR pr);
     operator Number<Approximate> () const;
 
@@ -155,6 +158,7 @@ template<class PR> class Float<Lower,PR> {
     typedef PR PrecisionType;
   public:
     Float<Lower,PR>() : _l(0.0) { }
+    Float<Lower,PR>(PrecisionType pr) : _l(0.0,pr) { }
     explicit Float<Lower,PR>(RawFloatType const& l) : _l(l) { }
 
     template<class N, EnableIf<IsIntegral<N>> = dummy> Float<Lower,PR>(N n) : _l(n) { }
@@ -164,13 +168,14 @@ template<class PR> class Float<Lower,PR> {
     Float<Lower,PR>(Float<Metric,PR> const& x);
     Float<Lower,PR>(Float<Exact,PR> const& x);
 
-    explicit Float<Lower,PR>(const Number<Lower>& x);
+    Float<Lower,PR>(const Rational& q, PR pr);
     Float<Lower,PR>(const Number<Lower>& x, PR pr);
     operator Number<Lower> () const;
 
-    explicit Float<Lower,PR>(const Real& x);
-    explicit Float<Lower,PR>(const Rational& x);
     explicit Float<Lower,PR>(const Integer& x);
+    explicit Float<Lower,PR>(const Rational& x);
+    explicit Float<Lower,PR>(const Real& x);
+    explicit Float<Lower,PR>(const Number<Lower>& x);
 
     PrecisionType precision() const { return _l.precision(); }
     RawFloatType const& raw() const { return _l; }
@@ -193,21 +198,22 @@ template<class PR> class Float<Upper,PR> {
     typedef PR PrecisionType;
   public:
     Float<Upper,PR>() : _u(0.0) { }
+    Float<Upper,PR>(PrecisionType pr) : _u(0.0,pr) { }
     explicit Float<Upper,PR>(RawFloatType const& u) : _u(u) { }
 
     template<class N, EnableIf<IsIntegral<N>> = dummy> Float<Upper,PR>(N n) : _u(n) { }
     template<class X, EnableIf<IsFloatingPoint<X>> = dummy> explicit Float<Upper,PR>(X x) : _u(x) { }
 
-
     Float<Upper,PR>(Float<Bounded,PR> const& x);
     Float<Upper,PR>(Float<Metric,PR> const& x);
     Float<Upper,PR>(Float<Exact,PR> const& x);
 
-    explicit Float<Upper,PR>(const Real& x);
-    explicit Float<Upper,PR>(const Rational& x);
     explicit Float<Upper,PR>(const Integer& x);
+    explicit Float<Upper,PR>(const Rational& x);
+    explicit Float<Upper,PR>(const Real& x);
     explicit Float<Upper,PR>(const Number<Upper>& x);
 
+    Float<Upper,PR>(const Rational& q, PR pr);
     Float<Upper,PR>(const Number<Upper>& x, PR pr);
     operator Number<Upper> () const;
 
@@ -262,6 +268,7 @@ template<class PR> class Float<Bounded,PR> {
     typedef PR PrecisionType;
   public:
     Float<Bounded,PR>() : _l(0.0), _u(0.0) { }
+    Float<Bounded,PR>(PrecisionType pr) : _l(0.0,pr), _u(0.0,pr) { }
     explicit Float<Bounded,PR>(RawFloatType const& v) : _l(v), _u(v) { }
     Float<Bounded,PR>(RawFloatType const& l, RawFloatType const& u) : _l(l), _u(u) { }
     Float<Bounded,PR>(Float<Lower,PR> const& lower, Float<Upper,PR> const& upper) : _l(lower.raw()), _u(upper.raw()) { }
@@ -317,6 +324,7 @@ template<class PR> class Float<Metric,PR> {
     typedef PR PrecisionType;
   public:
     Float<Metric,PR>() : _v(0.0), _e(0.0) { }
+    Float<Metric,PR>(PrecisionType pr) : _v(0.0,pr), _e(0.0,pr) { }
     explicit Float<Metric,PR>(RawFloatType const& v) : _v(v), _e(0.0) { }
     Float<Metric,PR>(RawFloatType const& v, RawFloatType const& e) : _v(v), _e(e) { }
     Float<Metric,PR>(Float<Exact,PR> const& value, Float<Error,PR> const& error) : _v(value.raw()), _e(error.raw()) { }
@@ -325,10 +333,13 @@ template<class PR> class Float<Metric,PR> {
     Float<Metric,PR>(Float<Bounded,PR> const& x);
     Float<Metric,PR>(Float<Exact,PR> const& x);
 
+    template<class N, EnableIf<IsIntegral<N>> = dummy> Float<Metric,PR>(N n) : _v(n), _e(nul(_v)) { }
+    template<class X, EnableIf<IsFloatingPoint<X>> = dummy> explicit Float<Metric,PR>(X x) : _v(x), _e(nul(_v)) { }
     explicit Float<Metric,PR>(const Integer& z);
     explicit Float<Metric,PR>(const Rational& q);
     explicit Float<Metric,PR>(const Real& x);
     explicit Float<Metric,PR>(const Number<Validated>& x);
+    Float<Metric,PR>(const Rational& q, PR pr);
     Float<Metric,PR>(const Number<Validated>& x, PR pr);
     operator Number<Validated> () const;
 
@@ -360,6 +371,7 @@ template<class PR> class Float<Exact,PR> {
     typedef PR PrecisionType;
   public:
     Float<Exact,PR>() : _v(0.0) { }
+    Float<Exact,PR>(PrecisionType pr) : _v(0.0,pr) { }
     explicit Float<Exact,PR>(RawFloatType const& v) : _v(v) { }
     template<class N, EnableIf<IsIntegral<N>> =dummy> Float<Exact,PR>(N n) : _v(n) { }
     template<class X, EnableIf<IsFloatingPoint<X>> =dummy> explicit Float<Exact,PR>(X x) : _v(x) { }
@@ -670,7 +682,10 @@ template<class PR> Float<Bounded,PR> make_bounds(Float<Error,PR> const& e) {
     return Float<Bounded,PR>(-e.raw(),+e.raw()); }
 
 //! \related Float, Validated \brief Tests if \_a x1 provides tighter bounds than \_a x2.
+template<class PR> Bool refines(Float<Metric,PR> const& x1, Float<Metric,PR> const& x2);
 template<class PR> Bool refines(Float<Bounded,PR> const& x1, Float<Bounded,PR> const& x2);
+template<class PR> Bool refines(Float<Lower,PR> const& x1, Float<Lower,PR> const& x2);
+template<class PR> Bool refines(Float<Upper,PR> const& x1, Float<Upper,PR> const& x2);
 
 //! \related Float, Validated \brief The common refinement of \_a x1 and \_a x2.
 template<class PR> Float<Bounded,PR> refinement(Float<Bounded,PR> const& x1, Float<Bounded,PR> const& x2);

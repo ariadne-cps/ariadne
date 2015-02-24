@@ -159,7 +159,7 @@ Void FloatMP::set_default_precision(PrecisionType pr) {
 }
 
 FloatMP::PrecisionType FloatMP::get_default_precision() {
-    return mpfr_get_default_prec();
+    return PrecisionType(mpfr_get_default_prec());
 }
 
 Void FloatMP::set_precision(PrecisionMP pr) {
@@ -170,7 +170,7 @@ Void FloatMP::set_precision(PrecisionMP pr) {
 }
 
 FloatMP::PrecisionType FloatMP::precision() const {
-    return mpfr_get_prec(this->_mpfr);
+    return PrecisionType(mpfr_get_prec(this->_mpfr));
 }
 
 double FloatMP::get_d() const {

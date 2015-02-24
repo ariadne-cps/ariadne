@@ -48,7 +48,7 @@ typedef mpfr_rnd_t RoundingModeMP;
 class PrecisionMP {
     mpfr_prec_t prec;
   public:
-    PrecisionMP(mpfr_prec_t pr) : prec(pr) { }
+    explicit PrecisionMP(mpfr_prec_t pr) : prec(pr) { }
     mpfr_prec_t bits() const { return prec; }
     operator mpfr_prec_t () const { return prec; }
 };
@@ -98,7 +98,6 @@ class FloatMP {
     explicit FloatMP(Float64, PrecisionType=get_default_precision());
 
     explicit FloatMP(PrecisionType);
-    explicit FloatMP(Rational const&, RoundingModeType=get_rounding_mode());
 
     FloatMP(const FloatMP&);
     FloatMP(FloatMP&&);

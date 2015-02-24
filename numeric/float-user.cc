@@ -93,12 +93,26 @@ TwoExp::operator Float<Exact,Precision64> () const {
 }
 
 
+/*
+template<class PR> Float<Exact,PR>::Float(Rational const& q, PR pr)
+    : _v(0.0,pr)
+{
+    Float<Bounded,PR> x(q,pr);
+    if(x.lower_raw()==x.upper_raw()) { this->_v==x.value_raw(); }
+    else { ARIADNE_THROW(std::runtime_error,"ExactFloat(Rational q, Precision pr)","q="<<q<<" cannot be expressed exactly to precision \n"); }
+}
+*/
+
+template<class PR> Float<Metric,PR>::Float(Rational const& q, PR pr)
+    : _v(RawFloat<PR>(q,RawFloat<PR>::to_nearest,pr)), _e(abs(Rational(_v)-q),RawFloat<PR>::upward,pr) {
+}
+
 template<class PR> Float<Bounded,PR>::Float(Real const& x)
     : Float(x(FLT::get_default_precision())) {
 }
 
 template<class PR> Float<Bounded,PR>::Float(Rational const& q, PR pr)
-    : Float(Real(q),pr) {
+    : Float(RawFloat<PR>(q,RawFloat<PR>::downward,pr),RawFloat<PR>(q,RawFloat<PR>::upward,pr)) {
 }
 
 template<class PR> Float<Bounded,PR>::Float(Real const& x, PR pr)
@@ -113,12 +127,32 @@ template<class PR> Float<Bounded,PR>::Float(Number<Validated> const& x, PR pr)
     : Float(x.get(Bounded(),pr)) {
 }
 
+template<class PR> Float<Upper,PR>::Float(Rational const& q)
+    : Float(Float<Bounded,PR>(q)) {
+}
+
+template<class PR> Float<Upper,PR>::Float(Rational const& q, PR pr)
+    : Float(Float<Bounded,PR>(q,pr)) {
+}
+
 template<class PR> Float<Upper,PR>::Float(Number<Upper> const& x, PR pr)
     : Float(x.get(Upper(),pr)) {
 }
 
+template<class PR> Float<Lower,PR>::Float(Rational const& q)
+    : Float(Float<Bounded,PR>(q)) {
+}
+
+template<class PR> Float<Lower,PR>::Float(Rational const& q, PR pr)
+    : Float(Float<Bounded,PR>(q,pr)) {
+}
+
 template<class PR> Float<Lower,PR>::Float(Number<Lower> const& x, PR pr)
     : Float(x.get(Lower(),pr)) {
+}
+
+template<class PR> Float<Approximate,PR>::Float(Rational const& q, PR pr)
+    : Float(Float<Bounded,PR>(q,pr)) {
 }
 
 template<class PR> Float<Approximate,PR>::Float(Number<Approximate> const& x, PR pr)
@@ -897,9 +931,17 @@ template<class PR> OutputStream& operator<<(OutputStream& os, const Float<Bounde
 
 template<class PR> InputStream& operator>>(InputStream& is, Float<Bounded,PR>& x)
 {
-    RawFloat<PR> _l,_u;
     char cl,cm,cr;
-    is >> cl >> _l >> cm >> _u >> cr;
+    RawFloat<PR> _l,_u;
+    auto rnd=RawFloat<PR>::get_rounding_mode();
+    is >> cl;
+    RawFloat<PR>::set_rounding_downward();
+    is >> _l;
+    is >> cm;
+    RawFloat<PR>::set_rounding_upward();
+    is >> _u;
+    is >> cr;
+    RawFloat<PR>::set_rounding_mode(rnd);
     ARIADNE_ASSERT(is);
     ARIADNE_ASSERT(cl=='[' || cl=='(');
     ARIADNE_ASSERT(cm==':' || cm==',' || cm==';');
@@ -1049,7 +1091,7 @@ template<class PR> Float<Metric,PR> min(Float<Metric,PR> const& x1, Float<Metric
 }
 
 template<class PR> OutputStream& operator<<(OutputStream& os, Float<Metric,PR> const& x) {
-    return os << x.value() << x.error();
+    return os << x.value() << "\u00b1" << x.error();
 }
 
 
@@ -1294,6 +1336,10 @@ template<class PR> Bool operator> (const Rational& q, Float<Exact,PR> const& x) 
 
 
 
+template<class PR> Bool refines(Float<Metric,PR> const& x1, Float<Metric,PR> const& x2) {
+    return (x1._v>=x2._v ? sub_up(x1._v,x2._v) : sub_up(x2._v,x1._v)) <= sub_down(x2._e, x1._e);
+}
+
 template<class PR> Bool models(Float<Bounded,PR> const& x1, Float<Exact,PR> const& x2) {
     return x1._l<=x2._v && x1._u >= x2._v;
 }
@@ -1317,6 +1363,14 @@ template<class PR> Bool inconsistent(Float<Bounded,PR> const& x1, Float<Bounded,
 
 template<class PR> Float<Metric,PR> refinement(Float<Metric,PR> const& x1, Float<Metric,PR> const& x2) {
     return Float<Metric,PR>(refinement(Float<Bounded,PR>(x1),Float<Bounded,PR>(x2)));
+}
+
+template<class PR> Bool refines(Float<Lower,PR> const& x1, Float<Lower,PR> const& x2) {
+    return x1._l>=x2._l;
+}
+
+template<class PR> Bool refines(Float<Upper,PR> const& x1, Float<Upper,PR> const& x2) {
+    return x1._u <= x2._u;
 }
 
 
@@ -1498,6 +1552,26 @@ template class Float<Bounded,Precision64>;
 template class Float<Metric,Precision64>;
 template class Float<Exact,Precision64>;
 
+/*
+template class Float<Approximate,PrecisionMP>;
+template class Float<Lower,PrecisionMP>;
+template class Float<Upper,PrecisionMP>;
+template class Float<Bounded,PrecisionMP>;
+template class Float<Metric,PrecisionMP>;
+template class Float<Exact,PrecisionMP>;
+*/
+
+template Float<Approximate,PrecisionMP>::Float(Rational const&, PrecisionMP);
+template Float<Lower,PrecisionMP>::Float(Rational const&, PrecisionMP);
+template Float<Upper,PrecisionMP>::Float(Rational const&, PrecisionMP);
+template Float<Bounded,PrecisionMP>::Float(Rational const&, PrecisionMP);
+template Float<Metric,PrecisionMP>::Float(Rational const&, PrecisionMP);
+//template Float<Exact,PrecisionMP>::Float(Rational const&, PrecisionMP);
+
+template Float<Lower,PrecisionMP>::Float(Rational const&);
+template Float<Upper,PrecisionMP>::Float(Rational const&);
+template Float<Bounded,PrecisionMP>::Float(Rational const&);
+
 template Float<Lower,PrecisionMP>::Float(Float<Bounded,PrecisionMP>const&);
 template Float<Upper,PrecisionMP>::Float(Float<Bounded,PrecisionMP>const&);
 
@@ -1602,9 +1676,16 @@ template Bool refines(BoundedFloat64 const&, BoundedFloat64 const&);
 template BoundedFloat64 refinement(BoundedFloat64 const&, BoundedFloat64 const&);
 template Bool same(BoundedFloat64 const&, BoundedFloat64 const&);
 
+template Bool refines(MetricFloat64 const&, MetricFloat64 const&);
 template MetricFloat64 refinement(MetricFloat64 const&, MetricFloat64 const&);
-template OutputStream& operator<<(OutputStream&, MetricFloat64 const&);
 
+template Bool refines(LowerFloat64 const&, LowerFloat64 const&);
+template Bool refines(UpperFloat64 const&, UpperFloat64 const&);
+
+template Bool refines(MetricFloatMP const&, MetricFloatMP const&);
+template Bool refines(BoundedFloatMP const&, BoundedFloatMP const&);
+template Bool refines(LowerFloatMP const&, LowerFloatMP const&);
+template Bool refines(UpperFloatMP const&, UpperFloatMP const&);
 
 ExactFloat64 midpoint(BoundedFloat64 const& x) { return x.value(); }
 

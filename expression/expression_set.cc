@@ -37,7 +37,7 @@ namespace Ariadne {
 template<class T> struct KeyValue { };
 
 template<> struct KeyValue<RealVariableInterval> {
-    typedef RealVariable KeyType; typedef IntervalSet ValueType;
+    typedef RealVariable KeyType; typedef RealInterval ValueType;
     KeyType const& key(const RealVariableInterval& ivl) { return ivl.variable(); }
     ValueType value(const RealVariableInterval& ivl) { return ivl.interval(); }
 };
@@ -88,13 +88,10 @@ Set<Identifier> arguments(const List<ContinuousPredicate>& c) {
 }
 
 
-const IntervalSet RealVariableInterval::interval() const {
-    return IntervalSet(this->_lower,this->_upper);
+const RealInterval RealVariableInterval::interval() const {
+    return RealInterval(this->_lower,this->_upper);
 }
 
-const ExactInterval RealVariableInterval::approximate_interval() const {
-    return approximation(this->interval());
-}
 
 OutputStream& operator<<(OutputStream& os, const RealVariableInterval& eivl) {
     return os << eivl.variable() << ".in(" << eivl.lower() << "," << eivl.upper() << ")";
@@ -113,7 +110,7 @@ RealVariablesBox::RealVariablesBox(const List<RealVariableInterval>& lst)
     }
 }
 
-RealVariablesBox::RealVariablesBox(const RealSpace& spc, const BoxSet& bx)
+RealVariablesBox::RealVariablesBox(const RealSpace& spc, const RealBox& bx)
 {
     ARIADNE_ASSERT(spc.size()==bx.size());
     for(Nat i=0; i!=spc.size(); ++i) {
@@ -121,15 +118,15 @@ RealVariablesBox::RealVariablesBox(const RealSpace& spc, const BoxSet& bx)
     }
 }
 
-BoxSet RealVariablesBox::euclidean_set(const RealSpace& spc) const {
-    BoxSet bx(spc.size());
+RealBox RealVariablesBox::euclidean_set(const RealSpace& spc) const {
+    RealBox bx(spc.size());
     for(Nat i=0; i!=spc.size(); ++i) {
         bx[i]=(*this)[spc[i]];
     }
     return bx;
 }
 
-BoxSet RealVariablesBox::box(const RealSpace& spc) const {
+RealBox RealVariablesBox::box(const RealSpace& spc) const {
     return this->euclidean_set(spc);
 }
 
@@ -137,11 +134,22 @@ OutputStream& operator<<(OutputStream& os, const RealVariablesBox& ebx) {
     return os << ebx._bounds;
 }
 
+ExactInterval over_approximation(RealInterval ivl) {
+    return make_exact_interval(UpperInterval(ivl));
+}
+
+ExactInterval under_approximation(RealInterval ivl) {
+    return make_exact_interval(LowerInterval(ivl));
+}
+
+ExactInterval approximation(RealInterval ivl) {
+    return make_exact_interval(ApproximateInterval(ivl));
+}
 
 
 VariablesBox over_approximation(const RealVariablesBox& ebx) {
     Map<RealVariable,ExactInterval> result;
-    for(Map<RealVariable,IntervalSet>::ConstIterator iter=ebx.bounds().begin();
+    for(Map<RealVariable,RealInterval>::ConstIterator iter=ebx.bounds().begin();
         iter!=ebx.bounds().end(); ++iter)
     {
         result[iter->first]=over_approximation(iter->second);
@@ -151,7 +159,7 @@ VariablesBox over_approximation(const RealVariablesBox& ebx) {
 
 VariablesBox approximation(const RealVariablesBox& ebx) {
     Map<RealVariable,ExactInterval> result;
-    for(Map<RealVariable,IntervalSet>::ConstIterator iter=ebx.bounds().begin();
+    for(Map<RealVariable,RealInterval>::ConstIterator iter=ebx.bounds().begin();
         iter!=ebx.bounds().end(); ++iter)
     {
         result[iter->first]=approximation(iter->second);
@@ -161,7 +169,7 @@ VariablesBox approximation(const RealVariablesBox& ebx) {
 
 VariablesBox under_approximation(const RealVariablesBox& ebx) {
     Map<RealVariable,ExactInterval> result;
-    for(Map<RealVariable,IntervalSet>::ConstIterator iter=ebx.bounds().begin();
+    for(Map<RealVariable,RealInterval>::ConstIterator iter=ebx.bounds().begin();
         iter!=ebx.bounds().end(); ++iter)
     {
         result[iter->first]=under_approximation(iter->second);
@@ -216,7 +224,7 @@ RealExpressionBoundedConstraintSet::RealExpressionBoundedConstraintSet(const Lis
 
 BoundedConstraintSet RealExpressionBoundedConstraintSet::euclidean_set(const RealSpace& space) const {
     const RealExpressionBoundedConstraintSet& set = *this;
-    BoxSet domain=RealVariablesBox(set.bounds()).euclidean_set(space);
+    RealBox domain=RealVariablesBox(set.bounds()).euclidean_set(space);
     List<RealConstraint> constraints;
     for(Nat i=0; i!=set.constraints().size(); ++i) {
         RealExpression constraint_expression=indicator(set.constraints()[i],NEGATIVE);
@@ -227,7 +235,7 @@ BoundedConstraintSet RealExpressionBoundedConstraintSet::euclidean_set(const Rea
 
 OutputStream& operator<<(OutputStream& os, const RealExpressionBoundedConstraintSet& eset) {
     os << "[";
-    for(Map<RealVariable,IntervalSet>::ConstIterator iter=eset._bounds.begin(); iter!=eset._bounds.end(); ++iter) {
+    for(Map<RealVariable,RealInterval>::ConstIterator iter=eset._bounds.begin(); iter!=eset._bounds.end(); ++iter) {
         os << (iter==eset._bounds.begin()?"":",") << *iter; }
     os << ";";
     for(List<ContinuousPredicate>::ConstIterator iter=eset._constraints.begin(); iter!=eset._constraints.end(); ++iter) {
@@ -237,7 +245,7 @@ OutputStream& operator<<(OutputStream& os, const RealExpressionBoundedConstraint
 }
 
 ValidatedConstrainedImageSet approximate_euclidean_set(const RealExpressionBoundedConstraintSet& set, const RealSpace& space) {
-    ExactIntervalVector domain=approximation(RealVariablesBox(set.bounds()).euclidean_set(space));
+    ExactIntervalVector domain=make_exact_box(ApproximateBox(RealVariablesBox(set.bounds()).euclidean_set(space)));
     ValidatedVectorFunction identity=ValidatedVectorFunction::identity(domain.size());
 
     ValidatedConstrainedImageSet result(domain,identity);

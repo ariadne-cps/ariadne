@@ -39,6 +39,11 @@ inline LogicalValue operator&&(LogicalValue lv1, LogicalValue lv2) { return disj
 inline LogicalValue operator||(LogicalValue lv1, LogicalValue lv2) { return conjunction(lv1,lv2); }
 } // namespace
 
+Logical<Exact> operator||(Bool b1, Logical<Exact> l2) { return Logical<Exact>(b1) || l2; }
+Logical<Exact> operator||(Logical<Exact> l1, Bool b2) { return l1 || Logical<Exact>(b2); }
+Logical<Exact> operator&&(Bool b1, Logical<Exact> l2) { return Logical<Exact>(b1) && l2; }
+Logical<Exact> operator&&(Logical<Exact> l1, Bool b2) { return l1 && Logical<Exact>(b2); }
+
 class LogicalConstant : public LogicalInterface {
     LogicalValue _v;
   public:

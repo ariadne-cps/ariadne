@@ -1567,6 +1567,7 @@ Void test_adjoin_operation_one(){
     //Define the higth of the primary root cell.
     //Create the GridTreeSet with the box related to the grid, but not to the original space
     GridTreeSet theOneCellPaving( theGrid, true );
+    ARIADNE_PRINT_TEST_COMMENT(theOneCellPaving);
     ARIADNE_PRINT_TEST_COMMENT("The GridTreeSet with the primary root cell height = 0");
     GridTreeSet expected_one_cell_paving( theGrid, 0, make_binary_word("0"), make_binary_word("1") );
     ARIADNE_TEST_EQUAL( expected_one_cell_paving, theOneCellPaving );
@@ -1689,7 +1690,7 @@ Void test_adjoin_outer_approximation_operation(){
     ARIADNE_TEST_EQUAL( expected_grid_tree_set1, theOneCellPaving );
 
     ARIADNE_PRINT_TEST_COMMENT("The GridTreeSet after adding the cell: ");
-    theOneCellPaving.adjoin_outer_approximation( static_cast<const LocatedSetInterface&>(initialRectangle), 1 );
+    theOneCellPaving.adjoin_outer_approximation( initialRectangle, 1 );
     tree = make_binary_word("1110101111110010011001001110010011001001111001000111001000111110010011001001001111001000000");
     leaves = make_binary_word("0001011111010111111010010100010111111010100000");
     GridTreeSet expected_grid_tree_set2( theTrivialGrid, 4, tree, leaves );
@@ -1720,7 +1721,7 @@ Void test_adjoin_outer_approximation_operation(){
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Create an outer_approximation of the rectangle on the scaling grid and get the GridTreeSet");
     Grid theScalingGrid(2, 2.0);
-    GridTreeSet theOuterApproxGridTreeSet = outer_approximation( static_cast<LocatedSetInterface&>(initialRectangle), theScalingGrid, 1 );
+    GridTreeSet theOuterApproxGridTreeSet = outer_approximation( initialRectangle, theScalingGrid, 1 );
     //IVAN S. ZAPREEV
     //NOTE: The recombination is needed because in the scaling Grid doing
     //    outer_approximation( theScalingGrid, initialRectangle, 2 )
@@ -1745,7 +1746,7 @@ Void test_adjoin_inner_approximation_operation_one(){
     //theSetTwo = empty, with the bounding box [0,1]x[0,1]
     GridTreeSet theSetZero( theTrivialGrid, heightZero, new BinaryTreeNode( make_binary_word("0"), make_binary_word("0") ) );
     GridTreeSet theSetZeroCopy( theSetZero );
-    ExactBox theBoxZeroOne = make_box("[-0.9,-0.1]x[0.1,0.9]");
+    ExactBoxSet theBoxZeroOne = make_box("[-0.9,-0.1]x[0.1,0.9]");
     ExactBox theBoundingBoxZeroOne = make_box("[0.01,0.99]x[0.01,0.99]");
 
     // !!!
@@ -1787,7 +1788,7 @@ Void test_adjoin_inner_approximation_operation_two(){
     //theSetTwo = empty, with the bounding box [-1,1]x[-1,1]
     GridTreeSet theSetOne( theTrivialGrid, heightOne, new BinaryTreeNode( make_binary_word("0"), make_binary_word("0") ) );
     GridTreeSet theSetOneCopy( theSetOne );
-    ExactBox theBoxOneOne = make_box("[-1.9,-0.1]x[0.1,1.75]");
+    ExactBoxSet theBoxOneOne = make_box("[-1.9,-0.1]x[0.1,1.75]");
     ExactBox theBoundingBoxOneOne = make_box("[-0.99,0.99]x[-0.99,1.99]");
 
     // !!!
@@ -1832,7 +1833,7 @@ Void test_adjoin_inner_approximation_operation_three(){
     //The set's bounding box is [-1,3]x[-1,3]
     GridTreeSet theSetTwo( theTrivialGrid, heightTwo, new BinaryTreeNode( make_binary_word("1111001000100"), make_binary_word("1001001") ) );
     GridTreeSet theSetTwoCopy( theSetTwo );
-    ExactBox theBoxTwoOne = make_box("[0.49,1.51]x[0.49,1.51]");
+    ExactBoxSet theBoxTwoOne = make_box("[0.49,1.51]x[0.49,1.51]");
 
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE(" theSetTwo.adjoin_inner_approximation( theBoxTwoOne, 1, 2) ");

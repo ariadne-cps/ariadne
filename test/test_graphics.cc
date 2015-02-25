@@ -58,7 +58,7 @@ Int main(Int argc, char **argv)
     ApproximateBox bbx1=widen(s1.bounding_box(),0.25);
 
     EffectiveVectorFunction rf(1u, sqr(x[0])+sqr(x[1])-sqr(p));
-    ConstraintSet cs1(rf,BoxSet(1u,IntervalSet(-1,0)));
+    ConstraintSet cs1(rf,EffectiveBox(1u,EffectiveInterval(-1,0)));
 
     {
         double h=10000;
@@ -110,7 +110,7 @@ Int main(Int argc, char **argv)
     g.write("test_graphics-set");
     g.clear();
 
-    InterpolatedCurve cv(0,ExactPoint(2,0.0));
+    InterpolatedCurve cv(0,ExactPoint(2,ExactFloat64(0.0)));
     for(Int i=1; i<=10; ++i) {
         ExactPoint pt(2); pt[0]=ExactFloat64(i/10.); pt[1]=ExactFloat64(i*i/100.);
         cv.insert(i,pt);

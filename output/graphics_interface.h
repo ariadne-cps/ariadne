@@ -37,7 +37,8 @@ struct Vector2d;
 struct Point2d;
 struct Box2d;
 
-class ApproximateInterval;
+template<class U> class Interval;
+typedef Interval<ApproximateNumber> ApproximateInterval;
 template<class IVL> class Box;
 typedef Box<ApproximateInterval> ApproximateBox;
 

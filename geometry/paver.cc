@@ -227,7 +227,8 @@ Void procedure_constraint_adjoin_outer_approximation_recursion(
 
     // Try to prove disjointness
     const ExactBox& old_domain=domain;
-    ExactBox new_domain=old_domain;
+    ExactBox exact_new_domain=old_domain;
+    UpperBox& new_domain = reinterpret_cast<UpperBox&>(exact_new_domain);
     Float64 olddomwdth = average_width(domain).raw();
     Float64 newdomwdth = olddomwdth;
 
@@ -238,13 +239,13 @@ Void procedure_constraint_adjoin_outer_approximation_recursion(
     for(Nat i=0; i!=nf; ++i) {
         for(Nat j=0; j!=m; ++j) {
             constraint_solver.box_reduce(new_domain,f[i],cell_box[i],j);
-            if(new_domain.empty()) { ARIADNE_LOG(4,"  Proved disjointness using box reduce\n"); return; }
+            if(definitely(new_domain.is_empty())) { ARIADNE_LOG(4,"  Proved disjointness using box reduce\n"); return; }
         }
     }
     for(Nat i=0; i!=ng; ++i) {
         for(Nat j=0; j!=m; ++j) {
             constraint_solver.box_reduce(new_domain,g[i],codomain[i],j);
-            if(new_domain.empty()) { ARIADNE_LOG(4,"  Proved disjointness using box reduce\n"); return; }
+            if(definitely(new_domain.is_empty())) { ARIADNE_LOG(4,"  Proved disjointness using box reduce\n"); return; }
         }
     }
     newdomwdth=average_width(new_domain).raw();
@@ -255,17 +256,17 @@ Void procedure_constraint_adjoin_outer_approximation_recursion(
         olddomwdth=newdomwdth;
         for(Nat i=0; i!=nf; ++i) {
             constraint_solver.hull_reduce(new_domain,procedures[i],cell_box[i]);
-            if(new_domain.empty()) { ARIADNE_LOG(4,"  Proved disjointness using hull reduce\n"); return; }
+            if(definitely(new_domain.is_empty())) { ARIADNE_LOG(4,"  Proved disjointness using hull reduce\n"); return; }
             //constraint_solver.hull_reduce(new_domain,f[i],cell_box[i]);
         }
         for(Nat i=0; i!=ng; ++i) {
             constraint_solver.hull_reduce(new_domain,procedures[nf+i],codomain[i]);
-            if(new_domain.empty()) { ARIADNE_LOG(4,"  Proved disjointness using hull reduce\n"); return; }
+            if(definitely(new_domain.is_empty())) { ARIADNE_LOG(4,"  Proved disjointness using hull reduce\n"); return; }
             //constraint_solver.hull_reduce(new_domain,g[i],codomain[i]);
         }
         newdomwdth=average_width(new_domain).raw();
         ARIADNE_LOG(6,"     domwdth="<<newdomwdth<<" dom="<<new_domain<<"\n");
-    } while( !new_domain.empty() && (newdomwdth < ACCEPTABLE_REDUCTION_FACTOR * olddomwdth) );
+    } while( !definitely(new_domain.is_empty()) && (newdomwdth < ACCEPTABLE_REDUCTION_FACTOR * olddomwdth) );
 
     ARIADNE_LOG(6,"new_domain="<<new_domain);
 
@@ -273,7 +274,7 @@ Void procedure_constraint_adjoin_outer_approximation_recursion(
     domwdth = average_scaled_width(new_domain,RawFloatVector(new_domain.size(),1.0)).raw();
     bbox=apply(f,new_domain);
     bbxwdth=average_scaled_width(bbox,paving.grid().lengths()).raw();
-    if(definitely(bbox.disjoint(cell_box)) || definitely(disjoint(apply(g,new_domain),codomain))) {
+    if(definitely(bbox.disjoint(cell_box)) || definitely(codomain.disjoint(apply(g,new_domain)))) {
         ARIADNE_LOG(4,"  Proved disjointness using image of new domain\n");
         return;
     }
@@ -291,7 +292,7 @@ Void procedure_constraint_adjoin_outer_approximation_recursion(
     if( (bbxmaxwdth > 4.0*clmaxwdth) || (cell.tree_depth()>=max_dpth && (bbxmaxwdth > clmaxwdth)) ) {
         Pair<Nat,double> lipsch = lipschitz_index_and_error(f,new_domain);
         ARIADNE_LOG(4,"  Splitting domain on coordinate "<<lipsch.first<<"\n");
-        Pair<ExactBox,ExactBox> sd=new_domain.split(lipsch.first);
+        Pair<ExactBox,ExactBox> sd=exact_new_domain.split(lipsch.first);
         procedure_constraint_adjoin_outer_approximation_recursion(paving, sd.first, f, g, codomain, cell, max_dpth, splt+1, procedures);
         procedure_constraint_adjoin_outer_approximation_recursion(paving, sd.second, f, g, codomain, cell, max_dpth, splt+1, procedures);
     } else if(cell.tree_depth()>=max_dpth) {
@@ -421,7 +422,7 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
         ARIADNE_LOG(6,"  dom="<<nd<<"\n");
         solver.hull_reduce(nd,txg,ExactInterval(0,inf));
         ARIADNE_LOG(6,"  dom="<<nd<<"\n");
-        if(definitely(nd.empty())) {
+        if(definitely(nd.is_empty())) {
             ARIADNE_LOG(2,"  Proved disjointness using hull reduce\n");
             return;
         }
@@ -429,13 +430,13 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
         for(Nat i=0; i!=m; ++i) {
             solver.box_reduce(nd,txg,ExactInterval(0,inf),i);
             ARIADNE_LOG(8,"  dom="<<nd<<"\n");
-            if(definitely(nd.empty())) { ARIADNE_LOG(2,"  Proved disjointness using box reduce\n"); return; }
+            if(definitely(nd.is_empty())) { ARIADNE_LOG(2,"  Proved disjointness using box reduce\n"); return; }
         }
         ARIADNE_LOG(6,"  dom="<<nd<<"\n");
 
         solver.hull_reduce(nd,txg,ExactInterval(0,inf));
         ARIADNE_LOG(6,"  dom="<<nd<<"\n");
-        if(definitely(nd.empty())) {
+        if(definitely(nd.is_empty())) {
             ARIADNE_LOG(2,"  Proved disjointness using hull reduce\n");
             return;
         }
@@ -532,7 +533,7 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
         ARIADNE_LOG(6,"  dom="<<nd<<"\n");
         solver.hull_reduce(nd,xg,ExactInterval(0,inf));
         ARIADNE_LOG(6,"  dom="<<nd<<"\n");
-        if(definitely(nd.empty())) {
+        if(definitely(nd.is_empty())) {
             ARIADNE_LOG(4,"  Proved disjointness using hull reduce\n");
             return;
         }
@@ -540,7 +541,7 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
         for(Nat i=0; i!=m; ++i) {
             solver.box_reduce(nd,xg,ExactInterval(0,inf),i);
             ARIADNE_LOG(8,"  dom="<<nd<<"\n");
-            if(definitely(nd.empty())) { ARIADNE_LOG(4,"  Proved disjointness using box reduce\n"); return; }
+            if(definitely(nd.is_empty())) { ARIADNE_LOG(4,"  Proved disjointness using box reduce\n"); return; }
         }
         ARIADNE_LOG(6,"  dom="<<nd<<"\n");
 

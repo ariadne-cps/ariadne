@@ -905,10 +905,10 @@ template<> Matrix<Rational> midpoint(Matrix<Rational> const& A) { return A; }
 #include "geometry/interval.h"
 
 namespace Ariadne {
-template class Matrix<UpperInterval>;
-template Matrix<SingletonType<UpperInterval>> make_singleton(Matrix<UpperInterval> const&);
-template Matrix<MidpointType<UpperInterval>> midpoint(Matrix<UpperInterval> const&);
-template Matrix<UpperInterval> inverse(const Matrix<UpperInterval>&);
-template Vector<UpperInterval> solve(const Matrix<UpperInterval>&, const Vector<UpperInterval>&);
+template class Matrix<UpperFloatInterval>;
+template Matrix<SingletonType<UpperFloatInterval>> make_singleton(Matrix<UpperFloatInterval> const&);
+template Matrix<MidpointType<UpperFloatInterval>> midpoint(Matrix<UpperFloatInterval> const&);
+template Matrix<UpperFloatInterval> inverse(const Matrix<UpperFloatInterval>&);
+template Vector<UpperFloatInterval> solve(const Matrix<UpperFloatInterval>&, const Vector<UpperFloatInterval>&);
 } // namespace Ariadne
 

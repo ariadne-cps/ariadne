@@ -33,16 +33,13 @@
 #include <vector>
 
 #include "utility/typedefs.h"
+#include "utility/declarations.h"
 #include "output/colour.h"
 #include "output/graphics_interface.h"
 
 typedef unsigned int Nat;
 
 namespace Ariadne {
-
-class ApproximateInterval;
-template<class IVL> class Box;
-typedef Box<ApproximateInterval> ApproximateBox;
 
 typedef ApproximateBox GraphicsBoundingBoxType;
 
@@ -112,6 +109,7 @@ class Figure
     Colour get_fill_colour() const;
 
     Void draw(const DrawableInterface& shape);
+    Void draw(const ApproximateBox& box);
 
     Void clear();
     Void display() const;
@@ -125,6 +123,8 @@ class Figure
     Data* _data;
 };
 
+Void draw(Figure& fig, const DrawableInterface& shape);
+Void draw(Figure& fig, const ApproximateBox& box);
 
 inline Figure& operator<<(Figure& g, const LineStyle& ls) { g.set_line_style(ls); return g; }
 inline Figure& operator<<(Figure& g, const LineWidth& lw) { g.set_line_width(lw); return g; }
@@ -133,8 +133,8 @@ inline Figure& operator<<(Figure& g, const FillStyle& fs) { g.set_fill_style(fs)
 inline Figure& operator<<(Figure& g, const FillOpacity& fo) { g.set_fill_opacity(fo); return g; }
 inline Figure& operator<<(Figure& g, const FillColour& fc) { g.set_fill_colour(fc); return g; }
 
-inline Void draw(Figure& fig, const DrawableInterface& shape) { fig.draw(shape); }
 inline Figure& operator<<(Figure& fig, const DrawableInterface& shape) { fig.draw(shape); return fig; }
+inline Figure& operator<<(Figure& fig, const ApproximateBox& box) { fig.draw(box); return fig; }
 
 template<class SET> Void plot(const char* filename, const SET& set) {
     Figure g; draw(g,set); g.write(filename); }

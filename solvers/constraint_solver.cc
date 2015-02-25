@@ -72,10 +72,9 @@ OutputStream& operator<<(OutputStream& os, const EffectiveConstraint& c) {
 }
 
 
-
 Pair<Tribool,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, const List<ValidatedConstraint>& constraints) const
 {
-    if(constraints.empty()) { return make_pair(!domain.empty(),domain.centre()); }
+    if(constraints.empty()) { return make_pair(!domain.is_empty(),domain.centre()); }
 
     ValidatedVectorFunction function(constraints.size(),constraints[0].function().domain());
     ExactBox bounds(constraints.size());
@@ -147,7 +146,7 @@ Pair<Tribool,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, cons
 
     if(decide(t<TERR)) {
         // Probably disjoint, so try to prove this
-        ExactBox subdomain=domain;
+        UpperBox subdomain=domain;
 
         Vector<ExactFloat64> x_exact=make_exact(x);
         // Use the computed dual variables to try to make a scalar function which is negative over the entire domain.
@@ -169,7 +168,7 @@ Pair<Tribool,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, cons
         ARIADNE_LOG(6,"  dom="<<subdomain<<"\n");
         this->hull_reduce(subdomain,txg,ExactInterval(0,inf));
         ARIADNE_LOG(6,"  dom="<<subdomain<<"\n");
-        if(subdomain.empty()) {
+        if(definitely(subdomain.is_empty())) {
             ARIADNE_LOG(4,"  Proved disjointness using hull reduce\n");
             return make_pair(false,ExactPoint());
         }
@@ -177,7 +176,7 @@ Pair<Tribool,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, cons
         for(Nat i=0; i!=m; ++i) {
             this->box_reduce(subdomain,txg,ExactInterval(0,inf),i);
             ARIADNE_LOG(8,"  dom="<<subdomain<<"\n");
-            if(subdomain.empty()) { ARIADNE_LOG(4,"  Proved disjointness using box reduce\n"); return make_pair(false,ExactPoint()); }
+            if(definitely(subdomain.is_empty())) { ARIADNE_LOG(4,"  Proved disjointness using box reduce\n"); return make_pair(false,ExactPoint()); }
         }
         ARIADNE_LOG(6,"  dom="<<subdomain<<"\n");
 
@@ -203,7 +202,7 @@ Bool ConstraintSolver::reduce(UpperBox& domain, const ValidatedVectorFunction& f
     ARIADNE_ASSERT(function.argument_size()==domain.size());
     ARIADNE_ASSERT(function.result_size()==codomain.size());
 
-    if(definitely(domain.empty())) { return true; }
+    if(definitely(domain.is_empty())) { return true; }
 
     Float64 domain_magnitude=0.0;
     for(Nat j=0; j!=domain.size(); ++j) {
@@ -213,15 +212,15 @@ Bool ConstraintSolver::reduce(UpperBox& domain, const ValidatedVectorFunction& f
 
     do {
         this->hull_reduce(domain,function,codomain);
-        if(definitely(domain.empty())) { return true; }
+        if(definitely(domain.is_empty())) { return true; }
 
         for(Nat i=0; i!=codomain.size(); ++i) {
             for(Nat j=0; j!=domain.size(); ++j) {
                 this->box_reduce(domain,function[i],codomain[i],j);
-                if(definitely(domain.empty())) { return true; }
+                if(definitely(domain.is_empty())) { return true; }
             }
         }
-        if(definitely(domain.empty())) { return true; }
+        if(definitely(domain.is_empty())) { return true; }
 
         old_domain_magnitude=domain_magnitude;
         domain_magnitude=0.0;
@@ -246,7 +245,7 @@ Bool ConstraintSolver::reduce(UpperBox& domain, const List<ValidatedConstraint>&
 
     const double MINIMUM_REDUCTION = 0.75;
 
-    if(definitely(domain.empty())) { return true; }
+    if(definitely(domain.is_empty())) { return true; }
 
     Float64 domain_magnitude=0.0;
     for(Nat j=0; j!=domain.size(); ++j) {
@@ -258,13 +257,13 @@ Bool ConstraintSolver::reduce(UpperBox& domain, const List<ValidatedConstraint>&
         for(Nat i=0; i!=constraints.size(); ++i) {
             this->hull_reduce(domain,constraints[i].function(),constraints[i].bounds());
         }
-        if(definitely(domain.empty())) { return true; }
+        if(definitely(domain.is_empty())) { return true; }
 
         if(USE_BOX_REDUCE) {
             for(Nat i=0; i!=constraints.size(); ++i) {
                 for(Nat j=0; j!=domain.size(); ++j) {
                     this->box_reduce(domain,constraints[i].function(),constraints[i].bounds(),j);
-                    if(definitely(domain[j].empty())) { return true; }
+                    if(definitely(domain[j].is_empty())) { return true; }
                 }
             }
         }
@@ -286,7 +285,7 @@ Bool ConstraintSolver::hull_reduce(UpperBox& domain, const ValidatedProcedure& p
                   "procedure="<<procedure<<", bounds="<<bounds<<", domain="<<domain<<"\n");
 
     Ariadne::simple_hull_reduce(domain, procedure, bounds);
-    return definitely(domain.empty());
+    return definitely(domain.is_empty());
 }
 
 Bool ConstraintSolver::hull_reduce(UpperBox& domain, const Vector<ValidatedProcedure>& procedure, const ExactBox& bounds) const
@@ -295,7 +294,7 @@ Bool ConstraintSolver::hull_reduce(UpperBox& domain, const Vector<ValidatedProce
                   "procedure="<<procedure<<", bounds="<<bounds<<", domain="<<domain<<"\n");
 
     Ariadne::simple_hull_reduce(domain, procedure, bounds);
-    return definitely(domain.empty());
+    return definitely(domain.is_empty());
 }
 
 Bool ConstraintSolver::hull_reduce(UpperBox& domain, const ValidatedScalarFunction& function, const ExactInterval& bounds) const
@@ -322,7 +321,7 @@ Bool ConstraintSolver::monotone_reduce(UpperBox& domain, const ValidatedScalarFu
 {
     ValidatedScalarFunction derivative=function.derivative(variable);
 
-    ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(ExactBox domain): function="<<function<<", bounds="<<bounds<<", domain="<<domain<<", variable="<<variable<<", derivative="<<derivative<<"\n");
+    ARIADNE_LOG(2,"ConstraintSolver::monotone_reduce(ExactBox domain): function="<<function<<", bounds="<<bounds<<", domain="<<domain<<", variable="<<variable<<", derivative="<<derivative<<"\n");
 
     ExactFloat64 splitpoint;
     UpperInterval lower=domain[variable];
@@ -335,24 +334,24 @@ Bool ConstraintSolver::monotone_reduce(UpperBox& domain, const ValidatedScalarFu
     do {
         // Apply Newton contractor on lower and upper strips
         if(lower.width().raw()>size) {
-            splitpoint=lower.centre();
+            splitpoint=lower.midpoint();
             slice[variable]=splitpoint;
             UpperInterval new_lower=splitpoint+(bounds-apply(function,slice))/apply(derivative,subdomain);
-            if(new_lower.upper_raw()<lower.lower_raw()) { lower=UpperInterval(lower.lower_raw()); }
+            if(definitely(new_lower.upper()<lower.lower())) { lower=UpperInterval(lower.lower().raw(),lower.lower().raw()); }
             else { lower=intersection(lower,new_lower); }
         }
         if(upper.width().raw()>size) {
-            splitpoint=upper.centre();
+            splitpoint=upper.midpoint();
             slice[variable]=splitpoint;
             UpperInterval new_upper=splitpoint+(bounds-apply(function,slice))/apply(derivative,subdomain);
-            if(new_upper.lower_raw()>upper.upper_raw()) { upper=UpperInterval(upper.upper_raw()); }
+            if(definitely(new_upper.lower()>upper.upper())) { upper=UpperInterval(upper.upper().raw(),upper.upper().raw()); }
             else { upper=intersection(upper,new_upper); }
         }
         subdomain[variable]=UpperInterval(lower.lower(),upper.upper());
     } while(lower.width().raw()>size && upper.width().raw()>size);
     domain=subdomain;
 
-    return definitely(domain.empty());
+    return definitely(domain.is_empty());
 }
 
 
@@ -393,7 +392,7 @@ Bool ConstraintSolver::lyapunov_reduce(UpperBox& domain, const VectorTaylorFunct
     }
 
     domain=new_domain;
-    return definitely(domain.empty());
+    return definitely(domain.is_empty());
 }
 
 Bool ConstraintSolver::box_reduce(UpperBox& domain, const ValidatedScalarFunction& function, const ExactInterval& bounds, Nat variable) const
@@ -420,7 +419,7 @@ Bool ConstraintSolver::box_reduce(UpperBox& domain, const ValidatedScalarFunctio
         subinterval=ExactInterval((l*(n-i)+u*i)/n,(l*(n-i-1)+u*(i+1))/n);
         slice[variable]=subinterval;
         UpperInterval slice_image=apply(function,slice);
-        if(definitely(intersection(slice_image,bounds).empty())) {
+        if(definitely(intersection(slice_image,bounds).is_empty())) {
             new_interval.set_lower(subinterval.upper());
         } else {
             imax = i; break;
@@ -438,7 +437,7 @@ Bool ConstraintSolver::box_reduce(UpperBox& domain, const ValidatedScalarFunctio
         subinterval=ExactInterval((l*(n-j)+u*j)/n,(l*(n-j-1)+u*(j+1))/n);
         slice[variable]=subinterval;
         UpperInterval slice_image=apply(function,slice);
-        if(definitely(intersection(slice_image,bounds).empty())) {
+        if(definitely(intersection(slice_image,bounds).is_empty())) {
             new_interval.set_upper(subinterval.lower());
         } else {
             break;
@@ -448,7 +447,7 @@ Bool ConstraintSolver::box_reduce(UpperBox& domain, const ValidatedScalarFunctio
     // The set cannot be empty, since a nonempty slice has been found in the upper pass.
     // Note that the interval is an UpperInterval, so non-emptiness of the approximated set cannot be guaranteed,
     // but emptiness would be verified
-    ARIADNE_ASSERT(not definitely(new_interval.empty()));
+    ARIADNE_ASSERT(not definitely(new_interval.is_empty()));
 
     domain[variable]=new_interval;
 

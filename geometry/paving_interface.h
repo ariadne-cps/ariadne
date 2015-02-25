@@ -29,23 +29,13 @@
 #define ARIADNE_PAVING_INTERFACE_H
 
 #include <iosfwd>
+#include "utility/declarations.h"
 #include "geometry/grid_cell.h"
 #include "geometry/set_interface.h"
 #include "output/graphics_interface.h"
 
 namespace Ariadne {
 
-typedef Void Void;
-typedef Bool Bool;
-typedef Tribool Tribool;
-typedef Nat Nat;
-typedef Int Int;
-typedef SizeType SizeType;
-typedef OutputStream OutputStream;
-
-class ExactInterval;
-template<class X> class Box;
-typedef Box<ExactInterval> ExactBox;
 
 class Grid;
 class GridCell;
@@ -248,6 +238,7 @@ class PavingInterface
     virtual GridCell smallest_enclosing_primary_cell(const UpperBox& bx) const = 0; // Useful query, but can also be implemented at the Grid level.
     virtual Void adjoin_cells(const PredicateInterface<ExactBox>& predicate, const Nat depth) { ARIADNE_ABSTRACT_METHOD; }
     virtual Void adjoin_outer_approximation(const CompactSetInterface& set, const Nat depth) = 0;
+    virtual Void adjoin_outer_approximation(const UpperBox& set, const Nat depth) = 0;
     virtual Void adjoin_inner_approximation(const OpenSetInterface& set, const Nat height, const Nat depth) = 0;
     virtual Void adjoin(const SubPavingInterface& paving) = 0;
     virtual Void restrict(const SubPavingInterface& paving) = 0;

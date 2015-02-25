@@ -85,11 +85,11 @@ TestHybridSet::test_hybrid_list_set()
     RealSpace spc1("x");
     RealSpace spc2((Identifier("x"),"y"));
 
-    ExactBox bx1=make_box("[0,1]");
-    ExactBox bx2=make_box("[2,3]");
-    ExactBox bx3=make_box("[1,2]x[2,3]");
-    ExactBox bx4=make_box("[4,5]x[5,6]");
-    ExactBox bx5=make_box("[6,7]x[8,9]");
+    ExactBox bx1={{0,1}};
+    ExactBox bx2={{2,3}};
+    ExactBox bx3={{1,2},{2,3}};
+    ExactBox bx4={{4,5},{5,6}};
+    ExactBox bx5={{6,7},{8,9}};
     ARIADNE_TEST_EXECUTE(hls.adjoin(loc1,spc1,bx1));
     ARIADNE_TEST_FAIL(hls.adjoin(loc1,bx3)); // Should fail due to incompatible dimensions
     ARIADNE_TEST_FAIL(hls.adjoin(loc2,bx3)); // Should fail due to unspecified space

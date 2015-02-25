@@ -73,15 +73,15 @@ class ConstraintSet
     List< EffectiveConstraint > _constraints;
   public:
     //! \brief Construct the preimage of \a C under \a g.
-    ConstraintSet(const EffectiveVectorFunction& g, const BoxSet& C);
+    ConstraintSet(const EffectiveVectorFunction& g, const RealBox& C);
     //! \brief Construct the restriction of \a D under the constraints \a c.
     ConstraintSet(const List<EffectiveConstraint>& c);
     //! \brief The codomain of the set.
-    const BoxSet codomain() const { return this->constraint_bounds(); }
+    const RealBox codomain() const { return this->constraint_bounds(); }
     //! \brief The function used to define the constraints.
     const EffectiveVectorFunction constraint_function() const;
     //! \brief The bounds of the constraints.
-    const BoxSet constraint_bounds() const;
+    const RealBox constraint_bounds() const;
     //! \brief The number of constraints.
     Nat number_of_constraints() const { return this->_constraints.size(); };
     //! \brief The constraints.
@@ -105,23 +105,23 @@ class BoundedConstraintSet
     : public virtual SetInterface
     , public virtual DrawableInterface
 {
-    BoxSet _domain;
+    RealBox _domain;
     List< EffectiveConstraint > _constraints;
   public:
     //! \brief Construct the preimage of \a C under \a g.
-    BoundedConstraintSet(const BoxSet& D, const EffectiveVectorFunction& g, const BoxSet& C);
+    BoundedConstraintSet(const RealBox& D, const EffectiveVectorFunction& g, const RealBox& C);
     //! \brief Construct the restriction of \a D under the constraints \a c.
-    BoundedConstraintSet(const BoxSet& D, const List<EffectiveConstraint>& c);
+    BoundedConstraintSet(const RealBox& D, const List<EffectiveConstraint>& c);
     //! \brief Construct the box \a D.
-    BoundedConstraintSet(const BoxSet& bx);
+    BoundedConstraintSet(const RealBox& bx);
     //! \brief The domain of the set.
-    const BoxSet& domain() const { return this->_domain; }
+    const RealBox& domain() const { return this->_domain; }
     //! \brief The codomain of the set.
-    const BoxSet codomain() const { return this->constraint_bounds(); }
+    const RealBox codomain() const { return this->constraint_bounds(); }
     //! \brief The function used to define the constraints.
     const EffectiveVectorFunction constraint_function() const;
     //! \brief The bounds for the constraints.
-    const BoxSet constraint_bounds() const;
+    const RealBox constraint_bounds() const;
     //! \brief The number of constraints.
     Nat number_of_constraints() const { return this->_constraints.size(); };
     //! \brief The constraints.
@@ -140,36 +140,36 @@ class BoundedConstraintSet
     Void draw(CanvasInterface&,const Projection2d&) const;
 };
 
-BoundedConstraintSet intersection(const ConstraintSet& cs, const BoxSet& bx);
+BoundedConstraintSet intersection(const ConstraintSet& cs, const RealBox& bx);
 
 
 class ConstrainedImageSet
     : public virtual LocatedSetInterface, public virtual DrawableInterface
 {
-    BoxSet _domain;
+    RealBox _domain;
     EffectiveVectorFunction _function;
     List< EffectiveConstraint > _constraints;
   public:
     //! \brief Construct the set with zero-dimensional parameterisation in zero dimensions with no constraints.
     ConstrainedImageSet() : _domain(), _function() { }
     //! \brief Construct the box \a dom.
-    ConstrainedImageSet(const BoxSet& dom) : _domain(dom), _function(EffectiveVectorFunction::identity(dom.size())) { }
+    ConstrainedImageSet(const RealBox& dom) : _domain(dom), _function(EffectiveVectorFunction::identity(dom.size())) { }
     //! \brief Construct the image of \a dom under \a fn.
-    ConstrainedImageSet(const BoxSet& dom, const EffectiveVectorFunction& fn) : _domain(dom), _function(fn) {
+    ConstrainedImageSet(const RealBox& dom, const EffectiveVectorFunction& fn) : _domain(dom), _function(fn) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
     //! \brief Construct the image of \a dom under \a fn, using constraints \a c.
-    ConstrainedImageSet(const BoxSet& dom, const EffectiveVectorFunction& fn, const List<EffectiveConstraint>& c) : _domain(dom), _function(fn), _constraints(c) {
+    ConstrainedImageSet(const RealBox& dom, const EffectiveVectorFunction& fn, const List<EffectiveConstraint>& c) : _domain(dom), _function(fn), _constraints(c) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
     //! \brief Convert from a bounded constraint set.
     ConstrainedImageSet(const BoundedConstraintSet& set);
     //! \brief The domain of the set.
-    const BoxSet& domain() const { return this->_domain; }
+    const RealBox& domain() const { return this->_domain; }
     //! \brief The function used to define the mapping from the parameter domain to the space.
     const EffectiveVectorFunction& function() const { return this->_function; };
     //! \brief The bounds for the constraints.
     const EffectiveVectorFunction constraint_function() const;
     //! \brief The bounds for the constraints.
-    const BoxSet constraint_bounds() const;
+    const RealBox constraint_bounds() const;
     //! \brief The function used to define the set.
     const List<EffectiveConstraint>& constraints() const { return this->_constraints; };
     //! \brief The number of parameters used to define the set, which equals the dimension of \f$D\f$.
@@ -196,7 +196,6 @@ class ConstrainedImageSet
 
     ConstrainedImageSet* clone() const { return new ConstrainedImageSet(*this); }
     Nat dimension() const { return this->_function.result_size(); }
-    Tribool inside(const ExactBox& bx) const { return this->bounding_box().inside(bx); }
 
     //! \brief A coarse over-approximation to the set. Computed by taking the interval evaluation \f$h(D)\f$.
     UpperBox bounding_box() const;
@@ -209,6 +208,8 @@ class ConstrainedImageSet
     //! \brief Split into two pieces by subdividing along the \a j<sup>th</sup> coordinate direction.
     Pair<ConstrainedImageSet,ConstrainedImageSet> split(Nat j) const;
 
+    //! \brief Test if the set is contained in (the interior of) a box.
+    Tribool inside(const ExactBox& bx) const;
     //! \brief Test if the set is disjoint from a (closed) box.
     Tribool separated(const ExactBox&) const;
     //! \brief Test if the set overlaps (intersects the interior of) a box.

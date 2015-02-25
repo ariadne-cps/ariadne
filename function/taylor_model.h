@@ -47,7 +47,7 @@
 namespace Ariadne {
 
 class UnitInterval;
-enum class SplitPart : char { LOWER, MIDDLE, UPPER };
+enum class SplitPart : char;
 
 template<class T1, class T2> struct Product;
 

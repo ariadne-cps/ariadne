@@ -44,7 +44,6 @@
 namespace Ariadne {
 
 class Real;
-class ExactInterval;
 template<class X> class Vector;
 template<class X> class Differential;
 template<class X> class Procedure;

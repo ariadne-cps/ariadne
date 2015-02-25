@@ -208,7 +208,7 @@ ValidatedAffineConstrainedImageSet::domain() const
 }
 
 Tribool ValidatedAffineConstrainedImageSet::bounded() const {
-    return ExactBox(this->domain()).bounded() || Tribool(indeterminate);
+    return Tribool(ExactBox(this->domain()).is_bounded()) || Tribool(indeterminate);
 }
 
 UpperBox ValidatedAffineConstrainedImageSet::bounding_box() const {
@@ -227,7 +227,7 @@ UpperBox ValidatedAffineConstrainedImageSet::bounding_box() const {
 
 Tribool ValidatedAffineConstrainedImageSet::separated(const ExactBox& bx) const {
     ARIADNE_PRECONDITION_MSG(this->dimension()==bx.dimension(),"set="<<*this<<", box="<<bx);
-    ExactBox wbx=widen(bx);
+    ExactBox wbx=make_exact_box(widen(bx));
     LinearProgram<Float64> lp;
     this->construct_linear_program(lp);
     for(Nat i=0; i!=bx.size(); ++i) {
@@ -253,7 +253,7 @@ Tribool ValidatedAffineConstrainedImageSet::empty() const {
 
 Tribool ValidatedAffineConstrainedImageSet::inside(const ExactBox& bx) const {
     ARIADNE_PRECONDITION_MSG(this->dimension()==bx.dimension(),"set="<<*this<<", box="<<bx);
-    return widen(this->bounding_box()).inside(bx) || Tribool(indeterminate);
+    return Tribool(widen(this->bounding_box()).inside(bx)) || Tribool(indeterminate);
 }
 
 

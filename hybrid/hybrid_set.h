@@ -37,6 +37,7 @@
 
 #include "utility/macros.h"
 #include "utility/stlio.h"
+#include "utility/declarations.h"
 #include "utility/container.h"
 #include "geometry/function_set.h"
 #include "geometry/list_set.h"
@@ -86,14 +87,14 @@ class HybridBoxSet
   public:
     HybridBoxSet(const DiscreteLocation& loc, const RealVariablesBox& bx)
         : Pair<DiscreteLocation,RealVariablesBox>(loc,bx) { }
-    HybridBoxSet(const DiscreteLocation& loc, const RealSpace& spc, const BoxSet& bx)
+    HybridBoxSet(const DiscreteLocation& loc, const RealSpace& spc, const RealBox& bx)
         : Pair<DiscreteLocation,RealVariablesBox>(loc,RealVariablesBox(spc,bx)) { }
     //! \brief The location in which the box is defined.
     DiscreteLocation location() const { return this->first; }
     //! \brief The active variables in the location \a loc.
     virtual Set<RealVariable> variables() const { return this->second.variables(); }
     //! \brief The subset of \f$\mathbb{R}^n\f$ obtained by ordering the variables as defined by \a spc.
-    BoxSet euclidean_set(const RealSpace& spc) const { return this->second.euclidean_set(spc); }
+    RealBox euclidean_set(const RealSpace& spc) const { return this->second.euclidean_set(spc); }
 
     virtual Void draw(CanvasInterface&, const Set<DiscreteLocation>&, const Variables2d&) const override;
 };
@@ -229,7 +230,7 @@ class HybridPoint
 
 //! \ingroup HybridSetSubModule
 //! \brief A box in a location of a hybrid space.
-//! \details Primarily used as a basic set against whabstract set properties can be tested.
+//! \details Primarily used as a basic set against which abstract set properties can be tested.
 class HybridBox
     : public HybridBasicSet<ExactBox>
     , public virtual HybridDrawableInterface
@@ -242,7 +243,7 @@ class HybridBox
     HybridBox(const DiscreteLocation& loc, const RealSpace& spc, const ExactBox& bx)
         : HybridBasicSet<ExactBox>(loc,spc,bx) { }
 
-   //! \brief The subset of \f$\mathbb{R}^n\f$ obtained by restricting to location \a loc and ordering the variables as defined by \a spc.
+    //! \brief The subset of \f$\mathbb{R}^n\f$ obtained by restricting to location \a loc and ordering the variables as defined by \a spc.
     ExactBox euclidean_set(const RealSpace& spc) const {
         if(spc==this->space()) { return this->continuous_set(); }
         else { return VariablesBox(this->space(),this->continuous_set() ).euclidean_set(spc); }
@@ -613,7 +614,7 @@ class HybridGridTreeSet
             DiscreteLocation const& loc=_loc_iter->first;
             VariablesBox const& vbx=_loc_iter->second;
             ARIADNE_ASSERT(vbx.space() == this->space(loc));
-            this->_provide_location(loc).adjoin_inner_approximation(vbx.continuous_set(),vbx.continuous_set(),depth); } }
+            this->_provide_location(loc).adjoin_inner_approximation(vbx.continuous_set(),depth); } }
 
     //!
     Void adjoin_lower_approximation(const HybridOvertSetInterface& hs, const Int height, const Int depth) {

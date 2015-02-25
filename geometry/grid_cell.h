@@ -73,7 +73,7 @@ class GridAbstractCell;
 class GridCell;
 class GridOpenCell;
 
-typedef Vector<ExactInterval> LatticeBoxType;
+typedef Box<ExactInterval> LatticeBoxType;
 
 OutputStream& operator<<(OutputStream& os, const GridCell& theGridCell);
 OutputStream& operator<<(OutputStream& os, const GridOpenCell& theGridOpenCell );

@@ -107,7 +107,7 @@ TestInterval::test_constructors()
     }
 
     // Constructor without approximations
-    ExactInterval ivld3(Rational(21,8),Rational(17,4));
+    RationalInterval ivld3(Rational(21,8),Rational(17,4));
     cout<<ivld3<<std::endl;
     ARIADNE_TEST_COMPARE(make_exact(ivld3.lower()),==,Rational(21,8));
     ARIADNE_TEST_COMPARE(make_exact(ivld3.upper()),==,Rational(17,4));
@@ -128,8 +128,8 @@ TestInterval::test_constructors()
     ARIADNE_TEST_EQUAL(ivld6.upper().raw(),Float64(1.25));
 
     // Empty interval
-    ExactInterval ivld7;
-    ARIADNE_TEST_EXECUTE(ivld7.set_empty());
+    EmptyInterval empty_interval;
+    ExactInterval ivld7(empty_interval);
     ARIADNE_TEST_ASSERT(ivld7.lower().raw()==+inf); ARIADNE_TEST_ASSERT(ivld7.upper().raw()==-inf);
 }
 
@@ -138,11 +138,12 @@ Void TestInterval::test_class()
     // Test lower, upper, midpoint, radius, width
 
     // Tests for exact operations
-    ARIADNE_TEST_EQUAL(ExactInterval(-0.25,0.50).lower().raw(),-0.25);
-    ARIADNE_TEST_EQUAL(ExactInterval(-0.25,0.50).upper().raw(),0.5);
-    ARIADNE_TEST_EQUAL(ExactInterval(-0.25,0.50).centre().raw(),0.125);
-    ARIADNE_TEST_EQUAL(ExactInterval(-0.25,0.50).error().raw(),0.375)
-    ARIADNE_TEST_EQUAL(ExactInterval(-0.25,0.50).width().raw(),0.75);
+    ARIADNE_TEST_EQUAL(ExactInterval(-0.25,0.50).lower(),-0.25_exact);
+    ARIADNE_TEST_EQUAL(ExactInterval(-0.25,0.50).upper(),0.5_exact);
+    ARIADNE_TEST_EQUAL(ExactInterval(-0.25,0.50).midpoint(),0.125_exact);
+    ARIADNE_TEST_EQUAL(ExactInterval(-0.25,0.50).centre(),0.125_exact);
+    ARIADNE_TEST_EQUAL(ExactInterval(-0.25,0.50).radius(),0.375)
+    ARIADNE_TEST_EQUAL(ExactInterval(-0.25,0.50).width(),0.75_exact);
 
 }
 
@@ -183,7 +184,7 @@ Void TestInterval::test_comparison() {
 
 Void TestInterval::test_geometric_predicates()
 {
-    ExactInterval empty_interval; empty_interval.set_empty();
+    ExactInterval empty_interval=EmptyInterval();
 
     ARIADNE_TEST_PRINT(empty_interval);
 

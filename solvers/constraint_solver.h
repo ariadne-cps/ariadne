@@ -31,23 +31,12 @@
 #include "utility/logging.h"
 #include "utility/container.h"
 
+#include "utility/declarations.h"
 #include "utility/tribool.h"
 #include "numeric/numeric.h"
 #include "function/constraint.h"
 
 namespace Ariadne {
-
-class Real;
-typedef Tribool Tribool;
-
-class ExactInterval;
-class UpperInterval;
-
-template<class X> class Point;
-typedef Point<ExactNumber> ExactPoint;
-template<class IVL> class Box;
-typedef Box<ExactInterval> ExactBox;
-typedef Box<UpperInterval> UpperBox;
 
 class GridTreeSet;
 

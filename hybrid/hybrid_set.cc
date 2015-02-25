@@ -181,10 +181,10 @@ operator<<(OutputStream& os, const Orbit< HybridEnclosure >& orb)
 
 
 
-Map<RealVariable,IntervalSet> make_map(const List<RealVariableInterval>& b) {
-    Map<RealVariable,IntervalSet> res;
+Map<RealVariable,RealInterval> make_map(const List<RealVariableInterval>& b) {
+    Map<RealVariable,RealInterval> res;
     for(Nat i=0; i!=b.size(); ++i) {
-        res.insert(b[i].variable(),IntervalSet(b[i].lower(),b[i].upper()));
+        res.insert(b[i].variable(),RealInterval(b[i].lower(),b[i].upper()));
     }
     return res;
 }

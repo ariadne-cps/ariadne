@@ -45,12 +45,6 @@
 
 namespace Ariadne {
 
-class BoxSet;
-
-class ExactInterval;
-template<class IVL> class Box;
-typedef Box<ExactInterval> ExactBox;
-
 template<class X> class Vector;
 template<class X> class LinearProgram;
 

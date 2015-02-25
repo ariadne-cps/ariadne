@@ -381,7 +381,7 @@ Pair<List<Float64>,Float64> midpoint_error(const Graded<ExactInterval>& x) {
     Float64 e;
     for(Nat i=0; i<=x.degree(); ++i) {
         m[i]=static_cast<Float64>(midpoint(x[i]));
-        e=add_up(e,max(sub_up(m[i],x[i].lower_raw()),sub_up(x[i].upper_raw(),m[i])));
+        e=add_up(e,max(sub_up(m[i],x[i].lower().raw()),sub_up(x[i].upper().raw(),m[i])));
     }
     return Pair<List<Float64>,Float64>(m,e);
 }

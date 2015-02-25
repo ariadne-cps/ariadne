@@ -804,7 +804,7 @@ template<class M> FunctionPatch<M> embed(const ExactBox& dom1, const FunctionPat
     return FunctionPatch<M>(product(dom1,tv2.domain(),dom3),embed(dom1.size(),tv2.model(),dom3.size())); }
 
 template<class M> NumericType<M> evaluate(const FunctionPatch<M>& f, const Vector<NumericType<M>>& x) {
-    if(!contains(f.domain(),x)) {
+    if(!definitely(contains(f.domain(),x))) {
         ARIADNE_THROW(DomainException,"evaluate(f,x) with f="<<f<<", x="<<x,"x is not an element of f.domain()="<<f.domain());
     }
     return unchecked_evaluate(f,x);
@@ -1153,7 +1153,7 @@ template<class M> VectorFunctionPatch<M> operator+(const VectorFunctionPatch<M>&
 template<class M> VectorFunctionPatch<M> operator-(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2)
 {
     typedef M ModelType;
-    ARIADNE_ASSERT(!empty(intersection(f1.domain(),f2.domain())));
+    ARIADNE_ASSERT(!is_empty(intersection(f1.domain(),f2.domain())));
     if(f1.domain()==f2.domain()) {
         return VectorFunctionPatch<M>(f1.domain(),Vector<ModelType>(f1.models()-f2.models()));
     } else {
@@ -1165,7 +1165,7 @@ template<class M> VectorFunctionPatch<M> operator-(const VectorFunctionPatch<M>&
 template<class M> VectorFunctionPatch<M> operator*(const FunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2)
 {
     typedef M ModelType;
-    ARIADNE_ASSERT(!empty(intersection(f1.domain(),f2.domain())));
+    ARIADNE_ASSERT(!is_empty(intersection(f1.domain(),f2.domain())));
     if(f1.domain()==f2.domain()) {
         return VectorFunctionPatch<M>(f1.domain(),Vector<ModelType>(f1.model()*f2.models()));
     } else {
@@ -1308,7 +1308,7 @@ template<class M> VectorFunctionPatch<M> restriction(const VectorFunctionPatch<M
 
 
 template<class M> Vector<ValidatedNumber> evaluate(const VectorFunctionPatch<M>& f, const Vector<ValidatedNumber>& x) {
-    if(!contains(f.domain(),x)) {
+    if(!definitely(contains(f.domain(),x))) {
         ARIADNE_THROW(DomainException,"evaluate(f,x) with f="<<f<<", x="<<x,"x is not a subset of f.domain()="<<f.domain());
     }
     return unchecked_evaluate(f,x);

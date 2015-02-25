@@ -762,7 +762,7 @@ Nat GridAbstractCell::smallest_enclosing_primary_cell_height( const LatticeBoxTy
     //The zero level coordinates are known, so we need to iterate only for higher level primary cells
     do{
         //Check if the given box is a subset of a primary cell
-        Vector< ExactInterval > primaryCellBox( dimensions, ExactInterval( leftBottomCorner, rightTopCorner ) );
+        Box< ExactInterval > primaryCellBox( dimensions, ExactInterval( leftBottomCorner, rightTopCorner ) );
         if(  inside(theLatticeBox, primaryCellBox ) ) {
             //If yes then we are done
             break;
@@ -800,7 +800,7 @@ ExactBox GridAbstractCell::lattice_box_to_space(const LatticeBoxType & theLattic
         //and upper values simultaneously to prevent lower temporarily higher than upper.
         Float64 lower = add_approx( theDimOrigin, mul_approx( theDimLength, theLatticeBox[current_dimension].lower().raw() ) );
         Float64 upper = add_approx( theDimOrigin, mul_approx( theDimLength, theLatticeBox[current_dimension].upper().raw() ) );
-        theTmpBox[current_dimension].set(lower,upper);
+        theTmpBox[current_dimension].set(make_exact(lower),make_exact(upper));
     }
 
     return theTmpBox;
@@ -887,8 +887,8 @@ GridCell GridCell::smallest_enclosing_primary_cell( const UpperBox& theBox, cons
 //The resulting box is not relaterd to the original space, but is a lattice box.
 // 1. Compute the primary cell located the the height \a theHeight above the zero level,
 // 2. Compute the cell defined by the path \a theWord (from the primary cell).
-Vector<ExactInterval> GridCell::compute_lattice_box( const Nat dimensions, const Nat theHeight, const BinaryWord& theWord ) {
-    Vector<ExactInterval> theResultLatticeBox( primary_cell_lattice_box( theHeight , dimensions ) );
+LatticeBoxType GridCell::compute_lattice_box( const Nat dimensions, const Nat theHeight, const BinaryWord& theWord ) {
+    LatticeBoxType theResultLatticeBox( primary_cell_lattice_box( theHeight , dimensions ) );
 
     //2. Compute the cell on some grid, corresponding to the binary path from the primary cell.
     Nat current_dimension = 0;
@@ -897,13 +897,13 @@ Vector<ExactInterval> GridCell::compute_lattice_box( const Nat dimensions, const
         current_dimension = i % dimensions;
         //Compute the middle point of the box's projection onto
         //the dimension \a current_dimension (relative to the grid)
-        Float64 middlePointInCurrDim = theResultLatticeBox[current_dimension].centre().raw();
+        Float64 middlePointInCurrDim = theResultLatticeBox[current_dimension].midpoint().raw();
         if( theWord[i] ){
             //Choose the right half
-            theResultLatticeBox[current_dimension].set_lower( middlePointInCurrDim );
+            theResultLatticeBox[current_dimension].set_lower( make_exact(middlePointInCurrDim) );
         } else {
             //Choose the left half
-            theResultLatticeBox[current_dimension].set_upper( middlePointInCurrDim );
+            theResultLatticeBox[current_dimension].set_upper( make_exact(middlePointInCurrDim) );
         }
     }
     return theResultLatticeBox;
@@ -930,7 +930,7 @@ GridCell GridCell::neighboringCell( const Grid& theGrid, const Nat theHeight, co
     //   we are sure that we get a box that overlaps with the required neighboring cell.
     //NOTE: This box is in the original space, but not on the lattice
     Vector<ExactInterval> baseCellBoxInLattice =  GridCell::compute_lattice_box( dimensions, theHeight, theWord );
-    const Float64 upperBorderOverlapping = add_approx( baseCellBoxInLattice[dim].upper().raw(), baseCellBoxInLattice[dim].width().raw() / 2 );
+    const Float64 upperBorderOverlapping = add_approx( baseCellBoxInLattice[dim].upper().raw(), baseCellBoxInLattice[dim].width().value_raw() / 2 );
 
     //2. Now check if the neighboring cell can be rooted to the given primary cell. For that
     //   we simply use the box computed in 1. and get the primary cell that encloses it.
@@ -1002,7 +1002,7 @@ ExactBox GridOpenCell::compute_box(const Grid& theGrid, const Nat theHeight, con
         Float64 upper = baseCellBoxInLatticeDimInterval.upper().raw() +
                         ( baseCellBoxInLatticeDimInterval.upper().raw() -
                           baseCellBoxInLatticeDimInterval.lower().raw() );
-        openCellBoxInLatticeDimInterval.set(lower,upper);
+        openCellBoxInLatticeDimInterval.set(make_exact(lower),make_exact(upper));
 
         openCellBoxInLattice[dim] = openCellBoxInLatticeDimInterval;
     }
@@ -1337,7 +1337,7 @@ Void GridTreeSubset::subdivide( Float64 theMaxCellWidth ) {
 double GridTreeSubset::measure() const {
     Float64 result=0.0;
     for(ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
-        result+=iter->box().measure().raw();
+        result+=iter->box().measure().value_raw();
     }
     return numeric_cast<double>(result);
 }
@@ -1431,7 +1431,7 @@ Tribool GridTreeSubset::covers( const ExactBox& theBox ) const {
     } else {
         //Otherwise, is theBox is possibly a subset then we try to see furhter
         BinaryWord pathCopy( cell().word() );
-        return GridTreeSubset::superset( binary_tree(), grid(), cell().height(), pathCopy, widen(theBox) ) || indeterminate;
+        return GridTreeSubset::superset( binary_tree(), grid(), cell().height(), pathCopy, make_exact_box(widen(theBox)) ) || indeterminate;
     }
 }
 
@@ -1445,7 +1445,7 @@ Tribool GridTreeSubset::inside( const ExactBox& theBox ) const {
 
     BinaryWord pathCopy( cell().word() );
 
-    return GridTreeSubset::subset( binary_tree(), grid(), cell().height(), pathCopy, narrow(theBox) ) || indeterminate;
+    return GridTreeSubset::subset( binary_tree(), grid(), cell().height(), pathCopy, make_exact_box(narrow(theBox)) ) || indeterminate;
 }
 
 Tribool GridTreeSubset::separated( const ExactBox& theBox ) const {
@@ -1455,7 +1455,7 @@ Tribool GridTreeSubset::separated( const ExactBox& theBox ) const {
 
     BinaryWord pathCopy( cell().word() );
 
-    return GridTreeSubset::disjoint( binary_tree(), grid(), cell().height(), pathCopy, widen(theBox) ) || indeterminate;
+    return GridTreeSubset::disjoint( binary_tree(), grid(), cell().height(), pathCopy, make_exact_box(widen(theBox)) ) || indeterminate;
 }
 
 Tribool GridTreeSubset::overlaps( const ExactBox& theBox ) const {
@@ -1468,7 +1468,7 @@ Tribool GridTreeSubset::overlaps( const ExactBox& theBox ) const {
 
     BinaryWord pathCopy( cell().word() );
 
-    return GridTreeSubset::intersects( binary_tree(), grid(), cell().height(), pathCopy, narrow(theBox) ) || indeterminate;
+    return GridTreeSubset::intersects( binary_tree(), grid(), cell().height(), pathCopy, make_exact_box(narrow(theBox)) ) || indeterminate;
 }
 
 Tribool GridTreeSubset::superset( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
@@ -2016,7 +2016,9 @@ Void GridTreeSet::adjoin_over_approximation( const ExactBox& theBox, const Nat n
 }
 
 Void GridTreeSet::adjoin_outer_approximation( const UpperBox& theBox, const Nat numSubdivInDim ) {
-    this->adjoin_outer_approximation(make_exact_box(theBox),numSubdivInDim);
+    ExactBoxSet theBoxSet=make_exact_box(theBox);
+    CompactSetInterface const& theSet=theBoxSet;
+    this->adjoin_outer_approximation(theSet,numSubdivInDim);
 }
 
 Void GridTreeSet::adjoin_outer_approximation( const CompactSetInterface& theSet, const Nat numSubdivInDim ) {
@@ -2186,6 +2188,11 @@ Void GridTreeSet::adjoin_inner_approximation( const OpenSetInterface& theSet, co
     //that are subsets of the set theSet Adjoin the inner approximation with
     //the bounding cell being the primary cell at the given height.
     adjoin_inner_approximation( theSet, height, numSubdivInDim );
+}
+
+Void GridTreeSet::adjoin_inner_approximation( const LowerBox& theBox, const Nat numSubdivInDim ) {
+    ExactBoxSet theBoxSet=make_exact_box(theBox);
+    this->adjoin_inner_approximation(theBoxSet,theBoxSet,numSubdivInDim);
 }
 
 Void GridTreeSet::restrict_to_lower( const GridTreeSubset& theOtherSubPaving ){
@@ -2854,7 +2861,9 @@ Bool intersect( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 ) {
 /*************************************FRIENDS OF GridTreeSet*****************************************/
 
 GridTreeSet outer_approximation(const ExactBox& theBox, const Grid& theGrid, const Nat depth) {
-    return outer_approximation(static_cast<const CompactSetInterface&>(theBox),theGrid,depth);
+    ExactBoxSet theBoxSet=theBox;
+    CompactSetInterface const& theSet=theBoxSet;
+    return outer_approximation(theSet,theGrid,depth);
 }
 
 GridTreeSet outer_approximation(const ExactBox& theBox, const Nat depth) {

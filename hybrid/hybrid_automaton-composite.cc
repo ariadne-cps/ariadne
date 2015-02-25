@@ -177,7 +177,7 @@ EffectiveVectorFunction reset_function(
     List<RealExpression> results(primed.size(),default_expression);
     for(Nat i=0; i!=primed.size(); ++i) { results[i]=substitute(primed[i].rhs,algebraic); }
 
-    return EffectiveVectorFunction(Ariadne::dimension(space),Ariadne::formula(results,algebraic,space));
+    return EffectiveVectorFunction(EuclideanDomain(space.dimension()),Ariadne::formula(results,algebraic,space));
 }
 
 EffectiveScalarFunction constraint_function(
@@ -187,7 +187,7 @@ EffectiveScalarFunction constraint_function(
     Sign sign)
 {
     RealExpression constraint_expression=indicator(constraint,sign);
-    return EffectiveScalarFunction(Ariadne::dimension(space),Ariadne::formula(constraint_expression,algebraic,space));
+    return EffectiveScalarFunction(EuclideanDomain(space.dimension()),Ariadne::formula(constraint_expression,algebraic,space));
 }
 
 HybridAutomaton::HybridAutomaton()
@@ -1090,7 +1090,7 @@ CompositeHybridAutomaton::invariant_function(DiscreteLocation location, Discrete
     Space<Real> space=this->state_variables(location);
     List<RealAssignment> algebraic=this->auxiliary_assignments(location);
     RealExpression invariant=indicator(invariant_predicate(location,event),NEGATIVE);
-    return EffectiveScalarFunction(Ariadne::dimension(space),Ariadne::formula(invariant,algebraic,space));
+    return EffectiveScalarFunction(EuclideanDomain(space.dimension()),Ariadne::formula(invariant,algebraic,space));
 }
 
 EffectiveScalarFunction
@@ -1098,7 +1098,7 @@ CompositeHybridAutomaton::guard_function(DiscreteLocation location, DiscreteEven
     Space<Real> space=this->state_variables(location);
     List<RealAssignment> algebraic=this->auxiliary_assignments(location);
     RealExpression guard=indicator(guard_predicate(location,event),POSITIVE);
-    return EffectiveScalarFunction(Ariadne::dimension(space),Ariadne::formula(guard,algebraic,space));
+    return EffectiveScalarFunction(EuclideanDomain(space.dimension()),Ariadne::formula(guard,algebraic,space));
 }
 
 

@@ -33,21 +33,17 @@
 #include <list>
 #include <iostream>
 
-#include <boost/smart_ptr.hpp>
-#include "output/graphics_interface.h"
+#include "utility/declarations.h"
+#include "utility/logging.h"
 #include "utility/container.h"
+#include "output/graphics_interface.h"
 #include "function/affine.h"
 #include "function/affine_model.h"
 #include "function/constraint.h"
-#include "utility/logging.h"
 
 namespace Ariadne {
 
 template<class X> class LinearProgram;
-
-class ExactInterval;
-template<class IVL> class Box;
-typedef Box<ExactInterval> ExactBox;
 
 class Grid;
 class PavingInterface;

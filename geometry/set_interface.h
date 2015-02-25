@@ -30,16 +30,13 @@
 
 #include <iosfwd>
 
+#include "utility/declarations.h"
 #include "utility/tribool.h"
 #include "numeric/numeric.h"
 
 namespace Ariadne {
 
 template<class X> class Vector;
-
-class ExactInterval;
-class UpperInterval;
-class ApproximateInterval;
 
 template<class X> class Point;
 typedef Point<ExactNumber> ExactPoint;

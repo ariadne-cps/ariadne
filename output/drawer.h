@@ -29,6 +29,7 @@
 #define ARIADNE_DRAWER_H
 
 #include <iosfwd>
+#include "utility/declarations.h"
 #include "output/drawer_interface.h"
 
 namespace Ariadne {

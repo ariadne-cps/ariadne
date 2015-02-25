@@ -58,9 +58,18 @@ StringType str(Float64 x) {
     return ss.str();
 }
 
+Void draw(Figure& fig, const DrawableInterface& shape) {
+    fig.draw(shape);
+}
+
+Void draw(Figure& fig, ApproximateFloatBox const& box) {
+    fig.draw(box);
+}
+
 OutputStream& operator<<(OutputStream& os, const DrawableInterface& drawable) {
     return drawable.write(os);
 }
+
 
 
 
@@ -200,6 +209,13 @@ double Figure::get_fill_opacity() const
 Colour Figure::get_fill_colour() const
 {
     return this->_data->properties.fill_colour;
+}
+
+Void Figure::draw(ApproximateBox const& box)
+{
+    ApproximateBoxSet box_set(box);
+    DrawableInterface const& shape=box_set;
+    this->draw(shape);
 }
 
 

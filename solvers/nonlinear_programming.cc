@@ -156,7 +156,8 @@ Vector<X> esqr(const Vector<X>& z) {
 
 inline
 ExactInterval eivl(const RawFloatVector& x) {
-    ARIADNE_ASSERT(x.size()>0); ExactInterval r(x[0]); for(Nat i=0; i!=x.size(); ++i) { r=hull(r,ExactFloat64(x[i])); } return r;
+    ARIADNE_ASSERT(x.size()>0); ExactInterval r=ExactInterval(ExactFloat64(x[0]));
+    for(Nat i=1; i!=x.size(); ++i) { r=hull(r,ExactFloat64(x[i])); } return r;
 }
 
 Matrix<ApproximateNumber> join(Matrix<ApproximateNumber> const& A1, Matrix<ApproximateNumber> const& A2, Matrix<ApproximateNumber> const& A3) {
@@ -473,7 +474,7 @@ almost_feasible_point(ExactBox D, ValidatedVectorFunction g, ExactBox C, Approxi
     ExactVector ex=make_exact(ax);
     if(!contains(D,ex)) { return false; }
     ApproximateVector gx=g(ax);
-    return contains(widen(C,error),gx);
+    return probably(contains(widen(C,make_exact(error)),gx));
 }
 
 
@@ -482,7 +483,7 @@ is_feasible_point(ExactBox D, ValidatedVectorFunction g, ExactBox C, ExactVector
 {
     if(!contains(D,x)) { return false; }
     Vector<ValidatedFloat64> gx=g(x);
-    return contains(C,gx);
+    return definitely(contains(C,gx));
 }
 
 
@@ -504,7 +505,7 @@ contains_feasible_point(ExactBox D, ValidatedVectorFunction g, ExactBox C, Valid
         if(definitely(disjoint(UpperInterval(gx[i]),C[i]))) {
             return false;
         }
-        if(!C[i].singleton()) {
+        if(!C[i].is_singleton()) {
             if(definitely(not subset(UpperInterval(gx[i]),C[i]))) { result = indeterminate; }
         }
     }
@@ -516,7 +517,7 @@ contains_feasible_point(ExactBox D, ValidatedVectorFunction g, ExactBox C, Valid
     List<Nat> equality_constraints;
     equality_constraints.reserve(C.size());
     for(Nat i=0; i!=C.size(); ++i) {
-        if(C[i].singleton()) { equality_constraints.append(i); }
+        if(C[i].is_singleton()) { equality_constraints.append(i); }
     }
 
     // Construct the function g_e(x) = g_{e_i}(x)
@@ -559,7 +560,7 @@ contains_feasible_point(ExactBox D, ValidatedVectorFunction g, ExactBox C, Valid
     // ExactInterval Newton update X' = x - L * (Dh(X)*L)^{-1} * h(x)
     // Choose L = rad(X)^2 Dh(x)^T where rad(X) is the diagonal matrix of radii of X
     Vector<ValidatedFloat64> x=midpoint(X);
-    Vector<ValidatedFloat64> new_X = x - make_exact(fltL) * (valR * (ge(x)-Vector<ValidatedFloat64>(ce)) );
+    Vector<ValidatedFloat64> new_X = x - make_exact(fltL) * (valR * (ge(x)-make_singleton(ce)) );
     ARIADNE_LOG(5,"old_X="<<X<<"\n");
     ARIADNE_LOG(5,"new_X="<<new_X<<"\n");
     Vector<ValidatedFloat64> reduced_X = refinement(X,new_X);
@@ -602,7 +603,7 @@ validate_feasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
             equalities.append(i);
         } else {
             inequalities.append(i);
-            if(!contains(C[i],gx[i])) {
+            if(!definitely(contains(C[i],gx[i]))) {
                 ARIADNE_LOG(3,"g["<<i<<"](x)="<<gx[i]<<", C["<<i<<"]="<<C[i]<<"\n");
                 return false; }
         }
@@ -673,9 +674,9 @@ validate_feasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
     // Check inequality constraints once more
     for(Nat i=0; i!=C.size(); ++i) {
         if(C[i].lower()==C[i].upper()) {
-            ARIADNE_DEBUG_ASSERT(models(gx[i],C[i].centre()));
+            ARIADNE_DEBUG_ASSERT(models(gx[i],C[i].midpoint()));
         } else {
-            if(!element(gx[i],C[i])) {
+            if(!definitely(element(gx[i],C[i]))) {
                 return false;
             }
         }
@@ -718,7 +719,7 @@ validate_infeasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
 
     ARIADNE_LOG(4,"yC="<<yC<<" tygD="<<tygD<<" ygD="<<ygD<<"\n");
 
-    if(empty(intersection(yC,ygD))) { ARIADNE_LOG(3,"infeasible\n"); return true; }
+    if(definitely(intersection(yC,ygD).is_empty())) { ARIADNE_LOG(3,"infeasible\n"); return true; }
     else { return false; }
 }
 
@@ -729,7 +730,7 @@ is_infeasibility_certificate(ExactBox D, ValidatedVectorFunction g, ExactBox C, 
     ARIADNE_LOG(2,"OptimiserBase::is_infeasibility_certificate(D,g,C,y)\n");
     ARIADNE_LOG(2,"  D="<<D<<", g="<<g<<", C="<<C<<", y="<<y<<"\n");
 
-    if(y.size()==0) { return D.empty(); }
+    if(y.size()==0) { return D.is_empty(); }
 
     // Try to prove lambda.(g(y)-c) != 0
     const Nat n=C.size();
@@ -1169,7 +1170,7 @@ minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, Exact
     ARIADNE_LOG(3,"f="<<f<<" D="<<D<<" g="<<g<<" C="<<C<<"\n");
     ValidatedVectorFunction h(0,D);
 
-    UpperIntervalVector gD = apply(g,D);
+    UpperBox gD = apply(g,D);
     if(definitely(disjoint(gD,C))) { throw InfeasibleProblemException(); }
 
     ApproximateFloatVector x = midpoint(D);
@@ -2029,7 +2030,7 @@ feasible(ExactBox D, ValidatedVectorFunction h) const
 
     if( decide(norm(h(x))<1e-10) ) { return true; }
 
-    if(!contains(UpperInterval(dot(UpperIntervalVector(make_exact(y)),apply(h,D))),ExactFloat64(0.0))) { return false; }
+    if(!possibly(contains(UpperInterval(dot(UpperIntervalVector(make_exact(y)),apply(h,D))),ExactFloat64(0.0)))) { return false; }
 
     return indeterminate;
 }
@@ -2114,7 +2115,7 @@ check_feasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
         if(C[j].lower()==C[j].upper()) {
             equalities.append(j);
         } else {
-            if(!contains(C[j],gx[j])) { result = indeterminate; }
+            if(!definitely(contains(C[j],gx[j]))) { result = indeterminate; }
         }
     }
 
@@ -2170,7 +2171,7 @@ check_feasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
 
     ARIADNE_LOG(4,"yC="<<yC<<" tygD="<<tygD<<" ygD="<<ygD<<"\n");
 
-    if(empty(intersection(yC,ygD))) { ARIADNE_LOG(3,"infeasible\n"); return false; }
+    if(definitely(is_empty(intersection(yC,ygD)))) { ARIADNE_LOG(3,"infeasible\n"); return false; }
     else { return indeterminate; }
 }
 

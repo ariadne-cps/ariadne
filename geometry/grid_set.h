@@ -981,6 +981,7 @@ class GridTreeSet
      */
     Void adjoin_inner_approximation( const OpenSetInterface& theSet, const ExactBox& bounding_box, const Nat numSubdivInDim );
 
+    Void adjoin_inner_approximation( const LowerBox& theBox, const Nat numSubdivInDim );
     //@}
 
     //@{
@@ -1702,8 +1703,8 @@ inline UpperBox GridTreeSubset::bounding_box() const {
     for( ; iter!=this->end(); ++iter) {
         UpperBox cell = iter->box();
         for(Nat i = 0; i < cell.dimension(); ++i) {
-            if(cell[i].lower_raw() < bbox[i].lower_raw()) bbox[i].set_lower(cell[i].lower());
-            if(cell[i].upper_raw() > bbox[i].upper_raw()) bbox[i].set_upper(cell[i].upper());
+            if(cell[i].lower().raw() < bbox[i].lower().raw()) bbox[i].set_lower(cell[i].lower());
+            if(cell[i].upper().raw() > bbox[i].upper().raw()) bbox[i].set_upper(cell[i].upper());
         }
     }
 

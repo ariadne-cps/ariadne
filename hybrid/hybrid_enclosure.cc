@@ -428,7 +428,7 @@ HybridEnclosure::kuhn_recondition()
 List<HybridEnclosure>
 HybridEnclosure::split() const
 {
-    List<ExactIntervalVector> subdomains = this->continuous_set().splitting_subdomains_zeroth_order();
+    List<ExactBox> subdomains = this->continuous_set().splitting_subdomains_zeroth_order();
     List<HybridEnclosure> result(subdomains.size(),*this);
     for(Nat i=0; i!=result.size(); ++i) {
         result[i].restrict(subdomains[i]);
@@ -437,7 +437,7 @@ HybridEnclosure::split() const
 }
 
 
-Void check_subset(const ExactIntervalVector& dom1, const ExactIntervalVector& dom2, const char* msg)
+Void check_subset(const ExactBox& dom1, const ExactBox& dom2, const char* msg)
 {
     if(dom1.size()!=dom2.size()) {
         ARIADNE_FAIL_MSG(msg<<" size("<<dom1<<")!=size("<<dom2<<")");
@@ -475,10 +475,10 @@ OutputStream& HybridEnclosure::write(OutputStream& os) const
               << ", range=" << apply(this->space_function(),this->_set.domain())
               << ", domain=" << this->_set.domain()
               << ", subdomain=" << this->_set.reduced_domain()
-              << ", empty=" << Ariadne::empty(this->_set.reduced_domain())
-              << ", state=" << (this->_set.space_function())
-              << ", constraints=" << (this->_set.constraints())
-              << ", time="<< (this->_set.time_function())
+              << ", empty=" << this->_set.reduced_domain().is_empty()
+              << ", state=" << this->_set.space_function()
+              << ", constraints=" << this->_set.constraints()
+              << ", time="<< this->_set.time_function()
               << ")";
 }
 

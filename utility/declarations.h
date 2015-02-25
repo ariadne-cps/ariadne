@@ -38,6 +38,9 @@
 #include "numeric/number.decl.h"
 #include "numeric/float.decl.h"
 
+#include "geometry/interval.decl.h"
+#include "geometry/box.decl.h"
+
 namespace Ariadne {
 
 typedef unsigned int uint;
@@ -98,15 +101,7 @@ template<class P, class F> class TaylorModel;
 template<class X> class Formula;
 template<class X> class Algebra;
 
-class ExactInterval;
-class UpperInterval;
-class ApproximateInterval;
-
 template<class X> class Point;
-template<class IVL> class Box;
-typedef Box<ExactInterval> ExactBox;
-typedef Box<UpperInterval> UpperBox;
-typedef Box<ApproximateInterval> ApproximateBox;
 
 typedef Vector<Rational> RationalVector;
 typedef Vector<Real> RealVector;
@@ -115,10 +110,6 @@ typedef Vector<RawFloat64> RawFloatVector;
 typedef Vector<ApproximateFloat64> ApproximateFloatVector;
 typedef Vector<ValidatedFloat64> ValidatedFloatVector;
 typedef Vector<ExactFloat64> ExactFloatVector;
-
-typedef Vector<ExactInterval> ExactIntervalVector;
-typedef Vector<UpperInterval> UpperIntervalVector;
-typedef Vector<ApproximateInterval> ApproximateIntervalVector;
 
 typedef Vector<ApproximateNumber> ApproximateVector;
 typedef Vector<ValidatedNumber> ValidatedVector;

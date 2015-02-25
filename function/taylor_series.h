@@ -72,7 +72,7 @@ TaylorSeries<ValidatedFloat64>::TaylorSeries(OP unary_operator, const ExactInter
     : _domain(domain), _expansion(degree+1), _error(0u)
 {
     Series<ValidatedNumber> centre_series=Series<ValidatedFloat64>(unary_operator,ValidatedNumber(centre));
-    Series<ValidatedNumber> range_series=Series<ValidatedFloat64>(unary_operator,ValidatedNumber(domain));
+    Series<ValidatedNumber> range_series=Series<ValidatedFloat64>(unary_operator,ValidatedNumber(make_singleton(domain)));
     for(DegreeType i=0; i!=degree; ++i) {
         this->_expansion[i]=centre_series[i].value();
         this->_error+=mag(centre_series[i]-this->_expansion[i]);

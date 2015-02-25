@@ -218,7 +218,7 @@ Void TestPaving::test_approximation() const {
     PavingInterface& paving = grid_set;
 
     EffectiveVectorFunction x=EffectiveVectorFunction::identity(2);
-    EffectiveConstrainedImageSet set(BoxSet(ExactIntervalVector({{-1.0,1.0},{-1.0,1.0}})));
+    EffectiveConstrainedImageSet set(EffectiveBox(ExactIntervalVector({{-1.0,1.0},{-1.0,1.0}})));
     set.apply( {2*x[0]+x[1]+x[0]*x[0]/4,x[0]+x[1]} );
     Nat depth = 2;
     paving.adjoin_outer_approximation(set,depth);

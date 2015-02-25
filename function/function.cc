@@ -285,7 +285,7 @@ template<class P> List<ScalarFunction<P>> FunctionConstructors<P>::coordinates(S
 }
 
 template<class P> VectorFunction<P> FunctionConstructors<P>::identity(SizeType n) {
-    ScalarFunction<P> z=ScalarFunction<P,BoxDomain>(n);
+    ScalarFunction<P> z=ScalarFunction<P,BoxDomain>::zero(n);
     VectorOfScalarFunction<P>* res = new VectorOfScalarFunction<P>(n,n);
     for(SizeType i=0; i!=n; ++i) {
         res->_vec[i]=ScalarFunction<P>::coordinate(n,i);

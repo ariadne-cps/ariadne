@@ -376,8 +376,8 @@ template<class M> ApproximateNumber FunctionPatch<M>::operator() (const Vector<A
 template<class M> ValidatedNumber FunctionPatch<M>::operator()(const Vector<ValidatedNumber>& x) const
 {
     const FunctionPatch<M>& f=*this;
-    if(!contains(f.domain(),x)) {
-        ARIADNE_THROW(DomainException,"evaluate(f,x) with f="<<f<<", x="<<x,"x is not a subset of f.domain()="<<f.domain());
+    if(!definitely(contains(f.domain(),x))) {
+        ARIADNE_THROW(DomainException,"evaluate(f,x) with f="<<f<<", x="<<x,"x is not definitely and element of f.domain()="<<f.domain());
     }
     return unchecked_evaluate(f,x);
 }
@@ -895,8 +895,8 @@ template<class M> Vector<ApproximateNumber> VectorFunctionPatch<M>::operator()(c
 template<class M> Vector<ValidatedNumber> VectorFunctionPatch<M>::operator()(const Vector<ValidatedNumber>& x) const
 {
     const VectorFunctionPatch<M>& f=*this;
-    if(!contains(f.domain(),x)) {
-        ARIADNE_THROW(DomainException,"tf.evaluate(vx) with tf="<<f<<", x="<<x,"vx is not a subset of tf.domain()="<<f.domain());
+    if(!definitely(contains(f.domain(),x))) {
+        ARIADNE_THROW(DomainException,"tf.evaluate(vx) with tf="<<f<<", x="<<x,"vx is not a definitely and element of tf.domain()="<<f.domain());
     }
     Vector<ValidatedNumber> sx=Ariadne::unscale(x,f._domain);
     return Ariadne::evaluate(f._models,sx);

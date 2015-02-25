@@ -67,6 +67,7 @@ uint DRAWING_ACCURACY=1u;
 
 template<class T> StringType str(const T& t) { StringStream ss; ss<<t; return ss.str(); }
 
+inline Tribool cast_to_tribool(Sierpinski l) { return Tribool(static_cast<LogicalValue>(l)); }
 
 Matrix<Float64> nonlinearities_zeroth_order(const ValidatedVectorFunction& f, const ExactBox& dom);
 Pair<Nat,double> nonlinearity_index_and_error(const ValidatedVectorFunction& function, const ExactBox domain);
@@ -104,13 +105,13 @@ Matrix<Float64> nonlinearities_first_order(const ValidatedVectorFunction& f, con
     Vector<UpperIntervalDifferential> ivl_dx=UpperIntervalDifferential::constants(m,n, 1, dom);
     MultiIndex a(n);
     for(Nat i=0; i!=n; ++i) {
-        Float64 sf=dom[i].error().raw();
+        Float64 sf=dom[i].radius().upper().raw();
         ++a[i];
-        ivl_dx[i].expansion().append(a,ExactInterval(sf));
+        ivl_dx[i].expansion().append(a,ExactInterval(sf,sf));
         --a[i];
     }
     //std::cerr<<"dx="<<ivl_dx<<"\n";
-    Vector<UpperIntervalDifferential> df=apply_derivative(f,ivl_dx);
+    Vector<UpperIntervalDifferential> df=derivative_range(f,ivl_dx);
     //std::cerr<<"df="<<df<<"\n";
 
     Matrix<Float64> nonlinearities=Matrix<Float64>::zero(m,n);
@@ -139,13 +140,13 @@ Matrix<Float64> nonlinearities_second_order(const ValidatedVectorFunction& f, co
     Vector<UpperIntervalDifferential> ivl_dx=UpperIntervalDifferential::constants(m,n, 2, dom);
     MultiIndex a(n);
     for(Nat i=0; i!=n; ++i) {
-        Float64 sf=dom[i].error().raw();
+        Float64 sf=dom[i].radius().upper().raw();
         ++a[i];
-        ivl_dx[i].expansion().append(a,ExactInterval(sf));
+        ivl_dx[i].expansion().append(a,ExactInterval(sf,sf));
         --a[i];
     }
     //std::cerr<<"dx="<<ivl_dx<<"\n";
-    Vector<UpperIntervalDifferential> df=apply_derivative(f,ivl_dx);
+    Vector<UpperIntervalDifferential> df=derivative_range(f,ivl_dx);
     //std::cerr<<"df="<<df<<"\n";
 
     Matrix<Float64> nonlinearities=Matrix<Float64>::zero(m,n);
@@ -193,34 +194,16 @@ Pair<Nat,double> nonlinearity_index_and_error(const VectorTaylorFunction& functi
 }
 
 
-BoxSet::BoxSet(const ExactIntervalVector& bx) : _ary(bx.size()) {
-    for(Nat i=0; i!=bx.size(); ++i) {
-        this->_ary[i]=IntervalSet(Real(bx[i].lower()),Real(bx[i].upper()));
-    }
+ExactBox under_approximation(const EffectiveBox& rbx) {
+    return make_exact_box(LowerBox(rbx));
 }
 
-ExactBox under_approximation(const BoxSet& rbx) {
-    ExactBox bx(rbx.size());
-    for(Nat i=0; i!=bx.size(); ++i) {
-        bx[i]=under_approximation(rbx[i]);
-    }
-    return bx;
+ExactBox over_approximation(const EffectiveBox& rbx) {
+    return make_exact_box(UpperBox(rbx));
 }
 
-ExactBox over_approximation(const BoxSet& rbx) {
-    ExactBox bx(rbx.size());
-    for(Nat i=0; i!=bx.size(); ++i) {
-        bx[i]=over_approximation(rbx[i]);
-    }
-    return bx;
-}
-
-ExactBox approximation(const BoxSet& rbx) {
-    ExactBox bx(rbx.size());
-    for(Nat i=0; i!=bx.size(); ++i) {
-        bx[i]=approximation(rbx[i]);
-    }
-    return bx;
+ExactBox approximation(const EffectiveBox& rbx) {
+    return make_exact_box(ApproximateBox(rbx));
 }
 
 
@@ -243,15 +226,15 @@ EffectiveVectorFunction constraint_function(Nat as, const List<EffectiveConstrai
     return f;
 }
 
-BoxSet constraint_bounds(const List<EffectiveConstraint>& c) {
-    BoxSet b(c.size());
+EffectiveBox constraint_bounds(const List<EffectiveConstraint>& c) {
+    EffectiveBox b(c.size());
     for(Nat i=0; i!=c.size(); ++i) {
-        b[i]=IntervalSet(c[i].lower_bound(),c[i].upper_bound());
+        b[i]=EffectiveInterval(c[i].lower_bound(),c[i].upper_bound());
     }
     return b;
 }
 
-List<EffectiveConstraint> constraints(const EffectiveVectorFunction& f, const BoxSet& b) {
+List<EffectiveConstraint> constraints(const EffectiveVectorFunction& f, const EffectiveBox& b) {
     ARIADNE_ASSERT(f.result_size()==b.size());
     List<EffectiveConstraint> c; c.reserve(b.size());
     for(Nat i=0; i!=b.size(); ++i) {
@@ -263,7 +246,7 @@ List<EffectiveConstraint> constraints(const EffectiveVectorFunction& f, const Bo
 } //namespace
 
 
-ConstraintSet::ConstraintSet(const EffectiveVectorFunction& f, const BoxSet& b)
+ConstraintSet::ConstraintSet(const EffectiveVectorFunction& f, const EffectiveBox& b)
     : _dimension(f.argument_size()), _constraints()
 {
     this->_constraints=::constraints(f,b);
@@ -279,7 +262,7 @@ EffectiveVectorFunction const ConstraintSet::constraint_function() const
     return ::constraint_function(this->dimension(),this->constraints());
 }
 
-BoxSet const ConstraintSet::constraint_bounds() const
+EffectiveBox const ConstraintSet::constraint_bounds() const
 {
     return ::constraint_bounds(this->constraints());
 }
@@ -302,21 +285,21 @@ Tribool
 ConstraintSet::separated(const ExactBox& bx) const
 {
     ExactBox codomain=over_approximation(this->codomain());
-    return ValidatedConstrainedImageSet(bx,this->constraint_function()).separated(codomain) || Tribool(indeterminate);
+    return ValidatedConstrainedImageSet(bx,this->constraint_function()).separated(codomain);
 }
 
 Tribool
 ConstraintSet::overlaps(const ExactBox& bx) const
 {
     ExactBox codomain=under_approximation(this->codomain());
-    return ValidatedConstrainedImageSet(bx,this->constraint_function()).overlaps(codomain) || Tribool(indeterminate);
+    return ValidatedConstrainedImageSet(bx,this->constraint_function()).overlaps(codomain);
 }
 
 Tribool
 ConstraintSet::covers(const ExactBox& bx) const
 {
     ExactBox codomain=under_approximation(this->codomain());
-    return UpperBox(apply(this->constraint_function(),bx)).inside(codomain) || Tribool(indeterminate);
+    return cast_to_tribool(UpperBox(apply(this->constraint_function(),bx)).inside(codomain));
 }
 
 
@@ -329,19 +312,19 @@ ConstraintSet::write(OutputStream& os) const
 
 
 
-BoundedConstraintSet::BoundedConstraintSet(const BoxSet& bx)
+BoundedConstraintSet::BoundedConstraintSet(const EffectiveBox& bx)
     : _domain(bx), _constraints()
 {
 }
 
-BoundedConstraintSet::BoundedConstraintSet(const BoxSet& d, const EffectiveVectorFunction& f, const BoxSet& b)
+BoundedConstraintSet::BoundedConstraintSet(const EffectiveBox& d, const EffectiveVectorFunction& f, const EffectiveBox& b)
     : _domain(d), _constraints(::constraints(f,b))
 {
     ARIADNE_ASSERT(b.size()==f.result_size());
     ARIADNE_ASSERT(d.size()==f.argument_size());
 }
 
-BoundedConstraintSet::BoundedConstraintSet(const BoxSet& d, const List<EffectiveConstraint>& c)
+BoundedConstraintSet::BoundedConstraintSet(const EffectiveBox& d, const List<EffectiveConstraint>& c)
     : _domain(d), _constraints(c)
 {
 }
@@ -351,7 +334,7 @@ EffectiveVectorFunction const BoundedConstraintSet::constraint_function() const
     return ::constraint_function(this->dimension(),this->constraints());
 }
 
-BoxSet const BoundedConstraintSet::constraint_bounds() const
+EffectiveBox const BoundedConstraintSet::constraint_bounds() const
 {
     return ::constraint_bounds(this->constraints());
 }
@@ -396,21 +379,20 @@ BoundedConstraintSet::covers(const ExactBox& bx) const
     ExactBox domain=under_approximation(this->domain());
     ExactBox codomain=under_approximation(this->codomain());
     if(!Ariadne::covers(domain,bx)) { return false; }
-    return UpperBox(apply(this->constraint_function(),bx)).inside(codomain) || Tribool(indeterminate);
+    return cast_to_tribool(UpperBox(apply(this->constraint_function(),bx)).inside(codomain));
 }
 
 Tribool
 BoundedConstraintSet::inside(const ExactBox& bx) const
 {
-    return Ariadne::inside(UpperBox(over_approximation(this->domain())),bx) || Tribool(indeterminate);
+    return cast_to_tribool(Ariadne::inside(UpperBox(over_approximation(this->domain())),bx));
 }
 
 UpperBox
 BoundedConstraintSet::bounding_box() const
 {
     ExactBox result=over_approximation(this->_domain);
-    result.widen();
-    return result;
+    return widen(result);
 }
 
 
@@ -428,7 +410,7 @@ BoundedConstraintSet::draw(CanvasInterface& c, const Projection2d& p) const
 
 
 BoundedConstraintSet
-intersection(const ConstraintSet& cs,const BoxSet& bx)
+intersection(const ConstraintSet& cs,const EffectiveBox& bx)
 {
     return BoundedConstraintSet(bx,cs.constraints());
 }
@@ -458,11 +440,11 @@ const EffectiveVectorFunction ConstrainedImageSet::constraint_function() const
     return result;
 }
 
-const BoxSet ConstrainedImageSet::constraint_bounds() const
+const EffectiveBox ConstrainedImageSet::constraint_bounds() const
 {
-    BoxSet result(this->number_of_constraints());
+    EffectiveBox result(this->number_of_constraints());
     for(Nat i=0; i!=this->number_of_constraints(); ++i) {
-        result[i]=IntervalSet(this->constraint(i).lower_bound(),this->constraint(i).upper_bound());
+        result[i]=EffectiveInterval(this->constraint(i).lower_bound(),this->constraint(i).upper_bound());
     }
     return result;
 }
@@ -509,7 +491,7 @@ Tribool ConstrainedImageSet::satisfies(const EffectiveConstraint& nc) const
     }
 
     ConstraintSolver solver;
-    const BoxSet& domain=this->_domain;
+    const EffectiveBox& domain=this->_domain;
     List<EffectiveConstraint> all_constraints=this->_constraints;
     EffectiveScalarFunction composed_function = compose(nc.function(),this->_function);
     const Real& lower_bound = nc.lower_bound();
@@ -530,14 +512,19 @@ Tribool ConstrainedImageSet::satisfies(const EffectiveConstraint& nc) const
 }
 
 
+//! \brief Test if the set is contained in (the interior of) a box.
+Tribool ConstrainedImageSet::inside(const ExactBox& bx) const {
+    return cast_to_tribool(this->bounding_box().inside(bx));
+}
+
 Tribool ConstrainedImageSet::separated(const ExactBox& bx) const
 {
-    ExactBox subdomain = over_approximation(this->_domain);
+    UpperBox subdomain = over_approximation(this->_domain);
     EffectiveVectorFunction function = join(this->function(),this->constraint_function());
     ExactBox codomain = product(bx,ExactBox(over_approximation(this->constraint_bounds())));
     ConstraintSolver solver;
     solver.reduce(subdomain,function,codomain);
-    return Tribool(subdomain.empty()) || Tribool(indeterminate);
+    return cast_to_tribool(subdomain.is_empty());
 
 
 }
@@ -546,14 +533,6 @@ Tribool ConstrainedImageSet::separated(const ExactBox& bx) const
 Tribool ConstrainedImageSet::overlaps(const ExactBox& bx) const
 {
     return ValidatedConstrainedImageSet(under_approximation(this->_domain),this->_function,this->_constraints).overlaps(bx);
-    return Tribool(indeterminate);
-    //ARIADNE_NOT_IMPLEMENTED;
-    ExactBox subdomain = under_approximation(this->_domain);
-    EffectiveVectorFunction function = join(this->function(),this->constraint_function());
-    ExactBox codomain = product(bx,ExactBox(under_approximation(this->constraint_bounds())));
-    ConstraintSolver solver;
-    solver.reduce(subdomain,function,codomain);
-    return !Tribool(subdomain.empty()) || Tribool(indeterminate);
 }
 
 
@@ -564,11 +543,11 @@ ConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, Int 
     const ExactBox domain=over_approximation(this->domain());
     const EffectiveVectorFunction& space_function=this->function();
     EffectiveVectorFunction constraint_function(this->number_of_constraints(),domain);
-    BoxSet codomain(this->number_of_constraints());
+    EffectiveBox codomain(this->number_of_constraints());
 
     for(Nat i=0; i!=this->number_of_constraints(); ++i) {
         constraint_function.set(i,this->_constraints[i].function());
-        codomain[i]=IntervalSet(this->_constraints[i].lower_bound(),this->_constraints[i].upper_bound());
+        codomain[i]=EffectiveInterval(this->_constraints[i].lower_bound(),this->_constraints[i].upper_bound());
     }
     ExactBox constraint_bounds=over_approximation(codomain);
 
@@ -607,11 +586,11 @@ ConstrainedImageSet::split() const
 Pair<ConstrainedImageSet,ConstrainedImageSet>
 ConstrainedImageSet::split(Nat j) const
 {
-    IntervalSet interval = this->domain()[j];
+    EffectiveInterval interval = this->domain()[j];
     Real midpoint = interval.midpoint();
-    Pair<BoxSet,BoxSet> subdomains(this->domain(),this->domain());
-    subdomains.first[j]=IntervalSet(interval.lower(),midpoint);
-    subdomains.second[j]=IntervalSet(midpoint,interval.upper());
+    Pair<EffectiveBox,EffectiveBox> subdomains(this->domain(),this->domain());
+    subdomains.first[j]=EffectiveInterval(interval.lower(),midpoint);
+    subdomains.second[j]=EffectiveInterval(midpoint,interval.upper());
     return make_pair(ConstrainedImageSet(subdomains.first,this->_function,this->_constraints),
                      ConstrainedImageSet(subdomains.second,this->_function,this->_constraints));
 }
@@ -738,7 +717,7 @@ Pair<Nat,double> lipschitz_index_and_error(const ValidatedVectorFunction& functi
         for(Nat i=0; i!=function.result_size(); ++i) {
             column_norm+=mag(jacobian[i][j]).raw();
         }
-        column_norm *= domain[j].error().raw();
+        column_norm *= domain[j].radius().upper().raw();
         if(column_norm>max_column_norm) {
             max_column_norm=column_norm;
             jmax=j;
@@ -963,23 +942,24 @@ Void
 ValidatedConstrainedImageSet::reduce()
 {
     ConstraintSolver solver;
-    solver.reduce(this->_reduced_domain, this->constraint_function(), this->constraint_bounds());
+    UpperBox& reduced_domain=reinterpret_cast<UpperBox&>(this->_reduced_domain);
+    solver.reduce(reduced_domain, this->constraint_function(), this->constraint_bounds());
 }
 
 Tribool ValidatedConstrainedImageSet::empty() const
 {
     const_cast<ValidatedConstrainedImageSet*>(this)->reduce();
-    return this->_reduced_domain.empty();
+    return cast_to_tribool(this->_reduced_domain.is_empty()) || Tribool(indeterminate);
 }
 
 Tribool ValidatedConstrainedImageSet::inside(const ExactBox& bx) const
 {
-    return Ariadne::inside(this->bounding_box(),bx);
+    return cast_to_tribool(Ariadne::inside(this->bounding_box(),bx));
 }
 
 Tribool ValidatedConstrainedImageSet::separated(const ExactBox& bx) const
 {
-    ExactBox subdomain = this->_reduced_domain;
+    UpperBox subdomain = this->_reduced_domain;
     ValidatedVectorFunction function(this->dimension()+this->number_of_constraints(),EuclideanDomain(this->number_of_parameters()));
     for(Nat i=0; i!=this->dimension(); ++i) { function[i]=this->_function[i]; }
     for(Nat i=0; i!=this->number_of_constraints(); ++i) { function[i+this->dimension()]=this->_constraints[i].function(); }
@@ -987,7 +967,7 @@ Tribool ValidatedConstrainedImageSet::separated(const ExactBox& bx) const
     ExactBox codomain = product(bx,this->constraint_bounds());
     ConstraintSolver solver;
     solver.reduce(subdomain,function,codomain);
-    return Tribool(subdomain.empty()) || Tribool(indeterminate);
+    return cast_to_tribool(subdomain.is_empty()) || Tribool(indeterminate);
 }
 
 Tribool ValidatedConstrainedImageSet::overlaps(const ExactBox& bx) const

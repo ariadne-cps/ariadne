@@ -98,8 +98,14 @@ template<class P> class LogicalFacade {
 };
 
 template<> class LogicalFacade<Exact> {
+    typedef Exact P;
   public:
     operator Bool () const;
+  public:
+    friend Logical<Exact> operator||(Bool b1, Logical<Exact> l2);
+    friend Logical<Exact> operator||(Logical<Exact> l1, Bool b2);
+    friend Logical<Exact> operator&&(Bool b1, Logical<Exact> l2);
+    friend Logical<Exact> operator&&(Logical<Exact> l1, Bool b2);
 };
 
 
@@ -131,9 +137,6 @@ template<class P> class Logical
     //! \brief %Logical disjunction.
     friend inline Logical<P> operator&&(Logical<P> l1, Logical<P> l2) { return Logical<P>(disjunction(l1._v,l2._v)); }
     //! \brief %Logical conjunction.
-    friend inline Logical<P> operator||(Logical<P> l1, Bool b2) { return l1 || Logical<P>(b2); }
-    friend inline Logical<P> operator||(Bool b1, Logical<P> l2) { return Logical<P>(b1) || l2; }
-
     friend inline Logical<P> operator||(Logical<P> l1, Logical<P> l2) { return Logical<P>(conjunction(l1._v,l2._v)); }
     //! \brief %Logical exclusive or.
     friend inline Logical<P> operator^(Logical<P> l1, Logical<P> l2) { return Logical<P>(negation(equal(l1._v,l2._v))); }
@@ -159,7 +162,6 @@ template<class P> class Logical
     friend inline Bool same(Logical<P> l1, Logical<P> l2) { return l1._v == l2._v; }
     //! \brief Write to an output stream.
     friend inline OutputStream& operator<<(OutputStream& os, Logical<P> l) { return os << l._v; }
-
   private:
     friend class Tribool;
 };
@@ -254,14 +256,6 @@ class Boolean : public Logical<Exact> {
   public:
     Boolean(Bool b=false) : Logical<Exact>(b) { }
     Boolean(Logical<Exact> l) : Logical<Exact>(l) { }
-    friend Boolean operator&&(Boolean l1, Boolean l2) { return Logical<Exact>(l1) && Logical<Exact>(l2); }
-    friend Boolean operator&&(Boolean l1, Bool l2) { return l1 && Boolean(l2); }
-    friend Boolean operator&&(Bool l1, Boolean l2) { return Boolean(l1) && l2; }
-    friend Boolean operator||(Boolean l1, Boolean l2) { return Logical<Exact>(l1) || Logical<Exact>(l2); }
-    friend Boolean operator||(Boolean l1, Bool l2) { return l1 || Boolean(l2); }
-    friend Boolean operator||(Bool l1, Boolean l2) { return Boolean(l1) || l2; }
-    friend Boolean operator!(Boolean l) { return !Logical<Exact>(l); }
-    operator Bool () const { return decide(*this); }
 };
 
 //! \ingroup LogicalTypes

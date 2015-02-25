@@ -76,6 +76,8 @@ namespace Ariadne {
 
 static const Nat verbosity = 0u;
 
+inline Tribool cast_to_tribool(Sierpinski l) { return Tribool(static_cast<LogicalValue>(l)); }
+
 template<class T> StringType str(const T& t) { StringStream ss; ss<<t; return ss.str(); }
 
 typedef Vector<Float64> RawFloatVector;
@@ -88,7 +90,7 @@ ExactInterval make_exact_interval(const Real& x) {
     return ExactInterval(x.lower().raw(),x.upper().raw());
 }
 
-ExactInterval make_domain(const IntervalSet& ivl) {
+ExactInterval make_domain(const EffectiveInterval& ivl) {
     Ariadne::RoundingModeType rnd=Ariadne::get_rounding_mode();
     ExactInterval dom_lower_ivl=make_exact_interval(ivl.lower());
     ExactInterval dom_upper_ivl=make_exact_interval(ivl.upper());
@@ -110,7 +112,7 @@ ExactInterval make_domain(const IntervalSet& ivl) {
     return ExactInterval(dom_lower,dom_upper);
 }
 
-ValidatedVectorFunctionModel make_identity(const BoxSet& bx, const ValidatedFunctionModelFactoryInterface& fac) {
+ValidatedVectorFunctionModel make_identity(const EffectiveBox& bx, const ValidatedFunctionModelFactoryInterface& fac) {
     ExactIntervalVector dom(bx.dimension());
     RawFloatVector errs(bx.dimension());
 
@@ -305,7 +307,7 @@ Enclosure::Enclosure(const ExactBox& domain, const ValidatedVectorFunction& func
     this->_domain=domain;
     for(Nat i=0; i!=this->_domain.size(); ++i) {
         if(decide(this->_domain[i].width()==0)) {
-            this->_domain[i]=widen(this->_domain[i]);
+            this->_domain[i]=make_exact_interval(widen(this->_domain[i]));
         }
     }
 
@@ -333,7 +335,7 @@ Enclosure::Enclosure(const ExactBox& domain, const ValidatedVectorFunction& spac
     this->_domain=domain;
     for(Nat i=0; i!=this->_domain.size(); ++i) {
         if(decide(this->_domain[i].width()==0)) {
-            this->_domain[i]=widen(this->_domain[i]);
+            this->_domain[i]=make_exact_interval(widen(this->_domain[i]));
         }
     }
 
@@ -672,7 +674,7 @@ UpperBox Enclosure::bounding_box() const {
 }
 
 ErrorFloat64 Enclosure::radius() const {
-    return this->bounding_box().radius();
+    return cast_positive(this->bounding_box().radius());
 }
 
 ExactPoint Enclosure::centre() const {
@@ -691,13 +693,13 @@ Enclosure::satisfies(ValidatedConstraint c) const
 
 Tribool Enclosure::bounded() const
 {
-    return ExactBox(this->domain()).bounded() || Tribool(indeterminate);
+    return this->domain().bounded() || Tribool(indeterminate);
 }
 
 Tribool Enclosure::empty() const
 {
-    if(definitely(Ariadne::empty(this->_reduced_domain))) { return true; }
-    if(this->_constraints.empty()) { return Ariadne::empty(this->domain()); }
+    if(definitely(this->_reduced_domain.empty())) { return true; }
+    if(this->_constraints.empty()) { return this->domain().empty(); }
     if(!this->_is_fully_reduced) { this->reduce(); this->reduce(); this->reduce(); }
 
     for(Nat i=0; i!=this->_constraints.size(); ++i) {
@@ -707,20 +709,20 @@ Tribool Enclosure::empty() const
             return true;
         }
     }
-    if(Ariadne::empty(this->_reduced_domain)) { return true; }
+    if(this->_reduced_domain.empty()) { return true; }
     return Tribool(indeterminate);
 }
 
 Tribool Enclosure::inside(const ExactBox& bx) const
 {
-    return Ariadne::subset(Ariadne::apply(this->_space_function,this->_reduced_domain),bx);
+    return cast_to_tribool(Ariadne::subset(Ariadne::apply(this->_space_function,this->_reduced_domain),bx));
 }
 
 Tribool Enclosure::subset(const ExactBox& bx) const
 {
     this->reduce();
 
-    return Ariadne::subset(Ariadne::apply(this->_space_function,this->_reduced_domain),bx) || Tribool(indeterminate);
+    return cast_to_tribool(Ariadne::subset(Ariadne::apply(this->_space_function,this->_reduced_domain),bx)) || Tribool(indeterminate);
 
 }
 
@@ -729,7 +731,7 @@ Tribool Enclosure::separated(const ExactBox& bx) const
     ARIADNE_ASSERT_MSG(this->dimension()==bx.dimension(),"Enclosure::subset(ExactBox): self="<<*this<<", box="<<bx);
     List<ValidatedConstraint> constraints = this->constraints();
     ConstraintSolver contractor=ConstraintSolver();
-    contractor.reduce(this->_reduced_domain,constraints);
+    contractor.reduce(reinterpret_cast<UpperBox&>(this->_reduced_domain),constraints);
 
     if(_reduced_domain.empty()) { return true; }
 
@@ -745,7 +747,7 @@ Void Enclosure::reduce() const
 {
     List<ValidatedConstraint> constraints=this->constraints();
     ConstraintSolver contractor=ConstraintSolver();
-    contractor.reduce(this->_reduced_domain,constraints);
+    contractor.reduce(reinterpret_cast<UpperBox&>(this->_reduced_domain),constraints);
 
     for(Nat i=0; i!=this->number_of_parameters(); ++i) {
         double l=this->_reduced_domain[i].lower().get_d();
@@ -813,7 +815,7 @@ Enclosure::splitting_index_zeroth_order() const
         for(Nat i=0; i!=this->dimension(); ++i) {
             column_norm+=mag(jacobian[i][j]).raw();
         }
-        column_norm *= this->reduced_domain()[j].error().raw();
+        column_norm *= this->reduced_domain()[j].radius().value_raw();
         if(column_norm>max_column_norm) {
             max_column_norm=column_norm;
             jmax=j;

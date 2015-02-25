@@ -706,7 +706,8 @@ template<class F> Box<UnitInterval> TaylorModel<Validated,F>::domain() const
 
 template<class F> ExactInterval TaylorModel<Validated,F>::codomain() const
 {
-    return make_exact_interval(this->range());
+    UpperInterval rng=this->range();
+    return ExactInterval(rng.lower().raw(),rng.upper().raw());
 }
 
 // Compute the range by grouping all quadratic terms x[i]^2 with linear terms x[i]

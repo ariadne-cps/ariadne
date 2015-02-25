@@ -568,10 +568,10 @@ IntervalNewtonSolver::implicit_step(const ValidatedVectorFunction& f,
 
     ValidatedVectorFunctionModel dh(n,z);
     if(n==1) {
-        if(contains(rngJ[0][0],ExactFloat64(0.0))) {
+        if(possibly(contains(rngJ[0][0],ExactFloat64(0.0)))) {
             ARIADNE_THROW(SingularJacobianException,"IntervalNewtonSolver","D2f(P,X)="<<rngJ[0][0]<<" which contains zero.");
         }
-        if(contains(J[0][0].range(),ExactFloat64(0.0))) {
+        if(possibly(contains(J[0][0].range(),ExactFloat64(0.0)))) {
             dh[0]=fidmh[0]/make_singleton(rngJ[0][0]);
         } else {
             dh[0]=fidmh[0]/J[0][0];

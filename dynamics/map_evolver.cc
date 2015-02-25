@@ -133,7 +133,7 @@ _evolution(EnclosureListType& final_sets,
         working_sets.pop_back();
         EnclosureType initial_enclosure=current_set.second;
         TimeType initial_time=current_set.first;
-        UpperFloat64 initial_set_radius=radius(initial_enclosure.bounding_box());
+        UpperFloat64 initial_set_radius=initial_enclosure.bounding_box().radius();
         if(initial_time>=maximum_time) {
             final_sets.adjoin(EnclosureType(initial_enclosure));
         } else if(UPPER_SEMANTICS && ENABLE_SUBDIVISIONS
@@ -183,7 +183,7 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     ARIADNE_LOG(6,"initial_enclosure = "<<initial_enclosure<<"\n");
 
     ARIADNE_LOG(2,"box = "<<initial_enclosure.bounding_box()<<" ");
-    ARIADNE_LOG(2,"radius = "<<radius(initial_enclosure.bounding_box())<<"\n\n");
+    ARIADNE_LOG(2,"radius = "<<initial_enclosure.bounding_box().radius()<<"\n\n");
     //const Nat nd=initial_enclosure.result_size();
     //const Nat ng=initial_enclosure.argument_size();
 

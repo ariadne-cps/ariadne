@@ -53,12 +53,10 @@ class Point
     Point() : Vector<RealType>() { }
     //! The origin in \a n dimensions.
     explicit Point(Nat n) : Vector<RealType>(n) { }
-    //! Construct from a string literal of the form "(x1,x2,...,xd)".
-    explicit Point(const StringType& str);
     Point(const Vector<RealType>& v) : Vector<RealType>(v) { }
     template<class T, EnableIf<IsConvertible<T,X>> =dummy> Point(const Point<T>& pt) : Vector<RealType>(pt.vector()) { }
     //! Construct from an initializer list of floating-point values.
-    template<class N, class T> Point(const N& n, const T& t) : Vector<RealType>(n,RealType(t)) { }
+    template<class T, EnableIf<IsConvertible<T,X>> =dummy> Point(SizeType n, const T& t) : Vector<RealType>(n,RealType(t)) { }
     //! Construct from an initializer list of floating-point values.
     explicit Point(InitializerList<double> lst);
     //! The origin in \a n dimensions.

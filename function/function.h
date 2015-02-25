@@ -69,6 +69,7 @@ class EuclideanDomain : public BoxDomain {
 
 template<class P>
 class FunctionConstructors {
+    static_assert(Or<IsSame<P,ApproximateTag>,IsSame<P,ValidatedTag>,IsSame<P,EffectiveTag>>::value,"P must be an information level/paradigm.");
     typedef CanonicalNumberType<P> Y;
   public:
     typedef Y NumericType;
@@ -534,11 +535,11 @@ template<class P, class D> template<class XX> inline XX VectorFunctionElementRef
 
 
 
-inline UpperInterval apply(ScalarFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {
+inline UpperInterval evaluate_range(ScalarFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {
     return static_cast<UpperInterval>(f(reinterpret_cast<Vector<ValidatedNumber>const&>(x))); }
-inline Box<UpperInterval> apply(VectorFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {
+inline Vector<UpperInterval> evaluate_range(VectorFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {
     return static_cast<Vector<UpperInterval>>(f(reinterpret_cast<Vector<ValidatedNumber>const&>(x))); }
-inline Vector<Differential<UpperInterval>> apply_derivative(VectorFunction<ValidatedTag>const& f, const Vector<Differential<UpperInterval>>& x) {
+inline Vector<Differential<UpperInterval>> derivative_range(VectorFunction<ValidatedTag>const& f, const Vector<Differential<UpperInterval>>& x) {
     return static_cast<Vector<Differential<UpperInterval>>>(f(reinterpret_cast<Vector<Differential<ValidatedNumber>>const&>(x))); }
 
 

@@ -318,7 +318,10 @@ feasible(const Vector<Float64>& xl, const Vector<Float64>& xu,
         if(xl[i]==-inf) { zl[i] = 0.0; } else { zl[i] = 1.0; }
         if(xu[i]==+inf) { zu[i] = 0.0; } else { zu[i] = 1.0; }
     }
-    Vector<UpperInterval> X=hull(Vector<ExactFloat64>(xl),Vector<ExactFloat64>(xu));
+    Vector<BoundedFloat64> X(n);
+    for(SizeType i=0; i!=n; ++i) {
+        X[i]=BoundedFloat64(xl[i],xu[i]);
+    }
 
     const double THRESHOLD = 1e-8;
     Nat step=0;
@@ -328,10 +331,10 @@ feasible(const Vector<Float64>& xl, const Vector<Float64>& xu,
             Tribool validated_feasible=this->validate_feasibility(xl,xu,A,b, x,y);
             if(definitely(validated_feasible)) { return true; }
         }
-        UpperInterval yb=dot(UpperIntervalVector(y),UpperIntervalVector(b));
-        // NOTTE: Must compute y*A first, as A*X may give NaN.
-        UpperInterval yAX = dot( transpose(UpperIntervalMatrix(A)) * UpperIntervalVector(y), X );
-        if(definitely(disjoint(yb,yAX))) { return false; }
+        BoundedFloat64 yb=dot(Vector<BoundedFloat64>(y),Vector<BoundedFloat64>(b));
+        // NOTE: Must compute y*A first, as A*X may give NaN.
+        BoundedFloat64 yAX = dot( transpose(Matrix<BoundedFloat64>(A)) * Vector<BoundedFloat64>(y), X );
+        if(inconsistent(yb,yAX)) { return false; }
         if(result==DEGENERATE_FEASIBILITY) { ARIADNE_LOG(2,"  degenerate\n"); return indeterminate; }
         if(compute_mu(xl,xu, x,zl,zu)<THRESHOLD ) { ARIADNE_LOG(2,"  threshold\n"); return indeterminate; }
     }

@@ -69,10 +69,10 @@ class OptimiserInterface {
     virtual Vector<ValidatedNumber> minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ValidatedVectorFunction h) const = 0;
 
     //! \brief Tests is the general nonlinear feasibility problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
-    virtual Tribool feasible(ExactBox D, ValidatedVectorFunction g, ExactBox C) const = 0;
+    virtual Kleenean feasible(ExactBox D, ValidatedVectorFunction g, ExactBox C) const = 0;
     //! \brief Tests is the standard nonlinear feasibility problem \f$x\in D,\ g(x)\leq 0 \text{ and } h(x) = 0\f$ is feasible. Assumes \fD\f$ is singleton with nonempty interior.
     //! \internal This is one of the simplest nonlinear programming problems, and is a good test case for new algorithms.
-    virtual Tribool feasible(ExactBox D, ValidatedVectorFunction g, ValidatedVectorFunction h) const = 0;
+    virtual Kleenean feasible(ExactBox D, ValidatedVectorFunction g, ValidatedVectorFunction h) const = 0;
 
     //! \brief Tests if the point \a x is feasible, in that \f$x\in D\f$ and \f$g(x)\in N_\epsilon(C)\f$.
     virtual Bool almost_feasible_point(ExactBox D, ValidatedVectorFunction g, ExactBox C,
@@ -90,7 +90,7 @@ class OptimiserInterface {
     virtual Bool validate_infeasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
                                       ExactVector x, ExactVector y) const = 0;
     //! \brief Tests if the box \a X definitely containss a feasible point.
-    virtual Tribool contains_feasible_point(ExactBox D, ValidatedVectorFunction g, ExactBox C,
+    virtual Kleenean contains_feasible_point(ExactBox D, ValidatedVectorFunction g, ExactBox C,
                                             ValidatedFloatVector X) const = 0;
     //! \brief Tests if the Lagrange multipliers \a y are a certificate of infeasiblity.
     virtual Bool is_infeasibility_certificate(ExactBox D, ValidatedVectorFunction g, ExactBox C,
@@ -107,8 +107,8 @@ class OptimiserBase
     virtual Vector<ValidatedNumber> minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ExactBox C) const = 0;
     virtual Vector<ValidatedNumber> minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ValidatedVectorFunction h) const;
 
-    virtual Tribool feasible(ExactBox D, ValidatedVectorFunction g, ExactBox C) const = 0;
-    virtual Tribool feasible(ExactBox D, ValidatedVectorFunction g, ValidatedVectorFunction h) const;
+    virtual Kleenean feasible(ExactBox D, ValidatedVectorFunction g, ExactBox C) const = 0;
+    virtual Kleenean feasible(ExactBox D, ValidatedVectorFunction g, ValidatedVectorFunction h) const;
 
     virtual Bool almost_feasible_point(ExactBox D, ValidatedVectorFunction g, ExactBox C,
                                        ApproximateVector x, ApproximateFloat64 error) const;
@@ -120,7 +120,7 @@ class OptimiserBase
                                       ExactVector x, ExactVector y) const;
     virtual Bool validate_infeasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
                                         ExactVector x, ExactVector y) const;
-    virtual Tribool contains_feasible_point(ExactBox D, ValidatedVectorFunction g, ExactBox C,
+    virtual Kleenean contains_feasible_point(ExactBox D, ValidatedVectorFunction g, ExactBox C,
                                             ValidatedVector X) const;
     virtual Bool is_infeasibility_certificate(ExactBox D, ValidatedVectorFunction g, ExactBox C,
                                               ExactVector lambda) const;
@@ -138,9 +138,9 @@ class PenaltyFunctionOptimiser
 {
   public:
     virtual PenaltyFunctionOptimiser* clone() const;
-    virtual Tribool check_feasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C, ExactVector x, ExactVector y) const;
+    virtual Kleenean check_feasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C, ExactVector x, ExactVector y) const;
     virtual Vector<ValidatedNumber> minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ExactBox C) const;
-    virtual Tribool feasible(ExactBox D, ValidatedVectorFunction g, ExactBox C) const;
+    virtual Kleenean feasible(ExactBox D, ValidatedVectorFunction g, ExactBox C) const;
     virtual Void feasibility_step(const ExactBox& D, const ApproximateVectorFunction& g, const ExactBox& C,
                                   ApproximateFloatVector& x, ApproximateFloatVector& w, ApproximateFloat64& mu) const;
     virtual Void feasibility_step(const ExactBox& D, const ValidatedVectorFunction& g, const ExactBox& C,
@@ -173,11 +173,11 @@ class NonlinearInfeasibleInteriorPointOptimiser
     //! \return A box \f$X\f$ which definitely contains a feasible point, and contains a local optimum.
     virtual Vector<ValidatedNumber> minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ExactBox C) const;
     //! \brief Tests is the nonlinear programming problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
-    virtual Tribool feasible(ExactBox D, ValidatedVectorFunction g, ExactBox C) const;
+    virtual Kleenean feasible(ExactBox D, ValidatedVectorFunction g, ExactBox C) const;
 
     //! \brief Test if the constraints \f$g(x)\in C\f$ are solvable for \f$x\in D\f$ using a nonlinear feasibility test,
     //! hotstarting the method with the overall primal and dual variables.
-    Pair<Tribool,ApproximateFloatVector> feasible_hotstarted(ExactBox D, ValidatedVectorFunction g, ExactBox C,
+    Pair<Kleenean,ApproximateFloatVector> feasible_hotstarted(ExactBox D, ValidatedVectorFunction g, ExactBox C,
                                                                 const PrimalDualData& wxy0) const;
 
     Void setup_feasibility(const ExactBox& D, const ApproximateVectorFunction& g, const ExactBox& C,
@@ -205,16 +205,16 @@ class NonlinearInteriorPointOptimiser
     //! \return A box \f$X\f$ which definitely contains a feasible point, and contains a local optimum.
     virtual Vector<ValidatedNumber> minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ExactBox C) const;
     //! \brief Tests is the nonlinear programming problem \f$x\in D, g(x)\in C \text{ and } h(x)= 0 \f$ is feasible.
-    virtual Tribool feasible(ExactBox D, ValidatedVectorFunction g, ExactBox C) const;
+    virtual Kleenean feasible(ExactBox D, ValidatedVectorFunction g, ExactBox C) const;
 
     //! \brief Test if the constraints \f$g(y)\in C\f$ are solvable for \f$y\in D\f$ using a nonlinear feasibility test,
     //! hotstarting the method with the overall constraint violation, primal and dual variables.
-    Pair<Tribool,ApproximateFloatVector> feasible_hotstarted(ExactBox D, ValidatedVectorFunction g, ExactBox C,
+    Pair<Kleenean,ApproximateFloatVector> feasible_hotstarted(ExactBox D, ValidatedVectorFunction g, ExactBox C,
                                                   const ApproximateFloatVector& x0, const ApproximateFloatVector& lambda0, const ApproximateFloat64& violation0) const;
 
     //! \brief Test if the constraints \f$g(y)\in C\f$ are solvable for \f$y\in D\f$ using a nonlinear feasibility test,
     //! hotstarting the method with the primal and dual.
-    Pair<Tribool,ApproximateFloatVector> feasible_hotstarted(ExactBox D, ValidatedVectorFunction g, ExactBox C,
+    Pair<Kleenean,ApproximateFloatVector> feasible_hotstarted(ExactBox D, ValidatedVectorFunction g, ExactBox C,
                                                   const ApproximateFloatVector& x0, const ApproximateFloatVector& lambda0) const;
 
     Void minimisation_step(const ApproximateScalarFunction& f, const ExactBox& D, const ApproximateVectorFunction& g, const ExactBox& C, const ApproximateVectorFunction& h,
@@ -255,7 +255,7 @@ class IntervalOptimiser
     : public NonlinearInteriorPointOptimiser
 {
     virtual IntervalOptimiser* clone() const { return new IntervalOptimiser(*this); }
-    virtual Tribool feasible(ExactBox D, ValidatedVectorFunction h) const;
+    virtual Kleenean feasible(ExactBox D, ValidatedVectorFunction h) const;
     Void feasibility_step(const ExactFloatVector& xl, const ExactFloatVector& xu, const ValidatedVectorFunction& h,
                           ValidatedFloatVector& x, ValidatedFloatVector& y, ValidatedFloatVector& zl, ValidatedFloatVector zu, ValidatedFloat64& mu) const;
 };
@@ -265,7 +265,7 @@ class ApproximateOptimiser
     : public NonlinearInteriorPointOptimiser
 {
     virtual ApproximateOptimiser* clone() const { return new ApproximateOptimiser(*this); }
-    virtual Tribool feasible(ExactBox D, ValidatedVectorFunction h) const;
+    virtual Kleenean feasible(ExactBox D, ValidatedVectorFunction h) const;
     Void feasibility_step(const ExactBox& D, const ApproximateVectorFunction& h,
                           ApproximateFloatVector& X, ApproximateFloatVector& Lambda) const;
 };
@@ -284,12 +284,12 @@ class KrawczykOptimiser
     //! \brief Solve the linear programming problem \f$\max f(x) \text{ such that } x\in D \text{ and } g(x)\in C\f$.
     virtual Vector<ValidatedNumber> minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ExactBox C) const;
     //! \brief Tests is the nonlinear programming problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
-    virtual Tribool feasible(ExactBox D, ValidatedVectorFunction g, ExactBox C) const;
+    virtual Kleenean feasible(ExactBox D, ValidatedVectorFunction g, ExactBox C) const;
 
   public:
     //! \brief Try to solve the nonlinear constraint problem by applying the Krawczyk contractor to the Kuhn-Tucker conditions,
     //! hotstarting the iteration with the primal and dual variables.
-    Tribool minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ExactBox C,
+    Kleenean minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ExactBox C,
                      const ValidatedFloat64& t0, const ValidatedFloatVector& x0, const ValidatedFloatVector& y0, const ValidatedFloatVector& z0) const;
 
     //! \brief A primal-dual feasibility step for the problem \f$g(y)\in C;\ y\in D\f$.

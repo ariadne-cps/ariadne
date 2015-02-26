@@ -218,7 +218,7 @@ class ConstrainedImageSet
     Void adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
 
     //! \brief Test if the set satisfies the state constraint at all points.
-    Tribool satisfies(const EffectiveConstraint& c) const;
+    Kleenean satisfies(const EffectiveConstraint& c) const;
 
     //! \brief Draw to a canvas.
     Void draw(CanvasInterface&,const Projection2d&) const;
@@ -304,7 +304,7 @@ class ValidatedConstrainedImageSet
     Pair<ValidatedConstrainedImageSet,ValidatedConstrainedImageSet> split(Nat j) const;
 
     //! \brief Test if the set is empty.
-    Tribool is_empty() const;
+    Kleenean is_empty() const;
     //! \brief Test if the set is a strict subset of a box.
     Sierpinski inside(const ExactBox& bx) const;
     //! \brief Test if the set is disjoint from a box.
@@ -315,7 +315,7 @@ class ValidatedConstrainedImageSet
     Void adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
 
     //! \brief Test if the set satisfies the state constraint at all points.
-    Tribool satisfies(const ValidatedConstraint& c) const;
+    Kleenean satisfies(const ValidatedConstraint& c) const;
 
     //! \brief Draw to a canvas.
     Void draw(CanvasInterface&,const Projection2d&) const;

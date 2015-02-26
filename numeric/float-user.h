@@ -234,7 +234,7 @@ template<class PR> class Float<Upper,PR> {
 //! Note that direct construction from a floating-point number is prohibited, since <c>%ValidatedFloat64(3.3)</c> would the singleton interval \f$[3.2999999999999998224,3.2999999999999998224]\f$ (the constant is first interpreted by the C++ compiler to give a C++ \c double, whereas <c>%ValidatedFloat64(3.3_decimal)</c> yields the interval \f$[3.2999999999999998224,3.3000000000000002665]\f$ enclosing \f$3.3\f$.
 //!
 //! Comparison tests on \c ValidatedFloat use the idea that an interval represents a single number with an unknown value.
-//! Hence the result is of type \c Tribool, which can take values { \c True, \c False, \c Indeterminate }.
+//! Hence the result is of type \c Kleenean, which can take values { \c True, \c False, \c Indeterminate }.
 //! Hence a test \f$[\underline{x},\overline{x}]\leq [\underline{y},\overline{y}]\f$ returns \c True if \f$\overline{x}\leq \underline{y}\f$, since in this case \f$x\leq x\f$ whenever \f$x_1\in[\underline{x},\overline{x}]\f$ and \f$y\in[\underline{y},\overline{y}]\f$, \c False if \f$\underline{x}>\overline{y}\f$, since in this case we know \f$x>y\f$, and \c Indeterminate otherwise, since in this case we can find \f$x,y\f$ making the result either true or false.
 //! In the case of equality, the comparison \f$[\underline{x},\overline{x}]\f$==\f$[\underline{y},\overline{y}]\f$ only returns \c True if both intervals are singletons, since otherwise we can find values making the result either true of false.
 //! To test equality of representation, use \c same(x,y)

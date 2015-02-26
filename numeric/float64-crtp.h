@@ -41,7 +41,7 @@ namespace Ariadne {
 struct ExactTag { };
 
 class Boolean;
-class Tribool;
+class Kleenean;
 class Sierpinski;
 class Fuzzy;
 
@@ -275,7 +275,7 @@ class BoundFloat64 : public NumberObject<BoundFloat64> {
     friend BoundFloat64 max(BoundFloat64,BoundFloat64);
     friend BoundFloat64 min(BoundFloat64,BoundFloat64);
     friend Bool operator==(BoundFloat64,Int);
-    friend Tribool operator> (BoundFloat64,BoundFloat64);
+    friend Kleenean operator> (BoundFloat64,BoundFloat64);
     friend OutputStream& operator<<(OutputStream& os, BoundFloat64 const&);
 
     LowerFloat64 lower() const;
@@ -292,12 +292,12 @@ BoundFloat64 sqr(BoundFloat64);
 
 Bool same(BoundFloat64 x1, BoundFloat64 x2);
 
-Tribool operator==(BoundFloat64 x1, BoundFloat64 x2);
-Tribool operator!=(BoundFloat64 x1, BoundFloat64 x2);
-Tribool operator<=(BoundFloat64 x1, BoundFloat64 x2);
-Tribool operator>=(BoundFloat64 x1, BoundFloat64 x2);
-Tribool operator< (BoundFloat64 x1, BoundFloat64 x2);
-Tribool operator> (BoundFloat64 x1, BoundFloat64 x2);
+Kleenean operator==(BoundFloat64 x1, BoundFloat64 x2);
+Kleenean operator!=(BoundFloat64 x1, BoundFloat64 x2);
+Kleenean operator<=(BoundFloat64 x1, BoundFloat64 x2);
+Kleenean operator>=(BoundFloat64 x1, BoundFloat64 x2);
+Kleenean operator< (BoundFloat64 x1, BoundFloat64 x2);
+Kleenean operator> (BoundFloat64 x1, BoundFloat64 x2);
 
 class LowerFloat64 : public NumberObject<LowerFloat64> {
     volatile double l;

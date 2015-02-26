@@ -40,12 +40,12 @@ enum class LogicalValue : char;
 template<class P=Void> class Logical;
 
 //typedef Logical<Exact> Boolean;
-//typedef Logical<Validated> Tribool;
+//typedef Logical<Validated> Kleenean;
 //typedef Logical<Upper> Sierpinski;
 //typedef Logical<Approximate> Fuzzy;
 
 class Boolean;
-class Tribool;
+class Kleenean;
 class Sierpinski;
 class NegSierpinski;
 class Fuzzy;

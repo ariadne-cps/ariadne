@@ -369,7 +369,7 @@ DimensionType HybridEnclosure::dimension() const {
     return this->space_function().result_size();
 }
 
-Tribool HybridEnclosure::is_empty() const {
+Kleenean HybridEnclosure::is_empty() const {
     return this->_set.is_empty();
 }
 
@@ -383,7 +383,7 @@ Sierpinski HybridEnclosure::separated(const HybridBox& hbx) const {
     else { return true; }
 }
 
-Tribool HybridEnclosure::satisfies(EffectiveConstraint c) const
+Kleenean HybridEnclosure::satisfies(EffectiveConstraint c) const
 {
     return this->continuous_set().satisfies(c);
 }

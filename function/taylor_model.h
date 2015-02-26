@@ -182,17 +182,17 @@ class TaylorModel<Validated,F>
     //! \brief Inequality operator.
     Bool operator!=(const TaylorModel<Validated,F>& sd) const {
         return !same(*this,sd); }
-    Tribool operator<(const TaylorModel<Validated,F>& sd) const {
+    Kleenean operator<(const TaylorModel<Validated,F>& sd) const {
         return (sd-*this)>0; }
     //! \brief Comparison with another Taylor model.
-    Tribool operator>(const TaylorModel<Validated,F>& sd) const {
+    Kleenean operator>(const TaylorModel<Validated,F>& sd) const {
         return (*this-sd)>0; }
 
     //! \brief Comparison with a scalar.
-    Tribool operator<(Int c) const {
+    Kleenean operator<(Int c) const {
         return this->range()<c; }
     //! \brief Comparison with a scalar.
-    Tribool operator>(Int c) const {
+    Kleenean operator>(Int c) const {
         return this->range()>c; }
     //@}
 

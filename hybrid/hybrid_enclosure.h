@@ -236,9 +236,9 @@ class HybridEnclosure
     //! \brief The dimension of the set.
     DimensionType dimension() const;
     //! \brief Tests whether the set is empty.
-    Tribool is_empty() const;
+    Kleenean is_empty() const;
     //! \brief Tests whether the set satisfies the constraint \a c.
-    Tribool satisfies(EffectiveConstraint c) const;
+    Kleenean satisfies(EffectiveConstraint c) const;
 
     //! \brief Returns a bounding box for the set. Computed by a simple interval evaluation of \f$f(D)\f$.
     HybridBox bounding_box() const;

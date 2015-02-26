@@ -87,13 +87,13 @@ inline Sierpinski operator!=(const HybridTime& ht1, const HybridTime& ht2) {
         ht1._discrete_time!=ht2._discrete_time;
 }
 
-inline Tribool operator<=(const HybridTime& ht1, const HybridTime& ht2) {
-    return Tribool(ht1._continuous_time<=ht2._continuous_time) &&
+inline Kleenean operator<=(const HybridTime& ht1, const HybridTime& ht2) {
+    return Kleenean(ht1._continuous_time<=ht2._continuous_time) &&
         Boolean(ht1._discrete_time<=ht2._discrete_time);
 }
 
-inline Tribool operator<(const HybridTime& ht1, const HybridTime& ht2) {
-    return Tribool(ht1._continuous_time< ht2._continuous_time) &&
+inline Kleenean operator<(const HybridTime& ht1, const HybridTime& ht2) {
+    return Kleenean(ht1._continuous_time< ht2._continuous_time) &&
         Boolean(ht1._discrete_time<=ht2._discrete_time);
 }
 

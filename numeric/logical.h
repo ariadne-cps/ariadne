@@ -113,7 +113,7 @@ template<> class Logical<Effective>;
 
 //!  \ingroup LogicalTypes
 //!  \brief A logical variable for the paradigm \a P, which must be %Exact, %Validated, %Upper, %Lower or %Approximate.
-//!  Used as a base of named logical types Boolean, Tribool, Sierpinski and Fuzzy. Implemented in terms of LogicalValue.
+//!  Used as a base of named logical types Boolean, Kleenean, Sierpinski and Fuzzy. Implemented in terms of LogicalValue.
 template<class P> class Logical
     : public LogicalFacade<P>
 {
@@ -163,7 +163,7 @@ template<class P> class Logical
     //! \brief Write to an output stream.
     friend inline OutputStream& operator<<(OutputStream& os, Logical<P> l) { return os << l._v; }
   private:
-    friend class Tribool;
+    friend class Kleenean;
 };
 
 inline LogicalFacade<Exact>::operator Bool () const { return decide(static_cast<Logical<Exact>const&>(*this)); }
@@ -262,14 +262,14 @@ class Boolean : public Logical<Exact> {
 //! \brief A logical variable representing the result of a proposition with some undecidable instances.
 //! Takes value \c INDETERMINATE for undecidable instances, for instances for which the information provided is insufficient to obtain a definite result, or for algorithms for which obtaining a result would be deemed to take unacceptably long.
 //! The concrete type of the constant indeterminate.
-class Tribool : public Logical<Validated> {
+class Kleenean : public Logical<Validated> {
  public:
     using Logical<Validated>::Logical;
-    Tribool() :  Logical<Validated>(LogicalValue::INDETERMINATE) { }
-    Tribool(Logical<Effective> l) : Logical<Validated>(l.check(Effort::get_default())) { }
+    Kleenean() :  Logical<Validated>(LogicalValue::INDETERMINATE) { }
+    Kleenean(Logical<Effective> l) : Logical<Validated>(l.check(Effort::get_default())) { }
     // FIXME: Currently needed for Real<Real comparison; Is there a better name?
-    explicit Tribool(Logical<Lower> l) : Logical<Validated>(l._v) { }
-    explicit Tribool(Logical<Upper> l) : Logical<Validated>(l._v) { }
+    explicit Kleenean(Logical<Lower> l) : Logical<Validated>(l._v) { }
+    explicit Kleenean(Logical<Upper> l) : Logical<Validated>(l._v) { }
   public:
     operator Logical<Effective>() const { return Logical<Effective>(*this); }
 };

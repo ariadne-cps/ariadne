@@ -159,8 +159,8 @@ class OpenSetWrapper
   public:
     OpenSetInterface* clone() const { return this->get_override("clone")(); }
     Nat dimension() const { return this->get_override("dimension")(); }
-    Tribool covers(const ExactBox& r) const { return this->get_override("covers")(); }
-    Tribool overlaps(const ExactBox& r) const { return this->get_override("overlaps")(); }
+    Kleenean covers(const ExactBox& r) const { return this->get_override("covers")(); }
+    Kleenean overlaps(const ExactBox& r) const { return this->get_override("overlaps")(); }
     OutputStream& write(OutputStream&) const { return this->get_override("write")(); }
 };
 
@@ -170,7 +170,7 @@ class ClosedSetWrapper
   public:
     ClosedSetInterface* clone() const { return this->get_override("clone")(); }
     Nat dimension() const { return this->get_override("dimension")(); }
-    Tribool separated(const ExactBox& r) const { return this->get_override("separated")(); }
+    Kleenean separated(const ExactBox& r) const { return this->get_override("separated")(); }
     OutputStream& write(OutputStream&) const { return this->get_override("write")(); }
 };
 
@@ -181,7 +181,7 @@ class OvertSetWrapper
   public:
     OvertSetInterface* clone() const { return this->get_override("clone")(); }
     Nat dimension() const { return this->get_override("dimension")(); }
-    Tribool overlaps(const ExactBox& r) const { return this->get_override("overlaps")(); }
+    Kleenean overlaps(const ExactBox& r) const { return this->get_override("overlaps")(); }
     OutputStream& write(OutputStream&) const { return this->get_override("write")(); }
 };
 
@@ -192,9 +192,9 @@ class CompactSetWrapper
   public:
     CompactSetInterface* clone() const { return this->get_override("clone")(); }
     Nat dimension() const { return this->get_override("dimension")(); }
-    Tribool separated(const ExactBox& r) const { return this->get_override("separated")(); }
-    Tribool inside(const ExactBox& r) const { return this->get_override("inside")(); }
-    Tribool is_bounded() const { return this->get_override("is_bounded")(); }
+    Kleenean separated(const ExactBox& r) const { return this->get_override("separated")(); }
+    Kleenean inside(const ExactBox& r) const { return this->get_override("inside")(); }
+    Kleenean is_bounded() const { return this->get_override("is_bounded")(); }
     UpperBox bounding_box() const { return this->get_override("bounding_box")(); }
     OutputStream& write(OutputStream&) const { return this->get_override("write")(); }
 };
@@ -205,9 +205,9 @@ class RegularSetWrapper
   public:
     RegularSetWrapper* clone() const { return this->get_override("clone")(); }
     Nat dimension() const { return this->get_override("dimension")(); }
-    Tribool overlaps(const ExactBox& r) const { return this->get_override("overlaps")(); }
-    Tribool covers(const ExactBox& r) const { return this->get_override("covers")(); }
-    Tribool separated(const ExactBox& r) const { return this->get_override("separated")(); }
+    Kleenean overlaps(const ExactBox& r) const { return this->get_override("overlaps")(); }
+    Kleenean covers(const ExactBox& r) const { return this->get_override("covers")(); }
+    Kleenean separated(const ExactBox& r) const { return this->get_override("separated")(); }
     OutputStream& write(OutputStream&) const { return this->get_override("write")(); }
 };
 
@@ -217,10 +217,10 @@ class LocatedSetWrapper
   public:
     LocatedSetInterface* clone() const { return this->get_override("clone")(); }
     Nat dimension() const { return this->get_override("dimension")(); }
-    Tribool overlaps(const ExactBox& r) const { return this->get_override("overlaps")(); }
-    Tribool separated(const ExactBox& r) const { return this->get_override("separated")(); }
-    Tribool inside(const ExactBox& r) const { return this->get_override("inside")(); }
-    Tribool is_bounded() const { return this->get_override("is_bounded")(); }
+    Kleenean overlaps(const ExactBox& r) const { return this->get_override("overlaps")(); }
+    Kleenean separated(const ExactBox& r) const { return this->get_override("separated")(); }
+    Kleenean inside(const ExactBox& r) const { return this->get_override("inside")(); }
+    Kleenean is_bounded() const { return this->get_override("is_bounded")(); }
     UpperBox bounding_box() const { return this->get_override("bounding_box")(); }
     OutputStream& write(OutputStream&) const { return this->get_override("write")(); }
 };
@@ -324,10 +324,10 @@ Void export_box()
     box_class.def("dimension", (Nat(ExactBox::*)()const) &ExactBox::dimension);
     box_class.def("centre", (ExactPoint(ExactBox::*)()const) &ExactBox::centre);
     box_class.def("radius", (Float64(ExactBox::*)()const) &ExactBox::radius);
-    box_class.def("separated", (Tribool(ExactBox::*)(const ExactBox&)const) &ExactBox::separated);
-    box_class.def("overlaps", (Tribool(ExactBox::*)(const ExactBox&)const) &ExactBox::overlaps);
-    box_class.def("covers", (Tribool(ExactBox::*)(const ExactBox&)const) &ExactBox::covers);
-    box_class.def("inside", (Tribool(ExactBox::*)(const ExactBox&)const) &ExactBox::inside);
+    box_class.def("separated", (Kleenean(ExactBox::*)(const ExactBox&)const) &ExactBox::separated);
+    box_class.def("overlaps", (Kleenean(ExactBox::*)(const ExactBox&)const) &ExactBox::overlaps);
+    box_class.def("covers", (Kleenean(ExactBox::*)(const ExactBox&)const) &ExactBox::covers);
+    box_class.def("inside", (Kleenean(ExactBox::*)(const ExactBox&)const) &ExactBox::inside);
     box_class.def("empty", (Bool(ExactBox::*)()const) &ExactBox::empty);
     box_class.def("widen", (ExactBox(ExactBox::*)()const) &ExactBox::widen);
     box_class.def("split", (Pair<ExactBox,ExactBox>(ExactBox::*)()const) &ExactBox::split);
@@ -370,10 +370,10 @@ Void export_zonotope()
     zonotope_class.def("split", (ListSet<Zonotope>(*)(const Zonotope&)) &split);
     zonotope_class.def("__str__",&__cstr__<Zonotope>);
 
-    def("contains", (Tribool(*)(const Zonotope&,const ExactPoint&)) &contains);
-    def("separated", (Tribool(*)(const Zonotope&,const ExactBox&)) &separated);
-    def("overlaps", (Tribool(*)(const Zonotope&,const ExactBox&)) &overlaps);
-    def("separated", (Tribool(*)(const Zonotope&,const Zonotope&)) &separated);
+    def("contains", (Kleenean(*)(const Zonotope&,const ExactPoint&)) &contains);
+    def("separated", (Kleenean(*)(const Zonotope&,const ExactBox&)) &separated);
+    def("overlaps", (Kleenean(*)(const Zonotope&,const ExactBox&)) &overlaps);
+    def("separated", (Kleenean(*)(const Zonotope&,const Zonotope&)) &separated);
 
     def("polytope", (Polytope(*)(const Zonotope&)) &polytope);
     def("orthogonal_approximation", (Zonotope(*)(const Zonotope&)) &orthogonal_approximation);

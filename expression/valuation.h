@@ -218,7 +218,7 @@ String evaluate(const Expression<String>&, const StringValuation&);
 Integer evaluate(const Expression<Integer>&, const IntegerValuation&);
 Boolean evaluate(const Expression<Boolean>&, const DiscreteValuation&);
 template<class X> X evaluate(const Expression<Real>& e, const ContinuousValuation<X>&);
-template<class X> Tribool evaluate(const Expression<Tribool>&, const ContinuousValuation<X>&);
+template<class X> Kleenean evaluate(const Expression<Kleenean>&, const ContinuousValuation<X>&);
 
 } // namespace Ariadne
 

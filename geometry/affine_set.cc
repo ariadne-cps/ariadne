@@ -207,8 +207,8 @@ ValidatedAffineConstrainedImageSet::domain() const
     return this->_domain;
 }
 
-Tribool ValidatedAffineConstrainedImageSet::is_bounded() const {
-    return Tribool(ExactBox(this->domain()).is_bounded()) || Tribool(indeterminate);
+Kleenean ValidatedAffineConstrainedImageSet::is_bounded() const {
+    return Kleenean(ExactBox(this->domain()).is_bounded()) || Kleenean(indeterminate);
 }
 
 UpperBox ValidatedAffineConstrainedImageSet::bounding_box() const {
@@ -235,7 +235,7 @@ Sierpinski ValidatedAffineConstrainedImageSet::separated(const ExactBox& bx) con
         lp.u[i]=add_up(wbx[i].upper().raw(),this->_space_models[i].error().raw());
     }
     //std::cerr<<"\ns="<<*this<<"\nbx="<<bx<<"\n\nA="<<lp.A<<"\nb="<<lp.b<<"\nl="<<lp.l<<"\nu="<<lp.u<<"\n\n";
-    Tribool feasible=indeterminate;
+    Kleenean feasible=indeterminate;
     try {
         InteriorPointSolver optimiser;
         feasible=optimiser.feasible(lp.l,lp.u,lp.A,lp.b);
@@ -247,8 +247,8 @@ Sierpinski ValidatedAffineConstrainedImageSet::separated(const ExactBox& bx) con
     return !feasible;
 }
 
-Tribool ValidatedAffineConstrainedImageSet::is_empty() const {
-    return Tribool(this->separated(cast_exact_box(this->bounding_box()))) || Tribool(indeterminate);
+Kleenean ValidatedAffineConstrainedImageSet::is_empty() const {
+    return Kleenean(this->separated(cast_exact_box(this->bounding_box()))) || Kleenean(indeterminate);
 }
 
 Sierpinski ValidatedAffineConstrainedImageSet::inside(const ExactBox& bx) const {
@@ -288,9 +288,9 @@ Void ValidatedAffineConstrainedImageSet::_adjoin_outer_approximation_to(PavingIn
     Int maximum_tree_depth=depth*cell.dimension();
 
     // Check for disjointness using linear program
-    //Tribool feasible=SimplexSolver<Float64>().hotstarted_feasible(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x,lp.y);
+    //Kleenean feasible=SimplexSolver<Float64>().hotstarted_feasible(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x,lp.y);
     InteriorPointSolver optimiser;
-    Tribool feasible=optimiser.feasible(lp.l,lp.u,lp.A,lp.b);
+    Kleenean feasible=optimiser.feasible(lp.l,lp.u,lp.A,lp.b);
     //feasible=verify_feasibility(lp.A,lp.b,lp.l,lp.u,lp.vt);
     if(definitely(!feasible)) { return; }
 
@@ -438,7 +438,7 @@ Void ValidatedAffineConstrainedImageSet::_robust_adjoin_outer_approximation_to(P
     Int maximum_tree_depth=depth*cell.dimension();
 
     // Check for disjointness using linear program
-    Tribool feasible=lpsolver.hotstarted_feasible(lp.l,lp.u,lp.A,lp.b,lp.vt,lp.p,lp.B,lp.x,lp.y);
+    Kleenean feasible=lpsolver.hotstarted_feasible(lp.l,lp.u,lp.A,lp.b,lp.vt,lp.p,lp.B,lp.x,lp.y);
 
     Bool done=false;
     while(!done && lp.x[ne+nx+nc]<0.0) {
@@ -580,7 +580,7 @@ ValidatedAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingI
     }
 
     ARIADNE_LOG(9,"A="<<lp.A<<"\nb="<<lp.b<<"\nl="<<lp.l<<"\nu="<<lp.u<<"\n");
-    Tribool feasible=lpsolver.hotstarted_feasible(lp.l,lp.u,lp.A,lp.b,lp.vt,lp.p,lp.B,lp.x,lp.y);
+    Kleenean feasible=lpsolver.hotstarted_feasible(lp.l,lp.u,lp.A,lp.b,lp.vt,lp.p,lp.B,lp.x,lp.y);
     ARIADNE_LOG(9,"  vt="<<lp.vt<<"\nx="<<lp.x<<"\n");
     if(definitely(not feasible)) { return; } // no intersection
 
@@ -673,7 +673,7 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
     Vector<Float64> x(np); Vector<Float64> y(nc);
 
     // Find an initial feasible point
-    Tribool feasible = lpsolver.hotstarted_feasible(l,u,A,b, vt, p,B, x,y);
+    Kleenean feasible = lpsolver.hotstarted_feasible(l,u,A,b, vt, p,B, x,y);
     ARIADNE_LOG(3," A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<" vt="<<vt<<" p="<<p<<"\n  x="<<x<<" Ax="<< A*x <<"\n");
     lpsolver.consistency_check(l,u,A,b, vt,p,B,x);
 

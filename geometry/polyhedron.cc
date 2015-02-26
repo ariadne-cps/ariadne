@@ -130,14 +130,14 @@ Polyhedron::dimension() const
     return this->_A.column_size();
 }
 
-Tribool
+Kleenean
 Polyhedron::empty() const
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
 
-Tribool
+Kleenean
 Polyhedron::is_bounded() const
 {
     ARIADNE_NOT_IMPLEMENTED;
@@ -152,15 +152,15 @@ Polyhedron::halfspace(SizeType i) const
 
 
 
-Tribool Polyhedron::overlaps(const ExactBox& bx) const {
+Kleenean Polyhedron::overlaps(const ExactBox& bx) const {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-Tribool Polyhedron::covers(const ExactBox& bx) const {
+Kleenean Polyhedron::covers(const ExactBox& bx) const {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-Tribool Polyhedron::separated(const ExactBox& bx) const {
+Kleenean Polyhedron::separated(const ExactBox& bx) const {
     ARIADNE_NOT_IMPLEMENTED;
 }
 

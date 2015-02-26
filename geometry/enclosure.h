@@ -196,10 +196,10 @@ class Enclosure
     //! \brief  Returns true if \f$g(x)>0\f$ over the whole set,
     //! false \f$g(x)<0\f$ over the whole set,
     //! and indeterminate otherwise.
-    Tribool satisfies(ValidatedScalarFunction g) const;
+    Kleenean satisfies(ValidatedScalarFunction g) const;
     //! \brief Tests if the set satisfies the constraint \a c. Returns \c true if all points in the set satisfy
     //! the constraint, and \c false if no points in the set satisfy the constraint.
-    virtual Tribool satisfies(ValidatedConstraint c) const;
+    virtual Kleenean satisfies(ValidatedConstraint c) const;
 
     //! \brief The dimension of the set.
     DimensionType dimension() const;
@@ -212,16 +212,16 @@ class Enclosure
     //! \brief An over-approximation to the radius of the set.
     ErrorFloat64 radius() const;
     //! \brief Returns \c true if the set is definitely singleton.
-    Tribool is_bounded() const;
+    Kleenean is_bounded() const;
     //! \brief Returns \c true if the set is provably empty.
     //! May return \c false if the set can (easily) be proved to be nonempty.
-    Tribool is_empty() const;
+    Kleenean is_empty() const;
     //! \brief Returns \c true if the set can be shown to be disjoint from \a bx.
     Sierpinski separated(const ExactBox& bx) const;
     //! \brief Returns \c true if the set can be shown to be a subset of \a bx..
     Sierpinski inside(const ExactBox& bx) const;
     //! \brief Returns \c true if the set can be shown to be a subset of \a bx..
-    Tribool subset(const ExactBox& bx) const;
+    Kleenean subset(const ExactBox& bx) const;
 
     //! \brief Reduces the size of the effective parameter domain
     //! by pruning away infeasible points. Does not affect the set as a mathematical entity.

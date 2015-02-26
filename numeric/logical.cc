@@ -127,7 +127,7 @@ template<> String class_name<Approximate>() { return "Approximate"; }
 
 template<> String class_name<Bool>() { return "Bool"; }
 template<> String class_name<Boolean>() { return "Boolean"; }
-template<> String class_name<Tribool>() { return "Tribool"; }
+template<> String class_name<Kleenean>() { return "Kleenean"; }
 template<> String class_name<Sierpinski>() { return "Sierpinski"; }
 template<> String class_name<NegSierpinski>() { return "NegSierpinski"; }
 template<> String class_name<Fuzzy>() { return "Fuzzy"; }

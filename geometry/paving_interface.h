@@ -46,7 +46,7 @@ class GridCell;
 // NOTE: Corresponds to your SetCheckerInterface; I think that this name is better.
 template<class BS> class PredicateInterface {
   public:
-    virtual Tribool check(const BS&) = 0;
+    virtual Kleenean check(const BS&) = 0;
 };
 
 template<class T> class ForwardConstantIteratorHandle;

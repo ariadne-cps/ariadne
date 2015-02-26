@@ -148,21 +148,21 @@ OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Real>& x) 
 } // namespace Ariadne
 
 
-StringType __str__(Tribool tb) {
+StringType __str__(Kleenean tb) {
   if(is_indeterminate(tb)) { return "Indeterminate"; }
   if(definitely(tb)) { return "True"; }
   else if(not possibly(tb)) { return "False"; }
   else { return "Indeterminate"; }
 }
 
-StringType __repr__(Tribool tb) {
-  if(definitely(tb)) { return "Tribool(True)"; }
-  else if(not possibly(tb)) { return "Tribool(False)"; }
-  else { return "Tribool(Indeterminate)"; }
+StringType __repr__(Kleenean tb) {
+  if(definitely(tb)) { return "Kleenean(True)"; }
+  else if(not possibly(tb)) { return "Kleenean(False)"; }
+  else { return "Kleenean(Indeterminate)"; }
 }
 
-Bool __nonzero__(Tribool tb) { return definitely(tb); }
-Tribool indeterminate_const() { return indeterminate; }
+Bool __nonzero__(Kleenean tb) { return definitely(tb); }
+Kleenean indeterminate_const() { return indeterminate; }
 
 namespace Ariadne {
 Bool possibly(Logical<Validated>);
@@ -172,28 +172,28 @@ Bool is_determinate(Logical<Validated>);
 
 Void export_tribool() {
 
-    class_<Tribool> tribool_class("Tribool",init<Bool>());
+    class_<Kleenean> tribool_class("Kleenean",init<Bool>());
     tribool_class.def(init<Int>());
-    tribool_class.def(init<Tribool>());
-    tribool_class.def("__eq__", &__eq__<Tribool,Tribool,Tribool>);
-    tribool_class.def("__ne__", &__ne__<Tribool,Tribool,Tribool>);
-    tribool_class.def("__and__", &__and__<Tribool,Tribool,Tribool>);
-    tribool_class.def("__or__", &__or__<Tribool,Tribool,Tribool>);
+    tribool_class.def(init<Kleenean>());
+    tribool_class.def("__eq__", &__eq__<Kleenean,Kleenean,Kleenean>);
+    tribool_class.def("__ne__", &__ne__<Kleenean,Kleenean,Kleenean>);
+    tribool_class.def("__and__", &__and__<Kleenean,Kleenean,Kleenean>);
+    tribool_class.def("__or__", &__or__<Kleenean,Kleenean,Kleenean>);
     // WARNING: __not__ is not a special method!
-    tribool_class.def("__not__", &__not__<Tribool,Tribool>);
-    tribool_class.def("__nonzero__", (Bool(*)(Tribool))&__nonzero__);
+    tribool_class.def("__not__", &__not__<Kleenean,Kleenean>);
+    tribool_class.def("__nonzero__", (Bool(*)(Kleenean))&__nonzero__);
 
     //tribool_class.def("__eq__", (Logical<Validated>(*)(Logical<Validated>,Bool))(&operator==));
     //tribool_class.def("__neq__", (Logical<Validated>(*)(Logical<Validated>,Bool))(&operator!=));
     //tribool_class.def("__and__", (Logical<Validated>(*)(Logical<Validated>,Bool))(&operator!=));
     //tribool_class.def("__or__", (Logical<Validated>(*)(Logical<Validated>,Bool))(&operator!=));
 
-    tribool_class.def("__str__", (StringType(*)(Tribool))&__str__);
-    tribool_class.def("__repr__", (StringType(*)(Tribool))&__repr__);
+    tribool_class.def("__str__", (StringType(*)(Kleenean))&__str__);
+    tribool_class.def("__repr__", (StringType(*)(Kleenean))&__repr__);
 
-    implicitly_convertible<Bool,Tribool>();
+    implicitly_convertible<Bool,Kleenean>();
 
-    def("indeterminate",(Tribool(*)())&indeterminate_const);
+    def("indeterminate",(Kleenean(*)())&indeterminate_const);
     def("possibly",(Bool(*)(Logical<Validated>))&possibly);
     def("definitely",(Bool(*)(Logical<Validated>))&definitely);
     def("is_determinate",(Bool(*)(Logical<Validated>))&is_determinate);

@@ -92,9 +92,9 @@ class Polytope
 
     virtual Polytope* clone() const { return new Polytope(*this); }
     virtual DimensionType dimension() const { if(this->_vertices.size()==0) { return 0; } return this->_vertices.front().dimension(); }
-    virtual Tribool separated(const ExactBox& bx) const;
-    virtual Tribool overlaps(const ExactBox& bx) const;
-    virtual Tribool inside(const ExactBox& bx) const;
+    virtual Kleenean separated(const ExactBox& bx) const;
+    virtual Kleenean overlaps(const ExactBox& bx) const;
+    virtual Kleenean inside(const ExactBox& bx) const;
     virtual UpperBox bounding_box() const;
     virtual Void draw(CanvasInterface& c, const Projection2d& p) const;
     virtual OutputStream& write(OutputStream& os) const;

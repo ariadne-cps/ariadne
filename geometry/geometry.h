@@ -94,7 +94,7 @@ Pair<ExactBox,ExactBox> split(const ExactBox& bx) {
 
 
 template<class F>
-Tribool
+Kleenean
 separated(const ExactBox& d, const F& f, const ExactBox& b, const RawFloat64& eps)
 {
 
@@ -120,7 +120,7 @@ separated(const ExactBox& d, const F& f, const ExactBox& b, const RawFloat64& ep
 
 
 template<class F>
-Tribool
+Kleenean
 inside(const ExactBox& d, const F& f, const ExactBox& b, const RawFloat64& eps)
 {
 
@@ -174,45 +174,45 @@ DS remove_supersets(const DS& ls)
 
 
 //! \brief Tests if \a ls overlaps \a rs, to a tolerance of \a eps.
-Tribool overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float64& eps);
+Kleenean overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float64& eps);
 
 //! \brief Tests if \a ls is a inside of \a rs, to a tolerance of \a eps.
-Tribool inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float64& eps);
+Kleenean inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float64& eps);
 
 //! \brief Tests if \a ls is disjoint from \a rs, to a tolerance of \a eps.
-Tribool separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float64& eps);
+Kleenean separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float64& eps);
 
 
 //! \brief Tests if \a ovs overlaps \a ops, to a tolerance of \a eps.
-Tribool overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const Float64& eps);
+Kleenean overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const Float64& eps);
 
 //! \brief Tests if \a cps is a inside of \a ops, to a tolerance of \a eps.
-Tribool inside(const CompactSetInterface& cps, const OpenSetInterface& ops, const Float64& eps);
+Kleenean inside(const CompactSetInterface& cps, const OpenSetInterface& ops, const Float64& eps);
 
 //! \brief Tests if \a cps is disjoint from \a cls, to a tolerance of \a eps.
-Tribool separated(const CompactSetInterface& cps, const ClosedSetInterface& cls, const Float64& eps);
+Kleenean separated(const CompactSetInterface& cps, const ClosedSetInterface& cls, const Float64& eps);
 
 
 
 
 //! \brief Tests if the intersection of \a ls and \a bx overlaps \a rs, to a tolerance of \a eps.
-Tribool overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBox& bx, const Float64& eps);
+Kleenean overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBox& bx, const Float64& eps);
 
 //! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
-Tribool inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBox& bx, const Float64& eps);
+Kleenean inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBox& bx, const Float64& eps);
 
 //! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
-Tribool separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBox& bx, const Float64& eps);
+Kleenean separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBox& bx, const Float64& eps);
 
 
 //! \brief Tests if the intersection of \a ls and \a bx overlaps \a rs, to a tolerance of \a eps.
-Tribool overlap(const OvertSetInterface& ls, const OpenSetInterface& rs, const ExactBox& bx, const Float64& eps);
+Kleenean overlap(const OvertSetInterface& ls, const OpenSetInterface& rs, const ExactBox& bx, const Float64& eps);
 
 //! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
-Tribool inside(const ClosedSetInterface& ls, const OpenSetInterface& rs, const ExactBox& bx, const Float64& eps);
+Kleenean inside(const ClosedSetInterface& ls, const OpenSetInterface& rs, const ExactBox& bx, const Float64& eps);
 
 //! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
-Tribool separated(const ClosedSetInterface& ls, const ClosedSetInterface& rs, const ExactBox& bx, const Float64& eps);
+Kleenean separated(const ClosedSetInterface& ls, const ClosedSetInterface& rs, const ExactBox& bx, const Float64& eps);
 
 
 } // namespace Ariadne

@@ -482,7 +482,7 @@ ConstrainedImageSet::affine_approximation() const
 }
 
 
-Tribool ConstrainedImageSet::satisfies(const EffectiveConstraint& nc) const
+Kleenean ConstrainedImageSet::satisfies(const EffectiveConstraint& nc) const
 {
     if( definitely(subset(Ariadne::apply(nc.function(),this->bounding_box()),nc.bounds())) ) {
         return true;
@@ -495,7 +495,7 @@ Tribool ConstrainedImageSet::satisfies(const EffectiveConstraint& nc) const
     const Real& lower_bound = nc.lower_bound();
     const Real& upper_bound = nc.upper_bound();
 
-    Tribool result;
+    Kleenean result;
     if(definitely(upper_bound<+infinity)) {
         all_constraints.append( composed_function >= upper_bound );
         result=solver.feasible(over_approximation(domain),all_constraints).first;
@@ -944,7 +944,7 @@ ValidatedConstrainedImageSet::reduce()
     solver.reduce(reduced_domain, this->constraint_function(), this->constraint_bounds());
 }
 
-Tribool ValidatedConstrainedImageSet::is_empty() const
+Kleenean ValidatedConstrainedImageSet::is_empty() const
 {
     const_cast<ValidatedConstrainedImageSet*>(this)->reduce();
     return this->_reduced_domain.is_empty();
@@ -987,17 +987,17 @@ Sierpinski ValidatedConstrainedImageSet::overlaps(const ExactBox& bx) const
     List<Pair<Nat,ExactBox> > subdomains;
     Nat depth(0);
     Nat MAX_DEPTH=2;
-    Tribool feasible = false;
+    Kleenean feasible = false;
     subdomains.append(make_pair(depth,subdomain));
 
     while(!subdomains.empty()) {
         make_lpair(depth,subdomain)=subdomains.back();
         subdomains.pop_back();
-        Tribool found_feasible = optimiser.feasible(subdomain,function,codomain);
+        Kleenean found_feasible = optimiser.feasible(subdomain,function,codomain);
         if(definitely(found_feasible)) { return true; }
         if(possibly(found_feasible)) {
             if(depth==MAX_DEPTH) {
-                feasible = Tribool(indeterminate);
+                feasible = Kleenean(indeterminate);
             } else {
                 Pair<ExactBox,ExactBox> split_subdomains=subdomain.split();
                 subdomains.append(make_pair(depth+1,split_subdomains.first));
@@ -1035,7 +1035,7 @@ Void ValidatedConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface
 
 
 
-Tribool ValidatedConstrainedImageSet::satisfies(const ValidatedConstraint& nc) const
+Kleenean ValidatedConstrainedImageSet::satisfies(const ValidatedConstraint& nc) const
 {
     if( definitely(subset(Ariadne::apply(nc.function(),this->bounding_box()),nc.bounds())) ) {
         return true;
@@ -1047,7 +1047,7 @@ Tribool ValidatedConstrainedImageSet::satisfies(const ValidatedConstraint& nc) c
     ValidatedScalarFunction composed_function = compose(nc.function(),this->_function);
     const ExactInterval& bounds = nc.bounds();
 
-    Tribool result;
+    Kleenean result;
     if(definitely(bounds.upper()<+infty)) {
         all_constraints.append( composed_function >= bounds.upper() );
         result=solver.feasible(domain,all_constraints).first;

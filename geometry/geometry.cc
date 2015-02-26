@@ -30,7 +30,7 @@
 namespace Ariadne {
 
 
-Tribool
+Kleenean
 separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float64& eps)
 {
     ExactBox bb=cast_exact_box(ls.bounding_box());
@@ -39,7 +39,7 @@ separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Fl
 }
 
 
-Tribool
+Kleenean
 overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float64& eps)
 {
     ExactBox bb=cast_exact_box(ls.bounding_box());
@@ -48,7 +48,7 @@ overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Floa
 }
 
 
-Tribool
+Kleenean
 inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float64& eps)
 {
     ExactBox bb=cast_exact_box(ls.bounding_box());
@@ -57,7 +57,7 @@ inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float
 }
 
 
-Tribool
+Kleenean
 overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBox& bx, const Float64& eps)
 {
     if(definitely(ls.separated(bx))) {
@@ -85,7 +85,7 @@ overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Exac
 }
 
 
-Tribool
+Kleenean
 inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBox& bx, const Float64& eps)
 {
     if(definitely(ls.separated(bx) || rs.separated(bx))) {
@@ -106,7 +106,7 @@ inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Exact
 }
 
 
-Tribool
+Kleenean
 separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBox& bx, const Float64& eps)
 {
     if(definitely(ls.separated(bx) || rs.separated(bx))) {
@@ -129,7 +129,7 @@ separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Ex
 
 
 
-Tribool
+Kleenean
 overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const ExactBox& bx, const Float64& eps)
 {
     if(definitely(ovs.overlaps(bx))) {
@@ -152,7 +152,7 @@ overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const ExactBo
 }
 
 
-Tribool
+Kleenean
 inside(const ClosedSetInterface& cls, const OpenSetInterface& ops, const ExactBox& bx, const Float64& eps)
 {
     if(definitely(cls.separated(bx) || ops.covers(bx))) {
@@ -171,7 +171,7 @@ inside(const ClosedSetInterface& cls, const OpenSetInterface& ops, const ExactBo
 }
 
 
-Tribool
+Kleenean
 separated(const ClosedSetInterface& cls1, const ClosedSetInterface& cls2, const ExactBox& bx, const Float64& eps)
 {
     if(definitely(cls1.separated(bx) || cls2.separated(bx))) {

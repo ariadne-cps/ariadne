@@ -148,7 +148,7 @@ add_up(const Vector<Float64>& v1, const Vector<Float64>& v2)
     return result;
 }
 
-Tribool
+Kleenean
 norm_grtr(const Vector<Float64>& v1, const Vector<Float64>& v2)
 {
     return norm(v1)>norm(v2);
@@ -331,21 +331,21 @@ Zonotope::radius() const
 }
 
 
-Tribool
+Kleenean
 Zonotope::contains(const ExactPoint& pt) const
 {
     return Ariadne::contains(*this,pt);
 }
 
 
-Tribool
+Kleenean
 Zonotope::separated(const ExactBox& bx) const
 {
     return Ariadne::separated(*this,ExactBox(bx));
 }
 
 
-Tribool
+Kleenean
 Zonotope::inside(const ExactBox& bx) const
 {
     return Ariadne::inside(*this,ExactBox(bx));
@@ -363,14 +363,14 @@ Zonotope::write(OutputStream& os) const
 
 
 
-Tribool
+Kleenean
 empty(const Zonotope& z)
 {
     return false;
 }
 
 
-Tribool
+Kleenean
 is_bounded(const Zonotope& z)
 {
     return true;
@@ -822,14 +822,14 @@ operator>>(InputStream& is, Zonotope& z)
 
 
 
-Tribool
+Kleenean
 inside(const Zonotope& z, const ExactBox& bx)
 {
     return z.bounding_box().inside(bx) || indeterminate;
 }
 
 
-Tribool
+Kleenean
 overlaps(const Zonotope& z, const ExactBox& bx)
 {
     return !separated(z,bx);
@@ -839,7 +839,7 @@ overlaps(const Zonotope& z, const ExactBox& bx)
 /* Set up constrained linear program Ax=b, l\leq x\leq u.
  * Here, A=[I,z.G], b=z.c, l=[r.l,-o], u=[r.u,+o]
  */
-Tribool
+Kleenean
 separated(const Zonotope& z, const ExactBox& bx)
 {
     ARIADNE_ASSERT(z.dimension()==bx.dimension());
@@ -874,7 +874,7 @@ separated(const Zonotope& z, const ExactBox& bx)
  * Still need to take into account errors, particularly in
  * the \a b vector.
  */
-Tribool
+Kleenean
 separated(const Zonotope& z1, const Zonotope& z2)
 {
     ARIADNE_ASSERT(z1.dimension()==z2.dimension());
@@ -900,7 +900,7 @@ separated(const Zonotope& z1, const Zonotope& z2)
 
 /* Set up LP problem to solve \f$c+Ge=p\f$; \f$-1<=e<=1\f$.
  */
-Tribool
+Kleenean
 contains(const Zonotope& z, const ExactPoint& pt)
 {
     //std::clog << "Zonotope::contains(const Vector<Float64>& )" << std::endl;
@@ -912,7 +912,7 @@ contains(const Zonotope& z, const ExactPoint& pt)
     Vector<Float64> xl(m,-1.0);
     Vector<Float64> xu(m,1.0);
 
-    Tribool result=SimplexSolver<Float64>().feasible(xl,xu,A,b);
+    Kleenean result=SimplexSolver<Float64>().feasible(xl,xu,A,b);
     return result;
 }
 

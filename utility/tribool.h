@@ -1,5 +1,5 @@
 /***************************************************************************
- *            Tribool.h
+ *            Kleenean.h
  *
  *  Copyright 2008  Pieter Collins
  *
@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file Tribool.h
+/*! \file Kleenean.h
  *  \brief Three-valued logic variable.
  */
 
@@ -31,13 +31,13 @@
 #ifdef DOXYGEN
 namespace Ariadne {
     //! \brief A three-valued logic type, with values \f$\top\f$ (true), \f$\bot\f$ (false) and \f$\uparrow\f$ (indeterminate).
-    class Tribool {
+    class Kleenean {
     //! \brief Returns \c true if \a tb is \c true, and \c false if \a tb is \c indeterminate or \c false.
-    friend bool definitely(Tribool tb);
+    friend bool definitely(Kleenean tb);
     //! \brief Returns \c true if \a tb is \c true or \c indeteriminate, and \c false if \a tb is \c false.
-    friend bool possibly(Tribool tb);
+    friend bool possibly(Kleenean tb);
     //! \brief Returns \c true if \a tb is \c indeterminate, and \c false if \a tb is \c true or \c false.
-    friend bool indeterminate(Tribool tb);
+    friend bool indeterminate(Kleenean tb);
     };
 }
 #endif // DOXYGEN

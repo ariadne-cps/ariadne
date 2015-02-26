@@ -357,12 +357,12 @@ Enclosure::Enclosure(const ExactBox& domain, const ValidatedVectorFunction& spac
 
 
 // Returns true if the entire set is positive; false if entire set is negative
-Tribool Enclosure::satisfies(ValidatedScalarFunction constraint) const
+Kleenean Enclosure::satisfies(ValidatedScalarFunction constraint) const
 {
     UpperInterval constraint_range=apply(constraint,this->codomain());
     if(definitely(constraint_range.upper()<0)) { return false; }
     if(definitely(constraint_range.lower()>0)) { return true; }
-    return Tribool(indeterminate);
+    return Kleenean(indeterminate);
 }
 
 
@@ -680,21 +680,21 @@ ExactPoint Enclosure::centre() const {
 }
 
 
-Tribool
+Kleenean
 Enclosure::satisfies(ValidatedConstraint c) const
 {
     Enclosure copy=*this;
     copy.new_state_constraint(c);
     if(definitely(copy.is_empty())) { return false; }
-    else { return Tribool(indeterminate); }
+    else { return Kleenean(indeterminate); }
 }
 
-Tribool Enclosure::is_bounded() const
+Kleenean Enclosure::is_bounded() const
 {
-    return this->domain().is_bounded() || Tribool(indeterminate);
+    return this->domain().is_bounded() || Kleenean(indeterminate);
 }
 
-Tribool Enclosure::is_empty() const
+Kleenean Enclosure::is_empty() const
 {
     if(definitely(this->_reduced_domain.is_empty())) { return true; }
     if(this->_constraints.empty()) { return this->domain().is_empty(); }
@@ -708,7 +708,7 @@ Tribool Enclosure::is_empty() const
         }
     }
     if(this->_reduced_domain.is_empty()) { return true; }
-    return Tribool(indeterminate);
+    return Kleenean(indeterminate);
 }
 
 Sierpinski Enclosure::inside(const ExactBox& bx) const
@@ -716,11 +716,11 @@ Sierpinski Enclosure::inside(const ExactBox& bx) const
     return Ariadne::subset(Ariadne::apply(this->_space_function,this->_reduced_domain),bx);
 }
 
-Tribool Enclosure::subset(const ExactBox& bx) const
+Kleenean Enclosure::subset(const ExactBox& bx) const
 {
     this->reduce();
 
-    return Tribool(Ariadne::subset(Ariadne::apply(this->_space_function,this->_reduced_domain),bx)) || Tribool(indeterminate);
+    return Kleenean(Ariadne::subset(Ariadne::apply(this->_space_function,this->_reduced_domain),bx)) || Kleenean(indeterminate);
 
 }
 

@@ -122,7 +122,7 @@ class Real
     friend ErrorFloat64 mag(Real);
 
     friend NegSierpinski eq(Real,Real);
-    friend Tribool lt(Real,Real);
+    friend Kleenean lt(Real,Real);
 
     friend PositiveReal dist(Real,Real);
 
@@ -291,12 +291,12 @@ class PositiveUpperReal : public UpperReal
 
 namespace Ariadne {
 
-template<class N, EnableIf<IsIntegral<N>> =dummy> inline Tribool operator==(const Real& x1, N n2) { return x1==Real(n2); }
-template<class N, EnableIf<IsIntegral<N>> =dummy> inline Tribool operator!=(const Real& x1, N n2) { return x1!=Real(n2); }
-template<class N, EnableIf<IsIntegral<N>> =dummy> inline Tribool operator<=(const Real& x1, N n2) { return x1<=Real(n2); }
-template<class N, EnableIf<IsIntegral<N>> =dummy> inline Tribool operator>=(const Real& x1, N n2) { return x1>=Real(n2); }
-template<class N, EnableIf<IsIntegral<N>> =dummy> inline Tribool operator< (const Real& x1, N n2) { return x1< Real(n2); }
-template<class N, EnableIf<IsIntegral<N>> =dummy> inline Tribool operator> (const Real& x1, N n2) { return x1> Real(n2); }
+template<class N, EnableIf<IsIntegral<N>> =dummy> inline Kleenean operator==(const Real& x1, N n2) { return x1==Real(n2); }
+template<class N, EnableIf<IsIntegral<N>> =dummy> inline Kleenean operator!=(const Real& x1, N n2) { return x1!=Real(n2); }
+template<class N, EnableIf<IsIntegral<N>> =dummy> inline Kleenean operator<=(const Real& x1, N n2) { return x1<=Real(n2); }
+template<class N, EnableIf<IsIntegral<N>> =dummy> inline Kleenean operator>=(const Real& x1, N n2) { return x1>=Real(n2); }
+template<class N, EnableIf<IsIntegral<N>> =dummy> inline Kleenean operator< (const Real& x1, N n2) { return x1< Real(n2); }
+template<class N, EnableIf<IsIntegral<N>> =dummy> inline Kleenean operator> (const Real& x1, N n2) { return x1> Real(n2); }
 
 /*
 template<class D, EnableIf<IsFloatingPoint<D>> =dummy> inline auto

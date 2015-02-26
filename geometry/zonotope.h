@@ -161,12 +161,12 @@ class Zonotope
     Float64 radius() const;
 
     /*! \brief Test if the set contains a point. */
-    Tribool contains(const ExactPoint& pt) const;
+    Kleenean contains(const ExactPoint& pt) const;
 
     /*! \brief Test if the set is disjoint from a box. */
-    Tribool separated(const ExactBox& bx) const;
+    Kleenean separated(const ExactBox& bx) const;
     /*! \brief Test if the set is a inside of a box. */
-    Tribool inside(const ExactBox& bx) const;
+    Kleenean inside(const ExactBox& bx) const;
 
     //@}
 
@@ -174,13 +174,13 @@ class Zonotope
     //@{
     //! \name Geometric binary predicates
     /*! \brief Tests disjointness of \a z and \a r. */
-    friend Tribool separated(const Zonotope& z, const ExactBox& r);
+    friend Kleenean separated(const Zonotope& z, const ExactBox& r);
     /*! \brief Tests if \a z and \a r intersect. */
-    friend Tribool overlaps(const Zonotope& z, const ExactBox& r);
+    friend Kleenean overlaps(const Zonotope& z, const ExactBox& r);
     /*! \brief Tests inclusion of \a z in \a r. */
-    friend Tribool inside(const Zonotope& z, const ExactBox& r);
+    friend Kleenean inside(const Zonotope& z, const ExactBox& r);
     /*! \brief Tests disjointness of \a r and \a z. */
-    friend Tribool separated(const ExactBox& r, const Zonotope& z);
+    friend Kleenean separated(const ExactBox& r, const Zonotope& z);
     //@}
 
     //@{
@@ -216,18 +216,18 @@ class Zonotope
 };
 
 
-Tribool empty(const Zonotope& z);
-Tribool is_bounded(const Zonotope& z);
+Kleenean empty(const Zonotope& z);
+Kleenean is_bounded(const Zonotope& z);
 Float64 radius(const Zonotope& z);
 ExactBox bounding_box(const Zonotope& z);
 
 
-Tribool contains(const Zonotope& z, const ExactPoint& pt);
-Tribool separated(const Zonotope& z, const ExactBox& r);
-Tribool overlaps(const Zonotope& z, const ExactBox& r);
-Tribool inside(const Zonotope& z, const ExactBox& r);
+Kleenean contains(const Zonotope& z, const ExactPoint& pt);
+Kleenean separated(const Zonotope& z, const ExactBox& r);
+Kleenean overlaps(const Zonotope& z, const ExactBox& r);
+Kleenean inside(const Zonotope& z, const ExactBox& r);
 
-Tribool separated(const Zonotope& z1, const Zonotope& z2);
+Kleenean separated(const Zonotope& z1, const Zonotope& z2);
 
 ListSet<Zonotope> split(const Zonotope& z);
 

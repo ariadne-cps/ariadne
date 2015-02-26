@@ -341,15 +341,15 @@ inline UpperInterval& operator/=(UpperInterval& ivl1, const UpperInterval& ivl2)
 
 inline Bool operator==(const UpperInterval& ivl1, const UpperInterval& ivl2) {
     return ivl1.lower().raw() == ivl2.lower().raw() && ivl1.upper().raw() == ivl2.upper().raw(); }
-inline Tribool operator!=(const UpperInterval& ivl1, const UpperInterval& ivl2) {
+inline Kleenean operator!=(const UpperInterval& ivl1, const UpperInterval& ivl2) {
     return ivl1.lower().raw() != ivl2.lower().raw() || ivl1.upper().raw() != ivl2.upper().raw(); }
-inline Tribool operator<=(UpperInterval ivl1, UpperInterval ivl2) {
+inline Kleenean operator<=(UpperInterval ivl1, UpperInterval ivl2) {
     return cast_singleton(ivl1) <= cast_singleton(ivl2); }
-inline Tribool operator>=(UpperInterval ivl1, UpperInterval ivl2) {
+inline Kleenean operator>=(UpperInterval ivl1, UpperInterval ivl2) {
     return cast_singleton(ivl1) >= cast_singleton(ivl2); }
-inline Tribool operator< (UpperInterval ivl1, UpperInterval ivl2) {
+inline Kleenean operator< (UpperInterval ivl1, UpperInterval ivl2) {
     return cast_singleton(ivl1) <  cast_singleton(ivl2); }
-inline Tribool operator> (UpperInterval ivl1, UpperInterval ivl2) {
+inline Kleenean operator> (UpperInterval ivl1, UpperInterval ivl2) {
     return cast_singleton(ivl1) >  cast_singleton(ivl2); }
 
 // Mixed operations
@@ -365,12 +365,12 @@ inline UpperInterval& operator+=(UpperInterval& ivl1, BoundedFloat64 x2) { retur
 inline UpperInterval& operator-=(UpperInterval& ivl1, BoundedFloat64 x2) { return ivl1-=make_interval(x2); }
 inline UpperInterval& operator*=(UpperInterval& ivl1, BoundedFloat64 x2) { return ivl1*=make_interval(x2); }
 inline UpperInterval& operator/=(UpperInterval& ivl1, BoundedFloat64 x2) { return ivl1/=make_interval(x2); }
-inline Tribool operator==(UpperInterval ivl1, BoundedFloat64 x2) { return ivl1==make_interval(x2); }
-inline Tribool operator!=(UpperInterval ivl1, BoundedFloat64 x2) { return ivl1!=make_interval(x2); }
-inline Tribool operator<=(UpperInterval ivl1, BoundedFloat64 x2) { return ivl1<=make_interval(x2); }
-inline Tribool operator>=(UpperInterval ivl1, BoundedFloat64 x2) { return ivl1>=make_interval(x2); }
-inline Tribool operator< (UpperInterval ivl1, BoundedFloat64 x2) { return ivl1< make_interval(x2); }
-inline Tribool operator> (UpperInterval ivl1, BoundedFloat64 x2) { return ivl1> make_interval(x2); }
+inline Kleenean operator==(UpperInterval ivl1, BoundedFloat64 x2) { return ivl1==make_interval(x2); }
+inline Kleenean operator!=(UpperInterval ivl1, BoundedFloat64 x2) { return ivl1!=make_interval(x2); }
+inline Kleenean operator<=(UpperInterval ivl1, BoundedFloat64 x2) { return ivl1<=make_interval(x2); }
+inline Kleenean operator>=(UpperInterval ivl1, BoundedFloat64 x2) { return ivl1>=make_interval(x2); }
+inline Kleenean operator< (UpperInterval ivl1, BoundedFloat64 x2) { return ivl1< make_interval(x2); }
+inline Kleenean operator> (UpperInterval ivl1, BoundedFloat64 x2) { return ivl1> make_interval(x2); }
 
 
 } // namespace Ariadne

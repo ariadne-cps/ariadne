@@ -209,7 +209,7 @@ OutputStream& operator<<(OutputStream& os, Real const& x) { return x._ptr->_writ
 Bool same(Real x1, Real x2) { ARIADNE_NOT_IMPLEMENTED; }
 
 NegSierpinski eq(Real x1, Real x2) { return BoundedFloat64(x1)==BoundedFloat64(x2); }
-Tribool lt(Real x1, Real x2) { return BoundedFloat64(x1)< BoundedFloat64(x2); }
+Kleenean lt(Real x1, Real x2) { return BoundedFloat64(x1)< BoundedFloat64(x2); }
 
 PositiveReal dist(Real x1, Real x2) { return abs(sub(x1,x2)); }
 
@@ -243,10 +243,10 @@ Quasidecidable operator>=(Real x1, Real x2) { return make_logical<Effective>(Geq
 
 NegSierpinski operator==(Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
 Sierpinski operator!=(Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
-Tribool operator< (Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
-Tribool operator> (Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
-Tribool operator<=(Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
-Tribool operator>=(Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
+Kleenean operator< (Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
+Kleenean operator> (Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
+Kleenean operator<=(Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
+Kleenean operator>=(Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
 
 template<> String class_name<Real>() { return "Real"; }
 

@@ -72,7 +72,7 @@ OutputStream& operator<<(OutputStream& os, const EffectiveConstraint& c) {
 }
 
 
-Pair<Tribool,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, const List<ValidatedConstraint>& constraints) const
+Pair<Kleenean,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, const List<ValidatedConstraint>& constraints) const
 {
     if(constraints.empty()) { return make_pair(!domain.is_empty(),domain.midpoint()); }
 
@@ -87,7 +87,7 @@ Pair<Tribool,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, cons
 }
 
 
-Pair<Tribool,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, const ValidatedVectorFunction& function, const ExactBox& codomain) const
+Pair<Kleenean,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, const ValidatedVectorFunction& function, const ExactBox& codomain) const
 {
 
     static const ExactFloat64 XSIGMA=0.125_exact;
@@ -185,7 +185,7 @@ Pair<Tribool,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, cons
         Pair<ExactBox,ExactBox> sd=d.split();
         Vector<ApproximateFloat64> nx = ApproximateFloat64(1.0_approx-XSIGMA)*x + Vector<ApproximateFloat64>(x.size(),XSIGMA/x.size());
         Vector<ApproximateFloat64> ny = midpoint(sd.first);
-        Tribool result=this->feasible(sd.first, fn, c).first;
+        Kleenean result=this->feasible(sd.first, fn, c).first;
         nx = ApproximateFloat64(1.0-XSIGMA)*x + Vector<ApproximateFloat64>(x.size(),XSIGMA/x.size());
         ny = midpoint(sd.second);
         result = result || this->feasible(sd.second, fn, c).first;
@@ -479,7 +479,7 @@ Pair<UpperBox,UpperBox> ConstraintSolver::split(const UpperBox& d, const Validat
 }
 
 
-Tribool ConstraintSolver::check_feasibility(const ExactBox& d, const ValidatedVectorFunction& f, const ExactBox& c, const ExactPoint& y) const
+Kleenean ConstraintSolver::check_feasibility(const ExactBox& d, const ValidatedVectorFunction& f, const ExactBox& c, const ExactPoint& y) const
 {
     for(Nat i=0; i!=y.size(); ++i) {
         if(y[i]<d[i].lower() || y[i]>d[i].upper()) { return false; }
@@ -487,7 +487,7 @@ Tribool ConstraintSolver::check_feasibility(const ExactBox& d, const ValidatedVe
 
     Vector<ValidatedFloat64> fy=f(Vector<ValidatedFloat64>(y));
     ARIADNE_LOG(4,"d="<<d<<" f="<<f<<", c="<<c<<"\n  y="<<y<<", f(y)="<<fy<<"\n");
-    Tribool result=true;
+    Kleenean result=true;
     for(Nat j=0; j!=fy.size(); ++j) {
         if(fy[j].lower().raw()>c[j].upper().raw() || fy[j].upper().raw()<c[j].lower().raw()) { return false; }
         if(fy[j].upper().raw()>=c[j].upper().raw() || fy[j].lower().raw()<=c[j].lower().raw()) { result=indeterminate; }

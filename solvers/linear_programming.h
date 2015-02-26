@@ -85,13 +85,13 @@ class InteriorPointSolver
 
     //! \brief Test feasibility of the problem \f$Ax=b; x_l\leq x\leq x_u\f$.
     //! Returns the pair (r,x) where r is the result, and x the (potential) feasible point.
-    Tribool
+    Kleenean
     feasible(const Vector<Float64>& xl, const Vector<Float64>& xu, const Matrix<Float64>& A, const Vector<Float64>& b) const;
 
 
     //! \brief Validate that \a x is primal feasible and \a y is dual feasible.
     //! Returns the interval of possible optimal values.
-    Tribool validate_feasibility(const Vector<Float64>& xl, const Vector<Float64>& xu,
+    Kleenean validate_feasibility(const Vector<Float64>& xl, const Vector<Float64>& xu,
                                  const Matrix<Float64>& A, const Vector<Float64>& b,
                                  const Vector<Float64>& x, const Vector<Float64>& y) const;
   public:
@@ -155,23 +155,23 @@ class SimplexSolver
 
     //! \ingroup LinearProgrammingModule
     //! Test if there exists a point \f$x\f$ with \f$0 \leq x\f$ and \f$Ax=b\f$.
-    Tribool
+    Kleenean
     primal_feasible(const Matrix<X>& A, const Vector<X>& b) const;
 
     //! \ingroup LinearProgrammingModule
     //! Test if there exists a point \f$y\f$ with \f$yA\leq c\f$.
-    Tribool
+    Kleenean
     dual_feasible(const Matrix<X>& A, const Vector<X>& c) const;
 
     //! \ingroup LinearProgrammingModule
     //! Test if there exists a point \f$x\f$ with \f$l \leq x \leq u\f$ and \f$Ax=b\f$.
-    Tribool
+    Kleenean
     feasible(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b) const;
 
     //! \ingroup LinearProgrammingModule
     //! Test if there exists a point \f$x\f$ with \f$l \leq x \leq u\f$ and \f$Ax=b\f$.
     //! The initial Array \a vt is used to define the initial basic point.
-    Tribool
+    Kleenean
     hotstarted_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
                         Array<Slackness>& vt) const;
 
@@ -180,7 +180,7 @@ class SimplexSolver
     //! If the initial Array \a vt has size zero, then an initial basis is computed, otherwise the given variable types are assumed.
     //! The values of \a p and \a B corresponding to \a vt may be given.
     //! The values of \a x and \a y are output parameters, giving access to the final primal and dual variables.
-    Tribool
+    Kleenean
     hotstarted_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
                         Array<Slackness>& vt, Array<SizeType>& p, Matrix<XX>& B, Vector<XX>& x, Vector<XX>& y) const;
 
@@ -189,17 +189,17 @@ class SimplexSolver
 
     //! \ingroup LinearProgrammingModule
     //! Check whether the assignment of basis, lower and upper variables yields a certificate of feasibility or infeasibility.
-    Tribool
+    Kleenean
     verify_primal_feasibility(const Matrix<X>& A, const Vector<X>& b, const Array<Slackness>& vt) const;
 
     //! \ingroup LinearProgrammingModule
     //! Check whether the assignment of basis, lower and upper variables yields a certificate of feasibility or infeasibility.
-    Tribool
+    Kleenean
     verify_dual_feasibility(const Matrix<X>& A, const Vector<X>& c, const Array<Slackness>& vt) const;
 
     //! \ingroup LinearProgrammingModule
     //! Check whether the assignment of basis, lower and upper variables yields a certificate of feasibility or infeasibility.
-    Tribool
+    Kleenean
     verify_feasibility(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
                        const Array<Slackness>& vt) const;
 
@@ -232,7 +232,7 @@ class SimplexSolver
 
     //! \ingroup LinearProgrammingModule
     //! Perform a step of the simplex algorithm for a feasibility computation using validated (interval) arithmetic.
-    Tribool validated_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b) const;
+    Kleenean validated_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b) const;
 
     //! \ingroup LinearProgrammingModule
     //! Perform a step of the simplex algorithm for a feasibility computation using validated (interval) arithmetic.
@@ -258,7 +258,7 @@ class SimplexSolver
     //! Returns the number of basic variables.
     SizeType consistency_check(const Array<Slackness>& vt, const Array<SizeType>& p) const;
   private:
-    Tribool _feasible(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
+    Kleenean _feasible(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
                       Array<Slackness>& vt, Array<SizeType>& p, Matrix<XX>& B, Vector<XX>& x) const;
 
 

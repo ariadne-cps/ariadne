@@ -113,11 +113,11 @@ class ValidatedAffineConstrainedImageSet
     SizeType number_of_constraints() const;
     ExactBox domain() const;
 
-    Tribool is_bounded() const;
+    Kleenean is_bounded() const;
     UpperBox bounding_box() const;
     Sierpinski separated(const ExactBox& bx) const;
     Sierpinski inside(const ExactBox& bx) const;
-    Tribool is_empty() const;
+    Kleenean is_empty() const;
 
     Void adjoin_outer_approximation_to(PavingInterface& g, Int depth) const;
     GridTreeSet outer_approximation(const Grid& g, Int depth) const;

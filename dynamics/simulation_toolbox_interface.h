@@ -54,7 +54,7 @@ class SimulationToolboxInterface
     //! \brief Test if a box satisfies the constraint given by the guard. Returns \a true is the point
     //! satisfies the constraint, \a false if the point does not satisfy the constraint, and
     //! indeterminate if the point lies on the boundary.
-    virtual Tribool
+    virtual Kleenean
     active(const ScalarFunction& guard,
            const ExactPoint& state) const = 0;
 

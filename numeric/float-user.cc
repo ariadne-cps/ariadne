@@ -103,6 +103,11 @@ template<class PR> Float<Exact,PR>::Float(Rational const& q, PR pr)
 }
 */
 
+template<class PR> Float<Exact,PR>::Float(TwoExp const& t, PR pr)
+    : _v(pow(RawFloat<PR>(2.0,pr),t.exponent()))
+{
+}
+
 template<class PR> Float<Exact,PR>::operator Number<Exact>() const {
     return Number<Exact>(new NumberWrapper<Float<Exact,PR>>(*this));
 }
@@ -125,6 +130,10 @@ template<class PR> Float<Metric,PR>::operator Number<Validated>() const {
 
 template<class PR> Float<Bounded,PR>::Float(Real const& x)
     : Float(x(FLT::get_default_precision())) {
+}
+
+template<class PR> Float<Bounded,PR>::Float(Integer const& z, PR pr)
+    : Float(RawFloat<PR>(z,RawFloat<PR>::downward,pr),RawFloat<PR>(z,RawFloat<PR>::upward,pr)) {
 }
 
 template<class PR> Float<Bounded,PR>::Float(Rational const& q, PR pr)

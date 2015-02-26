@@ -43,6 +43,10 @@
 
 namespace Ariadne {
 
+TwoExp Accuracy::error() const {
+    return TwoExp(-(Int)this->bits());
+}
+
 typedef Real::Interface RealInterface;
 
 struct Real::Interface {
@@ -55,15 +59,33 @@ struct Real::Interface {
     virtual OutputStream& _write(OutputStream& os) const = 0;
 };
 
-template<class O, class... AS> struct RealWrapper : virtual RealInterface, ExpressionTemplate<O,AS...>, BoundedFloat64 {
-    RealWrapper(O o, AS... as) : ExpressionTemplate<O,AS...>(o,as...)
-        , BoundedFloat64(static_cast<ExpressionTemplate<O,AS...>const&>(*this).operator BoundedFloat64()) { }
+template<class O, class... AS> struct RealWrapper;
+
+template<class O, class A> struct RealWrapper<O,A> : virtual RealInterface, ExpressionTemplate<O,A>, BoundedFloat64 {
+    RealWrapper(O o, A a) : ExpressionTemplate<O,A>(o,a)
+        , BoundedFloat64(static_cast<ExpressionTemplate<O,A>const&>(*this).operator BoundedFloat64()) { }
     virtual BoundedFloat64 _value() const { return static_cast<BoundedFloat64 const&>(*this); }
-    //virtual BoundFloat64 _evaluate(Precision64 pr) const { ExpressionTemplate<O,AS...> const& self=*this; return self(pr); }
-    //virtual BoundFloatMP _evaluate(PrecisionMP pr) const { ExpressionTemplate<O,AS...> const& self=*this; return self(pr); }
     virtual BoundFloat64 _evaluate(Precision64 pr) const {  return static_cast<BoundedFloat64>(*this); }
-    virtual BoundFloatMP _evaluate(PrecisionMP pr) const {  ARIADNE_NOT_IMPLEMENTED; }
-    virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<ExpressionTemplate<O,AS...> const&>(*this); }
+    virtual BoundFloatMP _evaluate(PrecisionMP pr) const {  return this->_op(this->_arg.get(pr)); }
+    virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<ExpressionTemplate<O,A> const&>(*this); }
+};
+
+template<class O, class A1, class A2> struct RealWrapper<O,A1,A2> : virtual RealInterface, ExpressionTemplate<O,A1,A2>, BoundedFloat64 {
+    RealWrapper(O o, A1 a1, A2 a2) : ExpressionTemplate<O,A1,A2>(o,a1,a2)
+        , BoundedFloat64(static_cast<ExpressionTemplate<O,A1,A2>const&>(*this).operator BoundedFloat64()) { }
+    virtual BoundedFloat64 _value() const { return static_cast<BoundedFloat64 const&>(*this); }
+    virtual BoundFloat64 _evaluate(Precision64 pr) const {  return static_cast<BoundedFloat64>(*this); }
+    virtual BoundFloatMP _evaluate(PrecisionMP pr) const {  return this->_op(this->_arg1.get(pr),this->_arg2.get(pr)); }
+    virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<ExpressionTemplate<O,A1,A2> const&>(*this); }
+};
+
+template<class A, class N> struct RealWrapper<Pow,A,N> : virtual RealInterface, ExpressionTemplate<Pow,A,N>, BoundedFloat64 {
+    RealWrapper(Pow o, A a, N n) : ExpressionTemplate<Pow,A,N>(o,a,n)
+        , BoundedFloat64(static_cast<ExpressionTemplate<Pow,A,N>const&>(*this).operator BoundedFloat64()) { }
+    virtual BoundedFloat64 _value() const { return static_cast<BoundedFloat64 const&>(*this); }
+    virtual BoundFloat64 _evaluate(Precision64 pr) const {  return static_cast<BoundedFloat64>(*this); }
+    virtual BoundFloatMP _evaluate(PrecisionMP pr) const {  return this->_op(this->_arg.get(pr),this->_n); }
+    virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<ExpressionTemplate<Pow,A,N> const&>(*this); }
 };
 
 template<class X> struct RealConstant : RealInterface, BoundedFloat64 {
@@ -72,7 +94,7 @@ template<class X> struct RealConstant : RealInterface, BoundedFloat64 {
     RealConstant(X const& x) : BoundedFloat64(x), _c(x) { }
     virtual BoundedFloat64 _value() const { return static_cast<BoundedFloat64 const&>(*this); }
     virtual BoundFloat64 _evaluate(Precision64 pr) const { return static_cast<BoundedFloat64>(*this); }
-    virtual BoundFloatMP _evaluate(PrecisionMP pr) const { ARIADNE_NOT_IMPLEMENTED; }
+    virtual BoundFloatMP _evaluate(PrecisionMP pr) const { return BoundFloatMP(this->_c,pr); }
     virtual OutputStream& _write(OutputStream& os) const { return os << this->_c; }
 };
 
@@ -83,7 +105,7 @@ template<> struct RealConstant<Integer> : RealInterface, BoundedFloat64 {
     RealConstant(X const& x) : BoundedFloat64(x), _c(x) { }
     virtual BoundedFloat64 _value() const { return static_cast<BoundedFloat64 const&>(*this); }
     virtual BoundFloat64 _evaluate(Precision64 pr) const { return static_cast<BoundedFloat64>(*this); }
-    virtual BoundFloatMP _evaluate(PrecisionMP pr) const { ARIADNE_NOT_IMPLEMENTED; }
+    virtual BoundFloatMP _evaluate(PrecisionMP pr) const { return BoundFloatMP(this->_c,pr); }
     virtual OutputStream& _write(OutputStream& os) const { return os << this->_c; }
 };
 
@@ -246,24 +268,19 @@ BoundFloatMP Real::get(PrecisionMP pr) const {
 }
 
 BoundFloatMP Real::evaluate(Accuracy accuracy) const {
-    ARIADNE_NOT_IMPLEMENTED;
-/*
     Nat effort=1;
     Nat acc=accuracy.bits();
-    PrecisionMP precision=effort*64;
-    ErrorFloatMP error_bound(two_exp(-acc).get_d(),precision);
-        std::cerr << "  acc="<<acc<<" max_err=="<<error_bound<<"\n";
-    ErrorFloatMP error=2*error_bound;
+    PrecisionMP precision(effort*64);
+    ErrorFloatMP error_bound(FloatMP(Rational(two_exp(-acc).get_d()),FloatMP::upward,precision));
+    ErrorFloatMP error=2u*error_bound;
     BoundFloatMP res;
     while (!(error.raw()<error_bound.raw())) {
         res=(*this)(precision);
         error=res.error();
-        std::cerr << "  eff="<<effort<<" prec="<<precision<<" err="<<error<<" res="<<res<<"\n";
         effort+=1;
-        precision=effort*64;
+        precision=PrecisionMP(effort*64);
     }
     return res;
-*/
 }
 
 

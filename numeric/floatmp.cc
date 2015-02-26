@@ -431,6 +431,10 @@ Comparison cmp(FloatMP const& x1, FloatMP const& x2) {
     return Comparison(mpfr_cmp(x1._mpfr,x2._mpfr));
 }
 
+Comparison cmp(FloatMP const& x1, Float64 const& x2) {
+    return Comparison(mpfr_cmp_d(x1._mpfr,x2.dbl));
+}
+
 FloatMP add(FloatMP const& x1, Dbl x2, FloatMP::RoundingModeType rnd) {
     FloatMP r(x1.precision(),NoInit()); mpfr_add_d(r._mpfr,x1._mpfr,x2,rnd); return std::move(r);
 }
@@ -476,23 +480,42 @@ Bool operator> (FloatMP const& x1, FloatMP const& x2) {
 }
 
 
-Bool operator==(FloatMP const& x1, double x2) {
+Bool operator==(FloatMP const& x1, Float64 x2) {
     return cmp(x1,x2)==Comparison::EQUAL;
 }
-Bool operator!=(FloatMP const& x1, double x2) {
+Bool operator!=(FloatMP const& x1, Float64 x2) {
     return cmp(x1,x2)!=Comparison::EQUAL;
 }
-Bool operator<=(FloatMP const& x1, double x2) {
+Bool operator<=(FloatMP const& x1, Float64 x2) {
     return cmp(x1,x2)<=Comparison::EQUAL;
 }
-Bool operator>=(FloatMP const& x1, double x2) {
+Bool operator>=(FloatMP const& x1, Float64 x2) {
     return cmp(x1,x2)>=Comparison::EQUAL;
 }
-Bool operator< (FloatMP const& x1, double x2) {
+Bool operator< (FloatMP const& x1, Float64 x2) {
     return cmp(x1,x2)< Comparison::EQUAL;
 }
-Bool operator> (FloatMP const& x1, double x2) {
+Bool operator> (FloatMP const& x1, Float64 x2) {
     return cmp(x1,x2)> Comparison::EQUAL;
+}
+
+Bool operator==(Float64 x1, FloatMP const& x2) {
+    return cmp(x2,x1)==Comparison::EQUAL;
+}
+Bool operator!=(Float64 x1, FloatMP const& x2) {
+    return cmp(x2,x1)!=Comparison::EQUAL;
+}
+Bool operator<=(Float64 x1, FloatMP const& x2) {
+    return cmp(x2,x1)>=Comparison::EQUAL;
+}
+Bool operator>=(Float64 x1, FloatMP const& x2) {
+    return cmp(x2,x1)<=Comparison::EQUAL;
+}
+Bool operator< (Float64 x1, FloatMP const& x2) {
+    return cmp(x2,x1)> Comparison::EQUAL;
+}
+Bool operator> (Float64 x1, FloatMP const& x2) {
+    return cmp(x2,x1)< Comparison::EQUAL;
 }
 
 

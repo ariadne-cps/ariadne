@@ -286,6 +286,7 @@ template<class PR> class Float<Bounded,PR> {
     explicit Float<Bounded,PR>(const Rational& q);
     explicit Float<Bounded,PR>(const Real& x);
     explicit Float<Bounded,PR>(const Number<Validated>& x);
+    Float<Bounded,PR>(const Integer& z, PR pr);
     Float<Bounded,PR>(const Rational& q, PR pr);
     Float<Bounded,PR>(const Real& x, PR pr);
     Float<Bounded,PR>(const Number<Validated>& x, PR pr);
@@ -379,6 +380,7 @@ template<class PR> class Float<Exact,PR> {
 
     explicit Float<Exact,PR>(const Integer& z);
     explicit Float<Exact,PR>(const Integer& z, PR pr);
+    explicit Float<Exact,PR>(const TwoExp& ex, PR pr);
     explicit operator Rational () const;
     operator Number<Exact> () const;
     explicit operator RawFloatType () const { return _v; }
@@ -418,6 +420,7 @@ template<class PR> inline const Float<Error,PR> Float<Metric,PR>::error() const 
 template<class PR> class Float<PositiveExact,PR> : public Float<Exact,PR> {
   public:
     Float<PositiveExact,PR>() : Float<Exact,PR>() { }
+    Float<PositiveExact,PR>(TwoExp ex) : Float<Exact,PR>(ex) { }
     template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy>
         Float<PositiveExact,PR>(M m) : Float<Exact,PR>(m) { }
     template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy>

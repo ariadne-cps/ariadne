@@ -42,7 +42,7 @@ namespace Ariadne {
 class Real;
 template<> struct IsNumber<Real> : True { };
 
-struct Accuracy { Nat _bits; Nat bits() { return _bits; } TwoExp error() const; };
+struct Accuracy { Nat _bits; Nat bits() const { return _bits; } TwoExp error() const; };
 
 extern const Real pi;
 extern const Real infinity;

@@ -156,6 +156,7 @@ class FloatMP {
     friend Bool is_inf(FloatMP const& x);
 
     friend Comparison cmp(FloatMP const& x1, FloatMP const& x2);
+    friend Comparison cmp(FloatMP const& x1, Float64 const& x2);
 
     // Mixed operations
     friend FloatMP add(FloatMP const& x1, Dbl x2, RoundingModeType=get_rounding_mode());

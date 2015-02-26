@@ -52,6 +52,7 @@ class TestReal
     void test_arithmetic();
     void test_transcendental();
     void test_comparison();
+    void test_accuracy();
 };
 
 void TestReal::test()
@@ -63,6 +64,7 @@ void TestReal::test()
     ARIADNE_TEST_CALL(test_arithmetic());
     ARIADNE_TEST_CALL(test_transcendental());
     ARIADNE_TEST_CALL(test_comparison());
+    ARIADNE_TEST_CALL(test_accuracy());
 }
 
 void TestReal::test_concept() {
@@ -173,6 +175,43 @@ void TestReal::test_comparison() {
     Rational zero=0;
     ARIADNE_TEST_ASSERT(check(e*log(pi)-pi<zero,effort));
 
+}
+
+
+namespace Ariadne {
+Bool operator>=(FloatMP const& x1, Float64 x2);
+Bool operator<=(FloatMP const& x1, Float64 x2);
+Bool operator<=(Float64 x1, FloatMP const& x2);
+Bool operator>=(Float64 x1, FloatMP const& x2);
+}
+
+void TestReal::test_accuracy() {
+    BoundedFloat64::set_output_precision(18);
+    Real one=1;
+    Real pi=4*atan(one);
+
+    PrecisionMP mp_high(320);
+    RawFloatMP pi_near = FloatMP::pi(mp_high,FloatMP::to_nearest);
+
+    Precision64 dp;
+    ARIADNE_TEST_CONSTRUCT(BoundedFloat64,pi_dp,(pi.get(dp)));
+
+    PrecisionMP mp(128);
+    ARIADNE_TEST_CONSTRUCT(BoundedFloatMP,pi_mp,(pi.get(mp)));
+
+    ARIADNE_TEST_ASSERT(pi_dp.lower_raw()<=pi_near);
+    ARIADNE_TEST_ASSERT(pi_dp.upper_raw()>=pi_near);
+
+    ARIADNE_TEST_ASSERT(pi_mp.lower_raw()<=pi_near);
+    ARIADNE_TEST_ASSERT(pi_mp.upper_raw()>=pi_near);
+
+    Accuracy accuracy{256};
+    ExactFloatMP error(accuracy.error(),PrecisionMP(320));
+    ARIADNE_TEST_CONSTRUCT(BoundedFloatMP,pi_met,(pi.evaluate(accuracy)));
+    ARIADNE_TEST_PRINT(pi_met.error());
+    ARIADNE_TEST_PRINT(abs(sub_up(pi_met.value_raw(),pi_near)));
+    ARIADNE_TEST_ASSERT(pi_met.error() <= error);
+    ARIADNE_TEST_ASSERT(rad_up(pi_met.value().raw(),pi_near) <= error.raw());
 }
 
 

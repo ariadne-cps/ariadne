@@ -208,6 +208,8 @@ struct PositiveUpper;
 struct PositiveApproximate : InformationLevel<ParadigmCode::POSITIVE_APPROXIMATE>  { };
 struct PositiveLower : InformationLevel<ParadigmCode::POSITIVE_LOWER>  { };
 struct PositiveUpper : InformationLevel<ParadigmCode::POSITIVE_UPPER>  { };
+struct PositiveBounded : InformationLevel<ParadigmCode::POSITIVE_BOUNDED>  { };
+struct PositiveMetric : InformationLevel<ParadigmCode::POSITIVE_METRIC>  { };
 struct PositiveEffectiveUpper : InformationLevel<ParadigmCode::POSITIVE_EFFECTIVE_UPPER>  { };
 struct PositiveExact : InformationLevel<ParadigmCode::POSITIVE_EXACT>  { };
 

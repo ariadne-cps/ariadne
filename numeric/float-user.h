@@ -429,6 +429,18 @@ template<class PR> class Float<PositiveExact,PR> : public Float<Exact,PR> {
     explicit Float<PositiveExact,PR>(Float<Exact,PR> const& x) : Float<Exact,PR>(x) { }
 };
 
+template<class PR> class Float<PositiveBounded,PR> : public Float<Bounded,PR> {
+  public:
+    Float<PositiveBounded,PR>() : Float<Bounded,PR>() { }
+    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy>
+        Float<PositiveBounded,PR>(M m) : Float<Bounded,PR>(m) { }
+    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy>
+        Float<PositiveBounded,PR>(M m, PR pr) : Float<Bounded,PR>(m,pr) { }
+    explicit Float<PositiveBounded,PR>(RawFloat<PR> const& x) : Float<Bounded,PR>(x) { }
+    explicit Float<PositiveBounded,PR>(RawFloat<PR> const& l, RawFloat<PR> const& u) : Float<Bounded,PR>(l,u) { }
+    explicit Float<PositiveBounded,PR>(Float<Bounded,PR> const& x) : Float<Bounded,PR>(x) { }
+};
+
 template<class PR> class Float<PositiveUpper,PR> : public Float<Upper,PR> {
   public:
     Float<PositiveUpper,PR>() : Float<Upper,PR>() { }

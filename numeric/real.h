@@ -40,6 +40,11 @@
 namespace Ariadne {
 
 class Real;
+class LowerReal;
+class UpperReal;
+class PositiveReal;
+class PositiveLowerReal;
+class PositiveUpperReal;
 template<> struct IsNumber<Real> : True { };
 
 struct Accuracy { Nat _bits; Nat bits() const { return _bits; } TwoExp error() const; };
@@ -112,12 +117,14 @@ class Real
 
     friend Real max(Real,Real);
     friend Real min(Real,Real);
-    friend Real abs(Real);
+    friend PositiveReal abs(Real);
 
     friend ErrorFloat64 mag(Real);
 
     friend NegSierpinski eq(Real,Real);
     friend Tribool lt(Real,Real);
+
+    friend PositiveReal dist(Real,Real);
 
     friend Real& operator+=(Real&,Real);
     friend Real& operator-=(Real&,Real);
@@ -154,16 +161,6 @@ class Real
 template<class M, EnableIf<And<IsIntegral<M>,IsUnsigned<M>>>> inline Real::Real(M m) : Real(std::uint64_t(m),nullptr) { };
 template<class N, EnableIf<And<IsIntegral<N>,IsSigned<N>>>> inline Real::Real(N n) : Real(std::int64_t(n),nullptr) { };
 
-Real pow(Real,Nat);
-Real sqrt(Real);
-Real exp(Real);
-Real log(Real);
-Real sin(Real);
-Real cos(Real);
-Real tan(Real);
-Real atan(Real);
-
-
 
 //! \ingroup UserNumberSubModule
 //! \brief Computable lower real numbers defined by conversion to concrete floats.
@@ -177,10 +174,24 @@ class LowerReal
     typedef EffectiveLower Paradigm;
     typedef LowerReal NumericType;
   public:
+    LowerReal(Real);
+  public:
     LowerFloat64 operator() (Precision64 pr) const;
     LowerFloatMP operator() (PrecisionMP pr) const;
     LowerFloat64 get(Precision64 pr) const;
     LowerFloatMP get(PrecisionMP pr) const;
+  public:
+    LowerReal max(LowerReal,LowerReal);
+
+    LowerReal min(LowerReal,LowerReal);
+    Real min(Real,LowerReal);
+    Real min(LowerReal,Real);
+
+    LowerReal neg(UpperReal);
+    UpperReal neg(LowerReal);
+    LowerReal add(LowerReal,LowerReal);
+    LowerReal sub(LowerReal,UpperReal);
+    UpperReal sub(UpperReal,LowerReal);
 };
 
 //! \ingroup UserNumberSubModule
@@ -195,10 +206,83 @@ class UpperReal
     typedef EffectiveUpper Paradigm;
     typedef UpperReal NumericType;
   public:
+    UpperReal(Real);
+  public:
     UpperFloat64 operator() (Precision64 pr) const;
     UpperFloatMP operator() (PrecisionMP pr) const;
     UpperFloat64 get(Precision64 pr) const;
     UpperFloatMP get(PrecisionMP pr) const;
+  public:
+    UpperReal max(UpperReal,UpperReal);
+    Real max(Real,UpperReal);
+    Real max(UpperReal,Real);
+
+    UpperReal min(UpperReal,UpperReal);
+
+    UpperReal neg(LowerReal);
+    LowerReal neg(UpperReal);
+    UpperReal add(UpperReal,UpperReal);
+    UpperReal sub(UpperReal,LowerReal);
+    LowerReal sub(LowerReal,UpperReal);
+};
+
+//! \ingroup UserNumberSubModule
+//! \brief Computable lower real numbers defined by conversion to concrete floats.
+class PositiveReal : public Real
+{
+  public:
+    using Real::Real;
+    PositiveReal() : Real() { }
+    PositiveReal(Real r) : Real(r) { }
+    PositiveBoundedFloat64 get(Precision64 pr) const;
+    PositiveBoundedFloatMP get(PrecisionMP pr) const;
+  public:
+    PositiveReal max(PositiveReal,PositiveReal);
+    PositiveReal max(Real,PositiveReal);
+    PositiveReal max(PositiveReal,Real);
+
+    PositiveReal min(PositiveReal,PositiveReal);
+
+    PositiveReal rec(PositiveReal);
+    PositiveReal add(PositiveReal,PositiveReal);
+    PositiveReal mul(PositiveReal,PositiveReal);
+    PositiveReal div(PositiveReal,PositiveReal);
+};
+
+//! \ingroup UserNumberSubModule
+//! \brief Computable lower real numbers defined by conversion to concrete floats.
+class PositiveLowerReal : public LowerReal
+{
+  public:
+    using LowerReal::LowerReal;
+    PositiveLowerReal(LowerReal r) : LowerReal(r) { }
+    PositiveLowerFloat64 get(Precision64 pr) const;
+    PositiveLowerFloatMP get(PrecisionMP pr) const;
+  public:
+    PositiveLowerReal rec(PositiveUpperReal);
+    PositiveUpperReal rec(PositiveLowerReal);
+    PositiveLowerReal add(PositiveLowerReal,PositiveLowerReal);
+    PositiveLowerReal mul(PositiveLowerReal,PositiveLowerReal);
+    PositiveLowerReal div(PositiveLowerReal,PositiveUpperReal);
+    PositiveUpperReal div(PositiveUpperReal,PositiveLowerReal);
+};
+
+//! \ingroup UserNumberSubModule
+//! \brief Computable lower real numbers defined by conversion to concrete floats.
+class PositiveUpperReal : public UpperReal
+{
+  public:
+    using UpperReal::UpperReal;
+    PositiveUpperReal(UpperReal r) : UpperReal(r) { }
+    PositiveUpperFloat64 get(Precision64 pr) const;
+    PositiveUpperFloatMP get(PrecisionMP pr) const;
+  public:
+    PositiveUpperReal rec(PositiveLowerReal);
+    PositiveLowerReal rec(PositiveUpperReal);
+    PositiveUpperReal add(PositiveUpperReal,PositiveUpperReal);
+    PositiveUpperReal mul(PositiveUpperReal,PositiveUpperReal);
+    PositiveUpperReal div(PositiveUpperReal,PositiveLowerReal);
+    PositiveLowerReal div(PositiveLowerReal,PositiveUpperReal);
 };
 
 } // namespace Ariadne

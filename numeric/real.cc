@@ -187,7 +187,7 @@ Real cos(Real x) { return make_real(Cos(),x); }
 Real tan(Real x) { return make_real(Tan(),x); }
 Real atan(Real x) { return make_real(Atan(),x); }
 
-Real abs(Real x) { return make_real(Abs(),x); }
+PositiveReal abs(Real x) { return PositiveReal(make_real(Abs(),x)); }
 Real max(Real x1, Real x2) { return make_real(Max(),x1,x2); }
 Real min(Real x1, Real x2) { return make_real(Min(),x1,x2); }
 
@@ -210,6 +210,8 @@ Bool same(Real x1, Real x2) { ARIADNE_NOT_IMPLEMENTED; }
 
 NegSierpinski eq(Real x1, Real x2) { return BoundedFloat64(x1)==BoundedFloat64(x2); }
 Tribool lt(Real x1, Real x2) { return BoundedFloat64(x1)< BoundedFloat64(x2); }
+
+PositiveReal dist(Real x1, Real x2) { return abs(sub(x1,x2)); }
 
 template<class O, class... ARGS> struct LogicalWrapper;
 
@@ -286,6 +288,9 @@ BoundFloatMP Real::evaluate(Accuracy accuracy) const {
 
 
 
+LowerReal::LowerReal(Real r) : _ptr(r._ptr) {
+}
+
 LowerFloat64 LowerReal::operator() (Precision64 pr) const {
     return this->_ptr->_evaluate(pr);
 }
@@ -302,6 +307,8 @@ LowerFloatMP LowerReal::get(PrecisionMP pr) const {
     return this->_ptr->_evaluate(pr);
 }
 
+UpperReal::UpperReal(Real r) : _ptr(r._ptr) {
+}
 
 UpperFloat64 UpperReal::operator() (Precision64 pr) const {
     return this->_ptr->_evaluate(pr);
@@ -318,6 +325,71 @@ UpperFloat64 UpperReal::get(Precision64 pr) const {
 UpperFloatMP UpperReal::get(PrecisionMP pr) const {
     return this->_ptr->_evaluate(pr);
 }
+
+inline Real const& cast_real(LowerReal const& lr) { return reinterpret_cast<Real const&>(lr); }
+inline Real const& cast_real(UpperReal const& ur) { return reinterpret_cast<Real const&>(ur); }
+inline Real const& make_signed(PositiveReal const& pr) { return pr; }
+inline PositiveReal const& cast_positive(Real const& pr) { return static_cast<PositiveReal const&>(pr); }
+inline LowerReal const& make_lower(Real const& r) { return reinterpret_cast<LowerReal const&>(r); }
+inline UpperReal const& make_upper(Real const& r) { return reinterpret_cast<UpperReal const&>(r); }
+
+LowerReal max(LowerReal lr1, LowerReal lr2) { return make_lower(max(cast_real(lr1),cast_real(lr2))); }
+LowerReal min(LowerReal lr1, LowerReal lr2) { return make_lower(min(cast_real(lr1),cast_real(lr2))); }
+Real min(LowerReal lr1, Real r2) { return min(cast_real(lr1),r2); }
+Real min(Real r1, LowerReal lr2) { return min(r1,cast_real(lr2)); }
+
+UpperReal max(UpperReal ur1, UpperReal ur2) { return make_upper(max(cast_real(ur1),cast_real(ur2))); }
+Real max(UpperReal ur1, Real r2) { return max(cast_real(ur1),r2); }
+Real max(Real r1, UpperReal ur2) { return max(r1,cast_real(ur2)); }
+UpperReal min(UpperReal ur1, UpperReal ur2) { return make_upper(min(cast_real(ur1),cast_real(ur2))); }
+
+LowerReal neg(UpperReal ur) { return make_lower(neg(cast_real(ur))); }
+UpperReal neg(LowerReal lr) { return make_upper(neg(cast_real(lr))); }
+LowerReal add(LowerReal lr1, LowerReal lr2) { return make_lower(add(cast_real(lr1),cast_real(lr2))); }
+UpperReal add(UpperReal ur1, UpperReal ur2) { return make_upper(add(cast_real(ur1),cast_real(ur2))); }
+LowerReal add(LowerReal lr1, UpperReal ur2) { return make_lower(add(cast_real(lr1),cast_real(ur2))); }
+UpperReal add(UpperReal ur1, LowerReal lr2) { return make_upper(add(cast_real(ur1),cast_real(lr2))); }
+
+PositiveBoundedFloat64 PositiveReal::get(Precision64 pr) const {
+    return PositiveBoundedFloat64(this->_ptr->_evaluate(pr));
+}
+
+PositiveBoundedFloatMP PositiveReal::get(PrecisionMP pr) const {
+    return PositiveBoundedFloatMP(this->_ptr->_evaluate(pr));
+}
+
+PositiveReal max(PositiveReal pr1, PositiveReal pr2) { return cast_positive(max(make_signed(pr1),make_signed(pr2))); }
+PositiveReal min(PositiveReal pr1, PositiveReal pr2) { return cast_positive(min(make_signed(pr1),make_signed(pr2))); }
+PositiveReal rec(PositiveReal pr) { return cast_positive(rec(make_signed(pr))); }
+PositiveReal add(PositiveReal pr1, PositiveReal pr2) { return cast_positive(add(make_signed(pr1),make_signed(pr2))); }
+PositiveReal mul(PositiveReal pr1, PositiveReal pr2) { return cast_positive(mul(make_signed(pr1),make_signed(pr2))); }
+PositiveReal div(PositiveReal pr1, PositiveReal pr2) { return cast_positive(div(make_signed(pr1),make_signed(pr2))); }
+
+
+PositiveLowerFloat64 PositiveLowerReal::get(Precision64 pr) const {
+    return PositiveLowerFloat64(this->_ptr->_evaluate(pr));
+}
+
+PositiveLowerFloatMP PositiveLowerReal::get(PrecisionMP pr) const {
+    return PositiveLowerFloatMP(this->_ptr->_evaluate(pr));
+}
+
+PositiveUpperFloat64 PositiveUpperReal::get(Precision64 pr) const {
+    return PositiveUpperFloat64(this->_ptr->_evaluate(pr));
+}
+
+PositiveUpperFloatMP PositiveUpperReal::get(PrecisionMP pr) const {
+    return PositiveUpperFloatMP(this->_ptr->_evaluate(pr));
+}
+
+PositiveUpperReal rec(PositiveLowerReal plr) { return cast_positive(rec(cast_real(plr))); }
+PositiveLowerReal rec(PositiveUpperReal pur) { return cast_positive(rec(cast_real(pur))); }
+PositiveLowerReal add(PositiveLowerReal plr1, PositiveLowerReal plr2) { return cast_positive(add(cast_real(plr1),cast_real(plr2))); }
+PositiveUpperReal add(PositiveUpperReal pur1, PositiveUpperReal pur2) { return cast_positive(add(cast_real(pur1),cast_real(pur2))); }
+PositiveLowerReal mul(PositiveLowerReal plr1, PositiveLowerReal plr2) { return cast_positive(mul(cast_real(plr1),cast_real(plr2))); }
+PositiveUpperReal mul(PositiveUpperReal pur1, PositiveUpperReal pur2) { return cast_positive(mul(cast_real(pur1),cast_real(pur2))); }
+PositiveLowerReal div(PositiveLowerReal plr1, PositiveUpperReal pur2) { return cast_positive(div(cast_real(plr1),cast_real(pur2))); }
+PositiveUpperReal div(PositiveUpperReal pur1, PositiveLowerReal plr2) { return cast_positive(div(cast_real(pur1),cast_real(plr2))); }
 
 Real::operator Number<Effective> () const {
     ARIADNE_NOT_IMPLEMENTED;

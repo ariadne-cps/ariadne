@@ -137,7 +137,7 @@ class Zonotope
     //@{
     //! \name Data access
     /*! \brief The dimension of the zonotope. */
-    Nat dimension() const;
+    DimensionType dimension() const;
 
     /*! \brief The number of generators of the zonotope. */
     Nat number_of_generators() const;

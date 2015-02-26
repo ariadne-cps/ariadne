@@ -28,6 +28,8 @@
 #ifndef ARIADNE_GRAPHICS_INTERFACE_H
 #define ARIADNE_GRAPHICS_INTERFACE_H
 
+#include "utility/declarations.h"
+
 namespace Ariadne {
 
 template<class R, class A> inline R numeric_cast(const A&);
@@ -36,11 +38,6 @@ template<class T> class Set;
 struct Vector2d;
 struct Point2d;
 struct Box2d;
-
-template<class U> class Interval;
-typedef Interval<ApproximateNumber> ApproximateInterval;
-template<class IVL> class Box;
-typedef Box<ApproximateInterval> ApproximateBox;
 
 typedef ApproximateBox GraphicsBoundingBoxType;
 class Colour;
@@ -142,7 +139,7 @@ class DrawableInterface {
     //! brief Draw the object on the canvas \a c using line segments and fill/stroke commands.
     virtual Void draw(CanvasInterface& c, const Projection2d& p) const = 0;
     //! brief The dimension of the object in Euclidean space
-    virtual Nat dimension() const = 0;
+    virtual DimensionType dimension() const = 0;
     //! brief Write to an output stream.
     virtual OutputStream& write(OutputStream& os) const { return os << "Drawable"; }
 };

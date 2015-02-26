@@ -90,10 +90,10 @@ class ConstraintSet
     EffectiveConstraint const& constraint(Nat i) const { return this->_constraints[i]; }
 
     ConstraintSet* clone() const;
-    Nat dimension() const;
-    Tribool separated(const ExactBox&) const;
-    Tribool overlaps(const ExactBox&) const;
-    Tribool covers(const ExactBox&) const;
+    DimensionType dimension() const;
+    Sierpinski separated(const ExactBox&) const;
+    Sierpinski overlaps(const ExactBox&) const;
+    Sierpinski covers(const ExactBox&) const;
     OutputStream& write(OutputStream&) const;
 };
 
@@ -130,11 +130,11 @@ class BoundedConstraintSet
     EffectiveConstraint const& constraint(Nat i) const { return this->_constraints[i]; }
 
     BoundedConstraintSet* clone() const;
-    Nat dimension() const;
-    Tribool separated(const ExactBox&) const;
-    Tribool overlaps(const ExactBox&) const;
-    Tribool covers(const ExactBox&) const;
-    Tribool inside(const ExactBox&) const;
+    DimensionType dimension() const;
+    Sierpinski separated(const ExactBox&) const;
+    Sierpinski overlaps(const ExactBox&) const;
+    Sierpinski covers(const ExactBox&) const;
+    Sierpinski inside(const ExactBox&) const;
     UpperBox bounding_box() const;
     OutputStream& write(OutputStream&) const;
     Void draw(CanvasInterface&,const Projection2d&) const;
@@ -195,7 +195,7 @@ class ConstrainedImageSet
         this->_constraints.append(EffectiveConstraint(c.lower_bound(),compose(c.function(),_function),c.upper_bound())); }
 
     ConstrainedImageSet* clone() const { return new ConstrainedImageSet(*this); }
-    Nat dimension() const { return this->_function.result_size(); }
+    DimensionType dimension() const { return this->_function.result_size(); }
 
     //! \brief A coarse over-approximation to the set. Computed by taking the interval evaluation \f$h(D)\f$.
     UpperBox bounding_box() const;
@@ -209,11 +209,11 @@ class ConstrainedImageSet
     Pair<ConstrainedImageSet,ConstrainedImageSet> split(Nat j) const;
 
     //! \brief Test if the set is contained in (the interior of) a box.
-    Tribool inside(const ExactBox& bx) const;
+    Sierpinski inside(const ExactBox& bx) const;
     //! \brief Test if the set is disjoint from a (closed) box.
-    Tribool separated(const ExactBox&) const;
+    Sierpinski separated(const ExactBox&) const;
     //! \brief Test if the set overlaps (intersects the interior of) a box.
-    Tribool overlaps(const ExactBox&) const;
+    Sierpinski overlaps(const ExactBox&) const;
     //! \brief Adjoin an outer approximation to a paving.
     Void adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
 
@@ -285,7 +285,7 @@ class ValidatedConstrainedImageSet
     }
 
     ValidatedConstrainedImageSet* clone() const { return new ValidatedConstrainedImageSet(*this); }
-    Nat dimension() const { return this->_function.result_size(); }
+    DimensionType dimension() const { return this->_function.result_size(); }
 
     ValidatedVectorFunction constraint_function() const;
     ExactBox constraint_bounds() const;
@@ -306,11 +306,11 @@ class ValidatedConstrainedImageSet
     //! \brief Test if the set is empty.
     Tribool empty() const;
     //! \brief Test if the set is a strict subset of a box.
-    Tribool inside(const ExactBox& bx) const;
+    Sierpinski inside(const ExactBox& bx) const;
     //! \brief Test if the set is disjoint from a box.
-    Tribool separated(const ExactBox&) const;
+    Sierpinski separated(const ExactBox&) const;
     //! \brief Test if the set overlaps (intersects the interior of) a box.
-    Tribool overlaps(const ExactBox&) const;
+    Sierpinski overlaps(const ExactBox&) const;
     //! \brief Adjoin an outer approximation to a paving.
     Void adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
 

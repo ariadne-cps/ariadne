@@ -210,7 +210,7 @@ class GridAbstractCell {
      *  in the \a dimensions dimensional space. We assume that \a topPCellHeight >= \a bottomPCellHeight
      *  if not, then we return an empty binary word.
      */
-    static BinaryWord primary_cell_path( const Nat dimensions, const Nat topPCellHeight, const Nat bottomPCellHeight);
+    static BinaryWord primary_cell_path( const DimensionType dimensions, const Nat topPCellHeight, const Nat bottomPCellHeight);
 
     /*! \brief Apply grid data \a theGrid to \a theLatticeBox in order to compute
      * the box dimensions in the original space
@@ -268,13 +268,13 @@ class GridCell : public GridAbstractCell {
     Bool operator<(const GridCell& otherCell) const;
 
     /*! \brief The dimension of the cell. */
-    Nat dimension() const;
+    DimensionType dimension() const;
 
     /*! \brief Allows to convert the given GridCell into an open grid cell (GridOpenCell)*/
     GridOpenCell interior() const;
 
     /*! \brief this method computes the box corresponding to this cell in the grid lattice.*/
-    static LatticeBoxType compute_lattice_box( const Nat dimensions, const Nat theHeight, const BinaryWord& theWord );
+    static LatticeBoxType compute_lattice_box( const DimensionType dimensions, const Nat theHeight, const BinaryWord& theWord );
 
     /*! \brief this method computes the box in the original space based on the \a theGrid,
      *  and a cell which is obtained by traversing the path given by \a _theWord from the
@@ -302,7 +302,7 @@ class GridCell : public GridAbstractCell {
     /*! \brief Computes the neighboring cell to the given cell (defined by \a theGrid, \a theHeight, \a theWord)
      *  in the given dimension \a dim. The resulting cell will the of the same size as the given one.
      */
-    static GridCell neighboringCell( const Grid& theGrid, const Nat theHeight, const BinaryWord& theWord, const Nat dim );
+    static GridCell neighboringCell( const Grid& theGrid, const Nat theHeight, const BinaryWord& theWord, const DimensionType dim );
 };
 
 /*! \brief An open cell of a grid paving. This cell is open and the path from the primary cell

@@ -104,7 +104,7 @@ class ListSet
     Iterator end() { return this->_data.end(); };
 
     /*! \brief Returns the denotable set's space dimension. */
-    Nat dimension() const { if(this->empty()) { return 0; } else { return this->_data.back().dimension(); } }
+    DimensionType dimension() const { if(this->empty()) { return 0; } else { return this->_data.back().dimension(); } }
 
     /*! \brief Removes a set from the list and return it. */
     BS pop() { BS result=this->_data.back(); this->_data.pop_back(); return result; }

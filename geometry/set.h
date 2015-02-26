@@ -44,7 +44,7 @@ class SetBase
 {
   public:
     template<class ...Args> SetBase(Args&&... args) : Handle<SetInterfaceBase>(std::forward<Args>(args)...) { }
-    inline Nat dimension() const { return this->reference().dimension(); }
+    inline DimensionType dimension() const { return this->reference().dimension(); }
 };
 
 //! \ingroup GeometryModule SetSubModule
@@ -54,8 +54,8 @@ class BoundedSet
 {
   public:
     template<class ...Args> BoundedSet(Args&&... args) : Handle<BoundedSetInterface>(std::forward<Args>(args)...) { }
-    inline Nat dimension() const { return this->reference().dimension(); }
-    inline Tribool inside(const ExactBox& bx) const { return this->reference().inside(bx); }
+    inline DimensionType dimension() const { return this->reference().dimension(); }
+    inline Sierpinski inside(const ExactBox& bx) const { return this->reference().inside(bx); }
     inline UpperBox bounding_box() const { return this->reference().bounding_box(); }
 };
 
@@ -67,8 +67,8 @@ class OvertSet
 {
   public:
     template<typename ...Args> OvertSet(Args&&... args) : Handle<OvertSetInterface>(std::forward<Args>(args)...) { }
-    inline Nat dimension() const { return this->reference().dimension(); }
-    inline Tribool overlaps(const ExactBox& bx) const { return this->reference().overlaps(bx); }
+    inline DimensionType dimension() const { return this->reference().dimension(); }
+    inline Sierpinski overlaps(const ExactBox& bx) const { return this->reference().overlaps(bx); }
 };
 
 //! \ingroup GeometryModule SetSubModule
@@ -78,9 +78,9 @@ class OpenSet
 {
   public:
     template<typename ...Args> OpenSet(Args&&... args) : Handle<OpenSetInterface>(std::forward<Args>(args)...) { }
-    inline Nat dimension() const { return this->reference().dimension(); }
-    inline Tribool overlaps(const ExactBox& bx) const { return this->reference().overlaps(bx); }
-    inline Tribool covers(const ExactBox& bx) const { return this->reference().covers(bx); }
+    inline DimensionType dimension() const { return this->reference().dimension(); }
+    inline Sierpinski overlaps(const ExactBox& bx) const { return this->reference().overlaps(bx); }
+    inline Sierpinski covers(const ExactBox& bx) const { return this->reference().covers(bx); }
 };
 
 //! \ingroup GeometryModule SetSubModule
@@ -90,8 +90,8 @@ class ClosedSet
 {
   public:
     template<typename ...Args> ClosedSet(Args&&... args) : Handle<ClosedSetInterface>(std::forward<Args>(args)...) { }
-    inline Nat dimension() const { return this->reference().dimension(); }
-    inline Tribool separated(const ExactBox& bx) const { return this->reference().separated(bx); }
+    inline DimensionType dimension() const { return this->reference().dimension(); }
+    inline Sierpinski separated(const ExactBox& bx) const { return this->reference().separated(bx); }
 };
 
 //! \ingroup GeometryModule SetSubModule
@@ -101,9 +101,9 @@ class CompactSet
 {
   public:
     template<typename ...Args> CompactSet(Args&&... args) : Handle<CompactSetInterface>(std::forward<Args>(args)...) { }
-    inline Nat dimension() const { return this->reference().dimension(); }
-    inline Tribool separated(const ExactBox& bx) const { return this->reference().separated(bx); }
-    inline Tribool inside(const ExactBox& bx) const { return this->reference().inside(bx); }
+    inline DimensionType dimension() const { return this->reference().dimension(); }
+    inline Sierpinski separated(const ExactBox& bx) const { return this->reference().separated(bx); }
+    inline Sierpinski inside(const ExactBox& bx) const { return this->reference().inside(bx); }
     inline UpperBox bounding_box() const { return this->reference().bounding_box(); }
 };
 
@@ -114,10 +114,10 @@ class RegularSet
 {
   public:
     template<typename ...Args> RegularSet(Args&&... args) : Handle<RegularSetInterface>(std::forward<Args>(args)...) { }
-    inline Nat dimension() const { return this->reference().dimension(); }
-    inline Tribool overlaps(const ExactBox& bx) const { return this->reference().overlaps(bx); }
-    inline Tribool covers(const ExactBox& bx) const { return this->reference().covers(bx); }
-    inline Tribool separated(const ExactBox& bx) const { return this->reference().separated(bx); }
+    inline DimensionType dimension() const { return this->reference().dimension(); }
+    inline Sierpinski overlaps(const ExactBox& bx) const { return this->reference().overlaps(bx); }
+    inline Sierpinski covers(const ExactBox& bx) const { return this->reference().covers(bx); }
+    inline Sierpinski separated(const ExactBox& bx) const { return this->reference().separated(bx); }
 };
 
 
@@ -129,10 +129,10 @@ class LocatedSet
 {
   public:
     template<typename ...Args> LocatedSet(Args&&... args) : Handle<LocatedSetInterface>(std::forward<Args>(args)...) { }
-    inline Nat dimension() const { return this->reference().dimension(); }
-    inline Tribool overlaps(const ExactBox& bx) const { return this->reference().overlaps(bx); }
-    inline Tribool separated(const ExactBox& bx) const { return this->reference().separated(bx); }
-    inline Tribool inside(const ExactBox& bx) const { return this->reference().inside(bx); }
+    inline DimensionType dimension() const { return this->reference().dimension(); }
+    inline Sierpinski overlaps(const ExactBox& bx) const { return this->reference().overlaps(bx); }
+    inline Sierpinski separated(const ExactBox& bx) const { return this->reference().separated(bx); }
+    inline Sierpinski inside(const ExactBox& bx) const { return this->reference().inside(bx); }
     inline UpperBox bounding_box() const { return this->reference().bounding_box(); }
 };
 
@@ -143,11 +143,11 @@ class RegularLocatedSet
 {
   public:
     template<typename ...Args> RegularLocatedSet(Args&&... args) : Handle<SetInterface>(std::forward<Args>(args)...) { }
-    inline Nat dimension() const { return this->reference().dimension(); }
-    inline Tribool overlaps(const ExactBox& bx) const { return this->reference().overlaps(bx); }
-    inline Tribool covers(const ExactBox& bx) const { return this->reference().covers(bx); }
-    inline Tribool separated(const ExactBox& bx) const { return this->reference().separated(bx); }
-    inline Tribool inside(const ExactBox& bx) const { return this->reference().inside(bx); }
+    inline DimensionType dimension() const { return this->reference().dimension(); }
+    inline Sierpinski overlaps(const ExactBox& bx) const { return this->reference().overlaps(bx); }
+    inline Sierpinski covers(const ExactBox& bx) const { return this->reference().covers(bx); }
+    inline Sierpinski separated(const ExactBox& bx) const { return this->reference().separated(bx); }
+    inline Sierpinski inside(const ExactBox& bx) const { return this->reference().inside(bx); }
     inline UpperBox bounding_box() const { return this->reference().bounding_box(); }
 };
 

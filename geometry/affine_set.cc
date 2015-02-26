@@ -182,20 +182,20 @@ ValidatedAffineConstrainedImageSet::clone() const
 }
 
 
-Nat
+DimensionType
 ValidatedAffineConstrainedImageSet::dimension() const
 {
     return this->_space_models.size();
 }
 
-Nat
+SizeType
 ValidatedAffineConstrainedImageSet::number_of_parameters() const
 {
     ARIADNE_ASSERT(this->_space_models.size()>0);
     return this->_space_models[0].argument_size();
 }
 
-Nat
+SizeType
 ValidatedAffineConstrainedImageSet::number_of_constraints() const
 {
     return this->_constraint_models.size();
@@ -225,7 +225,7 @@ UpperBox ValidatedAffineConstrainedImageSet::bounding_box() const {
 
 
 
-Tribool ValidatedAffineConstrainedImageSet::separated(const ExactBox& bx) const {
+Sierpinski ValidatedAffineConstrainedImageSet::separated(const ExactBox& bx) const {
     ARIADNE_PRECONDITION_MSG(this->dimension()==bx.dimension(),"set="<<*this<<", box="<<bx);
     ExactBox wbx=cast_exact_box(widen(bx));
     LinearProgram<Float64> lp;
@@ -248,12 +248,12 @@ Tribool ValidatedAffineConstrainedImageSet::separated(const ExactBox& bx) const 
 }
 
 Tribool ValidatedAffineConstrainedImageSet::empty() const {
-    return this->separated(cast_exact_box(this->bounding_box()));
+    return Tribool(this->separated(cast_exact_box(this->bounding_box()))) || Tribool(indeterminate);
 }
 
-Tribool ValidatedAffineConstrainedImageSet::inside(const ExactBox& bx) const {
+Sierpinski ValidatedAffineConstrainedImageSet::inside(const ExactBox& bx) const {
     ARIADNE_PRECONDITION_MSG(this->dimension()==bx.dimension(),"set="<<*this<<", box="<<bx);
-    return Tribool(widen(this->bounding_box()).inside(bx)) || Tribool(indeterminate);
+    return widen(this->bounding_box()).inside(bx);
 }
 
 

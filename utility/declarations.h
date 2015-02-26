@@ -62,6 +62,7 @@ typedef uint Nat;
 class String;
 class Tribool;
 
+typedef SizeType DimensionType;
 
 typedef ErrorFloat64 ValidatedNormType;
 typedef ApproximateFloat64 ApproximateNormType;

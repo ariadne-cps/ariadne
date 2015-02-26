@@ -78,7 +78,7 @@ class Grid {
     Grid(const Grid& g);
 
     //! The underlying dimension of the grid.
-    Nat dimension() const;
+    DimensionType dimension() const;
 
     //! Tests equality of two grids. Tests equality of references first.
     Bool operator==(const Grid& g) const;

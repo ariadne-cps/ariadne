@@ -35,8 +35,6 @@
 
 namespace Ariadne {
 
-typedef Nat DimensionType;
-
 
 MonolithicHybridAutomaton::Mode::Mode(DiscreteLocation q, RealSpace s, EffectiveVectorFunction f)
     : _location(q), _variable_names(s.variable_names()), _dynamic(f)

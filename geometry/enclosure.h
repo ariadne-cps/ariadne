@@ -139,9 +139,9 @@ class Enclosure
     Void new_variable(ExactInterval ivl);
     //! \brief Substitutes the expression \f$x_j=v(x_1,\ldots,x_{j-1},x_{j+1}\ldots,x_n)\f$ into the function and constraints.
     //! Requires that \f$v(D_1,\ldots,D_{j-1},D_{j+1}\ldots,D_n) \subset D_j\f$ where \f$D\f$ is the domain.
-    Void substitute(Nat j, ValidatedScalarFunctionModel v);
+    Void substitute(SizeType j, ValidatedScalarFunctionModel v);
     //! \brief Substitutes the expression \f$x_j=c\f$ into the function and constraints.
-    Void substitute(Nat j, Float64 c);
+    Void substitute(SizeType j, Float64 c);
 
     //! \brief Apply the map \f$r\f$ to the map \f$f\f$.
     Void apply_map(ValidatedVectorFunction r);
@@ -185,13 +185,13 @@ class Enclosure
     Void new_zero_parameter_constraint(ValidatedScalarFunction h);
 
     //! \brief The number of negative constraints.
-    Nat number_of_constraints() const;
+    SizeType number_of_constraints() const;
     //! \brief All equality and inequality constraints.
     List<ValidatedConstraintModel> const& constraint_models() const;
     //! \brief All equality and inequality constraints.
     List<ValidatedConstraint> const constraints() const;
     //! \brief The \a i<sup>th</sup> constraint.
-    ValidatedConstraintModel const& constraint(Nat i) const;
+    ValidatedConstraintModel const& constraint(SizeType i) const;
 
     //! \brief  Returns true if \f$g(x)>0\f$ over the whole set,
     //! false \f$g(x)<0\f$ over the whole set,
@@ -202,9 +202,9 @@ class Enclosure
     virtual Tribool satisfies(ValidatedConstraint c) const;
 
     //! \brief The dimension of the set.
-    Nat dimension() const;
+    DimensionType dimension() const;
     //! \brief The number of parameters i.e. the dimension of the parameter domain.
-    Nat number_of_parameters() const;
+    SizeType number_of_parameters() const;
     //! \brief A bounding box for the set.
     UpperBox bounding_box() const;
     //! \brief A point in the image of the <em>unconstrained</em> parameter domain.
@@ -217,9 +217,9 @@ class Enclosure
     //! May return \c false if the set can (easily) be proved to be nonempty.
     Tribool empty() const;
     //! \brief Returns \c true if the set can be shown to be disjoint from \a bx.
-    Tribool separated(const ExactBox& bx) const;
+    Sierpinski separated(const ExactBox& bx) const;
     //! \brief Returns \c true if the set can be shown to be a subset of \a bx..
-    Tribool inside(const ExactBox& bx) const;
+    Sierpinski inside(const ExactBox& bx) const;
     //! \brief Returns \c true if the set can be shown to be a subset of \a bx..
     Tribool subset(const ExactBox& bx) const;
 

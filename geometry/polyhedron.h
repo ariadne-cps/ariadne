@@ -102,7 +102,7 @@ class Polyhedron
     //! \name Geometric operations
 
     //! \brief The dimension of the polyhedron.
-    virtual Nat dimension() const;
+    virtual DimensionType dimension() const;
 
     //! \brief Tests if the polyhedron is empty. (Not currently implemented.)
     virtual Tribool empty() const;

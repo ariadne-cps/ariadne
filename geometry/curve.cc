@@ -65,14 +65,14 @@ Curve::clone() const
 }
 
 
-Nat
+DimensionType
 Curve::dimension() const
 {
     return this->_function.result_size();
 }
 
 
-ushort
+DegreeType
 Curve::smoothness() const
 {
     return SMOOTH;

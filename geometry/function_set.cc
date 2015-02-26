@@ -67,8 +67,6 @@ uint DRAWING_ACCURACY=1u;
 
 template<class T> StringType str(const T& t) { StringStream ss; ss<<t; return ss.str(); }
 
-inline Tribool cast_to_tribool(Sierpinski l) { return Tribool(static_cast<LogicalValue>(l)); }
-
 Matrix<Float64> nonlinearities_zeroth_order(const ValidatedVectorFunction& f, const ExactBox& dom);
 Pair<Nat,double> nonlinearity_index_and_error(const ValidatedVectorFunction& function, const ExactBox domain);
 Pair<Nat,double> lipschitz_index_and_error(const ValidatedVectorFunction& function, const ExactBox& domain);
@@ -274,32 +272,32 @@ ConstraintSet::clone() const
 }
 
 
-Nat
+DimensionType
 ConstraintSet::dimension() const
 {
     return this->_dimension;
 }
 
 
-Tribool
+Sierpinski
 ConstraintSet::separated(const ExactBox& bx) const
 {
     ExactBox codomain=over_approximation(this->codomain());
     return ValidatedConstrainedImageSet(bx,this->constraint_function()).separated(codomain);
 }
 
-Tribool
+Sierpinski
 ConstraintSet::overlaps(const ExactBox& bx) const
 {
     ExactBox codomain=under_approximation(this->codomain());
     return ValidatedConstrainedImageSet(bx,this->constraint_function()).overlaps(codomain);
 }
 
-Tribool
+Sierpinski
 ConstraintSet::covers(const ExactBox& bx) const
 {
     ExactBox codomain=under_approximation(this->codomain());
-    return cast_to_tribool(UpperBox(apply(this->constraint_function(),bx)).inside(codomain));
+    return UpperBox(apply(this->constraint_function(),bx)).inside(codomain);
 }
 
 
@@ -346,46 +344,46 @@ BoundedConstraintSet::clone() const
 }
 
 
-Nat
+DimensionType
 BoundedConstraintSet::dimension() const
 {
     return this->_domain.size();
 }
 
 
-Tribool
+Sierpinski
 BoundedConstraintSet::separated(const ExactBox& bx) const
 {
     ExactBox domain=over_approximation(this->domain());
     if(Ariadne::disjoint(domain,bx)) { return true; }
     ExactBox codomain=over_approximation(this->codomain());
-    return ValidatedConstrainedImageSet(Ariadne::intersection(bx,domain),this->constraint_function()).separated(codomain) || Tribool(indeterminate);
+    return ValidatedConstrainedImageSet(Ariadne::intersection(bx,domain),this->constraint_function()).separated(codomain);
 }
 
 
-Tribool
+Sierpinski
 BoundedConstraintSet::overlaps(const ExactBox& bx) const
 {
     if(Ariadne::disjoint(over_approximation(this->domain()),bx)) { return false; }
     ExactBox domain=under_approximation(this->domain());
     ExactBox codomain=under_approximation(this->codomain());
-    return ValidatedConstrainedImageSet(Ariadne::intersection(bx,domain),this->constraint_function()).overlaps(codomain) || Tribool(indeterminate);
+    return ValidatedConstrainedImageSet(Ariadne::intersection(bx,domain),this->constraint_function()).overlaps(codomain);
 }
 
 
-Tribool
+Sierpinski
 BoundedConstraintSet::covers(const ExactBox& bx) const
 {
     ExactBox domain=under_approximation(this->domain());
     ExactBox codomain=under_approximation(this->codomain());
     if(!Ariadne::covers(domain,bx)) { return false; }
-    return cast_to_tribool(UpperBox(apply(this->constraint_function(),bx)).inside(codomain));
+    return UpperBox(apply(this->constraint_function(),bx)).inside(codomain);
 }
 
-Tribool
+Sierpinski
 BoundedConstraintSet::inside(const ExactBox& bx) const
 {
-    return cast_to_tribool(Ariadne::inside(UpperBox(over_approximation(this->domain())),bx));
+    return Ariadne::inside(UpperBox(over_approximation(this->domain())),bx);
 }
 
 UpperBox
@@ -513,24 +511,24 @@ Tribool ConstrainedImageSet::satisfies(const EffectiveConstraint& nc) const
 
 
 //! \brief Test if the set is contained in (the interior of) a box.
-Tribool ConstrainedImageSet::inside(const ExactBox& bx) const {
-    return cast_to_tribool(this->bounding_box().inside(bx));
+Sierpinski ConstrainedImageSet::inside(const ExactBox& bx) const {
+    return this->bounding_box().inside(bx);
 }
 
-Tribool ConstrainedImageSet::separated(const ExactBox& bx) const
+Sierpinski ConstrainedImageSet::separated(const ExactBox& bx) const
 {
     UpperBox subdomain = over_approximation(this->_domain);
     EffectiveVectorFunction function = join(this->function(),this->constraint_function());
     ExactBox codomain = product(bx,ExactBox(over_approximation(this->constraint_bounds())));
     ConstraintSolver solver;
     solver.reduce(subdomain,function,codomain);
-    return cast_to_tribool(subdomain.is_empty());
+    return subdomain.is_empty();
 
 
 }
 
 
-Tribool ConstrainedImageSet::overlaps(const ExactBox& bx) const
+Sierpinski ConstrainedImageSet::overlaps(const ExactBox& bx) const
 {
     return ValidatedConstrainedImageSet(under_approximation(this->_domain),this->_function,this->_constraints).overlaps(bx);
 }
@@ -949,15 +947,15 @@ ValidatedConstrainedImageSet::reduce()
 Tribool ValidatedConstrainedImageSet::empty() const
 {
     const_cast<ValidatedConstrainedImageSet*>(this)->reduce();
-    return cast_to_tribool(this->_reduced_domain.is_empty()) || Tribool(indeterminate);
+    return this->_reduced_domain.is_empty();
 }
 
-Tribool ValidatedConstrainedImageSet::inside(const ExactBox& bx) const
+Sierpinski ValidatedConstrainedImageSet::inside(const ExactBox& bx) const
 {
-    return cast_to_tribool(Ariadne::inside(this->bounding_box(),bx));
+    return Ariadne::inside(this->bounding_box(),bx);
 }
 
-Tribool ValidatedConstrainedImageSet::separated(const ExactBox& bx) const
+Sierpinski ValidatedConstrainedImageSet::separated(const ExactBox& bx) const
 {
     UpperBox subdomain = this->_reduced_domain;
     ValidatedVectorFunction function(this->dimension()+this->number_of_constraints(),EuclideanDomain(this->number_of_parameters()));
@@ -967,10 +965,10 @@ Tribool ValidatedConstrainedImageSet::separated(const ExactBox& bx) const
     ExactBox codomain = product(bx,this->constraint_bounds());
     ConstraintSolver solver;
     solver.reduce(subdomain,function,codomain);
-    return cast_to_tribool(subdomain.is_empty()) || Tribool(indeterminate);
+    return subdomain.is_empty();
 }
 
-Tribool ValidatedConstrainedImageSet::overlaps(const ExactBox& bx) const
+Sierpinski ValidatedConstrainedImageSet::overlaps(const ExactBox& bx) const
 {
     //std::cerr<<"domain="<<this->_domain<<"\n";
     //std::cerr<<"subdomain="<<this->_reduced_domain<<"\n";

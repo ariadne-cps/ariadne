@@ -56,7 +56,7 @@ struct Polytope2d
     }
 
     virtual Polytope2d* clone() const { return new Polytope2d(*this); }
-    virtual Nat dimension() const { return 2u; }
+    virtual DimensionType dimension() const { return 2u; }
 
     virtual Void draw(CanvasInterface& canvas, const Projection2d& p) const {
         if(points.size()==1) { canvas.dot(points[0].x,points[0].y); return; }
@@ -144,9 +144,10 @@ class TestAffineSet
         ExactBox cell5({{-0.9375,-0.875},{0.4375,0.5}}); // disjoint
         ExactBox cell6({{-1.5,-1.375},{0.5,0.625}}); // disjoint; regression test
 
-        ARIADNE_TEST_ASSERT(definitely(!affine_set.separated(cell1)));
-        ARIADNE_TEST_ASSERT(definitely(!affine_set.separated(cell2)));
+        ARIADNE_TEST_ASSERT(!definitely(affine_set.separated(cell1)));
+        ARIADNE_TEST_ASSERT(!definitely(affine_set.separated(cell2)));
         ARIADNE_TEST_ASSERT(!definitely(affine_set.separated(cell3)));
+        //ARIADNE_TEST_ASSERT(!definitely(affine_set.overlaps(cell3)));
         ARIADNE_TEST_ASSERT(possibly(affine_set.separated(cell4)));
         ARIADNE_TEST_ASSERT(definitely(affine_set.separated(cell5)));
         ARIADNE_TEST_ASSERT(definitely(affine_set.separated(cell6)));

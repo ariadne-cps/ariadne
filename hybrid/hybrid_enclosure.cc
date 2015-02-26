@@ -199,13 +199,13 @@ HybridEnclosure::dwell_time_range() const
     return apply(this->dwell_time_function(),this->_set.reduced_domain());
 }
 
-Nat
+SizeType
 HybridEnclosure::number_of_constraints() const
 {
     return this->_set.number_of_constraints();
 }
 
-Nat
+SizeType
 HybridEnclosure::number_of_parameters() const
 {
     return this->_set.number_of_parameters();
@@ -365,7 +365,7 @@ HybridEnclosure::continuous_set() const {
 }
 
 
-Nat HybridEnclosure::dimension() const {
+DimensionType HybridEnclosure::dimension() const {
     return this->space_function().result_size();
 }
 
@@ -373,12 +373,12 @@ Tribool HybridEnclosure::empty() const {
     return this->_set.empty();
 }
 
-Tribool HybridEnclosure::inside(const HybridBox& hbx) const {
+Sierpinski HybridEnclosure::inside(const HybridBox& hbx) const {
     if(this->_location==hbx.location()) { return this->continuous_set().inside(hbx.continuous_set()); }
     else { return this->continuous_set().empty(); }
 }
 
-Tribool HybridEnclosure::separated(const HybridBox& hbx) const {
+Sierpinski HybridEnclosure::separated(const HybridBox& hbx) const {
     if(this->_location==hbx.location()) { return this->continuous_set().separated(hbx.continuous_set()); }
     else { return true; }
 }

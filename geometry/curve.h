@@ -64,9 +64,9 @@ class CurveInterface
     /*! \brief Return a new dynamically-allocated copy of the curve. */
     virtual CurveInterface* clone() const = 0;
     /*! \brief The dimension of the space the curve lies in. */
-    virtual Nat dimension() const = 0;
+    virtual DimensionType dimension() const = 0;
     /*! \brief The smoothness of the curve. */
-    virtual ushort smoothness() const = 0;
+    virtual DegreeType smoothness() const = 0;
 
     /*! \brief The point on the curve at a parameter value. */
     virtual PointType value(const ParameterType& s) const = 0;
@@ -101,9 +101,9 @@ class Curve
     /*! \brief Return a new dynamically-allocated copy of the constraint. */
     virtual Curve* clone() const;
     /*! \brief The dimension of the set. */
-    virtual Nat dimension() const;
+    virtual DimensionType dimension() const;
     /*! \brief The smoothness of the curve. */
-    virtual ushort smoothness() const;
+    virtual DegreeType smoothness() const;
 
     /*! \brief The value at a point. */
     virtual PointType value(const ParameterType& s) const;
@@ -149,7 +149,7 @@ class InterpolatedCurve
     /*! \brief The number of segments in the curve. */
     SizeType size() const { return this->_points.size(); }
     /*! \brief The dimension of the Euclidean space the line segment lies in. */
-    Nat dimension() const { return this->_points.begin()->second.size(); }
+    DimensionType dimension() const { return this->_points.begin()->second.size(); }
     /*! \brief An Iterator to the first point in the curve. */
     ConstIterator begin() const { return this->_points.begin(); }
     /*! \brief An Iterator to the end point in the curve, NOT the one-past-the-end! */

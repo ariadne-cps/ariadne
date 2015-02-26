@@ -143,7 +143,7 @@ class SubPavingInterface
     virtual SubPavingInterface* clone() const = 0;
 
     //! \brief The dimension of the paving.
-    virtual Nat dimension() const = 0;
+    virtual DimensionType dimension() const = 0;
 
     //! \brief The underlying grid of the paving.
     virtual const Grid& grid() const = 0;
@@ -168,9 +168,9 @@ class SubPavingInterface
     virtual Void set_root_cell(Bool onoff) = 0;
 
     virtual UpperBox bounding_box() const = 0; // Inherited from CompactSetInterface
-    virtual Tribool inside(const ExactBox& bx) const = 0; // Inherited from CompactSetInterface
-    virtual Tribool separated(const ExactBox& bx) const = 0; // Inherited from ClosedSetInterface
-    virtual Tribool overlaps(const ExactBox& bx) const = 0; // Inherited from OvertSetInterface
+    virtual Sierpinski inside(const ExactBox& bx) const = 0; // Inherited from CompactSetInterface
+    virtual Sierpinski separated(const ExactBox& bx) const = 0; // Inherited from ClosedSetInterface
+    virtual Sierpinski overlaps(const ExactBox& bx) const = 0; // Inherited from OvertSetInterface
 
     virtual Void mince(Nat depth) = 0; // Deprecated?
     virtual Void recombine() = 0; // Deprecated?
@@ -215,9 +215,9 @@ class SubPavingHandle
     ForwardConstantIteratorHandle<GridCell> end() const { return this->_ptr->_end(); }
 
     UpperBox bounding_box() const { return this->_ptr->bounding_box(); };
-    Tribool inside(const ExactBox& bx) const { return this->_ptr->inside(bx); }
-    Tribool separated(const ExactBox& bx) const { return this->_ptr->separated(bx); }
-    Tribool overlaps(const ExactBox& bx) const { return this->_ptr->overlaps(bx); }
+    Sierpinski inside(const ExactBox& bx) const { return this->_ptr->inside(bx); }
+    Sierpinski separated(const ExactBox& bx) const { return this->_ptr->separated(bx); }
+    Sierpinski overlaps(const ExactBox& bx) const { return this->_ptr->overlaps(bx); }
 
     Void mince(Nat depth) { this->_ptr->mince(depth); }
     Void recombine() { this->_ptr->recombine(); }
@@ -274,9 +274,9 @@ class PavingHandle
     ForwardConstantIteratorHandle<GridCell> begin() const { return this->_ptr->_begin(); }
     ForwardConstantIteratorHandle<GridCell> end() const { return this->_ptr->_end(); }
     UpperBox bounding_box() const { return this->_ptr->bounding_box(); };
-    Tribool inside(const ExactBox& bx) const { return this->_ptr->inside(bx); }
-    Tribool separated(const ExactBox& bx) const { return this->_ptr->separated(bx); }
-    Tribool overlaps(const ExactBox& bx) const { return this->_ptr->overlaps(bx); }
+    Sierpinski inside(const ExactBox& bx) const { return this->_ptr->inside(bx); }
+    Sierpinski separated(const ExactBox& bx) const { return this->_ptr->separated(bx); }
+    Sierpinski overlaps(const ExactBox& bx) const { return this->_ptr->overlaps(bx); }
 
     //GridCell smallest_enclosing_primary_cell(const ExactBox& bx) const { return this->_ptr->smallest_enclosing_primary_cell(); }
     Void adjoin_cells(const PredicateInterface<ExactBox>& predicate, const Nat depth) { return this->_ptr->adjoin_cells(predicate,depth); }

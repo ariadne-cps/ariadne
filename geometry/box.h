@@ -110,7 +110,7 @@ class Box
     static Box<IntervalType> upper_orthant(SizeType n);
 
     //! The dimension of the set.
-    SizeType dimension() const;
+    DimensionType dimension() const;
     //! Indexing the bounds in each dimension yields an exact interval.
     const IntervalType& operator[](SizeType i) const;
     IntervalType& operator[](SizeType i);
@@ -471,11 +471,11 @@ class ExactBoxSet
     ExactBoxSet(Box<ExactInterval>const& bx) : Box<ExactInterval>(bx) { }
 
     virtual ExactBoxSet* clone() const { return new ExactBoxSet(*this); }
-    virtual SizeType dimension() const final { return this->ExactBox::size(); }
-    virtual Tribool separated(const ExactBox& other) const final { return this->ExactBox::separated(other); }
-    virtual Tribool overlaps(const ExactBox& other) const final { return this->ExactBox::overlaps(other); }
-    virtual Tribool covers(const ExactBox& other) const final { return this->ExactBox::covers(other); }
-    virtual Tribool inside(const ExactBox& other) const final { return this->ExactBox::inside(other); }
+    virtual DimensionType dimension() const final { return this->ExactBox::size(); }
+    virtual Sierpinski separated(const ExactBox& other) const final { return this->ExactBox::separated(other); }
+    virtual Sierpinski overlaps(const ExactBox& other) const final { return this->ExactBox::overlaps(other); }
+    virtual Sierpinski covers(const ExactBox& other) const final { return this->ExactBox::covers(other); }
+    virtual Sierpinski inside(const ExactBox& other) const final { return this->ExactBox::inside(other); }
     virtual UpperBox bounding_box() const final { return this->ExactBox::bounding_box(); }
     virtual Void draw(CanvasInterface& c, const Projection2d& p) const final { return Ariadne::draw(c,p,*this); }
     virtual OutputStream& write(OutputStream& os) const final { return os << static_cast<const ExactBox&>(*this); }
@@ -491,7 +491,7 @@ class ApproximateBoxSet
     ApproximateBoxSet(Box<ApproximateInterval>const& bx) : Box<ApproximateInterval>(bx) { }
 
     virtual ApproximateBoxSet* clone() const { return new ApproximateBoxSet(*this); }
-    virtual SizeType dimension() const final { return this->ApproximateBox::size(); }
+    virtual DimensionType dimension() const final { return this->ApproximateBox::size(); }
     virtual Void draw(CanvasInterface& c, const Projection2d& p) const final { return Ariadne::draw(c,p,*this); }
     virtual OutputStream& write(OutputStream& os) const final { return os << static_cast<const ApproximateBox&>(*this); }
 };

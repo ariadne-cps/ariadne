@@ -104,7 +104,7 @@ Void Grid::_create(const Vector<Float64>& origin, const Vector<Float64>& lengths
     this->_data->_lengths=lengths;
 }
 
-Nat Grid::dimension() const
+DimensionType Grid::dimension() const
 {
     return this->_data->_lengths.size();
 }
@@ -786,7 +786,7 @@ Nat GridAbstractCell::smallest_enclosing_primary_cell_height( const UpperBox& th
 
 /*! \brief Apply grid data \a theGrid to \a theLatticeBox in order to compute the box dimensions in the original space*/
 ExactBox GridAbstractCell::lattice_box_to_space(const LatticeBoxType & theLatticeBox, const Grid& theGrid ){
-    const Nat dimensions = theGrid.dimension();
+    const DimensionType dimensions = theGrid.dimension();
     ExactBox theTmpBox( dimensions );
 
     Vector<Float64> theGridOrigin( theGrid.origin() );
@@ -806,7 +806,7 @@ ExactBox GridAbstractCell::lattice_box_to_space(const LatticeBoxType & theLattic
     return theTmpBox;
 }
 
-BinaryWord GridAbstractCell::primary_cell_path( const Nat dimensions, const Nat topPCellHeight, const Nat bottomPCellHeight) {
+BinaryWord GridAbstractCell::primary_cell_path( const DimensionType dimensions, const Nat topPCellHeight, const Nat bottomPCellHeight) {
     BinaryWord theBinaryPath;
 
     //The path from one primary cell to another consists of alternating subsequences
@@ -887,7 +887,7 @@ GridCell GridCell::smallest_enclosing_primary_cell( const UpperBox& theBox, cons
 //The resulting box is not relaterd to the original space, but is a lattice box.
 // 1. Compute the primary cell located the the height \a theHeight above the zero level,
 // 2. Compute the cell defined by the path \a theWord (from the primary cell).
-LatticeBoxType GridCell::compute_lattice_box( const Nat dimensions, const Nat theHeight, const BinaryWord& theWord ) {
+LatticeBoxType GridCell::compute_lattice_box( const DimensionType dimensions, const Nat theHeight, const BinaryWord& theWord ) {
     LatticeBoxType theResultLatticeBox( primary_cell_lattice_box( theHeight , dimensions ) );
 
     //2. Compute the cell on some grid, corresponding to the binary path from the primary cell.
@@ -924,8 +924,8 @@ GridOpenCell GridCell::interior() const {
 
 //NOTE: The cell defined byt the method's arguments is called the base cell.
 //NOTE: Here we work with the lattice boxes that are in the grid
-GridCell GridCell::neighboringCell( const Grid& theGrid, const Nat theHeight, const BinaryWord& theWord, const Nat dim ) {
-    const Nat dimensions = theGrid.dimension();
+GridCell GridCell::neighboringCell( const Grid& theGrid, const Nat theHeight, const BinaryWord& theWord, const DimensionType dim ) {
+    const DimensionType dimensions = theGrid.dimension();
     //1. Extend the base cell in the given dimension (dim) by it's half width. This way
     //   we are sure that we get a box that overlaps with the required neighboring cell.
     //NOTE: This box is in the original space, but not on the lattice
@@ -981,7 +981,7 @@ GridCell GridCell::neighboringCell( const Grid& theGrid, const Nat theHeight, co
     return GridCell( theGrid, theBaseCellHeight, theBaseCellWord );
 }
 
-Nat GridCell::dimension() const {
+DimensionType GridCell::dimension() const {
     return this->grid().dimension();
 }
 
@@ -995,7 +995,7 @@ ExactBox GridOpenCell::compute_box(const Grid& theGrid, const Nat theHeight, con
     ExactBox openCellBoxInLattice( theGrid.dimension() );
 
     //Go through all the dimensions, and double the box size in the positive axis direction.
-    for( Nat dim = 0; dim < theGrid.dimension(); dim++){
+    for( DimensionType dim = 0; dim < theGrid.dimension(); dim++){
         ExactInterval openCellBoxInLatticeDimInterval;
         ExactInterval baseCellBoxInLatticeDimInterval = baseCellBoxInLattice[dim];
         Float64 lower = baseCellBoxInLatticeDimInterval.lower().raw();
@@ -1024,7 +1024,7 @@ GridOpenCell GridOpenCell::split(Tribool isRight) const {
             //NOTE: We use theNewBaseCellPath.size() but not theNewBaseCellPath.size()-1 because
             //we want to determine the dimension in which will be the next split, but not the
             //dimension in which we had the last split.
-            const Nat dim = theNewBaseCellPath.size() % _theGrid.dimension();
+            const DimensionType dim = theNewBaseCellPath.size() % _theGrid.dimension();
             //2. Then get the neighboring cell in this dimension
             GridCell neighboringCell = GridCell::neighboringCell( _theGrid, _theHeight, theNewBaseCellPath, dim );
             //3. Get the neighboring's cell height and word, because heigh might change
@@ -1284,7 +1284,7 @@ Void GridTreeSubset::subdivide( Float64 theMaxCellWidth ) {
     //2. Compute the widths of the box in each dimension and the maximum number
     //   among the number of subdivisions that we need to do in each dimension
     //   in order to make the width in this dimension <= theMaxCellWidth.
-    const Nat dimensions = _theGridCell.dimension();
+    const DimensionType dimensions = _theGridCell.dimension();
     Nat max_num_subdiv_dim = 0, num_subdiv = 0, max_subdiv_dim = 0;
 
     for(Nat i = 0; i < dimensions; i++){
@@ -1417,7 +1417,7 @@ Bool GridTreeSubset::intersects( const ExactBox& theBox ) const {
     return definitely( GridTreeSubset::intersects( binary_tree(), grid(), cell().height(), pathCopy, theBox ) );
 }
 
-Tribool GridTreeSubset::covers( const ExactBox& theBox ) const {
+Sierpinski GridTreeSubset::covers( const ExactBox& theBox ) const {
     //Simply check if theBox is covered by the set and then make sure that
     //all tree cells that are not disjoint from theBox are enabled
 
@@ -1431,11 +1431,11 @@ Tribool GridTreeSubset::covers( const ExactBox& theBox ) const {
     } else {
         //Otherwise, is theBox is possibly a subset then we try to see furhter
         BinaryWord pathCopy( cell().word() );
-        return GridTreeSubset::superset( binary_tree(), grid(), cell().height(), pathCopy, cast_exact_box(widen(theBox)) ) || indeterminate;
+        return GridTreeSubset::superset( binary_tree(), grid(), cell().height(), pathCopy, cast_exact_box(widen(theBox)) );
     }
 }
 
-Tribool GridTreeSubset::inside( const ExactBox& theBox ) const {
+Sierpinski GridTreeSubset::inside( const ExactBox& theBox ) const {
     //Check that the box corresponding to the root node of the set
     //is not disjoint from theBox. If it is then the set is not a
     //subset of theBox otherwise we need to traverse the tree and check
@@ -1445,20 +1445,20 @@ Tribool GridTreeSubset::inside( const ExactBox& theBox ) const {
 
     BinaryWord pathCopy( cell().word() );
 
-    return GridTreeSubset::subset( binary_tree(), grid(), cell().height(), pathCopy, cast_exact_box(narrow(theBox)) ) || indeterminate;
+    return GridTreeSubset::subset( binary_tree(), grid(), cell().height(), pathCopy, cast_exact_box(narrow(theBox)) );
 }
 
-Tribool GridTreeSubset::separated( const ExactBox& theBox ) const {
+Sierpinski GridTreeSubset::separated( const ExactBox& theBox ) const {
     //Simply check if the box does not intersect with the set
 
     ARIADNE_ASSERT( theBox.dimension() == cell().dimension() );
 
     BinaryWord pathCopy( cell().word() );
 
-    return GridTreeSubset::disjoint( binary_tree(), grid(), cell().height(), pathCopy, cast_exact_box(widen(theBox)) ) || indeterminate;
+    return GridTreeSubset::disjoint( binary_tree(), grid(), cell().height(), pathCopy, cast_exact_box(widen(theBox)) );
 }
 
-Tribool GridTreeSubset::overlaps( const ExactBox& theBox ) const {
+Sierpinski GridTreeSubset::overlaps( const ExactBox& theBox ) const {
     //Check if the box of the root cell overlaps with theBox,
     //if not then theBox does not intersect with the cell,
     //otherwise we need to find at least one enabled node
@@ -1468,7 +1468,7 @@ Tribool GridTreeSubset::overlaps( const ExactBox& theBox ) const {
 
     BinaryWord pathCopy( cell().word() );
 
-    return GridTreeSubset::intersects( binary_tree(), grid(), cell().height(), pathCopy, cast_exact_box(narrow(theBox)) ) || indeterminate;
+    return GridTreeSubset::intersects( binary_tree(), grid(), cell().height(), pathCopy, cast_exact_box(narrow(theBox)) );
 }
 
 Tribool GridTreeSubset::superset( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
@@ -2108,13 +2108,16 @@ Void GridTreeSet::_adjoin_inner_approximation( const Grid & theGrid, BinaryTreeN
     //Compute the cell corresponding to the current node
     GridCell theCurrentCell( theGrid, primary_cell_height, *pPath );
 
+    // If the set if closed, then we can use the separated(Box) method to speed-up computation
+    const ClosedSetInterface* theClosedSet = dynamic_cast<const ClosedSetInterface*>(&theSet);
+
     if( ! pBinaryTreeNode->is_enabled() ) {
         //If this it is not an enabled leaf node then we can add something to it.
         if( definitely( theSet.covers( theCurrentCell.box() ) ) ) {
             //If this node's box is a subset of theSet then it belongs to the inner approximation
             //Thus we need to make it an enabled leaf and then do the mincing to the maximum depth
             pBinaryTreeNode->make_leaf( true );
-        } else if ( possibly( theSet.overlaps( theCurrentCell.box() ) ) ) {
+        } else if ( theClosedSet && !definitely( theClosedSet->separated( theCurrentCell.box() ) ) ) {
             //If theSet overlaps with the box corresponding to the given node in the original
             //space, then there might be something to add from the inner approximation of theSet.
             if( pPath->size() >= max_mince_depth ) {

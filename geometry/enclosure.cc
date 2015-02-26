@@ -76,8 +76,6 @@ namespace Ariadne {
 
 static const Nat verbosity = 0u;
 
-inline Tribool cast_to_tribool(Sierpinski l) { return Tribool(static_cast<LogicalValue>(l)); }
-
 template<class T> StringType str(const T& t) { StringStream ss; ss<<t; return ss.str(); }
 
 typedef Vector<Float64> RawFloatVector;
@@ -369,7 +367,7 @@ Tribool Enclosure::satisfies(ValidatedScalarFunction constraint) const
 
 
 /*
-Void Enclosure::substitute(Nat j, ValidatedScalarFunctionModel v)
+Void Enclosure::substitute(SizeType j, ValidatedScalarFunctionModel v)
 {
     ARIADNE_ASSERT_MSG(v.argument_size()+1u==this->number_of_parameters(),
                        "number_of_parameters="<<this->number_of_parameters()<<", variable="<<v);
@@ -384,7 +382,7 @@ Void Enclosure::substitute(Nat j, ValidatedScalarFunctionModel v)
                        this->_check();
 }
 
-Void Enclosure::substitute(Nat j, Float64 c)
+Void Enclosure::substitute(SizeType j, Float64 c)
 {
     this->_space_function = Ariadne::partial_evaluate(this->_space_function,j,c);
     for(List<ValidatedScalarFunctionModel>::Iterator iter=this->_negative_constraints.begin(); iter!=this->_negative_constraints.end(); ++iter) {
@@ -625,7 +623,7 @@ ValidatedScalarFunctionModel const& Enclosure::dwell_time_function() const {
     return this->_dwell_time_function;
 }
 
-Nat Enclosure::number_of_constraints() const {
+SizeType Enclosure::number_of_constraints() const {
     return this->_constraints.size();
 }
 
@@ -641,7 +639,7 @@ List<ValidatedConstraint> const Enclosure::constraints() const {
     return result;
 }
 
-ValidatedConstraintModel const& Enclosure::constraint(Nat i) const {
+ValidatedConstraintModel const& Enclosure::constraint(SizeType i) const {
     return this->_constraints[i];
 }
 
@@ -661,11 +659,11 @@ ExactBox const Enclosure::constraint_bounds() const {
     return c;
 }
 
-Nat Enclosure::dimension() const {
+DimensionType Enclosure::dimension() const {
     return this->_space_function.result_size();
 }
 
-Nat Enclosure::number_of_parameters() const {
+SizeType Enclosure::number_of_parameters() const {
     return this->_space_function.argument_size();
 }
 
@@ -713,20 +711,20 @@ Tribool Enclosure::empty() const
     return Tribool(indeterminate);
 }
 
-Tribool Enclosure::inside(const ExactBox& bx) const
+Sierpinski Enclosure::inside(const ExactBox& bx) const
 {
-    return cast_to_tribool(Ariadne::subset(Ariadne::apply(this->_space_function,this->_reduced_domain),bx));
+    return Ariadne::subset(Ariadne::apply(this->_space_function,this->_reduced_domain),bx);
 }
 
 Tribool Enclosure::subset(const ExactBox& bx) const
 {
     this->reduce();
 
-    return cast_to_tribool(Ariadne::subset(Ariadne::apply(this->_space_function,this->_reduced_domain),bx)) || Tribool(indeterminate);
+    return Tribool(Ariadne::subset(Ariadne::apply(this->_space_function,this->_reduced_domain),bx)) || Tribool(indeterminate);
 
 }
 
-Tribool Enclosure::separated(const ExactBox& bx) const
+Sierpinski Enclosure::separated(const ExactBox& bx) const
 {
     ARIADNE_ASSERT_MSG(this->dimension()==bx.dimension(),"Enclosure::subset(ExactBox): self="<<*this<<", box="<<bx);
     List<ValidatedConstraint> constraints = this->constraints();

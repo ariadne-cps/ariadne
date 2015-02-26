@@ -43,8 +43,6 @@
 namespace Ariadne {
 
 
-typedef Nat DimensionType;
-
 DiscreteMode::DiscreteMode()
 {
 }

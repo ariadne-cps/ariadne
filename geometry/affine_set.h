@@ -108,15 +108,15 @@ class ValidatedAffineConstrainedImageSet
     Void new_parameter_constraint(const ValidatedAffineConstraint& c);
     Void new_constraint(const ValidatedAffineModelConstraint& c);
 
-    Nat dimension() const;
-    Nat number_of_parameters() const;
-    Nat number_of_constraints() const;
+    DimensionType dimension() const;
+    SizeType number_of_parameters() const;
+    SizeType number_of_constraints() const;
     ExactBox domain() const;
 
     Tribool bounded() const;
     UpperBox bounding_box() const;
-    Tribool separated(const ExactBox& bx) const;
-    Tribool inside(const ExactBox& bx) const;
+    Sierpinski separated(const ExactBox& bx) const;
+    Sierpinski inside(const ExactBox& bx) const;
     Tribool empty() const;
 
     Void adjoin_outer_approximation_to(PavingInterface& g, Int depth) const;

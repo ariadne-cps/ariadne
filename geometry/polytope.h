@@ -91,7 +91,7 @@ class Polytope
     Void reduce() { ARIADNE_NOT_IMPLEMENTED; }
 
     virtual Polytope* clone() const { return new Polytope(*this); }
-    virtual Nat dimension() const { if(this->_vertices.size()==0) { return 0; } return this->_vertices.front().dimension(); }
+    virtual DimensionType dimension() const { if(this->_vertices.size()==0) { return 0; } return this->_vertices.front().dimension(); }
     virtual Tribool separated(const ExactBox& bx) const;
     virtual Tribool overlaps(const ExactBox& bx) const;
     virtual Tribool inside(const ExactBox& bx) const;

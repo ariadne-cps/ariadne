@@ -505,7 +505,7 @@ class GridTreeSubset
     SizeType size() const;
 
     /*! \brief The dimension of the set. */
-    Nat dimension() const;
+    DimensionType dimension() const;
 
     /*! \brief Returns a constant reference to the underlying grid. */
     const Grid& grid() const;
@@ -624,16 +624,16 @@ class GridTreeSubset
     Bool disjoint( const ExactBox& theBox ) const;
 
     /*! \brief Tests if the interior of a grid set is a superset of a box. */
-    Tribool covers( const ExactBox& theBox ) const;
+    Sierpinski covers( const ExactBox& theBox ) const;
 
     /*! \brief Tests if (the closure of) a grid set is a subset of the interior of box. */
-    Tribool inside( const ExactBox& theBox  ) const;
+    Sierpinski inside( const ExactBox& theBox  ) const;
 
     /*! \brief Tests if (the closure of) a grid set is disjoint from (the closure of) a box. */
-    Tribool separated( const ExactBox& theBox  ) const;
+    Sierpinski separated( const ExactBox& theBox  ) const;
 
     /*! \brief Tests if a grid set overlaps (intersects the interior of) a box. */
-    Tribool overlaps( const ExactBox& theBox ) const;
+    Sierpinski overlaps( const ExactBox& theBox ) const;
 
     //@}
 
@@ -1677,7 +1677,7 @@ inline SizeType GridTreeSubset::size() const {
     return BinaryTreeNode::count_enabled_leaf_nodes( this->binary_tree() );
 }
 
-inline Nat GridTreeSubset::dimension( ) const {
+inline DimensionType GridTreeSubset::dimension( ) const {
     return grid().dimension();
 }
 

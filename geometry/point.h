@@ -64,7 +64,7 @@ class Point
     //! A dynamically-allocated copy.
     virtual Point<X>* clone() const;
     //! The dimension of the point.
-    Nat dimension() const { return this->size(); }
+    DimensionType dimension() const { return this->size(); }
     //! An explicit cast to a float vector. Useful to prevent ambiguous function overloads.
     const Vector<RealType>& vector() const { return *this; }
 

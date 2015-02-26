@@ -149,9 +149,9 @@ class HybridEnclosure
     //! \brief The list of previous events.
     const List<DiscreteEvent>& previous_events() const;
     //! \brief The number of independent parameters.
-    Nat number_of_parameters() const;
+    SizeType number_of_parameters() const;
     //! \brief The number of constraints.
-    Nat number_of_constraints() const;
+    SizeType number_of_constraints() const;
     //! \brief The continuous state set.
     const ExactBox parameter_domain() const;
     //! \brief The function related to space.
@@ -234,7 +234,7 @@ class HybridEnclosure
 
 
     //! \brief The dimension of the set.
-    Nat dimension() const;
+    DimensionType dimension() const;
     //! \brief Tests whether the set is empty.
     Tribool empty() const;
     //! \brief Tests whether the set satisfies the constraint \a c.
@@ -243,9 +243,9 @@ class HybridEnclosure
     //! \brief Returns a bounding box for the set. Computed by a simple interval evaluation of \f$f(D)\f$.
     HybridBox bounding_box() const;
     //! \brief Tests whether the set is disjoint from the box \a hbx.
-    Tribool separated(const HybridBox& hbx) const;
+    Sierpinski separated(const HybridBox& hbx) const;
     //! \brief Tests whether the set is a subset of the interior of the box \a hbx.
-    Tribool inside(const HybridBox& hbx) const;
+    Sierpinski inside(const HybridBox& hbx) const;
     //! \brief Restricts to a subdomain of the \em parameter domain.
     Void restrict(const ExactBox& subdomain);
     //! \brief Adjoins an outer approximation of the set to the grid-based set \a paving, with accuracy given by
@@ -286,8 +286,8 @@ class HybridEnclosure
 
 };
 
-inline Tribool inside(const HybridEnclosure& he, const HybridBox& hbx) { return he.inside(hbx); }
-inline Tribool separated(const HybridEnclosure& he, const HybridBox& hbx) { return he.separated(hbx); }
+inline Sierpinski inside(const HybridEnclosure& he, const HybridBox& hbx) { return he.inside(hbx); }
+inline Sierpinski separated(const HybridEnclosure& he, const HybridBox& hbx) { return he.separated(hbx); }
 
 inline OutputStream& operator<<(OutputStream& os, const HybridEnclosure& s) { return s.write(os); }
 inline OutputStream& operator<<(OutputStream& os, const Representation<HybridEnclosure>& s) { return s.pointer->repr(os); }

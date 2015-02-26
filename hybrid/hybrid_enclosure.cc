@@ -180,7 +180,7 @@ HybridEnclosure::space_bounding_box() const
 {
     ARIADNE_LOG(8,"space_codomain="<<this->space_function().codomain()<<" space_range="<<apply(this->space_function(),this->_set.reduced_domain())<<"\n");
     //return this->space_function()(this->_set.reduced_domain());
-    return make_exact_box(this->_set.bounding_box());
+    return cast_exact_box(this->_set.bounding_box());
 }
 
 UpperInterval
@@ -220,7 +220,7 @@ HybridEnclosure::parameter_domain() const
 HybridUpperBox
 HybridEnclosure::bounding_box() const
 {
-    return HybridUpperBox(this->_location,this->_space,make_exact_box(this->space_bounding_box()));
+    return HybridUpperBox(this->_location,this->_space,cast_exact_box(this->space_bounding_box()));
 }
 
 

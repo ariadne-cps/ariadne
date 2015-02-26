@@ -646,12 +646,12 @@ template<class X> inline Vector<MidpointType<X>> midpoint(const Vector<X>& v) {
     return r;
 }
 
-template<class X> using SingletonType = decltype(make_singleton(declval<X>()));
+template<class X> using SingletonType = decltype(cast_singleton(declval<X>()));
 
-template<class X> inline Vector<SingletonType<X>> make_singleton(const Vector<X>& v) {
-    Vector<SingletonType<X>> r(v.size(),make_singleton(v.zero_element()));
+template<class X> inline Vector<SingletonType<X>> cast_singleton(const Vector<X>& v) {
+    Vector<SingletonType<X>> r(v.size(),cast_singleton(v.zero_element()));
     for(SizeType i=0; i!=v.size(); ++i) {
-        r[i]=make_singleton(v[i]);
+        r[i]=cast_singleton(v[i]);
     }
     return r;
 }
@@ -667,12 +667,12 @@ template<class X> inline Vector<BoundsType<X>> make_bounds(const Vector<X>& v) {
 }
 
 
-template<class X> using ExactType = RemoveConst<RemoveReference<decltype(make_exact(declval<X>()))>>;
+template<class X> using ExactType = RemoveConst<RemoveReference<decltype(cast_exact(declval<X>()))>>;
 
-template<class X> inline Vector<ExactType<X>> make_exact(const Vector<X>& v) {
-    Vector<ExactType<X>> r(v.size(),make_exact(v.zero_element()));
+template<class X> inline Vector<ExactType<X>> cast_exact(const Vector<X>& v) {
+    Vector<ExactType<X>> r(v.size(),cast_exact(v.zero_element()));
     for(SizeType i=0; i!=v.size(); ++i) {
-        r[i]=make_exact(v[i]);
+        r[i]=cast_exact(v[i]);
     }
     return std::move(r);
 }
@@ -682,7 +682,7 @@ class Precision64;
 class Exact; class Approximate;
 typedef Float<Exact,Precision64> ExactFloat64;
 typedef Float<Approximate,Precision64> ApproximateFloat64;
-inline Vector<ExactFloat64>const& make_exact(Vector<ApproximateFloat64>const& v) {
+inline Vector<ExactFloat64>const& cast_exact(Vector<ApproximateFloat64>const& v) {
     return reinterpret_cast<Vector<ExactFloat64>const&>(v);
 }
 

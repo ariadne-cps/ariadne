@@ -778,7 +778,7 @@ Nat GridAbstractCell::smallest_enclosing_primary_cell_height( const UpperBox& th
     Vector<ExactInterval> theLatticeBox( theBox.size() );
     //Convert the box to theGrid coordinates
     for( Nat i = 0; i != theBox.size(); ++i ) {
-        theLatticeBox[i] = make_exact_interval( ( theBox[i] - make_exact(theGrid.origin()[i])) / make_exact(theGrid.lengths()[i]) );
+        theLatticeBox[i] = cast_exact_interval( ( theBox[i] - cast_exact(theGrid.origin()[i])) / cast_exact(theGrid.lengths()[i]) );
     }
     //Compute and return the smallest primary cell, enclosing this box on the grid
     return smallest_enclosing_primary_cell_height( theLatticeBox );
@@ -800,7 +800,7 @@ ExactBox GridAbstractCell::lattice_box_to_space(const LatticeBoxType & theLattic
         //and upper values simultaneously to prevent lower temporarily higher than upper.
         Float64 lower = add_approx( theDimOrigin, mul_approx( theDimLength, theLatticeBox[current_dimension].lower().raw() ) );
         Float64 upper = add_approx( theDimOrigin, mul_approx( theDimLength, theLatticeBox[current_dimension].upper().raw() ) );
-        theTmpBox[current_dimension].set(make_exact(lower),make_exact(upper));
+        theTmpBox[current_dimension].set(cast_exact(lower),cast_exact(upper));
     }
 
     return theTmpBox;
@@ -900,10 +900,10 @@ LatticeBoxType GridCell::compute_lattice_box( const Nat dimensions, const Nat th
         Float64 middlePointInCurrDim = theResultLatticeBox[current_dimension].midpoint().raw();
         if( theWord[i] ){
             //Choose the right half
-            theResultLatticeBox[current_dimension].set_lower( make_exact(middlePointInCurrDim) );
+            theResultLatticeBox[current_dimension].set_lower( cast_exact(middlePointInCurrDim) );
         } else {
             //Choose the left half
-            theResultLatticeBox[current_dimension].set_upper( make_exact(middlePointInCurrDim) );
+            theResultLatticeBox[current_dimension].set_upper( cast_exact(middlePointInCurrDim) );
         }
     }
     return theResultLatticeBox;
@@ -1002,7 +1002,7 @@ ExactBox GridOpenCell::compute_box(const Grid& theGrid, const Nat theHeight, con
         Float64 upper = baseCellBoxInLatticeDimInterval.upper().raw() +
                         ( baseCellBoxInLatticeDimInterval.upper().raw() -
                           baseCellBoxInLatticeDimInterval.lower().raw() );
-        openCellBoxInLatticeDimInterval.set(make_exact(lower),make_exact(upper));
+        openCellBoxInLatticeDimInterval.set(cast_exact(lower),cast_exact(upper));
 
         openCellBoxInLattice[dim] = openCellBoxInLatticeDimInterval;
     }
@@ -1431,7 +1431,7 @@ Tribool GridTreeSubset::covers( const ExactBox& theBox ) const {
     } else {
         //Otherwise, is theBox is possibly a subset then we try to see furhter
         BinaryWord pathCopy( cell().word() );
-        return GridTreeSubset::superset( binary_tree(), grid(), cell().height(), pathCopy, make_exact_box(widen(theBox)) ) || indeterminate;
+        return GridTreeSubset::superset( binary_tree(), grid(), cell().height(), pathCopy, cast_exact_box(widen(theBox)) ) || indeterminate;
     }
 }
 
@@ -1445,7 +1445,7 @@ Tribool GridTreeSubset::inside( const ExactBox& theBox ) const {
 
     BinaryWord pathCopy( cell().word() );
 
-    return GridTreeSubset::subset( binary_tree(), grid(), cell().height(), pathCopy, make_exact_box(narrow(theBox)) ) || indeterminate;
+    return GridTreeSubset::subset( binary_tree(), grid(), cell().height(), pathCopy, cast_exact_box(narrow(theBox)) ) || indeterminate;
 }
 
 Tribool GridTreeSubset::separated( const ExactBox& theBox ) const {
@@ -1455,7 +1455,7 @@ Tribool GridTreeSubset::separated( const ExactBox& theBox ) const {
 
     BinaryWord pathCopy( cell().word() );
 
-    return GridTreeSubset::disjoint( binary_tree(), grid(), cell().height(), pathCopy, make_exact_box(widen(theBox)) ) || indeterminate;
+    return GridTreeSubset::disjoint( binary_tree(), grid(), cell().height(), pathCopy, cast_exact_box(widen(theBox)) ) || indeterminate;
 }
 
 Tribool GridTreeSubset::overlaps( const ExactBox& theBox ) const {
@@ -1468,7 +1468,7 @@ Tribool GridTreeSubset::overlaps( const ExactBox& theBox ) const {
 
     BinaryWord pathCopy( cell().word() );
 
-    return GridTreeSubset::intersects( binary_tree(), grid(), cell().height(), pathCopy, make_exact_box(narrow(theBox)) ) || indeterminate;
+    return GridTreeSubset::intersects( binary_tree(), grid(), cell().height(), pathCopy, cast_exact_box(narrow(theBox)) ) || indeterminate;
 }
 
 Tribool GridTreeSubset::superset( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
@@ -2016,7 +2016,7 @@ Void GridTreeSet::adjoin_over_approximation( const ExactBox& theBox, const Nat n
 }
 
 Void GridTreeSet::adjoin_outer_approximation( const UpperBox& theBox, const Nat numSubdivInDim ) {
-    ExactBoxSet theBoxSet=make_exact_box(theBox);
+    ExactBoxSet theBoxSet=cast_exact_box(theBox);
     CompactSetInterface const& theSet=theBoxSet;
     this->adjoin_outer_approximation(theSet,numSubdivInDim);
 }
@@ -2056,7 +2056,7 @@ Void GridTreeSet::adjoin_outer_approximation( const CompactSetInterface& theSet,
 // TODO:Think of another representation in terms of covers but not pavings, then the implementation
 // will be different, this is why, for now we do not fix these things.
 Void GridTreeSet::adjoin_lower_approximation( const LocatedSetInterface& theSet, const Nat numSubdivInDim ) {
-    this->adjoin_lower_approximation( theSet, make_exact_box(theSet.bounding_box()), numSubdivInDim );
+    this->adjoin_lower_approximation( theSet, cast_exact_box(theSet.bounding_box()), numSubdivInDim );
 }
 
 Void GridTreeSet::adjoin_lower_approximation( const OvertSetInterface& theSet, const Nat height, const Nat numSubdivInDim ) {
@@ -2191,7 +2191,7 @@ Void GridTreeSet::adjoin_inner_approximation( const OpenSetInterface& theSet, co
 }
 
 Void GridTreeSet::adjoin_inner_approximation( const LowerBox& theBox, const Nat numSubdivInDim ) {
-    ExactBoxSet theBoxSet=make_exact_box(theBox);
+    ExactBoxSet theBoxSet=cast_exact_box(theBox);
     this->adjoin_inner_approximation(theBoxSet,theBoxSet,numSubdivInDim);
 }
 

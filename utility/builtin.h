@@ -63,13 +63,13 @@ class exact_double {
   private:
     exact_double(double x) : _x(x) { }
   public:
-    friend exact_double make_exact(double);
+    friend exact_double cast_exact(double);
     exact_double() : _x(0.0) { }
     explicit operator double () const { return _x; }
     double get_d() const { return _x; }
 };
 
-exact_double make_exact(double x) { return exact_double(x); }
+exact_double cast_exact(double x) { return exact_double(x); }
 
 } // namespace Ariadne
 

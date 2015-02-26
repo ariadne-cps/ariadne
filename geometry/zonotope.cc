@@ -314,11 +314,11 @@ Zonotope::bounding_box() const
 {
     const Zonotope& z=*this;
 //    std::cerr<<"zD="<<z.domain()<<"\n";
-//    std::cerr<<"zc="<<make_exact(z.centre())<<"\n";
-//    std::cerr<<"zG="<<make_exact(z.generators())<<"\n";
-//    std::cerr<<"ze"<<make_exact(z.error())*ExactInterval(-1,1)<<"\n";
-//    std::cerr<<"zG*E"<<make_exact(z.generators())*z.domain()<<"\n";
-    ExactBox b=make_exact(z.centre())+(make_exact(z.generators())*z.domain())+make_exact(z.error())*ExactInterval(-1,1);
+//    std::cerr<<"zc="<<cast_exact(z.centre())<<"\n";
+//    std::cerr<<"zG="<<cast_exact(z.generators())<<"\n";
+//    std::cerr<<"ze"<<cast_exact(z.error())*ExactInterval(-1,1)<<"\n";
+//    std::cerr<<"zG*E"<<cast_exact(z.generators())*z.domain()<<"\n";
+    ExactBox b=cast_exact(z.centre())+(cast_exact(z.generators())*z.domain())+cast_exact(z.error())*ExactInterval(-1,1);
 //    std::cerr<<"bb="<<b<<"\n";
     return b;
 }
@@ -845,7 +845,7 @@ separated(const Zonotope& z, const ExactBox& bx)
     ARIADNE_ASSERT(z.dimension()==bx.dimension());
     SizeType d=z.dimension();
     SizeType ng=z.number_of_generators();
-    Vector<ExactInterval> ebx=bx+ExactInterval(-1,1)*make_exact(z.error());
+    Vector<ExactInterval> ebx=bx+ExactInterval(-1,1)*cast_exact(z.error());
     const Vector<Float64>& zc=z.centre();
     const Matrix<Float64>& zG=z.generators();
     Matrix<Float64> A(d,d+ng);

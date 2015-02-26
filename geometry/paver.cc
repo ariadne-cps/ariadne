@@ -44,7 +44,7 @@ namespace Ariadne {
 
 Pair<Nat,double> lipschitz_index_and_error(const ValidatedVectorFunction& function, const ExactBox& domain);
 Pair<Nat,double> lipschitz_index_and_error(const ValidatedVectorFunction& function, const UpperBox& domain) {
-    return lipschitz_index_and_error(function,make_exact_box(domain));
+    return lipschitz_index_and_error(function,cast_exact_box(domain));
 }
 
 namespace {
@@ -181,7 +181,7 @@ Void subdivision_adjoin_outer_approximation_recursion(PavingInterface& paving, c
     }
 
     if(small) {
-        paving.adjoin_outer_approximation(make_exact_box(range),depth);
+        paving.adjoin_outer_approximation(cast_exact_box(range),depth);
     } else {
         ExactBox subdomain1,subdomain2;
         make_lpair(subdomain1,subdomain2)=Ariadne::split(subdomain);
@@ -301,8 +301,8 @@ Void procedure_constraint_adjoin_outer_approximation_recursion(
     } else {
         ARIADNE_LOG(4,"  Splitting cell "<<cell_box<<"\n");
         Pair<GridCell,GridCell> sb = cell.split();
-        procedure_constraint_adjoin_outer_approximation_recursion(paving,make_exact_box(new_domain),f,g,codomain,sb.first, max_dpth, splt, procedures);
-        procedure_constraint_adjoin_outer_approximation_recursion(paving,make_exact_box(new_domain),f,g,codomain,sb.second, max_dpth, splt, procedures);
+        procedure_constraint_adjoin_outer_approximation_recursion(paving,cast_exact_box(new_domain),f,g,codomain,sb.first, max_dpth, splt, procedures);
+        procedure_constraint_adjoin_outer_approximation_recursion(paving,cast_exact_box(new_domain),f,g,codomain,sb.second, max_dpth, splt, procedures);
     }
 
 
@@ -548,10 +548,10 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
         //Pair<ExactBox,ExactBox> sd=solver.split(List<EffectiveConstraint>(1u,constraint),d);
         ARIADNE_LOG(4,"  Splitting domain\n");
         Pair<ExactBox,ExactBox> sd=split(d);
-        ExactPoint nx = make_exact(ApproximateFloat64(1.0-XSIGMA)*ax + Vector<ApproximateFloat64>(x.size(),XSIGMA/x.size()));
+        ExactPoint nx = cast_exact(ApproximateFloat64(1.0-XSIGMA)*ax + Vector<ApproximateFloat64>(x.size(),XSIGMA/x.size()));
         ExactPoint ny = midpoint(sd.first);
         hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(r, sd.first, fg, c, b, nx, ny, e);
-        nx = make_exact(ApproximateFloat64(1.0-XSIGMA)*x + Vector<ApproximateFloat64>(x.size(),XSIGMA/x.size()));
+        nx = cast_exact(ApproximateFloat64(1.0-XSIGMA)*x + Vector<ApproximateFloat64>(x.size(),XSIGMA/x.size()));
         ny = midpoint(sd.second);
         hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(r, sd.second, fg, c, b, x, ny, e);
     }
@@ -562,10 +562,10 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
     } else {
         ARIADNE_LOG(4,"  Splitting cell; t="<<t<<"\n");
         Pair<GridCell,GridCell> sb = b.split();
-        ExactPoint sx = make_exact(ApproximateFloat64(1-XSIGMA)*x + Vector<ApproximateFloat64>(x.size(),XSIGMA/x.size()));
+        ExactPoint sx = cast_exact(ApproximateFloat64(1-XSIGMA)*x + Vector<ApproximateFloat64>(x.size(),XSIGMA/x.size()));
         ExactPoint sy = y;
         hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(r,d,fg,c,sb.first,sx,sy,e);
-        sx = make_exact(ApproximateFloat64(1-XSIGMA)*x + Vector<ApproximateFloat64>(x.size(),XSIGMA/x.size()));
+        sx = cast_exact(ApproximateFloat64(1-XSIGMA)*x + Vector<ApproximateFloat64>(x.size(),XSIGMA/x.size()));
         sy = y;
         hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(r,d,fg,c,sb.second,sx,sy,e);
     }
@@ -611,8 +611,8 @@ constraint_adjoin_outer_approximation(PavingInterface& p, const ExactBox& d, con
 {
     ARIADNE_ASSERT(p.dimension()==f.result_size());
 
-    GridCell b=GridCell::smallest_enclosing_primary_cell(make_exact_box(apply(f,d)),p.grid());
-    ExactBox r=make_exact_box(apply(g,d)+UpperBox(g.result_size(),UpperInterval(-1,1)));
+    GridCell b=GridCell::smallest_enclosing_primary_cell(cast_exact_box(apply(f,d)),p.grid());
+    ExactBox r=cast_exact_box(apply(g,d)+UpperBox(g.result_size(),UpperInterval(-1,1)));
     ExactBox rc=intersection(r,c);
 
     ExactPoint y=midpoint(d);
@@ -626,7 +626,7 @@ Void
 procedure_constraint_adjoin_outer_approximation(PavingInterface& p, const ExactBox& d, const ValidatedVectorFunction& f,
                                                 const ValidatedVectorFunction& g, const ExactBox& c, Int e)
 {
-    GridCell b=p.smallest_enclosing_primary_cell(make_exact_box(apply(f,d)));
+    GridCell b=p.smallest_enclosing_primary_cell(cast_exact_box(apply(f,d)));
 
     List<ValidatedProcedure> procedures;
     procedures.reserve(f.result_size()+g.result_size());
@@ -643,8 +643,8 @@ procedure_constraint_adjoin_outer_approximation(PavingInterface& p, const ExactB
 Void optimal_constraint_adjoin_outer_approximation(PavingInterface& p, const ExactBox& d, const ValidatedVectorFunction& f,
                                                    const ValidatedVectorFunction& g, const ExactBox& c, Int e)
 {
-    GridCell b=GridCell::smallest_enclosing_primary_cell(make_exact_box(apply(g,d)),p.grid());
-    ExactBox rc=intersection(make_exact_box(apply(g,d)+UpperBox(g.result_size(),UpperInterval(-1,1))),c);
+    GridCell b=GridCell::smallest_enclosing_primary_cell(cast_exact_box(apply(g,d)),p.grid());
+    ExactBox rc=intersection(cast_exact_box(apply(g,d)+UpperBox(g.result_size(),UpperInterval(-1,1))),c);
 
     ExactPoint y=midpoint(d);
     const Nat l=(d.size()+f.result_size()+g.result_size())*2;

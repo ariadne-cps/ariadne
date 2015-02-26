@@ -127,7 +127,7 @@ Pair<Tribool,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, cons
     for(Nat k=0; k!=l; ++k) { multipliers[k]=1.0/l; }
 
     NonlinearInteriorPointOptimiser optimiser;
-    optimiser.compute_tz(domain,function,make_exact_box(bounds),point,violation,slack);
+    optimiser.compute_tz(domain,function,cast_exact_box(bounds),point,violation,slack);
 
     ARIADNE_LOG(4,"d="<<d<<", f="<<fn<<", c="<<c<<"\n");
 
@@ -138,8 +138,8 @@ Pair<Tribool,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, cons
         optimiser.feasibility_step(d,fn,c,x,y,z,t);
         if(decide(t>=TERR)) {
             ARIADNE_LOG(4,"t="<<t<<", y="<<y<<", x="<<x<<", z="<<z<<"\n");
-            if(definitely(this->check_feasibility(domain,function,codomain,make_exact(point)))) { return make_pair(true,make_exact(point)); }
-            else { ARIADNE_LOG(2,"f(y)="<<fn(make_exact(y))<<"\n"); return make_pair(indeterminate,make_exact(point)); }
+            if(definitely(this->check_feasibility(domain,function,codomain,cast_exact(point)))) { return make_pair(true,cast_exact(point)); }
+            else { ARIADNE_LOG(2,"f(y)="<<fn(cast_exact(y))<<"\n"); return make_pair(indeterminate,cast_exact(point)); }
         }
     }
     ARIADNE_LOG(4,"  t="<<t<<", y="<<y<<", x="<<x<<", z="<<z<<"\n");
@@ -148,7 +148,7 @@ Pair<Tribool,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, cons
         // Probably disjoint, so try to prove this
         UpperBox subdomain=domain;
 
-        Vector<ExactFloat64> x_exact=make_exact(x);
+        Vector<ExactFloat64> x_exact=cast_exact(x);
         // Use the computed dual variables to try to make a scalar function which is negative over the entire domain.
         // This should be easier than using all constraints separately
         ScalarTaylorFunction txg=ScalarTaylorFunction::zero(d,default_sweeper());
@@ -359,7 +359,7 @@ Bool ConstraintSolver::monotone_reduce(UpperBox& domain, const ValidatedScalarFu
 Bool ConstraintSolver::lyapunov_reduce(UpperBox& domain, const VectorTaylorFunction& function, const ExactBox& bounds,
                                        ApproximateFloatVector centre, ApproximateFloatVector multipliers) const
 {
-    return this->lyapunov_reduce(domain,function,bounds,make_exact(centre),make_exact(multipliers));
+    return this->lyapunov_reduce(domain,function,bounds,cast_exact(centre),cast_exact(multipliers));
 }
 
 
@@ -369,8 +369,8 @@ Bool ConstraintSolver::lyapunov_reduce(UpperBox& domain, const VectorTaylorFunct
     ScalarTaylorFunction g(function.domain(),default_sweeper());
     UpperInterval C(0);
     for(Nat i=0; i!=function.result_size(); ++i) {
-        g += make_exact(multipliers[i]) * function[i];
-        C += make_exact(multipliers[i]) * bounds[i];
+        g += cast_exact(multipliers[i]) * function[i];
+        C += cast_exact(multipliers[i]) * bounds[i];
     }
     Covector<UpperInterval> dg = gradient_range(g,domain);
     C -= g(centre);

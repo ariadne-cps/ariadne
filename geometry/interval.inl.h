@@ -25,7 +25,7 @@
 namespace Ariadne {
 
 template<class M> inline M make_split_point(M const& m) { return m; }
-template<class PR> inline Float<Exact,PR> make_split_point(Float<Approximate,PR> const& am) { return make_exact(am); }
+template<class PR> inline Float<Exact,PR> make_split_point(Float<Approximate,PR> const& am) { return cast_exact(am); }
 template<class PR> inline Float<Exact,PR> make_split_point(Float<Bounded,PR> const& vm) { return vm.value(); }
 template<class PR> inline Float<Exact,PR> make_split_point(Float<Metric,PR> const& bm) { return bm.value(); }
 
@@ -170,9 +170,9 @@ inline Interval<LowerFloat64> narrow(Interval<LowerFloat64> const& ivl, UpperFlo
 inline Interval<LowerFloat64> narrow(Interval<LowerFloat64> const& ivl) {
     return narrow(ivl,UpperFloat64(Float64::min())); }
 
-inline ExactInterval make_exact(ApproximateInterval const& ivl) {
+inline ExactInterval cast_exact(ApproximateInterval const& ivl) {
     return reinterpret_cast<ExactInterval const&>(ivl); }
-inline ExactInterval make_exact_interval(ApproximateInterval const& ivl) {
+inline ExactInterval cast_exact_interval(ApproximateInterval const& ivl) {
     return reinterpret_cast<ExactInterval const&>(ivl); }
 
 } // namespace Ariadne

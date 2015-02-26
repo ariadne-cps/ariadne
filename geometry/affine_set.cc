@@ -227,7 +227,7 @@ UpperBox ValidatedAffineConstrainedImageSet::bounding_box() const {
 
 Tribool ValidatedAffineConstrainedImageSet::separated(const ExactBox& bx) const {
     ARIADNE_PRECONDITION_MSG(this->dimension()==bx.dimension(),"set="<<*this<<", box="<<bx);
-    ExactBox wbx=make_exact_box(widen(bx));
+    ExactBox wbx=cast_exact_box(widen(bx));
     LinearProgram<Float64> lp;
     this->construct_linear_program(lp);
     for(Nat i=0; i!=bx.size(); ++i) {
@@ -248,7 +248,7 @@ Tribool ValidatedAffineConstrainedImageSet::separated(const ExactBox& bx) const 
 }
 
 Tribool ValidatedAffineConstrainedImageSet::empty() const {
-    return this->separated(make_exact_box(this->bounding_box()));
+    return this->separated(cast_exact_box(this->bounding_box()));
 }
 
 Tribool ValidatedAffineConstrainedImageSet::inside(const ExactBox& bx) const {

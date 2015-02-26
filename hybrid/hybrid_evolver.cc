@@ -1096,7 +1096,7 @@ _evolution_step(EvolutionData& evolution_data,
 
 
     // Compute the bounding box of the enclosure
-    const ExactBox starting_bounding_box=make_exact_box(starting_set.space_bounding_box());
+    const ExactBox starting_bounding_box=cast_exact_box(starting_set.space_bounding_box());
     ARIADNE_LOG(4,"starting_bounding_box="<<starting_bounding_box<<"\n");
 
     // Test to see if set requires reconditioning
@@ -1500,8 +1500,8 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
     result.step_size=flow.step_size();
     result.final_time=final_time;
 
-    ExactBox space_domain = make_exact_box(initial_set.space_bounding_box());
-    ExactInterval time_domain = make_exact_interval(initial_set.time_range()+ExactInterval(zero,step_size));
+    ExactBox space_domain = cast_exact_box(initial_set.space_bounding_box());
+    ExactInterval time_domain = cast_exact_interval(initial_set.time_range()+ExactInterval(zero,step_size));
     ExactBox spacetime_domain = join(space_domain,time_domain);
 
     //ValidatedVectorFunctionModel space_coordinates=this->function_factory().create_identity(space_domain);
@@ -1684,7 +1684,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
 
                 // Prefer simpler linear restrictions.
                 // Multiply evolution time by crossing_time/max_crossing_time
-                spacial_evolution_time=spacial_evolution_time*lower_crossing_time/make_exact(lower_crossing_time.range().upper());
+                spacial_evolution_time=spacial_evolution_time*lower_crossing_time/cast_exact(lower_crossing_time.range().upper());
             }
         }
         // Erase increasing transverse crossings since these cannot occur
@@ -1742,8 +1742,8 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
                 UpperInterval guard_derivative_range = compose(lie_derivative(guard_function,dynamic),flow).range();
 
                 //ExactFloat64 alpha=numeric_cast<ExactFloat64>(1+flow.step_size()*guard_derivative_range.lower()/guard_range.lower());
-                ValidatedFloat64 alpha_val=(1+flow.step_size()*make_exact(guard_derivative_range.lower())/make_exact(guard_range.lower()));
-                ExactFloat64 alpha=make_exact(alpha_val);
+                ValidatedFloat64 alpha_val=(1+flow.step_size()*cast_exact(guard_derivative_range.lower())/cast_exact(guard_range.lower()));
+                ExactFloat64 alpha=cast_exact(alpha_val);
                 assert(alpha_val.value()==alpha);
                 ARIADNE_LOG(6,"  step_size: "<<flow.step_size()<<", guard_range: "<<guard_range<<", guard_derivative_range: "<<guard_derivative_range<<", alpha: "<<alpha<<"\n");
                 if(alpha>0 && alpha<=1) {
@@ -1805,15 +1805,15 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         result.step_kind=StepKind::PARAMETER_DEPENDENT_FINISHING_TIME;
         result.finishing_kind=FinishingKind::BEFORE_FINAL_TIME;
         if(decide(starting_time_range.width()*2<step_size)) {
-            result.parameter_dependent_finishing_time=this->function_factory().create_constant(initial_set.parameter_domain(),make_exact(starting_time_range.lower())+step_size);
+            result.parameter_dependent_finishing_time=this->function_factory().create_constant(initial_set.parameter_domain(),cast_exact(starting_time_range.lower())+step_size);
         } else {
             // Try to reduce the time interval by half the step size
             // Corresponds to setting omega(smin)=tau(smin)+h, omega(smax)=tau(smax)+h/2
             // Taking omega(s)=a tau(s) + b, we obtain
             //   a=1-h/2(tmax-tmin);  b=h(tmax-tmin/2)/(tmax-tmin) = (2tmax-tmin)a
             ExactFloat64 h=result.step_size;
-            ExactFloat64 tmin=make_exact(starting_time_range.lower());
-            ExactFloat64 tmax=make_exact(starting_time_range.upper());
+            ExactFloat64 tmin=cast_exact(starting_time_range.lower());
+            ExactFloat64 tmax=cast_exact(starting_time_range.upper());
             ValidatedFloat64 a=1-(half(h)/(tmax-tmin));
             ValidatedFloat64 b=h*(tmax-half(tmin))/(tmax-tmin);
             result.parameter_dependent_finishing_time=a*starting_time_function+b;

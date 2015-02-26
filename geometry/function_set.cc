@@ -195,15 +195,15 @@ Pair<Nat,double> nonlinearity_index_and_error(const VectorTaylorFunction& functi
 
 
 ExactBox under_approximation(const EffectiveBox& rbx) {
-    return make_exact_box(LowerBox(rbx));
+    return cast_exact_box(LowerBox(rbx));
 }
 
 ExactBox over_approximation(const EffectiveBox& rbx) {
-    return make_exact_box(UpperBox(rbx));
+    return cast_exact_box(UpperBox(rbx));
 }
 
 ExactBox approximation(const EffectiveBox& rbx) {
-    return make_exact_box(ApproximateBox(rbx));
+    return cast_exact_box(ApproximateBox(rbx));
 }
 
 
@@ -455,7 +455,7 @@ UpperBox ConstrainedImageSet::bounding_box() const
     return Ariadne::apply(this->_function,over_approximation(this->_domain));
 }
 
-Matrix<ExactFloat64> make_exact(Matrix<ValidatedFloat64> vA) {
+Matrix<ExactFloat64> cast_exact(Matrix<ValidatedFloat64> vA) {
     Matrix<ApproximateFloat64> aA=vA;
     return reinterpret_cast<Matrix<ExactFloat64>&>(aA);
 }
@@ -465,8 +465,8 @@ ConstrainedImageSet::affine_approximation() const
 {
     const Vector<ExactInterval> D=approximation(this->domain());
     Vector<ExactFloat64> m=midpoint(D);
-    Matrix<ExactFloat64> G=make_exact(jacobian(this->_function,m));
-    Vector<ExactFloat64> h=make_exact(this->_function.evaluate(m)-G*m);
+    Matrix<ExactFloat64> G=cast_exact(jacobian(this->_function,m));
+    Vector<ExactFloat64> h=cast_exact(this->_function.evaluate(m)-G*m);
     ValidatedAffineConstrainedImageSet result(D,G,h);
 
 
@@ -808,7 +808,7 @@ ExactBox ValidatedConstrainedImageSet::constraint_bounds() const
 {
     ExactBox result(this->number_of_constraints());
     for(Nat i=0; i!=this->number_of_constraints(); ++i) {
-        result[i]=make_exact_interval(UpperInterval(this->constraint(i).lower_bound(),this->constraint(i).upper_bound()));
+        result[i]=cast_exact_interval(UpperInterval(this->constraint(i).lower_bound(),this->constraint(i).upper_bound()));
     }
     return result;
 }
@@ -980,7 +980,7 @@ Tribool ValidatedConstrainedImageSet::overlaps(const ExactBox& bx) const
     ValidatedVectorFunction constraint_function = this->constraint_function();
     ValidatedVectorFunction function = join(space_function,constraint_function);
     //std::cerr<<"function="<<function<<"\n";
-    ExactBox constraint_bounds = intersection(this->constraint_bounds(),make_exact_box(Ariadne::apply(this->constraint_function(),subdomain)));
+    ExactBox constraint_bounds = intersection(this->constraint_bounds(),cast_exact_box(Ariadne::apply(this->constraint_function(),subdomain)));
     ExactBox codomain = product(bx,constraint_bounds);
     //std::cerr<<"codomain="<<codomain<<"\n";
     NonlinearInfeasibleInteriorPointOptimiser optimiser;

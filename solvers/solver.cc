@@ -176,7 +176,7 @@ Vector<ValidatedNumber>
 SolverBase::solve(const ValidatedVectorFunction& f,
                   const Vector<ValidatedNumber>& ix) const
 {
-    ExactBox bx=make_exact_box(ix);
+    ExactBox bx=cast_exact_box(ix);
     return this->solve(f,bx);
 }
 
@@ -218,7 +218,7 @@ SolverBase::solve_all(const ValidatedVectorFunction& f,
     // Create result set
     Set< Vector<ValidatedNumber> > r;
 
-    Vector<ValidatedFloat64> x=make_singleton(bx);
+    Vector<ValidatedFloat64> x=cast_singleton(bx);
 
     // Test for no solution
     const Vector<ValidatedNumber> z(bx.size());
@@ -227,7 +227,7 @@ SolverBase::solve_all(const ValidatedVectorFunction& f,
     }
 
     Bool invertible_jacobian=true;
-    //Vector<ValidatedNumber> nx=2*ix-make_exact(bx);
+    //Vector<ValidatedNumber> nx=2*ix-cast_exact(bx);
     Vector<ValidatedNumber> nx=x;
     try {
         Matrix<ValidatedNumber> Jinv=inverse(f.jacobian(nx));
@@ -269,13 +269,13 @@ SolverBase::solve_all(const ValidatedVectorFunction& f,
 
     if(need_to_split) {
         // If sup_error is too small, assume solution is not verified
-        if(definitely(sup_error(make_singleton(bx))<this->maximum_error())) {
+        if(definitely(sup_error(cast_singleton(bx))<this->maximum_error())) {
             if(!invertible_jacobian) {
-                ARIADNE_WARN("Cannot verify solution in "<<bx<<" with f="<<f(make_singleton(bx))<<"); "
+                ARIADNE_WARN("Cannot verify solution in "<<bx<<" with f="<<f(cast_singleton(bx))<<"); "
                              <<"Jacobian "<<f.jacobian(nx)<<" is not invertible; "
                              <<"approximate inverse="<<inverse(midpoint(f.jacobian(nx)))<<"\n");
             } else {
-                ARIADNE_WARN("Cannot verify or falsify solution in "<<bx<<"; f("<<bx<<")="<<f(make_singleton(bx))<<".\n");
+                ARIADNE_WARN("Cannot verify or falsify solution in "<<bx<<"; f("<<bx<<")="<<f(cast_singleton(bx))<<".\n");
             }
             return r;
         }
@@ -300,7 +300,7 @@ SolverBase::zero(const ValidatedVectorFunction& f,
     const ExactFloat64 e=this->maximum_error();
     Nat n=this->maximum_number_of_steps();
     ARIADNE_LOG(1,"verbosity="<<verbosity<<"\n");
-    Vector<ValidatedNumber> r=make_singleton(bx);
+    Vector<ValidatedNumber> r=cast_singleton(bx);
     Vector<ValidatedNumber> nr(r.size());
     Bool has_solution=false;
     while(n>0) {
@@ -358,7 +358,7 @@ SolverBase::implicit(const ValidatedVectorFunction& f,
     const ExactFloat64 err=this->maximum_error();
 
     ValidatedVectorFunctionModel id(this->function_factory().create_identity(ip));
-    ValidatedVectorFunctionModel h(this->function_factory().create_constants(ip,make_singleton(ix)));
+    ValidatedVectorFunctionModel h(this->function_factory().create_constants(ip,cast_singleton(ix)));
     ValidatedVectorFunctionModel nh(this->function_factory().create_zeros(n,ip));
     ValidatedVectorFunctionModel fnh(this->function_factory().create_zeros(n,ip));
 
@@ -449,7 +449,7 @@ IntervalNewtonSolver::step(const ValidatedVectorFunction& f,
 {
     ARIADNE_LOG(4,"Testing for root in "<<x<<"\n");
     ARIADNE_LOG(5,"  e="<<sup_error(x)<<"  x="<<x<<"\n");
-    Vector<ExactFloat64> m(make_exact(x));
+    Vector<ExactFloat64> m(cast_exact(x));
     ARIADNE_LOG(5,"  m="<<m<<"\n");
     Vector<ValidatedNumber> im(m);
     Vector<ValidatedNumber> w=f.evaluate(im);
@@ -472,7 +472,7 @@ KrawczykSolver::step(const ValidatedVectorFunction& f,
     Matrix<ValidatedNumber> I=Matrix<ValidatedNumber>::identity(x.size());
     ARIADNE_LOG(4,"Testing for root in "<<x<<"\n");
     ARIADNE_LOG(5,"  e="<<sup_error(x)<<"  x="<<x<<"\n");
-    Vector<ExactFloat64> m(make_exact(x));
+    Vector<ExactFloat64> m(cast_exact(x));
     ARIADNE_LOG(5,"  m="<<m<<"\n");
     Vector<ValidatedNumber> im(m);
     Vector<ValidatedNumber> fm=f.evaluate(im);
@@ -498,7 +498,7 @@ FactoredKrawczykSolver::step(const ValidatedVectorFunction& f,
     Matrix<ValidatedNumber> I=Matrix<ValidatedNumber>::identity(x.size());
     ARIADNE_LOG(4,"Testing for root in "<<x<<"\n");
     ARIADNE_LOG(5,"  e="<<sup_error(x)<<"  x="<<x<<"\n");
-    Vector<ExactFloat64> m(make_exact(x));
+    Vector<ExactFloat64> m(cast_exact(x));
     ARIADNE_LOG(5,"  m="<<m<<"\n");
     Vector<ValidatedNumber> im(m);
     Vector<ValidatedNumber> fm=f.evaluate(im);
@@ -557,7 +557,7 @@ IntervalNewtonSolver::implicit_step(const ValidatedVectorFunction& f,
     Matrix<UpperInterval> rngJ(n,n);
     for(Nat i=0; i!=n; ++i) {
         for(Nat j=0; j!=n; ++j) {
-            UpperInterval D2fij=UpperInterval(unchecked_evaluate(D2f[i][j],make_singleton(product(id.range(),h.range()))));
+            UpperInterval D2fij=UpperInterval(unchecked_evaluate(D2f[i][j],cast_singleton(product(id.range(),h.range()))));
             rngJ[i][j]=intersection(J[i][j].range(),D2fij);
         }
     }
@@ -572,12 +572,12 @@ IntervalNewtonSolver::implicit_step(const ValidatedVectorFunction& f,
             ARIADNE_THROW(SingularJacobianException,"IntervalNewtonSolver","D2f(P,X)="<<rngJ[0][0]<<" which contains zero.");
         }
         if(possibly(contains(J[0][0].range(),ExactFloat64(0.0)))) {
-            dh[0]=fidmh[0]/make_singleton(rngJ[0][0]);
+            dh[0]=fidmh[0]/cast_singleton(rngJ[0][0]);
         } else {
             dh[0]=fidmh[0]/J[0][0];
         }
     } else {
-        dh=inverse(make_singleton(rngJ))*fidmh;
+        dh=inverse(cast_singleton(rngJ))*fidmh;
     }
     ARIADNE_LOG(7,"dh="<<dh<<"\n");
 
@@ -609,9 +609,9 @@ KrawczykSolver::implicit_step(const ValidatedVectorFunction& f,
     ValidatedVectorFunctionModel fm=compose(f,join(p,mx));
     ARIADNE_LOG(5,"    f(p,mx)="<<fm<<"\n");
     Vector<ValidatedNumber> rp(np);
-    for(Nat i=0; i!=np; ++i) { rp[i]=make_singleton(p[i].range()); }
+    for(Nat i=0; i!=np; ++i) { rp[i]=cast_singleton(p[i].range()); }
     Vector<ValidatedNumber> rx(nx);
-    for(Nat i=0; i!=nx; ++i) { rx[i]=make_singleton(x[i].range()); }
+    for(Nat i=0; i!=nx; ++i) { rx[i]=cast_singleton(x[i].range()); }
     Matrix<ValidatedNumber> J=project(f.jacobian(join(rp,rx)),range(0,nx),range(np,np+nx));
     ARIADNE_LOG(5,"    D2f(r)=J="<<J<<"\n");
     Matrix<ValidatedNumber> M=inverse(midpoint(J));

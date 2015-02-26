@@ -835,7 +835,7 @@ template<class F> TaylorModel<Validated,F> abs(const TaylorModel<Validated,F>& x
         static const Dbl p[n]={0.0112167620474, 5.6963263292747541, -31.744583789655049, 100.43002481377681, -162.01366698662306, 127.45243493284417, -38.829743345344667};
         static const Dbl err=0.035;
         TaylorModel<Validated,F> r(x.argument_size(),x.sweeper());
-        ExactFloat64 xmag=make_exact(mag(xr));
+        ExactFloat64 xmag=cast_exact(mag(xr));
         TaylorModel<Validated,F> s=x/xmag;
         s=sqr(s);
         r=static_cast<ExactFloat64>(p[n-1]);
@@ -928,7 +928,7 @@ compose(const AnalyticFunction& fn, const TaylorModel<Validated,F>& tm) {
 
     Nat d=max_degree;
     ExactFloat64 c=tm.value();
-    ValidatedFloat64 r=make_singleton(tm.range());
+    ValidatedFloat64 r=cast_singleton(tm.range());
     Series<ValidatedFloat64> centre_series=fn.series(c);
     Series<ValidatedFloat64> range_series=fn.series(r);
     std::cerr<<"c="<<c<<"\nr="<<r<<"\n";
@@ -989,7 +989,7 @@ template<class F> TaylorModel<Validated,F> TaylorModel<Validated,F>::_embed_erro
     MultiIndex ra(as+1u);
 
     // The new error term is first in reverse lexicographic order.
-    ExactFloat64 err_coef=make_exact(tm.error());
+    ExactFloat64 err_coef=cast_exact(tm.error());
     ra[as]=1;
     rtm._append(ra,err_coef);
     ra[as]=0;

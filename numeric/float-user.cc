@@ -1352,8 +1352,8 @@ template<class PR> Integer integer_cast(Float<Exact,PR> const& x) {
 }
 
 
-Float<Exact,Precision64> make_exact(Real const& x) {
-    return make_exact(Float<Approximate,Precision64>(x));
+Float<Exact,Precision64> cast_exact(Real const& x) {
+    return cast_exact(Float<Approximate,Precision64>(x));
 }
 
 template<class PR> Bool operator==(Float<Exact,PR> const& x, const Rational& q) { return Rational(x)==q; }

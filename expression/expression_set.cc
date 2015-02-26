@@ -135,15 +135,15 @@ OutputStream& operator<<(OutputStream& os, const RealVariablesBox& ebx) {
 }
 
 ExactInterval over_approximation(RealInterval ivl) {
-    return make_exact_interval(UpperInterval(ivl));
+    return cast_exact_interval(UpperInterval(ivl));
 }
 
 ExactInterval under_approximation(RealInterval ivl) {
-    return make_exact_interval(LowerInterval(ivl));
+    return cast_exact_interval(LowerInterval(ivl));
 }
 
 ExactInterval approximation(RealInterval ivl) {
-    return make_exact_interval(ApproximateInterval(ivl));
+    return cast_exact_interval(ApproximateInterval(ivl));
 }
 
 
@@ -245,7 +245,7 @@ OutputStream& operator<<(OutputStream& os, const RealExpressionBoundedConstraint
 }
 
 ValidatedConstrainedImageSet approximate_euclidean_set(const RealExpressionBoundedConstraintSet& set, const RealSpace& space) {
-    ExactIntervalVector domain=make_exact_box(ApproximateBox(RealVariablesBox(set.bounds()).euclidean_set(space)));
+    ExactIntervalVector domain=cast_exact_box(ApproximateBox(RealVariablesBox(set.bounds()).euclidean_set(space)));
     ValidatedVectorFunction identity=ValidatedVectorFunction::identity(domain.size());
 
     ValidatedConstrainedImageSet result(domain,identity);

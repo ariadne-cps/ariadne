@@ -199,7 +199,7 @@ template<> Matrix<BoundedFloat64> gs_solve(const Matrix<BoundedFloat64>& A, cons
     // Precondition A and B
     Matrix<ApproximateFloat64> mA(A);
 
-    Matrix<ExactFloat64> J=make_exact(inverse(mA));
+    Matrix<ExactFloat64> J=cast_exact(inverse(mA));
     Matrix<BoundedFloat64> JA=J*A;
     Matrix<BoundedFloat64> JB=J*B;
 
@@ -837,18 +837,18 @@ template<class X> Matrix<MidpointType<X>> midpoint(Matrix<X> const& A) {
     return std::move(R);
 }
 
-template<class X> Matrix<SingletonType<X>> make_singleton(Matrix<X> const& A) {
-    Matrix<SingletonType<X>> R(A.row_size(),A.column_size(),make_singleton(A.zero_element()));
+template<class X> Matrix<SingletonType<X>> cast_singleton(Matrix<X> const& A) {
+    Matrix<SingletonType<X>> R(A.row_size(),A.column_size(),cast_singleton(A.zero_element()));
     for(SizeType i=0; i!=A.row_size(); ++i) {
         for(SizeType j=0; j!=A.column_size(); ++j) {
-            R.at(i,j)=make_singleton(A.at(i,j));
+            R.at(i,j)=cast_singleton(A.at(i,j));
         }
     }
     return std::move(R);
 }
 
-template<class AX> Matrix<decltype(make_exact(declval<AX>()))> make_exact(Matrix<AX> const& A) {
-    typedef decltype(make_exact(declval<AX>())) EX;
+template<class AX> Matrix<decltype(cast_exact(declval<AX>()))> cast_exact(Matrix<AX> const& A) {
+    typedef decltype(cast_exact(declval<AX>())) EX;
     return reinterpret_cast<Matrix<EX> const&>(A);
 }
 
@@ -891,7 +891,7 @@ template class Matrix<Real>;
 template PositiveUpperFloat64 sup_norm(const Matrix<BoundedFloat64>& A);
 template UpperFloat64 log_norm(const Matrix<BoundedFloat64>& A);
 
-template Matrix<ExactFloat64>const& make_exact(const Matrix<ApprxFloat64>& mx);
+template Matrix<ExactFloat64>const& cast_exact(const Matrix<ApprxFloat64>& mx);
 
 template class Matrix<Rational>;
 template Matrix<Rational> inverse(const Matrix<Rational>&);
@@ -906,7 +906,7 @@ template<> Matrix<Rational> midpoint(Matrix<Rational> const& A) { return A; }
 
 namespace Ariadne {
 template class Matrix<UpperFloatInterval>;
-template Matrix<SingletonType<UpperFloatInterval>> make_singleton(Matrix<UpperFloatInterval> const&);
+template Matrix<SingletonType<UpperFloatInterval>> cast_singleton(Matrix<UpperFloatInterval> const&);
 template Matrix<MidpointType<UpperFloatInterval>> midpoint(Matrix<UpperFloatInterval> const&);
 template Matrix<UpperFloatInterval> inverse(const Matrix<UpperFloatInterval>&);
 template Vector<UpperFloatInterval> solve(const Matrix<UpperFloatInterval>&, const Vector<UpperFloatInterval>&);

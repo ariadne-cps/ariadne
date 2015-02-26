@@ -738,7 +738,7 @@ class HybridGridTreeSet
             if( !_loc_iter->second.empty() ) {
                 DiscreteLocation const& loc = _loc_iter->first;
                 RealSpace const& spc=this->space(loc);
-                result.insert(loc,spc,make_exact_box(_loc_iter->second.bounding_box()));
+                result.insert(loc,spc,cast_exact_box(_loc_iter->second.bounding_box()));
             }
         }
         return result;

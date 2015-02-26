@@ -86,14 +86,14 @@ typedef Vector<ExactInterval> ExactIntervalVector;
 namespace {
 
 
-ExactInterval make_exact_interval(const Real& x) {
+ExactInterval cast_exact_interval(const Real& x) {
     return ExactInterval(x.lower().raw(),x.upper().raw());
 }
 
 ExactInterval make_domain(const EffectiveInterval& ivl) {
     Ariadne::RoundingModeType rnd=Ariadne::get_rounding_mode();
-    ExactInterval dom_lower_ivl=make_exact_interval(ivl.lower());
-    ExactInterval dom_upper_ivl=make_exact_interval(ivl.upper());
+    ExactInterval dom_lower_ivl=cast_exact_interval(ivl.lower());
+    ExactInterval dom_upper_ivl=cast_exact_interval(ivl.upper());
     Float64 dom_lower=dom_lower_ivl.lower().raw();
     Float64 dom_upper=dom_upper_ivl.upper().raw();
     Ariadne::set_rounding_downward();
@@ -117,8 +117,8 @@ ValidatedVectorFunctionModel make_identity(const EffectiveBox& bx, const Validat
     RawFloatVector errs(bx.dimension());
 
     for(Nat i=0; i!=bx.dimension(); ++i) {
-        ExactInterval dom_lower_ivl=make_exact_interval(bx[i].lower());
-        ExactInterval dom_upper_ivl=make_exact_interval(bx[i].upper());
+        ExactInterval dom_lower_ivl=cast_exact_interval(bx[i].lower());
+        ExactInterval dom_upper_ivl=cast_exact_interval(bx[i].upper());
         // Convert to single-precision values
         Float64 dom_lower_flt=numeric_cast<float>(bx[i].lower());
         Float64 dom_upper_flt=numeric_cast<float>(bx[i].upper());
@@ -278,7 +278,7 @@ Enclosure::Enclosure(const ExactBox& box, const ValidatedFunctionModelFactoryInt
             this->_space_function[i]=this->function_factory().create_coordinate(this->_domain,j);
             ++j;
         } else {
-            this->_space_function[i]=this->function_factory().create_constant(this->_domain,make_singleton(box[i]));
+            this->_space_function[i]=this->function_factory().create_constant(this->_domain,cast_singleton(box[i]));
         }
     }
     this->_reduced_domain=this->_domain;
@@ -307,7 +307,7 @@ Enclosure::Enclosure(const ExactBox& domain, const ValidatedVectorFunction& func
     this->_domain=domain;
     for(Nat i=0; i!=this->_domain.size(); ++i) {
         if(decide(this->_domain[i].width()==0)) {
-            this->_domain[i]=make_exact_interval(widen(this->_domain[i]));
+            this->_domain[i]=cast_exact_interval(widen(this->_domain[i]));
         }
     }
 
@@ -335,7 +335,7 @@ Enclosure::Enclosure(const ExactBox& domain, const ValidatedVectorFunction& spac
     this->_domain=domain;
     for(Nat i=0; i!=this->_domain.size(); ++i) {
         if(decide(this->_domain[i].width()==0)) {
-            this->_domain[i]=make_exact_interval(widen(this->_domain[i]));
+            this->_domain[i]=cast_exact_interval(widen(this->_domain[i]));
         }
     }
 
@@ -606,7 +606,7 @@ ExactBox Enclosure::reduced_domain() const {
 }
 
 ExactBox Enclosure::codomain() const {
-    return make_exact_box(widen(this->_space_function.range()));
+    return cast_exact_box(widen(this->_space_function.range()));
 }
 
 ValidatedVectorFunctionModel const& Enclosure::function() const {
@@ -678,7 +678,7 @@ ErrorFloat64 Enclosure::radius() const {
 }
 
 ExactPoint Enclosure::centre() const {
-    return make_exact(this->bounding_box().centre());
+    return cast_exact(this->bounding_box().centre());
 }
 
 
@@ -1087,7 +1087,7 @@ TaylorModel<Validated,Float64> recondition(const TaylorModel<Validated,Float64>&
         error_ptr = &r.error();
     } else {
         ra[number_of_kept_variables+index_of_error]=1;
-        r.expansion().append(ra,make_exact(tm.error()));
+        r.expansion().append(ra,cast_exact(tm.error()));
         ra[number_of_kept_variables+index_of_error]=0;
         error_ptr = reinterpret_cast<ErrorFloat64*>(&r.begin()->data());
     }
@@ -1253,7 +1253,7 @@ Void Enclosure::draw(CanvasInterface& canvas, const Projection2d& projection) co
 
 Void Enclosure::box_draw(CanvasInterface& canvas, const Projection2d& projection) const {
     this->reduce();
-    make_exact_box(product(Ariadne::apply(this->_space_function,this->_reduced_domain),Ariadne::apply(this->_time_function,this->_reduced_domain))).draw(canvas,projection);
+    cast_exact_box(product(Ariadne::apply(this->_space_function,this->_reduced_domain),Ariadne::apply(this->_time_function,this->_reduced_domain))).draw(canvas,projection);
 }
 
 ValidatedVectorFunctionModel join(const ValidatedVectorFunctionModel& f1, const ValidatedScalarFunctionModel& f2, const ValidatedVectorFunctionModel& f3) {

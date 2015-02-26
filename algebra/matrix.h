@@ -682,7 +682,7 @@ template<class X1, class X2> Vector<ArithmeticType<X1,X2>> operator*(MatrixTrans
 }
 
 template<class X> Matrix<MidpointType<X>> midpoint(const Matrix<X>&);
-template<class X> Matrix<SingletonType<X>> make_singleton(const Matrix<X>&);
+template<class X> Matrix<SingletonType<X>> cast_singleton(const Matrix<X>&);
 
 
 // Invert matrices and solve linear systems
@@ -717,7 +717,7 @@ Tuple< Matrix<ApproximateFloat64>, PivotMatrix> triangular_factor(const Matrix<A
 Matrix<ApproximateFloat64> triangular_multiplier(const Matrix<ApproximateFloat64>& A);
 
 
-inline Matrix<ExactFloat64>& make_exact(Matrix<ApproximateFloat64>& A) {
+inline Matrix<ExactFloat64>& cast_exact(Matrix<ApproximateFloat64>& A) {
     return reinterpret_cast<Matrix<ExactFloat64>&>(A); }
 
 } // namespace Ariadne

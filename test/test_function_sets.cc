@@ -144,7 +144,7 @@ class TestConstrainedImageSet
 
         Figure figure;
         figure.set_bounding_box(widen(set.bounding_box(),0.5_exact));
-        ExactBox b(make_exact_box(set.bounding_box()));
+        ExactBox b(cast_exact_box(set.bounding_box()));
         List<ExactBox> stack(1u,b);
         while(!stack.empty()) {
             ExactBox bx=stack.back();
@@ -228,7 +228,7 @@ class TestConstrainedImageSet
         Figure figure;
         figure.set_bounding_box(ExactBox({{-4.0,+4.0},{-4.0,+4.0}}));
         figure.set_fill_colour(1.0,1.0,1.0);
-        figure.draw(make_exact_box(set.bounding_box()));
+        figure.draw(cast_exact_box(set.bounding_box()));
         figure.set_fill_colour(0.75,0.75,0.75);
         figure.draw(set.affine_approximation());
         figure.set_fill_colour(0.5,0.5,0.5);

@@ -290,7 +290,7 @@ Void TestTaylorModel::test_range()
     ValidatedTaylorModel t2 = x*x+x;
     ARIADNE_TEST_BINARY_PREDICATE(refines,t2.range(),ExactInterval(-2,+2));
     ARIADNE_TEST_BINARY_PREDICATE(refines,ExactInterval(-0.25,+2),t2.range());
-    if(make_exact_interval(t2.range())!=ExactInterval(-0.25,2.0)) {
+    if(cast_exact_interval(t2.range())!=ExactInterval(-0.25,2.0)) {
         ARIADNE_TEST_WARN("ValidatedTaylorModel::range() not exact for quadratic functions."); }
 }
 

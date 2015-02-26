@@ -366,7 +366,7 @@ template<class M> FunctionPatch<M>* FunctionPatch<M>::_derivative(SizeType j) co
 template<class M> ApproximateNumber FunctionPatch<M>::operator() (const Vector<ApproximateNumber>& x) const
 {
     const FunctionPatch<M>& f=*this;
-    if(!contains(f.domain(),make_exact(x))) {
+    if(!contains(f.domain(),cast_exact(x))) {
         ARIADNE_THROW(DomainException,"tf.evaluate(ax) with tf="<<f<<", ax="<<x," ax is not an element of tf.domain()="<<f.domain());
     }
     Vector<ApproximateNumber> sx=Ariadne::unscale(x,f._domain);

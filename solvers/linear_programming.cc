@@ -150,8 +150,8 @@ Float64 compute_mu(const Vector<Float64>& xl, const Vector<Float64>& xu,
 
 
 inline ValidatedFloat64 mul_val(Float64 x1, Float64 x2) { return ValidatedFloat64(mul_down(x1,x2),mul_up(x1,x2)); }
-inline Vector<ExactFloat64> const& make_exact(Vector<Float64> const& v) { return reinterpret_cast<Vector<ExactFloat64>const&>(v); }
-inline Matrix<ExactFloat64> const& make_exact(Matrix<Float64> const& A) { return reinterpret_cast<Matrix<ExactFloat64>const&>(A); }
+inline Vector<ExactFloat64> const& cast_exact(Vector<Float64> const& v) { return reinterpret_cast<Vector<ExactFloat64>const&>(v); }
+inline Matrix<ExactFloat64> const& cast_exact(Matrix<Float64> const& A) { return reinterpret_cast<Matrix<ExactFloat64>const&>(A); }
 
 
 Tribool InteriorPointSolver::
@@ -164,8 +164,8 @@ validate_feasibility(const Vector<Float64>& xl, const Vector<Float64>& xu,
 
     // x should be an approximate solution to Ax=b
     // Use the fact that for any x, x'=(x + A^T (AA^T)^{-1}(b-Ax)) satisfies Ax'=0
-    Vector<ValidatedNumber> ivlx = make_exact(x);
-    Vector<ValidatedNumber> ivle = make_exact(b)-make_exact(A)*ivlx;
+    Vector<ValidatedNumber> ivlx = cast_exact(x);
+    Vector<ValidatedNumber> ivle = cast_exact(b)-cast_exact(A)*ivlx;
 
     Matrix<ValidatedNumber> ivlS(m,m);
     for(Nat i1=0; i1!=m; ++i1) {
@@ -181,7 +181,7 @@ validate_feasibility(const Vector<Float64>& xl, const Vector<Float64>& xu,
         }
     }
 
-    Vector<ValidatedNumber> ivld =  transpose(make_exact(A)) * solve(ivlS,ivle);
+    Vector<ValidatedNumber> ivld =  transpose(cast_exact(A)) * solve(ivlS,ivle);
 
     ivlx += ivld;
 
@@ -197,7 +197,7 @@ validate_feasibility(const Vector<Float64>& xl, const Vector<Float64>& xu,
 
     // If yb - max(yA,0) xu + min(yA,0) xl > 0, then problem is infeasible
     // Evaluate lower bound for yb - max(z,0) xu + min(z,0) xl
-    Vector<ValidatedNumber> z=transpose(make_exact(A)) * make_exact(y);
+    Vector<ValidatedNumber> z=transpose(cast_exact(A)) * cast_exact(y);
     Float64 mx = 0.0;
     Float64::set_rounding_downward();
     for(Nat i=0; i!=y.size(); ++i) {

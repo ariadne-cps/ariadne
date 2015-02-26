@@ -46,7 +46,7 @@
 namespace Ariadne {
 
 template<> inline ExactFloat64 numeric_cast<ExactFloat64>(Real const& r) {
-    return make_exact(ApproximateFloat64(r));
+    return cast_exact(ApproximateFloat64(r));
 }
 
 Orbit<HybridPoint>::Orbit(const HybridPoint& hpt)
@@ -70,7 +70,7 @@ Orbit<HybridPoint>::insert(HybridTime ht, const HybridPoint& hpt)
 {
     ARIADNE_ASSERT(ht.discrete_time()<=this->size());
     Real time=ht.continuous_time();
-    ExactFloat64 flt_time=make_exact(time);
+    ExactFloat64 flt_time=cast_exact(time);
     ARIADNE_ASSERT(Real(flt_time)==time);
     if(this->size()==ht.discrete_time()) {
         this->_curves_ptr->push_back(HybridInterpolatedCurve(hpt.location(),hpt.space(),InterpolatedCurve(flt_time,hpt.point())));

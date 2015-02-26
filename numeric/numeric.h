@@ -62,7 +62,7 @@ template<> inline Float64 numeric_cast(const ExactFloat64& a) { return a.raw(); 
 
 template<> inline Real numeric_cast(const Float64& a) { return Real(ExactFloat64(a)); }
 template<> inline Real numeric_cast(const ExactFloat64& a) { return Real(a); }
-template<> inline Real numeric_cast(const ValidatedFloat64& a) { return Real(make_exact(ApproximateFloat64(a))); }
+template<> inline Real numeric_cast(const ValidatedFloat64& a) { return Real(cast_exact(ApproximateFloat64(a))); }
 
 } // namespace Ariadne
 

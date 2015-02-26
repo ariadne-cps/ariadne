@@ -125,10 +125,10 @@ InterpolatedCurve::insert(const RawFloat64& s, const Vector<RawFloat64>& pt) {
 UpperBox
 InterpolatedCurve::bounding_box() const
 {
-    ExactPoint pt=make_exact(this->_points.begin()->second);
+    ExactPoint pt=cast_exact(this->_points.begin()->second);
     ExactBox bx(pt);
     for(ConstIterator iter=this->_points.begin(); iter!=this->_points.end(); ++iter) {
-        pt=make_exact(iter->second);
+        pt=cast_exact(iter->second);
         bx=hull(bx,pt);
     }
     return bx;

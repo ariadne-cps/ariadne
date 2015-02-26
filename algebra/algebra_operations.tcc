@@ -224,9 +224,9 @@ sqrt(const A& x)
     //std::cerr<<"rec(A)\n";
     // Use a special routine to minimise errors
     // Given range [rl,ru], rescale by constant a such that rl/a=1-d; ru/a=1+d
-    auto tol=make_exact(x.tolerance());
-    auto avg=make_exact(x.average());
-    auto rad=make_exact(x.radius());
+    auto tol=cast_exact(x.tolerance());
+    auto avg=cast_exact(x.average());
+    auto rad=cast_exact(x.radius());
 
     if(avg<=rad) {
         ARIADNE_THROW(DomainException,"log(A x)","x="<<x<<"\n");
@@ -256,9 +256,9 @@ rec(const A& x)
     typedef typename A::NumericType X;
     // Use a special routine to minimise errors
     // Given range [rl,ru], rescale by constant a such that rl/a=1-d; ru/a=1+d
-    auto tol=make_exact(x.tolerance());
-    auto avg=make_exact(x.average());
-    auto rad=make_exact(x.radius());
+    auto tol=cast_exact(x.tolerance());
+    auto avg=cast_exact(x.average());
+    auto rad=cast_exact(x.radius());
 
     if(decide(rad>=abs(avg))) {
         ARIADNE_THROW(DivideByZeroException,"rec(A x)","x="<<x<<", avg="<<avg<<", rad="<<rad<<"\n");
@@ -289,9 +289,9 @@ log(const A& x)
     typedef typename A::NumericType X;
     // Use a special routine to minimise errors
     // Given range [rl,ru], rescale by constant a such that rl/a=1-d; ru/a=1+d
-    auto tol=make_exact(x.tolerance());
-    auto avg=make_exact(x.average());
-    auto rad=make_exact(x.radius());
+    auto tol=cast_exact(x.tolerance());
+    auto avg=cast_exact(x.average());
+    auto rad=cast_exact(x.radius());
 
     if(avg<=rad) {
         ARIADNE_THROW(DomainException,"log(A x)","x="<<x<<"\n");
@@ -323,7 +323,7 @@ template<class A> EnableIfNormedAlgebra<A> exp(const A& x)
 
     auto avg=x.average();
     auto rad=x.radius();
-    auto tol = make_exact(x.tolerance());
+    auto tol = cast_exact(x.tolerance());
 
     // Scale to unit interval
     Nat sfp=0; // A number such that 2^sfp>rad(x.range())
@@ -368,7 +368,7 @@ sin(const A& x)
     Real const& pi=Ariadne::pi;
     // FIXME: Truncation error may be incorrect
 
-    auto tol = make_exact(x.tolerance());
+    auto tol = cast_exact(x.tolerance());
     auto avg=x.average();
     auto rad=x.radius();
     auto rng=avg.pm(rad);
@@ -407,7 +407,7 @@ cos(const A& x)
 {
     typedef typename A::NumericType X;
 
-    auto tol = make_exact(x.tolerance());
+    auto tol = cast_exact(x.tolerance());
     auto avg=x.average();
     auto rad=x.radius();
 

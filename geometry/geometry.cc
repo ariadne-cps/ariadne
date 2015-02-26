@@ -33,7 +33,7 @@ namespace Ariadne {
 Tribool
 separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float64& eps)
 {
-    ExactBox bb=make_exact_box(ls.bounding_box());
+    ExactBox bb=cast_exact_box(ls.bounding_box());
     if(definitely(bb.empty())) { return true; }
     return separated(ls,rs,bb,eps);
 }
@@ -42,7 +42,7 @@ separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Fl
 Tribool
 overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float64& eps)
 {
-    ExactBox bb=make_exact_box(ls.bounding_box());
+    ExactBox bb=cast_exact_box(ls.bounding_box());
     if(definitely(bb.empty())) { return false; }
     return overlap(ls,rs,bb,eps);
 }
@@ -51,7 +51,7 @@ overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Floa
 Tribool
 inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float64& eps)
 {
-    ExactBox bb=make_exact_box(ls.bounding_box());
+    ExactBox bb=cast_exact_box(ls.bounding_box());
     if(definitely(bb.empty())) { return true; }
     return inside(ls,rs,bb,eps);
 }

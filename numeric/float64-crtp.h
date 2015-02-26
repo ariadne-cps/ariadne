@@ -396,10 +396,10 @@ class TwoExp {
 inline TwoExp two_exp(Int n) { return TwoExp(n); }
 
 
-ExactFloat64 make_exact(const Float64&);
+ExactFloat64 cast_exact(const Float64&);
 ErrorFloat64 make_error(const Float64&);
 ValidFloat64 make_valid(const Float64&);
-Float64 make_raw(const ApprxFloat64&);
+Float64 cast_raw(const ApprxFloat64&);
 
 } // namespace Ariadne
 

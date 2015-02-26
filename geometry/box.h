@@ -390,9 +390,9 @@ template<class I> inline I& Box<I>::operator[](SizeType i) {
     return this->Vector<I>::operator[](i);
 }
 
-template<class I> inline auto make_singleton(Box<I> const& bx) -> Vector<decltype(make_singleton(declval<I>()))> {
-    Vector<decltype(make_singleton(declval<I>()))> v(bx.dimension());
-    for(SizeType i=0; i!=bx.dimension(); ++i) { v[i]=make_singleton(bx[i]); }
+template<class I> inline auto cast_singleton(Box<I> const& bx) -> Vector<decltype(cast_singleton(declval<I>()))> {
+    Vector<decltype(cast_singleton(declval<I>()))> v(bx.dimension());
+    for(SizeType i=0; i!=bx.dimension(); ++i) { v[i]=cast_singleton(bx[i]); }
     return v;
 }
 
@@ -400,11 +400,11 @@ template<class I> inline Void Box<I>::draw(CanvasInterface& c, const Projection2
     return Ariadne::draw(c,p,ApproximateFloatBox(*this)); }
 
 
-inline ExactBox make_exact_box(ApproximateBox const& abx) {
+inline ExactBox cast_exact_box(ApproximateBox const& abx) {
     return ExactBox(reinterpret_cast<ExactBox const&>(abx));
 }
 
-inline ExactBox make_exact_box(Vector<BoundedFloat64> const& bv) {
+inline ExactBox cast_exact_box(Vector<BoundedFloat64> const& bv) {
     return ExactBox(reinterpret_cast<Vector<ExactInterval>const&>(bv));
 }
 

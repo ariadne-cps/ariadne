@@ -49,9 +49,9 @@ using RawFloatMP = FloatMP;
 //template<> struct FloatTypedef<PrecisionMP> { typedef FloatMP Type; };
 //template<class PR> using RawFloat = typename FloatTypedef<PR>::Type;
 
-RawFloat64 make_raw_float(Precision64);
-RawFloatMP make_raw_float(PrecisionMP);
-template<class PR> using RawFloat = decltype(make_raw_float(declval<PR>()));
+RawFloat64 cast_raw_float(Precision64);
+RawFloatMP cast_raw_float(PrecisionMP);
+template<class PR> using RawFloat = decltype(cast_raw_float(declval<PR>()));
 
 
 template<class P, class PR> class Float;

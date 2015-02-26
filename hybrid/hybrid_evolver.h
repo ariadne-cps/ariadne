@@ -67,7 +67,7 @@ class FlowFunctionModel
 {
   public:
     FlowFunctionModel(const ValidatedVectorFunctionModel& f) : ValidatedVectorFunctionModel(f) { }
-    ExactFloat64 step_size() const { return make_exact(this->time_domain().upper()); }
+    ExactFloat64 step_size() const { return cast_exact(this->time_domain().upper()); }
     ExactInterval time_domain() const { return this->domain()[this->domain().size()-1]; }
     ExactBox space_domain() const { return ExactBox(project(this->domain(),Ariadne::range(0,this->domain().size()-1))); }
     ExactBox const codomain() const { return this->ValidatedVectorFunctionModel::codomain(); }

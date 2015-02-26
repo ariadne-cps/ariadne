@@ -221,7 +221,7 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     //const Float64 zero_time=0.0;
 
     // Get bounding boxes for time and space bounding_box
-    ExactBox current_set_bounds=make_exact_box(current_set_model.bounding_box());
+    ExactBox current_set_bounds=cast_exact_box(current_set_model.bounding_box());
     ARIADNE_LOG(4,"current_set_bounds = "<<current_set_bounds<<"\n");
 
 

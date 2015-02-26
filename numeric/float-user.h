@@ -774,39 +774,39 @@ template<class PR> auto operator>=(Rational const& q, Float<Exact,PR> const& x) 
 template<class PR> auto operator< (Rational const& q, Float<Exact,PR> const& x) -> decltype(q< Rational(x)) { return q< Rational(x); }
 template<class PR> auto operator> (Rational const& q, Float<Exact,PR> const& x) -> decltype(q> Rational(x)) { return q> Rational(x); }
 
-ExactFloat64 make_exact(const Real& x);
+ExactFloat64 cast_exact(const Real& x);
 
-inline ExactFloat64 const& make_exact(RawFloat64 const& x) { return reinterpret_cast<ExactFloat64 const&>(x); }
-inline ExactFloat64 const& make_exact(ApproximateFloat64 const& x) { return reinterpret_cast<ExactFloat64 const&>(x); }
-inline ExactFloat64 const& make_exact(ExactFloat64 const& x) { return reinterpret_cast<ExactFloat64 const&>(x); }
+inline ExactFloat64 const& cast_exact(RawFloat64 const& x) { return reinterpret_cast<ExactFloat64 const&>(x); }
+inline ExactFloat64 const& cast_exact(ApproximateFloat64 const& x) { return reinterpret_cast<ExactFloat64 const&>(x); }
+inline ExactFloat64 const& cast_exact(ExactFloat64 const& x) { return reinterpret_cast<ExactFloat64 const&>(x); }
 
-template<template<class>class T> inline const T<ExactFloat64>& make_exact(const T<RawFloat64>& t) {
+template<template<class>class T> inline const T<ExactFloat64>& cast_exact(const T<RawFloat64>& t) {
     return reinterpret_cast<const T<ExactFloat64>&>(t); }
-template<template<class>class T> inline const T<ExactFloat64>& make_exact(const T<ApproximateFloat64>& t) {
+template<template<class>class T> inline const T<ExactFloat64>& cast_exact(const T<ApproximateFloat64>& t) {
     return reinterpret_cast<const T<ExactFloat64>&>(t); }
-template<template<class>class T> inline const T<ExactFloat64>& make_exact(const T<ExactFloat64>& t) {
+template<template<class>class T> inline const T<ExactFloat64>& cast_exact(const T<ExactFloat64>& t) {
     return reinterpret_cast<const T<ExactFloat64>&>(t); }
 
-inline RawFloat64 const& make_raw(RawFloat64 const& x) { return reinterpret_cast<RawFloat64 const&>(x); }
-inline RawFloat64 const& make_raw(ApproximateFloat64 const& x) { return reinterpret_cast<RawFloat64 const&>(x); }
-inline RawFloat64 const& make_raw(ExactFloat64 const& x) { return reinterpret_cast<RawFloat64 const&>(x); }
+inline RawFloat64 const& cast_raw(RawFloat64 const& x) { return reinterpret_cast<RawFloat64 const&>(x); }
+inline RawFloat64 const& cast_raw(ApproximateFloat64 const& x) { return reinterpret_cast<RawFloat64 const&>(x); }
+inline RawFloat64 const& cast_raw(ExactFloat64 const& x) { return reinterpret_cast<RawFloat64 const&>(x); }
 
-template<template<class>class T> inline const T<RawFloat64>& make_raw(const T<RawFloat64>& t) {
+template<template<class>class T> inline const T<RawFloat64>& cast_raw(const T<RawFloat64>& t) {
     return reinterpret_cast<const T<RawFloat64>&>(t); }
-template<template<class>class T> inline const T<RawFloat64>& make_raw(const T<ApproximateFloat64>& t) {
+template<template<class>class T> inline const T<RawFloat64>& cast_raw(const T<ApproximateFloat64>& t) {
     return reinterpret_cast<const T<RawFloat64>&>(t); }
-template<template<class>class T> inline const T<RawFloat64>& make_raw(const T<ExactFloat64>& t) {
+template<template<class>class T> inline const T<RawFloat64>& cast_raw(const T<ExactFloat64>& t) {
     return reinterpret_cast<const T<RawFloat64>&>(t); }
 
-inline ApproximateFloat64 const& make_approximate(RawFloat64 const& x) { return reinterpret_cast<ApproximateFloat64 const&>(x); }
-inline ApproximateFloat64 const& make_approximate(ApproximateFloat64 const& x) { return reinterpret_cast<ApproximateFloat64 const&>(x); }
-inline ApproximateFloat64 const& make_approximate(ExactFloat64 const& x) { return reinterpret_cast<ApproximateFloat64 const&>(x); }
+inline ApproximateFloat64 const& cast_approximate(RawFloat64 const& x) { return reinterpret_cast<ApproximateFloat64 const&>(x); }
+inline ApproximateFloat64 const& cast_approximate(ApproximateFloat64 const& x) { return reinterpret_cast<ApproximateFloat64 const&>(x); }
+inline ApproximateFloat64 const& cast_approximate(ExactFloat64 const& x) { return reinterpret_cast<ApproximateFloat64 const&>(x); }
 
-template<template<class>class T> inline const T<ApproximateFloat64>& make_approximate(const T<RawFloat64>& t) {
+template<template<class>class T> inline const T<ApproximateFloat64>& cast_approximate(const T<RawFloat64>& t) {
     return reinterpret_cast<const T<ApproximateFloat64>&>(t); }
-template<template<class>class T> inline const T<ApproximateFloat64>& make_approximate(const T<ApproximateFloat64>& t) {
+template<template<class>class T> inline const T<ApproximateFloat64>& cast_approximate(const T<ApproximateFloat64>& t) {
     return reinterpret_cast<const T<ApproximateFloat64>&>(t); }
-template<template<class>class T> inline const T<ApproximateFloat64>& make_approximate(const T<ExactFloat64>& t) {
+template<template<class>class T> inline const T<ApproximateFloat64>& cast_approximate(const T<ExactFloat64>& t) {
     return reinterpret_cast<const T<ApproximateFloat64>&>(t); }
 
 } // namespace Ariadne

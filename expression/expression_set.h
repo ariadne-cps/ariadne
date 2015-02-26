@@ -168,7 +168,7 @@ class VariablesBox {
         for(Nat i=0; i!=this->_bx.dimension(); ++i) { this->_bx[i] = bnds[this->_spc[i]]; } }
     VariablesBox(const List<RealVariableInterval>& bnds) : _spc(), _bx(bnds.size()) {
         for(Nat i=0; i!=bnds.size(); ++i) {
-            this->_spc.append(bnds[i].variable()); this->_bx[i]=make_exact_interval(ApproximateInterval(bnds[i].interval())); } }
+            this->_spc.append(bnds[i].variable()); this->_bx[i]=cast_exact_interval(ApproximateInterval(bnds[i].interval())); } }
     VariablesBox(const RealSpace& spc, const ExactBox& bx) : _spc(spc), _bx(bx) { ARIADNE_ASSERT(spc.dimension()==bx.dimension()); }
     Set<RealVariable> variables() const { return Set<RealVariable>(_spc.variables()); }
     RealSpace const& space() const { return this->_spc; }

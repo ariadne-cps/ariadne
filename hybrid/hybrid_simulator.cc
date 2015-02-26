@@ -95,7 +95,7 @@ HybridSimulator::orbit(const HybridAutomatonInterface& system, const HybridPoint
     ApproximatePoint point=make_point(init_pt,space);
     ApproximatePoint next_point;
 
-    Orbit<HybridPoint> orbit(HybridPoint(location,space,make_exact(point)));
+    Orbit<HybridPoint> orbit(HybridPoint(location,space,cast_exact(point)));
 
     EffectiveVectorFunction dynamic=system.dynamic_function(location);
     Map<DiscreteEvent,EffectiveScalarFunction> guards=guard_functions(system,location);
@@ -142,7 +142,7 @@ HybridSimulator::orbit(const HybridAutomatonInterface& system, const HybridPoint
             t._continuous_time += Real(ExactFloat64(h.raw()));
         }
         point=next_point;
-        orbit.insert(t,HybridPoint(location,space,make_exact(point)));
+        orbit.insert(t,HybridPoint(location,space,cast_exact(point)));
     }
 
     return orbit;

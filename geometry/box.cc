@@ -164,9 +164,9 @@ List<Point> Box<I>::vertices() const {
 
 
 /*
-Vector<ValidatedFloat> make_singleton(const Vector<UpperFloatInterval>& bx) {
+Vector<ValidatedFloat> cast_singleton(const Vector<UpperFloatInterval>& bx) {
     Vector<ValidatedFloat> r(bx.size());
-    for(SizeType i=0; i!=r.size(); ++i) { r[i]=make_singleton(bx[i]); }
+    for(SizeType i=0; i!=r.size(); ++i) { r[i]=cast_singleton(bx[i]); }
     return r;
 }
 

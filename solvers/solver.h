@@ -59,7 +59,7 @@ class SolverBase
     /*! \brief The maximum permissible error of the solution. */
     ExactFloat64 maximum_error() const { return this->_max_error; }
     /*! \brief Set the maximum error. */
-    Void set_maximum_error(RawFloat64 max_error) { this->_max_error=make_exact(max_error); };
+    Void set_maximum_error(RawFloat64 max_error) { this->_max_error=cast_exact(max_error); };
 
     /*! \brief The maximum number of steps allowed before the method must quit. */
     Nat maximum_number_of_steps() const { return this->_max_steps; }

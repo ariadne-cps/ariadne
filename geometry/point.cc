@@ -51,7 +51,7 @@ template<class X> ExactBox Point<X>::bounding_box() const {
     ExactBox r(this->dimension());
     UpperInterval e(-Float64::eps(),+Float64::eps());
     for(Nat i=0; i!=this->dimension(); ++i) {
-        r[i]=make_exact_interval(make_exact((*this)[i])+e); }
+        r[i]=cast_exact_interval(cast_exact((*this)[i])+e); }
     return r;
 }
 

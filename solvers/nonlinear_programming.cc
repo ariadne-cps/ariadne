@@ -74,14 +74,14 @@ typedef Vector<ExactFloat64> ExactFloatVector;
 typedef Vector<UpperInterval> UpperIntervalVector;
 typedef Matrix<UpperInterval> UpperIntervalMatrix;
 
-inline Vector<Differential<RawFloat64>>const& make_raw(Vector<Differential<ApproximateFloat64>>const& v) {
+inline Vector<Differential<RawFloat64>>const& cast_raw(Vector<Differential<ApproximateFloat64>>const& v) {
     return reinterpret_cast<Vector<Differential<RawFloat64>>const&>(v);
 }
 
-inline Vector<ApproximateFloat64>& make_approximate(Vector<RawFloat64>& v) {
+inline Vector<ApproximateFloat64>& cast_approximate(Vector<RawFloat64>& v) {
     return reinterpret_cast<Vector<ApproximateFloat64>&>(v);
 }
-inline Vector<Differential<ApproximateFloat64>>const& make_approximate(Vector<Differential<RawFloat64>>const& v) {
+inline Vector<Differential<ApproximateFloat64>>const& cast_approximate(Vector<Differential<RawFloat64>>const& v) {
     return reinterpret_cast<Vector<Differential<ApproximateFloat64>>const&>(v);
 }
 
@@ -471,10 +471,10 @@ ExactBox widen(ExactBox bx, RawFloat64 e) {
 Bool OptimiserBase::
 almost_feasible_point(ExactBox D, ValidatedVectorFunction g, ExactBox C, ApproximateVector ax, ApproximateFloat64 error) const
 {
-    ExactVector ex=make_exact(ax);
+    ExactVector ex=cast_exact(ax);
     if(!contains(D,ex)) { return false; }
     ApproximateVector gx=g(ax);
-    return probably(contains(widen(C,make_exact(error)),gx));
+    return probably(contains(widen(C,cast_exact(error)),gx));
 }
 
 
@@ -542,7 +542,7 @@ contains_feasible_point(ExactBox D, ValidatedVectorFunction g, ExactBox C, Valid
     ApproximateFloatMatrix fltL = ApproximateFloatDiagonalMatrix(fltD.array())*transpose(fltA);
     ARIADNE_LOG(7,"L="<<fltL<<"\n");
 
-    ValidatedFloatMatrix ivlS = ivlA * make_exact(fltL);
+    ValidatedFloatMatrix ivlS = ivlA * cast_exact(fltL);
     ARIADNE_LOG(7,"ivlS="<<ivlS<<"\n");
 
     ValidatedFloatMatrix ivlR = inverse(ivlS);
@@ -560,7 +560,7 @@ contains_feasible_point(ExactBox D, ValidatedVectorFunction g, ExactBox C, Valid
     // ExactInterval Newton update X' = x - L * (Dh(X)*L)^{-1} * h(x)
     // Choose L = rad(X)^2 Dh(x)^T where rad(X) is the diagonal matrix of radii of X
     Vector<ValidatedFloat64> x=midpoint(X);
-    Vector<ValidatedFloat64> new_X = x - make_exact(fltL) * (valR * (ge(x)-make_singleton(ce)) );
+    Vector<ValidatedFloat64> new_X = x - cast_exact(fltL) * (valR * (ge(x)-cast_singleton(ce)) );
     ARIADNE_LOG(5,"old_X="<<X<<"\n");
     ARIADNE_LOG(5,"new_X="<<new_X<<"\n");
     Vector<ValidatedFloat64> reduced_X = refinement(X,new_X);
@@ -739,7 +739,7 @@ is_infeasibility_certificate(ExactBox D, ValidatedVectorFunction g, ExactBox C, 
     for(Nat i=0; i!=n; ++i) {
         tyg+=y[i]*ScalarTaylorFunction(D,g[i],default_sweeper());
     }
-    ValidatedNumber iygx = tyg(make_singleton(D));
+    ValidatedNumber iygx = tyg(cast_singleton(D));
 
     UpperInterval iyC(0,0);
     for(Nat i=0; i!=n; ++i) {
@@ -805,9 +805,9 @@ minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, Exact
     ARIADNE_ASSERT(g.argument_size()==D.size());
     ARIADNE_ASSERT(g.result_size()==C.size());
     StepData v;
-    ApproximateFloatVector& x=make_approximate(v.x);
-    ApproximateFloatVector& y=make_approximate(v.y);
-    C=intersection(C,make_exact_box(apply(g,D)+UpperIntervalVector(C.size(),UpperInterval(-1,+1))));
+    ApproximateFloatVector& x=cast_approximate(v.x);
+    ApproximateFloatVector& y=cast_approximate(v.y);
+    C=intersection(C,cast_exact_box(apply(g,D)+UpperIntervalVector(C.size(),UpperInterval(-1,+1))));
     this->setup_feasibility(D,g,C,v);
     ApproximateFloatVector oldx=x;
 
@@ -819,7 +819,7 @@ minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, Exact
         oldx=x;
         ApproximateFloat64 oldfx=f(oldx);
         this->step(f,D,g,C,v);
-        if(this->is_infeasibility_certificate(D,g,C,make_exact(y))) {
+        if(this->is_infeasibility_certificate(D,g,C,cast_exact(y))) {
             ARIADNE_LOG(2,"f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x)<<"\n");
             ARIADNE_LOG(2,"infeasible\n");
             std::cerr<<"EXCEPTION: "<<InfeasibleProblemException().what()<<"\n";
@@ -835,9 +835,9 @@ minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, Exact
     }
     ARIADNE_LOG(2,"f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x)<<"\n");
 
-    if(this->validate_feasibility(D,g,C,make_exact(x))) {
+    if(this->validate_feasibility(D,g,C,cast_exact(x))) {
         ARIADNE_LOG(2,"f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x)<<"\n");
-        return make_exact(x);
+        return cast_exact(x);
     }
     ARIADNE_LOG(2,"indeterminate_feasibility\n");
     throw IndeterminateFeasibilityException();
@@ -853,11 +853,11 @@ feasible(ExactBox D, ValidatedVectorFunction g, ExactBox C) const
     ARIADNE_ASSERT(g.result_size()==C.size());
 
     StepData v;
-    ApproximateFloatVector& x=make_approximate(v.x);
-    ApproximateFloatVector& y=make_approximate(v.y);
+    ApproximateFloatVector& x=cast_approximate(v.x);
+    ApproximateFloatVector& y=cast_approximate(v.y);
 
     ApproximateScalarFunction f(D);
-    ExactBox R=intersection(make_exact_box(apply(g,D)+UpperBox(C.size(),UpperInterval(-1,+1))),C);
+    ExactBox R=intersection(cast_exact_box(apply(g,D)+UpperBox(C.size(),UpperInterval(-1,+1))),C);
     this->setup_feasibility(D,g,R,v);
 
     static const float MU_MIN = 1e-12;
@@ -866,12 +866,12 @@ feasible(ExactBox D, ValidatedVectorFunction g, ExactBox C) const
     for(Nat i=0; i!=12; ++i) {
         ARIADNE_LOG(5,"f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x)<<"\n");
         this->step(f,D,g,R,v);
-        if(this->validate_feasibility(D,g,C,make_exact(x))) {
+        if(this->validate_feasibility(D,g,C,cast_exact(x))) {
             ARIADNE_LOG(3,"f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x)<<"\n");
             ARIADNE_LOG(2,"feasible\n");
             return true;
         }
-        if(this->is_infeasibility_certificate(D,g,C,make_exact(y))) {
+        if(this->is_infeasibility_certificate(D,g,C,cast_exact(y))) {
             ARIADNE_LOG(3,"f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x)<<"\n");
             ARIADNE_LOG(2,"infeasible\n");
             return false;
@@ -892,15 +892,15 @@ setup_feasibility(const ExactBox& D, const ApproximateVectorFunction& g, const E
     ExactInterval I(-1,+1);
     Nat m=C.size(); Nat n=D.size();
 
-    v.x=make_raw(midpoint(D));
+    v.x=cast_raw(midpoint(D));
     v.y=RawFloatVector(m,0.0);
-    v.w=make_raw(midpoint(C));
+    v.w=cast_raw(midpoint(C));
 
     //stp.xl=lower(D)-x;
     v.wl=RawFloatVector(m,-1.0);
     v.wu=RawFloatVector(m,+1.0);
-    v.xl=make_raw(lower_bounds(D))-v.x;
-    v.xu=make_raw(upper_bounds(D))-v.x;
+    v.xl=cast_raw(lower_bounds(D))-v.x;
+    v.xu=cast_raw(upper_bounds(D))-v.x;
     v.vl=RawFloatVector(m,-1.0);
     v.vu=RawFloatVector(m,+1.0);
     v.zl=RawFloatVector(n,-1.0);
@@ -918,8 +918,8 @@ NonlinearInfeasibleInteriorPointOptimiser::step(
     RawFloatVector& w=v.w; RawFloatVector& x=v.x; RawFloatVector& y=v.y; Float64& mu=v.mu;
     RawFloatVector& wl=v.wl; RawFloatVector& wu=v.wu; RawFloatVector& xl=v.xl; RawFloatVector& xu=v.xu;
     RawFloatVector& vl=v.vl; RawFloatVector& vu=v.vu; RawFloatVector& zl=v.zl; RawFloatVector& zu=v.zu;
-    RawFloatVector cl=make_raw(lower_bounds(c)); RawFloatVector cu=make_raw(upper_bounds(c));
-    RawFloatVector dl=make_raw(lower_bounds(d)); RawFloatVector du=make_raw(upper_bounds(d));
+    RawFloatVector cl=cast_raw(lower_bounds(c)); RawFloatVector cu=cast_raw(upper_bounds(c));
+    RawFloatVector dl=cast_raw(lower_bounds(d)); RawFloatVector du=cast_raw(upper_bounds(d));
 
     ARIADNE_LOG(4,"NonlinearInfeasibleInteriorPointOptimiser::step(f,D,g,C,...)\n");
     ARIADNE_LOG(5,"  f="<<f<<", D="<<d<<", g="<<g<<", C="<<c<<"\n");
@@ -946,9 +946,9 @@ NonlinearInfeasibleInteriorPointOptimiser::step(
     mu = mu * sigma;
 
     ApproximateFloatVector ax(x);
-    FloatDifferential ddfx=make_raw(f.differential(ax,2u));
+    FloatDifferential ddfx=cast_raw(f.differential(ax,2u));
     ARIADNE_LOG(9,"ddfx="<<ddfx<<"\n");
-    Vector<FloatDifferential> ddgx=make_raw(g.differential(ax,2u));
+    Vector<FloatDifferential> ddgx=cast_raw(g.differential(ax,2u));
     ARIADNE_LOG(9,"ddgx="<<ddgx<<"\n");
 
     Float64 fx = ddfx.value();
@@ -1094,13 +1094,13 @@ NonlinearInfeasibleInteriorPointOptimiser::step(
     Float64 alpha=1.0;
     nx = x-alpha*dx;
     // Pick an update value which minimises the objective function
-    Float64 fxmin=make_raw(f(make_approximate(nx)));
+    Float64 fxmin=cast_raw(f(cast_approximate(nx)));
     Float64 alphamin=1.0;
     static const Nat REDUCTION_STEPS=4;
     for(Nat i=0; i!=REDUCTION_STEPS; ++i) {
         alpha*=scale;
         nx = x-alpha*dx;
-        Float64 fnx=make_raw(f(make_approximate(nx)));
+        Float64 fnx=cast_raw(f(cast_approximate(nx)));
         if(fnx<fxmin*scale) {
             fxmin=fnx;
             alphamin=alpha;
@@ -1186,7 +1186,7 @@ minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, Exact
         if(i%3==0 && i<=10) { mu *= 0.25; }
     }
 
-    return ValidatedVector(make_exact(x));
+    return ValidatedVector(cast_exact(x));
 }
 
 
@@ -1213,8 +1213,8 @@ minimisation_step(const ApproximateScalarFunction& f, const ExactBox& d, const A
     ARIADNE_DEBUG_PRECONDITION(h.argument_size()==n);
     ARIADNE_DEBUG_PRECONDITION(g.result_size()==m);
     ARIADNE_DEBUG_PRECONDITION(h.result_size()==l);
-    ARIADNE_DEBUG_PRECONDITION(contains(d,make_exact(x)));
-    ARIADNE_DEBUG_PRECONDITION(contains(c,make_exact(w)));
+    ARIADNE_DEBUG_PRECONDITION(contains(d,cast_exact(x)));
+    ARIADNE_DEBUG_PRECONDITION(contains(c,cast_exact(w)));
     ARIADNE_DEBUG_PRECONDITION(mu>0);
 
     ARIADNE_LOG(4,"NonlinearInteriorPointOptimiser::minimisation_step(f,D,g,C,h, x,w, kappa,lambda, mu)\n");
@@ -1339,7 +1339,7 @@ minimisation_step(const ApproximateScalarFunction& f, const ExactBox& d, const A
     do {
         newx = x - alpha * dx;
         neww = w - alpha * dw;
-        if (contains(d,make_exact(newx)) && contains(c,make_exact(neww))) { success = true; }
+        if (contains(d,cast_exact(newx)) && contains(c,cast_exact(neww))) { success = true; }
         else { alpha *= ALPHA_SCALE_FACTOR; }
         if(probably(alpha<MINIMUM_ALPHA)) { throw NearBoundaryOfFeasibleDomainException(); }
     } while(!success);
@@ -1379,13 +1379,13 @@ feasible(ExactBox d, ValidatedVectorFunction g, ExactBox c) const
         this->feasibility_step(d,g,c,x,y);
         if(probably(t>0)) {
             ARIADNE_LOG(2,"  y="<<y<<", g(y)="<<g(y)<<"\n");
-            if(this->is_feasible_point(d,g,c,make_exact(y))) {
+            if(this->is_feasible_point(d,g,c,cast_exact(y))) {
                 return true;
             }
         }
     }
     ARIADNE_LOG(2,"  t="<<t<<", y="<<y<<", g(y)="<<g(y)<<"\n");
-    if(this->is_infeasibility_certificate(d,g,c,make_exact(x))) {
+    if(this->is_infeasibility_certificate(d,g,c,cast_exact(x))) {
         return false;
     }
     return indeterminate;
@@ -1733,7 +1733,7 @@ feasible(ExactBox D, ValidatedVectorFunction g, ExactBox C) const
     for(Nat i=0; i!=10; ++i) {
         this->feasibility_step(D,g,C,x,y,w);
     }
-    return this->check_feasibility(D,g,C,make_exact(x),make_exact(y));
+    return this->check_feasibility(D,g,C,cast_exact(x),cast_exact(y));
 }
 
 Void PenaltyFunctionOptimiser::
@@ -1812,7 +1812,7 @@ feasibility_step(const ExactBox& X, const ApproximateVectorFunction& g, const Ex
         newx = x - alpha * dx;
         neww = w - alpha * dw;
         alpha *= ALPHA_SCALE_FACTOR;
-    } while ( !contains(X,make_exact(newx)) || !contains(W,make_exact(neww)) );
+    } while ( !contains(X,cast_exact(newx)) || !contains(W,cast_exact(neww)) );
     alpha /= ALPHA_SCALE_FACTOR;
 
     ARIADNE_LOG(9,"alpha="<<alpha<<"\n");
@@ -1942,7 +1942,7 @@ feasibility_step(ExactBox const& D, ApproximateVectorFunction const& g, ExactBox
     ApproximateVector ny(m);
     ARIADNE_LOG(5,"sx="<<sx<<"\n");
     ARIADNE_LOG(5,"sw="<<sw<<"\n");
-    while(!contains(C,make_exact(nw)) || !contains(D,make_exact(nx))) {
+    while(!contains(C,cast_exact(nw)) || !contains(D,cast_exact(nx))) {
         al*=0.75;
         nw=w+al*sw;
         nx=x+al*sx;
@@ -2030,7 +2030,7 @@ feasible(ExactBox D, ValidatedVectorFunction h) const
 
     if( decide(norm(h(x))<1e-10) ) { return true; }
 
-    if(!possibly(contains(UpperInterval(dot(UpperIntervalVector(make_exact(y)),apply(h,D))),ExactFloat64(0.0)))) { return false; }
+    if(!possibly(contains(UpperInterval(dot(UpperIntervalVector(cast_exact(y)),apply(h,D))),ExactFloat64(0.0)))) { return false; }
 
     return indeterminate;
 }
@@ -2079,7 +2079,7 @@ feasibility_step(const ExactBox& D, const ApproximateVectorFunction& h,
 
     ApproximateFloat64 ax = 1.0;
     ApproximateFloatVector nx = x-ax*dx;
-    while(!contains(D,make_exact(nx))) {
+    while(!contains(D,cast_exact(nx))) {
         ax*=SCALE_FACTOR;
         nx = x - ax * dx;
     }
@@ -2139,7 +2139,7 @@ check_feasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
         ARIADNE_LOG(5,"B="<<B<<"\n");
 
         // Perform an interval Newton step to try to attain feasibility
-        ValidatedFloatVector nW = inverse(IA*AT) * ValidatedFloatVector(h(x)-make_exact(c));
+        ValidatedFloatVector nW = inverse(IA*AT) * ValidatedFloatVector(h(x)-cast_exact(c));
         ARIADNE_LOG(4,"W="<<W<<"\nnew_W="<<nW<<"\n");
         if(definitely(subset(UpperBox(B),D)) && refines(nW,W)) { ARIADNE_LOG(3,"feasible\n"); return true; }
         else { result=indeterminate; }
@@ -2157,7 +2157,7 @@ check_feasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
     VectorTaylorFunction tg(D,g,default_sweeper());
     ScalarTaylorFunction tyg(D,default_sweeper());
     for(Nat j=0; j!=y.size(); ++j) { tyg += y[j]*tg[j]; }
-    UpperInterval tygD = UpperInterval(tyg(make_singleton(D)));
+    UpperInterval tygD = UpperInterval(tyg(cast_singleton(D)));
 
     UpperIntervalMatrix dgD = jacobian_range(g,D);
     UpperIntervalVector ydgD = transpose(dgD) * UpperIntervalVector(y);
@@ -2328,7 +2328,7 @@ feasible(ExactBox D, ValidatedVectorFunction h) const
     ExactFloatVector xl = Ariadne::lower_bounds(D);
     ExactFloatVector xu = Ariadne::upper_bounds(D);
 
-    ValidatedFloatVector x=make_singleton(D);
+    ValidatedFloatVector x=cast_singleton(D);
     ValidatedFloatVector y(h.result_size(),ValidatedFloat64(-1,+1));
     ValidatedFloat64 mu(0,1);
 

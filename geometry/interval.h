@@ -234,8 +234,8 @@ template<class U> inline auto operator!=(Interval<U> const& ivl1, Interval<U> co
 
 
 //! \related ApproximateFloatInterval \related ExactFloatInterval \brief Allows the over-approximating interval \a ivl to be treated as exact.
-Interval<ExactFloat64> make_exact(Interval<ApproximateFloat64> const& ivl);
-Interval<ExactFloat64> make_exact_interval(Interval<ApproximateFloat64> const& ivl);
+Interval<ExactFloat64> cast_exact(Interval<ApproximateFloat64> const& ivl);
+Interval<ExactFloat64> cast_exact_interval(Interval<ApproximateFloat64> const& ivl);
 
 //! \related UpperFloatInterval \brief Computes a common refinement of \a ivl1 and \a ivl2 ivl.e. the intersection.
 Interval<UpperFloat64> refinement(Interval<UpperFloat64> const& ivl1, Interval<UpperFloat64> const& ivl2);
@@ -246,7 +246,7 @@ bool refines(Interval<UpperFloat64> const& ivl1, Interval<UpperFloat64> const& i
 bool same(Interval<UpperFloat64> const& ivl1, Interval<UpperFloat64> const& ivl2);
 
 //! \related UpperFloatInterval \related BoundFloat \brief Allows the over-approximating interval \a ivl to be treated an over-approximation to a single point.
-BoundFloat64 make_singleton(Interval<UpperFloat64> const& ivl);
+BoundFloat64 cast_singleton(Interval<UpperFloat64> const& ivl);
 
 //! \related UpperFloatInterval \brief An interval containing the given interval in its interior.
 Interval<UpperFloat64> widen(Interval<UpperFloat64> const& ivl);
@@ -272,63 +272,63 @@ class EmptyInterval { };
 
 namespace Ariadne {
 
-inline BoundedFloat64 make_singleton(Interval<UpperFloat64> const& ivl) {
+inline BoundedFloat64 cast_singleton(Interval<UpperFloat64> const& ivl) {
     return BoundedFloat64(ivl.lower(),ivl.upper()); }
 inline Interval<UpperFloat64> make_interval(BoundedFloat64 const& x) {
     return Interval<UpperFloat64>(x.lower(),x.upper()); }
 
 inline UpperInterval max(UpperInterval ivl1, UpperInterval ivl2) {
-    return make_interval(max(make_singleton(ivl1),make_singleton(ivl2))); }
+    return make_interval(max(cast_singleton(ivl1),cast_singleton(ivl2))); }
 inline UpperInterval min(UpperInterval ivl1, UpperInterval ivl2) {
-    return make_interval(min(make_singleton(ivl1),make_singleton(ivl2))); }
+    return make_interval(min(cast_singleton(ivl1),cast_singleton(ivl2))); }
 inline UpperInterval abs(UpperInterval ivl) {
-    return make_interval(abs(make_singleton(ivl))); }
+    return make_interval(abs(cast_singleton(ivl))); }
 inline UpperInterval pos(UpperInterval ivl) {
-    return make_interval(pos(make_singleton(ivl))); }
+    return make_interval(pos(cast_singleton(ivl))); }
 inline UpperInterval neg(UpperInterval ivl) {
-    return make_interval(neg(make_singleton(ivl))); }
+    return make_interval(neg(cast_singleton(ivl))); }
 inline UpperInterval sqr(UpperInterval ivl) {
-    return make_interval(sqr(make_singleton(ivl))); }
+    return make_interval(sqr(cast_singleton(ivl))); }
 inline UpperInterval rec(UpperInterval ivl) {
-    return make_interval(rec(make_singleton(ivl))); }
+    return make_interval(rec(cast_singleton(ivl))); }
 
 inline UpperInterval add(UpperInterval ivl1, UpperInterval ivl2) {
-    return make_interval(add(make_singleton(ivl1),make_singleton(ivl2))); }
+    return make_interval(add(cast_singleton(ivl1),cast_singleton(ivl2))); }
 inline UpperInterval sub(UpperInterval ivl1, UpperInterval ivl2) {
-    return make_interval(sub(make_singleton(ivl1),make_singleton(ivl2))); }
+    return make_interval(sub(cast_singleton(ivl1),cast_singleton(ivl2))); }
 inline UpperInterval mul(UpperInterval ivl1, UpperInterval ivl2) {
-    return make_interval(mul(make_singleton(ivl1),make_singleton(ivl2))); }
+    return make_interval(mul(cast_singleton(ivl1),cast_singleton(ivl2))); }
 inline UpperInterval div(UpperInterval ivl1, UpperInterval ivl2) {
-    return make_interval(div(make_singleton(ivl1),make_singleton(ivl2))); }
+    return make_interval(div(cast_singleton(ivl1),cast_singleton(ivl2))); }
 
 inline UpperInterval pow(UpperInterval ivl, Nat m) {
-    return make_interval(pow(make_singleton(ivl),m)); }
+    return make_interval(pow(cast_singleton(ivl),m)); }
 inline UpperInterval pow(UpperInterval ivl, Int n) {
-    return make_interval(pow(make_singleton(ivl),n)); }
+    return make_interval(pow(cast_singleton(ivl),n)); }
 
 inline UpperInterval sqrt(UpperInterval ivl) {
-    return make_interval(sqrt(make_singleton(ivl))); }
+    return make_interval(sqrt(cast_singleton(ivl))); }
 inline UpperInterval exp(UpperInterval ivl) {
-    return make_interval(exp(make_singleton(ivl))); }
+    return make_interval(exp(cast_singleton(ivl))); }
 inline UpperInterval log(UpperInterval ivl) {
-    return make_interval(log(make_singleton(ivl))); }
+    return make_interval(log(cast_singleton(ivl))); }
 inline UpperInterval sin(UpperInterval ivl) {
-    return make_interval(sin(make_singleton(ivl))); }
+    return make_interval(sin(cast_singleton(ivl))); }
 inline UpperInterval cos(UpperInterval ivl) {
-    return make_interval(cos(make_singleton(ivl))); }
+    return make_interval(cos(cast_singleton(ivl))); }
 inline UpperInterval tan(UpperInterval ivl) {
-    return make_interval(tan(make_singleton(ivl))); }
+    return make_interval(tan(cast_singleton(ivl))); }
 inline UpperInterval asin(UpperInterval ivl) {
-    return make_interval(asin(make_singleton(ivl))); }
+    return make_interval(asin(cast_singleton(ivl))); }
 inline UpperInterval acos(UpperInterval ivl) {
-    return make_interval(acos(make_singleton(ivl))); }
+    return make_interval(acos(cast_singleton(ivl))); }
 inline UpperInterval atan(UpperInterval ivl) {
-    return make_interval(atan(make_singleton(ivl))); }
+    return make_interval(atan(cast_singleton(ivl))); }
 
 inline PositiveUpperFloat64 mag(UpperInterval ivl) {
-    return mag(make_singleton(ivl)); }
+    return mag(cast_singleton(ivl)); }
 inline LowerFloat64 mig(UpperInterval ivl) {
-    return mig(make_singleton(ivl)); }
+    return mig(cast_singleton(ivl)); }
 
 inline UpperInterval operator+(const UpperInterval& ivl) { return pos(ivl); }
 inline UpperInterval operator-(const UpperInterval& ivl) { return neg(ivl); }
@@ -346,13 +346,13 @@ inline Bool operator==(const UpperInterval& ivl1, const UpperInterval& ivl2) {
 inline Tribool operator!=(const UpperInterval& ivl1, const UpperInterval& ivl2) {
     return ivl1.lower().raw() != ivl2.lower().raw() || ivl1.upper().raw() != ivl2.upper().raw(); }
 inline Tribool operator<=(UpperInterval ivl1, UpperInterval ivl2) {
-    return make_singleton(ivl1) <= make_singleton(ivl2); }
+    return cast_singleton(ivl1) <= cast_singleton(ivl2); }
 inline Tribool operator>=(UpperInterval ivl1, UpperInterval ivl2) {
-    return make_singleton(ivl1) >= make_singleton(ivl2); }
+    return cast_singleton(ivl1) >= cast_singleton(ivl2); }
 inline Tribool operator< (UpperInterval ivl1, UpperInterval ivl2) {
-    return make_singleton(ivl1) <  make_singleton(ivl2); }
+    return cast_singleton(ivl1) <  cast_singleton(ivl2); }
 inline Tribool operator> (UpperInterval ivl1, UpperInterval ivl2) {
-    return make_singleton(ivl1) >  make_singleton(ivl2); }
+    return cast_singleton(ivl1) >  cast_singleton(ivl2); }
 
 // Mixed operations
 inline UpperInterval operator+(UpperInterval ivl1, BoundedFloat64 x2) { return ivl1+make_interval(x2); }

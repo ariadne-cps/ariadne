@@ -62,6 +62,7 @@ template<class X> Void Point<X>::draw(CanvasInterface& canv, const Projection2d&
 
 template class Point<ExactNumber>;
 template class Point<EffectiveNumber>;
+template class Point<ValidatedNumber>;
 template class Point<ApproximateNumber>;
 
 

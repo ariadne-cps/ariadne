@@ -21,9 +21,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file geometry/interval.inl.h
- *  \brief
- */
 
 namespace Ariadne {
 
@@ -60,86 +57,81 @@ template<class U> auto Interval<U>::set_lower(LowerBoundType l) -> void { _l=l; 
 template<class U> auto Interval<U>::set_upper(UpperBoundType u) -> void { _u=u; }
 template<class U> auto Interval<U>::set(LowerBoundType l, UpperBoundType u) -> void { _l=l; _u=u; }
 
-//! \related Interval \brief Write to an output stream
 template<class U> inline OutputStream& operator<<(OutputStream& os, Interval<U> const& ivl) {
     return os << "{" << ivl.lower() << ":" << ivl.upper() << "}";
 }
 
+
+template<class U> inline auto lower_bound(Interval<U> const& i) -> decltype(i.lower()) { return i.lower(); }
+template<class U> inline auto upper_bound(Interval<U> const& i) -> decltype(i.upper()) { return i.upper(); }
+template<class UB> inline auto centre(Interval<UB> const& i) -> decltype(i.centre()) { return i.centre(); }
 template<class UB> inline auto midpoint(Interval<UB> const& i) -> decltype(i.midpoint()) { return i.midpoint(); }
 template<class UB> inline auto radius(Interval<UB> const& i) -> decltype(i.radius()) { return i.radius(); }
 template<class UB> inline auto width(Interval<UB> const& i) -> decltype(i.width()) { return i.width(); }
 
-
-//! \related Interval \brief Test if the interval is empty.
 template<class UB> inline auto is_empty(Interval<UB> const& i) -> decltype(i.lower()>i.upper()) { return i.lower()>i.upper(); }
-//! \related Interval \brief Test if the interval is empty.
 template<class UB> inline auto is_singleton(Interval<UB> const& i) -> decltype(i.lower()==i.upper()) { return i.lower()==i.upper(); }
-//! \related Interval \brief Test if the interval is bounded.
 template<class UB> inline auto is_bounded(Interval<UB> const& i) -> decltype(i.upper()<inf) { return -i.lower()<inf && i.upper()<inf; }
 
-//! \related Interval \brief Test if \a x1 is an element of the interval \a i2.
+
 template<class UB, class X> inline auto element(X const& x1, Interval<UB> const& i2) -> decltype(i2.lower()<=x1 && i2.upper()>=x1) {
     return i2.lower()<=x1 && i2.upper()>=x1; }
-//! \related Interval \brief Test if the interval \a i1 contains \a x2.
+
 template<class UB, class X> inline auto contains(Interval<UB> const& i1, X const& x2) -> decltype(i1.lower()<=x2 && i1.upper()>=x2) {
     return i1.lower()<=x2 && i1.upper()>=x2; }
-//! \related Interval \brief Test if the interval \a i1 is equal to \a i2.
+
 template<class UB> inline auto equal(Interval<UB> const& i1, Interval<UB> const& i2) -> decltype(i1.upper()==i2.upper()) {
     return i1.lower()<=i2.lower() && i1.upper()==i2.upper(); }
-//! \related Interval \brief Test if the interval \a i1 is a subset of \a i2.
+
 template<class UB1, class UB2> inline auto subset(Interval<UB1> const& i1, Interval<UB2> const& i2) -> decltype(i1.upper()<=i2.upper()) {
     return i1.lower()>=i2.lower() && i1.upper()<=i2.upper(); }
-//! \related Interval \brief Test if the interval \a i1 is a superset of \a i2.
+
 template<class UB1, class UB2> inline auto superset(Interval<UB1> const& i1, Interval<UB2> const& i2) -> decltype(i1.upper()>=i2.upper()) {
     return i1.lower()<=i2.lower() && i1.upper()>=i2.upper(); }
-//! \related Interval \brief Test if the interval \a i1 is disjoint from \a i2. Returns \c false even if the two intervals only have an endpoint in common.
+
 template<class UB1, class UB2> inline auto disjoint(Interval<UB1> const& i1, Interval<UB2> const& i2) -> decltype(i1.upper()<i2.lower()) {
     return i1.lower()>i2.upper() || i1.upper()<i2.lower(); }
-//! \related Interval \brief Test if the interval \a i1 intersects \a i2. Returns \c true even if the two intervals only have an endpoint in common.
+
 template<class UB1, class UB2> inline auto intersect(Interval<UB1> const& i1, Interval<UB2> const& i2) -> decltype(i1.upper()>=i2.lower()) {
     return i1.lower()<=i2.upper() && i1.upper()>=i2.lower(); }
 
-//! \related Interval \brief Test if the closed interval \a i1 is disjoint from the closed interval \a i2.
-//! Returns \c false if the two intervals only have an endpoint in common.
+
 template<class UB1, class UB2> inline auto separated(Interval<UB1> const& i1, Interval<UB2> const& i2) -> decltype(i1.upper()<i2.lower()) {
     return i1.lower()>i2.upper() || i1.upper()<i2.lower(); }
-//! \related Interval \brief Test if the interval \a i1 overlaps \a i2.
-//! Returns \c false if the two intervals only have an endpoint in common.
-//! Returns \c true if one of the intervals is a singleton in the interior of the other.
+
 template<class UB1, class UB2> inline auto overlap(Interval<UB1> const& i1, Interval<UB2> const& i2) -> decltype(i1.upper()>i2.lower()) {
     return i1.lower()<i2.upper() && i1.upper()>i2.lower(); }
-//! \related Interval \brief Test if the (closed) interval \a i1 is a subset of the interior of \a i2.
+
 template<class UB1, class UB2> inline auto inside(Interval<UB1> const& i1, Interval<UB2> const& i2) -> decltype(i1.upper()<i2.upper()) {
     return i1.lower()>i2.lower() && i1.upper()<i2.upper(); }
-//! \related Interval \brief Test if the interior of the interval \a i1 is a superset of the (closed) interval \a i2.
+
 template<class UB1, class UB2> inline auto covers(Interval<UB1> const& i1, Interval<UB2> const& i2) -> decltype(i1.upper()>i2.upper()) {
     return i1.lower()<i2.lower() && i1.upper()>i2.upper(); }
 
-//! \related Interval \brief The intersection of two intervals.
-template<class UB1, class UB2> inline Interval<decltype(max(declval<UB1>(),declval<UB2>()))> intersection(Interval<UB1> const& i1, Interval<UB2> const& i2) {
-    return Interval<decltype(max(declval<UB1>(),declval<UB2>()))>(max(i1.lower(),i2.lower()),min(i1.upper(),i2.upper()));
+
+template<class UB1, class UB2> inline auto
+intersection(Interval<UB1> const& i1, Interval<UB2> const& i2) -> Interval<decltype(min(declval<UB1>(),declval<UB2>()))> {
+    return Interval<decltype(min(declval<UB1>(),declval<UB2>()))>(max(i1.lower(),i2.lower()),min(i1.upper(),i2.upper()));
 }
 
-//! \related Interval \brief The hull of two intervals, equal to the smallest interval containing both as subsets.
+
 template<class UB1, class UB2> inline auto
 hull(Interval<UB1> const& i1, Interval<UB2> const& i2) -> Interval<decltype(max(declval<UB1>(),declval<UB2>()))> {
     typedef decltype(max(declval<UB1>(),declval<UB2>())) UB0; return Interval<UB0>(min(i1.lower(),i2.lower()),max(i1.upper(),i2.upper()));
 }
 
-//! \related Interval \brief The hull of an interval and a point, equal to the smallest interval containing both.
 template<class UB, class X> inline auto
 hull(Interval<UB> const& i1, X x2) -> Interval<decltype(max(declval<UB>(),declval<X>()))> {
     return Interval<decltype(max(declval<UB>(),declval<X>()))>(min(i1.lower(),x2),max(i1.upper(),x2));
 }
 
-//! \related Interval \brief The hull of an interval and a point, equal to the smallest interval containing both.
 template<class UB, class X> inline auto
 hull(X x1, Interval<UB> const& i2) -> Interval<decltype(max(declval<UB>(),declval<X>()))> {
     return Interval<decltype(max(declval<UB>(),declval<X>()))>(min(x1,i2.lower()),max(x1,i2.upper()));
 }
 
 
-//! \related Interval \brief Split an interval into its lower, middle or upper half.
+
 template<class UB> inline auto split(Interval<UB> const& ivl, SplitPart lmu) -> Interval<UB> {
     auto cc=(ivl.lower()+ivl.upper())/2;
     if(lmu==SplitPart::LOWER) {
@@ -153,124 +145,34 @@ template<class UB> inline auto split(Interval<UB> const& ivl, SplitPart lmu) -> 
     }
 }
 
-inline BoundFloat64 make_singleton(Interval<UpperFloat64> const& i) {
-    return BoundFloat64(i.lower(),i.upper());
-}
 
-inline Interval<UpperFloat64> make_interval(BoundFloat64 const& x) {
-    return Interval<UpperFloat64>(x.lower(),x.upper());
-}
 
-inline Interval<UpperFloat64> widen(Interval<UpperFloat64> const& x, UpperFloat64 e) {
-    return Interval<UpperFloat64>(x.lower()-e,x.upper()+e); }
-
-inline Interval<UpperFloat64> widen(Interval<UpperFloat64> const& x) {
-    return widen(x,UpperFloat64(Float64::min())); }
-
-inline Interval<LowerFloat64> narrow(Interval<LowerFloat64> const& x, UpperFloat64 e) {
-    return Interval<LowerFloat64>(x.lower()+e,x.upper()-e); }
-
-inline Interval<LowerFloat64> narrow(Interval<LowerFloat64> const& x) {
-    return narrow(x,UpperFloat64(Float64::min())); }
-
-inline bool operator==(Interval<ExactFloat64> const& i1, Interval<ExactFloat64> const& i2) {
-    return equal(i1,i2);
-}
-
-inline bool operator!=(Interval<ExactFloat64> const& i1, Interval<ExactFloat64> const& i2) {
-    return !(i1==i2);
-}
-
-//! \related Interval \brief Test if the interval \a i1 is equal to \a i2.
 template<class UB> inline auto operator==(Interval<UB> const& i1, Interval<UB> const& i2) -> decltype(i1.upper()==i2.upper()) {
-    return i1.lower()<=i2.lower() && i1.upper()==i2.upper(); }
+    return i1.lower()==i2.lower() && i1.upper()==i2.upper(); }
+template<class UB> inline auto operator!=(Interval<UB> const& i1, Interval<UB> const& i2) -> decltype(i1.upper()!=i2.upper()) {
+    return i1.lower()!=i2.lower() || i1.upper()!=i2.upper(); }
 
+
+inline Interval<UpperFloat64> refinement(Interval<UpperFloat64> const& ivl1, Interval<UpperFloat64> const& ivl2) {
+    return Interval<UpperFloat64>(max(ivl1.lower().raw(),ivl2.lower().raw()),min(ivl1.upper().raw(),ivl2.upper().raw())); }
+inline Bool refines(UpperInterval const& ivl1, UpperInterval const& ivl2) {
+    return ivl1.lower().raw()>=ivl2.lower().raw() && ivl1.upper().raw()<=ivl2.upper().raw(); }
+inline Bool same(UpperInterval const& ivl1, UpperInterval const& ivl2) {
+    return ivl1.lower().raw()==ivl2.lower().raw() && ivl1.upper().raw()==ivl2.upper().raw(); }
+
+inline Interval<UpperFloat64> widen(Interval<UpperFloat64> const& ivl, UpperFloat64 e) {
+    return Interval<UpperFloat64>(ivl.lower()-e,ivl.upper()+e); }
+inline Interval<UpperFloat64> widen(Interval<UpperFloat64> const& ivl) {
+    return widen(ivl,UpperFloat64(Float64::min())); }
+
+inline Interval<LowerFloat64> narrow(Interval<LowerFloat64> const& ivl, UpperFloat64 e) {
+    return Interval<LowerFloat64>(ivl.lower()+e,ivl.upper()-e); }
+inline Interval<LowerFloat64> narrow(Interval<LowerFloat64> const& ivl) {
+    return narrow(ivl,UpperFloat64(Float64::min())); }
 
 inline ExactInterval make_exact(ApproximateInterval const& ivl) {
-    return reinterpret_cast<ExactInterval const&>(ivl);
-}
-
+    return reinterpret_cast<ExactInterval const&>(ivl); }
 inline ExactInterval make_exact_interval(ApproximateInterval const& ivl) {
-    return reinterpret_cast<ExactInterval const&>(ivl);
-}
-/*
-
-
-class RealInterval : public Interval<Real> { public: using Interval<Real>::Interval; };
-class Float64Interval : public Interval<Flt64> { public: using Interval<Flt64>::Interval; };
-class ExactFloat64Interval : public Interval<ExactFloat64> { public: using Interval<ExactFloat64>::Interval; };
-class LowerFloat64Interval : public Interval<LowerFloat64> { public: using Interval<LowerFloat64>::Interval; };
-class ApproximateFloat64Interval : public Interval<ApproximateFloat64> { public: using Interval<ApproximateFloat64>::Interval; };
-
-class UpperFloat64Interval : public Interval<UpperFloat64> { public: typedef UpperFloat64Interval NumericType; using Interval<UpperFloat64>::Interval; };
-template<> struct IsFloat64<UpperFloat64Interval> : True { };
-
-//! \related Interval \brief Read from an output stream
-InputStream& operator>>(InputStream& os, UpperFloat64Interval& ivl);
-
-
-// Standard equality operators
-//! \related UpperFloat64Interval \brief Equality operator. Tests equality of intervals as geometric objects, so \c [0,1]==[0,1] returns \c true.
-inline bool operator==(const ExactFloat64Interval& i1, const ExactFloat64Interval& i2) { return i1.lower()==i2.lower() && i1.upper()==i2.upper(); }
-//! \related UpperFloat64Interval \brief Inequality operator. Tests equality of intervals as geometric objects, so \c [0,2]!=[1,3] returns \c true.
-inline bool operator!=(const ExactFloat64Interval& i1, const ExactFloat64Interval& i2) { return i1.lower()!=i2.lower() || i1.upper()!=i2.upper(); }
-
-
-//! \related UpperFloat64Interval \brief Truncate interval to single-precision.
-UpperFloat64Interval trunc(UpperFloat64Interval x);
-UpperFloat64Interval trunc(UpperFloat64Interval x, uint n);
-
-//! \related UpperFloat64Interval \brief Widen interval by 1ulp.
-UpperFloat64Interval widen(UpperFloat64Interval x);
-//! \related UpperFloat64Interval \brief Narrow interval by 1ulp.
-LowerFloat64Interval narrow(LowerFloat64Interval x);
-
-//! \related UpperFloat64Interval \brief An interval containing the given interval in its interior.
-UpperFloat64Interval widen(UpperFloat64Interval i);
-//! \related LowerFloat64Interval \brief An interval contained in the interior of the given interval.
-LowerFloat64Interval narrow(LowerFloat64Interval i);
-
-
-//! \related Interval<Real> \brief An under-approximation to an interval.
-inline LowerFloat64Interval under_approximation(const RealInterval& rivl) {
-    return LowerFloat64Interval(rivl.lower().upper(),rivl.upper().lower());
-}
-//! \related Interval<Real> \brief An over-approximation to an interval.
-inline UpperFloat64Interval over_approximation(const RealInterval& rivl) {
-    return ExactFloat64Interval(make_exact(rivl.lower().lower()),make_exact(rivl.upper().upper()));
-}
-//! \related Interval<Real> \brief An approximation to an interval.
-inline ApproximateFloat64Interval approximation(const RealInterval& rivl) {
-    return ApproximateFloat64Interval(rivl.lower().approx(),rivl.upper().approx());
-}
-
-//! \related Interval<Real> \brief Convert an interval to the Exact paradigm.
-inline ExactFloat64Interval const& make_exact(const ApproximateFloat64Interval& ivl) {
-    return reinterpret_cast<ExactFloat64Interval const&>(ivl);
-}
-
-
-
-// Validated paradigm checks
-
-//! \related UpperFloat64Interval \brief Computes a common refinement of \a i1 and \a i2 i.e. the intersection.
-inline UpperFloat64Interval refinement(UpperFloat64Interval const& i1, UpperFloat64Interval const& i2) {
-    return UpperFloat64Interval(max(i1.lower(),i2.lower()),min(i1.upper(),i2.upper())); }
-
-//! \related UpperFloat64Interval \brief Tests if \a i1 provides a better over-approximation to the exact interval than \a i2.
-//! i.e. \a i1 is a subset of \a i2.
-inline bool refines(UpperFloat64Interval const& i1, UpperFloat64Interval const& i2) {
-    return make_raw(i1.lower())>=make_raw(i2.lower()) && make_raw(i1.upper())<=make_raw(i2.upper()); }
-
-//! \related UpperFloat64Interval \brief Computes if two over-approximating intervals have the same representation.
-inline bool same(UpperFloat64Interval const& i1, UpperFloat64Interval const& i2) {
-    return make_raw(i1.lower())==make_raw(i2.lower()) && make_raw(i1.upper())==make_raw(i2.upper()); }
-
-//! \related UpperFloat64Interval \brief Restricts \a i to to interval \a r. i.e. Performs an intersection in-place.
-inline Void restrict(UpperFloat64Interval& i, UpperFloat64Interval const& r) {
-    i.set_lower(max(i.lower(),r.lower())); i.set_upper(min(i.upper(),r.upper()));
-}
-
-*/
+    return reinterpret_cast<ExactInterval const&>(ivl); }
 
 } // namespace Ariadne

@@ -74,7 +74,7 @@ OutputStream& operator<<(OutputStream& os, const EffectiveConstraint& c) {
 
 Pair<Tribool,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, const List<ValidatedConstraint>& constraints) const
 {
-    if(constraints.empty()) { return make_pair(!domain.is_empty(),domain.centre()); }
+    if(constraints.empty()) { return make_pair(!domain.is_empty(),domain.midpoint()); }
 
     ValidatedVectorFunction function(constraints.size(),constraints[0].function().domain());
     ExactBox bounds(constraints.size());

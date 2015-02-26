@@ -21,15 +21,22 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file interval.cc
- *  \brief
- */
-
-
-
 #include "interval.h"
 
 namespace Ariadne {
+
+Interval<ExactFloat64> widen_domain(Interval<UpperFloat64> const& ivl) {
+    volatile float min=std::numeric_limits<float>::min();
+    volatile double l=-ivl.lower().get_d();
+    volatile double u=ivl.upper().get_d();
+    volatile double neg_l=-l;
+    volatile float neg_rl=neg_l;
+    volatile float ru=u;
+    if(l==u) { neg_rl+=min; ru+=min; }
+    if(neg_rl<neg_l) { neg_rl+=min; }
+    if(ru<u) { ru+=min; }
+    return Interval<ExactFloat64>(-neg_rl,ru);
+}
 
 InputStream&
 operator>>(InputStream& is, Interval<ExactFloat64>& ivl)

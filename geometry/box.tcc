@@ -118,8 +118,13 @@ template<class I> typename Box<I>::MidpointType Box<I>::midpoint() const
     return r;
 }
 
-template<class I> typename Box<I>::MidpointType Box<I>::centre() const {
-    return this->midpoint();
+template<class I> typename Box<I>::CentreType Box<I>::centre() const {
+    const Box<I>& bx=*this;
+    CentreType r(bx.size());
+    for(SizeType i=0; i!=bx.size(); ++i) {
+        r[i]=bx[i].centre();
+    }
+    return r;
 }
 
 template<class I> typename Box<I>::VertexType Box<I>::lower_bounds() const

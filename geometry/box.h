@@ -59,6 +59,7 @@ class Box
     typedef typename I::UpperBoundType U;
     typedef typename I::LowerBoundType L;
     typedef typename I::MidpointType M;
+    typedef typename I::CentreType C;
     typedef typename I::RadiusType R;
     typedef typename I::WidthType W;
     typedef decltype(max(declval<L>(),declval<U>())) V;
@@ -70,7 +71,9 @@ class Box
     //! The type used for the upper bound of a component interval.
     typedef U UpperBoundType;
     //! The type used for the midpoint of a component interval.
-    typedef M MidpointValueType;
+    typedef M CentreValueType;
+    //! The type used for the midpoint of a component interval.
+    typedef C MidpointValueType;
     //! A type which can be used for the both the lower and upper bound of a component interval.
     typedef V VertexBoundType;
     //! A type which can be used for the radius or length of a side.
@@ -80,9 +83,11 @@ class Box
     typedef Point<V> VertexType;
     //! A type which can be used for the midpoint of the box.
     typedef Point<M> MidpointType;
+    //! A type which can be used for the exact centre of the box.
+    typedef Point<C> CentreType;
   public:
     Box(); // DEPRECATED
-    explicit Box(SizeType n);
+    explicit Box(SizeType n); // DEPRECATED
     Box(SizeType n, IntervalType ivl);
     Box(const InitializerList<IntervalType>& lst);
 
@@ -95,14 +100,14 @@ class Box
     template<class II, EnableIf<IsConvertible<II,I>> = dummy>
         Box(const Vector<II>& bx) : Vector<I>(bx) { }
 
-    //! Convert from a box of a different type
+    //! Construct from a box of a different type
     template<class II, EnableIf<And<IsConstructible<I,II>,Not<IsConvertible<II,I>>>> = dummy>
         explicit Box(const Vector<II>& bx) : Vector<I>(bx) { }
 
     //! The unit box \f$[-1,1]^n\f$ in \a n dimensions.
     static Box<IntervalType> unit_box(SizeType n);
     //! The upper quadrant box \f$[0,\infty]^n\f$ in \a n dimensions.
-    static Box<IntervalType> upper_quadrant(SizeType n);
+    static Box<IntervalType> upper_orthant(SizeType n);
 
     //! The dimension of the set.
     SizeType dimension() const;
@@ -110,9 +115,10 @@ class Box
     const IntervalType& operator[](SizeType i) const;
     IntervalType& operator[](SizeType i);
 
-    //! The midpoint of the box.
+    //! The (mid)point of the box.
     MidpointType midpoint() const;
-    MidpointType centre() const;
+    //! The exact centre of the box.
+    CentreType centre() const;
     //! The lower corner of the box.
     VertexType lower_bounds() const;
     //! The upper corner of the box.
@@ -131,11 +137,11 @@ class Box
 
     //! Splits the box along coordinate \a k and takes the lower, middle, or upper part as given by \a lmu.
     Box<IntervalType> split(SizeType k, SplitPart lmu) const;
-    //! Determines an coordinate \a k and splits the box along coordinate \a k and takes the lower, middle, or upper part as given by \a lmu.
+    //! Splits the box along the longest direction \a k and takes the lower, middle, or upper part as given by \a lmu.
     Box<IntervalType> split(SplitPart lmu) const;
-    //! Splits the box along coordinate \a k and takes the lower and upper parts.
+    //! Splits the box along widest coordinate \a k and takes the lower and upper parts.
     Pair< Box<IntervalType>, Box<IntervalType> > split(SizeType k) const;
-    //! Determines an coordinate \a k, and splits the box along coordinate \a k and takes the lower and upper parts.
+    //! Splits the box along widest coordinate \a k and takes the lower and upper parts.
     Pair< Box<IntervalType>, Box<IntervalType> > split() const;
 
     //! \brief Test if the box contains the point \a pt.
@@ -170,19 +176,18 @@ template<class I> inline OutputStream& operator<<(OutputStream& os, const Box<I>
     return os << static_cast<const Vector<I>&>(bx);
 }
 
-template<class I> template<class II> inline Box<I>::Box(const Array<II>& bx) : Vector<I>(bx) { }
+template<class I> template<class II> inline Box<I>::Box(const Array<II>& ary) : Vector<I>(ary) { }
 template<class I> inline Box<I>::Box(InitializerList<I> const& lst) : Vector<I>(lst) { }
 
-template<class I> decltype(declval<Box<I>>().empty()) empty(const Array<I>& bx) { return static_cast<Box<I>const&>(bx).empty(); }
-template<class I> decltype(declval<Box<I>>().bounded()) bounded(const Array<I>& bx) { return static_cast<Box<I>const&>(bx).bounded(); }
+template<class I> decltype(declval<Box<I>>().empty()) empty(const Vector<I>& bx) { return static_cast<Box<I>const&>(bx).empty(); }
+template<class I> decltype(declval<Box<I>>().bounded()) bounded(const Vector<I>& bx) { return static_cast<Box<I>const&>(bx).bounded(); }
 
-template<class I> decltype(declval<Box<I>>().radius()) radius(const Array<I>& bx) { return static_cast<Box<I>const&>(bx).radius(); }
-template<class I> decltype(declval<Box<I>>().widths()) widths(const Array<I>& bx) { return static_cast<Box<I>const&>(bx).widths(); }
-template<class I> decltype(declval<Box<I>>().measure()) measure(const Array<I>& bx) { return static_cast<Box<I>const&>(bx).measure(); }
+template<class I> decltype(declval<Box<I>>().radius()) radius(const Vector<I>& bx) { return static_cast<Box<I>const&>(bx).radius(); }
+template<class I> decltype(declval<Box<I>>().widths()) widths(const Vector<I>& bx) { return static_cast<Box<I>const&>(bx).widths(); }
+template<class I> decltype(declval<Box<I>>().measure()) measure(const Vector<I>& bx) { return static_cast<Box<I>const&>(bx).measure(); }
 
 template<class I> inline Box<I> split(const Vector<I>& bx, SizeType k, SplitPart lmu) { return static_cast<Box<I>const&>(bx).split(k,lmu); }
 template<class I> inline Box<I> split(const Vector<I>& bx, SplitPart lmu) { return static_cast<Box<I>const&>(bx).split(lmu); }
-
 template<class I> inline Pair<Box<I>,Box<I>> split(const Vector<I>& bx) { return static_cast<Box<I>const&>(bx).split(); }
 template<class I> inline Pair<Box<I>,Box<I>> split(const Vector<I>& bx, SizeType k) { return static_cast<Box<I>const&>(bx).split(k); }
 
@@ -191,24 +196,15 @@ template<class I> inline Box<I> product(const Box<I>& bx1, const Box<I>& bx2) { 
 template<class I> inline Box<I> product(const Box<I>& bx1, const I& ivl2) { return Box<I>::_product(bx1,ivl2); }
 template<class I> inline Box<I> product(const Box<I>& bx1, const Box<I>& bx2, const Box<I>& bx3) { return Box<I>::_product(bx1,bx2,bx3); }
 
-template<class I> inline decltype(refines(declval<I>(),declval<I>())) refines(const Box<typename Box<I>::IntervalType>& bx1, const Box<I>& bx2) {
-    ARIADNE_ASSERT(bx1.size()==bx2.size());
-    for(SizeType i=0; i!=bx1.size(); ++i) {
-        if(!refines(bx1[i],bx2[i])) { return false; }
-    }
-    return true;
-}
 
 UpperInterval apply(ScalarFunction<ValidatedTag>const& f, const Box<UpperInterval>& x);
 Box<UpperInterval> apply(VectorFunction<ValidatedTag>const& f, const Box<UpperInterval>& x);
 
-//! Project onto the variables \a rng.
-//template<class I> inline Box<I> project(const Box<I> & bx, Range rng) { return Box<I>::_project(bx,rng); }
+//! \relates Box \brief Project onto the variables \a rng.
+template<class I> inline Box<I> project(const Box<I> & bx, Array<SizeType> const& rng) { return Box<I>::_project(bx,rng); }
 
 template<class I> auto is_empty(Box<I> const& bx) -> decltype(bx.is_empty()) { return bx.is_empty(); }
 
-// Provide the following avoiding the Point class
-// Use decltype to allow action on arbitrary classes suppoerting midpoint etc.
 template<class I> auto midpoint(const Box<I>& bx) -> typename Box<I>::MidpointType {
     return bx.midpoint();
 }
@@ -238,6 +234,16 @@ template<class I, class X> Box<I> hull(const Box<I>& bx1, const Point<X>& pt2) {
     Box<I> r(bx1.size());
     for(SizeType i=0; i!=bx1.size(); ++i) {
         r[i]=hull(bx1[i],pt2[i]);
+    }
+    return r;
+}
+
+//! \relates Box \brief The smallest box containing the box and a point.
+template<class I, class X> Box<I> hull(const Point<X>& pt1, const Box<I>& bx2) {
+    ARIADNE_ASSERT(pt1.size()==bx2.size());
+    Box<I> r(bx2.size());
+    for(SizeType i=0; i!=bx2.size(); ++i) {
+        r[i]=hull(pt1[i],bx2[i]);
     }
     return r;
 }
@@ -321,6 +327,16 @@ template<class I1, class I2> decltype(inside(declval<I1>(),declval<I2>())) insid
     return res;
 }
 
+
+template<class I> inline decltype(refines(declval<I>(),declval<I>())) refines(const Box<typename Box<I>::IntervalType>& bx1, const Box<I>& bx2) {
+    ARIADNE_ASSERT(bx1.size()==bx2.size());
+    for(SizeType i=0; i!=bx1.size(); ++i) {
+        if(!refines(bx1[i],bx2[i])) { return false; }
+    }
+    return true;
+}
+
+
 template<class I> template<class X> inline auto Box<I>::contains(const Point<X>& pt) const -> decltype(Ariadne::contains(declval<I>(),declval<X>())) {
     return Ariadne::contains(*this,pt); }
 
@@ -341,6 +357,11 @@ template<class I1> template<class I2> inline auto Box<I1>::inside(const Box<I2>&
 template<class I1> template<class I2> inline auto Box<I1>::separated(const Box<I2>& bx) const -> decltype(Ariadne::separated(declval<I1>(),declval<I2>())) {
     return Ariadne::separated(*this,bx); }
 
+
+
+// Declare related functions
+Void draw(CanvasInterface& c, Projection2d const& p, ApproximateFloatBox const& bx);
+ExactBox make_box(const String& str);
 
 
 // Inline functions so as not to have to instantiate box class
@@ -375,6 +396,10 @@ template<class I> inline auto make_singleton(Box<I> const& bx) -> Vector<decltyp
     return v;
 }
 
+template<class I> inline Void Box<I>::draw(CanvasInterface& c, const Projection2d& p) const {
+    return Ariadne::draw(c,p,ApproximateFloatBox(*this)); }
+
+
 inline ExactBox make_exact_box(ApproximateBox const& abx) {
     return ExactBox(reinterpret_cast<ExactBox const&>(abx));
 }
@@ -382,6 +407,7 @@ inline ExactBox make_exact_box(ApproximateBox const& abx) {
 inline ExactBox make_exact_box(Vector<BoundedFloat64> const& bv) {
     return ExactBox(reinterpret_cast<Vector<ExactInterval>const&>(bv));
 }
+
 
 inline UpperBox widen(const UpperBox& bx, UpperFloat64 eps) {
     UpperBox r(bx.dimension());
@@ -392,7 +418,19 @@ inline UpperBox widen(const UpperBox& bx, UpperFloat64 eps) {
 }
 
 inline UpperBox widen(const UpperBox& bx) {
-    return widen(bx,UpperFloat64(Float64::min()));
+    UpperBox r(bx.dimension());
+    for(Nat i=0; i!=bx.size(); ++i) {
+        r[i]=widen(bx[i]);
+    }
+    return r;
+}
+
+inline ExactBox widen_domain(const UpperBox& bx) {
+    ExactBox r(bx.dimension());
+    for(Nat i=0; i!=bx.size(); ++i) {
+        r[i]=widen_domain(bx[i]);
+    }
+    return r;
 }
 
 inline ApproximateBox widen(const ApproximateBox& bx, Float64 e) {
@@ -413,17 +451,14 @@ inline LowerBox narrow(const LowerBox& bx, UpperFloat64 eps) {
 }
 
 inline LowerBox narrow(const LowerBox& bx) {
-    return narrow(bx,UpperFloat64(Float64::min()));
+    LowerBox r(bx.dimension());
+    for(Nat i=0; i!=bx.size(); ++i) {
+        r[i]=narrow(bx[i]);
+    }
+    return r;
 }
 
 
-
-Void draw(CanvasInterface& c, Projection2d const& p, ApproximateFloatBox const& bx);
-
-template<class I> inline Void Box<I>::draw(CanvasInterface& c, const Projection2d& p) const {
-    return Ariadne::draw(c,p,ApproximateFloatBox(*this)); }
-
-ExactBox make_box(const String& str);
 
 class ExactBoxSet
     : public virtual SetInterface,
@@ -461,32 +496,6 @@ class ApproximateBoxSet
     virtual OutputStream& write(OutputStream& os) const final { return os << static_cast<const ApproximateBox&>(*this); }
 };
 
-//inline bool separated(const ExactFloatBox& bx1, const ExactFloatBox& bx2) { return bx1.separated(bx2); }
-//inline bool overlap(const ExactFloatBox& bx1, const ExactFloatBox& bx2) { return bx1.overlaps(bx2); }
-//inline bool inside(const ExactFloatBox& bx1, const ExactFloatBox& bx2) { return bx1.inside(bx2); }
-//inline bool covers(const ExactFloatBox& bx1, const ExactFloatBox& bx2) { return bx1.covers(bx2); }
-/*
-Sierpinski overlap(const Vector<LowerFloatInterval>& bx1, const Vector<LowerFloatInterval>& bx2);
-Sierpinski separated(const Vector<UpperFloatInterval>& bx1, const Vector<UpperFloatInterval>& bx2);
-Sierpinski inside(const Vector<UpperFloatInterval>& bx1, const Vector<LowerFloatInterval>& bx2);
-Sierpinski covers(const Vector<LowerFloatInterval>& bx1, const Vector<UpperFloatInterval>& bx2);
-
-Box<UpperFloatInterval> over_approximation(const Box<RealInterval>& bx);
-Box<LowerFloatInterval> under_approximation(const Box<RealInterval>& bx);
-Box<ApproximateFloatInterval> approximation(const Box<RealInterval>& bx);
-
-Box<UpperFloatInterval> widen(Box<UpperFloatInterval> bx, UpperFloat e);
-
-Box<UpperFloatInterval> widen(Box<UpperFloatInterval> bx);
-Box<LowerFloatInterval> narrow(Box<LowerFloatInterval> bx);
-
-Vector<ValidatedFloat> make_singleton(const Vector<UpperFloatInterval>& bx);
-
-inline ExactFloatBox const& make_exact(const Vector<ExactFloatInterval>& bx) { return reinterpret_cast<ExactFloatBox const&>(bx); }
-inline ExactFloatBox const& make_exact(const Vector<UpperFloatInterval>& bx) { return reinterpret_cast<ExactFloatBox const&>(bx); }
-inline ExactFloatBox const& make_exact(const Vector<LowerFloatInterval>& bx) { return reinterpret_cast<ExactFloatBox const&>(bx); }
-inline ExactFloatBox const& make_exact(const Vector<ApproximateFloatInterval>& bx) { return reinterpret_cast<ExactFloatBox const&>(bx); }
-*/
 
 } // namespace Ariadne
 

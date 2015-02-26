@@ -267,7 +267,7 @@ class TestAffineSet
         set.new_parameter_constraint(-1.0_ex*x[1] <= -2.0_ex);
 
         ARIADNE_TEST_PRINT(set);
-        ARIADNE_TEST_ASSERT(set.empty());
+        ARIADNE_TEST_ASSERT(set.is_empty());
 
         figure.clear();
         figure.draw(set);

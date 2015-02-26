@@ -659,10 +659,10 @@ class HybridGridTreeSet
     }
 
     //!
-    Bool empty() const {
+    Bool is_empty() const {
         for(LocationsConstIterator _loc_iter=this->locations_begin();
             _loc_iter!=this->locations_end(); ++_loc_iter) {
-            if(!_loc_iter->second.empty()) { return false; } }
+            if(!_loc_iter->second.is_empty()) { return false; } }
         return true; }
 
     //!
@@ -722,7 +722,7 @@ class HybridGridTreeSet
     //!
     Sierpinski inside(const HybridBoxes& hbx) const  {
         for( LocationsConstIterator _loc_iter = this->locations_begin(); _loc_iter != this->locations_end(); ++_loc_iter ) {
-            if( !_loc_iter->second.empty() ) {
+            if( !_loc_iter->second.is_empty() ) {
                 DiscreteLocation const& loc = _loc_iter->first;
                 RealSpace spc=this->space(loc);
                 return this->continuous_set(loc).inside(hbx.euclidean_set(loc,spc));
@@ -735,7 +735,7 @@ class HybridGridTreeSet
     HybridUpperBoxes bounding_box() const {
         HybridBoxes result;
         for( LocationsConstIterator _loc_iter = this->locations_begin(); _loc_iter != this->locations_end(); ++_loc_iter ) {
-            if( !_loc_iter->second.empty() ) {
+            if( !_loc_iter->second.is_empty() ) {
                 DiscreteLocation const& loc = _loc_iter->first;
                 RealSpace const& spc=this->space(loc);
                 result.insert(loc,spc,cast_exact_box(_loc_iter->second.bounding_box()));

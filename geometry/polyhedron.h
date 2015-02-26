@@ -47,7 +47,7 @@ class Polyhedron;
 
 
 
-/*! \brief A polyhedron (not necessarily bounded polyhedral set) described by a system of linear inequalities.
+/*! \brief A polyhedron (not necessarily is_bounded polyhedral set) described by a system of linear inequalities.
  *
  *  The set is described as
  *  \f$ \{ x\in\mathbb{R}^d \mid Ax \leq b \} \f$
@@ -107,8 +107,8 @@ class Polyhedron
     //! \brief Tests if the polyhedron is empty. (Not currently implemented.)
     virtual Tribool empty() const;
 
-    //! \brief Tests if the polyhedron is bounded. (Not currently implemented.)
-    virtual Tribool bounded() const;
+    //! \brief Tests if the polyhedron is singleton. (Not currently implemented.)
+    virtual Tribool is_bounded() const;
 
     //! \brief Tests if the polyhedron intersects a box. (Not currently implemented.)
     virtual Tribool overlaps(const ExactBox& bx) const;

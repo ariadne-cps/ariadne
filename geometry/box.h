@@ -130,10 +130,8 @@ class Box
 
     //! \brief Test if the box is empty.
     auto is_empty() const -> decltype(declval<IntervalType>().is_empty());
-    auto empty() const -> decltype(declval<IntervalType>().empty());
-    //! \brief Test if the box is bounded.
+    //! \brief Test if the box is singleton.
     auto is_bounded() const -> decltype(declval<IntervalType>().is_bounded());
-    auto bounded() const -> decltype(declval<IntervalType>().bounded());
 
     //! Splits the box along coordinate \a k and takes the lower, middle, or upper part as given by \a lmu.
     Box<IntervalType> split(SizeType k, SplitPart lmu) const;
@@ -179,8 +177,8 @@ template<class I> inline OutputStream& operator<<(OutputStream& os, const Box<I>
 template<class I> template<class II> inline Box<I>::Box(const Array<II>& ary) : Vector<I>(ary) { }
 template<class I> inline Box<I>::Box(InitializerList<I> const& lst) : Vector<I>(lst) { }
 
-template<class I> decltype(declval<Box<I>>().empty()) empty(const Vector<I>& bx) { return static_cast<Box<I>const&>(bx).empty(); }
-template<class I> decltype(declval<Box<I>>().bounded()) bounded(const Vector<I>& bx) { return static_cast<Box<I>const&>(bx).bounded(); }
+template<class I> decltype(declval<Box<I>>().is_empty()) is_empty(const Vector<I>& bx) { return static_cast<Box<I>const&>(bx).is_empty(); }
+template<class I> decltype(declval<Box<I>>().is_bounded()) is_bounded(const Vector<I>& bx) { return static_cast<Box<I>const&>(bx).is_bounded(); }
 
 template<class I> decltype(declval<Box<I>>().radius()) radius(const Vector<I>& bx) { return static_cast<Box<I>const&>(bx).radius(); }
 template<class I> decltype(declval<Box<I>>().widths()) widths(const Vector<I>& bx) { return static_cast<Box<I>const&>(bx).widths(); }
@@ -203,7 +201,6 @@ Box<UpperInterval> apply(VectorFunction<ValidatedTag>const& f, const Box<UpperIn
 //! \relates Box \brief Project onto the variables \a rng.
 template<class I> inline Box<I> project(const Box<I> & bx, Array<SizeType> const& rng) { return Box<I>::_project(bx,rng); }
 
-template<class I> auto is_empty(Box<I> const& bx) -> decltype(bx.is_empty()) { return bx.is_empty(); }
 
 template<class I> auto midpoint(const Box<I>& bx) -> typename Box<I>::MidpointType {
     return bx.midpoint();

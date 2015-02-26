@@ -66,7 +66,7 @@ class TestConstraintSolver
 
         ARIADNE_TEST_EXECUTE(propagator.reduce(D,c));
         ARIADNE_TEST_PRINT(D);
-        ARIADNE_TEST_ASSERT(D.empty());
+        ARIADNE_TEST_ASSERT(D.is_empty());
     }
 
     Void test_empty_reduce_equality() {
@@ -79,7 +79,7 @@ class TestConstraintSolver
 
         ARIADNE_TEST_EXECUTE(propagator.reduce(D,c));
         ARIADNE_TEST_PRINT(D);
-        ARIADNE_TEST_ASSERT(D.empty());
+        ARIADNE_TEST_ASSERT(D.is_empty());
     }
 
     Void test_empty_reduce_mixed() {
@@ -92,7 +92,7 @@ class TestConstraintSolver
 
         ARIADNE_TEST_EXECUTE(propagator.reduce(D,c));
         ARIADNE_TEST_PRINT(D);
-        ARIADNE_TEST_ASSERT(D.empty());
+        ARIADNE_TEST_ASSERT(D.is_empty());
     }
 
     Void test_empty_hull_reduce() {
@@ -106,7 +106,7 @@ class TestConstraintSolver
         ARIADNE_TEST_EXECUTE(propagator.hull_reduce(D,c[0]));
         ARIADNE_TEST_EXECUTE(propagator.hull_reduce(D,c[1]));
         ARIADNE_TEST_PRINT(D);
-        ARIADNE_TEST_ASSERT(D.empty());
+        ARIADNE_TEST_ASSERT(D.is_empty());
     }
 
     Void test_empty_box_reduce() {
@@ -124,7 +124,7 @@ class TestConstraintSolver
         ARIADNE_TEST_EXECUTE(propagator.hull_reduce(D,c[0]));
         ARIADNE_TEST_EXECUTE(propagator.hull_reduce(D,c[1]));
         ARIADNE_TEST_PRINT(D);
-        ARIADNE_TEST_ASSERT(D.empty());
+        ARIADNE_TEST_ASSERT(D.is_empty());
     }
 
     Void test_hull_reduce() {

@@ -499,7 +499,7 @@ class GridTreeSubset
     //! \name Properties
 
     /*! \brief True if the set is empty. */
-    Bool empty() const;
+    Bool is_empty() const;
 
     /*! \brief The number of activated cells in the set. */
     SizeType size() const;
@@ -1669,7 +1669,7 @@ inline Nat GridTreeSubset::compute_number_subdiv( Float64 theWidth, const Float6
     return result;
 }
 
-inline Bool GridTreeSubset::empty() const {
+inline Bool GridTreeSubset::is_empty() const {
     return BinaryTreeNode::count_enabled_leaf_nodes( this->binary_tree() ) == 0;
 }
 
@@ -1695,7 +1695,7 @@ inline Void GridTreeSubset::set_root_cell(Bool enabled_or_disabled)  {
 }
 
 inline UpperBox GridTreeSubset::bounding_box() const {
-    if(this->empty()) return ExactBox(this->dimension());
+    if(this->is_empty()) return ExactBox(this->dimension());
 
     GridTreeSet::ConstIterator iter=this->begin();
     UpperBox bbox = iter->box();

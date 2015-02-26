@@ -138,7 +138,7 @@ Polyhedron::empty() const
 
 
 Tribool
-Polyhedron::bounded() const
+Polyhedron::is_bounded() const
 {
     ARIADNE_NOT_IMPLEMENTED;
 }

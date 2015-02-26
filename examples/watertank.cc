@@ -204,7 +204,7 @@ Int main(Int argc, const char* argv[])
     plot("watertank-initial_set1",bounding_box, Colour(0.0,0.5,1.0), initial_set);
 
     // Compute evolved sets (i.e. at the evolution time) and reach sets (i.e. up to the evolution time) using lower semantics.
-    // These functions run a bunch of simulations with bounded approximation errors and combines the results.
+    // These functions run a bunch of simulations with singleton approximation errors and combines the results.
     // If the desired evolution time can not be attained without exceeding the error bounds, then the run discarded (without warning)
     std::cout << "Computing lower reach set... " << std::flush;
     HybridGridTreeSet* lower_reach_set_ptr = analyser.lower_reach(watertank_system,initial_set,reach_time);
@@ -228,7 +228,7 @@ Int main(Int argc, const char* argv[])
     plot("watertank-initial_set2",bounding_box, Colour(0.0,0.5,1.0), initial_set2);
 
     // Compute evolved sets (i.e. at the evolution time) and reach sets (i.e. up to the evolution time) using lower semantics.
-    // These functions run a bunch of simulations with bounded approximation errors and combines the results.
+    // These functions run a bunch of simulations with singleton approximation errors and combines the results.
     // If the desired evolution time can not be attained without exceeding the error bounds, then the run discarded (without warning)
     std::cout << "Computing lower reach set... " << std::flush;
     lower_reach_set_ptr = analyser.lower_reach(watertank_system,initial_set2,reach_time);

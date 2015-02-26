@@ -22,7 +22,7 @@
  */
 
 /*! \file taylor_model.h
- *  \brief Approximate functions on a bounded domain with a sparse representation.
+ *  \brief Approximate functions on a is_bounded domain with a sparse representation.
  */
 
 #ifndef ARIADNE_TAYLOR_MODEL_H

@@ -22,7 +22,7 @@
  */
 
 /*! \file affine_set.h
- *  \brief Affine sets described by equality, inequality and interval constraints over a bounded box.
+ *  \brief Affine sets described by equality, inequality and interval constraints over a is_bounded box.
  */
 
 #ifndef ARIADNE_AFFINE_SET_H
@@ -113,11 +113,11 @@ class ValidatedAffineConstrainedImageSet
     SizeType number_of_constraints() const;
     ExactBox domain() const;
 
-    Tribool bounded() const;
+    Tribool is_bounded() const;
     UpperBox bounding_box() const;
     Sierpinski separated(const ExactBox& bx) const;
     Sierpinski inside(const ExactBox& bx) const;
-    Tribool empty() const;
+    Tribool is_empty() const;
 
     Void adjoin_outer_approximation_to(PavingInterface& g, Int depth) const;
     GridTreeSet outer_approximation(const Grid& g, Int depth) const;

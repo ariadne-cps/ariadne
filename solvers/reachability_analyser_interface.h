@@ -54,7 +54,7 @@ template<class SYS> class ReachabilityAnalyserInterface {
     typedef typename StateSpaceType::LocatedSetInterfaceType LocatedSetInterfaceType;
     //! \brief The type used to describe the interface for regular sets in the state space, which are used as safe sets for verification.
     typedef typename StateSpaceType::RegularSetInterfaceType RegularSetInterfaceType;
-    //! \brief The type used to describe the interface for bounded sets in the state space.
+    //! \brief The type used to describe the interface for singleton sets in the state space.
     typedef typename StateSpaceType::BoundedSetInterfaceType BoundedSetInterfaceType;
     //! \brief The type used to describe the type used for concrete approximations to sets.
     typedef typename StateSpaceType::SetApproximationType SetApproximationType;

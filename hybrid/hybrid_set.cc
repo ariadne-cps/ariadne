@@ -300,7 +300,7 @@ Sierpinski HybridConstraintSet::covers(const HybridBox& bx) const {
     if(this->_sets.has_key(bx.location())) {
         return this->_sets[bx.location()].euclidean_set(bx.space()).covers(bx.continuous_set());
     } else {
-        return bx.continuous_set().empty();
+        return bx.continuous_set().is_empty();
     }
 }
 
@@ -376,7 +376,7 @@ Sierpinski HybridBoundedConstraintSet::covers(const HybridBox& bx) const {
     if(this->_sets.has_key(bx.location())) {
         return this->_sets[bx.location()].euclidean_set(bx.space()).covers(bx.continuous_set());
     } else {
-        return bx.continuous_set().empty();
+        return bx.continuous_set().is_empty();
     }
 }
 

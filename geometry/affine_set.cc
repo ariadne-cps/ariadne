@@ -207,7 +207,7 @@ ValidatedAffineConstrainedImageSet::domain() const
     return this->_domain;
 }
 
-Tribool ValidatedAffineConstrainedImageSet::bounded() const {
+Tribool ValidatedAffineConstrainedImageSet::is_bounded() const {
     return Tribool(ExactBox(this->domain()).is_bounded()) || Tribool(indeterminate);
 }
 
@@ -247,7 +247,7 @@ Sierpinski ValidatedAffineConstrainedImageSet::separated(const ExactBox& bx) con
     return !feasible;
 }
 
-Tribool ValidatedAffineConstrainedImageSet::empty() const {
+Tribool ValidatedAffineConstrainedImageSet::is_empty() const {
     return Tribool(this->separated(cast_exact_box(this->bounding_box()))) || Tribool(indeterminate);
 }
 

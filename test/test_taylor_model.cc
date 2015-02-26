@@ -216,9 +216,9 @@ Void TestTaylorModel::test_approximation()
 Void TestTaylorModel::test_unscale()
 {
 
-    ExactInterval singleton(1.0,1.0);
-    if(unscale(3*o,singleton).codomain()!=singleton) {
-        ARIADNE_TEST_WARN("Unscaling over singleton domain does not yield constant");
+    ExactInterval is_singleton(1.0,1.0);
+    if(unscale(3*o,is_singleton).codomain()!=is_singleton) {
+        ARIADNE_TEST_WARN("Unscaling over is_singleton domain does not yield constant");
     }
 }
 

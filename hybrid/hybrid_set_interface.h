@@ -69,7 +69,7 @@ class HybridSetInterfaceBase
     virtual SetInterfaceBase* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
 };
 
-//! \brief Interface for bounded sets in a hybrid space.
+//! \brief Interface for singleton sets in a hybrid space.
 class HybridBoundedSetInterface
     : public virtual HybridSetInterfaceBase
 {
@@ -119,7 +119,7 @@ class HybridClosedSetInterface
     virtual ClosedSetInterface* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
 };
 
-//! \brief Interface for compact (closed and bounded) sets in a hybrid space.
+//! \brief Interface for compact (closed and singleton) sets in a hybrid space.
 class HybridCompactSetInterface
     : public virtual HybridBoundedSetInterface
     , public virtual HybridClosedSetInterface
@@ -153,7 +153,7 @@ class HybridLocatedSetInterface
     virtual LocatedSetInterface* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
 };
 
-//! \brief Complete set interface for bounded regular sets in a hybrid space.
+//! \brief Complete set interface for singleton regular sets in a hybrid space.
 class HybridSetInterface
     : public virtual HybridRegularSetInterface,
       public virtual HybridLocatedSetInterface

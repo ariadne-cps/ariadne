@@ -109,7 +109,7 @@ class Enclosure
     //! \brief Construct the set with domain \a d, space function \a sf, time function \a tf, negative constraints \a g and equality constraints \a h.
     //!   (Not currently implemented.)
     explicit Enclosure(const ExactBox& d, const ValidatedVectorFunction& sf, const ValidatedScalarFunction tf, const ValidatedVectorFunction& g, const ValidatedVectorFunction& h, const ValidatedFunctionModelFactoryInterface& fac);
-    //! \brief Construct from an exact bounded constraint \a set.
+    //! \brief Construct from an exact singleton constraint \a set.
     explicit Enclosure(const BoundedConstraintSet& set, const ValidatedFunctionModelFactoryInterface& fac);
 
     //! \brief Create a dynamically-allocated copy.
@@ -211,11 +211,11 @@ class Enclosure
     ExactPoint centre() const;
     //! \brief An over-approximation to the radius of the set.
     ErrorFloat64 radius() const;
-    //! \brief Returns \c true if the set is definitely bounded.
-    Tribool bounded() const;
+    //! \brief Returns \c true if the set is definitely singleton.
+    Tribool is_bounded() const;
     //! \brief Returns \c true if the set is provably empty.
     //! May return \c false if the set can (easily) be proved to be nonempty.
-    Tribool empty() const;
+    Tribool is_empty() const;
     //! \brief Returns \c true if the set can be shown to be disjoint from \a bx.
     Sierpinski separated(const ExactBox& bx) const;
     //! \brief Returns \c true if the set can be shown to be a subset of \a bx..

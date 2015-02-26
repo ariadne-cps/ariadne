@@ -157,12 +157,10 @@ template<class U> class Interval {
 
     //! Test if the interval is empty.
     auto is_empty() const -> decltype(declval<L>() > declval<U>());
-    auto empty() const -> decltype(declval<L>() > declval<U>());
     //! Test if the interval is a singleton.
     auto is_singleton() const -> decltype(declval<L>() == declval<U>());
     //! Test if the interval is bounded.
     auto is_bounded() const -> decltype(declval<U>()<infty);
-    auto bounded() const -> decltype(declval<U>()<infty);
   public:
     L _l; U _u;
 };
@@ -179,7 +177,7 @@ template<class U> inline auto width(Interval<U> const& ivl) -> decltype(ivl.widt
 
 //! \related Interval \brief Test if the interval is empty.
 template<class U> inline auto is_empty(Interval<U> const& ivl) -> decltype(ivl.lower()>ivl.upper());
-//! \related Interval \brief Test if the interval is empty.
+//! \related Interval \brief Test if the interval is a singleton.
 template<class U> inline auto is_singleton(Interval<U> const& ivl) -> decltype(ivl.lower()==ivl.upper());
 //! \related Interval \brief Test if the interval is bounded.
 template<class U> inline auto is_bounded(Interval<U> const& ivl) -> decltype(ivl.upper()<infty);

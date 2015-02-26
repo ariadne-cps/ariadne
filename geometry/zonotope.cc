@@ -371,7 +371,7 @@ empty(const Zonotope& z)
 
 
 Tribool
-bounded(const Zonotope& z)
+is_bounded(const Zonotope& z)
 {
     return true;
 }

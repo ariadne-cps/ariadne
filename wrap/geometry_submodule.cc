@@ -194,7 +194,7 @@ class CompactSetWrapper
     Nat dimension() const { return this->get_override("dimension")(); }
     Tribool separated(const ExactBox& r) const { return this->get_override("separated")(); }
     Tribool inside(const ExactBox& r) const { return this->get_override("inside")(); }
-    Tribool bounded() const { return this->get_override("bounded")(); }
+    Tribool is_bounded() const { return this->get_override("is_bounded")(); }
     UpperBox bounding_box() const { return this->get_override("bounding_box")(); }
     OutputStream& write(OutputStream&) const { return this->get_override("write")(); }
 };
@@ -220,7 +220,7 @@ class LocatedSetWrapper
     Tribool overlaps(const ExactBox& r) const { return this->get_override("overlaps")(); }
     Tribool separated(const ExactBox& r) const { return this->get_override("separated")(); }
     Tribool inside(const ExactBox& r) const { return this->get_override("inside")(); }
-    Tribool bounded() const { return this->get_override("bounded")(); }
+    Tribool is_bounded() const { return this->get_override("is_bounded")(); }
     UpperBox bounding_box() const { return this->get_override("bounding_box")(); }
     OutputStream& write(OutputStream&) const { return this->get_override("write")(); }
 };
@@ -422,7 +422,7 @@ Void export_affine_set()
     affine_set_class.def("new_parameter_constraint", (Void(ValidatedAffineConstrainedImageSet::*)(const Constraint<Affine<ValidatedFloat64>,ValidatedFloat64>&)) &ValidatedAffineConstrainedImageSet::new_parameter_constraint);
     affine_set_class.def("new_constraint", (Void(ValidatedAffineConstrainedImageSet::*)(const Constraint<AffineModel<ValidatedFloat64>,ValidatedFloat64>&)) &ValidatedAffineConstrainedImageSet::new_constraint);
     affine_set_class.def("dimension", &ValidatedAffineConstrainedImageSet::dimension);
-    affine_set_class.def("bounded", &ValidatedAffineConstrainedImageSet::bounded);
+    affine_set_class.def("is_bounded", &ValidatedAffineConstrainedImageSet::is_bounded);
     affine_set_class.def("empty", &ValidatedAffineConstrainedImageSet::empty);
     affine_set_class.def("bounding_box", &ValidatedAffineConstrainedImageSet::bounding_box);
     affine_set_class.def("separated", &ValidatedAffineConstrainedImageSet::separated);

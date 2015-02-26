@@ -492,7 +492,7 @@ _process_starting_events(EvolutionData& evolution_data,
                 if(transition.event_kind!=PROGRESS) {
                     HybridEnclosure immediate_jump_set=invariant_set;
                     immediate_jump_set.new_activation(event,transition.guard_function);
-                    if(!definitely(immediate_jump_set.empty())) {
+                    if(!definitely(immediate_jump_set.is_empty())) {
                         // Put the immediate jump set in the reached sets, since it does not occur in the flowable set
                         ARIADNE_LOG(2,event<<": "<<transition.event_kind<<", immediate\n");
                         evolution_data.reach_sets.append(immediate_jump_set);
@@ -510,7 +510,7 @@ _process_starting_events(EvolutionData& evolution_data,
     }
 
     // Put the flowable set in the starting sets for ordinary evolution
-    if(!definitely(flowable_set.empty())) {
+    if(!definitely(flowable_set.is_empty())) {
         evolution_data.working_sets.append(flowable_set);
     }
 }
@@ -572,7 +572,7 @@ _compute_active_events(EffectiveVectorFunction const& dynamic,
             // not satisfied anywhere.
             HybridEnclosure test_set=reach_set;
             test_set.new_activation(event,guard_function);
-            if(!definitely(test_set.empty())) {
+            if(!definitely(test_set.is_empty())) {
                 active_events.insert(*event_iter);
 /*
                 // FIXME: Need to allow permissive events with strictly decreasing guard.
@@ -927,7 +927,7 @@ _apply_guard(List<HybridEnclosure>& sets,
                 HybridEnclosure eventually_hitting_set=set;
                 eventually_hitting_set.new_parameter_constraint( event, elapsed_time <= critical_time );
                 eventually_hitting_set.new_parameter_constraint( event, maximal_guard >= zero);
-                if(definitely(eventually_hitting_set.empty())) {
+                if(definitely(eventually_hitting_set.is_empty())) {
                     set.new_parameter_constraint(event, maximal_guard <= zero);
                     break;
                 }
@@ -936,7 +936,7 @@ _apply_guard(List<HybridEnclosure>& sets,
                 HybridEnclosure returning_set=set;
                 returning_set.new_parameter_constraint( event, elapsed_time >= critical_time );
                 returning_set.new_parameter_constraint( event, final_guard <= zero );
-                if(definitely(returning_set.empty())) {
+                if(definitely(returning_set.is_empty())) {
                     set.new_parameter_constraint(event, final_guard <= zero);
                     break;
                 }
@@ -1081,7 +1081,7 @@ _evolution_step(EvolutionData& evolution_data,
 
     ARIADNE_LOG(4,"starting_set="<<starting_set<<"\n");
     ARIADNE_LOG(4,"starting_time="<<starting_set.time_function()<<"\n");
-    if(definitely(starting_set.empty())) {
+    if(definitely(starting_set.is_empty())) {
         ARIADNE_LOG(4,"Empty starting_set "<<starting_set<<"\n");
         return;
     }
@@ -1118,7 +1118,7 @@ _evolution_step(EvolutionData& evolution_data,
             ARIADNE_LOG(1,"\r  too large, splitting\n");
             List<HybridEnclosure> split_sets = starting_set.split();
             for(Nat i=0; i!=split_sets.size(); ++i) {
-                if(!definitely(split_sets[i].empty())) { evolution_data.working_sets.append(split_sets[i]); }
+                if(!definitely(split_sets[i].is_empty())) { evolution_data.working_sets.append(split_sets[i]); }
             }
             return;
         }
@@ -1176,7 +1176,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
 
     EvolutionStepData _step_data;
     HybridEnclosure starting_set_copy=starting_set;
-    Tribool starting_set_empty=starting_set_copy.empty();
+    Tribool starting_set_empty=starting_set_copy.is_empty();
 
     // Counters for number of sucessor sets
     Nat jump_sets = 0;
@@ -1262,7 +1262,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
             evolve_set_iter!=evolve_sets.end(); ++evolve_set_iter)
         {
             HybridEnclosure const& evolve_set=*evolve_set_iter;
-            if(!definitely(evolve_set.empty())) {
+            if(!definitely(evolve_set.is_empty())) {
                 ARIADNE_LOG(4,"final_set="<<evolve_set<<"\n");
                 evolution_data.final_sets.append(evolve_set);
                 _step_data.finishing = true;
@@ -1286,7 +1286,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
                 // Do nothing, since evolve set is past final time is definitely empty
             } else if(definitely(evolve_set_time_range.upper()<=timing_data.final_time)) {
                 // No need to introduce timing constraints
-                if(!definitely(evolve_set.empty())) {
+                if(!definitely(evolve_set.is_empty())) {
                     ARIADNE_LOG(4,"evolve_set="<<evolve_set<<"\n");
                     ARIADNE_LOG(4,"next_working_set="<<next_working_set<<"\n");
                     evolution_data.working_sets.append(next_working_set);
@@ -1298,10 +1298,10 @@ _apply_evolution_step(EvolutionData& evolution_data,
                 if(possibly(evolve_set_time_range.upper()>timing_data.final_time)) {
                     evolve_set.bound_time(timing_data.final_time);
                 }
-                // Only continue evolution if the time-bounded evolve set is nonempty;
+                // Only continue evolution if the time-singleton evolve set is nonempty;
                 // However, continue evolution without adding time constraint,
                 // since this will be introduced in the next step
-                if(!definitely(evolve_set.empty())) {
+                if(!definitely(evolve_set.is_empty())) {
                     ARIADNE_LOG(4,"evolve_set="<<evolve_set<<"\n");
                     ARIADNE_LOG(4,"next_working_set="<<next_working_set<<"\n");
                     evolution_data.working_sets.append(next_working_set);
@@ -1318,8 +1318,8 @@ _apply_evolution_step(EvolutionData& evolution_data,
             if(possibly(reach_set.time_range().upper()>timing_data.final_time)) {
                 HybridEnclosure final_set=reach_set;
                 final_set.set_time(timing_data.final_time);
-                if(timing_data.finishing_kind!=FinishingKind::BEFORE_FINAL_TIME && !definitely(final_set.empty())) {
-                //if(!definitely(final_set.empty())) {
+                if(timing_data.finishing_kind!=FinishingKind::BEFORE_FINAL_TIME && !definitely(final_set.is_empty())) {
+                //if(!definitely(final_set.is_empty())) {
                     ARIADNE_LOG(4,"final_set="<<final_set<<"\n");
                     evolution_data.final_sets.append(final_set);
                     _step_data.finishing = true;
@@ -1367,7 +1367,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
         for(List<HybridEnclosure>::Iterator jump_set_iter=jump_sets.begin(); jump_set_iter!=jump_sets.end(); ++jump_set_iter) {
             if(possibly(jump_set.time_range().upper()>timing_data.final_time)) {
                 jump_set.bound_time(timing_data.final_time);
-                if(definitely(not jump_set.empty())) { ARIADNE_WARN("Explicitly bounding time in jump set\n"); }
+                if(definitely(not jump_set.is_empty())) { ARIADNE_WARN("Explicitly bounding time in jump set\n"); }
             }
         }
 
@@ -1388,7 +1388,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
         // Apply reset
         for(List<HybridEnclosure>::Iterator jump_set_iter=jump_sets.begin(); jump_set_iter!=jump_sets.end(); ++jump_set_iter) {
             HybridEnclosure& jump_set=*jump_set_iter;
-            if(!definitely(jump_set.empty())) {
+            if(!definitely(jump_set.is_empty())) {
                 jump_set.apply_reset(event,transitions[event].target,transitions[event].target_space,transitions[event].reset_function);
                 evolution_data.initial_sets.append(jump_set);
                 _step_data.events.insert(event);
@@ -1653,7 +1653,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
             }
         }
         // If the evolved set is definitely empty, no creeping occurs
-        if(definitely(evolve_set.empty())) {
+        if(definitely(evolve_set.is_empty())) {
             ARIADNE_LOG(6,"No creep; evolve set is empty");
             creep=false;
         }

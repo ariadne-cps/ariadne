@@ -1440,7 +1440,7 @@ NonlinearInteriorPointOptimiser::feasibility_step(
 
 
 
-    // Add correction for bounded domain to diagonal elements of Hessian
+    // Add correction for singleton domain to diagonal elements of Hessian
     for(Nat i=0; i!=m; ++i) {
     }
 
@@ -1673,7 +1673,7 @@ compute_mu(const ExactBox& D, const ApproximateVectorFunction& g, const ExactBox
         if(C[i].lower()==C[i].upper()) { }
         else if(C[i].lower()==-infty) { mu += lambda[i] * (gx[i] - C[i].upper()); }
         else if(C[i].upper()==+infty) { mu += lambda[i] * (gx[i] - C[i].lower()); }
-        else { // std::cerr<<"FIXME: Compute mu for bounded constraint\n";
+        else { // std::cerr<<"FIXME: Compute mu for singleton constraint\n";
             if ( decide(lambda[i] <=0.0) ) { mu += lambda[i] * (gx[i] - C[i].upper()); }
             else { mu += lambda[i] * (gx[i] - C[i].lower()); }
         }

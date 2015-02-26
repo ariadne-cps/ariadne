@@ -944,7 +944,7 @@ ValidatedConstrainedImageSet::reduce()
     solver.reduce(reduced_domain, this->constraint_function(), this->constraint_bounds());
 }
 
-Tribool ValidatedConstrainedImageSet::empty() const
+Tribool ValidatedConstrainedImageSet::is_empty() const
 {
     const_cast<ValidatedConstrainedImageSet*>(this)->reduce();
     return this->_reduced_domain.is_empty();

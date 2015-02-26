@@ -71,7 +71,7 @@ class SetInterfaceBase
 };
 
 //! \ingroup GeometryModule SetInterfaceSubModule
-//! \brief Interface for bounded sets.
+//! \brief Interface for singleton sets.
 class BoundedSetInterface
     : public virtual SetInterfaceBase {
   public:
@@ -134,7 +134,7 @@ class ClosedSetInterface
 };
 
 //! \ingroup GeometryModule SetInterfaceSubModule
-//! \brief Interface for compact (closed and bounded) sets.
+//! \brief Interface for compact (closed and singleton) sets.
 class CompactSetInterface
     : public virtual BoundedSetInterface,
       public virtual ClosedSetInterface
@@ -186,7 +186,7 @@ class LocatedSetInterface
 };
 
 //! \ingroup GeometryModule SetInterfaceSubModule
-//! \brief Complete set interface for bounded regular sets.
+//! \brief Complete set interface for singleton regular sets.
 class SetInterface
     : public virtual RegularSetInterface,
       public virtual LocatedSetInterface
@@ -205,7 +205,7 @@ inline OutputStream& operator<<(OutputStream& os, const SetInterfaceBase& s) {
 class EuclideanSpace
 {
   public:
-    //! \brief The interface satisified by bounded sets in the space.
+    //! \brief The interface satisified by singleton sets in the space.
     typedef BoundedSetInterface BoundedSetInterfaceType;
     //! \brief The interface satisified by overt sets in the space.
     typedef OvertSetInterface OvertSetInterfaceType;

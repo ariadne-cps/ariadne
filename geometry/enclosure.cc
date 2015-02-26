@@ -685,19 +685,19 @@ Enclosure::satisfies(ValidatedConstraint c) const
 {
     Enclosure copy=*this;
     copy.new_state_constraint(c);
-    if(definitely(copy.empty())) { return false; }
+    if(definitely(copy.is_empty())) { return false; }
     else { return Tribool(indeterminate); }
 }
 
-Tribool Enclosure::bounded() const
+Tribool Enclosure::is_bounded() const
 {
-    return this->domain().bounded() || Tribool(indeterminate);
+    return this->domain().is_bounded() || Tribool(indeterminate);
 }
 
-Tribool Enclosure::empty() const
+Tribool Enclosure::is_empty() const
 {
-    if(definitely(this->_reduced_domain.empty())) { return true; }
-    if(this->_constraints.empty()) { return this->domain().empty(); }
+    if(definitely(this->_reduced_domain.is_empty())) { return true; }
+    if(this->_constraints.empty()) { return this->domain().is_empty(); }
     if(!this->_is_fully_reduced) { this->reduce(); this->reduce(); this->reduce(); }
 
     for(Nat i=0; i!=this->_constraints.size(); ++i) {
@@ -707,7 +707,7 @@ Tribool Enclosure::empty() const
             return true;
         }
     }
-    if(this->_reduced_domain.empty()) { return true; }
+    if(this->_reduced_domain.is_empty()) { return true; }
     return Tribool(indeterminate);
 }
 
@@ -731,7 +731,7 @@ Sierpinski Enclosure::separated(const ExactBox& bx) const
     ConstraintSolver contractor=ConstraintSolver();
     contractor.reduce(reinterpret_cast<UpperBox&>(this->_reduced_domain),constraints);
 
-    if(_reduced_domain.empty()) { return true; }
+    if(_reduced_domain.is_empty()) { return true; }
 
     const ExactBox test_domain=this->_reduced_domain;
     for(Nat i=0; i!=bx.dimension(); ++i) {
@@ -1274,7 +1274,7 @@ Void Enclosure::affine_draw(CanvasInterface& canvas, const Projection2d& project
     const double max_error=BASIC_ERROR/(1<<accuracy);
 
     // If the reduced domain is empty, then the set is empty; abort
-    if(this->_reduced_domain.empty()) {
+    if(this->_reduced_domain.is_empty()) {
         return;
     }
 

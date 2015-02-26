@@ -207,7 +207,7 @@ _compose(const AnalyticFunction& fn, const A& tm, Float64 eps)
 ///////////////////////////////////////////////////////////////////////////////
 
 // Algebraic and trancendental functions
-//   bounded domain (rec,sqrt,log,tan)
+//   singleton domain (rec,sqrt,log,tan)
 //   unbounded domain (exp,sin,cos)
 
 namespace {

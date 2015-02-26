@@ -48,7 +48,6 @@ template<class U> auto Interval<U>::width() const -> WidthType { return this->up
 template<class U> Interval<U> Interval<U>::empty_interval() { return Interval<U>(+infty,-infty); }
 template<class U> Interval<U> Interval<U>::unit_interval() { return Interval<U>(-1,+1); }
 
-template<class U> auto Interval<U>::empty() const -> decltype(declval<L>()>declval<U>()) { return this->_l > this->_u; }
 template<class U> auto Interval<U>::is_empty() const -> decltype(declval<L>()>declval<U>()) { return this->_l > this->_u; }
 template<class U> auto Interval<U>::is_bounded() const -> decltype(declval<U>()<infty) { return this->_l > -infty && this->_u < +infty; }
 template<class U> auto Interval<U>::is_singleton() const -> decltype(declval<L>() == declval<U>()) { return this->_l == this->_u; }

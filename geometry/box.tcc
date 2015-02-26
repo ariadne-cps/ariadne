@@ -43,10 +43,6 @@ template<class I> decltype(declval<I>().is_empty()) Box<I>::is_empty() const
     return res;
 }
 
-template<class I> decltype(declval<I>().empty()) Box<I>::empty() const
-{
-    return this->is_empty();
-}
 
 template<class I> decltype(declval<I>().is_bounded()) Box<I>::is_bounded() const
 {
@@ -58,10 +54,6 @@ template<class I> decltype(declval<I>().is_bounded()) Box<I>::is_bounded() const
     return res;
 }
 
-template<class I> decltype(declval<I>().bounded()) Box<I>::bounded() const
-{
-    return this->is_bounded();
-}
 
 
 template<class I> SizeType irmax(const Box<I>& bx) {

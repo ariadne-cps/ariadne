@@ -96,7 +96,7 @@ Pair<Tribool,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, cons
 
     ARIADNE_LOG(4,"domain="<<domain<<"\nfunction="<<function<<"\ncodomain="<<codomain<<"\n");
 
-    // Make codomain bounded
+    // Make codomain singleton
     UpperBox bounds=codomain;
     UpperBox image=apply(function,domain);
     ARIADNE_LOG(4,"image="<<image<<"\n");

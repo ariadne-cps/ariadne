@@ -160,7 +160,7 @@ class ConstrainedImageSet
     //! \brief Construct the image of \a dom under \a fn, using constraints \a c.
     ConstrainedImageSet(const RealBox& dom, const EffectiveVectorFunction& fn, const List<EffectiveConstraint>& c) : _domain(dom), _function(fn), _constraints(c) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
-    //! \brief Convert from a bounded constraint set.
+    //! \brief Convert from a singleton constraint set.
     ConstrainedImageSet(const BoundedConstraintSet& set);
     //! \brief The domain of the set.
     const RealBox& domain() const { return this->_domain; }
@@ -304,7 +304,7 @@ class ValidatedConstrainedImageSet
     Pair<ValidatedConstrainedImageSet,ValidatedConstrainedImageSet> split(Nat j) const;
 
     //! \brief Test if the set is empty.
-    Tribool empty() const;
+    Tribool is_empty() const;
     //! \brief Test if the set is a strict subset of a box.
     Sierpinski inside(const ExactBox& bx) const;
     //! \brief Test if the set is disjoint from a box.

@@ -59,7 +59,7 @@ class Figure;
  * The columns of the matrix \f$G\f$ are the <em>generators</em> of the
  * zonotope.
  *
- * Zonotopes are always bounded.
+ * Zonotopes are always is_bounded.
  * A zonotope always contains its centre point, so can never be empty.
  * However, it may not be regular.
  *
@@ -217,7 +217,7 @@ class Zonotope
 
 
 Tribool empty(const Zonotope& z);
-Tribool bounded(const Zonotope& z);
+Tribool is_bounded(const Zonotope& z);
 Float64 radius(const Zonotope& z);
 ExactBox bounding_box(const Zonotope& z);
 

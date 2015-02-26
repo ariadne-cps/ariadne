@@ -392,7 +392,7 @@ lower_reach(const OvertSetInterfaceType& initial_set) const
     }
     ARIADNE_LOG(3,"Computing recurrent evolution...\n");
 
-    while(!evolve_cells.empty()) {
+    while(!evolve_cells.is_empty()) {
 
         HybridGridTreeSet new_reach_cells(grid);
         ListSet<HybridEnclosure> new_evolve_enclosures;
@@ -445,7 +445,7 @@ upper_evolve(const CompactSetInterfaceType& initial_set,
         evolve_cells=this->_upper_evolve(evolve_cells,hybrid_lock_to_grid_time,grid_depth,*_evolver);
     }
     ARIADNE_LOG(3,"remainder_time="<<remainder_time<<"\n");
-    if(!evolve_cells.empty() && possibly(remainder_time > 0)) {
+    if(!evolve_cells.is_empty() && possibly(remainder_time > 0)) {
         ARIADNE_LOG(3,"computing evolution for remainder time...\n");
         evolve_cells=this->_upper_evolve(evolve_cells,hybrid_remainder_time,grid_depth,*_evolver);
     }
@@ -493,11 +493,11 @@ upper_reach(const CompactSetInterfaceType& initial_set,
         reach_cells.adjoin(found_cells);
         accumulated_evolve_cells.adjoin(evolve_cells);
         ARIADNE_LOG(3,"  found "<<found_cells.size()<<" cells, with "<<evolve_cells.size()<<" new intermediate.\n");
-        if(evolve_cells.empty()) break;
+        if(evolve_cells.is_empty()) break;
         ARIADNE_LOG(6,"evolve_cells="<<evolve_cells<<"\n");
     }
     ARIADNE_LOG(3,"remainder_time="<<remainder_time<<"\n");
-    if(!evolve_cells.empty() && possibly(remainder_time > 0)) {
+    if(!evolve_cells.is_empty() && possibly(remainder_time > 0)) {
         ARIADNE_LOG(3,"computing evolution for remainder time...\n");
         this->_adjoin_upper_reach_evolve(found_cells,accumulated_evolve_cells,evolve_cells,hybrid_remainder_time,grid_depth,*_evolver);
         reach_cells.adjoin(found_cells);
@@ -546,7 +546,7 @@ upper_reach_evolve(const CompactSetInterfaceType& initial_set,
         ARIADNE_LOG(3,"  found "<<found_cells.size()<<" cells.\n");
     }
     ARIADNE_LOG(3,"remainder_time="<<remainder_time<<"\n");
-    if(!evolve_cells.empty() && possibly(remainder_time > 0)) {
+    if(!evolve_cells.is_empty() && possibly(remainder_time > 0)) {
         ARIADNE_LOG(3,"computing evolution for remainder time...\n");
         this->_adjoin_upper_reach_evolve(found_cells,evolve_cells,evolve_cells,hybrid_remainder_time,grid_depth,*_evolver);
         reach_cells.adjoin(found_cells);
@@ -615,7 +615,7 @@ outer_chain_reach(
     HybridGridTreeSet current_evolve_cells(grid);
 
 
-    while(!starting_cells.empty()) {
+    while(!starting_cells.is_empty()) {
         current_evolve_cells = evolve_cells;
         this->_adjoin_upper_reach_evolve(reach_cells,evolve_cells,starting_cells,
                                          recurrent_termination,maximum_grid_depth,*_evolver);
@@ -644,11 +644,11 @@ Void HybridReachabilityAnalyser::_checked_restriction(HybridGridTreeSet& set, co
         set_copy = set;
     }
     set.restrict_to_height(this->_configuration->maximum_grid_height());
-    if (!bounding.empty()) set.restrict(bounding);
+    if (!bounding.is_empty()) set.restrict(bounding);
 
     if (policy != OVERSPILL_IGNORE) {
         set_copy.remove(set);
-        if (!set_copy.empty()) {
+        if (!set_copy.is_empty()) {
             if (policy == OVERSPILL_WARNING) {
                 ARIADNE_WARN("The computed chain reach has been restricted, an outer approximation is .");
             }

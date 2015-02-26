@@ -147,7 +147,7 @@ template<class F> class ScalarFunctionModelMixin<F,ValidatedTag>
 };
 
 //! \ingroup FunctionModelSubModule
-//! \brief Generic scalar functions on bounded domains.
+//! \brief Generic scalar functions on singleton domains.
 template<> class ScalarFunctionModel<ValidatedTag>
 {
   public:
@@ -297,7 +297,7 @@ template<class P> inline OutputStream& operator<<(OutputStream& os, const Scalar
 
 
 //! \ingroup FunctionModelSubModule
-//! \brief Generic vector functions on bounded domains.
+//! \brief Generic vector functions on singleton domains.
 template<> class VectorFunctionModelInterface<ValidatedTag>
     : public virtual VectorFunctionInterface<ValidatedTag>
 {
@@ -387,7 +387,7 @@ template<class X> inline OutputStream& operator<<(OutputStream& os, const Vector
 }
 
 //! \ingroup FunctionModelSubModule
-//! \brief Generic vector functions on bounded domains.
+//! \brief Generic vector functions on singleton domains.
 template<> class VectorFunctionModel<ValidatedTag>
 {
   public:

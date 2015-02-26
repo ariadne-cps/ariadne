@@ -170,91 +170,91 @@ template<class U> class Interval {
 //! \related Interval \brief Write to an output stream.
 template<class U> OutputStream& operator<<(OutputStream& os, Interval<U> const& ivl);
 
-template<class U> inline auto lower_bound(Interval<U> const& i) -> decltype(i.lower());
-template<class U> inline auto upper_bound(Interval<U> const& i) -> decltype(i.upper());
-template<class U> inline auto centre(Interval<U> const& i) -> decltype(i.centre());
-template<class U> inline auto midpoint(Interval<U> const& i) -> decltype(i.midpoint());
-template<class U> inline auto radius(Interval<U> const& i) -> decltype(i.radius());
-template<class U> inline auto width(Interval<U> const& i) -> decltype(i.width());
+template<class U> inline auto lower_bound(Interval<U> const& ivl) -> decltype(ivl.lower());
+template<class U> inline auto upper_bound(Interval<U> const& ivl) -> decltype(ivl.upper());
+template<class U> inline auto centre(Interval<U> const& ivl) -> decltype(ivl.centre());
+template<class U> inline auto midpoint(Interval<U> const& ivl) -> decltype(ivl.midpoint());
+template<class U> inline auto radius(Interval<U> const& ivl) -> decltype(ivl.radius());
+template<class U> inline auto width(Interval<U> const& ivl) -> decltype(ivl.width());
 
 //! \related Interval \brief Test if the interval is empty.
-template<class U> inline auto is_empty(Interval<U> const& i) -> decltype(i.lower()>i.upper());
+template<class U> inline auto is_empty(Interval<U> const& ivl) -> decltype(ivl.lower()>ivl.upper());
 //! \related Interval \brief Test if the interval is empty.
-template<class U> inline auto is_singleton(Interval<U> const& i) -> decltype(i.lower()==i.upper());
+template<class U> inline auto is_singleton(Interval<U> const& ivl) -> decltype(ivl.lower()==ivl.upper());
 //! \related Interval \brief Test if the interval is bounded.
-template<class U> inline auto is_bounded(Interval<U> const& i) -> decltype(i.upper()<infty);
+template<class U> inline auto is_bounded(Interval<U> const& ivl) -> decltype(ivl.upper()<infty);
 
-//! \related Interval \brief Test if \a x1 is an element of the interval \a i2.
-template<class U, class X> inline auto element(X const& x1, Interval<U> const& i2) -> decltype(i2.lower()<=x1 && i2.upper()>=x1);
-//! \related Interval \brief Test if the interval \a i1 contains \a x2.
-template<class U, class X> inline auto contains(Interval<U> const& i1, X const& x2) -> decltype(i1.lower()<=x2 && i1.upper()>=x2);
-//! \related Interval \brief Test if the interval \a i1 is equal to \a i2.
-template<class U> inline auto equal(Interval<U> const& i1, Interval<U> const& i2) -> decltype(i1.upper()==i2.upper());
-//! \related Interval \brief Test if the interval \a i1 is a subset of \a i2.
-template<class U1, class U2> inline auto subset(Interval<U1> const& i1, Interval<U2> const& i2) -> decltype(i1.upper()<=i2.upper());
-//! \related Interval \brief Test if the interval \a i1 is a superset of \a i2.
-template<class U1, class U2> inline auto superset(Interval<U1> const& i1, Interval<U2> const& i2) -> decltype(i1.upper()>=i2.upper());
-//! \related Interval \brief Test if the interval \a i1 is disjoint from \a i2. Returns \c false even if the two intervals only have an endpoint in common.
-template<class U1, class U2> inline auto disjoint(Interval<U1> const& i1, Interval<U2> const& i2) -> decltype(i1.upper()<i2.lower());
-//! \related Interval \brief Test if the interval \a i1 intersects \a i2. Returns \c true even if the two intervals only have an endpoint in common.
-template<class U1, class U2> inline auto intersect(Interval<U1> const& i1, Interval<U2> const& i2) -> decltype(i1.upper()>=i2.lower());
+//! \related Interval \brief Test if \a x1 is an element of the interval \a ivl2.
+template<class U, class X> inline auto element(X const& x1, Interval<U> const& ivl2) -> decltype(ivl2.lower()<=x1 && ivl2.upper()>=x1);
+//! \related Interval \brief Test if the interval \a ivl1 contains \a x2.
+template<class U, class X> inline auto contains(Interval<U> const& ivl1, X const& x2) -> decltype(ivl1.lower()<=x2 && ivl1.upper()>=x2);
+//! \related Interval \brief Test if the interval \a ivl1 is equal to \a ivl2.
+template<class U> inline auto equal(Interval<U> const& ivl1, Interval<U> const& ivl2) -> decltype(ivl1.upper()==ivl2.upper());
+//! \related Interval \brief Test if the interval \a ivl1 is a subset of \a ivl2.
+template<class U1, class U2> inline auto subset(Interval<U1> const& ivl1, Interval<U2> const& ivl2) -> decltype(ivl1.upper()<=ivl2.upper());
+//! \related Interval \brief Test if the interval \a ivl1 is a superset of \a ivl2.
+template<class U1, class U2> inline auto superset(Interval<U1> const& ivl1, Interval<U2> const& ivl2) -> decltype(ivl1.upper()>=ivl2.upper());
+//! \related Interval \brief Test if the interval \a ivl1 is disjoint from \a ivl2. Returns \c false even if the two intervals only have an endpoint in common.
+template<class U1, class U2> inline auto disjoint(Interval<U1> const& ivl1, Interval<U2> const& ivl2) -> decltype(ivl1.upper()<ivl2.lower());
+//! \related Interval \brief Test if the interval \a ivl1 intersects \a ivl2. Returns \c true even if the two intervals only have an endpoint in common.
+template<class U1, class U2> inline auto intersect(Interval<U1> const& ivl1, Interval<U2> const& ivl2) -> decltype(ivl1.upper()>=ivl2.lower());
 
-//! \related Interval \brief Test if the closed interval \a i1 is disjoint from the closed interval \a i2.
+//! \related Interval \brief Test if the closed interval \a ivl1 is disjoint from the closed interval \a ivl2.
 //! Returns \c false if the two intervals only have an endpoint in common.
-template<class U1, class U2> inline auto separated(Interval<U1> const& i1, Interval<U2> const& i2) -> decltype(i1.upper()<i2.lower());
-//! \related Interval \brief Test if the interval \a i1 overlaps \a i2.
+template<class U1, class U2> inline auto separated(Interval<U1> const& ivl1, Interval<U2> const& ivl2) -> decltype(ivl1.upper()<ivl2.lower());
+//! \related Interval \brief Test if the interval \a ivl1 overlaps \a ivl2.
 //! Returns \c false if the two intervals only have an endpoint in common.
 //! Returns \c true if one of the intervals is a singleton in the interior of the other.
-template<class U1, class U2> inline auto overlap(Interval<U1> const& i1, Interval<U2> const& i2) -> decltype(i1.upper()>i2.lower());
-//! \related Interval \brief Test if the (closed) interval \a i1 is a subset of the interior of \a i2.
-template<class U1, class U2> inline auto inside(Interval<U1> const& i1, Interval<U2> const& i2) -> decltype(i1.upper()<i2.upper());
-//! \related Interval \brief Test if the interior of the interval \a i1 is a superset of the (closed) interval \a i2.
-template<class U1, class U2> inline auto covers(Interval<U1> const& i1, Interval<U2> const& i2) -> decltype(i1.upper()>i2.upper());
+template<class U1, class U2> inline auto overlap(Interval<U1> const& ivl1, Interval<U2> const& ivl2) -> decltype(ivl1.upper()>ivl2.lower());
+//! \related Interval \brief Test if the (closed) interval \a ivl1 is a subset of the interior of \a ivl2.
+template<class U1, class U2> inline auto inside(Interval<U1> const& ivl1, Interval<U2> const& ivl2) -> decltype(ivl1.upper()<ivl2.upper());
+//! \related Interval \brief Test if the interior of the interval \a ivl1 is a superset of the (closed) interval \a ivl2.
+template<class U1, class U2> inline auto covers(Interval<U1> const& ivl1, Interval<U2> const& ivl2) -> decltype(ivl1.upper()>ivl2.upper());
 
 //! \related Interval \brief The intersection of two intervals.
-template<class U1, class U2> inline auto intersection(Interval<U1> const& i1, Interval<U2> const& i2) -> Interval<decltype(min(declval<U1>(),declval<U2>()))>;
+template<class U1, class U2> inline auto intersection(Interval<U1> const& ivl1, Interval<U2> const& ivl2) -> Interval<decltype(min(declval<U1>(),declval<U2>()))>;
 
 //! \related Interval \brief The hull of two intervals, equal to the smallest interval containing both as subsets.
-template<class U1, class U2> inline auto hull(Interval<U1> const& i1, Interval<U2> const& i2) ->  Interval<decltype(max(declval<U1>(),declval<U2>()))>;
+template<class U1, class U2> inline auto hull(Interval<U1> const& ivl1, Interval<U2> const& ivl2) ->  Interval<decltype(max(declval<U1>(),declval<U2>()))>;
 
 //! \related Interval \brief The hull of an interval and a point, equal to the smallest interval containing both.
-template<class U, class X> inline auto hull(Interval<U> const& i1, X x2) -> Interval<decltype(max(declval<U>(),declval<X>()))>;
+template<class U, class X> inline auto hull(Interval<U> const& ivl1, X x2) -> Interval<decltype(max(declval<U>(),declval<X>()))>;
 
 //! \related Interval \brief The hull of a point and an interval, equal to the smallest interval containing both.
-template<class U, class X> inline auto hull(X x1, Interval<U> const& i2) -> Interval<decltype(max(declval<U>(),declval<X>()))>;
+template<class U, class X> inline auto hull(X x1, Interval<U> const& ivl2) -> Interval<decltype(max(declval<U>(),declval<X>()))>;
 
 //! \related Interval \brief Split an interval into its lower, middle or upper half.
-template<class U> inline auto split(Interval<U> const& i1, SplitPart lmu) -> Interval<U>;
+template<class U> inline auto split(Interval<U> const& ivl1, SplitPart lmu) -> Interval<U>;
 
 
 //! \related Interval \brief Equality operator. Tests equality of intervals as geometric objects given information on endpoints.
-template<class U> inline auto operator==(Interval<U> const& i1, Interval<U> const& i2) -> decltype(i1.upper()==i2.upper());
+template<class U> inline auto operator==(Interval<U> const& ivl1, Interval<U> const& ivl2) -> decltype(ivl1.upper()==ivl2.upper());
 //! \related Interval \brief Inequality operator.
-template<class U> inline auto operator!=(Interval<U> const& i1, Interval<U> const& i2) -> decltype(i1.upper()!=i2.upper());
+template<class U> inline auto operator!=(Interval<U> const& ivl1, Interval<U> const& ivl2) -> decltype(ivl1.upper()!=ivl2.upper());
 
 
-//! \related ApproximateFloatInterval \related ExactFloatInterval \brief Allows the over-approximating interval \a i to be treated as exact.
-Interval<ExactFloat64> make_exact(Interval<ApproximateFloat64> const& i);
-Interval<ExactFloat64> make_exact_interval(Interval<ApproximateFloat64> const& i);
+//! \related ApproximateFloatInterval \related ExactFloatInterval \brief Allows the over-approximating interval \a ivl to be treated as exact.
+Interval<ExactFloat64> make_exact(Interval<ApproximateFloat64> const& ivl);
+Interval<ExactFloat64> make_exact_interval(Interval<ApproximateFloat64> const& ivl);
 
-//! \related UpperFloatInterval \brief Computes a common refinement of \a i1 and \a i2 i.e. the intersection.
-Interval<UpperFloat64> refinement(Interval<UpperFloat64> const& i1, Interval<UpperFloat64> const& i2);
-//! \related UpperFloatInterval \brief Tests if \a i1 provides a better over-approximation to the exact interval than \a i2.
-//! i.e. \a i1 is a subset of \a i2.
-bool refines(Interval<UpperFloat64> const& i1, Interval<UpperFloat64> const& i2);
+//! \related UpperFloatInterval \brief Computes a common refinement of \a ivl1 and \a ivl2 ivl.e. the intersection.
+Interval<UpperFloat64> refinement(Interval<UpperFloat64> const& ivl1, Interval<UpperFloat64> const& ivl2);
+//! \related UpperFloatInterval \brief Tests if \a ivl1 provides a better over-approximation to the exact interval than \a ivl2.
+//! ivl.e. \a ivl1 is a subset of \a ivl2.
+bool refines(Interval<UpperFloat64> const& ivl1, Interval<UpperFloat64> const& ivl2);
 //! \related UpperFloatInterval \brief Tests if two intervals have the same representation.
-bool same(Interval<UpperFloat64> const& i1, Interval<UpperFloat64> const& i2);
+bool same(Interval<UpperFloat64> const& ivl1, Interval<UpperFloat64> const& ivl2);
 
-//! \related UpperFloatInterval \related BoundFloat \brief Allows the over-approximating interval \a i to be treated an over-approximation to a single point.
-BoundFloat64 make_singleton(Interval<UpperFloat64> const& i);
+//! \related UpperFloatInterval \related BoundFloat \brief Allows the over-approximating interval \a ivl to be treated an over-approximation to a single point.
+BoundFloat64 make_singleton(Interval<UpperFloat64> const& ivl);
 
 //! \related UpperFloatInterval \brief An interval containing the given interval in its interior.
-Interval<UpperFloat64> widen(Interval<UpperFloat64> const& i);
-Interval<UpperFloat64> widen(Interval<UpperFloat64> const& i, UpperFloat64 e);
-Interval<ExactFloat64> widen_domain(Interval<UpperFloat64> const& i);
+Interval<UpperFloat64> widen(Interval<UpperFloat64> const& ivl);
+Interval<UpperFloat64> widen(Interval<UpperFloat64> const& ivl, UpperFloat64 e);
+Interval<ExactFloat64> widen_domain(Interval<UpperFloat64> const& ivl);
 //! \related LowerFloatInterval \brief An interval contained in the interior of the given interval.
-Interval<LowerFloat64> narrow(Interval<LowerFloat64> const& i);
-Interval<LowerFloat64> narrow(Interval<LowerFloat64> const& i, UpperFloat64 e);
+Interval<LowerFloat64> narrow(Interval<LowerFloat64> const& ivl);
+Interval<LowerFloat64> narrow(Interval<LowerFloat64> const& ivl, UpperFloat64 e);
 
 //! \related Interval \brief Read from an input stream.
 InputStream& operator>>(InputStream&, Interval<ExactFloat64>&);
@@ -272,107 +272,107 @@ class EmptyInterval { };
 
 namespace Ariadne {
 
-inline BoundedFloat64 make_singleton(Interval<UpperFloat64> const& i) {
-    return BoundedFloat64(i.lower(),i.upper()); }
+inline BoundedFloat64 make_singleton(Interval<UpperFloat64> const& ivl) {
+    return BoundedFloat64(ivl.lower(),ivl.upper()); }
 inline Interval<UpperFloat64> make_interval(BoundedFloat64 const& x) {
     return Interval<UpperFloat64>(x.lower(),x.upper()); }
 
-inline UpperInterval max(UpperInterval i1, UpperInterval i2) {
-    return make_interval(max(make_singleton(i1),make_singleton(i2))); }
-inline UpperInterval min(UpperInterval i1, UpperInterval i2) {
-    return make_interval(min(make_singleton(i1),make_singleton(i2))); }
-inline UpperInterval abs(UpperInterval i) {
-    return make_interval(abs(make_singleton(i))); }
-inline UpperInterval pos(UpperInterval i) {
-    return make_interval(pos(make_singleton(i))); }
-inline UpperInterval neg(UpperInterval i) {
-    return make_interval(neg(make_singleton(i))); }
-inline UpperInterval sqr(UpperInterval i) {
-    return make_interval(sqr(make_singleton(i))); }
-inline UpperInterval rec(UpperInterval i) {
-    return make_interval(rec(make_singleton(i))); }
+inline UpperInterval max(UpperInterval ivl1, UpperInterval ivl2) {
+    return make_interval(max(make_singleton(ivl1),make_singleton(ivl2))); }
+inline UpperInterval min(UpperInterval ivl1, UpperInterval ivl2) {
+    return make_interval(min(make_singleton(ivl1),make_singleton(ivl2))); }
+inline UpperInterval abs(UpperInterval ivl) {
+    return make_interval(abs(make_singleton(ivl))); }
+inline UpperInterval pos(UpperInterval ivl) {
+    return make_interval(pos(make_singleton(ivl))); }
+inline UpperInterval neg(UpperInterval ivl) {
+    return make_interval(neg(make_singleton(ivl))); }
+inline UpperInterval sqr(UpperInterval ivl) {
+    return make_interval(sqr(make_singleton(ivl))); }
+inline UpperInterval rec(UpperInterval ivl) {
+    return make_interval(rec(make_singleton(ivl))); }
 
-inline UpperInterval add(UpperInterval i1, UpperInterval i2) {
-    return make_interval(add(make_singleton(i1),make_singleton(i2))); }
-inline UpperInterval sub(UpperInterval i1, UpperInterval i2) {
-    return make_interval(sub(make_singleton(i1),make_singleton(i2))); }
-inline UpperInterval mul(UpperInterval i1, UpperInterval i2) {
-    return make_interval(mul(make_singleton(i1),make_singleton(i2))); }
-inline UpperInterval div(UpperInterval i1, UpperInterval i2) {
-    return make_interval(div(make_singleton(i1),make_singleton(i2))); }
+inline UpperInterval add(UpperInterval ivl1, UpperInterval ivl2) {
+    return make_interval(add(make_singleton(ivl1),make_singleton(ivl2))); }
+inline UpperInterval sub(UpperInterval ivl1, UpperInterval ivl2) {
+    return make_interval(sub(make_singleton(ivl1),make_singleton(ivl2))); }
+inline UpperInterval mul(UpperInterval ivl1, UpperInterval ivl2) {
+    return make_interval(mul(make_singleton(ivl1),make_singleton(ivl2))); }
+inline UpperInterval div(UpperInterval ivl1, UpperInterval ivl2) {
+    return make_interval(div(make_singleton(ivl1),make_singleton(ivl2))); }
 
-inline UpperInterval pow(UpperInterval i, Nat m) {
-    return make_interval(pow(make_singleton(i),m)); }
-inline UpperInterval pow(UpperInterval i, Int n) {
-    return make_interval(pow(make_singleton(i),n)); }
+inline UpperInterval pow(UpperInterval ivl, Nat m) {
+    return make_interval(pow(make_singleton(ivl),m)); }
+inline UpperInterval pow(UpperInterval ivl, Int n) {
+    return make_interval(pow(make_singleton(ivl),n)); }
 
-inline UpperInterval sqrt(UpperInterval i) {
-    return make_interval(sqrt(make_singleton(i))); }
-inline UpperInterval exp(UpperInterval i) {
-    return make_interval(exp(make_singleton(i))); }
-inline UpperInterval log(UpperInterval i) {
-    return make_interval(log(make_singleton(i))); }
-inline UpperInterval sin(UpperInterval i) {
-    return make_interval(sin(make_singleton(i))); }
-inline UpperInterval cos(UpperInterval i) {
-    return make_interval(cos(make_singleton(i))); }
-inline UpperInterval tan(UpperInterval i) {
-    return make_interval(tan(make_singleton(i))); }
-inline UpperInterval asin(UpperInterval i) {
-    return make_interval(asin(make_singleton(i))); }
-inline UpperInterval acos(UpperInterval i) {
-    return make_interval(acos(make_singleton(i))); }
-inline UpperInterval atan(UpperInterval i) {
-    return make_interval(atan(make_singleton(i))); }
+inline UpperInterval sqrt(UpperInterval ivl) {
+    return make_interval(sqrt(make_singleton(ivl))); }
+inline UpperInterval exp(UpperInterval ivl) {
+    return make_interval(exp(make_singleton(ivl))); }
+inline UpperInterval log(UpperInterval ivl) {
+    return make_interval(log(make_singleton(ivl))); }
+inline UpperInterval sin(UpperInterval ivl) {
+    return make_interval(sin(make_singleton(ivl))); }
+inline UpperInterval cos(UpperInterval ivl) {
+    return make_interval(cos(make_singleton(ivl))); }
+inline UpperInterval tan(UpperInterval ivl) {
+    return make_interval(tan(make_singleton(ivl))); }
+inline UpperInterval asin(UpperInterval ivl) {
+    return make_interval(asin(make_singleton(ivl))); }
+inline UpperInterval acos(UpperInterval ivl) {
+    return make_interval(acos(make_singleton(ivl))); }
+inline UpperInterval atan(UpperInterval ivl) {
+    return make_interval(atan(make_singleton(ivl))); }
 
-inline PositiveUpperFloat64 mag(UpperInterval i) {
-    return mag(make_singleton(i)); }
-inline LowerFloat64 mig(UpperInterval i) {
-    return mig(make_singleton(i)); }
+inline PositiveUpperFloat64 mag(UpperInterval ivl) {
+    return mag(make_singleton(ivl)); }
+inline LowerFloat64 mig(UpperInterval ivl) {
+    return mig(make_singleton(ivl)); }
 
-inline UpperInterval operator+(const UpperInterval& i) { return pos(i); }
-inline UpperInterval operator-(const UpperInterval& i) { return neg(i); }
-inline UpperInterval operator+(const UpperInterval& i1, const UpperInterval& i2) { return add(i1,i2); }
-inline UpperInterval operator-(const UpperInterval& i1, const UpperInterval& i2) { return sub(i1,i2); }
-inline UpperInterval operator*(const UpperInterval& i1, const UpperInterval& i2) { return mul(i1,i2); }
-inline UpperInterval operator/(const UpperInterval& i1, const UpperInterval& i2) { return div(i1,i2); };
-inline UpperInterval& operator+=(UpperInterval& i1, const UpperInterval& i2) { i1=add(i1,i2); return i1; }
-inline UpperInterval& operator-=(UpperInterval& i1, const UpperInterval& i2) { i1=sub(i1,i2); return i1; }
-inline UpperInterval& operator*=(UpperInterval& i1, const UpperInterval& i2) { i1=mul(i1,i2); return i1; }
-inline UpperInterval& operator/=(UpperInterval& i1, const UpperInterval& i2) { i1=div(i1,i2); return i1; }
+inline UpperInterval operator+(const UpperInterval& ivl) { return pos(ivl); }
+inline UpperInterval operator-(const UpperInterval& ivl) { return neg(ivl); }
+inline UpperInterval operator+(const UpperInterval& ivl1, const UpperInterval& ivl2) { return add(ivl1,ivl2); }
+inline UpperInterval operator-(const UpperInterval& ivl1, const UpperInterval& ivl2) { return sub(ivl1,ivl2); }
+inline UpperInterval operator*(const UpperInterval& ivl1, const UpperInterval& ivl2) { return mul(ivl1,ivl2); }
+inline UpperInterval operator/(const UpperInterval& ivl1, const UpperInterval& ivl2) { return div(ivl1,ivl2); };
+inline UpperInterval& operator+=(UpperInterval& ivl1, const UpperInterval& ivl2) { ivl1=add(ivl1,ivl2); return ivl1; }
+inline UpperInterval& operator-=(UpperInterval& ivl1, const UpperInterval& ivl2) { ivl1=sub(ivl1,ivl2); return ivl1; }
+inline UpperInterval& operator*=(UpperInterval& ivl1, const UpperInterval& ivl2) { ivl1=mul(ivl1,ivl2); return ivl1; }
+inline UpperInterval& operator/=(UpperInterval& ivl1, const UpperInterval& ivl2) { ivl1=div(ivl1,ivl2); return ivl1; }
 
-inline Bool operator==(const UpperInterval& i1, const UpperInterval& i2) {
-    return i1.lower().raw() == i2.lower().raw() && i1.upper().raw() == i2.upper().raw(); }
-inline Tribool operator!=(const UpperInterval& i1, const UpperInterval& i2) {
-    return i1.lower().raw() != i2.lower().raw() || i1.upper().raw() != i2.upper().raw(); }
-inline Tribool operator<=(UpperInterval i1, UpperInterval i2) {
-    return make_singleton(i1) <= make_singleton(i2); }
-inline Tribool operator>=(UpperInterval i1, UpperInterval i2) {
-    return make_singleton(i1) >= make_singleton(i2); }
-inline Tribool operator< (UpperInterval i1, UpperInterval i2) {
-    return make_singleton(i1) <  make_singleton(i2); }
-inline Tribool operator> (UpperInterval i1, UpperInterval i2) {
-    return make_singleton(i1) >  make_singleton(i2); }
+inline Bool operator==(const UpperInterval& ivl1, const UpperInterval& ivl2) {
+    return ivl1.lower().raw() == ivl2.lower().raw() && ivl1.upper().raw() == ivl2.upper().raw(); }
+inline Tribool operator!=(const UpperInterval& ivl1, const UpperInterval& ivl2) {
+    return ivl1.lower().raw() != ivl2.lower().raw() || ivl1.upper().raw() != ivl2.upper().raw(); }
+inline Tribool operator<=(UpperInterval ivl1, UpperInterval ivl2) {
+    return make_singleton(ivl1) <= make_singleton(ivl2); }
+inline Tribool operator>=(UpperInterval ivl1, UpperInterval ivl2) {
+    return make_singleton(ivl1) >= make_singleton(ivl2); }
+inline Tribool operator< (UpperInterval ivl1, UpperInterval ivl2) {
+    return make_singleton(ivl1) <  make_singleton(ivl2); }
+inline Tribool operator> (UpperInterval ivl1, UpperInterval ivl2) {
+    return make_singleton(ivl1) >  make_singleton(ivl2); }
 
 // Mixed operations
-inline UpperInterval operator+(UpperInterval i1, BoundedFloat64 x2) { return i1+make_interval(x2); }
-inline UpperInterval operator-(UpperInterval i1, BoundedFloat64 x2) { return i1-make_interval(x2); }
-inline UpperInterval operator*(UpperInterval i1, BoundedFloat64 x2) { return i1*make_interval(x2); }
-inline UpperInterval operator/(UpperInterval i1, BoundedFloat64 x2) { return i1/make_interval(x2); }
-inline UpperInterval operator+(BoundedFloat64 x1, UpperInterval i2) { return make_interval(x1)+i2; }
-inline UpperInterval operator-(BoundedFloat64 x1, UpperInterval i2) { return make_interval(x1)-i2; }
-inline UpperInterval operator*(BoundedFloat64 x1, UpperInterval i2) { return make_interval(x1)*i2; }
-inline UpperInterval operator/(BoundedFloat64 x1, UpperInterval i2) { return make_interval(x1)/i2; }
-inline UpperInterval& operator+=(UpperInterval& i1, BoundedFloat64 x2) { return i1+=make_interval(x2); }
-inline UpperInterval& operator-=(UpperInterval& i1, BoundedFloat64 x2) { return i1-=make_interval(x2); }
-inline UpperInterval& operator*=(UpperInterval& i1, BoundedFloat64 x2) { return i1*=make_interval(x2); }
-inline UpperInterval& operator/=(UpperInterval& i1, BoundedFloat64 x2) { return i1/=make_interval(x2); }
-inline Tribool operator==(UpperInterval i1, BoundedFloat64 x2) { return i1==make_interval(x2); }
-inline Tribool operator!=(UpperInterval i1, BoundedFloat64 x2) { return i1!=make_interval(x2); }
-inline Tribool operator<=(UpperInterval i1, BoundedFloat64 x2) { return i1<=make_interval(x2); }
-inline Tribool operator>=(UpperInterval i1, BoundedFloat64 x2) { return i1>=make_interval(x2); }
-inline Tribool operator< (UpperInterval i1, BoundedFloat64 x2) { return i1< make_interval(x2); }
-inline Tribool operator> (UpperInterval i1, BoundedFloat64 x2) { return i1> make_interval(x2); }
+inline UpperInterval operator+(UpperInterval ivl1, BoundedFloat64 x2) { return ivl1+make_interval(x2); }
+inline UpperInterval operator-(UpperInterval ivl1, BoundedFloat64 x2) { return ivl1-make_interval(x2); }
+inline UpperInterval operator*(UpperInterval ivl1, BoundedFloat64 x2) { return ivl1*make_interval(x2); }
+inline UpperInterval operator/(UpperInterval ivl1, BoundedFloat64 x2) { return ivl1/make_interval(x2); }
+inline UpperInterval operator+(BoundedFloat64 x1, UpperInterval ivl2) { return make_interval(x1)+ivl2; }
+inline UpperInterval operator-(BoundedFloat64 x1, UpperInterval ivl2) { return make_interval(x1)-ivl2; }
+inline UpperInterval operator*(BoundedFloat64 x1, UpperInterval ivl2) { return make_interval(x1)*ivl2; }
+inline UpperInterval operator/(BoundedFloat64 x1, UpperInterval ivl2) { return make_interval(x1)/ivl2; }
+inline UpperInterval& operator+=(UpperInterval& ivl1, BoundedFloat64 x2) { return ivl1+=make_interval(x2); }
+inline UpperInterval& operator-=(UpperInterval& ivl1, BoundedFloat64 x2) { return ivl1-=make_interval(x2); }
+inline UpperInterval& operator*=(UpperInterval& ivl1, BoundedFloat64 x2) { return ivl1*=make_interval(x2); }
+inline UpperInterval& operator/=(UpperInterval& ivl1, BoundedFloat64 x2) { return ivl1/=make_interval(x2); }
+inline Tribool operator==(UpperInterval ivl1, BoundedFloat64 x2) { return ivl1==make_interval(x2); }
+inline Tribool operator!=(UpperInterval ivl1, BoundedFloat64 x2) { return ivl1!=make_interval(x2); }
+inline Tribool operator<=(UpperInterval ivl1, BoundedFloat64 x2) { return ivl1<=make_interval(x2); }
+inline Tribool operator>=(UpperInterval ivl1, BoundedFloat64 x2) { return ivl1>=make_interval(x2); }
+inline Tribool operator< (UpperInterval ivl1, BoundedFloat64 x2) { return ivl1< make_interval(x2); }
+inline Tribool operator> (UpperInterval ivl1, BoundedFloat64 x2) { return ivl1> make_interval(x2); }
 
 
 } // namespace Ariadne

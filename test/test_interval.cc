@@ -74,16 +74,16 @@ TestInterval::test_concept()
     double d=1;
     ExactFloat64 x=1;
     Float64 a,b;
-    ExactInterval i;
-    UpperInterval j;
+    ExactInterval xivl;
+    UpperInterval uivl;
 
 
     // Constructors
-    j=I(); j=I(n); j=I(m); j=I(d); j=I(x); j=I(i);
-    j=I(n,n); j=I(m,m); j=I(d,d); j=I(a,b);
-    j=I(n,m); j=I(m,d); j=I(d,n);
+    uivl=I(); uivl=I(n); uivl=I(m); uivl=I(d); uivl=I(x); uivl=I(xivl);
+    uivl=I(n,n); uivl=I(m,m); uivl=I(d,d); uivl=I(a,b);
+    uivl=I(n,m); uivl=I(m,d); uivl=I(d,n);
     // Assignment
-    j=n; j=m; j=x; j=i;
+    uivl=n; uivl=m; uivl=x; uivl=xivl;
 
 }
 

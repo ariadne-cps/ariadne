@@ -62,95 +62,95 @@ template<class U> inline OutputStream& operator<<(OutputStream& os, Interval<U> 
 }
 
 
-template<class U> inline auto lower_bound(Interval<U> const& i) -> decltype(i.lower()) { return i.lower(); }
-template<class U> inline auto upper_bound(Interval<U> const& i) -> decltype(i.upper()) { return i.upper(); }
-template<class UB> inline auto centre(Interval<UB> const& i) -> decltype(i.centre()) { return i.centre(); }
-template<class UB> inline auto midpoint(Interval<UB> const& i) -> decltype(i.midpoint()) { return i.midpoint(); }
-template<class UB> inline auto radius(Interval<UB> const& i) -> decltype(i.radius()) { return i.radius(); }
-template<class UB> inline auto width(Interval<UB> const& i) -> decltype(i.width()) { return i.width(); }
+template<class U> inline auto lower_bound(Interval<U> const& ivl) -> decltype(ivl.lower()) { return ivl.lower(); }
+template<class U> inline auto upper_bound(Interval<U> const& ivl) -> decltype(ivl.upper()) { return ivl.upper(); }
+template<class U> inline auto centre(Interval<U> const& ivl) -> decltype(ivl.centre()) { return ivl.centre(); }
+template<class U> inline auto midpoint(Interval<U> const& ivl) -> decltype(ivl.midpoint()) { return ivl.midpoint(); }
+template<class U> inline auto radius(Interval<U> const& ivl) -> decltype(ivl.radius()) { return ivl.radius(); }
+template<class U> inline auto width(Interval<U> const& ivl) -> decltype(ivl.width()) { return ivl.width(); }
 
-template<class UB> inline auto is_empty(Interval<UB> const& i) -> decltype(i.lower()>i.upper()) { return i.lower()>i.upper(); }
-template<class UB> inline auto is_singleton(Interval<UB> const& i) -> decltype(i.lower()==i.upper()) { return i.lower()==i.upper(); }
-template<class UB> inline auto is_bounded(Interval<UB> const& i) -> decltype(i.upper()<inf) { return -i.lower()<inf && i.upper()<inf; }
-
-
-template<class UB, class X> inline auto element(X const& x1, Interval<UB> const& i2) -> decltype(i2.lower()<=x1 && i2.upper()>=x1) {
-    return i2.lower()<=x1 && i2.upper()>=x1; }
-
-template<class UB, class X> inline auto contains(Interval<UB> const& i1, X const& x2) -> decltype(i1.lower()<=x2 && i1.upper()>=x2) {
-    return i1.lower()<=x2 && i1.upper()>=x2; }
-
-template<class UB> inline auto equal(Interval<UB> const& i1, Interval<UB> const& i2) -> decltype(i1.upper()==i2.upper()) {
-    return i1.lower()<=i2.lower() && i1.upper()==i2.upper(); }
-
-template<class UB1, class UB2> inline auto subset(Interval<UB1> const& i1, Interval<UB2> const& i2) -> decltype(i1.upper()<=i2.upper()) {
-    return i1.lower()>=i2.lower() && i1.upper()<=i2.upper(); }
-
-template<class UB1, class UB2> inline auto superset(Interval<UB1> const& i1, Interval<UB2> const& i2) -> decltype(i1.upper()>=i2.upper()) {
-    return i1.lower()<=i2.lower() && i1.upper()>=i2.upper(); }
-
-template<class UB1, class UB2> inline auto disjoint(Interval<UB1> const& i1, Interval<UB2> const& i2) -> decltype(i1.upper()<i2.lower()) {
-    return i1.lower()>i2.upper() || i1.upper()<i2.lower(); }
-
-template<class UB1, class UB2> inline auto intersect(Interval<UB1> const& i1, Interval<UB2> const& i2) -> decltype(i1.upper()>=i2.lower()) {
-    return i1.lower()<=i2.upper() && i1.upper()>=i2.lower(); }
+template<class U> inline auto is_empty(Interval<U> const& ivl) -> decltype(ivl.lower()>ivl.upper()) { return ivl.lower()>ivl.upper(); }
+template<class U> inline auto is_singleton(Interval<U> const& ivl) -> decltype(ivl.lower()==ivl.upper()) { return ivl.lower()==ivl.upper(); }
+template<class U> inline auto is_bounded(Interval<U> const& ivl) -> decltype(ivl.upper()<inf) { return -ivl.lower()<inf && ivl.upper()<inf; }
 
 
-template<class UB1, class UB2> inline auto separated(Interval<UB1> const& i1, Interval<UB2> const& i2) -> decltype(i1.upper()<i2.lower()) {
-    return i1.lower()>i2.upper() || i1.upper()<i2.lower(); }
+template<class U, class X> inline auto element(X const& x1, Interval<U> const& ivl2) -> decltype(ivl2.lower()<=x1 && ivl2.upper()>=x1) {
+    return ivl2.lower()<=x1 && ivl2.upper()>=x1; }
 
-template<class UB1, class UB2> inline auto overlap(Interval<UB1> const& i1, Interval<UB2> const& i2) -> decltype(i1.upper()>i2.lower()) {
-    return i1.lower()<i2.upper() && i1.upper()>i2.lower(); }
+template<class U, class X> inline auto contains(Interval<U> const& ivl1, X const& x2) -> decltype(ivl1.lower()<=x2 && ivl1.upper()>=x2) {
+    return ivl1.lower()<=x2 && ivl1.upper()>=x2; }
 
-template<class UB1, class UB2> inline auto inside(Interval<UB1> const& i1, Interval<UB2> const& i2) -> decltype(i1.upper()<i2.upper()) {
-    return i1.lower()>i2.lower() && i1.upper()<i2.upper(); }
+template<class U> inline auto equal(Interval<U> const& ivl1, Interval<U> const& ivl2) -> decltype(ivl1.upper()==ivl2.upper()) {
+    return ivl1.lower()<=ivl2.lower() && ivl1.upper()==ivl2.upper(); }
 
-template<class UB1, class UB2> inline auto covers(Interval<UB1> const& i1, Interval<UB2> const& i2) -> decltype(i1.upper()>i2.upper()) {
-    return i1.lower()<i2.lower() && i1.upper()>i2.upper(); }
+template<class UB1, class UB2> inline auto subset(Interval<UB1> const& ivl1, Interval<UB2> const& ivl2) -> decltype(ivl1.upper()<=ivl2.upper()) {
+    return ivl1.lower()>=ivl2.lower() && ivl1.upper()<=ivl2.upper(); }
+
+template<class UB1, class UB2> inline auto superset(Interval<UB1> const& ivl1, Interval<UB2> const& ivl2) -> decltype(ivl1.upper()>=ivl2.upper()) {
+    return ivl1.lower()<=ivl2.lower() && ivl1.upper()>=ivl2.upper(); }
+
+template<class UB1, class UB2> inline auto disjoint(Interval<UB1> const& ivl1, Interval<UB2> const& ivl2) -> decltype(ivl1.upper()<ivl2.lower()) {
+    return ivl1.lower()>ivl2.upper() || ivl1.upper()<ivl2.lower(); }
+
+template<class UB1, class UB2> inline auto intersect(Interval<UB1> const& ivl1, Interval<UB2> const& ivl2) -> decltype(ivl1.upper()>=ivl2.lower()) {
+    return ivl1.lower()<=ivl2.upper() && ivl1.upper()>=ivl2.lower(); }
 
 
-template<class UB1, class UB2> inline auto
-intersection(Interval<UB1> const& i1, Interval<UB2> const& i2) -> Interval<decltype(min(declval<UB1>(),declval<UB2>()))> {
-    return Interval<decltype(min(declval<UB1>(),declval<UB2>()))>(max(i1.lower(),i2.lower()),min(i1.upper(),i2.upper()));
-}
+template<class UB1, class UB2> inline auto separated(Interval<UB1> const& ivl1, Interval<UB2> const& ivl2) -> decltype(ivl1.upper()<ivl2.lower()) {
+    return ivl1.lower()>ivl2.upper() || ivl1.upper()<ivl2.lower(); }
+
+template<class UB1, class UB2> inline auto overlap(Interval<UB1> const& ivl1, Interval<UB2> const& ivl2) -> decltype(ivl1.upper()>ivl2.lower()) {
+    return ivl1.lower()<ivl2.upper() && ivl1.upper()>ivl2.lower(); }
+
+template<class UB1, class UB2> inline auto inside(Interval<UB1> const& ivl1, Interval<UB2> const& ivl2) -> decltype(ivl1.upper()<ivl2.upper()) {
+    return ivl1.lower()>ivl2.lower() && ivl1.upper()<ivl2.upper(); }
+
+template<class UB1, class UB2> inline auto covers(Interval<UB1> const& ivl1, Interval<UB2> const& ivl2) -> decltype(ivl1.upper()>ivl2.upper()) {
+    return ivl1.lower()<ivl2.lower() && ivl1.upper()>ivl2.upper(); }
 
 
 template<class UB1, class UB2> inline auto
-hull(Interval<UB1> const& i1, Interval<UB2> const& i2) -> Interval<decltype(max(declval<UB1>(),declval<UB2>()))> {
-    typedef decltype(max(declval<UB1>(),declval<UB2>())) UB0; return Interval<UB0>(min(i1.lower(),i2.lower()),max(i1.upper(),i2.upper()));
-}
-
-template<class UB, class X> inline auto
-hull(Interval<UB> const& i1, X x2) -> Interval<decltype(max(declval<UB>(),declval<X>()))> {
-    return Interval<decltype(max(declval<UB>(),declval<X>()))>(min(i1.lower(),x2),max(i1.upper(),x2));
-}
-
-template<class UB, class X> inline auto
-hull(X x1, Interval<UB> const& i2) -> Interval<decltype(max(declval<UB>(),declval<X>()))> {
-    return Interval<decltype(max(declval<UB>(),declval<X>()))>(min(x1,i2.lower()),max(x1,i2.upper()));
+intersection(Interval<UB1> const& ivl1, Interval<UB2> const& ivl2) -> Interval<decltype(min(declval<UB1>(),declval<UB2>()))> {
+    return Interval<decltype(min(declval<UB1>(),declval<UB2>()))>(max(ivl1.lower(),ivl2.lower()),min(ivl1.upper(),ivl2.upper()));
 }
 
 
+template<class UB1, class UB2> inline auto
+hull(Interval<UB1> const& ivl1, Interval<UB2> const& ivl2) -> Interval<decltype(max(declval<UB1>(),declval<UB2>()))> {
+    typedef decltype(max(declval<UB1>(),declval<UB2>())) UB0; return Interval<UB0>(min(ivl1.lower(),ivl2.lower()),max(ivl1.upper(),ivl2.upper()));
+}
 
-template<class UB> inline auto split(Interval<UB> const& ivl, SplitPart lmu) -> Interval<UB> {
+template<class U, class X> inline auto
+hull(Interval<U> const& ivl1, X x2) -> Interval<decltype(max(declval<U>(),declval<X>()))> {
+    return Interval<decltype(max(declval<U>(),declval<X>()))>(min(ivl1.lower(),x2),max(ivl1.upper(),x2));
+}
+
+template<class U, class X> inline auto
+hull(X x1, Interval<U> const& ivl2) -> Interval<decltype(max(declval<U>(),declval<X>()))> {
+    return Interval<decltype(max(declval<U>(),declval<X>()))>(min(x1,ivl2.lower()),max(x1,ivl2.upper()));
+}
+
+
+
+template<class U> inline auto split(Interval<U> const& ivl, SplitPart lmu) -> Interval<U> {
     auto cc=(ivl.lower()+ivl.upper())/2;
     if(lmu==SplitPart::LOWER) {
-        return Interval<UB>(ivl.lower(),make_split_point(cc));
+        return Interval<U>(ivl.lower(),make_split_point(cc));
     } else if(lmu==SplitPart::UPPER) {
-        return Interval<UB>(make_split_point(cc),ivl.upper());
+        return Interval<U>(make_split_point(cc),ivl.upper());
     } else {
         auto cl=(3*ivl.lower()+ivl.upper())/4;
         auto cu=(ivl.lower()+3*ivl.upper())/4;
-        return Interval<UB>(make_split_point(cl),make_split_point(cu));
+        return Interval<U>(make_split_point(cl),make_split_point(cu));
     }
 }
 
 
 
-template<class UB> inline auto operator==(Interval<UB> const& i1, Interval<UB> const& i2) -> decltype(i1.upper()==i2.upper()) {
-    return i1.lower()==i2.lower() && i1.upper()==i2.upper(); }
-template<class UB> inline auto operator!=(Interval<UB> const& i1, Interval<UB> const& i2) -> decltype(i1.upper()!=i2.upper()) {
-    return i1.lower()!=i2.lower() || i1.upper()!=i2.upper(); }
+template<class U> inline auto operator==(Interval<U> const& ivl1, Interval<U> const& ivl2) -> decltype(ivl1.upper()==ivl2.upper()) {
+    return ivl1.lower()==ivl2.lower() && ivl1.upper()==ivl2.upper(); }
+template<class U> inline auto operator!=(Interval<U> const& ivl1, Interval<U> const& ivl2) -> decltype(ivl1.upper()!=ivl2.upper()) {
+    return ivl1.lower()!=ivl2.lower() || ivl1.upper()!=ivl2.upper(); }
 
 
 inline Interval<UpperFloat64> refinement(Interval<UpperFloat64> const& ivl1, Interval<UpperFloat64> const& ivl2) {

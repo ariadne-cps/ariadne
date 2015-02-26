@@ -59,7 +59,7 @@ LIB_GEOMETRY_SRC = \
 	graphics.cc
 
 TEST_GEOMETRY_SRC = \
-	test_interval.cc test_function_sets.cc test_affine_sets.cc test_paving.cc test_grid_set.cc \
+	test_interval.cc test_box.cc test_function_sets.cc test_affine_sets.cc test_paving.cc test_grid_set.cc \
 	test_graphics.cc \
 
 LIB_DYNAMICS_SRC = \

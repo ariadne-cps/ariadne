@@ -1,7 +1,9 @@
 #include <utility>
 #include <iostream>
+#include <type_traits>
 
 using OutputStream = std::ostream;
+using std::declval;
 
 class Integer {
     long long int _n;
@@ -25,6 +27,13 @@ class Rational {
     friend Signum cmp(Rational, Rational);
 };
 
+Rational max(Rational,Rational);
+Rational add(Rational,Rational);
+Rational mul(Rational,Rational);
+Rational neg(Rational);
+Rational rec(Rational);
+Rational abs(Rational);
+
 struct Effort {
     int _bits;
     Effort(int bits) : _bits(bits) { }
@@ -44,7 +53,7 @@ class PositiveReal;
 
 class LowerReal {
   public:
-    LowerReal(Rational q);
+    LowerReal();
     Rational get_lower(Effort e);
     friend LowerReal max(LowerReal,LowerReal);
     friend LowerReal add(LowerReal,LowerReal);
@@ -54,6 +63,7 @@ class LowerReal {
 
 class UpperReal {
   public:
+    UpperReal();
     UpperReal(Rational q);
     Rational get_upper(Effort e);
     friend LowerReal max(LowerReal,LowerReal);
@@ -63,26 +73,31 @@ class UpperReal {
 };
 
 class Real {
+  public:
     operator LowerReal() const;
     operator UpperReal() const;
 
+    Real();
     Real(Rational q);
     Rational get_lower(Effort e);
     Rational get_upper(Effort e);
 
-    Real max(Real,Real);
-    Real add(Real,Real);
-    Real mul(Real,Real);
-    Real neg(Real);
-    Real rec(Real);
-    PositiveReal abs(Real);
+    friend Real max(Real,Real);
+    friend Real add(Real,Real);
+    friend Real mul(Real,Real);
+    friend Real neg(Real);
+    friend Real rec(Real);
+    friend PositiveReal abs(Real);
 
-    PositiveReal dist(Real,Real);
+    friend PositiveReal exp(Real);
+
+    friend PositiveReal dist(Real,Real);
     Comparison cmp(Real, Real);
 };
 
 class PositiveLowerReal : LowerReal {
   public:
+    PositiveLowerReal();
     PositiveLowerReal(Rational q);
     friend PositiveLowerReal max(PositiveLowerReal,PositiveLowerReal);
     friend PositiveLowerReal add(PositiveLowerReal,PositiveLowerReal);
@@ -94,6 +109,7 @@ class PositiveLowerReal : LowerReal {
 
 class PositiveUpperReal : UpperReal {
   public:
+    PositiveUpperReal();
     PositiveUpperReal(Rational q);
     friend PositiveUpperReal max(PositiveUpperReal,PositiveUpperReal);
     friend PositiveUpperReal add(PositiveUpperReal,PositiveUpperReal);
@@ -102,6 +118,22 @@ class PositiveUpperReal : UpperReal {
     friend PositiveUpperReal rec(PositiveLowerReal);
     friend PositiveLowerReal rec(PositiveUpperReal);
 };
+
+class PositiveReal : Real {
+  public:
+    PositiveReal();
+    PositiveReal(Rational q);
+};
+
+struct ApproximateTag { };
+struct ValidatedTag { };
+struct EffectiveTag { };
+struct ExactTag { };
+
+struct LowerTag { };
+struct UpperTag { };
+struct RangeTag { };
+struct MetricTag { };
 
 
 template<class A1, class A2> inline auto min(A1 const& a1, A2 const& a2) -> decltype(neg(max(neg(a1),neg(a2)))) {
@@ -138,10 +170,10 @@ template<class X1, class X2> friend auto operator*=(X1& x1, X2 const& x2) -> dec
 template<class X1, class X2> friend auto operator/=(X1& x1, X2 const& x2) -> decltype(x1=div(x1,x2)) { return x1=div(x1,x2); }
 };
 
-
 class Float64 : DefineArithmeticOperators {
     volatile double _dbl;
   public:
+    Float64() : _dbl() { }
     Float64(int n) : _dbl(n) { }
     Float64(float f) : _dbl(f) { }
     Float64(double d) : _dbl(d) { }
@@ -173,6 +205,7 @@ class Float64 : DefineArithmeticOperators {
 class Float32 : DefineArithmeticOperators {
     volatile float _flt;
   public:
+    Float32() : _flt() { }
     Float32(int n) : _flt(n) { }
     Float32(float d) : _flt(d) { }
     explicit operator Rational() const;
@@ -200,9 +233,54 @@ class Float32 : DefineArithmeticOperators {
     friend OutputStream& operator<<(OutputStream& os, Float32 x) { return os << x._flt; }
 };
 
+template<class F> class Approximate;
+template<class F> class Lower;
 template<class F> class Upper;
+template<class F> class Range;
+template<class F, class EF> class Ball;
 
-template<class F> class Approximate : DefineArithmeticOperators {
+template<class X> using NegType = decltype(neg(declval<X>()));
+template<class X> using RecType = decltype(rec(declval<X>()));
+template<class X1, class X2=X1> using MaxType = decltype(max(declval<X1>(),declval<X2>()));
+template<class X1, class X2=X1> using AddType = decltype(add(declval<X1>(),declval<X2>()));
+template<class X1, class X2=X1> using MulType = decltype(mul(declval<X1>(),declval<X2>()));
+
+template<class F, class R> struct ConcreteTypeTraits;
+template<class F> struct ConcreteTypeTraits<F,LowerReal> { typedef Lower<F> Type; };
+template<class F> struct ConcreteTypeTraits<F,UpperReal>  { typedef Upper<F> Type; };
+template<class F> struct ConcreteTypeTraits<F,Real>  { typedef Range<F> Type; };
+template<class F, class R> using ConcreteType = typename ConcreteTypeTraits<F,R>::Type;
+
+template<class X> struct Traits;
+template<class F> struct Traits<Range<F>> { typedef F RawType; typedef Real ModelType; };
+template<class F> struct Traits<Lower<F>> { typedef F RawType; typedef LowerReal ModelType; };
+template<class F> struct Traits<Upper<F>> { typedef F RawType; typedef UpperReal ModelType; };
+
+template<class T> using ModelType = typename Traits<T>::ModelType;
+
+template<class X> struct DeclareDirectedOperations {
+    typedef typename Traits<X>::RawType F;
+    typedef ConcreteType<F,NegType<ModelType<X>>> NEGX;
+    friend auto neg(X) -> ConcreteType<F,NegType<ModelType<X>>>;
+    friend auto max(X,X) -> ConcreteType<F,MaxType<ModelType<X>>>;
+    friend auto add(X,X) -> ConcreteType<F,AddType<ModelType<X>>>;
+//    friend auto sub(X,NEGX) -> ConcreteType<F,AddType<ModelType<X>>>;
+};
+
+template<class X> struct DeclarePositiveDirectedOperations {
+    typedef typename Traits<X>::RawType F;
+    typedef ConcreteType<F,RecType<ModelType<X>>> RECX;
+    friend auto rec(X) -> ConcreteType<F,RecType<ModelType<X>>>;
+    friend auto max(X,X) -> ConcreteType<F,MaxType<ModelType<X>>>;
+    friend auto add(X,X) -> ConcreteType<F,AddType<ModelType<X>>>;
+    friend auto mul(X,X) -> ConcreteType<F,MulType<ModelType<X>>>;
+//    friend auto div(X,RECX) -> ConcreteType<F,MulType<ModelType<X>>>;
+};
+
+template<class X> struct DeclareOperations : DeclareDirectedOperations<X>, DeclarePositiveDirectedOperations<X> {
+};
+
+template<class F> class Approximate : DefineArithmeticOperators, DeclareOperations<Approximate<F>> {
   protected:
     F _a;
   public:
@@ -215,60 +293,75 @@ template<class F> class Approximate : DefineArithmeticOperators {
     friend Approximate<F> rec(Approximate<F> x) { return Approximate<F>(rec_near(x._a)); }
 };
 
-template<class F> class Lower : public DefineArithmeticOperators {
+template<class F> class Lower : public DefineArithmeticOperators, DeclareDirectedOperations<Lower<F>> {
   protected:
     F _l;
   public:
+    typedef LowerReal ModelType;
+    typedef ValidatedTag InformationTag;
     Lower<F>(F l) : _l(l) { }
     F lower_raw() { return _l; }
     friend Lower<F> max(Lower<F> x1, Lower<F> x2) { return Lower<F>(max(x1._l, x2._l)); }
     friend Lower<F> add(Lower<F> x1, Lower<F> x2) { return Lower<F>(add_down(x1._l, x2._l)); }
     friend Lower<F> neg(Upper<F> x);
     friend Upper<F> neg(Lower<F> x);
+    friend OutputStream& operator<<(OutputStream& os, Lower<F> x) { return os << x._l << ":"; }
 };
 
-template<class F> class Upper : public DefineArithmeticOperators {
+template<class F> class Upper : public DefineArithmeticOperators, DeclareDirectedOperations<Lower<F>> {
   protected:
     F _u;
   public:
+    typedef UpperReal ModelType;
+    typedef ValidatedTag InformationTag;
     Upper<F>(F u) : _u(u) { }
     F upper_raw() { return _u; }
     friend Upper<F> max(Upper<F> x1, Upper<F> x2) { return Upper<F>(max(x1._u, x2._u)); }
     friend Upper<F> add(Upper<F> x1, Upper<F> x2) { return Upper<F>(add_up(x1._u, x2._u)); }
     friend Upper<F> neg(Lower<F> x) { return Upper<F>(neg_exact(x._l)); }
     friend Lower<F> neg(Upper<F> x) { return Lower<F>(neg_exact(x._u)); }
+    friend OutputStream& operator<<(OutputStream& os, Upper<F> x) { return os << ":" << x._u; }
 };
 
 template<class F> class PositiveRange;
 
 template<class F> class Range;
-template<class F> Range<F> max(Range<F> const& x1, Range<F> const& x2);
-template<class F> Range<F> add(Range<F> const& x1, Range<F> const& x2);
-template<class F> Range<F> mul(Range<F> const& x1, Range<F> const& x2);
-template<class F> Range<F> rec(Range<F> const& x);
+template<class F> Range<F> generic_max(Range<F> const& x1, Range<F> const& x2);
+template<class F> Range<F> generic_add(Range<F> const& x1, Range<F> const& x2);
+template<class F> Range<F> generic_sub(Range<F> const& x1, Range<F> const& x2);
+template<class F> Range<F> generic_mul(Range<F> const& x1, Range<F> const& x2);
+template<class F> Range<F> generic_neg(Range<F> const& x);
+template<class F> Range<F> generic_rec(Range<F> const& x);
 
-template<class F> class Range : public Lower<F>, public Upper<F>, public DefineArithmeticOperators {
-    template<class FF> friend Range<FF> max(Range<FF> const& x1, Range<FF> const& x2);
-    template<class FF> friend Range<FF> add(Range<FF> const& x1, Range<FF> const& x2);
-    template<class FF> friend Range<FF> mul(Range<FF> const& x1, Range<FF> const& x2);
-    template<class FF> friend Range<FF> rec(Range<FF> const& x);
+template<class F> class Range : public Lower<F>, public Upper<F>, public DefineArithmeticOperators, public DeclareOperations<Range<F>> {
+    template<class FF> friend Range<FF> generic_max(Range<FF> const& x1, Range<FF> const& x2);
+    template<class FF> friend Range<FF> generic_add(Range<FF> const& x1, Range<FF> const& x2);
+    template<class FF> friend Range<FF> generic_sub(Range<FF> const& x1, Range<FF> const& x2);
+    template<class FF> friend Range<FF> generic_mul(Range<FF> const& x1, Range<FF> const& x2);
+    template<class FF> friend Range<FF> generic_neg(Range<FF> const& x);
+    template<class FF> friend Range<FF> generic_rec(Range<FF> const& x);
   public:
+    typedef Real ModelType;
+    typedef ValidatedTag InformationTag;
     Range<F>(Lower<F> l, Upper<F> u) : Lower<F>(l), Upper<F>(u) { }
     Range<F>(F l, F u) : Lower<F>(l), Upper<F>(u) { }
 
-    friend Range<F> max(Range<F> x1, Range<F> x2) { return max<F>(x1,x2); }
+    friend Range<F> max(Range<F> x1, Range<F> x2) { return generic_max<F>(x1,x2); }
     friend Range<F> max(Upper<F> x1, Range<F> x2) { return Range<F>(x2._l,max(x1._u,x2._u)); }
     friend Range<F> max(Range<F> x1, Upper<F> x2) { return Range<F>(x1._l,max(x1._u,x2._u)); }
-    friend Range<F> add(Range<F> x1, Range<F> x2) { return add<F>(x1,x2); }
-    friend Range<F> mul(Range<F> x1, Range<F> x2) { return mul<F>(x1,x2); }
+//    friend Range<F> min(Range<F> x1, Range<F> x2) { return neg(max(neg(x1),neg(x2))); }
+    friend Range<F> add(Range<F> x1, Range<F> x2) { return generic_add<F>(x1,x2); }
+//    friend Range<F> sub(Range<F> x1, Range<F> x2) { return generic_sub<F>(x1,x2); }
+    friend Range<F> mul(Range<F> x1, Range<F> x2) { return generic_mul<F>(x1,x2); }
+//    friend Range<F> div(Range<F> x1, Range<F> x2) { return mul(x1,rec(x2)); }
     friend Range<F> neg(Range<F> x) { return Range<F>(neg_exact(x._u),neg_exact(x._l)); }
-    friend Range<F> rec(Range<F> x) { return rec<F>(x); }
+    friend Range<F> rec(Range<F> x) { return generic_rec<F>(x); }
     friend PositiveRange<F> abs(Range<F> x);
 
     friend PositiveRange<F> dist(Range<F> x1, Range<F> x2) { return abs(sub(x1,x2)); }
     friend Signum cmp(Range<F> x1, Range<F> x2) { return x1._l>x2._u ? GREATER : x1._u<x2._l ? LESS : UNKNOWN; }
 
-    friend OutputStream& operator<<(OutputStream& os, Range<F> x) { return os << "{" << x._l << ":" << x._u << "}"; }
+    friend OutputStream& operator<<(OutputStream& os, Range<F> x) { return os << x._l << ":" << x._u; }
 };
 
 template<class F> class PositiveLower;
@@ -305,25 +398,30 @@ template<class F> class PositiveRange : public Range<F> {
 };
 
 
-template<class F> Range<F> max(Range<F> const& x1, Range<F> const& x2) {
+template<class F> Range<F> generic_max(Range<F> const& x1, Range<F> const& x2) {
     return Range<F>(max(x1._l,x2._l),max(x1._u,x2._u)); }
 
-template<class F> Range<F> add(Range<F> const& x1, Range<F> const& x2) {
+template<class F> Range<F> generic_add(Range<F> const& x1, Range<F> const& x2) {
     return Range<F>(add_down(x1._l,x2._l),add_up(x1._u,x2._u)); }
 
-template<class F> Range<F> mul(Range<F> const& x1, Range<F> const& x2) {
+template<class F> Range<F> generic_sub(Range<F> const& x1, Range<F> const& x2) {
+    return Range<F>(add_down(x1._l,neg_exact(x2._u)),add_up(x1._u,neg_exact(x2._l))); }
+
+template<class F> Range<F> generic_mul(Range<F> const& x1, Range<F> const& x2) {
     F rl=min(min(mul_down(x1._l,x2._l),mul_down(x1._l,x2._u)),min(mul_down(x1._u,x2._l),mul_down(x1._u,x2._u)));
     F ru=max(max(mul_up(x1._l,x2._l),mul_up(x1._l,x2._u)),max(mul_up(x1._u,x2._l),mul_up(x1._u,x2._u)));
     return Range<F>(rl,ru); }
 
-template<class F> Range<F> rec(Range<F> const& x) {
+template<class F> Range<F> generic_neg(Range<F> const& x) {
+    return Range<F>(neg_exact(x._u),neg_exact(x._l)); }
+
+template<class F> Range<F> generic_rec(Range<F> const& x) {
     if(x._l>0 || x._u<0) { return Range<F>(rec_down(x._u),rec_up(x._l)); }
     else { return Range<F>(neg(F::inf()),F::inf()); } }
 
 #define PRINT(expression) std::cout << #expression << ": " << (expression) << "\n";
 
-
-template<class F> void test() {
+template<class F> void test_float() {
     Range<F> x(-0.5f,1.5f);
     Range<F> y(1.0f,3.5f);
 
@@ -342,15 +440,37 @@ template<class F> void test() {
     PRINT(dist(x,y));
     PRINT(cmp(x,y));
 
-    PositiveUpper<F> ux(1.5f);
-    mul(ux,ux);
+    Upper<F> ux(-1.5f);
+    Lower<F> lx(-3.25f);
+    PRINT(neg(lx))
+    PRINT(add(lx,lx))
+    PRINT(add(ux,ux))
+    PRINT(sub(lx,ux))
+    PRINT(sub(ux,lx))
+
+    PositiveUpper<F> pux(1.5f);
+    PRINT(pux);
+    PRINT(neg(pux));
+    PRINT(add(pux,pux));
+    PRINT(mul(pux,pux));
+    PRINT(div(pux,rec(pux)));
+    PRINT(rec(pux));
 
     +x; -x; x+x; x-x; x*x; x/x; x+=x; x-=x; x*=x; x/=x;
-    auto re=(x==x); auto ri=(x!=x);
-    x<=x; x>=x; x<x; x>x;
+    auto r=(x==x) xor (x!=x) xor x<=x xor x>=x xor x<x xor x>x;
 }
 
 int main() {
-    test<Float32>();
-    test<Float64>();
+    test_float<Float32>();
+    std::cout << std::endl;
+    test_float<Float64>();
 }
+
+Real::Real() { }
+LowerReal::LowerReal() { }
+UpperReal::UpperReal() { }
+PositiveReal::PositiveReal() { }
+PositiveLowerReal::PositiveLowerReal() { }
+PositiveUpperReal::PositiveUpperReal() { }
+PositiveUpperReal rec(PositiveLowerReal plr) { return PositiveUpperReal(); }
+PositiveLowerReal rec(PositiveUpperReal pur) { return PositiveLowerReal(); }

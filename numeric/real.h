@@ -47,7 +47,7 @@ class PositiveLowerReal;
 class PositiveUpperReal;
 template<> struct IsNumber<Real> : True { };
 
-struct Accuracy { Nat _bits; Nat bits() const { return _bits; } TwoExp error() const; };
+struct Accuracy { Nat _bits; Accuracy(Nat bits) : _bits(bits) { } Nat bits() const { return _bits; } TwoExp error() const; };
 
 extern const Real pi;
 extern const Real infinity;

@@ -105,7 +105,7 @@ LIB_SRC = $(LIB_NUMERIC_SRC) $(LIB_ALGEBRA_SRC) $(LIB_FUNCTION_SRC) $(LIB_SOLVER
 TESTS_SRC = $(TEST_NUMERIC_SRC) $(TEST_ALGEBRA_SRC) $(TEST_FUNCTION_SRC) $(TEST_SOLVER_SRC) $(TEST_GEOMETRY_SRC) $(TEST_DYNAMICS_SRC) $(TEST_EXPRESSION_SRC) $(TEST_HYBRID_SRC)
 
 WRAP_PYTHON_SRC = \
-	ariadne_module.cc utilities.cc \
+	ariadne_module.cc numeric_module.cc utilities.cc \
 	numeric_submodule.cc linear_algebra_submodule.cc optimization_submodule.cc \
 	differentiation_submodule.cc function_submodule.cc calculus_submodule.cc \
 	geometry_submodule.cc solver_submodule.cc storage_submodule.cc \
@@ -264,6 +264,9 @@ libariadne-function.so: $(PCH) $(LIB_NUMERIC_OBJ) $(LIB_ALGEBRA_OBJ) $(LIB_FUNCT
 
 ariadne.so: $(PCH) $(WRAP_OBJ) $(LIB_EXTRAS_OBJ) libariadne.so
 	$(CXX) $(WRAP_OBJ) $(LIB_EXTRAS_OBJ) $(PYTHON_LINK_LIBS) libariadne.so -shared -o ariadne.so
+
+numeric.so: $(PCH) $(WRAP_OBJ_DIR)/numeric_module.o $(WRAP_OBJ_DIR)/numeric_submodule.o libariadne-numeric.so
+	$(CXX) $(WRAP_OBJ_DIR)/numeric_module.o $(WRAP_OBJ_DIR)/numeric_submodule.o $(PYTHON_LINK_LIBS) libariadne-numeric.so -shared -o numeric.so
 
 %.h.gch: %.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) $<

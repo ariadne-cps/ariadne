@@ -433,8 +433,8 @@ template<class PR> Void export_user_floats() {
     export_approximate_float<PR>();
     export_upper_float<PR>();
     export_lower_float<PR>();
-    export_metric_float<PR>();
     export_bounded_float<PR>();
+    export_metric_float<PR>();
     export_exact_float<PR>();
     export_error_float<PR>();
 }

@@ -1040,11 +1040,20 @@ template<class PR> Float<Metric,PR> sqr(Float<Metric,PR> const& x) {
 }
 
 template<class PR> Float<Metric,PR> rec(Float<Metric,PR> const& x) {
-    auto ru=rec_up(add_down(x._v,x._e));
+    // Use this code to find value same as reciprocal value
+    auto rv=rec_approx(x._v);
+    auto ru=rec_up(sub_down(x._v,x._e));
+    auto rl=rec_down(add_up(x._v,x._e));
+    auto re=max(sub_up(ru,rv),sub_up(rv,rl));
+    return Float<Metric,PR>(rv,re);
+#ifdef ARIADNE_UNDEFINED
+    // Use this code to get same result as interval computation
+    auto ru=rec_up(sub_down(x._v,x._e));
     auto rl=rec_down(add_up(x._v,x._e));
     auto re=half(sub_up(ru,rl));
     auto rv=half(add_near(rl,ru));
     return Float<Metric,PR>(rv,re);
+#endif
 }
 
 template<class PR> Float<Metric,PR> add(Float<Metric,PR> const& x, Float<Metric,PR> y) {

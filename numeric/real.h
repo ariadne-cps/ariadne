@@ -47,7 +47,13 @@ class PositiveLowerReal;
 class PositiveUpperReal;
 template<> struct IsNumber<Real> : True { };
 
-struct Accuracy { Nat _bits; Accuracy(Nat bits) : _bits(bits) { } Nat bits() const { return _bits; } TwoExp error() const; };
+struct Accuracy {
+    Nat _bits;
+    Accuracy(Nat bits) : _bits(bits) { }
+    Nat bits() const { return _bits; }
+    TwoExp error() const;
+    friend OutputStream& operator<<(OutputStream& os, Accuracy acc) { return os << "Accuracy("<<acc.bits()<<")"; }
+};
 
 extern const Real pi;
 extern const Real infinity;

@@ -273,6 +273,7 @@ template<class PR> class Float<Bounded,PR> {
     Float<Bounded,PR>(RawFloatType const& l, RawFloatType const& u) : _l(l), _u(u) { }
     Float<Bounded,PR>(Float<Lower,PR> const& lower, Float<Upper,PR> const& upper) : _l(lower.raw()), _u(upper.raw()) { }
     template<class N1, class N2, EnableIf<And<IsIntegral<N1>,IsIntegral<N2>>> = dummy> Float<Bounded,PR>(N1 n1, N2 n2) : _l(n1), _u(n2) { }
+    Float<Bounded,PR>(Rational const& ql, Rational const& qu, PrecisionType pr);
 
     template<class N, EnableIf<IsIntegral<N>> = dummy> Float<Bounded,PR>(N n) : _l(n), _u(n) { }
     template<class X, EnableIf<IsFloatingPoint<X>> = dummy> explicit Float<Bounded,PR>(X x) : _l(x), _u(x) { }

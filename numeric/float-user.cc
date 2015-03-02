@@ -140,6 +140,10 @@ template<class PR> Float<Bounded,PR>::Float(Rational const& q, PR pr)
     : Float(RawFloat<PR>(q,RawFloat<PR>::downward,pr),RawFloat<PR>(q,RawFloat<PR>::upward,pr)) {
 }
 
+template<class PR> Float<Bounded,PR>::Float(Rational const& ql, Rational const& qu, PR pr)
+    : Float(RawFloat<PR>(ql,RawFloat<PR>::downward,pr),RawFloat<PR>(qu,RawFloat<PR>::upward,pr)) {
+}
+
 template<class PR> Float<Bounded,PR>::Float(Real const& x, PR pr)
     : Float(x(pr)) {
 }
@@ -290,7 +294,7 @@ template<class PR> Float<Bounded,PR>::Float(Float<Exact,PR> const& x) : _l(x.raw
 template<class PR> Float<Metric,PR>::Float(Float<Bounded,PR> const& x) : _v(x.value_raw()), _e(x.error_raw()) {
 }
 
-template<class PR> Float<Metric,PR>::Float(Float<Exact,PR> const& x) : _v(x.raw()), _e(0.0) {
+template<class PR> Float<Metric,PR>::Float(Float<Exact,PR> const& x) : _v(x.raw()), _e(nul(x.raw())) {
 }
 
 
@@ -625,7 +629,7 @@ template<class PR> Float<Bounded,PR> abs(Float<Bounded,PR> const& x) {
     } else if(x.upper_raw()<=0) {
         return Float<Bounded,PR>(neg(x.upper_raw()),neg(x.lower_raw()));
     } else {
-        return Float<Bounded,PR>(static_cast<RawFloat<PR>>(0.0),max(neg(x.lower_raw()),x.upper_raw()));
+        return Float<Bounded,PR>(static_cast<RawFloat<PR>>(0.0,x.precision()),max(neg(x.lower_raw()),x.upper_raw()));
     }
 }
 
@@ -798,11 +802,12 @@ template<class PR> Float<Bounded,PR> cos(Float<Bounded,PR> const& x)
     typename RawFloat<PR>::RoundingModeType rnd = RawFloat<PR>::get_rounding_mode();
     PR prec=x.precision();
 
-    static const Float<Exact,PR> two(2);
+    static const RawFloat<PR> one(1,prec);
+    static const Float<Exact,PR> two(2,prec);
 
-    if(x.error().raw()>2*pi_down(prec)) { return Float<Bounded,PR>(-1.0,+1.0); }
+    if(x.error().raw()>2*pi_down(prec)) { return Float<Bounded,PR>(-one,+one); }
 
-    auto n=floor(x.lower_raw()/(2*pi_approx(prec))+0.5);
+    auto n=floor(x.lower_raw()/(2*pi_approx(prec))+one/2);
     Float<Bounded,PR> y=x-two*Float<Exact,PR>(n)*pi_val<PR>(x.precision());
 
     ARIADNE_ASSERT(y.lower_raw()<=pi_up(prec));
@@ -810,16 +815,16 @@ template<class PR> Float<Bounded,PR> cos(Float<Bounded,PR> const& x)
 
     RawFloat<PR> rl,ru;
     if(y.lower_raw()<=-pi_down(prec)) {
-        if(y.upper_raw()<=0.0) { rl=-1.0; ru=cos_up(y.upper_raw()); }
-        else { rl=-1.0; ru=+1.0; }
+        if(y.upper_raw()<=0.0) { rl=-one; ru=cos_up(y.upper_raw()); }
+        else { rl=-one; ru=+one; }
     } else if(y.lower_raw()<=0.0) {
         if(y.upper_raw()<=0.0) { rl=cos_down(y.lower_raw()); ru=cos_up(y.upper_raw()); }
-        else if(y.upper_raw()<=pi_down(prec)) { rl=cos_down(max(-y.lower_raw(),y.upper_raw())); ru=+1.0; }
-        else { rl=-1.0; ru=+1.0; }
+        else if(y.upper_raw()<=pi_down(prec)) { rl=cos_down(max(-y.lower_raw(),y.upper_raw())); ru=+one; }
+        else { rl=-one; ru=+one; }
     } else if(y.lower_raw()<=pi_up(prec)) {
         if(y.upper_raw()<=pi_down(prec)) { rl=cos_down(y.upper_raw()); ru=cos_up(y.lower_raw()); }
-        else if(y.upper_raw()<=2*pi_down(prec)) { rl=-1.0; ru=cos_up(min(y.lower_raw(),sub_down(2*pi_down(prec),y.upper_raw()))); }
-        else { rl=-1.0; ru=+1.0; }
+        else if(y.upper_raw()<=2*pi_down(prec)) { rl=-one; ru=cos_up(min(y.lower_raw(),sub_down(2*pi_down(prec),y.upper_raw()))); }
+        else { rl=-one; ru=+one; }
     } else {
         assert(false);
     }
@@ -1203,8 +1208,9 @@ template<class PR> Float<Bounded,PR> div(Float<Bounded,PR> const& x1, Float<Exac
         rl=div_down(x1u,x2v); ru=div_up(x1l,x2v);
     } else {
         //ARIADNE_THROW(DivideByZeroException,"BoundedFloat div(BoundedFloat const& x1, ExactFloat x2)","x1="<<x1<<", x2="<<x2);
-        rl=-RawFloat<PR>::inf();
-        ru=+RawFloat<PR>::inf();
+        PR pr=min(x1.precision(),x2.precision());
+        rl=-RawFloat<PR>::inf(pr);
+        ru=+RawFloat<PR>::inf(pr);
     }
     return Float<Bounded,PR>(rl,ru);
 }
@@ -1218,8 +1224,9 @@ template<class PR> Float<Bounded,PR> div(Float<Exact,PR> const& x1, Float<Bounde
     RawFloat<PR> rl,ru;
     if(i2l<=0 && i2u>=0) {
         //ARIADNE_THROW(DivideByZeroException,"BoundedFloat div(ExactFloat const& x1, BoundedFloat x2)","x1="<<x1<<", x2="<<x2);
-        rl=-RawFloat<PR>::inf();
-        ru=+RawFloat<PR>::inf();
+        PR pr=min(x1.precision(),x2.precision());
+        rl=-RawFloat<PR>::inf(pr);
+        ru=+RawFloat<PR>::inf(pr);
     } else if(x1v>=0) {
         rl=div_down(x1v,i2u); ru=div_up(x1v,i2l);
     } else {

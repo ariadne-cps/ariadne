@@ -208,8 +208,9 @@ template<class PR> void export_exact_float()
     exact_float_class.def(init<Integer,PR>());
     exact_float_class.def(init<ExactFloat<PR>>());
 
-    exact_float_class.define_self_arithmetic();
+    exact_float_class.define_mixed_arithmetic(Tag<Int>());
     exact_float_class.define_mixed_arithmetic(Tag<ExactFloat<PR>>());
+    exact_float_class.define_self_arithmetic();
     //exact_float_class.define_mixed_arithmetic<ApproximateNumber>();
     //exact_float_class.define_mixed_arithmetic<LowerNumber>();
     //exact_float_class.define_mixed_arithmetic<UpperNumber>();
@@ -218,6 +219,7 @@ template<class PR> void export_exact_float()
     def("pos", (ExactFloat<PR>(*)(ExactFloat<PR> const&)) &pos);
     def("neg", (ExactFloat<PR>(*)(ExactFloat<PR> const&)) &neg);
 
+    exact_float_class.def("precision", &ExactFloat<PR>::precision);
     exact_float_class.def("get_d",&ExactFloat<PR>::get_d);
 
     exact_float_class.def(boost::python::self_ns::str(self));
@@ -241,7 +243,9 @@ template<class PR> void export_error_float()
     error_float_class.def(boost::python::self_ns::str(self));
     error_float_class.def(boost::python::self_ns::repr(self));
 
-//    error_float_class.def("set_output_precision",&ErrorFloat<PR>::set_output_precision).staticmethod("set_output_precision");
+    error_float_class.def("precision", &ErrorFloat<PR>::precision);
+
+    //    error_float_class.def("set_output_precision",&ErrorFloat<PR>::set_output_precision).staticmethod("set_output_precision");
 }
 
 template<class PR> void export_metric_float()
@@ -261,6 +265,10 @@ template<class PR> void export_metric_float()
     metric_float_class.def("lower", &MetricFloat<PR>::lower);
     metric_float_class.def("upper", &MetricFloat<PR>::upper);
 
+    metric_float_class.def("precision", &MetricFloat<PR>::precision);
+
+    metric_float_class.define_mixed_arithmetic( Tag<Int>() );
+    metric_float_class.define_mixed_arithmetic( Tag<MetricFloat<PR>>() );
     metric_float_class.define_self_arithmetic();
 //    metric_float_class.define_mixed_arithmetic<MetricFloat<PR>>();
 //    metric_float_class.define_mixed_arithmetic<ApproximateNumber>();
@@ -295,9 +303,12 @@ template<class PR> void export_bounded_float()
     bounded_float_class.def("value", &BoundedFloat<PR>::value);
     bounded_float_class.def("error", &BoundedFloat<PR>::error);
 
-    bounded_float_class.define_self_arithmetic();
+    bounded_float_class.def("precision", &BoundedFloat<PR>::precision);
+
+    bounded_float_class.define_mixed_arithmetic( Tag<Int>() );
     bounded_float_class.define_mixed_arithmetic( Tag<MetricFloat<PR>>() );
     bounded_float_class.define_mixed_arithmetic( Tag<BoundedFloat<PR>>() );
+    bounded_float_class.define_self_arithmetic();
 //    bounded_float_class.define_mixed_arithmetic<ApproximateNumber>();
 //    bounded_float_class.define_mixed_arithmetic<LowerNumber>();
 //    bounded_float_class.define_mixed_arithmetic<UpperNumber>();
@@ -329,6 +340,8 @@ template<class PR> void export_upper_float()
     upper_float_class.def(boost::python::self_ns::str(self));
     upper_float_class.def(boost::python::self_ns::repr(self));
 
+    upper_float_class.def("precision", &UpperFloat<PR>::precision);
+
     upper_float_class.def(+self);
     upper_float_class.def(-self);
     upper_float_class.def(self + self);
@@ -337,6 +350,11 @@ template<class PR> void export_upper_float()
     upper_float_class.def(self - self);
     upper_float_class.def(self - LowerFloat<PR>());
     upper_float_class.def(LowerFloat<PR>() - self);
+
+    upper_float_class.def(self + Int());
+    upper_float_class.def(Int() + self);
+    upper_float_class.def(self - Int());
+    upper_float_class.def(Int() - self);
 
 //    upper_float_class.define_mixed_arithmetic<ApproximateNumber>();
 //    upper_float_class.def(UpperNumber() + self);
@@ -363,6 +381,8 @@ template<class PR> void export_lower_float()
     lower_float_class.def(boost::python::self_ns::str(self));
     lower_float_class.def(boost::python::self_ns::repr(self));
 
+    lower_float_class.def("precision", &LowerFloat<PR>::precision);
+
     lower_float_class.def(+self);
     lower_float_class.def(-self);
     lower_float_class.def(self + self);
@@ -371,6 +391,11 @@ template<class PR> void export_lower_float()
     lower_float_class.def(self - self);
     lower_float_class.def(self - UpperFloat<PR>());
     lower_float_class.def(UpperFloat<PR>() - self);
+
+    lower_float_class.def(self + Int());
+    lower_float_class.def(Int() + self);
+    lower_float_class.def(self - Int());
+    lower_float_class.def(Int() - self);
 
 //    lower_float_class.define_mixed_arithmetic<ApproximateNumber>();
 
@@ -400,10 +425,10 @@ template<class PR> void export_approximate_float()
     approximate_float_class.def(init<ApproximateNumber>());
 
     approximate_float_class.define_self_arithmetic();
-    approximate_float_class.define_mixed_arithmetic(Tag<double>());
     approximate_float_class.define_mixed_arithmetic(Tag<ApproximateFloat<PR>>());
-//    approximate_float_class.define_mixed_arithmetic<ApproximateNumber>();
-
+    approximate_float_class.define_mixed_arithmetic(Tag<double>());
+//
+    approximate_float_class.def("precision", &ApproximateFloat<PR>::precision);
     approximate_float_class.def("get_d", &ApproximateFloat<PR>::get_d);
 
     approximate_float_class.def(boost::python::self_ns::str(self));
@@ -424,9 +449,14 @@ template<class PR> void export_approximate_float()
 }
 
 Void export_precision() {
-    class_<Precision64>("Precision64",init<>());
-    class_<PrecisionMP>("PrecisionMP",init<Nat>());
-    class_<Accuracy>("Accuracy",init<Nat>());
+    class_<Precision64> precision64_class("Precision64",init<>());
+    precision64_class.def(boost::python::self_ns::str(self));
+    class_<PrecisionMP> precisionmp_class("PrecisionMP",init<Nat>());
+    precisionmp_class.def("bits",&PrecisionMP::bits);
+    precisionmp_class.def(boost::python::self_ns::str(self));
+    class_<Accuracy> accuracy_class("Accuracy",init<Nat>());
+    accuracy_class.def("bits",&Accuracy::bits);
+    accuracy_class.def(boost::python::self_ns::str(self));
 }
 
 template<class PR> Void export_user_floats() {

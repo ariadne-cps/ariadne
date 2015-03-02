@@ -86,10 +86,11 @@ class TestDirectedFloats
   private:
     PR precision;
   public:
-    TestDirectedFloats(PR pr) : precision(pr) { };
+    TestDirectedFloats(PR prec) : precision(prec) { };
     Void test();
   private:
     Void test_concept();
+    Void test_precision();
     Void test_conversions();
     Void test_validation();
     Void test_rounded_arithmetic();
@@ -98,6 +99,7 @@ class TestDirectedFloats
 template<class PR> Void
 TestDirectedFloats<PR>::test()
 {
+    ARIADNE_TEST_CALL(test_precision());
     ARIADNE_TEST_CALL(test_conversions());
     ARIADNE_TEST_CALL(test_validation());
     ARIADNE_TEST_CALL(test_rounded_arithmetic());
@@ -126,6 +128,21 @@ TestDirectedFloats<PR>::test_concept()
 }
 
 template<class PR> Void
+TestDirectedFloats<PR>::test_precision()
+{
+    LowerFloatType lx(Rational(1),precision);
+    ARIADNE_TEST_EQUALS(max(lx,lx).precision(),precision);
+    ARIADNE_TEST_EQUALS(min(lx,lx).precision(),precision);
+    ARIADNE_TEST_EQUALS((lx+lx).precision(),precision);
+    ARIADNE_TEST_EQUALS(exp(lx).precision(),precision);
+    ARIADNE_TEST_EQUALS((lx+2u).precision(),precision);
+    ARIADNE_TEST_EQUALS((lx*2u).precision(),precision);
+    ARIADNE_TEST_EQUALS((lx/2u).precision(),precision);
+    ARIADNE_TEST_EQUALS((lx+2).precision(),precision);
+    ARIADNE_TEST_EQUALS((lx-2).precision(),precision);
+}
+
+template<class PR> Void
 TestDirectedFloats<PR>::test_conversions()
 {
     Rational one=1;
@@ -140,25 +157,23 @@ TestDirectedFloats<PR>::test_conversions()
 
 template<class PR> Void
 TestDirectedFloats<PR>::test_validation() {
-    PR pr=precision;
     Rational one=1;
     Rational two=2;
-    ARIADNE_TEST_ASSERT(refines(LowerFloatType(one,pr),LowerFloatType(-one,pr)));
-    ARIADNE_TEST_ASSERT(refines(UpperFloatType(-one,pr),UpperFloatType(+one,pr)));
-    ARIADNE_TEST_ASSERT(refines(UpperFloatType(-two,pr),UpperFloatType(-one,pr)));
-    ARIADNE_TEST_ASSERT(refines(rec(UpperFloatType(-two,pr)),rec(UpperFloatType(-one,pr))));
+    ARIADNE_TEST_ASSERT(refines(LowerFloatType(one,precision),LowerFloatType(-one,precision)));
+    ARIADNE_TEST_ASSERT(refines(UpperFloatType(-one,precision),UpperFloatType(+one,precision)));
+    ARIADNE_TEST_ASSERT(refines(UpperFloatType(-two,precision),UpperFloatType(-one,precision)));
+    ARIADNE_TEST_ASSERT(refines(rec(UpperFloatType(-two,precision)),rec(UpperFloatType(-one,precision))));
 }
 
 template<class PR> Void
 TestDirectedFloats<PR>::test_rounded_arithmetic() {
-    PR pr=precision;
     Rational one=1;
     Rational third=one/3;
     Rational fifth=one/3;
-    ARIADNE_TEST_COMPARE((LowerFloatType(third,pr)+LowerFloatType(fifth,pr)).raw(),<=,third+fifth);
-    ARIADNE_TEST_COMPARE((LowerFloatType(third,pr)-UpperFloatType(fifth,pr)).raw(),<=,third-fifth);
-    ARIADNE_TEST_ASSERT(refines(UpperFloatType(third+fifth,pr),UpperFloatType(third,pr)+UpperFloatType(fifth,pr)));
-    ARIADNE_TEST_ASSERT(refines(LowerFloatType(third+fifth,pr),LowerFloatType(third,pr)+LowerFloatType(fifth,pr)));
+    ARIADNE_TEST_COMPARE((LowerFloatType(third,precision)+LowerFloatType(fifth,precision)).raw(),<=,third+fifth);
+    ARIADNE_TEST_COMPARE((LowerFloatType(third,precision)-UpperFloatType(fifth,precision)).raw(),<=,third-fifth);
+    ARIADNE_TEST_ASSERT(refines(UpperFloatType(third+fifth,precision),UpperFloatType(third,precision)+UpperFloatType(fifth,precision)));
+    ARIADNE_TEST_ASSERT(refines(LowerFloatType(third+fifth,precision),LowerFloatType(third,precision)+LowerFloatType(fifth,precision)));
 }
 
 
@@ -176,11 +191,12 @@ class TestMetricFloat
   private:
     PR precision;
   public:
-    TestMetricFloat(PR pr) : precision(pr) { };
+    TestMetricFloat(PR prec) : precision(prec) { };
     Void test();
   private:
     using TestFloats<PR>::to_rational;
     Void test_concept();
+    Void test_precision();
     Void test_conversions();
     Void test_validation();
     Void test_rounded_arithmetic();
@@ -189,6 +205,7 @@ class TestMetricFloat
 template<class PR> Void
 TestMetricFloat<PR>::test()
 {
+    ARIADNE_TEST_CALL(test_precision());
     ARIADNE_TEST_CALL(test_conversions());
     ARIADNE_TEST_CALL(test_rounded_arithmetic());
 }
@@ -198,7 +215,38 @@ TestMetricFloat<PR>::test_conversions()
 {
     Rational one=1;
     Rational third=one/3;
-    PR pr=precision;
+}
+
+template<class PR> Void
+TestMetricFloat<PR>::test_precision()
+{
+    PR error_precision=precision;
+
+    MetricFloatType mx(Rational(1),precision);
+    ARIADNE_TEST_EQUALS(mx.value().precision(),precision);
+    ARIADNE_TEST_EQUALS(mx.error().precision(),error_precision);
+    ARIADNE_TEST_EQUALS(max(mx,mx).precision(),precision);
+    ARIADNE_TEST_EQUALS(min(mx,mx).precision(),precision);
+    ARIADNE_TEST_EQUALS(abs(mx).precision(),precision);
+    ARIADNE_TEST_EQUALS((mx+mx).precision(),precision);
+    ARIADNE_TEST_EQUALS((mx-mx).precision(),precision);
+    ARIADNE_TEST_EQUALS((mx*mx).precision(),precision);
+    ARIADNE_TEST_EQUALS((mx/mx).precision(),precision);
+    ARIADNE_TEST_EQUALS(sqrt(mx).precision(),precision);
+    ARIADNE_TEST_EQUALS(exp(mx).precision(),precision);
+    ARIADNE_TEST_EQUALS(log(mx).precision(),precision);
+    ARIADNE_TEST_EQUALS(sin(mx).precision(),precision);
+    ARIADNE_TEST_EQUALS(cos(mx).precision(),precision);
+    ARIADNE_TEST_EQUALS(tan(mx).precision(),precision);
+    ARIADNE_TEST_EQUALS(atan(mx).precision(),precision);
+    ARIADNE_TEST_EQUALS((mx+2u).precision(),precision);
+    ARIADNE_TEST_EQUALS((mx-2u).precision(),precision);
+    ARIADNE_TEST_EQUALS((mx*2u).precision(),precision);
+    ARIADNE_TEST_EQUALS((mx/2u).precision(),precision);
+    ARIADNE_TEST_EQUALS((mx+2).precision(),precision);
+    ARIADNE_TEST_EQUALS((mx-2).precision(),precision);
+    ARIADNE_TEST_EQUALS((mx*2).precision(),precision);
+    ARIADNE_TEST_EQUALS((mx/2).precision(),precision);
 }
 
 template<class PR> Void
@@ -210,18 +258,17 @@ TestMetricFloat<PR>::test_rounded_arithmetic()
     Rational six=6;
     Rational third=one/three;
     Rational fifth=one/five;
-    PR pr=precision;
 
-    ARIADNE_TEST_BINARY_PREDICATE(models,MetricFloatType(third,pr)+MetricFloatType(fifth,pr),third+fifth);
-    ARIADNE_TEST_BINARY_PREDICATE(models,MetricFloatType(third,pr)-MetricFloatType(fifth,pr),third-fifth);
-    ARIADNE_TEST_BINARY_PREDICATE(models,MetricFloatType(third,pr)*MetricFloatType(fifth,pr),third*fifth);
-    ARIADNE_TEST_BINARY_PREDICATE(models,MetricFloatType(third,pr)/MetricFloatType(fifth,pr),third/fifth);
-//    ARIADNE_TEST_BINARY_PREDICATE(models,1/MetricFloatType(three,pr)/MetricFloatType(fifth,pr),1/three);
+    ARIADNE_TEST_BINARY_PREDICATE(models,MetricFloatType(third,precision)+MetricFloatType(fifth,precision),third+fifth);
+    ARIADNE_TEST_BINARY_PREDICATE(models,MetricFloatType(third,precision)-MetricFloatType(fifth,precision),third-fifth);
+    ARIADNE_TEST_BINARY_PREDICATE(models,MetricFloatType(third,precision)*MetricFloatType(fifth,precision),third*fifth);
+    ARIADNE_TEST_BINARY_PREDICATE(models,MetricFloatType(third,precision)/MetricFloatType(fifth,precision),third/fifth);
+//    ARIADNE_TEST_BINARY_PREDICATE(models,1/MetricFloatType(three,precision)/MetricFloatType(fifth,precision),1/three);
 
-    ARIADNE_TEST_BINARY_PREDICATE(models,pow(MetricFloatType(three/five,pr),4u),pow(three/five,4u));
-    ARIADNE_TEST_BINARY_PREDICATE(models,pow(MetricFloatType(three/five,pr),4),pow(three/five,4));
-    ARIADNE_TEST_BINARY_PREDICATE(models,pow(MetricFloatType(three/five,pr),-4),pow(three/five,-4));
-    ARIADNE_TEST_BINARY_PREDICATE(models,pow(MetricFloatType(three/five,pr),-7),pow(three/five,-7));
+    ARIADNE_TEST_BINARY_PREDICATE(models,pow(MetricFloatType(three/five,precision),4u),pow(three/five,4u));
+    ARIADNE_TEST_BINARY_PREDICATE(models,pow(MetricFloatType(three/five,precision),4),pow(three/five,4));
+    ARIADNE_TEST_BINARY_PREDICATE(models,pow(MetricFloatType(three/five,precision),-4),pow(three/five,-4));
+    ARIADNE_TEST_BINARY_PREDICATE(models,pow(MetricFloatType(three/five,precision),-7),pow(three/five,-7));
 }
 
 
@@ -233,9 +280,9 @@ class TestBoundedFloat
     typedef Float<Bounded,PR> BoundedFloatType;
     typedef Float<Exact,PR> ExactFloatType;
   private:
-    PR pr;
+    PR precision;
   public:
-    TestBoundedFloat(PR prec) : pr(prec) { }
+    TestBoundedFloat(PR prec) : precision(prec) { }
     Void test();
   private:
     Void test_concept();
@@ -243,6 +290,7 @@ class TestBoundedFloat
     Void test_input();
     Void test_class();
     Void test_comparison();
+    Void test_precision();
     Void test_correct_rounded_arithmetic();
     Void test_accurate_rounded_arithmetic();
     Void test_exact_rounded_arithmetic();
@@ -261,6 +309,7 @@ TestBoundedFloat<PR>::test()
     ARIADNE_TEST_CALL(test_input());
     ARIADNE_TEST_CALL(test_class());
     ARIADNE_TEST_CALL(test_comparison());
+    ARIADNE_TEST_CALL(test_precision());
     ARIADNE_TEST_CALL(test_correct_rounded_arithmetic());
     ARIADNE_TEST_CALL(test_accurate_rounded_arithmetic());
     ARIADNE_TEST_CALL(test_exact_rounded_arithmetic());
@@ -317,6 +366,40 @@ TestBoundedFloat<PR>::test_concept()
     rx=cos(vx);
     rx=tan(vx);
     rx=atan(vx);
+}
+
+template<class PR> Void
+TestBoundedFloat<PR>::test_precision()
+{
+
+    BoundedFloatType bx(Rational(1),precision);
+    ARIADNE_TEST_EQUALS(bx.lower().precision(),precision);
+    ARIADNE_TEST_EQUALS(bx.upper().precision(),precision);
+    ARIADNE_TEST_EQUALS(max(bx,bx).precision(),precision);
+    ARIADNE_TEST_EQUALS(min(bx,bx).precision(),precision);
+    ARIADNE_TEST_EQUALS(abs(bx).precision(),precision);
+    ARIADNE_TEST_EQUALS((bx+bx).precision(),precision);
+    ARIADNE_TEST_EQUALS((bx-bx).precision(),precision);
+    ARIADNE_TEST_EQUALS((bx*bx).precision(),precision);
+    ARIADNE_TEST_EQUALS((bx/bx).precision(),precision);
+    ARIADNE_TEST_EQUALS(sqrt(bx).precision(),precision);
+    ARIADNE_TEST_EQUALS(exp(bx).precision(),precision);
+    ARIADNE_TEST_EQUALS(log(bx).precision(),precision);
+    ARIADNE_TEST_EQUALS(sin(bx).precision(),precision);
+    ARIADNE_TEST_EQUALS(cos(bx).precision(),precision);
+    ARIADNE_TEST_EQUALS(tan(bx).precision(),precision);
+    ARIADNE_TEST_EQUALS(atan(bx).precision(),precision);
+    ARIADNE_TEST_EQUALS((bx+2u).precision(),precision);
+    ARIADNE_TEST_EQUALS((bx-2u).precision(),precision);
+    ARIADNE_TEST_EQUALS((bx*2u).precision(),precision);
+    ARIADNE_TEST_EQUALS((bx/2u).precision(),precision);
+    ARIADNE_TEST_EQUALS((bx+2).precision(),precision);
+    ARIADNE_TEST_EQUALS((bx-2).precision(),precision);
+    ARIADNE_TEST_EQUALS((bx*2).precision(),precision);
+    ARIADNE_TEST_EQUALS((bx/2).precision(),precision);
+
+    ARIADNE_TEST_EQUALS(abs(BoundedFloatType(-1,2,precision)).lower().precision(),precision);
+
 }
 
 
@@ -690,13 +773,13 @@ Int main() {
     std::cerr<<std::setprecision(20);
 
     TestDirectedFloats<Precision64>(Precision64()).test();
-    TestDirectedFloats<PrecisionMP>(PrecisionMP(64)).test();
+    TestDirectedFloats<PrecisionMP>(PrecisionMP(128)).test();
 
     TestMetricFloat<Precision64>(Precision64()).test();
-    TestMetricFloat<PrecisionMP>(PrecisionMP(64)).test();
+    TestMetricFloat<PrecisionMP>(PrecisionMP(128)).test();
 
     TestBoundedFloat<Precision64>(Precision64()).test();
-    TestBoundedFloat<PrecisionMP>(PrecisionMP(64)).test();
+    TestBoundedFloat<PrecisionMP>(PrecisionMP(128)).test();
 
     return ARIADNE_TEST_FAILURES;
 }

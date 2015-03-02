@@ -51,8 +51,10 @@ class PrecisionMP {
     explicit PrecisionMP(mpfr_prec_t pr) : prec(pr) { }
     mpfr_prec_t bits() const { return prec; }
     operator mpfr_prec_t () const { return prec; }
+    friend inline bool operator==(PrecisionMP mp1, PrecisionMP mp2) { return mp1.bits()==mp2.bits(); }
+    friend bool operator<=(PrecisionMP mp1, PrecisionMP mp2) { return mp1.bits()<=mp2.bits(); }
+    friend OutputStream& operator<<(OutputStream& os, PrecisionMP mp) { return os << "PrecisionMP("<<mp.bits()<<")"; }
 };
-inline bool operator==(PrecisionMP mp1, PrecisionMP mp2) { return mp1.bits()==mp2.bits(); }
 
 //! \ingroup FltMPSubModule
 //! \brief Multiple-precision floating-point numbers.

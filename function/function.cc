@@ -212,24 +212,31 @@ Vector< Formula<Real> > formula(const EffectiveVectorFunction& f) {
 //------------------------ Function Constructors -----------------------------------//
 
 template<class P> ScalarFunction<P> FunctionConstructors<P>::zero(BoxDomain dom) {
-    return zero(dom.dimension());
+    return ConstantFunction<Y>(dom, Y(0));
 }
 
-template<class P> ScalarFunction<P> FunctionConstructors<P>::constant(BoxDomain dom, CanonicalNumericType<P> c) {
-    return constant(dom.dimension(),c);
+
+template<class P> ScalarFunction<P> FunctionConstructors<P>::constant(BoxDomain dom, NumericType c) {
+    return ConstantFunction<Y>(dom, c);
 }
 
 template<class P> ScalarFunction<P> FunctionConstructors<P>::coordinate(BoxDomain dom, SizeType j) {
-    return coordinate(dom.dimension(),j);
+    return CoordinateFunction<P>(dom, j);
 }
 
 template<class P> VectorFunction<P> FunctionConstructors<P>::zeros(SizeType rs, BoxDomain dom) {
-    return zeros(rs,dom.dimension());
+    return VectorFunction<P>(new VectorOfScalarFunction<P>(rs,zero(dom)));
 }
 
 
 template<class P> VectorFunction<P> FunctionConstructors<P>::identity(BoxDomain dom) {
-    return identity(dom.dimension());
+    SizeType n=dom.dimension();
+    ScalarFunction<P> z=ScalarFunction<P,BoxDomain>::zero(dom);
+    VectorOfScalarFunction<P>* res = new VectorOfScalarFunction<P>(n,z);
+    for(SizeType i=0; i!=n; ++i) {
+        res->_vec[i]=ScalarFunction<P>::coordinate(dom,i);
+    }
+    return VectorFunction<P>(res);
 }
 
 
@@ -258,7 +265,6 @@ template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::identity(
 
 template<class P> ScalarFunction<P> FunctionConstructors<P>::zero(SizeType as) {
     ScalarFunction<P> sf(new ScalarFormulaFunction<Y>(as,Formula<Y>::zero()));
-    ScalarFunction<P> sfc=sf;
     return sf;
 }
 

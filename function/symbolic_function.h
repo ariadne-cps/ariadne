@@ -104,18 +104,20 @@ struct ConstantFunction
 {
     typedef InformationTag<X> P;
   public:
-    SizeType _argument_size;
+    BoxDomain _domain;
     X _value;
 
-    ConstantFunction(SizeType as, const X& c) : _argument_size(as), _value(c) { }
+    //ConstantFunction(SizeType as, const X& c) : _argument_size(as), _value(c) { }
+    ConstantFunction(BoxDomain dom, const X& c) : _domain(dom), _value(c) { }
     operator X() const { return _value; }
 
-    virtual SizeType argument_size() const { return _argument_size; }
-    virtual ScalarFunctionInterface<P>* _derivative(SizeType j) const { return new ConstantFunction<P>(_argument_size,P(0)); }
+    virtual const BoxDomain domain() const { return _domain; }
+    virtual SizeType argument_size() const { return _domain.dimension(); }
+    virtual ScalarFunctionInterface<P>* _derivative(SizeType j) const { return new ConstantFunction<X>(_domain,X(0)); }
     virtual OutputStream& repr(OutputStream& os) const { return os << this->_value; }
-    virtual OutputStream& write(OutputStream& os) const { return os << "CF[R"<<this->_argument_size<<"]("<<_value<<")"; }
+    virtual OutputStream& write(OutputStream& os) const { return os << "CF[R"<<this->argument_size()<<"]("<<_value<<")"; }
     template<class XX> inline Void _compute(XX& r, const Vector<XX>& x) const {
-        r=x.zero_element()+_value; }
+        r=x.zero_element()+static_cast<typename XX::NumericType>(_value); }
 };
 
 //! A coordinate function \f$f:\R^n\rightarrow\R\f$ given by \f$f(x)=x_i\f$.
@@ -125,18 +127,20 @@ struct CoordinateFunction
 {
     typedef CanonicalNumericType<P> X;
 
-    SizeType _argument_size;
+    BoxDomain _domain;
     SizeType _index;
 
-    CoordinateFunction(SizeType as, SizeType i) : _argument_size(as), _index(i) { }
+    //CoordinateFunction(SizeType as, SizeType i) : _argument_size(as), _index(i) { }
+    CoordinateFunction(BoxDomain dom, SizeType i) : _domain(dom), _index(i) { }
     SizeType index() const { return _index; }
 
-    virtual SizeType argument_size() const { return _argument_size; }
+    virtual const BoxDomain domain() const { return _domain; }
+    virtual SizeType argument_size() const { return _domain.dimension(); }
     virtual ScalarFunctionInterface<P>* _derivative(SizeType j) const {
-        if(j==_index) { return new ConstantFunction<X>(_argument_size,X(1)); }
-        else { return new ConstantFunction<X>(_argument_size,X(0)); } }
-    virtual OutputStream& repr(OutputStream& os) const { return os << "x"<<this->_index; }
-    virtual OutputStream& write(OutputStream& os) const { return os << "IF[R"<<this->_argument_size<<"](x"<<this->_index<<")"; }
+        if(j==_index) { return new ConstantFunction<X>(_domain,X(1)); }
+        else { return new ConstantFunction<X>(_domain,X(0)); } }
+    virtual OutputStream& write(OutputStream& os) const { return os << "x"<<this->_index; }
+    virtual OutputStream& repr(OutputStream& os) const { return os << "IF[R"<<this->argument_size()<<"](x"<<this->_index<<")"; }
     template<class XX> inline Void _compute(XX& r, const Vector<XX>& x) const {
         r=x[_index]; }
 };
@@ -152,6 +156,8 @@ struct UnaryFunction
     UnaryFunction(const OperatorCode& op, const ScalarFunction<P>& arg)
         : _op(op), _arg(arg) { }
     virtual UnaryFunction<P>* clone() const { return new UnaryFunction<P>(*this); }
+    virtual const BoxDomain domain() const {
+        return this->_arg.domain(); }
     virtual SizeType argument_size() const {
         return this->_arg.argument_size(); }
 
@@ -205,6 +211,8 @@ struct BinaryFunction
     BinaryFunction(OperatorCode op, const ScalarFunction<P>& arg1, const ScalarFunction<P>& arg2)
         : _op(op), _arg1(arg1), _arg2(arg2) { ARIADNE_ASSERT_MSG(arg1.argument_size()==arg2.argument_size(),"op='"<<op<<"', arg1="<<arg1<<", arg2="<<arg2); }
     virtual BinaryFunction<P>* clone() const { return new BinaryFunction<P>(*this); }
+    virtual const BoxDomain domain() const {
+        return intersection(this->_arg1.domain(),this->_arg2.domain()); }
     virtual SizeType argument_size() const {
         return this->_arg1.argument_size(); }
 
@@ -255,6 +263,8 @@ class PowerFunction
     PowerFunction(OperatorCode op, const ScalarFunction<P>& arg1, const Int& arg2)
         : _op(op), _arg1(arg1), _arg2(arg2) {  }
     virtual PowerFunction<P>* clone() const { return new PowerFunction<P>(*this); }
+    virtual const BoxDomain domain() const {
+        return this->_arg1.domain(); }
     virtual SizeType argument_size() const {
         return this->_arg1.argument_size(); }
 

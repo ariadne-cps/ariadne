@@ -158,6 +158,7 @@ template<> class ScalarFunctionModel<ValidatedTag>
   public:
     ScalarFunctionModel() : _ptr() { }
     ScalarFunctionModel(ScalarFunctionModelInterface<ValidatedTag>* p) : _ptr(p) { }
+    ScalarFunctionModel(const shared_ptr<const ScalarFunctionModelInterface<ValidatedTag>> p) : _ptr(p->_clone()) { }
     ScalarFunctionModel(const ScalarFunctionModel<ValidatedTag>& f) : _ptr(f._ptr) { }
     ScalarFunctionModel(const ScalarFunctionModelInterface<ValidatedTag>& f) : _ptr(f._clone()) { }
     ScalarFunctionModel(const ValidatedScalarFunction& f) : _ptr(dynamic_cast<ScalarFunctionModelInterface<ValidatedTag>*>(f.raw_pointer()->_clone())) { }
@@ -227,7 +228,9 @@ inline ScalarFunctionModel<ValidatedTag>& operator-=(ScalarFunctionModel<Validat
 inline ScalarFunctionModel<ValidatedTag>& operator*=(ScalarFunctionModel<ValidatedTag>& f1, const ValidatedNumericType& c2) { f1._ptr->_imul(c2); return f1; }
 inline ScalarFunctionModel<ValidatedTag>& operator/=(ScalarFunctionModel<ValidatedTag>& f1, const ValidatedNumericType& c2) { f1._ptr->_imul(rec(c2)); return f1; }
 
+inline ScalarFunctionModel<ValidatedTag> pos(const ScalarFunctionModel<ValidatedTag>& f) { return f.apply(Pos()); }
 inline ScalarFunctionModel<ValidatedTag> neg(const ScalarFunctionModel<ValidatedTag>& f) { return f.apply(Neg()); }
+inline ScalarFunctionModel<ValidatedTag> sqr(const ScalarFunctionModel<ValidatedTag>& f) { return f.apply(Sqr()); }
 inline ScalarFunctionModel<ValidatedTag> rec(const ScalarFunctionModel<ValidatedTag>& f) { return f.apply(Rec()); }
 
 inline ScalarFunctionModel<ValidatedTag> operator+(const ScalarFunctionModel<ValidatedTag>& f) {
@@ -334,7 +337,7 @@ template<class M> class VectorFunctionPatch;
 template<class M> struct Element<VectorFunctionPatch<M>> { typedef FunctionPatch<M> Type; };
 
 typedef FunctionPatch<ValidatedTaylorModel> ScalarTaylorFunction;
-
+//
 template<class F> class VectorFunctionModelMixin<F,ValidatedTag>
     : public virtual VectorFunctionModelInterface<ValidatedTag>
     , public  VectorFunctionMixin<F,ValidatedTag>

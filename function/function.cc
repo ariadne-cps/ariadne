@@ -836,58 +836,177 @@ EffectiveScalarFunction lie_derivative(const EffectiveScalarFunction& g, const E
 
 
 
-//------------------------ ValidatedNumericType function operators -------------------------------//
+//------------------------ ValidatedNumber function operators -------------------------------//
+
+ValidatedScalarFunctionModel add(ValidatedScalarFunctionModel const& fm1, ValidatedScalarFunctionModel const& fm2) {
+    return fm1+fm2; }
+ValidatedScalarFunctionModel sub(ValidatedScalarFunctionModel const& fm1, ValidatedScalarFunctionModel const& fm2) {
+    return fm1-fm2; }
+ValidatedScalarFunctionModel mul(ValidatedScalarFunctionModel const& fm1, ValidatedScalarFunctionModel const& fm2) {
+    return fm1*fm2; }
+ValidatedScalarFunctionModel div(ValidatedScalarFunctionModel const& fm1, ValidatedScalarFunctionModel const& fm2) {
+    return fm1/fm2; }
+ValidatedScalarFunctionModel add(ValidatedScalarFunctionModel const& fm1, ValidatedNumericType const& c2) {
+    return fm1+c2; }
+ValidatedScalarFunctionModel sub(ValidatedScalarFunctionModel const& fm1, ValidatedNumericType const& c2) {
+    return fm1-c2; }
+ValidatedScalarFunctionModel mul(ValidatedScalarFunctionModel const& fm1, ValidatedNumericType const& c2) {
+    return fm1*c2; }
+ValidatedScalarFunctionModel div(ValidatedScalarFunctionModel const& fm1, ValidatedNumericType const& c2) {
+    return fm1/c2; }
+ValidatedScalarFunctionModel add(ValidatedNumericType const& c1, ValidatedScalarFunctionModel const& fm2) {
+    return c1+fm2; }
+ValidatedScalarFunctionModel sub(ValidatedNumericType const& c1, ValidatedScalarFunctionModel const& fm2) {
+    return c1-fm2; }
+ValidatedScalarFunctionModel mul(ValidatedNumericType const& c1, ValidatedScalarFunctionModel const& fm2) {
+    return c1*fm2; }
+ValidatedScalarFunctionModel div(ValidatedNumericType const& c1, ValidatedScalarFunctionModel const& fm2) {
+    return c1/fm2; }
+
+namespace {
+
+template<class OP> ValidatedScalarFunction apply(OP op, ValidatedScalarFunction const& f) {
+    std::shared_ptr<ValidatedScalarFunctionModelInterface const>
+        fp=std::dynamic_pointer_cast<ValidatedScalarFunctionModelInterface const>(f.managed_pointer());
+    if(fp) {
+        ValidatedScalarFunctionModel fm(fp); return op(fm);
+    }
+    return ValidatedScalarFunction(new UnaryFunction<ValidatedTag>(op.code(),f));
+}
+
+template<class OP> ValidatedScalarFunction apply(OP op, ValidatedScalarFunction const& f1, ValidatedScalarFunction const& f2) {
+    std::shared_ptr<ValidatedScalarFunctionModelInterface const>
+        f1p=std::dynamic_pointer_cast<ValidatedScalarFunctionModelInterface const>(f1.managed_pointer());
+    std::shared_ptr<ValidatedScalarFunctionModelInterface const>
+        f2p=std::dynamic_pointer_cast<ValidatedScalarFunctionModelInterface const>(f2.managed_pointer());
+    if(f1p && f2p) {
+        ValidatedScalarFunctionModel f1m(f1p); ValidatedScalarFunctionModel f2m(f2p); return op(f1m,f2m);
+    } else if(f1p) {
+        ValidatedScalarFunctionModel f1m(f1p); return op(f1m,f1m.create(f2));
+    } else if(f2p) {
+        ValidatedScalarFunctionModel f2m(f2p); return op(f2m.create(f1),f2m);
+    } else {
+        return ValidatedScalarFunction(new BinaryFunction<ValidatedTag>(op.code(),f1,f2));
+    }
+}
+
+template<class OP> ValidatedScalarFunction apply(OP op, ValidatedScalarFunction const& f1, ValidatedNumericType const& c2) {
+    std::shared_ptr<ValidatedScalarFunctionModelInterface const>
+        f1p=std::dynamic_pointer_cast<ValidatedScalarFunctionModelInterface const>(f1.managed_pointer());
+    if(f1p) {
+        ValidatedScalarFunctionModel f1m=f1p; return op(f1m,c2);
+    } else {
+        return ValidatedScalarFunction(new BinaryFunction<ValidatedTag>(op.code(),f1,f1.create_constant(c2)));
+    }
+}
+
+template<class OP> ValidatedScalarFunction apply(OP op, ValidatedNumericType const& c1, ValidatedScalarFunction const& f2) {
+    std::shared_ptr<ValidatedScalarFunctionModelInterface const>
+        f2p=std::dynamic_pointer_cast<ValidatedScalarFunctionModelInterface const>(f2.managed_pointer());
+    if(f2p) {
+        ValidatedScalarFunctionModel f2m=f2p; return op(c1,f2m);
+    } else {
+        return ValidatedScalarFunction(new BinaryFunction<ValidatedTag>(op.code(),f2.create_constant(c1),f2));
+    }
+}
+
+} // namespace
+
+
+
+ValidatedScalarFunction operator+(ValidatedScalarFunction const& f) {
+    return apply(Pos(),f);
+}
+
+ValidatedScalarFunction operator-(ValidatedScalarFunction const& f) {
+    return apply(Neg(),f);
+}
 
 ValidatedScalarFunction operator+(ValidatedScalarFunction const& f1, ValidatedScalarFunction const& f2) {
-    std::shared_ptr<ValidatedScalarFunctionModelInterface const> f1p=std::dynamic_pointer_cast<ValidatedScalarFunctionModelInterface const>(f1.managed_pointer());
-    std::shared_ptr<ValidatedScalarFunctionModelInterface const> f2p=std::dynamic_pointer_cast<ValidatedScalarFunctionModelInterface const>(f2.managed_pointer());
-    if(f1p && f2p) {
-        return ValidatedScalarFunctionModel(*f1p) + ValidatedScalarFunctionModel(*f2p);
-    }
-    return ValidatedScalarFunction(new BinaryFunction<ValidatedTag>(OperatorCode::ADD,f1,f2));
+    return apply(Add(),f1,f2);
 }
 
 ValidatedScalarFunction operator-(ValidatedScalarFunction const& f1, ValidatedScalarFunction const& f2) {
-    std::shared_ptr<ValidatedScalarFunctionModelInterface const> f1p=std::dynamic_pointer_cast<ValidatedScalarFunctionModelInterface const>(f1.managed_pointer());
-    std::shared_ptr<ValidatedScalarFunctionModelInterface const> f2p=std::dynamic_pointer_cast<ValidatedScalarFunctionModelInterface const>(f2.managed_pointer());
-    if(f1p && f2p) {
-        return ValidatedScalarFunctionModel(*f1p) - ValidatedScalarFunctionModel(*f2p);
-    }
-    return ValidatedScalarFunction(new BinaryFunction<ValidatedTag>(OperatorCode::SUB,f1,f2));
+    return apply(Sub(),f1,f2);
 }
 
 ValidatedScalarFunction operator*(ValidatedScalarFunction const& f1, ValidatedScalarFunction const& f2) {
-    std::shared_ptr<ValidatedScalarFunctionModelInterface const> f1p=std::dynamic_pointer_cast<ValidatedScalarFunctionModelInterface const>(f1.managed_pointer());
-    std::shared_ptr<ValidatedScalarFunctionModelInterface const> f2p=std::dynamic_pointer_cast<ValidatedScalarFunctionModelInterface const>(f2.managed_pointer());
-    if(f1p && f2p) {
-        return ValidatedScalarFunctionModel(*f1p) * ValidatedScalarFunctionModel(*f2p);
-    }
-    return ValidatedScalarFunction(new BinaryFunction<ValidatedTag>(OperatorCode::MUL,f1,f2));
+    return apply(Mul(),f1,f2);
 }
 
 ValidatedScalarFunction operator/(ValidatedScalarFunction const& f1, ValidatedScalarFunction const& f2) {
-    std::shared_ptr<ValidatedScalarFunctionModelInterface const> f1p=std::dynamic_pointer_cast<ValidatedScalarFunctionModelInterface const>(f1.managed_pointer());
-    std::shared_ptr<ValidatedScalarFunctionModelInterface const> f2p=std::dynamic_pointer_cast<ValidatedScalarFunctionModelInterface const>(f2.managed_pointer());
-    if(f1p && f2p) {
-        return ValidatedScalarFunctionModel(*f1p) / ValidatedScalarFunctionModel(*f2p);
-    }
-    return ValidatedScalarFunction(new BinaryFunction<ValidatedTag>(OperatorCode::DIV,f1,f2));
+    return apply(Div(),f1,f2);
+}
+
+ValidatedScalarFunction operator+(ValidatedScalarFunction const& f1, ValidatedNumericType const& c2) {
+    return apply(Add(),f1,c2);
+}
+
+ValidatedScalarFunction operator-(ValidatedScalarFunction const& f1, ValidatedNumericType const& c2) {
+    return apply(Sub(),f1,c2);
+}
+
+ValidatedScalarFunction operator*(ValidatedScalarFunction const& f1, ValidatedNumericType const& c2) {
+    return apply(Mul(),f1,c2);
+}
+
+ValidatedScalarFunction operator/(ValidatedScalarFunction const& f1, ValidatedNumericType const& c2) {
+    return apply(Div(),f1,c2);
+}
+
+ValidatedScalarFunction operator+(ValidatedNumericType const& c1, ValidatedScalarFunction const& f2) {
+    return apply(Add(),c1,f2);
+}
+
+ValidatedScalarFunction operator-(ValidatedNumericType const& c1, ValidatedScalarFunction const& f2) {
+    return apply(Sub(),c1,f2);
+}
+
+ValidatedScalarFunction operator*(ValidatedNumericType const& c1, ValidatedScalarFunction const& f2) {
+    return apply(Mul(),c1,f2);
+}
+
+ValidatedScalarFunction operator/(ValidatedNumericType const& c1, ValidatedScalarFunction const& f2) {
+    return apply(Div(),c1,f2);
 }
 
 
-ValidatedScalarFunction operator-(ValidatedScalarFunction const& f, ValidatedNumericType const& c) {
-    std::shared_ptr<ValidatedScalarFunctionModelInterface const> fp=std::dynamic_pointer_cast<ValidatedScalarFunctionModelInterface const>(f.managed_pointer());
-    if(fp) { return ValidatedScalarFunctionModel(*fp) - c; }
-    std::shared_ptr<EffectiveScalarFunctionInterface const> rfp=std::dynamic_pointer_cast<EffectiveScalarFunctionInterface const>(f.managed_pointer());
-    if(rfp && c.lower().raw()==c.upper().raw()) { return EffectiveScalarFunction(*rfp) - ExactFloat64(c.lower().raw()); }
-    return ValidatedScalarFunction(new BinaryFunction<ValidatedTag>(OperatorCode::SUB,f,ValidatedScalarFunction::constant(f.argument_size(),c)));
+ValidatedScalarFunction sqr(ValidatedScalarFunction const& f) {
+    return apply(Sqr(),f);
 }
 
-ValidatedScalarFunction operator-(ValidatedNumericType const& c, ValidatedScalarFunction const& f) {
-    std::shared_ptr<ValidatedScalarFunctionModelInterface const> fp=std::dynamic_pointer_cast<ValidatedScalarFunctionModelInterface const>(f.managed_pointer());
-    if(fp) { return c - ValidatedScalarFunctionModel(*fp); }
-    return ValidatedScalarFunction(new BinaryFunction<ValidatedTag>(OperatorCode::SUB,ValidatedScalarFunction::constant(f.argument_size(),c),f));
+ValidatedScalarFunction rec(ValidatedScalarFunction const& f) {
+    return apply(Rec(),f);
 }
+
+ValidatedScalarFunction sqrt(ValidatedScalarFunction const& f) {
+    return apply(Sqrt(),f);
+}
+
+ValidatedScalarFunction exp(ValidatedScalarFunction const& f) {
+    return apply(Exp(),f);
+}
+
+ValidatedScalarFunction log(ValidatedScalarFunction const& f) {
+    return apply(Log(),f);
+}
+
+ValidatedScalarFunction sin(ValidatedScalarFunction const& f) {
+    return apply(Sin(),f);
+}
+
+ValidatedScalarFunction cos(ValidatedScalarFunction const& f) {
+    return apply(Cos(),f);
+}
+
+ValidatedScalarFunction tan(ValidatedScalarFunction const& f) {
+    return apply(Tan(),f);
+}
+
+ValidatedScalarFunction atan(ValidatedScalarFunction const& f) {
+    return apply(Atan(),f);
+}
+
 
 /*
 ValidatedVectorFunction operator-(ValidatedVectorFunction const& f1, ValidatedVectorFunction const& f2) {

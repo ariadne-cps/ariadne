@@ -359,10 +359,32 @@ EffectiveScalarFunction cos(const EffectiveScalarFunction&);
 EffectiveScalarFunction tan(const EffectiveScalarFunction&);
 EffectiveScalarFunction atan(const EffectiveScalarFunction&);
 
+ValidatedScalarFunction operator+(const ValidatedScalarFunction&);
+ValidatedScalarFunction operator-(const ValidatedScalarFunction&);
 ValidatedScalarFunction operator+(const ValidatedScalarFunction&, const ValidatedScalarFunction&);
 ValidatedScalarFunction operator-(const ValidatedScalarFunction&, const ValidatedScalarFunction&);
 ValidatedScalarFunction operator*(const ValidatedScalarFunction&, const ValidatedScalarFunction&);
 ValidatedScalarFunction operator/(const ValidatedScalarFunction&, const ValidatedScalarFunction&);
+ValidatedScalarFunction operator+(const ValidatedScalarFunction&, const ValidatedNumericType&);
+ValidatedScalarFunction operator-(const ValidatedScalarFunction&, const ValidatedNumericType&);
+ValidatedScalarFunction operator*(const ValidatedScalarFunction&, const ValidatedNumericType&);
+ValidatedScalarFunction operator/(const ValidatedScalarFunction&, const ValidatedNumericType&);
+ValidatedScalarFunction operator+(const ValidatedNumericType&, const ValidatedScalarFunction&);
+ValidatedScalarFunction operator-(const ValidatedNumericType&, const ValidatedScalarFunction&);
+ValidatedScalarFunction operator*(const ValidatedNumericType&, const ValidatedScalarFunction&);
+ValidatedScalarFunction operator/(const ValidatedNumericType&, const ValidatedScalarFunction&);
+
+ValidatedScalarFunction pow(const ValidatedScalarFunction&, Int);
+ValidatedScalarFunction neg(const ValidatedScalarFunction&);
+ValidatedScalarFunction rec(const ValidatedScalarFunction&);
+ValidatedScalarFunction sqr(const ValidatedScalarFunction&);
+ValidatedScalarFunction sqrt(const ValidatedScalarFunction&);
+ValidatedScalarFunction exp(const ValidatedScalarFunction&);
+ValidatedScalarFunction log(const ValidatedScalarFunction&);
+ValidatedScalarFunction sin(const ValidatedScalarFunction&);
+ValidatedScalarFunction cos(const ValidatedScalarFunction&);
+ValidatedScalarFunction tan(const ValidatedScalarFunction&);
+ValidatedScalarFunction atan(const ValidatedScalarFunction&);
 
 
 /*
@@ -477,9 +499,6 @@ Formula<EffectiveNumericType> formula(const EffectiveScalarFunction& f);
 Vector< Formula<EffectiveNumericType> > formula(const EffectiveVectorFunction& f);
 
 
-ValidatedScalarFunction operator-(const ValidatedScalarFunction&, const ValidatedScalarFunction&);
-ValidatedScalarFunction operator-(const ValidatedScalarFunction&, const ValidatedNumericType&);
-ValidatedScalarFunction operator-(const ValidatedNumericType&, const ValidatedScalarFunction&);
 ValidatedVectorFunction operator-(const ValidatedVectorFunction&, const ValidatedVectorFunction&);
 ValidatedVectorFunction join(const ValidatedVectorFunction& f1, const ValidatedVectorFunction& f2);
 ValidatedScalarFunction compose(const ValidatedScalarFunction& f, const ValidatedVectorFunction& g);
@@ -492,6 +511,7 @@ struct VectorFunctionElementReference {
     typedef IntervalDomain SC; typedef BoxDomain VC;
     typedef VectorFunctionElementReference<P,D> SelfType;
     typedef Function<P,D,SC> ElementType;
+    typedef typename ElementType::NumericType NumericType;
     Function<P,D,VC>& _vf; SizeType _i;
     VectorFunctionElementReference<P,D>(Function<P,D,VC>& vf, SizeType i) : _vf(vf), _i(i) { }
     template<class WP> operator Function<WP,D,SC> () const;
@@ -503,6 +523,11 @@ struct VectorFunctionElementReference {
     friend ElementType operator-(SelfType const& vfe1, SelfType const& vfe2) { return ElementType(vfe1)-ElementType(vfe2); }
     friend ElementType operator*(SelfType const& vfe1, SelfType const& vfe2) { return ElementType(vfe1)*ElementType(vfe2); }
     friend ElementType operator/(SelfType const& vfe1, SelfType const& vfe2) { return ElementType(vfe1)/ElementType(vfe2); }
+    friend ElementType operator*(NumericType const& c1, SelfType const& vfe2) { return c1*ElementType(vfe2); }
+    friend ElementType operator/(NumericType const& c1, SelfType const& vfe2) { return c1/ElementType(vfe2); }
+    friend ElementType operator*(SelfType const& vfe1, NumericType const& c2) { return ElementType(vfe1)*c2; }
+    friend ElementType operator/(SelfType const& vfe1, NumericType const& c2) { return ElementType(vfe1)/c2; }
+    friend ElementType sqr(SelfType const& vfe) { return sqr(ElementType(vfe)); }
 };
 
 template<class P, class D> template<class WP> inline
@@ -544,26 +569,26 @@ inline Vector<Differential<UpperIntervalType>> derivative_range(VectorFunction<V
 
 
 inline Covector<UpperIntervalType> gradient_range(ValidatedScalarFunction const& f, const Vector<UpperIntervalType>& x) {
-    return static_cast<Covector<UpperIntervalType>>(static_cast<Covector<BoundedFloat64>>(gradient(f,reinterpret_cast<Vector<BoundedFloat64>const&>(x)))); }
+    return static_cast<Covector<UpperIntervalType>>(static_cast<Covector<ValidatedNumericType>>(gradient(f,reinterpret_cast<Vector<ValidatedNumericType>const&>(x)))); }
 inline Matrix<UpperIntervalType> jacobian_range(ValidatedVectorFunction const& f, const Vector<UpperIntervalType>& x) {
-    return static_cast<Matrix<UpperIntervalType>>(static_cast<Matrix<BoundedFloat64>>(jacobian(f,reinterpret_cast<Vector<BoundedFloat64>const&>(x)))); }
+    return static_cast<Matrix<UpperIntervalType>>(static_cast<Matrix<ValidatedNumericType>>(jacobian(f,reinterpret_cast<Vector<ValidatedNumericType>const&>(x)))); }
 
 /*
 inline Matrix<UpperIntervalType> jacobian(VectorFunction<ValidatedTag>const& f, const Vector<UpperIntervalType>& x) {
-    return static_cast<Matrix<UpperIntervalType>>(f.jacobian(reinterpret_cast<Vector<BoundedFloat64>const&>(x))); }
-inline Matrix<UpperIntervalType> jacobian(VectorFunction<ValidatedTag>const& f, const Vector<ExactIntervalType>& x) {
-    return static_cast<Matrix<UpperIntervalType>>(f.jacobian(reinterpret_cast<Vector<BoundedFloat64>const&>(x))); }
+    return static_cast<Matrix<UpperIntervalType>>(f.jacobian(reinterpret_cast<Vector<ValidatedNumericType>const&>(x))); }
+inline Matrix<UpperIntervalType> jacobian(VectorFunction<ValidatedTag>const& f, const Vector<ExactInterval>& x) {
+    return static_cast<Matrix<UpperIntervalType>>(f.jacobian(reinterpret_cast<Vector<ValidatedNumericType>const&>(x))); }
 inline Matrix<UpperIntervalType> jacobian_range(VectorFunction<ValidatedTag>const& f, const Vector<UpperIntervalType>& x) {
-    return static_cast<Matrix<UpperIntervalType>>(f.jacobian(reinterpret_cast<Vector<BoundedFloat64>const&>(x))); }
+    return static_cast<Matrix<UpperIntervalType>>(f.jacobian(reinterpret_cast<Vector<ValidatedNumericType>const&>(x))); }
 
 // FIXME: Needed to override templated gradient and jacobian
 inline Covector<UpperIntervalType> gradient(ScalarFunction<EffectiveTag>const& f, const Vector<UpperIntervalType>& x) {
-    return static_cast<Covector<UpperIntervalType>>(gradient(f,reinterpret_cast<Vector<BoundedFloat64>const&>(x))); }
-inline Covector<UpperIntervalType> gradient(ScalarFunction<EffectiveTag>const& f, const Vector<ExactIntervalType>& x) {
+    return static_cast<Covector<UpperIntervalType>>(gradient(f,reinterpret_cast<Vector<ValidatedNumericType>const&>(x))); }
+inline Covector<UpperIntervalType> gradient(ScalarFunction<EffectiveTag>const& f, const Vector<ExactInterval>& x) {
     return gradient(f,static_cast<Vector<UpperIntervalType>>(x)); }
 inline Matrix<UpperIntervalType> jacobian(VectorFunction<EffectiveTag>const& f, const Vector<UpperIntervalType>& x) {
-    return static_cast<Matrix<UpperIntervalType>>(f.jacobian(reinterpret_cast<Vector<BoundedFloat64>const&>(x))); }
-inline Matrix<UpperIntervalType> jacobian(VectorFunction<EffectiveTag>const& f, const Vector<ExactIntervalType>& x) {
+    return static_cast<Matrix<UpperIntervalType>>(f.jacobian(reinterpret_cast<Vector<ValidatedNumericType>const&>(x))); }
+inline Matrix<UpperIntervalType> jacobian(VectorFunction<EffectiveTag>const& f, const Vector<ExactInterval>& x) {
     return jacobian(f,static_cast<Vector<UpperIntervalType>>(x)); }
 */
 

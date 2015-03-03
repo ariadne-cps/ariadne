@@ -49,12 +49,7 @@ typedef Box<ApproximateIntervalType> ApproximateBoxType;
 using BoxDomain = ExactFloat64Box;
 
 template<class X> class Vector;
-/*
-typedef Vector<ApproximateFloat> ApproximateFloatVector;
-typedef Vector<ValidatedFloat> ValidatedFloatVector;
-typedef Vector<ExactFloat> ExactFloatVector;
-typedef Vector<UpperFloat64Interval> UpperFloat64IntervalVector;
-*/
+
 typedef Vector<ExactIntervalType> ExactIntervalVectorType;
 typedef Vector<UpperIntervalType> UpperIntervalVectorType;
 typedef Vector<ApproximateIntervalType> ApproximateIntervalVectorType;

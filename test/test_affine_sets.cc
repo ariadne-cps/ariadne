@@ -78,7 +78,7 @@ static const Colour expected_colour(1.0,0.25,0.25);
 
 namespace Ariadne {
 ExactFloat64 operator"" _ex (long double x) { return ExactFloat64((double)x); }
-ValidatedFloat64 operator/(Int n1, ExactFloat64 x2) { return ExactFloat64(n1)/x2; }
+BoundedFloat64 operator/(Int n1, ExactFloat64 x2) { return ExactFloat64(n1)/x2; }
 }
 
 class TestAffineSet

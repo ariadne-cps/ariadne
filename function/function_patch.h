@@ -71,7 +71,7 @@ template<class A> A operator*(const GenericType<A>& ga1, const A& ca2) { return 
 template<class A> A operator/(const GenericType<A>& ga1, const A& ca2) { return ca2.create(ga1)+ca2; }
 
 inline ApproximateFloat64 convert_error_to_bounds(const PositiveApproximateFloat64& e) { return ApproximateFloat64(0.0); }
-inline ValidatedFloat64 convert_error_to_bounds(const PositiveUpperFloat64& e) { return ValidatedFloat64(-e.raw(),+e.raw()); }
+inline BoundedFloat64 convert_error_to_bounds(const PositiveUpperFloat64& e) { return BoundedFloat64(-e.raw(),+e.raw()); }
 
 
 
@@ -204,7 +204,7 @@ template<class M> class FunctionPatch
     const CoefficientType gradient_value(SizeType i) const { return cast_exact(this->_model.gradient_value(i)/this->_domain[i].radius()); }
 
     //! \brief A polynomial representation.
-    Polynomial<ValidatedFloat64> polynomial() const;
+    Polynomial<BoundedFloat64> polynomial() const;
     //! \brief A multivalued function equal to the model on the domain.
     ScalarFunctionType<M> function() const;
 
@@ -259,7 +259,7 @@ template<class M> class FunctionPatch
 
     //@{
     /*! \name Accuracy parameters. */
-    //! \copydoc TaylorModel<ValidatedFloat64>::set_sweeper()
+    //! \copydoc TaylorModel<BoundedFloat64>::set_sweeper()
     Void set_sweeper(const Sweeper& swp) { this->_model.set_sweeper(swp); }
     //@}
 
@@ -507,7 +507,7 @@ template<class M> class VectorFunctionPatch
     static VectorFunctionPatch<M> projection(const ExactBoxType& d, SizeType imin, SizeType imax, Sweeper swp);
 
     /*! \brief Convert to an interval polynomial. */
-    Vector<Polynomial<ValidatedFloat64>> polynomials() const;
+    Vector<Polynomial<BoundedFloat64>> polynomials() const;
     /*! \brief The vector of roundoff/truncation errors of each component. */
     Vector<ErrorType> const errors() const;
     /*! \brief The maximum roundoff/truncation error of the components. */

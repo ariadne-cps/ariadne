@@ -231,9 +231,9 @@ template<class PR> class Float<Upper,PR> {
 //! \ingroup NumericModule
 //! \brief Validated bounds on a number with floating-point endpoints supporting outwardly-rounded arithmetic.
 //! \details
-//! Note that direct construction from a floating-point number is prohibited, since <c>%ValidatedFloat64(3.3)</c> would the singleton interval \f$[3.2999999999999998224,3.2999999999999998224]\f$ (the constant is first interpreted by the C++ compiler to give a C++ \c double, whereas <c>%ValidatedFloat64(3.3_decimal)</c> yields the interval \f$[3.2999999999999998224,3.3000000000000002665]\f$ enclosing \f$3.3\f$.
+//! Note that direct construction from a floating-point number is prohibited, since <c>%BoundedFloat64(3.3)</c> would the singleton interval \f$[3.2999999999999998224,3.2999999999999998224]\f$ (the constant is first interpreted by the C++ compiler to give a C++ \c double, whereas <c>%BoundedFloat64(3.3_decimal)</c> yields the interval \f$[3.2999999999999998224,3.3000000000000002665]\f$ enclosing \f$3.3\f$.
 //!
-//! Comparison tests on \c ValidatedFloat use the idea that an interval represents a single number with an unknown value.
+//! Comparison tests on \c BoundedFloat use the idea that an interval represents a single number with an unknown value.
 //! Hence the result is of type \c Kleenean, which can take values { \c True, \c False, \c Indeterminate }.
 //! Hence a test \f$[\underline{x},\overline{x}]\leq [\underline{y},\overline{y}]\f$ returns \c True if \f$\overline{x}\leq \underline{y}\f$, since in this case \f$x\leq x\f$ whenever \f$x_1\in[\underline{x},\overline{x}]\f$ and \f$y\in[\underline{y},\overline{y}]\f$, \c False if \f$\underline{x}>\overline{y}\f$, since in this case we know \f$x>y\f$, and \c Indeterminate otherwise, since in this case we can find \f$x,y\f$ making the result either true or false.
 //! In the case of equality, the comparison \f$[\underline{x},\overline{x}]\f$==\f$[\underline{y},\overline{y}]\f$ only returns \c True if both intervals are singletons, since otherwise we can find values making the result either true of false.
@@ -243,21 +243,21 @@ template<class PR> class Float<Upper,PR> {
 //! To obtain a best estimate of the value, use \c x.value(), which has an error at most \a x.error().
 //! If \f$v\f$ and \f$e\f$ are the returned value and error for the bounds \f$[l,u]\f$, then it is guaranteed that \f$v-e\leq l\f$ and \f$v+e\geq u\f$ in exact arithmetic.
 //!
-//! To test if the bounds contain a number , use \c models(ValidatedFloat,ExactFloat), and to test if bounds are inconsistent use \c inconsistent(x,y), and to test if \c x provides a better approximation, use \c refines(x,y).
+//! To test if the bounds contain a number , use \c models(BoundedFloat,ExactFloat), and to test if bounds are inconsistent use \c inconsistent(x,y), and to test if \c x provides a better approximation, use \c refines(x,y).
 //! \sa Float64, FloatMP
 //!
 //! \par Python interface
 //!
 //! In the Python interface, %Ariadne validated bounds can be constructed from Python literals of the form \c {a:b} or (deprecated) \c [a,b] .
 //! The former is preferred, as it cannot be confused with literals for other classes such as Vector and Array types.
-//! Automatic conversion is used to convert ValidatedFloat literals of the form \c {a,b} to an ValidatedFloat in functions.
+//! Automatic conversion is used to convert BoundedFloat literals of the form \c {a,b} to an BoundedFloat in functions.
 //!
 //! Care must be taken when defining intervals using floating-point coefficients, since values are first converted to the nearest
 //! representable value by the Python interpreter. <br><br>
 //! \code
-//!   ValidatedFloat64({1.1:2.3}) # Create the interval [1.1000000000000001, 2.2999999999999998]
-//!   ValidatedFloat64({2.5:4.25}) # Create the interval [2.5, 4.25], which can be represented exactly
-//!   ValidatedFloat64([2.5,4.25]) # Alternative syntax for creating the interval [2.5, 4.25]
+//!   BoundedFloat64({1.1:2.3}) # Create the interval [1.1000000000000001, 2.2999999999999998]
+//!   BoundedFloat64({2.5:4.25}) # Create the interval [2.5, 4.25], which can be represented exactly
+//!   BoundedFloat64([2.5,4.25]) # Alternative syntax for creating the interval [2.5, 4.25]
 //! \endcode
 template<class PR> class Float<Bounded,PR> {
     typedef Bounded P; typedef RawFloat<PR> FLT;
@@ -362,7 +362,7 @@ template<class PR> class Float<Metric,PR> {
 };
 
 //! \ingroup NumericModule
-//! \related Float64, ValidatedFloat64
+//! \related Float64, BoundedFloat64
 //! \brief A floating-point number, which is taken to represent the \em exact value of a real quantity.
 template<class PR> class Float<Exact,PR> {
     typedef Exact P; typedef RawFloat<PR> FLT;

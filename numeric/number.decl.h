@@ -92,7 +92,7 @@ namespace Ariadne {
 
 using ExactNumericType=ExactFloat64;
 using EffectiveNumericType=Real;
-using ValidatedNumericType=ValidatedFloat64;
+using ValidatedNumericType=BoundedFloat64;
 using UpperNumericType=UpperFloat64;
 using LowerNumericType=LowerFloat64;
 using ApproximateNumericType=ApproximateFloat64;

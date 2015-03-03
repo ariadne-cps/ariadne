@@ -848,7 +848,7 @@ Void TestHybridEvolver::test_transverse_linear_crossing() const
     Enclosure expected_final_enclosure(initial_set.euclidean_set(q1,final_space),evolver_ptr->function_factory());
     expected_final_enclosure.apply_map(function);
 
-    Vector<ValidatedFloat64> tolerance(2,ValidatedFloat64(-tol,+tol));
+    Vector<BoundedFloat64> tolerance(2,BoundedFloat64(-tol,+tol));
     ARIADNE_TEST_BINARY_PREDICATE(refines,expected_final_enclosure.space_function()[0],final_enclosure.space_function()[0]);
     ARIADNE_TEST_BINARY_PREDICATE(refines,final_enclosure.space_function()[0],expected_final_enclosure.space_function()[0]+tolerance[0]);
 

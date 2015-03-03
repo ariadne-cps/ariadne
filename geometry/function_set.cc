@@ -453,7 +453,7 @@ UpperBoxType ConstrainedImageSet::bounding_box() const
     return Ariadne::apply(this->_function,over_approximation(this->_domain));
 }
 
-Matrix<ExactFloat64> cast_exact(Matrix<ValidatedFloat64> vA) {
+Matrix<ExactFloat64> cast_exact(Matrix<BoundedFloat64> vA) {
     Matrix<ApproximateFloat64> aA=vA;
     return reinterpret_cast<Matrix<ExactFloat64>&>(aA);
 }
@@ -1117,7 +1117,7 @@ join(const ValidatedConstrainedImageSet& set1, const ValidatedConstrainedImageSe
         function_error1[i]=norm(new_function[i]-function1[i])+function_error1[i];
         function_error2[i]=norm(new_function[i]-function2[i])+function_error2[i];
         ErrorFloat64 new_function_error = max(function_error1[i],function_error2[i]);
-        new_function[i] = new_function[i] + ValidatedFloat64(-new_function_error,+new_function_error);
+        new_function[i] = new_function[i] + BoundedFloat64(-new_function_error,+new_function_error);
     }
 
     ARIADNE_ASSERT(set1.number_of_constraints()==0);

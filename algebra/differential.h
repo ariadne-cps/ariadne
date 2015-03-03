@@ -53,7 +53,7 @@ template<class X> class Differential;
 
 typedef Differential<Float64> FloatDifferential;
 typedef Differential<ApproximateFloat64> ApproximateFloatDifferential;
-typedef Differential<ValidatedFloat64> ValidatedFloatDifferential;
+typedef Differential<BoundedFloat64> BoundedFloatDifferential;
 typedef Differential<UpperIntervalType> UpperIntervalDifferentialType;
 
 

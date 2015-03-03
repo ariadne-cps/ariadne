@@ -48,14 +48,14 @@ namespace Ariadne {
 
 static const ExactFloat64 zero=0;
 
-inline auto operator+(Int n, ValidatedFloat64 x) -> decltype(ExactFloat64(n)+x) { return ExactFloat64(n)+x; }
-inline auto operator-(Int n, ValidatedFloat64 x) -> decltype(ExactFloat64(n)-x) { return ExactFloat64(n)-x; }
+inline auto operator+(Int n, BoundedFloat64 x) -> decltype(ExactFloat64(n)+x) { return ExactFloat64(n)+x; }
+inline auto operator-(Int n, BoundedFloat64 x) -> decltype(ExactFloat64(n)-x) { return ExactFloat64(n)-x; }
 inline auto operator/(ExactFloat64 x, Nat n) -> decltype(x/ExactFloat64(n)) { return x/ExactFloat64(n); }
 
-inline auto operator> (LowerFloat64 x, Real r) -> decltype(x> ValidatedFloat64(r)) { return x> ValidatedFloat64(r); }
-inline auto operator>=(LowerFloat64 x, Real r) -> decltype(x>=ValidatedFloat64(r)) { return x>=ValidatedFloat64(r); }
-inline auto operator> (UpperFloat64 x, Real r) -> decltype(x> ValidatedFloat64(r)) { return x> ValidatedFloat64(r); }
-inline auto operator<=(UpperFloat64 x, Real r) -> decltype(x<=ValidatedFloat64(r)) { return x<=ValidatedFloat64(r); }
+inline auto operator> (LowerFloat64 x, Real r) -> decltype(x> BoundedFloat64(r)) { return x> BoundedFloat64(r); }
+inline auto operator>=(LowerFloat64 x, Real r) -> decltype(x>=BoundedFloat64(r)) { return x>=BoundedFloat64(r); }
+inline auto operator> (UpperFloat64 x, Real r) -> decltype(x> BoundedFloat64(r)) { return x> BoundedFloat64(r); }
+inline auto operator<=(UpperFloat64 x, Real r) -> decltype(x<=BoundedFloat64(r)) { return x<=BoundedFloat64(r); }
 
 typedef Integer Natural;
 
@@ -962,7 +962,7 @@ _apply_guard(List<HybridEnclosure>& sets,
                 switch(semantics) {
                     case UPPER_SEMANTICS:
                         for(Nat i=0; i!=n; ++i) {
-                            ValidatedFloat64 alpha=ExactFloat64(i+1)/n;
+                            BoundedFloat64 alpha=ExactFloat64(i+1)/n;
                             ValidatedScalarFunctionModel intermediate_guard
                                 = compose( guard_function, unchecked_compose( flow, join(starting_state, alpha*elapsed_time) ) );
                             set.new_parameter_constraint(event, intermediate_guard <= zero);
@@ -1538,16 +1538,16 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
                 // Within one time step we can go beyond final time
                 result.step_kind=StepKind::CONSTANT_EVOLUTION_TIME;
                 result.finishing_kind=FinishingKind::AFTER_FINAL_TIME;
-                temporal_evolution_time=ValidatedFloat64(step_size); //   remaining_time_range.upper();
+                temporal_evolution_time=BoundedFloat64(step_size); //   remaining_time_range.upper();
             } else {
                 result.step_kind=StepKind::CONSTANT_FINISHING_TIME;
                 result.finishing_kind=FinishingKind::AT_FINAL_TIME;
-                temporal_evolution_time=ValidatedFloat64(final_time)-time_identity;
+                temporal_evolution_time=BoundedFloat64(final_time)-time_identity;
             }
         } else {
             result.step_kind=StepKind::CONSTANT_EVOLUTION_TIME;
             result.finishing_kind=FinishingKind::STRADDLE_FINAL_TIME;
-            temporal_evolution_time=ValidatedFloat64(step_size);
+            temporal_evolution_time=BoundedFloat64(step_size);
         }
     } else if(definitely(remaining_time_range.upper()<=result.step_size)) {
         // The rest of the evolution can be computed within a single time step.
@@ -1559,7 +1559,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         // a ExactFloat64
         result.step_kind=StepKind::CONSTANT_FINISHING_TIME;
         result.finishing_kind=FinishingKind::AT_FINAL_TIME;
-        temporal_evolution_time=ValidatedFloat64(final_time)-time_identity;
+        temporal_evolution_time=BoundedFloat64(final_time)-time_identity;
     } else if(possibly(remaining_time_range.lower()<=step_size) && ALLOW_CREEP) {
         // Some of the evolved points can be evolved to the final time in a single step
         // The evolution is performed over a step size which moves points closer to the final time, but does not cross.
@@ -1570,7 +1570,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         result.finishing_kind=FinishingKind::BEFORE_FINAL_TIME;
         ExactFloat64 sf=1;
         while(possibly(remaining_time_range.upper()*sf>step_size)) { sf = half(sf); }
-        temporal_evolution_time= ValidatedFloat64(sf)*(ValidatedFloat64(final_time)-time_identity);
+        temporal_evolution_time= BoundedFloat64(sf)*(BoundedFloat64(final_time)-time_identity);
     } else { // remaining_time_range.lower()>step_size)
         // As far as timing goes, perform the evolution over a full time step
         result.step_kind=StepKind::CONSTANT_EVOLUTION_TIME;
@@ -1742,7 +1742,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
                 UpperIntervalType guard_derivative_range = compose(lie_derivative(guard_function,dynamic),flow).range();
 
                 //ExactFloat64 alpha=numeric_cast<ExactFloat64>(1+flow.step_size()*guard_derivative_range.lower()/guard_range.lower());
-                ValidatedFloat64 alpha_val=(1+flow.step_size()*cast_exact(guard_derivative_range.lower())/cast_exact(guard_range.lower()));
+                BoundedFloat64 alpha_val=(1+flow.step_size()*cast_exact(guard_derivative_range.lower())/cast_exact(guard_range.lower()));
                 ExactFloat64 alpha=cast_exact(alpha_val);
                 assert(alpha_val.value()==alpha);
                 ARIADNE_LOG(6,"  step_size: "<<flow.step_size()<<", guard_range: "<<guard_range<<", guard_derivative_range: "<<guard_derivative_range<<", alpha: "<<alpha<<"\n");
@@ -1814,8 +1814,8 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
             ExactFloat64 h=result.step_size;
             ExactFloat64 tmin=cast_exact(starting_time_range.lower());
             ExactFloat64 tmax=cast_exact(starting_time_range.upper());
-            ValidatedFloat64 a=1-(half(h)/(tmax-tmin));
-            ValidatedFloat64 b=h*(tmax-half(tmin))/(tmax-tmin);
+            BoundedFloat64 a=1-(half(h)/(tmax-tmin));
+            BoundedFloat64 b=h*(tmax-half(tmin))/(tmax-tmin);
             result.parameter_dependent_finishing_time=a*starting_time_function+b;
         }
         ARIADNE_LOG(7,"Unwinding to time "<<result.parameter_dependent_finishing_time<<"\n");

@@ -40,13 +40,6 @@
 
 
 namespace Ariadne {
-template<class PR> using ApproximateFloat=Float<Approximate,PR>;
-template<class PR> using LowerFloat=Float<Lower,PR>;
-template<class PR> using UpperFloat=Float<Upper,PR>;
-template<class PR> using BoundedFloat=Float<Bounded,PR>;
-template<class PR> using MetricFloat=Float<Metric,PR>;
-template<class PR> using ExactFloat=Float<Exact,PR>;
-template<class PR> using ErrorFloat=Float<Error,PR>;
 
 // Declare friend functions in namespace
 Rational operator/(Integer const&, Integer const&);

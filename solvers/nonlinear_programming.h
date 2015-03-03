@@ -91,7 +91,7 @@ class OptimiserInterface {
                                       ExactVector x, ExactVector y) const = 0;
     //! \brief Tests if the box \a X definitely containss a feasible point.
     virtual Kleenean contains_feasible_point(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
-                                            ValidatedFloatVector X) const = 0;
+                                            BoundedFloatVector X) const = 0;
     //! \brief Tests if the Lagrange multipliers \a y are a certificate of infeasiblity.
     virtual Bool is_infeasibility_certificate(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
                                               ExactVector y) const = 0;
@@ -144,7 +144,7 @@ class PenaltyFunctionOptimiser
     virtual Void feasibility_step(const ExactBoxType& D, const ApproximateVectorFunction& g, const ExactBoxType& C,
                                   ApproximateFloatVector& x, ApproximateFloatVector& w, ApproximateFloat64& mu) const;
     virtual Void feasibility_step(const ExactBoxType& D, const ValidatedVectorFunction& g, const ExactBoxType& C,
-                                  ValidatedFloatVector& x, ValidatedFloatVector& w) const;
+                                  BoundedFloatVector& x, BoundedFloatVector& w) const;
     virtual Void feasibility_step(const ExactBoxType& D, const ApproximateVectorFunction& g, const ExactBoxType& C,
                                   ApproximateFloatVector& x, ApproximateFloatVector& y, ApproximateFloatVector& z) const;
 };
@@ -257,7 +257,7 @@ class IntervalOptimiser
     virtual IntervalOptimiser* clone() const { return new IntervalOptimiser(*this); }
     virtual Kleenean feasible(ExactBoxType D, ValidatedVectorFunction h) const;
     Void feasibility_step(const ExactFloatVector& xl, const ExactFloatVector& xu, const ValidatedVectorFunction& h,
-                          ValidatedFloatVector& x, ValidatedFloatVector& y, ValidatedFloatVector& zl, ValidatedFloatVector zu, ValidatedFloat64& mu) const;
+                          BoundedFloatVector& x, BoundedFloatVector& y, BoundedFloatVector& zl, BoundedFloatVector zu, BoundedFloat64& mu) const;
 };
 
 
@@ -290,29 +290,29 @@ class KrawczykOptimiser
     //! \brief Try to solve the nonlinear constraint problem by applying the Krawczyk contractor to the Kuhn-Tucker conditions,
     //! hotstarting the iteration with the primal and dual variables.
     Kleenean minimise(ValidatedScalarFunction f, ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
-                     const ValidatedFloat64& t0, const ValidatedFloatVector& x0, const ValidatedFloatVector& y0, const ValidatedFloatVector& z0) const;
+                     const BoundedFloat64& t0, const BoundedFloatVector& x0, const BoundedFloatVector& y0, const BoundedFloatVector& z0) const;
 
     //! \brief A primal-dual feasibility step for the problem \f$g(y)\in C;\ y\in D\f$.
     Void minimisation_step(const ExactBoxType& D, const ValidatedVectorFunction& g, const ExactBoxType& C,
-                           ValidatedFloatVector& x, ValidatedFloatVector& y, ValidatedFloatVector& z, ValidatedFloat64& t) const;
+                           BoundedFloatVector& x, BoundedFloatVector& y, BoundedFloatVector& z, BoundedFloat64& t) const;
     //! \brief A primal-dual feasibility step for the problem \f$g(y)\in C;\ y\in D\f$.
     Void feasibility_step(const ExactBoxType& D, const ValidatedVectorFunction& g, const ExactBoxType& C,
-                          ValidatedFloatVector& x, ValidatedFloatVector& y, ValidatedFloatVector& z, ValidatedFloat64& t) const;
+                          BoundedFloatVector& x, BoundedFloatVector& y, BoundedFloatVector& z, BoundedFloat64& t) const;
 
     //! \brief A primal feasibility step for the problem \f$g(y)\in C;\ y\in D\f$. \deprecated
     Void feasibility_step(const ExactBoxType& D, const ValidatedVectorFunction& g, const ExactBoxType& C,
-                          ValidatedFloatVector& y, ValidatedFloat64& t) const;
+                          BoundedFloatVector& y, BoundedFloat64& t) const;
     //! \brief A feasibility step for the problem \f$g(y)\leq 0\f$. \deprecated
     Void feasibility_step(const ValidatedVectorFunction& g,
-                          ValidatedFloatVector& x, ValidatedFloatVector& y, ValidatedFloatVector& z, ValidatedFloat64& t) const;
+                          BoundedFloatVector& x, BoundedFloatVector& y, BoundedFloatVector& z, BoundedFloat64& t) const;
     //! \brief An optimization step for the problem \f$\max f(y) \text{ s.t. } g(y)\leq 0\f$. \deprecated
     Void minimisation_step(const ValidatedScalarFunction& f, const ValidatedVectorFunction& g,
-                           ValidatedFloatVector& x, ValidatedFloatVector& y, ValidatedFloatVector& z) const;
+                           BoundedFloatVector& x, BoundedFloatVector& y, BoundedFloatVector& z) const;
   protected:
     Void setup_feasibility(const ExactBoxType& D, const ValidatedVectorFunction& g, const ExactBoxType& C,
-                           ValidatedFloatVector& x, ValidatedFloatVector& y, ValidatedFloatVector& z, ValidatedFloat64& t) const;
+                           BoundedFloatVector& x, BoundedFloatVector& y, BoundedFloatVector& z, BoundedFloat64& t) const;
     protected:
-    Void compute_tz(const ExactBoxType& D, const ValidatedVectorFunction& g, const ExactBoxType& C, const ValidatedFloatVector& y, ValidatedFloat64& t, ValidatedFloatVector& z) const;
+    Void compute_tz(const ExactBoxType& D, const ValidatedVectorFunction& g, const ExactBoxType& C, const BoundedFloatVector& y, BoundedFloat64& t, BoundedFloatVector& z) const;
 };
 
 */

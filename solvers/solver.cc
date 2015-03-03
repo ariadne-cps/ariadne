@@ -218,7 +218,7 @@ SolverBase::solve_all(const ValidatedVectorFunction& f,
     // Create result set
     Set< Vector<ValidatedNumericType> > r;
 
-    Vector<ValidatedFloat64> x=cast_singleton(bx);
+    Vector<BoundedFloat64> x=cast_singleton(bx);
 
     // Test for no solution
     const Vector<ValidatedNumericType> z(bx.size());

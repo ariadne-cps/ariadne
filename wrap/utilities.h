@@ -62,8 +62,8 @@ template<> inline const char* python_name<Real>(const char* name) {
 
 template<> inline const char* python_name<ExactFloat64>(const char* name) {
     return (StringType("ExactFloat64")+name).c_str(); }
-template<> inline const char* python_name<ValidatedFloat64>(const char* name) {
-    return (StringType("ValidatedFloat64")+name).c_str(); }
+template<> inline const char* python_name<BoundedFloat64>(const char* name) {
+    return (StringType("BoundedFloat64")+name).c_str(); }
 template<> inline const char* python_name<UpperFloat64>(const char* name) {
     return (StringType("UpperFloat64")+name).c_str(); }
 template<> inline const char* python_name<ApproximateFloat64>(const char* name) {

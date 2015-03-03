@@ -146,9 +146,9 @@ struct to_python< ListSet< HybridBasicSet<ES> > > {
     static const PyTypeObject* get_pytype() { return &PyDict_Type; }
 };
 
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ValidatedFloat64>& x);
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<BoundedFloat64>& x);
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ExactIntervalType>& x) {
-    return os << PythonRepresentation<ValidatedFloat64>(ValidatedFloat64(x.reference()));
+    return os << PythonRepresentation<BoundedFloat64>(BoundedFloat64(x.reference()));
 }
 
 
@@ -419,8 +419,8 @@ Void export_affine_set()
         affine_set_class("ValidatedAffineConstrainedImageSet",init<ValidatedAffineConstrainedImageSet>());
     affine_set_class.def(init<Vector<ExactIntervalType>, Matrix<ExactFloat64>, Vector<ExactFloat64> >());
     affine_set_class.def(init<Matrix<ExactFloat64>, Vector<ExactFloat64> >());
-    affine_set_class.def("new_parameter_constraint", (Void(ValidatedAffineConstrainedImageSet::*)(const Constraint<Affine<ValidatedFloat64>,ValidatedFloat64>&)) &ValidatedAffineConstrainedImageSet::new_parameter_constraint);
-    affine_set_class.def("new_constraint", (Void(ValidatedAffineConstrainedImageSet::*)(const Constraint<AffineModel<ValidatedFloat64>,ValidatedFloat64>&)) &ValidatedAffineConstrainedImageSet::new_constraint);
+    affine_set_class.def("new_parameter_constraint", (Void(ValidatedAffineConstrainedImageSet::*)(const Constraint<Affine<BoundedFloat64>,BoundedFloat64>&)) &ValidatedAffineConstrainedImageSet::new_parameter_constraint);
+    affine_set_class.def("new_constraint", (Void(ValidatedAffineConstrainedImageSet::*)(const Constraint<AffineModel<BoundedFloat64>,BoundedFloat64>&)) &ValidatedAffineConstrainedImageSet::new_constraint);
     affine_set_class.def("dimension", &ValidatedAffineConstrainedImageSet::dimension);
     affine_set_class.def("is_bounded", &ValidatedAffineConstrainedImageSet::is_bounded);
     affine_set_class.def("empty", &ValidatedAffineConstrainedImageSet::empty);

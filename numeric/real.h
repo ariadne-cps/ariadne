@@ -96,11 +96,11 @@ class Real
     double get_d() const;
 
     // Extract arbitrarily accurate approximations
-    BoundFloat64 operator() (Precision64 pr) const;
-    BoundFloatMP operator() (PrecisionMP pr) const;
-    BoundFloat64 get(Precision64 pr) const;
-    BoundFloatMP get(PrecisionMP pr) const;
-    BoundFloatMP evaluate(Accuracy acc) const;
+    BoundedFloat64 operator() (Precision64 pr) const;
+    BoundedFloatMP operator() (PrecisionMP pr) const;
+    BoundedFloat64 get(Precision64 pr) const;
+    BoundedFloatMP get(PrecisionMP pr) const;
+    BoundedFloatMP evaluate(Accuracy acc) const;
 
     // Non-templated to allow conversions
     friend Real add(Real,Real);
@@ -306,17 +306,17 @@ template<class N, EnableIf<IsIntegral<N>> =dummy> inline Kleenean operator> (con
 
 /*
 template<class D, EnableIf<IsFloatingPoint<D>> =dummy> inline auto
-    operator==(Real r, D d) -> decltype(r==ApprxFloat64(d)) { return r==ApprxFloat64(d); }
+    operator==(Real r, D d) -> decltype(r==ApproximateFloat64(d)) { return r==ApproximateFloat64(d); }
 template<class D, EnableIf<IsFloatingPoint<D>> =dummy> inline auto
-    operator!=(Real r, D d) -> decltype(r!=ApprxFloat64(d)) { return r!=ApprxFloat64(d); }
+    operator!=(Real r, D d) -> decltype(r!=ApproximateFloat64(d)) { return r!=ApproximateFloat64(d); }
 template<class D, EnableIf<IsFloatingPoint<D>> =dummy> inline auto
-    operator< (Real r, D d) -> decltype(r< ApprxFloat64(d)) { return r< ApprxFloat64(d); }
+    operator< (Real r, D d) -> decltype(r< ApproximateFloat64(d)) { return r< ApproximateFloat64(d); }
 template<class D, EnableIf<IsFloatingPoint<D>> =dummy> inline auto
-    operator> (Real r, D d) -> decltype(r> ApprxFloat64(d)) { return r> ApprxFloat64(d); }
+    operator> (Real r, D d) -> decltype(r> ApproximateFloat64(d)) { return r> ApproximateFloat64(d); }
 template<class D, EnableIf<IsFloatingPoint<D>> =dummy> inline auto
-    operator<=(Real r, D d) -> decltype(r<=ApprxFloat64(d)) { return r<=ApprxFloat64(d); }
+    operator<=(Real r, D d) -> decltype(r<=ApproximateFloat64(d)) { return r<=ApproximateFloat64(d); }
 template<class D, EnableIf<IsFloatingPoint<D>> =dummy> inline auto
-    operator>=(Real r, D d) -> decltype(r>=ApprxFloat64(d)) { return r>=ApprxFloat64(d); }
+    operator>=(Real r, D d) -> decltype(r>=ApproximateFloat64(d)) { return r>=ApproximateFloat64(d); }
 */
 /*
 template<class T> auto operator+(T const& t) -> decltype(pos(t)) { return pos(t); }

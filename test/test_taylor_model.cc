@@ -109,7 +109,7 @@ Void TestTaylorModel::test()
     std::cout<<std::setprecision(18);
     std::clog<<std::setprecision(18);
     ExactFloat64::set_output_precision(18);
-    ValidatedFloat64::set_output_precision(18);
+    BoundedFloat64::set_output_precision(18);
 
     ARIADNE_TEST_CALL(test_constructors());
     ARIADNE_TEST_CALL(test_predicates());
@@ -131,9 +131,9 @@ Void TestTaylorModel::test()
 Void TestTaylorModel::test_concept()
 {
     const ExactFloat64 f=0;
-    const ValidatedFloat64 i;
+    const BoundedFloat64 i;
     const Vector<ExactFloat64> vf;
-    const Vector<ValidatedFloat64> vi;
+    const Vector<BoundedFloat64> vi;
     const ValidatedTaylorModel  t(0,swp);
     ValidatedTaylorModel tr(0,swp);
 
@@ -224,9 +224,9 @@ Void TestTaylorModel::test_unscale()
 
 Void TestTaylorModel::test_evaluate()
 {
-    Vector<ValidatedFloat64> iv={{0.25,0.5},{-0.75,-0.5}};
+    Vector<BoundedFloat64> iv={{0.25,0.5},{-0.75,-0.5}};
     ValidatedTaylorModel tv=1+2*x+3*y+4*(x^2)+5*(x*y)+6*(y^2)+e/2;
-    ARIADNE_TEST_EQUAL(evaluate(tv,iv),ValidatedFloat64(-1,1));
+    ARIADNE_TEST_EQUAL(evaluate(tv,iv),BoundedFloat64(-1,1));
 }
 
 
@@ -243,10 +243,10 @@ Void TestTaylorModel::test_arithmetic()
     ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)-(-3), ValidatedTaylorModel(E(1,2, {4.0,-2.0,3.0}), 0.75,swp));
     ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)*(-3), ValidatedTaylorModel(E(1,2, {-3.0,6.0,-9.0}), 2.25,swp));
     ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)/(-4), ValidatedTaylorModel(E(1,2, {-0.25,0.5,-0.75}), 0.1875,swp));
-    ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)+ValidatedFloat64(-1,2), ValidatedTaylorModel(E(1,2, {1.5,-2.0,3.0}), 2.25,swp));
-    ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)-ValidatedFloat64(-1,2), ValidatedTaylorModel(E(1,2, {0.5,-2.0,3.0}), 2.25,swp));
-    ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)*ValidatedFloat64(-1,2), ValidatedTaylorModel(E(1,2, {0.5,-1.0,1.5}), 10.5,swp));
-    ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)/ValidatedFloat64(0.25,2.0), ValidatedTaylorModel(E(1,2, {2.25,-4.5,6.75}), 13.5,swp));
+    ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)+BoundedFloat64(-1,2), ValidatedTaylorModel(E(1,2, {1.5,-2.0,3.0}), 2.25,swp));
+    ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)-BoundedFloat64(-1,2), ValidatedTaylorModel(E(1,2, {0.5,-2.0,3.0}), 2.25,swp));
+    ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)*BoundedFloat64(-1,2), ValidatedTaylorModel(E(1,2, {0.5,-1.0,1.5}), 10.5,swp));
+    ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)/BoundedFloat64(0.25,2.0), ValidatedTaylorModel(E(1,2, {2.25,-4.5,6.75}), 13.5,swp));
     ARIADNE_TEST_EQUAL(+ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp), ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp));
     ARIADNE_TEST_EQUAL(-ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp), ValidatedTaylorModel(E(1,2, {-1.0,2.0,-3.0}), 0.75,swp));
     ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)+ValidatedTaylorModel(E(1,2, {3.0,2.0,-4.0}),0.5,swp), ValidatedTaylorModel(E(1,2, {4.0,0.0,-1.0}), 1.25,swp));
@@ -299,7 +299,7 @@ Void TestTaylorModel::test_functions()
     ValidatedTaylorModel x=ValidatedTaylorModel::coordinate(1,0,swp);
     ValidatedTaylorModel hx=x/2;
     ValidatedTaylorModel ophx=1+x/2;
-    ValidatedFloat64 e(-1,+1);
+    BoundedFloat64 e(-1,+1);
 
     ARIADNE_TEST_PRINT(exp(x));
     ARIADNE_TEST_PRINT(sin(x));
@@ -308,7 +308,7 @@ Void TestTaylorModel::test_functions()
 
     // Expected tolerance based on sweeper characteristics
     static const ExactFloat64 xtol=ExactFloat64(x.tolerance());
-    static const ValidatedFloat64 tol=xtol*ValidatedFloat64(-1,+1);
+    static const BoundedFloat64 tol=xtol*BoundedFloat64(-1,+1);
     ExactFloat64 LAXITY=1;
 
     // exp, sin and cos have error bound e^N/N!*(1+1/N), where e is bound for |x| N is the first term omitted
@@ -418,7 +418,7 @@ Void TestTaylorModel::test_split()
 
 Void TestTaylorModel::test_antiderivative()
 {
-    ValidatedFloat64 unit_interval(-1,+1);
+    BoundedFloat64 unit_interval(-1,+1);
     ValidatedTaylorModel tm=ValidatedTaylorModel::constant(2,1,swp);
     ValidatedTaylorModel atm=antiderivative(tm,1);
 
@@ -431,7 +431,7 @@ Void TestTaylorModel::test_antiderivative()
     ARIADNE_TEST_EQUAL(antiderivative((x^2)*(y^4)*15/2,1),(x^2)*(y^5)*3/2);
 
     ValidatedTaylorModel x=ValidatedTaylorModel::coordinate(1,0,swp);
-    ValidatedTaylorModel e=ValidatedTaylorModel::zero(1,swp)+ValidatedFloat64(-1,+1);
+    ValidatedTaylorModel e=ValidatedTaylorModel::zero(1,swp)+BoundedFloat64(-1,+1);
     ARIADNE_TEST_EQUAL(antiderivative(2.0*x*x,0),0.66666666666666663*x*x*x+5.5511151231257827021e-17*e);
     ARIADNE_TEST_EQUAL(antiderivative(2.0*x*x+e,0),0.66666666666666663*x*x*x+1.0000000000000002*e);
     ARIADNE_TEST_EQUAL(antiderivative(2*(x^2),0),ExactFloat64(0.66666666666666663)*(x^3)+ExactFloat64(5.5511151231257827021e-17)*e);

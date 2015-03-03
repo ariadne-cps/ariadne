@@ -109,7 +109,7 @@ typedef Vector<Real> RealVector;
 typedef Vector<Float64> FloatVector;
 typedef Vector<RawFloat64> RawFloatVector;
 typedef Vector<ApproximateFloat64> ApproximateFloatVector;
-typedef Vector<ValidatedFloat64> ValidatedFloatVector;
+typedef Vector<BoundedFloat64> BoundedFloatVector;
 typedef Vector<ExactFloat64> ExactFloatVector;
 
 typedef Vector<ApproximateNumericType> ApproximateVector;
@@ -122,7 +122,7 @@ typedef Matrix<Real> RealMatrix;
 typedef Matrix<RawFloat64> RawFloatMatrix;
 typedef Matrix<Float64> FloatMatrix;
 typedef Matrix<ApproximateFloat64> ApproximateFloatMatrix;
-typedef Matrix<ValidatedFloat64> ValidatedFloatMatrix;
+typedef Matrix<BoundedFloat64> BoundedFloatMatrix;
 typedef Matrix<ExactFloat64> ExactFloatMatrix;
 
 typedef Point<ApproximateNumericType> ApproximatePoint;

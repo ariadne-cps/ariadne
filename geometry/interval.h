@@ -243,8 +243,8 @@ bool refines(Interval<UpperFloat64> const& ivl1, Interval<UpperFloat64> const& i
 //! \related UpperFloat64Interval \brief Tests if two intervals have the same representation.
 bool same(Interval<UpperFloat64> const& ivl1, Interval<UpperFloat64> const& ivl2);
 
-//! \related UpperFloat64Interval \related BoundFloat \brief Allows the over-approximating interval \a ivl to be treated an over-approximation to a single point.
-BoundFloat64 cast_singleton(Interval<UpperFloat64> const& ivl);
+//! \related UpperFloat64Interval \related BoundedFloat \brief Allows the over-approximating interval \a ivl to be treated an over-approximation to a single point.
+BoundedFloat64 cast_singleton(Interval<UpperFloat64> const& ivl);
 
 //! \related UpperFloat64Interval \brief An interval containing the given interval in its interior.
 Interval<UpperFloat64> widen(Interval<UpperFloat64> const& ivl);

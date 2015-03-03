@@ -404,16 +404,16 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
         EffectiveScalarFunction zero_function=EffectiveScalarFunction::zero(m);
         EffectiveVectorFunction identity_function=EffectiveVectorFunction::identity(m);
         ScalarTaylorFunction txg(domain,zero_function,sweeper);
-        ValidatedFloat64 cnst=0;
+        BoundedFloat64 cnst=0;
         for(Nat j=0; j!=n; ++j) {
-            txg = txg - (ValidatedFloat64(x[j])-ValidatedFloat64(x[n+j]))*ScalarTaylorFunction(domain,ValidatedScalarFunction(fg[j]),sweeper);
+            txg = txg - (BoundedFloat64(x[j])-BoundedFloat64(x[n+j]))*ScalarTaylorFunction(domain,ValidatedScalarFunction(fg[j]),sweeper);
             cnst += (bx[j].upper()*x[j]-bx[j].lower()*x[n+j]);
         }
         for(Nat i=0; i!=m; ++i) {
-            txg = txg - (ValidatedFloat64(x[2*n+i])-ValidatedFloat64(x[2*n+m+i]))*ScalarTaylorFunction(domain,ValidatedScalarFunction(identity_function[i]),sweeper);
+            txg = txg - (BoundedFloat64(x[2*n+i])-BoundedFloat64(x[2*n+m+i]))*ScalarTaylorFunction(domain,ValidatedScalarFunction(identity_function[i]),sweeper);
             cnst += (d[i].upper()*x[2*n+i]-d[i].lower()*x[2*n+m+i]);
         }
-        txg = ValidatedFloat64(cnst) + txg;
+        txg = BoundedFloat64(cnst) + txg;
 
         ARIADNE_LOG(6,"    txg="<<txg<<"\n");
 
@@ -516,7 +516,7 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
         // Use the computed dual variables to try to make a scalar function which is negative over the entire domain.
         // This should be easier than using all constraints separately
         ScalarTaylorFunction xg=ScalarTaylorFunction::zero(d,sweeper);
-        ValidatedFloat64 cnst=0;
+        BoundedFloat64 cnst=0;
         for(Nat j=0; j!=n; ++j) {
             xg = xg - (x[j]-x[n+j])*ScalarTaylorFunction(d,fg[j],sweeper);
             cnst += (bx[j].upper()*x[j]-bx[j].lower()*x[n+j]);

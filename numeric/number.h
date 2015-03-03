@@ -129,7 +129,7 @@ template<class P> class Number
     // Construct from a builtin integer
     template<class N, EnableIf<IsIntegral<N>> =dummy> Number(const N& n) : Number<P>(Integer(n)) { }
     // Construct from a builtin floating-point number
-    template<class X, EnableIf<And<IsSame<P,Approximate>,IsFloatingPoint<X>>> =dummy> Number(const X& x) : Number<P>(Float64Template<P>(x)) { }
+    template<class X, EnableIf<And<IsSame<P,Approximate>,IsFloatingPoint<X>>> =dummy> Number(const X& x) : Number<P>(Float<P,Precision64>(x)) { }
 
     // Construct from a type which is convertible to another Number type.
     template<class X, EnableIf<IsWeaker<P,ParadigmTag<X>>> =dummy, EnableIf<IsConvertible<X,Number<ParadigmTag<X>>>> = dummy>

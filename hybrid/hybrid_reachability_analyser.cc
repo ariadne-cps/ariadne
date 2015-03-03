@@ -76,7 +76,7 @@ inline Real operator-(Real const& r1, Rational const& q2) {
     return r1-Real(q2);
 }
 
-inline ValidatedFloat64 operator*(Integer n1,  const ExactFloat64& x2) {
+inline BoundedFloat64 operator*(Integer n1,  const ExactFloat64& x2) {
     ARIADNE_ASSERT(n1==n1.get_si());
     ExactFloat64 x1((Int)n1.get_si());
     return x1*x2;
@@ -94,7 +94,7 @@ inline DiscreteTimeType div_floor(Real const& t, ExactNumericType h) {
     return integer_cast<Nat>(numeric_cast<ApproximateFloat64>(t)/h);
 }
 
-template<> inline Nat integer_cast<Nat>(ValidatedFloat64 const& x) {
+template<> inline Nat integer_cast<Nat>(BoundedFloat64 const& x) {
     return integer_cast<Nat>(ApproximateFloat64(x).raw());
 }
 

@@ -337,7 +337,7 @@ typedef decltype(declval<ExN>() + declval<ExF>()) EfF;
 typedef decltype(declval<MeF>() + declval<BoF>()) VaF;
 typedef decltype(declval<UpF>() * declval<UpF>()) PrF;
 typedef decltype(declval<double>() + declval<Number<Approximate>>()) ApD;
-//typedef ValidatedFloat64Type VaF;
+//typedef BoundedFloat64Type VaF;
 
 } // namespace Ariadne
 

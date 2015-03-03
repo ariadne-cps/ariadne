@@ -55,9 +55,15 @@ template<class PR> using RawFloat = decltype(cast_raw_float(declval<PR>()));
 
 
 template<class P, class PR> class Float;
-template<class P, class PR> using FloatTemplate = Float<P,PR>;
-template<class P> using Float64Template = Float<P,Precision64>;
-template<class P> using FloatMPTemplate = Float<P,PrecisionMP>;
+//template<class P> using Float64=Float<P,Precision64>;
+//template<class P> using FloatMP=Float<P,PrecisionMP>;
+template<class PR> using ApproximateFloat=Float<Approximate,PR>;
+template<class PR> using LowerFloat=Float<Lower,PR>;
+template<class PR> using UpperFloat=Float<Upper,PR>;
+template<class PR> using BoundedFloat=Float<Bounded,PR>;
+template<class PR> using MetricFloat=Float<Metric,PR>;
+template<class PR> using ExactFloat=Float<Exact,PR>;
+template<class PR> using ErrorFloat=Float<Error,PR>;
 
 using ApproximateFloat64 = Float<Approximate,Precision64>;
 using LowerFloat64 = Float<Lower,Precision64>;
@@ -71,44 +77,22 @@ using PositiveUpperFloat64 = Float<PositiveUpper,Precision64>;
 using PositiveBoundedFloat64 = Float<PositiveBounded,Precision64>;
 using PositiveMetricFloat64 = Float<PositiveMetric,Precision64>;
 using PositiveExactFloat64 = Float<PositiveExact,Precision64>;
-using ErrorFloat64 = PositiveUpperFloat64;
-using ValidatedFloat64 = BoundedFloat64;
-using BoundFloat64 = BoundedFloat64;
-using MetrcFloat64 = MetricFloat64;
-using ApprxFloat64 = ApproximateFloat64;
+using ErrorFloat64 = Float<Error,Precision64>;
 
-using ApproximateFloatMP = FloatMPTemplate<Approximate>;
-using LowerFloatMP = FloatMPTemplate<Lower>;
-using UpperFloatMP = FloatMPTemplate<Upper>;
-using BoundedFloatMP= FloatMPTemplate<Bounded>;
-using MetricFloatMP = FloatMPTemplate<Metric>;
-using ExactFloatMP = FloatMPTemplate<Exact>;
-using PositiveApproximateFloatMP = FloatMPTemplate<PositiveApproximate>;
-using PositiveLowerFloatMP = FloatMPTemplate<PositiveLower>;
-using PositiveUpperFloatMP = FloatMPTemplate<PositiveUpper>;
-using PositiveBoundedFloatMP = FloatMPTemplate<PositiveBounded>;
-using PositiveMetricFloatMP = FloatMPTemplate<PositiveMetric>;
-using PositiveExactFloatMP = FloatMPTemplate<PositiveExact>;
-using ErrorFloatMP = PositiveUpperFloatMP;
-using ValidatedFloatMP = BoundedFloatMP;
-using BoundFloatMP = BoundedFloatMP;
-using MetrcFloatMP = MetricFloatMP;
-using ApprxFloatMP = ApproximateFloatMP;
+using ApproximateFloatMP = Float<Approximate,PrecisionMP>;
+using LowerFloatMP = Float<Lower,PrecisionMP>;
+using UpperFloatMP = Float<Upper,PrecisionMP>;
+using BoundedFloatMP= Float<Bounded,PrecisionMP>;
+using MetricFloatMP = Float<Metric,PrecisionMP>;
+using ExactFloatMP = Float<Exact,PrecisionMP>;
+using PositiveApproximateFloatMP = Float<PositiveApproximate,PrecisionMP>;
+using PositiveLowerFloatMP = Float<PositiveLower,PrecisionMP>;
+using PositiveUpperFloatMP = Float<PositiveUpper,PrecisionMP>;
+using PositiveBoundedFloatMP = Float<PositiveBounded,PrecisionMP>;
+using PositiveMetricFloatMP = Float<PositiveMetric,PrecisionMP>;
+using PositiveExactFloatMP = Float<PositiveExact,PrecisionMP>;
+using ErrorFloatMP = Float<Error,PrecisionMP>;
 
-/*
-using ApproximateFloatMP = FloatMPTemplate<Approximate>;
-using LowerFloatMP = FloatMPTemplate<Lower>;
-using UpperFloatMP = FloatMPTemplate<Upper>;
-using BoundedFloatMP = FloatMPTemplate<Bounded>;
-using MetricFloatMP = FloatMPTemplate<Metric>;
-using ExactFloatMP = FloatMPTemplate<Exact>;
-using ErrorFloatMP = FloatMPTemplate<Error>;
-using ValidatedFloatMP = BoundedFloatMP;
-using PositiveUpperFloatMP = ErrorFloatMP;
-using BoundFloatMP = BoundedFloatMP;
-using MetrcFloatMP = MetricFloatMP;
-using ApprxFloatMP = ApproximateFloatMP;
-*/
 
 template<class X> struct IsFloat : False { };
 template<class P, class PR> struct IsFloat<Float<P,PR>> : True { };

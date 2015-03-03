@@ -64,25 +64,25 @@ Integer::operator ExactNumericType() const { return ExactNumericType(new NumberW
 Rational::operator ExactNumericType() const { return ExactNumericType(new NumberWrapper<Rational>(*this)); }
 Real::operator EffectiveNumericType() const { return EffectiveNumericType(new NumberWrapper<Real>(*this)); }
 
-template class NumberWrapper<ApprxFloat64>;
+template class NumberWrapper<ApproximateFloat64>;
 template class NumberWrapper<LowerFloat64>;
 template class NumberWrapper<UpperFloat64>;
-template class NumberWrapper<BoundFloat64>;
-template class NumberWrapper<MetrcFloat64>;
+template class NumberWrapper<BoundedFloat64>;
+template class NumberWrapper<MetricFloat64>;
 template class NumberWrapper<ExactFloat64>;
 
 ExactFloat64::operator ExactNumericType() const { return ExactNumericType(new NumberWrapper<ExactFloat64>(*this)); }
-MetrcFloat64::operator ValidatedNumericType() const { return ValidatedNumericType(new NumberWrapper<MetrcFloat64>(*this)); }
-BoundFloat64::operator ValidatedNumericType() const { return ValidatedNumericType(new NumberWrapper<BoundFloat64>(*this)); }
+MetricFloat64::operator ValidatedNumericType() const { return ValidatedNumericType(new NumberWrapper<MetricFloat64>(*this)); }
+BoundedFloat64::operator ValidatedNumericType() const { return ValidatedNumericType(new NumberWrapper<BoundedFloat64>(*this)); }
 UpperFloat64::operator UpperNumericType() const { return UpperNumericType(new NumberWrapper<UpperFloat64>(*this)); }
 LowerFloat64::operator LowerNumericType() const { return LowerNumericType(new NumberWrapper<LowerFloat64>(*this)); }
-ApprxFloat64::operator ApproximateNumericType() const { return ApproximateNumericType(new NumberWrapper<ApprxFloat64>(*this)); }
+ApproximateFloat64::operator ApproximateNumericType() const { return ApproximateNumericType(new NumberWrapper<ApproximateFloat64>(*this)); }
 
-template class NumberWrapper<ApprxFloatMP>;
+template class NumberWrapper<ApproximateFloatMP>;
 //template class NumberWrapper<LowerFloatMP>;
 //template class NumberWrapper<UpperFloatMP>;
-template class NumberWrapper<BoundFloatMP>;
-template class NumberWrapper<MetrcFloatMP>;
+template class NumberWrapper<BoundedFloatMP>;
+template class NumberWrapper<MetricFloatMP>;
 //template class NumberWrapper<ExactFloatMP>;
 
 template<> String class_name<NumberHandle>() { return "NumberHandle"; }

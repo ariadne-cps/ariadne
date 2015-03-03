@@ -251,8 +251,8 @@ template<class X> Matrix<ArithmeticType<X>> inverse(const Matrix<X>& A) {
     return lu_inverse(A);
 }
 
-template<> Matrix<ValidatedFloat64> inverse<>(const Matrix<ExactFloat64>& A) {
-    return lu_inverse(Matrix<ValidatedFloat64>(A));
+template<> Matrix<BoundedFloat64> inverse<>(const Matrix<ExactFloat64>& A) {
+    return lu_inverse(Matrix<BoundedFloat64>(A));
 }
 
 template<> Matrix<BoundedFloat64> inverse<BoundedFloat64>(const Matrix<BoundedFloat64>& A) {
@@ -891,7 +891,7 @@ template class Matrix<Real>;
 template PositiveUpperFloat64 sup_norm(const Matrix<BoundedFloat64>& A);
 template UpperFloat64 log_norm(const Matrix<BoundedFloat64>& A);
 
-template Matrix<ExactFloat64>const& cast_exact(const Matrix<ApprxFloat64>& mx);
+template Matrix<ExactFloat64>const& cast_exact(const Matrix<ApproximateFloat64>& mx);
 
 template class Matrix<Rational>;
 template Matrix<Rational> inverse(const Matrix<Rational>&);

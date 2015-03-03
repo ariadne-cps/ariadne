@@ -71,7 +71,7 @@ class TestSeries
 //        ARIADNE_TEST_EQUALS(series[32767],1.0);
         std::cerr<<std::setprecision(18);
         ExactFloat64::set_output_precision(18);
-        ValidatedFloat64::set_output_precision(18);
+        BoundedFloat64::set_output_precision(18);
     }
     void test_rec() {
         ARIADNE_TEST_EQUALS( Series<Float64>(Rec(),2.0).coefficients(5), (List<Float64>{0.5,-0.25,0.125,-0.0625,0.03125,-0.015625}) );
@@ -125,7 +125,7 @@ class TestSeries
     }
 
     void test_taylor_series() {
-        TaylorSeries<ValidatedFloat64> exp_series(Exp(),ExactIntervalType(-1,+1),ExactFloat64(0),8u);
+        TaylorSeries<BoundedFloat64> exp_series(Exp(),ExactIntervalType(-1,+1),ExactFloat64(0),8u);
         ARIADNE_TEST_PRINT(Series<ValidatedNumericType>(Exp(),ValidatedNumericType(-1,+1)).coefficients(8u));
         ARIADNE_TEST_PRINT(exp_series);
     }

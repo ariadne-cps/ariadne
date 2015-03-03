@@ -485,7 +485,7 @@ Kleenean ConstraintSolver::check_feasibility(const ExactBoxType& d, const Valida
         if(y[i]<d[i].lower() || y[i]>d[i].upper()) { return false; }
     }
 
-    Vector<ValidatedFloat64> fy=f(Vector<ValidatedFloat64>(y));
+    Vector<BoundedFloat64> fy=f(Vector<BoundedFloat64>(y));
     ARIADNE_LOG(4,"d="<<d<<" f="<<f<<", c="<<c<<"\n  y="<<y<<", f(y)="<<fy<<"\n");
     Kleenean result=true;
     for(Nat j=0; j!=fy.size(); ++j) {

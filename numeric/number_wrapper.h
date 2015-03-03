@@ -51,13 +51,13 @@ class UnaryOperatorInterface {
   public:
     virtual NumberInterface* _compute(Real) const = 0;
     virtual NumberInterface* _compute(ExactFloat64) const = 0;
-    virtual NumberInterface* _compute(MetrcFloat64) const = 0;
-    virtual NumberInterface* _compute(BoundFloat64) const = 0;
-    virtual NumberInterface* _compute(ApprxFloat64) const = 0;
+    virtual NumberInterface* _compute(MetricFloat64) const = 0;
+    virtual NumberInterface* _compute(BoundedFloat64) const = 0;
+    virtual NumberInterface* _compute(ApproximateFloat64) const = 0;
     virtual NumberInterface* _compute(ExactFloatMP) const = 0;
-    virtual NumberInterface* _compute(MetrcFloatMP) const = 0;
-    virtual NumberInterface* _compute(BoundFloatMP) const = 0;
-    virtual NumberInterface* _compute(ApprxFloatMP) const = 0;
+    virtual NumberInterface* _compute(MetricFloatMP) const = 0;
+    virtual NumberInterface* _compute(BoundedFloatMP) const = 0;
+    virtual NumberInterface* _compute(ApproximateFloatMP) const = 0;
 };
 
 template<class X> class NumberWrapper;
@@ -75,13 +75,13 @@ template<class O, class A1> class UnaryOperator : public UnaryOperatorInterface 
     UnaryOperator(O o, A1 a1) : _op(o), _arg1(a1) { }
     virtual NumberInterface* _compute(Real a2) const { return _heap_move_number(_op(_arg1,a2)); }
     virtual NumberInterface* _compute(ExactFloat64 a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(MetrcFloat64 a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(BoundFloat64 a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(ApprxFloat64 a2) const { return _heap_move_number(_op(_arg1,a2)); }
+    virtual NumberInterface* _compute(MetricFloat64 a2) const { return _heap_move_number(_op(_arg1,a2)); }
+    virtual NumberInterface* _compute(BoundedFloat64 a2) const { return _heap_move_number(_op(_arg1,a2)); }
+    virtual NumberInterface* _compute(ApproximateFloat64 a2) const { return _heap_move_number(_op(_arg1,a2)); }
     virtual NumberInterface* _compute(ExactFloatMP a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(MetrcFloatMP a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(BoundFloatMP a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(ApprxFloatMP a2) const { return _heap_move_number(_op(_arg1,a2)); }
+    virtual NumberInterface* _compute(MetricFloatMP a2) const { return _heap_move_number(_op(_arg1,a2)); }
+    virtual NumberInterface* _compute(BoundedFloatMP a2) const { return _heap_move_number(_op(_arg1,a2)); }
+    virtual NumberInterface* _compute(ApproximateFloatMP a2) const { return _heap_move_number(_op(_arg1,a2)); }
 };
 
 template<class T1, class T2> inline auto add(T1&& t1, T2&& t2) -> decltype(t1+t2) { return std::forward<T1>(t1) + std::forward<T2>(t2); }
@@ -89,38 +89,38 @@ template<class T1, class T2> inline auto sub(T1&& t1, T2&& t2) -> decltype(t1-t2
 template<class T1, class T2> inline auto mul(T1&& t1, T2&& t2) -> decltype(t1*t2) { return std::forward<T1>(t1) * std::forward<T2>(t2); }
 template<class T1, class T2> inline auto div(T1&& t1, T2&& t2) -> decltype(t1/t2) { return std::forward<T1>(t1) / std::forward<T2>(t2); }
 
-template<class O, class P> class UnaryOperator<O,Float64Template<P>> : public UnaryOperatorInterface {
-    typedef Float64Template<P> A1;
+template<class O, class P> class UnaryOperator<O,Float<P,Precision64>> : public UnaryOperatorInterface {
+    typedef Float<P,Precision64> A1;
     O _op; A1 _arg1;
   public:
     UnaryOperator(A1 a1) : _arg1(a1) { }
     UnaryOperator(O o, A1 a1) : _op(o), _arg1(a1) { }
     virtual NumberInterface* _compute(Real a2) const { return _heap_move_number(_op(_arg1,a2)); }
     virtual NumberInterface* _compute(ExactFloat64 a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(MetrcFloat64 a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(BoundFloat64 a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(ApprxFloat64 a2) const { return _heap_move_number(_op(_arg1,a2)); }
+    virtual NumberInterface* _compute(MetricFloat64 a2) const { return _heap_move_number(_op(_arg1,a2)); }
+    virtual NumberInterface* _compute(BoundedFloat64 a2) const { return _heap_move_number(_op(_arg1,a2)); }
+    virtual NumberInterface* _compute(ApproximateFloat64 a2) const { return _heap_move_number(_op(_arg1,a2)); }
     virtual NumberInterface* _compute(ExactFloatMP a2) const { assert(false); }
-    virtual NumberInterface* _compute(MetrcFloatMP a2) const { assert(false); }
-    virtual NumberInterface* _compute(BoundFloatMP a2) const { assert(false); }
-    virtual NumberInterface* _compute(ApprxFloatMP a2) const { assert(false); }
+    virtual NumberInterface* _compute(MetricFloatMP a2) const { assert(false); }
+    virtual NumberInterface* _compute(BoundedFloatMP a2) const { assert(false); }
+    virtual NumberInterface* _compute(ApproximateFloatMP a2) const { assert(false); }
 };
 
-template<class O, class P> class UnaryOperator<O,FloatMPTemplate<P>> : public UnaryOperatorInterface {
-    typedef FloatMPTemplate<P> A1;
+template<class O, class P> class UnaryOperator<O,Float<P,PrecisionMP>> : public UnaryOperatorInterface {
+    typedef Float<P,PrecisionMP> A1;
     O _op; A1 _arg1;
   public:
     UnaryOperator(A1 a1) : _arg1(a1) { }
     UnaryOperator(O o, A1 a1) : _op(o), _arg1(a1) { }
     virtual NumberInterface* _compute(Real a2) const { return _heap_move_number(_op(_arg1,a2)); }
     virtual NumberInterface* _compute(ExactFloat64 a2) const { assert(false); }
-    virtual NumberInterface* _compute(MetrcFloat64 a2) const { assert(false); }
-    virtual NumberInterface* _compute(BoundFloat64 a2) const { assert(false); }
-    virtual NumberInterface* _compute(ApprxFloat64 a2) const { assert(false); }
+    virtual NumberInterface* _compute(MetricFloat64 a2) const { assert(false); }
+    virtual NumberInterface* _compute(BoundedFloat64 a2) const { assert(false); }
+    virtual NumberInterface* _compute(ApproximateFloat64 a2) const { assert(false); }
     virtual NumberInterface* _compute(ExactFloatMP a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(MetrcFloatMP a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(BoundFloatMP a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(ApprxFloatMP a2) const { return _heap_move_number(_op(_arg1,a2)); }
+    virtual NumberInterface* _compute(MetricFloatMP a2) const { return _heap_move_number(_op(_arg1,a2)); }
+    virtual NumberInterface* _compute(BoundedFloatMP a2) const { return _heap_move_number(_op(_arg1,a2)); }
+    virtual NumberInterface* _compute(ApproximateFloatMP a2) const { return _heap_move_number(_op(_arg1,a2)); }
 };
 
 template<class X> class NumberWrapper

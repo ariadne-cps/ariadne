@@ -78,7 +78,7 @@ class NumberInterface
     virtual NumberInterface* _apply(UnaryOperatorInterface const& o) const = 0;
 
     virtual MetricFloat64 _get(Metric, Precision64) const = 0;
-    virtual ValidatedFloat64 _get(Bounded, Precision64) const = 0;
+    virtual BoundedFloat64 _get(Bounded, Precision64) const = 0;
     virtual UpperFloat64 _get(Upper, Precision64) const = 0;
     virtual LowerFloat64 _get(Lower, Precision64) const = 0;
     virtual ApproximateFloat64 _get(Approximate, Precision64) const = 0;

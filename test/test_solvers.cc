@@ -40,7 +40,7 @@
 using namespace Ariadne;
 using namespace std;
 
-typedef Vector<ValidatedFloat64> ValidatedFloatVector;
+typedef Vector<BoundedFloat64> BoundedFloatVector;
 
 class TestSolver
 {
@@ -63,7 +63,7 @@ class TestSolver
         EffectiveScalarFunction x=EffectiveScalarFunction::coordinate(1,0);
         ExactIntervalVectorType d({ExactIntervalType(0.0,1.0)});
         EffectiveVectorFunction f({(x*x+1)*x-1});
-        ValidatedFloatVector p=solver->solve(f,d);
+        BoundedFloatVector p=solver->solve(f,d);
         ARIADNE_TEST_BINARY_PREDICATE(contains,ExactIntervalType(0.6823,0.6824),p[0]);
     }
 

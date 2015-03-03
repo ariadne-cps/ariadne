@@ -66,9 +66,9 @@ typedef Matrix<ApproximateFloat64> ApproximateFloatMatrix;
 typedef DiagonalMatrix<ApproximateFloat64> ApproximateFloatDiagonalMatrix;
 typedef Differential<ApproximateFloat64> ApproximateFloatDifferential;
 
-typedef Vector<ValidatedFloat64> ValidatedFloatVector;
-typedef Matrix<ValidatedFloat64> ValidatedFloatMatrix;
-typedef Differential<ValidatedFloat64> ValidatedFloatDifferential;
+typedef Vector<BoundedFloat64> BoundedFloatVector;
+typedef Matrix<BoundedFloat64> BoundedFloatMatrix;
+typedef Differential<BoundedFloat64> BoundedFloatDifferential;
 typedef Vector<ExactFloat64> ExactFloatVector;
 
 typedef Vector<UpperIntervalType> UpperIntervalVectorType;
@@ -482,7 +482,7 @@ Bool OptimiserBase::
 is_feasible_point(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C, ExactVector x) const
 {
     if(!contains(D,x)) { return false; }
-    Vector<ValidatedFloat64> gx=g(x);
+    Vector<BoundedFloat64> gx=g(x);
     return definitely(contains(C,gx));
 }
 
@@ -499,7 +499,7 @@ contains_feasible_point(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType 
 
     // Test inequality constraints
     Kleenean result = true;
-    Vector<ValidatedFloat64> gx=g(X);
+    Vector<BoundedFloat64> gx=g(X);
     ARIADNE_LOG(7,"g(X)="<<gx<<"\n");
     for(Nat i=0; i!=C.size(); ++i) {
         if(definitely(disjoint(UpperIntervalType(gx[i]),C[i]))) {
@@ -532,7 +532,7 @@ contains_feasible_point(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType 
     ARIADNE_LOG(7,"ge="<<ge<<", ce="<<ce<<"\n");
 
     // FIXME: Carefully change this code!
-    ValidatedFloatMatrix ivlA=jacobian(ge,X);
+    BoundedFloatMatrix ivlA=jacobian(ge,X);
     ARIADNE_LOG(7,"ivlA="<<ivlA<<"\n");
     ApproximateFloatVector fltD(X.size());
     for(Nat i=0; i!=X.size(); ++i) { fltD[i]=rec(sqr(X[i].error())); }
@@ -542,10 +542,10 @@ contains_feasible_point(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType 
     ApproximateFloatMatrix fltL = ApproximateFloatDiagonalMatrix(fltD.array())*transpose(fltA);
     ARIADNE_LOG(7,"L="<<fltL<<"\n");
 
-    ValidatedFloatMatrix ivlS = ivlA * cast_exact(fltL);
+    BoundedFloatMatrix ivlS = ivlA * cast_exact(fltL);
     ARIADNE_LOG(7,"ivlS="<<ivlS<<"\n");
 
-    ValidatedFloatMatrix ivlR = inverse(ivlS);
+    BoundedFloatMatrix ivlR = inverse(ivlS);
     try {
         ivlR=inverse(ivlS);
     }
@@ -554,16 +554,16 @@ contains_feasible_point(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType 
     }
 
     ARIADNE_LOG(7,"ivlR="<<ivlR<<"\n");
-    ValidatedFloatMatrix& valR=reinterpret_cast<ValidatedFloatMatrix&>(ivlR);
+    BoundedFloatMatrix& valR=reinterpret_cast<BoundedFloatMatrix&>(ivlR);
 
     // Projected interval Newton step. For h:R^n->R^m; Dh mxn, take L nxm.
     // ExactIntervalType Newton update X' = x - L * (Dh(X)*L)^{-1} * h(x)
     // Choose L = rad(X)^2 Dh(x)^T where rad(X) is the diagonal matrix of radii of X
-    Vector<ValidatedFloat64> x=midpoint(X);
-    Vector<ValidatedFloat64> new_X = x - cast_exact(fltL) * (valR * (ge(x)-cast_singleton(ce)) );
+    Vector<BoundedFloat64> x=midpoint(X);
+    Vector<BoundedFloat64> new_X = x - cast_exact(fltL) * (valR * (ge(x)-cast_singleton(ce)) );
     ARIADNE_LOG(5,"old_X="<<X<<"\n");
     ARIADNE_LOG(5,"new_X="<<new_X<<"\n");
-    Vector<ValidatedFloat64> reduced_X = refinement(X,new_X);
+    Vector<BoundedFloat64> reduced_X = refinement(X,new_X);
     ARIADNE_LOG(5,"reduced_X="<<reduced_X<<"\n");
 
     if(refines(new_X,X)) { return true; }
@@ -591,10 +591,10 @@ validate_feasibility(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
     ARIADNE_LOG(3,"D="<<D<<", g="<<g<<", C="<<C<<"\n");
     ARIADNE_LOG(3,"x0="<<x0<<"\n");
 
-    Vector<ValidatedFloat64> x(x0);
+    Vector<BoundedFloat64> x(x0);
     ARIADNE_LOG(3,"x="<<x<<"\n");
 
-    Vector<ValidatedFloat64> gx=g(x);
+    Vector<BoundedFloat64> gx=g(x);
     ARIADNE_LOG(4,"gx="<<gx<<"\n");
 
     List<Nat> equalities, inequalities;
@@ -623,29 +623,29 @@ validate_feasibility(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
 
     // Attempt to solve h(x0+AT*w)=0
     // TODO: Change to use validated numbers
-    Matrix<ValidatedFloat64> AT = transpose(h.jacobian(x0));
+    Matrix<BoundedFloat64> AT = transpose(h.jacobian(x0));
     ARIADNE_LOG(5,"A="<<transpose(AT)<<"\n");
-    Vector<ValidatedFloat64> w0(k,ValidatedFloat64(0));
+    Vector<BoundedFloat64> w0(k,BoundedFloat64(0));
 
     Bool found_solution=false;
     Bool validated_solution=false;
 
-    Vector<ValidatedFloat64> w(k), mw(k), nw(k);
-    Vector<ValidatedFloat64> mx(n);
+    Vector<BoundedFloat64> w(k), mw(k), nw(k);
+    Vector<BoundedFloat64> mx(n);
 
     for(Nat ii=0; ii!=12; ++ii) {
         mw=midpoint(w);
         x=x0+AT*w;
         mx=x0+AT*mw;
-        nw = mw - solve(h.jacobian(x)*AT,Vector<ValidatedFloat64>(h(mx)-c));
+        nw = mw - solve(h.jacobian(x)*AT,Vector<BoundedFloat64>(h(mx)-c));
         ARIADNE_LOG(7,"w="<<w<<", h(x0+AT*w)="<<h(x)<<", nw="<<nw<<", refines="<<refines(nw,w)<<"\n");
 
         if(!found_solution) {
             if(refines(nw,w)) {
                 found_solution=true;
-                w=w+ValidatedFloat64(0,1)*(w0-w);
+                w=w+BoundedFloat64(0,1)*(w0-w);
             } else {
-                w=w+ValidatedFloat64(0,1)*(ValidatedFloat64(2)*nw-w);
+                w=w+BoundedFloat64(0,1)*(BoundedFloat64(2)*nw-w);
             }
         } else {
             if(refines(nw,w)) {
@@ -1829,7 +1829,7 @@ feasibility_step(const ExactBoxType& X, const ApproximateVectorFunction& g, cons
 
 Void PenaltyFunctionOptimiser::
 feasibility_step(const ExactBoxType& D, const ValidatedVectorFunction& g, const ExactBoxType& C,
-                 ValidatedFloatVector& x, ValidatedFloatVector& w) const
+                 BoundedFloatVector& x, BoundedFloatVector& w) const
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
@@ -2102,7 +2102,7 @@ check_feasibility(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
     ARIADNE_LOG(2,"check_feasibility\n");
     ARIADNE_LOG(3,"D="<<D<<" C="<<C<<"\n");
 
-    ValidatedFloatVector gx=g(x);
+    BoundedFloatVector gx=g(x);
     ARIADNE_LOG(3,"x="<<x<<" y="<<y<<" g(x)="<<gx<<"\n");
 
     Kleenean result = true;
@@ -2123,7 +2123,7 @@ check_feasibility(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
         if(equalities.empty()) { ARIADNE_LOG(2,"feasible\n"); return true; }
 
         ValidatedVectorFunction h(equalities.size(),g.domain());
-        ValidatedFloatVector c(equalities.size());
+        BoundedFloatVector c(equalities.size());
         for(Nat i=0; i!=equalities.size(); ++i) {
             h[i] = g[equalities[i]];
             c[i] = C[equalities[i]].lower();
@@ -2131,15 +2131,15 @@ check_feasibility(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
         ARIADNE_LOG(5,"g="<<g<<"\n");
         ARIADNE_LOG(5,"h="<<h<<" c="<<c<<" h(x)-c="<<(h(x)-c)<<"\n");
 
-        ValidatedFloatVector W(h.result_size(),ValidatedFloat64(-1e-8,1e-8));
-        ValidatedFloatMatrix AT = transpose(midpoint(h.jacobian(x)));
-        ValidatedFloatVector B = x+AT*W;
-        ValidatedFloatMatrix IA = h.jacobian(B);
+        BoundedFloatVector W(h.result_size(),BoundedFloat64(-1e-8,1e-8));
+        BoundedFloatMatrix AT = transpose(midpoint(h.jacobian(x)));
+        BoundedFloatVector B = x+AT*W;
+        BoundedFloatMatrix IA = h.jacobian(B);
         ARIADNE_LOG(5,"AT="<<AT<<" IA="<<IA<<"\n");
         ARIADNE_LOG(5,"B="<<B<<"\n");
 
         // Perform an interval Newton step to try to attain feasibility
-        ValidatedFloatVector nW = inverse(IA*AT) * ValidatedFloatVector(h(x)-cast_exact(c));
+        BoundedFloatVector nW = inverse(IA*AT) * BoundedFloatVector(h(x)-cast_exact(c));
         ARIADNE_LOG(4,"W="<<W<<"\nnew_W="<<nW<<"\n");
         if(definitely(subset(UpperBoxType(B),D)) && refines(nW,W)) { ARIADNE_LOG(3,"feasible\n"); return true; }
         else { result=indeterminate; }
@@ -2162,7 +2162,7 @@ check_feasibility(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
     UpperIntervalMatrixType dgD = jacobian_range(g,D);
     UpperIntervalVectorType ydgD = transpose(dgD) * UpperIntervalVectorType(y);
 
-    ValidatedFloat64 ygx = dot(y,gx);
+    BoundedFloat64 ygx = dot(y,gx);
 
     UpperIntervalType ygD = UpperIntervalType(ygx);
     for(Nat i=0; i!=x.size(); ++i) {
@@ -2324,13 +2324,13 @@ feasible(ExactBoxType D, ValidatedVectorFunction h) const
 
     const Nat n=D.size();
 
-    ValidatedFloatVector zl(n), zu(n);
+    BoundedFloatVector zl(n), zu(n);
     ExactFloatVector xl = Ariadne::lower_bounds(D);
     ExactFloatVector xu = Ariadne::upper_bounds(D);
 
-    ValidatedFloatVector x=cast_singleton(D);
-    ValidatedFloatVector y(h.result_size(),ValidatedFloat64(-1,+1));
-    ValidatedFloat64 mu(0,1);
+    BoundedFloatVector x=cast_singleton(D);
+    BoundedFloatVector y(h.result_size(),BoundedFloat64(-1,+1));
+    BoundedFloat64 mu(0,1);
 
     for(Nat i=0; i!=8; ++i) {
         this->feasibility_step(xl,xu,h,x,y,zl,zu,mu);
@@ -2341,7 +2341,7 @@ feasible(ExactBoxType D, ValidatedVectorFunction h) const
 
 Void IntervalOptimiser::
 feasibility_step(const ExactFloatVector& xl, const ExactFloatVector& xu, const ValidatedVectorFunction& h,
-                 ValidatedFloatVector& x, ValidatedFloatVector& y, ValidatedFloatVector& zl, ValidatedFloatVector zu, ValidatedFloat64& mu) const
+                 BoundedFloatVector& x, BoundedFloatVector& y, BoundedFloatVector& zl, BoundedFloatVector zu, BoundedFloat64& mu) const
 {
     ARIADNE_LOG(4,"IntervalOptimiser::feasibility_step(D,h,X,Lambda)\n");
     ARIADNE_LOG(5,"[x]="<<x<<" [lambda]="<<y<<", [zl]="<<zl<<", [zu]="<<zu<<" [mu]="<<mu<<"\n");
@@ -2349,31 +2349,31 @@ feasibility_step(const ExactFloatVector& xl, const ExactFloatVector& xu, const V
     const Nat n=x.size();
     const Nat m=y.size();
 
-    ValidatedFloatVector mx=midpoint(x);
-    ValidatedFloatVector my=midpoint(y);
-    ValidatedFloatVector mzl=midpoint(zl);
-    ValidatedFloatVector mzu=midpoint(zu);
-    ValidatedFloat64 mmu(midpoint(mu));
+    BoundedFloatVector mx=midpoint(x);
+    BoundedFloatVector my=midpoint(y);
+    BoundedFloatVector mzl=midpoint(zl);
+    BoundedFloatVector mzu=midpoint(zu);
+    BoundedFloat64 mmu(midpoint(mu));
     ARIADNE_LOG(6,"x~"<<x<<" lambda~="<<y<<", mu~"<<mu<<"\n");
 
     // Solve equations y Dh(x) - zl + zu = 0; h(x) = 0; (x-xl).zl - mu = 0;  (xu-x).zu - mu = 0; Sum_j y_j^2 - mu = 0
-    Vector<ValidatedFloatDifferential> ddhx=h.evaluate(ValidatedFloatDifferential::variables(2,x));
-    Vector<ValidatedFloatDifferential> dhmx=h.evaluate(ValidatedFloatDifferential::variables(1,mx));
-    ValidatedFloatMatrix A = ddhx.jacobian();
-    ValidatedFloatMatrix mA = dhmx.jacobian();
+    Vector<BoundedFloatDifferential> ddhx=h.evaluate(BoundedFloatDifferential::variables(2,x));
+    Vector<BoundedFloatDifferential> dhmx=h.evaluate(BoundedFloatDifferential::variables(1,mx));
+    BoundedFloatMatrix A = ddhx.jacobian();
+    BoundedFloatMatrix mA = dhmx.jacobian();
     ARIADNE_LOG(6,"A="<<A<<" b="<<ddhx.value()<<"\n");
 
-    ValidatedFloatVector rx = transpose(mA) * my;
+    BoundedFloatVector rx = transpose(mA) * my;
     for(Nat j=0; j!=n; ++j) {
         rx[j] -= mmu*rec(mx[j]-xl[j]);
         rx[j] += mmu*rec(xu[j]-mx[j]);
     }
-    ValidatedFloatVector ry = dhmx.value();
-    ValidatedFloatVector rzl = esub(emul(ValidatedFloatVector(mx-xl),mzl),mmu);
-    ValidatedFloatVector rzu = esub(emul(ValidatedFloatVector(xu-mx),mzu),mmu);
+    BoundedFloatVector ry = dhmx.value();
+    BoundedFloatVector rzl = esub(emul(BoundedFloatVector(mx-xl),mzl),mmu);
+    BoundedFloatVector rzu = esub(emul(BoundedFloatVector(xu-mx),mzu),mmu);
     ARIADNE_LOG(5,"rx="<<rx<<" ry="<<ry<<" rzl="<<rzl<<" rzu="<<rzu<<"\n");
 
-    ValidatedFloatMatrix H(n,n);
+    BoundedFloatMatrix H(n,n);
     for(Nat i=0; i!=m; ++i) { H += y[i] * ddhx[i].hessian(); }
     for(Nat j=0; j!=n; ++j) {
         H[j][j] += mu*rec(sqr(x[j]-xl[j]));
@@ -2384,22 +2384,22 @@ feasibility_step(const ExactFloatVector& xl, const ExactFloatVector& xu, const V
     // H dx + AT dy = rx; A dx = ry;
     //  dx = Hinv ( rx - AT dy )
     //  dy = Sinv ( A Hinv rx - ry )
-    ValidatedFloatMatrix Hinv=inverse(H);
+    BoundedFloatMatrix Hinv=inverse(H);
     ARIADNE_LOG(6,"H="<<H<<" Hinv="<<Hinv<<"\n");
-    ValidatedFloatMatrix S=A*Hinv*transpose(A);
-    ValidatedFloatMatrix Sinv=inverse(S);
+    BoundedFloatMatrix S=A*Hinv*transpose(A);
+    BoundedFloatMatrix Sinv=inverse(S);
     ARIADNE_LOG(6,"S="<<S<<" Sinv="<<Sinv<<"\n");
-    ValidatedFloatVector dy = Sinv * ( A*(Hinv*rx) - ry );
-    ValidatedFloatVector dx = Hinv * ( rx - transpose(A) * dy);
+    BoundedFloatVector dy = Sinv * ( A*(Hinv*rx) - ry );
+    BoundedFloatVector dx = Hinv * ( rx - transpose(A) * dy);
     ARIADNE_LOG(5,"dx="<<dx<<" dy="<<dy<<"\n");
 
-    ValidatedFloatVector nx = x-dx;
-    ValidatedFloatVector ny = y-dy;
+    BoundedFloatVector nx = x-dx;
+    BoundedFloatVector ny = y-dy;
     ARIADNE_LOG(5,"nx="<<nx<<" ny="<<ny<<"\n");
     ARIADNE_LOG(6,"h(x)="<<h(nx)<<"\n");
 
     x = refinement(x,nx); y=refinement(y,ny);
-    ValidatedFloat64 nmu = 0;
+    BoundedFloat64 nmu = 0;
     for(Nat i=0; i!=m; ++i) { nmu += sqr(y[i]); }
     mu=refinement(mu,nmu);
 }

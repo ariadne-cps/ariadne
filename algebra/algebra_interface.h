@@ -53,7 +53,7 @@ template<> struct AlgebraTraits<ApproximateFloat64> {
     typedef ApproximateNumericType NumericType;
 };
 
-template<> struct AlgebraTraits<ValidatedFloat64> {
+template<> struct AlgebraTraits<BoundedFloat64> {
     typedef ExactFloat64 ValueType;
     typedef UpperIntervalType RangeType;
     typedef ErrorFloat64 NormType;

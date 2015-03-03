@@ -72,10 +72,10 @@ inline Bool operator< (Rational q, Int n) { return q< Rational(n); }
 inline Bool operator==(Rational q, double n) { return q==Rational(n); }
 Rational midpoint(Rational const& q) { return q; }
 
-inline auto operator<=(ValidatedFloat64 x1, Int x2) -> decltype(x1<=ValidatedFloat64(x2)) { return x1<=ValidatedFloat64(x2); }
-inline auto operator>=(ValidatedFloat64 x1, Int x2) -> decltype(x1>=ValidatedFloat64(x2)) { return x1>=ValidatedFloat64(x2); }
-inline auto operator< (ValidatedFloat64 x1, Int x2) -> decltype(x1< ValidatedFloat64(x2)) { return x1< ValidatedFloat64(x2); }
-inline auto operator> (ValidatedFloat64 x1, Int x2) -> decltype(x1> ValidatedFloat64(x2)) { return x1> ValidatedFloat64(x2); }
+inline auto operator<=(BoundedFloat64 x1, Int x2) -> decltype(x1<=BoundedFloat64(x2)) { return x1<=BoundedFloat64(x2); }
+inline auto operator>=(BoundedFloat64 x1, Int x2) -> decltype(x1>=BoundedFloat64(x2)) { return x1>=BoundedFloat64(x2); }
+inline auto operator< (BoundedFloat64 x1, Int x2) -> decltype(x1< BoundedFloat64(x2)) { return x1< BoundedFloat64(x2); }
+inline auto operator> (BoundedFloat64 x1, Int x2) -> decltype(x1> BoundedFloat64(x2)) { return x1> BoundedFloat64(x2); }
 
 // Extend an Array of size m to an Array of size n
 // such that the first m elements are the same,

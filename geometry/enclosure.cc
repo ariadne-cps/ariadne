@@ -1044,7 +1044,7 @@ uniform_error_recondition()
         Float64 error=this->_space_function.get(large_error_indices[i]).error().raw();
         if(error > MAXIMUM_ERROR) {
             this->_space_function[i].set_error(0u);
-            this->_space_function[i] = this->_space_function.get(i) + this->function_factory().create_coordinate(this->_domain,k)*ValidatedFloat64(+error);
+            this->_space_function[i] = this->_space_function.get(i) + this->function_factory().create_coordinate(this->_domain,k)*BoundedFloat64(+error);
             ++k;
         }
     }

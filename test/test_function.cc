@@ -148,7 +148,7 @@ Void TestFunction::test_differentiation()
     ARIADNE_TEST_EQUAL(daf.evaluate(Vector<ApproximateFloat64>{2.4,1.3}),-2.0_exact);
 
     ARIADNE_TEST_EQUAL(x.derivative(0).evaluate(Vector<ApproximateFloat64>{2.4,1.3}),1.0_exact);
-    ARIADNE_TEST_EQUAL(x.derivative(0).evaluate(Vector<ValidatedFloat64>{{2.4,2.4},{1.3,1.3}}),1.0_exact);
+    ARIADNE_TEST_EQUAL(x.derivative(0).evaluate(Vector<BoundedFloat64>{{2.4,2.4},{1.3,1.3}}),1.0_exact);
     ARIADNE_TEST_EQUAL(x.derivative(1).evaluate(Vector<ApproximateFloat64>{2.4, 1.3}),0.0_exact);
 
 }

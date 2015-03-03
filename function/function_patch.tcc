@@ -310,34 +310,34 @@ template<class M> Void FunctionPatch<M>::restrict(const ExactBoxType& dom) {
 
 
 inline Bool operator==(ExactFloat64 x1, Int n2) { return x1.raw()==Float64(n2); }
-inline Bool operator==(ValidatedFloat64 x1, Int n2) { return x1.upper_raw()==Float64(n2) && x1.lower_raw()==Float64(n2); }
+inline Bool operator==(BoundedFloat64 x1, Int n2) { return x1.upper_raw()==Float64(n2) && x1.lower_raw()==Float64(n2); }
 inline Bool operator==(ApproximateFloat64 x1, Int n2) { return x1.raw()==Float64(n2); }
 
 inline Bool operator!=(ExactFloat64 x1, Int n2) { return x1.raw()!=Float64(n2); }
-inline Bool operator!=(ValidatedFloat64 x1, Int n2) { return x1.upper_raw()!=Float64(n2) || x1.lower_raw()!=Float64(n2); }
+inline Bool operator!=(BoundedFloat64 x1, Int n2) { return x1.upper_raw()!=Float64(n2) || x1.lower_raw()!=Float64(n2); }
 inline Bool operator!=(ApproximateFloat64 x1, Int n2) { return x1.raw()!=Float64(n2); }
 
 inline Bool operator> (ExactFloat64 x1, Int n2) { return x1.raw()> Float64(n2); }
-inline Bool operator> (ValidatedFloat64 x1, Int n2) { return x1.lower_raw()> Float64(n2); }
+inline Bool operator> (BoundedFloat64 x1, Int n2) { return x1.lower_raw()> Float64(n2); }
 inline Bool operator> (ApproximateFloat64 x1, Int n2) { return x1.raw()> Float64(n2); }
 
-template<class M> Polynomial<ValidatedFloat64> FunctionPatch<M>::polynomial() const
+template<class M> Polynomial<BoundedFloat64> FunctionPatch<M>::polynomial() const
 {
-    Vector<Polynomial<ValidatedFloat64> > pid=Polynomial<NumericType>::coordinates(this->argument_size());
-    return horner_evaluate(this->expansion(),unscale(pid,this->domain()))+ValidatedFloat64(-this->error(),+this->error());
+    Vector<Polynomial<BoundedFloat64> > pid=Polynomial<NumericType>::coordinates(this->argument_size());
+    return horner_evaluate(this->expansion(),unscale(pid,this->domain()))+BoundedFloat64(-this->error(),+this->error());
 
-    Polynomial<ValidatedFloat64> z(this->argument_size());
-    Polynomial<ValidatedFloat64> p;//=Ariadne::polynomial(this->model());
+    Polynomial<BoundedFloat64> z(this->argument_size());
+    Polynomial<BoundedFloat64> p;//=Ariadne::polynomial(this->model());
 
-    Vector<Polynomial<ValidatedFloat64> > s(this->argument_size(),z);
+    Vector<Polynomial<BoundedFloat64> > s(this->argument_size(),z);
     for(SizeType j=0; j!=this->argument_size(); ++j) {
         ExactIntervalType const& domj=this->domain()[j];
         if(domj.lower()>=domj.upper()) {
             ARIADNE_ASSERT(this->domain()[j].width()==0);
-            s[j]=Polynomial<ValidatedFloat64>::constant(this->argument_size(),0);
+            s[j]=Polynomial<BoundedFloat64>::constant(this->argument_size(),0);
         } else {
             //s[j]=Ariadne::polynomial(ModelType::unscaling(this->argument_size(),j,this->domain()[j],this->sweeper()));
-            s[j]=(Polynomial<ValidatedFloat64>::coordinate(this->argument_size(),j)-domj.midpoint())/domj.radius();
+            s[j]=(Polynomial<BoundedFloat64>::coordinate(this->argument_size(),j)-domj.midpoint())/domj.radius();
         }
     }
 
@@ -400,7 +400,7 @@ template<class M> Covector<NumericType<M>> FunctionPatch<M>::gradient(const Vect
 
 
 template<class M> OutputStream& FunctionPatch<M>::write(OutputStream& os) const {
-    Polynomial<ValidatedFloat64> p=this->polynomial();
+    Polynomial<BoundedFloat64> p=this->polynomial();
     Polynomial<ApproximateFloat64> ap=p;
     os << "FP" << this->domain();
     os << "(";
@@ -464,7 +464,7 @@ template<class M> OutputStream& operator<<(OutputStream& os, const PolynomialRep
     truncated_function.sweep(ThresholdSweeper(frepr.threshold));
     ErrorFloat64 truncatation_error = truncated_function.error();
     truncated_function.clobber();
-    Polynomial<ValidatedFloat64> validated_polynomial_function=polynomial(truncated_function);
+    Polynomial<BoundedFloat64> validated_polynomial_function=polynomial(truncated_function);
     Polynomial<ExactFloat64> polynomial_function = midpoint(validated_polynomial_function);
     if(frepr.names.empty()) { os << polynomial_function; }
     else { os << named_argument_repr(polynomial_function,frepr.names); }
@@ -657,9 +657,9 @@ template<class M> VectorFunctionPatch<M> VectorFunctionPatch<M>::projection(cons
 }
 
 
-template<class M> Vector<Polynomial<ValidatedFloat64>> VectorFunctionPatch<M>::polynomials() const
+template<class M> Vector<Polynomial<BoundedFloat64>> VectorFunctionPatch<M>::polynomials() const
 {
-    Vector<Polynomial<ValidatedFloat64> > p(this->result_size(),Polynomial<ValidatedFloat64>(this->argument_size()));
+    Vector<Polynomial<BoundedFloat64> > p(this->result_size(),Polynomial<BoundedFloat64>(this->argument_size()));
     for(SizeType i=0; i!=this->result_size(); ++i) {
         p[i]=static_cast<FunctionPatch<M>>((*this)[i]).polynomial();
     }

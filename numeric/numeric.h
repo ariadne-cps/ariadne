@@ -53,7 +53,7 @@ template<> inline Int numeric_cast(const FloatMP& a) { return Int(a.get_d()); }
 template<> inline double numeric_cast(const Float64& a) { return a.get_d(); }
 template<> inline double numeric_cast(const Real& a) { return a.get_d(); }
 template<> inline double numeric_cast(const ExactFloat64& a) { return a.get_d(); }
-template<> inline double numeric_cast(const ValidatedFloat64& a) { return a.get_d(); }
+template<> inline double numeric_cast(const BoundedFloat64& a) { return a.get_d(); }
 template<> inline double numeric_cast(const ApproximateFloat64& a) { return a.get_d(); }
 template<> inline float numeric_cast(const double& a) { return a; }
 template<> inline float numeric_cast(const Float64& a) { return a.get_d(); }
@@ -62,7 +62,7 @@ template<> inline Float64 numeric_cast(const ExactFloat64& a) { return a.raw(); 
 
 template<> inline Real numeric_cast(const Float64& a) { return Real(ExactFloat64(a)); }
 template<> inline Real numeric_cast(const ExactFloat64& a) { return Real(a); }
-template<> inline Real numeric_cast(const ValidatedFloat64& a) { return Real(cast_exact(ApproximateFloat64(a))); }
+template<> inline Real numeric_cast(const BoundedFloat64& a) { return Real(cast_exact(ApproximateFloat64(a))); }
 
 } // namespace Ariadne
 

@@ -61,13 +61,13 @@ Void
 TestMatrix::test_concept()
 {
     ApproximateFloat64 fx(1);
-    ValidatedFloat64 ix(1);
+    BoundedFloat64 ix(1);
     ExactFloat64 ex(1);
     Vector<ApproximateFloat64> fv;
-    Vector<ValidatedFloat64> iv;
+    Vector<BoundedFloat64> iv;
     Vector<ExactFloat64> ev;
     Matrix<ApproximateFloat64> fA;
-    Matrix<ValidatedFloat64> iA;
+    Matrix<BoundedFloat64> iA;
     Matrix<ExactFloat64> eA;
 
     fv=fv+fv; iv=ev+ev; iv=ev+iv; iv=iv+ev; iv=iv+iv;
@@ -93,9 +93,9 @@ Void
 TestMatrix::test_misc()
 {
     ApproximateFloat64 x=2.25;
-    ValidatedFloat64 ix(1.5,2.25);
+    BoundedFloat64 ix(1.5,2.25);
     ApproximateFloat64 Aptr[9]={-1.0,3.0,1.0, -1.0,1.0,2.0, 2.0,1.0,1.0};
-    ValidatedFloat64 iAptr[4]={-1,3, -1,1};
+    BoundedFloat64 iAptr[4]={-1,3, -1,1};
 
     Matrix<ApproximateFloat64> A0;
     ARIADNE_TEST_PRINT(A0);

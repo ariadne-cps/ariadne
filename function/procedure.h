@@ -47,8 +47,8 @@ template<class X> class Formula;
 template<class X> class Graded;
 
 template<class X> class Procedure;
-typedef Procedure<ApproximateNumber> ApproximateProcedure;
-typedef Procedure<ValidatedNumber> ValidatedProcedure;
+typedef Procedure<ApproximateNumericType> ApproximateProcedure;
+typedef Procedure<ValidatedNumericType> ValidatedProcedure;
 
 struct ProcedureInstruction
 {

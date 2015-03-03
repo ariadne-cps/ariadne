@@ -50,7 +50,7 @@ template<class ES> class Orbit;
 
 template<class BS> class ListSet;
 template<class X> class Point;
-typedef Point<ExactNumber> ExactPoint;
+typedef Point<ExactNumericType> ExactPoint;
 class Grid;
 class GridCell;
 class GridTreeSet;

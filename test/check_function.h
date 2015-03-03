@@ -143,19 +143,19 @@ template<class F> void CheckFunctionConcept<F>::check_evaluable_concept()
     ARIADNE_TEST_STATIC_ASSERT(IsSame<decltype(declval<F>().argument_size()),SizeType>);
 
     if(IsWeaker<Approximate,P>::value) {
-        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ApproximateNumber>, Return<ApproximateNumber>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ApproximateNumericType>, Return<ApproximateNumericType>>);
         ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ApproximateFloat64>, Return<ApproximateFloat64>>);
-        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ApproximateNumber>, Return<ApproximateNumber>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ApproximateNumericType>, Return<ApproximateNumericType>>);
     }
 
     if(IsWeaker<Validated,P>::value) {
-        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ValidatedNumber>, Return<ValidatedNumber>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ValidatedNumericType>, Return<ValidatedNumericType>>);
         ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<BoundedFloat64>, Return<BoundedFloat64>>);
         ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ValidatedFloat64>, Return<ValidatedFloat64>>);
     }
 
     if(IsWeaker<Effective,P>::value) {
-        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<EffectiveNumber>, Return<EffectiveNumber>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<EffectiveNumericType>, Return<EffectiveNumericType>>);
         ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<Real>, Return<Real>>);
     }
 
@@ -248,29 +248,29 @@ template<class F> void CheckVectorFunctionConcept<F>::check_evaluable_concept()
     ARIADNE_TEST_STATIC_ASSERT(IsSame<decltype(declval<F>().argument_size()),SizeType>);
 
     if(IsWeaker<Approximate,P>::value) {
-        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ApproximateNumber>, Return<Vector<ApproximateNumber>>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ApproximateNumericType>, Return<Vector<ApproximateNumericType>>>);
         ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ApproximateFloat64>, Return<Vector<ApproximateFloat64>>>);
 
-        ARIADNE_TEST_STATIC_ASSERT(HasEvaluate<F,Vector<ApproximateNumber>, Return<Vector<ApproximateNumber>>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasEvaluate<F,Vector<ApproximateNumericType>, Return<Vector<ApproximateNumericType>>>);
         ARIADNE_TEST_STATIC_ASSERT(HasEvaluate<F,Vector<ApproximateFloat64>, Return<Vector<ApproximateFloat64>>>);
     }
 
     if(IsWeaker<Validated,P>::value) {
-        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ValidatedNumber>, Return<Vector<ValidatedNumber>>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ValidatedNumericType>, Return<Vector<ValidatedNumericType>>>);
         ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<BoundedFloat64>, Return<Vector<BoundedFloat64>>>);
         ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ValidatedFloat64>, Return<Vector<ValidatedFloat64>>>);
 
-        ARIADNE_TEST_STATIC_ASSERT(HasEvaluate<F,Vector<ValidatedNumber>, Return<Vector<ValidatedNumber>>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasEvaluate<F,Vector<ValidatedNumericType>, Return<Vector<ValidatedNumericType>>>);
         ARIADNE_TEST_STATIC_ASSERT(HasEvaluate<F,Vector<BoundedFloat64>, Return<Vector<BoundedFloat64>>>);
         ARIADNE_TEST_STATIC_ASSERT(HasEvaluate<F,Vector<ValidatedFloat64>, Return<Vector<ValidatedFloat64>>>);
 
     }
 
     if(IsWeaker<Effective,P>::value) {
-        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<EffectiveNumber>, Return<Vector<EffectiveNumber>>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<EffectiveNumericType>, Return<Vector<EffectiveNumericType>>>);
         ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<Real>, Return<Vector<Real>>>);
 
-        ARIADNE_TEST_STATIC_ASSERT(HasEvaluate<F,Vector<EffectiveNumber>, Return<Vector<EffectiveNumber>>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasEvaluate<F,Vector<EffectiveNumericType>, Return<Vector<EffectiveNumericType>>>);
         ARIADNE_TEST_STATIC_ASSERT(HasEvaluate<F,Vector<Real>, Return<Vector<Real>>>);
 
     }

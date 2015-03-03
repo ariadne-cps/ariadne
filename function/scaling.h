@@ -33,35 +33,35 @@
 
 namespace Ariadne {
 
-inline ApproximateNumber med_apprx(ExactInterval const& ivl) {
-    return ApproximateNumber(half_exact(add_approx(ivl.lower().raw(),ivl.upper().raw())));
+inline ApproximateNumericType med_apprx(ExactInterval const& ivl) {
+    return ApproximateNumericType(half_exact(add_approx(ivl.lower().raw(),ivl.upper().raw())));
 }
 
-inline ApproximateNumber rad_apprx(ExactInterval const& ivl) {
-    return ApproximateNumber(half_exact(sub_approx(ivl.upper().raw(),ivl.lower().raw())));
+inline ApproximateNumericType rad_apprx(ExactInterval const& ivl) {
+    return ApproximateNumericType(half_exact(sub_approx(ivl.upper().raw(),ivl.lower().raw())));
 }
 
-inline ValidatedNumber med_val(ExactInterval const& ivl) {
+inline ValidatedNumericType med_val(ExactInterval const& ivl) {
     return half(ivl.lower()+ivl.upper());
 }
 
-inline ValidatedNumber rad_val(ExactInterval const& ivl) {
+inline ValidatedNumericType rad_val(ExactInterval const& ivl) {
     return half(ivl.upper()-ivl.lower());
 }
 
 
 template<class T, EnableIf<IsSame<Paradigm<T>,Approximate>> =dummy>
 inline T unscale(T x, const ExactInterval& d) {
-    ApproximateNumber c(med_apprx(d));
-    ApproximateNumber r(rad_apprx(d));
+    ApproximateNumericType c(med_apprx(d));
+    ApproximateNumericType r(rad_apprx(d));
     return (std::move(x)-c)/r;
 }
 
 template<class T, EnableIf<IsStronger<Paradigm<T>,Validated>> =dummy>
 inline T unscale(T x, const ExactInterval& d) {
-    ValidatedNumber c(med_val(d));
+    ValidatedNumericType c(med_val(d));
     if(d.lower()==d.upper()) { c=0; return std::move(x)*c; }
-    ValidatedNumber r(rad_val(d));
+    ValidatedNumericType r(rad_val(d));
     return (std::move(x)-c)/r;
 }
 

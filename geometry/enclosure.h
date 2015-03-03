@@ -69,8 +69,8 @@ template<class X> class FunctionModelFactoryInterface;
 typedef FunctionModelFactoryInterface<ValidatedTag> ValidatedFunctionModelFactoryInterface;
 
 template<class X, class R> class Constraint;
-typedef Constraint<EffectiveScalarFunction,EffectiveNumber> EffectiveConstraint;
-typedef Constraint<ValidatedScalarFunction,ValidatedNumber> ValidatedConstraint;
+typedef Constraint<EffectiveScalarFunction,EffectiveNumericType> EffectiveConstraint;
+typedef Constraint<ValidatedScalarFunction,ValidatedNumericType> ValidatedConstraint;
 
 class ValidatedAffineConstrainedImageSet;
 class BoundedConstraintSet;
@@ -80,7 +80,7 @@ template<class BS> class ListSet;
 class Grid;
 class PavingInterface;
 
-typedef Constraint<ValidatedScalarFunctionModel,ValidatedNumber> ValidatedConstraintModel;
+typedef Constraint<ValidatedScalarFunctionModel,ValidatedNumericType> ValidatedConstraintModel;
 
 //! \brief A set of the form \f$x=f(s)\f$ for \f$s\in D\f$ satisfying \f$g(s)\leq0\f$ and \f$h(s)=0\f$.
 class Enclosure

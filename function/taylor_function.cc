@@ -85,7 +85,7 @@ ScalarTaylorFunction TaylorFunctionFactory::create_zero(const ExactBox& domain) 
     return ScalarTaylorFunction::zero(domain,this->_sweeper);
 }
 
-ScalarTaylorFunction TaylorFunctionFactory::create_constant(const ExactBox& domain, ValidatedNumber value) const
+ScalarTaylorFunction TaylorFunctionFactory::create_constant(const ExactBox& domain, ValidatedNumericType value) const
 {
     return ScalarTaylorFunction::constant(domain,value,this->_sweeper);
 }

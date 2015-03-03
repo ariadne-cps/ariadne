@@ -68,7 +68,7 @@ template<class ES> OutputStream& operator<<(OutputStream&, const Orbit<ES>&);
 template<class BS> class ListSet;
 
 template<class X> class Point;
-typedef Point<ExactNumber> ExactPoint;
+typedef Point<ExactNumericType> ExactPoint;
 
 class InterpolatedCurve;
 class Grid;

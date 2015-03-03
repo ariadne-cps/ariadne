@@ -64,7 +64,7 @@ ValidatedAffineModel operator+(const ValidatedAffineModel& a1, const ValidatedAf
     return r;
 }
 
-ValidatedAffineModel operator+(const ValidatedNumber& c, const ValidatedAffineModel& a) {
+ValidatedAffineModel operator+(const ValidatedNumericType& c, const ValidatedAffineModel& a) {
     ValidatedAffineModel r=a;
     RawFloat64 cm=c.value().raw();
     r.set_value( static_cast<ValidatedAffineModel::CoefficientType>( cm + a.value().raw() ) );
@@ -82,11 +82,11 @@ ValidatedAffineModel operator+(const ValidatedNumber& c, const ValidatedAffineMo
     return r;
 }
 
-ValidatedAffineModel operator+(const ValidatedAffineModel& a, const ValidatedNumber& c) {
+ValidatedAffineModel operator+(const ValidatedAffineModel& a, const ValidatedNumericType& c) {
     return c+a;
 }
 
-ValidatedAffineModel operator*(const ValidatedNumber& c, const ValidatedAffineModel& a) {
+ValidatedAffineModel operator*(const ValidatedNumericType& c, const ValidatedAffineModel& a) {
     Nat n=a.argument_size();
     RawFloat64 cm=c.value().raw();
     ValidatedAffineModel r(n);
@@ -121,7 +121,7 @@ ValidatedAffineModel operator*(const ValidatedNumber& c, const ValidatedAffineMo
     return r;
 }
 
-ValidatedAffineModel operator*(const ValidatedAffineModel& a, const ValidatedNumber& c) {
+ValidatedAffineModel operator*(const ValidatedAffineModel& a, const ValidatedNumericType& c) {
     return c*a;
 }
 

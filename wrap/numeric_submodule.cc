@@ -179,8 +179,8 @@ void export_real()
 
     real_class.define_self_arithmetic();
 //    real_class.define_mixed_arithmetic<double>();
-    // Needed to dispatch Real # ExactNumber operations
-    //real_class.define_mixed_arithmetic<EffectiveNumber>();
+    // Needed to dispatch Real # ExactNumericType operations
+    //real_class.define_mixed_arithmetic<EffectiveNumericType>();
 //    real_class.define_mixed_arithmetic<Real>();
     real_class.define_transcendental_functions();
 
@@ -211,10 +211,10 @@ template<class PR> void export_exact_float()
     exact_float_class.define_mixed_arithmetic(Tag<Int>());
     exact_float_class.define_mixed_arithmetic(Tag<ExactFloat<PR>>());
     exact_float_class.define_self_arithmetic();
-    //exact_float_class.define_mixed_arithmetic<ApproximateNumber>();
-    //exact_float_class.define_mixed_arithmetic<LowerNumber>();
-    //exact_float_class.define_mixed_arithmetic<UpperNumber>();
-    //exact_float_class.define_mixed_arithmetic<ValidatedNumber>();
+    //exact_float_class.define_mixed_arithmetic<ApproximateNumericType>();
+    //exact_float_class.define_mixed_arithmetic<LowerNumericType>();
+    //exact_float_class.define_mixed_arithmetic<UpperNumericType>();
+    //exact_float_class.define_mixed_arithmetic<ValidatedNumericType>();
 
     def("pos", (ExactFloat<PR>(*)(ExactFloat<PR> const&)) &pos);
     def("neg", (ExactFloat<PR>(*)(ExactFloat<PR> const&)) &neg);
@@ -255,7 +255,7 @@ template<class PR> void export_metric_float()
     metric_float_class.def(init<Real,PR>());
     metric_float_class.def(init<double,double>());
     metric_float_class.def(init<ExactFloat<PR>,ErrorFloat<PR>>());
-    metric_float_class.def(init<ValidatedNumber>());
+    metric_float_class.def(init<ValidatedNumericType>());
     metric_float_class.def(init<ExactFloat<PR>>());
     metric_float_class.def(init<MetricFloat<PR>>());
     metric_float_class.def(init<BoundedFloat<PR>>());
@@ -271,10 +271,10 @@ template<class PR> void export_metric_float()
     metric_float_class.define_mixed_arithmetic( Tag<MetricFloat<PR>>() );
     metric_float_class.define_self_arithmetic();
 //    metric_float_class.define_mixed_arithmetic<MetricFloat<PR>>();
-//    metric_float_class.define_mixed_arithmetic<ApproximateNumber>();
-//    metric_float_class.define_mixed_arithmetic<LowerNumber>();
-//    metric_float_class.define_mixed_arithmetic<UpperNumber>();
-//    metric_float_class.define_mixed_arithmetic<ValidatedNumber>();
+//    metric_float_class.define_mixed_arithmetic<ApproximateNumericType>();
+//    metric_float_class.define_mixed_arithmetic<LowerNumericType>();
+//    metric_float_class.define_mixed_arithmetic<UpperNumericType>();
+//    metric_float_class.define_mixed_arithmetic<ValidatedNumericType>();
 
     metric_float_class.define_unary_arithmetic();
     metric_float_class.define_transcendental_functions();
@@ -293,7 +293,7 @@ template<class PR> void export_bounded_float()
     bounded_float_class.def(init<Real,PR>());
     bounded_float_class.def(init<double,double>());
     bounded_float_class.def(init<LowerFloat<PR>,UpperFloat<PR>>());
-    bounded_float_class.def(init<ValidatedNumber>());
+    bounded_float_class.def(init<ValidatedNumericType>());
     bounded_float_class.def(init<ExactFloat<PR>>());
     bounded_float_class.def(init<MetricFloat<PR>>());
     bounded_float_class.def(init<BoundedFloat<PR>>());
@@ -309,10 +309,10 @@ template<class PR> void export_bounded_float()
     bounded_float_class.define_mixed_arithmetic( Tag<MetricFloat<PR>>() );
     bounded_float_class.define_mixed_arithmetic( Tag<BoundedFloat<PR>>() );
     bounded_float_class.define_self_arithmetic();
-//    bounded_float_class.define_mixed_arithmetic<ApproximateNumber>();
-//    bounded_float_class.define_mixed_arithmetic<LowerNumber>();
-//    bounded_float_class.define_mixed_arithmetic<UpperNumber>();
-//    bounded_float_class.define_mixed_arithmetic<ValidatedNumber>();
+//    bounded_float_class.define_mixed_arithmetic<ApproximateNumericType>();
+//    bounded_float_class.define_mixed_arithmetic<LowerNumericType>();
+//    bounded_float_class.define_mixed_arithmetic<UpperNumericType>();
+//    bounded_float_class.define_mixed_arithmetic<ValidatedNumericType>();
 
     bounded_float_class.define_unary_arithmetic();
     bounded_float_class.define_transcendental_functions();
@@ -336,7 +336,7 @@ template<class PR> void export_upper_float()
     upper_float_class.def(init<MetricFloat<PR>>());
     upper_float_class.def(init<BoundedFloat<PR>>());
     upper_float_class.def(init<UpperFloat<PR>>());
-    upper_float_class.def(init<UpperNumber>());
+    upper_float_class.def(init<UpperNumericType>());
     upper_float_class.def(boost::python::self_ns::str(self));
     upper_float_class.def(boost::python::self_ns::repr(self));
 
@@ -356,11 +356,11 @@ template<class PR> void export_upper_float()
     upper_float_class.def(self - Int());
     upper_float_class.def(Int() - self);
 
-//    upper_float_class.define_mixed_arithmetic<ApproximateNumber>();
-//    upper_float_class.def(UpperNumber() + self);
-//    upper_float_class.def(LowerNumber() - self);
-//    upper_float_class.def(self + UpperNumber());
-//    upper_float_class.def(self - LowerNumber());
+//    upper_float_class.define_mixed_arithmetic<ApproximateNumericType>();
+//    upper_float_class.def(UpperNumericType() + self);
+//    upper_float_class.def(LowerNumericType() - self);
+//    upper_float_class.def(self + UpperNumericType());
+//    upper_float_class.def(self - LowerNumericType());
 
     upper_float_class.define_monotonic_functions();
 
@@ -377,7 +377,7 @@ template<class PR> void export_lower_float()
     lower_float_class.def(init<MetricFloat<PR>>());
     lower_float_class.def(init<BoundedFloat<PR>>());
     lower_float_class.def(init<LowerFloat<PR>>());
-    lower_float_class.def(init<LowerNumber>());
+    lower_float_class.def(init<LowerNumericType>());
     lower_float_class.def(boost::python::self_ns::str(self));
     lower_float_class.def(boost::python::self_ns::repr(self));
 
@@ -397,12 +397,12 @@ template<class PR> void export_lower_float()
     lower_float_class.def(self - Int());
     lower_float_class.def(Int() - self);
 
-//    lower_float_class.define_mixed_arithmetic<ApproximateNumber>();
+//    lower_float_class.define_mixed_arithmetic<ApproximateNumericType>();
 
-//    lower_float_class.def(LowerNumber() + self);
-//    lower_float_class.def(UpperNumber() - self);
-//    lower_float_class.def(self + LowerNumber());
-//    lower_float_class.def(self - UpperNumber());
+//    lower_float_class.def(LowerNumericType() + self);
+//    lower_float_class.def(UpperNumericType() - self);
+//    lower_float_class.def(self + LowerNumericType());
+//    lower_float_class.def(self - UpperNumericType());
 
     lower_float_class.define_monotonic_functions();
 
@@ -422,7 +422,7 @@ template<class PR> void export_approximate_float()
     approximate_float_class.def(init<LowerFloat<PR>>());
     approximate_float_class.def(init<UpperFloat<PR>>());
     approximate_float_class.def(init<ApproximateFloat<PR>>());
-    approximate_float_class.def(init<ApproximateNumber>());
+    approximate_float_class.def(init<ApproximateNumericType>());
 
     approximate_float_class.define_self_arithmetic();
     approximate_float_class.define_mixed_arithmetic(Tag<ApproximateFloat<PR>>());

@@ -50,14 +50,14 @@ template<> struct AlgebraTraits<ApproximateFloat64> {
     typedef ApproximateFloat64 ValueType;
     typedef ApproximateInterval RangeType;
     typedef ApproximateFloat64 NormType;
-    typedef ApproximateNumber NumericType;
+    typedef ApproximateNumericType NumericType;
 };
 
 template<> struct AlgebraTraits<ValidatedFloat64> {
     typedef ExactFloat64 ValueType;
     typedef UpperInterval RangeType;
     typedef ErrorFloat64 NormType;
-    typedef ValidatedNumber NumericType;
+    typedef ValidatedNumericType NumericType;
 };
 
 template<> struct AlgebraTraits<Real> {

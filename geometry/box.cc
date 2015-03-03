@@ -38,9 +38,9 @@
 namespace Ariadne {
 
 UpperInterval apply(ScalarFunction<ValidatedTag>const& f, const Box<UpperInterval>& x) {
-    return static_cast<UpperInterval>(f(reinterpret_cast<Vector<ValidatedNumber>const&>(x))); }
+    return static_cast<UpperInterval>(f(reinterpret_cast<Vector<ValidatedNumericType>const&>(x))); }
 Box<UpperInterval> apply(VectorFunction<ValidatedTag>const& f, const Box<UpperInterval>& x) {
-    return static_cast<Box<UpperInterval>>(f(reinterpret_cast<Vector<ValidatedNumber>const&>(x))); }
+    return static_cast<Box<UpperInterval>>(f(reinterpret_cast<Vector<ValidatedNumericType>const&>(x))); }
 
 template class Box<Interval<Real>>;
 template class Box<Interval<ExactFloat64>>;

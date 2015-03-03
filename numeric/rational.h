@@ -48,7 +48,7 @@ enum class Comparison : char;
 
 /************ Rational *******************************************************/
 
-//! \ingroup UserNumberSubModule
+//! \ingroup UserNumericTypeSubModule
 //! \brief %Rational numbers.
 class Rational
 {
@@ -120,7 +120,7 @@ class Rational
   private:
     explicit Rational(double, std::nullptr_t dummy);
 };
-template<> struct IsNumber<Rational> : True { };
+template<> struct IsNumericType<Rational> : True { };
 Rational operator"" _q(long double x);
 
 template<class N, EnableIf<IsIntegral<N>>> inline Rational::Rational(N n) : Rational(Int64(n)) { }

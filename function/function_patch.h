@@ -239,9 +239,9 @@ template<class M> class FunctionPatch
     //! \brief An over-approximation to the range of the function.
     UpperInterval range() const { return this->_model.range(); }
     //! \brief Evaluate the function at the point \a x.
-    ValidatedNumber operator()(const Vector<ValidatedNumber>& x) const;
-    ValidatedNumber operator()(const Vector<ExactNumber>& x) const;
-    ApproximateNumber operator()(const Vector<ApproximateNumber>& x) const;
+    ValidatedNumericType operator()(const Vector<ValidatedNumericType>& x) const;
+    ValidatedNumericType operator()(const Vector<ExactNumericType>& x) const;
+    ApproximateNumericType operator()(const Vector<ApproximateNumericType>& x) const;
 
     /*! \brief Compute an approximation to gradient derivative of the function at the point \a x. */
     Covector<NumericType> gradient(const Vector<NumericType>& x) const;
@@ -485,9 +485,9 @@ template<class M> class VectorFunctionPatch
 
 
     /*! \brief Evaluate the Taylor model at the point \a x. */
-    Vector<ValidatedNumber> operator()(const Vector<ValidatedNumber>& x) const;
-    Vector<ApproximateNumber> operator()(const Vector<ApproximateNumber>& x) const;
-    Vector<ValidatedNumber> operator()(const Vector<ExactNumber>& x) const;
+    Vector<ValidatedNumericType> operator()(const Vector<ValidatedNumericType>& x) const;
+    Vector<ApproximateNumericType> operator()(const Vector<ApproximateNumericType>& x) const;
+    Vector<ValidatedNumericType> operator()(const Vector<ExactNumericType>& x) const;
     /*! \brief Compute an approximation to Jacobian derivative of the Taylor model sat the point \a x. */
     Matrix<NumericType> jacobian(const Vector<NumericType>& x) const;
 
@@ -587,7 +587,7 @@ template<class M> VectorFunctionPatch<M> operator*(const VectorFunctionPatch<M>&
 /*! \brief Division by a scalar. */
 template<class M> VectorFunctionPatch<M> operator/(const VectorFunctionPatch<M>& f, const NumericType<M>& c);
 /*! \brief Multiplication by a matrix. */
-template<class M> VectorFunctionPatch<M> operator*(const Matrix<ExactNumber>& A, const VectorFunctionPatch<M>& f);
+template<class M> VectorFunctionPatch<M> operator*(const Matrix<ExactNumericType>& A, const VectorFunctionPatch<M>& f);
 /*! \brief Multiplication by a matrix. */
 template<class M> VectorFunctionPatch<M> operator*(const Matrix<NumericType<M>>& A, const VectorFunctionPatch<M>& f);
 
@@ -793,11 +793,11 @@ template<class M> FunctionPatch<M> abs(const FunctionPatch<M>& f) {
 
 
 template<class M> FunctionPatch<M> antiderivative(const FunctionPatch<M>& x, SizeType k) {
-    ValidatedNumber sf=rad_val(x.domain()[k]);
+    ValidatedNumericType sf=rad_val(x.domain()[k]);
     return FunctionPatch<M>(x.domain(),antiderivative(x.model(),k)*sf); }
 
 template<class M> FunctionPatch<M> derivative(const FunctionPatch<M>& x, SizeType k) {
-    ValidatedNumber sf=rec(rad_val(x.domain()[k]));
+    ValidatedNumericType sf=rec(rad_val(x.domain()[k]));
     return FunctionPatch<M>(x.domain(),derivative(x.model(),k)*sf); }
 
 template<class M> FunctionPatch<M> embed(const ExactBox& dom1, const FunctionPatch<M>& tv2,const ExactBox& dom3) {
@@ -838,7 +838,7 @@ template<class M> FunctionPatch<M> partial_evaluate(const FunctionPatch<M>& te, 
     ARIADNE_ASSERT(k<as);
     const ExactBox& domain=te.domain();
     const ExactInterval& dk=domain[k];
-    ValidatedNumber sc=(c-med_val(dk))/rad_val(dk);
+    ValidatedNumericType sc=(c-med_val(dk))/rad_val(dk);
 
     ExactBox new_domain(as-1);
     for(SizeType i=0; i!=k; ++i) { new_domain[i]=domain[i]; }
@@ -1307,7 +1307,7 @@ template<class M> VectorFunctionPatch<M> restriction(const VectorFunctionPatch<M
 }
 
 
-template<class M> Vector<ValidatedNumber> evaluate(const VectorFunctionPatch<M>& f, const Vector<ValidatedNumber>& x) {
+template<class M> Vector<ValidatedNumericType> evaluate(const VectorFunctionPatch<M>& f, const Vector<ValidatedNumericType>& x) {
     if(!definitely(contains(f.domain(),x))) {
         ARIADNE_THROW(DomainException,"evaluate(f,x) with f="<<f<<", x="<<x,"x is not a subset of f.domain()="<<f.domain());
     }
@@ -1341,7 +1341,7 @@ template<class M> VectorFunctionPatch<M> unchecked_compose(const VectorFunctionP
 template<class M> VectorFunctionPatch<M> derivative(const VectorFunctionPatch<M>& f, SizeType k)
 {
     ARIADNE_ASSERT_MSG(k<f.argument_size(),"f="<<f<<"\n f.argument_size()="<<f.argument_size()<<" k="<<k);
-    ValidatedNumber fdomkrad=rad_val(f.domain()[k]);
+    ValidatedNumericType fdomkrad=rad_val(f.domain()[k]);
     VectorFunctionPatch<M> g=f;
     for(SizeType i=0; i!=g.size(); ++i) {
         g[i]=derivative(f[i],k);
@@ -1352,7 +1352,7 @@ template<class M> VectorFunctionPatch<M> derivative(const VectorFunctionPatch<M>
 template<class M> VectorFunctionPatch<M> antiderivative(const VectorFunctionPatch<M>& f, SizeType k)
 {
     ARIADNE_ASSERT_MSG(k<f.argument_size(),"f="<<f<<"\n f.argument_size()="<<f.argument_size()<<" k="<<k);
-    ValidatedNumber fdomkrad=rad_val(f.domain()[k]);
+    ValidatedNumericType fdomkrad=rad_val(f.domain()[k]);
     VectorFunctionPatch<M> g=f;
     for(SizeType i=0; i!=g.size(); ++i) {
         g.models()[i].antidifferentiate(k);
@@ -1361,10 +1361,10 @@ template<class M> VectorFunctionPatch<M> antiderivative(const VectorFunctionPatc
     return g;
 }
 
-template<class M> VectorFunctionPatch<M> antiderivative(const VectorFunctionPatch<M>& f, SizeType k, ExactNumber c)
+template<class M> VectorFunctionPatch<M> antiderivative(const VectorFunctionPatch<M>& f, SizeType k, ExactNumericType c)
 {
     ARIADNE_ASSERT_MSG(k<f.argument_size(),"f="<<f<<"\n f.argument_size()="<<f.argument_size()<<" k="<<k);
-    ValidatedNumber fdomkrad=rad_val(f.domain()[k]);
+    ValidatedNumericType fdomkrad=rad_val(f.domain()[k]);
     VectorFunctionPatch<M> g=f;
     for(SizeType i=0; i!=g.size(); ++i) {
         g[i]=antiderivative(f[i],k,c);

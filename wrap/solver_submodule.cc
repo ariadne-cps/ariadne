@@ -40,8 +40,8 @@ using namespace Ariadne;
 
 namespace Ariadne {
 
-typedef Vector<ValidatedNumber> ValidatedPointType;
-typedef Vector<ApproximateNumber> ApproximatePointType;
+typedef Vector<ValidatedNumericType> ValidatedPointType;
+typedef Vector<ApproximateNumericType> ApproximatePointType;
 
 class SolverWrapper
   : public SolverInterface, public wrapper< SolverInterface >
@@ -107,10 +107,10 @@ class IntegratorWrapper
 Void export_solver()
 {
     class_<SolverWrapper, boost::noncopyable> solver_wrapper_class("SolverInterface");
-    solver_wrapper_class.def("solve",pure_virtual((Vector<ValidatedNumber>(SolverInterface::*)(const ValidatedVectorFunction&,const ExactBox&)const) &SolverInterface::solve));
+    solver_wrapper_class.def("solve",pure_virtual((Vector<ValidatedNumericType>(SolverInterface::*)(const ValidatedVectorFunction&,const ExactBox&)const) &SolverInterface::solve));
     solver_wrapper_class.def("implicit",pure_virtual((ValidatedVectorFunctionModel(SolverInterface::*)(const ValidatedVectorFunction&,const ExactBox&,const ExactBox&)const) &SolverInterface::implicit));
     solver_wrapper_class.def("implicit",pure_virtual((ValidatedScalarFunctionModel(SolverInterface::*)(const ValidatedScalarFunction&,const ExactBox&,const ExactInterval&)const) &SolverInterface::implicit));
-    solver_wrapper_class.def("solve_all",pure_virtual((Set< Vector<ValidatedNumber> >(SolverInterface::*)(const ValidatedVectorFunction&,const ExactBox&)const) &SolverInterface::solve_all));
+    solver_wrapper_class.def("solve_all",pure_virtual((Set< Vector<ValidatedNumericType> >(SolverInterface::*)(const ValidatedVectorFunction&,const ExactBox&)const) &SolverInterface::solve_all));
     //solver_wrapper_class.def(self_ns::str(self));
 
     class_<IntervalNewtonSolver, bases<SolverInterface> > interval_newton_solver_class("IntervalNewtonSolver",init<double,unsigned int>());

@@ -95,13 +95,13 @@ class Grid {
     //! Write to an output stream.
     friend OutputStream& operator<<(OutputStream& os, const Grid& g);
 
-    ExactNumber coordinate(Nat d, DyadicType x) const;
-    ExactNumber subdivision_coordinate(Nat d, DyadicType x) const;
-    ExactNumber subdivision_coordinate(Nat d, IntegerType n) const;
+    ExactNumericType coordinate(Nat d, DyadicType x) const;
+    ExactNumericType subdivision_coordinate(Nat d, DyadicType x) const;
+    ExactNumericType subdivision_coordinate(Nat d, IntegerType n) const;
 
-    Int subdivision_index(Nat d, const ExactNumber& x) const;
-    Int subdivision_lower_index(Nat d, const LowerNumber& x) const;
-    Int subdivision_upper_index(Nat d, const UpperNumber& x) const;
+    Int subdivision_index(Nat d, const ExactNumericType& x) const;
+    Int subdivision_lower_index(Nat d, const LowerNumericType& x) const;
+    Int subdivision_upper_index(Nat d, const UpperNumericType& x) const;
 
     Array<DyadicType> index(const ExactPoint& pt) const;
     Array<DyadicType> lower_index(const ExactBox& bx) const;

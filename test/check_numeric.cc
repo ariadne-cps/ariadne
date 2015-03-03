@@ -434,24 +434,24 @@ String to_str(bool b) { return b?"true":"false"; }
 void CheckNumeric::notifications()
 {
     // Operations on ExactFloat64: display what is being used.
-    ARIADNE_TEST_NOTIFY(String("Conversion double -> ApproximateNumber: ")+to_str(IsConvertible<double,ApproximateNumber>::value));
+    ARIADNE_TEST_NOTIFY(String("Conversion double -> ApproximateNumericType: ")+to_str(IsConvertible<double,ApproximateNumericType>::value));
     ARIADNE_TEST_NOTIFY(String("Conversion double -> ApproximateFloat64: ")+to_str(IsConvertible<double,ApproximateFloat64>::value));
     ARIADNE_TEST_NOTIFY(String("Conversion double -> ExactFloat64: ")+to_str(IsConvertible<double,ExactFloat64>::value));
-    ARIADNE_TEST_NOTIFY(String("Construction double -> ExactNumber: ")+to_str(IsConstructible<ExactNumber,double>::value));
+    ARIADNE_TEST_NOTIFY(String("Construction double -> ExactNumericType: ")+to_str(IsConstructible<ExactNumericType,double>::value));
     ARIADNE_TEST_NOTIFY(String("Construction double -> ExactFloat64: ")+to_str(IsConstructible<ExactFloat64,double>::value));
     ARIADNE_TEST_NOTIFY(String("Conversion int -> ExactFloat64: ")+to_str(IsConvertible<int,ExactFloat64>::value));
     ARIADNE_TEST_NOTIFY(String("Construction Integer -> ExactFloat64: ")+to_str(IsConstructible<ExactFloat64,Integer>::value)+"\n");
 
-    ARIADNE_TEST_NOTIFY((String("UpperNumber * UpperNumber -> ")+class_name<SafeProductType<UpperNumber,UpperNumber>>()+"\n"));
+    ARIADNE_TEST_NOTIFY((String("UpperNumericType * UpperNumericType -> ")+class_name<SafeProductType<UpperNumericType,UpperNumericType>>()+"\n"));
 
     ARIADNE_TEST_NOTIFY((String("ExactFloat64 + ExactFloat64 -> ")+class_name<SafeSumType<ExactFloat64,ExactFloat64>>()));
     ARIADNE_TEST_NOTIFY((String("MetricFloat64 + BoundedFloat64 -> ")+class_name<SafeSumType<MetricFloat64,BoundedFloat64>>()));
-    ARIADNE_TEST_NOTIFY((String("ExactFloat64 + ValidatedNumber -> ")+class_name<SafeSumType<ExactFloat64,ValidatedNumber>>()));
+    ARIADNE_TEST_NOTIFY((String("ExactFloat64 + ValidatedNumericType -> ")+class_name<SafeSumType<ExactFloat64,ValidatedNumericType>>()));
     ARIADNE_TEST_NOTIFY((String("UpperFloat64 * UpperFloat64 -> ")+class_name<SafeProductType<UpperFloat64,UpperFloat64>>()+"\n"));
 
     ARIADNE_TEST_NOTIFY((String("Integer + double -> ")+class_name<SafeSumType<Integer,double>>()));
-    ARIADNE_TEST_NOTIFY((String("ExactNumber + double -> ")+class_name<SafeSumType<ExactNumber,double>>()));
-    ARIADNE_TEST_NOTIFY((String("ApproximateNumber + double -> ")+class_name<SafeSumType<ApproximateNumber,double>>()));
+    ARIADNE_TEST_NOTIFY((String("ExactNumericType + double -> ")+class_name<SafeSumType<ExactNumericType,double>>()));
+    ARIADNE_TEST_NOTIFY((String("ApproximateNumericType + double -> ")+class_name<SafeSumType<ApproximateNumericType,double>>()));
     ARIADNE_TEST_NOTIFY((String("ExactFloat64 + double -> ")+class_name<SafeSumType<ExactFloat64,double>>()+"\n"));
 
     ARIADNE_TEST_NOTIFY((String("Rational == double -> ")+class_name<SafeEqualsType<Rational,double>>()));

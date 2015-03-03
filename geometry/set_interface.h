@@ -39,9 +39,9 @@ namespace Ariadne {
 template<class X> class Vector;
 
 template<class X> class Point;
-typedef Point<ExactNumber> ExactPoint;
-typedef Point<ValidatedNumber> ValidatedPoint;
-typedef Point<ApproximateNumber> ApproximatePoint;
+typedef Point<ExactNumericType> ExactPoint;
+typedef Point<ValidatedNumericType> ValidatedPoint;
+typedef Point<ApproximateNumericType> ApproximatePoint;
 
 template<class IVL> class Box;
 typedef Box<ExactInterval> ExactBox;

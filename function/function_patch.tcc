@@ -363,17 +363,17 @@ template<class M> FunctionPatch<M>* FunctionPatch<M>::_derivative(SizeType j) co
 }
 
 
-template<class M> ApproximateNumber FunctionPatch<M>::operator() (const Vector<ApproximateNumber>& x) const
+template<class M> ApproximateNumericType FunctionPatch<M>::operator() (const Vector<ApproximateNumericType>& x) const
 {
     const FunctionPatch<M>& f=*this;
     if(!contains(f.domain(),cast_exact(x))) {
         ARIADNE_THROW(DomainException,"tf.evaluate(ax) with tf="<<f<<", ax="<<x," ax is not an element of tf.domain()="<<f.domain());
     }
-    Vector<ApproximateNumber> sx=Ariadne::unscale(x,f._domain);
+    Vector<ApproximateNumericType> sx=Ariadne::unscale(x,f._domain);
     return Ariadne::evaluate(this->_model.expansion(),sx);
 }
 
-template<class M> ValidatedNumber FunctionPatch<M>::operator()(const Vector<ValidatedNumber>& x) const
+template<class M> ValidatedNumericType FunctionPatch<M>::operator()(const Vector<ValidatedNumericType>& x) const
 {
     const FunctionPatch<M>& f=*this;
     if(!definitely(contains(f.domain(),x))) {
@@ -382,9 +382,9 @@ template<class M> ValidatedNumber FunctionPatch<M>::operator()(const Vector<Vali
     return unchecked_evaluate(f,x);
 }
 
-template<class M> ValidatedNumber FunctionPatch<M>::operator()(const Vector<ExactNumber>& x) const
+template<class M> ValidatedNumericType FunctionPatch<M>::operator()(const Vector<ExactNumericType>& x) const
 {
-    return Ariadne::evaluate(*this,Vector<ValidatedNumber>(x));
+    return Ariadne::evaluate(*this,Vector<ValidatedNumericType>(x));
 }
 
 template<class M> Covector<NumericType<M>> FunctionPatch<M>::gradient(const Vector<NumericType>& x) const
@@ -878,27 +878,27 @@ template<class M> Void VectorFunctionPatch<M>::clobber()
 
 
 
-template<class M> Vector<ApproximateNumber> VectorFunctionPatch<M>::operator()(const Vector<ApproximateNumber>& x) const
+template<class M> Vector<ApproximateNumericType> VectorFunctionPatch<M>::operator()(const Vector<ApproximateNumericType>& x) const
 {
     const VectorFunctionPatch<M>& f=*this;
     if(!decide(contains(f.domain(),x))) {
         ARIADNE_THROW(DomainException,"tf.evaluate(ax) with tf="<<f<<", ax="<<x,"ax is not an element of tf.domain()="<<f.domain());
     }
-    Vector<ApproximateNumber> sx=Ariadne::unscale(x,f._domain);
-    Vector<ApproximateNumber> r(this->result_size());
+    Vector<ApproximateNumericType> sx=Ariadne::unscale(x,f._domain);
+    Vector<ApproximateNumericType> r(this->result_size());
     for(SizeType i=0; i!=r.size(); ++i) {
         r[i]=Ariadne::evaluate(this->_models[i].expansion(),sx);
     }
     return r;
 }
 
-template<class M> Vector<ValidatedNumber> VectorFunctionPatch<M>::operator()(const Vector<ValidatedNumber>& x) const
+template<class M> Vector<ValidatedNumericType> VectorFunctionPatch<M>::operator()(const Vector<ValidatedNumericType>& x) const
 {
     const VectorFunctionPatch<M>& f=*this;
     if(!definitely(contains(f.domain(),x))) {
         ARIADNE_THROW(DomainException,"tf.evaluate(vx) with tf="<<f<<", x="<<x,"vx is not a definitely and element of tf.domain()="<<f.domain());
     }
-    Vector<ValidatedNumber> sx=Ariadne::unscale(x,f._domain);
+    Vector<ValidatedNumericType> sx=Ariadne::unscale(x,f._domain);
     return Ariadne::evaluate(f._models,sx);
 }
 

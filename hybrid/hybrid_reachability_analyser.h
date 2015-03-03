@@ -190,7 +190,7 @@ class HybridReachabilityAnalyserConfiguration : public ConfigurationInterface {
     //! \brief The unsigned integer type.
     typedef Nat UnsignedIntType;
     //! \brief The real type.
-    typedef ExactNumber RealType;
+    typedef ExactNumericType RealType;
 
     //! \brief Default constructor gives reasonable values.
     HybridReachabilityAnalyserConfiguration(HybridReachabilityAnalyser& analyser);

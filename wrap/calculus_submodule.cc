@@ -301,23 +301,23 @@ Void export_taylor_model()
     taylor_model_class.def(self-self);
     taylor_model_class.def(self*self);
     taylor_model_class.def(self/self);
-    taylor_model_class.def(ValidatedNumber()+self);
-    taylor_model_class.def(ValidatedNumber()-self);
-    taylor_model_class.def(ValidatedNumber()*self);
-    taylor_model_class.def(ValidatedNumber()/self);
-    taylor_model_class.def(self+ValidatedNumber());
-    taylor_model_class.def(self-ValidatedNumber());
-    taylor_model_class.def(self*ValidatedNumber());
-    taylor_model_class.def(self/ValidatedNumber());
-    taylor_model_class.def(self+=ValidatedNumber());
-    taylor_model_class.def(self-=ValidatedNumber());
-    taylor_model_class.def(self*=ValidatedNumber());
-    taylor_model_class.def(self/=ValidatedNumber());
+    taylor_model_class.def(ValidatedNumericType()+self);
+    taylor_model_class.def(ValidatedNumericType()-self);
+    taylor_model_class.def(ValidatedNumericType()*self);
+    taylor_model_class.def(ValidatedNumericType()/self);
+    taylor_model_class.def(self+ValidatedNumericType());
+    taylor_model_class.def(self-ValidatedNumericType());
+    taylor_model_class.def(self*ValidatedNumericType());
+    taylor_model_class.def(self/ValidatedNumericType());
+    taylor_model_class.def(self+=ValidatedNumericType());
+    taylor_model_class.def(self-=ValidatedNumericType());
+    taylor_model_class.def(self*=ValidatedNumericType());
+    taylor_model_class.def(self/=ValidatedNumericType());
     taylor_model_class.def(self+=self);
     taylor_model_class.def(self-=self);
     taylor_model_class.def(self_ns::str(self));
 
-    taylor_model_class.def("constant",(ValidatedTaylorModel(*)(SizeType, const ValidatedNumber&,Sweeper))&ValidatedTaylorModel::constant);
+    taylor_model_class.def("constant",(ValidatedTaylorModel(*)(SizeType, const ValidatedNumericType&,Sweeper))&ValidatedTaylorModel::constant);
     taylor_model_class.def("coordinate",(ValidatedTaylorModel(*)(SizeType, SizeType,Sweeper))&ValidatedTaylorModel::coordinate);
 
     taylor_model_class.staticmethod("constant");
@@ -341,7 +341,7 @@ Void export_taylor_model()
 
     taylor_model_class.def("range", (UpperInterval(ValidatedTaylorModel::*)()const) &ValidatedTaylorModel::range);
 
-    //def("evaluate", (ValidatedNumber(*)(const ValidatedTaylorModel&, const Vector<ValidatedNumber>&))&evaluate);
+    //def("evaluate", (ValidatedNumericType(*)(const ValidatedTaylorModel&, const Vector<ValidatedNumericType>&))&evaluate);
     //def("split",(ValidatedTaylorModel(*)(const ValidatedTaylorModel&,SizeType,SplitPart)) &split);
 
     from_python< Vector<ValidatedTaylorModel> >();
@@ -370,20 +370,20 @@ Void export_scalar_function_model()
     scalar_function_model_class.def(self-self);
     scalar_function_model_class.def(self*self);
     scalar_function_model_class.def(self/self);
-    scalar_function_model_class.def(self+ValidatedNumber());
-    scalar_function_model_class.def(self-ValidatedNumber());
-    scalar_function_model_class.def(self*ValidatedNumber());
-    scalar_function_model_class.def(self/ValidatedNumber());
-    scalar_function_model_class.def(ValidatedNumber()+self);
-    scalar_function_model_class.def(ValidatedNumber()-self);
-    scalar_function_model_class.def(ValidatedNumber()*self);
-    scalar_function_model_class.def(ValidatedNumber()/self);
+    scalar_function_model_class.def(self+ValidatedNumericType());
+    scalar_function_model_class.def(self-ValidatedNumericType());
+    scalar_function_model_class.def(self*ValidatedNumericType());
+    scalar_function_model_class.def(self/ValidatedNumericType());
+    scalar_function_model_class.def(ValidatedNumericType()+self);
+    scalar_function_model_class.def(ValidatedNumericType()-self);
+    scalar_function_model_class.def(ValidatedNumericType()*self);
+    scalar_function_model_class.def(ValidatedNumericType()/self);
     scalar_function_model_class.def("__str__", &__cstr__<ValidatedScalarFunctionModel>);
     scalar_function_model_class.def("__repr__", &__crepr__<ValidatedScalarFunctionModel>);
     //scalar_function_model_class.def("__repr__",&__repr__<ValidatedScalarFunctionModel>);
 
-    //def("evaluate", (ValidatedNumber(*)(const ValidatedScalarFunctionModel&,const Vector<ValidatedNumber>&)) &evaluate);
-    //def("partial_evaluate", (ValidatedScalarFunctionModel(*)(const ValidatedScalarFunctionModel&,SizeType,const ValidatedNumber&)) &partial_evaluate);
+    //def("evaluate", (ValidatedNumericType(*)(const ValidatedScalarFunctionModel&,const Vector<ValidatedNumericType>&)) &evaluate);
+    //def("partial_evaluate", (ValidatedScalarFunctionModel(*)(const ValidatedScalarFunctionModel&,SizeType,const ValidatedNumericType&)) &partial_evaluate);
     def("compose", (ValidatedScalarFunctionModel(*)(const ValidatedScalarFunctionModel&,const ValidatedVectorFunctionModel&)) &compose);
     def("compose", (ValidatedScalarFunctionModel(*)(const ValidatedScalarFunction&,const ValidatedVectorFunctionModel&)) &compose);
 
@@ -404,12 +404,12 @@ Void export_vector_function_model()
     vector_function_model_class.def("__setitem__",&__setitem__<ValidatedVectorFunctionModel,SizeType,ValidatedScalarFunctionModel>);
     //vector_function_model_class.def("__setitem__",&__setitem__<ValidatedVectorFunctionModel,SizeType,ValidatedScalarFunction>);
     vector_function_model_class.def("__call__", (Vector<ValidatedFloat64>(ValidatedVectorFunctionModel::*)(const Vector<ValidatedFloat64>&)const) &ValidatedVectorFunctionModel::operator());
-    vector_function_model_class.def(self*ValidatedNumber());
+    vector_function_model_class.def(self*ValidatedNumericType());
     vector_function_model_class.def("__str__", &__cstr__<ValidatedVectorFunctionModel>);
     vector_function_model_class.def("__repr__", &__crepr__<ValidatedVectorFunctionModel>);
     //export_vector_function_model.def("__repr__",&__repr__<ValidatedVectorFunctionModel>);
 
-    //def("evaluate", (Vector<ValidatedNumber>(*)(const ValidatedVectorFunctionModel&,const Vector<ValidatedNumber>&)) &evaluate);
+    //def("evaluate", (Vector<ValidatedNumericType>(*)(const ValidatedVectorFunctionModel&,const Vector<ValidatedNumericType>&)) &evaluate);
     def("compose", (ValidatedVectorFunctionModel(*)(const ValidatedVectorFunctionModel&,const ValidatedVectorFunctionModel&)) &compose);
     def("compose", (ValidatedVectorFunctionModel(*)(const ValidatedVectorFunction&,const ValidatedVectorFunctionModel&)) &compose);
 
@@ -450,18 +450,18 @@ Void export_scalar_taylor_function()
     scalar_taylor_function_class.def(self-self);
     scalar_taylor_function_class.def(self*self);
     scalar_taylor_function_class.def(self/self);
-    scalar_taylor_function_class.def(self+ValidatedNumber());
-    scalar_taylor_function_class.def(self-ValidatedNumber());
-    scalar_taylor_function_class.def(self*ValidatedNumber());
-    scalar_taylor_function_class.def(self/ValidatedNumber());
-    scalar_taylor_function_class.def(ValidatedNumber()+self);
-    scalar_taylor_function_class.def(ValidatedNumber()-self);
-    scalar_taylor_function_class.def(ValidatedNumber()*self);
-    scalar_taylor_function_class.def(ValidatedNumber()/self);
-    scalar_taylor_function_class.def(self+=ValidatedNumber());
-    scalar_taylor_function_class.def(self-=ValidatedNumber());
-    scalar_taylor_function_class.def(self*=ValidatedNumber());
-    scalar_taylor_function_class.def(self/=ValidatedNumber());
+    scalar_taylor_function_class.def(self+ValidatedNumericType());
+    scalar_taylor_function_class.def(self-ValidatedNumericType());
+    scalar_taylor_function_class.def(self*ValidatedNumericType());
+    scalar_taylor_function_class.def(self/ValidatedNumericType());
+    scalar_taylor_function_class.def(ValidatedNumericType()+self);
+    scalar_taylor_function_class.def(ValidatedNumericType()-self);
+    scalar_taylor_function_class.def(ValidatedNumericType()*self);
+    scalar_taylor_function_class.def(ValidatedNumericType()/self);
+    scalar_taylor_function_class.def(self+=ValidatedNumericType());
+    scalar_taylor_function_class.def(self-=ValidatedNumericType());
+    scalar_taylor_function_class.def(self*=ValidatedNumericType());
+    scalar_taylor_function_class.def(self/=ValidatedNumericType());
     scalar_taylor_function_class.def(self+ValidatedScalarFunction());
     scalar_taylor_function_class.def(self-ValidatedScalarFunction());
     scalar_taylor_function_class.def(self*ValidatedScalarFunction());
@@ -474,7 +474,7 @@ Void export_scalar_taylor_function()
     scalar_taylor_function_class.def(self-=self);
     scalar_taylor_function_class.def("__str__", &__cstr__<ScalarTaylorFunction>);
     scalar_taylor_function_class.def("__repr__", &__crepr__<ScalarTaylorFunction>);
-    scalar_taylor_function_class.def("__mul__",&__mul__< VectorTaylorFunction, ScalarTaylorFunction, Vector<ValidatedNumber> >);
+    scalar_taylor_function_class.def("__mul__",&__mul__< VectorTaylorFunction, ScalarTaylorFunction, Vector<ValidatedNumericType> >);
 
     //scalar_taylor_function_class.def("__str__",(StringType(*)(const ScalarTaylorFunction&)) &__str__);
     //scalar_taylor_function_class.def("__cstr__",(StringType(*)(const ScalarTaylorFunction&)) &__cstr__);
@@ -506,7 +506,7 @@ Void export_scalar_taylor_function()
 
 
     scalar_taylor_function_class.def("zero",(ScalarTaylorFunction(*)(const ExactBox&,Sweeper))&ScalarTaylorFunction::zero);
-    scalar_taylor_function_class.def("constant",(ScalarTaylorFunction(*)(const ExactBox&,const ValidatedNumber&,Sweeper))&ScalarTaylorFunction::constant);
+    scalar_taylor_function_class.def("constant",(ScalarTaylorFunction(*)(const ExactBox&,const ValidatedNumericType&,Sweeper))&ScalarTaylorFunction::constant);
     scalar_taylor_function_class.def("coordinate",(ScalarTaylorFunction(*)(const ExactBox&,SizeType,Sweeper))&ScalarTaylorFunction::coordinate);
 
 
@@ -582,15 +582,15 @@ Void export_vector_taylor_function()
     vector_taylor_function_class.def(-self);
     vector_taylor_function_class.def(self+self);
     vector_taylor_function_class.def(self-self);
-    vector_taylor_function_class.def(self+Vector<ValidatedNumber>());
-    vector_taylor_function_class.def(self-Vector<ValidatedNumber>());
-    vector_taylor_function_class.def(self*ValidatedNumber());
-    vector_taylor_function_class.def(self/ValidatedNumber());
+    vector_taylor_function_class.def(self+Vector<ValidatedNumericType>());
+    vector_taylor_function_class.def(self-Vector<ValidatedNumericType>());
+    vector_taylor_function_class.def(self*ValidatedNumericType());
+    vector_taylor_function_class.def(self/ValidatedNumericType());
     vector_taylor_function_class.def(self*ScalarTaylorFunction());
-    vector_taylor_function_class.def(self+=Vector<ValidatedNumber>());
-    vector_taylor_function_class.def(self-=Vector<ValidatedNumber>());
-    vector_taylor_function_class.def(self*=ValidatedNumber());
-    vector_taylor_function_class.def(self/=ValidatedNumber());
+    vector_taylor_function_class.def(self+=Vector<ValidatedNumericType>());
+    vector_taylor_function_class.def(self-=Vector<ValidatedNumericType>());
+    vector_taylor_function_class.def(self*=ValidatedNumericType());
+    vector_taylor_function_class.def(self/=ValidatedNumericType());
     vector_taylor_function_class.def(self+=self);
     vector_taylor_function_class.def(self-=self);
     vector_taylor_function_class.def("__str__", &__cstr__<VectorTaylorFunction>);
@@ -605,7 +605,7 @@ Void export_vector_taylor_function()
     vector_taylor_function_class.def("function", (EffectiveVectorFunction(VectorTaylorFunction::*)()const) &VectorTaylorFunction::function);
 
 
-    vector_taylor_function_class.def("constant",(VectorTaylorFunction(*)(const ExactBox&, const Vector<ValidatedNumber>&,Sweeper))&VectorTaylorFunction::constant);
+    vector_taylor_function_class.def("constant",(VectorTaylorFunction(*)(const ExactBox&, const Vector<ValidatedNumericType>&,Sweeper))&VectorTaylorFunction::constant);
     vector_taylor_function_class.def("identity",(VectorTaylorFunction(*)(const ExactBox&,Sweeper))&VectorTaylorFunction::identity);
 
     vector_taylor_function_class.staticmethod("constant");

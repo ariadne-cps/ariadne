@@ -54,11 +54,11 @@ template<class T> inline T Generator<T>::operator=(const typename T::Type& v) co
 
 struct MaximumError : Attribute<double> { using Attribute<double>::Attribute; };
 struct SweepThreshold : Attribute<double> { using Attribute<double>::Attribute; };
-struct MaximumNumberOfSteps : Attribute<uint> { using Attribute<uint>::Attribute; };
+struct MaximumNumericTypeOfSteps : Attribute<uint> { using Attribute<uint>::Attribute; };
 
 static const Generator<MaximumError> maximum_error = Generator<MaximumError>();
 static const Generator<SweepThreshold> sweep_threshold = Generator<SweepThreshold>();
-static const Generator<MaximumNumberOfSteps> maximum_number_of_steps = Generator<MaximumNumberOfSteps>();
+static const Generator<MaximumNumericTypeOfSteps> maximum_number_of_steps = Generator<MaximumNumericTypeOfSteps>();
 
 struct Capacity : Attribute<SizeType> { };
 static const Generator<Capacity> capacity = Generator<Capacity>();

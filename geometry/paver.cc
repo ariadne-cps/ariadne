@@ -68,8 +68,8 @@ Void optimal_constraint_adjoin_outer_approximation(PavingInterface& paving, cons
 namespace {
 
 ValidatedProcedure make_procedure(const ValidatedScalarFunction& f) {
-    Formula<ValidatedNumber> e=f(Formula<ValidatedNumber>::identity(f.argument_size()));
-    return Procedure<ValidatedNumber>(e);
+    Formula<ValidatedNumericType> e=f(Formula<ValidatedNumericType>::identity(f.argument_size()));
+    return Procedure<ValidatedNumericType>(e);
 }
 
 UpperInterval emulrng(const ExactFloatVector& x, const ExactFloatVector& z) {

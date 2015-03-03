@@ -41,11 +41,11 @@ namespace Ariadne {
 class GridTreeSet;
 
 template<class X, class R> class Constraint;
-typedef Constraint<EffectiveScalarFunction,EffectiveNumber> EffectiveConstraint;
-typedef Constraint<ValidatedScalarFunction,ValidatedNumber> ValidatedConstraint;
+typedef Constraint<EffectiveScalarFunction,EffectiveNumericType> EffectiveConstraint;
+typedef Constraint<ValidatedScalarFunction,ValidatedNumericType> ValidatedConstraint;
 
 template<class X> class Procedure;
-typedef Procedure<ValidatedNumber> ValidatedProcedure;
+typedef Procedure<ValidatedNumericType> ValidatedProcedure;
 
 template<class P,class F> class TaylorModel;
 template<class M> class VectorFunctionPatch;
@@ -108,7 +108,7 @@ class ConstraintSolver
     Bool lyapunov_reduce(UpperBox& domain, const VectorTaylorFunction& function, const ExactBox& codomain,
                          Vector<ExactFloat64> centre, Vector<ExactFloat64> multpliers) const;
     Bool lyapunov_reduce(UpperBox& domain, const VectorTaylorFunction& function, const ExactBox& codomain,
-                         Vector<ApproximateNumber> centre, Vector<ApproximateNumber> multpliers) const;
+                         Vector<ApproximateNumericType> centre, Vector<ApproximateNumericType> multpliers) const;
     //! \brief Try to enforce hull consistency by reducing a constraint with respect to one variable.
     Bool box_reduce(UpperBox& bx, const ValidatedScalarFunction& function, const ExactInterval&, Nat j) const;
     //! \brief Try to enforce hull consistency by reducing an a monotone dimension.

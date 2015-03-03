@@ -30,21 +30,21 @@
 
 namespace Ariadne {
 
-typedef ApproximateNumber ApproximateNumber;
-typedef ValidatedNumber ValidatedNumber;
-typedef EffectiveNumber EffectiveNumber;
-typedef Differential<ApproximateNumber> ApproximateDifferential;
-typedef Differential<ValidatedNumber> ValidatedDifferential;
-typedef UnivariateDifferential<ApproximateNumber> ApproximateUnivariateDifferential;
-typedef UnivariateDifferential<ValidatedNumber> ValidatedUnivariateDifferential;
+typedef ApproximateNumericType ApproximateNumericType;
+typedef ValidatedNumericType ValidatedNumericType;
+typedef EffectiveNumericType EffectiveNumericType;
+typedef Differential<ApproximateNumericType> ApproximateDifferential;
+typedef Differential<ValidatedNumericType> ValidatedDifferential;
+typedef UnivariateDifferential<ApproximateNumericType> ApproximateUnivariateDifferential;
+typedef UnivariateDifferential<ValidatedNumericType> ValidatedUnivariateDifferential;
 typedef TaylorModel<Approximate,Float64> ApproximateTaylorModel;
 typedef TaylorModel<Validated,Float64> ValidatedTaylorModel;
-typedef Formula<ApproximateNumber> ApproximateFormula;
-typedef Formula<ValidatedNumber> ValidatedFormula;
-typedef Formula<EffectiveNumber> EffectiveFormula;
-typedef Algebra<ApproximateNumber> ApproximateAlgebra;
-typedef Algebra<ValidatedNumber> ValidatedAlgebra;
-typedef Algebra<EffectiveNumber> EffectiveAlgebra;
+typedef Formula<ApproximateNumericType> ApproximateFormula;
+typedef Formula<ValidatedNumericType> ValidatedFormula;
+typedef Formula<EffectiveNumericType> EffectiveFormula;
+typedef Algebra<ApproximateNumericType> ApproximateAlgebra;
+typedef Algebra<ValidatedNumericType> ValidatedAlgebra;
+typedef Algebra<EffectiveNumericType> EffectiveAlgebra;
 
 template<class F, class P, class D, class C> class FunctionMixin { };
 template<class F, class P, class D=BoxDomain> class ScalarFunctionMixin;
@@ -105,7 +105,7 @@ class FunctionMixin<F,ApproximateTag,D,C>
     template<class X> using Result = typename ElementTraits<C>::template Type<X>;
   public:
     virtual FunctionInterface<ApproximateTag,D,C>* _clone() const;
-    virtual Result<ApproximateNumber> _evaluate(const Argument<ApproximateNumber>& x) const;
+    virtual Result<ApproximateNumericType> _evaluate(const Argument<ApproximateNumericType>& x) const;
     virtual Result<ApproximateDifferential> _evaluate(const Argument<ApproximateDifferential>& x) const;
     virtual Result<ApproximateFormula> _evaluate(const Argument<ApproximateFormula>& x) const;
     virtual Result<ApproximateTaylorModel> _evaluate(const Argument<ApproximateTaylorModel>& x) const;
@@ -122,7 +122,7 @@ class FunctionMixin<F,ValidatedTag,D,C>
     template<class X> using Result = typename ElementTraits<C>::template Type<X>;
   public:
     virtual FunctionInterface<ValidatedTag,D,C>* _clone() const;
-    virtual Result<ValidatedNumber> _evaluate(const Argument<ValidatedNumber>& x) const;
+    virtual Result<ValidatedNumericType> _evaluate(const Argument<ValidatedNumericType>& x) const;
     virtual Result<ValidatedDifferential> _evaluate(const Argument<ValidatedDifferential>& x) const;
     virtual Result<ValidatedFormula> _evaluate(const Argument<ValidatedFormula>& x) const;
     virtual Result<ValidatedTaylorModel> _evaluate(const Argument<ValidatedTaylorModel>& x) const;
@@ -140,7 +140,7 @@ class FunctionMixin<F,EffectiveTag,D,C>
     template<class X> using Result = typename ElementTraits<C>::template Type<X>;
   public:
     virtual FunctionInterface<EffectiveTag,D,C>* _clone() const;
-    virtual Result<EffectiveNumber> _evaluate(const Argument<EffectiveNumber>& x) const;
+    virtual Result<EffectiveNumericType> _evaluate(const Argument<EffectiveNumericType>& x) const;
     virtual Result<EffectiveFormula> _evaluate(const Argument<EffectiveFormula>& x) const;
     virtual Result<EffectiveAlgebra> _evaluate(const Argument<EffectiveAlgebra>& x) const;
 };

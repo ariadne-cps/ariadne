@@ -45,7 +45,7 @@ class UpperReal;
 class PositiveReal;
 class PositiveLowerReal;
 class PositiveUpperReal;
-template<> struct IsNumber<Real> : True { };
+template<> struct IsNumericType<Real> : True { };
 
 struct Accuracy {
     Nat _bits;
@@ -58,7 +58,7 @@ struct Accuracy {
 extern const Real pi;
 extern const Real infinity;
 
-//! \ingroup UserNumberSubModule
+//! \ingroup UserNumericTypeSubModule
 //! \brief Computable real numbers definable in terms of elementary functions.
 class Real
 {
@@ -168,7 +168,7 @@ template<class M, EnableIf<And<IsIntegral<M>,IsUnsigned<M>>>> inline Real::Real(
 template<class N, EnableIf<And<IsIntegral<N>,IsSigned<N>>>> inline Real::Real(N n) : Real(std::int64_t(n),nullptr) { };
 
 
-//! \ingroup UserNumberSubModule
+//! \ingroup UserNumericTypeSubModule
 //! \brief Computable lower real numbers defined by conversion to concrete floats.
 class LowerReal
 {
@@ -200,7 +200,7 @@ class LowerReal
     UpperReal sub(UpperReal,LowerReal);
 };
 
-//! \ingroup UserNumberSubModule
+//! \ingroup UserNumericTypeSubModule
 //! \brief Computable lower real numbers defined by conversion to concrete floats.
 class UpperReal
 {
@@ -232,7 +232,7 @@ class UpperReal
     LowerReal sub(LowerReal,UpperReal);
 };
 
-//! \ingroup UserNumberSubModule
+//! \ingroup UserNumericTypeSubModule
 //! \brief Computable lower real numbers defined by conversion to concrete floats.
 class PositiveReal : public Real
 {
@@ -255,7 +255,7 @@ class PositiveReal : public Real
     PositiveReal div(PositiveReal,PositiveReal);
 };
 
-//! \ingroup UserNumberSubModule
+//! \ingroup UserNumericTypeSubModule
 //! \brief Computable lower real numbers defined by conversion to concrete floats.
 class PositiveLowerReal : public LowerReal
 {
@@ -273,7 +273,7 @@ class PositiveLowerReal : public LowerReal
     PositiveUpperReal div(PositiveUpperReal,PositiveLowerReal);
 };
 
-//! \ingroup UserNumberSubModule
+//! \ingroup UserNumericTypeSubModule
 //! \brief Computable lower real numbers defined by conversion to concrete floats.
 class PositiveUpperReal : public UpperReal
 {

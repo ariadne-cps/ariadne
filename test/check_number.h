@@ -36,7 +36,7 @@ template<class T1, class T2> struct IsLessThanCompartible : HasBinaryOperator<Le
 template<class X, class N, class R=Return<DontCare>, class = Fallback> struct HasPow : IsConvertible<SafeType<Pow,X,N>,R> { };
 
 
-template<class N> class CheckNumberConcepts {
+template<class N> class CheckNumericTypeConcepts {
   public:
     void check_signed_concept() {
         ARIADNE_TEST_STATIC_ASSERT(HasOperatorReturning<N,OperatorPlus,N>);

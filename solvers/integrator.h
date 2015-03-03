@@ -48,8 +48,8 @@ template<class X> class Vector;
 template<class X> class Differential;
 template<class X> class Procedure;
 template<class X> class Polynomial;
-typedef Differential<ValidatedNumber> ValidatedDifferential;
-typedef Vector< Procedure<ValidatedNumber> > ValidatedVectorProcedure;
+typedef Differential<ValidatedNumericType> ValidatedDifferential;
+typedef Vector< Procedure<ValidatedNumericType> > ValidatedVectorProcedure;
 template<class X> class FunctionModelFactoryInterface;
 typedef FunctionModelFactoryInterface<ValidatedTag> ValidatedFunctionModelFactoryInterface;
 typedef std::shared_ptr<const ValidatedFunctionModelFactoryInterface> FunctionFactoryPointer;
@@ -278,7 +278,7 @@ class AffineIntegrator
     //! \brief Compute the derivative of the flow of f at time zero within \a dom.
     Vector<ValidatedDifferential>
     flow_derivative(const ValidatedVectorFunction& f,
-                    const Vector<ValidatedNumber>& dom) const;
+                    const Vector<ValidatedNumericType>& dom) const;
 };
 
 

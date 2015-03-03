@@ -54,15 +54,15 @@ class CanvasInterface;
 class Point2d;
 
 
-typedef Constraint<AffineModel<ValidatedNumber>,ValidatedFloat64> ValidatedAffineModelConstraint;
-typedef Constraint<Affine<ValidatedNumber>,ValidatedFloat64> ValidatedAffineConstraint;
-typedef Constraint<Affine<EffectiveNumber>,EffectiveNumber> EffectiveAffineConstraint;
-typedef Affine<ValidatedNumber> ValidatedAffineFunction;
+typedef Constraint<AffineModel<ValidatedNumericType>,ValidatedFloat64> ValidatedAffineModelConstraint;
+typedef Constraint<Affine<ValidatedNumericType>,ValidatedFloat64> ValidatedAffineConstraint;
+typedef Constraint<Affine<EffectiveNumericType>,EffectiveNumericType> EffectiveAffineConstraint;
+typedef Affine<ValidatedNumericType> ValidatedAffineFunction;
 
-EffectiveAffineConstraint operator<=(const EffectiveNumber& l, const EffectiveAffine& am);
-EffectiveAffineConstraint operator<=(const EffectiveAffine& am, const EffectiveNumber& u);
-EffectiveAffineConstraint operator<=(const EffectiveAffine& am, const EffectiveNumber& u);
-EffectiveAffineConstraint operator==(const EffectiveAffine& am, const EffectiveNumber& b);
+EffectiveAffineConstraint operator<=(const EffectiveNumericType& l, const EffectiveAffine& am);
+EffectiveAffineConstraint operator<=(const EffectiveAffine& am, const EffectiveNumericType& u);
+EffectiveAffineConstraint operator<=(const EffectiveAffine& am, const EffectiveNumericType& u);
+EffectiveAffineConstraint operator==(const EffectiveAffine& am, const EffectiveNumericType& b);
 
 ValidatedAffineConstraint operator<=(const ValidatedFloat64& l, const ValidatedAffineFunction& am);
 ValidatedAffineConstraint operator<=(const ValidatedAffineFunction& am, const ValidatedFloat64& u);

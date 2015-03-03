@@ -138,7 +138,7 @@ template<class F> DegreeType TaylorModel<Validated,F>::degree() const {
 }
 
 
-template<class F> TaylorModel<Validated,F>& TaylorModel<Validated,F>::operator=(const ValidatedNumber& c) {
+template<class F> TaylorModel<Validated,F>& TaylorModel<Validated,F>::operator=(const ValidatedNumericType& c) {
     this->_expansion.clear();
     ExactFloat64 m=c.value();
     if(m!=0) {
@@ -591,21 +591,21 @@ template<class F> inline Void _mul(TaylorModel<Validated,F>& r, const TaylorMode
 
 // Inplace arithmetical operations for Algebra concept
 
-template<class F> Void TaylorModel<Validated,F>::iadd(const ValidatedNumber& c)
+template<class F> Void TaylorModel<Validated,F>::iadd(const ValidatedNumericType& c)
 {
     _acc(*this,c);
     this->sweep();
     ARIADNE_DEBUG_ASSERT_MSG(this->error()>=0,*this);
 }
 
-template<class F> Void TaylorModel<Validated,F>::imul(const ValidatedNumber& c)
+template<class F> Void TaylorModel<Validated,F>::imul(const ValidatedNumericType& c)
 {
     _scal(*this,c);
     this->sweep();
     ARIADNE_DEBUG_ASSERT_MSG(this->error()>=0,*this);
 }
 
-template<class F> Void TaylorModel<Validated,F>::isma(const ValidatedNumber& c, const TaylorModel<Validated,F>& y)
+template<class F> Void TaylorModel<Validated,F>::isma(const ValidatedNumericType& c, const TaylorModel<Validated,F>& y)
 {
     TaylorModel<Validated,F>& x=*this;
     TaylorModel<Validated,F> r=this->create();
@@ -1140,18 +1140,18 @@ template<class F> TaylorModel<Validated,F> derivative(const TaylorModel<Validate
 // Scalar function operators (evaluate, split, unscale, embed)
 // and predicates (refines)
 
-template<class F> ValidatedNumber TaylorModel<Validated,F>::_evaluate(const TaylorModel<Validated,F>& tm, const Vector<ValidatedNumber>& x) {
-    return horner_evaluate(tm.expansion(),x)+ValidatedNumber(-tm.error(),+tm.error());
+template<class F> ValidatedNumericType TaylorModel<Validated,F>::_evaluate(const TaylorModel<Validated,F>& tm, const Vector<ValidatedNumericType>& x) {
+    return horner_evaluate(tm.expansion(),x)+ValidatedNumericType(-tm.error(),+tm.error());
 }
 
-template<class F> ApproximateNumber TaylorModel<Validated,F>::_evaluate(const TaylorModel<Validated,F>& tm, const Vector<ApproximateNumber>& x) {
+template<class F> ApproximateNumericType TaylorModel<Validated,F>::_evaluate(const TaylorModel<Validated,F>& tm, const Vector<ApproximateNumericType>& x) {
     return horner_evaluate(tm.expansion(),x);
 }
 
 
-template<class F> Covector<ValidatedNumber> TaylorModel<Validated,F>::_gradient(const TaylorModel<Validated,F>& tm, const Vector<ValidatedNumber>& x) {
-    Vector< Differential<ValidatedNumber> > dx=Differential<ValidatedNumber>::variables(1u,x);
-    Differential<ValidatedNumber> df=horner_evaluate(tm.expansion(),dx)+ValidatedNumber(-tm.error(),+tm.error());
+template<class F> Covector<ValidatedNumericType> TaylorModel<Validated,F>::_gradient(const TaylorModel<Validated,F>& tm, const Vector<ValidatedNumericType>& x) {
+    Vector< Differential<ValidatedNumericType> > dx=Differential<ValidatedNumericType>::variables(1u,x);
+    Differential<ValidatedNumericType> df=horner_evaluate(tm.expansion(),dx)+ValidatedNumericType(-tm.error(),+tm.error());
     return gradient(df);
 }
 
@@ -1182,8 +1182,8 @@ template<class F> Void TaylorModel<Validated,F>::unscale(ExactInterval const& iv
         // Uncomment out line below to make unscaling to a singleton interval undefined
         //tm.clear(); tm.set_error(+inf);
     } else {
-        ValidatedNumber c=ivl.centre();
-        ValidatedNumber s=rec(ivl.radius());
+        ValidatedNumericType c=ivl.centre();
+        ValidatedNumericType s=rec(ivl.radius());
         tm-=c;
         tm*=s;
     }
@@ -1209,23 +1209,23 @@ template<class T> class Powers {
     mutable std::vector<T> _values;
 };
 
-template<> class Powers<ValidatedNumber> {
+template<> class Powers<ValidatedNumericType> {
   public:
-    explicit Powers(const ValidatedNumber& t) { _values.push_back(ValidatedNumber(1)); _values.push_back(t); }
-    explicit Powers(const ValidatedNumber& z, const ValidatedNumber& t) { _values.push_back(z); _values.push_back(t); }
-    const ValidatedNumber& operator[](SizeType i) const {
+    explicit Powers(const ValidatedNumericType& t) { _values.push_back(ValidatedNumericType(1)); _values.push_back(t); }
+    explicit Powers(const ValidatedNumericType& z, const ValidatedNumericType& t) { _values.push_back(z); _values.push_back(t); }
+    const ValidatedNumericType& operator[](SizeType i) const {
         while(_values.size()<=i) {
             if(_values.size()%2==0) { _values.push_back(sqr(_values[_values.size()/2])); }
             else { _values.push_back(_values[1]*_values.back()); } }
         return _values[i]; }
   private:
-    mutable std::vector<ValidatedNumber> _values;
+    mutable std::vector<ValidatedNumericType> _values;
 };
 
 
 
 template<class F> TaylorModel<Validated,F>
-TaylorModel<Validated,F>::_partial_evaluate(const TaylorModel<Validated,F>& x, SizeType k, ValidatedNumber c)
+TaylorModel<Validated,F>::_partial_evaluate(const TaylorModel<Validated,F>& x, SizeType k, ValidatedNumericType c)
 {
     const SizeType as=x.argument_size();
     Vector<TaylorModel<Validated,F>> y(as,TaylorModel<Validated,F>(as-1,x.sweeper()));
@@ -1445,7 +1445,7 @@ template<class F> Vector<TaylorModel<Validated,F>> TaylorModel<Validated,F>::zer
 }
 
 
-template<class F> Vector<TaylorModel<Validated,F>> TaylorModel<Validated,F>::constants(SizeType as, const Vector<ValidatedNumber>& c, Sweeper swp)
+template<class F> Vector<TaylorModel<Validated,F>> TaylorModel<Validated,F>::constants(SizeType as, const Vector<ValidatedNumericType>& c, Sweeper swp)
 {
     Vector<TaylorModel<Validated,F>> result(c.size(),TaylorModel<Validated,F>::zero(as,swp));
     for(SizeType i=0; i!=c.size(); ++i) {
@@ -1477,31 +1477,31 @@ template<class F> Vector<TaylorModel<Validated,F>> TaylorModel<Validated,F>::sca
 // Jacobian matrices
 
 // Compute the Jacobian over an arbitrary domain
-template<class F> Matrix<ValidatedNumber>
-jacobian(const Vector<TaylorModel<Validated,F>>& f, const Vector<ValidatedNumber>& x) {
-    Vector< Differential<ValidatedNumber> > dx=Differential<ValidatedNumber>::variables(1u,x);
-    Vector< Differential<ValidatedNumber> > df(f.size(),x.size(),1u);
+template<class F> Matrix<ValidatedNumericType>
+jacobian(const Vector<TaylorModel<Validated,F>>& f, const Vector<ValidatedNumericType>& x) {
+    Vector< Differential<ValidatedNumericType> > dx=Differential<ValidatedNumericType>::variables(1u,x);
+    Vector< Differential<ValidatedNumericType> > df(f.size(),x.size(),1u);
     for(SizeType i=0; i!=f.size(); ++i) {
         df[i]=evaluate(f[i].expansion(),dx);
     }
-    Matrix<ValidatedNumber> J=jacobian(df);
+    Matrix<ValidatedNumericType> J=jacobian(df);
     return J;
 }
 
 // Compute the Jacobian over an arbitrary domain
-template<class F> Matrix<ValidatedNumber>
-jacobian(const Vector<TaylorModel<Validated,F>>& f, const Vector<ValidatedNumber>& x, const Array<SizeType>& p) {
-    Vector<Differential<ValidatedNumber>> dx(x.size());
+template<class F> Matrix<ValidatedNumericType>
+jacobian(const Vector<TaylorModel<Validated,F>>& f, const Vector<ValidatedNumericType>& x, const Array<SizeType>& p) {
+    Vector<Differential<ValidatedNumericType>> dx(x.size());
     for(SizeType j=0; j!=x.size(); ++j) {
-        dx[j]=Differential<ValidatedNumber>::constant(p.size(),1u,x[j]); }
+        dx[j]=Differential<ValidatedNumericType>::constant(p.size(),1u,x[j]); }
     for(SizeType k=0; k!=p.size(); ++k) {
         SizeType j=p[k];
-        dx[j]=Differential<ValidatedNumber>::variable(p.size(),1u,x[j],k); }
-    Vector< Differential<ValidatedNumber> > df(f.size());
+        dx[j]=Differential<ValidatedNumericType>::variable(p.size(),1u,x[j],k); }
+    Vector< Differential<ValidatedNumericType> > df(f.size());
     for(SizeType i=0; i!=f.size(); ++i) {
         df[i]=evaluate(f[i].expansion(),dx);
     }
-    Matrix<ValidatedNumber> J=jacobian(df);
+    Matrix<ValidatedNumericType> J=jacobian(df);
     return J;
 }
 

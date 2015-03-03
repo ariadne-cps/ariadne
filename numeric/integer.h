@@ -84,11 +84,11 @@ uint64_t bin(uint64_t n, uint64_t k);
 
 struct Exact;
 class Integer;
-template<> struct IsNumber<Nat> : True { };
-template<> struct IsNumber<Int> : True { };
-template<> struct IsNumber<Integer> : True { };
+template<> struct IsNumericType<Nat> : True { };
+template<> struct IsNumericType<Int> : True { };
+template<> struct IsNumericType<Integer> : True { };
 
-//! \ingroup UserNumberSubModule
+//! \ingroup UserNumericTypeSubModule
 //! \brief Arbitrarily-sized integers.
 class Integer
 {

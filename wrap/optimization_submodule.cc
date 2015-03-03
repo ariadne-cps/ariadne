@@ -81,10 +81,10 @@ Void export_variable_type()
 
 Void export_constraint()
 {
-    class_<EffectiveConstraint> effective_nonlinear_constraint_class("EffectiveConstraint",init<Real,EffectiveScalarFunction,EffectiveNumber>());
+    class_<EffectiveConstraint> effective_nonlinear_constraint_class("EffectiveConstraint",init<Real,EffectiveScalarFunction,EffectiveNumericType>());
     effective_nonlinear_constraint_class.def(self_ns::str(self));
 
-    class_<ValidatedConstraint> validated_nonlinear_constraint_class("ValidatedConstraint",init<ValidatedNumber,ValidatedScalarFunction,ValidatedNumber>());
+    class_<ValidatedConstraint> validated_nonlinear_constraint_class("ValidatedConstraint",init<ValidatedNumericType,ValidatedScalarFunction,ValidatedNumericType>());
     validated_nonlinear_constraint_class.def(init<ValidatedConstraint>());
     validated_nonlinear_constraint_class.def(init<EffectiveConstraint>());
     validated_nonlinear_constraint_class.def("lower_bound", &ValidatedConstraint::lower_bound, return_value_policy<copy_const_reference>());

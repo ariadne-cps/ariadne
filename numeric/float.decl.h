@@ -115,9 +115,9 @@ template<class P, class PR> struct IsFloat<Float<P,PR>> : True { };
 template<> struct IsFloat<Dbl> : False { };
 
 
-template<class T> struct IsNumber;
-template<> struct IsNumber<Dbl> : True { };
-template<class P, class PR> struct IsNumber<Float<P,PR>> : True { };
+template<class T> struct IsNumericType;
+template<> struct IsNumericType<Dbl> : True { };
+template<class P, class PR> struct IsNumericType<Float<P,PR>> : True { };
 
 } // namespace Ariadne
 

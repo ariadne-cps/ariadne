@@ -50,7 +50,7 @@ class PredicateInterface {
 
     virtual SizeType argument_size() const = 0;
     virtual Kleenean evaluate(const Vector<Float64>& x) const = 0;
-    virtual Kleenean evaluate(const Vector<ValidatedNumber>& x) const = 0;
+    virtual Kleenean evaluate(const Vector<ValidatedNumericType>& x) const = 0;
 };
 
 class ExpressionPredicate
@@ -77,7 +77,7 @@ class ExpressionPredicate
         if(value<0) { return true; }
         else if(value>0) { return false; }
         else { return indeterminate; } }
-    Kleenean evaluate(const Vector<ValidatedNumber>& x) const {
+    Kleenean evaluate(const Vector<ValidatedNumericType>& x) const {
         ExactInterval range=_expression.evaluate(x)*_sign;
         if(range.upper()<0) { return true; }
         else if(range.lower()>0) { return false; }
@@ -114,7 +114,7 @@ class DisjunctivePredicate
 
     virtual SizeType argument_size() const;
     virtual Kleenean evaluate(const Vector<Float64>& x) const;
-    virtual Kleenean evaluate(const Vector<ValidatedNumber>& x) const;
+    virtual Kleenean evaluate(const Vector<ValidatedNumericType>& x) const;
 
   private:
     std::vector<ExpressionPredicate> _predicates;
@@ -139,7 +139,7 @@ class ConjunctiveNormalFormPredicate
 
     virtual SizeType argument_size() const;
     virtual Kleenean evaluate(const Vector<Float64>& x) const;
-    virtual Kleenean evaluate(const Vector<ValidatedNumber>& x) const;
+    virtual Kleenean evaluate(const Vector<ValidatedNumericType>& x) const;
   private:
     std::vector<DisjunctivePredicate> _cnf;
 };

@@ -130,7 +130,7 @@ ValidatedVectorFunctionModel make_identity(const EffectiveBox& bx, const Validat
 
     ValidatedVectorFunctionModel res=fac.create_identity(dom);
     for(Nat i=0; i!=bx.dimension(); ++i) {
-        res[i]=res[i]+ValidatedNumber(-errs[i],+errs[i]);
+        res[i]=res[i]+ValidatedNumericType(-errs[i],+errs[i]);
     }
 
     return res;

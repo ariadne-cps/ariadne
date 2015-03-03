@@ -38,8 +38,8 @@
 namespace Ariadne {
 
 template<class X, class R> class Constraint;
-typedef Constraint<EffectiveScalarFunction,EffectiveNumber> EffectiveConstraint;
-typedef Constraint<ValidatedScalarFunction,ValidatedNumber> ValidatedConstraint;
+typedef Constraint<EffectiveScalarFunction,EffectiveNumericType> EffectiveConstraint;
+typedef Constraint<ValidatedScalarFunction,ValidatedNumericType> ValidatedConstraint;
 
 class InfeasibleProblemException : public std::runtime_error {
   public: InfeasibleProblemException() : std::runtime_error("InfeasibleProblemException") { }
@@ -64,9 +64,9 @@ class OptimiserInterface {
     virtual OptimiserInterface* clone() const = 0;
 
     //! \brief Solve the general nonlinear programming problem \f$\min f(x) \text{ such that } x\in D \text{ and } g(x)\in C\f$.
-    virtual Vector<ValidatedNumber> minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ExactBox C) const = 0;
+    virtual Vector<ValidatedNumericType> minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ExactBox C) const = 0;
     //! \brief Solve the standard nonlinear programming problem \f$\min f(x) \text{ such that } x\in ,D\ g(x)\leq 0  \text{ and } h(x) = 0\f$.
-    virtual Vector<ValidatedNumber> minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ValidatedVectorFunction h) const = 0;
+    virtual Vector<ValidatedNumericType> minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ValidatedVectorFunction h) const = 0;
 
     //! \brief Tests is the general nonlinear feasibility problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
     virtual Kleenean feasible(ExactBox D, ValidatedVectorFunction g, ExactBox C) const = 0;
@@ -104,8 +104,8 @@ class OptimiserBase
     , public Loggable
 {
   public:
-    virtual Vector<ValidatedNumber> minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ExactBox C) const = 0;
-    virtual Vector<ValidatedNumber> minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ValidatedVectorFunction h) const;
+    virtual Vector<ValidatedNumericType> minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ExactBox C) const = 0;
+    virtual Vector<ValidatedNumericType> minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ValidatedVectorFunction h) const;
 
     virtual Kleenean feasible(ExactBox D, ValidatedVectorFunction g, ExactBox C) const = 0;
     virtual Kleenean feasible(ExactBox D, ValidatedVectorFunction g, ValidatedVectorFunction h) const;
@@ -139,7 +139,7 @@ class PenaltyFunctionOptimiser
   public:
     virtual PenaltyFunctionOptimiser* clone() const;
     virtual Kleenean check_feasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C, ExactVector x, ExactVector y) const;
-    virtual Vector<ValidatedNumber> minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ExactBox C) const;
+    virtual Vector<ValidatedNumericType> minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ExactBox C) const;
     virtual Kleenean feasible(ExactBox D, ValidatedVectorFunction g, ExactBox C) const;
     virtual Void feasibility_step(const ExactBox& D, const ApproximateVectorFunction& g, const ExactBox& C,
                                   ApproximateFloatVector& x, ApproximateFloatVector& w, ApproximateFloat64& mu) const;
@@ -171,7 +171,7 @@ class NonlinearInfeasibleInteriorPointOptimiser
     //! \brief Compute a \em local optimum of linear programming problem \f$\max f(x) \text{ such that } x\in D, g(x)\in C \text{ and } h(x)=0.\f$.
     //! \precondition The domain \f$D\f$ is singleton and has nonempty interior, and the codomain \f$C\f$ is nonempty.
     //! \return A box \f$X\f$ which definitely contains a feasible point, and contains a local optimum.
-    virtual Vector<ValidatedNumber> minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ExactBox C) const;
+    virtual Vector<ValidatedNumericType> minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ExactBox C) const;
     //! \brief Tests is the nonlinear programming problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
     virtual Kleenean feasible(ExactBox D, ValidatedVectorFunction g, ExactBox C) const;
 
@@ -203,7 +203,7 @@ class NonlinearInteriorPointOptimiser
     //! \brief Compute a \em local optimum of linear programming problem \f$\max f(x) \text{ such that } x\in D, g(x)\in C \text{ and } h(x)=0.\f$.
     //! \precondition The domain \f$D\f$ is singleton and has nonempty interior, and the codomain \f$C\f$ is nonempty.
     //! \return A box \f$X\f$ which definitely contains a feasible point, and contains a local optimum.
-    virtual Vector<ValidatedNumber> minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ExactBox C) const;
+    virtual Vector<ValidatedNumericType> minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ExactBox C) const;
     //! \brief Tests is the nonlinear programming problem \f$x\in D, g(x)\in C \text{ and } h(x)= 0 \f$ is feasible.
     virtual Kleenean feasible(ExactBox D, ValidatedVectorFunction g, ExactBox C) const;
 
@@ -282,7 +282,7 @@ class KrawczykOptimiser
     virtual KrawczykOptimiser* clone() const { return new KrawczykOptimiser(*this); }
 
     //! \brief Solve the linear programming problem \f$\max f(x) \text{ such that } x\in D \text{ and } g(x)\in C\f$.
-    virtual Vector<ValidatedNumber> minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ExactBox C) const;
+    virtual Vector<ValidatedNumericType> minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ExactBox C) const;
     //! \brief Tests is the nonlinear programming problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
     virtual Kleenean feasible(ExactBox D, ValidatedVectorFunction g, ExactBox C) const;
 

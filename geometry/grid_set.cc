@@ -119,22 +119,22 @@ const Vector<Float64>& Grid::lengths() const
     return this->_data->_lengths;
 }
 
-ExactNumber Grid::coordinate(Nat d, DyadicType x) const
+ExactNumericType Grid::coordinate(Nat d, DyadicType x) const
 {
-    return ExactNumber(add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],x)));
+    return ExactNumericType(add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],x)));
 }
 
-ExactNumber Grid::subdivision_coordinate(Nat d, DyadicType x) const
+ExactNumericType Grid::subdivision_coordinate(Nat d, DyadicType x) const
 {
-    return ExactNumber(add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],x)));
+    return ExactNumericType(add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],x)));
 }
 
-ExactNumber Grid::subdivision_coordinate(Nat d, IntegerType n) const
+ExactNumericType Grid::subdivision_coordinate(Nat d, IntegerType n) const
 {
-    return ExactNumber(add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],n)));
+    return ExactNumericType(add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],n)));
 }
 
-Int Grid::subdivision_index(Nat d, const ExactNumber& x) const
+Int Grid::subdivision_index(Nat d, const ExactNumericType& x) const
 {
     Float64 half=0.5;
     Int n=integer_cast<Int>(floor(add_approx(div_approx(sub_approx(x.raw(),this->_data->_origin[d]),this->_data->_lengths[d]),half)));
@@ -142,11 +142,11 @@ Int Grid::subdivision_index(Nat d, const ExactNumber& x) const
     if(sc == x.raw()) {
         return n;
     } else {
-        ARIADNE_THROW(InvalidGridPosition,std::setprecision(20)<<"Grid::subdivision_index(Nat d,ExactNumber x)","d="<<d<<", x="<<x<<", this->origin[d]="<<this->_data->_origin[d]<<", this->lengths[d]="<<this->_data->_lengths[d]<<" (closest value is "<<sc<<")");
+        ARIADNE_THROW(InvalidGridPosition,std::setprecision(20)<<"Grid::subdivision_index(Nat d,ExactNumericType x)","d="<<d<<", x="<<x<<", this->origin[d]="<<this->_data->_origin[d]<<", this->lengths[d]="<<this->_data->_lengths[d]<<" (closest value is "<<sc<<")");
     }
 }
 
-Int Grid::subdivision_lower_index(Nat d, const LowerNumber& x) const
+Int Grid::subdivision_lower_index(Nat d, const LowerNumericType& x) const
 {
     Int n=integer_cast<Int>(floor(div_down(sub_down(x.raw(),this->_data->_origin[d]),this->_data->_lengths[d])));
     if(x.raw()>=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],(n+1)))) {
@@ -156,7 +156,7 @@ Int Grid::subdivision_lower_index(Nat d, const LowerNumber& x) const
     }
 }
 
-Int Grid::subdivision_upper_index(Nat d, const UpperNumber& x) const
+Int Grid::subdivision_upper_index(Nat d, const UpperNumericType& x) const
 {
     Int n=integer_cast<Int>(ceil(div_up(sub_up(x.raw(),this->_data->_origin[d]),this->_data->_lengths[d])));
     if(x.raw()<=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],(n-1)))) {
@@ -1136,10 +1136,10 @@ GridCell GridOpenCell::neighboring_cell( const Grid& theGrid, const Nat theHeigh
     //Initialize the Array with NO_INVERSE_POSITION to make sure that the inversion positions
     //for the dimensions that are not set to one in cellPosition will be undefined. Also,
     //count the required number of iverse dimensions
-    Int inverseDimensionsNumber = 0;
+    Int inverseDimensionsNumericType = 0;
     for( Nat i = 0; i < num_dimensions; i++ ) {
         invert_position[ i ] = NO_INVERSE_POSITION;
-        inverseDimensionsNumber += cellPosition[i];
+        inverseDimensionsNumericType += cellPosition[i];
     }
 
     //02. Create the path to the neighboring cell and initialize it with the path to the base cell
@@ -1150,9 +1150,9 @@ GridCell GridOpenCell::neighboring_cell( const Grid& theGrid, const Nat theHeigh
     //    for the first zero in the path. This position, for each dimension, will indicate the path
     //    suffix which has to be inverted to get the neighboring cell defined by cellPosition
     Int firstInversePosition = NO_INVERSE_POSITION;
-    if( inverseDimensionsNumber > 0 ) {
+    if( inverseDimensionsNumericType > 0 ) {
         //If there is a need to do inverses, i.e. we are not adding the base cell itself
-        Int foundNumberOfInverses = 0;
+        Int foundNumericTypeOfInverses = 0;
         for( Int position = ( theNeighborCellWord.size() - 1 ); position >= 0; position-- ){
             //Only consider the dimension that we need and look for the first opotrunity to invert the path suffix.
             Int dimension = position % num_dimensions;
@@ -1167,8 +1167,8 @@ GridCell GridOpenCell::neighboring_cell( const Grid& theGrid, const Nat theHeigh
                     firstInversePosition = position;
                 }
                 //Incremenet the number of fount inverses and check if this is all we need, if yes then break
-                foundNumberOfInverses += 1;
-                if( foundNumberOfInverses == inverseDimensionsNumber ) {
+                foundNumericTypeOfInverses += 1;
+                if( foundNumericTypeOfInverses == inverseDimensionsNumericType ) {
                     break;
                 }
             }

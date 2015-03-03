@@ -74,7 +74,7 @@ struct IntersectionException : public std::runtime_error {
  */
 template<class F>
 class TaylorModel<Validated,F>
-    : public NormedAlgebraMixin<TaylorModel<Validated,F>,ValidatedNumber>
+    : public NormedAlgebraMixin<TaylorModel<Validated,F>,ValidatedNumericType>
 {
   public:
     typedef ExactFloat64 CoefficientType;
@@ -90,7 +90,7 @@ class TaylorModel<Validated,F>
     typedef Validated Paradigm;
 
     //! \brief The type used for the coefficients.
-    typedef ValidatedNumber NumericType;
+    typedef ValidatedNumericType NumericType;
 
     typedef ValidatedScalarFunction FunctionType;
     typedef ValidatedScalarFunction ScalarFunctionType;
@@ -137,7 +137,7 @@ class TaylorModel<Validated,F>
     //@{
     /*! \name Assignment to constant values. */
     //! \brief Set equal to an interval constant, keeping the same number of arguments.
-    TaylorModel<Validated,F>& operator =(const ValidatedNumber& c);
+    TaylorModel<Validated,F>& operator =(const ValidatedNumericType& c);
     //@}
 
     //@{
@@ -164,7 +164,7 @@ class TaylorModel<Validated,F>
     //! \brief Return the vector of zero variables of size \a rs in \a as arguments.
     static Vector<TaylorModel<Validated,F>> zeros(SizeType rs, SizeType as, Sweeper swp);
     //! \brief Return the vector of constants with values \a c in \a as arguments.
-    static Vector<TaylorModel<Validated,F>> constants(SizeType as, const Vector<ValidatedNumber>& c, Sweeper swp);
+    static Vector<TaylorModel<Validated,F>> constants(SizeType as, const Vector<ValidatedNumericType>& c, Sweeper swp);
     //! \brief Return the vector of variables on the unit domain.
     static Vector<TaylorModel<Validated,F>> coordinates(SizeType as, Sweeper swp);
 
@@ -273,15 +273,15 @@ class TaylorModel<Validated,F>
     Covector<UpperInterval> gradient_range() const;
 
     //! \brief Evaluate the quantity over the interval of points \a x.
-    friend ApproximateNumber evaluate(const TaylorModel<Validated,F>& f, const Vector<ApproximateNumber>& x) {
+    friend ApproximateNumericType evaluate(const TaylorModel<Validated,F>& f, const Vector<ApproximateNumericType>& x) {
         return TaylorModel<Validated,F>::_evaluate(f,x); }
-    friend ValidatedNumber evaluate(const TaylorModel<Validated,F>& f, const Vector<ValidatedNumber>& x) {
+    friend ValidatedNumericType evaluate(const TaylorModel<Validated,F>& f, const Vector<ValidatedNumericType>& x) {
         return TaylorModel<Validated,F>::_evaluate(f,x); }
     //! \brief Evaluate the gradient over the interval of points \a x.
-    friend Covector<ValidatedNumber> gradient(const TaylorModel<Validated,F>& f, const Vector<ValidatedNumber>& x) {
+    friend Covector<ValidatedNumericType> gradient(const TaylorModel<Validated,F>& f, const Vector<ValidatedNumericType>& x) {
         return TaylorModel<Validated,F>::_gradient(f,x); }
     //! \brief Substite \a c for the \a k th variable.
-    friend TaylorModel<Validated,F> partial_evaluate(const TaylorModel<Validated,F>& x, SizeType k, ValidatedNumber c) {
+    friend TaylorModel<Validated,F> partial_evaluate(const TaylorModel<Validated,F>& x, SizeType k, ValidatedNumericType c) {
         return TaylorModel<Validated,F>::_partial_evaluate(x,k,c); }
     //! \relates TaylorModel<Validated,F Compose a vector of Taylor models with another.
     friend TaylorModel<Validated,F> compose(const Unscaling& uf, const TaylorModel<Validated,F>& tg) {
@@ -381,11 +381,11 @@ class TaylorModel<Validated,F>
     //@{
     /*! \name Inplace arithmetic operations. */
     //! \brief Add a constant numerical scalar \c r+=c .
-    Void iadd(const ValidatedNumber& c);
+    Void iadd(const ValidatedNumericType& c);
     //! \brief Multiply by a numerical scalar \c r*=c .
-    Void imul(const ValidatedNumber& c);
+    Void imul(const ValidatedNumericType& c);
     //! \brief Scalar multiply and add \c r+=c*x .
-    Void isma(const ValidatedNumber& c, const TaylorModel<Validated,F>& x);
+    Void isma(const ValidatedNumericType& c, const TaylorModel<Validated,F>& x);
     //! \brief Fused multiply and add \c r+=x1*x2 .
     Void ifma(const TaylorModel<Validated,F>& x1, const TaylorModel<Validated,F>& x2);
 
@@ -435,13 +435,13 @@ class TaylorModel<Validated,F>
     static TaylorModel<Validated,F> _compose(TaylorModel<Validated,F> const& tf, const Vector<TaylorModel<Validated,F>>& tg);
     static TaylorModel<Validated,F> _compose(Unscaling const& uf, TaylorModel<Validated,F> const& tg);
     static TaylorModel<Validated,F> _compose(TaylorModel<Validated,F> const& tf, VectorUnscaling const& u, const Vector<TaylorModel<Validated,F>>& tg);
-    static TaylorModel<Validated,F> _partial_evaluate(const TaylorModel<Validated,F>& x, SizeType k, ValidatedNumber c);
-    static Covector<ValidatedNumber> _gradient(const TaylorModel<Validated,F>& x, Vector<ValidatedNumber> const& v);
-    static ValidatedNumber _evaluate(const TaylorModel<Validated,F>& x, Vector<ValidatedNumber> const& v);
-    static ApproximateNumber _evaluate(const TaylorModel<Validated,F>& x, Vector<ApproximateNumber> const& v);
+    static TaylorModel<Validated,F> _partial_evaluate(const TaylorModel<Validated,F>& x, SizeType k, ValidatedNumericType c);
+    static Covector<ValidatedNumericType> _gradient(const TaylorModel<Validated,F>& x, Vector<ValidatedNumericType> const& v);
+    static ValidatedNumericType _evaluate(const TaylorModel<Validated,F>& x, Vector<ValidatedNumericType> const& v);
+    static ApproximateNumericType _evaluate(const TaylorModel<Validated,F>& x, Vector<ApproximateNumericType> const& v);
 };
 
-Covector<ValidatedNumber> gradient(const TaylorModel<Validated,Float64>& x, const Vector<ValidatedNumber>& v);
+Covector<ValidatedNumericType> gradient(const TaylorModel<Validated,Float64>& x, const Vector<ValidatedNumericType>& v);
 
 
 
@@ -451,7 +451,7 @@ Covector<ValidatedNumber> gradient(const TaylorModel<Validated,Float64>& x, cons
  */
 template<class F>
 class TaylorModel<Approximate,F>
-    : public NormedAlgebraMixin<TaylorModel<Approximate,F>,ApproximateNumber>
+    : public NormedAlgebraMixin<TaylorModel<Approximate,F>,ApproximateNumericType>
 {
   public:
     typedef ApproximateFloat64 CoefficientType;
@@ -464,7 +464,7 @@ class TaylorModel<Approximate,F>
     typedef ApproximateFloat64 NormType;
 
     //! \brief The type used for the coefficients.
-    typedef ApproximateNumber NumericType;
+    typedef ApproximateNumericType NumericType;
     //! \brief The type used to index the coefficients.
     typedef MultiIndex IndexType;
     //! \brief The type used for the coefficients.
@@ -507,12 +507,12 @@ class TaylorModel<Approximate,F>
     TaylorModel<Approximate,F>& operator=(double c) {
         this->_expansion.clear(); this->_expansion.append(MultiIndex(this->argument_size()),CoefficientType(c)); return *this; }
     //! \brief Set equal to a constant, keeping the same number of arguments.
-    TaylorModel<Approximate,F>& operator=(const ApproximateNumber& c) {
+    TaylorModel<Approximate,F>& operator=(const ApproximateNumericType& c) {
         this->_expansion.clear(); this->_expansion.append(MultiIndex(this->argument_size()),c); return *this; }
     //! \brief Set equal to an interval constant, keeping the same number of arguments.
-    TaylorModel<Approximate,F>& operator=(const ValidatedNumber& c) { return (*this)=ApproximateNumber(c); }
+    TaylorModel<Approximate,F>& operator=(const ValidatedNumericType& c) { return (*this)=ApproximateNumericType(c); }
     //! \brief Set equal to a real constant, keeping the same number of arguments.
-    TaylorModel<Approximate,F>& operator=(const EffectiveNumber& c) { return (*this)=ApproximateNumber(c); }
+    TaylorModel<Approximate,F>& operator=(const EffectiveNumericType& c) { return (*this)=ApproximateNumericType(c); }
     //@}
 
     //@{
@@ -594,11 +594,11 @@ class TaylorModel<Approximate,F>
     //! \brief Write to an output stream.
     virtual OutputStream& write(OutputStream&) const;
     //! \brief Inplace addition of a scalar constant.
-    virtual Void iadd(const ApproximateNumber& c);
+    virtual Void iadd(const ApproximateNumericType& c);
     //! \brief Inplace multiplication of a scalar constant.
-    virtual Void imul(const ApproximateNumber& c);
+    virtual Void imul(const ApproximateNumericType& c);
     //! \brief Inplace addition of a scalar multiple of a Taylor model.
-    virtual Void isma(const ApproximateNumber& c, const TaylorModel<Approximate,F>& x);
+    virtual Void isma(const ApproximateNumericType& c, const TaylorModel<Approximate,F>& x);
     //! \brief Inplace addition of a product of Taylor models.
     virtual Void ifma(const TaylorModel<Approximate,F>& x1, const TaylorModel<Approximate,F>& x2);
 
@@ -643,14 +643,14 @@ template<class F> Vector<TaylorModel<Validated,F>> refinement(const Vector<Taylo
 
 
 
-template<class F> Vector<TaylorModel<Validated,F>> partial_evaluate(const Vector<TaylorModel<Validated,F>>& tf, SizeType k, const ValidatedNumber& c) {
+template<class F> Vector<TaylorModel<Validated,F>> partial_evaluate(const Vector<TaylorModel<Validated,F>>& tf, SizeType k, const ValidatedNumericType& c) {
     Vector<TaylorModel<Validated,F>> r(tf.size(),ValidatedTaylorModel::zero(tf.zero_element().argument_size()-1,tf.zero_element().sweeper()));
     for(SizeType i=0; i!=r.size(); ++i) { r[i]=partial_evaluate(tf[i],k,c); }
     return std::move(r);
 }
 
-template<class F> Vector<ValidatedNumber> evaluate(const Vector<TaylorModel<Validated,F>>& tf, const Vector<ValidatedNumber>& x) {
-    Vector<ValidatedNumber> r(tf.size());
+template<class F> Vector<ValidatedNumericType> evaluate(const Vector<TaylorModel<Validated,F>>& tf, const Vector<ValidatedNumericType>& x) {
+    Vector<ValidatedNumericType> r(tf.size());
     for(SizeType i=0; i!=r.size(); ++i) { r[i]=evaluate(tf[i],x); }
     return std::move(r);
 }
@@ -722,8 +722,8 @@ template<class P, class F> typename TaylorModel<P,F>::NormType norm(const Vector
     typename TaylorModel<P,F>::NormType r=0u; for(SizeType i=0; i!=h.size(); ++i) { r=max(r,norm(h[i])); } return std::move(r);
 }
 
-template<class F> Matrix<ValidatedNumber> jacobian(const Vector<TaylorModel<Validated,F>>& x, const Vector<ValidatedNumber>& y);
-template<class F> Matrix<ValidatedNumber> jacobian(const Vector<TaylorModel<Validated,F>>& x, const Vector<ValidatedNumber>& y, Array<SizeType>& p);
+template<class F> Matrix<ValidatedNumericType> jacobian(const Vector<TaylorModel<Validated,F>>& x, const Vector<ValidatedNumericType>& y);
+template<class F> Matrix<ValidatedNumericType> jacobian(const Vector<TaylorModel<Validated,F>>& x, const Vector<ValidatedNumericType>& y, Array<SizeType>& p);
 template<class F> Matrix<ExactFloat64> jacobian_value(const Vector<TaylorModel<Validated,F>>& x);
 template<class F> Matrix<ExactFloat64> jacobian_value(const Vector<TaylorModel<Validated,F>>& x, const Array<SizeType>& p);
 template<class F> Matrix<UpperInterval> jacobian_range(const Vector<TaylorModel<Validated,F>>& x);

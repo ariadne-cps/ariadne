@@ -114,7 +114,7 @@ class TestAffineSet
 
     Void test_constrained_image() {
         D = ExactBox::unit_box(3);
-        x = Affine<ValidatedNumber>::variables(3);
+        x = Affine<ValidatedNumericType>::variables(3);
 
         set=ValidatedAffineConstrainedImageSet(D, {2*x[0]+3*x[1]+x[2],x[0]+x[1]-2} );
 
@@ -133,7 +133,7 @@ class TestAffineSet
 
     Void test_separated() {
         D=ExactBox::unit_box(3);
-        x=Affine<ValidatedNumber>::variables(3);
+        x=Affine<ValidatedNumericType>::variables(3);
         ValidatedAffineConstrainedImageSet affine_set(D, {-0.9375_ex+0.0625_ex*x[0]+0.5_ex*x[1],0.87890625_ex-0.1171875_ex*x[0]+x[1]+0.00390625_ex*x[2]});
         affine_set.new_parameter_constraint(-1.1875_ex+0.0625_ex*x[0]+x[1]<=0.0_ex);
         ARIADNE_TEST_PRINT(affine_set);
@@ -170,7 +170,7 @@ class TestAffineSet
 
         {
             D=ExactBox::unit_box(2);
-            x=Affine<ValidatedNumber>::variables(2);
+            x=Affine<ValidatedNumericType>::variables(2);
             ValidatedAffineConstrainedImageSet set(D,{x[0],x[1]});
             set.new_parameter_constraint(x[0]+x[1]<=-0.5_ex);
             ARIADNE_TEST_PRINT(set);
@@ -211,7 +211,7 @@ class TestAffineSet
 
         {
             D=ExactBox::unit_box(3);
-            x=Affine<ValidatedNumber>::variables(3);
+            x=Affine<ValidatedNumericType>::variables(3);
 
             set=ValidatedAffineConstrainedImageSet( D, {2.0_ex*x[0]+3.0_ex*x[1]+1.0_ex*x[2]+0.05_ex, x[0]+x[1]+2.051_ex} );
 
@@ -261,7 +261,7 @@ class TestAffineSet
 
     Void test_empty() {
         D = ExactBox::unit_box(2);
-        x = Affine<ValidatedNumber>::variables(2);
+        x = Affine<ValidatedNumericType>::variables(2);
 
         set=ValidatedAffineConstrainedImageSet(D, {0.125_ex*x[0]+1.0_ex, 0.125_ex*x[1]+1.0_ex} );
         set.new_parameter_constraint(-1.0_ex*x[1] <= -2.0_ex);
@@ -277,12 +277,12 @@ class TestAffineSet
     Void test_uniform_error() {
         double e=0.25;
         ExactInterval I = ExactInterval(-1,+1);
-        ValidatedNumber E = ValidatedNumber(-e,+e);
+        ValidatedNumericType E = ValidatedNumericType(-e,+e);
         D = ExactBox::unit_box(2);
-        x = Affine<ValidatedNumber>::variables(2);
+        x = Affine<ValidatedNumericType>::variables(2);
         ValidatedAffineConstrainedImageSet set1=ValidatedAffineConstrainedImageSet(D, {0.5_ex*x[0]+0.25_ex*x[1]+E/2, 0.25_ex*x[0]-0.25_ex*x[1]+E} );
         D = ExactBox::unit_box(4);
-        x = Affine<ValidatedNumber>::variables(4);
+        x = Affine<ValidatedNumericType>::variables(4);
         ValidatedAffineConstrainedImageSet set2=ValidatedAffineConstrainedImageSet(D, {0.5_ex*x[0]+0.25_ex*x[1]+e*x[2]/2, 0.25_ex*x[0]-0.25_ex*x[1]+e*x[3]} );
 
         figure.clear();
@@ -315,7 +315,7 @@ class TestAffineSet
         ExactFloatVector& o=offsets;
         double& ox=(double&)offsets[0]; double& oy=(double&)offsets[1];
         Polytope2d expected_set(1,0.0,0.0);
-        Vector< Affine<ValidatedNumber> > a;
+        Vector< Affine<ValidatedNumericType> > a;
         Vector<ExactInterval> dom;
         figure.clear();
         figure.set_bounding_box(ExactBox{{-1.0,+15.0},{-1.0,+15.0}});
@@ -330,7 +330,7 @@ class TestAffineSet
 
         {
             // Test draw of nondegenerate two-dimensional image set
-            a=Affine<ValidatedNumber>::variables(2);
+            a=Affine<ValidatedNumericType>::variables(2);
             dom=ExactBox::unit_box(2);
             offsets=ExactFloatVector2d{1.0,13.0};
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+0.5_ex*a[0],o[1]+0.25_ex*a[1]});
@@ -340,7 +340,7 @@ class TestAffineSet
 
         {
             // Test draw of nondegenerate two-dimensional constrained image set
-            a=Affine<ValidatedNumber>::variables(2);
+            a=Affine<ValidatedNumericType>::variables(2);
             dom=ExactBox::unit_box(2);
             offsets=ExactFloatVector2d(4.0,13.0);
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+0.5_ex*a[0],o[1]+0.25_ex*a[1]},{a[0]+a[1]<=0.5_ex});
@@ -350,10 +350,10 @@ class TestAffineSet
 
         {
             // Test draw of two-dimensional image set with errors
-            a=Affine<ValidatedNumber>::variables(2);
+            a=Affine<ValidatedNumericType>::variables(2);
             dom=ExactBox::unit_box(2);
             offsets=ExactFloatVector2d{7.0,13.0};
-            ValidatedNumber e=ValidatedNumber(-1.0,+1.0);
+            ValidatedNumericType e=ValidatedNumericType(-1.0,+1.0);
 
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+0.25_ex*a[0]+0.25_ex*a[1]+0.5_ex*e,o[1]+0.5_ex*a[0]-0.5_ex*a[1]});
             expected_set=Polytope2d(6, -1.0,0.0, -0.5,-1.0, +0.5,-1.0, +1.0,0.0, +0.5,+1.0, -0.5,+1.0) + offsets;
@@ -362,7 +362,7 @@ class TestAffineSet
 
         {
             // Test draw of nondegenerate one-dimensional image set
-            a=Affine<ValidatedNumber>::variables(1);
+            a=Affine<ValidatedNumericType>::variables(1);
             dom=ExactBox::unit_box(1);
             offsets=ExactFloatVector2d{1.0,1.0};
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+0.5_ex*a[0],o[1]+0.25_ex*a[0]},{0*a[0]<=1.0_ex,a[0]==0.75_ex});
@@ -380,7 +380,7 @@ class TestAffineSet
 
         {
             // Test draw of one-dimensional constraint set
-            a=Affine<ValidatedNumber>::variables(2);
+            a=Affine<ValidatedNumericType>::variables(2);
             dom=ExactBox::unit_box(2);
             offsets=ExactFloatVector2d{7.0,1.0};
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{0*a[0]<=1.0_ex,a[0]+a[1]==0.5_ex});
@@ -438,7 +438,7 @@ class TestAffineSet
 
         {
             // Test draw of projection of three-dimensional box with single equality constraint
-            a=Affine<ValidatedNumber>::variables(3);
+            a=Affine<ValidatedNumericType>::variables(3);
             dom=ExactBox::unit_box(3);
             offsets=ExactFloatVector2d{10.0,4.0};
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{a[0]+2*a[1]+a[2]==1.5_ex});

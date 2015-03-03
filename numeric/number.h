@@ -56,18 +56,18 @@ namespace Ariadne {
 
 /************ Number *********************************************************/
 
-template<class X> struct IsNumber;
+template<class X> struct IsNumericType;
 
 class NumberInterface;
 template<class X> class NumberWrapper;
 
 template<class P> class Number;
-template<class P> struct IsNumber<Number<P>> : True { };
+template<class P> struct IsNumericType<Number<P>> : True { };
 
-template<class N1, class N2, EnableIf<And<IsNumber<N1>,IsNumber<N2>>> =dummy> inline N1& operator+=(N1& n1, const N2& n2) { n1=n1+n2; return n1; }
-template<class N1, class N2, EnableIf<And<IsNumber<N1>,IsNumber<N2>>> =dummy> inline N1& operator-=(N1& n1, const N2& n2) { n1=n1-n2; return n1; }
-template<class N1, class N2, EnableIf<And<IsNumber<N1>,IsNumber<N2>>> =dummy> inline N1& operator*=(N1& n1, const N2& n2) { n1=n1*n2; return n1; }
-template<class N1, class N2, EnableIf<And<IsNumber<N1>,IsNumber<N2>>> =dummy> inline N1& operator/=(N1& n1, const N2& n2) { n1=n1/n2; return n1; }
+template<class N1, class N2, EnableIf<And<IsNumericType<N1>,IsNumericType<N2>>> =dummy> inline N1& operator+=(N1& n1, const N2& n2) { n1=n1+n2; return n1; }
+template<class N1, class N2, EnableIf<And<IsNumericType<N1>,IsNumericType<N2>>> =dummy> inline N1& operator-=(N1& n1, const N2& n2) { n1=n1-n2; return n1; }
+template<class N1, class N2, EnableIf<And<IsNumericType<N1>,IsNumericType<N2>>> =dummy> inline N1& operator*=(N1& n1, const N2& n2) { n1=n1*n2; return n1; }
+template<class N1, class N2, EnableIf<And<IsNumericType<N1>,IsNumericType<N2>>> =dummy> inline N1& operator/=(N1& n1, const N2& n2) { n1=n1/n2; return n1; }
 
 
 /*
@@ -100,7 +100,7 @@ template<class P> class Number
 {
     static_assert(IsParadigm<P>::value,"P must be a paradigm");
     template<class PP> friend class Number;
-    template<class X> using IsGettableAs = And<IsNumber<X>,IsWeaker<typename X::Paradigm,P>,Not<IsSame<typename X::Paradigm,Exact>>>;
+    template<class X> using IsGettableAs = And<IsNumericType<X>,IsWeaker<typename X::Paradigm,P>,Not<IsSame<typename X::Paradigm,Exact>>>;
   private:
     typedef Opposite<P> NP;
     typedef Weaker<P,NP> SP;
@@ -208,29 +208,29 @@ template<class P> class Number
     friend Number<SP> operator/(Number<SP>, Number<SP>);
 };
 
-template<class N, class D, EnableIf<IsGenericNumber<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
+template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
 operator+(N const& y1, D const& d2) -> decltype(y1+Number<Approximate>(d2)) { y1+Number<Approximate>(d2); }
-template<class N, class D, EnableIf<IsGenericNumber<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
+template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
 operator-(N const& y1, D const& d2) -> decltype(y1-Number<Approximate>(d2)) { y1-Number<Approximate>(d2); }
-template<class N, class D, EnableIf<IsGenericNumber<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
+template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
 operator*(N const& y1, D const& d2) -> decltype(y1*Number<Approximate>(d2)) { y1*Number<Approximate>(d2); }
-template<class N, class D, EnableIf<IsGenericNumber<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
+template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
 operator/(N const& y1, D const& d2) -> decltype(y1/Number<Approximate>(d2)) { y1/Number<Approximate>(d2); }
-template<class N, class D, EnableIf<IsGenericNumber<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
+template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
 operator+(D const& d1, N const& y2) -> decltype(Number<Approximate>(d1)+y2) { Number<Approximate>(d1)+y2; }
-template<class N, class D, EnableIf<IsGenericNumber<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
+template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
 operator-(D const& d1, N const& y2) -> decltype(Number<Approximate>(d1)-y2) { Number<Approximate>(d1)-y2; }
-template<class N, class D, EnableIf<IsGenericNumber<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
+template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
 operator*(D const& d1, N const& y2) -> decltype(Number<Approximate>(d1)*y2) { Number<Approximate>(d1)*y2; }
-template<class N, class D, EnableIf<IsGenericNumber<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
+template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
 operator/(D const& d1, N const& y2) -> decltype(Number<Approximate>(d1)/y2) { Number<Approximate>(d1)/y2; }
 
 
-template<class R> struct IsConcreteNumber : IsConvertible<R,Real> { };
+template<class R> struct IsConcreteNumericType : IsConvertible<R,Real> { };
 
-template<class R, class P, EnableIf<IsConcreteNumber<R>> =dummy> auto operator+(R const& r1, Number<P> const& y2) -> decltype(Number<Paradigm<R>>(r1)+y2) {
+template<class R, class P, EnableIf<IsConcreteNumericType<R>> =dummy> auto operator+(R const& r1, Number<P> const& y2) -> decltype(Number<Paradigm<R>>(r1)+y2) {
     return Number<Paradigm<R>>(r1)+y2; }
-template<class R, class P, EnableIf<IsConcreteNumber<R>> =dummy> auto operator+(Number<P> const& y1, R const& r2) -> decltype(y1+Number<Paradigm<R>>(r2)) {
+template<class R, class P, EnableIf<IsConcreteNumericType<R>> =dummy> auto operator+(Number<P> const& y1, R const& r2) -> decltype(y1+Number<Paradigm<R>>(r2)) {
     return y1+Number<Paradigm<R>>(r2); }
 
 //! \brief Get the value of the number represented by \a X with the same precision paramters as \a p.
@@ -249,7 +249,7 @@ template<class P> class Number
 {
     static_assert(IsConvertible<P,Approximate>::value,"P must be a paradigm");
     template<class PP> friend class Number;
-    template<class X> using IsGettableAs = And<IsNumber<X>,IsWeaker<typename X::Paradigm,P>,Not<IsSame<typename X::Paradigm,Exact>>>;
+    template<class X> using IsGettableAs = And<IsNumericType<X>,IsWeaker<typename X::Paradigm,P>,Not<IsSame<typename X::Paradigm,Exact>>>;
   public:
     explicit Number(Handle<NumberInterface> h) : Handle<NumberInterface>(h) { }
     Handle<NumberInterface> handle() const { return *this; }

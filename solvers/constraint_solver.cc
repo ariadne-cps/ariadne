@@ -152,7 +152,7 @@ Pair<Kleenean,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, con
         // Use the computed dual variables to try to make a scalar function which is negative over the entire domain.
         // This should be easier than using all constraints separately
         ScalarTaylorFunction txg=ScalarTaylorFunction::zero(d,default_sweeper());
-        ValidatedNumber cnst=0;
+        ValidatedNumericType cnst=0;
         for(Nat j=0; j!=n; ++j) {
             txg = txg - (x_exact[j]-x_exact[n+j])*tfn[j];
             cnst += (c[j].upper()*x_exact[j]-c[j].lower()*x_exact[n+j]);
@@ -302,8 +302,8 @@ Bool ConstraintSolver::hull_reduce(UpperBox& domain, const ValidatedScalarFuncti
     ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(ExactBox domain, ValidatedScalarFunction function, ExactInterval bounds): "
                   "function="<<function<<", bounds="<<bounds<<", domain="<<domain<<"\n");
 
-    Formula<ValidatedNumber> formula=function.evaluate(Formula<ValidatedNumber>::identity(function.argument_size()));
-    Procedure<ValidatedNumber> procedure(formula);
+    Formula<ValidatedNumericType> formula=function.evaluate(Formula<ValidatedNumericType>::identity(function.argument_size()));
+    Procedure<ValidatedNumericType> procedure(formula);
     return this->hull_reduce(domain,procedure,bounds);
 }
 
@@ -312,8 +312,8 @@ Bool ConstraintSolver::hull_reduce(UpperBox& domain, const ValidatedVectorFuncti
     ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(ExactBox domain, ValidatedScalarFunction function, ExactInterval bounds): "
                   "function="<<function<<", bounds="<<bounds<<", domain="<<domain<<"\n");
 
-    Vector< Formula<ValidatedNumber> > formula=function.evaluate(Formula<ValidatedNumber>::identity(function.argument_size()));
-    Vector< Procedure<ValidatedNumber> > procedure(formula);
+    Vector< Formula<ValidatedNumericType> > formula=function.evaluate(Formula<ValidatedNumericType>::identity(function.argument_size()));
+    Vector< Procedure<ValidatedNumericType> > procedure(formula);
     return this->hull_reduce(domain,procedure,bounds);
 }
 

@@ -55,7 +55,7 @@ template<class F,class D, class C> FunctionInterface<EffectiveTag,D,C>* Function
     return new F(static_cast<const F&>(*this)); }
 
 template<class F,class D, class C> auto
-FunctionMixin<F,ApproximateTag,D,C>::_evaluate(const Argument<ApproximateNumber>& x) const -> Result<ApproximateNumber> {
+FunctionMixin<F,ApproximateTag,D,C>::_evaluate(const Argument<ApproximateNumericType>& x) const -> Result<ApproximateNumericType> {
     return this->_base_evaluate(x); }
 template<class F,class D, class C> auto
 FunctionMixin<F,ApproximateTag,D,C>::_evaluate(const Argument<ApproximateDifferential>& x) const -> Result<ApproximateDifferential> {
@@ -71,7 +71,7 @@ FunctionMixin<F,ApproximateTag,D,C>::_evaluate(const Argument<ApproximateFormula
     return this->_base_evaluate(x); }
 
 template<class F,class D, class C> auto
-FunctionMixin<F,ValidatedTag,D,C>::_evaluate(const Argument<ValidatedNumber>& x) const -> Result<ValidatedNumber> {
+FunctionMixin<F,ValidatedTag,D,C>::_evaluate(const Argument<ValidatedNumericType>& x) const -> Result<ValidatedNumericType> {
     return this->_base_evaluate(x); }
 template<class F,class D, class C> auto
 FunctionMixin<F,ValidatedTag,D,C>::_evaluate(const Argument<ValidatedDifferential>& x) const -> Result<ValidatedDifferential> {
@@ -87,7 +87,7 @@ FunctionMixin<F,ValidatedTag,D,C>::_evaluate(const Argument<ValidatedFormula>& x
     return this->_base_evaluate(x); }
 
 template<class F,class D, class C> auto
-FunctionMixin<F,EffectiveTag,D,C>::_evaluate(const Argument<EffectiveNumber>& x) const -> Result<EffectiveNumber> {
+FunctionMixin<F,EffectiveTag,D,C>::_evaluate(const Argument<EffectiveNumericType>& x) const -> Result<EffectiveNumericType> {
     return this->_base_evaluate(x); }
 template<class F,class D, class C> auto
 FunctionMixin<F,EffectiveTag,D,C>::_evaluate(const Argument<EffectiveAlgebra>& x) const -> Result<EffectiveAlgebra> {

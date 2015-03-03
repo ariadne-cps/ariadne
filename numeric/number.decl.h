@@ -41,8 +41,8 @@ class DivideByZeroError : public std::runtime_error {
     using std::runtime_error::runtime_error;
 };
 
-template<class X> struct IsNumber : False { };
-template<class X, class T> using EnableIfNumber = EnableIf<IsNumber<X>,T>;
+template<class X> struct IsNumericType : False { };
+template<class X, class T> using EnableIfNumericType = EnableIf<IsNumericType<X>,T>;
 
 typedef uint Nat;
 typedef int Int;
@@ -62,41 +62,41 @@ class Real;
 
 template<class P=Void> class Number;
 
-template<> struct IsNumber<Nat>;
-template<> struct IsNumber<Int>;
-template<> struct IsNumber<Dbl>;
+template<> struct IsNumericType<Nat>;
+template<> struct IsNumericType<Int>;
+template<> struct IsNumericType<Dbl>;
 
-template<> struct IsNumber<Integer>;
-template<> struct IsNumber<Rational>;
-template<> struct IsNumber<Real>;
+template<> struct IsNumericType<Integer>;
+template<> struct IsNumericType<Rational>;
+template<> struct IsNumericType<Real>;
 
-template<class X> struct IsGenericNumber : IsConvertible<X,Real> { };
-template<> struct IsGenericNumber<Real> : True { };
-template<> struct IsGenericNumber<Dbl> : True { };
-template<class P> struct IsGenericNumber<Number<P>> : True { };
+template<class X> struct IsGenericNumericType : IsConvertible<X,Real> { };
+template<> struct IsGenericNumericType<Real> : True { };
+template<> struct IsGenericNumericType<Dbl> : True { };
+template<class P> struct IsGenericNumericType<Number<P>> : True { };
 
 
-/*
 using ExactNumber=Number<Exact>;
 using EffectiveNumber=Number<Effective>;
 using ValidatedNumber=Number<Validated>;
 using UpperNumber=Number<Upper>;
 using LowerNumber=Number<Lower>;
 using ApproximateNumber=Number<Approximate>;
-*/
-}
+using PositiveUpperNumber=Number<PositiveUpper>;
+
+} // namespace Ariadne
 
 #include "float.decl.h"
 
 namespace Ariadne {
 
-using ExactNumber=ExactFloat64;
-using EffectiveNumber=Real;
-using ValidatedNumber=ValidatedFloat64;
-using UpperNumber=UpperFloat64;
-using LowerNumber=LowerFloat64;
-using ApproximateNumber=ApproximateFloat64;
-using PositiveUpperNumber=PositiveUpperFloat64;
+using ExactNumericType=ExactFloat64;
+using EffectiveNumericType=Real;
+using ValidatedNumericType=ValidatedFloat64;
+using UpperNumericType=UpperFloat64;
+using LowerNumericType=LowerFloat64;
+using ApproximateNumericType=ApproximateFloat64;
+using PositiveUpperNumericType=PositiveUpperFloat64;
 
 } // namespace Ariadne
 

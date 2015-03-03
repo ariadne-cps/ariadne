@@ -164,10 +164,10 @@ validate_feasibility(const Vector<Float64>& xl, const Vector<Float64>& xu,
 
     // x should be an approximate solution to Ax=b
     // Use the fact that for any x, x'=(x + A^T (AA^T)^{-1}(b-Ax)) satisfies Ax'=0
-    Vector<ValidatedNumber> ivlx = cast_exact(x);
-    Vector<ValidatedNumber> ivle = cast_exact(b)-cast_exact(A)*ivlx;
+    Vector<ValidatedNumericType> ivlx = cast_exact(x);
+    Vector<ValidatedNumericType> ivle = cast_exact(b)-cast_exact(A)*ivlx;
 
-    Matrix<ValidatedNumber> ivlS(m,m);
+    Matrix<ValidatedNumericType> ivlS(m,m);
     for(Nat i1=0; i1!=m; ++i1) {
         for(Nat i2=i1; i2!=m; ++i2) {
             for(Nat j=0; j!=n; ++j) {
@@ -181,7 +181,7 @@ validate_feasibility(const Vector<Float64>& xl, const Vector<Float64>& xu,
         }
     }
 
-    Vector<ValidatedNumber> ivld =  transpose(cast_exact(A)) * solve(ivlS,ivle);
+    Vector<ValidatedNumericType> ivld =  transpose(cast_exact(A)) * solve(ivlS,ivle);
 
     ivlx += ivld;
 
@@ -197,7 +197,7 @@ validate_feasibility(const Vector<Float64>& xl, const Vector<Float64>& xu,
 
     // If yb - max(yA,0) xu + min(yA,0) xl > 0, then problem is infeasible
     // Evaluate lower bound for yb - max(z,0) xu + min(z,0) xl
-    Vector<ValidatedNumber> z=transpose(cast_exact(A)) * cast_exact(y);
+    Vector<ValidatedNumericType> z=transpose(cast_exact(A)) * cast_exact(y);
     Float64 mx = 0.0;
     Float64::set_rounding_downward();
     for(Nat i=0; i!=y.size(); ++i) {

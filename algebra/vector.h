@@ -59,7 +59,7 @@ template<class V> struct IsCovectorExpression : IsVector<V> { };
 template<class M> struct IsMatrix : False { };
 template<class M> struct IsMatrixExpression : IsMatrix<M> { };
 
-template<class X> struct IsNumber;
+template<class X> struct IsNumericType;
 template<class A> struct IsAlgebra;
 
 template<class X> struct IsScalar { static const Bool value = !IsVector<X>::value && !IsCovector<X>::value && !IsMatrix<X>::value; };

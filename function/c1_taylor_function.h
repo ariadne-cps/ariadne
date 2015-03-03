@@ -65,11 +65,11 @@ class C1TaylorSeries
     Nat degree() const;
     Void sweep(Float64 threshold);
   public:
-    friend C1TaylorSeries& operator+=(C1TaylorSeries&, ValidatedNumber);
-    friend C1TaylorSeries& operator*=(C1TaylorSeries&, ValidatedNumber);
+    friend C1TaylorSeries& operator+=(C1TaylorSeries&, ValidatedNumericType);
+    friend C1TaylorSeries& operator*=(C1TaylorSeries&, ValidatedNumericType);
     friend C1TaylorSeries operator+(C1TaylorSeries, C1TaylorSeries);
     friend C1TaylorSeries operator*(C1TaylorSeries, C1TaylorSeries);
-    friend ValidatedNumber evaluate(C1TaylorSeries, ValidatedNumber);
+    friend ValidatedNumericType evaluate(C1TaylorSeries, ValidatedNumericType);
     friend C1TaylorSeries compose(C1TaylorSeries, C1TaylorSeries);
     friend OutputStream& operator<< (OutputStream& os, const C1TaylorSeries& f);
 };
@@ -101,7 +101,7 @@ class C1TaylorFunction
     friend C1TaylorFunction& operator*=(C1TaylorFunction& f, Float64 c);
     friend C1TaylorFunction operator+(C1TaylorFunction f1, C1TaylorFunction f2);
     friend C1TaylorFunction operator*(C1TaylorFunction f1, C1TaylorFunction f2);
-    friend ValidatedNumber evaluate(C1TaylorFunction f, Vector<ValidatedNumber> x);
+    friend ValidatedNumericType evaluate(C1TaylorFunction f, Vector<ValidatedNumericType> x);
     friend C1TaylorFunction compose(C1TaylorSeries f, C1TaylorFunction g);
     friend C1TaylorFunction compose(C1TaylorFunction f, Vector<C1TaylorFunction> g);
     friend OutputStream& operator<< (OutputStream& os, const C1TaylorFunction& f);

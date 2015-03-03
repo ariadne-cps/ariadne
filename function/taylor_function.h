@@ -76,7 +76,7 @@ class TaylorFunctionFactory
     ScalarTaylorFunction create(const ExactBox& domain, const ValidatedScalarFunctionInterface& function) const;
     VectorTaylorFunction create(const ExactBox& domain, const ValidatedVectorFunctionInterface& function) const;
     ScalarTaylorFunction create_zero(const ExactBox& domain) const;
-    ScalarTaylorFunction create_constant(const ExactBox& domain, ValidatedNumber c) const;
+    ScalarTaylorFunction create_constant(const ExactBox& domain, ValidatedNumericType c) const;
     ScalarTaylorFunction create_coordinate(const ExactBox& domain, SizeType k) const;
     VectorTaylorFunction create_zero(SizeType i, const ExactBox& domain) const;
     ScalarTaylorFunction create_identity(const ExactInterval& domain) const;

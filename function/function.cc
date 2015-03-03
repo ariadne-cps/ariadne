@@ -215,7 +215,7 @@ template<class P> ScalarFunction<P> FunctionConstructors<P>::zero(BoxDomain dom)
     return zero(dom.dimension());
 }
 
-template<class P> ScalarFunction<P> FunctionConstructors<P>::constant(BoxDomain dom, CanonicalNumberType<P> c) {
+template<class P> ScalarFunction<P> FunctionConstructors<P>::constant(BoxDomain dom, CanonicalNumericTypeType<P> c) {
     return constant(dom.dimension(),c);
 }
 
@@ -237,7 +237,7 @@ template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::zero(Inte
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::constant(IntervalDomain dom, CanonicalNumberType<P> c) {
+template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::constant(IntervalDomain dom, CanonicalNumericTypeType<P> c) {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
@@ -262,7 +262,7 @@ template<class P> ScalarFunction<P> FunctionConstructors<P>::zero(SizeType as) {
     return sf;
 }
 
-template<class P> ScalarFunction<P> FunctionConstructors<P>::constant(SizeType as, CanonicalNumberType<P> c) {
+template<class P> ScalarFunction<P> FunctionConstructors<P>::constant(SizeType as, CanonicalNumericTypeType<P> c) {
     return ScalarFunction<P>(new ScalarFormulaFunction<Y>(as,Formula<Y>::constant(c)));
 }
 
@@ -836,7 +836,7 @@ EffectiveScalarFunction lie_derivative(const EffectiveScalarFunction& g, const E
 
 
 
-//------------------------ ValidatedNumber function operators -------------------------------//
+//------------------------ ValidatedNumericType function operators -------------------------------//
 
 ValidatedScalarFunction operator+(ValidatedScalarFunction const& f1, ValidatedScalarFunction const& f2) {
     std::shared_ptr<ValidatedScalarFunctionModelInterface const> f1p=std::dynamic_pointer_cast<ValidatedScalarFunctionModelInterface const>(f1.managed_pointer());
@@ -875,7 +875,7 @@ ValidatedScalarFunction operator/(ValidatedScalarFunction const& f1, ValidatedSc
 }
 
 
-ValidatedScalarFunction operator-(ValidatedScalarFunction const& f, ValidatedNumber const& c) {
+ValidatedScalarFunction operator-(ValidatedScalarFunction const& f, ValidatedNumericType const& c) {
     std::shared_ptr<ValidatedScalarFunctionModelInterface const> fp=std::dynamic_pointer_cast<ValidatedScalarFunctionModelInterface const>(f.managed_pointer());
     if(fp) { return ValidatedScalarFunctionModel(*fp) - c; }
     std::shared_ptr<EffectiveScalarFunctionInterface const> rfp=std::dynamic_pointer_cast<EffectiveScalarFunctionInterface const>(f.managed_pointer());
@@ -883,7 +883,7 @@ ValidatedScalarFunction operator-(ValidatedScalarFunction const& f, ValidatedNum
     return ValidatedScalarFunction(new BinaryFunction<ValidatedTag>(OperatorCode::SUB,f,ValidatedScalarFunction::constant(f.argument_size(),c)));
 }
 
-ValidatedScalarFunction operator-(ValidatedNumber const& c, ValidatedScalarFunction const& f) {
+ValidatedScalarFunction operator-(ValidatedNumericType const& c, ValidatedScalarFunction const& f) {
     std::shared_ptr<ValidatedScalarFunctionModelInterface const> fp=std::dynamic_pointer_cast<ValidatedScalarFunctionModelInterface const>(f.managed_pointer());
     if(fp) { return c - ValidatedScalarFunctionModel(*fp); }
     return ValidatedScalarFunction(new BinaryFunction<ValidatedTag>(OperatorCode::SUB,ValidatedScalarFunction::constant(f.argument_size(),c),f));

@@ -139,17 +139,17 @@ template<class OP, class X> inline Series<X> make_series(OP op, const X& x) { re
 
 class AnalyticFunction {
     OperatorCode _op_code;
-    std::shared_ptr<const SeriesGeneratorInterface<ApproximateNumber>> _asg_ptr;
-    std::shared_ptr<const SeriesGeneratorInterface<ValidatedNumber>> _vsg_ptr;
+    std::shared_ptr<const SeriesGeneratorInterface<ApproximateNumericType>> _asg_ptr;
+    std::shared_ptr<const SeriesGeneratorInterface<ValidatedNumericType>> _vsg_ptr;
   public:
     template<class OP> explicit AnalyticFunction(OP op)
-        : _op_code(op.code()), _asg_ptr(new SeriesGenerator<OP,ApproximateNumber>()), _vsg_ptr(new SeriesGenerator<OP,ValidatedNumber>()) { }
-    Series<ApproximateNumber> series(ApproximateNumber c) const {
-        return Series<ApproximateNumber>(_asg_ptr,c,nullptr); }
-    Series<ValidatedNumber> series(ValidatedNumber c) const {
-        return Series<ValidatedNumber>(_vsg_ptr,c,nullptr); }
-    Series<ValidatedNumber> series(ExactNumber c) const {
-        return Series<ValidatedNumber>(_vsg_ptr,c,nullptr); }
+        : _op_code(op.code()), _asg_ptr(new SeriesGenerator<OP,ApproximateNumericType>()), _vsg_ptr(new SeriesGenerator<OP,ValidatedNumericType>()) { }
+    Series<ApproximateNumericType> series(ApproximateNumericType c) const {
+        return Series<ApproximateNumericType>(_asg_ptr,c,nullptr); }
+    Series<ValidatedNumericType> series(ValidatedNumericType c) const {
+        return Series<ValidatedNumericType>(_vsg_ptr,c,nullptr); }
+    Series<ValidatedNumericType> series(ExactNumericType c) const {
+        return Series<ValidatedNumericType>(_vsg_ptr,c,nullptr); }
     friend OutputStream& operator<<(OutputStream& os, AnalyticFunction const& af) {
         return os << "AnalyticFunction( " << af._op_code << " )"; }
 };

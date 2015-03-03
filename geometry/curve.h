@@ -41,7 +41,7 @@ namespace Ariadne {
 template<class X> class Vector;
 
 template<class X> class Point;
-typedef Point<ExactNumber> ExactPoint;
+typedef Point<ExactNumericType> ExactPoint;
 template<class IVL> class Box;
 typedef Box<ExactInterval> ExactBox;
 typedef Box<UpperInterval> UpperBox;

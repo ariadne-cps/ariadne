@@ -101,13 +101,13 @@ class SolverInterface
     virtual Void set_maximum_number_of_steps(Nat max_steps) = 0;
 
     //! \brief Solve \f$f(x)=0\f$, starting in the box \a bx.
-    virtual Vector<ValidatedNumber> zero(const ValidatedVectorFunction& f,const ExactBox& pt) const = 0;
+    virtual Vector<ValidatedNumericType> zero(const ValidatedVectorFunction& f,const ExactBox& pt) const = 0;
     //! \brief Solve \f$f(x)=x\f$, starting in the box \a bx.
-    virtual Vector<ValidatedNumber> fixed_point(const ValidatedVectorFunction& f,const ExactBox& pt) const = 0;
+    virtual Vector<ValidatedNumericType> fixed_point(const ValidatedVectorFunction& f,const ExactBox& pt) const = 0;
 
     //! \brief Solve \f$f(x)=0\f$, starting in the box \a bx. Throws a SolverException if there is not a unique solution.
-    virtual Vector<ValidatedNumber> solve(const ValidatedVectorFunction& f,const ExactBox& bx) const = 0;
-    virtual Vector<ValidatedNumber> solve(const ValidatedVectorFunction& f,const Vector<ValidatedNumber>& ipt) const = 0;
+    virtual Vector<ValidatedNumericType> solve(const ValidatedVectorFunction& f,const ExactBox& bx) const = 0;
+    virtual Vector<ValidatedNumericType> solve(const ValidatedVectorFunction& f,const Vector<ValidatedNumericType>& ipt) const = 0;
     //! \brief Solve \f$f(a,x)=0\f$ for \f$a\f$ in \f$A\f$, looking for a solution with \f$x\f$ in \f$X\f$. The result is a function \f$h\f$ with domain \f$A\f$ such that \f$f(a,h(a))=0\f$ for all \f$a\in A\f$.
     //! \details A <em>strong solution</em> to the problem exists if for every \f$a\in A\f$, there is a unique solution \f$x\in X\f$ to the equation \f$f(a,x)=0\f$, and this solution varies continuously in \f$a\f$. A <em>weak solution</em> is a function \f$h\f$ with domain \f$A\f$ such that \f$f(a,h(a))=0\f$ for all \f$a\in A\f$, if \f$f(a,x)=0\f$ for \f$x\in X\f$ then \f$h(a)=x\f$, and there exists \f$(a,x)\in A\times X\f$ such that \f$f(a,x)=0\f$.
     //! If \f$D_2f(a,x)\f$ is nonsingular for all \f$(a,x)\in A\times X\f$, then any solution is guaranteed to be unique.
@@ -119,12 +119,12 @@ class SolverInterface
     virtual ValidatedScalarFunctionModel implicit(const ValidatedScalarFunction& f, const ExactBox& A, const ExactInterval& X) const = 0;
 
     //! \brief Solve \f$f(a,x)=0\f$ for x in \a X, and continue to a function \f$h\f$ solving \f$f(a,h(a))=0\f$ over \f$A\f$.
-    virtual ValidatedVectorFunctionModel continuation(const ValidatedVectorFunction& f, const Vector<ApproximateNumber>& a, const ExactBox& X,  const ExactBox& A) const = 0;
+    virtual ValidatedVectorFunctionModel continuation(const ValidatedVectorFunction& f, const Vector<ApproximateNumericType>& a, const ExactBox& X,  const ExactBox& A) const = 0;
 
     //! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. Returns a set of boxes for which it can be <em>proved</em> that
     //! a solution exists in the box. This means that some solutions may be omitted if they are not sufficiently robust.
     //!
-    virtual Set< Vector<ValidatedNumber> > solve_all(const ValidatedVectorFunction& f,const ExactBox& bx) const = 0;
+    virtual Set< Vector<ValidatedNumericType> > solve_all(const ValidatedVectorFunction& f,const ExactBox& bx) const = 0;
 };
 
 inline OutputStream& operator<<(OutputStream& os, const SolverInterface& solver) {

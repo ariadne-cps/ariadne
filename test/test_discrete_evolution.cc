@@ -83,11 +83,11 @@ Void TestMapEvolver::test() const
     cout << "henon_function=" << henon << endl;
 
     //VectorUserFunction evaluation sanity check
-    Vector<ApproximateNumber> p(2); p[0]=ApproximateNumber(a); p[1]=ApproximateNumber(b);
-    Vector<ApproximateNumber> x(2); x[0]=0.5; x[1]=0.25;
-    Vector<ApproximateNumber> hx(2); hx[0]=p[0]-x[0]*x[0]+x[1]*p[1]; hx[1]=x[0];
+    Vector<ApproximateNumericType> p(2); p[0]=ApproximateNumericType(a); p[1]=ApproximateNumericType(b);
+    Vector<ApproximateNumericType> x(2); x[0]=0.5; x[1]=0.25;
+    Vector<ApproximateNumericType> hx(2); hx[0]=p[0]-x[0]*x[0]+x[1]*p[1]; hx[1]=x[0];
     ARIADNE_TEST_EQUAL(henon.evaluate(x),hx);
-    Matrix<ApproximateNumber> dhx(2,2); dhx[0][0]=-2*x[0]; dhx[0][1]=p[1]; dhx[1][0]=1.0;
+    Matrix<ApproximateNumericType> dhx(2,2); dhx[0][0]=-2*x[0]; dhx[0][1]=p[1]; dhx[1][0]=1.0;
     ARIADNE_TEST_EQUAL(henon.jacobian(x),dhx);
 
 

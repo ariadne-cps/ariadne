@@ -126,7 +126,7 @@ class TestSeries
 
     void test_taylor_series() {
         TaylorSeries<ValidatedFloat64> exp_series(Exp(),ExactInterval(-1,+1),ExactFloat64(0),8u);
-        ARIADNE_TEST_PRINT(Series<ValidatedNumber>(Exp(),ValidatedNumber(-1,+1)).coefficients(8u));
+        ARIADNE_TEST_PRINT(Series<ValidatedNumericType>(Exp(),ValidatedNumericType(-1,+1)).coefficients(8u));
         ARIADNE_TEST_PRINT(exp_series);
     }
 

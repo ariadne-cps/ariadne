@@ -35,8 +35,8 @@
 
 namespace Ariadne {
 
-inline ExactInterval make_interval(ApproximateNumber x) { return ExactInterval(x.raw(),x.raw()); }
-inline ExactInterval make_interval(ExactNumber x) { return ExactInterval(x.raw(),x.raw()); }
+inline ExactInterval make_interval(ApproximateNumericType x) { return ExactInterval(x.raw(),x.raw()); }
+inline ExactInterval make_interval(ExactNumericType x) { return ExactInterval(x.raw(),x.raw()); }
 
 template<class X> Point<X>::Point(InitializerList<double> lst)
     : Vector<X>(Vector<ExactFloat64>(Vector<Float64>(lst)))
@@ -60,10 +60,10 @@ template<class X> Void Point<X>::draw(CanvasInterface& canv, const Projection2d&
     canv.stroke();
 }
 
-template class Point<ExactNumber>;
-template class Point<EffectiveNumber>;
-template class Point<ValidatedNumber>;
-template class Point<ApproximateNumber>;
+template class Point<ExactNumericType>;
+template class Point<EffectiveNumericType>;
+template class Point<ValidatedNumericType>;
+template class Point<ApproximateNumericType>;
 
 
 ExactPoint make_point(const StringType& str)

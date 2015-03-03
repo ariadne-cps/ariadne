@@ -71,18 +71,18 @@ typedef ErrorFloat64 NormType; // FIXME: Remove this typedef
 typedef ErrorFloat64 ErrorType; // FIXME: Remove this typedef
 typedef ApproximateFloat64 ApproximateErrorType; // FIXME: Remove this typedef
 
-template<class I> struct CanonicalNumberTypedef;
-template<> struct CanonicalNumberTypedef<ExactTag> { typedef ExactNumber Type; };
-template<> struct CanonicalNumberTypedef<EffectiveTag> { typedef EffectiveNumber Type; };
-template<> struct CanonicalNumberTypedef<ValidatedTag> { typedef ValidatedNumber Type; };
-template<> struct CanonicalNumberTypedef<ApproximateTag> { typedef ApproximateNumber Type; };
-template<class I> using CanonicalNumberType = typename CanonicalNumberTypedef<I>::Type;
+template<class I> struct CanonicalNumericTypeTypedef;
+template<> struct CanonicalNumericTypeTypedef<ExactTag> { typedef ExactNumericType Type; };
+template<> struct CanonicalNumericTypeTypedef<EffectiveTag> { typedef EffectiveNumericType Type; };
+template<> struct CanonicalNumericTypeTypedef<ValidatedTag> { typedef ValidatedNumericType Type; };
+template<> struct CanonicalNumericTypeTypedef<ApproximateTag> { typedef ApproximateNumericType Type; };
+template<class I> using CanonicalNumericTypeType = typename CanonicalNumericTypeTypedef<I>::Type;
 
 template<class X> struct InformationTypedef;
-template<> struct InformationTypedef<ExactNumber> { typedef ExactTag Type; };
-template<> struct InformationTypedef<EffectiveNumber> { typedef EffectiveTag Type; };
-template<> struct InformationTypedef<ValidatedNumber> { typedef ValidatedTag Type; };
-template<> struct InformationTypedef<ApproximateNumber> { typedef ApproximateTag Type; };
+template<> struct InformationTypedef<ExactNumericType> { typedef ExactTag Type; };
+template<> struct InformationTypedef<EffectiveNumericType> { typedef EffectiveTag Type; };
+template<> struct InformationTypedef<ValidatedNumericType> { typedef ValidatedTag Type; };
+template<> struct InformationTypedef<ApproximateNumericType> { typedef ApproximateTag Type; };
 template<class X> using InformationTag = typename InformationTypedef<X>::Type;
 
 template<class X> using Scalar = X;
@@ -112,10 +112,10 @@ typedef Vector<ApproximateFloat64> ApproximateFloatVector;
 typedef Vector<ValidatedFloat64> ValidatedFloatVector;
 typedef Vector<ExactFloat64> ExactFloatVector;
 
-typedef Vector<ApproximateNumber> ApproximateVector;
-typedef Vector<ValidatedNumber> ValidatedVector;
-typedef Vector<EffectiveNumber> EffectiveVector;
-typedef Vector<ExactNumber> ExactVector;
+typedef Vector<ApproximateNumericType> ApproximateVector;
+typedef Vector<ValidatedNumericType> ValidatedVector;
+typedef Vector<EffectiveNumericType> EffectiveVector;
+typedef Vector<ExactNumericType> ExactVector;
 
 typedef Matrix<Rational> RationalMatrix;
 typedef Matrix<Real> RealMatrix;
@@ -125,10 +125,10 @@ typedef Matrix<ApproximateFloat64> ApproximateFloatMatrix;
 typedef Matrix<ValidatedFloat64> ValidatedFloatMatrix;
 typedef Matrix<ExactFloat64> ExactFloatMatrix;
 
-typedef Point<ApproximateNumber> ApproximatePoint;
-typedef Point<ValidatedNumber> ValidatedPoint;
-typedef Point<EffectiveNumber> EffectivePoint;
-typedef Point<ExactNumber> ExactPoint;
+typedef Point<ApproximateNumericType> ApproximatePoint;
+typedef Point<ValidatedNumericType> ValidatedPoint;
+typedef Point<EffectiveNumericType> EffectivePoint;
+typedef Point<ExactNumericType> ExactPoint;
 
 
 // Domain declarations

@@ -58,7 +58,7 @@ typedef Matrix<Float64> FloatMatrix;
 typedef DiagonalMatrix<Float64> FloatDiagonalMatrix;
 
 typedef VectorRange<ExactIntervalVector> IntervalVectorRange;
-typedef DiagonalMatrix<ValidatedNumber> IntervalDiagonalMatrix;
+typedef DiagonalMatrix<ValidatedNumericType> IntervalDiagonalMatrix;
 
 typedef Vector<ApproximateFloat64> ApproximateFloatVector;
 typedef VectorRange<ApproximateFloatVector> ApproximateFloatVectorRange;
@@ -160,9 +160,9 @@ ExactInterval eivl(const RawFloatVector& x) {
     for(Nat i=1; i!=x.size(); ++i) { r=hull(r,ExactFloat64(x[i])); } return r;
 }
 
-Matrix<ApproximateNumber> join(Matrix<ApproximateNumber> const& A1, Matrix<ApproximateNumber> const& A2, Matrix<ApproximateNumber> const& A3) {
+Matrix<ApproximateNumericType> join(Matrix<ApproximateNumericType> const& A1, Matrix<ApproximateNumericType> const& A2, Matrix<ApproximateNumericType> const& A3) {
     Nat m=A1.row_size(); Nat n1=A1.column_size(); Nat n2=A2.column_size(); Nat n3=A3.column_size();
-    Matrix<ApproximateNumber> A123(m,n1+n2+n3);
+    Matrix<ApproximateNumericType> A123(m,n1+n2+n3);
     project(A123,range(0,m),range(0,n1))=A1;
     project(A123,range(0,m),range(n1,n1+n2))=A2;
     project(A123,range(0,m),range(n1+n2,n1+n2+n3))=A3;
@@ -739,7 +739,7 @@ is_infeasibility_certificate(ExactBox D, ValidatedVectorFunction g, ExactBox C, 
     for(Nat i=0; i!=n; ++i) {
         tyg+=y[i]*ScalarTaylorFunction(D,g[i],default_sweeper());
     }
-    ValidatedNumber iygx = tyg(cast_singleton(D));
+    ValidatedNumericType iygx = tyg(cast_singleton(D));
 
     UpperInterval iyC(0,0);
     for(Nat i=0; i!=n; ++i) {
@@ -1884,41 +1884,41 @@ feasibility_step(ExactBox const& D, ApproximateVectorFunction const& g, ExactBox
     Vector<ApproximateDifferential> ddgx=g.evaluate(ApproximateDifferential::variables(2,x));
     ARIADNE_LOG(9,"ddgx="<<ddgx<<"\n");
 
-    Vector<ApproximateNumber> gx = ddgx.value();
+    Vector<ApproximateNumericType> gx = ddgx.value();
     ARIADNE_LOG(7,"g(x)="<<gx<<"\n");
-    Matrix<ApproximateNumber> A = ddgx.jacobian();
+    Matrix<ApproximateNumericType> A = ddgx.jacobian();
     ARIADNE_LOG(7,"Dg(x)="<<A<<"\n");
 
-    Vector<ApproximateNumber> yA=transpose(A)*y;
+    Vector<ApproximateNumericType> yA=transpose(A)*y;
 
     // H is the Hessian matrix H of the Lagrangian $L(x,\lambda) = f(x) + \sum_k g_k(x) $
-    Matrix<ApproximateNumber> YH(x.size(),x.size());
+    Matrix<ApproximateNumericType> YH(x.size(),x.size());
     for(Nat i=0; i!=y.size(); ++i) {
         YH+=y[i]*ddgx[i].hessian();
     }
     ARIADNE_LOG(7,"Y.D2g(x)="<<YH<<"\n");
 
-    Vector<ApproximateNumber> recwu=cu-w; recwu=erec(recwu);
-    Vector<ApproximateNumber> recwl=w-cl; recwl=erec(recwl);
-    Vector<ApproximateNumber> recxu=du-x; recxu=erec(recxu);
-    Vector<ApproximateNumber> recxl=x-dl; recxl=erec(recxl);
+    Vector<ApproximateNumericType> recwu=cu-w; recwu=erec(recwu);
+    Vector<ApproximateNumericType> recwl=w-cl; recwl=erec(recwl);
+    Vector<ApproximateNumericType> recxu=du-x; recxu=erec(recxu);
+    Vector<ApproximateNumericType> recxl=x-dl; recxl=erec(recxl);
 
-    Vector<ApproximateNumber> diagDw=esqr(recwu)+esqr(recwl);
-    Matrix<ApproximateNumber> Dw(m,m); for(Nat i=0; i!=m; ++i) { Dw[i][i]=diagDw[i]; }
-    DiagonalMatrix<ApproximateNumber> Dx(esqr(recxu)+esqr(recxl));
+    Vector<ApproximateNumericType> diagDw=esqr(recwu)+esqr(recwl);
+    Matrix<ApproximateNumericType> Dw(m,m); for(Nat i=0; i!=m; ++i) { Dw[i][i]=diagDw[i]; }
+    DiagonalMatrix<ApproximateNumericType> Dx(esqr(recxu)+esqr(recxl));
 
 
     for(Nat i=0; i!=n; ++i) { YH[i][i]-=Dx[i]; }
 
-    Matrix<ApproximateNumber> AT=transpose(A);
-    Matrix<ApproximateNumber> Znm(n,m);
-    Matrix<ApproximateNumber> Zmn(m,n);
-    Matrix<ApproximateNumber> Zmm(m,m);
-    Matrix<ApproximateNumber> Im=Matrix<ApproximateNumber>::identity(m);
+    Matrix<ApproximateNumericType> AT=transpose(A);
+    Matrix<ApproximateNumericType> Znm(n,m);
+    Matrix<ApproximateNumericType> Zmn(m,n);
+    Matrix<ApproximateNumericType> Zmm(m,m);
+    Matrix<ApproximateNumericType> Im=Matrix<ApproximateNumericType>::identity(m);
 
 
-    Matrix<ApproximateNumber> S=cojoin(join(Dw,Zmn,Im),join(Znm,-YH,-AT),join(Im,-A,Zmm));
-    Vector<ApproximateNumber> r=join(recwu-recwl+y,recxu-recxl-yA,w-gx);
+    Matrix<ApproximateNumericType> S=cojoin(join(Dw,Zmn,Im),join(Znm,-YH,-AT),join(Im,-A,Zmm));
+    Vector<ApproximateNumericType> r=join(recwu-recwl+y,recxu-recxl-yA,w-gx);
 
     for(Nat j=0; j!=m; ++j) {
         if(C[j].lower()==C[j].upper()) {
@@ -1929,14 +1929,14 @@ feasibility_step(ExactBox const& D, ApproximateVectorFunction const& g, ExactBox
         }
     }
 
-    Vector<ApproximateNumber> swxy = -solve(S,r);
+    Vector<ApproximateNumericType> swxy = -solve(S,r);
 
-    Vector<ApproximateNumber> sw(m),sx(n),sy(m);
+    Vector<ApproximateNumericType> sw(m),sx(n),sy(m);
     sw = project(swxy,range(0,m));
     sx = project(swxy,range(m,m+n));
     sy = project(swxy,range(m+n,m+n+m));
 
-    ApproximateNumber al=1.0;
+    ApproximateNumericType al=1.0;
     ApproximateVector nw=w+al*sw;
     ApproximateVector nx=x+al*sx;
     ApproximateVector ny(m);

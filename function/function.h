@@ -70,7 +70,7 @@ class EuclideanDomain : public BoxDomain {
 template<class P>
 class FunctionConstructors {
     static_assert(Or<IsSame<P,ApproximateTag>,IsSame<P,ValidatedTag>,IsSame<P,EffectiveTag>>::value,"P must be an information level/paradigm.");
-    typedef CanonicalNumberType<P> Y;
+    typedef CanonicalNumericTypeType<P> Y;
   public:
     typedef Y NumericType;
 
@@ -98,13 +98,13 @@ template<class P, class D, class C> class FunctionFacade {
 };
 
 template<class P> class FunctionFacade<P,BoxDomain,IntervalDomain> {
-    typedef CanonicalNumberType<P> Y;
+    typedef CanonicalNumericTypeType<P> Y;
   public:
     template<class X> Covector<ArithmeticType<X,Y>> gradient(Vector<X> const& x) const;
 };
 
 template<class P> class FunctionFacade<P,BoxDomain,BoxDomain> {
-    typedef CanonicalNumberType<P> Y;
+    typedef CanonicalNumericTypeType<P> Y;
   public:
     template<class X> Matrix<ArithmeticType<X,Y>> jacobian(Vector<X> const& x) const;
 };
@@ -118,7 +118,7 @@ class Function
     , public FunctionFacade<P,D,C>
 {
     static_assert(IsStronger<P,ApproximateTag>::value,"P must be an information level/paradigm.");
-    typedef CanonicalNumberType<P> Y;
+    typedef CanonicalNumericTypeType<P> Y;
   protected:
     std::shared_ptr< const FunctionInterface<P,D,C> > _ptr;
   public:
@@ -211,47 +211,47 @@ evaluate(const Function<P,D,C>& f, const ElementType<D,X>& x) -> decltype(f(x)) 
 
 template<class P, class C, class X> inline auto
 differential(const Function<P,IntervalDomain,C>& f, const X& x, DegreeType d)
-    -> ElementType<C,Differential<ArithmeticType<CanonicalNumberType<P>,X>>> {
-    auto dx=Differential<ArithmeticType<X,CanonicalNumberType<P>>>::identity(d,x); return f(dx);
+    -> ElementType<C,Differential<ArithmeticType<CanonicalNumericTypeType<P>,X>>> {
+    auto dx=Differential<ArithmeticType<X,CanonicalNumericTypeType<P>>>::identity(d,x); return f(dx);
 }
 
 template<class P, class C, class X> inline auto
 differential(const Function<P,BoxDomain,C>& f, const Vector<X>& x, DegreeType d)
-    -> ElementType<C,Differential<ArithmeticType<CanonicalNumberType<P>,X>>> {
-    auto dx=Differential<ArithmeticType<X,CanonicalNumberType<P>>>::identity(d,x); return f(dx);
+    -> ElementType<C,Differential<ArithmeticType<CanonicalNumericTypeType<P>,X>>> {
+    auto dx=Differential<ArithmeticType<X,CanonicalNumericTypeType<P>>>::identity(d,x); return f(dx);
 }
 
 /*
 template<class P, class D, class C, class X> inline auto
 differential(const Function<P,D,C>& f, const ElementType<D,X>& x, DegreeType d)
-    -> ElementType<C,Differential<ArithmeticType<CanonicalNumberType<P>,X>>> {
+    -> ElementType<C,Differential<ArithmeticType<CanonicalNumericTypeType<P>,X>>> {
     auto dx=Differential<X>::create_identity(x,d); return f(dx);
 }
 */
 
 
-template<class P, class X> ArithmeticType<CanonicalNumberType<P>,X>
+template<class P, class X> ArithmeticType<CanonicalNumericTypeType<P>,X>
 derivative(const ScalarUnivariateFunction<P>& f, const X& x) {
     return differential(f,x,1u).gradient(); }
 
-template<class P, class X> Vector<ArithmeticType<CanonicalNumberType<P>,X>>
+template<class P, class X> Vector<ArithmeticType<CanonicalNumericTypeType<P>,X>>
 tangent(const VectorUnivariateFunction<P>& f, const X& x) {
     return column(differential(f,x,1u).jacobian(),0u); }
 
-template<class P, class X> Covector<ArithmeticType<CanonicalNumberType<P>,X>>
+template<class P, class X> Covector<ArithmeticType<CanonicalNumericTypeType<P>,X>>
 gradient(const ScalarMultivariateFunction<P>& f, const Vector<X>& x) {
     return differential(f,x,1u).gradient(); }
 
-template<class P, class X> Matrix<ArithmeticType<CanonicalNumberType<P>,X>>
+template<class P, class X> Matrix<ArithmeticType<CanonicalNumericTypeType<P>,X>>
 jacobian(const VectorMultivariateFunction<P>& f, const Vector<X>& x) {
     return differential(f,x,1u).jacobian(); }
 
-template<class P> template<class X> Covector<ArithmeticType<X,CanonicalNumberType<P>>>
+template<class P> template<class X> Covector<ArithmeticType<X,CanonicalNumericTypeType<P>>>
 FunctionFacade<P,BoxDomain,IntervalDomain>::gradient(Vector<X> const& x) const {
     return Ariadne::gradient(static_cast<Function<P,BoxDomain,IntervalDomain>const&>(*this),x);
 }
 
-template<class P> template<class X> Matrix<ArithmeticType<X,CanonicalNumberType<P>>>
+template<class P> template<class X> Matrix<ArithmeticType<X,CanonicalNumericTypeType<P>>>
 FunctionFacade<P,BoxDomain,BoxDomain>::jacobian(Vector<X> const& x) const {
     return Ariadne::jacobian(static_cast<Function<P,BoxDomain,BoxDomain>const&>(*this),x);
 }
@@ -260,7 +260,7 @@ FunctionFacade<P,BoxDomain,BoxDomain>::jacobian(Vector<X> const& x) const {
 /*
 template<class P, class D> class ScalarFunction : public Function<P,D,IntervalDomain> {
     typedef IntervalDomain C;
-    typedef CanonicalNumberType<P> X;
+    typedef CanonicalNumericTypeType<P> X;
   public:
     typedef D DomainType;
     using Function<P,D,C>::Function;
@@ -274,7 +274,7 @@ template<class P, class D> class ScalarFunction : public Function<P,D,IntervalDo
 
 template<class P, class D> class VectorFunction : public Function<P,D,BoxDomain> {
     typedef BoxDomain C;
-    typedef CanonicalNumberType<P> X;
+    typedef CanonicalNumericTypeType<P> X;
   public:
     using Function<P,D,BoxDomain>::Function;
     VectorFunction();
@@ -338,14 +338,14 @@ EffectiveScalarFunction operator+(const EffectiveScalarFunction&, const Effectiv
 EffectiveScalarFunction operator-(const EffectiveScalarFunction&, const EffectiveScalarFunction&);
 EffectiveScalarFunction operator*(const EffectiveScalarFunction&, const EffectiveScalarFunction&);
 EffectiveScalarFunction operator/(const EffectiveScalarFunction&, const EffectiveScalarFunction&);
-EffectiveScalarFunction operator+(const EffectiveScalarFunction&, const EffectiveNumber&);
-EffectiveScalarFunction operator-(const EffectiveScalarFunction&, const EffectiveNumber&);
-EffectiveScalarFunction operator*(const EffectiveScalarFunction&, const EffectiveNumber&);
-EffectiveScalarFunction operator/(const EffectiveScalarFunction&, const EffectiveNumber&);
-EffectiveScalarFunction operator+(const EffectiveNumber&, const EffectiveScalarFunction&);
-EffectiveScalarFunction operator-(const EffectiveNumber&, const EffectiveScalarFunction&);
-EffectiveScalarFunction operator*(const EffectiveNumber&, const EffectiveScalarFunction&);
-EffectiveScalarFunction operator/(const EffectiveNumber&, const EffectiveScalarFunction&);
+EffectiveScalarFunction operator+(const EffectiveScalarFunction&, const EffectiveNumericType&);
+EffectiveScalarFunction operator-(const EffectiveScalarFunction&, const EffectiveNumericType&);
+EffectiveScalarFunction operator*(const EffectiveScalarFunction&, const EffectiveNumericType&);
+EffectiveScalarFunction operator/(const EffectiveScalarFunction&, const EffectiveNumericType&);
+EffectiveScalarFunction operator+(const EffectiveNumericType&, const EffectiveScalarFunction&);
+EffectiveScalarFunction operator-(const EffectiveNumericType&, const EffectiveScalarFunction&);
+EffectiveScalarFunction operator*(const EffectiveNumericType&, const EffectiveScalarFunction&);
+EffectiveScalarFunction operator/(const EffectiveNumericType&, const EffectiveScalarFunction&);
 
 EffectiveScalarFunction pow(const EffectiveScalarFunction&, Int);
 EffectiveScalarFunction neg(const EffectiveScalarFunction&);
@@ -372,7 +372,7 @@ template<class P>
 class VectorFunction
 {
     static_assert(IsStronger<P,ApproximateTag>::value,"P must be an information level/paradigm.");
-    typedef CanonicalNumberType<P> X;
+    typedef CanonicalNumericTypeType<P> X;
   private:
     std::shared_ptr< const VectorFunctionInterface<P> > _ptr;
   public:
@@ -428,8 +428,8 @@ template<class P> inline OutputStream& operator<<(OutputStream& os, const Vector
 template<class P, class XX> inline Vector<XX> evaluate(const VectorFunction<P>& f, const Vector<XX>& x) { return f(x); }
 template<class P, class XX> inline Matrix<XX> jacobian(const VectorFunction<P>& f, const Vector<XX>& x) { return f.jacobian(x); }
 
-inline Matrix<ValidatedNumber> VectorFunctionInterface<ValidatedTag>::jacobian(const Vector<ExactNumber>& x) const {
-    return this->jacobian(Vector<ValidatedNumber>(x)); }
+inline Matrix<ValidatedNumericType> VectorFunctionInterface<ValidatedTag>::jacobian(const Vector<ExactNumericType>& x) const {
+    return this->jacobian(Vector<ValidatedNumericType>(x)); }
 */
 
 /*
@@ -453,12 +453,12 @@ template<class X> VectorFunction<X> compose(const VectorFunction<X>& f, const Ve
 template<class X> ScalarFunction<X> lie_derivative(const ScalarFunction<X>& g, const VectorFunction<X>& f);
 */
 
-EffectiveVectorFunction operator*(const EffectiveScalarFunction& sf, const Vector<EffectiveNumber>& e);
+EffectiveVectorFunction operator*(const EffectiveScalarFunction& sf, const Vector<EffectiveNumericType>& e);
 EffectiveVectorFunction operator+(const EffectiveVectorFunction& f1, const EffectiveVectorFunction& f2);
 EffectiveVectorFunction operator-(const EffectiveVectorFunction& f1, const EffectiveVectorFunction& f2);
 EffectiveVectorFunction operator*(const EffectiveVectorFunction& vf, const EffectiveScalarFunction& sf);
 EffectiveVectorFunction operator*(const EffectiveScalarFunction& sf, const EffectiveVectorFunction& vf);
-EffectiveVectorFunction operator*(const EffectiveNumber& c, const EffectiveVectorFunction& vf);
+EffectiveVectorFunction operator*(const EffectiveNumericType& c, const EffectiveVectorFunction& vf);
 
 EffectiveScalarFunction embed(SizeType as1, const EffectiveScalarFunction& f2, SizeType as3);
 EffectiveVectorFunction embed(SizeType as1, const EffectiveVectorFunction& f2, SizeType as3);
@@ -473,13 +473,13 @@ EffectiveVectorFunction compose(const EffectiveVectorFunction& f, const Effectiv
 
 EffectiveScalarFunction lie_derivative(const EffectiveScalarFunction& g, const EffectiveVectorFunction& f);
 
-Formula<EffectiveNumber> formula(const EffectiveScalarFunction& f);
-Vector< Formula<EffectiveNumber> > formula(const EffectiveVectorFunction& f);
+Formula<EffectiveNumericType> formula(const EffectiveScalarFunction& f);
+Vector< Formula<EffectiveNumericType> > formula(const EffectiveVectorFunction& f);
 
 
 ValidatedScalarFunction operator-(const ValidatedScalarFunction&, const ValidatedScalarFunction&);
-ValidatedScalarFunction operator-(const ValidatedScalarFunction&, const ValidatedNumber&);
-ValidatedScalarFunction operator-(const ValidatedNumber&, const ValidatedScalarFunction&);
+ValidatedScalarFunction operator-(const ValidatedScalarFunction&, const ValidatedNumericType&);
+ValidatedScalarFunction operator-(const ValidatedNumericType&, const ValidatedScalarFunction&);
 ValidatedVectorFunction operator-(const ValidatedVectorFunction&, const ValidatedVectorFunction&);
 ValidatedVectorFunction join(const ValidatedVectorFunction& f1, const ValidatedVectorFunction& f2);
 ValidatedScalarFunction compose(const ValidatedScalarFunction& f, const ValidatedVectorFunction& g);
@@ -536,11 +536,11 @@ template<class P, class D> template<class XX> inline XX VectorFunctionElementRef
 
 
 inline UpperInterval evaluate_range(ScalarFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {
-    return static_cast<UpperInterval>(f(reinterpret_cast<Vector<ValidatedNumber>const&>(x))); }
+    return static_cast<UpperInterval>(f(reinterpret_cast<Vector<ValidatedNumericType>const&>(x))); }
 inline Vector<UpperInterval> evaluate_range(VectorFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {
-    return static_cast<Vector<UpperInterval>>(f(reinterpret_cast<Vector<ValidatedNumber>const&>(x))); }
+    return static_cast<Vector<UpperInterval>>(f(reinterpret_cast<Vector<ValidatedNumericType>const&>(x))); }
 inline Vector<Differential<UpperInterval>> derivative_range(VectorFunction<ValidatedTag>const& f, const Vector<Differential<UpperInterval>>& x) {
-    return static_cast<Vector<Differential<UpperInterval>>>(f(reinterpret_cast<Vector<Differential<ValidatedNumber>>const&>(x))); }
+    return static_cast<Vector<Differential<UpperInterval>>>(f(reinterpret_cast<Vector<Differential<ValidatedNumericType>>const&>(x))); }
 
 
 inline Covector<UpperInterval> gradient_range(ValidatedScalarFunction const& f, const Vector<UpperInterval>& x) {

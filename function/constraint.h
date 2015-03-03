@@ -70,27 +70,27 @@ class Constraint {
 };
 
 typedef Constraint<RealScalarFunction,Real> RealConstraint;
-typedef Constraint<EffectiveScalarFunction,EffectiveNumber> EffectiveConstraint;
-typedef Constraint<ValidatedScalarFunction,ValidatedNumber> ValidatedConstraint;
-typedef Constraint<ValidatedScalarFunction,ExactNumber> ValidatedExactConstraint;
+typedef Constraint<EffectiveScalarFunction,EffectiveNumericType> EffectiveConstraint;
+typedef Constraint<ValidatedScalarFunction,ValidatedNumericType> ValidatedConstraint;
+typedef Constraint<ValidatedScalarFunction,ExactNumericType> ValidatedExactConstraint;
 
-inline EffectiveConstraint operator<=(const EffectiveNumber& c, const EffectiveScalarFunction& f) {
+inline EffectiveConstraint operator<=(const EffectiveNumericType& c, const EffectiveScalarFunction& f) {
     return EffectiveConstraint(c,f,infinity);
 }
 
-inline EffectiveConstraint operator>=(const EffectiveNumber& c, const EffectiveScalarFunction& f) {
+inline EffectiveConstraint operator>=(const EffectiveNumericType& c, const EffectiveScalarFunction& f) {
     return EffectiveConstraint(-infinity,f,c);
 }
 
-inline EffectiveConstraint operator<=(const EffectiveScalarFunction& f, const EffectiveNumber& c) {
+inline EffectiveConstraint operator<=(const EffectiveScalarFunction& f, const EffectiveNumericType& c) {
     return EffectiveConstraint(-infinity,f,c);
 }
 
-inline EffectiveConstraint operator>=(const EffectiveScalarFunction& f, const EffectiveNumber& c) {
+inline EffectiveConstraint operator>=(const EffectiveScalarFunction& f, const EffectiveNumericType& c) {
     return EffectiveConstraint(c,f,infinity);
 }
 
-inline EffectiveConstraint operator==(const EffectiveScalarFunction& f, const EffectiveNumber& c) {
+inline EffectiveConstraint operator==(const EffectiveScalarFunction& f, const EffectiveNumericType& c) {
     return EffectiveConstraint(f,c);
 }
 
@@ -106,61 +106,61 @@ inline EffectiveConstraint operator==(const EffectiveScalarFunction& f, double c
     return EffectiveConstraint(f,Real(c));
 }
 
-inline EffectiveConstraint operator<=(const EffectiveConstraint& nc, const EffectiveNumber& c) {
+inline EffectiveConstraint operator<=(const EffectiveConstraint& nc, const EffectiveNumericType& c) {
     ARIADNE_ASSERT(static_cast<ApproximateFloat64>(nc.upper_bound()).get_d()==inf);
     return EffectiveConstraint(nc.lower_bound(),nc.function(),c);
 }
 
 
-inline ValidatedExactConstraint operator<=(const ExactNumber& c, const ValidatedScalarFunction& f) {
+inline ValidatedExactConstraint operator<=(const ExactNumericType& c, const ValidatedScalarFunction& f) {
     return ValidatedExactConstraint(c,f,+infty);
 }
 
-inline ValidatedExactConstraint operator<=(const ValidatedScalarFunction& f, const ExactNumber& c) {
+inline ValidatedExactConstraint operator<=(const ValidatedScalarFunction& f, const ExactNumericType& c) {
     return ValidatedExactConstraint(-infty,f,c);
 }
 
-inline ValidatedExactConstraint operator>=(const ValidatedScalarFunction& f, const ExactNumber& c) {
+inline ValidatedExactConstraint operator>=(const ValidatedScalarFunction& f, const ExactNumericType& c) {
     return ValidatedExactConstraint(c,f,+infty);
 }
 
-inline ValidatedExactConstraint operator==(const ValidatedScalarFunction& f, const ExactNumber& c) {
+inline ValidatedExactConstraint operator==(const ValidatedScalarFunction& f, const ExactNumericType& c) {
     return ValidatedExactConstraint(c,f,c);
 }
 
-inline ValidatedExactConstraint operator<=(const ValidatedExactConstraint& nc, const ExactNumber& c) {
+inline ValidatedExactConstraint operator<=(const ValidatedExactConstraint& nc, const ExactNumericType& c) {
     ARIADNE_ASSERT(nc.upper_bound()==infty);
     return ValidatedExactConstraint(nc.lower_bound(),nc.function(),c);
 }
 
 /*
 inline ValidatedConstraint operator<=(const ValidatedScalarFunction& f, double c) {
-    return f<=ExactNumber(c);
+    return f<=ExactNumericType(c);
 }
 
 inline ValidatedConstraint operator>=(const ValidatedScalarFunction& f, double c) {
-    return f>=ExactNumber(c);
+    return f>=ExactNumericType(c);
 }
 
 inline ValidatedConstraint operator==(const ValidatedScalarFunction& f, double c) {
-    return f==ExactNumber(c);
+    return f==ExactNumericType(c);
 }
 */
 
 inline ValidatedExactConstraint operator<=(const ValidatedScalarFunction& f1, const ValidatedScalarFunction& f2) {
-    return (f1-f2) <= ExactNumber(0);
+    return (f1-f2) <= ExactNumericType(0);
 }
 
 inline ValidatedExactConstraint operator>=(const ValidatedScalarFunction& f1, const ValidatedScalarFunction& f2) {
-    return (f1-f2) >= ExactNumber(0);
+    return (f1-f2) >= ExactNumericType(0);
 }
 
 
-inline ValidatedConstraint operator<=(const ValidatedNumber& c, const ValidatedScalarFunction& f) {
+inline ValidatedConstraint operator<=(const ValidatedNumericType& c, const ValidatedScalarFunction& f) {
     return ValidatedConstraint(c,f,+infty);
 }
 
-inline ValidatedConstraint operator<=(const ValidatedConstraint& nc, const ValidatedNumber& c) {
+inline ValidatedConstraint operator<=(const ValidatedConstraint& nc, const ValidatedNumericType& c) {
     ARIADNE_ASSERT(nc.upper_bound()==infty);
     return ValidatedConstraint(nc.lower_bound(),nc.function(),c);
 }

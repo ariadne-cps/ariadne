@@ -473,7 +473,7 @@ ConstrainedImageSet::affine_approximation() const
     for(List<EffectiveConstraint>::ConstIterator iter=this->_constraints.begin();
         iter!=this->_constraints.end(); ++iter)
     {
-        AffineModel<ValidatedNumber> a=affine_model(D,iter->function());
+        AffineModel<ValidatedNumericType> a=affine_model(D,iter->function());
         ExactInterval b=iter->bounds();
         result.new_constraint(b.lower()<=a<=b.upper());
     }

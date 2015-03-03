@@ -224,10 +224,15 @@ template<class P> ScalarFunction<P> FunctionConstructors<P>::coordinate(BoxDomai
     return CoordinateFunction<P>(dom, j);
 }
 
+template<class P> List<ScalarFunction<P>> FunctionConstructors<P>::coordinates(BoxDomain dom) {
+    List<ScalarFunction<P>> r; r.reserve(dom.dimension());
+    for(SizeType j=0; j!=dom.dimension(); ++j) { r.append(coordinate(dom,j)); }
+    return std::move(r);
+}
+
 template<class P> VectorFunction<P> FunctionConstructors<P>::zeros(SizeType rs, BoxDomain dom) {
     return VectorFunction<P>(new VectorOfScalarFunction<P>(rs,zero(dom)));
 }
-
 
 template<class P> VectorFunction<P> FunctionConstructors<P>::identity(BoxDomain dom) {
     SizeType n=dom.dimension();
@@ -1036,17 +1041,33 @@ ValidatedVectorFunction operator-(ValidatedVectorFunction const& f1, ValidatedVe
 
 ValidatedScalarFunction compose(const ValidatedScalarFunction& f, const ValidatedVectorFunction& g) {
     ARIADNE_ASSERT(f.argument_size()==g.result_size());
-    return compose(f,ValidatedVectorFunctionModel(dynamic_cast<ValidatedVectorFunctionModelInterface const&>(*g.raw_pointer())));
+    std::shared_ptr<ValidatedVectorFunctionModelInterface const>
+        gp=std::dynamic_pointer_cast<ValidatedVectorFunctionModelInterface const>(g.managed_pointer());
+    if(gp) {
+        return compose(f,ValidatedVectorFunctionModel(gp->_clone()));
+    } else {
+        return ValidatedScalarFunction(new ScalarComposedFunction<ValidatedTag>(f,g));
+    }
 }
 
 ValidatedVectorFunction compose(const ValidatedVectorFunction& f, const ValidatedVectorFunction& g) {
     ARIADNE_ASSERT(f.argument_size()==g.result_size());
-    return compose(f,ValidatedVectorFunctionModel(dynamic_cast<ValidatedVectorFunctionModelInterface const&>(*g.raw_pointer())));
+    std::shared_ptr<ValidatedVectorFunctionModelInterface const>
+        gp=std::dynamic_pointer_cast<ValidatedVectorFunctionModelInterface const>(g.managed_pointer());
+    if(gp) {
+        return compose(f,ValidatedVectorFunctionModel(gp->_clone()));
+    } else {
+        return ValidatedVectorFunction(new VectorComposedFunction<ValidatedTag>(f,g));
+    }
 }
 
 ValidatedVectorFunction join(ValidatedVectorFunction const& f1, const ValidatedVectorFunction& f2) {
-    if(dynamic_cast<VectorTaylorFunction const*>(f1.raw_pointer()) && dynamic_cast<VectorTaylorFunction const*>(f2.raw_pointer())) {
-        return join(dynamic_cast<VectorTaylorFunction const&>(*f1.raw_pointer()),dynamic_cast<VectorTaylorFunction const&>(*f2.raw_pointer()));
+    VectorTaylorFunction const*
+        f1p=dynamic_cast<VectorTaylorFunction const*>(f1.raw_pointer());
+    VectorTaylorFunction const*
+        f2p=dynamic_cast<VectorTaylorFunction const*>(f2.raw_pointer());
+    if(f1p && f2p) {
+        return join(*f1p,*f2p);
     }
     VectorOfScalarFunction<ValidatedTag> r(f1.result_size()+f2.result_size(),f1.domain());
     for(SizeType i=0; i!=f1.result_size(); ++i) { r[i]=f1[i]; }

@@ -57,6 +57,12 @@ template<class S, class X> using ElementType = typename ElementTraits<S>::templa
 
 template<class P, class D=BoxDomain> struct VectorFunctionElementReference;
 
+template<class T> class Variable;
+typedef Variable<Real> RealVariable;
+template<class T> class Expression;
+typedef Expression<Real> RealExpression;
+template<class P, class D, class C> class FunctionExpression;
+
 class RealDomain : public IntervalDomain {
   public:
     RealDomain() : IntervalDomain(-inf,+inf) { }
@@ -84,6 +90,7 @@ class FunctionConstructors {
     static ScalarFunction<P,BoxDomain> zero(BoxDomain dom);
     static ScalarFunction<P,BoxDomain> constant(BoxDomain dom, NumericType c);
     static ScalarFunction<P,BoxDomain> coordinate(BoxDomain dom, SizeType j);
+    static List<ScalarFunction<P,BoxDomain>> coordinates(BoxDomain dom);
     static VectorFunction<P,BoxDomain> zeros(SizeType rs, BoxDomain dom);
     static VectorFunction<P,BoxDomain> identity(BoxDomain dom);
 
@@ -101,6 +108,8 @@ template<class P> class FunctionFacade<P,BoxDomain,IntervalDomain> {
     typedef CanonicalNumericType<P> Y;
   public:
     template<class X> Covector<ArithmeticType<X,Y>> gradient(Vector<X> const& x) const;
+    FunctionExpression<P,BoxDomain,IntervalDomain> operator() (const Vector<RealVariable>& x) const;
+    //FunctionExpression<P,BoxDomain,IntervalDomain> operator() (const Vector<RealExpression>& x) const;
 };
 
 template<class P> class FunctionFacade<P,BoxDomain,BoxDomain> {

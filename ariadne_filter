@@ -57,6 +57,8 @@ s/ValidatedBounded/Bounded/g
 s/ValidatedLower/Lower/g
 s/ValidatedUpper/Upper/g
 
+s/Interval<ExactFloat64>/IntervalDomain/g
+s/Box<IntervalDomain>/BoxDomain/g
 s/Box<\(\w*\)Interval>/\1Box/g
 
 s/\/usr\/lib\/gcc\/.*\/include\/c++\/.\..\..\///g

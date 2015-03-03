@@ -61,7 +61,7 @@ class C1TaylorSeries
     static C1TaylorSeries constant(Float64);
     static C1TaylorSeries coordinate();
   public:
-    ExactInterval domain() const;
+    ExactIntervalType domain() const;
     Nat degree() const;
     Void sweep(Float64 threshold);
   public:
@@ -77,7 +77,7 @@ class C1TaylorSeries
 class C1TaylorFunction
 {
   public:
-    typedef ExactInterval NumericType;
+    typedef ExactIntervalType NumericType;
   public:
     Expansion<Float64> _expansion;
     Float64 _zero_error;
@@ -91,10 +91,10 @@ class C1TaylorFunction
     static C1TaylorFunction constant(Nat as, Float64 c);
     static C1TaylorFunction coordinate(Nat as, Nat ind);
   public:
-    ExactBox domain() const;
+    ExactBoxType domain() const;
     Nat argument_size() const;
     Void sweep(Float64 threshold);
-    C1TaylorFunction& operator=(ExactInterval c);
+    C1TaylorFunction& operator=(ExactIntervalType c);
     Void clear();
   public:
     friend C1TaylorFunction& operator+=(C1TaylorFunction& f, Float64 c);

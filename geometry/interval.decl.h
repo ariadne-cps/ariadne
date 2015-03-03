@@ -40,19 +40,12 @@ typedef Interval<UpperFloat64> UpperFloat64Interval;
 typedef Interval<LowerFloat64> LowerFloat64Interval;
 typedef Interval<ApproximateFloat64> ApproximateFloat64Interval;
 
-typedef Interval<ExactFloat64> ExactFloatInterval;
-typedef Interval<MetricFloat64> MetricFloatInterval;
-typedef Interval<BoundedFloat64> BoundedFloatInterval;
-typedef Interval<UpperFloat64> UpperFloatInterval;
-typedef Interval<LowerFloat64> LowerFloatInterval;
-typedef Interval<ApproximateFloat64> ApproximateFloatInterval;
-
-typedef Interval<ExactNumericType> ExactInterval;
-typedef Interval<EffectiveNumericType> EffectiveInterval;
-typedef Interval<ValidatedNumericType> ValidatedInterval;
-typedef Interval<UpperNumericType> UpperInterval;
-typedef Interval<LowerNumericType> LowerInterval;
-typedef Interval<ApproximateNumericType> ApproximateInterval;
+typedef Interval<ExactNumericType> ExactIntervalType;
+typedef Interval<EffectiveNumericType> EffectiveIntervalType;
+typedef Interval<ValidatedNumericType> ValidatedIntervalType;
+typedef Interval<UpperNumericType> UpperIntervalType;
+typedef Interval<LowerNumericType> LowerIntervalType;
+typedef Interval<ApproximateNumericType> ApproximateIntervalType;
 
 
 } // namespace Ariadne

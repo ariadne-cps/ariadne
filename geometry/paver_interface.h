@@ -38,11 +38,11 @@ class PavingInterface;
 class PaverInterface
 {
   public:
-    typedef ExactBox DomainType;
+    typedef ExactBoxType DomainType;
   public:
     virtual Void
     adjoin_outer_approximation(PavingInterface& paving, const DomainType& domain, const ValidatedVectorFunction& space_function,
-                               const ValidatedVectorFunction& constraint_function, const ExactBox& constraint_bounds, Int depth) const = 0;
+                               const ValidatedVectorFunction& constraint_function, const ExactBoxType& constraint_bounds, Int depth) const = 0;
 
 };
 

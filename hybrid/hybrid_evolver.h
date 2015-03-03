@@ -68,9 +68,9 @@ class FlowFunctionModel
   public:
     FlowFunctionModel(const ValidatedVectorFunctionModel& f) : ValidatedVectorFunctionModel(f) { }
     ExactFloat64 step_size() const { return cast_exact(this->time_domain().upper()); }
-    ExactInterval time_domain() const { return this->domain()[this->domain().size()-1]; }
-    ExactBox space_domain() const { return ExactBox(project(this->domain(),Ariadne::range(0,this->domain().size()-1))); }
-    ExactBox const codomain() const { return this->ValidatedVectorFunctionModel::codomain(); }
+    ExactIntervalType time_domain() const { return this->domain()[this->domain().size()-1]; }
+    ExactBoxType space_domain() const { return ExactBoxType(project(this->domain(),Ariadne::range(0,this->domain().size()-1))); }
+    ExactBoxType const codomain() const { return this->ValidatedVectorFunctionModel::codomain(); }
 };
 
 struct TransitionData;
@@ -154,7 +154,7 @@ class HybridEvolverBase
     //@{
     //! \name Main evolution functions.
 
-    Orbit<EnclosureType> orbit(const HybridBox& initial_box, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const;
+    Orbit<EnclosureType> orbit(const HybridBoxType& initial_box, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const;
     Orbit<EnclosureType> orbit(const HybridSet& initial_set, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const;
 
     //! \brief Compute an approximation to the orbit set using the given semantics, starting from an initial enclosure.
@@ -183,7 +183,7 @@ class HybridEvolverBase
     //! \name Auxiliary set conversion functionality
 
     //! \brief Set construct an enclosure from a box, such as one obtained from a grid.
-    virtual EnclosureType enclosure(const HybridBox& initial_box) const;
+    virtual EnclosureType enclosure(const HybridBoxType& initial_box) const;
     //! \brief Set construct an enclosure from a user-provided set.
     virtual EnclosureType enclosure(const HybridSet& initial_set) const;
 
@@ -247,7 +247,7 @@ class HybridEvolverBase
     virtual
     ValidatedVectorFunctionModel
     _compute_flow(EffectiveVectorFunction vector_field,
-                  ExactBox const& initial_set,
+                  ExactBoxType const& initial_set,
                   const ExactFloat64& maximum_step_size) const;
 
     //! \brief Compute the active events for the \a flow \f$\phi\f$ with
@@ -558,7 +558,7 @@ struct CrossingData
     //! during a crossing. e.g. INCREASING
     CrossingKind crossing_kind;
     //! \brief The range of times at which the crossing may occur.
-    ExactInterval crossing_time_range;
+    ExactIntervalType crossing_time_range;
     //! \brief The time \f$\gamma(x)\f$ at which the crossing occurs,
     //! as a function of the initial point in space. Satisfies \f$g(\phi(x,\gamma(x)))=0\f$.
     ValidatedScalarFunctionModel crossing_time;
@@ -627,7 +627,7 @@ struct TimingData
         //!< The time \f$\delta(s)\f$ used in a \a PARAMETER_DEPENDENT_EVOLUTION_TIME step.
         //! Set equal to \f$\varepsilon(\xi(s))\f$ for a \a SPACE_DEPENDENT_EVOLUTION_TIME
         //! and \f$\omega(s)-\varepsilon(s)\f$ for an \a PARAMETER_DEPENDENT_FINISHING_TIME.
-    ExactInterval evolution_time_domain; //!< The time domain of the flow function, equal to \f$[0,h]\f$.
+    ExactIntervalType evolution_time_domain; //!< The time domain of the flow function, equal to \f$[0,h]\f$.
     ValidatedScalarFunctionModel evolution_time_coordinate; //!< The time coordinate of the flow function, equal to the identity on \f$[0,h]\f$.
 };
 

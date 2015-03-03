@@ -38,25 +38,25 @@
 namespace Ariadne {
 
 Kleenean
-Polytope::separated(const ExactBox& bx) const {
+Polytope::separated(const ExactBoxType& bx) const {
     return this->bounding_box().separated(bx) || indeterminate;
 }
 
 Kleenean
-Polytope::overlaps(const ExactBox& bx) const {
+Polytope::overlaps(const ExactBoxType& bx) const {
     return bx.covers(baricentre(*this)) || indeterminate;
 }
 
 Kleenean
-Polytope::inside(const ExactBox& bx) const {
+Polytope::inside(const ExactBoxType& bx) const {
     return this->bounding_box().inside(bx) || indeterminate;
 }
 
-ExactBox
+ExactBoxType
 Polytope::bounding_box() const
 {
     const Polytope& p=*this;
-    ExactBox res(p._vertices[0]);
+    ExactBoxType res(p._vertices[0]);
     for(Nat i=1; i!=p._vertices.size(); ++i) {
         res=hull(res,p._vertices[i]);
     }
@@ -84,7 +84,7 @@ slope2d(const ExactPoint& pt1, const ExactPoint& pt2)
 
 
 
-Polytope polytope(const ExactBox& bx)
+Polytope polytope(const ExactBoxType& bx)
 {
     return Polytope(bx.vertices());
 }

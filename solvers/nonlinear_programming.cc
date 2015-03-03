@@ -57,7 +57,7 @@ typedef Vector<Float64> FloatVector;
 typedef Matrix<Float64> FloatMatrix;
 typedef DiagonalMatrix<Float64> FloatDiagonalMatrix;
 
-typedef VectorRange<ExactIntervalVector> IntervalVectorRange;
+typedef VectorRange<ExactIntervalVectorType> IntervalVectorRange;
 typedef DiagonalMatrix<ValidatedNumericType> IntervalDiagonalMatrix;
 
 typedef Vector<ApproximateFloat64> ApproximateFloatVector;
@@ -71,8 +71,8 @@ typedef Matrix<ValidatedFloat64> ValidatedFloatMatrix;
 typedef Differential<ValidatedFloat64> ValidatedFloatDifferential;
 typedef Vector<ExactFloat64> ExactFloatVector;
 
-typedef Vector<UpperInterval> UpperIntervalVector;
-typedef Matrix<UpperInterval> UpperIntervalMatrix;
+typedef Vector<UpperIntervalType> UpperIntervalVectorType;
+typedef Matrix<UpperIntervalType> UpperIntervalMatrixType;
 
 inline Vector<Differential<RawFloat64>>const& cast_raw(Vector<Differential<ApproximateFloat64>>const& v) {
     return reinterpret_cast<Vector<Differential<RawFloat64>>const&>(v);
@@ -85,8 +85,8 @@ inline Vector<Differential<ApproximateFloat64>>const& cast_approximate(Vector<Di
     return reinterpret_cast<Vector<Differential<ApproximateFloat64>>const&>(v);
 }
 
-inline UpperInterval dot(Vector<UpperInterval> const& bx1, Vector<ExactInterval> const& bx2) {
-    return dot(bx1,Vector<UpperInterval>(bx2));
+inline UpperIntervalType dot(Vector<UpperIntervalType> const& bx1, Vector<ExactIntervalType> const& bx2) {
+    return dot(bx1,Vector<UpperIntervalType>(bx2));
 }
 
 template<class X> inline
@@ -155,8 +155,8 @@ Vector<X> esqr(const Vector<X>& z) {
 }
 
 inline
-ExactInterval eivl(const RawFloatVector& x) {
-    ARIADNE_ASSERT(x.size()>0); ExactInterval r=ExactInterval(ExactFloat64(x[0]));
+ExactIntervalType eivl(const RawFloatVector& x) {
+    ARIADNE_ASSERT(x.size()>0); ExactIntervalType r=ExactIntervalType(ExactFloat64(x[0]));
     for(Nat i=1; i!=x.size(); ++i) { r=hull(r,ExactFloat64(x[i])); } return r;
 }
 
@@ -451,7 +451,7 @@ class ConstrainedFeasibilityMatrix {
 
 enum ConstraintKind { EQUALITY, UPPER_BOUNDED, LOWER_BOUNDED, BOUNDED };
 
-inline ConstraintKind constraint_kind(ExactInterval C) {
+inline ConstraintKind constraint_kind(ExactIntervalType C) {
     if(C.lower()==C.upper()) { return EQUALITY; }
     else if(C.lower()==-infty) { return UPPER_BOUNDED; }
     else if(C.upper()==+infty) { return LOWER_BOUNDED; }
@@ -459,9 +459,9 @@ inline ConstraintKind constraint_kind(ExactInterval C) {
 }
 
 
-ExactBox widen(ExactBox bx, RawFloat64 e) {
+ExactBoxType widen(ExactBoxType bx, RawFloat64 e) {
     for(Nat i=0; i!=bx.size(); ++i) {
-        bx[i]=ExactInterval(bx[i].lower().raw()-e,bx[i].upper().raw()+e);
+        bx[i]=ExactIntervalType(bx[i].lower().raw()-e,bx[i].upper().raw()+e);
     }
     return bx;
 }
@@ -469,7 +469,7 @@ ExactBox widen(ExactBox bx, RawFloat64 e) {
 
 
 Bool OptimiserBase::
-almost_feasible_point(ExactBox D, ValidatedVectorFunction g, ExactBox C, ApproximateVector ax, ApproximateFloat64 error) const
+almost_feasible_point(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C, ApproximateVector ax, ApproximateFloat64 error) const
 {
     ExactVector ex=cast_exact(ax);
     if(!contains(D,ex)) { return false; }
@@ -479,7 +479,7 @@ almost_feasible_point(ExactBox D, ValidatedVectorFunction g, ExactBox C, Approxi
 
 
 Bool OptimiserBase::
-is_feasible_point(ExactBox D, ValidatedVectorFunction g, ExactBox C, ExactVector x) const
+is_feasible_point(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C, ExactVector x) const
 {
     if(!contains(D,x)) { return false; }
     Vector<ValidatedFloat64> gx=g(x);
@@ -488,25 +488,25 @@ is_feasible_point(ExactBox D, ValidatedVectorFunction g, ExactBox C, ExactVector
 
 
 Kleenean OptimiserBase::
-contains_feasible_point(ExactBox D, ValidatedVectorFunction g, ExactBox C, ValidatedVector X) const
+contains_feasible_point(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C, ValidatedVector X) const
 {
     ARIADNE_LOG(4,"OptimiserBase::contains_feasible_point(D,g,C,X):\n");
     ARIADNE_LOG(5,"  D="<<D<<", g="<<g<<", C="<<C<<", X="<<X<<"\n");
 
     // Now test if the (reduced) box X satisfies other constraints
-    if(definitely(disjoint(Box<UpperInterval>(X),D))) { return false; }
-    if(definitely(not subset(Box<UpperInterval>(X),D))) { return indeterminate; }
+    if(definitely(disjoint(Box<UpperIntervalType>(X),D))) { return false; }
+    if(definitely(not subset(Box<UpperIntervalType>(X),D))) { return indeterminate; }
 
     // Test inequality constraints
     Kleenean result = true;
     Vector<ValidatedFloat64> gx=g(X);
     ARIADNE_LOG(7,"g(X)="<<gx<<"\n");
     for(Nat i=0; i!=C.size(); ++i) {
-        if(definitely(disjoint(UpperInterval(gx[i]),C[i]))) {
+        if(definitely(disjoint(UpperIntervalType(gx[i]),C[i]))) {
             return false;
         }
         if(!C[i].is_singleton()) {
-            if(definitely(not subset(UpperInterval(gx[i]),C[i]))) { result = indeterminate; }
+            if(definitely(not subset(UpperIntervalType(gx[i]),C[i]))) { result = indeterminate; }
         }
     }
 
@@ -523,7 +523,7 @@ contains_feasible_point(ExactBox D, ValidatedVectorFunction g, ExactBox C, Valid
     // Construct the function g_e(x) = g_{e_i}(x)
     ARIADNE_ASSERT(g.result_size()>0);
     ValidatedVectorFunction ge(equality_constraints.size(),g.domain());
-    ExactIntervalVector ce(equality_constraints.size());
+    ExactIntervalVectorType ce(equality_constraints.size());
     for(Nat i=0; i!=ge.result_size(); ++i) {
         ge[i]=g[equality_constraints[i]];
         ce[i]=C[equality_constraints[i]];
@@ -557,7 +557,7 @@ contains_feasible_point(ExactBox D, ValidatedVectorFunction g, ExactBox C, Valid
     ValidatedFloatMatrix& valR=reinterpret_cast<ValidatedFloatMatrix&>(ivlR);
 
     // Projected interval Newton step. For h:R^n->R^m; Dh mxn, take L nxm.
-    // ExactInterval Newton update X' = x - L * (Dh(X)*L)^{-1} * h(x)
+    // ExactIntervalType Newton update X' = x - L * (Dh(X)*L)^{-1} * h(x)
     // Choose L = rad(X)^2 Dh(x)^T where rad(X) is the diagonal matrix of radii of X
     Vector<ValidatedFloat64> x=midpoint(X);
     Vector<ValidatedFloat64> new_X = x - cast_exact(fltL) * (valR * (ge(x)-cast_singleton(ce)) );
@@ -574,14 +574,14 @@ contains_feasible_point(ExactBox D, ValidatedVectorFunction g, ExactBox C, Valid
 
 
 Bool OptimiserBase::
-validate_feasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
+validate_feasibility(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
                      ExactVector x0, ExactVector y0) const
 {
     return this->validate_feasibility(D,g,C,x0);
 }
 
 Bool OptimiserBase::
-validate_feasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
+validate_feasibility(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
                      ExactVector x0) const
 {
     ARIADNE_PRECONDITION(D.size()==g.argument_size());
@@ -686,7 +686,7 @@ validate_feasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
 
 
 Bool OptimiserBase::
-validate_infeasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
+validate_infeasibility(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
                        ExactVector x, ExactVector y) const
 {
     ARIADNE_PRECONDITION(D.size()==g.argument_size());
@@ -699,20 +699,20 @@ validate_infeasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
     // Estimate y g(X) = y g(x) + y Dg(X).(X-x)
 
     // Compute y.C
-    UpperInterval yC = dot(UpperIntervalVector(y),UpperIntervalVector(C));
+    UpperIntervalType yC = dot(UpperIntervalVectorType(y),UpperIntervalVectorType(C));
 
     // Compute Taylor estimate of y g(X)
     VectorTaylorFunction tg(D,g,default_sweeper());
     ScalarTaylorFunction tyg(D,default_sweeper());
     for(Nat j=0; j!=y.size(); ++j) { tyg += y[j]*tg[j]; }
-    UpperInterval tygD = apply(tyg,D);
+    UpperIntervalType tygD = apply(tyg,D);
 
-    UpperIntervalMatrix dgD = jacobian_range(g,D);
-    UpperIntervalVector ydgD = transpose(dgD) * UpperIntervalVector(y);
+    UpperIntervalMatrixType dgD = jacobian_range(g,D);
+    UpperIntervalVectorType ydgD = transpose(dgD) * UpperIntervalVectorType(y);
 
-    UpperInterval ygx = dot(UpperIntervalVector(y),apply(g,UpperIntervalVector(x)));
+    UpperIntervalType ygx = dot(UpperIntervalVectorType(y),apply(g,UpperIntervalVectorType(x)));
 
-    UpperInterval ygD = ygx;
+    UpperIntervalType ygD = ygx;
     for(Nat i=0; i!=x.size(); ++i) {
         ygD += ydgD[i] * (D[i]-x[i]);
     }
@@ -725,7 +725,7 @@ validate_infeasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
 
 // FIXME: Look at this code again, especially relating to generalised Lagrange multipliers
 Bool OptimiserBase::
-is_infeasibility_certificate(ExactBox D, ValidatedVectorFunction g, ExactBox C, ExactFloatVector y) const
+is_infeasibility_certificate(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C, ExactFloatVector y) const
 {
     ARIADNE_LOG(2,"OptimiserBase::is_infeasibility_certificate(D,g,C,y)\n");
     ARIADNE_LOG(2,"  D="<<D<<", g="<<g<<", C="<<C<<", y="<<y<<"\n");
@@ -741,12 +741,12 @@ is_infeasibility_certificate(ExactBox D, ValidatedVectorFunction g, ExactBox C, 
     }
     ValidatedNumericType iygx = tyg(cast_singleton(D));
 
-    UpperInterval iyC(0,0);
+    UpperIntervalType iyC(0,0);
     for(Nat i=0; i!=n; ++i) {
         iyC+=y[i]*C[i];
     }
 
-    if(definitely(disjoint(iyC,UpperInterval(iygx)))) {
+    if(definitely(disjoint(iyC,UpperIntervalType(iygx)))) {
         return true;
     } else {
         return false;
@@ -759,24 +759,24 @@ is_infeasibility_certificate(ExactBox D, ValidatedVectorFunction g, ExactBox C, 
 
 
 ValidatedVector OptimiserBase::
-minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ValidatedVectorFunction h) const
+minimise(ValidatedScalarFunction f, ExactBoxType D, ValidatedVectorFunction g, ValidatedVectorFunction h) const
 {
     ARIADNE_LOG(2,"OptimiserBase::minimise(f,D,g,h)\n");
     ValidatedVectorFunction gh=join(g,h);
-    ExactBox C(gh.result_size(),ExactInterval(0,0));
-    for(Nat i=0; i!=g.result_size(); ++i) { C[i]=ExactInterval(-inf,0); }
+    ExactBoxType C(gh.result_size(),ExactIntervalType(0,0));
+    for(Nat i=0; i!=g.result_size(); ++i) { C[i]=ExactIntervalType(-inf,0); }
     return this->minimise(f,D,gh,C);
 }
 
 
 
 Kleenean OptimiserBase::
-feasible(ExactBox D, ValidatedVectorFunction g, ValidatedVectorFunction h) const
+feasible(ExactBoxType D, ValidatedVectorFunction g, ValidatedVectorFunction h) const
 {
     ARIADNE_LOG(2,"OptimiserBase::feasible(D,g,h)\n");
     ValidatedVectorFunction gh=join(g,h);
-    ExactBox C(gh.result_size(),ExactInterval(0,0));
-    for(Nat i=0; i!=g.result_size(); ++i) { C[i]=ExactInterval(-inf,0); }
+    ExactBoxType C(gh.result_size(),ExactIntervalType(0,0));
+    for(Nat i=0; i!=g.result_size(); ++i) { C[i]=ExactIntervalType(-inf,0); }
     return this->feasible(D,gh,C);
 }
 
@@ -792,7 +792,7 @@ struct NonlinearInfeasibleInteriorPointOptimiser::StepData : public PrimalDualDa
 };
 
 ValidatedVector NonlinearInfeasibleInteriorPointOptimiser::
-minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ExactBox C) const
+minimise(ValidatedScalarFunction f, ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C) const
 {
     ARIADNE_LOG(2,"NonlinearInfeasibleInteriorPointOptimiser::minimise(f,D,g,C)\n");
     ARIADNE_LOG(2,"  f="<<f<<", D="<<D<<", g="<<g<<", C="<<C<<"\n");
@@ -807,7 +807,7 @@ minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, Exact
     StepData v;
     ApproximateFloatVector& x=cast_approximate(v.x);
     ApproximateFloatVector& y=cast_approximate(v.y);
-    C=intersection(C,cast_exact_box(apply(g,D)+UpperIntervalVector(C.size(),UpperInterval(-1,+1))));
+    C=intersection(C,cast_exact_box(apply(g,D)+UpperIntervalVectorType(C.size(),UpperIntervalType(-1,+1))));
     this->setup_feasibility(D,g,C,v);
     ApproximateFloatVector oldx=x;
 
@@ -844,7 +844,7 @@ minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, Exact
 }
 
 Kleenean NonlinearInfeasibleInteriorPointOptimiser::
-feasible(ExactBox D, ValidatedVectorFunction g, ExactBox C) const
+feasible(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C) const
 {
     ARIADNE_LOG(2,"NonlinearInfeasibleInteriorPointOptimiser::feasible(D,g,C)\n");
     ARIADNE_LOG(3,"D="<<D<<", g="<<g<<", C="<<C<<"\n");
@@ -857,7 +857,7 @@ feasible(ExactBox D, ValidatedVectorFunction g, ExactBox C) const
     ApproximateFloatVector& y=cast_approximate(v.y);
 
     ApproximateScalarFunction f(D);
-    ExactBox R=intersection(cast_exact_box(apply(g,D)+UpperBox(C.size(),UpperInterval(-1,+1))),C);
+    ExactBoxType R=intersection(cast_exact_box(apply(g,D)+UpperBoxType(C.size(),UpperIntervalType(-1,+1))),C);
     this->setup_feasibility(D,g,R,v);
 
     static const float MU_MIN = 1e-12;
@@ -886,10 +886,10 @@ feasible(ExactBox D, ValidatedVectorFunction g, ExactBox C) const
 }
 
 Void NonlinearInfeasibleInteriorPointOptimiser::
-setup_feasibility(const ExactBox& D, const ApproximateVectorFunction& g, const ExactBox& C,
+setup_feasibility(const ExactBoxType& D, const ApproximateVectorFunction& g, const ExactBoxType& C,
                   StepData& v) const
 {
-    ExactInterval I(-1,+1);
+    ExactIntervalType I(-1,+1);
     Nat m=C.size(); Nat n=D.size();
 
     v.x=cast_raw(midpoint(D));
@@ -912,7 +912,7 @@ setup_feasibility(const ExactBox& D, const ApproximateVectorFunction& g, const E
 
 Void
 NonlinearInfeasibleInteriorPointOptimiser::step(
-    const ApproximateScalarFunction& f, const ExactBox& d, const ApproximateVectorFunction& g, const ExactBox& c,
+    const ApproximateScalarFunction& f, const ExactBoxType& d, const ApproximateVectorFunction& g, const ExactBoxType& c,
     StepData& v) const
 {
     RawFloatVector& w=v.w; RawFloatVector& x=v.x; RawFloatVector& y=v.y; Float64& mu=v.mu;
@@ -1164,17 +1164,17 @@ NonlinearInfeasibleInteriorPointOptimiser::step(
 //------- NonlinearInteriorPointOptimiser -----------------------------------//
 
 ValidatedVector NonlinearInteriorPointOptimiser::
-minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ExactBox C) const
+minimise(ValidatedScalarFunction f, ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C) const
 {
     ARIADNE_LOG(2,"NonlinearInteriorPointOptimiser::minimise(f,D,g,C)\n");
     ARIADNE_LOG(3,"f="<<f<<" D="<<D<<" g="<<g<<" C="<<C<<"\n");
     ValidatedVectorFunction h(0,D);
 
-    UpperBox gD = apply(g,D);
+    UpperBoxType gD = apply(g,D);
     if(definitely(disjoint(gD,C))) { throw InfeasibleProblemException(); }
 
     ApproximateFloatVector x = midpoint(D);
-    ApproximateFloatVector w = midpoint(intersection(UpperBox(gD),C));
+    ApproximateFloatVector w = midpoint(intersection(UpperBoxType(gD),C));
 
     ApproximateFloatVector kappa(g.result_size(),0.0);
     ApproximateFloatVector lambda(h.result_size(),0.0);
@@ -1199,7 +1199,7 @@ minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, Exact
 // min f(x) | x\in D & w\in C | g(x) = w & h(x) = 0
 // Lagrange multipliers kappa d(g(x)-w); lambda dh(x)
 Void NonlinearInteriorPointOptimiser::
-minimisation_step(const ApproximateScalarFunction& f, const ExactBox& d, const ApproximateVectorFunction& g, const ExactBox& c, const ApproximateVectorFunction& h,
+minimisation_step(const ApproximateScalarFunction& f, const ExactBoxType& d, const ApproximateVectorFunction& g, const ExactBoxType& c, const ApproximateVectorFunction& h,
                   ApproximateFloatVector& x, ApproximateFloatVector& w,
                   ApproximateFloatVector& kappa, ApproximateFloatVector& lambda, const ApproximateFloat64& mu) const
 {
@@ -1361,7 +1361,7 @@ minimisation_step(const ApproximateScalarFunction& f, const ExactBox& d, const A
 
 
 Kleenean NonlinearInteriorPointOptimiser::
-feasible(ExactBox d, ValidatedVectorFunction g, ExactBox c) const
+feasible(ExactBoxType d, ValidatedVectorFunction g, ExactBoxType c) const
 {
     ARIADNE_LOG(2,"NonlinearInteriorPointOptimiser::feasible(D,g,C,h)\n");
     ARIADNE_LOG(2,"  d="<<d<<", g="<<g<<", c="<<c<<"\n");
@@ -1394,7 +1394,7 @@ feasible(ExactBox d, ValidatedVectorFunction g, ExactBox c) const
 
 Void
 NonlinearInteriorPointOptimiser::feasibility_step(
-    const ExactBox& d, const ApproximateVectorFunction& g, const ExactBox& c,
+    const ExactBoxType& d, const ApproximateVectorFunction& g, const ExactBoxType& c,
     ApproximateFloatVector& x, ApproximateFloatVector& y) const
 {
     ARIADNE_NOT_IMPLEMENTED;
@@ -1403,7 +1403,7 @@ NonlinearInteriorPointOptimiser::feasibility_step(
 
 Void
 NonlinearInteriorPointOptimiser::feasibility_step(
-    const ExactBox& d, const ApproximateVectorFunction& g, const ExactBox& c,
+    const ExactBoxType& d, const ApproximateVectorFunction& g, const ExactBoxType& c,
     ApproximateFloatVector& x, ApproximateFloatVector& y, ApproximateFloat64& t) const
 {
     static const double inf = std::numeric_limits<double>::infinity();
@@ -1542,7 +1542,7 @@ NonlinearInteriorPointOptimiser::feasibility_step(
 
 /*
 Void NonlinearInteriorPointOptimiser::linearised_feasibility_step(
-    const ExactBox& d, const ApproximateVectorFunction& g, const ExactBox& c,
+    const ExactBoxType& d, const ApproximateVectorFunction& g, const ExactBoxType& c,
     Float64& t, RawFloatVector& x, RawFloatVector& y) const
 {
     static const double gamma=1.0/1024;
@@ -1662,7 +1662,7 @@ Void NonlinearInteriorPointOptimiser::linearised_feasibility_step(
 
 
 ApproximateFloat64 NonlinearInteriorPointOptimiser::
-compute_mu(const ExactBox& D, const ApproximateVectorFunction& g, const ExactBox& C,
+compute_mu(const ExactBoxType& D, const ApproximateVectorFunction& g, const ExactBoxType& C,
            const ApproximateFloatVector& x, const ApproximateFloatVector& lambda) const
 {
     // Compute the relaxation parameter mu as the average of the product of the Lyapunov exponents and constraint satisfactions
@@ -1684,7 +1684,7 @@ compute_mu(const ExactBox& D, const ApproximateVectorFunction& g, const ExactBox
 
 
 Void NonlinearInteriorPointOptimiser::
-setup_feasibility(const ExactBox& d, const ApproximateVectorFunction& g, const ExactBox& c,
+setup_feasibility(const ExactBoxType& d, const ApproximateVectorFunction& g, const ExactBoxType& c,
                   ApproximateFloatVector& x, ApproximateFloatVector& y) const
 {
     const Nat l=2*(d.size()+c.size());
@@ -1705,13 +1705,13 @@ clone() const
 }
 
 ValidatedVector PenaltyFunctionOptimiser::
-minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ExactBox C) const
+minimise(ValidatedScalarFunction f, ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C) const
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
 Kleenean PenaltyFunctionOptimiser::
-feasible(ExactBox D, ValidatedVectorFunction g, ExactBox C) const
+feasible(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C) const
 {
     ARIADNE_LOG(2,"PenaltyFunctionOptimiser::feasible(D,g,C)\n");
     ARIADNE_LOG(3,"D="<<D<<" g="<<g<<" C="<<C<<" \n");
@@ -1737,7 +1737,7 @@ feasible(ExactBox D, ValidatedVectorFunction g, ExactBox C) const
 }
 
 Void PenaltyFunctionOptimiser::
-feasibility_step(const ExactBox& X, const ApproximateVectorFunction& g, const ExactBox& W,
+feasibility_step(const ExactBoxType& X, const ApproximateVectorFunction& g, const ExactBoxType& W,
                  ApproximateFloatVector& x, ApproximateFloatVector& w, ApproximateFloat64& mu) const
 {
     ApproximateVectorFunction h(0u,X);
@@ -1828,7 +1828,7 @@ feasibility_step(const ExactBox& X, const ApproximateVectorFunction& g, const Ex
 
 
 Void PenaltyFunctionOptimiser::
-feasibility_step(const ExactBox& D, const ValidatedVectorFunction& g, const ExactBox& C,
+feasibility_step(const ExactBoxType& D, const ValidatedVectorFunction& g, const ExactBoxType& C,
                  ValidatedFloatVector& x, ValidatedFloatVector& w) const
 {
     ARIADNE_NOT_IMPLEMENTED;
@@ -1838,7 +1838,7 @@ feasibility_step(const ExactBox& D, const ValidatedVectorFunction& g, const Exac
 // Use a penalty approach without multipliers on the constraint functions
 // Solve g(x)=w, x in D, w in C; Lagrangian y.(g(x)-w)
 Void PenaltyFunctionOptimiser::
-feasibility_step(ExactBox const& D, ApproximateVectorFunction const& g, ExactBox const& C,
+feasibility_step(ExactBoxType const& D, ApproximateVectorFunction const& g, ExactBoxType const& C,
                  ApproximateFloatVector& x, ApproximateFloatVector& y, ApproximateFloatVector& w) const
 {
 
@@ -1955,7 +1955,7 @@ feasibility_step(ExactBox const& D, ApproximateVectorFunction const& g, ExactBox
 
 /*
 Void NonlinearInteriorPointOptimiser::
-compute_tz(const ExactBox& d, const ApproximateVectorFunction& g, const ExactBox& b,
+compute_tz(const ExactBoxType& d, const ApproximateVectorFunction& g, const ExactBoxType& b,
            const RawFloatVector& y, Float64& t, RawFloatVector& z) const
 {
     static const double ZMIN=0.5;
@@ -1991,7 +1991,7 @@ compute_tz(const ExactBox& d, const ApproximateVectorFunction& g, const ExactBox
     }
 }
 
-Void NonlinearInteriorPointOptimiser::compute_z(const ExactBox& d, const ApproximateVectorFunction& g, const ExactBox& b,
+Void NonlinearInteriorPointOptimiser::compute_z(const ExactBoxType& d, const ApproximateVectorFunction& g, const ExactBoxType& b,
                                                 const RawFloatVector& y, const Float64& t, RawFloatVector& z) const
 {
     const Nat m=g.argument_size();
@@ -2017,7 +2017,7 @@ Void NonlinearInteriorPointOptimiser::compute_z(const ExactBox& d, const Approxi
 
 
 Kleenean ApproximateOptimiser::
-feasible(ExactBox D, ValidatedVectorFunction h) const
+feasible(ExactBoxType D, ValidatedVectorFunction h) const
 {
     ARIADNE_LOG(2,"ApproximateOptimiser::feasible(D,h)\n");
     ARIADNE_LOG(3,"D="<<D<<", h="<<h<<"\n");
@@ -2030,13 +2030,13 @@ feasible(ExactBox D, ValidatedVectorFunction h) const
 
     if( decide(norm(h(x))<1e-10) ) { return true; }
 
-    if(!possibly(contains(UpperInterval(dot(UpperIntervalVector(cast_exact(y)),apply(h,D))),ExactFloat64(0.0)))) { return false; }
+    if(!possibly(contains(UpperIntervalType(dot(UpperIntervalVectorType(cast_exact(y)),apply(h,D))),ExactFloat64(0.0)))) { return false; }
 
     return indeterminate;
 }
 
 Void ApproximateOptimiser::
-feasibility_step(const ExactBox& D, const ApproximateVectorFunction& h,
+feasibility_step(const ExactBoxType& D, const ApproximateVectorFunction& h,
                  ApproximateFloatVector& x, ApproximateFloatVector& y) const
 {
     ARIADNE_LOG(4,"ApproximateOptimiser::feasibility_step(D,h,x,y)\n");
@@ -2092,7 +2092,7 @@ feasibility_step(const ExactBox& D, const ApproximateVectorFunction& h,
 
 
 Kleenean PenaltyFunctionOptimiser::
-check_feasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
+check_feasibility(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
                      ExactFloatVector x, ExactFloatVector y) const
 {
     ARIADNE_PRECONDITION(D.size()==g.argument_size());
@@ -2141,7 +2141,7 @@ check_feasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
         // Perform an interval Newton step to try to attain feasibility
         ValidatedFloatVector nW = inverse(IA*AT) * ValidatedFloatVector(h(x)-cast_exact(c));
         ARIADNE_LOG(4,"W="<<W<<"\nnew_W="<<nW<<"\n");
-        if(definitely(subset(UpperBox(B),D)) && refines(nW,W)) { ARIADNE_LOG(3,"feasible\n"); return true; }
+        if(definitely(subset(UpperBoxType(B),D)) && refines(nW,W)) { ARIADNE_LOG(3,"feasible\n"); return true; }
         else { result=indeterminate; }
     }
 
@@ -2150,23 +2150,23 @@ check_feasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
     // Estimate y g(X) = y g(x) + y Dg(X).(X-x)
 
     // Compute y.C
-    UpperIntervalVector iy(y);
-    UpperInterval yC = dot(iy,C);
+    UpperIntervalVectorType iy(y);
+    UpperIntervalType yC = dot(iy,C);
 
     // Compute Taylor estimate of y g(X)
     VectorTaylorFunction tg(D,g,default_sweeper());
     ScalarTaylorFunction tyg(D,default_sweeper());
     for(Nat j=0; j!=y.size(); ++j) { tyg += y[j]*tg[j]; }
-    UpperInterval tygD = UpperInterval(tyg(cast_singleton(D)));
+    UpperIntervalType tygD = UpperIntervalType(tyg(cast_singleton(D)));
 
-    UpperIntervalMatrix dgD = jacobian_range(g,D);
-    UpperIntervalVector ydgD = transpose(dgD) * UpperIntervalVector(y);
+    UpperIntervalMatrixType dgD = jacobian_range(g,D);
+    UpperIntervalVectorType ydgD = transpose(dgD) * UpperIntervalVectorType(y);
 
     ValidatedFloat64 ygx = dot(y,gx);
 
-    UpperInterval ygD = UpperInterval(ygx);
+    UpperIntervalType ygD = UpperIntervalType(ygx);
     for(Nat i=0; i!=x.size(); ++i) {
-        ygD += ydgD[i] * (D[i]-UpperInterval(x[i]));
+        ygD += ydgD[i] * (D[i]-UpperIntervalType(x[i]));
     }
 
     ARIADNE_LOG(4,"yC="<<yC<<" tygD="<<tygD<<" ygD="<<ygD<<"\n");
@@ -2221,7 +2221,7 @@ check_feasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
 //     Dg dx - I dz
 //    2y . dy - dmu
 Void PenaltyFunctionOptimiser::
-feasibility_step(const ExactBox& D, const ApproximateVectorFunction& g, const ExactBox& C,
+feasibility_step(const ExactBoxType& D, const ApproximateVectorFunction& g, const ExactBoxType& C,
                  RawFloatVector& x, RawFloatVector& y, RawFloatVector& z) const
 {
     ARIADNE_LOG(2,"feasibility_step\n");
@@ -2317,7 +2317,7 @@ feasibility_step(const ExactBox& D, const ApproximateVectorFunction& g, const Ex
 
 // Solve equations y Dh(x) - 1/(x-xl) + 1/(xu-x) = 0; h(x) = 0
 Kleenean IntervalOptimiser::
-feasible(ExactBox D, ValidatedVectorFunction h) const
+feasible(ExactBoxType D, ValidatedVectorFunction h) const
 {
     ARIADNE_LOG(2,"IntervalOptimiser::feasible(D,h)\n");
     ARIADNE_LOG(3,"D="<<D<<", h="<<h<<"\n");
@@ -2406,7 +2406,7 @@ feasibility_step(const ExactFloatVector& xl, const ExactFloatVector& xu, const V
 
 /*
 
-struct KuhnTuckerFunctionBody : VectorFunctionMixin<KuhnTuckerFunctionBody,ExactInterval>
+struct KuhnTuckerFunctionBody : VectorFunctionMixin<KuhnTuckerFunctionBody,ExactIntervalType>
 {
     ValidatedScalarFunction f;
     Array<ValidatedScalarFunction> g;
@@ -2445,7 +2445,7 @@ struct KuhnTuckerFunctionBody : VectorFunctionMixin<KuhnTuckerFunctionBody,Exact
     }
 };
 
-struct FeasibilityKuhnTuckerFunctionBody : VectorFunctionMixin<FeasibilityKuhnTuckerFunctionBody,ExactInterval>
+struct FeasibilityKuhnTuckerFunctionBody : VectorFunctionMixin<FeasibilityKuhnTuckerFunctionBody,ExactIntervalType>
 {
     Array<ValidatedScalarFunction> g;
     Array<Array<ValidatedScalarFunction> > dg;
@@ -2483,16 +2483,16 @@ struct FeasibilityKuhnTuckerFunctionBody : VectorFunctionMixin<FeasibilityKuhnTu
 
 
 
-struct ConstrainedFeasibilityKuhnTuckerFunctionBody : VectorFunctionMixin<FeasibilityKuhnTuckerFunctionBody,ExactInterval>
+struct ConstrainedFeasibilityKuhnTuckerFunctionBody : VectorFunctionMixin<FeasibilityKuhnTuckerFunctionBody,ExactIntervalType>
 {
     Nat m;
     Nat n;
-    ExactIntervalVector d;
+    ExactIntervalVectorType d;
     Array<ValidatedScalarFunction> g;
-    ExactIntervalVector c;
+    ExactIntervalVectorType c;
     Array<Array<ValidatedScalarFunction> > dg;
 
-    ConstrainedFeasibilityKuhnTuckerFunctionBody(ExactBox D, ValidatedVectorFunction _g, ExactBox C) {
+    ConstrainedFeasibilityKuhnTuckerFunctionBody(ExactBoxType D, ValidatedVectorFunction _g, ExactBoxType C) {
         m=_g.argument_size();
         n=_g.result_size();
         d=D; c=C;
@@ -2537,22 +2537,22 @@ struct ConstrainedFeasibilityKuhnTuckerFunctionBody : VectorFunctionMixin<Feasib
 
 
 ValidatedVector KrawczykOptimiser::
-minimise(ValidatedScalarFunction f, ExactBox d, ValidatedVectorFunction g, ExactBox c) const
+minimise(ValidatedScalarFunction f, ExactBoxType d, ValidatedVectorFunction g, ExactBoxType c) const
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
 
 Kleenean KrawczykOptimiser::
-feasible(ExactBox d, ValidatedVectorFunction g, ExactBox c) const
+feasible(ExactBoxType d, ValidatedVectorFunction g, ExactBoxType c) const
 {
-    ARIADNE_LOG(2,"KrawczykOptimiser::feasible(ExactBox d, ValidatedVectorFunction g, ExactBox c)\n");
+    ARIADNE_LOG(2,"KrawczykOptimiser::feasible(ExactBoxType d, ValidatedVectorFunction g, ExactBoxType c)\n");
     ARIADNE_LOG(2,"  d="<<d<<", g="<<g<<", c="<<c<<"\n");
 
     ARIADNE_ASSERT(g.argument_size()==d.size());
     ARIADNE_ASSERT(g.result_size()==c.size());
 
-    ExactInterval t; ExactIntervalVector x,y,z;
+    ExactIntervalType t; ExactIntervalVectorType x,y,z;
     setup_feasibility(d,g,c,x,y,z,t);
 
 
@@ -2589,21 +2589,21 @@ feasible(ExactBox d, ValidatedVectorFunction g, ExactBox c) const
 
 
 
-Void KrawczykOptimiser::setup_feasibility(const ExactBox& d, const ValidatedVectorFunction& g, const ExactBox& c,
-                                          ExactIntervalVector& x, ExactIntervalVector& y, ExactIntervalVector& z, ExactInterval& t) const
+Void KrawczykOptimiser::setup_feasibility(const ExactBoxType& d, const ValidatedVectorFunction& g, const ExactBoxType& c,
+                                          ExactIntervalVectorType& x, ExactIntervalVectorType& y, ExactIntervalVectorType& z, ExactIntervalType& t) const
 {
     const Nat m=g.argument_size();
     const Nat n=g.result_size();
     const Nat l=2*(m+n);
-    x=ExactIntervalVector(l, ExactInterval(0,1)/l);
+    x=ExactIntervalVectorType(l, ExactIntervalType(0,1)/l);
     y=d;
     z.resize(2*(m+n));
     compute_tz(d,g,c,y,t,z);
 }
 
 
-Void KrawczykOptimiser::compute_tz(const ExactBox& d, const ValidatedVectorFunction& g, const ExactBox& c,
-                                   const ExactIntervalVector& y, ExactInterval& t, ExactIntervalVector& z) const
+Void KrawczykOptimiser::compute_tz(const ExactBoxType& d, const ValidatedVectorFunction& g, const ExactBoxType& c,
+                                   const ExactIntervalVectorType& y, ExactIntervalType& t, ExactIntervalVectorType& z) const
 {
     ARIADNE_ASSERT(d.size()>0u);
     //static const double EPS=1.0/8;
@@ -2613,14 +2613,14 @@ Void KrawczykOptimiser::compute_tz(const ExactBox& d, const ValidatedVectorFunct
     const Nat n=g.result_size();
 
     // Compute the image of y under the constraint function
-    ExactIntervalVector gy=g(y);
-    gy+=ExactIntervalVector(gy.size(),ExactInterval(-min_float,+min_float));
-    ExactIntervalVector my=midpoint(y);
-    ExactIntervalVector mgy=g(my);
+    ExactIntervalVectorType gy=g(y);
+    gy+=ExactIntervalVectorType(gy.size(),ExactIntervalType(-min_float,+min_float));
+    ExactIntervalVectorType my=midpoint(y);
+    ExactIntervalVectorType mgy=g(my);
 
     // Find the range of possible values of the optimal t
     // This range is too pessimistic
-    t=ExactInterval(+inf,+inf);
+    t=ExactIntervalType(+inf,+inf);
     for(Nat j=0; j!=n; ++j) {
         t=min(t,c[j]-gy[j]);
         t=min(t,gy[j]-c[j]);
@@ -2646,7 +2646,7 @@ Void KrawczykOptimiser::compute_tz(const ExactBox& d, const ValidatedVectorFunct
         tmax=min(tmax,sub_down(my[i].lower(),d[i].lower()));
     }
     tmin-=0.0625;
-    t=ExactInterval(tmin,tmax);
+    t=ExactIntervalType(tmin,tmax);
 
 
     // Find the range of possible values of the optimal z
@@ -2663,12 +2663,12 @@ Void KrawczykOptimiser::compute_tz(const ExactBox& d, const ValidatedVectorFunct
     // Find the range of possible values of the optimal z
     // This range is too pessimistic
     for(Nat j=0; j!=n; ++j) {
-        z[j]=ExactInterval(0.0,c[j].upper()-mgy[j].lower()-tmin);
-        z[n+j]=ExactInterval(0.0,mgy[j].upper()-c[j].lower()-tmin);
+        z[j]=ExactIntervalType(0.0,c[j].upper()-mgy[j].lower()-tmin);
+        z[n+j]=ExactIntervalType(0.0,mgy[j].upper()-c[j].lower()-tmin);
     }
     for(Nat i=0; i!=m; ++i) {
-        z[2*n+i]=ExactInterval(0.0,d[i].upper()-my[i].lower()-tmin);
-        z[2*n+m+i]=ExactInterval(0.0,my[i].upper()-d[i].lower()-tmin);
+        z[2*n+i]=ExactIntervalType(0.0,d[i].upper()-my[i].lower()-tmin);
+        z[2*n+m+i]=ExactIntervalType(0.0,my[i].upper()-d[i].lower()-tmin);
     }
 
     ARIADNE_LOG(9,"  d="<<d<<", c="<<c<<", y="<<y<<", g(y)="<<gy<<", t="<<t<<", z="<<z<<"\n");
@@ -2678,19 +2678,19 @@ Void KrawczykOptimiser::compute_tz(const ExactBox& d, const ValidatedVectorFunct
 
 Void KrawczykOptimiser::
 minimisation_step(const ValidatedScalarFunction& f, const ValidatedVectorFunction& g,
-                  ExactIntervalVector& x, ExactIntervalVector& y, ExactIntervalVector& z) const
+                  ExactIntervalVectorType& x, ExactIntervalVectorType& y, ExactIntervalVectorType& z) const
 {
     const Nat m=f.argument_size();
     const Nat n=g.result_size();
 
-    Differential<UpperInterval> ddf=f.evaluate(Differential<UpperInterval>::variables(2,y));
-    Vector< Differential<UpperInterval> > ddg=g.evaluate(Differential<UpperInterval>::variables(2,y));
+    Differential<UpperIntervalType> ddf=f.evaluate(Differential<UpperIntervalType>::variables(2,y));
+    Vector< Differential<UpperIntervalType> > ddg=g.evaluate(Differential<UpperIntervalType>::variables(2,y));
 
-    ExactIntervalMatrix H(m,m);
+    ExactIntervalMatrixType H(m,m);
     set_hessian(H,ddf);
     for(Nat j=0; j!=n; ++j) { add_hessian(H,-x[j],ddg[j]); }
 
-    ExactIntervalMatrix A(m,n);
+    ExactIntervalMatrixType A(m,n);
     set_jacobian_transpose(A,ddg);
 
     ARIADNE_LOG(9,"f="<<f<<"\ng="<<g<<"\nx="<<x<<" y="<<y<<" z="<<z<<"\n");
@@ -2703,16 +2703,16 @@ minimisation_step(const ValidatedScalarFunction& f, const ValidatedVectorFunctio
 
 
 Void KrawczykOptimiser::feasibility_step(const ValidatedVectorFunction& g,
-                                         ExactIntervalVector& x, ExactIntervalVector& y, ExactIntervalVector& z, ExactInterval& t) const
+                                         ExactIntervalVectorType& x, ExactIntervalVectorType& y, ExactIntervalVectorType& z, ExactIntervalType& t) const
 {
     ARIADNE_NOT_IMPLEMENTED;
     const Nat m=y.size();
     const Nat n=x.size();
 
-    Vector< Differential<UpperInterval> > ddg=g.evaluate(Differential<UpperInterval>::variables(2,y));
+    Vector< Differential<UpperIntervalType> > ddg=g.evaluate(Differential<UpperIntervalType>::variables(2,y));
 
     // A is the transpose derivative matrix aij=dgj/dyi
-    ExactIntervalMatrix A(m,n);
+    ExactIntervalMatrixType A(m,n);
     for(Nat i=0; i!=m; ++i) {
         for(Nat j=0; j!=n; ++j) {
             A[i][j]=ddg[j][i];
@@ -2721,7 +2721,7 @@ Void KrawczykOptimiser::feasibility_step(const ValidatedVectorFunction& g,
     ARIADNE_LOG(9,"A="<<A<<"\n");
 
     // H is the Hessian matrix Hik = xj*dgj/dyidyk
-    ExactIntervalMatrix H(m,m);
+    ExactIntervalMatrixType H(m,m);
     for(Nat j=0; j!=n; ++j) {
         add_hessian(H,x[j],ddg[j]);
     }
@@ -2746,38 +2746,38 @@ Void KrawczykOptimiser::feasibility_step(const ValidatedVectorFunction& g,
 // Feasibility step for dual (inequality constrained) problem without using slack variables
 // FIXME: Do we need a slackness parameter mu? Probably not; hopefully the infinities are kept in check...
 // This method has the advantage of not needing to update the primal variables
-Void KrawczykOptimiser::feasibility_step(const ExactBox& d, const ValidatedVectorFunction& g, const ExactBox& c,
-                                         ExactIntervalVector& y, ExactInterval& t) const
+Void KrawczykOptimiser::feasibility_step(const ExactBoxType& d, const ValidatedVectorFunction& g, const ExactBoxType& c,
+                                         ExactIntervalVectorType& y, ExactIntervalType& t) const
 {
     const Nat m=d.size();
     const Nat n=c.size();
 
     // Compute function values
-    Vector< Differential<UpperInterval> > ddg=g.evaluate(Differential<UpperInterval>::variables(2,y));
+    Vector< Differential<UpperIntervalType> > ddg=g.evaluate(Differential<UpperIntervalType>::variables(2,y));
 
     // gy is the vector of values of g(y)
-    ExactIntervalVector gy(n);
+    ExactIntervalVectorType gy(n);
     for(Nat j=0; j!=n; ++j) { gy[j]=ddg[j].value(); }
 
     // z is the vector of slack variables z[k]=cu[k]-gy[k]-t or z[k]=gy[k]-cl[k]-t
-    ExactIntervalVector z(2*(m+n));
+    ExactIntervalVectorType z(2*(m+n));
     for(Nat j=0; j!=n; ++j) { z[j]=d[j].upper()-gy[j]-t; z[n+j]=gy[j]-d[j].lower()-t; }
     for(Nat i=0; i!=m; ++i) { z[i]=c[2*n+i].upper()-y[i]-t; z[2*n+m+i]=y[i]-c[i].lower()-t; }
 
-    ExactIntervalVector zr(2*(m+n));
+    ExactIntervalVectorType zr(2*(m+n));
     for(Nat k=0; k!=2*(m+n); ++k) { zr[k]=1.0/z[k]; }
 
-    ExactIntervalVector D(2*(m+n));
+    ExactIntervalVectorType D(2*(m+n));
     for(Nat k=0; k!=2*(m+n); ++k) { D[k]=zr[k]*zr[k]; }
 
     // A is the transpose derivative matrix aij=dgj/dyi
-    ExactIntervalMatrix A(m,n);
+    ExactIntervalMatrixType A(m,n);
     for(Nat i=0; i!=m; ++i) { for(Nat j=0; j!=n; ++j) { A[i][j]=ddg[j][i]; } }
 
     // A is the sum of scaled Hessian matrices hi1i2=zj*ddgj/dyi1yi2
-    ExactIntervalMatrix H(m,m);
+    ExactIntervalMatrixType H(m,m);
 
-    ExactIntervalMatrix SE(m+1,m+1);
+    ExactIntervalMatrixType SE(m+1,m+1);
     // SE[0:m][0:m] is the matrix H+/-A(D1+D2)AT+(D3+D4) where D=z.z
     for(Nat i1=0; i1!=m; ++i1) { for(Nat i2=0; i2!=m; ++i2) { SE[i1][i2]=H[i1][i2];
         for(Nat j=0; j!=n; ++j) { SE[i1][i2]+=A[i1][j]*(D[j]+D[n+j])*A[i2][j]; }
@@ -2792,7 +2792,7 @@ Void KrawczykOptimiser::feasibility_step(const ExactBox& d, const ValidatedVecto
     for(Nat k=0; k!=2*(m+n); ++k) { SE[m][m]+=D[k]; }
 
     // Vector of residuals
-    ExactIntervalVector re(m+1);
+    ExactIntervalVectorType re(m+1);
     for(Nat i=0; i!=m; ++i) { re[i]+=(zr[2*n+i]-zr[2*n+m+i]);
         for(Nat j=0; j!=n; ++j) { re[i]+=A[i][j]*(zr[j]-zr[n+j]); }
     }
@@ -2800,7 +2800,7 @@ Void KrawczykOptimiser::feasibility_step(const ExactBox& d, const ValidatedVecto
     for(Nat i=0; i!=m; ++i) { re[m]+=(zr[2*n+i]+zr[2*n+m+i]); }
 
     // Compute inverse Jacobian matrix
-    ExactIntervalMatrix JE;
+    ExactIntervalMatrixType JE;
     try {
         JE=inverse(midpoint(SE));
     }
@@ -2811,11 +2811,11 @@ Void KrawczykOptimiser::feasibility_step(const ExactBox& d, const ValidatedVecto
     }
 
     // Krawczyk step
-    ExactIntervalVector dyt=prod(JE,ExactIntervalVector(midpoint(re)))+prod(ExactIntervalMatrix::identity(m+1)-prod(JE,SE),re-midpoint(re));
+    ExactIntervalVectorType dyt=prod(JE,ExactIntervalVectorType(midpoint(re)))+prod(ExactIntervalMatrixType::identity(m+1)-prod(JE,SE),re-midpoint(re));
 
     // Extract y and t
-    ExactIntervalVector yt=join(y,t);
-    ExactIntervalVector nyt=yt+dyt;
+    ExactIntervalVectorType yt=join(y,t);
+    ExactIntervalVectorType nyt=yt+dyt;
 
     yt=intersection(yt,nyt);
     y=project(yt,range(0,m));
@@ -2825,8 +2825,8 @@ Void KrawczykOptimiser::feasibility_step(const ExactBox& d, const ValidatedVecto
 
 
 
-Void KrawczykOptimiser::feasibility_step(const ExactBox& d, const ValidatedVectorFunction& g, const ExactBox& c,
-                                         ExactIntervalVector& x, ExactIntervalVector& y, ExactIntervalVector& z, ExactInterval& t) const
+Void KrawczykOptimiser::feasibility_step(const ExactBoxType& d, const ValidatedVectorFunction& g, const ExactBoxType& c,
+                                         ExactIntervalVectorType& x, ExactIntervalVectorType& y, ExactIntervalVectorType& z, ExactIntervalType& t) const
 {
     const Nat m=d.size();
     const Nat n=c.size();
@@ -2838,19 +2838,19 @@ Void KrawczykOptimiser::feasibility_step(const ExactBox& d, const ValidatedVecto
     ARIADNE_ASSERT(y.size()==m);
     ARIADNE_ASSERT(z.size()==o);
 
-    ExactIntervalVector yt=join(y,t);
+    ExactIntervalVectorType yt=join(y,t);
     ARIADNE_LOG(9,"m="<<m<<" n="<<n<<"\n");
     ARIADNE_LOG(9,"x="<<x<<" yt="<<yt<<" z="<<z<<"\n");
 
-    Vector< Differential<UpperInterval> > ddg=g.evaluate(Differential<UpperInterval>::variables(2,y));
+    Vector< Differential<UpperIntervalType> > ddg=g.evaluate(Differential<UpperIntervalType>::variables(2,y));
     ARIADNE_LOG(9,"  ddg="<<ddg<<"\n");
 
     // gy is the vector of values of g(y)
-    UpperIntervalVector gy(n); for(Nat j=0; j!=n; ++j) { gy[j]=ddg[j].value(); }
+    UpperIntervalVectorType gy(n); for(Nat j=0; j!=n; ++j) { gy[j]=ddg[j].value(); }
     ARIADNE_LOG(9,"  g(y)="<<gy<<" ");
 
     // A is the transpose derivative matrix aij=dgj/dyi, extended with a column of ones
-    UpperIntervalMatrix A(m,n);
+    UpperIntervalMatrixType A(m,n);
     for(Nat i=0; i!=m; ++i) {
         for(Nat j=0; j!=n; ++j) {
             A[i][j]=ddg[j][i];
@@ -2859,24 +2859,24 @@ Void KrawczykOptimiser::feasibility_step(const ExactBox& d, const ValidatedVecto
     ARIADNE_LOG(9," A="<<A<<" ");
 
     // H is the Hessian matrix Hik = (xcuj-xclj)*dgj/dyidyk
-    UpperIntervalMatrix H(m,m);
+    UpperIntervalMatrixType H(m,m);
     for(Nat j=0; j!=n; ++j) {
         add_hessian(H,x[j]-x[n+j],ddg[j]);
     }
     ARIADNE_LOG(9," H="<<H);
 
     // Construct the extended valuation GY=(gy-cu+te,cl-gy+te,y-bu+te,bl-y+te)
-    UpperIntervalVector gye(o);
+    UpperIntervalVectorType gye(o);
     for(Nat j=0; j!=n; ++j) { gye[j]=gy[j]-c[j].upper()+t; gye[n+j]=c[j].lower()-gy[j]+t; }
     for(Nat i=0; i!=m; ++i) { gye[2*n+i]=y[i]-d[i].upper()+t; gye[2*n+m+i]=d[i].lower()-y[i]+t; }
     ARIADNE_LOG(9,"  GE="<<gye<<"\n");
 
     // Construct the extended matrix AE=(A -A I -I \\ e e 0 0)
-    UpperIntervalMatrix AE(m+1,o);
+    UpperIntervalMatrixType AE(m+1,o);
     for(Nat i=0; i!=m; ++i) { for(Nat j=0; j!=n; ++j) { AE[i][j]=A[i][j]; AE[i][n+j]=-A[i][j]; } }
     for(Nat i=0; i!=m; ++i) { AE[i][2*n+i]=1; AE[i][2*n+m+i]=-1; }
     for(Nat k=0; k!=o; ++k) { AE[m][k]=1; }
-    UpperIntervalMatrix AET=transpose(AE);
+    UpperIntervalMatrixType AET=transpose(AE);
 
     FloatMatrix mA=midpoint(A);
     FloatMatrix mAE=midpoint(AE);
@@ -2901,55 +2901,55 @@ Void KrawczykOptimiser::feasibility_step(const ExactBox& d, const ValidatedVecto
     // FIXME: What if S is not invertible?
 
     // Construct the residuals
-    UpperIntervalVector rx=emul(mx,mz);
+    UpperIntervalVectorType rx=emul(mx,mz);
     //RawFloatVector ryt=-prod(AE,x); ryt[m]+=1; // FIXME: Need hessian
-    UpperIntervalVector ryt=-feasibility_mul(mA,mx); ryt[m]+=1; // FIXME: Need hessian
-    UpperIntervalVector rz=midpoint(gye)+mz;
+    UpperIntervalVectorType ryt=-feasibility_mul(mA,mx); ryt[m]+=1; // FIXME: Need hessian
+    UpperIntervalVectorType rz=midpoint(gye)+mz;
     ARIADNE_LOG(9,"rx="<<rx<<" ryt="<<ryt<<" rz="<<rz<<"\n");
 
     // Construct the errors on the residuals ([M]-M)([x]-x)
-    UpperIntervalVector ex=x-mx;
-    UpperIntervalVector eyt=yt-myt;
-    UpperIntervalVector ez=z-mz;
-    UpperIntervalMatrix eA=A-mA;
-    UpperIntervalMatrix eH=H-mH;
+    UpperIntervalVectorType ex=x-mx;
+    UpperIntervalVectorType eyt=yt-myt;
+    UpperIntervalVectorType ez=z-mz;
+    UpperIntervalMatrixType eA=A-mA;
+    UpperIntervalMatrixType eH=H-mH;
 
-    UpperIntervalVector erx=2.0*emul(ex,ez);
-    UpperIntervalVector eryt=UpperIntervalMatrix(AE-mAE)*ex;
-    UpperIntervalVector erz=UpperIntervalMatrix(AET-mAET)*eyt;
+    UpperIntervalVectorType erx=2.0*emul(ex,ez);
+    UpperIntervalVectorType eryt=UpperIntervalMatrixType(AE-mAE)*ex;
+    UpperIntervalVectorType erz=UpperIntervalMatrixType(AET-mAET)*eyt;
     ARIADNE_LOG(9,"erx="<<erx<<" eryt="<<eryt<<" erz="<<erz<<"\n");
 
     rx+=2.0*emul(ex,ez);
-    ryt+=UpperIntervalMatrix(AE-mAE)*ex;
-    rz+=UpperIntervalMatrix(AET-mAET)*eyt;
+    ryt+=UpperIntervalMatrixType(AE-mAE)*ex;
+    rz+=UpperIntervalMatrixType(AET-mAET)*eyt;
     ARIADNE_LOG(9,"rx="<<rx<<" ryt="<<ryt<<" rz="<<rz<<"\n");
 
     //RawFloatVector rr=prod(AE,ediv(RawFloatVector(rx-emul(x,rz)),z))-ryt;
 
     // Compute the error differences
-    UpperIntervalVector erxdz=ediv(erx,mz);
-    UpperIntervalVector edyt=(mSinv*mAE)*erxdz + mSinv*eyt - (mSinv*(mAE*DiagonalMatrix<Float64>(mDE))) * ez;
-    UpperIntervalVector edz=-erz-feasibility_trmul(mA,edyt);
-    UpperIntervalVector edx=-ediv(UpperIntervalVector(erx+emul(mx,edz)),mz);
+    UpperIntervalVectorType erxdz=ediv(erx,mz);
+    UpperIntervalVectorType edyt=(mSinv*mAE)*erxdz + mSinv*eyt - (mSinv*(mAE*DiagonalMatrix<Float64>(mDE))) * ez;
+    UpperIntervalVectorType edz=-erz-feasibility_trmul(mA,edyt);
+    UpperIntervalVectorType edx=-ediv(UpperIntervalVectorType(erx+emul(mx,edz)),mz);
     ARIADNE_LOG(9,"edx="<<edx<<" edyt="<<edyt<<" edz="<<edz<<"\n");
 
     // Compute the error differences
-    UpperIntervalVector eerr=prod(mAE,ediv(esub(erx,emul(mx,erz)),mz))-eryt;
+    UpperIntervalVectorType eerr=prod(mAE,ediv(esub(erx,emul(mx,erz)),mz))-eryt;
     ARIADNE_LOG(9,"  eerr="<<eerr<<"\n");
-    UpperIntervalVector eedyt=prod(mSinv,eerr);
-    UpperIntervalVector eedz=-erz-feasibility_trmul(mA,eedyt);
-    UpperIntervalVector eedx=-ediv(UpperIntervalVector(erx+emul(mx,eedz)),mz);
+    UpperIntervalVectorType eedyt=prod(mSinv,eerr);
+    UpperIntervalVectorType eedz=-erz-feasibility_trmul(mA,eedyt);
+    UpperIntervalVectorType eedx=-ediv(UpperIntervalVectorType(erx+emul(mx,eedz)),mz);
     ARIADNE_LOG(9,"eedx="<<eedx<<" eedyt="<<eedyt<<" eedz="<<eedz<<"\n");
 
 
     // Compute the differences
-    UpperIntervalVector rr=prod(mAE,ediv(esub(rx,emul(mx,rz)),mz))-ryt;
-    UpperIntervalVector dyt=prod(mSinv,rr);
-    UpperIntervalVector dz=-rz-feasibility_trmul(mA,dyt);
-    UpperIntervalVector dx=-ediv(UpperIntervalVector(rx+emul(mx,dz)),mz);
+    UpperIntervalVectorType rr=prod(mAE,ediv(esub(rx,emul(mx,rz)),mz))-ryt;
+    UpperIntervalVectorType dyt=prod(mSinv,rr);
+    UpperIntervalVectorType dz=-rz-feasibility_trmul(mA,dyt);
+    UpperIntervalVectorType dx=-ediv(UpperIntervalVectorType(rx+emul(mx,dz)),mz);
     ARIADNE_LOG(9,"dx="<<dx<<" dyt="<<dyt<<" dz="<<dz<<"\n\n");
 
-    UpperIntervalVector nx,ny,nyt,nz; Float64 nt;
+    UpperIntervalVectorType nx,ny,nyt,nz; Float64 nt;
     nx=mx+dx;
     nyt=myt+dyt;
     nz=mz+dz;

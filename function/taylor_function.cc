@@ -60,43 +60,43 @@ ScalarFunctionModel<ValidatedTag>& ScalarFunctionModel<ValidatedTag>::operator=(
 
 
 
-ScalarTaylorFunction TaylorFunctionFactory::create(const ExactBox& domain, const ValidatedScalarFunctionInterface& function) const
+ScalarTaylorFunction TaylorFunctionFactory::create(const ExactBoxType& domain, const ValidatedScalarFunctionInterface& function) const
 {
     return ScalarTaylorFunction(domain,function,this->_sweeper);
 }
 
-ScalarTaylorFunction* TaylorFunctionFactory::_create(const ExactBox& domain, const ValidatedScalarFunctionInterface& function) const
+ScalarTaylorFunction* TaylorFunctionFactory::_create(const ExactBoxType& domain, const ValidatedScalarFunctionInterface& function) const
 {
     return new ScalarTaylorFunction(domain,function,this->_sweeper);
 }
 
-VectorTaylorFunction TaylorFunctionFactory::create(const ExactBox& domain, const ValidatedVectorFunctionInterface& function) const
+VectorTaylorFunction TaylorFunctionFactory::create(const ExactBoxType& domain, const ValidatedVectorFunctionInterface& function) const
 {
     return VectorTaylorFunction(domain,function,this->_sweeper);
 }
 
-VectorTaylorFunction* TaylorFunctionFactory::_create(const ExactBox& domain, const ValidatedVectorFunctionInterface& function) const
+VectorTaylorFunction* TaylorFunctionFactory::_create(const ExactBoxType& domain, const ValidatedVectorFunctionInterface& function) const
 {
     return new VectorTaylorFunction(domain,function,this->_sweeper);
 }
 
-ScalarTaylorFunction TaylorFunctionFactory::create_zero(const ExactBox& domain) const
+ScalarTaylorFunction TaylorFunctionFactory::create_zero(const ExactBoxType& domain) const
 {
     return ScalarTaylorFunction::zero(domain,this->_sweeper);
 }
 
-ScalarTaylorFunction TaylorFunctionFactory::create_constant(const ExactBox& domain, ValidatedNumericType value) const
+ScalarTaylorFunction TaylorFunctionFactory::create_constant(const ExactBoxType& domain, ValidatedNumericType value) const
 {
     return ScalarTaylorFunction::constant(domain,value,this->_sweeper);
 }
 
-ScalarTaylorFunction TaylorFunctionFactory::create_coordinate(const ExactBox& domain, SizeType k) const
+ScalarTaylorFunction TaylorFunctionFactory::create_coordinate(const ExactBoxType& domain, SizeType k) const
 {
     return ScalarTaylorFunction::coordinate(domain,k,this->_sweeper);
 }
 
 
-VectorTaylorFunction TaylorFunctionFactory::create_identity(const ExactBox& domain) const
+VectorTaylorFunction TaylorFunctionFactory::create_identity(const ExactBoxType& domain) const
 {
     return VectorTaylorFunction::identity(domain,this->_sweeper);
 }

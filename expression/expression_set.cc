@@ -134,21 +134,21 @@ OutputStream& operator<<(OutputStream& os, const RealVariablesBox& ebx) {
     return os << ebx._bounds;
 }
 
-ExactInterval over_approximation(RealInterval ivl) {
-    return cast_exact_interval(UpperInterval(ivl));
+ExactIntervalType over_approximation(RealInterval ivl) {
+    return cast_exact_interval(UpperIntervalType(ivl));
 }
 
-ExactInterval under_approximation(RealInterval ivl) {
-    return cast_exact_interval(LowerInterval(ivl));
+ExactIntervalType under_approximation(RealInterval ivl) {
+    return cast_exact_interval(LowerIntervalType(ivl));
 }
 
-ExactInterval approximation(RealInterval ivl) {
-    return cast_exact_interval(ApproximateInterval(ivl));
+ExactIntervalType approximation(RealInterval ivl) {
+    return cast_exact_interval(ApproximateIntervalType(ivl));
 }
 
 
-VariablesBox over_approximation(const RealVariablesBox& ebx) {
-    Map<RealVariable,ExactInterval> result;
+ExactVariablesBoxType over_approximation(const RealVariablesBox& ebx) {
+    Map<RealVariable,ExactIntervalType> result;
     for(Map<RealVariable,RealInterval>::ConstIterator iter=ebx.bounds().begin();
         iter!=ebx.bounds().end(); ++iter)
     {
@@ -157,8 +157,8 @@ VariablesBox over_approximation(const RealVariablesBox& ebx) {
     return result;
 }
 
-VariablesBox approximation(const RealVariablesBox& ebx) {
-    Map<RealVariable,ExactInterval> result;
+ExactVariablesBoxType approximation(const RealVariablesBox& ebx) {
+    Map<RealVariable,ExactIntervalType> result;
     for(Map<RealVariable,RealInterval>::ConstIterator iter=ebx.bounds().begin();
         iter!=ebx.bounds().end(); ++iter)
     {
@@ -167,8 +167,8 @@ VariablesBox approximation(const RealVariablesBox& ebx) {
     return result;
 }
 
-VariablesBox under_approximation(const RealVariablesBox& ebx) {
-    Map<RealVariable,ExactInterval> result;
+ExactVariablesBoxType under_approximation(const RealVariablesBox& ebx) {
+    Map<RealVariable,ExactIntervalType> result;
     for(Map<RealVariable,RealInterval>::ConstIterator iter=ebx.bounds().begin();
         iter!=ebx.bounds().end(); ++iter)
     {
@@ -245,7 +245,7 @@ OutputStream& operator<<(OutputStream& os, const RealExpressionBoundedConstraint
 }
 
 ValidatedConstrainedImageSet approximate_euclidean_set(const RealExpressionBoundedConstraintSet& set, const RealSpace& space) {
-    ExactIntervalVector domain=cast_exact_box(ApproximateBox(RealVariablesBox(set.bounds()).euclidean_set(space)));
+    ExactIntervalVectorType domain=cast_exact_box(ApproximateBoxType(RealVariablesBox(set.bounds()).euclidean_set(space)));
     ValidatedVectorFunction identity=ValidatedVectorFunction::identity(domain.size());
 
     ValidatedConstrainedImageSet result(domain,identity);

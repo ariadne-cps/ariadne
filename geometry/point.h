@@ -75,7 +75,7 @@ class Point
         return os << static_cast<const Vector<RealType>&>(*this); }
 
     virtual Void draw(CanvasInterface& c, const Projection2d& p) const;
-    virtual ExactBox bounding_box() const;
+    virtual ExactBoxType bounding_box() const;
 };
 
 ExactPoint make_point(const StringType&);

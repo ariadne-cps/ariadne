@@ -91,9 +91,9 @@ class ConstraintSet
 
     ConstraintSet* clone() const;
     DimensionType dimension() const;
-    Sierpinski separated(const ExactBox&) const;
-    Sierpinski overlaps(const ExactBox&) const;
-    Sierpinski covers(const ExactBox&) const;
+    Sierpinski separated(const ExactBoxType&) const;
+    Sierpinski overlaps(const ExactBoxType&) const;
+    Sierpinski covers(const ExactBoxType&) const;
     OutputStream& write(OutputStream&) const;
 };
 
@@ -131,11 +131,11 @@ class BoundedConstraintSet
 
     BoundedConstraintSet* clone() const;
     DimensionType dimension() const;
-    Sierpinski separated(const ExactBox&) const;
-    Sierpinski overlaps(const ExactBox&) const;
-    Sierpinski covers(const ExactBox&) const;
-    Sierpinski inside(const ExactBox&) const;
-    UpperBox bounding_box() const;
+    Sierpinski separated(const ExactBoxType&) const;
+    Sierpinski overlaps(const ExactBoxType&) const;
+    Sierpinski covers(const ExactBoxType&) const;
+    Sierpinski inside(const ExactBoxType&) const;
+    UpperBoxType bounding_box() const;
     OutputStream& write(OutputStream&) const;
     Void draw(CanvasInterface&,const Projection2d&) const;
 };
@@ -198,7 +198,7 @@ class ConstrainedImageSet
     DimensionType dimension() const { return this->_function.result_size(); }
 
     //! \brief A coarse over-approximation to the set. Computed by taking the interval evaluation \f$h(D)\f$.
-    UpperBox bounding_box() const;
+    UpperBoxType bounding_box() const;
     //! \brief Construct an affine over-approximation
     ValidatedAffineConstrainedImageSet affine_over_approximation() const;
     //! \brief Construct an affine approximation, with undefined accuracy.
@@ -209,11 +209,11 @@ class ConstrainedImageSet
     Pair<ConstrainedImageSet,ConstrainedImageSet> split(Nat j) const;
 
     //! \brief Test if the set is contained in (the interior of) a box.
-    Sierpinski inside(const ExactBox& bx) const;
+    Sierpinski inside(const ExactBoxType& bx) const;
     //! \brief Test if the set is disjoint from a (closed) box.
-    Sierpinski separated(const ExactBox&) const;
+    Sierpinski separated(const ExactBoxType&) const;
     //! \brief Test if the set overlaps (intersects the interior of) a box.
-    Sierpinski overlaps(const ExactBox&) const;
+    Sierpinski overlaps(const ExactBoxType&) const;
     //! \brief Adjoin an outer approximation to a paving.
     Void adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
 
@@ -234,28 +234,28 @@ class ConstrainedImageSet
 class ValidatedConstrainedImageSet
     : public virtual LocatedSetInterface, public virtual DrawableInterface
 {
-    ExactBox _domain;
-    ExactBox _reduced_domain;
+    ExactBoxType _domain;
+    ExactBoxType _reduced_domain;
     ValidatedVectorFunction _function;
     List< ValidatedConstraint > _constraints;
   public:
     //! \brief Construct the set with zero-dimensional parameterisation in zero dimensions with no constraints.
     ValidatedConstrainedImageSet() : _domain(), _function() { }
     //! \brief Construct the box \a dom.
-    ValidatedConstrainedImageSet(const ExactBox& dom)
+    ValidatedConstrainedImageSet(const ExactBoxType& dom)
         : _domain(dom), _reduced_domain(dom)
         , _function(static_cast<ValidatedVectorFunction const&>(EffectiveVectorFunction::identity(dom.size()))) { }
     //! \brief Construct the image of \a dom under \a fn.
-    ValidatedConstrainedImageSet(const ExactBox& dom, const ValidatedVectorFunction& fn) : _domain(dom), _reduced_domain(dom), _function(fn) {
+    ValidatedConstrainedImageSet(const ExactBoxType& dom, const ValidatedVectorFunction& fn) : _domain(dom), _reduced_domain(dom), _function(fn) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
-    ValidatedConstrainedImageSet(const ExactBox& dom, const ValidatedVectorFunctionModel& fn) : _domain(dom), _reduced_domain(dom), _function(fn.raw_pointer()->_clone()) {
+    ValidatedConstrainedImageSet(const ExactBoxType& dom, const ValidatedVectorFunctionModel& fn) : _domain(dom), _reduced_domain(dom), _function(fn.raw_pointer()->_clone()) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
     //! \brief Construct the image of \a dom under \a fn.
-    ValidatedConstrainedImageSet(const ExactBox& dom, const ValidatedVectorFunction& fn, const List<ValidatedConstraint>& cnstr) : _domain(dom), _reduced_domain(dom), _function(fn), _constraints(cnstr) {
+    ValidatedConstrainedImageSet(const ExactBoxType& dom, const ValidatedVectorFunction& fn, const List<ValidatedConstraint>& cnstr) : _domain(dom), _reduced_domain(dom), _function(fn), _constraints(cnstr) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
 
     //! \brief The domain of the set.
-    const ExactBox& domain() const { return this->_domain; }
+    const ExactBoxType& domain() const { return this->_domain; }
     //! \brief The function used to define the set.
     const ValidatedVectorFunction& function() const { return this->_function; }
     //! \brief The constraints used to define the set.
@@ -288,12 +288,12 @@ class ValidatedConstrainedImageSet
     DimensionType dimension() const { return this->_function.result_size(); }
 
     ValidatedVectorFunction constraint_function() const;
-    ExactBox constraint_bounds() const;
+    ExactBoxType constraint_bounds() const;
 
     //! \brief Reduce the size of the domain by constraint propagation, if possible.
     Void reduce();
     //! \brief A coarse over-approximation to the set. Computed by taking the interval evaluation \f$h(D)\f$.
-    UpperBox bounding_box() const;
+    UpperBoxType bounding_box() const;
     //! \brief Construct an affine over-approximation
     ValidatedAffineConstrainedImageSet affine_over_approximation() const;
     //! \brief Construct an affine approximation, with undefined accuracy.
@@ -306,11 +306,11 @@ class ValidatedConstrainedImageSet
     //! \brief Test if the set is empty.
     Kleenean is_empty() const;
     //! \brief Test if the set is a strict subset of a box.
-    Sierpinski inside(const ExactBox& bx) const;
+    Sierpinski inside(const ExactBoxType& bx) const;
     //! \brief Test if the set is disjoint from a box.
-    Sierpinski separated(const ExactBox&) const;
+    Sierpinski separated(const ExactBoxType&) const;
     //! \brief Test if the set overlaps (intersects the interior of) a box.
-    Sierpinski overlaps(const ExactBox&) const;
+    Sierpinski overlaps(const ExactBoxType&) const;
     //! \brief Adjoin an outer approximation to a paving.
     Void adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
 

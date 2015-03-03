@@ -108,7 +108,7 @@ Void TestHybridEvolution::test_bouncing_ball() const {
 
     double height=2.0;
     double radius=1.0/64;
-    HybridBox initial(q,bouncing_ball.continuous_state_space(q),ExactBox{{height-radius,height+radius},{-radius,+radius}});
+    HybridBoxType initial(q,bouncing_ball.continuous_state_space(q),ExactBoxType{{height-radius,height+radius},{-radius,+radius}});
     HybridTime time(4.5,3);
 
     this->_set_evolver(bouncing_ball);
@@ -124,7 +124,7 @@ Void TestHybridEvolution::test_bouncing_ball() const {
 
 
     Decimal exl(0.12), exu(+0.13), evl(-0.04), evu(+0.04); // Expected bounds
-    HybridBox expected_orbit_final_bounding_box=HybridBox(q,{x.in(exl,exu),v.in(evl,evu)});
+    HybridBoxType expected_orbit_final_bounding_box=HybridBoxType(q,{x.in(exl,exu),v.in(evl,evu)});
     for(ListSet<HybridEnclosure>::ConstIterator iter=orbit_final.begin(); iter!=orbit_final.end(); ++iter) {
         const HybridEnclosure& orbit_final_set=*iter;
         ARIADNE_TEST_PRINT(orbit_final_set.bounding_box());
@@ -184,7 +184,7 @@ Void TestHybridEvolution::test_water_tank() const {
     ARIADNE_TEST_PRINT(watertank);
 
     DiscreteLocation initial_location=opening;
-    HybridBox initial_box(initial_location,{0<=height<=one/16,0<=aperture<=one/64});
+    HybridBoxType initial_box(initial_location,{0<=height<=one/16,0<=aperture<=one/64});
     HybridSet initial(initial_location,{0<=height<=one/16,0<=aperture<=one/64});
 
     //HybridTime evolution_time(80.0,5);
@@ -201,7 +201,7 @@ Void TestHybridEvolution::test_water_tank() const {
     HybridEnclosure final_enclosure=HybridEnclosure(*orbit.final().begin());
     ARIADNE_TEST_PRINT(final_enclosure.bounding_box());
     Dyadic ehl(7.6875), ehu(8.0); Decimal eal(0.999), eau(1.001); // Expected bounds
-    ARIADNE_TEST_BINARY_PREDICATE(inside,final_enclosure,HybridBox(open,{height.in(ehl,ehu),aperture.in(eal,eau)}));
+    ARIADNE_TEST_BINARY_PREDICATE(inside,final_enclosure,HybridBoxType(open,{height.in(ehl,ehu),aperture.in(eal,eau)}));
 
     Decimal hl(-0.1), hu(+9.1), al(-0.3), au(+1.3);
     Axes2d bounding_box={hl<=height<=hu, al<=aperture<=au};

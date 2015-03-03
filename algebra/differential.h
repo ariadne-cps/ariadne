@@ -54,7 +54,7 @@ template<class X> class Differential;
 typedef Differential<Float64> FloatDifferential;
 typedef Differential<ApproximateFloat64> ApproximateFloatDifferential;
 typedef Differential<ValidatedFloat64> ValidatedFloatDifferential;
-typedef Differential<UpperInterval> UpperIntervalDifferential;
+typedef Differential<UpperIntervalType> UpperIntervalDifferentialType;
 
 
 template<class X> using EqualityType = decltype(declval<X>()==declval<X>());

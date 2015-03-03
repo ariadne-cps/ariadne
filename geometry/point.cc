@@ -35,8 +35,8 @@
 
 namespace Ariadne {
 
-inline ExactInterval make_interval(ApproximateNumericType x) { return ExactInterval(x.raw(),x.raw()); }
-inline ExactInterval make_interval(ExactNumericType x) { return ExactInterval(x.raw(),x.raw()); }
+inline ExactIntervalType make_interval(ApproximateNumericType x) { return ExactIntervalType(x.raw(),x.raw()); }
+inline ExactIntervalType make_interval(ExactNumericType x) { return ExactIntervalType(x.raw(),x.raw()); }
 
 template<class X> Point<X>::Point(InitializerList<double> lst)
     : Vector<X>(Vector<ExactFloat64>(Vector<Float64>(lst)))
@@ -47,9 +47,9 @@ template<class X> Point<X>* Point<X>::clone() const {
     return new Point<X>(*this);
 }
 
-template<class X> ExactBox Point<X>::bounding_box() const {
-    ExactBox r(this->dimension());
-    UpperInterval e(-Float64::eps(),+Float64::eps());
+template<class X> ExactBoxType Point<X>::bounding_box() const {
+    ExactBoxType r(this->dimension());
+    UpperIntervalType e(-Float64::eps(),+Float64::eps());
     for(Nat i=0; i!=this->dimension(); ++i) {
         r[i]=cast_exact_interval(cast_exact((*this)[i])+e); }
     return r;

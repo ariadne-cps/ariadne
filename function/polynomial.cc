@@ -33,7 +33,7 @@ namespace Ariadne {
 template class Polynomial<Float64>;
 template class Polynomial<ApproximateFloat64>;
 template class Polynomial<ValidatedFloat64>;
-template class Polynomial<UpperInterval>;
+template class Polynomial<UpperIntervalType>;
 
 template<> Void Polynomial<ExactFloat64>::cleanup() { }
 

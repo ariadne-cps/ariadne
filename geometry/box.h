@@ -189,14 +189,14 @@ template<class I> inline Box<I> split(const Vector<I>& bx, SplitPart lmu) { retu
 template<class I> inline Pair<Box<I>,Box<I>> split(const Vector<I>& bx) { return static_cast<Box<I>const&>(bx).split(); }
 template<class I> inline Pair<Box<I>,Box<I>> split(const Vector<I>& bx, SizeType k) { return static_cast<Box<I>const&>(bx).split(k); }
 
-//! \relates ExactFloatBox \brief The cartesian product of two boxes.
+//! \relates ExactFloat64Box \brief The cartesian product of two boxes.
 template<class I> inline Box<I> product(const Box<I>& bx1, const Box<I>& bx2) { return Box<I>::_product(bx1,bx2); }
 template<class I> inline Box<I> product(const Box<I>& bx1, const I& ivl2) { return Box<I>::_product(bx1,ivl2); }
 template<class I> inline Box<I> product(const Box<I>& bx1, const Box<I>& bx2, const Box<I>& bx3) { return Box<I>::_product(bx1,bx2,bx3); }
 
 
-UpperInterval apply(ScalarFunction<ValidatedTag>const& f, const Box<UpperInterval>& x);
-Box<UpperInterval> apply(VectorFunction<ValidatedTag>const& f, const Box<UpperInterval>& x);
+UpperIntervalType apply(ScalarFunction<ValidatedTag>const& f, const Box<UpperIntervalType>& x);
+Box<UpperIntervalType> apply(VectorFunction<ValidatedTag>const& f, const Box<UpperIntervalType>& x);
 
 //! \relates Box \brief Project onto the variables \a rng.
 template<class I> inline Box<I> project(const Box<I> & bx, Array<SizeType> const& rng) { return Box<I>::_project(bx,rng); }
@@ -215,7 +215,7 @@ template<class I> auto upper_bounds(const Box<I>& bx) -> typename Box<I>::Vertex
 }
 
 
-//! \relates EBox \brief The smallest box containing the two boxes.
+//! \relates EBoxType \brief The smallest box containing the two boxes.
 template<class I1, class I2> Box<decltype(hull(declval<I1>(),declval<I2>()))> hull(const Box<I1>& bx1, const Box<I2>& bx2) {
     ARIADNE_ASSERT(bx1.size()==bx2.size());
     Box<decltype(hull(declval<I1>(),declval<I2>()))> r(bx1.size());
@@ -357,8 +357,8 @@ template<class I1> template<class I2> inline auto Box<I1>::separated(const Box<I
 
 
 // Declare related functions
-Void draw(CanvasInterface& c, Projection2d const& p, ApproximateFloatBox const& bx);
-ExactBox make_box(const String& str);
+Void draw(CanvasInterface& c, Projection2d const& p, ApproximateBoxType const& bx);
+ExactBoxType make_box(const String& str);
 
 
 // Inline functions so as not to have to instantiate box class
@@ -394,61 +394,65 @@ template<class I> inline auto cast_singleton(Box<I> const& bx) -> Vector<decltyp
 }
 
 template<class I> inline Void Box<I>::draw(CanvasInterface& c, const Projection2d& p) const {
-    return Ariadne::draw(c,p,ApproximateFloatBox(*this)); }
+    return Ariadne::draw(c,p,ApproximateBoxType(*this)); }
 
 
-inline ExactBox cast_exact_box(ApproximateBox const& abx) {
-    return ExactBox(reinterpret_cast<ExactBox const&>(abx));
+inline ExactFloat64Box cast_exact_box(ApproximateFloat64Box const& abx) {
+    return ExactFloat64Box(reinterpret_cast<ExactFloat64Box const&>(abx));
 }
 
-inline ExactBox cast_exact_box(Vector<BoundedFloat64> const& bv) {
-    return ExactBox(reinterpret_cast<Vector<ExactInterval>const&>(bv));
+inline Box<ExactFloat64Interval> cast_exact_box(Vector<BoundedFloat64> const& bv) {
+    return Box<ExactFloat64Interval>(reinterpret_cast<Vector<ExactFloat64Interval>const&>(bv));
 }
 
 
-inline UpperBox widen(const UpperBox& bx, UpperFloat64 eps) {
-    UpperBox r(bx.dimension());
+inline ApproximateFloat64Box widen(const ApproximateFloat64Box& bx, ApproximateFloat64 e) {
+    ApproximateFloat64 eps(e);
+    ApproximateFloat64Box r(bx.dimension());
+    for(Nat i=0; i!=bx.size(); ++i) {
+        r[i]=ApproximateIntervalType(bx[i].lower()-eps,bx[i].upper()+eps);
+    }
+    return r;
+}
+
+inline UpperFloat64Box widen(const UpperFloat64Box& bx, UpperFloat64 eps) {
+    UpperFloat64Box r(bx.dimension());
     for(Nat i=0; i!=bx.size(); ++i) {
         r[i]=widen(bx[i],eps);
     }
     return r;
 }
 
-inline UpperBox widen(const UpperBox& bx) {
-    UpperBox r(bx.dimension());
+inline UpperFloat64Box widen(const ExactFloat64Box& bx, ExactFloat64 eps) {
+    return widen(reinterpret_cast<const UpperFloat64Box&>(bx),UpperFloat64(eps));
+}
+
+inline UpperFloat64Box widen(const UpperFloat64Box& bx) {
+    UpperFloat64Box r(bx.dimension());
     for(Nat i=0; i!=bx.size(); ++i) {
         r[i]=widen(bx[i]);
     }
     return r;
 }
 
-inline ExactBox widen_domain(const UpperBox& bx) {
-    ExactBox r(bx.dimension());
+inline ExactFloat64Box widen_domain(const UpperFloat64Box& bx) {
+    ExactFloat64Box r(bx.dimension());
     for(Nat i=0; i!=bx.size(); ++i) {
         r[i]=widen_domain(bx[i]);
     }
     return r;
 }
 
-inline ApproximateBox widen(const ApproximateBox& bx, Float64 e) {
-    ApproximateFloat64 eps(e);
-    ApproximateBox r(bx.dimension());
-    for(Nat i=0; i!=bx.size(); ++i) {
-        r[i]=ApproximateInterval(bx[i].lower()-eps,bx[i].upper()+eps);
-    }
-    return r;
-}
-
-inline LowerBox narrow(const LowerBox& bx, UpperFloat64 eps) {
-    LowerBox r(bx.dimension());
+inline LowerFloat64Box narrow(const LowerFloat64Box& bx, UpperFloat64 eps) {
+    LowerFloat64Box r(bx.dimension());
     for(Nat i=0; i!=bx.size(); ++i) {
         r[i]=narrow(bx[i],eps);
     }
     return r;
 }
 
-inline LowerBox narrow(const LowerBox& bx) {
-    LowerBox r(bx.dimension());
+inline LowerFloat64Box narrow(const LowerFloat64Box& bx) {
+    LowerFloat64Box r(bx.dimension());
     for(Nat i=0; i!=bx.size(); ++i) {
         r[i]=narrow(bx[i]);
     }
@@ -460,37 +464,37 @@ inline LowerBox narrow(const LowerBox& bx) {
 class ExactBoxSet
     : public virtual SetInterface,
       public virtual DrawableInterface,
-      public Box<ExactInterval>
+      public Box<ExactIntervalType>
 {
 
   public:
-    using Box<ExactInterval>::Box;
-    ExactBoxSet(Box<ExactInterval>const& bx) : Box<ExactInterval>(bx) { }
+    using Box<ExactIntervalType>::Box;
+    ExactBoxSet(Box<ExactIntervalType>const& bx) : Box<ExactIntervalType>(bx) { }
 
     virtual ExactBoxSet* clone() const { return new ExactBoxSet(*this); }
-    virtual DimensionType dimension() const final { return this->ExactBox::size(); }
-    virtual Sierpinski separated(const ExactBox& other) const final { return this->ExactBox::separated(other); }
-    virtual Sierpinski overlaps(const ExactBox& other) const final { return this->ExactBox::overlaps(other); }
-    virtual Sierpinski covers(const ExactBox& other) const final { return this->ExactBox::covers(other); }
-    virtual Sierpinski inside(const ExactBox& other) const final { return this->ExactBox::inside(other); }
-    virtual UpperBox bounding_box() const final { return this->ExactBox::bounding_box(); }
+    virtual DimensionType dimension() const final { return this->ExactBoxType::size(); }
+    virtual Sierpinski separated(const ExactBoxType& other) const final { return this->ExactBoxType::separated(other); }
+    virtual Sierpinski overlaps(const ExactBoxType& other) const final { return this->ExactBoxType::overlaps(other); }
+    virtual Sierpinski covers(const ExactBoxType& other) const final { return this->ExactBoxType::covers(other); }
+    virtual Sierpinski inside(const ExactBoxType& other) const final { return this->ExactBoxType::inside(other); }
+    virtual UpperBoxType bounding_box() const final { return this->ExactBoxType::bounding_box(); }
     virtual Void draw(CanvasInterface& c, const Projection2d& p) const final { return Ariadne::draw(c,p,*this); }
-    virtual OutputStream& write(OutputStream& os) const final { return os << static_cast<const ExactBox&>(*this); }
+    virtual OutputStream& write(OutputStream& os) const final { return os << static_cast<const ExactBoxType&>(*this); }
 };
 
 class ApproximateBoxSet
     : public virtual DrawableInterface,
-      public Box<ApproximateInterval>
+      public Box<ApproximateIntervalType>
 {
 
   public:
-    using Box<ApproximateInterval>::Box;
-    ApproximateBoxSet(Box<ApproximateInterval>const& bx) : Box<ApproximateInterval>(bx) { }
+    using Box<ApproximateIntervalType>::Box;
+    ApproximateBoxSet(Box<ApproximateIntervalType>const& bx) : Box<ApproximateIntervalType>(bx) { }
 
     virtual ApproximateBoxSet* clone() const { return new ApproximateBoxSet(*this); }
-    virtual DimensionType dimension() const final { return this->ApproximateBox::size(); }
+    virtual DimensionType dimension() const final { return this->ApproximateBoxType::size(); }
     virtual Void draw(CanvasInterface& c, const Projection2d& p) const final { return Ariadne::draw(c,p,*this); }
-    virtual OutputStream& write(OutputStream& os) const final { return os << static_cast<const ApproximateBox&>(*this); }
+    virtual OutputStream& write(OutputStream& os) const final { return os << static_cast<const ApproximateBoxType&>(*this); }
 };
 
 

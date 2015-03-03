@@ -46,7 +46,7 @@ using namespace std;
 template<class X> class Point;
 typedef Point<ExactNumericType> ExactPoint;
 template<class IVL> class Box;
-typedef Box<ExactInterval> ExactBox;
+typedef Box<ExactIntervalType> ExactBoxType;
 
 class InterpolatedCurve;
 class Zonotope;
@@ -90,7 +90,7 @@ class TextPlot
     Void open(const char* filename);
     Void open(const char* filename, ios::openmode mode);
     Void draw(const ExactPoint&);
-    Void draw(const ExactBox&);
+    Void draw(const ExactBoxType&);
 //    Void draw(const Polytope&);
     Void draw(const InterpolatedCurve&);
     Void draw(const GridTreeSubset&);

@@ -215,7 +215,7 @@ template<class P> ScalarFunction<P> FunctionConstructors<P>::zero(BoxDomain dom)
     return zero(dom.dimension());
 }
 
-template<class P> ScalarFunction<P> FunctionConstructors<P>::constant(BoxDomain dom, CanonicalNumericTypeType<P> c) {
+template<class P> ScalarFunction<P> FunctionConstructors<P>::constant(BoxDomain dom, CanonicalNumericType<P> c) {
     return constant(dom.dimension(),c);
 }
 
@@ -237,7 +237,7 @@ template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::zero(Inte
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::constant(IntervalDomain dom, CanonicalNumericTypeType<P> c) {
+template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::constant(IntervalDomain dom, CanonicalNumericType<P> c) {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
@@ -262,7 +262,7 @@ template<class P> ScalarFunction<P> FunctionConstructors<P>::zero(SizeType as) {
     return sf;
 }
 
-template<class P> ScalarFunction<P> FunctionConstructors<P>::constant(SizeType as, CanonicalNumericTypeType<P> c) {
+template<class P> ScalarFunction<P> FunctionConstructors<P>::constant(SizeType as, CanonicalNumericType<P> c) {
     return ScalarFunction<P>(new ScalarFormulaFunction<Y>(as,Formula<Y>::constant(c)));
 }
 

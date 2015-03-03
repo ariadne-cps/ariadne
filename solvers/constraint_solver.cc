@@ -56,7 +56,7 @@ Sign sign(const Float64& x) {
     else { return ZERO; }
 }
 
-Sign sign(const ExactInterval& ivl) {
+Sign sign(const ExactIntervalType& ivl) {
     if(ivl.lower()>0) { return NEGATIVE; }
     else if(ivl.upper()<0) {  return POSITIVE; }
     else { return ZERO; }
@@ -72,12 +72,12 @@ OutputStream& operator<<(OutputStream& os, const EffectiveConstraint& c) {
 }
 
 
-Pair<Kleenean,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, const List<ValidatedConstraint>& constraints) const
+Pair<Kleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType& domain, const List<ValidatedConstraint>& constraints) const
 {
     if(constraints.empty()) { return make_pair(!domain.is_empty(),domain.midpoint()); }
 
     ValidatedVectorFunction function(constraints.size(),constraints[0].function().domain());
-    ExactBox bounds(constraints.size());
+    ExactBoxType bounds(constraints.size());
 
     for(Nat i=0; i!=constraints.size(); ++i) {
         function[i]=constraints[i].function();
@@ -87,7 +87,7 @@ Pair<Kleenean,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, con
 }
 
 
-Pair<Kleenean,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, const ValidatedVectorFunction& function, const ExactBox& codomain) const
+Pair<Kleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType& domain, const ValidatedVectorFunction& function, const ExactBoxType& codomain) const
 {
 
     static const ExactFloat64 XSIGMA=0.125_exact;
@@ -97,8 +97,8 @@ Pair<Kleenean,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, con
     ARIADNE_LOG(4,"domain="<<domain<<"\nfunction="<<function<<"\ncodomain="<<codomain<<"\n");
 
     // Make codomain singleton
-    UpperBox bounds=codomain;
-    UpperBox image=apply(function,domain);
+    UpperBoxType bounds=codomain;
+    UpperBoxType image=apply(function,domain);
     ARIADNE_LOG(4,"image="<<image<<"\n");
     for(Nat i=0; i!=image.size(); ++i) {
         if(definitely(disjoint(image[i],codomain[i]))) {
@@ -120,7 +120,7 @@ Pair<Kleenean,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, con
     ApproximateFloatVector slack(l); // The slack between the test point and the violated constraints
 
     ApproximateFloat64& t=violation; ApproximateFloatVector& x=multipliers; ApproximateFloatVector& y=point; ApproximateFloatVector& z=slack; // Aliases for the main quantities used
-    const ExactBox& d=domain; const ValidatedVectorFunction& fn=function; const ExactBox& c=codomain; // Aliases for the main quantities used
+    const ExactBoxType& d=domain; const ValidatedVectorFunction& fn=function; const ExactBoxType& c=codomain; // Aliases for the main quantities used
     VectorTaylorFunction tfn(d,fn,default_sweeper());
 
     point=static_cast<ApproximateFloatVector>(midpoint(d));
@@ -146,7 +146,7 @@ Pair<Kleenean,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, con
 
     if(decide(t<TERR)) {
         // Probably disjoint, so try to prove this
-        UpperBox subdomain=domain;
+        UpperBoxType subdomain=domain;
 
         Vector<ExactFloat64> x_exact=cast_exact(x);
         // Use the computed dual variables to try to make a scalar function which is negative over the entire domain.
@@ -166,7 +166,7 @@ Pair<Kleenean,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, con
         ARIADNE_LOG(4,"    txg="<<txg<<"\n");
 
         ARIADNE_LOG(6,"  dom="<<subdomain<<"\n");
-        this->hull_reduce(subdomain,txg,ExactInterval(0,inf));
+        this->hull_reduce(subdomain,txg,ExactIntervalType(0,inf));
         ARIADNE_LOG(6,"  dom="<<subdomain<<"\n");
         if(definitely(subdomain.is_empty())) {
             ARIADNE_LOG(4,"  Proved disjointness using hull reduce\n");
@@ -174,15 +174,15 @@ Pair<Kleenean,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, con
         }
 
         for(Nat i=0; i!=m; ++i) {
-            this->box_reduce(subdomain,txg,ExactInterval(0,inf),i);
+            this->box_reduce(subdomain,txg,ExactIntervalType(0,inf),i);
             ARIADNE_LOG(8,"  dom="<<subdomain<<"\n");
             if(definitely(subdomain.is_empty())) { ARIADNE_LOG(4,"  Proved disjointness using box reduce\n"); return make_pair(false,ExactPoint()); }
         }
         ARIADNE_LOG(6,"  dom="<<subdomain<<"\n");
 
-        //Pair<ExactBox,ExactBox> sd=solver.split(List<EffectiveConstraint>(1u,constraint),d);
+        //Pair<ExactBoxType,ExactBoxType> sd=solver.split(List<EffectiveConstraint>(1u,constraint),d);
         ARIADNE_LOG(4,"  Splitting domain\n");
-        Pair<ExactBox,ExactBox> sd=d.split();
+        Pair<ExactBoxType,ExactBoxType> sd=d.split();
         Vector<ApproximateFloat64> nx = ApproximateFloat64(1.0_approx-XSIGMA)*x + Vector<ApproximateFloat64>(x.size(),XSIGMA/x.size());
         Vector<ApproximateFloat64> ny = midpoint(sd.first);
         Kleenean result=this->feasible(sd.first, fn, c).first;
@@ -196,7 +196,7 @@ Pair<Kleenean,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, con
 }
 
 
-Bool ConstraintSolver::reduce(UpperBox& domain, const ValidatedVectorFunction& function, const ExactBox& codomain) const
+Bool ConstraintSolver::reduce(UpperBoxType& domain, const ValidatedVectorFunction& function, const ExactBoxType& codomain) const
 {
     const double MINIMUM_REDUCTION = 0.75;
     ARIADNE_ASSERT(function.argument_size()==domain.size());
@@ -232,14 +232,14 @@ Bool ConstraintSolver::reduce(UpperBox& domain, const ValidatedVectorFunction& f
     return false;
 }
 
-Bool has_nan(const ExactBox& domain) {
+Bool has_nan(const ExactBoxType& domain) {
     for(Nat i=0; i!=domain.size(); ++i) {
         if(is_nan(domain[i].lower().raw()) || is_nan(domain[i].upper().raw())) { return true; }
     }
     return false;
 }
 
-Bool ConstraintSolver::reduce(UpperBox& domain, const List<ValidatedConstraint>& constraints) const
+Bool ConstraintSolver::reduce(UpperBoxType& domain, const List<ValidatedConstraint>& constraints) const
 {
     static const Bool USE_BOX_REDUCE = false;
 
@@ -279,27 +279,27 @@ Bool ConstraintSolver::reduce(UpperBox& domain, const List<ValidatedConstraint>&
 }
 
 
-Bool ConstraintSolver::hull_reduce(UpperBox& domain, const ValidatedProcedure& procedure, const ExactInterval& bounds) const
+Bool ConstraintSolver::hull_reduce(UpperBoxType& domain, const ValidatedProcedure& procedure, const ExactIntervalType& bounds) const
 {
-    ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(ExactBox domain, ValidatedProcedure procedure, ExactInterval bounds): "
+    ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(ExactBoxType domain, ValidatedProcedure procedure, ExactIntervalType bounds): "
                   "procedure="<<procedure<<", bounds="<<bounds<<", domain="<<domain<<"\n");
 
     Ariadne::simple_hull_reduce(domain, procedure, bounds);
     return definitely(domain.is_empty());
 }
 
-Bool ConstraintSolver::hull_reduce(UpperBox& domain, const Vector<ValidatedProcedure>& procedure, const ExactBox& bounds) const
+Bool ConstraintSolver::hull_reduce(UpperBoxType& domain, const Vector<ValidatedProcedure>& procedure, const ExactBoxType& bounds) const
 {
-    ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(ExactBox domain, Vector<ValidatedProcedure> procedure, ExactBox bounds): "
+    ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(ExactBoxType domain, Vector<ValidatedProcedure> procedure, ExactBoxType bounds): "
                   "procedure="<<procedure<<", bounds="<<bounds<<", domain="<<domain<<"\n");
 
     Ariadne::simple_hull_reduce(domain, procedure, bounds);
     return definitely(domain.is_empty());
 }
 
-Bool ConstraintSolver::hull_reduce(UpperBox& domain, const ValidatedScalarFunction& function, const ExactInterval& bounds) const
+Bool ConstraintSolver::hull_reduce(UpperBoxType& domain, const ValidatedScalarFunction& function, const ExactIntervalType& bounds) const
 {
-    ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(ExactBox domain, ValidatedScalarFunction function, ExactInterval bounds): "
+    ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(ExactBoxType domain, ValidatedScalarFunction function, ExactIntervalType bounds): "
                   "function="<<function<<", bounds="<<bounds<<", domain="<<domain<<"\n");
 
     Formula<ValidatedNumericType> formula=function.evaluate(Formula<ValidatedNumericType>::identity(function.argument_size()));
@@ -307,9 +307,9 @@ Bool ConstraintSolver::hull_reduce(UpperBox& domain, const ValidatedScalarFuncti
     return this->hull_reduce(domain,procedure,bounds);
 }
 
-Bool ConstraintSolver::hull_reduce(UpperBox& domain, const ValidatedVectorFunction& function, const ExactBox& bounds) const
+Bool ConstraintSolver::hull_reduce(UpperBoxType& domain, const ValidatedVectorFunction& function, const ExactBoxType& bounds) const
 {
-    ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(ExactBox domain, ValidatedScalarFunction function, ExactInterval bounds): "
+    ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(ExactBoxType domain, ValidatedScalarFunction function, ExactIntervalType bounds): "
                   "function="<<function<<", bounds="<<bounds<<", domain="<<domain<<"\n");
 
     Vector< Formula<ValidatedNumericType> > formula=function.evaluate(Formula<ValidatedNumericType>::identity(function.argument_size()));
@@ -317,17 +317,17 @@ Bool ConstraintSolver::hull_reduce(UpperBox& domain, const ValidatedVectorFuncti
     return this->hull_reduce(domain,procedure,bounds);
 }
 
-Bool ConstraintSolver::monotone_reduce(UpperBox& domain, const ValidatedScalarFunction& function, const ExactInterval& bounds, Nat variable) const
+Bool ConstraintSolver::monotone_reduce(UpperBoxType& domain, const ValidatedScalarFunction& function, const ExactIntervalType& bounds, Nat variable) const
 {
     ValidatedScalarFunction derivative=function.derivative(variable);
 
-    ARIADNE_LOG(2,"ConstraintSolver::monotone_reduce(ExactBox domain): function="<<function<<", bounds="<<bounds<<", domain="<<domain<<", variable="<<variable<<", derivative="<<derivative<<"\n");
+    ARIADNE_LOG(2,"ConstraintSolver::monotone_reduce(ExactBoxType domain): function="<<function<<", bounds="<<bounds<<", domain="<<domain<<", variable="<<variable<<", derivative="<<derivative<<"\n");
 
     ExactFloat64 splitpoint;
-    UpperInterval lower=domain[variable];
-    UpperInterval upper=domain[variable];
-    Vector<UpperInterval> slice=domain;
-    Vector<UpperInterval> subdomain=domain;
+    UpperIntervalType lower=domain[variable];
+    UpperIntervalType upper=domain[variable];
+    Vector<UpperIntervalType> slice=domain;
+    Vector<UpperIntervalType> subdomain=domain;
 
     static const Int MAX_STEPS=3;
     const Float64 size = lower.width().raw() / (1<<MAX_STEPS);
@@ -336,18 +336,18 @@ Bool ConstraintSolver::monotone_reduce(UpperBox& domain, const ValidatedScalarFu
         if(lower.width().raw()>size) {
             splitpoint=lower.midpoint();
             slice[variable]=splitpoint;
-            UpperInterval new_lower=splitpoint+(bounds-apply(function,slice))/apply(derivative,subdomain);
-            if(definitely(new_lower.upper()<lower.lower())) { lower=UpperInterval(lower.lower().raw(),lower.lower().raw()); }
+            UpperIntervalType new_lower=splitpoint+(bounds-apply(function,slice))/apply(derivative,subdomain);
+            if(definitely(new_lower.upper()<lower.lower())) { lower=UpperIntervalType(lower.lower().raw(),lower.lower().raw()); }
             else { lower=intersection(lower,new_lower); }
         }
         if(upper.width().raw()>size) {
             splitpoint=upper.midpoint();
             slice[variable]=splitpoint;
-            UpperInterval new_upper=splitpoint+(bounds-apply(function,slice))/apply(derivative,subdomain);
-            if(definitely(new_upper.lower()>upper.upper())) { upper=UpperInterval(upper.upper().raw(),upper.upper().raw()); }
+            UpperIntervalType new_upper=splitpoint+(bounds-apply(function,slice))/apply(derivative,subdomain);
+            if(definitely(new_upper.lower()>upper.upper())) { upper=UpperIntervalType(upper.upper().raw(),upper.upper().raw()); }
             else { upper=intersection(upper,new_upper); }
         }
-        subdomain[variable]=UpperInterval(lower.lower(),upper.upper());
+        subdomain[variable]=UpperIntervalType(lower.lower(),upper.upper());
     } while(lower.width().raw()>size && upper.width().raw()>size);
     domain=subdomain;
 
@@ -356,38 +356,38 @@ Bool ConstraintSolver::monotone_reduce(UpperBox& domain, const ValidatedScalarFu
 
 
 
-Bool ConstraintSolver::lyapunov_reduce(UpperBox& domain, const VectorTaylorFunction& function, const ExactBox& bounds,
+Bool ConstraintSolver::lyapunov_reduce(UpperBoxType& domain, const VectorTaylorFunction& function, const ExactBoxType& bounds,
                                        ApproximateFloatVector centre, ApproximateFloatVector multipliers) const
 {
     return this->lyapunov_reduce(domain,function,bounds,cast_exact(centre),cast_exact(multipliers));
 }
 
 
-Bool ConstraintSolver::lyapunov_reduce(UpperBox& domain, const VectorTaylorFunction& function, const ExactBox& bounds,
+Bool ConstraintSolver::lyapunov_reduce(UpperBoxType& domain, const VectorTaylorFunction& function, const ExactBoxType& bounds,
                                        ExactFloatVector centre, ExactFloatVector multipliers) const
 {
     ScalarTaylorFunction g(function.domain(),default_sweeper());
-    UpperInterval C(0);
+    UpperIntervalType C(0);
     for(Nat i=0; i!=function.result_size(); ++i) {
         g += cast_exact(multipliers[i]) * function[i];
         C += cast_exact(multipliers[i]) * bounds[i];
     }
-    Covector<UpperInterval> dg = gradient_range(g,domain);
+    Covector<UpperIntervalType> dg = gradient_range(g,domain);
     C -= g(centre);
 
-    UpperBox new_domain(domain);
-    UpperIntervalVector ranges(domain.size());
+    UpperBoxType new_domain(domain);
+    UpperIntervalVectorType ranges(domain.size());
     for(Nat j=0; j!=domain.size(); ++j) {
         ranges[j] = dg[j]*(domain[j]-centre[j]);
     }
 
     // We now have sum dg(xi)[j] * (x[j]-x0[j]) in C, so we can reduce each component
     for(Nat j=0; j!=domain.size(); ++j) {
-        UpperInterval E = C;
+        UpperIntervalType E = C;
         for(Nat k=0; k!=domain.size(); ++k) {
             if(j!=k) { E-=ranges[k]; }
         }
-        UpperInterval estimated_domain = E/dg[j]+centre[j];
+        UpperIntervalType estimated_domain = E/dg[j]+centre[j];
         new_domain[j] = intersection(domain[j],estimated_domain);
     }
 
@@ -395,20 +395,20 @@ Bool ConstraintSolver::lyapunov_reduce(UpperBox& domain, const VectorTaylorFunct
     return definitely(domain.is_empty());
 }
 
-Bool ConstraintSolver::box_reduce(UpperBox& domain, const ValidatedScalarFunction& function, const ExactInterval& bounds, Nat variable) const
+Bool ConstraintSolver::box_reduce(UpperBoxType& domain, const ValidatedScalarFunction& function, const ExactIntervalType& bounds, Nat variable) const
 {
-    ARIADNE_LOG(2,"ConstraintSolver::box_reduce(ExactBox domain): function="<<function<<", bounds="<<bounds<<", domain="<<domain<<", variable="<<variable<<"\n");
+    ARIADNE_LOG(2,"ConstraintSolver::box_reduce(ExactBoxType domain): function="<<function<<", bounds="<<bounds<<", domain="<<domain<<", variable="<<variable<<"\n");
 
     if(definitely(domain[variable].lower() >= domain[variable].upper())) { return false; }
 
     // Try to reduce the size of the set by "shaving" off along a coordinate axis
     //
-    UpperInterval interval=domain[variable];
+    UpperIntervalType interval=domain[variable];
     RawFloat64 l=interval.lower().raw();
     RawFloat64 u=interval.upper().raw();
-    ExactInterval subinterval;
-    UpperInterval new_interval(interval);
-    Vector<UpperInterval> slice=domain;
+    ExactIntervalType subinterval;
+    UpperIntervalType new_interval(interval);
+    Vector<UpperIntervalType> slice=domain;
 
     static const Nat MAX_SLICES=(1<<3);
     const Nat n=MAX_SLICES;
@@ -416,9 +416,9 @@ Bool ConstraintSolver::box_reduce(UpperBox& domain, const ValidatedScalarFunctio
     // Look for empty slices from below
     Nat imax = n;
     for(Nat i=0; i!=n; ++i) {
-        subinterval=ExactInterval((l*(n-i)+u*i)/n,(l*(n-i-1)+u*(i+1))/n);
+        subinterval=ExactIntervalType((l*(n-i)+u*i)/n,(l*(n-i-1)+u*(i+1))/n);
         slice[variable]=subinterval;
-        UpperInterval slice_image=apply(function,slice);
+        UpperIntervalType slice_image=apply(function,slice);
         if(definitely(intersection(slice_image,bounds).is_empty())) {
             new_interval.set_lower(subinterval.upper());
         } else {
@@ -428,15 +428,15 @@ Bool ConstraintSolver::box_reduce(UpperBox& domain, const ValidatedScalarFunctio
 
     // The set is proved to be empty
     if(imax==n) {
-        domain[variable]=ExactInterval(+inf,-inf);
+        domain[variable]=ExactIntervalType(+inf,-inf);
         return true;
     }
 
     // Look for empty slices from above; note that at least one nonempty slice has been found
     for(Nat j=n-1; j!=imax; --j) {
-        subinterval=ExactInterval((l*(n-j)+u*j)/n,(l*(n-j-1)+u*(j+1))/n);
+        subinterval=ExactIntervalType((l*(n-j)+u*j)/n,(l*(n-j-1)+u*(j+1))/n);
         slice[variable]=subinterval;
-        UpperInterval slice_image=apply(function,slice);
+        UpperIntervalType slice_image=apply(function,slice);
         if(definitely(intersection(slice_image,bounds).is_empty())) {
             new_interval.set_upper(subinterval.lower());
         } else {
@@ -445,7 +445,7 @@ Bool ConstraintSolver::box_reduce(UpperBox& domain, const ValidatedScalarFunctio
     }
 
     // The set cannot be empty, since a nonempty slice has been found in the upper pass.
-    // Note that the interval is an UpperInterval, so non-emptiness of the approximated set cannot be guaranteed,
+    // Note that the interval is an UpperIntervalType, so non-emptiness of the approximated set cannot be guaranteed,
     // but emptiness would be verified
     ARIADNE_ASSERT(not definitely(new_interval.is_empty()));
 
@@ -458,13 +458,13 @@ Bool ConstraintSolver::box_reduce(UpperBox& domain, const ValidatedScalarFunctio
 
 namespace {
 
-Void compute_monotonicity(UpperBox& domain, const EffectiveConstraint& constraint) {
+Void compute_monotonicity(UpperBoxType& domain, const EffectiveConstraint& constraint) {
 /*
     static const Nat n = domain.size();
 
     // Compute monotone formulae
     boost::Array<Sign,0> monotonicity(n);
-    Covector<ExactInterval> grad=constraint.function().gradient(domain);
+    Covector<ExactIntervalType> grad=constraint.function().gradient(domain);
     for(Nat j=0; j!=n; ++j) {
         monotonicity[j]=sign(grad[j]);
     }
@@ -473,13 +473,13 @@ Void compute_monotonicity(UpperBox& domain, const EffectiveConstraint& constrain
 } // namespace
 
 
-Pair<UpperBox,UpperBox> ConstraintSolver::split(const UpperBox& d, const ValidatedVectorFunction& f, const ExactBox& c) const
+Pair<UpperBoxType,UpperBoxType> ConstraintSolver::split(const UpperBoxType& d, const ValidatedVectorFunction& f, const ExactBoxType& c) const
 {
     return d.split();
 }
 
 
-Kleenean ConstraintSolver::check_feasibility(const ExactBox& d, const ValidatedVectorFunction& f, const ExactBox& c, const ExactPoint& y) const
+Kleenean ConstraintSolver::check_feasibility(const ExactBoxType& d, const ValidatedVectorFunction& f, const ExactBoxType& c, const ExactPoint& y) const
 {
     for(Nat i=0; i!=y.size(); ++i) {
         if(y[i]<d[i].lower() || y[i]>d[i].upper()) { return false; }

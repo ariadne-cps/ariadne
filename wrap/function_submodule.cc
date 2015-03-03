@@ -198,13 +198,13 @@ class VectorPythonFunction
 using namespace Ariadne;
 
 typedef ApproximateFloat64 F;
-typedef ExactInterval I;
+typedef ExactIntervalType I;
 typedef Vector<ApproximateFloat64> FV;
-typedef Vector<ExactInterval> IV;
+typedef Vector<ExactIntervalType> IV;
 typedef Matrix<ApproximateFloat64> FMx;
-typedef Matrix<ExactInterval> IMx;
+typedef Matrix<ExactIntervalType> IMx;
 typedef Vector< Differential<ApproximateFloat64> > FSDV;
-typedef Vector< Differential<ExactInterval> > ISDV;
+typedef Vector< Differential<ExactIntervalType> > ISDV;
 typedef Vector<ValidatedTaylorModel> TMV;
 typedef VectorTaylorFunction TFM;
 typedef ValidatedTaylorModel TM;

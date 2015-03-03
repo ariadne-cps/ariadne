@@ -223,8 +223,8 @@ template<> Matrix<BoundedFloat64> gs_solve(const Matrix<BoundedFloat64>& A, cons
                     Rij/=JA[i][i];
                     R[i][j]=refinement(R[i][j],Rij);
                 }
-                // FIXME: Use FloatInterval or Float64 here?
-                //R[i][j]=FloatInterval(max(R[i][j].lower(),Rij.lower()),min(R[i][j].upper(),Rij.upper()));
+                // FIXME: Use Float64Interval or Float64 here?
+                //R[i][j]=Float64Interval(max(R[i][j].lower(),Rij.lower()),min(R[i][j].upper(),Rij.upper()));
             }
         }
         ++step;
@@ -905,10 +905,10 @@ template<> Matrix<Rational> midpoint(Matrix<Rational> const& A) { return A; }
 #include "geometry/interval.h"
 
 namespace Ariadne {
-template class Matrix<UpperFloatInterval>;
-template Matrix<SingletonType<UpperFloatInterval>> cast_singleton(Matrix<UpperFloatInterval> const&);
-template Matrix<MidpointType<UpperFloatInterval>> midpoint(Matrix<UpperFloatInterval> const&);
-template Matrix<UpperFloatInterval> inverse(const Matrix<UpperFloatInterval>&);
-template Vector<UpperFloatInterval> solve(const Matrix<UpperFloatInterval>&, const Vector<UpperFloatInterval>&);
+template class Matrix<UpperFloat64Interval>;
+template Matrix<SingletonType<UpperFloat64Interval>> cast_singleton(Matrix<UpperFloat64Interval> const&);
+template Matrix<MidpointType<UpperFloat64Interval>> midpoint(Matrix<UpperFloat64Interval> const&);
+template Matrix<UpperFloat64Interval> inverse(const Matrix<UpperFloat64Interval>&);
+template Vector<UpperFloat64Interval> solve(const Matrix<UpperFloat64Interval>&, const Vector<UpperFloat64Interval>&);
 } // namespace Ariadne
 

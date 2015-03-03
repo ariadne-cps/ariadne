@@ -101,8 +101,8 @@ inline OutputStream& operator<<(OutputStream& os, const DrawableInterface& sh) {
 Void TextPlot::draw(const DrawableInterface& shape) {
     if(dynamic_cast<const ExactPoint*>(&shape)) {
         this->draw(dynamic_cast<const ExactPoint&>(shape));
-    } else if(dynamic_cast<const ExactBox*>(&shape)) {
-        this->draw(dynamic_cast<const ExactBox&>(shape));
+    } else if(dynamic_cast<const ExactBoxType*>(&shape)) {
+        this->draw(dynamic_cast<const ExactBoxType&>(shape));
 //    } else if(dynamic_cast<const Polytope*>(&shape)) {
 //        this->draw(dynamic_cast<const Polytope&>(shape));
     } else if(dynamic_cast<const InterpolatedCurve*>(&shape)) {
@@ -129,7 +129,7 @@ Void TextPlot::draw(const ExactPoint& pt) {
 }
 
 
-Void TextPlot::draw(const ExactBox& bx) {
+Void TextPlot::draw(const ExactBoxType& bx) {
     this->_draw(bx.vertices());
 }
 

@@ -104,13 +104,13 @@ HybridEnclosure::HybridEnclosure(const HybridBoundedConstraintSet& hybrid_set,
 }
 
 HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const RealSpace& space,
-                                 const ExactBox& box, const IntervalFunctionModelFactoryInterface& factory)
+                                 const ExactBoxType& box, const IntervalFunctionModelFactoryInterface& factory)
     : _location(location), _events(), _space(space.variable_names()), _set(box,factory),
       _variables(box.dimension(),INITIAL)
 {
 }
 
-HybridEnclosure::HybridEnclosure(const HybridBox& hbox, const IntervalFunctionModelFactoryInterface& factory)
+HybridEnclosure::HybridEnclosure(const HybridBoxType& hbox, const IntervalFunctionModelFactoryInterface& factory)
     : _location(hbox.location()), _events(), _space(hbox.space().variable_names()), _set(hbox.continuous_set(),factory),
       _variables(hbox.continuous_set().dimension(),INITIAL)
 {
@@ -175,7 +175,7 @@ Void HybridEnclosure::set_time_function(const ValidatedScalarFunctionModel& time
     //this->_set._time_function=time_function;
 }
 
-UpperBox
+UpperBoxType
 HybridEnclosure::space_bounding_box() const
 {
     ARIADNE_LOG(8,"space_codomain="<<this->space_function().codomain()<<" space_range="<<apply(this->space_function(),this->_set.reduced_domain())<<"\n");
@@ -183,7 +183,7 @@ HybridEnclosure::space_bounding_box() const
     return cast_exact_box(this->_set.bounding_box());
 }
 
-UpperInterval
+UpperIntervalType
 HybridEnclosure::time_range() const
 {
     ARIADNE_LOG(8,"time_codomain="<<this->time_function().codomain()<<" time_range="<<apply(this->time_function(),this->_set.reduced_domain())<<"\n");
@@ -191,7 +191,7 @@ HybridEnclosure::time_range() const
     return apply(this->time_function(),this->_set.reduced_domain());
 }
 
-UpperInterval
+UpperIntervalType
 HybridEnclosure::dwell_time_range() const
 {
     ARIADNE_LOG(8,"dwell_time_codomain="<<this->dwell_time_function().codomain()<<
@@ -211,26 +211,26 @@ HybridEnclosure::number_of_parameters() const
     return this->_set.number_of_parameters();
 }
 
-const ExactBox
+const ExactBoxType
 HybridEnclosure::parameter_domain() const
 {
     return this->_set.domain();
 }
 
-HybridUpperBox
+HybridUpperBoxType
 HybridEnclosure::bounding_box() const
 {
-    return HybridUpperBox(this->_location,this->_space,cast_exact_box(this->space_bounding_box()));
+    return HybridUpperBoxType(this->_location,this->_space,cast_exact_box(this->space_bounding_box()));
 }
 
 
-Void HybridEnclosure::new_parameter(ExactInterval ivl, EnclosureVariableType vt)
+Void HybridEnclosure::new_parameter(ExactIntervalType ivl, EnclosureVariableType vt)
 {
     this->_set.new_parameter(ivl);
     this->_variables.append(vt);
 }
 
-Void HybridEnclosure::new_variable(ExactInterval ivl, EnclosureVariableType vt)
+Void HybridEnclosure::new_variable(ExactIntervalType ivl, EnclosureVariableType vt)
 {
     this->_set.new_variable(ivl);
     this->_variables.append(vt);
@@ -373,12 +373,12 @@ Kleenean HybridEnclosure::is_empty() const {
     return this->_set.is_empty();
 }
 
-Sierpinski HybridEnclosure::inside(const HybridBox& hbx) const {
+Sierpinski HybridEnclosure::inside(const HybridBoxType& hbx) const {
     if(this->_location==hbx.location()) { return this->continuous_set().inside(hbx.continuous_set()); }
     else { return this->continuous_set().is_empty(); }
 }
 
-Sierpinski HybridEnclosure::separated(const HybridBox& hbx) const {
+Sierpinski HybridEnclosure::separated(const HybridBoxType& hbx) const {
     if(this->_location==hbx.location()) { return this->continuous_set().separated(hbx.continuous_set()); }
     else { return true; }
 }
@@ -394,7 +394,7 @@ List<ValidatedConstraint> HybridEnclosure::constraints() const {
 }
 
 Void
-HybridEnclosure::restrict(const ExactBox& subdomain)
+HybridEnclosure::restrict(const ExactBoxType& subdomain)
 {
     this->_set.restrict(subdomain);
 }
@@ -411,7 +411,7 @@ HybridEnclosure::uniform_error_recondition()
 {
     Nat old_number_of_parameters = this->number_of_parameters();
     this->_set.uniform_error_recondition();
-    ExactIntervalVector new_variables = project(this->parameter_domain(),range(old_number_of_parameters,this->number_of_parameters()));
+    ExactIntervalVectorType new_variables = project(this->parameter_domain(),range(old_number_of_parameters,this->number_of_parameters()));
     this->_variables.concatenate(List<EnclosureVariableType>(new_variables.size(),ERROR));
     this->_check();
 }
@@ -428,7 +428,7 @@ HybridEnclosure::kuhn_recondition()
 List<HybridEnclosure>
 HybridEnclosure::split() const
 {
-    List<ExactBox> subdomains = this->continuous_set().splitting_subdomains_zeroth_order();
+    List<ExactBoxType> subdomains = this->continuous_set().splitting_subdomains_zeroth_order();
     List<HybridEnclosure> result(subdomains.size(),*this);
     for(Nat i=0; i!=result.size(); ++i) {
         result[i].restrict(subdomains[i]);
@@ -437,7 +437,7 @@ HybridEnclosure::split() const
 }
 
 
-Void check_subset(const ExactBox& dom1, const ExactBox& dom2, const char* msg)
+Void check_subset(const ExactBoxType& dom1, const ExactBoxType& dom2, const char* msg)
 {
     if(dom1.size()!=dom2.size()) {
         ARIADNE_FAIL_MSG(msg<<" size("<<dom1<<")!=size("<<dom2<<")");
@@ -450,7 +450,7 @@ Void
 HybridEnclosure::_check() const
 {
     //this->_set.check();
-    const ExactIntervalVector& reduced_domain = this->_set.reduced_domain();
+    const ExactIntervalVectorType& reduced_domain = this->_set.reduced_domain();
     check_subset(reduced_domain,this->_set.domain(),"domain");
     check_subset(reduced_domain,this->space_function().domain(),"function domain");
     for(Nat i=0; i!=this->_set.constraints().size(); ++i) {

@@ -254,7 +254,7 @@ Int main(Int argc, char** argv)
     Semantics semantics=UPPER_SEMANTICS;
 
     // safe set
-    ExactInterval zsafe(0.19,0.20);
+    ExactIntervalType zsafe(0.19,0.20);
     // Inital range for delta
     Rational deltamin ( 0.0_dec );
     Rational deltamax ( 0.1_dec );

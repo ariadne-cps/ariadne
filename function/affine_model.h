@@ -45,7 +45,7 @@ namespace Ariadne {
 
 template<class X> class Affine;
 typedef Affine<Float64> FloatAffine;
-typedef Affine<ExactInterval> IntervalAffine;
+typedef Affine<ExactIntervalType> IntervalAffine;
 typedef Affine<ApproximateNumericType> ApproximateAffine;
 typedef Affine<ValidatedNumericType> ValidatedAffine;
 
@@ -62,9 +62,9 @@ typedef TaylorModel<Validated,Float64> ValidatedTaylorModel;
 AffineModel<ValidatedNumericType> affine_model(const Affine<ValidatedNumericType>& affine);
 AffineModel<ValidatedNumericType> affine_model(const Affine<EffectiveNumericType>& affine);
 AffineModel<ValidatedNumericType> affine_model(const TaylorModel<Validated,Float64>& taylor_model);
-AffineModel<ValidatedNumericType> affine_model(const ExactBox& domain, const ValidatedScalarFunction& function);
+AffineModel<ValidatedNumericType> affine_model(const ExactBoxType& domain, const ValidatedScalarFunction& function);
 Vector< AffineModel<ValidatedNumericType> > affine_models(const Vector< TaylorModel<Validated,Float64> >& taylor_models);
-Vector< AffineModel<ValidatedNumericType> > affine_models(const ExactBox& domain, const ValidatedVectorFunction& function);
+Vector< AffineModel<ValidatedNumericType> > affine_models(const ExactBoxType& domain, const ValidatedVectorFunction& function);
 
 //! An affine expression \f$f:\R^n\rightarrow\R\f$ given by \f$f(x) \approx \sum_{i=0}^{n-1} a_i x_i + b\f$.
 template<>

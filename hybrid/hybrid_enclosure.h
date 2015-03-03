@@ -67,7 +67,7 @@ class HybridEnclosure;
 template<> class ListSet<HybridEnclosure>;
 
 template<class BS> class HybridBasicSet;
-class HybridBox;
+class HybridBoxType;
 class HybridGridTreeSet;
 class HybridBoundedConstraintSet;
 
@@ -130,9 +130,9 @@ class HybridEnclosure
     //! \brief An enclosure corresponding to the hybrid set \a set using \a space to order the continuous variables.
     HybridEnclosure(const HybridBoundedConstraintSet& set, const RealSpace& space, const IntervalFunctionModelFactoryInterface& factory);
     //! \brief An enclosure corresponding to a Euclidean box \a bx in location \a q with variables ordered by \a spc.
-    HybridEnclosure(const DiscreteLocation& q, const RealSpace& spc, const ExactBox& bx, const IntervalFunctionModelFactoryInterface& fac);
+    HybridEnclosure(const DiscreteLocation& q, const RealSpace& spc, const ExactBoxType& bx, const IntervalFunctionModelFactoryInterface& fac);
     //! \brief An enclosure corresponding to a hybrid box \a hbx.
-    HybridEnclosure(const HybridBox& hbx, const IntervalFunctionModelFactoryInterface& fac);
+    HybridEnclosure(const HybridBoxType& hbx, const IntervalFunctionModelFactoryInterface& fac);
     //! \brief An enclosure constructed from a location \a q, a real space \a spc, and a (timed) enclosure \a es.
     HybridEnclosure(const DiscreteLocation& q, const RealSpace& spc, const Enclosure& es);
     //! \brief Destructor.
@@ -153,7 +153,7 @@ class HybridEnclosure
     //! \brief The number of constraints.
     SizeType number_of_constraints() const;
     //! \brief The continuous state set.
-    const ExactBox parameter_domain() const;
+    const ExactBoxType parameter_domain() const;
     //! \brief The function related to space.
     const ValidatedVectorFunctionModel& space_function() const;
     //! \brief The function related to time.
@@ -165,11 +165,11 @@ class HybridEnclosure
     Void set_time_function(const ValidatedScalarFunctionModel& omega);
 
     //! \brief A bounding box for the space.
-    UpperBox space_bounding_box() const;
+    UpperBoxType space_bounding_box() const;
     //! \brief The range of times since the starting time that the set represents.
-    UpperInterval time_range() const;
+    UpperIntervalType time_range() const;
     //! \brief The range of times since the last event.
-    UpperInterval dwell_time_range() const;
+    UpperIntervalType dwell_time_range() const;
 
     //! \brief The continuous state set.
     const ContinuousStateSetType& continuous_set() const;
@@ -213,9 +213,9 @@ class HybridEnclosure
     Void new_time_step_bound(DiscreteEvent e, ValidatedScalarFunction tau);
 
     //! \brief Introduces a new parameter with domain \a ivl.
-    Void new_parameter(ExactInterval ivl, EnclosureVariableType);
+    Void new_parameter(ExactIntervalType ivl, EnclosureVariableType);
     //! \brief Introduce a new independent variable with domain \a ivl.
-    Void new_variable(ExactInterval ivl, EnclosureVariableType);
+    Void new_variable(ExactIntervalType ivl, EnclosureVariableType);
     //! \brief Introduces a new state constraint \f$C\f$ on \f$x\f$. \deprecated
     Void new_constraint(DiscreteEvent e, ValidatedConstraint c);
     //! \brief Introduces a new state constraint \f$C\f$ on \f$x\f$.
@@ -241,13 +241,13 @@ class HybridEnclosure
     Kleenean satisfies(EffectiveConstraint c) const;
 
     //! \brief Returns a bounding box for the set. Computed by a simple interval evaluation of \f$f(D)\f$.
-    HybridBox bounding_box() const;
+    HybridBoxType bounding_box() const;
     //! \brief Tests whether the set is disjoint from the box \a hbx.
-    Sierpinski separated(const HybridBox& hbx) const;
+    Sierpinski separated(const HybridBoxType& hbx) const;
     //! \brief Tests whether the set is a subset of the interior of the box \a hbx.
-    Sierpinski inside(const HybridBox& hbx) const;
+    Sierpinski inside(const HybridBoxType& hbx) const;
     //! \brief Restricts to a subdomain of the \em parameter domain.
-    Void restrict(const ExactBox& subdomain);
+    Void restrict(const ExactBoxType& subdomain);
     //! \brief Adjoins an outer approximation of the set to the grid-based set \a paving, with accuracy given by
     //! \a depth subdivisions in each component.
     Void adjoin_outer_approximation_to(HybridGridTreeSet& paving, Int depth) const;
@@ -286,8 +286,8 @@ class HybridEnclosure
 
 };
 
-inline Sierpinski inside(const HybridEnclosure& he, const HybridBox& hbx) { return he.inside(hbx); }
-inline Sierpinski separated(const HybridEnclosure& he, const HybridBox& hbx) { return he.separated(hbx); }
+inline Sierpinski inside(const HybridEnclosure& he, const HybridBoxType& hbx) { return he.inside(hbx); }
+inline Sierpinski separated(const HybridEnclosure& he, const HybridBoxType& hbx) { return he.separated(hbx); }
 
 inline OutputStream& operator<<(OutputStream& os, const HybridEnclosure& s) { return s.write(os); }
 inline OutputStream& operator<<(OutputStream& os, const Representation<HybridEnclosure>& s) { return s.pointer->repr(os); }

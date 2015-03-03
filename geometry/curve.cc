@@ -122,11 +122,11 @@ InterpolatedCurve::insert(const RawFloat64& s, const Vector<RawFloat64>& pt) {
     this->insert(ParameterType(s),PointType(reinterpret_cast<Vector<ExactFloat64>const&>(pt)));
 }
 
-UpperBox
+UpperBoxType
 InterpolatedCurve::bounding_box() const
 {
     ExactPoint pt=cast_exact(this->_points.begin()->second);
-    ExactBox bx(pt);
+    ExactBoxType bx(pt);
     for(ConstIterator iter=this->_points.begin(); iter!=this->_points.end(); ++iter) {
         pt=cast_exact(iter->second);
         bx=hull(bx,pt);

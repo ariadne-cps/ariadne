@@ -86,7 +86,7 @@ class HybridEvolverInterface
 
     //! \brief Compute an approximation to the orbit set using the given semantics, starting from a box.
     //!   Useful for computing the evolution starting from a cell of a grid.
-    virtual Orbit<EnclosureType> orbit(const HybridBox& initial_box,const TerminationType& termination,Semantics semantics) const = 0;
+    virtual Orbit<EnclosureType> orbit(const HybridBoxType& initial_box,const TerminationType& termination,Semantics semantics) const = 0;
     //! \brief Compute an approximation to the orbit set using the given semantics, starting from a set described by bounds and constraints.
     //!   Useful for computing the evolution starting from user-provided set.
     virtual Orbit<EnclosureType> orbit(const HybridSet& initial_set,const TerminationType& termination,Semantics semantics) const = 0;
@@ -99,7 +99,7 @@ class HybridEvolverInterface
     //! \name Auxiliary set conversion functionality
 
     //! \brief Set construct an enclosure from a box, such as one obtained from a grid.
-    virtual EnclosureType enclosure(const HybridBox& initial_box) const = 0;
+    virtual EnclosureType enclosure(const HybridBoxType& initial_box) const = 0;
     //! \brief Set construct an enclosure from a user-provided set.
     virtual EnclosureType enclosure(const HybridSet& initial_set) const = 0;
 

@@ -48,7 +48,7 @@ class Zonotope;
 class Polytope;
 class InterpolatedCurve;
 
-Polytope polytope(const ExactBox& bx);
+Polytope polytope(const ExactBoxType& bx);
 Polytope polytope(const Zonotope& z);
 Polytope polytope(const Polytope& p);
 
@@ -92,10 +92,10 @@ class Polytope
 
     virtual Polytope* clone() const { return new Polytope(*this); }
     virtual DimensionType dimension() const { if(this->_vertices.size()==0) { return 0; } return this->_vertices.front().dimension(); }
-    virtual Kleenean separated(const ExactBox& bx) const;
-    virtual Kleenean overlaps(const ExactBox& bx) const;
-    virtual Kleenean inside(const ExactBox& bx) const;
-    virtual UpperBox bounding_box() const;
+    virtual Kleenean separated(const ExactBoxType& bx) const;
+    virtual Kleenean overlaps(const ExactBoxType& bx) const;
+    virtual Kleenean inside(const ExactBoxType& bx) const;
+    virtual UpperBoxType bounding_box() const;
     virtual Void draw(CanvasInterface& c, const Projection2d& p) const;
     virtual OutputStream& write(OutputStream& os) const;
 

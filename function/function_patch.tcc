@@ -45,7 +45,7 @@
 
 namespace Ariadne {
 
-template<class M> Void _set_scaling(FunctionPatch<M>& x, const ExactInterval& ivl, SizeType j)
+template<class M> Void _set_scaling(FunctionPatch<M>& x, const ExactIntervalType& ivl, SizeType j)
 {
     Float64::RoundingModeType rounding_mode=Float64::get_rounding_mode();
     Float64::set_rounding_upward();
@@ -81,12 +81,12 @@ inline OutputStream& operator<<(OutputStream& os, const Representation<PositiveU
     return os << reinterpret_cast<Representation<Float64>const&>(flt_repr);
 }
 
-inline OutputStream& operator<<(OutputStream& os, const Representation<ExactInterval>& ivl_repr)
+inline OutputStream& operator<<(OutputStream& os, const Representation<ExactIntervalType>& ivl_repr)
 {
-    const ExactInterval& ivl=*ivl_repr.pointer;
+    const ExactIntervalType& ivl=*ivl_repr.pointer;
     Int precision=os.precision(); std::ios_base::fmtflags flags = os.flags();
     os.precision(17); os.setf(std::ios_base::showpoint);
-    os << "ExactInterval("<<ivl.lower()<<","<<ivl.upper()<<")";
+    os << "ExactIntervalType("<<ivl.lower()<<","<<ivl.upper()<<")";
     os.precision(precision); os.flags(flags);
     return os;
 }
@@ -130,9 +130,9 @@ template<class X> inline OutputStream& operator<<(OutputStream& os, const Repres
     return os;
 }
 
-inline OutputStream& operator<<(OutputStream& os, const Representation< ExactBox >& box_repr)
+inline OutputStream& operator<<(OutputStream& os, const Representation< ExactBoxType >& box_repr)
 {
-    const Vector<ExactInterval>& vec=*box_repr.pointer;
+    const Vector<ExactIntervalType>& vec=*box_repr.pointer;
     ARIADNE_ASSERT(vec.size()!=0);
     os << "(";
     for(SizeType i=0; i!=vec.size(); ++i) {
@@ -172,27 +172,27 @@ template<class M> FunctionPatch<M>::FunctionPatch()
     : _domain(), _model()
 { }
 
-template<class M> FunctionPatch<M>::FunctionPatch(const ExactBox& d, Sweeper swp)
+template<class M> FunctionPatch<M>::FunctionPatch(const ExactBoxType& d, Sweeper swp)
     : _domain(d), _model(d.size(),swp)
 {
 }
 
-template<class M> FunctionPatch<M>::FunctionPatch(const ExactBox& d, const Expansion<RawFloat64>& p, const RawFloat64& e, const Sweeper& swp)
+template<class M> FunctionPatch<M>::FunctionPatch(const ExactBoxType& d, const Expansion<RawFloat64>& p, const RawFloat64& e, const Sweeper& swp)
     : _domain(d), _model(p,e,swp)
 {
 }
 
-template<class M> FunctionPatch<M>::FunctionPatch(const ExactBox& d, const Expansion<ExactFloat64>& p, const ErrorFloat64& e, const Sweeper& swp)
+template<class M> FunctionPatch<M>::FunctionPatch(const ExactBoxType& d, const Expansion<ExactFloat64>& p, const ErrorFloat64& e, const Sweeper& swp)
     : _domain(d), _model(p,e,swp)
 {
 }
 
-template<class M> FunctionPatch<M>::FunctionPatch(const ExactBox& d, const ModelType& m)
+template<class M> FunctionPatch<M>::FunctionPatch(const ExactBoxType& d, const ModelType& m)
     : _domain(d), _model(m)
 {
 }
 
-template<class M> FunctionPatch<M>::FunctionPatch(const ExactBox& d, const ScalarFunctionType<M>& f, Sweeper swp)
+template<class M> FunctionPatch<M>::FunctionPatch(const ExactBoxType& d, const ScalarFunctionType<M>& f, Sweeper swp)
     : _domain(d), _model(f.argument_size(),swp)
 {
     ARIADNE_ASSERT_MSG(d.size()==f.argument_size(),"d="<<d<<" f="<<f);
@@ -208,29 +208,29 @@ template<class M> FunctionPatch<M>& FunctionPatch<M>::operator=(const ValidatedS
 
 
 
-template<class M> FunctionPatch<M> FunctionPatch<M>::zero(const ExactBox& d, Sweeper swp)
+template<class M> FunctionPatch<M> FunctionPatch<M>::zero(const ExactBoxType& d, Sweeper swp)
 {
     return FunctionPatch<M>(d,ModelType::zero(d.size(),swp));
 }
 
-template<class M> FunctionPatch<M> FunctionPatch<M>::constant(const ExactBox& d, const NumericType& c, Sweeper swp)
+template<class M> FunctionPatch<M> FunctionPatch<M>::constant(const ExactBoxType& d, const NumericType& c, Sweeper swp)
 {
     return FunctionPatch<M>(d,ModelType::constant(d.size(),c,swp));
 }
 
-template<class M> FunctionPatch<M> FunctionPatch<M>::coordinate(const ExactBox& d, SizeType j, Sweeper swp)
+template<class M> FunctionPatch<M> FunctionPatch<M>::coordinate(const ExactBoxType& d, SizeType j, Sweeper swp)
 {
     ARIADNE_ASSERT(j<d.size());
     return FunctionPatch<M>(d,ModelType::scaling(d.size(),j,d[j],swp));
 }
 
-template<class M> VectorFunctionPatch<M> FunctionPatch<M>::identity(const ExactBox& d, Sweeper swp)
+template<class M> VectorFunctionPatch<M> FunctionPatch<M>::identity(const ExactBoxType& d, Sweeper swp)
 {
     return VectorFunctionPatch<M>(d,ModelType::scalings(d,swp));
 }
 
 
-template<class M> Vector<FunctionPatch<M>> FunctionPatch<M>::constants(const ExactBox& d, const Vector<NumericType>& c, Sweeper swp)
+template<class M> Vector<FunctionPatch<M>> FunctionPatch<M>::constants(const ExactBoxType& d, const Vector<NumericType>& c, Sweeper swp)
 {
     ARIADNE_DEPRECATED("FunctionPatch<M>::constants","Use VectorFunctionPatch<M>::constant instead");
     Vector<FunctionPatch<M>> x(c.size(),FunctionPatch<M>(d,swp));
@@ -240,7 +240,7 @@ template<class M> Vector<FunctionPatch<M>> FunctionPatch<M>::constants(const Exa
     return x;
 }
 
-template<class M> Vector<FunctionPatch<M>> FunctionPatch<M>::coordinates(const ExactBox& d, Sweeper swp)
+template<class M> Vector<FunctionPatch<M>> FunctionPatch<M>::coordinates(const ExactBoxType& d, Sweeper swp)
 {
     ARIADNE_DEPRECATED("FunctionPatch<M>::coordinates","Use VectorFunctionPatch<M>::identity instead");
     Vector<FunctionPatch<M>> x(d.dimension(),FunctionPatch<M>(d,swp));
@@ -250,7 +250,7 @@ template<class M> Vector<FunctionPatch<M>> FunctionPatch<M>::coordinates(const E
     return x;
 }
 
-template<class M> Vector<FunctionPatch<M>> FunctionPatch<M>::coordinates(const ExactBox& d, SizeType imin, SizeType imax, Sweeper swp)
+template<class M> Vector<FunctionPatch<M>> FunctionPatch<M>::coordinates(const ExactBoxType& d, SizeType imin, SizeType imax, Sweeper swp)
 {
     ARIADNE_DEPRECATED("FunctionPatch<M>::coordinates","Use VectorFunctionPatch<M>::projection instead");
     ARIADNE_ASSERT(imin<=imax);
@@ -303,7 +303,7 @@ template<class M> VectorFunctionModelInterface<typename M::Paradigm>* FunctionPa
 }
 
 
-template<class M> Void FunctionPatch<M>::restrict(const ExactBox& dom) {
+template<class M> Void FunctionPatch<M>::restrict(const ExactBoxType& dom) {
     (*this)=restriction(*this,dom);
 }
 
@@ -331,7 +331,7 @@ template<class M> Polynomial<ValidatedFloat64> FunctionPatch<M>::polynomial() co
 
     Vector<Polynomial<ValidatedFloat64> > s(this->argument_size(),z);
     for(SizeType j=0; j!=this->argument_size(); ++j) {
-        ExactInterval const& domj=this->domain()[j];
+        ExactIntervalType const& domj=this->domain()[j];
         if(domj.lower()>=domj.upper()) {
             ARIADNE_ASSERT(this->domain()[j].width()==0);
             s[j]=Polynomial<ValidatedFloat64>::constant(this->argument_size(),0);
@@ -489,7 +489,7 @@ template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(SizeType k)
 {
 }
 
-template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(SizeType m, const ExactBox& d, Sweeper swp)
+template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(SizeType m, const ExactBoxType& d, Sweeper swp)
     : _domain(d), _models(m,ModelType(d.size(),swp))
 {
 }
@@ -516,7 +516,7 @@ template<class M> VectorFunctionPatch<M>& VectorFunctionPatch<M>::operator=(cons
 
 
 
-template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBox& d,
+template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBoxType& d,
                                            const Vector<ModelType>& f)
     : _domain(d), _models(f)
 {
@@ -525,7 +525,7 @@ template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBox& d,
     }
 }
 
-template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBox& d,
+template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBoxType& d,
                                            const Vector<Expansion<ExactFloat64>>& f,
                                            const Vector<ErrorFloat64>& e,
                                            Sweeper swp)
@@ -538,14 +538,14 @@ template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBox& d,
     }
 }
 
-template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBox& d,
+template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBoxType& d,
                                            const Vector<Expansion<ExactFloat64>>& f,
                                            Sweeper swp)
     : VectorFunctionPatch<M>(d,f,Vector<ErrorFloat64>(f.size()),swp)
 {
 }
 
-template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBox& d,
+template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBoxType& d,
                                            const Vector<Expansion<RawFloat64>>& f,
                                            const Vector<RawFloat64>& e,
                                            Sweeper swp)
@@ -554,7 +554,7 @@ template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBox& d,
 {
 }
 
-template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBox& d,
+template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBoxType& d,
                                            const Vector<Expansion<RawFloat64>>& f,
                                            Sweeper swp)
     : VectorFunctionPatch<M>(d,reinterpret_cast<Vector<Expansion<ExactFloat64>>const&>(f),Vector<ErrorFloat64>(f.size()),swp)
@@ -563,7 +563,7 @@ template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBox& d,
 
 
 
-template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBox& d,
+template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBoxType& d,
                                            const VectorFunctionType<M>& f,
                                            const Sweeper& swp)
     : _domain(d), _models(f.result_size())
@@ -641,17 +641,17 @@ template<class M> Void VectorFunctionPatch<M>::adjoin(const FunctionPatch<M>& sf
 
 
 
-template<class M> VectorFunctionPatch<M> VectorFunctionPatch<M>::constant(const ExactBox& d, const Vector<NumericType>& c, Sweeper swp)
+template<class M> VectorFunctionPatch<M> VectorFunctionPatch<M>::constant(const ExactBoxType& d, const Vector<NumericType>& c, Sweeper swp)
 {
     return VectorFunctionPatch<M>(d,ModelType::constants(d.size(),c,swp));
 }
 
-template<class M> VectorFunctionPatch<M> VectorFunctionPatch<M>::identity(const ExactBox& d, Sweeper swp)
+template<class M> VectorFunctionPatch<M> VectorFunctionPatch<M>::identity(const ExactBoxType& d, Sweeper swp)
 {
     return VectorFunctionPatch<M>(d,ModelType::scalings(d,swp));
 }
 
-template<class M> VectorFunctionPatch<M> VectorFunctionPatch<M>::projection(const ExactBox& d, SizeType imin, SizeType imax, Sweeper swp)
+template<class M> VectorFunctionPatch<M> VectorFunctionPatch<M>::projection(const ExactBoxType& d, SizeType imin, SizeType imax, Sweeper swp)
 {
     return VectorFunctionPatch<M>(FunctionPatch<M>::coordinates(d,imin,imax,swp));
 }
@@ -725,14 +725,14 @@ template<class M> Void VectorFunctionPatch<M>::set_sweeper(Sweeper swp)
     }
 }
 
-template<class M> const ExactBox VectorFunctionPatch<M>::domain() const
+template<class M> const ExactBoxType VectorFunctionPatch<M>::domain() const
 {
     return this->_domain;
 }
 
-template<class M> const ExactBox VectorFunctionPatch<M>::codomain() const
+template<class M> const ExactBoxType VectorFunctionPatch<M>::codomain() const
 {
-    ExactBox result(this->result_size());
+    ExactBoxType result(this->result_size());
     for(SizeType i=0; i!=result.size(); ++i) {
         result[i]=this->_models[i].codomain();
     }
@@ -740,13 +740,13 @@ template<class M> const ExactBox VectorFunctionPatch<M>::codomain() const
 }
 
 
-template<class M> const UpperBox VectorFunctionPatch<M>::range() const
+template<class M> const UpperBoxType VectorFunctionPatch<M>::range() const
 {
-    Vector<UpperInterval> result(this->result_size());
+    Vector<UpperIntervalType> result(this->result_size());
     for(SizeType i=0; i!=result.size(); ++i) {
         result[i]=this->_models[i].range();
     }
-    return UpperBox(result);
+    return UpperBoxType(result);
 }
 
 
@@ -918,7 +918,7 @@ template<class M> Matrix<typename VectorFunctionPatch<M>::NumericType> VectorFun
     return J;
 }
 
-template<class M> Void VectorFunctionPatch<M>::restrict(const ExactBox& x)
+template<class M> Void VectorFunctionPatch<M>::restrict(const ExactBoxType& x)
 {
     *this=restriction(*this,x);
 }

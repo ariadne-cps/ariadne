@@ -58,7 +58,7 @@ class TestConstraintSolver
 
     Void test_empty_reduce_inequality() {
         List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
-        UpperBox D = ExactBox{{0.0,1.0},{0.0,1.0}};
+        UpperBoxType D = ExactBoxType{{0.0,1.0},{0.0,1.0}};
         List<EffectiveConstraint> c = {4<=2*x[0]+x[1]};
 
         ConstraintSolver propagator;
@@ -71,7 +71,7 @@ class TestConstraintSolver
 
     Void test_empty_reduce_equality() {
         List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
-        UpperBox D = ExactBox{{0.0,1.0},{0.0,1.0}};
+        UpperBoxType D = ExactBoxType{{0.0,1.0},{0.0,1.0}};
         List<EffectiveConstraint> c = {2*x[0]+x[1]==4};
 
         ConstraintSolver propagator;
@@ -84,7 +84,7 @@ class TestConstraintSolver
 
     Void test_empty_reduce_mixed() {
         List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
-        UpperBox D = ExactBox{{0.0,0.25},{0.0, 2.0}};
+        UpperBoxType D = ExactBoxType{{0.0,0.25},{0.0, 2.0}};
         List<EffectiveConstraint> c = {x[1]<=1,x[0]+x[1]==2};
 
         ConstraintSolver propagator;
@@ -97,7 +97,7 @@ class TestConstraintSolver
 
     Void test_empty_hull_reduce() {
         List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
-        UpperBox D = ExactBox{{0.0,0.25},{0.0,2.0}};
+        UpperBoxType D = ExactBoxType{{0.0,0.25},{0.0,2.0}};
         List<EffectiveConstraint> c = {x[1]<=1, x[0]+x[1]==2};
 
         ConstraintSolver propagator;
@@ -111,7 +111,7 @@ class TestConstraintSolver
 
     Void test_empty_box_reduce() {
         List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
-        UpperBox D = ExactBox{{0.0,0.25},{0.0, 2.0}};
+        UpperBoxType D = ExactBoxType{{0.0,0.25},{0.0, 2.0}};
         List<EffectiveConstraint> c = {x[1]<=1,x[0]+x[1]==2};
 
         ConstraintSolver propagator;
@@ -129,43 +129,43 @@ class TestConstraintSolver
 
     Void test_hull_reduce() {
         List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
-        UpperBox D = ExactBox{{0.0,2.0},{0.0,2.0}};
+        UpperBoxType D = ExactBoxType{{0.0,2.0},{0.0,2.0}};
         List<EffectiveConstraint> c = {-2<=2*x[0]+x[1]<=1};
 
         ConstraintSolver propagator;
         propagator.verbosity=this->verbosity;
 
         ARIADNE_TEST_EXECUTE(propagator.hull_reduce(D,c[0]));
-        ARIADNE_TEST_EQUAL(D,ExactBox({{0.0,0.5},{0.0,1.0}}));
+        ARIADNE_TEST_EQUAL(D,ExactBoxType({{0.0,0.5},{0.0,1.0}}));
     }
 
     Void test_box_reduce() {
         List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
-        UpperBox D = ExactBox{{0.0,2.0},{0.0,2.0}};
+        UpperBoxType D = ExactBoxType{{0.0,2.0},{0.0,2.0}};
         EffectiveConstraint c = (-2<=2*x[0]+x[1]<=1);
 
         ConstraintSolver propagator;
         propagator.verbosity=this->verbosity;
 
         ARIADNE_TEST_EXECUTE(propagator.box_reduce(D,c,0));
-        ARIADNE_TEST_EQUAL(D,ExactBox({{0.0,0.75},{0.0,2.0}}));
+        ARIADNE_TEST_EQUAL(D,ExactBoxType({{0.0,0.75},{0.0,2.0}}));
         ARIADNE_TEST_EXECUTE(propagator.box_reduce(D,c,1));
-        ARIADNE_TEST_EQUAL(D,ExactBox({{0.0,0.75},{0.0,1.25}}));
+        ARIADNE_TEST_EQUAL(D,ExactBoxType({{0.0,0.75},{0.0,1.25}}));
     }
 
 
     Void test_monotone_reduce() {
         List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
-        UpperBox D = ExactBox{{0.0,2.0},{0.0,2.0}};
+        UpperBoxType D = ExactBoxType{{0.0,2.0},{0.0,2.0}};
         EffectiveConstraint c = (-2<=2*x[0]+x[1]<=1);
 
         ConstraintSolver propagator;
         propagator.verbosity=this->verbosity;
 
         ARIADNE_TEST_EXECUTE(propagator.box_reduce(D,c,0));
-        ARIADNE_TEST_EQUAL(D,ExactBox({{0.0,0.75},{0.0,2.0}}));
+        ARIADNE_TEST_EQUAL(D,ExactBoxType({{0.0,0.75},{0.0,2.0}}));
         ARIADNE_TEST_EXECUTE(propagator.box_reduce(D,c,1));
-        ARIADNE_TEST_EQUAL(D,ExactBox({{0.0,0.75},{0.0,1.25}}));
+        ARIADNE_TEST_EQUAL(D,ExactBoxType({{0.0,0.75},{0.0,1.25}}));
     }
 
     Void test_split() {

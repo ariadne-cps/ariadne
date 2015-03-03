@@ -117,7 +117,7 @@ _evolution(EnclosureListType& final_sets,
            Bool reach) const
 {
     typedef EffectiveVectorFunction FunctionType;
-    typedef Vector<ExactInterval> BoxType;
+    typedef Vector<ExactIntervalType> BoxType;
     typedef ValidatedVectorFunctionModel FunctionModelType;
     typedef ValidatedVectorFunctionModel FlowModelType;
 
@@ -193,7 +193,7 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
                 Bool reach) const
 {
     typedef EffectiveVectorFunction FunctionType;
-    typedef Vector<ExactInterval> BoxType;
+    typedef Vector<ExactIntervalType> BoxType;
     typedef ValidatedVectorFunctionModel MapModelType;
     typedef ValidatedVectorFunctionModel FlowModelType;
     typedef Enclosure EnclosureType;
@@ -221,7 +221,7 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     //const Float64 zero_time=0.0;
 
     // Get bounding boxes for time and space bounding_box
-    ExactBox current_set_bounds=cast_exact_box(current_set_model.bounding_box());
+    ExactBoxType current_set_bounds=cast_exact_box(current_set_model.bounding_box());
     ARIADNE_LOG(4,"current_set_bounds = "<<current_set_bounds<<"\n");
 
 
@@ -240,8 +240,8 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     TimeType next_time=current_time+step_size;
     ARIADNE_LOG(6,"next_time = "<<next_time<<"\n");
     // Compute the flow tube (reachable set) model and the final set
-    ARIADNE_LOG(6,"product = "<<product(current_set_model,ExactInterval(0.0,step_size))<<"\n");
-    EnclosureType reach_set_model=apply(flow_model,product(current_set_model,ExactInterval(0.0,step_size)));
+    ARIADNE_LOG(6,"product = "<<product(current_set_model,ExactIntervalType(0.0,step_size))<<"\n");
+    EnclosureType reach_set_model=apply(flow_model,product(current_set_model,ExactIntervalType(0.0,step_size)));
     ARIADNE_LOG(6,"reach_set_model = "<<reach_set_model<<"\n");
     EnclosureType next_set_model=apply(flow_step_model,current_set_model);
     ARIADNE_LOG(6,"next_set_model = "<<next_set_model<<"\n");

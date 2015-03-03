@@ -47,7 +47,7 @@ struct UnsafeReal : Real { UnsafeReal(double d) : Real(d) { } };
 
 class TestIntegrator
 {
-    typedef Vector<ExactInterval> ExactIntervalVector;
+    typedef Vector<ExactIntervalType> ExactIntervalVectorType;
   private:
     std::unique_ptr<IntegratorInterface> integrator_ptr;
     EffectiveScalarFunction o,x,y,x0,y0,t;
@@ -84,7 +84,7 @@ class TestIntegrator
     Void test_constant_derivative() {
         EffectiveVectorFunction f={o*2,o*3};
         ARIADNE_TEST_PRINT(f);
-        ExactBox d={ExactInterval(0.0,1.0),ExactInterval(-0.5,1.5)};
+        ExactBoxType d={ExactIntervalType(0.0,1.0),ExactIntervalType(-0.5,1.5)};
         Float64 h=0.25;
         ValidatedVectorFunctionModel flow=integrator_ptr->flow_step(f,d,h);
         EffectiveVectorFunction expected_flow={x0+2*t,y0+3*t};
@@ -96,7 +96,7 @@ class TestIntegrator
 
     Void test_quadratic_flow() {
         EffectiveVectorFunction f={o,x};
-        ExactBox d={ExactInterval(0.0,1.0),ExactInterval(-0.5,1.5)};
+        ExactBoxType d={ExactIntervalType(0.0,1.0),ExactIntervalType(-0.5,1.5)};
         Float64 h=0.25;
         ValidatedVectorFunctionModel flow=integrator_ptr->flow_step(f,d,h);
         EffectiveVectorFunction expected_flow={x0+t,y0+x0*t+t*t/2};
@@ -109,7 +109,7 @@ class TestIntegrator
 
     Void test_linear() {
         EffectiveVectorFunction f={x,-y};
-        ExactBox d={ExactInterval(-0.25,0.25),ExactInterval(-0.25,0.25)};
+        ExactBoxType d={ExactIntervalType(-0.25,0.25),ExactIntervalType(-0.25,0.25)};
         Float64 h=0.25;
         ValidatedVectorFunctionModel flow=integrator_ptr->flow_step(f,d,h);
         EffectiveVectorFunction expected_flow={x0*(1+t+t*t/2+t*t*t/6+t*t*t*t/24),y0*(1-t+t*t/2-t*t*t/6+t*t*t*t/24)};
@@ -123,7 +123,7 @@ class TestIntegrator
     Void test_spiral() {
         Real half(0.5);
         EffectiveVectorFunction f={-half*x-y,x-half*y};
-        ExactBox d={ExactInterval(0.75,1.25),ExactInterval(-0.25,0.25)};
+        ExactBoxType d={ExactIntervalType(0.75,1.25),ExactIntervalType(-0.25,0.25)};
         Float64 h=0.25;
         ValidatedVectorFunctionModel flow=integrator_ptr->flow_step(f,d,h);
         EffectiveVectorFunction expected_flow={exp(-half*t)*(x0*cos(t)-y0*sin(t)),exp(-half*t)*(x0*sin(t)+y0*cos(t))};
@@ -157,10 +157,10 @@ class TestIntegrator
 
         //EffectiveVectorFunction f=(x*(o-x),o);
         EffectiveVectorFunction f={x*(o-x)};
-        //ExactIntervalVector d=(ExactInterval(0.25,0.5),ExactInterval(-0.25,0.25));
-        ExactBox d={ExactInterval(0.25,0.5)};
+        //ExactIntervalVectorType d=(ExactIntervalType(0.25,0.5),ExactIntervalType(-0.25,0.25));
+        ExactBoxType d={ExactIntervalType(0.25,0.5)};
         Float64 h=0.5;
-        //ExactIntervalVector d(1u,ExactInterval(-0.125,+0.125));
+        //ExactIntervalVectorType d(1u,ExactIntervalType(-0.125,+0.125));
         //Float64 h=0.125;
         ValidatedVectorFunctionModel flow=integrator_ptr->flow_step(f,d,h);
         VectorTaylorFunction taylor_flow=dynamic_cast<VectorTaylorFunction&>(flow.reference());

@@ -84,7 +84,7 @@ template<class F> TaylorModel<Validated,F>::TaylorModel(const Expansion<Float64>
 {
 }
 
-template<class F> TaylorModel<Validated,F> TaylorModel<Validated,F>::scaling(SizeType as, SizeType j, const ExactInterval& codom, Sweeper swp) {
+template<class F> TaylorModel<Validated,F> TaylorModel<Validated,F>::scaling(SizeType as, SizeType j, const ExactIntervalType& codom, Sweeper swp) {
     TaylorModel<Validated,F> r(as,swp);
     r.set_gradient(j,1);
     r*=codom.radius();
@@ -699,20 +699,20 @@ template<class F> Float64 TaylorModel<Validated,F>::tolerance() const {
 
 // Basic function operators (domain, range, evaluate)
 
-template<class F> Box<UnitInterval> TaylorModel<Validated,F>::domain() const
+template<class F> Box<UnitIntervalType> TaylorModel<Validated,F>::domain() const
 {
-    return Box<UnitInterval>(this->argument_size(),UnitInterval());
+    return Box<UnitIntervalType>(this->argument_size(),UnitIntervalType());
 }
 
-template<class F> ExactInterval TaylorModel<Validated,F>::codomain() const
+template<class F> ExactIntervalType TaylorModel<Validated,F>::codomain() const
 {
-    UpperInterval rng=this->range();
-    return ExactInterval(rng.lower().raw(),rng.upper().raw());
+    UpperIntervalType rng=this->range();
+    return ExactIntervalType(rng.lower().raw(),rng.upper().raw());
 }
 
 // Compute the range by grouping all quadratic terms x[i]^2 with linear terms x[i]
 // The range of ax^2+bx+c is a([-1,1]+b/2a)^2+(c-b^2/4a)
-template<class F> UpperInterval TaylorModel<Validated,F>::range() const {
+template<class F> UpperIntervalType TaylorModel<Validated,F>::range() const {
     const TaylorModel<Validated,F>& tm=*this;
     const SizeType as=tm.argument_size();
     ExactFloat64 constant_term=0;
@@ -751,11 +751,11 @@ template<class F> UpperInterval TaylorModel<Validated,F>::range() const {
             r += ql;
         }
     }
-    return UpperInterval(r);
+    return UpperIntervalType(r);
 }
 
 
-template<class F> UpperInterval TaylorModel<Validated,F>::gradient_range(SizeType j) const {
+template<class F> UpperIntervalType TaylorModel<Validated,F>::gradient_range(SizeType j) const {
     SizeType as=this->argument_size();
     ValidatedFloat64 g(0,0);
     for(typename TaylorModel<Validated,F>::ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
@@ -767,10 +767,10 @@ template<class F> UpperInterval TaylorModel<Validated,F>::gradient_range(SizeTyp
             else { g+=ValidatedFloat64(-1,1)*x*c; }
         }
     }
-    return UpperInterval(g);
+    return UpperIntervalType(g);
 }
 
-template<class F> Covector<UpperInterval> TaylorModel<Validated,F>::gradient_range() const {
+template<class F> Covector<UpperIntervalType> TaylorModel<Validated,F>::gradient_range() const {
     SizeType as=this->argument_size();
     Covector<ValidatedFloat64> g(this->argument_size(),ValidatedFloat64(0,0));
     for(typename TaylorModel<Validated,F>::ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
@@ -784,7 +784,7 @@ template<class F> Covector<UpperInterval> TaylorModel<Validated,F>::gradient_ran
             }
         }
     }
-    return Covector<UpperInterval>(g);
+    return Covector<UpperIntervalType>(g);
 }
 
 
@@ -797,8 +797,8 @@ template<class F> Covector<UpperInterval> TaylorModel<Validated,F>::gradient_ran
 
 
 template<class F> TaylorModel<Validated,F> max(const TaylorModel<Validated,F>& x, const TaylorModel<Validated,F>& y) {
-    UpperInterval xr=x.range();
-    UpperInterval yr=y.range();
+    UpperIntervalType xr=x.range();
+    UpperIntervalType yr=y.range();
     if(definitely(xr.lower()>=yr.upper())) {
         return x;
     } else if(definitely(yr.lower()>=xr.upper())) {
@@ -810,8 +810,8 @@ template<class F> TaylorModel<Validated,F> max(const TaylorModel<Validated,F>& x
 
 
 template<class F> TaylorModel<Validated,F> min(const TaylorModel<Validated,F>& x, const TaylorModel<Validated,F>& y) {
-    UpperInterval xr=x.range();
-    UpperInterval yr=y.range();
+    UpperIntervalType xr=x.range();
+    UpperIntervalType yr=y.range();
     if(definitely(xr.upper()<=yr.lower())) {
         return x;
     } else if(definitely(yr.upper()<=xr.lower())) {
@@ -822,7 +822,7 @@ template<class F> TaylorModel<Validated,F> min(const TaylorModel<Validated,F>& x
 }
 
 template<class F> TaylorModel<Validated,F> abs(const TaylorModel<Validated,F>& x) {
-    UpperInterval xr=x.range();
+    UpperIntervalType xr=x.range();
     if(definitely(xr.lower()>=0)) {
         return x;
     } else if(definitely(xr.upper()<=0)) {
@@ -1162,7 +1162,7 @@ TaylorModel<Validated,F>::_compose(TaylorModel<Validated,F> const& x, Vector<Tay
     return horner_evaluate(x.expansion(),y)+ValidatedFloat64(-x.error(),+x.error());
 }
 
-template<class F> Void TaylorModel<Validated,F>::unscale(ExactInterval const& ivl) {
+template<class F> Void TaylorModel<Validated,F>::unscale(ExactIntervalType const& ivl) {
     // Scale tv so that the interval ivl maps into [-1,1]
     // The result is given by  (tv-c)*s where c is the centre
     // and s the reciprocal of the radius of ivl
@@ -1461,7 +1461,7 @@ template<class F> Vector<TaylorModel<Validated,F>> TaylorModel<Validated,F>::coo
     return result;
 }
 
-template<class F> Vector<TaylorModel<Validated,F>> TaylorModel<Validated,F>::scalings(const Vector<ExactInterval>& d, Sweeper swp)
+template<class F> Vector<TaylorModel<Validated,F>> TaylorModel<Validated,F>::scalings(const Vector<ExactIntervalType>& d, Sweeper swp)
 {
     Vector<TaylorModel<Validated,F>> result(d.size(),TaylorModel<Validated,F>::zero(d.size(),swp));
     for(SizeType i=0; i!=d.size(); ++i) {
@@ -1539,7 +1539,7 @@ jacobian_value(const Vector<TaylorModel<Validated,F>>& f, const Array<SizeType>&
 
 
 // Compute the Jacobian over the unit domain
-template<class F> Matrix<UpperInterval>
+template<class F> Matrix<UpperIntervalType>
 jacobian_range(const Vector<TaylorModel<Validated,F>>& f) {
     SizeType rs=f.size();
     SizeType as=f.zero_element().argument_size();
@@ -1557,11 +1557,11 @@ jacobian_range(const Vector<TaylorModel<Validated,F>>& f) {
             }
         }
     }
-    return Matrix<UpperInterval>(J);
+    return Matrix<UpperIntervalType>(J);
 }
 
 // Compute the Jacobian over the unit domain, with respect to the variables p.
-template<class F> Matrix<UpperInterval>
+template<class F> Matrix<UpperIntervalType>
 jacobian_range(const Vector<TaylorModel<Validated,F>>& f, const Array<SizeType>& p) {
     SizeType rs=f.size();
     SizeType as=f.zero_element().argument_size();
@@ -1581,7 +1581,7 @@ jacobian_range(const Vector<TaylorModel<Validated,F>>& f, const Array<SizeType>&
             }
         }
     }
-    return Matrix<UpperInterval>(J);
+    return Matrix<UpperIntervalType>(J);
 }
 
 
@@ -1714,7 +1714,7 @@ template<class F> Void TaylorModel<Approximate,F>::ifma(const TaylorModel<Approx
 }
 
 
-template<class F> Void TaylorModel<Approximate,F>::unscale(ExactInterval const& dom) {
+template<class F> Void TaylorModel<Approximate,F>::unscale(ExactIntervalType const& dom) {
     TaylorModel<Approximate,F>& x=*this;
     x-=dom.midpoint();
     x/=dom.radius();
@@ -1744,10 +1744,10 @@ template<class F> typename TaylorModel<Approximate,F>::NormType TaylorModel<Appr
     return NormType(r);
 }
 
-template<class F> ApproximateInterval TaylorModel<Approximate,F>::range() const {
+template<class F> ApproximateIntervalType TaylorModel<Approximate,F>::range() const {
     ApproximateFloat64 av=this->average();
     ApproximateFloat64 rad=this->radius();
-    return ApproximateInterval(av-rad,av+rad);
+    return ApproximateIntervalType(av-rad,av+rad);
 }
 
 template<class F> Float64 TaylorModel<Approximate,F>::tolerance() const {

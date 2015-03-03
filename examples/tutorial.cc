@@ -213,9 +213,9 @@ Void compute_evolution(const CompositeHybridAutomaton& heating_system,const Gene
          Colour(0.0,0.5,1.0), reach, Colour(0.0,0.25,0.5), initial_enclosure, Colour(0.25,0.0,0.5), evolve);
 
 /*
-    plot("tutorial-reach_evolve-off.png",ExactBox(2, 0.0,1.0, 14.0,23.0),
+    plot("tutorial-reach_evolve-off.png",ExactBoxType(2, 0.0,1.0, 14.0,23.0),
          Colour(0.0,0.5,1.0), reach[heating_off], Colour(0.25,0.0,0.5), evolve[heating_on]);
-    plot("tutorial-reach_evolve-on.png",ExactBox(2, 0.0,1.0, 14.0,23.0),
+    plot("tutorial-reach_evolve-on.png",ExactBoxType(2, 0.0,1.0, 14.0,23.0),
          Colour(0.0,0.5,1.0), reach[heating_on], Colour(0.0,0.25,0.5), initial_enclosure, Colour(0.25,0.0,0.5), evolve[heating_on]);
 */
     cout << "done." << endl;
@@ -237,7 +237,7 @@ Void compute_reachable_sets(const GeneralHybridEvolver& evolver)
     // Define the initial set
     HybridImageSet initial_set;
     AtomicDiscreteLocation heater_off(2);
-    ExactBox initial_box(2, 0.0,0.015625/4, 16.0,16.0+0.0625/16);
+    ExactBoxType initial_box(2, 0.0,0.015625/4, 16.0,16.0+0.0625/16);
     initial_set[heater_off]=initial_box;
 
     // Set the maximum evolution time
@@ -254,7 +254,7 @@ Void compute_reachable_sets(const GeneralHybridEvolver& evolver)
     HybridGridTreeSet lower_reach_set = analyser.lower_reach(heating_system,initial_set,reach_time);
     std::cout << "done." << std::endl;
 
-    plot("tutorial-lower_reach_evolve.png",ExactBox(2, 0.0,1.0, 14.0,21.0),
+    plot("tutorial-lower_reach_evolve.png",ExactBoxType(2, 0.0,1.0, 14.0,21.0),
          Colour(0.0,0.5,1.0), lower_reach_set,
          Colour(0.0,0.25,0.5), initial_set,
          Colour(0.25,0.0,0.5), lower_evolve_set);
@@ -271,7 +271,7 @@ Void compute_reachable_sets(const GeneralHybridEvolver& evolver)
     HybridGridTreeSet upper_reach_set = analyser.upper_reach(heating_system,initial_set,reach_time);
     std::cout << "done." << std::endl;
 
-    plot("tutorial-upper_reach_evolve.png",ExactBox(2, 0.0,1.0, 14.0,21.0),
+    plot("tutorial-upper_reach_evolve.png",ExactBoxType(2, 0.0,1.0, 14.0,21.0),
          Colour(0.0,0.5,1.0), upper_reach_set,
          Colour(0.0,0.25,0.5), initial_set,
          Colour(0.25,0.0,0.5), upper_evolve_set);
@@ -280,7 +280,7 @@ Void compute_reachable_sets(const GeneralHybridEvolver& evolver)
     std::cout << "Computing chain reach set... " << std::flush;
     HybridGridTreeSet chain_reach_set = analyser.chain_reach(heating_system,initial_set);
     std::cout << "done." << std::endl;
-    plot("tutorial-chain_reach.png",ExactBox(2, 0.0,1.0, 14.0,21.0), Colour(0.0,0.5,1.0), chain_reach_set);
+    plot("tutorial-chain_reach.png",ExactBoxType(2, 0.0,1.0, 14.0,21.0), Colour(0.0,0.5,1.0), chain_reach_set);
 */
 }
 
@@ -292,7 +292,7 @@ Void compute_reachable_sets_with_serialisation(const CompositeHybridAutomaton& h
     // Define the initial set
     HybridImageSet initial_set;
     AtomicDiscreteLocation heater_off(2);
-    ExactBox initial_box(2, 0.0,0.015625, 16.0,16.0625);
+    ExactBoxType initial_box(2, 0.0,0.015625, 16.0,16.0625);
     initial_set[heater_off]=initial_box;
 
 
@@ -305,7 +305,7 @@ Void compute_reachable_sets_with_serialisation(const CompositeHybridAutomaton& h
     HybridTime recurrent_time(tupper-tlower,16);
 
     const HybridGridTreeSet upper_intermediate_set = analyser.upper_evolve(heating_system,initial_set,transient_time);
-    plot("tutorial-upper_intermediate.png",ExactBox(2, 0.0,1.0, 14.0,18.0), Colour(0.0,0.5,1.0), upper_intermediate_set);
+    plot("tutorial-upper_intermediate.png",ExactBoxType(2, 0.0,1.0, 14.0,18.0), Colour(0.0,0.5,1.0), upper_intermediate_set);
 
     std::ofstream output_file_stream("tutorial-transient.txt");
     text_oarchive output_archive(output_file_stream);
@@ -320,7 +320,7 @@ Void compute_reachable_sets_with_serialisation(const CompositeHybridAutomaton& h
     input_file_stream.close();
 
     HybridGridTreeSet upper_recurrent_set = analyser.upper_reach(heating_system,initial_set,recurrent_time);
-    plot("tutorial-upper_recurrent.png",ExactBox(2, 0.0,1.0, 14.0,18.0), Colour(0.0,0.5,1.0), upper_recurrent_set);
+    plot("tutorial-upper_recurrent.png",ExactBoxType(2, 0.0,1.0, 14.0,18.0), Colour(0.0,0.5,1.0), upper_recurrent_set);
 */
 }
 

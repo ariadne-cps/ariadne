@@ -16,7 +16,7 @@ Int test_taylor_series() {
     std::cout << "f2="<<f2<<"\n";
 
     const ExactFloat64 c1=3.0;
-    const ExactInterval c2=ExactInterval(1.0)/ExactInterval(3.0);
+    const ExactIntervalType c2=ExactIntervalType(1.0)/ExactIntervalType(3.0);
     C1TaylorSeries f1pc1=f1; f1pc1+=c1;
     std::cout << "f1pc1="<<f1pc1<<"\n";
     C1TaylorSeries f1tc2=f1; f1tc2*=c2;
@@ -30,7 +30,7 @@ Int test_taylor_series() {
     std::cout << "\n\n";
     //std::cout << "f2*f2="<<f2*f2<<"\n";
 
-    ExactInterval x=2.0;
+    ExactIntervalType x=2.0;
     std::cout << "f1(x)="<<evaluate(f1,x)<<"\n";
    
 }
@@ -64,7 +64,7 @@ Int test_taylor_function() {
     std::cout << "\n\n";
     //std::cout << "f2*f2="<<f2*f2<<"\n";
 
-    Vector<ExactInterval> x={2,3};
+    Vector<ExactIntervalType> x={2,3};
     std::cout << "x="<<x<<"\n";
     std::cout << "f1(x)="<<evaluate(f1,x)<<"\n";
 

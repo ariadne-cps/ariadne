@@ -73,7 +73,7 @@ template<class X> Bool compatible(const Polynomial<X>& x1, const Polynomial<X>& 
 template<class X> Bool compatible(const Differential<X>& x1, const Differential<X>& x2) { return x1.argument_size()==x2.argument_size(); }
 
 Float64 create(const Float64& x) { return Float64(0); }
-ExactInterval create(const ExactInterval& x) { return ExactInterval(0); }
+ExactIntervalType create(const ExactIntervalType& x) { return ExactIntervalType(0); }
 template<class X> Polynomial<X> create(const Polynomial<X>& x) { return Polynomial<X>(x.argument_size()); }
 template<class X> Differential<X> create(const Differential<X>& x) { return Differential<X>(x.argument_size(),x.degree()); }
 
@@ -124,7 +124,7 @@ template<> OutputStream& operator<<(OutputStream& os, const Graded<Float64>& g) 
     os << "}";
     return os;
 }
-template<> OutputStream& operator<<(OutputStream& os, const Graded<ExactInterval>& g) {
+template<> OutputStream& operator<<(OutputStream& os, const Graded<ExactIntervalType>& g) {
     if(g.size()==0) { return os << "0"; }
     os << g[0];
     for(Nat i=1; i<=g.degree(); ++i) {
@@ -376,7 +376,7 @@ template<class A> ClosureExpression<AntiDiff,Graded<A> > antidifferential(const 
 }
 
 
-Pair<List<Float64>,Float64> midpoint_error(const Graded<ExactInterval>& x) {
+Pair<List<Float64>,Float64> midpoint_error(const Graded<ExactIntervalType>& x) {
     List<Float64> m(x.degree()+1);
     Float64 e;
     for(Nat i=0; i<=x.degree(); ++i) {

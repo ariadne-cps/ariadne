@@ -41,7 +41,7 @@
 namespace Ariadne {
 
 class Float64;
-class ExactInterval;
+class ExactIntervalType;
 
 template<class X> class Vector;
 template<class X> class Matrix;

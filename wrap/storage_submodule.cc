@@ -61,13 +61,13 @@ PyGridTreeSetConstIterator py_cells_end(const GridTreeSubset& gts) {
 class PyGridTreeSetBoxConstIterator {
   public:
     typedef boost::forward_traversal_tag iterator_category;
-    typedef ExactBox value_type;
+    typedef ExactBoxType value_type;
     typedef SizeType difference_type;
-    typedef const ExactBox reference;
-    typedef const ExactBox* pointer;
+    typedef const ExactBoxType reference;
+    typedef const ExactBoxType* pointer;
 
     PyGridTreeSetBoxConstIterator(GridTreeSet::ConstIterator iter) : _iter(iter) { }
-    const ExactBox operator*() const { return this->_iter->box(); }
+    const ExactBoxType operator*() const { return this->_iter->box(); }
     PyGridTreeSetBoxConstIterator& operator++() { ++this->_iter; return *this; }
     PyGridTreeSetBoxConstIterator operator++(Int) { PyGridTreeSetBoxConstIterator ret(*this); ++this->_iter; return ret; }
     Bool operator==(const PyGridTreeSetBoxConstIterator& other) { return this->_iter==other._iter; }
@@ -89,7 +89,7 @@ PyGridTreeSetBoxConstIterator py_boxes_end(const GridTreeSubset& gts) {
 Void export_grid()
 {
     typedef Vector<Float64> RVector;
-    typedef Vector<ExactInterval> IVector;
+    typedef Vector<ExactIntervalType> IVector;
 
     class_< Grid > grid_class("Grid",no_init);
     grid_class.def(init<Nat>());
@@ -139,7 +139,7 @@ Void export_grid_tree_set() {
     grid_tree_set_class.def("adjoin", (Void(GridTreeSet::*)(const GridTreeSubset&))(&GridTreeSet::adjoin));
     grid_tree_set_class.def("restrict", (Void(GridTreeSet::*)(const GridTreeSubset&))(&GridTreeSet::restrict));
     grid_tree_set_class.def("remove", (Void(GridTreeSet::*)(const GridTreeSubset&))(&GridTreeSet::remove));
-    grid_tree_set_class.def("adjoin_over_approximation", (Void(GridTreeSet::*)(const ExactBox&,const Nat)) &GridTreeSet::adjoin_over_approximation);
+    grid_tree_set_class.def("adjoin_over_approximation", (Void(GridTreeSet::*)(const ExactBoxType&,const Nat)) &GridTreeSet::adjoin_over_approximation);
     grid_tree_set_class.def("adjoin_outer_approximation", (Void(GridTreeSet::*)(const CompactSetInterface&,const Nat)) &GridTreeSet::adjoin_outer_approximation);
     grid_tree_set_class.def("adjoin_inner_approximation", (Void(GridTreeSet::*)(const OpenSetInterface&,const Nat,const Nat)) &GridTreeSet::adjoin_inner_approximation);
     grid_tree_set_class.def("__len__", &GridTreeSet::size);

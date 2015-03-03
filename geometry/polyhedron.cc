@@ -59,7 +59,7 @@ Int verbosity=global_verbosity;
 
 Void ddconv(std::vector< Vector<Float64> >&, const std::vector< Vector<Float64> >&);
 
-Polyhedron polyhedron(const ExactBox& bx);
+Polyhedron polyhedron(const ExactBoxType& bx);
 Polyhedron polyhedron(const Polytope& p);
 Polytope polytope(const Polyhedron& p);
 
@@ -86,7 +86,7 @@ Polyhedron::Polyhedron(const Matrix<Float64>& A, const Vector<Float64>& b)
 
 
 
-Polyhedron::Polyhedron(const ExactBox& bx)
+Polyhedron::Polyhedron(const ExactBoxType& bx)
     : _A(bx.dimension()*2,bx.dimension()), _b(bx.dimension()*2)
 {
     const Nat n=bx.dimension();
@@ -152,15 +152,15 @@ Polyhedron::halfspace(SizeType i) const
 
 
 
-Kleenean Polyhedron::overlaps(const ExactBox& bx) const {
+Kleenean Polyhedron::overlaps(const ExactBoxType& bx) const {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-Kleenean Polyhedron::covers(const ExactBox& bx) const {
+Kleenean Polyhedron::covers(const ExactBoxType& bx) const {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-Kleenean Polyhedron::separated(const ExactBox& bx) const {
+Kleenean Polyhedron::separated(const ExactBoxType& bx) const {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
@@ -185,7 +185,7 @@ intersection(const Polyhedron& plhd1, const Polyhedron& plhd2)
 
 
 Polyhedron
-polyhedron(const ExactBox& bx)
+polyhedron(const ExactBoxType& bx)
 {
     return Polyhedron(bx);
 }

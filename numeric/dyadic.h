@@ -43,7 +43,7 @@ namespace Ariadne {
 class Dyadic;
 
 //! \ingroup NumericModule
-//! \related Float64, ExactInterval
+//! \related Float64, ExactIntervalType
 //! \brief A floating-point number, which is taken to represent the \em exact value of a real quantity.
 class Dyadic {
     RawFloat64 _x;

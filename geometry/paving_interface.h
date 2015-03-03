@@ -167,10 +167,10 @@ class SubPavingInterface
     //! \brief Modify the underlying paving so that the root cell of the subpaving is either enabled or disabled.
     virtual Void set_root_cell(Bool onoff) = 0;
 
-    virtual UpperBox bounding_box() const = 0; // Inherited from CompactSetInterface
-    virtual Sierpinski inside(const ExactBox& bx) const = 0; // Inherited from CompactSetInterface
-    virtual Sierpinski separated(const ExactBox& bx) const = 0; // Inherited from ClosedSetInterface
-    virtual Sierpinski overlaps(const ExactBox& bx) const = 0; // Inherited from OvertSetInterface
+    virtual UpperBoxType bounding_box() const = 0; // Inherited from CompactSetInterface
+    virtual Sierpinski inside(const ExactBoxType& bx) const = 0; // Inherited from CompactSetInterface
+    virtual Sierpinski separated(const ExactBoxType& bx) const = 0; // Inherited from ClosedSetInterface
+    virtual Sierpinski overlaps(const ExactBoxType& bx) const = 0; // Inherited from OvertSetInterface
 
     virtual Void mince(Nat depth) = 0; // Deprecated?
     virtual Void recombine() = 0; // Deprecated?
@@ -214,10 +214,10 @@ class SubPavingHandle
     ForwardConstantIteratorHandle<GridCell> begin() const { return this->_ptr->_begin(); }
     ForwardConstantIteratorHandle<GridCell> end() const { return this->_ptr->_end(); }
 
-    UpperBox bounding_box() const { return this->_ptr->bounding_box(); };
-    Sierpinski inside(const ExactBox& bx) const { return this->_ptr->inside(bx); }
-    Sierpinski separated(const ExactBox& bx) const { return this->_ptr->separated(bx); }
-    Sierpinski overlaps(const ExactBox& bx) const { return this->_ptr->overlaps(bx); }
+    UpperBoxType bounding_box() const { return this->_ptr->bounding_box(); };
+    Sierpinski inside(const ExactBoxType& bx) const { return this->_ptr->inside(bx); }
+    Sierpinski separated(const ExactBoxType& bx) const { return this->_ptr->separated(bx); }
+    Sierpinski overlaps(const ExactBoxType& bx) const { return this->_ptr->overlaps(bx); }
 
     Void mince(Nat depth) { this->_ptr->mince(depth); }
     Void recombine() { this->_ptr->recombine(); }
@@ -235,10 +235,10 @@ class PavingInterface
 {
   public:
     virtual PavingInterface* clone() const = 0;
-    virtual GridCell smallest_enclosing_primary_cell(const UpperBox& bx) const = 0; // Useful query, but can also be implemented at the Grid level.
-    virtual Void adjoin_cells(const PredicateInterface<ExactBox>& predicate, const Nat depth) { ARIADNE_ABSTRACT_METHOD; }
+    virtual GridCell smallest_enclosing_primary_cell(const UpperBoxType& bx) const = 0; // Useful query, but can also be implemented at the Grid level.
+    virtual Void adjoin_cells(const PredicateInterface<ExactBoxType>& predicate, const Nat depth) { ARIADNE_ABSTRACT_METHOD; }
     virtual Void adjoin_outer_approximation(const CompactSetInterface& set, const Nat depth) = 0;
-    virtual Void adjoin_outer_approximation(const UpperBox& set, const Nat depth) = 0;
+    virtual Void adjoin_outer_approximation(const UpperBoxType& set, const Nat depth) = 0;
     virtual Void adjoin_inner_approximation(const OpenSetInterface& set, const Nat height, const Nat depth) = 0;
     virtual Void adjoin(const SubPavingInterface& paving) = 0;
     virtual Void restrict(const SubPavingInterface& paving) = 0;
@@ -273,13 +273,13 @@ class PavingHandle
 
     ForwardConstantIteratorHandle<GridCell> begin() const { return this->_ptr->_begin(); }
     ForwardConstantIteratorHandle<GridCell> end() const { return this->_ptr->_end(); }
-    UpperBox bounding_box() const { return this->_ptr->bounding_box(); };
-    Sierpinski inside(const ExactBox& bx) const { return this->_ptr->inside(bx); }
-    Sierpinski separated(const ExactBox& bx) const { return this->_ptr->separated(bx); }
-    Sierpinski overlaps(const ExactBox& bx) const { return this->_ptr->overlaps(bx); }
+    UpperBoxType bounding_box() const { return this->_ptr->bounding_box(); };
+    Sierpinski inside(const ExactBoxType& bx) const { return this->_ptr->inside(bx); }
+    Sierpinski separated(const ExactBoxType& bx) const { return this->_ptr->separated(bx); }
+    Sierpinski overlaps(const ExactBoxType& bx) const { return this->_ptr->overlaps(bx); }
 
-    //GridCell smallest_enclosing_primary_cell(const ExactBox& bx) const { return this->_ptr->smallest_enclosing_primary_cell(); }
-    Void adjoin_cells(const PredicateInterface<ExactBox>& predicate, const Nat depth) { return this->_ptr->adjoin_cells(predicate,depth); }
+    //GridCell smallest_enclosing_primary_cell(const ExactBoxType& bx) const { return this->_ptr->smallest_enclosing_primary_cell(); }
+    Void adjoin_cells(const PredicateInterface<ExactBoxType>& predicate, const Nat depth) { return this->_ptr->adjoin_cells(predicate,depth); }
     Void adjoin_outer_approximation(const CompactSetInterface& set, const Nat depth) { return this->_ptr->adjoin_outer_approximation(set,depth); }
     Void adjoin_inner_approximation(const OpenSetInterface& set, const Nat height, const Nat depth) { return this->_ptr->adjoin_inner_approximation(set,height,depth); }
     Void adjoin(const SubPavingInterface& paving) { return this->_ptr->adjoin(paving); }

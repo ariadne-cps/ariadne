@@ -39,7 +39,7 @@ struct Vector2d;
 struct Point2d;
 struct Box2d;
 
-typedef ApproximateBox GraphicsBoundingBoxType;
+typedef ApproximateBoxType GraphicsBoundingBoxType;
 class Colour;
 
 class DrawableInterface;
@@ -63,7 +63,7 @@ class FigureInterface {
   public:
     virtual ~FigureInterface() { };
     virtual Void set_projection_map(const PlanarProjectionMap& prj) = 0;
-    virtual Void set_bounding_box(const ApproximateBox& bx) = 0;
+    virtual Void set_bounding_box(const ApproximateBoxType& bx) = 0;
     virtual Void set_projection(Nat as, Nat ix, Nat iy) = 0;
     virtual Void set_line_style(Bool) = 0;
     virtual Void set_line_width(double) = 0;

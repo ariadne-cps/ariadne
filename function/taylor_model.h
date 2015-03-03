@@ -46,7 +46,7 @@
 
 namespace Ariadne {
 
-class UnitInterval;
+class UnitIntervalType;
 enum class SplitPart : char;
 
 template<class T1, class T2> struct Product;
@@ -83,8 +83,8 @@ class TaylorModel<Validated,F>
     typedef ReverseLexicographicKeyLess ComparisonType;
     typedef SortedExpansion<CoefficientType,ComparisonType> ExpansionType;
 
-    typedef ExactInterval CodomainType;
-    typedef ApproximateInterval RangeType;
+    typedef ExactIntervalType CodomainType;
+    typedef ApproximateIntervalType RangeType;
 
     //! \brief The computational paradigm.
     typedef Validated Paradigm;
@@ -159,7 +159,7 @@ class TaylorModel<Validated,F>
         TaylorModel<Validated,F> r(as,swp); r.set_error(e); return r; }
 
     //! \brief Construct the quantity which scales the interval \a codom onto the unit interval.
-    static TaylorModel<Validated,F> scaling(SizeType as, SizeType j, const ExactInterval& codom, Sweeper swp);
+    static TaylorModel<Validated,F> scaling(SizeType as, SizeType j, const ExactIntervalType& codom, Sweeper swp);
 
     //! \brief Return the vector of zero variables of size \a rs in \a as arguments.
     static Vector<TaylorModel<Validated,F>> zeros(SizeType rs, SizeType as, Sweeper swp);
@@ -169,7 +169,7 @@ class TaylorModel<Validated,F>
     static Vector<TaylorModel<Validated,F>> coordinates(SizeType as, Sweeper swp);
 
     //! \brief Return the vector scaling the box \a codom onto the unit box.
-    static Vector<TaylorModel<Validated,F>> scalings(const Vector<ExactInterval>& codom, Sweeper swp);
+    static Vector<TaylorModel<Validated,F>> scalings(const Vector<ExactIntervalType>& codom, Sweeper swp);
     //@}
 
     //@{
@@ -263,14 +263,14 @@ class TaylorModel<Validated,F>
     //@{
     /*! \name Function evaluation. */
     //! \brief The domain of the quantity, always given by \f$[-1,1]^{\mathrm{as}}\f$.
-    Box<UnitInterval> domain() const;
+    Box<UnitIntervalType> domain() const;
     //! \brief The codomain of the quantity.
-    ExactInterval codomain() const;
+    ExactIntervalType codomain() const;
     //! \brief An over-approximation to the range of the quantity.
-    UpperInterval range() const;
+    UpperIntervalType range() const;
     //! \brief Compute the gradient of the expansion with respect to the \a jth variable over the domain.
-    UpperInterval gradient_range(SizeType j) const;
-    Covector<UpperInterval> gradient_range() const;
+    UpperIntervalType gradient_range(SizeType j) const;
+    Covector<UpperIntervalType> gradient_range() const;
 
     //! \brief Evaluate the quantity over the interval of points \a x.
     friend ApproximateNumericType evaluate(const TaylorModel<Validated,F>& f, const Vector<ApproximateNumericType>& x) {
@@ -297,13 +297,13 @@ class TaylorModel<Validated,F>
     //@{
     /*! \name Inplace modifications. */
     //! \brief Scales the model by a function mapping \a dom into the unit interval.
-    Void unscale(ExactInterval const& dom);
+    Void unscale(ExactIntervalType const& dom);
     //! \brief Compute the antiderivative (in place).
     Void antidifferentiate(SizeType k);
     //! \brief Compute the weak derivative (in place).
     Void differentiate(SizeType k);
 
-    friend TaylorModel<Validated,F> unscale(TaylorModel<Validated,F> tm, ExactInterval const& dom) {
+    friend TaylorModel<Validated,F> unscale(TaylorModel<Validated,F> tm, ExactIntervalType const& dom) {
         tm.unscale(dom); return std::move(tm); }
     friend TaylorModel<Validated,F> antiderivative(TaylorModel<Validated,F> tm, SizeType k) {
         tm.antidifferentiate(k); return std::move(tm); }
@@ -447,7 +447,7 @@ Covector<ValidatedNumericType> gradient(const TaylorModel<Validated,Float64>& x,
 
 /*! \brief A class representing a power series expansion, scaled to the unit box, with an error term.
  *
- * See also Expansion, Polynomila, TaylorModel<Validated,F><ExactInterval>.
+ * See also Expansion, Polynomila, TaylorModel<Validated,F><ExactIntervalType>.
  */
 template<class F>
 class TaylorModel<Approximate,F>
@@ -459,8 +459,8 @@ class TaylorModel<Approximate,F>
     typedef ReverseLexicographicKeyLess ComparisonType;
     typedef SortedExpansion<CoefficientType,ComparisonType> ExpansionType;
 
-    typedef ExactInterval CodomainType;
-    typedef ApproximateInterval RangeType;
+    typedef ExactIntervalType CodomainType;
+    typedef ApproximateIntervalType RangeType;
     typedef ApproximateFloat64 NormType;
 
     //! \brief The type used for the coefficients.
@@ -538,25 +538,25 @@ class TaylorModel<Approximate,F>
     //@{
     /*! \name Function evaluation. */
     //! \brief The domain of the quantity.
-    Vector<UnitInterval> domain() const;
+    Vector<UnitIntervalType> domain() const;
     //! \brief A coarse over-approximation to the range of the quantity.
-    ExactInterval codomain() const;
+    ExactIntervalType codomain() const;
     //! \brief An over-approximation to the range of the quantity.
-    ApproximateInterval range() const;
+    ApproximateIntervalType range() const;
     //! \brief Compute the gradient of the expansion with respect to the \a jth variable over the domain.
-    ApproximateInterval gradient_range(SizeType j) const;
+    ApproximateIntervalType gradient_range(SizeType j) const;
     //@}
 
     //@{
     /*! \name Inplace modifications. */
     //! \brief Scale so that the old codomain maps into the unit interval.
-    Void unscale(const ExactInterval& dom);
+    Void unscale(const ExactIntervalType& dom);
     //! \brief Compute the antiderivative (in place).
     Void antidifferentiate(SizeType k);
     //! \brief Compute the derivative (in place).
     Void differentiate(SizeType k);
 
-    friend TaylorModel<Approximate,F> unscale(TaylorModel<Approximate,F> tm, const ExactInterval& dom) {
+    friend TaylorModel<Approximate,F> unscale(TaylorModel<Approximate,F> tm, const ExactIntervalType& dom) {
         tm.unscale(dom); return std::move(tm); }
 
     //@}
@@ -661,7 +661,7 @@ template<class F> Vector<TaylorModel<Validated,F>> compose(const Vector<TaylorMo
     return std::move(r);
 }
 
-template<class P, class F> Vector<TaylorModel<P,F>> unscale(const Vector<TaylorModel<P,F>>& x, const Vector<ExactInterval>& dom) {
+template<class P, class F> Vector<TaylorModel<P,F>> unscale(const Vector<TaylorModel<P,F>>& x, const Vector<ExactIntervalType>& dom) {
     Vector<TaylorModel<P,F>> r(x.size());
     for(SizeType i=0; i!=r.size(); ++i) { r[i]=unscale(x[i],dom[i]); }
     return std::move(r);
@@ -726,8 +726,8 @@ template<class F> Matrix<ValidatedNumericType> jacobian(const Vector<TaylorModel
 template<class F> Matrix<ValidatedNumericType> jacobian(const Vector<TaylorModel<Validated,F>>& x, const Vector<ValidatedNumericType>& y, Array<SizeType>& p);
 template<class F> Matrix<ExactFloat64> jacobian_value(const Vector<TaylorModel<Validated,F>>& x);
 template<class F> Matrix<ExactFloat64> jacobian_value(const Vector<TaylorModel<Validated,F>>& x, const Array<SizeType>& p);
-template<class F> Matrix<UpperInterval> jacobian_range(const Vector<TaylorModel<Validated,F>>& x);
-template<class F> Matrix<UpperInterval> jacobian_range(const Vector<TaylorModel<Validated,F>>& x, const Array<SizeType>& p);
+template<class F> Matrix<UpperIntervalType> jacobian_range(const Vector<TaylorModel<Validated,F>>& x);
+template<class F> Matrix<UpperIntervalType> jacobian_range(const Vector<TaylorModel<Validated,F>>& x, const Array<SizeType>& p);
 
 
 

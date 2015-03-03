@@ -63,7 +63,7 @@ static const DiscreteEvent final_event("_tmax_");
 static const DiscreteEvent step_event("_h_");
 
 typedef Vector<ExactFloat64> ExactFloatVector;
-typedef Vector<ExactInterval> ExactIntervalVector;
+typedef Vector<ExactIntervalType> ExactIntervalVectorType;
 
 OutputStream& operator<<(OutputStream& os, const HybridTerminationCriterion& termination) {
     return os << "HybridTerminationCriterion( maximum_time=" << termination.maximum_time()
@@ -206,11 +206,11 @@ Set<DiscreteEvent> activating_events(const Map<DiscreteEvent,TransitionData>& tr
 
 Orbit<HybridEnclosure>
 HybridEvolverBase::
-orbit(const HybridBox& initial_box,
+orbit(const HybridBoxType& initial_box,
       const HybridTerminationCriterion& termination,
       Semantics semantics) const
 {
-    ARIADNE_LOG(2,"HybridEvolverBase::orbit(HybridAutomaton, HybridBox, HybridTime, Semantics)\n");
+    ARIADNE_LOG(2,"HybridEvolverBase::orbit(HybridAutomaton, HybridBoxType, HybridTime, Semantics)\n");
     ARIADNE_LOG(3,"factory="<<this->function_factory()<<"\n");
     ARIADNE_LOG(3,"initial_box="<<initial_box<<"\n");
     HybridEnclosure initial_enclosure(initial_box,this->function_factory());
@@ -326,7 +326,7 @@ HybridEvolverBase::set_solver(const SolverInterface& solver)
 
 
 HybridEvolverBase::EnclosureType
-HybridEvolverBase::enclosure(const HybridBox& initial_box) const
+HybridEvolverBase::enclosure(const HybridBoxType& initial_box) const
 {
     return HybridEnclosure(initial_box,this->function_factory());
 }
@@ -372,9 +372,9 @@ Void
 HybridEvolverBase::
 _log_summary(const EvolutionData& evolution_data, HybridEnclosure const& starting_set) const
 {
-    UpperBox starting_bounding_box=starting_set.space_bounding_box();
-    UpperInterval starting_time_range=starting_set.time_range();
-    UpperInterval starting_dwell_time_range=starting_set.dwell_time_range();
+    UpperBoxType starting_bounding_box=starting_set.space_bounding_box();
+    UpperIntervalType starting_time_range=starting_set.time_range();
+    UpperIntervalType starting_dwell_time_range=starting_set.dwell_time_range();
     Int old_precision = std::clog.precision();
     if(verbosity>=1) { std::clog<<"\n"; }
     ARIADNE_LOG(1,(verbosity==1?"\r":"")
@@ -518,7 +518,7 @@ _process_starting_events(EvolutionData& evolution_data,
 ValidatedVectorFunctionModel
 HybridEvolverBase::
 _compute_flow(EffectiveVectorFunction dynamic,
-              ExactBox const& initial_box,
+              ExactBoxType const& initial_box,
               const ExactFloat64& maximum_step_size) const
 {
     ARIADNE_LOG(7,"HybridEvolverBase::_compute_flow(...)\n");
@@ -536,9 +536,9 @@ _compute_flow(EffectiveVectorFunction dynamic,
     ValidatedVectorFunctionModel flow_model=integrator.flow_step(dynamic,initial_box,step_size.raw());
 
     ARIADNE_LOG(6,"twosided_flow_model="<<flow_model<<"\n");
-    ExactIntervalVector flow_domain=flow_model.domain();
+    ExactIntervalVectorType flow_domain=flow_model.domain();
     ARIADNE_ASSERT(step_size==flow_domain[flow_domain.size()-1u].upper());
-    flow_domain[flow_domain.size()-1u]=ExactInterval(zero,step_size);
+    flow_domain[flow_domain.size()-1u]=ExactIntervalType(zero,step_size);
     flow_model=restrict(flow_model,flow_domain);
     ARIADNE_LOG(6,"flow_model="<<flow_model<<"\n");
     ARIADNE_LOG(2,"flow_model: step_size="<<step_size<<", errors="<<std::scientific<<flow_model.errors()<<", range="<<std::fixed<<flow_model.range()<<"\n");
@@ -556,7 +556,7 @@ _compute_active_events(EffectiveVectorFunction const& dynamic,
     Set<DiscreteEvent> events=guards.keys();
     Set<DiscreteEvent> active_events;
     HybridEnclosure reach_set=starting_set;
-    UpperBox flow_bounds=flow.range();
+    UpperBoxType flow_bounds=flow.range();
     ARIADNE_LOG(8,"flow_bounds="<<flow_bounds<<"\n");
     reach_set.apply_full_reach_step(flow);
     ARIADNE_LOG(8,"reach_set="<<reach_set<<"\n");
@@ -565,7 +565,7 @@ _compute_active_events(EffectiveVectorFunction const& dynamic,
         const EffectiveScalarFunction& guard_function=guards[event];
         ARIADNE_LOG(8,"event="<<event<<", guard="<<guard_function<<", flow_derivative="<<lie_derivative(guard_function,dynamic)<<"\n");
         // First try a simple test based on the bounding box
-        UpperInterval guard_range=apply(guard_function,reach_set.space_bounding_box());
+        UpperIntervalType guard_range=apply(guard_function,reach_set.space_bounding_box());
         if(possibly(guard_range.upper()>=zero)) {
             // Now make a set containing the complement of the constraint,
             // and test for emptiness. If the set is empty, then the guard is
@@ -578,7 +578,7 @@ _compute_active_events(EffectiveVectorFunction const& dynamic,
                 // FIXME: Need to allow permissive events with strictly decreasing guard.
                 // Test direction of guard increase
                 EffectiveScalarFunction flow_derivative = lie_derivative(guard_function,dynamic);
-                ExactInterval flow_derivative_range = flow_derivative(flow_bounds);
+                ExactIntervalType flow_derivative_range = flow_derivative(flow_bounds);
                 if(flow_derivative_range.upper()>zero) {
                     active_events.insert(*event_iter);
                 }
@@ -605,9 +605,9 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
     Map<DiscreteEvent,CrossingData> crossings;
     crossings.clear();
 
-    ExactIntervalVector flow_spacial_domain=project(flow.domain(),range(0,flow.argument_size()-1u));
-    ExactInterval flow_time_domain=flow.domain()[flow.argument_size()-1u];
-    UpperBox flow_bounds=flow.range();
+    ExactIntervalVectorType flow_spacial_domain=project(flow.domain(),range(0,flow.argument_size()-1u));
+    ExactIntervalType flow_time_domain=flow.domain()[flow.argument_size()-1u];
+    UpperBoxType flow_bounds=flow.range();
     for(Set<DiscreteEvent>::ConstIterator event_iter=active_events.begin();
         event_iter!=active_events.end(); ++event_iter)
     {
@@ -617,7 +617,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
         // Compute the derivative of the guard function g along flow lines of $\dot(x)=f(x)$
         // This is given by the Lie derivative at a point x, defined as $L_{f}g(x) = (\nabla g\cdot f)(x)$
         EffectiveScalarFunction derivative=lie_derivative(guard,dynamic);
-        UpperInterval derivative_range=apply(derivative,flow_bounds);
+        UpperIntervalType derivative_range=apply(derivative,flow_bounds);
         if(possibly(derivative_range.lower()>zero)) {
             // If the derivative $L_{f}g$is strictly positive over the bounding box for the flow,
             // then the guard function is strictly increasing.
@@ -660,9 +660,9 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
             // to have a definite sign over the entire flow box, then try to compute
             // the sign of the second derivative $L_{f}^{2}g(x)=L_{f}L_{f}g(x)$.
             ValidatedScalarFunction second_derivative=lie_derivative(derivative,dynamic);
-            UpperInterval second_derivative_bounds_range=apply(second_derivative,flow_bounds);
-            UpperInterval second_derivative_flow_range=compose(second_derivative,flow).range();
-            UpperInterval second_derivative_range=intersection(second_derivative_bounds_range,second_derivative_flow_range);
+            UpperIntervalType second_derivative_bounds_range=apply(second_derivative,flow_bounds);
+            UpperIntervalType second_derivative_flow_range=compose(second_derivative,flow).range();
+            UpperIntervalType second_derivative_range=intersection(second_derivative_bounds_range,second_derivative_flow_range);
             if(definitely(second_derivative_range.lower()>zero)) {
                 // If the second derivative is positive, then either
                 //    (i) the event is immediately active
@@ -728,11 +728,11 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
         }
     }
     if(!crossings.empty()) {
-        Map<DiscreteEvent,Tuple<CrossingKind,UpperInterval,ErrorFloat64> > crossing_log_data;
+        Map<DiscreteEvent,Tuple<CrossingKind,UpperIntervalType,ErrorFloat64> > crossing_log_data;
         for (Map<DiscreteEvent,CrossingData>::ConstIterator crossing_iter=crossings.begin(); crossing_iter!=crossings.end(); ++crossing_iter) {
             DiscreteEvent event=crossing_iter->first;
             CrossingKind crossing_kind=crossing_iter->second.crossing_kind;
-            UpperInterval crossing_time_range(-infty,+infty);
+            UpperIntervalType crossing_time_range(-infty,+infty);
             ErrorFloat64 crossing_time_error=0u;
             if (crossing_kind==CrossingKind::TRANSVERSE) {
                 crossing_time_range=crossing_iter->second.crossing_time.range();
@@ -1096,7 +1096,7 @@ _evolution_step(EvolutionData& evolution_data,
 
 
     // Compute the bounding box of the enclosure
-    const ExactBox starting_bounding_box=cast_exact_box(starting_set.space_bounding_box());
+    const ExactBoxType starting_bounding_box=cast_exact_box(starting_set.space_bounding_box());
     ARIADNE_LOG(4,"starting_bounding_box="<<starting_bounding_box<<"\n");
 
     // Test to see if set requires reconditioning
@@ -1183,7 +1183,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
     Bool progress = false;
 
     if(definitely(starting_set_empty)) {
-        ExactIntervalVector reduced_domain=starting_set.continuous_set().reduced_domain();
+        ExactIntervalVectorType reduced_domain=starting_set.continuous_set().reduced_domain();
         ARIADNE_WARN("empty starting_set "<<representation(starting_set)<<"\n");
         return;
     }
@@ -1281,7 +1281,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
         {
             HybridEnclosure& evolve_set=*evolve_set_iter;
             HybridEnclosure& next_working_set=*next_working_set_iter;
-            UpperInterval evolve_set_time_range=evolve_set.time_range();
+            UpperIntervalType evolve_set_time_range=evolve_set.time_range();
             if(definitely(evolve_set_time_range.lower()>timing_data.final_time)) {
                 // Do nothing, since evolve set is past final time is definitely empty
             } else if(definitely(evolve_set_time_range.upper()<=timing_data.final_time)) {
@@ -1424,7 +1424,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
     result.finishing_kind=FinishingKind::STRADDLE_FINAL_TIME;
     result.step_size=step_size;
     result.final_time=final_time;
-    result.evolution_time_domain=ExactInterval(zero,step_size);
+    result.evolution_time_domain=ExactIntervalType(zero,step_size);
     result.evolution_time_coordinate=this->function_factory().create_identity(result.evolution_time_domain);
     result.parameter_dependent_evolution_time=this->function_factory().create_constant(initial_set.parameter_domain(),ExactFloat64(result.step_size));
     ARIADNE_LOG(8,"  timing_data="<<result<<"\n");
@@ -1500,18 +1500,18 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
     result.step_size=flow.step_size();
     result.final_time=final_time;
 
-    ExactBox space_domain = cast_exact_box(initial_set.space_bounding_box());
-    ExactInterval time_domain = cast_exact_interval(initial_set.time_range()+ExactInterval(zero,step_size));
-    ExactBox spacetime_domain = join(space_domain,time_domain);
+    ExactBoxType space_domain = cast_exact_box(initial_set.space_bounding_box());
+    ExactIntervalType time_domain = cast_exact_interval(initial_set.time_range()+ExactIntervalType(zero,step_size));
+    ExactBoxType spacetime_domain = join(space_domain,time_domain);
 
     //ValidatedVectorFunctionModel space_coordinates=this->function_factory().create_identity(space_domain);
     ValidatedScalarFunctionModel time_coordinate=this->function_factory().create_coordinate(spacetime_domain,n);
     ValidatedScalarFunctionModel time_identity=this->function_factory().create_identity(time_domain);
 
-    result.evolution_time_domain=ExactInterval(zero,step_size);
+    result.evolution_time_domain=ExactIntervalType(zero,step_size);
     result.evolution_time_coordinate=this->function_factory().create_identity(result.evolution_time_domain);
 
-    ExactBox flow_space_domain = ExactBox(project(flow.domain(),range(0,n)));
+    ExactBoxType flow_space_domain = ExactBoxType(project(flow.domain(),range(0,n)));
     if(!subset(space_domain,flow_space_domain)) {
         ARIADNE_WARN(std::setprecision(17)<<"Bounding box "<<space_domain<<" is not subset of the flow spacial domain "<<flow_space_domain<<"\n");
         space_domain=hull(space_domain,flow_space_domain);
@@ -1521,14 +1521,14 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
     // over part of the parameter domain.
     ValidatedVectorFunctionModel const& starting_space_function=initial_set.space_function();
     ValidatedScalarFunctionModel const& starting_time_function=initial_set.time_function();
-    UpperInterval starting_time_range=initial_set.time_range();
-    UpperInterval remaining_time_range=static_cast<UpperInterval>(final_time)-starting_time_range;
+    UpperIntervalType starting_time_range=initial_set.time_range();
+    UpperIntervalType remaining_time_range=static_cast<UpperIntervalType>(final_time)-starting_time_range;
 
     ARIADNE_LOG(7,std::fixed<<"starting_time_range="<<starting_time_range<<" step_size="<<step_size<<" final_time="<<final_time<<"\n");
 
 
     // The time-dependent part of the evolution time
-    ValidatedScalarFunctionModel temporal_evolution_time=this->function_factory().create_zero(ExactIntervalVector(1u,time_domain));
+    ValidatedScalarFunctionModel temporal_evolution_time=this->function_factory().create_zero(ExactIntervalVectorType(1u,time_domain));
 
     if(definitely(remaining_time_range.lower()<zero)) {
         // Some of the points may already have reached the final time.
@@ -1621,7 +1621,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
             {
                 ARIADNE_LOG(6,"  crossing_time_range="<<crossing_iter->second.crossing_time.range()<<"\n");
                 const ValidatedScalarFunctionModel& crossing_time=crossing_iter->second.crossing_time;
-                UpperInterval crossing_time_range=crossing_time.range();
+                UpperIntervalType crossing_time_range=crossing_time.range();
                 if(Ariadne::is_blocking(event_kind) && definitely(crossing_time_range.upper()<step_size)) {
                     // NOTE: Use strict comparison here so that guard is fully crossed
                     // In principle this is not necessary, but this would involve testing
@@ -1717,8 +1717,8 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         HybridEnclosure evolve_set=initial_set;
         evolve_set.apply_fixed_evolve_step(flow,flow.step_size());
         EffectiveVectorFunction dynamic=this->_sys_ptr->dynamic_function(initial_set.location());
-        ExactIntervalVector flow_spacial_domain=project(flow.domain(),range(0,flow.argument_size()-1u));
-        ExactInterval flow_time_domain=flow.domain()[flow.argument_size()-1u];
+        ExactIntervalVectorType flow_spacial_domain=project(flow.domain(),range(0,flow.argument_size()-1u));
+        ExactIntervalType flow_time_domain=flow.domain()[flow.argument_size()-1u];
         ValidatedScalarFunctionModel zero_function=flow[0].create_zero();
         ValidatedVectorFunctionModel identity_function=flow.create_identity();
         ValidatedVectorFunctionModel space_projection=flow*zero;
@@ -1737,9 +1737,9 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
             EffectiveScalarFunction guard_function=transitions[event].guard_function;
             ARIADNE_LOG(6,"  Event "<<event<<": "<<event_kind<<": "<<crossing_kind<<"\n");
             if(event_kind!=PERMISSIVE) {
-                UpperInterval guard_range = compose(guard_function,flow).range();
+                UpperIntervalType guard_range = compose(guard_function,flow).range();
                 ARIADNE_ASSERT(guard_range.lower()<zero);
-                UpperInterval guard_derivative_range = compose(lie_derivative(guard_function,dynamic),flow).range();
+                UpperIntervalType guard_derivative_range = compose(lie_derivative(guard_function,dynamic),flow).range();
 
                 //ExactFloat64 alpha=numeric_cast<ExactFloat64>(1+flow.step_size()*guard_derivative_range.lower()/guard_range.lower());
                 ValidatedFloat64 alpha_val=(1+flow.step_size()*cast_exact(guard_derivative_range.lower())/cast_exact(guard_range.lower()));

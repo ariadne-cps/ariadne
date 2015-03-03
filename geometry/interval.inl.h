@@ -31,7 +31,7 @@ template<class PR> inline Float<Exact,PR> make_split_point(Float<Metric,PR> cons
 
 
 template<class U> Interval<U>::Interval() : _l(+infty), _u(-infty) { }
-template<class U> Interval<U>::Interval(EmptyInterval) : _l(+infty), _u(-infty) { }
+template<class U> Interval<U>::Interval(EmptyIntervalType) : _l(+infty), _u(-infty) { }
 template<class U> Interval<U>::Interval(LowerBoundType l, UpperBoundType u) : _l(l), _u(u) { }
 
 template<class U> Interval<U> Interval<U>::create_zero() const { return Interval<U>(0,0); }
@@ -154,9 +154,9 @@ template<class U> inline auto operator!=(Interval<U> const& ivl1, Interval<U> co
 
 inline Interval<UpperFloat64> refinement(Interval<UpperFloat64> const& ivl1, Interval<UpperFloat64> const& ivl2) {
     return Interval<UpperFloat64>(max(ivl1.lower().raw(),ivl2.lower().raw()),min(ivl1.upper().raw(),ivl2.upper().raw())); }
-inline Bool refines(UpperInterval const& ivl1, UpperInterval const& ivl2) {
+inline Bool refines(Interval<UpperFloat64> const& ivl1, Interval<UpperFloat64> const& ivl2) {
     return ivl1.lower().raw()>=ivl2.lower().raw() && ivl1.upper().raw()<=ivl2.upper().raw(); }
-inline Bool same(UpperInterval const& ivl1, UpperInterval const& ivl2) {
+inline Bool same(Interval<UpperFloat64> const& ivl1, Interval<UpperFloat64> const& ivl2) {
     return ivl1.lower().raw()==ivl2.lower().raw() && ivl1.upper().raw()==ivl2.upper().raw(); }
 
 inline Interval<UpperFloat64> widen(Interval<UpperFloat64> const& ivl, UpperFloat64 e) {
@@ -169,9 +169,9 @@ inline Interval<LowerFloat64> narrow(Interval<LowerFloat64> const& ivl, UpperFlo
 inline Interval<LowerFloat64> narrow(Interval<LowerFloat64> const& ivl) {
     return narrow(ivl,UpperFloat64(Float64::min())); }
 
-inline ExactInterval cast_exact(ApproximateInterval const& ivl) {
-    return reinterpret_cast<ExactInterval const&>(ivl); }
-inline ExactInterval cast_exact_interval(ApproximateInterval const& ivl) {
-    return reinterpret_cast<ExactInterval const&>(ivl); }
+inline Interval<ExactFloat64> cast_exact(Interval<ApproximateFloat64> const& ivl) {
+    return reinterpret_cast<ExactIntervalType const&>(ivl); }
+inline Interval<ExactFloat64> cast_exact_interval(Interval<ApproximateFloat64> const& ivl) {
+    return reinterpret_cast<Interval<ExactFloat64> const&>(ivl); }
 
 } // namespace Ariadne

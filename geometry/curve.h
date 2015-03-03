@@ -43,8 +43,8 @@ template<class X> class Vector;
 template<class X> class Point;
 typedef Point<ExactNumericType> ExactPoint;
 template<class IVL> class Box;
-typedef Box<ExactInterval> ExactBox;
-typedef Box<UpperInterval> UpperBox;
+typedef Box<ExactIntervalType> ExactBoxType;
+typedef Box<UpperIntervalType> UpperBoxType;
 
 
 // Forward declarations for friends
@@ -160,7 +160,7 @@ class InterpolatedCurve
     /*! \brief Draw on a two-dimensional canvas. */
     virtual Void draw(CanvasInterface& c, const Projection2d& p) const;
     /*! \brief A bounding box for the curve. */
-    virtual UpperBox bounding_box() const;
+    virtual UpperBoxType bounding_box() const;
 
     /*! \brief Write to an output stream. */
     virtual OutputStream& write(OutputStream& os) const;

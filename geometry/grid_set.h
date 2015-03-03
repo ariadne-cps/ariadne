@@ -99,7 +99,7 @@ GridTreeSet join(const GridTreeSubset& theSet1, const GridTreeSubset& theSet2);
 GridTreeSet intersection(const GridTreeSubset& theSet1, const GridTreeSubset& theSet2);
 GridTreeSet difference(const GridTreeSubset& theSet1, const GridTreeSubset& theSet2);
 
-GridTreeSet outer_approximation(const ExactBox& theBox, const Grid& theGrid, const Nat numSubdivInDim);
+GridTreeSet outer_approximation(const ExactBoxType& theBoxType, const Grid& theGrid, const Nat numSubdivInDim);
 GridTreeSet outer_approximation(const CompactSetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim);
 GridTreeSet outer_approximation(const CompactSetInterface& theSet, const Nat numSubdivInDim);
 template<class BS> GridTreeSet outer_approximation(const ListSet<BS>& theSet, const Nat numSubdivInDim);
@@ -413,25 +413,25 @@ class GridTreeSubset
     Nat compute_number_subdiv( Float64 theWidth, const Float64 theMaxWidth) const;
 
     /*! \brief This method checks whether the set defined by \a pCurrentNode is a superset
-     *  of \a theBox, in case when it is known that the cell corresponding to the root of
+     *  of \a theBoxType, in case when it is known that the cell corresponding to the root of
      *  pCurrentNode [and defined by \a theGrid, the primary cell (\a theHeight) to which
-     *  this tree is (virtually) rooted via the path theWord] encloses \a theBox.
+     *  this tree is (virtually) rooted via the path theWord] encloses \a theBoxType.
      *  This is a recursive procedure and it returns true only if there are no disabled
-     *  cells in \a pCurrentNode that intersect with theBox.
+     *  cells in \a pCurrentNode that intersect with theBoxType.
      */
     static Kleenean superset( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
-                             const Nat theHeight, BinaryWord &theWord, const ExactBox& theBox );
+                             const Nat theHeight, BinaryWord &theWord, const ExactBoxType& theBoxType );
 
     /*! \brief This method checks whether the set defined by \a pCurrentNode is a subset
-     *  of \a theBox. The set of \a pCurrentNode is defined by \a theGrid, the primary
+     *  of \a theBoxType. The set of \a pCurrentNode is defined by \a theGrid, the primary
      *  cell (\a theHeight) to which this tree is (virtually) rooted via the path theWord.
      *  This is a recursive procedure and it returns true only if all enabled sub-cells of
-     *  \a pCurrentNode are sub-sets of \a theBox.
+     *  \a pCurrentNode are sub-sets of \a theBoxType.
      */
     static Kleenean subset( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
-                           const Nat theHeight, BinaryWord &theWord, const ExactBox& theBox );
+                           const Nat theHeight, BinaryWord &theWord, const ExactBoxType& theBoxType );
 
-    /*! \brief This method checks whether \a theBox is disjoint from the set defined by
+    /*! \brief This method checks whether \a theBoxType is disjoint from the set defined by
      *  \a pCurrentNode, \a theGrid, the primary cell (\a theHeight) to which this
      *  tree is (virtually) rooted via the path theWord. This is done using the recursive
      *  procedure by checking the cells of the tree that intersect with the box and going
@@ -440,9 +440,9 @@ class GridTreeSubset
      *  and the sets are disjoint.
      */
     static Kleenean disjoint( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
-                             const Nat theHeight, BinaryWord &theWord, const ExactBox& theBox );
+                             const Nat theHeight, BinaryWord &theWord, const ExactBoxType& theBoxType );
 
-    /*! \brief This method checks whether \a theBox overlaps the set defined by
+    /*! \brief This method checks whether \a theBoxType overlaps the set defined by
      *  \a pCurrentNode, \a theGrid, the primary cell (\a theHeight) to which this
      *  tree is (virtually) rooted via the path theWord. This is done using the recursive
      *  procedure by checking the cells of the tree that overlap the box and going
@@ -452,7 +452,7 @@ class GridTreeSubset
      *  are disjoint, and overlaps tests if the interiors are not disjoint.
      */
     static Kleenean intersects( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
-                               const Nat theHeight, BinaryWord &theWord, const ExactBox& theBox );
+                               const Nat theHeight, BinaryWord &theWord, const ExactBoxType& theBoxType );
 
     /*! Allow to convert the number of subdivisions in each dimension, i.e. \a numSubdivInDim,
      *  starting from the zero cell into the number of subdivisions that have to be done in a
@@ -532,7 +532,7 @@ class GridTreeSubset
     GridCell cell() const { return this->root_cell(); };
 
     /*! \brief Computes a bounding box for a grid set. */
-    UpperBox bounding_box() const;
+    UpperBoxType bounding_box() const;
 
     /*! \brief Allows to test if the two subpavings are "equal". The method returns true if
      * the grida are equal and the binary trees are equal. Note that, only in case both
@@ -612,28 +612,28 @@ class GridTreeSubset
     virtual Bool intersects(const SubPavingInterface&) const;
 
     /*! \brief Tests if a grid set is a subset of a box. */
-    Bool subset( const ExactBox& theBox ) const;
+    Bool subset( const ExactBoxType& theBoxType ) const;
 
     /*! \brief Tests if a grid set is a superset of a box. */
-    Bool superset( const ExactBox& theBox ) const;
+    Bool superset( const ExactBoxType& theBoxType ) const;
 
     /*! \brief Tests if a grid set intersects (the interior) of a box. */
-    Bool intersects( const ExactBox& theBox ) const;
+    Bool intersects( const ExactBoxType& theBoxType ) const;
 
     /*! \brief Tests if a grid set is disjoint from (the interior of) box. */
-    Bool disjoint( const ExactBox& theBox ) const;
+    Bool disjoint( const ExactBoxType& theBoxType ) const;
 
     /*! \brief Tests if the interior of a grid set is a superset of a box. */
-    Sierpinski covers( const ExactBox& theBox ) const;
+    Sierpinski covers( const ExactBoxType& theBoxType ) const;
 
     /*! \brief Tests if (the closure of) a grid set is a subset of the interior of box. */
-    Sierpinski inside( const ExactBox& theBox  ) const;
+    Sierpinski inside( const ExactBoxType& theBoxType  ) const;
 
     /*! \brief Tests if (the closure of) a grid set is disjoint from (the closure of) a box. */
-    Sierpinski separated( const ExactBox& theBox  ) const;
+    Sierpinski separated( const ExactBoxType& theBoxType  ) const;
 
     /*! \brief Tests if a grid set overlaps (intersects the interior of) a box. */
-    Sierpinski overlaps( const ExactBox& theBox ) const;
+    Sierpinski overlaps( const ExactBoxType& theBoxType ) const;
 
     //@}
 
@@ -655,7 +655,7 @@ class GridTreeSubset
     GridTreeSubset& operator=( const GridTreeSubset &otherSubset);
 
     /*! \brief Convert to a list of ordinary boxes, unrelated to the grid. */
-    operator ListSet<ExactBox>() const;
+    operator ListSet<ExactBoxType>() const;
 
     //@}
 
@@ -817,15 +817,15 @@ class GridTreeSet
      */
     explicit GridTreeSet( const Nat theDimension, const Bool enable = false );
 
-    /*! \brief Construct an empty tree. The \a theBoundingBox is used to define the lattice
+    /*! \brief Construct an empty tree. The \a theBoundingBoxType is used to define the lattice
      *  block (in theGrid) that will correspond to the root of the paving tree \a pRootTreeNode.
      */
     explicit GridTreeSet( const Grid& theGrid, const Bool enable = false  );
 
-    /*! \brief Construct an empty tree. The \a theLatticeBox is used to define the lattice
+    /*! \brief Construct an empty tree. The \a theLatticeBoxType is used to define the lattice
      *  block (in theGrid) that will correspond to the root of the paving tree \a pRootTreeNode.
      */
-    explicit GridTreeSet( const Grid& theGrid, const ExactBox & theLatticeBox );
+    explicit GridTreeSet( const Grid& theGrid, const ExactBoxType & theLatticeBoxType );
 
     /*! \brief Construct the paving based on the block's coordinates, defined by: \a theLeftLowerPoint
      *  and \a theRightUpperPoint. These are the coordinates in the lattice defined by theGrid.
@@ -898,12 +898,12 @@ class GridTreeSet
     /*! \brief Restrict to cells rooted to the primary cell with the height (at most) \a theHeight. */
     Void restrict_to_height( const Nat theHeight );
 
-    /*! /brief Creates an over approximation for the \a theBox on \a theGrid. \a theBox
+    /*! /brief Creates an over approximation for the \a theBoxType on \a theGrid. \a theBoxType
      * is in the original space coordinates. We compute the over approximation as the
-     * smallest primary cell on the Grid, such that it contains \a theBox (after it's
+     * smallest primary cell on the Grid, such that it contains \a theBoxType (after it's
      * mapping on \a theGrid )
      */
-    GridCell smallest_enclosing_primary_cell(const UpperBox& theBox) const;
+    GridCell smallest_enclosing_primary_cell(const UpperBoxType& theBoxType) const;
     //@}
 
     //@{
@@ -930,7 +930,7 @@ class GridTreeSet
      *   the zero cell we should make to get the proper cells for outer approximating \a theSet.
      *   \pre The box must have nonempty interior.
      */
-    Void adjoin_over_approximation( const ExactBox& theBox, const Nat numSubdivInDim );
+    Void adjoin_over_approximation( const ExactBoxType& theBoxType, const Nat numSubdivInDim );
 
     /*! \brief Adjoin an outer approximation to a given set, computing to the given depth.
      *  This method computes an outer approximation for the set \a theSet on the grid \a theGrid.
@@ -943,7 +943,7 @@ class GridTreeSet
      * 5. Disables the cells that are disjoint with the \a theSet
      */
     Void adjoin_outer_approximation( const CompactSetInterface& theSet, const Nat numSubdivInDim );
-    Void adjoin_outer_approximation( const UpperBox& theBox, const Nat numSubdivInDim );
+    Void adjoin_outer_approximation( const UpperBoxType& theBoxType, const Nat numSubdivInDim );
 
     /*! \brief Adjoin a lower approximation to a given set, computing to the given height and depth:
      *   \a numSubdivInDim -- defines, how many subdivisions in each dimension from the level of the
@@ -957,7 +957,7 @@ class GridTreeSet
      *   dimension from the level of the zero cell we should make to get the proper cells for outer
      *   approximating \a theSet. A lower approximation comprises all cells intersecting a given set.
      */
-    Void adjoin_lower_approximation( const OvertSetInterface& theSet, const ExactBox& bounding_box, const Nat numSubdivInDim );
+    Void adjoin_lower_approximation( const OvertSetInterface& theSet, const ExactBoxType& bounding_box, const Nat numSubdivInDim );
 
     /*! \brief Adjoin a lower approximation to a given set, computing to the given depth
      *   \a numSubdivInDim -- defines, how many subdivisions in each dimension from the level of the
@@ -979,9 +979,9 @@ class GridTreeSet
      *   approximating \a theSet. An inner approximation comprises all cells that are sub-cells of
      *   the given set.
      */
-    Void adjoin_inner_approximation( const OpenSetInterface& theSet, const ExactBox& bounding_box, const Nat numSubdivInDim );
+    Void adjoin_inner_approximation( const OpenSetInterface& theSet, const ExactBoxType& bounding_box, const Nat numSubdivInDim );
 
-    Void adjoin_inner_approximation( const LowerBox& theBox, const Nat numSubdivInDim );
+    Void adjoin_inner_approximation( const LowerBoxType& theBoxType, const Nat numSubdivInDim );
     //@}
 
     //@{
@@ -1694,14 +1694,14 @@ inline Void GridTreeSubset::set_root_cell(Bool enabled_or_disabled)  {
     this->_pRootTreeNode->set(enabled_or_disabled);
 }
 
-inline UpperBox GridTreeSubset::bounding_box() const {
-    if(this->is_empty()) return ExactBox(this->dimension());
+inline UpperBoxType GridTreeSubset::bounding_box() const {
+    if(this->is_empty()) return ExactBoxType(this->dimension());
 
     GridTreeSet::ConstIterator iter=this->begin();
-    UpperBox bbox = iter->box();
+    UpperBoxType bbox = iter->box();
 
     for( ; iter!=this->end(); ++iter) {
-        UpperBox cell = iter->box();
+        UpperBoxType cell = iter->box();
         for(Nat i = 0; i < cell.dimension(); ++i) {
             if(cell[i].lower().raw() < bbox[i].lower().raw()) bbox[i].set_lower(cell[i].lower());
             if(cell[i].upper().raw() > bbox[i].upper().raw()) bbox[i].set_upper(cell[i].upper());
@@ -1793,10 +1793,10 @@ inline Bool GridTreeSubset::intersects(const SubPavingInterface& paving) const {
 
 /*********************************************GridTreeSet*********************************************/
 
-inline GridCell GridTreeSet::smallest_enclosing_primary_cell( const UpperBox& theBox ) const {
-    ARIADNE_ASSERT_MSG( this->dimension() == theBox.dimension(), "Cannot find enclosing cell for ExactBox  " << theBox << " for GridTreeSet with grid " << this->grid() );
+inline GridCell GridTreeSet::smallest_enclosing_primary_cell( const UpperBoxType& theBoxType ) const {
+    ARIADNE_ASSERT_MSG( this->dimension() == theBoxType.dimension(), "Cannot find enclosing cell for ExactBoxType  " << theBoxType << " for GridTreeSet with grid " << this->grid() );
 
-    return GridCell::smallest_enclosing_primary_cell( theBox, this->grid() );
+    return GridCell::smallest_enclosing_primary_cell( theBoxType, this->grid() );
 }
 
 inline Void GridTreeSet::adjoin( const GridCell& theCell ) {
@@ -1846,7 +1846,7 @@ inline OutputStream& operator<<(OutputStream& os, const GridOpenCell& theGridOpe
     return os << "GridOpenCell( " << theGridOpenCell.grid() <<
         ", Primary cell height: " << theGridOpenCell.height() <<
         ", Base cell path: " << theGridOpenCell.word() <<
-        ", ExactBox (closure): " << theGridOpenCell.box() << " )";
+        ", ExactBoxType (closure): " << theGridOpenCell.box() << " )";
 }
 
 /****************************************FRIENDS OF GridCell*******************************************/
@@ -1857,7 +1857,7 @@ inline OutputStream& operator<<(OutputStream& os, const GridCell& gridPavingCell
     return os << "GridCell( " << gridPavingCell.grid() <<
         ", Primary cell height: " << gridPavingCell.height() <<
         ", Path to the root: " << gridPavingCell.word() <<
-        ", ExactBox: " << gridPavingCell.box() << " )";
+        ", ExactBoxType: " << gridPavingCell.box() << " )";
 }
 
 

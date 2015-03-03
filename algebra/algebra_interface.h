@@ -48,21 +48,21 @@ template<class X> struct AlgebraTraits;
 
 template<> struct AlgebraTraits<ApproximateFloat64> {
     typedef ApproximateFloat64 ValueType;
-    typedef ApproximateInterval RangeType;
+    typedef ApproximateIntervalType RangeType;
     typedef ApproximateFloat64 NormType;
     typedef ApproximateNumericType NumericType;
 };
 
 template<> struct AlgebraTraits<ValidatedFloat64> {
     typedef ExactFloat64 ValueType;
-    typedef UpperInterval RangeType;
+    typedef UpperIntervalType RangeType;
     typedef ErrorFloat64 NormType;
     typedef ValidatedNumericType NumericType;
 };
 
 template<> struct AlgebraTraits<Real> {
     typedef ExactFloat64 ValueType;
-    typedef UpperInterval RangeType;
+    typedef UpperIntervalType RangeType;
     typedef ErrorFloat64 NormType;
     typedef Real NumericType;
 };

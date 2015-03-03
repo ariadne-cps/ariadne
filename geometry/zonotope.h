@@ -101,11 +101,11 @@ class Zonotope
     /*! \brief Construct from centre and generators. */
     explicit Zonotope(const Vector<Float64>& c, const Matrix<Float64>& G);
     /*! \brief Construct from interval centre and a generator matrix. */
-    explicit Zonotope(const Vector<ExactInterval>& c, const Matrix<Float64>& G);
+    explicit Zonotope(const Vector<ExactIntervalType>& c, const Matrix<Float64>& G);
     /*! \brief Construct from centre and an interval generator matrix. */
-    explicit Zonotope(const Vector<Float64>& c, const Matrix<ExactInterval>& G);
+    explicit Zonotope(const Vector<Float64>& c, const Matrix<ExactIntervalType>& G);
     /*! \brief Construct from an interval centre and an interval generator matrix. */
-    explicit Zonotope(const Vector<ExactInterval>& c, const Matrix<ExactInterval>& G);
+    explicit Zonotope(const Vector<ExactIntervalType>& c, const Matrix<ExactIntervalType>& G);
 
 
     /*! \brief Construct a zonotope of dimension \a d with centre at the origin and \a m generators from the data beginning at \a ptr. */
@@ -118,7 +118,7 @@ class Zonotope
 
 
     /*! \brief Convert from a box. */
-    Zonotope(const ExactBox& r);
+    Zonotope(const ExactBoxType& r);
     /*! \brief Copy constructor. */
     Zonotope(const Zonotope& z);
     /*! \brief Copy assignment operator. */
@@ -143,7 +143,7 @@ class Zonotope
     Nat number_of_generators() const;
 
     /*! \brief The domain. */
-    Vector<ExactInterval> domain() const;
+    Vector<ExactIntervalType> domain() const;
 
     /*! \brief The centre. */
     const Vector<Float64>& centre() const;
@@ -155,7 +155,7 @@ class Zonotope
     const Vector<Float64>& error() const;
 
     /*! \brief A bounding box for the set. */
-    UpperBox bounding_box() const;
+    UpperBoxType bounding_box() const;
 
     /*! \brief The radius of the set in the supremum norm. */
     Float64 radius() const;
@@ -164,9 +164,9 @@ class Zonotope
     Kleenean contains(const ExactPoint& pt) const;
 
     /*! \brief Test if the set is disjoint from a box. */
-    Kleenean separated(const ExactBox& bx) const;
+    Kleenean separated(const ExactBoxType& bx) const;
     /*! \brief Test if the set is a inside of a box. */
-    Kleenean inside(const ExactBox& bx) const;
+    Kleenean inside(const ExactBoxType& bx) const;
 
     //@}
 
@@ -174,13 +174,13 @@ class Zonotope
     //@{
     //! \name Geometric binary predicates
     /*! \brief Tests disjointness of \a z and \a r. */
-    friend Kleenean separated(const Zonotope& z, const ExactBox& r);
+    friend Kleenean separated(const Zonotope& z, const ExactBoxType& r);
     /*! \brief Tests if \a z and \a r intersect. */
-    friend Kleenean overlaps(const Zonotope& z, const ExactBox& r);
+    friend Kleenean overlaps(const Zonotope& z, const ExactBoxType& r);
     /*! \brief Tests inclusion of \a z in \a r. */
-    friend Kleenean inside(const Zonotope& z, const ExactBox& r);
+    friend Kleenean inside(const Zonotope& z, const ExactBoxType& r);
     /*! \brief Tests disjointness of \a r and \a z. */
-    friend Kleenean separated(const ExactBox& r, const Zonotope& z);
+    friend Kleenean separated(const ExactBoxType& r, const Zonotope& z);
     //@}
 
     //@{
@@ -202,7 +202,7 @@ class Zonotope
     //@{
     //! \name Function operations.
     /*! \brief Compute the image of \a z under a function given by the affine form \a af. */
-    friend Zonotope apply(const Vector<Affine<ExactInterval>>& af, const Zonotope& z);
+    friend Zonotope apply(const Vector<Affine<ExactIntervalType>>& af, const Zonotope& z);
     friend Zonotope apply(const VectorFunction<ValidatedTag>& f, const Zonotope& z);
     //@}
 
@@ -219,13 +219,13 @@ class Zonotope
 Kleenean empty(const Zonotope& z);
 Kleenean is_bounded(const Zonotope& z);
 Float64 radius(const Zonotope& z);
-ExactBox bounding_box(const Zonotope& z);
+ExactBoxType bounding_box(const Zonotope& z);
 
 
 Kleenean contains(const Zonotope& z, const ExactPoint& pt);
-Kleenean separated(const Zonotope& z, const ExactBox& r);
-Kleenean overlaps(const Zonotope& z, const ExactBox& r);
-Kleenean inside(const Zonotope& z, const ExactBox& r);
+Kleenean separated(const Zonotope& z, const ExactBoxType& r);
+Kleenean overlaps(const Zonotope& z, const ExactBoxType& r);
+Kleenean inside(const Zonotope& z, const ExactBoxType& r);
 
 Kleenean separated(const Zonotope& z1, const Zonotope& z2);
 
@@ -239,7 +239,7 @@ Zonotope nonsingular_over_approximation(const Zonotope&);
 Zonotope cascade_over_approximation(const Zonotope& z, Nat b);
 Zonotope orthogonal_approximation(const Zonotope& z);
 
-Zonotope apply(const Affine<ExactInterval>& af, const Zonotope& z);
+Zonotope apply(const Affine<ExactIntervalType>& af, const Zonotope& z);
 Zonotope apply(const VectorFunction<ValidatedTag>& f, const Zonotope& z);
 
 OutputStream& operator<<(OutputStream& os, const Zonotope& z);

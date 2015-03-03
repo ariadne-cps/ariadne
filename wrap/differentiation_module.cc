@@ -25,7 +25,7 @@
 
 namespace Ariadne {
 class Float64;
-class ExactInterval;
+class ExactIntervalType;
 template<class X> class DenseDifferential;
 template<class X> class SparseDifferential;
 template<class DIFF> class DifferentialVector;
@@ -39,12 +39,12 @@ using namespace Ariadne;
 BOOST_PYTHON_MODULE(differentiation)
 {
     export_differential< DenseDifferential<Float64> >();
-    export_differential< DenseDifferential<ExactInterval> >();
+    export_differential< DenseDifferential<ExactIntervalType> >();
     export_differential< SparseDifferential<Float64> >();
-    export_differential< SparseDifferential<ExactInterval> >();
+    export_differential< SparseDifferential<ExactIntervalType> >();
 
     export_differential_vector< DenseDifferential<Float64> >();
-    export_differential_vector< DenseDifferential<ExactInterval> >();
+    export_differential_vector< DenseDifferential<ExactIntervalType> >();
     export_differential_vector< SparseDifferential<Float64> >();
-    export_differential_vector< SparseDifferential<ExactInterval> >();
+    export_differential_vector< SparseDifferential<ExactIntervalType> >();
 }

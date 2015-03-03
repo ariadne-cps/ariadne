@@ -163,7 +163,7 @@ Void TestHybridEvolver::test_flow() const {
     MonolithicHybridAutomaton automaton;
     automaton.new_mode(q,{c,c/2});
     RealSpace space=automaton.continuous_state_space(q);
-    HybridBox initial(q,space,ExactBox{{-0.125,0.125},{-0.125,0.125}});
+    HybridBoxType initial(q,space,ExactBoxType{{-0.125,0.125},{-0.125,0.125}});
     HybridTime time(2.5,3);
 
     _set_evolver(automaton);
@@ -189,7 +189,7 @@ Void TestHybridEvolver::test_exact_final_time() const {
     automaton.new_mode(q,{c,c/2});
     RealSpace space=automaton.continuous_state_space(q);
 
-    HybridBox initial(q,space,ExactBox{{-0.125,0.125},{-0.125,0.125}});
+    HybridBoxType initial(q,space,ExactBoxType{{-0.125,0.125},{-0.125,0.125}});
     HybridTime time(2.0,1);
 
     _set_evolver(automaton);
@@ -218,7 +218,7 @@ Void TestHybridEvolver::test_maximum_steps() const {
     // FIXME: Change so that hitting coordinate guard is not an error.
 
     RealSpace space=automaton.continuous_state_space(q);
-    HybridBox initial(q,space,ExactBox{{-0.125,0.125},{-0.125,0.125}});
+    HybridBoxType initial(q,space,ExactBoxType{{-0.125,0.125},{-0.125,0.125}});
     HybridTime time(1.0,1);
 
     _set_evolver(automaton);
@@ -249,7 +249,7 @@ Void TestHybridEvolver::test_urgent_event() const {
     // FIXME: Change so that hitting coordinate guard is not an error.
 
     RealSpace space=automaton.continuous_state_space(q);
-    HybridBox initial(q,space,ExactBox{{-0.125,0.125},{-0.125,0.125}});
+    HybridBoxType initial(q,space,ExactBoxType{{-0.125,0.125},{-0.125,0.125}});
     HybridTime time(1.0,2);
 
     _set_evolver(automaton);
@@ -278,7 +278,7 @@ Void TestHybridEvolver::test_empty_interior() const {
     automaton.new_transition(q,e,q,{x0-2,x1},x0-1,urgent);
 
     RealSpace space=automaton.continuous_state_space(q);
-    HybridBox initial(q,space,ExactBox{{-0.125,0.25},{-0.125,0.125}});
+    HybridBoxType initial(q,space,ExactBoxType{{-0.125,0.25},{-0.125,0.125}});
     HybridTime time(2.0,3);
 
     _set_evolver(automaton);
@@ -290,7 +290,7 @@ Void TestHybridEvolver::test_empty_interior() const {
     ARIADNE_TEST_CHECK_WARN(orbit.reach().size(),2u);
 
     plot(cstr("test_hybrid_evolver-"+evolver_name+"-empty_interior"),Axes2d(-1.5,space[0],+2.5, -1.0,space[1],+3.0),
-         //guard_set_colour,ExactBox(2,1.0,8.0,-8.0,+8.0),
+         //guard_set_colour,ExactBoxType(2,1.0,8.0,-8.0,+8.0),
          reach_set_colour,orbit.reach(),
          intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(),
@@ -306,7 +306,7 @@ Void TestHybridEvolver::test_partial_event() const {
     //FIXME: Need to allow domain of TaylorFunction to have empty interior
 
     RealSpace space=automaton.continuous_state_space(q);
-    HybridBox initial(q,space,ExactBox{{-0.125,0.25},{-0.125,0.125}});
+    HybridBoxType initial(q,space,ExactBoxType{{-0.125,0.25},{-0.125,0.125}});
     HybridTime time(2.0,3);
 
     _set_evolver(automaton);
@@ -336,7 +336,7 @@ Void TestHybridEvolver::test_step_size_event() const {
     automaton.new_transition(q,e,q,{x0-2,x1},x0-2,urgent);
 
     RealSpace space=automaton.continuous_state_space(q);
-    HybridBox initial(q,space,ExactBox{{-0.125,0.125},{-0.125,0.125}});
+    HybridBoxType initial(q,space,ExactBoxType{{-0.125,0.125},{-0.125,0.125}});
     HybridTime time(1.0,3);
 
     _set_evolver(automaton);
@@ -348,7 +348,7 @@ Void TestHybridEvolver::test_step_size_event() const {
     ARIADNE_TEST_CHECK_WARN(orbit.reach().size(),1u);
 
     plot(cstr("test_hybrid_evolver-"+evolver_name+"-step_size_event"),Axes2d(-0.5,v0,+2.5, -1.0,v1,+3.0),
-         //guard_set_colour,ExactBox(2,2.0,8.0,-8.0,+8.0),
+         //guard_set_colour,ExactBoxType(2,2.0,8.0,-8.0,+8.0),
          reach_set_colour,orbit.reach(),
          intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(),
@@ -362,7 +362,7 @@ Void TestHybridEvolver::test_initially_active_event() const {
     automaton.new_transition(q,e,q,{x0+1,x1},-x0,urgent);
 
     RealSpace space=automaton.continuous_state_space(q);
-    HybridBox initial(q,space,ExactBox{{-1.625,-1.375},{-0.125,0.125}});
+    HybridBoxType initial(q,space,ExactBoxType{{-1.625,-1.375},{-0.125,0.125}});
     HybridTime time(1.0,4);
 
     _set_evolver(automaton);
@@ -375,7 +375,7 @@ Void TestHybridEvolver::test_initially_active_event() const {
     ARIADNE_TEST_CHECK_WARN(orbit.reach().size(),3u);
 
     plot(cstr("test_hybrid_evolver-"+evolver_name+"-initially_active"),Axes2d(-2.0,v0,+2.0, -1.0,v1,+2.0),
-         //guard_set_colour,ExactBox(2,-8.0,0.0,-8.0,+8.0),
+         //guard_set_colour,ExactBoxType(2,-8.0,0.0,-8.0,+8.0),
          reach_set_colour,orbit.reach(),
          intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(),
@@ -390,7 +390,7 @@ Void TestHybridEvolver::test_initially_active_attracting_event() const {
     automaton.new_transition(q,e,q,{x0+1,x1},-x0-x1/256,urgent);
 
     RealSpace space=automaton.continuous_state_space(q);
-    HybridBox initial(q,space,ExactBox{{-0.125,0.25},{-0.125,0.125}});
+    HybridBoxType initial(q,space,ExactBoxType{{-0.125,0.25},{-0.125,0.125}});
     HybridTime time(1.0,4);
 
     _set_evolver(automaton);
@@ -399,7 +399,7 @@ Void TestHybridEvolver::test_initially_active_attracting_event() const {
     Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(initial,time,UPPER_SEMANTICS);
 
     plot(cstr("test_hybrid_evolver-"+evolver_name+"-initially_active_attracting"),Axes2d(-1.0,v0,+2.0, -1.0,v1,+2.0),
-         //guard_set_colour,ExactBox(2,-1.0,0.0,-8.0,+8.0),
+         //guard_set_colour,ExactBoxType(2,-1.0,0.0,-8.0,+8.0),
          reach_set_colour,orbit.reach(),
          intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(),
@@ -414,7 +414,7 @@ Void TestHybridEvolver::test_initially_active_repelling_event() const {
     automaton.new_transition(q,e,q,{x0+1,x1},-x0,urgent);
 
     RealSpace space=automaton.continuous_state_space(q);
-    HybridBox initial(q,space,ExactBox{{-0.125,0.25},{-0.125,0.125}});
+    HybridBoxType initial(q,space,ExactBoxType{{-0.125,0.25},{-0.125,0.125}});
     HybridTime time(1.0,2);
 
     _set_evolver(automaton);
@@ -422,7 +422,7 @@ Void TestHybridEvolver::test_initially_active_repelling_event() const {
     Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(initial,time,UPPER_SEMANTICS);
 
     plot(cstr("test_hybrid_evolver-"+evolver_name+"-initially_active_repelling"),Axes2d(-1.0,v0,+2.0, -1.0,v1,+2.0),
-         guard_set_colour,HybridBox(q,space,ExactBox{{-1.0,0.0},{-8.0,+8.0}}),
+         guard_set_colour,HybridBoxType(q,space,ExactBoxType{{-1.0,0.0},{-8.0,+8.0}}),
          reach_set_colour,orbit.reach(),
          intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(),
@@ -438,7 +438,7 @@ Void TestHybridEvolver::test_impact() const {
     //automaton.new_transition(q,e,q,(x0+0.001*x1-0.0004,x1-2),x0-1,urgent);
 
     RealSpace space=automaton.continuous_state_space(q);
-    HybridBox initial(q,space,ExactBox{{0.4375,0.5625},{0.9375,1.0625}});
+    HybridBoxType initial(q,space,ExactBoxType{{0.4375,0.5625},{0.9375,1.0625}});
     HybridTime time(2.0,3);
 
     _set_evolver(automaton);
@@ -448,7 +448,7 @@ Void TestHybridEvolver::test_impact() const {
     //ARIADNE_TEST_CHECK(orbit.final().size(),2u);
 
     plot(cstr("test_hybrid_evolver-"+evolver_name+"-impact"),Axes2d(-3.0,v0,+2.0, -4.0,v1,+2.0),
-         //guard_set_colour,ExactBox(2,1.0,8.0,-8.0,+8.0),
+         //guard_set_colour,ExactBoxType(2,1.0,8.0,-8.0,+8.0),
          reach_set_colour,orbit.reach(),
          intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(),
@@ -461,7 +461,7 @@ Void TestHybridEvolver::test_tangency() const {
     automaton.new_transition(q,e,q,{x0,x1-1},x1-sqr(x0),urgent);
 
     RealSpace space=automaton.continuous_state_space(q);
-    HybridBox initial(q,space,ExactBox{{-1.125,-0.875},{-0.25,0.25}});
+    HybridBoxType initial(q,space,ExactBoxType{{-1.125,-0.875},{-0.25,0.25}});
     HybridTime time(2.0,3);
 
     _set_evolver(automaton);
@@ -493,7 +493,7 @@ Void TestHybridEvolver::test_simultaneous_events() const {
     automaton.new_transition(q,e2,q,{x0-2,x1-1},x1-1,urgent);
 
     RealSpace space=automaton.continuous_state_space(q);
-    HybridBox initial(q,space,ExactBox{{-0.25,0.125},{-0.125,0.25}});
+    HybridBoxType initial(q,space,ExactBoxType{{-0.25,0.125},{-0.125,0.25}});
     HybridTime time(2.5,4);
 
     _set_evolver(automaton);
@@ -503,8 +503,8 @@ Void TestHybridEvolver::test_simultaneous_events() const {
     ARIADNE_TEST_CHECK_WARN(orbit.final().size(),2u);
 
     plot(cstr("test_hybrid_evolver-"+evolver_name+"-simultaneous_events"),Axes2d(-3.0,v0,+2.0, -3.0,v1,+2.0),
-         //guard_set_colour,ExactBox(2,1.0,8.0,-8.0,+8.0),
-         //guard_set_colour,ExactBox(2,-8.0,+8.0,1.0,8.0),
+         //guard_set_colour,ExactBoxType(2,1.0,8.0,-8.0,+8.0),
+         //guard_set_colour,ExactBoxType(2,-8.0,+8.0,1.0,8.0),
          reach_set_colour,orbit.reach(),
          intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(),
@@ -519,7 +519,7 @@ Void TestHybridEvolver::test_creep() const {
     automaton.new_transition(q,e,q,{x0-1,x1},x0-1,urgent);
 
     RealSpace space=automaton.continuous_state_space(q);
-    HybridBox initial(q,space,ExactBox{{-0.25,0.125},{-0.125,0.25}});
+    HybridBoxType initial(q,space,ExactBoxType{{-0.25,0.125},{-0.125,0.25}});
     HybridTime time(1.5,4);
 
     _set_evolver(automaton);
@@ -531,10 +531,10 @@ Void TestHybridEvolver::test_creep() const {
     ARIADNE_TEST_PRINT(HybridEnclosure(*orbit.final().begin()).bounding_box());
     ARIADNE_TEST_CHECK_WARN(orbit.final().size(),1u);
     ARIADNE_TEST_CHECK_WARN(orbit.reach().size(),3u);
-    ARIADNE_TEST_BINARY_PREDICATE(inside,HybridEnclosure(*orbit.final().begin()),HybridBox(q,space,ExactBox{{0.24,0.635},{1.365,1.76}}));
+    ARIADNE_TEST_BINARY_PREDICATE(inside,HybridEnclosure(*orbit.final().begin()),HybridBoxType(q,space,ExactBoxType{{0.24,0.635},{1.365,1.76}}));
 
     plot(cstr("test_hybrid_evolver-"+evolver_name+"-creep"),Axes2d(-1.5,v0,+1.5, -0.5,v1,+3.5),
-         //guard_set_colour,ExactBox(2,1.0,8.0,-8.0,+8.0),
+         //guard_set_colour,ExactBoxType(2,1.0,8.0,-8.0,+8.0),
          reach_set_colour,orbit.reach(),
          intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(),
@@ -548,7 +548,7 @@ Void TestHybridEvolver::test_unwind() const {
     automaton.new_transition(q,e,q,{x0-3,x1-1},x0-x1/16-1,urgent);
 
     RealSpace space=automaton.continuous_state_space(q);
-    HybridBox initial(q,space,ExactBox{{-0.25,0.125},{-0.125,0.25}});
+    HybridBoxType initial(q,space,ExactBoxType{{-0.25,0.125},{-0.125,0.25}});
     HybridTime time(3.0,4);
 
     _set_evolver(automaton);
@@ -577,7 +577,7 @@ Void TestHybridEvolver::test_permissive() const {
     ARIADNE_TEST_PRINT(automaton);
 
     RealSpace space=automaton.continuous_state_space(q);
-    HybridBox initial(q,space,ExactBox{{-0.125,0.125},{-0.125,0.125}});
+    HybridBoxType initial(q,space,ExactBoxType{{-0.125,0.125},{-0.125,0.125}});
     HybridTime time(3.0,4);
 
     _set_evolver(automaton);
@@ -587,7 +587,7 @@ Void TestHybridEvolver::test_permissive() const {
     ARIADNE_TEST_PRINT(orbit);
     ARIADNE_TEST_CHECK_WARN(orbit.final().size(),1u);
 
-    HybridBox guard_set(q,space,ExactBox{{2-0.125,2+0.125},{-0.5,+2.5}});
+    HybridBoxType guard_set(q,space,ExactBoxType{{2-0.125,2+0.125},{-0.5,+2.5}});
     Axes2d axes(-4.5,v0,+2.5, -0.5,v1,+2.5);
     plot(cstr("test_hybrid_evolver-"+evolver_name+"-permissive"),axes,
          guard_set_colour,guard_set,

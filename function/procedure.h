@@ -351,17 +351,17 @@ namespace Ariadne {
 // NOTE: Ordering of r and x is important, since nan elements of r are preserved,
 // but nan elements of x do not affect r
 inline
-Void restrict(UpperInterval& r, const UpperInterval& x) {
+Void restrict(UpperIntervalType& r, const UpperIntervalType& x) {
     r.set_lower(max(r.lower(),x.lower()));
     r.set_upper(min(r.upper(),x.upper()));
 };
 
 template<class X>
-Void simple_hull_reduce(UpperBox& dom, const Procedure<X>& f, ExactInterval codom)
+Void simple_hull_reduce(UpperBoxType& dom, const Procedure<X>& f, ExactIntervalType codom)
 {
     const List<ProcedureInstruction>& p=f._instructions;
     const List<X>& c=f._constants;
-    List<UpperInterval> v; v.reserve(p.size());
+    List<UpperIntervalType> v; v.reserve(p.size());
 
     _execute(v,p,c,dom);
     restrict(v.back(),codom);
@@ -369,11 +369,11 @@ Void simple_hull_reduce(UpperBox& dom, const Procedure<X>& f, ExactInterval codo
 }
 
 template<class X>
-Void simple_hull_reduce(UpperBox& dom, const Vector< Procedure<X> >& f, ExactBox codom)
+Void simple_hull_reduce(UpperBoxType& dom, const Vector< Procedure<X> >& f, ExactBoxType codom)
 {
     const List<ProcedureInstruction>& p=f._instructions;
     const List<X>& c=f._constants;
-    List<UpperInterval> v; v.reserve(p.size());
+    List<UpperIntervalType> v; v.reserve(p.size());
 
     ARIADNE_ASSERT(codom.size()==f._results.size());
 

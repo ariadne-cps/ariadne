@@ -123,7 +123,7 @@ template<class P>
 struct CoordinateFunction
     : ScalarFunctionMixin<CoordinateFunction<P>,P>
 {
-    typedef CanonicalNumericTypeType<P> X;
+    typedef CanonicalNumericType<P> X;
 
     SizeType _argument_size;
     SizeType _index;
@@ -147,7 +147,7 @@ template<class P>
 struct UnaryFunction
     : ScalarFunctionMixin< UnaryFunction<P>, P >
 {
-    typedef CanonicalNumericTypeType<P> X;
+    typedef CanonicalNumericType<P> X;
   public:
     UnaryFunction(const OperatorCode& op, const ScalarFunction<P>& arg)
         : _op(op), _arg(arg) { }
@@ -200,7 +200,7 @@ template<class P>
 struct BinaryFunction
     : ScalarFunctionMixin< BinaryFunction<P>, P >
 {
-    typedef CanonicalNumericTypeType<P> X;
+    typedef CanonicalNumericType<P> X;
   public:
     BinaryFunction(OperatorCode op, const ScalarFunction<P>& arg1, const ScalarFunction<P>& arg2)
         : _op(op), _arg1(arg1), _arg2(arg2) { ARIADNE_ASSERT_MSG(arg1.argument_size()==arg2.argument_size(),"op='"<<op<<"', arg1="<<arg1<<", arg2="<<arg2); }
@@ -250,7 +250,7 @@ template<class P>
 class PowerFunction
     : public ScalarFunctionMixin< PowerFunction<P>, P >
 {
-    typedef CanonicalNumericTypeType<P> X;
+    typedef CanonicalNumericType<P> X;
   public:
     PowerFunction(OperatorCode op, const ScalarFunction<P>& arg1, const Int& arg2)
         : _op(op), _arg1(arg1), _arg2(arg2) {  }

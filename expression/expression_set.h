@@ -56,8 +56,10 @@ typedef Space<Real> RealSpace;
 
 class RealVariableInterval;
 class RealVariablesBox;
-class VariablesBox;
+class ExactFloat64VariablesBox;
 class ExpressionConstraintSet;
+
+typedef ExactFloat64VariablesBox ExactVariablesBoxType;
 
 Set<Identifier> arguments(const List<ContinuousPredicate>& c);
 
@@ -152,33 +154,33 @@ class RealVariablesBox {
     const RealInterval& operator[](const RealVariable& v) const { return this->_bounds[v]; }
     RealBox box(const RealSpace& spc) const;
     RealBox euclidean_set(const RealSpace& spc) const;
-    friend VariablesBox approximation(const RealVariablesBox& set);
-    friend VariablesBox over_approximation(const RealVariablesBox& vbx);
-    friend VariablesBox under_approximation(const RealVariablesBox& set);
+    friend ExactFloat64VariablesBox approximation(const RealVariablesBox& set);
+    friend ExactFloat64VariablesBox over_approximation(const RealVariablesBox& vbx);
+    friend ExactFloat64VariablesBox under_approximation(const RealVariablesBox& set);
     friend OutputStream& operator<<(OutputStream& os, const RealVariablesBox& ebx);
 };
 
 //! \brief An box defining ranges for a collection of real variables.
-class VariablesBox {
+class ExactFloat64VariablesBox {
     RealSpace _spc;
-    ExactBox _bx;
+    ExactFloat64Box _bx;
   public:
-    VariablesBox() : _spc(), _bx(0) { }
-    VariablesBox(const Map<RealVariable,ExactInterval>& bnds) : _spc(List<RealVariable>(bnds.keys())), _bx(_spc.dimension()) {
+    ExactFloat64VariablesBox() : _spc(), _bx(0) { }
+    ExactFloat64VariablesBox(const Map<RealVariable,ExactFloat64Interval>& bnds) : _spc(List<RealVariable>(bnds.keys())), _bx(_spc.dimension()) {
         for(Nat i=0; i!=this->_bx.dimension(); ++i) { this->_bx[i] = bnds[this->_spc[i]]; } }
-    VariablesBox(const List<RealVariableInterval>& bnds) : _spc(), _bx(bnds.size()) {
+    ExactFloat64VariablesBox(const List<RealVariableInterval>& bnds) : _spc(), _bx(bnds.size()) {
         for(Nat i=0; i!=bnds.size(); ++i) {
-            this->_spc.append(bnds[i].variable()); this->_bx[i]=cast_exact_interval(ApproximateInterval(bnds[i].interval())); } }
-    VariablesBox(const RealSpace& spc, const ExactBox& bx) : _spc(spc), _bx(bx) { ARIADNE_ASSERT(spc.dimension()==bx.dimension()); }
+            this->_spc.append(bnds[i].variable()); this->_bx[i]=cast_exact_interval(ApproximateIntervalType(bnds[i].interval())); } }
+    ExactFloat64VariablesBox(const RealSpace& spc, const ExactFloat64Box& bx) : _spc(spc), _bx(bx) { ARIADNE_ASSERT(spc.dimension()==bx.dimension()); }
     Set<RealVariable> variables() const { return Set<RealVariable>(_spc.variables()); }
     RealSpace const& space() const { return this->_spc; }
-    ExactBox const& continuous_set() const { return this->_bx; }
-    ExactBox const& box() const { return this->_bx; }
-    const ExactInterval& operator[](const RealVariable& v) const { return this->_bx[this->_spc.index(v)]; }
-    ExactBox euclidean_set(const RealSpace& spc) const {
-        ExactBox res(spc.dimension()); for(Nat i=0; i!=res.dimension(); ++i) { res[i]=this->_bx[this->_spc.index(spc[i])]; } return res; }
-    friend OutputStream& operator<<(OutputStream& os, const VariablesBox& ebx) {
-        return os << "VariablesBox( space=" << ebx.space() << ", box=" << ebx.box() << " )"; }
+    ExactFloat64Box const& continuous_set() const { return this->_bx; }
+    ExactFloat64Box const& box() const { return this->_bx; }
+    const ExactFloat64Interval& operator[](const RealVariable& v) const { return this->_bx[this->_spc.index(v)]; }
+    ExactFloat64Box euclidean_set(const RealSpace& spc) const {
+        ExactFloat64Box res(spc.dimension()); for(Nat i=0; i!=res.dimension(); ++i) { res[i]=this->_bx[this->_spc.index(spc[i])]; } return res; }
+    friend OutputStream& operator<<(OutputStream& os, const ExactFloat64VariablesBox& ebx) {
+        return os << "ExactFloat64VariablesBox( space=" << ebx.space() << ", box=" << ebx.box() << " )"; }
 };
 
 

@@ -37,8 +37,8 @@ template<> String class_name<Effective>() { return "Effective"; }
 
 using namespace Ariadne;
 
-typedef ExactInterval IntervalDomain;
-typedef ExactBox BoxDomain;
+typedef ExactIntervalType IntervalDomain;
+typedef ExactBoxType BoxDomain;
 template<class P> using Function = ScalarFunction<P>;
 typedef ScalarFunction<Effective> EffectiveFunction;
 

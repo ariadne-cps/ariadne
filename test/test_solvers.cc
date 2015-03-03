@@ -61,10 +61,10 @@ class TestSolver
 
     Void test_solve() {
         EffectiveScalarFunction x=EffectiveScalarFunction::coordinate(1,0);
-        ExactIntervalVector d({ExactInterval(0.0,1.0)});
+        ExactIntervalVectorType d({ExactIntervalType(0.0,1.0)});
         EffectiveVectorFunction f({(x*x+1)*x-1});
         ValidatedFloatVector p=solver->solve(f,d);
-        ARIADNE_TEST_BINARY_PREDICATE(contains,ExactInterval(0.6823,0.6824),p[0]);
+        ARIADNE_TEST_BINARY_PREDICATE(contains,ExactIntervalType(0.6823,0.6824),p[0]);
     }
 
     Void test_implicit() {
@@ -74,15 +74,15 @@ class TestSolver
         EffectiveScalarFunction a=EffectiveScalarFunction::coordinate(2,0);
         EffectiveScalarFunction x=EffectiveScalarFunction::coordinate(2,1);
         EffectiveScalarFunction bb;
-        ExactIntervalVector p,r;
+        ExactIntervalVectorType p,r;
         EffectiveVectorFunction f;
         ValidatedVectorFunctionModel h;
         EffectiveVectorFunction e;
         ExactFloat64 tol;
 
         // Test solution of x-a=0. This should be very easy to solve.
-        p=ExactIntervalVector({ExactInterval(-0.25,0.25)});
-        r=ExactIntervalVector({ExactInterval(-2.0,2.0)});
+        p=ExactIntervalVectorType({ExactIntervalType(-0.25,0.25)});
+        r=ExactIntervalVectorType({ExactIntervalType(-2.0,2.0)});
         f=EffectiveVectorFunction({x-a});
         ARIADNE_TEST_PRINT(f);
         h=solver->implicit(f,p,r);
@@ -92,8 +92,8 @@ class TestSolver
         ARIADNE_TEST_COMPARE(norm(h-e),<,1e-8);
 
         // Test solution of 4x^2+x-4-a=0 on [0.875,1.125]. There is a unique solution with positive derivative.
-        p=ExactIntervalVector({ExactInterval(0.875,1.125)});
-        r=ExactIntervalVector({ExactInterval(0.25,1.25)});
+        p=ExactIntervalVectorType({ExactIntervalType(0.875,1.125)});
+        r=ExactIntervalVectorType({ExactIntervalType(0.25,1.25)});
         f=EffectiveVectorFunction({(x*x+1)*x-a});
         ARIADNE_TEST_PRINT(f);
         h=solver->implicit(f,p,r);
@@ -105,8 +105,8 @@ class TestSolver
         ARIADNE_TEST_COMPARE(norm(h-e),<,1e-4);
 
         // Test solution of 4x^2+x-4-a=0 on [-0.25,0.25]. There is a unique solution with positive derivative.
-        p=ExactIntervalVector({ExactInterval(-0.25,0.25)});
-        r=ExactIntervalVector({ExactInterval(0.25,2.0)});
+        p=ExactIntervalVectorType({ExactIntervalType(-0.25,0.25)});
+        r=ExactIntervalVectorType({ExactIntervalType(0.25,2.0)});
         f=EffectiveVectorFunction({4*x+x*x-a-4});
         ARIADNE_TEST_PRINT(f);
         h=solver->implicit(f,p,r);
@@ -120,8 +120,8 @@ class TestSolver
         // Test solution of x-2*a=0 on [-1,+1], taking values in [-1,+1].
         // There is at most one solution, but this lies partially outside the range.
         // Should obtain PartialSolutionException
-        p=ExactIntervalVector({ExactInterval(-1,1)});
-        r=ExactIntervalVector({ExactInterval(-1,1)});
+        p=ExactIntervalVectorType({ExactIntervalType(-1,1)});
+        r=ExactIntervalVectorType({ExactIntervalType(-1,1)});
         f=EffectiveVectorFunction({x-2*a});
         ARIADNE_TEST_PRINT(f);
         try {
@@ -143,15 +143,15 @@ class TestSolver
         EffectiveScalarFunction x=EffectiveScalarFunction::coordinate(2,1);
         // Test solution of x-2*a=0 on [-1,+1], taking values in [-1,+1]. There is at most one solution.
         // Uses scalar implicit
-        ExactIntervalVector p; ExactInterval r;
+        ExactIntervalVectorType p; ExactIntervalType r;
         EffectiveScalarFunction e,f,s; // s is unscaling functions
         ValidatedScalarFunctionModel h;
 
         ARIADNE_TEST_PRINT(*solver);
 
         // Test solution of 4x^2+x-4-a=0 on [0.875,1.125]. There is a unique solution with positive derivative.
-        p=ExactIntervalVector({ExactInterval(0.875,1.125)});
-        r=ExactInterval(0.25,1.25);
+        p=ExactIntervalVectorType({ExactIntervalType(0.875,1.125)});
+        r=ExactIntervalType(0.25,1.25);
         f=EffectiveScalarFunction((x*x+1)*x-a);
         ARIADNE_TEST_PRINT(f);
         h=solver->implicit(f,p,r);
@@ -165,8 +165,8 @@ class TestSolver
         // Test solution of x-2*a=0 on [-1,+1], taking values in [-1,+1].
         // There is at most one solution, but this lies partially outside the range.
         // Should obtain PartialSolutionException
-        p=ExactIntervalVector({ExactInterval(-1,1)});
-        r=ExactInterval(-1,1);
+        p=ExactIntervalVectorType({ExactIntervalType(-1,1)});
+        r=ExactIntervalType(-1,1);
         f=EffectiveScalarFunction(x-2*a);
         ARIADNE_TEST_PRINT(f);
         ValidatedScalarFunctionModel g=ScalarTaylorFunction(join(p,r),f,ThresholdSweeper(1e-12));
@@ -188,18 +188,18 @@ class TestSolver
 
 Int main(Int argc, const char **argv) {
 /*
-    ExactIntervalVector D={{-1,+1},{-1,+1}};
+    ExactIntervalVectorType D={{-1,+1},{-1,+1}};
     VectorTaylorFunction x=VectorTaylorFunction::identity(D,ThresholdSweeper(1e-10));
     ScalarTaylorFunction f=2*x[0]-x[1];
     std::cerr<<"D="<<D<<"\n";
-    ExactInterval D0=D[0];
+    ExactIntervalType D0=D[0];
     std::cerr<<"f="<<representation(f)<<"\n";
-    Vector<Differential<ExactInterval>> dx=Differential<ExactInterval>::variables(2,2,1u,D);
-    Differential<ExactInterval> dx0=dx[0];
+    Vector<Differential<ExactIntervalType>> dx=Differential<ExactIntervalType>::variables(2,2,1u,D);
+    Differential<ExactIntervalType> dx0=dx[0];
     std::cerr<<"dx="<<dx<<"\n";
     std::cerr<<"unscale(dx[0],D[0])="<<unscale(dx0,D[0])<<"\n";
-    ExactInterval c(add_ivl(D0.lower()/2,D0.upper()/2));
-    ExactInterval r(sub_ivl(D0.upper()/2,D0.lower()/2));
+    ExactIntervalType c(add_ivl(D0.lower()/2,D0.upper()/2));
+    ExactIntervalType r(sub_ivl(D0.upper()/2,D0.lower()/2));
     std::cerr<<"(dx[0]-c)/r="<<((dx0-c)/r)<<" c="<<c<<" r="<<r<<"\n";
     std::cerr<<"unscale(dx,D)="<<unscale(dx,D)<<"\n";
     std::cerr<<"f(dx)="<<f.evaluate(dx)<<"\n";

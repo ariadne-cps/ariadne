@@ -79,19 +79,19 @@ static const Nat verbosity = 0u;
 template<class T> StringType str(const T& t) { StringStream ss; ss<<t; return ss.str(); }
 
 typedef Vector<Float64> RawFloatVector;
-typedef Vector<ExactInterval> ExactIntervalVector;
+typedef Vector<ExactIntervalType> ExactIntervalVectorType;
 
 namespace {
 
 
-ExactInterval cast_exact_interval(const Real& x) {
-    return ExactInterval(x.lower().raw(),x.upper().raw());
+ExactIntervalType cast_exact_interval(const Real& x) {
+    return ExactIntervalType(x.lower().raw(),x.upper().raw());
 }
 
-ExactInterval make_domain(const EffectiveInterval& ivl) {
+ExactIntervalType make_domain(const EffectiveIntervalType& ivl) {
     Ariadne::RoundingModeType rnd=Ariadne::get_rounding_mode();
-    ExactInterval dom_lower_ivl=cast_exact_interval(ivl.lower());
-    ExactInterval dom_upper_ivl=cast_exact_interval(ivl.upper());
+    ExactIntervalType dom_lower_ivl=cast_exact_interval(ivl.lower());
+    ExactIntervalType dom_upper_ivl=cast_exact_interval(ivl.upper());
     Float64 dom_lower=dom_lower_ivl.lower().raw();
     Float64 dom_upper=dom_upper_ivl.upper().raw();
     Ariadne::set_rounding_downward();
@@ -107,16 +107,16 @@ ExactInterval make_domain(const EffectiveInterval& ivl) {
     }
     dom_upper=flt_dom_upper;
     Ariadne::set_rounding_mode(rnd);
-    return ExactInterval(dom_lower,dom_upper);
+    return ExactIntervalType(dom_lower,dom_upper);
 }
 
-ValidatedVectorFunctionModel make_identity(const EffectiveBox& bx, const ValidatedFunctionModelFactoryInterface& fac) {
-    ExactIntervalVector dom(bx.dimension());
+ValidatedVectorFunctionModel make_identity(const EffectiveBoxType& bx, const ValidatedFunctionModelFactoryInterface& fac) {
+    ExactIntervalVectorType dom(bx.dimension());
     RawFloatVector errs(bx.dimension());
 
     for(Nat i=0; i!=bx.dimension(); ++i) {
-        ExactInterval dom_lower_ivl=cast_exact_interval(bx[i].lower());
-        ExactInterval dom_upper_ivl=cast_exact_interval(bx[i].upper());
+        ExactIntervalType dom_lower_ivl=cast_exact_interval(bx[i].lower());
+        ExactIntervalType dom_upper_ivl=cast_exact_interval(bx[i].upper());
         // Convert to single-precision values
         Float64 dom_lower_flt=numeric_cast<float>(bx[i].lower());
         Float64 dom_upper_flt=numeric_cast<float>(bx[i].upper());
@@ -124,7 +124,7 @@ ValidatedVectorFunctionModel make_identity(const EffectiveBox& bx, const Validat
         Float64 err=max( max(dom_upper_ivl.upper().raw()-dom_upper_flt,dom_upper_flt-dom_upper_ivl.lower().raw()),
                        max(dom_lower_ivl.upper().raw()-dom_lower_flt,dom_lower_flt-dom_lower_ivl.lower().raw()) );
         Float64::set_rounding_to_nearest();
-        dom[i]=ExactInterval(dom_lower_flt,dom_upper_flt);
+        dom[i]=ExactIntervalType(dom_lower_flt,dom_upper_flt);
         errs[i]=err;
     }
 
@@ -143,12 +143,12 @@ inline Void assign_all_but_last(MultiIndex& r, const MultiIndex& a) {
 } // namespace
 
 Pair<ValidatedScalarFunctionModel,ValidatedScalarFunctionModel> split(const ValidatedScalarFunctionModel& f, Nat k) {
-    Pair<ExactBox,ExactBox> domains=split(f.domain(),k);
+    Pair<ExactBoxType,ExactBoxType> domains=split(f.domain(),k);
     return make_pair(restrict(f,domains.first),restrict(f,domains.second));
 }
 
 Pair<ValidatedVectorFunctionModel,ValidatedVectorFunctionModel> split(const ValidatedVectorFunctionModel& f, Nat k) {
-    Pair<ExactBox,ExactBox> domains=split(f.domain(),k);
+    Pair<ExactBoxType,ExactBoxType> domains=split(f.domain(),k);
     return make_pair(restrict(f,domains.first),restrict(f,domains.second));
 }
 
@@ -172,7 +172,7 @@ Enclosure::function_factory() const {
 Void Enclosure::_solve_zero_constraints() {
     this->_check();
     for(List<ValidatedScalarFunctionModel>::Iterator iter=this->_zero_constraints.begin(); iter!=this->_zero_constraints.end(); ) {
-        const ExactBox& domain=this->domain();
+        const ExactBoxType& domain=this->domain();
         const ValidatedTaylorModel& model=iter->model();
         const Nat k=model.argument_size()-1u;
         ValidatedTaylorModel zeroth_order(k,this->sweeper());
@@ -194,7 +194,7 @@ Void Enclosure::_solve_zero_constraints() {
             }
         }
         if(is_first_order && !is_zeroth_order) {
-            const ExactBox new_domain=project(domain,range(0,k));
+            const ExactBoxType new_domain=project(domain,range(0,k));
             ValidatedTaylorModel substitution_model=-zeroth_order/first_order;
             this->_space_function=this->function_factory().create(new_domain,Ariadne::substitute(this->_space_function.models(),k,substitution_model));
             for(List<ValidatedScalarFunctionModel>::Iterator constraint_iter=this->_negative_constraints.begin();
@@ -243,7 +243,7 @@ Enclosure::Enclosure(const BoundedConstraintSet& set, const ValidatedFunctionMod
     this->_check();
 }
 
-Enclosure::Enclosure(const ExactBox& box, const ValidatedFunctionModelFactoryInterface& factory)
+Enclosure::Enclosure(const ExactBoxType& box, const ValidatedFunctionModelFactoryInterface& factory)
     : _function_factory_ptr(factory.clone())
 {
     // Ensure domain elements have nonempty radius
@@ -255,7 +255,7 @@ Enclosure::Enclosure(const ExactBox& box, const ValidatedFunctionModelFactoryInt
             proper_coordinates.append(i);
         }
     }
-    this->_domain=ExactBox(proper_coordinates.size());
+    this->_domain=ExactBoxType(proper_coordinates.size());
     for(Nat j=0; j!=this->_domain.size(); ++j) {
         this->_domain[j]=box[proper_coordinates[j]];
     }
@@ -263,7 +263,7 @@ Enclosure::Enclosure(const ExactBox& box, const ValidatedFunctionModelFactoryInt
     // HACK: Make a dummy variable for the domain to avoid bugs which occur
     // with a zero-dimensional domain.
     // FIXME: Fix issues with TaylorFunction on zero-dimensional domain.
-    if(proper_coordinates.size()==0) { this->_domain=ExactBox(1u,ExactInterval(-1,+1)); }
+    if(proper_coordinates.size()==0) { this->_domain=ExactBoxType(1u,ExactIntervalType(-1,+1)); }
 
 
     this->_space_function=this->function_factory().create_zeros(box.dimension(),this->_domain);
@@ -285,7 +285,7 @@ Enclosure::Enclosure(const ExactBox& box, const ValidatedFunctionModelFactoryInt
 }
 
 
-Enclosure::Enclosure(const ExactBox& domain, const ValidatedVectorFunction& function, const ValidatedFunctionModelFactoryInterface& factory)
+Enclosure::Enclosure(const ExactBoxType& domain, const ValidatedVectorFunction& function, const ValidatedFunctionModelFactoryInterface& factory)
     : _function_factory_ptr(factory.clone())
 {
     ARIADNE_ASSERT_MSG(domain.size()==function.argument_size(),"domain="<<domain<<", function="<<function);
@@ -297,7 +297,7 @@ Enclosure::Enclosure(const ExactBox& domain, const ValidatedVectorFunction& func
     this->_check();
 }
 
-Enclosure::Enclosure(const ExactBox& domain, const ValidatedVectorFunction& function, const List<ValidatedConstraint>& constraints, const ValidatedFunctionModelFactoryInterface& factory)
+Enclosure::Enclosure(const ExactBoxType& domain, const ValidatedVectorFunction& function, const List<ValidatedConstraint>& constraints, const ValidatedFunctionModelFactoryInterface& factory)
     : _function_factory_ptr(factory.clone())
 {
     ARIADNE_ASSERT_MSG(domain.size()==function.argument_size(),"domain="<<domain<<", function="<<function);
@@ -324,7 +324,7 @@ Enclosure::Enclosure(const ExactBox& domain, const ValidatedVectorFunction& func
     this->_check();
 }
 
-Enclosure::Enclosure(const ExactBox& domain, const ValidatedVectorFunction& space_function, const ValidatedScalarFunction& time_function, const List<ValidatedConstraint>& constraints, const ValidatedFunctionModelFactoryInterface& factory)
+Enclosure::Enclosure(const ExactBoxType& domain, const ValidatedVectorFunction& space_function, const ValidatedScalarFunction& time_function, const List<ValidatedConstraint>& constraints, const ValidatedFunctionModelFactoryInterface& factory)
     : _function_factory_ptr(factory.clone())
 {
     ARIADNE_ASSERT_MSG(domain.size()==space_function.argument_size(),"domain="<<domain<<", space_function="<<space_function);
@@ -359,7 +359,7 @@ Enclosure::Enclosure(const ExactBox& domain, const ValidatedVectorFunction& spac
 // Returns true if the entire set is positive; false if entire set is negative
 Kleenean Enclosure::satisfies(ValidatedScalarFunction constraint) const
 {
-    UpperInterval constraint_range=apply(constraint,this->codomain());
+    UpperIntervalType constraint_range=apply(constraint,this->codomain());
     if(definitely(constraint_range.upper()<0)) { return false; }
     if(definitely(constraint_range.lower()>0)) { return true; }
     return Kleenean(indeterminate);
@@ -395,7 +395,7 @@ Void Enclosure::substitute(SizeType j, Float64 c)
 }
 */
 
-Void Enclosure::new_parameter(ExactInterval ivl)
+Void Enclosure::new_parameter(ExactIntervalType ivl)
 {
     this->_domain=product(this->_domain,ivl);
     this->_reduced_domain=product(this->_reduced_domain,ivl);
@@ -409,7 +409,7 @@ Void Enclosure::new_parameter(ExactInterval ivl)
     this->_check();
 }
 
-Void Enclosure::new_variable(ExactInterval ivl)
+Void Enclosure::new_variable(ExactIntervalType ivl)
 {
     ValidatedScalarFunctionModel variable_function = this->function_factory().create_identity(ivl);
     this->_domain=product(this->_domain,ivl);
@@ -433,10 +433,10 @@ Void Enclosure::apply_map(ValidatedVectorFunction map)
 }
 
 /*
-Void Enclosure::apply_flow(ValidatedVectorFunction flow, ExactInterval time)
+Void Enclosure::apply_flow(ValidatedVectorFunction flow, ExactIntervalType time)
 {
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->dimension()+1u,"dimension="<<this->dimension()<<", flow="<<flow);
-    this->_space_function=compose(flow,combine(this->_space_function,this->function_factory().create_identity(ExactBox(1u,time))));
+    this->_space_function=compose(flow,combine(this->_space_function,this->function_factory().create_identity(ExactBoxType(1u,time))));
     for(List<ValidatedScalarFunctionModel>::Iterator iter=this->_negative_constraints.begin(); iter!=this->_negative_constraints.end(); ++iter) {
         *iter=embed(*iter,time);
     }
@@ -526,13 +526,13 @@ Void Enclosure::apply_parameter_reach_step(ValidatedVectorFunctionModel phi, Val
     ARIADNE_ASSERT(phi.argument_size()==this->dimension()+1);
     ARIADNE_ASSERT(elps.argument_size()==this->number_of_parameters());
     Float64 h=phi.domain()[phi.result_size()].upper().raw();
-    ExactBox parameter_domain=this->parameter_domain();
-    ExactInterval time_domain=ExactInterval(0,h);
+    ExactBoxType parameter_domain=this->parameter_domain();
+    ExactIntervalType time_domain=ExactIntervalType(0,h);
     ValidatedScalarFunctionModel time_function=this->function_factory().create_identity(time_domain);
     this->new_variable(time_domain);
     ARIADNE_ASSERT(phi.argument_size()==this->dimension());
     this->apply_map(phi);
-    ExactBox new_domain=this->parameter_domain();
+    ExactBoxType new_domain=this->parameter_domain();
     ValidatedScalarFunctionModel time_step_function=this->function_factory().create_coordinate(new_domain,new_domain.size()-1u);
     this->_time_function=this->_time_function+time_step_function;
     this->_dwell_time_function=this->_dwell_time_function+time_step_function;
@@ -591,19 +591,19 @@ Void Enclosure::new_zero_parameter_constraint(ValidatedScalarFunction constraint
 
 
 
-ExactBox Enclosure::domain() const {
+ExactBoxType Enclosure::domain() const {
     return this->_domain;
 }
 
-ExactBox Enclosure::parameter_domain() const {
+ExactBoxType Enclosure::parameter_domain() const {
     return this->_domain;
 }
 
-ExactBox Enclosure::reduced_domain() const {
+ExactBoxType Enclosure::reduced_domain() const {
     return this->_reduced_domain;
 }
 
-ExactBox Enclosure::codomain() const {
+ExactBoxType Enclosure::codomain() const {
     return cast_exact_box(widen(this->_space_function.range()));
 }
 
@@ -651,8 +651,8 @@ ValidatedVectorFunctionModel const Enclosure::constraint_function() const {
     return g;
 }
 
-ExactBox const Enclosure::constraint_bounds() const {
-    ExactBox c(this->number_of_constraints());
+ExactBoxType const Enclosure::constraint_bounds() const {
+    ExactBoxType c(this->number_of_constraints());
     for(Nat i=0; i!=this->number_of_constraints(); ++i) {
         c[i]=this->constraint(i).bounds();
     }
@@ -667,7 +667,7 @@ SizeType Enclosure::number_of_parameters() const {
     return this->_space_function.argument_size();
 }
 
-UpperBox Enclosure::bounding_box() const {
+UpperBoxType Enclosure::bounding_box() const {
     return this->_space_function.codomain().bounding_box();
 }
 
@@ -701,9 +701,9 @@ Kleenean Enclosure::is_empty() const
     if(!this->_is_fully_reduced) { this->reduce(); this->reduce(); this->reduce(); }
 
     for(Nat i=0; i!=this->_constraints.size(); ++i) {
-        UpperInterval constraint_range = Ariadne::apply(this->_constraints[i].function(),this->_reduced_domain);
+        UpperIntervalType constraint_range = Ariadne::apply(this->_constraints[i].function(),this->_reduced_domain);
         if( definitely(disjoint(constraint_range,this->_constraints[i].bounds())) ) {
-            if(this->_reduced_domain.size()>0) { this->_reduced_domain[0] = ExactInterval(1,-1); }
+            if(this->_reduced_domain.size()>0) { this->_reduced_domain[0] = ExactIntervalType(1,-1); }
             return true;
         }
     }
@@ -711,12 +711,12 @@ Kleenean Enclosure::is_empty() const
     return Kleenean(indeterminate);
 }
 
-Sierpinski Enclosure::inside(const ExactBox& bx) const
+Sierpinski Enclosure::inside(const ExactBoxType& bx) const
 {
     return Ariadne::subset(Ariadne::apply(this->_space_function,this->_reduced_domain),bx);
 }
 
-Kleenean Enclosure::subset(const ExactBox& bx) const
+Kleenean Enclosure::subset(const ExactBoxType& bx) const
 {
     this->reduce();
 
@@ -724,16 +724,16 @@ Kleenean Enclosure::subset(const ExactBox& bx) const
 
 }
 
-Sierpinski Enclosure::separated(const ExactBox& bx) const
+Sierpinski Enclosure::separated(const ExactBoxType& bx) const
 {
-    ARIADNE_ASSERT_MSG(this->dimension()==bx.dimension(),"Enclosure::subset(ExactBox): self="<<*this<<", box="<<bx);
+    ARIADNE_ASSERT_MSG(this->dimension()==bx.dimension(),"Enclosure::subset(ExactBoxType): self="<<*this<<", box="<<bx);
     List<ValidatedConstraint> constraints = this->constraints();
     ConstraintSolver contractor=ConstraintSolver();
-    contractor.reduce(reinterpret_cast<UpperBox&>(this->_reduced_domain),constraints);
+    contractor.reduce(reinterpret_cast<UpperBoxType&>(this->_reduced_domain),constraints);
 
     if(_reduced_domain.is_empty()) { return true; }
 
-    const ExactBox test_domain=this->_reduced_domain;
+    const ExactBoxType test_domain=this->_reduced_domain;
     for(Nat i=0; i!=bx.dimension(); ++i) {
         constraints.append(ValidatedScalarFunctionModel(this->_space_function[i]) >= bx[i].lower());
         constraints.append(ValidatedScalarFunctionModel(this->_space_function[i]) <= bx[i].upper());
@@ -745,7 +745,7 @@ Void Enclosure::reduce() const
 {
     List<ValidatedConstraint> constraints=this->constraints();
     ConstraintSolver contractor=ConstraintSolver();
-    contractor.reduce(reinterpret_cast<UpperBox&>(this->_reduced_domain),constraints);
+    contractor.reduce(reinterpret_cast<UpperBoxType&>(this->_reduced_domain),constraints);
 
     for(Nat i=0; i!=this->number_of_parameters(); ++i) {
         double l=this->_reduced_domain[i].lower().get_d();
@@ -772,9 +772,9 @@ Void Enclosure::reduce() const
 
 
 
-Matrix<Float64> nonlinearities_zeroth_order(const ValidatedVectorFunction& f, const ExactBox& dom);
-Pair<Nat,double> nonlinearity_index_and_error(const ValidatedVectorFunction& function, const ExactBox& domain);
-Pair<Nat,double> lipschitz_index_and_error(const ValidatedVectorFunction& function, const ExactBox& domain);
+Matrix<Float64> nonlinearities_zeroth_order(const ValidatedVectorFunction& f, const ExactBoxType& dom);
+Pair<Nat,double> nonlinearity_index_and_error(const ValidatedVectorFunction& function, const ExactBoxType& domain);
+Pair<Nat,double> lipschitz_index_and_error(const ValidatedVectorFunction& function, const ExactBoxType& domain);
 
 Pair<Enclosure,Enclosure>
 Enclosure::split_zeroth_order() const
@@ -783,15 +783,15 @@ Enclosure::split_zeroth_order() const
 }
 
 
-List<ExactBox>
+List<ExactBoxType>
 Enclosure::splitting_subdomains_zeroth_order() const
 {
-    List<ExactBox> result;
+    List<ExactBoxType> result;
     Nat k=this->splitting_index_zeroth_order();
     if(k==this->number_of_parameters()) {
         result.append(this->_reduced_domain);
     } else {
-        Pair<ExactBox,ExactBox> subdomains = this->_reduced_domain.split(this->splitting_index_zeroth_order());
+        Pair<ExactBoxType,ExactBoxType> subdomains = this->_reduced_domain.split(this->splitting_index_zeroth_order());
         result.append(subdomains.first);
         result.append(subdomains.second);
     }
@@ -802,7 +802,7 @@ Enclosure::splitting_subdomains_zeroth_order() const
 Nat
 Enclosure::splitting_index_zeroth_order() const
 {
-    Matrix<UpperInterval> jacobian=Ariadne::jacobian_range(this->function(),this->reduced_domain());
+    Matrix<UpperIntervalType> jacobian=Ariadne::jacobian_range(this->function(),this->reduced_domain());
 
     // Compute the column of the matrix which has the norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
@@ -868,7 +868,7 @@ Pair<Enclosure,Enclosure>
 Enclosure::split(Nat d) const
 {
     ARIADNE_PRECONDITION(d<this->number_of_parameters());
-    ExactBox subdomain1,subdomain2;
+    ExactBoxType subdomain1,subdomain2;
     make_lpair(subdomain1,subdomain2)=Ariadne::split(this->_space_function.domain(),d);
 
     ValidatedVectorFunctionModel function1,function2;
@@ -913,16 +913,16 @@ Enclosure::split(Nat d) const
 
 
 
-Void adjoin_outer_approximation(PavingInterface&, const ExactBox& domain, const ValidatedVectorFunction& function, const ValidatedVectorFunction& negative_constraints, const ValidatedVectorFunction& equality_constraints, Int depth);
+Void adjoin_outer_approximation(PavingInterface&, const ExactBoxType& domain, const ValidatedVectorFunction& function, const ValidatedVectorFunction& negative_constraints, const ValidatedVectorFunction& equality_constraints, Int depth);
 
 Void Enclosure::adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const
 {
     PavingInterface& p=paving;
-    const ExactBox& d=this->domain();
+    const ExactBoxType& d=this->domain();
     const ValidatedVectorFunction& f=this->function();
 
     ValidatedVectorFunctionModel g=this->constraint_function();
-    ExactIntervalVector c=this->constraint_bounds();
+    ExactIntervalVectorType c=this->constraint_bounds();
     Int e=depth;
 
     switch(DISCRETISATION_METHOD) {
@@ -965,11 +965,11 @@ Void Enclosure::affine_adjoin_outer_approximation_to(PavingInterface& paving, In
 
     ValidatedVectorFunctionModel fg=join(this->function(),this->constraint_function());
 
-    List<ExactBox> subdomains;
-    List<ExactBox> unsplitdomains;
-    List<ExactBox> splitdomains;
+    List<ExactBoxType> subdomains;
+    List<ExactBoxType> unsplitdomains;
+    List<ExactBoxType> splitdomains;
     unsplitdomains.append(this->_reduced_domain);
-    ExactBox splitdomain1,splitdomain2;
+    ExactBoxType splitdomain1,splitdomain2;
     for(Int i=0; i!=MAXIMUM_DEPTH; ++i) {
         //std::cerr<<"i="<<i<<"\nsubdomains="<<subdomains<<"\nunsplitdomains="<<unsplitdomains<<"\n\n";
         for(Nat n=0; n!=unsplitdomains.size(); ++n) {
@@ -1025,12 +1025,12 @@ uniform_error_recondition()
         }
     }
 
-    ExactBox error_domains(large_error_indices.size());
+    ExactBoxType error_domains(large_error_indices.size());
     for(Nat i=0; i!=large_error_indices.size(); ++i) {
         Float64 error=this->_space_function.get(large_error_indices[i]).error().raw();
-        error_domains[i]=ExactInterval(-error,+error);
+        error_domains[i]=ExactIntervalType(-error,+error);
     }
-    error_domains=ExactBox(large_error_indices.size(),ExactInterval(-1,+1));
+    error_domains=ExactBoxType(large_error_indices.size(),ExactIntervalType(-1,+1));
     Nat k=this->number_of_parameters();
 
     this->_domain=product(this->_domain,error_domains);
@@ -1049,7 +1049,7 @@ uniform_error_recondition()
         }
     }
 
-    ExactIntervalVector new_variables = project(this->parameter_domain(),range(old_number_of_parameters,this->number_of_parameters()));
+    ExactIntervalVectorType new_variables = project(this->parameter_domain(),range(old_number_of_parameters,this->number_of_parameters()));
     this->_time_function = embed(this->_time_function,new_variables);
     this->_dwell_time_function = embed(this->_dwell_time_function,new_variables);
 
@@ -1170,15 +1170,15 @@ Enclosure::kuhn_recondition()
         new_models[i] = Ariadne::recondition(models[i],discarded_parameters,number_of_error_parameters,i);
     }
 
-    ExactBox new_domain(number_of_kept_parameters+number_of_error_parameters);
-    ExactBox new_reduced_domain(number_of_kept_parameters+number_of_error_parameters);
+    ExactBoxType new_domain(number_of_kept_parameters+number_of_error_parameters);
+    ExactBoxType new_reduced_domain(number_of_kept_parameters+number_of_error_parameters);
     for(SizeType j=0; j!=number_of_kept_parameters; ++j) {
         new_domain[j]=this->parameter_domain()[kept_parameters[j]];
         new_reduced_domain[j]=this->reduced_domain()[kept_parameters[j]];
     }
     for(SizeType j=number_of_kept_parameters; j!=number_of_kept_parameters+number_of_error_parameters; ++j) {
-        new_domain[j]=ExactInterval(-1,+1);
-        new_reduced_domain[j]=ExactInterval(-1,+1);
+        new_domain[j]=ExactIntervalType(-1,+1);
+        new_reduced_domain[j]=ExactIntervalType(-1,+1);
     }
     this->_domain = new_domain;
     this->_reduced_domain = new_reduced_domain;
@@ -1204,13 +1204,13 @@ Enclosure::kuhn_recondition()
 
 
 
-Void Enclosure::restrict(const ExactBox& subdomain)
+Void Enclosure::restrict(const ExactBoxType& subdomain)
 {
     ARIADNE_ASSERT_MSG(subdomain.size()==this->number_of_parameters(),"set="<<*this<<", subdomain="<<subdomain);
     ARIADNE_ASSERT_MSG(Ariadne::subset(subdomain,this->domain()),"set.domain()="<<this->domain()<<", subdomain="<<subdomain);
     Enclosure& result(*this);
     result._domain=subdomain;
-    result._reduced_domain=Ariadne::intersection(static_cast<const ExactBox&>(result._reduced_domain),subdomain);
+    result._reduced_domain=Ariadne::intersection(static_cast<const ExactBoxType&>(result._reduced_domain),subdomain);
     result._space_function=Ariadne::restrict(result._space_function,subdomain);
     result._time_function=Ariadne::restrict(result._time_function,subdomain);
     result._dwell_time_function=Ariadne::restrict(result._dwell_time_function,subdomain);
@@ -1224,7 +1224,7 @@ Void Enclosure::restrict(const ExactBox& subdomain)
     this->reduce();
 }
 
-Enclosure Enclosure::restriction(const ExactBox& subdomain) const
+Enclosure Enclosure::restriction(const ExactBoxType& subdomain) const
 {
     Enclosure result(*this);
     result.restrict(subdomain);
@@ -1285,11 +1285,11 @@ Void Enclosure::affine_draw(CanvasInterface& canvas, const Projection2d& project
 
 //    ValidatedVectorFunctionModel fg=join(this->space_function(),this->time_function(),this->constraint_function());
 
-    List<ExactBox> subdomains;
-    List<ExactBox> unsplitdomains;
-    List<ExactBox> splitdomains;
+    List<ExactBoxType> subdomains;
+    List<ExactBoxType> unsplitdomains;
+    List<ExactBoxType> splitdomains;
     unsplitdomains.append(this->_reduced_domain);
-    ExactBox splitdomain1,splitdomain2;
+    ExactBoxType splitdomain1,splitdomain2;
     for(Int i=0; i!=MAXIMUM_DEPTH; ++i) {
         //std::cerr<<"i="<<i<<"\nsubdomains="<<subdomains<<"\nunsplitdomains="<<unsplitdomains<<"\n\n";
         for(Nat n=0; n!=unsplitdomains.size(); ++n) {
@@ -1474,7 +1474,7 @@ Enclosure::affine_over_approximation() const
     for(Nat i=0; i!=this->number_of_constraints(); ++i) {
         ValidatedTaylorModel const& constraint_model=constraint_functions[i].model();
         ValidatedAffineModel affine_constraint_model=affine_model(constraint_model);
-        ExactInterval constraint_bound=this->constraint(i).bounds();
+        ExactIntervalType constraint_bound=this->constraint(i).bounds();
         result.new_constraint(constraint_bound.lower()<=affine_constraint_model<=constraint_bound.upper());
     }
 
@@ -1484,7 +1484,7 @@ Enclosure::affine_over_approximation() const
 }
 
 
-Enclosure product(const Enclosure& set, const ExactInterval& ivl) {
+Enclosure product(const Enclosure& set, const ExactIntervalType& ivl) {
     typedef List<ValidatedConstraintModel>::ConstIterator ConstIterator;
 
     ValidatedVectorFunctionModel new_function=combine(set.function(),set.function_factory().create_identity(ivl));
@@ -1499,7 +1499,7 @@ Enclosure product(const Enclosure& set, const ExactInterval& ivl) {
     return result;
 }
 
-Enclosure product(const Enclosure& set, const ExactBox& bx) {
+Enclosure product(const Enclosure& set, const ExactBoxType& bx) {
     typedef List<ValidatedConstraintModel>::ConstIterator ConstIterator;
 
     ValidatedVectorFunctionModel new_function=combine(set.function(),set.function_factory().create_identity(bx));

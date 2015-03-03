@@ -50,7 +50,7 @@ class DiscreteLocation;
 class HybridAutomatonInterface;
 
 template<class BS> class HybridBasicSet;
-class HybridBox;
+class HybridBoxType;
 
 class HybridGrid;
 class HybridGridCell;
@@ -155,7 +155,7 @@ class HybridReachabilityAnalyser
   public:
     typedef HybridTime T;
     typedef HybridAutomatonInterface Sys;
-    typedef HybridListSet<ExactBox> BxLS;
+    typedef HybridListSet<ExactBoxType> BxLS;
     typedef HybridGrid Gr;
     typedef HybridGridCell GC;
     typedef HybridGridTreeSet GCLS;

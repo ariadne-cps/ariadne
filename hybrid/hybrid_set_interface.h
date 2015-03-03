@@ -43,14 +43,15 @@
 namespace Ariadne {
 
 class BoxSet;
-class VariablesBox;
 class RealVariablesBox;
+class ExactFloat64VariablesBox;
+typedef ExactFloat64VariablesBox ExactVariablesBoxType;
 
 class HybridSpace;
 template<class BS> class HybridBasicSet;
 
 class HybridPoint;
-class HybridBox;
+class HybridBoxType;
 class HybridBoxes;
 
 //! \ingroup HybridSetSubmodule
@@ -90,7 +91,7 @@ class HybridOvertSetInterface
   public:
     virtual HybridOvertSetInterface* clone() const = 0;
     inline OvertSet euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
-    virtual Sierpinski overlaps(const HybridBox& bx) const = 0;
+    virtual Sierpinski overlaps(const HybridBoxType& bx) const = 0;
   protected:
     virtual OvertSetInterface* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
 };
@@ -102,7 +103,7 @@ class HybridOpenSetInterface
   public:
     virtual HybridOpenSetInterface* clone() const = 0;
     inline OpenSet euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
-    virtual Sierpinski covers(const HybridBox& bx) const = 0;
+    virtual Sierpinski covers(const HybridBoxType& bx) const = 0;
   protected:
     virtual OpenSetInterface* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
 };
@@ -114,7 +115,7 @@ class HybridClosedSetInterface
   public:
     virtual HybridClosedSetInterface* clone() const = 0;
     inline ClosedSet euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
-    virtual Sierpinski separated(const HybridBox& bx) const = 0;
+    virtual Sierpinski separated(const HybridBoxType& bx) const = 0;
   protected:
     virtual ClosedSetInterface* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
 };

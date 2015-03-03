@@ -528,9 +528,9 @@ Expansion<X> embed(unsigned int before_size, const Expansion<X>& x, unsigned int
 }
 
 
-inline Expansion<Float64> midpoint(const Expansion<ExactInterval>& pse) {
+inline Expansion<Float64> midpoint(const Expansion<ExactIntervalType>& pse) {
     Expansion<Float64> r(pse.argument_size());
-    for(Expansion<ExactInterval>::ConstIterator iter=pse.begin(); iter!=pse.end(); ++iter) {
+    for(Expansion<ExactIntervalType>::ConstIterator iter=pse.begin(); iter!=pse.end(); ++iter) {
         //r.append(iter->key(),midpoint(iter->data())); }
         r.append(iter->key(),midpoint(iter->data())); }
     return r;
@@ -603,7 +603,7 @@ template<class X> Vector< Expansion<X> > operator*(const Expansion<X>& e, const 
 }
 
 
-inline Vector< Expansion<Float64> > midpoint(const Vector< Expansion<ExactInterval> >& pse) {
+inline Vector< Expansion<Float64> > midpoint(const Vector< Expansion<ExactIntervalType> >& pse) {
     Vector< Expansion<Float64> > r(pse.size());
     for(Nat i=0; i!=pse.size(); ++i) {
         r[i]=midpoint(pse[i]); }

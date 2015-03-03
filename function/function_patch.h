@@ -128,8 +128,8 @@ template<class M> class FunctionPatch
     //! \brief Construct a FunctionPatch<M> over the domain \a d, based on the scaled model \a m.
     explicit FunctionPatch(const DomainType& d, const ModelType& m);
 
-    explicit FunctionPatch(const ExactBox& d, const Expansion<ExactFloat64>& p, const ErrorFloat64& e, const Sweeper& swp);
-    explicit FunctionPatch(const ExactBox& d, const Expansion<RawFloat64>& p, const RawFloat64& e, const Sweeper& swp);
+    explicit FunctionPatch(const ExactBoxType& d, const Expansion<ExactFloat64>& p, const ErrorFloat64& e, const Sweeper& swp);
+    explicit FunctionPatch(const ExactBoxType& d, const Expansion<RawFloat64>& p, const RawFloat64& e, const Sweeper& swp);
 
     explicit FunctionPatch(const ScalarFunctionModel<ValidatedTag>& f);
     FunctionPatch& operator=(const ScalarFunctionModel<ValidatedTag>& f);
@@ -237,7 +237,7 @@ template<class M> class FunctionPatch
     //@{
     /*! \name Function operations. */
     //! \brief An over-approximation to the range of the function.
-    UpperInterval range() const { return this->_model.range(); }
+    UpperIntervalType range() const { return this->_model.range(); }
     //! \brief Evaluate the function at the point \a x.
     ValidatedNumericType operator()(const Vector<ValidatedNumericType>& x) const;
     ValidatedNumericType operator()(const Vector<ExactNumericType>& x) const;
@@ -306,10 +306,10 @@ template<class M> class FunctionPatch
 };
 
 //! \brief Restrict to a subdomain.
-template<class M> FunctionPatch<M> restriction(const FunctionPatch<M>& x, const ExactBox& d);
+template<class M> FunctionPatch<M> restriction(const FunctionPatch<M>& x, const ExactBoxType& d);
 //! \brief Extend over a larger domain. Only possible if the larger domain is only larger where the smaller domain is a singleton.
 //! The extension is performed keeping \a x constant over the new coordinates. // DEPRECATED
-template<class M> FunctionPatch<M> extension(const FunctionPatch<M>& x, const ExactBox& d);
+template<class M> FunctionPatch<M> extension(const FunctionPatch<M>& x, const ExactBoxType& d);
 
 //! \brief Test if the quantity is a better approximation than \a t throughout the domain.
 template<class M> Bool refines(const FunctionPatch<M>& x1, const FunctionPatch<M>& x2);
@@ -328,7 +328,7 @@ template<class M> FunctionPatch<M> antiderivative(const FunctionPatch<M>& x, Siz
 template<class M> FunctionPatch<M> derivative(const FunctionPatch<M>& x, SizeType k);
 
 // Function algebra
-template<class M> FunctionPatch<M> embed(const ExactBox& dom1, const FunctionPatch<M>& tv2,const ExactBox& dom3);
+template<class M> FunctionPatch<M> embed(const ExactBoxType& dom1, const FunctionPatch<M>& tv2,const ExactBoxType& dom3);
 // Set the value of the \a kth variable to c
 template<class M> FunctionPatch<M> partial_evaluate(const FunctionPatch<M>& f, SizeType k, const NumericType<M>& c);
 // Evaluate a scalar Taylor function on a vector.
@@ -371,7 +371,7 @@ template<class M> class VectorFunctionPatch
     friend class VectorFunctionPatchElementReference<M>;
     typedef typename M::Paradigm P;
   public:
-    typedef ExactBox DomainType;
+    typedef ExactBoxType DomainType;
     typedef M ModelType;
     typedef Box<typename ModelType::CodomainType> CodomainType;
     typedef Box<typename ModelType::RangeType> RangeType;
@@ -388,38 +388,38 @@ template<class M> class VectorFunctionPatch
     explicit VectorFunctionPatch<M>(SizeType result_size);
 
     /*! \brief Construct from a result size and a domain. */
-    VectorFunctionPatch<M>(SizeType result_size, const ExactBox& domain, Sweeper swp);
+    VectorFunctionPatch<M>(SizeType result_size, const ExactBoxType& domain, Sweeper swp);
 
     /*! \brief Construct a vector function all of whose components are the same. */
     VectorFunctionPatch<M>(SizeType result_size, const FunctionPatch<M>& scalar_function);
 
     /*! \brief Construct from a domain and the expansion. */
-    VectorFunctionPatch<M>(const ExactBox& domain,
+    VectorFunctionPatch<M>(const ExactBoxType& domain,
                          const Vector<Expansion<ExactFloat64>>& expansion,
                          Sweeper swp);
 
     /*! \brief Construct from a domain, and expansion and errors. */
-    VectorFunctionPatch<M>(const ExactBox& domain,
+    VectorFunctionPatch<M>(const ExactBoxType& domain,
                          const Vector<Expansion<ExactFloat64>>& expansion,
                          const Vector<ErrorFloat64>& error,
                          Sweeper swp);
 
     /*! \brief Construct from a domain, and expansion and errors. */
-    VectorFunctionPatch<M>(const ExactBox& domain,
+    VectorFunctionPatch<M>(const ExactBoxType& domain,
                          const Vector<Expansion<RawFloat64>>& expansion,
                          const Vector<RawFloat64>& error,
                          Sweeper swp);
 
     /*! \brief Construct from a domain, and expansion and errors. */
-    VectorFunctionPatch<M>(const ExactBox& domain,
+    VectorFunctionPatch<M>(const ExactBoxType& domain,
                          const Vector<Expansion<RawFloat64>>& expansion,
                          Sweeper swp);
 
     /*! \brief Construct from a domain and the models. */
-    explicit VectorFunctionPatch<M>(const ExactBox& domain, const Vector< ModelType >& variables);
+    explicit VectorFunctionPatch<M>(const ExactBoxType& domain, const Vector< ModelType >& variables);
 
     /*! \brief Construct from a domain, a function, and a sweeper determining the accuracy. */
-    VectorFunctionPatch<M>(const ExactBox& domain,
+    VectorFunctionPatch<M>(const ExactBoxType& domain,
                          const VectorFunctionType<M>& function,
                          const Sweeper& sweeper);
 
@@ -449,13 +449,13 @@ template<class M> class VectorFunctionPatch
     /*! \brief Set the sweeper used to control approximation of the Taylor function. */
     Void set_sweeper(Sweeper swp);
     /*! \brief The data used to define the domain of the Taylor model. */
-    const ExactBox domain() const;
+    const ExactBoxType domain() const;
     /*! \brief A rough bound for the range of the function. */
-    const ExactBox codomain() const;
+    const ExactBoxType codomain() const;
     /*! \brief The centre of the Taylor model. */
     const Vector<CoefficientType> centre() const;
     /*! \brief The range of the Taylor model. */
-    const UpperBox range() const;
+    const UpperBoxType range() const;
     /*! \brief The data used to define the Taylor models. */
     const Vector<ModelType>& models() const;
     Vector<ModelType>& models();
@@ -500,11 +500,11 @@ template<class M> class VectorFunctionPatch
     Void clobber();
 
     /*! \brief The constant Taylor model with range \a r and argument domain \a d. */
-    static VectorFunctionPatch<M> constant(const ExactBox& d, const Vector<NumericType>& r, Sweeper swp);
+    static VectorFunctionPatch<M> constant(const ExactBoxType& d, const Vector<NumericType>& r, Sweeper swp);
     /*! \brief The identity Taylor model on domain \a d. */
-    static VectorFunctionPatch<M> identity(const ExactBox& d, Sweeper swp);
+    static VectorFunctionPatch<M> identity(const ExactBoxType& d, Sweeper swp);
     //! \brief Return the vector of variables in the range with values \a x over domain \a d.
-    static VectorFunctionPatch<M> projection(const ExactBox& d, SizeType imin, SizeType imax, Sweeper swp);
+    static VectorFunctionPatch<M> projection(const ExactBoxType& d, SizeType imin, SizeType imax, Sweeper swp);
 
     /*! \brief Convert to an interval polynomial. */
     Vector<Polynomial<ValidatedFloat64>> polynomials() const;
@@ -518,7 +518,7 @@ template<class M> class VectorFunctionPatch
     /*! \brief Truncate terms higher than \a bd. */
     VectorFunctionPatch<M>& truncate(const MultiIndexBound& bd);
     /*! \brief Restrict to a subdomain. */
-    Void restrict(const ExactBox& d);
+    Void restrict(const ExactBoxType& d);
     //! \brief Adjoin a scalar function.
     Void adjoin(const FunctionPatch<M>& sf);
 
@@ -545,7 +545,7 @@ template<class M> class VectorFunctionPatch
     template<class X> Void _compute(Vector<X>& r, const Vector<X>& a) const;
   private:
     /* Domain of definition. */
-    ExactBox _domain;
+    ExactBoxType _domain;
     Vector< ModelType > _models;
 };
 
@@ -623,11 +623,11 @@ template<class M> NormType distance(const VectorFunctionPatch<M>& f1, const Vect
 template<class M> NormType distance(const VectorFunctionPatch<M>& f1, const VectorFunctionType<M>& f2);
 
 //! \brief Restrict the function \a f to a subdomain \a d.
-template<class M> VectorFunctionPatch<M> restriction(const VectorFunctionPatch<M>& f, const ExactBox& d);
+template<class M> VectorFunctionPatch<M> restriction(const VectorFunctionPatch<M>& f, const ExactBoxType& d);
 //! \brief Restrict the function \a f to a larger domain \a d.
-template<class M> VectorFunctionPatch<M> extension(const VectorFunctionPatch<M>& f, const ExactBox& d);
+template<class M> VectorFunctionPatch<M> extension(const VectorFunctionPatch<M>& f, const ExactBoxType& d);
 
-template<class M> VectorFunctionPatch<M> embed(const ExactBox& d1, const VectorFunctionPatch<M>& tv2,const ExactBox& d3);
+template<class M> VectorFunctionPatch<M> embed(const ExactBoxType& d1, const VectorFunctionPatch<M>& tv2,const ExactBoxType& d3);
 
 //! \brief Tests if a function \a f refines another function \a g.
 //! To be a refinement, the domain of \a f must contain the domain of \a g.
@@ -698,7 +698,7 @@ template<class M> class VectorFunctionPatchElementReference
     Void operator=(const VectorFunctionPatchElementReference<M>& x) { this->_c->set(this->_i,x._c->get(x._i)); }
     Void operator=(const ScalarFunctionPatch<M>& x) { this->_c->set(this->_i,x); }
     ScalarFunctionPatch<M> element() const { return this->_c->get(this->_i); }
-    ExactBox const& domain() const { return this->_c->domain(); }
+    ExactBoxType const& domain() const { return this->_c->domain(); }
     const ModelType& model() const { return this->_c->_models[this->_i]; }
     ErrorType error() const { return this->_c->_models[this->_i].error(); }
     Void set_error(const ErrorType& e) { this->_c->_models[this->_i].set_error(e); }
@@ -734,16 +734,16 @@ template<class M> FunctionPatch<M>::FunctionPatch(const ScalarFunctionModel<Vali
 // and translation t=((c+d)-(a+b))/(b-a)
 // Because we are scaling the model on [-1,+1], this is not the same as
 // the mapping taking [a,b] to [c,d]
-template<class M> FunctionPatch<M> partial_restriction(const FunctionPatch<M>& fp, SizeType k, const ExactInterval& ivl) {
-    ExactBox dom=fp.domain(); dom[k]=ivl; return restriction(fp,dom);
+template<class M> FunctionPatch<M> partial_restriction(const FunctionPatch<M>& fp, SizeType k, const ExactIntervalType& ivl) {
+    ExactBoxType dom=fp.domain(); dom[k]=ivl; return restriction(fp,dom);
 }
 
-template<class M> FunctionPatch<M> restriction(const FunctionPatch<M>& fp, const ExactBox& dom) {
-    if(not(subset(dom,fp.domain()))) { ARIADNE_THROW(DomainException,"restiction(FunctionPatch<M>,ExactBox)","fp="<<fp<<", dom="<<dom); }
+template<class M> FunctionPatch<M> restriction(const FunctionPatch<M>& fp, const ExactBoxType& dom) {
+    if(not(subset(dom,fp.domain()))) { ARIADNE_THROW(DomainException,"restiction(FunctionPatch<M>,ExactBoxType)","fp="<<fp<<", dom="<<dom); }
     return unchecked_compose(fp,FunctionPatch<M>::identity(dom,fp.sweeper()));
 }
 
-template<class M> FunctionPatch<M> extension(const FunctionPatch<M>& fp, const ExactBox& dom) {
+template<class M> FunctionPatch<M> extension(const FunctionPatch<M>& fp, const ExactBoxType& dom) {
     return unchecked_compose(fp,FunctionPatch<M>::identity(dom,fp.sweeper()));
 }
 
@@ -757,7 +757,7 @@ template<class M, class OP> FunctionPatch<M> apply(OP op, FunctionPatch<M> const
     if(f1.domain()==f2.domain()) {
         return FunctionPatch<M>(f1.domain(),op(f1.model(),f2.model()));
     } else {
-        ExactBox domain=intersection(f1.domain(),f2.domain());
+        ExactBoxType domain=intersection(f1.domain(),f2.domain());
         return FunctionPatch<M>(domain,op(restriction(f1,domain).model(),restriction(f2,domain).model()));
     }
 }
@@ -800,7 +800,7 @@ template<class M> FunctionPatch<M> derivative(const FunctionPatch<M>& x, SizeTyp
     ValidatedNumericType sf=rec(rad_val(x.domain()[k]));
     return FunctionPatch<M>(x.domain(),derivative(x.model(),k)*sf); }
 
-template<class M> FunctionPatch<M> embed(const ExactBox& dom1, const FunctionPatch<M>& tv2,const ExactBox& dom3) {
+template<class M> FunctionPatch<M> embed(const ExactBoxType& dom1, const FunctionPatch<M>& tv2,const ExactBoxType& dom3) {
     return FunctionPatch<M>(product(dom1,tv2.domain(),dom3),embed(dom1.size(),tv2.model(),dom3.size())); }
 
 template<class M> NumericType<M> evaluate(const FunctionPatch<M>& f, const Vector<NumericType<M>>& x) {
@@ -836,11 +836,11 @@ template<class M> FunctionPatch<M> partial_evaluate(const FunctionPatch<M>& te, 
     // Scale c to domain
     const SizeType as=te.argument_size();
     ARIADNE_ASSERT(k<as);
-    const ExactBox& domain=te.domain();
-    const ExactInterval& dk=domain[k];
+    const ExactBoxType& domain=te.domain();
+    const ExactIntervalType& dk=domain[k];
     ValidatedNumericType sc=(c-med_val(dk))/rad_val(dk);
 
-    ExactBox new_domain(as-1);
+    ExactBoxType new_domain(as-1);
     for(SizeType i=0; i!=k; ++i) { new_domain[i]=domain[i]; }
     for(SizeType i=k; i!=as-1; ++i) { new_domain[i]=domain[i+1]; }
 
@@ -869,7 +869,7 @@ template<class M> FunctionPatch<M> antiderivative(const FunctionPatch<M>& f, Siz
 template<class M> Pair<FunctionPatch<M>,FunctionPatch<M>> split(const FunctionPatch<M>& tv, SizeType j) {
     typedef M ModelType;
     Pair<ModelType,ModelType> models={split(tv.model(),j,SplitPart::LOWER),split(tv.model(),j,SplitPart::LOWER)};
-    Pair<ExactBox,ExactBox> subdomains=split(tv.domain(),j);
+    Pair<ExactBoxType,ExactBoxType> subdomains=split(tv.domain(),j);
     return make_pair(FunctionPatch<M>(subdomains.first,models.first),
                      FunctionPatch<M>(subdomains.second,models.second));
 
@@ -885,7 +885,7 @@ template<class M> Bool inconsistent(const FunctionPatch<M>& tv1, const FunctionP
     if(tv1.domain()==tv2.domain()) {
         return inconsistent(tv1.model(),tv2.model());
     } else {
-        ExactBox domain=intersection(tv1.domain(),tv2.domain());
+        ExactBoxType domain=intersection(tv1.domain(),tv2.domain());
         return inconsistent(restriction(tv1,domain).model(),restriction(tv2,domain).model());
     }
 }
@@ -964,9 +964,9 @@ template<class M> Vector<ExactFloat64> value(const Vector<FunctionPatch<M>>& x)
     return r;
 }
 
-template<class M> Vector<UpperInterval> ranges(const Vector<FunctionPatch<M>>& x)
+template<class M> Vector<UpperIntervalType> ranges(const Vector<FunctionPatch<M>>& x)
 {
-    Vector<UpperInterval> r(x.size());
+    Vector<UpperIntervalType> r(x.size());
     for(SizeType i=0; i!=x.size(); ++i) {
         r[i]=x[i].range();
     }
@@ -1024,27 +1024,27 @@ template<class M> VectorFunctionPatch<M> combine(const VectorFunctionPatch<M>& f
 }
 
 
-template<class M> VectorFunctionPatch<M> embed(const VectorFunctionPatch<M>& f, const ExactInterval& d)
+template<class M> VectorFunctionPatch<M> embed(const VectorFunctionPatch<M>& f, const ExactIntervalType& d)
 {
-    return embed(ExactBox(),f,ExactBox(1u,d));
+    return embed(ExactBoxType(),f,ExactBoxType(1u,d));
 }
 
-template<class M> VectorFunctionPatch<M> embed(const VectorFunctionPatch<M>& f, const ExactBox& d)
+template<class M> VectorFunctionPatch<M> embed(const VectorFunctionPatch<M>& f, const ExactBoxType& d)
 {
-    return embed(ExactBox(),f,d);
+    return embed(ExactBoxType(),f,d);
 }
 
-template<class M> VectorFunctionPatch<M> embed(const ExactBox& d, const VectorFunctionPatch<M>& f)
+template<class M> VectorFunctionPatch<M> embed(const ExactBoxType& d, const VectorFunctionPatch<M>& f)
 {
-    return embed(d,f,ExactBox());
+    return embed(d,f,ExactBoxType());
 }
 
-template<class M> VectorFunctionPatch<M> embed(const ExactBox& d1, const VectorFunctionPatch<M>& f, const ExactBox& d2)
+template<class M> VectorFunctionPatch<M> embed(const ExactBoxType& d1, const VectorFunctionPatch<M>& f, const ExactBoxType& d2)
 {
     return VectorFunctionPatch<M>(product(d1,f.domain(),d2),embed(d1.size(),f.models(),d2.size()));
 }
 
-template<class M> VectorFunctionPatch<M> restriction(const VectorFunctionPatch<M>& f, const ExactBox& d)
+template<class M> VectorFunctionPatch<M> restriction(const VectorFunctionPatch<M>& f, const ExactBoxType& d)
 {
     ARIADNE_ASSERT_MSG(subset(d,f.domain()),"Cannot restriction "<<f<<" to non-sub-domain "<<d);
     if(d==f.domain()) { return f; }
@@ -1059,7 +1059,7 @@ template<class M> Pair<VectorFunctionPatch<M>,VectorFunctionPatch<M>> split(cons
 {
     typedef M ModelType;
     Pair< Vector<ModelType>,Vector<ModelType> > models=split(tf.models(),j);
-    Pair<ExactBox,ExactBox> subdomains=split(tf.domain(),j);
+    Pair<ExactBoxType,ExactBoxType> subdomains=split(tf.domain(),j);
     return make_pair(VectorFunctionPatch<M>(subdomains.first,models.first),
                      VectorFunctionPatch<M>(subdomains.second,models.second));
 
@@ -1144,7 +1144,7 @@ template<class M> VectorFunctionPatch<M> operator+(const VectorFunctionPatch<M>&
     if(f1.domain()==f2.domain()) {
         return VectorFunctionPatch<M>(f1.domain(),Vector<ModelType>(f1.models()+f2.models()));
     } else {
-        ExactBox new_domain=intersection(f1.domain(),f2.domain());
+        ExactBoxType new_domain=intersection(f1.domain(),f2.domain());
         return operator+(restriction(f1,new_domain),restriction(f2,new_domain));
     }
 }
@@ -1157,7 +1157,7 @@ template<class M> VectorFunctionPatch<M> operator-(const VectorFunctionPatch<M>&
     if(f1.domain()==f2.domain()) {
         return VectorFunctionPatch<M>(f1.domain(),Vector<ModelType>(f1.models()-f2.models()));
     } else {
-        ExactBox new_domain=intersection(f1.domain(),f2.domain());
+        ExactBoxType new_domain=intersection(f1.domain(),f2.domain());
         return operator-(restriction(f1,new_domain),restriction(f2,new_domain));
     }
 }
@@ -1169,7 +1169,7 @@ template<class M> VectorFunctionPatch<M> operator*(const FunctionPatch<M>& f1, c
     if(f1.domain()==f2.domain()) {
         return VectorFunctionPatch<M>(f1.domain(),Vector<ModelType>(f1.model()*f2.models()));
     } else {
-        ExactBox new_domain=intersection(f1.domain(),f2.domain());
+        ExactBoxType new_domain=intersection(f1.domain(),f2.domain());
         return operator*(restriction(f1,new_domain),restriction(f2,new_domain));
     }
 }
@@ -1181,7 +1181,7 @@ template<class M> VectorFunctionPatch<M> operator*(const VectorFunctionPatch<M>&
     if(f1.domain()==f2.domain()) {
         return VectorFunctionPatch<M>(f1.domain(),Vector<ModelType>(f1.models()*f2.model()));
     } else {
-        ExactBox new_domain=intersection(f1.domain(),f2.domain());
+        ExactBoxType new_domain=intersection(f1.domain(),f2.domain());
         return operator*(restriction(f1,new_domain),restriction(f2,new_domain));
     }
 }
@@ -1278,11 +1278,11 @@ template<class M> VectorFunctionPatch<M> partial_evaluate(const VectorFunctionPa
     // Scale c to domain
     const SizeType as=tf.argument_size();
     ARIADNE_ASSERT(k<as);
-    const Vector<ExactInterval>& domain=tf.domain();
-    const ExactInterval& dk=domain[k];
+    const Vector<ExactIntervalType>& domain=tf.domain();
+    const ExactIntervalType& dk=domain[k];
     NumericType<M> sc=(c-med_val(dk))/rad_val(dk);
 
-    Vector<ExactInterval> new_domain(as-1);
+    Vector<ExactIntervalType> new_domain(as-1);
     for(SizeType i=0; i!=k; ++i) { new_domain[i]=domain[i]; }
     for(SizeType i=k; i!=as-1; ++i) { new_domain[i]=domain[i+1]; }
 
@@ -1292,7 +1292,7 @@ template<class M> VectorFunctionPatch<M> partial_evaluate(const VectorFunctionPa
 }
 
 
-template<class M> VectorFunctionPatch<M> partial_restriction(const VectorFunctionPatch<M>& tf, SizeType k, const ExactInterval& d)
+template<class M> VectorFunctionPatch<M> partial_restriction(const VectorFunctionPatch<M>& tf, SizeType k, const ExactIntervalType& d)
 {
     VectorFunctionPatch<M> r(tf.result_size(),tf.domain(),tf.sweeper());
     for(SizeType i=0; i!=tf.result_size(); ++i) {
@@ -1301,7 +1301,7 @@ template<class M> VectorFunctionPatch<M> partial_restriction(const VectorFunctio
     return r;
 }
 
-template<class M> VectorFunctionPatch<M> restriction(const VectorFunctionPatch<M>& tf, SizeType k, const ExactInterval& d)
+template<class M> VectorFunctionPatch<M> restriction(const VectorFunctionPatch<M>& tf, SizeType k, const ExactIntervalType& d)
 {
     return partial_restriction(tf,k,d);
 }

@@ -43,32 +43,32 @@ EffectiveScalarFunction operator*(double c, EffectiveScalarFunction f) { return 
 Int main(Int argc, char **argv)
 {
 
-    ExactBox bx1(2); bx1[0]=ExactInterval(-0.2,0.2); bx1[1]=ExactInterval(-0.1,0.10);
-    ExactBox bx2(2); bx2[0]=ExactInterval(0.1,0.3); bx2[1]=ExactInterval(0.05,0.15);
-    ExactBox bx3(2); bx3[0]=ExactInterval(0.2,0.4); bx3[1]=ExactInterval(0.10,0.25);
-    ExactBox bx4(2); bx4[0]=ExactInterval(0.25,0.5); bx4[1]=ExactInterval(0.20,0.50);
-    ExactBox bx5(2); bx5[0]=ExactInterval(0.4,0.8); bx5[1]=ExactInterval(0.40,1.1);
+    ExactBoxType bx1(2); bx1[0]=ExactIntervalType(-0.2,0.2); bx1[1]=ExactIntervalType(-0.1,0.10);
+    ExactBoxType bx2(2); bx2[0]=ExactIntervalType(0.1,0.3); bx2[1]=ExactIntervalType(0.05,0.15);
+    ExactBoxType bx3(2); bx3[0]=ExactIntervalType(0.2,0.4); bx3[1]=ExactIntervalType(0.10,0.25);
+    ExactBoxType bx4(2); bx4[0]=ExactIntervalType(0.25,0.5); bx4[1]=ExactIntervalType(0.20,0.50);
+    ExactBoxType bx5(2); bx5[0]=ExactIntervalType(0.4,0.8); bx5[1]=ExactIntervalType(0.40,1.1);
 
     //Zonotope z1(z1c,z1g);
     //Polytope p1=polytope(z1);
     Real p(0.5);
     EffectiveVectorFunction x=EffectiveVectorFunction::identity(3);
     EffectiveVectorFunction afn1={0.05*x[0]+0.05*x[2]+0.15,0.05*x[1]+0.05*x[2]+0.6};
-    ValidatedConstrainedImageSet s1(ExactBox::unit_box(3),afn1);
-    ApproximateBox bbx1=widen(s1.bounding_box(),0.25);
+    ValidatedConstrainedImageSet s1(ExactBoxType::unit_box(3),afn1);
+    ApproximateBoxType bbx1=widen(s1.bounding_box(),0.25);
 
     EffectiveVectorFunction rf(1u, sqr(x[0])+sqr(x[1])-sqr(p));
-    ConstraintSet cs1(rf,EffectiveBox(1u,EffectiveInterval(-1,0)));
+    ConstraintSet cs1(rf,EffectiveBoxType(1u,EffectiveIntervalType(-1,0)));
 
     {
         double h=10000;
         Figure g;
-        g.set_bounding_box(ExactBox{{-1.,+1.},{-1*h,+1*h}});
+        g.set_bounding_box(ExactBoxType{{-1.,+1.},{-1*h,+1*h}});
         g.set_fill_colour(0.5,1.0,1.0);
         g.set_line_width(10);
-        g << ExactBox({{-0.5,+0.0},{-0.5*h, +0.5*h}});
+        g << ExactBoxType({{-0.5,+0.0},{-0.5*h, +0.5*h}});
         g.set_line_width(1);
-        g << ExactBox({{0.25,+0.75},{-0.5*h, +0.5*h}});
+        g << ExactBoxType({{0.25,+0.75},{-0.5*h, +0.5*h}});
         g.write("test_graphics-canvas");
     }
 
@@ -93,8 +93,8 @@ Int main(Int argc, char **argv)
     g.clear();
 
 
-    ExactBox bx2d(2); bx2d[0]=ExactInterval(0.2,0.4); bx2d[1]=ExactInterval(0.2,0.5);
-    ExactBox bx3d(3); bx3d[0]=ExactInterval(0.2,0.4); bx3d[1]=ExactInterval(0.2,0.5); bx3d[2]=ExactInterval(0.2,0.7);
+    ExactBoxType bx2d(2); bx2d[0]=ExactIntervalType(0.2,0.4); bx2d[1]=ExactIntervalType(0.2,0.5);
+    ExactBoxType bx3d(3); bx3d[0]=ExactIntervalType(0.2,0.4); bx3d[1]=ExactIntervalType(0.2,0.5); bx3d[2]=ExactIntervalType(0.2,0.7);
     g.set_projection(3,0,1);
     g.set_bounding_box(bx3d.bounding_box());
     g.draw(bx3d);
@@ -130,7 +130,7 @@ Int main(Int argc, char **argv)
     gts.adjoin_outer_approximation(bx5, 8);
     gts.recombine();
 
-    ExactBox bbox(2); bbox[0]=ExactInterval(-2,2); bbox[1]=ExactInterval(-2,2);
+    ExactBoxType bbox(2); bbox[0]=ExactIntervalType(-2,2); bbox[1]=ExactIntervalType(-2,2);
     g.set_bounding_box(bbox);
     g << gts;
     g.write("test_graphics-paving");

@@ -37,7 +37,7 @@ namespace Ariadne {
 enum Piece { left=0, right=1, middle=2 };
 
 inline
-Nat irmax(const ExactBox& bx) {
+Nat irmax(const ExactBoxType& bx) {
     Float64 dmax=0.0;
     Nat imax=0;
     for(Nat i=0; i!=bx.size(); ++i) {
@@ -55,9 +55,9 @@ inline ExactFloat64 mid(ExactFloat64 l, ExactFloat64 u) {
 }
 
 inline
-ExactBox split(const ExactBox& bx, Nat i, Piece lr) {
-    ExactBox result(bx);
-    ExactInterval& ivl=result[i];
+ExactBoxType split(const ExactBoxType& bx, Nat i, Piece lr) {
+    ExactBoxType result(bx);
+    ExactIntervalType& ivl=result[i];
     const ExactFloat64& l=ivl.lower();
     const ExactFloat64& u=ivl.upper();
     ExactFloat64 c=mid(l,u);
@@ -71,9 +71,9 @@ ExactBox split(const ExactBox& bx, Nat i, Piece lr) {
 }
 
 inline
-Pair<ExactBox,ExactBox> split(const ExactBox& bx, Nat i)
+Pair<ExactBoxType,ExactBoxType> split(const ExactBoxType& bx, Nat i)
 {
-    Pair<ExactBox,ExactBox> result(bx,bx);
+    Pair<ExactBoxType,ExactBoxType> result(bx,bx);
     ExactFloat64 c=mid(bx[i].lower(),bx[i].upper());
     result.first[i].set_upper(c);
     result.second[i].set_lower(c);
@@ -81,25 +81,25 @@ Pair<ExactBox,ExactBox> split(const ExactBox& bx, Nat i)
 }
 
 inline
-ExactBox split(const ExactBox& bx, Piece lr)
+ExactBoxType split(const ExactBoxType& bx, Piece lr)
 {
     Nat i=irmax(bx);
     return split(bx,i,lr);
 }
 
 inline
-Pair<ExactBox,ExactBox> split(const ExactBox& bx) {
+Pair<ExactBoxType,ExactBoxType> split(const ExactBoxType& bx) {
     return split(bx,irmax(bx));
 }
 
 
 template<class F>
 Kleenean
-separated(const ExactBox& d, const F& f, const ExactBox& b, const RawFloat64& eps)
+separated(const ExactBoxType& d, const F& f, const ExactBoxType& b, const RawFloat64& eps)
 {
 
-    ExactBox fd=f.evaluate(d);
-    ExactBox fc=f.evaluate(ExactBox(midpoint(d)));
+    ExactBoxType fd=f.evaluate(d);
+    ExactBoxType fc=f.evaluate(ExactBoxType(midpoint(d)));
 
     //cout << "called with " << d << ", having fd=" << fd << " and fc=" << fc << endl;
     if(disjoint(fd,b)) {
@@ -121,11 +121,11 @@ separated(const ExactBox& d, const F& f, const ExactBox& b, const RawFloat64& ep
 
 template<class F>
 Kleenean
-inside(const ExactBox& d, const F& f, const ExactBox& b, const RawFloat64& eps)
+inside(const ExactBoxType& d, const F& f, const ExactBoxType& b, const RawFloat64& eps)
 {
 
-    ExactBox fd=f.evaluate(d);
-    ExactBox fc=f.evaluate(ExactBox(midpoint(d)));
+    ExactBoxType fd=f.evaluate(d);
+    ExactBoxType fc=f.evaluate(ExactBoxType(midpoint(d)));
 
     //cout << "called with " << d << ", having fd=" << fd << " and fc=" << fc << endl;
     if(disjoint(fc,b)) {
@@ -196,23 +196,23 @@ Kleenean separated(const CompactSetInterface& cps, const ClosedSetInterface& cls
 
 
 //! \brief Tests if the intersection of \a ls and \a bx overlaps \a rs, to a tolerance of \a eps.
-Kleenean overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBox& bx, const Float64& eps);
+Kleenean overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBoxType& bx, const Float64& eps);
 
 //! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
-Kleenean inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBox& bx, const Float64& eps);
+Kleenean inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBoxType& bx, const Float64& eps);
 
 //! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
-Kleenean separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBox& bx, const Float64& eps);
+Kleenean separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBoxType& bx, const Float64& eps);
 
 
 //! \brief Tests if the intersection of \a ls and \a bx overlaps \a rs, to a tolerance of \a eps.
-Kleenean overlap(const OvertSetInterface& ls, const OpenSetInterface& rs, const ExactBox& bx, const Float64& eps);
+Kleenean overlap(const OvertSetInterface& ls, const OpenSetInterface& rs, const ExactBoxType& bx, const Float64& eps);
 
 //! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
-Kleenean inside(const ClosedSetInterface& ls, const OpenSetInterface& rs, const ExactBox& bx, const Float64& eps);
+Kleenean inside(const ClosedSetInterface& ls, const OpenSetInterface& rs, const ExactBoxType& bx, const Float64& eps);
 
 //! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
-Kleenean separated(const ClosedSetInterface& ls, const ClosedSetInterface& rs, const ExactBox& bx, const Float64& eps);
+Kleenean separated(const ClosedSetInterface& ls, const ClosedSetInterface& rs, const ExactBoxType& bx, const Float64& eps);
 
 
 } // namespace Ariadne

@@ -63,7 +63,7 @@ class DiscreteLocation;
 template<class BS> class HybridBasicSet;
 
 class HybridPoint;
-class HybridBox;
+class HybridBoxType;
 typedef HybridBasicSet<InterpolatedCurve> HybridInterpolatedCurve;
 
 template<class ES> OutputStream& operator<<(OutputStream&, const Orbit<ES>&);

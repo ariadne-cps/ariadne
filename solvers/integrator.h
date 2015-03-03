@@ -102,39 +102,39 @@ class IntegratorBase
     Void set_function_factory(const ValidatedFunctionModelFactoryInterface& factory);
 
 
-    virtual Pair<ExactFloat64,UpperBox>
+    virtual Pair<ExactFloat64,UpperBoxType>
     flow_bounds(const ValidatedVectorFunction& vector_field,
-                const ExactBox& state_domain,
+                const ExactBoxType& state_domain,
                 const RawFloat64& suggested_time_step) const;
 
     virtual ValidatedVectorFunctionModel
     flow_step(const ValidatedVectorFunction& vector_field,
-              const ExactBox& state_domain,
+              const ExactBoxType& state_domain,
               RawFloat64& suggested_time_step) const;
 
     virtual ValidatedVectorFunctionModel
     flow_to(const ValidatedVectorFunction& vector_field,
-         const ExactBox& state_domain,
+         const ExactBoxType& state_domain,
          const Real& time) const;
 
     //! \brief Solve \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$ for \f$t\in[0,T_{\max}]\f$.
     virtual List<ValidatedVectorFunctionModel>
     flow(const ValidatedVectorFunction& vector_field,
-         const ExactBox& state_domain,
+         const ExactBoxType& state_domain,
          const Real& minimum_time,
          const Real& maximum_time) const;
 
     //! \brief Solve \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$ for \f$t\in[0,T_{\max}]\f$.
     virtual List<ValidatedVectorFunctionModel>
     flow(const ValidatedVectorFunction& vector_field,
-         const ExactBox& state_domain,
+         const ExactBoxType& state_domain,
          const Real& maximum_time) const;
 
     virtual ValidatedVectorFunctionModel
     flow_step(const ValidatedVectorFunction& vector_field,
-              const ExactBox& state_domain,
+              const ExactBoxType& state_domain,
               const ExactFloat64& suggested_time_step,
-              const UpperBox& bounding_box) const = 0;
+              const UpperBoxType& bounding_box) const = 0;
 
   public:
     double _maximum_error;
@@ -176,9 +176,9 @@ class TaylorPicardIntegrator
 
     virtual ValidatedVectorFunctionModel
     flow_step(const ValidatedVectorFunction& vector_field,
-              const ExactBox& state_domain,
+              const ExactBoxType& state_domain,
               const ExactFloat64& time_step,
-              const UpperBox& bounding_box) const;
+              const UpperBoxType& bounding_box) const;
 
     using IntegratorBase::flow_step;
 };
@@ -232,16 +232,16 @@ class TaylorSeriesIntegrator
     virtual TaylorSeriesIntegrator* clone() const { return new TaylorSeriesIntegrator(*this); }
     virtual Void write(OutputStream& os) const;
 
-    virtual Pair<ExactFloat64,UpperBox>
+    virtual Pair<ExactFloat64,UpperBoxType>
     flow_bounds(const ValidatedVectorFunction& vector_field,
-                const ExactBox& state_domain,
+                const ExactBoxType& state_domain,
                 const RawFloat64& suggested_time_step) const;
 
     virtual ValidatedVectorFunctionModel
     flow_step(const ValidatedVectorFunction& vector_field,
-              const ExactBox& state_domain,
+              const ExactBoxType& state_domain,
               const ExactFloat64& time_step,
-              const UpperBox& bounding_box) const;
+              const UpperBoxType& bounding_box) const;
 
     using IntegratorBase::flow_step;
 };
@@ -269,9 +269,9 @@ class AffineIntegrator
 
     virtual ValidatedVectorFunctionModel
     flow_step(const ValidatedVectorFunction& vector_field,
-              const ExactBox& state_domain,
+              const ExactBoxType& state_domain,
               const ExactFloat64& time_step,
-              const UpperBox& bounding_box) const;
+              const UpperBoxType& bounding_box) const;
 
     using IntegratorBase::flow_step;
 

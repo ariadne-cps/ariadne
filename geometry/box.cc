@@ -37,19 +37,19 @@
 
 namespace Ariadne {
 
-UpperInterval apply(ScalarFunction<ValidatedTag>const& f, const Box<UpperInterval>& x) {
-    return static_cast<UpperInterval>(f(reinterpret_cast<Vector<ValidatedNumericType>const&>(x))); }
-Box<UpperInterval> apply(VectorFunction<ValidatedTag>const& f, const Box<UpperInterval>& x) {
-    return static_cast<Box<UpperInterval>>(f(reinterpret_cast<Vector<ValidatedNumericType>const&>(x))); }
+UpperIntervalType apply(ScalarFunction<ValidatedTag>const& f, const Box<UpperIntervalType>& x) {
+    return static_cast<UpperIntervalType>(f(reinterpret_cast<Vector<ValidatedNumericType>const&>(x))); }
+Box<UpperIntervalType> apply(VectorFunction<ValidatedTag>const& f, const Box<UpperIntervalType>& x) {
+    return static_cast<Box<UpperIntervalType>>(f(reinterpret_cast<Vector<ValidatedNumericType>const&>(x))); }
 
 template class Box<Interval<Real>>;
 template class Box<Interval<ExactFloat64>>;
 template class Box<Interval<UpperFloat64>>;
 template class Box<Interval<ApproximateFloat64>>;
 
-Void draw(CanvasInterface& c, Projection2d const& p, ApproximateFloatBox const& bx) {
+Void draw(CanvasInterface& c, Projection2d const& p, ApproximateBoxType const& bx) {
     Nat ix=p.x_coordinate(); Nat iy=p.y_coordinate();
-    ApproximateFloatInterval x=bx[ix]; ApproximateFloatInterval y=bx[iy];
+    ApproximateIntervalType x=bx[ix]; ApproximateIntervalType y=bx[iy];
     c.move_to(numeric_cast<double>(x.lower()),numeric_cast<double>(y.lower()));
     c.line_to(numeric_cast<double>(x.upper()),numeric_cast<double>(y.lower()));
     c.line_to(numeric_cast<double>(x.upper()),numeric_cast<double>(y.upper()));
@@ -58,14 +58,14 @@ Void draw(CanvasInterface& c, Projection2d const& p, ApproximateFloatBox const& 
     c.fill();
 }
 
-ExactBox make_box(const String& str)
+ExactBoxType make_box(const String& str)
 {
     // Representation as a literal
     //   "[a1,b1]x[a2,b2]x...x[an,bn]"
 
     StringStream ss(str);
-    std::vector<ExactInterval> vec;
-    ExactInterval ivl;
+    std::vector<ExactIntervalType> vec;
+    ExactIntervalType ivl;
     char c;
 
     c='x';
@@ -81,16 +81,16 @@ ExactBox make_box(const String& str)
         ss.putback(c);
     }
 
-    ExactBox bx(vec.size());
+    ExactBoxType bx(vec.size());
     for(Nat i=0; i!=bx.dimension(); ++i) {
         bx[i]=vec[i];
     }
     return bx;
 }
 /*
-void make_vertices_down(const ExactFloatBox& bx, SizeType i, SizeType n, ExactFloatPoint& pt, std::vector<ExactFloatPoint>& v);
+void make_vertices_down(const ExactFloat64Box& bx, SizeType i, SizeType n, ExactFloatPoint& pt, std::vector<ExactFloatPoint>& v);
 
-void make_vertices_up(const ExactFloatBox& bx, SizeType i, SizeType n, ExactFloatPoint& pt, std::vector<ExactFloatPoint>& v) {
+void make_vertices_up(const ExactFloat64Box& bx, SizeType i, SizeType n, ExactFloatPoint& pt, std::vector<ExactFloatPoint>& v) {
     ARIADNE_ASSERT(i <= n);
     if(i == n) {    // base case: we are at the last dimension of the box
         pt[i] = bx[i].lower();
@@ -105,7 +105,7 @@ void make_vertices_up(const ExactFloatBox& bx, SizeType i, SizeType n, ExactFloa
     }
 }
 
-void make_vertices_down(const ExactFloatBox& bx, SizeType i, SizeType n, ExactFloatPoint& pt, std::vector<ExactFloatPoint>& v) {
+void make_vertices_down(const ExactFloat64Box& bx, SizeType i, SizeType n, ExactFloatPoint& pt, std::vector<ExactFloatPoint>& v) {
     ARIADNE_ASSERT(i <= n);
     if(i == n) {    // base case: we are at the last dimension of the box
         pt[i] = bx[i].upper();
@@ -123,24 +123,24 @@ void make_vertices_down(const ExactFloatBox& bx, SizeType i, SizeType n, ExactFl
 
 
 /*
-LowerFloatBox under_approximation(const RealBox& rbx) {
-    LowerFloatBox bx(rbx.size());
+LowerFloat64Box under_approximation(const RealBox& rbx) {
+    LowerFloat64Box bx(rbx.size());
     for(SizeType i=0; i!=bx.size(); ++i) {
         bx[i]=under_approximation(rbx[i]);
     }
     return bx;
 }
 
-UpperFloatBox over_approximation(const RealBox& rbx) {
-    UpperFloatBox bx(rbx.size(),UpperFloatInterval(-inf,+inf));
+UpperFloat64Box over_approximation(const RealBox& rbx) {
+    UpperFloat64Box bx(rbx.size(),UpperFloat64Interval(-inf,+inf));
     for(SizeType i=0; i!=bx.size(); ++i) {
         bx[i]=over_approximation(rbx[i]);
     }
     return bx;
 }
 
-ApproximateFloatBox approximation(const RealBox& rbx) {
-    ApproximateFloatBox bx(rbx.size(),ApproximateFloatInterval(-inf,+inf));
+ApproximateFloat64Box approximation(const RealBox& rbx) {
+    ApproximateFloat64Box bx(rbx.size(),ApproximateFloat64Interval(-inf,+inf));
     for(SizeType i=0; i!=bx.size(); ++i) {
         bx[i]=approximation(rbx[i]);
     }
@@ -164,16 +164,16 @@ List<Point> Box<I>::vertices() const {
 
 
 /*
-Vector<ValidatedFloat> cast_singleton(const Vector<UpperFloatInterval>& bx) {
+Vector<ValidatedFloat> cast_singleton(const Vector<UpperFloat64Interval>& bx) {
     Vector<ValidatedFloat> r(bx.size());
     for(SizeType i=0; i!=r.size(); ++i) { r[i]=cast_singleton(bx[i]); }
     return r;
 }
 
 template class Box<RealInterval>;
-template class Box<ExactFloatInterval>;
-template class Box<UpperFloatInterval>;
-template class Box<ApproximateFloatInterval>;
+template class Box<ExactFloat64Interval>;
+template class Box<UpperFloat64Interval>;
+template class Box<ApproximateFloat64Interval>;
 */
 
 } //namespace Ariadne

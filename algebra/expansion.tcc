@@ -159,7 +159,7 @@ template<class X> Void Expansion<X>::combine_terms() {
     this->resize(curr-this->begin()); }
 
 template<> Void Expansion<ExactFloat64>::combine_terms() { ARIADNE_NOT_IMPLEMENTED; }
-template<> Void Expansion<ExactInterval>::combine_terms() { ARIADNE_NOT_IMPLEMENTED; }
+template<> Void Expansion<ExactIntervalType>::combine_terms() { ARIADNE_NOT_IMPLEMENTED; }
 
 template<class X> Void Expansion<X>::graded_sort() {
     this->_sort(GradedKeyLess());

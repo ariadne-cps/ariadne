@@ -33,39 +33,39 @@
 
 namespace Ariadne {
 
-inline ApproximateNumericType med_apprx(ExactInterval const& ivl) {
+inline ApproximateNumericType med_apprx(ExactIntervalType const& ivl) {
     return ApproximateNumericType(half_exact(add_approx(ivl.lower().raw(),ivl.upper().raw())));
 }
 
-inline ApproximateNumericType rad_apprx(ExactInterval const& ivl) {
+inline ApproximateNumericType rad_apprx(ExactIntervalType const& ivl) {
     return ApproximateNumericType(half_exact(sub_approx(ivl.upper().raw(),ivl.lower().raw())));
 }
 
-inline ValidatedNumericType med_val(ExactInterval const& ivl) {
+inline ValidatedNumericType med_val(ExactIntervalType const& ivl) {
     return half(ivl.lower()+ivl.upper());
 }
 
-inline ValidatedNumericType rad_val(ExactInterval const& ivl) {
+inline ValidatedNumericType rad_val(ExactIntervalType const& ivl) {
     return half(ivl.upper()-ivl.lower());
 }
 
 
 template<class T, EnableIf<IsSame<Paradigm<T>,Approximate>> =dummy>
-inline T unscale(T x, const ExactInterval& d) {
+inline T unscale(T x, const ExactIntervalType& d) {
     ApproximateNumericType c(med_apprx(d));
     ApproximateNumericType r(rad_apprx(d));
     return (std::move(x)-c)/r;
 }
 
 template<class T, EnableIf<IsStronger<Paradigm<T>,Validated>> =dummy>
-inline T unscale(T x, const ExactInterval& d) {
+inline T unscale(T x, const ExactIntervalType& d) {
     ValidatedNumericType c(med_val(d));
     if(d.lower()==d.upper()) { c=0; return std::move(x)*c; }
     ValidatedNumericType r(rad_val(d));
     return (std::move(x)-c)/r;
 }
 
-template<class X> Vector<X> unscale(const Vector<X>& x, const ExactBox& d) {
+template<class X> Vector<X> unscale(const Vector<X>& x, const ExactBoxType& d) {
     Vector<X> r(x);
     for(SizeType i=0; i!=r.size(); ++i) {
         r[i]=unscale(x[i],d[i]);
@@ -74,40 +74,40 @@ template<class X> Vector<X> unscale(const Vector<X>& x, const ExactBox& d) {
 }
 
 class Scaling {
-    ExactInterval _codom;
+    ExactIntervalType _codom;
   public:
-    Scaling(ExactInterval codom) : _codom(codom) { }
-    UnitInterval domain() const { return UnitInterval(); }
-    ExactInterval codomain() const { return _codom; }
+    Scaling(ExactIntervalType codom) : _codom(codom) { }
+    UnitIntervalType domain() const { return UnitIntervalType(); }
+    ExactIntervalType codomain() const { return _codom; }
     template<class X> X operator() (X) const;
 };
 
 class VectorScaling {
-    Box<ExactInterval> _codom;
+    Box<ExactIntervalType> _codom;
   public:
-    VectorScaling(Box<ExactInterval> codom) : _codom(codom) { }
+    VectorScaling(Box<ExactIntervalType> codom) : _codom(codom) { }
     SizeType size() const { return _codom.dimension(); }
     Scaling operator[] (SizeType i) const { return Scaling(_codom[i]); }
-    Box<ExactInterval> const& codomain() const { return _codom; }
+    Box<ExactIntervalType> const& codomain() const { return _codom; }
     template<class X> Vector<X> operator() (Vector<X> const&) const;
 };
 
 class Unscaling {
-    ExactInterval _dom;
+    ExactIntervalType _dom;
   public:
-    Unscaling(ExactInterval dom) : _dom(dom) { }
-    ExactInterval domain() const { return _dom; }
-    UnitInterval codomain() const { return UnitInterval(); }
+    Unscaling(ExactIntervalType dom) : _dom(dom) { }
+    ExactIntervalType domain() const { return _dom; }
+    UnitIntervalType codomain() const { return UnitIntervalType(); }
     template<class X> X operator() (X) const;
 };
 
 class VectorUnscaling {
-    Box<ExactInterval> _dom;
+    Box<ExactIntervalType> _dom;
   public:
-    VectorUnscaling(Box<ExactInterval> dom) : _dom(dom) { }
+    VectorUnscaling(Box<ExactIntervalType> dom) : _dom(dom) { }
     SizeType size() const { return _dom.dimension(); }
     Unscaling operator[] (SizeType i) const { return Unscaling(_dom[i]); }
-    Box<ExactInterval> const& domain() const { return _dom; }
+    Box<ExactIntervalType> const& domain() const { return _dom; }
     template<class X> Vector<X> operator() (Vector<X> const&) const;
 };
 

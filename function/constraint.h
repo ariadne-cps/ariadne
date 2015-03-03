@@ -62,7 +62,7 @@ class Constraint {
     LowerBoundType const& lower_bound() const { return this->_lower_bound; }
     UpperBoundType const& upper_bound() const { return this->_upper_bound; }
     // FIXME: This function should not be used as it breaks type safety
-    const ExactInterval bounds() const { return ExactInterval(cast_exact(this->_lower_bound),cast_exact(this->_upper_bound)); }
+    const ExactIntervalType bounds() const { return ExactIntervalType(cast_exact(this->_lower_bound),cast_exact(this->_upper_bound)); }
   private:
     F _function;
     R _lower_bound;

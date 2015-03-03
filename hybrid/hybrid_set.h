@@ -62,8 +62,8 @@ namespace Ariadne {
 
 // Classes defined in this file
 class HybridPoint;
-class HybridBox;
-typedef HybridBox HybridUpperBox;
+class HybridBoxType;
+typedef HybridBoxType HybridUpperBoxType;
 class HybridBoxes;
 typedef HybridBoxes HybridUpperBoxes;
 class HybridGridTreeSet;
@@ -119,9 +119,9 @@ class HybridConstraintSet
     //! \brief The subset of \f$\mathbb{R}^n\f$ obtained by restricting to location \a loc and ordering the variables as defined by \a spc.
     ConstraintSet const euclidean_set(DiscreteLocation loc, RealSpace spc) const;
 
-    virtual Sierpinski overlaps(const HybridBox& bx) const override;
-    virtual Sierpinski separated(const HybridBox& bx) const override;
-    virtual Sierpinski covers(const HybridBox& bx) const override;
+    virtual Sierpinski overlaps(const HybridBoxType& bx) const override;
+    virtual Sierpinski separated(const HybridBoxType& bx) const override;
+    virtual Sierpinski covers(const HybridBoxType& bx) const override;
 
     virtual OutputStream& write(OutputStream& os) const override;
   protected:
@@ -159,11 +159,11 @@ class HybridBoundedConstraintSet
     //! \brief The subset of \f$\mathbb{R}^n\f$ obtained by restricting to location \a loc and ordering the variables as defined by \a spc.
     BoundedConstraintSet const euclidean_set(DiscreteLocation loc, RealSpace spc) const;
 
-    virtual Sierpinski overlaps(const HybridBox& bx) const override;
+    virtual Sierpinski overlaps(const HybridBoxType& bx) const override;
     virtual Sierpinski inside(const HybridBoxes& bx) const override;
 
-    virtual Sierpinski separated(const HybridBox& bx) const override;
-    virtual Sierpinski covers(const HybridBox& bx) const override;
+    virtual Sierpinski separated(const HybridBoxType& bx) const override;
+    virtual Sierpinski covers(const HybridBoxType& bx) const override;
     virtual HybridUpperBoxes bounding_box() const override;
 
     virtual OutputStream& write(OutputStream& os) const override;
@@ -231,22 +231,22 @@ class HybridPoint
 //! \ingroup HybridSetSubModule
 //! \brief A box in a location of a hybrid space.
 //! \details Primarily used as a basic set against which abstract set properties can be tested.
-class HybridBox
-    : public HybridBasicSet<ExactBox>
+class HybridBoxType
+    : public HybridBasicSet<ExactBoxType>
     , public virtual HybridDrawableInterface
 {
   public:
-    HybridBox(const DiscreteLocation& loc, const VariablesBox& bx)
-        : HybridBasicSet<ExactBox>(loc,bx.space(),bx.continuous_set()) { }
-    HybridBox(const DiscreteLocation& loc, const List<RealVariableInterval>& bnds)
-        : HybridBox(loc,VariablesBox(bnds)) { }
-    HybridBox(const DiscreteLocation& loc, const RealSpace& spc, const ExactBox& bx)
-        : HybridBasicSet<ExactBox>(loc,spc,bx) { }
+    HybridBoxType(const DiscreteLocation& loc, const ExactVariablesBoxType& bx)
+        : HybridBasicSet<ExactBoxType>(loc,bx.space(),bx.continuous_set()) { }
+    HybridBoxType(const DiscreteLocation& loc, const List<RealVariableInterval>& bnds)
+        : HybridBoxType(loc,ExactVariablesBoxType(bnds)) { }
+    HybridBoxType(const DiscreteLocation& loc, const RealSpace& spc, const ExactBoxType& bx)
+        : HybridBasicSet<ExactBoxType>(loc,spc,bx) { }
 
     //! \brief The subset of \f$\mathbb{R}^n\f$ obtained by restricting to location \a loc and ordering the variables as defined by \a spc.
-    ExactBox euclidean_set(const RealSpace& spc) const {
+    ExactBoxType euclidean_set(const RealSpace& spc) const {
         if(spc==this->space()) { return this->continuous_set(); }
-        else { return VariablesBox(this->space(),this->continuous_set() ).euclidean_set(spc); }
+        else { return ExactVariablesBoxType(this->space(),this->continuous_set() ).euclidean_set(spc); }
     }
 
     virtual Void draw(CanvasInterface& c, const Set<DiscreteLocation>& q, const Variables2d& v) const override;
@@ -256,25 +256,25 @@ class HybridBox
 //! \brief A collection of boxes, one in each location of a hybrid space.
 //! \details Primarily used to represent bounds for a compact hybrid set.
 class HybridBoxes
-    : public Map<DiscreteLocation,VariablesBox>
+    : public Map<DiscreteLocation,ExactVariablesBoxType>
 {
   public:
     //! \brief Set the continuous state set in location \a loc to \a vbx.
-    Void insert(const DiscreteLocation& loc, const VariablesBox& vbx) {
-        this->Map<DiscreteLocation,VariablesBox>::insert(loc,vbx); }
+    Void insert(const DiscreteLocation& loc, const ExactVariablesBoxType& vbx) {
+        this->Map<DiscreteLocation,ExactVariablesBoxType>::insert(loc,vbx); }
     //! \brief Set the continuous state set in location \a loc to box \a bx using \a spc to order the variables.
-    Void insert(const DiscreteLocation& loc, const RealSpace& spc, const ExactBox& bx) {
-        this->insert(loc,VariablesBox(spc,bx)); }
+    Void insert(const DiscreteLocation& loc, const RealSpace& spc, const ExactBoxType& bx) {
+        this->insert(loc,ExactVariablesBoxType(spc,bx)); }
 
     //! \brief The set of discrete locations in which the set is nontrivial.
     Set<DiscreteLocation> locations() const { return this->keys(); }
     //! \brief The ordering of variables used to define the Euclidean box in location \a loc.
     RealSpace const& space(const DiscreteLocation& loc) const { return this->operator[](loc).space(); }
     //! \brief The Euclidean box in location \a loc.
-    ExactBox const& continuous_set(const DiscreteLocation& loc) const { return this->operator[](loc).continuous_set(); }
+    ExactBoxType const& continuous_set(const DiscreteLocation& loc) const { return this->operator[](loc).continuous_set(); }
 
     //! \brief The subset of \f$\mathbb{R}^n\f$ obtained by restricting to location \a loc and ordering the variables as defined by \a spc.
-    ExactBox euclidean_set(const DiscreteLocation& loc, const RealSpace& spc) const {
+    ExactBoxType euclidean_set(const DiscreteLocation& loc, const RealSpace& spc) const {
         return this->operator[](loc).euclidean_set(spc); }
 };
 
@@ -427,8 +427,8 @@ class HybridListSet
             _loc_iter!=hls.locations_end(); ++_loc_iter) {
             (*this)[_loc_iter->first].adjoin(_loc_iter->second); } }
 
-    HybridListSet<UpperBox> bounding_boxes() const {
-        HybridListSet<UpperBox> result;
+    HybridListSet<UpperBoxType> bounding_boxes() const {
+        HybridListSet<UpperBoxType> result;
         for(LocationsConstIterator _loc_iter=this->locations_begin();
             _loc_iter!=this->locations_end(); ++_loc_iter) {
             result[_loc_iter->first]=_loc_iter->second.bounding_boxes(); }
@@ -470,7 +470,7 @@ class HybridGridCell
         : HybridBasicSet<GridCell>() { }
     HybridGridCell(DiscreteLocation q,const RealSpace& s,const GridCell& gc)
         : HybridBasicSet<GridCell>(q,s,gc) { }
-    HybridBox box() const { return HybridBox(this->location(),this->space(),this->continuous_set().box()); }
+    HybridBoxType box() const { return HybridBoxType(this->location(),this->space(),this->continuous_set().box()); }
 };
 
 class HybridGridTreeSet;
@@ -612,7 +612,7 @@ class HybridGridTreeSet
         for(HybridBoxes::ConstIterator _loc_iter=hbxs.begin();
                 _loc_iter!=hbxs.end(); ++_loc_iter) {
             DiscreteLocation const& loc=_loc_iter->first;
-            VariablesBox const& vbx=_loc_iter->second;
+            ExactVariablesBoxType const& vbx=_loc_iter->second;
             ARIADNE_ASSERT(vbx.space() == this->space(loc));
             this->_provide_location(loc).adjoin_inner_approximation(vbx.continuous_set(),depth); } }
 
@@ -639,7 +639,7 @@ class HybridGridTreeSet
         for(HybridBoxes::ConstIterator _loc_iter=hbxs.begin();
                 _loc_iter!=hbxs.end(); ++_loc_iter) {
             DiscreteLocation const& loc=_loc_iter->first;
-            VariablesBox const& vbx=_loc_iter->second;
+            ExactVariablesBoxType const& vbx=_loc_iter->second;
             ARIADNE_ASSERT(vbx.space() == this->space(loc));
             this->_provide_location(_loc_iter->first).adjoin_outer_approximation(vbx.continuous_set(),depth); } }
 
@@ -674,8 +674,8 @@ class HybridGridTreeSet
         return result; }
 
     //!
-    HybridListSet<ExactBox> boxes() const {
-        HybridListSet<ExactBox> result;
+    HybridListSet<ExactBoxType> boxes() const {
+        HybridListSet<ExactBoxType> result;
         for(ConstIterator iter=this->begin();
             iter!=this->end(); ++iter) {
             result.adjoin(iter->location(),iter->continuous_set().box()); }
@@ -702,19 +702,19 @@ class HybridGridTreeSet
     HybridSpace space() const { return this->grid().space(); }
 
     //!
-    Sierpinski separated(const HybridBox& hbx) const {
+    Sierpinski separated(const HybridBoxType& hbx) const {
         LocationsConstIterator _loc_iter = this->_map.find( hbx.location() );
         return _loc_iter != this->locations_end() || _loc_iter->second.separated( hbx.continuous_set() );
     }
 
     //!
-    Sierpinski overlaps(const HybridBox& hbx) const {
+    Sierpinski overlaps(const HybridBoxType& hbx) const {
         LocationsConstIterator _loc_iter = this->_map.find( hbx.location() );
         return _loc_iter != this->locations_end() && _loc_iter->second.overlaps( hbx.continuous_set() );
     }
 
     //!
-    Sierpinski covers(const HybridBox& hbx) const {
+    Sierpinski covers(const HybridBoxType& hbx) const {
         LocationsConstIterator _loc_iter=this->_map.find(hbx.location());
         return _loc_iter!=this->locations_end() && _loc_iter->second.covers( hbx.continuous_set() );
     }

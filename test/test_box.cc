@@ -36,7 +36,7 @@ template<class I> Box<I> make_box(InitializerList<Interval<RawFloat64>> lst) {
 template<class B> inline auto possibly_not(B b) -> decltype(possibly(not b)) { return possibly(not b); }
 template<class B> inline auto definitely_not(B b) -> decltype(definitely(not b)) { return definitely(not b); }
 
-template<class BX> class TestBox {
+template<class BX> class TestBoxType {
     typedef typename BX::IntervalType I;
     typedef typename I::LowerBoundType L;
     typedef typename I::UpperBoundType U;
@@ -116,7 +116,7 @@ template<class BX> class TestBox {
 
 
 int main() {
-    TestBox<ExactFloatBox>().test();
+    TestBoxType<ExactFloat64Box>().test();
 
     return ARIADNE_TEST_FAILURES;
 }

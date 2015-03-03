@@ -73,17 +73,17 @@ class TaylorFunctionFactory
     Sweeper sweeper() const { return this->_sweeper; }
     TaylorFunctionFactory* clone() const { return new TaylorFunctionFactory(this->_sweeper); }
     Void write(OutputStream& os) const { os << "TaylorFunctionFactory( sweeper=" << this->_sweeper << " )"; }
-    ScalarTaylorFunction create(const ExactBox& domain, const ValidatedScalarFunctionInterface& function) const;
-    VectorTaylorFunction create(const ExactBox& domain, const ValidatedVectorFunctionInterface& function) const;
-    ScalarTaylorFunction create_zero(const ExactBox& domain) const;
-    ScalarTaylorFunction create_constant(const ExactBox& domain, ValidatedNumericType c) const;
-    ScalarTaylorFunction create_coordinate(const ExactBox& domain, SizeType k) const;
-    VectorTaylorFunction create_zero(SizeType i, const ExactBox& domain) const;
-    ScalarTaylorFunction create_identity(const ExactInterval& domain) const;
-    VectorTaylorFunction create_identity(const ExactBox& domain) const;
+    ScalarTaylorFunction create(const ExactBoxType& domain, const ValidatedScalarFunctionInterface& function) const;
+    VectorTaylorFunction create(const ExactBoxType& domain, const ValidatedVectorFunctionInterface& function) const;
+    ScalarTaylorFunction create_zero(const ExactBoxType& domain) const;
+    ScalarTaylorFunction create_constant(const ExactBoxType& domain, ValidatedNumericType c) const;
+    ScalarTaylorFunction create_coordinate(const ExactBoxType& domain, SizeType k) const;
+    VectorTaylorFunction create_zero(SizeType i, const ExactBoxType& domain) const;
+    ScalarTaylorFunction create_identity(const ExactIntervalType& domain) const;
+    VectorTaylorFunction create_identity(const ExactBoxType& domain) const;
   private:
-    ScalarTaylorFunction* _create(const ExactBox& domain, const ValidatedScalarFunctionInterface& function) const;
-    VectorTaylorFunction* _create(const ExactBox& domain, const ValidatedVectorFunctionInterface& function) const;
+    ScalarTaylorFunction* _create(const ExactBoxType& domain, const ValidatedScalarFunctionInterface& function) const;
+    VectorTaylorFunction* _create(const ExactBoxType& domain, const ValidatedVectorFunctionInterface& function) const;
 };
 
 

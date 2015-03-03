@@ -70,7 +70,7 @@ class EuclideanDomain : public BoxDomain {
 template<class P>
 class FunctionConstructors {
     static_assert(Or<IsSame<P,ApproximateTag>,IsSame<P,ValidatedTag>,IsSame<P,EffectiveTag>>::value,"P must be an information level/paradigm.");
-    typedef CanonicalNumericTypeType<P> Y;
+    typedef CanonicalNumericType<P> Y;
   public:
     typedef Y NumericType;
 
@@ -98,13 +98,13 @@ template<class P, class D, class C> class FunctionFacade {
 };
 
 template<class P> class FunctionFacade<P,BoxDomain,IntervalDomain> {
-    typedef CanonicalNumericTypeType<P> Y;
+    typedef CanonicalNumericType<P> Y;
   public:
     template<class X> Covector<ArithmeticType<X,Y>> gradient(Vector<X> const& x) const;
 };
 
 template<class P> class FunctionFacade<P,BoxDomain,BoxDomain> {
-    typedef CanonicalNumericTypeType<P> Y;
+    typedef CanonicalNumericType<P> Y;
   public:
     template<class X> Matrix<ArithmeticType<X,Y>> jacobian(Vector<X> const& x) const;
 };
@@ -118,7 +118,7 @@ class Function
     , public FunctionFacade<P,D,C>
 {
     static_assert(IsStronger<P,ApproximateTag>::value,"P must be an information level/paradigm.");
-    typedef CanonicalNumericTypeType<P> Y;
+    typedef CanonicalNumericType<P> Y;
   protected:
     std::shared_ptr< const FunctionInterface<P,D,C> > _ptr;
   public:
@@ -211,47 +211,47 @@ evaluate(const Function<P,D,C>& f, const ElementType<D,X>& x) -> decltype(f(x)) 
 
 template<class P, class C, class X> inline auto
 differential(const Function<P,IntervalDomain,C>& f, const X& x, DegreeType d)
-    -> ElementType<C,Differential<ArithmeticType<CanonicalNumericTypeType<P>,X>>> {
-    auto dx=Differential<ArithmeticType<X,CanonicalNumericTypeType<P>>>::identity(d,x); return f(dx);
+    -> ElementType<C,Differential<ArithmeticType<CanonicalNumericType<P>,X>>> {
+    auto dx=Differential<ArithmeticType<X,CanonicalNumericType<P>>>::identity(d,x); return f(dx);
 }
 
 template<class P, class C, class X> inline auto
 differential(const Function<P,BoxDomain,C>& f, const Vector<X>& x, DegreeType d)
-    -> ElementType<C,Differential<ArithmeticType<CanonicalNumericTypeType<P>,X>>> {
-    auto dx=Differential<ArithmeticType<X,CanonicalNumericTypeType<P>>>::identity(d,x); return f(dx);
+    -> ElementType<C,Differential<ArithmeticType<CanonicalNumericType<P>,X>>> {
+    auto dx=Differential<ArithmeticType<X,CanonicalNumericType<P>>>::identity(d,x); return f(dx);
 }
 
 /*
 template<class P, class D, class C, class X> inline auto
 differential(const Function<P,D,C>& f, const ElementType<D,X>& x, DegreeType d)
-    -> ElementType<C,Differential<ArithmeticType<CanonicalNumericTypeType<P>,X>>> {
+    -> ElementType<C,Differential<ArithmeticType<CanonicalNumericType<P>,X>>> {
     auto dx=Differential<X>::create_identity(x,d); return f(dx);
 }
 */
 
 
-template<class P, class X> ArithmeticType<CanonicalNumericTypeType<P>,X>
+template<class P, class X> ArithmeticType<CanonicalNumericType<P>,X>
 derivative(const ScalarUnivariateFunction<P>& f, const X& x) {
     return differential(f,x,1u).gradient(); }
 
-template<class P, class X> Vector<ArithmeticType<CanonicalNumericTypeType<P>,X>>
+template<class P, class X> Vector<ArithmeticType<CanonicalNumericType<P>,X>>
 tangent(const VectorUnivariateFunction<P>& f, const X& x) {
     return column(differential(f,x,1u).jacobian(),0u); }
 
-template<class P, class X> Covector<ArithmeticType<CanonicalNumericTypeType<P>,X>>
+template<class P, class X> Covector<ArithmeticType<CanonicalNumericType<P>,X>>
 gradient(const ScalarMultivariateFunction<P>& f, const Vector<X>& x) {
     return differential(f,x,1u).gradient(); }
 
-template<class P, class X> Matrix<ArithmeticType<CanonicalNumericTypeType<P>,X>>
+template<class P, class X> Matrix<ArithmeticType<CanonicalNumericType<P>,X>>
 jacobian(const VectorMultivariateFunction<P>& f, const Vector<X>& x) {
     return differential(f,x,1u).jacobian(); }
 
-template<class P> template<class X> Covector<ArithmeticType<X,CanonicalNumericTypeType<P>>>
+template<class P> template<class X> Covector<ArithmeticType<X,CanonicalNumericType<P>>>
 FunctionFacade<P,BoxDomain,IntervalDomain>::gradient(Vector<X> const& x) const {
     return Ariadne::gradient(static_cast<Function<P,BoxDomain,IntervalDomain>const&>(*this),x);
 }
 
-template<class P> template<class X> Matrix<ArithmeticType<X,CanonicalNumericTypeType<P>>>
+template<class P> template<class X> Matrix<ArithmeticType<X,CanonicalNumericType<P>>>
 FunctionFacade<P,BoxDomain,BoxDomain>::jacobian(Vector<X> const& x) const {
     return Ariadne::jacobian(static_cast<Function<P,BoxDomain,BoxDomain>const&>(*this),x);
 }
@@ -260,7 +260,7 @@ FunctionFacade<P,BoxDomain,BoxDomain>::jacobian(Vector<X> const& x) const {
 /*
 template<class P, class D> class ScalarFunction : public Function<P,D,IntervalDomain> {
     typedef IntervalDomain C;
-    typedef CanonicalNumericTypeType<P> X;
+    typedef CanonicalNumericType<P> X;
   public:
     typedef D DomainType;
     using Function<P,D,C>::Function;
@@ -274,7 +274,7 @@ template<class P, class D> class ScalarFunction : public Function<P,D,IntervalDo
 
 template<class P, class D> class VectorFunction : public Function<P,D,BoxDomain> {
     typedef BoxDomain C;
-    typedef CanonicalNumericTypeType<P> X;
+    typedef CanonicalNumericType<P> X;
   public:
     using Function<P,D,BoxDomain>::Function;
     VectorFunction();
@@ -372,7 +372,7 @@ template<class P>
 class VectorFunction
 {
     static_assert(IsStronger<P,ApproximateTag>::value,"P must be an information level/paradigm.");
-    typedef CanonicalNumericTypeType<P> X;
+    typedef CanonicalNumericType<P> X;
   private:
     std::shared_ptr< const VectorFunctionInterface<P> > _ptr;
   public:
@@ -535,36 +535,36 @@ template<class P, class D> template<class XX> inline XX VectorFunctionElementRef
 
 
 
-inline UpperInterval evaluate_range(ScalarFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {
-    return static_cast<UpperInterval>(f(reinterpret_cast<Vector<ValidatedNumericType>const&>(x))); }
-inline Vector<UpperInterval> evaluate_range(VectorFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {
-    return static_cast<Vector<UpperInterval>>(f(reinterpret_cast<Vector<ValidatedNumericType>const&>(x))); }
-inline Vector<Differential<UpperInterval>> derivative_range(VectorFunction<ValidatedTag>const& f, const Vector<Differential<UpperInterval>>& x) {
-    return static_cast<Vector<Differential<UpperInterval>>>(f(reinterpret_cast<Vector<Differential<ValidatedNumericType>>const&>(x))); }
+inline UpperIntervalType evaluate_range(ScalarFunction<ValidatedTag>const& f, const Vector<UpperIntervalType>& x) {
+    return static_cast<UpperIntervalType>(f(reinterpret_cast<Vector<ValidatedNumericType>const&>(x))); }
+inline Vector<UpperIntervalType> evaluate_range(VectorFunction<ValidatedTag>const& f, const Vector<UpperIntervalType>& x) {
+    return static_cast<Vector<UpperIntervalType>>(f(reinterpret_cast<Vector<ValidatedNumericType>const&>(x))); }
+inline Vector<Differential<UpperIntervalType>> derivative_range(VectorFunction<ValidatedTag>const& f, const Vector<Differential<UpperIntervalType>>& x) {
+    return static_cast<Vector<Differential<UpperIntervalType>>>(f(reinterpret_cast<Vector<Differential<ValidatedNumericType>>const&>(x))); }
 
 
-inline Covector<UpperInterval> gradient_range(ValidatedScalarFunction const& f, const Vector<UpperInterval>& x) {
-    return static_cast<Covector<UpperInterval>>(static_cast<Covector<ValidatedFloat64>>(gradient(f,reinterpret_cast<Vector<ValidatedFloat64>const&>(x)))); }
-inline Matrix<UpperInterval> jacobian_range(ValidatedVectorFunction const& f, const Vector<UpperInterval>& x) {
-    return static_cast<Matrix<UpperInterval>>(static_cast<Matrix<ValidatedFloat64>>(jacobian(f,reinterpret_cast<Vector<ValidatedFloat64>const&>(x)))); }
+inline Covector<UpperIntervalType> gradient_range(ValidatedScalarFunction const& f, const Vector<UpperIntervalType>& x) {
+    return static_cast<Covector<UpperIntervalType>>(static_cast<Covector<ValidatedFloat64>>(gradient(f,reinterpret_cast<Vector<ValidatedFloat64>const&>(x)))); }
+inline Matrix<UpperIntervalType> jacobian_range(ValidatedVectorFunction const& f, const Vector<UpperIntervalType>& x) {
+    return static_cast<Matrix<UpperIntervalType>>(static_cast<Matrix<ValidatedFloat64>>(jacobian(f,reinterpret_cast<Vector<ValidatedFloat64>const&>(x)))); }
 
 /*
-inline Matrix<UpperInterval> jacobian(VectorFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {
-    return static_cast<Matrix<UpperInterval>>(f.jacobian(reinterpret_cast<Vector<ValidatedFloat64>const&>(x))); }
-inline Matrix<UpperInterval> jacobian(VectorFunction<ValidatedTag>const& f, const Vector<ExactInterval>& x) {
-    return static_cast<Matrix<UpperInterval>>(f.jacobian(reinterpret_cast<Vector<ValidatedFloat64>const&>(x))); }
-inline Matrix<UpperInterval> jacobian_range(VectorFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {
-    return static_cast<Matrix<UpperInterval>>(f.jacobian(reinterpret_cast<Vector<ValidatedFloat64>const&>(x))); }
+inline Matrix<UpperIntervalType> jacobian(VectorFunction<ValidatedTag>const& f, const Vector<UpperIntervalType>& x) {
+    return static_cast<Matrix<UpperIntervalType>>(f.jacobian(reinterpret_cast<Vector<ValidatedFloat64>const&>(x))); }
+inline Matrix<UpperIntervalType> jacobian(VectorFunction<ValidatedTag>const& f, const Vector<ExactIntervalType>& x) {
+    return static_cast<Matrix<UpperIntervalType>>(f.jacobian(reinterpret_cast<Vector<ValidatedFloat64>const&>(x))); }
+inline Matrix<UpperIntervalType> jacobian_range(VectorFunction<ValidatedTag>const& f, const Vector<UpperIntervalType>& x) {
+    return static_cast<Matrix<UpperIntervalType>>(f.jacobian(reinterpret_cast<Vector<ValidatedFloat64>const&>(x))); }
 
 // FIXME: Needed to override templated gradient and jacobian
-inline Covector<UpperInterval> gradient(ScalarFunction<EffectiveTag>const& f, const Vector<UpperInterval>& x) {
-    return static_cast<Covector<UpperInterval>>(gradient(f,reinterpret_cast<Vector<ValidatedFloat64>const&>(x))); }
-inline Covector<UpperInterval> gradient(ScalarFunction<EffectiveTag>const& f, const Vector<ExactInterval>& x) {
-    return gradient(f,static_cast<Vector<UpperInterval>>(x)); }
-inline Matrix<UpperInterval> jacobian(VectorFunction<EffectiveTag>const& f, const Vector<UpperInterval>& x) {
-    return static_cast<Matrix<UpperInterval>>(f.jacobian(reinterpret_cast<Vector<ValidatedFloat64>const&>(x))); }
-inline Matrix<UpperInterval> jacobian(VectorFunction<EffectiveTag>const& f, const Vector<ExactInterval>& x) {
-    return jacobian(f,static_cast<Vector<UpperInterval>>(x)); }
+inline Covector<UpperIntervalType> gradient(ScalarFunction<EffectiveTag>const& f, const Vector<UpperIntervalType>& x) {
+    return static_cast<Covector<UpperIntervalType>>(gradient(f,reinterpret_cast<Vector<ValidatedFloat64>const&>(x))); }
+inline Covector<UpperIntervalType> gradient(ScalarFunction<EffectiveTag>const& f, const Vector<ExactIntervalType>& x) {
+    return gradient(f,static_cast<Vector<UpperIntervalType>>(x)); }
+inline Matrix<UpperIntervalType> jacobian(VectorFunction<EffectiveTag>const& f, const Vector<UpperIntervalType>& x) {
+    return static_cast<Matrix<UpperIntervalType>>(f.jacobian(reinterpret_cast<Vector<ValidatedFloat64>const&>(x))); }
+inline Matrix<UpperIntervalType> jacobian(VectorFunction<EffectiveTag>const& f, const Vector<ExactIntervalType>& x) {
+    return jacobian(f,static_cast<Vector<UpperIntervalType>>(x)); }
 */
 
 template<class P> class FunctionFactory;
@@ -578,29 +578,29 @@ class FunctionFactory<ValidatedTag>
     FunctionFactory(const FunctionFactoryInterface<ValidatedTag>& ref) : _ptr(ref.clone()) { }
     FunctionFactory(const FunctionFactoryInterface<ValidatedTag>* ptr) : _ptr(ptr) { }
     FunctionFactory(std::shared_ptr< const FunctionFactoryInterface<ValidatedTag> > ptr) : _ptr(ptr) { }
-    inline ValidatedScalarFunction create(const ExactBox& d, const ValidatedScalarFunctionInterface& f) const;
-    inline ValidatedVectorFunction create(const ExactBox& d, const ValidatedVectorFunctionInterface& f) const;
-    inline ValidatedScalarFunction create_zero(const ExactBox& d) const;
-    inline ValidatedVectorFunction create_identity(const ExactBox& d) const;
+    inline ValidatedScalarFunction create(const ExactBoxType& d, const ValidatedScalarFunctionInterface& f) const;
+    inline ValidatedVectorFunction create(const ExactBoxType& d, const ValidatedVectorFunctionInterface& f) const;
+    inline ValidatedScalarFunction create_zero(const ExactBoxType& d) const;
+    inline ValidatedVectorFunction create_identity(const ExactBoxType& d) const;
     friend OutputStream& operator<<(OutputStream& os, const FunctionFactory<ValidatedTag>& factory);
 };
 
-inline ValidatedScalarFunction FunctionFactoryInterface<ValidatedTag>::create(const ExactBox& domain, const ValidatedScalarFunctionInterface& function) const {
+inline ValidatedScalarFunction FunctionFactoryInterface<ValidatedTag>::create(const ExactBoxType& domain, const ValidatedScalarFunctionInterface& function) const {
     return ValidatedScalarFunction(SharedPointer<ValidatedScalarFunctionInterface>(this->_create(domain,function))); }
-inline ValidatedVectorFunction FunctionFactoryInterface<ValidatedTag>::create(const ExactBox& domain, const ValidatedVectorFunctionInterface& function) const {
+inline ValidatedVectorFunction FunctionFactoryInterface<ValidatedTag>::create(const ExactBoxType& domain, const ValidatedVectorFunctionInterface& function) const {
     return ValidatedVectorFunction(SharedPointer<ValidatedVectorFunctionInterface>(this->_create(domain,function))); }
-inline ValidatedScalarFunction FunctionFactoryInterface<ValidatedTag>::create_zero(const ExactBox& domain) const {
+inline ValidatedScalarFunction FunctionFactoryInterface<ValidatedTag>::create_zero(const ExactBoxType& domain) const {
     return this->create(domain,EffectiveScalarFunction::zero(domain.dimension())); }
-inline ValidatedVectorFunction FunctionFactoryInterface<ValidatedTag>::create_identity(const ExactBox& domain) const {
+inline ValidatedVectorFunction FunctionFactoryInterface<ValidatedTag>::create_identity(const ExactBoxType& domain) const {
     return this->create(domain,EffectiveVectorFunction::identity(domain.dimension())); }
 
-inline ValidatedScalarFunction FunctionFactory<ValidatedTag>::create(const ExactBox& domain, const ValidatedScalarFunctionInterface& function) const {
+inline ValidatedScalarFunction FunctionFactory<ValidatedTag>::create(const ExactBoxType& domain, const ValidatedScalarFunctionInterface& function) const {
     return this->_ptr->create(domain,function); }
-inline ValidatedVectorFunction FunctionFactory<ValidatedTag>::create(const ExactBox& domain, const ValidatedVectorFunctionInterface& function) const {
+inline ValidatedVectorFunction FunctionFactory<ValidatedTag>::create(const ExactBoxType& domain, const ValidatedVectorFunctionInterface& function) const {
     return this->_ptr->create(domain,function); }
-inline ValidatedScalarFunction FunctionFactory<ValidatedTag>::create_zero(const ExactBox& domain) const {
+inline ValidatedScalarFunction FunctionFactory<ValidatedTag>::create_zero(const ExactBoxType& domain) const {
     return this->_ptr->create_zero(domain); }
-inline ValidatedVectorFunction FunctionFactory<ValidatedTag>::create_identity(const ExactBox& domain) const {
+inline ValidatedVectorFunction FunctionFactory<ValidatedTag>::create_identity(const ExactBoxType& domain) const {
     return this->_ptr->create_identity(domain); }
 
 inline OutputStream& operator<<(OutputStream& os, const ValidatedFunctionFactory& factory) {

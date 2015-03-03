@@ -71,12 +71,12 @@ typedef ErrorFloat64 NormType; // FIXME: Remove this typedef
 typedef ErrorFloat64 ErrorType; // FIXME: Remove this typedef
 typedef ApproximateFloat64 ApproximateErrorType; // FIXME: Remove this typedef
 
-template<class I> struct CanonicalNumericTypeTypedef;
-template<> struct CanonicalNumericTypeTypedef<ExactTag> { typedef ExactNumericType Type; };
-template<> struct CanonicalNumericTypeTypedef<EffectiveTag> { typedef EffectiveNumericType Type; };
-template<> struct CanonicalNumericTypeTypedef<ValidatedTag> { typedef ValidatedNumericType Type; };
-template<> struct CanonicalNumericTypeTypedef<ApproximateTag> { typedef ApproximateNumericType Type; };
-template<class I> using CanonicalNumericTypeType = typename CanonicalNumericTypeTypedef<I>::Type;
+template<class I> struct CanonicalNumericTypedef;
+template<> struct CanonicalNumericTypedef<ExactTag> { typedef ExactNumericType Type; };
+template<> struct CanonicalNumericTypedef<EffectiveTag> { typedef EffectiveNumericType Type; };
+template<> struct CanonicalNumericTypedef<ValidatedTag> { typedef ValidatedNumericType Type; };
+template<> struct CanonicalNumericTypedef<ApproximateTag> { typedef ApproximateNumericType Type; };
+template<class I> using CanonicalNumericType = typename CanonicalNumericTypedef<I>::Type;
 
 template<class X> struct InformationTypedef;
 template<> struct InformationTypedef<ExactNumericType> { typedef ExactTag Type; };
@@ -132,8 +132,8 @@ typedef Point<ExactNumericType> ExactPoint;
 
 
 // Domain declarations
-using IntervalDomain = ExactInterval;
-using BoxDomain = ExactBox;
+using IntervalDomain = ExactIntervalType;
+using BoxDomain = ExactBoxType;
 
 // Function declarations
 template<class P, class D, class F> class Function;

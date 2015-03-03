@@ -32,32 +32,32 @@ template<class IVL> class Box;
 typedef Box<RationalInterval> RationalBox;
 typedef Box<RealInterval> RealBox;
 
-typedef Box<ExactFloatInterval> ExactFloatBox;
-typedef Box<MetricFloatInterval> MetricFloatBox;
-typedef Box<BoundedFloatInterval> BoundedFloatBox;
-typedef Box<UpperFloatInterval> UpperFloatBox;
-typedef Box<LowerFloatInterval> LowerFloatBox;
-typedef Box<ApproximateFloatInterval> ApproximateFloatBox;
+typedef Box<ExactFloat64Interval> ExactFloat64Box;
+typedef Box<MetricFloat64Interval> MetricFloat64Box;
+typedef Box<BoundedFloat64Interval> BoundedFloat64Box;
+typedef Box<UpperFloat64Interval> UpperFloat64Box;
+typedef Box<LowerFloat64Interval> LowerFloat64Box;
+typedef Box<ApproximateFloat64Interval> ApproximateFloat64Box;
 
-typedef Box<ExactInterval> ExactBox;
-typedef Box<EffectiveInterval> EffectiveBox;
-typedef Box<ValidatedInterval> ValidatedBox;
-typedef Box<UpperInterval> UpperBox;
-typedef Box<LowerInterval> LowerBox;
-typedef Box<ApproximateInterval> ApproximateBox;
+typedef Box<ExactIntervalType> ExactBoxType;
+typedef Box<EffectiveIntervalType> EffectiveBoxType;
+typedef Box<ValidatedIntervalType> ValidatedBoxType;
+typedef Box<UpperIntervalType> UpperBoxType;
+typedef Box<LowerIntervalType> LowerBoxType;
+typedef Box<ApproximateIntervalType> ApproximateBoxType;
 
-using BoxDomain = ExactFloatBox;
+using BoxDomain = ExactFloat64Box;
 
 template<class X> class Vector;
 /*
 typedef Vector<ApproximateFloat> ApproximateFloatVector;
 typedef Vector<ValidatedFloat> ValidatedFloatVector;
 typedef Vector<ExactFloat> ExactFloatVector;
-typedef Vector<UpperFloatInterval> UpperFloatIntervalVector;
+typedef Vector<UpperFloat64Interval> UpperFloat64IntervalVector;
 */
-typedef Vector<ExactInterval> ExactIntervalVector;
-typedef Vector<UpperInterval> UpperIntervalVector;
-typedef Vector<ApproximateInterval> ApproximateIntervalVector;
+typedef Vector<ExactIntervalType> ExactIntervalVectorType;
+typedef Vector<UpperIntervalType> UpperIntervalVectorType;
+typedef Vector<ApproximateIntervalType> ApproximateIntervalVectorType;
 
 } // namespace Ariadne
 

@@ -85,23 +85,23 @@ class ValidatedAffineConstrainedImageSet
 	, public virtual DrawableInterface
 	, public Loggable
 {
-    ExactBox  _domain;
+    ExactBoxType  _domain;
     Vector<ValidatedAffineModel> _space_models;
     List<ValidatedAffineModelConstraint> _constraint_models;
   public:
     //!\brief The set \f$\{ Gy+c \mid y\in D\}\f$.
-    ValidatedAffineConstrainedImageSet(const ExactBox& D, const Matrix<ExactFloat64>& G, const Vector<ExactFloat64>& c);
+    ValidatedAffineConstrainedImageSet(const ExactBoxType& D, const Matrix<ExactFloat64>& G, const Vector<ExactFloat64>& c);
     //!\brief The set \f$\{ Gy+c \mid ||y||_\infty\leq 1\}\f$. \deprecated
     ValidatedAffineConstrainedImageSet(const Matrix<ExactFloat64>& G, const Vector<ExactFloat64>& c);
     //!\brief The set \f$\{ x_i=f_i(s) \mid s\in D \}\f$.
-    ValidatedAffineConstrainedImageSet(const ExactBox& D, const Vector<ValidatedAffine>& f);
+    ValidatedAffineConstrainedImageSet(const ExactBoxType& D, const Vector<ValidatedAffine>& f);
     //!\brief The set \f$\{ x_i=f_i(s) \mid s\in D \mid c(s) \}\f$.
-    ValidatedAffineConstrainedImageSet(const ExactBox& D, const Vector<ValidatedAffine>& f, const List<ValidatedAffineConstraint>& c);
+    ValidatedAffineConstrainedImageSet(const ExactBoxType& D, const Vector<ValidatedAffine>& f, const List<ValidatedAffineConstraint>& c);
     //!\brief The set \f$\{ x_i=f_i(s) \mid s\in [-1,+1]^n \mid c(s) \}\f$.
     explicit ValidatedAffineConstrainedImageSet(const Vector<ValidatedAffineModel>& f, const List<ValidatedAffineModelConstraint>& c);
     explicit ValidatedAffineConstrainedImageSet(const Vector<ValidatedAffineModel>& f);
 
-    ValidatedAffineConstrainedImageSet(const ExactBox& D, const Vector<ValidatedAffineModel>& f, const List<ValidatedAffineModelConstraint>& c);
+    ValidatedAffineConstrainedImageSet(const ExactBoxType& D, const Vector<ValidatedAffineModel>& f, const List<ValidatedAffineModelConstraint>& c);
 
     ValidatedAffineConstrainedImageSet* clone() const;
     Void new_parameter_constraint(const EffectiveAffineConstraint& c);
@@ -111,12 +111,12 @@ class ValidatedAffineConstrainedImageSet
     DimensionType dimension() const;
     SizeType number_of_parameters() const;
     SizeType number_of_constraints() const;
-    ExactBox domain() const;
+    ExactBoxType domain() const;
 
     Kleenean is_bounded() const;
-    UpperBox bounding_box() const;
-    Sierpinski separated(const ExactBox& bx) const;
-    Sierpinski inside(const ExactBox& bx) const;
+    UpperBoxType bounding_box() const;
+    Sierpinski separated(const ExactBoxType& bx) const;
+    Sierpinski inside(const ExactBoxType& bx) const;
     Kleenean is_empty() const;
 
     Void adjoin_outer_approximation_to(PavingInterface& g, Int depth) const;
@@ -129,7 +129,7 @@ class ValidatedAffineConstrainedImageSet
     virtual OutputStream& write(OutputStream& os) const;
 
   private:
-    Void construct(const ExactBox& D, const Matrix<ExactFloat64>& G, const Vector<ExactFloat64>& c);
+    Void construct(const ExactBoxType& D, const Matrix<ExactFloat64>& G, const Vector<ExactFloat64>& c);
     Void construct_linear_program(LinearProgram<Float64>& lp) const;
     static Void _robust_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<Float64>& lp, const Vector<Float64>& errors, GridCell& cell, Int depth);
     static Void _adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<Float64>& lp, const Vector<Float64>& errors, GridCell& cell, Int depth);

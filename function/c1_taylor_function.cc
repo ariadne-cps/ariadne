@@ -93,8 +93,8 @@ C1TaylorSeries C1TaylorSeries::coordinate() {
     return result;
 }
 
-ExactInterval C1TaylorSeries::domain() const {
-    return ExactInterval(-1,+1);
+ExactIntervalType C1TaylorSeries::domain() const {
+    return ExactIntervalType(-1,+1);
 }
 
 Nat C1TaylorSeries::degree() const {
@@ -103,7 +103,7 @@ Nat C1TaylorSeries::degree() const {
 
 #define ARIADNE_BOUNDS_INTERVAL_SUM
 #if defined ARIADNE_MIDPOINT_INTERVAL_SUM
-C1TaylorSeries& operator+=(C1TaylorSeries& f, ExactInterval ic) {
+C1TaylorSeries& operator+=(C1TaylorSeries& f, ExactIntervalType ic) {
     Float64::set_rounding_upward();
     Float64& fv=f._coefficients[0];
     Float64 c=ic.midpoint();
@@ -315,19 +315,19 @@ C1TaylorSeries compose(C1TaylorSeries f, C1TaylorSeries g) {
     return r;
 }
 
-UpperInterval evaluate(C1TaylorSeries f, UpperInterval x) {
+UpperIntervalType evaluate(C1TaylorSeries f, UpperIntervalType x) {
     Nat i=f.degree();
-    UpperInterval r=UpperInterval(Float64(f._coefficients[i]));
+    UpperIntervalType r=UpperIntervalType(Float64(f._coefficients[i]));
     while (i!=0) {
         i=i-i;
         r*=x;
-        r+=UpperInterval(Float64(f._coefficients[i]));
+        r+=UpperIntervalType(Float64(f._coefficients[i]));
     }
     if(f._zero_error+Float64(x.centre())*f._derivative_error < f._uniform_error) {
-        r+=UpperInterval(-f._zero_error,+f._zero_error);
-        r+=UpperInterval(x)*UpperInterval(-f._derivative_error,+f._derivative_error);
+        r+=UpperIntervalType(-f._zero_error,+f._zero_error);
+        r+=UpperIntervalType(x)*UpperIntervalType(-f._derivative_error,+f._derivative_error);
     } else {
-        r+=UpperInterval(-f._uniform_error,+f._uniform_error);
+        r+=UpperIntervalType(-f._uniform_error,+f._uniform_error);
     }
     return r;
 }
@@ -390,7 +390,7 @@ Void C1TaylorFunction::clear() {
     }
 }
 
-C1TaylorFunction& C1TaylorFunction::operator=(ExactInterval ic) {
+C1TaylorFunction& C1TaylorFunction::operator=(ExactIntervalType ic) {
     this->clear();
     Float64::set_rounding_upward();
     Float64 e=(ic.upper().raw()-ic.lower().raw())/2;
@@ -619,9 +619,9 @@ C1TaylorFunction operator*(C1TaylorFunction f1, C1TaylorFunction f2) {
     return *frp;
 }
 
-UpperInterval evaluate(C1TaylorFunction f, Vector<UpperInterval> x) {
-    UpperInterval r=horner_evaluate(reinterpret_cast<Expansion<ExactFloat64>const&>(f._expansion),x);
-    r += UpperInterval(-f._uniform_error,+f._uniform_error);
+UpperIntervalType evaluate(C1TaylorFunction f, Vector<UpperIntervalType> x) {
+    UpperIntervalType r=horner_evaluate(reinterpret_cast<Expansion<ExactFloat64>const&>(f._expansion),x);
+    r += UpperIntervalType(-f._uniform_error,+f._uniform_error);
     return r;
 }
 

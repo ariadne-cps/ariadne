@@ -33,7 +33,7 @@ namespace Ariadne {
 Kleenean
 separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float64& eps)
 {
-    ExactBox bb=cast_exact_box(ls.bounding_box());
+    ExactBoxType bb=cast_exact_box(ls.bounding_box());
     if(definitely(bb.empty())) { return true; }
     return separated(ls,rs,bb,eps);
 }
@@ -42,7 +42,7 @@ separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Fl
 Kleenean
 overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float64& eps)
 {
-    ExactBox bb=cast_exact_box(ls.bounding_box());
+    ExactBoxType bb=cast_exact_box(ls.bounding_box());
     if(definitely(bb.empty())) { return false; }
     return overlap(ls,rs,bb,eps);
 }
@@ -51,14 +51,14 @@ overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Floa
 Kleenean
 inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float64& eps)
 {
-    ExactBox bb=cast_exact_box(ls.bounding_box());
+    ExactBoxType bb=cast_exact_box(ls.bounding_box());
     if(definitely(bb.empty())) { return true; }
     return inside(ls,rs,bb,eps);
 }
 
 
 Kleenean
-overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBox& bx, const Float64& eps)
+overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBoxType& bx, const Float64& eps)
 {
     if(definitely(ls.separated(bx))) {
         return false;
@@ -72,7 +72,7 @@ overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Exac
     else if(definitely(bx.radius().raw()<eps)) {
         return indeterminate;
     } else {
-        ExactBox bx1,bx2;
+        ExactBoxType bx1,bx2;
         make_lpair(bx1,bx2)=split(bx);
         if(definitely(ls.separated(bx1))) {
             return overlap(ls,rs,bx2,eps);
@@ -86,14 +86,14 @@ overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Exac
 
 
 Kleenean
-inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBox& bx, const Float64& eps)
+inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBoxType& bx, const Float64& eps)
 {
     if(definitely(ls.separated(bx) || rs.separated(bx))) {
         return true;
     } else if(bx.radius().raw()<eps) {
         return indeterminate;
     } else {
-        ExactBox bx1,bx2;
+        ExactBoxType bx1,bx2;
         make_lpair(bx1,bx2)=split(bx);
         if(definitely(ls.separated(bx1))) {
             return inside(ls,rs,bx2,eps);
@@ -107,14 +107,14 @@ inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Exact
 
 
 Kleenean
-separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBox& bx, const Float64& eps)
+separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBoxType& bx, const Float64& eps)
 {
     if(definitely(ls.separated(bx) || rs.separated(bx))) {
         return true;
     } else if(bx.radius().raw()<eps) {
         return indeterminate;
     } else {
-        ExactBox bx1,bx2;
+        ExactBoxType bx1,bx2;
         make_lpair(bx1,bx2)=split(bx);
         if(definitely(ls.separated(bx1))) {
             return separated(ls,rs,bx2,eps);
@@ -130,7 +130,7 @@ separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Ex
 
 
 Kleenean
-overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const ExactBox& bx, const Float64& eps)
+overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const ExactBoxType& bx, const Float64& eps)
 {
     if(definitely(ovs.overlaps(bx))) {
         if(definitely(ops.covers(bx))) {
@@ -138,7 +138,7 @@ overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const ExactBo
         } else if(bx.radius().raw()<eps) {
             return indeterminate;
         } else {
-            ExactBox bx1,bx2;
+            ExactBoxType bx1,bx2;
             make_lpair(bx1,bx2)=split(bx);
             if(definitely(overlap(ovs,ops,bx1,eps))) {
                 return true;
@@ -153,14 +153,14 @@ overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const ExactBo
 
 
 Kleenean
-inside(const ClosedSetInterface& cls, const OpenSetInterface& ops, const ExactBox& bx, const Float64& eps)
+inside(const ClosedSetInterface& cls, const OpenSetInterface& ops, const ExactBoxType& bx, const Float64& eps)
 {
     if(definitely(cls.separated(bx) || ops.covers(bx))) {
         return true;
     } else if(bx.radius().raw()<eps) {
         return indeterminate;
     } else {
-        ExactBox bx1,bx2;
+        ExactBoxType bx1,bx2;
         make_lpair(bx1,bx2)=split(bx);
         if(definitely(inside(cls,ops,bx1,eps))) {
             return inside(cls,ops,bx2,eps);
@@ -172,14 +172,14 @@ inside(const ClosedSetInterface& cls, const OpenSetInterface& ops, const ExactBo
 
 
 Kleenean
-separated(const ClosedSetInterface& cls1, const ClosedSetInterface& cls2, const ExactBox& bx, const Float64& eps)
+separated(const ClosedSetInterface& cls1, const ClosedSetInterface& cls2, const ExactBoxType& bx, const Float64& eps)
 {
     if(definitely(cls1.separated(bx) || cls2.separated(bx))) {
         return true;
     } else if(bx.radius().raw()<eps) {
         return indeterminate;
     } else {
-        ExactBox bx1,bx2;
+        ExactBoxType bx1,bx2;
         make_lpair(bx1,bx2)=split(bx);
         if(definitely(separated(cls1,cls2,bx1,eps))) {
             return separated(cls1,cls2,bx2,eps);

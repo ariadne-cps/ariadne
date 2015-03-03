@@ -46,16 +46,16 @@ class AnalyticFunction;
 template<class X> class TaylorSeries;
 
 template<> class TaylorSeries<ValidatedFloat64> {
-    ExactInterval _domain;
+    ExactIntervalType _domain;
     Array<ExactFloat64> _expansion;
     ErrorFloat64 _error;
   public:
-    TaylorSeries(const ExactInterval& dom, DegreeType deg) : _domain(dom), _expansion(deg+1), _error(0u) { }
+    TaylorSeries(const ExactIntervalType& dom, DegreeType deg) : _domain(dom), _expansion(deg+1), _error(0u) { }
 
-    TaylorSeries(const ExactInterval& domain, const ExactFloat64& centre, DegreeType degree,
+    TaylorSeries(const ExactIntervalType& domain, const ExactFloat64& centre, DegreeType degree,
                  AnalyticFunction const& function);
 
-    template<class OP> TaylorSeries(OP unary_operator, const ExactInterval& domain, const ExactFloat64& centre, DegreeType degree);
+    template<class OP> TaylorSeries(OP unary_operator, const ExactIntervalType& domain, const ExactFloat64& centre, DegreeType degree);
 
     DegreeType degree() const { return _expansion.size()-1; }
     ExactFloat64 const& operator[](DegreeType i) const { return _expansion[i]; }
@@ -68,7 +68,7 @@ template<> class TaylorSeries<ValidatedFloat64> {
 
 
 template<class OP> inline
-TaylorSeries<ValidatedFloat64>::TaylorSeries(OP unary_operator, const ExactInterval& domain, const ExactFloat64& centre, DegreeType degree)
+TaylorSeries<ValidatedFloat64>::TaylorSeries(OP unary_operator, const ExactIntervalType& domain, const ExactFloat64& centre, DegreeType degree)
     : _domain(domain), _expansion(degree+1), _error(0u)
 {
     Series<ValidatedNumericType> centre_series=Series<ValidatedFloat64>(unary_operator,ValidatedNumericType(centre));

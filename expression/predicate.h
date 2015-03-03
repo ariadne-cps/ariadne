@@ -78,7 +78,7 @@ class ExpressionPredicate
         else if(value>0) { return false; }
         else { return indeterminate; } }
     Kleenean evaluate(const Vector<ValidatedNumericType>& x) const {
-        ExactInterval range=_expression.evaluate(x)*_sign;
+        ExactIntervalType range=_expression.evaluate(x)*_sign;
         if(range.upper()<0) { return true; }
         else if(range.lower()>0) { return false; }
         else { return indeterminate; } }

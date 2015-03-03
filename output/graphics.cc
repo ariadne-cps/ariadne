@@ -62,7 +62,7 @@ Void draw(Figure& fig, const DrawableInterface& shape) {
     fig.draw(shape);
 }
 
-Void draw(Figure& fig, ApproximateFloatBox const& box) {
+Void draw(Figure& fig, ApproximateFloat64Box const& box) {
     fig.draw(box);
 }
 
@@ -85,7 +85,7 @@ struct GraphicsObject {
 struct Figure::Data
 {
     Data() : bounding_box(0), projection(2,0,1), properties() { }
-    ApproximateBox bounding_box;
+    ApproximateBoxType bounding_box;
     PlanarProjectionMap projection;
     GraphicsProperties properties;
     std::vector<GraphicsObject> objects;
@@ -100,7 +100,7 @@ Figure::~Figure()
 Figure::Figure()
     : _data(new Data())
 {
-    this->_data->bounding_box=ApproximateBox(0);
+    this->_data->bounding_box=ApproximateBoxType(0);
     this->_data->projection=PlanarProjectionMap(2,0,1);
 }
 
@@ -120,7 +120,7 @@ Void Figure::set_projection_map(const PlanarProjectionMap& p)
     this->_data->projection=p;
 }
 
-Void Figure::set_bounding_box(const ApproximateBox& bx)
+Void Figure::set_bounding_box(const ApproximateBoxType& bx)
 {
     this->_data->bounding_box=bx;
 }
@@ -130,7 +130,7 @@ PlanarProjectionMap Figure::get_projection_map() const
     return this->_data->projection;
 }
 
-ApproximateBox Figure::get_bounding_box() const
+ApproximateBoxType Figure::get_bounding_box() const
 {
     return this->_data->bounding_box;
 }
@@ -211,7 +211,7 @@ Colour Figure::get_fill_colour() const
     return this->_data->properties.fill_colour;
 }
 
-Void Figure::draw(ApproximateBox const& box)
+Void Figure::draw(ApproximateBoxType const& box)
 {
     ApproximateBoxSet box_set(box);
     DrawableInterface const& shape=box_set;
@@ -458,11 +458,11 @@ Void set_properties(CanvasInterface& canvas, const GraphicsProperties& propertie
     canvas.set_line_colour(line_colour.red, line_colour.green, line_colour.blue);
 }
 
-inline OutputStream& operator<<(OutputStream& os, const ExactBox& bx) { return os << static_cast<const ExactIntervalVector&>(bx); }
+inline OutputStream& operator<<(OutputStream& os, const ExactBoxType& bx) { return os << static_cast<const ExactIntervalVectorType&>(bx); }
 
 Void Figure::_paint_all(CanvasInterface& canvas) const
 {
-    ApproximateBox bounding_box=this->_data->bounding_box;
+    ApproximateBoxType bounding_box=this->_data->bounding_box;
     const PlanarProjectionMap projection=this->_data->projection;
     const std::vector<GraphicsObject>& objects=this->_data->objects;
 
@@ -472,7 +472,7 @@ Void Figure::_paint_all(CanvasInterface& canvas) const
     // a drawable object having one. Instead, the bounding box must be
     // specified explicitly
     if(bounding_box.dimension()==0) {
-        bounding_box=ExactBox(dimension,ExactInterval(-1,1));
+        bounding_box=ExactBoxType(dimension,ExactIntervalType(-1,1));
     }
 
     // Check projection and bounding box have same values.

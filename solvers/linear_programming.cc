@@ -39,8 +39,8 @@ static const int verbosity=0;
 
 namespace Ariadne {
 
-typedef Vector<UpperInterval> UpperIntervalVector;
-typedef Matrix<UpperInterval> UpperIntervalMatrix;
+typedef Vector<UpperIntervalType> UpperIntervalVectorType;
+typedef Matrix<UpperIntervalType> UpperIntervalMatrixType;
 
 
 // Return r[i]=x[i]-c for i=1,...,n

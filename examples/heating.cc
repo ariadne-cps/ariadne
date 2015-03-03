@@ -170,8 +170,8 @@ Int main(Int argc, const char* argv[])
 
     Real tmax=evolution_time.continuous_time();
     Real dTmin=Tmin.value(); Real dTmax=Tmax.value();
-    HybridBox guard(heating|off,{Ton_lower.value()<=T<=Ton_upper.value(),0<=C<=1,0<=t<=tmax});
-    HybridBox midnight_guard(heating|off,{dTmin<=T<=dTmax,0<=C<=1,1<=t<=2});
+    HybridBoxType guard(heating|off,{Ton_lower.value()<=T<=Ton_upper.value(),0<=C<=1,0<=t<=tmax});
+    HybridBoxType midnight_guard(heating|off,{dTmin<=T<=dTmax,0<=C<=1,1<=t<=2});
     cout << "\nPlotting time trace of orbit... " << flush;
     plot("heating-orbit-time.png",Axes2d(0<=t<=tmax,dTmin<=T<=dTmax), midnight_guard_colour, midnight_guard, guard_colour, guard, series_orbit_colour, series_orbit);
     cout << "done." << endl << endl;

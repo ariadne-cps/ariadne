@@ -99,6 +99,10 @@ class FunctionConstructors {
     static ScalarFunction<P,IntervalDomain> coordinate(IntervalDomain dom, SizeType j);
     static VectorFunction<P,IntervalDomain> zeros(SizeType rs, IntervalDomain dom);
     static ScalarFunction<P,IntervalDomain> identity(IntervalDomain dom);
+
+    static VectorFunction<P,BoxDomain> constant(BoxDomain dom, Vector<NumericType> c);
+    static VectorFunction<P,IntervalDomain> constant(IntervalDomain dom, Vector<NumericType> c);
+
 };
 
 template<class P, class D, class C> class FunctionFacade {
@@ -156,9 +160,10 @@ class Function
     Function(List<ScalarFunction<P,D>> const& lsf);
     Function(Vector<ScalarFunction<P,D>> const& lsf);
 
-    ScalarFunction<P,D> create_zero() const { return ScalarFunction<P>::zero(this->domain()); }
-    ScalarFunction<P,D> create_constant(NumericType c) const { return ScalarFunction<P>::constant(this->domain(),c); }
-    ScalarFunction<P,D> create_coordinate(SizeType j) const { return ScalarFunction<P>::coordinate(this->domain(),j); }
+    ScalarFunction<P,D> create_zero() const { return ScalarFunction<P,D>::zero(this->domain()); }
+    ScalarFunction<P,D> create_constant(NumericType c) const { return ScalarFunction<P,D>::constant(this->domain(),c); }
+    ScalarFunction<P,D> create_coordinate(SizeType j) const { return ScalarFunction<P,D>::coordinate(this->domain(),j); }
+    VectorFunction<P,D> create_constant(Vector<NumericType> c) const { return VectorFunction<P,D>::constant(this->domain(),c); }
 
     Function();
     explicit Function(FunctionInterface<P,D,C>* p) : _ptr(p) { }
@@ -166,6 +171,8 @@ class Function
     Function(const FunctionInterface<P,D,C>& t) : _ptr(t._clone()) { }
     Function<P,D,C>& operator=(const FunctionInterface<P,D,C>& f) {
         _ptr=std::shared_ptr< FunctionInterface<P,D,C> >(f._clone()); return *this; }
+    Function<P,D,C>& operator=(const Result<NumericType>& c) {
+        (*this)=this->create_constant(c); }
 
     template<class PP, EnableIf<IsStronger<PP,P>> =dummy>
     Function(const Function<PP,D,C>& f)
@@ -382,6 +389,13 @@ ValidatedScalarFunction operator+(const ValidatedNumericType&, const ValidatedSc
 ValidatedScalarFunction operator-(const ValidatedNumericType&, const ValidatedScalarFunction&);
 ValidatedScalarFunction operator*(const ValidatedNumericType&, const ValidatedScalarFunction&);
 ValidatedScalarFunction operator/(const ValidatedNumericType&, const ValidatedScalarFunction&);
+
+ValidatedScalarFunction& operator+=(ValidatedScalarFunction&, const ValidatedScalarFunction&);
+ValidatedScalarFunction& operator-=(ValidatedScalarFunction&, const ValidatedScalarFunction&);
+ValidatedScalarFunction& operator+=(ValidatedScalarFunction&, const ValidatedNumericType&);
+ValidatedScalarFunction& operator-=(ValidatedScalarFunction&, const ValidatedNumericType&);
+ValidatedScalarFunction& operator*=(ValidatedScalarFunction&, const ValidatedNumericType&);
+ValidatedScalarFunction& operator/=(ValidatedScalarFunction&, const ValidatedNumericType&);
 
 ValidatedScalarFunction pow(const ValidatedScalarFunction&, Int);
 ValidatedScalarFunction neg(const ValidatedScalarFunction&);

@@ -87,6 +87,10 @@ FunctionMixin<F,ValidatedTag,D,C>::_evaluate(const Argument<ValidatedFormula>& x
     return this->_base_evaluate(x); }
 
 template<class F,class D, class C> auto
+FunctionMixin<F,ValidatedTag,D,C>::_evaluate(const Argument<ValidatedScalarFunction>& x) const -> Result<ValidatedScalarFunction> {
+    return this->_base_evaluate(x); }
+
+template<class F,class D, class C> auto
 FunctionMixin<F,EffectiveTag,D,C>::_evaluate(const Argument<EffectiveNumericType>& x) const -> Result<EffectiveNumericType> {
     return this->_base_evaluate(x); }
 template<class F,class D, class C> auto

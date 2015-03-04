@@ -174,6 +174,8 @@ template<class M> class FunctionPatch
     FunctionPatch<M> create_constant(NumericType const& c) const;
     FunctionPatch<M> create_coordinate(SizeType j) const;
     FunctionPatch<M> create(GenericType const& f) const;
+
+    Vector<FunctionPatch<M>> create_coordinates(DomainType const&) const;
     //@}
 
     //@{
@@ -301,6 +303,9 @@ template<class M> class FunctionPatch
     FunctionPatch<M>* _derivative(SizeType j) const;
     FunctionPatch<M>* _clone() const;
     FunctionPatch<M>* _create() const;
+    virtual ScalarFunctionPatch<M>* _create_zero(DomainType const&) const;
+    virtual ScalarFunctionPatch<M>* _create_constant(DomainType const&, NumericType const&) const;
+    virtual ScalarFunctionPatch<M>* _create_coordinate(DomainType const&, SizeType) const;
     VectorFunctionModelInterface<Paradigm>* _create_identity() const;
     VectorFunctionModelInterface<Paradigm>* _create_vector(SizeType i) const;
 };

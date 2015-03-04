@@ -128,6 +128,8 @@ class FunctionMixin<F,ValidatedTag,D,C>
     virtual Result<ValidatedTaylorModel> _evaluate(const Argument<ValidatedTaylorModel>& x) const;
     virtual Result<ValidatedAlgebra> _evaluate(const Argument<ValidatedAlgebra>& x) const;
 
+    virtual Result<ValidatedScalarFunction> _evaluate(const Argument<ValidatedScalarFunction>& x) const;
+
 };
 
 // A wrapper for classes with non-static _compute and _compute_approx methods

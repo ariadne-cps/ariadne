@@ -114,8 +114,8 @@ struct ConstantFunction
     virtual const BoxDomain domain() const { return _domain; }
     virtual SizeType argument_size() const { return _domain.dimension(); }
     virtual ScalarFunctionInterface<P>* _derivative(SizeType j) const { return new ConstantFunction<X>(_domain,X(0)); }
-    virtual OutputStream& repr(OutputStream& os) const { return os << this->_value; }
-    virtual OutputStream& write(OutputStream& os) const { return os << "CF[R"<<this->argument_size()<<"]("<<_value<<")"; }
+    virtual OutputStream& write(OutputStream& os) const { return os << this->_value; }
+    virtual OutputStream& repr(OutputStream& os) const { return os << "CF[R"<<this->argument_size()<<"]("<<_value<<")"; }
     template<class XX> inline Void _compute(XX& r, const Vector<XX>& x) const {
         r=x.zero_element()+static_cast<typename XX::NumericType>(_value); }
 };

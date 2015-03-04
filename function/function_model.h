@@ -97,6 +97,10 @@ template<> class ScalarFunctionModelInterface<ValidatedTag>
     virtual VectorFunctionModelInterface<ValidatedTag>* _create_identity() const = 0;
     virtual Void restrict(const ExactBoxType& d) = 0;
 
+    virtual ScalarFunctionModelInterface<ValidatedTag>* _create_zero(DomainType const& dom) const = 0;
+    virtual ScalarFunctionModelInterface<ValidatedTag>* _create_constant(DomainType const& dom, ValidatedNumericType const& c) const = 0;
+    virtual ScalarFunctionModelInterface<ValidatedTag>* _create_coordinate(DomainType const& dom, SizeType j) const = 0;
+
     virtual ScalarFunctionModelInterface<ValidatedTag>* _derivative(SizeType j) const = 0;
     virtual ScalarFunctionModelInterface<ValidatedTag>* _antiderivative(SizeType j) const = 0;
 
@@ -151,6 +155,7 @@ template<class F> class ScalarFunctionModelMixin<F,ValidatedTag>
 template<> class ScalarFunctionModel<ValidatedTag>
 {
   public:
+    typedef ExactBoxType DomainType;
     typedef Ariadne::ValidatedCoefficientType CoefficientType;
     typedef Ariadne::ValidatedErrorType ErrorType;
   public:
@@ -170,8 +175,9 @@ template<> class ScalarFunctionModel<ValidatedTag>
     const ScalarFunctionModelInterface<ValidatedTag>& reference() const { return *_ptr; }
     ScalarFunctionModel<ValidatedTag> create_zero() const { return this->_ptr->_create(); }
     ScalarFunctionModel<ValidatedTag> create_constant(const ValidatedNumericType& c) const;
-    ScalarFunctionModel<ValidatedTag> create(const ValidatedScalarFunction& f) const;
     VectorFunctionModel<ValidatedTag> create_identity() const;
+    ScalarFunctionModel<ValidatedTag> create(const ValidatedScalarFunction& f) const;
+    Vector<ScalarFunctionModel<ValidatedTag>> create_coordinates(DomainType const&) const;
     ScalarFunctionModel<ValidatedTag>& operator=(const ValidatedNumericType& c);
     ScalarFunctionModel<ValidatedTag>& operator=(const ValidatedScalarFunction& f);
     ScalarFunctionModel<ValidatedTag>& operator=(const ScalarTaylorFunction& f);
@@ -399,6 +405,8 @@ template<> class VectorFunctionModel<ValidatedTag>
     inline VectorFunctionModel() : _ptr() { }
     inline VectorFunctionModel(SizeType n, const ScalarFunctionModelInterface<ValidatedTag>& sf)
         : _ptr(sf._create_vector(n)) { for(SizeType i=0; i!=n; ++i) { (*this)[i]=sf; } }
+    inline VectorFunctionModel(Array<ScalarFunctionModel<ValidatedTag>> const& asf)
+        : VectorFunctionModel(asf.size(),asf[0]) { for(SizeType i=0; i!=asf.size(); ++i) { (*this)[i]=asf[i]; } }
     inline VectorFunctionModel(VectorFunctionModelInterface<ValidatedTag>* p) : _ptr(p) { }
     inline VectorFunctionModel(const VectorFunctionModelInterface<ValidatedTag>& f) : _ptr(f._clone()) { }
     inline VectorFunctionModel(const VectorFunctionModel<ValidatedTag>& f) : _ptr(f._ptr) { }
@@ -536,6 +544,13 @@ inline VectorFunctionModel<ValidatedTag> partial_evaluate(const VectorFunctionMo
 
 template<class X> VectorFunctionModelElement<X>::operator const ScalarFunctionModel<X> () const {
     return _p->get(_i); }
+
+
+inline Vector<ScalarFunctionModel<ValidatedTag>> ScalarFunctionModel<ValidatedTag>::create_coordinates(DomainType const& dom) const {
+    Vector<ScalarFunctionModel<ValidatedTag>> res(dom.dimension(),this->_ptr->_create_zero(dom));
+    for(SizeType i=0; i!=dom.dimension(); ++i) { res[i]=this->_ptr->_create_coordinate(dom,i); }
+    return res;
+}
 
 
 inline VectorFunctionModel<ValidatedTag> ScalarFunctionModel<ValidatedTag>::create_identity() const { return this->_ptr->_create_identity(); }

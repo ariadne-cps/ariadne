@@ -302,6 +302,27 @@ template<class M> VectorFunctionModelInterface<typename M::Paradigm>* FunctionPa
     return new VectorFunctionPatch<M>(i,this->domain(),this->_model.sweeper());
 }
 
+template<class M> FunctionPatch<M>* FunctionPatch<M>::_create_zero(DomainType const& dom) const
+{
+    return new FunctionPatch<M>(dom,this->sweeper());
+}
+
+template<class M> FunctionPatch<M>* FunctionPatch<M>::_create_constant(DomainType const& dom, NumericType const& c) const
+{
+    return new FunctionPatch<M>(FunctionPatch<M>::constant(dom,c,this->sweeper()));
+}
+
+template<class M> FunctionPatch<M>* FunctionPatch<M>::_create_coordinate(DomainType const& dom, SizeType j) const
+{
+    return new FunctionPatch<M>(FunctionPatch<M>::coordinate(dom,j,this->sweeper()));
+}
+
+template<class M> Void VectorFunctionPatch<M>::adjoin(const FunctionPatch<M>& sf)
+{
+    ARIADNE_ASSERT_MSG(sf.domain()==this->domain(),"sf="<<sf);
+    this->_models=join(this->_models,sf.model());
+}
+
 
 template<class M> Void FunctionPatch<M>::restrict(const ExactBoxType& dom) {
     (*this)=restriction(*this,dom);
@@ -627,12 +648,6 @@ template<class M> VectorFunctionPatch<M>* VectorFunctionPatch<M>::_create_identi
     VectorFunctionPatch<M>* result = new VectorFunctionPatch<M>(this->domain().size(), FunctionPatch<M>(this->domain(),sweeper));
     for(SizeType i=0; i!=result->size(); ++i) { (*result)[i]=FunctionPatch<M>::coordinate(this->domain(),i,sweeper); }
     return result;
-}
-
-template<class M> Void VectorFunctionPatch<M>::adjoin(const FunctionPatch<M>& sf)
-{
-    ARIADNE_ASSERT_MSG(sf.domain()==this->domain(),"sf="<<sf);
-    this->_models=join(this->_models,sf.model());
 }
 
 

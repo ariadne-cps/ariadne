@@ -304,6 +304,27 @@ template<class P> VectorFunction<P> FunctionConstructors<P>::identity(SizeType n
     return VectorFunction<P>(res);
 }
 
+template<class P> VectorFunction<P,BoxDomain> FunctionConstructors<P>::constant(BoxDomain dom, Vector<NumericType> c) {
+    SizeType n=c.size();
+    ScalarFunction<P> z=ScalarFunction<P,BoxDomain>::zero(dom);
+    VectorOfScalarFunction<P>* res = new VectorOfScalarFunction<P>(n,z);
+    for(SizeType i=0; i!=n; ++i) {
+        res->_vec[i]=ScalarFunction<P>::constant(dom,c[i]);
+    }
+    return VectorFunction<P>(res);
+}
+
+template<class P> VectorFunction<P,IntervalDomain> FunctionConstructors<P>::constant(IntervalDomain dom, Vector<NumericType> c) {
+    SizeType n=c.size();
+    ScalarFunction<P,IntervalDomain> z=ScalarFunction<P,IntervalDomain>::zero(dom);
+    VectorOfScalarFunction<P,IntervalDomain>* res = new VectorOfScalarFunction<P,IntervalDomain>(n,z);
+    for(SizeType i=0; i!=n; ++i) {
+        res->_vec[i]=ScalarFunction<P,IntervalDomain>::constant(dom,c[i]);
+    }
+    return VectorFunction<P,IntervalDomain>(res);
+}
+
+
 template class FunctionConstructors<ApproximateTag>;
 template class FunctionConstructors<ValidatedTag>;
 template class FunctionConstructors<EffectiveTag>;
@@ -921,6 +942,16 @@ template<class OP> ValidatedScalarFunction apply(OP op, ValidatedNumericType con
     }
 }
 
+ValidatedScalarFunction apply(Pow op, ValidatedScalarFunction const& f, Int n) {
+    std::shared_ptr<ValidatedScalarFunctionModelInterface const>
+        fp=std::dynamic_pointer_cast<ValidatedScalarFunctionModelInterface const>(f.managed_pointer());
+    if(fp) {
+        ValidatedScalarFunctionModel fm=fp; return op(fm,n);
+    } else {
+        return ValidatedScalarFunction(new PowerFunction<ValidatedTag>(op.code(),f,n));
+    }
+}
+
 } // namespace
 
 
@@ -981,6 +1012,39 @@ ValidatedScalarFunction operator/(ValidatedNumericType const& c1, ValidatedScala
     return apply(Div(),c1,f2);
 }
 
+
+ValidatedScalarFunction& operator+=(ValidatedScalarFunction& f1, const ValidatedScalarFunction& f2) {
+    return f1=f1+f2;
+}
+
+ValidatedScalarFunction& operator-=(ValidatedScalarFunction& f1, const ValidatedScalarFunction& f2) {
+    return f1=f1-f2;
+}
+
+ValidatedScalarFunction& operator+=(ValidatedScalarFunction& f1, const ValidatedNumericType& c2) {
+    return f1=f1+c2;
+}
+
+ValidatedScalarFunction& operator-=(ValidatedScalarFunction& f1, const ValidatedNumericType& c2) {
+    return f1=f1-c2;
+}
+
+ValidatedScalarFunction& operator*=(ValidatedScalarFunction& f1, const ValidatedNumericType& c2) {
+    return f1=f1*c2;
+}
+
+ValidatedScalarFunction& operator/=(ValidatedScalarFunction& f1, const ValidatedNumericType& c2) {
+    return f1=f1/c2;
+}
+
+
+ValidatedScalarFunction neg(ValidatedScalarFunction const& f) {
+    return apply(Neg(),f);
+}
+
+ValidatedScalarFunction pow(ValidatedScalarFunction const& f, Int n) {
+    return apply(Pow(),f,n);
+}
 
 ValidatedScalarFunction sqr(ValidatedScalarFunction const& f) {
     return apply(Sqr(),f);

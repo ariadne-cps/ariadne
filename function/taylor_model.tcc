@@ -646,6 +646,7 @@ template<class F> TaylorModel<Validated,F>& TaylorModel<Validated,F>::unique()
         while(advanced!=end && advanced->key()==current->key()) {
             const ExactFloat64& xv=advanced->data();
             rv=add_err(rv,xv,e);
+            ++advanced;
         }
         current->data()=rv;
         ++current;

@@ -160,6 +160,25 @@ class RealVariablesBox {
     friend OutputStream& operator<<(OutputStream& os, const RealVariablesBox& ebx);
 };
 
+//! \ingroup ExpressionSetSubModule
+//! \brief An interval range for a real variable.
+class ExactFloat64VariableInterval {
+  private:
+    ExactFloat64 _lower;
+    Variable<Real> _variable;
+    ExactFloat64 _upper;
+  public:
+    ExactFloat64VariableInterval(const Variable<Real>& v, const ExactFloat64Interval& ivl)
+        : _lower(ivl.lower()), _variable(v), _upper(ivl.upper()) { }
+    ExactFloat64VariableInterval(const ExactFloat64& l, const Variable<Real>& v, const ExactFloat64& u)
+        : _lower(l), _variable(v), _upper(u) { ARIADNE_ASSERT_MSG(definitely(l<=u),"ExactFloat64("<<l<<","<<u<<") not provably nonempty"); }
+    Variable<Real> const& variable() const { return this->_variable; }
+    const ExactFloat64Interval interval() const { return ExactFloat64Interval(this->_lower,this->_upper); }
+    const ExactFloat64 lower() const { return this->_lower; }
+    const ExactFloat64 upper() const { return this->_upper; }
+    friend OutputStream& operator<<(OutputStream& os, const ExactFloat64VariableInterval& eivl);
+};
+
 //! \brief An box defining ranges for a collection of real variables.
 class ExactFloat64VariablesBox {
     RealSpace _spc;

@@ -391,6 +391,32 @@ template<class X> Formula<X> formula(const Expansion<X>& e)
 // Class for which an object x produces coordinate \f$x_j\f$ when calling \c x[j].
 struct Coordinate { Formula<Real> operator[](Nat j) { return Formula<Real>::coordinate(j); } };
 
+class Projection
+{
+    SizeType _as;
+    Array<SizeType> _ind;
+  public:
+    Projection(SizeType as, Array<SizeType> ind) : _as(as), _ind(ind) {
+        for(SizeType i=0; i!=this->_ind.size(); ++i) { ARIADNE_PRECONDITION(_ind[i]<_as); } }
+    SizeType result_size() const { return this->_ind.size(); }
+    SizeType argument_size() const { return this->_as; }
+    SizeType index(SizeType i) const { return this->_ind[i]; }
+
+    template<class X> Vector<X> operator() (Vector<X> const& v) const {
+        Vector<X> r(this->result_size(),v.zero_element());
+        for(SizeType i=0; i!=this->result_size(); ++i) { r[i]=v[this->_ind[i]]; }
+        return std::move(r); }
+    friend OutputStream& operator<<(OutputStream& os, Projection const& prj) {
+        return os << "Projection("<<prj._ind<<")"; }
+    template<class BX> BX preimage(Projection const& prj, BX const& bx) {
+        typedef decltype(bx[0]) IVL;
+        BX dbx(prj.argument_size(),IVL(-infty,+infty));
+        for(SizeType i=0; i!=prj.result_size(); ++i) {
+            IVL& dbxj=dbx[prj.index(i)]; dbxj=IVL(dbxj,bx[i]); }
+        return std::move(dbx); }
+};
+
+
 } // namespace Ariadne
 
 

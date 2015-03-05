@@ -160,6 +160,17 @@ class RealVariablesBox {
     friend OutputStream& operator<<(OutputStream& os, const RealVariablesBox& ebx);
 };
 
+template<class T> template<class IVL> inline RealVariablesBox Variables<T>::in(const List<IVL>& bx) const {
+    ARIADNE_FAIL_MESSAGE("Can't create interval in variables "<<*this<<"\n");
+}
+
+template<> template<class IVL> inline RealVariablesBox Variables<Real>::in(const List<IVL>& bx) const {
+    ARIADNE_PRECONDITION(this->size()==bx.size());
+    Map<RealVariable,RealInterval> bnds;
+    for(SizeType i=0; i!=this->size(); ++i) { bnds.insert((*this)[i],bx[i]); }
+    return std::move(bnds);
+}
+
 //! \ingroup ExpressionSetSubModule
 //! \brief An interval range for a real variable.
 class ExactFloat64VariableInterval {

@@ -72,6 +72,8 @@ template<class T> class LetVariable;
 template<class T> class DottedVariable;
 template<class T> class PrimedVariable;
 
+template<class T> class Variables;
+
 template<class T> class Constant;
 template<class T> class Expression;
 template<class LHS,class RHS> class Assignment;
@@ -88,6 +90,10 @@ typedef DottedVariable<Real> DottedRealVariable;
 typedef PrimedVariable<Real> PrimedRealVariable;
 typedef Variable<Real> RealVariable;
 typedef Constant<Real> RealConstant;
+typedef Variables<Real> RealVariables;
+
+class RealVariableInterval;
+class RealVariablesBox;
 
 //! \ingroup ExpressionModule
 //! A named constant of type \a T.
@@ -189,8 +195,6 @@ template<> struct IsRealBuiltin<Real,int> : True { };
 template<> struct IsRealBuiltin<Real,double> : True { };
 template<class R, class D, class T=Dummy> using EnableIfRealBuiltin = EnableIf<IsRealBuiltin<R,D>,T>;
 
-class RealVariableInterval;
-
 
 //! \ingroup ExpressionModule
 //! \brief A named variable of type \a T.
@@ -217,6 +221,19 @@ template<class T> class Variable
 class TimeVariable : public Variable<Real> {
   public:
     TimeVariable() : Variable<Real>(" t ") { }
+};
+
+//! \ingroup ExpressionModule
+//! \brief A list of variables of type \a T.
+//! \sa Variable
+template<class T> class Variables : public List<Variable<T>> {
+    typedef Assignment< Variable<T>, Expression<T> > AssignmentType;
+  public:
+    Variables(Identifier name, SizeType num) : List<Variable<T>>() {
+        this->reserve(num); for(SizeType i=0; i!=num; ++i) { this->append(Variable<T>(name+to_str(i))); } }
+    Variables<T>& operator=(Variables<T> const&) = default;
+    inline List<AssignmentType> operator=(const List<Expression<T>>& e) const;
+    template<class IVL> inline RealVariablesBox in(const List<IVL>& bx) const;
 };
 
 template<class T> LetVariable<T> let(const Variable<T>&);

@@ -151,6 +151,14 @@ template<class T> template<class D> inline EnableIfRealBuiltin<T,D,Assignment< V
 Variable<T>::operator=(D c) const {
     return this->operator=(Real(c)); }
 
+template<class T> inline List< Assignment< Variable<T>, Expression<T> > >
+Variables<T>::operator=(const List<Expression<T>>& expr) const {
+    ARIADNE_PRECONDITION(this->size()==expr.size());
+    List<Assignment<Variable<T>,Expression<T>>> res;
+    for(SizeType i=0; i!=this->size(); ++i) { res.append((*this)[i]=expr[i]); }
+    return std::move(res);
+}
+
 
 template<class T> inline Assignment< Variable<T>, Expression<T> >
 LetVariable<T>::operator=(const T& c) const {

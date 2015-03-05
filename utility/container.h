@@ -65,6 +65,7 @@ template<class T> OutputStream& operator<<(OutputStream& os, const SharedArray<T
 
 template<class T> class List : public std::vector<T> {
   public:
+    typedef typename std::vector<T>::value_type ValueType;
     typedef typename std::vector<T>::iterator Iterator;
     typedef typename std::vector<T>::const_iterator ConstIterator;
     using std::vector<T>::vector;

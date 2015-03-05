@@ -191,6 +191,8 @@ class ExactFloat64VariablesBox {
         for(Nat i=0; i!=bnds.size(); ++i) {
             this->_spc.append(bnds[i].variable()); this->_bx[i]=cast_exact_interval(ApproximateIntervalType(bnds[i].interval())); } }
     ExactFloat64VariablesBox(const RealSpace& spc, const ExactFloat64Box& bx) : _spc(spc), _bx(bx) { ARIADNE_ASSERT(spc.dimension()==bx.dimension()); }
+    Map<RealVariable,ExactFloat64Interval> bounds() const { Map<RealVariable,ExactFloat64Interval> bnds;
+        for(SizeType i=0; i!=_spc.size(); ++i) { bnds.insert(_spc[i],_bx[i]); } return bnds; }
     Set<RealVariable> variables() const { return Set<RealVariable>(_spc.variables()); }
     RealSpace const& space() const { return this->_spc; }
     ExactFloat64Box const& continuous_set() const { return this->_bx; }

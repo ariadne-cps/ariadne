@@ -103,6 +103,7 @@ template<> class ScalarFunctionModelInterface<ValidatedTag>
 
     virtual ScalarFunctionModelInterface<ValidatedTag>* _derivative(SizeType j) const = 0;
     virtual ScalarFunctionModelInterface<ValidatedTag>* _antiderivative(SizeType j) const = 0;
+    virtual ScalarFunctionModelInterface<ValidatedTag>* _antiderivative(SizeType j, ValidatedNumericType c) const = 0;
 
     virtual Boolean _refines(const ScalarFunctionModelInterface<ValidatedTag>& f) const = 0;
     virtual Boolean _disjoint(const ScalarFunctionModelInterface<ValidatedTag>& f) const = 0;
@@ -128,6 +129,8 @@ template<class F> class ScalarFunctionModelMixin<F,ValidatedTag>
         return norm(static_cast<const F&>(*this)); }
     ScalarFunctionModelInterface<ValidatedTag>* _antiderivative(SizeType j) const {
         return new F(antiderivative(static_cast<const F&>(*this),j)); }
+    ScalarFunctionModelInterface<ValidatedTag>* _antiderivative(SizeType j, ValidatedNumericType c) const {
+        return new F(antiderivative(static_cast<const F&>(*this),j,c)); }
     ScalarFunctionModelInterface<ValidatedTag>* _apply(OperatorCode op) const {
         return new F(this->apply(op)); }
     ValidatedNumericType _unchecked_evaluate(const Vector<ValidatedNumericType>& x) const {
@@ -206,6 +209,7 @@ template<> class ScalarFunctionModel<ValidatedTag>
 inline NormType norm(const ScalarFunctionModel<ValidatedTag>& f) { return f._ptr->_norm(); }
 inline ScalarFunctionModel<ValidatedTag> derivative(const ScalarFunctionModel<ValidatedTag>& f, SizeType j) { return f._ptr->_derivative(j); }
 inline ScalarFunctionModel<ValidatedTag> antiderivative(const ScalarFunctionModel<ValidatedTag>& f, SizeType j) { return f._ptr->_antiderivative(j); }
+inline ScalarFunctionModel<ValidatedTag> antiderivative(const ScalarFunctionModel<ValidatedTag>& f, SizeType j, ValidatedNumericType c) { return f._ptr->_antiderivative(j,c); }
 inline ScalarFunctionModel<ValidatedTag> restriction(const ScalarFunctionModel<ValidatedTag>& f, const ExactBoxType& d) {
     ScalarFunctionModel<ValidatedTag> r(f); r.restrict(d); return r; }
 
@@ -293,6 +297,7 @@ template<class F> F ScalarFunctionModelMixin<F,ValidatedTag>::apply(OperatorCode
     switch(op) {
         case OperatorCode::NEG: return neg(f);
         case OperatorCode::REC: return rec(f);
+        case OperatorCode::EXP: return exp(f);
         default: ARIADNE_FAIL_MSG("ScalarFunctionModel<ValidatedTag>::apply(OperatorCode op): Operator op="<<op<<" not implemented\n");
     }
 }
@@ -407,6 +412,8 @@ template<> class VectorFunctionModel<ValidatedTag>
         : _ptr(sf._create_vector(n)) { for(SizeType i=0; i!=n; ++i) { (*this)[i]=sf; } }
     inline VectorFunctionModel(Array<ScalarFunctionModel<ValidatedTag>> const& asf)
         : VectorFunctionModel(asf.size(),asf[0]) { for(SizeType i=0; i!=asf.size(); ++i) { (*this)[i]=asf[i]; } }
+    inline VectorFunctionModel(List<ScalarFunctionModel<ValidatedTag>> const& lsf)
+        : VectorFunctionModel(lsf.size(),lsf[0]) { for(SizeType i=0; i!=lsf.size(); ++i) { (*this)[i]=lsf[i]; } }
     inline VectorFunctionModel(VectorFunctionModelInterface<ValidatedTag>* p) : _ptr(p) { }
     inline VectorFunctionModel(const VectorFunctionModelInterface<ValidatedTag>& f) : _ptr(f._clone()) { }
     inline VectorFunctionModel(const VectorFunctionModel<ValidatedTag>& f) : _ptr(f._ptr) { }
@@ -535,6 +542,12 @@ inline VectorFunctionModel<ValidatedTag> intersection(const VectorFunctionModel<
 inline VectorFunctionModel<ValidatedTag> antiderivative(const VectorFunctionModel<ValidatedTag>& f, SizeType j) {
     VectorFunctionModel<ValidatedTag> r(f);
     for(SizeType i=0; i!=r.size(); ++i) { r[i]=antiderivative(f[i],j); }
+    return r;
+}
+
+inline VectorFunctionModel<ValidatedTag> antiderivative(const VectorFunctionModel<ValidatedTag>& f, SizeType j, const ValidatedNumericType& c) {
+    VectorFunctionModel<ValidatedTag> r(f);
+    for(SizeType i=0; i!=r.size(); ++i) { r[i]=antiderivative(f[i],j,c); }
     return r;
 }
 

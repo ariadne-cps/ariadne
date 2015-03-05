@@ -198,8 +198,12 @@ template<class T, class Y> Expression<T> substitute(const Expression<T>& e, cons
 template<class T, class Y> Expression<T> substitute(const Expression<T>& e, const List< Assignment< Variable<Y>,Expression<Y> > >& a);
 
 
-//! \brief Make a function on a Euclidean domain given an ordered list including all argument variables.
+//! \brief Make a function on a Euclidean domain given an ordered list including all argument variables. // DEPRECATED
 ScalarFunction<EffectiveTag> make_function(const Expression<Real>& e, const Space<Real>& s);
+//! \brief Make a function on a Euclidean domain given an ordered list including all argument variables.
+ScalarFunction<EffectiveTag> make_function(const Space<Real>& s, const Expression<Real>& e);
+//! \brief Make a function on a Euclidean domain given an ordered list including all argument variables.
+VectorFunction<EffectiveTag> make_function(const Space<Real>& s, const Vector<Expression<Real>>& e);
 //! \brief Make a function on coordinates given a mapping from variable names to indices.
 Formula<Real> formula(const Expression<Real>& e, const Map<Identifier,Nat>& v);
 Formula<Real> formula(const Expression<Real>& e, const List<Variable<Real>>& vars);

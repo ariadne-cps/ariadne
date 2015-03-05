@@ -64,6 +64,10 @@ template<class T> struct Space
     Space(const List<VariableType>& vl) { for(Nat i=0; i!=vl.size(); ++i) { this->append(vl[i]); } }
     Space(const InitializerList<VariableType>& vl) { for(Nat i=0; i!=vl.size(); ++i) { this->append(vl.begin()[i]); } }
 
+    template<class... ARGS> Space(VariableType, ARGS... args);
+    template<class... ARGS> Space(List<VariableType>, VariableType, ARGS... args);
+    template<class... ARGS> Space(List<VariableType>, List<VariableType>, ARGS... args);
+
     explicit Space(const List<String>& vnl) { for(Nat i=0; i!=vnl.size(); ++i) { this->append(VariableType(vnl[i])); } }
     explicit Space(const String& vn) { this->append(VariableType(vn)); }
 

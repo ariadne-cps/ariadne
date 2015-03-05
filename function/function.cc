@@ -25,6 +25,7 @@
 
 #include "algebra/differential.h"
 #include "expression/operators.h"
+#include "expression/expression.h"
 #include "expression/formula.h"
 #include "algebra/algebra.h"
 #include "function/taylor_model.h"
@@ -71,6 +72,17 @@ EffectiveScalarFunction make_function(const Expression<Real>& expr, const Space<
 EffectiveScalarFunction make_function(const Expression<Real>& expr, const List< Variable<Real> >& vars) {
     return EffectiveScalarFunction(EuclideanDomain(len(vars)),formula(expr,vars)); }
 
+OutputStream& operator<<(OutputStream& os, Expression<Real> const&);
+
+EffectiveScalarFunction make_function(const Space<Real>& spc, const Expression<Real>& expr) {
+    return EffectiveScalarFunction(EuclideanDomain(dimension(spc)),formula(expr,spc)); }
+EffectiveVectorFunction make_function(const Space<Real>& spc, const Vector<Expression<Real>>& expr) {
+    List<EffectiveScalarFunction> lsf;
+    for(SizeType i=0; i!=expr.size(); ++i) {
+        lsf.append(make_function(spc,expr[i]));
+    }
+    return EffectiveVectorFunction(lsf);
+}
 
 
 //------------------------ Vector of Scalar functions  -----------------------------------//
@@ -1136,6 +1148,20 @@ ValidatedVectorFunction join(ValidatedVectorFunction const& f1, const ValidatedV
     VectorOfScalarFunction<ValidatedTag> r(f1.result_size()+f2.result_size(),f1.domain());
     for(SizeType i=0; i!=f1.result_size(); ++i) { r[i]=f1[i]; }
     for(SizeType i=0; i!=f2.result_size(); ++i) { r[i+f1.result_size()]=f2[i]; }
+    return r;
+}
+
+ValidatedVectorFunction join(ValidatedVectorFunction const& f1, const ValidatedScalarFunction& f2) {
+    VectorTaylorFunction const*
+        f1p=dynamic_cast<VectorTaylorFunction const*>(f1.raw_pointer());
+    ScalarTaylorFunction const*
+        f2p=dynamic_cast<ScalarTaylorFunction const*>(f2.raw_pointer());
+    if(f1p && f2p) {
+        return join(*f1p,*f2p);
+    }
+    VectorOfScalarFunction<ValidatedTag> r(f1.result_size()+1u,f1.domain());
+    for(SizeType i=0; i!=f1.result_size(); ++i) { r[i]=f1[i]; }
+    r[f1.result_size()]=f2;
     return r;
 }
 

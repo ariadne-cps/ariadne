@@ -175,6 +175,10 @@ template<class M> class FunctionPatch
     FunctionPatch<M> create_coordinate(SizeType j) const;
     FunctionPatch<M> create(GenericType const& f) const;
 
+    FunctionPatch<M> create_constant(DomainType const&, NumericType const& c) const;
+    FunctionPatch<M> create_coordinate(DomainType const&, SizeType j) const;
+
+    Vector<FunctionPatch<M>> create_coordinates() const;
     Vector<FunctionPatch<M>> create_coordinates(DomainType const&) const;
     //@}
 
@@ -328,7 +332,7 @@ template<class M> FunctionPatch<M> refinement(const FunctionPatch<M>& x1, const 
 template<class M> NormType norm(const FunctionPatch<M>& f);
 
 // Differential algebra
-template<class M> FunctionPatch<M> antiderivative(const FunctionPatch<M>& x, SizeType k, ExactFloat64 c);
+template<class M> FunctionPatch<M> antiderivative(const FunctionPatch<M>& x, SizeType k, const NumericType<M>& c);
 template<class M> FunctionPatch<M> antiderivative(const FunctionPatch<M>& x, SizeType k);
 template<class M> FunctionPatch<M> derivative(const FunctionPatch<M>& x, SizeType k);
 
@@ -621,7 +625,7 @@ template<class M> VectorFunctionPatch<M> derivative(const VectorFunctionPatch<M>
 //! \brief Antiderivative of \a f with respect to variable \a k.
 template<class M> VectorFunctionPatch<M> antiderivative(const VectorFunctionPatch<M>& f, SizeType k);
 //! \brief Antiderivative of \a f with respect to variable \a k, taking value \c 0 when \a x[k]=c.
-template<class M> VectorFunctionPatch<M> antiderivative(const VectorFunctionPatch<M>& f, SizeType k, ExactFloat64 c);
+template<class M> VectorFunctionPatch<M> antiderivative(const VectorFunctionPatch<M>& f, SizeType k, const NumericType<M>& c);
 
 template<class M> NormType norm(const VectorFunctionPatch<M>& f);
 template<class M> NormType distance(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2);
@@ -797,13 +801,24 @@ template<class M> FunctionPatch<M> abs(const FunctionPatch<M>& f) {
     return apply(Abs(),f); }
 
 
-template<class M> FunctionPatch<M> antiderivative(const FunctionPatch<M>& x, SizeType k) {
-    ValidatedNumericType sf=rad_val(x.domain()[k]);
-    return FunctionPatch<M>(x.domain(),antiderivative(x.model(),k)*sf); }
+template<class M> FunctionPatch<M> antiderivative(const FunctionPatch<M>& f, SizeType k) {
+    ValidatedNumericType sf=rad_val(f.domain()[k]);
+    return FunctionPatch<M>(f.domain(),antiderivative(f.model(),k)*sf); }
 
-template<class M> FunctionPatch<M> derivative(const FunctionPatch<M>& x, SizeType k) {
-    ValidatedNumericType sf=rec(rad_val(x.domain()[k]));
-    return FunctionPatch<M>(x.domain(),derivative(x.model(),k)*sf); }
+template<class M> FunctionPatch<M> antiderivative(const FunctionPatch<M>& f, SizeType k, const NumericType<M>& c) {
+    ARIADNE_ASSERT(k<f.argument_size());
+    ARIADNE_ASSERT(contains(f.domain()[k],c));
+
+    FunctionPatch<M> g = antiderivative(f,k);
+    VectorFunctionPatch<M> h ( f.create_coordinates() );
+    h[k] = f.create_constant(c);
+
+    return g-compose(g,h);
+}
+
+template<class M> FunctionPatch<M> derivative(const FunctionPatch<M>& f, SizeType k) {
+    ValidatedNumericType sf=rec(rad_val(f.domain()[k]));
+    return FunctionPatch<M>(f.domain(),derivative(f.model(),k)*sf); }
 
 template<class M> FunctionPatch<M> embed(const ExactBoxType& dom1, const FunctionPatch<M>& tv2,const ExactBoxType& dom3) {
     return FunctionPatch<M>(product(dom1,tv2.domain(),dom3),embed(dom1.size(),tv2.model(),dom3.size())); }
@@ -855,17 +870,6 @@ template<class M> FunctionPatch<M> partial_evaluate(const FunctionPatch<M>& te, 
 }
 
 
-
-template<class M> FunctionPatch<M> antiderivative(const FunctionPatch<M>& f, SizeType k, ExactFloat64 c) {
-    ARIADNE_ASSERT(k<f.argument_size());
-    ARIADNE_ASSERT(contains(f.domain()[k],c));
-
-    FunctionPatch<M> g = antiderivative(f,k);
-    VectorFunctionPatch<M> h = VectorFunctionPatch<M>::identity(g.domain(),g.sweeper());
-    h[k] = FunctionPatch<M>::constant(g.domain(),c,g.sweeper());
-
-    return g-compose(g,h);
-}
 
 
 

@@ -524,6 +524,7 @@ Vector< Formula<EffectiveNumericType> > formula(const EffectiveVectorFunction& f
 
 ValidatedVectorFunction operator-(const ValidatedVectorFunction&, const ValidatedVectorFunction&);
 ValidatedVectorFunction join(const ValidatedVectorFunction& f1, const ValidatedVectorFunction& f2);
+ValidatedVectorFunction join(const ValidatedVectorFunction& f1, const ValidatedScalarFunction& f2);
 ValidatedScalarFunction compose(const ValidatedScalarFunction& f, const ValidatedVectorFunction& g);
 ValidatedVectorFunction compose(const ValidatedVectorFunction& f, const ValidatedVectorFunction& g);
 

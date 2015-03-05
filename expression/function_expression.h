@@ -50,6 +50,13 @@ using ValidatedVectorFunctionExpression = FunctionExpression<Validated,BoxDomain
 using VariableIntervalDomain = ExactFloat64VariableInterval;
 using VariablesBoxDomain = ExactFloat64VariablesBox;
 
+inline BoxDomain preimage(Projection const& prj, BoxDomain const& bx) {
+    BoxDomain dbx(prj.argument_size(),IntervalDomain(-infty,+infty));
+    for(SizeType i=0; i!=prj.result_size(); ++i) {
+        IntervalDomain& dbxj=dbx[prj.index(i)]; dbxj=intersection(dbxj,bx[i]); }
+    return std::move(dbx);
+}
+
 VariableIntervalDomain _make_domain(RealVariable const& arg, IntervalDomain const& dom) {
     return VariableIntervalDomain(arg,dom);
 }
@@ -73,7 +80,8 @@ template<class P,class C> class FunctionExpression<P,BoxDomain,C> {
         ARIADNE_PRECONDITION(_f.argument_size()==_vars.size()); }
     Function<P,D,C> const& function() const { return this->_f; }
     Argument<RealVariable> const& variables() const { return this->_vars; }
-    auto domain() const -> decltype(_make_domain(_vars,_f._domain())) { return _make_domain(_vars,_f.domain()); }
+    Set<RealVariable> arguments() const { Set<RealVariable> args; for(SizeType i=0; i!=_vars.size(); ++i) { args.insert(_vars[i]); } return args; }
+    auto domain() const -> decltype(_make_domain(_vars,_f.domain())) { return _make_domain(_vars,_f.domain()); }
     template<class PP> friend OutputStream& operator<<(OutputStream& os, ScalarFunctionExpression<PP> const& sfe);
 };
 
@@ -143,19 +151,27 @@ template<class P> ScalarFunction<P> compose(ScalarFunction<P> const& f, Projecti
     auto fmp = std::dynamic_pointer_cast<const ScalarFunctionModelInterface<P>>(f.managed_pointer());
     if(fmp) {
         return compose(ScalarFunctionModel<P>(fmp),prj);
-    } else {
     }
     SizeType as=prj.argument_size();
     auto f_dom=f.domain();
     BoxDomain dom=preimage(prj,f_dom);
     Vector<ScalarFunction<P>> id(ScalarFunction<P>::coordinates(dom));
-    Vector<ScalarFunction<P>> pid=prj(id);
-    return evaluate(f,pid);
+    VectorFunction<P> pid=prj(id);
+    return compose(f,pid);
+}
+
+RealScalarFunction compose(RealScalarFunction const& f, Projection const& prj) {
+    SizeType as=prj.argument_size();
+    auto f_dom=f.domain();
+    BoxDomain dom=preimage(prj,f_dom);
+    Vector<RealScalarFunction> id(RealScalarFunction::coordinates(dom));
+    RealVectorFunction pid=prj(id);
+    return compose(f,pid);
 }
 
 
 template<class P> ScalarFunction<P> make_function(RealSpace args, ScalarFunctionExpression<P> const& expr) {
-    ARIADNE_PRECONDITION(subset(expr.variables(),make_set(args.variables())));
+    ARIADNE_PRECONDITION(subset(expr.arguments(),args.variables()));
     auto expr_vars=expr.variables();
     auto expr_func=expr.function();
 

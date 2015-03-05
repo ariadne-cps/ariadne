@@ -408,12 +408,6 @@ class Projection
         return std::move(r); }
     friend OutputStream& operator<<(OutputStream& os, Projection const& prj) {
         return os << "Projection("<<prj._ind<<")"; }
-    template<class BX> BX preimage(Projection const& prj, BX const& bx) {
-        typedef decltype(bx[0]) IVL;
-        BX dbx(prj.argument_size(),IVL(-infty,+infty));
-        for(SizeType i=0; i!=prj.result_size(); ++i) {
-            IVL& dbxj=dbx[prj.index(i)]; dbxj=IVL(dbxj,bx[i]); }
-        return std::move(dbx); }
 };
 
 

@@ -274,6 +274,16 @@ template<class M> FunctionPatch<M> FunctionPatch<M>::create_constant(NumericType
     return FunctionPatch<M>::constant(this->domain(),c,this->_model.sweeper());
 }
 
+template<class M> FunctionPatch<M> FunctionPatch<M>::create_coordinate(SizeType j) const
+{
+    return FunctionPatch<M>::coordinate(this->domain(),j,this->_model.sweeper());
+}
+
+template<class M> Vector<FunctionPatch<M>> FunctionPatch<M>::create_coordinates() const
+{
+    return FunctionPatch<M>::coordinates(this->domain(),this->_model.sweeper());
+}
+
 template<class M> FunctionPatch<M> FunctionPatch<M>::create(GenericType const& f) const
 {
     return FunctionPatch<M>(this->domain(),f,this->_model.sweeper());

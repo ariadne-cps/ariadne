@@ -70,6 +70,7 @@ template<class X> class ContinuousValuation;
 
 template<class X> class Vector;
 template<class X> class Formula;
+template<class X> class Algebra;
 
 
 typedef Expression<Boolean> DiscretePredicate;
@@ -98,6 +99,7 @@ template<class T>
 class Expression {
     typedef SharedPointer<const ExpressionNode<T>> Pointer;
   public:
+    typedef Real NumericType;
     typedef T ValueType;
     typedef Constant<T> ConstantType;
     typedef Variable<T> VariableType;
@@ -130,6 +132,8 @@ class Expression {
     template<class A> const Expression<A>& cmp2(A* dummy=0) const;
     friend OutputStream& operator<<(OutputStream& os, Expression<T> const& e) { return e._write(os); }
   public:
+    template<class X, EnableIf<And<IsSame<T,Real>,IsSame<X,EffectiveNumericType>>> =dummy> operator Algebra<X>() const;
+  public:
     //! \brief The variables needed to compute the expression.
     Set<UntypedVariable> arguments() const;
   public:
@@ -149,7 +153,7 @@ class Expression {
 Boolean evaluate(const Expression<Boolean>& e, const DiscreteValuation& q);
 String evaluate(const Expression<String>& e, const StringValuation& q);
 Integer evaluate(const Expression<Integer>& e, const IntegerValuation& q);
-Real evaluate(const Expression<Integer>& e, const ContinuousValuation<Real>& q);
+Real evaluate(const Expression<Real>& e, const ContinuousValuation<Real>& q);
 Kleenean evaluate(const Expression<Kleenean>& e, const ContinuousValuation<Real>& q);
 
 //! \brief Evaluate expression \a e on argument \a x which is a map of variable identifiers to values of type \c A.
@@ -303,6 +307,8 @@ Expression<Real> sin(Expression<Real> e);
 Expression<Real> cos(Expression<Real> e);
 //! \related Expression \brief %Real tangent expression.
 Expression<Real> tan(Expression<Real> e);
+//! \related Expression \brief %Real arctangent expression.
+Expression<Real> atan(Expression<Real> e);
 
 //! \related Expression \brief Real maximum expression.
 Expression<Real> max(Expression<Real> e1, Expression<Real> e2);

@@ -31,11 +31,15 @@
 #include "expression/assignment.h"
 #include "expression/valuation.h"
 #include "expression/space.h"
+#include "algebra/algebra.h"
 #include "function/function.h"
 
 #include "test.h"
 
 using namespace Ariadne;
+
+typedef Algebra<EffectiveNumericType> EffectiveAlgebra;
+typedef SymbolicAlgebra<EffectiveNumericType> EffectiveSymbolicAlgebra;
 
 class TestExpression {
     RealConstant o;
@@ -105,6 +109,7 @@ class TestExpression {
         Real tz=Dyadic(3.750);
 
         Vector<Real> tv={tx,ty,tz};
+        ContinuousValuation<Real> tw({{x.name(),tx},{y.name(),ty},{z.name(),tz}});
 
         RealConstant c("5",tc);
         RealVariable x("x");
@@ -136,6 +141,14 @@ class TestExpression {
 
         //ARIADNE_TEST_EVALUATE(EffectiveVectorFunction((dot(x),dot(y)),(dot(x)=x+y,dot(y)=y+z*z),(x,y,z))[0]);
         //ARIADNE_TEST_EQUAL(EffectiveVectorFunction((x+y,y+z*z),(x,y,z))[0],EffectiveScalarFunction(x+y,(x,y,z)));
+
+        EffectiveAlgebra ax=RealExpression(x);
+        EffectiveAlgebra ay=RealExpression(y);
+        EffectiveAlgebra az=RealExpression(z);
+        Vector<EffectiveAlgebra> va={ax,ay,az};
+        ARIADNE_TEST_PRINT(f3(va));
+        ARIADNE_TEST_PRINT(f3(va).extract<RealExpression>());
+        ARIADNE_TEST_EQUALS(evaluate(f3(va).extract<RealExpression>(),tw),evaluate(e3,tw));
     }
 
     Void test() {

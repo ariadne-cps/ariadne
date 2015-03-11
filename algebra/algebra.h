@@ -46,10 +46,12 @@ template<class X> class Algebra
     typedef X ScalarType;
     typedef typename X::Paradigm Paradigm;
     typedef typename X::NumericType NumericType;
+  public:
     Algebra() : _ptr() { }
     Algebra(AlgebraInterface<X>* p) : _ptr(p) { }
     Algebra(const AlgebraInterface<X>& a) : _ptr(a._clone()) { }
     Algebra(const Algebra<X>& a) : _ptr(a._ptr->_clone()) { }
+    template<class A> A extract() const { A const* ap=dynamic_cast<A const*>(this->_ptr.operator->()); assert(ap); return *ap; }
     Algebra<X>& operator=(Int c) { *this = this->create(); this->iadd(c); return *this; }
     Algebra<X>& operator=(const X& c) { *this = this->create(); this->iadd(c); return *this; }
     Algebra<X>& operator=(const Algebra<X>& a) { this->_ptr=std::shared_ptr< AlgebraInterface<X> >(a._ptr->_clone()); return *this; }

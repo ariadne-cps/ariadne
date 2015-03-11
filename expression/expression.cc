@@ -24,6 +24,9 @@
 #include "utility/standard.h"
 #include "config.h"
 
+#include "algebra/algebra.h"
+#include "algebra/algebra_wrapper.h"
+
 #include "expression/expression.h"
 #include "expression/assignment.h"
 #include "expression/space.h"
@@ -45,7 +48,45 @@ struct ExpressionNode {
 
 
 
+template<> class SymbolicAlgebraWrapper<Expression<Real>,Real>
+    : public virtual SymbolicAlgebraInterface<Real>
+    , public Expression<Real>
+{
+    typedef Expression<Real> A; typedef Real X;
+  public:
+    SymbolicAlgebraWrapper(A const& a) : A(a) { }
+    virtual SymbolicAlgebraInterface<X>* _create() const { return new SymbolicAlgebraWrapper<A>(A()); }
+    virtual SymbolicAlgebraInterface<X>* _create_constant(X const& c) const { return new SymbolicAlgebraWrapper<A>(A::constant(c)); }
+    virtual SymbolicAlgebraInterface<X>* _clone() const { return new SymbolicAlgebraWrapper<A>(*this); }
+    virtual Void _iadd(const X& c) { (*this) = (*this) + c; }
+    virtual Void _imul(const X& c) { (*this) = (*this) * c; }
+    virtual Void _isma(const X& c, const AlgebraInterface<X>& x) {
+        (*this) = (*this) + c * dynamic_cast<const A&>(x); }
+    virtual Void _ifma(const AlgebraInterface<X>& x1, const AlgebraInterface<X>& x2)  {
+        (*this) = (*this) + dynamic_cast<const A&>(x1) * dynamic_cast<const A&>(x2); }
+    virtual OutputStream& write(OutputStream& os) const { return os << static_cast<const A&>(*this); }
+    virtual SymbolicAlgebraInterface<X>* _apply(OperatorCode op);
+  private:
+    template<class OP> SymbolicAlgebraInterface<X>* _apply(OP op) { return new SymbolicAlgebraWrapper<A>(op(static_cast<A const&>(*this))); }
+};
 
+auto SymbolicAlgebraWrapper<Expression<Real>,Real>::_apply(OperatorCode op) -> SymbolicAlgebraInterface<X>* {
+    switch(op) {
+        case OperatorCode::SQRT: return this->_apply(Sqrt());
+        case OperatorCode::EXP: return this->_apply(Exp());
+        case OperatorCode::LOG: return this->_apply(Log());
+        case OperatorCode::SIN: return this->_apply(Sin());
+        case OperatorCode::COS: return this->_apply(Cos());
+        case OperatorCode::TAN: return this->_apply(Tan());
+        case OperatorCode::ATAN: return this->_apply(Atan());
+        default: ARIADNE_FAIL_MSG("Unknown operator "<<op<<"\n");
+    }
+}
+
+template<> template<>
+Expression<Real>::operator Algebra<Real>() const {
+    return Algebra<Real>(new SymbolicAlgebraWrapper<Expression<Real>,Real>(*this));
+}
 
 
 template<class T> struct ConstantExpressionNode : public ExpressionNode<T> {
@@ -319,6 +360,8 @@ Expression<Real> cos(Expression<Real> e) {
     return make_expression<Real>(Cos(),e); }
 Expression<Real> tan(Expression<Real> e) {
     return make_expression<Real>(Tan(),e); }
+Expression<Real> atan(Expression<Real> e) {
+    return make_expression<Real>(Atan(),e); }
 
 Expression<Real> max(Expression<Real> e1, Expression<Real> e2) {
     return make_expression<Real>(Max(),e1,e2); }
@@ -397,17 +440,13 @@ Boolean evaluate(const Expression<Boolean>& e, const StringValuation& x) {
     return evaluate(e,x.values());
 }
 
-template<class X> Kleenean evaluate(const Expression<Kleenean>& e, const ContinuousValuation<X>& x) {
+Kleenean evaluate(const Expression<Kleenean>& e, const ContinuousValuation<Real>& x) {
     return evaluate(e,x.values());
 }
 
-template<class X> X evaluate(const Expression<Real>& e, const ContinuousValuation<X>& x) {
+Real evaluate(const Expression<Real>& e, const ContinuousValuation<Real>& x) {
     return evaluate(e,x.values());
 }
-
-
-template Kleenean evaluate(const Expression<Kleenean>& e, const ContinuousValuation<Real>& x);
-template Real evaluate(const Expression<Real>& e, const ContinuousValuation<Real>& x);
 
 
 

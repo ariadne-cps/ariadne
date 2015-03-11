@@ -104,6 +104,29 @@ template<class X> class AlgebraInterface
 };
 
 //! \brief Interface for a normed unital algebra over a field \a X.
+template<class X> class TranscendentalAlgebraInterface
+    : public virtual AlgebraInterface<X>
+{
+  public:
+    typedef typename AlgebraTraits<X>::ValueType ValueType;
+    typedef typename AlgebraTraits<X>::NormType NormType;
+    typedef typename AlgebraTraits<X>::RangeType RangeType;
+  public:
+    // Overrides for AlgebraInterface operations
+    virtual TranscendentalAlgebraInterface<X>* _clone() const = 0;
+    virtual TranscendentalAlgebraInterface<X>* _create() const = 0;
+    virtual TranscendentalAlgebraInterface<X>* _create_constant(X c) const = 0;
+
+    virtual TranscendentalAlgebraInterface<X>* _apply(Sqrt) const;
+    virtual TranscendentalAlgebraInterface<X>* _apply(Exp) const;
+    virtual TranscendentalAlgebraInterface<X>* _apply(Log) const;
+    virtual TranscendentalAlgebraInterface<X>* _apply(Sin) const;
+    virtual TranscendentalAlgebraInterface<X>* _apply(Cos) const;
+    virtual TranscendentalAlgebraInterface<X>* _apply(Tan) const;
+    virtual TranscendentalAlgebraInterface<X>* _apply(Atan) const;
+};
+
+//! \brief Interface for a normed unital algebra over a field \a X.
 template<class X> class NormedAlgebraInterface
     : public virtual AlgebraInterface<X>
 {

@@ -35,6 +35,16 @@
 namespace Ariadne {
 
 template<class A, class X=NumericType<A>> class AlgebraWrapper
+    : public AlgebraMixin<AlgebraWrapper<A,X>,X>
+    , public A
+{
+  public:
+    using A::A;
+    AlgebraWrapper(A const& a) : A(a) { }
+    friend OutputStream& operator<<(OutputStream& os, AlgebraWrapper<A,X> const& a) { return os << static_cast<A const&>(a); }
+};
+/*
+template<class A, class X=NumericType<A>> class AlgebraWrapper
     : public virtual AlgebraInterface<X>
     , public A
 {
@@ -42,7 +52,8 @@ template<class A, class X=NumericType<A>> class AlgebraWrapper
   public:
     typedef X NumericType;
 
-    AlgebraWrapper(A&&) : A(std::forward<A>(a)) { }
+    AlgebraWrapper(A&& a) : A(std::move(a)) { }
+    AlgebraWrapper(A const& a) : A(a) { }
     virtual AlgebraInterface<X>* _create() const override { return move_heap(this->A::create()); }
     virtual AlgebraInterface<X>* _create_constant(X const& c) const override { return move_heap(this->A::create_constant(c)); }
     virtual AlgebraInterface<X>* _clone() const { return new A(*this); }
@@ -54,33 +65,37 @@ template<class A, class X=NumericType<A>> class AlgebraWrapper
         static_cast<A*>(this)->A::ifma(dynamic_cast<const A&>(x1),dynamic_cast<const A&>(x2)); }
     virtual OutputStream& write(OutputStream& os) const { os << static_cast<const A&>(*this); return os; }
 };
+*/
 
 template<class A, class X=NumericType<A>> class NormedAlgebraWrapper
     : public virtual NormedAlgebraInterface<X>
     , public AlgebraWrapper<A,X>
 {
+    using AlgebraWrapper<A,X>::AlgebraWrapper;
     virtual NormedAlgebraInterface<X>* _create_ball(ErrorType r) const { return new A(static_cast<const A&>(*this).A::create_ball(r)); }
     virtual NormedAlgebraInterface<X>* _create_constant(X c) const { return new A(static_cast<const A&>(*this).A::create_constant(c)); }
     virtual NormedAlgebraInterface<X>* _create() const { return new A(static_cast<const A&>(*this).A::create()); }
     virtual NormedAlgebraInterface<X>* _clone() const { return new A(static_cast<const A&>(*this)); }
 };
 
-template<class A, class X> class GradedAlgebraWrapper
+template<class A, class X=NumericType<A>> class GradedAlgebraWrapper
     : public virtual GradedAlgebraInterface<X>
     , public AlgebraWrapper<A,X>
 {
-    virtual GradedAlgebraMixin<A,X>* _create() const { return new A(static_cast<const A&>(*this).A::create()); }
-    virtual GradedAlgebraMixin<A,X>* _clone() const { return new A(static_cast<const A&>(*this)); }
-    virtual GradedAlgebraMixin<A,X>* _apply(const Series<X>& f) const { return new A(compose(f,static_cast<const A&>(*this))); }
+    using AlgebraWrapper<A,X>::AlgebraWrapper;
+    virtual GradedAlgebraInterface<X>* _create() const { return new A(static_cast<const A&>(*this).A::create()); }
+    virtual GradedAlgebraInterface<X>* _clone() const { return new A(static_cast<const A&>(*this)); }
+    virtual GradedAlgebraInterface<X>* _apply(const Series<X>& f) const { return new A(compose(f,static_cast<const A&>(*this))); }
 };
 
-template<class A, class X> class SymbolicAlgebraWrapper
+template<class A, class X=NumericType<A>> class SymbolicAlgebraWrapper
     : public virtual SymbolicAlgebraInterface<X>
     , public AlgebraWrapper<A,X>
 {
-    virtual SymbolicAlgebraMixin<A,X>* _create() const { return new A(static_cast<const A&>(*this).A::create()); }
-    virtual SymbolicAlgebraMixin<A,X>* _clone() const { return new A(static_cast<const A&>(*this)); }
-    virtual SymbolicAlgebraMixin<A,X>* _apply(OperatorCode op) { return new A(op,static_cast<const A&>(*this)); }
+    using AlgebraWrapper<A,X>::AlgebraWrapper;
+    virtual SymbolicAlgebraInterface<X>* _create() const { return new A(static_cast<const A&>(*this).A::create()); }
+    virtual SymbolicAlgebraInterface<X>* _clone() const { return new SymbolicAlgebraWrapper<A>(*this); }
+    virtual SymbolicAlgebraInterface<X>* _apply(OperatorCode op) { return new A(op,static_cast<const A&>(*this)); }
 };
 
 } // namespace Ariadne

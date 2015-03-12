@@ -4,6 +4,7 @@
 #include <map>
 #include <vector>
 #include <memory>
+
 using std::declval;
 static const bool dummy = true;
 template<class P, class T=bool> using EnableIf = typename std::enable_if<P::value,T>::type;
@@ -17,13 +18,30 @@ using SizeType = std::size_t;
 
 using OutputStream = std::ostream;
 
+#define TEMPLATE_FLOAT
+#ifndef TEMPLATE_FLOAT
+#define FRIEND_FLOAT
+#endif
+
+auto const RESET   = "\033[0m";
+auto const BLACK   = "\033[30m";      /* Black */
+auto const RED     = "\033[31m";      /* Red */
+auto const GREEN   = "\033[32m";      /* Green */
+auto const YELLOW  = "\033[33m";      /* Yellow */
+auto const BLUE    = "\033[34m";      /* Blue */
+auto const MAGENTA = "\033[35m";      /* Magenta */
+auto const CYAN    = "\033[36m";      /* Cyan */
+auto const WHITE   = "\033[37m";      /* White */
+
 template<class T> struct Self { typedef T Type; };
 template<class T> using SelfType = typename Self<T>::Type;
 template<class T> using GenericType = typename T::GenericType;
-//template<class T> using NumericType = typename T::NumericType;
+template<class T> using NumericType = typename T::NumericType;
 
-template<class T> struct NumericTypedef { typedef typename T::NumericType Type; };
-template<class T> using NumericType = typename NumericTypedef<T>::Type;
+//template<class T> struct NumericTypedef { typedef typename T::NumericType Type; };
+//template<class T> using NumericType = typename NumericTypedef<T>::Type;
+
+template<class T> using GenericNumericType = GenericType<NumericType<T>>;
 
 struct Cnst { };
 struct Var { };
@@ -61,6 +79,38 @@ template<class T1, class T2=T1> using MulType = typename ArithmeticTraits<T1,T2>
 template<class T> using NegType = typename ArithmeticTraits<T>::NegType;
 
 struct Effort { };
+
+// ---------------- Logical ---------------------------------------------------------------------------------------- //
+
+class Boolean {
+    bool _b;
+  public:
+    Boolean(bool b) : _b(b) { }
+    operator bool() const { return this->_b; };
+    friend bool decide(Boolean l) { return l._b; }
+};
+
+class Logical {
+    enum class Value : char { FALSE=-2, UNLIKELY=-1, INDETERMINATE=0, LIKELY=+1, TRUE=2 };
+    Value _v;
+  public:
+    Logical(bool b) : _v(b ? Value::TRUE : Value::FALSE) { }
+    Logical(Value v) : _v(v) { }
+    friend bool definitely(Logical l) { return l._v==Value::TRUE; }
+    friend bool possibly(Logical l) { return l._v!=Value::FALSE; }
+    friend bool likely(Logical l) { return l._v>=Value::LIKELY; }
+    friend bool decide(Logical l) { return l._v>=Value::LIKELY; }
+};
+
+class Kleenean {
+    Logical _l;
+  public:
+    Kleenean(bool b) : _l(b) { }
+    Kleenean(Logical l) : _l(l) { }
+    Logical check(Effort e) const;
+    friend Logical check(Kleenean l, Effort e);
+    friend bool decide(Kleenean l, Effort e);
+};
 
 // ---------------- Integer --------------------------------------------------------------------------------------- //
 
@@ -104,12 +154,15 @@ class Float64;
 typedef Bounds<Float64> Float64Bounds;
 
 class RealInterface;
-class Real {
+
+struct Real {
     Real(double) = delete;
+  public:
     std::shared_ptr<RealInterface> _ptr;
   public:
     Real(RealInterface* p);
   public:
+    typedef Real GenericType;
     Real(int n);
     Real(Integer z);
     Real(Rational q);
@@ -128,12 +181,13 @@ class Real {
     friend OutputStream& operator<<(OutputStream&,Real const&);
 
     // FIXME: Should not be necessary...
-    Real create_constant(Real);
+    Real create_constant(Real) const;
 };
 
 class ValidatedReal {
     Real _r;
   public:
+    typedef Real GenericType;
     template<class T, EnableIf<IsConvertible<T,Real>> =dummy> ValidatedReal(T t) : ValidatedReal(Real(t)) { }
     ValidatedReal(Real);
     Float64Bounds get(Precision64) const;
@@ -147,6 +201,7 @@ class ValidatedReal {
     friend ValidatedReal exp(ValidatedReal);
     friend ValidatedReal log(ValidatedReal);
     friend OutputStream& operator<<(OutputStream&,ValidatedReal const&);
+    ValidatedReal create_constant(ValidatedReal) const;
 };
 
 // ---------------- Float ------------------------------------------------------------------------------------------ //
@@ -181,10 +236,12 @@ template<class F> class Bounds {
     Bounds<F>(GenericType, PrecisionType);
     operator GenericType() const;
     Bounds<F> create(GenericType) const;
+    Bounds<F> create_constant(GenericType) const;
 
     F lower_bound() const;
     F upper_bound() const;
     PrecisionType precision() const;
+    F error_bound() const;
     friend OutputStream& operator<<(OutputStream&,Bounds<F> const&);
 
 #ifndef TEMPLATE_FLOAT
@@ -299,11 +356,12 @@ template<class X> class Algebra
 // : public Field
 {
     std::shared_ptr<AlgebraInterface<X>> _ptr;
-  private:
+  private: public:
     explicit Algebra(AlgebraInterface<X>* p) : _ptr(p) { }
   public:
     typedef Algebra<X> SelfType;
     typedef X NumericType;
+    typedef GenericType<X> GenericTypeNumericType;
     template<class XX> friend Algebra<XX> make_handle(AlgebraInterface<XX>*);
     template<class A> A const& extract() const { return dynamic_cast<AlgebraWrapper<A,X>const&>(*this->_ptr); }
     friend OutputStream& operator<<(OutputStream& os, Algebra<X> const& a) { return a._ptr->_write(os); }
@@ -388,18 +446,20 @@ template<class X> class Valuation {
 template<class X> class ExpressionInterface;
 
 template<class X> class Expression {
+  private: public:
     std::shared_ptr<ExpressionInterface<X>> _ptr;
   private: public:
     explicit Expression<X>(ExpressionInterface<X>* p);
   public:
     typedef X NumericType;
     typedef Algebra<X> AlgebraType;
-    typedef Variable<X> VariableType;
+    typedef Variable<GenericType<X>> VariableType;
 
-//     template<class SX, EnableIf<IsConvertible<SX,X>> =dummy> Expression<X>(Expression<SX>);
-    template<class SX, EnableIf<IsConvertible<SX,X>> =dummy> Expression<X>(SX c) : Expression(NumericType(c)) { }
+    template<class SX, EnableIf<IsConvertible<SX,X>> =dummy> Expression<X>(Expression<SX> e);
+    template<class SX, EnableIf<IsConvertible<SX,X>> =dummy> Expression<X>(SX c)
+        : Expression(NumericType(c)) { }
     explicit operator Algebra<NumericType> () const;
-    explicit Expression<X>(Algebra<X> const& a);
+    explicit Expression(Algebra<NumericType> const& a);
 
     Expression(NumericType);
     Expression(VariableType);
@@ -421,24 +481,27 @@ template<class X> class Expression {
 
     friend NumericType evaluate(Expression, Valuation<NumericType>);
     friend AlgebraType evaluate(Expression, Valuation<AlgebraType>);
-    template<class A> friend IfAlgebra<A,NumericType>  evaluate_algebra(Expression, Valuation<A>);
     friend OutputStream& operator<<(OutputStream& os, Expression<X> const& e);
 };
 
-template<class X> template<class A> auto
-Expression<X>::operator() (Valuation<A> const& x) -> IfAlgebra<A,X> {
+template<class X, class A> IfAlgebra<A,X> evaluate_algebra(Expression<X> e, Valuation<A> x) {
     Valuation<Algebra<X>> ax;
     for(auto xv : x) { ax.insert(xv.first,Algebra<X>(xv.second)); }
-    Algebra<X> eax=evaluate(*this,ax);
+    Algebra<X> eax=evaluate(e,ax);
     return eax.template extract<A>();
 }
 
-template<class A> IfAlgebra<A,Real> evaluate_algebra(Expression<Real> e, Valuation<A> x) {
-    return e(x); }
+template<class X> template<class A> auto
+Expression<X>::operator() (Valuation<A> const& x) -> IfAlgebra<A,X> {
+    return evaluate_algebra(*this,x);
+}
 
 typedef Variable<Real> RealVariable;
 typedef Expression<Real> RealExpression;
 typedef Valuation<Real> RealValuation;
+
+typedef Expression<ValidatedReal> ValidatedRealExpression;
+typedef Valuation<ValidatedReal> ValidatedRealValuation;
 
 // ---------------- Vector ----------------------------------------------------------------------------------------- //
 
@@ -462,6 +525,50 @@ typedef Vector<Real> RealVector;
 typedef Vector<ValidatedReal> ValidatedRealVector;
 
 
+// ---------------- Differential ----------------------------------------------------------------------------------- //\
+
+template<class X> class Differential {
+    typedef GenericType<X> Y;
+  private: public:
+    X _vx; X _dx;
+  public:
+    typedef X NumericType;
+    typedef Y GenericNumericType;
+    Differential(X vx, X dx);
+    static Differential<X> constant(NumericType c);
+    static Differential<X> coordinate(NumericType c);
+    Differential<X> create_constant(GenericNumericType c) const;
+    template<class Y, EnableIf<IsConvertible<X,Y>> =dummy> explicit operator Algebra<Y> () const;
+    template<class Y, EnableIf<IsConvertible<X,Y>> =dummy> explicit Differential(Algebra<Y>);
+  public:
+    static Differential<X> _add(Differential<X>,Differential<X>);
+    static Differential<X> _mul(Differential<X>,Differential<X>);
+    static Differential<X> _neg(Differential<X>);
+    static Differential<X> _rec(Differential<X>);
+    static Differential<X> _exp(Differential<X>);
+    static Differential<X> _log(Differential<X>);
+
+    static Differential<X> _add(Differential<X>,Y);
+    static Differential<X> _add(Y,Differential<X>);
+    static Differential<X> _mul(Differential<X>,Y);
+    static Differential<X> _mul(Y,Differential<X>);
+  public:
+    friend Differential<X> add(Differential<X> dx1, Differential<X> dx2) { return _add(dx1,dx2); }
+    friend Differential<X> mul(Differential<X> dx1, Differential<X> dx2) { return _mul(dx1,dx2); }
+    friend Differential<X> neg(Differential<X> dx) { return _neg(dx); }
+    friend Differential<X> rec(Differential<X> dx) { return _rec(dx); }
+    friend Differential<X> exp(Differential<X> dx) { return _exp(dx); }
+    friend Differential<X> log(Differential<X> dx) { return _log(dx); }
+
+    friend Differential<X> add(Differential<X> dx1, Y c2) { return _add(dx1,c2); }
+    friend Differential<X> add(Y c1, Differential<X> dx2) { return _add(c1,dx2); }
+    friend Differential<X> mul(Differential<X> dx1, Y c2) { return _mul(dx1,c2); }
+    friend Differential<X> mul(Y c1, Differential<X> dx2) { return _mul(c1,dx2); }
+
+    friend OutputStream& operator<<(OutputStream& os, Differential<X> const& dx) {
+        return os << "(" << dx._vx << ";" << dx._dx << ")"; }
+};
+
 // ---------------- Function --------------------------------------------------------------------------------------- //
 
 class Coordinate {
@@ -484,8 +591,8 @@ template<class X> class FormulaInterface;
 template<class X> struct Formula {
     std::shared_ptr<FormulaInterface<X>> _ptr;
     Formula(FormulaInterface<X>* p) : _ptr(p) { }
+    Formula(std::shared_ptr<FormulaInterface<X>> p) : _ptr(p) { }
     Formula<X> constant(X const& c);
-    friend X evaluate(Formula<X>, Vector<X>);
 };
 
 template<class X> class Function {
@@ -531,20 +638,30 @@ template<class X> class Function {
     friend Function mul(Function,NumericType);
     friend Function mul(NumericType,Function);
 
+    Float64Bounds operator() (Vector<Float64Bounds>) const;
     NumericType operator() (Vector<NumericType>) const;
     AlgebraType operator() (Vector<AlgebraType>) const;
-//    template<class A> IfAlgebra<A,X> operator() (Vector<A> const& a);
+    template<class A> IfAlgebra<A,X> operator() (Vector<A> const& a) const;
 
     friend NumericType evaluate(Function, Vector<NumericType>);
-    friend NumericType evaluate(Function, Vector<AlgebraType>);
+    friend AlgebraType evaluate(Function, Vector<AlgebraType>);
+    friend Float64Bounds evaluate(Function, Vector<Float64Bounds>);
 
     friend OutputStream& operator<<(OutputStream& os, Function<X> const& e);
 };
 
 template<class X, class A> IfAlgebra<A,X> evaluate_algebra(Function<X> const& f, Vector<A> const& x) {
     std::vector<Algebra<X>> va; for(SizeType i=0; i!=x.size(); ++i) { va.push_back(Algebra<X>(x[i])); } Vector<Algebra<X>> ax(va);
-    Algebra<X> fax=f(ax); return fax.template extract<A>(); }
+    Algebra<X> fax=f(ax); return fax.template extract<A>();
+}
 
+template<class X> template<class A> IfAlgebra<A,X> Function<X>::operator() (Vector<A> const& x) const {
+    return evaluate_algebra(*this,x);
+}
 
 typedef Function<Real> RealFunction;
 typedef Function<ValidatedReal> ValidatedRealFunction;
+
+Real evaluate(RealFunction, Vector<Real>);
+ValidatedReal evaluate(ValidatedRealFunction, Vector<ValidatedReal>);
+

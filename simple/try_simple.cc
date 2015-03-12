@@ -1,5 +1,7 @@
 #include "simple.h"
 
+#include <iomanip>
+
 template<class X> void test_ring_operations(X x) {
     X r=x; r=add(x,x); r=mul(x,x); r=neg(x);
 }
@@ -51,6 +53,13 @@ int main() {
     PRINT(add(x1,x2));
     PRINT(add(x1,r2));
     PRINT(add(r1,x2));
+    PRINT(mul(x1,x2));
+    PRINT(mul(x1,r2));
+    PRINT(mul(r1,x2));
+    PRINT(neg(x2));
+    PRINT(rec(x2));
+    PRINT(exp(x1));
+    PRINT(log(x2));
 
     vr1=x1;
     PRINT(vr1);
@@ -70,11 +79,21 @@ int main() {
     a=r1;
     PRINT(a);
 
+    e=mul(add(x,r1),exp(y));
+    PRINT(e);
+    Expression<ValidatedReal> ve(e);
+    PRINT(ve);
+
+    // FIXME: Should be no need to use explicit cast here!
+    ve=mul(add(x,Expression<ValidatedReal>::constant(vr1)),exp(y));
+    PRINT(ve);
+
     std::cout << std::endl;
     test_ring_operations(n1);
     test_field_operations(q1);
     test_elementary_operations(r1);
     test_elementary_operations(e);
+    test_elementary_operations(ve);
     test_elementary_operations(a);
     test_algebra_operations(e,r1);
     test_algebra_operations(a,r1);
@@ -97,18 +116,57 @@ int main() {
     PRINT(mul(id0,exp(id1)));
 
     std::map<RealVariable,RealFunction> mf{{x,id0},{y,id1}};
-    Valuation<RealFunction> vf(mf);
-    PRINT(evaluate_algebra(add(x,y),vf));
+    Valuation<RealFunction> fv(mf);
+    PRINT(evaluate_algebra(add(x,y),fv));
     Function<Real> f({x,y},e);
     PRINT(f);
 
-    Vector<RealExpression> ve={x,y};
-    PRINT(ve);
-    PRINT(vf);
+    Vector<RealExpression> ev={x,y};
+    PRINT(ev);
+    PRINT(fv);
     PRINT(f);
-    e=evaluate_algebra(f,ve);
+    e=evaluate_algebra(f,ev);
     PRINT(e);
-    f=evaluate_algebra(e,vf);
+    f=evaluate_algebra(e,fv);
     PRINT(f);
+
+    Float64Bounds third=rec(Float64Bounds(3,3));
+    std::cout << std::setprecision(17);
+    PRINT(third);
+    PRINT(third.error_bound());
+
+    vr1=x1; vr2=r2;
+    Vector<Real> rv={r1,r2};
+    Vector<ValidatedReal> vrv={vr1,vr2};
+    Vector<Float64Bounds> xv={x1,x2};
+
+    PRINT(f(rv));
+    PRINT(evaluate(f,rv));
+
+//    PRINT(f(vrv));
+    PRINT(evaluate(f,vrv));
+    PRINT(f(xv));
+    PRINT(evaluate(f,xv));
+
+    ValidatedRealFunction vf(f);
+    PRINT(vf(vrv));
+    PRINT(evaluate(vf,vrv));
+    PRINT(vf(xv));
+//    PRINT(evaluate(vf,xv));
+
+    Differential<Real> dr1=Differential<Real>::coordinate(r1);
+    Differential<Real> dr2=Differential<Real>::coordinate(r2);
+    Vector<Differential<Real>> vdr={dr1,dr2};
+    PRINT(f(vdr));
+    PRINT(evaluate_algebra(f,vdr));
+
+    Differential<Float64Bounds> dx1=Differential<Float64Bounds>::coordinate(x1);
+    Differential<Float64Bounds> dx2=Differential<Float64Bounds>::coordinate(x2);
+    Vector<Differential<Float64Bounds>> vdx={dx1,dx2};
+
+//    PRINT(f(vdx));
+//    PRINT(evaluate_algebra(f,vdx));
+    PRINT(vf(vdx));
+    PRINT(evaluate_algebra(vf,vdx));
 
 }

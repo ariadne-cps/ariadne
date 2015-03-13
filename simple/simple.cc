@@ -310,14 +310,24 @@ template<class X> Expression<X> neg(Expression<X> e) { return make_expression<X,
 template<class X> Expression<X> rec(Expression<X> e) { return make_expression<X,Rec>(e); }
 template<class X> Expression<X> exp(Expression<X> e) { return make_expression<X,Exp>(e); }
 template<class X> Expression<X> log(Expression<X> e) { return make_expression<X,Log>(e); }
-template Expression<Real> exp(Expression<Real>);
+
+template Expression<Real> add(Expression<Real>,Expression<Real>);
+template Expression<Real> mul(Expression<Real>,Expression<Real>);
+//template Expression<Real> neg(Expression<Real>);
+//template Expression<Real> rec(Expression<Real>);
+//template Expression<Real> exp(Expression<Real>);
+//template Expression<Real> log(Expression<Real>);
+template Expression<ValidatedReal> add(Expression<ValidatedReal>,Expression<ValidatedReal>);
+template Expression<ValidatedReal> mul(Expression<ValidatedReal>,Expression<ValidatedReal>);
 
 RealExpression add(RealExpression e1, RealExpression e2) { return make_expression<Real,Add>(e1,e2); }
 RealExpression mul(RealExpression e1, RealExpression e2) { return make_expression<Real,Mul>(e1,e2); }
+/*
 RealExpression neg(RealExpression e) { return make_expression<Real,Neg>(e); }
 RealExpression rec(RealExpression e) { return make_expression<Real,Rec>(e); }
 RealExpression exp(RealExpression e) { return make_expression<Real,Exp>(e); }
 RealExpression log(RealExpression e) { return make_expression<Real,Log>(e); }
+*/
 
 Real evaluate(RealExpression e, RealValuation v) { return e._ptr->_evaluate(v); }
 RealAlgebra evaluate(RealExpression e, Valuation<RealAlgebra> v) { return e._ptr->_evaluate(v); }
@@ -326,10 +336,12 @@ OutputStream& operator<<(OutputStream& os, RealExpression const& e) { os << MAGE
 
 ValidatedRealExpression add(ValidatedRealExpression e1, ValidatedRealExpression e2) { return make_expression<ValidatedReal,Add>(e1,e2); }
 ValidatedRealExpression mul(ValidatedRealExpression e1, ValidatedRealExpression e2) { return make_expression<ValidatedReal,Mul>(e1,e2); }
+/*
 ValidatedRealExpression neg(ValidatedRealExpression e) { return make_expression<ValidatedReal,Neg>(e); }
 ValidatedRealExpression rec(ValidatedRealExpression e) { return make_expression<ValidatedReal,Rec>(e); }
 ValidatedRealExpression exp(ValidatedRealExpression e) { return make_expression<ValidatedReal,Exp>(e); }
 ValidatedRealExpression log(ValidatedRealExpression e) { return make_expression<ValidatedReal,Log>(e); }
+*/
 ValidatedReal evaluate(ValidatedRealExpression e, Valuation<ValidatedReal> v) { return e._ptr->_evaluate(v); }
 ValidatedRealAlgebra evaluate(ValidatedRealExpression e, Valuation<ValidatedRealAlgebra> v) { return e._ptr->_evaluate(v); }
 OutputStream& operator<<(OutputStream& os, ValidatedRealExpression const& e) { os << BLUE; e._ptr->_write(os); os << RESET; return os; }
@@ -451,6 +463,12 @@ template<class X> Function<X> rec(Function<X> f) { return make_function<X,Rec>(f
 template<class X> Function<X> exp(Function<X> f) { return make_function<X,Exp>(f.domain(),f.formula()); }
 template<class X> Function<X> log(Function<X> f) { return make_function<X,Log>(f.domain(),f.formula()); }
 
+template Function<Real> add(Function<Real>,Function<Real>);
+template Function<Real> mul(Function<Real>,Function<Real>);
+template Function<Real> neg(Function<Real>);
+template Function<Real> rec(Function<Real>);
+template Function<Real> exp(Function<Real>);
+template Function<Real> log(Function<Real>);
 
 template class Function<Real>;
 typedef Formula<Real> RealFormula;

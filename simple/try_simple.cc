@@ -69,7 +69,7 @@ int main() {
     Variable<Real> x("x");
     Variable<Real> y("y");
     PRINT(x);
-    Expression<Real> e=mul(add(x,1),exp(y));
+    Expression<Real> e=log(mul(add(x,1),exp(y)));
     PRINT(e);
     Algebra<Real> a=static_cast<Algebra<Real>>(e);
     PRINT(a);

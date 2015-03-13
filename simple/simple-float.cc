@@ -5,15 +5,32 @@
 
 // ---------------- Float ------------------------------------------------------------------------------------------ //
 
+#if ( defined __SSE_MATH__ &&  defined __SSE2__ )
+    #define ARIADNE_SSE_ROUNDING
+#else
+    #define ARIADNE_GCC_ROUNDING
+#endif
+
+#if defined ARIADNE_SSE_ROUNDING
 #include <xmmintrin.h>
 typedef unsigned short rounding_mode_t;
 inline void set_rounding_to_nearest() { _MM_SET_ROUNDING_MODE(_MM_ROUND_NEAREST);  }
 inline void set_rounding_downward() { _MM_SET_ROUNDING_MODE(_MM_ROUND_DOWN);  }
 inline void set_rounding_upward() { _MM_SET_ROUNDING_MODE(_MM_ROUND_UP);  }
 inline void set_rounding_toward_zero() { _MM_SET_ROUNDING_MODE(_MM_ROUND_TOWARD_ZERO);  }
-
 inline void set_rounding_mode(rounding_mode_t rnd) { _MM_SET_ROUNDING_MODE(rnd); }
 inline rounding_mode_t get_rounding_mode() { return _MM_GET_ROUNDING_MODE(); }
+#else
+typedef unsigned short rounding_mode_t;
+const rounding_mode_t ROUND_NEAR = 895;
+const rounding_mode_t ROUND_DOWN = 895+1024;
+const rounding_mode_t ROUND_UP = 895+2048;
+inline void set_rounding_to_nearest() { asm volatile ("fldcw %0" : : "m" (ROUND_NEAR) ); }
+inline void set_rounding_downward() { asm volatile ("fldcw %0" : : "m" (ROUND_DOWN) ); }
+inline void set_rounding_upward() { asm volatile ("fldcw %0" : : "m" (ROUND_UP) ); }
+inline void set_rounding_mode(rounding_mode_t rnd) { asm volatile ("fldcw %0" : : "m" (rnd) ); }
+inline rounding_mode_t get_rounding_mode() { rounding_mode_t rnd; asm volatile ("fstcw %0" : "=m" (rnd) ); return rnd; }
+#endif
 
 bool initialize_rounding_mode() { set_rounding_upward(); }
 static const bool rounding_mode_initialized = initialize_rounding_mode();

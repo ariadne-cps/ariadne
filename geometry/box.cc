@@ -87,10 +87,13 @@ ExactBoxType make_box(const String& str)
     }
     return bx;
 }
-/*
-void make_vertices_down(const ExactFloat64Box& bx, SizeType i, SizeType n, ExactFloatPoint& pt, std::vector<ExactFloatPoint>& v);
 
-void make_vertices_up(const ExactFloat64Box& bx, SizeType i, SizeType n, ExactFloatPoint& pt, std::vector<ExactFloatPoint>& v) {
+
+template<class BX> using VertexType = typename BX::VertexType;
+
+template<class BX> void make_vertices_down(const BX& bx, SizeType i, SizeType n, VertexType<BX>& pt, std::vector<VertexType<BX>>& v);
+
+template<class BX> void make_vertices_up(const BX& bx, SizeType i, SizeType n, VertexType<BX>& pt, std::vector<VertexType<BX>>& v) {
     ARIADNE_ASSERT(i <= n);
     if(i == n) {    // base case: we are at the last dimension of the box
         pt[i] = bx[i].lower();
@@ -105,7 +108,7 @@ void make_vertices_up(const ExactFloat64Box& bx, SizeType i, SizeType n, ExactFl
     }
 }
 
-void make_vertices_down(const ExactFloat64Box& bx, SizeType i, SizeType n, ExactFloatPoint& pt, std::vector<ExactFloatPoint>& v) {
+template<class BX> void make_vertices_down(const BX& bx, SizeType i, SizeType n, VertexType<BX>& pt, std::vector<VertexType<BX>>& v) {
     ARIADNE_ASSERT(i <= n);
     if(i == n) {    // base case: we are at the last dimension of the box
         pt[i] = bx[i].upper();
@@ -119,8 +122,18 @@ void make_vertices_down(const ExactFloat64Box& bx, SizeType i, SizeType n, Exact
         make_vertices_down(bx, i+1, n, pt, v);
     }
 }
-*/
 
+template<class I> List<typename Box<I>::VertexType> Box<I>::vertices() const {
+    std::vector<VertexType> v;
+    SizeType n = this->dimension();
+    if(n > 0) {
+        VertexType pt(n);
+        make_vertices_up(*this, 0, n-1, pt, v);
+    }
+    return v;
+}
+
+template List<typename ExactFloat64Box::VertexType> Box<ExactFloat64Interval>::vertices() const;
 
 /*
 LowerFloat64Box under_approximation(const RealBox& rbx) {
@@ -145,20 +158,6 @@ ApproximateFloat64Box approximation(const RealBox& rbx) {
         bx[i]=approximation(rbx[i]);
     }
     return bx;
-}
-*/
-
-
-
-/*
-List<Point> Box<I>::vertices() const {
-    std::vector<Point> v;
-    SizeType n = this->dimension();
-    if(n > 0) {
-        Point pt(n);
-        make_vertices_up(*this, 0, n-1, pt, v);
-    }
-    return v;
 }
 */
 

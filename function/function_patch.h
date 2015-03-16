@@ -1147,7 +1147,7 @@ template<class M> VectorFunctionPatch<M>& operator/=(VectorFunctionPatch<M>& f, 
 template<class M> VectorFunctionPatch<M> operator+(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2)
 {
     typedef M ModelType;
-    ARIADNE_ASSERT_MSG(!empty(intersection(f1.domain(),f2.domain())),
+    ARIADNE_ASSERT_MSG(!is_empty(intersection(f1.domain(),f2.domain())),
                        "operator+(VectorFunctionPatch<M> f1, VectorFunctionPatch<M> f2) with f1="<<f1<<" f2="<<f2<<
                        ": domains are disjoint");
     if(f1.domain()==f2.domain()) {
@@ -1186,7 +1186,7 @@ template<class M> VectorFunctionPatch<M> operator*(const FunctionPatch<M>& f1, c
 template<class M> VectorFunctionPatch<M> operator*(const VectorFunctionPatch<M>& f1, const FunctionPatch<M>& f2)
 {
     typedef M ModelType;
-    ARIADNE_ASSERT(!empty(intersection(f1.domain(),f2.domain())));
+    ARIADNE_ASSERT(!is_empty(intersection(f1.domain(),f2.domain())));
     if(f1.domain()==f2.domain()) {
         return VectorFunctionPatch<M>(f1.domain(),Vector<ModelType>(f1.models()*f2.model()));
     } else {

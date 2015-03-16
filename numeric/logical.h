@@ -39,8 +39,10 @@ class Effort {
     Nat _m;
   public:
     static Effort get_default() { return Effort(0u); }
+    explicit Effort() : _m(0u) { }
     explicit Effort(Nat m) : _m(m) { }
     operator Nat() const { return _m; }
+    friend OutputStream& operator<<(OutputStream& os, Effort eff) { return os << "Effort(" << eff._m << ")"; }
 };
 
 template<class P> class Logical;
@@ -213,6 +215,12 @@ template<> class Logical<EffectiveUpper>
     explicit operator LogicalHandle () const { return _v; }
     Logical<EffectiveUpper>(Logical<Effective> l) : _v(l._v) { }
     Logical<ValidatedUpper> check(Effort e) const { return Logical<ValidatedUpper>(Ariadne::check(_v,e)); }
+    friend Logical<EffectiveUpper> operator&&(Logical<EffectiveUpper> l1, Logical<EffectiveUpper> l2) {
+        return Logical<EffectiveUpper>(conjunction(l1._v,l2._v)); }
+    friend Logical<EffectiveUpper> operator||(Logical<EffectiveUpper> l1, Logical<EffectiveUpper> l2) {
+        return Logical<EffectiveUpper>(disjunction(l1._v,l2._v)); }
+    friend Logical<EffectiveLower> operator!(Logical<EffectiveUpper> l);
+    friend Logical<EffectiveUpper> operator!(Logical<EffectiveLower> l);
     friend Logical<ValidatedUpper> check(Logical<EffectiveUpper> l, Effort e) { return Logical<ValidatedUpper>(Ariadne::check(l._v,e)); }
     friend Bool decide(Logical<EffectiveUpper> l, Effort e=Effort::get_default()) { return decide(l.check(e)); }
     friend inline OutputStream& operator<<(OutputStream& os, Logical<EffectiveUpper> l) { return os << l._v; }
@@ -229,7 +237,15 @@ template<> class Logical<EffectiveLower>
     Logical<EffectiveLower>(Logical<Effective> l) : _v(l._v) { }
     Logical<ValidatedLower> check(Effort e) const { return Logical<ValidatedLower>(Ariadne::check(_v,e)); }
     friend Logical<ValidatedLower> check(Logical<EffectiveLower> l, Effort e) { return Logical<ValidatedLower>(Ariadne::check(l._v,e)); }
-    friend Bool decide(Logical<EffectiveLower> l, Effort e=Effort::get_default()) { return decide(l.check(e)); }
+    friend Logical<EffectiveLower> operator&&(Logical<EffectiveLower> l1, Logical<EffectiveLower> l2) {
+        return Logical<EffectiveLower>(conjunction(l1._v,l2._v)); }
+    friend Logical<EffectiveLower> operator||(Logical<EffectiveLower> l1, Logical<EffectiveLower> l2) {
+        return Logical<EffectiveLower>(disjunction(l1._v,l2._v)); }
+    friend Logical<EffectiveUpper> operator!(Logical<EffectiveLower> l) {
+        return Logical<EffectiveUpper>(negation(l._v)); }
+    friend Logical<EffectiveLower> operator!(Logical<EffectiveUpper> l) {
+        return Logical<EffectiveLower>(negation(l._v)); }
+     friend Bool decide(Logical<EffectiveLower> l, Effort e=Effort::get_default()) { return decide(l.check(e)); }
     friend inline OutputStream& operator<<(OutputStream& os, Logical<EffectiveLower> l) { return os << l._v; }
 };
 

@@ -99,6 +99,14 @@ RealExpression operator+(const RealExpression& e, const RealVariable& v) { retur
 RealExpression operator-(const RealExpression& e, const RealVariable& v) { return e-RealExpression(v); }
 RealExpression operator*(const RealExpression& e, const RealVariable& v) { return e*RealExpression(v); }
 RealExpression operator/(const RealExpression& e, const RealVariable& v) { return e/RealExpression(v); }
+RealExpression operator+(const RealVariable& v, const Real& x) { return RealExpression(v)+RealExpression(x); }
+RealExpression operator-(const RealVariable& v, const Real& x) { return RealExpression(v)-RealExpression(x); }
+RealExpression operator*(const RealVariable& v, const Real& x) { return RealExpression(v)*RealExpression(x); }
+RealExpression operator/(const RealVariable& v, const Real& x) { return RealExpression(v)/RealExpression(x); }
+RealExpression operator+(const Real& x, const RealVariable& v) { return RealExpression(x)+RealExpression(v); }
+RealExpression operator-(const Real& x, const RealVariable& v) { return RealExpression(x)-RealExpression(v); }
+RealExpression operator*(const Real& x, const RealVariable& v) { return RealExpression(x)*RealExpression(v); }
+RealExpression operator/(const Real& x, const RealVariable& v) { return RealExpression(x)/RealExpression(v); }
 
 } // namespace Ariadne
 
@@ -114,7 +122,6 @@ Void export_formula()
     implicitly_convertible<Integer,IntegerExpression>();
     implicitly_convertible<IntegerVariable,IntegerExpression>();
 
-    implicitly_convertible<Real,RealExpression>();
     implicitly_convertible<RealVariable,RealExpression>();
 
     to_python< List<RealExpression> >();
@@ -207,6 +214,15 @@ Void export_formula()
     real_variable_class.def("__rsub__", &__rsub__<RealExpression,RealVariable,RealExpression>);
     real_variable_class.def("__rmul__", &__rmul__<RealExpression,RealVariable,RealExpression>);
     real_variable_class.def("__rdiv__", &__rdiv__<RealExpression,RealVariable,RealExpression>);
+    real_variable_class.def("__add__", &__add__<RealExpression,RealVariable,Real>);
+    real_variable_class.def("__sub__", &__sub__<RealExpression,RealVariable,Real>);
+    real_variable_class.def("__mul__", &__mul__<RealExpression,RealVariable,Real>);
+    real_variable_class.def("__div__", &__div__<RealExpression,RealVariable,Real>);
+    real_variable_class.def("__radd__", &__radd__<RealExpression,RealVariable,Real>);
+    real_variable_class.def("__rsub__", &__rsub__<RealExpression,RealVariable,Real>);
+    real_variable_class.def("__rmul__", &__rmul__<RealExpression,RealVariable,Real>);
+    real_variable_class.def("__rdiv__", &__rdiv__<RealExpression,RealVariable,Real>);
+
     real_variable_class.def("__le__", &__le__<ContinuousPredicate,RealVariable,RealExpression>);
     real_variable_class.def("__ge__", &__ge__<ContinuousPredicate,RealVariable,RealExpression>);
     real_variable_class.def("__lt__", &__lt__<ContinuousPredicate,RealVariable,RealExpression>);
@@ -254,6 +270,15 @@ Void export_formula()
     real_expression_class.def("__gt__", &__gt__<ContinuousPredicate,RealExpression,RealExpression>);
     //real_expression_class.def("__cmp__", &__cmp__<ContinuousPredicate,RealExpression,RealExpression>);
     real_expression_class.def(self_ns::str(self));
+
+    real_expression_class.def("__add__", &__add__<RealExpression,RealExpression,Real>);
+    real_expression_class.def("__sub__", &__sub__<RealExpression,RealExpression,Real>);
+    real_expression_class.def("__mul__", &__mul__<RealExpression,RealExpression,Real>);
+    real_expression_class.def("__div__", &__div__<RealExpression,RealExpression,Real>);
+    real_expression_class.def("__radd__", &__radd__<RealExpression,RealExpression,Real>);
+    real_expression_class.def("__rsub__", &__rsub__<RealExpression,RealExpression,Real>);
+    real_expression_class.def("__rmul__", &__rmul__<RealExpression,RealExpression,Real>);
+    real_expression_class.def("__rdiv__", &__rdiv__<RealExpression,RealExpression,Real>);
 
     def("neg", (RealExpression(*)(RealExpression)) &neg);
     def("rec", (RealExpression(*)(RealExpression)) &rec);

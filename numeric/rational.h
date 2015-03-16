@@ -74,6 +74,8 @@ class Rational
     operator Number<Exact> () const;
     Integer get_num() const;
     Integer get_den() const;
+    Integer numerator() const;
+    Integer denominator() const;
     friend Rational operator+(Rational const& q);
     friend Rational operator-(Rational const& q);
     friend Rational operator+(Rational const& q1, Rational const& q2);

@@ -164,6 +164,18 @@ Integer Rational::get_den() const {
     return z;
 }
 
+Integer Rational::numerator() const {
+    Integer z;
+    mpq_get_num(z._mpz,this->_mpq);
+    return z;
+}
+
+Integer Rational::denominator() const {
+    Integer z;
+    mpq_get_den(z._mpz,this->_mpq);
+    return z;
+}
+
 Rational operator+(Rational const& q) {
     return Rational(q);
 }

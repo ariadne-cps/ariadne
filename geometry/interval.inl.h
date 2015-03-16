@@ -38,8 +38,6 @@ template<class U> Interval<U> Interval<U>::create_zero() const { return Interval
 template<class U> SizeOne Interval<U>::dimension() const  { return SizeOne(); }
 template<class U> auto Interval<U>::lower() const -> LowerBoundType const& { return _l; }
 template<class U> auto Interval<U>::upper() const -> UpperBoundType const& { return _u; }
-template<class U> auto Interval<U>::lower() -> LowerBoundType& { return _l; }
-template<class U> auto Interval<U>::upper() -> UpperBoundType& { return _u; }
 template<class U> auto Interval<U>::centre() const -> CentreType { return (_l+_u)/2u; }
 template<class U> auto Interval<U>::midpoint() const -> MidpointType { auto m=((_l+_u)/2); return make_split_point(m); }
 template<class U> auto Interval<U>::radius() const -> RadiusType { return max(this->upper()-this->midpoint(),this->midpoint()-this->lower()); }

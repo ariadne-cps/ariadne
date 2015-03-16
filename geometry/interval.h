@@ -138,10 +138,8 @@ template<class U> class Interval {
 
     //! \brief The lower bound of the interval.
     LowerBoundType const& lower() const;
-    LowerBoundType& lower();
     //! \brief The upper bound of the interval.
     UpperBoundType const& upper() const;
-    UpperBoundType& upper();
     //! \brief The midpoint of the interval. Need not be the exact midpoint. \sa radius()
     MidpointType midpoint() const;
     //! \brief The centre of the interval, computed with whatever rounding is appropriate.

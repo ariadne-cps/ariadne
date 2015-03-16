@@ -152,6 +152,7 @@ template<class P> class Number
     //! \brief Get the value of the number as a multiple-precision floating-point type
     Float<P,PrecisionMP> get(PrecisionMP const& prec) const { return pointer()->_get(WP(),prec); }
 
+    template<class X> X extract() const;
 
     friend Number<P> operator+(Number<P> y) { return pos(y); }
     friend Number<NP> operator-(Number<P> y) { return neg(y); }
@@ -233,9 +234,6 @@ template<class R, class P, EnableIf<IsConcreteNumericType<R>> =dummy> auto opera
 template<class R, class P, EnableIf<IsConcreteNumericType<R>> =dummy> auto operator+(Number<P> const& y1, R const& r2) -> decltype(y1+Number<Paradigm<R>>(r2)) {
     return y1+Number<Paradigm<R>>(r2); }
 
-//! \brief Get the value of the number represented by \a X with the same precision paramters as \a p.
-template<class X, class P, EnableIf<IsWeaker<ParadigmTag<X>,P>> =dummy>
-inline X extract(Number<P> y);
 
 #endif
 
@@ -263,6 +261,8 @@ template<class P> class Number
 
     // Construct from raw double
     template<class X, EnableIf<And<IsSame<P,Approximate>,IsFloatingPoint<X>>> =dummy> explicit Number(const X& n);
+
+    template<class X> X extract() const;
 };
 
 // Unary and binary operators
@@ -302,9 +302,6 @@ template<class P> inline Logical<LessThan<Negated<P>>> operator>=(Number<P> y1, 
 
 template<class P> inline OutputStream& operator<<(OutputStream& os, Number<P> y) {
     return os << y.handle(); }
-
-template<class P, class X, EnableIf<And<IsFloat<X>,IsWeaker<Paradigm<X>,P>>> =dummy>
-    inline X extract(Number<P> y, Prototype<X> const& p) { return y.handle().get(p); }
 
 template<class P> inline Number<P> abs(Number<P> y);
 template<class P1, class P2> inline Number<Weaker<P1,P2>> max(Number<P1> y1, Number<P2> y2);

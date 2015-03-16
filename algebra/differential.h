@@ -385,6 +385,8 @@ struct NonAssignableDifferential
         this->Differential<X>::operator=(other); return *this; }
     NonAssignableDifferential<X>& operator=(const X& c) {
         this->Differential<X>::operator=(c); return *this; }
+    NonAssignableDifferential<X>& operator+=(const Differential<X>& x) {
+        static_cast<Differential<X>&>(*this) += x; return *this; }
 };
 
 class DifferentialCharacteristics {

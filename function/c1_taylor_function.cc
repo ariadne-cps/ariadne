@@ -140,7 +140,7 @@ C1TaylorSeries& operator*=(C1TaylorSeries& f, ValidatedNumericType ic) {
     Float64& fze=f._zero_error;
     Float64& fue=f._uniform_error;
     Float64& fde=f._derivative_error;
-    const Float64 c=ic.midpoint().raw();
+    const Float64 c=ic.value().raw();
     const Float64 ac=max(abs(ic.lower().raw()),abs(ic.upper().raw()));
 
     Float64::set_rounding_upward();
@@ -180,7 +180,7 @@ C1TaylorSeries& operator*=(C1TaylorSeries& f, ValidatedNumericType ic) {
 }
 
 C1TaylorSeries operator+(C1TaylorSeries f1, C1TaylorSeries f2) {
-    C1TaylorSeries r(max(f1.degree(),f2.degree()));
+    C1TaylorSeries r(std::max(f1.degree(),f2.degree()));
 
     const std::vector<Float64>& f1a=f1._coefficients;
     const std::vector<Float64>& f2a=f2._coefficients;
@@ -202,13 +202,13 @@ C1TaylorSeries operator+(C1TaylorSeries f1, C1TaylorSeries f2) {
     r._derivative_error+=f1._derivative_error+f2._derivative_error;
 
     Float64::set_rounding_to_nearest();
-    for(Nat i=0; i!=min(f1a.size(),f2a.size()); ++i) {
+    for(Nat i=0; i!=std::min(f1a.size(),f2a.size()); ++i) {
         f0a[i]=f1a[i]+f2a[i];
     }
-    for(Nat i=min(f1a.size(),f2a.size()); i!=f1a.size(); ++i) {
+    for(Nat i=std::min(f1a.size(),f2a.size()); i!=f1a.size(); ++i) {
         f0a[i]=f1a[i];
     }
-    for(Nat i=min(f1a.size(),f2a.size()); i!=f2a.size(); ++i) {
+    for(Nat i=std::min(f1a.size(),f2a.size()); i!=f2a.size(); ++i) {
         f0a[i]=f2a[i];
     }
     return r;
@@ -267,7 +267,7 @@ C1TaylorSeries operator*(C1TaylorSeries f1, C1TaylorSeries f2) {
     for(Nat ir=1; ir!=f1a.size()+f2a.size()-1; ++ir) {
         vu=0.0;
         mvl=0.0;
-        for(Nat i1=max(0,Int(ir)-Int(f2a.size()-1)); i1!=min(Int(ir+1),Int(f1a.size())); ++i1) {
+        for(Nat i1=std::max(0,Int(ir)-Int(f2a.size()-1)); i1!=min(Int(ir+1),Int(f1a.size())); ++i1) {
             Nat i2=ir-i1;
             // std::cerr<<"ir="<<ir<<", i1="<<i1<<", i2="<<i2<<"\n";
             ARIADNE_DEBUG_ASSERT(i2<f2a.size());
@@ -390,14 +390,15 @@ Void C1TaylorFunction::clear() {
     }
 }
 
-C1TaylorFunction& C1TaylorFunction::operator=(ExactIntervalType ic) {
+C1TaylorFunction& C1TaylorFunction::operator=(NumericType ic) {
     this->clear();
     Float64::set_rounding_upward();
     Float64 e=(ic.upper().raw()-ic.lower().raw())/2;
     this->_zero_error=e;
     this->_uniform_error=e;
     Float64::set_rounding_to_nearest();
-    this->_expansion.append(MultiIndex(this->argument_size()),ic.centre().raw());
+    Float64 c=(ic.upper().raw()-ic.lower().raw())/2;
+    this->_expansion.append(MultiIndex(this->argument_size()),c);
     return *this;
 }
 
@@ -565,7 +566,7 @@ Void fma(C1TaylorFunction& f0, const C1TaylorFunction& f1, const C1TaylorFunctio
             }
             f0._uniform_error+=e;
             for(Nat j=0; j!=n; ++j) {
-                f0._derivative_errors[j]+=a[j]*e;
+                f0._derivative_errors[j]+=(uchar)a[j]*e;
             }
             Float64::set_rounding_to_nearest();
             f0._expansion.append(a,i2->data()*c3);
@@ -586,7 +587,7 @@ Void fma(C1TaylorFunction& f0, const C1TaylorFunction& f1, const C1TaylorFunctio
         }
         f0._uniform_error+=e;
         for(Nat j=0; j!=n; ++j) {
-            f0._derivative_errors[j]+=a[j]*e;
+            f0._derivative_errors[j]+=(uchar)a[j]*e;
         }
         Float64::set_rounding_to_nearest();
         f0._expansion.append(i2->key()+a3,i2->data()*c3);

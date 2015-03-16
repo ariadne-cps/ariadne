@@ -34,7 +34,7 @@ Kleenean
 separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float64& eps)
 {
     ExactBoxType bb=cast_exact_box(ls.bounding_box());
-    if(definitely(bb.empty())) { return true; }
+    if(definitely(bb.is_empty())) { return true; }
     return separated(ls,rs,bb,eps);
 }
 
@@ -43,7 +43,7 @@ Kleenean
 overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float64& eps)
 {
     ExactBoxType bb=cast_exact_box(ls.bounding_box());
-    if(definitely(bb.empty())) { return false; }
+    if(definitely(bb.is_empty())) { return false; }
     return overlap(ls,rs,bb,eps);
 }
 
@@ -52,7 +52,7 @@ Kleenean
 inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float64& eps)
 {
     ExactBoxType bb=cast_exact_box(ls.bounding_box());
-    if(definitely(bb.empty())) { return true; }
+    if(definitely(bb.is_empty())) { return true; }
     return inside(ls,rs,bb,eps);
 }
 
@@ -69,7 +69,7 @@ overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Exac
     else if(definitely(rs.covers(bx))) {
         return true;
     }
-    else if(definitely(bx.radius().raw()<eps)) {
+    else if(definitely(bx.radius()<cast_exact(eps))) {
         return indeterminate;
     } else {
         ExactBoxType bx1,bx2;
@@ -90,7 +90,7 @@ inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Exact
 {
     if(definitely(ls.separated(bx) || rs.separated(bx))) {
         return true;
-    } else if(bx.radius().raw()<eps) {
+    } else if(decide(bx.radius()<cast_exact(eps))) {
         return indeterminate;
     } else {
         ExactBoxType bx1,bx2;
@@ -111,7 +111,7 @@ separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Ex
 {
     if(definitely(ls.separated(bx) || rs.separated(bx))) {
         return true;
-    } else if(bx.radius().raw()<eps) {
+    } else if(definitely(bx.radius()<cast_exact(eps))) {
         return indeterminate;
     } else {
         ExactBoxType bx1,bx2;
@@ -135,7 +135,7 @@ overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const ExactBo
     if(definitely(ovs.overlaps(bx))) {
         if(definitely(ops.covers(bx))) {
             return true;
-        } else if(bx.radius().raw()<eps) {
+        } else if(decide(bx.radius()<cast_exact(eps))) {
             return indeterminate;
         } else {
             ExactBoxType bx1,bx2;
@@ -157,7 +157,7 @@ inside(const ClosedSetInterface& cls, const OpenSetInterface& ops, const ExactBo
 {
     if(definitely(cls.separated(bx) || ops.covers(bx))) {
         return true;
-    } else if(bx.radius().raw()<eps) {
+    } else if(decide(bx.radius()<cast_exact(eps))) {
         return indeterminate;
     } else {
         ExactBoxType bx1,bx2;
@@ -176,7 +176,7 @@ separated(const ClosedSetInterface& cls1, const ClosedSetInterface& cls2, const 
 {
     if(definitely(cls1.separated(bx) || cls2.separated(bx))) {
         return true;
-    } else if(bx.radius().raw()<eps) {
+    } else if(decide(bx.radius()<cast_exact(eps))) {
         return indeterminate;
     } else {
         ExactBoxType bx1,bx2;

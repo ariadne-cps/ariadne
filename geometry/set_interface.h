@@ -157,12 +157,12 @@ class RegularSetInterface
 {
     virtual RegularSetInterface* clone() const = 0;
     //! \brief Tests if \a ls overlaps \a rs, to a tolerance of \a eps.
-    friend Sierpinski overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const RawFloat64& eps);
+    friend Kleenean overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const RawFloat64& eps);
 
     //! \brief Tests if \a ls is a inside of \a rs, to a tolerance of \a eps.
-    friend Sierpinski inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const RawFloat64& eps);
+    friend Kleenean inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const RawFloat64& eps);
     //! \brief Tests if \a ls is disjoint from \a rs, to a tolerance of \a eps.
-    friend Sierpinski separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const RawFloat64& eps);
+    friend Kleenean separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const RawFloat64& eps);
 };
 
 
@@ -177,12 +177,12 @@ class LocatedSetInterface
 {
     virtual LocatedSetInterface* clone() const = 0;
     //! \brief Tests if \a ls overlaps \a rs, to a tolerance of \a eps.
-    friend Sierpinski overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const RawFloat64& eps);
+    friend Kleenean overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const RawFloat64& eps);
 
     //! \brief Tests if \a ls is a inside of \a rs, to a tolerance of \a eps.
-    friend Sierpinski inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const RawFloat64& eps);
+    friend Kleenean inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const RawFloat64& eps);
     //! \brief Tests if \a ls is disjoint from \a rs, to a tolerance of \a eps.
-    friend Sierpinski separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const RawFloat64& eps);
+    friend Kleenean separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const RawFloat64& eps);
 };
 
 //! \ingroup GeometryModule SetInterfaceSubModule

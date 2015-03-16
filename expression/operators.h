@@ -180,11 +180,11 @@ struct Unequal : ComparisonObject<Unequal> {
 
 struct AndOp : OperatorObject<AndOp> {
     template<class A1, class A2> auto operator()(A1&& a1, A2&& a2) const -> decltype(a1 and a2) { return a1 and a2; }
-    OperatorCode code() const { return OperatorCode::OR; } OperatorKind kind() const { return OperatorKind::BINARY; }
+    OperatorCode code() const { return OperatorCode::AND; } OperatorKind kind() const { return OperatorKind::BINARY; }
 };
 struct OrOp : OperatorObject<OrOp> {
     template<class A1, class A2> auto operator()(A1&& a1, A2&& a2) const -> decltype(a1 or a2) { return a1 or a2; }
-    OperatorCode code() const { return OperatorCode::AND; } OperatorKind kind() const { return OperatorKind::BINARY; }
+    OperatorCode code() const { return OperatorCode::OR; } OperatorKind kind() const { return OperatorKind::BINARY; }
 };
 struct NotOp : OperatorObject<NotOp> {
     template<class A> auto operator()(A&& a) const -> decltype(not a) { return not a; }

@@ -90,8 +90,8 @@ const char* name(const OperatorCode& op) {
         case OperatorCode::NEQ:  return "neq"; break;
         case OperatorCode::GEQ:  return "geq"; break;
         case OperatorCode::LEQ:  return "leq"; break;
-        case OperatorCode::GT:   return "lt"; break;
-        case OperatorCode::LT:   return "gt"; break;
+        case OperatorCode::GT:   return "gt"; break;
+        case OperatorCode::LT:   return "lt"; break;
         case OperatorCode::SUBS:   return "subs"; break;
         default: return "UNKNOWN";
     }

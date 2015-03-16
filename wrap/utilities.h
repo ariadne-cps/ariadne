@@ -469,6 +469,6 @@ Void export_array(const char* name)
 
 
 
-}
+} // namespace Ariadne
 
 #endif /* ARIADNE_PYTHON_UTILITIES_H */

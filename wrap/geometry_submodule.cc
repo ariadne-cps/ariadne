@@ -34,9 +34,6 @@
 #include "geometry/curve.h"
 #include "geometry/interval.h"
 #include "geometry/box.h"
-#include "geometry/zonotope.h"
-#include "geometry/polytope.h"
-#include "geometry/polyhedron.h"
 #include "geometry/grid_set.h"
 #include "geometry/function_set.h"
 #include "geometry/affine_set.h"
@@ -51,6 +48,7 @@ using namespace Ariadne;
 
 namespace Ariadne {
 
+typedef RealBox BoxSet;
 
 template<>
 struct from_python_dict<ExactIntervalType> {
@@ -87,15 +85,15 @@ struct from_python<ExactPoint> {
     from_python() { converter::registry::push_back(&convertible,&construct,type_id<ExactPoint>()); }
     static Void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr) && !PyTuple_Check(obj_ptr)) { return 0; } return obj_ptr; }
     static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
-        extract<boost::python::tuple> xtup(obj_ptr);
-        extract<boost::python::list> xlst(obj_ptr);
+        boost::python::extract<boost::python::tuple> xtup(obj_ptr);
+        boost::python::extract<boost::python::list> xlst(obj_ptr);
         ExactPoint pt;
         if(xtup.check()) {
             boost::python::tuple tup=xtup(); pt=ExactPoint(len(tup));
-            for(Int i=0; i!=len(tup); ++i) { pt[i]=ExactFloat64(extract<Float64>(tup[i])); }
+            for(Int i=0; i!=len(tup); ++i) { pt[i]=ExactFloat64(boost::python::extract<Float64>(tup[i])); }
         } else if(xlst.check()) {
             boost::python::list lst=xlst(); pt=ExactPoint(len(lst));
-            for(Int i=0; i!=len(lst); ++i) { pt[i]=ExactFloat64(extract<Float64>(lst[i])); }
+            for(Int i=0; i!=len(lst); ++i) { pt[i]=ExactFloat64(boost::python::extract<Float64>(lst[i])); }
         }
         Void* storage = ((converter::rvalue_from_python_storage<ExactIntervalType>*)data)->storage.bytes;
         new (storage) ExactPoint(pt);
@@ -109,9 +107,9 @@ struct from_python<ExactBoxType> {
     static Void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
     static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
         Void* storage = ((converter::rvalue_from_python_storage<ExactIntervalType>*)data)->storage.bytes;
-        boost::python::list lst=extract<boost::python::list>(obj_ptr);
+        boost::python::list lst=boost::python::extract<boost::python::list>(obj_ptr);
         ExactBoxType* bx_ptr = new (storage) ExactBoxType(len(lst));
-        for(Int i=0; i!=len(lst); ++i) { (*bx_ptr)[i]=extract<ExactIntervalType>(lst[i]); }
+        for(Int i=0; i!=len(lst); ++i) { (*bx_ptr)[i]=boost::python::extract<ExactIntervalType>(lst[i]); }
         data->convertible = storage;
     }
 };
@@ -148,7 +146,7 @@ struct to_python< ListSet< HybridBasicSet<ES> > > {
 
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<BoundedFloat64>& x);
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ExactIntervalType>& x) {
-    return os << PythonRepresentation<BoundedFloat64>(BoundedFloat64(x.reference()));
+    ExactIntervalType const& ivl=x.reference(); return os << PythonRepresentation<BoundedFloat64>(BoundedFloat64(ivl.lower(),ivl.upper()));
 }
 
 
@@ -158,9 +156,9 @@ class OpenSetWrapper
 {
   public:
     OpenSetInterface* clone() const { return this->get_override("clone")(); }
-    Nat dimension() const { return this->get_override("dimension")(); }
-    Kleenean covers(const ExactBoxType& r) const { return this->get_override("covers")(); }
-    Kleenean overlaps(const ExactBoxType& r) const { return this->get_override("overlaps")(); }
+    SizeType dimension() const { return this->get_override("dimension")(); }
+    Sierpinski covers(const ExactBoxType& r) const { return this->get_override("covers")(); }
+    Sierpinski overlaps(const ExactBoxType& r) const { return this->get_override("overlaps")(); }
     OutputStream& write(OutputStream&) const { return this->get_override("write")(); }
 };
 
@@ -169,8 +167,8 @@ class ClosedSetWrapper
 {
   public:
     ClosedSetInterface* clone() const { return this->get_override("clone")(); }
-    Nat dimension() const { return this->get_override("dimension")(); }
-    Kleenean separated(const ExactBoxType& r) const { return this->get_override("separated")(); }
+    SizeType dimension() const { return this->get_override("dimension")(); }
+    Sierpinski separated(const ExactBoxType& r) const { return this->get_override("separated")(); }
     OutputStream& write(OutputStream&) const { return this->get_override("write")(); }
 };
 
@@ -180,8 +178,8 @@ class OvertSetWrapper
 {
   public:
     OvertSetInterface* clone() const { return this->get_override("clone")(); }
-    Nat dimension() const { return this->get_override("dimension")(); }
-    Kleenean overlaps(const ExactBoxType& r) const { return this->get_override("overlaps")(); }
+    SizeType dimension() const { return this->get_override("dimension")(); }
+    Sierpinski overlaps(const ExactBoxType& r) const { return this->get_override("overlaps")(); }
     OutputStream& write(OutputStream&) const { return this->get_override("write")(); }
 };
 
@@ -191,10 +189,10 @@ class CompactSetWrapper
 {
   public:
     CompactSetInterface* clone() const { return this->get_override("clone")(); }
-    Nat dimension() const { return this->get_override("dimension")(); }
-    Kleenean separated(const ExactBoxType& r) const { return this->get_override("separated")(); }
-    Kleenean inside(const ExactBoxType& r) const { return this->get_override("inside")(); }
-    Kleenean is_bounded() const { return this->get_override("is_bounded")(); }
+    SizeType dimension() const { return this->get_override("dimension")(); }
+    Sierpinski separated(const ExactBoxType& r) const { return this->get_override("separated")(); }
+    Sierpinski inside(const ExactBoxType& r) const { return this->get_override("inside")(); }
+    Sierpinski is_bounded() const { return this->get_override("is_bounded")(); }
     UpperBoxType bounding_box() const { return this->get_override("bounding_box")(); }
     OutputStream& write(OutputStream&) const { return this->get_override("write")(); }
 };
@@ -204,10 +202,10 @@ class RegularSetWrapper
 {
   public:
     RegularSetWrapper* clone() const { return this->get_override("clone")(); }
-    Nat dimension() const { return this->get_override("dimension")(); }
-    Kleenean overlaps(const ExactBoxType& r) const { return this->get_override("overlaps")(); }
-    Kleenean covers(const ExactBoxType& r) const { return this->get_override("covers")(); }
-    Kleenean separated(const ExactBoxType& r) const { return this->get_override("separated")(); }
+    SizeType dimension() const { return this->get_override("dimension")(); }
+    Sierpinski overlaps(const ExactBoxType& r) const { return this->get_override("overlaps")(); }
+    Sierpinski covers(const ExactBoxType& r) const { return this->get_override("covers")(); }
+    Sierpinski separated(const ExactBoxType& r) const { return this->get_override("separated")(); }
     OutputStream& write(OutputStream&) const { return this->get_override("write")(); }
 };
 
@@ -216,11 +214,11 @@ class LocatedSetWrapper
 {
   public:
     LocatedSetInterface* clone() const { return this->get_override("clone")(); }
-    Nat dimension() const { return this->get_override("dimension")(); }
-    Kleenean overlaps(const ExactBoxType& r) const { return this->get_override("overlaps")(); }
-    Kleenean separated(const ExactBoxType& r) const { return this->get_override("separated")(); }
-    Kleenean inside(const ExactBoxType& r) const { return this->get_override("inside")(); }
-    Kleenean is_bounded() const { return this->get_override("is_bounded")(); }
+    SizeType dimension() const { return this->get_override("dimension")(); }
+    Sierpinski overlaps(const ExactBoxType& r) const { return this->get_override("overlaps")(); }
+    Sierpinski separated(const ExactBoxType& r) const { return this->get_override("separated")(); }
+    Sierpinski inside(const ExactBoxType& r) const { return this->get_override("inside")(); }
+    Sierpinski is_bounded() const { return this->get_override("is_bounded")(); }
     UpperBoxType bounding_box() const { return this->get_override("bounding_box")(); }
     OutputStream& write(OutputStream&) const { return this->get_override("write")(); }
 };
@@ -264,90 +262,93 @@ Void export_point()
 
 }
 
+typedef Logical<Exact> ExactLogicalType;
 
-Void export_interval()
-{
-    using boost::python::class_;
-    using boost::python::init;
-    using boost::python::self;
-    using boost::python::return_value_policy;
-    using boost::python::copy_const_reference;
-    using boost::python::def;
 
-    class_< ExactIntervalType > interval_class("ExactIntervalType");
-    interval_class.def(init<double>());
-    interval_class.def(init<double,double>());
-    interval_class.def(init<Float64,Float64>());
-    interval_class.def(init<Real,Real>());
-    interval_class.def(init<Decimal>());
-    interval_class.def(init<Dyadic>());
-    interval_class.def(init<Float64>());
+template<class IVL> Void export_interval(std::string name) {
+    typedef IVL IntervalType;
+    typedef typename IntervalType::LowerBoundType LowerBoundType;
+    typedef typename IntervalType::UpperBoundType UpperBoundType;
+    typedef typename IntervalType::MidpointType MidpointType;
 
-    interval_class.def(init<Rational>());
-    interval_class.def(init<Rational,Rational>());
+    typedef decltype(contains(declval<IntervalType>(),declval<MidpointType>())) ContainsType;
+    typedef decltype(disjoint(declval<IntervalType>(),declval<IntervalType>())) DisjointType;
+    typedef decltype(subset(declval<IntervalType>(),declval<IntervalType>())) SubsetType;
+
+    class_< IntervalType > interval_class(name.c_str());
+    interval_class.def(init<MidpointType>());
+    interval_class.def(init<LowerBoundType,UpperBoundType>());
 
     interval_class.def(self == self);
     interval_class.def(self != self);
-    interval_class.def("lower", &ExactIntervalType::lower, return_value_policy<copy_const_reference>());
-    interval_class.def("upper", &ExactIntervalType::upper, return_value_policy<copy_const_reference>());
-    interval_class.def("midpoint", &ExactIntervalType::midpoint);
-    interval_class.def("radius", &ExactIntervalType::radius);
-    interval_class.def("width", &ExactIntervalType::width);
-    interval_class.def("contains", (Bool(*)(ExactIntervalType,Float64)) &contains);
-    interval_class.def("empty", (Bool(ExactIntervalType::*)()const) &ExactIntervalType::empty);
+    interval_class.def("lower", &IntervalType::lower, return_value_policy<copy_const_reference>());
+    interval_class.def("upper", &IntervalType::upper, return_value_policy<copy_const_reference>());
+    interval_class.def("midpoint", &IntervalType::midpoint);
+    interval_class.def("radius", &IntervalType::radius);
+    interval_class.def("width", &IntervalType::width);
+    interval_class.def("contains", (ContainsType(*)(IntervalType const&,MidpointType const&)) &contains);
+    interval_class.def("empty", &IntervalType::is_empty);
     interval_class.def(boost::python::self_ns::str(self));
 
-    from_python_dict<ExactIntervalType>();
-    from_python_list<ExactIntervalType>();
+    from_python_dict<IntervalType>();
+    from_python_list<IntervalType>();
     //from_python_str<ExactIntervalType>();
 
-    def("midpoint", &ExactIntervalType::midpoint);
-    def("radius", &ExactIntervalType::radius);
-    def("width", &ExactIntervalType::width);
+    def("midpoint", &IntervalType::midpoint);
+    def("radius", &IntervalType::radius);
+    def("width", &IntervalType::width);
 
-    def("disjoint", (Bool(*)(ExactIntervalType,ExactIntervalType)) &disjoint);
-    def("subset", (Bool(*)(ExactIntervalType,ExactIntervalType)) &subset);
-    def("intersection", (ExactIntervalType(*)(ExactIntervalType,ExactIntervalType)) &intersection);
+    def("disjoint", (ContainsType(*)(ExactIntervalType const&,ExactIntervalType const&)) &disjoint);
+    def("subset", (DisjointType(*)(ExactIntervalType const&,ExactIntervalType const&)) &subset);
+    def("intersection", (IntervalType(*)(IntervalType const&,IntervalType const&)) &intersection);
 
-    def("hull", (ExactIntervalType(*)(ExactIntervalType,ExactIntervalType)) &hull);
+    def("hull", (IntervalType(*)(IntervalType const&, IntervalType const&)) &hull);
 }
 
-Void export_box()
+Void export_intervals() {
+    export_interval<ExactIntervalType>("ExactInterval");
+}
+
+template<class BX> Void export_box()
 {
     typedef Vector<ExactIntervalType> ExactIntervalVectorType;
     class_<Vector<ExactIntervalType>> interval_vector_class("ExactIntervalVectorType");
 
-    class_<ExactBoxType,bases<CompactSetInterface,OpenSetInterface,Vector<ExactIntervalType>,DrawableInterface > > box_class("ExactBoxType",init<ExactBoxType>());
-    box_class.def(init<Nat>());
+//    class_<ExactBoxType,bases<CompactSetInterface,OpenSetInterface,Vector<ExactIntervalType>,DrawableInterface > >
+    class_<ExactBoxType,bases< > > box_class("ExactBoxType",init<ExactBoxType>());
+    box_class.def(init<DimensionType>());
     box_class.def(init< Vector<ExactIntervalType> >());
-    box_class.def("__eq__", (Bool(*)(const Vector<ExactIntervalType>&,const Vector<ExactIntervalType>&)) &operator==);
-    box_class.def("dimension", (Nat(ExactBoxType::*)()const) &ExactBoxType::dimension);
-    box_class.def("centre", (ExactPoint(ExactBoxType::*)()const) &ExactBoxType::centre);
-    box_class.def("radius", (Float64(ExactBoxType::*)()const) &ExactBoxType::radius);
-    box_class.def("separated", (Kleenean(ExactBoxType::*)(const ExactBoxType&)const) &ExactBoxType::separated);
-    box_class.def("overlaps", (Kleenean(ExactBoxType::*)(const ExactBoxType&)const) &ExactBoxType::overlaps);
-    box_class.def("covers", (Kleenean(ExactBoxType::*)(const ExactBoxType&)const) &ExactBoxType::covers);
-    box_class.def("inside", (Kleenean(ExactBoxType::*)(const ExactBoxType&)const) &ExactBoxType::inside);
-    box_class.def("empty", (Bool(ExactBoxType::*)()const) &ExactBoxType::empty);
-    box_class.def("widen", (ExactBoxType(ExactBoxType::*)()const) &ExactBoxType::widen);
+    box_class.def("__eq__", (ExactLogicalType(*)(const Vector<ExactIntervalType>&,const Vector<ExactIntervalType>&)) &operator==);
+    box_class.def("dimension", (DimensionType(ExactBoxType::*)()const) &ExactBoxType::dimension);
+    box_class.def("centre", (ExactBoxType::CentreType(ExactBoxType::*)()const) &ExactBoxType::centre);
+    box_class.def("radius", (ExactBoxType::RadiusType(ExactBoxType::*)()const) &ExactBoxType::radius);
+    box_class.def("separated", (ExactLogicalType(ExactBoxType::*)(const ExactBoxType&)const) &ExactBoxType::separated);
+    box_class.def("overlaps", (ExactLogicalType(ExactBoxType::*)(const ExactBoxType&)const) &ExactBoxType::overlaps);
+    box_class.def("covers", (ExactLogicalType(ExactBoxType::*)(const ExactBoxType&)const) &ExactBoxType::covers);
+    box_class.def("inside", (ExactLogicalType(ExactBoxType::*)(const ExactBoxType&)const) &ExactBoxType::inside);
+    box_class.def("is_empty", (Bool(ExactBoxType::*)()const) &ExactBoxType::is_empty);
     box_class.def("split", (Pair<ExactBoxType,ExactBoxType>(ExactBoxType::*)()const) &ExactBoxType::split);
-    box_class.def("split", (Pair<ExactBoxType,ExactBoxType>(ExactBoxType::*)(Nat)const) &ExactBoxType::split);
+    box_class.def("split", (Pair<ExactBoxType,ExactBoxType>(ExactBoxType::*)(SizeType)const) &ExactBoxType::split);
     box_class.def("split", (Pair<ExactBoxType,ExactBoxType>(ExactBoxType::*)()const) &ExactBoxType::split);
     box_class.def(self_ns::str(self));
 
-    def("split", (Pair<ExactIntervalVectorType,ExactIntervalVectorType>(*)(const ExactIntervalVectorType&)) &split);
-    def("disjoint", (Bool(*)(const ExactIntervalVectorType&,const ExactIntervalVectorType&)) &disjoint);
-    def("subset", (Bool(*)(const ExactIntervalVectorType&,const ExactIntervalVectorType&)) &subset);
+    def("disjoint", (ExactLogicalType(*)(const ExactBoxType&,const ExactBoxType&)) &disjoint);
+    def("subset", (ExactLogicalType(*)(const ExactBoxType&,const ExactBoxType&)) &subset);
 
     def("product", (ExactBoxType(*)(const ExactBoxType&,const ExactIntervalType&)) &product);
     def("product", (ExactBoxType(*)(const ExactBoxType&,const ExactBoxType&)) &product);
     def("hull", (ExactBoxType(*)(const ExactBoxType&,const ExactBoxType&)) &hull);
     def("intersection", (ExactBoxType(*)(const ExactBoxType&,const ExactBoxType&)) &intersection);
 
+    def("widen", (UpperBoxType(*)(ExactBoxType const&, ExactFloat64 eps)) &widen);
+
     from_python<ExactBoxType>();
     to_python< Pair<ExactBoxType,ExactBoxType> >();
     implicitly_convertible<Vector<ExactIntervalType>,ExactBoxType>();
+}
 
+Void export_boxes() {
+    export_box<ExactBoxType>();
 }
 
 /*
@@ -403,7 +404,7 @@ Void export_curve()
 
     class_<InterpolatedCurve,bases<DrawableInterface> > interpolated_curve_class("InterpolatedCurve",init<InterpolatedCurve>());
     interpolated_curve_class.def(init<ExactFloat64,ExactPoint>());
-    interpolated_curve_class.def("insert", (Void(InterpolatedCurve::*)(const ApproximateFloat64&, const Point<ApproximateFloat64>&)) &InterpolatedCurve::insert);
+    interpolated_curve_class.def("insert", (Void(InterpolatedCurve::*)(const ExactFloat64&, const Point<ApproximateFloat64>&)) &InterpolatedCurve::insert);
     interpolated_curve_class.def("__iter__",boost::python::range(&InterpolatedCurve::begin,&InterpolatedCurve::end));
     interpolated_curve_class.def(self_ns::str(self));
 
@@ -423,7 +424,7 @@ Void export_affine_set()
     affine_set_class.def("new_constraint", (Void(ValidatedAffineConstrainedImageSet::*)(const Constraint<AffineModel<BoundedFloat64>,BoundedFloat64>&)) &ValidatedAffineConstrainedImageSet::new_constraint);
     affine_set_class.def("dimension", &ValidatedAffineConstrainedImageSet::dimension);
     affine_set_class.def("is_bounded", &ValidatedAffineConstrainedImageSet::is_bounded);
-    affine_set_class.def("empty", &ValidatedAffineConstrainedImageSet::empty);
+    affine_set_class.def("is_empty", &ValidatedAffineConstrainedImageSet::is_empty);
     affine_set_class.def("bounding_box", &ValidatedAffineConstrainedImageSet::bounding_box);
     affine_set_class.def("separated", &ValidatedAffineConstrainedImageSet::separated);
     affine_set_class.def("adjoin_outer_approximation_to", &ValidatedAffineConstrainedImageSet::adjoin_outer_approximation_to);
@@ -447,8 +448,6 @@ Void export_constraint_set()
 
     class_<BoxSet>
         box_set_class("BoxSet");
-    box_set_class.def(init<ExactIntervalVectorType>());
-    box_set_class.def(init< List<IntervalSet> >());
 
     def("intersection", (BoundedConstraintSet(*)(const ConstraintSet&,const BoxSet&)) &intersection);
 
@@ -496,7 +495,9 @@ Void export_constrained_image_set()
 Void geometry_submodule() {
     export_set_interface();
     export_point();
-    export_box();
+
+    export_intervals();
+    export_boxes();
 //    export_zonotope();
 //    export_polytope();
     export_curve();

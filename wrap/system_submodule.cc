@@ -53,12 +53,12 @@ struct from_python< Space<T> > {
     static Void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
     static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
         Void* storage = ((converter::rvalue_from_python_storage<ExactIntervalType>*)data)->storage.bytes;
-        boost::python::list elements=extract<boost::python::list>(obj_ptr);
+        boost::python::list elements=boost::python::extract<boost::python::list>(obj_ptr);
         Space<T>* spc_ptr = new (storage) Space<T>();
         for(Int i=0; i!=len(elements); ++i) {
-            extract<String> xs(elements[i]);
+            boost::python::extract<String> xs(elements[i]);
             if(xs.check()) { spc_ptr->append(Variable<T>(xs())); }
-            else { Variable<T> v=extract< Variable<T> >(elements[i]); spc_ptr->append(v); }
+            else { Variable<T> v=boost::python::extract< Variable<T> >(elements[i]); spc_ptr->append(v); }
         }
         data->convertible = storage;
     }
@@ -70,12 +70,12 @@ struct from_python< Set<DiscreteEvent> > {
     static Void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
     static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
         Void* storage = ((converter::rvalue_from_python_storage< Set<DiscreteEvent> >*)data)->storage.bytes;
-        boost::python::list elements=extract<boost::python::list>(obj_ptr);
+        boost::python::list elements=boost::python::extract<boost::python::list>(obj_ptr);
         Set<DiscreteEvent>* evnts_ptr = new (storage) Set<DiscreteEvent>();
         for(Int i=0; i!=len(elements); ++i) {
-            extract<String> xs(elements[i]);
+            boost::python::extract<String> xs(elements[i]);
             if(xs.check()) { evnts_ptr->insert(DiscreteEvent(xs())); }
-            else { DiscreteEvent e=extract< DiscreteEvent >(elements[i]); evnts_ptr->insert(e); }
+            else { DiscreteEvent e=boost::python::extract< DiscreteEvent >(elements[i]); evnts_ptr->insert(e); }
         }
         data->convertible = storage;
     }

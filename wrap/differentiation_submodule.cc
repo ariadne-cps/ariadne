@@ -207,10 +207,10 @@ Void export_differential(const char* name)
     typedef Vector<D> DV;
 
 
-    class_<D> differential_class(name);
+    class_<D> differential_class(name, init<D>() );
     //differential_class.def("__init__", make_constructor(&make_differential<D>) );
     differential_class.def("__init__", make_constructor(&make_sparse_differential<D>) );
-    differential_class.def( init< D >());
+    //differential_class.def( init< D >());
     differential_class.def( init< Nat, Nat >());
     differential_class.def( init< Expansion<X>, Nat >());
     differential_class.def("__getitem__", &get_item<D,MultiIndex,X>);
@@ -251,16 +251,9 @@ Void export_differential(const char* name)
     differential_class.staticmethod("variable");
     differential_class.staticmethod("variables");
 
-    def("derivative", (D(*)(const D&, SizeType))&derivative<X>);
-    def("antiderivative", (D(*)(const D&, SizeType))&antiderivative<X>);
-    def("sin", (D(*)(const D&))&sin<X>);
+    def("derivative", (D(*)(const D&, SizeType))&derivative);
+    def("antiderivative", (D(*)(const D&, SizeType))&antiderivative);
 
-/*
-    // Declare non-template friends
-    D abs(D const&); D pos(D const&); D neg(D const&); D rec(D const&); D pow(D const&, Int);
-    D sqrt(D const&); D exp(D const&); D log(D const&); D sin(D const&); D cos(D const&); D tan(D const&);
-
-    def("abs",(D(*)(const D&))&abs);
     def("pos",(D(*)(const D&))&pos);
     def("neg",(D(*)(const D&))&neg);
     def("rec",(D(*)(const D&))&rec);
@@ -272,10 +265,7 @@ Void export_differential(const char* name)
     def("sin", (D(*)(const D&))&sin);
     def("cos", (D(*)(const D&))&cos);
     def("tan", (D(*)(const D&))&tan);
-    def("asin", (D(*)(const D&))&asin<X>);
-    def("acos", (D(*)(const D&))&acos<X>);
-    def("atan", (D(*)(const D&))&atan<X>);
-*/
+    def("atan", (D(*)(const D&))&atan);
 }
 
 template<class DIFF>
@@ -288,7 +278,7 @@ export_differential_vector(const char* name)
     typedef DIFF D;
     typedef Vector<D> DV;
 
-    class_<DV> differential_vector_class(name);
+    class_<DV> differential_vector_class(name, init<DV>());
     differential_vector_class.def("__init__", make_constructor(&make_differential_vector<D>) );
     differential_vector_class.def( init< Nat, Nat, Nat >());
     differential_vector_class.def("__getitem__", &matrix_get_item<DV,Int,MultiIndex,X>);

@@ -61,10 +61,10 @@ struct from_python< MultiIndex >
     from_python() { converter::registry::push_back(&convertible,&construct,type_id<MultiIndex>()); }
     static Void* convertible(PyObject* obj_ptr) { if (!PyTuple_Check(obj_ptr)) { return 0; } return obj_ptr; }
     static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
-        boost::python::tuple tup=extract<boost::python::tuple>(obj_ptr);
+        boost::python::tuple tup=boost::python::extract<boost::python::tuple>(obj_ptr);
         Void* storage = ((converter::rvalue_from_python_storage<MultiIndex>*)   data)->storage.bytes;
         MultiIndex res(len(tup));
-        for(Nat i=0; i!=res.size(); ++i) { res.set(i,extract<Nat>(tup[i])); }
+        for(Nat i=0; i!=res.size(); ++i) { res.set(i,boost::python::extract<Nat>(tup[i])); }
         new (storage) MultiIndex(res);
         data->convertible = storage;
     }
@@ -79,10 +79,10 @@ struct from_python<EffectiveVectorFunction>
     from_python() { converter::registry::push_back(&convertible,&construct,type_id<EffectiveVectorFunction>()); }
     static Void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
     static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
-        list lst=extract<list>(obj_ptr);
+        list lst=boost::python::extract<list>(obj_ptr);
         Void* storage = ((converter::rvalue_from_python_storage< EffectiveVectorFunction >*)   data)->storage.bytes;
         EffectiveVectorFunction res(len(lst),0);
-        for(Nat i=0; i!=res.result_size(); ++i) { res.set(i,extract<EffectiveScalarFunction>(lst[i])); }
+        for(Nat i=0; i!=res.result_size(); ++i) { res.set(i,boost::python::extract<EffectiveScalarFunction>(lst[i])); }
         new (storage) EffectiveVectorFunction(res);
         data->convertible = storage;
     }
@@ -114,37 +114,33 @@ template<class X> OutputStream& operator<<(OutputStream& os, const Representatio
 class ScalarPythonFunction
     : public ScalarFunctionMixin<ScalarPythonFunction,EffectiveTag>
 {
+  public:
     friend class ScalarFunctionMixin<ScalarPythonFunction,EffectiveTag>;
     template<class T> Void _compute(T& r, const Vector<T>& a) const {
         r=boost::python::extract<T>(this->_pyf(a)); }
   public:
-    ScalarPythonFunction(StringType& nm, Nat as, const object& pyf) : _name(nm), _argument_size(as), _pyf(pyf) { }
-    ScalarPythonFunction(Nat as, const object& pyf) : _name(),  _argument_size(as), _pyf(pyf) { }
-    ScalarPythonFunction(const object& pyf)
+    ScalarPythonFunction(StringType& nm, SizeType as, const boost::python::object& pyf) : _name(nm), _argument_size(as), _pyf(pyf) { }
+    ScalarPythonFunction(SizeType as, const boost::python::object& pyf) : _name(),  _argument_size(as), _pyf(pyf) { }
+    ScalarPythonFunction(const boost::python::object& pyf)
         : _name(),
-          _argument_size(extract<Int>(pyf.attr("argument_size"))),
+          _argument_size(boost::python::extract<SizeType>(pyf.attr("argument_size"))),
           _pyf(pyf) { }
 
     ScalarPythonFunction* clone() const { return new ScalarPythonFunction(*this); }
-    virtual Nat argument_size() const { return this->_argument_size; }
+    virtual SizeType argument_size() const { return this->_argument_size; }
 
-    virtual Covector<ApproximateFloat64> gradient(const Vector<ApproximateFloat64>& x) const {
-        return this->evaluate(Differential<ApproximateFloat64>::variables(1u,x)).gradient(); }
-    virtual Covector<BoundedFloat64> gradient(const Vector<BoundedFloat64>& x) const {
-        return this->evaluate(Differential<BoundedFloat64>::variables(1u,x)).gradient(); }
-
-    virtual EffectiveScalarFunctionInterface* _derivative (Nat j) const {
-        ARIADNE_FAIL_MSG("Cannot get a component of a Python function"); }
+    virtual EffectiveScalarFunctionInterface* _derivative (SizeType j) const {
+        ARIADNE_FAIL_MSG("Cannot symbolically differentiate a Python function"); }
     virtual OutputStream& repr(OutputStream& os) const { return os; }
     virtual OutputStream& write(OutputStream& os) const {
         os << "ScalarUserFunction( ";
         if(this->_name.size()>0) { os << "name=" << this->_name << ", "; }
         os << "argument_size="<<this->_argument_size;
         return os << " )"; }
-    EffectiveScalarFunction derivative(Nat j) const { return EffectiveScalarFunction(this->_derivative(j)); }
+    EffectiveScalarFunction derivative(SizeType j) const { return EffectiveScalarFunction(this->_derivative(j)); }
   private:
     StringType _name;
-    Nat _argument_size;
+    SizeType _argument_size;
     boost::python::object _pyf;
 };
 
@@ -152,30 +148,28 @@ class ScalarPythonFunction
 class VectorPythonFunction
     : public VectorFunctionMixin<VectorPythonFunction,EffectiveTag>
 {
+  public:
     friend class VectorFunctionMixin<VectorPythonFunction,EffectiveTag>;
     template<class T> Void _compute(Vector<T>& r, const Vector<T>& a) const {
         r=boost::python::extract< Vector<T> >(this->_pyf(a)); }
   public:
-    VectorPythonFunction(StringType& nm, Nat rs, Nat as, const object& pyf) : _name(nm), _result_size(rs), _argument_size(as), _pyf(pyf) { }
-    VectorPythonFunction(Nat rs, Nat as, const object& pyf) : _name(), _result_size(rs), _argument_size(as), _pyf(pyf) { }
+    VectorPythonFunction(StringType& nm, SizeType rs, SizeType as, const boost::python::object& pyf) : _name(nm), _result_size(rs), _argument_size(as), _pyf(pyf) { }
+    VectorPythonFunction(SizeType rs, SizeType as, const object& pyf) : _name(), _result_size(rs), _argument_size(as), _pyf(pyf) { }
     VectorPythonFunction(const object& pyf)
         : _name(),
-          _result_size(extract<Int>(pyf.attr("result_size"))),
-          _argument_size(extract<Int>(pyf.attr("argument_size"))),
+          _result_size(boost::python::extract<Int>(pyf.attr("result_size"))),
+          _argument_size(boost::python::extract<Int>(pyf.attr("argument_size"))),
           _pyf(pyf) { }
 
     VectorPythonFunction* clone() const { return new VectorPythonFunction(*this); }
-    virtual Nat result_size() const { return this->_result_size; }
-    virtual Nat argument_size() const { return this->_argument_size; }
+    virtual SizeType result_size() const { return this->_result_size; }
+    virtual SizeType argument_size() const { return this->_argument_size; }
 
-    virtual Matrix<ApproximateFloat64> jacobian (const Vector<ApproximateFloat64>& x) const {
-        return this->evaluate(Differential<ApproximateFloat64>::variables(1u,x)).jacobian(); }
-    virtual Matrix<BoundedFloat64> jacobian (const Vector<BoundedFloat64>& x) const {
-        return this->evaluate(Differential<BoundedFloat64>::variables(1u,x)).jacobian(); }
-
-    virtual EffectiveScalarFunctionInterface* _get(Nat i) const {
+    virtual EffectiveVectorFunctionInterface* _derivative (SizeType j) const {
+        ARIADNE_FAIL_MSG("Cannot symbolically differentiate a Python function"); }
+    virtual EffectiveScalarFunctionInterface* _get(SizeType i) const {
         ARIADNE_FAIL_MSG("Cannot get a component of a Python function"); }
-    virtual EffectiveScalarFunction operator[](Nat i) const {
+    virtual EffectiveScalarFunction operator[](SizeType i) const {
         ARIADNE_FAIL_MSG("Cannot get a component of a Python function"); }
 
     virtual OutputStream& write(OutputStream& os) const {
@@ -186,8 +180,8 @@ class VectorPythonFunction
         return os << " )"; }
   private:
     StringType _name;
-    Nat _result_size;
-    Nat _argument_size;
+    SizeType _result_size;
+    SizeType _argument_size;
     boost::python::object _pyf;
 };
 
@@ -287,8 +281,8 @@ Void export_scalar_function()
     scalar_function_class.def("__call__", (Differential<ApproximateFloat64>(EffectiveScalarFunction::*)(const Vector<Differential<ApproximateFloat64>>&)const)&EffectiveScalarFunction::evaluate );
     scalar_function_class.def("gradient", (Covector<BoundedFloat64>(EffectiveScalarFunction::*)(const Vector<BoundedFloat64>&)const)&EffectiveScalarFunction::gradient );
     scalar_function_class.def("gradient", (Covector<BoundedFloat64>(EffectiveScalarFunction::*)(const Vector<BoundedFloat64>&)const)&EffectiveScalarFunction::gradient );
-    scalar_function_class.def("differential", (Differential<BoundedFloat64>(EffectiveScalarFunction::*)(const Vector<BoundedFloat64>&,Nat)const) &EffectiveScalarFunction::differential);
-    scalar_function_class.def("differential", (Differential<ApproximateFloat64>(EffectiveScalarFunction::*)(const Vector<ApproximateFloat64>&,Nat)const) &EffectiveScalarFunction::differential);
+    scalar_function_class.def("differential", (Differential<BoundedFloat64>(EffectiveScalarFunction::*)(const Vector<BoundedFloat64>&,DegreeType)const) &EffectiveScalarFunction::differential);
+    scalar_function_class.def("differential", (Differential<ApproximateFloat64>(EffectiveScalarFunction::*)(const Vector<ApproximateFloat64>&,DegreeType)const) &EffectiveScalarFunction::differential);
     scalar_function_class.def("__pos__", &__pos__<EffectiveScalarFunction,EffectiveScalarFunction>);
     scalar_function_class.def("__neg__", &__neg__<EffectiveScalarFunction,EffectiveScalarFunction>);
     scalar_function_class.def("__add__", &__add__<EffectiveScalarFunction,EffectiveScalarFunction,EffectiveScalarFunction>);
@@ -309,15 +303,15 @@ Void export_scalar_function()
     scalar_function_class.def("__str__", &__cstr__<EffectiveScalarFunction>);
     scalar_function_class.def("__repr__", &__crepr__<EffectiveScalarFunction>);
 
-    scalar_function_class.def("constant", (EffectiveScalarFunction(*)(Nat,Real)) &EffectiveScalarFunction::constant);
-    scalar_function_class.def("coordinate", (EffectiveScalarFunction(*)(Nat,Nat)) &EffectiveScalarFunction::coordinate);
+    scalar_function_class.def("constant", (EffectiveScalarFunction(*)(SizeType,Real)) &EffectiveScalarFunction::constant);
+    scalar_function_class.def("coordinate", (EffectiveScalarFunction(*)(SizeType,SizeType)) &EffectiveScalarFunction::coordinate);
     scalar_function_class.staticmethod("constant");
     scalar_function_class.staticmethod("coordinate");
 
     def("evaluate", (ApproximateFloat64(*)(const EffectiveScalarFunction&,const Vector<ApproximateFloat64>&)) &evaluate);
     def("evaluate", (BoundedFloat64(*)(const EffectiveScalarFunction&,const Vector<BoundedFloat64>&)) &evaluate);
 
-    def("derivative", (EffectiveScalarFunction(EffectiveScalarFunction::*)(Nat)const) &EffectiveScalarFunction::derivative);
+    def("derivative", (EffectiveScalarFunction(EffectiveScalarFunction::*)(SizeType)const) &EffectiveScalarFunction::derivative);
 
     def("pow", (EffectiveScalarFunction(*)(const EffectiveScalarFunction&,Int)) &pow);
     def("rec", (EffectiveScalarFunction(*)(const EffectiveScalarFunction&)) &rec);
@@ -359,12 +353,12 @@ Void export_vector_function()
     vector_function_class.def("__call__", (Vector<Differential<ApproximateFloat64>>(EffectiveVectorFunction::*)(const Vector<Differential<ApproximateFloat64>>&)const)&EffectiveVectorFunction::evaluate );
     vector_function_class.def("jacobian", (Matrix<BoundedFloat64>(EffectiveVectorFunction::*)(const Vector<BoundedFloat64>&)const) &EffectiveVectorFunction::jacobian);
     vector_function_class.def("jacobian", (Matrix<ApproximateFloat64>(EffectiveVectorFunction::*)(const Vector<ApproximateFloat64>&)const) &EffectiveVectorFunction::jacobian);
-    vector_function_class.def("differentials", (Vector<Differential<BoundedFloat64> >(EffectiveVectorFunction::*)(const Vector<BoundedFloat64>&,Nat)const) &EffectiveVectorFunction::differentials);
-    vector_function_class.def("differentials", (Vector<Differential<ApproximateFloat64> >(EffectiveVectorFunction::*)(const Vector<ApproximateFloat64>&,Nat)const) &EffectiveVectorFunction::differentials);
+    vector_function_class.def("differential", (Vector<Differential<BoundedFloat64> >(EffectiveVectorFunction::*)(const Vector<BoundedFloat64>&,DegreeType)const) &EffectiveVectorFunction::differential);
+    vector_function_class.def("differential", (Vector<Differential<ApproximateFloat64> >(EffectiveVectorFunction::*)(const Vector<ApproximateFloat64>&,DegreeType)const) &EffectiveVectorFunction::differential);
     vector_function_class.def("__str__", &__cstr__<EffectiveVectorFunction>);
     vector_function_class.def("__repr__", &__crepr__<EffectiveVectorFunction>);
 
-    vector_function_class.def("identity", (EffectiveVectorFunction(*)(Nat)) &EffectiveVectorFunction::identity);
+    vector_function_class.def("identity", (EffectiveVectorFunction(*)(SizeType)) &EffectiveVectorFunction::identity);
     vector_function_class.staticmethod("identity");
 
     def("evaluate", (Vector<ApproximateFloat64>(*)(const EffectiveVectorFunction&,const Vector<ApproximateFloat64>&)) &evaluate);

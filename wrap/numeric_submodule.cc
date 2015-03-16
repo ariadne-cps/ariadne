@@ -23,6 +23,7 @@
 
 
 #include "boost_python.h"
+#include "utilities.h"
 
 #include "numeric/logical.h"
 #include "numeric/integer.h"
@@ -68,6 +69,21 @@ using namespace boost::python;
 
 
 namespace Ariadne {
+
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Rational>& repr) {
+    return os << "Rational("<<repr.reference().numerator()<<","<<repr.reference().denominator()<<")"; }
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<RawFloat64>& repr) {
+    return os << "Float64("<<repr.reference()<<")"; }
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ApproximateFloat64>& repr) {
+    return os << "ApproximateFloat64("<<repr.reference().raw()<<")"; }
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<BoundedFloat64>& repr) {
+    return os << "BoundedFloat64("<<repr.reference().lower().raw()<<","<<repr.reference().upper().raw()<<")"; }
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ExactFloat64>& repr) {
+    return os << "ExactFloat64("<<repr.reference().raw()<<")"; }
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<UpperFloat64>& repr) {
+    return os << "UpperFloat64("<<repr.reference().raw()<<")"; }
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<PositiveUpperFloat64>& repr) {
+    return os << "ErrorFloat64("<<repr.reference().raw()<<")"; }
 
 template<class T> struct Tag { };
 

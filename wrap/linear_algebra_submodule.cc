@@ -103,10 +103,10 @@ struct from_python< Vector<X> >
 
     static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data)
     {
-        list lst=extract<list>(obj_ptr);
+        list lst=boost::python::extract<list>(obj_ptr);
         Void* storage = ((converter::rvalue_from_python_storage< Vector<X> >*)   data)->storage.bytes;
         Vector<X> res(len(lst));
-        for(Nat i=0; i!=res.size(); ++i) { res[i]=extract<X>(lst[i]); }
+        for(Nat i=0; i!=res.size(); ++i) { res[i]=boost::python::extract<X>(lst[i]); }
         new (storage) Vector<X>(res);
         data->convertible = storage;
     }
@@ -127,13 +127,13 @@ struct from_python< Matrix<X> >
 
     static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data)
     {
-        list rows=extract<list>(obj_ptr);
-        Matrix<X> res(len(rows),len(extract<list>(rows[0])));
+        list rows=boost::python::extract<list>(obj_ptr);
+        Matrix<X> res(len(rows),len(boost::python::extract<list>(rows[0])));
         for(Nat i=0; i!=res.row_size(); ++i) {
-            list elmnts=extract<list>(rows[i]);
+            list elmnts=boost::python::extract<list>(rows[i]);
             ARIADNE_ASSERT(Nat(len(elmnts))==res.column_size());
             for(Nat j=0; j!=res.column_size(); ++j) {
-                res[i][j]=extract<X>(elmnts[j]); } }
+                res[i][j]=boost::python::extract<X>(elmnts[j]); } }
         Void* storage = ((converter::rvalue_from_python_storage< Matrix<X> >*)   data)->storage.bytes;
         new (storage) Matrix<X>(res);
         data->convertible = storage;
@@ -168,6 +168,10 @@ template<class X> Vector<X> __join__(const X& s1, const X& s2) { return Vector<X
 } // namespace Ariadne
 
 
+template<class X1, class X2=X1> using EqualToType = decltype(declval<X1>()==declval<X2>());
+template<class X1, class X2=X1> using NotEqualToType = decltype(declval<X1>()!=declval<X2>());
+
+
 template<class X>
 Void export_vector_class(class_<Vector<X> >& vector_class)
 {
@@ -179,8 +183,8 @@ Void export_vector_class(class_<Vector<X> >& vector_class)
     vector_class.def("__setitem__", &__vsetitem__<X>);
     vector_class.def("__getitem__", &__vgetitem__<X>);
     vector_class.def("__getslice__", &__vgetslice__<X>);
-    vector_class.def("__eq__", &__eq__<Bool,Vector<X>,Vector<X> >);
-    vector_class.def("__ne__", &__ne__<Bool,Vector<X>,Vector<X> >);
+    vector_class.def("__eq__", &__eq__<EqualToType<X,X>,Vector<X>,Vector<X> >);
+    vector_class.def("__ne__", &__ne__<NotEqualToType<X,X>,Vector<X>,Vector<X> >);
     vector_class.def("__pos__", &__pos__< Vector<X>, Vector<X> >);
     vector_class.def("__neg__", &__neg__< Vector<X>, Vector<X> >);
     vector_class.def("__str__",&__cstr__< Vector<X> >);
@@ -334,7 +338,7 @@ template<class X> Void export_matrix()
 template<> Void export_matrix<ExactFloat64>()
 {
     class_< Matrix<ExactFloat64> > matrix_class(python_name<ExactFloat64>("Matrix"),no_init);
-    matrix_class.def(init<PivotMatrix>());
+//    matrix_class.def(init<PivotMatrix>());
     export_matrix_class<ExactFloat64>(matrix_class);
 }
 
@@ -373,7 +377,7 @@ template<> Void export_matrix<ApproximateFloat64>()
     def("triangular_factor",&triangular_factor);
     def("triangular_multiplier", &triangular_multiplier);
 
-    to_python< Tuple<FloatMatrix,FloatMatrix,PivotMatrix> >();
+//    to_python< Tuple<FloatMatrix,FloatMatrix,PivotMatrix> >();
 }
 
 
@@ -403,11 +407,12 @@ template<class X> Void export_diagonal_matrix()
 Void export_pivot_matrix()
 {
 
-    implicitly_convertible< PivotMatrix, Matrix<ExactFloat64> >();
+//    implicitly_convertible< PivotMatrix, Matrix<ExactFloat64> >();
 
     class_<PivotMatrix> pivot_matrix_class("PivotMatrix",no_init);
-    pivot_matrix_class.def("__str__",&__cstr__<PivotMatrix>);
-    pivot_matrix_class.def("__repr__",&__cstr__<PivotMatrix>);
+//    pivot_matrix_class.def("__str__",&__cstr__<PivotMatrix>);
+//    pivot_matrix_class.def("__repr__",&__cstr__<PivotMatrix>);
+
 }
 
 

@@ -26,6 +26,7 @@
 
 #include <boost/python.hpp>
 
+#include "algebra/expansion.tcc"
 #include "function/function_interface.h"
 #include "function/polynomial.h"
 #include "function/function.h"
@@ -99,7 +100,7 @@ struct from_python< Expansion<T> > {
         for(Int i=0; i!=len(lst); ++i) {
             boost::python::tuple tup=boost::python::extract<boost::python::tuple>(lst[i]);
             MultiIndex a=boost::python::extract<MultiIndex>(tup[0]);
-            T c=extract<T>(tup[1]);
+            T c=boost::python::extract<T>(tup[1]);
             r.append(a,c);
         }
         new (storage) Expansion<T>(r);
@@ -115,10 +116,10 @@ struct from_python< Vector<X> >
     from_python() { converter::registry::push_back(&convertible,&construct,type_id< Vector<X> >()); }
     static Void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
     static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
-        list lst=extract<list>(obj_ptr);
+        list lst=boost::python::extract<list>(obj_ptr);
         Void* storage = ((converter::rvalue_from_python_storage< Vector<X> >*) data)->storage.bytes;
         Vector<X> res(len(lst));
-        for(SizeType i=0; i!=res.size(); ++i) { res[i]=extract<X>(lst[i]); }
+        for(SizeType i=0; i!=res.size(); ++i) { res[i]=boost::python::extract<X>(lst[i]); }
         new (storage) Vector<X>(res);
         data->convertible = storage;
     }
@@ -133,20 +134,17 @@ struct from_python<VectorTaylorFunction> {
         if (!PyList_Check(obj_ptr) && !PyTuple_Check(obj_ptr)) { return 0; } return obj_ptr; }
     static Void construct(PyObject* obj_ptr,boost::python::converter::rvalue_from_python_stage1_data* data) {
         Void* storage = ((boost::python::converter::rvalue_from_python_storage<VectorTaylorFunction>*)data)->storage.bytes;
-        list lst=extract<boost::python::list>(obj_ptr);
+        list lst=boost::python::extract<boost::python::list>(obj_ptr);
         VectorTaylorFunction* tf_ptr = new (storage) VectorTaylorFunction(len(lst));
-        for(SizeType i=0; i!=tf_ptr->result_size(); ++i) { tf_ptr->set(i,extract<ScalarTaylorFunction>(lst[i])); }
+        for(SizeType i=0; i!=tf_ptr->result_size(); ++i) { tf_ptr->set(i,boost::python::extract<ScalarTaylorFunction>(lst[i])); }
         data->convertible = storage;
     }
 };
 
 
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<RawFloat64>& repr);
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ApproximateFloat64>& repr);
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<BoundedFloat64>& repr);
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ExactFloat64>& repr);
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<UpperFloat64>& repr);
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ExactIntervalType>& repr);
+template<class X> OutputStream& operator<<(OutputStream& os, const PythonRepresentation< X >& repr) {
+    return os << repr.reference();
+}
 
 template<class X> OutputStream& operator<<(OutputStream& os, const PythonRepresentation< Expansion<X> >& repr) {
     const Expansion<X>& exp=repr.reference();
@@ -433,7 +431,7 @@ Void export_scalar_taylor_function()
     scalar_taylor_function_class.def("error", (const ErrorFloat64&(ScalarTaylorFunction::*)()const) &ScalarTaylorFunction::error, return_value_policy<copy_const_reference>());
     scalar_taylor_function_class.def("set_error", (Void(ScalarTaylorFunction::*)(const ErrorFloat64&)) &ScalarTaylorFunction::set_error);
     scalar_taylor_function_class.def("argument_size", &ScalarTaylorFunction::argument_size);
-    scalar_taylor_function_class.def("domain", &ScalarTaylorFunction::domain, return_value_policy<copy_const_reference>());
+    scalar_taylor_function_class.def("domain", &ScalarTaylorFunction::domain);
     scalar_taylor_function_class.def("codomain", &ScalarTaylorFunction::codomain);
     scalar_taylor_function_class.def("range", &ScalarTaylorFunction::range);
     scalar_taylor_function_class.def("model", (const ValidatedTaylorModel&(ScalarTaylorFunction::*)()const)&ScalarTaylorFunction::model, return_value_policy<copy_const_reference>());
@@ -488,10 +486,8 @@ Void export_scalar_taylor_function()
     //scalar_taylor_function_class.def("set_default_sweep_threshold",&ScalarTaylorFunction::set_default_sweep_threshold);
     //scalar_taylor_function_class.def("default_maximum_degree",&ScalarTaylorFunction::default_maximum_degree);
     //scalar_taylor_function_class.def("default_sweep_threshold",&ScalarTaylorFunction::default_sweep_threshold);
-    scalar_taylor_function_class.def("__call__", (ApproximateFloat64(ScalarTaylorFunction::*)(const Vector<ApproximateFloat64>&)const) &ScalarTaylorFunction::evaluate);
-    scalar_taylor_function_class.def("__call__", (BoundedFloat64(ScalarTaylorFunction::*)(const Vector<BoundedFloat64>&)const) &ScalarTaylorFunction::evaluate);
-    scalar_taylor_function_class.def("evaluate", (ApproximateFloat64(ScalarTaylorFunction::*)(const Vector<ApproximateFloat64>&)const) &ScalarTaylorFunction::evaluate);
-    scalar_taylor_function_class.def("evaluate", (BoundedFloat64(ScalarTaylorFunction::*)(const Vector<BoundedFloat64>&)const) &ScalarTaylorFunction::evaluate);
+    scalar_taylor_function_class.def("__call__", (ApproximateFloat64(ScalarTaylorFunction::*)(const Vector<ApproximateFloat64>&)const) &ScalarTaylorFunction::operator());
+    scalar_taylor_function_class.def("__call__", (BoundedFloat64(ScalarTaylorFunction::*)(const Vector<BoundedFloat64>&)const) &ScalarTaylorFunction::operator());
     //scalar_taylor_function_class.def("gradient", (Covector<BoundedFloat64>(ScalarTaylorFunction::*)(const Vector<BoundedFloat64>&)const) &ScalarTaylorFunction::gradient);
     scalar_taylor_function_class.def("function", (EffectiveScalarFunction(ScalarTaylorFunction::*)()const) &ScalarTaylorFunction::function);
     scalar_taylor_function_class.def("polynomial", (Polynomial<BoundedFloat64>(ScalarTaylorFunction::*)()const) &ScalarTaylorFunction::polynomial);
@@ -521,7 +517,7 @@ Void export_scalar_taylor_function()
     def("evaluate",(BoundedFloat64(*)(const ScalarTaylorFunction&,const Vector<BoundedFloat64>&)) &evaluate);
     def("derivative",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,SizeType)) &derivative);
     def("antiderivative",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,SizeType)) &antiderivative);
-    def("antiderivative",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,SizeType,ExactFloat64)) &antiderivative);
+    def("antiderivative",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,SizeType,const BoundedFloat64&)) &antiderivative);
 
     def("inconsistent",(Bool(*)(const ScalarTaylorFunction&,const ScalarTaylorFunction&)) &inconsistent);
     def("refines",(Bool(*)(const ScalarTaylorFunction&,const ScalarTaylorFunction&)) &refines);
@@ -563,7 +559,7 @@ Void export_vector_taylor_function()
     vector_taylor_function_class.def("__len__", &VectorTaylorFunction::result_size);
     vector_taylor_function_class.def("result_size", &VectorTaylorFunction::result_size);
     vector_taylor_function_class.def("argument_size", &VectorTaylorFunction::argument_size);
-    vector_taylor_function_class.def("domain", &VectorTaylorFunction::domain, return_value_policy<copy_const_reference>());
+    vector_taylor_function_class.def("domain", &VectorTaylorFunction::domain);
     vector_taylor_function_class.def("codomain", &VectorTaylorFunction::codomain);
     // FIXME: Omitted since const and non-const versions
     // vector_taylor_function_class.def("models", &VectorTaylorFunction::models, return_value_policy<copy_const_reference>());
@@ -596,11 +592,9 @@ Void export_vector_taylor_function()
     vector_taylor_function_class.def("__str__", &__cstr__<VectorTaylorFunction>);
     vector_taylor_function_class.def("__repr__", &__crepr__<VectorTaylorFunction>);
     vector_taylor_function_class.def("clobber", (VectorTaylorFunction&(VectorTaylorFunction::*)()) &VectorTaylorFunction::clobber,return_value_policy<reference_existing_object>());
-    vector_taylor_function_class.def("__call__", (Vector<ApproximateFloat64>(VectorTaylorFunction::*)(const Vector<ApproximateFloat64>&)const) &VectorTaylorFunction::evaluate);
-    vector_taylor_function_class.def("__call__", (Vector<BoundedFloat64>(VectorTaylorFunction::*)(const Vector<BoundedFloat64>&)const) &VectorTaylorFunction::evaluate);
-    vector_taylor_function_class.def("evaluate", (Vector<ApproximateFloat64>(VectorTaylorFunction::*)(const Vector<ApproximateFloat64>&)const) &VectorTaylorFunction::evaluate);
-    vector_taylor_function_class.def("evaluate", (Vector<BoundedFloat64>(VectorTaylorFunction::*)(const Vector<BoundedFloat64>&)const) &VectorTaylorFunction::evaluate);
-    //vector_taylor_function_class.def("jacobian", (Vector<BoundedFloat64>(VectorTaylorFunction::*)(const Vector<BoundedFloat64>&)const) &VectorTaylorFunction::jacobian);
+    vector_taylor_function_class.def("__call__", (Vector<ApproximateFloat64>(VectorTaylorFunction::*)(const Vector<ApproximateFloat64>&)const) &VectorTaylorFunction::operator());
+    vector_taylor_function_class.def("__call__", (Vector<BoundedFloat64>(VectorTaylorFunction::*)(const Vector<BoundedFloat64>&)const) &VectorTaylorFunction::operator());
+     //vector_taylor_function_class.def("jacobian", (Vector<BoundedFloat64>(VectorTaylorFunction::*)(const Vector<BoundedFloat64>&)const) &VectorTaylorFunction::jacobian);
     vector_taylor_function_class.def("polynomials", (Vector< Polynomial<BoundedFloat64> >(VectorTaylorFunction::*)()const) &VectorTaylorFunction::polynomials);
     vector_taylor_function_class.def("function", (EffectiveVectorFunction(VectorTaylorFunction::*)()const) &VectorTaylorFunction::function);
 
@@ -634,8 +628,8 @@ Void export_vector_taylor_function()
 
     //def("split", (Pair<VectorTaylorFunction,VectorTaylorFunction>(*)(const VectorTaylorFunction&,SizeType)) &Ariadne::split);
 
-    def("evaluate",(Vector<ApproximateFloat64>(VectorTaylorFunction::*)(const Vector<ApproximateFloat64>&)const) &VectorTaylorFunction::evaluate);
-    def("evaluate",(Vector<BoundedFloat64>(VectorTaylorFunction::*)(const Vector<BoundedFloat64>&)const) &VectorTaylorFunction::evaluate);
+//    def("evaluate",(Vector<ApproximateFloat64>(VectorTaylorFunction::*)(const Vector<ApproximateFloat64>&)const) &VectorTaylorFunction::evaluate);
+    def("evaluate",(Vector<BoundedFloat64>(*)(const VectorTaylorFunction&,const Vector<BoundedFloat64>&)) &evaluate);
     def("partial_evaluate",(VectorTaylorFunction(*)(const VectorTaylorFunction&,SizeType,const BoundedFloat64&)) &partial_evaluate);
     //def("compose",(ScalarTaylorFunction(*)(const RP&,const VectorTaylorFunction&)) &compose);
     def("compose",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const VectorTaylorFunction&)) &compose);

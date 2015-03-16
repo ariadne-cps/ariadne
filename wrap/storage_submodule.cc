@@ -127,7 +127,7 @@ Void export_grid_tree_set() {
     grid_tree_set_class.def(init<Nat>());
     grid_tree_set_class.def(init<Grid>());
     grid_tree_set_class.def("bounding_box", &GridTreeSet::bounding_box);
-    grid_tree_set_class.def("empty", &GridTreeSet::empty);
+    grid_tree_set_class.def("is_empty", &GridTreeSet::is_empty);
     grid_tree_set_class.def("size", &GridTreeSet::size);
     grid_tree_set_class.def("dimension", &GridTreeSet::dimension);
     grid_tree_set_class.def("clear", &GridTreeSet::clear);

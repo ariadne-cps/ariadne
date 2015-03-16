@@ -48,10 +48,10 @@ class SolverWrapper
 {
   public:
     SolverInterface* clone() const { return this->get_override("clone")(); }
-    Void set_maximum_error(double) { this->get_override("set_maximum_error")(); }
-    double maximum_error() const { return this->get_override("maximum_error")(); }
-    Void set_maximum_number_of_steps(uint) { this->get_override("set_maximum_number_of_steps")(); }
-    uint maximum_number_of_steps() const { return this->get_override("maximum_number_of_steps")(); }
+    Void set_maximum_error(RawFloat64) { this->get_override("set_maximum_error")(); }
+    ExactFloat64 maximum_error() const { return this->get_override("maximum_error")(); }
+    Void set_maximum_number_of_steps(Nat) { this->get_override("set_maximum_number_of_steps")(); }
+    Nat maximum_number_of_steps() const { return this->get_override("maximum_number_of_steps")(); }
     ValidatedPointType zero(const ValidatedVectorFunction& f, const ExactBoxType& bx) const {
         return this->get_override("zero")(); }
     ValidatedPointType fixed_point(const ValidatedVectorFunction& f, const ExactBoxType& bx) const {

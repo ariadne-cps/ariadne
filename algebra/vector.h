@@ -312,7 +312,7 @@ template<class X1, class X2>
 auto operator!=(const Vector<X1>& v1, const Vector<X2>& v2) -> decltype(v1[0]!=v2[0]) {
     decltype(v1[0]!=v2[0]) r=false;
     for(SizeType i=0; i!=v1.size(); ++i) {
-        r = r || (v1[i]==v2[i]);
+        r = r || (v1[i]!=v2[i]);
     }
     return r;
 }

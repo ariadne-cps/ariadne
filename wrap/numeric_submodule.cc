@@ -114,29 +114,40 @@ template<class T> void class_<T>::define_transcendental_functions() {
     def("sin",(T(*)(Tcr))&sin); def("cos",(T(*)(Tcr))&cos); def("tan",(T(*)(Tcr))&tan); def("atan",(T(*)(Tcr))&atan);
 }
 
-template<class P> Logical<P> operator&&(Logical<P> l1, Logical<P> l2) { return Logical<P>(disjunction(LogicalValue(l1),LogicalValue(l2))); }
-template<class P> Logical<P> operator||(Logical<P> l1, Logical<P> l2) { return Logical<P>(conjunction(LogicalValue(l1),LogicalValue(l2))); }
-template<class P> Logical<P> operator!(Logical<P> l) { return Logical<P>(negation(LogicalValue(l))); }
+
+template<class P> Logical<P> operator&&(Logical<P> l1, Logical<P> l2) {
+    return Logical<P>(conjunction(LogicalValue(l1),LogicalValue(l2))); }
+template<class P> Logical<P> operator||(Logical<P> l1, Logical<P> l2) {
+    return Logical<P>(disjunction(LogicalValue(l1),LogicalValue(l2))); }
+template<class P> Logical<P> operator!(Logical<P> l) {
+    return Logical<P>(negation(LogicalValue(l))); }
 Logical<Upper> operator!(Logical<Lower> l);
 Logical<Lower> operator!(Logical<Upper> l);
 
+template<> Logical<Exact> operator&&(Logical<Exact> l1, Logical<Exact> l2) {
+    return Logical<Exact>(conjunction(LogicalValue(l1),LogicalValue(l2))); }
+template<> Logical<Exact> operator||(Logical<Exact> l1, Logical<Exact> l2) {
+    return Logical<Exact>(disjunction(LogicalValue(l1),LogicalValue(l2))); }
+template<> Logical<Exact> operator!(Logical<Exact> l) {
+    return Logical<Exact>(negation(LogicalValue(l))); }
+
 template<> Logical<Effective> operator&&(Logical<Effective> l1, Logical<Effective> l2) {
-    return Logical<Effective>(disjunction(LogicalHandle(l1),LogicalHandle(l2))); }
-template<> Logical<Effective> operator||(Logical<Effective> l1, Logical<Effective> l2) {
     return Logical<Effective>(conjunction(LogicalHandle(l1),LogicalHandle(l2))); }
+template<> Logical<Effective> operator||(Logical<Effective> l1, Logical<Effective> l2) {
+    return Logical<Effective>(disjunction(LogicalHandle(l1),LogicalHandle(l2))); }
 template<> Logical<Effective> operator!(Logical<Effective> l) {
     return Logical<Effective>(negation(LogicalHandle(l))); }
 
 template<> Logical<EffectiveUpper> operator&&(Logical<EffectiveUpper> l1, Logical<EffectiveUpper> l2) {
-    return Logical<EffectiveUpper>(disjunction(LogicalHandle(l1),LogicalHandle(l2))); }
-template<> Logical<EffectiveUpper> operator||(Logical<EffectiveUpper> l1, Logical<EffectiveUpper> l2) {
     return Logical<EffectiveUpper>(conjunction(LogicalHandle(l1),LogicalHandle(l2))); }
-template<> Logical<EffectiveLower> operator&&(Logical<EffectiveLower> l1, Logical<EffectiveLower> l2) {
-    return Logical<EffectiveLower>(disjunction(LogicalHandle(l1),LogicalHandle(l2))); }
-template<> Logical<EffectiveLower> operator||(Logical<EffectiveLower> l1, Logical<EffectiveLower> l2) {
-    return Logical<EffectiveLower>(conjunction(LogicalHandle(l1),LogicalHandle(l2))); }
+template<> Logical<EffectiveUpper> operator||(Logical<EffectiveUpper> l1, Logical<EffectiveUpper> l2) {
+    return Logical<EffectiveUpper>((LogicalHandle(l1),LogicalHandle(l2))); }
 Logical<EffectiveLower> operator!(Logical<EffectiveUpper> l) {
     return Logical<EffectiveLower>(negation(LogicalHandle(l))); }
+template<> Logical<EffectiveLower> operator&&(Logical<EffectiveLower> l1, Logical<EffectiveLower> l2) {
+    return Logical<EffectiveLower>(conjunction(LogicalHandle(l1),LogicalHandle(l2))); }
+template<> Logical<EffectiveLower> operator||(Logical<EffectiveLower> l1, Logical<EffectiveLower> l2) {
+    return Logical<EffectiveLower>(disjunction(LogicalHandle(l1),LogicalHandle(l2))); }
 Logical<EffectiveUpper> operator!(Logical<EffectiveLower> l) {
     return Logical<EffectiveUpper>(negation(LogicalHandle(l))); }
 
@@ -148,6 +159,7 @@ template<class P> Bool possibly(Logical<P> l) { return Ariadne::possibly(l); }
 
 template<class P> auto check(Logical<P> l, Effort e) -> decltype(l.check(e)) { return l.check(e); }
 
+
 template<class P> void export_effective_logical(std::string name)
 {
     typedef decltype(declval<Logical<P>>().check(declval<Effort>())) CheckType;
@@ -156,12 +168,15 @@ template<class P> void export_effective_logical(std::string name)
     class_<Logical<P>> logical_class(name,init<bool>());
     logical_class.def(init<Logical<P>>());
     logical_class.def("check", (CheckType(Logical<P>::*)(Effort)) &Logical<P>::check);
-    def("check", (CheckType(*)(Logical<P>,Effort)) &check<P>);
-    def("__and__", (Logical<P>(*)(Logical<P>, Logical<P>)) &operator&&);
-    def("__or__", (Logical<P>(*)(Logical<P>, Logical<P>)) &operator||);
-    def("__not__", (decltype(!declval<Logical<P>>())(*)(Logical<P>)) &operator!);
+    //logical_class.def(self && self);
+    //logical_class.def(self || self);
+    //logical_class.def(!self);
+    logical_class.def("__and__", (Logical<P>(*)(Logical<P>, Logical<P>)) &operator&&);
+    logical_class.def("__or__", (Logical<P>(*)(Logical<P>, Logical<P>)) &operator||);
+    logical_class.def("__not__", (decltype(!declval<Logical<P>>())(*)(Logical<P>)) &operator!);
     logical_class.def(boost::python::self_ns::str(self));
     logical_class.def(boost::python::self_ns::repr(self));
+    def("check", (CheckType(*)(Logical<P>,Effort)) &Ariadne::check<P>);
 };
 
 template<class P> void export_logical(std::string name)
@@ -170,14 +185,19 @@ template<class P> void export_logical(std::string name)
     OutputStream& operator<<(OutputStream& os, Logical<P> l);
     class_<Logical<P>> logical_class(name,init<bool>());
     logical_class.def(init<Logical<P>>());
-    logical_class.def("decide", (bool(*)(Logical<P>)) &decide);
-    logical_class.def("possibly", (bool(*)(Logical<P>)) &possibly);
-    logical_class.def("definitely", (bool(*)(Logical<P>)) &definitely);
-    def("__and__", (Logical<P>(*)(Logical<P>, Logical<P>)) &operator&&);
-    def("__or__", (Logical<P>(*)(Logical<P>, Logical<P>)) &operator||);
-    def("__not__", (NotType(*)(Logical<P>)) &operator!);
+    //logical_class.def(self && self);
+    //logical_class.def(self || self);
+    //logical_class.def(!self);
+    logical_class.def("__and__", (Logical<P>(*)(Logical<P>, Logical<P>)) &operator&&);
+    logical_class.def("__or__", (Logical<P>(*)(Logical<P>, Logical<P>)) &operator||);
+    logical_class.def("__not__", (NotType(*)(Logical<P>)) &operator!);
     logical_class.def(boost::python::self_ns::str(self));
     logical_class.def(boost::python::self_ns::repr(self));
+
+    def("decide", (bool(*)(Logical<P>)) &decide);
+    def("possibly", (bool(*)(Logical<P>)) &possibly);
+    def("definitely", (bool(*)(Logical<P>)) &definitely);
+
 };
 
 template<> void export_logical<Exact>(std::string name)
@@ -186,9 +206,12 @@ template<> void export_logical<Exact>(std::string name)
     OutputStream& operator<<(OutputStream& os, Logical<P> l);
     class_<Logical<P>> logical_class(name,init<bool>());
     logical_class.def(init<Logical<P>>());
-    def("__and__", (Logical<P>(*)(Logical<P>, Logical<P>)) &operator&&);
-    def("__or__", (Logical<P>(*)(Logical<P>, Logical<P>)) &operator||);
-    def("__not__", (Logical<P>(*)(Logical<P>)) &operator!);
+    //logical_class.def(self && self);
+    //logical_class.def(self || self);
+    //logical_class.def(!self);
+    logical_class.def("__and__", (Logical<P>(*)(Logical<P>, Logical<P>)) &operator&&);
+    logical_class.def("__or__", (Logical<P>(*)(Logical<P>, Logical<P>)) &operator||);
+    logical_class.def("__not__", (Logical<P>(*)(Logical<P>)) &operator!);
     logical_class.def(boost::python::self_ns::str(self));
     logical_class.def(boost::python::self_ns::repr(self));
 

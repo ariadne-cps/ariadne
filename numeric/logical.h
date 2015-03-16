@@ -61,8 +61,8 @@ inline Bool probably(const LogicalValue& l) { return l==LogicalValue::TRUE || l=
 inline Bool decide(const LogicalValue& l) { return l==LogicalValue::TRUE || l==LogicalValue::LIKELY; };
 
 LogicalValue equal(LogicalValue l1, LogicalValue l2);
-inline LogicalValue disjunction(LogicalValue l1, LogicalValue l2) { return (l1<l2 ? l1 : l2); }
-inline LogicalValue conjunction(LogicalValue l1, LogicalValue l2) { return (l1>l2 ? l1 : l2); }
+inline LogicalValue conjunction(LogicalValue l1, LogicalValue l2) { return (l1<l2 ? l1 : l2); }
+inline LogicalValue disjunction(LogicalValue l1, LogicalValue l2) { return (l1>l2 ? l1 : l2); }
 inline LogicalValue negation(LogicalValue l) { return static_cast<LogicalValue>(-static_cast<char>(l)); }
 inline LogicalValue check(LogicalValue l) { return l; }
 
@@ -86,8 +86,8 @@ class LogicalHandle {
   public:
     explicit LogicalHandle(SharedPointer<const LogicalInterface> p) : _ptr(p) { }
     explicit LogicalHandle(LogicalValue v);
-    friend LogicalHandle disjunction(LogicalHandle l1, LogicalHandle l2);
     friend LogicalHandle conjunction(LogicalHandle l1, LogicalHandle l2);
+    friend LogicalHandle disjunction(LogicalHandle l1, LogicalHandle l2);
     friend LogicalHandle negation(LogicalHandle l);
     friend LogicalValue check(LogicalHandle const& l, Effort e) { return l._ptr->_check(e); }
     friend OutputStream& operator<<(OutputStream& os, LogicalHandle const& l) { return l._ptr->_write(os); }
@@ -134,10 +134,10 @@ template<class P> class Logical
     //! \brief Equality of two logical values.
     friend inline Logical<P> operator==(Logical<P> l1, Logical<P> l2) { return Logical<P>(equal(l1._v,l2._v)); }
     friend inline Logical<P> operator!=(Logical<P> l1, Logical<P> l2) { return Logical<P>(negation(equal(l1._v,l2._v))); }
-    //! \brief %Logical disjunction.
-    friend inline Logical<P> operator&&(Logical<P> l1, Logical<P> l2) { return Logical<P>(disjunction(l1._v,l2._v)); }
-    //! \brief %Logical conjunction.
-    friend inline Logical<P> operator||(Logical<P> l1, Logical<P> l2) { return Logical<P>(conjunction(l1._v,l2._v)); }
+    //! \brief %Logical conjunction [and].
+    friend inline Logical<P> operator&&(Logical<P> l1, Logical<P> l2) { return Logical<P>(conjunction(l1._v,l2._v)); }
+    //! \brief %Logical disjunction [or].
+    friend inline Logical<P> operator||(Logical<P> l1, Logical<P> l2) { return Logical<P>(disjunction(l1._v,l2._v)); }
     //! \brief %Logical exclusive or.
     friend inline Logical<P> operator^(Logical<P> l1, Logical<P> l2) { return Logical<P>(negation(equal(l1._v,l2._v))); }
     //! \brief %Logical negation.
@@ -192,9 +192,9 @@ template<> class Logical<Effective>
     Logical<Validated> check(Effort e) const { return Logical<Validated>(Ariadne::check(_v,e)); }
     friend Logical<Validated> check(Logical<Effective> l, Effort e) { return Logical<Validated>(Ariadne::check(l._v,e)); }
     friend Logical<Effective> operator&&(Logical<Effective> l1, Logical<Effective> l2) {
-        return Logical<Effective>(disjunction(l1._v,l2._v)); }
-    friend Logical<Effective> operator||(Logical<Effective> l1, Logical<Effective> l2) {
         return Logical<Effective>(conjunction(l1._v,l2._v)); }
+    friend Logical<Effective> operator||(Logical<Effective> l1, Logical<Effective> l2) {
+        return Logical<Effective>(disjunction(l1._v,l2._v)); }
     friend Logical<Effective> operator!(Logical<Effective> l) {
         return Logical<Effective>(negation(l._v)); }
     friend Bool decide(Logical<Effective> l, Effort e=Effort::get_default()) { return decide(l.check(e)); }

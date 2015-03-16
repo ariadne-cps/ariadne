@@ -35,8 +35,8 @@ namespace Ariadne {
 
 namespace{
 inline LogicalValue operator!(LogicalValue lv) { return negation(lv); }
-inline LogicalValue operator&&(LogicalValue lv1, LogicalValue lv2) { return disjunction(lv1,lv2); }
-inline LogicalValue operator||(LogicalValue lv1, LogicalValue lv2) { return conjunction(lv1,lv2); }
+inline LogicalValue operator&&(LogicalValue lv1, LogicalValue lv2) { return conjunction(lv1,lv2); }
+inline LogicalValue operator||(LogicalValue lv1, LogicalValue lv2) { return disjunction(lv1,lv2); }
 } // namespace
 
 Logical<Exact> operator||(Bool b1, Logical<Exact> l2) { return Logical<Exact>(b1) || l2; }
@@ -76,11 +76,11 @@ LogicalHandle::LogicalHandle(LogicalValue l)
     : _ptr(std::make_shared<LogicalConstant>(l)) {
 }
 
-LogicalHandle disjunction(LogicalHandle l1, LogicalHandle l2) {
+LogicalHandle conjunction(LogicalHandle l1, LogicalHandle l2) {
     return LogicalHandle(std::make_shared<LogicalExpression<AndOp,LogicalHandle,LogicalHandle>>(AndOp(),l1,l2));
 };
 
-LogicalHandle conjunction(LogicalHandle l1, LogicalHandle l2) {
+LogicalHandle disjunction(LogicalHandle l1, LogicalHandle l2) {
     return LogicalHandle(std::make_shared<LogicalExpression<OrOp,LogicalHandle,LogicalHandle>>(OrOp(),l1,l2));
 };
 

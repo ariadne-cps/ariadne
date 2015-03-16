@@ -42,7 +42,6 @@
 
 namespace Ariadne {
 
-class BoxSet;
 class RealVariablesBox;
 class ExactFloat64VariablesBox;
 typedef ExactFloat64VariablesBox ExactVariablesBoxType;

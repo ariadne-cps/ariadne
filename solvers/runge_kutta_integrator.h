@@ -26,8 +26,9 @@
 
 #include <iostream>
 
-#include "solvers/integrator.h"
 #include "utility/container.h"
+#include "utility/declarations.h"
+#include "solvers/integrator.h"
 #include "numeric/numeric.h"
 #include "algebra/vector.h"
 #include "function/function.h"
@@ -37,11 +38,6 @@ namespace Ariadne {
 template<class T1, class T2> class Pair;
 template<class T> class List;
 
-class ApproximateFloat64;
-template<class X> class Vector;
-typedef Vector<ApproximateFloat64> ApproximateFloatVector;
-template<class P> class VectorFunctionInterface;
-typedef VectorFunctionInterface<ApproximateTag> ApproximateVectorFunctionInterface;
 
 class RungeKutta4Integrator
 {
@@ -49,10 +45,10 @@ class RungeKutta4Integrator
     RungeKutta4Integrator(double step_size);
 
     ApproximateFloatVector
-    step(const ApproximateVectorFunctionInterface& f, const ApproximateFloatVector& x, const ApproximateFloat64& h) const;
+    step(const ApproximateVectorFunction& f, const ApproximateFloatVector& x, const ApproximateFloat64& h) const;
 
     List< Pair<ApproximateFloat64,ApproximateFloatVector> >
-    evolve(const ApproximateVectorFunctionInterface& f, const ApproximateFloatVector& x0, const ApproximateFloat64& tmax) const;
+    evolve(const ApproximateVectorFunction& f, const ApproximateFloatVector& x0, const ApproximateFloat64& tmax) const;
   private:
     double _step_size;
 };

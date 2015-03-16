@@ -43,18 +43,18 @@ RungeKutta4Integrator::RungeKutta4Integrator(double step_size)
 }
 
 ApproximateFloatVector
-RungeKutta4Integrator::step(const ApproximateVectorFunctionInterface& f, const ApproximateFloatVector& x, const ApproximateFloat64& h) const
+RungeKutta4Integrator::step(const ApproximateVectorFunction& f, const ApproximateFloatVector& x, const ApproximateFloat64& h) const
 {
-    ApproximateFloatVector k1=f.evaluate(x);
-    ApproximateFloatVector k2=f.evaluate(ApproximateFloatVector(x+(h/2)*k1));
-    ApproximateFloatVector k3=f.evaluate(ApproximateFloatVector(x+(h/2)*k2));
-    ApproximateFloatVector k4=f.evaluate(ApproximateFloatVector(x+h*k3));
+    ApproximateFloatVector k1=f(x);
+    ApproximateFloatVector k2=f(ApproximateFloatVector(x+(h/2)*k1));
+    ApproximateFloatVector k3=f(ApproximateFloatVector(x+(h/2)*k2));
+    ApproximateFloatVector k4=f(ApproximateFloatVector(x+h*k3));
     //std::cerr<<"k1,2,3,4="<<k1<<k2<<k3<<k4<<"\n";
     return x+(h/6)*(k1+2.0*k3+2.0*k4+k2);
 }
 
 List< Pair<ApproximateFloat64,ApproximateFloatVector> >
-RungeKutta4Integrator::evolve(const ApproximateVectorFunctionInterface& f, const ApproximateFloatVector& x0, const ApproximateFloat64& tmax) const
+RungeKutta4Integrator::evolve(const ApproximateVectorFunction& f, const ApproximateFloatVector& x0, const ApproximateFloat64& tmax) const
 {
     static const ApproximateFloat64 h=this->_step_size;
 
@@ -63,7 +63,7 @@ RungeKutta4Integrator::evolve(const ApproximateVectorFunctionInterface& f, const
     ApproximateFloatVector x=x0;
 
     res.push_back(make_pair(t,x));
-    while(t<tmax) {
+    while(decide(t<tmax)) {
         x=this->step(f,x,h);
         t+=h;
         res.push_back(make_pair(t,x));

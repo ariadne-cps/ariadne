@@ -395,9 +395,6 @@ Comparison cmp(Rational const& q1, Float64 const& x2) {
     return cmp(q1,Rational(x2));
 }
 
-Rational::operator Number<Exact>() const {
-    ARIADNE_NOT_IMPLEMENTED;
-}
 
 
 template<> String class_name<Rational>() { return "Rational"; }

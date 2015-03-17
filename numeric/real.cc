@@ -249,6 +249,7 @@ Kleenean operator<=(Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
 Kleenean operator>=(Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
 
 template<> String class_name<Real>() { return "Real"; }
+template<> String class_name<PositiveReal>() { return "PositiveReal"; }
 
 const Real pi = Real(3.1415926535897930, 3.141592653589793238, 3.1415926535897936);
 const Real infinity = Real(std::numeric_limits<double>::infinity());
@@ -390,11 +391,6 @@ PositiveLowerReal mul(PositiveLowerReal plr1, PositiveLowerReal plr2) { return c
 PositiveUpperReal mul(PositiveUpperReal pur1, PositiveUpperReal pur2) { return cast_positive(mul(cast_real(pur1),cast_real(pur2))); }
 PositiveLowerReal div(PositiveLowerReal plr1, PositiveUpperReal pur2) { return cast_positive(div(cast_real(plr1),cast_real(pur2))); }
 PositiveUpperReal div(PositiveUpperReal pur1, PositiveLowerReal plr2) { return cast_positive(div(cast_real(pur1),cast_real(plr2))); }
-
-Real::operator Number<Effective> () const {
-    ARIADNE_NOT_IMPLEMENTED;
-    //Number<Effective>(new NumberWrapper<Real>(*this));
-}
 
 } // namespace Ariadne
 

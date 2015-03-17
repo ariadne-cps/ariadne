@@ -60,23 +60,23 @@ template class NumberWrapper<Integer>;
 template class NumberWrapper<Rational>;
 template class NumberWrapper<Real>;
 
-Integer::operator ExactNumericType() const { return ExactNumericType(new NumberWrapper<Integer>(*this)); }
-Rational::operator ExactNumericType() const { return ExactNumericType(new NumberWrapper<Rational>(*this)); }
-Real::operator EffectiveNumericType() const { return EffectiveNumericType(new NumberWrapper<Real>(*this)); }
+Integer::operator ExactNumber() const { return ExactNumber(new NumberWrapper<Integer>(*this)); }
+Rational::operator ExactNumber() const { return ExactNumber(new NumberWrapper<Rational>(*this)); }
+Real::operator EffectiveNumber() const { return EffectiveNumber(new NumberWrapper<Real>(*this)); }
 
 template class NumberWrapper<ApproximateFloat64>;
-template class NumberWrapper<LowerFloat64>;
-template class NumberWrapper<UpperFloat64>;
+//template class NumberWrapper<LowerFloat64>;
+//template class NumberWrapper<UpperFloat64>;
 template class NumberWrapper<BoundedFloat64>;
 template class NumberWrapper<MetricFloat64>;
 template class NumberWrapper<ExactFloat64>;
 
-ExactFloat64::operator ExactNumericType() const { return ExactNumericType(new NumberWrapper<ExactFloat64>(*this)); }
-MetricFloat64::operator ValidatedNumericType() const { return ValidatedNumericType(new NumberWrapper<MetricFloat64>(*this)); }
-BoundedFloat64::operator ValidatedNumericType() const { return ValidatedNumericType(new NumberWrapper<BoundedFloat64>(*this)); }
-UpperFloat64::operator UpperNumericType() const { return UpperNumericType(new NumberWrapper<UpperFloat64>(*this)); }
-LowerFloat64::operator LowerNumericType() const { return LowerNumericType(new NumberWrapper<LowerFloat64>(*this)); }
-ApproximateFloat64::operator ApproximateNumericType() const { return ApproximateNumericType(new NumberWrapper<ApproximateFloat64>(*this)); }
+template<> ApproximateFloat64::operator ApproximateNumber() const { return ApproximateNumber(new NumberWrapper<ApproximateFloat64>(*this)); }
+template<> LowerFloat64::operator LowerNumber() const { return LowerNumber(new NumberWrapper<LowerFloat64>(*this)); }
+template<> UpperFloat64::operator UpperNumber() const { return UpperNumber(new NumberWrapper<UpperFloat64>(*this)); }
+template<> BoundedFloat64::operator ValidatedNumber() const { return ValidatedNumber(new NumberWrapper<BoundedFloat64>(*this)); }
+template<> MetricFloat64::operator ValidatedNumber() const { return ValidatedNumber(new NumberWrapper<MetricFloat64>(*this)); }
+template<> ExactFloat64::operator ExactNumber() const { return ExactNumber(new NumberWrapper<ExactFloat64>(*this)); }
 
 template class NumberWrapper<ApproximateFloatMP>;
 //template class NumberWrapper<LowerFloatMP>;
@@ -84,6 +84,13 @@ template class NumberWrapper<ApproximateFloatMP>;
 template class NumberWrapper<BoundedFloatMP>;
 template class NumberWrapper<MetricFloatMP>;
 //template class NumberWrapper<ExactFloatMP>;
+
+template<> ExactFloatMP::operator ExactNumber() const { return ExactNumber(new NumberWrapper<ExactFloatMP>(*this)); }
+//template<> MetricFloatMP::operator ValidatedNumber() const { return ValidatedNumber(new NumberWrapper<MetricFloatMP>(*this)); }
+//template<> BoundedFloatMP::operator ValidatedNumber() const { return ValidatedNumber(new NumberWrapper<BoundedFloatMP>(*this)); }
+//template<> UpperFloatMP::operator UpperNumber() const { return UpperNumber(new NumberWrapper<UpperFloatMP>(*this)); }
+//template<> LowerFloatMP::operator LowerNumber() const { return LowerNumber(new NumberWrapper<LowerFloatMP>(*this)); }
+//template<> ApproximateFloatMP::operator ApproximateNumber() const { return ApproximateNumber(new NumberWrapper<ApproximateFloatMP>(*this)); }
 
 template<> String class_name<NumberHandle>() { return "NumberHandle"; }
 

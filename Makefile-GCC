@@ -11,7 +11,7 @@ HDR = \
 LIB_NUMERIC_SRC = \
 	logging.cc operators.cc logical.cc integer.cc rational.cc decimal.cc real.cc \
 	float64.cc floatmp.cc \
-	float-user.cc
+	float-user.cc number.cc
 
 #	float-approximate.cc float-lower.cc float-upper.cc float-validated.cc float-exact.cc \
 

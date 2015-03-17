@@ -103,9 +103,20 @@ template<class PR> Float<Exact,PR>::Float(Rational const& q, PR pr)
 }
 */
 
+template<class PR> Float<Exact,PR>::operator Rational() const {
+    return Rational(this->get_d());
+}
+
 template<class PR> Float<Exact,PR>::Float(TwoExp const& t, PR pr)
     : _v(pow(RawFloat<PR>(2.0,pr),t.exponent()))
 {
+}
+
+template<class PR> Float<Exact,PR>::Float(Integer const& z, PR pr)
+    : _v(Rational(z),RawFloat<PR>::to_nearest,pr)
+{
+    Rational q(_v);
+    ARIADNE_PRECONDITION(z==q);
 }
 
 template<class PR> Float<Exact,PR>::operator Number<Exact>() const {
@@ -116,10 +127,6 @@ template<class PR> Float<Metric,PR>::Float(Rational const& q, PR pr)
     : _v(RawFloat<PR>(q,RawFloat<PR>::to_nearest,pr)), _e(abs(Rational(_v)-q),RawFloat<PR>::upward,pr) {
 }
 
-template<class PR> Float<Metric,PR>::Float(Number<Validated> const& x)
-    : Float(x.get(Metric(),RawFloat<PR>::get_default_precision())) {
-}
-
 template<class PR> Float<Metric,PR>::Float(Number<Validated> const& x, PR pr)
     : Float(x.get(Metric(),pr)) {
 }
@@ -128,9 +135,6 @@ template<class PR> Float<Metric,PR>::operator Number<Validated>() const {
     return Number<Validated>(new NumberWrapper<Float<Metric,PR>>(*this));
 }
 
-template<class PR> Float<Bounded,PR>::Float(Real const& x)
-    : Float(x(FLT::get_default_precision())) {
-}
 
 template<class PR> Float<Bounded,PR>::Float(Integer const& z, PR pr)
     : Float(RawFloat<PR>(z,RawFloat<PR>::downward,pr),RawFloat<PR>(z,RawFloat<PR>::upward,pr)) {
@@ -148,20 +152,12 @@ template<class PR> Float<Bounded,PR>::Float(Real const& x, PR pr)
     : Float(x(pr)) {
 }
 
-template<class PR> Float<Bounded,PR>::Float(Number<Validated> const& x)
-    : Float(x.get(Bounded(),FLT::get_default_precision())) {
-}
-
 template<class PR> Float<Bounded,PR>::Float(Number<Validated> const& x, PR pr)
     : Float(x.get(Bounded(),pr)) {
 }
 
 template<class PR> Float<Bounded,PR>::operator Number<Validated>() const {
     return Number<Validated>(new NumberWrapper<Float<Bounded,PR>>(*this));
-}
-
-template<class PR> Float<Upper,PR>::Float(Rational const& q)
-    : Float(Float<Bounded,PR>(q)) {
 }
 
 template<class PR> Float<Upper,PR>::Float(Rational const& q, PR pr)
@@ -174,10 +170,6 @@ template<class PR> Float<Upper,PR>::Float(Number<Upper> const& x, PR pr)
 
 template<class PR> Float<Upper,PR>::operator Number<Upper>() const {
     return Number<Upper>(new NumberWrapper<Float<Upper,PR>>(*this));
-}
-
-template<class PR> Float<Lower,PR>::Float(Rational const& q)
-    : Float(Float<Bounded,PR>(q)) {
 }
 
 template<class PR> Float<Lower,PR>::Float(Rational const& q, PR pr)
@@ -205,51 +197,34 @@ template<class PR> Float<Approximate,PR>::operator Number<Approximate>() const {
 }
 
 
-template<class PR> Float<Exact,PR>::Float(Integer const& z) : Float(z,RawFloatType::get_default_precision()) { }
 
-template<class PR> Float<Exact,PR>::Float(Integer const& z, PR pr)
-    : _v(Rational(z),RawFloat<PR>::to_nearest,pr)
-{
-    Rational q(_v);
-    ARIADNE_PRECONDITION(z==q);
-}
+template<class PR> Float<Exact,PR>::Float(Integer const& z) : Float(z,RawFloat<PR>::get_default_precision()) { }
 
-template<class PR> Float<Bounded,PR>::Float(const Dyadic& b) : Float<Bounded,PR>(Rational(b)) { }
+template<class PR> Float<Metric,PR>::Float(Integer const& z) : Float(Rational(z)) { }
+template<class PR> Float<Metric,PR>::Float(Rational const& q) : Float(q,RawFloat<PR>::get_default_precision()) { }
+template<class PR> Float<Metric,PR>::Float(Number<Validated> const& x) : Float(x,RawFloat<PR>::get_default_precision()) { }
 
-template<class PR> Float<Bounded,PR>::Float(const Decimal& d) : Float<Bounded,PR>(Rational(d)) { }
+template<class PR> Float<Bounded,PR>::Float(Integer const& z) : Float(Rational(z)) { }
+template<class PR> Float<Bounded,PR>::Float(Dyadic const& b) : Float(Rational(b)) { }
+template<class PR> Float<Bounded,PR>::Float(Decimal const& d) : Float(Rational(d)) { }
+template<class PR> Float<Bounded,PR>::Float(Rational const& q) : Float(q,RawFloat<PR>::get_default_precision()) { }
+template<class PR> Float<Bounded,PR>::Float(Real const& x) : Float(x,RawFloat<PR>::get_default_precision()) { }
+template<class PR> Float<Bounded,PR>::Float(Number<Validated> const& x) : Float(x,RawFloat<PR>::get_default_precision()) { }
 
-template<class PR> Float<Bounded,PR>::Float(const Integer& z) : Float<Bounded,PR>(Rational(z)) { }
+template<class PR> Float<Upper,PR>::Float(Integer const& z) : Float(Rational(z)) { }
+template<class PR> Float<Upper,PR>::Float(Rational const& q) : Float(q,RawFloat<PR>::get_default_precision()) { }
+template<class PR> Float<Upper,PR>::Float(Number<Upper> const& x) : Float(x,RawFloat<PR>::get_default_precision()) { }
 
-template<class PR> Float<Bounded,PR>::Float(const Rational& q) : _l(q.get_d()), _u(_l)  {
-    while(Rational(_l)>q) { _l=next_down(_l); }
-    while(Rational(_u)<q) { _u=next_up(_u); }
-}
+template<class PR> Float<Lower,PR>::Float(Integer const& z) : Float(Rational(z)) { }
+template<class PR> Float<Lower,PR>::Float(Rational const& q) : Float(q,RawFloat<PR>::get_default_precision()) { }
+template<class PR> Float<Lower,PR>::Float(Number<Lower> const& x) : Float(x,RawFloat<PR>::get_default_precision()) { }
 
+template<class PR> Float<Approximate,PR>::Float(Integer const& z) : Float(Rational(z)) { }
+template<class PR> Float<Approximate,PR>::Float(Dyadic const& b) : Float(Rational(b)) { }
+template<class PR> Float<Approximate,PR>::Float(Decimal const& d) : Float(Rational(d)) { }
+template<class PR> Float<Approximate,PR>::Float(Rational const& q) : Float(q,RawFloat<PR>::get_default_precision()) { }
+template<class PR> Float<Approximate,PR>::Float(Number<Approximate> const& x) : Float(x,RawFloat<PR>::get_default_precision()) { }
 
-template<class PR> Float<Metric,PR> Float<Exact,PR>::pm(Float<Error,PR> _e) const {
-    Float<Exact,PR> const& _v=*this; return Float<Metric,PR>(_v,_e);
-}
-
-
-template<class PR> Float<Upper,PR>::Float(Number<Upper> const& x) {
-    ARIADNE_NOT_IMPLEMENTED;
-}
-
-
-template<class PR> Float<Lower,PR>::Float(Number<Lower> const& x) {
-    ARIADNE_NOT_IMPLEMENTED;
-}
-
-
-template<class PR> Float<Approximate,PR>::Float(Dyadic const& b) : Float<Approximate,PR>(b.operator Rational()) { }
-template<class PR> Float<Approximate,PR>::Float(Decimal const& d) : Float<Approximate,PR>(d.operator Rational()) { }
-template<class PR> Float<Approximate,PR>::Float(Rational const& q) : Float<Approximate,PR>(RawFloatType(q,RawFloatType::to_nearest)) { }
-
-template<class PR> Float<Approximate,PR>::Float(Number<Approximate> const& x) { ARIADNE_NOT_IMPLEMENTED; }
-
-template<class PR> Float<Exact,PR>::operator Rational() const {
-    return Rational(this->get_d());
-}
 
 
 template<class PR> Float<Approximate,PR>::Float(Float<Lower,PR> const& x) : _a(x.raw()) {
@@ -297,6 +272,10 @@ template<class PR> Float<Metric,PR>::Float(Float<Bounded,PR> const& x) : _v(x.va
 template<class PR> Float<Metric,PR>::Float(Float<Exact,PR> const& x) : _v(x.raw()), _e(nul(x.raw())) {
 }
 
+
+template<class PR> Float<Metric,PR> Float<Exact,PR>::pm(Float<Error,PR> _e) const {
+    Float<Exact,PR> const& _v=*this; return Float<Metric,PR>(_v,_e);
+}
 
 
 

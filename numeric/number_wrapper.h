@@ -39,6 +39,7 @@
 #include "logical.h"
 #include "float64.h"
 #include "floatmp.h"
+#include "float-user.h"
 
 #include "expression/operators.h"
 

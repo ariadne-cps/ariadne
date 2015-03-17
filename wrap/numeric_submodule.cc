@@ -124,6 +124,7 @@ template<> void class_<Real>::define_transcendental_functions() {
     def("sin",(T(*)(T))&sin); def("cos",(T(*)(T))&cos); def("tan",(T(*)(T))&tan); def("atan",(T(*)(T))&atan);
 }
 
+
 template<class T> void class_<T>::define_transcendental_functions() {
     using boost::python::def;
     def("sqrt",(T(*)(Tcr))&sqrt); def("exp",(T(*)(Tcr))&exp); def("log",(T(*)(Tcr))&log);
@@ -286,7 +287,78 @@ void export_real()
 }
 
 
+template<class P> void export_number()
+{
+    class_<Number<P>> number_class(class_name<P>()+"Number");
+    number_class.def(init<Rational>());
+    number_class.define_self_arithmetic();
+//    number_class.def("get", (BoundedFloat64(Number<P>::*)(ValidatedTag,Precision64)const) &Number<P>::get);
+//    number_class.def("get", (ApproximateFloat64(Number<P>::*)(ApproximateTag,Precision64)const) &Number<P>::get);
+//    number_class.def("get", (BoundedFloatMP(Number<P>::*)(ValidatedTag,PrecisionMP)const) &Number<P>::get);
+//    number_class.def("get", (ApproximateFloatMP(Number<P>::*)(ApproximateTag,PrecisionMP)const) &Number<P>::get);
+}
 
+BoundedFloat64 get(ExactNumber const& n, Precision64 const& pr) { return n.get(BoundedTag(),pr); }
+BoundedFloatMP get(ExactNumber const& n, PrecisionMP const& pr) { return n.get(BoundedTag(),pr); }
+BoundedFloat64 get(EffectiveNumber const& n, Precision64 const& pr) { return n.get(BoundedTag(),pr); }
+BoundedFloatMP get(EffectiveNumber const& n, PrecisionMP const& pr) { return n.get(BoundedTag(),pr); }
+BoundedFloat64 get(ValidatedNumber const& n, Precision64 const& pr) { return n.get(BoundedTag(),pr); }
+BoundedFloatMP get(ValidatedNumber const& n, PrecisionMP const& pr) { return n.get(BoundedTag(),pr); }
+ApproximateFloat64 get(ApproximateNumber const& n, Precision64 const& pr) { return n.get(ApproximateTag(),pr); }
+ApproximateFloatMP get(ApproximateNumber const& n, PrecisionMP const& pr) { return n.get(ApproximateTag(),pr); }
+
+void export_numbers()
+{
+    class_<Number<Exact>> exact_number_class(class_name<Exact>()+"Number");
+    exact_number_class.def(init<Rational>());
+    exact_number_class.def("get", (BoundedFloat64(*)(Number<Exact> const&, Precision64 const&)) &get);
+    exact_number_class.def("get", (BoundedFloatMP(*)(Number<Exact> const&, PrecisionMP const&)) &get);
+
+    class_<Number<Effective>> effective_number_class(class_name<Effective>()+"Number");
+    effective_number_class.def(init<Rational>());
+    effective_number_class.def(init<Real>());
+    effective_number_class.def(init<Number<Exact>>());
+    effective_number_class.def("get", (BoundedFloat64(*)(Number<Effective> const&, Precision64 const&)) &get);
+    effective_number_class.def("get", (BoundedFloatMP(*)(Number<Effective> const&, PrecisionMP const&)) &get);
+    effective_number_class.define_self_arithmetic();
+    effective_number_class.define_mixed_arithmetic( Tag<Number<Effective>>() );
+//    effective_number_class.define_transcendental_functions();
+
+    class_<Number<Validated>> validated_number_class(class_name<Validated>()+"Number");
+    validated_number_class.def(init<Rational>());
+    validated_number_class.def(init<Real>());
+    validated_number_class.def(init<Number<Exact>>());
+    validated_number_class.def(init<Number<Effective>>());
+    //validated_number_class.def("get", (BoundedFloat64(Number<Validated>::*)(BoundedTag, Precision64 const&)const) &Number<Validated>::get);
+    //validated_number_class.def("get", (BoundedFloatMP(Number<Validated>::*)(BoundedTag, PrecisionMP const&)const) &Number<Validated>::get);
+    validated_number_class.def("get", (BoundedFloat64(*)(Number<Validated> const&, Precision64 const&)) &get);
+    validated_number_class.def("get", (BoundedFloatMP(*)(Number<Validated> const&, PrecisionMP const&)) &get);
+    validated_number_class.define_self_arithmetic();
+    validated_number_class.define_mixed_arithmetic( Tag<Number<Validated>>() );
+//    validated_number_class.define_transcendental_functions();
+
+    class_<Number<Approximate>> approximate_number_class(class_name<Approximate>()+"Number");
+    approximate_number_class.def(init<Rational>());
+    approximate_number_class.def(init<Real>());
+    approximate_number_class.def(init<Number<Exact>>());
+    approximate_number_class.def(init<Number<Effective>>());
+    approximate_number_class.def(init<Number<Validated>>());
+    //approximate_number_class.def("get", (ApproximateFloat64(Number<Approximate>::*)(ApproximateTag, Precision64 const&)const) &Number<Validated>::get);
+    //approximate_number_class.def("get", (ApproximateFloatMP(Number<Approximate>::*)(ApproximateTag, PrecisionMP const&)const) &Number<Validated>::get);
+    approximate_number_class.def("get", (ApproximateFloat64(*)(Number<Approximate> const&, Precision64 const&)) &get);
+    approximate_number_class.def("get", (ApproximateFloatMP(*)(Number<Approximate> const&, PrecisionMP const&)) &get);
+    approximate_number_class.define_self_arithmetic();
+    approximate_number_class.define_mixed_arithmetic( Tag<Number<Approximate>>() );
+//    approximate_number_class.define_transcendental_functions();
+
+    implicitly_convertible<Number<Validated>,Number<Approximate>>();
+    implicitly_convertible<Number<Effective>,Number<Approximate>>();
+    implicitly_convertible<Number<Effective>,Number<Validated>>();
+    implicitly_convertible<Number<Exact>,Number<Approximate>>();
+    implicitly_convertible<Number<Exact>,Number<Validated>>();
+    implicitly_convertible<Number<Exact>,Number<Effective>>();
+
+}
 
 template<class PR> void export_exact_float()
 {
@@ -619,6 +691,8 @@ numeric_submodule()
     export_integer();
     export_rational();
     export_real();
+
+    export_numbers();
 
     export_precision();
     export_user_floats<Precision64>();

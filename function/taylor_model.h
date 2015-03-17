@@ -39,7 +39,6 @@
 #include "algebra/multi_index.h"
 #include "algebra/expansion.h"
 #include "algebra/sweeper.h"
-#include "algebra/algebra_mixin.h"
 #include "algebra/algebra_operations.h"
 #include "function/scaling.h"
 #include "geometry/interval.h"
@@ -74,7 +73,6 @@ struct IntersectionException : public std::runtime_error {
  */
 template<class F>
 class TaylorModel<Validated,F>
-    : public NormedAlgebraMixin<TaylorModel<Validated,F>,ValidatedNumericType>
 {
   public:
     typedef ExactFloat64 CoefficientType;
@@ -451,7 +449,6 @@ Covector<ValidatedNumericType> gradient(const TaylorModel<Validated,Float64>& x,
  */
 template<class F>
 class TaylorModel<Approximate,F>
-    : public NormedAlgebraMixin<TaylorModel<Approximate,F>,ApproximateNumericType>
 {
   public:
     typedef ApproximateFloat64 CoefficientType;
@@ -584,23 +581,23 @@ class TaylorModel<Approximate,F>
     //@{
     /*! \name Standard algebra interface. */
     //! \brief An approximation to the norm of the function.
-    virtual NormType norm() const;
+    NormType norm() const;
     //! \brief An approximation to the average value of the function.
-    virtual CoefficientType average() const;
+    CoefficientType average() const;
     //! \brief The tolerance to which analytic functions should be computed.
-    virtual RawFloat64 tolerance() const;
+    RawFloat64 tolerance() const;
     //! \brief The radius of the ball containing the functions.
-    virtual NormType radius() const;
+    NormType radius() const;
     //! \brief Write to an output stream.
-    virtual OutputStream& write(OutputStream&) const;
+    OutputStream& write(OutputStream&) const;
     //! \brief Inplace addition of a scalar constant.
-    virtual Void iadd(const ApproximateNumericType& c);
+    Void iadd(const ApproximateNumericType& c);
     //! \brief Inplace multiplication of a scalar constant.
-    virtual Void imul(const ApproximateNumericType& c);
+    Void imul(const ApproximateNumericType& c);
     //! \brief Inplace addition of a scalar multiple of a Taylor model.
-    virtual Void isma(const ApproximateNumericType& c, const TaylorModel<Approximate,F>& x);
+    Void isma(const ApproximateNumericType& c, const TaylorModel<Approximate,F>& x);
     //! \brief Inplace addition of a product of Taylor models.
-    virtual Void ifma(const TaylorModel<Approximate,F>& x1, const TaylorModel<Approximate,F>& x2);
+    Void ifma(const TaylorModel<Approximate,F>& x1, const TaylorModel<Approximate,F>& x2);
 
     template<class FF> friend TaylorModel<Approximate,FF> max(const TaylorModel<Approximate,FF>& x, const TaylorModel<Approximate,FF>& y);
     template<class FF> friend TaylorModel<Approximate,FF> min(const TaylorModel<Approximate,FF>& x, const TaylorModel<Approximate,FF>& y);

@@ -32,7 +32,7 @@ inline void set_rounding_mode(rounding_mode_t rnd) { asm volatile ("fldcw %0" : 
 inline rounding_mode_t get_rounding_mode() { rounding_mode_t rnd; asm volatile ("fstcw %0" : "=m" (rnd) ); return rnd; }
 #endif
 
-bool initialize_rounding_mode() { set_rounding_upward(); }
+bool initialize_rounding_mode() { set_rounding_upward(); return true; }
 static const bool rounding_mode_initialized = initialize_rounding_mode();
 
 static const double inf = std::numeric_limits<double>::infinity();

@@ -30,6 +30,11 @@ template<class K, class V> OutputStream& operator<<(OutputStream& os, std::map<K
 bool initialize() { return true; }
 const bool initialized = initialize();
 
+// ---------------- Instantiation ---------------------------------------------------------------------------------- //
+
+template<class X> SizeType instantiate_operators();
+template<class X> SizeType instantiate_template_operators();
+
 // ---------------- Symbolic --------------------------------------------------------------------------------------- //
 
 template<class OP, class... AS> struct Symbolic;
@@ -76,6 +81,40 @@ OutputStream& operator<<(OutputStream& os, Neg op) { return os << "neg"; }
 OutputStream& operator<<(OutputStream& os, Rec op) { return os << "rec"; }
 OutputStream& operator<<(OutputStream& os, Exp op) { return os << "exp"; }
 OutputStream& operator<<(OutputStream& os, Log op) { return os << "log"; }
+
+// ---------------- Logical --------------------------------------------------------------------------------------- //
+
+inline Logical operator&&(Logical l1, Logical l2) { return conjunction(l1,l2); }
+inline Logical operator||(Logical l1, Logical l2) { return disjunction(l1,l2); }
+inline Logical operator!(Logical l) { return negation(l); }
+
+inline OutputStream& operator<<(OutputStream& os, Logical l) {
+    switch(l._v) {
+        case Logical::Value::TRUE: return os << "TRUE";
+        case Logical::Value::LIKELY: return os << "LIKELY";
+        case Logical::Value::INDETERMINATE: return os << "INDETERMINATE";
+        case Logical::Value::UNLIKELY: return os << "UNLIKELY";
+        case Logical::Value::FALSE: return os << "FALSE";
+        default: return os << "???";
+    }
+}
+
+Boolean conjunction(Boolean l1, Boolean l2) { return Boolean(bool(l1) && bool(l2)); }
+Boolean disjunction(Boolean l1, Boolean l2) { return Boolean(bool(l1) || bool(l2)); }
+Boolean negation(Boolean l) { return Boolean(!bool(l)); }
+OutputStream& operator<<(OutputStream& os, Boolean l) { return os << bool(l); }
+
+Kleenean conjunction(Kleenean l1, Kleenean l2) { return Kleenean(Logical(l1) && Logical(l2)); }
+Kleenean disjunction(Kleenean l1, Kleenean l2) { return Kleenean(Logical(l1) || Logical(l2)); }
+Kleenean negation(Kleenean l) { return Kleenean(!Logical(l)); }
+OutputStream& operator<<(OutputStream& os, Kleenean l) { return os << Logical(l); }
+
+Sierpinskian conjunction(Sierpinskian l1, Sierpinskian l2) { return Sierpinskian(Logical(l1) && Logical(l2)); }
+Sierpinskian disjunction(Sierpinskian l1, Sierpinskian l2) { return Sierpinskian(Logical(l1) || Logical(l2)); }
+NegatedSierpinskian negation(Sierpinskian l) { return NegatedSierpinskian(!Logical(l)); }
+Sierpinskian negation(NegatedSierpinskian l) { return Sierpinskian(!Logical(l)); }
+OutputStream& operator<<(OutputStream& os, Sierpinskian l) { return os << Logical(l); }
+OutputStream& operator<<(OutputStream& os, NegatedSierpinskian l) { return os << Logical(l); }
 
 // ---------------- Integer --------------------------------------------------------------------------------------- //
 
@@ -171,6 +210,7 @@ OutputStream& operator<<(OutputStream& os, Real const& r) { os << MAGENTA; r._pt
 inline Float64Bounds evaluate(ValidatedReal const& vr, Precision64 pr) { return vr.get(pr); }
 
 ValidatedReal::ValidatedReal(Real r) : _r(r) { }
+ValidatedReal ValidatedReal::create_constant(ValidatedReal r) const { return r; }
 Float64Bounds ValidatedReal::get(Precision64 pr) const { return this->_r.get(pr); }
 ValidatedReal add(ValidatedReal r1, ValidatedReal r2) { return make_real<Add>(r1,r2); }
 ValidatedReal mul(ValidatedReal r1, ValidatedReal r2) { return make_real<Mul>(r1,r2); }
@@ -187,6 +227,59 @@ template Bounds<Float64>::operator GenericType() const;
 
 // ---------------- Algebra ---------------------------------------------------------------------------------------- //
 
+template<class X> class Algebra;
+
+
+template<class A, class X=NumericType<A>> class AlgebraWrapper
+    : public virtual AlgebraInterface<X>, public A
+{
+    friend A; friend class Algebra<X>;
+  public:
+    AlgebraWrapper(A&& a) : A(std::move(a)) { }
+    AlgebraWrapper(A const& a) : A(a) { }
+    virtual ~AlgebraWrapper<A,X> () = default;
+  private:
+    //virtual AlgebraInterface<X>* _create_constant(X c) const { AlgebraWrapper<A,X> r(*this); r=c; return r; }
+    virtual AlgebraInterface<X>* _create_constant(X c) const { return new AlgebraWrapper<A,X>(this->create_constant(c)); }
+    virtual AlgebraInterface<X>* _add(AlgebraInterface<X> const* other) const { return this->_apply(Add(),other); }
+    virtual AlgebraInterface<X>* _mul(AlgebraInterface<X> const* other) const { return this->_apply(Mul(),other); }
+    virtual AlgebraInterface<X>* _neg() const { return new AlgebraWrapper<A,X>(neg(*this)); }
+    virtual AlgebraInterface<X>* _rec() const { return new AlgebraWrapper<A,X>(rec(*this)); }
+    virtual AlgebraInterface<X>* _exp() const { return new AlgebraWrapper<A,X>(exp(*this)); }
+    virtual AlgebraInterface<X>* _log() const { return new AlgebraWrapper<A,X>(log(*this)); }
+    virtual AlgebraInterface<X>* _add(X const& c) const { return new AlgebraWrapper<A,X>(add(*this,c)); }
+    virtual AlgebraInterface<X>* _radd(X const& c) const { return new AlgebraWrapper<A,X>(add(c,*this)); }
+    virtual AlgebraInterface<X>* _mul(X const& c) const { return new AlgebraWrapper<A,X>(mul(*this,c)); }
+    virtual AlgebraInterface<X>* _rmul(X const& c) const { return new AlgebraWrapper<A,X>(mul(c,*this)); }
+    virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<A const&>(*this); }
+  private:
+    template<class OP> AlgebraInterface<X>* _apply(OP op, AlgebraInterface<X> const* ai2) const;
+    template<class OP> AlgebraInterface<X>* _apply(OP op) const;
+};
+
+template<class A, class X> template<class OP> AlgebraInterface<X>*
+AlgebraWrapper<A,X>::_apply(OP op, AlgebraInterface<X> const* ai2) const {
+    AlgebraWrapper<A,X> const* aw1=this; AlgebraWrapper<A,X> const* aw2=dynamic_cast<AlgebraWrapper<A,X>const*>(ai2);
+    if(not aw2) {
+        std::cerr << "aw1="; aw1->_write(std::cerr);
+        std::cerr << ", ai2="; ai2->_write(std::cerr);std::cerr << "\n";
+        throw std::bad_cast(); }
+    return new AlgebraWrapper<A,X>(op(static_cast<A const&>(*aw1),static_cast<A const&>(*aw2)));
+}
+
+template<class A, class X> template<class OP>
+AlgebraInterface<X>* AlgebraWrapper<A,X>::_apply(OP op) const {
+       return new AlgebraWrapper<A,X>(op(static_cast<A const&>(*this)));
+}
+
+template<class A, class X> using IfAlgebra = EnableIf<IsConstructible<Algebra<X>,A>,A>;
+
+using RealAlgebra = Algebra<Real>;
+using ValidatedRealAlgebra = Algebra<ValidatedReal>;
+
+template<class X> template<class A> A Algebra<X>::extract() const { return dynamic_cast<AlgebraWrapper<A,X>const&>(*this->_ptr); }
+
+
 // ---------------- Differential ----------------------------------------------------------------------------------- //
 
 template<class X> Differential<X>::Differential(X vx, X dx)
@@ -197,41 +290,54 @@ template<class X> Differential<X> Differential<X>::coordinate(NumericType c) {
     return Differential<X>(c,c.create_constant(1)); }
 template<class X> Differential<X> Differential<X>::create_constant(GenericNumericType c) const {
     return Differential<X>::constant(this->_vx.create_constant(c)); }
-
-template<class X> template<class Z,EnableIf<IsConvertible<X,Z>>> Differential<X>::operator Algebra<Z> () const {
-    return Algebra<Z>(new AlgebraWrapper<Differential<X>,Z>(*this));
-}
-template<class X> template<class Z,EnableIf<IsConvertible<X,Z>>> Differential<X>::Differential(Algebra<Z> a)
+template<class X> Differential<X>& Differential<X>::operator=(GenericNumericType c) {
+    return *this=Differential<X>::constant(this->_vx.create_constant(c)); }
+template<class X> Differential<X>::operator Algebra<Y> () const {
+    return Algebra<Y>(new AlgebraWrapper<Differential<X>,Y>(*this)); }
+template<class X> Differential<X>::Differential(Algebra<Y> a)
     : Differential(a.template extract<Differential<X>>()) { }
 
-template class Differential<Real>;
-template class Differential<Float64Bounds>;
 
-template<class X> Differential<X> Differential<X>::_add(Differential<X> dx1, Differential<X> dx2) {
+template class Differential<Real>;
+template class Differential<ValidatedReal>;
+template class Differential<Float64Bounds>;
+template Differential<Real> Algebra<Real>::extract() const;
+template Differential<ValidatedReal> Algebra<ValidatedReal>::extract() const;
+template Differential<Float64Bounds> Algebra<ValidatedReal>::extract() const;
+
+template<class X> struct Operations<Differential<X>> {
+    typedef Differential<X> A; typedef GenericType<X> Y;
+    static A _add(A,A); static A _add(A,Y); static A _add(Y,A);
+    static A _mul(A,A); static A _mul(A,Y); static A _mul(Y,A);
+    static A _neg(A); static A _rec(A); static A _exp(A); static A _log(A);
+    //static A _sub(A,A); static A _sub(A,X); static A _sub(X,A);
+};
+
+template<class X> Differential<X> Operations<Differential<X>>::_add(Differential<X> dx1, Differential<X> dx2) {
     return Differential<X>(add(dx1._vx,dx2._vx),add(dx1._dx,dx2._dx)); }
-template<class X> Differential<X> Differential<X>::_mul(Differential<X> dx1, Differential<X> dx2) {
+template<class X> Differential<X> Operations<Differential<X>>::_mul(Differential<X> dx1, Differential<X> dx2) {
     return Differential<X>(mul(dx1._vx,dx2._vx),add(mul(dx1._dx,dx2._vx),mul(dx1._vx,dx2._dx))); }
-template<class X> Differential<X> Differential<X>::_neg(Differential<X> dx) {
+template<class X> Differential<X> Operations<Differential<X>>::_neg(Differential<X> dx) {
     return Differential<X>(neg(dx._vx),neg(dx._dx)); }
-template<class X> Differential<X> Differential<X>::_rec(Differential<X> dx) {
+template<class X> Differential<X> Operations<Differential<X>>::_rec(Differential<X> dx) {
     return Differential<X>(rec(dx._vx),mul(rec(neg(mul(dx._vx,dx._vx))),dx._dx)); }
-template<class X> Differential<X> Differential<X>::_exp(Differential<X> dx) {
+template<class X> Differential<X> Operations<Differential<X>>::_exp(Differential<X> dx) {
     return Differential<X>(exp(dx._vx),mul(exp(dx._vx),dx._dx)); }
-template<class X> Differential<X> Differential<X>::_log(Differential<X> dx) {
+template<class X> Differential<X> Operations<Differential<X>>::_log(Differential<X> dx) {
     return Differential<X>(log(dx._vx),mul(rec(dx._vx),dx._dx)); }
 
-template<class X> Differential<X> Differential<X>::_add(Differential<X> dx, Y c) {
+template<class X> Differential<X> Operations<Differential<X>>::_add(Differential<X> dx, Y c) {
     return Differential<X>(add(dx._vx,c),dx._dx); }
-template<class X> Differential<X> Differential<X>::_add(Y c, Differential<X> dx) {
+template<class X> Differential<X> Operations<Differential<X>>::_add(Y c, Differential<X> dx) {
     return Differential<X>(add(c,dx._vx),dx._dx); }
-template<class X> Differential<X> Differential<X>::_mul(Differential<X> dx, Y c) {
+template<class X> Differential<X> Operations<Differential<X>>::_mul(Differential<X> dx, Y c) {
     return Differential<X>(mul(dx._vx,c),mul(dx._dx,c)); }
-template<class X> Differential<X> Differential<X>::_mul(Y c, Differential<X> dx) {
+template<class X> Differential<X> Operations<Differential<X>>::_mul(Y c, Differential<X> dx) {
     return Differential<X>(mul(dx._vx,c),mul(dx._dx,c)); }
 
-// FIXME: Should not need to explicitly instantiate these
-template Differential<Real>::operator Algebra<Real>() const;
-template Differential<Float64Bounds>::operator Algebra<ValidatedReal>() const;
+//template class Operations<Differential<Real>>;
+//template class Operations<Differential<ValidatedReal>>;
+//template class Operations<Differential<Float64Bounds>>;
 
 // ---------------- Expression ------------------------------------------------------------------------------------- //
 
@@ -303,45 +409,29 @@ template<class X> X Expression<X>::operator()(Valuation<X> v) const { return eva
 
 template class Expression<Real>;
 template class Expression<ValidatedReal>;
+template Expression<Real> Algebra<Real>::extract() const;
+template Expression<ValidatedReal> Algebra<ValidatedReal>::extract() const;
 
-template<class X> Expression<X> add(Expression<X> e1,Expression<X> e2) { return make_expression<X,Add>(e1,e2); }
-template<class X> Expression<X> mul(Expression<X> e1,Expression<X> e2) { return make_expression<X,Mul>(e1,e2); }
-template<class X> Expression<X> neg(Expression<X> e) { return make_expression<X,Neg>(e); }
-template<class X> Expression<X> rec(Expression<X> e) { return make_expression<X,Rec>(e); }
-template<class X> Expression<X> exp(Expression<X> e) { return make_expression<X,Exp>(e); }
-template<class X> Expression<X> log(Expression<X> e) { return make_expression<X,Log>(e); }
+template<class X> struct Operations<Expression<X>> {
+    typedef Expression<X> A;
+    static A _add(A,A); static A _mul(A,A);
+    static A _neg(A); static A _rec(A); static A _exp(A); static A _log(A);
+};
 
-template Expression<Real> add(Expression<Real>,Expression<Real>);
-template Expression<Real> mul(Expression<Real>,Expression<Real>);
-//template Expression<Real> neg(Expression<Real>);
-//template Expression<Real> rec(Expression<Real>);
-//template Expression<Real> exp(Expression<Real>);
-//template Expression<Real> log(Expression<Real>);
-template Expression<ValidatedReal> add(Expression<ValidatedReal>,Expression<ValidatedReal>);
-template Expression<ValidatedReal> mul(Expression<ValidatedReal>,Expression<ValidatedReal>);
+template<class X> Expression<X> Operations<Expression<X>>::_add(Expression<X> e1, Expression<X> e2) { return make_expression<X,Add>(e1,e2); }
+template<class X> Expression<X> Operations<Expression<X>>::_mul(Expression<X> e1, Expression<X> e2) { return make_expression<X,Mul>(e1,e2); }
+template<class X> Expression<X> Operations<Expression<X>>::_neg(Expression<X> e) { return make_expression<X,Neg>(e); }
+template<class X> Expression<X> Operations<Expression<X>>::_rec(Expression<X> e) { return make_expression<X,Rec>(e); }
+template<class X> Expression<X> Operations<Expression<X>>::_exp(Expression<X> e) { return make_expression<X,Neg>(e); }
+template<class X> Expression<X> Operations<Expression<X>>::_log(Expression<X> e) { return make_expression<X,Rec>(e); }
 
-RealExpression add(RealExpression e1, RealExpression e2) { return make_expression<Real,Add>(e1,e2); }
-RealExpression mul(RealExpression e1, RealExpression e2) { return make_expression<Real,Mul>(e1,e2); }
-/*
-RealExpression neg(RealExpression e) { return make_expression<Real,Neg>(e); }
-RealExpression rec(RealExpression e) { return make_expression<Real,Rec>(e); }
-RealExpression exp(RealExpression e) { return make_expression<Real,Exp>(e); }
-RealExpression log(RealExpression e) { return make_expression<Real,Log>(e); }
-*/
+template class Operations<Expression<Real>>;
+template class Operations<Expression<ValidatedReal>>;
 
 Real evaluate(RealExpression e, RealValuation v) { return e._ptr->_evaluate(v); }
 RealAlgebra evaluate(RealExpression e, Valuation<RealAlgebra> v) { return e._ptr->_evaluate(v); }
-//OutputStream& operator<<(OutputStream& os, RealExpression const& e) { os << "RealExpression("; e._ptr->_write(os); return os << ")"; }
 OutputStream& operator<<(OutputStream& os, RealExpression const& e) { os << MAGENTA; e._ptr->_write(os); os << RESET; return os; }
 
-ValidatedRealExpression add(ValidatedRealExpression e1, ValidatedRealExpression e2) { return make_expression<ValidatedReal,Add>(e1,e2); }
-ValidatedRealExpression mul(ValidatedRealExpression e1, ValidatedRealExpression e2) { return make_expression<ValidatedReal,Mul>(e1,e2); }
-/*
-ValidatedRealExpression neg(ValidatedRealExpression e) { return make_expression<ValidatedReal,Neg>(e); }
-ValidatedRealExpression rec(ValidatedRealExpression e) { return make_expression<ValidatedReal,Rec>(e); }
-ValidatedRealExpression exp(ValidatedRealExpression e) { return make_expression<ValidatedReal,Exp>(e); }
-ValidatedRealExpression log(ValidatedRealExpression e) { return make_expression<ValidatedReal,Log>(e); }
-*/
 ValidatedReal evaluate(ValidatedRealExpression e, Valuation<ValidatedReal> v) { return e._ptr->_evaluate(v); }
 ValidatedRealAlgebra evaluate(ValidatedRealExpression e, Valuation<ValidatedRealAlgebra> v) { return e._ptr->_evaluate(v); }
 OutputStream& operator<<(OutputStream& os, ValidatedRealExpression const& e) { os << BLUE; e._ptr->_write(os); os << RESET; return os; }
@@ -407,6 +497,10 @@ template<class OP, class... AS> struct FormulaWrapper<Real,OP,AS...>
     virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<Symbolic<OP,AS...>const&>(*this); }
 };
 
+template<class X> Formula<X> Formula<X>::constant(X const& c) { return Formula<X>(new FormulaWrapper<X,Cnst,X>(c)); }
+
+
+
 template<class X, class OP, class... AS> Function<X> make_function(typename Function<X>::DomainType dom, AS... as) {
     return Function<X>(dom, Formula<X>(new FormulaWrapper<X,OP,AS...>(as...))); }
 
@@ -428,6 +522,7 @@ template<class X> Function<X> Function<X>::create_constant(NumericType c) const 
 template<class X> Function<X> Function<X>::create_coordinate(IndexType j) const { return Function<X>(this->domain(),Coordinate(j)); }
 template<class X> Function<X> Function<X>::constant(DomainType dom, NumericType c) { return Function<X>(dom,c); }
 template<class X> Function<X> Function<X>::coordinate(DomainType dom, IndexType j) { return Function<X>(dom,Coordinate(j)); }
+template<class X> Function<X>& Function<X>::operator=(NumericType c) { return *this=Function<X>::constant(this->domain(),c); }
 
 template<class X> auto Function<X>::domain() const -> DomainType { return this->_dom; }
 template<class X> auto Function<X>::formula() const -> FormulaType { return this->_frml; }
@@ -454,25 +549,84 @@ template<class X> Function<X> make_function(Vector<RealVariable> a, Expression<X
     return evaluate_algebra(e,v);
 }
 
-template<class X> Function<X> add(Function<X> f1,Function<X> f2) {
-    return make_function<X,Add>(intersection(f1.domain(),f2.domain()),f1.formula(),f2.formula()); }
-template<class X> Function<X> mul(Function<X> f1,Function<X> f2) {
-    return make_function<X,Mul>(intersection(f1.domain(),f2.domain()),f1.formula(),f2.formula()); }
-template<class X> Function<X> neg(Function<X> f) { return make_function<X,Neg>(f.domain(),f.formula()); }
-template<class X> Function<X> rec(Function<X> f) { return make_function<X,Rec>(f.domain(),f.formula()); }
-template<class X> Function<X> exp(Function<X> f) { return make_function<X,Exp>(f.domain(),f.formula()); }
-template<class X> Function<X> log(Function<X> f) { return make_function<X,Log>(f.domain(),f.formula()); }
-
-template Function<Real> add(Function<Real>,Function<Real>);
-template Function<Real> mul(Function<Real>,Function<Real>);
-template Function<Real> neg(Function<Real>);
-template Function<Real> rec(Function<Real>);
-template Function<Real> exp(Function<Real>);
-template Function<Real> log(Function<Real>);
-
 template class Function<Real>;
-typedef Formula<Real> RealFormula;
+template class Function<ValidatedReal>;
 
+
+
+/*
+template<class X> struct Operations<Function<X>> {
+    typedef Function<X> A;
+    static A _add(A,A); static A _mul(A,A);
+    static A _neg(A); static A _rec(A); static A _exp(A); static A _log(A);
+    static A _add(A,X); static A _add(X,A); static A _mul(A,X); static A _mul(X,A);
+};
+
+template<class X> Function<X> Operations<Function<X>>::_add(Function<X> f1,Function<X> f2) {
+    return make_function<X,Add>(intersection(f1.domain(),f2.domain()),f1.formula(),f2.formula()); }
+template<class X> Function<X> Operations<Function<X>>::_mul(Function<X> f1,Function<X> f2) {
+    return make_function<X,Mul>(intersection(f1.domain(),f2.domain()),f1.formula(),f2.formula()); }
+template<class X> Function<X> Operations<Function<X>>::_neg(Function<X> f) {
+    return make_function<X,Neg>(f.domain(),f.formula()); }
+template<class X> Function<X> Operations<Function<X>>::_rec(Function<X> f) {
+    return make_function<X,Rec>(f.domain(),f.formula()); }
+template<class X> Function<X> Operations<Function<X>>::_exp(Function<X> f) {
+    return make_function<X,Exp>(f.domain(),f.formula()); }
+template<class X> Function<X> Operations<Function<X>>::_log(Function<X> f) {
+    return make_function<X,Log>(f.domain(),f.formula()); }
+template<class X> Function<X> Operations<Function<X>>::_add(Function<X> f1,X c2) {
+    return make_function<X,Add>(f1.domain(),f1.formula(),Formula<X>::constant(c2)); }
+template<class X> Function<X> Operations<Function<X>>::_add(X c1,Function<X> f2) {
+    return make_function<X,Add>(f2.domain(),Formula<X>::constant(c1),f2.formula()); }
+template<class X> Function<X> Operations<Function<X>>::_mul(Function<X> f1,X c2) {
+    return make_function<X,Mul>(f1.domain(),f1.formula(),Formula<X>::constant(c2)); }
+template<class X> Function<X> Operations<Function<X>>::_mul(X c1,Function<X> f2) {
+    return make_function<X,Mul>(f2.domain(),Formula<X>::constant(c1),f2.formula()); }
+
+template class Operations<Function<Real>>;
+template class Operations<Function<ValidatedReal>>;
+*/
+
+
+template<class X> Function<X> add(Function<X> f1, Function<X> f2) {
+    return make_function<X,Add>(intersection(f1.domain(),f2.domain()),f1.formula(),f2.formula()); }
+template<class X> Function<X> mul(Function<X> f1, Function<X> f2) {
+    return make_function<X,Mul>(intersection(f1.domain(),f2.domain()),f1.formula(),f2.formula()); }
+template<class X> Function<X> neg(Function<X> f) {
+    return make_function<X,Neg>(f.domain(),f.formula()); }
+template<class X> Function<X> rec(Function<X> f) {
+    return make_function<X,Rec>(f.domain(),f.formula()); }
+template<class X> Function<X> exp(Function<X> f) {
+    return make_function<X,Exp>(f.domain(),f.formula()); }
+template<class X> Function<X> log(Function<X> f) {
+    return make_function<X,Log>(f.domain(),f.formula()); }
+template<class X> Function<X> add(Function<X> f1, NumericType<Function<X>> c2) {
+    return make_function<X,Add>(f1.domain(),f1.formula(),Formula<X>::constant(c2)); }
+template<class X> Function<X> add(NumericType<Function<X>> c1, Function<X> f2) {
+    return make_function<X,Add>(f2.domain(),Formula<X>::constant(c1),f2.formula()); }
+template<class X> Function<X> mul(Function<X> f1, NumericType<Function<X>> c2) {
+    return make_function<X,Mul>(f1.domain(),f1.formula(),Formula<X>::constant(c2)); }
+template<class X> Function<X> mul(NumericType<Function<X>> c1, Function<X> f2) {
+    return make_function<X,Mul>(f2.domain(),Formula<X>::constant(c1),f2.formula()); }
+
+template SizeType instantiate_template_operators<RealFunction>();
+template SizeType instantiate_template_operators<ValidatedRealFunction>();
+
+
+typedef Formula<Real> RealFormula;
+Float64Bounds evaluate(RealFunction f, Vector<Float64Bounds> v) { return evaluate(f.formula(),v); }
+Real evaluate(RealFunction f, RealVector v) { return evaluate(f.formula(),v); }
+Real evaluate(RealFormula f, RealVector v) { return f._ptr->_evaluate(v); }
+//OutputStream& operator<<(OutputStream& os, RealFunction const& e) { os << "RealFunction("; e._ptr->_write(os); return os << ")"; }
+OutputStream& operator<<(OutputStream& os, RealFunction const& f) { f._frml._ptr->_write(os); return os; }
+
+typedef Formula<ValidatedReal> ValidatedRealFormula;
+ValidatedReal evaluate(ValidatedRealFunction f, ValidatedRealVector v) { return evaluate(f.formula(),v); }
+ValidatedReal evaluate(ValidatedRealFormula f, ValidatedRealVector v) { return f._ptr->_evaluate(v); }
+//OutputStream& operator<<(OutputStream& os, ValidatedRealFunction const& e) { os << "ValidatedRealFunction("; e._ptr->_write(os); return os << ")"; }
+OutputStream& operator<<(OutputStream& os, ValidatedRealFunction const& f) { f._frml._ptr->_write(os); return os; }
+
+/*
 RealFunction add(RealFunction f1, RealFunction f2) {
     return make_function<Real,Add>(intersection(f1.domain(),f2.domain()),f1.formula(),f2.formula()); }
 RealFunction mul(RealFunction f1, RealFunction f2) {
@@ -486,37 +640,24 @@ RealFunction add(RealFunction f1, Real c2) { return add(f1,f1.create_constant(c2
 RealFunction add(Real c1, RealFunction f2) { return add(f2.create_constant(c1),f2); }
 RealFunction mul(RealFunction f1, Real c2) { return mul(f1,f1.create_constant(c2)); }
 RealFunction mul(Real c1, RealFunction f2) { return mul(f2.create_constant(c1),f2); }
-
-Float64Bounds evaluate(RealFunction f, Vector<Float64Bounds> v) { return evaluate(f.formula(),v); }
-Real evaluate(RealFunction f, RealVector v) { return evaluate(f.formula(),v); }
-Real evaluate(RealFormula f, RealVector v) { return f._ptr->_evaluate(v); }
-//OutputStream& operator<<(OutputStream& os, RealFunction const& e) { os << "RealFunction("; e._ptr->_write(os); return os << ")"; }
-OutputStream& operator<<(OutputStream& os, RealFunction const& f) { f._frml._ptr->_write(os); return os; }
+*/
 
 
-template class Function<ValidatedReal>;
-typedef Formula<ValidatedReal> ValidatedRealFormula;
+template<class X> SizeType instantiate_template_operators() {
+    auto add_ptr=(X(*)(X,X)) &add<>;
+    auto mul_ptr=(X(*)(X,X)) &mul<>;
+    auto neg_ptr=(X(*)(X)) &neg<>;
+    auto rec_ptr=(X(*)(X)) &rec<>;
+    auto exp_ptr=(X(*)(X)) &exp<>;
+    auto log_ptr=(X(*)(X)) &log<>;
 
-ValidatedRealFunction add(ValidatedRealFunction f1, ValidatedRealFunction f2) {
-    return make_function<ValidatedReal,Add>(intersection(f1.domain(),f2.domain()),f1.formula(),f2.formula()); }
-ValidatedRealFunction mul(ValidatedRealFunction f1, ValidatedRealFunction f2) {
-    return make_function<ValidatedReal,Mul>(intersection(f1.domain(),f2.domain()),f1.formula(),f2.formula()); }
-ValidatedRealFunction neg(ValidatedRealFunction f) { return make_function<ValidatedReal,Neg>(f.domain(),f.formula()); }
-ValidatedRealFunction rec(ValidatedRealFunction f) { return make_function<ValidatedReal,Rec>(f.domain(),f.formula()); }
-ValidatedRealFunction exp(ValidatedRealFunction f) { return make_function<ValidatedReal,Exp>(f.domain(),f.formula()); }
-ValidatedRealFunction log(ValidatedRealFunction f) { return make_function<ValidatedReal,Log>(f.domain(),f.formula()); }
-
-ValidatedRealFunction add(ValidatedRealFunction f1, ValidatedReal c2) { return add(f1,f1.create_constant(c2)); }
-ValidatedRealFunction add(ValidatedReal c1, ValidatedRealFunction f2) { return add(f2.create_constant(c1),f2); }
-ValidatedRealFunction mul(ValidatedRealFunction f1, ValidatedReal c2) { return mul(f1,f1.create_constant(c2)); }
-ValidatedRealFunction mul(ValidatedReal c1, ValidatedRealFunction f2) { return mul(f2.create_constant(c1),f2); }
-
-ValidatedReal evaluate(ValidatedRealFunction f, ValidatedRealVector v) { return evaluate(f.formula(),v); }
-ValidatedReal evaluate(ValidatedRealFormula f, ValidatedRealVector v) { return f._ptr->_evaluate(v); }
-//OutputStream& operator<<(OutputStream& os, ValidatedRealFunction const& e) { os << "ValidatedRealFunction("; e._ptr->_write(os); return os << ")"; }
-OutputStream& operator<<(OutputStream& os, ValidatedRealFunction const& f) { f._frml._ptr->_write(os); return os; }
+    return (SizeType)add_ptr + (SizeType)mul_ptr
+        + (SizeType)neg_ptr + (SizeType)rec_ptr
+        + (SizeType)exp_ptr + (SizeType)log_ptr;
+}
 
 template<class X> SizeType instantiate_operators() {
+    X add(X,X); X mul(X,X); X neg(X); X rec(X); X exp(X); X log(X);
     auto add_ptr=(X(*)(X,X)) &add;
     auto mul_ptr=(X(*)(X,X)) &mul;
     auto neg_ptr=(X(*)(X)) &neg;
@@ -528,5 +669,5 @@ template<class X> SizeType instantiate_operators() {
         + (SizeType)neg_ptr + (SizeType)rec_ptr
         + (SizeType)exp_ptr + (SizeType)log_ptr;
 }
-template SizeType instantiate_operators<RealFunction>();
-template SizeType instantiate_operators<ValidatedRealFunction>();
+
+

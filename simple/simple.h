@@ -9,6 +9,8 @@ using std::declval;
 static const bool dummy = true;
 template<class P, class T=bool> using EnableIf = typename std::enable_if<P::value,T>::type;
 template<class P, class T=bool> using DisableIf = typename std::enable_if<not P::value,T>::type;
+using True = std::true_type;
+using False = std::false_type;
 template<class F, class T> using IsConvertible = std::is_convertible<F,T>;
 template<class T, class... F> using IsConstructible = std::is_constructible<T,F...>;
 template<class T1, class T2> using IsSame = std::is_same<T1,T2>;
@@ -38,6 +40,21 @@ auto const WHITE   = "\033[37m";      /* White */
 struct Cnst { };
 struct Var { };
 
+struct And {
+    template<class A1, class A2> auto operator() (A1&& a1, A2&& a2) const -> decltype(conjunction(a1,a2)) {
+        return conjunction(std::forward<A1>(a1),std::forward<A2>(a2)); }
+};
+struct Or {
+    template<class A1, class A2> auto operator() (A1&& a1, A2&& a2) const -> decltype(disjunction(a1,a2)) {
+        return disjunction(std::forward<A1>(a1),std::forward<A2>(a2)); }
+};
+struct Not { template<class A> auto operator() (A&& a) const -> decltype(negation(a)) { return negation(std::forward<A>(a)); } };
+
+
+struct Max {
+    template<class A1, class A2> auto operator() (A1&& a1, A2&& a2) const -> decltype(max(a1,a2)) {
+        return max(std::forward<A1>(a1),std::forward<A2>(a2)); }
+};
 struct Add {
     template<class A1, class A2> auto operator() (A1&& a1, A2&& a2) const -> decltype(add(a1,a2)) {
         return add(std::forward<A1>(a1),std::forward<A2>(a2)); }
@@ -51,27 +68,6 @@ struct Neg { template<class A> auto operator() (A&& a) const -> decltype(neg(a))
 struct Rec { template<class A> auto operator() (A&& a) const -> decltype(rec(a)) { return rec(std::forward<A>(a)); } };
 struct Exp { template<class A> auto operator() (A&& a) const -> decltype(exp(a)) { return exp(std::forward<A>(a)); } };
 struct Log { template<class A> auto operator() (A&& a) const -> decltype(log(a)) { return log(std::forward<A>(a)); } };
-
-// ---------------- Declarators ------------------------------------------------------------------------------------ //
-
-template<class X> struct DeclareRingOperators {
-    friend X add(X,X);friend X mul(X,X);friend X neg(X);
-};
-template<class X> struct DeclareFieldOperators : DeclareRingOperators<X> {
-   friend X rec(X);
-};
-template<class X> struct DeclareOperators : DeclareFieldOperators<X> {
-   friend X exp(X);friend X log(X);
-};
-
-template<template<typename>class F> struct DeclareTemplateOperators {
-    template<class X> friend F<X> add(F<X>,F<X>);
-    template<class X> friend F<X> mul(F<X>,F<X>);
-    template<class X> friend F<X> neg(F<X>);
-    template<class X> friend F<X> rec(F<X>);
-    template<class X> friend F<X> exp(F<X>);
-    template<class X> friend F<X> log(F<X>);
-};
 
 // ---------------- Traits ---------------------------------------------------------------------------------------- //
 
@@ -90,7 +86,7 @@ template<class T1, class T2=Void> struct ArithmeticTraits {
     typedef decltype(mul(declval<T1>(),declval<T2>())) MulType;
 };
 
-template<class T> struct ArithmeticTraits<T,Void> {
+template<class T> struct ArithmeticTraits<T> {
     typedef decltype(add(declval<T>(),declval<T>())) AddType;
     typedef decltype(mul(declval<T>(),declval<T>())) MulType;
     typedef decltype(neg(declval<T>())) NegType;
@@ -102,40 +98,210 @@ template<class T> struct ArithmeticTraits<T,Void> {
 template<class T1, class T2=T1> using AddType = typename ArithmeticTraits<T1,T2>::AddType;
 template<class T1, class T2=T1> using MulType = typename ArithmeticTraits<T1,T2>::MulType;
 template<class T> using NegType = typename ArithmeticTraits<T>::NegType;
+template<class T> using RecType = typename ArithmeticTraits<T>::RecType;
+template<class T> using ExpType = typename ArithmeticTraits<T>::ExpType;
+template<class T> using LogType = typename ArithmeticTraits<T>::LogType;
+
+// ---------------- Declarators ------------------------------------------------------------------------------------ //
+
+template<class X> struct DeclareRingOperators {
+    friend X add(X,X); friend X mul(X,X); friend X neg(X);
+};
+template<class X> struct DeclareFieldOperators : DeclareRingOperators<X> {
+   friend X rec(X);
+};
+template<class X> struct DeclareOperators : DeclareFieldOperators<X> {
+   friend X exp(X);friend X log(X);
+   friend X max(X,X);
+};
+
+template<class A, class X=typename A::NumericType> struct DeclareAlgbraOperators : DeclareOperators<A> {
+    friend A add(A,X); friend A add(X,A); friend A mul(A,X); friend A mul(X,A);
+};
+
+template<class A, class X=typename A::NumericType> struct DeclareStaticAlgbraOperators  {
+    static A _add(A,A); static A _mul(A,A);
+    static A _neg(A); static A _rec(A); static A _exp(A); static A _log(A);
+    static A _add(A,X); static A _add(X,A); static A _mul(A,X); static A _mul(X,A);
+};
+
+template<class A> struct Operations {
+    typedef typename A::NumericType X;
+    static A _add(A,A); static A _mul(A,A);
+    static A _neg(A); static A _rec(A); static A _exp(A); static A _log(A);
+    static A _add(A,X); static A _add(X,A); static A _mul(A,X); static A _mul(X,A);
+};
+
+template<class A> struct StaticDispatchNumericOperators {
+    friend A add(A a1, A a2) { return Operations<A>::_add(a1,a2); }
+    friend A mul(A a1, A a2) { return Operations<A>::_mul(a1,a2); }
+    friend A neg(A a) { return Operations<A>::_neg(a); }
+    friend A rec(A a) { return Operations<A>::_rec(a); }
+    friend A exp(A a) { return Operations<A>::_exp(a); }
+    friend A log(A a) { return Operations<A>::_log(a); }
+};
+
+template<class A, class X=typename A::NumericType> struct StaticDispatchAlgbraOperators : StaticDispatchNumericOperators<A> {
+    friend A add(A a1, X x2) { return Operations<A>::_add(a1,x2); }
+    friend A add(X x1, A a2) { return Operations<A>::_add(x1,a2); }
+    friend A mul(A a1, X x2) { return Operations<A>::_mul(a1,x2); }
+    friend A mul(X x1, A a2) { return Operations<A>::_mul(x1,a2); }
+};
+
+template<template<typename>class F> struct DeclareTemplateOperators {
+    template<class X> friend F<X> add(F<X>,F<X>);
+    template<class X> friend F<X> mul(F<X>,F<X>);
+    template<class X> friend F<X> neg(F<X>);
+    template<class X> friend F<X> rec(F<X>);
+    template<class X> friend F<X> exp(F<X>);
+    template<class X> friend F<X> log(F<X>);
+};
+
+template<template<typename>class F> struct DeclareTemplateMixedSelfOperators {
+    template<class X> friend F<X> add(F<X>,SelfType<F<X>>);
+    template<class X> friend F<X> add(SelfType<F<X>>,F<X>);
+    template<class X> friend F<X> mul(F<X>,SelfType<F<X>>);
+    template<class X> friend F<X> mul(SelfType<F<X>>,F<X>);
+};
+
+template<template<typename>class F> struct DeclareTemplateAlgebraOperators {
+    template<class X> friend F<X> add(F<X>,F<X>);
+    template<class X> friend F<X> mul(F<X>,F<X>);
+    template<class X> friend F<X> neg(F<X>);
+    template<class X> friend F<X> rec(F<X>);
+    template<class X> friend F<X> exp(F<X>);
+    template<class X> friend F<X> log(F<X>);
+    template<class X> friend F<X> add(F<X>,NumericType<F<X>>);
+    template<class X> friend F<X> add(NumericType<F<X>>,F<X>);
+    template<class X> friend F<X> mul(F<X>,NumericType<F<X>>);
+    template<class X> friend F<X> mul(NumericType<F<X>>,F<X>);
+};
+
+template<class X> struct DeclareLogicalOperators {
+   friend X conjunction(X,X); friend X disjunction(X,X);
+   friend X negation(X);
+};
+
+template<template<typename>class F> struct DeclareTemplateLogicalOperators {
+    template<class X> friend F<X> conjunction(F<X>,F<X>);
+    template<class X> friend F<X> disjunction(F<X>,F<X>);
+    template<class X> friend F<X> negation(F<X>);
+};
+
+template<template<typename>class F> struct DefineTemplateMixedSelfOperators {
+    template<class X> friend F<X> add(F<X> x1, SelfType<F<X>> x2) { return add(x1,x2); }
+    template<class X> friend F<X> add(SelfType<F<X>> x1, F<X> x2) { return add(x1,x2); }
+    template<class X> friend F<X> mul(F<X> x1, SelfType<F<X>> x2) { return mul(x1,x2); }
+    template<class X> friend F<X> mul(SelfType<F<X>> x1, F<X> x2) { return mul(x1,x2); }
+};
+
+struct Fooby { };
+//Fooby conjunction(Fooby,Fooby);
+//Fooby disjunction(Fooby,Fooby);
+//Fooby negation(Fooby);
+
+
+// ---------------- Effort ----------------------------------------------------------------------------------------- //
 
 struct Effort { };
 
 // ---------------- Logical ---------------------------------------------------------------------------------------- //
 
-class Boolean {
-    bool _b;
-  public:
-    Boolean(bool b) : _b(b) { }
-    operator bool() const { return this->_b; };
-    friend bool decide(Boolean l) { return l._b; }
-};
+class Boolean;
 
 class Logical {
+  public:
     enum class Value : char { FALSE=-2, UNLIKELY=-1, INDETERMINATE=0, LIKELY=+1, TRUE=2 };
+  private:
     Value _v;
   public:
-    Logical(bool b) : _v(b ? Value::TRUE : Value::FALSE) { }
     Logical(Value v) : _v(v) { }
+    explicit Logical(bool b) : _v(b?Value::TRUE:Value::FALSE) { }
+    explicit Logical(Boolean b);
+    friend Logical conjunction(Logical l1, Logical l2) { return l1._v<=l2._v?l1:l2; }
+    friend Logical disjunction(Logical l1, Logical l2) { return l1._v>=l2._v?l1:l2; }
+    friend Logical negation(Logical l) { return Logical(static_cast<Value>(-static_cast<char>(l._v))); }
     friend bool definitely(Logical l) { return l._v==Value::TRUE; }
     friend bool possibly(Logical l) { return l._v!=Value::FALSE; }
     friend bool likely(Logical l) { return l._v>=Value::LIKELY; }
     friend bool decide(Logical l) { return l._v>=Value::LIKELY; }
+    friend OutputStream& operator<<(OutputStream&, Logical);
 };
+
+class Boolean {
+    bool _b;
+  public:
+    Boolean(bool b) : _b(b) { }
+    operator bool() const { return this->_b; }
+    Logical value() const { return Logical(this->_b); }
+    explicit operator Logical() const { return this->value(); }
+    friend Boolean conjunction(Boolean l1, Boolean l2);
+    friend Boolean disjunction(Boolean l1, Boolean l2);
+    friend Boolean negation(Boolean l);
+    friend bool decide(Boolean l) { return l._b; }
+    friend OutputStream& operator<<(OutputStream&, Boolean);
+};
+
+inline Logical::Logical(Boolean l) : Logical(static_cast<bool>(l)) { }
 
 class Kleenean {
     Logical _l;
   public:
     Kleenean(bool b) : _l(b) { }
-    Kleenean(Logical l) : _l(l) { }
+    explicit Kleenean(Logical l) : _l(l) { }
+    explicit operator Logical() const { return _l; }
     Logical check(Effort e) const;
     friend Logical check(Kleenean l, Effort e);
+    friend Kleenean conjunction(Kleenean l1, Kleenean l2);
+    friend Kleenean disjunction(Kleenean l1, Kleenean l2);
+    friend Kleenean negation(Kleenean l);
     friend bool decide(Kleenean l, Effort e);
+    friend OutputStream& operator<<(OutputStream&, Kleenean);
 };
+
+class NegatedSierpinskian;
+
+class Sierpinskian {
+    Logical _l;
+  public:
+    Sierpinskian(bool b) : _l(b) { }
+    Sierpinskian(Kleenean l) : _l(reinterpret_cast<Logical const&>(l)) { }
+    explicit Sierpinskian(Logical l) : _l(l) { }
+    explicit operator Logical() const { return _l; }
+    Logical check(Effort e) const;
+    friend Logical check(Sierpinskian l, Effort e);
+    friend Sierpinskian conjunction(Sierpinskian l1, Sierpinskian l2);
+    friend Sierpinskian disjunction(Sierpinskian l1, Sierpinskian l2);
+    friend NegatedSierpinskian negation(Sierpinskian l);
+    friend bool decide(Sierpinskian l, Effort e);
+    friend OutputStream& operator<<(OutputStream&, Sierpinskian);
+};
+
+class NegatedSierpinskian {
+    Logical _l;
+  public:
+    explicit NegatedSierpinskian(Logical l) : _l(l) { }
+    explicit operator Logical() const { return _l; }
+    friend Sierpinskian negation(NegatedSierpinskian l);
+    friend OutputStream& operator<<(OutputStream&, NegatedSierpinskian);
+};
+
+template<class L> using IsLogical = IsConstructible<Logical,L>;
+
+
+template<class T1, class T2=Void> struct LogicalTraits {
+    typedef decltype(conjunction(declval<T1>(),declval<T2>())) AndType;
+    typedef decltype(disjunction(declval<T1>(),declval<T2>())) OrType;
+};
+
+template<class T> struct LogicalTraits<T> {
+    typedef decltype(conjunction(declval<T>(),declval<T>())) AndType;
+    typedef decltype(disjunction(declval<T>(),declval<T>())) OrType;
+    typedef decltype(negation(declval<T>())) NotType;
+};
+template<class T1, class T2=T1> using AndType = typename LogicalTraits<T1,T2>::AndType;
+template<class T1, class T2=T1> using OrType = typename LogicalTraits<T1,T2>::OrType;
+template<class T> using NotType = typename LogicalTraits<T>::NotType;
 
 // ---------------- Integer --------------------------------------------------------------------------------------- //
 
@@ -160,6 +326,7 @@ class Rational : DeclareFieldOperators<Rational> {
     Integer _num; Integer _den;
     Rational(double) = delete;
  public:
+    typedef Rational GenericType;
     Rational(int n) : Rational(Integer(n)) { }
     Rational(Integer n, Integer d=1);
     double get_d() const;
@@ -194,12 +361,11 @@ struct Real : DeclareOperators<Real> {
     // FIXME: Should not be necessary...
     Real create_constant(Real) const;
 };
-
 class ValidatedReal : DeclareOperators<ValidatedReal> {
   private: public:
     Real _r;
   public:
-    typedef Real GenericType;
+    typedef ValidatedReal GenericType;
     template<class T, EnableIf<IsConvertible<T,Real>> =dummy> ValidatedReal(T t) : ValidatedReal(Real(t)) { }
     ValidatedReal(Real);
     Float64Bounds get(Precision64) const;
@@ -255,6 +421,9 @@ template<class F> class Bounds
     friend OutputStream& operator<<(OutputStream&,Bounds<F> const&);
 };
 
+template<class F> Bounds<F> add(Bounds<F> x1, Bounds<F> x2);
+template<class F> Bounds<F> mul(Bounds<F> x1, Bounds<F> x2);
+
 template<class X> X add(X const& x, GenericType<X> const& y) { return add(x,x.create(y)); }
 template<class X> X add(GenericType<X> const& y, X const& x) { return add(x.create(y),x); }
 template<class X> X mul(X const& x, GenericType<X> const& y) { return mul(x,x.create(y)); }
@@ -279,6 +448,7 @@ class Field {
 
 // ---------------- Algebra ---------------------------------------------------------------------------------------- //
 
+
 template<class X> class Algebra;
 
 template<class X> class AlgebraInterface {
@@ -300,48 +470,6 @@ template<class X> class AlgebraInterface {
     virtual OutputStream& _write(OutputStream&) const = 0;
 };
 
-template<class A, class X=NumericType<A>> class AlgebraWrapper
-    : public virtual AlgebraInterface<X>, public A
-{
-    friend A; friend class Algebra<X>;
-  public:
-    AlgebraWrapper(A&& a) : A(std::move(a)) { }
-    AlgebraWrapper(A const& a) : A(a) { }
-    virtual ~AlgebraWrapper<A,X> () = default;
-  private:
-    //virtual AlgebraInterface<X>* _create_constant(X c) const { AlgebraWrapper<A,X> r(*this); r=c; return r; }
-    virtual AlgebraInterface<X>* _create_constant(X c) const { return new AlgebraWrapper<A,X>(this->create_constant(c)); }
-    virtual AlgebraInterface<X>* _add(AlgebraInterface<X> const* other) const { return this->_apply(Add(),other); }
-    virtual AlgebraInterface<X>* _mul(AlgebraInterface<X> const* other) const { return this->_apply(Mul(),other); }
-    virtual AlgebraInterface<X>* _neg() const { return new AlgebraWrapper<A,X>(neg(*this)); }
-    virtual AlgebraInterface<X>* _rec() const { return new AlgebraWrapper<A,X>(rec(*this)); }
-    virtual AlgebraInterface<X>* _exp() const { return new AlgebraWrapper<A,X>(exp(*this)); }
-    virtual AlgebraInterface<X>* _log() const { return new AlgebraWrapper<A,X>(log(*this)); }
-    virtual AlgebraInterface<X>* _add(X const& c) const { return new AlgebraWrapper<A,X>(add(*this,c)); }
-    virtual AlgebraInterface<X>* _radd(X const& c) const { return new AlgebraWrapper<A,X>(add(c,*this)); }
-    virtual AlgebraInterface<X>* _mul(X const& c) const { return new AlgebraWrapper<A,X>(mul(*this,c)); }
-    virtual AlgebraInterface<X>* _rmul(X const& c) const { return new AlgebraWrapper<A,X>(mul(c,*this)); }
-    virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<A const&>(*this); }
-  private:
-    template<class OP> AlgebraInterface<X>* _apply(OP op, AlgebraInterface<X> const* ai2) const;
-    template<class OP> AlgebraInterface<X>* _apply(OP op) const;
-};
-
-template<class A, class X> template<class OP> AlgebraInterface<X>*
-AlgebraWrapper<A,X>::_apply(OP op, AlgebraInterface<X> const* ai2) const {
-    AlgebraWrapper<A,X> const* aw1=this; AlgebraWrapper<A,X> const* aw2=dynamic_cast<AlgebraWrapper<A,X>const*>(ai2);
-    if(not aw2) {
-        std::cerr << "aw1="; aw1->_write(std::cerr);
-        std::cerr << ", ai2="; ai2->_write(std::cerr);std::cerr << "\n";
-        throw std::bad_cast(); }
-    return new AlgebraWrapper<A,X>(op(static_cast<A const&>(*aw1),static_cast<A const&>(*aw2)));
-}
-
-template<class A, class X> template<class OP>
-AlgebraInterface<X>* AlgebraWrapper<A,X>::_apply(OP op) const {
-       return new AlgebraWrapper<A,X>(op(static_cast<A const&>(*this)));
-}
-
 template<class X> class Algebra
 // : public Field
 {
@@ -352,8 +480,7 @@ template<class X> class Algebra
     typedef Algebra<X> SelfType;
     typedef X NumericType;
     typedef GenericType<X> GenericTypeNumericType;
-    template<class XX> friend Algebra<XX> make_handle(AlgebraInterface<XX>*);
-    template<class A> A const& extract() const { return dynamic_cast<AlgebraWrapper<A,X>const&>(*this->_ptr); }
+    template<class A> A extract() const;
     friend OutputStream& operator<<(OutputStream& os, Algebra<X> const& a) { return a._ptr->_write(os); }
 
     SelfType create_constant(NumericType c) const { return Algebra<X>(this->_ptr->_create_constant(c)); }
@@ -391,7 +518,7 @@ template<class X> class Expression;
 template<class X> class Valuation;
 
 template<class X> class Variable
-    : DeclareTemplateOperators<Expression>
+    : StaticDispatchNumericOperators<Expression<X>>
 {
     Identifier _name;
   public:
@@ -402,10 +529,6 @@ template<class X> class Variable
     friend OutputStream& operator<<(OutputStream& os, Variable<X> const& v) { return os << v._name; }
   private:
     // FIXME: Should not be needed...
-    friend inline Expression<X> add(Variable<X> v1, Variable<X> v2) { return add(Expression<X>(v1),Expression<X>(v2)); }
-    friend inline Expression<X> add(Variable<X> v1, X c2) { return add(Expression<X>(v1),Expression<X>(c2)); }
-    friend inline Expression<X> add(X c1, Variable<X> v2) { return add(Expression<X>(c1),Expression<X>(v2)); }
-    friend inline Expression<X> exp(Variable<X> v) { return exp(Expression<X>(v)); }
     friend X evaluate(Expression<X>, Valuation<X>);
 };
 
@@ -437,7 +560,7 @@ template<class X> class Valuation {
 template<class X> class ExpressionInterface;
 
 template<class X> class Expression
-    : DeclareTemplateOperators<Expression>
+    : StaticDispatchNumericOperators<Expression<X>>
 {
   private: public:
     std::shared_ptr<ExpressionInterface<X>> _ptr;
@@ -446,7 +569,7 @@ template<class X> class Expression
   public:
     typedef X NumericType;
     typedef Algebra<X> AlgebraType;
-    typedef Variable<GenericType<X>> VariableType;
+    typedef Variable<Real> VariableType;
 
     template<class SX, EnableIf<IsConvertible<SX,X>> =dummy> Expression<X>(Expression<SX> e);
     template<class SX, EnableIf<IsConvertible<SX,X>> =dummy> Expression<X>(SX c)
@@ -468,11 +591,6 @@ template<class X> class Expression
     friend AlgebraType evaluate(Expression, Valuation<AlgebraType>);
     friend OutputStream& operator<<(OutputStream& os, Expression<X> const& e);
 };
-
-template<class XX> Expression<XX> add(Expression<XX> e1, SelfType<Expression<XX>> e2) { return add(e1,e2); }
-template<class XX> Expression<XX> add(SelfType<Expression<XX>> e1, Expression<XX> e2) { return add(e1,e2); }
-template<class XX> Expression<XX> mul(Expression<XX> e1, SelfType<Expression<XX>> e2) { return mul(e1,e2); }
-template<class XX> Expression<XX> mul(SelfType<Expression<XX>> e1, Expression<XX> e2) { return mul(e1,e2); }
 
 template<class X, class A> IfAlgebra<A,X> evaluate_algebra(Expression<X> e, Valuation<A> x) {
     Valuation<Algebra<X>> ax;
@@ -517,7 +635,19 @@ typedef Vector<ValidatedReal> ValidatedRealVector;
 
 // ---------------- Differential ----------------------------------------------------------------------------------- //\
 
-template<class X> class Differential {
+/*
+template<class A> struct AlgebraOperations {
+    typedef typename A::NumericType X;
+    static A _add(A,A); static A _add(A,X); static A _add(X,A);
+    static A _mul(A,A); static A _mul(A,X); static A _mul(X,A);
+    static A _neg(A); static A _rec(A); static A _exp(A); static A _log(A);
+    //static A _sub(A,A); static A _sub(A,X); static A _sub(X,A);
+};
+*/
+
+template<class X> class Differential
+    : StaticDispatchAlgbraOperators<Differential<X>,GenericType<X>>
+{
     typedef GenericType<X> Y;
   private: public:
     X _vx; X _dx;
@@ -528,36 +658,18 @@ template<class X> class Differential {
     static Differential<X> constant(NumericType c);
     static Differential<X> coordinate(NumericType c);
     Differential<X> create_constant(GenericNumericType c) const;
-    template<class Y, EnableIf<IsConvertible<X,Y>> =dummy> explicit operator Algebra<Y> () const;
-    template<class Y, EnableIf<IsConvertible<X,Y>> =dummy> explicit Differential(Algebra<Y>);
+    explicit operator Algebra<Y> () const;
+    explicit Differential(Algebra<Y>);
+    Differential<X>& operator=(Y);
   public:
-    static Differential<X> _add(Differential<X>,Differential<X>);
-    static Differential<X> _mul(Differential<X>,Differential<X>);
-    static Differential<X> _neg(Differential<X>);
-    static Differential<X> _rec(Differential<X>);
-    static Differential<X> _exp(Differential<X>);
-    static Differential<X> _log(Differential<X>);
-
-    static Differential<X> _add(Differential<X>,Y);
-    static Differential<X> _add(Y,Differential<X>);
-    static Differential<X> _mul(Differential<X>,Y);
-    static Differential<X> _mul(Y,Differential<X>);
-  public:
-    friend Differential<X> add(Differential<X> dx1, Differential<X> dx2) { return _add(dx1,dx2); }
-    friend Differential<X> mul(Differential<X> dx1, Differential<X> dx2) { return _mul(dx1,dx2); }
-    friend Differential<X> neg(Differential<X> dx) { return _neg(dx); }
-    friend Differential<X> rec(Differential<X> dx) { return _rec(dx); }
-    friend Differential<X> exp(Differential<X> dx) { return _exp(dx); }
-    friend Differential<X> log(Differential<X> dx) { return _log(dx); }
-
-    friend Differential<X> add(Differential<X> dx1, Y c2) { return _add(dx1,c2); }
-    friend Differential<X> add(Y c1, Differential<X> dx2) { return _add(c1,dx2); }
-    friend Differential<X> mul(Differential<X> dx1, Y c2) { return _mul(dx1,c2); }
-    friend Differential<X> mul(Y c1, Differential<X> dx2) { return _mul(c1,dx2); }
-
     friend OutputStream& operator<<(OutputStream& os, Differential<X> const& dx) {
         return os << "(" << dx._vx << ";" << dx._dx << ")"; }
 };
+
+template<class D> struct IsDifferential : False { };
+template<class X> struct IsDifferential<Differential<X>> : True { };
+
+template<class D, EnableIf<IsDifferential<D>> =dummy> D add(D,D);
 
 // ---------------- Function --------------------------------------------------------------------------------------- //
 
@@ -582,11 +694,13 @@ template<class X> struct Formula {
     std::shared_ptr<FormulaInterface<X>> _ptr;
     Formula(FormulaInterface<X>* p) : _ptr(p) { }
     Formula(std::shared_ptr<FormulaInterface<X>> p) : _ptr(p) { }
-    Formula<X> constant(X const& c);
+    static Formula<X> constant(X const& c);
 };
 
 template<class X> class Function
-    : DeclareTemplateOperators<Function>
+    : DeclareTemplateAlgebraOperators<Function>
+    , DefineTemplateMixedSelfOperators<Function>
+//    : StaticDispatchAlgbraOperators<Function<X>,X>
 {
   public:
     typedef EuclideanSpace DomainType;
@@ -613,22 +727,10 @@ template<class X> class Function
     static Function coordinate(DomainType d, IndexType j);
     Function create_constant(NumericType c) const;
     Function create_coordinate(IndexType j) const;
+    Function& operator=(NumericType c);
 
     DomainType domain() const;
     FormulaType formula() const;
-/*
-    friend Function add(Function,Function);
-    friend Function mul(Function,Function);
-
-    friend Function neg(Function);
-    friend Function rec(Function);
-    friend Function exp(Function);
-    friend Function log(Function);
-*/
-    friend Function add(Function,NumericType);
-    friend Function add(NumericType,Function);
-    friend Function mul(Function,NumericType);
-    friend Function mul(NumericType,Function);
 
     Float64Bounds operator() (Vector<Float64Bounds>) const;
     NumericType operator() (Vector<NumericType>) const;

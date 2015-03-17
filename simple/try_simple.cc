@@ -2,25 +2,110 @@
 
 #include <iomanip>
 
+std::string demangle(std::string s) {
+    char r[100];
+    SizeType i=0; SizeType j=9;
+    while(s[j]!=0) {
+        r[i]=s[j];
+        ++i; ++j;
+    }
+    r[i]=0;
+    return std::string(r);
+}
+
+template<class T> struct Virtual { ~Virtual() = default; };
+template<class T> std::string mangled_class_name() { return typeid(Virtual<T>()).name(); }
+template<class T> std::string class_name() { return demangle(mangled_class_name<T>()); }
+
+template<class L> void test_logical_operations(L l) {
+    std::cout<<"test_logical_operations(" << class_name<L>() << ")\n";
+    L r(l); r=l;
+    //r=l&&l; r=l||l; r=!(!l);
+    r=conjunction(l,l); r=disjunction(l,l); r=negation(negation(l));
+}
+
 template<class X> void test_ring_operations(X x) {
+    std::cout<<"test_ring_operations(" << class_name<X>() << ")\n";
     X r=x; r=add(x,x); r=mul(x,x); r=neg(x);
 }
 
 template<class X> void test_field_operations(X x) {
-    test_ring_operations(x); x=rec(x);
+    std::cout<<"test_field_operations(" << class_name<X>()  << ")\n";
+    X r(x); r=x; r=add(x,x); r=mul(x,x); r=neg(x); x=rec(x);
 }
 
 template<class X> void test_elementary_operations(X x) {
-    test_field_operations(x); x=exp(x); x=log(x);
+    std::cout<<"test_elementary_operations(" << class_name<X>()  << ")\n";
+    X r(x); r=x; r=add(x,x); r=mul(x,x); r=neg(x); x=rec(x); x=exp(x); x=log(x);
 }
 
 template<class A, class X=NumericType<A>> void test_algebra_operations(A a, X x) {
-    A r=a; r=x; r=add(a,x); r=add(x,a); r=mul(a,x); r=mul(x,a);
+    std::cout<<"test_algebra_operations(" << class_name<A>()  << "," << class_name<X>() << ")\n";
+    A r=a;
+    r=a; r=add(a,a); r=mul(a,a); r=neg(a); a=rec(a); a=exp(a); a=log(a);
+    r=x; r=add(a,x); r=add(x,a); r=mul(a,x); r=mul(x,a);
 }
+
+template<class X1, class X2> void test_mixed_operations(X1 x1, X2 x2) {
+    std::cout<<"test_mixed_operations(" << class_name<X1>()  << "," << class_name<X2>() << ")\n";
+    auto ra=add(x1,x2); ra=add(x2,x1); auto rm=mul(x1,x2); rm=mul(x2,x1);
+};
 
 #define PRINT(x) { std::cout << #x << "=" << x << std::endl; }
 
+void wrap();
+
+void test() {
+    Boolean bl=true;
+    test_logical_operations(bl);
+    Kleenean kl=true;
+    test_logical_operations(kl);
+    Sierpinskian sl=true;
+    test_logical_operations(sl);
+
+    Integer n(3);
+    test_ring_operations(n);
+    Rational q(1,n);
+    test_field_operations(q);
+    Real r(q);
+    test_elementary_operations(r);
+    ValidatedReal vr(r);
+    test_elementary_operations(vr);
+
+    Differential<Real> d=Differential<Real>::coordinate(r);
+    test_algebra_operations(d,r);
+    Differential<ValidatedReal> vd=Differential<ValidatedReal>::coordinate(r);
+    test_algebra_operations(vd,r);
+    test_algebra_operations(vd,vr);
+    Algebra<Real> a(d);
+    Algebra<ValidatedReal> va(vd);
+    test_algebra_operations(a,r);
+    test_algebra_operations(va,r);
+    test_algebra_operations(va,vr);
+
+    Variable<Real> v("x");
+    Expression<Real> e=v;
+    test_elementary_operations(e);
+    Expression<ValidatedReal> ve=e;
+    test_elementary_operations(ve);
+    test_algebra_operations(e,r);
+    test_algebra_operations(ve,r);
+    test_algebra_operations(ve,vr);
+
+    EuclideanSpace dom(2);
+    Function<Real> f=Function<Real>::constant(dom,r);
+    Function<ValidatedReal> vf=f;
+    test_algebra_operations(f,r);
+    test_algebra_operations(vf,r);
+    test_algebra_operations(vf,vr);
+    test_mixed_operations(vf,f);
+
+}
+
 int main() {
+    wrap();
+    test();
+
     Integer n1(3);
     Integer n2(5);
     PRINT(n1);
@@ -84,19 +169,10 @@ int main() {
     Expression<ValidatedReal> ve(e);
     PRINT(ve);
 
+
     // FIXME: Should be no need to use explicit cast here!
     ve=mul(add(x,Expression<ValidatedReal>::constant(vr1)),exp(y));
     PRINT(ve);
-
-    std::cout << std::endl;
-    test_ring_operations(n1);
-    test_field_operations(q1);
-    test_elementary_operations(r1);
-    test_elementary_operations(e);
-    test_elementary_operations(ve);
-    test_elementary_operations(a);
-    test_algebra_operations(e,r1);
-    test_algebra_operations(a,r1);
 
     e=mul(x,exp(y));
     r1=q1;

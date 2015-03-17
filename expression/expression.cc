@@ -57,6 +57,12 @@ template<> class SymbolicAlgebraWrapper<Expression<Real>,Real>
     static A const& _cast(AlgebraInterface<X> const& a) { return static_cast<A const&>(dynamic_cast<SymbolicAlgebraWrapper<A,X>const&>(a)); }
     static A const& _cast(SymbolicAlgebraWrapper<A,X> const& a) { return static_cast<A const&>(a); }
     static SymbolicAlgebraInterface<X>* _make(A&& a) { return new SymbolicAlgebraWrapper<A,X>(std::move(a)); }
+    template<class OP> static AlgebraInterface<X>* _eval(OP op, SymbolicAlgebraWrapper<A,X> const& aw1, AlgebraInterface<X> const& ai2) {
+        return _make(op(_cast(aw1),_cast(ai2))); }
+    template<class OP> static AlgebraInterface<X>* _eval(OP op, SymbolicAlgebraWrapper<A,X> const& aw1, X const& c2) {
+        return _make(op(_cast(aw1),c2)); }
+    template<class OP> static AlgebraInterface<X>* _eval(OP op, SymbolicAlgebraWrapper<A,X> const& aw) {
+        return _make(op(_cast(aw))); }
   public:
     SymbolicAlgebraWrapper(A const& a) : A(a) { }
     virtual SymbolicAlgebraInterface<X>* _create_zero() const { return new SymbolicAlgebraWrapper<A>(A()); }
@@ -76,6 +82,12 @@ template<> class SymbolicAlgebraWrapper<Expression<Real>,Real>
         (*this) = (*this) + c * _cast(x); }
     virtual Void _ifma(const AlgebraInterface<X>& x1, const AlgebraInterface<X>& x2)  {
         (*this) = (*this) + _cast(x1) * _cast(x2); }
+    virtual AlgebraInterface<X>* _apply(Neg op) const { return _eval(Minus(),*this); }
+    virtual AlgebraInterface<X>* _apply(Add op, AlgebraInterface<X>const& other) const { return _eval(Plus(),*this,other); }
+    virtual AlgebraInterface<X>* _apply(Sub op, AlgebraInterface<X>const& other) const { return _eval(Minus(),*this,other); }
+    virtual AlgebraInterface<X>* _apply(Mul op, AlgebraInterface<X>const& other) const { return _eval(Times(),*this,other); }
+    virtual AlgebraInterface<X>* _apply(Add op, X const& cnst) const { return _eval(Plus(),*this,cnst); }
+    virtual AlgebraInterface<X>* _apply(Mul op, X const& cnst) const { return _eval(Times(),*this,cnst); }
     virtual OutputStream& write(OutputStream& os) const { return os << _cast(*this); }
     virtual SymbolicAlgebraInterface<X>* _apply(OperatorCode op);
   private:

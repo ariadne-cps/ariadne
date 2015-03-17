@@ -38,18 +38,22 @@ template<class A, class X> class AlgebraMixin
 {
     typedef X NumericType;
   private:
-    template<class OP> static AlgebraInterface<X>* _apply(OP op, AlgebraMixin<A,X> const& am1, AlgebraInterface<X> const& ai2) {
+    template<class OP> static AlgebraInterface<X>* _eval(OP op, AlgebraMixin<A,X> const& am1, AlgebraInterface<X> const& ai2) {
         AlgebraMixin<A,X>const* amp2 = dynamic_cast<AlgebraMixin<A,X>const*>(&ai2); assert(amp2);
         A const& a1=static_cast<A const&>(am1); A const& a2=static_cast<A const&>(*amp2);
         return new A(op(a1,a2)); }
+    template<class OP> static AlgebraInterface<X>* _eval(OP op, AlgebraMixin<A,X> const& am, X const& c) {
+        A const& a=static_cast<A const&>(am); return new A(op(a,c)); }
+    template<class OP> static AlgebraInterface<X>* _eval(OP op, AlgebraMixin<A,X> const& am) {
+        A const& a=static_cast<A const&>(am); return new A(op(a)); }
   public:
     virtual AlgebraInterface<X>* _create_zero() const { return new A(static_cast<const A&>(*this).A::create_zero()); }
     virtual AlgebraInterface<X>* _create_constant(X const& c) const { return new A(static_cast<const A&>(*this).A::create_constant(c)); }
     virtual AlgebraInterface<X>* _create_copy() const { return new A(static_cast<const A&>(*this)); }
     virtual AlgebraInterface<X>* _neg() { return new AlgebraMixin<A,X>(-static_cast<A const&>(*this)); }
-    virtual AlgebraInterface<X>* _add(AlgebraInterface<X> const& other) { return _apply(Add(),*this,other); }
-    virtual AlgebraInterface<X>* _sub(AlgebraInterface<X> const& other) { return _apply(Sub(),*this,other); }
-    virtual AlgebraInterface<X>* _mul(AlgebraInterface<X> const& other) { return _apply(Mul(),*this,other); }
+    virtual AlgebraInterface<X>* _add(AlgebraInterface<X> const& other) { return _eval(Add(),*this,other); }
+    virtual AlgebraInterface<X>* _sub(AlgebraInterface<X> const& other) { return _eval(Sub(),*this,other); }
+    virtual AlgebraInterface<X>* _mul(AlgebraInterface<X> const& other) { return _eval(Mul(),*this,other); }
     virtual Void _iadd(const X& c) { static_cast<A*>(this)->A::iadd(c); }
     virtual Void _imul(const X& c) { static_cast<A*>(this)->A::imul(c); }
     virtual Void _isma(const X& c, const AlgebraInterface<X>& x) {
@@ -57,6 +61,13 @@ template<class A, class X> class AlgebraMixin
     virtual Void _ifma(const AlgebraInterface<X>& x1, const AlgebraInterface<X>& x2)  {
         static_cast<A*>(this)->A::ifma(dynamic_cast<const A&>(x1),dynamic_cast<const A&>(x2)); }
     virtual OutputStream& write(OutputStream& os) const { os << static_cast<const A&>(*this); return os; }
+
+    virtual AlgebraInterface<X>* _apply(Neg op) const { return _eval(op,*this); }
+    virtual AlgebraInterface<X>* _apply(Add op, AlgebraInterface<X>const& other) const { return _eval(op,*this,other); }
+    virtual AlgebraInterface<X>* _apply(Sub op, AlgebraInterface<X>const& other) const { return _eval(op,*this,other); }
+    virtual AlgebraInterface<X>* _apply(Mul op, AlgebraInterface<X>const& other) const { return _eval(op,*this,other); }
+    virtual AlgebraInterface<X>* _apply(Add op, X const& cnst) const { return _eval(op,*this,cnst); }
+    virtual AlgebraInterface<X>* _apply(Mul op, X const& cnst) const { return _eval(op,*this,cnst); }
 };
 
 template<class A, class X> class NormedAlgebraMixin

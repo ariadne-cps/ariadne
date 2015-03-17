@@ -36,12 +36,18 @@
 
 namespace Ariadne {
 
+template<class R, class A> R dynamic_handle_cast(A a) {
+    typedef decltype(*declval<R>()._ptr) RP;
+    return R(std::dynamic_pointer_cast<RP>(a.pointer()));
+}
+
 //! \brief Generic class for elements of unital algebras.
 template<class X> class Algebra
 {
   private:
   public:
     std::shared_ptr< AlgebraInterface<X> > _ptr;
+    std::shared_ptr< AlgebraInterface<X> > pointer() const { return _ptr; }
   public:
     typedef X ScalarType;
     typedef typename X::Paradigm Paradigm;
@@ -49,6 +55,7 @@ template<class X> class Algebra
   public:
     Algebra() : _ptr() { }
     explicit Algebra(AlgebraInterface<X>* p) : _ptr(p) { }
+    explicit Algebra(std::shared_ptr< AlgebraInterface<X> > p) : _ptr(p) { }
     Algebra(const AlgebraInterface<X>& a) : _ptr(a._create_copy()) { }
     Algebra(const Algebra<X>& a) : _ptr(a._ptr->_create_copy()) { }
     template<class A> A extract() const { A const* ap=dynamic_cast<A const*>(this->_ptr.operator->()); assert(ap); return *ap; }
@@ -69,6 +76,13 @@ template<class X> class Algebra
     friend Algebra<X> add(Algebra<X> const& x1, Algebra<X> const& x2) { return Algebra<X>(x1._ptr->_add(*x2._ptr)); }
     friend Algebra<X> sub(Algebra<X> const& x1, Algebra<X> const& x2) { return Algebra<X>(x1._ptr->_sub(*x2._ptr)); }
     friend Algebra<X> mul(Algebra<X> const& x1, Algebra<X> const& x2) { return Algebra<X>(x1._ptr->_mul(*x2._ptr)); }
+
+    template<class OP> friend Algebra<X> apply(OP op, Algebra<X> a1, Algebra<X> a2) { return Algebra<X>(a1._ptr->_apply(op,*a2._ptr)); }
+    template<class OP> friend Algebra<X> apply(OP op, Algebra<X> a1, X c2) { return Algebra<X>(a1._ptr->_apply(op,c2)); }
+    template<class OP> friend Algebra<X> apply(OP op, Algebra<X> a) {
+        TranscendentalAlgebraInterface<X> const* tap=dynamic_cast<TranscendentalAlgebraInterface<X>const*>(a._ptr.operator->());
+        return Algebra<X>(tap->_apply(op)); }
+    friend Algebra<X> apply(Neg op, Algebra<X> a) { return Algebra<X>(a._ptr->_apply(op)); }
 };
 
 template<class X> Algebra<X> rec(const Algebra<X>& a) { return apply(Rec(),a); }

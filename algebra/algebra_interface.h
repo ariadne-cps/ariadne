@@ -107,6 +107,13 @@ template<class X> class AlgebraInterface
     virtual AlgebraInterface<X>* _sub(const AlgebraInterface<X>& x) const = 0;
     //! \brief Add multiply with another algebra element \c r+=c*x .
     virtual AlgebraInterface<X>* _mul(const AlgebraInterface<X>& x) const = 0;
+
+    virtual AlgebraInterface<X>* _apply(Neg) const = 0;
+    virtual AlgebraInterface<X>* _apply(Add,AlgebraInterface<X>const&) const = 0;
+    virtual AlgebraInterface<X>* _apply(Sub,AlgebraInterface<X>const&) const = 0;
+    virtual AlgebraInterface<X>* _apply(Mul,AlgebraInterface<X>const&) const = 0;
+    virtual AlgebraInterface<X>* _apply(Add,X const&) const = 0;
+    virtual AlgebraInterface<X>* _apply(Mul,X const&) const = 0;
 };
 
 //! \brief Interface for a normed unital algebra over a field \a X.

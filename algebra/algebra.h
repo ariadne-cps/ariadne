@@ -48,25 +48,47 @@ template<class X> class Algebra
     typedef typename X::NumericType NumericType;
   public:
     Algebra() : _ptr() { }
-    Algebra(AlgebraInterface<X>* p) : _ptr(p) { }
-    Algebra(const AlgebraInterface<X>& a) : _ptr(a._clone()) { }
-    Algebra(const Algebra<X>& a) : _ptr(a._ptr->_clone()) { }
+    explicit Algebra(AlgebraInterface<X>* p) : _ptr(p) { }
+    Algebra(const AlgebraInterface<X>& a) : _ptr(a._create_copy()) { }
+    Algebra(const Algebra<X>& a) : _ptr(a._ptr->_create_copy()) { }
     template<class A> A extract() const { A const* ap=dynamic_cast<A const*>(this->_ptr.operator->()); assert(ap); return *ap; }
-    Algebra<X>& operator=(Int c) { *this = this->create(); this->iadd(c); return *this; }
-    Algebra<X>& operator=(const X& c) { *this = this->create(); this->iadd(c); return *this; }
-    Algebra<X>& operator=(const Algebra<X>& a) { this->_ptr=std::shared_ptr< AlgebraInterface<X> >(a._ptr->_clone()); return *this; }
-    operator const AlgebraInterface<X>& () const { return *_ptr; }
-    Algebra<X> create() const { return Algebra<X>(_ptr->_create()); }
-    Algebra<X> clone() const { return Algebra<X>(_ptr->_clone()); }
-    Algebra<X> create_zero() const { return Algebra<X>(_ptr->_create()); }
-    Algebra<X> create_constant(X const& c) const { return Algebra<X>(_ptr->_create_constant(c)); }
+    Algebra<X>& operator=(const X& c) { return *this = this->create_constant(c); }
+    Algebra<X>& operator=(const Algebra<X>& a) { this->_ptr=std::shared_ptr< AlgebraInterface<X> >(a._ptr->_create_copy()); return *this; }
+    operator const AlgebraInterface<X>& () const { return *this->_ptr; }
+    Algebra<X> create() const { return Algebra<X>(this->_ptr->_create_zero()); }
+    Algebra<X> clone() const { return Algebra<X>(this->_ptr->_create_copy()); }
+    Algebra<X> create_zero() const { return Algebra<X>(this->_ptr->_create_zero()); }
+    Algebra<X> create_constant(X const& c) const { return Algebra<X>(this->_ptr->_create_constant(c)); }
     OutputStream& write(OutputStream& os) const { return _ptr->write(os); }
   public:
     Void iadd(const X& c) { _ptr->_iadd(c); }
     Void imul(const X& c) { _ptr->_imul(c); }
     Void isma(const X& c, const Algebra<X>& x) { _ptr->_isma(c,*x._ptr); }
     Void ifma(const Algebra<X>& x1, const Algebra<X>& x2) { _ptr->_ifma(*x1._ptr,*x2._ptr); }
+    friend Algebra<X> neg(Algebra<X> const& x) { return Algebra<X>(x._ptr->_neg()); }
+    friend Algebra<X> add(Algebra<X> const& x1, Algebra<X> const& x2) { return Algebra<X>(x1._ptr->_add(*x2._ptr)); }
+    friend Algebra<X> sub(Algebra<X> const& x1, Algebra<X> const& x2) { return Algebra<X>(x1._ptr->_sub(*x2._ptr)); }
+    friend Algebra<X> mul(Algebra<X> const& x1, Algebra<X> const& x2) { return Algebra<X>(x1._ptr->_mul(*x2._ptr)); }
 };
+
+template<class X> Algebra<X> rec(const Algebra<X>& a) { return apply(Rec(),a); }
+template<class X> Algebra<X> sqrt(const Algebra<X>& a) { return apply(Sqrt(),a); }
+template<class X> Algebra<X> exp(const Algebra<X>& a) { return apply(Exp(),a); }
+template<class X> Algebra<X> log(const Algebra<X>& a) { return apply(Log(),a); }
+template<class X> Algebra<X> sin(const Algebra<X>& a) { return apply(Sin(),a); }
+template<class X> Algebra<X> cos(const Algebra<X>& a) { return apply(Cos(),a); }
+template<class X> Algebra<X> tan(const Algebra<X>& a) { return apply(Tan(),a); }
+template<class X> Algebra<X> atan(const Algebra<X>& a) { return apply(Atan(),a); }
+
+// FIXME: Eliminate use of clone with std::dynamic_pointer_cast
+template<class X, class OP> Algebra<X> apply(OP op, const Algebra<X>& a) {
+    std::shared_ptr<TranscendentalAlgebraInterface<X> const> tap
+        = std::dynamic_pointer_cast<TranscendentalAlgebraInterface<X>const>(a._ptr);
+    if(!tap) { ARIADNE_FAIL_MSG("Cannot apply operator "<<op<<" to "<<a<<"\n"); }
+    return Algebra<X>(tap->_apply(op));
+}
+
+
 
 template<class X> class NormedAlgebra
 {
@@ -80,11 +102,11 @@ template<class X> class NormedAlgebra
     NormedAlgebra(NormedAlgebraInterface<X>* p) : _ptr(p) { }
     NormedAlgebra(std::shared_ptr< NormedAlgebraInterface<X> > p) : _ptr(p) { }
     NormedAlgebra(const NormedAlgebraInterface<X>& a) : _ptr(a.clone()) { }
-    operator Algebra<X> () const { return _ptr->_clone(); }
+    operator Algebra<X> () const { return _ptr->_create_copy(); }
     operator const NormedAlgebraInterface<X>& () const { return *_ptr; }
     NormedAlgebra<X>& operator=(Int c) { *this = this->create(); this->iadd(c); return *this; }
     NormedAlgebra<X>& operator=(const X& c) { *this = this->create(); this->iadd(c); return *this; }
-    NormedAlgebra<X>& operator=(const NormedAlgebra<X>& a) { this->_ptr=std::shared_ptr< NormedAlgebraInterface<X> >(a._ptr->_clone()); return *this; }
+    NormedAlgebra<X>& operator=(const NormedAlgebra<X>& a) { this->_ptr=std::shared_ptr< NormedAlgebraInterface<X> >(a._ptr->_create_copy()); return *this; }
     //! \brief The norm of the element.
     typename AlgebraTraits<X>::NormType norm() const { return _ptr->norm(); }
     //! \brief A value \a c minimising |a-c|.
@@ -93,13 +115,13 @@ template<class X> class NormedAlgebra
     Float64 tolerance() const { return _ptr->tolerance(); }
     //! \brief A value \c r such that \c |a-c1|<=r.
     typename AlgebraTraits<X>::NormType radius() const { return _ptr->radius(); }
-    NormedAlgebra<X> create_zero() const { return NormedAlgebra<X>(_ptr->_create()); }
+    NormedAlgebra<X> create_zero() const { return NormedAlgebra<X>(_ptr->_create_zero()); }
     NormedAlgebra<X> create_constant(X c) const { return NormedAlgebra<X>(_ptr->_create_constant(c)); }
     NormedAlgebra<X> create_ball(ErrorFloat64 r) const { return NormedAlgebra<X>(_ptr->_create_ball(r)); }
     NormedAlgebra<X> create_ball(ApproximateFloat64 r) const {
         return create_ball(ErrorFloat64(r.raw())); }
-    NormedAlgebra<X> create() const { return NormedAlgebra<X>(_ptr->_create()); }
-    NormedAlgebra<X> clone() const { return NormedAlgebra<X>(_ptr->_clone()); }
+    NormedAlgebra<X> create() const { return NormedAlgebra<X>(_ptr->_create_zero()); }
+    NormedAlgebra<X> clone() const { return NormedAlgebra<X>(_ptr->_create_copy()); }
     Void clear() { this->imul(0); }
     Void iadd(const X& c) { _ptr->_iadd(c); }
     Void imul(const X& c) { _ptr->_imul(c); }
@@ -119,15 +141,15 @@ template<class X> class GradedAlgebra
     typedef typename X::NumericType NumericType;
     GradedAlgebra() : _ptr() { }
     GradedAlgebra(GradedAlgebraInterface<X>* p) : _ptr(p) { }
-    GradedAlgebra(const GradedAlgebraInterface<X>& a) : _ptr(a._clone()) { }
-    GradedAlgebra(const GradedAlgebra<X>& a) : _ptr(a._ptr->_clone()) { }
+    GradedAlgebra(const GradedAlgebraInterface<X>& a) : _ptr(a._create_copy()) { }
+    GradedAlgebra(const GradedAlgebra<X>& a) : _ptr(a._ptr->_create_copy()) { }
     GradedAlgebra<X>& operator=(Int c) { *this = this->create(); this->iadd(c); return *this; }
     GradedAlgebra<X>& operator=(const X& c) { *this = this->create(); this->iadd(c); return *this; }
-    GradedAlgebra<X>& operator=(const Algebra<X>& a) { this->_ptr=std::shared_ptr< AlgebraInterface<X> >(a._ptr->_clone()); return *this; }
-    operator Algebra<X> () const { return _ptr->_clone(); }
+    GradedAlgebra<X>& operator=(const Algebra<X>& a) { this->_ptr=std::shared_ptr< AlgebraInterface<X> >(a._ptr->_create_copy()); return *this; }
+    operator Algebra<X> () const { return _ptr->_create_copy(); }
     operator const GradedAlgebraInterface<X>& () const { return *_ptr; }
-    GradedAlgebra<X> create() const { return GradedAlgebra<X>(_ptr->_create()); }
-    GradedAlgebra<X> clone() const { return GradedAlgebra<X>(_ptr->_clone()); }
+    GradedAlgebra<X> create() const { return GradedAlgebra<X>(_ptr->_create_zero()); }
+    GradedAlgebra<X> clone() const { return GradedAlgebra<X>(_ptr->_create_copy()); }
     //! \brief The degree of the algebra.
     Nat degree() const { return _ptr->degree(); }
     //! \brief The value in the null grade.
@@ -150,18 +172,19 @@ template<class X> class SymbolicAlgebra
     typedef X ScalarType;
     typedef typename X::NumericType NumericType;
     SymbolicAlgebra() : _ptr() { }
-    SymbolicAlgebra(SymbolicAlgebraInterface<X>* p) : _ptr(p) { }
-    SymbolicAlgebra(const SymbolicAlgebraInterface<X>& a) : _ptr(a._clone()) { }
-    SymbolicAlgebra(const SymbolicAlgebra<X>& a) : _ptr(a._ptr->_clone()) { }
+    explicit SymbolicAlgebra(SymbolicAlgebraInterface<X>* p) : _ptr(p) { }
+    SymbolicAlgebra(const SymbolicAlgebraInterface<X>& a) : _ptr(a._create_copy()) { }
+    SymbolicAlgebra(const SymbolicAlgebra<X>& a) : _ptr(a._ptr->_create_copy()) { }
     //! \brief Create the representation of the operator \a op applied to \a a.
     SymbolicAlgebra(OperatorCode op, const SymbolicAlgebra<X>& a) : _ptr(a._ptr->_apply(op)) { }
     SymbolicAlgebra<X>& operator=(Int c) { *this = this->create(); this->iadd(c); return *this; }
     SymbolicAlgebra<X>& operator=(const X& c) { *this = this->create(); this->iadd(c); return *this; }
-    SymbolicAlgebra<X>& operator=(const Algebra<X>& a) { this->_ptr=std::shared_ptr< AlgebraInterface<X> >(a._ptr->_clone()); return *this; }
-    operator Algebra<X> () const { return _ptr->_clone(); }
+    SymbolicAlgebra<X>& operator=(const Algebra<X>& a) { this->_ptr=std::shared_ptr< AlgebraInterface<X> >(a._ptr->_create_copy()); return *this; }
+    operator Algebra<X> () const { return _ptr->_create_copy(); }
     operator const SymbolicAlgebraInterface<X>& () const { return *_ptr; }
-    SymbolicAlgebra<X> create() const { return SymbolicAlgebra<X>(_ptr->_create()); }
-    SymbolicAlgebra<X> clone() const { return SymbolicAlgebra<X>(_ptr->_clone()); }
+    SymbolicAlgebra<X> create() const { return SymbolicAlgebra<X>(_ptr->_create_zero()); }
+    SymbolicAlgebra<X> create_zero() const { return SymbolicAlgebra<X>(_ptr->_create_zero()); }
+    SymbolicAlgebra<X> clone() const { return SymbolicAlgebra<X>(_ptr->_create_copy()); }
     OutputStream& write(OutputStream& os) const { return _ptr->write(os); }
   public:
     Void iadd(const X& c) { _ptr->_iadd(c); }
@@ -170,31 +193,8 @@ template<class X> class SymbolicAlgebra
     Void ifma(const SymbolicAlgebra<X>& x1, const SymbolicAlgebra<X>& x2) { _ptr->_ifma(*x1._ptr,*x2._ptr); }
 };
 
-template<class X> inline Algebra<X> AlgebraInterface<X>::create() const { return this->_create(); }
-template<class X> inline Algebra<X> AlgebraInterface<X>::clone() const { return this->_clone(); }
-template<class X> inline NormedAlgebra<X> NormedAlgebraInterface<X>::create() const { return this->_create(); }
-template<class X> inline NormedAlgebra<X> NormedAlgebraInterface<X>::clone() const { return this->_clone(); }
-
 template<class X> OutputStream& operator<<(OutputStream& os, const Algebra<X>& x) { return x.write(os); }
 template<class X> OutputStream& operator<<(OutputStream& os, const NormedAlgebra<X>& x) { return x.write(os); }
-
-template<class X> Algebra<X> create(const Algebra<X>& a) { return a.create(); }
-template<class X> Algebra<X> copy(const Algebra<X>& a) { return a.clone(); }
-
-template<class X> Algebra<X> rec(const Algebra<X>& a) { return apply(Rec(),a); }
-template<class X> Algebra<X> sqrt(const Algebra<X>& a) { return apply(Sqrt(),a); }
-template<class X> Algebra<X> exp(const Algebra<X>& a) { return apply(Exp(),a); }
-template<class X> Algebra<X> log(const Algebra<X>& a) { return apply(Log(),a); }
-template<class X> Algebra<X> sin(const Algebra<X>& a) { return apply(Sin(),a); }
-template<class X> Algebra<X> cos(const Algebra<X>& a) { return apply(Cos(),a); }
-template<class X> Algebra<X> tan(const Algebra<X>& a) { return apply(Tan(),a); }
-template<class X> Algebra<X> atan(const Algebra<X>& a) { return apply(Atan(),a); }
-
-// FIXME: Eliminate use of clone with std::dynamic_pointer_cast
-template<class X, class OP> Algebra<X> apply(OP op, const Algebra<X>& a) {
-    ARIADNE_FAIL_MSG("Cannot apply operator "<<op<<" to "<<a<<"\n");
-}
-
 } // namespace Ariadne
 
 #endif /* ARIADNE_ALGEBRA_H */

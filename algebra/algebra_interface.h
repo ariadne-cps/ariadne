@@ -81,15 +81,12 @@ template<class X> class AlgebraInterface
   public:
     typedef X NumericType;
   public:
-    Algebra<X> create() const;
-    Algebra<X> clone() const;
-  public:
     //! \brief Virtual destructor.
     virtual ~AlgebraInterface<X>() { }
     //! \brief Create a dynamically-allocated copy.
-    virtual AlgebraInterface<X>* _clone() const = 0;
+    virtual AlgebraInterface<X>* _create_copy() const = 0;
     //! \brief Create the zero element in the same algebra as the current object.
-    virtual AlgebraInterface<X>* _create() const = 0;
+    virtual AlgebraInterface<X>* _create_zero() const = 0;
     //! \brief Create a constant multiple of the unit element in the same algebra as the current object.
     virtual AlgebraInterface<X>* _create_constant(X const& c) const = 0;
 
@@ -97,10 +94,19 @@ template<class X> class AlgebraInterface
     virtual Void _iadd(const X& c) = 0;
     //! \brief Multiply by a numerical scalar \c r*=c .
     virtual Void _imul(const X& c) = 0;
-    //! \brief Scalar multiply and add \c r+=c*x .
-    virtual Void _isma(const X& c, const AlgebraInterface<X>& x) = 0;
+    //! \brief Fused scalar multiply and add \c r+=x1*x2 .
+    virtual Void _isma(const X& c1, const AlgebraInterface<X>& x2) = 0;
     //! \brief Fused multiply and add \c r+=x1*x2 .
     virtual Void _ifma(const AlgebraInterface<X>& x1, const AlgebraInterface<X>& x2) = 0;
+
+    //! \brief Negation (unary minus).
+    virtual AlgebraInterface<X>* _neg() const = 0;
+    //! \brief Add another algebra element.
+    virtual AlgebraInterface<X>* _add(const AlgebraInterface<X>& x) const = 0;
+    //! \brief Subract another algebra element.
+    virtual AlgebraInterface<X>* _sub(const AlgebraInterface<X>& x) const = 0;
+    //! \brief Add multiply with another algebra element \c r+=c*x .
+    virtual AlgebraInterface<X>* _mul(const AlgebraInterface<X>& x) const = 0;
 };
 
 //! \brief Interface for a normed unital algebra over a field \a X.
@@ -113,10 +119,11 @@ template<class X> class TranscendentalAlgebraInterface
     typedef typename AlgebraTraits<X>::RangeType RangeType;
   public:
     // Overrides for AlgebraInterface operations
-    virtual TranscendentalAlgebraInterface<X>* _clone() const = 0;
-    virtual TranscendentalAlgebraInterface<X>* _create() const = 0;
+    virtual TranscendentalAlgebraInterface<X>* _create_copy() const = 0;
+    virtual TranscendentalAlgebraInterface<X>* _create_zero() const = 0;
     virtual TranscendentalAlgebraInterface<X>* _create_constant(X c) const = 0;
 
+    virtual TranscendentalAlgebraInterface<X>* _apply(Rec) const;
     virtual TranscendentalAlgebraInterface<X>* _apply(Sqrt) const;
     virtual TranscendentalAlgebraInterface<X>* _apply(Exp) const;
     virtual TranscendentalAlgebraInterface<X>* _apply(Log) const;
@@ -139,8 +146,8 @@ template<class X> class NormedAlgebraInterface
     NormedAlgebra<X> clone() const;
   public:
     // Overrides for AlgebraInterface operations
-    virtual NormedAlgebraInterface<X>* _clone() const = 0;
-    virtual NormedAlgebraInterface<X>* _create() const = 0;
+    virtual NormedAlgebraInterface<X>* _create_copy() const = 0;
+    virtual NormedAlgebraInterface<X>* _create_zero() const = 0;
     virtual NormedAlgebraInterface<X>* _create_constant(X c) const = 0;
     virtual NormedAlgebraInterface<X>* _create_ball(ErrorType r) const = 0;
 
@@ -165,8 +172,8 @@ template<class X> class GradedAlgebraInterface
     GradedAlgebra<X> clone() const;
   public:
     // Overrides for AlgebraInterface operations
-    virtual GradedAlgebraInterface<X>* _clone() const = 0;
-    virtual GradedAlgebraInterface<X>* _create() const = 0;
+    virtual GradedAlgebraInterface<X>* _create_copy() const = 0;
+    virtual GradedAlgebraInterface<X>* _create_zero() const = 0;
 
     virtual Nat degree() const = 0;
     virtual const X& value() const = 0;
@@ -181,8 +188,8 @@ template<class X> class SymbolicAlgebraInterface
     SymbolicAlgebra<X> clone() const;
   public:
     // Overrides for AlgebraInterface operations
-    virtual SymbolicAlgebraInterface<X>* _clone() const = 0;
-    virtual SymbolicAlgebraInterface<X>* _create() const = 0;
+    virtual SymbolicAlgebraInterface<X>* _create_copy() const = 0;
+    virtual SymbolicAlgebraInterface<X>* _create_zero() const = 0;
 
     virtual SymbolicAlgebraInterface<X>* _apply(OperatorCode op) = 0;
 };

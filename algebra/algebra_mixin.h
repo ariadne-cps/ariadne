@@ -37,10 +37,19 @@ template<class A, class X> class AlgebraMixin
     : public virtual AlgebraInterface<X>
 {
     typedef X NumericType;
+  private:
+    template<class OP> static AlgebraInterface<X>* _apply(OP op, AlgebraMixin<A,X> const& am1, AlgebraInterface<X> const& ai2) {
+        AlgebraMixin<A,X>const* amp2 = dynamic_cast<AlgebraMixin<A,X>const*>(&ai2); assert(amp2);
+        A const& a1=static_cast<A const&>(am1); A const& a2=static_cast<A const&>(*amp2);
+        return new A(op(a1,a2)); }
   public:
-    virtual AlgebraInterface<X>* _create() const { return new A(static_cast<const A&>(*this).A::create()); }
+    virtual AlgebraInterface<X>* _create_zero() const { return new A(static_cast<const A&>(*this).A::create_zero()); }
     virtual AlgebraInterface<X>* _create_constant(X const& c) const { return new A(static_cast<const A&>(*this).A::create_constant(c)); }
-    virtual AlgebraInterface<X>* _clone() const { return new A(static_cast<const A&>(*this)); }
+    virtual AlgebraInterface<X>* _create_copy() const { return new A(static_cast<const A&>(*this)); }
+    virtual AlgebraInterface<X>* _neg() { return new AlgebraMixin<A,X>(-static_cast<A const&>(*this)); }
+    virtual AlgebraInterface<X>* _add(AlgebraInterface<X> const& other) { return _apply(Add(),*this,other); }
+    virtual AlgebraInterface<X>* _sub(AlgebraInterface<X> const& other) { return _apply(Sub(),*this,other); }
+    virtual AlgebraInterface<X>* _mul(AlgebraInterface<X> const& other) { return _apply(Mul(),*this,other); }
     virtual Void _iadd(const X& c) { static_cast<A*>(this)->A::iadd(c); }
     virtual Void _imul(const X& c) { static_cast<A*>(this)->A::imul(c); }
     virtual Void _isma(const X& c, const AlgebraInterface<X>& x) {
@@ -56,16 +65,16 @@ template<class A, class X> class NormedAlgebraMixin
 {
     virtual NormedAlgebraInterface<X>* _create_ball(ErrorType r) const { return new A(static_cast<const A&>(*this).A::create_ball(r)); }
     virtual NormedAlgebraInterface<X>* _create_constant(X c) const { return new A(static_cast<const A&>(*this).A::create_constant(c)); }
-    virtual NormedAlgebraInterface<X>* _create() const { return new A(static_cast<const A&>(*this).A::create()); }
-    virtual NormedAlgebraInterface<X>* _clone() const { return new A(static_cast<const A&>(*this)); }
+    virtual NormedAlgebraInterface<X>* _create_zero() const { return new A(static_cast<const A&>(*this).A::create()); }
+    virtual NormedAlgebraInterface<X>* _create_copy() const { return new A(static_cast<const A&>(*this)); }
 };
 
 template<class A, class X> class GradedAlgebraMixin
     : public virtual GradedAlgebraInterface<X>
     , public AlgebraMixin<A,X>
 {
-    virtual GradedAlgebraMixin<A,X>* _create() const { return new A(static_cast<const A&>(*this).A::create()); }
-    virtual GradedAlgebraMixin<A,X>* _clone() const { return new A(static_cast<const A&>(*this)); }
+    virtual GradedAlgebraMixin<A,X>* _create_zero() const { return new A(static_cast<const A&>(*this).A::create()); }
+    virtual GradedAlgebraMixin<A,X>* _create_copy() const { return new A(static_cast<const A&>(*this)); }
     virtual GradedAlgebraMixin<A,X>* _apply(const Series<X>& f) const { return new A(compose(f,static_cast<const A&>(*this))); }
 };
 
@@ -73,8 +82,9 @@ template<class A, class X> class SymbolicAlgebraMixin
     : public virtual SymbolicAlgebraInterface<X>
     , public AlgebraMixin<A,X>
 {
-    virtual SymbolicAlgebraMixin<A,X>* _create() const { return new A(static_cast<const A&>(*this).A::create()); }
-    virtual SymbolicAlgebraMixin<A,X>* _clone() const { return new A(static_cast<const A&>(*this)); }
+    virtual SymbolicAlgebraMixin<A,X>* _create_copy() const { return new A(static_cast<const A&>(*this)); }
+    virtual SymbolicAlgebraMixin<A,X>* _create_zero() const { return new A(static_cast<const A&>(*this).A::create()); }
+    virtual SymbolicAlgebraMixin<A,X>* _create_constant(X const& c) const { return new A(static_cast<const A&>(*this).A::create_constant(c)); }
     virtual SymbolicAlgebraMixin<A,X>* _apply(OperatorCode op) { return new A(op,static_cast<const A&>(*this)); }
 };
 

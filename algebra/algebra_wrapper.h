@@ -54,9 +54,9 @@ template<class A, class X=NumericType<A>> class AlgebraWrapper
 
     AlgebraWrapper(A&& a) : A(std::move(a)) { }
     AlgebraWrapper(A const& a) : A(a) { }
-    virtual AlgebraInterface<X>* _create() const override { return move_heap(this->A::create()); }
+    virtual AlgebraInterface<X>* _create_zero() const override { return move_heap(this->A::create()); }
     virtual AlgebraInterface<X>* _create_constant(X const& c) const override { return move_heap(this->A::create_constant(c)); }
-    virtual AlgebraInterface<X>* _clone() const { return new A(*this); }
+    virtual AlgebraInterface<X>* _create_copy() const { return new A(*this); }
     virtual Void _iadd(const X& c) { static_cast<A*>(this)->A::iadd(c); }
     virtual Void _imul(const X& c) { static_cast<A*>(this)->A::imul(c); }
     virtual Void _isma(const X& c, const AlgebraInterface<X>& x) {
@@ -74,8 +74,8 @@ template<class A, class X=NumericType<A>> class NormedAlgebraWrapper
     using AlgebraWrapper<A,X>::AlgebraWrapper;
     virtual NormedAlgebraInterface<X>* _create_ball(ErrorType r) const { return new A(static_cast<const A&>(*this).A::create_ball(r)); }
     virtual NormedAlgebraInterface<X>* _create_constant(X c) const { return new A(static_cast<const A&>(*this).A::create_constant(c)); }
-    virtual NormedAlgebraInterface<X>* _create() const { return new A(static_cast<const A&>(*this).A::create()); }
-    virtual NormedAlgebraInterface<X>* _clone() const { return new A(static_cast<const A&>(*this)); }
+    virtual NormedAlgebraInterface<X>* _create_zero() const { return new A(static_cast<const A&>(*this).A::create()); }
+    virtual NormedAlgebraInterface<X>* _create_copy() const { return new A(static_cast<const A&>(*this)); }
 };
 
 template<class A, class X=NumericType<A>> class GradedAlgebraWrapper
@@ -83,8 +83,8 @@ template<class A, class X=NumericType<A>> class GradedAlgebraWrapper
     , public AlgebraWrapper<A,X>
 {
     using AlgebraWrapper<A,X>::AlgebraWrapper;
-    virtual GradedAlgebraInterface<X>* _create() const { return new A(static_cast<const A&>(*this).A::create()); }
-    virtual GradedAlgebraInterface<X>* _clone() const { return new A(static_cast<const A&>(*this)); }
+    virtual GradedAlgebraInterface<X>* _create_zero() const { return new A(static_cast<const A&>(*this).A::create()); }
+    virtual GradedAlgebraInterface<X>* _create_copy() const { return new A(static_cast<const A&>(*this)); }
     virtual GradedAlgebraInterface<X>* _apply(const Series<X>& f) const { return new A(compose(f,static_cast<const A&>(*this))); }
 };
 
@@ -93,8 +93,8 @@ template<class A, class X=NumericType<A>> class SymbolicAlgebraWrapper
     , public AlgebraWrapper<A,X>
 {
     using AlgebraWrapper<A,X>::AlgebraWrapper;
-    virtual SymbolicAlgebraInterface<X>* _create() const { return new A(static_cast<const A&>(*this).A::create()); }
-    virtual SymbolicAlgebraInterface<X>* _clone() const { return new SymbolicAlgebraWrapper<A>(*this); }
+    virtual SymbolicAlgebraInterface<X>* _create_zero() const { return new A(static_cast<const A&>(*this).A::create()); }
+    virtual SymbolicAlgebraInterface<X>* _create_copy() const { return new SymbolicAlgebraWrapper<A>(*this); }
     virtual SymbolicAlgebraInterface<X>* _apply(OperatorCode op) { return new A(op,static_cast<const A&>(*this)); }
 };
 

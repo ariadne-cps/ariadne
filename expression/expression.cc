@@ -53,18 +53,30 @@ template<> class SymbolicAlgebraWrapper<Expression<Real>,Real>
     , public Expression<Real>
 {
     typedef Expression<Real> A; typedef Real X;
+  private:
+    static A const& _cast(AlgebraInterface<X> const& a) { return static_cast<A const&>(dynamic_cast<SymbolicAlgebraWrapper<A,X>const&>(a)); }
+    static A const& _cast(SymbolicAlgebraWrapper<A,X> const& a) { return static_cast<A const&>(a); }
+    static SymbolicAlgebraInterface<X>* _make(A&& a) { return new SymbolicAlgebraWrapper<A,X>(std::move(a)); }
   public:
     SymbolicAlgebraWrapper(A const& a) : A(a) { }
-    virtual SymbolicAlgebraInterface<X>* _create() const { return new SymbolicAlgebraWrapper<A>(A()); }
+    virtual SymbolicAlgebraInterface<X>* _create_zero() const { return new SymbolicAlgebraWrapper<A>(A()); }
     virtual SymbolicAlgebraInterface<X>* _create_constant(X const& c) const { return new SymbolicAlgebraWrapper<A>(A::constant(c)); }
-    virtual SymbolicAlgebraInterface<X>* _clone() const { return new SymbolicAlgebraWrapper<A>(*this); }
+    virtual SymbolicAlgebraInterface<X>* _create_copy() const { return new SymbolicAlgebraWrapper<A>(*this); }
+    virtual SymbolicAlgebraInterface<X>* _neg() const {
+        return _make(-_cast(*this)); }
+    virtual SymbolicAlgebraInterface<X>* _add(AlgebraInterface<X> const& other) const {
+        return _make(_cast(*this) + _cast(other)); }
+    virtual SymbolicAlgebraInterface<X>* _sub(AlgebraInterface<X> const& other) const {
+        return _make(_cast(*this) - _cast(other)); }
+    virtual SymbolicAlgebraInterface<X>* _mul(AlgebraInterface<X> const& other) const {
+        return _make(_cast(*this) * _cast(other)); }
     virtual Void _iadd(const X& c) { (*this) = (*this) + c; }
     virtual Void _imul(const X& c) { (*this) = (*this) * c; }
     virtual Void _isma(const X& c, const AlgebraInterface<X>& x) {
-        (*this) = (*this) + c * dynamic_cast<const A&>(x); }
+        (*this) = (*this) + c * _cast(x); }
     virtual Void _ifma(const AlgebraInterface<X>& x1, const AlgebraInterface<X>& x2)  {
-        (*this) = (*this) + dynamic_cast<const A&>(x1) * dynamic_cast<const A&>(x2); }
-    virtual OutputStream& write(OutputStream& os) const { return os << static_cast<const A&>(*this); }
+        (*this) = (*this) + _cast(x1) * _cast(x2); }
+    virtual OutputStream& write(OutputStream& os) const { return os << _cast(*this); }
     virtual SymbolicAlgebraInterface<X>* _apply(OperatorCode op);
   private:
     template<class OP> SymbolicAlgebraInterface<X>* _apply(OP op) { return new SymbolicAlgebraWrapper<A>(op(static_cast<A const&>(*this))); }

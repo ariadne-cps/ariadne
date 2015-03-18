@@ -127,6 +127,10 @@ template<class PR> Float<Metric,PR>::Float(Rational const& q, PR pr)
     : _v(RawFloat<PR>(q,RawFloat<PR>::to_nearest,pr)), _e(abs(Rational(_v)-q),RawFloat<PR>::upward,pr) {
 }
 
+template<class PR> Float<Metric,PR>::Float(Real const& r, PR pr)
+    : Float(r.get(pr)) {
+}
+
 template<class PR> Float<Metric,PR>::Float(Number<Validated> const& x, PR pr)
     : Float(x.get(Metric(),pr)) {
 }
@@ -149,7 +153,7 @@ template<class PR> Float<Bounded,PR>::Float(Rational const& ql, Rational const& 
 }
 
 template<class PR> Float<Bounded,PR>::Float(Real const& x, PR pr)
-    : Float(x(pr)) {
+    : Float(x.get(pr)) {
 }
 
 template<class PR> Float<Bounded,PR>::Float(Number<Validated> const& x, PR pr)
@@ -164,6 +168,10 @@ template<class PR> Float<Upper,PR>::Float(Rational const& q, PR pr)
     : Float(Float<Bounded,PR>(q,pr)) {
 }
 
+template<class PR> Float<Upper,PR>::Float(Real const& r, PR pr)
+    : Float(r.get(pr)) {
+}
+
 template<class PR> Float<Upper,PR>::Float(Number<Upper> const& x, PR pr)
     : Float(x.get(Upper(),pr)) {
 }
@@ -176,6 +184,10 @@ template<class PR> Float<Lower,PR>::Float(Rational const& q, PR pr)
     : Float(Float<Bounded,PR>(q,pr)) {
 }
 
+template<class PR> Float<Lower,PR>::Float(Real const& r, PR pr)
+    : Float(r.get(pr)) {
+}
+
 template<class PR> Float<Lower,PR>::Float(Number<Lower> const& x, PR pr)
     : Float(x.get(Lower(),pr)) {
 }
@@ -186,6 +198,10 @@ template<class PR> Float<Lower,PR>::operator Number<Lower>() const {
 
 template<class PR> Float<Approximate,PR>::Float(Rational const& q, PR pr)
     : Float(Float<Bounded,PR>(q,pr)) {
+}
+
+template<class PR> Float<Approximate,PR>::Float(Real const& r, PR pr)
+    : Float(r.get(pr)) {
 }
 
 template<class PR> Float<Approximate,PR>::Float(Number<Approximate> const& x, PR pr)

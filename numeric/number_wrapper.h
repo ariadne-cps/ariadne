@@ -222,7 +222,7 @@ template<class X> class NumberWrapper
     virtual LowerFloatMP _get(Lower, PrecisionMP pr) const {
         return this->_get_as<LowerFloatMP>(pr); }
     virtual ApproximateFloatMP _get(Approximate, PrecisionMP pr) const {
-        return this->_get_as<ApproximateFloatMP>(pr); }
+        std::cerr<<"NI::_get(A,PR) "; return this->_get_as<ApproximateFloatMP>(pr); }
     virtual ParadigmCode _paradigm() const { return P::code(); }
     virtual String _class_name() const { return class_name<X>(); }
     virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<const X&>(*this); }
@@ -235,7 +235,7 @@ template<class X> class NumberWrapper
     template<class R, typename std::enable_if<!std::is_constructible<R,X>::value,Int>::type = 0>
         inline R _get_as() const { std::cerr<<"Warning: Cannot convert " << _cast(*this) << " of type " << this->_class_name() << " to " << class_name<R>() << "\n"; throw ParadigmError(); }
     template<class R, typename std::enable_if<std::is_constructible<R,X,PrecisionMP>::value,Int>::type = 0>
-        inline R _get_as(PrecisionMP pr) const { return R(static_cast<const X&>(*this),pr); }
+        inline R _get_as(PrecisionMP pr) const { std::cerr<<"NW<X>::_get_as<R>(MP) R="<<class_name<R>()<<", X="<<class_name<X>()<<"\n"; return R(static_cast<const X&>(*this),pr); }
     template<class R, typename std::enable_if<!std::is_constructible<R,X,PrecisionMP>::value,Int>::type = 0>
         inline R _get_as(PrecisionMP) const { std::cerr<<"Warning: Cannot convert " << _cast(*this) << " of type " << this->_class_name() << " to " << class_name<R>() << " with given precision\n"; throw ParadigmError(); }
 };

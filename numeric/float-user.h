@@ -124,6 +124,7 @@ template<class PR> class Float<Approximate,PR> {
     explicit Float<Approximate,PR>(const Real& r);
     explicit Float<Approximate,PR>(const Number<Approximate>& x);
     Float<Approximate,PR>(const Rational& q, PR pr);
+    Float<Approximate,PR>(const Real& r, PR pr);
     Float<Approximate,PR>(const Number<Approximate>& x, PR pr);
     operator Number<Approximate> () const;
 
@@ -169,6 +170,7 @@ template<class PR> class Float<Lower,PR> {
     Float<Lower,PR>(Float<Exact,PR> const& x);
 
     Float<Lower,PR>(const Rational& q, PR pr);
+    Float<Lower,PR>(const Real& r, PR pr);
     Float<Lower,PR>(const Number<Lower>& x, PR pr);
     operator Number<Lower> () const;
 
@@ -214,6 +216,7 @@ template<class PR> class Float<Upper,PR> {
     explicit Float<Upper,PR>(const Number<Upper>& x);
 
     Float<Upper,PR>(const Rational& q, PR pr);
+    Float<Upper,PR>(const Real& r, PR pr);
     Float<Upper,PR>(const Number<Upper>& x, PR pr);
     operator Number<Upper> () const;
 
@@ -342,6 +345,7 @@ template<class PR> class Float<Metric,PR> {
     explicit Float<Metric,PR>(const Real& x);
     explicit Float<Metric,PR>(const Number<Validated>& x);
     Float<Metric,PR>(const Rational& q, PR pr);
+    Float<Metric,PR>(const Real& r, PR pr);
     Float<Metric,PR>(const Number<Validated>& x, PR pr);
     operator Number<Validated> () const;
 

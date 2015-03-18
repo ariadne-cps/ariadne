@@ -225,8 +225,7 @@ template<class O> struct LogicalWrapper<O,Real,Real> : virtual LogicalInterface,
 
 template<class O> LogicalValue LogicalWrapper<O,Real,Real>::_check(Effort e) const {
     if(e==0u) { Precision64 p; return static_cast<LogicalValue>(this->_op(this->_arg1(p),this->_arg2(p))); }
-    else { ARIADNE_NOT_IMPLEMENTED; }
-    // else { PrecisionMP p=e*64; return static_cast<LogicalValue>(this->_op(this->_arg1(p),this->_arg2(p))); }
+    else { PrecisionMP p(e*64); return static_cast<LogicalValue>(this->_op(this->_arg1(p),this->_arg2(p))); }
 }
 
 template<class P, class O, class... ARGS> Logical<P> make_logical(O op, ARGS ...args) {

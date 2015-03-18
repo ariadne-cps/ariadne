@@ -269,11 +269,27 @@ Void export_polynomial()
     to_python< Vector< Polynomial<X> > >();
 }
 
+
+Void export_univariate_function()
+{
+    class_<EffectiveScalarUnivariateFunction>
+        function_class("EffectiveScalarUnivariateFunction", init<EffectiveScalarUnivariateFunction>());
+    function_class.def("__call__", (BoundedFloat64(EffectiveScalarUnivariateFunction::*)(const BoundedFloat64&)const)&EffectiveScalarUnivariateFunction::operator() );
+    function_class.def("__call__", (Differential<BoundedFloat64>(EffectiveScalarUnivariateFunction::*)(const Differential<BoundedFloat64>&)const)&EffectiveScalarUnivariateFunction::operator() );
+
+    function_class.def("constant", (EffectiveScalarUnivariateFunction(*)(Real)) &EffectiveScalarUnivariateFunction::constant);
+    function_class.def("coordinate", (EffectiveScalarUnivariateFunction(*)()) &EffectiveScalarUnivariateFunction::coordinate);
+    function_class.staticmethod("constant");
+    function_class.staticmethod("coordinate");
+
+}
+
+
 Void export_scalar_function()
 {
     class_<EffectiveScalarFunction>
         scalar_function_class("EffectiveScalarFunction", init<EffectiveScalarFunction>());
-    scalar_function_class.def(init<Nat>());
+    scalar_function_class.def(init<SizeType>());
     scalar_function_class.def("argument_size", &EffectiveScalarFunction::argument_size);
     scalar_function_class.def("derivative", &EffectiveScalarFunction::derivative);
     scalar_function_class.def("__call__", (BoundedFloat64(EffectiveScalarFunction::*)(const Vector<BoundedFloat64>&)const)&EffectiveScalarFunction::operator() );
@@ -414,6 +430,7 @@ Void function_submodule() {
 
     export_multi_index();
 
+    export_univariate_function();
     export_scalar_function();
     export_vector_function();
 

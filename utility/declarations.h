@@ -147,6 +147,11 @@ template<class P> using VectorUnivariateFunction = Function<P,IntervalDomain,Box
 template<class P> using ScalarMultivariateFunction = Function<P,BoxDomain,IntervalDomain>;
 template<class P> using VectorMultivariateFunction = Function<P,BoxDomain,BoxDomain>;
 
+typedef ScalarUnivariateFunction<ApproximateTag> ApproximateScalarUnivariateFunction;
+typedef ScalarUnivariateFunction<ValidatedTag> ValidatedScalarUnivariateFunction;
+typedef ScalarUnivariateFunction<EffectiveTag> EffectiveScalarUnivariateFunction;
+typedef EffectiveScalarUnivariateFunction RealScalarUnivariateFunction;
+
 typedef ScalarFunction<ApproximateTag> ApproximateScalarFunction;
 typedef ScalarFunction<ValidatedTag> ValidatedScalarFunction;
 typedef ScalarFunction<EffectiveTag> EffectiveScalarFunction;

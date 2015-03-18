@@ -756,12 +756,12 @@ Bool opposite(Expression<Kleenean> e1, Expression<Kleenean> e2) {
 
 
 
-Nat dimension(const Space<Real>& spc)
+SizeType dimension(const Space<Real>& spc)
 {
     return spc.size();
 }
 
-Nat len(const List< Variable<Real> >& vars)
+SizeType len(const List< Variable<Real> >& vars)
 {
     return vars.size();
 }

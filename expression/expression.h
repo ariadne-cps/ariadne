@@ -203,6 +203,8 @@ template<class T, class Y> Expression<T> substitute(const Expression<T>& e, cons
 
 //! \brief Make a function on a Euclidean domain given an ordered list including all argument variables. // DEPRECATED
 ScalarFunction<EffectiveTag> make_function(const Expression<Real>& e, const Space<Real>& s);
+//! \brief Make a function on the real line given an expression in a single argument variable.
+ScalarUnivariateFunction<EffectiveTag> make_function(const Variable<Real>& v, const Expression<Real>& e);
 //! \brief Make a function on a Euclidean domain given an ordered list including all argument variables.
 ScalarFunction<EffectiveTag> make_function(const Space<Real>& s, const Expression<Real>& e);
 //! \brief Make a function on a Euclidean domain given an ordered list including all argument variables.

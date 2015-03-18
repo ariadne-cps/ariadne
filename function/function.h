@@ -94,6 +94,12 @@ class FunctionConstructors {
     static VectorFunction<P,BoxDomain> zeros(SizeType rs, BoxDomain dom);
     static VectorFunction<P,BoxDomain> identity(BoxDomain dom);
 
+    static ScalarFunction<P,IntervalDomain> zero();
+    static ScalarFunction<P,IntervalDomain> constant(NumericType c);
+    static ScalarFunction<P,IntervalDomain> coordinate();
+    static VectorFunction<P,IntervalDomain> zeros(SizeType rs);
+    static ScalarFunction<P,IntervalDomain> identity();
+
     static ScalarFunction<P,IntervalDomain> zero(IntervalDomain dom);
     static ScalarFunction<P,IntervalDomain> constant(IntervalDomain dom, NumericType c);
     static ScalarFunction<P,IntervalDomain> coordinate(IntervalDomain dom, SizeType j);

@@ -316,10 +316,10 @@ Void differentiation_submodule()
     to_python_dict < Expansion<ApproximateFloat64> >();
     to_python_dict < Expansion<BoundedFloat64> >();
 
-    export_differential< Differential<ApproximateFloat64> >("ApproximateDifferential");
-    export_differential< Differential<BoundedFloat64> >("ValidatedDifferential");
+    export_differential< Differential<ApproximateFloat64> >(python_name<ApproximateFloat64>("Differential"));
+    export_differential< Differential<BoundedFloat64> >(python_name<BoundedFloat64>("Differential"));
 
-    export_differential_vector< Differential<ApproximateFloat64> >("ApproximateDifferentialVector");
-    export_differential_vector< Differential<BoundedFloat64> >("ValidatedDifferentialVector");
+    export_differential_vector< Differential<ApproximateFloat64> >(python_name<ApproximateFloat64>("DifferentialVector"));
+    export_differential_vector< Differential<BoundedFloat64> >(python_name<BoundedFloat64>("DifferentialVector"));
 }
 

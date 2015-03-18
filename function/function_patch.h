@@ -1370,7 +1370,7 @@ template<class M> VectorFunctionPatch<M> antiderivative(const VectorFunctionPatc
     return g;
 }
 
-template<class M> VectorFunctionPatch<M> antiderivative(const VectorFunctionPatch<M>& f, SizeType k, ExactNumericType c)
+template<class M> VectorFunctionPatch<M> antiderivative(const VectorFunctionPatch<M>& f, SizeType k, NumericType<M> c)
 {
     ARIADNE_ASSERT_MSG(k<f.argument_size(),"f="<<f<<"\n f.argument_size()="<<f.argument_size()<<" k="<<k);
     ValidatedNumericType fdomkrad=rad_val(f.domain()[k]);

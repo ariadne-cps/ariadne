@@ -56,6 +56,7 @@ class Rational
     mpq_t _mpq;
   public:
     typedef Exact Paradigm;
+    typedef Rational NumericType;
   public:
     ~Rational();
     Rational();

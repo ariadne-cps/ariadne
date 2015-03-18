@@ -144,7 +144,7 @@ template<class T> inline Space<T> join(const Space<T>& spc1, const Space<T>& spc
 
 
 // Compiled conversion operators to allow conversion between expression and function.
-Nat dimension(const Space<Real>& spc);
+SizeType dimension(const Space<Real>& spc);
 Space<Real> space(const List< Variable<Real> >& vars);
 
 template<class T> Variable<T> variable(const String& s) { return Variable<T>(s); }

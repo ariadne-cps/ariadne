@@ -886,6 +886,10 @@ template Tuple<Matrix<BoundedFloat64>,Matrix<BoundedFloat64>> orthogonal_decompo
 
 template class Matrix<ExactFloat64>;
 
+template class Matrix<ApproximateFloatMP>;
+template class Matrix<BoundedFloatMP>;
+template class Matrix<ExactFloatMP>;
+
 template class Matrix<Real>;
 
 template PositiveUpperFloat64 sup_norm(const Matrix<BoundedFloat64>& A);

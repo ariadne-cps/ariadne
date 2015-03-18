@@ -638,7 +638,7 @@ Void export_vector_taylor_function()
     def("compose",(VectorTaylorFunction(*)(const ValidatedVectorFunction&,const VectorTaylorFunction&)) &compose);
     def("derivative",(VectorTaylorFunction(*)(const VectorTaylorFunction&,SizeType)) &derivative);
     def("antiderivative",(VectorTaylorFunction(*)(const VectorTaylorFunction&,SizeType)) &antiderivative);
-    def("antiderivative",(VectorTaylorFunction(*)(const VectorTaylorFunction&,SizeType,ExactFloat64)) &antiderivative);
+    def("antiderivative",(VectorTaylorFunction(*)(const VectorTaylorFunction&,SizeType,BoundedFloat64)) &antiderivative);
 
     def("unchecked_compose",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const VectorTaylorFunction&)) &unchecked_compose);
     def("unchecked_compose",(VectorTaylorFunction(*)(const VectorTaylorFunction&,const VectorTaylorFunction&)) &unchecked_compose);

@@ -50,27 +50,8 @@ namespace Ariadne {
 
 class Real;
 
-template<class X> inline const char* python_name(const char* name);
-template<> inline const char* python_name<Float64>(const char* name) {
-    return (StringType("Float64")+name).c_str(); }
-template<> inline const char* python_name<Integer>(const char* name) {
-    return (StringType("Integer")+name).c_str(); }
-template<> inline const char* python_name<Rational>(const char* name) {
-    return (StringType("Rational")+name).c_str(); }
-template<> inline const char* python_name<Real>(const char* name) {
-    return (StringType("Real")+name).c_str(); }
-
-template<> inline const char* python_name<ExactFloat64>(const char* name) {
-    return (StringType("ExactFloat64")+name).c_str(); }
-template<> inline const char* python_name<BoundedFloat64>(const char* name) {
-    return (StringType("BoundedFloat64")+name).c_str(); }
-template<> inline const char* python_name<UpperFloat64>(const char* name) {
-    return (StringType("UpperFloat64")+name).c_str(); }
-template<> inline const char* python_name<ApproximateFloat64>(const char* name) {
-    return (StringType("ApproximateFloat64")+name).c_str(); }
-
-template<> inline const char* python_name<ExactIntervalType>(const char* name) {
-    return (StringType("ExactIntervalType")+name).c_str(); }
+template<class X> inline const char* python_name(const char* name) {
+    return (StringType(class_name<X>())+name).c_str(); }
 
 template<class T> struct to_python;
 template<class T> struct to_python_list;

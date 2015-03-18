@@ -147,6 +147,9 @@ OutputStream& operator<<(OutputStream& os, const PythonRepresentation<RawFloat64
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Rational>& repr);
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Real>& repr);
 
+template<class P> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Float<P,PrecisionMP>>& repr) {
+    return os << repr.reference(); }
+
 template<class X> OutputStream& operator<<(OutputStream& os, const PythonRepresentation< Vector<X> >& repr) {
     Vector<X> const& v=repr.reference();
     os << "["; for(Nat i=0; i!=v.size(); ++i) { if(i!=0) { os << ","; } os << python_representation(v[i]); } os << "]"; return os;
@@ -205,21 +208,22 @@ Void export_vector_class(class_<Vector<X> >& vector_class)
 
 }
 
-template<class X, class Y>
+template<class Y, class X>
 Void export_vector_conversion(class_<Vector<X> >& vector_class)
 {
     //vector_class.def(init<Int,Y>());
     vector_class.def(init< Vector<Y> >());
+    implicitly_convertible< Vector<Y>, Vector<X> >();
 }
 
-template<class R, class X, class Y>
+template<class X, class Y>
 Void export_vector_arithmetic(class_<Vector<X> >& vector_class)
 {
-    vector_class.def("__add__",__add__< Vector<R>, Vector<X>, Vector<Y> >);
-    vector_class.def("__sub__",__sub__< Vector<R>, Vector<X>, Vector<Y> >);
-    vector_class.def("__rmul__",__rmul__< Vector<R>, Vector<X>, Y >);
-    vector_class.def("__mul__",__mul__< Vector<R>, Vector<X>, Y >);
-    vector_class.def("__div__",__div__< Vector<R>, Vector<X>, Y >);
+    vector_class.def("__add__",__add__< Vector<SumType<X,Y>>, Vector<X>, Vector<Y> >);
+    vector_class.def("__sub__",__sub__< Vector<DifferenceType<X,Y>>, Vector<X>, Vector<Y> >);
+    vector_class.def("__rmul__",__rmul__< Vector<ProductType<X,Y>>, Vector<X>, Y >);
+    vector_class.def("__mul__",__mul__< Vector<QuotientType<X,Y>>, Vector<X>, Y >);
+    vector_class.def("__div__",__div__< Vector<QuotientType<X,Y>>, Vector<X>, Y >);
     // Don't use boost::python style operators self+other (as below) because of
     // below) because of need to convert result expressions to Vector<R>.
     // vector_class.def(self+=Vector<Y>());
@@ -231,39 +235,48 @@ template<class X> Void export_vector()
 {
     class_< Vector<X> > vector_class(python_name<X>("Vector"),init< Vector<X> >());
     export_vector_class<X>(vector_class);
-    export_vector_conversion<X,X>(vector_class);
-    export_vector_arithmetic<X,X,X>(vector_class);
+    export_vector_arithmetic<X,X>(vector_class);
 }
 
 
 template<> Void export_vector<ExactFloat64>()
 {
-    class_< Vector<ExactFloat64> > exact_vector_class("ExactFloatVector",init< Vector<ExactFloat64> >());
-    export_vector_class<ExactFloat64>(exact_vector_class);
+    typedef ExactFloat64 X;
+    class_< Vector<X> > vector_class(python_name<X>("Vector"),init< Vector<X> >());
+    export_vector_class<X>(vector_class);
+}
+
+template<> Void export_vector<ExactFloatMP>()
+{
+    typedef ExactFloatMP X;
+    class_< Vector<X> > vector_class(python_name<X>("Vector"),init< Vector<X> >());
+    export_vector_class<X>(vector_class);
 }
 
 template<> Void export_vector<BoundedFloat64>()
 {
-    class_< Vector<BoundedFloat64> > validated_vector_class("BoundedFloatVector",init< Vector<BoundedFloat64> >());
-    export_vector_class<BoundedFloat64>(validated_vector_class);
-    export_vector_conversion<BoundedFloat64,ExactFloat64>(validated_vector_class);
-    export_vector_arithmetic<BoundedFloat64,BoundedFloat64,BoundedFloat64>(validated_vector_class);
-    def("norm",&__norm__<BoundedFloat64>);
-    def("dot", &__dot__<BoundedFloat64>);
+    typedef BoundedFloat64 X;
+    class_< Vector<X> > vector_class(python_name<X>("Vector"),init< Vector<X> >());
+    export_vector_class<X>(vector_class);
+    export_vector_arithmetic<X,X>(vector_class);
+    def("norm",&__norm__<X>);
+    def("dot", &__dot__<X>);
 
-    implicitly_convertible< Vector<ExactFloat64>, Vector<BoundedFloat64> >();
+    export_vector_conversion<ExactFloat64,BoundedFloat64>(vector_class);
 }
 
 template<> Void export_vector<ApproximateFloat64>()
 {
-    class_< Vector<ApproximateFloat64> > approximate_vector_class("RawFloatVector",init< Vector<ApproximateFloat64> >());
-    export_vector_class<ApproximateFloat64>(approximate_vector_class);
-    export_vector_conversion<ApproximateFloat64,BoundedFloat64>(approximate_vector_class);
-    export_vector_arithmetic<ApproximateFloat64,ApproximateFloat64,ApproximateFloat64>(approximate_vector_class);
-    //export_vector_arithmetic<BoundedFloat64,ApproximateFloat64,BoundedFloat64>(approximate_vector_class);
-    approximate_vector_class.def("__rmul__",__rmul__< Vector<ApproximateFloat64>, Vector<ApproximateFloat64>, ApproximateFloat64 >);
-    approximate_vector_class.def("__mul__",__mul__< Vector<ApproximateFloat64>, Vector<ApproximateFloat64>, ApproximateFloat64 >);
-    approximate_vector_class.def("__div__",__div__< Vector<ApproximateFloat64>, Vector<ApproximateFloat64>, ApproximateFloat64 >);
+    typedef ApproximateFloat64 X;
+    class_< Vector<X> > vector_class(python_name<X>("Vector"),init< Vector<ApproximateFloat64> >());
+    export_vector_class<X>(vector_class);
+    export_vector_arithmetic<X,X>(vector_class);
+    vector_class.def("__rmul__",__rmul__< Vector<X>, Vector<X>, X >);
+    vector_class.def("__mul__",__mul__< Vector<X>, Vector<X>, X >);
+    vector_class.def("__div__",__div__< Vector<X>, Vector<X>, X >);
+
+    export_vector_conversion<BoundedFloat64,ApproximateFloat64>(vector_class);
+
 }
 
 
@@ -293,23 +306,23 @@ Void export_matrix_class(class_<Matrix<X> >& matrix_class)
 }
 
 
-template<class X, class Y>
+template<class Y, class X>
 Void export_matrix_conversion(class_<Matrix<X> >& matrix_class)
 {
     matrix_class.def(init< Matrix<Y> >());
 }
 
-template<class R, class X, class Y>
+template<class X, class Y>
 Void export_matrix_arithmetic(class_<Matrix<X> >& matrix_class)
 {
-    matrix_class.def("__add__", &__add__< Matrix<R>, Matrix<X>, Matrix<Y> >);
-    matrix_class.def("__sub__", &__sub__< Matrix<R>, Matrix<X>, Matrix<Y> >);
-    matrix_class.def("__mul__", &__mul__< Matrix<R>, Matrix<X>, Y >);
-    matrix_class.def("__rmul__", &__rmul__< Matrix<R>, Matrix<X>, Y >);
-    matrix_class.def("__div__", &__div__< Matrix<R>, Matrix<X>, Y >);
-    matrix_class.def("__mul__", &__mul__< Vector<R>, Matrix<X>, Vector<Y> >);
-    matrix_class.def("__mul__", &__mul__< Matrix<R>, Matrix<X>, Matrix<Y> >);
-    matrix_class.def("__rmul__", &__rmul__< Covector<R>, Matrix<X>, Covector<Y> >);
+    matrix_class.def("__add__", &__add__< Matrix<SumType<X,Y>>, Matrix<X>, Matrix<Y> >);
+    matrix_class.def("__sub__", &__sub__< Matrix<DifferenceType<X,Y>>, Matrix<X>, Matrix<Y> >);
+    matrix_class.def("__mul__", &__mul__< Matrix<ArithmeticType<X,Y>>, Matrix<X>, Y >);
+    matrix_class.def("__rmul__", &__rmul__< Matrix<ProductType<X,Y>>, Matrix<X>, Y >);
+    matrix_class.def("__div__", &__div__< Matrix<QuotientType<X,Y>>, Matrix<X>, Y >);
+    matrix_class.def("__mul__", &__mul__< Vector<ArithmeticType<X,Y>>, Matrix<X>, Vector<Y> >);
+    matrix_class.def("__mul__", &__mul__< Matrix<ArithmeticType<X,Y>>, Matrix<X>, Matrix<Y> >);
+    matrix_class.def("__rmul__", &__rmul__< Covector<ArithmeticType<X,Y>>, Matrix<X>, Covector<Y> >);
 }
 
 template<class X>
@@ -329,7 +342,7 @@ template<class X> Void export_matrix()
     class_< Matrix<X> > matrix_class(python_name<X>("Matrix"),init< Matrix<X> >());
     export_matrix_class<X>(matrix_class);
     export_matrix_conversion<X,X>(matrix_class);
-    export_matrix_arithmetic<X,X,X>(matrix_class);
+    export_matrix_arithmetic<X,X>(matrix_class);
     export_matrix_operations<X>(matrix_class);
 
 
@@ -337,42 +350,44 @@ template<class X> Void export_matrix()
 
 template<> Void export_matrix<ExactFloat64>()
 {
-    class_< Matrix<ExactFloat64> > matrix_class(python_name<ExactFloat64>("Matrix"),no_init);
-//    matrix_class.def(init<PivotMatrix>());
-    export_matrix_class<ExactFloat64>(matrix_class);
+    typedef ExactFloat64 X;
+    class_< Matrix<X> > matrix_class(python_name<X>("Matrix"),init<Matrix<X>>());
+    export_matrix_class<X>(matrix_class);
 }
 
 template<> Void export_matrix<BoundedFloat64>()
 {
-    class_< Matrix<BoundedFloat64> > matrix_class(python_name<BoundedFloat64>("Matrix"),no_init);
-    export_matrix_class<BoundedFloat64>(matrix_class);
-    export_matrix_conversion<BoundedFloat64,ExactFloat64>(matrix_class);
-    export_matrix_arithmetic<BoundedFloat64,BoundedFloat64,BoundedFloat64>(matrix_class);
-    //export_matrix_arithmetic<BoundedFloat64,BoundedFloat64,ApproximateFloat64>(matrix_class);
-    def("gs_inverse", (Matrix<BoundedFloat64>(*)(const Matrix<BoundedFloat64>&)) &gs_inverse);
-    def("lu_inverse", (Matrix<BoundedFloat64>(*)(const Matrix<BoundedFloat64>&)) &lu_inverse);
-    def("gs_solve", (Vector<BoundedFloat64>(*)(const Matrix<BoundedFloat64>&,const Vector<BoundedFloat64>&)) &gs_solve);
-    def("gs_solve", (Matrix<BoundedFloat64>(*)(const Matrix<BoundedFloat64>&,const Matrix<BoundedFloat64>&)) &gs_solve);
-    def("lu_solve", (Matrix<BoundedFloat64>(*)(const Matrix<BoundedFloat64>&,const Matrix<BoundedFloat64>&)) &lu_solve);
+    typedef BoundedFloat64 X;
+    class_< Matrix<X> > matrix_class(python_name<X>("Matrix"),init<Matrix<X>>());
+    export_matrix_class<X>(matrix_class);
+    export_matrix_conversion<ExactFloat64,BoundedFloat64>(matrix_class);
+    export_matrix_arithmetic<X,X>(matrix_class);
+    export_matrix_operations<X>(matrix_class);
+    def("gs_inverse", (Matrix<X>(*)(const Matrix<X>&)) &gs_inverse);
+    def("lu_inverse", (Matrix<X>(*)(const Matrix<X>&)) &lu_inverse);
+    def("gs_solve", (Vector<X>(*)(const Matrix<X>&,const Vector<X>&)) &gs_solve);
+    def("gs_solve", (Matrix<X>(*)(const Matrix<X>&,const Matrix<X>&)) &gs_solve);
+    def("lu_solve", (Matrix<X>(*)(const Matrix<X>&,const Matrix<X>&)) &lu_solve);
 
-    def("triangular_decomposition",&triangular_decomposition<BoundedFloat64>);
-    def("orthogonal_decomposition", &orthogonal_decomposition<BoundedFloat64>);
+    def("triangular_decomposition",&triangular_decomposition<X>);
+    def("orthogonal_decomposition", &orthogonal_decomposition<X>);
 
     //implicitly_convertible< Matrix<ApproximateFloat64>, Matrix<BoundedFloat64> >();
 }
 
 template<> Void export_matrix<ApproximateFloat64>()
 {
-    class_< Matrix<ApproximateFloat64> > matrix_class(python_name<ApproximateFloat64>("Matrix"),no_init);
-    export_matrix_class<ApproximateFloat64>(matrix_class);
-    export_matrix_conversion<ApproximateFloat64,BoundedFloat64>(matrix_class);
-    export_matrix_arithmetic<ApproximateFloat64,ApproximateFloat64,ApproximateFloat64>(matrix_class);
-    //export_matrix_arithmetic<BoundedFloat64,ApproximateFloat64,BoundedFloat64>(matrix_class);
+    typedef ApproximateFloat64 X;
+    class_< Matrix<X> > matrix_class(python_name<X>("Matrix"),init<Matrix<X>>());
+    export_matrix_class<X>(matrix_class);
+    export_matrix_conversion<BoundedFloat64,ApproximateFloat64>(matrix_class);
+    export_matrix_arithmetic<X,X>(matrix_class);
+    export_matrix_operations<X>(matrix_class);
 
-    def("triangular_decomposition",&triangular_decomposition<ApproximateFloat64>);
-    def("orthogonal_decomposition", &orthogonal_decomposition<ApproximateFloat64>);
-    def("row_norms",(Vector<ApproximateFloat64>(*)(const Matrix<ApproximateFloat64>&)) &row_norms<ApproximateFloat64>);
-    def("normalise_rows",(Matrix<ApproximateFloat64>(*)(const Matrix<ApproximateFloat64>&)) &normalise_rows<ApproximateFloat64>);
+    def("triangular_decomposition",&triangular_decomposition<X>);
+    def("orthogonal_decomposition", &orthogonal_decomposition<X>);
+    def("row_norms",(Vector<X>(*)(const Matrix<X>&)) &row_norms<X>);
+    def("normalise_rows",(Matrix<X>(*)(const Matrix<X>&)) &normalise_rows<X>);
 
     def("triangular_factor",&triangular_factor);
     def("triangular_multiplier", &triangular_multiplier);
@@ -384,7 +399,7 @@ template<> Void export_matrix<ApproximateFloat64>()
 template<class X> Void export_diagonal_matrix()
 {
     class_< DiagonalMatrix<X> > diagonal_matrix_class(python_name<X>("DiagonalMatrix"),no_init);
-    diagonal_matrix_class.def(init< Nat >());
+    diagonal_matrix_class.def(init< SizeType >());
     diagonal_matrix_class.def(init< Vector<X> >());
     diagonal_matrix_class.def("__setitem__", &DiagonalMatrix<X>::set);
     diagonal_matrix_class.def("__getitem__", &DiagonalMatrix<X>::get, return_value_policy<copy_const_reference>());
@@ -430,9 +445,11 @@ template Void export_matrix<Rational>();
 Void linear_algebra_submodule() {
     export_vector<ApproximateFloat64>();
     export_vector<BoundedFloat64>();
+    export_vector<ExactFloat64>();
 
     export_matrix<ApproximateFloat64>();
     export_matrix<BoundedFloat64>();
+    export_matrix<ExactFloat64>();
 
     export_pivot_matrix();
     export_diagonal_matrix<ApproximateFloat64>();

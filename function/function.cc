@@ -25,7 +25,9 @@
 
 #include "algebra/differential.h"
 #include "expression/operators.h"
+#include "expression/variables.h"
 #include "expression/expression.h"
+#include "expression/space.h"
 #include "expression/formula.h"
 #include "algebra/algebra.h"
 #include "function/taylor_model.h"
@@ -67,6 +69,7 @@ SizeType dimension(const Space<Real>& spc);
 SizeType len(const List< Variable<Real> >& vars);
 Formula<Real> formula(const Expression<Real>& expr, const Space<Real>& spc);
 Formula<Real> formula(const Expression<Real>& expr, const List< Variable<Real> >& vars);
+
 EffectiveScalarFunction make_function(const Expression<Real>& expr, const Space<Real>& spc) {
     return EffectiveScalarFunction(EuclideanDomain(dimension(spc)),formula(expr,spc)); }
 EffectiveScalarFunction make_function(const Expression<Real>& expr, const List< Variable<Real> >& vars) {
@@ -74,6 +77,8 @@ EffectiveScalarFunction make_function(const Expression<Real>& expr, const List< 
 
 OutputStream& operator<<(OutputStream& os, Expression<Real> const&);
 
+EffectiveScalarUnivariateFunction make_function(const Variable<Real>& var, const Expression<Real>& expr) {
+    Space<Real> spc={var}; return EffectiveScalarUnivariateFunction(RealDomain(),formula(expr,spc)); }
 EffectiveScalarFunction make_function(const Space<Real>& spc, const Expression<Real>& expr) {
     return EffectiveScalarFunction(EuclideanDomain(dimension(spc)),formula(expr,spc)); }
 EffectiveVectorFunction make_function(const Space<Real>& spc, const Vector<Expression<Real>>& expr) {
@@ -278,6 +283,27 @@ template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::identity(
     ARIADNE_NOT_IMPLEMENTED;
 }
 
+
+template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::zero() {
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::constant(CanonicalNumericType<P> c) {
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::coordinate() {
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+template<class P> VectorUnivariateFunction<P> FunctionConstructors<P>::zeros(SizeType rs) {
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+
+template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::identity() {
+    ARIADNE_NOT_IMPLEMENTED;
+}
 
 
 template<class P> ScalarFunction<P> FunctionConstructors<P>::zero(SizeType as) {

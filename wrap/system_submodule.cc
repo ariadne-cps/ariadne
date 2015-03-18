@@ -345,6 +345,7 @@ Void export_formula()
     tribool_variable_class.def(self_ns::str(self));
 
     from_python<Vector<RealExpression>>();
+    def("make_function", (RealScalarUnivariateFunction(*)(RealVariable const&, RealExpression const&)) &make_function);
     def("make_function", (RealScalarFunction(*)(RealSpace const&, RealExpression const&)) &make_function);
     def("make_function", (RealVectorFunction(*)(RealSpace const&, Vector<RealExpression> const&)) &make_function);
 

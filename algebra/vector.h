@@ -288,9 +288,9 @@ template<class X> inline VectorContainerRange< Vector<X> > project(Vector<X>& v,
 
 
 template<class X> OutputStream& operator<<(OutputStream& os, Vector<X> const& v) {
-    if(v.size()==0) { os << "{"; }
+    if(v.size()==0) { os << "["; }
     for(SizeType i=0; i!=v.size(); ++i) { os << (i==0u?"{":",") << v[i]; }
-    return os << "}";
+    return os << "]";
 }
 
 template<class V, EnableIf<IsVectorExpression<V>> =dummy> OutputStream& operator<<(OutputStream& os, const V& v) {

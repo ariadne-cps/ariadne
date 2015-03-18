@@ -292,7 +292,6 @@ template<class IVL> Void export_interval(std::string name) {
     interval_class.def("empty", &IntervalType::is_empty);
     interval_class.def(boost::python::self_ns::str(self));
 
-    from_python_dict<IntervalType>();
     //from_python_list<IntervalType>();
     //from_python_str<ExactIntervalType>();
 
@@ -300,15 +299,18 @@ template<class IVL> Void export_interval(std::string name) {
     def("radius", &IntervalType::radius);
     def("width", &IntervalType::width);
 
-    def("disjoint", (ContainsType(*)(ExactIntervalType const&,ExactIntervalType const&)) &disjoint);
-    def("subset", (DisjointType(*)(ExactIntervalType const&,ExactIntervalType const&)) &subset);
-    def("intersection", (IntervalType(*)(IntervalType const&,IntervalType const&)) &intersection);
+    def("contains", (ContainsType(*)(IntervalType const&,MidpointType const&)) &contains);
+    def("disjoint", (DisjointType(*)(IntervalType const&,IntervalType const&)) &disjoint);
+    def("subset", (SubsetType(*)(IntervalType const&,IntervalType const&)) &subset);
 
+    def("intersection", (IntervalType(*)(IntervalType const&,IntervalType const&)) &intersection);
     def("hull", (IntervalType(*)(IntervalType const&, IntervalType const&)) &hull);
 }
 
 Void export_intervals() {
     export_interval<ExactIntervalType>("ExactInterval");
+    export_interval<UpperIntervalType>("UpperInterval");
+    from_python_dict<ExactIntervalType>();
 }
 
 template<class BX> Void export_box()

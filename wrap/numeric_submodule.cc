@@ -271,6 +271,8 @@ void export_real()
     real_class.def(init<Real>());
 
     real_class.define_self_arithmetic();
+    real_class.template define_mixed_arithmetic<Int>();
+    real_class.template define_mixed_arithmetic<Rational>();
     real_class.define_transcendental_functions();
     real_class.define_self_comparisons();
 
@@ -388,6 +390,8 @@ void export_numbers()
     implicitly_convertible<EffectiveNumber,ValidatedNumber>();
     implicitly_convertible<ExactNumber,EffectiveNumber>();
 
+    implicitly_convertible<Rational,ExactNumber>();
+    implicitly_convertible<Real,EffectiveNumber>();
 }
 
 template<class PR> void export_exact_float()
@@ -714,13 +718,13 @@ numeric_submodule()
     export_logical<Lower>("Falsifyable");
     export_logical<Approximate>("Fuzzy");
 
-    export_integer();
-    export_rational();
-    export_real();
-
-    export_numbers();
 
     export_precision();
     export_user_floats<Precision64>();
     export_user_floats<PrecisionMP>();
+
+    export_numbers();
+    export_real();
+    export_rational();
+    export_integer();
 }

@@ -81,6 +81,20 @@ struct from_python< Set<DiscreteEvent> > {
     }
 };
 
+template<class X>
+struct from_python< Vector<X>> {
+    from_python() { converter::registry::push_back(&convertible,&construct,type_id< Vector<X> >()); }
+    static Void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
+    static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
+        boost::python::list lst=boost::python::extract<boost::python::list>(obj_ptr);
+        Void* storage = ((converter::rvalue_from_python_storage< Vector<X> >*) data)->storage.bytes;
+        Vector<X> res(len(lst));
+        for(Nat i=0; i!=res.size(); ++i) { res[i]=boost::python::extract<X>(lst[i]); }
+        new (storage) Vector<X>(res);
+        data->convertible = storage;
+    }
+};
+
 template<class T> Nat __hash__(const T&);
 template<> Nat __hash__<DiscreteEvent>(const DiscreteEvent& e) {
     return reinterpret_cast<const ushort&>(e.name().c_str()[0]); }
@@ -231,6 +245,10 @@ Void export_formula()
     real_variable_class.def("eq", (RealAssignment(RealVariable::*)(const RealExpression&)const) &RealVariable::operator=);
     real_variable_class.def(self_ns::str(self));
 
+    class_<RealVariables> real_variables_class("RealVariables", init<StringType,SizeType>());
+    real_variables_class.def("__getitem__", &__getitem__<RealVariables,SizeType,RealVariable>);
+    real_variables_class.def(self_ns::str(self));
+
     class_<DottedRealVariable> real_dotted_variable_class("DottedRealVariable", no_init);
     real_dotted_variable_class.def("__lshift__", (DottedRealAssignment(DottedRealVariable::*)(const RealExpression&)const) &DottedRealVariable::operator=);
     real_dotted_variable_class.def(self_ns::str(self));
@@ -325,6 +343,10 @@ Void export_formula()
 
     class_<TriboolVariable> tribool_variable_class("TriboolVariable", init<StringType>());
     tribool_variable_class.def(self_ns::str(self));
+
+    from_python<Vector<RealExpression>>();
+    def("make_function", (RealScalarFunction(*)(RealSpace const&, RealExpression const&)) &make_function);
+    def("make_function", (RealVectorFunction(*)(RealSpace const&, Vector<RealExpression> const&)) &make_function);
 
     /*
     class_<TriboolExpression> tribool_expression_class("TriboolExpression",init<TriboolExpression>());

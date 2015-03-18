@@ -60,7 +60,8 @@ struct from_python_dict<ExactIntervalType> {
         boost::python::list lst=dct.items();
         assert(boost::python::len(lst)==1);
         Void* storage = ((converter::rvalue_from_python_storage<ExactIntervalType>*)data)->storage.bytes;
-        new (storage) ExactIntervalType(boost::python::extract<Float64>(lst[0][0]),boost::python::extract<Float64>(lst[0][1]));
+        double lb=boost::python::extract<double>(lst[0][0]); double ub=boost::python::extract<double>(lst[0][1]);
+        new (storage) ExactIntervalType(lb,ub);
         data->convertible = storage;
     }
 };
@@ -75,7 +76,8 @@ struct from_python_list<ExactIntervalType> {
         boost::python::list lst = boost::python::extract<boost::python::list>(obj_ptr);
         assert(boost::python::len(lst)==2);
         Void* storage = ((converter::rvalue_from_python_storage<ExactIntervalType>*)data)->storage.bytes;
-        new (storage) ExactIntervalType(boost::python::extract<Float64>(lst[0]),boost::python::extract<Float64>(lst[1]));
+        double lb=boost::python::extract<double>(lst[0]); double ub=boost::python::extract<double>(lst[1]);
+        new (storage) ExactIntervalType(lb,ub);
         data->convertible = storage;
     }
 };
@@ -275,9 +277,9 @@ template<class IVL> Void export_interval(std::string name) {
     typedef decltype(disjoint(declval<IntervalType>(),declval<IntervalType>())) DisjointType;
     typedef decltype(subset(declval<IntervalType>(),declval<IntervalType>())) SubsetType;
 
-    class_< IntervalType > interval_class(name.c_str());
-    interval_class.def(init<MidpointType>());
-    interval_class.def(init<LowerBoundType,UpperBoundType>());
+    class_< IntervalType > interval_class(name.c_str(),init<IntervalType>());
+    //interval_class.def(init<MidpointType>());
+    //interval_class.def(init<LowerBoundType,UpperBoundType>());
 
     interval_class.def(self == self);
     interval_class.def(self != self);
@@ -291,7 +293,7 @@ template<class IVL> Void export_interval(std::string name) {
     interval_class.def(boost::python::self_ns::str(self));
 
     from_python_dict<IntervalType>();
-    from_python_list<IntervalType>();
+    //from_python_list<IntervalType>();
     //from_python_str<ExactIntervalType>();
 
     def("midpoint", &IntervalType::midpoint);
@@ -315,7 +317,7 @@ template<class BX> Void export_box()
     class_<Vector<ExactIntervalType>> interval_vector_class("ExactIntervalVectorType");
 
 //    class_<ExactBoxType,bases<CompactSetInterface,OpenSetInterface,Vector<ExactIntervalType>,DrawableInterface > >
-    class_<ExactBoxType,bases< > > box_class("ExactBoxType",init<ExactBoxType>());
+    class_<ExactBoxType,bases< > > box_class("ExactBox",init<ExactBoxType>());
     box_class.def(init<DimensionType>());
     box_class.def(init< Vector<ExactIntervalType> >());
     box_class.def("__eq__", (ExactLogicalType(*)(const Vector<ExactIntervalType>&,const Vector<ExactIntervalType>&)) &operator==);

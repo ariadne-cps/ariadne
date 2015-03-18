@@ -216,6 +216,7 @@ template<class T> class Variable
     inline AssignmentType operator=(const Expression<T>& e) const;
     template<class XL, class XU> inline RealVariableInterval in(const XL& l, const XU& u);
     template<class D> inline EnableIfRealBuiltin<T,D,ConstantAssignmentType> operator=(D e) const;
+    Expression<T> create_zero() const { return Expression<T>::constant(0); }
 };
 
 class TimeVariable : public Variable<Real> {

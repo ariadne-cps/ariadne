@@ -118,6 +118,9 @@ class Expression {
     static Expression<T> constant(const ValueType& c);
     //! \brief Construct an expression from a name.
     static Expression<T> variable(const Identifier& c);
+
+    //! \brief Create the zero element.
+    Expression<T> create_zero() const { return Expression<T>::constant(0); }
   public:
     const Operator& op() const;
     OperatorCode code() const;

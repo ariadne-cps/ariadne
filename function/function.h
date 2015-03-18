@@ -108,6 +108,16 @@ class FunctionConstructors {
 template<class P, class D, class C> class FunctionFacade {
 };
 
+template<class P> class FunctionFacade<P,IntervalDomain,IntervalDomain> {
+  public:
+    FunctionExpression<P,IntervalDomain,IntervalDomain> operator() (const RealVariable& x) const;
+};
+
+template<class P> class FunctionFacade<P,IntervalDomain,BoxDomain> {
+  public:
+    FunctionExpression<P,IntervalDomain,BoxDomain> operator() (const RealVariable& x) const;
+};
+
 template<class P> class FunctionFacade<P,BoxDomain,IntervalDomain> {
     typedef CanonicalNumericType<P> Y;
   public:
@@ -120,6 +130,7 @@ template<class P> class FunctionFacade<P,BoxDomain,BoxDomain> {
     typedef CanonicalNumericType<P> Y;
   public:
     template<class X> Matrix<ArithmeticType<X,Y>> jacobian(Vector<X> const& x) const;
+    FunctionExpression<P,BoxDomain,BoxDomain> operator() (const Vector<RealVariable>& x) const;
 };
 
 
@@ -193,6 +204,7 @@ class Function
         return this->reference().argument_size(); }
     SizeType result_size() const {
         return this->reference().result_size(); }
+
     template<class X> auto operator() (const Argument<X>& x) const -> decltype(this->reference()._evaluate(x)) {
         return this->reference()._evaluate(x); }
     template<class X> auto evaluate(const Argument<X>& x) const -> decltype(this->reference()._evaluate(x)) {
@@ -236,6 +248,8 @@ differential(const Function<P,BoxDomain,C>& f, const Vector<X>& x, DegreeType d)
     -> ElementType<C,Differential<ArithmeticType<CanonicalNumericType<P>,X>>> {
     auto dx=Differential<ArithmeticType<X,CanonicalNumericType<P>>>::identity(d,x); return f(dx);
 }
+
+RealExpression evaluate(EffectiveScalarFunction const& f, Vector<RealVariable> const& vars);
 
 /*
 template<class P, class D, class C, class X> inline auto

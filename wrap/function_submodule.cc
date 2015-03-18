@@ -47,6 +47,7 @@
 #include "expression/space.h"
 #include "expression/assignment.h"
 #include "expression/formula.h"
+#include "expression/function_expression.h"
 #include "solvers/constraint_solver.h"
 
 #include "function/function_mixin.tcc"
@@ -324,6 +325,12 @@ Void export_scalar_function()
     def("tan", (EffectiveScalarFunction(*)(const EffectiveScalarFunction&)) &tan);
 
     def("lie_derivative", (EffectiveScalarFunction(*)(const EffectiveScalarFunction&,const EffectiveVectorFunction&)) &lie_derivative);
+
+    //scalar_function_class.def("__call__", (RealScalarFunctionExpression(EffectiveScalarFunction::*)(const Vector<RealVariable>&)const)&EffectiveScalarFunction::operator() );
+
+    scalar_function_class.def("__call__", (RealExpression(*)(EffectiveScalarFunction const&, Vector<RealVariable> const&)) &evaluate);
+    def("evaluate", (RealExpression(*)(EffectiveScalarFunction const&, Vector<RealVariable> const&)) &evaluate);
+
 
     class_<ValidatedScalarFunction> interval_scalar_function_class("ValidatedScalarFunction", init<ValidatedScalarFunction>());
     interval_scalar_function_class.def(init<EffectiveScalarFunction>());

@@ -218,6 +218,19 @@ struct Divides {
     template<class A1, class A2> auto operator()(A1&& a1, A2&& a2) const -> decltype(a1/a2) { return a1/a2; }
 };
 
+struct RAdd : OperatorObject<RAdd> {
+    template<class A1, class A2> auto operator()(A1&& a1, A2&& a2) const -> decltype(add(a2,a1)) { return add(a2,a1); }
+};
+struct RSub : OperatorObject<RSub> {
+    template<class A1, class A2> auto operator()(A1&& a1, A2&& a2) const -> decltype(sub(a2,a1)) { return sub(a2,a1); }
+};
+struct RMul : OperatorObject<RMul> {
+    template<class A1, class A2> auto operator()(A1&& a1, A2&& a2) const -> decltype(mul(a2,a1)) { return mul(a2,a1); }
+};
+struct RDiv : OperatorObject<RDiv> {
+    template<class A1, class A2> auto operator()(A1&& a1, A2&& a2) const -> decltype(div(a2,a1)) { return div(a2,a1); }
+};
+
 struct Add : OperatorObject<Add> {
     OperatorCode code() const { return OperatorCode::ADD; } OperatorKind kind() const { return OperatorKind::BINARY; }
     template<class A1, class A2> auto operator()(A1&& a1, A2&& a2) const -> decltype(add(a1,a2)) { return add(a1,a2); }

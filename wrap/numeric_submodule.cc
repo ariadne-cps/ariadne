@@ -684,6 +684,9 @@ Void export_precision() {
 }
 
 template<class PR> Void export_user_floats() {
+    class_<RawFloat<PR>> raw_float_class("RawFloat"+class_tag<PR>(),init<double>());
+    raw_float_class.def(self_ns::str(self));
+
     export_approximate_float<PR>();
     export_upper_float<PR>();
     export_lower_float<PR>();

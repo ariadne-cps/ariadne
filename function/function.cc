@@ -1168,6 +1168,15 @@ ValidatedVectorFunction join(ValidatedVectorFunction const& f1, const ValidatedS
 
 
 
+RealExpression evaluate(EffectiveScalarFunction const& f, Vector<RealVariable> const& vars) {
+    typedef Algebra<EffectiveNumericType> EffectiveAlgebra;
+    EffectiveAlgebra az(RealExpression::constant(0));
+    Vector<EffectiveAlgebra> va(vars.size(),az);
+    for(SizeType i=0; i!=va.size(); ++i) { va[i]=EffectiveAlgebra(RealExpression(vars[i])); }
+    //Vector<EffectiveAlgebra> va=Vector<EffectiveAlgebra>(Vector<RealExpression>(vars));
+    EffectiveAlgebra fa=f(va);
+    return fa.template extract<RealExpression>();
+}
 
 
 

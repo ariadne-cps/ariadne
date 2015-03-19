@@ -614,6 +614,16 @@ class TaylorModel<Approximate,F>
     //! \brief Inplace addition of a product of Taylor models.
     Void ifma(const TaylorModel<Approximate,F>& x1, const TaylorModel<Approximate,F>& x2);
 
+    friend TaylorModel<Approximate,F> operator-(TaylorModel<Approximate,F> x) { x.imul(-1); return std::move(x); }
+    friend TaylorModel<Approximate,F>& operator+=(TaylorModel<Approximate,F>& x, NumericType const& c) { x.iadd(c); return x; }
+    friend TaylorModel<Approximate,F>& operator*=(TaylorModel<Approximate,F>& x, NumericType const& c) { x.imul(c); return x; }
+    friend TaylorModel<Approximate,F> operator+(TaylorModel<Approximate,F> const& x1, TaylorModel<Approximate,F> const& x2) {
+        TaylorModel<Approximate,F> r=x1; r.isma(+1,x2); return std::move(r); }
+    friend TaylorModel<Approximate,F> operator-(TaylorModel<Approximate,F> const& x1, TaylorModel<Approximate,F> const& x2) {
+        TaylorModel<Approximate,F> r=x1; r.isma(-1,x2); return std::move(r); }
+    friend TaylorModel<Approximate,F> operator*(TaylorModel<Approximate,F> const& x1, TaylorModel<Approximate,F> const& x2) {
+        TaylorModel<Approximate,F> r(x1.argument_size(),x1.sweeper()); r.ifma(x1,x2); return std::move(r); }
+
     template<class FF> friend TaylorModel<Approximate,FF> max(const TaylorModel<Approximate,FF>& x, const TaylorModel<Approximate,FF>& y);
     template<class FF> friend TaylorModel<Approximate,FF> min(const TaylorModel<Approximate,FF>& x, const TaylorModel<Approximate,FF>& y);
     template<class FF> friend TaylorModel<Approximate,FF> abs(const TaylorModel<Approximate,FF>& x);

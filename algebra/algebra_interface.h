@@ -108,6 +108,16 @@ template<class X> class AlgebraInterface
     //! \brief Add multiply with another algebra element \c r+=c*x .
     virtual AlgebraInterface<X>* _mul(const AlgebraInterface<X>& x) const = 0;
 
+    virtual AlgebraInterface<X>* _add(const X& c) const = 0;
+    virtual AlgebraInterface<X>* _sub(const X& c) const = 0;
+    virtual AlgebraInterface<X>* _mul(const X& c) const = 0;
+    virtual AlgebraInterface<X>* _div(const X& c) const = 0;
+    virtual AlgebraInterface<X>* _radd(const X& c) const = 0;
+    virtual AlgebraInterface<X>* _rsub(const X& c) const = 0;
+    virtual AlgebraInterface<X>* _rmul(const X& c) const = 0;
+
+    virtual AlgebraInterface<X>* _pow(Nat m) const = 0;
+
     virtual AlgebraInterface<X>* _apply(Neg) const = 0;
     virtual AlgebraInterface<X>* _apply(Add,AlgebraInterface<X>const&) const = 0;
     virtual AlgebraInterface<X>* _apply(Sub,AlgebraInterface<X>const&) const = 0;

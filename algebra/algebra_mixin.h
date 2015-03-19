@@ -51,9 +51,16 @@ template<class A, class X> class AlgebraMixin
     virtual AlgebraInterface<X>* _create_constant(X const& c) const { return new A(static_cast<const A&>(*this).A::create_constant(c)); }
     virtual AlgebraInterface<X>* _create_copy() const { return new A(static_cast<const A&>(*this)); }
     virtual AlgebraInterface<X>* _neg() { return new AlgebraMixin<A,X>(-static_cast<A const&>(*this)); }
-    virtual AlgebraInterface<X>* _add(AlgebraInterface<X> const& other) { return _eval(Add(),*this,other); }
-    virtual AlgebraInterface<X>* _sub(AlgebraInterface<X> const& other) { return _eval(Sub(),*this,other); }
-    virtual AlgebraInterface<X>* _mul(AlgebraInterface<X> const& other) { return _eval(Mul(),*this,other); }
+    virtual AlgebraInterface<X>* _add(AlgebraInterface<X> const& other) const { return _eval(Add(),*this,other); }
+    virtual AlgebraInterface<X>* _sub(AlgebraInterface<X> const& other) const { return _eval(Sub(),*this,other); }
+    virtual AlgebraInterface<X>* _mul(AlgebraInterface<X> const& other) const { return _eval(Mul(),*this,other); }
+    virtual AlgebraInterface<X>* _add(X const& cnst) const { return _eval(Add(),*this,cnst); }
+    virtual AlgebraInterface<X>* _sub(X const& cnst) const { return _eval(Sub(),*this,cnst); }
+    virtual AlgebraInterface<X>* _mul(X const& cnst) const { return _eval(Mul(),*this,cnst); }
+    virtual AlgebraInterface<X>* _div(X const& cnst) const { return _eval(Div(),*this,cnst); }
+    virtual AlgebraInterface<X>* _radd(X const& cnst) const { return _eval(RAdd(),*this,cnst); }
+    virtual AlgebraInterface<X>* _rsub(X const& cnst) const { return _eval(RSub(),*this,cnst); }
+    virtual AlgebraInterface<X>* _rmul(X const& cnst) const { return _eval(RMul(),*this,cnst); }
     virtual Void _iadd(const X& c) { static_cast<A*>(this)->A::iadd(c); }
     virtual Void _imul(const X& c) { static_cast<A*>(this)->A::imul(c); }
     virtual Void _isma(const X& c, const AlgebraInterface<X>& x) {

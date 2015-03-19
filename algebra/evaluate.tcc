@@ -114,7 +114,7 @@ template<class X, class Y>
 Y power_evaluate(const Expansion<X>& e, const Vector<Y>& y)
 {
     Y zero = y.zero_element();
-    Y one = zero; one+=1;
+    Y one = zero + 1;
 
     Y r=zero;
     Y t=zero;

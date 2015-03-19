@@ -57,11 +57,11 @@ template<> class SymbolicAlgebraWrapper<Expression<Real>,Real>
     static A const& _cast(AlgebraInterface<X> const& a) { return static_cast<A const&>(dynamic_cast<SymbolicAlgebraWrapper<A,X>const&>(a)); }
     static A const& _cast(SymbolicAlgebraWrapper<A,X> const& a) { return static_cast<A const&>(a); }
     static SymbolicAlgebraInterface<X>* _make(A&& a) { return new SymbolicAlgebraWrapper<A,X>(std::move(a)); }
-    template<class OP> static AlgebraInterface<X>* _eval(OP op, SymbolicAlgebraWrapper<A,X> const& aw1, AlgebraInterface<X> const& ai2) {
+    template<class OP> static SymbolicAlgebraInterface<X>* _eval(OP op, SymbolicAlgebraWrapper<A,X> const& aw1, AlgebraInterface<X> const& ai2) {
         return _make(op(_cast(aw1),_cast(ai2))); }
-    template<class OP> static AlgebraInterface<X>* _eval(OP op, SymbolicAlgebraWrapper<A,X> const& aw1, X const& c2) {
+    template<class OP> static SymbolicAlgebraInterface<X>* _eval(OP op, SymbolicAlgebraWrapper<A,X> const& aw1, X const& c2) {
         return _make(op(_cast(aw1),c2)); }
-    template<class OP> static AlgebraInterface<X>* _eval(OP op, SymbolicAlgebraWrapper<A,X> const& aw) {
+    template<class OP> static SymbolicAlgebraInterface<X>* _eval(OP op, SymbolicAlgebraWrapper<A,X> const& aw) {
         return _make(op(_cast(aw))); }
   public:
     SymbolicAlgebraWrapper(A const& a) : A(a) { }
@@ -76,6 +76,14 @@ template<> class SymbolicAlgebraWrapper<Expression<Real>,Real>
         return _make(_cast(*this) - _cast(other)); }
     virtual SymbolicAlgebraInterface<X>* _mul(AlgebraInterface<X> const& other) const {
         return _make(_cast(*this) * _cast(other)); }
+    virtual SymbolicAlgebraInterface<X>* _add(const X& cnst) const { return _make(_cast(*this) + cnst); }
+    virtual SymbolicAlgebraInterface<X>* _sub(X const& cnst) const { return _make(_cast(*this) - cnst); }
+    virtual SymbolicAlgebraInterface<X>* _mul(X const& cnst) const { return _make(_cast(*this) * cnst); }
+    virtual SymbolicAlgebraInterface<X>* _div(X const& cnst) const { return _make(_cast(*this) / cnst); }
+    virtual SymbolicAlgebraInterface<X>* _radd(X const& cnst) const { return _make(cnst + _cast(*this)); }
+    virtual SymbolicAlgebraInterface<X>* _rsub(X const& cnst) const { return _make(cnst - _cast(*this)); }
+    virtual SymbolicAlgebraInterface<X>* _rmul(X const& cnst) const { return _make(cnst * _cast(*this)); }
+    virtual SymbolicAlgebraInterface<X>* _pow(Nat m) const { return _make(pow(_cast(*this),m)); }
     virtual Void _iadd(const X& c) { (*this) = (*this) + c; }
     virtual Void _imul(const X& c) { (*this) = (*this) * c; }
     virtual Void _isma(const X& c, const AlgebraInterface<X>& x) {

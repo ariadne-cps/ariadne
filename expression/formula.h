@@ -240,15 +240,40 @@ template<class X, class R> inline EnableIfNumericType<R,Formula<X> > operator/(R
 template<class X, class R> inline EnableIfNumericType<R,Formula<X> >& operator+=(Formula<X>& f, const R& c) { return f+=make_formula<X>(c); }
 template<class X, class R> inline EnableIfNumericType<R,Formula<X> >& operator*=(Formula<X>& f, const R& c) { return f*=make_formula<X>(c); }
 
-
 // Make a constant of type T with value c based on a prototype vector v
-template<class X, class T> inline T make_constant(const X& c, const Vector<T>& v, EnableIf< Not< IsNumericType<T> >, Void >* =0 ) {
-    return v.zero_element()+numeric_cast<typename T::NumericType>(c);
+template<class P, class PR, class Y> inline Float<P,PR> make_constant(const Y& c, const Float<P,PR>& x) {
+    return Float<P,PR>(c,x.precision());
+}
+
+// FIXME: Should allow change of precision!
+template<class PW, class PR, class PS> inline Float<PW,PR> make_constant(const Float<PS,PR>& c, const Float<PW,PR>& x) {
+    return Float<PW,PR>(c);
+}
+
+template<class R, EnableIf<IsSame<R,Real>> =dummy> inline R make_constant(const R& c, const R& x) {
+    return c;
+}
+
+template<class X, class Y> inline X make_constant(const Y& c, const X& x, EnableIf<IsNumericType<X>> =-dummy) {
+    return x.create(c);
+}
+
+template<class X, class Y> inline Differential<X> make_constant(const Y& c, const Differential<X>& x) {
+    return x.create_constant(numeric_cast<X>(c));
+}
+
+template<class A, class Y> inline A make_constant(const Y& c, const A& a, DisableIf<IsNumericType<A>> =-dummy) {
+    return a.create_constant(numeric_cast<typename A::NumericType>(c));
 }
 
 // Make a constant of type T with value c based on a prototype vector v
-template<class X, class T> inline T make_constant(const X& c, const Vector<T>& v, EnableIf<IsNumericType<T>,Void>* = 0) {
-    return v.zero_element()+numeric_cast<T>(c);
+//template<class X, class T> inline T make_constant(const X& c, const Vector<T>& v, EnableIf< Not< IsNumericType<T> >, Void >* =0 ) {
+//    return v.zero_element()+numeric_cast<typename T::NumericType>(c);
+//}
+
+// Make a constant of type T with value c based on a prototype vector v
+template<class X, class Y> inline X make_constant(const Y& c, const Vector<X>& v) {
+    return make_constant(c,v.zero_element());
 }
 
 // Make a constant of type T with value c based on a prototype vector v

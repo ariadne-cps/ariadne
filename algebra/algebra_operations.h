@@ -40,7 +40,7 @@ template<class X> class SymbolicAlgebra;
 template<class T> using NumericType = typename T::NumericType;
 
 template<class A> struct IsAlgebra { static const Bool value = false; };
-template<class X> struct IsAlgebra< Algebra<X> > { static const Bool value = true; };
+//template<class X> struct IsAlgebra< Algebra<X> > { static const Bool value = true; };
 template<class X> struct IsAlgebra< GradedAlgebra<X> > { static const Bool value = true; };
 template<class X> struct IsAlgebra< NormedAlgebra<X> > { static const Bool value = true; };
 template<class X> struct IsAlgebra< SymbolicAlgebra<X> > { static const Bool value = true; };
@@ -98,8 +98,6 @@ template<class A> inline EnableIfAlgebra<A> sqr(const A& a) { return a*a; }
 template<class A>  inline EnableIfAlgebra<A> pow(const A& x, Nat m) {
     A s=x; A r=s.create_constant(1); while(m) { if(m%2) { r*=s; } s=sqr(s); m/=2; } return r; }
 
-template<class X> inline X generic_pow(X p, Int n) {
-    return n>=0 ? generic_pow(p,Nat(n)) : rec(generic_pow(p,Nat(-n))); }
 
 // Operations requiring reciprocal
 template<class A> inline EnableIfAlgebra<A> pow(const A& a, Int n) { return n<0 ? rec(pow(a,Nat(-n))) : pow(a,Nat(n)); }

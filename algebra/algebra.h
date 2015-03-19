@@ -70,17 +70,55 @@ template<class X> class Algebra
   public:
     Void iadd(const X& c) { _ptr->_iadd(c); }
     Void imul(const X& c) { _ptr->_imul(c); }
-    Void isma(const X& c, const Algebra<X>& x) { _ptr->_isma(c,*x._ptr); }
-    Void ifma(const Algebra<X>& x1, const Algebra<X>& x2) { _ptr->_ifma(*x1._ptr,*x2._ptr); }
-    friend Algebra<X> neg(Algebra<X> const& x) { return Algebra<X>(x._ptr->_neg()); }
-    friend Algebra<X> add(Algebra<X> const& x1, Algebra<X> const& x2) { return Algebra<X>(x1._ptr->_add(*x2._ptr)); }
-    friend Algebra<X> sub(Algebra<X> const& x1, Algebra<X> const& x2) { return Algebra<X>(x1._ptr->_sub(*x2._ptr)); }
-    friend Algebra<X> mul(Algebra<X> const& x1, Algebra<X> const& x2) { return Algebra<X>(x1._ptr->_mul(*x2._ptr)); }
+    Void isma(const X& c, const Algebra<X>& a) { _ptr->_isma(c,*a._ptr); }
+    Void ifma(const Algebra<X>& a1, const Algebra<X>& a2) { _ptr->_ifma(*a1._ptr,*a2._ptr); }
+
+    friend Algebra<X> pos(Algebra<X> const& a) { return Algebra<X>(a); }
+    friend Algebra<X> neg(Algebra<X> const& a) { return Algebra<X>(a._ptr->_neg()); }
+    friend Algebra<X> add(Algebra<X> const& a1, Algebra<X> const& a2) { return Algebra<X>(a1._ptr->_add(*a2._ptr)); }
+    friend Algebra<X> sub(Algebra<X> const& a1, Algebra<X> const& a2) { return Algebra<X>(a1._ptr->_sub(*a2._ptr)); }
+    friend Algebra<X> mul(Algebra<X> const& a1, Algebra<X> const& a2) { return Algebra<X>(a1._ptr->_mul(*a2._ptr)); }
+    friend Algebra<X> add(Algebra<X> const& a1, X const& c2) { return Algebra<X>(a1._ptr->_add(c2)); }
+    friend Algebra<X> sub(Algebra<X> const& a1, X const& c2) { return Algebra<X>(a1._ptr->_sub(c2)); }
+    friend Algebra<X> mul(Algebra<X> const& a1, X const& c2) { return Algebra<X>(a1._ptr->_mul(c2)); }
+    friend Algebra<X> div(Algebra<X> const& a1, X const& c2) { return Algebra<X>(a1._ptr->_div(c2)); }
+    friend Algebra<X> add(X const& c1, Algebra<X> const& a2) { return Algebra<X>(a2._ptr->_radd(c1)); }
+    friend Algebra<X> sub(X const& c1, Algebra<X> const& a2) { return Algebra<X>(a2._ptr->_rsub(c1)); }
+    friend Algebra<X> mul(X const& c1, Algebra<X> const& a2) { return Algebra<X>(a2._ptr->_rmul(c1)); }
+
+    friend Algebra<X> operator+(Algebra<X> const& a) { return pos(a); }
+    friend Algebra<X> operator-(Algebra<X> const& a) { return neg(a); }
+    friend Algebra<X> operator+(Algebra<X> const& a1, Algebra<X> const& a2) { return add(a1,a2); }
+    friend Algebra<X> operator-(Algebra<X> const& a1, Algebra<X> const& a2) { return sub(a1,a2); }
+    friend Algebra<X> operator*(Algebra<X> const& a1, Algebra<X> const& a2) { return mul(a1,a2); }
+    friend Algebra<X> operator+(Algebra<X> const& a1, X const& c2) { return add(a1,c2); }
+    friend Algebra<X> operator-(Algebra<X> const& a1, X const& c2) { return sub(a1,c2); }
+    friend Algebra<X> operator*(Algebra<X> const& a1, X const& c2) { return mul(a1,c2); }
+    friend Algebra<X> operator/(Algebra<X> const& a1, X const& c2) { return div(a1,c2); }
+    friend Algebra<X> operator+(X const& c1, Algebra<X> const& a2) { return add(c1,a2); }
+    friend Algebra<X> operator-(X const& c1, Algebra<X> const& a2) { return sub(c1,a2); }
+    friend Algebra<X> operator*(X const& c1, Algebra<X> const& a2) { return mul(c1,a2); }
+    friend Algebra<X>& operator+=(Algebra<X>& a1, X const& c2) { return a1=add(a1,c2); }
+    friend Algebra<X>& operator-=(Algebra<X>& a1, X const& c2) { return a1=sub(a1,c2); }
+    friend Algebra<X>& operator*=(Algebra<X>& a1, X const& c2) { return a1=mul(a1,c2); }
+    friend Algebra<X>& operator/=(Algebra<X>& a1, X const& c2) { return a1=div(a1,c2); }
+    friend Algebra<X>& operator+=(Algebra<X>& a1, Algebra<X> const& a2) { return a1=add(a1,a2); }
+    friend Algebra<X>& operator-=(Algebra<X>& a1, Algebra<X> const& a2) { return a1=sub(a1,a2); }
+    friend Algebra<X>& operator*=(Algebra<X>& a1, Algebra<X> const& a2) { return a1=mul(a1,a2); }
+    friend Algebra<X> sqr(Algebra<X> const& a) { return mul(a,a); }
+    friend Algebra<X> pow(Algebra<X> const& a, Nat m) { return Algebra<X>(a._ptr->_pow(m)); }
+
+    friend Algebra<X> operator/(Algebra<X> const& a1, Algebra<X> const& a2) { return mul(a1,rec(a2)); }
+    friend Algebra<X> operator/(X const& c1, Algebra<X> const& a2) { return mul(c1,rec(a2)); }
+    friend Algebra<X>& operator/=(Algebra<X>& a1, Algebra<X> const& a2) { return a1=div(a1,a2); }
+    friend Algebra<X> pow(Algebra<X> const& a, Int n) {
+        return n>=0 ? pow(a,Nat(n)) : rec(pow(a,Nat(-n))); }
 
     template<class OP> friend Algebra<X> apply(OP op, Algebra<X> a1, Algebra<X> a2) { return Algebra<X>(a1._ptr->_apply(op,*a2._ptr)); }
     template<class OP> friend Algebra<X> apply(OP op, Algebra<X> a1, X c2) { return Algebra<X>(a1._ptr->_apply(op,c2)); }
     template<class OP> friend Algebra<X> apply(OP op, Algebra<X> a) {
         TranscendentalAlgebraInterface<X> const* tap=dynamic_cast<TranscendentalAlgebraInterface<X>const*>(a._ptr.operator->());
+        if(!tap) { ARIADNE_THROW(std::runtime_error,"apply(OP,Algebra<X>)","a="<<a<<" does not support transcendental operations."); }
         return Algebra<X>(tap->_apply(op)); }
     friend Algebra<X> apply(Neg op, Algebra<X> a) { return Algebra<X>(a._ptr->_apply(op)); }
 };

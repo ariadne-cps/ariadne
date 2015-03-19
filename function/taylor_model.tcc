@@ -1745,10 +1745,19 @@ template<class F> typename TaylorModel<Approximate,F>::NormType TaylorModel<Appr
     return NormType(r);
 }
 
+template<class F> UnitBoxType TaylorModel<Approximate,F>::domain() const {
+    return UnitBoxType(this->argument_size(),UnitIntervalType());
+}
+
 template<class F> ApproximateIntervalType TaylorModel<Approximate,F>::range() const {
     ApproximateFloat64 av=this->average();
     ApproximateFloat64 rad=this->radius();
     return ApproximateIntervalType(av-rad,av+rad);
+}
+
+template<class F> TaylorModel<Approximate,F>& TaylorModel<Approximate,F>::sweep() {
+    this->_sweeper.sweep(this->_expansion.raw());
+    return *this;
 }
 
 template<class F> Float64 TaylorModel<Approximate,F>::tolerance() const {

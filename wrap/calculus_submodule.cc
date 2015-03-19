@@ -270,12 +270,11 @@ Void export_sweeper()
 
 Expansion<ExactFloat64>const& get_expansion(ValidatedTaylorModel const& tm) { return tm.expansion(); }
 
-Void export_taylor_model()
+Void export_validated_taylor_model()
 {
     typedef SizeType SizeType;
     typedef ValidatedTaylorModel ValidatedTaylorModel;
     typedef VectorTaylorFunction VectorTaylorFunction;
-
 
     class_<ValidatedTaylorModel> taylor_model_class("ValidatedTaylorModel", init<ValidatedTaylorModel>());
     taylor_model_class.def( init< SizeType,Sweeper >());
@@ -349,6 +348,85 @@ Void export_taylor_model()
     class_< TMV > taylor_model_vector_class("TaylorModelVector");
     taylor_model_vector_class.def("__getitem__", &__getitem__<TMV,Int,ValidatedTaylorModel>);
     taylor_model_vector_class.def("__setitem__", &__setitem__<TMV,Int,ValidatedTaylorModel>);
+    taylor_model_vector_class.def(self_ns::str(self));
+*/
+}
+
+Void export_approximate_taylor_model()
+{
+    typedef SizeType SizeType;
+    typedef ApproximateTaylorModel ApproximateTaylorModel;
+
+    class_<ApproximateTaylorModel> taylor_model_class("ApproximateTaylorModel", init<ApproximateTaylorModel>());
+    taylor_model_class.def( init< SizeType,Sweeper >());
+    taylor_model_class.def("keys", (List<MultiIndex>(*)(const ApproximateTaylorModel&))&keys);
+    taylor_model_class.def("value", (const ApproximateFloat64&(ApproximateTaylorModel::*)()const) &ApproximateTaylorModel::value, return_value_policy<copy_const_reference>());
+    taylor_model_class.def("gradient", (const ApproximateFloat64&(ApproximateTaylorModel::*)(SizeType)const) &ApproximateTaylorModel::gradient_value, return_value_policy<copy_const_reference>());
+    taylor_model_class.def("expansion", (const Expansion<ApproximateFloat64>&(*)(ApproximateTaylorModel const&)) &get_expansion, return_value_policy<copy_const_reference>());
+    taylor_model_class.def("argument_size", &ApproximateTaylorModel::argument_size);
+    taylor_model_class.def("domain", &ApproximateTaylorModel::domain);
+    taylor_model_class.def("range", &ApproximateTaylorModel::range);
+    taylor_model_class.def("set_sweeper", &ApproximateTaylorModel::set_sweeper);
+    taylor_model_class.def("sweeper", &ApproximateTaylorModel::sweeper);
+    taylor_model_class.def("sweep", (ApproximateTaylorModel&(ApproximateTaylorModel::*)()) &ApproximateTaylorModel::sweep, return_value_policy<reference_existing_object>());
+    taylor_model_class.def("__getitem__", &__getitem__<ApproximateTaylorModel,MultiIndex,ApproximateFloat64>);
+    taylor_model_class.def("__setitem__",&__setitem__<ApproximateTaylorModel,MultiIndex,ApproximateFloat64>);
+    taylor_model_class.def(+self);
+    taylor_model_class.def(-self);
+    taylor_model_class.def(self+self);
+    taylor_model_class.def(self-self);
+    taylor_model_class.def(self*self);
+    taylor_model_class.def(self/self);
+    taylor_model_class.def(ApproximateNumericType()+self);
+    taylor_model_class.def(ApproximateNumericType()-self);
+    taylor_model_class.def(ApproximateNumericType()*self);
+    taylor_model_class.def(ApproximateNumericType()/self);
+    taylor_model_class.def(self+ApproximateNumericType());
+    taylor_model_class.def(self-ApproximateNumericType());
+    taylor_model_class.def(self*ApproximateNumericType());
+    taylor_model_class.def(self/ApproximateNumericType());
+    taylor_model_class.def(self+=ApproximateNumericType());
+    taylor_model_class.def(self-=ApproximateNumericType());
+    taylor_model_class.def(self*=ApproximateNumericType());
+    taylor_model_class.def(self/=ApproximateNumericType());
+    taylor_model_class.def(self+=self);
+    taylor_model_class.def(self-=self);
+    taylor_model_class.def(self_ns::str(self));
+
+    taylor_model_class.def("constant",(ApproximateTaylorModel(*)(SizeType, const ApproximateNumericType&,Sweeper))&ApproximateTaylorModel::constant);
+    taylor_model_class.def("coordinate",(ApproximateTaylorModel(*)(SizeType, SizeType,Sweeper))&ApproximateTaylorModel::coordinate);
+
+    taylor_model_class.staticmethod("constant");
+    taylor_model_class.staticmethod("coordinate");
+
+    //def("max",(ApproximateTaylorModel(*)(const ApproximateTaylorModel&,const ApproximateTaylorModel&))&max);
+    //def("min",(ApproximateTaylorModel(*)(const ApproximateTaylorModel&,const ApproximateTaylorModel&))&min);
+    //def("abs",(ApproximateTaylorModel(*)(const ApproximateTaylorModel&))&abs);
+
+    def("neg",(ApproximateTaylorModel(*)(const ApproximateTaylorModel&))&neg);
+    def("rec",(ApproximateTaylorModel(*)(const ApproximateTaylorModel&))&rec);
+    def("sqr",(ApproximateTaylorModel(*)(const ApproximateTaylorModel&))&sqr);
+    def("pow",(ApproximateTaylorModel(*)(const ApproximateTaylorModel&, Int))&pow);
+
+    def("sqrt", (ApproximateTaylorModel(*)(const ApproximateTaylorModel&))&sqrt);
+    def("exp", (ApproximateTaylorModel(*)(const ApproximateTaylorModel&))&exp);
+    def("log", (ApproximateTaylorModel(*)(const ApproximateTaylorModel&))&log);
+    def("sin", (ApproximateTaylorModel(*)(const ApproximateTaylorModel&))&sin);
+    def("cos", (ApproximateTaylorModel(*)(const ApproximateTaylorModel&))&cos);
+    def("tan", (ApproximateTaylorModel(*)(const ApproximateTaylorModel&))&tan);
+
+    taylor_model_class.def("range", (ApproximateIntervalType(ApproximateTaylorModel::*)()const) &ApproximateTaylorModel::range);
+
+    //def("evaluate", (ApproximateNumericType(*)(const ApproximateTaylorModel&, const Vector<ApproximateNumericType>&))&evaluate);
+    //def("split",(ApproximateTaylorModel(*)(const ApproximateTaylorModel&,SizeType,SplitPart)) &split);
+
+    from_python< Vector<ApproximateTaylorModel> >();
+    to_python< Vector<ApproximateTaylorModel> >();
+
+/*
+    class_< TMV > taylor_model_vector_class("TaylorModelVector");
+    taylor_model_vector_class.def("__getitem__", &__getitem__<TMV,Int,ApproximateTaylorModel>);
+    taylor_model_vector_class.def("__setitem__", &__setitem__<TMV,Int,ApproximateTaylorModel>);
     taylor_model_vector_class.def(self_ns::str(self));
 */
 }
@@ -650,7 +728,8 @@ Void calculus_submodule()
 {
     export_expansion();
     export_sweeper();
-    export_taylor_model();
+    export_approximate_taylor_model();
+    export_validated_taylor_model();
     export_scalar_function_model();
     export_vector_function_model();
     export_scalar_taylor_function();

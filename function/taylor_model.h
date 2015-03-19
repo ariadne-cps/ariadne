@@ -46,6 +46,7 @@
 namespace Ariadne {
 
 class UnitIntervalType;
+typedef Box<UnitIntervalType> UnitBoxType;
 enum class SplitPart : char;
 
 template<class T1, class T2> struct Product;
@@ -261,7 +262,7 @@ class TaylorModel<Validated,F>
     //@{
     /*! \name Function evaluation. */
     //! \brief The domain of the quantity, always given by \f$[-1,1]^{\mathrm{as}}\f$.
-    Box<UnitIntervalType> domain() const;
+    UnitBoxType domain() const;
     //! \brief The codomain of the quantity.
     ExactIntervalType codomain() const;
     //! \brief An over-approximation to the range of the quantity.
@@ -490,6 +491,13 @@ class TaylorModel<Approximate,F>
     TaylorModel<Approximate,F> create_variable(SizeType i) const;
     TaylorModel<Approximate,F> create_ball(ErrorType r) const;
 
+    //! \brief Construct a constant quantity in \a as independent variables.
+    static TaylorModel<Approximate,F> constant(SizeType as, const NumericType& c, Sweeper swp) {
+        TaylorModel<Approximate,F> r(as,swp); r[MultiIndex::zero(as)]=1; r*=c; return r; }
+    //! \brief Construct the quantity with expansion \f$x_j\f$ in \a as independent variables.
+    static TaylorModel<Approximate,F> coordinate(SizeType as, SizeType j, Sweeper swp) {
+        TaylorModel<Approximate,F> r(as,swp); r[MultiIndex::unit(as,j)]=1; return r; }
+
     //! \brief Fast swap with another Taylor model.
     Void swap(TaylorModel<Approximate,F>& other) { this->_expansion.swap(other._expansion); }
     //! \brief Set to zero.
@@ -528,6 +536,13 @@ class TaylorModel<Approximate,F>
     SizeType argument_size() const { return this->_expansion.argument_size(); }
     //! \brief The coefficient of the term in $x^a$.
     const CoefficientType& operator[](const MultiIndex& a) const { return this->_expansion[a]; }
+    CoefficientType& operator[](const MultiIndex& a) { return this->_expansion.at(a); }
+    //! \brief The constant term in the expansion.
+    const CoefficientType& value() const { return (*this)[MultiIndex::zero(this->argument_size())]; }
+    //! \brief The coefficient of the gradient term \f$df/dx_j\f$.
+    const CoefficientType& gradient_value(SizeType j) const { return (*this)[MultiIndex::unit(this->argument_size(),j)]; }
+    Covector<CoefficientType> gradient_value() const { Covector<CoefficientType> r(this->argument_size());
+        for(SizeType j=0; j!=this->argument_size(); ++j) { r[j]=(*this)[MultiIndex::unit(this->argument_size(),j)]; } return r; }
     //! \brief The error of the expansion over the domain.
     Void error() const { }
     //@}
@@ -535,7 +550,7 @@ class TaylorModel<Approximate,F>
     //@{
     /*! \name Function evaluation. */
     //! \brief The domain of the quantity.
-    Vector<UnitIntervalType> domain() const;
+    UnitBoxType domain() const;
     //! \brief A coarse over-approximation to the range of the quantity.
     ExactIntervalType codomain() const;
     //! \brief An over-approximation to the range of the quantity.

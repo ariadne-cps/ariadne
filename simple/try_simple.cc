@@ -72,9 +72,9 @@ void test() {
     ValidatedReal vr(r);
     test_elementary_operations(vr);
 
-    Differential<Real> d=Differential<Real>::coordinate(r);
+    Differential<Real,Scalar> d=Differential<Real,Scalar>::coordinate(r);
     test_algebra_operations(d,r);
-    Differential<ValidatedReal> vd=Differential<ValidatedReal>::coordinate(r);
+    Differential<ValidatedReal,Scalar> vd=Differential<ValidatedReal,Scalar>::coordinate(r);
     test_algebra_operations(vd,r);
     test_algebra_operations(vd,vr);
     Algebra<Real> a(d);
@@ -230,15 +230,15 @@ int main() {
     PRINT(vf(xv));
 //    PRINT(evaluate(vf,xv));
 
-    Differential<Real> dr1=Differential<Real>::coordinate(r1);
-    Differential<Real> dr2=Differential<Real>::coordinate(r2);
-    Vector<Differential<Real>> vdr={dr1,dr2};
+    Differential<Real,Scalar> dr1=Differential<Real,Scalar>::coordinate(r1);
+    Differential<Real,Scalar> dr2=Differential<Real,Scalar>::coordinate(r2);
+    Vector<Differential<Real,Scalar>> vdr={dr1,dr2};
     PRINT(f(vdr));
     PRINT(evaluate_algebra(f,vdr));
 
-    Differential<Float64Bounds> dx1=Differential<Float64Bounds>::coordinate(x1);
-    Differential<Float64Bounds> dx2=Differential<Float64Bounds>::coordinate(x2);
-    Vector<Differential<Float64Bounds>> vdx={dx1,dx2};
+    Differential<Float64Bounds,Scalar> dx1=Differential<Float64Bounds,Scalar>::coordinate(x1);
+    Differential<Float64Bounds,Scalar> dx2=Differential<Float64Bounds,Scalar>::coordinate(x2);
+    Vector<Differential<Float64Bounds,Scalar>> vdx={dx1,dx2};
 
 //    PRINT(f(vdx));
 //    PRINT(evaluate_algebra(f,vdx));

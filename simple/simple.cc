@@ -282,58 +282,58 @@ template<class X> template<class A> A Algebra<X>::extract() const { return dynam
 
 // ---------------- Differential ----------------------------------------------------------------------------------- //
 
-template<class X> Differential<X>::Differential(X vx, X dx)
+template<class X, template<typename>class D> Differential<X,D>::Differential(X vx, D<X> dx)
     : _vx(vx), _dx(dx) { }
-template<class X> Differential<X> Differential<X>::constant(NumericType c) {
-    return Differential<X>(c,c.create_constant(1)); }
-template<class X> Differential<X> Differential<X>::coordinate(NumericType c) {
-    return Differential<X>(c,c.create_constant(1)); }
-template<class X> Differential<X> Differential<X>::create_constant(GenericNumericType c) const {
-    return Differential<X>::constant(this->_vx.create_constant(c)); }
-template<class X> Differential<X>& Differential<X>::operator=(GenericNumericType c) {
-    return *this=Differential<X>::constant(this->_vx.create_constant(c)); }
-template<class X> Differential<X>::operator Algebra<Y> () const {
-    return Algebra<Y>(new AlgebraWrapper<Differential<X>,Y>(*this)); }
-template<class X> Differential<X>::Differential(Algebra<Y> a)
-    : Differential(a.template extract<Differential<X>>()) { }
+template<class X, template<typename>class D> Differential<X,D> Differential<X,D>::constant(NumericType c) {
+    return Differential<X,D>(c,c.create_constant(1)); }
+template<class X, template<typename>class D> Differential<X,D> Differential<X,D>::coordinate(NumericType c) { // FIXME: IndexType i) {
+    return Differential<X,D>(c,c.create_constant(1)); }
+template<class X, template<typename>class D> Differential<X,D> Differential<X,D>::create_constant(GenericNumericType c) const {
+    return Differential<X,D>::constant(this->_vx.create_constant(c)); }
+template<class X, template<typename>class D> Differential<X,D>& Differential<X,D>::operator=(GenericNumericType c) {
+    return *this=Differential<X,D>::constant(this->_vx.create_constant(c)); }
+template<class X, template<typename>class D> Differential<X,D>::operator Algebra<Y> () const {
+    return Algebra<Y>(new AlgebraWrapper<Differential<X,D>,Y>(*this)); }
+template<class X, template<typename>class D> Differential<X,D>::Differential(Algebra<Y> a)
+    : Differential(a.template extract<Differential<X,D>>()) { }
 
 
-template class Differential<Real>;
-template class Differential<ValidatedReal>;
-template class Differential<Float64Bounds>;
-template Differential<Real> Algebra<Real>::extract() const;
-template Differential<ValidatedReal> Algebra<ValidatedReal>::extract() const;
-template Differential<Float64Bounds> Algebra<ValidatedReal>::extract() const;
+template class Differential<Real,Scalar>;
+template class Differential<ValidatedReal,Scalar>;
+template class Differential<Float64Bounds,Scalar>;
+template Differential<Real,Scalar> Algebra<Real>::extract() const;
+template Differential<ValidatedReal,Scalar> Algebra<ValidatedReal>::extract() const;
+template Differential<Float64Bounds,Scalar> Algebra<ValidatedReal>::extract() const;
 
-template<class X> struct Operations<Differential<X>> {
-    typedef Differential<X> A; typedef GenericType<X> Y;
+template<class X, template<typename>class D> struct Operations<Differential<X,D>> {
+    typedef Differential<X,D> A; typedef GenericType<X> Y;
     static A _add(A,A); static A _add(A,Y); static A _add(Y,A);
     static A _mul(A,A); static A _mul(A,Y); static A _mul(Y,A);
     static A _neg(A); static A _rec(A); static A _exp(A); static A _log(A);
     //static A _sub(A,A); static A _sub(A,X); static A _sub(X,A);
 };
 
-template<class X> Differential<X> Operations<Differential<X>>::_add(Differential<X> dx1, Differential<X> dx2) {
-    return Differential<X>(add(dx1._vx,dx2._vx),add(dx1._dx,dx2._dx)); }
-template<class X> Differential<X> Operations<Differential<X>>::_mul(Differential<X> dx1, Differential<X> dx2) {
-    return Differential<X>(mul(dx1._vx,dx2._vx),add(mul(dx1._dx,dx2._vx),mul(dx1._vx,dx2._dx))); }
-template<class X> Differential<X> Operations<Differential<X>>::_neg(Differential<X> dx) {
-    return Differential<X>(neg(dx._vx),neg(dx._dx)); }
-template<class X> Differential<X> Operations<Differential<X>>::_rec(Differential<X> dx) {
-    return Differential<X>(rec(dx._vx),mul(rec(neg(mul(dx._vx,dx._vx))),dx._dx)); }
-template<class X> Differential<X> Operations<Differential<X>>::_exp(Differential<X> dx) {
-    return Differential<X>(exp(dx._vx),mul(exp(dx._vx),dx._dx)); }
-template<class X> Differential<X> Operations<Differential<X>>::_log(Differential<X> dx) {
-    return Differential<X>(log(dx._vx),mul(rec(dx._vx),dx._dx)); }
+template<class X, template<typename>class D> Differential<X,D> Operations<Differential<X,D>>::_add(Differential<X,D> dx1, Differential<X,D> dx2) {
+    return Differential<X,D>(add(dx1._vx,dx2._vx),add(dx1._dx,dx2._dx)); }
+template<class X,template<typename>class D> Differential<X,D> Operations<Differential<X,D>>::_mul(Differential<X,D> dx1, Differential<X,D> dx2) {
+    return Differential<X,D>(mul(dx1._vx,dx2._vx),add(mul(dx1._dx,dx2._vx),mul(dx1._vx,dx2._dx))); }
+template<class X,template<typename>class D> Differential<X,D> Operations<Differential<X,D>>::_neg(Differential<X,D> dx) {
+    return Differential<X,D>(neg(dx._vx),neg(dx._dx)); }
+template<class X,template<typename>class D> Differential<X,D> Operations<Differential<X,D>>::_rec(Differential<X,D> dx) {
+    return Differential<X,D>(rec(dx._vx),mul(rec(neg(mul(dx._vx,dx._vx))),dx._dx)); }
+template<class X,template<typename>class D> Differential<X,D> Operations<Differential<X,D>>::_exp(Differential<X,D> dx) {
+    return Differential<X,D>(exp(dx._vx),mul(exp(dx._vx),dx._dx)); }
+template<class X,template<typename>class D> Differential<X,D> Operations<Differential<X,D>>::_log(Differential<X,D> dx) {
+    return Differential<X,D>(log(dx._vx),mul(rec(dx._vx),dx._dx)); }
 
-template<class X> Differential<X> Operations<Differential<X>>::_add(Differential<X> dx, Y c) {
-    return Differential<X>(add(dx._vx,c),dx._dx); }
-template<class X> Differential<X> Operations<Differential<X>>::_add(Y c, Differential<X> dx) {
-    return Differential<X>(add(c,dx._vx),dx._dx); }
-template<class X> Differential<X> Operations<Differential<X>>::_mul(Differential<X> dx, Y c) {
-    return Differential<X>(mul(dx._vx,c),mul(dx._dx,c)); }
-template<class X> Differential<X> Operations<Differential<X>>::_mul(Y c, Differential<X> dx) {
-    return Differential<X>(mul(dx._vx,c),mul(dx._dx,c)); }
+template<class X,template<typename>class D> Differential<X,D> Operations<Differential<X,D>>::_add(Differential<X,D> dx, Y c) {
+    return Differential<X,D>(add(dx._vx,c),dx._dx); }
+template<class X,template<typename>class D> Differential<X,D> Operations<Differential<X,D>>::_add(Y c, Differential<X,D> dx) {
+    return Differential<X,D>(add(c,dx._vx),dx._dx); }
+template<class X,template<typename>class D> Differential<X,D> Operations<Differential<X,D>>::_mul(Differential<X,D> dx, Y c) {
+    return Differential<X,D>(mul(dx._vx,c),mul(dx._dx,c)); }
+template<class X,template<typename>class D> Differential<X,D> Operations<Differential<X,D>>::_mul(Y c, Differential<X,D> dx) {
+    return Differential<X,D>(mul(dx._vx,c),mul(dx._dx,c)); }
 
 //template class Operations<Differential<Real>>;
 //template class Operations<Differential<ValidatedReal>>;

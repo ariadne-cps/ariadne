@@ -35,6 +35,11 @@ auto const MAGENTA = "\033[35m";      /* Magenta */
 auto const CYAN    = "\033[36m";      /* Cyan */
 auto const WHITE   = "\033[37m";      /* White */
 
+// ---------------- Indexing --------------------------------------------------------------------------------------- //
+
+class Index { SizeType _i; public: Index(SizeType i) : _i(i) { } operator SizeType() const { return _i; } };
+
+
 // ---------------- Operators -------------------------------------------------------------------------------------- //
 
 struct Cnst { };
@@ -75,6 +80,9 @@ template<class T> struct Self { typedef T Type; };
 template<class T> using SelfType = typename Self<T>::Type;
 template<class T> using GenericType = typename T::GenericType;
 template<class T> using NumericType = typename T::NumericType;
+
+template<class T> struct IndexTraits { typedef Void Type; };
+template<class T> using IndexType = typename IndexTraits<T>::Type;
 
 //template<class T> struct NumericTypedef { typedef typename T::NumericType Type; };
 //template<class T> using NumericType = typename NumericTypedef<T>::Type;
@@ -446,6 +454,55 @@ class Field {
     friend SelfType log(SelfType);
 };
 
+// ---------------- Scalar ----------------------------------------------------------------------------------------- //
+
+template<class X> using Scalar = X;
+
+// ---------------- Vector ----------------------------------------------------------------------------------------- //
+
+template<class X> class Vector {
+    std::vector<X> _ary;
+  public:
+    Vector(SizeType n, X x) : _ary(n,x) { }
+    Vector(InitializerList<X> lst) : _ary(lst) { }
+    Vector(std::vector<X> ary) : _ary(ary) { }
+    X create_constant(X c) const { return c; }
+    template<class Y, DisableIf<IsConvertible<Y,X>> =dummy> auto
+        create_constant(Y const& c) const -> decltype(declval<X>().create_constant(c)) {
+            const X& x0=_ary[0]; return x0.create_constant(c); }
+    SizeType size() const { return _ary.size(); }
+    X const& operator[] (Index i) const { return _ary[i]; }
+    X& operator[] (Index i) { return _ary[i]; }
+    friend OutputStream& operator<<(OutputStream& os, Vector<X> const& v) {
+        for(SizeType i=0; i!=v.size(); ++i) { os << (i==0?"[":",") << v[i]; } return os << "]"; }
+};
+typedef Vector<Real> RealVector;
+typedef Vector<ValidatedReal> ValidatedRealVector;
+
+// ---------------- Covector --------------------------------------------------------------------------------------- //
+
+
+template<class X> class Covector {
+    std::vector<X> _ary;
+  public:
+    typedef Index IndexType;
+    Covector(SizeType n, X x) : _ary(n,x) { }
+    Covector(InitializerList<X> lst) : _ary(lst) { }
+    Covector(std::vector<X> ary) : _ary(ary) { }
+    X create_constant(X c) const { return c; }
+    SizeType size() const { return _ary.size(); }
+    X const& operator[] (Index j) const { return _ary[j]; }
+    X& operator[] (Index j) { return _ary[j]; }
+    friend OutputStream& operator<<(OutputStream& os, Covector<X> const& v) {
+        for(SizeType j=0; j!=v.size(); ++j) { os << (j==0?"[":",") << v[j]; } return os << "]"; }
+    friend Covector<AddType<X,X>> add(Covector<X> const&, Covector<X> const&);
+    friend Covector<MulType<X>> mul(Covector<X> const&, Scalar<X> const&);
+    friend Covector<MulType<X>> mul(Scalar<X> const&, Covector<X> const);
+};
+typedef Vector<Real> RealVector;
+typedef Vector<ValidatedReal> ValidatedRealVector;
+
+
 // ---------------- Algebra ---------------------------------------------------------------------------------------- //
 
 
@@ -506,6 +563,21 @@ template<class A, class X> using IfAlgebra = EnableIf<IsConstructible<Algebra<X>
 using RealAlgebra = Algebra<Real>;
 using ValidatedRealAlgebra = Algebra<ValidatedReal>;
 
+// ---------------- Creation --------------------------------------------------------------------------------------- //
+
+template<class X> struct Creator {
+    struct Foo {}; typedef Foo P;
+
+    X create(GenericType<X>) const;
+    X create_constant(NumericType<X>) const;
+
+    static X concrete(P, GenericType<X>);
+    static X constant(P, NumericType<X>);
+    static X coordinate(P, IndexType<X>);
+    static X variable(P, NumericType<X>, IndexType<X>);
+    static X identity(P);
+};
+
 // ---------------- Expression ------------------------------------------------------------------------------------- //
 
 class Identifier : public std::string {
@@ -524,11 +596,11 @@ template<class X> class Variable
   public:
     explicit Variable(std::string name) : _name(name) { }
     Identifier name() const { return _name; }
-    template<class Y> Y create_constant(Y const& c) { return Expression<Y>(c); }
+    template<class Y> Expression<Y> create_constant(Y const& c) { return Expression<Y>(c); }
+    // template<class Y> Y create_constant(Y const& c) { return c; }
     friend bool operator<(Variable<X> v1, Variable<X> v2) { return v1._name < v2._name; }
     friend OutputStream& operator<<(OutputStream& os, Variable<X> const& v) { return os << v._name; }
   private:
-    // FIXME: Should not be needed...
     friend X evaluate(Expression<X>, Valuation<X>);
 };
 
@@ -611,29 +683,7 @@ typedef Valuation<Real> RealValuation;
 typedef Expression<ValidatedReal> ValidatedRealExpression;
 typedef Valuation<ValidatedReal> ValidatedRealValuation;
 
-// ---------------- Vector ----------------------------------------------------------------------------------------- //
-
-template<class X> class Vector {
-    std::vector<X> _ary;
-  public:
-    Vector(SizeType n, X x) : _ary(n,x) { }
-    Vector(InitializerList<X> lst) : _ary(lst) { }
-    Vector(std::vector<X> ary) : _ary(ary) { }
-    X create_constant(X c) const { return c; }
-    template<class Y, DisableIf<IsConvertible<Y,X>> =dummy> auto
-        create_constant(Y const& c) const -> decltype(declval<X>().create_constant(c)) {
-            const X& x0=_ary[0]; return x0.create_constant(c); }
-    SizeType size() const { return _ary.size(); }
-    X const& operator[] (SizeType i) const { return _ary[i]; }
-    X& operator[] (SizeType i) { return _ary[i]; }
-    friend OutputStream& operator<<(OutputStream& os, Vector<X> const& v) {
-        for(SizeType i=0; i!=v.size(); ++i) { os << (i==0?"[":",") << v[i]; } return os << "]"; }
-};
-typedef Vector<Real> RealVector;
-typedef Vector<ValidatedReal> ValidatedRealVector;
-
-
-// ---------------- Differential ----------------------------------------------------------------------------------- //\
+// ---------------- Differential ----------------------------------------------------------------------------------- //
 
 /*
 template<class A> struct AlgebraOperations {
@@ -645,31 +695,56 @@ template<class A> struct AlgebraOperations {
 };
 */
 
-template<class X> class Differential
-    : StaticDispatchAlgbraOperators<Differential<X>,GenericType<X>>
+template<class X, template<typename>class D> class Differential
+    : StaticDispatchAlgbraOperators<Differential<X,D>,GenericType<X>>
 {
     typedef GenericType<X> Y;
+    typedef IndexType<D<X>> I;
   private: public:
-    X _vx; X _dx;
+    X _vx; D<X> _dx;
   public:
+    typedef I IndexType;
     typedef X NumericType;
     typedef Y GenericNumericType;
-    Differential(X vx, X dx);
-    static Differential<X> constant(NumericType c);
-    static Differential<X> coordinate(NumericType c);
-    Differential<X> create_constant(GenericNumericType c) const;
+    Differential<X,D>(X vx, D<X> dx);
+    static Differential<X,D> constant(NumericType c);
+    static Differential<X,D> coordinate(NumericType c);
+//    static Differential<X,D> coordinate(NumericType c, IndexType i);
+    Differential<X,D> create_constant(GenericNumericType c) const;
     explicit operator Algebra<Y> () const;
-    explicit Differential(Algebra<Y>);
-    Differential<X>& operator=(Y);
+    explicit Differential<X,D>(Algebra<Y>);
+    Differential<X,D>& operator=(Y);
   public:
-    friend OutputStream& operator<<(OutputStream& os, Differential<X> const& dx) {
+    friend OutputStream& operator<<(OutputStream& os, Differential<X,D> const& dx) {
         return os << "(" << dx._vx << ";" << dx._dx << ")"; }
 };
 
+
 template<class D> struct IsDifferential : False { };
-template<class X> struct IsDifferential<Differential<X>> : True { };
+template<class X, template<typename>class D> struct IsDifferential<Differential<X,D>> : True { };
 
 template<class D, EnableIf<IsDifferential<D>> =dummy> D add(D,D);
+
+
+// ---------------- Polynomial ------------------------------------------------------------------------------------- //
+
+template<class X> class Polynomial
+    : StaticDispatchAlgbraOperators<Polynomial<X>,GenericType<X>>
+{
+    typedef GenericType<X> Y;
+  public:
+    typedef Index IndexType;
+    typedef X NumericType;
+    typedef Y GenericNumericType;
+    static Polynomial<X> constant(NumericType c);
+    static Polynomial<X> coordinate(NumericType c, IndexType j);
+    Polynomial<X> create_constant(GenericNumericType c) const;
+    explicit operator Algebra<Y> () const;
+    explicit Polynomial(Algebra<Y>);
+    Polynomial<X>& operator=(Y);
+  public:
+    friend OutputStream& operator<<(OutputStream& os, Polynomial<X> const& p);
+};
 
 // ---------------- Function --------------------------------------------------------------------------------------- //
 

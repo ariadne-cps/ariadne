@@ -28,7 +28,7 @@
 #ifndef ARIADNE_ALGEBRA_OPERATIONS_H
 #define ARIADNE_ALGEBRA_OPERATIONS_H
 
-#include "expression/operators.h"
+#include "numeric/operators.h"
 
 namespace Ariadne {
 

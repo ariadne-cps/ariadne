@@ -26,7 +26,7 @@
  */
 
 #include "utility/module.h"
-#include "expression/operators.h"
+#include "numeric/operators.h"
 #include "expression/templates.h"
 
 #include "real.h"

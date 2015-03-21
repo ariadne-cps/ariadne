@@ -31,7 +31,7 @@
 #include <iostream>
 #include "numeric/numeric.h"
 #include "utility/pointer.h"
-#include "expression/operators.h"
+#include "numeric/operators.h"
 #include "algebra/algebra_interface.h"
 
 namespace Ariadne {

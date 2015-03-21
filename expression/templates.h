@@ -30,7 +30,7 @@
 #ifndef ARIADNE_EXPRESSION_TEMPLATES_H
 #define ARIADNE_EXPRESSION_TEMPLATES_H
 
-#include "operators.h"
+#include "numeric/operators.h"
 
 namespace Ariadne {
 

@@ -30,7 +30,7 @@
 
 #include "algebra/algebra_interface.h"
 #include "algebra/algebra_mixin.h"
-#include "expression/operators.h"
+#include "numeric/operators.h"
 
 namespace Ariadne {
 

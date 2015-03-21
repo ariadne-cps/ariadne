@@ -68,7 +68,7 @@
 #include <cairo/cairo.h>
 #endif // HAVE_CAIRO_H
 #include <boost/concept_check.hpp>
-#include "expression/operators.h"
+#include "numeric/operators.h"
 #include "expression/space.h"
 
 

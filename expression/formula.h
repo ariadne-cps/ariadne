@@ -40,7 +40,7 @@
 #include "utility/container.h"
 #include "utility/stlio.h"
 
-#include "expression/operators.h"
+#include "numeric/operators.h"
 #include "numeric/numeric.h"
 #include "algebra/vector.h"
 #include "algebra/expansion.h"

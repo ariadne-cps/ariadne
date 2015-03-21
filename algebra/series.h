@@ -30,7 +30,7 @@
 
 #include "utility/array.h"
 #include "utility/container.h"
-#include "expression/operators.h"
+#include "numeric/operators.h"
 
 namespace Ariadne {
 

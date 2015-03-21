@@ -26,7 +26,7 @@
 
 #include "numeric/numeric.h"
 #include "algebra/vector.h"
-#include "expression/operators.h"
+#include "numeric/operators.h"
 #include "function/function.h"
 #include "function/constraint.h"
 #include "function/polynomial.h"

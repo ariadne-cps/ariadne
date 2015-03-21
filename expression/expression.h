@@ -41,7 +41,7 @@
 #include "utility/container.h"
 
 #include "expression/valuation.h"
-#include "expression/operators.h"
+#include "numeric/operators.h"
 #include "expression/variables.h"
 
 namespace Ariadne {

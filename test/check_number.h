@@ -23,7 +23,7 @@
 
 #include "test.h"
 #include "test/utility.h"
-#include "expression/operators.h"
+#include "numeric/operators.h"
 
 using namespace Ariadne;
 

@@ -29,7 +29,7 @@
 #define ARIADNE_ALGEBRA_MIXIN_H
 
 #include "algebra/algebra_interface.h"
-#include "expression/operators.h"
+#include "numeric/operators.h"
 
 namespace Ariadne {
 

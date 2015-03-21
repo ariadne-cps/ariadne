@@ -31,7 +31,7 @@
 #include "float.decl.h"
 #include "float64.h"
 #include "floatmp.h"
-#include "expression/operators.h"
+#include "numeric/operators.h"
 
 namespace Ariadne {
 

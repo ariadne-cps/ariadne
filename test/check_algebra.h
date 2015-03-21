@@ -23,7 +23,7 @@
 
 #include "test.h"
 #include "test/utility.h"
-#include "expression/operators.h"
+#include "numeric/operators.h"
 
 namespace Ariadne {
 template<class X> String vector_class_name() { return String("Vector<") + class_name<X>() + ">"; }

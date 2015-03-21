@@ -34,7 +34,7 @@
 #include "utility/writable.h"
 #include "numeric/numeric.h"
 #include "utility/pointer.h"
-#include "expression/operators.h"
+#include "numeric/operators.h"
 
 namespace Ariadne {
 

@@ -25,7 +25,7 @@
 #include "test/utility.h"
 #include "test/check_algebra.h"
 
-#include "expression/operators.h"
+#include "numeric/operators.h"
 #include "function/function.h"
 
 namespace Ariadne {

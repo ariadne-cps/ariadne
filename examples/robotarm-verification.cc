@@ -24,7 +24,7 @@
 #include <cstdarg>
 #include "ariadne.h"
 #include "expression/valuation.h"
-#include "expression/operators.h"
+#include "numeric/operators.h"
 
 using namespace Ariadne;
 

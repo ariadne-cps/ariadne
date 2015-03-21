@@ -24,7 +24,7 @@
 #include "numeric/numeric.h"
 
 #include "algebra/differential.h"
-#include "expression/operators.h"
+#include "numeric/operators.h"
 #include "expression/variables.h"
 #include "expression/expression.h"
 #include "expression/space.h"

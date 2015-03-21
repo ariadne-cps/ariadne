@@ -36,7 +36,7 @@
 #include "function/function_mixin.h"
 #include "function/function.h"
 
-#include "expression/operators.h"
+#include "numeric/operators.h"
 #include "numeric/numeric.h"
 #include "algebra/vector.h"
 #include "algebra/matrix.h"

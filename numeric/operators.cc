@@ -27,7 +27,7 @@
 #include "numeric/logical.h"
 #include "numeric/integer.h"
 #include "numeric/real.h"
-#include "expression/operators.h"
+#include "numeric/operators.h"
 
 namespace Ariadne {
 

@@ -34,7 +34,7 @@
 #include <limits> // For std::numeric_limits<double>
 
 #include "utility/declarations.h"
-#include "expression/operators.h"
+#include "numeric/operators.h"
 #include "numeric/rounding.h"
 #include "numeric/number.decl.h"
 #include "numeric/float.decl.h"

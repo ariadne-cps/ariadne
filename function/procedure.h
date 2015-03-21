@@ -36,7 +36,7 @@
 
 #include "geometry/box.h"
 
-#include "expression/operators.h"
+#include "numeric/operators.h"
 #include "expression/formula.h"
 #include "algebra/expansion.h"
 

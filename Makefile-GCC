@@ -151,7 +151,8 @@ ARIADNE_NUMERIC_LIB = libariadne-numeric.so
 ARIADNE_ALGEBRA_LIB = libariadne-algebra.so
 ARIADNE_FUNCTION_LIB = libariadne-function.so
 
-DEPS = $(patsubst %.cc,$(DEP_DIR)/%.d,$(LIB_SRC) $(LIB_EXTRAS_SRC) $(TESTS_SRC) $(EXAMPLES_SRC))
+DEPS = $(patsubst %.cc,$(DEP_DIR)/%.o.d,$(LIB_SRC) $(LIB_EXTRAS_SRC) $(TESTS_SRC) $(EXAMPLES_SRC)) \
+	$(patsubst %.h.gch,dep/%.h.gch.d,$(PCH))
 
 PCH = $(patsubst %.h,%.h.gch,$(HDR))
 LIB_OBJ = $(patsubst %.cc,$(LIB_OBJ_DIR)/%.o,$(LIB_SRC))
@@ -184,7 +185,6 @@ PYTHON_LINK_LIBS=-lboost_python -l$(PYTHON_LIBRARY)
 
 # Pull in dependency information
 include $(DEPS)
-# include $(PCH:.gch=.d)
 
 phony: all help dirs deps lib tests wrap examples check clean shiny
 
@@ -214,6 +214,9 @@ dirs:
 
 deps: dirs $(DEPS)
 
+helpdep:
+	Secho $(DEPS)
+
 lib: dirs deps libariadne.so libariadne-function.so
 
 wrap: lib $(WRAP_OBJ) ariadne.so
@@ -232,40 +235,48 @@ shiny: clean
 	@rm -rf $(DEP_DIR) $(OBJ_DIR) $(BIN_DIR) $(CHECK_DIR)
 	@rm -f *.png *.d
 
-%.h.d: %.h
-	@$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -MM $< > $*.h.d
-	@sed -i 's|.*.o:|$*.h.gch:|' $*.h.d
-
-$(DEP_DIR)/numeric.d: numeric/numeric.h | dirs
-	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -MM $< 2>/dev/null > $@
-	sed -i 's|.*.o:|obj/$*.o:|' $(DEP_DIR)/$*.d
-
-$(DEP_DIR)/functional.d: function/functional.h | dirs
-	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -MM $< 2>/dev/null > $@
-	sed -i 's|.*.o:|obj/$*.o:|' $(DEP_DIR)/$*.d
-
-$(DEP_DIR)/%.d: %.cc | dirs
+$(DEP_DIR)/standard.h.gch.d: utility/standard.h | dirs
 	@echo "Making dependencies for "$<
-	@$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -I$(PYTHON_INCLUDE_PATH) -MM $< > $(DEP_DIR)/$*.d
-	@sed -i 's|.*.o:|$(OBJ_DIR)/$*.o:|' $(DEP_DIR)/$*.d
+	@$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -MM $< 2>/dev/null | sed 's|standard\.o:|utility\/standard\.h\.gch:|' > $@
+
+$(DEP_DIR)/numeric.h.gch.d: numeric/numeric.h | dirs
+	@echo "Making dependencies for "$<" with star "$*
+	@$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -MM $< 2>/dev/null | sed 's|\(.*\)\.o:|numeric\/\1\.h\.gch:|' > $@
+
+$(DEP_DIR)/functional.h.gch.d: function/functional.h | dirs
+	@echo "Making dependencies for "$<
+	@$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -MM $< 2>/dev/null | sed 's|functional\.o:|function/functional\.h\.gch:|' > $@
+
+$(DEP_DIR)/boost_python.h.gch.d: wrap/boost_python.h | dirs
+	@echo "Making dependencies for "$<
+	@$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -MM $< 2>/dev/null | sed 's|boost_python\.o:|boost_python\.h\.gch:|' > $@
 
 
-libariadne.so: $(PCH) $(LIB_OBJ)
+$(DEP_DIR)/%.o.d: %.cc | dirs
+	@echo "Making dependencies for "$<
+	@$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -I$(PYTHON_INCLUDE_PATH) -MM $< > $(DEP_DIR)/$*.o.d
+	@sed -i 's|$*.o:|$(OBJ_DIR)/$*.o:|' $(DEP_DIR)/$*.o.d
+	@sed -i 's|utility\/standard\.h|utility\/standard\.h\.gch|g' $(DEP_DIR)/$*.o.d
+	@sed -i 's|numeric\/numeric\.h|numeric\/numeric\.h\.gch|g' $(DEP_DIR)/$*.o.d
+	@sed -i 's|function\/functional\.h|function\/function\.h\.gch|g' $(DEP_DIR)/$*.o.d
+
+
+libariadne.so: $(LIB_OBJ)
 	$(CXX) $(LIB_OBJ) $(LINK_LIBS) -shared -o libariadne.so
 
-libariadne-numeric.so: $(PCH) $(LIB_NUMERIC_OBJ)
+libariadne-numeric.so: $(LIB_NUMERIC_OBJ)
 	$(CXX) $(LIB_NUMERIC_OBJ) $(LINK_LIBS) -shared -o libariadne-numeric.so
 
-libariadne-algebra.so: $(PCH) $(LIB_NUMERIC_OBJ) $(LIB_ALGEBRA_OBJ)  $(LIB_OBJ_DIR)/interval.o $(LIB_OBJ_DIR)/point.o $(LIB_OBJ_DIR)/box.o
+libariadne-algebra.so: $(LIB_NUMERIC_OBJ) $(LIB_ALGEBRA_OBJ)  $(LIB_OBJ_DIR)/interval.o $(LIB_OBJ_DIR)/point.o $(LIB_OBJ_DIR)/box.o
 	$(CXX) $(LIB_NUMERIC_OBJ) $(LIB_ALGEBRA_OBJ)  $(LIB_OBJ_DIR)/interval.o $(LIB_OBJ_DIR)/point.o $(LIB_OBJ_DIR)/box.o  $(LINK_LIBS) -shared -o libariadne-algebra.so
 
-libariadne-function.so: $(PCH) $(LIB_NUMERIC_OBJ) $(LIB_ALGEBRA_OBJ) $(LIB_FUNCTION_OBJ)  $(LIB_OBJ_DIR)/expression.o $(LIB_OBJ_DIR)/interval.o $(LIB_OBJ_DIR)/point.o $(LIB_OBJ_DIR)/box.o
+libariadne-function.so: $(LIB_NUMERIC_OBJ) $(LIB_ALGEBRA_OBJ) $(LIB_FUNCTION_OBJ)  $(LIB_OBJ_DIR)/expression.o $(LIB_OBJ_DIR)/interval.o $(LIB_OBJ_DIR)/point.o $(LIB_OBJ_DIR)/box.o
 	$(CXX) $(LIB_NUMERIC_OBJ) $(LIB_ALGEBRA_OBJ) $(LIB_FUNCTION_OBJ) $(LIB_OBJ_DIR)/expression.o $(LIB_OBJ_DIR)/interval.o $(LIB_OBJ_DIR)/point.o  $(LIB_OBJ_DIR)/box.o  $(LINK_LIBS) -shared -o libariadne-function.so
 
-ariadne.so: $(PCH) $(WRAP_OBJ) $(LIB_EXTRAS_OBJ) libariadne.so
+ariadne.so: $(WRAP_OBJ) $(LIB_EXTRAS_OBJ) libariadne.so
 	$(CXX) $(WRAP_OBJ) $(LIB_EXTRAS_OBJ) $(PYTHON_LINK_LIBS) libariadne.so -shared -o ariadne.so
 
-numeric.so: $(PCH) $(WRAP_OBJ_DIR)/numeric_module.o $(WRAP_OBJ_DIR)/numeric_submodule.o libariadne-numeric.so
+numeric.so: $(WRAP_OBJ_DIR)/numeric_module.o $(WRAP_OBJ_DIR)/numeric_submodule.o libariadne-numeric.so
 	$(CXX) $(WRAP_OBJ_DIR)/numeric_module.o $(WRAP_OBJ_DIR)/numeric_submodule.o $(PYTHON_LINK_LIBS) libariadne-numeric.so -shared -o numeric.so
 
 %.h.gch: %.h

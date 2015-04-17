@@ -561,7 +561,7 @@ template<class X> inline Expression<X> _simplify(const Expression<X>& e) {
 }
 
 
-template<class I> inline Expression<Real> _simplify(const Expression<Real>& e) {
+inline Expression<Real> _simplify(const Expression<Real>& e) {
     typedef Real R;
 
     if(e.kind() == OperatorKind::UNARY) {
@@ -761,6 +761,44 @@ Bool opposite(Expression<Kleenean> e1, Expression<Kleenean> e2) {
 
 }
 
+
+Expression<Real> derivative(const Expression<Real>& e, Variable<Real> v)
+{
+    switch(e.op()) {
+        case OperatorCode::CNST:
+            return Expression<Real>::constant(0);
+        case OperatorCode::VAR:
+            if(e.var()==v.name()) { return Expression<Real>::constant(1); }
+            else { return Expression<Real>::constant(0); }
+        case OperatorCode::ADD:
+            return derivative(e.arg1(),v)+derivative(e.arg2(),v);
+        case OperatorCode::SUB:
+            return derivative(e.arg1(),v)-derivative(e.arg2(),v);
+        case OperatorCode::MUL:
+            return e.arg1()*derivative(e.arg2(),v)+derivative(e.arg1(),v)*e.arg2();
+        case OperatorCode::DIV:
+            return derivative(e.arg1() * rec(e.arg2()),v);
+        case OperatorCode::NEG:
+            return  - derivative(e.arg(),v);
+        case OperatorCode::REC:
+            return  - derivative(e.arg(),v) * rec(sqr(e.arg()));
+        case OperatorCode::SQR:
+            return static_cast<Real>(2) * derivative(e.arg(),v) * e.arg();
+        case OperatorCode::EXP:
+            return derivative(e.arg(),v) * e.arg();
+        case OperatorCode::LOG:
+            return derivative(e.arg(),v) * rec(e.arg());
+        case OperatorCode::SIN:
+            return derivative(e.arg(),v) * cos(e.arg());
+        case OperatorCode::COS:
+            return -derivative(e.arg(),v) * sin(e.arg());
+        case OperatorCode::TAN:
+            return derivative(e.arg(),v) * (static_cast<Real>(1)-sqr(e.arg()));
+        default:
+            ARIADNE_THROW(std::runtime_error,"derivative(Expression<Real> e, Variable<Real> v)",
+                          "Cannot compute derivative of "<<e<<"\n");
+    }
+}
 
 
 

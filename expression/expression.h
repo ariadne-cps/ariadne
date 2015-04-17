@@ -200,6 +200,9 @@ template<class T, class Y> Expression<T> substitute(const Expression<T>& e, cons
 
 template<class T, class Y> Expression<T> substitute(const Expression<T>& e, const List< Assignment< Variable<Y>,Expression<Y> > >& a);
 
+//! \brief Simplify the expression \a e.
+Expression<Real> derivative(const Expression<Real>& e, Variable<Real> v);
+
 
 //! \brief Make a function on a Euclidean domain given an ordered list including all argument variables. // DEPRECATED
 ScalarFunction<EffectiveTag> make_function(const Expression<Real>& e, const Space<Real>& s);

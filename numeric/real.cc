@@ -206,7 +206,9 @@ Real& operator/=(Real& x1, Real x2) { return x1=make_real(Div(),x1,x2); }
 
 OutputStream& operator<<(OutputStream& os, Real const& x) { return x._ptr->_write(os); }
 
-Bool same(Real x1, Real x2) { ARIADNE_NOT_IMPLEMENTED; }
+Bool same(Real x1, Real x2) {
+    return same(BoundedFloat64(x1),BoundedFloat64(x2));
+}
 
 NegSierpinski eq(Real x1, Real x2) { return BoundedFloat64(x1)==BoundedFloat64(x2); }
 Kleenean lt(Real x1, Real x2) { return BoundedFloat64(x1)< BoundedFloat64(x2); }

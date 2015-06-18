@@ -283,7 +283,7 @@ Int main(Int argc, char** argv)
 //    cout << "\norbit.final=\n" << orbit.final() << endl << endl;
 //    cout << "\norbit=\n" << orbit << endl << endl;
         // Show the value of the bounding box of the final set for x and z
-        BoundingBoxType bbox = orbit.reach()[punct].bounding_box();
+        UpperBoxType bbox = orbit.reach()[punct].bounding_box();
         std::cout << "Bounding box of the final set:" << std::endl;
         std::cout << "      x = " << bbox[0] << std::endl;
         std::cout << "      z = " << bbox[2] << std::endl;

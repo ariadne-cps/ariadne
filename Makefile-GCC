@@ -219,7 +219,7 @@ helpdep:
 
 lib: dirs deps libariadne.so libariadne-function.so
 
-wrap: lib $(WRAP_OBJ) ariadne.so
+wrap: lib $(WRAP_OBJ) ariadne.so numeric.so
 
 tests: dirs $(TESTS_BIN) $(TESTS_OBJ) lib
 
@@ -278,6 +278,9 @@ ariadne.so: $(WRAP_OBJ) $(LIB_EXTRAS_OBJ) libariadne.so
 
 numeric.so: $(WRAP_OBJ_DIR)/numeric_module.o $(WRAP_OBJ_DIR)/numeric_submodule.o libariadne-numeric.so
 	$(CXX) $(WRAP_OBJ_DIR)/numeric_module.o $(WRAP_OBJ_DIR)/numeric_submodule.o $(PYTHON_LINK_LIBS) libariadne-numeric.so -shared -o numeric.so
+
+algebra.so: $(WRAP_OBJ_DIR)/algebra_module.o $(WRAP_OBJ_DIR)/numeric_submodule.o $(WRAP_OBJ_DIR)/linear_algebra_submodule.o $(WRAP_OBJ_DIR)/differentiation_submodule.o $(WRAP_OBJ_DIR)/calculus_submodule.o libariadne.so
+	$(CXX) $(WRAP_OBJ_DIR)/algebra_module.o $(WRAP_OBJ_DIR)/numeric_submodule.o $(WRAP_OBJ_DIR)/linear_algebra_submodule.o $(WRAP_OBJ_DIR)/differentiation_submodule.o $(WRAP_OBJ_DIR)/calculus_submodule.o $(PYTHON_LINK_LIBS) libariadne.so -shared -o linalg.so
 
 %.h.gch: %.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) $<

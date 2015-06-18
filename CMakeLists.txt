@@ -106,11 +106,10 @@ set_target_properties(pyariadne PROPERTIES PREFIX "" OUTPUT_NAME "ariadne")
 target_link_libraries (pyariadne ariadne boost_python)
 
 
-add_library(pyinterval $<TARGET_OBJECTS:pyinterval-src>)
-set_target_properties(pyinterval PROPERTIES PREFIX "" OUTPUT_NAME "interval")
-target_link_libraries (pyinterval ariadne boost_python)
+add_library(pynumeric $<TARGET_OBJECTS:pynumeric-src>)
+set_target_properties(pynumeric PROPERTIES PREFIX "" OUTPUT_NAME "numeric")
+target_link_libraries (pynumeric ariadne boost_python)
 
-add_library(pydifferentiation $<TARGET_OBJECTS:pydifferentiation-src>)
-set_target_properties(pydifferentiation PROPERTIES PREFIX "" OUTPUT_NAME "differentiation")
-target_link_libraries (pydifferentiation ariadne boost_python)
-
+add_library(pyalgebra $<TARGET_OBJECTS:pyalgebra-src>)
+set_target_properties(pyalgebra PROPERTIES PREFIX "" OUTPUT_NAME "algebra")
+target_link_libraries (pyalgebra ariadne boost_python)

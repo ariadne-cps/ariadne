@@ -26,6 +26,7 @@
 
 #include <boost/python.hpp>
 
+#include "utility/typedefs.h"
 #include "utility/array.h"
 #include "numeric/numeric.h"
 #include "algebra/vector.h"

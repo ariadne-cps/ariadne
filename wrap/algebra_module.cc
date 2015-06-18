@@ -1,5 +1,5 @@
 /***************************************************************************
- *            differentiation_module.cc
+ *            algebra_module.cc
  *
  *  Copyright  2007-8  Pieter Collins
  *
@@ -23,28 +23,13 @@
 
 #include "boost_python.h"
 
-namespace Ariadne {
-class Float64;
-class ExactIntervalType;
-template<class X> class DenseDifferential;
-template<class X> class SparseDifferential;
-template<class DIFF> class DifferentialVector;
-}
+void numeric_submodule();
+void linear_algebra_submodule();
+void differentiation_submodule();
 
-template<class DIFF> Void export_differential();
-template<class DIFF> Void export_differential_vector();
-
-using namespace Ariadne;
-
-BOOST_PYTHON_MODULE(differentiation)
+BOOST_PYTHON_MODULE(algebra)
 {
-    export_differential< DenseDifferential<Float64> >();
-    export_differential< DenseDifferential<ExactIntervalType> >();
-    export_differential< SparseDifferential<Float64> >();
-    export_differential< SparseDifferential<ExactIntervalType> >();
-
-    export_differential_vector< DenseDifferential<Float64> >();
-    export_differential_vector< DenseDifferential<ExactIntervalType> >();
-    export_differential_vector< SparseDifferential<Float64> >();
-    export_differential_vector< SparseDifferential<ExactIntervalType> >();
+    numeric_submodule();
+    linear_algebra_submodule();
+    differentiation_submodule();
 }

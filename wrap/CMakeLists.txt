@@ -11,16 +11,20 @@ ELSE()
 ENDIF()
 
 
-add_library(pyinterval-src OBJECT
-    interval_module.cc
+add_library(pynumeric-src OBJECT
+    numeric_module.cc
     numeric_submodule.cc
-    linear_algebra_submodule.cc
 )
 
-add_library(pydifferentiation-src OBJECT
-    differentiation_module.cc
+add_library(pyalgebra-src OBJECT
+    utilities.cc
+    algebra_module.cc
+    numeric_submodule.cc
+    linear_algebra_submodule.cc
     differentiation_submodule.cc
+    calculus_submodule.cc
 )
+
 
 add_library(pyariadne-src OBJECT
     utilities.cc

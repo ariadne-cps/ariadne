@@ -328,12 +328,12 @@ Void export_matrix_arithmetic(class_<Matrix<X> >& matrix_class)
 template<class X>
 Void export_matrix_operations(class_<Matrix<X> >& matrix_class)
 {
-    def("norm",(X(*)(const Matrix<X>&)) &norm);
+    def("norm",(ArithmeticType<X>(*)(const Matrix<X>&)) &norm);
     def("transpose",(Matrix<X>(*)(const Matrix<X>&)) &transpose);
 
-    def("inverse",(Matrix<X>(*)(const Matrix<X>&)) &inverse);
-    def("solve",(Matrix<X>(*)(const Matrix<X>&,const Matrix<X>&)) &solve<X>);
-    def("solve",(Vector<X>(*)(const Matrix<X>&,const Vector<X>&)) &solve<X>);
+    def("inverse",(Matrix<ArithmeticType<X>>(*)(const Matrix<X>&)) &inverse);
+    def("solve",(Matrix<ArithmeticType<X>>(*)(const Matrix<X>&,const Matrix<X>&)) &solve<X>);
+    def("solve",(Vector<ArithmeticType<X>>(*)(const Matrix<X>&,const Vector<X>&)) &solve<X>);
 }
 
 
@@ -351,6 +351,13 @@ template<class X> Void export_matrix()
 template<> Void export_matrix<ExactFloat64>()
 {
     typedef ExactFloat64 X;
+    class_< Matrix<X> > matrix_class(python_name<X>("Matrix"),init<Matrix<X>>());
+    export_matrix_class<X>(matrix_class);
+}
+
+template<> Void export_matrix<ExactFloatMP>()
+{
+    typedef ExactFloatMP X;
     class_< Matrix<X> > matrix_class(python_name<X>("Matrix"),init<Matrix<X>>());
     export_matrix_class<X>(matrix_class);
 }
@@ -447,9 +454,17 @@ Void linear_algebra_submodule() {
     export_vector<BoundedFloat64>();
     export_vector<ExactFloat64>();
 
+    export_vector<ApproximateFloatMP>();
+    export_vector<BoundedFloatMP>();
+    export_vector<ExactFloatMP>();
+
     export_matrix<ApproximateFloat64>();
     export_matrix<BoundedFloat64>();
     export_matrix<ExactFloat64>();
+
+    export_matrix<ApproximateFloatMP>();
+    export_matrix<BoundedFloatMP>();
+    export_matrix<ExactFloatMP>();
 
     export_pivot_matrix();
     export_diagonal_matrix<ApproximateFloat64>();

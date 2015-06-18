@@ -890,6 +890,14 @@ template class Matrix<ApproximateFloatMP>;
 template class Matrix<BoundedFloatMP>;
 template class Matrix<ExactFloatMP>;
 
+template Matrix<ApproximateFloatMP> inverse(const Matrix<ApproximateFloatMP>&);
+template Vector<ApproximateFloatMP> solve(const Matrix<ApproximateFloatMP>&, const Vector<ApproximateFloatMP>&);
+template Matrix<ApproximateFloatMP> solve(const Matrix<ApproximateFloatMP>&, const Matrix<ApproximateFloatMP>&);
+
+template Matrix<BoundedFloatMP> inverse(const Matrix<BoundedFloatMP>&);
+template Vector<BoundedFloatMP> solve(const Matrix<BoundedFloatMP>&, const Vector<BoundedFloatMP>&);
+template Matrix<BoundedFloatMP> solve(const Matrix<BoundedFloatMP>&, const Matrix<BoundedFloatMP>&);
+
 template class Matrix<Real>;
 
 template PositiveUpperFloat64 sup_norm(const Matrix<BoundedFloat64>& A);

@@ -25,6 +25,7 @@
  *  \brief
  */
 
+#include "utility/typedefs.h"
 #include "numeric/paradigm.h"
 
 #ifndef ARIADNE_FLOAT_DECL_H

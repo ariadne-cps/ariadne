@@ -31,6 +31,7 @@
 #include <stdexcept>
 
 #include "utility/metaprogramming.h"
+#include "utility/typedefs.h"
 #include "numeric/paradigm.h"
 
 namespace Ariadne {

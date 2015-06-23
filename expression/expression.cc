@@ -370,9 +370,7 @@ Expression<Real> operator/(Expression<Real> e1, Expression<Real> e2) {
     return make_expression<Real>(Div(),e1,e2); }
 
 Expression<Real> pow(Expression<Real> e, Int n) {
-    ARIADNE_NOT_IMPLEMENTED;
-    //return make_expression(POW,e,n);
-}
+    return make_expression<Real>(Pow(),e,n); }
 
 Expression<Real> neg(Expression<Real> e) {
     return make_expression<Real>(Neg(),e); }

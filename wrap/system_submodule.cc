@@ -301,7 +301,7 @@ Void export_formula()
     def("neg", (RealExpression(*)(RealExpression)) &neg);
     def("rec", (RealExpression(*)(RealExpression)) &rec);
     def("sqr", (RealExpression(*)(RealExpression)) &sqr);
-    //def("pow", (RealExpression(*)(RealExpression,Int)) &pow);
+    def("pow", (RealExpression(*)(RealExpression,Int)) &pow);
     def("sqrt", (RealExpression(*)(RealExpression)) &sqrt);
     def("exp", (RealExpression(*)(RealExpression)) &exp);
     def("log", (RealExpression(*)(RealExpression)) &log);

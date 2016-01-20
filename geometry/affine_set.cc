@@ -225,7 +225,7 @@ UpperBoxType ValidatedAffineConstrainedImageSet::bounding_box() const {
 
 
 
-Sierpinski ValidatedAffineConstrainedImageSet::separated(const ExactBoxType& bx) const {
+Sierpinskian ValidatedAffineConstrainedImageSet::separated(const ExactBoxType& bx) const {
     ARIADNE_PRECONDITION_MSG(this->dimension()==bx.dimension(),"set="<<*this<<", box="<<bx);
     ExactBoxType wbx=cast_exact_box(widen(bx));
     LinearProgram<Float64> lp;
@@ -251,7 +251,7 @@ Kleenean ValidatedAffineConstrainedImageSet::is_empty() const {
     return Kleenean(this->separated(cast_exact_box(this->bounding_box()))) || Kleenean(indeterminate);
 }
 
-Sierpinski ValidatedAffineConstrainedImageSet::inside(const ExactBoxType& bx) const {
+Sierpinskian ValidatedAffineConstrainedImageSet::inside(const ExactBoxType& bx) const {
     ARIADNE_PRECONDITION_MSG(this->dimension()==bx.dimension(),"set="<<*this<<", box="<<bx);
     return widen(this->bounding_box()).inside(bx);
 }

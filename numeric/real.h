@@ -127,7 +127,7 @@ class Real
 
     friend Float64Error mag(Real);
 
-    friend NegSierpinski eq(Real,Real);
+    friend NegatedSierpinskian eq(Real,Real);
     friend Kleenean lt(Real,Real);
 
     friend PositiveReal dist(Real,Real);

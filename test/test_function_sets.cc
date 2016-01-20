@@ -153,8 +153,8 @@ class TestConstrainedImageSet
                 Pair<ExactBoxType,ExactBoxType> sbx=bx.split();
                 stack.append(sbx.first); stack.append(sbx.second);
             } else {
-                Sierpinski overlaps = set.overlaps(bx);
-                Sierpinski separated = set.separated(bx);
+                Sierpinskian overlaps = set.overlaps(bx);
+                Sierpinskian separated = set.separated(bx);
             if(definitely(overlaps)) {
                     figure.set_fill_colour(0.0,0.5,0.0);
                 } else if(definitely(separated)) {

@@ -473,10 +473,10 @@ class ExactBoxSet
 
     virtual ExactBoxSet* clone() const { return new ExactBoxSet(*this); }
     virtual DimensionType dimension() const final { return this->ExactBoxType::size(); }
-    virtual Sierpinski separated(const ExactBoxType& other) const final { return this->ExactBoxType::separated(other); }
-    virtual Sierpinski overlaps(const ExactBoxType& other) const final { return this->ExactBoxType::overlaps(other); }
-    virtual Sierpinski covers(const ExactBoxType& other) const final { return this->ExactBoxType::covers(other); }
-    virtual Sierpinski inside(const ExactBoxType& other) const final { return this->ExactBoxType::inside(other); }
+    virtual Sierpinskian separated(const ExactBoxType& other) const final { return this->ExactBoxType::separated(other); }
+    virtual Sierpinskian overlaps(const ExactBoxType& other) const final { return this->ExactBoxType::overlaps(other); }
+    virtual Sierpinskian covers(const ExactBoxType& other) const final { return this->ExactBoxType::covers(other); }
+    virtual Sierpinskian inside(const ExactBoxType& other) const final { return this->ExactBoxType::inside(other); }
     virtual UpperBoxType bounding_box() const final { return this->ExactBoxType::bounding_box(); }
     virtual Void draw(CanvasInterface& c, const Projection2d& p) const final { return Ariadne::draw(c,p,*this); }
     virtual OutputStream& write(OutputStream& os) const final { return os << static_cast<const ExactBoxType&>(*this); }

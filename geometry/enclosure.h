@@ -217,9 +217,9 @@ class Enclosure
     //! May return \c false if the set can (easily) be proved to be nonempty.
     Kleenean is_empty() const;
     //! \brief Returns \c true if the set can be shown to be disjoint from \a bx.
-    Sierpinski separated(const ExactBoxType& bx) const;
+    Sierpinskian separated(const ExactBoxType& bx) const;
     //! \brief Returns \c true if the set can be shown to be a subset of \a bx..
-    Sierpinski inside(const ExactBoxType& bx) const;
+    Sierpinskian inside(const ExactBoxType& bx) const;
     //! \brief Returns \c true if the set can be shown to be a subset of \a bx..
     Kleenean subset(const ExactBoxType& bx) const;
 

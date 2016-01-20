@@ -115,8 +115,8 @@ class ValidatedAffineConstrainedImageSet
 
     Kleenean is_bounded() const;
     UpperBoxType bounding_box() const;
-    Sierpinski separated(const ExactBoxType& bx) const;
-    Sierpinski inside(const ExactBoxType& bx) const;
+    Sierpinskian separated(const ExactBoxType& bx) const;
+    Sierpinskian inside(const ExactBoxType& bx) const;
     Kleenean is_empty() const;
 
     Void adjoin_outer_approximation_to(PavingInterface& g, Int depth) const;

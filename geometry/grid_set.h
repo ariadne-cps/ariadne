@@ -624,16 +624,16 @@ class GridTreeSubset
     Bool disjoint( const ExactBoxType& theBoxType ) const;
 
     /*! \brief Tests if the interior of a grid set is a superset of a box. */
-    Sierpinski covers( const ExactBoxType& theBoxType ) const;
+    Sierpinskian covers( const ExactBoxType& theBoxType ) const;
 
     /*! \brief Tests if (the closure of) a grid set is a subset of the interior of box. */
-    Sierpinski inside( const ExactBoxType& theBoxType  ) const;
+    Sierpinskian inside( const ExactBoxType& theBoxType  ) const;
 
     /*! \brief Tests if (the closure of) a grid set is disjoint from (the closure of) a box. */
-    Sierpinski separated( const ExactBoxType& theBoxType  ) const;
+    Sierpinskian separated( const ExactBoxType& theBoxType  ) const;
 
     /*! \brief Tests if a grid set overlaps (intersects the interior of) a box. */
-    Sierpinski overlaps( const ExactBoxType& theBoxType ) const;
+    Sierpinskian overlaps( const ExactBoxType& theBoxType ) const;
 
     //@}
 

@@ -153,8 +153,8 @@ TestLogical::test_conversion_to_bool()
 
     ARIADNE_TEST_STATIC_ASSERT(IsConvertible<Boolean,Bool>);
     ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<Kleenean,Bool>>);
-    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<Sierpinski,Bool>>);
-    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<NegSierpinski,Bool>>);
+    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<Sierpinskian,Bool>>);
+    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<NegatedSierpinskian,Bool>>);
     ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<Fuzzy,Bool>>);
 }
 

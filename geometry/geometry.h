@@ -185,13 +185,13 @@ Kleenean separated(const LocatedSetInterface& ls, const RegularSetInterface& rs,
 
 
 //! \brief Tests if \a ovs overlaps \a ops, to a tolerance of \a eps.
-Sierpinski overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const Float64& eps);
+Sierpinskian overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const Float64& eps);
 
 //! \brief Tests if \a cps is a inside of \a ops, to a tolerance of \a eps.
-Sierpinski inside(const CompactSetInterface& cps, const OpenSetInterface& ops, const Float64& eps);
+Sierpinskian inside(const CompactSetInterface& cps, const OpenSetInterface& ops, const Float64& eps);
 
 //! \brief Tests if \a cps is disjoint from \a cls, to a tolerance of \a eps.
-Sierpinski separated(const CompactSetInterface& cps, const ClosedSetInterface& cls, const Float64& eps);
+Sierpinskian separated(const CompactSetInterface& cps, const ClosedSetInterface& cls, const Float64& eps);
 
 
 
@@ -207,13 +207,13 @@ Kleenean separated(const LocatedSetInterface& ls, const RegularSetInterface& rs,
 
 
 //! \brief Tests if the intersection of \a ls and \a bx overlaps \a rs, to a tolerance of \a eps.
-Sierpinski intersection_overlap(const OvertSetInterface& ls, const OpenSetInterface& rs, const ExactBoxType& bx, const Float64& eps);
+Sierpinskian intersection_overlap(const OvertSetInterface& ls, const OpenSetInterface& rs, const ExactBoxType& bx, const Float64& eps);
 
 //! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
-Sierpinski intersection_inside(const ClosedSetInterface& ls, const OpenSetInterface& rs, const ExactBoxType& bx, const Float64& eps);
+Sierpinskian intersection_inside(const ClosedSetInterface& ls, const OpenSetInterface& rs, const ExactBoxType& bx, const Float64& eps);
 
 //! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
-Sierpinski intersection_separated(const ClosedSetInterface& ls, const ClosedSetInterface& rs, const ExactBoxType& bx, const Float64& eps);
+Sierpinskian intersection_separated(const ClosedSetInterface& ls, const ClosedSetInterface& rs, const ExactBoxType& bx, const Float64& eps);
 
 
 } // namespace Ariadne

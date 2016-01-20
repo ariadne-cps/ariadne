@@ -41,13 +41,13 @@ template<class P=Void> class Logical;
 
 //typedef Logical<ExactTag> Boolean;
 //typedef Logical<ValidatedTag> Kleenean;
-//typedef Logical<UpperTag> Sierpinski;
+//typedef Logical<UpperTag> Sierpinskian;
 //typedef Logical<ApproximateTag> Fuzzy;
 
 class Boolean;
 class Kleenean;
-class Sierpinski;
-class NegSierpinski;
+class Sierpinskian;
+class NegatedSierpinskian;
 class Fuzzy;
 
 template<class P> using LogicalType = Logical<P>;

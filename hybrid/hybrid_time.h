@@ -77,12 +77,12 @@ inline Bool same(const HybridTime& ht1, const HybridTime& ht2) {
         ht1._discrete_time==ht2._discrete_time;
 }
 
-inline NegSierpinski operator==(const HybridTime& ht1, const HybridTime& ht2) {
+inline NegatedSierpinskian operator==(const HybridTime& ht1, const HybridTime& ht2) {
     return ht1._continuous_time==ht2._continuous_time &&
         ht1._discrete_time==ht2._discrete_time;
 }
 
-inline Sierpinski operator!=(const HybridTime& ht1, const HybridTime& ht2) {
+inline Sierpinskian operator!=(const HybridTime& ht1, const HybridTime& ht2) {
     return ht1._continuous_time!=ht2._continuous_time ||
         ht1._discrete_time!=ht2._discrete_time;
 }

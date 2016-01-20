@@ -279,21 +279,21 @@ ConstraintSet::dimension() const
 }
 
 
-Sierpinski
+Sierpinskian
 ConstraintSet::separated(const ExactBoxType& bx) const
 {
     ExactBoxType codomain=over_approximation(this->codomain());
     return ValidatedConstrainedImageSet(bx,this->constraint_function()).separated(codomain);
 }
 
-Sierpinski
+Sierpinskian
 ConstraintSet::overlaps(const ExactBoxType& bx) const
 {
     ExactBoxType codomain=under_approximation(this->codomain());
     return ValidatedConstrainedImageSet(bx,this->constraint_function()).overlaps(codomain);
 }
 
-Sierpinski
+Sierpinskian
 ConstraintSet::covers(const ExactBoxType& bx) const
 {
     ExactBoxType codomain=under_approximation(this->codomain());
@@ -351,7 +351,7 @@ BoundedConstraintSet::dimension() const
 }
 
 
-Sierpinski
+Sierpinskian
 BoundedConstraintSet::separated(const ExactBoxType& bx) const
 {
     ExactBoxType domain=over_approximation(this->domain());
@@ -361,7 +361,7 @@ BoundedConstraintSet::separated(const ExactBoxType& bx) const
 }
 
 
-Sierpinski
+Sierpinskian
 BoundedConstraintSet::overlaps(const ExactBoxType& bx) const
 {
     if(Ariadne::disjoint(over_approximation(this->domain()),bx)) { return false; }
@@ -371,7 +371,7 @@ BoundedConstraintSet::overlaps(const ExactBoxType& bx) const
 }
 
 
-Sierpinski
+Sierpinskian
 BoundedConstraintSet::covers(const ExactBoxType& bx) const
 {
     ExactBoxType domain=under_approximation(this->domain());
@@ -380,7 +380,7 @@ BoundedConstraintSet::covers(const ExactBoxType& bx) const
     return UpperBoxType(apply(this->constraint_function(),bx)).inside(codomain);
 }
 
-Sierpinski
+Sierpinskian
 BoundedConstraintSet::inside(const ExactBoxType& bx) const
 {
     return Ariadne::inside(UpperBoxType(over_approximation(this->domain())),bx);
@@ -511,11 +511,11 @@ Kleenean ConstrainedImageSet::satisfies(const EffectiveConstraint& nc) const
 
 
 //! \brief Test if the set is contained in (the interior of) a box.
-Sierpinski ConstrainedImageSet::inside(const ExactBoxType& bx) const {
+Sierpinskian ConstrainedImageSet::inside(const ExactBoxType& bx) const {
     return this->bounding_box().inside(bx);
 }
 
-Sierpinski ConstrainedImageSet::separated(const ExactBoxType& bx) const
+Sierpinskian ConstrainedImageSet::separated(const ExactBoxType& bx) const
 {
     UpperBoxType subdomain = over_approximation(this->_domain);
     EffectiveVectorFunction function = join(this->function(),this->constraint_function());
@@ -528,7 +528,7 @@ Sierpinski ConstrainedImageSet::separated(const ExactBoxType& bx) const
 }
 
 
-Sierpinski ConstrainedImageSet::overlaps(const ExactBoxType& bx) const
+Sierpinskian ConstrainedImageSet::overlaps(const ExactBoxType& bx) const
 {
     return ValidatedConstrainedImageSet(under_approximation(this->_domain),this->_function,this->_constraints).overlaps(bx);
 }
@@ -950,12 +950,12 @@ Kleenean ValidatedConstrainedImageSet::is_empty() const
     return this->_reduced_domain.is_empty();
 }
 
-Sierpinski ValidatedConstrainedImageSet::inside(const ExactBoxType& bx) const
+Sierpinskian ValidatedConstrainedImageSet::inside(const ExactBoxType& bx) const
 {
     return Ariadne::inside(this->bounding_box(),bx);
 }
 
-Sierpinski ValidatedConstrainedImageSet::separated(const ExactBoxType& bx) const
+Sierpinskian ValidatedConstrainedImageSet::separated(const ExactBoxType& bx) const
 {
     UpperBoxType subdomain = this->_reduced_domain;
     ValidatedVectorFunction function(this->dimension()+this->number_of_constraints(),EuclideanDomain(this->number_of_parameters()));
@@ -968,7 +968,7 @@ Sierpinski ValidatedConstrainedImageSet::separated(const ExactBoxType& bx) const
     return subdomain.is_empty();
 }
 
-Sierpinski ValidatedConstrainedImageSet::overlaps(const ExactBoxType& bx) const
+Sierpinskian ValidatedConstrainedImageSet::overlaps(const ExactBoxType& bx) const
 {
     //std::cerr<<"domain="<<this->_domain<<"\n";
     //std::cerr<<"subdomain="<<this->_reduced_domain<<"\n";

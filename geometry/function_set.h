@@ -91,9 +91,9 @@ class ConstraintSet
 
     ConstraintSet* clone() const;
     DimensionType dimension() const;
-    Sierpinski separated(const ExactBoxType&) const;
-    Sierpinski overlaps(const ExactBoxType&) const;
-    Sierpinski covers(const ExactBoxType&) const;
+    Sierpinskian separated(const ExactBoxType&) const;
+    Sierpinskian overlaps(const ExactBoxType&) const;
+    Sierpinskian covers(const ExactBoxType&) const;
     OutputStream& write(OutputStream&) const;
 };
 
@@ -131,10 +131,10 @@ class BoundedConstraintSet
 
     BoundedConstraintSet* clone() const;
     DimensionType dimension() const;
-    Sierpinski separated(const ExactBoxType&) const;
-    Sierpinski overlaps(const ExactBoxType&) const;
-    Sierpinski covers(const ExactBoxType&) const;
-    Sierpinski inside(const ExactBoxType&) const;
+    Sierpinskian separated(const ExactBoxType&) const;
+    Sierpinskian overlaps(const ExactBoxType&) const;
+    Sierpinskian covers(const ExactBoxType&) const;
+    Sierpinskian inside(const ExactBoxType&) const;
     UpperBoxType bounding_box() const;
     OutputStream& write(OutputStream&) const;
     Void draw(CanvasInterface&,const Projection2d&) const;
@@ -209,11 +209,11 @@ class ConstrainedImageSet
     Pair<ConstrainedImageSet,ConstrainedImageSet> split(Nat j) const;
 
     //! \brief Test if the set is contained in (the interior of) a box.
-    Sierpinski inside(const ExactBoxType& bx) const;
+    Sierpinskian inside(const ExactBoxType& bx) const;
     //! \brief Test if the set is disjoint from a (closed) box.
-    Sierpinski separated(const ExactBoxType&) const;
+    Sierpinskian separated(const ExactBoxType&) const;
     //! \brief Test if the set overlaps (intersects the interior of) a box.
-    Sierpinski overlaps(const ExactBoxType&) const;
+    Sierpinskian overlaps(const ExactBoxType&) const;
     //! \brief Adjoin an outer approximation to a paving.
     Void adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
 
@@ -306,11 +306,11 @@ class ValidatedConstrainedImageSet
     //! \brief Test if the set is empty.
     Kleenean is_empty() const;
     //! \brief Test if the set is a strict subset of a box.
-    Sierpinski inside(const ExactBoxType& bx) const;
+    Sierpinskian inside(const ExactBoxType& bx) const;
     //! \brief Test if the set is disjoint from a box.
-    Sierpinski separated(const ExactBoxType&) const;
+    Sierpinskian separated(const ExactBoxType&) const;
     //! \brief Test if the set overlaps (intersects the interior of) a box.
-    Sierpinski overlaps(const ExactBoxType&) const;
+    Sierpinskian overlaps(const ExactBoxType&) const;
     //! \brief Adjoin an outer approximation to a paving.
     Void adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
 

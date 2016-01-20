@@ -42,7 +42,7 @@ struct ExactTag { };
 
 class Boolean;
 class Kleenean;
-class Sierpinski;
+class Sierpinskian;
 class Fuzzy;
 
 class Float64Approximation;

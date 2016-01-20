@@ -1417,7 +1417,7 @@ Bool GridTreeSubset::intersects( const ExactBoxType& theBoxType ) const {
     return definitely( GridTreeSubset::intersects( binary_tree(), grid(), cell().height(), pathCopy, theBoxType ) );
 }
 
-Sierpinski GridTreeSubset::covers( const ExactBoxType& theBoxType ) const {
+Sierpinskian GridTreeSubset::covers( const ExactBoxType& theBoxType ) const {
     //Simply check if theBoxType is covered by the set and then make sure that
     //all tree cells that are not disjoint from theBoxType are enabled
 
@@ -1435,7 +1435,7 @@ Sierpinski GridTreeSubset::covers( const ExactBoxType& theBoxType ) const {
     }
 }
 
-Sierpinski GridTreeSubset::inside( const ExactBoxType& theBoxType ) const {
+Sierpinskian GridTreeSubset::inside( const ExactBoxType& theBoxType ) const {
     //Check that the box corresponding to the root node of the set
     //is not disjoint from theBoxType. If it is then the set is not a
     //subset of theBoxType otherwise we need to traverse the tree and check
@@ -1448,7 +1448,7 @@ Sierpinski GridTreeSubset::inside( const ExactBoxType& theBoxType ) const {
     return GridTreeSubset::subset( binary_tree(), grid(), cell().height(), pathCopy, cast_exact_box(narrow(theBoxType)) );
 }
 
-Sierpinski GridTreeSubset::separated( const ExactBoxType& theBoxType ) const {
+Sierpinskian GridTreeSubset::separated( const ExactBoxType& theBoxType ) const {
     //Simply check if the box does not intersect with the set
 
     ARIADNE_ASSERT( theBoxType.dimension() == cell().dimension() );
@@ -1458,7 +1458,7 @@ Sierpinski GridTreeSubset::separated( const ExactBoxType& theBoxType ) const {
     return GridTreeSubset::disjoint( binary_tree(), grid(), cell().height(), pathCopy, cast_exact_box(widen(theBoxType)) );
 }
 
-Sierpinski GridTreeSubset::overlaps( const ExactBoxType& theBoxType ) const {
+Sierpinskian GridTreeSubset::overlaps( const ExactBoxType& theBoxType ) const {
     //Check if the box of the root cell overlaps with theBoxType,
     //if not then theBoxType does not intersect with the cell,
     //otherwise we need to find at least one enabled node

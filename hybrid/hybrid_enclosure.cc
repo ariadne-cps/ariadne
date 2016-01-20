@@ -373,12 +373,12 @@ Kleenean HybridEnclosure::is_empty() const {
     return this->_set.is_empty();
 }
 
-Sierpinski HybridEnclosure::inside(const HybridBoxType& hbx) const {
+Sierpinskian HybridEnclosure::inside(const HybridBoxType& hbx) const {
     if(this->_location==hbx.location()) { return this->continuous_set().inside(hbx.continuous_set()); }
     else { return this->continuous_set().is_empty(); }
 }
 
-Sierpinski HybridEnclosure::separated(const HybridBoxType& hbx) const {
+Sierpinskian HybridEnclosure::separated(const HybridBoxType& hbx) const {
     if(this->_location==hbx.location()) { return this->continuous_set().separated(hbx.continuous_set()); }
     else { return true; }
 }

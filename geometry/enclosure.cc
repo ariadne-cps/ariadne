@@ -1058,7 +1058,7 @@ uniform_error_recondition()
 // In TaylorModel code file
 Array<SizeType> complement(SizeType nmax, Array<SizeType> vars);
 
-TaylorModel<Validated,Float64> recondition(const TaylorModel<Validated,Float64>& tm, Array<SizeType>& discarded_variables, SizeType number_of_error_variables, SizeType index_of_error)
+TaylorModel<ValidatedTag,Float64> recondition(const TaylorModel<ValidatedTag,Float64>& tm, Array<SizeType>& discarded_variables, SizeType number_of_error_variables, SizeType index_of_error)
 {
     for(SizeType i=0; i!=discarded_variables.size()-1; ++i) {
         ARIADNE_PRECONDITION(discarded_variables[i]<discarded_variables[i+1]);
@@ -1074,7 +1074,7 @@ TaylorModel<Validated,Float64> recondition(const TaylorModel<Validated,Float64>&
     Array<SizeType> kept_variables=complement(number_of_variables,discarded_variables);
 
     // Construct result and reserve memory
-    TaylorModel<Validated,Float64> r(number_of_kept_variables+number_of_error_variables,tm.sweeper());
+    TaylorModel<ValidatedTag,Float64> r(number_of_kept_variables+number_of_error_variables,tm.sweeper());
     r.expansion().reserve(tm.number_of_nonzeros()+1u);
     MultiIndex ra(number_of_kept_variables+number_of_error_variables);
 
@@ -1091,7 +1091,7 @@ TaylorModel<Validated,Float64> recondition(const TaylorModel<Validated,Float64>&
     }
     ErrorFloat64& error=*error_ptr;
 
-    for(TaylorModel<Validated,Float64>::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
+    for(TaylorModel<ValidatedTag,Float64>::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
         MultiIndex const& xa=iter->key();
         ExactFloat64 const& xv=iter->data();
         Bool keep=true;
@@ -1114,7 +1114,7 @@ TaylorModel<Validated,Float64> recondition(const TaylorModel<Validated,Float64>&
     return r;
 }
 
-TaylorModel<Validated,Float64> recondition(const TaylorModel<Validated,Float64>& tm, Array<SizeType>& discarded_variables, SizeType number_of_error_variables) {
+TaylorModel<ValidatedTag,Float64> recondition(const TaylorModel<ValidatedTag,Float64>& tm, Array<SizeType>& discarded_variables, SizeType number_of_error_variables) {
     return recondition(tm,discarded_variables,number_of_error_variables,number_of_error_variables);
 }
 
@@ -1317,7 +1317,7 @@ Void Enclosure::affine_draw(CanvasInterface& canvas, const Projection2d& project
         try {
             this->restriction(subdomains[n]).affine_over_approximation().draw(canvas,projection);
         } catch(std::runtime_error& e) {
-            ARIADNE_WARN("Error "<<e.what()<<" in Enclosure::affine_draw(...) for "<<*this<<"\n");
+            ARIADNE_WARN("ErrorTag "<<e.what()<<" in Enclosure::affine_draw(...) for "<<*this<<"\n");
             this->restriction(subdomains[n]).box_draw(canvas,projection);
         }
     }

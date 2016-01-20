@@ -146,7 +146,7 @@ class ExactFloat64
   public:
     static Void set_output_precision(Int);
   public:
-    typedef Exact Paradigm;
+    typedef ExactTag Paradigm;
     ExactFloat64();
     template<class N, typename std::enable_if<std::is_integral<N>::value>::type> ExactFloat64(N);
     ExactFloat64(Nat);
@@ -214,7 +214,7 @@ class ValidFloat64 : public NumberObject<ValidFloat64> {
   private:
     ValidFloat64(double d, ExactTag);
   public:
-    typedef Validated Paradigm;
+    typedef ValidatedTag Paradigm;
     ValidFloat64();
     template<class N, typename std::enable_if<std::is_integral<N>::value,Int>::type = 0>
         ValidFloat64(N n);
@@ -254,7 +254,7 @@ class BoundedFloat64 : public NumberObject<BoundedFloat64> {
   public:
     static Void set_output_precision(Int);
   public:
-    typedef Validated Paradigm;
+    typedef ValidatedTag Paradigm;
     BoundedFloat64();
     BoundedFloat64(Int);
     BoundedFloat64(const Rational&);
@@ -351,7 +351,7 @@ LowerFloat64 operator-(LowerFloat64,ErrorFloat64);
 class ApproximateFloat64 : public NumberObject<ApproximateFloat64> {
     volatile double a;
   public:
-    typedef Approximate Paradigm;
+    typedef ApproximateTag Paradigm;
     ApproximateFloat64();
     ApproximateFloat64(double);
     ApproximateFloat64(const Rational&);

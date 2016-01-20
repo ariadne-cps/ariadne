@@ -22,7 +22,7 @@
  */
 
 /*! \file taylor_model.h
- *  \brief Approximate functions on a is_bounded domain with a sparse representation.
+ *  \brief ApproximateTag functions on a is_bounded domain with a sparse representation.
  */
 
 #ifndef ARIADNE_TAYLOR_MODEL_H
@@ -52,8 +52,8 @@ enum class SplitPart : char;
 template<class T1, class T2> struct Product;
 
 template<class P, class F> class TaylorModel;
-typedef TaylorModel<Approximate,Float64> ApproximateTaylorModel;
-typedef TaylorModel<Validated,Float64> ValidatedTaylorModel;
+typedef TaylorModel<ApproximateTag,Float64> ApproximateTaylorModel;
+typedef TaylorModel<ValidatedTag,Float64> ValidatedTaylorModel;
 
 template<class P, class F> struct IsScalar< TaylorModel<P,F> > { static const Bool value = true; };
 template<class P, class F> struct IsAlgebra< TaylorModel<P,F> > { static const Bool value = true; };
@@ -73,7 +73,7 @@ struct IntersectionException : public std::runtime_error {
  * See also Expansion, ScalarTaylorFunction, VectorTaylorFunction, TaylorConstrainedImageSet.
  */
 template<class F>
-class TaylorModel<Validated,F>
+class TaylorModel<ValidatedTag,F>
 {
   public:
     typedef ExactFloat64 CoefficientType;
@@ -86,7 +86,7 @@ class TaylorModel<Validated,F>
     typedef ApproximateIntervalType RangeType;
 
     //! \brief The computational paradigm.
-    typedef Validated Paradigm;
+    typedef ValidatedTag Paradigm;
 
     //! \brief The type used for the coefficients.
     typedef ValidatedNumericType NumericType;
@@ -112,79 +112,79 @@ class TaylorModel<Validated,F>
     //@{
     /*! \name Constructors and destructors. */
     //! \brief Default constructor.
-    TaylorModel<Validated,F>();
+    TaylorModel<ValidatedTag,F>();
     //! \brief Construct a TaylorModel in \a as arguments with the given accuracy control.
-    TaylorModel<Validated,F>(SizeType as, Sweeper swp);
+    TaylorModel<ValidatedTag,F>(SizeType as, Sweeper swp);
     //! \brief Construct from a map giving the expansion, a constant giving the error, and an accuracy parameter.
-    TaylorModel<Validated,F>(const Expansion<CoefficientType>& f, const ErrorType& e, Sweeper swp);
-    TaylorModel<Validated,F>(const Expansion<RawFloat64>& f, const RawFloat64& e, Sweeper swp);
+    TaylorModel<ValidatedTag,F>(const Expansion<CoefficientType>& f, const ErrorType& e, Sweeper swp);
+    TaylorModel<ValidatedTag,F>(const Expansion<RawFloat64>& f, const RawFloat64& e, Sweeper swp);
     //! \brief Fast swap with another Taylor model.
-    Void swap(TaylorModel<Validated,F>& tm);
+    Void swap(TaylorModel<ValidatedTag,F>& tm);
     //! \brief The zero element of the algebra of Taylor models, with the same number of arguments and accuracy parameters.
-    TaylorModel<Validated,F> create() const;
+    TaylorModel<ValidatedTag,F> create() const;
     //! \brief The zero element of the algebra of Taylor models, with the same number of arguments and accuracy parameters.
-    TaylorModel<Validated,F> create_zero() const;
+    TaylorModel<ValidatedTag,F> create_zero() const;
     //! \brief A constant element of the algebra of Taylor models, with the same number of arguments and accuracy parameters.
-    TaylorModel<Validated,F> create_constant(NumericType c) const;
+    TaylorModel<ValidatedTag,F> create_constant(NumericType c) const;
     //! \brief The \a j<sup>th</sup> coordinate element of the algebra of Taylor models, with the same number of arguments and accuracy parameters.
-    TaylorModel<Validated,F> create_coordinate(SizeType j) const;
+    TaylorModel<ValidatedTag,F> create_coordinate(SizeType j) const;
     //! \brief Set to zero.
-    TaylorModel<Validated,F> create_ball(ErrorType e) const;
+    TaylorModel<ValidatedTag,F> create_ball(ErrorType e) const;
     //! \brief Set to zero.
     Void clear();
 
     //@{
     /*! \name Assignment to constant values. */
     //! \brief Set equal to an interval constant, keeping the same number of arguments.
-    TaylorModel<Validated,F>& operator =(const ValidatedNumericType& c);
+    TaylorModel<ValidatedTag,F>& operator =(const ValidatedNumericType& c);
     //@}
 
     //@{
     /*! \name Named constructors. */
     //! \brief Construct the zero quantity in \a as independent variables.
-    static TaylorModel<Validated,F> zero(SizeType as, Sweeper swp) {
-        TaylorModel<Validated,F> r(as,swp); return r; }
+    static TaylorModel<ValidatedTag,F> zero(SizeType as, Sweeper swp) {
+        TaylorModel<ValidatedTag,F> r(as,swp); return r; }
     //! \brief Construct a constant quantity in \a as independent variables.
-    static TaylorModel<Validated,F> constant(SizeType as, const NumericType& c, Sweeper swp) {
-        TaylorModel<Validated,F> r(as,swp); r.set_value(1); r*=c; return r; }
+    static TaylorModel<ValidatedTag,F> constant(SizeType as, const NumericType& c, Sweeper swp) {
+        TaylorModel<ValidatedTag,F> r(as,swp); r.set_value(1); r*=c; return r; }
     //! \brief Construct the quantity with expansion \f$x_j\f$ in \a as independent variables.
-    static TaylorModel<Validated,F> coordinate(SizeType as, SizeType j, Sweeper swp) {
-        TaylorModel<Validated,F> r(as,swp); r.set_gradient(j,1); return r; }
+    static TaylorModel<ValidatedTag,F> coordinate(SizeType as, SizeType j, Sweeper swp) {
+        TaylorModel<ValidatedTag,F> r(as,swp); r.set_gradient(j,1); return r; }
     //! \brief Construct a constant quantity in \a as independent variables with value zero and uniform error \a e
-    static TaylorModel<Validated,F> error(SizeType as, ErrorType e, Sweeper swp) {
-        TaylorModel<Validated,F> r(as,swp); r.set_error(e); return r; }
+    static TaylorModel<ValidatedTag,F> error(SizeType as, ErrorType e, Sweeper swp) {
+        TaylorModel<ValidatedTag,F> r(as,swp); r.set_error(e); return r; }
     //! \brief Construct a constant quantity in \a as independent variables with value zero and uniform error \a e
-    static TaylorModel<Validated,F> ball(SizeType as, ErrorType e, Sweeper swp) {
-        TaylorModel<Validated,F> r(as,swp); r.set_error(e); return r; }
+    static TaylorModel<ValidatedTag,F> ball(SizeType as, ErrorType e, Sweeper swp) {
+        TaylorModel<ValidatedTag,F> r(as,swp); r.set_error(e); return r; }
 
     //! \brief Construct the quantity which scales the interval \a codom onto the unit interval.
-    static TaylorModel<Validated,F> scaling(SizeType as, SizeType j, const ExactIntervalType& codom, Sweeper swp);
+    static TaylorModel<ValidatedTag,F> scaling(SizeType as, SizeType j, const ExactIntervalType& codom, Sweeper swp);
 
     //! \brief Return the vector of zero variables of size \a rs in \a as arguments.
-    static Vector<TaylorModel<Validated,F>> zeros(SizeType rs, SizeType as, Sweeper swp);
+    static Vector<TaylorModel<ValidatedTag,F>> zeros(SizeType rs, SizeType as, Sweeper swp);
     //! \brief Return the vector of constants with values \a c in \a as arguments.
-    static Vector<TaylorModel<Validated,F>> constants(SizeType as, const Vector<ValidatedNumericType>& c, Sweeper swp);
+    static Vector<TaylorModel<ValidatedTag,F>> constants(SizeType as, const Vector<ValidatedNumericType>& c, Sweeper swp);
     //! \brief Return the vector of variables on the unit domain.
-    static Vector<TaylorModel<Validated,F>> coordinates(SizeType as, Sweeper swp);
+    static Vector<TaylorModel<ValidatedTag,F>> coordinates(SizeType as, Sweeper swp);
 
     //! \brief Return the vector scaling the box \a codom onto the unit box.
-    static Vector<TaylorModel<Validated,F>> scalings(const Vector<ExactIntervalType>& codom, Sweeper swp);
+    static Vector<TaylorModel<ValidatedTag,F>> scalings(const Vector<ExactIntervalType>& codom, Sweeper swp);
     //@}
 
     //@{
     /*! \name Comparison operators. */
     //! \brief Equality operator. Tests equality of representation, including error term.
-    friend Bool same(const TaylorModel<Validated,F>& tm1, const TaylorModel<Validated,F>& tm2) {
+    friend Bool same(const TaylorModel<ValidatedTag,F>& tm1, const TaylorModel<ValidatedTag,F>& tm2) {
         return same(tm1._expansion, tm2._expansion) && same(tm1._error, tm2._error); }
-    Bool operator==(const TaylorModel<Validated,F>& sd) const {
+    Bool operator==(const TaylorModel<ValidatedTag,F>& sd) const {
         return same(*this,sd); }
     //! \brief Inequality operator.
-    Bool operator!=(const TaylorModel<Validated,F>& sd) const {
+    Bool operator!=(const TaylorModel<ValidatedTag,F>& sd) const {
         return !same(*this,sd); }
-    Kleenean operator<(const TaylorModel<Validated,F>& sd) const {
+    Kleenean operator<(const TaylorModel<ValidatedTag,F>& sd) const {
         return (sd-*this)>0; }
     //! \brief Comparison with another Taylor model.
-    Kleenean operator>(const TaylorModel<Validated,F>& sd) const {
+    Kleenean operator>(const TaylorModel<ValidatedTag,F>& sd) const {
         return (*this-sd)>0; }
 
     //! \brief Comparison with a scalar.
@@ -220,8 +220,8 @@ class TaylorModel<Validated,F>
     //! \brief An over-approximation to the supremum norm.
     NormType norm() const;
     //! \brief An over-approximation to the supremum norm.
-    friend typename TaylorModel<Validated,F>::NormType norm(const TaylorModel<Validated,F>& tm) { return tm.norm(); }
-    friend typename TaylorModel<Validated,F>::NormType mag(const TaylorModel<Validated,F>& tm) { return tm.norm(); }
+    friend typename TaylorModel<ValidatedTag,F>::NormType norm(const TaylorModel<ValidatedTag,F>& tm) { return tm.norm(); }
+    friend typename TaylorModel<ValidatedTag,F>::NormType mag(const TaylorModel<ValidatedTag,F>& tm) { return tm.norm(); }
 
 
     //! \brief A value \c e such that analytic functions are evaluated to a tolerance of \c e. Equal to the sweep threshold.
@@ -272,24 +272,24 @@ class TaylorModel<Validated,F>
     Covector<UpperIntervalType> gradient_range() const;
 
     //! \brief Evaluate the quantity over the interval of points \a x.
-    friend ApproximateNumericType evaluate(const TaylorModel<Validated,F>& f, const Vector<ApproximateNumericType>& x) {
-        return TaylorModel<Validated,F>::_evaluate(f,x); }
-    friend ValidatedNumericType evaluate(const TaylorModel<Validated,F>& f, const Vector<ValidatedNumericType>& x) {
-        return TaylorModel<Validated,F>::_evaluate(f,x); }
+    friend ApproximateNumericType evaluate(const TaylorModel<ValidatedTag,F>& f, const Vector<ApproximateNumericType>& x) {
+        return TaylorModel<ValidatedTag,F>::_evaluate(f,x); }
+    friend ValidatedNumericType evaluate(const TaylorModel<ValidatedTag,F>& f, const Vector<ValidatedNumericType>& x) {
+        return TaylorModel<ValidatedTag,F>::_evaluate(f,x); }
     //! \brief Evaluate the gradient over the interval of points \a x.
-    friend Covector<ValidatedNumericType> gradient(const TaylorModel<Validated,F>& f, const Vector<ValidatedNumericType>& x) {
-        return TaylorModel<Validated,F>::_gradient(f,x); }
+    friend Covector<ValidatedNumericType> gradient(const TaylorModel<ValidatedTag,F>& f, const Vector<ValidatedNumericType>& x) {
+        return TaylorModel<ValidatedTag,F>::_gradient(f,x); }
     //! \brief Substite \a c for the \a k th variable.
-    friend TaylorModel<Validated,F> partial_evaluate(const TaylorModel<Validated,F>& x, SizeType k, ValidatedNumericType c) {
-        return TaylorModel<Validated,F>::_partial_evaluate(x,k,c); }
-    //! \relates TaylorModel<Validated,F Compose a vector of Taylor models with another.
-    friend TaylorModel<Validated,F> compose(const Unscaling& uf, const TaylorModel<Validated,F>& tg) {
-        return TaylorModel<Validated,F>::_compose(uf,tg); }
+    friend TaylorModel<ValidatedTag,F> partial_evaluate(const TaylorModel<ValidatedTag,F>& x, SizeType k, ValidatedNumericType c) {
+        return TaylorModel<ValidatedTag,F>::_partial_evaluate(x,k,c); }
+    //! \relates TaylorModel<ValidatedTag,F Compose a vector of Taylor models with another.
+    friend TaylorModel<ValidatedTag,F> compose(const Unscaling& uf, const TaylorModel<ValidatedTag,F>& tg) {
+        return TaylorModel<ValidatedTag,F>::_compose(uf,tg); }
     //! \brief Evaluate the quantity over the interval of points \a x.
-    friend TaylorModel<Validated,F> compose(const TaylorModel<Validated,F>& f, const Vector<TaylorModel<Validated,F>>& g) {
-        return TaylorModel<Validated,F>::_compose(f,g); }
+    friend TaylorModel<ValidatedTag,F> compose(const TaylorModel<ValidatedTag,F>& f, const Vector<TaylorModel<ValidatedTag,F>>& g) {
+        return TaylorModel<ValidatedTag,F>::_compose(f,g); }
     //! \brief Scale the variable by post-composing with an affine map taking the interval ivl to the unit interval
-    friend TaylorModel<Validated,F> compose(const TaylorModel<Validated,F>& tf, const VectorUnscaling& u);
+    friend TaylorModel<ValidatedTag,F> compose(const TaylorModel<ValidatedTag,F>& tf, const VectorUnscaling& u);
 
     //@}
 
@@ -302,70 +302,70 @@ class TaylorModel<Validated,F>
     //! \brief Compute the weak derivative (in place).
     Void differentiate(SizeType k);
 
-    friend TaylorModel<Validated,F> unscale(TaylorModel<Validated,F> tm, ExactIntervalType const& dom) {
+    friend TaylorModel<ValidatedTag,F> unscale(TaylorModel<ValidatedTag,F> tm, ExactIntervalType const& dom) {
         tm.unscale(dom); return std::move(tm); }
-    friend TaylorModel<Validated,F> antiderivative(TaylorModel<Validated,F> tm, SizeType k) {
+    friend TaylorModel<ValidatedTag,F> antiderivative(TaylorModel<ValidatedTag,F> tm, SizeType k) {
         tm.antidifferentiate(k); return std::move(tm); }
-    friend TaylorModel<Validated,F> derivative(TaylorModel<Validated,F> tm, SizeType k) {
+    friend TaylorModel<ValidatedTag,F> derivative(TaylorModel<ValidatedTag,F> tm, SizeType k) {
         tm.differentiate(k); return std::move(tm); }
     //@}
 
     //@{
     /*! \name Operations on the domain. */
     //!\brief Split the Taylor model \a tm, subdividing along the independent variable \a k, taking the lower/middle/upper \a part.
-    friend TaylorModel<Validated,F> split(const TaylorModel<Validated,F>& tm, SizeType k, SplitPart part) {
-        return TaylorModel<Validated,F>::_split(tm,k,part); }
-    //! \relates TaylorModel<Validated,F> \brief Embed the model in a space of higher dimension
-    friend TaylorModel<Validated,F> embed(SizeType as1, const TaylorModel<Validated,F>& tm2, SizeType as3) {
-        return TaylorModel<Validated,F>::_embed(as1,tm2,as3); }
+    friend TaylorModel<ValidatedTag,F> split(const TaylorModel<ValidatedTag,F>& tm, SizeType k, SplitPart part) {
+        return TaylorModel<ValidatedTag,F>::_split(tm,k,part); }
+    //! \relates TaylorModel<ValidatedTag,F> \brief Embed the model in a space of higher dimension
+    friend TaylorModel<ValidatedTag,F> embed(SizeType as1, const TaylorModel<ValidatedTag,F>& tm2, SizeType as3) {
+        return TaylorModel<ValidatedTag,F>::_embed(as1,tm2,as3); }
     //@}
 
     //@{
-    /*! \name Validated paradigm-based operations. */
+    /*! \name ValidatedTag paradigm-based operations. */
     //! \brief Test if one model is disjoint from (is incompatible with) another.
-    friend Bool consistent(const TaylorModel<Validated,F>& tm1, const TaylorModel<Validated,F>& tm2) {
-        return TaylorModel<Validated,F>::_consistent(tm1,tm2); }
+    friend Bool consistent(const TaylorModel<ValidatedTag,F>& tm1, const TaylorModel<ValidatedTag,F>& tm2) {
+        return TaylorModel<ValidatedTag,F>::_consistent(tm1,tm2); }
     //! \brief Test if one model is disjoint from (is incompatible with) another.
-    friend Bool inconsistent(const TaylorModel<Validated,F>& tm1, const TaylorModel<Validated,F>& tm2) {
-        return TaylorModel<Validated,F>::_inconsistent(tm1,tm2); }
+    friend Bool inconsistent(const TaylorModel<ValidatedTag,F>& tm1, const TaylorModel<ValidatedTag,F>& tm2) {
+        return TaylorModel<ValidatedTag,F>::_inconsistent(tm1,tm2); }
     //! \brief Test if one model refines (is a subset of) another.
-    friend Bool refines(const TaylorModel<Validated,F>& tm1, const TaylorModel<Validated,F>& tm2) {
-        return TaylorModel<Validated,F>::_refines(tm1,tm2); }
+    friend Bool refines(const TaylorModel<ValidatedTag,F>& tm1, const TaylorModel<ValidatedTag,F>& tm2) {
+        return TaylorModel<ValidatedTag,F>::_refines(tm1,tm2); }
     //! \brief An over-approximation to the common refinement of two Taylor models.
     //! Since the intersection of represented sets of functions cannot be represented
     //! exactly in the class of TaylorModels, truncation errors as well as roundoff errors
     //! may be present. In the absence of roundoff errors, the result is a subset of both
     //! arguments, and is guaranteed to contain any function contained in both arguments.
-    friend TaylorModel<Validated,F> refinement(const TaylorModel<Validated,F>& tm1, const TaylorModel<Validated,F>& tm2) {
-        return TaylorModel<Validated,F>::_refinement(tm1,tm2); }
+    friend TaylorModel<ValidatedTag,F> refinement(const TaylorModel<ValidatedTag,F>& tm1, const TaylorModel<ValidatedTag,F>& tm2) {
+        return TaylorModel<ValidatedTag,F>::_refinement(tm1,tm2); }
     //@}
 
     //@{
     /*! \name Simplification operations. */
-    //! \relates TaylorModel<Validated,F> \brief Embed the model in a space of higher dimension, placing the error in the final variable.
-    friend TaylorModel<Validated,F> embed_error(const TaylorModel<Validated,F>& tm) {
-        return TaylorModel<Validated,F>::_embed_error(tm); }
-    //! \relates TaylorModel<Validated,F> \brief Abstract away the given variables.
+    //! \relates TaylorModel<ValidatedTag,F> \brief Embed the model in a space of higher dimension, placing the error in the final variable.
+    friend TaylorModel<ValidatedTag,F> embed_error(const TaylorModel<ValidatedTag,F>& tm) {
+        return TaylorModel<ValidatedTag,F>::_embed_error(tm); }
+    //! \relates TaylorModel<ValidatedTag,F> \brief Abstract away the given variables.
     //! For example, the model tm(x0,x1,x2,x3) becomes tm'(x0,x1)=tm(x0,[-1,+1],x1,[-1,+1]) on discarding x1 and x3.
-    friend TaylorModel<Validated,F>  discard_variables(const TaylorModel<Validated,F>& tm, const Array<SizeType>& variables) {
-        return TaylorModel<Validated,F>::_discard_variables(tm,variables); }
+    friend TaylorModel<ValidatedTag,F>  discard_variables(const TaylorModel<ValidatedTag,F>& tm, const Array<SizeType>& variables) {
+        return TaylorModel<ValidatedTag,F>::_discard_variables(tm,variables); }
 
     //! \brief Remove all terms based on the \a swp conditions.
-    TaylorModel<Validated,F>& sweep(const Sweeper& swp);
+    TaylorModel<ValidatedTag,F>& sweep(const Sweeper& swp);
 
     //! \brief Remove all terms whose coefficient has magnitude
     //! lower than the cutoff threshold of the quantity.
-    TaylorModel<Validated,F>& sweep();
+    TaylorModel<ValidatedTag,F>& sweep();
     //! \brief Sorts keys.
-    TaylorModel<Validated,F>& sort();
+    TaylorModel<ValidatedTag,F>& sort();
     //! \brief Remove terms with the same keys. Assumes sorted.
-    TaylorModel<Validated,F>& unique();
+    TaylorModel<ValidatedTag,F>& unique();
     //! \brief Sort the terms in index order and combine terms with the same index.
-    TaylorModel<Validated,F>& cleanup();
+    TaylorModel<ValidatedTag,F>& cleanup();
 
     //! \brief Set the error to zero.
     //! WARNING: This method does not preserve rigour of the model approximation.
-    TaylorModel<Validated,F>& clobber();
+    TaylorModel<ValidatedTag,F>& clobber();
 
     //@}
 
@@ -384,35 +384,35 @@ class TaylorModel<Validated,F>
     //! \brief Multiply by a numerical scalar \c r*=c .
     Void imul(const ValidatedNumericType& c);
     //! \brief Scalar multiply and add \c r+=c*x .
-    Void isma(const ValidatedNumericType& c, const TaylorModel<Validated,F>& x);
+    Void isma(const ValidatedNumericType& c, const TaylorModel<ValidatedTag,F>& x);
     //! \brief Fused multiply and add \c r+=x1*x2 .
-    Void ifma(const TaylorModel<Validated,F>& x1, const TaylorModel<Validated,F>& x2);
+    Void ifma(const TaylorModel<ValidatedTag,F>& x1, const TaylorModel<ValidatedTag,F>& x2);
 
-    friend TaylorModel<Validated,F> operator-(TaylorModel<Validated,F> x) { x.imul(-1); return std::move(x); }
-    friend TaylorModel<Validated,F>& operator+=(TaylorModel<Validated,F>& x, NumericType const& c) { x.iadd(c); return x; }
-    friend TaylorModel<Validated,F>& operator*=(TaylorModel<Validated,F>& x, NumericType const& c) { x.imul(c); return x; }
-    friend TaylorModel<Validated,F> operator+(TaylorModel<Validated,F> const& x1, TaylorModel<Validated,F> const& x2) {
-        TaylorModel<Validated,F> r=x1; r.isma(+1,x2); return std::move(r); }
-    friend TaylorModel<Validated,F> operator-(TaylorModel<Validated,F> const& x1, TaylorModel<Validated,F> const& x2) {
-        TaylorModel<Validated,F> r=x1; r.isma(-1,x2); return std::move(r); }
-    friend TaylorModel<Validated,F> operator*(TaylorModel<Validated,F> const& x1, TaylorModel<Validated,F> const& x2) {
-        TaylorModel<Validated,F> r(x1.argument_size(),x1.sweeper()); r.ifma(x1,x2); return std::move(r); }
+    friend TaylorModel<ValidatedTag,F> operator-(TaylorModel<ValidatedTag,F> x) { x.imul(-1); return std::move(x); }
+    friend TaylorModel<ValidatedTag,F>& operator+=(TaylorModel<ValidatedTag,F>& x, NumericType const& c) { x.iadd(c); return x; }
+    friend TaylorModel<ValidatedTag,F>& operator*=(TaylorModel<ValidatedTag,F>& x, NumericType const& c) { x.imul(c); return x; }
+    friend TaylorModel<ValidatedTag,F> operator+(TaylorModel<ValidatedTag,F> const& x1, TaylorModel<ValidatedTag,F> const& x2) {
+        TaylorModel<ValidatedTag,F> r=x1; r.isma(+1,x2); return std::move(r); }
+    friend TaylorModel<ValidatedTag,F> operator-(TaylorModel<ValidatedTag,F> const& x1, TaylorModel<ValidatedTag,F> const& x2) {
+        TaylorModel<ValidatedTag,F> r=x1; r.isma(-1,x2); return std::move(r); }
+    friend TaylorModel<ValidatedTag,F> operator*(TaylorModel<ValidatedTag,F> const& x1, TaylorModel<ValidatedTag,F> const& x2) {
+        TaylorModel<ValidatedTag,F> r(x1.argument_size(),x1.sweeper()); r.ifma(x1,x2); return std::move(r); }
     //@}
 
     //@{
     /*! \name Order operators. */
     //! \brief The pointwise maximum.
-    template<class FF> friend TaylorModel<Validated,FF> max(const TaylorModel<Validated,FF>& x, const TaylorModel<Validated,FF>& y);
+    template<class FF> friend TaylorModel<ValidatedTag,FF> max(const TaylorModel<ValidatedTag,FF>& x, const TaylorModel<ValidatedTag,FF>& y);
     //! \brief The pointwise minimum.
-    template<class FF> friend TaylorModel<Validated,FF> min(const TaylorModel<Validated,FF>& x, const TaylorModel<Validated,FF>& y);
+    template<class FF> friend TaylorModel<ValidatedTag,FF> min(const TaylorModel<ValidatedTag,FF>& x, const TaylorModel<ValidatedTag,FF>& y);
     //! \brief The pointwise absolute value.
     //! \details If the range of \a x definitely does not include 0, returns +x or -x. Otherwise, uses a uniform polynomial approximation to abs.
-    template<class FF> friend TaylorModel<Validated,FF> abs(const TaylorModel<Validated,FF>& x);
+    template<class FF> friend TaylorModel<ValidatedTag,FF> abs(const TaylorModel<ValidatedTag,FF>& x);
     //@}
     //@{
     /*! \name Stream input/output operators. */
     //! \brief Write to an output stream.
-    friend OutputStream& operator<<(OutputStream& os, const TaylorModel<Validated,F>& x) { return x.str(os); }
+    friend OutputStream& operator<<(OutputStream& os, const TaylorModel<ValidatedTag,F>& x) { return x.str(os); }
     //@}
 
   public:
@@ -421,35 +421,35 @@ class TaylorModel<Validated,F>
   public: // FIXME: Should be private
     Void _set_error(const RawFloat64& ne) { ARIADNE_ASSERT(ne>=0); this->_error=ErrorType(ne); }
     Void _append(MultiIndex const& a, CoefficientType const& v) { this->_expansion.append(a,v); }
-    static Bool _consistent(const TaylorModel<Validated,F>& tm1, const TaylorModel<Validated,F>& tm2);
-    static Bool _inconsistent(const TaylorModel<Validated,F>& tm1, const TaylorModel<Validated,F>& tm2);
-    static Bool _refines(const TaylorModel<Validated,F>& tm1, const TaylorModel<Validated,F>& tm2);
-    static TaylorModel<Validated,F> _refinement(const TaylorModel<Validated,F>& tm1, const TaylorModel<Validated,F>& tm2);
-    static TaylorModel<Validated,F> _antiderivative(const TaylorModel<Validated,F>& tm, SizeType k);
-    static TaylorModel<Validated,F> _weak_derivative(const TaylorModel<Validated,F>& tm, SizeType k);
-    static TaylorModel<Validated,F> _embed_error(const TaylorModel<Validated,F>& tm);
-    static TaylorModel<Validated,F>  _discard_variables(const TaylorModel<Validated,F>&, const Array<SizeType>& variables);
-    static TaylorModel<Validated,F> _split(const TaylorModel<Validated,F>& tm, SizeType k, SplitPart part);
-    static TaylorModel<Validated,F> _embed(SizeType as1, const TaylorModel<Validated,F>& tm2, SizeType as3);
-    static TaylorModel<Validated,F> _compose(TaylorModel<Validated,F> const& tf, const Vector<TaylorModel<Validated,F>>& tg);
-    static TaylorModel<Validated,F> _compose(Unscaling const& uf, TaylorModel<Validated,F> const& tg);
-    static TaylorModel<Validated,F> _compose(TaylorModel<Validated,F> const& tf, VectorUnscaling const& u, const Vector<TaylorModel<Validated,F>>& tg);
-    static TaylorModel<Validated,F> _partial_evaluate(const TaylorModel<Validated,F>& x, SizeType k, ValidatedNumericType c);
-    static Covector<ValidatedNumericType> _gradient(const TaylorModel<Validated,F>& x, Vector<ValidatedNumericType> const& v);
-    static ValidatedNumericType _evaluate(const TaylorModel<Validated,F>& x, Vector<ValidatedNumericType> const& v);
-    static ApproximateNumericType _evaluate(const TaylorModel<Validated,F>& x, Vector<ApproximateNumericType> const& v);
+    static Bool _consistent(const TaylorModel<ValidatedTag,F>& tm1, const TaylorModel<ValidatedTag,F>& tm2);
+    static Bool _inconsistent(const TaylorModel<ValidatedTag,F>& tm1, const TaylorModel<ValidatedTag,F>& tm2);
+    static Bool _refines(const TaylorModel<ValidatedTag,F>& tm1, const TaylorModel<ValidatedTag,F>& tm2);
+    static TaylorModel<ValidatedTag,F> _refinement(const TaylorModel<ValidatedTag,F>& tm1, const TaylorModel<ValidatedTag,F>& tm2);
+    static TaylorModel<ValidatedTag,F> _antiderivative(const TaylorModel<ValidatedTag,F>& tm, SizeType k);
+    static TaylorModel<ValidatedTag,F> _weak_derivative(const TaylorModel<ValidatedTag,F>& tm, SizeType k);
+    static TaylorModel<ValidatedTag,F> _embed_error(const TaylorModel<ValidatedTag,F>& tm);
+    static TaylorModel<ValidatedTag,F>  _discard_variables(const TaylorModel<ValidatedTag,F>&, const Array<SizeType>& variables);
+    static TaylorModel<ValidatedTag,F> _split(const TaylorModel<ValidatedTag,F>& tm, SizeType k, SplitPart part);
+    static TaylorModel<ValidatedTag,F> _embed(SizeType as1, const TaylorModel<ValidatedTag,F>& tm2, SizeType as3);
+    static TaylorModel<ValidatedTag,F> _compose(TaylorModel<ValidatedTag,F> const& tf, const Vector<TaylorModel<ValidatedTag,F>>& tg);
+    static TaylorModel<ValidatedTag,F> _compose(Unscaling const& uf, TaylorModel<ValidatedTag,F> const& tg);
+    static TaylorModel<ValidatedTag,F> _compose(TaylorModel<ValidatedTag,F> const& tf, VectorUnscaling const& u, const Vector<TaylorModel<ValidatedTag,F>>& tg);
+    static TaylorModel<ValidatedTag,F> _partial_evaluate(const TaylorModel<ValidatedTag,F>& x, SizeType k, ValidatedNumericType c);
+    static Covector<ValidatedNumericType> _gradient(const TaylorModel<ValidatedTag,F>& x, Vector<ValidatedNumericType> const& v);
+    static ValidatedNumericType _evaluate(const TaylorModel<ValidatedTag,F>& x, Vector<ValidatedNumericType> const& v);
+    static ApproximateNumericType _evaluate(const TaylorModel<ValidatedTag,F>& x, Vector<ApproximateNumericType> const& v);
 };
 
-Covector<ValidatedNumericType> gradient(const TaylorModel<Validated,Float64>& x, const Vector<ValidatedNumericType>& v);
+Covector<ValidatedNumericType> gradient(const TaylorModel<ValidatedTag,Float64>& x, const Vector<ValidatedNumericType>& v);
 
 
 
 /*! \brief A class representing a power series expansion, scaled to the unit box, with an error term.
  *
- * See also Expansion, Polynomila, TaylorModel<Validated,F><ExactIntervalType>.
+ * See also Expansion, Polynomila, TaylorModel<ValidatedTag,F><ExactIntervalType>.
  */
 template<class F>
-class TaylorModel<Approximate,F>
+class TaylorModel<ApproximateTag,F>
 {
   public:
     typedef ApproximateFloat64 CoefficientType;
@@ -481,52 +481,52 @@ class TaylorModel<Approximate,F>
   public:
     //@{
     /*! \name Constructors and destructors. */
-    //! \brief Construct a TaylorModel<Validated,F> in \a as arguments.
-    TaylorModel<Approximate,F>(SizeType as = 0u);
-    TaylorModel<Approximate,F>(SizeType as, Sweeper swp);
+    //! \brief Construct a TaylorModel<ValidatedTag,F> in \a as arguments.
+    TaylorModel<ApproximateTag,F>(SizeType as = 0u);
+    TaylorModel<ApproximateTag,F>(SizeType as, Sweeper swp);
 
-    TaylorModel<Approximate,F> create() const { return TaylorModel<Approximate,F>(this->argument_size(),this->_sweeper); }
-    TaylorModel<Approximate,F> create_zero() const { return TaylorModel<Approximate,F>(this->argument_size(),this->_sweeper); }
-    TaylorModel<Approximate,F> create_constant(NumericType) const;
-    TaylorModel<Approximate,F> create_variable(SizeType i) const;
-    TaylorModel<Approximate,F> create_ball(ErrorType r) const;
+    TaylorModel<ApproximateTag,F> create() const { return TaylorModel<ApproximateTag,F>(this->argument_size(),this->_sweeper); }
+    TaylorModel<ApproximateTag,F> create_zero() const { return TaylorModel<ApproximateTag,F>(this->argument_size(),this->_sweeper); }
+    TaylorModel<ApproximateTag,F> create_constant(NumericType) const;
+    TaylorModel<ApproximateTag,F> create_variable(SizeType i) const;
+    TaylorModel<ApproximateTag,F> create_ball(ErrorType r) const;
 
     //! \brief Construct a constant quantity in \a as independent variables.
-    static TaylorModel<Approximate,F> constant(SizeType as, const NumericType& c, Sweeper swp) {
-        TaylorModel<Approximate,F> r(as,swp); r[MultiIndex::zero(as)]=1; r*=c; return r; }
+    static TaylorModel<ApproximateTag,F> constant(SizeType as, const NumericType& c, Sweeper swp) {
+        TaylorModel<ApproximateTag,F> r(as,swp); r[MultiIndex::zero(as)]=1; r*=c; return r; }
     //! \brief Construct the quantity with expansion \f$x_j\f$ in \a as independent variables.
-    static TaylorModel<Approximate,F> coordinate(SizeType as, SizeType j, Sweeper swp) {
-        TaylorModel<Approximate,F> r(as,swp); r[MultiIndex::unit(as,j)]=1; return r; }
+    static TaylorModel<ApproximateTag,F> coordinate(SizeType as, SizeType j, Sweeper swp) {
+        TaylorModel<ApproximateTag,F> r(as,swp); r[MultiIndex::unit(as,j)]=1; return r; }
 
     //! \brief Fast swap with another Taylor model.
-    Void swap(TaylorModel<Approximate,F>& other) { this->_expansion.swap(other._expansion); }
+    Void swap(TaylorModel<ApproximateTag,F>& other) { this->_expansion.swap(other._expansion); }
     //! \brief Set to zero.
     Void clear() { this->_expansion.clear(); }
     //! \brief A zero element with the same parameters.
-    TaylorModel<Approximate,F> null() const { return TaylorModel<Approximate,F>(this->argument_size()); }
+    TaylorModel<ApproximateTag,F> null() const { return TaylorModel<ApproximateTag,F>(this->argument_size()); }
     //@}
 
     //@{
     /*! \name Assignment to constant values. */
     //! \brief Set equal to a built-in, keeping the same number of arguments.
-    TaylorModel<Approximate,F>& operator=(double c) {
+    TaylorModel<ApproximateTag,F>& operator=(double c) {
         this->_expansion.clear(); this->_expansion.append(MultiIndex(this->argument_size()),CoefficientType(c)); return *this; }
     //! \brief Set equal to a constant, keeping the same number of arguments.
-    TaylorModel<Approximate,F>& operator=(const ApproximateNumericType& c) {
+    TaylorModel<ApproximateTag,F>& operator=(const ApproximateNumericType& c) {
         this->_expansion.clear(); this->_expansion.append(MultiIndex(this->argument_size()),c); return *this; }
     //! \brief Set equal to an interval constant, keeping the same number of arguments.
-    TaylorModel<Approximate,F>& operator=(const ValidatedNumericType& c) { return (*this)=ApproximateNumericType(c); }
+    TaylorModel<ApproximateTag,F>& operator=(const ValidatedNumericType& c) { return (*this)=ApproximateNumericType(c); }
     //! \brief Set equal to a real constant, keeping the same number of arguments.
-    TaylorModel<Approximate,F>& operator=(const EffectiveNumericType& c) { return (*this)=ApproximateNumericType(c); }
+    TaylorModel<ApproximateTag,F>& operator=(const EffectiveNumericType& c) { return (*this)=ApproximateNumericType(c); }
     //@}
 
     //@{
     /*! \name Comparison operators. */
     //! \brief Equality operator. Tests equality of representation, including error term.
-    Bool operator==(const TaylorModel<Approximate,F>& other) const {
+    Bool operator==(const TaylorModel<ApproximateTag,F>& other) const {
         return this->_expansion==other._expansion; }
     //! \brief Inequality operator.
-    Bool operator!=(const TaylorModel<Approximate,F>& other) const {
+    Bool operator!=(const TaylorModel<ApproximateTag,F>& other) const {
         return !(*this==other); }
     //@}
 
@@ -568,7 +568,7 @@ class TaylorModel<Approximate,F>
     //! \brief Compute the derivative (in place).
     Void differentiate(SizeType k);
 
-    friend TaylorModel<Approximate,F> unscale(TaylorModel<Approximate,F> tm, const ExactIntervalType& dom) {
+    friend TaylorModel<ApproximateTag,F> unscale(TaylorModel<ApproximateTag,F> tm, const ExactIntervalType& dom) {
         tm.unscale(dom); return std::move(tm); }
 
     //@}
@@ -585,11 +585,11 @@ class TaylorModel<Approximate,F>
     /*! \name Simplification operations. */
     //! \brief Remove all terms whose coefficient has magnitude
     //! lower than the cutoff threshold of the quantity.
-    TaylorModel<Approximate,F>& sweep();
+    TaylorModel<ApproximateTag,F>& sweep();
     //! \brief Combine terms with the same index; requires sorted.
-    TaylorModel<Approximate,F>& unique();
+    TaylorModel<ApproximateTag,F>& unique();
     //! \brief Sort the terms in index order.
-    TaylorModel<Approximate,F>& sort();
+    TaylorModel<ApproximateTag,F>& sort();
     //@}
 
   public:
@@ -610,28 +610,28 @@ class TaylorModel<Approximate,F>
     //! \brief Inplace multiplication of a scalar constant.
     Void imul(const ApproximateNumericType& c);
     //! \brief Inplace addition of a scalar multiple of a Taylor model.
-    Void isma(const ApproximateNumericType& c, const TaylorModel<Approximate,F>& x);
+    Void isma(const ApproximateNumericType& c, const TaylorModel<ApproximateTag,F>& x);
     //! \brief Inplace addition of a product of Taylor models.
-    Void ifma(const TaylorModel<Approximate,F>& x1, const TaylorModel<Approximate,F>& x2);
+    Void ifma(const TaylorModel<ApproximateTag,F>& x1, const TaylorModel<ApproximateTag,F>& x2);
 
-    friend TaylorModel<Approximate,F> operator-(TaylorModel<Approximate,F> x) { x.imul(-1); return std::move(x); }
-    friend TaylorModel<Approximate,F>& operator+=(TaylorModel<Approximate,F>& x, NumericType const& c) { x.iadd(c); return x; }
-    friend TaylorModel<Approximate,F>& operator*=(TaylorModel<Approximate,F>& x, NumericType const& c) { x.imul(c); return x; }
-    friend TaylorModel<Approximate,F> operator+(TaylorModel<Approximate,F> const& x1, TaylorModel<Approximate,F> const& x2) {
-        TaylorModel<Approximate,F> r=x1; r.isma(+1,x2); return std::move(r); }
-    friend TaylorModel<Approximate,F> operator-(TaylorModel<Approximate,F> const& x1, TaylorModel<Approximate,F> const& x2) {
-        TaylorModel<Approximate,F> r=x1; r.isma(-1,x2); return std::move(r); }
-    friend TaylorModel<Approximate,F> operator*(TaylorModel<Approximate,F> const& x1, TaylorModel<Approximate,F> const& x2) {
-        TaylorModel<Approximate,F> r(x1.argument_size(),x1.sweeper()); r.ifma(x1,x2); return std::move(r); }
+    friend TaylorModel<ApproximateTag,F> operator-(TaylorModel<ApproximateTag,F> x) { x.imul(-1); return std::move(x); }
+    friend TaylorModel<ApproximateTag,F>& operator+=(TaylorModel<ApproximateTag,F>& x, NumericType const& c) { x.iadd(c); return x; }
+    friend TaylorModel<ApproximateTag,F>& operator*=(TaylorModel<ApproximateTag,F>& x, NumericType const& c) { x.imul(c); return x; }
+    friend TaylorModel<ApproximateTag,F> operator+(TaylorModel<ApproximateTag,F> const& x1, TaylorModel<ApproximateTag,F> const& x2) {
+        TaylorModel<ApproximateTag,F> r=x1; r.isma(+1,x2); return std::move(r); }
+    friend TaylorModel<ApproximateTag,F> operator-(TaylorModel<ApproximateTag,F> const& x1, TaylorModel<ApproximateTag,F> const& x2) {
+        TaylorModel<ApproximateTag,F> r=x1; r.isma(-1,x2); return std::move(r); }
+    friend TaylorModel<ApproximateTag,F> operator*(TaylorModel<ApproximateTag,F> const& x1, TaylorModel<ApproximateTag,F> const& x2) {
+        TaylorModel<ApproximateTag,F> r(x1.argument_size(),x1.sweeper()); r.ifma(x1,x2); return std::move(r); }
 
-    template<class FF> friend TaylorModel<Approximate,FF> max(const TaylorModel<Approximate,FF>& x, const TaylorModel<Approximate,FF>& y);
-    template<class FF> friend TaylorModel<Approximate,FF> min(const TaylorModel<Approximate,FF>& x, const TaylorModel<Approximate,FF>& y);
-    template<class FF> friend TaylorModel<Approximate,FF> abs(const TaylorModel<Approximate,FF>& x);
+    template<class FF> friend TaylorModel<ApproximateTag,FF> max(const TaylorModel<ApproximateTag,FF>& x, const TaylorModel<ApproximateTag,FF>& y);
+    template<class FF> friend TaylorModel<ApproximateTag,FF> min(const TaylorModel<ApproximateTag,FF>& x, const TaylorModel<ApproximateTag,FF>& y);
+    template<class FF> friend TaylorModel<ApproximateTag,FF> abs(const TaylorModel<ApproximateTag,FF>& x);
 
     //@{
     /*! \name Stream input/output operators. */
     //! \brief Write to an output stream.
-    friend OutputStream& operator<<(OutputStream& os, const TaylorModel<Approximate,F>& x) {
+    friend OutputStream& operator<<(OutputStream& os, const TaylorModel<ApproximateTag,F>& x) {
         return x.str(os); }
     //@}
 
@@ -642,21 +642,21 @@ class TaylorModel<Approximate,F>
 
 
 
-template<class F> Bool inconsistent(const Vector<TaylorModel<Validated,F>>& tm1, const Vector<TaylorModel<Validated,F>>& tm2) {
+template<class F> Bool inconsistent(const Vector<TaylorModel<ValidatedTag,F>>& tm1, const Vector<TaylorModel<ValidatedTag,F>>& tm2) {
     ARIADNE_ASSERT(tm1.size()==tm2.size());
     for(SizeType i=0; i!=tm1.size(); ++i) { if(inconsistent(tm1[i],tm2[i])) { return true; } }
     return false;
 }
 
-template<class F> Bool refines(const Vector<TaylorModel<Validated,F>>& tm1, const Vector<TaylorModel<Validated,F>>& tm2) {
+template<class F> Bool refines(const Vector<TaylorModel<ValidatedTag,F>>& tm1, const Vector<TaylorModel<ValidatedTag,F>>& tm2) {
     ARIADNE_ASSERT(tm1.size()==tm2.size());
     for(SizeType i=0; i!=tm1.size(); ++i) { if(not refines(tm1[i],tm2[i])) { return false; } }
     return true;
 }
 
-template<class F> Vector<TaylorModel<Validated,F>> refinement(const Vector<TaylorModel<Validated,F>>& tm1, const Vector<TaylorModel<Validated,F>>& tm2) {
+template<class F> Vector<TaylorModel<ValidatedTag,F>> refinement(const Vector<TaylorModel<ValidatedTag,F>>& tm1, const Vector<TaylorModel<ValidatedTag,F>>& tm2) {
     ARIADNE_ASSERT(tm1.size()==tm2.size());
-    Vector<TaylorModel<Validated,F>> r(tm1.size());
+    Vector<TaylorModel<ValidatedTag,F>> r(tm1.size());
     for(SizeType i=0; i!=tm1.size(); ++i) { r[i]=refinement(tm1[i],tm2[i]); }
     return std::move(r);
 }
@@ -665,20 +665,20 @@ template<class F> Vector<TaylorModel<Validated,F>> refinement(const Vector<Taylo
 
 
 
-template<class F> Vector<TaylorModel<Validated,F>> partial_evaluate(const Vector<TaylorModel<Validated,F>>& tf, SizeType k, const ValidatedNumericType& c) {
-    Vector<TaylorModel<Validated,F>> r(tf.size(),ValidatedTaylorModel::zero(tf.zero_element().argument_size()-1,tf.zero_element().sweeper()));
+template<class F> Vector<TaylorModel<ValidatedTag,F>> partial_evaluate(const Vector<TaylorModel<ValidatedTag,F>>& tf, SizeType k, const ValidatedNumericType& c) {
+    Vector<TaylorModel<ValidatedTag,F>> r(tf.size(),ValidatedTaylorModel::zero(tf.zero_element().argument_size()-1,tf.zero_element().sweeper()));
     for(SizeType i=0; i!=r.size(); ++i) { r[i]=partial_evaluate(tf[i],k,c); }
     return std::move(r);
 }
 
-template<class F> Vector<ValidatedNumericType> evaluate(const Vector<TaylorModel<Validated,F>>& tf, const Vector<ValidatedNumericType>& x) {
+template<class F> Vector<ValidatedNumericType> evaluate(const Vector<TaylorModel<ValidatedTag,F>>& tf, const Vector<ValidatedNumericType>& x) {
     Vector<ValidatedNumericType> r(tf.size());
     for(SizeType i=0; i!=r.size(); ++i) { r[i]=evaluate(tf[i],x); }
     return std::move(r);
 }
 
-template<class F> Vector<TaylorModel<Validated,F>> compose(const Vector<TaylorModel<Validated,F>>& tf, const Vector<TaylorModel<Validated,F>>& tg) {
-    Vector<TaylorModel<Validated,F>> r(tf.size());
+template<class F> Vector<TaylorModel<ValidatedTag,F>> compose(const Vector<TaylorModel<ValidatedTag,F>>& tf, const Vector<TaylorModel<ValidatedTag,F>>& tg) {
+    Vector<TaylorModel<ValidatedTag,F>> r(tf.size());
     for(SizeType i=0; i!=r.size(); ++i) { r[i]=compose(tf[i],tg); }
     return std::move(r);
 }
@@ -718,8 +718,8 @@ template<class P, class F> Vector<TaylorModel<P,F>> combine(const Vector<TaylorM
     return join(embed(0u,x1,x2.zero_element().argument_size()),embed(x1.zero_element().argument_size(),x2,0u));
 }
 
-template<class F> Vector<TaylorModel<Validated,F>> embed(SizeType as1, const Vector<TaylorModel<Validated,F>>& x2, SizeType as3) {
-    Vector<TaylorModel<Validated,F>> r(x2.size());
+template<class F> Vector<TaylorModel<ValidatedTag,F>> embed(SizeType as1, const Vector<TaylorModel<ValidatedTag,F>>& x2, SizeType as3) {
+    Vector<TaylorModel<ValidatedTag,F>> r(x2.size());
     for(SizeType i=0; i!=r.size(); ++i) { r[i]=embed(as1,x2[i],as3); }
     return std::move(r);
 }
@@ -744,12 +744,12 @@ template<class P, class F> typename TaylorModel<P,F>::NormType norm(const Vector
     typename TaylorModel<P,F>::NormType r=0u; for(SizeType i=0; i!=h.size(); ++i) { r=max(r,norm(h[i])); } return std::move(r);
 }
 
-template<class F> Matrix<ValidatedNumericType> jacobian(const Vector<TaylorModel<Validated,F>>& x, const Vector<ValidatedNumericType>& y);
-template<class F> Matrix<ValidatedNumericType> jacobian(const Vector<TaylorModel<Validated,F>>& x, const Vector<ValidatedNumericType>& y, Array<SizeType>& p);
-template<class F> Matrix<ExactFloat64> jacobian_value(const Vector<TaylorModel<Validated,F>>& x);
-template<class F> Matrix<ExactFloat64> jacobian_value(const Vector<TaylorModel<Validated,F>>& x, const Array<SizeType>& p);
-template<class F> Matrix<UpperIntervalType> jacobian_range(const Vector<TaylorModel<Validated,F>>& x);
-template<class F> Matrix<UpperIntervalType> jacobian_range(const Vector<TaylorModel<Validated,F>>& x, const Array<SizeType>& p);
+template<class F> Matrix<ValidatedNumericType> jacobian(const Vector<TaylorModel<ValidatedTag,F>>& x, const Vector<ValidatedNumericType>& y);
+template<class F> Matrix<ValidatedNumericType> jacobian(const Vector<TaylorModel<ValidatedTag,F>>& x, const Vector<ValidatedNumericType>& y, Array<SizeType>& p);
+template<class F> Matrix<ExactFloat64> jacobian_value(const Vector<TaylorModel<ValidatedTag,F>>& x);
+template<class F> Matrix<ExactFloat64> jacobian_value(const Vector<TaylorModel<ValidatedTag,F>>& x, const Array<SizeType>& p);
+template<class F> Matrix<UpperIntervalType> jacobian_range(const Vector<TaylorModel<ValidatedTag,F>>& x);
+template<class F> Matrix<UpperIntervalType> jacobian_range(const Vector<TaylorModel<ValidatedTag,F>>& x, const Array<SizeType>& p);
 
 
 

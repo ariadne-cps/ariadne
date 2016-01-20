@@ -68,7 +68,7 @@ template<class N> class CheckNumericTypeConcepts {
 
     void check_field_concept() {
         check_ring_concept();
-        if (IsSame<Paradigm<N>,Approximate>::value) {
+        if (IsSame<Paradigm<N>,ApproximateTag>::value) {
             ARIADNE_TEST_STATIC_ASSERT(IsConstructible<N,double>);
         }
         ARIADNE_TEST_STATIC_ASSERT(HasOperator<OperatorDivides,N,N>);

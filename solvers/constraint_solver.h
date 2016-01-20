@@ -49,7 +49,7 @@ typedef Procedure<ValidatedNumericType> ValidatedProcedure;
 
 template<class P,class F> class TaylorModel;
 template<class M> class VectorFunctionPatch;
-typedef VectorFunctionPatch<TaylorModel<Validated,Float64>> VectorTaylorFunction;
+typedef VectorFunctionPatch<TaylorModel<ValidatedTag,Float64>> VectorTaylorFunction;
 
 template<class X> struct FeasibilityState {
     X t;

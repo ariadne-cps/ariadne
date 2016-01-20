@@ -130,7 +130,7 @@ TestFloat<PR>::test_concept()
     x=max(x,x); x=min(x,x); x=abs(x);
 
 
-    // Exact operations
+    // ExactTag operations
     x=nul(x); x=pos(x); x=neg(x); x=half(x);
 
     // Rounded arithmetic operations
@@ -516,7 +516,7 @@ TestFloat<PR>::test_arithmetic()
     if( mul_up(pi_near,4.0) != mul_up(pi_near,four) ) {
         if(not full_precision_warning) {
             full_precision_warning=true;
-            ARIADNE_TEST_WARN("Mixed Float/Builtin operations may not use full precision.");
+            ARIADNE_TEST_WARN("Mixed Float/BuiltinTag operations may not use full precision.");
         }
     }
 

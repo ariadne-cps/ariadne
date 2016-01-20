@@ -59,12 +59,12 @@ template<class N, EnableIf<IsIntegral<N>> =dummy> bool signum(N n);
 Decidable signum(Integer z);
 Decidable signum(Rational q);
 Quasidecidable signum(Real r);
-Decidable signum(Number<Exact> n);
-Quasidecidable signum(Number<Effective> n);
-Logical<Validated> signum(Number<Validated> n);
-Logical<Lower> signum(Number<Upper> n);
-Logical<Upper> signum(Number<Lower> n);
-Logical<Approximate> signum(Number<Approximate> n);
+Decidable signum(Number<ExactTag> n);
+Quasidecidable signum(Number<EffectiveTag> n);
+Logical<ValidatedTag> signum(Number<ValidatedTag> n);
+Logical<LowerTag> signum(Number<UpperTag> n);
+Logical<UpperTag> signum(Number<LowerTag> n);
+Logical<ApproximateTag> signum(Number<ApproximateTag> n);
 template<class P, class PR> decltype(signum(declval<Number<P>>())) signum(Float<P,PR>);
 struct Sig { template<class A> auto operator() (A&& a) const -> decltype(signum(a)) { return signum(std::move(a)); } };
 
@@ -270,21 +270,21 @@ template<class T> String class_name() { return "Unknown"; }
 
 ARIADNE_CLASS_NAME(Fallback);
 
-ARIADNE_CLASS_NAME(Approximate);
-ARIADNE_CLASS_NAME(Lower);
-ARIADNE_CLASS_NAME(Upper);
-ARIADNE_CLASS_NAME(Bounded);
-ARIADNE_CLASS_NAME(Validated);
-ARIADNE_CLASS_NAME(Exact);
+ARIADNE_CLASS_NAME(ApproximateTag);
+ARIADNE_CLASS_NAME(LowerTag);
+ARIADNE_CLASS_NAME(UpperTag);
+ARIADNE_CLASS_NAME(BoundedTag);
+ARIADNE_CLASS_NAME(ValidatedTag);
+ARIADNE_CLASS_NAME(ExactTag);
 
-ARIADNE_CLASS_NAME(Logical<Approximate>);
-ARIADNE_CLASS_NAME(Logical<ValidatedLower>);
-ARIADNE_CLASS_NAME(Logical<ValidatedUpper>);
-ARIADNE_CLASS_NAME(Logical<Validated>);
-ARIADNE_CLASS_NAME(Logical<EffectiveLower>);
-ARIADNE_CLASS_NAME(Logical<EffectiveUpper>);
-ARIADNE_CLASS_NAME(Logical<Effective>);
-ARIADNE_CLASS_NAME(Logical<Exact>);
+ARIADNE_CLASS_NAME(Logical<ApproximateTag>);
+ARIADNE_CLASS_NAME(Logical<ValidatedLowerTag>);
+ARIADNE_CLASS_NAME(Logical<ValidatedUpperTag>);
+ARIADNE_CLASS_NAME(Logical<ValidatedTag>);
+ARIADNE_CLASS_NAME(Logical<EffectiveLowerTag>);
+ARIADNE_CLASS_NAME(Logical<EffectiveUpperTag>);
+ARIADNE_CLASS_NAME(Logical<EffectiveTag>);
+ARIADNE_CLASS_NAME(Logical<ExactTag>);
 
 ARIADNE_CLASS_NAME(bool);
 ARIADNE_CLASS_NAME(uint);
@@ -298,12 +298,12 @@ ARIADNE_CLASS_NAME(Integer);
 ARIADNE_CLASS_NAME(Rational);
 ARIADNE_CLASS_NAME(Real);
 
-ARIADNE_CLASS_NAME(Number<Approximate>)
-ARIADNE_CLASS_NAME(Number<Lower>)
-ARIADNE_CLASS_NAME(Number<Upper>)
-ARIADNE_CLASS_NAME(Number<Validated>)
-ARIADNE_CLASS_NAME(Number<Effective>)
-ARIADNE_CLASS_NAME(Number<Exact>)
+ARIADNE_CLASS_NAME(Number<ApproximateTag>)
+ARIADNE_CLASS_NAME(Number<LowerTag>)
+ARIADNE_CLASS_NAME(Number<UpperTag>)
+ARIADNE_CLASS_NAME(Number<ValidatedTag>)
+ARIADNE_CLASS_NAME(Number<EffectiveTag>)
+ARIADNE_CLASS_NAME(Number<ExactTag>)
 
 ARIADNE_CLASS_NAME(ApproximateFloat64);
 ARIADNE_CLASS_NAME(LowerFloat64);
@@ -325,18 +325,18 @@ ARIADNE_CLASS_NAME(ExactFloatMP);
 
 typedef bool B; typedef uint Nat; typedef int Int; typedef double Dbl;
 typedef Integer  Z ; typedef Rational  Q ; typedef Real  R ;
-typedef Number<Exact> ExN; typedef Number<Effective> EfN; typedef Number<Validated> VaN;
-typedef Number<Upper> UpN; typedef Number<Lower> LoN; typedef Number<Approximate> ApN;
+typedef Number<ExactTag> ExN; typedef Number<EffectiveTag> EfN; typedef Number<ValidatedTag> VaN;
+typedef Number<UpperTag> UpN; typedef Number<LowerTag> LoN; typedef Number<ApproximateTag> ApN;
 typedef ExactFloat64 ExF; typedef MetricFloat64 MeF; typedef BoundedFloat64 BoF;
 typedef UpperFloat64 UpF; typedef LowerFloat64 LoF; typedef ApproximateFloat64 ApF;
-typedef Logical<Exact> ExL; typedef Logical<Effective> EfL; typedef Logical<Validated> VaL;
-typedef Logical<Upper> UpL; typedef Logical<Lower> LoL; typedef Logical<Approximate> ApL;
+typedef Logical<ExactTag> ExL; typedef Logical<EffectiveTag> EfL; typedef Logical<ValidatedTag> VaL;
+typedef Logical<UpperTag> UpL; typedef Logical<LowerTag> LoL; typedef Logical<ApproximateTag> ApL;
 
 //typedef decltype(declval<ExF>() + declval<ExF>()) EfF;
 typedef decltype(declval<ExN>() + declval<ExF>()) EfF;
 typedef decltype(declval<MeF>() + declval<BoF>()) VaF;
 typedef decltype(declval<UpF>() * declval<UpF>()) PrF;
-typedef decltype(declval<double>() + declval<Number<Approximate>>()) ApD;
+typedef decltype(declval<double>() + declval<Number<ApproximateTag>>()) ApD;
 //typedef BoundedFloat64Type VaF;
 
 } // namespace Ariadne
@@ -362,7 +362,7 @@ class CheckNumeric
 
     typedef Tags<Nat,Int,Dbl> BuiltinTypes;
     typedef Tags<Integer,Rational,Real> UserTypes;
-    typedef Tags<Number<Exact>,Number<Effective>,Number<Validated>,Number<Upper>,Number<Lower>,Number<Approximate>> GenericTypes;
+    typedef Tags<Number<ExactTag>,Number<EffectiveTag>,Number<ValidatedTag>,Number<UpperTag>,Number<LowerTag>,Number<ApproximateTag>> GenericTypes;
     typedef Tags<ExactFloat64,MetricFloat64,BoundedFloat64,UpperFloat64,LowerFloat64,ApproximateFloat64> Float64Types;
 
     typedef decltype(cat(declval<BuiltinTypes>(),declval<UserTypes>(),declval<GenericTypes>(),declval<Float64Types>())) NumericTypes;
@@ -457,7 +457,7 @@ void CheckNumeric::notifications()
     ARIADNE_TEST_NOTIFY((String("Rational == double -> ")+class_name<SafeEqualsType<Rational,double>>()));
     ARIADNE_TEST_NOTIFY((String("Rational < double -> ")+class_name<SafeLessType<Rational,double>>()+"\n"));
 
-    ARIADNE_TEST_STATIC_ASSERT(IsStronger<Paradigm<ExactFloatArithmeticType>,Validated>)
+    ARIADNE_TEST_STATIC_ASSERT(IsStronger<Paradigm<ExactFloatArithmeticType>,ValidatedTag>)
 }
 
 void CheckNumeric::check_conversions() {

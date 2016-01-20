@@ -172,7 +172,7 @@ read_sequence(InputStream& is, Container& v,
             }
             is >> x;
             if(is.fail()) {
-                throw std::ios_base::failure("Ariadne::Base::read_vector: Error inputting value in list");
+                throw std::ios_base::failure("Ariadne::Base::read_vector: ErrorTag inputting value in list");
             }
             v.push_back(x);
             is >> c;

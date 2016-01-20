@@ -52,7 +52,7 @@ class InvalidRationalLiteralException {
 
 // Shortened version of raw float classes sufficient for comparison operator
 struct Float64 { volatile double dbl; double get_d() const { return dbl; } };
-template<> struct Float<Exact,Precision64> { Float64 _v; Float64 raw() const { return _v; } };
+template<> struct Float<ExactTag,Precision64> { Float64 _v; Float64 raw() const { return _v; } };
 
 Rational rec(Integer const& z) {
     return Rational(1,z);

@@ -55,7 +55,7 @@ class Rational
   public:
     mpq_t _mpq;
   public:
-    typedef Exact Paradigm;
+    typedef ExactTag Paradigm;
     typedef Rational NumericType;
   public:
     ~Rational();
@@ -72,7 +72,7 @@ class Rational
     Rational(Rational&&);
     Rational& operator=(const Rational&);
     Rational& operator=(Rational&&);
-    operator Number<Exact> () const;
+    operator Number<ExactTag> () const;
     Integer get_num() const;
     Integer get_den() const;
     Integer numerator() const;

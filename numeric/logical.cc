@@ -39,10 +39,10 @@ inline LogicalValue operator&&(LogicalValue lv1, LogicalValue lv2) { return conj
 inline LogicalValue operator||(LogicalValue lv1, LogicalValue lv2) { return disjunction(lv1,lv2); }
 } // namespace
 
-Logical<Exact> operator||(Bool b1, Logical<Exact> l2) { return Logical<Exact>(b1) || l2; }
-Logical<Exact> operator||(Logical<Exact> l1, Bool b2) { return l1 || Logical<Exact>(b2); }
-Logical<Exact> operator&&(Bool b1, Logical<Exact> l2) { return Logical<Exact>(b1) && l2; }
-Logical<Exact> operator&&(Logical<Exact> l1, Bool b2) { return l1 && Logical<Exact>(b2); }
+Logical<ExactTag> operator||(Bool b1, Logical<ExactTag> l2) { return Logical<ExactTag>(b1) || l2; }
+Logical<ExactTag> operator||(Logical<ExactTag> l1, Bool b2) { return l1 || Logical<ExactTag>(b2); }
+Logical<ExactTag> operator&&(Bool b1, Logical<ExactTag> l2) { return Logical<ExactTag>(b1) && l2; }
+Logical<ExactTag> operator&&(Logical<ExactTag> l1, Bool b2) { return l1 && Logical<ExactTag>(b2); }
 
 class LogicalConstant : public LogicalInterface {
     LogicalValue _v;
@@ -117,13 +117,13 @@ OutputStream& operator<<(OutputStream& os, LogicalValue l) {
     return os;
 }
 
-template<> String class_name<Exact>() { return "Exact"; }
-template<> String class_name<Effective>() { return "Effective"; }
-template<> String class_name<Validated>() { return "Validated"; }
-template<> String class_name<Bounded>() { return "Bounded"; }
-template<> String class_name<Upper>() { return "Upper"; }
-template<> String class_name<Lower>() { return "Lower"; }
-template<> String class_name<Approximate>() { return "Approximate"; }
+template<> String class_name<ExactTag>() { return "ExactTag"; }
+template<> String class_name<EffectiveTag>() { return "EffectiveTag"; }
+template<> String class_name<ValidatedTag>() { return "ValidatedTag"; }
+template<> String class_name<BoundedTag>() { return "BoundedTag"; }
+template<> String class_name<UpperTag>() { return "UpperTag"; }
+template<> String class_name<LowerTag>() { return "LowerTag"; }
+template<> String class_name<ApproximateTag>() { return "ApproximateTag"; }
 
 template<> String class_name<Bool>() { return "Bool"; }
 template<> String class_name<Boolean>() { return "Boolean"; }

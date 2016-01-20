@@ -635,13 +635,13 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
             catch(const UnknownSolutionException& e) {
                 // If the crossing time cannot be computed, then we can still
                 // use the fact that the crossing occurs as soon as $g(x(t))=0$.
-                ARIADNE_LOG(2,"Error in computing crossing time for event "<<*event_iter<<":\n  "<<e.what()<<"\n");
+                ARIADNE_LOG(2,"ErrorTag in computing crossing time for event "<<*event_iter<<":\n  "<<e.what()<<"\n");
                 crossings[event]=CrossingData(CrossingKind::INCREASING);
             }
             catch(const SolverException& e) {
                 // If the crossing time cannot be computed, then we can still
                 // use the fact that the crossing occurs as soon as $g(x(t))=0$.
-                ARIADNE_LOG(2,"Error in computing crossing time for event "<<*event_iter<<":\n  "<<e.what()<<"\n");
+                ARIADNE_LOG(2,"ErrorTag in computing crossing time for event "<<*event_iter<<":\n  "<<e.what()<<"\n");
                 crossings[event]=CrossingData(CrossingKind::INCREASING);
             }
             catch(const std::runtime_error& e) {
@@ -712,7 +712,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                     crossings[event].critical_time=critical_time;
                 }
                 catch(const SolverException& e) {
-                    ARIADNE_LOG(2,"Error in computing critical time for event "<<*event_iter<<":\n  "<<e.what()<<"\n");
+                    ARIADNE_LOG(2,"ErrorTag in computing critical time for event "<<*event_iter<<":\n  "<<e.what()<<"\n");
                     crossings[event]=CrossingData(CrossingKind::CONCAVE);
                 }
                 catch(const std::runtime_error& e) {
@@ -1758,7 +1758,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
                         ARIADNE_LOG(9,"  sucessfully_computed_guard_creep_time="<<sucessfully_computed_guard_creep_time<<"\n");
                     }
                     catch(...) {
-                        ARIADNE_LOG(6,"  Error in computing guard creep time\n");
+                        ARIADNE_LOG(6,"  ErrorTag in computing guard creep time\n");
                     }
                     if(sucessfully_computed_guard_creep_time) {
                         spacial_evolution_time = spacial_evolution_time * (guard_creep_time/flow.step_size());

@@ -22,7 +22,7 @@
  */
 
 /*! \file decimal.h
- *  \brief Exact decimal numbers, useful for user input.
+ *  \brief ExactTag decimal numbers, useful for user input.
  */
 
 #ifndef ARIADNE_DECIMAL_H

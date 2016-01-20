@@ -148,18 +148,18 @@ ApproximateFloat64 Real::approx() const { return this->_ptr->_value(); }
 double Real::get_d() const { return this->approx().get_d(); }
 
 /*
-template<class PR> Float<Metric,PR>::Float(Real const& x) : Float<Metric,PR>(x.lower(),x.upper()) { }
-template<class PR> Float<Bounded,PR>::Float(Real const& x) : Float<Bounded,PR>(x.lower(),x.upper()) { }
-template<class PR> Float<Upper,PR>::Float(Real const& x) : Float<Upper,PR>(x.upper()) { }
-template<class PR> Float<Lower,PR>::Float(Real const& x) : Float<Lower,PR>(x.lower()) { }
-template<class PR> Float<Approximate,PR>::Float(Real const& x) : Float<Approximate,PR>(x.approx()) { }
+template<class PR> Float<MetricTag,PR>::Float(Real const& x) : Float<MetricTag,PR>(x.lower(),x.upper()) { }
+template<class PR> Float<BoundedTag,PR>::Float(Real const& x) : Float<BoundedTag,PR>(x.lower(),x.upper()) { }
+template<class PR> Float<UpperTag,PR>::Float(Real const& x) : Float<UpperTag,PR>(x.upper()) { }
+template<class PR> Float<LowerTag,PR>::Float(Real const& x) : Float<LowerTag,PR>(x.lower()) { }
+template<class PR> Float<ApproximateTag,PR>::Float(Real const& x) : Float<ApproximateTag,PR>(x.approx()) { }
 */
 
-template<> Float<Metric,Precision64>::Float(Real const& x) : Float<Metric,Precision64>(x.approx().raw(),max(sub_up(x.upper().raw(),x.approx().raw()),sub_up(x.approx().raw(),x.lower().raw()))) { }
-template<> Float<Bounded,Precision64>::Float(Real const& x) : Float<Bounded,Precision64>(x.lower(),x.upper()) { }
-template<> Float<Upper,Precision64>::Float(Real const& x) : Float<Upper,Precision64>(x.upper()) { }
-template<> Float<Lower,Precision64>::Float(Real const& x) : Float<Lower,Precision64>(x.lower()) { }
-template<> Float<Approximate,Precision64>::Float(Real const& x) : Float<Approximate,Precision64>(x.approx()) { }
+template<> Float<MetricTag,Precision64>::Float(Real const& x) : Float<MetricTag,Precision64>(x.approx().raw(),max(sub_up(x.upper().raw(),x.approx().raw()),sub_up(x.approx().raw(),x.lower().raw()))) { }
+template<> Float<BoundedTag,Precision64>::Float(Real const& x) : Float<BoundedTag,Precision64>(x.lower(),x.upper()) { }
+template<> Float<UpperTag,Precision64>::Float(Real const& x) : Float<UpperTag,Precision64>(x.upper()) { }
+template<> Float<LowerTag,Precision64>::Float(Real const& x) : Float<LowerTag,Precision64>(x.lower()) { }
+template<> Float<ApproximateTag,Precision64>::Float(Real const& x) : Float<ApproximateTag,Precision64>(x.approx()) { }
 
 Real::Real(std::uint64_t m, Void*) : Real(std::make_shared<RealConstant<Integer>>(m)) { }
 Real::Real(std::int64_t n, Void*) : Real(std::make_shared<RealConstant<Integer>>(n)) { }
@@ -235,12 +235,12 @@ template<class P, class O, class... ARGS> Logical<P> make_logical(O op, ARGS ...
 }
 
 
-Falsifyable operator==(Real x1, Real x2) { return make_logical<EffectiveLower>(Equal(),x1,x2); }
-Verifyable operator!=(Real x1, Real x2) { return make_logical<EffectiveUpper>(Unequal(),x1,x2); }
-Quasidecidable operator< (Real x1, Real x2) { return make_logical<Effective>(Less(),x1,x2); }
-Quasidecidable operator> (Real x1, Real x2) { return make_logical<Effective>(Gtr(),x1,x2); }
-Quasidecidable operator<=(Real x1, Real x2) { return make_logical<Effective>(Leq(),x1,x2); }
-Quasidecidable operator>=(Real x1, Real x2) { return make_logical<Effective>(Geq(),x1,x2); }
+Falsifyable operator==(Real x1, Real x2) { return make_logical<EffectiveLowerTag>(Equal(),x1,x2); }
+Verifyable operator!=(Real x1, Real x2) { return make_logical<EffectiveUpperTag>(Unequal(),x1,x2); }
+Quasidecidable operator< (Real x1, Real x2) { return make_logical<EffectiveTag>(Less(),x1,x2); }
+Quasidecidable operator> (Real x1, Real x2) { return make_logical<EffectiveTag>(Gtr(),x1,x2); }
+Quasidecidable operator<=(Real x1, Real x2) { return make_logical<EffectiveTag>(Leq(),x1,x2); }
+Quasidecidable operator>=(Real x1, Real x2) { return make_logical<EffectiveTag>(Geq(),x1,x2); }
 
 NegSierpinski operator==(Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
 Sierpinski operator!=(Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }

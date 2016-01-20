@@ -22,7 +22,7 @@
  */
 
 /*! \file numeric/floatmp.h
- *  \brief Raw floating-point numbers based on MPFT floats.
+ *  \brief RawTag floating-point numbers based on MPFT floats.
  */
 
 
@@ -65,7 +65,7 @@ class FloatMP {
     mpfr_t _mpfr;
     typedef decltype(_mpfr[0]) MpfrReference;
   public:
-    typedef Raw Paradigm;
+    typedef RawTag Paradigm;
     typedef FloatMP NumericType;
     typedef PrecisionMP PrecisionType;
     typedef RoundingModeMP RoundingModeType;

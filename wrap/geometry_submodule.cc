@@ -264,7 +264,7 @@ Void export_point()
 
 }
 
-typedef Logical<Exact> ExactLogicalType;
+typedef Logical<ExactTag> ExactLogicalType;
 
 
 template<class IVL> Void export_interval(std::string name) {

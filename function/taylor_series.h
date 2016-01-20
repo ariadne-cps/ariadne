@@ -22,7 +22,7 @@
  */
 
 /*! \file taylor_series.h
- *  \brief Approximate power series in one variable on a is_bounded domain with a dense
+ *  \brief ApproximateTag power series in one variable on a is_bounded domain with a dense
  *  representation as a floating-point polynomial plus an error bound.
  */
 

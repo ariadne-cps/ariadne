@@ -129,15 +129,15 @@ constexpr ParadigmCode null(ParadigmCode p) {
 //!     \code Int n=1.5; // n is set to 1! \endcode
 //! and
 //!     \code double x=1.3; // x not exactly equal to 1.3! \endcode
-//! the Builtin tag is used to describe these objects.
-//! %Builtin objects should be immediately converted to %Ariadne objects in user code.
+//! the BuiltinTag tag is used to describe these objects.
+//! %BuiltinTag objects should be immediately converted to %Ariadne objects in user code.
 
 template<ParadigmCode CODE> struct InformationLevel { static constexpr ParadigmCode code() { return CODE; } };
 
 //! \ingroup ParadigmSubModule
 //! \brief The <em>computational paradigm</em> supported by the object.
-//! User paradigms are Exact, Effective, Validated,ValidatedBounded, ValidatedUpper, ValidatedLower or Approximate.
-//! Internal paradigms are Builtin and Raw.
+//! User paradigms are ExactTag, EffectiveTag, ValidatedTag,ValidatedBoundedTag, ValidatedUpperTag, ValidatedLowerTag or ApproximateTag.
+//! Internal paradigms are BuiltinTag and RawTag.
 template<class T> using Paradigm = typename T::Paradigm;
 
 //! \ingroup ParadigmSubModule
@@ -147,108 +147,96 @@ template<class T> using ParadigmTag = typename T::Paradigm;
 
 //! \ingroup ParadigmSubModule
 //! \brief A tag meaning that the object is of a builtin type. Such objects should be converted to %Ariadne internal types before use.
-struct Builtin : InformationLevel<ParadigmCode::RAW>  { };
+struct BuiltinTag : InformationLevel<ParadigmCode::RAW>  { };
 
 //! \ingroup ParadigmSubModule
 //! \brief A tag meaning that the object decribes raw data. Such objects should not be used in high-level code, as they probably do not provide safe guarantees on their values.
-struct Raw : InformationLevel<ParadigmCode::RAW>  { };
+struct RawTag : InformationLevel<ParadigmCode::RAW>  { };
 
 //! \ingroup ParadigmSubModule
 //! \brief A tag meaning that the object represents a quantity exactly, and equality is decidable.
 //! Only available for discrete types i.e. elements of countable spaces, or for computational types such as floating-point numbers.
-struct Exact : InformationLevel<ParadigmCode::EXACT>  { };
+struct ExactTag : InformationLevel<ParadigmCode::EXACT>  { };
 
 //! \ingroup ParadigmSubModule
 //! \brief A tag meaning that the object represents a quantity exactly, but equality is undecidable.
-struct Effective : InformationLevel<ParadigmCode::EFFECTIVE>  { };
+struct EffectiveTag : InformationLevel<ParadigmCode::EFFECTIVE>  { };
 
 //! \ingroup ParadigmSubModule
 //! \brief A tag meaning that the object represents a quantity exactly, but only convergent upper bounds can be computed.
-struct EffectiveUpper : InformationLevel<ParadigmCode::EFFECTIVE_UPPER>  { };
+struct EffectiveUpperTag : InformationLevel<ParadigmCode::EFFECTIVE_UPPER>  { };
 
 //! \ingroup ParadigmSubModule
 //! \brief A tag meaning that the object represents a quantity exactly, but only convergent lower bounds can be computed.
-struct EffectiveLower : InformationLevel<ParadigmCode::EFFECTIVE_LOWER>  { };
+struct EffectiveLowerTag : InformationLevel<ParadigmCode::EFFECTIVE_LOWER>  { };
 
 //! \ingroup ParadigmSubModule
 //! \brief A tag meaning that the object represents a quantity exactly, but no information can be extracted in finite time.
-struct EffectiveUninformative : InformationLevel<ParadigmCode::EFFECTIVE_UNINFORMATIVE>  { };
+struct EffectiveUninformativeTag : InformationLevel<ParadigmCode::EFFECTIVE_UNINFORMATIVE>  { };
 
 //! \ingroup ParadigmSubModule
 //! \brief A tag meaning that the object represents an approximation to a quantity with a bound on the error in some metric, or lower and upper bounds on a quantity.
-struct Validated : InformationLevel<ParadigmCode::VALIDATED>  { };
+struct ValidatedTag : InformationLevel<ParadigmCode::VALIDATED>  { };
 
 //! \ingroup ParadigmSubModule
 //! \brief A tag meaning that the object provides an approximation with a bound on the metric error.
-//! For numbers, a specialisation of Validated.
-struct Metric : InformationLevel<ParadigmCode::METRIC>  { };
+//! For numbers, a specialisation of ValidatedTag.
+struct MetricTag : InformationLevel<ParadigmCode::METRIC>  { };
 
 //! \ingroup ParadigmSubModule
 //! \brief A tag meaning that the object provides lower and upper bounds for a quantity.
-//! For numbers, is a specialisation of Validated.
-struct Bounded : InformationLevel<ParadigmCode::BOUNDED>  { };
+//! For numbers, is a specialisation of ValidatedTag.
+struct BoundedTag : InformationLevel<ParadigmCode::BOUNDED>  { };
 
 //! \ingroup ParadigmSubModule
 //! \brief A tag meaning that the object provides an upper bound for a quantity.
-struct Upper : InformationLevel<ParadigmCode::UPPER>  { };
+struct UpperTag : InformationLevel<ParadigmCode::UPPER>  { };
 
 //! \ingroup ParadigmSubModule
 //! \brief A tag meaning that the object provides a lower bound for a quantity.
-struct Lower : InformationLevel<ParadigmCode::LOWER>  { };
+struct LowerTag : InformationLevel<ParadigmCode::LOWER>  { };
 
 //! \ingroup ParadigmSubModule
 //! \brief A tag meaning that the object provides an approximation to a quantity with no guarantees on the error.
-struct Approximate : InformationLevel<ParadigmCode::APPROXIMATE>  { };
+struct ApproximateTag : InformationLevel<ParadigmCode::APPROXIMATE>  { };
 
 
 //! \ingroup ParadigmSubModule
 //! \brief A tag meaning that the object represents an upper bound for a positive quantity.
-struct PositiveUpper;
+struct PositiveUpperTag;
 
-struct PositiveApproximate : InformationLevel<ParadigmCode::POSITIVE_APPROXIMATE>  { };
-struct PositiveLower : InformationLevel<ParadigmCode::POSITIVE_LOWER>  { };
-struct PositiveUpper : InformationLevel<ParadigmCode::POSITIVE_UPPER>  { };
-struct PositiveBounded : InformationLevel<ParadigmCode::POSITIVE_BOUNDED>  { };
-struct PositiveMetric : InformationLevel<ParadigmCode::POSITIVE_METRIC>  { };
-struct PositiveEffectiveUpper : InformationLevel<ParadigmCode::POSITIVE_EFFECTIVE_UPPER>  { };
-struct PositiveExact : InformationLevel<ParadigmCode::POSITIVE_EXACT>  { };
+struct PositiveApproximateTag : InformationLevel<ParadigmCode::POSITIVE_APPROXIMATE>  { };
+struct PositiveLowerTag : InformationLevel<ParadigmCode::POSITIVE_LOWER>  { };
+struct PositiveUpperTag : InformationLevel<ParadigmCode::POSITIVE_UPPER>  { };
+struct PositiveBoundedTag : InformationLevel<ParadigmCode::POSITIVE_BOUNDED>  { };
+struct PositiveMetricTag : InformationLevel<ParadigmCode::POSITIVE_METRIC>  { };
+struct PositiveEffectiveUpperTag : InformationLevel<ParadigmCode::POSITIVE_EFFECTIVE_UPPER>  { };
+struct PositiveExactTag : InformationLevel<ParadigmCode::POSITIVE_EXACT>  { };
 
-using ValidatedLower = Lower;
-using ValidatedUpper = Upper;
-using ValidatedBounded = Bounded;
-using ValidatedMetric = Metric;
-using PositiveValidatedLower = PositiveLower;
-using PositiveValidatedUpper = PositiveUpper;
-using Error = PositiveUpper;
-
-using ApproximateTag = Approximate;
-using LowerTag = Lower;
-using UpperTag = Upper;
-using BoundedTag = Bounded;
-using MetricTag = Metric;
-using ValidatedTag = Validated;
-using EffectiveLowerTag = EffectiveLower;
-using EffectiveUpperTag = EffectiveUpper;
-using EffectiveTag = Effective;
-using ExactTag = Exact;
-using ErrorTag = Error;
+using ValidatedLowerTag = LowerTag;
+using ValidatedUpperTag = UpperTag;
+using ValidatedBoundedTag = BoundedTag;
+using ValidatedMetricTag = MetricTag;
+using PositiveValidatedLowerTag = PositiveLowerTag;
+using PositiveValidatedUpperTag = PositiveUpperTag;
+using ErrorTag = PositiveUpperTag;
 
 template<ParadigmCode PC> struct InformationTraits { };
 template<> struct InformationTraits<ParadigmCode::RAW> { typedef Void Paradigm; };
-template<> struct InformationTraits<ParadigmCode::APPROXIMATE> { typedef Approximate Paradigm; };
-template<> struct InformationTraits<ParadigmCode::LOWER> { typedef Lower Paradigm; };
-template<> struct InformationTraits<ParadigmCode::UPPER> { typedef Upper Paradigm; };
-template<> struct InformationTraits<ParadigmCode::BOUNDED> { typedef Bounded Paradigm; };
-template<> struct InformationTraits<ParadigmCode::METRIC> { typedef Metric Paradigm; };
-template<> struct InformationTraits<ParadigmCode::VALIDATED> { typedef Validated Paradigm; };
-template<> struct InformationTraits<ParadigmCode::EFFECTIVE_LOWER> { typedef EffectiveLower Paradigm; };
-template<> struct InformationTraits<ParadigmCode::EFFECTIVE_UPPER> { typedef EffectiveUpper Paradigm; };
-template<> struct InformationTraits<ParadigmCode::EFFECTIVE> { typedef Effective Paradigm; };
-template<> struct InformationTraits<ParadigmCode::EXACT> { typedef Exact Paradigm; };
-template<> struct InformationTraits<ParadigmCode::POSITIVE_APPROXIMATE> { typedef PositiveApproximate Paradigm; };
-template<> struct InformationTraits<ParadigmCode::POSITIVE_LOWER> { typedef PositiveLower Paradigm; };
-template<> struct InformationTraits<ParadigmCode::POSITIVE_UPPER> { typedef PositiveUpper Paradigm; };
-template<> struct InformationTraits<ParadigmCode::POSITIVE_EXACT> { typedef PositiveExact Paradigm; };
+template<> struct InformationTraits<ParadigmCode::APPROXIMATE> { typedef ApproximateTag Paradigm; };
+template<> struct InformationTraits<ParadigmCode::LOWER> { typedef LowerTag Paradigm; };
+template<> struct InformationTraits<ParadigmCode::UPPER> { typedef UpperTag Paradigm; };
+template<> struct InformationTraits<ParadigmCode::BOUNDED> { typedef BoundedTag Paradigm; };
+template<> struct InformationTraits<ParadigmCode::METRIC> { typedef MetricTag Paradigm; };
+template<> struct InformationTraits<ParadigmCode::VALIDATED> { typedef ValidatedTag Paradigm; };
+template<> struct InformationTraits<ParadigmCode::EFFECTIVE_LOWER> { typedef EffectiveLowerTag Paradigm; };
+template<> struct InformationTraits<ParadigmCode::EFFECTIVE_UPPER> { typedef EffectiveUpperTag Paradigm; };
+template<> struct InformationTraits<ParadigmCode::EFFECTIVE> { typedef EffectiveTag Paradigm; };
+template<> struct InformationTraits<ParadigmCode::EXACT> { typedef ExactTag Paradigm; };
+template<> struct InformationTraits<ParadigmCode::POSITIVE_APPROXIMATE> { typedef PositiveApproximateTag Paradigm; };
+template<> struct InformationTraits<ParadigmCode::POSITIVE_LOWER> { typedef PositiveLowerTag Paradigm; };
+template<> struct InformationTraits<ParadigmCode::POSITIVE_UPPER> { typedef PositiveUpperTag Paradigm; };
+template<> struct InformationTraits<ParadigmCode::POSITIVE_EXACT> { typedef PositiveExactTag Paradigm; };
 template<ParadigmCode PC> using ParadigmClass = typename InformationTraits<PC>::Paradigm;
 
 template<bool b> using BooleanConstant = std::integral_constant<bool,b>;
@@ -267,32 +255,32 @@ template<class P1, class P2=P1> struct ParadigmTraits {
     using Stronger = typename InformationTraits<P1::code()&P2::code()>::Paradigm;
 };
 
-template<> struct ParadigmTraits<Metric,Bounded> {
+template<> struct ParadigmTraits<MetricTag,BoundedTag> {
     using Weaker = typename InformationTraits<ParadigmCode::BOUNDED>::Paradigm;
     using Stronger = typename InformationTraits<ParadigmCode::METRIC>::Paradigm;
 };
 
-template<> struct ParadigmTraits<Bounded,Metric> {
+template<> struct ParadigmTraits<BoundedTag,MetricTag> {
     using Weaker = ParadigmClass<ParadigmCode::BOUNDED>;
     using Stronger = ParadigmClass<ParadigmCode::METRIC>;
 };
 
-template<> struct ParadigmTraits<Metric,Upper> {
+template<> struct ParadigmTraits<MetricTag,UpperTag> {
     using Weaker = typename InformationTraits<ParadigmCode::UPPER>::Paradigm;
     using Stronger = typename InformationTraits<ParadigmCode::METRIC>::Paradigm;
 };
 
-template<> struct ParadigmTraits<Upper,Metric> {
+template<> struct ParadigmTraits<UpperTag,MetricTag> {
     using Weaker = ParadigmClass<ParadigmCode::UPPER>;
     using Stronger = ParadigmClass<ParadigmCode::METRIC>;
 };
 
-template<> struct ParadigmTraits<Metric,Lower> {
+template<> struct ParadigmTraits<MetricTag,LowerTag> {
     using Weaker = typename InformationTraits<ParadigmCode::LOWER>::Paradigm;
     using Stronger = typename InformationTraits<ParadigmCode::METRIC>::Paradigm;
 };
 
-template<> struct ParadigmTraits<Lower,Metric> {
+template<> struct ParadigmTraits<LowerTag,MetricTag> {
     using Weaker = ParadigmClass<ParadigmCode::LOWER>;
     using Stronger = ParadigmClass<ParadigmCode::METRIC>;
 };
@@ -303,9 +291,9 @@ template<class P> struct ParadigmTraits<P,P> {
     using NextWeaker = typename InformationTraits<next_weaker(P::code())>::Paradigm;
 };
 
-template<> struct ParadigmTraits<Approximate,Approximate> {
+template<> struct ParadigmTraits<ApproximateTag,ApproximateTag> {
   private:
-    typedef Approximate P;
+    typedef ApproximateTag P;
   public:
     using Weaker = typename InformationTraits<P::code()>::Paradigm;
     using Stronger = typename InformationTraits<P::code()>::Paradigm;
@@ -319,7 +307,7 @@ template<class P1, class P2> using Weaker = typename ParadigmTraits<P1,P2>::Weak
 //! \brief The weakest paradigm which is stronger than both paradigms \a P1 and \a P2.
 template<class P1, class P2> using Stronger = typename ParadigmTraits<P1,P2>::Stronger;
 //! \ingroup ParadigmSubModule
-//! \brief The strongest paradigm which is strictly weaker than \a P. If \a P is \c ValidatedBounded, is defined as \c Approximate.
+//! \brief The strongest paradigm which is strictly weaker than \a P. If \a P is \c ValidatedBoundedTag, is defined as \c ApproximateTag.
 template<class P> using NextWeaker = typename ParadigmTraits<P>::NextWeaker;
 template<class P> using Weaken = typename ParadigmTraits<P>::NextWeaker;
 

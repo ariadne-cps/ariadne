@@ -312,7 +312,7 @@ Void TestTaylorModel::test_functions()
     ExactFloat64 LAXITY=1;
 
     // exp, sin and cos have error bound e^N/N!*(1+1/N), where e is bound for |x| N is the first term omitted
-    // Error bound for rec is e^(N-1); log is e^(N-1)/N; sqrt is ???, where e is bound for |x-1|
+    // ErrorTag bound for rec is e^(N-1); log is e^(N-1)/N; sqrt is ???, where e is bound for |x-1|
 
     //Functions based on their natural defining points with variable dependence 1.0
     ValidatedTaylorModel expected_exp_x = 1+x+(x^2)/2+(x^3)/6+(x^4)/24+(x^5)/120+(x^6)/720+e/4410+tol;

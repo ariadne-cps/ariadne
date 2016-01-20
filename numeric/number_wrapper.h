@@ -197,31 +197,31 @@ template<class X> class NumberWrapper
         return _heap_move_number(min(_cast(*this),_cast(*p))); }
     virtual LogicalValue _equals(NumberInterface const& y) const {
         if (this->_paradigm() == ParadigmCode::VALIDATED && y._paradigm() == ParadigmCode::VALIDATED) {
-            return LogicalValue(this->_get(Bounded(),Precision64()) == y._get(Bounded(),Precision64())); }
-        else { return LogicalValue(this->_get(Approximate(),Precision64()) == y._get(Approximate(),Precision64())); } }
+            return LogicalValue(this->_get(BoundedTag(),Precision64()) == y._get(BoundedTag(),Precision64())); }
+        else { return LogicalValue(this->_get(ApproximateTag(),Precision64()) == y._get(ApproximateTag(),Precision64())); } }
     virtual LogicalValue _less(NumberInterface const& y) const {
         if (this->_paradigm() == ParadigmCode::VALIDATED && y._paradigm() == ParadigmCode::VALIDATED) {
-            return LogicalValue(this->_get(Bounded(),Precision64()) < y._get(Bounded(),Precision64())); }
-        else { return LogicalValue(this->_get(Approximate(),Precision64()) < y._get(Approximate(),Precision64())); } }
-    virtual MetricFloat64 _get(Metric,Precision64) const {
+            return LogicalValue(this->_get(BoundedTag(),Precision64()) < y._get(BoundedTag(),Precision64())); }
+        else { return LogicalValue(this->_get(ApproximateTag(),Precision64()) < y._get(ApproximateTag(),Precision64())); } }
+    virtual MetricFloat64 _get(MetricTag,Precision64) const {
         return this->_get_as<MetricFloat64>(); }
-    virtual BoundedFloat64 _get(Bounded,Precision64) const {
+    virtual BoundedFloat64 _get(BoundedTag,Precision64) const {
         return this->_get_as<BoundedFloat64>(); }
-    virtual UpperFloat64 _get(Upper,Precision64) const {
+    virtual UpperFloat64 _get(UpperTag,Precision64) const {
         return this->_get_as<UpperFloat64>(); }
-    virtual LowerFloat64 _get(Lower,Precision64) const {
+    virtual LowerFloat64 _get(LowerTag,Precision64) const {
         return this->_get_as<LowerFloat64>(); }
-    virtual ApproximateFloat64 _get(Approximate,Precision64) const {
+    virtual ApproximateFloat64 _get(ApproximateTag,Precision64) const {
         return this->_get_as<ApproximateFloat64>(); }
-    virtual MetricFloatMP _get(Metric, PrecisionMP pr) const {
+    virtual MetricFloatMP _get(MetricTag, PrecisionMP pr) const {
         return this->_get_as<MetricFloatMP>(pr); }
-    virtual BoundedFloatMP _get(Bounded, PrecisionMP pr) const {
+    virtual BoundedFloatMP _get(BoundedTag, PrecisionMP pr) const {
         return this->_get_as<BoundedFloatMP>(pr); }
-    virtual UpperFloatMP _get(Upper, PrecisionMP pr) const {
+    virtual UpperFloatMP _get(UpperTag, PrecisionMP pr) const {
         return this->_get_as<UpperFloatMP>(pr); }
-    virtual LowerFloatMP _get(Lower, PrecisionMP pr) const {
+    virtual LowerFloatMP _get(LowerTag, PrecisionMP pr) const {
         return this->_get_as<LowerFloatMP>(pr); }
-    virtual ApproximateFloatMP _get(Approximate, PrecisionMP pr) const {
+    virtual ApproximateFloatMP _get(ApproximateTag, PrecisionMP pr) const {
         return this->_get_as<ApproximateFloatMP>(pr); }
     virtual ParadigmCode _paradigm() const { return P::code(); }
     virtual String _class_name() const { return class_name<X>(); }

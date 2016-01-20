@@ -57,7 +57,7 @@ template<class X> class TaylorSeries;
 template<class A> EnableIfNormedAlgebra<A>
 _compose(const TaylorSeries<BoundedFloat64>& ts, const A& tv, double eps)
 {
-    //std::cerr<<"_compose(TaylorSeries,A,Error)\n";
+    //std::cerr<<"_compose(TaylorSeries,A,ErrorTag)\n";
     //std::cerr<<"\n  ts="<<ts<<"\n  tv="<<tv<<"\n";
     ExactFloat64& vref=const_cast<ExactFloat64&>(tv.value());
     ExactFloat64 vtmp=vref;

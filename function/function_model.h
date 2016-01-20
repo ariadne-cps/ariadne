@@ -67,7 +67,7 @@ typedef ErrorFloat64 ValidatedErrorType;
 
 template<class P, class F> class TaylorModel;
 template<class M> class FunctionPatch;
-typedef FunctionPatch<TaylorModel<Validated,Float64>> ScalarTaylorFunction;
+typedef FunctionPatch<TaylorModel<ValidatedTag,Float64>> ScalarTaylorFunction;
 
 template<> class ScalarFunctionModelInterface<ValidatedTag>
     : public virtual ScalarFunctionInterface<ValidatedTag>
@@ -573,7 +573,7 @@ inline ScalarFunctionModel<ValidatedTag> ScalarFunctionModel<ValidatedTag>::crea
 
 
 
-// Exact output
+// ExactTag output
 template<class T> struct Representation { const T* pointer; Representation(const T& t) : pointer(&t) { } const T& reference() const { return *pointer; } };
 template<class T> inline Representation<T> representation(const T& t) { return Representation<T>(t); }
 template<class T> inline OutputStream& operator<<(OutputStream& os, const Representation<T>& obj) { obj.reference().repr(os); return os; }

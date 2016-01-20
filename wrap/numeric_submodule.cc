@@ -200,9 +200,9 @@ template<class P> void export_logical(std::string name)
 
 };
 
-template<> void export_logical<Exact>(std::string name)
+template<> void export_logical<ExactTag>(std::string name)
 {
-    typedef Exact P;
+    typedef ExactTag P;
     OutputStream& operator<<(OutputStream& os, Logical<P> l);
     class_<Logical<P>> logical_class(name,init<bool>());
     logical_class.def(init<Logical<P>>());
@@ -210,9 +210,9 @@ template<> void export_logical<Exact>(std::string name)
     logical_class.def(self_ns::str(self));
     logical_class.def(self_ns::repr(self));
 
-    implicitly_convertible<Logical<Exact>,bool>();
+    implicitly_convertible<Logical<ExactTag>,bool>();
 
-    boost::python::class_<Boolean,boost::python::bases<Logical<Exact>>> boolean_class("Boolean");
+    boost::python::class_<Boolean,boost::python::bases<Logical<ExactTag>>> boolean_class("Boolean");
 }
 
 void export_integer()
@@ -317,7 +317,7 @@ ApproximateFloatMP get(ApproximateNumber const& n, PrecisionMP const& pr) { std:
 
 void export_numbers()
 {
-    class_<ApproximateNumber> approximate_number_class(class_name<Approximate>()+"Number");
+    class_<ApproximateNumber> approximate_number_class(class_name<ApproximateTag>()+"Number");
     approximate_number_class.def(init<Rational>());
     approximate_number_class.def(init<Real>());
     approximate_number_class.def(init<ExactNumber>());
@@ -332,7 +332,7 @@ void export_numbers()
     approximate_number_class.def(self_ns::str(self));
     approximate_number_class.def(self_ns::repr(self));
 
-    class_<LowerNumber> lower_number_class(class_name<Lower>()+"Number");
+    class_<LowerNumber> lower_number_class(class_name<LowerTag>()+"Number");
     lower_number_class.def(init<ValidatedNumber>());
     lower_number_class.def("get", (LowerFloat64(*)(LowerNumber const&, Precision64 const&)) &get);
     lower_number_class.def("get", (LowerFloatMP(*)(LowerNumber const&, PrecisionMP const&)) &get);
@@ -340,7 +340,7 @@ void export_numbers()
     lower_number_class.def(self_ns::str(self));
     lower_number_class.def(self_ns::repr(self));
 
-    class_<UpperNumber> upper_number_class(class_name<Upper>()+"Number");
+    class_<UpperNumber> upper_number_class(class_name<UpperTag>()+"Number");
     upper_number_class.def(init<ValidatedNumber>());
     upper_number_class.def("get", (UpperFloat64(*)(UpperNumber const&, Precision64 const&)) &get);
     upper_number_class.def("get", (UpperFloatMP(*)(UpperNumber const&, PrecisionMP const&)) &get);
@@ -348,7 +348,7 @@ void export_numbers()
     upper_number_class.def(self_ns::str(self));
     upper_number_class.def(self_ns::repr(self));
 
-    class_<ValidatedNumber> validated_number_class(class_name<Validated>()+"Number");
+    class_<ValidatedNumber> validated_number_class(class_name<ValidatedTag>()+"Number");
     validated_number_class.def(init<Rational>());
     validated_number_class.def(init<Real>());
     validated_number_class.def(init<ExactNumber>());
@@ -362,7 +362,7 @@ void export_numbers()
     validated_number_class.def(self_ns::str(self));
     validated_number_class.def(self_ns::repr(self));
 
-    class_<EffectiveNumber> effective_number_class(class_name<Effective>()+"Number");
+    class_<EffectiveNumber> effective_number_class(class_name<EffectiveTag>()+"Number");
     effective_number_class.def(init<Rational>());
     effective_number_class.def(init<Real>());
     effective_number_class.def(init<ExactNumber>());
@@ -375,7 +375,7 @@ void export_numbers()
     effective_number_class.def(self_ns::str(self));
     effective_number_class.def(self_ns::repr(self));
 
-    class_<ExactNumber> exact_number_class(class_name<Exact>()+"Number");
+    class_<ExactNumber> exact_number_class(class_name<ExactTag>()+"Number");
     exact_number_class.def(init<Rational>());
     exact_number_class.def(init<ExactNumber>());
     exact_number_class.def("get", (BoundedFloat64(*)(ExactNumber const&, Precision64 const&)) &get);
@@ -710,14 +710,14 @@ numeric_submodule()
     using namespace Ariadne;
     export_effort();
 
-    export_effective_logical<Effective>("Kleenean");
-    export_effective_logical<EffectiveUpper>("Sierpinskian");
-    export_effective_logical<EffectiveLower>("EffectiveLowerLogical");
-    export_logical<Exact>("Boolean");
-    export_logical<Validated>("Tribool");
-    export_logical<Upper>("Verifyable");
-    export_logical<Lower>("Falsifyable");
-    export_logical<Approximate>("Fuzzy");
+    export_effective_logical<EffectiveTag>("Kleenean");
+    export_effective_logical<EffectiveUpperTag>("Sierpinskian");
+    export_effective_logical<EffectiveLowerTag>("EffectiveLowerLogical");
+    export_logical<ExactTag>("Boolean");
+    export_logical<ValidatedTag>("Tribool");
+    export_logical<UpperTag>("Verifyable");
+    export_logical<LowerTag>("Falsifyable");
+    export_logical<ApproximateTag>("Fuzzy");
 
 
     export_precision();

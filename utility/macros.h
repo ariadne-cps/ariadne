@@ -122,7 +122,7 @@ bool decide(bool);
 
 #define ARIADNE_FAIL_MSG(error)             \
     { \
-        ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Error "<<error<<"\n"); \
+        ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"ErrorTag "<<error<<"\n"); \
     } \
 
 #define ARIADNE_ASSERT_MSG(expression,error)             \

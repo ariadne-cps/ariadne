@@ -77,13 +77,13 @@ template<> struct IsGenericNumericType<Dbl> : True { };
 template<class P> struct IsGenericNumericType<Number<P>> : True { };
 
 
-using ExactNumber=Number<Exact>;
-using EffectiveNumber=Number<Effective>;
-using ValidatedNumber=Number<Validated>;
-using UpperNumber=Number<Upper>;
-using LowerNumber=Number<Lower>;
-using ApproximateNumber=Number<Approximate>;
-using PositiveUpperNumber=Number<PositiveUpper>;
+using ExactNumber=Number<ExactTag>;
+using EffectiveNumber=Number<EffectiveTag>;
+using ValidatedNumber=Number<ValidatedTag>;
+using UpperNumber=Number<UpperTag>;
+using LowerNumber=Number<LowerTag>;
+using ApproximateNumber=Number<ApproximateTag>;
+using PositiveUpperNumber=Number<PositiveUpperTag>;
 
 } // namespace Ariadne
 

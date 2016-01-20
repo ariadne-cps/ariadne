@@ -159,7 +159,7 @@ Polytope& reduce2d(Polytope& p)
         }
     new_vertices.pop_back();
 
-    // Upper sweep
+    // UpperTag sweep
     //std::cerr << "Forward pass\n";
     min_size=new_vertices.size()+1;
     for(std::vector<ExactPoint>::const_reverse_iterator vertex_iter=old_vertices.rbegin();

@@ -72,7 +72,7 @@ template<class N1, class N2, EnableIf<And<IsNumericType<N1>,IsNumericType<N2>>> 
 
 /*
 struct DefineBuiltinFloatOperators {
-    using ApN = Number<Approximate>;
+    using ApN = Number<ApproximateTag>;
 
     template<class X, class D, EnableIf<IsFloatingPoint<D>> =dummy> friend auto operator+(X x, D d) -> decltype(add(x,ApN(d))) { return add(x,ApN(d)); }
     template<class X, class D, EnableIf<IsFloatingPoint<D>> =dummy> friend auto operator+(D d, X x) -> decltype(add(ApN(d),x)) { return add(ApN(d),x); }
@@ -94,13 +94,13 @@ struct DefineBuiltinFloatOperators {
 template<class P1, class P2> using DisableIfWeaker = DisableIf<IsWeaker<P1,P2>>;
 
 //! \ingroup NumericModule
-//! \brief Generic numbers with computational paradigm \a P, which may be %Effective, %Validated, %Upper, %Lower or %Approximate.
+//! \brief Generic numbers with computational paradigm \a P, which may be %EffectiveTag, %ValidatedTag, %UpperTag, %LowerTag or %ApproximateTag.
 // Number
 template<class P> class Number
 {
     static_assert(IsParadigm<P>::value,"P must be a paradigm");
     template<class PP> friend class Number;
-    template<class X> using IsGettableAs = And<IsNumericType<X>,IsWeaker<typename X::Paradigm,P>,Not<IsSame<typename X::Paradigm,Exact>>>;
+    template<class X> using IsGettableAs = And<IsNumericType<X>,IsWeaker<typename X::Paradigm,P>,Not<IsSame<typename X::Paradigm,ExactTag>>>;
   private:
     typedef Opposite<P> NP;
     typedef Weaker<P,NP> SP;
@@ -129,7 +129,7 @@ template<class P> class Number
     // Construct from a builtin integer
     template<class N, EnableIf<IsIntegral<N>> =dummy> Number(const N& n) : Number<P>(Integer(n)) { }
     // Construct from a builtin floating-point number
-    template<class X, EnableIf<And<IsSame<P,Approximate>,IsFloatingPoint<X>>> =dummy> Number(const X& x) : Number<P>(Float<P,Precision64>(x)) { }
+    template<class X, EnableIf<And<IsSame<P,ApproximateTag>,IsFloatingPoint<X>>> =dummy> Number(const X& x) : Number<P>(Float<P,Precision64>(x)) { }
 
     // Construct from a type which is convertible to another Number type.
     template<class X, EnableIf<IsWeaker<P,ParadigmTag<X>>> =dummy, EnableIf<IsConvertible<X,Number<ParadigmTag<X>>>> = dummy>
@@ -210,21 +210,21 @@ template<class P> class Number
 };
 
 template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
-operator+(N const& y1, D const& d2) -> decltype(y1+Number<Approximate>(d2)) { y1+Number<Approximate>(d2); }
+operator+(N const& y1, D const& d2) -> decltype(y1+Number<ApproximateTag>(d2)) { y1+Number<ApproximateTag>(d2); }
 template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
-operator-(N const& y1, D const& d2) -> decltype(y1-Number<Approximate>(d2)) { y1-Number<Approximate>(d2); }
+operator-(N const& y1, D const& d2) -> decltype(y1-Number<ApproximateTag>(d2)) { y1-Number<ApproximateTag>(d2); }
 template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
-operator*(N const& y1, D const& d2) -> decltype(y1*Number<Approximate>(d2)) { y1*Number<Approximate>(d2); }
+operator*(N const& y1, D const& d2) -> decltype(y1*Number<ApproximateTag>(d2)) { y1*Number<ApproximateTag>(d2); }
 template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
-operator/(N const& y1, D const& d2) -> decltype(y1/Number<Approximate>(d2)) { y1/Number<Approximate>(d2); }
+operator/(N const& y1, D const& d2) -> decltype(y1/Number<ApproximateTag>(d2)) { y1/Number<ApproximateTag>(d2); }
 template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
-operator+(D const& d1, N const& y2) -> decltype(Number<Approximate>(d1)+y2) { Number<Approximate>(d1)+y2; }
+operator+(D const& d1, N const& y2) -> decltype(Number<ApproximateTag>(d1)+y2) { Number<ApproximateTag>(d1)+y2; }
 template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
-operator-(D const& d1, N const& y2) -> decltype(Number<Approximate>(d1)-y2) { Number<Approximate>(d1)-y2; }
+operator-(D const& d1, N const& y2) -> decltype(Number<ApproximateTag>(d1)-y2) { Number<ApproximateTag>(d1)-y2; }
 template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
-operator*(D const& d1, N const& y2) -> decltype(Number<Approximate>(d1)*y2) { Number<Approximate>(d1)*y2; }
+operator*(D const& d1, N const& y2) -> decltype(Number<ApproximateTag>(d1)*y2) { Number<ApproximateTag>(d1)*y2; }
 template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
-operator/(D const& d1, N const& y2) -> decltype(Number<Approximate>(d1)/y2) { Number<Approximate>(d1)/y2; }
+operator/(D const& d1, N const& y2) -> decltype(Number<ApproximateTag>(d1)/y2) { Number<ApproximateTag>(d1)/y2; }
 
 
 template<class R> struct IsConcreteNumericType : IsConvertible<R,Real> { };
@@ -240,14 +240,14 @@ template<class R, class P, EnableIf<IsConcreteNumericType<R>> =dummy> auto opera
 #ifdef ARIADNE_TEMPLATE_NUMBER
 
 //! \ingroup NumericModule
-//! \brief Generic numbers with computational paradigm \a P, which may be %Effective, %Validated, %Upper, %Lower or %Approximate.
+//! \brief Generic numbers with computational paradigm \a P, which may be %EffectiveTag, %ValidatedTag, %UpperTag, %LowerTag or %ApproximateTag.
 // Number
 template<class P> class Number
     : public Handle<NumberInterface>
 {
-    static_assert(IsConvertible<P,Approximate>::value,"P must be a paradigm");
+    static_assert(IsConvertible<P,ApproximateTag>::value,"P must be a paradigm");
     template<class PP> friend class Number;
-    template<class X> using IsGettableAs = And<IsNumericType<X>,IsWeaker<typename X::Paradigm,P>,Not<IsSame<typename X::Paradigm,Exact>>>;
+    template<class X> using IsGettableAs = And<IsNumericType<X>,IsWeaker<typename X::Paradigm,P>,Not<IsSame<typename X::Paradigm,ExactTag>>>;
   public:
     explicit Number(Handle<NumberInterface> h) : Handle<NumberInterface>(h) { }
     Handle<NumberInterface> handle() const { return *this; }
@@ -260,7 +260,7 @@ template<class P> class Number
     template<class N, EnableIf<IsIntegral<N>> =dummy> Number(const N& n) : Number<P>(Integer(n)) { }
 
     // Construct from raw double
-    template<class X, EnableIf<And<IsSame<P,Approximate>,IsFloatingPoint<X>>> =dummy> explicit Number(const X& n);
+    template<class X, EnableIf<And<IsSame<P,ApproximateTag>,IsFloatingPoint<X>>> =dummy> explicit Number(const X& n);
 
     template<class X> X extract() const;
 };
@@ -281,14 +281,14 @@ template<class P1, class P2> inline Number<Weaker<P1,P2>> operator/(Number<P1> y
     typedef Weaker<P1,P2> P0; return div(Number<P0>(y1),Number<P0>(y2)); }
 
 // Overloads
-template<class P1, class P2, EnableIf<And<IsSame<P1,Upper>,IsSame<P2,Lower>>> =dummy>
-    inline Number<Approximate> operator+(Number<P1> y1, Number<P2> y2) { return Number<Approximate>(y1)+Number<Approximate>(y2); }
-template<class P1, class P2, EnableIf<And<IsSame<P1,Lower>,IsSame<P2,Upper>>> =dummy>
-    inline Number<Approximate> operator+(Number<P1> y1, Number<P2> y2) { return Number<Approximate>(y1)+Number<Approximate>(y2); }
-template<class P1, class P2, EnableIf<And<IsSame<P1,Upper>,IsSame<P2,Upper>>> =dummy>
-    inline Number<Approximate> operator-(Number<P1> y1, Number<P2> y2) { return Number<Approximate>(y1)-Number<Approximate>(y2); }
-template<class P1, class P2, EnableIf<And<IsSame<P1,Lower>,IsSame<P2,Lower>>> =dummy>
-    inline Number<Approximate> operator-(Number<P1> y1, Number<P2> y2) { return Number<Approximate>(y1)-Number<Approximate>(y2); }
+template<class P1, class P2, EnableIf<And<IsSame<P1,UpperTag>,IsSame<P2,LowerTag>>> =dummy>
+    inline Number<ApproximateTag> operator+(Number<P1> y1, Number<P2> y2) { return Number<ApproximateTag>(y1)+Number<ApproximateTag>(y2); }
+template<class P1, class P2, EnableIf<And<IsSame<P1,LowerTag>,IsSame<P2,UpperTag>>> =dummy>
+    inline Number<ApproximateTag> operator+(Number<P1> y1, Number<P2> y2) { return Number<ApproximateTag>(y1)+Number<ApproximateTag>(y2); }
+template<class P1, class P2, EnableIf<And<IsSame<P1,UpperTag>,IsSame<P2,UpperTag>>> =dummy>
+    inline Number<ApproximateTag> operator-(Number<P1> y1, Number<P2> y2) { return Number<ApproximateTag>(y1)-Number<ApproximateTag>(y2); }
+template<class P1, class P2, EnableIf<And<IsSame<P1,LowerTag>,IsSame<P2,LowerTag>>> =dummy>
+    inline Number<ApproximateTag> operator-(Number<P1> y1, Number<P2> y2) { return Number<ApproximateTag>(y1)-Number<ApproximateTag>(y2); }
 
 // Comparison operators
 template<class P> inline Logical<Equality<P>> operator==(Number<P> y1, Number<Negated<P>> y2) {

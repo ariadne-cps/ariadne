@@ -39,10 +39,10 @@ typedef Void Void;
 enum class LogicalValue : char;
 template<class P=Void> class Logical;
 
-//typedef Logical<Exact> Boolean;
-//typedef Logical<Validated> Kleenean;
-//typedef Logical<Upper> Sierpinski;
-//typedef Logical<Approximate> Fuzzy;
+//typedef Logical<ExactTag> Boolean;
+//typedef Logical<ValidatedTag> Kleenean;
+//typedef Logical<UpperTag> Sierpinski;
+//typedef Logical<ApproximateTag> Fuzzy;
 
 class Boolean;
 class Kleenean;
@@ -51,17 +51,17 @@ class NegSierpinski;
 class Fuzzy;
 
 template<class P> using LogicalType = Logical<P>;
-using ExactLogic = Logical<Exact>;
-using EffectiveLogic = Logical<Effective>;
-using ValidatedLogic = Logical<Validated>;
-using UpperLogic = Logical<Upper>;
-using LowerLogic = Logical<Lower>;
-using ApproximateLogic = Logical<Approximate>;
+using ExactLogic = Logical<ExactTag>;
+using EffectiveLogic = Logical<EffectiveTag>;
+using ValidatedLogic = Logical<ValidatedTag>;
+using UpperLogic = Logical<UpperTag>;
+using LowerLogic = Logical<LowerTag>;
+using ApproximateLogic = Logical<ApproximateTag>;
 
-using Decidable = Logical<Exact>;
-using Quasidecidable = Logical<Effective>;
-using Verifyable = Logical<EffectiveUpper>;
-using Falsifyable = Logical<EffectiveLower>;
+using Decidable = Logical<ExactTag>;
+using Quasidecidable = Logical<EffectiveTag>;
+using Verifyable = Logical<EffectiveUpperTag>;
+using Falsifyable = Logical<EffectiveLowerTag>;
 
 }
 

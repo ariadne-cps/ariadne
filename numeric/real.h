@@ -70,7 +70,7 @@ class Real
     explicit Real(SharedPointer<Interface>);
     explicit Real(double,double,double);
   public:
-    typedef Effective Paradigm;
+    typedef EffectiveTag Paradigm;
     typedef Real NumericType;
   public:
     Real();
@@ -87,7 +87,7 @@ class Real
 
     explicit Real(ExactFloat64 x);
 
-    operator Number<Effective>() const;
+    operator Number<EffectiveTag>() const;
 
     // Extract floating-point properties
     UpperFloat64 upper() const;
@@ -155,10 +155,10 @@ class Real
 
     friend OutputStream& operator<<(OutputStream&, Real const&);
 
-    friend Number<Effective> operator+(Number<Effective>, Number<Effective>);
-    friend Number<Effective> operator-(Number<Effective>, Number<Effective>);
-    friend Number<Effective> operator*(Number<Effective>, Number<Effective>);
-    friend Number<Effective> operator/(Number<Effective>, Number<Effective>);
+    friend Number<EffectiveTag> operator+(Number<EffectiveTag>, Number<EffectiveTag>);
+    friend Number<EffectiveTag> operator-(Number<EffectiveTag>, Number<EffectiveTag>);
+    friend Number<EffectiveTag> operator*(Number<EffectiveTag>, Number<EffectiveTag>);
+    friend Number<EffectiveTag> operator/(Number<EffectiveTag>, Number<EffectiveTag>);
   private:
     Real(std::int64_t n, Void*);
     Real(std::uint64_t m, Void*);
@@ -177,7 +177,7 @@ class LowerReal
   private: public:
     explicit LowerReal(SharedPointer<Real::Interface>);
   public:
-    typedef EffectiveLower Paradigm;
+    typedef EffectiveLowerTag Paradigm;
     typedef LowerReal NumericType;
   public:
     LowerReal(Real);
@@ -209,7 +209,7 @@ class UpperReal
   private: public:
     explicit UpperReal(SharedPointer<Real::Interface>);
   public:
-    typedef EffectiveUpper Paradigm;
+    typedef EffectiveUpperTag Paradigm;
     typedef UpperReal NumericType;
   public:
     UpperReal(Real);

@@ -82,7 +82,7 @@ uint16_t bin(uint16_t n, uint16_t k);
 uint32_t bin(uint32_t n, uint32_t k);
 uint64_t bin(uint64_t n, uint64_t k);
 
-struct Exact;
+struct ExactTag;
 class Integer;
 template<> struct IsNumericType<Nat> : True { };
 template<> struct IsNumericType<Int> : True { };
@@ -95,7 +95,7 @@ class Integer
   public:
     mpz_t _mpz;
   public:
-    typedef Exact Paradigm;
+    typedef ExactTag Paradigm;
   public:
     ~Integer();
     Integer();
@@ -106,7 +106,7 @@ class Integer
     Integer(Integer&&);
     Integer& operator=(const Integer&);
     Integer& operator=(Integer&&);
-    operator Number<Exact> () const;
+    operator Number<ExactTag> () const;
 
     friend Integer operator+(Integer const& z);
     friend Integer operator-(Integer const& z);

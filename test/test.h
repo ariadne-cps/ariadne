@@ -295,7 +295,7 @@ int test_case_counter = 0;
                       << "\n     : " << #expected << ":\n           " << (expected) \
                       << "\n     : error: " << (error) \
                       << "\n     : tolerance " << (tolerance) << std::endl; \
-            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Approximate equality `" << #expression << " ~ " << #expected << "' failed; " << #expression << "=" << (expression) << "; " << #expected << "=" << (expected)<< "; error=" << (error) << "; tolerance=" << (tolerance) << std::endl; \
+            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": ApproximateTag equality `" << #expression << " ~ " << #expected << "' failed; " << #expression << "=" << (expression) << "; " << #expected << "=" << (expected)<< "; error=" << (error) << "; tolerance=" << (tolerance) << std::endl; \
         }                                                               \
     }                                                                   \
                                                                    \

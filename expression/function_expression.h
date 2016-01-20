@@ -43,8 +43,8 @@ template<class P, class D, class C> class FunctionExpression;
 template<class P, class D=BoxDomain> using ScalarFunctionExpression = FunctionExpression<P,D,IntervalDomain>;
 template<class P, class D=BoxDomain> using VectorFunctionExpression = FunctionExpression<P,D,BoxDomain>;
 
-using ValidatedScalarFunctionExpression = FunctionExpression<Validated,BoxDomain,IntervalDomain>;
-using ValidatedVectorFunctionExpression = FunctionExpression<Validated,BoxDomain,BoxDomain>;
+using ValidatedScalarFunctionExpression = FunctionExpression<ValidatedTag,BoxDomain,IntervalDomain>;
+using ValidatedVectorFunctionExpression = FunctionExpression<ValidatedTag,BoxDomain,BoxDomain>;
 
 using VariableIntervalDomain = ExactFloat64VariableInterval;
 using VariablesBoxDomain = ExactFloat64VariablesBox;
@@ -99,8 +99,8 @@ template<class P> ScalarFunctionExpression<P> evaluate(ScalarFunction<P> const& 
     return ScalarFunctionExpression<P>(f,vars);
 }
 
-template<class F> TaylorModel<Validated,F> compose(const TaylorModel<Validated,F>& x, Projection const& prj) {
-    TaylorModel<Validated,F> r(prj.argument_size(),x.sweeper());
+template<class F> TaylorModel<ValidatedTag,F> compose(const TaylorModel<ValidatedTag,F>& x, Projection const& prj) {
+    TaylorModel<ValidatedTag,F> r(prj.argument_size(),x.sweeper());
     r.expansion().reserve(x.number_of_nonzeros());
     MultiIndex ra(r.argument_size());
     for(auto xiter=x.begin(); xiter!=x.end(); ++xiter) {

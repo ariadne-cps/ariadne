@@ -22,7 +22,7 @@
  */
 
 /*! \file float64.h
- *  \brief Raw floating-point number class based on double-precision floats.
+ *  \brief RawTag floating-point number class based on double-precision floats.
  */
 
 #ifndef ARIADNE_FLOAT64_H
@@ -76,7 +76,7 @@ class Float64 {
   public:
     volatile double dbl;
   public:
-    typedef Raw Paradigm;
+    typedef RawTag Paradigm;
     typedef Float64 NumericType;
     typedef Precision64 PrecisionType;
     typedef RoundingMode64 RoundingModeType;

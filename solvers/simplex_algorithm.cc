@@ -1279,7 +1279,7 @@ SimplexSolver<X>::hotstarted_feasible(const Vector<X>& xl, const Vector<X>& xu, 
     Kleenean vfs = this->verify_feasibility(xl,xu,A,b,vt);
     if(is_determinate(vfs) && definitely(vfs!=fs)) {
         if(verbosity>0) {
-            ARIADNE_WARN("Approximate feasibility algorithm for\n  A="<<A<<" b="<<b<<" xl="<<xl<<" xu="<<xu<<"\nyielded basic variables "<<vt<<
+            ARIADNE_WARN("ApproximateTag feasibility algorithm for\n  A="<<A<<" b="<<b<<" xl="<<xl<<" xu="<<xu<<"\nyielded basic variables "<<vt<<
                          " and result "<<fs<<", but validation code gave "<<vfs<<".\n");
         }
     }

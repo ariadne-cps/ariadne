@@ -99,22 +99,22 @@ class LogicalHandle {
 template<class P> class LogicalFacade {
 };
 
-template<> class LogicalFacade<Exact> {
-    typedef Exact P;
+template<> class LogicalFacade<ExactTag> {
+    typedef ExactTag P;
   public:
     operator Bool () const;
   public:
-    friend Logical<Exact> operator||(Bool b1, Logical<Exact> l2);
-    friend Logical<Exact> operator||(Logical<Exact> l1, Bool b2);
-    friend Logical<Exact> operator&&(Bool b1, Logical<Exact> l2);
-    friend Logical<Exact> operator&&(Logical<Exact> l1, Bool b2);
+    friend Logical<ExactTag> operator||(Bool b1, Logical<ExactTag> l2);
+    friend Logical<ExactTag> operator||(Logical<ExactTag> l1, Bool b2);
+    friend Logical<ExactTag> operator&&(Bool b1, Logical<ExactTag> l2);
+    friend Logical<ExactTag> operator&&(Logical<ExactTag> l1, Bool b2);
 };
 
 
-template<> class Logical<Effective>;
+template<> class Logical<EffectiveTag>;
 
 //!  \ingroup LogicalTypes
-//!  \brief A logical variable for the paradigm \a P, which must be %Exact, %Validated, %Upper, %Lower or %Approximate.
+//!  \brief A logical variable for the paradigm \a P, which must be %ExactTag, %ValidatedTag, %UpperTag, %LowerTag or %ApproximateTag.
 //!  Used as a base of named logical types Boolean, Kleenean, Sierpinski and Fuzzy. Implemented in terms of LogicalValue.
 template<class P> class Logical
     : public LogicalFacade<P>
@@ -168,107 +168,107 @@ template<class P> class Logical
     friend class Kleenean;
 };
 
-inline LogicalFacade<Exact>::operator Bool () const { return decide(static_cast<Logical<Exact>const&>(*this)); }
+inline LogicalFacade<ExactTag>::operator Bool () const { return decide(static_cast<Logical<ExactTag>const&>(*this)); }
 
-template<> inline Logical<Exact>::Logical(LogicalValue v)
+template<> inline Logical<ExactTag>::Logical(LogicalValue v)
      : _v(v) { assert(v==LogicalValue::FALSE || v==LogicalValue::TRUE); }
-template<> inline Logical<Validated>::Logical(LogicalValue v)
+template<> inline Logical<ValidatedTag>::Logical(LogicalValue v)
     : _v(v) { }
-template<> inline Logical<Upper>::Logical(LogicalValue v)
+template<> inline Logical<UpperTag>::Logical(LogicalValue v)
     : _v(v==LogicalValue::FALSE?LogicalValue::UNLIKELY:v) { }
-template<> inline Logical<Lower>::Logical(LogicalValue v)
+template<> inline Logical<LowerTag>::Logical(LogicalValue v)
     : _v(v==LogicalValue::TRUE?LogicalValue::LIKELY:v) { }
-template<> inline Logical<Approximate>::Logical(LogicalValue v)
+template<> inline Logical<ApproximateTag>::Logical(LogicalValue v)
     : _v(v==LogicalValue::TRUE?LogicalValue::LIKELY:v==LogicalValue::FALSE?LogicalValue::UNLIKELY:v) { }
 
-template<> class Logical<Effective>
+template<> class Logical<EffectiveTag>
 {
     LogicalHandle _v;
     template<class P> friend class Logical;
   public:
-    explicit Logical<Effective>(SharedPointer<const LogicalInterface> p) : _v(p) { }
-    explicit Logical<Effective>(LogicalHandle h) : _v(h) { }
+    explicit Logical<EffectiveTag>(SharedPointer<const LogicalInterface> p) : _v(p) { }
+    explicit Logical<EffectiveTag>(LogicalHandle h) : _v(h) { }
     explicit operator LogicalHandle () const { return _v; }
-    template<class B, EnableIf<IsSame<B,Bool>> =dummy> Logical(B b) : Logical(Logical<Exact>(b)) { }
-    Logical<Effective>(Logical<Exact> l) : _v(static_cast<LogicalValue>(l)) { };
-    Logical<Validated> check(Effort e) const { return Logical<Validated>(Ariadne::check(_v,e)); }
-    friend Logical<Validated> check(Logical<Effective> l, Effort e) { return Logical<Validated>(Ariadne::check(l._v,e)); }
-    friend Logical<Effective> operator&&(Logical<Effective> l1, Logical<Effective> l2) {
-        return Logical<Effective>(conjunction(l1._v,l2._v)); }
-    friend Logical<Effective> operator||(Logical<Effective> l1, Logical<Effective> l2) {
-        return Logical<Effective>(disjunction(l1._v,l2._v)); }
-    friend Logical<Effective> operator!(Logical<Effective> l) {
-        return Logical<Effective>(negation(l._v)); }
-    friend Bool decide(Logical<Effective> l, Effort e=Effort::get_default()) { return decide(l.check(e)); }
-    friend Bool definitely(Logical<Effective> l, Effort e=Effort::get_default()) { return definitely(l.check(e)); }
-    friend Bool possibly(Logical<Effective> l, Effort e=Effort::get_default()) { return possibly(l.check(e)); }
-    friend inline OutputStream& operator<<(OutputStream& os, Logical<Effective> l) { return os << l._v; }
+    template<class B, EnableIf<IsSame<B,Bool>> =dummy> Logical(B b) : Logical(Logical<ExactTag>(b)) { }
+    Logical<EffectiveTag>(Logical<ExactTag> l) : _v(static_cast<LogicalValue>(l)) { };
+    Logical<ValidatedTag> check(Effort e) const { return Logical<ValidatedTag>(Ariadne::check(_v,e)); }
+    friend Logical<ValidatedTag> check(Logical<EffectiveTag> l, Effort e) { return Logical<ValidatedTag>(Ariadne::check(l._v,e)); }
+    friend Logical<EffectiveTag> operator&&(Logical<EffectiveTag> l1, Logical<EffectiveTag> l2) {
+        return Logical<EffectiveTag>(conjunction(l1._v,l2._v)); }
+    friend Logical<EffectiveTag> operator||(Logical<EffectiveTag> l1, Logical<EffectiveTag> l2) {
+        return Logical<EffectiveTag>(disjunction(l1._v,l2._v)); }
+    friend Logical<EffectiveTag> operator!(Logical<EffectiveTag> l) {
+        return Logical<EffectiveTag>(negation(l._v)); }
+    friend Bool decide(Logical<EffectiveTag> l, Effort e=Effort::get_default()) { return decide(l.check(e)); }
+    friend Bool definitely(Logical<EffectiveTag> l, Effort e=Effort::get_default()) { return definitely(l.check(e)); }
+    friend Bool possibly(Logical<EffectiveTag> l, Effort e=Effort::get_default()) { return possibly(l.check(e)); }
+    friend inline OutputStream& operator<<(OutputStream& os, Logical<EffectiveTag> l) { return os << l._v; }
 };
 
-template<> class Logical<EffectiveUpper>
+template<> class Logical<EffectiveUpperTag>
 {
     LogicalHandle _v;
     template<class P> friend class Logical;
   public:
-    explicit Logical<EffectiveUpper>(SharedPointer<const LogicalInterface> p) : _v(p) { }
-    explicit Logical<EffectiveUpper>(LogicalHandle h) : _v(h) { }
+    explicit Logical<EffectiveUpperTag>(SharedPointer<const LogicalInterface> p) : _v(p) { }
+    explicit Logical<EffectiveUpperTag>(LogicalHandle h) : _v(h) { }
     explicit operator LogicalHandle () const { return _v; }
-    Logical<EffectiveUpper>(Logical<Effective> l) : _v(l._v) { }
-    Logical<ValidatedUpper> check(Effort e) const { return Logical<ValidatedUpper>(Ariadne::check(_v,e)); }
-    friend Logical<EffectiveUpper> operator&&(Logical<EffectiveUpper> l1, Logical<EffectiveUpper> l2) {
-        return Logical<EffectiveUpper>(conjunction(l1._v,l2._v)); }
-    friend Logical<EffectiveUpper> operator||(Logical<EffectiveUpper> l1, Logical<EffectiveUpper> l2) {
-        return Logical<EffectiveUpper>(disjunction(l1._v,l2._v)); }
-    friend Logical<EffectiveLower> operator!(Logical<EffectiveUpper> l);
-    friend Logical<EffectiveUpper> operator!(Logical<EffectiveLower> l);
-    friend Logical<ValidatedUpper> check(Logical<EffectiveUpper> l, Effort e) { return Logical<ValidatedUpper>(Ariadne::check(l._v,e)); }
-    friend Bool decide(Logical<EffectiveUpper> l, Effort e=Effort::get_default()) { return decide(l.check(e)); }
-    friend inline OutputStream& operator<<(OutputStream& os, Logical<EffectiveUpper> l) { return os << l._v; }
+    Logical<EffectiveUpperTag>(Logical<EffectiveTag> l) : _v(l._v) { }
+    Logical<ValidatedUpperTag> check(Effort e) const { return Logical<ValidatedUpperTag>(Ariadne::check(_v,e)); }
+    friend Logical<EffectiveUpperTag> operator&&(Logical<EffectiveUpperTag> l1, Logical<EffectiveUpperTag> l2) {
+        return Logical<EffectiveUpperTag>(conjunction(l1._v,l2._v)); }
+    friend Logical<EffectiveUpperTag> operator||(Logical<EffectiveUpperTag> l1, Logical<EffectiveUpperTag> l2) {
+        return Logical<EffectiveUpperTag>(disjunction(l1._v,l2._v)); }
+    friend Logical<EffectiveLowerTag> operator!(Logical<EffectiveUpperTag> l);
+    friend Logical<EffectiveUpperTag> operator!(Logical<EffectiveLowerTag> l);
+    friend Logical<ValidatedUpperTag> check(Logical<EffectiveUpperTag> l, Effort e) { return Logical<ValidatedUpperTag>(Ariadne::check(l._v,e)); }
+    friend Bool decide(Logical<EffectiveUpperTag> l, Effort e=Effort::get_default()) { return decide(l.check(e)); }
+    friend inline OutputStream& operator<<(OutputStream& os, Logical<EffectiveUpperTag> l) { return os << l._v; }
 };
 
-template<> class Logical<EffectiveLower>
+template<> class Logical<EffectiveLowerTag>
 {
     LogicalHandle _v;
     template<class P> friend class Logical;
   public:
-    Logical<EffectiveLower>(SharedPointer<const LogicalInterface> p) : _v(p) { }
-    explicit Logical<EffectiveLower>(LogicalHandle h) : _v(h) { }
+    Logical<EffectiveLowerTag>(SharedPointer<const LogicalInterface> p) : _v(p) { }
+    explicit Logical<EffectiveLowerTag>(LogicalHandle h) : _v(h) { }
     explicit operator LogicalHandle () const { return _v; }
-    Logical<EffectiveLower>(Logical<Effective> l) : _v(l._v) { }
-    Logical<ValidatedLower> check(Effort e) const { return Logical<ValidatedLower>(Ariadne::check(_v,e)); }
-    friend Logical<ValidatedLower> check(Logical<EffectiveLower> l, Effort e) { return Logical<ValidatedLower>(Ariadne::check(l._v,e)); }
-    friend Logical<EffectiveLower> operator&&(Logical<EffectiveLower> l1, Logical<EffectiveLower> l2) {
-        return Logical<EffectiveLower>(conjunction(l1._v,l2._v)); }
-    friend Logical<EffectiveLower> operator||(Logical<EffectiveLower> l1, Logical<EffectiveLower> l2) {
-        return Logical<EffectiveLower>(disjunction(l1._v,l2._v)); }
-    friend Logical<EffectiveUpper> operator!(Logical<EffectiveLower> l) {
-        return Logical<EffectiveUpper>(negation(l._v)); }
-    friend Logical<EffectiveLower> operator!(Logical<EffectiveUpper> l) {
-        return Logical<EffectiveLower>(negation(l._v)); }
-     friend Bool decide(Logical<EffectiveLower> l, Effort e=Effort::get_default()) { return decide(l.check(e)); }
-    friend inline OutputStream& operator<<(OutputStream& os, Logical<EffectiveLower> l) { return os << l._v; }
+    Logical<EffectiveLowerTag>(Logical<EffectiveTag> l) : _v(l._v) { }
+    Logical<ValidatedLowerTag> check(Effort e) const { return Logical<ValidatedLowerTag>(Ariadne::check(_v,e)); }
+    friend Logical<ValidatedLowerTag> check(Logical<EffectiveLowerTag> l, Effort e) { return Logical<ValidatedLowerTag>(Ariadne::check(l._v,e)); }
+    friend Logical<EffectiveLowerTag> operator&&(Logical<EffectiveLowerTag> l1, Logical<EffectiveLowerTag> l2) {
+        return Logical<EffectiveLowerTag>(conjunction(l1._v,l2._v)); }
+    friend Logical<EffectiveLowerTag> operator||(Logical<EffectiveLowerTag> l1, Logical<EffectiveLowerTag> l2) {
+        return Logical<EffectiveLowerTag>(disjunction(l1._v,l2._v)); }
+    friend Logical<EffectiveUpperTag> operator!(Logical<EffectiveLowerTag> l) {
+        return Logical<EffectiveUpperTag>(negation(l._v)); }
+    friend Logical<EffectiveLowerTag> operator!(Logical<EffectiveUpperTag> l) {
+        return Logical<EffectiveLowerTag>(negation(l._v)); }
+     friend Bool decide(Logical<EffectiveLowerTag> l, Effort e=Effort::get_default()) { return decide(l.check(e)); }
+    friend inline OutputStream& operator<<(OutputStream& os, Logical<EffectiveLowerTag> l) { return os << l._v; }
 };
 
-typedef Logical<Effective> Quasidecidable;
-typedef Logical<EffectiveUpper> Verifyable;
-typedef Logical<EffectiveLower> Falsifyable;
+typedef Logical<EffectiveTag> Quasidecidable;
+typedef Logical<EffectiveUpperTag> Verifyable;
+typedef Logical<EffectiveLowerTag> Falsifyable;
 
-inline Logical<EffectiveLower> operator&&(Logical<EffectiveLower> l1, Logical<Exact> l2) {
-    if(decide(l2)) { return l1; } else { return Logical<Effective>(false); } }
-inline Logical<EffectiveUpper> operator||(Logical<EffectiveUpper> l1, Logical<Exact> l2) {
-    if(decide(l2)) { return Logical<Effective>(true); } else { return l1; } }
+inline Logical<EffectiveLowerTag> operator&&(Logical<EffectiveLowerTag> l1, Logical<ExactTag> l2) {
+    if(decide(l2)) { return l1; } else { return Logical<EffectiveTag>(false); } }
+inline Logical<EffectiveUpperTag> operator||(Logical<EffectiveUpperTag> l1, Logical<ExactTag> l2) {
+    if(decide(l2)) { return Logical<EffectiveTag>(true); } else { return l1; } }
 
 //! \ingroup LogicalTypes
 //! \brief The logical constant representing an unknown value.
-static const Logical<Validated> indeterminate = Logical<Validated>(LogicalValue::INDETERMINATE);
+static const Logical<ValidatedTag> indeterminate = Logical<ValidatedTag>(LogicalValue::INDETERMINATE);
 
 //! \ingroup LogicalTypes
 //! \brief The logical constant representing an value which is deemed likely to be true, but for which truth has not been confirmed.
-static const Logical<Approximate> likely = Logical<Approximate>(LogicalValue::LIKELY);
+static const Logical<ApproximateTag> likely = Logical<ApproximateTag>(LogicalValue::LIKELY);
 
 //! \ingroup LogicalTypes
 //! \brief The logical constant representing an value which is deemed unlikely to be true, but for which truth has not been ruled out.
-static const Logical<Approximate> unlikely = Logical<Approximate>(LogicalValue::UNLIKELY);
+static const Logical<ApproximateTag> unlikely = Logical<ApproximateTag>(LogicalValue::UNLIKELY);
 
 inline Bool definitely(Bool b) { return b; }
 inline Bool possibly(Bool b) { return b; }
@@ -276,41 +276,41 @@ inline Bool decide(Bool b) { return b; }
 
 //! \ingroup LogicalTypes
 //! \brief A logical variable representing the result of a decidable proposition.
-class Boolean : public Logical<Exact> {
+class Boolean : public Logical<ExactTag> {
   public:
-    Boolean(Bool b=false) : Logical<Exact>(b) { }
-    Boolean(Logical<Exact> l) : Logical<Exact>(l) { }
+    Boolean(Bool b=false) : Logical<ExactTag>(b) { }
+    Boolean(Logical<ExactTag> l) : Logical<ExactTag>(l) { }
 };
 
 //! \ingroup LogicalTypes
 //! \brief A logical variable representing the result of a proposition with some undecidable instances.
 //! Takes value \c INDETERMINATE for undecidable instances, for instances for which the information provided is insufficient to obtain a definite result, or for algorithms for which obtaining a result would be deemed to take unacceptably long.
 //! The concrete type of the constant indeterminate.
-class Kleenean : public Logical<Validated> {
+class Kleenean : public Logical<ValidatedTag> {
  public:
-    using Logical<Validated>::Logical;
-    Kleenean() :  Logical<Validated>(LogicalValue::INDETERMINATE) { }
-    Kleenean(Logical<Effective> l) : Logical<Validated>(l.check(Effort::get_default())) { }
+    using Logical<ValidatedTag>::Logical;
+    Kleenean() :  Logical<ValidatedTag>(LogicalValue::INDETERMINATE) { }
+    Kleenean(Logical<EffectiveTag> l) : Logical<ValidatedTag>(l.check(Effort::get_default())) { }
     // FIXME: Currently needed for Real<Real comparison; Is there a better name?
-    explicit Kleenean(Logical<Lower> l) : Logical<Validated>(l._v) { }
-    explicit Kleenean(Logical<Upper> l) : Logical<Validated>(l._v) { }
+    explicit Kleenean(Logical<LowerTag> l) : Logical<ValidatedTag>(l._v) { }
+    explicit Kleenean(Logical<UpperTag> l) : Logical<ValidatedTag>(l._v) { }
   public:
-    operator Logical<Effective>() const { return Logical<Effective>(*this); }
+    operator Logical<EffectiveTag>() const { return Logical<EffectiveTag>(*this); }
 };
 
 //! \ingroup LogicalTypes
 //! \brief A logical variable representing the result of a verifyable proposition. May not take the value FALSE.
-class Sierpinski : public Logical<Upper> {
+class Sierpinski : public Logical<UpperTag> {
   public:
-    using Logical<Upper>::Logical;
-    Sierpinski(Logical<EffectiveUpper> l) : Logical<ValidatedUpper>(l.check(Effort::get_default())) { }
+    using Logical<UpperTag>::Logical;
+    Sierpinski(Logical<EffectiveUpperTag> l) : Logical<ValidatedUpperTag>(l.check(Effort::get_default())) { }
 };
 
 // TODO: Should this be a user class?
-class NegSierpinski : public Logical<Lower> {
+class NegSierpinski : public Logical<LowerTag> {
   public:
-    using Logical<Lower>::Logical;
-    NegSierpinski(Logical<EffectiveLower> l) : Logical<ValidatedLower>(l.check(Effort::get_default())) { }
+    using Logical<LowerTag>::Logical;
+    NegSierpinski(Logical<EffectiveLowerTag> l) : Logical<ValidatedLowerTag>(l.check(Effort::get_default())) { }
 };
 
 //! \ingroup LogicalTypes
@@ -320,8 +320,8 @@ class NegSierpinski : public Logical<Lower> {
 //! Takes value \c LIKELY the information suggests that the result is \c true,
 //! and \c UNLIKELY the information suggests that the result is \c false.
 //! May take value \c INDETERMINATE if the information provided does not strongly suggest either result.
-class Fuzzy : public Logical<Approximate> {
-    using Logical<Approximate>::Logical;
+class Fuzzy : public Logical<ApproximateTag> {
+    using Logical<ApproximateTag>::Logical;
 };
 
 

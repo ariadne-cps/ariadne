@@ -109,7 +109,7 @@ class FunctionInterface<ApproximateTag,D,C>
   public:
     virtual Result<ApproximateNumericType> _evaluate(const Argument<ApproximateNumericType>& x) const = 0;
     virtual Result<Differential<ApproximateNumericType>> _evaluate(const Argument< Differential<ApproximateNumericType> >& x) const = 0;
-    virtual Result<TaylorModel<Approximate,Float64>> _evaluate(const Argument< TaylorModel<Approximate,Float64> >& x) const = 0;
+    virtual Result<TaylorModel<ApproximateTag,Float64>> _evaluate(const Argument< TaylorModel<ApproximateTag,Float64> >& x) const = 0;
     virtual Result<Formula<ApproximateNumericType>> _evaluate(const Argument< Formula<ApproximateNumericType> >& x) const = 0;
     virtual Result<Algebra<ApproximateNumericType>> _evaluate(const Argument< Algebra<ApproximateNumericType> >& x) const = 0;
 
@@ -135,11 +135,11 @@ class FunctionInterface<ValidatedTag,D,C>
     using FunctionInterface<AP,D,C>::_evaluate;
     virtual Result<ValidatedNumericType> _evaluate(const Argument<ValidatedNumericType>& x) const = 0;
     virtual Result<Differential<ValidatedNumericType>> _evaluate(const Argument< Differential<ValidatedNumericType> >& x) const = 0;
-    virtual Result<TaylorModel<Validated,Float64>> _evaluate(const Argument< TaylorModel<Validated,Float64> >& x) const = 0;
+    virtual Result<TaylorModel<ValidatedTag,Float64>> _evaluate(const Argument< TaylorModel<ValidatedTag,Float64> >& x) const = 0;
     virtual Result<Formula<ValidatedNumericType>> _evaluate(const Argument< Formula<ValidatedNumericType> >& x) const = 0;
     virtual Result<Algebra<ValidatedNumericType>> _evaluate(const Argument< Algebra<ValidatedNumericType> >& x) const = 0;
 
-    virtual Result<ScalarFunction<Validated>> _evaluate(const Argument< ScalarFunction<Validated> >& x) const = 0;
+    virtual Result<ScalarFunction<ValidatedTag>> _evaluate(const Argument< ScalarFunction<ValidatedTag> >& x) const = 0;
 
     inline Result<ValidatedNumericType> _evaluate(const Argument<ExactFloat64>& x) const {
         return this->_evaluate(Argument<ValidatedNumericType>(x)); }

@@ -52,10 +52,10 @@ template<class Q, EnableIf<IsSame<Q,Rational>> =dummy> Bool operator>=(FloatMP c
 template<class Q, EnableIf<IsSame<Q,Rational>> =dummy> Bool operator< (FloatMP const& x, Q const& q) { return Rational(x)< q; }
 template<class Q, EnableIf<IsSame<Q,Rational>> =dummy> Bool operator> (FloatMP const& x, Q const& q) { return Rational(x)> q; }
 
-template<class PR> Bool models(Float<Lower,PR> x, Rational q) { return x.raw() <= q; }
-template<class PR> Bool models(Float<Upper,PR> x, Rational q) { return x.raw() >= q; }
-template<class PR> Bool models(Float<Bounded,PR> x, Rational q) { return x.lower_raw() <= q and x.upper_raw() >= q; }
-template<class PR> Bool models(Float<Metric,PR> x, Rational q) { return x.error_raw() >= abs(Rational(x.value_raw())-q); }
+template<class PR> Bool models(Float<LowerTag,PR> x, Rational q) { return x.raw() <= q; }
+template<class PR> Bool models(Float<UpperTag,PR> x, Rational q) { return x.raw() >= q; }
+template<class PR> Bool models(Float<BoundedTag,PR> x, Rational q) { return x.lower_raw() <= q and x.upper_raw() >= q; }
+template<class PR> Bool models(Float<MetricTag,PR> x, Rational q) { return x.error_raw() >= abs(Rational(x.value_raw())-q); }
 
 template<> String class_name<Precision64>() { return "Precision64"; }
 template<> String class_name<PrecisionMP>() { return "PrecisionMP"; }
@@ -65,10 +65,10 @@ template<class PR>
 class TestFloats
 {
   public:
-    static Rational to_rational(Float<Approximate,PR> x) { return Rational(x.raw()); }
-    static Rational to_rational(Float<Lower,PR> x) { return Rational(x.raw()); }
-    static Rational to_rational(Float<Upper,PR> x) { return Rational(x.raw()); }
-    static Rational to_rational(Float<Exact,PR> x) { return Rational(x.raw()); }
+    static Rational to_rational(Float<ApproximateTag,PR> x) { return Rational(x.raw()); }
+    static Rational to_rational(Float<LowerTag,PR> x) { return Rational(x.raw()); }
+    static Rational to_rational(Float<UpperTag,PR> x) { return Rational(x.raw()); }
+    static Rational to_rational(Float<ExactTag,PR> x) { return Rational(x.raw()); }
 };
 
 
@@ -76,12 +76,12 @@ template<class PR>
 class TestDirectedFloats
     : public TestFloats<PR>
 {
-    typedef Float<Approximate,PR> ApproximateFloatType;
-    typedef Float<Lower,PR> LowerFloatType;
-    typedef Float<Upper,PR> UpperFloatType;
-    typedef Float<Bounded,PR> BoundedFloatType;
-    typedef Float<Metric,PR> MetricFloatType;
-    typedef Float<Exact,PR> ExactFloatType;
+    typedef Float<ApproximateTag,PR> ApproximateFloatType;
+    typedef Float<LowerTag,PR> LowerFloatType;
+    typedef Float<UpperTag,PR> UpperFloatType;
+    typedef Float<BoundedTag,PR> BoundedFloatType;
+    typedef Float<MetricTag,PR> MetricFloatType;
+    typedef Float<ExactTag,PR> ExactFloatType;
 
   private:
     PR precision;
@@ -182,12 +182,12 @@ class TestMetricFloat
     : public TestFloats<PR>
 {
     typedef RawFloat<PR> RawFloatType;
-    typedef Float<Approximate,PR> ApproximateFloatType;
-    typedef Float<Lower,PR> LowerFloatType;
-    typedef Float<Upper,PR> UpperFloatType;
-    typedef Float<Bounded,PR> BoundedFloatType;
-    typedef Float<Metric,PR> MetricFloatType;
-    typedef Float<Exact,PR> ExactFloatType;
+    typedef Float<ApproximateTag,PR> ApproximateFloatType;
+    typedef Float<LowerTag,PR> LowerFloatType;
+    typedef Float<UpperTag,PR> UpperFloatType;
+    typedef Float<BoundedTag,PR> BoundedFloatType;
+    typedef Float<MetricTag,PR> MetricFloatType;
+    typedef Float<ExactTag,PR> ExactFloatType;
   private:
     PR precision;
   public:
@@ -277,8 +277,8 @@ template<class PR>
 class TestBoundedFloat
 {
     typedef RawFloat<PR> RawFloatType;
-    typedef Float<Bounded,PR> BoundedFloatType;
-    typedef Float<Exact,PR> ExactFloatType;
+    typedef Float<BoundedTag,PR> BoundedFloatType;
+    typedef Float<ExactTag,PR> ExactFloatType;
   private:
     PR precision;
   public:
@@ -339,7 +339,7 @@ TestBoundedFloat<PR>::test_concept()
     // Assignment
     rx=n; rx=m; rx=x; rx=vx;
 
-    // Exact operations
+    // ExactTag operations
     rx=nul(vx); rx=pos(vx); rx=neg(vx); rx=half(vx); rx=sqr(vx); rx=rec(vx);
 
     rx=operator+(x,x); rx=operator+(x,vx); rx=operator+(vx,x); rx=operator+(vx,vx);
@@ -561,12 +561,12 @@ TestBoundedFloat<Precision64>::test_constructors()
     ARIADNE_TEST_COMPARE(xd4.lower_raw(),<=,2.1);
     ARIADNE_TEST_COMPARE(xd4.upper_raw(),>=,3.2);
 
-    // Approximate constructor from a single value
+    // ApproximateTag constructor from a single value
     BoundedFloatType xd5(Rational(1,3));
     ARIADNE_TEST_COMPARE(Rational(xd5.lower_raw()),<,Rational(1,3));
     ARIADNE_TEST_COMPARE(Rational(xd5.upper_raw()),>,Rational(1,3));
 
-    // Exact constructor from a single value
+    // ExactTag constructor from a single value
     BoundedFloatType xd6(Float64(1.25));
     ARIADNE_TEST_EQUAL(xd6.lower_raw(),Float64(1.25));
     ARIADNE_TEST_EQUAL(xd6.upper_raw(),Float64(1.25));
@@ -599,12 +599,12 @@ TestBoundedFloat<PR>::test_constructors()
     ARIADNE_TEST_COMPARE(xd4.lower_raw(),<=,2.1);
     ARIADNE_TEST_COMPARE(xd4.upper_raw(),>=,3.2);
 
-    // Approximate constructor from a single value
+    // ApproximateTag constructor from a single value
     BoundedFloatType xd5(Rational(1,3));
     ARIADNE_TEST_COMPARE(Rational(xd5.lower_raw()),<,Rational(1,3));
     ARIADNE_TEST_COMPARE(Rational(xd5.upper_raw()),>,Rational(1,3));
 
-    // Exact constructor from a single value
+    // ExactTag constructor from a single value
     BoundedFloatType xd6(RawFloatType(1.25));
     ARIADNE_TEST_EQUAL(xd6.lower_raw(),RawFloatType(1.25));
     ARIADNE_TEST_EQUAL(xd6.upper_raw(),RawFloatType(1.25));
@@ -651,7 +651,7 @@ template<class PR> Void TestBoundedFloat<PR>::test_input()
     //ARIADNE_TEST_COMPARE(x.lower_raw(),<,Rational(2,5))
     // ARIADNE_TEST_COMPARE(x.upper_raw(),>,Rational(3,5))
     if(not(x.lower_raw()<=Rational(2,5) and x.upper_raw()>=Rational(3,5))) {
-        ARIADNE_TEST_WARN("Float<Bounded,"<<class_name<PR>()<<"> string constructor returns an approximate interval, not an outwardly rounded interval.");
+        ARIADNE_TEST_WARN("Float<BoundedTag,"<<class_name<PR>()<<"> string constructor returns an approximate interval, not an outwardly rounded interval.");
     }
 }
 

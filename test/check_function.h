@@ -30,9 +30,9 @@
 
 namespace Ariadne {
 template<class X> String class_name();
-template<> String class_name<Approximate>() { return "Approximate"; }
-template<> String class_name<Validated>() { return "Validated"; }
-template<> String class_name<Effective>() { return "Effective"; }
+template<> String class_name<ApproximateTag>() { return "ApproximateTag"; }
+template<> String class_name<ValidatedTag>() { return "ValidatedTag"; }
+template<> String class_name<EffectiveTag>() { return "EffectiveTag"; }
 } // namespace Ariadne
 
 using namespace Ariadne;
@@ -40,7 +40,7 @@ using namespace Ariadne;
 typedef ExactIntervalType IntervalDomain;
 typedef ExactBoxType BoxDomain;
 template<class P> using Function = ScalarFunction<P>;
-typedef ScalarFunction<Effective> EffectiveFunction;
+typedef ScalarFunction<EffectiveTag> EffectiveFunction;
 
 template<class F, class R=Return<DontCare>, class = Fallback> struct HasCodomainMethod : False { };
 template<class F, class R> struct HasCodomainMethod<F, R, EnableIf<IsDefined<decltype(declval<F>().codomain())>,Fallback>> : True { };
@@ -142,19 +142,19 @@ template<class F> void CheckFunctionConcept<F>::check_evaluable_concept()
     ARIADNE_TEST_STATIC_ASSERT(HasCodomainMethod<F>);
     ARIADNE_TEST_STATIC_ASSERT(IsSame<decltype(declval<F>().argument_size()),SizeType>);
 
-    if(IsWeaker<Approximate,P>::value) {
+    if(IsWeaker<ApproximateTag,P>::value) {
         ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ApproximateNumericType>, Return<ApproximateNumericType>>);
         ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ApproximateFloat64>, Return<ApproximateFloat64>>);
         ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ApproximateNumericType>, Return<ApproximateNumericType>>);
     }
 
-    if(IsWeaker<Validated,P>::value) {
+    if(IsWeaker<ValidatedTag,P>::value) {
         ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ValidatedNumericType>, Return<ValidatedNumericType>>);
         ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<BoundedFloat64>, Return<BoundedFloat64>>);
         ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<BoundedFloat64>, Return<BoundedFloat64>>);
     }
 
-    if(IsWeaker<Effective,P>::value) {
+    if(IsWeaker<EffectiveTag,P>::value) {
         ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<EffectiveNumericType>, Return<EffectiveNumericType>>);
         ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<Real>, Return<Real>>);
     }
@@ -169,19 +169,19 @@ template<class F> void CheckFunctionConcept<F>::check_differentiable_concept()
 
     ARIADNE_TEST_STATIC_ASSERT(HasDerivative<F,SizeType,Return<F>>);
 
-    if(IsWeaker<Approximate,P>::value) {
+    if(IsWeaker<ApproximateTag,P>::value) {
         ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<Differential<ApproximateFloat64>>, Return<Differential<ApproximateFloat64>>>);
         ARIADNE_TEST_STATIC_ASSERT(HasGradientMethod<F,Vector<ApproximateFloat64>, Return<Covector<ApproximateFloat64>>>);
         ARIADNE_TEST_STATIC_ASSERT(HasDifferentialMethod<F,Vector<ApproximateFloat64>, Return<Differential<ApproximateFloat64>>>);
     }
 
-    if(IsWeaker<Validated,P>::value) {
+    if(IsWeaker<ValidatedTag,P>::value) {
         ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<Differential<BoundedFloat64>>, Return<Differential<BoundedFloat64>>>);
         ARIADNE_TEST_STATIC_ASSERT(HasGradientMethod<F,Vector<BoundedFloat64>, Return<Covector<BoundedFloat64>>>);
         ARIADNE_TEST_STATIC_ASSERT(HasDifferentialMethod<F,Vector<BoundedFloat64>, Return<Differential<BoundedFloat64>>>);
     }
 
-    if(IsWeaker<Effective,P>::value) {
+    if(IsWeaker<EffectiveTag,P>::value) {
     }
 
 }
@@ -196,16 +196,16 @@ template<class F> void CheckFunctionConcept<F>::check_composable_concept()
     typedef typename F::Paradigm P;
     ARIADNE_TEST_STATIC_ASSERT(HasCompose<F,Vector<F>, Return<F>>);
 
-    if(IsWeaker<P,Approximate>::value) {
-        ARIADNE_TEST_STATIC_ASSERT(HasCompose<ScalarFunction<Approximate>,Vector<F>, Return<F>>);
+    if(IsWeaker<P,ApproximateTag>::value) {
+        ARIADNE_TEST_STATIC_ASSERT(HasCompose<ScalarFunction<ApproximateTag>,Vector<F>, Return<F>>);
     }
 
-    if(IsWeaker<P,Validated>::value) {
-        ARIADNE_TEST_STATIC_ASSERT(HasCompose<ScalarFunction<Validated>,Vector<F>, Return<F>>);
+    if(IsWeaker<P,ValidatedTag>::value) {
+        ARIADNE_TEST_STATIC_ASSERT(HasCompose<ScalarFunction<ValidatedTag>,Vector<F>, Return<F>>);
     }
 
-    if(IsWeaker<P,Effective>::value) {
-        ARIADNE_TEST_STATIC_ASSERT(HasCompose<ScalarFunction<Effective>,Vector<F>, Return<F>>);
+    if(IsWeaker<P,EffectiveTag>::value) {
+        ARIADNE_TEST_STATIC_ASSERT(HasCompose<ScalarFunction<EffectiveTag>,Vector<F>, Return<F>>);
     }
 }
 
@@ -247,7 +247,7 @@ template<class F> void CheckVectorFunctionConcept<F>::check_evaluable_concept()
     ARIADNE_TEST_STATIC_ASSERT(HasCodomainMethod<F>);
     ARIADNE_TEST_STATIC_ASSERT(IsSame<decltype(declval<F>().argument_size()),SizeType>);
 
-    if(IsWeaker<Approximate,P>::value) {
+    if(IsWeaker<ApproximateTag,P>::value) {
         ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ApproximateNumericType>, Return<Vector<ApproximateNumericType>>>);
         ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ApproximateFloat64>, Return<Vector<ApproximateFloat64>>>);
 
@@ -255,7 +255,7 @@ template<class F> void CheckVectorFunctionConcept<F>::check_evaluable_concept()
         ARIADNE_TEST_STATIC_ASSERT(HasEvaluate<F,Vector<ApproximateFloat64>, Return<Vector<ApproximateFloat64>>>);
     }
 
-    if(IsWeaker<Validated,P>::value) {
+    if(IsWeaker<ValidatedTag,P>::value) {
         ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ValidatedNumericType>, Return<Vector<ValidatedNumericType>>>);
         ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<BoundedFloat64>, Return<Vector<BoundedFloat64>>>);
         ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<BoundedFloat64>, Return<Vector<BoundedFloat64>>>);
@@ -266,7 +266,7 @@ template<class F> void CheckVectorFunctionConcept<F>::check_evaluable_concept()
 
     }
 
-    if(IsWeaker<Effective,P>::value) {
+    if(IsWeaker<EffectiveTag,P>::value) {
         ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<EffectiveNumericType>, Return<Vector<EffectiveNumericType>>>);
         ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<Real>, Return<Vector<Real>>>);
 
@@ -283,205 +283,205 @@ template<class T1, class T2> inline const bool same_type(const T1& t1, const T2&
 
 void CheckFunctionConcept::check_operators_concept()
 {
-    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( SymbolicFunction<Validated>, SymbolicFunction<Validated>, SymbolicFunction<Validated> );
-    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( SymbolicFunction<Validated>, VectorFunctionElement<Validated>, Function<Validated> );
-    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( SymbolicFunction<Validated>, Function<Validated>, Function<Validated> );
-    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( SymbolicFunction<Validated>, FunctionModel<Validated>, FunctionModel<Validated> );
-    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( SymbolicFunction<Validated>, VectorFunctionModelElement<Validated>, FunctionModel<Validated> );
-    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( SymbolicFunction<Validated>, PolynomialFunctionModel<Validated>, PolynomialFunctionModel<Validated> );
+    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( SymbolicFunction<ValidatedTag>, SymbolicFunction<ValidatedTag>, SymbolicFunction<ValidatedTag> );
+    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( SymbolicFunction<ValidatedTag>, VectorFunctionElement<ValidatedTag>, Function<ValidatedTag> );
+    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( SymbolicFunction<ValidatedTag>, Function<ValidatedTag>, Function<ValidatedTag> );
+    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( SymbolicFunction<ValidatedTag>, FunctionModel<ValidatedTag>, FunctionModel<ValidatedTag> );
+    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( SymbolicFunction<ValidatedTag>, VectorFunctionModelElement<ValidatedTag>, FunctionModel<ValidatedTag> );
+    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( SymbolicFunction<ValidatedTag>, PolynomialFunctionModel<ValidatedTag>, PolynomialFunctionModel<ValidatedTag> );
 
-    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( VectorFunctionElement<Validated>, SymbolicFunction<Validated>, Function<Validated> );
-    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( VectorFunctionElement<Validated>, VectorFunctionElement<Validated>, Function<Validated> );
-    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( VectorFunctionElement<Validated>, Function<Validated>, Function<Validated> );
-    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( VectorFunctionElement<Validated>, FunctionModel<Validated>, FunctionModel<Validated> );
-    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( VectorFunctionElement<Validated>, VectorFunctionModelElement<Validated>, FunctionModel<Validated> );
-    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( VectorFunctionElement<Validated>, PolynomialFunctionModel<Validated>, PolynomialFunctionModel<Validated> );
+    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( VectorFunctionElement<ValidatedTag>, SymbolicFunction<ValidatedTag>, Function<ValidatedTag> );
+    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( VectorFunctionElement<ValidatedTag>, VectorFunctionElement<ValidatedTag>, Function<ValidatedTag> );
+    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( VectorFunctionElement<ValidatedTag>, Function<ValidatedTag>, Function<ValidatedTag> );
+    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( VectorFunctionElement<ValidatedTag>, FunctionModel<ValidatedTag>, FunctionModel<ValidatedTag> );
+    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( VectorFunctionElement<ValidatedTag>, VectorFunctionModelElement<ValidatedTag>, FunctionModel<ValidatedTag> );
+    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( VectorFunctionElement<ValidatedTag>, PolynomialFunctionModel<ValidatedTag>, PolynomialFunctionModel<ValidatedTag> );
 
-    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( Function<Validated>, SymbolicFunction<Validated>, Function<Validated> );
-    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( Function<Validated>, VectorFunctionElement<Validated>, Function<Validated> );
-    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( Function<Validated>, Function<Validated>, Function<Validated> );
-    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( Function<Validated>, FunctionModel<Validated>, FunctionModel<Validated> );
-    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( Function<Validated>, VectorFunctionModelElement<Validated>, FunctionModel<Validated> );
-    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( Function<Validated>, PolynomialFunctionModel<Validated>, PolynomialFunctionModel<Validated> );
+    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( Function<ValidatedTag>, SymbolicFunction<ValidatedTag>, Function<ValidatedTag> );
+    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( Function<ValidatedTag>, VectorFunctionElement<ValidatedTag>, Function<ValidatedTag> );
+    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( Function<ValidatedTag>, Function<ValidatedTag>, Function<ValidatedTag> );
+    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( Function<ValidatedTag>, FunctionModel<ValidatedTag>, FunctionModel<ValidatedTag> );
+    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( Function<ValidatedTag>, VectorFunctionModelElement<ValidatedTag>, FunctionModel<ValidatedTag> );
+    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( Function<ValidatedTag>, PolynomialFunctionModel<ValidatedTag>, PolynomialFunctionModel<ValidatedTag> );
 
-    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( FunctionModel<Validated>, SymbolicFunction<Validated>, FunctionModel<Validated> );
-    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( FunctionModel<Validated>, VectorFunctionElement<Validated>, FunctionModel<Validated> );
-    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( FunctionModel<Validated>, Function<Validated>, FunctionModel<Validated> );
-    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( FunctionModel<Validated>, FunctionModel<Validated>, FunctionModel<Validated> );
-    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( FunctionModel<Validated>, VectorFunctionModelElement<Validated>, FunctionModel<Validated> );
-    //ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( FunctionModel<Validated>, PolynomialFunctionModel<Validated>, PolynomialFunctionModel<Validated> );
+    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( FunctionModel<ValidatedTag>, SymbolicFunction<ValidatedTag>, FunctionModel<ValidatedTag> );
+    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( FunctionModel<ValidatedTag>, VectorFunctionElement<ValidatedTag>, FunctionModel<ValidatedTag> );
+    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( FunctionModel<ValidatedTag>, Function<ValidatedTag>, FunctionModel<ValidatedTag> );
+    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( FunctionModel<ValidatedTag>, FunctionModel<ValidatedTag>, FunctionModel<ValidatedTag> );
+    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( FunctionModel<ValidatedTag>, VectorFunctionModelElement<ValidatedTag>, FunctionModel<ValidatedTag> );
+    //ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( FunctionModel<ValidatedTag>, PolynomialFunctionModel<ValidatedTag>, PolynomialFunctionModel<ValidatedTag> );
 
-    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( VectorFunctionModelElement<Validated>, SymbolicFunction<Validated>, FunctionModel<Validated> );
-    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( VectorFunctionModelElement<Validated>, VectorFunctionElement<Validated>, FunctionModel<Validated> );
-    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( VectorFunctionModelElement<Validated>, Function<Validated>, FunctionModel<Validated> );
-    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( VectorFunctionModelElement<Validated>, FunctionModel<Validated>, FunctionModel<Validated> );
-    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( VectorFunctionModelElement<Validated>, VectorFunctionModelElement<Validated>, FunctionModel<Validated> );
-    //ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( VectorFunctionModelElement<Validated>, PolynomialFunctionModel<Validated>, PolynomialFunctionModel<Validated> );
+    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( VectorFunctionModelElement<ValidatedTag>, SymbolicFunction<ValidatedTag>, FunctionModel<ValidatedTag> );
+    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( VectorFunctionModelElement<ValidatedTag>, VectorFunctionElement<ValidatedTag>, FunctionModel<ValidatedTag> );
+    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( VectorFunctionModelElement<ValidatedTag>, Function<ValidatedTag>, FunctionModel<ValidatedTag> );
+    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( VectorFunctionModelElement<ValidatedTag>, FunctionModel<ValidatedTag>, FunctionModel<ValidatedTag> );
+    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( VectorFunctionModelElement<ValidatedTag>, VectorFunctionModelElement<ValidatedTag>, FunctionModel<ValidatedTag> );
+    //ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( VectorFunctionModelElement<ValidatedTag>, PolynomialFunctionModel<ValidatedTag>, PolynomialFunctionModel<ValidatedTag> );
 
-    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( PolynomialFunctionModel<Validated>, SymbolicFunction<Validated>, PolynomialFunctionModel<Validated> );
-    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( PolynomialFunctionModel<Validated>, VectorFunctionElement<Validated>, PolynomialFunctionModel<Validated> );
-    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( PolynomialFunctionModel<Validated>, Function<Validated>, PolynomialFunctionModel<Validated> );
-    //ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( PolynomialFunctionModel<Validated>, FunctionModel<Validated>, PolynomialFunctionModel<Validated> );
-    //ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( PolynomialFunctionModel<Validated>, VectorFunctionModelElement<Validated>, PolynomialFunctionModel<Validated> );
-    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( PolynomialFunctionModel<Validated>, PolynomialFunctionModel<Validated>, PolynomialFunctionModel<Validated> );
+    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( PolynomialFunctionModel<ValidatedTag>, SymbolicFunction<ValidatedTag>, PolynomialFunctionModel<ValidatedTag> );
+    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( PolynomialFunctionModel<ValidatedTag>, VectorFunctionElement<ValidatedTag>, PolynomialFunctionModel<ValidatedTag> );
+    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( PolynomialFunctionModel<ValidatedTag>, Function<ValidatedTag>, PolynomialFunctionModel<ValidatedTag> );
+    //ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( PolynomialFunctionModel<ValidatedTag>, FunctionModel<ValidatedTag>, PolynomialFunctionModel<ValidatedTag> );
+    //ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( PolynomialFunctionModel<ValidatedTag>, VectorFunctionModelElement<ValidatedTag>, PolynomialFunctionModel<ValidatedTag> );
+    ARIADNE_TEST_ARITHMETIC_RESULT_TYPE( PolynomialFunctionModel<ValidatedTag>, PolynomialFunctionModel<ValidatedTag>, PolynomialFunctionModel<ValidatedTag> );
 }
 
 void CheckFunctionConcept::check_mixed_operators_concept()
 {
     // Function * Function -> Function
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<Exact>>()+declval<Function<Exact>>()),Function<Exact>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<Exact>>()+declval<Function<Validated>>()),Function<Validated>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<Exact>>()+declval<Function<Approximate>>()),Function<Approximate>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<Validated>>()+declval<Function<Validated>>()),Function<Validated>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<Validated>>()+declval<Function<Validated>>()),Function<Validated>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<Validated>>()+declval<Function<Approximate>>()),Function<Approximate>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<Approximate>>()+declval<Function<Exact>>()),Function<Approximate>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<Approximate>>()+declval<Function<Validated>>()),Function<Approximate>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<Approximate>>()+declval<Function<Approximate>>()),Function<Approximate>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<ExactTag>>()+declval<Function<ExactTag>>()),Function<ExactTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<ExactTag>>()+declval<Function<ValidatedTag>>()),Function<ValidatedTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<ExactTag>>()+declval<Function<ApproximateTag>>()),Function<ApproximateTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<ValidatedTag>>()+declval<Function<ValidatedTag>>()),Function<ValidatedTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<ValidatedTag>>()+declval<Function<ValidatedTag>>()),Function<ValidatedTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<ValidatedTag>>()+declval<Function<ApproximateTag>>()),Function<ApproximateTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<ApproximateTag>>()+declval<Function<ExactTag>>()),Function<ApproximateTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<ApproximateTag>>()+declval<Function<ValidatedTag>>()),Function<ApproximateTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<ApproximateTag>>()+declval<Function<ApproximateTag>>()),Function<ApproximateTag>>::value) )
 
     // Function * Number -> Function
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<Exact>>()+declval<Number<Exact>>()),Function<Exact>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<Exact>>()+declval<Number<Validated>>()),Function<Validated>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<Validated>>()+declval<Number<Exact>>()),Function<Validated>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<ExactTag>>()+declval<Number<ExactTag>>()),Function<ExactTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<ExactTag>>()+declval<Number<ValidatedTag>>()),Function<ValidatedTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<ValidatedTag>>()+declval<Number<ExactTag>>()),Function<ValidatedTag>>::value) )
 
     // Number * Function -> Function
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Number<Exact>>()+declval<Function<Exact>>()),Function<Exact>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Number<Exact>>()+declval<Function<Validated>>()),Function<Validated>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Number<Validated>>()+declval<Function<Exact>>()),Function<Validated>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Number<ExactTag>>()+declval<Function<ExactTag>>()),Function<ExactTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Number<ExactTag>>()+declval<Function<ValidatedTag>>()),Function<ValidatedTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Number<ValidatedTag>>()+declval<Function<ExactTag>>()),Function<ValidatedTag>>::value) )
 
     // SymbolicFunction * SymbolicFunction -> SymbolicFunction
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<SymbolicFunction<Exact>>()+declval<SymbolicFunction<Exact>>()),SymbolicFunction<Exact>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<SymbolicFunction<Exact>>()+declval<SymbolicFunction<Validated>>()),SymbolicFunction<Validated>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<SymbolicFunction<Validated>>()+declval<SymbolicFunction<Exact>>()),SymbolicFunction<Validated>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<SymbolicFunction<ExactTag>>()+declval<SymbolicFunction<ExactTag>>()),SymbolicFunction<ExactTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<SymbolicFunction<ExactTag>>()+declval<SymbolicFunction<ValidatedTag>>()),SymbolicFunction<ValidatedTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<SymbolicFunction<ValidatedTag>>()+declval<SymbolicFunction<ExactTag>>()),SymbolicFunction<ValidatedTag>>::value) )
 
     // SymbolicFunction * Number -> SymbolicFunction
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<SymbolicFunction<Exact>>()+declval<Number<Exact>>()),SymbolicFunction<Exact>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<SymbolicFunction<Exact>>()+declval<Number<Validated>>()),SymbolicFunction<Validated>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<SymbolicFunction<Validated>>()+declval<Number<Exact>>()),SymbolicFunction<Validated>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<SymbolicFunction<ExactTag>>()+declval<Number<ExactTag>>()),SymbolicFunction<ExactTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<SymbolicFunction<ExactTag>>()+declval<Number<ValidatedTag>>()),SymbolicFunction<ValidatedTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<SymbolicFunction<ValidatedTag>>()+declval<Number<ExactTag>>()),SymbolicFunction<ValidatedTag>>::value) )
 
     // Number * SymbolicFunction -> SymbolicFunction
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Number<Exact>>()+declval<SymbolicFunction<Exact>>()),SymbolicFunction<Exact>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Number<Exact>>()+declval<SymbolicFunction<Validated>>()),SymbolicFunction<Validated>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Number<Validated>>()+declval<SymbolicFunction<Exact>>()),SymbolicFunction<Validated>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Number<ExactTag>>()+declval<SymbolicFunction<ExactTag>>()),SymbolicFunction<ExactTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Number<ExactTag>>()+declval<SymbolicFunction<ValidatedTag>>()),SymbolicFunction<ValidatedTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Number<ValidatedTag>>()+declval<SymbolicFunction<ExactTag>>()),SymbolicFunction<ValidatedTag>>::value) )
 
     // Function * SymbolicFunction -> Function
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<Exact>>()+declval<SymbolicFunction<Exact>>()),Function<Exact>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<Exact>>()+declval<SymbolicFunction<Validated>>()),Function<Validated>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<Validated>>()+declval<SymbolicFunction<Exact>>()),Function<Validated>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<ExactTag>>()+declval<SymbolicFunction<ExactTag>>()),Function<ExactTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<ExactTag>>()+declval<SymbolicFunction<ValidatedTag>>()),Function<ValidatedTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<ValidatedTag>>()+declval<SymbolicFunction<ExactTag>>()),Function<ValidatedTag>>::value) )
 
     // SymbolicFunction * Function -> Function
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<SymbolicFunction<Exact>>()+declval<Function<Exact>>()),Function<Exact>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<SymbolicFunction<Exact>>()+declval<Function<Validated>>()),Function<Validated>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<SymbolicFunction<Validated>>()+declval<Function<Exact>>()),Function<Validated>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<SymbolicFunction<ExactTag>>()+declval<Function<ExactTag>>()),Function<ExactTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<SymbolicFunction<ExactTag>>()+declval<Function<ValidatedTag>>()),Function<ValidatedTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<SymbolicFunction<ValidatedTag>>()+declval<Function<ExactTag>>()),Function<ValidatedTag>>::value) )
 
 
     // FunctionModel * FunctionModel -> FunctionModel; no mixed operators
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<FunctionModel<Validated>>()+declval<FunctionModel<Validated>>()),FunctionModel<Validated>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<FunctionModel<Approximate>>()+declval<FunctionModel<Validated>>()),FunctionModel<Approximate>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<FunctionModel<ValidatedTag>>()+declval<FunctionModel<ValidatedTag>>()),FunctionModel<ValidatedTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<FunctionModel<ApproximateTag>>()+declval<FunctionModel<ValidatedTag>>()),FunctionModel<ApproximateTag>>::value) )
 
     // FunctionModel * Function -> FunctionModel
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<FunctionModel<Validated>>()+declval<Function<Exact>>()),FunctionModel<Validated>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<FunctionModel<Validated>>()+declval<Function<Validated>>()),FunctionModel<Validated>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<FunctionModel<Approximate>>()+declval<Function<Exact>>()),FunctionModel<Approximate>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<FunctionModel<Approximate>>()+declval<Function<Validated>>()),FunctionModel<Approximate>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<FunctionModel<Approximate>>()+declval<Function<Approximate>>()),FunctionModel<Approximate>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<FunctionModel<ValidatedTag>>()+declval<Function<ExactTag>>()),FunctionModel<ValidatedTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<FunctionModel<ValidatedTag>>()+declval<Function<ValidatedTag>>()),FunctionModel<ValidatedTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<FunctionModel<ApproximateTag>>()+declval<Function<ExactTag>>()),FunctionModel<ApproximateTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<FunctionModel<ApproximateTag>>()+declval<Function<ValidatedTag>>()),FunctionModel<ApproximateTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<FunctionModel<ApproximateTag>>()+declval<Function<ApproximateTag>>()),FunctionModel<ApproximateTag>>::value) )
 
     // Function * FunctionModel -> FunctionModel
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<Exact>>()+declval<FunctionModel<Validated>>()),FunctionModel<Validated>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<Validated>>()+declval<FunctionModel<Validated>>()),FunctionModel<Validated>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<Exact>>()+declval<FunctionModel<Approximate>>()),FunctionModel<Approximate>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<Validated>>()+declval<FunctionModel<Approximate>>()),FunctionModel<Approximate>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<Approximate>>()+declval<FunctionModel<Approximate>>()),FunctionModel<Approximate>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<ExactTag>>()+declval<FunctionModel<ValidatedTag>>()),FunctionModel<ValidatedTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<ValidatedTag>>()+declval<FunctionModel<ValidatedTag>>()),FunctionModel<ValidatedTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<ExactTag>>()+declval<FunctionModel<ApproximateTag>>()),FunctionModel<ApproximateTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<ValidatedTag>>()+declval<FunctionModel<ApproximateTag>>()),FunctionModel<ApproximateTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<ApproximateTag>>()+declval<FunctionModel<ApproximateTag>>()),FunctionModel<ApproximateTag>>::value) )
 
     // FunctionModel * SymbolicFunction -> FunctionModel
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<FunctionModel<Validated>>()+declval<SymbolicFunction<Exact>>()),FunctionModel<Validated>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<FunctionModel<Validated>>()+declval<SymbolicFunction<Validated>>()),FunctionModel<Validated>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<FunctionModel<Approximate>>()+declval<SymbolicFunction<Exact>>()),FunctionModel<Approximate>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<FunctionModel<Approximate>>()+declval<SymbolicFunction<Validated>>()),FunctionModel<Approximate>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<FunctionModel<Approximate>>()+declval<SymbolicFunction<Approximate>>()),FunctionModel<Approximate>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<FunctionModel<ValidatedTag>>()+declval<SymbolicFunction<ExactTag>>()),FunctionModel<ValidatedTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<FunctionModel<ValidatedTag>>()+declval<SymbolicFunction<ValidatedTag>>()),FunctionModel<ValidatedTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<FunctionModel<ApproximateTag>>()+declval<SymbolicFunction<ExactTag>>()),FunctionModel<ApproximateTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<FunctionModel<ApproximateTag>>()+declval<SymbolicFunction<ValidatedTag>>()),FunctionModel<ApproximateTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<FunctionModel<ApproximateTag>>()+declval<SymbolicFunction<ApproximateTag>>()),FunctionModel<ApproximateTag>>::value) )
 
     // SymbolicFunction * FunctionModel -> FunctionModel
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<SymbolicFunction<Exact>>()+declval<FunctionModel<Validated>>()),FunctionModel<Validated>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<SymbolicFunction<Validated>>()+declval<FunctionModel<Validated>>()),FunctionModel<Validated>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<SymbolicFunction<Exact>>()+declval<FunctionModel<Approximate>>()),FunctionModel<Approximate>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<SymbolicFunction<Validated>>()+declval<FunctionModel<Approximate>>()),FunctionModel<Approximate>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<SymbolicFunction<Approximate>>()+declval<FunctionModel<Approximate>>()),FunctionModel<Approximate>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<SymbolicFunction<ExactTag>>()+declval<FunctionModel<ValidatedTag>>()),FunctionModel<ValidatedTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<SymbolicFunction<ValidatedTag>>()+declval<FunctionModel<ValidatedTag>>()),FunctionModel<ValidatedTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<SymbolicFunction<ExactTag>>()+declval<FunctionModel<ApproximateTag>>()),FunctionModel<ApproximateTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<SymbolicFunction<ValidatedTag>>()+declval<FunctionModel<ApproximateTag>>()),FunctionModel<ApproximateTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<SymbolicFunction<ApproximateTag>>()+declval<FunctionModel<ApproximateTag>>()),FunctionModel<ApproximateTag>>::value) )
 
     // FunctionModel * Number -> FunctionModel
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<FunctionModel<Validated>>()+declval<Number<Exact>>()),FunctionModel<Validated>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<FunctionModel<Validated>>()+declval<Number<Validated>>()),FunctionModel<Validated>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<FunctionModel<Approximate>>()+declval<Number<Exact>>()),FunctionModel<Approximate>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<FunctionModel<Approximate>>()+declval<Number<Validated>>()),FunctionModel<Approximate>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<FunctionModel<Approximate>>()+declval<Number<Approximate>>()),FunctionModel<Approximate>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<FunctionModel<ValidatedTag>>()+declval<Number<ExactTag>>()),FunctionModel<ValidatedTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<FunctionModel<ValidatedTag>>()+declval<Number<ValidatedTag>>()),FunctionModel<ValidatedTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<FunctionModel<ApproximateTag>>()+declval<Number<ExactTag>>()),FunctionModel<ApproximateTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<FunctionModel<ApproximateTag>>()+declval<Number<ValidatedTag>>()),FunctionModel<ApproximateTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<FunctionModel<ApproximateTag>>()+declval<Number<ApproximateTag>>()),FunctionModel<ApproximateTag>>::value) )
 
     // Number * FunctionModel -> FunctionModel
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Number<Exact>>()+declval<FunctionModel<Validated>>()),FunctionModel<Validated>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Number<Validated>>()+declval<FunctionModel<Validated>>()),FunctionModel<Validated>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Number<Exact>>()+declval<FunctionModel<Approximate>>()),FunctionModel<Approximate>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Number<Validated>>()+declval<FunctionModel<Approximate>>()),FunctionModel<Approximate>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Number<Approximate>>()+declval<FunctionModel<Approximate>>()),FunctionModel<Approximate>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Number<ExactTag>>()+declval<FunctionModel<ValidatedTag>>()),FunctionModel<ValidatedTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Number<ValidatedTag>>()+declval<FunctionModel<ValidatedTag>>()),FunctionModel<ValidatedTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Number<ExactTag>>()+declval<FunctionModel<ApproximateTag>>()),FunctionModel<ApproximateTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Number<ValidatedTag>>()+declval<FunctionModel<ApproximateTag>>()),FunctionModel<ApproximateTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Number<ApproximateTag>>()+declval<FunctionModel<ApproximateTag>>()),FunctionModel<ApproximateTag>>::value) )
 
     // PolynomialFunctionModel * PolynomialFunctionModel -> PolynomialFunctionModel; no mixed operators
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<PolynomialFunctionModel<Validated>>()+declval<PolynomialFunctionModel<Validated>>()),PolynomialFunctionModel<Validated>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<PolynomialFunctionModel<Approximate>>()+declval<PolynomialFunctionModel<Approximate>>()),PolynomialFunctionModel<Approximate>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<PolynomialFunctionModel<ValidatedTag>>()+declval<PolynomialFunctionModel<ValidatedTag>>()),PolynomialFunctionModel<ValidatedTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<PolynomialFunctionModel<ApproximateTag>>()+declval<PolynomialFunctionModel<ApproximateTag>>()),PolynomialFunctionModel<ApproximateTag>>::value) )
     // FunctionModel * PolynomialFunctionModel -> FunctionModel; no mixed operators
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<FunctionModel<Validated>>()+declval<PolynomialFunctionModel<Validated>>()),FunctionModel<Validated>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<FunctionModel<Approximate>>()+declval<PolynomialFunctionModel<Approximate>>()),FunctionModel<Approximate>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<FunctionModel<ValidatedTag>>()+declval<PolynomialFunctionModel<ValidatedTag>>()),FunctionModel<ValidatedTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<FunctionModel<ApproximateTag>>()+declval<PolynomialFunctionModel<ApproximateTag>>()),FunctionModel<ApproximateTag>>::value) )
 
     // PolynomialFunctionModel * FunctionModel -> FunctionModel; no mixed operators
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<PolynomialFunctionModel<Validated>>()+declval<FunctionModel<Validated>>()),FunctionModel<Validated>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<PolynomialFunctionModel<Approximate>>()+declval<FunctionModel<Approximate>>()),FunctionModel<Approximate>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<PolynomialFunctionModel<ValidatedTag>>()+declval<FunctionModel<ValidatedTag>>()),FunctionModel<ValidatedTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<PolynomialFunctionModel<ApproximateTag>>()+declval<FunctionModel<ApproximateTag>>()),FunctionModel<ApproximateTag>>::value) )
     // Function * PolynomialFunctionModel -> PolynomialFunctionModel
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<Exact>>()+declval<PolynomialFunctionModel<Validated>>()),PolynomialFunctionModel<Validated>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<Validated>>()+declval<PolynomialFunctionModel<Validated>>()),PolynomialFunctionModel<Validated>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<Exact>>()+declval<PolynomialFunctionModel<Approximate>>()),PolynomialFunctionModel<Approximate>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<Validated>>()+declval<PolynomialFunctionModel<Approximate>>()),PolynomialFunctionModel<Approximate>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<Approximate>>()+declval<PolynomialFunctionModel<Approximate>>()),PolynomialFunctionModel<Approximate>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<ExactTag>>()+declval<PolynomialFunctionModel<ValidatedTag>>()),PolynomialFunctionModel<ValidatedTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<ValidatedTag>>()+declval<PolynomialFunctionModel<ValidatedTag>>()),PolynomialFunctionModel<ValidatedTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<ExactTag>>()+declval<PolynomialFunctionModel<ApproximateTag>>()),PolynomialFunctionModel<ApproximateTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<ValidatedTag>>()+declval<PolynomialFunctionModel<ApproximateTag>>()),PolynomialFunctionModel<ApproximateTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Function<ApproximateTag>>()+declval<PolynomialFunctionModel<ApproximateTag>>()),PolynomialFunctionModel<ApproximateTag>>::value) )
 
     // PolynomialFunctionModel * Function -> PolynomialFunctionModel
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<PolynomialFunctionModel<Validated>>()+declval<Function<Exact>>()),PolynomialFunctionModel<Validated>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<PolynomialFunctionModel<Validated>>()+declval<Function<Validated>>()),PolynomialFunctionModel<Validated>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<PolynomialFunctionModel<Approximate>>()+declval<Function<Exact>>()),PolynomialFunctionModel<Approximate>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<PolynomialFunctionModel<Approximate>>()+declval<Function<Validated>>()),PolynomialFunctionModel<Approximate>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<PolynomialFunctionModel<Approximate>>()+declval<Function<Approximate>>()),PolynomialFunctionModel<Approximate>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<PolynomialFunctionModel<ValidatedTag>>()+declval<Function<ExactTag>>()),PolynomialFunctionModel<ValidatedTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<PolynomialFunctionModel<ValidatedTag>>()+declval<Function<ValidatedTag>>()),PolynomialFunctionModel<ValidatedTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<PolynomialFunctionModel<ApproximateTag>>()+declval<Function<ExactTag>>()),PolynomialFunctionModel<ApproximateTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<PolynomialFunctionModel<ApproximateTag>>()+declval<Function<ValidatedTag>>()),PolynomialFunctionModel<ApproximateTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<PolynomialFunctionModel<ApproximateTag>>()+declval<Function<ApproximateTag>>()),PolynomialFunctionModel<ApproximateTag>>::value) )
 
     // SymbolicFunction * PolynomialFunctionModel -> PolynomialFunctionModel
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<SymbolicFunction<Exact>>()+declval<PolynomialFunctionModel<Validated>>()),PolynomialFunctionModel<Validated>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<SymbolicFunction<Validated>>()+declval<PolynomialFunctionModel<Validated>>()),PolynomialFunctionModel<Validated>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<SymbolicFunction<Exact>>()+declval<PolynomialFunctionModel<Approximate>>()),PolynomialFunctionModel<Approximate>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<SymbolicFunction<Validated>>()+declval<PolynomialFunctionModel<Approximate>>()),PolynomialFunctionModel<Approximate>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<SymbolicFunction<Approximate>>()+declval<PolynomialFunctionModel<Approximate>>()),PolynomialFunctionModel<Approximate>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<SymbolicFunction<ExactTag>>()+declval<PolynomialFunctionModel<ValidatedTag>>()),PolynomialFunctionModel<ValidatedTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<SymbolicFunction<ValidatedTag>>()+declval<PolynomialFunctionModel<ValidatedTag>>()),PolynomialFunctionModel<ValidatedTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<SymbolicFunction<ExactTag>>()+declval<PolynomialFunctionModel<ApproximateTag>>()),PolynomialFunctionModel<ApproximateTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<SymbolicFunction<ValidatedTag>>()+declval<PolynomialFunctionModel<ApproximateTag>>()),PolynomialFunctionModel<ApproximateTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<SymbolicFunction<ApproximateTag>>()+declval<PolynomialFunctionModel<ApproximateTag>>()),PolynomialFunctionModel<ApproximateTag>>::value) )
 
     // PolynomialFunctionModel * SymbolicFunction -> PolynomialFunctionModel
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<PolynomialFunctionModel<Validated>>()+declval<SymbolicFunction<Exact>>()),PolynomialFunctionModel<Validated>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<PolynomialFunctionModel<Validated>>()+declval<SymbolicFunction<Validated>>()),PolynomialFunctionModel<Validated>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<PolynomialFunctionModel<Approximate>>()+declval<SymbolicFunction<Exact>>()),PolynomialFunctionModel<Approximate>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<PolynomialFunctionModel<Approximate>>()+declval<SymbolicFunction<Validated>>()),PolynomialFunctionModel<Approximate>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<PolynomialFunctionModel<Approximate>>()+declval<SymbolicFunction<Approximate>>()),PolynomialFunctionModel<Approximate>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<PolynomialFunctionModel<ValidatedTag>>()+declval<SymbolicFunction<ExactTag>>()),PolynomialFunctionModel<ValidatedTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<PolynomialFunctionModel<ValidatedTag>>()+declval<SymbolicFunction<ValidatedTag>>()),PolynomialFunctionModel<ValidatedTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<PolynomialFunctionModel<ApproximateTag>>()+declval<SymbolicFunction<ExactTag>>()),PolynomialFunctionModel<ApproximateTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<PolynomialFunctionModel<ApproximateTag>>()+declval<SymbolicFunction<ValidatedTag>>()),PolynomialFunctionModel<ApproximateTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<PolynomialFunctionModel<ApproximateTag>>()+declval<SymbolicFunction<ApproximateTag>>()),PolynomialFunctionModel<ApproximateTag>>::value) )
 
     // Number * PolynomialFunctionModel -> PolynomialFunctionModel
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Number<Exact>>()+declval<PolynomialFunctionModel<Validated>>()),PolynomialFunctionModel<Validated>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Number<Validated>>()+declval<PolynomialFunctionModel<Validated>>()),PolynomialFunctionModel<Validated>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Number<Exact>>()+declval<PolynomialFunctionModel<Approximate>>()),PolynomialFunctionModel<Approximate>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Number<Validated>>()+declval<PolynomialFunctionModel<Approximate>>()),PolynomialFunctionModel<Approximate>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Number<Approximate>>()+declval<PolynomialFunctionModel<Approximate>>()),PolynomialFunctionModel<Approximate>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Number<ExactTag>>()+declval<PolynomialFunctionModel<ValidatedTag>>()),PolynomialFunctionModel<ValidatedTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Number<ValidatedTag>>()+declval<PolynomialFunctionModel<ValidatedTag>>()),PolynomialFunctionModel<ValidatedTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Number<ExactTag>>()+declval<PolynomialFunctionModel<ApproximateTag>>()),PolynomialFunctionModel<ApproximateTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Number<ValidatedTag>>()+declval<PolynomialFunctionModel<ApproximateTag>>()),PolynomialFunctionModel<ApproximateTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<Number<ApproximateTag>>()+declval<PolynomialFunctionModel<ApproximateTag>>()),PolynomialFunctionModel<ApproximateTag>>::value) )
 
     // PolynomialFunctionModel * Number -> PolynomialFunctionModel
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<PolynomialFunctionModel<Validated>>()+declval<Number<Exact>>()),PolynomialFunctionModel<Validated>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<PolynomialFunctionModel<Validated>>()+declval<Number<Validated>>()),PolynomialFunctionModel<Validated>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<PolynomialFunctionModel<Approximate>>()+declval<Number<Exact>>()),PolynomialFunctionModel<Approximate>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<PolynomialFunctionModel<Approximate>>()+declval<Number<Validated>>()),PolynomialFunctionModel<Approximate>>::value) )
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<PolynomialFunctionModel<Approximate>>()+declval<Number<Approximate>>()),PolynomialFunctionModel<Approximate>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<PolynomialFunctionModel<ValidatedTag>>()+declval<Number<ExactTag>>()),PolynomialFunctionModel<ValidatedTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<PolynomialFunctionModel<ValidatedTag>>()+declval<Number<ValidatedTag>>()),PolynomialFunctionModel<ValidatedTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<PolynomialFunctionModel<ApproximateTag>>()+declval<Number<ExactTag>>()),PolynomialFunctionModel<ApproximateTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<PolynomialFunctionModel<ApproximateTag>>()+declval<Number<ValidatedTag>>()),PolynomialFunctionModel<ApproximateTag>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(declval<PolynomialFunctionModel<ApproximateTag>>()+declval<Number<ApproximateTag>>()),PolynomialFunctionModel<ApproximateTag>>::value) )
 
 
     // SymbolicFunction -> SymbolicFunction
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(-declval<SymbolicFunction<Exact>>()),SymbolicFunction<Exact>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(-declval<SymbolicFunction<ExactTag>>()),SymbolicFunction<ExactTag>>::value) )
     // Function -> Function
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(-declval<Function<Exact>>()),Function<Exact>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(-declval<Function<ExactTag>>()),Function<ExactTag>>::value) )
     // FunctionModel -> FunctionModel
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(-declval<FunctionModel<Validated>>()),FunctionModel<Validated>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(-declval<FunctionModel<ValidatedTag>>()),FunctionModel<ValidatedTag>>::value) )
     // PolynomialFunctionModel -> PolynomialFunctionModel
-    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(-declval<PolynomialFunctionModel<Validated>>()),PolynomialFunctionModel<Validated>>::value) )
+    ARIADNE_TEST_STATIC_ASSERT( (IsSame<decltype(-declval<PolynomialFunctionModel<ValidatedTag>>()),PolynomialFunctionModel<ValidatedTag>>::value) )
 
 }
 
@@ -494,39 +494,39 @@ template<class T> FunctionInterface<Void> const& reference(const T& f) {
 
 void CheckFunctionConcept::check_mixed_operators()
 {
-    Number<Exact> en(1);
-    Number<Validated> vn(2);
-    Number<Approximate> an(3);
+    Number<ExactTag> en(1);
+    Number<ValidatedTag> vn(2);
+    Number<ApproximateTag> an(3);
 
-    Vector<Number<Exact>> ev(2);
-    Vector<Number<Validated>> vv(2);
-    Vector<Number<Approximate>> av(2);
+    Vector<Number<ExactTag>> ev(2);
+    Vector<Number<ValidatedTag>> vv(2);
+    Vector<Number<ApproximateTag>> av(2);
 
-    Number<Exact> ec(1.25);
-    Number<Validated> vc(2.25);
-    Number<Approximate> ac(3.25);
+    Number<ExactTag> ec(1.25);
+    Number<ValidatedTag> vc(2.25);
+    Number<ApproximateTag> ac(3.25);
 
-    SymbolicFunction<Exact> esf=SymbolicFunction<Exact>::constant(2,ec);
-    SymbolicFunction<Validated> vsf=SymbolicFunction<Validated>::constant(2,vc);
-    SymbolicFunction<Approximate> asf=SymbolicFunction<Approximate>::constant(2,ac);
+    SymbolicFunction<ExactTag> esf=SymbolicFunction<ExactTag>::constant(2,ec);
+    SymbolicFunction<ValidatedTag> vsf=SymbolicFunction<ValidatedTag>::constant(2,vc);
+    SymbolicFunction<ApproximateTag> asf=SymbolicFunction<ApproximateTag>::constant(2,ac);
 
     Sweeper swp;
     BoxDomain dom=BoxDomain(2,IntervalDomain(-1,+1));
-    PolynomialFunctionModel<Validated> vtf(dom,swp);
-    PolynomialFunctionModel<Approximate> atf(dom,swp);
-    Function<Validated> vvtf(vtf);
-    Function<Approximate> avtf(vtf);
-    Function<Approximate> aatf(atf);
+    PolynomialFunctionModel<ValidatedTag> vtf(dom,swp);
+    PolynomialFunctionModel<ApproximateTag> atf(dom,swp);
+    Function<ValidatedTag> vvtf(vtf);
+    Function<ApproximateTag> avtf(vtf);
+    Function<ApproximateTag> aatf(atf);
 
-    FunctionModel<Validated> vtfm(vtf);
-    FunctionModel<Approximate> atfm(atf);
+    FunctionModel<ValidatedTag> vtfm(vtf);
+    FunctionModel<ApproximateTag> atfm(atf);
 
-    Function<Exact> eesf(esf);
-    Function<Validated> vesf(eesf);
-    Function<Approximate> aesf(vesf);
-    Function<Validated> vvsf(vsf);
-    Function<Approximate> avsf(vsf);
-    Function<Approximate> aasf(asf);
+    Function<ExactTag> eesf(esf);
+    Function<ValidatedTag> vesf(eesf);
+    Function<ApproximateTag> aesf(vesf);
+    Function<ValidatedTag> vvsf(vsf);
+    Function<ApproximateTag> avsf(vsf);
+    Function<ApproximateTag> aasf(asf);
 
     // Simple tests for checking addition of concrete symbolic functions
     ARIADNE_TEST_EQUALS(typeid(reference(esf+esf)),typeid(esf));
@@ -612,39 +612,39 @@ void CheckFunctionConcept::check_mixed_operators()
 
 void CheckFunctionConcept::check_mixed_evaluation()
 {
-    Number<Exact> en(1);
-    Number<Validated> vn(2);
-    Number<Approximate> an(3);
+    Number<ExactTag> en(1);
+    Number<ValidatedTag> vn(2);
+    Number<ApproximateTag> an(3);
 
-    Vector<Number<Exact>> ev(2);
-    Vector<Number<Validated>> vv(2);
-    Vector<Number<Approximate>> av(2);
+    Vector<Number<ExactTag>> ev(2);
+    Vector<Number<ValidatedTag>> vv(2);
+    Vector<Number<ApproximateTag>> av(2);
 
-    Number<Exact> ec(1.25);
-    Number<Validated> vc(2.25);
-    Number<Approximate> ac(3.25);
+    Number<ExactTag> ec(1.25);
+    Number<ValidatedTag> vc(2.25);
+    Number<ApproximateTag> ac(3.25);
 
-    SymbolicFunction<Exact> esf=SymbolicFunction<Exact>::constant(2,ec);
-    SymbolicFunction<Validated> vsf=SymbolicFunction<Validated>::constant(2,vc);
-    SymbolicFunction<Approximate> asf=SymbolicFunction<Approximate>::constant(2,ac);
+    SymbolicFunction<ExactTag> esf=SymbolicFunction<ExactTag>::constant(2,ec);
+    SymbolicFunction<ValidatedTag> vsf=SymbolicFunction<ValidatedTag>::constant(2,vc);
+    SymbolicFunction<ApproximateTag> asf=SymbolicFunction<ApproximateTag>::constant(2,ac);
 
     Sweeper swp;
     BoxDomain dom=BoxDomain(2,IntervalDomain(-1,+1));
-    PolynomialFunctionModel<Validated> vtf(dom,swp);
-    PolynomialFunctionModel<Approximate> atf(dom,swp);
-    Function<Validated> vvtf(vtf);
-    Function<Approximate> avtf(vtf);
-    Function<Approximate> aatf(atf);
+    PolynomialFunctionModel<ValidatedTag> vtf(dom,swp);
+    PolynomialFunctionModel<ApproximateTag> atf(dom,swp);
+    Function<ValidatedTag> vvtf(vtf);
+    Function<ApproximateTag> avtf(vtf);
+    Function<ApproximateTag> aatf(atf);
 
-    FunctionModel<Validated> vtfm(vtf);
-    FunctionModel<Approximate> atfm(atf);
+    FunctionModel<ValidatedTag> vtfm(vtf);
+    FunctionModel<ApproximateTag> atfm(atf);
 
-    Function<Exact> eesf(esf);
-    Function<Validated> vesf(eesf);
-    Function<Approximate> aesf(vesf);
-    Function<Validated> vvsf(vsf);
-    Function<Approximate> avsf(vsf);
-    Function<Approximate> aasf(asf);
+    Function<ExactTag> eesf(esf);
+    Function<ValidatedTag> vesf(eesf);
+    Function<ApproximateTag> aesf(vesf);
+    Function<ValidatedTag> vvsf(vsf);
+    Function<ApproximateTag> avsf(vsf);
+    Function<ApproximateTag> aasf(asf);
 
     ARIADNE_TEST_EXECUTE(evaluate(eesf,ev));
     ARIADNE_TEST_EXECUTE(evaluate(eesf,vv));
@@ -772,13 +772,13 @@ void CheckFunctionConcept::check_vector_function()
 
 void CheckFunctionConcept::check_conversions()
 {
-    Function<Exact> ef(2);
-    Function<Validated> vf(2);
-    Function<Approximate> af(2);
+    Function<ExactTag> ef(2);
+    Function<ValidatedTag> vf(2);
+    Function<ApproximateTag> af(2);
 
-    vf=Function<Validated>(ef);
-    af=Function<Approximate>(ef);
-    af=Function<Approximate>(vf);
+    vf=Function<ValidatedTag>(ef);
+    af=Function<ApproximateTag>(ef);
+    af=Function<ApproximateTag>(vf);
 
     vf=ef;
     af=ef;
@@ -786,20 +786,20 @@ void CheckFunctionConcept::check_conversions()
 
     std::stringstream cnul;
 
-    const FunctionInterface<Exact>& efie=ef;
-    const FunctionInterface<Validated>& vfie=ef;
-    const FunctionInterface<Validated>& vfiv=vf;
-    const FunctionInterface<Approximate>& afie=ef;
-    const FunctionInterface<Approximate>& afiv=vf;
-    const FunctionInterface<Approximate>& afia=af;
+    const FunctionInterface<ExactTag>& efie=ef;
+    const FunctionInterface<ValidatedTag>& vfie=ef;
+    const FunctionInterface<ValidatedTag>& vfiv=vf;
+    const FunctionInterface<ApproximateTag>& afie=ef;
+    const FunctionInterface<ApproximateTag>& afiv=vf;
+    const FunctionInterface<ApproximateTag>& afia=af;
     cnul << efie << vfie << vfiv << afie << afiv << afia;
 
-    const ScalarEvaluableInterface<Exact>& egie=ef;
-    const ScalarEvaluableInterface<Validated>& vgie=vf;
-    const ScalarEvaluableInterface<Validated>& vgiv=vf;
-    const ScalarEvaluableInterface<Approximate>& agie=ef;
-    const ScalarEvaluableInterface<Approximate>& agiv=vf;
-    const ScalarEvaluableInterface<Approximate>& agia=af;
+    const ScalarEvaluableInterface<ExactTag>& egie=ef;
+    const ScalarEvaluableInterface<ValidatedTag>& vgie=vf;
+    const ScalarEvaluableInterface<ValidatedTag>& vgiv=vf;
+    const ScalarEvaluableInterface<ApproximateTag>& agie=ef;
+    const ScalarEvaluableInterface<ApproximateTag>& agiv=vf;
+    const ScalarEvaluableInterface<ApproximateTag>& agia=af;
     cnul << egie << vgie << vgiv << agie << agiv << agia;
 }
 

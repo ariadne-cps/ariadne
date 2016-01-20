@@ -50,14 +50,14 @@ inline ValidatedNumericType rad_val(ExactIntervalType const& ivl) {
 }
 
 
-template<class T, EnableIf<IsSame<Paradigm<T>,Approximate>> =dummy>
+template<class T, EnableIf<IsSame<Paradigm<T>,ApproximateTag>> =dummy>
 inline T unscale(T x, const ExactIntervalType& d) {
     ApproximateNumericType c(med_apprx(d));
     ApproximateNumericType r(rad_apprx(d));
     return (std::move(x)-c)/r;
 }
 
-template<class T, EnableIf<IsStronger<Paradigm<T>,Validated>> =dummy>
+template<class T, EnableIf<IsStronger<Paradigm<T>,ValidatedTag>> =dummy>
 inline T unscale(T x, const ExactIntervalType& d) {
     ValidatedNumericType c(med_val(d));
     if(d.lower()==d.upper()) { c=0; return std::move(x)*c; }

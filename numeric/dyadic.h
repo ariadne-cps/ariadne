@@ -22,7 +22,7 @@
  */
 
 /*! \file float-exact.h
- *  \brief Exact floating-point number class, a subset of dyadic numbers.
+ *  \brief ExactTag floating-point number class, a subset of dyadic numbers.
  */
 
 #ifndef ARIADNE_DYADIC_H

@@ -120,7 +120,7 @@ class TestSerialization
             txtia >> input_one;
             ARIADNE_TEST_EQUALS( input_one, 1.0 );
         } catch(...) {
-            ARIADNE_TEST_WARN("Error in archive read leaves archive in an invalid state.");
+            ARIADNE_TEST_WARN("ErrorTag in archive read leaves archive in an invalid state.");
         }
 
         try {

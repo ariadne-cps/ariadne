@@ -117,12 +117,12 @@ TestIntervalType::test_constructors()
     ARIADNE_TEST_COMPARE(ivld4.lower(),<=,2.1);
     ARIADNE_TEST_COMPARE(ivld4.upper(),>=,3.2);
 
-    // Approximate constructor from a single value
+    // ApproximateTag constructor from a single value
     UpperIntervalType ivld5(Rational(1,3));
     ARIADNE_TEST_COMPARE(cast_exact(ivld5.lower()),<,Rational(1,3));
     ARIADNE_TEST_COMPARE(cast_exact(ivld5.upper()),>,Rational(1,3));
 
-    // Exact constructor from a single value
+    // ExactTag constructor from a single value
     ExactIntervalType ivld6(Float64(1.25));
     ARIADNE_TEST_EQUAL(ivld6.lower().raw(),Float64(1.25));
     ARIADNE_TEST_EQUAL(ivld6.upper().raw(),Float64(1.25));

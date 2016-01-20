@@ -363,7 +363,7 @@ template<class X> Void Differential<X>::check() const {
     for(auto iter=this->begin(); iter!=this->end(); ++iter) {
         ARIADNE_ASSERT_MSG(iter->key().degree()<=this->degree(), *this);
         auto next = iter; ++next;
-        ARIADNE_ASSERT_MSG(graded_less(iter->key(),next->key()),"Error in ordering Differential "<<this->expansion());
+        ARIADNE_ASSERT_MSG(graded_less(iter->key(),next->key()),"ErrorTag in ordering Differential "<<this->expansion());
     }
 }
 

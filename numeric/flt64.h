@@ -64,11 +64,11 @@ extern const RoundingModeType ROUND_DOWN;
 extern const RoundingModeType ROUND_UP;
 extern const RoundingModeType ROUND_ZERO;
 
-// ----------------- Raw Floatt64 class ---------------------------------------------------------
+// ----------------- RawTag Floatt64 class ---------------------------------------------------------
 
 template<class Z, EnableIf<IsIntegral<Z>> =dummy> Z integer_cast(Flt64);
 
-// ----------------- Raw Float64 class ---------------------------------------------------------
+// ----------------- RawTag Float64 class ---------------------------------------------------------
 
 //! \ingroup Float64SubModule
 //! \brief Wrapper class for double-precision floating-point numbers.
@@ -79,9 +79,9 @@ template<class Z, EnableIf<IsIntegral<Z>> =dummy> Z integer_cast(Flt64);
 //!
 //! Default arithmetic operations are approximate, and comparisons are exact, so this class is \em unsafe.
 //! %Rounded operations on \b Float64 classes are provided using the \c _down
-//! and \c _up suffixes. %Approximate arithmetic without control of the
+//! and \c _up suffixes. %ApproximateTag arithmetic without control of the
 //! rounding mode can be specified by the \c _approx rounding suffix, or \c _near if round-to-nearest is available.
-//! %Exact arithmetic can be specified explicitly using the \c _exact rounding suffix.
+//! %ExactTag arithmetic can be specified explicitly using the \c _exact rounding suffix.
 //!
 //! Since the raw \b Float64 classes represent unsafe values, they cannot be converted to other numbers.
 //! The exception is conversion to \b ApproximateFloat64 classes, since these represent approximate values with no control of the error.
@@ -98,7 +98,7 @@ class Flt64 {
   public:
     volatile double d;
   public:
-    typedef Raw Paradigm;
+    typedef RawTag Paradigm;
     typedef Flt64 NumericType;
     Flt64() : d(0.0) { }
     Flt64(double dbl) : d(dbl) { }

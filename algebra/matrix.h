@@ -320,7 +320,6 @@ template<class M, EnableIf<IsMatrix<M>> =dummy> inline
 MatrixScalarQuotient<M,typename M::ScalarType> operator/(const M& A1, typename M::ScalarType const& x2) {
     return MatrixScalarQuotient<M,typename M::ScalarType>(A1,x2); }
 
-
 template<class X1, class X2> inline MatrixVectorProduct<X1,X2> operator*(Matrix<X1> const& A1, Vector<X2> const& v2) {
     return MatrixVectorProduct<X1,X2>(A1,v2);
 }

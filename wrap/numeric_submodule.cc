@@ -482,6 +482,7 @@ template<class PR> void export_metric_float()
     metric_float_class.def(self_ns::repr(self));
 
     implicitly_convertible<ExactFloat<PR>,MetricFloat<PR>>();
+
 }
 
 

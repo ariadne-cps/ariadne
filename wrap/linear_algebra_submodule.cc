@@ -276,7 +276,6 @@ template<> Void export_vector<ApproximateFloat64>()
     vector_class.def("__div__",__div__< Vector<X>, Vector<X>, X >);
 
     export_vector_conversion<BoundedFloat64,ApproximateFloat64>(vector_class);
-
 }
 
 

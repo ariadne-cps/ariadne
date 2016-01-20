@@ -172,12 +172,12 @@ template<class PR> Float<UpperTag,PR>::Float(Real const& r, PR pr)
     : Float(r.get(pr)) {
 }
 
-template<class PR> Float<UpperTag,PR>::Float(Number<UpperTag> const& x, PR pr)
+template<class PR> Float<UpperTag,PR>::Float(Number<ValidatedUpperTag> const& x, PR pr)
     : Float(x.get(UpperTag(),pr)) {
 }
 
-template<class PR> Float<UpperTag,PR>::operator Number<UpperTag>() const {
-    return Number<UpperTag>(new NumberWrapper<Float<UpperTag,PR>>(*this));
+template<class PR> Float<UpperTag,PR>::operator Number<ValidatedUpperTag>() const {
+    return Number<ValidatedUpperTag>(new NumberWrapper<Float<UpperTag,PR>>(*this));
 }
 
 template<class PR> Float<LowerTag,PR>::Float(Rational const& q, PR pr)
@@ -188,12 +188,12 @@ template<class PR> Float<LowerTag,PR>::Float(Real const& r, PR pr)
     : Float(r.get(pr)) {
 }
 
-template<class PR> Float<LowerTag,PR>::Float(Number<LowerTag> const& x, PR pr)
+template<class PR> Float<LowerTag,PR>::Float(Number<ValidatedLowerTag> const& x, PR pr)
     : Float(x.get(LowerTag(),pr)) {
 }
 
-template<class PR> Float<LowerTag,PR>::operator Number<LowerTag>() const {
-    return Number<LowerTag>(new NumberWrapper<Float<LowerTag,PR>>(*this));
+template<class PR> Float<LowerTag,PR>::operator Number<ValidatedLowerTag>() const {
+    return Number<ValidatedLowerTag>(new NumberWrapper<Float<LowerTag,PR>>(*this));
 }
 
 template<class PR> Float<ApproximateTag,PR>::Float(Rational const& q, PR pr)
@@ -229,11 +229,11 @@ template<class PR> Float<BoundedTag,PR>::Float(Number<ValidatedTag> const& x) : 
 
 template<class PR> Float<UpperTag,PR>::Float(Integer const& z) : Float(Rational(z)) { }
 template<class PR> Float<UpperTag,PR>::Float(Rational const& q) : Float(q,RawFloat<PR>::get_default_precision()) { }
-template<class PR> Float<UpperTag,PR>::Float(Number<UpperTag> const& x) : Float(x,RawFloat<PR>::get_default_precision()) { }
+template<class PR> Float<UpperTag,PR>::Float(Number<ValidatedUpperTag> const& x) : Float(x,RawFloat<PR>::get_default_precision()) { }
 
 template<class PR> Float<LowerTag,PR>::Float(Integer const& z) : Float(Rational(z)) { }
 template<class PR> Float<LowerTag,PR>::Float(Rational const& q) : Float(q,RawFloat<PR>::get_default_precision()) { }
-template<class PR> Float<LowerTag,PR>::Float(Number<LowerTag> const& x) : Float(x,RawFloat<PR>::get_default_precision()) { }
+template<class PR> Float<LowerTag,PR>::Float(Number<ValidatedLowerTag> const& x) : Float(x,RawFloat<PR>::get_default_precision()) { }
 
 template<class PR> Float<ApproximateTag,PR>::Float(Integer const& z) : Float(Rational(z)) { }
 template<class PR> Float<ApproximateTag,PR>::Float(Dyadic const& b) : Float(Rational(b)) { }
@@ -1592,8 +1592,8 @@ template<class PR, class P> OutputStream& operator<<(OutputStream& os, Float<P,P
 template<class PR, class P> InputStream& operator>>(InputStream& is, Float<P,PR>& x) { return operator>>(is,x); }
 
 template<class PR> Float<ApproximateTag,PR> make_float(Number<ApproximateTag> x) { return Float<ApproximateTag,PR>(x); }
-template<class PR> Float<LowerTag,PR> make_float(Number<LowerTag> x) { return Float<LowerTag,PR>(x); }
-template<class PR> Float<UpperTag,PR> make_float(Number<UpperTag> x) { return Float<UpperTag,PR>(x); }
+template<class PR> Float<LowerTag,PR> make_float(Number<ValidatedLowerTag> x) { return Float<LowerTag,PR>(x); }
+template<class PR> Float<UpperTag,PR> make_float(Number<ValidatedUpperTag> x) { return Float<UpperTag,PR>(x); }
 template<class PR> Float<BoundedTag,PR> make_float(Number<ValidatedTag> x) { return Float<BoundedTag,PR>(x); }
 template<class PR> Float<BoundedTag,PR> make_float(Number<EffectiveTag> x) { return Float<BoundedTag,PR>(x); }
 template<class PR> Float<BoundedTag,PR> make_float(Number<ExactTag> x) { return Float<BoundedTag,PR>(x); }

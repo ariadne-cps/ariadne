@@ -79,9 +79,11 @@ template<class P> struct IsGenericNumericType<Number<P>> : True { };
 
 using ExactNumber=Number<ExactTag>;
 using EffectiveNumber=Number<EffectiveTag>;
+using EffectiveUpperNumber=Number<EffectiveUpperTag>;
+using EffectiveLowerNumber=Number<EffectiveLowerTag>;
 using ValidatedNumber=Number<ValidatedTag>;
-using UpperNumber=Number<UpperTag>;
-using LowerNumber=Number<LowerTag>;
+using ValidatedUpperNumber=Number<ValidatedUpperTag>;
+using ValidatedLowerNumber=Number<ValidatedLowerTag>;
 using ApproximateNumber=Number<ApproximateTag>;
 using PositiveUpperNumber=Number<PositiveUpperTag>;
 

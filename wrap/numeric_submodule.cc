@@ -308,10 +308,10 @@ Float64Bounds get(EffectiveNumber const& n, Precision64 const& pr) { return n.ge
 FloatMPBounds get(EffectiveNumber const& n, PrecisionMP const& pr) { return n.get(BoundedTag(),pr); }
 Float64Bounds get(ValidatedNumber const& n, Precision64 const& pr) { return n.get(BoundedTag(),pr); }
 FloatMPBounds get(ValidatedNumber const& n, PrecisionMP const& pr) { return n.get(BoundedTag(),pr); }
-Float64UpperBound get(UpperNumber const& n, Precision64 const& pr) { return n.get(UpperTag(),pr); }
-FloatMPUpperBound get(UpperNumber const& n, PrecisionMP const& pr) { return n.get(UpperTag(),pr); }
-Float64LowerBound get(LowerNumber const& n, Precision64 const& pr) { return n.get(LowerTag(),pr); }
-FloatMPLowerBound get(LowerNumber const& n, PrecisionMP const& pr) { return n.get(LowerTag(),pr); }
+Float64UpperBound get(ValidatedUpperNumber const& n, Precision64 const& pr) { return n.get(UpperTag(),pr); }
+FloatMPUpperBound get(ValidatedUpperNumber const& n, PrecisionMP const& pr) { return n.get(UpperTag(),pr); }
+Float64LowerBound get(ValidatedLowerNumber const& n, Precision64 const& pr) { return n.get(LowerTag(),pr); }
+FloatMPLowerBound get(ValidatedLowerNumber const& n, PrecisionMP const& pr) { return n.get(LowerTag(),pr); }
 Float64Approximation get(ApproximateNumber const& n, Precision64 const& pr) { return n.get(ApproximateTag(),pr); }
 FloatMPApproximation get(ApproximateNumber const& n, PrecisionMP const& pr) { std::cerr<<"get(AN,MP)\n";return n.get(ApproximateTag(),pr); }
 
@@ -332,18 +332,18 @@ void export_numbers()
     approximate_number_class.def(self_ns::str(self));
     approximate_number_class.def(self_ns::repr(self));
 
-    class_<LowerNumber> lower_number_class(class_name<LowerTag>()+"Number");
+    class_<ValidatedLowerNumber> lower_number_class(class_name<LowerTag>()+"Number");
     lower_number_class.def(init<ValidatedNumber>());
-    lower_number_class.def("get", (Float64LowerBound(*)(LowerNumber const&, Precision64 const&)) &get);
-    lower_number_class.def("get", (FloatMPLowerBound(*)(LowerNumber const&, PrecisionMP const&)) &get);
+    lower_number_class.def("get", (Float64LowerBound(*)(ValidatedLowerNumber const&, Precision64 const&)) &get);
+    lower_number_class.def("get", (FloatMPLowerBound(*)(ValidatedLowerNumber const&, PrecisionMP const&)) &get);
     lower_number_class.define_monotonic_functions();
     lower_number_class.def(self_ns::str(self));
     lower_number_class.def(self_ns::repr(self));
 
-    class_<UpperNumber> upper_number_class(class_name<UpperTag>()+"Number");
+    class_<ValidatedUpperNumber> upper_number_class(class_name<UpperTag>()+"Number");
     upper_number_class.def(init<ValidatedNumber>());
-    upper_number_class.def("get", (Float64UpperBound(*)(UpperNumber const&, Precision64 const&)) &get);
-    upper_number_class.def("get", (FloatMPUpperBound(*)(UpperNumber const&, PrecisionMP const&)) &get);
+    upper_number_class.def("get", (Float64UpperBound(*)(ValidatedUpperNumber const&, Precision64 const&)) &get);
+    upper_number_class.def("get", (FloatMPUpperBound(*)(ValidatedUpperNumber const&, PrecisionMP const&)) &get);
     upper_number_class.define_monotonic_functions();
     upper_number_class.def(self_ns::str(self));
     upper_number_class.def(self_ns::repr(self));
@@ -385,8 +385,8 @@ void export_numbers()
 
 
     implicitly_convertible<ValidatedNumber,ApproximateNumber>();
-    implicitly_convertible<ValidatedNumber,LowerNumber>();
-    implicitly_convertible<ValidatedNumber,UpperNumber>();
+    implicitly_convertible<ValidatedNumber,ValidatedLowerNumber>();
+    implicitly_convertible<ValidatedNumber,ValidatedUpperNumber>();
     implicitly_convertible<EffectiveNumber,ValidatedNumber>();
     implicitly_convertible<ExactNumber,EffectiveNumber>();
 

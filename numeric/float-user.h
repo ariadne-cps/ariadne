@@ -171,13 +171,13 @@ template<class PR> class Float<LowerTag,PR> {
 
     Float<LowerTag,PR>(const Rational& q, PR pr);
     Float<LowerTag,PR>(const Real& r, PR pr);
-    Float<LowerTag,PR>(const Number<LowerTag>& x, PR pr);
-    operator Number<LowerTag> () const;
+    Float<LowerTag,PR>(const Number<ValidatedLowerTag>& x, PR pr);
+    operator Number<ValidatedLowerTag> () const;
 
     explicit Float<LowerTag,PR>(const Integer& x);
     explicit Float<LowerTag,PR>(const Rational& x);
     explicit Float<LowerTag,PR>(const Real& x);
-    explicit Float<LowerTag,PR>(const Number<LowerTag>& x);
+    explicit Float<LowerTag,PR>(const Number<ValidatedLowerTag>& x);
 
     PrecisionType precision() const { return _l.precision(); }
     RawFloatType const& raw() const { return _l; }
@@ -213,12 +213,12 @@ template<class PR> class Float<UpperTag,PR> {
     explicit Float<UpperTag,PR>(const Integer& x);
     explicit Float<UpperTag,PR>(const Rational& x);
     explicit Float<UpperTag,PR>(const Real& x);
-    explicit Float<UpperTag,PR>(const Number<UpperTag>& x);
+    explicit Float<UpperTag,PR>(const Number<ValidatedUpperTag>& x);
 
     Float<UpperTag,PR>(const Rational& q, PR pr);
     Float<UpperTag,PR>(const Real& r, PR pr);
-    Float<UpperTag,PR>(const Number<UpperTag>& x, PR pr);
-    operator Number<UpperTag> () const;
+    Float<UpperTag,PR>(const Number<ValidatedUpperTag>& x, PR pr);
+    operator Number<ValidatedUpperTag> () const;
 
     PrecisionType precision() const { return _u.precision(); }
     RawFloatType const& raw() const { return _u; }
@@ -723,8 +723,8 @@ template<class PR> Bool models(Float<BoundedTag,PR> const& x1, Float<ExactTag,PR
 
 template<class PR> inline Float<ApproximateTag,PR> make_float(Number<ApproximateTag> const& y, PR pr) { return Float<ApproximateTag,PR>(y,pr); }
 template<class PR> Float<ApproximateTag,PR> make_float(Number<ApproximateTag> const& y, PR pr);
-template<class PR> inline Float<LowerTag,PR> make_float(Number<LowerTag> const& y, PR pr) { return Float<LowerTag,PR>(y,pr); }
-template<class PR> inline Float<UpperTag,PR> make_float(Number<UpperTag> const& y, PR pr) { return Float<UpperTag,PR>(y,pr); }
+template<class PR> inline Float<LowerTag,PR> make_float(Number<ValidatedLowerTag> const& y, PR pr) { return Float<LowerTag,PR>(y,pr); }
+template<class PR> inline Float<UpperTag,PR> make_float(Number<ValidatedUpperTag> const& y, PR pr) { return Float<UpperTag,PR>(y,pr); }
 template<class PR> inline Float<BoundedTag,PR> make_float(Number<ValidatedTag> const& y, PR pr) { return Float<BoundedTag,PR>(y,pr); }
 template<class PR> inline Float<BoundedTag,PR> make_float(Number<EffectiveTag> const& y, PR pr) { return Float<BoundedTag,PR>(y,pr); }
 template<class PR> inline Float<BoundedTag,PR> make_float(Number<ExactTag> const& y, PR pr) { return Float<BoundedTag,PR>(y,pr); }

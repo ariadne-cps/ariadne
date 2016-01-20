@@ -62,8 +62,8 @@ Quasidecidable signum(Real r);
 Decidable signum(Number<ExactTag> n);
 Quasidecidable signum(Number<EffectiveTag> n);
 Logical<ValidatedTag> signum(Number<ValidatedTag> n);
-Logical<LowerTag> signum(Number<UpperTag> n);
-Logical<UpperTag> signum(Number<LowerTag> n);
+Logical<LowerTag> signum(Number<ValidatedUpperTag> n);
+Logical<UpperTag> signum(Number<ValidatedLowerTag> n);
 Logical<ApproximateTag> signum(Number<ApproximateTag> n);
 template<class P, class PR> decltype(signum(declval<Number<P>>())) signum(Float<P,PR>);
 struct Sig { template<class A> auto operator() (A&& a) const -> decltype(signum(a)) { return signum(std::move(a)); } };
@@ -299,8 +299,8 @@ ARIADNE_CLASS_NAME(Rational);
 ARIADNE_CLASS_NAME(Real);
 
 ARIADNE_CLASS_NAME(Number<ApproximateTag>)
-ARIADNE_CLASS_NAME(Number<LowerTag>)
-ARIADNE_CLASS_NAME(Number<UpperTag>)
+ARIADNE_CLASS_NAME(Number<ValidatedLowerTag>)
+ARIADNE_CLASS_NAME(Number<ValidatedUpperTag>)
 ARIADNE_CLASS_NAME(Number<ValidatedTag>)
 ARIADNE_CLASS_NAME(Number<EffectiveTag>)
 ARIADNE_CLASS_NAME(Number<ExactTag>)
@@ -326,7 +326,7 @@ ARIADNE_CLASS_NAME(FloatMPValue);
 typedef bool B; typedef uint Nat; typedef int Int; typedef double Dbl;
 typedef Integer  Z ; typedef Rational  Q ; typedef Real  R ;
 typedef Number<ExactTag> ExN; typedef Number<EffectiveTag> EfN; typedef Number<ValidatedTag> VaN;
-typedef Number<UpperTag> UpN; typedef Number<LowerTag> LoN; typedef Number<ApproximateTag> ApN;
+typedef Number<ValidatedUpperTag> UpN; typedef Number<ValidatedLowerTag> LoN; typedef Number<ApproximateTag> ApN;
 typedef Float64Value ExF; typedef Float64Ball MeF; typedef Float64Bounds BoF;
 typedef Float64UpperBound UpF; typedef Float64LowerBound LoF; typedef Float64Approximation ApF;
 typedef Logical<ExactTag> ExL; typedef Logical<EffectiveTag> EfL; typedef Logical<ValidatedTag> VaL;
@@ -362,7 +362,7 @@ class CheckNumeric
 
     typedef Tags<Nat,Int,Dbl> BuiltinTypes;
     typedef Tags<Integer,Rational,Real> UserTypes;
-    typedef Tags<Number<ExactTag>,Number<EffectiveTag>,Number<ValidatedTag>,Number<UpperTag>,Number<LowerTag>,Number<ApproximateTag>> GenericTypes;
+    typedef Tags<Number<ExactTag>,Number<EffectiveTag>,Number<ValidatedTag>,Number<ValidatedUpperTag>,Number<ValidatedLowerTag>,Number<ApproximateTag>> GenericTypes;
     typedef Tags<Float64Value,Float64Ball,Float64Bounds,Float64UpperBound,Float64LowerBound,Float64Approximation> Float64Types;
 
     typedef decltype(cat(declval<BuiltinTypes>(),declval<UserTypes>(),declval<GenericTypes>(),declval<Float64Types>())) NumericTypes;

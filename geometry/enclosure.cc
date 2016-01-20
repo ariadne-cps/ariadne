@@ -247,7 +247,7 @@ Enclosure::Enclosure(const ExactBoxType& box, const ValidatedFunctionModelFactor
     : _function_factory_ptr(factory.clone())
 {
     // Ensure domain elements have nonempty radius
-    const ExactFloat64 min_float(std::numeric_limits<float>::min());
+    const Float64Value min_float(std::numeric_limits<float>::min());
     List<Nat> proper_coordinates;
     proper_coordinates.reserve(box.dimension());
     for(Nat i=0; i!=box.dimension(); ++i) {
@@ -447,10 +447,10 @@ Void Enclosure::apply_flow(ValidatedVectorFunction flow, ExactIntervalType time)
 }
 */
 
-Void Enclosure::apply_fixed_evolve_step(ValidatedVectorFunction flow, ExactFloat64 time)
+Void Enclosure::apply_fixed_evolve_step(ValidatedVectorFunction flow, Float64Value time)
 {
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->dimension()+1u,"dimension="<<this->dimension()<<", flow="<<flow);
-    ValidatedScalarFunctionModel evolve_time_function=this->function_factory().create_constant(this->domain(),ExactFloat64(time));
+    ValidatedScalarFunctionModel evolve_time_function=this->function_factory().create_constant(this->domain(),Float64Value(time));
     this->_space_function=compose(flow,join(this->_space_function,evolve_time_function));
     this->_time_function=this->_time_function + evolve_time_function;
     this->_dwell_time_function=this->_dwell_time_function + evolve_time_function;
@@ -506,7 +506,7 @@ Void Enclosure::apply_full_reach_step(ValidatedVectorFunctionModel phi)
     ARIADNE_ASSERT(phi.result_size()==this->dimension());
     ARIADNE_ASSERT(phi.argument_size()==this->dimension()+1);
     Float64 h=phi.domain()[phi.result_size()].upper().raw();
-    ValidatedScalarFunctionModel elps=this->function_factory().create_constant(this->domain(),ExactFloat64(h));
+    ValidatedScalarFunctionModel elps=this->function_factory().create_constant(this->domain(),Float64Value(h));
     this->apply_parameter_reach_step(phi,elps);
 }
 
@@ -671,7 +671,7 @@ UpperBoxType Enclosure::bounding_box() const {
     return this->_space_function.codomain().bounding_box();
 }
 
-ErrorFloat64 Enclosure::radius() const {
+Float64Error Enclosure::radius() const {
     return cast_positive(this->bounding_box().radius());
 }
 
@@ -1044,7 +1044,7 @@ uniform_error_recondition()
         Float64 error=this->_space_function.get(large_error_indices[i]).error().raw();
         if(error > MAXIMUM_ERROR) {
             this->_space_function[i].set_error(0u);
-            this->_space_function[i] = this->_space_function.get(i) + this->function_factory().create_coordinate(this->_domain,k)*BoundedFloat64(+error);
+            this->_space_function[i] = this->_space_function.get(i) + this->function_factory().create_coordinate(this->_domain,k)*Float64Bounds(+error);
             ++k;
         }
     }
@@ -1080,20 +1080,20 @@ TaylorModel<ValidatedTag,Float64> recondition(const TaylorModel<ValidatedTag,Flo
 
     // Set the uniform error of the original model
     // If index_of_error == number_of_error_variables, then the error is kept as a uniform error bound
-    ErrorFloat64* error_ptr;
+    Float64Error* error_ptr;
     if(number_of_error_variables==index_of_error) {
         error_ptr = &r.error();
     } else {
         ra[number_of_kept_variables+index_of_error]=1;
         r.expansion().append(ra,cast_exact(tm.error()));
         ra[number_of_kept_variables+index_of_error]=0;
-        error_ptr = reinterpret_cast<ErrorFloat64*>(&r.begin()->data());
+        error_ptr = reinterpret_cast<Float64Error*>(&r.begin()->data());
     }
-    ErrorFloat64& error=*error_ptr;
+    Float64Error& error=*error_ptr;
 
     for(TaylorModel<ValidatedTag,Float64>::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
         MultiIndex const& xa=iter->key();
-        ExactFloat64 const& xv=iter->data();
+        Float64Value const& xv=iter->data();
         Bool keep=true;
         for(SizeType k=0; k!=number_of_discarded_variables; ++k) {
             if(xa[discarded_variables[k]]!=0) {

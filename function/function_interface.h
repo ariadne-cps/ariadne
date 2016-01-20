@@ -141,9 +141,9 @@ class FunctionInterface<ValidatedTag,D,C>
 
     virtual Result<ScalarFunction<ValidatedTag>> _evaluate(const Argument< ScalarFunction<ValidatedTag> >& x) const = 0;
 
-    inline Result<ValidatedNumericType> _evaluate(const Argument<ExactFloat64>& x) const {
+    inline Result<ValidatedNumericType> _evaluate(const Argument<Float64Value>& x) const {
         return this->_evaluate(Argument<ValidatedNumericType>(x)); }
-    inline Result<Differential<ValidatedNumericType>> _evaluate(const Argument<Differential<ExactFloat64>>& x) const {
+    inline Result<Differential<ValidatedNumericType>> _evaluate(const Argument<Differential<Float64Value>>& x) const {
         return this->_evaluate(Argument<Differential<ValidatedNumericType>>(x)); }
 
     virtual FunctionInterface<P,D,C>* _clone() const = 0;

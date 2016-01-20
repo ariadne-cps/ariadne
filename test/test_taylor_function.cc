@@ -107,10 +107,10 @@ Void TestScalarTaylorFunction::test_concept()
 {
     static_assert(IsAlgebra<ScalarTaylorFunction>::value,"");
 
-    const ExactFloat64 f=0;
-    const BoundedFloat64 i;
-    const Vector<ExactFloat64> vf;
-    const Vector<BoundedFloat64> vi;
+    const Float64Value f=0;
+    const Float64Bounds i;
+    const Vector<Float64Value> vf;
+    const Vector<Float64Bounds> vi;
     const ScalarTaylorFunction  t;
     ScalarTaylorFunction tr;
 
@@ -152,8 +152,8 @@ Void TestScalarTaylorFunction::test_constructors()
 Void TestScalarTaylorFunction::test_create()
 {
     ExactBoxType D={{-0.5,0.5},{-1.0,2.0}};
-    ExactFloat64 c1=1;
-    ExactFloat64 c2=2;
+    Float64Value c1=1;
+    Float64Value c2=2;
     ScalarTaylorFunction pf1=ScalarTaylorFunction::constant(D,c1,swp);
     ScalarTaylorFunction pf2=ScalarTaylorFunction::constant(D,c2,swp);
     ValidatedScalarFunctionModel fm1=pf1;
@@ -187,9 +187,9 @@ Void TestScalarTaylorFunction::test_approximation()
 
 Void TestScalarTaylorFunction::test_evaluate()
 {
-    Vector<BoundedFloat64> iv({{0.25,0.5},{-0.75,-0.5}});
+    Vector<Float64Bounds> iv({{0.25,0.5},{-0.75,-0.5}});
     ScalarTaylorFunction tv(d(2),e(2,2,{1.0,2.0,3.0,4.0,5.0,6.0}),0.25,swp);
-    ARIADNE_TEST_SAME(evaluate(tv,iv),BoundedFloat64(-0.375000,3.43750));
+    ARIADNE_TEST_SAME(evaluate(tv,iv),Float64Bounds(-0.375000,3.43750));
 }
 
 Void TestScalarTaylorFunction::test_gradient()
@@ -202,8 +202,8 @@ Void TestScalarTaylorFunction::test_gradient()
     ExactBoxType domain2={{-0.5,+0.5},{-0.25,+0.25}};
     ExactBoxType domain3={{-0.25,+0.75},{0.0,+0.50}};
 
-    Vector<BoundedFloat64> point1=Vector<BoundedFloat64>{0,0};
-    Vector<BoundedFloat64> point2=Vector<BoundedFloat64>{0,0.25_exact};
+    Vector<Float64Bounds> point1=Vector<Float64Bounds>{0,0};
+    Vector<Float64Bounds> point2=Vector<Float64Bounds>{0,0.25_exact};
 
     ARIADNE_TEST_EQUAL(ScalarTaylorFunction(domain1,quadratic,swp).gradient(point1),quadratic.gradient(point1));
     ARIADNE_TEST_EQUAL(ScalarTaylorFunction(domain1,quadratic,swp).gradient(point2),quadratic.gradient(point2));
@@ -222,10 +222,10 @@ Void TestScalarTaylorFunction::test_arithmetic()
     ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp)-(-3), ScalarTaylorFunction(d(1),e(1,2, {4.0,-2.0,3.0}), 0.75, swp));
     ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp)*(-3), ScalarTaylorFunction(d(1),e(1,2, {-3.0,6.0,-9.0}), 2.25, swp));
     ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp)/(-4), ScalarTaylorFunction(d(1),e(1,2, {-0.25,0.5,-0.75}), 0.1875, swp));
-    ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp)+BoundedFloat64(-1,2), ScalarTaylorFunction(d(1),e(1,2, {1.5,-2.0,3.0}), 2.25, swp));
-    ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp)-BoundedFloat64(-1,2), ScalarTaylorFunction(d(1),e(1,2, {0.5,-2.0,3.0}), 2.25, swp));
-    ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp)*BoundedFloat64(-1,2), ScalarTaylorFunction(d(1),e(1,2, {0.5,-1.0,1.5}), 10.5, swp));
-    ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp)/BoundedFloat64(0.25,2.0), ScalarTaylorFunction(d(1),e(1,2, {2.25,-4.5,6.75}), 13.5, swp));
+    ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp)+Float64Bounds(-1,2), ScalarTaylorFunction(d(1),e(1,2, {1.5,-2.0,3.0}), 2.25, swp));
+    ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp)-Float64Bounds(-1,2), ScalarTaylorFunction(d(1),e(1,2, {0.5,-2.0,3.0}), 2.25, swp));
+    ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp)*Float64Bounds(-1,2), ScalarTaylorFunction(d(1),e(1,2, {0.5,-1.0,1.5}), 10.5, swp));
+    ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp)/Float64Bounds(0.25,2.0), ScalarTaylorFunction(d(1),e(1,2, {2.25,-4.5,6.75}), 13.5, swp));
     ARIADNE_TEST_EQUAL(+ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp), ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp));
     ARIADNE_TEST_EQUAL(-ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp), ScalarTaylorFunction(d(1),e(1,2, {-1.0,2.0,-3.0}), 0.75, swp));
 
@@ -279,7 +279,7 @@ Void TestScalarTaylorFunction::test_antiderivative()
     ScalarTaylorFunction h=compose(g,VectorTaylorFunction({c,s}));
 
     Vector<ExactIntervalType> hdom=h.domain();
-    Vector<BoundedFloat64> domv(reinterpret_cast<Vector<BoundedFloat64>const&>(hdom));
+    Vector<Float64Bounds> domv(reinterpret_cast<Vector<Float64Bounds>const&>(hdom));
     ARIADNE_ASSERT(mag(h(domv))<1e-8);
 
 }
@@ -287,8 +287,8 @@ Void TestScalarTaylorFunction::test_antiderivative()
 Void TestScalarTaylorFunction::test_conversion() {
     // Test conversion between ordinary functions and Taylor functions.
     ExactBoxType D={{-0.5,0.5},{-1.0,2.0}};
-    Vector<ExactFloat64> pt={-0.25_exact,0.25_exact};
-    Vector<BoundedFloat64> ipt(pt);
+    Vector<Float64Value> pt={-0.25_exact,0.25_exact};
+    Vector<Float64Bounds> ipt(pt);
     EffectiveVectorFunction x=EffectiveVectorFunction::identity(2);
 
     EffectiveScalarFunction f=(1-x[0]*x[0]-x[1]/2);
@@ -299,14 +299,14 @@ Void TestScalarTaylorFunction::test_conversion() {
 
     // Conversion to TaylorFunction should be exact in second component
     ARIADNE_TEST_BINARY_PREDICATE(refines,f(ipt),tf(ipt));
-    ARIADNE_TEST_BINARY_PREDICATE(refines,tf(ipt),f(ipt)+BoundedFloat64(-1e-15,1e-15));
+    ARIADNE_TEST_BINARY_PREDICATE(refines,tf(ipt),f(ipt)+Float64Bounds(-1e-15,1e-15));
 }
 
 Void TestScalarTaylorFunction::test_generic() {
     ExactBoxType D={{-0.5,0.5},{-1.0,2.0}};
-    ExactFloat64 c0=0;
-    ExactFloat64 c1=2;
-    ExactFloat64 c2=3;
+    Float64Value c0=0;
+    Float64Value c1=2;
+    Float64Value c2=3;
     ScalarTaylorFunction pf0=ScalarTaylorFunction::constant(D,c0,swp);
     ScalarTaylorFunction pf1=ScalarTaylorFunction::constant(D,c1,swp);
     ScalarTaylorFunction pf2=ScalarTaylorFunction::constant(D,c2,swp);
@@ -327,7 +327,7 @@ Void TestScalarTaylorFunction::test_generic() {
 }
 
 /*
-VectorTaylorFunction henon(const VectorTaylorFunction& x, const Vector<ExactFloat64>& p)
+VectorTaylorFunction henon(const VectorTaylorFunction& x, const Vector<Float64Value>& p)
 {
     VectorTaylorFunction r(2,2,x.degree()); henon(r,x,p); return r;
 }
@@ -374,7 +374,7 @@ TestVectorTaylorFunction::test()
     ARIADNE_TEST_CALL(test_domain());
 }
 
-Bool operator==(Expansion<ExactFloat64> const& e1, Expansion<RawFloat64> const& e2) {
+Bool operator==(Expansion<Float64Value> const& e1, Expansion<RawFloat64> const& e2) {
     return reinterpret_cast<Expansion<RawFloat64>const&>(e1)==e2;
 }
 
@@ -394,7 +394,7 @@ Void TestVectorTaylorFunction::test_constructors()
     ARIADNE_TEST_EQUAL(henon_model.models()[0].expansion(),expansion[0])
     ARIADNE_TEST_EQUAL(henon_model.models()[1].expansion(),expansion[1])
 
-    Vector<BoundedFloat64> e0(e(2,0)); Vector<BoundedFloat64> e1(e(2,1));
+    Vector<Float64Bounds> e0(e(2,0)); Vector<Float64Bounds> e1(e(2,1));
 
     VectorTaylorFunction t=VectorTaylorFunction::identity(domain,swp);
     //VectorTaylorFunction variables_model((1.5-t[0]*t[0]+0.25*t[1])*e0+t[0]*e1);
@@ -444,12 +444,12 @@ Void TestVectorTaylorFunction::test_jacobian()
     ExactBoxType domain1={{-1.0,+1.0},{-1.0,+1.0}};
     ExactBoxType domain2={{-0.5,+0.5},{-0.25,+0.25}};
     ExactBoxType domain3={{-0.25,+0.75},{0.0,+0.50}};
-    //Vector<ApproximateFloat64> point1={0.0,0.0};
-    //Vector<ApproximateFloat64> point2={0.5,0.25};
-    Vector<BoundedFloat64> point1=Vector<BoundedFloat64>{0,0};
-    Vector<BoundedFloat64> point2=Vector<BoundedFloat64>{0,0.25_exact};
-    //Vector<ExactFloat64> point1=Vector<ExactFloat64>{0.0,0.0};
-    //Vector<ExactFloat64> point2=Vector<ExactFloat64>{0.5,0.25};
+    //Vector<Float64Approximation> point1={0.0,0.0};
+    //Vector<Float64Approximation> point2={0.5,0.25};
+    Vector<Float64Bounds> point1=Vector<Float64Bounds>{0,0};
+    Vector<Float64Bounds> point2=Vector<Float64Bounds>{0,0.25_exact};
+    //Vector<Float64Value> point1=Vector<Float64Value>{0.0,0.0};
+    //Vector<Float64Value> point2=Vector<Float64Value>{0.5,0.25};
     ARIADNE_TEST_EQUAL(VectorTaylorFunction(domain1,henon,swp).jacobian(point1),henon.jacobian(point1));
     ARIADNE_TEST_EQUAL(VectorTaylorFunction(domain1,henon,swp).jacobian(point2),henon.jacobian(point2));
     ARIADNE_TEST_EQUAL(VectorTaylorFunction(domain2,henon,swp).jacobian(point1),henon.jacobian(point1));
@@ -555,8 +555,8 @@ Void TestVectorTaylorFunction::test_conversion()
     // Test conversion between ordinary functions and Taylor functions.
     ExactBoxType D={{-0.5,0.5},{-1.0,2.0}};
     Vector<RawFloat64> pt={-0.25,0.25};
-    Vector<BoundedFloat64> ipt(pt);
-    Vector<ApproximateFloat64> apt(pt);
+    Vector<Float64Bounds> ipt(pt);
+    Vector<Float64Approximation> apt(pt);
     EffectiveVectorFunction x=EffectiveVectorFunction::identity(2);
 
     EffectiveVectorFunction h={1-x[0]*x[0]-x[1]/2,x[0]+Real(0)};
@@ -596,12 +596,12 @@ Void TestVectorTaylorFunction::test_domain()
     ScalarTaylorFunction t3(D1,2+(x0+x1)*(x0+x1),swp);
     ARIADNE_TEST_EQUAL(compose(t2,t1),t3);
 
-    Vector<BoundedFloat64> x={{1.0,1.0},{0.5,1.5}};
+    Vector<Float64Bounds> x={{1.0,1.0},{0.5,1.5}};
     ARIADNE_TEST_PRINT(x);
-    ARIADNE_TEST_SAME(evaluate(t2,x),BoundedFloat64(2.25,4.25));
+    ARIADNE_TEST_SAME(evaluate(t2,x),Float64Bounds(2.25,4.25));
 
     // Ensure evaluation and composition throw errors when expected
-    Vector<BoundedFloat64> xe={{0.875,1.125},{0.5,1.5}};
+    Vector<Float64Bounds> xe={{0.875,1.125},{0.5,1.5}};
     ARIADNE_TEST_THROWS(t2(xe),DomainException);
     ARIADNE_TEST_THROWS(evaluate(t2,xe),DomainException);
 
@@ -610,11 +610,11 @@ Void TestVectorTaylorFunction::test_domain()
     ARIADNE_TEST_THROWS(vt2(xe),DomainException);
     ARIADNE_TEST_THROWS(evaluate(vt2,xe),DomainException);
 
-    VectorTaylorFunction te1=t1; te1[0]=te1[0]+BoundedFloat64(-0.125,+0.125);
+    VectorTaylorFunction te1=t1; te1[0]=te1[0]+Float64Bounds(-0.125,+0.125);
     ARIADNE_TEST_THROWS(compose(t2,te1),DomainException);
     ARIADNE_TEST_THROWS(compose(vt2,te1),DomainException);
 
-    ARIADNE_TEST_SAME(unchecked_evaluate(t2,xe),BoundedFloat64(2.25,4.25));
+    ARIADNE_TEST_SAME(unchecked_evaluate(t2,xe),Float64Bounds(2.25,4.25));
 
     // Regression test for printing functions with trivial domain component
     ExactBoxType D4={{1.0,1.0},{0.0,2.0}};
@@ -651,22 +651,22 @@ Void TestTaylorFunctionFactory::test_create()
     TaylorFunctionFactory factory(sweeper);
 
     Vector<ExactIntervalType> dom={{-1,+1},{0.5,3.5}};
-    Vector<BoundedFloat64> args=reinterpret_cast<Vector<BoundedFloat64>const&>(dom);
+    Vector<Float64Bounds> args=reinterpret_cast<Vector<Float64Bounds>const&>(dom);
 
     ScalarTaylorFunction stf=factory.create(dom, EffectiveScalarFunction::zero(dom.size()) );
     ARIADNE_TEST_PRINT(stf);
     ARIADNE_TEST_EQUALS(&stf.sweeper(),&sweeper);
-    ARIADNE_TEST_EQUALS(stf(args),BoundedFloat64(0.0));
-    ARIADNE_TEST_EQUALS(evaluate(stf,args),BoundedFloat64(0.0));
+    ARIADNE_TEST_EQUALS(stf(args),Float64Bounds(0.0));
+    ARIADNE_TEST_EQUALS(evaluate(stf,args),Float64Bounds(0.0));
 
     VectorTaylorFunction vtf=factory.create(dom, EffectiveVectorFunction::identity(dom.size()) );
     ARIADNE_TEST_PRINT(vtf);
 
     // Test evaluation gives a superset with small additional error
-    Vector<BoundedFloat64> errs(2,BoundedFloat64(-1e-15,+1e-15));
+    Vector<Float64Bounds> errs(2,Float64Bounds(-1e-15,+1e-15));
     ARIADNE_TEST_BINARY_PREDICATE(refines,args,vtf(args));
-    ARIADNE_TEST_BINARY_PREDICATE(refines,vtf(args),Vector<BoundedFloat64>(args+errs));
-    Vector<BoundedFloat64> pt(2); pt[0]=BoundedFloat64(0.2); pt[1]=BoundedFloat64(1.25);
+    ARIADNE_TEST_BINARY_PREDICATE(refines,vtf(args),Vector<Float64Bounds>(args+errs));
+    Vector<Float64Bounds> pt(2); pt[0]=Float64Bounds(0.2); pt[1]=Float64Bounds(1.25);
     ARIADNE_TEST_BINARY_PREDICATE(refines,pt,vtf(pt));
 }
 

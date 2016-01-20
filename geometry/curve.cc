@@ -83,7 +83,7 @@ Curve::smoothness() const
 Curve::PointType
 Curve::value(const ParameterType& s) const
 {
-    Vector<ApproximateFloat64> fv=this->_function.evaluate(s);
+    Vector<Float64Approximation> fv=this->_function.evaluate(s);
     return PointType(fv);
 }
 
@@ -119,7 +119,7 @@ InterpolatedCurve::insert(const ParameterType& s, const PointType& pt) {
 Void
 InterpolatedCurve::insert(const RawFloat64& s, const Vector<RawFloat64>& pt) {
     if(!this->_points.empty()) { ARIADNE_ASSERT(pt.size()==this->dimension()); }
-    this->insert(ParameterType(s),PointType(reinterpret_cast<Vector<ExactFloat64>const&>(pt)));
+    this->insert(ParameterType(s),PointType(reinterpret_cast<Vector<Float64Value>const&>(pt)));
 }
 
 UpperBoxType

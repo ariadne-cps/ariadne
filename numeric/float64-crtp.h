@@ -45,21 +45,21 @@ class Kleenean;
 class Sierpinski;
 class Fuzzy;
 
-class ApproximateFloat64;
-class LowerFloat64;
-class UpperFloat64;
+class Float64Approximation;
+class Float64LowerBound;
+class Float64UpperBound;
 class ValidFloat64;
-class BoundedFloat64;
-class ErrorFloat64;
-class ExactFloat64;
+class Float64Bounds;
+class Float64Error;
+class Float64Value;
 
 class Rational;
 
-ExactFloat64 operator"" _x(long double);
-ErrorFloat64 operator"" _e(long double);
-LowerFloat64 operator"" _l(long double);
-UpperFloat64 operator"" _u(long double);
-ApproximateFloat64 operator"" _a(long double);
+Float64Value operator"" _x(long double);
+Float64Error operator"" _e(long double);
+Float64LowerBound operator"" _l(long double);
+Float64UpperBound operator"" _u(long double);
+Float64Approximation operator"" _a(long double);
 
 Void Float64::set_rounding_to_nearest();
 Void Float64::set_rounding_downward();
@@ -132,82 +132,82 @@ inline Bool operator>=(Float64 x1, Float64 x2) { return (x2<=x1); }
 inline Bool operator< (Float64 x1, Float64 x2) { return !(x2<=x1); }
 inline Bool operator> (Float64 x1, Float64 x2) { return !(x1<=x2); }
 
-/************ ExactFloat64 ***************************************************/
+/************ Float64Value ***************************************************/
 
-extern const ExactFloat64 inf;
+extern const Float64Value inf;
 
-class ExactFloat64
-    : public NumberObject<ExactFloat64>
+class Float64Value
+    : public NumberObject<Float64Value>
 {
-    friend class BoundedFloat64;
-    friend class ApproximateFloat64;
+    friend class Float64Bounds;
+    friend class Float64Approximation;
     volatile double v;
     static Int output_precision;
   public:
     static Void set_output_precision(Int);
   public:
     typedef ExactTag Paradigm;
-    ExactFloat64();
-    template<class N, typename std::enable_if<std::is_integral<N>::value>::type> ExactFloat64(N);
-    ExactFloat64(Nat);
-    ExactFloat64(Int);
-    explicit ExactFloat64(double);
-    explicit ExactFloat64(Float64);
-    operator BoundedFloat64 () const;
+    Float64Value();
+    template<class N, typename std::enable_if<std::is_integral<N>::value>::type> Float64Value(N);
+    Float64Value(Nat);
+    Float64Value(Int);
+    explicit Float64Value(double);
+    explicit Float64Value(Float64);
+    operator Float64Bounds () const;
     operator ValidFloat64 () const;
-    operator LowerFloat64 () const;
-    operator UpperFloat64 () const;
-    operator ApproximateFloat64 () const;
+    operator Float64LowerBound () const;
+    operator Float64UpperBound () const;
+    operator Float64Approximation () const;
     Float64 get_flt() const;
     double get_d() const;
-    friend ExactFloat64 operator+(ExactFloat64);
-    friend ExactFloat64 operator-(ExactFloat64);
-    friend BoundedFloat64 operator+(ExactFloat64 x1, ExactFloat64 x2);
-    friend BoundedFloat64 operator-(ExactFloat64 x1, ExactFloat64 x2);
-    friend BoundedFloat64 operator*(ExactFloat64 x1, ExactFloat64 x2);
-    friend BoundedFloat64 operator/(ExactFloat64 x1, ExactFloat64 x2);
-    friend OutputStream& operator<<(OutputStream& os, ExactFloat64 const&);
+    friend Float64Value operator+(Float64Value);
+    friend Float64Value operator-(Float64Value);
+    friend Float64Bounds operator+(Float64Value x1, Float64Value x2);
+    friend Float64Bounds operator-(Float64Value x1, Float64Value x2);
+    friend Float64Bounds operator*(Float64Value x1, Float64Value x2);
+    friend Float64Bounds operator/(Float64Value x1, Float64Value x2);
+    friend OutputStream& operator<<(OutputStream& os, Float64Value const&);
   private:
-    ExactFloat64(long long int n, std::nullptr_t);
+    Float64Value(long long int n, std::nullptr_t);
 };
-Boolean operator==(ExactFloat64 x1, ExactFloat64 x2);
-Boolean operator!=(ExactFloat64 x1, ExactFloat64 x2);
-Boolean operator<=(ExactFloat64 x1, ExactFloat64 x2);
-Boolean operator>=(ExactFloat64 x1, ExactFloat64 x2);
-Boolean operator< (ExactFloat64 x1, ExactFloat64 x2);
-Boolean operator> (ExactFloat64 x1, ExactFloat64 x2);
-ExactFloat64 min(ExactFloat64 x1, ExactFloat64 x2);
-ExactFloat64 max(ExactFloat64 x1, ExactFloat64 x2);
+Boolean operator==(Float64Value x1, Float64Value x2);
+Boolean operator!=(Float64Value x1, Float64Value x2);
+Boolean operator<=(Float64Value x1, Float64Value x2);
+Boolean operator>=(Float64Value x1, Float64Value x2);
+Boolean operator< (Float64Value x1, Float64Value x2);
+Boolean operator> (Float64Value x1, Float64Value x2);
+Float64Value min(Float64Value x1, Float64Value x2);
+Float64Value max(Float64Value x1, Float64Value x2);
 
-class ErrorFloat64 : public NumberObject<UpperFloat64> {
+class Float64Error : public NumberObject<Float64UpperBound> {
     volatile double e;
     static Int output_precision;
   public:
     static Void set_output_precision(Int);
   public:
-    ErrorFloat64();
-    template<class M, EnableIf<IsSame<M,Nat>> = dummy> ErrorFloat64(M m);
-    template<class X, EnableIf<IsSame<X,double>> = dummy> explicit ErrorFloat64(X x);
-    explicit ErrorFloat64(double);
-    explicit ErrorFloat64(Float64);
-    explicit operator UpperFloat64 () const;
+    Float64Error();
+    template<class M, EnableIf<IsSame<M,Nat>> = dummy> Float64Error(M m);
+    template<class X, EnableIf<IsSame<X,double>> = dummy> explicit Float64Error(X x);
+    explicit Float64Error(double);
+    explicit Float64Error(Float64);
+    explicit operator Float64UpperBound () const;
     Float64 get_flt() const;
     Float64& get_flt();
     double get_d() const;
     explicit operator double() const;
-    friend ErrorFloat64 operator+(ErrorFloat64);
-    friend ErrorFloat64 operator+(ErrorFloat64,ErrorFloat64);
-    friend ErrorFloat64 operator*(ErrorFloat64,ErrorFloat64);
-    friend ErrorFloat64 pow(ErrorFloat64,Nat);
-    friend UpperFloat64 operator/(ErrorFloat64 x1, ExactFloat64 x2);
-    friend OutputStream& operator<<(OutputStream& os, ErrorFloat64 const&);
-    friend Fuzzy operator==(ErrorFloat64, Float64);
+    friend Float64Error operator+(Float64Error);
+    friend Float64Error operator+(Float64Error,Float64Error);
+    friend Float64Error operator*(Float64Error,Float64Error);
+    friend Float64Error pow(Float64Error,Nat);
+    friend Float64UpperBound operator/(Float64Error x1, Float64Value x2);
+    friend OutputStream& operator<<(OutputStream& os, Float64Error const&);
+    friend Fuzzy operator==(Float64Error, Float64);
 };
 
-ErrorFloat64 max(ErrorFloat64 x1, ErrorFloat64 x2);
+Float64Error max(Float64Error x1, Float64Error x2);
 
-template<class M, typename std::enable_if<std::is_unsigned<M>::value,Int>::type=0> inline ErrorFloat64 operator/(ErrorFloat64 x1, M m2) {
-    return ErrorFloat64(x1.get_d()/m2); }
+template<class M, typename std::enable_if<std::is_unsigned<M>::value,Int>::type=0> inline Float64Error operator/(Float64Error x1, M m2) {
+    return Float64Error(x1.get_d()/m2); }
 
 class ValidFloat64 : public NumberObject<ValidFloat64> {
     volatile double v; volatile double e;
@@ -220,12 +220,12 @@ class ValidFloat64 : public NumberObject<ValidFloat64> {
         ValidFloat64(N n);
     explicit ValidFloat64(double);
     explicit ValidFloat64(double,double);
-    ValidFloat64(ExactFloat64, ErrorFloat64);
-    operator ApproximateFloat64 () const;
-    ExactFloat64 value() const;
-    ErrorFloat64 error() const;
-    UpperFloat64 upper() const;
-    LowerFloat64 lower() const;
+    ValidFloat64(Float64Value, Float64Error);
+    operator Float64Approximation () const;
+    Float64Value value() const;
+    Float64Error error() const;
+    Float64UpperBound upper() const;
+    Float64LowerBound lower() const;
     friend ValidFloat64 operator+(ValidFloat64);
     friend ValidFloat64 operator-(ValidFloat64);
     friend ValidFloat64 operator+(ValidFloat64,ValidFloat64);
@@ -247,140 +247,140 @@ template<class N, typename std::enable_if<std::is_integral<N>::value,Int>::type>
 ValidFloat64::ValidFloat64(N n) : ValidFloat64(double(n),ExactTag())
 { }
 
-class BoundedFloat64 : public NumberObject<BoundedFloat64> {
-    friend class ApproximateFloat64; friend class ValidFloat64;
+class Float64Bounds : public NumberObject<Float64Bounds> {
+    friend class Float64Approximation; friend class ValidFloat64;
     volatile double l; volatile double u;
     static Int output_precision;
   public:
     static Void set_output_precision(Int);
   public:
     typedef ValidatedTag Paradigm;
-    BoundedFloat64();
-    BoundedFloat64(Int);
-    BoundedFloat64(const Rational&);
-    explicit BoundedFloat64(double);
-    explicit BoundedFloat64(double,double);
-    BoundedFloat64(LowerFloat64, UpperFloat64);
-    operator ApproximateFloat64 () const;
-    operator UpperFloat64 () const;
-    operator LowerFloat64 () const;
+    Float64Bounds();
+    Float64Bounds(Int);
+    Float64Bounds(const Rational&);
+    explicit Float64Bounds(double);
+    explicit Float64Bounds(double,double);
+    Float64Bounds(Float64LowerBound, Float64UpperBound);
+    operator Float64Approximation () const;
+    operator Float64UpperBound () const;
+    operator Float64LowerBound () const;
     operator ValidFloat64 () const;
-    friend BoundedFloat64 operator+(BoundedFloat64);
-    friend BoundedFloat64 operator-(BoundedFloat64);
-    friend BoundedFloat64 operator+(BoundedFloat64,BoundedFloat64);
-    friend BoundedFloat64 operator-(BoundedFloat64,BoundedFloat64);
-    friend BoundedFloat64 operator*(BoundedFloat64,BoundedFloat64);
-    friend BoundedFloat64 operator/(BoundedFloat64,BoundedFloat64);
-    friend BoundedFloat64 sqr(BoundedFloat64);
-    friend BoundedFloat64 max(BoundedFloat64,BoundedFloat64);
-    friend BoundedFloat64 min(BoundedFloat64,BoundedFloat64);
-    friend Bool operator==(BoundedFloat64,Int);
-    friend Kleenean operator> (BoundedFloat64,BoundedFloat64);
-    friend OutputStream& operator<<(OutputStream& os, BoundedFloat64 const&);
+    friend Float64Bounds operator+(Float64Bounds);
+    friend Float64Bounds operator-(Float64Bounds);
+    friend Float64Bounds operator+(Float64Bounds,Float64Bounds);
+    friend Float64Bounds operator-(Float64Bounds,Float64Bounds);
+    friend Float64Bounds operator*(Float64Bounds,Float64Bounds);
+    friend Float64Bounds operator/(Float64Bounds,Float64Bounds);
+    friend Float64Bounds sqr(Float64Bounds);
+    friend Float64Bounds max(Float64Bounds,Float64Bounds);
+    friend Float64Bounds min(Float64Bounds,Float64Bounds);
+    friend Bool operator==(Float64Bounds,Int);
+    friend Kleenean operator> (Float64Bounds,Float64Bounds);
+    friend OutputStream& operator<<(OutputStream& os, Float64Bounds const&);
 
-    LowerFloat64 lower() const;
-    UpperFloat64 upper() const;
-    ErrorFloat64 error() const;
-    ErrorFloat64 width() const;
-    ErrorFloat64 radius() const;
+    Float64LowerBound lower() const;
+    Float64UpperBound upper() const;
+    Float64Error error() const;
+    Float64Error width() const;
+    Float64Error radius() const;
 
 };
-BoundedFloat64 min(BoundedFloat64 x1, BoundedFloat64 x2);
-BoundedFloat64 max(BoundedFloat64 x1, BoundedFloat64 x2);
-ErrorFloat64 mag(BoundedFloat64 x);
-BoundedFloat64 sqr(BoundedFloat64);
+Float64Bounds min(Float64Bounds x1, Float64Bounds x2);
+Float64Bounds max(Float64Bounds x1, Float64Bounds x2);
+Float64Error mag(Float64Bounds x);
+Float64Bounds sqr(Float64Bounds);
 
-Bool same(BoundedFloat64 x1, BoundedFloat64 x2);
+Bool same(Float64Bounds x1, Float64Bounds x2);
 
-Kleenean operator==(BoundedFloat64 x1, BoundedFloat64 x2);
-Kleenean operator!=(BoundedFloat64 x1, BoundedFloat64 x2);
-Kleenean operator<=(BoundedFloat64 x1, BoundedFloat64 x2);
-Kleenean operator>=(BoundedFloat64 x1, BoundedFloat64 x2);
-Kleenean operator< (BoundedFloat64 x1, BoundedFloat64 x2);
-Kleenean operator> (BoundedFloat64 x1, BoundedFloat64 x2);
+Kleenean operator==(Float64Bounds x1, Float64Bounds x2);
+Kleenean operator!=(Float64Bounds x1, Float64Bounds x2);
+Kleenean operator<=(Float64Bounds x1, Float64Bounds x2);
+Kleenean operator>=(Float64Bounds x1, Float64Bounds x2);
+Kleenean operator< (Float64Bounds x1, Float64Bounds x2);
+Kleenean operator> (Float64Bounds x1, Float64Bounds x2);
 
-class LowerFloat64 : public NumberObject<LowerFloat64> {
+class Float64LowerBound : public NumberObject<Float64LowerBound> {
     volatile double l;
   public:
-    LowerFloat64();
-    LowerFloat64(Int);
-    explicit LowerFloat64(double);
-    operator ApproximateFloat64 () const;
+    Float64LowerBound();
+    Float64LowerBound(Int);
+    explicit Float64LowerBound(double);
+    operator Float64Approximation () const;
     Float64 get_flt() const;
-    friend LowerFloat64 operator+(LowerFloat64);
-    friend UpperFloat64 operator-(LowerFloat64);
-    friend LowerFloat64 operator-(UpperFloat64);
-    friend LowerFloat64 operator+(LowerFloat64,LowerFloat64);
-    friend LowerFloat64 operator-(LowerFloat64,UpperFloat64);
-    friend UpperFloat64 operator-(UpperFloat64,LowerFloat64);
-    friend UpperFloat64 min(UpperFloat64,UpperFloat64);
-    friend UpperFloat64 max(UpperFloat64,UpperFloat64);
-    friend OutputStream& operator<<(OutputStream& os, LowerFloat64 const&);
+    friend Float64LowerBound operator+(Float64LowerBound);
+    friend Float64UpperBound operator-(Float64LowerBound);
+    friend Float64LowerBound operator-(Float64UpperBound);
+    friend Float64LowerBound operator+(Float64LowerBound,Float64LowerBound);
+    friend Float64LowerBound operator-(Float64LowerBound,Float64UpperBound);
+    friend Float64UpperBound operator-(Float64UpperBound,Float64LowerBound);
+    friend Float64UpperBound min(Float64UpperBound,Float64UpperBound);
+    friend Float64UpperBound max(Float64UpperBound,Float64UpperBound);
+    friend OutputStream& operator<<(OutputStream& os, Float64LowerBound const&);
 };
-LowerFloat64 min(LowerFloat64,LowerFloat64);
-LowerFloat64 max(LowerFloat64,LowerFloat64);
+Float64LowerBound min(Float64LowerBound,Float64LowerBound);
+Float64LowerBound max(Float64LowerBound,Float64LowerBound);
 
-UpperFloat64 rec(LowerFloat64);
+Float64UpperBound rec(Float64LowerBound);
 
-class UpperFloat64 : public NumberObject<UpperFloat64> {
+class Float64UpperBound : public NumberObject<Float64UpperBound> {
     volatile double u;
   public:
-    UpperFloat64();
-    UpperFloat64(Int);
-    explicit UpperFloat64(double);
-    operator ApproximateFloat64 () const;
+    Float64UpperBound();
+    Float64UpperBound(Int);
+    explicit Float64UpperBound(double);
+    operator Float64Approximation () const;
     Float64 get_flt() const;
-    friend UpperFloat64 operator+(UpperFloat64);
-    friend UpperFloat64 operator-(LowerFloat64);
-    friend LowerFloat64 operator-(UpperFloat64);
-    friend UpperFloat64 operator+(UpperFloat64,UpperFloat64);
-    friend UpperFloat64 operator-(UpperFloat64,LowerFloat64);
-    friend LowerFloat64 operator-(LowerFloat64,UpperFloat64);
-    friend UpperFloat64 operator*(UpperFloat64,UpperFloat64);
-    friend LowerFloat64 min(LowerFloat64,LowerFloat64);
-    friend LowerFloat64 max(LowerFloat64,LowerFloat64);
-    friend OutputStream& operator<<(OutputStream& os, UpperFloat64 const&);
+    friend Float64UpperBound operator+(Float64UpperBound);
+    friend Float64UpperBound operator-(Float64LowerBound);
+    friend Float64LowerBound operator-(Float64UpperBound);
+    friend Float64UpperBound operator+(Float64UpperBound,Float64UpperBound);
+    friend Float64UpperBound operator-(Float64UpperBound,Float64LowerBound);
+    friend Float64LowerBound operator-(Float64LowerBound,Float64UpperBound);
+    friend Float64UpperBound operator*(Float64UpperBound,Float64UpperBound);
+    friend Float64LowerBound min(Float64LowerBound,Float64LowerBound);
+    friend Float64LowerBound max(Float64LowerBound,Float64LowerBound);
+    friend OutputStream& operator<<(OutputStream& os, Float64UpperBound const&);
 };
-UpperFloat64 min(UpperFloat64,UpperFloat64);
-UpperFloat64 max(UpperFloat64,UpperFloat64);
-LowerFloat64 rec(UpperFloat64);
+Float64UpperBound min(Float64UpperBound,Float64UpperBound);
+Float64UpperBound max(Float64UpperBound,Float64UpperBound);
+Float64LowerBound rec(Float64UpperBound);
 
-UpperFloat64 operator+(UpperFloat64,ErrorFloat64);
-LowerFloat64 operator-(LowerFloat64,ErrorFloat64);
+Float64UpperBound operator+(Float64UpperBound,Float64Error);
+Float64LowerBound operator-(Float64LowerBound,Float64Error);
 
-class ApproximateFloat64 : public NumberObject<ApproximateFloat64> {
+class Float64Approximation : public NumberObject<Float64Approximation> {
     volatile double a;
   public:
     typedef ApproximateTag Paradigm;
-    ApproximateFloat64();
-    ApproximateFloat64(double);
-    ApproximateFloat64(const Rational&);
+    Float64Approximation();
+    Float64Approximation(double);
+    Float64Approximation(const Rational&);
     Float64 get_flt() const;
     double get_d() const;
-    friend ApproximateFloat64 operator+(ApproximateFloat64);
-    friend ApproximateFloat64 operator-(ApproximateFloat64);
-    friend ApproximateFloat64 operator+(ApproximateFloat64,ApproximateFloat64);
-    friend ApproximateFloat64 operator-(ApproximateFloat64,ApproximateFloat64);
-    friend ApproximateFloat64 operator*(ApproximateFloat64,ApproximateFloat64);
-    friend ApproximateFloat64 operator/(ApproximateFloat64,ApproximateFloat64);
-    friend ApproximateFloat64& operator+=(ApproximateFloat64&,ApproximateFloat64);
-    friend ApproximateFloat64 neg(ApproximateFloat64);
-    friend ApproximateFloat64 sqr(ApproximateFloat64);
-    friend ApproximateFloat64 min(ApproximateFloat64,ApproximateFloat64);
-    friend ApproximateFloat64 max(ApproximateFloat64,ApproximateFloat64);
-    friend Fuzzy operator==(ApproximateFloat64,ApproximateFloat64);
-    friend OutputStream& operator<<(OutputStream& os, ApproximateFloat64 const&);
+    friend Float64Approximation operator+(Float64Approximation);
+    friend Float64Approximation operator-(Float64Approximation);
+    friend Float64Approximation operator+(Float64Approximation,Float64Approximation);
+    friend Float64Approximation operator-(Float64Approximation,Float64Approximation);
+    friend Float64Approximation operator*(Float64Approximation,Float64Approximation);
+    friend Float64Approximation operator/(Float64Approximation,Float64Approximation);
+    friend Float64Approximation& operator+=(Float64Approximation&,Float64Approximation);
+    friend Float64Approximation neg(Float64Approximation);
+    friend Float64Approximation sqr(Float64Approximation);
+    friend Float64Approximation min(Float64Approximation,Float64Approximation);
+    friend Float64Approximation max(Float64Approximation,Float64Approximation);
+    friend Fuzzy operator==(Float64Approximation,Float64Approximation);
+    friend OutputStream& operator<<(OutputStream& os, Float64Approximation const&);
 };
 
-Fuzzy operator==(ApproximateFloat64,ApproximateFloat64);
-Fuzzy operator!=(ApproximateFloat64,ApproximateFloat64);
-Fuzzy operator<=(ApproximateFloat64,ApproximateFloat64);
-Fuzzy operator>=(ApproximateFloat64,ApproximateFloat64);
-Fuzzy operator< (ApproximateFloat64,ApproximateFloat64);
-Fuzzy operator> (ApproximateFloat64,ApproximateFloat64);
-ApproximateFloat64 neg(ApproximateFloat64);
-ApproximateFloat64 abs(ApproximateFloat64);
-ApproximateFloat64 sqr(ApproximateFloat64);
+Fuzzy operator==(Float64Approximation,Float64Approximation);
+Fuzzy operator!=(Float64Approximation,Float64Approximation);
+Fuzzy operator<=(Float64Approximation,Float64Approximation);
+Fuzzy operator>=(Float64Approximation,Float64Approximation);
+Fuzzy operator< (Float64Approximation,Float64Approximation);
+Fuzzy operator> (Float64Approximation,Float64Approximation);
+Float64Approximation neg(Float64Approximation);
+Float64Approximation abs(Float64Approximation);
+Float64Approximation sqr(Float64Approximation);
 
 
 class TwoExp {
@@ -388,18 +388,18 @@ class TwoExp {
   public:
     TwoExp(Int n) : _n(n) { }
     double get_d() const { if(_n>=0) { return 1<<_n; } else { return 1.0/(1<<(-_n)); } }
-    operator ExactFloat64 () const { return ExactFloat64(this->get_d()); }
-    operator ErrorFloat64 () const { return ErrorFloat64(this->get_d()); }
+    operator Float64Value () const { return Float64Value(this->get_d()); }
+    operator Float64Error () const { return Float64Error(this->get_d()); }
     operator ValidFloat64 () const { return ValidFloat64(this->get_d()); }
-    operator BoundedFloat64 () const { return BoundedFloat64(this->get_d()); }
+    operator Float64Bounds () const { return Float64Bounds(this->get_d()); }
 };
 inline TwoExp two_exp(Int n) { return TwoExp(n); }
 
 
-ExactFloat64 cast_exact(const Float64&);
-ErrorFloat64 make_error(const Float64&);
+Float64Value cast_exact(const Float64&);
+Float64Error make_error(const Float64&);
 ValidFloat64 make_valid(const Float64&);
-Float64 cast_raw(const ApproximateFloat64&);
+Float64 cast_raw(const Float64Approximation&);
 
 } // namespace Ariadne
 

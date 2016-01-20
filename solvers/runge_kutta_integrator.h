@@ -44,11 +44,11 @@ class RungeKutta4Integrator
   public:
     RungeKutta4Integrator(double step_size);
 
-    ApproximateFloatVector
-    step(const ApproximateVectorFunction& f, const ApproximateFloatVector& x, const ApproximateFloat64& h) const;
+    FloatApproximationVector
+    step(const ApproximateVectorFunction& f, const FloatApproximationVector& x, const Float64Approximation& h) const;
 
-    List< Pair<ApproximateFloat64,ApproximateFloatVector> >
-    evolve(const ApproximateVectorFunction& f, const ApproximateFloatVector& x0, const ApproximateFloat64& tmax) const;
+    List< Pair<Float64Approximation,FloatApproximationVector> >
+    evolve(const ApproximateVectorFunction& f, const FloatApproximationVector& x0, const Float64Approximation& tmax) const;
   private:
     double _step_size;
 };

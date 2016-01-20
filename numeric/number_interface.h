@@ -77,17 +77,17 @@ class NumberInterface
     virtual NumberInterface* _min(NumberInterface const& y) const = 0;
     virtual NumberInterface* _apply(UnaryOperatorInterface const& o) const = 0;
 
-    virtual MetricFloat64 _get(MetricTag, Precision64) const = 0;
-    virtual BoundedFloat64 _get(BoundedTag, Precision64) const = 0;
-    virtual UpperFloat64 _get(UpperTag, Precision64) const = 0;
-    virtual LowerFloat64 _get(LowerTag, Precision64) const = 0;
-    virtual ApproximateFloat64 _get(ApproximateTag, Precision64) const = 0;
+    virtual Float64Ball _get(MetricTag, Precision64) const = 0;
+    virtual Float64Bounds _get(BoundedTag, Precision64) const = 0;
+    virtual Float64UpperBound _get(UpperTag, Precision64) const = 0;
+    virtual Float64LowerBound _get(LowerTag, Precision64) const = 0;
+    virtual Float64Approximation _get(ApproximateTag, Precision64) const = 0;
 
-    virtual MetricFloatMP _get(MetricTag, PrecisionMP) const = 0;
-    virtual BoundedFloatMP _get(BoundedTag, PrecisionMP) const = 0;
-    virtual UpperFloatMP _get(UpperTag, PrecisionMP) const = 0;
-    virtual LowerFloatMP _get(LowerTag, PrecisionMP) const = 0;
-    virtual ApproximateFloatMP _get(ApproximateTag, PrecisionMP) const = 0;
+    virtual FloatMPBall _get(MetricTag, PrecisionMP) const = 0;
+    virtual FloatMPBounds _get(BoundedTag, PrecisionMP) const = 0;
+    virtual FloatMPUpperBound _get(UpperTag, PrecisionMP) const = 0;
+    virtual FloatMPLowerBound _get(LowerTag, PrecisionMP) const = 0;
+    virtual FloatMPApproximation _get(ApproximateTag, PrecisionMP) const = 0;
 
     virtual ParadigmCode _paradigm() const = 0;
     virtual String _class_name() const = 0;

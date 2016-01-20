@@ -72,7 +72,7 @@ TestIntervalType::test_concept()
     Int n=1;
     Nat m=1;
     double d=1;
-    ExactFloat64 x=1;
+    Float64Value x=1;
     Float64 a,b;
     ExactIntervalType xivl;
     UpperIntervalType uivl;

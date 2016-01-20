@@ -45,8 +45,8 @@
 
 namespace Ariadne {
 
-template<> inline ExactFloat64 numeric_cast<ExactFloat64>(Real const& r) {
-    return cast_exact(ApproximateFloat64(r));
+template<> inline Float64Value numeric_cast<Float64Value>(Real const& r) {
+    return cast_exact(Float64Approximation(r));
 }
 
 Orbit<HybridPoint>::Orbit(const HybridPoint& hpt)
@@ -70,7 +70,7 @@ Orbit<HybridPoint>::insert(HybridTime ht, const HybridPoint& hpt)
 {
     ARIADNE_ASSERT(ht.discrete_time()<=this->size());
     Real time=ht.continuous_time();
-    ExactFloat64 flt_time=cast_exact(time);
+    Float64Value flt_time=cast_exact(time);
     ARIADNE_ASSERT(Real(flt_time)==time);
     if(this->size()==ht.discrete_time()) {
         this->_curves_ptr->push_back(HybridInterpolatedCurve(hpt.location(),hpt.space(),InterpolatedCurve(flt_time,hpt.point())));
@@ -194,15 +194,15 @@ HybridPoint::HybridPoint(const DiscreteLocation& q, const Map<Identifier,Real>& 
 {
     Nat i=0;
     for(Map<Identifier,Real>::ConstIterator iter=x.begin(); iter!=x.end(); ++iter, ++i) {
-        this->point()[i]=numeric_cast<ExactFloat64>(iter->second);
+        this->point()[i]=numeric_cast<Float64Value>(iter->second);
     }
 }
 
-HybridPoint::HybridPoint(const DiscreteLocation& q, const Map<Identifier,ExactFloat64>& x)
+HybridPoint::HybridPoint(const DiscreteLocation& q, const Map<Identifier,Float64Value>& x)
     : HybridBasicSet<ExactPoint>(q,make_list(x.keys()),ExactPoint(x.size()))
 {
     Nat i=0;
-    for(Map<Identifier,ExactFloat64>::ConstIterator iter=x.begin(); iter!=x.end(); ++iter, ++i) {
+    for(Map<Identifier,Float64Value>::ConstIterator iter=x.begin(); iter!=x.end(); ++iter, ++i) {
         this->point()[i]=iter->second;
     }
 }
@@ -212,7 +212,7 @@ HybridPoint::HybridPoint(const DiscreteLocation& q, const List<RealConstantAssig
 {
     Nat i=0;
     for(List<RealConstantAssignment>::ConstIterator iter=x.begin(); iter!=x.end(); ++iter, ++i) {
-        this->point()[i]=numeric_cast<ExactFloat64>(iter->right_hand_side());
+        this->point()[i]=numeric_cast<Float64Value>(iter->right_hand_side());
     }
 }
 
@@ -221,8 +221,8 @@ HybridPoint::HybridPoint(const DiscreteLocation& q, const InitializerList<RealCo
 {
 }
 
-Map<RealVariable,ExactFloat64> HybridPoint::values() const {
-    Map<RealVariable,ExactFloat64> r;
+Map<RealVariable,Float64Value> HybridPoint::values() const {
+    Map<RealVariable,Float64Value> r;
     for(Nat i=0; i!=this->space().dimension(); ++i) {
         r.insert(this->space()[i],this->point()[i]);
     }

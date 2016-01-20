@@ -45,34 +45,34 @@ class AnalyticFunction;
 // and is valid within the entire radius of convergence
 template<class X> class TaylorSeries;
 
-template<> class TaylorSeries<BoundedFloat64> {
+template<> class TaylorSeries<Float64Bounds> {
     ExactIntervalType _domain;
-    Array<ExactFloat64> _expansion;
-    ErrorFloat64 _error;
+    Array<Float64Value> _expansion;
+    Float64Error _error;
   public:
     TaylorSeries(const ExactIntervalType& dom, DegreeType deg) : _domain(dom), _expansion(deg+1), _error(0u) { }
 
-    TaylorSeries(const ExactIntervalType& domain, const ExactFloat64& centre, DegreeType degree,
+    TaylorSeries(const ExactIntervalType& domain, const Float64Value& centre, DegreeType degree,
                  AnalyticFunction const& function);
 
-    template<class OP> TaylorSeries(OP unary_operator, const ExactIntervalType& domain, const ExactFloat64& centre, DegreeType degree);
+    template<class OP> TaylorSeries(OP unary_operator, const ExactIntervalType& domain, const Float64Value& centre, DegreeType degree);
 
     DegreeType degree() const { return _expansion.size()-1; }
-    ExactFloat64 const& operator[](DegreeType i) const { return _expansion[i]; }
-    Array<ExactFloat64> expansion() const { return _expansion; }
-    ErrorFloat64 error() const { return _error; }
-    Void sweep(ExactFloat64 threshold);
+    Float64Value const& operator[](DegreeType i) const { return _expansion[i]; }
+    Array<Float64Value> expansion() const { return _expansion; }
+    Float64Error error() const { return _error; }
+    Void sweep(Float64Value threshold);
 
-    friend OutputStream& operator<<(OutputStream&, TaylorSeries<BoundedFloat64> const&);
+    friend OutputStream& operator<<(OutputStream&, TaylorSeries<Float64Bounds> const&);
 };
 
 
 template<class OP> inline
-TaylorSeries<BoundedFloat64>::TaylorSeries(OP unary_operator, const ExactIntervalType& domain, const ExactFloat64& centre, DegreeType degree)
+TaylorSeries<Float64Bounds>::TaylorSeries(OP unary_operator, const ExactIntervalType& domain, const Float64Value& centre, DegreeType degree)
     : _domain(domain), _expansion(degree+1), _error(0u)
 {
-    Series<ValidatedNumericType> centre_series=Series<BoundedFloat64>(unary_operator,ValidatedNumericType(centre));
-    Series<ValidatedNumericType> range_series=Series<BoundedFloat64>(unary_operator,ValidatedNumericType(cast_singleton(domain)));
+    Series<ValidatedNumericType> centre_series=Series<Float64Bounds>(unary_operator,ValidatedNumericType(centre));
+    Series<ValidatedNumericType> range_series=Series<Float64Bounds>(unary_operator,ValidatedNumericType(cast_singleton(domain)));
     for(DegreeType i=0; i!=degree; ++i) {
         this->_expansion[i]=centre_series[i].value();
         this->_error+=mag(centre_series[i]-this->_expansion[i]);
@@ -84,7 +84,7 @@ TaylorSeries<BoundedFloat64>::TaylorSeries(OP unary_operator, const ExactInterva
 
 
 inline
-Void TaylorSeries<BoundedFloat64>::sweep(ExactFloat64 threshold) {
+Void TaylorSeries<Float64Bounds>::sweep(Float64Value threshold) {
     for(DegreeType i=0; i<=degree(); ++i) {
         if(definitely(mag(_expansion[i])<=threshold)) {
             _error+=mag(_expansion[i]);
@@ -94,7 +94,7 @@ Void TaylorSeries<BoundedFloat64>::sweep(ExactFloat64 threshold) {
 }
 
 inline
-OutputStream& operator<<(OutputStream& os, const TaylorSeries<BoundedFloat64>& ts) {
+OutputStream& operator<<(OutputStream& os, const TaylorSeries<Float64Bounds>& ts) {
     return os<<"TS("<<ts._expansion<<"+/-"<<ts._error<<")";
 }
 

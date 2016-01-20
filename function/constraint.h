@@ -107,7 +107,7 @@ inline EffectiveConstraint operator==(const EffectiveScalarFunction& f, double c
 }
 
 inline EffectiveConstraint operator<=(const EffectiveConstraint& nc, const EffectiveNumericType& c) {
-    ARIADNE_ASSERT(static_cast<ApproximateFloat64>(nc.upper_bound()).get_d()==inf);
+    ARIADNE_ASSERT(static_cast<Float64Approximation>(nc.upper_bound()).get_d()==inf);
     return EffectiveConstraint(nc.lower_bound(),nc.function(),c);
 }
 

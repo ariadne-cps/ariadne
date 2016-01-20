@@ -33,12 +33,12 @@ template<class U> class Interval;
 typedef Interval<Rational> RationalInterval;
 typedef Interval<Real> RealInterval;
 
-typedef Interval<ExactFloat64> ExactFloat64Interval;
-typedef Interval<MetricFloat64> MetricFloat64Interval;
-typedef Interval<BoundedFloat64> BoundedFloat64Interval;
-typedef Interval<UpperFloat64> UpperFloat64Interval;
-typedef Interval<LowerFloat64> LowerFloat64Interval;
-typedef Interval<ApproximateFloat64> ApproximateFloat64Interval;
+typedef Interval<Float64Value> Float64ExactInterval;
+typedef Interval<Float64Ball> Float64BallInterval;
+typedef Interval<Float64Bounds> Float64BoundsInterval;
+typedef Interval<Float64UpperBound> Float64UpperInterval;
+typedef Interval<Float64LowerBound> Float64LowerInterval;
+typedef Interval<Float64Approximation> Float64ApproximationInterval;
 
 typedef Interval<ExactNumericType> ExactIntervalType;
 typedef Interval<EffectiveNumericType> EffectiveIntervalType;

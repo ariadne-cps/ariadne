@@ -32,8 +32,8 @@ namespace Ariadne {
 struct Factorial {
     Nat _n;
     Factorial(Nat n) : _n(n) { }
-    operator BoundedFloat64() { BoundedFloat64 r=1; for(Nat i=1; i<=_n; ++i) { r*=i; } return r; }
-    friend BoundedFloat64 rec(Factorial x) { return rec(BoundedFloat64(x)); }
+    operator Float64Bounds() { Float64Bounds r=1; for(Nat i=1; i<=_n; ++i) { r*=i; } return r; }
+    friend Float64Bounds rec(Factorial x) { return rec(Float64Bounds(x)); }
 };
 
 template<class A> EnableIfGradedAlgebra<A>
@@ -55,12 +55,12 @@ compose(const Series<typename A::NumericType>& x, const A& y)
 template<class X> class TaylorSeries;
 
 template<class A> EnableIfNormedAlgebra<A>
-_compose(const TaylorSeries<BoundedFloat64>& ts, const A& tv, double eps)
+_compose(const TaylorSeries<Float64Bounds>& ts, const A& tv, double eps)
 {
     //std::cerr<<"_compose(TaylorSeries,A,ErrorTag)\n";
     //std::cerr<<"\n  ts="<<ts<<"\n  tv="<<tv<<"\n";
-    ExactFloat64& vref=const_cast<ExactFloat64&>(tv.value());
-    ExactFloat64 vtmp=vref;
+    Float64Value& vref=const_cast<Float64Value&>(tv.value());
+    Float64Value vtmp=vref;
     vref=0;
     A r(tv.argument_size());
     r+=ts[ts.degree()];
@@ -78,7 +78,7 @@ _compose(const TaylorSeries<BoundedFloat64>& ts, const A& tv, double eps)
 }
 
 template<class A> EnableIfNormedAlgebra<A>
-compose(const TaylorSeries<BoundedFloat64>& ts, const A& tm)
+compose(const TaylorSeries<Float64Bounds>& ts, const A& tm)
 {
     return _compose(ts,tm,tm.tolerance());
 }
@@ -93,10 +93,10 @@ _compose1(const AnalyticFunction& fn, const A& tm, double eps)
     static const Nat DEGREE=18;
     static const double TRUNCATION_ERROR=1e-8;
     Nat d=DEGREE;
-    ExactFloat64 c=tm.value();
-    BoundedFloat64 r=tm.range();
-    Series<BoundedFloat64> centre_series=fn.series(BoundedFloat64(c));
-    Series<BoundedFloat64> range_series=fn.series(r);
+    Float64Value c=tm.value();
+    Float64Bounds r=tm.range();
+    Series<Float64Bounds> centre_series=fn.series(Float64Bounds(c));
+    Series<Float64Bounds> range_series=fn.series(r);
 
     Float64 truncation_error_estimate=mag(range_series[d])*pow(mag(r-c),d);
     if(truncation_error_estimate>TRUNCATION_ERROR) {
@@ -126,15 +126,15 @@ _compose2(const AnalyticFunction& fn, const A& tm, double eps)
     static const Nat DEGREE=20;
     static const Float64 TRUNCATION_ERROR=1e-8;
     Nat d=DEGREE;
-    ExactFloat64 c=tm.value();
-    BoundedFloat64 r=tm.range();
-    Series<BoundedFloat64> centre_series=fn.series(BoundedFloat64(c));
-    Series<BoundedFloat64> range_series=fn.series(r);
+    Float64Value c=tm.value();
+    Float64Bounds r=tm.range();
+    Series<Float64Bounds> centre_series=fn.series(Float64Bounds(c));
+    Series<Float64Bounds> range_series=fn.series(r);
 
     //std::cerr<<"c="<<c<<" r="<<r<<" r-c="<<r-c<<" e="<<mag(r-c)<<"\n";
     //std::cerr<<"cs[d]="<<centre_series[d]<<" rs[d]="<<range_series[d]<<"\n";
     //std::cerr<<"cs="<<centre_series<<"\nrs="<<range_series<<"\n";
-    ErrorFloat64 truncation_error=mag(range_series[d]-centre_series[d])*pow(mag(r-c),d);
+    Float64Error truncation_error=mag(range_series[d]-centre_series[d])*pow(mag(r-c),d);
     //std::cerr<<"te="<<truncation_error<<"\n";
     if(truncation_error.raw()>TRUNCATION_ERROR) {
         ARIADNE_WARN("Truncation error estimate "<<truncation_error
@@ -148,7 +148,7 @@ _compose2(const AnalyticFunction& fn, const A& tm, double eps)
         res=centre_series[d-i-1]+x*res;
         res.sweep(eps);
     }
-    res+=BoundedFloat64(-truncation_error,+truncation_error);
+    res+=Float64Bounds(-truncation_error,+truncation_error);
     return res;
 }
 
@@ -163,18 +163,18 @@ _compose3(const AnalyticFunction& fn, const A& tm, Float64 eps)
     static const Nat DEGREE=20;
     static const Float64 TRUNCATION_ERROR=1e-8;
     Nat d=DEGREE;
-    ExactFloat64 c=tm.value();
-    BoundedFloat64 r=tm.range();
-    Series<BoundedFloat64> centre_series=fn.series(BoundedFloat64(c));
-    Series<BoundedFloat64> range_series=fn.series(r);
+    Float64Value c=tm.value();
+    Float64Bounds r=tm.range();
+    Series<Float64Bounds> centre_series=fn.series(Float64Bounds(c));
+    Series<Float64Bounds> range_series=fn.series(r);
 
     //std::cerr<<"c="<<c<<" r="<<r<<" r-c="<<r-c<<" e="<<mag(r-c)<<"\n";
     //std::cerr<<"cs[d]="<<centre_series[d]<<" rs[d]="<<range_series[d]<<"\n";
     //std::cerr<<"cs="<<centre_series<<"\nrs="<<range_series<<"\n";
-    BoundedFloat64 se=range_series[d]-centre_series[d];
-    BoundedFloat64 e=r-c;
-    BoundedFloat64 p=pow(e,d-1);
-    p=BoundedFloat64(-(-p.lower()*(-e.lower())),p.upper()*e.upper());
+    Float64Bounds se=range_series[d]-centre_series[d];
+    Float64Bounds e=r-c;
+    Float64Bounds p=pow(e,d-1);
+    p=Float64Bounds(-(-p.lower()*(-e.lower())),p.upper()*e.upper());
     //std::cerr<<"se="<<se<<" e="<<e<<" p="<<p<<std::endl;
     // FIXME: Here we assume the dth derivative of f is monotone increasing
     Float64 truncation_error=max(-(-se.lower()*(-p.lower())),se.upper()*p.upper()).raw();
@@ -191,7 +191,7 @@ _compose3(const AnalyticFunction& fn, const A& tm, Float64 eps)
         res=centre_series[d-i-1]+x*res;
         //res.sweep(eps);
     }
-    res+=BoundedFloat64(-truncation_error,+truncation_error);
+    res+=Float64Bounds(-truncation_error,+truncation_error);
     return res;
 }
 
@@ -232,7 +232,7 @@ sqrt(const A& x)
         ARIADNE_THROW(DomainException,"log(A x)","x="<<x<<"\n");
     }
 
-    ErrorFloat64 eps=mag(rad/avg);
+    Float64Error eps=mag(rad/avg);
     ARIADNE_DEBUG_ASSERT(eps<1);
 
     Series<X> sqrt_series=Series<X>::sqrt(X(1));
@@ -327,8 +327,8 @@ template<class A> EnableIfNormedAlgebra<A> exp(const A& x)
 
     // Scale to unit interval
     Nat sfp=0; // A number such that 2^sfp>rad(x.range())
-    while(decide(ExactFloat64(two_exp(sfp))<rad)) { ++sfp; }
-    ExactFloat64 sf=two_exp(sfp);
+    while(decide(Float64Value(two_exp(sfp))<rad)) { ++sfp; }
+    Float64Value sf=two_exp(sfp);
     A y = (x-avg)/sf;
     auto yrad=rad*mag(sf);
 
@@ -454,7 +454,7 @@ asin(const A& x)
     typedef typename A::NumericType X;
     Float64 xavg = x.average();
     Float64 xrad = x.radius();
-    BoundedFloat64 xrng = xavg + BoundedFloat64(-xrad,+xrad);
+    Float64Bounds xrng = xavg + Float64Bounds(-xrad,+xrad);
     return compose(TaylorSeries(DEG,&Series<X>::asin,xavg,xrng),x);
 */
 }
@@ -468,7 +468,7 @@ acos(const A& x)
     typedef typename A::NumericType X;
     Float64 xavg = x.average();
     Float64 xrad = x.radius();
-    BoundedFloat64 xrng = xavg + BoundedFloat64(-xrad,+xrad);
+    Float64Bounds xrng = xavg + Float64Bounds(-xrad,+xrad);
     return compose(TaylorSeries(DEG,&Series<X>::acos,xavg,xrng),x);
 */
 }
@@ -482,7 +482,7 @@ atan(const A& x)
     typedef typename A::NumericType X;
     Float64 xavg = x.average();
     Float64 xrad = x.radius();
-    BoundedFloat64 xrng = xavg + BoundedFloat64(-xrad,+xrad);
+    Float64Bounds xrng = xavg + Float64Bounds(-xrad,+xrad);
     return compose(TaylorSeries(DEG,&Series<X>::atan,xavg,xrng),x);
 */
 }

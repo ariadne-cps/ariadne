@@ -680,10 +680,10 @@ template<class X> inline Vector<ExactType<X>> cast_exact(const Vector<X>& v) {
 template<class P, class PR> class Float;
 class Precision64;
 class ExactTag; class ApproximateTag;
-typedef Float<ExactTag,Precision64> ExactFloat64;
-typedef Float<ApproximateTag,Precision64> ApproximateFloat64;
-inline Vector<ExactFloat64>const& cast_exact(Vector<ApproximateFloat64>const& v) {
-    return reinterpret_cast<Vector<ExactFloat64>const&>(v);
+typedef Float<ExactTag,Precision64> Float64Value;
+typedef Float<ApproximateTag,Precision64> Float64Approximation;
+inline Vector<Float64Value>const& cast_exact(Vector<Float64Approximation>const& v) {
+    return reinterpret_cast<Vector<Float64Value>const&>(v);
 }
 
 

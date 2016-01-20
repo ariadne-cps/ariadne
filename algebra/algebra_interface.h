@@ -46,24 +46,24 @@ template<class X> class SymbolicAlgebra;
 
 template<class X> struct AlgebraTraits;
 
-template<> struct AlgebraTraits<ApproximateFloat64> {
-    typedef ApproximateFloat64 ValueType;
+template<> struct AlgebraTraits<Float64Approximation> {
+    typedef Float64Approximation ValueType;
     typedef ApproximateIntervalType RangeType;
-    typedef ApproximateFloat64 NormType;
+    typedef Float64Approximation NormType;
     typedef ApproximateNumericType NumericType;
 };
 
-template<> struct AlgebraTraits<BoundedFloat64> {
-    typedef ExactFloat64 ValueType;
+template<> struct AlgebraTraits<Float64Bounds> {
+    typedef Float64Value ValueType;
     typedef UpperIntervalType RangeType;
-    typedef ErrorFloat64 NormType;
+    typedef Float64Error NormType;
     typedef ValidatedNumericType NumericType;
 };
 
 template<> struct AlgebraTraits<Real> {
-    typedef ExactFloat64 ValueType;
+    typedef Float64Value ValueType;
     typedef UpperIntervalType RangeType;
-    typedef ErrorFloat64 NormType;
+    typedef Float64Error NormType;
     typedef Real NumericType;
 };
 

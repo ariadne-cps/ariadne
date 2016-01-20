@@ -35,32 +35,32 @@
 
 namespace Ariadne {
 
-inline auto operator*(double s, ApproximateFloatVector v) -> decltype(ApproximateFloat64(s)*v) { return ApproximateFloat64(s)*v; }
+inline auto operator*(double s, FloatApproximationVector v) -> decltype(Float64Approximation(s)*v) { return Float64Approximation(s)*v; }
 
 RungeKutta4Integrator::RungeKutta4Integrator(double step_size)
     : _step_size(step_size)
 {
 }
 
-ApproximateFloatVector
-RungeKutta4Integrator::step(const ApproximateVectorFunction& f, const ApproximateFloatVector& x, const ApproximateFloat64& h) const
+FloatApproximationVector
+RungeKutta4Integrator::step(const ApproximateVectorFunction& f, const FloatApproximationVector& x, const Float64Approximation& h) const
 {
-    ApproximateFloatVector k1=f(x);
-    ApproximateFloatVector k2=f(ApproximateFloatVector(x+(h/2)*k1));
-    ApproximateFloatVector k3=f(ApproximateFloatVector(x+(h/2)*k2));
-    ApproximateFloatVector k4=f(ApproximateFloatVector(x+h*k3));
+    FloatApproximationVector k1=f(x);
+    FloatApproximationVector k2=f(FloatApproximationVector(x+(h/2)*k1));
+    FloatApproximationVector k3=f(FloatApproximationVector(x+(h/2)*k2));
+    FloatApproximationVector k4=f(FloatApproximationVector(x+h*k3));
     //std::cerr<<"k1,2,3,4="<<k1<<k2<<k3<<k4<<"\n";
     return x+(h/6)*(k1+2.0*k3+2.0*k4+k2);
 }
 
-List< Pair<ApproximateFloat64,ApproximateFloatVector> >
-RungeKutta4Integrator::evolve(const ApproximateVectorFunction& f, const ApproximateFloatVector& x0, const ApproximateFloat64& tmax) const
+List< Pair<Float64Approximation,FloatApproximationVector> >
+RungeKutta4Integrator::evolve(const ApproximateVectorFunction& f, const FloatApproximationVector& x0, const Float64Approximation& tmax) const
 {
-    static const ApproximateFloat64 h=this->_step_size;
+    static const Float64Approximation h=this->_step_size;
 
-    List< Pair<ApproximateFloat64,ApproximateFloatVector> > res;
-    ApproximateFloat64 t=0.0;
-    ApproximateFloatVector x=x0;
+    List< Pair<Float64Approximation,FloatApproximationVector> > res;
+    Float64Approximation t=0.0;
+    FloatApproximationVector x=x0;
 
     res.push_back(make_pair(t,x));
     while(decide(t<tmax)) {

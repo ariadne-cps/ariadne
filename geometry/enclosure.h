@@ -146,7 +146,7 @@ class Enclosure
     //! \brief Apply the map \f$r\f$ to the map \f$f\f$.
     Void apply_map(ValidatedVectorFunction r);
     //! \brief Apply the flow \f$\phi(x,h)\f$ to the map \f$f\f$.
-    Void apply_fixed_evolve_step(ValidatedVectorFunction phi, ExactFloat64 h);
+    Void apply_fixed_evolve_step(ValidatedVectorFunction phi, Float64Value h);
     //! \brief Apply the flow \f$xi'(s)=\phi(\xi(s),\epsilon(\xi(s)))\f$, \f$\tau'(s)=\tau(s)+\epsilon(\xi(s))\f$.
     Void apply_space_evolve_step(ValidatedVectorFunction phi, ValidatedScalarFunction elps);
     //! \brief Apply the flow \f$xi'(s)=\phi(\xi(s),\epsilon(\xi(s),\tau(s)))\f$, \f$\tau'(s)=\tau(s)+\epsilon(\xi(s),\tau(s))\f$.
@@ -210,7 +210,7 @@ class Enclosure
     //! \brief A point in the image of the <em>unconstrained</em> parameter domain.
     ExactPoint centre() const;
     //! \brief An over-approximation to the radius of the set.
-    ErrorFloat64 radius() const;
+    Float64Error radius() const;
     //! \brief Returns \c true if the set is definitely singleton.
     Kleenean is_bounded() const;
     //! \brief Returns \c true if the set is provably empty.

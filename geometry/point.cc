@@ -39,7 +39,7 @@ inline ExactIntervalType make_interval(ApproximateNumericType x) { return ExactI
 inline ExactIntervalType make_interval(ExactNumericType x) { return ExactIntervalType(x.raw(),x.raw()); }
 
 template<class X> Point<X>::Point(InitializerList<double> lst)
-    : Vector<X>(Vector<ExactFloat64>(Vector<Float64>(lst)))
+    : Vector<X>(Vector<Float64Value>(Vector<Float64>(lst)))
 {
 }
 
@@ -73,7 +73,7 @@ ExactPoint make_point(const StringType& str)
     read_sequence(ss,lst,'(',')',',');
     Vector<Float64> vec(lst);
 
-    return ExactPoint(Vector<ExactFloat64>(vec));
+    return ExactPoint(Vector<Float64Value>(vec));
 }
 
 } //namespace Ariadne

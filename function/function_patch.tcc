@@ -76,7 +76,7 @@ inline OutputStream& operator<<(OutputStream& os, const Representation<Float64>&
     return os;
 }
 
-inline OutputStream& operator<<(OutputStream& os, const Representation<PositiveUpperFloat64>& flt_repr)
+inline OutputStream& operator<<(OutputStream& os, const Representation<PositiveFloat64UpperBound>& flt_repr)
 {
     return os << reinterpret_cast<Representation<Float64>const&>(flt_repr);
 }
@@ -109,11 +109,11 @@ inline OutputStream& operator<<(OutputStream& os, const Representation< Expansio
     return os;
 }
 
-inline OutputStream& operator<<(OutputStream& os, const Representation< Expansion<ExactFloat64> >& exp_repr) {
+inline OutputStream& operator<<(OutputStream& os, const Representation< Expansion<Float64Value> >& exp_repr) {
     return os << reinterpret_cast<Expansion<Float64>const&>(exp_repr);
 }
 
-inline OutputStream& operator<<(OutputStream& os, const Representation< Expansion<ApproximateFloat64> >& exp_repr) {
+inline OutputStream& operator<<(OutputStream& os, const Representation< Expansion<Float64Approximation> >& exp_repr) {
     return os << reinterpret_cast<Expansion<Float64>const&>(exp_repr);
 }
 
@@ -182,7 +182,7 @@ template<class M> FunctionPatch<M>::FunctionPatch(const ExactBoxType& d, const E
 {
 }
 
-template<class M> FunctionPatch<M>::FunctionPatch(const ExactBoxType& d, const Expansion<ExactFloat64>& p, const ErrorFloat64& e, const Sweeper& swp)
+template<class M> FunctionPatch<M>::FunctionPatch(const ExactBoxType& d, const Expansion<Float64Value>& p, const Float64Error& e, const Sweeper& swp)
     : _domain(d), _model(p,e,swp)
 {
 }
@@ -340,35 +340,35 @@ template<class M> Void FunctionPatch<M>::restrict(const ExactBoxType& dom) {
 
 
 
-inline Bool operator==(ExactFloat64 x1, Int n2) { return x1.raw()==Float64(n2); }
-inline Bool operator==(BoundedFloat64 x1, Int n2) { return x1.upper_raw()==Float64(n2) && x1.lower_raw()==Float64(n2); }
-inline Bool operator==(ApproximateFloat64 x1, Int n2) { return x1.raw()==Float64(n2); }
+inline Bool operator==(Float64Value x1, Int n2) { return x1.raw()==Float64(n2); }
+inline Bool operator==(Float64Bounds x1, Int n2) { return x1.upper_raw()==Float64(n2) && x1.lower_raw()==Float64(n2); }
+inline Bool operator==(Float64Approximation x1, Int n2) { return x1.raw()==Float64(n2); }
 
-inline Bool operator!=(ExactFloat64 x1, Int n2) { return x1.raw()!=Float64(n2); }
-inline Bool operator!=(BoundedFloat64 x1, Int n2) { return x1.upper_raw()!=Float64(n2) || x1.lower_raw()!=Float64(n2); }
-inline Bool operator!=(ApproximateFloat64 x1, Int n2) { return x1.raw()!=Float64(n2); }
+inline Bool operator!=(Float64Value x1, Int n2) { return x1.raw()!=Float64(n2); }
+inline Bool operator!=(Float64Bounds x1, Int n2) { return x1.upper_raw()!=Float64(n2) || x1.lower_raw()!=Float64(n2); }
+inline Bool operator!=(Float64Approximation x1, Int n2) { return x1.raw()!=Float64(n2); }
 
-inline Bool operator> (ExactFloat64 x1, Int n2) { return x1.raw()> Float64(n2); }
-inline Bool operator> (BoundedFloat64 x1, Int n2) { return x1.lower_raw()> Float64(n2); }
-inline Bool operator> (ApproximateFloat64 x1, Int n2) { return x1.raw()> Float64(n2); }
+inline Bool operator> (Float64Value x1, Int n2) { return x1.raw()> Float64(n2); }
+inline Bool operator> (Float64Bounds x1, Int n2) { return x1.lower_raw()> Float64(n2); }
+inline Bool operator> (Float64Approximation x1, Int n2) { return x1.raw()> Float64(n2); }
 
-template<class M> Polynomial<BoundedFloat64> FunctionPatch<M>::polynomial() const
+template<class M> Polynomial<Float64Bounds> FunctionPatch<M>::polynomial() const
 {
-    Vector<Polynomial<BoundedFloat64> > pid=Polynomial<NumericType>::coordinates(this->argument_size());
-    return horner_evaluate(this->expansion(),unscale(pid,this->domain()))+BoundedFloat64(-this->error(),+this->error());
+    Vector<Polynomial<Float64Bounds> > pid=Polynomial<NumericType>::coordinates(this->argument_size());
+    return horner_evaluate(this->expansion(),unscale(pid,this->domain()))+Float64Bounds(-this->error(),+this->error());
 
-    Polynomial<BoundedFloat64> z(this->argument_size());
-    Polynomial<BoundedFloat64> p;//=Ariadne::polynomial(this->model());
+    Polynomial<Float64Bounds> z(this->argument_size());
+    Polynomial<Float64Bounds> p;//=Ariadne::polynomial(this->model());
 
-    Vector<Polynomial<BoundedFloat64> > s(this->argument_size(),z);
+    Vector<Polynomial<Float64Bounds> > s(this->argument_size(),z);
     for(SizeType j=0; j!=this->argument_size(); ++j) {
         ExactIntervalType const& domj=this->domain()[j];
         if(domj.lower()>=domj.upper()) {
             ARIADNE_ASSERT(this->domain()[j].width()==0);
-            s[j]=Polynomial<BoundedFloat64>::constant(this->argument_size(),0);
+            s[j]=Polynomial<Float64Bounds>::constant(this->argument_size(),0);
         } else {
             //s[j]=Ariadne::polynomial(ModelType::unscaling(this->argument_size(),j,this->domain()[j],this->sweeper()));
-            s[j]=(Polynomial<BoundedFloat64>::coordinate(this->argument_size(),j)-domj.midpoint())/domj.radius();
+            s[j]=(Polynomial<Float64Bounds>::coordinate(this->argument_size(),j)-domj.midpoint())/domj.radius();
         }
     }
 
@@ -431,8 +431,8 @@ template<class M> Covector<NumericType<M>> FunctionPatch<M>::gradient(const Vect
 
 
 template<class M> OutputStream& FunctionPatch<M>::write(OutputStream& os) const {
-    Polynomial<BoundedFloat64> p=this->polynomial();
-    Polynomial<ApproximateFloat64> ap=p;
+    Polynomial<Float64Bounds> p=this->polynomial();
+    Polynomial<Float64Approximation> ap=p;
     os << "FP" << this->domain();
     os << "(";
     os << ap;
@@ -493,10 +493,10 @@ template<class M> OutputStream& operator<<(OutputStream& os, const PolynomialRep
     FunctionPatch<M> truncated_function = function;
     truncated_function.clobber();
     truncated_function.sweep(ThresholdSweeper(frepr.threshold));
-    ErrorFloat64 truncatation_error = truncated_function.error();
+    Float64Error truncatation_error = truncated_function.error();
     truncated_function.clobber();
-    Polynomial<BoundedFloat64> validated_polynomial_function=polynomial(truncated_function);
-    Polynomial<ExactFloat64> polynomial_function = midpoint(validated_polynomial_function);
+    Polynomial<Float64Bounds> validated_polynomial_function=polynomial(truncated_function);
+    Polynomial<Float64Value> polynomial_function = midpoint(validated_polynomial_function);
     if(frepr.names.empty()) { os << polynomial_function; }
     else { os << named_argument_repr(polynomial_function,frepr.names); }
     os << "+/-" << truncatation_error << "+/-" << function.error();
@@ -557,8 +557,8 @@ template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBoxType
 }
 
 template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBoxType& d,
-                                           const Vector<Expansion<ExactFloat64>>& f,
-                                           const Vector<ErrorFloat64>& e,
+                                           const Vector<Expansion<Float64Value>>& f,
+                                           const Vector<Float64Error>& e,
                                            Sweeper swp)
     : _domain(d), _models(f.size(),ModelType(d.size(),swp))
 {
@@ -570,9 +570,9 @@ template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBoxType
 }
 
 template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBoxType& d,
-                                           const Vector<Expansion<ExactFloat64>>& f,
+                                           const Vector<Expansion<Float64Value>>& f,
                                            Sweeper swp)
-    : VectorFunctionPatch<M>(d,f,Vector<ErrorFloat64>(f.size()),swp)
+    : VectorFunctionPatch<M>(d,f,Vector<Float64Error>(f.size()),swp)
 {
 }
 
@@ -580,15 +580,15 @@ template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBoxType
                                            const Vector<Expansion<RawFloat64>>& f,
                                            const Vector<RawFloat64>& e,
                                            Sweeper swp)
-    : VectorFunctionPatch<M>(d,reinterpret_cast<Vector<Expansion<ExactFloat64>>const&>(f),
-                           reinterpret_cast<Vector<ErrorFloat64>const&>(e),swp)
+    : VectorFunctionPatch<M>(d,reinterpret_cast<Vector<Expansion<Float64Value>>const&>(f),
+                           reinterpret_cast<Vector<Float64Error>const&>(e),swp)
 {
 }
 
 template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBoxType& d,
                                            const Vector<Expansion<RawFloat64>>& f,
                                            Sweeper swp)
-    : VectorFunctionPatch<M>(d,reinterpret_cast<Vector<Expansion<ExactFloat64>>const&>(f),Vector<ErrorFloat64>(f.size()),swp)
+    : VectorFunctionPatch<M>(d,reinterpret_cast<Vector<Expansion<Float64Value>>const&>(f),Vector<Float64Error>(f.size()),swp)
 {
 }
 
@@ -682,18 +682,18 @@ template<class M> VectorFunctionPatch<M> VectorFunctionPatch<M>::projection(cons
 }
 
 
-template<class M> Vector<Polynomial<BoundedFloat64>> VectorFunctionPatch<M>::polynomials() const
+template<class M> Vector<Polynomial<Float64Bounds>> VectorFunctionPatch<M>::polynomials() const
 {
-    Vector<Polynomial<BoundedFloat64> > p(this->result_size(),Polynomial<BoundedFloat64>(this->argument_size()));
+    Vector<Polynomial<Float64Bounds> > p(this->result_size(),Polynomial<Float64Bounds>(this->argument_size()));
     for(SizeType i=0; i!=this->result_size(); ++i) {
         p[i]=static_cast<FunctionPatch<M>>((*this)[i]).polynomial();
     }
     return p;
 }
 
-template<class M> Vector<Expansion<ExactFloat64>> const VectorFunctionPatch<M>::expansions() const
+template<class M> Vector<Expansion<Float64Value>> const VectorFunctionPatch<M>::expansions() const
 {
-    Vector<Expansion<ExactFloat64>> e(this->result_size(),Expansion<ExactFloat64>(this->argument_size()));
+    Vector<Expansion<Float64Value>> e(this->result_size(),Expansion<Float64Value>(this->argument_size()));
     for(SizeType i=0; i!=this->result_size(); ++i) {
         e[i]=this->models()[i].expansion();
     }
@@ -702,7 +702,7 @@ template<class M> Vector<Expansion<ExactFloat64>> const VectorFunctionPatch<M>::
 
 template<class M> Vector<typename VectorFunctionPatch<M>::ErrorType> const VectorFunctionPatch<M>::errors() const
 {
-    Vector<ErrorFloat64> e(this->result_size());
+    Vector<Float64Error> e(this->result_size());
     for(SizeType i=0; i!=this->result_size(); ++i) {
         e[i]=this->models()[i].error();
     }
@@ -711,7 +711,7 @@ template<class M> Vector<typename VectorFunctionPatch<M>::ErrorType> const Vecto
 
 template<class M> typename VectorFunctionPatch<M>::ErrorType const VectorFunctionPatch<M>::error() const
 {
-    ErrorFloat64 e=0u;
+    Float64Error e=0u;
     for(SizeType i=0; i!=this->result_size(); ++i) {
         e=max(e,this->models()[i].error());
     }
@@ -777,7 +777,7 @@ template<class M> const UpperBoxType VectorFunctionPatch<M>::range() const
 
 template<class M> const Vector<typename VectorFunctionPatch<M>::CoefficientType> VectorFunctionPatch<M>::centre() const
 {
-    Vector<ExactFloat64> result(this->result_size());
+    Vector<Float64Value> result(this->result_size());
     for(SizeType i=0; i!=result.size(); ++i) {
         result[i]=this->_models[i].value();
     }

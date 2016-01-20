@@ -115,7 +115,7 @@ class InteriorPointSolver
 
 
 template<class X> struct RigorousNumericsTraits { typedef X Type; };
-template<> struct RigorousNumericsTraits<ExactFloat64> { typedef BoundedFloat64 Type; };
+template<> struct RigorousNumericsTraits<Float64Value> { typedef Float64Bounds Type; };
 template<class X> using RigorousNumericType = typename RigorousNumericsTraits<X>::Type;
 
 //! \relates SimplexSolver \brief The type of variable; lower is_bounded, upper is_bounded, basic, or fixed (upper and lower singleton).

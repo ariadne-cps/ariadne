@@ -62,8 +62,8 @@ typedef VectorFunctionModel<ValidatedTag> ValidatedVectorFunctionModel;
 template<class X> class FunctionModelFactory;
 typedef FunctionModelFactory<ValidatedTag> ValidatedFunctionModelFactory;
 
-typedef ExactFloat64 ValidatedCoefficientType;
-typedef ErrorFloat64 ValidatedErrorType;
+typedef Float64Value ValidatedCoefficientType;
+typedef Float64Error ValidatedErrorType;
 
 template<class P, class F> class TaylorModel;
 template<class M> class FunctionPatch;

@@ -71,7 +71,7 @@ using RoundingMode64 = RoundingModeType;
 //! Note that the value of a built-in floating-point value may differ from the mathematical value of the literal.
 //! For example, while <c>%Float64(3.25)</c> is represented exactly, <c>%Float64(3.3)</c> has a value of \f$3.2999999999999998224\ldots\f$.
 //! \note In the future, the construction of a \c %Float64 from a string literal may be supported.
-//! \sa Real, ExactFloat64, BoundedFloat64, UpperFloat64, LowerFloat64, ApproximateFloat64
+//! \sa Real, Float64Value, Float64Bounds, Float64UpperBound, Float64LowerBound, Float64Approximation
 class Float64 {
   public:
     volatile double dbl;

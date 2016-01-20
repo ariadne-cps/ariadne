@@ -175,42 +175,42 @@ template<> template<class IVL> inline RealVariablesBox Variables<Real>::in(const
 //! \brief An interval range for a real variable.
 class ExactFloat64VariableInterval {
   private:
-    ExactFloat64 _lower;
+    Float64Value _lower;
     Variable<Real> _variable;
-    ExactFloat64 _upper;
+    Float64Value _upper;
   public:
-    ExactFloat64VariableInterval(const Variable<Real>& v, const ExactFloat64Interval& ivl)
+    ExactFloat64VariableInterval(const Variable<Real>& v, const Float64ExactInterval& ivl)
         : _lower(ivl.lower()), _variable(v), _upper(ivl.upper()) { }
-    ExactFloat64VariableInterval(const ExactFloat64& l, const Variable<Real>& v, const ExactFloat64& u)
-        : _lower(l), _variable(v), _upper(u) { ARIADNE_ASSERT_MSG(definitely(l<=u),"ExactFloat64("<<l<<","<<u<<") not provably nonempty"); }
+    ExactFloat64VariableInterval(const Float64Value& l, const Variable<Real>& v, const Float64Value& u)
+        : _lower(l), _variable(v), _upper(u) { ARIADNE_ASSERT_MSG(definitely(l<=u),"Float64Value("<<l<<","<<u<<") not provably nonempty"); }
     Variable<Real> const& variable() const { return this->_variable; }
-    const ExactFloat64Interval interval() const { return ExactFloat64Interval(this->_lower,this->_upper); }
-    const ExactFloat64 lower() const { return this->_lower; }
-    const ExactFloat64 upper() const { return this->_upper; }
+    const Float64ExactInterval interval() const { return Float64ExactInterval(this->_lower,this->_upper); }
+    const Float64Value lower() const { return this->_lower; }
+    const Float64Value upper() const { return this->_upper; }
     friend OutputStream& operator<<(OutputStream& os, const ExactFloat64VariableInterval& eivl);
 };
 
 //! \brief An box defining ranges for a collection of real variables.
 class ExactFloat64VariablesBox {
     RealSpace _spc;
-    ExactFloat64Box _bx;
+    Float64ExactBox _bx;
   public:
     ExactFloat64VariablesBox() : _spc(), _bx(0) { }
-    ExactFloat64VariablesBox(const Map<RealVariable,ExactFloat64Interval>& bnds) : _spc(List<RealVariable>(bnds.keys())), _bx(_spc.dimension()) {
+    ExactFloat64VariablesBox(const Map<RealVariable,Float64ExactInterval>& bnds) : _spc(List<RealVariable>(bnds.keys())), _bx(_spc.dimension()) {
         for(Nat i=0; i!=this->_bx.dimension(); ++i) { this->_bx[i] = bnds[this->_spc[i]]; } }
     ExactFloat64VariablesBox(const List<RealVariableInterval>& bnds) : _spc(), _bx(bnds.size()) {
         for(Nat i=0; i!=bnds.size(); ++i) {
             this->_spc.append(bnds[i].variable()); this->_bx[i]=cast_exact_interval(ApproximateIntervalType(bnds[i].interval())); } }
-    ExactFloat64VariablesBox(const RealSpace& spc, const ExactFloat64Box& bx) : _spc(spc), _bx(bx) { ARIADNE_ASSERT(spc.dimension()==bx.dimension()); }
-    Map<RealVariable,ExactFloat64Interval> bounds() const { Map<RealVariable,ExactFloat64Interval> bnds;
+    ExactFloat64VariablesBox(const RealSpace& spc, const Float64ExactBox& bx) : _spc(spc), _bx(bx) { ARIADNE_ASSERT(spc.dimension()==bx.dimension()); }
+    Map<RealVariable,Float64ExactInterval> bounds() const { Map<RealVariable,Float64ExactInterval> bnds;
         for(SizeType i=0; i!=_spc.size(); ++i) { bnds.insert(_spc[i],_bx[i]); } return bnds; }
     Set<RealVariable> variables() const { return Set<RealVariable>(_spc.variables()); }
     RealSpace const& space() const { return this->_spc; }
-    ExactFloat64Box const& continuous_set() const { return this->_bx; }
-    ExactFloat64Box const& box() const { return this->_bx; }
-    const ExactFloat64Interval& operator[](const RealVariable& v) const { return this->_bx[this->_spc.index(v)]; }
-    ExactFloat64Box euclidean_set(const RealSpace& spc) const {
-        ExactFloat64Box res(spc.dimension()); for(Nat i=0; i!=res.dimension(); ++i) { res[i]=this->_bx[this->_spc.index(spc[i])]; } return res; }
+    Float64ExactBox const& continuous_set() const { return this->_bx; }
+    Float64ExactBox const& box() const { return this->_bx; }
+    const Float64ExactInterval& operator[](const RealVariable& v) const { return this->_bx[this->_spc.index(v)]; }
+    Float64ExactBox euclidean_set(const RealSpace& spc) const {
+        Float64ExactBox res(spc.dimension()); for(Nat i=0; i!=res.dimension(); ++i) { res[i]=this->_bx[this->_spc.index(spc[i])]; } return res; }
     friend OutputStream& operator<<(OutputStream& os, const ExactFloat64VariablesBox& ebx) {
         return os << "ExactFloat64VariablesBox( space=" << ebx.space() << ", box=" << ebx.box() << " )"; }
 };

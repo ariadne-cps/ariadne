@@ -85,22 +85,22 @@ class Real
     Real(Decimal const& d);
     Real(Rational const& q);
 
-    explicit Real(ExactFloat64 x);
+    explicit Real(Float64Value x);
 
     operator Number<EffectiveTag>() const;
 
     // Extract floating-point properties
-    UpperFloat64 upper() const;
-    LowerFloat64 lower() const;
-    ApproximateFloat64 approx() const;
+    Float64UpperBound upper() const;
+    Float64LowerBound lower() const;
+    Float64Approximation approx() const;
     double get_d() const;
 
     // Extract arbitrarily accurate approximations
-    BoundedFloat64 operator() (Precision64 pr) const;
-    BoundedFloatMP operator() (PrecisionMP pr) const;
-    BoundedFloat64 get(Precision64 pr) const;
-    BoundedFloatMP get(PrecisionMP pr) const;
-    BoundedFloatMP evaluate(Accuracy acc) const;
+    Float64Bounds operator() (Precision64 pr) const;
+    FloatMPBounds operator() (PrecisionMP pr) const;
+    Float64Bounds get(Precision64 pr) const;
+    FloatMPBounds get(PrecisionMP pr) const;
+    FloatMPBounds evaluate(Accuracy acc) const;
 
     // Non-templated to allow conversions
     friend Real add(Real,Real);
@@ -125,7 +125,7 @@ class Real
     friend Real min(Real,Real);
     friend PositiveReal abs(Real);
 
-    friend ErrorFloat64 mag(Real);
+    friend Float64Error mag(Real);
 
     friend NegSierpinski eq(Real,Real);
     friend Kleenean lt(Real,Real);
@@ -182,10 +182,10 @@ class LowerReal
   public:
     LowerReal(Real);
   public:
-    LowerFloat64 operator() (Precision64 pr) const;
-    LowerFloatMP operator() (PrecisionMP pr) const;
-    LowerFloat64 get(Precision64 pr) const;
-    LowerFloatMP get(PrecisionMP pr) const;
+    Float64LowerBound operator() (Precision64 pr) const;
+    FloatMPLowerBound operator() (PrecisionMP pr) const;
+    Float64LowerBound get(Precision64 pr) const;
+    FloatMPLowerBound get(PrecisionMP pr) const;
   public:
     LowerReal max(LowerReal,LowerReal);
 
@@ -214,10 +214,10 @@ class UpperReal
   public:
     UpperReal(Real);
   public:
-    UpperFloat64 operator() (Precision64 pr) const;
-    UpperFloatMP operator() (PrecisionMP pr) const;
-    UpperFloat64 get(Precision64 pr) const;
-    UpperFloatMP get(PrecisionMP pr) const;
+    Float64UpperBound operator() (Precision64 pr) const;
+    FloatMPUpperBound operator() (PrecisionMP pr) const;
+    Float64UpperBound get(Precision64 pr) const;
+    FloatMPUpperBound get(PrecisionMP pr) const;
   public:
     UpperReal max(UpperReal,UpperReal);
     Real max(Real,UpperReal);
@@ -240,8 +240,8 @@ class PositiveReal : public Real
     using Real::Real;
     PositiveReal() : Real() { }
     PositiveReal(Real r) : Real(r) { }
-    PositiveBoundedFloat64 get(Precision64 pr) const;
-    PositiveBoundedFloatMP get(PrecisionMP pr) const;
+    PositiveFloat64Bounds get(Precision64 pr) const;
+    PositiveFloatMPBounds get(PrecisionMP pr) const;
   public:
     PositiveReal max(PositiveReal,PositiveReal);
     PositiveReal max(Real,PositiveReal);
@@ -262,8 +262,8 @@ class PositiveLowerReal : public LowerReal
   public:
     using LowerReal::LowerReal;
     PositiveLowerReal(LowerReal r) : LowerReal(r) { }
-    PositiveLowerFloat64 get(Precision64 pr) const;
-    PositiveLowerFloatMP get(PrecisionMP pr) const;
+    PositiveFloat64LowerBound get(Precision64 pr) const;
+    PositiveFloatMPLowerBound get(PrecisionMP pr) const;
   public:
     PositiveLowerReal rec(PositiveUpperReal);
     PositiveUpperReal rec(PositiveLowerReal);
@@ -280,8 +280,8 @@ class PositiveUpperReal : public UpperReal
   public:
     using UpperReal::UpperReal;
     PositiveUpperReal(UpperReal r) : UpperReal(r) { }
-    PositiveUpperFloat64 get(Precision64 pr) const;
-    PositiveUpperFloatMP get(PrecisionMP pr) const;
+    PositiveFloat64UpperBound get(Precision64 pr) const;
+    PositiveFloatMPUpperBound get(PrecisionMP pr) const;
   public:
     PositiveUpperReal rec(PositiveLowerReal);
     PositiveLowerReal rec(PositiveUpperReal);
@@ -306,17 +306,17 @@ template<class N, EnableIf<IsIntegral<N>> =dummy> inline Kleenean operator> (con
 
 /*
 template<class D, EnableIf<IsFloatingPoint<D>> =dummy> inline auto
-    operator==(Real r, D d) -> decltype(r==ApproximateFloat64(d)) { return r==ApproximateFloat64(d); }
+    operator==(Real r, D d) -> decltype(r==Float64Approximation(d)) { return r==Float64Approximation(d); }
 template<class D, EnableIf<IsFloatingPoint<D>> =dummy> inline auto
-    operator!=(Real r, D d) -> decltype(r!=ApproximateFloat64(d)) { return r!=ApproximateFloat64(d); }
+    operator!=(Real r, D d) -> decltype(r!=Float64Approximation(d)) { return r!=Float64Approximation(d); }
 template<class D, EnableIf<IsFloatingPoint<D>> =dummy> inline auto
-    operator< (Real r, D d) -> decltype(r< ApproximateFloat64(d)) { return r< ApproximateFloat64(d); }
+    operator< (Real r, D d) -> decltype(r< Float64Approximation(d)) { return r< Float64Approximation(d); }
 template<class D, EnableIf<IsFloatingPoint<D>> =dummy> inline auto
-    operator> (Real r, D d) -> decltype(r> ApproximateFloat64(d)) { return r> ApproximateFloat64(d); }
+    operator> (Real r, D d) -> decltype(r> Float64Approximation(d)) { return r> Float64Approximation(d); }
 template<class D, EnableIf<IsFloatingPoint<D>> =dummy> inline auto
-    operator<=(Real r, D d) -> decltype(r<=ApproximateFloat64(d)) { return r<=ApproximateFloat64(d); }
+    operator<=(Real r, D d) -> decltype(r<=Float64Approximation(d)) { return r<=Float64Approximation(d); }
 template<class D, EnableIf<IsFloatingPoint<D>> =dummy> inline auto
-    operator>=(Real r, D d) -> decltype(r>=ApproximateFloat64(d)) { return r>=ApproximateFloat64(d); }
+    operator>=(Real r, D d) -> decltype(r>=Float64Approximation(d)) { return r>=Float64Approximation(d); }
 */
 /*
 template<class T> auto operator+(T const& t) -> decltype(pos(t)) { return pos(t); }

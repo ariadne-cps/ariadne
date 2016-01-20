@@ -64,20 +64,20 @@ struct LinearProgram {
 };
 
 
-ValidatedAffineConstraint operator<=(const BoundedFloat64& l, const ValidatedAffine& a) { return ValidatedAffineConstraint(l,a,+infty); }
-ValidatedAffineConstraint operator<=(const ValidatedAffine& a, const BoundedFloat64& u) { return ValidatedAffineConstraint(-infty,a,u); }
-ValidatedAffineConstraint operator==(const ValidatedAffine& a, const BoundedFloat64& b) { return ValidatedAffineConstraint(b,a,b); }
+ValidatedAffineConstraint operator<=(const Float64Bounds& l, const ValidatedAffine& a) { return ValidatedAffineConstraint(l,a,+infty); }
+ValidatedAffineConstraint operator<=(const ValidatedAffine& a, const Float64Bounds& u) { return ValidatedAffineConstraint(-infty,a,u); }
+ValidatedAffineConstraint operator==(const ValidatedAffine& a, const Float64Bounds& b) { return ValidatedAffineConstraint(b,a,b); }
 
-ValidatedAffineConstraint operator<=(const ValidatedAffineConstraint& c, const BoundedFloat64& u) {
+ValidatedAffineConstraint operator<=(const ValidatedAffineConstraint& c, const Float64Bounds& u) {
     ARIADNE_ASSERT(c.upper_bound()==infty);
     return ValidatedAffineConstraint(c.lower_bound(),c.function(),u);
 }
 
-ValidatedAffineModelConstraint operator<=(const BoundedFloat64& l, const ValidatedAffineModel& a) { return ValidatedAffineModelConstraint(l,a,+infty); }
-ValidatedAffineModelConstraint operator<=(const ValidatedAffineModel& a, const BoundedFloat64& u) { return ValidatedAffineModelConstraint(-infty,a,u); }
-ValidatedAffineModelConstraint operator==(const ValidatedAffineModel& a, const BoundedFloat64& b) { return ValidatedAffineModelConstraint(b,a,b); }
+ValidatedAffineModelConstraint operator<=(const Float64Bounds& l, const ValidatedAffineModel& a) { return ValidatedAffineModelConstraint(l,a,+infty); }
+ValidatedAffineModelConstraint operator<=(const ValidatedAffineModel& a, const Float64Bounds& u) { return ValidatedAffineModelConstraint(-infty,a,u); }
+ValidatedAffineModelConstraint operator==(const ValidatedAffineModel& a, const Float64Bounds& b) { return ValidatedAffineModelConstraint(b,a,b); }
 
-ValidatedAffineModelConstraint operator<=(const ValidatedAffineModelConstraint& c, const BoundedFloat64& u) {
+ValidatedAffineModelConstraint operator<=(const ValidatedAffineModelConstraint& c, const Float64Bounds& u) {
     ARIADNE_ASSERT(c.upper_bound()==infty);
     return ValidatedAffineModelConstraint(c.lower_bound(),c.function(),u);
 }
@@ -130,17 +130,17 @@ ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Vec
 {
 }
 
-ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const ExactBoxType& D, const Matrix<ExactFloat64>& G, const Vector<ExactFloat64>& h)
+ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const ExactBoxType& D, const Matrix<Float64Value>& G, const Vector<Float64Value>& h)
 {
     this->construct(D,G,h);
 }
 
-ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Matrix<ExactFloat64>& G, const Vector<ExactFloat64>& h)
+ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Matrix<Float64Value>& G, const Vector<Float64Value>& h)
 {
     this->construct(Vector<ExactIntervalType>(G.column_size(),ExactIntervalType(-1,+1)),G,h);
 }
 
-Void ValidatedAffineConstrainedImageSet::construct(const ExactBoxType& D, const Matrix<ExactFloat64>& G, const Vector<ExactFloat64>& h)
+Void ValidatedAffineConstrainedImageSet::construct(const ExactBoxType& D, const Matrix<Float64Value>& G, const Vector<Float64Value>& h)
 {
     ARIADNE_ASSERT_MSG(G.row_size()==h.size() && G.row_size()>0,"G="<<G<<", h="<<h);
     this->_domain=D;

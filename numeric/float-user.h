@@ -103,7 +103,7 @@ template<class PR, class P1, class P2> using FloatLessType = Logical<Generic<Wea
 //! Note that the value of a built-in floating-point value may differ from the mathematical value of the literal.
 //! For example, while <c>%Float64(3.25)</c> is represented exactly, <c>%Float64(3.3)</c> has a value of \f$3.2999999999999998224\ldots\f$.
 //! \note In the future, the construction of a \c %Float64 from a string literal may be supported.
-//! \sa ExactIntervalType, Real, ExactFloat64
+//! \sa ExactIntervalType, Real, Float64Value
 template<class PR> class Float<ApproximateTag,PR> {
     typedef ApproximateTag P; typedef RawFloat<PR> FLT;
   public:
@@ -234,9 +234,9 @@ template<class PR> class Float<UpperTag,PR> {
 //! \ingroup NumericModule
 //! \brief ValidatedTag bounds on a number with floating-point endpoints supporting outwardly-rounded arithmetic.
 //! \details
-//! Note that direct construction from a floating-point number is prohibited, since <c>%BoundedFloat64(3.3)</c> would the singleton interval \f$[3.2999999999999998224,3.2999999999999998224]\f$ (the constant is first interpreted by the C++ compiler to give a C++ \c double, whereas <c>%BoundedFloat64(3.3_decimal)</c> yields the interval \f$[3.2999999999999998224,3.3000000000000002665]\f$ enclosing \f$3.3\f$.
+//! Note that direct construction from a floating-point number is prohibited, since <c>%Float64Bounds(3.3)</c> would the singleton interval \f$[3.2999999999999998224,3.2999999999999998224]\f$ (the constant is first interpreted by the C++ compiler to give a C++ \c double, whereas <c>%Float64Bounds(3.3_decimal)</c> yields the interval \f$[3.2999999999999998224,3.3000000000000002665]\f$ enclosing \f$3.3\f$.
 //!
-//! Comparison tests on \c BoundedFloat use the idea that an interval represents a single number with an unknown value.
+//! Comparison tests on \c FloatBounds use the idea that an interval represents a single number with an unknown value.
 //! Hence the result is of type \c Kleenean, which can take values { \c True, \c False, \c Indeterminate }.
 //! Hence a test \f$[\underline{x},\overline{x}]\leq [\underline{y},\overline{y}]\f$ returns \c True if \f$\overline{x}\leq \underline{y}\f$, since in this case \f$x\leq x\f$ whenever \f$x_1\in[\underline{x},\overline{x}]\f$ and \f$y\in[\underline{y},\overline{y}]\f$, \c False if \f$\underline{x}>\overline{y}\f$, since in this case we know \f$x>y\f$, and \c Indeterminate otherwise, since in this case we can find \f$x,y\f$ making the result either true or false.
 //! In the case of equality, the comparison \f$[\underline{x},\overline{x}]\f$==\f$[\underline{y},\overline{y}]\f$ only returns \c True if both intervals are singletons, since otherwise we can find values making the result either true of false.
@@ -246,21 +246,21 @@ template<class PR> class Float<UpperTag,PR> {
 //! To obtain a best estimate of the value, use \c x.value(), which has an error at most \a x.error().
 //! If \f$v\f$ and \f$e\f$ are the returned value and error for the bounds \f$[l,u]\f$, then it is guaranteed that \f$v-e\leq l\f$ and \f$v+e\geq u\f$ in exact arithmetic.
 //!
-//! To test if the bounds contain a number , use \c models(BoundedFloat,ExactFloat), and to test if bounds are inconsistent use \c inconsistent(x,y), and to test if \c x provides a better approximation, use \c refines(x,y).
+//! To test if the bounds contain a number , use \c models(FloatBounds,FloatValue), and to test if bounds are inconsistent use \c inconsistent(x,y), and to test if \c x provides a better approximation, use \c refines(x,y).
 //! \sa Float64, FloatMP
 //!
 //! \par Python interface
 //!
 //! In the Python interface, %Ariadne validated bounds can be constructed from Python literals of the form \c {a:b} or (deprecated) \c [a,b] .
 //! The former is preferred, as it cannot be confused with literals for other classes such as Vector and Array types.
-//! Automatic conversion is used to convert BoundedFloat literals of the form \c {a,b} to an BoundedFloat in functions.
+//! Automatic conversion is used to convert FloatBounds literals of the form \c {a,b} to an FloatBounds in functions.
 //!
 //! Care must be taken when defining intervals using floating-point coefficients, since values are first converted to the nearest
 //! representable value by the Python interpreter. <br><br>
 //! \code
-//!   BoundedFloat64({1.1:2.3}) # Create the interval [1.1000000000000001, 2.2999999999999998]
-//!   BoundedFloat64({2.5:4.25}) # Create the interval [2.5, 4.25], which can be represented exactly
-//!   BoundedFloat64([2.5,4.25]) # Alternative syntax for creating the interval [2.5, 4.25]
+//!   Float64Bounds({1.1:2.3}) # Create the interval [1.1000000000000001, 2.2999999999999998]
+//!   Float64Bounds({2.5:4.25}) # Create the interval [2.5, 4.25], which can be represented exactly
+//!   Float64Bounds([2.5,4.25]) # Alternative syntax for creating the interval [2.5, 4.25]
 //! \endcode
 template<class PR> class Float<BoundedTag,PR> {
     typedef BoundedTag P; typedef RawFloat<PR> FLT;
@@ -366,7 +366,7 @@ template<class PR> class Float<MetricTag,PR> {
 };
 
 //! \ingroup NumericModule
-//! \related Float64, BoundedFloat64
+//! \related Float64, Float64Bounds
 //! \brief A floating-point number, which is taken to represent the \em exact value of a real quantity.
 template<class PR> class Float<ExactTag,PR> {
     typedef ExactTag P; typedef RawFloat<PR> FLT;
@@ -689,12 +689,12 @@ template<class P1, class P2, class PR> Float<Weaker<P1,P2>,PR> w(Float<P1,PR> x1
 
 
 // Literals operations
-ExactFloat64 operator"" _exact(long double lx);
-ErrorFloat64 operator"" _error(long double lx);
-MetricFloat64 operator"" _near(long double lx);
-UpperFloat64 operator"" _upper(long double lx);
-LowerFloat64 operator"" _lower(long double lx);
-ApproximateFloat64 operator"" _approx(long double lx);
+Float64Value operator"" _exact(long double lx);
+Float64Error operator"" _error(long double lx);
+Float64Ball operator"" _near(long double lx);
+Float64UpperBound operator"" _upper(long double lx);
+Float64LowerBound operator"" _lower(long double lx);
+Float64Approximation operator"" _approx(long double lx);
 
 
 // ValidatedTag operations
@@ -794,40 +794,40 @@ template<class PR> auto operator>=(Rational const& q, Float<ExactTag,PR> const& 
 template<class PR> auto operator< (Rational const& q, Float<ExactTag,PR> const& x) -> decltype(q< Rational(x)) { return q< Rational(x); }
 template<class PR> auto operator> (Rational const& q, Float<ExactTag,PR> const& x) -> decltype(q> Rational(x)) { return q> Rational(x); }
 
-ExactFloat64 cast_exact(const Real& x);
+Float64Value cast_exact(const Real& x);
 
-inline ExactFloat64 const& cast_exact(RawFloat64 const& x) { return reinterpret_cast<ExactFloat64 const&>(x); }
-inline ExactFloat64 const& cast_exact(ApproximateFloat64 const& x) { return reinterpret_cast<ExactFloat64 const&>(x); }
-inline ExactFloat64 const& cast_exact(ExactFloat64 const& x) { return reinterpret_cast<ExactFloat64 const&>(x); }
+inline Float64Value const& cast_exact(RawFloat64 const& x) { return reinterpret_cast<Float64Value const&>(x); }
+inline Float64Value const& cast_exact(Float64Approximation const& x) { return reinterpret_cast<Float64Value const&>(x); }
+inline Float64Value const& cast_exact(Float64Value const& x) { return reinterpret_cast<Float64Value const&>(x); }
 
-template<template<class>class T> inline const T<ExactFloat64>& cast_exact(const T<RawFloat64>& t) {
-    return reinterpret_cast<const T<ExactFloat64>&>(t); }
-template<template<class>class T> inline const T<ExactFloat64>& cast_exact(const T<ApproximateFloat64>& t) {
-    return reinterpret_cast<const T<ExactFloat64>&>(t); }
-template<template<class>class T> inline const T<ExactFloat64>& cast_exact(const T<ExactFloat64>& t) {
-    return reinterpret_cast<const T<ExactFloat64>&>(t); }
+template<template<class>class T> inline const T<Float64Value>& cast_exact(const T<RawFloat64>& t) {
+    return reinterpret_cast<const T<Float64Value>&>(t); }
+template<template<class>class T> inline const T<Float64Value>& cast_exact(const T<Float64Approximation>& t) {
+    return reinterpret_cast<const T<Float64Value>&>(t); }
+template<template<class>class T> inline const T<Float64Value>& cast_exact(const T<Float64Value>& t) {
+    return reinterpret_cast<const T<Float64Value>&>(t); }
 
 inline RawFloat64 const& cast_raw(RawFloat64 const& x) { return reinterpret_cast<RawFloat64 const&>(x); }
-inline RawFloat64 const& cast_raw(ApproximateFloat64 const& x) { return reinterpret_cast<RawFloat64 const&>(x); }
-inline RawFloat64 const& cast_raw(ExactFloat64 const& x) { return reinterpret_cast<RawFloat64 const&>(x); }
+inline RawFloat64 const& cast_raw(Float64Approximation const& x) { return reinterpret_cast<RawFloat64 const&>(x); }
+inline RawFloat64 const& cast_raw(Float64Value const& x) { return reinterpret_cast<RawFloat64 const&>(x); }
 
 template<template<class>class T> inline const T<RawFloat64>& cast_raw(const T<RawFloat64>& t) {
     return reinterpret_cast<const T<RawFloat64>&>(t); }
-template<template<class>class T> inline const T<RawFloat64>& cast_raw(const T<ApproximateFloat64>& t) {
+template<template<class>class T> inline const T<RawFloat64>& cast_raw(const T<Float64Approximation>& t) {
     return reinterpret_cast<const T<RawFloat64>&>(t); }
-template<template<class>class T> inline const T<RawFloat64>& cast_raw(const T<ExactFloat64>& t) {
+template<template<class>class T> inline const T<RawFloat64>& cast_raw(const T<Float64Value>& t) {
     return reinterpret_cast<const T<RawFloat64>&>(t); }
 
-inline ApproximateFloat64 const& cast_approximate(RawFloat64 const& x) { return reinterpret_cast<ApproximateFloat64 const&>(x); }
-inline ApproximateFloat64 const& cast_approximate(ApproximateFloat64 const& x) { return reinterpret_cast<ApproximateFloat64 const&>(x); }
-inline ApproximateFloat64 const& cast_approximate(ExactFloat64 const& x) { return reinterpret_cast<ApproximateFloat64 const&>(x); }
+inline Float64Approximation const& cast_approximate(RawFloat64 const& x) { return reinterpret_cast<Float64Approximation const&>(x); }
+inline Float64Approximation const& cast_approximate(Float64Approximation const& x) { return reinterpret_cast<Float64Approximation const&>(x); }
+inline Float64Approximation const& cast_approximate(Float64Value const& x) { return reinterpret_cast<Float64Approximation const&>(x); }
 
-template<template<class>class T> inline const T<ApproximateFloat64>& cast_approximate(const T<RawFloat64>& t) {
-    return reinterpret_cast<const T<ApproximateFloat64>&>(t); }
-template<template<class>class T> inline const T<ApproximateFloat64>& cast_approximate(const T<ApproximateFloat64>& t) {
-    return reinterpret_cast<const T<ApproximateFloat64>&>(t); }
-template<template<class>class T> inline const T<ApproximateFloat64>& cast_approximate(const T<ExactFloat64>& t) {
-    return reinterpret_cast<const T<ApproximateFloat64>&>(t); }
+template<template<class>class T> inline const T<Float64Approximation>& cast_approximate(const T<RawFloat64>& t) {
+    return reinterpret_cast<const T<Float64Approximation>&>(t); }
+template<template<class>class T> inline const T<Float64Approximation>& cast_approximate(const T<Float64Approximation>& t) {
+    return reinterpret_cast<const T<Float64Approximation>&>(t); }
+template<template<class>class T> inline const T<Float64Approximation>& cast_approximate(const T<Float64Value>& t) {
+    return reinterpret_cast<const T<Float64Approximation>&>(t); }
 
 } // namespace Ariadne
 

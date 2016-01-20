@@ -51,14 +51,14 @@ namespace Ariadne {
 class UnaryOperatorInterface {
   public:
     virtual NumberInterface* _compute(Real) const = 0;
-    virtual NumberInterface* _compute(ExactFloat64) const = 0;
-    virtual NumberInterface* _compute(MetricFloat64) const = 0;
-    virtual NumberInterface* _compute(BoundedFloat64) const = 0;
-    virtual NumberInterface* _compute(ApproximateFloat64) const = 0;
-    virtual NumberInterface* _compute(ExactFloatMP) const = 0;
-    virtual NumberInterface* _compute(MetricFloatMP) const = 0;
-    virtual NumberInterface* _compute(BoundedFloatMP) const = 0;
-    virtual NumberInterface* _compute(ApproximateFloatMP) const = 0;
+    virtual NumberInterface* _compute(Float64Value) const = 0;
+    virtual NumberInterface* _compute(Float64Ball) const = 0;
+    virtual NumberInterface* _compute(Float64Bounds) const = 0;
+    virtual NumberInterface* _compute(Float64Approximation) const = 0;
+    virtual NumberInterface* _compute(FloatMPValue) const = 0;
+    virtual NumberInterface* _compute(FloatMPBall) const = 0;
+    virtual NumberInterface* _compute(FloatMPBounds) const = 0;
+    virtual NumberInterface* _compute(FloatMPApproximation) const = 0;
 };
 
 template<class X> class NumberWrapper;
@@ -75,14 +75,14 @@ template<class O, class A1> class UnaryOperator : public UnaryOperatorInterface 
     UnaryOperator(A1 a1) : _arg1(a1) { }
     UnaryOperator(O o, A1 a1) : _op(o), _arg1(a1) { }
     virtual NumberInterface* _compute(Real a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(ExactFloat64 a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(MetricFloat64 a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(BoundedFloat64 a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(ApproximateFloat64 a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(ExactFloatMP a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(MetricFloatMP a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(BoundedFloatMP a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(ApproximateFloatMP a2) const { return _heap_move_number(_op(_arg1,a2)); }
+    virtual NumberInterface* _compute(Float64Value a2) const { return _heap_move_number(_op(_arg1,a2)); }
+    virtual NumberInterface* _compute(Float64Ball a2) const { return _heap_move_number(_op(_arg1,a2)); }
+    virtual NumberInterface* _compute(Float64Bounds a2) const { return _heap_move_number(_op(_arg1,a2)); }
+    virtual NumberInterface* _compute(Float64Approximation a2) const { return _heap_move_number(_op(_arg1,a2)); }
+    virtual NumberInterface* _compute(FloatMPValue a2) const { return _heap_move_number(_op(_arg1,a2)); }
+    virtual NumberInterface* _compute(FloatMPBall a2) const { return _heap_move_number(_op(_arg1,a2)); }
+    virtual NumberInterface* _compute(FloatMPBounds a2) const { return _heap_move_number(_op(_arg1,a2)); }
+    virtual NumberInterface* _compute(FloatMPApproximation a2) const { return _heap_move_number(_op(_arg1,a2)); }
 };
 
 template<class T1, class T2> inline auto add(T1&& t1, T2&& t2) -> decltype(t1+t2) { return std::forward<T1>(t1) + std::forward<T2>(t2); }
@@ -97,14 +97,14 @@ template<class O, class P> class UnaryOperator<O,Float<P,Precision64>> : public 
     UnaryOperator(A1 a1) : _arg1(a1) { }
     UnaryOperator(O o, A1 a1) : _op(o), _arg1(a1) { }
     virtual NumberInterface* _compute(Real a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(ExactFloat64 a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(MetricFloat64 a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(BoundedFloat64 a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(ApproximateFloat64 a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(ExactFloatMP a2) const { assert(false); }
-    virtual NumberInterface* _compute(MetricFloatMP a2) const { assert(false); }
-    virtual NumberInterface* _compute(BoundedFloatMP a2) const { assert(false); }
-    virtual NumberInterface* _compute(ApproximateFloatMP a2) const { assert(false); }
+    virtual NumberInterface* _compute(Float64Value a2) const { return _heap_move_number(_op(_arg1,a2)); }
+    virtual NumberInterface* _compute(Float64Ball a2) const { return _heap_move_number(_op(_arg1,a2)); }
+    virtual NumberInterface* _compute(Float64Bounds a2) const { return _heap_move_number(_op(_arg1,a2)); }
+    virtual NumberInterface* _compute(Float64Approximation a2) const { return _heap_move_number(_op(_arg1,a2)); }
+    virtual NumberInterface* _compute(FloatMPValue a2) const { assert(false); }
+    virtual NumberInterface* _compute(FloatMPBall a2) const { assert(false); }
+    virtual NumberInterface* _compute(FloatMPBounds a2) const { assert(false); }
+    virtual NumberInterface* _compute(FloatMPApproximation a2) const { assert(false); }
 };
 
 template<class O, class P> class UnaryOperator<O,Float<P,PrecisionMP>> : public UnaryOperatorInterface {
@@ -114,14 +114,14 @@ template<class O, class P> class UnaryOperator<O,Float<P,PrecisionMP>> : public 
     UnaryOperator(A1 a1) : _arg1(a1) { }
     UnaryOperator(O o, A1 a1) : _op(o), _arg1(a1) { }
     virtual NumberInterface* _compute(Real a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(ExactFloat64 a2) const { assert(false); }
-    virtual NumberInterface* _compute(MetricFloat64 a2) const { assert(false); }
-    virtual NumberInterface* _compute(BoundedFloat64 a2) const { assert(false); }
-    virtual NumberInterface* _compute(ApproximateFloat64 a2) const { assert(false); }
-    virtual NumberInterface* _compute(ExactFloatMP a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(MetricFloatMP a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(BoundedFloatMP a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(ApproximateFloatMP a2) const { return _heap_move_number(_op(_arg1,a2)); }
+    virtual NumberInterface* _compute(Float64Value a2) const { assert(false); }
+    virtual NumberInterface* _compute(Float64Ball a2) const { assert(false); }
+    virtual NumberInterface* _compute(Float64Bounds a2) const { assert(false); }
+    virtual NumberInterface* _compute(Float64Approximation a2) const { assert(false); }
+    virtual NumberInterface* _compute(FloatMPValue a2) const { return _heap_move_number(_op(_arg1,a2)); }
+    virtual NumberInterface* _compute(FloatMPBall a2) const { return _heap_move_number(_op(_arg1,a2)); }
+    virtual NumberInterface* _compute(FloatMPBounds a2) const { return _heap_move_number(_op(_arg1,a2)); }
+    virtual NumberInterface* _compute(FloatMPApproximation a2) const { return _heap_move_number(_op(_arg1,a2)); }
 };
 
 template<class X> class NumberWrapper
@@ -203,26 +203,26 @@ template<class X> class NumberWrapper
         if (this->_paradigm() == ParadigmCode::VALIDATED && y._paradigm() == ParadigmCode::VALIDATED) {
             return LogicalValue(this->_get(BoundedTag(),Precision64()) < y._get(BoundedTag(),Precision64())); }
         else { return LogicalValue(this->_get(ApproximateTag(),Precision64()) < y._get(ApproximateTag(),Precision64())); } }
-    virtual MetricFloat64 _get(MetricTag,Precision64) const {
-        return this->_get_as<MetricFloat64>(); }
-    virtual BoundedFloat64 _get(BoundedTag,Precision64) const {
-        return this->_get_as<BoundedFloat64>(); }
-    virtual UpperFloat64 _get(UpperTag,Precision64) const {
-        return this->_get_as<UpperFloat64>(); }
-    virtual LowerFloat64 _get(LowerTag,Precision64) const {
-        return this->_get_as<LowerFloat64>(); }
-    virtual ApproximateFloat64 _get(ApproximateTag,Precision64) const {
-        return this->_get_as<ApproximateFloat64>(); }
-    virtual MetricFloatMP _get(MetricTag, PrecisionMP pr) const {
-        return this->_get_as<MetricFloatMP>(pr); }
-    virtual BoundedFloatMP _get(BoundedTag, PrecisionMP pr) const {
-        return this->_get_as<BoundedFloatMP>(pr); }
-    virtual UpperFloatMP _get(UpperTag, PrecisionMP pr) const {
-        return this->_get_as<UpperFloatMP>(pr); }
-    virtual LowerFloatMP _get(LowerTag, PrecisionMP pr) const {
-        return this->_get_as<LowerFloatMP>(pr); }
-    virtual ApproximateFloatMP _get(ApproximateTag, PrecisionMP pr) const {
-        return this->_get_as<ApproximateFloatMP>(pr); }
+    virtual Float64Ball _get(MetricTag,Precision64) const {
+        return this->_get_as<Float64Ball>(); }
+    virtual Float64Bounds _get(BoundedTag,Precision64) const {
+        return this->_get_as<Float64Bounds>(); }
+    virtual Float64UpperBound _get(UpperTag,Precision64) const {
+        return this->_get_as<Float64UpperBound>(); }
+    virtual Float64LowerBound _get(LowerTag,Precision64) const {
+        return this->_get_as<Float64LowerBound>(); }
+    virtual Float64Approximation _get(ApproximateTag,Precision64) const {
+        return this->_get_as<Float64Approximation>(); }
+    virtual FloatMPBall _get(MetricTag, PrecisionMP pr) const {
+        return this->_get_as<FloatMPBall>(pr); }
+    virtual FloatMPBounds _get(BoundedTag, PrecisionMP pr) const {
+        return this->_get_as<FloatMPBounds>(pr); }
+    virtual FloatMPUpperBound _get(UpperTag, PrecisionMP pr) const {
+        return this->_get_as<FloatMPUpperBound>(pr); }
+    virtual FloatMPLowerBound _get(LowerTag, PrecisionMP pr) const {
+        return this->_get_as<FloatMPLowerBound>(pr); }
+    virtual FloatMPApproximation _get(ApproximateTag, PrecisionMP pr) const {
+        return this->_get_as<FloatMPApproximation>(pr); }
     virtual ParadigmCode _paradigm() const { return P::code(); }
     virtual String _class_name() const { return class_name<X>(); }
     virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<const X&>(*this); }

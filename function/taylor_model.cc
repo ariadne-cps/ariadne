@@ -26,7 +26,7 @@
 
 namespace Ariadne {
 
-template class Series<BoundedFloat64>;
+template class Series<Float64Bounds>;
 
 template class TaylorModel<ValidatedTag,Float64>;
 template int instantiate_transcendental<TaylorModel<ValidatedTag,Float64>>();

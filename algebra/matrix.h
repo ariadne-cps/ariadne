@@ -712,12 +712,12 @@ template<class X> using RowNormType = decltype(abs(declval<X>())+abs(declval<X>(
 template<class X> Vector<RowNormType<X>> row_norms(const Matrix<X>& A);
 template<class X> Matrix<X> normalise_rows(const Matrix<X>& A);
 
-Tuple< Matrix<ApproximateFloat64>, PivotMatrix> triangular_factor(const Matrix<ApproximateFloat64>& A);
-Matrix<ApproximateFloat64> triangular_multiplier(const Matrix<ApproximateFloat64>& A);
+Tuple< Matrix<Float64Approximation>, PivotMatrix> triangular_factor(const Matrix<Float64Approximation>& A);
+Matrix<Float64Approximation> triangular_multiplier(const Matrix<Float64Approximation>& A);
 
 
-inline Matrix<ExactFloat64>& cast_exact(Matrix<ApproximateFloat64>& A) {
-    return reinterpret_cast<Matrix<ExactFloat64>&>(A); }
+inline Matrix<Float64Value>& cast_exact(Matrix<Float64Approximation>& A) {
+    return reinterpret_cast<Matrix<Float64Value>&>(A); }
 
 } // namespace Ariadne
 

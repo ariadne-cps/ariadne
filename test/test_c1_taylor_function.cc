@@ -15,7 +15,7 @@ Int test_taylor_series() {
     f2._uniform_error=0.01;
     std::cout << "f2="<<f2<<"\n";
 
-    const ExactFloat64 c1=3.0;
+    const Float64Value c1=3.0;
     const ExactIntervalType c2=ExactIntervalType(1.0)/ExactIntervalType(3.0);
     C1TaylorSeries f1pc1=f1; f1pc1+=c1;
     std::cout << "f1pc1="<<f1pc1<<"\n";
@@ -41,8 +41,8 @@ Int test_taylor_function() {
     f1._uniform_error=0.0;
     std::cout << "f1="<<f1<<"\n";
     std::cout << "(f1+=13)="<<(f1+=13)<<"\n";
-    std::cout << "(f1+=1/5)="<<(f1+=ExactFloat64(0.2))<<"\n";
-    std::cout << "(f1*=1/5)="<<(f1*=ExactFloat64(0.2))<<"\n";
+    std::cout << "(f1+=1/5)="<<(f1+=Float64Value(0.2))<<"\n";
+    std::cout << "(f1*=1/5)="<<(f1*=Float64Value(0.2))<<"\n";
 
     C1TaylorFunction f2=C1TaylorFunction::coordinate(2,1);
     f2._uniform_error=0.01;

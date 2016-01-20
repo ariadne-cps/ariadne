@@ -305,21 +305,21 @@ ARIADNE_CLASS_NAME(Number<ValidatedTag>)
 ARIADNE_CLASS_NAME(Number<EffectiveTag>)
 ARIADNE_CLASS_NAME(Number<ExactTag>)
 
-ARIADNE_CLASS_NAME(ApproximateFloat64);
-ARIADNE_CLASS_NAME(LowerFloat64);
-ARIADNE_CLASS_NAME(UpperFloat64);
-ARIADNE_CLASS_NAME(BoundedFloat64);
-ARIADNE_CLASS_NAME(MetricFloat64);
-ARIADNE_CLASS_NAME(ErrorFloat64);
-ARIADNE_CLASS_NAME(ExactFloat64);
+ARIADNE_CLASS_NAME(Float64Approximation);
+ARIADNE_CLASS_NAME(Float64LowerBound);
+ARIADNE_CLASS_NAME(Float64UpperBound);
+ARIADNE_CLASS_NAME(Float64Bounds);
+ARIADNE_CLASS_NAME(Float64Ball);
+ARIADNE_CLASS_NAME(Float64Error);
+ARIADNE_CLASS_NAME(Float64Value);
 
-ARIADNE_CLASS_NAME(ApproximateFloatMP);
-ARIADNE_CLASS_NAME(LowerFloatMP);
-ARIADNE_CLASS_NAME(UpperFloatMP);
-ARIADNE_CLASS_NAME(BoundedFloatMP);
-ARIADNE_CLASS_NAME(MetricFloatMP);
-ARIADNE_CLASS_NAME(ErrorFloatMP);
-ARIADNE_CLASS_NAME(ExactFloatMP);
+ARIADNE_CLASS_NAME(FloatMPApproximation);
+ARIADNE_CLASS_NAME(FloatMPLowerBound);
+ARIADNE_CLASS_NAME(FloatMPUpperBound);
+ARIADNE_CLASS_NAME(FloatMPBounds);
+ARIADNE_CLASS_NAME(FloatMPBall);
+ARIADNE_CLASS_NAME(FloatMPError);
+ARIADNE_CLASS_NAME(FloatMPValue);
 
 #undef ARIADNE_CLASS_NAME
 
@@ -327,8 +327,8 @@ typedef bool B; typedef uint Nat; typedef int Int; typedef double Dbl;
 typedef Integer  Z ; typedef Rational  Q ; typedef Real  R ;
 typedef Number<ExactTag> ExN; typedef Number<EffectiveTag> EfN; typedef Number<ValidatedTag> VaN;
 typedef Number<UpperTag> UpN; typedef Number<LowerTag> LoN; typedef Number<ApproximateTag> ApN;
-typedef ExactFloat64 ExF; typedef MetricFloat64 MeF; typedef BoundedFloat64 BoF;
-typedef UpperFloat64 UpF; typedef LowerFloat64 LoF; typedef ApproximateFloat64 ApF;
+typedef Float64Value ExF; typedef Float64Ball MeF; typedef Float64Bounds BoF;
+typedef Float64UpperBound UpF; typedef Float64LowerBound LoF; typedef Float64Approximation ApF;
 typedef Logical<ExactTag> ExL; typedef Logical<EffectiveTag> EfL; typedef Logical<ValidatedTag> VaL;
 typedef Logical<UpperTag> UpL; typedef Logical<LowerTag> LoL; typedef Logical<ApproximateTag> ApL;
 
@@ -337,7 +337,7 @@ typedef decltype(declval<ExN>() + declval<ExF>()) EfF;
 typedef decltype(declval<MeF>() + declval<BoF>()) VaF;
 typedef decltype(declval<UpF>() * declval<UpF>()) PrF;
 typedef decltype(declval<double>() + declval<Number<ApproximateTag>>()) ApD;
-//typedef BoundedFloat64Type VaF;
+//typedef Float64BoundsType VaF;
 
 } // namespace Ariadne
 
@@ -346,7 +346,7 @@ class CheckNumeric
   public:
     void check();
   private:
-    typedef SafeSumType<ExactFloat64,ExactFloat64> ExactFloatArithmeticType;
+    typedef SafeSumType<Float64Value,Float64Value> ExactFloatArithmeticType;
 
     void notifications();
     void check_conversions();
@@ -363,7 +363,7 @@ class CheckNumeric
     typedef Tags<Nat,Int,Dbl> BuiltinTypes;
     typedef Tags<Integer,Rational,Real> UserTypes;
     typedef Tags<Number<ExactTag>,Number<EffectiveTag>,Number<ValidatedTag>,Number<UpperTag>,Number<LowerTag>,Number<ApproximateTag>> GenericTypes;
-    typedef Tags<ExactFloat64,MetricFloat64,BoundedFloat64,UpperFloat64,LowerFloat64,ApproximateFloat64> Float64Types;
+    typedef Tags<Float64Value,Float64Ball,Float64Bounds,Float64UpperBound,Float64LowerBound,Float64Approximation> Float64Types;
 
     typedef decltype(cat(declval<BuiltinTypes>(),declval<UserTypes>(),declval<GenericTypes>(),declval<Float64Types>())) NumericTypes;
 
@@ -433,26 +433,26 @@ String to_str(bool b) { return b?"true":"false"; }
 
 void CheckNumeric::notifications()
 {
-    // Operations on ExactFloat64: display what is being used.
+    // Operations on Float64Value: display what is being used.
     ARIADNE_TEST_NOTIFY(String("Conversion double -> ApproximateNumericType: ")+to_str(IsConvertible<double,ApproximateNumericType>::value));
-    ARIADNE_TEST_NOTIFY(String("Conversion double -> ApproximateFloat64: ")+to_str(IsConvertible<double,ApproximateFloat64>::value));
-    ARIADNE_TEST_NOTIFY(String("Conversion double -> ExactFloat64: ")+to_str(IsConvertible<double,ExactFloat64>::value));
+    ARIADNE_TEST_NOTIFY(String("Conversion double -> Float64Approximation: ")+to_str(IsConvertible<double,Float64Approximation>::value));
+    ARIADNE_TEST_NOTIFY(String("Conversion double -> Float64Value: ")+to_str(IsConvertible<double,Float64Value>::value));
     ARIADNE_TEST_NOTIFY(String("Construction double -> ExactNumericType: ")+to_str(IsConstructible<ExactNumericType,double>::value));
-    ARIADNE_TEST_NOTIFY(String("Construction double -> ExactFloat64: ")+to_str(IsConstructible<ExactFloat64,double>::value));
-    ARIADNE_TEST_NOTIFY(String("Conversion int -> ExactFloat64: ")+to_str(IsConvertible<int,ExactFloat64>::value));
-    ARIADNE_TEST_NOTIFY(String("Construction Integer -> ExactFloat64: ")+to_str(IsConstructible<ExactFloat64,Integer>::value)+"\n");
+    ARIADNE_TEST_NOTIFY(String("Construction double -> Float64Value: ")+to_str(IsConstructible<Float64Value,double>::value));
+    ARIADNE_TEST_NOTIFY(String("Conversion int -> Float64Value: ")+to_str(IsConvertible<int,Float64Value>::value));
+    ARIADNE_TEST_NOTIFY(String("Construction Integer -> Float64Value: ")+to_str(IsConstructible<Float64Value,Integer>::value)+"\n");
 
     ARIADNE_TEST_NOTIFY((String("UpperNumericType * UpperNumericType -> ")+class_name<SafeProductType<UpperNumericType,UpperNumericType>>()+"\n"));
 
-    ARIADNE_TEST_NOTIFY((String("ExactFloat64 + ExactFloat64 -> ")+class_name<SafeSumType<ExactFloat64,ExactFloat64>>()));
-    ARIADNE_TEST_NOTIFY((String("MetricFloat64 + BoundedFloat64 -> ")+class_name<SafeSumType<MetricFloat64,BoundedFloat64>>()));
-    ARIADNE_TEST_NOTIFY((String("ExactFloat64 + ValidatedNumericType -> ")+class_name<SafeSumType<ExactFloat64,ValidatedNumericType>>()));
-    ARIADNE_TEST_NOTIFY((String("UpperFloat64 * UpperFloat64 -> ")+class_name<SafeProductType<UpperFloat64,UpperFloat64>>()+"\n"));
+    ARIADNE_TEST_NOTIFY((String("Float64Value + Float64Value -> ")+class_name<SafeSumType<Float64Value,Float64Value>>()));
+    ARIADNE_TEST_NOTIFY((String("Float64Ball + Float64Bounds -> ")+class_name<SafeSumType<Float64Ball,Float64Bounds>>()));
+    ARIADNE_TEST_NOTIFY((String("Float64Value + ValidatedNumericType -> ")+class_name<SafeSumType<Float64Value,ValidatedNumericType>>()));
+    ARIADNE_TEST_NOTIFY((String("Float64UpperBound * Float64UpperBound -> ")+class_name<SafeProductType<Float64UpperBound,Float64UpperBound>>()+"\n"));
 
     ARIADNE_TEST_NOTIFY((String("Integer + double -> ")+class_name<SafeSumType<Integer,double>>()));
     ARIADNE_TEST_NOTIFY((String("ExactNumericType + double -> ")+class_name<SafeSumType<ExactNumericType,double>>()));
     ARIADNE_TEST_NOTIFY((String("ApproximateNumericType + double -> ")+class_name<SafeSumType<ApproximateNumericType,double>>()));
-    ARIADNE_TEST_NOTIFY((String("ExactFloat64 + double -> ")+class_name<SafeSumType<ExactFloat64,double>>()+"\n"));
+    ARIADNE_TEST_NOTIFY((String("Float64Value + double -> ")+class_name<SafeSumType<Float64Value,double>>()+"\n"));
 
     ARIADNE_TEST_NOTIFY((String("Rational == double -> ")+class_name<SafeEqualsType<Rational,double>>()));
     ARIADNE_TEST_NOTIFY((String("Rational < double -> ")+class_name<SafeLessType<Rational,double>>()+"\n"));
@@ -464,7 +464,7 @@ void CheckNumeric::check_conversions() {
     // Cid is conversion, Eid is explicit construction, Nid is no construction
 
     // Conversions involving int
-    chk<ErrorFloat64,Cid,Nat>(); chk<ErrorFloat64,Nid,Int>(); chk<ErrorFloat64,Eid,Dbl>();
+    chk<Float64Error,Cid,Nat>(); chk<Float64Error,Nid,Int>(); chk<Float64Error,Eid,Dbl>();
 
     // Concrete numbers
     chk<Nat,Cid,Nat>(); chk<Nat,Cid,Int>(); chk<Nat,Cid,Dbl>(); chk<Nat,Nid, Z >(); chk<Int,Nid, Q >(); chk<Int,Nid, R >();

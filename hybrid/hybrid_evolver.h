@@ -53,7 +53,7 @@ namespace Ariadne {
 template<class X> class FunctionModelFactoryInterface;
 typedef FunctionModelFactoryInterface<ValidatedTag> ValidatedFunctionModelFactoryInterface;
 
-typedef Map< DiscreteLocation, Vector<ExactFloat64> > HybridExactFloatVector;
+typedef Map< DiscreteLocation, Vector<Float64Value> > HybridExactFloatVector;
 
 class IntegratorInterface;
 class SolverInterface;
@@ -67,7 +67,7 @@ class FlowFunctionModel
 {
   public:
     FlowFunctionModel(const ValidatedVectorFunctionModel& f) : ValidatedVectorFunctionModel(f) { }
-    ExactFloat64 step_size() const { return cast_exact(this->time_domain().upper()); }
+    Float64Value step_size() const { return cast_exact(this->time_domain().upper()); }
     ExactIntervalType time_domain() const { return this->domain()[this->domain().size()-1]; }
     ExactBoxType space_domain() const { return ExactBoxType(project(this->domain(),Ariadne::range(0,this->domain().size()-1))); }
     ExactBoxType const codomain() const { return this->ValidatedVectorFunctionModel::codomain(); }
@@ -248,7 +248,7 @@ class HybridEvolverBase
     ValidatedVectorFunctionModel
     _compute_flow(EffectiveVectorFunction vector_field,
                   ExactBoxType const& initial_set,
-                  const ExactFloat64& maximum_step_size) const;
+                  const Float64Value& maximum_step_size) const;
 
     //! \brief Compute the active events for the \a flow \f$\phi\f$ with
     //! time step \f$h\f$ starting in the given \a starting_set \f$S\f$.
@@ -616,7 +616,7 @@ struct TimingData
     StepKind step_kind; //!< The kind of step taken in the evolution
     FinishingKind finishing_kind; //!< The relationship between the finishing time of the step, and the final time of the evolution trace.
     Real final_time; //!< The time \f$t_{\max}\f$ specified as the final time of the evolution trace.
-    ExactFloat64 step_size; //!< The maximum step size \f$h\f$ allowed by the computed flow function.
+    Float64Value step_size; //!< The maximum step size \f$h\f$ allowed by the computed flow function.
     ValidatedScalarFunctionModel spacetime_dependent_evolution_time;
         //!< The evolution time \f$\varepsilon(x,t)\f$ used in a \a SPACETIME_DEPENDENT_EVOLUTION_TIME step.
     ValidatedScalarFunctionModel spacetime_dependent_finishing_time;
@@ -668,7 +668,7 @@ class HybridEvolverBaseConfiguration : public ConfigurationInterface
 {
   public:
     typedef Nat UnsignedIntType;
-    typedef ExactFloat64 RealType;
+    typedef Float64Value RealType;
     typedef double RawRealType;
 
   protected:

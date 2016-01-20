@@ -25,7 +25,7 @@
 
 namespace Ariadne {
 
-Interval<ExactFloat64> widen_domain(Interval<UpperFloat64> const& ivl) {
+Interval<Float64Value> widen_domain(Interval<Float64UpperBound> const& ivl) {
     volatile float min=std::numeric_limits<float>::min();
     volatile double l=-ivl.lower().get_d();
     volatile double u=ivl.upper().get_d();
@@ -35,11 +35,11 @@ Interval<ExactFloat64> widen_domain(Interval<UpperFloat64> const& ivl) {
     if(l==u) { neg_rl+=min; ru+=min; }
     if(neg_rl<neg_l) { neg_rl+=min; }
     if(ru<u) { ru+=min; }
-    return Interval<ExactFloat64>(-neg_rl,ru);
+    return Interval<Float64Value>(-neg_rl,ru);
 }
 
 InputStream&
-operator>>(InputStream& is, Interval<ExactFloat64>& ivl)
+operator>>(InputStream& is, Interval<Float64Value>& ivl)
 {
     Float64 l,u;
     char cl,cm,cr;
@@ -48,7 +48,7 @@ operator>>(InputStream& is, Interval<ExactFloat64>& ivl)
     ARIADNE_ASSERT(cl=='[' || cl=='(');
     ARIADNE_ASSERT(cm==':' || cm==',' || cm==';');
     ARIADNE_ASSERT(cr==']' || cr==')');
-    ivl.set(ExactFloat64(l),ExactFloat64(u));
+    ivl.set(Float64Value(l),Float64Value(u));
     return is;
 }
 

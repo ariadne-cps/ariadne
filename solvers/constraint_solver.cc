@@ -45,8 +45,8 @@
 
 namespace Ariadne {
 
-typedef Vector<ApproximateFloat64> ApproximateFloatVector;
-typedef Vector<ExactFloat64> ExactFloatVector;
+typedef Vector<Float64Approximation> FloatApproximationVector;
+typedef Vector<Float64Value> ExactFloatVector;
 
 inline Sweeper default_sweeper() { return Sweeper(); }
 
@@ -90,8 +90,8 @@ Pair<Kleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType& domain,
 Pair<Kleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType& domain, const ValidatedVectorFunction& function, const ExactBoxType& codomain) const
 {
 
-    static const ExactFloat64 XSIGMA=0.125_exact;
-    static const ExactFloat64 TERR=-1.0_exact*two_exp(-10);
+    static const Float64Value XSIGMA=0.125_exact;
+    static const Float64Value TERR=-1.0_exact*two_exp(-10);
     static const Float64 inf = Ariadne::inf;
 
     ARIADNE_LOG(4,"domain="<<domain<<"\nfunction="<<function<<"\ncodomain="<<codomain<<"\n");
@@ -114,16 +114,16 @@ Pair<Kleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType& domain,
     const Nat n=codomain.size(); // The total number of nontrivial constraints
     const Nat l=(m+n)*2; // The total number of lagrange multipliers
 
-    ApproximateFloatVector point(m); // The point in the domain which is the current test point
-    ApproximateFloat64 violation; // An upper bound on amount by which the constraints are violated by the test point
-    ApproximateFloatVector multipliers(l); // The lagrange multipliers for the constraints
-    ApproximateFloatVector slack(l); // The slack between the test point and the violated constraints
+    FloatApproximationVector point(m); // The point in the domain which is the current test point
+    Float64Approximation violation; // An upper bound on amount by which the constraints are violated by the test point
+    FloatApproximationVector multipliers(l); // The lagrange multipliers for the constraints
+    FloatApproximationVector slack(l); // The slack between the test point and the violated constraints
 
-    ApproximateFloat64& t=violation; ApproximateFloatVector& x=multipliers; ApproximateFloatVector& y=point; ApproximateFloatVector& z=slack; // Aliases for the main quantities used
+    Float64Approximation& t=violation; FloatApproximationVector& x=multipliers; FloatApproximationVector& y=point; FloatApproximationVector& z=slack; // Aliases for the main quantities used
     const ExactBoxType& d=domain; const ValidatedVectorFunction& fn=function; const ExactBoxType& c=codomain; // Aliases for the main quantities used
     VectorTaylorFunction tfn(d,fn,default_sweeper());
 
-    point=static_cast<ApproximateFloatVector>(midpoint(d));
+    point=static_cast<FloatApproximationVector>(midpoint(d));
     for(Nat k=0; k!=l; ++k) { multipliers[k]=1.0/l; }
 
     NonlinearInteriorPointOptimiser optimiser;
@@ -148,7 +148,7 @@ Pair<Kleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType& domain,
         // Probably disjoint, so try to prove this
         UpperBoxType subdomain=domain;
 
-        Vector<ExactFloat64> x_exact=cast_exact(x);
+        Vector<Float64Value> x_exact=cast_exact(x);
         // Use the computed dual variables to try to make a scalar function which is negative over the entire domain.
         // This should be easier than using all constraints separately
         ScalarTaylorFunction txg=ScalarTaylorFunction::zero(d,default_sweeper());
@@ -183,10 +183,10 @@ Pair<Kleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType& domain,
         //Pair<ExactBoxType,ExactBoxType> sd=solver.split(List<EffectiveConstraint>(1u,constraint),d);
         ARIADNE_LOG(4,"  Splitting domain\n");
         Pair<ExactBoxType,ExactBoxType> sd=d.split();
-        Vector<ApproximateFloat64> nx = ApproximateFloat64(1.0_approx-XSIGMA)*x + Vector<ApproximateFloat64>(x.size(),XSIGMA/x.size());
-        Vector<ApproximateFloat64> ny = midpoint(sd.first);
+        Vector<Float64Approximation> nx = Float64Approximation(1.0_approx-XSIGMA)*x + Vector<Float64Approximation>(x.size(),XSIGMA/x.size());
+        Vector<Float64Approximation> ny = midpoint(sd.first);
         Kleenean result=this->feasible(sd.first, fn, c).first;
-        nx = ApproximateFloat64(1.0-XSIGMA)*x + Vector<ApproximateFloat64>(x.size(),XSIGMA/x.size());
+        nx = Float64Approximation(1.0-XSIGMA)*x + Vector<Float64Approximation>(x.size(),XSIGMA/x.size());
         ny = midpoint(sd.second);
         result = result || this->feasible(sd.second, fn, c).first;
         return make_pair(result,ExactPoint());
@@ -323,7 +323,7 @@ Bool ConstraintSolver::monotone_reduce(UpperBoxType& domain, const ValidatedScal
 
     ARIADNE_LOG(2,"ConstraintSolver::monotone_reduce(ExactBoxType domain): function="<<function<<", bounds="<<bounds<<", domain="<<domain<<", variable="<<variable<<", derivative="<<derivative<<"\n");
 
-    ExactFloat64 splitpoint;
+    Float64Value splitpoint;
     UpperIntervalType lower=domain[variable];
     UpperIntervalType upper=domain[variable];
     Vector<UpperIntervalType> slice=domain;
@@ -357,7 +357,7 @@ Bool ConstraintSolver::monotone_reduce(UpperBoxType& domain, const ValidatedScal
 
 
 Bool ConstraintSolver::lyapunov_reduce(UpperBoxType& domain, const VectorTaylorFunction& function, const ExactBoxType& bounds,
-                                       ApproximateFloatVector centre, ApproximateFloatVector multipliers) const
+                                       FloatApproximationVector centre, FloatApproximationVector multipliers) const
 {
     return this->lyapunov_reduce(domain,function,bounds,cast_exact(centre),cast_exact(multipliers));
 }
@@ -485,7 +485,7 @@ Kleenean ConstraintSolver::check_feasibility(const ExactBoxType& d, const Valida
         if(y[i]<d[i].lower() || y[i]>d[i].upper()) { return false; }
     }
 
-    Vector<BoundedFloat64> fy=f(Vector<BoundedFloat64>(y));
+    Vector<Float64Bounds> fy=f(Vector<Float64Bounds>(y));
     ARIADNE_LOG(4,"d="<<d<<" f="<<f<<", c="<<c<<"\n  y="<<y<<", f(y)="<<fy<<"\n");
     Kleenean result=true;
     for(Nat j=0; j!=fy.size(); ++j) {

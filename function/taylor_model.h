@@ -76,9 +76,9 @@ template<class F>
 class TaylorModel<ValidatedTag,F>
 {
   public:
-    typedef ExactFloat64 CoefficientType;
-    typedef ErrorFloat64 ErrorType;
-    typedef ErrorFloat64 NormType;
+    typedef Float64Value CoefficientType;
+    typedef Float64Error ErrorType;
+    typedef Float64Error NormType;
     typedef ReverseLexicographicKeyLess ComparisonType;
     typedef SortedExpansion<CoefficientType,ComparisonType> ExpansionType;
 
@@ -452,14 +452,14 @@ template<class F>
 class TaylorModel<ApproximateTag,F>
 {
   public:
-    typedef ApproximateFloat64 CoefficientType;
+    typedef Float64Approximation CoefficientType;
     typedef ApproximateErrorType ErrorType;
     typedef ReverseLexicographicKeyLess ComparisonType;
     typedef SortedExpansion<CoefficientType,ComparisonType> ExpansionType;
 
     typedef ExactIntervalType CodomainType;
     typedef ApproximateIntervalType RangeType;
-    typedef ApproximateFloat64 NormType;
+    typedef Float64Approximation NormType;
 
     //! \brief The type used for the coefficients.
     typedef ApproximateNumericType NumericType;
@@ -746,8 +746,8 @@ template<class P, class F> typename TaylorModel<P,F>::NormType norm(const Vector
 
 template<class F> Matrix<ValidatedNumericType> jacobian(const Vector<TaylorModel<ValidatedTag,F>>& x, const Vector<ValidatedNumericType>& y);
 template<class F> Matrix<ValidatedNumericType> jacobian(const Vector<TaylorModel<ValidatedTag,F>>& x, const Vector<ValidatedNumericType>& y, Array<SizeType>& p);
-template<class F> Matrix<ExactFloat64> jacobian_value(const Vector<TaylorModel<ValidatedTag,F>>& x);
-template<class F> Matrix<ExactFloat64> jacobian_value(const Vector<TaylorModel<ValidatedTag,F>>& x, const Array<SizeType>& p);
+template<class F> Matrix<Float64Value> jacobian_value(const Vector<TaylorModel<ValidatedTag,F>>& x);
+template<class F> Matrix<Float64Value> jacobian_value(const Vector<TaylorModel<ValidatedTag,F>>& x, const Array<SizeType>& p);
 template<class F> Matrix<UpperIntervalType> jacobian_range(const Vector<TaylorModel<ValidatedTag,F>>& x);
 template<class F> Matrix<UpperIntervalType> jacobian_range(const Vector<TaylorModel<ValidatedTag,F>>& x, const Array<SizeType>& p);
 

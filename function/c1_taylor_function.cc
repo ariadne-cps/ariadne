@@ -621,7 +621,7 @@ C1TaylorFunction operator*(C1TaylorFunction f1, C1TaylorFunction f2) {
 }
 
 UpperIntervalType evaluate(C1TaylorFunction f, Vector<UpperIntervalType> x) {
-    UpperIntervalType r=horner_evaluate(reinterpret_cast<Expansion<ExactFloat64>const&>(f._expansion),x);
+    UpperIntervalType r=horner_evaluate(reinterpret_cast<Expansion<Float64Value>const&>(f._expansion),x);
     r += UpperIntervalType(-f._uniform_error,+f._uniform_error);
     return r;
 }
@@ -647,7 +647,7 @@ C1TaylorFunction compose(C1TaylorSeries f, C1TaylorFunction g) {
 }
 
 C1TaylorFunction compose(C1TaylorFunction f, Vector<C1TaylorFunction> g) {
-    C1TaylorFunction r=horner_evaluate(reinterpret_cast<Expansion<ExactFloat64>const&>(f._expansion),g);
+    C1TaylorFunction r=horner_evaluate(reinterpret_cast<Expansion<Float64Value>const&>(f._expansion),g);
     std::cerr<<"intermediate="<<r<<"\n";
     r._uniform_error += f._uniform_error;
     r._zero_error += f._zero_error;

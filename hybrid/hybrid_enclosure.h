@@ -178,7 +178,7 @@ class HybridEnclosure
     //! Corresponds to replacing \f$\xi\f$ by \f$r\circ \xi\f$.
     Void apply_reset(DiscreteEvent e, DiscreteLocation q, RealSpace s, const ValidatedVectorFunction& r);
     //! \brief Apply the evolve step \xi'(s) = phi(xi(s),eps) and tau'(s)=tau(s)+eps
-    Void apply_fixed_evolve_step(const ValidatedVectorFunctionModel& phi, const ExactFloat64& eps);
+    Void apply_fixed_evolve_step(const ValidatedVectorFunctionModel& phi, const Float64Value& eps);
     //! \brief Apply the evolve step \xi'(s) = phi(xi(s),eps(xi(s),tau(s))) and tau'(s)=tau(s)+eps(xi(s),tau(s))
     Void apply_spacetime_evolve_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& eps);
     //! \brief Apply the reach step \xi'(s) = phi(xi(s),t-tau(s)) and tau'(s)=tau(s)+t for 0<=t<=eps(xi(s),tau(s))
@@ -208,7 +208,7 @@ class HybridEnclosure
     //! Corresponds to introducting the constraint \f$\tau(s)\leq t_{\max}\f$.
     Void set_maximum_time(DiscreteEvent event, RawFloat64 tmax);
     //! \brief Set the current time-step to \f$h\f$. \deprecated
-    Void set_step_time(ExactFloat64 h);
+    Void set_step_time(Float64Value h);
     //! \brief \deprecated
     Void new_time_step_bound(DiscreteEvent e, ValidatedScalarFunction tau);
 
@@ -275,9 +275,9 @@ class HybridEnclosure
   private:
   public:
     // Compute the flow reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h] .
-    Void _apply_flow(ValidatedVectorFunction phi, ExactFloat64 step);
+    Void _apply_flow(ValidatedVectorFunction phi, Float64Value step);
     // Compute the flow reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h] and t <= eps(xi(s)) .
-    Void _apply_flow(ValidatedVectorFunction phi, ExactFloat64 step, ValidatedScalarFunction elps);
+    Void _apply_flow(ValidatedVectorFunction phi, Float64Value step, ValidatedScalarFunction elps);
     // Compute the flow evolve step \xi'(s) = phi(xi(s),eps(s)) and tau'(s)=tau(s)+eps(s)
     Void _apply_flow_step(ValidatedVectorFunction phi, ValidatedScalarFunction elps);
     Void _check() const; // Check that set is well-formed.

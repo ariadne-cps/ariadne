@@ -453,23 +453,23 @@ UpperBoxType ConstrainedImageSet::bounding_box() const
     return Ariadne::apply(this->_function,over_approximation(this->_domain));
 }
 
-Matrix<ExactFloat64> cast_exact(Matrix<BoundedFloat64> vA) {
-    Matrix<ApproximateFloat64> aA=vA;
-    return reinterpret_cast<Matrix<ExactFloat64>&>(aA);
+Matrix<Float64Value> cast_exact(Matrix<Float64Bounds> vA) {
+    Matrix<Float64Approximation> aA=vA;
+    return reinterpret_cast<Matrix<Float64Value>&>(aA);
 }
 
 ValidatedAffineConstrainedImageSet
 ConstrainedImageSet::affine_approximation() const
 {
     const Vector<ExactIntervalType> D=approximation(this->domain());
-    Vector<ExactFloat64> m=midpoint(D);
-    Matrix<ExactFloat64> G=cast_exact(jacobian(this->_function,m));
-    Vector<ExactFloat64> h=cast_exact(this->_function.evaluate(m)-G*m);
+    Vector<Float64Value> m=midpoint(D);
+    Matrix<Float64Value> G=cast_exact(jacobian(this->_function,m));
+    Vector<Float64Value> h=cast_exact(this->_function.evaluate(m)-G*m);
     ValidatedAffineConstrainedImageSet result(D,G,h);
 
 
-    Vector<ApproximateFloat64> a(this->number_of_parameters());
-    ApproximateFloat64 b,l,u;
+    Vector<Float64Approximation> a(this->number_of_parameters());
+    Float64Approximation b,l,u;
     for(List<EffectiveConstraint>::ConstIterator iter=this->_constraints.begin();
         iter!=this->_constraints.end(); ++iter)
     {
@@ -572,7 +572,7 @@ ConstrainedImageSet::split() const
     Nat k=this->number_of_parameters();
     Float64 rmax=0.0;
     for(Nat j=0; j!=this->number_of_parameters(); ++j) {
-       UpperFloat64 rj(this->domain()[j].radius());
+       Float64UpperBound rj(this->domain()[j].radius());
        if(rj.raw()>rmax) {
             k=j;
             rmax=rj.raw();
@@ -926,7 +926,7 @@ ValidatedConstrainedImageSet::split() const
     Nat k=this->number_of_parameters();
     Float64 rmax=0.0;
     for(Nat j=0; j!=this->number_of_parameters(); ++j) {
-        UpperFloat64 rj=this->domain()[j].radius();
+        Float64UpperBound rj=this->domain()[j].radius();
         if(rj.raw()>rmax) {
             k=j;
             rmax=rj.raw();
@@ -1101,23 +1101,23 @@ join(const ValidatedConstrainedImageSet& set1, const ValidatedConstrainedImageSe
 
     ValidatedVectorFunctionModel function1
         = ValidatedVectorFunctionModel( dynamic_cast<VectorFunctionModelInterface<ValidatedTag> const&>(set1.function().reference()));
-    Vector<ErrorFloat64> function_error1=function1.errors();
+    Vector<Float64Error> function_error1=function1.errors();
     function1.clobber();
     function1.restrict(new_domain);
 
     ValidatedVectorFunctionModel function2
         = ValidatedVectorFunctionModel( dynamic_cast<VectorFunctionModelInterface<ValidatedTag> const&>(set2.function().reference()));
-    Vector<ErrorFloat64> function_error2=function2.errors();
+    Vector<Float64Error> function_error2=function2.errors();
     function2.clobber();
     function2.restrict(new_domain);
 
-    ValidatedVectorFunctionModel new_function=(function1+function2)*ExactFloat64(0.5);
+    ValidatedVectorFunctionModel new_function=(function1+function2)*Float64Value(0.5);
     new_function.clobber();
     for(Nat i=0; i!=new_function.result_size(); ++i) {
         function_error1[i]=norm(new_function[i]-function1[i])+function_error1[i];
         function_error2[i]=norm(new_function[i]-function2[i])+function_error2[i];
-        ErrorFloat64 new_function_error = max(function_error1[i],function_error2[i]);
-        new_function[i] = new_function[i] + BoundedFloat64(-new_function_error,+new_function_error);
+        Float64Error new_function_error = max(function_error1[i],function_error2[i]);
+        new_function[i] = new_function[i] + Float64Bounds(-new_function_error,+new_function_error);
     }
 
     ARIADNE_ASSERT(set1.number_of_constraints()==0);

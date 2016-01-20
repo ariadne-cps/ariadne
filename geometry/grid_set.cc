@@ -207,18 +207,18 @@ Array<double> Grid::upper_index(const ExactBoxType& bx) const {
 
 ExactPoint Grid::point(const Array<IntegerType>& a) const
 {
-    Vector<ExactFloat64> res(a.size());
+    Vector<Float64Value> res(a.size());
     for(SizeType i=0; i!=res.size(); ++i) {
-        res[i]=ExactFloat64(this->_data->_origin[i]+this->_data->_lengths[i]*a[i]);
+        res[i]=Float64Value(this->_data->_origin[i]+this->_data->_lengths[i]*a[i]);
     }
     return res;
 }
 
 ExactPoint Grid::point(const Array<DyadicType>& a) const
 {
-    Vector<ExactFloat64> res(a.size());
+    Vector<Float64Value> res(a.size());
     for(SizeType i=0; i!=res.size(); ++i) {
-        res[i]=ExactFloat64(this->_data->_origin[i]+this->_data->_lengths[i]*a[i]);
+        res[i]=Float64Value(this->_data->_origin[i]+this->_data->_lengths[i]*a[i]);
     }
     return res;
 }

@@ -27,14 +27,14 @@
 namespace Ariadne {
 //namespace Test {
 
-// Compare with double's as if they were ExactFloat64
+// Compare with double's as if they were Float64Value
 
-template<class X> auto operator==(X const& x, double d) -> decltype(x==ExactFloat64(d)) { return x==ExactFloat64(d); }
-template<class X> auto operator!=(X const& x, double d) -> decltype(x!=ExactFloat64(d)) { return x!=ExactFloat64(d); }
-template<class X> auto operator< (X const& x, double d) -> decltype(x< ExactFloat64(d)) { return x< ExactFloat64(d); }
-template<class X> auto operator> (X const& x, double d) -> decltype(x> ExactFloat64(d)) { return x> ExactFloat64(d); }
-template<class X> auto operator<=(X const& x, double d) -> decltype(x<=ExactFloat64(d)) { return x<=ExactFloat64(d); }
-template<class X> auto operator>=(X const& x, double d) -> decltype(x>=ExactFloat64(d)) { return x>=ExactFloat64(d); }
+template<class X> auto operator==(X const& x, double d) -> decltype(x==Float64Value(d)) { return x==Float64Value(d); }
+template<class X> auto operator!=(X const& x, double d) -> decltype(x!=Float64Value(d)) { return x!=Float64Value(d); }
+template<class X> auto operator< (X const& x, double d) -> decltype(x< Float64Value(d)) { return x< Float64Value(d); }
+template<class X> auto operator> (X const& x, double d) -> decltype(x> Float64Value(d)) { return x> Float64Value(d); }
+template<class X> auto operator<=(X const& x, double d) -> decltype(x<=Float64Value(d)) { return x<=Float64Value(d); }
+template<class X> auto operator>=(X const& x, double d) -> decltype(x>=Float64Value(d)) { return x>=Float64Value(d); }
 
 
 #define ARIADNE_HAS_TYPEDEF(typename_to_check) \

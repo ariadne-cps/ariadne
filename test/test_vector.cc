@@ -60,14 +60,14 @@ TestVector::test()
 Void
 TestVector::test_concept()
 {
-    ApproximateFloat64 ax(1);
-    BoundedFloat64 ix(1);
-    ExactFloat64 ex(1);
-    Vector<ApproximateFloat64> av;
-    Vector<BoundedFloat64> iv;
-    Vector<ExactFloat64> ev;
+    Float64Approximation ax(1);
+    Float64Bounds ix(1);
+    Float64Value ex(1);
+    Vector<Float64Approximation> av;
+    Vector<Float64Bounds> iv;
+    Vector<Float64Value> ev;
 
-    iv=Vector<BoundedFloat64>(ev);
+    iv=Vector<Float64Bounds>(ev);
 
     av=av+av;
     iv=ev+ev;
@@ -130,62 +130,62 @@ TestVector::test_misc()
 {
 
     Int n=3;
-    ApproximateFloat64 vptr[3]={-4.0,3.0,1.0};
-    ApproximateFloat64 x=1.5;
+    Float64Approximation vptr[3]={-4.0,3.0,1.0};
+    Float64Approximation x=1.5;
 
-    Vector<ApproximateFloat64> v0;
+    Vector<Float64Approximation> v0;
     cout << "v0.size()=" << v0.size() << endl;
     cout << "v0=" << flush; cout << v0 << endl;
     ARIADNE_TEST_NOTIFY("Constructor Vector<X>(SizeType, const X*) is unsafe and has been removed.");
-    Array<ApproximateFloat64> a1(vptr,vptr+3);
-    Vector<ApproximateFloat64> v1(a1);
+    Array<Float64Approximation> a1(vptr,vptr+3);
+    Vector<Float64Approximation> v1(a1);
     cout << "v1=" << v1 << endl;
-    Vector<ApproximateFloat64> v2=Vector<ApproximateFloat64>({2.375,4.25,-1.25});
+    Vector<Float64Approximation> v2=Vector<Float64Approximation>({2.375,4.25,-1.25});
     cout << "v2=" << v2 << endl;
     cout << "norm(v1)=" << norm(v1) << "  norm(v2)=" << norm(v2) << endl;
     ARIADNE_TEST_EQUAL(norm(v1).raw(),4);
     ARIADNE_TEST_EQUAL(norm(v2).raw(),4.25);
 
-    Vector<ApproximateFloat64> v3(1);
+    Vector<Float64Approximation> v3(1);
     cout << "v3=" << v3 << endl;
-    Vector<ApproximateFloat64> v4=v2;
+    Vector<Float64Approximation> v4=v2;
     cout << "v4=" << v4 << endl;
-    Vector<ApproximateFloat64> v5={-4.0,3.0,1.0};
+    Vector<Float64Approximation> v5={-4.0,3.0,1.0};
     cout << "v5=" << v5 << endl;
     ARIADNE_TEST_EQUAL(v1,v5);
     cout << endl;
 
-    Vector<ApproximateFloat64> vf0;
-    v1=Vector<ApproximateFloat64>({0.25,-1.5});
-    v2=Vector<ApproximateFloat64>({-0.5,2.25});
+    Vector<Float64Approximation> vf0;
+    v1=Vector<Float64Approximation>({0.25,-1.5});
+    v2=Vector<Float64Approximation>({-0.5,2.25});
     vf0=-v1;
     cout << vf0 << " = -" << v1 << endl;
-    vf0=Vector<ApproximateFloat64>(v1)+v2;
+    vf0=Vector<Float64Approximation>(v1)+v2;
     cout << vf0 << " = " << v1 << " + " << v2 << endl;
-    vf0=Vector<ApproximateFloat64>(v1)-v2;
+    vf0=Vector<Float64Approximation>(v1)-v2;
     cout << vf0 << " = " << v1 << " - " << v2 << endl;
-    vf0=x*Vector<ApproximateFloat64>(v2);
+    vf0=x*Vector<Float64Approximation>(v2);
     cout << vf0 << " = " << x << " * " << v2 << endl;
-    vf0=Vector<ApproximateFloat64>(v1)*x;
+    vf0=Vector<Float64Approximation>(v1)*x;
     cout << vf0 << " = " << v1 << " * " << x << endl;
-    vf0=Vector<ApproximateFloat64>(v1)/x;
+    vf0=Vector<Float64Approximation>(v1)/x;
     cout << vf0 << " = " << v1 << " / " << x << endl;
     cout << endl;
 
-    Vector< BoundedFloat64 > iv1=Vector<BoundedFloat64>({BoundedFloat64{0.984375,1.015625},{2.25,2.375},{4.0,4.375},{-0.03125,0.015625}});
+    Vector< Float64Bounds > iv1=Vector<Float64Bounds>({Float64Bounds{0.984375,1.015625},{2.25,2.375},{4.0,4.375},{-0.03125,0.015625}});
     cout << "iv1=" << iv1 << endl;
     cout << "norm(iv1)=" << norm(iv1) << endl;
     cout << "norm(iv1).upper()=" << norm(iv1).upper() << endl;
 
-    Vector< BoundedFloat64 > iv2=Vector<BoundedFloat64>({{-1,1},{-1,1}});
+    Vector< Float64Bounds > iv2=Vector<Float64Bounds>({{-1,1},{-1,1}});
     cout << "iv2=" << iv2 << endl;
-    Vector< BoundedFloat64 > iv3(3);
+    Vector< Float64Bounds > iv3(3);
     cout << "iv3=" << iv3 << endl;
-    iv3=Vector<BoundedFloat64>({{4.25,4.25},{2.375,2.375}});
+    iv3=Vector<Float64Bounds>({{4.25,4.25},{2.375,2.375}});
     cout << "iv3=" << iv3 << endl;
-    BoundedFloat64 ix=BoundedFloat64(-2,1);
+    Float64Bounds ix=Float64Bounds(-2,1);
 
-    Vector< BoundedFloat64 > iv0;
+    Vector< Float64Bounds > iv0;
     cout << "iv0=" << iv0 << endl;
     iv1=iv0;
     cout << "iv1=" << iv1 << endl;
@@ -193,9 +193,9 @@ TestVector::test_misc()
     cout << "iv1=" << iv1 << endl;
     cout << endl;
 
-    BoundedFloat64 ix2=iv2[0];
-    BoundedFloat64 ix3=iv3[0];
-    BoundedFloat64 ix1=ix2+ix3;
+    Float64Bounds ix2=iv2[0];
+    Float64Bounds ix3=iv3[0];
+    Float64Bounds ix1=ix2+ix3;
     ix1=ix2+ix3;
 
     cout << "iv2=" << iv2 << ", iv3=" << iv3 << endl;
@@ -207,13 +207,13 @@ TestVector::test_misc()
     cout << iv1 << " = " << ix << " * " << iv3 << endl;
     iv1=iv2*ix;
     cout << iv1 << " = " << iv2 << " * " << ix << endl;
-    ix=BoundedFloat64(1,2);
+    ix=Float64Bounds(1,2);
     iv1=iv2/ix;
     cout << iv1 << " = " << iv2 << " / " << ix << endl;
     cout << endl;
 
-    Vector<ExactFloat64> ev1(reinterpret_cast<Vector<ExactFloat64>const&>(v1));
-    ExactFloat64 ex(reinterpret_cast<ExactFloat64 const&>(x));
+    Vector<Float64Value> ev1(reinterpret_cast<Vector<Float64Value>const&>(v1));
+    Float64Value ex(reinterpret_cast<Float64Value const&>(x));
     iv0=iv1+ev1;
     cout << iv0 << " = " << iv1 << " + " << ev1 << endl;
     iv0=ev1+iv1;
@@ -237,22 +237,22 @@ TestVector::test_misc()
 
     iv0=ev1;
     iv0/=ix;
-    iv0=Vector<BoundedFloat64>({2,1});
-    iv1=Vector<BoundedFloat64>({0,1});
+    iv0=Vector<Float64Bounds>({2,1});
+    iv1=Vector<Float64Bounds>({0,1});
     /*
-      ARIADNE_TEST_ASSERT( (iv0+=Vector<BoundedFloat64>("[0,1]")) == Vector<BoundedFloat64>("[2,2]") );
-      ARIADNE_TEST_ASSERT( (iv0-=Vector<BoundedFloat64>("[0,1]")) == Vector<BoundedFloat64>("[2,1]") );
-      ARIADNE_TEST_ASSERT( (iv0*=2) == Vector<BoundedFloat64>("[4,2]") );
-      ARIADNE_TEST_ASSERT( (iv0/=4) == Vector<BoundedFloat64>("[1,0.5]") );
+      ARIADNE_TEST_ASSERT( (iv0+=Vector<Float64Bounds>("[0,1]")) == Vector<Float64Bounds>("[2,2]") );
+      ARIADNE_TEST_ASSERT( (iv0-=Vector<Float64Bounds>("[0,1]")) == Vector<Float64Bounds>("[2,1]") );
+      ARIADNE_TEST_ASSERT( (iv0*=2) == Vector<Float64Bounds>("[4,2]") );
+      ARIADNE_TEST_ASSERT( (iv0/=4) == Vector<Float64Bounds>("[1,0.5]") );
     */
 
     /*
       cout << "test_vector_slice" << endl;
-      v1=Vector<ApproximateFloat64>("[-1.25,0.75,-0.5,-4.25,2.375]");
+      v1=Vector<Float64Approximation>("[-1.25,0.75,-0.5,-4.25,2.375]");
       cout << v1 << endl;
-      VectorSlice<ApproximateFloat64> vs1(2,v1.begin()+2,2);
+      VectorSlice<Float64Approximation> vs1(2,v1.begin()+2,2);
       cout << vs1 << endl;
-      VectorSlice<ApproximateFloat64> vs2(2,v1.begin(),3);
+      VectorSlice<Float64Approximation> vs2(2,v1.begin(),3);
       cout << vs2 << endl;
 
       iv1=vs1+vs2;

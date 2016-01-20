@@ -61,7 +61,7 @@ VariableIntervalDomain _make_domain(RealVariable const& arg, IntervalDomain cons
 }
 
 VariablesBoxDomain _make_domain(Vector<RealVariable> const& args, BoxDomain const& dom) {
-    Map<RealVariable,ExactFloat64Interval> domain;
+    Map<RealVariable,Float64ExactInterval> domain;
     for(SizeType i=0; i!=args.size(); ++i) { domain[args[i]]=dom[i]; }
     return std::move(domain);
 }

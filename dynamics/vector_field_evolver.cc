@@ -141,7 +141,7 @@ _evolution(EnclosureListType& final_sets,
         working_sets.pop_back();
         TimeType current_time=current_timed_set.first;
         EnclosureType current_set_model=current_timed_set.second;
-        UpperFloat64 current_set_radius=current_set_model.bounding_box().radius();
+        Float64UpperBound current_set_radius=current_set_model.bounding_box().radius();
         if(current_time>=maximum_time) {
             final_sets.adjoin(current_set_model);
         } else if(UPPER_SEMANTICS && ENABLE_SUBDIVISIONS
@@ -233,7 +233,7 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     FlowModelType flow_model=integrator->flow_step(dynamic,current_set_bounds,step_size);
     ARIADNE_LOG(4,"step_size = "<<step_size<<"\n");
     ARIADNE_LOG(6,"flow_model = "<<flow_model<<"\n");
-    FlowModelType flow_step_model=partial_evaluate(flow_model,flow_model.domain().size()-1u,ExactFloat64(step_size));
+    FlowModelType flow_step_model=partial_evaluate(flow_model,flow_model.domain().size()-1u,Float64Value(step_size));
     ARIADNE_LOG(6,"flow_step_model = "<<flow_step_model<<"\n");
 
     // Compute the integration time model

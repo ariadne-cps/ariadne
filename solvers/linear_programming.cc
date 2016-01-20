@@ -149,9 +149,9 @@ Float64 compute_mu(const Vector<Float64>& xl, const Vector<Float64>& xu,
 
 
 
-inline BoundedFloat64 mul_val(Float64 x1, Float64 x2) { return BoundedFloat64(mul_down(x1,x2),mul_up(x1,x2)); }
-inline Vector<ExactFloat64> const& cast_exact(Vector<Float64> const& v) { return reinterpret_cast<Vector<ExactFloat64>const&>(v); }
-inline Matrix<ExactFloat64> const& cast_exact(Matrix<Float64> const& A) { return reinterpret_cast<Matrix<ExactFloat64>const&>(A); }
+inline Float64Bounds mul_val(Float64 x1, Float64 x2) { return Float64Bounds(mul_down(x1,x2),mul_up(x1,x2)); }
+inline Vector<Float64Value> const& cast_exact(Vector<Float64> const& v) { return reinterpret_cast<Vector<Float64Value>const&>(v); }
+inline Matrix<Float64Value> const& cast_exact(Matrix<Float64> const& A) { return reinterpret_cast<Matrix<Float64Value>const&>(A); }
 
 
 Kleenean InteriorPointSolver::
@@ -318,9 +318,9 @@ feasible(const Vector<Float64>& xl, const Vector<Float64>& xu,
         if(xl[i]==-inf) { zl[i] = 0.0; } else { zl[i] = 1.0; }
         if(xu[i]==+inf) { zu[i] = 0.0; } else { zu[i] = 1.0; }
     }
-    Vector<BoundedFloat64> X(n);
+    Vector<Float64Bounds> X(n);
     for(SizeType i=0; i!=n; ++i) {
-        X[i]=BoundedFloat64(xl[i],xu[i]);
+        X[i]=Float64Bounds(xl[i],xu[i]);
     }
 
     const double THRESHOLD = 1e-8;
@@ -331,9 +331,9 @@ feasible(const Vector<Float64>& xl, const Vector<Float64>& xu,
             Kleenean validated_feasible=this->validate_feasibility(xl,xu,A,b, x,y);
             if(definitely(validated_feasible)) { return true; }
         }
-        BoundedFloat64 yb=dot(Vector<BoundedFloat64>(y),Vector<BoundedFloat64>(b));
+        Float64Bounds yb=dot(Vector<Float64Bounds>(y),Vector<Float64Bounds>(b));
         // NOTE: Must compute y*A first, as A*X may give NaN.
-        BoundedFloat64 yAX = dot( transpose(Matrix<BoundedFloat64>(A)) * Vector<BoundedFloat64>(y), X );
+        Float64Bounds yAX = dot( transpose(Matrix<Float64Bounds>(A)) * Vector<Float64Bounds>(y), X );
         if(inconsistent(yb,yAX)) { return false; }
         if(result==DEGENERATE_FEASIBILITY) { ARIADNE_LOG(2,"  degenerate\n"); return indeterminate; }
         if(compute_mu(xl,xu, x,zl,zu)<THRESHOLD ) { ARIADNE_LOG(2,"  threshold\n"); return indeterminate; }

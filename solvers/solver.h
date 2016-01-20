@@ -57,7 +57,7 @@ class SolverBase
     SolverBase(double max_error, Nat max_steps);
 
     /*! \brief The maximum permissible error of the solution. */
-    ExactFloat64 maximum_error() const { return this->_max_error; }
+    Float64Value maximum_error() const { return this->_max_error; }
     /*! \brief Set the maximum error. */
     Void set_maximum_error(RawFloat64 max_error) { this->_max_error=cast_exact(max_error); };
 
@@ -95,7 +95,7 @@ class SolverBase
     /*! \brief Perform one iterative step of the contractor. */
     virtual ValidatedVectorFunctionModel implicit_step(const ValidatedVectorFunction& f,const ValidatedVectorFunctionModel& p,const ValidatedVectorFunctionModel& x) const = 0;
   private:
-    ExactFloat64 _max_error;
+    Float64Value _max_error;
     Nat _max_steps;
     std::shared_ptr< FunctionModelFactoryInterface<ValidatedTag> > _function_factory_ptr;
 };

@@ -32,12 +32,12 @@ template<class IVL> class Box;
 typedef Box<RationalInterval> RationalBox;
 typedef Box<RealInterval> RealBox;
 
-typedef Box<ExactFloat64Interval> ExactFloat64Box;
-typedef Box<MetricFloat64Interval> MetricFloat64Box;
-typedef Box<BoundedFloat64Interval> BoundedFloat64Box;
-typedef Box<UpperFloat64Interval> UpperFloat64Box;
-typedef Box<LowerFloat64Interval> LowerFloat64Box;
-typedef Box<ApproximateFloat64Interval> ApproximateFloat64Box;
+typedef Box<Float64ExactInterval> Float64ExactBox;
+typedef Box<Float64BallInterval> Float64BallBox;
+typedef Box<Float64BoundsInterval> Float64BoundsBox;
+typedef Box<Float64UpperInterval> Float64UpperBox;
+typedef Box<Float64LowerInterval> Float64LowerBox;
+typedef Box<Float64ApproximationInterval> Float64ApproximationBox;
 
 typedef Box<ExactIntervalType> ExactBoxType;
 typedef Box<EffectiveIntervalType> EffectiveBoxType;
@@ -46,7 +46,7 @@ typedef Box<UpperIntervalType> UpperBoxType;
 typedef Box<LowerIntervalType> LowerBoxType;
 typedef Box<ApproximateIntervalType> ApproximateBoxType;
 
-using BoxDomain = ExactFloat64Box;
+using BoxDomain = Float64ExactBox;
 
 template<class X> class Vector;
 

@@ -73,9 +73,9 @@ template<class T> Bool subset(Set<T> const& s, List<T> const& l) {
 template<class T> Bool subset(List<T> const& l, Set<T> const& s) {
     for(auto t:l) { if(!s.contains(t)) { return false; } } return true; }
 
-using ExactFloatType = ExactFloat64;
-using ExactFloatInterval = ExactFloat64Interval;
-using ExactFloatBox = ExactFloat64Box;
+using FloatValueType = Float64Value;
+using ExactFloatInterval = Float64ExactInterval;
+using ExactFloatBox = Float64ExactBox;
 using ExactFloatVariablesBox = ExactFloat64VariablesBox;
 
 template<class T> using remove_cv_t = typename std::remove_cv<T>::type;
@@ -223,7 +223,7 @@ ValidatedVectorFunctionModel
 flow_step(const ValidatedVectorFunction& control_system,
           const ExactBoxType& parameter_domain,
           const ExactBoxType& state_domain,
-          const ExactFloatType& step_size,
+          const FloatValueType& step_size,
           const ValidatedVectorFunctionModel& inputs);
 
 
@@ -234,7 +234,7 @@ void
 control_flow_step(const ControlSystem& control_system,
           const ExactVariablesBoxType& parameter_domain,
           const ExactVariablesBoxType& state_domain,
-          const ExactFloatType& step_size,
+          const FloatValueType& step_size,
           const List<ValidatedScalarAssignment>& inputs)
 {
     ValidatedScalarAssignment input = inputs[0];
@@ -325,7 +325,7 @@ control_flow_step(const ControlSystem& control_system,
         //ARIADNE_PRINT(dynamic_flow_function);
 
         //ValidatedVectorFunctionModel antiderivative_dynamic_flow_function = antiderivative(dynamic_flow_function,time_index);
-        ValidatedVectorFunctionModel antiderivative_dynamic_flow_function = antiderivative(dynamic_flow_function,time_index,ExactFloat64(0));
+        ValidatedVectorFunctionModel antiderivative_dynamic_flow_function = antiderivative(dynamic_flow_function,time_index,Float64Value(0));
         //ARIADNE_PRINT(antiderivative_dynamic_flow_function);
 
         old_state_function = state_function;
@@ -405,7 +405,7 @@ int main() {
     ControlSystem system={ dot(x)=-a*x+u, a.in(1,4) };
     ExactVariablesBoxType parameter_domain={a.in(2,3)};
     ExactVariablesBoxType state_domain={x.in(0,1)};
-    ExactFloatType step_size=0.5_exact;
+    FloatValueType step_size=0.5_exact;
     ARIADNE_PRINT(step_size);
     ValidatedScalarFunctionModel ufm=id[3]*exp(-id[1]*id[4]);
     ARIADNE_PRINT(ufm.range());

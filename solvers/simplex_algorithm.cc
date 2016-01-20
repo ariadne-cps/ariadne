@@ -40,7 +40,7 @@ static const int verbosity=0;
 
 namespace Ariadne {
 
-template<class X1, class X2, EnableIf<IsSame<X1,RawFloat64>> =dummy, EnableIf<IsSame<X2,ExactFloat64>> =dummy>
+template<class X1, class X2, EnableIf<IsSame<X1,RawFloat64>> =dummy, EnableIf<IsSame<X2,Float64Value>> =dummy>
     bool operator<(X1 x1, X2 x2) { return x1<x2.raw(); }
 
 // Threshold for matrix diagonal elements below which it may be considered singular
@@ -72,10 +72,10 @@ inline Bool operator< (Rational q, Int n) { return q< Rational(n); }
 inline Bool operator==(Rational q, double n) { return q==Rational(n); }
 Rational midpoint(Rational const& q) { return q; }
 
-inline auto operator<=(BoundedFloat64 x1, Int x2) -> decltype(x1<=BoundedFloat64(x2)) { return x1<=BoundedFloat64(x2); }
-inline auto operator>=(BoundedFloat64 x1, Int x2) -> decltype(x1>=BoundedFloat64(x2)) { return x1>=BoundedFloat64(x2); }
-inline auto operator< (BoundedFloat64 x1, Int x2) -> decltype(x1< BoundedFloat64(x2)) { return x1< BoundedFloat64(x2); }
-inline auto operator> (BoundedFloat64 x1, Int x2) -> decltype(x1> BoundedFloat64(x2)) { return x1> BoundedFloat64(x2); }
+inline auto operator<=(Float64Bounds x1, Int x2) -> decltype(x1<=Float64Bounds(x2)) { return x1<=Float64Bounds(x2); }
+inline auto operator>=(Float64Bounds x1, Int x2) -> decltype(x1>=Float64Bounds(x2)) { return x1>=Float64Bounds(x2); }
+inline auto operator< (Float64Bounds x1, Int x2) -> decltype(x1< Float64Bounds(x2)) { return x1< Float64Bounds(x2); }
+inline auto operator> (Float64Bounds x1, Int x2) -> decltype(x1> Float64Bounds(x2)) { return x1> Float64Bounds(x2); }
 
 // Extend an Array of size m to an Array of size n
 // such that the first m elements are the same,
@@ -552,7 +552,7 @@ template<class X,class XX,class XXX>
 Vector<XX>
 compute_z(const Matrix<X>& A, const Vector<XXX>& c, const Array<SizeType>& p, const Vector<XX>& y)
 {
-    const ExactFloat64 CUTOFF_THRESHOLD(1e-10);
+    const Float64Value CUTOFF_THRESHOLD(1e-10);
     const SizeType m=A.row_size();
     const SizeType n=A.column_size();
     Vector<XX> z(n);
@@ -1478,8 +1478,8 @@ SimplexSolver<X>::hotstarted_minimise(const Vector<X>& c, const Vector<X>& xl, c
 
 
 template class SimplexSolver<RawFloat64>;
-template class SimplexSolver<ApproximateFloat64>;
-template class SimplexSolver<ExactFloat64>;
+template class SimplexSolver<Float64Approximation>;
+template class SimplexSolver<Float64Value>;
 template class SimplexSolver<Rational>;
 
 

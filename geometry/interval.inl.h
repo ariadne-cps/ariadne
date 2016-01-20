@@ -150,26 +150,26 @@ template<class U> inline auto operator!=(Interval<U> const& ivl1, Interval<U> co
     return ivl1.lower()!=ivl2.lower() || ivl1.upper()!=ivl2.upper(); }
 
 
-inline Interval<UpperFloat64> refinement(Interval<UpperFloat64> const& ivl1, Interval<UpperFloat64> const& ivl2) {
-    return Interval<UpperFloat64>(max(ivl1.lower().raw(),ivl2.lower().raw()),min(ivl1.upper().raw(),ivl2.upper().raw())); }
-inline Bool refines(Interval<UpperFloat64> const& ivl1, Interval<UpperFloat64> const& ivl2) {
+inline Interval<Float64UpperBound> refinement(Interval<Float64UpperBound> const& ivl1, Interval<Float64UpperBound> const& ivl2) {
+    return Interval<Float64UpperBound>(max(ivl1.lower().raw(),ivl2.lower().raw()),min(ivl1.upper().raw(),ivl2.upper().raw())); }
+inline Bool refines(Interval<Float64UpperBound> const& ivl1, Interval<Float64UpperBound> const& ivl2) {
     return ivl1.lower().raw()>=ivl2.lower().raw() && ivl1.upper().raw()<=ivl2.upper().raw(); }
-inline Bool same(Interval<UpperFloat64> const& ivl1, Interval<UpperFloat64> const& ivl2) {
+inline Bool same(Interval<Float64UpperBound> const& ivl1, Interval<Float64UpperBound> const& ivl2) {
     return ivl1.lower().raw()==ivl2.lower().raw() && ivl1.upper().raw()==ivl2.upper().raw(); }
 
-inline Interval<UpperFloat64> widen(Interval<UpperFloat64> const& ivl, UpperFloat64 e) {
-    return Interval<UpperFloat64>(ivl.lower()-e,ivl.upper()+e); }
-inline Interval<UpperFloat64> widen(Interval<UpperFloat64> const& ivl) {
-    return widen(ivl,UpperFloat64(Float64::min())); }
+inline Interval<Float64UpperBound> widen(Interval<Float64UpperBound> const& ivl, Float64UpperBound e) {
+    return Interval<Float64UpperBound>(ivl.lower()-e,ivl.upper()+e); }
+inline Interval<Float64UpperBound> widen(Interval<Float64UpperBound> const& ivl) {
+    return widen(ivl,Float64UpperBound(Float64::min())); }
 
-inline Interval<LowerFloat64> narrow(Interval<LowerFloat64> const& ivl, UpperFloat64 e) {
-    return Interval<LowerFloat64>(ivl.lower()+e,ivl.upper()-e); }
-inline Interval<LowerFloat64> narrow(Interval<LowerFloat64> const& ivl) {
-    return narrow(ivl,UpperFloat64(Float64::min())); }
+inline Interval<Float64LowerBound> narrow(Interval<Float64LowerBound> const& ivl, Float64UpperBound e) {
+    return Interval<Float64LowerBound>(ivl.lower()+e,ivl.upper()-e); }
+inline Interval<Float64LowerBound> narrow(Interval<Float64LowerBound> const& ivl) {
+    return narrow(ivl,Float64UpperBound(Float64::min())); }
 
-inline Interval<ExactFloat64> cast_exact(Interval<ApproximateFloat64> const& ivl) {
+inline Interval<Float64Value> cast_exact(Interval<Float64Approximation> const& ivl) {
     return reinterpret_cast<ExactIntervalType const&>(ivl); }
-inline Interval<ExactFloat64> cast_exact_interval(Interval<ApproximateFloat64> const& ivl) {
-    return reinterpret_cast<Interval<ExactFloat64> const&>(ivl); }
+inline Interval<Float64Value> cast_exact_interval(Interval<Float64Approximation> const& ivl) {
+    return reinterpret_cast<Interval<Float64Value> const&>(ivl); }
 
 } // namespace Ariadne

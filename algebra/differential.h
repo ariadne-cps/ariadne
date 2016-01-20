@@ -52,8 +52,8 @@ template<class X> class Expansion;
 template<class X> class Differential;
 
 typedef Differential<Float64> FloatDifferential;
-typedef Differential<ApproximateFloat64> ApproximateFloatDifferential;
-typedef Differential<BoundedFloat64> BoundedFloatDifferential;
+typedef Differential<Float64Approximation> FloatApproximationDifferential;
+typedef Differential<Float64Bounds> FloatBoundsDifferential;
 typedef Differential<UpperIntervalType> UpperIntervalDifferentialType;
 
 

@@ -102,7 +102,7 @@ class IntegratorBase
     Void set_function_factory(const ValidatedFunctionModelFactoryInterface& factory);
 
 
-    virtual Pair<ExactFloat64,UpperBoxType>
+    virtual Pair<Float64Value,UpperBoxType>
     flow_bounds(const ValidatedVectorFunction& vector_field,
                 const ExactBoxType& state_domain,
                 const RawFloat64& suggested_time_step) const;
@@ -133,7 +133,7 @@ class IntegratorBase
     virtual ValidatedVectorFunctionModel
     flow_step(const ValidatedVectorFunction& vector_field,
               const ExactBoxType& state_domain,
-              const ExactFloat64& suggested_time_step,
+              const Float64Value& suggested_time_step,
               const UpperBoxType& bounding_box) const = 0;
 
   public:
@@ -177,7 +177,7 @@ class TaylorPicardIntegrator
     virtual ValidatedVectorFunctionModel
     flow_step(const ValidatedVectorFunction& vector_field,
               const ExactBoxType& state_domain,
-              const ExactFloat64& time_step,
+              const Float64Value& time_step,
               const UpperBoxType& bounding_box) const;
 
     using IntegratorBase::flow_step;
@@ -232,7 +232,7 @@ class TaylorSeriesIntegrator
     virtual TaylorSeriesIntegrator* clone() const { return new TaylorSeriesIntegrator(*this); }
     virtual Void write(OutputStream& os) const;
 
-    virtual Pair<ExactFloat64,UpperBoxType>
+    virtual Pair<Float64Value,UpperBoxType>
     flow_bounds(const ValidatedVectorFunction& vector_field,
                 const ExactBoxType& state_domain,
                 const RawFloat64& suggested_time_step) const;
@@ -240,7 +240,7 @@ class TaylorSeriesIntegrator
     virtual ValidatedVectorFunctionModel
     flow_step(const ValidatedVectorFunction& vector_field,
               const ExactBoxType& state_domain,
-              const ExactFloat64& time_step,
+              const Float64Value& time_step,
               const UpperBoxType& bounding_box) const;
 
     using IntegratorBase::flow_step;
@@ -270,7 +270,7 @@ class AffineIntegrator
     virtual ValidatedVectorFunctionModel
     flow_step(const ValidatedVectorFunction& vector_field,
               const ExactBoxType& state_domain,
-              const ExactFloat64& time_step,
+              const Float64Value& time_step,
               const UpperBoxType& bounding_box) const;
 
     using IntegratorBase::flow_step;

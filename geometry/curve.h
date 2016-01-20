@@ -55,9 +55,9 @@ class CurveInterface;
 class CurveInterface
 {
   public:
-    typedef ExactFloat64 ParameterType;
-    typedef Point<ApproximateFloat64> PointType;
-    typedef Vector<ApproximateFloat64> TangentVectorType;
+    typedef Float64Value ParameterType;
+    typedef Point<Float64Approximation> PointType;
+    typedef Vector<Float64Approximation> TangentVectorType;
   public:
     /*! \brief Destructor. */
     virtual ~CurveInterface() { };

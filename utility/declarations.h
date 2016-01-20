@@ -64,12 +64,12 @@ class Kleenean;
 
 typedef SizeType DimensionType;
 
-typedef ErrorFloat64 ValidatedNormType;
-typedef ApproximateFloat64 ApproximateNormType;
+typedef Float64Error ValidatedNormType;
+typedef Float64Approximation ApproximateNormType;
 
-typedef ErrorFloat64 NormType; // FIXME: Remove this typedef
-typedef ErrorFloat64 ErrorType; // FIXME: Remove this typedef
-typedef ApproximateFloat64 ApproximateErrorType; // FIXME: Remove this typedef
+typedef Float64Error NormType; // FIXME: Remove this typedef
+typedef Float64Error ErrorType; // FIXME: Remove this typedef
+typedef Float64Approximation ApproximateErrorType; // FIXME: Remove this typedef
 
 template<class I> struct CanonicalNumericTypedef;
 template<> struct CanonicalNumericTypedef<ExactTag> { typedef ExactNumericType Type; };
@@ -108,9 +108,9 @@ typedef Vector<Rational> RationalVector;
 typedef Vector<Real> RealVector;
 typedef Vector<Float64> FloatVector;
 typedef Vector<RawFloat64> RawFloatVector;
-typedef Vector<ApproximateFloat64> ApproximateFloatVector;
-typedef Vector<BoundedFloat64> BoundedFloatVector;
-typedef Vector<ExactFloat64> ExactFloatVector;
+typedef Vector<Float64Approximation> FloatApproximationVector;
+typedef Vector<Float64Bounds> FloatBoundsVector;
+typedef Vector<Float64Value> ExactFloatVector;
 
 typedef Vector<ApproximateNumericType> ApproximateVector;
 typedef Vector<ValidatedNumericType> ValidatedVector;
@@ -121,9 +121,9 @@ typedef Matrix<Rational> RationalMatrix;
 typedef Matrix<Real> RealMatrix;
 typedef Matrix<RawFloat64> RawFloatMatrix;
 typedef Matrix<Float64> FloatMatrix;
-typedef Matrix<ApproximateFloat64> ApproximateFloatMatrix;
-typedef Matrix<BoundedFloat64> BoundedFloatMatrix;
-typedef Matrix<ExactFloat64> ExactFloatMatrix;
+typedef Matrix<Float64Approximation> FloatApproximationMatrix;
+typedef Matrix<Float64Bounds> FloatBoundsMatrix;
+typedef Matrix<Float64Value> ExactFloatMatrix;
 
 typedef Point<ApproximateNumericType> ApproximatePoint;
 typedef Point<ValidatedNumericType> ValidatedPoint;

@@ -91,13 +91,13 @@ using PositiveUpperNumber=Number<PositiveUpperTag>;
 
 namespace Ariadne {
 
-using ExactNumericType=ExactFloat64;
+using ExactNumericType=Float64Value;
 using EffectiveNumericType=Real;
-using ValidatedNumericType=BoundedFloat64;
-using UpperNumericType=UpperFloat64;
-using LowerNumericType=LowerFloat64;
-using ApproximateNumericType=ApproximateFloat64;
-using PositiveUpperNumericType=PositiveUpperFloat64;
+using ValidatedNumericType=Float64Bounds;
+using UpperNumericType=Float64UpperBound;
+using LowerNumericType=Float64LowerBound;
+using ApproximateNumericType=Float64Approximation;
+using PositiveUpperNumericType=PositiveFloat64UpperBound;
 
 } // namespace Ariadne
 

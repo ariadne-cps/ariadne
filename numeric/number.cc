@@ -64,33 +64,33 @@ Integer::operator ExactNumber() const { return ExactNumber(new NumberWrapper<Int
 Rational::operator ExactNumber() const { return ExactNumber(new NumberWrapper<Rational>(*this)); }
 Real::operator EffectiveNumber() const { return EffectiveNumber(new NumberWrapper<Real>(*this)); }
 
-template class NumberWrapper<ApproximateFloat64>;
-//template class NumberWrapper<LowerFloat64>;
-//template class NumberWrapper<UpperFloat64>;
-template class NumberWrapper<BoundedFloat64>;
-template class NumberWrapper<MetricFloat64>;
-template class NumberWrapper<ExactFloat64>;
+template class NumberWrapper<Float64Approximation>;
+//template class NumberWrapper<Float64LowerBound>;
+//template class NumberWrapper<Float64UpperBound>;
+template class NumberWrapper<Float64Bounds>;
+template class NumberWrapper<Float64Ball>;
+template class NumberWrapper<Float64Value>;
 
-template<> ApproximateFloat64::operator ApproximateNumber() const { return ApproximateNumber(new NumberWrapper<ApproximateFloat64>(*this)); }
-template<> LowerFloat64::operator LowerNumber() const { return LowerNumber(new NumberWrapper<LowerFloat64>(*this)); }
-template<> UpperFloat64::operator UpperNumber() const { return UpperNumber(new NumberWrapper<UpperFloat64>(*this)); }
-template<> BoundedFloat64::operator ValidatedNumber() const { return ValidatedNumber(new NumberWrapper<BoundedFloat64>(*this)); }
-template<> MetricFloat64::operator ValidatedNumber() const { return ValidatedNumber(new NumberWrapper<MetricFloat64>(*this)); }
-template<> ExactFloat64::operator ExactNumber() const { return ExactNumber(new NumberWrapper<ExactFloat64>(*this)); }
+template<> Float64Approximation::operator ApproximateNumber() const { return ApproximateNumber(new NumberWrapper<Float64Approximation>(*this)); }
+template<> Float64LowerBound::operator LowerNumber() const { return LowerNumber(new NumberWrapper<Float64LowerBound>(*this)); }
+template<> Float64UpperBound::operator UpperNumber() const { return UpperNumber(new NumberWrapper<Float64UpperBound>(*this)); }
+template<> Float64Bounds::operator ValidatedNumber() const { return ValidatedNumber(new NumberWrapper<Float64Bounds>(*this)); }
+template<> Float64Ball::operator ValidatedNumber() const { return ValidatedNumber(new NumberWrapper<Float64Ball>(*this)); }
+template<> Float64Value::operator ExactNumber() const { return ExactNumber(new NumberWrapper<Float64Value>(*this)); }
 
-template class NumberWrapper<ApproximateFloatMP>;
-//template class NumberWrapper<LowerFloatMP>;
-//template class NumberWrapper<UpperFloatMP>;
-template class NumberWrapper<BoundedFloatMP>;
-template class NumberWrapper<MetricFloatMP>;
-//template class NumberWrapper<ExactFloatMP>;
+template class NumberWrapper<FloatMPApproximation>;
+//template class NumberWrapper<FloatMPLowerBound>;
+//template class NumberWrapper<FloatMPUpperBound>;
+template class NumberWrapper<FloatMPBounds>;
+template class NumberWrapper<FloatMPBall>;
+//template class NumberWrapper<FloatMPValue>;
 
-template<> ExactFloatMP::operator ExactNumber() const { return ExactNumber(new NumberWrapper<ExactFloatMP>(*this)); }
-//template<> MetricFloatMP::operator ValidatedNumber() const { return ValidatedNumber(new NumberWrapper<MetricFloatMP>(*this)); }
-//template<> BoundedFloatMP::operator ValidatedNumber() const { return ValidatedNumber(new NumberWrapper<BoundedFloatMP>(*this)); }
-//template<> UpperFloatMP::operator UpperNumber() const { return UpperNumber(new NumberWrapper<UpperFloatMP>(*this)); }
-//template<> LowerFloatMP::operator LowerNumber() const { return LowerNumber(new NumberWrapper<LowerFloatMP>(*this)); }
-//template<> ApproximateFloatMP::operator ApproximateNumber() const { return ApproximateNumber(new NumberWrapper<ApproximateFloatMP>(*this)); }
+template<> FloatMPValue::operator ExactNumber() const { return ExactNumber(new NumberWrapper<FloatMPValue>(*this)); }
+//template<> FloatMPBall::operator ValidatedNumber() const { return ValidatedNumber(new NumberWrapper<FloatMPBall>(*this)); }
+//template<> FloatMPBounds::operator ValidatedNumber() const { return ValidatedNumber(new NumberWrapper<FloatMPBounds>(*this)); }
+//template<> FloatMPUpperBound::operator UpperNumber() const { return UpperNumber(new NumberWrapper<FloatMPUpperBound>(*this)); }
+//template<> FloatMPLowerBound::operator LowerNumber() const { return LowerNumber(new NumberWrapper<FloatMPLowerBound>(*this)); }
+//template<> FloatMPApproximation::operator ApproximateNumber() const { return ApproximateNumber(new NumberWrapper<FloatMPApproximation>(*this)); }
 
 template<> String class_name<NumberHandle>() { return "NumberHandle"; }
 

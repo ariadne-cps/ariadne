@@ -76,26 +76,26 @@ inline Real operator-(Real const& r1, Rational const& q2) {
     return r1-Real(q2);
 }
 
-inline BoundedFloat64 operator*(Integer n1,  const ExactFloat64& x2) {
+inline Float64Bounds operator*(Integer n1,  const Float64Value& x2) {
     ARIADNE_ASSERT(n1==n1.get_si());
-    ExactFloat64 x1((Int)n1.get_si());
+    Float64Value x1((Int)n1.get_si());
     return x1*x2;
 }
 
-template<> inline ApproximateFloat64 numeric_cast<ApproximateFloat64>(Real const& x) {
-    return ApproximateFloat64(x);
+template<> inline Float64Approximation numeric_cast<Float64Approximation>(Real const& x) {
+    return Float64Approximation(x);
 }
 
-template<> inline ExactFloat64 numeric_cast<ExactFloat64>(Real const& x) {
-    return ExactFloat64(ApproximateFloat64(x).raw());
+template<> inline Float64Value numeric_cast<Float64Value>(Real const& x) {
+    return Float64Value(Float64Approximation(x).raw());
 }
 
 inline DiscreteTimeType div_floor(Real const& t, ExactNumericType h) {
-    return integer_cast<Nat>(numeric_cast<ApproximateFloat64>(t)/h);
+    return integer_cast<Nat>(numeric_cast<Float64Approximation>(t)/h);
 }
 
-template<> inline Nat integer_cast<Nat>(BoundedFloat64 const& x) {
-    return integer_cast<Nat>(ApproximateFloat64(x).raw());
+template<> inline Nat integer_cast<Nat>(Float64Bounds const& x) {
+    return integer_cast<Nat>(Float64Approximation(x).raw());
 }
 
 
@@ -433,7 +433,7 @@ upper_evolve(const CompactSetInterfaceType& initial_set,
     Real real_time=time.continuous_time();
     DiscreteTimeType discrete_steps=time.discrete_time();
     ExactNumericType lock_to_grid_time=this->_configuration->lock_to_grid_time();
-    DiscreteTimeType time_steps=integer_cast<Nat>(numeric_cast<ExactFloat64>(real_time)/lock_to_grid_time);
+    DiscreteTimeType time_steps=integer_cast<Nat>(numeric_cast<Float64Value>(real_time)/lock_to_grid_time);
     Real remainder_time=real_time-Real(time_steps*Rational(lock_to_grid_time));
     HybridTime hybrid_lock_to_grid_time(lock_to_grid_time,discrete_steps);
     HybridTime hybrid_remainder_time(remainder_time,discrete_steps);

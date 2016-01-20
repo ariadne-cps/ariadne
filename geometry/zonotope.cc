@@ -621,8 +621,8 @@ orthogonal_over_approximation(const Zonotope& z)
 }
 
 Tuple< Matrix<Float64>, Matrix<Float64>, PivotMatrix > orthogonal_decomposition(const Matrix<Float64>& A, Bool allow_pivoting=true) {
-    Matrix<ApproximateFloat64> approximate_matrix=reinterpret_cast<Matrix<ApproximateFloat64>const&>(A);
-    Tuple< Matrix<ApproximateFloat64>, Matrix<ApproximateFloat64>, PivotMatrix >
+    Matrix<Float64Approximation> approximate_matrix=reinterpret_cast<Matrix<Float64Approximation>const&>(A);
+    Tuple< Matrix<Float64Approximation>, Matrix<Float64Approximation>, PivotMatrix >
         approximate_decomposition=orthogonal_decomposition(approximate_matrix);
     return reinterpret_cast<Tuple<Matrix<Float64>, Matrix<Float64>, PivotMatrix >const&>(approximate_decomposition);
 }

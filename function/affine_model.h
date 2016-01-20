@@ -71,7 +71,7 @@ template<>
 class AffineModel<ApproximateNumericType>
 {
   public:
-    typedef ApproximateFloat64 CoefficientType;
+    typedef Float64Approximation CoefficientType;
 
     explicit AffineModel() : _c(), _g() { }
     explicit AffineModel(Nat n) : _c(0.0), _g(n,0.0) { }
@@ -131,36 +131,36 @@ template<>
 class AffineModel<ValidatedNumericType>
 {
   public:
-    typedef ExactFloat64 CoefficientType;
-    typedef ErrorFloat64 ErrorType;
+    typedef Float64Value CoefficientType;
+    typedef Float64Error ErrorType;
 
     explicit AffineModel() : _c(), _g() { }
-    explicit AffineModel(Nat n) : _c(0.0), _g(n,ExactFloat64(0.0)), _e(0u) { }
-    explicit AffineModel(const ExactFloat64& c, const Covector<ExactFloat64>& g, const ErrorFloat64& e) : _c(c), _g(g), _e(e) { }
-    explicit AffineModel(ExactFloat64 c, InitializerList<ExactFloat64> g) : _c(c), _g(g), _e(0u) { }
+    explicit AffineModel(Nat n) : _c(0.0), _g(n,Float64Value(0.0)), _e(0u) { }
+    explicit AffineModel(const Float64Value& c, const Covector<Float64Value>& g, const Float64Error& e) : _c(c), _g(g), _e(e) { }
+    explicit AffineModel(Float64Value c, InitializerList<Float64Value> g) : _c(c), _g(g), _e(0u) { }
 
-    AffineModel<ValidatedNumericType>& operator=(const ExactFloat64& c) {
+    AffineModel<ValidatedNumericType>& operator=(const Float64Value& c) {
         this->_c=c; for(Nat i=0; i!=this->_g.size(); ++i) { this->_g[i]=0; } this->_e=0u; return *this; }
-    static AffineModel<ValidatedNumericType> constant(Nat n, const ExactFloat64& c) {
-        return AffineModel<ValidatedNumericType>(c,Covector<ExactFloat64>(n,0),ErrorFloat64(0u)); }
+    static AffineModel<ValidatedNumericType> constant(Nat n, const Float64Value& c) {
+        return AffineModel<ValidatedNumericType>(c,Covector<Float64Value>(n,0),Float64Error(0u)); }
     static AffineModel<ValidatedNumericType> variable(Nat n, Nat j) {
-        return AffineModel<ValidatedNumericType>(0,Covector<ExactFloat64>::unit(n,j),0u); }
+        return AffineModel<ValidatedNumericType>(0,Covector<Float64Value>::unit(n,j),0u); }
 
 
-    const Covector<ExactFloat64>& a() const { return this->_g; }
-    const ExactFloat64& b() const { return this->_c; }
-    const ErrorFloat64& e() const { return this->_e; }
+    const Covector<Float64Value>& a() const { return this->_g; }
+    const Float64Value& b() const { return this->_c; }
+    const Float64Error& e() const { return this->_e; }
 
-    ExactFloat64& operator[](Nat i) { return this->_g[i]; }
-    const ExactFloat64& operator[](Nat i) const { return this->_g[i]; }
-    const Covector<ExactFloat64>& gradient() const { return this->_g; }
-    const ExactFloat64& gradient(Nat i) const { return this->_g[i]; }
-    const ExactFloat64& value() const { return this->_c; }
-    const ErrorFloat64& error() const { return this->_e; }
+    Float64Value& operator[](Nat i) { return this->_g[i]; }
+    const Float64Value& operator[](Nat i) const { return this->_g[i]; }
+    const Covector<Float64Value>& gradient() const { return this->_g; }
+    const Float64Value& gradient(Nat i) const { return this->_g[i]; }
+    const Float64Value& value() const { return this->_c; }
+    const Float64Error& error() const { return this->_e; }
 
-    Void set_value(const ExactFloat64& c) { _c=c; }
-    Void set_gradient(Nat j, const ExactFloat64& g) { _g[j]=g; }
-    Void set_error(const ErrorFloat64& e) { _e=e; }
+    Void set_value(const Float64Value& c) { _c=c; }
+    Void set_gradient(Nat j, const Float64Value& g) { _g[j]=g; }
+    Void set_error(const Float64Error& e) { _e=e; }
 
     Void resize(Nat n) { this->_g.resize(n); }
 
@@ -174,9 +174,9 @@ class AffineModel<ValidatedNumericType>
     }
 
   private:
-    ExactFloat64 _c;
-    Covector<ExactFloat64> _g;
-    ErrorFloat64 _e;
+    Float64Value _c;
+    Covector<Float64Value> _g;
+    Float64Error _e;
 };
 
 //! \relates AffineModel

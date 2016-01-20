@@ -66,7 +66,7 @@ class Rational
     explicit Rational(Float64 const&);
     Rational(const Integer&);
     explicit Rational(const String&);
-    explicit Rational(const ExactFloat64&);
+    explicit Rational(const Float64Value&);
     explicit Rational(const mpq_t);
     Rational(const Rational&);
     Rational(Rational&&);

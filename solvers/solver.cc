@@ -67,17 +67,17 @@ jacobian2(const Vector<ValidatedTaylorModel>& f, const Vector<ValidatedNumericTy
 }
 
 // Compute the Jacobian over the unit domain
-Matrix<ExactFloat64>
+Matrix<Float64Value>
 jacobian2_value(const Vector<ValidatedTaylorModel>& f)
 {
     const Nat rs=f.size();
     const Nat fas=f.zero_element().argument_size();
     const Nat has=fas-rs;
-    Matrix<ExactFloat64> J(rs,rs);
+    Matrix<Float64Value> J(rs,rs);
     MultiIndex a(fas);
     for(Nat i=0; i!=rs; ++i) {
         for(Nat j=0; j!=rs; ++j) {
-            a[has+j]=1; const ExactFloat64 x=f[i][a]; J[i][j]=x; a[has+j]=0;
+            a[has+j]=1; const Float64Value x=f[i][a]; J[i][j]=x; a[has+j]=0;
         }
     }
     return J;
@@ -96,7 +96,7 @@ jacobian2_range(const Vector<ValidatedTaylorModel>& f)
             for(Nat k=0; k!=rs; ++k) {
                 const Nat c=iter->key()[has+k];
                 if(c>0) {
-                    const ExactFloat64& x=iter->data();
+                    const Float64Value& x=iter->data();
                     if(iter->key().degree()==1) { J[i][k]+=x; }
                     else { J[i][k]+=ValidatedNumericType(-1,1)*x*c; }
                     //std::cerr<<"  J="<<J<<" i="<<i<<" a="<<iter->key()<<" k="<<k<<" c="<<c<<" x="<<x<<std::endl;
@@ -116,13 +116,13 @@ static const Bool ALLOW_PARTIAL_FUNCTION = true;
 
 FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory();
 
-ValidatedVectorFunctionModel operator*(const Matrix<ExactFloat64>& A,const ValidatedVectorFunctionModel& v) {
+ValidatedVectorFunctionModel operator*(const Matrix<Float64Value>& A,const ValidatedVectorFunctionModel& v) {
     ARIADNE_ASSERT(v.size()!=0);
     ValidatedVectorFunctionModel r(A.row_size(),v[0].create_zero());
     for(Nat i=0; i!=r.size(); ++i) {
         ValidatedScalarFunctionModel t=r[i];
         for(Nat j=0; j!=v.size(); ++j) {
-            t+=ExactFloat64(A[i][j])*v[j];
+            t+=Float64Value(A[i][j])*v[j];
         }
         r[i]=t;
     }
@@ -142,8 +142,8 @@ ValidatedVectorFunctionModel operator*(const Matrix<ValidatedNumericType>& A,con
     return r;
 }
 
-ErrorFloat64 sup_error(const ValidatedVectorFunctionModel& x) {
-    ErrorFloat64 r=0u;
+Float64Error sup_error(const ValidatedVectorFunctionModel& x) {
+    Float64Error r=0u;
     for(Nat i=0; i!=x.size(); ++i) { r=max(r,x[i].error()); }
     return r;
 }
@@ -218,7 +218,7 @@ SolverBase::solve_all(const ValidatedVectorFunction& f,
     // Create result set
     Set< Vector<ValidatedNumericType> > r;
 
-    Vector<BoundedFloat64> x=cast_singleton(bx);
+    Vector<Float64Bounds> x=cast_singleton(bx);
 
     // Test for no solution
     const Vector<ValidatedNumericType> z(bx.size());
@@ -297,7 +297,7 @@ Vector<ValidatedNumericType>
 SolverBase::zero(const ValidatedVectorFunction& f,
                  const ExactBoxType& bx) const
 {
-    const ExactFloat64 e=this->maximum_error();
+    const Float64Value e=this->maximum_error();
     Nat n=this->maximum_number_of_steps();
     ARIADNE_LOG(1,"verbosity="<<verbosity<<"\n");
     Vector<ValidatedNumericType> r=cast_singleton(bx);
@@ -324,7 +324,7 @@ SolverBase::zero(const ValidatedVectorFunction& f,
     if(!consistent(f.evaluate(r),Vector<ValidatedNumericType>(f.result_size()))) {
         ARIADNE_THROW(NoSolutionException,"SolverBase::zero","No result found in "<<bx<<"; f("<<r<<") is inconsistent with zero");
     } else {
-        UpperFloat64 widen=ExactFloat64(Float64::eps())*sup_error(r);
+        Float64UpperBound widen=Float64Value(Float64::eps())*sup_error(r);
         r+=Vector<ValidatedNumericType>(r.size(),ValidatedNumericType(-widen,+widen));
         nr=this->step(f,r);
         if(refines(nr,r)) {
@@ -355,7 +355,7 @@ SolverBase::implicit(const ValidatedVectorFunction& f,
     ARIADNE_ASSERT(f.argument_size()==ip.size()+ix.size());
 
     const Nat n=ix.size();
-    const ExactFloat64 err=this->maximum_error();
+    const Float64Value err=this->maximum_error();
 
     ValidatedVectorFunctionModel id(this->function_factory().create_identity(ip));
     ValidatedVectorFunctionModel h(this->function_factory().create_constants(ip,cast_singleton(ix)));
@@ -449,7 +449,7 @@ IntervalNewtonSolver::step(const ValidatedVectorFunction& f,
 {
     ARIADNE_LOG(4,"Testing for root in "<<x<<"\n");
     ARIADNE_LOG(5,"  e="<<sup_error(x)<<"  x="<<x<<"\n");
-    Vector<ExactFloat64> m(cast_exact(x));
+    Vector<Float64Value> m(cast_exact(x));
     ARIADNE_LOG(5,"  m="<<m<<"\n");
     Vector<ValidatedNumericType> im(m);
     Vector<ValidatedNumericType> w=f.evaluate(im);
@@ -472,7 +472,7 @@ KrawczykSolver::step(const ValidatedVectorFunction& f,
     Matrix<ValidatedNumericType> I=Matrix<ValidatedNumericType>::identity(x.size());
     ARIADNE_LOG(4,"Testing for root in "<<x<<"\n");
     ARIADNE_LOG(5,"  e="<<sup_error(x)<<"  x="<<x<<"\n");
-    Vector<ExactFloat64> m(cast_exact(x));
+    Vector<Float64Value> m(cast_exact(x));
     ARIADNE_LOG(5,"  m="<<m<<"\n");
     Vector<ValidatedNumericType> im(m);
     Vector<ValidatedNumericType> fm=f.evaluate(im);
@@ -498,7 +498,7 @@ FactoredKrawczykSolver::step(const ValidatedVectorFunction& f,
     Matrix<ValidatedNumericType> I=Matrix<ValidatedNumericType>::identity(x.size());
     ARIADNE_LOG(4,"Testing for root in "<<x<<"\n");
     ARIADNE_LOG(5,"  e="<<sup_error(x)<<"  x="<<x<<"\n");
-    Vector<ExactFloat64> m(cast_exact(x));
+    Vector<Float64Value> m(cast_exact(x));
     ARIADNE_LOG(5,"  m="<<m<<"\n");
     Vector<ValidatedNumericType> im(m);
     Vector<ValidatedNumericType> fm=f.evaluate(im);
@@ -568,10 +568,10 @@ IntervalNewtonSolver::implicit_step(const ValidatedVectorFunction& f,
 
     ValidatedVectorFunctionModel dh(n,z);
     if(n==1) {
-        if(possibly(contains(rngJ[0][0],ExactFloat64(0.0)))) {
+        if(possibly(contains(rngJ[0][0],Float64Value(0.0)))) {
             ARIADNE_THROW(SingularJacobianException,"IntervalNewtonSolver","D2f(P,X)="<<rngJ[0][0]<<" which contains zero.");
         }
-        if(possibly(contains(J[0][0].range(),ExactFloat64(0.0)))) {
+        if(possibly(contains(J[0][0].range(),Float64Value(0.0)))) {
             dh[0]=fidmh[0]/cast_singleton(rngJ[0][0]);
         } else {
             dh[0]=fidmh[0]/J[0][0];
@@ -602,7 +602,7 @@ KrawczykSolver::implicit_step(const ValidatedVectorFunction& f,
     ValidatedVectorFunctionModel mx(x);
     for(Nat i=0; i!=mx.size(); ++i) { mx[i].set_error(0u); }
     ARIADNE_LOG(5,"    mx="<<mx<<"\n");
-    Vector<ErrorFloat64> ex(nx);
+    Vector<Float64Error> ex(nx);
     for(Nat i=0; i!=nx; ++i) { ex[i]=x[i].error(); }
     Vector<ValidatedNumericType> eix=make_bounds(ex);
     ARIADNE_LOG(5,"    ex="<<ex<<"\n");
@@ -695,8 +695,8 @@ IntervalNewtonSolver::implicit(const ValidatedScalarFunction& f,
         ARIADNE_LOG(6,"dh="<<dh<<"\n");
         ARIADNE_LOG(6,"dh.range()="<<dh.range()<<"\n");
         ARIADNE_LOG(8,"norm(dh)="<<norm(dh)<<", h.error()="<<h.error()<<"\n");
-        ErrorFloat64 herr=h.error();
-        ErrorFloat64 dhnrm=norm(dh);
+        Float64Error herr=h.error();
+        Float64Error dhnrm=norm(dh);
         // Prefer to check refinement using norm of dh, since this is faster
         // if(refines(nh,h)) { refinement=true; }
         if(dhnrm<=herr) { refinement=true; }

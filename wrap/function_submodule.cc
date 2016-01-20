@@ -192,13 +192,13 @@ class VectorPythonFunction
 
 using namespace Ariadne;
 
-typedef ApproximateFloat64 F;
+typedef Float64Approximation F;
 typedef ExactIntervalType I;
-typedef Vector<ApproximateFloat64> FV;
+typedef Vector<Float64Approximation> FV;
 typedef Vector<ExactIntervalType> IV;
-typedef Matrix<ApproximateFloat64> FMx;
+typedef Matrix<Float64Approximation> FMx;
 typedef Matrix<ExactIntervalType> IMx;
-typedef Vector< Differential<ApproximateFloat64> > FSDV;
+typedef Vector< Differential<Float64Approximation> > FSDV;
 typedef Vector< Differential<ExactIntervalType> > ISDV;
 typedef Vector<ValidatedTaylorModel> TMV;
 typedef VectorTaylorFunction TFM;
@@ -274,8 +274,8 @@ Void export_univariate_function()
 {
     class_<EffectiveScalarUnivariateFunction>
         function_class("EffectiveScalarUnivariateFunction", init<EffectiveScalarUnivariateFunction>());
-    function_class.def("__call__", (BoundedFloat64(EffectiveScalarUnivariateFunction::*)(const BoundedFloat64&)const)&EffectiveScalarUnivariateFunction::operator() );
-    function_class.def("__call__", (Differential<BoundedFloat64>(EffectiveScalarUnivariateFunction::*)(const Differential<BoundedFloat64>&)const)&EffectiveScalarUnivariateFunction::operator() );
+    function_class.def("__call__", (Float64Bounds(EffectiveScalarUnivariateFunction::*)(const Float64Bounds&)const)&EffectiveScalarUnivariateFunction::operator() );
+    function_class.def("__call__", (Differential<Float64Bounds>(EffectiveScalarUnivariateFunction::*)(const Differential<Float64Bounds>&)const)&EffectiveScalarUnivariateFunction::operator() );
 
     function_class.def("constant", (EffectiveScalarUnivariateFunction(*)(Real)) &EffectiveScalarUnivariateFunction::constant);
     function_class.def("coordinate", (EffectiveScalarUnivariateFunction(*)()) &EffectiveScalarUnivariateFunction::coordinate);
@@ -292,14 +292,14 @@ Void export_scalar_function()
     scalar_function_class.def(init<SizeType>());
     scalar_function_class.def("argument_size", &EffectiveScalarFunction::argument_size);
     scalar_function_class.def("derivative", &EffectiveScalarFunction::derivative);
-    scalar_function_class.def("__call__", (BoundedFloat64(EffectiveScalarFunction::*)(const Vector<BoundedFloat64>&)const)&EffectiveScalarFunction::operator() );
-    scalar_function_class.def("__call__", (ApproximateFloat64(EffectiveScalarFunction::*)(const Vector<ApproximateFloat64>&)const)&EffectiveScalarFunction::operator() );
-    scalar_function_class.def("__call__", (Differential<BoundedFloat64>(EffectiveScalarFunction::*)(const Vector<Differential<BoundedFloat64>>&)const)&EffectiveScalarFunction::evaluate );
-    scalar_function_class.def("__call__", (Differential<ApproximateFloat64>(EffectiveScalarFunction::*)(const Vector<Differential<ApproximateFloat64>>&)const)&EffectiveScalarFunction::evaluate );
-    scalar_function_class.def("gradient", (Covector<BoundedFloat64>(EffectiveScalarFunction::*)(const Vector<BoundedFloat64>&)const)&EffectiveScalarFunction::gradient );
-    scalar_function_class.def("gradient", (Covector<BoundedFloat64>(EffectiveScalarFunction::*)(const Vector<BoundedFloat64>&)const)&EffectiveScalarFunction::gradient );
-    scalar_function_class.def("differential", (Differential<BoundedFloat64>(EffectiveScalarFunction::*)(const Vector<BoundedFloat64>&,DegreeType)const) &EffectiveScalarFunction::differential);
-    scalar_function_class.def("differential", (Differential<ApproximateFloat64>(EffectiveScalarFunction::*)(const Vector<ApproximateFloat64>&,DegreeType)const) &EffectiveScalarFunction::differential);
+    scalar_function_class.def("__call__", (Float64Bounds(EffectiveScalarFunction::*)(const Vector<Float64Bounds>&)const)&EffectiveScalarFunction::operator() );
+    scalar_function_class.def("__call__", (Float64Approximation(EffectiveScalarFunction::*)(const Vector<Float64Approximation>&)const)&EffectiveScalarFunction::operator() );
+    scalar_function_class.def("__call__", (Differential<Float64Bounds>(EffectiveScalarFunction::*)(const Vector<Differential<Float64Bounds>>&)const)&EffectiveScalarFunction::evaluate );
+    scalar_function_class.def("__call__", (Differential<Float64Approximation>(EffectiveScalarFunction::*)(const Vector<Differential<Float64Approximation>>&)const)&EffectiveScalarFunction::evaluate );
+    scalar_function_class.def("gradient", (Covector<Float64Bounds>(EffectiveScalarFunction::*)(const Vector<Float64Bounds>&)const)&EffectiveScalarFunction::gradient );
+    scalar_function_class.def("gradient", (Covector<Float64Bounds>(EffectiveScalarFunction::*)(const Vector<Float64Bounds>&)const)&EffectiveScalarFunction::gradient );
+    scalar_function_class.def("differential", (Differential<Float64Bounds>(EffectiveScalarFunction::*)(const Vector<Float64Bounds>&,DegreeType)const) &EffectiveScalarFunction::differential);
+    scalar_function_class.def("differential", (Differential<Float64Approximation>(EffectiveScalarFunction::*)(const Vector<Float64Approximation>&,DegreeType)const) &EffectiveScalarFunction::differential);
     scalar_function_class.def("__pos__", &__pos__<EffectiveScalarFunction,EffectiveScalarFunction>);
     scalar_function_class.def("__neg__", &__neg__<EffectiveScalarFunction,EffectiveScalarFunction>);
     scalar_function_class.def("__add__", &__add__<EffectiveScalarFunction,EffectiveScalarFunction,EffectiveScalarFunction>);
@@ -325,8 +325,8 @@ Void export_scalar_function()
     scalar_function_class.staticmethod("constant");
     scalar_function_class.staticmethod("coordinate");
 
-    def("evaluate", (ApproximateFloat64(*)(const EffectiveScalarFunction&,const Vector<ApproximateFloat64>&)) &evaluate);
-    def("evaluate", (BoundedFloat64(*)(const EffectiveScalarFunction&,const Vector<BoundedFloat64>&)) &evaluate);
+    def("evaluate", (Float64Approximation(*)(const EffectiveScalarFunction&,const Vector<Float64Approximation>&)) &evaluate);
+    def("evaluate", (Float64Bounds(*)(const EffectiveScalarFunction&,const Vector<Float64Bounds>&)) &evaluate);
 
     def("derivative", (EffectiveScalarFunction(EffectiveScalarFunction::*)(SizeType)const) &EffectiveScalarFunction::derivative);
 
@@ -370,22 +370,22 @@ Void export_vector_function()
     vector_function_class.def("argument_size", &EffectiveVectorFunction::argument_size);
     vector_function_class.def("__getitem__", &EffectiveVectorFunction::get);
     vector_function_class.def("__setitem__", &EffectiveVectorFunction::set);
-    vector_function_class.def("__call__", (Vector<BoundedFloat64>(EffectiveVectorFunction::*)(const Vector<BoundedFloat64>&)const)&EffectiveVectorFunction::operator() );
-    vector_function_class.def("__call__", (Vector<ApproximateFloat64>(EffectiveVectorFunction::*)(const Vector<ApproximateFloat64>&)const)&EffectiveVectorFunction::operator() );
-    vector_function_class.def("__call__", (Vector<Differential<BoundedFloat64>>(EffectiveVectorFunction::*)(const Vector<Differential<BoundedFloat64>>&)const)&EffectiveVectorFunction::evaluate );
-    vector_function_class.def("__call__", (Vector<Differential<ApproximateFloat64>>(EffectiveVectorFunction::*)(const Vector<Differential<ApproximateFloat64>>&)const)&EffectiveVectorFunction::evaluate );
-    vector_function_class.def("jacobian", (Matrix<BoundedFloat64>(EffectiveVectorFunction::*)(const Vector<BoundedFloat64>&)const) &EffectiveVectorFunction::jacobian);
-    vector_function_class.def("jacobian", (Matrix<ApproximateFloat64>(EffectiveVectorFunction::*)(const Vector<ApproximateFloat64>&)const) &EffectiveVectorFunction::jacobian);
-    vector_function_class.def("differential", (Vector<Differential<BoundedFloat64> >(EffectiveVectorFunction::*)(const Vector<BoundedFloat64>&,DegreeType)const) &EffectiveVectorFunction::differential);
-    vector_function_class.def("differential", (Vector<Differential<ApproximateFloat64> >(EffectiveVectorFunction::*)(const Vector<ApproximateFloat64>&,DegreeType)const) &EffectiveVectorFunction::differential);
+    vector_function_class.def("__call__", (Vector<Float64Bounds>(EffectiveVectorFunction::*)(const Vector<Float64Bounds>&)const)&EffectiveVectorFunction::operator() );
+    vector_function_class.def("__call__", (Vector<Float64Approximation>(EffectiveVectorFunction::*)(const Vector<Float64Approximation>&)const)&EffectiveVectorFunction::operator() );
+    vector_function_class.def("__call__", (Vector<Differential<Float64Bounds>>(EffectiveVectorFunction::*)(const Vector<Differential<Float64Bounds>>&)const)&EffectiveVectorFunction::evaluate );
+    vector_function_class.def("__call__", (Vector<Differential<Float64Approximation>>(EffectiveVectorFunction::*)(const Vector<Differential<Float64Approximation>>&)const)&EffectiveVectorFunction::evaluate );
+    vector_function_class.def("jacobian", (Matrix<Float64Bounds>(EffectiveVectorFunction::*)(const Vector<Float64Bounds>&)const) &EffectiveVectorFunction::jacobian);
+    vector_function_class.def("jacobian", (Matrix<Float64Approximation>(EffectiveVectorFunction::*)(const Vector<Float64Approximation>&)const) &EffectiveVectorFunction::jacobian);
+    vector_function_class.def("differential", (Vector<Differential<Float64Bounds> >(EffectiveVectorFunction::*)(const Vector<Float64Bounds>&,DegreeType)const) &EffectiveVectorFunction::differential);
+    vector_function_class.def("differential", (Vector<Differential<Float64Approximation> >(EffectiveVectorFunction::*)(const Vector<Float64Approximation>&,DegreeType)const) &EffectiveVectorFunction::differential);
     vector_function_class.def("__str__", &__cstr__<EffectiveVectorFunction>);
     vector_function_class.def("__repr__", &__crepr__<EffectiveVectorFunction>);
 
     vector_function_class.def("identity", (EffectiveVectorFunction(*)(SizeType)) &EffectiveVectorFunction::identity);
     vector_function_class.staticmethod("identity");
 
-    def("evaluate", (Vector<ApproximateFloat64>(*)(const EffectiveVectorFunction&,const Vector<ApproximateFloat64>&)) &evaluate);
-    def("evaluate", (Vector<BoundedFloat64>(*)(const EffectiveVectorFunction&,const Vector<BoundedFloat64>&)) &evaluate);
+    def("evaluate", (Vector<Float64Approximation>(*)(const EffectiveVectorFunction&,const Vector<Float64Approximation>&)) &evaluate);
+    def("evaluate", (Vector<Float64Bounds>(*)(const EffectiveVectorFunction&,const Vector<Float64Bounds>&)) &evaluate);
 
     def("join", (EffectiveVectorFunction(*)(const EffectiveScalarFunction&, const EffectiveScalarFunction&)) &join);
     def("join", (EffectiveVectorFunction(*)(const EffectiveVectorFunction&, const EffectiveScalarFunction&)) &join);

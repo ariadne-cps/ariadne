@@ -40,7 +40,7 @@
 
 namespace Ariadne {
 
-extern const ExactFloat64 infty;
+extern const Float64Value infty;
 
 struct DoubleInput {
     double _d;
@@ -189,7 +189,7 @@ template<class I> inline Box<I> split(const Vector<I>& bx, SplitPart lmu) { retu
 template<class I> inline Pair<Box<I>,Box<I>> split(const Vector<I>& bx) { return static_cast<Box<I>const&>(bx).split(); }
 template<class I> inline Pair<Box<I>,Box<I>> split(const Vector<I>& bx, SizeType k) { return static_cast<Box<I>const&>(bx).split(k); }
 
-//! \relates ExactFloat64Box \brief The cartesian product of two boxes.
+//! \relates Float64ExactBox \brief The cartesian product of two boxes.
 template<class I> inline Box<I> product(const Box<I>& bx1, const Box<I>& bx2) { return Box<I>::_product(bx1,bx2); }
 template<class I> inline Box<I> product(const Box<I>& bx1, const I& ivl2) { return Box<I>::_product(bx1,ivl2); }
 template<class I> inline Box<I> product(const Box<I>& bx1, const Box<I>& bx2, const Box<I>& bx3) { return Box<I>::_product(bx1,bx2,bx3); }
@@ -397,62 +397,62 @@ template<class I> inline Void Box<I>::draw(CanvasInterface& c, const Projection2
     return Ariadne::draw(c,p,ApproximateBoxType(*this)); }
 
 
-inline ExactFloat64Box cast_exact_box(ApproximateFloat64Box const& abx) {
-    return ExactFloat64Box(reinterpret_cast<ExactFloat64Box const&>(abx));
+inline Float64ExactBox cast_exact_box(Float64ApproximationBox const& abx) {
+    return Float64ExactBox(reinterpret_cast<Float64ExactBox const&>(abx));
 }
 
-inline Box<ExactFloat64Interval> cast_exact_box(Vector<BoundedFloat64> const& bv) {
-    return Box<ExactFloat64Interval>(reinterpret_cast<Vector<ExactFloat64Interval>const&>(bv));
+inline Box<Float64ExactInterval> cast_exact_box(Vector<Float64Bounds> const& bv) {
+    return Box<Float64ExactInterval>(reinterpret_cast<Vector<Float64ExactInterval>const&>(bv));
 }
 
 
-inline ApproximateFloat64Box widen(const ApproximateFloat64Box& bx, ApproximateFloat64 e) {
-    ApproximateFloat64 eps(e);
-    ApproximateFloat64Box r(bx.dimension());
+inline Float64ApproximationBox widen(const Float64ApproximationBox& bx, Float64Approximation e) {
+    Float64Approximation eps(e);
+    Float64ApproximationBox r(bx.dimension());
     for(Nat i=0; i!=bx.size(); ++i) {
         r[i]=ApproximateIntervalType(bx[i].lower()-eps,bx[i].upper()+eps);
     }
     return r;
 }
 
-inline UpperFloat64Box widen(const UpperFloat64Box& bx, UpperFloat64 eps) {
-    UpperFloat64Box r(bx.dimension());
+inline Float64UpperBox widen(const Float64UpperBox& bx, Float64UpperBound eps) {
+    Float64UpperBox r(bx.dimension());
     for(Nat i=0; i!=bx.size(); ++i) {
         r[i]=widen(bx[i],eps);
     }
     return r;
 }
 
-inline UpperFloat64Box widen(const ExactFloat64Box& bx, ExactFloat64 eps) {
-    return widen(reinterpret_cast<const UpperFloat64Box&>(bx),UpperFloat64(eps));
+inline Float64UpperBox widen(const Float64ExactBox& bx, Float64Value eps) {
+    return widen(reinterpret_cast<const Float64UpperBox&>(bx),Float64UpperBound(eps));
 }
 
-inline UpperFloat64Box widen(const UpperFloat64Box& bx) {
-    UpperFloat64Box r(bx.dimension());
+inline Float64UpperBox widen(const Float64UpperBox& bx) {
+    Float64UpperBox r(bx.dimension());
     for(Nat i=0; i!=bx.size(); ++i) {
         r[i]=widen(bx[i]);
     }
     return r;
 }
 
-inline ExactFloat64Box widen_domain(const UpperFloat64Box& bx) {
-    ExactFloat64Box r(bx.dimension());
+inline Float64ExactBox widen_domain(const Float64UpperBox& bx) {
+    Float64ExactBox r(bx.dimension());
     for(Nat i=0; i!=bx.size(); ++i) {
         r[i]=widen_domain(bx[i]);
     }
     return r;
 }
 
-inline LowerFloat64Box narrow(const LowerFloat64Box& bx, UpperFloat64 eps) {
-    LowerFloat64Box r(bx.dimension());
+inline Float64LowerBox narrow(const Float64LowerBox& bx, Float64UpperBound eps) {
+    Float64LowerBox r(bx.dimension());
     for(Nat i=0; i!=bx.size(); ++i) {
         r[i]=narrow(bx[i],eps);
     }
     return r;
 }
 
-inline LowerFloat64Box narrow(const LowerFloat64Box& bx) {
-    LowerFloat64Box r(bx.dimension());
+inline Float64LowerBox narrow(const Float64LowerBox& bx) {
+    Float64LowerBox r(bx.dimension());
     for(Nat i=0; i!=bx.size(); ++i) {
         r[i]=narrow(bx[i]);
     }

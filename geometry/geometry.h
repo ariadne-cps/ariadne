@@ -51,17 +51,17 @@ SizeType irmax(const ExactBoxType& bx) {
     return imax;
 }
 
-inline ExactFloat64 mid(ExactFloat64 l, ExactFloat64 u) {
-    return ExactFloat64(med_approx(l.raw(),u.raw()));
+inline Float64Value mid(Float64Value l, Float64Value u) {
+    return Float64Value(med_approx(l.raw(),u.raw()));
 }
 
 inline
 ExactBoxType split(const ExactBoxType& bx, SizeType i, SplitPart lr) {
     ExactBoxType result(bx);
     ExactIntervalType& ivl=result[i];
-    const ExactFloat64& l=ivl.lower();
-    const ExactFloat64& u=ivl.upper();
-    ExactFloat64 c=mid(l,u);
+    const Float64Value& l=ivl.lower();
+    const Float64Value& u=ivl.upper();
+    Float64Value c=mid(l,u);
     if(lr==SplitPart::MIDDLE) {
         ivl.set(mid(l,c),mid(c,u));
     } else {
@@ -75,7 +75,7 @@ inline
 Pair<ExactBoxType,ExactBoxType> split(const ExactBoxType& bx, SizeType i)
 {
     Pair<ExactBoxType,ExactBoxType> result(bx,bx);
-    ExactFloat64 c=mid(bx[i].lower(),bx[i].upper());
+    Float64Value c=mid(bx[i].lower(),bx[i].upper());
     result.first[i].set_upper(c);
     result.second[i].set_lower(c);
     return result;

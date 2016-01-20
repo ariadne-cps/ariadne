@@ -99,7 +99,7 @@ template<class PR> Float<ExactTag,PR>::Float(Rational const& q, PR pr)
 {
     Float<BoundedTag,PR> x(q,pr);
     if(x.lower_raw()==x.upper_raw()) { this->_v==x.value_raw(); }
-    else { ARIADNE_THROW(std::runtime_error,"ExactFloat(Rational q, Precision pr)","q="<<q<<" cannot be expressed exactly to precision \n"); }
+    else { ARIADNE_THROW(std::runtime_error,"FloatValue(Rational q, Precision pr)","q="<<q<<" cannot be expressed exactly to precision \n"); }
 }
 */
 
@@ -530,13 +530,13 @@ template<class PR> Float<UpperTag,PR> sub(Float<UpperTag,PR> const& x1, Float<Lo
     return Float<UpperTag,PR>(sub_up(x1._u,x2._l)); }
 
 template<class PR> Float<UpperTag,PR> mul(Float<UpperTag,PR> const& x1, Float<UpperTag,PR> const& x2) {
-//    ARIADNE_WARN("Multiplying UpperFloat "<<x1<<" with UpperFloat "<<x2<<" is unsafe");
+//    ARIADNE_WARN("Multiplying FloatUpperBound "<<x1<<" with FloatUpperBound "<<x2<<" is unsafe");
     ARIADNE_PRECONDITION(x1.raw()>=0);
     ARIADNE_PRECONDITION(x2.raw()>=0);
     return Float<UpperTag,PR>(mul_up(x1._u,x2._u)); }
 
 template<class PR> Float<UpperTag,PR> div(Float<UpperTag,PR> const& x1, Float<LowerTag,PR> const& x2) {
-//    ARIADNE_WARN("Dividing UpperFloat "<<x1<<" by LowerFloat "<<x2<<" is unsafe");
+//    ARIADNE_WARN("Dividing FloatUpperBound "<<x1<<" by FloatLowerBound "<<x2<<" is unsafe");
     ARIADNE_PRECONDITION(x1.raw()>=0);
     ARIADNE_PRECONDITION(x2.raw()>=0);
     return Float<UpperTag,PR>(div_up(x1._u,x2._l)); }
@@ -672,7 +672,7 @@ template<class PR> Float<BoundedTag,PR> rec(Float<BoundedTag,PR> const& x) {
     } else {
         RawFloat<PR> inf=RawFloat<PR>::inf(x.precision());
         RawFloat<PR> rl=-inf; RawFloat<PR> ru=+inf;
-        //ARIADNE_THROW(DivideByZeroException,"BoundedFloat rec(BoundedFloat x)","x="<<x);
+        //ARIADNE_THROW(DivideByZeroException,"FloatBounds rec(FloatBounds x)","x="<<x);
         return Float<BoundedTag,PR>(-inf,+inf);
     }
 }
@@ -745,7 +745,7 @@ template<class PR> Float<BoundedTag,PR> div(Float<BoundedTag,PR> const& x1, Floa
         }
     }
     else {
-        //ARIADNE_THROW(DivideByZeroException,"BoundedFloat div(BoundedFloat x1, BoundedFloat x2)","x1="<<x1<<", x2="<<x2);
+        //ARIADNE_THROW(DivideByZeroException,"FloatBounds div(FloatBounds x1, FloatBounds x2)","x1="<<x1<<", x2="<<x2);
         rl=-RawFloat<PR>::inf();
         ru=+RawFloat<PR>::inf();
     }
@@ -1202,7 +1202,7 @@ template<class PR> Float<BoundedTag,PR> div(Float<BoundedTag,PR> const& x1, Floa
     } else if(x2v<0) {
         rl=div_down(x1u,x2v); ru=div_up(x1l,x2v);
     } else {
-        //ARIADNE_THROW(DivideByZeroException,"BoundedFloat div(BoundedFloat const& x1, ExactFloat x2)","x1="<<x1<<", x2="<<x2);
+        //ARIADNE_THROW(DivideByZeroException,"FloatBounds div(FloatBounds const& x1, FloatValue x2)","x1="<<x1<<", x2="<<x2);
         PR pr=min(x1.precision(),x2.precision());
         rl=-RawFloat<PR>::inf(pr);
         ru=+RawFloat<PR>::inf(pr);
@@ -1218,7 +1218,7 @@ template<class PR> Float<BoundedTag,PR> div(Float<ExactTag,PR> const& x1, Float<
     const RawFloat<PR>& i2u=x2.upper_raw();
     RawFloat<PR> rl,ru;
     if(i2l<=0 && i2u>=0) {
-        //ARIADNE_THROW(DivideByZeroException,"BoundedFloat div(ExactFloat const& x1, BoundedFloat x2)","x1="<<x1<<", x2="<<x2);
+        //ARIADNE_THROW(DivideByZeroException,"FloatBounds div(FloatValue const& x1, FloatBounds x2)","x1="<<x1<<", x2="<<x2);
         PR pr=min(x1.precision(),x2.precision());
         rl=-RawFloat<PR>::inf(pr);
         ru=+RawFloat<PR>::inf(pr);
@@ -1527,19 +1527,19 @@ template<class PR> Float<PositiveApproximateTag,PR> mul(Float<PositiveApproximat
 
 
 
-template<> Nat integer_cast<Nat,ApproximateFloat64>(ApproximateFloat64 const& x) {
+template<> Nat integer_cast<Nat,Float64Approximation>(Float64Approximation const& x) {
     return std::round(x.get_d()); }
 
-template<> Int integer_cast<Int,ApproximateFloat64>(ApproximateFloat64 const& x) {
+template<> Int integer_cast<Int,Float64Approximation>(Float64Approximation const& x) {
     return std::round(x.get_d()); }
 
-template<> Nat integer_cast<Nat,LowerFloat64>(LowerFloat64 const& x) {
+template<> Nat integer_cast<Nat,Float64LowerBound>(Float64LowerBound const& x) {
     return std::round(x.get_d()); }
 
-template<> Int integer_cast<Int,LowerFloat64>(LowerFloat64 const& x) {
+template<> Int integer_cast<Int,Float64LowerBound>(Float64LowerBound const& x) {
     return std::round(x.get_d()); }
 
-template<> Int integer_cast<Int,BoundedFloat64>(BoundedFloat64 const& x) {
+template<> Int integer_cast<Int,Float64Bounds>(Float64Bounds const& x) {
     return std::round((x.lower().get_d()+x.upper().get_d())/2); }
 
 
@@ -1701,48 +1701,48 @@ template<class PR> std::size_t instantiate_floats() {
 template std::size_t instantiate_floats<Precision64>();
 template std::size_t instantiate_floats<PrecisionMP>();
 
-template ExactFloat64 operator* <Precision64,ExactTag>(ExactFloat64 const&, TwoExp);
-template ExactFloat64 operator/ <Precision64,ExactTag>(ExactFloat64 const&, TwoExp);
+template Float64Value operator* <Precision64,ExactTag>(Float64Value const&, TwoExp);
+template Float64Value operator/ <Precision64,ExactTag>(Float64Value const&, TwoExp);
 
-template PositiveUpperFloat64 abs(PositiveUpperFloat64 const&);
-template PositiveUpperFloatMP abs(PositiveUpperFloatMP const&);
+template PositiveFloat64UpperBound abs(PositiveFloat64UpperBound const&);
+template PositiveFloatMPUpperBound abs(PositiveFloatMPUpperBound const&);
 
-template BoundedFloat64 round<Precision64,BoundedTag>(BoundedFloat64 const&);
-template ApproximateFloat64 round<Precision64,ApproximateTag>(ApproximateFloat64 const&);
+template Float64Bounds round<Precision64,BoundedTag>(Float64Bounds const&);
+template Float64Approximation round<Precision64,ApproximateTag>(Float64Approximation const&);
 
-template Bool models(BoundedFloat64 const&, ExactFloat64 const&);
-template Bool consistent(BoundedFloat64 const&, BoundedFloat64 const&);
-template Bool inconsistent(BoundedFloat64 const&, BoundedFloat64 const&);
-template Bool refines(BoundedFloat64 const&, BoundedFloat64 const&);
-template BoundedFloat64 refinement(BoundedFloat64 const&, BoundedFloat64 const&);
-template Bool same(BoundedFloat64 const&, BoundedFloat64 const&);
+template Bool models(Float64Bounds const&, Float64Value const&);
+template Bool consistent(Float64Bounds const&, Float64Bounds const&);
+template Bool inconsistent(Float64Bounds const&, Float64Bounds const&);
+template Bool refines(Float64Bounds const&, Float64Bounds const&);
+template Float64Bounds refinement(Float64Bounds const&, Float64Bounds const&);
+template Bool same(Float64Bounds const&, Float64Bounds const&);
 
-template Bool refines(MetricFloat64 const&, MetricFloat64 const&);
-template MetricFloat64 refinement(MetricFloat64 const&, MetricFloat64 const&);
+template Bool refines(Float64Ball const&, Float64Ball const&);
+template Float64Ball refinement(Float64Ball const&, Float64Ball const&);
 
-template Bool refines(LowerFloat64 const&, LowerFloat64 const&);
-template Bool refines(UpperFloat64 const&, UpperFloat64 const&);
+template Bool refines(Float64LowerBound const&, Float64LowerBound const&);
+template Bool refines(Float64UpperBound const&, Float64UpperBound const&);
 
-template Bool refines(MetricFloatMP const&, MetricFloatMP const&);
-template Bool refines(BoundedFloatMP const&, BoundedFloatMP const&);
-template Bool refines(LowerFloatMP const&, LowerFloatMP const&);
-template Bool refines(UpperFloatMP const&, UpperFloatMP const&);
+template Bool refines(FloatMPBall const&, FloatMPBall const&);
+template Bool refines(FloatMPBounds const&, FloatMPBounds const&);
+template Bool refines(FloatMPLowerBound const&, FloatMPLowerBound const&);
+template Bool refines(FloatMPUpperBound const&, FloatMPUpperBound const&);
 
-ExactFloat64 midpoint(BoundedFloat64 const& x) { return x.value(); }
+Float64Value midpoint(Float64Bounds const& x) { return x.value(); }
 
 template Float<Widen<PositiveApproximateTag>,Precision64> mul<Precision64,PositiveApproximateTag>(Float<PositiveApproximateTag,Precision64> const& x1, Float<PositiveApproximateTag,Precision64> const& x2);
 
-template<> String class_name<ApproximateFloat64>() { return "ApproximateFloat64"; }
-template<> String class_name<LowerFloat64>() { return "LowerFloat64"; }
-template<> String class_name<UpperFloat64>() { return "UpperFloat64"; }
-template<> String class_name<BoundedFloat64>() { return "BoundedFloat64"; }
-template<> String class_name<MetricFloat64>() { return "MetricFloat64"; }
-template<> String class_name<ExactFloat64>() { return "ExactFloat64"; }
-template<> String class_name<ApproximateFloatMP>() { return "ApproximateFloatMP"; }
-template<> String class_name<LowerFloatMP>() { return "LowerFloatMP"; }
-template<> String class_name<UpperFloatMP>() { return "UpperFloatMP"; }
-template<> String class_name<BoundedFloatMP>() { return "BoundedFloatMP"; }
-template<> String class_name<MetricFloatMP>() { return "MetricFloatMP"; }
-template<> String class_name<ExactFloatMP>() { return "ExactFloatMP"; }
+template<> String class_name<Float64Approximation>() { return "Float64Approximation"; }
+template<> String class_name<Float64LowerBound>() { return "Float64LowerBound"; }
+template<> String class_name<Float64UpperBound>() { return "Float64UpperBound"; }
+template<> String class_name<Float64Bounds>() { return "Float64Bounds"; }
+template<> String class_name<Float64Ball>() { return "Float64Ball"; }
+template<> String class_name<Float64Value>() { return "Float64Value"; }
+template<> String class_name<FloatMPApproximation>() { return "FloatMPApproximation"; }
+template<> String class_name<FloatMPLowerBound>() { return "FloatMPLowerBound"; }
+template<> String class_name<FloatMPUpperBound>() { return "FloatMPUpperBound"; }
+template<> String class_name<FloatMPBounds>() { return "FloatMPBounds"; }
+template<> String class_name<FloatMPBall>() { return "FloatMPBall"; }
+template<> String class_name<FloatMPValue>() { return "FloatMPValue"; }
 
 } // namespace Ariadne

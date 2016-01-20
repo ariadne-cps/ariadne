@@ -106,7 +106,7 @@ class ConstraintSolver
     //! with \a multipliers innner product \a codomain, centering at \a centre.
     //! Reduces \f$(\lambda\cdot f)(X) \cap (\lambda\cdot C)\f$, evaluating \f$g(x)=g(x^*)+Dg(X) (X-x^*)\f$.
     Bool lyapunov_reduce(UpperBoxType& domain, const VectorTaylorFunction& function, const ExactBoxType& codomain,
-                         Vector<ExactFloat64> centre, Vector<ExactFloat64> multpliers) const;
+                         Vector<Float64Value> centre, Vector<Float64Value> multpliers) const;
     Bool lyapunov_reduce(UpperBoxType& domain, const VectorTaylorFunction& function, const ExactBoxType& codomain,
                          Vector<ApproximateNumericType> centre, Vector<ApproximateNumericType> multpliers) const;
     //! \brief Try to enforce hull consistency by reducing a constraint with respect to one variable.

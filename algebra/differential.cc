@@ -33,13 +33,13 @@
 namespace Ariadne {
 
 template class UnivariateDifferential<Float64>;
-template class UnivariateDifferential<ApproximateFloat64>;
-template class UnivariateDifferential<BoundedFloat64>;
+template class UnivariateDifferential<Float64Approximation>;
+template class UnivariateDifferential<Float64Bounds>;
 template class UnivariateDifferential<UpperIntervalType>;
 
 template class Differential<Float64>;
-template class Differential<BoundedFloat64>;
-template class Differential<ApproximateFloat64>;
+template class Differential<Float64Bounds>;
+template class Differential<Float64Approximation>;
 template class Differential<UpperIntervalType>;
 
 }

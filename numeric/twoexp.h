@@ -46,10 +46,10 @@ class TwoExp {
     Float64 get_raw(Precision64 pr) const { return Float64(this->get_d()); }
     FloatMP get_raw(PrecisionMP pr) const { return FloatMP(this->get_d(),pr); }
     double get_d() const { return std::pow(2.0,this->_n); }
-    operator ExactFloat64 () const;
-    operator ErrorFloat64 () const;
-    operator MetricFloat64 () const;
-    operator BoundedFloat64 () const;
+    operator Float64Value () const;
+    operator Float64Error () const;
+    operator Float64Ball () const;
+    operator Float64Bounds () const;
 };
 inline TwoExp two_exp(Int n) { return TwoExp(n); }
 

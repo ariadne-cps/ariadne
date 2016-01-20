@@ -68,10 +68,10 @@ class TestOptimiser
         ExactBoxType C=ExactBoxType{};
         ARIADNE_TEST_PRINT(Ariadne::make_tuple(f,D,g,C));
 
-        BoundedFloatVector x_optimal=optimiser->minimise(f,D,g,C);
+        FloatBoundsVector x_optimal=optimiser->minimise(f,D,g,C);
         ARIADNE_TEST_BINARY_PREDICATE(element,x_optimal,D);
         ARIADNE_TEST_BINARY_PREDICATE(element,g(x_optimal),C);
-        ExactFloat64 required_accuracy(1e-8);
+        Float64Value required_accuracy(1e-8);
         //ARIADNE_TEST_LESS(norm(x_optimal),required_accuracy);
     }
 
@@ -86,8 +86,8 @@ class TestOptimiser
         ExactBoxType D=ExactBoxType{{-1.0,2.0},{-3.0,5.0}};
         ARIADNE_TEST_PRINT(Ariadne::make_tuple(f,D,g,C));
 
-        ExactFloat64 required_accuracy(1e-7);
-        BoundedFloatVector x_optimal=optimiser->minimise(f,D,g,C);
+        Float64Value required_accuracy(1e-7);
+        FloatBoundsVector x_optimal=optimiser->minimise(f,D,g,C);
         ARIADNE_TEST_BINARY_PREDICATE(element,x_optimal,D);
         ARIADNE_TEST_LESS(norm(g(x_optimal)),required_accuracy);
     }
@@ -105,10 +105,10 @@ class TestOptimiser
         ExactBoxType C = ExactBoxType{{0.0,inf},{0.0,inf}};
         ARIADNE_TEST_PRINT(C);
 
-        BoundedFloatVector x_optimal=optimiser->minimise(f,D,g,C);
+        FloatBoundsVector x_optimal=optimiser->minimise(f,D,g,C);
         ARIADNE_TEST_BINARY_PREDICATE(element,x_optimal,D);
         ARIADNE_TEST_BINARY_PREDICATE(element,g(x_optimal),C);
-        ExactFloat64 required_accuracy(1e-6);
+        Float64Value required_accuracy(1e-6);
         //ARIADNE_TEST_LESS(norm(x_optimal),required_accuracy);
     }
 
@@ -125,8 +125,8 @@ class TestOptimiser
         ExactBoxType C = ExactBoxType {{-1.0,-0.5},{0.0,0.0}};
         ARIADNE_TEST_PRINT(C);
 
-        BoundedFloatVector x_optimal=optimiser->minimise(f,D,gh,C);
-        ExactFloat64 required_accuracy(1e-8);
+        FloatBoundsVector x_optimal=optimiser->minimise(f,D,gh,C);
+        Float64Value required_accuracy(1e-8);
         ARIADNE_TEST_LESS(norm(h(x_optimal)),required_accuracy);
     }
 
@@ -177,18 +177,18 @@ class TestOptimiser
         ARIADNE_TEST_CONSTRUCT( ExactIntervalVectorType, D, ({{-1.0, 1.0},{-1.0,1.0}}) );
         ARIADNE_TEST_CONSTRUCT( ExactIntervalVectorType, C, ({{0.0,0.0}}) );
 
-        ARIADNE_TEST_CONSTRUCT( BoundedFloatVector, X1, ({{0.30,0.40},{0.60,0.70}}) );
+        ARIADNE_TEST_CONSTRUCT( FloatBoundsVector, X1, ({{0.30,0.40},{0.60,0.70}}) );
         ARIADNE_TEST_ASSERT( definitely(optimiser->contains_feasible_point(D,g,C,X1)) );
 
         // The following test fails since it is difficult to find the feasible
         // point in the box.
-        ARIADNE_TEST_CONSTRUCT( BoundedFloatVector, X2, ({{0.30,0.40},{0.65,0.65}}) );
+        ARIADNE_TEST_CONSTRUCT( FloatBoundsVector, X2, ({{0.30,0.40},{0.65,0.65}}) );
         ARIADNE_TEST_ASSERT( optimiser->contains_feasible_point(D,g,C,X2) );
 
-        ARIADNE_TEST_CONSTRUCT( BoundedFloatVector, X3, ({{0.30,0.40},{0.65,0.68}}) );
+        ARIADNE_TEST_CONSTRUCT( FloatBoundsVector, X3, ({{0.30,0.40},{0.65,0.68}}) );
         ARIADNE_TEST_ASSERT( definitely(optimiser->contains_feasible_point(D,g,C,X3)) );
 
-        ARIADNE_TEST_CONSTRUCT(ExactFloatVector, x2, ({ExactFloat64(0.35),ExactFloat64(0.655)}) );
+        ARIADNE_TEST_CONSTRUCT(ExactFloatVector, x2, ({Float64Value(0.35),Float64Value(0.655)}) );
         ARIADNE_TEST_ASSERT( optimiser->validate_feasibility(D,g,C,x2) );
     }
 

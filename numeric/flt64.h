@@ -64,7 +64,7 @@ extern const RoundingModeType ROUND_DOWN;
 extern const RoundingModeType ROUND_UP;
 extern const RoundingModeType ROUND_ZERO;
 
-// ----------------- RawTag Floatt64 class ---------------------------------------------------------
+// ----------------- RawTag Float64 class ---------------------------------------------------------
 
 template<class Z, EnableIf<IsIntegral<Z>> =dummy> Z integer_cast(Flt64);
 
@@ -74,7 +74,7 @@ template<class Z, EnableIf<IsIntegral<Z>> =dummy> Z integer_cast(Flt64);
 //! \brief Wrapper class for double-precision floating-point numbers.
 //! \details
 //! The main purpose of this class is as a base implementation for the \em safe floating-point number types
-//! ApproximateFloat64, LowerFloat64, UpperFloat64,BoundedFloat64, MetricFloat64, ErrorFloat64 and ExactFloat64.
+//! Float64Approximation, Float64LowerBound, Float64UpperBound,Float64Bounds, Float64Ball, Float64Error and Float64Value.
 //! These classes
 //!
 //! Default arithmetic operations are approximate, and comparisons are exact, so this class is \em unsafe.
@@ -84,14 +84,14 @@ template<class Z, EnableIf<IsIntegral<Z>> =dummy> Z integer_cast(Flt64);
 //! %ExactTag arithmetic can be specified explicitly using the \c _exact rounding suffix.
 //!
 //! Since the raw \b Float64 classes represent unsafe values, they cannot be converted to other numbers.
-//! The exception is conversion to \b ApproximateFloat64 classes, since these represent approximate values with no control of the error.
+//! The exception is conversion to \b Float64Approximation classes, since these represent approximate values with no control of the error.
 //! Since the raw \b Float64 classes are used as the implementation of the safe \c Float64 classes,
 //! they are valid arguments to constructors, but these constructors are all declared \c explicit.
-//! Comparison of raw \b %Float64 data and other numbers is performed as if the %Float64 object were an \b %ApproximateFloat64.
+//! Comparison of raw \b %Float64 data and other numbers is performed as if the %Float64 object were an \b %Float64Approximation.
 //!
 //! When testing, it is often useful to perform comparisons with \c %Flt64 or \c double values.
 //! Although care must be taken, since compiler rounding may change the truth of certain comparisons.
-//! comparisons with \c double are performed as if the value were \c ExactFloat64.
+//! comparisons with \c double are performed as if the value were \c Float64Value.
 
 
 class Flt64 {

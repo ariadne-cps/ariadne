@@ -116,7 +116,7 @@ template<class BX> class TestBoxType {
 
 
 int main() {
-    TestBoxType<ExactFloat64Box>().test();
+    TestBoxType<Float64ExactBox>().test();
 
     return ARIADNE_TEST_FAILURES;
 }

@@ -37,8 +37,8 @@
 using namespace std;
 using namespace Ariadne;
 
-auto operator==(const Real& x1, double x2) -> decltype(x1==ExactFloat64(x2)) {
-    return BoundedFloat64(x1)==BoundedFloat64(x2);
+auto operator==(const Real& x1, double x2) -> decltype(x1==Float64Value(x2)) {
+    return Float64Bounds(x1)==Float64Bounds(x2);
 }
 
 class TestReal
@@ -57,7 +57,7 @@ class TestReal
 
 void TestReal::test()
 {
-    ApproximateFloat64::set_output_precision(18);
+    Float64Approximation::set_output_precision(18);
 //    ARIADNE_TEST_CALL(test_concept());
     ARIADNE_TEST_CALL(test_constructors());
     ARIADNE_TEST_CALL(test_conversions());
@@ -112,7 +112,7 @@ void TestReal::test_constructors() {
 }
 
 void TestReal::test_arithmetic() {
-    ApproximateFloat64::set_output_precision(18);
+    Float64Approximation::set_output_precision(18);
     Real x(2.5_exact);
     Real y(4.0_exact);
     ARIADNE_TEST_EQUALS(x, 2.5);
@@ -136,9 +136,9 @@ void TestReal::test_arithmetic() {
 }
 
 void TestReal::test_transcendental() {
-    ApproximateFloat64 eps=std::numeric_limits<double>::epsilon();
+    Float64Approximation eps=std::numeric_limits<double>::epsilon();
     Real x(2.5_exact);
-    ApproximateFloat64 ax(x);
+    Float64Approximation ax(x);
     ARIADNE_TEST_EQUALS(sqrt(Real(4)),2.0);
     ARIADNE_TEST_EQUALS(exp(Real(0)),1.0);
     ARIADNE_TEST_EQUALS(log(Real(1)),0.0);
@@ -186,7 +186,7 @@ Bool operator>=(Float64 x1, FloatMP const& x2);
 }
 
 void TestReal::test_accuracy() {
-    BoundedFloat64::set_output_precision(18);
+    Float64Bounds::set_output_precision(18);
     Real one=1;
     Real pi=4*atan(one);
 
@@ -194,10 +194,10 @@ void TestReal::test_accuracy() {
     RawFloatMP pi_near = FloatMP::pi(mp_high,FloatMP::to_nearest);
 
     Precision64 dp;
-    ARIADNE_TEST_CONSTRUCT(BoundedFloat64,pi_dp,(pi.get(dp)));
+    ARIADNE_TEST_CONSTRUCT(Float64Bounds,pi_dp,(pi.get(dp)));
 
     PrecisionMP mp(128);
-    ARIADNE_TEST_CONSTRUCT(BoundedFloatMP,pi_mp,(pi.get(mp)));
+    ARIADNE_TEST_CONSTRUCT(FloatMPBounds,pi_mp,(pi.get(mp)));
 
     ARIADNE_TEST_ASSERT(pi_dp.lower_raw()<=pi_near);
     ARIADNE_TEST_ASSERT(pi_dp.upper_raw()>=pi_near);
@@ -206,8 +206,8 @@ void TestReal::test_accuracy() {
     ARIADNE_TEST_ASSERT(pi_mp.upper_raw()>=pi_near);
 
     Accuracy accuracy{256};
-    ExactFloatMP error(accuracy.error(),PrecisionMP(320));
-    ARIADNE_TEST_CONSTRUCT(BoundedFloatMP,pi_met,(pi.evaluate(accuracy)));
+    FloatMPValue error(accuracy.error(),PrecisionMP(320));
+    ARIADNE_TEST_CONSTRUCT(FloatMPBounds,pi_met,(pi.evaluate(accuracy)));
     ARIADNE_TEST_PRINT(pi_met.error());
     ARIADNE_TEST_PRINT(abs(sub_up(pi_met.value_raw(),pi_near)));
     ARIADNE_TEST_ASSERT(pi_met.error() <= error);

@@ -91,7 +91,7 @@ class SolverInterface
 
 
     //! \brief The maximum permissible error of the solution.
-    virtual ExactFloat64 maximum_error() const = 0;
+    virtual Float64Value maximum_error() const = 0;
     //! \brief Set the maximum error.
     virtual Void set_maximum_error(RawFloat64 max_error) = 0;
 

@@ -92,10 +92,10 @@ struct from_python<ExactPoint> {
         ExactPoint pt;
         if(xtup.check()) {
             boost::python::tuple tup=xtup(); pt=ExactPoint(len(tup));
-            for(Int i=0; i!=len(tup); ++i) { pt[i]=ExactFloat64(boost::python::extract<Float64>(tup[i])); }
+            for(Int i=0; i!=len(tup); ++i) { pt[i]=Float64Value(boost::python::extract<Float64>(tup[i])); }
         } else if(xlst.check()) {
             boost::python::list lst=xlst(); pt=ExactPoint(len(lst));
-            for(Int i=0; i!=len(lst); ++i) { pt[i]=ExactFloat64(boost::python::extract<Float64>(lst[i])); }
+            for(Int i=0; i!=len(lst); ++i) { pt[i]=Float64Value(boost::python::extract<Float64>(lst[i])); }
         }
         Void* storage = ((converter::rvalue_from_python_storage<ExactIntervalType>*)data)->storage.bytes;
         new (storage) ExactPoint(pt);
@@ -146,9 +146,9 @@ struct to_python< ListSet< HybridBasicSet<ES> > > {
     static const PyTypeObject* get_pytype() { return &PyDict_Type; }
 };
 
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<BoundedFloat64>& x);
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Float64Bounds>& x);
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ExactIntervalType>& x) {
-    ExactIntervalType const& ivl=x.reference(); return os << PythonRepresentation<BoundedFloat64>(BoundedFloat64(ivl.lower(),ivl.upper()));
+    ExactIntervalType const& ivl=x.reference(); return os << PythonRepresentation<Float64Bounds>(Float64Bounds(ivl.lower(),ivl.upper()));
 }
 
 
@@ -256,11 +256,11 @@ Void export_point()
 {
     class_<ExactPoint,bases<DrawableInterface>> point_class("ExactPoint",init<ExactPoint>());
     point_class.def(init<Nat>());
-    point_class.def("__getitem__", &__getitem__<ExactPoint,Int,ExactFloat64>);
+    point_class.def("__getitem__", &__getitem__<ExactPoint,Int,Float64Value>);
     point_class.def(self_ns::str(self));
 
     from_python<ExactPoint>();
-    implicitly_convertible<Vector<ExactFloat64>,ExactPoint>();
+    implicitly_convertible<Vector<Float64Value>,ExactPoint>();
 
 }
 
@@ -344,7 +344,7 @@ template<class BX> Void export_box()
     def("hull", (ExactBoxType(*)(const ExactBoxType&,const ExactBoxType&)) &hull);
     def("intersection", (ExactBoxType(*)(const ExactBoxType&,const ExactBoxType&)) &intersection);
 
-    def("widen", (UpperBoxType(*)(ExactBoxType const&, ExactFloat64 eps)) &widen);
+    def("widen", (UpperBoxType(*)(ExactBoxType const&, Float64Value eps)) &widen);
 
     from_python<ExactBoxType>();
     to_python< Pair<ExactBoxType,ExactBoxType> >();
@@ -365,8 +365,8 @@ Pair<Zonotope,Zonotope> split_pair(const Zonotope& z) {
 Void export_zonotope()
 {
     class_<Zonotope,bases<CompactSetInterface,OpenSetInterface,DrawableInterface> > zonotope_class("Zonotope",init<Zonotope>());
-    zonotope_class.def(init< Vector<ExactFloat64>, Matrix<ExactFloat64>, Vector<ErrorFloat64> >());
-    zonotope_class.def(init< Vector<ExactFloat64>, Matrix<ExactFloat64> >());
+    zonotope_class.def(init< Vector<Float64Value>, Matrix<Float64Value>, Vector<Float64Error> >());
+    zonotope_class.def(init< Vector<Float64Value>, Matrix<Float64Value> >());
     zonotope_class.def(init< ExactBoxType >());
     zonotope_class.def("centre",&Zonotope::centre,return_value_policy<copy_const_reference>());
     zonotope_class.def("generators",&Zonotope::generators,return_value_policy<copy_const_reference>());
@@ -404,11 +404,11 @@ Void export_polytope()
 
 Void export_curve()
 {
-    to_python< Pair<const ExactFloat64,ExactPoint> >();
+    to_python< Pair<const Float64Value,ExactPoint> >();
 
     class_<InterpolatedCurve,bases<DrawableInterface> > interpolated_curve_class("InterpolatedCurve",init<InterpolatedCurve>());
-    interpolated_curve_class.def(init<ExactFloat64,ExactPoint>());
-    interpolated_curve_class.def("insert", (Void(InterpolatedCurve::*)(const ExactFloat64&, const Point<ApproximateFloat64>&)) &InterpolatedCurve::insert);
+    interpolated_curve_class.def(init<Float64Value,ExactPoint>());
+    interpolated_curve_class.def("insert", (Void(InterpolatedCurve::*)(const Float64Value&, const Point<Float64Approximation>&)) &InterpolatedCurve::insert);
     interpolated_curve_class.def("__iter__",boost::python::range(&InterpolatedCurve::begin,&InterpolatedCurve::end));
     interpolated_curve_class.def(self_ns::str(self));
 
@@ -422,10 +422,10 @@ Void export_affine_set()
 
     class_<ValidatedAffineConstrainedImageSet,bases<CompactSetInterface,DrawableInterface> >
         affine_set_class("ValidatedAffineConstrainedImageSet",init<ValidatedAffineConstrainedImageSet>());
-    affine_set_class.def(init<Vector<ExactIntervalType>, Matrix<ExactFloat64>, Vector<ExactFloat64> >());
-    affine_set_class.def(init<Matrix<ExactFloat64>, Vector<ExactFloat64> >());
-    affine_set_class.def("new_parameter_constraint", (Void(ValidatedAffineConstrainedImageSet::*)(const Constraint<Affine<BoundedFloat64>,BoundedFloat64>&)) &ValidatedAffineConstrainedImageSet::new_parameter_constraint);
-    affine_set_class.def("new_constraint", (Void(ValidatedAffineConstrainedImageSet::*)(const Constraint<AffineModel<BoundedFloat64>,BoundedFloat64>&)) &ValidatedAffineConstrainedImageSet::new_constraint);
+    affine_set_class.def(init<Vector<ExactIntervalType>, Matrix<Float64Value>, Vector<Float64Value> >());
+    affine_set_class.def(init<Matrix<Float64Value>, Vector<Float64Value> >());
+    affine_set_class.def("new_parameter_constraint", (Void(ValidatedAffineConstrainedImageSet::*)(const Constraint<Affine<Float64Bounds>,Float64Bounds>&)) &ValidatedAffineConstrainedImageSet::new_parameter_constraint);
+    affine_set_class.def("new_constraint", (Void(ValidatedAffineConstrainedImageSet::*)(const Constraint<AffineModel<Float64Bounds>,Float64Bounds>&)) &ValidatedAffineConstrainedImageSet::new_constraint);
     affine_set_class.def("dimension", &ValidatedAffineConstrainedImageSet::dimension);
     affine_set_class.def("is_bounded", &ValidatedAffineConstrainedImageSet::is_bounded);
     affine_set_class.def("is_empty", &ValidatedAffineConstrainedImageSet::is_empty);

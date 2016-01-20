@@ -158,7 +158,7 @@ template<class X> Void Expansion<X>::combine_terms() {
         while(adv!=end && curr->key()==adv->key()) { curr->data()+=adv->data(); ++adv; } ++curr; }
     this->resize(curr-this->begin()); }
 
-template<> Void Expansion<ExactFloat64>::combine_terms() { ARIADNE_NOT_IMPLEMENTED; }
+template<> Void Expansion<Float64Value>::combine_terms() { ARIADNE_NOT_IMPLEMENTED; }
 template<> Void Expansion<ExactIntervalType>::combine_terms() { ARIADNE_NOT_IMPLEMENTED; }
 
 template<class X> Void Expansion<X>::graded_sort() {

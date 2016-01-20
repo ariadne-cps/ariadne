@@ -40,7 +40,7 @@
 using namespace Ariadne;
 using namespace std;
 
-typedef Vector<BoundedFloat64> BoundedFloatVector;
+typedef Vector<Float64Bounds> FloatBoundsVector;
 
 class TestSolver
 {
@@ -63,7 +63,7 @@ class TestSolver
         EffectiveScalarFunction x=EffectiveScalarFunction::coordinate(1,0);
         ExactIntervalVectorType d({ExactIntervalType(0.0,1.0)});
         EffectiveVectorFunction f({(x*x+1)*x-1});
-        BoundedFloatVector p=solver->solve(f,d);
+        FloatBoundsVector p=solver->solve(f,d);
         ARIADNE_TEST_BINARY_PREDICATE(contains,ExactIntervalType(0.6823,0.6824),p[0]);
     }
 
@@ -78,7 +78,7 @@ class TestSolver
         EffectiveVectorFunction f;
         ValidatedVectorFunctionModel h;
         EffectiveVectorFunction e;
-        ExactFloat64 tol;
+        Float64Value tol;
 
         // Test solution of x-a=0. This should be very easy to solve.
         p=ExactIntervalVectorType({ExactIntervalType(-0.25,0.25)});

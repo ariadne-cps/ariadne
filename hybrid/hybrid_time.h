@@ -62,8 +62,8 @@ struct HybridTime
     HybridTime(Real t, Integer n)
       : _continuous_time(t), _discrete_time(n) { }
     HybridTime(RawFloat64 t, Integer n)
-      : _continuous_time(ExactFloat64(t)), _discrete_time(n) { }
-    HybridTime(ExactFloat64 t, Integer n)
+      : _continuous_time(Float64Value(t)), _discrete_time(n) { }
+    HybridTime(Float64Value t, Integer n)
       : _continuous_time(t), _discrete_time(n) { }
     HybridTime(double t, Int n)
       : _continuous_time(t), _discrete_time(n) { }

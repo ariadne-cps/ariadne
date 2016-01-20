@@ -173,7 +173,7 @@ template<class X, class T> Void _compute(List<T>& v, const List<ProcedureInstruc
 
 template<class T> Void _propagate(Vector<T>& x, List<T>& v, const List<ProcedureInstruction>& p)
 {
-    ExactFloat64 infty(inf);
+    Float64Value infty(inf);
 
     ARIADNE_ASSERT(v.size()==p.size());
     SizeType r=p.size();

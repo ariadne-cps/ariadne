@@ -43,9 +43,9 @@ Box<UpperIntervalType> apply(VectorFunction<ValidatedTag>const& f, const Box<Upp
     return static_cast<Box<UpperIntervalType>>(f(reinterpret_cast<Vector<ValidatedNumericType>const&>(x))); }
 
 template class Box<Interval<Real>>;
-template class Box<Interval<ExactFloat64>>;
-template class Box<Interval<UpperFloat64>>;
-template class Box<Interval<ApproximateFloat64>>;
+template class Box<Interval<Float64Value>>;
+template class Box<Interval<Float64UpperBound>>;
+template class Box<Interval<Float64Approximation>>;
 
 Void draw(CanvasInterface& c, Projection2d const& p, ApproximateBoxType const& bx) {
     Nat ix=p.x_coordinate(); Nat iy=p.y_coordinate();
@@ -133,27 +133,27 @@ template<class I> List<typename Box<I>::VertexType> Box<I>::vertices() const {
     return v;
 }
 
-template List<typename ExactFloat64Box::VertexType> Box<ExactFloat64Interval>::vertices() const;
+template List<typename Float64ExactBox::VertexType> Box<Float64ExactInterval>::vertices() const;
 
 /*
-LowerFloat64Box under_approximation(const RealBox& rbx) {
-    LowerFloat64Box bx(rbx.size());
+Float64LowerBox under_approximation(const RealBox& rbx) {
+    Float64LowerBox bx(rbx.size());
     for(SizeType i=0; i!=bx.size(); ++i) {
         bx[i]=under_approximation(rbx[i]);
     }
     return bx;
 }
 
-UpperFloat64Box over_approximation(const RealBox& rbx) {
-    UpperFloat64Box bx(rbx.size(),UpperFloat64Interval(-inf,+inf));
+Float64UpperBox over_approximation(const RealBox& rbx) {
+    Float64UpperBox bx(rbx.size(),Float64UpperInterval(-inf,+inf));
     for(SizeType i=0; i!=bx.size(); ++i) {
         bx[i]=over_approximation(rbx[i]);
     }
     return bx;
 }
 
-ApproximateFloat64Box approximation(const RealBox& rbx) {
-    ApproximateFloat64Box bx(rbx.size(),ApproximateFloat64Interval(-inf,+inf));
+Float64ApproximationBox approximation(const RealBox& rbx) {
+    Float64ApproximationBox bx(rbx.size(),Float64ApproximationInterval(-inf,+inf));
     for(SizeType i=0; i!=bx.size(); ++i) {
         bx[i]=approximation(rbx[i]);
     }
@@ -163,16 +163,16 @@ ApproximateFloat64Box approximation(const RealBox& rbx) {
 
 
 /*
-Vector<BoundedFloat> cast_singleton(const Vector<UpperFloat64Interval>& bx) {
-    Vector<BoundedFloat> r(bx.size());
+Vector<FloatBounds> cast_singleton(const Vector<Float64UpperInterval>& bx) {
+    Vector<FloatBounds> r(bx.size());
     for(SizeType i=0; i!=r.size(); ++i) { r[i]=cast_singleton(bx[i]); }
     return r;
 }
 
 template class Box<RealInterval>;
-template class Box<ExactFloat64Interval>;
-template class Box<UpperFloat64Interval>;
-template class Box<ApproximateFloat64Interval>;
+template class Box<Float64ExactInterval>;
+template class Box<Float64UpperInterval>;
+template class Box<Float64ApproximationInterval>;
 */
 
 } //namespace Ariadne

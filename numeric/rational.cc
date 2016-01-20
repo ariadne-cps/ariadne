@@ -107,7 +107,7 @@ Rational::Rational(double d, std::nullptr_t dummy) {
 Rational::Rational(Float64 const& x) : Rational(x.get_d(),nullptr) {
 }
 
-Rational::Rational(ExactFloat64 const& x) : Rational(x.raw()) {
+Rational::Rational(Float64Value const& x) : Rational(x.raw()) {
 }
 
 Rational::Rational(const String& s) {

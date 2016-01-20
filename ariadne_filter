@@ -57,7 +57,7 @@ s/ValidatedBoundedTag/BoundedTag/g
 s/ValidatedLowerTag/LowerTag/g
 s/ValidatedUpperTag/UpperTag/g
 
-s/Interval<ExactFloat64>/IntervalDomain/g
+s/Interval<Float64Value>/IntervalDomain/g
 s/Box<IntervalDomain>/BoxDomain/g
 s/Box<\(\w*\)Interval>/\1Box/g
 

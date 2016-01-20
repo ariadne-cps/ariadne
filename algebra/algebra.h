@@ -169,9 +169,9 @@ template<class X> class NormedAlgebra
     typename AlgebraTraits<X>::NormType radius() const { return _ptr->radius(); }
     NormedAlgebra<X> create_zero() const { return NormedAlgebra<X>(_ptr->_create_zero()); }
     NormedAlgebra<X> create_constant(X c) const { return NormedAlgebra<X>(_ptr->_create_constant(c)); }
-    NormedAlgebra<X> create_ball(ErrorFloat64 r) const { return NormedAlgebra<X>(_ptr->_create_ball(r)); }
-    NormedAlgebra<X> create_ball(ApproximateFloat64 r) const {
-        return create_ball(ErrorFloat64(r.raw())); }
+    NormedAlgebra<X> create_ball(Float64Error r) const { return NormedAlgebra<X>(_ptr->_create_ball(r)); }
+    NormedAlgebra<X> create_ball(Float64Approximation r) const {
+        return create_ball(Float64Error(r.raw())); }
     NormedAlgebra<X> create() const { return NormedAlgebra<X>(_ptr->_create_zero()); }
     NormedAlgebra<X> clone() const { return NormedAlgebra<X>(_ptr->_create_copy()); }
     Void clear() { this->imul(0); }

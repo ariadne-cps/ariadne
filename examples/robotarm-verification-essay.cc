@@ -259,7 +259,7 @@ Int main(Int argc, char** argv)
     Rational deltamin ( 0.0_dec );
     Rational deltamax ( 0.1_dec );
     // accuracy
-    ExactFloat64 eps = 1e-2_exact;
+    Float64Value eps = 1e-2_exact;
     Int iter=0; // iteration count
 
     Orbit<HybridEnclosure> orbit;

@@ -70,8 +70,8 @@ class TestSeries
         ARIADNE_TEST_EQUALS(series[255],-1.0);
 //        ARIADNE_TEST_EQUALS(series[32767],1.0);
         std::cerr<<std::setprecision(18);
-        Float64Value::set_output_precision(18);
-        Float64Bounds::set_output_precision(18);
+        Float64Value::set_output_places(18);
+        Float64Bounds::set_output_places(18);
     }
     void test_rec() {
         ARIADNE_TEST_EQUALS( Series<Float64>(Rec(),2.0).coefficients(5), (List<Float64>{0.5,-0.25,0.125,-0.0625,0.03125,-0.015625}) );

@@ -421,7 +421,7 @@ template<class PR> void export_exact_float()
 
     implicitly_convertible<int,FloatValue<PR>>();
 
-    exact_float_class.def("set_output_precision",&FloatValue<PR>::set_output_precision).staticmethod("set_output_precision");
+    exact_float_class.def("set_output_places",&FloatValue<PR>::set_output_places).staticmethod("set_output_places");
 }
 
 template<class PR> void export_error_float()
@@ -440,7 +440,7 @@ template<class PR> void export_error_float()
 
     error_float_class.def("precision", &FloatError<PR>::precision);
 
-    //    error_float_class.def("set_output_precision",&FloatError<PR>::set_output_precision).staticmethod("set_output_precision");
+    //    error_float_class.def("set_output_places",&FloatError<PR>::set_output_places).staticmethod("set_output_places");
 }
 
 template<class PR> void export_metric_float()
@@ -524,7 +524,7 @@ template<class PR> void export_bounded_float()
 
     implicitly_convertible<FloatBall<PR>,FloatBounds<PR>>();
 
-    bounded_float_class.def("set_output_precision",&FloatBounds<PR>::set_output_precision).staticmethod("set_output_precision");
+    bounded_float_class.def("set_output_places",&FloatBounds<PR>::set_output_places).staticmethod("set_output_places");
 
 }
 

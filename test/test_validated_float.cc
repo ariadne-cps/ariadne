@@ -321,7 +321,7 @@ TestFloatBounds<PR>::test()
 template<class PR> Void
 TestFloatBounds<PR>::test_concept()
 {
-    FloatBoundsType::set_output_precision(17);
+    FloatBoundsType::set_output_places(17);
 
     Nat m=1;
     Int n=1;

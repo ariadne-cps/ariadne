@@ -142,9 +142,9 @@ class Float64Value
     friend class Float64Bounds;
     friend class Float64Approximation;
     volatile double v;
-    static Int output_precision;
+    static Int output_places;
   public:
-    static Void set_output_precision(Int);
+    static Void set_output_places(Int);
   public:
     typedef ExactTag Paradigm;
     Float64Value();
@@ -181,9 +181,9 @@ Float64Value max(Float64Value x1, Float64Value x2);
 
 class Float64Error : public NumberObject<Float64UpperBound> {
     volatile double e;
-    static Int output_precision;
+    static Int output_places;
   public:
-    static Void set_output_precision(Int);
+    static Void set_output_places(Int);
   public:
     Float64Error();
     template<class M, EnableIf<IsSame<M,Nat>> = dummy> Float64Error(M m);
@@ -250,9 +250,9 @@ ValidFloat64::ValidFloat64(N n) : ValidFloat64(double(n),ExactTag())
 class Float64Bounds : public NumberObject<Float64Bounds> {
     friend class Float64Approximation; friend class ValidFloat64;
     volatile double l; volatile double u;
-    static Int output_precision;
+    static Int output_places;
   public:
-    static Void set_output_precision(Int);
+    static Void set_output_places(Int);
   public:
     typedef ValidatedTag Paradigm;
     Float64Bounds();

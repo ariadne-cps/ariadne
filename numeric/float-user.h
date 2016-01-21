@@ -140,10 +140,10 @@ template<class PR> class Float<ApproximateTag,PR> {
     RawFloatType& raw() { return this->_a; }
     double get_d() const { return this->_a.get_d(); }
   public:
-    static Void set_output_precision(Nat p) { output_precision=p; }
+    static Void set_output_places(Nat p) { output_places=p; }
     Float<ApproximateTag,PR> pm(Float<ApproximateTag,PR> _e) { return *this; }
   private: public:
-    static Nat output_precision;
+    static Nat output_places;
     RawFloatType _a;
 };
 
@@ -184,7 +184,7 @@ template<class PR> class Float<LowerTag,PR> {
     RawFloatType& raw() { return _l; }
     double get_d() const { return _l.get_d(); }
   private: public:
-    static Nat output_precision;
+    static Nat output_places;
     RawFloatType _l;
 };
 
@@ -225,7 +225,7 @@ template<class PR> class Float<UpperTag,PR> {
     RawFloatType& raw() { return _u; }
     double get_d() const { return _u.get_d(); }
   private: public:
-    static Nat output_precision;
+    static Nat output_places;
     RawFloatType _u;
 };
 
@@ -313,8 +313,8 @@ template<class PR> class Float<BoundedTag,PR> {
     explicit operator RawFloatType () const { return value_raw(); }
     friend Float<ExactTag,PR> midpoint(Float<BoundedTag,PR> const& x);
   public:
-    static Nat output_precision;
-    static Void set_output_precision(Nat p) { output_precision=p; }
+    static Nat output_places;
+    static Void set_output_places(Nat p) { output_places=p; }
   private: public:
     RawFloatType _l, _u;
 };
@@ -397,8 +397,8 @@ template<class PR> class Float<ExactTag,PR> {
 
     Float<MetricTag,PR> pm(Float<ErrorTag,PR> _e) const;
   public:
-    static Nat output_precision;
-    static Void set_output_precision(Nat p) { output_precision=p; }
+    static Nat output_places;
+    static Void set_output_places(Nat p) { output_places=p; }
   private: public:
     RawFloatType _v;
 };

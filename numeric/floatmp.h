@@ -189,8 +189,9 @@ class FloatMP {
     friend Bool operator< (FloatMP const& x1, FloatMP const& x2);
     friend Bool operator> (FloatMP const& x1, FloatMP const& x2);
 
-    friend OutputStream& operator<<(OutputStream& os, FloatMP const&);
-    friend InputStream& operator>>(InputStream& is, FloatMP&);
+    friend OutputStream& operator<<(OutputStream& os, FloatMP const& x);
+    friend InputStream& operator>>(InputStream& is, FloatMP& x);
+    friend OutputStream& write(OutputStream& os, FloatMP const& x, Nat dgts, RoundingModeMP rnd);
 
     // Mixed operators
     friend FloatMP operator+(FloatMP const& x1, Dbl x2);

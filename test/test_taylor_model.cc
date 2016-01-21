@@ -108,8 +108,8 @@ Void TestTaylorModel::test()
     std::cerr<<std::setprecision(18);
     std::cout<<std::setprecision(18);
     std::clog<<std::setprecision(18);
-    Float64Value::set_output_precision(18);
-    Float64Bounds::set_output_precision(18);
+    Float64Value::set_output_places(18);
+    Float64Bounds::set_output_places(18);
 
     ARIADNE_TEST_CALL(test_constructors());
     ARIADNE_TEST_CALL(test_predicates());

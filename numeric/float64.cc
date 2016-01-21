@@ -759,6 +759,25 @@ Bool operator> (Float64 x1, Float64 x2) { return x1.dbl> x2.dbl; }
 
 Bool is_nan(Float64 x) { return std::isnan(x.dbl); }
 
+/*
+OutputStream& write(OutputStream& os, Float64 const& x, Nat bits, RoundingMode64 rnd) {
+    Nat dgts = std::ceil(bits*std::log(2))/std::log(10);
+    Float64::RoundingModeType old_rnd=Float64::get_rounding_mode();
+    Float64::set_rounding_mode(rnd);
+    os << std::setprecision(dgts) << x.get_d();
+    Float64::set_rounding_mode(old_rnd);
+    return os;
+}
+*/
+OutputStream& write(OutputStream& os, FloatMP const& x, Nat bits, RoundingModeMP rnd);
+
+OutputStream& write(OutputStream& os, Float64 const& x, Nat bits, RoundingMode64 rnd) {
+    assert(rnd==Float64::to_nearest || rnd==Float64::upward || rnd==Float64::downward);
+    RoundingModeMP rnd_mp = (rnd==Float64::to_nearest) ? FloatMP::to_nearest : (rnd==Float64::downward) ? FloatMP::downward : FloatMP::upward;
+    return write(os,FloatMP(x),bits,rnd_mp);
+}
+
+
 OutputStream& operator<<(OutputStream& os, Float64 const& x) {
     return os << x.dbl;
 }

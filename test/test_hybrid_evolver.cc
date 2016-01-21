@@ -684,7 +684,7 @@ TestHybridEvolver::test_affine_hysteresis() const
     // with an affine flow in each, and affine guards and resets.
     // This should be very easy to analyse numerically, and is there to test
     // switching logic
-    Float64Value::set_output_precision(2);
+    Float64Value::set_output_places(2);
 
     RealVariable x("x");
     RealVariable y("y");

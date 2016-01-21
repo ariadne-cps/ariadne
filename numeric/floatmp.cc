@@ -290,8 +290,16 @@ FloatMP operator/(Dbl x1, FloatMP const& x2) {
 }
 
 
-String sprintf(FloatMP const& x, RoundingModeMP rnd);
-String sprintf(FloatMP const&, PrecisionMP, RoundingModeMP);
+OutputStream& write(OutputStream& os, FloatMP const& x, Nat dgts, RoundingModeMP rnd) {
+    char fmt[12]; char str[1024];
+    uint bits = std::ceil((dgts*std::log(10))/std::log(2));
+    std::strcpy(fmt,"%.");
+    std::sprintf(fmt+2, "%d", dgts);
+    std::strcat(fmt,"R*f");
+    mpfr_snprintf(str,bits,fmt,rnd,x._mpfr);
+    return os << str;
+}
+
 
 //   mpfr_get_str (char *str, mpfr_exp_t *expptr, Int b, SizeType n, mpfr_t op, mpfr_rnd_t rnd)
 // If str is not _a null pointer, it should point to _a block of storage large enough for the significand,

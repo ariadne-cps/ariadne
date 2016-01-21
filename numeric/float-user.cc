@@ -38,9 +38,9 @@
 namespace Ariadne {
 
 
-template<class PR> Nat Float<ApproximateTag,PR>::output_precision = 4;
-template<class PR> Nat Float<BoundedTag,PR>::output_precision=8;
-template<class PR> Nat Float<ExactTag,PR>::output_precision = 16;
+template<class PR> Nat Float<ApproximateTag,PR>::output_places = 4;
+template<class PR> Nat Float<BoundedTag,PR>::output_places=8;
+template<class PR> Nat Float<ExactTag,PR>::output_places = 16;
 
 const Float<ExactTag,Precision64> infty = Float<ExactTag,Precision64>(Float64::inf());
 
@@ -387,11 +387,7 @@ template<class PR> Fuzzy operator< (Float<ApproximateTag,PR> const& x1, Float<Ap
 template<class PR> Fuzzy operator> (Float<ApproximateTag,PR> const& x1, Float<ApproximateTag,PR> const& x2) { return x1._a> x2._a; }
 
 template<class PR> OutputStream& operator<<(OutputStream& os, Float<ApproximateTag,PR> const& x) {
-    typename RawFloat<PR>::RoundingModeType rnd=RawFloat<PR>::get_rounding_mode();
-    RawFloat<PR>::set_rounding_to_nearest();
-    os << std::showpoint << std::setprecision(Float<ApproximateTag,PR>::output_precision) << x.raw();
-    RawFloat<PR>::set_rounding_mode(rnd);
-    return os;
+    return write(os,x.raw(),Float<ApproximateTag,PR>::output_places,RawFloat<PR>::to_nearest);
 }
 
 template<class PR> InputStream& operator>>(InputStream& is, Float<ApproximateTag,PR>& x) {
@@ -480,11 +476,7 @@ template<class PR> Float<LowerTag,PR>& operator*=(Float<LowerTag,PR>& x1, Float<
 template<class PR> Float<LowerTag,PR>& operator/=(Float<LowerTag,PR>& x1, Float<UpperTag,PR> const& x2) { return x1=x1/x2; }
 
 template<class PR> OutputStream& operator<<(OutputStream& os, Float<LowerTag,PR> const& x) {
-    typename RawFloat<PR>::RoundingModeType rnd=RawFloat<PR>::get_rounding_mode();
-    RawFloat<PR>::set_rounding_downward();
-    os << std::showpoint << std::setprecision(Float<BoundedTag,PR>::output_precision) << x.raw();
-    RawFloat<PR>::set_rounding_mode(rnd);
-    return os;
+    return write(os,x.raw(),Float<BoundedTag,PR>::output_places,RawFloat<PR>::downward);
 }
 
 template<class PR> InputStream& operator>>(InputStream& is, Float<LowerTag,PR>& x) {
@@ -587,11 +579,7 @@ template<class PR> Float<UpperTag,PR>& operator*=(Float<UpperTag,PR>& x1, Float<
 template<class PR> Float<UpperTag,PR>& operator/=(Float<UpperTag,PR>& x1, Float<LowerTag,PR> const& x2) { return x1=x1/x2; }
 
 template<class PR> OutputStream& operator<<(OutputStream& os, Float<UpperTag,PR> const& x) {
-    typename RawFloat<PR>::RoundingModeType rnd=RawFloat<PR>::get_rounding_mode();
-    RawFloat<PR>::set_rounding_upward();
-    os << std::showpoint << std::setprecision(Float<BoundedTag,PR>::output_precision) << x.raw();
-    RawFloat<PR>::set_rounding_mode(rnd);
-    return os;
+    return write(os,x.raw(),Float<BoundedTag,PR>::output_places,RawFloat<PR>::upward);
 }
 
 template<class PR> InputStream& operator>>(InputStream& is, Float<UpperTag,PR>& x) {
@@ -960,15 +948,12 @@ template<class PR> Bool same(Float<BoundedTag,PR> const& x1, Float<BoundedTag,PR
 
 template<class PR> OutputStream& operator<<(OutputStream& os, const Float<BoundedTag,PR>& x)
 {
-    //if(x.lower_raw()==x.upper_raw()) { return os << "{" << std::setprecision(Float<BoundedTag,PR>::output_precision) << x.lower_raw().get_d() << ; }
+    //if(x.lower_raw()==x.upper_raw()) { return write(os,x.lower().raw(),Float<BoundedTag,PR>::output_places,RawFloat<PR>::to_nearest);
     typename RawFloat<PR>::RoundingModeType rnd=RawFloat<PR>::get_rounding_mode();
     os << '{';
-    RawFloat<PR>::set_rounding_downward();
-    os << std::showpoint << std::setprecision(Float<BoundedTag,PR>::output_precision) << x.lower().get_d();
+    write(os,x.lower().raw(),Float<BoundedTag,PR>::output_places,RawFloat<PR>::downward);
     os << ':';
-    RawFloat<PR>::set_rounding_upward();
-    os << std::showpoint << std::setprecision(Float<BoundedTag,PR>::output_precision) << x.upper().get_d();
-    RawFloat<PR>::set_rounding_mode(rnd);
+    write(os,x.upper().raw(),Float<BoundedTag,PR>::output_places,RawFloat<PR>::upward);
     os << '}';
     return os;
 
@@ -1353,7 +1338,7 @@ template<class PR> Boolean operator< (Float<ExactTag,PR> const& x1, Float<ExactT
 template<class PR> Boolean operator> (Float<ExactTag,PR> const& x1, Float<ExactTag,PR> const& x2) { return x1.raw()> x2.raw(); }
 
 template<class PR> OutputStream& operator<<(OutputStream& os, Float<ExactTag,PR> const& x) {
-    return os << std::setprecision(Float<ExactTag,PR>::output_precision) << x.raw();
+    write(os,x.raw(),Float<ExactTag,PR>::output_places,RawFloat<PR>::to_nearest);
 }
 
 template<class PR> InputStream& operator>>(InputStream& is, Float<ExactTag,PR>& x) {

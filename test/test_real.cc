@@ -57,7 +57,7 @@ class TestReal
 
 void TestReal::test()
 {
-    Float64Approximation::set_output_precision(18);
+    Float64Approximation::set_output_places(18);
 //    ARIADNE_TEST_CALL(test_concept());
     ARIADNE_TEST_CALL(test_constructors());
     ARIADNE_TEST_CALL(test_conversions());
@@ -112,7 +112,7 @@ void TestReal::test_constructors() {
 }
 
 void TestReal::test_arithmetic() {
-    Float64Approximation::set_output_precision(18);
+    Float64Approximation::set_output_places(18);
     Real x(2.5_exact);
     Real y(4.0_exact);
     ARIADNE_TEST_EQUALS(x, 2.5);
@@ -186,7 +186,7 @@ Bool operator>=(Float64 x1, FloatMP const& x2);
 }
 
 void TestReal::test_accuracy() {
-    Float64Bounds::set_output_precision(18);
+    Float64Bounds::set_output_places(18);
     Real one=1;
     Real pi=4*atan(one);
 

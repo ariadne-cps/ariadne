@@ -39,16 +39,22 @@ typedef Void Void;
 enum class LogicalValue : char;
 template<class P=Void> class Logical;
 
-//typedef Logical<ExactTag> Boolean;
-//typedef Logical<ValidatedTag> ValidatedKleenean;
-//typedef Logical<UpperTag> ValidatedSierpinskian;
-//typedef Logical<ApproximateTag> Fuzzy;
+typedef Logical<ExactTag> Boolean;
+typedef Logical<EffectiveTag> Kleenean;
+typedef Logical<EffectiveUpperTag> Sierpinskian;
+typedef Logical<EffectiveLowerTag> NegatedSierpinskian;
+typedef Logical<ValidatedTag> ValidatedKleenean;
+typedef Logical<ValidatedUpperTag> ValidatedSierpinskian;
+typedef Logical<ValidatedLowerTag> ValidatedNegatedSierpinskian;
+typedef Logical<ApproximateTag> Fuzzy;
 
+/*
 class Boolean;
 class ValidatedKleenean;
 class ValidatedSierpinskian;
 class ValidatedNegatedSierpinskian;
 class Fuzzy;
+*/
 
 template<class P> using LogicalType = Logical<P>;
 using ExactLogic = Logical<ExactTag>;

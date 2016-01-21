@@ -288,11 +288,6 @@ ARIADNE_CLASS_NAME(Logical<ExactTag>);
 
 ARIADNE_CLASS_NAME(bool);
 ARIADNE_CLASS_NAME(uint);
-ARIADNE_CLASS_NAME(Fuzzy);
-ARIADNE_CLASS_NAME(ValidatedNegatedSierpinskian);
-ARIADNE_CLASS_NAME(ValidatedSierpinskian);
-ARIADNE_CLASS_NAME(ValidatedKleenean);
-ARIADNE_CLASS_NAME(Boolean);
 
 ARIADNE_CLASS_NAME(Integer);
 ARIADNE_CLASS_NAME(Rational);
@@ -302,6 +297,8 @@ ARIADNE_CLASS_NAME(Number<ApproximateTag>)
 ARIADNE_CLASS_NAME(Number<ValidatedLowerTag>)
 ARIADNE_CLASS_NAME(Number<ValidatedUpperTag>)
 ARIADNE_CLASS_NAME(Number<ValidatedTag>)
+ARIADNE_CLASS_NAME(Number<EffectiveLowerTag>)
+ARIADNE_CLASS_NAME(Number<EffectiveUpperTag>)
 ARIADNE_CLASS_NAME(Number<EffectiveTag>)
 ARIADNE_CLASS_NAME(Number<ExactTag>)
 

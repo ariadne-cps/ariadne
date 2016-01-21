@@ -212,16 +212,16 @@ class Enclosure
     //! \brief An over-approximation to the radius of the set.
     Float64Error radius() const;
     //! \brief Returns \c true if the set is definitely singleton.
-    ValidatedKleenean is_bounded() const;
+    ValidatedSierpinskian is_bounded() const;
     //! \brief Returns \c true if the set is provably empty.
     //! May return \c false if the set can (easily) be proved to be nonempty.
-    ValidatedKleenean is_empty() const;
+    ValidatedSierpinskian is_empty() const;
     //! \brief Returns \c true if the set can be shown to be disjoint from \a bx.
     ValidatedSierpinskian separated(const ExactBoxType& bx) const;
     //! \brief Returns \c true if the set can be shown to be a subset of \a bx..
     ValidatedSierpinskian inside(const ExactBoxType& bx) const;
     //! \brief Returns \c true if the set can be shown to be a subset of \a bx..
-    ValidatedKleenean subset(const ExactBoxType& bx) const;
+    ValidatedSierpinskian subset(const ExactBoxType& bx) const;
 
     //! \brief Reduces the size of the effective parameter domain
     //! by pruning away infeasible points. Does not affect the set as a mathematical entity.

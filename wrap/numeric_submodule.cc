@@ -212,7 +212,6 @@ template<> void export_logical<ExactTag>(std::string name)
 
     implicitly_convertible<Logical<ExactTag>,bool>();
 
-    boost::python::class_<Boolean,boost::python::bases<Logical<ExactTag>>> boolean_class("Boolean");
 }
 
 void export_integer()
@@ -710,13 +709,13 @@ numeric_submodule()
     using namespace Ariadne;
     export_effort();
 
-    export_effective_logical<EffectiveTag>("ValidatedKleenean");
-    export_effective_logical<EffectiveUpperTag>("ValidatedSierpinskian");
-    export_effective_logical<EffectiveLowerTag>("EffectiveLowerLogical");
     export_logical<ExactTag>("Boolean");
+    export_effective_logical<EffectiveTag>("Kleenean");
+    export_effective_logical<EffectiveUpperTag>("Sierpinskian");
+    export_effective_logical<EffectiveLowerTag>("NegatedSierpinskian");
     export_logical<ValidatedTag>("Tribool");
-    export_logical<UpperTag>("Verifyable");
-    export_logical<LowerTag>("Falsifyable");
+    export_logical<UpperTag>("Verified");
+    export_logical<LowerTag>("Falsified");
     export_logical<ApproximateTag>("Fuzzy");
 
 

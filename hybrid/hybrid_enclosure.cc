@@ -369,7 +369,7 @@ DimensionType HybridEnclosure::dimension() const {
     return this->space_function().result_size();
 }
 
-ValidatedKleenean HybridEnclosure::is_empty() const {
+ValidatedSierpinskian HybridEnclosure::is_empty() const {
     return this->_set.is_empty();
 }
 

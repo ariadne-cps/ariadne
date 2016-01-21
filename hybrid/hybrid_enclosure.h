@@ -236,7 +236,7 @@ class HybridEnclosure
     //! \brief The dimension of the set.
     DimensionType dimension() const;
     //! \brief Tests whether the set is empty.
-    ValidatedKleenean is_empty() const;
+    ValidatedSierpinskian is_empty() const;
     //! \brief Tests whether the set satisfies the constraint \a c.
     ValidatedKleenean satisfies(EffectiveConstraint c) const;
 

@@ -247,8 +247,8 @@ ValidatedSierpinskian ValidatedAffineConstrainedImageSet::separated(const ExactB
     return !feasible;
 }
 
-ValidatedKleenean ValidatedAffineConstrainedImageSet::is_empty() const {
-    return ValidatedKleenean(this->separated(cast_exact_box(this->bounding_box()))) || ValidatedKleenean(indeterminate);
+ValidatedSierpinskian ValidatedAffineConstrainedImageSet::is_empty() const {
+    return ValidatedSierpinskian(this->separated(cast_exact_box(this->bounding_box()))) || ValidatedKleenean(indeterminate);
 }
 
 ValidatedSierpinskian ValidatedAffineConstrainedImageSet::inside(const ExactBoxType& bx) const {

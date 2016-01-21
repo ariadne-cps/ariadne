@@ -40,18 +40,16 @@
 #include "utility/pointer.h"
 #include "utility/container.h"
 
-#include "expression/valuation.h"
+#include "numeric/logical.decl.h"
+#include "numeric/number.decl.h"
+
 #include "numeric/operators.h"
+#include "expression/valuation.h"
 #include "expression/variables.h"
 
 namespace Ariadne {
 
-class Boolean;
-class ValidatedKleenean;
-
 class String;
-class Integer;
-class Real;
 
 template<class T> class Set;
 

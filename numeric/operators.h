@@ -31,6 +31,9 @@
 
 #include <iostream>
 
+#include "logical.decl.h"
+#include "number.decl.h"
+
 namespace Ariadne {
 
 typedef void Void;
@@ -40,12 +43,6 @@ typedef int Int;
 
 typedef std::ostream OutputStream;
 
-class Integer;
-class String;
-class Boolean;
-
-class Real;
-class ValidatedKleenean;
 
 enum class OperatorKind : char {
     VARIABLE,

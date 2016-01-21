@@ -39,18 +39,16 @@
 #include "utility/tribool.h"
 #include "utility/string.h"
 
+#include "numeric/logical.decl.h"
+#include "numeric/number.decl.h"
+
 namespace Ariadne {
 
 class Identifier;
 
 template<class T> class Set;
 
-class Boolean;
-class ValidatedKleenean;
-
 class String;
-class Integer;
-class Real;
 
 //! \ingroup ExpressionModule
 //! \brief A class representing the name of a variable.

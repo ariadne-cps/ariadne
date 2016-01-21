@@ -127,6 +127,9 @@ template<> String class_name<ApproximateTag>() { return "ApproximateTag"; }
 
 template<> String class_name<Bool>() { return "Bool"; }
 template<> String class_name<Boolean>() { return "Boolean"; }
+template<> String class_name<Kleenean>() { return "Kleenean"; }
+template<> String class_name<Sierpinskian>() { return "Sierpinskian"; }
+template<> String class_name<NegatedSierpinskian>() { return "NegatedSierpinskian"; }
 template<> String class_name<ValidatedKleenean>() { return "ValidatedKleenean"; }
 template<> String class_name<ValidatedSierpinskian>() { return "ValidatedSierpinskian"; }
 template<> String class_name<ValidatedNegatedSierpinskian>() { return "ValidatedNegatedSierpinskian"; }

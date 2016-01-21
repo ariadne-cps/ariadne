@@ -117,7 +117,7 @@ class ValidatedAffineConstrainedImageSet
     UpperBoxType bounding_box() const;
     ValidatedSierpinskian separated(const ExactBoxType& bx) const;
     ValidatedSierpinskian inside(const ExactBoxType& bx) const;
-    ValidatedKleenean is_empty() const;
+    ValidatedSierpinskian is_empty() const;
 
     Void adjoin_outer_approximation_to(PavingInterface& g, Int depth) const;
     GridTreeSet outer_approximation(const Grid& g, Int depth) const;

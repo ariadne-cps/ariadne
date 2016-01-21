@@ -34,7 +34,7 @@
 #include "utility/typedefs.h"
 
 #include "numeric/paradigm.h"
-#include "numeric/logical.h"
+#include "numeric/logical.decl.h"
 #include "numeric/number.decl.h"
 #include "numeric/float.decl.h"
 
@@ -60,7 +60,6 @@ typedef uint Nat;
 
 // Define as a class for consistency with other value types
 class String;
-class ValidatedKleenean;
 
 typedef SizeType DimensionType;
 

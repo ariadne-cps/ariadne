@@ -164,8 +164,6 @@ template<class P> class Logical
     friend inline Bool same(Logical<P> l1, Logical<P> l2) { return l1._v == l2._v; }
     //! \brief Write to an output stream.
     friend inline OutputStream& operator<<(OutputStream& os, Logical<P> l) { return os << l._v; }
-  private:
-    friend class ValidatedKleenean;
 };
 
 inline LogicalFacade<ExactTag>::operator Bool () const { return decide(static_cast<Logical<ExactTag>const&>(*this)); }
@@ -273,57 +271,6 @@ static const Logical<ApproximateTag> unlikely = Logical<ApproximateTag>(LogicalV
 inline Bool definitely(Bool b) { return b; }
 inline Bool possibly(Bool b) { return b; }
 inline Bool decide(Bool b) { return b; }
-
-//! \ingroup LogicalTypes
-//! \brief A logical variable representing the result of a decidable proposition.
-class Boolean : public Logical<ExactTag> {
-  public:
-    Boolean(Bool b=false) : Logical<ExactTag>(b) { }
-    Boolean(Logical<ExactTag> l) : Logical<ExactTag>(l) { }
-};
-
-//! \ingroup LogicalTypes
-//! \brief A logical variable representing the result of a proposition with some undecidable instances.
-//! Takes value \c INDETERMINATE for undecidable instances, for instances for which the information provided is insufficient to obtain a definite result, or for algorithms for which obtaining a result would be deemed to take unacceptably long.
-//! The concrete type of the constant indeterminate.
-class ValidatedKleenean : public Logical<ValidatedTag> {
- public:
-    using Logical<ValidatedTag>::Logical;
-    ValidatedKleenean() :  Logical<ValidatedTag>(LogicalValue::INDETERMINATE) { }
-    ValidatedKleenean(Logical<EffectiveTag> l) : Logical<ValidatedTag>(l.check(Effort::get_default())) { }
-    // FIXME: Currently needed for Real<Real comparison; Is there a better name?
-    explicit ValidatedKleenean(Logical<LowerTag> l) : Logical<ValidatedTag>(l._v) { }
-    explicit ValidatedKleenean(Logical<UpperTag> l) : Logical<ValidatedTag>(l._v) { }
-  public:
-    operator Logical<EffectiveTag>() const { return Logical<EffectiveTag>(*this); }
-};
-
-//! \ingroup LogicalTypes
-//! \brief A logical variable representing the result of a verifyable proposition. May not take the value FALSE.
-class ValidatedSierpinskian : public Logical<UpperTag> {
-  public:
-    using Logical<UpperTag>::Logical;
-    ValidatedSierpinskian(Logical<EffectiveUpperTag> l) : Logical<ValidatedUpperTag>(l.check(Effort::get_default())) { }
-};
-
-// TODO: Should this be a user class?
-class ValidatedNegatedSierpinskian : public Logical<LowerTag> {
-  public:
-    using Logical<LowerTag>::Logical;
-    ValidatedNegatedSierpinskian(Logical<EffectiveLowerTag> l) : Logical<ValidatedLowerTag>(l.check(Effort::get_default())) { }
-};
-
-//! \ingroup LogicalTypes
-//! \brief A logical variable representing the result of a proposition
-//! for which not enough information is provided to yield a definite answer.
-//! May not take the values \c TRUE or \c FALSE.
-//! Takes value \c LIKELY the information suggests that the result is \c true,
-//! and \c UNLIKELY the information suggests that the result is \c false.
-//! May take value \c INDETERMINATE if the information provided does not strongly suggest either result.
-class Fuzzy : public Logical<ApproximateTag> {
-    using Logical<ApproximateTag>::Logical;
-};
-
 
 }
 

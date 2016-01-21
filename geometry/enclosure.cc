@@ -689,12 +689,12 @@ Enclosure::satisfies(ValidatedConstraint c) const
     else { return ValidatedKleenean(indeterminate); }
 }
 
-ValidatedKleenean Enclosure::is_bounded() const
+ValidatedSierpinskian Enclosure::is_bounded() const
 {
     return this->domain().is_bounded() || ValidatedKleenean(indeterminate);
 }
 
-ValidatedKleenean Enclosure::is_empty() const
+ValidatedSierpinskian Enclosure::is_empty() const
 {
     if(definitely(this->_reduced_domain.is_empty())) { return true; }
     if(this->_constraints.empty()) { return this->domain().is_empty(); }
@@ -716,11 +716,11 @@ ValidatedSierpinskian Enclosure::inside(const ExactBoxType& bx) const
     return Ariadne::subset(Ariadne::apply(this->_space_function,this->_reduced_domain),bx);
 }
 
-ValidatedKleenean Enclosure::subset(const ExactBoxType& bx) const
+ValidatedSierpinskian Enclosure::subset(const ExactBoxType& bx) const
 {
     this->reduce();
 
-    return ValidatedKleenean(Ariadne::subset(Ariadne::apply(this->_space_function,this->_reduced_domain),bx)) || ValidatedKleenean(indeterminate);
+    return ValidatedSierpinskian(Ariadne::subset(Ariadne::apply(this->_space_function,this->_reduced_domain),bx)) || ValidatedKleenean(indeterminate);
 
 }
 

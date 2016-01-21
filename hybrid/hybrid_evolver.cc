@@ -1176,7 +1176,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
 
     EvolutionStepData _step_data;
     HybridEnclosure starting_set_copy=starting_set;
-    Kleenean starting_set_empty=starting_set_copy.is_empty();
+    ValidatedKleenean starting_set_empty=starting_set_copy.is_empty();
 
     // Counters for number of sucessor sets
     Nat jump_sets = 0;

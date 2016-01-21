@@ -1010,7 +1010,7 @@ ExactBoxType GridOpenCell::compute_box(const Grid& theGrid, const Nat theHeight,
     return lattice_box_to_space( openCellBoxInLattice, theGrid );
 }
 
-GridOpenCell GridOpenCell::split(Kleenean isRight) const {
+GridOpenCell GridOpenCell::split(ValidatedKleenean isRight) const {
     BinaryWord theNewBaseCellPath = _theWord;
     Nat theNewPrimaryCellHeight;
     if( is_indeterminate( isRight ) ) {
@@ -1417,7 +1417,7 @@ Bool GridTreeSubset::intersects( const ExactBoxType& theBoxType ) const {
     return definitely( GridTreeSubset::intersects( binary_tree(), grid(), cell().height(), pathCopy, theBoxType ) );
 }
 
-Sierpinskian GridTreeSubset::covers( const ExactBoxType& theBoxType ) const {
+ValidatedSierpinskian GridTreeSubset::covers( const ExactBoxType& theBoxType ) const {
     //Simply check if theBoxType is covered by the set and then make sure that
     //all tree cells that are not disjoint from theBoxType are enabled
 
@@ -1435,7 +1435,7 @@ Sierpinskian GridTreeSubset::covers( const ExactBoxType& theBoxType ) const {
     }
 }
 
-Sierpinskian GridTreeSubset::inside( const ExactBoxType& theBoxType ) const {
+ValidatedSierpinskian GridTreeSubset::inside( const ExactBoxType& theBoxType ) const {
     //Check that the box corresponding to the root node of the set
     //is not disjoint from theBoxType. If it is then the set is not a
     //subset of theBoxType otherwise we need to traverse the tree and check
@@ -1448,7 +1448,7 @@ Sierpinskian GridTreeSubset::inside( const ExactBoxType& theBoxType ) const {
     return GridTreeSubset::subset( binary_tree(), grid(), cell().height(), pathCopy, cast_exact_box(narrow(theBoxType)) );
 }
 
-Sierpinskian GridTreeSubset::separated( const ExactBoxType& theBoxType ) const {
+ValidatedSierpinskian GridTreeSubset::separated( const ExactBoxType& theBoxType ) const {
     //Simply check if the box does not intersect with the set
 
     ARIADNE_ASSERT( theBoxType.dimension() == cell().dimension() );
@@ -1458,7 +1458,7 @@ Sierpinskian GridTreeSubset::separated( const ExactBoxType& theBoxType ) const {
     return GridTreeSubset::disjoint( binary_tree(), grid(), cell().height(), pathCopy, cast_exact_box(widen(theBoxType)) );
 }
 
-Sierpinskian GridTreeSubset::overlaps( const ExactBoxType& theBoxType ) const {
+ValidatedSierpinskian GridTreeSubset::overlaps( const ExactBoxType& theBoxType ) const {
     //Check if the box of the root cell overlaps with theBoxType,
     //if not then theBoxType does not intersect with the cell,
     //otherwise we need to find at least one enabled node
@@ -1471,13 +1471,13 @@ Sierpinskian GridTreeSubset::overlaps( const ExactBoxType& theBoxType ) const {
     return GridTreeSubset::intersects( binary_tree(), grid(), cell().height(), pathCopy, cast_exact_box(narrow(theBoxType)) );
 }
 
-Kleenean GridTreeSubset::superset( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
+ValidatedKleenean GridTreeSubset::superset( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
                                   const Nat theHeight, BinaryWord &theWord, const ExactBoxType& theBoxType ) {
-    Kleenean result;
+    ValidatedKleenean result;
 
     //Check if the current node's cell intersects with theBoxType
     ExactBoxType theCellsBoxType = GridCell::compute_box( theGrid, theHeight, theWord );
-    Kleenean doIntersect = theCellsBoxType.overlaps( theBoxType );
+    ValidatedKleenean doIntersect = theCellsBoxType.overlaps( theBoxType );
 
     if( ! definitely(doIntersect) ) {
         //If theBoxType does not intersect with the cell then for the covering relation
@@ -1502,7 +1502,7 @@ Kleenean GridTreeSubset::superset( const BinaryTreeNode* pCurrentNode, const Gri
             //The node is not a leaf so we need to go down and see if the cell
             //falls into sub cells for which we can sort things out
             theWord.push_back(false);
-            const Kleenean result_left = superset( pCurrentNode->left_node(), theGrid, theHeight, theWord, theBoxType );
+            const ValidatedKleenean result_left = superset( pCurrentNode->left_node(), theGrid, theHeight, theWord, theBoxType );
             theWord.pop_back();
 
             if( definitely(not result_left) ) {
@@ -1513,7 +1513,7 @@ Kleenean GridTreeSubset::superset( const BinaryTreeNode* pCurrentNode, const Gri
                 //If the covering property holds or is possible, then we still
                 //need to check the second branch because it can change the outcome.
                 theWord.push_back(true);
-                const Kleenean result_right = superset( pCurrentNode->right_node(), theGrid, theHeight, theWord, theBoxType );
+                const ValidatedKleenean result_right = superset( pCurrentNode->right_node(), theGrid, theHeight, theWord, theBoxType );
                 theWord.pop_back();
 
                 if( definitely(not result_right) ) {
@@ -1541,13 +1541,13 @@ Kleenean GridTreeSubset::superset( const BinaryTreeNode* pCurrentNode, const Gri
     return result;
 }
 
-Kleenean GridTreeSubset::subset( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
+ValidatedKleenean GridTreeSubset::subset( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
                                 const Nat theHeight, BinaryWord &theWord, const ExactBoxType& theBoxType ) {
-    Kleenean result;
+    ValidatedKleenean result;
 
     //Check if the current node overlaps with theBoxType
     ExactBoxType theCellsBoxType = GridCell::compute_box( theGrid, theHeight, theWord );
-    Kleenean isASubset = theCellsBoxType.subset( theBoxType );
+    ValidatedKleenean isASubset = theCellsBoxType.subset( theBoxType );
 
     if( definitely(isASubset) ){
         //It does not matter if pCurrentNode has enableds leaves or not we already know that the cell
@@ -1574,7 +1574,7 @@ Kleenean GridTreeSubset::subset( const BinaryTreeNode* pCurrentNode, const Grid&
                 //The node is not a leaf, and we either know that the cell of pCurrentNode is not a geometrical subset
                 //of theBoxType or we are not sure that it is, This means that we can do recursion to sort things out.
                 theWord.push_back(false);
-                const Kleenean result_left = subset( pCurrentNode->left_node(), theGrid, theHeight, theWord, theBoxType );
+                const ValidatedKleenean result_left = subset( pCurrentNode->left_node(), theGrid, theHeight, theWord, theBoxType );
                 theWord.pop_back();
 
                 if( definitely(not result_left) ) {
@@ -1583,7 +1583,7 @@ Kleenean GridTreeSubset::subset( const BinaryTreeNode* pCurrentNode, const Grid&
                 } else {
                     //if we still do not know the answer, then we check the right branch
                     theWord.push_back(true);
-                    const Kleenean result_right = subset( pCurrentNode->right_node(), theGrid, theHeight, theWord, theBoxType );
+                    const ValidatedKleenean result_right = subset( pCurrentNode->right_node(), theGrid, theHeight, theWord, theBoxType );
                     theWord.pop_back();
 
                     if( definitely(not result_right) ) {
@@ -1612,13 +1612,13 @@ Kleenean GridTreeSubset::subset( const BinaryTreeNode* pCurrentNode, const Grid&
     return result;
 }
 
-Kleenean GridTreeSubset::disjoint( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
+ValidatedKleenean GridTreeSubset::disjoint( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
                                   const Nat theHeight, BinaryWord &theWord, const ExactBoxType& theBoxType ) {
-    Kleenean intersect;
+    ValidatedKleenean intersect;
 
     //Check if the current node overlaps with theBoxType
     ExactBoxType theCellsBoxType = GridCell::compute_box( theGrid, theHeight, theWord );
-    Kleenean doPossiblyIntersect = !theCellsBoxType.disjoint( theBoxType );
+    ValidatedKleenean doPossiblyIntersect = !theCellsBoxType.disjoint( theBoxType );
 
     if( possibly(doPossiblyIntersect) ) {
         //If there is a possible intersection then we do the checking
@@ -1634,7 +1634,7 @@ Kleenean GridTreeSubset::disjoint( const BinaryTreeNode* pCurrentNode, const Gri
         } else {
             //The node is not a leaf and the intersection is possible so check the left sub-node
             theWord.push_back(false);
-            const Kleenean intersect_left = intersects( pCurrentNode->left_node(), theGrid, theHeight, theWord, theBoxType );
+            const ValidatedKleenean intersect_left = intersects( pCurrentNode->left_node(), theGrid, theHeight, theWord, theBoxType );
             theWord.pop_back();
 
             //
@@ -1650,7 +1650,7 @@ Kleenean GridTreeSubset::disjoint( const BinaryTreeNode* pCurrentNode, const Gri
             } else {
                 //If we still not sure/ or do not know then try to search further, i.e. check the right node
                 theWord.push_back(true);
-                const Kleenean intersect_right = intersects( pCurrentNode->right_node(), theGrid, theHeight, theWord, theBoxType );
+                const ValidatedKleenean intersect_right = intersects( pCurrentNode->right_node(), theGrid, theHeight, theWord, theBoxType );
                 theWord.pop_back();
                 if( definitely(intersect_right) ) {
                     //If we definitely have intersection for the right branch then answer is true
@@ -1679,13 +1679,13 @@ Kleenean GridTreeSubset::disjoint( const BinaryTreeNode* pCurrentNode, const Gri
     return !intersect;
 }
 
-Kleenean GridTreeSubset::intersects( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
+ValidatedKleenean GridTreeSubset::intersects( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
                                     const Nat theHeight, BinaryWord &theWord, const ExactBoxType& theBoxType ) {
-    Kleenean result;
+    ValidatedKleenean result;
 
     //Check if the current node overlaps with theBoxType
     ExactBoxType theCellsBoxType = GridCell::compute_box( theGrid, theHeight, theWord );
-    Kleenean doPossiblyIntersect = theCellsBoxType.overlaps( theBoxType );
+    ValidatedKleenean doPossiblyIntersect = theCellsBoxType.overlaps( theBoxType );
 
     if( possibly(doPossiblyIntersect) ) {
         //If there is a possible intersection then we do the checking
@@ -1701,7 +1701,7 @@ Kleenean GridTreeSubset::intersects( const BinaryTreeNode* pCurrentNode, const G
         } else {
             //The node is not a leaf and the intersection is possible so check the left sub-node
             theWord.push_back(false);
-            const Kleenean result_left = intersects( pCurrentNode->left_node(), theGrid, theHeight, theWord, theBoxType );
+            const ValidatedKleenean result_left = intersects( pCurrentNode->left_node(), theGrid, theHeight, theWord, theBoxType );
             theWord.pop_back();
 
             //
@@ -1717,7 +1717,7 @@ Kleenean GridTreeSubset::intersects( const BinaryTreeNode* pCurrentNode, const G
             } else {
                 //If we still not sure/ or do not know then try to search further, i.e. check the right node
                 theWord.push_back(true);
-                const Kleenean result_right = intersects( pCurrentNode->right_node(), theGrid, theHeight, theWord, theBoxType );
+                const ValidatedKleenean result_right = intersects( pCurrentNode->right_node(), theGrid, theHeight, theWord, theBoxType );
                 theWord.pop_back();
                 if( definitely(result_right) ) {
                     //If we definitely have intersection for the right branch then answer is true

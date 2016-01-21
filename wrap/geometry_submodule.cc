@@ -159,8 +159,8 @@ class OpenSetWrapper
   public:
     OpenSetInterface* clone() const { return this->get_override("clone")(); }
     SizeType dimension() const { return this->get_override("dimension")(); }
-    Sierpinskian covers(const ExactBoxType& r) const { return this->get_override("covers")(); }
-    Sierpinskian overlaps(const ExactBoxType& r) const { return this->get_override("overlaps")(); }
+    ValidatedSierpinskian covers(const ExactBoxType& r) const { return this->get_override("covers")(); }
+    ValidatedSierpinskian overlaps(const ExactBoxType& r) const { return this->get_override("overlaps")(); }
     OutputStream& write(OutputStream&) const { return this->get_override("write")(); }
 };
 
@@ -170,7 +170,7 @@ class ClosedSetWrapper
   public:
     ClosedSetInterface* clone() const { return this->get_override("clone")(); }
     SizeType dimension() const { return this->get_override("dimension")(); }
-    Sierpinskian separated(const ExactBoxType& r) const { return this->get_override("separated")(); }
+    ValidatedSierpinskian separated(const ExactBoxType& r) const { return this->get_override("separated")(); }
     OutputStream& write(OutputStream&) const { return this->get_override("write")(); }
 };
 
@@ -181,7 +181,7 @@ class OvertSetWrapper
   public:
     OvertSetInterface* clone() const { return this->get_override("clone")(); }
     SizeType dimension() const { return this->get_override("dimension")(); }
-    Sierpinskian overlaps(const ExactBoxType& r) const { return this->get_override("overlaps")(); }
+    ValidatedSierpinskian overlaps(const ExactBoxType& r) const { return this->get_override("overlaps")(); }
     OutputStream& write(OutputStream&) const { return this->get_override("write")(); }
 };
 
@@ -192,9 +192,9 @@ class CompactSetWrapper
   public:
     CompactSetInterface* clone() const { return this->get_override("clone")(); }
     SizeType dimension() const { return this->get_override("dimension")(); }
-    Sierpinskian separated(const ExactBoxType& r) const { return this->get_override("separated")(); }
-    Sierpinskian inside(const ExactBoxType& r) const { return this->get_override("inside")(); }
-    Sierpinskian is_bounded() const { return this->get_override("is_bounded")(); }
+    ValidatedSierpinskian separated(const ExactBoxType& r) const { return this->get_override("separated")(); }
+    ValidatedSierpinskian inside(const ExactBoxType& r) const { return this->get_override("inside")(); }
+    ValidatedSierpinskian is_bounded() const { return this->get_override("is_bounded")(); }
     UpperBoxType bounding_box() const { return this->get_override("bounding_box")(); }
     OutputStream& write(OutputStream&) const { return this->get_override("write")(); }
 };
@@ -205,9 +205,9 @@ class RegularSetWrapper
   public:
     RegularSetWrapper* clone() const { return this->get_override("clone")(); }
     SizeType dimension() const { return this->get_override("dimension")(); }
-    Sierpinskian overlaps(const ExactBoxType& r) const { return this->get_override("overlaps")(); }
-    Sierpinskian covers(const ExactBoxType& r) const { return this->get_override("covers")(); }
-    Sierpinskian separated(const ExactBoxType& r) const { return this->get_override("separated")(); }
+    ValidatedSierpinskian overlaps(const ExactBoxType& r) const { return this->get_override("overlaps")(); }
+    ValidatedSierpinskian covers(const ExactBoxType& r) const { return this->get_override("covers")(); }
+    ValidatedSierpinskian separated(const ExactBoxType& r) const { return this->get_override("separated")(); }
     OutputStream& write(OutputStream&) const { return this->get_override("write")(); }
 };
 
@@ -217,10 +217,10 @@ class LocatedSetWrapper
   public:
     LocatedSetInterface* clone() const { return this->get_override("clone")(); }
     SizeType dimension() const { return this->get_override("dimension")(); }
-    Sierpinskian overlaps(const ExactBoxType& r) const { return this->get_override("overlaps")(); }
-    Sierpinskian separated(const ExactBoxType& r) const { return this->get_override("separated")(); }
-    Sierpinskian inside(const ExactBoxType& r) const { return this->get_override("inside")(); }
-    Sierpinskian is_bounded() const { return this->get_override("is_bounded")(); }
+    ValidatedSierpinskian overlaps(const ExactBoxType& r) const { return this->get_override("overlaps")(); }
+    ValidatedSierpinskian separated(const ExactBoxType& r) const { return this->get_override("separated")(); }
+    ValidatedSierpinskian inside(const ExactBoxType& r) const { return this->get_override("inside")(); }
+    ValidatedSierpinskian is_bounded() const { return this->get_override("is_bounded")(); }
     UpperBoxType bounding_box() const { return this->get_override("bounding_box")(); }
     OutputStream& write(OutputStream&) const { return this->get_override("write")(); }
 };
@@ -375,10 +375,10 @@ Void export_zonotope()
     zonotope_class.def("split", (ListSet<Zonotope>(*)(const Zonotope&)) &split);
     zonotope_class.def("__str__",&__cstr__<Zonotope>);
 
-    def("contains", (Kleenean(*)(const Zonotope&,const ExactPoint&)) &contains);
-    def("separated", (Kleenean(*)(const Zonotope&,const ExactBoxType&)) &separated);
-    def("overlaps", (Kleenean(*)(const Zonotope&,const ExactBoxType&)) &overlaps);
-    def("separated", (Kleenean(*)(const Zonotope&,const Zonotope&)) &separated);
+    def("contains", (ValidatedKleenean(*)(const Zonotope&,const ExactPoint&)) &contains);
+    def("separated", (ValidatedKleenean(*)(const Zonotope&,const ExactBoxType&)) &separated);
+    def("overlaps", (ValidatedKleenean(*)(const Zonotope&,const ExactBoxType&)) &overlaps);
+    def("separated", (ValidatedKleenean(*)(const Zonotope&,const Zonotope&)) &separated);
 
     def("polytope", (Polytope(*)(const Zonotope&)) &polytope);
     def("orthogonal_approximation", (Zonotope(*)(const Zonotope&)) &orthogonal_approximation);

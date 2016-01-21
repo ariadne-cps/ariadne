@@ -49,8 +49,8 @@ class PredicateInterface {
     typedef std::size_t SizeType;
 
     virtual SizeType argument_size() const = 0;
-    virtual Kleenean evaluate(const Vector<Float64>& x) const = 0;
-    virtual Kleenean evaluate(const Vector<ValidatedNumericType>& x) const = 0;
+    virtual ValidatedKleenean evaluate(const Vector<Float64>& x) const = 0;
+    virtual ValidatedKleenean evaluate(const Vector<ValidatedNumericType>& x) const = 0;
 };
 
 class ExpressionPredicate
@@ -72,12 +72,12 @@ class ExpressionPredicate
     Bool operator<(const ExpressionPredicate& p) const {
         return (_expression.pointer()) < (const Void*)(p._expression.pointer()); }
     SizeType argument_size() const { return _expression.argument_size(); }
-    Kleenean evaluate(const Vector<Float64>& x) const {
+    ValidatedKleenean evaluate(const Vector<Float64>& x) const {
         Float64 value=_expression.evaluate(x)*_sign;
         if(value<0) { return true; }
         else if(value>0) { return false; }
         else { return indeterminate; } }
-    Kleenean evaluate(const Vector<ValidatedNumericType>& x) const {
+    ValidatedKleenean evaluate(const Vector<ValidatedNumericType>& x) const {
         ExactIntervalType range=_expression.evaluate(x)*_sign;
         if(range.upper()<0) { return true; }
         else if(range.lower()>0) { return false; }
@@ -113,8 +113,8 @@ class DisjunctivePredicate
         for(Nat i=0; i!=p.size(); ++i) { (*this) |= p[i]; } return *this; }
 
     virtual SizeType argument_size() const;
-    virtual Kleenean evaluate(const Vector<Float64>& x) const;
-    virtual Kleenean evaluate(const Vector<ValidatedNumericType>& x) const;
+    virtual ValidatedKleenean evaluate(const Vector<Float64>& x) const;
+    virtual ValidatedKleenean evaluate(const Vector<ValidatedNumericType>& x) const;
 
   private:
     std::vector<ExpressionPredicate> _predicates;
@@ -138,8 +138,8 @@ class ConjunctiveNormalFormPredicate
         for(Nat i=0; i!=_cnf.size(); ++i) { _cnf[i] |= p; } return *this; }
 
     virtual SizeType argument_size() const;
-    virtual Kleenean evaluate(const Vector<Float64>& x) const;
-    virtual Kleenean evaluate(const Vector<ValidatedNumericType>& x) const;
+    virtual ValidatedKleenean evaluate(const Vector<Float64>& x) const;
+    virtual ValidatedKleenean evaluate(const Vector<ValidatedNumericType>& x) const;
   private:
     std::vector<DisjunctivePredicate> _cnf;
 };

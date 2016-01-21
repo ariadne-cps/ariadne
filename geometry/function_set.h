@@ -91,9 +91,9 @@ class ConstraintSet
 
     ConstraintSet* clone() const;
     DimensionType dimension() const;
-    Sierpinskian separated(const ExactBoxType&) const;
-    Sierpinskian overlaps(const ExactBoxType&) const;
-    Sierpinskian covers(const ExactBoxType&) const;
+    ValidatedSierpinskian separated(const ExactBoxType&) const;
+    ValidatedSierpinskian overlaps(const ExactBoxType&) const;
+    ValidatedSierpinskian covers(const ExactBoxType&) const;
     OutputStream& write(OutputStream&) const;
 };
 
@@ -131,10 +131,10 @@ class BoundedConstraintSet
 
     BoundedConstraintSet* clone() const;
     DimensionType dimension() const;
-    Sierpinskian separated(const ExactBoxType&) const;
-    Sierpinskian overlaps(const ExactBoxType&) const;
-    Sierpinskian covers(const ExactBoxType&) const;
-    Sierpinskian inside(const ExactBoxType&) const;
+    ValidatedSierpinskian separated(const ExactBoxType&) const;
+    ValidatedSierpinskian overlaps(const ExactBoxType&) const;
+    ValidatedSierpinskian covers(const ExactBoxType&) const;
+    ValidatedSierpinskian inside(const ExactBoxType&) const;
     UpperBoxType bounding_box() const;
     OutputStream& write(OutputStream&) const;
     Void draw(CanvasInterface&,const Projection2d&) const;
@@ -209,16 +209,16 @@ class ConstrainedImageSet
     Pair<ConstrainedImageSet,ConstrainedImageSet> split(Nat j) const;
 
     //! \brief Test if the set is contained in (the interior of) a box.
-    Sierpinskian inside(const ExactBoxType& bx) const;
+    ValidatedSierpinskian inside(const ExactBoxType& bx) const;
     //! \brief Test if the set is disjoint from a (closed) box.
-    Sierpinskian separated(const ExactBoxType&) const;
+    ValidatedSierpinskian separated(const ExactBoxType&) const;
     //! \brief Test if the set overlaps (intersects the interior of) a box.
-    Sierpinskian overlaps(const ExactBoxType&) const;
+    ValidatedSierpinskian overlaps(const ExactBoxType&) const;
     //! \brief Adjoin an outer approximation to a paving.
     Void adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
 
     //! \brief Test if the set satisfies the state constraint at all points.
-    Kleenean satisfies(const EffectiveConstraint& c) const;
+    ValidatedKleenean satisfies(const EffectiveConstraint& c) const;
 
     //! \brief Draw to a canvas.
     Void draw(CanvasInterface&,const Projection2d&) const;
@@ -304,18 +304,18 @@ class ValidatedConstrainedImageSet
     Pair<ValidatedConstrainedImageSet,ValidatedConstrainedImageSet> split(Nat j) const;
 
     //! \brief Test if the set is empty.
-    Kleenean is_empty() const;
+    ValidatedKleenean is_empty() const;
     //! \brief Test if the set is a strict subset of a box.
-    Sierpinskian inside(const ExactBoxType& bx) const;
+    ValidatedSierpinskian inside(const ExactBoxType& bx) const;
     //! \brief Test if the set is disjoint from a box.
-    Sierpinskian separated(const ExactBoxType&) const;
+    ValidatedSierpinskian separated(const ExactBoxType&) const;
     //! \brief Test if the set overlaps (intersects the interior of) a box.
-    Sierpinskian overlaps(const ExactBoxType&) const;
+    ValidatedSierpinskian overlaps(const ExactBoxType&) const;
     //! \brief Adjoin an outer approximation to a paving.
     Void adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
 
     //! \brief Test if the set satisfies the state constraint at all points.
-    Kleenean satisfies(const ValidatedConstraint& c) const;
+    ValidatedKleenean satisfies(const ValidatedConstraint& c) const;
 
     //! \brief Draw to a canvas.
     Void draw(CanvasInterface&,const Projection2d&) const;

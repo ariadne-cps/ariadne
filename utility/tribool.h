@@ -1,5 +1,5 @@
 /***************************************************************************
- *            Kleenean.h
+ *            ValidatedKleenean.h
  *
  *  Copyright 2008  Pieter Collins
  *
@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file Kleenean.h
+/*! \file ValidatedKleenean.h
  *  \brief Three-valued logic variable.
  */
 
@@ -31,13 +31,13 @@
 #ifdef DOXYGEN
 namespace Ariadne {
     //! \brief A three-valued logic type, with values \f$\top\f$ (true), \f$\bot\f$ (false) and \f$\uparrow\f$ (indeterminate).
-    class Kleenean {
+    class ValidatedKleenean {
     //! \brief Returns \c true if \a tb is \c true, and \c false if \a tb is \c indeterminate or \c false.
-    friend bool definitely(Kleenean tb);
+    friend bool definitely(ValidatedKleenean tb);
     //! \brief Returns \c true if \a tb is \c true or \c indeteriminate, and \c false if \a tb is \c false.
-    friend bool possibly(Kleenean tb);
+    friend bool possibly(ValidatedKleenean tb);
     //! \brief Returns \c true if \a tb is \c indeterminate, and \c false if \a tb is \c true or \c false.
-    friend bool indeterminate(Kleenean tb);
+    friend bool indeterminate(ValidatedKleenean tb);
     };
 }
 #endif // DOXYGEN

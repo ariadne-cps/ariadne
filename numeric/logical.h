@@ -115,7 +115,7 @@ template<> class Logical<EffectiveTag>;
 
 //!  \ingroup LogicalTypes
 //!  \brief A logical variable for the paradigm \a P, which must be %ExactTag, %ValidatedTag, %UpperTag, %LowerTag or %ApproximateTag.
-//!  Used as a base of named logical types Boolean, Kleenean, Sierpinskian and Fuzzy. Implemented in terms of LogicalValue.
+//!  Used as a base of named logical types Boolean, ValidatedKleenean, ValidatedSierpinskian and Fuzzy. Implemented in terms of LogicalValue.
 template<class P> class Logical
     : public LogicalFacade<P>
 {
@@ -165,7 +165,7 @@ template<class P> class Logical
     //! \brief Write to an output stream.
     friend inline OutputStream& operator<<(OutputStream& os, Logical<P> l) { return os << l._v; }
   private:
-    friend class Kleenean;
+    friend class ValidatedKleenean;
 };
 
 inline LogicalFacade<ExactTag>::operator Bool () const { return decide(static_cast<Logical<ExactTag>const&>(*this)); }
@@ -286,31 +286,31 @@ class Boolean : public Logical<ExactTag> {
 //! \brief A logical variable representing the result of a proposition with some undecidable instances.
 //! Takes value \c INDETERMINATE for undecidable instances, for instances for which the information provided is insufficient to obtain a definite result, or for algorithms for which obtaining a result would be deemed to take unacceptably long.
 //! The concrete type of the constant indeterminate.
-class Kleenean : public Logical<ValidatedTag> {
+class ValidatedKleenean : public Logical<ValidatedTag> {
  public:
     using Logical<ValidatedTag>::Logical;
-    Kleenean() :  Logical<ValidatedTag>(LogicalValue::INDETERMINATE) { }
-    Kleenean(Logical<EffectiveTag> l) : Logical<ValidatedTag>(l.check(Effort::get_default())) { }
+    ValidatedKleenean() :  Logical<ValidatedTag>(LogicalValue::INDETERMINATE) { }
+    ValidatedKleenean(Logical<EffectiveTag> l) : Logical<ValidatedTag>(l.check(Effort::get_default())) { }
     // FIXME: Currently needed for Real<Real comparison; Is there a better name?
-    explicit Kleenean(Logical<LowerTag> l) : Logical<ValidatedTag>(l._v) { }
-    explicit Kleenean(Logical<UpperTag> l) : Logical<ValidatedTag>(l._v) { }
+    explicit ValidatedKleenean(Logical<LowerTag> l) : Logical<ValidatedTag>(l._v) { }
+    explicit ValidatedKleenean(Logical<UpperTag> l) : Logical<ValidatedTag>(l._v) { }
   public:
     operator Logical<EffectiveTag>() const { return Logical<EffectiveTag>(*this); }
 };
 
 //! \ingroup LogicalTypes
 //! \brief A logical variable representing the result of a verifyable proposition. May not take the value FALSE.
-class Sierpinskian : public Logical<UpperTag> {
+class ValidatedSierpinskian : public Logical<UpperTag> {
   public:
     using Logical<UpperTag>::Logical;
-    Sierpinskian(Logical<EffectiveUpperTag> l) : Logical<ValidatedUpperTag>(l.check(Effort::get_default())) { }
+    ValidatedSierpinskian(Logical<EffectiveUpperTag> l) : Logical<ValidatedUpperTag>(l.check(Effort::get_default())) { }
 };
 
 // TODO: Should this be a user class?
-class NegatedSierpinskian : public Logical<LowerTag> {
+class ValidatedNegatedSierpinskian : public Logical<LowerTag> {
   public:
     using Logical<LowerTag>::Logical;
-    NegatedSierpinskian(Logical<EffectiveLowerTag> l) : Logical<ValidatedLowerTag>(l.check(Effort::get_default())) { }
+    ValidatedNegatedSierpinskian(Logical<EffectiveLowerTag> l) : Logical<ValidatedLowerTag>(l.check(Effort::get_default())) { }
 };
 
 //! \ingroup LogicalTypes

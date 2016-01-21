@@ -207,8 +207,8 @@ ValidatedAffineConstrainedImageSet::domain() const
     return this->_domain;
 }
 
-Kleenean ValidatedAffineConstrainedImageSet::is_bounded() const {
-    return Kleenean(ExactBoxType(this->domain()).is_bounded()) || Kleenean(indeterminate);
+ValidatedKleenean ValidatedAffineConstrainedImageSet::is_bounded() const {
+    return ValidatedKleenean(ExactBoxType(this->domain()).is_bounded()) || ValidatedKleenean(indeterminate);
 }
 
 UpperBoxType ValidatedAffineConstrainedImageSet::bounding_box() const {
@@ -225,7 +225,7 @@ UpperBoxType ValidatedAffineConstrainedImageSet::bounding_box() const {
 
 
 
-Sierpinskian ValidatedAffineConstrainedImageSet::separated(const ExactBoxType& bx) const {
+ValidatedSierpinskian ValidatedAffineConstrainedImageSet::separated(const ExactBoxType& bx) const {
     ARIADNE_PRECONDITION_MSG(this->dimension()==bx.dimension(),"set="<<*this<<", box="<<bx);
     ExactBoxType wbx=cast_exact_box(widen(bx));
     LinearProgram<Float64> lp;
@@ -235,7 +235,7 @@ Sierpinskian ValidatedAffineConstrainedImageSet::separated(const ExactBoxType& b
         lp.u[i]=add_up(wbx[i].upper().raw(),this->_space_models[i].error().raw());
     }
     //std::cerr<<"\ns="<<*this<<"\nbx="<<bx<<"\n\nA="<<lp.A<<"\nb="<<lp.b<<"\nl="<<lp.l<<"\nu="<<lp.u<<"\n\n";
-    Kleenean feasible=indeterminate;
+    ValidatedKleenean feasible=indeterminate;
     try {
         InteriorPointSolver optimiser;
         feasible=optimiser.feasible(lp.l,lp.u,lp.A,lp.b);
@@ -247,11 +247,11 @@ Sierpinskian ValidatedAffineConstrainedImageSet::separated(const ExactBoxType& b
     return !feasible;
 }
 
-Kleenean ValidatedAffineConstrainedImageSet::is_empty() const {
-    return Kleenean(this->separated(cast_exact_box(this->bounding_box()))) || Kleenean(indeterminate);
+ValidatedKleenean ValidatedAffineConstrainedImageSet::is_empty() const {
+    return ValidatedKleenean(this->separated(cast_exact_box(this->bounding_box()))) || ValidatedKleenean(indeterminate);
 }
 
-Sierpinskian ValidatedAffineConstrainedImageSet::inside(const ExactBoxType& bx) const {
+ValidatedSierpinskian ValidatedAffineConstrainedImageSet::inside(const ExactBoxType& bx) const {
     ARIADNE_PRECONDITION_MSG(this->dimension()==bx.dimension(),"set="<<*this<<", box="<<bx);
     return widen(this->bounding_box()).inside(bx);
 }
@@ -288,9 +288,9 @@ Void ValidatedAffineConstrainedImageSet::_adjoin_outer_approximation_to(PavingIn
     Int maximum_tree_depth=depth*cell.dimension();
 
     // Check for disjointness using linear program
-    //Kleenean feasible=SimplexSolver<Float64>().hotstarted_feasible(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x,lp.y);
+    //ValidatedKleenean feasible=SimplexSolver<Float64>().hotstarted_feasible(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x,lp.y);
     InteriorPointSolver optimiser;
-    Kleenean feasible=optimiser.feasible(lp.l,lp.u,lp.A,lp.b);
+    ValidatedKleenean feasible=optimiser.feasible(lp.l,lp.u,lp.A,lp.b);
     //feasible=verify_feasibility(lp.A,lp.b,lp.l,lp.u,lp.vt);
     if(definitely(!feasible)) { return; }
 
@@ -438,7 +438,7 @@ Void ValidatedAffineConstrainedImageSet::_robust_adjoin_outer_approximation_to(P
     Int maximum_tree_depth=depth*cell.dimension();
 
     // Check for disjointness using linear program
-    Kleenean feasible=lpsolver.hotstarted_feasible(lp.l,lp.u,lp.A,lp.b,lp.vt,lp.p,lp.B,lp.x,lp.y);
+    ValidatedKleenean feasible=lpsolver.hotstarted_feasible(lp.l,lp.u,lp.A,lp.b,lp.vt,lp.p,lp.B,lp.x,lp.y);
 
     Bool done=false;
     while(!done && lp.x[ne+nx+nc]<0.0) {
@@ -580,7 +580,7 @@ ValidatedAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingI
     }
 
     ARIADNE_LOG(9,"A="<<lp.A<<"\nb="<<lp.b<<"\nl="<<lp.l<<"\nu="<<lp.u<<"\n");
-    Kleenean feasible=lpsolver.hotstarted_feasible(lp.l,lp.u,lp.A,lp.b,lp.vt,lp.p,lp.B,lp.x,lp.y);
+    ValidatedKleenean feasible=lpsolver.hotstarted_feasible(lp.l,lp.u,lp.A,lp.b,lp.vt,lp.p,lp.B,lp.x,lp.y);
     ARIADNE_LOG(9,"  vt="<<lp.vt<<"\nx="<<lp.x<<"\n");
     if(definitely(not feasible)) { return; } // no intersection
 
@@ -673,7 +673,7 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
     Vector<Float64> x(np); Vector<Float64> y(nc);
 
     // Find an initial feasible point
-    Kleenean feasible = lpsolver.hotstarted_feasible(l,u,A,b, vt, p,B, x,y);
+    ValidatedKleenean feasible = lpsolver.hotstarted_feasible(l,u,A,b, vt, p,B, x,y);
     ARIADNE_LOG(3," A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<" vt="<<vt<<" p="<<p<<"\n  x="<<x<<" Ax="<< A*x <<"\n");
     lpsolver.consistency_check(l,u,A,b, vt,p,B,x);
 

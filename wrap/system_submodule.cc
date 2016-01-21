@@ -322,8 +322,8 @@ Void export_formula()
     class_<PrimedIntegerAssignment> primed_integer_assignment_class("PrimedIntegerAssignment",no_init);
     primed_integer_assignment_class.def(self_ns::str(self));
 
-    typedef Variable<Kleenean> TriboolVariable;
-    typedef Expression<Kleenean> TriboolExpression;
+    typedef Variable<ValidatedKleenean> TriboolVariable;
+    typedef Expression<ValidatedKleenean> TriboolExpression;
 
     to_python< List<TriboolExpression> >();
 
@@ -335,7 +335,7 @@ Void export_formula()
     discrete_predicate_class.def(self_ns::str(self));
 
     class_<ContinuousPredicate> continuous_predicate_class("ContinuousPredicate", init<ContinuousPredicate>());
-    continuous_predicate_class.def(init<Kleenean>());
+    continuous_predicate_class.def(init<ValidatedKleenean>());
     continuous_predicate_class.def("__and__", &__and__<ContinuousPredicate,ContinuousPredicate,ContinuousPredicate>);
     continuous_predicate_class.def("__or__", &__or__<ContinuousPredicate,ContinuousPredicate,ContinuousPredicate>);
     continuous_predicate_class.def("__invert__", &__not__<ContinuousPredicate,ContinuousPredicate>);
@@ -354,7 +354,7 @@ Void export_formula()
     tribool_expression_class.def("name", &TriboolExpression::operator_name);
     tribool_expression_class.def("subexpressions", &TriboolExpression::subexpressions);
     tribool_expression_class.def("substitute", &TriboolExpression::substitute<Real>);
-    tribool_expression_class.def("substitute", &TriboolExpression::substitute<Kleenean>);
+    tribool_expression_class.def("substitute", &TriboolExpression::substitute<ValidatedKleenean>);
     tribool_expression_class.def("simplify", &TriboolExpression::simplify);
     tribool_expression_class.def("__and__", &__and__<TriboolExpression,TriboolExpression,TriboolExpression>);
     tribool_expression_class.def("__or__", &__or__<TriboolExpression,TriboolExpression,TriboolExpression>);

@@ -210,8 +210,8 @@ Bool same(Real x1, Real x2) {
     return same(Float64Bounds(x1),Float64Bounds(x2));
 }
 
-NegatedSierpinskian eq(Real x1, Real x2) { return Float64Bounds(x1)==Float64Bounds(x2); }
-Kleenean lt(Real x1, Real x2) { return Float64Bounds(x1)< Float64Bounds(x2); }
+ValidatedNegatedSierpinskian eq(Real x1, Real x2) { return Float64Bounds(x1)==Float64Bounds(x2); }
+ValidatedKleenean lt(Real x1, Real x2) { return Float64Bounds(x1)< Float64Bounds(x2); }
 
 PositiveReal dist(Real x1, Real x2) { return abs(sub(x1,x2)); }
 
@@ -242,12 +242,12 @@ Quasidecidable operator> (Real x1, Real x2) { return make_logical<EffectiveTag>(
 Quasidecidable operator<=(Real x1, Real x2) { return make_logical<EffectiveTag>(Leq(),x1,x2); }
 Quasidecidable operator>=(Real x1, Real x2) { return make_logical<EffectiveTag>(Geq(),x1,x2); }
 
-NegatedSierpinskian operator==(Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
-Sierpinskian operator!=(Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
-Kleenean operator< (Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
-Kleenean operator> (Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
-Kleenean operator<=(Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
-Kleenean operator>=(Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
+ValidatedNegatedSierpinskian operator==(Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
+ValidatedSierpinskian operator!=(Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
+ValidatedKleenean operator< (Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
+ValidatedKleenean operator> (Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
+ValidatedKleenean operator<=(Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
+ValidatedKleenean operator>=(Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
 
 template<> String class_name<Real>() { return "Real"; }
 template<> String class_name<PositiveReal>() { return "PositiveReal"; }

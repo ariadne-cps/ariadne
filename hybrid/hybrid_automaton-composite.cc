@@ -743,7 +743,7 @@ class CompositeHybridSpace
     virtual Bool has_location(const DiscreteLocation& q) const { return this->_system_ptr->has_mode(q); }
     virtual RealSpace operator[](const DiscreteLocation& q) const { return this->_system_ptr->continuous_state_space(q); }
     virtual OutputStream& write(OutputStream& os) const { return os << "CompositeHybridSpace( " << *this->_system_ptr << " )"; }
-    Kleenean operator==(const HybridSpaceInterface& other) const {
+    ValidatedKleenean operator==(const HybridSpaceInterface& other) const {
         const CompositeHybridSpace* chs_ptr = dynamic_cast<const CompositeHybridSpace* >(&other);
         if (!chs_ptr) return indeterminate;
         if (&*chs_ptr->_system_ptr == &*_system_ptr)

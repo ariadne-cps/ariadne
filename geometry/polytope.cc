@@ -37,17 +37,17 @@
 
 namespace Ariadne {
 
-Kleenean
+ValidatedKleenean
 Polytope::separated(const ExactBoxType& bx) const {
     return this->bounding_box().separated(bx) || indeterminate;
 }
 
-Kleenean
+ValidatedKleenean
 Polytope::overlaps(const ExactBoxType& bx) const {
     return bx.covers(baricentre(*this)) || indeterminate;
 }
 
-Kleenean
+ValidatedKleenean
 Polytope::inside(const ExactBoxType& bx) const {
     return this->bounding_box().inside(bx) || indeterminate;
 }

@@ -104,17 +104,17 @@ Boolean disjunction(Boolean l1, Boolean l2) { return Boolean(bool(l1) || bool(l2
 Boolean negation(Boolean l) { return Boolean(!bool(l)); }
 OutputStream& operator<<(OutputStream& os, Boolean l) { return os << bool(l); }
 
-Kleenean conjunction(Kleenean l1, Kleenean l2) { return Kleenean(Logical(l1) && Logical(l2)); }
-Kleenean disjunction(Kleenean l1, Kleenean l2) { return Kleenean(Logical(l1) || Logical(l2)); }
-Kleenean negation(Kleenean l) { return Kleenean(!Logical(l)); }
-OutputStream& operator<<(OutputStream& os, Kleenean l) { return os << Logical(l); }
+ValidatedKleenean conjunction(ValidatedKleenean l1, ValidatedKleenean l2) { return ValidatedKleenean(Logical(l1) && Logical(l2)); }
+ValidatedKleenean disjunction(ValidatedKleenean l1, ValidatedKleenean l2) { return ValidatedKleenean(Logical(l1) || Logical(l2)); }
+ValidatedKleenean negation(ValidatedKleenean l) { return ValidatedKleenean(!Logical(l)); }
+OutputStream& operator<<(OutputStream& os, ValidatedKleenean l) { return os << Logical(l); }
 
-Sierpinskian conjunction(Sierpinskian l1, Sierpinskian l2) { return Sierpinskian(Logical(l1) && Logical(l2)); }
-Sierpinskian disjunction(Sierpinskian l1, Sierpinskian l2) { return Sierpinskian(Logical(l1) || Logical(l2)); }
-NegatedSierpinskian negation(Sierpinskian l) { return NegatedSierpinskian(!Logical(l)); }
-Sierpinskian negation(NegatedSierpinskian l) { return Sierpinskian(!Logical(l)); }
-OutputStream& operator<<(OutputStream& os, Sierpinskian l) { return os << Logical(l); }
-OutputStream& operator<<(OutputStream& os, NegatedSierpinskian l) { return os << Logical(l); }
+ValidatedSierpinskian conjunction(ValidatedSierpinskian l1, ValidatedSierpinskian l2) { return ValidatedSierpinskian(Logical(l1) && Logical(l2)); }
+ValidatedSierpinskian disjunction(ValidatedSierpinskian l1, ValidatedSierpinskian l2) { return ValidatedSierpinskian(Logical(l1) || Logical(l2)); }
+ValidatedNegatedSierpinskian negation(ValidatedSierpinskian l) { return ValidatedNegatedSierpinskian(!Logical(l)); }
+ValidatedSierpinskian negation(ValidatedNegatedSierpinskian l) { return ValidatedSierpinskian(!Logical(l)); }
+OutputStream& operator<<(OutputStream& os, ValidatedSierpinskian l) { return os << Logical(l); }
+OutputStream& operator<<(OutputStream& os, ValidatedNegatedSierpinskian l) { return os << Logical(l); }
 
 // ---------------- Integer --------------------------------------------------------------------------------------- //
 

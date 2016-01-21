@@ -252,46 +252,46 @@ class Boolean {
 
 inline Logical::Logical(Boolean l) : Logical(static_cast<bool>(l)) { }
 
-class Kleenean {
+class ValidatedKleenean {
     Logical _l;
   public:
-    Kleenean(bool b) : _l(b) { }
-    explicit Kleenean(Logical l) : _l(l) { }
+    ValidatedKleenean(bool b) : _l(b) { }
+    explicit ValidatedKleenean(Logical l) : _l(l) { }
     explicit operator Logical() const { return _l; }
     Logical check(Effort e) const;
-    friend Logical check(Kleenean l, Effort e);
-    friend Kleenean conjunction(Kleenean l1, Kleenean l2);
-    friend Kleenean disjunction(Kleenean l1, Kleenean l2);
-    friend Kleenean negation(Kleenean l);
-    friend bool decide(Kleenean l, Effort e);
-    friend OutputStream& operator<<(OutputStream&, Kleenean);
+    friend Logical check(ValidatedKleenean l, Effort e);
+    friend ValidatedKleenean conjunction(ValidatedKleenean l1, ValidatedKleenean l2);
+    friend ValidatedKleenean disjunction(ValidatedKleenean l1, ValidatedKleenean l2);
+    friend ValidatedKleenean negation(ValidatedKleenean l);
+    friend bool decide(ValidatedKleenean l, Effort e);
+    friend OutputStream& operator<<(OutputStream&, ValidatedKleenean);
 };
 
-class NegatedSierpinskian;
+class ValidatedNegatedSierpinskian;
 
-class Sierpinskian {
+class ValidatedSierpinskian {
     Logical _l;
   public:
-    Sierpinskian(bool b) : _l(b) { }
-    Sierpinskian(Kleenean l) : _l(reinterpret_cast<Logical const&>(l)) { }
-    explicit Sierpinskian(Logical l) : _l(l) { }
+    ValidatedSierpinskian(bool b) : _l(b) { }
+    ValidatedSierpinskian(ValidatedKleenean l) : _l(reinterpret_cast<Logical const&>(l)) { }
+    explicit ValidatedSierpinskian(Logical l) : _l(l) { }
     explicit operator Logical() const { return _l; }
     Logical check(Effort e) const;
-    friend Logical check(Sierpinskian l, Effort e);
-    friend Sierpinskian conjunction(Sierpinskian l1, Sierpinskian l2);
-    friend Sierpinskian disjunction(Sierpinskian l1, Sierpinskian l2);
-    friend NegatedSierpinskian negation(Sierpinskian l);
-    friend bool decide(Sierpinskian l, Effort e);
-    friend OutputStream& operator<<(OutputStream&, Sierpinskian);
+    friend Logical check(ValidatedSierpinskian l, Effort e);
+    friend ValidatedSierpinskian conjunction(ValidatedSierpinskian l1, ValidatedSierpinskian l2);
+    friend ValidatedSierpinskian disjunction(ValidatedSierpinskian l1, ValidatedSierpinskian l2);
+    friend ValidatedNegatedSierpinskian negation(ValidatedSierpinskian l);
+    friend bool decide(ValidatedSierpinskian l, Effort e);
+    friend OutputStream& operator<<(OutputStream&, ValidatedSierpinskian);
 };
 
-class NegatedSierpinskian {
+class ValidatedNegatedSierpinskian {
     Logical _l;
   public:
-    explicit NegatedSierpinskian(Logical l) : _l(l) { }
+    explicit ValidatedNegatedSierpinskian(Logical l) : _l(l) { }
     explicit operator Logical() const { return _l; }
-    friend Sierpinskian negation(NegatedSierpinskian l);
-    friend OutputStream& operator<<(OutputStream&, NegatedSierpinskian);
+    friend ValidatedSierpinskian negation(ValidatedNegatedSierpinskian l);
+    friend OutputStream& operator<<(OutputStream&, ValidatedNegatedSierpinskian);
 };
 
 template<class L> using IsLogical = IsConstructible<Logical,L>;

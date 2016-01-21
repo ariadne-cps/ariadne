@@ -288,7 +288,7 @@ RegularSetInterface* HybridConstraintSet::_euclidean_set(DiscreteLocation loc, R
     return new ConstraintSet(this->euclidean_set(loc,spc));
 }
 
-Sierpinskian HybridConstraintSet::overlaps(const HybridBoxType& bx) const {
+ValidatedSierpinskian HybridConstraintSet::overlaps(const HybridBoxType& bx) const {
     if(this->_sets.has_key(bx.location())) {
         return this->_sets[bx.location()].euclidean_set(bx.space()).overlaps(bx.continuous_set());
     } else {
@@ -296,7 +296,7 @@ Sierpinskian HybridConstraintSet::overlaps(const HybridBoxType& bx) const {
     }
 }
 
-Sierpinskian HybridConstraintSet::covers(const HybridBoxType& bx) const {
+ValidatedSierpinskian HybridConstraintSet::covers(const HybridBoxType& bx) const {
     if(this->_sets.has_key(bx.location())) {
         return this->_sets[bx.location()].euclidean_set(bx.space()).covers(bx.continuous_set());
     } else {
@@ -304,7 +304,7 @@ Sierpinskian HybridConstraintSet::covers(const HybridBoxType& bx) const {
     }
 }
 
-Sierpinskian HybridConstraintSet::separated(const HybridBoxType& bx) const {
+ValidatedSierpinskian HybridConstraintSet::separated(const HybridBoxType& bx) const {
     if(this->_sets.has_key(bx.location())) {
         return this->_sets[bx.location()].euclidean_set(bx.space()).separated(bx.continuous_set());
     } else {
@@ -364,7 +364,7 @@ BoundedConstraintSet* HybridBoundedConstraintSet::_euclidean_set(DiscreteLocatio
     return new BoundedConstraintSet(this->euclidean_set(loc,spc));
 }
 
-Sierpinskian HybridBoundedConstraintSet::overlaps(const HybridBoxType& bx) const {
+ValidatedSierpinskian HybridBoundedConstraintSet::overlaps(const HybridBoxType& bx) const {
     if(this->_sets.has_key(bx.location())) {
         return this->_sets[bx.location()].euclidean_set(bx.space()).overlaps(bx.continuous_set());
     } else {
@@ -372,7 +372,7 @@ Sierpinskian HybridBoundedConstraintSet::overlaps(const HybridBoxType& bx) const
     }
 }
 
-Sierpinskian HybridBoundedConstraintSet::covers(const HybridBoxType& bx) const {
+ValidatedSierpinskian HybridBoundedConstraintSet::covers(const HybridBoxType& bx) const {
     if(this->_sets.has_key(bx.location())) {
         return this->_sets[bx.location()].euclidean_set(bx.space()).covers(bx.continuous_set());
     } else {
@@ -380,7 +380,7 @@ Sierpinskian HybridBoundedConstraintSet::covers(const HybridBoxType& bx) const {
     }
 }
 
-Sierpinskian HybridBoundedConstraintSet::separated(const HybridBoxType& bx) const {
+ValidatedSierpinskian HybridBoundedConstraintSet::separated(const HybridBoxType& bx) const {
     if(this->_sets.has_key(bx.location())) {
         return this->_sets[bx.location()].euclidean_set(bx.space()).separated(bx.continuous_set());
     } else {
@@ -388,8 +388,8 @@ Sierpinskian HybridBoundedConstraintSet::separated(const HybridBoxType& bx) cons
     }
 }
 
-Sierpinskian HybridBoundedConstraintSet::inside(const HybridBoxes& bxs) const {
-    Sierpinskian result=true;
+ValidatedSierpinskian HybridBoundedConstraintSet::inside(const HybridBoxes& bxs) const {
+    ValidatedSierpinskian result=true;
     for(Map<DiscreteLocation,RealExpressionBoundedConstraintSet>::ConstIterator iter=this->_sets.begin(); iter!=this->_sets.end(); ++iter) {
         DiscreteLocation const& loc=iter->first;
         RealExpressionBoundedConstraintSet const& set = iter->second;

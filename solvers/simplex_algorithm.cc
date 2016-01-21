@@ -868,7 +868,7 @@ SizeType lpenter(const Matrix<X>& A, const Vector<X>& c, const Array<Slackness>&
 
 
 template<class X>
-Kleenean
+ValidatedKleenean
 SimplexSolver<X>::validated_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b) const
 {
     ARIADNE_LOG(4,"A="<<A<<" b="<<b<<"\n");
@@ -904,7 +904,7 @@ SimplexSolver<X>::validated_feasibility_step(const Vector<X>& xl, const Vector<X
     Vector<XX> x=Ariadne::compute_x(xl,xu,A,b,vt,p,B);
     ARIADNE_LOG(9," x="<<x<<"\n");
 
-    Kleenean feasible=true;
+    ValidatedKleenean feasible=true;
 
     Vector<X> c(n);
     Vector<X> relaxed_xl(xl);
@@ -1103,7 +1103,7 @@ SimplexSolver<X>::compute_x(const Vector<X>& xl, const Vector<X>& xu, const Matr
 
 
 template<class X>
-Kleenean
+ValidatedKleenean
 SimplexSolver<X>::_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
                             Array<Slackness>& vt, Array<SizeType>& p, Matrix<XX>& B, Vector<XX>& x) const
 {
@@ -1189,7 +1189,7 @@ SimplexSolver<X>::_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matr
 
 // Check for feasibility of Ax=b xl<=b<=xu
 template<class X>
-Kleenean
+ValidatedKleenean
 SimplexSolver<X>::feasible(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b) const
 {
     ARIADNE_LOG(2,"feasible(xl,xu,A,b)\n");
@@ -1218,7 +1218,7 @@ SimplexSolver<X>::feasible(const Vector<X>& xl, const Vector<X>& xu, const Matri
 
 
 template<class X>
-Kleenean
+ValidatedKleenean
 SimplexSolver<X>::hotstarted_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
                                       Array<Slackness>& vt) const
 {
@@ -1246,7 +1246,7 @@ SimplexSolver<X>::hotstarted_feasible(const Vector<X>& xl, const Vector<X>& xu, 
 
 
 template<class X>
-Kleenean
+ValidatedKleenean
 SimplexSolver<X>::hotstarted_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
                                       Array<Slackness>& vt, Array<SizeType>& p, Matrix<XX>& B, Vector<XX>& x, Vector<XX>& y) const
 {
@@ -1268,7 +1268,7 @@ SimplexSolver<X>::hotstarted_feasible(const Vector<X>& xl, const Vector<X>& xu, 
     x=Ariadne::compute_x(xl,xu,A,b,vt,p,B);
     this->consistency_check(xl,xu,A,b,vt,p,B,x);
 
-    Kleenean fs = this->_feasible(xl,xu,A,b,vt,p,B,x);
+    ValidatedKleenean fs = this->_feasible(xl,xu,A,b,vt,p,B,x);
 
     ARIADNE_LOG(7,"vt="<<vt<<" p="<<p<<" fs="<<fs<<"\n");
     Vector<X> c=Ariadne::compute_c(xl,xu,p,x,m);
@@ -1276,7 +1276,7 @@ SimplexSolver<X>::hotstarted_feasible(const Vector<X>& xl, const Vector<X>& xu, 
     Vector<XX> z=Ariadne::compute_z(A,c,p,y);
     ARIADNE_LOG(7,"x="<<x<<" c="<<c<<" y="<<y<<" z="<<z<<"\n");
 
-    Kleenean vfs = this->verify_feasibility(xl,xu,A,b,vt);
+    ValidatedKleenean vfs = this->verify_feasibility(xl,xu,A,b,vt);
     if(is_determinate(vfs) && definitely(vfs!=fs)) {
         if(verbosity>0) {
             ARIADNE_WARN("ApproximateTag feasibility algorithm for\n  A="<<A<<" b="<<b<<" xl="<<xl<<" xu="<<xu<<"\nyielded basic variables "<<vt<<
@@ -1294,7 +1294,7 @@ SimplexSolver<X>::hotstarted_feasible(const Vector<X>& xl, const Vector<X>& xu, 
 // and set dual vector y = c_B A_B^{-1} .
 //  y (b - A_L x_L - A_U x_U) > 0
 //  z = c - y A  satisfies z_U < 0 and z_L > 0; by construction z_B = 0.
-template<class X> Kleenean
+template<class X> ValidatedKleenean
 SimplexSolver<X>::verify_feasibility(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b, const Array<Slackness>& vt) const
 {
     ARIADNE_LOG(4,"verify_feasibility(Vector xl, Vector xu, Matrix A, Vector b, VariableTypeArray vt)\n");
@@ -1341,7 +1341,7 @@ SimplexSolver<X>::verify_feasibility(const Vector<X>& xl, const Vector<X>& xu, c
 
     ARIADNE_LOG(5,"x="<<x<<" c="<<c<<" y="<<y<<" z="<<z<<"\n");
 
-    Kleenean fs=true;
+    ValidatedKleenean fs=true;
     for(SizeType k=0; k!=m; ++k) {
         SizeType j=p[k];
         if(possibly(x[j]<=xl[j]) || possibly(x[j]>=xu[j])) {

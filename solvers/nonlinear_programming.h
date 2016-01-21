@@ -69,10 +69,10 @@ class OptimiserInterface {
     virtual Vector<ValidatedNumericType> minimise(ValidatedScalarFunction f, ExactBoxType D, ValidatedVectorFunction g, ValidatedVectorFunction h) const = 0;
 
     //! \brief Tests is the general nonlinear feasibility problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
-    virtual Kleenean feasible(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C) const = 0;
+    virtual ValidatedKleenean feasible(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C) const = 0;
     //! \brief Tests is the standard nonlinear feasibility problem \f$x\in D,\ g(x)\leq 0 \text{ and } h(x) = 0\f$ is feasible. Assumes \fD\f$ is singleton with nonempty interior.
     //! \internal This is one of the simplest nonlinear programming problems, and is a good test case for new algorithms.
-    virtual Kleenean feasible(ExactBoxType D, ValidatedVectorFunction g, ValidatedVectorFunction h) const = 0;
+    virtual ValidatedKleenean feasible(ExactBoxType D, ValidatedVectorFunction g, ValidatedVectorFunction h) const = 0;
 
     //! \brief Tests if the point \a x is feasible, in that \f$x\in D\f$ and \f$g(x)\in N_\epsilon(C)\f$.
     virtual Bool almost_feasible_point(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
@@ -90,7 +90,7 @@ class OptimiserInterface {
     virtual Bool validate_infeasibility(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
                                       ExactVector x, ExactVector y) const = 0;
     //! \brief Tests if the box \a X definitely containss a feasible point.
-    virtual Kleenean contains_feasible_point(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
+    virtual ValidatedKleenean contains_feasible_point(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
                                             FloatBoundsVector X) const = 0;
     //! \brief Tests if the Lagrange multipliers \a y are a certificate of infeasiblity.
     virtual Bool is_infeasibility_certificate(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
@@ -107,8 +107,8 @@ class OptimiserBase
     virtual Vector<ValidatedNumericType> minimise(ValidatedScalarFunction f, ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C) const = 0;
     virtual Vector<ValidatedNumericType> minimise(ValidatedScalarFunction f, ExactBoxType D, ValidatedVectorFunction g, ValidatedVectorFunction h) const;
 
-    virtual Kleenean feasible(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C) const = 0;
-    virtual Kleenean feasible(ExactBoxType D, ValidatedVectorFunction g, ValidatedVectorFunction h) const;
+    virtual ValidatedKleenean feasible(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C) const = 0;
+    virtual ValidatedKleenean feasible(ExactBoxType D, ValidatedVectorFunction g, ValidatedVectorFunction h) const;
 
     virtual Bool almost_feasible_point(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
                                        ApproximateVector x, Float64Approximation error) const;
@@ -120,7 +120,7 @@ class OptimiserBase
                                       ExactVector x, ExactVector y) const;
     virtual Bool validate_infeasibility(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
                                         ExactVector x, ExactVector y) const;
-    virtual Kleenean contains_feasible_point(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
+    virtual ValidatedKleenean contains_feasible_point(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
                                             ValidatedVector X) const;
     virtual Bool is_infeasibility_certificate(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
                                               ExactVector lambda) const;
@@ -138,9 +138,9 @@ class PenaltyFunctionOptimiser
 {
   public:
     virtual PenaltyFunctionOptimiser* clone() const;
-    virtual Kleenean check_feasibility(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C, ExactVector x, ExactVector y) const;
+    virtual ValidatedKleenean check_feasibility(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C, ExactVector x, ExactVector y) const;
     virtual Vector<ValidatedNumericType> minimise(ValidatedScalarFunction f, ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C) const;
-    virtual Kleenean feasible(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C) const;
+    virtual ValidatedKleenean feasible(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C) const;
     virtual Void feasibility_step(const ExactBoxType& D, const ApproximateVectorFunction& g, const ExactBoxType& C,
                                   FloatApproximationVector& x, FloatApproximationVector& w, Float64Approximation& mu) const;
     virtual Void feasibility_step(const ExactBoxType& D, const ValidatedVectorFunction& g, const ExactBoxType& C,
@@ -173,11 +173,11 @@ class NonlinearInfeasibleInteriorPointOptimiser
     //! \return A box \f$X\f$ which definitely contains a feasible point, and contains a local optimum.
     virtual Vector<ValidatedNumericType> minimise(ValidatedScalarFunction f, ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C) const;
     //! \brief Tests is the nonlinear programming problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
-    virtual Kleenean feasible(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C) const;
+    virtual ValidatedKleenean feasible(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C) const;
 
     //! \brief Test if the constraints \f$g(x)\in C\f$ are solvable for \f$x\in D\f$ using a nonlinear feasibility test,
     //! hotstarting the method with the overall primal and dual variables.
-    Pair<Kleenean,FloatApproximationVector> feasible_hotstarted(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
+    Pair<ValidatedKleenean,FloatApproximationVector> feasible_hotstarted(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
                                                                 const PrimalDualData& wxy0) const;
 
     Void setup_feasibility(const ExactBoxType& D, const ApproximateVectorFunction& g, const ExactBoxType& C,
@@ -205,16 +205,16 @@ class NonlinearInteriorPointOptimiser
     //! \return A box \f$X\f$ which definitely contains a feasible point, and contains a local optimum.
     virtual Vector<ValidatedNumericType> minimise(ValidatedScalarFunction f, ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C) const;
     //! \brief Tests is the nonlinear programming problem \f$x\in D, g(x)\in C \text{ and } h(x)= 0 \f$ is feasible.
-    virtual Kleenean feasible(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C) const;
+    virtual ValidatedKleenean feasible(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C) const;
 
     //! \brief Test if the constraints \f$g(y)\in C\f$ are solvable for \f$y\in D\f$ using a nonlinear feasibility test,
     //! hotstarting the method with the overall constraint violation, primal and dual variables.
-    Pair<Kleenean,FloatApproximationVector> feasible_hotstarted(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
+    Pair<ValidatedKleenean,FloatApproximationVector> feasible_hotstarted(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
                                                   const FloatApproximationVector& x0, const FloatApproximationVector& lambda0, const Float64Approximation& violation0) const;
 
     //! \brief Test if the constraints \f$g(y)\in C\f$ are solvable for \f$y\in D\f$ using a nonlinear feasibility test,
     //! hotstarting the method with the primal and dual.
-    Pair<Kleenean,FloatApproximationVector> feasible_hotstarted(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
+    Pair<ValidatedKleenean,FloatApproximationVector> feasible_hotstarted(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
                                                   const FloatApproximationVector& x0, const FloatApproximationVector& lambda0) const;
 
     Void minimisation_step(const ApproximateScalarFunction& f, const ExactBoxType& D, const ApproximateVectorFunction& g, const ExactBoxType& C, const ApproximateVectorFunction& h,
@@ -255,7 +255,7 @@ class IntervalOptimiser
     : public NonlinearInteriorPointOptimiser
 {
     virtual IntervalOptimiser* clone() const { return new IntervalOptimiser(*this); }
-    virtual Kleenean feasible(ExactBoxType D, ValidatedVectorFunction h) const;
+    virtual ValidatedKleenean feasible(ExactBoxType D, ValidatedVectorFunction h) const;
     Void feasibility_step(const ExactFloatVector& xl, const ExactFloatVector& xu, const ValidatedVectorFunction& h,
                           FloatBoundsVector& x, FloatBoundsVector& y, FloatBoundsVector& zl, FloatBoundsVector zu, Float64Bounds& mu) const;
 };
@@ -265,7 +265,7 @@ class ApproximateOptimiser
     : public NonlinearInteriorPointOptimiser
 {
     virtual ApproximateOptimiser* clone() const { return new ApproximateOptimiser(*this); }
-    virtual Kleenean feasible(ExactBoxType D, ValidatedVectorFunction h) const;
+    virtual ValidatedKleenean feasible(ExactBoxType D, ValidatedVectorFunction h) const;
     Void feasibility_step(const ExactBoxType& D, const ApproximateVectorFunction& h,
                           FloatApproximationVector& X, FloatApproximationVector& Lambda) const;
 };
@@ -284,12 +284,12 @@ class KrawczykOptimiser
     //! \brief Solve the linear programming problem \f$\max f(x) \text{ such that } x\in D \text{ and } g(x)\in C\f$.
     virtual Vector<ValidatedNumericType> minimise(ValidatedScalarFunction f, ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C) const;
     //! \brief Tests is the nonlinear programming problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
-    virtual Kleenean feasible(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C) const;
+    virtual ValidatedKleenean feasible(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C) const;
 
   public:
     //! \brief Try to solve the nonlinear constraint problem by applying the Krawczyk contractor to the Kuhn-Tucker conditions,
     //! hotstarting the iteration with the primal and dual variables.
-    Kleenean minimise(ValidatedScalarFunction f, ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
+    ValidatedKleenean minimise(ValidatedScalarFunction f, ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
                      const Float64Bounds& t0, const FloatBoundsVector& x0, const FloatBoundsVector& y0, const FloatBoundsVector& z0) const;
 
     //! \brief A primal-dual feasibility step for the problem \f$g(y)\in C;\ y\in D\f$.

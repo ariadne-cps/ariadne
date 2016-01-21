@@ -30,7 +30,7 @@
 namespace Ariadne {
 
 
-Kleenean
+ValidatedKleenean
 separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float64& eps)
 {
     ExactBoxType bb=cast_exact_box(ls.bounding_box());
@@ -39,7 +39,7 @@ separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Fl
 }
 
 
-Kleenean
+ValidatedKleenean
 overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float64& eps)
 {
     ExactBoxType bb=cast_exact_box(ls.bounding_box());
@@ -48,7 +48,7 @@ overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Floa
 }
 
 
-Kleenean
+ValidatedKleenean
 inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float64& eps)
 {
     ExactBoxType bb=cast_exact_box(ls.bounding_box());
@@ -57,7 +57,7 @@ inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float
 }
 
 
-Kleenean
+ValidatedKleenean
 overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBoxType& bx, const Float64& eps)
 {
     if(definitely(ls.separated(bx))) {
@@ -85,7 +85,7 @@ overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Exac
 }
 
 
-Kleenean
+ValidatedKleenean
 inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBoxType& bx, const Float64& eps)
 {
     if(definitely(ls.separated(bx) || rs.separated(bx))) {
@@ -106,7 +106,7 @@ inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Exact
 }
 
 
-Kleenean
+ValidatedKleenean
 separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBoxType& bx, const Float64& eps)
 {
     if(definitely(ls.separated(bx) || rs.separated(bx))) {
@@ -129,7 +129,7 @@ separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Ex
 
 
 
-Kleenean
+ValidatedKleenean
 overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const ExactBoxType& bx, const Float64& eps)
 {
     if(definitely(ovs.overlaps(bx))) {
@@ -152,7 +152,7 @@ overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const ExactBo
 }
 
 
-Kleenean
+ValidatedKleenean
 inside(const ClosedSetInterface& cls, const OpenSetInterface& ops, const ExactBoxType& bx, const Float64& eps)
 {
     if(definitely(cls.separated(bx) || ops.covers(bx))) {
@@ -171,7 +171,7 @@ inside(const ClosedSetInterface& cls, const OpenSetInterface& ops, const ExactBo
 }
 
 
-Kleenean
+ValidatedKleenean
 separated(const ClosedSetInterface& cls1, const ClosedSetInterface& cls2, const ExactBoxType& bx, const Float64& eps)
 {
     if(definitely(cls1.separated(bx) || cls2.separated(bx))) {

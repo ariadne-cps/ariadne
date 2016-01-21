@@ -119,9 +119,9 @@ class HybridConstraintSet
     //! \brief The subset of \f$\mathbb{R}^n\f$ obtained by restricting to location \a loc and ordering the variables as defined by \a spc.
     ConstraintSet const euclidean_set(DiscreteLocation loc, RealSpace spc) const;
 
-    virtual Sierpinskian overlaps(const HybridBoxType& bx) const override;
-    virtual Sierpinskian separated(const HybridBoxType& bx) const override;
-    virtual Sierpinskian covers(const HybridBoxType& bx) const override;
+    virtual ValidatedSierpinskian overlaps(const HybridBoxType& bx) const override;
+    virtual ValidatedSierpinskian separated(const HybridBoxType& bx) const override;
+    virtual ValidatedSierpinskian covers(const HybridBoxType& bx) const override;
 
     virtual OutputStream& write(OutputStream& os) const override;
   protected:
@@ -159,11 +159,11 @@ class HybridBoundedConstraintSet
     //! \brief The subset of \f$\mathbb{R}^n\f$ obtained by restricting to location \a loc and ordering the variables as defined by \a spc.
     BoundedConstraintSet const euclidean_set(DiscreteLocation loc, RealSpace spc) const;
 
-    virtual Sierpinskian overlaps(const HybridBoxType& bx) const override;
-    virtual Sierpinskian inside(const HybridBoxes& bx) const override;
+    virtual ValidatedSierpinskian overlaps(const HybridBoxType& bx) const override;
+    virtual ValidatedSierpinskian inside(const HybridBoxes& bx) const override;
 
-    virtual Sierpinskian separated(const HybridBoxType& bx) const override;
-    virtual Sierpinskian covers(const HybridBoxType& bx) const override;
+    virtual ValidatedSierpinskian separated(const HybridBoxType& bx) const override;
+    virtual ValidatedSierpinskian covers(const HybridBoxType& bx) const override;
     virtual HybridUpperBoxes bounding_box() const override;
 
     virtual OutputStream& write(OutputStream& os) const override;
@@ -702,25 +702,25 @@ class HybridGridTreeSet
     HybridSpace space() const { return this->grid().space(); }
 
     //!
-    Sierpinskian separated(const HybridBoxType& hbx) const {
+    ValidatedSierpinskian separated(const HybridBoxType& hbx) const {
         LocationsConstIterator _loc_iter = this->_map.find( hbx.location() );
         return _loc_iter != this->locations_end() || _loc_iter->second.separated( hbx.continuous_set() );
     }
 
     //!
-    Sierpinskian overlaps(const HybridBoxType& hbx) const {
+    ValidatedSierpinskian overlaps(const HybridBoxType& hbx) const {
         LocationsConstIterator _loc_iter = this->_map.find( hbx.location() );
         return _loc_iter != this->locations_end() && _loc_iter->second.overlaps( hbx.continuous_set() );
     }
 
     //!
-    Sierpinskian covers(const HybridBoxType& hbx) const {
+    ValidatedSierpinskian covers(const HybridBoxType& hbx) const {
         LocationsConstIterator _loc_iter=this->_map.find(hbx.location());
         return _loc_iter!=this->locations_end() && _loc_iter->second.covers( hbx.continuous_set() );
     }
 
     //!
-    Sierpinskian inside(const HybridBoxes& hbx) const  {
+    ValidatedSierpinskian inside(const HybridBoxes& hbx) const  {
         for( LocationsConstIterator _loc_iter = this->locations_begin(); _loc_iter != this->locations_end(); ++_loc_iter ) {
             if( !_loc_iter->second.is_empty() ) {
                 DiscreteLocation const& loc = _loc_iter->first;

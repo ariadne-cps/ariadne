@@ -339,15 +339,15 @@ inline Float64UpperInterval& operator/=(Float64UpperInterval& ivl1, const Float6
 
 inline Bool operator==(const Float64UpperInterval& ivl1, const Float64UpperInterval& ivl2) {
     return ivl1.lower().raw() == ivl2.lower().raw() && ivl1.upper().raw() == ivl2.upper().raw(); }
-inline Kleenean operator!=(const Float64UpperInterval& ivl1, const Float64UpperInterval& ivl2) {
+inline ValidatedKleenean operator!=(const Float64UpperInterval& ivl1, const Float64UpperInterval& ivl2) {
     return ivl1.lower().raw() != ivl2.lower().raw() || ivl1.upper().raw() != ivl2.upper().raw(); }
-inline Kleenean operator<=(Float64UpperInterval ivl1, Float64UpperInterval ivl2) {
+inline ValidatedKleenean operator<=(Float64UpperInterval ivl1, Float64UpperInterval ivl2) {
     return cast_singleton(ivl1) <= cast_singleton(ivl2); }
-inline Kleenean operator>=(Float64UpperInterval ivl1, Float64UpperInterval ivl2) {
+inline ValidatedKleenean operator>=(Float64UpperInterval ivl1, Float64UpperInterval ivl2) {
     return cast_singleton(ivl1) >= cast_singleton(ivl2); }
-inline Kleenean operator< (Float64UpperInterval ivl1, Float64UpperInterval ivl2) {
+inline ValidatedKleenean operator< (Float64UpperInterval ivl1, Float64UpperInterval ivl2) {
     return cast_singleton(ivl1) <  cast_singleton(ivl2); }
-inline Kleenean operator> (Float64UpperInterval ivl1, Float64UpperInterval ivl2) {
+inline ValidatedKleenean operator> (Float64UpperInterval ivl1, Float64UpperInterval ivl2) {
     return cast_singleton(ivl1) >  cast_singleton(ivl2); }
 
 // Mixed operations
@@ -363,12 +363,12 @@ inline Float64UpperInterval& operator+=(Float64UpperInterval& ivl1, Float64Bound
 inline Float64UpperInterval& operator-=(Float64UpperInterval& ivl1, Float64Bounds x2) { return ivl1-=make_interval(x2); }
 inline Float64UpperInterval& operator*=(Float64UpperInterval& ivl1, Float64Bounds x2) { return ivl1*=make_interval(x2); }
 inline Float64UpperInterval& operator/=(Float64UpperInterval& ivl1, Float64Bounds x2) { return ivl1/=make_interval(x2); }
-inline Kleenean operator==(Float64UpperInterval ivl1, Float64Bounds x2) { return ivl1==make_interval(x2); }
-inline Kleenean operator!=(Float64UpperInterval ivl1, Float64Bounds x2) { return ivl1!=make_interval(x2); }
-inline Kleenean operator<=(Float64UpperInterval ivl1, Float64Bounds x2) { return ivl1<=make_interval(x2); }
-inline Kleenean operator>=(Float64UpperInterval ivl1, Float64Bounds x2) { return ivl1>=make_interval(x2); }
-inline Kleenean operator< (Float64UpperInterval ivl1, Float64Bounds x2) { return ivl1< make_interval(x2); }
-inline Kleenean operator> (Float64UpperInterval ivl1, Float64Bounds x2) { return ivl1> make_interval(x2); }
+inline ValidatedKleenean operator==(Float64UpperInterval ivl1, Float64Bounds x2) { return ivl1==make_interval(x2); }
+inline ValidatedKleenean operator!=(Float64UpperInterval ivl1, Float64Bounds x2) { return ivl1!=make_interval(x2); }
+inline ValidatedKleenean operator<=(Float64UpperInterval ivl1, Float64Bounds x2) { return ivl1<=make_interval(x2); }
+inline ValidatedKleenean operator>=(Float64UpperInterval ivl1, Float64Bounds x2) { return ivl1>=make_interval(x2); }
+inline ValidatedKleenean operator< (Float64UpperInterval ivl1, Float64Bounds x2) { return ivl1< make_interval(x2); }
+inline ValidatedKleenean operator> (Float64UpperInterval ivl1, Float64Bounds x2) { return ivl1> make_interval(x2); }
 
 
 } // namespace Ariadne

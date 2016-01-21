@@ -357,12 +357,12 @@ Enclosure::Enclosure(const ExactBoxType& domain, const ValidatedVectorFunction& 
 
 
 // Returns true if the entire set is positive; false if entire set is negative
-Kleenean Enclosure::satisfies(ValidatedScalarFunction constraint) const
+ValidatedKleenean Enclosure::satisfies(ValidatedScalarFunction constraint) const
 {
     UpperIntervalType constraint_range=apply(constraint,this->codomain());
     if(definitely(constraint_range.upper()<0)) { return false; }
     if(definitely(constraint_range.lower()>0)) { return true; }
-    return Kleenean(indeterminate);
+    return ValidatedKleenean(indeterminate);
 }
 
 
@@ -680,21 +680,21 @@ ExactPoint Enclosure::centre() const {
 }
 
 
-Kleenean
+ValidatedKleenean
 Enclosure::satisfies(ValidatedConstraint c) const
 {
     Enclosure copy=*this;
     copy.new_state_constraint(c);
     if(definitely(copy.is_empty())) { return false; }
-    else { return Kleenean(indeterminate); }
+    else { return ValidatedKleenean(indeterminate); }
 }
 
-Kleenean Enclosure::is_bounded() const
+ValidatedKleenean Enclosure::is_bounded() const
 {
-    return this->domain().is_bounded() || Kleenean(indeterminate);
+    return this->domain().is_bounded() || ValidatedKleenean(indeterminate);
 }
 
-Kleenean Enclosure::is_empty() const
+ValidatedKleenean Enclosure::is_empty() const
 {
     if(definitely(this->_reduced_domain.is_empty())) { return true; }
     if(this->_constraints.empty()) { return this->domain().is_empty(); }
@@ -708,23 +708,23 @@ Kleenean Enclosure::is_empty() const
         }
     }
     if(this->_reduced_domain.is_empty()) { return true; }
-    return Kleenean(indeterminate);
+    return ValidatedKleenean(indeterminate);
 }
 
-Sierpinskian Enclosure::inside(const ExactBoxType& bx) const
+ValidatedSierpinskian Enclosure::inside(const ExactBoxType& bx) const
 {
     return Ariadne::subset(Ariadne::apply(this->_space_function,this->_reduced_domain),bx);
 }
 
-Kleenean Enclosure::subset(const ExactBoxType& bx) const
+ValidatedKleenean Enclosure::subset(const ExactBoxType& bx) const
 {
     this->reduce();
 
-    return Kleenean(Ariadne::subset(Ariadne::apply(this->_space_function,this->_reduced_domain),bx)) || Kleenean(indeterminate);
+    return ValidatedKleenean(Ariadne::subset(Ariadne::apply(this->_space_function,this->_reduced_domain),bx)) || ValidatedKleenean(indeterminate);
 
 }
 
-Sierpinskian Enclosure::separated(const ExactBoxType& bx) const
+ValidatedSierpinskian Enclosure::separated(const ExactBoxType& bx) const
 {
     ARIADNE_ASSERT_MSG(this->dimension()==bx.dimension(),"Enclosure::subset(ExactBoxType): self="<<*this<<", box="<<bx);
     List<ValidatedConstraint> constraints = this->constraints();

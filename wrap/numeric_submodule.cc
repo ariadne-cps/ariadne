@@ -710,8 +710,8 @@ numeric_submodule()
     using namespace Ariadne;
     export_effort();
 
-    export_effective_logical<EffectiveTag>("Kleenean");
-    export_effective_logical<EffectiveUpperTag>("Sierpinskian");
+    export_effective_logical<EffectiveTag>("ValidatedKleenean");
+    export_effective_logical<EffectiveUpperTag>("ValidatedSierpinskian");
     export_effective_logical<EffectiveLowerTag>("EffectiveLowerLogical");
     export_logical<ExactTag>("Boolean");
     export_logical<ValidatedTag>("Tribool");

@@ -236,16 +236,16 @@ class HybridEnclosure
     //! \brief The dimension of the set.
     DimensionType dimension() const;
     //! \brief Tests whether the set is empty.
-    Kleenean is_empty() const;
+    ValidatedKleenean is_empty() const;
     //! \brief Tests whether the set satisfies the constraint \a c.
-    Kleenean satisfies(EffectiveConstraint c) const;
+    ValidatedKleenean satisfies(EffectiveConstraint c) const;
 
     //! \brief Returns a bounding box for the set. Computed by a simple interval evaluation of \f$f(D)\f$.
     HybridBoxType bounding_box() const;
     //! \brief Tests whether the set is disjoint from the box \a hbx.
-    Sierpinskian separated(const HybridBoxType& hbx) const;
+    ValidatedSierpinskian separated(const HybridBoxType& hbx) const;
     //! \brief Tests whether the set is a subset of the interior of the box \a hbx.
-    Sierpinskian inside(const HybridBoxType& hbx) const;
+    ValidatedSierpinskian inside(const HybridBoxType& hbx) const;
     //! \brief Restricts to a subdomain of the \em parameter domain.
     Void restrict(const ExactBoxType& subdomain);
     //! \brief Adjoins an outer approximation of the set to the grid-based set \a paving, with accuracy given by
@@ -286,8 +286,8 @@ class HybridEnclosure
 
 };
 
-inline Sierpinskian inside(const HybridEnclosure& he, const HybridBoxType& hbx) { return he.inside(hbx); }
-inline Sierpinskian separated(const HybridEnclosure& he, const HybridBoxType& hbx) { return he.separated(hbx); }
+inline ValidatedSierpinskian inside(const HybridEnclosure& he, const HybridBoxType& hbx) { return he.inside(hbx); }
+inline ValidatedSierpinskian separated(const HybridEnclosure& he, const HybridBoxType& hbx) { return he.separated(hbx); }
 
 inline OutputStream& operator<<(OutputStream& os, const HybridEnclosure& s) { return s.write(os); }
 inline OutputStream& operator<<(OutputStream& os, const Representation<HybridEnclosure>& s) { return s.pointer->repr(os); }

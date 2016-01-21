@@ -58,9 +58,9 @@ void wrap();
 void test() {
     Boolean bl=true;
     test_logical_operations(bl);
-    Kleenean kl=true;
+    ValidatedKleenean kl=true;
     test_logical_operations(kl);
-    Sierpinskian sl=true;
+    ValidatedSierpinskian sl=true;
     test_logical_operations(sl);
 
     Integer n(3);

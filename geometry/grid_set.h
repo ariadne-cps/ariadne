@@ -135,13 +135,13 @@ class NotAllowedMoveException : public std::logic_error {
  * space into enabled and disabled cells. This is required for representing
  * subsets of the state space.
  *
- * \b Storage: We only store pointers to the left and right subtrees and the Kleenean
+ * \b Storage: We only store pointers to the left and right subtrees and the ValidatedKleenean
  * value indicating whether this cell is enabled/disabled or we do not know.
  */
 class BinaryTreeNode {
   protected:
     /*! \brief Defines whether the given node of the tree is on/off or we do not know*/
-    Kleenean _isEnabled;
+    ValidatedKleenean _isEnabled;
 
     /*! \brief The left and right subnodes of the tree. Note that,
      * \a pLeftNode == \a NULL iff \a pRightNode == \a NULL. The latter
@@ -171,14 +171,14 @@ class BinaryTreeNode {
                        const BooleanArray& theTree, const BooleanArray& theEnabledCells);
 
     /*! \brief This method is used in constructors for the node initialization */
-    Void init( Kleenean isEnabled, BinaryTreeNode* pLeftNode, BinaryTreeNode* pRightNode );
+    Void init( ValidatedKleenean isEnabled, BinaryTreeNode* pLeftNode, BinaryTreeNode* pRightNode );
 
   public:
     //@{
     //! \name Constructors
 
     /*! \brief Construct a tree node. */
-    explicit BinaryTreeNode(const Kleenean _isEnabled = false );
+    explicit BinaryTreeNode(const ValidatedKleenean _isEnabled = false );
 
     /*! \brief The copy constructor.
      * The the node and all it's sub nodes are copied.
@@ -259,7 +259,7 @@ class BinaryTreeNode {
      * NOTE: the leat and the right sub-trees (are deallocated.
      * WARNING: this method MUST NOT be called on a non-leaf node!!!
      */
-    Void make_leaf( Kleenean is_enabled );
+    Void make_leaf( ValidatedKleenean is_enabled );
 
     /*! \brief Marks the leaf node as enabled, otherwise they through \a NotALeafNodeEsception */
     Void set_enabled();
@@ -419,7 +419,7 @@ class GridTreeSubset
      *  This is a recursive procedure and it returns true only if there are no disabled
      *  cells in \a pCurrentNode that intersect with theBoxType.
      */
-    static Kleenean superset( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
+    static ValidatedKleenean superset( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
                              const Nat theHeight, BinaryWord &theWord, const ExactBoxType& theBoxType );
 
     /*! \brief This method checks whether the set defined by \a pCurrentNode is a subset
@@ -428,7 +428,7 @@ class GridTreeSubset
      *  This is a recursive procedure and it returns true only if all enabled sub-cells of
      *  \a pCurrentNode are sub-sets of \a theBoxType.
      */
-    static Kleenean subset( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
+    static ValidatedKleenean subset( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
                            const Nat theHeight, BinaryWord &theWord, const ExactBoxType& theBoxType );
 
     /*! \brief This method checks whether \a theBoxType is disjoint from the set defined by
@@ -439,7 +439,7 @@ class GridTreeSubset
      *  have an intersection. If there are no such nodes then there is no intersection,
      *  and the sets are disjoint.
      */
-    static Kleenean disjoint( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
+    static ValidatedKleenean disjoint( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
                              const Nat theHeight, BinaryWord &theWord, const ExactBoxType& theBoxType );
 
     /*! \brief This method checks whether \a theBoxType overlaps the set defined by
@@ -451,7 +451,7 @@ class GridTreeSubset
      *  method cannot be implemented using disjoint since disjoint tests if the closures
      *  are disjoint, and overlaps tests if the interiors are not disjoint.
      */
-    static Kleenean intersects( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
+    static ValidatedKleenean intersects( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
                                const Nat theHeight, BinaryWord &theWord, const ExactBoxType& theBoxType );
 
     /*! Allow to convert the number of subdivisions in each dimension, i.e. \a numSubdivInDim,
@@ -624,16 +624,16 @@ class GridTreeSubset
     Bool disjoint( const ExactBoxType& theBoxType ) const;
 
     /*! \brief Tests if the interior of a grid set is a superset of a box. */
-    Sierpinskian covers( const ExactBoxType& theBoxType ) const;
+    ValidatedSierpinskian covers( const ExactBoxType& theBoxType ) const;
 
     /*! \brief Tests if (the closure of) a grid set is a subset of the interior of box. */
-    Sierpinskian inside( const ExactBoxType& theBoxType  ) const;
+    ValidatedSierpinskian inside( const ExactBoxType& theBoxType  ) const;
 
     /*! \brief Tests if (the closure of) a grid set is disjoint from (the closure of) a box. */
-    Sierpinskian separated( const ExactBoxType& theBoxType  ) const;
+    ValidatedSierpinskian separated( const ExactBoxType& theBoxType  ) const;
 
     /*! \brief Tests if a grid set overlaps (intersects the interior of) a box. */
-    Sierpinskian overlaps( const ExactBoxType& theBoxType ) const;
+    ValidatedSierpinskian overlaps( const ExactBoxType& theBoxType ) const;
 
     //@}
 
@@ -1022,7 +1022,7 @@ class GridTreeCursor {
      * if left_or_right == false then we go left, if left_or_right == true then right
      * if left_or_right == indeterminate then we are going one level up.
      */
-    Void updateTheCurrentGridCell( Kleenean left_or_right );
+    Void updateTheCurrentGridCell( ValidatedKleenean left_or_right );
 
     friend OutputStream& operator<<(OutputStream& os, const GridTreeCursor& theGridTreeCursor);
 
@@ -1175,7 +1175,7 @@ class GridTreeConstIterator
      * on the first enabled leaf node (firstLastNone == true) or the last one (firstLastNone == false)
      * or we are constructing the "end Iterator" that does not point anywhere.
      */
-    explicit GridTreeConstIterator( const GridTreeSubset * pSubPaving, const Kleenean firstLastNone );
+    explicit GridTreeConstIterator( const GridTreeSubset * pSubPaving, const ValidatedKleenean firstLastNone );
 
     /*! \brief The copy constructor that copies the current state by copying the
      *   underlying GridTreeCursor. The latter is copied by it's copy constructor.
@@ -1217,13 +1217,13 @@ class GridTreeConstIterator
 
 /****************************************BinaryTreeNode**********************************************/
 
-inline Void BinaryTreeNode::init( Kleenean isEnabled, BinaryTreeNode* pLeftNode, BinaryTreeNode* pRightNode ){
+inline Void BinaryTreeNode::init( ValidatedKleenean isEnabled, BinaryTreeNode* pLeftNode, BinaryTreeNode* pRightNode ){
     _isEnabled = isEnabled;
     _pLeftNode = pLeftNode;
     _pRightNode = pRightNode;
 }
 
-inline BinaryTreeNode::BinaryTreeNode(const Kleenean isEnabled){
+inline BinaryTreeNode::BinaryTreeNode(const ValidatedKleenean isEnabled){
     init( isEnabled, NULL, NULL );
 }
 
@@ -1327,7 +1327,7 @@ inline Void BinaryTreeNode::set_unknown() {
     }
 }
 
-inline Void BinaryTreeNode::make_leaf(Kleenean is_enabled ){
+inline Void BinaryTreeNode::make_leaf(ValidatedKleenean is_enabled ){
     _isEnabled = is_enabled;
     if( _pLeftNode != NULL ) { delete _pLeftNode; _pLeftNode= NULL; }
     if( _pRightNode != NULL ) { delete _pRightNode; _pRightNode= NULL; }
@@ -1501,7 +1501,7 @@ inline GridTreeCursor& GridTreeCursor::move_right() {
     return move(true);
 }
 
-inline Void GridTreeCursor::updateTheCurrentGridCell( Kleenean left_or_right ){
+inline Void GridTreeCursor::updateTheCurrentGridCell( ValidatedKleenean left_or_right ){
     if( is_determinate(left_or_right) ){
         //Here left_or_right is either true or false, also true defines moving to the right branch
         _theCurrentGridCell._theWord.push_back( definitely( left_or_right ) );
@@ -1573,7 +1573,7 @@ inline GridTreeConstIterator& GridTreeConstIterator::operator=( const GridTreeCo
     return *this;
 }
 
-inline GridTreeConstIterator::GridTreeConstIterator( const GridTreeSubset * pSubPaving, const Kleenean firstLastNone ):
+inline GridTreeConstIterator::GridTreeConstIterator( const GridTreeSubset * pSubPaving, const ValidatedKleenean firstLastNone ):
     _pGridTreeCursor(pSubPaving) {
     if( is_determinate( firstLastNone ) ){
         //If the first/last enabled node is not found, it means that there are no elements

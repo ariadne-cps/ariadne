@@ -181,17 +181,17 @@ class TaylorModel<ValidatedTag,F>
     //! \brief Inequality operator.
     Bool operator!=(const TaylorModel<ValidatedTag,F>& sd) const {
         return !same(*this,sd); }
-    Kleenean operator<(const TaylorModel<ValidatedTag,F>& sd) const {
+    ValidatedKleenean operator<(const TaylorModel<ValidatedTag,F>& sd) const {
         return (sd-*this)>0; }
     //! \brief Comparison with another Taylor model.
-    Kleenean operator>(const TaylorModel<ValidatedTag,F>& sd) const {
+    ValidatedKleenean operator>(const TaylorModel<ValidatedTag,F>& sd) const {
         return (*this-sd)>0; }
 
     //! \brief Comparison with a scalar.
-    Kleenean operator<(Int c) const {
+    ValidatedKleenean operator<(Int c) const {
         return this->range()<c; }
     //! \brief Comparison with a scalar.
-    Kleenean operator>(Int c) const {
+    ValidatedKleenean operator>(Int c) const {
         return this->range()>c; }
     //@}
 

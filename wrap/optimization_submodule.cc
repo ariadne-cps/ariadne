@@ -99,7 +99,7 @@ Void export_interior_point_solver()
 
     class_<InteriorPointSolver> interior_point_solver_class("InteriorPointSolver",init<>());
     interior_point_solver_class.def("minimise", &InteriorPointSolver::minimise);
-    interior_point_solver_class.def("feasible", (Kleenean(InteriorPointSolver::*)(const Vector<Float64>&,const Vector<Float64>&, const Matrix<Float64>&,const Vector<Float64>&)const) &InteriorPointSolver::feasible);
+    interior_point_solver_class.def("feasible", (ValidatedKleenean(InteriorPointSolver::*)(const Vector<Float64>&,const Vector<Float64>&, const Matrix<Float64>&,const Vector<Float64>&)const) &InteriorPointSolver::feasible);
     interior_point_solver_class.def("validate_feasibility", &InteriorPointSolver::validate_feasibility);
 }
 
@@ -126,9 +126,9 @@ Void export_simplex_solver()
     simplex_solver_class.def("lpstep",(Bool(SimplexSolver<X>::*)(const Vector<X>&,const Vector<X>&,const Vector<X>&,const Matrix<X>&,const Vector<X>&,Array<Slackness>& ,SizeArray&,Matrix<X>&,Vector<X>&)const) &SimplexSolver<X>::lpstep);
 
 
-    simplex_solver_class.def("feasible",(Kleenean(SimplexSolver<X>::*)(const Vector<X>&,const Vector<X>&,const Matrix<X>&,const Vector<X>&)const) &SimplexSolver<X>::feasible);
+    simplex_solver_class.def("feasible",(ValidatedKleenean(SimplexSolver<X>::*)(const Vector<X>&,const Vector<X>&,const Matrix<X>&,const Vector<X>&)const) &SimplexSolver<X>::feasible);
 
-    simplex_solver_class.def("verify_feasibility",(Kleenean(SimplexSolver<X>::*)(const Vector<X>&,const Vector<X>&,const Matrix<X>&,const Vector<X>&,const Array<Slackness>&)const) &SimplexSolver<X>::verify_feasibility);
+    simplex_solver_class.def("verify_feasibility",(ValidatedKleenean(SimplexSolver<X>::*)(const Vector<X>&,const Vector<X>&,const Matrix<X>&,const Vector<X>&,const Array<Slackness>&)const) &SimplexSolver<X>::verify_feasibility);
 
     simplex_solver_class.def("compute_basis",(std::pair< SizeArray, Matrix<X> >(SimplexSolver<X>::*)(const Matrix<X>&)const) &SimplexSolver<X>::compute_basis);
 

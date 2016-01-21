@@ -369,21 +369,21 @@ DimensionType HybridEnclosure::dimension() const {
     return this->space_function().result_size();
 }
 
-Kleenean HybridEnclosure::is_empty() const {
+ValidatedKleenean HybridEnclosure::is_empty() const {
     return this->_set.is_empty();
 }
 
-Sierpinskian HybridEnclosure::inside(const HybridBoxType& hbx) const {
+ValidatedSierpinskian HybridEnclosure::inside(const HybridBoxType& hbx) const {
     if(this->_location==hbx.location()) { return this->continuous_set().inside(hbx.continuous_set()); }
     else { return this->continuous_set().is_empty(); }
 }
 
-Sierpinskian HybridEnclosure::separated(const HybridBoxType& hbx) const {
+ValidatedSierpinskian HybridEnclosure::separated(const HybridBoxType& hbx) const {
     if(this->_location==hbx.location()) { return this->continuous_set().separated(hbx.continuous_set()); }
     else { return true; }
 }
 
-Kleenean HybridEnclosure::satisfies(EffectiveConstraint c) const
+ValidatedKleenean HybridEnclosure::satisfies(EffectiveConstraint c) const
 {
     return this->continuous_set().satisfies(c);
 }

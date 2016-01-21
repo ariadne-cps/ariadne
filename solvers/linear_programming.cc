@@ -154,7 +154,7 @@ inline Vector<Float64Value> const& cast_exact(Vector<Float64> const& v) { return
 inline Matrix<Float64Value> const& cast_exact(Matrix<Float64> const& A) { return reinterpret_cast<Matrix<Float64Value>const&>(A); }
 
 
-Kleenean InteriorPointSolver::
+ValidatedKleenean InteriorPointSolver::
 validate_feasibility(const Vector<Float64>& xl, const Vector<Float64>& xu,
                      const Matrix<Float64>& A, const Vector<Float64>& b,
                      const Vector<Float64>& x, const Vector<Float64>& y) const
@@ -186,7 +186,7 @@ validate_feasibility(const Vector<Float64>& xl, const Vector<Float64>& xu,
     ivlx += ivld;
 
     ARIADNE_LOG(2,"[x] = "<<ivlx);
-    Kleenean result=true;
+    ValidatedKleenean result=true;
     for(Nat i=0; i!=n; ++i) {
         if(ivlx[i].lower().raw()<=xl[i] || ivlx[i].upper().raw()>=xu[i]) {
             result = indeterminate; break;
@@ -293,7 +293,7 @@ hotstarted_minimise(const Vector<Float64>& c,
 }
 
 
-Kleenean
+ValidatedKleenean
 InteriorPointSolver::
 feasible(const Vector<Float64>& xl, const Vector<Float64>& xu,
          const Matrix<Float64>& A, const Vector<Float64>& b) const
@@ -328,7 +328,7 @@ feasible(const Vector<Float64>& xl, const Vector<Float64>& xu,
     while(step++<24) {
         LinearProgramStatus result=this->_feasibility_step(xl,xu,A,b, x,y,zl,zu);
         if(result==PRIMAL_DUAL_FEASIBLE || result==PRIMAL_FEASIBLE) {
-            Kleenean validated_feasible=this->validate_feasibility(xl,xu,A,b, x,y);
+            ValidatedKleenean validated_feasible=this->validate_feasibility(xl,xu,A,b, x,y);
             if(definitely(validated_feasible)) { return true; }
         }
         Float64Bounds yb=dot(Vector<Float64Bounds>(y),Vector<Float64Bounds>(b));

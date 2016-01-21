@@ -161,12 +161,12 @@ class Zonotope
     Float64 radius() const;
 
     /*! \brief Test if the set contains a point. */
-    Kleenean contains(const ExactPoint& pt) const;
+    ValidatedKleenean contains(const ExactPoint& pt) const;
 
     /*! \brief Test if the set is disjoint from a box. */
-    Kleenean separated(const ExactBoxType& bx) const;
+    ValidatedKleenean separated(const ExactBoxType& bx) const;
     /*! \brief Test if the set is a inside of a box. */
-    Kleenean inside(const ExactBoxType& bx) const;
+    ValidatedKleenean inside(const ExactBoxType& bx) const;
 
     //@}
 
@@ -174,13 +174,13 @@ class Zonotope
     //@{
     //! \name Geometric binary predicates
     /*! \brief Tests disjointness of \a z and \a r. */
-    friend Kleenean separated(const Zonotope& z, const ExactBoxType& r);
+    friend ValidatedKleenean separated(const Zonotope& z, const ExactBoxType& r);
     /*! \brief Tests if \a z and \a r intersect. */
-    friend Kleenean overlaps(const Zonotope& z, const ExactBoxType& r);
+    friend ValidatedKleenean overlaps(const Zonotope& z, const ExactBoxType& r);
     /*! \brief Tests inclusion of \a z in \a r. */
-    friend Kleenean inside(const Zonotope& z, const ExactBoxType& r);
+    friend ValidatedKleenean inside(const Zonotope& z, const ExactBoxType& r);
     /*! \brief Tests disjointness of \a r and \a z. */
-    friend Kleenean separated(const ExactBoxType& r, const Zonotope& z);
+    friend ValidatedKleenean separated(const ExactBoxType& r, const Zonotope& z);
     //@}
 
     //@{
@@ -216,18 +216,18 @@ class Zonotope
 };
 
 
-Kleenean empty(const Zonotope& z);
-Kleenean is_bounded(const Zonotope& z);
+ValidatedKleenean empty(const Zonotope& z);
+ValidatedKleenean is_bounded(const Zonotope& z);
 Float64 radius(const Zonotope& z);
 ExactBoxType bounding_box(const Zonotope& z);
 
 
-Kleenean contains(const Zonotope& z, const ExactPoint& pt);
-Kleenean separated(const Zonotope& z, const ExactBoxType& r);
-Kleenean overlaps(const Zonotope& z, const ExactBoxType& r);
-Kleenean inside(const Zonotope& z, const ExactBoxType& r);
+ValidatedKleenean contains(const Zonotope& z, const ExactPoint& pt);
+ValidatedKleenean separated(const Zonotope& z, const ExactBoxType& r);
+ValidatedKleenean overlaps(const Zonotope& z, const ExactBoxType& r);
+ValidatedKleenean inside(const Zonotope& z, const ExactBoxType& r);
 
-Kleenean separated(const Zonotope& z1, const Zonotope& z2);
+ValidatedKleenean separated(const Zonotope& z1, const Zonotope& z2);
 
 ListSet<Zonotope> split(const Zonotope& z);
 

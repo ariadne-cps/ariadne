@@ -45,7 +45,7 @@ class String;
 class Boolean;
 
 class Real;
-class Kleenean;
+class ValidatedKleenean;
 
 enum class OperatorKind : char {
     VARIABLE,
@@ -130,7 +130,7 @@ class Operator {
 template<class X> struct Logic;
 template<> struct Logic<String> { typedef Boolean Type; };
 template<> struct Logic<Integer> { typedef Boolean Type; };
-template<> struct Logic<Real> { typedef Kleenean Type; };
+template<> struct Logic<Real> { typedef ValidatedKleenean Type; };
 
 template<class X> typename Logic<X>::Type compare(OperatorCode op, const X& x1, const X& x2);
 template<class X> X compute(OperatorCode op, const X& x);
@@ -341,7 +341,7 @@ struct Abs : OperatorObject<Abs> {
 
 struct Sgn : ComparisonObject<Sgn> {
     OperatorCode code() const { return OperatorCode::SGN; }
-    Kleenean operator()(const Real& a) const;
+    ValidatedKleenean operator()(const Real& a) const;
 };
 
 

@@ -105,19 +105,19 @@ class Polyhedron
     virtual DimensionType dimension() const;
 
     //! \brief Tests if the polyhedron is empty. (Not currently implemented.)
-    virtual Kleenean empty() const;
+    virtual ValidatedKleenean empty() const;
 
     //! \brief Tests if the polyhedron is singleton. (Not currently implemented.)
-    virtual Kleenean is_bounded() const;
+    virtual ValidatedKleenean is_bounded() const;
 
     //! \brief Tests if the polyhedron intersects a box. (Not currently implemented.)
-    virtual Kleenean overlaps(const ExactBoxType& bx) const;
+    virtual ValidatedKleenean overlaps(const ExactBoxType& bx) const;
 
     //! \brief Tests if the polyhedron is a superset of a box. (Not currently implemented.)
-    virtual Kleenean covers(const ExactBoxType& bx) const;
+    virtual ValidatedKleenean covers(const ExactBoxType& bx) const;
 
     //! \brief Tests if the polyhedron is disjoint from a box. (Not currently implemented.)
-    virtual Kleenean separated(const ExactBoxType& bx) const;
+    virtual ValidatedKleenean separated(const ExactBoxType& bx) const;
 
     //! \brief The \a i<sup>th</sup> defining halfspace.
     Polyhedron halfspace(SizeType i) const;

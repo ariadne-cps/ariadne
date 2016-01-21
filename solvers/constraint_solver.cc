@@ -72,7 +72,7 @@ OutputStream& operator<<(OutputStream& os, const EffectiveConstraint& c) {
 }
 
 
-Pair<Kleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType& domain, const List<ValidatedConstraint>& constraints) const
+Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType& domain, const List<ValidatedConstraint>& constraints) const
 {
     if(constraints.empty()) { return make_pair(!domain.is_empty(),domain.midpoint()); }
 
@@ -87,7 +87,7 @@ Pair<Kleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType& domain,
 }
 
 
-Pair<Kleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType& domain, const ValidatedVectorFunction& function, const ExactBoxType& codomain) const
+Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType& domain, const ValidatedVectorFunction& function, const ExactBoxType& codomain) const
 {
 
     static const Float64Value XSIGMA=0.125_exact;
@@ -185,7 +185,7 @@ Pair<Kleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType& domain,
         Pair<ExactBoxType,ExactBoxType> sd=d.split();
         Vector<Float64Approximation> nx = Float64Approximation(1.0_approx-XSIGMA)*x + Vector<Float64Approximation>(x.size(),XSIGMA/x.size());
         Vector<Float64Approximation> ny = midpoint(sd.first);
-        Kleenean result=this->feasible(sd.first, fn, c).first;
+        ValidatedKleenean result=this->feasible(sd.first, fn, c).first;
         nx = Float64Approximation(1.0-XSIGMA)*x + Vector<Float64Approximation>(x.size(),XSIGMA/x.size());
         ny = midpoint(sd.second);
         result = result || this->feasible(sd.second, fn, c).first;
@@ -479,7 +479,7 @@ Pair<UpperBoxType,UpperBoxType> ConstraintSolver::split(const UpperBoxType& d, c
 }
 
 
-Kleenean ConstraintSolver::check_feasibility(const ExactBoxType& d, const ValidatedVectorFunction& f, const ExactBoxType& c, const ExactPoint& y) const
+ValidatedKleenean ConstraintSolver::check_feasibility(const ExactBoxType& d, const ValidatedVectorFunction& f, const ExactBoxType& c, const ExactPoint& y) const
 {
     for(Nat i=0; i!=y.size(); ++i) {
         if(y[i]<d[i].lower() || y[i]>d[i].upper()) { return false; }
@@ -487,7 +487,7 @@ Kleenean ConstraintSolver::check_feasibility(const ExactBoxType& d, const Valida
 
     Vector<Float64Bounds> fy=f(Vector<Float64Bounds>(y));
     ARIADNE_LOG(4,"d="<<d<<" f="<<f<<", c="<<c<<"\n  y="<<y<<", f(y)="<<fy<<"\n");
-    Kleenean result=true;
+    ValidatedKleenean result=true;
     for(Nat j=0; j!=fy.size(); ++j) {
         if(fy[j].lower().raw()>c[j].upper().raw() || fy[j].upper().raw()<c[j].lower().raw()) { return false; }
         if(fy[j].upper().raw()>=c[j].upper().raw() || fy[j].lower().raw()<=c[j].lower().raw()) { result=indeterminate; }

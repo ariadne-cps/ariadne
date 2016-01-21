@@ -41,8 +41,8 @@ namespace Ariadne {
 struct ExactTag { };
 
 class Boolean;
-class Kleenean;
-class Sierpinskian;
+class ValidatedKleenean;
+class ValidatedSierpinskian;
 class Fuzzy;
 
 class Float64Approximation;
@@ -275,7 +275,7 @@ class Float64Bounds : public NumberObject<Float64Bounds> {
     friend Float64Bounds max(Float64Bounds,Float64Bounds);
     friend Float64Bounds min(Float64Bounds,Float64Bounds);
     friend Bool operator==(Float64Bounds,Int);
-    friend Kleenean operator> (Float64Bounds,Float64Bounds);
+    friend ValidatedKleenean operator> (Float64Bounds,Float64Bounds);
     friend OutputStream& operator<<(OutputStream& os, Float64Bounds const&);
 
     Float64LowerBound lower() const;
@@ -292,12 +292,12 @@ Float64Bounds sqr(Float64Bounds);
 
 Bool same(Float64Bounds x1, Float64Bounds x2);
 
-Kleenean operator==(Float64Bounds x1, Float64Bounds x2);
-Kleenean operator!=(Float64Bounds x1, Float64Bounds x2);
-Kleenean operator<=(Float64Bounds x1, Float64Bounds x2);
-Kleenean operator>=(Float64Bounds x1, Float64Bounds x2);
-Kleenean operator< (Float64Bounds x1, Float64Bounds x2);
-Kleenean operator> (Float64Bounds x1, Float64Bounds x2);
+ValidatedKleenean operator==(Float64Bounds x1, Float64Bounds x2);
+ValidatedKleenean operator!=(Float64Bounds x1, Float64Bounds x2);
+ValidatedKleenean operator<=(Float64Bounds x1, Float64Bounds x2);
+ValidatedKleenean operator>=(Float64Bounds x1, Float64Bounds x2);
+ValidatedKleenean operator< (Float64Bounds x1, Float64Bounds x2);
+ValidatedKleenean operator> (Float64Bounds x1, Float64Bounds x2);
 
 class Float64LowerBound : public NumberObject<Float64LowerBound> {
     volatile double l;

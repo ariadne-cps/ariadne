@@ -60,7 +60,7 @@ typedef uint Nat;
 
 // Define as a class for consistency with other value types
 class String;
-class Kleenean;
+class ValidatedKleenean;
 
 typedef SizeType DimensionType;
 

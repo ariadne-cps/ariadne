@@ -54,7 +54,7 @@ class HybridSpaceInterface
   public:
     virtual HybridSpaceInterface* clone() const = 0;
     virtual OutputStream& write(OutputStream& os) const = 0;
-    virtual Kleenean operator==(const HybridSpaceInterface& other) const = 0;
+    virtual ValidatedKleenean operator==(const HybridSpaceInterface& other) const = 0;
   public:
     friend OutputStream& operator<<(OutputStream& os, const HybridSpaceInterface& hsp) { return hsp.write(os); }
 };
@@ -87,7 +87,7 @@ class HybridSpace
     Bool has_location(const DiscreteLocation& q) const { return this->_ptr->has_location(q); }
     RealSpace operator[](const DiscreteLocation& q) const { return this->_ptr->operator[](q); }
 
-    Kleenean operator==(const HybridSpace& other) const { return this->_ptr->operator==(other); }
+    ValidatedKleenean operator==(const HybridSpace& other) const { return this->_ptr->operator==(other); }
 
     operator const HybridSpaceInterface& () const { return *_ptr; }
 
@@ -115,7 +115,7 @@ class MonolithicHybridSpace
 
     Bool has_location(const DiscreteLocation& q) const { return _locations.has_key(q); }
 
-    Kleenean operator==(const HybridSpaceInterface& other) const {
+    ValidatedKleenean operator==(const HybridSpaceInterface& other) const {
         for (ConstIterator iter=this->_locations.begin(); iter!=this->_locations.end(); ++iter) {
             if (!other.has_location(iter->first)) return false;
             if (other[iter->first] != iter->second) return false;

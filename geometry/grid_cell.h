@@ -373,7 +373,7 @@ class GridOpenCell: public GridAbstractCell {
 
     /*! \brief Allows to split the given cell into two sub-cells. When isRight == true
      * then we return the right sub-cell, if false then the left one, otherwise the middle one */
-    GridOpenCell split(Kleenean isRight) const;
+    GridOpenCell split(ValidatedKleenean isRight) const;
 
     /*! \brief The equality operator. */
     Bool operator==(const GridOpenCell& otherCell) const;

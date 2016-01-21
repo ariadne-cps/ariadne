@@ -291,7 +291,7 @@ Bool HybridSystem::check_guards(const DiscreteValuation& location) const
             if(iter->evnts.finite()) {
                 ARIADNE_ASSERT_MSG(subset(iter->pred.arguments(),variables),"");
             } else {
-                const Expression<Kleenean>& pred=iter->pred;
+                const Expression<ValidatedKleenean>& pred=iter->pred;
                 if(!(pred==false)) { ARIADNE_ASSERT_MSG(true,"Nontrivial guard applied to an infinite set of events"); }
             }
             unguarded_events.remove(iter->evnts);
@@ -372,8 +372,8 @@ HybridSystem::guard(const Event& event, const DiscreteValuation& location) const
     RealSpace space=this->state_variables(location);
 
     RealExpression expression(0.0);
-    const ExpressionInterface<Kleenean>* ptr=guard_predicate._ptr.operator->();
-    const BinaryExpression<Kleenean,Gtr,Real,Real>* bptr=dynamic_cast< const BinaryExpression<Kleenean,Gtr,Real,Real>*>(ptr);
+    const ExpressionInterface<ValidatedKleenean>* ptr=guard_predicate._ptr.operator->();
+    const BinaryExpression<ValidatedKleenean,Gtr,Real,Real>* bptr=dynamic_cast< const BinaryExpression<ValidatedKleenean,Gtr,Real,Real>*>(ptr);
     if(bptr) {
         expression = bptr->_arg1 - bptr->_arg2;
     }

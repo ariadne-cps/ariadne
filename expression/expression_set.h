@@ -68,7 +68,7 @@ struct RealVariableLowerInterval {
     RealVariableLowerInterval(const Real& l, const RealVariable& v) : _lower(l), _variable(v) { }
     Real lower() const { return _lower; }
     const RealVariable& variable() const { return _variable; }
-    operator Expression<Kleenean>() const { return ( Real(this->_lower) <= RealExpression(this->_variable) ); };
+    operator Expression<ValidatedKleenean>() const { return ( Real(this->_lower) <= RealExpression(this->_variable) ); };
 };
 
 struct RealVariableUpperInterval {
@@ -76,7 +76,7 @@ struct RealVariableUpperInterval {
     RealVariableUpperInterval(const RealVariable& v, const Real& u) : _variable(v), _upper(u)  { }
     const RealVariable& variable() const { return _variable; }
     Real upper() const { return _upper; }
-    operator Expression<Kleenean>() const { return ( RealExpression(this->_variable) <= Real(this->_upper) ); }
+    operator Expression<ValidatedKleenean>() const { return ( RealExpression(this->_variable) <= Real(this->_upper) ); }
 };
 
 

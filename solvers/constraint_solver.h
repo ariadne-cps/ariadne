@@ -64,9 +64,9 @@ template<class X> struct FeasibilityState {
 class ConstraintSolverInterface {
   public:
     //! \brief Test if the image of the box \a domain under the function \a function intersects \a codomain.
-    virtual Pair<Kleenean,ExactPoint> feasible(const ExactBoxType& domain, const ValidatedVectorFunction& function, const ExactBoxType& codomain) const = 0;
+    virtual Pair<ValidatedKleenean,ExactPoint> feasible(const ExactBoxType& domain, const ValidatedVectorFunction& function, const ExactBoxType& codomain) const = 0;
     //! \brief Test if \a point is in \a domain and the image of \a point under the function \a function lies in \a codomain.
-    virtual Kleenean check_feasibility(const ExactBoxType& domain, const ValidatedVectorFunction& function, const ExactBoxType& codomain, const ExactPoint& point) const = 0;
+    virtual ValidatedKleenean check_feasibility(const ExactBoxType& domain, const ValidatedVectorFunction& function, const ExactBoxType& codomain, const ExactPoint& point) const = 0;
     //! \brief Try to reduce the size of the domain by propagating interval constraints. Returns \c true if the reduced domain is empty.
     virtual Bool reduce(UpperBoxType& domain, const ValidatedVectorFunction& function, const ExactBoxType& codomain) const = 0;
 
@@ -81,15 +81,15 @@ class ConstraintSolver
 {
   public:
     //! \brief Test if the image of the box \a domain under the function \a function intersects \a codomain.
-    virtual Pair<Kleenean,ExactPoint> feasible(const ExactBoxType& domain, const ValidatedVectorFunction& function, const ExactBoxType& codomain) const;
+    virtual Pair<ValidatedKleenean,ExactPoint> feasible(const ExactBoxType& domain, const ValidatedVectorFunction& function, const ExactBoxType& codomain) const;
     //! \brief Test if \a point is in \a domain and the image of \a point under the function \a function lies in \a codomain.
-    virtual Kleenean check_feasibility(const ExactBoxType& domain, const ValidatedVectorFunction& function, const ExactBoxType& codomain, const ExactPoint& point) const;
+    virtual ValidatedKleenean check_feasibility(const ExactBoxType& domain, const ValidatedVectorFunction& function, const ExactBoxType& codomain, const ExactPoint& point) const;
     //! \brief Try to reduce the size of the domain by propagating interval constraints.
     virtual Bool reduce(UpperBoxType& domain, const ValidatedVectorFunction& function, const ExactBoxType& codomain) const;
 
 
     //! \brief Test if the constraints are solvable using a nonlinear feasibility test. Returns an approximate feasible point if the result is true. (Deprecated)
-    virtual Pair<Kleenean,ExactPoint> feasible(const ExactBoxType& domain, const List<ValidatedConstraint>& constraints) const;
+    virtual Pair<ValidatedKleenean,ExactPoint> feasible(const ExactBoxType& domain, const List<ValidatedConstraint>& constraints) const;
     //! \brief Try to reduce the size of the domain by propagating interval constraints. (Deprecated)
     virtual Bool reduce(UpperBoxType& domain, const List<ValidatedConstraint>& constraints) const;
 

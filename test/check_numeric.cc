@@ -289,9 +289,9 @@ ARIADNE_CLASS_NAME(Logical<ExactTag>);
 ARIADNE_CLASS_NAME(bool);
 ARIADNE_CLASS_NAME(uint);
 ARIADNE_CLASS_NAME(Fuzzy);
-ARIADNE_CLASS_NAME(NegatedSierpinskian);
-ARIADNE_CLASS_NAME(Sierpinskian);
-ARIADNE_CLASS_NAME(Kleenean);
+ARIADNE_CLASS_NAME(ValidatedNegatedSierpinskian);
+ARIADNE_CLASS_NAME(ValidatedSierpinskian);
+ARIADNE_CLASS_NAME(ValidatedKleenean);
 ARIADNE_CLASS_NAME(Boolean);
 
 ARIADNE_CLASS_NAME(Integer);

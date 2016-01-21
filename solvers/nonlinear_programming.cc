@@ -487,7 +487,7 @@ is_feasible_point(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C, Exa
 }
 
 
-Kleenean OptimiserBase::
+ValidatedKleenean OptimiserBase::
 contains_feasible_point(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C, ValidatedVector X) const
 {
     ARIADNE_LOG(4,"OptimiserBase::contains_feasible_point(D,g,C,X):\n");
@@ -498,7 +498,7 @@ contains_feasible_point(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType 
     if(definitely(not subset(Box<UpperIntervalType>(X),D))) { return indeterminate; }
 
     // Test inequality constraints
-    Kleenean result = true;
+    ValidatedKleenean result = true;
     Vector<Float64Bounds> gx=g(X);
     ARIADNE_LOG(7,"g(X)="<<gx<<"\n");
     for(Nat i=0; i!=C.size(); ++i) {
@@ -770,7 +770,7 @@ minimise(ValidatedScalarFunction f, ExactBoxType D, ValidatedVectorFunction g, V
 
 
 
-Kleenean OptimiserBase::
+ValidatedKleenean OptimiserBase::
 feasible(ExactBoxType D, ValidatedVectorFunction g, ValidatedVectorFunction h) const
 {
     ARIADNE_LOG(2,"OptimiserBase::feasible(D,g,h)\n");
@@ -843,7 +843,7 @@ minimise(ValidatedScalarFunction f, ExactBoxType D, ValidatedVectorFunction g, E
     throw IndeterminateFeasibilityException();
 }
 
-Kleenean NonlinearInfeasibleInteriorPointOptimiser::
+ValidatedKleenean NonlinearInfeasibleInteriorPointOptimiser::
 feasible(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C) const
 {
     ARIADNE_LOG(2,"NonlinearInfeasibleInteriorPointOptimiser::feasible(D,g,C)\n");
@@ -1360,7 +1360,7 @@ minimisation_step(const ApproximateScalarFunction& f, const ExactBoxType& d, con
 
 
 
-Kleenean NonlinearInteriorPointOptimiser::
+ValidatedKleenean NonlinearInteriorPointOptimiser::
 feasible(ExactBoxType d, ValidatedVectorFunction g, ExactBoxType c) const
 {
     ARIADNE_LOG(2,"NonlinearInteriorPointOptimiser::feasible(D,g,C,h)\n");
@@ -1710,7 +1710,7 @@ minimise(ValidatedScalarFunction f, ExactBoxType D, ValidatedVectorFunction g, E
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-Kleenean PenaltyFunctionOptimiser::
+ValidatedKleenean PenaltyFunctionOptimiser::
 feasible(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C) const
 {
     ARIADNE_LOG(2,"PenaltyFunctionOptimiser::feasible(D,g,C)\n");
@@ -2016,7 +2016,7 @@ Void NonlinearInteriorPointOptimiser::compute_z(const ExactBoxType& d, const App
 
 
 
-Kleenean ApproximateOptimiser::
+ValidatedKleenean ApproximateOptimiser::
 feasible(ExactBoxType D, ValidatedVectorFunction h) const
 {
     ARIADNE_LOG(2,"ApproximateOptimiser::feasible(D,h)\n");
@@ -2091,7 +2091,7 @@ feasibility_step(const ExactBoxType& D, const ApproximateVectorFunction& h,
 }
 
 
-Kleenean PenaltyFunctionOptimiser::
+ValidatedKleenean PenaltyFunctionOptimiser::
 check_feasibility(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
                      ExactFloatVector x, ExactFloatVector y) const
 {
@@ -2105,7 +2105,7 @@ check_feasibility(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
     FloatBoundsVector gx=g(x);
     ARIADNE_LOG(3,"x="<<x<<" y="<<y<<" g(x)="<<gx<<"\n");
 
-    Kleenean result = true;
+    ValidatedKleenean result = true;
 
     List<Nat> equalities;
     for(Nat j=0; j!=C.size(); ++j) {
@@ -2316,7 +2316,7 @@ feasibility_step(const ExactBoxType& D, const ApproximateVectorFunction& g, cons
 */
 
 // Solve equations y Dh(x) - 1/(x-xl) + 1/(xu-x) = 0; h(x) = 0
-Kleenean IntervalOptimiser::
+ValidatedKleenean IntervalOptimiser::
 feasible(ExactBoxType D, ValidatedVectorFunction h) const
 {
     ARIADNE_LOG(2,"IntervalOptimiser::feasible(D,h)\n");
@@ -2543,7 +2543,7 @@ minimise(ValidatedScalarFunction f, ExactBoxType d, ValidatedVectorFunction g, E
 }
 
 
-Kleenean KrawczykOptimiser::
+ValidatedKleenean KrawczykOptimiser::
 feasible(ExactBoxType d, ValidatedVectorFunction g, ExactBoxType c) const
 {
     ARIADNE_LOG(2,"KrawczykOptimiser::feasible(ExactBoxType d, ValidatedVectorFunction g, ExactBoxType c)\n");

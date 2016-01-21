@@ -40,22 +40,24 @@ enum class LogicalValue : char;
 template<class P=Void> class Logical;
 
 //typedef Logical<ExactTag> Boolean;
-//typedef Logical<ValidatedTag> Kleenean;
-//typedef Logical<UpperTag> Sierpinskian;
+//typedef Logical<ValidatedTag> ValidatedKleenean;
+//typedef Logical<UpperTag> ValidatedSierpinskian;
 //typedef Logical<ApproximateTag> Fuzzy;
 
 class Boolean;
-class Kleenean;
-class Sierpinskian;
-class NegatedSierpinskian;
+class ValidatedKleenean;
+class ValidatedSierpinskian;
+class ValidatedNegatedSierpinskian;
 class Fuzzy;
 
 template<class P> using LogicalType = Logical<P>;
 using ExactLogic = Logical<ExactTag>;
 using EffectiveLogic = Logical<EffectiveTag>;
+using EffectiveUpperLogic = Logical<EffectiveUpperTag>;
+using EffectiveLowerLogic = Logical<EffectiveLowerTag>;
 using ValidatedLogic = Logical<ValidatedTag>;
-using UpperLogic = Logical<UpperTag>;
-using LowerLogic = Logical<LowerTag>;
+using ValidatedUpperLogic = Logical<ValidatedUpperTag>;
+using ValidatedLowerLogic = Logical<ValidatedLowerTag>;
 using ApproximateLogic = Logical<ApproximateTag>;
 
 using Decidable = Logical<ExactTag>;

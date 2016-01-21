@@ -35,13 +35,13 @@ template<> Boolean compare(OperatorCode cmp, const Integer& z1, const Integer& z
 
 template<class X> X compute(OperatorCode op, const X& x1, const X& x2);
 template<> Boolean compute(OperatorCode op, const Boolean& b1, const Boolean& b2);
-template<> ValidatedKleenean compute(OperatorCode op, const ValidatedKleenean& b1, const ValidatedKleenean& b2);
+template<> Kleenean compute(OperatorCode op, const Kleenean& b1, const Kleenean& b2);
 template<> String compute(OperatorCode op, const String& s1, const String& s2);
 template<> Integer compute(OperatorCode op, const Integer& x1, const Integer& x2);
 
 template<class X> X compute(OperatorCode op, const X& x);
 template<> Boolean compute(OperatorCode op, const Boolean& b);
-template<> ValidatedKleenean compute(OperatorCode op, const ValidatedKleenean& b);
+template<> Kleenean compute(OperatorCode op, const Kleenean& b);
 template<> String compute(OperatorCode op, const String& s);
 template<> Integer compute(OperatorCode op, const Integer& z);
 

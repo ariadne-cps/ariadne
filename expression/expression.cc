@@ -133,7 +133,7 @@ template<class T, class A=T> struct UnaryExpressionNode : public ExpressionNode<
     Expression<A> arg;
     UnaryExpressionNode(const Operator& op, Expression<A> const& a) : ExpressionNode<T>(op), arg(a) { }
 };
-template<class T, class A1=T, class A2=A1> struct BinaryExpressionNode {
+template<class T, class A1=T, class A2=A1> struct BinaryExpressionNode : public ExpressionNode<T> {
     Expression<T> arg1; Expression<T> arg2;
 };
 template<class T> struct BinaryExpressionNode<T> : public ExpressionNode<T> {
@@ -160,7 +160,7 @@ template<class T> inline OutputStream& operator<<(OutputStream& os, const Expres
 }
 
 
-template<class T> Expression<T>::Expression() : _root(new ConstantExpressionNode<T>(0)) { };
+template<class T> Expression<T>::Expression() : _root(new ConstantExpressionNode<T>(T())) { };
 template<class T> Expression<T>::Expression(const T& c): _root(new ConstantExpressionNode<T>(c)) { };
 template<class T> Expression<T>::Expression(const Constant<T>& c): _root(new ConstantExpressionNode<T>(c.value())) { };
 template<class T> Expression<T>::Expression(const Variable<T>& v) : _root(new VariableExpressionNode<T>(v.name())) { }
@@ -211,7 +211,7 @@ template<class T> Set<UntypedVariable> Expression<T>::arguments() const {
 
 template<class T> inline OutputStream& _write_comparison(OutputStream& os, const Expression<T>& f) {
     ARIADNE_FAIL_MSG("Comparison must return a logical type."); }
-template<> inline OutputStream& _write_comparison(OutputStream& os, const Expression<ValidatedKleenean>& f) {
+template<> inline OutputStream& _write_comparison(OutputStream& os, const Expression<Kleenean>& f) {
     Real* real_ptr=0; return os << "(" << f.cmp1(real_ptr) << symbol(f.op()) << f.cmp2(real_ptr) << ")"; }
 template<> inline OutputStream& _write_comparison(OutputStream& os, const Expression<Boolean>& f) {
     String* string_ptr=0; return os << "(" << f.cmp1(string_ptr) << symbol(f.op()) << f.cmp2(string_ptr) << ")"; }
@@ -256,7 +256,7 @@ template<class T> OutputStream& Expression<T>::_write(OutputStream& os) const {
 }
 
 template class Expression<Boolean>;
-template class Expression<ValidatedKleenean>;
+template class Expression<Kleenean>;
 template class Expression<String>;
 template class Expression<Integer>;
 template class Expression<Real>;
@@ -297,12 +297,12 @@ Expression<Boolean> operator!(Expression<Boolean> e) {
     return make_expression<Boolean>(NotOp(),e); }
 
 
-Expression<ValidatedKleenean> operator&&(Expression<ValidatedKleenean> e1, Expression<ValidatedKleenean> e2) {
-    return make_expression<ValidatedKleenean>(AndOp(),e1,e2); }
-Expression<ValidatedKleenean> operator||(Expression<ValidatedKleenean> e1, Expression<ValidatedKleenean> e2) {
-    return make_expression<ValidatedKleenean>(OrOp(),e1,e2); }
-Expression<ValidatedKleenean> operator!(Expression<ValidatedKleenean> e) {
-    return make_expression<ValidatedKleenean>(NotOp(),e); }
+Expression<Kleenean> operator&&(Expression<Kleenean> e1, Expression<Kleenean> e2) {
+    return make_expression<Kleenean>(AndOp(),e1,e2); }
+Expression<Kleenean> operator||(Expression<Kleenean> e1, Expression<Kleenean> e2) {
+    return make_expression<Kleenean>(OrOp(),e1,e2); }
+Expression<Kleenean> operator!(Expression<Kleenean> e) {
+    return make_expression<Kleenean>(NotOp(),e); }
 
 
 Expression<Boolean> operator==(Variable<String> v1, const String& s2) {
@@ -339,21 +339,21 @@ Expression<Integer> operator*(Expression<Integer> e1, Expression<Integer> e2) {
 
 
 
-Expression<ValidatedKleenean> sgn(Expression<Real> e) {
-    return make_expression<ValidatedKleenean>(Sgn(),e); }
+Expression<Kleenean> sgn(Expression<Real> e) {
+    return make_expression<Kleenean>(Sgn(),e); }
 
-Expression<ValidatedKleenean> operator==(Expression<Real> e1, Expression<Real> e2) {
-    return make_expression<ValidatedKleenean>(Equal(),e1,e2); }
-Expression<ValidatedKleenean> operator!=(Expression<Real> e1, Expression<Real> e2) {
-    return make_expression<ValidatedKleenean>(Unequal(),e1,e2); }
-Expression<ValidatedKleenean> operator>=(Expression<Real> e1, Expression<Real> e2) {
-    return make_expression<ValidatedKleenean>(Geq(),e1,e2); }
-Expression<ValidatedKleenean> operator<=(Expression<Real> e1, Expression<Real> e2) {
-    return make_expression<ValidatedKleenean>(Leq(),e1,e2); }
-Expression<ValidatedKleenean> operator>(Expression<Real> e1, Expression<Real> e2) {
-    return make_expression<ValidatedKleenean>(Gtr(),e1,e2); }
-Expression<ValidatedKleenean> operator<(Expression<Real> e1, Expression<Real> e2) {
-    return make_expression<ValidatedKleenean>(Less(),e1,e2); }
+Expression<Kleenean> operator==(Expression<Real> e1, Expression<Real> e2) {
+    return make_expression<Kleenean>(Equal(),e1,e2); }
+Expression<Kleenean> operator!=(Expression<Real> e1, Expression<Real> e2) {
+    return make_expression<Kleenean>(Unequal(),e1,e2); }
+Expression<Kleenean> operator>=(Expression<Real> e1, Expression<Real> e2) {
+    return make_expression<Kleenean>(Geq(),e1,e2); }
+Expression<Kleenean> operator<=(Expression<Real> e1, Expression<Real> e2) {
+    return make_expression<Kleenean>(Leq(),e1,e2); }
+Expression<Kleenean> operator>(Expression<Real> e1, Expression<Real> e2) {
+    return make_expression<Kleenean>(Gtr(),e1,e2); }
+Expression<Kleenean> operator<(Expression<Real> e1, Expression<Real> e2) {
+    return make_expression<Kleenean>(Less(),e1,e2); }
 
 
 Expression<Real> operator+(Expression<Real> e) {
@@ -410,14 +410,14 @@ Expression<Real> operator-(Real c, Expression<Real> e) { return Expression<Real>
 Expression<Real> operator*(Real c, Expression<Real> e) { return Expression<Real>::constant(c) * e; }
 Expression<Real> operator/(Real c, Expression<Real> e) { return Expression<Real>::constant(c) / e; }
 
-Expression<ValidatedKleenean> operator<=(Expression<Real> e, Real c) { return e <= Expression<Real>::constant(c); }
-Expression<ValidatedKleenean> operator< (Expression<Real> e, Real c) { return e <  Expression<Real>::constant(c); }
-Expression<ValidatedKleenean> operator>=(Expression<Real> e, Real c) { return e >= Expression<Real>::constant(c); }
-Expression<ValidatedKleenean> operator> (Expression<Real> e, Real c) { return e >  Expression<Real>::constant(c); }
-Expression<ValidatedKleenean> operator<=(Real c, Expression<Real> e) { return Expression<Real>::constant(c) <= e; }
-Expression<ValidatedKleenean> operator< (Real c, Expression<Real> e) { return Expression<Real>::constant(c) <  e; }
-Expression<ValidatedKleenean> operator>=(Real c, Expression<Real> e) { return Expression<Real>::constant(c) >= e; }
-Expression<ValidatedKleenean> operator> (Real c, Expression<Real> e) { return Expression<Real>::constant(c) >  e; }
+Expression<Kleenean> operator<=(Expression<Real> e, Real c) { return e <= Expression<Real>::constant(c); }
+Expression<Kleenean> operator< (Expression<Real> e, Real c) { return e <  Expression<Real>::constant(c); }
+Expression<Kleenean> operator>=(Expression<Real> e, Real c) { return e >= Expression<Real>::constant(c); }
+Expression<Kleenean> operator> (Expression<Real> e, Real c) { return e >  Expression<Real>::constant(c); }
+Expression<Kleenean> operator<=(Real c, Expression<Real> e) { return Expression<Real>::constant(c) <= e; }
+Expression<Kleenean> operator< (Real c, Expression<Real> e) { return Expression<Real>::constant(c) <  e; }
+Expression<Kleenean> operator>=(Real c, Expression<Real> e) { return Expression<Real>::constant(c) >= e; }
+Expression<Kleenean> operator> (Real c, Expression<Real> e) { return Expression<Real>::constant(c) >  e; }
 
 
 
@@ -470,7 +470,7 @@ Boolean evaluate(const Expression<Boolean>& e, const StringValuation& x) {
     return evaluate(e,x.values());
 }
 
-ValidatedKleenean evaluate(const Expression<ValidatedKleenean>& e, const ContinuousValuation<Real>& x) {
+Kleenean evaluate(const Expression<Kleenean>& e, const ContinuousValuation<Real>& x) {
     return evaluate(e,x.values());
 }
 
@@ -498,7 +498,7 @@ template<class T> Set<Identifier> arguments(const Expression<T>& e)
 }
 
 template Set<Identifier> arguments(const Expression<Boolean>& e);
-template Set<Identifier> arguments(const Expression<ValidatedKleenean>& e);
+template Set<Identifier> arguments(const Expression<Kleenean>& e);
 template Set<Identifier> arguments(const Expression<Real>& e);
 
 
@@ -544,12 +544,12 @@ template<class X, class Y> Expression<X> substitute(const Expression<X>& e, cons
     }
     return r;
 }
-template Expression<ValidatedKleenean> substitute(const Expression<ValidatedKleenean>& e, const Variable<ValidatedKleenean>& v, const ValidatedKleenean& c);
-template Expression<ValidatedKleenean> substitute(const Expression<ValidatedKleenean>& e, const Variable<Real>& v, const Real& c);
+template Expression<Kleenean> substitute(const Expression<Kleenean>& e, const Variable<Kleenean>& v, const Kleenean& c);
+template Expression<Kleenean> substitute(const Expression<Kleenean>& e, const Variable<Real>& v, const Real& c);
 template Expression<Real> substitute(const Expression<Real>& e, const Variable<Real>& v, const Real& c);
 template Expression<Real> substitute(const Expression<Real>& e, const Variable<Real>& v, const Expression<Real>& c);
 template Expression<Real> substitute(const Expression<Real>& e, const List< Assignment< Variable<Real>, Expression<Real> > >& c);
-template Expression<ValidatedKleenean> substitute(const Expression<ValidatedKleenean>& e, const List< Assignment< Variable<Real>, Expression<Real> > >& c);
+template Expression<Kleenean> substitute(const Expression<Kleenean>& e, const List< Assignment< Variable<Real>, Expression<Real> > >& c);
 
 
 namespace {
@@ -603,8 +603,8 @@ inline Expression<Real> _simplify(const Expression<Real>& e) {
 
 }
 
-template<class I> inline Expression<ValidatedKleenean> _simplify(const Expression<ValidatedKleenean>& e) {
-    typedef ValidatedKleenean T;
+template<class I> inline Expression<Kleenean> _simplify(const Expression<Kleenean>& e) {
+    typedef Kleenean T;
 
     if( e.kind()==OperatorKind::UNARY ) {
         Expression<T> sarg=simplify(e.arg());
@@ -627,15 +627,15 @@ template<class I> inline Expression<ValidatedKleenean> _simplify(const Expressio
             if(e.op()==OperatorCode::OR) { return Expression<T>(sarg1.val() || sarg2.val()); }
             return Expression<T>(compute(e.op(),sarg1.val(),sarg2.val()));
         } else if(sarg1.op()==OperatorCode::CNST) {
-            if(e.op()==OperatorCode::AND && sarg1.val()==true) { return sarg2; }
-            if(e.op()==OperatorCode::AND && sarg1.val()==false) { return sarg1; }
-            if(e.op()==OperatorCode::OR && sarg1.val()==true) { return sarg1; }
-            if(e.op()==OperatorCode::OR && sarg1.val()==false) { return sarg2; }
+            if(e.op()==OperatorCode::AND && definitely(sarg1.val())) { return sarg2; }
+            if(e.op()==OperatorCode::AND && definitely(not sarg1.val())) { return sarg1; }
+            if(e.op()==OperatorCode::OR && definitely(sarg1.val())) { return sarg1; }
+            if(e.op()==OperatorCode::OR && definitely(not sarg1.val())) { return sarg2; }
         } else if(sarg2.op()==OperatorCode::CNST) {
-            if(e.op()==OperatorCode::AND && sarg2.val()==true) { return sarg1; }
-            if(e.op()==OperatorCode::AND && sarg2.val()==false) { return sarg2; }
-            if(e.op()==OperatorCode::OR && sarg2.val()==true) { return sarg2; }
-            if(e.op()==OperatorCode::OR && sarg2.val()==false) { return sarg1; }
+            if(e.op()==OperatorCode::AND && definitely(sarg2.val())) { return sarg1; }
+            if(e.op()==OperatorCode::AND && definitely(not sarg2.val())) { return sarg2; }
+            if(e.op()==OperatorCode::OR && definitely(sarg2.val())) { return sarg2; }
+            if(e.op()==OperatorCode::OR && definitely(not sarg2.val())) { return sarg1; }
         } else {
             return make_expression<T>(e.op(),sarg1,sarg2);
         }
@@ -651,15 +651,15 @@ template<class X> Expression<X> simplify(const Expression<X>& e) {
 }
 
 template Expression<Real> simplify(const Expression<Real>& e);
-template Expression<ValidatedKleenean> simplify(const Expression<ValidatedKleenean>& e);
+template Expression<Kleenean> simplify(const Expression<Kleenean>& e);
 
 
 
-Expression<Real> indicator(Expression<ValidatedKleenean> e, Sign sign) {
-    ValidatedKleenean value;
+Expression<Real> indicator(Expression<Kleenean> e, Sign sign) {
+    Kleenean value(indeterminate);
     switch(e.op()) {
         case OperatorCode::CNST:
-            value=( sign==POSITIVE ? e.val() : ValidatedKleenean(!e.val()) );
+            value=( sign==POSITIVE ? e.val() : Kleenean(!e.val()) );
             if(definitely(value)) { return Expression<Real>::constant(+1); }
             else if(not possibly(value)) {  return Expression<Real>::constant(-1); }
             else { return Expression<Real>::constant(0); }
@@ -691,7 +691,7 @@ template<class T> Bool is_constant(const Expression<T>& e, const typename Expres
 }
 
 template Bool is_constant(const Expression<Real>&, const Real&);
-template Bool is_constant(const Expression<ValidatedKleenean>&, const ValidatedKleenean&);
+template Bool is_constant(const Expression<Kleenean>&, const Kleenean&);
 
 
 template<class T> Bool is_variable(const Expression<T>& e, const Variable<T>& v) {
@@ -727,7 +727,7 @@ template Bool identical(const Expression<Real>&, const Expression<Real>&);
 
 
 
-Bool opposite(Expression<ValidatedKleenean> e1, Expression<ValidatedKleenean> e2) {
+Bool opposite(Expression<Kleenean> e1, Expression<Kleenean> e2) {
 
     OperatorCode e1op;
     OperatorCode e2op;

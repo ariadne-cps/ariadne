@@ -31,7 +31,7 @@
 
 namespace Ariadne {
 
-ValidatedKleenean Sgn::operator()(const Real& a) const {
+Kleenean Sgn::operator()(const Real& a) const {
     if(definitely(a>0)) { return true; }
     else if(definitely(a<0)) { return false; }
     else { return indeterminate; }
@@ -187,7 +187,7 @@ template<> Boolean compute(OperatorCode op, const Boolean& b1, const Boolean& b2
     }
 }
 
-template<> ValidatedKleenean compute(OperatorCode op, const ValidatedKleenean& b1, const ValidatedKleenean& b2) {
+template<> Kleenean compute(OperatorCode op, const Kleenean& b1, const Kleenean& b2) {
     switch(op) {
         case OperatorCode::AND: return b1 && b2;
         case OperatorCode::OR: return b1 || b2;
@@ -220,7 +220,7 @@ template<> Boolean compute(OperatorCode op, const Boolean& b) {
     }
 }
 
-template<> ValidatedKleenean compute(OperatorCode op, const ValidatedKleenean& b) {
+template<> Kleenean compute(OperatorCode op, const Kleenean& b) {
     switch(op) {
         case OperatorCode::NOT: return !b;
         default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on a boolean arguments.");

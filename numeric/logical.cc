@@ -37,6 +37,7 @@ namespace{
 inline LogicalValue operator!(LogicalValue lv) { return negation(lv); }
 inline LogicalValue operator&&(LogicalValue lv1, LogicalValue lv2) { return conjunction(lv1,lv2); }
 inline LogicalValue operator||(LogicalValue lv1, LogicalValue lv2) { return disjunction(lv1,lv2); }
+inline LogicalValue operator^(LogicalValue lv1, LogicalValue lv2) { return exclusive(lv1,lv2); }
 } // namespace
 
 Logical<ExactTag> operator||(Bool b1, Logical<ExactTag> l2) { return Logical<ExactTag>(b1) || l2; }
@@ -72,6 +73,16 @@ template<class OP, class ARG1, class ARG2> struct LogicalExpression<OP,ARG1,ARG2
         return os << static_cast<ExpressionTemplate<OP,ARG1,ARG2>const&>(*this); }
 };
 
+//FIXME: Should not need special treatment
+template<class ARG1, class ARG2> struct LogicalExpression<Equal,ARG1,ARG2>
+    : virtual LogicalInterface, ExpressionTemplate<Equal,ARG1,ARG2>
+{
+    using ExpressionTemplate<Equal,ARG1,ARG2>::ExpressionTemplate;
+    virtual LogicalValue _check(Effort e) const { return equality(check(this->_arg1,e),check(this->_arg2,e)); }
+    virtual OutputStream& _write(OutputStream& os) const {
+        return os << static_cast<ExpressionTemplate<Equal,ARG1,ARG2>const&>(*this); }
+};
+
 LogicalHandle::LogicalHandle(LogicalValue l)
     : _ptr(std::make_shared<LogicalConstant>(l)) {
 }
@@ -88,7 +99,15 @@ LogicalHandle negation(LogicalHandle l) {
     return LogicalHandle(std::make_shared<LogicalExpression<NotOp,LogicalHandle>>(NotOp(),l));
 };
 
-LogicalValue equal(LogicalValue l1, LogicalValue l2) {
+LogicalHandle equality(LogicalHandle l1, LogicalHandle l2) {
+    return LogicalHandle(std::make_shared<LogicalExpression<Equal,LogicalHandle,LogicalHandle>>(Equal(),l1,l2));
+};
+
+LogicalHandle exclusive(LogicalHandle l1, LogicalHandle l2) {
+    return LogicalHandle(std::make_shared<LogicalExpression<XOrOp,LogicalHandle,LogicalHandle>>(XOrOp(),l1,l2));
+};
+
+LogicalValue equality(LogicalValue l1, LogicalValue l2) {
     switch (l1) {
         case LogicalValue::TRUE:
             return l2;
@@ -116,6 +135,8 @@ OutputStream& operator<<(OutputStream& os, LogicalValue l) {
     }
     return os;
 }
+
+const Logical<EffectiveTag> indeterminate = Logical<EffectiveTag>(LogicalValue::INDETERMINATE);
 
 template<> String class_name<ExactTag>() { return "ExactTag"; }
 template<> String class_name<EffectiveTag>() { return "EffectiveTag"; }

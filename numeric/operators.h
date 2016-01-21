@@ -127,7 +127,7 @@ class Operator {
 template<class X> struct Logic;
 template<> struct Logic<String> { typedef Boolean Type; };
 template<> struct Logic<Integer> { typedef Boolean Type; };
-template<> struct Logic<Real> { typedef ValidatedKleenean Type; };
+template<> struct Logic<Real> { typedef Kleenean Type; };
 
 template<class X> typename Logic<X>::Type compare(OperatorCode op, const X& x1, const X& x2);
 template<class X> X compute(OperatorCode op, const X& x);
@@ -175,6 +175,10 @@ struct Unequal : ComparisonObject<Unequal> {
     OperatorCode code() const { return OperatorCode::NEQ; } OperatorKind kind() const { return OperatorKind::COMPARISON; }
 };
 
+struct XOrOp : OperatorObject<XOrOp> {
+    template<class A1, class A2> auto operator()(A1&& a1, A2&& a2) const -> decltype(a1 xor a2) { return a1 xor a2; }
+    OperatorCode code() const { return OperatorCode::XOR; } OperatorKind kind() const { return OperatorKind::BINARY; }
+};
 struct AndOp : OperatorObject<AndOp> {
     template<class A1, class A2> auto operator()(A1&& a1, A2&& a2) const -> decltype(a1 and a2) { return a1 and a2; }
     OperatorCode code() const { return OperatorCode::AND; } OperatorKind kind() const { return OperatorKind::BINARY; }
@@ -338,7 +342,7 @@ struct Abs : OperatorObject<Abs> {
 
 struct Sgn : ComparisonObject<Sgn> {
     OperatorCode code() const { return OperatorCode::SGN; }
-    ValidatedKleenean operator()(const Real& a) const;
+    Kleenean operator()(const Real& a) const;
 };
 
 

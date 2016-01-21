@@ -73,7 +73,7 @@ typedef Expression<Real> RealExpression;
 typedef List<RealExpression> RealExpressions;
 
 typedef Expression<Boolean> DiscretePredicate;
-typedef Expression<ValidatedKleenean> ContinuousPredicate;
+typedef Expression<Kleenean> ContinuousPredicate;
 
 class Identifier;
 typedef Set<UntypedVariable> VariableSet;

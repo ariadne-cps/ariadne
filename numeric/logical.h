@@ -62,10 +62,11 @@ inline Bool possibly(const LogicalValue& l) { return l!=LogicalValue::FALSE; }
 inline Bool probably(const LogicalValue& l) { return l==LogicalValue::TRUE || l==LogicalValue::LIKELY; };
 inline Bool decide(const LogicalValue& l) { return l==LogicalValue::TRUE || l==LogicalValue::LIKELY; };
 
-LogicalValue equal(LogicalValue l1, LogicalValue l2);
+LogicalValue equality(LogicalValue l1, LogicalValue l2);
+inline LogicalValue negation(LogicalValue l) { return static_cast<LogicalValue>(-static_cast<char>(l)); }
 inline LogicalValue conjunction(LogicalValue l1, LogicalValue l2) { return (l1<l2 ? l1 : l2); }
 inline LogicalValue disjunction(LogicalValue l1, LogicalValue l2) { return (l1>l2 ? l1 : l2); }
-inline LogicalValue negation(LogicalValue l) { return static_cast<LogicalValue>(-static_cast<char>(l)); }
+inline LogicalValue exclusive(LogicalValue l1, LogicalValue l2) { return negation(equality(l1,l2)); }
 inline LogicalValue check(LogicalValue l) { return l; }
 
 OutputStream& operator<<(OutputStream& os, LogicalValue b);
@@ -88,8 +89,10 @@ class LogicalHandle {
   public:
     explicit LogicalHandle(SharedPointer<const LogicalInterface> p) : _ptr(p) { }
     explicit LogicalHandle(LogicalValue v);
+    friend LogicalHandle equality(LogicalHandle l1, LogicalHandle l2);
     friend LogicalHandle conjunction(LogicalHandle l1, LogicalHandle l2);
     friend LogicalHandle disjunction(LogicalHandle l1, LogicalHandle l2);
+    friend LogicalHandle exclusive(LogicalHandle l1, LogicalHandle l2);
     friend LogicalHandle negation(LogicalHandle l);
     friend LogicalValue check(LogicalHandle const& l, Effort e) { return l._ptr->_check(e); }
     friend OutputStream& operator<<(OutputStream& os, LogicalHandle const& l) { return l._ptr->_write(os); }
@@ -115,7 +118,7 @@ template<> class Logical<EffectiveTag>;
 
 //!  \ingroup LogicalTypes
 //!  \brief A logical variable for the paradigm \a P, which must be %ExactTag, %ValidatedTag, %UpperTag, %LowerTag or %ApproximateTag.
-//!  Used as a base of named logical types Boolean, ValidatedKleenean, ValidatedSierpinskian and Fuzzy. Implemented in terms of LogicalValue.
+//!  Used as a base of exact, validated and approximate logical types. Implemented in terms of LogicalValue.
 template<class P> class Logical
     : public LogicalFacade<P>
 {
@@ -134,14 +137,14 @@ template<class P> class Logical
     // TODO: This should be explicit (except for Boolean)
 
     //! \brief Equality of two logical values.
-    friend inline Logical<P> operator==(Logical<P> l1, Logical<P> l2) { return Logical<P>(equal(l1._v,l2._v)); }
-    friend inline Logical<P> operator!=(Logical<P> l1, Logical<P> l2) { return Logical<P>(negation(equal(l1._v,l2._v))); }
+    friend inline Logical<P> operator==(Logical<P> l1, Logical<P> l2) { return Logical<P>(equality(l1._v,l2._v)); }
+    friend inline Logical<P> operator!=(Logical<P> l1, Logical<P> l2) { return Logical<P>(negation(equality(l1._v,l2._v))); }
     //! \brief %Logical conjunction [and].
     friend inline Logical<P> operator&&(Logical<P> l1, Logical<P> l2) { return Logical<P>(conjunction(l1._v,l2._v)); }
     //! \brief %Logical disjunction [or].
     friend inline Logical<P> operator||(Logical<P> l1, Logical<P> l2) { return Logical<P>(disjunction(l1._v,l2._v)); }
     //! \brief %Logical exclusive or.
-    friend inline Logical<P> operator^(Logical<P> l1, Logical<P> l2) { return Logical<P>(negation(equal(l1._v,l2._v))); }
+    friend inline Logical<P> operator^(Logical<P> l1, Logical<P> l2) { return Logical<P>(negation(equality(l1._v,l2._v))); }
     //! \brief %Logical negation.
     friend inline Logical<Negated<P>> operator!(Logical<P> l) { return Logical<Negated<P>>(negation(l._v)); }
     //! \brief Returns \c true only if \a l represents the result of a logical predicate which is definitely true.
@@ -184,17 +187,23 @@ template<> class Logical<EffectiveTag>
     LogicalHandle _v;
     template<class P> friend class Logical;
   public:
+    explicit Logical<EffectiveTag>() : _v(LogicalValue::INDETERMINATE) { }
     explicit Logical<EffectiveTag>(SharedPointer<const LogicalInterface> p) : _v(p) { }
+    explicit Logical<EffectiveTag>(LogicalValue v) : _v(LogicalHandle(v)) { }
     explicit Logical<EffectiveTag>(LogicalHandle h) : _v(h) { }
     explicit operator LogicalHandle () const { return _v; }
     template<class B, EnableIf<IsSame<B,Bool>> =dummy> Logical(B b) : Logical(Logical<ExactTag>(b)) { }
     Logical<EffectiveTag>(Logical<ExactTag> l) : _v(static_cast<LogicalValue>(l)) { };
     Logical<ValidatedTag> check(Effort e) const { return Logical<ValidatedTag>(Ariadne::check(_v,e)); }
     friend Logical<ValidatedTag> check(Logical<EffectiveTag> l, Effort e) { return Logical<ValidatedTag>(Ariadne::check(l._v,e)); }
+    friend Logical<EffectiveTag> operator==(Logical<EffectiveTag> l1, Logical<EffectiveTag> l2) {
+        return Logical<EffectiveTag>(equality(l1._v,l2._v)); }
     friend Logical<EffectiveTag> operator&&(Logical<EffectiveTag> l1, Logical<EffectiveTag> l2) {
         return Logical<EffectiveTag>(conjunction(l1._v,l2._v)); }
     friend Logical<EffectiveTag> operator||(Logical<EffectiveTag> l1, Logical<EffectiveTag> l2) {
         return Logical<EffectiveTag>(disjunction(l1._v,l2._v)); }
+    friend Logical<EffectiveTag> operator^(Logical<EffectiveTag> l1, Logical<EffectiveTag> l2) {
+        return Logical<EffectiveTag>(exclusive(l1._v,l2._v)); }
     friend Logical<EffectiveTag> operator!(Logical<EffectiveTag> l) {
         return Logical<EffectiveTag>(negation(l._v)); }
     friend Bool decide(Logical<EffectiveTag> l, Effort e=Effort::get_default()) { return decide(l.check(e)); }
@@ -258,7 +267,7 @@ inline Logical<EffectiveUpperTag> operator||(Logical<EffectiveUpperTag> l1, Logi
 
 //! \ingroup LogicalTypes
 //! \brief The logical constant representing an unknown value.
-static const Logical<ValidatedTag> indeterminate = Logical<ValidatedTag>(LogicalValue::INDETERMINATE);
+extern const Logical<EffectiveTag> indeterminate;
 
 //! \ingroup LogicalTypes
 //! \brief The logical constant representing an value which is deemed likely to be true, but for which truth has not been confirmed.

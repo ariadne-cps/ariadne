@@ -135,7 +135,7 @@ class UntypedVariable {
     static StringType name(const VariableType& tp) {
         switch(tp) {
             case type_bool: return "Bool";
-            case type_tribool: return "ValidatedKleenean";
+            case type_tribool: return "Kleenean";
             case type_enumerated: return "Enumerated";
             case type_string: return "String";
             case type_integer: return "Integer";
@@ -154,7 +154,7 @@ class UntypedVariable {
 
 template<class T> inline VariableType variable_type() { ARIADNE_FAIL_MSG("Unknown variable type"); }
 template<> inline VariableType variable_type<Boolean>() { return type_bool; }
-template<> inline VariableType variable_type<ValidatedKleenean>() { return type_tribool; }
+template<> inline VariableType variable_type<Kleenean>() { return type_tribool; }
 template<> inline VariableType variable_type<String>() { return type_string; }
 template<> inline VariableType variable_type<Integer>() { return type_integer; }
 template<> inline VariableType variable_type<Real>() { return type_real; }

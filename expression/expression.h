@@ -72,7 +72,7 @@ template<class X> class Algebra;
 
 
 typedef Expression<Boolean> DiscretePredicate;
-typedef Expression<ValidatedKleenean> ContinuousPredicate;
+typedef Expression<Kleenean> ContinuousPredicate;
 typedef Expression<String> StringExpression;
 typedef Expression<Integer> IntegerExpression;
 typedef Expression<Real> RealExpression;
@@ -84,7 +84,7 @@ template<class X> struct ExpressionNode;
 //! \ingroup ExpressionModule
 //! \brief A simple expression in named variables.
 //!
-//! %Ariadne supports expressions of type Boolean, ValidatedKleenean, String, Integer and Real.
+//! %Ariadne supports expressions of type Boolean, Kleenean, String, Integer and Real.
 //! The class Real is a dummy type which can be implemented in many different ways.
 //!
 //! The independent variables are given string names, rather than an integer index.
@@ -118,7 +118,7 @@ class Expression {
     static Expression<T> variable(const Identifier& c);
 
     //! \brief Create the zero element.
-    Expression<T> create_zero() const { return Expression<T>::constant(0); }
+    Expression<T> create_zero() const { return Expression<T>::constant(T()); }
   public:
     const Operator& op() const;
     OperatorCode code() const;
@@ -155,7 +155,7 @@ Boolean evaluate(const Expression<Boolean>& e, const DiscreteValuation& q);
 String evaluate(const Expression<String>& e, const StringValuation& q);
 Integer evaluate(const Expression<Integer>& e, const IntegerValuation& q);
 Real evaluate(const Expression<Real>& e, const ContinuousValuation<Real>& q);
-ValidatedKleenean evaluate(const Expression<ValidatedKleenean>& e, const ContinuousValuation<Real>& q);
+Kleenean evaluate(const Expression<Kleenean>& e, const ContinuousValuation<Real>& q);
 
 //! \brief Evaluate expression \a e on argument \a x which is a map of variable identifiers to values of type \c A.
 template<class A> typename Logic<A>::Type evaluate(const Expression<typename Logic<A>::Type>& e, const Map<Identifier,A>& x);
@@ -185,10 +185,10 @@ template<class T> Bool identical(const Expression<T>& e1, const Expression<T>& e
 //!
 //! Currently can only test for pairs of the form (a1<=a2; a1>=a2),  (a1<=a2; a2<=a1)
 //! or (a1>=a2; a2>=a1).
-Bool opposite(Expression<ValidatedKleenean> p, Expression<ValidatedKleenean> q);
+Bool opposite(Expression<Kleenean> p, Expression<Kleenean> q);
 
 //! \brief Given \a sign when the predicate \a p is true.
-Expression<Real> indicator(Expression<ValidatedKleenean> p, Sign sign=POSITIVE);
+Expression<Real> indicator(Expression<Kleenean> p, Sign sign=POSITIVE);
 
 //! \brief Substitute all occurrences of variable \a v of type \c Y with constant value \a c.
 template<class T, class Y> Expression<T> substitute(const Expression<T>& e, const Variable<Y>& v, const Y& c);
@@ -231,11 +231,11 @@ Expression<Boolean> operator||(Expression<Boolean> e1, Expression<Boolean> e2);
 Expression<Boolean> operator!(Expression<Boolean> e);
 
 //! \related Expression \brief Fuzzy logical disjunction.
-Expression<ValidatedKleenean> operator&&(Expression<ValidatedKleenean> e1, Expression<ValidatedKleenean> e2);
+Expression<Kleenean> operator&&(Expression<Kleenean> e1, Expression<Kleenean> e2);
 //! \related Expression \brief Fuzzy logical conjunction.
-Expression<ValidatedKleenean> operator||(Expression<ValidatedKleenean> e1, Expression<ValidatedKleenean> e2);
+Expression<Kleenean> operator||(Expression<Kleenean> e1, Expression<Kleenean> e2);
 //! \related Expression \brief Fuzzy logical negation.
-Expression<ValidatedKleenean> operator!(Expression<ValidatedKleenean> e);
+Expression<Kleenean> operator!(Expression<Kleenean> e);
 
 //! \related Expression \brief %String equality.
 Expression<Boolean> operator==(Variable<String> v1, const String& s2);
@@ -271,15 +271,15 @@ Expression<Integer> operator*(Expression<Integer> e1, Expression<Integer> e2);
 
 //! \related Expression \brief Positivity test.
 //! Returns \c indeterminate if the value cannot be distinguished from zero.
-Expression<ValidatedKleenean> sgn(Expression<Real> e);
+Expression<Kleenean> sgn(Expression<Real> e);
 //! \related Expression \brief Fuzzy inequality comparison predicate (less) of real expressions.
-Expression<ValidatedKleenean> operator<=(Expression<Real> e1, Expression<Real> e2);
+Expression<Kleenean> operator<=(Expression<Real> e1, Expression<Real> e2);
 //! \related Expression \brief Fuzzy inequality comparison predicate (greater) of real expressions.
-Expression<ValidatedKleenean> operator>=(Expression<Real> e1, Expression<Real> e2);
+Expression<Kleenean> operator>=(Expression<Real> e1, Expression<Real> e2);
 //! \related Expression \brief Fuzzy inequality comparison predicate (less) of real expressions.
-Expression<ValidatedKleenean> operator< (Expression<Real> e1, Expression<Real> e2);
+Expression<Kleenean> operator< (Expression<Real> e1, Expression<Real> e2);
 //! \related Expression \brief Fuzzy inequality comparison predicate (greater) of real expressions.
-Expression<ValidatedKleenean> operator> (Expression<Real> e1, Expression<Real> e2);
+Expression<Kleenean> operator> (Expression<Real> e1, Expression<Real> e2);
 
 //! \related Expression \brief %Real unary plus expression.
 Expression<Real> operator+(Expression<Real> e);
@@ -336,14 +336,14 @@ Expression<Real> operator-(Real c, Expression<Real> e);
 Expression<Real> operator*(Real c, Expression<Real> e);
 Expression<Real> operator/(Real c, Expression<Real> e);
 
-Expression<ValidatedKleenean> operator<=(Expression<Real> e, Real c);
-Expression<ValidatedKleenean> operator< (Expression<Real> e, Real c);
-Expression<ValidatedKleenean> operator>=(Expression<Real> e, Real c);
-Expression<ValidatedKleenean> operator> (Expression<Real> e, Real c);
-Expression<ValidatedKleenean> operator<=(Real c, Expression<Real> e);
-Expression<ValidatedKleenean> operator< (Real c, Expression<Real> e);
-Expression<ValidatedKleenean> operator>=(Real c, Expression<Real> e);
-Expression<ValidatedKleenean> operator> (Real c, Expression<Real> e);
+Expression<Kleenean> operator<=(Expression<Real> e, Real c);
+Expression<Kleenean> operator< (Expression<Real> e, Real c);
+Expression<Kleenean> operator>=(Expression<Real> e, Real c);
+Expression<Kleenean> operator> (Expression<Real> e, Real c);
+Expression<Kleenean> operator<=(Real c, Expression<Real> e);
+Expression<Kleenean> operator< (Real c, Expression<Real> e);
+Expression<Kleenean> operator>=(Real c, Expression<Real> e);
+Expression<Kleenean> operator> (Real c, Expression<Real> e);
 
 
 //@}

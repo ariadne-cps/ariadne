@@ -395,7 +395,7 @@ void export_numbers()
 
 template<class PR> void export_exact_float()
 {
-    class_<FloatValue<PR>> exact_float_class("FloatValue"+class_tag<PR>());
+    class_<FloatValue<PR>> exact_float_class("Float"+class_tag<PR>()+"Value");
     exact_float_class.def(init<int>());
     exact_float_class.def(init<double>());
     exact_float_class.def(init<Integer,PR>());
@@ -426,7 +426,7 @@ template<class PR> void export_exact_float()
 
 template<class PR> void export_error_float()
 {
-    class_<FloatError<PR>> error_float_class("FloatError"+class_tag<PR>());
+    class_<FloatError<PR>> error_float_class("Float"+class_tag<PR>()+"Error");
     error_float_class.def(init<uint>());
     error_float_class.def(init<double>());
     error_float_class.def(init<FloatError<PR>>());
@@ -445,7 +445,7 @@ template<class PR> void export_error_float()
 
 template<class PR> void export_metric_float()
 {
-    class_<FloatBall<PR>> metric_float_class("FloatBall"+class_tag<PR>());
+    class_<FloatBall<PR>> metric_float_class("Float"+class_tag<PR>()+"Ball");
     metric_float_class.def(init<double,double>());
     metric_float_class.def(init<FloatValue<PR>,FloatError<PR>>());
     metric_float_class.def(init<Real,PR>());
@@ -487,7 +487,7 @@ template<class PR> void export_metric_float()
 
 template<class PR> void export_bounded_float()
 {
-    class_<FloatBounds<PR>> bounded_float_class("FloatBounds"+class_tag<PR>());
+    class_<FloatBounds<PR>> bounded_float_class("Float"+class_tag<PR>()+"Bounds");
     bounded_float_class.def(init<double,double>());
     bounded_float_class.def(init<FloatLowerBound<PR>,FloatUpperBound<PR>>());
     bounded_float_class.def(init<Real,PR>());
@@ -530,7 +530,7 @@ template<class PR> void export_bounded_float()
 
 template<class PR> void export_upper_float()
 {
-    class_<FloatUpperBound<PR>> upper_float_class("FloatUpperBound"+class_tag<PR>());
+    class_<FloatUpperBound<PR>> upper_float_class("Float"+class_tag<PR>()+"UpperBound");
     upper_float_class.def(init<int>());
     upper_float_class.def(init<double>());
     upper_float_class.def(init<Real,PR>());
@@ -579,7 +579,7 @@ template<class PR> void export_upper_float()
 
 template<class PR> void export_lower_float()
 {
-    class_<FloatLowerBound<PR>> lower_float_class("FloatLowerBound"+class_tag<PR>());
+    class_<FloatLowerBound<PR>> lower_float_class("Float"+class_tag<PR>()+"LowerBound");
     lower_float_class.def(init<int>());
     lower_float_class.def(init<double>());
     lower_float_class.def(init<Real,PR>());
@@ -631,7 +631,7 @@ template<class PR> void export_lower_float()
 
 template<class PR> void export_approximate_float()
 {
-    class_<FloatApproximation<PR>> approximate_float_class("FloatApproximation"+class_tag<PR>());
+    class_<FloatApproximation<PR>> approximate_float_class("Float"+class_tag<PR>()+"Approximation");
     approximate_float_class.def(init<double>());
     approximate_float_class.def(init<Real,PR>());
 

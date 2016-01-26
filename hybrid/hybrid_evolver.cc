@@ -57,8 +57,6 @@ inline auto operator>=(Float64LowerBound x, Real r) -> decltype(x>=Float64Bounds
 inline auto operator> (Float64UpperBound x, Real r) -> decltype(x> Float64Bounds(r)) { return x> Float64Bounds(r); }
 inline auto operator<=(Float64UpperBound x, Real r) -> decltype(x<=Float64Bounds(r)) { return x<=Float64Bounds(r); }
 
-typedef Integer Natural;
-
 static const DiscreteEvent final_event("_tmax_");
 static const DiscreteEvent step_event("_h_");
 
@@ -1010,7 +1008,7 @@ _evolution_in_mode(EvolutionData& evolution_data,
     typedef Set<DiscreteEvent>::ConstIterator event_iterator;
 
     const Real final_time=termination_criterion.maximum_time();
-    const Natural maximum_steps=termination_criterion.maximum_steps();
+    const Integer maximum_steps=termination_criterion.maximum_steps();
     const Set<DiscreteEvent>& terminating_events=termination_criterion.terminating_events();
 
     // Routine check for emptiness

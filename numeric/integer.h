@@ -165,6 +165,16 @@ template<class N, EnableIf<IsIntegral<N>> = dummy> inline auto operator> (Intege
 template<class N, EnableIf<IsIntegral<N>> = dummy> inline auto operator<=(Integer const& x, N n) -> decltype(x!=Int64(n)) { return x<=Int64(n); }
 template<class N, EnableIf<IsIntegral<N>> = dummy> inline auto operator>=(Integer const& x, N n) -> decltype(x!=Int64(n)) { return x>=Int64(n); }
 
+class Natural : public Integer {
+  public:
+    Natural(uint m) : Integer(m) { }
+    Natural(int n) = delete;
+    explicit Natural(Integer const& z) : Integer(z) { assert(z>=Integer(0)); }
+    friend Natural& operator++(Natural& n) { ++static_cast<Integer&>(n); return n; }
+    friend Natural& operator+=(Natural& n1, Natural const& n2) { static_cast<Integer&>(n1)+=n2; return n1; }
+    friend Natural operator+(Natural const& n1, Natural const& n2) { return Natural(static_cast<Integer const&>(n1)+static_cast<Integer const&>(n2)); }
+    friend Natural operator*(Natural const& n1, Natural const& n2) { return Natural(static_cast<Integer const&>(n1)*static_cast<Integer const&>(n2)); }
+};
 
 } // namespace Ariadne
 

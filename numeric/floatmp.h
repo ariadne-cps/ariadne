@@ -67,6 +67,7 @@ class FloatMP {
   public:
     typedef RawTag Paradigm;
     typedef FloatMP NumericType;
+    typedef mpfr_exp_t ExponentType;
     typedef PrecisionMP PrecisionType;
     typedef RoundingModeMP RoundingModeType;
   public:
@@ -112,6 +113,7 @@ class FloatMP {
     explicit FloatMP(Rational const&, RoundingModeType=get_rounding_mode(), PrecisionType=get_default_precision());
     explicit operator Rational() const;
 
+    ExponentType exponent() const;
     PrecisionMP precision() const;
     Void set_precision(PrecisionMP);
   public:
@@ -191,7 +193,6 @@ class FloatMP {
 
     friend OutputStream& operator<<(OutputStream& os, FloatMP const& x);
     friend InputStream& operator>>(InputStream& is, FloatMP& x);
-    friend OutputStream& write(OutputStream& os, FloatMP const& x, Nat dgts, RoundingModeMP rnd);
 
     // Mixed operators
     friend FloatMP operator+(FloatMP const& x1, Dbl x2);
@@ -202,7 +203,10 @@ class FloatMP {
     friend FloatMP operator-(Dbl x1, FloatMP const& x2);
     friend FloatMP operator*(Dbl x1, FloatMP const& x2);
     friend FloatMP operator/(Dbl x1, FloatMP const& x2);
-
+  private:
+    friend OutputStream& write(OutputStream& os, FloatMP const& x, DecimalPlaces dgts, RoundingModeMP rnd);
+    friend String print(FloatMP const& x, DecimalPlaces dgts, RoundingModeMP rnd);
+    friend String print(FloatMP const& x, DecimalPrecision dgts, RoundingModeMP rnd);
 };
 
 template<class R, class A> R integer_cast(const A& a);

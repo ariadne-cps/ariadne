@@ -78,6 +78,9 @@ Arnold Neumaier, <em>Interval methods for systems of equations</em>,
 A. Neumaier, "The wrapping effect, ellipsoid arithmetic, stability and confidence regions",
   <em>Computing Supplementum</em> <b>9</b> (1993), 175–190.
 
+Florian Loitsch, "Printing Floating-Point Numbers Quickly and Accurately with Integers"
+  <em>Proceedings of the ACM SIGPLAN Conference on Programming Language Design and Implementation</em>, 2010.
+
 \section linear_programming_references Linear Programming
 
 Vašek Chvátal, <em>Linear Programming</em>, Freeman, 1983, ISBN 0-7167-1195-8.

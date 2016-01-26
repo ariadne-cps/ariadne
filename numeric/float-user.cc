@@ -38,6 +38,7 @@
 namespace Ariadne {
 
 
+template<class PR> Nat Float<PositiveUpperTag,PR>::output_places = 3;
 template<class PR> Nat Float<ApproximateTag,PR>::output_places = 4;
 template<class PR> Nat Float<BoundedTag,PR>::output_places=8;
 template<class PR> Nat Float<ExactTag,PR>::output_places = 16;
@@ -946,9 +947,56 @@ template<class PR> Bool same(Float<BoundedTag,PR> const& x1, Float<BoundedTag,PR
     return x1._l==x2._l && x1._u==x2._u; }
 
 
+inline int log10floor(double const& x) { return std::max(std::floor(std::log10(x)),-65280.); }
+inline int log10floor(FloatMP const& x) { return log10floor(x.get_d()); }
+inline int abslog10floor(double const& x) { return log10floor(std::abs(x)); }
+
+template<> OutputStream& operator<<(OutputStream& os, const Float<BoundedTag,PrecisionMP>& x)
+{
+    static const double log2ten = 3.3219280948873621817;
+    using std::max; using std::min;
+    FloatMP const& l=x.lower_raw();
+    FloatMP const& u=x.upper_raw();
+    double ldbl=l.get_d();
+    double udbl=u.get_d();
+    if(ldbl==0.0 && udbl==0.0) { return os << "0.0[:]"; }
+    int errplc=Float<ErrorTag,PrecisionMP>::output_places;
+    int bndplc=Float<BoundedTag,PrecisionMP>::output_places;
+    int precplc=x.precision()/log2ten;
+    int log10wdth=log10floor(u-l);
+    int log10mag=log10floor(max(-ldbl,udbl));
+    int dgtswdth=errplc-(log10wdth+1); // Digits appropriate given width of interval
+    int dgtsbnd=bndplc-(log10mag+1); // Digits appropriate given asked-for precision of bounded objects
+    int dgtsprec=precplc-(log10mag+1); // Digits appropriate given precision of objects
+    int dgts=max(min(dgtswdth,dgtsprec),1);
+    DecimalPlaces plcs{dgts};
+    String lstr=print(l,plcs,MPFR_RNDD);
+    String ustr=print(u,plcs,MPFR_RNDU);
+    auto lcstr=lstr.c_str();
+    auto ucstr=ustr.c_str();
+    size_t cpl=0;
+    if(ldbl*udbl>=0 && abslog10floor(ldbl)==abslog10floor(udbl)) {
+        while(lcstr[cpl]!='\0' && lcstr[cpl]==ustr[cpl]) { ++cpl; }
+    }
+    char ocstr[1024];
+    ocstr[0]='\0';
+    strncat(ocstr,lcstr,cpl);
+    strcat(ocstr,"[");
+    strcat(ocstr,lcstr+cpl);
+    strcat(ocstr,":");
+    strcat(ocstr,ucstr+cpl);
+    strcat(ocstr,"]");
+    return os << ocstr;
+}
+
+template<> OutputStream& operator<<(OutputStream& os, const Float<BoundedTag,Precision64>& x)
+{
+    PrecisionMP prec(64);
+    return os << Float<BoundedTag,PrecisionMP>(FloatMP(x.lower_raw(),prec),FloatMP(x.upper_raw(),prec));
+}
+
 template<class PR> OutputStream& operator<<(OutputStream& os, const Float<BoundedTag,PR>& x)
 {
-    //if(x.lower_raw()==x.upper_raw()) { return write(os,x.lower().raw(),Float<BoundedTag,PR>::output_places,RawFloat<PR>::to_nearest);
     typename RawFloat<PR>::RoundingModeType rnd=RawFloat<PR>::get_rounding_mode();
     os << '{';
     write(os,x.lower().raw(),Float<BoundedTag,PR>::output_places,RawFloat<PR>::downward);
@@ -1127,6 +1175,61 @@ template<class PR> Float<MetricTag,PR> max(Float<MetricTag,PR> const& x1, Float<
 
 template<class PR> Float<MetricTag,PR> min(Float<MetricTag,PR> const& x1, Float<MetricTag,PR> const& x2) {
     return half((x1+x2)-abs(x1-x2));
+}
+
+template<> OutputStream& operator<<(OutputStream& os, Float<MetricTag,PrecisionMP> const& x) {
+    // Write based on number of correct digits
+    static const double log2ten = 3.3219280948873621817;
+    static const char pmstr[] = "\u00b1";
+    static const char hlfstr[] = "\u00bd";
+    FloatMP const& v=x.value_raw();
+    FloatMP const& e=x.error_raw();
+    double edbl=e.get_d();
+    // Compute the number of decimal places to be displayed
+    int errplc = Float<ErrorTag,PrecisionMP>::output_places;
+    int log10err = log10floor(edbl);
+    int dgtserr = errplc-(log10err+1);
+    int dgtsval = std::floor((x.value().precision()-x.value().raw().exponent())/log2ten);
+    int dgts = std::max(std::min(dgtsval,dgtserr),1);
+    if(edbl==0.0) { dgts = dgtsval; }
+    DecimalPlaces plcs{dgts};
+
+    // Get string version of mpfr values
+    String vstr=print(v,plcs,MPFR_RNDN);
+    String estr=print(e,plcs,MPFR_RNDU);
+
+    // Find position of first significan digit of error
+    auto vcstr=vstr.c_str(); auto ecstr=estr.c_str();
+    int cpl=0;
+    if(edbl==0.0) {
+        cpl=std::strlen(vcstr);
+    } else if(edbl<1.0) {
+        const char* vptr = std::strchr(vcstr,'.');
+        const char* eptr = std::strchr(ecstr,'.');
+        ++vptr; ++eptr;
+        while((*eptr)=='0') { ++eptr; ++vptr; }
+        cpl = vptr-vcstr;
+    }
+
+    // Chop and catenate strings
+    static const size_t buf_sz = 1024;
+    char ocstr[buf_sz];
+    ocstr[0]='\0';
+    std::strncat(ocstr,vcstr,cpl);
+    std::strcat(ocstr,"[");
+    std::strcat(ocstr,vcstr+cpl);
+    std::strcat(ocstr,pmstr);
+    std::strcat(ocstr,ecstr+cpl);
+    std::strcat(ocstr,hlfstr);
+    std::strcat(ocstr,"]");
+    return os << ocstr;
+
+    return os << x.value() << "\u00b1" << x.error();
+}
+
+template<> OutputStream& operator<<(OutputStream& os, Float<MetricTag,Precision64> const& x) {
+    PrecisionMP prec(64);
+    return os << Float<MetricTag,PrecisionMP>(FloatMP(x.value_raw(),prec),FloatMP(x.error_raw(),prec));
 }
 
 template<class PR> OutputStream& operator<<(OutputStream& os, Float<MetricTag,PR> const& x) {

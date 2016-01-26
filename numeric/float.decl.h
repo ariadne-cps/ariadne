@@ -39,6 +39,9 @@ class TwoExp;
 class Precision64;
 class PrecisionMP;
 
+struct DecimalPlaces { int _places; DecimalPlaces(int plc) : _places(plc) { } operator int() const { return _places; } };
+struct DecimalPrecision { uint _figures; operator uint() const { return _figures; } };
+
 class Float64;
 class FloatMP;
 

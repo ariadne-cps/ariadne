@@ -456,6 +456,9 @@ template<class PR> class Float<PositiveUpperTag,PR> : public Float<UpperTag,PR> 
     template<class F, EnableIf<IsSame<F,Float<UpperTag,PR>>> =dummy>
         explicit Float<PositiveUpperTag,PR>(F const& x) : Float<UpperTag,PR>(x) { }
     Float<PositiveUpperTag,PR>(Float<PositiveExactTag,PR> const& x) : Float<UpperTag,PR>(x) { }
+  public:
+    static Nat output_places;
+    static Void set_output_places(Nat p) { output_places=p; }
 };
 template<class PR> Float<PositiveUpperTag,PR> abs(Float<PositiveUpperTag,PR> const&);
 

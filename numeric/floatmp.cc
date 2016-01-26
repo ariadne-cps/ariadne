@@ -169,6 +169,10 @@ Void FloatMP::set_precision(PrecisionMP pr) {
     mpfr_swap(_mpfr,tmp);
 }
 
+FloatMP::ExponentType FloatMP::exponent() const {
+    return mpfr_get_exp(this->_mpfr);
+}
+
 FloatMP::PrecisionType FloatMP::precision() const {
     return PrecisionType(mpfr_get_prec(this->_mpfr));
 }
@@ -289,27 +293,47 @@ FloatMP operator/(Dbl x1, FloatMP const& x2) {
     FloatMP r(x2.precision(),NoInit()); mpfr_d_div(r._mpfr,x1,x2._mpfr,FloatMP::get_rounding_mode()); return std::move(r);
 }
 
+inline int log10floor(double const& x) { return std::max(std::floor(std::log10(x)),-65280.); }
+inline int log10floor(FloatMP const& x) { return log10floor(x.get_d()); }
+inline int abslog10floor(double const& x) { return log10floor(std::abs(x)); }
 
-OutputStream& write(OutputStream& os, FloatMP const& x, Nat dgts, RoundingModeMP rnd) {
-    char fmt[12]; char str[1024];
-    uint bits = std::ceil((dgts*std::log(10))/std::log(2));
+
+String print(const mpfr_t x, int zdgts, int fdgts, mpfr_rnd_t rnd) {
+    char fmt[16];
     std::strcpy(fmt,"%.");
-    std::sprintf(fmt+2, "%d", dgts);
+    std::sprintf(fmt+2, "%d", fdgts);
     std::strcat(fmt,"R*f");
-    mpfr_snprintf(str,bits,fmt,rnd,x._mpfr);
-    return os << str;
+    static const uint buf_size=1024;
+    char cstr[buf_size];
+    // uint buf_size = zdgts+fdgts+8;
+    mpfr_snprintf(cstr,buf_size,fmt,rnd,x);
+    cstr[1023]='\0';
+    return String(cstr);
+};
+
+String print(FloatMP const& x, DecimalPrecision figs, RoundingModeMP rnd) {
+    static const double log2ten = 3.3219280948873621817;
+    int pdgts = std::ceil(x.precision()/log2ten);
+    int zdgts = std::max(log10floor(x),0)+1;
+    int fdgts = pdgts-zdgts;
+    return print(x._mpfr,zdgts,fdgts,rnd);
+}
+
+String print(FloatMP const& x, DecimalPlaces plcs, RoundingModeMP rnd) {
+    static const double log2ten = 3.3219280948873621817;
+    int zdgts = std::max(log10floor(x),0)+1;
+    int fdgts = plcs;
+    return print(x._mpfr,zdgts,fdgts,rnd);
+};
+
+OutputStream& write(OutputStream& os, FloatMP const& x, DecimalPlaces plcs, RoundingModeMP rnd) {
+    return os << print(x,plcs,rnd);
 }
 
 
-//   mpfr_get_str (char *str, mpfr_exp_t *expptr, Int b, SizeType n, mpfr_t op, mpfr_rnd_t rnd)
-// If str is not _a null pointer, it should point to _a block of storage large enough for the significand,
-// i._e., at least max(n + 2, 7). The extra two bytes are for _a possible minus sign,
-// and for the terminating null character, and the value 7 accounts for -@Inf@ plus the terminating null character.
 OutputStream& operator<<(OutputStream& os, FloatMP const& x) {
-    char str[1024];
-//    mpfr_snprintf (str, 1024, "%R*e", MPFR_RNDN, x._mpfr);
-    mpfr_snprintf (str, 1024, "%.100R*f", MPFR_RNDN, x._mpfr);
-    return os << str;
+    static const double log2ten = 3.3219280948873621817;
+    return os << print(x,DecimalPlaces(std::max((int)x.precision()-(int)x.exponent(),0)/log2ten),FloatMP::get_rounding_mode());
 }
 
 InputStream& operator>>(InputStream& is, FloatMP& x) {

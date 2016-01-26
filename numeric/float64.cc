@@ -769,12 +769,12 @@ OutputStream& write(OutputStream& os, Float64 const& x, Nat bits, RoundingMode64
     return os;
 }
 */
-OutputStream& write(OutputStream& os, FloatMP const& x, Nat bits, RoundingModeMP rnd);
+OutputStream& write(OutputStream& os, FloatMP const& x, DecimalPlaces dgts, RoundingModeMP rnd);
 
-OutputStream& write(OutputStream& os, Float64 const& x, Nat bits, RoundingMode64 rnd) {
+OutputStream& write(OutputStream& os, Float64 const& x, DecimalPlaces dgts, RoundingMode64 rnd) {
     assert(rnd==Float64::to_nearest || rnd==Float64::upward || rnd==Float64::downward);
     RoundingModeMP rnd_mp = (rnd==Float64::to_nearest) ? FloatMP::to_nearest : (rnd==Float64::downward) ? FloatMP::downward : FloatMP::upward;
-    return write(os,FloatMP(x),bits,rnd_mp);
+    return write(os,FloatMP(x),dgts,rnd_mp);
 }
 
 

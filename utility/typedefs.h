@@ -54,6 +54,7 @@ class String; // Define as a class for consistency with other value types
 using StringType = std::string;
 
 using Void = void;
+using Char = char;
 using Byte = std::int8_t;
 using Bool = bool;
 using Nat = uint;

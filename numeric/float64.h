@@ -181,7 +181,7 @@ class Float64 {
 
     friend OutputStream& operator<<(OutputStream& os, Float64 const&);
     friend InputStream& operator>>(InputStream& is, Float64&);
-    friend OutputStream& write(OutputStream& os, Float64 const& x, Nat dgts, RoundingMode64 rnd);
+    friend OutputStream& write(OutputStream& os, Float64 const& x, DecimalPlaces dgts, RoundingMode64 rnd);
 };
 
 // Correctly rounded algebraic and transcendental functions

@@ -232,29 +232,6 @@ long int Integer::get_si() const {
     return mpz_get_si(this->_mpz);
 }
 
-Integer operator+(Integer const& z) {
-    return Integer(z);
-}
-
-Integer operator-(Integer const& z) {
-    Integer r; mpz_neg(r._mpz,z._mpz);
-    return std::move(r);
-}
-
-Integer operator+(Integer const& z1, Integer const& z2) {
-    Integer r; mpz_add(r._mpz,z1._mpz,z2._mpz);
-    return std::move(r);
-}
-
-Integer operator-(Integer const& z1, Integer const& z2) {
-    Integer r; mpz_sub(r._mpz,z1._mpz,z2._mpz);
-    return std::move(r);
-}
-
-Integer operator*(Integer const& z1, Integer const& z2) {
-    Integer r; mpz_mul(r._mpz,z1._mpz,z2._mpz);
-    return std::move(r);
-}
 
 Integer& operator++(Integer& z) {
     mpz_add_ui(z._mpz,z._mpz,1u);
@@ -266,6 +243,7 @@ Integer& operator--(Integer& z) {
     return z;
 }
 
+/*
 Integer& operator+=(Integer& z1, Integer const& z2) {
     mpz_add(z1._mpz,z1._mpz,z2._mpz);
     return z1;
@@ -280,6 +258,7 @@ Integer& operator*=(Integer& z1, Integer const& z2) {
     mpz_mul(z1._mpz,z1._mpz,z2._mpz);
     return z1;
 }
+*/
 
 Integer pos(Integer const& z) {
     Integer r; mpz_set(r._mpz,z._mpz);
@@ -323,11 +302,11 @@ Integer abs(Integer const& z) {
     return std::move(r);
 }
 
-Integer const& min(Integer const& z1,Integer const& z2) {
+Integer min(Integer const& z1,Integer const& z2) {
     return (z1<z2)?z1:z2;
 }
 
-Integer const& max(Integer const& z1,Integer const& z2) {
+Integer max(Integer const& z1,Integer const& z2) {
     return (z1>z2)?z1:z2;
 }
 
@@ -345,29 +324,6 @@ Comparison cmp(Integer const& z1, Integer const& z2) {
     return c==0 ? Comparison::EQUAL : (c>0?Comparison::GREATER:Comparison::LESS);
 }
 
-Boolean operator==(Integer const& z1, Integer const& z2) {
-    return cmp(z1,z2)==Comparison::EQUAL;
-}
-
-Boolean operator!=(Integer const& z1, Integer const& z2) {
-    return cmp(z1,z2)!=Comparison::EQUAL;
-}
-
-Boolean operator<=(Integer const& z1, Integer const& z2) {
-    return cmp(z1,z2)!=Comparison::GREATER;
-}
-
-Boolean operator>=(Integer const& z1, Integer const& z2) {
-    return cmp(z1,z2)!=Comparison::LESS;
-}
-
-Boolean operator< (Integer const& z1, Integer const& z2) {
-    return cmp(z1,z2)==Comparison::LESS;
-}
-
-Boolean operator> (Integer const& z1, Integer const& z2) {
-    return cmp(z1,z2)==Comparison::GREATER;
-}
 
 //   mpz_get_str (char *str, mpz_exp_t *expptr, Int b, SizeType n, mpz_t op, mpz_rnd_t rnd)
 // If str is not a null pointer, it should point to a block of storage large enough for the significand,

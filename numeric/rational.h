@@ -35,6 +35,7 @@
 #include "utility/metaprogramming.h"
 #include "utility/string.h"
 #include "numeric/integer.h"
+#include "numeric/arithmetic.h"
 #include "numeric/number.decl.h"
 #include "numeric/float.decl.h"
 
@@ -51,6 +52,11 @@ enum class Comparison : char;
 //! \ingroup UserNumericTypeSubModule
 //! \brief %Rational numbers.
 class Rational
+    : Field<Rational>
+    , DirectedLattice<Rational>
+    , Ordered<Rational,Boolean>
+    , DefineArithmeticOperators<Rational>
+    , DefineComparisonOperators<Rational,Boolean>
 {
   public:
     mpq_t _mpq;
@@ -77,40 +83,9 @@ class Rational
     Integer get_den() const;
     Integer numerator() const;
     Integer denominator() const;
-    friend Rational operator+(Rational const& q);
-    friend Rational operator-(Rational const& q);
-    friend Rational operator+(Rational const& q1, Rational const& q2);
-    friend Rational operator-(Rational const& q1, Rational const& q2);
-    friend Rational operator*(Rational const& q1, Rational const& q2);
-    friend Rational operator/(Rational const& q1, Rational const& q2);
     friend Rational operator/(Integer const& z1, Integer const& z2);
-    friend Rational& operator+=(Rational& q1, Rational const& q2);
-    friend Rational& operator-=(Rational& q1, Rational const& q2);
-    friend Rational& operator*=(Rational& q1, Rational const& q2);
-    friend Rational& operator/=(Rational& q1, Rational const& q2);
-    friend Rational max(Rational const& q1, Rational const& q2);
-    friend Rational min(Rational const& q1, Rational const& q2);
-    friend Rational abs(Rational const& q);
-    friend Rational pos(Rational const& q);
-    friend Rational neg(Rational const& q);
-    friend Rational sqr(Rational const& q);
-    friend Rational rec(Rational const& q);
-    friend Rational add(Rational const& q1, Rational const& q2);
-    friend Rational sub(Rational const& q1, Rational const& q2);
-    friend Rational mul(Rational const& q1, Rational const& q2);
-    friend Rational div(Rational const& q1, Rational const& q2);
-    friend Rational pow(Rational const& q, Nat m);
-    friend Rational pow(Rational const& q, Int n);
 
-    friend Boolean eq(Rational const& q1, Rational const& q2);
     friend Comparison cmp(Rational const& q1, Rational const& q2);
-
-    friend Boolean operator==(Rational const& q1, Rational const& q2);
-    friend Boolean operator!=(Rational const& q1, Rational const& q2);
-    friend Boolean operator>=(Rational const& q1, Rational const& q2);
-    friend Boolean operator<=(Rational const& q1, Rational const& q2);
-    friend Boolean operator> (Rational const& q1, Rational const& q2);
-    friend Boolean operator< (Rational const& q1, Rational const& q2);
 
     friend OutputStream& operator<<(OutputStream& os, Rational const& q);
     friend InputStream& operator>>(InputStream& os, Rational& q);

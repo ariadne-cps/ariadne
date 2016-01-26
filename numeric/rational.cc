@@ -107,7 +107,7 @@ Rational::Rational(double d, std::nullptr_t dummy) {
 Rational::Rational(Float64 const& x) : Rational(x.get_d(),nullptr) {
 }
 
-Rational::Rational(Float64Value const& x) : Rational(x.raw()) {
+Rational::Rational(Float64Value const& x) : Rational(reinterpret_cast<Float64 const&>(x)) {
 }
 
 Rational::Rational(const String& s) {
@@ -176,38 +176,17 @@ Integer Rational::denominator() const {
     return z;
 }
 
-Rational operator+(Rational const& q) {
-    return Rational(q);
-}
-
-Rational operator-(Rational const& q) {
-    Rational r; mpq_neg(r._mpq,q._mpq);
-    return std::move(r);
-}
-
-Rational operator+(Rational const& q1, Rational const& q2) {
-    Rational r; mpq_add(r._mpq,q1._mpq,q2._mpq);
-    return std::move(r);
-}
-
-Rational operator-(Rational const& q1, Rational const& q2) {
-    Rational r; mpq_sub(r._mpq,q1._mpq,q2._mpq);
-    return std::move(r);
-}
-
-Rational operator*(Rational const& q1, Rational const& q2) {
-    Rational r; mpq_mul(r._mpq,q1._mpq,q2._mpq);
-    return std::move(r);
-}
-
-Rational operator/(Rational const& q1, Rational const& q2) {
-    Rational r; mpq_div(r._mpq,q1._mpq,q2._mpq);
-    return std::move(r);
-}
-
 Rational operator/(Integer const& z1, Integer const& z2) {
     return Rational(z1,z2);
 }
+
+/*
+Rational operator+(Rational const& q) { return pos(q); }
+Rational operator-(Rational const& q) { return neg(q); }
+Rational operator+(Rational const& q1, Rational const& q2) { return add(q1,q2); }
+Rational operator-(Rational const& q1, Rational const& q2) { return sub(q1,q2); }
+Rational operator*(Rational const& q1, Rational const& q2) { return mul(q1,q2); }
+Rational operator/(Rational const& q1, Rational const& q2) { return div(q1,q2); }
 
 Rational& operator+=(Rational& q1, Rational const& q2) {
     mpq_add(q1._mpq,q1._mpq,q2._mpq);
@@ -228,6 +207,7 @@ Rational& operator/=(Rational& q1, Rational const& q2) {
     mpq_div(q1._mpq,q1._mpq,q2._mpq);
     return q1;
 }
+*/
 
 Rational max(Rational const& q1, Rational const& q2) {
     return q1>q2 ? q1 :  q2;
@@ -297,8 +277,12 @@ Rational pow(Rational const& q, Int n) {
     else { return pow(q,Nat(n)); }
 }
 
-Boolean eq(Rational const& q1, Rational const& q2) {
-    return Boolean(mpq_equal(q1._mpq,q2._mpq));
+Boolean neq(Rational const& q1, Rational const& q2) {
+    return Boolean(not mpq_equal(q1._mpq,q2._mpq));
+}
+
+Boolean leq(Rational const& q1, Rational const& q2) {
+    return Boolean(mpq_cmp(q1._mpq,q2._mpq)!=+1);
 }
 
 Comparison cmp(Rational const& q1, Rational const& q2) {
@@ -378,17 +362,6 @@ OutputStream& operator<<(OutputStream& os, Rational const& q1) {
     if(mpz_cmp_si(den,1)!=0) { os << "/"; write(os,den); }
     mpz_clear(num); mpz_clear(den);
     return os;
-}
-
-Boolean operator==(Rational const& q1, Rational const& q2) { return cmp(q1,q2)==Comparison::EQUAL; }
-Boolean operator!=(Rational const& q1, Rational const& q2) { return cmp(q1,q2)!=Comparison::EQUAL; }
-Boolean operator<=(Rational const& q1, Rational const& q2) { return cmp(q1,q2)!=Comparison::GREATER; }
-Boolean operator>=(Rational const& q1, Rational const& q2) { return cmp(q1,q2)!=Comparison::LESS; }
-Boolean operator< (Rational const& q1, Rational const& q2) { return cmp(q1,q2)==Comparison::LESS; }
-Boolean operator> (Rational const& q1, Rational const& q2) { return cmp(q1,q2)==Comparison::GREATER; }
-
-Boolean eq(Rational const& q1, Float64 const& x2) {
-    return eq(q1,Rational(x2));
 }
 
 Comparison cmp(Rational const& q1, Float64 const& x2) {

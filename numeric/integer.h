@@ -38,6 +38,7 @@
 #include "utility/metaprogramming.h"
 #include "numeric/sign.h"
 #include "numeric/logical.h"
+#include "numeric/arithmetic.h"
 #include "numeric/number.decl.h"
 
 namespace Ariadne {
@@ -91,6 +92,11 @@ template<> struct IsNumericType<Integer> : True { };
 //! \ingroup UserNumericTypeSubModule
 //! \brief Arbitrarily-sized integers.
 class Integer
+    : Ring<Integer>
+    , DirectedLattice<Integer>
+    , Ordered<Integer,Boolean>
+    , DefineRingOperators<Integer>
+    , DefineComparisonOperators<Integer,Boolean>
 {
   public:
     mpz_t _mpz;
@@ -108,37 +114,15 @@ class Integer
     Integer& operator=(Integer&&);
     operator Number<ExactTag> () const;
 
-    friend Integer operator+(Integer const& z);
-    friend Integer operator-(Integer const& z);
-    friend Integer operator+(Integer const& z1, Integer const& z2);
-    friend Integer operator-(Integer const& z1, Integer const& z2);
-    friend Integer operator*(Integer const& z1, Integer const& z2);
     friend Rational operator/(Integer const& z1, Integer const& z2);
     friend Integer& operator++(Integer& z);
     friend Integer& operator--(Integer& z);
     friend Integer& operator+=(Integer& z1, Integer const& z2);
     friend Integer& operator*=(Integer& z1, Integer const& z2);
-    friend Integer const& max(Integer const& z1, Integer const& z2);
-    friend Integer const& min(Integer const& z1, Integer const& z2);
-    friend Integer abs(Integer const& z);
-    friend Integer pos(Integer const& z);
-    friend Integer neg(Integer const& z);
-    friend Integer sqr(Integer const& z);
-    friend Integer add(Integer const& z1, Integer const& z2);
-    friend Integer sub(Integer const& z1, Integer const& z2);
-    friend Integer mul(Integer const& z1, Integer const& z2);
-    friend Integer pow(Integer const& z, Nat m);
 
     friend Rational rec(Integer const& z);
     friend Rational div(Integer const& z1, Integer const& z2);
     friend Rational pow(Integer const& z, Int n);
-
-    friend Boolean operator==(Integer const& z1, Integer const& z2);
-    friend Boolean operator!=(Integer const& z1, Integer const& z2);
-    friend Boolean operator>=(Integer const& z1, Integer const& z2);
-    friend Boolean operator<=(Integer const& z1, Integer const& z2);
-    friend Boolean operator> (Integer const& z1, Integer const& z2);
-    friend Boolean operator< (Integer const& z1, Integer const& z2);
 
     friend OutputStream& operator<<(OutputStream& os, Integer const& z);
     friend Integer operator"" _z(unsigned long long int n);

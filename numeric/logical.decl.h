@@ -71,6 +71,10 @@ using Quasidecidable = Logical<EffectiveTag>;
 using Verifyable = Logical<EffectiveUpperTag>;
 using Falsifyable = Logical<EffectiveLowerTag>;
 
+Boolean operator!(Boolean const&);
+NegatedSierpinskian operator!(Sierpinskian const&);
+Kleenean operator!(Kleenean const&);
+
 }
 
 #endif

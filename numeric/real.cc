@@ -29,8 +29,8 @@
 #include "numeric/operators.h"
 #include "expression/templates.h"
 
-#include "real.h"
 #include "logical.h"
+#include "real.h"
 #include "integer.h"
 #include "rational.h"
 
@@ -169,48 +169,37 @@ Real::Real(Integer const& x) : Real(std::make_shared<RealConstant<Integer>>(x)) 
 Real::Real(Rational const& x) : Real(std::make_shared<RealConstant<Rational>>(x)) { }
 Real::Real(Float64Value x) : Real(std::make_shared<RealConstant<Float64Value>>(x)) { }
 
-Real add(Real x1, Real x2) { return make_real(Add(),x1,x2); }
-Real sub(Real x1, Real x2) { return make_real(Sub(),x1,x2); }
-Real mul(Real x1, Real x2) { return make_real(Mul(),x1,x2); }
-Real div(Real x1, Real x2) { return make_real(Div(),x1,x2); }
-Real pow(Real x1, Nat m2) { return make_real(Pow(),x1,Int(m2)); }
-Real pow(Real x1, Int n2) { return make_real(Pow(),x1,n2); }
-Real pos(Real x) { return make_real(Pos(),x); }
-Real neg(Real x) { return make_real(Neg(),x); }
-Real sqr(Real x) { return make_real(Sqr(),x); }
-Real rec(Real x) { return make_real(Rec(),x); }
-Real sqrt(Real x) { return make_real(Sqrt(),x); }
-Real exp(Real x) { return make_real(Exp(),x); }
-Real log(Real x) { return make_real(Log(),x); }
-Real sin(Real x) { return make_real(Sin(),x); }
-Real cos(Real x) { return make_real(Cos(),x); }
-Real tan(Real x) { return make_real(Tan(),x); }
-Real atan(Real x) { return make_real(Atan(),x); }
+Real add(Real const& x1, Real const& x2) { return make_real(Add(),x1,x2); }
+Real sub(Real const& x1, Real const& x2) { return make_real(Sub(),x1,x2); }
+Real mul(Real const& x1, Real const& x2) { return make_real(Mul(),x1,x2); }
+Real div(Real const& x1, Real const& x2) { return make_real(Div(),x1,x2); }
+Real pow(Real const& x1, Nat m2) { return make_real(Pow(),x1,Int(m2)); }
+Real pow(Real const& x1, Int n2) { return make_real(Pow(),x1,n2); }
+Real pos(Real const& x) { return make_real(Pos(),x); }
+Real neg(Real const& x) { return make_real(Neg(),x); }
+Real sqr(Real const& x) { return make_real(Sqr(),x); }
+Real rec(Real const& x) { return make_real(Rec(),x); }
+Real sqrt(Real const& x) { return make_real(Sqrt(),x); }
+Real exp(Real const& x) { return make_real(Exp(),x); }
+Real log(Real const& x) { return make_real(Log(),x); }
+Real sin(Real const& x) { return make_real(Sin(),x); }
+Real cos(Real const& x) { return make_real(Cos(),x); }
+Real tan(Real const& x) { return make_real(Tan(),x); }
+Real atan(Real const& x) { return make_real(Atan(),x); }
 
-PositiveReal abs(Real x) { return PositiveReal(make_real(Abs(),x)); }
-Real max(Real x1, Real x2) { return make_real(Max(),x1,x2); }
-Real min(Real x1, Real x2) { return make_real(Min(),x1,x2); }
+PositiveReal abs(Real const& x) { return PositiveReal(make_real(Abs(),x)); }
+Real max(Real const& x1, Real const& x2) { return make_real(Max(),x1,x2); }
+Real min(Real const& x1, Real const& x2) { return make_real(Min(),x1,x2); }
 
-Float64Error mag(Real x) { return mag(static_cast<Float64Bounds>(x)); }
-
-Real operator+(Real x) { return make_real(Pos(),x); }
-Real operator-(Real x) { return make_real(Neg(),x); }
-Real operator+(Real x1, Real x2) { return make_real(Add(),x1,x2); }
-Real operator-(Real x1, Real x2) { return make_real(Sub(),x1,x2); }
-Real operator*(Real x1, Real x2) { return make_real(Mul(),x1,x2); }
-Real operator/(Real x1, Real x2) { return make_real(Div(),x1,x2); }
-Real& operator+=(Real& x1, Real x2) { return x1=make_real(Add(),x1,x2); }
-Real& operator-=(Real& x1, Real x2) { return x1=make_real(Sub(),x1,x2); }
-Real& operator*=(Real& x1, Real x2) { return x1=make_real(Mul(),x1,x2); }
-Real& operator/=(Real& x1, Real x2) { return x1=make_real(Div(),x1,x2); }
+Float64Error mag(Real const& x) { return mag(static_cast<Float64Bounds>(x)); }
 
 OutputStream& operator<<(OutputStream& os, Real const& x) { return x._ptr->_write(os); }
 
-Bool same(Real x1, Real x2) {
+Bool same(Real const& x1, Real const& x2) {
     return same(Float64Bounds(x1),Float64Bounds(x2));
 }
 
-PositiveReal dist(Real x1, Real x2) { return abs(sub(x1,x2)); }
+PositiveReal dist(Real const& x1, Real const& x2) { return abs(sub(x1,x2)); }
 
 template<class O, class... ARGS> struct LogicalWrapper;
 
@@ -231,22 +220,22 @@ template<class P, class O, class... ARGS> Logical<P> make_logical(O op, ARGS ...
     return Logical<P>(std::make_shared<LogicalWrapper<O,ARGS...>>(op,args...));
 }
 
-NegatedSierpinskian eq(Real x1, Real x2) { return make_logical<EffectiveLowerTag>(Equal(),x1,x2); }
-Kleenean lt(Real x1, Real x2) { return make_logical<EffectiveTag>(Less(),x1,x2); }
+NegatedSierpinskian eq(Real const& x1, Real const& x2) { return make_logical<EffectiveLowerTag>(Equal(),x1,x2); }
+Kleenean lt(Real const& x1, Real const& x2) { return make_logical<EffectiveTag>(Less(),x1,x2); }
 
-Falsifyable operator==(Real x1, Real x2) { return make_logical<EffectiveLowerTag>(Equal(),x1,x2); }
-Verifyable operator!=(Real x1, Real x2) { return make_logical<EffectiveUpperTag>(Unequal(),x1,x2); }
-Quasidecidable operator< (Real x1, Real x2) { return make_logical<EffectiveTag>(Less(),x1,x2); }
-Quasidecidable operator> (Real x1, Real x2) { return make_logical<EffectiveTag>(Gtr(),x1,x2); }
-Quasidecidable operator<=(Real x1, Real x2) { return make_logical<EffectiveTag>(Leq(),x1,x2); }
-Quasidecidable operator>=(Real x1, Real x2) { return make_logical<EffectiveTag>(Geq(),x1,x2); }
+Falsifyable operator==(Real const& x1, Real const& x2) { return make_logical<EffectiveLowerTag>(Equal(),x1,x2); }
+Verifyable operator!=(Real const& x1, Real const& x2) { return make_logical<EffectiveUpperTag>(Unequal(),x1,x2); }
+Quasidecidable operator< (Real const& x1, Real const& x2) { return make_logical<EffectiveTag>(Less(),x1,x2); }
+Quasidecidable operator> (Real const& x1, Real const& x2) { return make_logical<EffectiveTag>(Gtr(),x1,x2); }
+Quasidecidable operator<=(Real const& x1, Real const& x2) { return make_logical<EffectiveTag>(Leq(),x1,x2); }
+Quasidecidable operator>=(Real const& x1, Real const& x2) { return make_logical<EffectiveTag>(Geq(),x1,x2); }
 
-ValidatedNegatedSierpinskian operator==(Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
-ValidatedSierpinskian operator!=(Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
-Kleenean operator< (Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
-Kleenean operator> (Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
-Kleenean operator<=(Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
-Kleenean operator>=(Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
+ValidatedNegatedSierpinskian operator==(Real const& x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
+ValidatedSierpinskian operator!=(Real const& x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
+Kleenean operator< (Real const& x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
+Kleenean operator> (Real const& x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
+Kleenean operator<=(Real const& x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
+Kleenean operator>=(Real const& x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
 
 template<> String class_name<Real>() { return "Real"; }
 template<> String class_name<PositiveReal>() { return "PositiveReal"; }

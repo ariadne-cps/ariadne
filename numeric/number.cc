@@ -48,13 +48,13 @@ namespace Ariadne {
 using NumberHandle = Handle<NumberInterface>;
 
 // Declare operations for Integer and Rational numbers
-Real sqrt(Real);
-Real exp(Real);
-Real log(Real);
-Real sin(Real);
-Real cos(Real);
-Real tan(Real);
-Real atan(Real);
+Real sqrt(Real const&);
+Real exp(Real const&);
+Real log(Real const&);
+Real sin(Real const&);
+Real cos(Real const&);
+Real tan(Real const&);
+Real atan(Real const&);
 
 template class NumberWrapper<Integer>;
 template class NumberWrapper<Rational>;

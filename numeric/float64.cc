@@ -59,6 +59,7 @@
 #endif
 
 #include "numeric/float64.h"
+#include "numeric/floatmp.h"
 
 
 namespace Ariadne {
@@ -742,6 +743,7 @@ Float64 Float64::eps(PrecisionType) { return std::numeric_limits<double>::epsilo
 Float64 Float64::inf(PrecisionType) { return std::numeric_limits<double>::infinity(); }
 Float64 Float64::nan(PrecisionType) { return std::numeric_limits<double>::quiet_NaN(); }
 
+template<class R, class A> R integer_cast(A const&);
 template<> Nat integer_cast<Nat,Float64>(Float64 const& x) { return x.dbl; }
 template<> Int integer_cast<Int,Float64>(Float64 const& x) { return x.dbl; }
 

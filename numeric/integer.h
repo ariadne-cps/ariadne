@@ -120,6 +120,8 @@ class Integer
     friend Integer& operator+=(Integer& z1, Integer const& z2);
     friend Integer& operator*=(Integer& z1, Integer const& z2);
 
+    friend Int log2floor(Natural const& n);
+
     friend Rational rec(Integer const& z);
     friend Rational div(Integer const& z1, Integer const& z2);
     friend Rational pow(Integer const& z, Int n);
@@ -151,6 +153,7 @@ template<class N, EnableIf<IsIntegral<N>> = dummy> inline auto operator>=(Intege
 
 class Natural : public Integer {
   public:
+    Natural() : Integer() { }
     Natural(uint m) : Integer(m) { }
     Natural(int n) = delete;
     explicit Natural(Integer const& z) : Integer(z) { assert(z>=Integer(0)); }

@@ -9,7 +9,7 @@ HDR = \
 # ariadne.h
 
 LIB_NUMERIC_SRC = \
-	logging.cc operators.cc logical.cc integer.cc rational.cc decimal.cc real.cc \
+	logging.cc operators.cc logical.cc integer.cc dyadic.cc rational.cc decimal.cc real.cc \
 	float64.cc floatmp.cc \
 	float-user.cc number.cc
 

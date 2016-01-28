@@ -71,6 +71,7 @@ class Rational
     Rational(Int64);
     explicit Rational(Float64 const&);
     Rational(const Integer&);
+    Rational(const Dyadic&);
     explicit Rational(const String&);
     explicit Rational(const Float64Value&);
     explicit Rational(const mpq_t);
@@ -82,7 +83,7 @@ class Rational
     Integer get_num() const;
     Integer get_den() const;
     Integer numerator() const;
-    Integer denominator() const;
+    Natural denominator() const;
     friend Rational operator/(Integer const& z1, Integer const& z2);
 
     friend Comparison cmp(Rational const& q1, Rational const& q2);
@@ -102,6 +103,7 @@ template<> struct IsNumericType<Rational> : True { };
 Rational operator"" _q(long double x);
 
 template<class N, EnableIf<IsIntegral<N>>> inline Rational::Rational(N n) : Rational(Int64(n)) { }
+
 
 
 } // namespace Ariadne

@@ -35,6 +35,7 @@
 #include "logical.h"
 #include "number.h"
 #include "integer.h"
+#include "dyadic.h"
 #include "sign.h"
 #include <limits>
 
@@ -86,6 +87,11 @@ Rational::Rational(Int n) {
 Rational::Rational(Integer const& z) {
     mpq_init(_mpq);
     mpq_set_z(_mpq,z._mpz);
+}
+
+Rational::Rational(Dyadic const& f) {
+    mpq_init(_mpq);
+    mpq_set_f(_mpq,f._mpf);
 }
 
 Rational::Rational(Integer const& znum, Integer const& zden) {
@@ -170,10 +176,10 @@ Integer Rational::numerator() const {
     return z;
 }
 
-Integer Rational::denominator() const {
-    Integer z;
-    mpq_get_den(z._mpz,this->_mpq);
-    return z;
+Natural Rational::denominator() const {
+    Natural n;
+    mpq_get_den(n._mpz,this->_mpq);
+    return n;
 }
 
 Rational operator/(Integer const& z1, Integer const& z2) {

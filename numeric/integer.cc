@@ -357,4 +357,9 @@ Integer operator"" _z(unsigned long long int n) {
 
 template<> String class_name<Integer>() { return "Integer"; }
 
+Int log2floor(Natural const& z) {
+    return mpz_sizeinbase(z._mpz,2)-1;
+}
+
+
 } // namespace Ariadne

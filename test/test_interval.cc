@@ -142,7 +142,7 @@ Void TestIntervalType::test_class()
     ARIADNE_TEST_EQUAL(ExactIntervalType(-0.25,0.50).upper(),0.5_exact);
     ARIADNE_TEST_EQUAL(ExactIntervalType(-0.25,0.50).midpoint(),0.125_exact);
     ARIADNE_TEST_EQUAL(ExactIntervalType(-0.25,0.50).centre(),0.125_exact);
-    ARIADNE_TEST_EQUAL(ExactIntervalType(-0.25,0.50).radius(),0.375)
+    ARIADNE_TEST_EQUAL(ExactIntervalType(-0.25,0.50).radius(),0.375_exact)
     ARIADNE_TEST_EQUAL(ExactIntervalType(-0.25,0.50).width(),0.75_exact);
 
 }

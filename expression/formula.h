@@ -240,15 +240,25 @@ template<class X, class R> inline EnableIfNumericType<R,Formula<X> > operator/(R
 template<class X, class R> inline EnableIfNumericType<R,Formula<X> >& operator+=(Formula<X>& f, const R& c) { return f+=make_formula<X>(c); }
 template<class X, class R> inline EnableIfNumericType<R,Formula<X> >& operator*=(Formula<X>& f, const R& c) { return f*=make_formula<X>(c); }
 
-// Make a constant of type T with value c based on a prototype vector v
-template<class P, class PR, class Y> inline Float<P,PR> make_constant(const Y& c, const Float<P,PR>& x) {
-    return Float<P,PR>(c,x.precision());
-}
 
 // FIXME: Should allow change of precision!
-template<class PW, class PR, class PS> inline Float<PW,PR> make_constant(const Float<PS,PR>& c, const Float<PW,PR>& x) {
-    return Float<PW,PR>(c);
-}
+template<class PR> inline FloatApproximation<PR> make_constant(const FloatApproximation<PR>& c, const FloatApproximation<PR>& x) {
+    return FloatApproximation<PR>(c,x.precision()); }
+
+template<class PR> inline FloatApproximation<PR> make_constant(const FloatApproximation<PR>& c, const FloatBounds<PR>& x) {
+    return FloatApproximation<PR>(c,x.precision()); }
+
+template<class PR> inline FloatBounds<PR> make_constant(const FloatBounds<PR>& c, const FloatApproximation<PR>& x) {
+    return FloatBounds<PR>(c,x.precision()); }
+
+template<class PR> inline FloatBounds<PR> make_constant(const FloatBounds<PR>& c, const FloatBounds<PR>& x) {
+    return FloatBounds<PR>(c,x.precision()); }
+
+template<class PR> inline FloatBounds<PR> make_constant(const Real& c, const FloatApproximation<PR>& x) {
+    return FloatBounds<PR>(c,x.precision()); }
+
+template<class PR> inline FloatBounds<PR> make_constant(const Real& c, const FloatBounds<PR>& x) {
+    return FloatBounds<PR>(c,x.precision()); }
 
 template<class R, EnableIf<IsSame<R,Real>> =dummy> inline R make_constant(const R& c, const R& x) {
     return c;

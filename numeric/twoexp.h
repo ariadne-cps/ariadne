@@ -50,6 +50,8 @@ class TwoExp {
     operator Float64Error () const;
     operator Float64Ball () const;
     operator Float64Bounds () const;
+    friend Float64Value operator+(TwoExp);
+    friend Float64Value operator-(TwoExp);
 };
 inline TwoExp two_exp(Int n) { return TwoExp(n); }
 

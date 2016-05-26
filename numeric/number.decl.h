@@ -99,7 +99,7 @@ using ValidatedNumericType=Float64Bounds;
 using UpperNumericType=Float64UpperBound;
 using LowerNumericType=Float64LowerBound;
 using ApproximateNumericType=Float64Approximation;
-using PositiveUpperNumericType=PositiveFloat64UpperBound;
+using ErrorNumericType=Float64Error;
 
 } // namespace Ariadne
 

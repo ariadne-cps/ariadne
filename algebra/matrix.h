@@ -716,9 +716,6 @@ Tuple< Matrix<Float64Approximation>, PivotMatrix> triangular_factor(const Matrix
 Matrix<Float64Approximation> triangular_multiplier(const Matrix<Float64Approximation>& A);
 
 
-inline Matrix<Float64Value>& cast_exact(Matrix<Float64Approximation>& A) {
-    return reinterpret_cast<Matrix<Float64Value>&>(A); }
-
 } // namespace Ariadne
 
 #endif

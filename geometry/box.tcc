@@ -142,7 +142,7 @@ template<class I> typename Box<I>::VertexType Box<I>::upper_bounds() const
 template<class I> typename Box<I>::RadiusType Box<I>::radius() const
 {
     const Box<I>& bx=*this;
-    decltype(declval<I>().radius()) r=0;
+    decltype(declval<I>().radius()) r=0u;
     for(SizeType i=0; i!=bx.size(); ++i) {
         r=max(r,bx[i].radius());
     }
@@ -152,7 +152,7 @@ template<class I> typename Box<I>::RadiusType Box<I>::radius() const
 template<class I> typename Box<I>::RadiusType Box<I>::lengths() const
 {
     const Box<I>& bx=*this;
-    decltype(declval<I>().width()) r=0;
+    decltype(declval<I>().width()) r=0u;
     for(SizeType i=0; i!=bx.size(); ++i) {
         r += bx[i].width();
     }
@@ -162,7 +162,7 @@ template<class I> typename Box<I>::RadiusType Box<I>::lengths() const
 template<class I> typename Box<I>::RadiusType Box<I>::measure() const
 {
     const Box<I>& bx=*this;
-    decltype(declval<I>().width()) r=1;
+    decltype(declval<I>().width()) r=1u;
     for(SizeType i=0; i!=bx.size(); ++i) {
         r*=bx[i].width();
     }

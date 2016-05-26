@@ -38,6 +38,7 @@
 #include "decimal.h"
 
 #include "float.h"
+#include "float-user.h"
 
 #include "number_wrapper.h"
 
@@ -148,18 +149,18 @@ Float64Approximation Real::approx() const { return this->_ptr->_value(); }
 double Real::get_d() const { return this->approx().get_d(); }
 
 /*
-template<class PR> Float<MetricTag,PR>::Float(Real const& x) : Float<MetricTag,PR>(x.lower(),x.upper()) { }
-template<class PR> Float<BoundedTag,PR>::Float(Real const& x) : Float<BoundedTag,PR>(x.lower(),x.upper()) { }
-template<class PR> Float<UpperTag,PR>::Float(Real const& x) : Float<UpperTag,PR>(x.upper()) { }
-template<class PR> Float<LowerTag,PR>::Float(Real const& x) : Float<LowerTag,PR>(x.lower()) { }
-template<class PR> Float<ApproximateTag,PR>::Float(Real const& x) : Float<ApproximateTag,PR>(x.approx()) { }
+template<class PR> FloatBall<PR>::Float(Real const& x) : FloatBall<PR>(x.lower(),x.upper()) { }
+template<class PR> FloatBounds<PR>::Float(Real const& x) : FloatBounds<PR>(x.lower(),x.upper()) { }
+template<class PR> FloatUpperBound<PR>::Float(Real const& x) : FloatUpperBound<PR>(x.upper()) { }
+template<class PR> FloatLowerBound<PR>::Float(Real const& x) : FloatLowerBound<PR>(x.lower()) { }
+template<class PR> FloatApproximation<PR>::Float(Real const& x) : FloatApproximation<PR>(x.approx()) { }
 */
 
-template<> Float<MetricTag,Precision64>::Float(Real const& x) : Float<MetricTag,Precision64>(x.approx().raw(),max(sub_up(x.upper().raw(),x.approx().raw()),sub_up(x.approx().raw(),x.lower().raw()))) { }
-template<> Float<BoundedTag,Precision64>::Float(Real const& x) : Float<BoundedTag,Precision64>(x.lower(),x.upper()) { }
-template<> Float<UpperTag,Precision64>::Float(Real const& x) : Float<UpperTag,Precision64>(x.upper()) { }
-template<> Float<LowerTag,Precision64>::Float(Real const& x) : Float<LowerTag,Precision64>(x.lower()) { }
-template<> Float<ApproximateTag,Precision64>::Float(Real const& x) : Float<ApproximateTag,Precision64>(x.approx()) { }
+template<> FloatBall<Precision64>::FloatBall(Real const& x) : FloatBall<Precision64>(x.approx().raw(),max(sub_up(x.upper().raw(),x.approx().raw()),sub_up(x.approx().raw(),x.lower().raw()))) { }
+template<> FloatBounds<Precision64>::FloatBounds(Real const& x) : FloatBounds<Precision64>(x.lower(),x.upper()) { }
+template<> FloatUpperBound<Precision64>::FloatUpperBound(Real const& x) : FloatUpperBound<Precision64>(x.upper()) { }
+template<> FloatLowerBound<Precision64>::FloatLowerBound(Real const& x) : FloatLowerBound<Precision64>(x.lower()) { }
+template<> FloatApproximation<Precision64>::FloatApproximation(Real const& x) : FloatApproximation<Precision64>(x.approx()) { }
 
 Real::Real(std::uint64_t m, Void*) : Real(std::make_shared<RealConstant<Integer>>(m)) { }
 Real::Real(std::int64_t n, Void*) : Real(std::make_shared<RealConstant<Integer>>(n)) { }
@@ -175,6 +176,7 @@ Real mul(Real const& x1, Real const& x2) { return make_real(Mul(),x1,x2); }
 Real div(Real const& x1, Real const& x2) { return make_real(Div(),x1,x2); }
 Real pow(Real const& x1, Nat m2) { return make_real(Pow(),x1,Int(m2)); }
 Real pow(Real const& x1, Int n2) { return make_real(Pow(),x1,n2); }
+Real nul(Real const& x) { return Real(0); }
 Real pos(Real const& x) { return make_real(Pos(),x); }
 Real neg(Real const& x) { return make_real(Neg(),x); }
 Real sqr(Real const& x) { return make_real(Sqr(),x); }
@@ -319,9 +321,10 @@ FloatMPUpperBound UpperReal::get(PrecisionMP pr) const {
 inline Real const& cast_real(LowerReal const& lr) { return reinterpret_cast<Real const&>(lr); }
 inline Real const& cast_real(UpperReal const& ur) { return reinterpret_cast<Real const&>(ur); }
 inline Real const& make_signed(PositiveReal const& pr) { return pr; }
-inline PositiveReal const& cast_positive(Real const& pr) { return static_cast<PositiveReal const&>(pr); }
 inline LowerReal const& make_lower(Real const& r) { return reinterpret_cast<LowerReal const&>(r); }
 inline UpperReal const& make_upper(Real const& r) { return reinterpret_cast<UpperReal const&>(r); }
+
+PositiveReal cast_positive(Real const& pr) { return static_cast<PositiveReal const&>(pr); }
 
 LowerReal max(LowerReal lr1, LowerReal lr2) { return make_lower(max(cast_real(lr1),cast_real(lr2))); }
 LowerReal min(LowerReal lr1, LowerReal lr2) { return make_lower(min(cast_real(lr1),cast_real(lr2))); }

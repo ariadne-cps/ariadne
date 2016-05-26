@@ -70,8 +70,8 @@ template<class U> class Interval {
     typedef decltype(-declval<U>()) L;
     typedef decltype(declval<U>()+declval<L>()) C;
     typedef typename SplitEndTypedef<U>::Type M;
-    typedef decltype(declval<U>()-declval<M>()) R;
-    typedef decltype(declval<U>()-declval<L>()) W;
+    typedef decltype(cast_positive(declval<U>()-declval<M>())) R;
+    typedef decltype(cast_positive(declval<U>()-declval<L>())) W;
 
   public:
     //! \brief The computational paradigm used by the interval.
@@ -321,7 +321,7 @@ inline Float64UpperInterval acos(Float64UpperInterval ivl) {
 inline Float64UpperInterval atan(Float64UpperInterval ivl) {
     return make_interval(atan(cast_singleton(ivl))); }
 
-inline PositiveFloat64UpperBound mag(Float64UpperInterval ivl) {
+inline Float64Error mag(Float64UpperInterval ivl) {
     return mag(cast_singleton(ivl)); }
 inline Float64LowerBound mig(Float64UpperInterval ivl) {
     return mig(cast_singleton(ivl)); }

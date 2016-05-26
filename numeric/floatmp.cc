@@ -365,6 +365,9 @@ FloatMP floor(FloatMP const& x) {
 FloatMP ceil(FloatMP const& x) {
     FloatMP r(x.precision()); mpfr_ceil(r._mpfr,x._mpfr); return std::move(r);
 };
+FloatMP round(FloatMP const& x) {
+    FloatMP r(x.precision()); mpfr_round(r._mpfr,x._mpfr); return std::move(r);
+};
 
 FloatMP abs(FloatMP const& x, FloatMP::RoundingModeType rnd) {
     FloatMP r(x.precision(),NoInit()); mpfr_abs(r._mpfr,x._mpfr,MPFR_RNDN); return std::move(r);

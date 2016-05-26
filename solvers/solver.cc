@@ -324,7 +324,7 @@ SolverBase::zero(const ValidatedVectorFunction& f,
     if(!consistent(f.evaluate(r),Vector<ValidatedNumericType>(f.result_size()))) {
         ARIADNE_THROW(NoSolutionException,"SolverBase::zero","No result found in "<<bx<<"; f("<<r<<") is inconsistent with zero");
     } else {
-        Float64UpperBound widen=Float64Value(Float64::eps())*sup_error(r);
+        Float64Error widen=Float64Error(Float64::eps())*sup_error(r);
         r+=Vector<ValidatedNumericType>(r.size(),ValidatedNumericType(-widen,+widen));
         nr=this->step(f,r);
         if(refines(nr,r)) {

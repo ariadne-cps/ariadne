@@ -120,10 +120,10 @@ template<class X> decltype(mag(declval<X>())) sup_norm(const Matrix<X>& A)
     return result;
 }
 
-template<class X> decltype(declval<X>()+mag(declval<X>())) log_norm(Matrix<X> const& A)
+template<class X> decltype(+mag(declval<X>())) log_norm(Matrix<X> const& A)
 {
     ARIADNE_PRECONDITION(A.row_size()==A.column_size());
-    typedef decltype(declval<X>()+mag(declval<X>())) R;
+    typedef decltype(+mag(declval<X>())) R;
     R r(-inf);
     for(SizeType i=0; i!=A.row_size(); ++i) {
         R t=A[i][i];

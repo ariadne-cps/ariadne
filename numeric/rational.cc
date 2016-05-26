@@ -53,7 +53,7 @@ class InvalidRationalLiteralException {
 
 // Shortened version of raw float classes sufficient for comparison operator
 struct Float64 { volatile double dbl; double get_d() const { return dbl; } };
-template<> struct Float<ExactTag,Precision64> { Float64 _v; Float64 raw() const { return _v; } };
+template<> struct FloatValue<Precision64> { Float64 _v; Float64 raw() const { return _v; } };
 
 Rational rec(Integer const& z) {
     return Rational(1,z);
@@ -225,6 +225,11 @@ Rational min(Rational const& q1, Rational const& q2) {
 
 Rational abs(Rational const& q) {
     Rational r; mpq_abs(r._mpq,q._mpq);
+    return std::move(r);
+}
+
+Rational nul(Rational const& q) {
+    Rational r; mpq_set_si(r._mpq,0,1u);
     return std::move(r);
 }
 

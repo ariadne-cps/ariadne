@@ -83,7 +83,7 @@ UpperIntervalType emulrng(const RawFloatVector& x, const RawFloatVector& z) {
 }
 
 Float64UpperBound total_widths(const UpperBoxType& bx) {
-    Float64UpperBound res=0u;
+    PositiveFloat64UpperBound res=0u;
     for(Nat i=0; i!=bx.size(); ++i) {
         res+=(bx[i].width());
     }
@@ -91,7 +91,7 @@ Float64UpperBound total_widths(const UpperBoxType& bx) {
 }
 
 Float64UpperBound average_width(const UpperBoxType& bx) {
-    Float64UpperBound res=0u;
+    PositiveFloat64UpperBound res=0u;
     for(Nat i=0; i!=bx.size(); ++i) {
         if(definitely(bx[i].lower()>bx[i].upper())) { return -infty; }
         res+=bx[i].width();
@@ -99,16 +99,16 @@ Float64UpperBound average_width(const UpperBoxType& bx) {
     return res/bx.size();
 }
 
-Float64UpperBound maximum_scaled_width(const UpperBoxType& bx, const Vector<Float64Value>& sf) {
-    Float64UpperBound res=0u;
+Float64UpperBound maximum_scaled_width(const UpperBoxType& bx, const Vector<PositiveFloat64Value>& sf) {
+    PositiveFloat64UpperBound res=0u;
     for(Nat i=0; i!=bx.size(); ++i) {
         res=max(bx[i].width()/sf[i],res);
     }
     return res;
 }
 
-Float64UpperBound average_scaled_width(const UpperBoxType& bx, const Vector<Float64Value>& sf) {
-    Float64UpperBound res=0u;
+Float64UpperBound average_scaled_width(const UpperBoxType& bx, const Vector<PositiveFloat64Value>& sf) {
+    PositiveFloat64UpperBound res=0u;
     for(Nat i=0; i!=bx.size(); ++i) {
         res+=(bx[i].width()/sf[i]);
     }
@@ -116,11 +116,11 @@ Float64UpperBound average_scaled_width(const UpperBoxType& bx, const Vector<Floa
 }
 
 Float64 maximum_scaled_width(const UpperBoxType& bx, const Vector<Float64>& sf) {
-    return maximum_scaled_width(bx,reinterpret_cast<Vector<Float64Value>const&>(sf)).raw();
+    return maximum_scaled_width(bx,reinterpret_cast<Vector<PositiveFloat64Value>const&>(sf)).raw();
 }
 
 Float64 average_scaled_width(const UpperBoxType& bx, const Vector<Float64>& sf) {
-    return average_scaled_width(bx,reinterpret_cast<Vector<Float64Value>const&>(sf)).raw();
+    return average_scaled_width(bx,reinterpret_cast<Vector<PositiveFloat64Value>const&>(sf)).raw();
 }
 
 } // namespace

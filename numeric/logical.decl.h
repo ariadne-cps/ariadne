@@ -46,6 +46,7 @@ typedef Logical<EffectiveLowerTag> NegatedSierpinskian;
 typedef Logical<ValidatedTag> ValidatedKleenean;
 typedef Logical<ValidatedUpperTag> ValidatedSierpinskian;
 typedef Logical<ValidatedLowerTag> ValidatedNegatedSierpinskian;
+typedef Logical<ApproximateTag> ApproximateKleenean;
 typedef Logical<ApproximateTag> Fuzzy;
 
 /*

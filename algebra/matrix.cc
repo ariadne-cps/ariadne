@@ -900,7 +900,7 @@ template Matrix<FloatMPBounds> solve(const Matrix<FloatMPBounds>&, const Matrix<
 
 template class Matrix<Real>;
 
-template PositiveFloat64UpperBound sup_norm(const Matrix<Float64Bounds>& A);
+template Float64Error sup_norm(const Matrix<Float64Bounds>& A);
 template Float64UpperBound log_norm(const Matrix<Float64Bounds>& A);
 
 template Matrix<Float64Value>const& cast_exact(const Matrix<Float64Approximation>& mx);

@@ -1346,7 +1346,7 @@ template<class F> Bool TaylorModel<ValidatedTag,F>::_consistent(const TaylorMode
 template<class F> Bool TaylorModel<ValidatedTag,F>::_inconsistent(const TaylorModel<ValidatedTag,F>& tm1, const TaylorModel<ValidatedTag,F>& tm2)
 {
     ARIADNE_PRECONDITION(tm1.argument_size()==tm2.argument_size());
-    return (Ariadne::mag(tm1.value()-tm2.value()).raw() > (tm1.error()+tm2.error()).raw());
+    return (mag(tm1.value()-tm2.value()).raw() > (tm1.error()+tm2.error()).raw());
 }
 
 template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::_refinement(const TaylorModel<ValidatedTag,F>& x, const TaylorModel<ValidatedTag,F>& y) {

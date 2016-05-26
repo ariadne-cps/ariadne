@@ -90,13 +90,16 @@ template<class T1, class T2> inline auto sub(T1&& t1, T2&& t2) -> decltype(t1-t2
 template<class T1, class T2> inline auto mul(T1&& t1, T2&& t2) -> decltype(t1*t2) { return std::forward<T1>(t1) * std::forward<T2>(t2); }
 template<class T1, class T2> inline auto div(T1&& t1, T2&& t2) -> decltype(t1/t2) { return std::forward<T1>(t1) / std::forward<T2>(t2); }
 
-template<class O, class P> class UnaryOperator<O,Float<P,Precision64>> : public UnaryOperatorInterface {
-    typedef Float<P,Precision64> A1;
+template<class O, class F, class PR> class FloatUnaryOperator;
+
+template<class O, class A1> class FloatUnaryOperator<O,A1,Precision64> : public UnaryOperatorInterface {
     O _op; A1 _arg1;
   public:
-    UnaryOperator(A1 a1) : _arg1(a1) { }
-    UnaryOperator(O o, A1 a1) : _op(o), _arg1(a1) { }
-    virtual NumberInterface* _compute(Real a2) const { return _heap_move_number(_op(_arg1,a2)); }
+    FloatUnaryOperator(A1 a1) : _op(), _arg1(a1) { }
+    FloatUnaryOperator(O o, A1 a1) : _op(o), _arg1(a1) { }
+    virtual NumberInterface* _compute(Real a2) const {
+        Float64Approximation r=_op(_arg1,a2);
+        return _heap_move_number(_op(_arg1,a2)); }
     virtual NumberInterface* _compute(Float64Value a2) const { return _heap_move_number(_op(_arg1,a2)); }
     virtual NumberInterface* _compute(Float64Ball a2) const { return _heap_move_number(_op(_arg1,a2)); }
     virtual NumberInterface* _compute(Float64Bounds a2) const { return _heap_move_number(_op(_arg1,a2)); }
@@ -107,12 +110,11 @@ template<class O, class P> class UnaryOperator<O,Float<P,Precision64>> : public 
     virtual NumberInterface* _compute(FloatMPApproximation a2) const { assert(false); }
 };
 
-template<class O, class P> class UnaryOperator<O,Float<P,PrecisionMP>> : public UnaryOperatorInterface {
-    typedef Float<P,PrecisionMP> A1;
+template<class O, class A1> class FloatUnaryOperator<O,A1,PrecisionMP> : public UnaryOperatorInterface {
     O _op; A1 _arg1;
   public:
-    UnaryOperator(A1 a1) : _arg1(a1) { }
-    UnaryOperator(O o, A1 a1) : _op(o), _arg1(a1) { }
+    FloatUnaryOperator(A1 a1) : _op(), _arg1(a1) { }
+    FloatUnaryOperator(O o, A1 a1) : _op(o), _arg1(a1) { }
     virtual NumberInterface* _compute(Real a2) const { return _heap_move_number(_op(_arg1,a2)); }
     virtual NumberInterface* _compute(Float64Value a2) const { assert(false); }
     virtual NumberInterface* _compute(Float64Ball a2) const { assert(false); }
@@ -123,6 +125,15 @@ template<class O, class P> class UnaryOperator<O,Float<P,PrecisionMP>> : public 
     virtual NumberInterface* _compute(FloatMPBounds a2) const { return _heap_move_number(_op(_arg1,a2)); }
     virtual NumberInterface* _compute(FloatMPApproximation a2) const { return _heap_move_number(_op(_arg1,a2)); }
 };
+
+template<class O, class PR> class UnaryOperator<O,FloatApproximation<PR>> : public FloatUnaryOperator<O,FloatApproximation<PR>,PR> {
+    using FloatUnaryOperator<O,FloatApproximation<PR>,PR>::FloatUnaryOperator; };
+template<class O, class PR> class UnaryOperator<O,FloatBounds<PR>> : public FloatUnaryOperator<O,FloatBounds<PR>,PR> {
+    using FloatUnaryOperator<O,FloatBounds<PR>,PR>::FloatUnaryOperator; };
+template<class O, class PR> class UnaryOperator<O,FloatBall<PR>> : public FloatUnaryOperator<O,FloatBall<PR>,PR> {
+    using FloatUnaryOperator<O,FloatBall<PR>,PR>::FloatUnaryOperator; };
+template<class O, class PR> class UnaryOperator<O,FloatValue<PR>> : public FloatUnaryOperator<O,FloatValue<PR>,PR> {
+    using FloatUnaryOperator<O,FloatValue<PR>,PR>::FloatUnaryOperator; };
 
 template<class X> class NumberWrapper
     : public virtual NumberInterface
@@ -145,7 +156,7 @@ template<class X> class NumberWrapper
     virtual NumberInterface* _copy() const { return new NumberWrapper<X>(static_cast<const X&>(*this)); }
     virtual NumberInterface* _move() { return new NumberWrapper<X>(std::move(static_cast<X&>(*this))); }
     virtual NumberInterface* _nul() const {
-        return _heap_move_number(0*_cast(*this)); }
+        return _heap_move_number(nul(_cast(*this))); }
     virtual NumberInterface* _pos() const {
         return _heap_move_number(pos(_cast(*this))); }
     virtual NumberInterface* _sqr() const {

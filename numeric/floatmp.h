@@ -127,6 +127,7 @@ class FloatMP {
 
     friend FloatMP floor(FloatMP const& x);
     friend FloatMP ceil(FloatMP const& x);
+    friend FloatMP round(FloatMP const& x);
 
     friend FloatMP nul(FloatMP const& x, RoundingModeType=get_rounding_mode());
     friend FloatMP half(FloatMP const& x, RoundingModeType=get_rounding_mode());

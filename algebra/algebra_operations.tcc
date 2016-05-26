@@ -152,6 +152,13 @@ _compose2(const AnalyticFunction& fn, const A& tm, double eps)
     return res;
 }
 
+template<class PR> FloatError<PR> error_bound(FloatBounds<PR> const& b, FloatValue<PR> const& c) {
+    return FloatError<PR>(max(b.upper()-c,c-b.lower()));
+}
+
+template<class PR> FloatError<PR> error_bound(FloatBounds<PR> const& b, FloatBounds<PR> const& c) {
+    return FloatError<PR>(max(b.upper()-c.lower(),c.upper()-b.lower()));
+}
 
 // Compose using the Taylor formula with a constant truncation error. This method
 // is usually better than _compose1 since there is no blow-up of the trunction
@@ -171,13 +178,12 @@ _compose3(const AnalyticFunction& fn, const A& tm, Float64 eps)
     //std::cerr<<"c="<<c<<" r="<<r<<" r-c="<<r-c<<" e="<<mag(r-c)<<"\n";
     //std::cerr<<"cs[d]="<<centre_series[d]<<" rs[d]="<<range_series[d]<<"\n";
     //std::cerr<<"cs="<<centre_series<<"\nrs="<<range_series<<"\n";
-    Float64Bounds se=range_series[d]-centre_series[d];
-    Float64Bounds e=r-c;
-    Float64Bounds p=pow(e,d-1);
-    p=Float64Bounds(-(-p.lower()*(-e.lower())),p.upper()*e.upper());
+    Float64Error se=error_bound(range_series[d],centre_series[d]);
+    Float64Error e=error_bound(r,c);
+    Float64Error p=pow(e,d);
     //std::cerr<<"se="<<se<<" e="<<e<<" p="<<p<<std::endl;
     // FIXME: Here we assume the dth derivative of f is monotone increasing
-    Float64 truncation_error=max(-(-se.lower()*(-p.lower())),se.upper()*p.upper()).raw();
+    Float64 truncation_error=(se*p).raw();
     //std::cerr<<"te="<<truncation_error<<"\n";
     if(truncation_error>TRUNCATION_ERROR) {
         ARIADNE_WARN("Truncation error estimate "<<truncation_error
@@ -237,6 +243,7 @@ sqrt(const A& x)
 
     Series<X> sqrt_series=Series<X>::sqrt(X(1));
     Nat d=integer_cast<Int>((log((1-eps)*tol)/log(eps)+1));
+
     auto trunc_err=pow(eps,d)/cast_positive(1-eps)*mag(sqrt_series[d]);
 
     A y=x/avg-1;

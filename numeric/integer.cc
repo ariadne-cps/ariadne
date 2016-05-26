@@ -260,6 +260,11 @@ Integer& operator*=(Integer& z1, Integer const& z2) {
 }
 */
 
+Integer nul(Integer const& z) {
+    Integer r; mpz_set_si(r._mpz,0);
+    return std::move(r);
+}
+
 Integer pos(Integer const& z) {
     Integer r; mpz_set(r._mpz,z._mpz);
     return std::move(r);

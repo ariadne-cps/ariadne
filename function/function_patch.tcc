@@ -81,6 +81,11 @@ inline OutputStream& operator<<(OutputStream& os, const Representation<PositiveF
     return os << reinterpret_cast<Representation<Float64>const&>(flt_repr);
 }
 
+inline OutputStream& operator<<(OutputStream& os, const Representation<Float64Error>& flt_repr)
+{
+    return os << reinterpret_cast<Representation<Float64>const&>(flt_repr);
+}
+
 inline OutputStream& operator<<(OutputStream& os, const Representation<ExactIntervalType>& ivl_repr)
 {
     const ExactIntervalType& ivl=*ivl_repr.pointer;

@@ -55,6 +55,7 @@ template<class T, class MT=T> struct Multiplicative {
 };
 
 template<class T, class NT=T> struct Abelian {
+    friend T nul(T const&);
     friend T pos(T const&);
     friend NT neg(T const&);
     friend T add(T const&, T const&);

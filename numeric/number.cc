@@ -72,8 +72,8 @@ template class NumberWrapper<Float64Ball>;
 template class NumberWrapper<Float64Value>;
 
 template<> Float64Approximation::operator ApproximateNumber() const { return ApproximateNumber(new NumberWrapper<Float64Approximation>(*this)); }
-template<> Float64LowerBound::operator ValidatedLowerNumber() const { return ValidatedLowerNumber(new NumberWrapper<Float64LowerBound>(*this)); }
-template<> Float64UpperBound::operator ValidatedUpperNumber() const { return ValidatedUpperNumber(new NumberWrapper<Float64UpperBound>(*this)); }
+//template<> Float64LowerBound::operator ValidatedLowerNumber() const { return ValidatedLowerNumber(new NumberWrapper<Float64LowerBound>(*this)); }
+//template<> Float64UpperBound::operator ValidatedUpperNumber() const { return ValidatedUpperNumber(new NumberWrapper<Float64UpperBound>(*this)); }
 template<> Float64Bounds::operator ValidatedNumber() const { return ValidatedNumber(new NumberWrapper<Float64Bounds>(*this)); }
 template<> Float64Ball::operator ValidatedNumber() const { return ValidatedNumber(new NumberWrapper<Float64Ball>(*this)); }
 template<> Float64Value::operator ExactNumber() const { return ExactNumber(new NumberWrapper<Float64Value>(*this)); }
@@ -83,14 +83,14 @@ template class NumberWrapper<FloatMPApproximation>;
 //template class NumberWrapper<FloatMPUpperBound>;
 template class NumberWrapper<FloatMPBounds>;
 template class NumberWrapper<FloatMPBall>;
-//template class NumberWrapper<FloatMPValue>;
+template class NumberWrapper<FloatMPValue>;
 
-template<> FloatMPValue::operator ExactNumber() const { return ExactNumber(new NumberWrapper<FloatMPValue>(*this)); }
-//template<> FloatMPBall::operator ValidatedNumber() const { return ValidatedNumber(new NumberWrapper<FloatMPBall>(*this)); }
-//template<> FloatMPBounds::operator ValidatedNumber() const { return ValidatedNumber(new NumberWrapper<FloatMPBounds>(*this)); }
-//template<> FloatMPUpperBound::operator ValidatedUpperNumber() const { return ValidatedUpperNumber(new NumberWrapper<FloatMPUpperBound>(*this)); }
+template<> FloatMPApproximation::operator ApproximateNumber() const { return ApproximateNumber(new NumberWrapper<FloatMPApproximation>(*this)); }
 //template<> FloatMPLowerBound::operator ValidatedLowerNumber() const { return ValidatedLowerNumber(new NumberWrapper<FloatMPLowerBound>(*this)); }
-//template<> FloatMPApproximation::operator ApproximateNumber() const { return ApproximateNumber(new NumberWrapper<FloatMPApproximation>(*this)); }
+//template<> FloatMPUpperBound::operator ValidatedUpperNumber() const { return ValidatedUpperNumber(new NumberWrapper<FloatMPUpperBound>(*this)); }
+template<> FloatMPBounds::operator ValidatedNumber() const { return ValidatedNumber(new NumberWrapper<FloatMPBounds>(*this)); }
+template<> FloatMPBall::operator ValidatedNumber() const { return ValidatedNumber(new NumberWrapper<FloatMPBall>(*this)); }
+template<> FloatMPValue::operator ExactNumber() const { return ExactNumber(new NumberWrapper<FloatMPValue>(*this)); }
 
 template<> String class_name<NumberHandle>() { return "NumberHandle"; }
 

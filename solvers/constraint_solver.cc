@@ -91,7 +91,7 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
 {
 
     static const Float64Value XSIGMA=0.125_exact;
-    static const Float64Value TERR=-1.0_exact*two_exp(-10);
+    static const Float64Value TERR=-two_exp(-10);
     static const Float64 inf = Ariadne::inf;
 
     ARIADNE_LOG(4,"domain="<<domain<<"\nfunction="<<function<<"\ncodomain="<<codomain<<"\n");

@@ -86,6 +86,8 @@ TaylorSeries<Float64Bounds>::TaylorSeries(OP unary_operator, const ExactInterval
 inline
 Void TaylorSeries<Float64Bounds>::sweep(Float64Value threshold) {
     for(DegreeType i=0; i<=degree(); ++i) {
+        Float64Value ei=_expansion[i];
+        PositiveFloat64UpperBound pei=mag(ei);
         if(definitely(mag(_expansion[i])<=threshold)) {
             _error+=mag(_expansion[i]);
             _expansion[i]=0;

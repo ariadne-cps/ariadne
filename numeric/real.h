@@ -269,6 +269,8 @@ class PositiveUpperReal : public UpperReal
     PositiveLowerReal div(PositiveLowerReal const&, PositiveUpperReal const&);
 };
 
+PositiveReal cast_positive(Real const& x);
+
 } // namespace Ariadne
 
 #include "numeric/logical.h"

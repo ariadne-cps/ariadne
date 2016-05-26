@@ -25,9 +25,9 @@
 namespace Ariadne {
 
 template<class M> inline M make_split_point(M const& m) { return m; }
-template<class PR> inline Float<ExactTag,PR> make_split_point(Float<ApproximateTag,PR> const& am) { return cast_exact(am); }
-template<class PR> inline Float<ExactTag,PR> make_split_point(Float<BoundedTag,PR> const& vm) { return vm.value(); }
-template<class PR> inline Float<ExactTag,PR> make_split_point(Float<MetricTag,PR> const& bm) { return bm.value(); }
+template<class PR> inline FloatValue<PR> make_split_point(FloatApproximation<PR> const& am) { return cast_exact(am); }
+template<class PR> inline FloatValue<PR> make_split_point(FloatBounds<PR> const& vm) { return vm.value(); }
+template<class PR> inline FloatValue<PR> make_split_point(FloatBall<PR> const& bm) { return bm.value(); }
 
 
 template<class U> Interval<U>::Interval() : _l(+infty), _u(-infty) { }
@@ -40,8 +40,8 @@ template<class U> auto Interval<U>::lower() const -> LowerBoundType const& { ret
 template<class U> auto Interval<U>::upper() const -> UpperBoundType const& { return _u; }
 template<class U> auto Interval<U>::centre() const -> CentreType { return (_l+_u)/2u; }
 template<class U> auto Interval<U>::midpoint() const -> MidpointType { auto m=((_l+_u)/2); return make_split_point(m); }
-template<class U> auto Interval<U>::radius() const -> RadiusType { return max(this->upper()-this->midpoint(),this->midpoint()-this->lower()); }
-template<class U> auto Interval<U>::width() const -> WidthType { return this->upper()-this->lower(); }
+template<class U> auto Interval<U>::radius() const -> RadiusType { return cast_positive(max(this->upper()-this->midpoint(),this->midpoint()-this->lower())); }
+template<class U> auto Interval<U>::width() const -> WidthType { return cast_positive(this->upper()-this->lower()); }
 
 template<class U> Interval<U> Interval<U>::empty_interval() { return Interval<U>(+infty,-infty); }
 template<class U> Interval<U> Interval<U>::unit_interval() { return Interval<U>(-1,+1); }

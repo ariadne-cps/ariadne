@@ -135,6 +135,73 @@ template<class X, class NX=X> class DeclareFloatOperators : DeclareNumericOperat
     friend InputStream& operator>>(InputStream&, X&);
 };
 
+template<class X,class R> class ProvideInplaceOperators
+{
+};
+template<class X> class ProvideInplaceOperators<X,X>
+{
+    friend X& operator+=(X& x1, X const& x2) { return x1=add(x1,x2); }
+    friend X& operator-=(X& x1, X const& x2) { return x1=sub(x1,x2); }
+    friend X& operator*=(X& x1, X const& x2) { return x1=mul(x1,x2); }
+    friend X& operator/=(X& x1, X const& x2) { return x1=div(x1,x2); }
+};
+template<class X, class R=X> class ProvideOperators
+    : ProvideInplaceOperators<X,R>
+{
+    friend X operator+(X const& x) { return pos(x); }
+    friend X operator-(X const& x) { return neg(x); }
+    friend R operator+(X const& x1, X const& x2) { return add(x1,x2); }
+    friend R operator-(X const& x1, X const& x2) { return sub(x1,x2); }
+    friend R operator*(X const& x1, X const& x2) { return mul(x1,x2); }
+    friend R operator/(X const& x1, X const& x2) { return div(x1,x2); }
+};
+
+template<class X, class NX> class ProvideDirectedOperators
+{
+    friend NX operator-(X const&);
+    friend X operator+(X const& x) { return pos(x); }
+    friend X operator-(NX const& x) { return neg(x); }
+    friend X operator+(X const& x1, X const& x2) { return add(x1,x2); }
+    friend X operator-(X const& x1, NX const& x2) { return sub(x1,x2); }
+    friend X& operator+=(X& x1, X const& x2) { return x1=add(x1,x2); }
+    friend X& operator-=(X& x1, NX const& x2) { return x1=sub(x1,x2); }
+};
+
+template<class X, class Y, class R=X, class NR=R> class ProvideMixedOperators {
+    friend R operator+(Y const& y1, X const& x2) { return make_float(y1,x2.precision())+x2; }
+    friend R operator+(X const& x1, Y const& y2) { return x1+make_float(y2,x1.precision()); }
+    friend NR operator-(Y const& y1, X const& x2) { return make_float(y1,x2.precision())-x2; }
+    friend R operator-(X const& x1, Y const& y2) { return x1-make_float(y2,x1.precision()); }
+    friend R operator*(Y const& y1, X const& x2) { return make_float(y1,x2.precision())*x2; }
+    friend R operator*(X const& x1, Y const& y2) { return x1*make_float(y2,x1.precision()); }
+    friend NR operator/(Y const& y1, X const& x2) { return make_float(y1,x2.precision())/x2; }
+    friend R operator/(X const& x1, Y const& y2) { return x1/make_float(y2,x1.precision()); }
+};
+
+template<class PR> inline FloatBall<PR> make_float_ball(Real const& y, PR pr) { return FloatBall<PR>(make_float(y,pr)); }
+template<class PR> class ProvideMixedOperators<FloatBall<PR>,Real> {
+    typedef FloatBall<PR> X; typedef Real Y; typedef X R; typedef R NR;
+//friend FloatBall<PR> make_float_ball(Real const& y, PR pr) { return FloatBall<PR>(make_float(y,pr)); }
+    friend R operator+(Y const& y1, X const& x2) { return make_float_ball(y1,x2.precision())+x2; }
+    friend R operator+(X const& x1, Y const& y2) { return x1+make_float_ball(y2,x1.precision()); }
+    friend NR operator-(Y const& y1, X const& x2) { return make_float_ball(y1,x2.precision())-x2; }
+    friend R operator-(X const& x1, Y const& y2) { return x1-make_float_ball(y2,x1.precision()); }
+    friend R operator*(Y const& y1, X const& x2) { return make_float_ball(y1,x2.precision())*x2; }
+    friend R operator*(X const& x1, Y const& y2) { return x1*make_float_ball(y2,x1.precision()); }
+    friend NR operator/(Y const& y1, X const& x2) { return make_float_ball(y1,x2.precision())/x2; }
+    friend R operator/(X const& x1, Y const& y2) { return x1/make_float_ball(y2,x1.precision()); }
+};
+
+template<class X, class Y, class NX, class NY=Y> class ProvideMixedDirectedOperators
+{
+    friend X operator+(X const& x1, Y const& y2) { return x1+make_float(y2,x1.precision()); }
+    friend X operator+(Y const& y1, X const& x2) { return make_float(y1,x2.precision())+x2; }
+    friend X operator-(X const& x1, NY const& y2) { return x1-make_float(y2,x1.precision()); }
+    friend X operator-(Y const& y1, NX const& x2) { return make_float(y1,x2.precision())-x2; }
+    friend X& operator+=(X& x1, Y const& y2) { return x1=x1+y2; }
+    friend X& operator-=(X& x1, NY const& y2) { return x1=x1-y2; }
+};
+
 template<class X, class C, class A=C> class DeclareFloatComparisons {
     typedef decltype(not declval<A>()) E;
     friend E operator==(X const&, X const&);
@@ -192,6 +259,8 @@ template<class PR, class P1, class P2> using FloatLessType = Logical<Generic<Wea
 template<class PR> class FloatApproximation
     : public DeclareFloatOperators<FloatApproximation<PR>>
     , public DeclareFloatComparisons<FloatApproximation<PR>,ApproximateKleenean>
+    , public ProvideOperators<FloatApproximation<PR>>
+    , public ProvideMixedOperators<FloatApproximation<PR>,Real>
 {
     typedef ApproximateTag P; typedef RawFloat<PR> FLT;
   public:
@@ -247,6 +316,8 @@ template<class PR> class FloatLowerBound
     , public DeclareFloatOperators<FloatApproximation<PR>>
     , public DeclareFloatComparisons<FloatApproximation<PR>,ApproximateKleenean>
     , public DeclareDirectedFloatComparisons<FloatUpperBound<PR>,FloatLowerBound<PR>,ValidatedSierpinskian>
+    , public ProvideDirectedOperators<FloatLowerBound<PR>,FloatUpperBound<PR>>
+    , public ProvideMixedDirectedOperators<FloatLowerBound<PR>,Real,FloatUpperBound<PR>>
 {
     typedef LowerTag P; typedef RawFloat<PR> FLT;
   public:
@@ -298,6 +369,8 @@ template<class PR> class FloatUpperBound
     , public DeclareFloatOperators<FloatApproximation<PR>>
     , public DeclareFloatComparisons<FloatApproximation<PR>,ApproximateKleenean>
     , public DeclareDirectedFloatComparisons<FloatUpperBound<PR>,FloatLowerBound<PR>,ValidatedSierpinskian>
+    , public ProvideDirectedOperators<FloatUpperBound<PR>,FloatLowerBound<PR>>
+    , public ProvideMixedDirectedOperators<FloatUpperBound<PR>,Real,FloatLowerBound<PR>>
 {
     typedef UpperTag P; typedef RawFloat<PR> FLT;
   public:
@@ -377,6 +450,8 @@ template<class PR> class FloatUpperBound
 template<class PR> class FloatBounds
     : public DeclareFloatOperators<FloatBounds<PR>>
     , public DeclareFloatComparisons<FloatBounds<PR>,ValidatedKleenean>
+    , public ProvideOperators<FloatBounds<PR>>
+    , public ProvideMixedOperators<FloatBounds<PR>,Real>
 {
     typedef BoundedTag P; typedef RawFloat<PR> FLT;
   public:
@@ -446,6 +521,8 @@ template<class PR> class FloatBounds
 
 template<class PR> class FloatBall
     : public DeclareFloatOperators<FloatBall<PR>>
+    , public ProvideOperators<FloatBall<PR>>
+    , public ProvideMixedOperators<FloatBall<PR>,Real>
 {
     typedef MetricTag P; typedef RawFloat<PR> FLT;
   public:
@@ -507,6 +584,8 @@ template<class PR> class FloatValue
     : public DeclareFloatOperators<FloatBounds<PR>>
     , public DeclareMixedOperators<FloatValue<PR>, Real, FloatBounds<PR>>
     , public DeclareFloatComparisons<FloatValue<PR>,Boolean>
+    , public ProvideOperators<FloatValue<PR>,FloatBounds<PR>>
+    , public ProvideMixedOperators<FloatValue<PR>,Real,FloatBounds<PR>>
 {
     typedef ExactTag P; typedef RawFloat<PR> FLT;
   public:

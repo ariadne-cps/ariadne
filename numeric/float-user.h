@@ -42,7 +42,10 @@ namespace Ariadne {
 
 template<class X> class Positive;
 
-template<class X, class NX=X> struct DeclareNumericOperators {
+
+
+
+template<class X, class NX=X> struct DeclareDirectedNumericOperators {
     friend X operator+(X const& x);
     friend X operator-(NX const& x);
     friend NX operator-(X const& x);
@@ -65,49 +68,6 @@ template<class X, class NX=X> struct DeclareNumericOperators {
     friend X min(X const& x1, X const& x2);
 };
 
-template<class X> struct DeclareNumericOperators<X> {
-    friend X operator+(X const& x);
-    friend X operator-(X const& x);
-    friend X operator+(X const& x1, X const& x2);
-    friend X operator-(X const& x1, X const& x2);
-    friend X operator*(X const& x1, X const& x2);
-    friend X operator/(X const& x1, X const& x2);
-    friend X& operator+=(X& x1, X const& x2);
-    friend X& operator-=(X& x1, X const& x2);
-    friend X& operator*=(X& x1, X const& x2);
-    friend X& operator/=(X& x1, X const& x2);
-
-    friend X nul(X const& x);
-    friend X pos(X const& x);
-    friend X neg(X const& x);
-    friend X half(X const& x);
-    friend X sqr(X const& x);
-    friend X rec(X const& x);
-
-    friend X add(X const& x1, X const& x2);
-    friend X sub(X const& x1, X const& x2);
-    friend X mul(X const& x1, X const& x2);
-    friend X div(X const& x1, X const& x2);
-    friend X fma(X const& x1, X const& x2, X const& y);
-    friend X pow(X const& x, Nat m);
-    friend X pow(X const& x, Int n);
-
-    friend X sqrt(X const& x);
-    friend X exp(X const& x);
-    friend X log(X const& x);
-    friend X sin(X const& x);
-    friend X cos(X const& x);
-    friend X tan(X const& x);
-    friend X asin(X const& x);
-    friend X acos(X const& x);
-    friend X atan(X const& x);
-
-    friend X max(X const& x1, X const& x2);
-    friend X min(X const& x1, X const& x2);
-    friend X abs(X const& x);
-
-    friend X round(X const&);
-};
 
 template<class X, class Y, class R=X, class NR=R> class DeclareMixedOperators {
     friend R operator+(Y const& y1, X const& x2);
@@ -130,42 +90,16 @@ template<class X, class Y, class R=X, class NR=R> class DeclareMixedOperators {
 */
 };
 
-template<class X, class NX=X> class DeclareFloatOperators : DeclareNumericOperators<X,NX>, DeclareMixedOperators<X,Real,X,NX> {
+template<class X, class NX=X> class DeclareFloatOperations : DeclareNumericOperations<X,NX>, DeclareMixedOperators<X,Real,X,NX> {
     friend OutputStream& operator<<(OutputStream&, X const&);
     friend InputStream& operator>>(InputStream&, X&);
 };
 
-template<class X,class R> class ProvideInplaceOperators
-{
-};
-template<class X> class ProvideInplaceOperators<X,X>
-{
-    friend X& operator+=(X& x1, X const& x2) { return x1=add(x1,x2); }
-    friend X& operator-=(X& x1, X const& x2) { return x1=sub(x1,x2); }
-    friend X& operator*=(X& x1, X const& x2) { return x1=mul(x1,x2); }
-    friend X& operator/=(X& x1, X const& x2) { return x1=div(x1,x2); }
-};
-template<class X, class R=X> class ProvideOperators
-    : ProvideInplaceOperators<X,R>
-{
-    friend X operator+(X const& x) { return pos(x); }
-    friend X operator-(X const& x) { return neg(x); }
-    friend R operator+(X const& x1, X const& x2) { return add(x1,x2); }
-    friend R operator-(X const& x1, X const& x2) { return sub(x1,x2); }
-    friend R operator*(X const& x1, X const& x2) { return mul(x1,x2); }
-    friend R operator/(X const& x1, X const& x2) { return div(x1,x2); }
+template<class X, class NX=X> class DeclareDirectedFloatOperations : DeclareDirectedNumericOperations<X,NX>, DeclareMixedOperators<X,Real,X,NX> {
+    friend OutputStream& operator<<(OutputStream&, X const&);
+    friend InputStream& operator>>(InputStream&, X&);
 };
 
-template<class X, class NX> class ProvideDirectedOperators
-{
-    friend NX operator-(X const&);
-    friend X operator+(X const& x) { return pos(x); }
-    friend X operator-(NX const& x) { return neg(x); }
-    friend X operator+(X const& x1, X const& x2) { return add(x1,x2); }
-    friend X operator-(X const& x1, NX const& x2) { return sub(x1,x2); }
-    friend X& operator+=(X& x1, X const& x2) { return x1=add(x1,x2); }
-    friend X& operator-=(X& x1, NX const& x2) { return x1=sub(x1,x2); }
-};
 
 template<class X, class Y, class R=X, class NR=R> class ProvideMixedOperators {
     friend R operator+(Y const& y1, X const& x2) { return make_float(y1,x2.precision())+x2; }
@@ -202,7 +136,7 @@ template<class X, class Y, class NX, class NY=Y> struct ProvideMixedDirectedOper
     friend X& operator-=(X& x1, NY const& y2) { return x1=x1-y2; }
 };
 
-template<class X, class C, class E=C> class DeclareFloatComparisons {
+template<class X, class C, class E=C> class DeclareComparisons {
     typedef decltype(not declval<E>()) NE;
     typedef decltype(not declval<C>()) NC;
     friend E operator==(X const&, X const&);
@@ -213,7 +147,7 @@ template<class X, class C, class E=C> class DeclareFloatComparisons {
     friend NC operator> (X const&, X const&);
 };
 
-template<class X, class NX, class C> class DeclareDirectedFloatComparisons {
+template<class X, class NX, class C> class DeclareDirectedComparisons {
     typedef decltype(not declval<C>()) NC;
     friend C operator<=(X const&, NX const&);
     friend NC operator<=(NX const&, X const&);
@@ -303,9 +237,9 @@ template<class PR, class P1, class P2> using FloatLessType = Logical<Generic<Wea
 //! \note In the future, the construction of a \c %Float64 from a string literal may be supported.
 //! \sa ExactIntervalType, Real, Float64Value
 template<class PR> class FloatApproximation
-    : public DeclareFloatOperators<FloatApproximation<PR>>
-    , public DeclareFloatComparisons<FloatApproximation<PR>,ApproximateKleenean>
-    , public ProvideOperators<FloatApproximation<PR>>
+    : public DeclareFloatOperations<FloatApproximation<PR>>
+    , public DeclareComparisons<FloatApproximation<PR>,ApproximateKleenean>
+    , public DispatchNumericOperations<FloatApproximation<PR>>
     , public ProvideMixedOperators<FloatApproximation<PR>,Real>
     , public ProvideComparisons<FloatApproximation<PR>,ApproximateKleenean>
 {
@@ -339,6 +273,8 @@ template<class PR> class FloatApproximation
     FloatApproximation<PR>(FloatUpperBound<PR> const& x);
     FloatApproximation<PR>(FloatLowerBound<PR> const& x);
 
+    friend FloatApproximation<PR> round(FloatApproximation<PR> const& x);
+
     PrecisionType precision() const { return _a.precision(); }
     explicit operator RawFloatType () const { return this->_a; }
     RawFloatType const& raw() const { return this->_a; }
@@ -359,13 +295,13 @@ template<class PR> class FloatApproximation
 //! \ingroup NumericModule
 //! \brief Floating-point lower bounds for real numbers.
 template<class PR> class FloatLowerBound
-    : public DeclareFloatOperators<FloatLowerBound<PR>,FloatUpperBound<PR>>
-    , public DeclareFloatOperators<FloatApproximation<PR>>
-    , public DeclareFloatComparisons<FloatApproximation<PR>,ApproximateKleenean>
-    , public DeclareDirectedFloatComparisons<FloatUpperBound<PR>,FloatLowerBound<PR>,ValidatedSierpinskian>
-    , public ProvideDirectedOperators<FloatLowerBound<PR>,FloatUpperBound<PR>>
+    : public DeclareDirectedFloatOperations<FloatLowerBound<PR>,FloatUpperBound<PR>>
+    , public DeclareDirectedComparisons<FloatUpperBound<PR>,FloatLowerBound<PR>,ValidatedSierpinskian>
+    , public DispatchDirectedNumericOperations<FloatLowerBound<PR>,FloatUpperBound<PR>>
     , public ProvideMixedDirectedOperators<FloatLowerBound<PR>,Real,FloatUpperBound<PR>>
     , public ProvideDirectedComparisons<FloatUpperBound<PR>,FloatLowerBound<PR>,ValidatedSierpinskian>
+    , public DeclareFloatOperations<FloatApproximation<PR>>
+    , public DeclareComparisons<FloatApproximation<PR>,ApproximateKleenean>
 {
     typedef LowerTag P; typedef RawFloat<PR> FLT;
   public:
@@ -413,13 +349,13 @@ template<class PR> class FloatLowerBound
 //! \ingroup NumericModule
 //! \brief Floating-point upper bounds for real numbers.
 template<class PR> class FloatUpperBound
-    : public DeclareFloatOperators<FloatUpperBound<PR>,FloatLowerBound<PR>>
-    , public DeclareFloatOperators<FloatApproximation<PR>>
-    , public DeclareFloatComparisons<FloatApproximation<PR>,ApproximateKleenean>
-    , public DeclareDirectedFloatComparisons<FloatUpperBound<PR>,FloatLowerBound<PR>,ValidatedSierpinskian>
-    , public ProvideDirectedOperators<FloatUpperBound<PR>,FloatLowerBound<PR>>
+    : public DeclareDirectedFloatOperations<FloatUpperBound<PR>,FloatLowerBound<PR>>
+    , public DeclareDirectedComparisons<FloatUpperBound<PR>,FloatLowerBound<PR>,ValidatedSierpinskian>
+    , public DispatchDirectedNumericOperations<FloatUpperBound<PR>,FloatLowerBound<PR>>
     , public ProvideMixedDirectedOperators<FloatUpperBound<PR>,Real,FloatLowerBound<PR>>
     , public ProvideDirectedComparisons<FloatLowerBound<PR>,FloatUpperBound<PR>,ValidatedNegatedSierpinskian>
+    , public DeclareFloatOperations<FloatApproximation<PR>>
+    , public DeclareComparisons<FloatApproximation<PR>,ApproximateKleenean>
 {
     typedef UpperTag P; typedef RawFloat<PR> FLT;
   public:
@@ -497,8 +433,8 @@ template<class PR> class FloatUpperBound
 //!   Float64Bounds([2.5,4.25]) # Alternative syntax for creating the interval [2.5, 4.25]
 //! \endcode
 template<class PR> class FloatBounds
-    : public DeclareFloatOperators<FloatBounds<PR>>
-    , public ProvideOperators<FloatBounds<PR>>
+    : public DeclareFloatOperations<FloatBounds<PR>>
+    , public DispatchNumericOperations<FloatBounds<PR>>
     , public ProvideMixedOperators<FloatBounds<PR>,Real>
     , public ProvideComparisons<FloatBounds<PR>,ValidatedKleenean>
 {
@@ -550,6 +486,7 @@ template<class PR> class FloatBounds
 
     // DEPRECATED
     explicit operator RawFloatType () const { return value_raw(); }
+    friend FloatApproximation<PR> round(FloatApproximation<PR> const& x);
     friend FloatValue<PR> midpoint(FloatBounds<PR> const& x);
   public:
     friend FloatError<PR> mag(FloatBounds<PR> const&);
@@ -569,8 +506,8 @@ template<class PR> class FloatBounds
 
 
 template<class PR> class FloatBall
-    : public DeclareFloatOperators<FloatBall<PR>>
-    , public ProvideOperators<FloatBall<PR>>
+    : public DeclareFloatOperations<FloatBall<PR>>
+    , public DispatchNumericOperations<FloatBall<PR>>
     , public ProvideMixedOperators<FloatBall<PR>,Real>
     , public ProvideComparisons<FloatBall<PR>,ValidatedKleenean>
 {
@@ -631,10 +568,10 @@ template<class PR> class FloatBall
 //! \related Float64, Float64Bounds
 //! \brief A floating-point number, which is taken to represent the \em exact value of a real quantity.
 template<class PR> class FloatValue
-    : public DeclareFloatOperators<FloatBounds<PR>>
+    : public DeclareFloatOperations<FloatBounds<PR>>
     , public DeclareMixedOperators<FloatValue<PR>, Real, FloatBounds<PR>>
-    , public DeclareFloatComparisons<FloatValue<PR>,Boolean>
-    , public ProvideOperators<FloatValue<PR>,FloatBounds<PR>>
+    , public DeclareComparisons<FloatValue<PR>,Boolean>
+    , public DispatchNumericOperations<FloatValue<PR>,FloatBounds<PR>>
     , public ProvideMixedOperators<FloatValue<PR>,Real,FloatBounds<PR>>
     , public ProvideComparisons<FloatValue<PR>,Boolean>
 {
@@ -688,7 +625,7 @@ template<class PR> class FloatValue
 };
 
 template<class PR> class FloatError
-    : public DeclareDirectedFloatComparisons<FloatUpperBound<PR>,FloatLowerBound<PR>,ValidatedSierpinskian>
+    : public DeclareDirectedComparisons<FloatUpperBound<PR>,FloatLowerBound<PR>,ValidatedSierpinskian>
 {
   private: public:
     RawFloat<PR> _e;
@@ -866,7 +803,6 @@ template<class PR> inline OutputStream& operator<<(OutputStream& os, PositiveFlo
 
 
 
-
 template<class R, class A> R integer_cast(const A& _a);
 
 template<> FloatBall<Precision64>::FloatBall(Real const& x);
@@ -880,183 +816,10 @@ template<class T> T const& convert(T const& x) { return x; }
 
 template<class T> using NumericType = typename T::NumericType;
 
-typedef Widen<ExactTag> Widened;
-
-template<class PR, class P> auto
-max(Float<P,PR> const& x1, Float<P,PR> const& x2) -> Float<P,PR>;
-template<class PR, class P> auto
-min(Float<P,PR> const& x1, Float<P,PR> const& x2) -> Float<P,PR>;
-template<class PR, class P> auto
-abs(Float<P,PR> const& x) -> Float<Weaker<P,Negated<P>>,PR>;
-
-template<class PR, class P> auto
-floor(Float<P,PR> const& x) -> Float<P,PR>;
-
-
-template<class PR, class P> auto
-nul(Float<P,PR> const&) -> Float<P,PR>;
-template<class PR, class P> auto
-pos(Float<P,PR> const&) -> Float<P,PR>;
-template<class PR, class P> auto
-neg(Float<P,PR> const&) -> Float<Negated<P>,PR>;
-template<class PR, class P> auto
-half(Float<P,PR> const&) -> Float<P,PR>;
-template<class PR, class P> auto
-sqr(Float<P,PR> const&) -> Float<Widen<P>,PR>;
-template<class PR, class P> auto
-rec(Float<P,PR> const&) -> Float<Widen<Inverted<P>>,PR>;
-
-template<class PR, class P> auto
-add(Float<P,PR> const&, Float<P,PR> const&) -> Float<Widen<P>,PR>;
-template<class PR, class P> auto
-sub(Float<P,PR> const&, Float<Negated<P>,PR> const&) -> Float<Widen<P>,PR>;
-template<class PR, class P> auto
-mul(Float<P,PR> const&, Float<P,PR> const&) -> Float<Widen<P>,PR>;
-template<class PR, class P> auto
-div(Float<P,PR> const&, Float<Inverted<P>,PR> const&) -> Float<Widen<P>,PR>;
-
-template<class PR, class P> auto
-pow(Float<P,PR> const&, Nat m) -> Float<Widen<P>,PR>;
-template<class PR, class P> auto
-pow(Float<P,PR> const&, Int n) -> Float<Widen<Undirect<P>>,PR>;
-
-template<class PR, class P> auto
-sqrt(Float<P,PR> const&) -> Float<Widen<P>,PR>;
-template<class PR, class P> auto
-exp(Float<P,PR> const&) -> Float<Widen<P>,PR>;
-template<class PR, class P> auto
-log(Float<P,PR> const&) -> Float<Widen<Signed<P>>,PR>;
-template<class PR, class P> auto
-sin(Float<P,PR> const&) -> Float<Widen<Unorder<P>>,PR>;
-template<class PR, class P> auto
-cos(Float<P,PR> const&) -> Float<Widen<Unorder<P>>,PR>;
-template<class PR, class P> auto
-tan(Float<P,PR> const&) -> Float<Widen<Unorder<P>>,PR>;
-template<class PR, class P> auto
-asin(Float<P,PR> const&) -> Float<Widen<Unorder<P>>,PR>;
-template<class PR, class P> auto
-acos(Float<P,PR> const&) -> Float<Widen<Unorder<P>>,PR>;
-template<class PR, class P> auto
-atan(Float<P,PR> const&) -> Float<Widen<P>,PR>;
-
-template<class PR, class P> auto
-floor(Float<P,PR> const& x) -> Float<P,PR>;
-
-template<class PR, class P> auto
-round(Float<P,PR> const& x) -> Float<P,PR>;
-
-template<class PR, class P> auto mag(Float<P,PR> const& x) -> Float<Unsigned<Weaker<P,UpperTag>>,PR>;
-template<class PR, class P> auto mig(Float<P,PR> const& x) -> Float<Unsigned<Weaker<P,LowerTag>>,PR>;
-
-template<class PR, class P> auto is_zero(Float<P,PR> const&) -> Logical<Weaker<P,Opposite<P>>>;
-template<class PR, class P> auto is_positive(Float<P,PR> const&) -> Logical<Opposite<P>>;
-template<class PR, class P> auto same(Float<P,PR> const&, Float<P,PR> const&) -> Bool;
-
-template<class PR, class P> auto eq(Float<P,PR> const& x1, Float<Negated<P>,PR> const& x2) -> FloatEqualsType<PR,P,Negated<P>>;
-template<class PR, class P> auto leq(Float<P,PR> const& x1, Float<Negated<P>,PR> const& x2) -> FloatLessType<PR,P,Negated<P>>;
-
-
-template<class PR, class P1, class P2> auto
-max(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> Float<Weaker<P1,P2>,PR>;
-
-template<class PR, class P1, class P2> auto
-max(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> Float<Weaker<P1,P2>,PR> {
-    typedef Float<Weaker<P1,P2>,PR> R; return max(convert<R>(x1),convert<R>(x2)); }
-
-template<class PR, class P1, class P2> auto
-min(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> Float<Weaker<P1,P2>,PR> {
-    typedef Weaker<P1,P2> P0; typedef Float<P0,PR> X0;
-    Float<P0,PR> rx1(x1); Float<P0,PR> rx2(x2); return min(rx1,rx2); }
-
-
-template<class PR, class P> auto
-operator+(Float<P,PR> const& x) -> Float<P,PR> {
-    return pos(x); }
-
-template<class PR, class P> auto
-operator-(Float<P,PR> const& x) -> Float<Negated<P>,PR> {
-    return neg(x); }
-
-template<class PR, class P1, class P2> auto
-operator+(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> FloatSumType<PR,P1,P2> {
-    typedef Widen<Weaker<P1,P2>> P0; typedef Float<P0,PR> R;
-    return add(convert<Float<P0,PR>>(x1),convert<Float<P0,PR>>(x2)); }
-
-template<class PR, class P1, class P2> auto
-operator-(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> Float<Widen<Weaker<P1,Negated<P2>>>,PR> {
-    typedef Widen<Weaker<P1,Negated<P2>>> P0; typedef Float<P0,PR> R;
-    return sub(convert<R>(x1),convert<Float<Negated<P0>,PR>>(x2)); }
-
-template<class PR, class P1, class P2> auto
-operator*(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> Float<Widen<Weaker<P1,P2>>,PR> {
-    typedef Float<Widen<Weaker<P1,P2>>,PR> R;
-    return mul(convert<R>(x1),convert<R>(x2)); }
-
-template<class PR, class P1, class P2> auto
-operator/(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> Float<Widen<Weaker<P1,Inverted<P2>>>,PR> {
-    typedef Widen<Weaker<P1,Inverted<P2>>> P0; typedef Float<P0,PR> R;
-    return div(convert<R>(x1),convert<Float<Inverted<P0>,PR>>(x2)); }
-
-
-template<class PR, class P> auto
-operator*(Float<P,PR> const& x1, TwoExp x2) -> Float<P,PR>;
-
-template<class PR, class P> auto
-operator/(Float<P,PR> const& x1, TwoExp x2) -> Float<P,PR>;
-
-template<class P1, class Y2, class PR> auto
-operator+=(Float<P1,PR>& x1, Y2 const& y2) -> decltype(x1=x1+y2) {
-    return x1=x1+y2; }
-
-template<class P1, class Y2, class PR> auto
-operator-=(Float<P1,PR>& x1, Y2 const& y2) -> decltype(x1=x1-y2) {
-    return x1=x1-y2; }
-
-template<class P1, class Y2, class PR> auto
-operator*=(Float<P1,PR>& x1, Y2 const& y2) -> decltype(x1=x1*y2) {
-    return x1=x1*y2; }
-
-template<class P1, class Y2, class PR> auto
-operator/=(Float<P1,PR>& x1, Y2 const& y2) -> decltype(x1=x1/y2) {
-    return x1=x1/y2; }
-
-template<class PR, class P1, class P2> auto
-operator==(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> FloatEqualsType<PR,P1,P2> {
-    typedef Weaker<P1,Opposite<P2>> WP1; typedef Opposite<WP1> WP2; typedef Float<WP1,PR> X1; typedef Float<WP2,PR> X2;
-    return eq(convert<X1>(x1),convert<X2>(x2)); }
-
-template<class PR, class P1, class P2> auto
-operator!=(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> decltype(not (x1==x2)) {
-    return !(x1==x2); }
-
-template<class PR, class P1, class P2> auto
-operator<=(Float<P1,PR> const& x1, Float<P2,PR> const& x2) ->  FloatLessType<PR,P1,P2> {
-    typedef Weaker<P1,Negated<P2>> WP1; typedef Negated<WP1> WP2; typedef Float<WP1,PR> X1; typedef Float<WP2,PR> X2;
-    return leq(convert<X1>(x1),convert<X2>(x2)); }
-
-template<class PR, class P1, class P2> auto
-operator>=(Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> decltype(x2<=x1) {
-    return x2<=x1; }
-
-template<class PR, class P1, class P2> auto
-operator< (Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> decltype(not (x2<=x1)) {
-    return not (x2<=x1); }
-
-template<class PR, class P1, class P2> auto
-operator> (Float<P1,PR> const& x1, Float<P2,PR> const& x2) -> decltype(not (x1<=x2)){
-    return not (x1<=x2); }
-
-template<class PR, class P> auto
-operator<<(OutputStream& os, Float<P,PR> const&) -> OutputStream&;
-
-template<class PR, class P> auto
-operator>>(InputStream& is, Float<P,PR>&) -> InputStream&;
 
 
 extern const FloatValue<Precision64> infty;
 
-template<class P1, class P2, class PR> Float<Weaker<P1,P2>,PR> w(Float<P1,PR> x1, Float<P2,PR> x2) {
-    return Float<Weaker<P1,P2>,PR>(x1); }
 
 
 // Literals operations
@@ -1074,7 +837,6 @@ template<class PR> FloatBounds<PR> make_bounds(FloatError<PR> const& e) {
 
 
 template<class PR> inline FloatApproximation<PR> make_float(Number<ApproximateTag> const& y, PR pr) { return FloatApproximation<PR>(y,pr); }
-template<class PR> FloatApproximation<PR> make_float(Number<ApproximateTag> const& y, PR pr);
 template<class PR> inline FloatLowerBound<PR> make_float(Number<ValidatedLowerTag> const& y, PR pr) { return FloatLowerBound<PR>(y,pr); }
 template<class PR> inline FloatUpperBound<PR> make_float(Number<ValidatedUpperTag> const& y, PR pr) { return FloatUpperBound<PR>(y,pr); }
 template<class PR> inline FloatBounds<PR> make_float(Number<ValidatedTag> const& y, PR pr) { return FloatBounds<PR>(y,pr); }

@@ -192,7 +192,7 @@ template<class PR> class ProvideMixedOperators<FloatBall<PR>,Real> {
     friend R operator/(X const& x1, Y const& y2) { return x1/make_float_ball(y2,x1.precision()); }
 };
 
-template<class X, class Y, class NX, class NY=Y> class ProvideMixedDirectedOperators
+template<class X, class Y, class NX, class NY=Y> struct ProvideMixedDirectedOperators
 {
     friend X operator+(X const& x1, Y const& y2) { return x1+make_float(y2,x1.precision()); }
     friend X operator+(Y const& y1, X const& x2) { return make_float(y1,x2.precision())+x2; }
@@ -202,14 +202,15 @@ template<class X, class Y, class NX, class NY=Y> class ProvideMixedDirectedOpera
     friend X& operator-=(X& x1, NY const& y2) { return x1=x1-y2; }
 };
 
-template<class X, class C, class A=C> class DeclareFloatComparisons {
-    typedef decltype(not declval<A>()) E;
+template<class X, class C, class E=C> class DeclareFloatComparisons {
+    typedef decltype(not declval<E>()) NE;
+    typedef decltype(not declval<C>()) NC;
     friend E operator==(X const&, X const&);
-    friend A operator!=(X const&, X const&);
+    friend NE operator!=(X const&, X const&);
     friend C operator<=(X const&, X const&);
     friend C operator>=(X const&, X const&);
-    friend C operator< (X const&, X const&);
-    friend C operator> (X const&, X const&);
+    friend NC operator< (X const&, X const&);
+    friend NC operator> (X const&, X const&);
 };
 
 template<class X, class NX, class C> class DeclareDirectedFloatComparisons {
@@ -223,6 +224,51 @@ template<class X, class NX, class C> class DeclareDirectedFloatComparisons {
     friend NC operator> (X const&, NX const&);
     friend C operator> (NX const&, X const&);
 };
+
+template<class X, class C, class E=C> struct ProvideComparisons {
+    typedef decltype(not declval<E>()) NE;
+    typedef decltype(not declval<C>()) NC;
+    friend E eq(X const&, X const&);
+    friend C leq(X const&, X const&);
+    friend C geq(X const& x1, X const& x2) { return leq(x2,x1); }
+    friend E operator==(X const& x1, X const& x2){ return eq(x1,x2); }
+    friend NE operator!=(X const& x1, X const& x2){ return not eq(x1,x2); }
+    friend C operator<=(X const& x1, X const& x2){ return leq(x1,x2); }
+    friend C operator>=(X const& x1, X const& x2){ return geq(x1,x2); }
+    friend NC operator< (X const& x1, X const& x2){ return not geq(x1,x2); }
+    friend NC operator> (X const& x1, X const& x2){ return not leq(x1,x2); }
+};
+
+template<class X1, class X2, class C1, class C2=C1, class E=C1> struct ProvideMixedComparisons {
+    typedef decltype(not declval<E>()) NE;
+    typedef decltype(not declval<C1>()) NC1;
+    typedef decltype(not declval<C2>()) NC2;
+    friend E eq(X1 const&, X2 const&);
+    friend C1 leq(X1 const&, X2 const&);
+    friend C2 geq(X1 const& x1, X2 const& x2) { return leq(x2,x1); }
+    friend E operator==(X1 const& x1, X2 const& x2){ return eq(x1,x2); }
+    friend NE operator!=(X1 const& x1, X2 const& x2){ return not eq(x1,x2); }
+    friend C1 operator<=(X1 const& x1, X2 const& x2){ return leq(x1,x2); }
+    friend C2 operator>=(X1 const& x1, X2 const& x2){ return geq(x1,x2); }
+    friend NC2 operator< (X1 const& x1, X2 const& x2){ return not geq(x1,x2); }
+    friend NC1 operator> (X1 const& x1, X2 const& x2){ return not leq(x1,x2); }
+    friend E operator==(X2 const& x2, X1 const& x1){ return eq(x1,x2); }
+    friend NE operator!=(X2 const& x2, X1 const& x1){ return not eq(x1,x2); }
+    friend C2 operator<=(X2 const& x2, X1 const& x1){ return geq(x1,x2); }
+    friend C1 operator>=(X2 const& x2, X1 const& x1){ return leq(x1,x2); }
+    friend NC1 operator< (X2 const& x2, X1 const& x1){ return not leq(x1,x2); }
+    friend NC2 operator> (X2 const& x2, X1 const& x1){ return not geq(x1,x2); }
+};
+
+template<class X, class NX, class C> struct ProvideDirectedComparisons {
+    typedef decltype(not declval<C>()) NC;
+    friend C leq(X const&, NX const&);
+    friend C operator<=(X const& x1, NX const& x2) { return leq(x1,x2); }
+    friend C operator>=(NX const& x1, X const& x2) { return leq(x2,x1); }
+    friend NC operator< (NX const& x1, X const& x2) { return not leq(x2,x1); }
+    friend NC operator> (X const& x1, NX const& x2) { return not leq(x1,x2); }
+};
+
 
 template<class PR, class P1, class P2> using FloatWeakerType = Float<Weaker<P1,P2>,PR>;
 
@@ -261,6 +307,7 @@ template<class PR> class FloatApproximation
     , public DeclareFloatComparisons<FloatApproximation<PR>,ApproximateKleenean>
     , public ProvideOperators<FloatApproximation<PR>>
     , public ProvideMixedOperators<FloatApproximation<PR>,Real>
+    , public ProvideComparisons<FloatApproximation<PR>,ApproximateKleenean>
 {
     typedef ApproximateTag P; typedef RawFloat<PR> FLT;
   public:
@@ -318,6 +365,7 @@ template<class PR> class FloatLowerBound
     , public DeclareDirectedFloatComparisons<FloatUpperBound<PR>,FloatLowerBound<PR>,ValidatedSierpinskian>
     , public ProvideDirectedOperators<FloatLowerBound<PR>,FloatUpperBound<PR>>
     , public ProvideMixedDirectedOperators<FloatLowerBound<PR>,Real,FloatUpperBound<PR>>
+    , public ProvideDirectedComparisons<FloatUpperBound<PR>,FloatLowerBound<PR>,ValidatedSierpinskian>
 {
     typedef LowerTag P; typedef RawFloat<PR> FLT;
   public:
@@ -371,6 +419,7 @@ template<class PR> class FloatUpperBound
     , public DeclareDirectedFloatComparisons<FloatUpperBound<PR>,FloatLowerBound<PR>,ValidatedSierpinskian>
     , public ProvideDirectedOperators<FloatUpperBound<PR>,FloatLowerBound<PR>>
     , public ProvideMixedDirectedOperators<FloatUpperBound<PR>,Real,FloatLowerBound<PR>>
+    , public ProvideDirectedComparisons<FloatLowerBound<PR>,FloatUpperBound<PR>,ValidatedNegatedSierpinskian>
 {
     typedef UpperTag P; typedef RawFloat<PR> FLT;
   public:
@@ -449,9 +498,9 @@ template<class PR> class FloatUpperBound
 //! \endcode
 template<class PR> class FloatBounds
     : public DeclareFloatOperators<FloatBounds<PR>>
-    , public DeclareFloatComparisons<FloatBounds<PR>,ValidatedKleenean>
     , public ProvideOperators<FloatBounds<PR>>
     , public ProvideMixedOperators<FloatBounds<PR>,Real>
+    , public ProvideComparisons<FloatBounds<PR>,ValidatedKleenean>
 {
     typedef BoundedTag P; typedef RawFloat<PR> FLT;
   public:
@@ -523,6 +572,7 @@ template<class PR> class FloatBall
     : public DeclareFloatOperators<FloatBall<PR>>
     , public ProvideOperators<FloatBall<PR>>
     , public ProvideMixedOperators<FloatBall<PR>,Real>
+    , public ProvideComparisons<FloatBall<PR>,ValidatedKleenean>
 {
     typedef MetricTag P; typedef RawFloat<PR> FLT;
   public:
@@ -586,6 +636,7 @@ template<class PR> class FloatValue
     , public DeclareFloatComparisons<FloatValue<PR>,Boolean>
     , public ProvideOperators<FloatValue<PR>,FloatBounds<PR>>
     , public ProvideMixedOperators<FloatValue<PR>,Real,FloatBounds<PR>>
+    , public ProvideComparisons<FloatValue<PR>,Boolean>
 {
     typedef ExactTag P; typedef RawFloat<PR> FLT;
   public:

@@ -1788,13 +1788,6 @@ template<class T> class Dynamic { public: virtual ~Dynamic() = default; };
 template<class T> String mangled_class_name() { Dynamic<T>* p; return typeid(p).name(); }
 
 
-ApproximateKleenean operator==(Float64Approximation const& x1, Float64Approximation const& x2) { return _eq(x1,x2); }
-ApproximateKleenean operator!=(Float64Approximation const& x1, Float64Approximation const& x2) { return not _eq(x1,x2); }
-ApproximateKleenean operator<=(Float64Approximation const& x1, Float64Approximation const& x2) { return _leq(x1,x2); }
-ApproximateKleenean operator>=(Float64Approximation const& x1, Float64Approximation const& x2) { return _leq(x2,x1); }
-ApproximateKleenean operator< (Float64Approximation const& x1, Float64Approximation const& x2) { return not _leq(x2,x1); }
-ApproximateKleenean operator> (Float64Approximation const& x1, Float64Approximation const& x2) { return not _leq(x1,x2); }
-
 OutputStream& operator<<(OutputStream& os, Float64Approximation const& x) { return _write<Precision64>(os,x); }
 InputStream& operator>>(InputStream& is, Float64Approximation& x) { return _read<Precision64>(is,x); }
 
@@ -1828,12 +1821,9 @@ PositiveFloat64Approximation mig(Float64Approximation const& x) { return _mig<Pr
 Float64Approximation round(Float64Approximation const& x) { return _round<Precision64>(x); }
 Bool same(Float64Approximation const& x1, Float64Approximation const& x2) { return _same<Precision64>(x1,x2); }
 
-ApproximateKleenean operator==(FloatMPApproximation const& x1, FloatMPApproximation const& x2) { return _eq(x1,x2); }
-ApproximateKleenean operator!=(FloatMPApproximation const& x1, FloatMPApproximation const& x2) { return not _eq(x1,x2); }
-ApproximateKleenean operator<=(FloatMPApproximation const& x1, FloatMPApproximation const& x2) { return _leq(x1,x2); }
-ApproximateKleenean operator>=(FloatMPApproximation const& x1, FloatMPApproximation const& x2) { return _leq(x2,x1); }
-ApproximateKleenean operator< (FloatMPApproximation const& x1, FloatMPApproximation const& x2) { return not _leq(x2,x1); }
-ApproximateKleenean operator> (FloatMPApproximation const& x1, FloatMPApproximation const& x2) { return not _leq(x1,x2); }
+ApproximateKleenean eq(Float64Approximation const& x1, Float64Approximation const& x2) { return _eq<Precision64>(x1,x2); }
+ApproximateKleenean leq(Float64Approximation const& x1, Float64Approximation const& x2) { return _leq<Precision64>(x1,x2); }
+
 
 OutputStream& operator<<(OutputStream& os, FloatMPApproximation const& x) { return _write<PrecisionMP>(os,x); }
 InputStream& operator>>(InputStream& is, FloatMPApproximation& x) { return _read<PrecisionMP>(is,x); }
@@ -1868,11 +1858,10 @@ PositiveFloatMPApproximation mig(FloatMPApproximation const& x) { return _mig<Pr
 FloatMPApproximation round(FloatMPApproximation const& x) { return _round<PrecisionMP>(x); }
 Bool same(FloatMPApproximation const& x1, FloatMPApproximation const& x2) { return _same<PrecisionMP>(x1,x2); }
 
+ApproximateKleenean eq(FloatMPApproximation const& x1, FloatMPApproximation const& x2) { return _eq<PrecisionMP>(x1,x2); }
+ApproximateKleenean leq(FloatMPApproximation const& x1, FloatMPApproximation const& x2) { return _leq<PrecisionMP>(x1,x2); }
 
-ValidatedNegatedSierpinskian operator<=(Float64LowerBound const& x1, Float64UpperBound const& x2) { return _leq(x1,x2); }
-ValidatedSierpinskian operator>=(Float64LowerBound const& x1, Float64UpperBound const& x2) { return _leq(x2,x1); }
-ValidatedNegatedSierpinskian operator< (Float64LowerBound const& x1, Float64UpperBound const& x2) { return not _leq(x2,x1); }
-ValidatedSierpinskian operator> (Float64LowerBound const& x1, Float64UpperBound const& x2) { return not _leq(x1,x2); }
+
 
 OutputStream& operator<<(OutputStream& os, Float64LowerBound const& x) { return _write<Precision64>(os,x); }
 InputStream& operator>>(InputStream& is, Float64LowerBound& x) { return _read<Precision64>(is,x); }
@@ -1895,11 +1884,8 @@ Bool same(Float64LowerBound const& x1, Float64LowerBound const& x2) { return _sa
 Bool refines(Float64LowerBound const& x1, Float64LowerBound const& x2) { return _refines<Precision64>(x1,x2); }
 Float64LowerBound refinement(Float64LowerBound const& x1, Float64LowerBound const& x2) { return _refinement<Precision64>(x1,x2); }
 
+ValidatedNegatedSierpinskian leq(Float64LowerBound const& x1, Float64UpperBound const& x2) { return _leq<Precision64>(x1,x2); }
 
-ValidatedNegatedSierpinskian operator<=(FloatMPLowerBound const& x1, FloatMPUpperBound const& x2) { return _leq(x1,x2); }
-ValidatedSierpinskian operator>=(FloatMPLowerBound const& x1, FloatMPUpperBound const& x2) { return _leq(x2,x1); }
-ValidatedNegatedSierpinskian operator< (FloatMPLowerBound const& x1, FloatMPUpperBound const& x2) { return not _leq(x2,x1); }
-ValidatedSierpinskian operator> (FloatMPLowerBound const& x1, FloatMPUpperBound const& x2) { return not _leq(x1,x2); }
 
 OutputStream& operator<<(OutputStream& os, FloatMPLowerBound const& x) { return _write<PrecisionMP>(os,x); }
 InputStream& operator>>(InputStream& is, FloatMPLowerBound& x) { return _read<PrecisionMP>(is,x); }
@@ -1922,12 +1908,9 @@ Bool same(FloatMPLowerBound const& x1, FloatMPLowerBound const& x2) { return _sa
 Bool refines(FloatMPLowerBound const& x1, FloatMPLowerBound const& x2) { return _refines<PrecisionMP>(x1,x2); }
 FloatMPLowerBound refinement(FloatMPLowerBound const& x1, FloatMPLowerBound const& x2) { return _refinement<PrecisionMP>(x1,x2); }
 
+ValidatedNegatedSierpinskian leq(FloatMPLowerBound const& x1, FloatMPUpperBound const& x2) { return _leq<PrecisionMP>(x1,x2); }
 
 
-ValidatedSierpinskian operator<=(Float64UpperBound const& x1, Float64LowerBound const& x2) { return _leq(x1,x2); }
-ValidatedNegatedSierpinskian operator>=(Float64UpperBound const& x1, Float64LowerBound const& x2) { return _leq(x2,x1); }
-ValidatedSierpinskian operator< (Float64UpperBound const& x1, Float64LowerBound const& x2) { return not _leq(x2,x1); }
-ValidatedNegatedSierpinskian operator> (Float64UpperBound const& x1, Float64LowerBound const& x2) { return not _leq(x1,x2); }
 
 OutputStream& operator<<(OutputStream& os, Float64UpperBound const& x) { return _write<Precision64>(os,x); }
 InputStream& operator>>(InputStream& is, Float64UpperBound& x) { return _read<Precision64>(is,x); }
@@ -1950,11 +1933,8 @@ Bool same(Float64UpperBound const& x1, Float64UpperBound const& x2) { return _sa
 Bool refines(Float64UpperBound const& x1, Float64UpperBound const& x2) { return _refines<Precision64>(x1,x2); }
 Float64UpperBound refinement(Float64UpperBound const& x1, Float64UpperBound const& x2) { return _refinement<Precision64>(x1,x2); }
 
+ValidatedSierpinskian leq(Float64UpperBound const& x1, Float64LowerBound const& x2) { return _leq<Precision64>(x1,x2); }
 
-ValidatedSierpinskian operator<=(FloatMPUpperBound const& x1, FloatMPLowerBound const& x2) { return _leq(x1,x2); }
-ValidatedNegatedSierpinskian operator>=(FloatMPUpperBound const& x1, FloatMPLowerBound const& x2) { return _leq(x2,x1); }
-ValidatedSierpinskian operator< (FloatMPUpperBound const& x1, FloatMPLowerBound const& x2) { return not _leq(x2,x1); }
-ValidatedNegatedSierpinskian operator> (FloatMPUpperBound const& x1, FloatMPLowerBound const& x2) { return not _leq(x1,x2); }
 
 OutputStream& operator<<(OutputStream& os, FloatMPUpperBound const& x) { return _write<PrecisionMP>(os,x); }
 InputStream& operator>>(InputStream& is, FloatMPUpperBound& x) { return _read<PrecisionMP>(is,x); }
@@ -1977,6 +1957,7 @@ Bool same(FloatMPUpperBound const& x1, FloatMPUpperBound const& x2) { return _sa
 Bool refines(FloatMPUpperBound const& x1, FloatMPUpperBound const& x2) { return _refines<PrecisionMP>(x1,x2); }
 FloatMPUpperBound refinement(FloatMPUpperBound const& x1, FloatMPUpperBound const& x2) { return _refinement<PrecisionMP>(x1,x2); }
 
+ValidatedSierpinskian leq(FloatMPUpperBound const& x1, FloatMPLowerBound const& x2) { return _leq<PrecisionMP>(x1,x2); }
 
 
 Float64Bounds nul(Float64Bounds const& x) { return _nul<Precision64>(x); }
@@ -2008,6 +1989,9 @@ Float64Error mag(Float64Bounds const& x) { return _mag<Precision64>(x); }
 Float64LowerBound mig(Float64Bounds const& x) { return _mig<Precision64>(x); }
 Float64Bounds round(Float64Bounds const& x) { return _round<Precision64>(x); }
 
+ValidatedKleenean eq(Float64Bounds const& x1, Float64Bounds const& x2) { return _eq<Precision64>(x1,x2); }
+ValidatedKleenean leq(Float64Bounds const& x1, Float64Bounds const& x2) { return _leq<Precision64>(x1,x2); }
+
 Bool same(Float64Bounds const& x1, Float64Bounds const& x2) { return _same<Precision64>(x1,x2); }
 Bool models(Float64Bounds const& x1, Float64Value const& x2) { return _models<Precision64>(x1,x2); }
 Bool refines(Float64Bounds const& x1, Float64Bounds const& x2) { return _refines<Precision64>(x1,x2); }
@@ -2015,26 +1999,12 @@ Bool consistent(Float64Bounds const& x1, Float64Bounds const& x2) { return _cons
 Bool inconsistent(Float64Bounds const& x1, Float64Bounds const& x2) { return _inconsistent<Precision64>(x1,x2); }
 Float64Bounds refinement(Float64Bounds const& x1, Float64Bounds const& x2) { return _refinement<Precision64>(x1,x2); }
 
-ValidatedKleenean operator==(Float64Bounds const& x1, Float64Bounds const& x2) { return _eq(x1,x2); }
-ValidatedKleenean operator!=(Float64Bounds const& x1, Float64Bounds const& x2) { return not _eq(x1,x2); }
-ValidatedKleenean operator<=(Float64Bounds const& x1, Float64Bounds const& x2) { return _leq(x1,x2); }
-ValidatedKleenean operator>=(Float64Bounds const& x1, Float64Bounds const& x2) { return _leq(x2,x1); }
-ValidatedKleenean operator< (Float64Bounds const& x1, Float64Bounds const& x2) { return not _leq(x2,x1); }
-ValidatedKleenean operator> (Float64Bounds const& x1, Float64Bounds const& x2) { return not _leq(x1,x2); }
-
 OutputStream& operator<<(OutputStream& os, Float64Bounds const& x) { return _write<Precision64>(os,x); }
 InputStream& operator>>(InputStream& is, Float64Bounds& x) { return _read<Precision64>(is,x); }
 
 
 OutputStream& operator<<(OutputStream& os, FloatMPBounds const& x) { return _write<PrecisionMP>(os,x); }
 InputStream& operator>>(InputStream& is, FloatMPBounds& x) { return _read<PrecisionMP>(is,x); }
-
-ValidatedKleenean operator==(FloatMPBounds const& x1, FloatMPBounds const& x2) { return _eq(x1,x2); }
-ValidatedKleenean operator!=(FloatMPBounds const& x1, FloatMPBounds const& x2) { return not _eq(x1,x2); }
-ValidatedKleenean operator<=(FloatMPBounds const& x1, FloatMPBounds const& x2) { return _leq(x1,x2); }
-ValidatedKleenean operator>=(FloatMPBounds const& x1, FloatMPBounds const& x2) { return _leq(x2,x1); }
-ValidatedKleenean operator< (FloatMPBounds const& x1, FloatMPBounds const& x2) { return not _leq(x2,x1); }
-ValidatedKleenean operator> (FloatMPBounds const& x1, FloatMPBounds const& x2) { return not _leq(x1,x2); }
 
 FloatMPBounds nul(FloatMPBounds const& x) { return _nul<PrecisionMP>(x); }
 FloatMPBounds pos(FloatMPBounds const& x) { return _pos<PrecisionMP>(x); }
@@ -2065,6 +2035,9 @@ FloatMPError mag(FloatMPBounds const& x) { return _mag<PrecisionMP>(x); }
 FloatMPLowerBound mig(FloatMPBounds const& x) { return _mig<PrecisionMP>(x); }
 FloatMPBounds round(FloatMPBounds const& x) { return _round<PrecisionMP>(x); }
 
+ValidatedKleenean eq(FloatMPBounds const& x1, FloatMPBounds const& x2) { return _eq<PrecisionMP>(x1,x2); }
+ValidatedKleenean leq(FloatMPBounds const& x1, FloatMPBounds const& x2) { return _leq<PrecisionMP>(x1,x2); }
+
 Bool same(FloatMPBounds const& x1, FloatMPBounds const& x2) { return _same<PrecisionMP>(x1,x2); }
 Bool models(FloatMPBounds const& x1, FloatMPValue const& x2) { return _models<PrecisionMP>(x1,x2); }
 Bool refines(FloatMPBounds const& x1, FloatMPBounds const& x2) { return _refines<PrecisionMP>(x1,x2); }
@@ -2073,12 +2046,6 @@ Bool inconsistent(FloatMPBounds const& x1, FloatMPBounds const& x2) { return _in
 FloatMPBounds refinement(FloatMPBounds const& x1, FloatMPBounds const& x2) { return _refinement<PrecisionMP>(x1,x2); }
 
 
-ValidatedKleenean operator==(Float64Ball const& x1, Float64Ball const& x2) { return _eq(x1,x2); }
-ValidatedKleenean operator!=(Float64Ball const& x1, Float64Ball const& x2) { return not _eq(x1,x2); }
-ValidatedKleenean operator<=(Float64Ball const& x1, Float64Ball const& x2) { return _leq(x1,x2); }
-ValidatedKleenean operator>=(Float64Ball const& x1, Float64Ball const& x2) { return _leq(x2,x1); }
-ValidatedKleenean operator< (Float64Ball const& x1, Float64Ball const& x2) { return not _leq(x2,x1); }
-ValidatedKleenean operator> (Float64Ball const& x1, Float64Ball const& x2) { return not _leq(x1,x2); }
 
 OutputStream& operator<<(OutputStream& os, Float64Ball const& x) { return _write<Precision64>(os,x); }
 InputStream& operator>>(InputStream& is, Float64Ball& x) { return _read<Precision64>(is,x); }
@@ -2111,6 +2078,9 @@ Float64Ball abs(Float64Ball const& x) { return _abs<Precision64>(x); }
 Float64Error mag(Float64Ball const& x) { return _mag<Precision64>(x); }
 Float64LowerBound mig(Float64Ball const& x) { return _mig<Precision64>(x); }
 
+ValidatedKleenean eq(Float64Ball const& x1, Float64Ball const& x2) { return _eq<Precision64>(x1,x2); }
+ValidatedKleenean leq(Float64Ball const& x1, Float64Ball const& x2) { return _leq<Precision64>(x1,x2); }
+
 Bool same(Float64Ball const& x1, Float64Ball const& x2) { return _same<Precision64>(x1,x2); }
 Bool models(Float64Ball const& x1, Float64Value const& x2) { return _models<Precision64>(x1,x2); }
 Bool refines(Float64Ball const& x1, Float64Ball const& x2) { return _refines<Precision64>(x1,x2); }
@@ -2121,13 +2091,6 @@ Float64Ball refinement(Float64Ball const& x1, Float64Ball const& x2) { return _r
 
 OutputStream& operator<<(OutputStream& os, FloatMPBall const& x) { return _write<PrecisionMP>(os,x); }
 InputStream& operator>>(InputStream& is, FloatMPBall& x) { return _read<PrecisionMP>(is,x); }
-
-ValidatedKleenean operator==(FloatMPBall const& x1, FloatMPBall const& x2) { return _eq(x1,x2); }
-ValidatedKleenean operator!=(FloatMPBall const& x1, FloatMPBall const& x2) { return not _eq(x1,x2); }
-ValidatedKleenean operator<=(FloatMPBall const& x1, FloatMPBall const& x2) { return _leq(x1,x2); }
-ValidatedKleenean operator>=(FloatMPBall const& x1, FloatMPBall const& x2) { return _leq(x2,x1); }
-ValidatedKleenean operator< (FloatMPBall const& x1, FloatMPBall const& x2) { return not _leq(x2,x1); }
-ValidatedKleenean operator> (FloatMPBall const& x1, FloatMPBall const& x2) { return not _leq(x1,x2); }
 
 FloatMPBall nul(FloatMPBall const& x) { return _nul<PrecisionMP>(x); }
 FloatMPBall pos(FloatMPBall const& x) { return _pos<PrecisionMP>(x); }
@@ -2157,6 +2120,9 @@ FloatMPBall abs(FloatMPBall const& x) { return _abs<PrecisionMP>(x); }
 FloatMPError mag(FloatMPBall const& x) { return _mag<PrecisionMP>(x); }
 FloatMPLowerBound mig(FloatMPBall const& x) { return _mig<PrecisionMP>(x); }
 
+ValidatedKleenean eq(FloatMPBall const& x1, FloatMPBall const& x2) { return _eq<PrecisionMP>(x1,x2); }
+ValidatedKleenean leq(FloatMPBall const& x1, FloatMPBall const& x2) { return _leq<PrecisionMP>(x1,x2); }
+
 Bool same(FloatMPBall const& x1, FloatMPBall const& x2) { return _same<PrecisionMP>(x1,x2); }
 Bool models(FloatMPBall const& x1, FloatMPValue const& x2) { return _models<PrecisionMP>(x1,x2); }
 Bool refines(FloatMPBall const& x1, FloatMPBall const& x2) { return _refines<PrecisionMP>(x1,x2); }
@@ -2165,13 +2131,6 @@ Bool inconsistent(FloatMPBall const& x1, FloatMPBall const& x2) { return _incons
 FloatMPBall refinement(FloatMPBall const& x1, FloatMPBall const& x2) { return _refinement<PrecisionMP>(x1,x2); }
 
 
-
-Boolean operator==(Float64Value const& x1, Float64Value const& x2) { return _eq(x1,x2); }
-Boolean operator!=(Float64Value const& x1, Float64Value const& x2) { return not _eq(x1,x2); }
-Boolean operator<=(Float64Value const& x1, Float64Value const& x2) { return _leq(x1,x2); }
-Boolean operator>=(Float64Value const& x1, Float64Value const& x2) { return _leq(x2,x1); }
-Boolean operator< (Float64Value const& x1, Float64Value const& x2) { return not _leq(x2,x1); }
-Boolean operator> (Float64Value const& x1, Float64Value const& x2) { return not _leq(x1,x2); }
 
 OutputStream& operator<<(OutputStream& os, Float64Value const& x) { return _write<Precision64>(os,x); }
 InputStream& operator>>(InputStream& is, Float64Value& x) { return _read<Precision64>(is,x); }
@@ -2203,13 +2162,9 @@ Float64Value min(Float64Value const& x1, Float64Value const& x2) { return _min<P
 Float64Value abs(Float64Value const& x) { return _abs<Precision64>(x); }
 Float64Error mag(Float64Value const& x) { return _mag<Precision64>(x); }
 
+Boolean eq(Float64Value const& x1, Float64Value const& x2) { return _eq<Precision64>(x1,x2); }
+Boolean leq(Float64Value const& x1, Float64Value const& x2) { return _leq<Precision64>(x1,x2); }
 
-Boolean operator==(FloatMPValue const& x1, FloatMPValue const& x2) { return _eq(x1,x2); }
-Boolean operator!=(FloatMPValue const& x1, FloatMPValue const& x2) { return not _eq(x1,x2); }
-Boolean operator<=(FloatMPValue const& x1, FloatMPValue const& x2) { return _leq(x1,x2); }
-Boolean operator>=(FloatMPValue const& x1, FloatMPValue const& x2) { return _leq(x2,x1); }
-Boolean operator< (FloatMPValue const& x1, FloatMPValue const& x2) { return not _leq(x2,x1); }
-Boolean operator> (FloatMPValue const& x1, FloatMPValue const& x2) { return not _leq(x1,x2); }
 
 OutputStream& operator<<(OutputStream& os, FloatMPValue const& x) { return _write<PrecisionMP>(os,x); }
 InputStream& operator>>(InputStream& is, FloatMPValue& x) { return _read<PrecisionMP>(is,x); }
@@ -2241,12 +2196,16 @@ FloatMPValue min(FloatMPValue const& x1, FloatMPValue const& x2) { return _min<P
 FloatMPValue abs(FloatMPValue const& x) { return _abs<PrecisionMP>(x); }
 FloatMPError mag(FloatMPValue const& x) { return _mag<PrecisionMP>(x); }
 
+Boolean eq(FloatMPValue const& x1, FloatMPValue const& x2) { return _eq<PrecisionMP>(x1,x2); }
+Boolean leq(FloatMPValue const& x1, FloatMPValue const& x2) { return _leq<PrecisionMP>(x1,x2); }
+
 Float64Value operator+(TwoExp y) { return Float64Value(y); }
 Float64Value operator-(TwoExp y) { return neg(Float64Value(y)); }
 Float64Value operator*(Float64Value const& x1, TwoExp y2) { Float64Value x2(y2); return Float64Value(mul_near(x1._v,x2._v)); }
 Float64Value operator/(Float64Value const& x1, TwoExp y2) { Float64Value x2(y2); return Float64Value(div_near(x1._v,x2._v)); }
 Float64Value& operator*=(Float64Value& x1, TwoExp y2) { return x1=x1*y2; }
 Float64Value& operator/=(Float64Value& x1, TwoExp y2) { return x1=x1/y2; }
+
 
 
 Float64UpperBound operator+(Float64Error const& x) { return x; }

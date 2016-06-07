@@ -774,27 +774,28 @@ template<class PR> FloatBounds<PR> _cos(FloatBounds<PR> const& x)
     typename RawFloat<PR>::RoundingModeType rnd = RawFloat<PR>::get_rounding_mode();
     PR prec=x.precision();
 
-    static const RawFloat<PR> one(1,prec);
-    static const FloatValue<PR> two(2,prec);
-    if(x.error().raw()>2*pi_down(prec)) { return FloatBounds<PR>(-one,+one); }
+    const RawFloat<PR> one(1,prec);
+    const FloatValue<PR> two(2,prec);
+    const FloatBounds<PR> pi=_pi_val(prec);
+    if(x.error().raw()>2*pi.lower().raw()) { return FloatBounds<PR>(-one,+one); }
 
-    auto n=floor(x.lower_raw()/(2*pi_approx(prec))+one/2);
-    FloatBounds<PR> y=x-two*FloatValue<PR>(n)*_pi_val<PR>(x.precision());
+    FloatValue<PR> n(round(x.value_raw()/(2*pi.value_raw())));
+    FloatBounds<PR> y=x-two*(n*pi);
 
-    ARIADNE_ASSERT(y.lower_raw()<=pi_up(prec));
-    ARIADNE_ASSERT(y.upper_raw()>=-pi_up(prec));
+    ARIADNE_ASSERT(y.lower_raw()<=pi.upper_raw());
+    ARIADNE_ASSERT(y.upper_raw()>=-pi.upper_raw());
 
     RawFloat<PR> rl,ru;
-    if(y.lower_raw()<=-pi_down(prec)) {
+    if(y.lower_raw()<=-pi.lower_raw()) {
         if(y.upper_raw()<=0.0) { rl=-one; ru=cos_up(y.upper_raw()); }
         else { rl=-one; ru=+one; }
     } else if(y.lower_raw()<=0.0) {
         if(y.upper_raw()<=0.0) { rl=cos_down(y.lower_raw()); ru=cos_up(y.upper_raw()); }
-        else if(y.upper_raw()<=pi_down(prec)) { rl=cos_down(max(-y.lower_raw(),y.upper_raw())); ru=+one; }
+        else if(y.upper_raw()<=pi.lower_raw()) { rl=cos_down(max(-y.lower_raw(),y.upper_raw())); ru=+one; }
         else { rl=-one; ru=+one; }
-    } else if(y.lower_raw()<=pi_up(prec)) {
-        if(y.upper_raw()<=pi_down(prec)) { rl=cos_down(y.upper_raw()); ru=cos_up(y.lower_raw()); }
-        else if(y.upper_raw()<=2*pi_down(prec)) { rl=-one; ru=cos_up(min(y.lower_raw(),sub_down(2*pi_down(prec),y.upper_raw()))); }
+    } else if(y.lower_raw()<=pi.upper_raw()) {
+        if(y.upper_raw()<=pi.lower_raw()) { rl=cos_down(y.upper_raw()); ru=cos_up(y.lower_raw()); }
+        else if(y.upper_raw()<=2*pi.lower_raw()) { rl=-one; ru=cos_up(min(y.lower_raw(),sub_down(2*pi_down(prec),y.upper_raw()))); }
         else { rl=-one; ru=+one; }
     } else {
         assert(false);

@@ -105,10 +105,10 @@ class Float64 {
   public:
     //! \brief Default constructor creates an uninitialised number.
     Float64() : dbl() { }
-    Float64(Precision64) : dbl() { }
+    explicit Float64(Precision64) : dbl() { }
     //! \brief Convert from a built-in double-precision floating-point number.
     Float64(double x) : dbl(x) { }
-    Float64(double x, Precision64) : dbl(x) { }
+    explicit Float64(double x, Precision64) : dbl(x) { }
     //! \brief Copy constructor.
     Float64(const Float64& x) : dbl(x.dbl) { }
 

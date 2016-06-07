@@ -1447,7 +1447,7 @@ template<class PR> Boolean operator< (FloatValue<PR> const& x1, FloatValue<PR> c
 template<class PR> Boolean operator> (FloatValue<PR> const& x1, FloatValue<PR> const& x2) { return x1.raw()> x2.raw(); }
 
 template<class PR> OutputStream& _write(OutputStream& os, FloatValue<PR> const& x) {
-    write(os,x.raw(),FloatValue<PR>::output_places,RawFloat<PR>::to_nearest);
+    return write(os,x.raw(),FloatValue<PR>::output_places,RawFloat<PR>::to_nearest);
 }
 
 template<class PR> InputStream& _read(InputStream& is, FloatValue<PR>& x) {

@@ -390,7 +390,7 @@ Differential<X> Differential<X>::_neg(Differential<X> x)
 }
 
 template<class X>
-Differential<X>& Differential<X>::_iadd(Differential<X>& x, const X& c)
+Differential<X> Differential<X>::_add(Differential<X> x, const X& c)
 {
     MultiIndex a(x.argument_size());
     if(x.expansion().empty()) {
@@ -400,11 +400,11 @@ Differential<X>& Differential<X>::_iadd(Differential<X>& x, const X& c)
     } else {
         x.begin()->data()+=c;
     }
-    return x;
+    return std::move(x);
 }
 
 template<class X>
-Differential<X>& Differential<X>::_imul(Differential<X>& x, const X& c)
+Differential<X> Differential<X>::_mul(Differential<X> x, const X& c)
 {
     if(decide(c==static_cast<X>(0))) {
         x.clear();
@@ -413,7 +413,7 @@ Differential<X>& Differential<X>::_imul(Differential<X>& x, const X& c)
             static_cast<X&>(iter->data())*=c;
         }
     }
-    return x;
+    return std::move(x);
 }
 
 

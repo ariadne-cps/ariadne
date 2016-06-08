@@ -42,4 +42,8 @@ template class Differential<Float64Bounds>;
 template class Differential<Float64Approximation>;
 template class Differential<UpperIntervalType>;
 
+template class GradedAlgebraOperations<Differential<Float64>>;
+template class GradedAlgebraOperations<Differential<Float64Approximation>>;
+template class GradedAlgebraOperations<Differential<Float64Bounds>>;
+
 }

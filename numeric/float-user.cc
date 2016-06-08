@@ -1498,7 +1498,7 @@ template<class PR> Bool operator< (const Rational& q, FloatValue<PR> const& x) {
 template<class PR> Bool operator> (const Rational& q, FloatValue<PR> const& x) { return q> Rational(x); }
 
 
-template<class PR> struct Operations<FloatError<PR>> {
+template<class PR> struct Operations<FloatError<PR>,FloatLowerBound<PR>> {
     static FloatError<PR> _sqr(FloatError<PR> const& x) {
         return FloatError<PR>(mul_up(x._e,x._e));
     }
@@ -1507,12 +1507,20 @@ template<class PR> struct Operations<FloatError<PR>> {
         return FloatLowerBound<PR>(rec_down(x._e));
     }
 
+    static FloatError<PR> _rec(FloatLowerBound<PR> const& x) {
+        ARIADNE_ASSERT_MSG(x._l>=0.0,x); return FloatError<PR>(rec_up(x._l));
+    }
+
     static FloatError<PR> _add(FloatError<PR> const& x1, FloatError<PR> const& x2) {
         return FloatError<PR>(add_up(x1._e,x2._e));
     }
 
     static FloatError<PR> _mul(FloatError<PR> const& x1, FloatError<PR> const& x2) {
         return FloatError<PR>(mul_up(x1._e,x2._e));
+    }
+
+    static FloatError<PR> _div(FloatError<PR> const& x1, FloatLowerBound<PR> const& x2) {
+        ARIADNE_ASSERT_MSG(x2._l>=0.0,x2); return FloatError<PR>(div_up(x1._e,x2._l));
     }
 
     static FloatError<PR> _pow(FloatError<PR> const& x1, Nat m2) {
@@ -1529,6 +1537,10 @@ template<class PR> struct Operations<FloatError<PR>> {
 
     static FloatError<PR> _min(FloatError<PR> const& x1, FloatError<PR> const& x2) {
         return FloatError<PR>(min(x1._e,x2._e));
+    }
+
+    static FloatError<PR> _abs(FloatError<PR> const& x) {
+        return FloatError<PR>(x._e);
     }
 
     static Bool _same(FloatError<PR> const& x1, FloatError<PR> const& x2) {
@@ -1705,6 +1717,7 @@ template class Operations<Float64UpperBound,Float64LowerBound>;
 template class Operations<Float64Bounds>;
 template class Operations<Float64Ball>;
 template class Operations<Float64Value,Float64Value,Float64Bounds>;
+template class Operations<Float64Error,Float64LowerBound>;
 
 template class Operations<FloatMPApproximation>;
 template class Operations<FloatMPLowerBound,FloatMPUpperBound>;
@@ -1712,6 +1725,7 @@ template class Operations<FloatMPUpperBound,FloatMPLowerBound>;
 template class Operations<FloatMPBounds>;
 template class Operations<FloatMPBall>;
 template class Operations<FloatMPValue,FloatMPValue,FloatMPBounds>;
+template class Operations<FloatMPError,FloatMPLowerBound>;
 
 
 
@@ -1883,50 +1897,30 @@ Float64Value& operator/=(Float64Value& x1, TwoExp y2) { return x1=x1/y2; }
 
 
 
-Float64UpperBound operator+(Float64Error const& x) { return x; }
-Float64LowerBound operator-(Float64Error const& x) { return -(+x); }
-Float64Error operator+(Float64Error const& x1, Float64Error const& x2) { return Operations<Float64Error>::_add(x1,x2); }
-Float64Error operator*(Float64Error const& x1, Float64Error const& x2) { return Operations<Float64Error>::_mul(x1,x2); }
 Float64Error operator*(Nat y1, Float64Error const& x2) { return Float64Error(y1)*x2; }
-Float64Error& operator+=(Float64Error& x1, Float64Error const& x2) { return x1=x1+x2; }
-Float64Error& operator*=(Float64Error& x1, Float64Error const& x2) { return x1=x1*x2; }
-Float64Error sqr(Float64Error const& x) { return Operations<Float64Error>::_sqr(x); }
-Float64LowerBound rec(Float64Error const& x) { return Operations<Float64Error>::_rec(x); }
-Float64Error pow(Float64Error const& x1, Nat m2) { return Operations<Float64Error>::_pow(x1,m2); }
-Float64UpperBound log(Float64Error const& x) { return Operations<Float64Error>::_log(x); }
-Float64Error max(Float64Error const& x1, Float64Error const& x2) { return Operations<Float64Error>::_max(x1,x2); }
-Float64Error abs(Float64Error const& x) { return x; }
+Float64LowerBound rec(Float64Error const& x) { return Operations<Float64Error,Float64LowerBound>::_rec(x); }
+Float64UpperBound log(Float64Error const& x) { return Operations<Float64Error,Float64LowerBound>::_log(x); }
 Float64Error mag(Float64Error const& x) { return x; }
 
-OutputStream& operator<<(OutputStream& os, Float64Error const& x) { return Operations<Float64Error>::_write(os,x); }
-InputStream& operator>>(InputStream& is, Float64Error& x) { return Operations<Float64Error>::_read(is,x); }
+OutputStream& operator<<(OutputStream& os, Float64Error const& x) { return Operations<Float64Error,Float64LowerBound>::_write(os,x); }
+InputStream& operator>>(InputStream& is, Float64Error& x) { return Operations<Float64Error,Float64LowerBound>::_read(is,x); }
 
-Bool same(Float64Error const& x1, Float64Error const& x2) { return Operations<Float64Error>::_same(x1,x2); }
-Bool refines(Float64Error const& x1, Float64Error const& x2) { return Operations<Float64Error>::_refines(x1,x2); }
-Float64Error refinement(Float64Error const& x1, Float64Error const& x2) { return Operations<Float64Error>::_refinement(x1,x2); }
+Bool same(Float64Error const& x1, Float64Error const& x2) { return Operations<Float64Error,Float64LowerBound>::_same(x1,x2); }
+Bool refines(Float64Error const& x1, Float64Error const& x2) { return Operations<Float64Error,Float64LowerBound>::_refines(x1,x2); }
+Float64Error refinement(Float64Error const& x1, Float64Error const& x2) { return Operations<Float64Error,Float64LowerBound>::_refinement(x1,x2); }
 
 
-FloatMPUpperBound operator+(FloatMPError const& x) { return x; }
-FloatMPLowerBound operator-(FloatMPError const& x) { return -(+x); }
-FloatMPError operator+(FloatMPError const& x1, FloatMPError const& x2) { return Operations<FloatMPError>::_add(x1,x2); }
-FloatMPError operator*(FloatMPError const& x1, FloatMPError const& x2) { return Operations<FloatMPError>::_mul(x1,x2); }
 FloatMPError operator*(Nat y1, FloatMPError const& x2) { return FloatMPError(y1)*x2; }
-FloatMPError& operator+=(FloatMPError& x1, FloatMPError const& x2) { return x1=x1+x2; }
-FloatMPError& operator*=(FloatMPError& x1, FloatMPError const& x2) { return x1=x1*x2; }
-FloatMPError sqr(FloatMPError const& x) { return Operations<FloatMPError>::_sqr(x); }
-FloatMPLowerBound rec(FloatMPError const& x) { return Operations<FloatMPError>::_rec(x); }
-FloatMPError pow(FloatMPError const& x1, Nat m2) { return Operations<FloatMPError>::_pow(x1,m2); }
-FloatMPUpperBound log(FloatMPError const& x) { return Operations<FloatMPError>::_log(x); }
-FloatMPError max(FloatMPError const& x1, FloatMPError const& x2) { return Operations<FloatMPError>::_max(x1,x2); }
-FloatMPError abs(FloatMPError const& x) { return x; }
+FloatMPLowerBound rec(FloatMPError const& x) { return Operations<FloatMPError,FloatMPLowerBound>::_rec(x); }
+FloatMPUpperBound log(FloatMPError const& x) { return Operations<FloatMPError,FloatMPLowerBound>::_log(x); }
 FloatMPError mag(FloatMPError const& x) { return x; }
 
-OutputStream& operator<<(OutputStream& os, FloatMPError const& x) { return Operations<FloatMPError>::_write(os,x); }
-InputStream& operator>>(InputStream& is, FloatMPError& x) { return Operations<FloatMPError>::_read(is,x); }
+OutputStream& operator<<(OutputStream& os, FloatMPError const& x) { return Operations<FloatMPError,FloatMPLowerBound>::_write(os,x); }
+InputStream& operator>>(InputStream& is, FloatMPError& x) { return Operations<FloatMPError,FloatMPLowerBound>::_read(is,x); }
 
-Bool same(FloatMPError const& x1, FloatMPError const& x2) { return Operations<FloatMPError>::_same(x1,x2); }
-Bool refines(FloatMPError const& x1, FloatMPError const& x2) { return Operations<FloatMPError>::_refines(x1,x2); }
-FloatMPError refinement(FloatMPError const& x1, FloatMPError const& x2) { return Operations<FloatMPError>::_refinement(x1,x2); }
+Bool same(FloatMPError const& x1, FloatMPError const& x2) { return Operations<FloatMPError,FloatMPLowerBound>::_same(x1,x2); }
+Bool refines(FloatMPError const& x1, FloatMPError const& x2) { return Operations<FloatMPError,FloatMPLowerBound>::_refines(x1,x2); }
+FloatMPError refinement(FloatMPError const& x1, FloatMPError const& x2) { return Operations<FloatMPError,FloatMPLowerBound>::_refinement(x1,x2); }
 
 
 
@@ -1949,9 +1943,6 @@ Float64Error operator/(Float64Error const& x1, PositiveFloat64LowerBound const& 
 
 Float64UpperBound operator*(Float64UpperBound const& x1, Real const& y2) {
     Float64UpperBound x2(y2,x1.precision()); return Float64UpperBound(mul_up(x1._u,x2._u)); }
-Float64UpperBound rec(Float64LowerBound const& x) {
-    return Float64UpperBound(rec_up(x._l)); }
-Float64Bounds rec(Float64Value const& x);
 
 
 Float64Value midpoint(Float64Bounds const& x) { return x.value(); }

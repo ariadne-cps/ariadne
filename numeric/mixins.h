@@ -387,6 +387,20 @@ template<class X, class NX> class ProvideDirectedArithmeticOperators
     friend X& operator-=(X& x1, NX const& x2) { return x1=sub(x1,x2); }
 };
 
+template<class X, class QX=X, class R=X, class QR=QX> class ProvidePositiveDirectedArithmeticOperators
+{
+    friend R rec(QX const&);
+    friend R operator+(X const& x1, X const& x2) { return add(x1,x2); }
+    friend R operator*(X const& x1, X const& x2) { return mul(x1,x2); }
+    friend R operator/(X const& x1, QX const& x2) { return div(x1,x2); }
+    friend X& operator+=(X& x1, X const& x2) { return x1=add(x1,x2); }
+    friend X& operator*=(X& x1, X const& x2) { return x1=mul(x1,x2); }
+    friend X& operator/=(X& x1, QX const& x2) { return x1=div(x1,x2); }
+
+    friend QR rec(X const&);
+    friend QR operator/(QX const&, X const&);
+};
+
 template<class X, class R=X> struct DispatchNumericOperations
     : ProvideArithmeticOperators<X,R>
 {
@@ -433,6 +447,24 @@ template<class X, class NX, class R=X, class NR=NX> struct DispatchDirectedNumer
     friend X min(X const& x1, X const& x2) { return Operations<X,NX>::_min(x1,x2); }
     friend X abs(X const& x) { return Operations<X,NX>::_abs(x); }
 
+};
+
+template<class X, class QX, class R=X, class QR=QX> struct DispatchPositiveDirectedNumericOperations
+    : ProvidePositiveDirectedArithmeticOperators<X,QX,R,QR>
+{
+    friend X nul(X const& x) { return Operations<X,QX>::_nul(x); }
+    friend X hlf(X const& x) { return Operations<X,QX>::_hlf(x); }
+    friend R sqr(X const& x) { return Operations<X,QX>::_sqr(x); }
+    friend R rec(QX const& x) { return Operations<X,QX>::_rec(x); }
+    friend R add(X const& x1, X const& x2) { return Operations<X,QX>::_add(x1,x2); }
+    friend R mul(X const& x1, X const& x2) { return Operations<X,QX>::_mul(x1,x2); }
+    friend R div(X const& x1, QX const& x2) { return Operations<X,QX>::_div(x1,x2); }
+    friend R pow(X const& x, Nat m) { return Operations<X,QX>::_pow(x,m); }
+    friend R sqrt(X const& x) { return Operations<X,QX>::_sqrt(x); }
+    friend R atan(X const& x) { return Operations<X,QX>::_atan(x); }
+    friend X max(X const& x1, X const& x2) { return Operations<X,QX>::_max(x1,x2); }
+    friend X min(X const& x1, X const& x2) { return Operations<X,QX>::_min(x1,x2); }
+    friend X abs(X const& x) { return Operations<X,QX>::_abs(x); }
 };
 
 template<class X> struct DispatchNumericComparisons

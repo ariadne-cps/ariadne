@@ -336,7 +336,7 @@ template<class PR> class FloatLowerBound
     RawFloatType& raw() { return _l; }
     double get_d() const { return _l.get_d(); }
   public: // To be removed
-    friend FloatUpperBound<PR> rec(FloatLowerBound<PR> const&);
+    friend FloatError<PR> rec(FloatLowerBound<PR> const&);
     friend Bool same(FloatLowerBound<PR> const&, FloatLowerBound<PR> const&);
     friend Bool refines(FloatLowerBound<PR> const&, FloatLowerBound<PR> const&);
     friend FloatLowerBound<PR> refinement(FloatLowerBound<PR> const&, FloatLowerBound<PR> const&);
@@ -625,7 +625,9 @@ template<class PR> class FloatValue
 };
 
 template<class PR> class FloatError
-    : public DeclareDirectedComparisons<FloatUpperBound<PR>,FloatLowerBound<PR>,ValidatedSierpinskian>
+    : public DispatchPositiveDirectedNumericOperations<FloatError<PR>,FloatLowerBound<PR>>
+    , public DeclareDirectedNumericOperations<FloatUpperBound<PR>,FloatLowerBound<PR>>
+    , public DeclareDirectedComparisons<FloatUpperBound<PR>,FloatLowerBound<PR>,ValidatedSierpinskian>
 {
   private: public:
     RawFloat<PR> _e;
@@ -645,34 +647,22 @@ template<class PR> class FloatError
     RawFloat<PR> const& raw() const { return _e; }
     RawFloat<PR>& raw() { return _e; }
   public:
-    friend FloatError<PR> mag(FloatError<PR> const&);
-    friend FloatError<PR> max(FloatError<PR> const&, FloatError<PR> const&);
-    friend FloatError<PR> min(FloatError<PR> const&, FloatError<PR> const&);
-    friend FloatUpperBound<PR> operator+(FloatError<PR> const&);
-    friend FloatLowerBound<PR> operator-(FloatError<PR> const&);
-    friend FloatError<PR> operator+(FloatError<PR> const&, FloatError<PR> const&);
-    friend FloatError<PR> operator*(FloatError<PR> const&, FloatError<PR> const&);
-    friend FloatError<PR> operator*(Nat, FloatError<PR> const&);
-    friend FloatError<PR> operator/(FloatError<PR> const&, PositiveFloatLowerBound<PR> const&);
-    friend FloatError<PR>& operator+=(FloatError<PR>&, FloatError<PR> const&);
-    friend FloatError<PR>& operator*=(FloatError<PR>&, FloatError<PR> const&);
-    friend FloatError<PR> sqr(FloatError<PR> const&);
-    friend FloatError<PR> pow(FloatError<PR> const&, Nat);
-    friend FloatError<PR> abs(FloatError<PR> const&);
-    friend OutputStream& operator<<(OutputStream&, FloatError<PR> const&);
+    friend FloatError<PR> mag(FloatError<PR> const& x);
+    friend FloatUpperBound<PR> operator+(FloatError<PR> const& x) { return FloatUpperBound<PR>(+x._e); }
+    friend FloatLowerBound<PR> operator-(FloatError<PR> const& x) { return FloatLowerBound<PR>(-x._e); }
+    friend FloatUpperBound<PR> log(FloatError<PR> const& x);
+    friend FloatError<PR> exp(FloatError<PR> const& x);
+
+    friend FloatError<PR> operator*(Nat m1, FloatError<PR> const& x2);
 
     friend Bool same(FloatError<PR> const&, FloatError<PR> const&);
-
-    friend FloatUpperBound<PR> operator+(FloatUpperBound<PR> const&, FloatUpperBound<PR> const&);
-    friend FloatLowerBound<PR> operator-(FloatLowerBound<PR> const&, FloatUpperBound<PR> const&);
+    friend Bool refines(FloatError<PR> const&, FloatError<PR> const&);
+    friend OutputStream& operator<<(OutputStream&, FloatError<PR> const&);
+    friend OutputStream& operator<<(OutputStream&, FloatError<PR> const&);
+  public:
     friend FloatUpperBound<PR> operator+(Real const&, FloatUpperBound<PR> const&);
     friend FloatLowerBound<PR> operator-(Real const&, FloatUpperBound<PR> const&);
     friend FloatLowerBound<PR> operator-(Int, FloatUpperBound<PR> const&);
-    friend FloatUpperBound<PR> log(FloatError<PR> const&);
-    friend FloatLowerBound<PR> rec(FloatError<PR> const&);
-
-    friend ValidatedSierpinskian operator<=(FloatUpperBound<PR> const&, FloatLowerBound<PR> const&);
-    friend ValidatedNegatedSierpinskian operator> (FloatUpperBound<PR> const&, FloatLowerBound<PR> const&);
     friend ValidatedNegatedSierpinskian operator> (FloatUpperBound<PR> const&, double); // FIXME: Remove
   public:
     static Nat output_places;

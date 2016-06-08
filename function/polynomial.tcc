@@ -212,9 +212,25 @@ template<class X> Polynomial<X> Polynomial<X>::_neg(const Polynomial<X>& p) {
 }
 
 
+template<class X> Polynomial<X> Polynomial<X>::_add(Polynomial<X> p, const X& c) {
+    p[MultiIndex(p.argument_size())]+=c;
+    return std::move(p);
+}
+
 template<class X> Polynomial<X>& Polynomial<X>::_iadd(Polynomial<X>& p, const X& c) {
     p[MultiIndex(p.argument_size())]+=c;
     return p;
+}
+
+template<class X> Polynomial<X> Polynomial<X>::_mul(Polynomial<X> p, const X& c) {
+    if(is_null(c)) {
+        p.expansion().clear();
+    } else {
+        for(auto iter=p.begin(); iter!=p.end(); ++iter) {
+            iter->data()*=c;
+        }
+    }
+    return std::move(p);
 }
 
 template<class X> Polynomial<X>& Polynomial<X>::_imul(Polynomial<X>& p, const X& c) {
@@ -294,6 +310,15 @@ template<class X> Polynomial<X> Polynomial<X>::_mul(const Polynomial<X>& p1, con
         }
     }
     return r;
+}
+
+template<class X> Polynomial<X> Polynomial<X>::_mul(Polynomial<X> p, const Monomial<X>& m) {
+    if(is_null(m.data())) { p.clear(); }
+    for(auto iter=p.begin(); iter!=p.end(); ++iter) {
+        iter->key()+=m.key();
+        iter->data()*=m.data();
+    }
+    return std::move(p);
 }
 
 template<class X> Polynomial<X>& Polynomial<X>::_imul(Polynomial<X>& p, const Monomial<X>& m) {

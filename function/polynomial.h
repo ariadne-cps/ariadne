@@ -38,6 +38,7 @@
 #include "algebra/multi_index.h"
 #include "algebra/expansion.h"
 #include "function/taylor_model.h"
+#include "algebra/algebra_operations.h"
 #include "algebra/differential.h"
 #include "algebra/evaluate.h"
 
@@ -60,6 +61,7 @@ class Monomial
 //! \brief A polynomial with coefficients of some type \a X.
 template<class X>
 class Polynomial
+    : public DispatchAlgebraOperations<Polynomial<X>,X>
 {
     template<class XX> friend class Polynomial;
   public:
@@ -187,6 +189,8 @@ class Polynomial
 
     //@{
     //! \name Related operations
+    friend Polynomial<X>& operator*=(Polynomial<X>& p, const Monomial<X>& m) { return Polynomial<X>::_imul(p,m); }
+
     template<class XX, class A> friend A evaluate(const Polynomial<XX>& p, const Vector<A>& v);
     template<class XX> friend Polynomial<XX> compose(const Polynomial<XX>& p, const Vector<Polynomial<XX>>& q);
     template<class XX> friend Polynomial<XX> derivative(Polynomial<XX> dx, SizeType k);
@@ -200,6 +204,9 @@ class Polynomial
     static Polynomial<X> _add(const Polynomial<X>& p1, const Polynomial<X>& p2);
     static Polynomial<X> _sub(const Polynomial<X>& p1, const Polynomial<X>& p2);
     static Polynomial<X> _mul(const Polynomial<X>& p1, const Polynomial<X>& p2);
+    static Polynomial<X> _add(Polynomial<X> p, const X& c);
+    static Polynomial<X> _mul(Polynomial<X> p, const X& c);
+    static Polynomial<X> _mul(Polynomial<X> p, const Monomial<X>& m);
     static Polynomial<X>& _iadd(Polynomial<X>& p, const X& c);
     static Polynomial<X>& _imul(Polynomial<X>& p, const X& c);
     static Polynomial<X>& _imul(Polynomial<X>& p, const Monomial<X>& m);
@@ -272,25 +279,6 @@ template<class F> inline NamedArgumentRepresentation<F> named_argument_repr(cons
 
 template<class X> inline OutputStream& operator<<(OutputStream& os, const NamedArgumentRepresentation<Polynomial<X>>& repr) {
     return repr.function._write(os,repr.argument_names); }
-
-template<class X> struct IsAlgebra<Polynomial<X>> : True { };
-
-template<class X> inline Polynomial<X> operator+(const Polynomial<X>& p) {
-    return Polynomial<X>::_pos(p); }
-template<class X> inline Polynomial<X> operator-(const Polynomial<X>& p) {
-    return Polynomial<X>::_neg(p); }
-template<class X> inline Polynomial<X> operator+(const Polynomial<X>& p1, const Polynomial<X>& p2) {
-    return Polynomial<X>::_add(p1,p2); }
-template<class X> inline Polynomial<X> operator-(const Polynomial<X>& p1, const Polynomial<X>& p2) {
-    return Polynomial<X>::_sub(p1,p2); }
-template<class X> inline Polynomial<X> operator*(const Polynomial<X>& p1, const Polynomial<X>& p2) {
-    return Polynomial<X>::_mul(p1,p2); }
-template<class X> inline Polynomial<X>& operator+=(Polynomial<X>& p, const NumericType<Polynomial<X>>& c) {
-    return Polynomial<X>::_iadd(p,c); }
-template<class X> inline Polynomial<X>& operator*=(Polynomial<X>& p, const NumericType<Polynomial<X>>& c) {
-    return Polynomial<X>::_imul(p,c); }
-template<class X> inline Polynomial<X>& operator*=(Polynomial<X>& p, const Monomial<X>& m) {
-    return Polynomial<X>::_imul(p,m); }
 
 template<class X> inline Polynomial<MidpointType<X>> midpoint(const Polynomial<X>& p) {
     return Polynomial<MidpointType<X>>(midpoint(p.expansion())); }

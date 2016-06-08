@@ -685,4 +685,150 @@ OutputStream& Differential<X>::_write(OutputStream& os) const
 
 
 
+template<class X> Vector<Differential<X>>::Vector(SizeType rs, SizeType as, DegreeType d)
+    : _chars(as,d), _ary(rs,Differential<X>(as,d)) {
+}
+
+template<class X> Vector<Differential<X>>::Vector(SizeType rs, const Differential<X>& sd)
+    : _chars(sd), _ary(rs,sd) {
+}
+
+template<class X> Vector<Differential<X>>::Vector(SizeType rs, const Differential<X>* p)
+    : _chars(), _ary(p,p+rs)
+{
+    ARIADNE_ASSERT(rs>0); _chars=DifferentialCharacteristics(p[0]);
+}
+
+template<class X>
+Vector<Differential<X>>::Vector(SizeType rs, SizeType as, DegreeType d,
+                                  const Vector<X>& v, const Matrix<X>& A)
+    :  _chars(as,d), _ary(rs,Differential<X>(as,d))
+{
+    ARIADNE_ASSERT(rs==v.size());
+    ARIADNE_ASSERT(rs==A.row_size());
+    ARIADNE_ASSERT(as==A.column_size());
+    for(SizeType i=0; i!=this->result_size(); ++i) {
+        (*this)[i]=v[i];
+        for(SizeType j=0; j!=this->argument_size(); ++j) {
+            const X& x=A[i][j];
+            if(decide(x!=0)) { (*this)[i][j]=x; }
+        }
+    }
+}
+
+
+template<class X> Vector<X> Vector<Differential<X>>::value() const {
+    Vector<Differential<X>> const& x=*this;
+    Vector<X> r(x.result_size());
+    for(SizeType i=0; i!=r.size(); ++i) {
+        r[i]=x[i].value();
+    }
+    return r;
+}
+
+template<class X> Matrix<X> Vector<Differential<X>>::jacobian() const {
+    Vector<Differential<X>> const& x=*this;
+    Matrix<X> r(x.size(),x.zero_element().argument_size());
+    for(SizeType i=0; i!=x.size(); ++i) {
+        for(SizeType j=0; j!=x[0].argument_size(); ++j) {
+            r[i][j]=x[i].gradient(j);
+
+        }
+    }
+    return r;
+}
+
+template<class X> Void Vector<Differential<X>>::set_value(const Vector<X>& c) {
+    ARIADNE_ASSERT(this->result_size()==c.size());
+    for(SizeType i=0; i!=c.size(); ++i) {
+        (*this)[i].set_value(c[i]);
+    }
+}
+
+template<class X> Vector<Differential<X>> Vector<Differential<X>>::constant(SizeType rs, SizeType as, DegreeType d, const Vector<X>& c) {
+    ARIADNE_ASSERT(c.size()==rs);
+    Vector< Differential<X> > result(rs,as,d);
+    for(SizeType i=0; i!=rs; ++i) { result[i]=c[i]; }
+    return result;
+}
+
+template<class X> Vector<Differential<X>> Vector<Differential<X>>::variable(SizeType rs, SizeType as, DegreeType d, const Vector<X>& x) {
+    ARIADNE_ASSERT(x.size()==rs);
+    Vector< Differential<X> > result(rs,as,d);
+    for(SizeType i=0; i!=rs; ++i) { result[i]=x[i]; result[i][i]=X(1.0); }
+    return result;
+}
+
+template<class X> Vector<Differential<X>> Vector<Differential<X>>::affine(SizeType rs, SizeType as, DegreeType d, const Vector<X>& b, const Matrix<X>& A) {
+    ARIADNE_ASSERT(b.size()==rs);
+    ARIADNE_ASSERT(A.row_size()==rs);
+    ARIADNE_ASSERT(A.column_size()==as);
+    Vector< Differential<X> > result(rs,as,d);
+    for(SizeType i=0; i!=rs; ++i) {
+        result[i]=b[i];
+        for(SizeType j=0; j!=as; ++j) {
+            result[i][j]=A[i][j];
+        }
+    }
+    return result;
+}
+
+
+
+template<class X> Vector<Differential<X>> Vector<Differential<X>>::_compose(Vector<Differential<X>> const& x, Vector<Differential<X>> const& y) {
+    Vector<Differential<X>> r(x.size(),y.zero_element());
+    for(SizeType i=0; i!=r.size(); ++i) { r[i]=compose(x[i],y); }
+    return r;
+}
+
+DegreeType min(DegreeType d1, DegreeType d2) { return std::min(d1,d2); }
+
+template<class X>
+Vector<Differential<X>>
+Vector<Differential<X>>::_derivative(const Vector<Differential<X>>& x, SizeType k) {
+    Vector<Differential<X>> r(x.size(), Differential<X>(x.argument_size(),min(x.degree(),(DegreeType)1u)-1u));
+    for(SizeType i=0; i!=r.size(); ++i) { r[i]=derivative(x[i],k); }
+    return r;
+}
+
+template<class X>
+Vector<Differential<X>>
+Vector<Differential<X>>::_antiderivative(const Vector<Differential<X>>& x, SizeType k) {
+    Vector<Differential<X>> r(x.size(), Differential<X>(x.argument_size(),x.degree()+1));
+    for(SizeType i=0; i!=r.size(); ++i) { r[i]=antiderivative(x[i],k); }
+    return r;
+}
+
+
+
+
+template<class X>
+Vector<Differential<X>>
+Vector<Differential<X>>::_lie_derivative(const Vector<Differential<X> >& df, const Vector<Differential<X> >& dg)
+{
+    Vector<Differential<X>> r(df.result_size(),df.argument_size(),df.degree()-1);
+    Differential<X> t(df.argument_size(), df.degree()-1);
+    MultiIndex a; X c;
+    for(SizeType i=0; i!=df.result_size(); ++i) {
+        Expansion<X> const& dfi_expansion = df[i].expansion();
+        Expansion<X>& t_expansion = t.expansion();
+        for(SizeType j=0; j!=df.argument_size(); ++j) {
+            for(typename Expansion<X>::ConstIterator iter=dfi_expansion.begin(); iter!=dfi_expansion.end(); ++iter) {
+                if(iter->key()[j]!=0) {
+                    a=iter->key();
+                    c=iter->data()*SizeType(a[j]);
+                    a[j]-=1;
+                    t_expansion.append(a,c);
+                }
+            }
+            r[i]+=t*dg[j];
+            t.clear();
+        }
+    }
+    return r;
+}
+
+
+
+
 } //namespace Ariadne

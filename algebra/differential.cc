@@ -46,4 +46,9 @@ template class GradedAlgebraOperations<Differential<Float64>>;
 template class GradedAlgebraOperations<Differential<Float64Approximation>>;
 template class GradedAlgebraOperations<Differential<Float64Bounds>>;
 
+template class Vector<Differential<Float64>>;
+template class Vector<Differential<Float64Bounds>>;
+template class Vector<Differential<Float64Approximation>>;
+//template class Vector<Differential<UpperIntervalType>>;
+
 }

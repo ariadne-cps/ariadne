@@ -66,7 +66,8 @@ template<class A, class X=typename A::NumericType> struct AlgebraOperations {
     static A _atan(A const& a);
 };
 
-template<class A, class X=NumericType<A>> struct GradedAlgebraOperations {
+template<class A> struct GradedAlgebraOperations {
+    typedef typename A::NumericType X;
     static A _sqr(A const& a) {
         return a*a; }
     static A _pow(A const& a, Nat m) {
@@ -85,8 +86,8 @@ template<class A, class X=NumericType<A>> struct GradedAlgebraOperations {
 };
 
 template<class A, class X> struct DispatchAlgebraOperations {
-    //typedef AlgebraOperations<A,X> OperationsType;
-    typedef A OperationsType;
+    typedef AlgebraOperations<A,X> OperationsType;
+    //typedef A OperationsType;
   public:
     friend A operator+(A const& a) { return pos(a); }
     friend A operator-(A const& a) { return neg(a); }
@@ -111,37 +112,37 @@ template<class A, class X> struct DispatchAlgebraOperations {
     friend A operator*(X const& x1, A const& a2) { return mul(x1,a2); }
     friend A operator/(X const& x1, A const& a2) { return div(x1,a2); }
 
-    friend A nul(A const& a) { return OperationsType::_nul(a); }
-    friend A pos(A const& a) { return OperationsType::_pos(a); }
-    friend A neg(A const& a) { return OperationsType::_neg(a); }
-    friend A half(A const& a) { return OperationsType::_half(a); }
-    friend A sqr(A const& a) { return OperationsType::_sqr(a); }
-    friend A rec(A const& a) { return OperationsType::_rec(a); }
-    friend A add(A const& a1, A const& a2) { return OperationsType::_add(a1, a2); }
-    friend A sub(A const& a1, A const& a2) { return OperationsType::_sub(a1, a2); }
-    friend A mul(A const& a1, A const& a2) { return OperationsType::_mul(a1, a2); }
-    friend A div(A const& a1, A const& a2) { return OperationsType::_div(a1, a2); }
+    friend A nul(A const& a) { return OperationsType()._nul(a); }
+    friend A pos(A const& a) { return OperationsType()._pos(a); }
+    friend A neg(A const& a) { return OperationsType()._neg(a); }
+    friend A half(A const& a) { return OperationsType()._half(a); }
+    friend A sqr(A const& a) { return OperationsType()._sqr(a); }
+    friend A rec(A const& a) { return OperationsType()._rec(a); }
+    friend A add(A const& a1, A const& a2) { return OperationsType()._add(a1, a2); }
+    friend A sub(A const& a1, A const& a2) { return OperationsType()._sub(a1, a2); }
+    friend A mul(A const& a1, A const& a2) { return OperationsType()._mul(a1, a2); }
+    friend A div(A const& a1, A const& a2) { return OperationsType()._div(a1, a2); }
 
-    friend A add(A const& a1, X const& x2) { return OperationsType::_add(a1, x2); }
-    friend A sub(A const& a1, X const& x2) { return OperationsType::_add(a1, neg(x2)); }
-    friend A mul(A const& a1, X const& x2) { return OperationsType::_mul(a1, x2); }
-    friend A div(A const& a1, X const& x2) { return OperationsType::_mul(a1, rec(x2)); }
-    friend A add(X const& x1, A const& a2) { return OperationsType::_add(a2, x1); }
-    friend A sub(X const& x1, A const& a2) { return OperationsType::_add(neg(a2), x1); }
-    friend A mul(X const& x1, A const& a2) { return OperationsType::_mul(a2, x1); }
-    friend A div(X const& x1, A const& a2) { return OperationsType::_mul(rec(a2), x1); }
+    friend A add(A const& a1, X const& x2) { return OperationsType()._add(a1, x2); }
+    friend A sub(A const& a1, X const& x2) { return OperationsType()._add(a1, neg(x2)); }
+    friend A mul(A const& a1, X const& x2) { return OperationsType()._mul(a1, x2); }
+    friend A div(A const& a1, X const& x2) { return OperationsType()._mul(a1, rec(x2)); }
+    friend A add(X const& x1, A const& a2) { return OperationsType()._add(a2, x1); }
+    friend A sub(X const& x1, A const& a2) { return OperationsType()._add(neg(a2), x1); }
+    friend A mul(X const& x1, A const& a2) { return OperationsType()._mul(a2, x1); }
+    friend A div(X const& x1, A const& a2) { return OperationsType()._mul(rec(a2), x1); }
 
-    friend A pow(A const& a, Nat m) { return OperationsType::_pow(a, m); }
-    friend A pow(A const& a, Int n) { return OperationsType::_pow(a, n); }
-    friend A sqrt(A const& a) { return OperationsType::_sqrt(a); }
-    friend A exp(A const& a) { return OperationsType::_exp(a); }
-    friend A log(A const& a) { return OperationsType::_log(a); }
-    friend A sin(A const& a) { return OperationsType::_sin(a); }
-    friend A cos(A const& a) { return OperationsType::_cos(a); }
-    friend A tan(A const& a) { return OperationsType::_tan(a); }
-    friend A asin(A const& a) { return OperationsType::_asin(a); }
-    friend A acos(A const& a) { return OperationsType::_acos(a); }
-    friend A atan(A const& a) { return OperationsType::_atan(a); }
+    friend A pow(A const& a, Nat m) { return OperationsType()._pow(a, m); }
+    friend A pow(A const& a, Int n) { return OperationsType()._pow(a, n); }
+    friend A sqrt(A const& a) { return OperationsType()._sqrt(a); }
+    friend A exp(A const& a) { return OperationsType()._exp(a); }
+    friend A log(A const& a) { return OperationsType()._log(a); }
+    friend A sin(A const& a) { return OperationsType()._sin(a); }
+    friend A cos(A const& a) { return OperationsType()._cos(a); }
+    friend A tan(A const& a) { return OperationsType()._tan(a); }
+    friend A asin(A const& a) { return OperationsType()._asin(a); }
+    friend A acos(A const& a) { return OperationsType()._acos(a); }
+    friend A atan(A const& a) { return OperationsType()._atan(a); }
 };
 
 

@@ -138,7 +138,6 @@ template<class X> template<class XX> UnivariateDifferential<X>::UnivariateDiffer
 template<class X>
 class Differential
     : public DispatchAlgebraOperations<Differential<X>,X>
-    , public GradedAlgebraOperations<Differential<X>,X>
 {
     typedef Differential<X> SelfType;
 
@@ -301,17 +300,6 @@ class Differential
         Differential<X>::_antiderivative(x,k); }
 
   public:
-    static Differential<X> _pos(Differential<X> dx);
-    static Differential<X> _neg(Differential<X> dx);
-    static Differential<X> _add(Differential<X> dx, X const& c);
-    static Differential<X> _mul(Differential<X> dx, X const& c);
-    static Differential<X> _add(Differential<X> const& dx1, Differential<X> const& dx2);
-    static Differential<X> _sub(Differential<X> const& dx1, Differential<X> const& dx2);
-    static Differential<X> _mul(Differential<X> const& dx1, Differential<X> const& dx2);
-    static Differential<X> _div(Differential<X> const& dx1, Differential<X> const& dx2);
-    static Differential<X> _min(Differential<X> const& dx1, Differential<X> const& dx2);
-    static Differential<X> _max(Differential<X> const& dx1, Differential<X> const& dx2);
-    static Differential<X> _abs(Differential<X> const& dx);
     static Differential<X> _derivative(Differential<X> const& dx, SizeType k);
     static Differential<X> _antiderivative(Differential<X> const& dx, SizeType k);
     static Differential<X> _compose(Series<X> const& f, Differential<X> const& dx) {
@@ -322,6 +310,21 @@ class Differential
 
     static Matrix<X> _jacobian(Vector<Differential<X>> const&);
     OutputStream& _write(OutputStream& os) const;
+};
+
+template<class X> struct AlgebraOperations<Differential<X>> : GradedAlgebraOperations<Differential<X>> {
+    static Differential<X> _pos(Differential<X> dx);
+    static Differential<X> _neg(Differential<X> dx);
+    static Differential<X> _add(Differential<X> dx, X const& c);
+    static Differential<X> _mul(Differential<X> dx, X const& c);
+    static Differential<X> _add(Differential<X> const& dx1, Differential<X> const& dx2);
+    static Differential<X> _sub(Differential<X> const& dx1, Differential<X> const& dx2);
+    static Differential<X> _mul(Differential<X> const& dx1, Differential<X> const& dx2);
+    static Differential<X> _div(Differential<X> const& dx1, Differential<X> const& dx2);
+    static Differential<X> _rec(Differential<X> const& dx);
+    static Differential<X> _min(Differential<X> const& dx1, Differential<X> const& dx2);
+    static Differential<X> _max(Differential<X> const& dx1, Differential<X> const& dx2);
+    static Differential<X> _abs(Differential<X> const& dx);
 };
 
 template<class X> template<class XX> Differential<X>::Differential(SizeType as, DegreeType deg, const XX* ptr) : _expansion(as), _degree(deg) {

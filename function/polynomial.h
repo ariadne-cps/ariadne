@@ -64,6 +64,7 @@ class Polynomial
     : public DispatchAlgebraOperations<Polynomial<X>,X>
 {
     template<class XX> friend class Polynomial;
+    friend class AlgebraOperations<Polynomial<X>,X>;
   public:
     typedef typename Expansion<X>::ValueType ValueType;
     typedef typename Expansion<X>::Reference Reference;
@@ -199,17 +200,6 @@ class Polynomial
     //@}
 
     Void check() const;
-  public:
-    static Polynomial<X> _neg(const Polynomial<X>& p);
-    static Polynomial<X> _add(const Polynomial<X>& p1, const Polynomial<X>& p2);
-    static Polynomial<X> _sub(const Polynomial<X>& p1, const Polynomial<X>& p2);
-    static Polynomial<X> _mul(const Polynomial<X>& p1, const Polynomial<X>& p2);
-    static Polynomial<X> _add(Polynomial<X> p, const X& c);
-    static Polynomial<X> _mul(Polynomial<X> p, const X& c);
-    static Polynomial<X> _mul(Polynomial<X> p, const Monomial<X>& m);
-    static Polynomial<X>& _iadd(Polynomial<X>& p, const X& c);
-    static Polynomial<X>& _imul(Polynomial<X>& p, const X& c);
-    static Polynomial<X>& _imul(Polynomial<X>& p, const Monomial<X>& m);
     static Polynomial<X> _compose(const Polynomial<X>& p, const Vector<Polynomial<X>>& q);
     static X _evaluate(const Polynomial<X>& p, const Vector<X>& vx);
     static Algebra<X> _evaluate(const Polynomial<X>& p, const Vector<Algebra<X>>& va);
@@ -223,7 +213,19 @@ class Polynomial
     SortedExpansion<X,ReverseLexicographicKeyLess> _expansion;
 };
 
-
+template<class X> struct AlgebraOperations<Polynomial<X>> {
+  public:
+    static Polynomial<X> _neg(const Polynomial<X>& p);
+    static Polynomial<X> _add(const Polynomial<X>& p1, const Polynomial<X>& p2);
+    static Polynomial<X> _sub(const Polynomial<X>& p1, const Polynomial<X>& p2);
+    static Polynomial<X> _mul(const Polynomial<X>& p1, const Polynomial<X>& p2);
+    static Polynomial<X> _add(Polynomial<X> p, const X& c);
+    static Polynomial<X> _mul(Polynomial<X> p, const X& c);
+    static Polynomial<X> _mul(Polynomial<X> p, const Monomial<X>& m);
+    static Polynomial<X>& _iadd(Polynomial<X>& p, const X& c);
+    static Polynomial<X>& _imul(Polynomial<X>& p, const X& c);
+    static Polynomial<X>& _imul(Polynomial<X>& p, const Monomial<X>& m);
+};
 
 
 template<class X> template<class XX> Polynomial<X>::Polynomial(const Polynomial<XX>& p)

@@ -66,7 +66,7 @@ template<class X> using InequalityType = decltype(declval<X>()!=declval<X>());
 //! \ingroup DifferentiationModule
 //! \brief Arbitrary-order derivatives with respect to a single argument.
 template<class X> class UnivariateDifferential
-    : public DispatchAlgebraOperations<UnivariateDifferential<X>,X>
+    : public DispatchTranscendentalAlgebraOperations<UnivariateDifferential<X>,X>
 {
     Array<X> _ary;
   public:
@@ -137,7 +137,7 @@ template<class X> template<class XX> UnivariateDifferential<X>::UnivariateDiffer
 //! total degree of the terms is increasing, and the linear terms appear in coordinate order.
 template<class X>
 class Differential
-    : public DispatchAlgebraOperations<Differential<X>,X>
+    : public DispatchTranscendentalAlgebraOperations<Differential<X>,X>
 {
     typedef Differential<X> SelfType;
 

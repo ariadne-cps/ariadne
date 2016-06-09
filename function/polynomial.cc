@@ -35,6 +35,11 @@ template class Polynomial<Float64Approximation>;
 template class Polynomial<Float64Bounds>;
 template class Polynomial<UpperIntervalType>;
 
+template class AlgebraOperations<Polynomial<Float64>>;
+template class AlgebraOperations<Polynomial<Float64Approximation>>;
+template class AlgebraOperations<Polynomial<Float64Bounds>>;
+// template class AlgebraOperations<Polynomial<UpperIntervalType>>;
+
 template<> Void Polynomial<Float64Value>::cleanup() { }
 
 template Polynomial<Float64Value>::Polynomial(SizeType);

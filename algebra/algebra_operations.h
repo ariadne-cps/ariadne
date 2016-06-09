@@ -94,11 +94,9 @@ template<class A, class X> struct DispatchAlgebraOperations {
     friend A operator+(A const& a1, A const& a2) { return add(a1,a2); }
     friend A operator-(A const& a1, A const& a2) { return sub(a1,a2); }
     friend A operator*(A const& a1, A const& a2) { return mul(a1,a2); }
-    friend A operator/(A const& a1, A const& a2) { return div(a1,a2); }
     friend A& operator+=(A& a1, A const& a2) { return a1=add(a1,a2); }
     friend A& operator-=(A& a1, A const& a2) { return a1=sub(a1,a2); }
     friend A& operator*=(A& a1, A const& a2) { return a1=mul(a1,a2); }
-    friend A& operator/=(A& a1, A const& a2) { return a1=div(a1,a2); }
     friend A operator+(A const& a1, X const& x2) { return add(a1,x2); }
     friend A operator-(A const& a1, X const& x2) { return sub(a1,x2); }
     friend A operator*(A const& a1, X const& x2) { return mul(a1,x2); }
@@ -110,18 +108,15 @@ template<class A, class X> struct DispatchAlgebraOperations {
     friend A operator+(X const& x1, A const& a2) { return add(x1,a2); }
     friend A operator-(X const& x1, A const& a2) { return sub(x1,a2); }
     friend A operator*(X const& x1, A const& a2) { return mul(x1,a2); }
-    friend A operator/(X const& x1, A const& a2) { return div(x1,a2); }
 
     friend A nul(A const& a) { return OperationsType()._nul(a); }
     friend A pos(A const& a) { return OperationsType()._pos(a); }
     friend A neg(A const& a) { return OperationsType()._neg(a); }
     friend A half(A const& a) { return OperationsType()._half(a); }
     friend A sqr(A const& a) { return OperationsType()._sqr(a); }
-    friend A rec(A const& a) { return OperationsType()._rec(a); }
     friend A add(A const& a1, A const& a2) { return OperationsType()._add(a1, a2); }
     friend A sub(A const& a1, A const& a2) { return OperationsType()._sub(a1, a2); }
     friend A mul(A const& a1, A const& a2) { return OperationsType()._mul(a1, a2); }
-    friend A div(A const& a1, A const& a2) { return OperationsType()._div(a1, a2); }
 
     friend A add(A const& a1, X const& x2) { return OperationsType()._add(a1, x2); }
     friend A sub(A const& a1, X const& x2) { return OperationsType()._add(a1, neg(x2)); }
@@ -130,10 +125,26 @@ template<class A, class X> struct DispatchAlgebraOperations {
     friend A add(X const& x1, A const& a2) { return OperationsType()._add(a2, x1); }
     friend A sub(X const& x1, A const& a2) { return OperationsType()._add(neg(a2), x1); }
     friend A mul(X const& x1, A const& a2) { return OperationsType()._mul(a2, x1); }
-    friend A div(X const& x1, A const& a2) { return OperationsType()._mul(rec(a2), x1); }
-
     friend A pow(A const& a, Nat m) { return OperationsType()._pow(a, m); }
+};
+
+template<class A, class X> struct DispatchTranscendentalAlgebraOperations : DispatchAlgebraOperations<A,X> {
+    typedef AlgebraOperations<A,X> OperationsType;
+    //typedef A OperationsType;
+  public:
+    friend A operator/(A const& a1, X const& x2);
+    friend A div(A const& a1, X const& x2);
+    friend A pow(A const& a, Nat m);
+
+    friend A div(A const& a1, A const& a2) { return OperationsType()._div(a1, a2); }
+    friend A operator/(A const& a1, A const& a2) { return div(a1,a2); }
+    friend A& operator/=(A& a1, A const& a2) { return a1=div(a1,a2); }
+    friend A operator/(X const& x1, A const& a2) { return div(x1,a2); }
+
+    friend A rec(A const& a) { return OperationsType()._rec(a); }
+    friend A div(X const& x1, A const& a2) { return OperationsType()._mul(rec(a2), x1); }
     friend A pow(A const& a, Int n) { return OperationsType()._pow(a, n); }
+
     friend A sqrt(A const& a) { return OperationsType()._sqrt(a); }
     friend A exp(A const& a) { return OperationsType()._exp(a); }
     friend A log(A const& a) { return OperationsType()._log(a); }

@@ -54,8 +54,7 @@ compose(const Series<typename A::NumericType>& x, const A& y)
 
 template<class X> class TaylorSeries;
 
-template<class A> EnableIfNormedAlgebra<A>
-_compose(const TaylorSeries<Float64Bounds>& ts, const A& tv, double eps)
+template<class A> EnableIfNormedAlgebra<A> compose(const TaylorSeries<Float64Bounds>& ts, const A& tv, double eps)
 {
     //std::cerr<<"_compose(TaylorSeries,A,ErrorTag)\n";
     //std::cerr<<"\n  ts="<<ts<<"\n  tv="<<tv<<"\n";
@@ -77,8 +76,7 @@ _compose(const TaylorSeries<Float64Bounds>& ts, const A& tv, double eps)
     return r;
 }
 
-template<class A> EnableIfNormedAlgebra<A>
-compose(const TaylorSeries<Float64Bounds>& ts, const A& tm)
+template<class A> EnableIfNormedAlgebra<A> compose(const TaylorSeries<Float64Bounds>& ts, const A& tm)
 {
     return _compose(ts,tm,tm.tolerance());
 }
@@ -87,8 +85,7 @@ compose(const TaylorSeries<Float64Bounds>& ts, const A& tm)
 // Compose using the Taylor formula directly. The final term is the Taylor series computed
 // over the range of the series. This method tends to suffer from blow-up of the
 // truncation error
-template<class A> EnableIfNormedAlgebra<A>
-_compose1(const AnalyticFunction& fn, const A& tm, double eps)
+template<class A> EnableIfNormedAlgebra<A> _compose1(const AnalyticFunction& fn, const A& tm, double eps)
 {
     static const Nat DEGREE=18;
     static const double TRUNCATION_ERROR=1e-8;
@@ -120,8 +117,7 @@ _compose1(const AnalyticFunction& fn, const A& tm, double eps)
 // is usually better than _compose1 since there is no blow-up of the trunction
 // error. The radius of convergence of this method is still quite low,
 // typically only half of the radius of convergence of the power series itself
-template<class A> EnableIfNormedAlgebra<A>
-_compose2(const AnalyticFunction& fn, const A& tm, double eps)
+template<class A> EnableIfNormedAlgebra<A> _compose2(const AnalyticFunction& fn, const A& tm, double eps)
 {
     static const Nat DEGREE=20;
     static const Float64 TRUNCATION_ERROR=1e-8;
@@ -164,8 +160,7 @@ template<class PR> FloatError<PR> error_bound(FloatBounds<PR> const& b, FloatBou
 // is usually better than _compose1 since there is no blow-up of the trunction
 // error. This method is better than _compose2 since the truncation error is
 // assumed at the ends of the intervals
-template<class A> EnableIfNormedAlgebra<A>
-_compose3(const AnalyticFunction& fn, const A& tm, Float64 eps)
+template<class A> EnableIfNormedAlgebra<A> _compose3(const AnalyticFunction& fn, const A& tm, Float64 eps)
 {
     static const Nat DEGREE=20;
     static const Float64 TRUNCATION_ERROR=1e-8;
@@ -202,8 +197,7 @@ _compose3(const AnalyticFunction& fn, const A& tm, Float64 eps)
 }
 
 
-template<class A> EnableIfNormedAlgebra<A>
-_compose(const AnalyticFunction& fn, const A& tm, Float64 eps)
+template<class A> EnableIfNormedAlgebra<A> _compose(const AnalyticFunction& fn, const A& tm, Float64 eps)
 {
     return _compose3(fn,tm,eps);
 }
@@ -222,8 +216,8 @@ inline Int powm1(Nat k) { return (k%2) ? -1 : +1; }
 double rec_fac_up(Nat n) { Float64::set_rounding_upward(); double r=1; for(Nat i=1; i<=n; ++i) { r/=i; } return r; }
 }
 
-template<class A> EnableIfNormedAlgebra<A>
-sqrt(const A& x)
+
+template<class A> A NormedAlgebraOperations<A>::_sqrt(const A& x)
 {
     typedef typename A::NumericType X;
 
@@ -257,8 +251,7 @@ sqrt(const A& x)
     return z;
 }
 
-template<class A> EnableIfNormedAlgebra<A>
-rec(const A& x)
+template<class A> A NormedAlgebraOperations<A>::_rec(const A& x)
 {
     typedef typename A::NumericType X;
     // Use a special routine to minimise errors
@@ -290,8 +283,7 @@ rec(const A& x)
     return z;
 }
 
-template<class A> EnableIfNormedAlgebra<A>
-log(const A& x)
+template<class A> A NormedAlgebraOperations<A>::_log(const A& x)
 {
     typedef typename A::NumericType X;
     // Use a special routine to minimise errors
@@ -324,7 +316,7 @@ log(const A& x)
 }
 
 // Use special code to utilise exp(ax+b)=exp(x)^a*exp(b)
-template<class A> EnableIfNormedAlgebra<A> exp(const A& x)
+template<class A> A NormedAlgebraOperations<A>::_exp(const A& x)
 {
     typedef typename A::NumericType X;
 
@@ -368,8 +360,7 @@ template<class A> EnableIfNormedAlgebra<A> exp(const A& x)
 
 // Use special code to utilise sin(x+2pi)=sin(x)
 // and that the power series is of the form x*f(x^2)
-template<class A> EnableIfNormedAlgebra<A>
-sin(const A& x)
+template<class A> A NormedAlgebraOperations<A>::_sin(const A& x)
 {
     typedef typename A::NumericType X;
     Real const& pi=Ariadne::pi;
@@ -409,8 +400,7 @@ sin(const A& x)
 
 // Use special code to utilise sin(x+2pi)=sin(x)
 // and that the power series is of the form f(x^2)
-template<class A> EnableIfNormedAlgebra<A>
-cos(const A& x)
+template<class A> A NormedAlgebraOperations<A>::_cos(const A& x)
 {
     typedef typename A::NumericType X;
 
@@ -446,14 +436,12 @@ cos(const A& x)
     return z;
 }
 
-template<class A> EnableIfNormedAlgebra<A>
-tan(const A& x)
+template<class A> A NormedAlgebraOperations<A>::_tan(const A& x)
 {
     return sin(x)*rec(cos(x));
 }
 
-template<class A> EnableIfNormedAlgebra<A>
-asin(const A& x)
+template<class A> A NormedAlgebraOperations<A>::_asin(const A& x)
 {
     ARIADNE_NOT_IMPLEMENTED;
 /*
@@ -466,8 +454,7 @@ asin(const A& x)
 */
 }
 
-template<class A> EnableIfNormedAlgebra<A>
-acos(const A& x)
+template<class A> A NormedAlgebraOperations<A>::_acos(const A& x)
 {
     ARIADNE_NOT_IMPLEMENTED;
 /*
@@ -480,8 +467,7 @@ acos(const A& x)
 */
 }
 
-template<class A> EnableIfNormedAlgebra<A>
-atan(const A& x)
+template<class A> A NormedAlgebraOperations<A>::_atan(const A& x)
 {
     ARIADNE_NOT_IMPLEMENTED;
 /*
@@ -494,28 +480,5 @@ atan(const A& x)
 */
 }
 
-
-template<class A> int instantiate_transcendental() {
-    auto rec_ptr  = (A(*)(A const&)) &rec;
-    auto sqrt_ptr = (A(*)(A const&)) &sqrt;
-    auto exp_ptr  = (A(*)(A const&)) &exp;
-    auto log_ptr  = (A(*)(A const&)) &log;
-    auto sin_ptr  = (A(*)(A const&)) &sin;
-    auto cos_ptr  = (A(*)(A const&)) &cos;
-    auto tan_ptr  = (A(*)(A const&)) &tan;
-    auto atan_ptr  = (A(*)(A const&)) &atan;
-
-    typedef std::size_t size_t;
-    return (size_t)rec_ptr + (size_t)sqrt_ptr + (size_t)exp_ptr + (size_t)log_ptr
-                + (size_t)sin_ptr + (size_t)cos_ptr + (size_t)tan_ptr + (size_t)atan_ptr;
-}
-
-template<class A> int instantiate_ordered() {
-    auto abs_ptr  = (A(*)(A const&)) &abs;
-    auto max_ptr = (A(*)(A const&, A const&)) &max;
-    auto min_ptr = (A(*)(A const&, A const&)) &min;
-    typedef std::size_t size_t;
-    return (size_t)abs_ptr + (size_t)max_ptr + (size_t)min_ptr;
-}
 
 } // namespace Ariadne

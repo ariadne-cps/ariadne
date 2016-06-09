@@ -56,8 +56,6 @@ typedef TaylorModel<ApproximateTag,Float64> ApproximateTaylorModel;
 typedef TaylorModel<ValidatedTag,Float64> ValidatedTaylorModel;
 
 template<class P, class F> struct IsScalar< TaylorModel<P,F> > { static const Bool value = true; };
-template<class P, class F> struct IsAlgebra< TaylorModel<P,F> > { static const Bool value = true; };
-template<class P, class F> struct IsNormedAlgebra< TaylorModel<P,F> > { static const Bool value = true; };
 
 class IntersectionException;
 
@@ -65,6 +63,20 @@ struct IntersectionException : public std::runtime_error {
     IntersectionException(const StringType& what) : std::runtime_error(what) { }
 };
 
+
+template<class P, class F> struct AlgebraOperations<TaylorModel<P,F>> : NormedAlgebraOperations<TaylorModel<P,F>> {
+    typedef typename TaylorModel<P,F>::NumericType X;
+    static TaylorModel<P,F> _pos(TaylorModel<P,F> dx);
+    static TaylorModel<P,F> _neg(TaylorModel<P,F> dx);
+    static TaylorModel<P,F> _add(TaylorModel<P,F> dx, X const& c);
+    static TaylorModel<P,F> _mul(TaylorModel<P,F> dx, X const& c);
+    static TaylorModel<P,F> _add(TaylorModel<P,F> const& dx1, TaylorModel<P,F> const& dx2);
+    static TaylorModel<P,F> _sub(TaylorModel<P,F> const& dx1, TaylorModel<P,F> const& dx2);
+    static TaylorModel<P,F> _mul(TaylorModel<P,F> const& dx1, TaylorModel<P,F> const& dx2);
+    static TaylorModel<P,F> _min(TaylorModel<P,F> const& dx1, TaylorModel<P,F> const& dx2);
+    static TaylorModel<P,F> _max(TaylorModel<P,F> const& dx1, TaylorModel<P,F> const& dx2);
+    static TaylorModel<P,F> _abs(TaylorModel<P,F> const& dx);
+};
 
 
 
@@ -74,6 +86,9 @@ struct IntersectionException : public std::runtime_error {
  */
 template<class F>
 class TaylorModel<ValidatedTag,F>
+    : public DispatchTranscendentalAlgebraOperations<TaylorModel<ValidatedTag,F>,ValidatedNumericType>
+    , public DispatchOrderedAlgebraOperations<TaylorModel<ValidatedTag,F>,ValidatedNumericType>
+    , public DispatchMixedAlgebraNumberOperations<TaylorModel<ValidatedTag,F>,int>
 {
   public:
     typedef Float64Value CoefficientType;
@@ -388,15 +403,6 @@ class TaylorModel<ValidatedTag,F>
     //! \brief Fused multiply and add \c r+=x1*x2 .
     Void ifma(const TaylorModel<ValidatedTag,F>& x1, const TaylorModel<ValidatedTag,F>& x2);
 
-    friend TaylorModel<ValidatedTag,F> operator-(TaylorModel<ValidatedTag,F> x) { x.imul(-1); return std::move(x); }
-    friend TaylorModel<ValidatedTag,F>& operator+=(TaylorModel<ValidatedTag,F>& x, NumericType const& c) { x.iadd(c); return x; }
-    friend TaylorModel<ValidatedTag,F>& operator*=(TaylorModel<ValidatedTag,F>& x, NumericType const& c) { x.imul(c); return x; }
-    friend TaylorModel<ValidatedTag,F> operator+(TaylorModel<ValidatedTag,F> const& x1, TaylorModel<ValidatedTag,F> const& x2) {
-        TaylorModel<ValidatedTag,F> r=x1; r.isma(+1,x2); return std::move(r); }
-    friend TaylorModel<ValidatedTag,F> operator-(TaylorModel<ValidatedTag,F> const& x1, TaylorModel<ValidatedTag,F> const& x2) {
-        TaylorModel<ValidatedTag,F> r=x1; r.isma(-1,x2); return std::move(r); }
-    friend TaylorModel<ValidatedTag,F> operator*(TaylorModel<ValidatedTag,F> const& x1, TaylorModel<ValidatedTag,F> const& x2) {
-        TaylorModel<ValidatedTag,F> r(x1.argument_size(),x1.sweeper()); r.ifma(x1,x2); return std::move(r); }
     //@}
 
     //@{
@@ -450,6 +456,9 @@ Covector<ValidatedNumericType> gradient(const TaylorModel<ValidatedTag,Float64>&
  */
 template<class F>
 class TaylorModel<ApproximateTag,F>
+    : public DispatchTranscendentalAlgebraOperations<TaylorModel<ApproximateTag,F>,ApproximateNumericType>
+    , public DispatchOrderedAlgebraOperations<TaylorModel<ApproximateTag,F>,ApproximateNumericType>
+    , public DispatchMixedAlgebraNumberOperations<TaylorModel<ApproximateTag,F>,int>
 {
   public:
     typedef Float64Approximation CoefficientType;
@@ -614,6 +623,7 @@ class TaylorModel<ApproximateTag,F>
     //! \brief Inplace addition of a product of Taylor models.
     Void ifma(const TaylorModel<ApproximateTag,F>& x1, const TaylorModel<ApproximateTag,F>& x2);
 
+/*
     friend TaylorModel<ApproximateTag,F> operator-(TaylorModel<ApproximateTag,F> x) { x.imul(-1); return std::move(x); }
     friend TaylorModel<ApproximateTag,F>& operator+=(TaylorModel<ApproximateTag,F>& x, NumericType const& c) { x.iadd(c); return x; }
     friend TaylorModel<ApproximateTag,F>& operator*=(TaylorModel<ApproximateTag,F>& x, NumericType const& c) { x.imul(c); return x; }
@@ -627,7 +637,7 @@ class TaylorModel<ApproximateTag,F>
     template<class FF> friend TaylorModel<ApproximateTag,FF> max(const TaylorModel<ApproximateTag,FF>& x, const TaylorModel<ApproximateTag,FF>& y);
     template<class FF> friend TaylorModel<ApproximateTag,FF> min(const TaylorModel<ApproximateTag,FF>& x, const TaylorModel<ApproximateTag,FF>& y);
     template<class FF> friend TaylorModel<ApproximateTag,FF> abs(const TaylorModel<ApproximateTag,FF>& x);
-
+*/
     //@{
     /*! \name Stream input/output operators. */
     //! \brief Write to an output stream.

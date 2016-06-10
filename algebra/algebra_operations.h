@@ -37,6 +37,11 @@ namespace Ariadne {
 
 template<class A, class X=typename A::NumericType> struct AlgebraOperations {
   public:
+    template<class OP> static A _create(OP, A const&);
+    template<class OP> static A _create(OP, A const&, A const&);
+    template<class OP> static A _create(OP, X const&, A const&);
+    template<class OP> static A _create(OP, A const&, X const&);
+
     static A _nul(A const& a);
     static A _pos(A const& a);
     static A _neg(A const& a);
@@ -129,7 +134,7 @@ template<class A> struct DispatchMixedAlgebraNumberOperations<A,int> {
 };
 
 
-template<class A, class X> struct DispatchAlgebraOperations
+template<class A, class X> struct DispatchAlgebraOperators
 {
     typedef AlgebraOperations<A,X> OperationsType;
    public:
@@ -152,7 +157,13 @@ template<class A, class X> struct DispatchAlgebraOperations
     friend A operator+(X const& x1, A const& a2) { return add(x1,a2); }
     friend A operator-(X const& x1, A const& a2) { return sub(x1,a2); }
     friend A operator*(X const& x1, A const& a2) { return mul(x1,a2); }
+};
 
+template<class A, class X> struct DispatchAlgebraOperations
+    : DispatchAlgebraOperators<A,X>
+{
+    typedef AlgebraOperations<A,X> OperationsType;
+   public:
     friend A nul(A const& a) { return OperationsType()._nul(a); }
     friend A pos(A const& a) { return OperationsType()._pos(a); }
     friend A neg(A const& a) { return OperationsType()._neg(a); }
@@ -170,6 +181,44 @@ template<class A, class X> struct DispatchAlgebraOperations
     friend A sub(X const& x1, A const& a2) { return OperationsType()._add(neg(a2), x1); }
     friend A mul(X const& x1, A const& a2) { return OperationsType()._mul(a2, x1); }
     friend A pow(A const& a, Nat m) { return OperationsType()._pow(a, m); }
+};
+
+template<class A, class X> struct DispatchSymbolicAlgebraOperations
+    : DispatchAlgebraOperators<A,X>
+{
+    typedef A OperationsType;
+    //typedef AlgebraOperations<A,X> OperationsType;
+  public:
+    friend A operator/(A const& a1, A const& a2) { return div(a1,a2); }
+    friend A& operator/=(A& a1, A const& a2) { return a1=div(a1,a2); }
+    friend A operator/(X const& x1, A const& a2) { return div(x1,a2); }
+  public:
+    friend A pos(A const& a) { return OperationsType::_create(Pos(),a); }
+    friend A neg(A const& a) { return OperationsType::_create(Neg(),a); }
+    friend A add(A const& a1, A const& a2) { return OperationsType::_create(Add(),a1,a2); }
+    friend A sub(A const& a1, A const& a2) { return OperationsType::_create(Sub(),a1,a2); }
+    friend A mul(A const& a1, A const& a2) { return OperationsType::_create(Mul(),a1,a2); }
+    friend A div(A const& a1, A const& a2) { return OperationsType::_create(Div(),a1,a2); }
+
+    friend A add(A const& a1, X const& x2) { return OperationsType::_create(Add(),a1,x2); }
+    friend A sub(A const& a1, X const& x2) { return OperationsType::_create(Sub(),a1,x2); }
+    friend A mul(A const& a1, X const& x2) { return OperationsType::_create(Mul(),a1,x2); }
+    friend A div(A const& a1, X const& x2) { return OperationsType::_create(Div(),a1,x2); }
+    friend A add(X const& x1, A const& a2) { return OperationsType::_create(Add(),x1,a2); }
+    friend A sub(X const& x1, A const& a2) { return OperationsType::_create(Sub(),x1,a2); }
+    friend A mul(X const& x1, A const& a2) { return OperationsType::_create(Mul(),x1,a2); }
+    friend A div(X const& x1, A const& a2) { return OperationsType::_create(Div(),x1,a2); }
+
+    friend A rec(A const& a) { return OperationsType::_create(Rec(),a); }
+    friend A sqrt(A const& a) { return OperationsType::_create(Sqrt(),a); }
+    friend A exp(A const& a) { return OperationsType::_create(Exp(),a); }
+    friend A log(A const& a) { return OperationsType::_create(Log(),a); }
+    friend A sin(A const& a) { return OperationsType::_create(Sin(),a); }
+    friend A cos(A const& a) { return OperationsType::_create(Cos(),a); }
+    friend A tan(A const& a) { return OperationsType::_create(Tan(),a); }
+    friend A asin(A const& a) { return OperationsType::_create(Asin(),a); }
+    friend A acos(A const& a) { return OperationsType::_create(Acos(),a); }
+    friend A atan(A const& a) { return OperationsType::_create(Atan(),a); }
 };
 
 template<class A, class X> struct DispatchTranscendentalAlgebraOperations : DispatchAlgebraOperations<A,X> {

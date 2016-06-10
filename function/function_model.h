@@ -40,6 +40,7 @@
 #include "numeric/numeric.h"
 #include "algebra/vector.h"
 #include "algebra/matrix.h"
+#include "algebra/algebra_operations.h"
 #include "geometry/box.h"
 
 namespace Ariadne {
@@ -176,7 +177,7 @@ template<> class ScalarFunctionModel<ValidatedTag>
     const ScalarFunctionModelInterface<ValidatedTag>* raw_pointer() const { return _ptr.operator->(); }
     ScalarFunctionModelInterface<ValidatedTag>& reference() { return *_ptr; }
     const ScalarFunctionModelInterface<ValidatedTag>& reference() const { return *_ptr; }
-    ScalarFunctionModel<ValidatedTag> create_zero() const { return this->_ptr->_create(); }
+    ScalarFunctionModel<ValidatedTag> create_zero() const { return ScalarFunctionModel<ValidatedTag>(this->_ptr->_create_zero(this->domain())); }
     ScalarFunctionModel<ValidatedTag> create_constant(const ValidatedNumericType& c) const;
     VectorFunctionModel<ValidatedTag> create_identity() const;
     ScalarFunctionModel<ValidatedTag> create(const ValidatedScalarFunction& f) const;
@@ -202,6 +203,91 @@ template<> class ScalarFunctionModel<ValidatedTag>
 
     inline ScalarFunctionModel<ValidatedTag> apply(Operator op) const { return this->_ptr->_apply(op); }
     inline Void restrict(const ExactBoxType& d) { this->_ptr->restrict(d); }
+  public:
+    friend inline ScalarFunctionModel<ValidatedTag>& operator+=(ScalarFunctionModel<ValidatedTag>& f1, const ScalarFunctionModel<ValidatedTag>& f2) { f1._ptr->_isma(ValidatedNumericType(+1),f2); return  f1; }
+    friend inline ScalarFunctionModel<ValidatedTag>& operator-=(ScalarFunctionModel<ValidatedTag>& f1, const ScalarFunctionModel<ValidatedTag>& f2) { f1._ptr->_isma(ValidatedNumericType(-1),f2); return  f1; }
+    friend inline ScalarFunctionModel<ValidatedTag>& operator+=(ScalarFunctionModel<ValidatedTag>& f1, const ValidatedNumericType& c2) { f1._ptr->_iadd(c2); return f1; }
+    friend inline ScalarFunctionModel<ValidatedTag>& operator-=(ScalarFunctionModel<ValidatedTag>& f1, const ValidatedNumericType& c2) { f1._ptr->_iadd(neg(c2)); return f1; }
+    friend inline ScalarFunctionModel<ValidatedTag>& operator*=(ScalarFunctionModel<ValidatedTag>& f1, const ValidatedNumericType& c2) { f1._ptr->_imul(c2); return f1; }
+    friend inline ScalarFunctionModel<ValidatedTag>& operator/=(ScalarFunctionModel<ValidatedTag>& f1, const ValidatedNumericType& c2) { f1._ptr->_imul(rec(c2)); return f1; }
+
+    friend inline ScalarFunctionModel<ValidatedTag> pos(const ScalarFunctionModel<ValidatedTag>& f) { return f.apply(Pos()); }
+    friend inline ScalarFunctionModel<ValidatedTag> neg(const ScalarFunctionModel<ValidatedTag>& f) { return f.apply(Neg()); }
+    friend inline ScalarFunctionModel<ValidatedTag> sqr(const ScalarFunctionModel<ValidatedTag>& f) { return f.apply(Sqr()); }
+    friend inline ScalarFunctionModel<ValidatedTag> rec(const ScalarFunctionModel<ValidatedTag>& f) { return f.apply(Rec()); }
+    friend inline ScalarFunctionModel<ValidatedTag> add(const ScalarFunctionModel<ValidatedTag>& f1, const ScalarFunctionModel<ValidatedTag>& f2) {
+        ScalarFunctionModel<ValidatedTag> r=f1; r+=f2; return r; }
+    friend inline ScalarFunctionModel<ValidatedTag> sub(const ScalarFunctionModel<ValidatedTag>& f1, const ScalarFunctionModel<ValidatedTag>& f2) {
+        ScalarFunctionModel<ValidatedTag> r=f1; r-=f2; return r; }
+    friend inline ScalarFunctionModel<ValidatedTag> mul(const ScalarFunctionModel<ValidatedTag>& f1, const ScalarFunctionModel<ValidatedTag>& f2) {
+        ScalarFunctionModel<ValidatedTag> r=f1.create_zero(); r._ptr->_ifma(f1,f2); return r; }
+    friend inline ScalarFunctionModel<ValidatedTag> div(const ScalarFunctionModel<ValidatedTag>& f1, const ScalarFunctionModel<ValidatedTag>& f2) {
+        return mul(f1,rec(f2)); }
+
+    friend inline ScalarFunctionModel<ValidatedTag> operator+(const ScalarFunctionModel<ValidatedTag>& f) {
+        return f._ptr->_clone(); }
+    friend inline ScalarFunctionModel<ValidatedTag> operator-(const ScalarFunctionModel<ValidatedTag>& f) {
+        ScalarFunctionModel<ValidatedTag> r=f; r*=-1; return r; }
+    friend inline ScalarFunctionModel<ValidatedTag> operator+(const ScalarFunctionModel<ValidatedTag>& f1, const ScalarFunctionModel<ValidatedTag>& f2) {
+        ScalarFunctionModel<ValidatedTag> r=f1; r+=f2; return r; }
+    friend inline ScalarFunctionModel<ValidatedTag> operator-(const ScalarFunctionModel<ValidatedTag>& f1, const ScalarFunctionModel<ValidatedTag>& f2) {
+        ScalarFunctionModel<ValidatedTag> r=f1; r-=f2; return r; }
+    friend inline ScalarFunctionModel<ValidatedTag> operator*(const ScalarFunctionModel<ValidatedTag>& f1, const ScalarFunctionModel<ValidatedTag>& f2) {
+        ScalarFunctionModel<ValidatedTag> r=f1.create_zero(); r._ptr->_ifma(f1,f2); return r; }
+    friend inline ScalarFunctionModel<ValidatedTag> operator/(const ScalarFunctionModel<ValidatedTag>& f1, const ScalarFunctionModel<ValidatedTag>& f2) {
+        return f1*rec(f2); }
+
+    friend inline ScalarFunctionModel<ValidatedTag> add(const ScalarFunctionModel<ValidatedTag>& f1, const ValidatedNumericType& c2) {
+        ScalarFunctionModel<ValidatedTag> r=f1; r+=c2; return r; }
+    friend inline ScalarFunctionModel<ValidatedTag> sub(const ScalarFunctionModel<ValidatedTag>& f1, const ValidatedNumericType& c2) {
+        ScalarFunctionModel<ValidatedTag> r=f1; r-=c2; return r; }
+    friend inline ScalarFunctionModel<ValidatedTag> mul(const ScalarFunctionModel<ValidatedTag>& f1, const ValidatedNumericType& c2) {
+        ScalarFunctionModel<ValidatedTag> r=f1; r*=c2; return r; }
+    friend inline ScalarFunctionModel<ValidatedTag> div(const ScalarFunctionModel<ValidatedTag>& f1, const ValidatedNumericType& c2) {
+        ScalarFunctionModel<ValidatedTag> r=f1; r/=c2; return r; }
+    friend inline ScalarFunctionModel<ValidatedTag> add(const ValidatedNumericType& c1, const ScalarFunctionModel<ValidatedTag>& f2) {
+        ScalarFunctionModel<ValidatedTag> r=f2; r+=c1; return r; }
+    friend inline ScalarFunctionModel<ValidatedTag> sub(const ValidatedNumericType& c1, const ScalarFunctionModel<ValidatedTag>& f2) {
+        ScalarFunctionModel<ValidatedTag> r=neg(f2); r+=c1; return r; }
+    friend inline ScalarFunctionModel<ValidatedTag> mul(const ValidatedNumericType& c1, const ScalarFunctionModel<ValidatedTag>& f2) {
+        ScalarFunctionModel<ValidatedTag> r=f2; r*=c1; return r; }
+    friend inline ScalarFunctionModel<ValidatedTag> div(const ValidatedNumericType& c1, const ScalarFunctionModel<ValidatedTag>& f2) {
+        ScalarFunctionModel<ValidatedTag> r=rec(f2); r*=c1; return r; }
+
+    friend inline ScalarFunctionModel<ValidatedTag> operator+(const ScalarFunctionModel<ValidatedTag>& f1, const ValidatedNumericType& c2) {
+        ScalarFunctionModel<ValidatedTag> r=f1; r+=c2; return r; }
+    friend inline ScalarFunctionModel<ValidatedTag> operator-(const ScalarFunctionModel<ValidatedTag>& f1, const ValidatedNumericType& c2) {
+        ScalarFunctionModel<ValidatedTag> r=f1; r-=c2; return r; }
+    friend inline ScalarFunctionModel<ValidatedTag> operator*(const ScalarFunctionModel<ValidatedTag>& f1, const ValidatedNumericType& c2) {
+        ScalarFunctionModel<ValidatedTag> r=f1; r*=c2; return r; }
+    friend inline ScalarFunctionModel<ValidatedTag> operator/(const ScalarFunctionModel<ValidatedTag>& f1, const ValidatedNumericType& c2) {
+        ScalarFunctionModel<ValidatedTag> r=f1; r/=c2; return r; }
+    friend inline ScalarFunctionModel<ValidatedTag> operator+(const ValidatedNumericType& c1, const ScalarFunctionModel<ValidatedTag>& f2) {
+        ScalarFunctionModel<ValidatedTag> r=f2; r+=c1; return r; }
+    friend inline ScalarFunctionModel<ValidatedTag> operator-(const ValidatedNumericType& c1, const ScalarFunctionModel<ValidatedTag>& f2) {
+        ScalarFunctionModel<ValidatedTag> r=neg(f2); r+=c1; return r; }
+    friend inline ScalarFunctionModel<ValidatedTag> operator*(const ValidatedNumericType& c1, const ScalarFunctionModel<ValidatedTag>& f2) {
+        ScalarFunctionModel<ValidatedTag> r=f2; r*=c1; return r; }
+    friend inline ScalarFunctionModel<ValidatedTag> operator/(const ValidatedNumericType& c1, const ScalarFunctionModel<ValidatedTag>& f2) {
+        ScalarFunctionModel<ValidatedTag> r=rec(f2); r*=c1; return r; }
+
+    friend inline ScalarFunctionModel<ValidatedTag> operator+(const ScalarFunctionModel<ValidatedTag>& f1, const ValidatedScalarFunction& g2) {
+        return f1+f1.create(g2); }
+    friend inline ScalarFunctionModel<ValidatedTag> operator-(const ScalarFunctionModel<ValidatedTag>& f1, const ValidatedScalarFunction& g2) {
+        return f1-f1.create(g2); }
+    friend inline ScalarFunctionModel<ValidatedTag> operator*(const ScalarFunctionModel<ValidatedTag>& f1, const ValidatedScalarFunction& g2) {
+        return f1*f1.create(g2); }
+    friend inline ScalarFunctionModel<ValidatedTag> operator/(const ScalarFunctionModel<ValidatedTag>& f1, const ValidatedScalarFunction& g2) {
+        return f1/f1.create(g2); }
+    friend inline ScalarFunctionModel<ValidatedTag> operator+(const ValidatedScalarFunction& g1, const ScalarFunctionModel<ValidatedTag>& f2) {
+        return f2.create(g1)+f2; }
+    friend inline ScalarFunctionModel<ValidatedTag> operator-(const ValidatedScalarFunction& g1, const ScalarFunctionModel<ValidatedTag>& f2) {
+        return f2.create(g1)-f2; }
+    friend inline ScalarFunctionModel<ValidatedTag> operator*(const ValidatedScalarFunction& g1, const ScalarFunctionModel<ValidatedTag>& f2) {
+        return f2.create(g1)*f2; }
+    friend inline ScalarFunctionModel<ValidatedTag> operator/(const ValidatedScalarFunction& g1, const ScalarFunctionModel<ValidatedTag>& f2) {
+        return f2.create(g1)/f2; }
+
 };
 
 // inline ScalarFunctionModel<ValidatedTag>& ScalarFunctionModel<ValidatedTag>::operator=(const ValidatedScalarFunction& f) { (*this)=this->_ptr->_create()+f; return *this; }
@@ -231,66 +317,8 @@ inline Boolean disjoint(const ScalarFunctionModel<ValidatedTag>& f1, const Scala
 inline Boolean refines(const ScalarFunctionModel<ValidatedTag>& f1, const ScalarFunctionModel<ValidatedTag>& f2) {
     return f1._ptr->_refines(f2); }
 
-inline ScalarFunctionModel<ValidatedTag>& operator+=(ScalarFunctionModel<ValidatedTag>& f1, const ScalarFunctionModel<ValidatedTag>& f2) { f1._ptr->_isma(ValidatedNumericType(+1),f2); return  f1; }
-inline ScalarFunctionModel<ValidatedTag>& operator-=(ScalarFunctionModel<ValidatedTag>& f1, const ScalarFunctionModel<ValidatedTag>& f2) { f1._ptr->_isma(ValidatedNumericType(-1),f2); return  f1; }
-inline ScalarFunctionModel<ValidatedTag>& operator+=(ScalarFunctionModel<ValidatedTag>& f1, const ValidatedNumericType& c2) { f1._ptr->_iadd(c2); return f1; }
-inline ScalarFunctionModel<ValidatedTag>& operator-=(ScalarFunctionModel<ValidatedTag>& f1, const ValidatedNumericType& c2) { f1._ptr->_iadd(neg(c2)); return f1; }
-inline ScalarFunctionModel<ValidatedTag>& operator*=(ScalarFunctionModel<ValidatedTag>& f1, const ValidatedNumericType& c2) { f1._ptr->_imul(c2); return f1; }
-inline ScalarFunctionModel<ValidatedTag>& operator/=(ScalarFunctionModel<ValidatedTag>& f1, const ValidatedNumericType& c2) { f1._ptr->_imul(rec(c2)); return f1; }
 
-inline ScalarFunctionModel<ValidatedTag> pos(const ScalarFunctionModel<ValidatedTag>& f) { return f.apply(Pos()); }
-inline ScalarFunctionModel<ValidatedTag> neg(const ScalarFunctionModel<ValidatedTag>& f) { return f.apply(Neg()); }
-inline ScalarFunctionModel<ValidatedTag> sqr(const ScalarFunctionModel<ValidatedTag>& f) { return f.apply(Sqr()); }
-inline ScalarFunctionModel<ValidatedTag> rec(const ScalarFunctionModel<ValidatedTag>& f) { return f.apply(Rec()); }
-
-inline ScalarFunctionModel<ValidatedTag> operator+(const ScalarFunctionModel<ValidatedTag>& f) {
-    return f._ptr->_clone(); }
-inline ScalarFunctionModel<ValidatedTag> operator-(const ScalarFunctionModel<ValidatedTag>& f) {
-    ScalarFunctionModel<ValidatedTag> r=f; r*=-1; return r; }
-inline ScalarFunctionModel<ValidatedTag> operator+(const ScalarFunctionModel<ValidatedTag>& f1, const ScalarFunctionModel<ValidatedTag>& f2) {
-    ScalarFunctionModel<ValidatedTag> r=f1; r+=f2; return r; }
-inline ScalarFunctionModel<ValidatedTag> operator-(const ScalarFunctionModel<ValidatedTag>& f1, const ScalarFunctionModel<ValidatedTag>& f2) {
-    ScalarFunctionModel<ValidatedTag> r=f1; r-=f2; return r; }
-inline ScalarFunctionModel<ValidatedTag> operator*(const ScalarFunctionModel<ValidatedTag>& f1, const ScalarFunctionModel<ValidatedTag>& f2) {
-    ScalarFunctionModel<ValidatedTag> r=f1.create_zero(); r._ptr->_ifma(f1,f2); return r; }
-inline ScalarFunctionModel<ValidatedTag> operator/(const ScalarFunctionModel<ValidatedTag>& f1, const ScalarFunctionModel<ValidatedTag>& f2) {
-    return f1*rec(f2); }
-
-inline ScalarFunctionModel<ValidatedTag> operator+(const ScalarFunctionModel<ValidatedTag>& f1, const ValidatedNumericType& c2) {
-    ScalarFunctionModel<ValidatedTag> r=f1; r+=c2; return r; }
-inline ScalarFunctionModel<ValidatedTag> operator-(const ScalarFunctionModel<ValidatedTag>& f1, const ValidatedNumericType& c2) {
-    ScalarFunctionModel<ValidatedTag> r=f1; r-=c2; return r; }
-inline ScalarFunctionModel<ValidatedTag> operator*(const ScalarFunctionModel<ValidatedTag>& f1, const ValidatedNumericType& c2) {
-    ScalarFunctionModel<ValidatedTag> r=f1; r*=c2; return r; }
-inline ScalarFunctionModel<ValidatedTag> operator/(const ScalarFunctionModel<ValidatedTag>& f1, const ValidatedNumericType& c2) {
-    ScalarFunctionModel<ValidatedTag> r=f1; r/=c2; return r; }
-inline ScalarFunctionModel<ValidatedTag> operator+(const ValidatedNumericType& c1, const ScalarFunctionModel<ValidatedTag>& f2) {
-    ScalarFunctionModel<ValidatedTag> r=f2; r+=c1; return r; }
-inline ScalarFunctionModel<ValidatedTag> operator-(const ValidatedNumericType& c1, const ScalarFunctionModel<ValidatedTag>& f2) {
-    ScalarFunctionModel<ValidatedTag> r=neg(f2); r+=c1; return r; }
-inline ScalarFunctionModel<ValidatedTag> operator*(const ValidatedNumericType& c1, const ScalarFunctionModel<ValidatedTag>& f2) {
-    ScalarFunctionModel<ValidatedTag> r=f2; r*=c1; return r; }
-inline ScalarFunctionModel<ValidatedTag> operator/(const ValidatedNumericType& c1, const ScalarFunctionModel<ValidatedTag>& f2) {
-    ScalarFunctionModel<ValidatedTag> r=rec(f2); r*=c1; return r; }
-
-inline ScalarFunctionModel<ValidatedTag> operator+(const ScalarFunctionModel<ValidatedTag>& f1, const ValidatedScalarFunction& g2) {
-    return f1+f1.create(g2); }
-inline ScalarFunctionModel<ValidatedTag> operator-(const ScalarFunctionModel<ValidatedTag>& f1, const ValidatedScalarFunction& g2) {
-    return f1-f1.create(g2); }
-inline ScalarFunctionModel<ValidatedTag> operator*(const ScalarFunctionModel<ValidatedTag>& f1, const ValidatedScalarFunction& g2) {
-    return f1*f1.create(g2); }
-inline ScalarFunctionModel<ValidatedTag> operator/(const ScalarFunctionModel<ValidatedTag>& f1, const ValidatedScalarFunction& g2) {
-    return f1/f1.create(g2); }
-inline ScalarFunctionModel<ValidatedTag> operator+(const ValidatedScalarFunction& g1, const ScalarFunctionModel<ValidatedTag>& f2) {
-    return f2.create(g1)+f2; }
-inline ScalarFunctionModel<ValidatedTag> operator-(const ValidatedScalarFunction& g1, const ScalarFunctionModel<ValidatedTag>& f2) {
-    return f2.create(g1)-f2; }
-inline ScalarFunctionModel<ValidatedTag> operator*(const ValidatedScalarFunction& g1, const ScalarFunctionModel<ValidatedTag>& f2) {
-    return f2.create(g1)*f2; }
-inline ScalarFunctionModel<ValidatedTag> operator/(const ValidatedScalarFunction& g1, const ScalarFunctionModel<ValidatedTag>& f2) {
-    return f2.create(g1)/f2; }
-
-inline ScalarFunctionModel<ValidatedTag>& ScalarFunctionModel<ValidatedTag>::operator=(const ValidatedNumericType& c) { (*this)*=0; (*this)+=c; return *this; }
+inline ScalarFunctionModel<ValidatedTag>& ScalarFunctionModel<ValidatedTag>::operator=(const ValidatedNumericType& c) { (*this)*=ValidatedNumericType(0); (*this)+=c; return *this; }
 
 template<class F> F ScalarFunctionModelMixin<F,ValidatedTag>::apply(OperatorCode op) const {
     const F& f=static_cast<const F&>(*this);
@@ -386,7 +414,11 @@ template<class F> class VectorFunctionModelMixin<F,ValidatedTag>
         return heap_copy(partial_evaluate(static_cast<const F&>(*this),j,c)); }
 };
 
-template<class X> class VectorFunctionModelElement {
+template<class X> class VectorFunctionModelElement
+    : public DeclareArithmeticOperators<ScalarFunctionModel<ValidatedTag>>
+    , public DeclareMixedOperators<ScalarFunctionModel<ValidatedTag>,ValidatedNumericType>
+    , public DeclareMixedOperators<ScalarFunctionModel<ValidatedTag>,ValidatedScalarFunction>
+{
     VectorFunctionModel<X>* _p; SizeType _i;
   public:
     operator const ScalarFunctionModel<X> () const;

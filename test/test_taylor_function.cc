@@ -105,8 +105,6 @@ Void TestScalarTaylorFunction::test()
 
 Void TestScalarTaylorFunction::test_concept()
 {
-    static_assert(IsAlgebra<ScalarTaylorFunction>::value,"");
-
     const Float64Value f=0;
     const Float64Bounds i;
     const Vector<Float64Value> vf;

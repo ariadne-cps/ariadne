@@ -908,30 +908,6 @@ EffectiveScalarFunction lie_derivative(const EffectiveScalarFunction& g, const E
 
 //------------------------ ValidatedNumber function operators -------------------------------//
 
-ValidatedScalarFunctionModel add(ValidatedScalarFunctionModel const& fm1, ValidatedScalarFunctionModel const& fm2) {
-    return fm1+fm2; }
-ValidatedScalarFunctionModel sub(ValidatedScalarFunctionModel const& fm1, ValidatedScalarFunctionModel const& fm2) {
-    return fm1-fm2; }
-ValidatedScalarFunctionModel mul(ValidatedScalarFunctionModel const& fm1, ValidatedScalarFunctionModel const& fm2) {
-    return fm1*fm2; }
-ValidatedScalarFunctionModel div(ValidatedScalarFunctionModel const& fm1, ValidatedScalarFunctionModel const& fm2) {
-    return fm1/fm2; }
-ValidatedScalarFunctionModel add(ValidatedScalarFunctionModel const& fm1, ValidatedNumericType const& c2) {
-    return fm1+c2; }
-ValidatedScalarFunctionModel sub(ValidatedScalarFunctionModel const& fm1, ValidatedNumericType const& c2) {
-    return fm1-c2; }
-ValidatedScalarFunctionModel mul(ValidatedScalarFunctionModel const& fm1, ValidatedNumericType const& c2) {
-    return fm1*c2; }
-ValidatedScalarFunctionModel div(ValidatedScalarFunctionModel const& fm1, ValidatedNumericType const& c2) {
-    return fm1/c2; }
-ValidatedScalarFunctionModel add(ValidatedNumericType const& c1, ValidatedScalarFunctionModel const& fm2) {
-    return c1+fm2; }
-ValidatedScalarFunctionModel sub(ValidatedNumericType const& c1, ValidatedScalarFunctionModel const& fm2) {
-    return c1-fm2; }
-ValidatedScalarFunctionModel mul(ValidatedNumericType const& c1, ValidatedScalarFunctionModel const& fm2) {
-    return c1*fm2; }
-ValidatedScalarFunctionModel div(ValidatedNumericType const& c1, ValidatedScalarFunctionModel const& fm2) {
-    return c1/fm2; }
 
 namespace {
 
@@ -1075,6 +1051,10 @@ ValidatedScalarFunction& operator/=(ValidatedScalarFunction& f1, const Validated
     return f1=f1/c2;
 }
 
+
+ValidatedScalarFunction pos(ValidatedScalarFunction const& f) {
+    return apply(Pos(),f);
+}
 
 ValidatedScalarFunction neg(ValidatedScalarFunction const& f) {
     return apply(Neg(),f);

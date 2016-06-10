@@ -56,25 +56,20 @@ template<class M> using ScalarFunctionPatch = FunctionPatch<M>;
 template<class M> class VectorFunctionPatch;
 template<class M> class VectorFunctionPatchElementReference;
 
-// Declare basic algebra operators
-template<class M> struct IsAlgebra<FunctionPatch<M>> : True { };
-template<class M> struct IsSymbolicAlgebra<FunctionPatch<M>> : True { };
-
-// Declare basic algebra operators
-template<class A> A operator+(const A& ca1, const GenericType<A>& ga2) { return ca1+ca1.create(ga2); }
-template<class A> A operator-(const A& ca1, const GenericType<A>& ga2) { return ca1-ca1.create(ga2); }
-template<class A> A operator*(const A& ca1, const GenericType<A>& ga2) { return ca1*ca1.create(ga2); }
-template<class A> A operator/(const A& ca1, const GenericType<A>& ga2) { return ca1/ca1.create(ga2); }
-template<class A> A operator+(const GenericType<A>& ga1, const A& ca2) { return ca2.create(ga1)+ca2; }
-template<class A> A operator-(const GenericType<A>& ga1, const A& ca2) { return ca2.create(ga1)+ca2; }
-template<class A> A operator*(const GenericType<A>& ga1, const A& ca2) { return ca2.create(ga1)+ca2; }
-template<class A> A operator/(const GenericType<A>& ga1, const A& ca2) { return ca2.create(ga1)+ca2; }
-
 inline Float64Approximation convert_error_to_bounds(const PositiveFloat64Approximation& e) { return Float64Approximation(0.0); }
 inline Float64Bounds convert_error_to_bounds(const PositiveFloat64UpperBound& e) { return Float64Bounds(-e.raw(),+e.raw()); }
 inline Float64Bounds convert_error_to_bounds(const Float64Error& e) { return Float64Bounds(-e.raw(),+e.raw()); }
 
-
+/*
+template<class X> X operator+(const X& x1, const GenericType<X>& y2) { return x1+x1.create(y2); }
+template<class X> X operator-(const X& x1, const GenericType<X>& y2) { return x1-x1.create(y2); }
+template<class X> X operator*(const X& x1, const GenericType<X>& y2) { return x1*x1.create(y2); }
+template<class X> X operator/(const X& x1, const GenericType<X>& y2) { return x1/x1.create(y2); }
+template<class X> X operator+(const GenericType<X>& y1, const X& x2) { return x2.create(y1)+x2; }
+template<class X> X operator-(const GenericType<X>& y1, const X& x2) { return x2.create(y1)-x2; }
+template<class X> X operator*(const GenericType<X>& y1, const X& x2) { return x2.create(y1)*x2; }
+template<class X> X operator/(const GenericType<X>& y1, const X& x2) { return x2.create(y1)/x2; }
+*/
 
 /*! \ingroup FunctionModelSubModule
  *  \brief A ScalarTaylorFunction is a type of FunctionModel in which a the restriction of a scalar function \f$f:\R^n\rightarrow\R\f$ on a domain \f$D\f$ is approximated by polynomial \f$p\f$ with uniform error \f$e\f$.
@@ -99,6 +94,8 @@ inline Float64Bounds convert_error_to_bounds(const Float64Error& e) { return Flo
  */
 template<class M> class FunctionPatch
     : public ScalarFunctionModelMixin<FunctionPatch<M>, typename M::Paradigm>
+    , public DispatchSymbolicAlgebraOperations<FunctionPatch<M>, NumericType<M>>
+    , public ProvideMixedConcreteGenericOperators<FunctionPatch<M>, ScalarFunction<typename M::Paradigm>>
 {
     typedef typename M::Paradigm P;
   public:
@@ -304,6 +301,11 @@ template<class M> class FunctionPatch
         r=Ariadne::horner_evaluate(this->_model.expansion(),Ariadne::unscale(a,this->_domain))
             + convert_error_to_bounds(this->_model.error());
     }
+  public:
+    template<class OP> static FunctionPatch<M> _create(OP op, FunctionPatch<M> const& fp);
+    template<class OP> static FunctionPatch<M> _create(OP op, FunctionPatch<M> const& fp1, FunctionPatch<M> const& fp2);
+    template<class OP> static FunctionPatch<M> _create(OP op, FunctionPatch<M> const& fp1, NumericType const& c2);
+    template<class OP> static FunctionPatch<M> _create(OP op, NumericType const& c1, FunctionPatch<M> const& fp2);
   private:
     FunctionPatch<M>* _derivative(SizeType j) const;
     FunctionPatch<M>* _clone() const;
@@ -314,6 +316,19 @@ template<class M> class FunctionPatch
     VectorFunctionModelInterface<Paradigm>* _create_identity() const;
     VectorFunctionModelInterface<Paradigm>* _create_vector(SizeType i) const;
 };
+
+template<class M> template<class OP> FunctionPatch<M> FunctionPatch<M>::_create(OP op, FunctionPatch<M> const& fp1, FunctionPatch<M> const& fp2) {
+    assert(fp1.domain()==fp2.domain()); return FunctionPatch<M>(fp1.domain(),op(fp1.model(),fp2.model()));
+}
+template<class M> template<class OP> FunctionPatch<M> FunctionPatch<M>::_create(OP op, FunctionPatch<M> const& fp) {
+    return FunctionPatch<M>(fp.domain(),op(fp.model()));
+}
+template<class M> template<class OP> FunctionPatch<M> FunctionPatch<M>::_create(OP op, FunctionPatch<M> const& fp1, typename M::NumericType const& c2) {
+    return FunctionPatch<M>(fp1.domain(),op(fp1.model(),c2));
+}
+template<class M> template<class OP> FunctionPatch<M> FunctionPatch<M>::_create(OP op, typename M::NumericType const& c1, FunctionPatch<M> const& fp2) {
+    return FunctionPatch<M>(fp2.domain(),op(c1,fp2.model()));
+}
 
 //! \brief Restrict to a subdomain.
 template<class M> FunctionPatch<M> restriction(const FunctionPatch<M>& x, const ExactBoxType& d);

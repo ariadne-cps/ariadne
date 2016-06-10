@@ -316,6 +316,16 @@ struct Tan : OperatorObject<Tan> {
     template<class A> auto operator()(A&& a) const -> decltype(tan(a)) { return tan(a); }
     template<class X,class D> D derivative(const X& a, const D& d) const { return rec(sqr(cos(a)))*d; }
 };
+struct Asin : OperatorObject<Asin> {
+    OperatorCode code() const { return OperatorCode::ASIN; } OperatorKind kind() const { return OperatorKind::UNARY; }
+    template<class A> auto operator()(A&& a) const -> decltype(asin(a)) { return asin(a); }
+    template<class X,class D> D derivative(const X& a, const D& d) const { return rec(1+sqr(a))*d; }
+};
+struct Acos : OperatorObject<Acos> {
+    OperatorCode code() const { return OperatorCode::ACOS; } OperatorKind kind() const { return OperatorKind::UNARY; }
+    template<class A> auto operator()(A&& a) const -> decltype(acos(a)) { return acos(a); }
+    template<class X,class D> D derivative(const X& a, const D& d) const { return rec(1+sqr(a))*d; }
+};
 struct Atan : OperatorObject<Atan> {
     OperatorCode code() const { return OperatorCode::ATAN; } OperatorKind kind() const { return OperatorKind::UNARY; }
     template<class A> auto operator()(A&& a) const -> decltype(atan(a)) { return atan(a); }

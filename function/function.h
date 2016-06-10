@@ -418,6 +418,7 @@ ValidatedScalarFunction& operator*=(ValidatedScalarFunction&, const ValidatedNum
 ValidatedScalarFunction& operator/=(ValidatedScalarFunction&, const ValidatedNumericType&);
 
 ValidatedScalarFunction pow(const ValidatedScalarFunction&, Int);
+ValidatedScalarFunction pos(const ValidatedScalarFunction&);
 ValidatedScalarFunction neg(const ValidatedScalarFunction&);
 ValidatedScalarFunction rec(const ValidatedScalarFunction&);
 ValidatedScalarFunction sqr(const ValidatedScalarFunction&);

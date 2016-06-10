@@ -387,6 +387,18 @@ template<class X, class NX> class ProvideDirectedArithmeticOperators
     friend X& operator-=(X& x1, NX const& x2) { return x1=sub(x1,x2); }
 };
 
+
+template<class X, class Y> struct ProvideMixedConcreteGenericOperators {
+    friend X operator+(const X& x1, const Y& y2) { return x1+x1.create(y2); }
+    friend X operator-(const X& x1, const Y& y2) { return x1-x1.create(y2); }
+    friend X operator*(const X& x1, const Y& y2) { return x1*x1.create(y2); }
+    friend X operator/(const X& x1, const Y& y2) { return x1/x1.create(y2); }
+    friend X operator+(const Y& y1, const X& x2) { return x2.create(y1)+x2; }
+    friend X operator-(const Y& y1, const X& x2) { return x2.create(y1)-x2; }
+    friend X operator*(const Y& y1, const X& x2) { return x2.create(y1)*x2; }
+    friend X operator/(const Y& y1, const X& x2) { return x2.create(y1)/x2; }
+};
+
 template<class X, class QX=X, class R=X, class QR=QX> class ProvidePositiveDirectedArithmeticOperators
 {
     friend R rec(QX const&);

@@ -35,95 +35,99 @@
 
 namespace Ariadne {
 
-ValidatedAffineModel operator+(const ValidatedAffineModel& a1, const ValidatedAffineModel& a2) {
-    ARIADNE_ASSERT_MSG(a1.argument_size()==a2.argument_size(),"a1="<<a1<<" a2="<<a2);
-    Nat n=a1.argument_size();
-    ValidatedAffineModel r(n);
-    r=ValidatedAffineModel::CoefficientType( a1.value().raw()+a2.value().raw() );
-    for(Nat i=0; i!=n; ++i) {
-        r[i]=ValidatedAffineModel::CoefficientType(a1[i].raw()+a2[i].raw());
-    }
+template<> struct AlgebraOperations<ValidatedAffineModel,ValidatedNumericType> {
 
-    Float64::set_rounding_upward();
-
-    RawFloat64 te=0.0;
-    for(Nat j=0; j!=n; ++j) {
-        RawFloat64 mrjl = (-a1.gradient(j).raw())-a2.gradient(j).raw();
-        RawFloat64  rju = ( a1.gradient(j).raw())+a2.gradient(j).raw();
-        te+=(rju+mrjl);
-    }
-    RawFloat64 mrl = (-a1.value().raw())-a2.value().raw();
-    RawFloat64  ru = ( a1.value().raw())+a2.value().raw();
-    te += (ru+mrl);
-
-    RawFloat64 re=0.0;
-    r.set_error( ErrorType(te/2 + (a1.error().raw()+a2.error().raw()) ) );
-
-    Float64::set_rounding_to_nearest();
-
-    return r;
-}
-
-ValidatedAffineModel operator+(const ValidatedNumericType& c, const ValidatedAffineModel& a) {
-    ValidatedAffineModel r=a;
-    RawFloat64 cm=c.value().raw();
-    r.set_value( static_cast<ValidatedAffineModel::CoefficientType>( cm + a.value().raw() ) );
-
-    Float64::set_rounding_upward();
-
-    RawFloat64 mrl = (-a.value().raw())-cm;
-    RawFloat64  ru = ( a.value().raw())+cm;
-    RawFloat64 te = (ru+mrl)/2;
-
-    r.set_error( ValidatedAffineModel::ErrorType( a.error().raw() + max(c.upper().raw()-cm,cm-c.lower().raw()) + te) );
-
-    Float64::set_rounding_to_nearest();
-
-    return r;
-}
-
-ValidatedAffineModel operator+(const ValidatedAffineModel& a, const ValidatedNumericType& c) {
-    return c+a;
-}
-
-ValidatedAffineModel operator*(const ValidatedNumericType& c, const ValidatedAffineModel& a) {
-    Nat n=a.argument_size();
-    RawFloat64 cm=c.value().raw();
-    ValidatedAffineModel r(n);
-    r=ValidatedAffineModel::CoefficientType(a.value().raw()*cm);
-    for(Nat i=0; i!=n; ++i) {
-        r[i].raw()=a[i].raw()*cm;
-    }
-
-    Float64::set_rounding_upward();
-
-    RawFloat64 te=0.0;
-    for(Nat j=0; j!=n; ++j) {
-        RawFloat64 mca=(-cm)*a.gradient(j).raw();
-        RawFloat64 ca= cm*a.gradient(j).raw();
-        te+=(ca+mca);
-    }
-    RawFloat64 mca=(-cm)*a.value().raw();
-    RawFloat64 ca= cm*a.value().raw();
-
-    RawFloat64 re=0.0;
-    if(c.lower_raw()!=c.upper_raw()) {
-        RawFloat64 ce=max(c.upper().raw()-cm,cm-c.lower().raw());
-        for(Nat j=0; j!=n; ++j) {
-            re+=abs(a.gradient(j).raw()*ce);
+    ValidatedAffineModel _add(const ValidatedAffineModel& a1, const ValidatedAffineModel& a2) {
+        ARIADNE_ASSERT_MSG(a1.argument_size()==a2.argument_size(),"a1="<<a1<<" a2="<<a2);
+        Nat n=a1.argument_size();
+        ValidatedAffineModel r(n);
+        r=ValidatedAffineModel::CoefficientType( a1.value().raw()+a2.value().raw() );
+        for(Nat i=0; i!=n; ++i) {
+            r[i]=ValidatedAffineModel::CoefficientType(a1[i].raw()+a2[i].raw());
         }
+
+        Float64::set_rounding_upward();
+
+        RawFloat64 te=0.0;
+        for(Nat j=0; j!=n; ++j) {
+            RawFloat64 mrjl = (-a1.gradient(j).raw())-a2.gradient(j).raw();
+            RawFloat64  rju = ( a1.gradient(j).raw())+a2.gradient(j).raw();
+            te+=(rju+mrjl);
+        }
+        RawFloat64 mrl = (-a1.value().raw())-a2.value().raw();
+        RawFloat64  ru = ( a1.value().raw())+a2.value().raw();
+        te += (ru+mrl);
+
+        RawFloat64 re=0.0;
+        r.set_error( ErrorType(te/2 + (a1.error().raw()+a2.error().raw()) ) );
+
+        Float64::set_rounding_to_nearest();
+
+        return r;
     }
 
-    r.set_error(ValidatedAffineModel::ErrorType(abs(cm)*a.error().raw() + ((ca+mca) + te)/2 + re));
+    ValidatedAffineModel _add(const ValidatedNumericType& c, const ValidatedAffineModel& a) {
+        ValidatedAffineModel r=a;
+        RawFloat64 cm=c.value().raw();
+        r.set_value( static_cast<ValidatedAffineModel::CoefficientType>( cm + a.value().raw() ) );
 
-    Float64::set_rounding_to_nearest();
+        Float64::set_rounding_upward();
 
-    return r;
-}
+        RawFloat64 mrl = (-a.value().raw())-cm;
+        RawFloat64  ru = ( a.value().raw())+cm;
+        RawFloat64 te = (ru+mrl)/2;
 
-ValidatedAffineModel operator*(const ValidatedAffineModel& a, const ValidatedNumericType& c) {
-    return c*a;
-}
+        r.set_error( ValidatedAffineModel::ErrorType( a.error().raw() + max(c.upper().raw()-cm,cm-c.lower().raw()) + te) );
+
+        Float64::set_rounding_to_nearest();
+
+        return r;
+    }
+
+    ValidatedAffineModel _add(const ValidatedAffineModel& a, const ValidatedNumericType& c) {
+        return c+a;
+    }
+
+    ValidatedAffineModel _mul(const ValidatedNumericType& c, const ValidatedAffineModel& a) {
+        Nat n=a.argument_size();
+        RawFloat64 cm=c.value().raw();
+        ValidatedAffineModel r(n);
+        r=ValidatedAffineModel::CoefficientType(a.value().raw()*cm);
+        for(Nat i=0; i!=n; ++i) {
+            r[i].raw()=a[i].raw()*cm;
+        }
+
+        Float64::set_rounding_upward();
+
+        RawFloat64 te=0.0;
+        for(Nat j=0; j!=n; ++j) {
+            RawFloat64 mca=(-cm)*a.gradient(j).raw();
+            RawFloat64 ca= cm*a.gradient(j).raw();
+            te+=(ca+mca);
+        }
+        RawFloat64 mca=(-cm)*a.value().raw();
+        RawFloat64 ca= cm*a.value().raw();
+
+        RawFloat64 re=0.0;
+        if(c.lower_raw()!=c.upper_raw()) {
+            RawFloat64 ce=max(c.upper().raw()-cm,cm-c.lower().raw());
+            for(Nat j=0; j!=n; ++j) {
+                re+=abs(a.gradient(j).raw()*ce);
+            }
+        }
+
+        r.set_error(ValidatedAffineModel::ErrorType(abs(cm)*a.error().raw() + ((ca+mca) + te)/2 + re));
+
+        Float64::set_rounding_to_nearest();
+
+        return r;
+    }
+
+    ValidatedAffineModel _mul(const ValidatedAffineModel& a, const ValidatedNumericType& c) {
+        return c*a;
+    }
+};
+
 
 ValidatedAffineModel affine_model(const ValidatedAffine& a) {
     ValidatedAffineModel am(a.argument_size());
@@ -194,6 +198,11 @@ OutputStream& operator<<(OutputStream& os, const ValidatedAffineModel& f)
     return os << "+/-" << f.error();
 
 }
+
+
+
+
+
 
 } //namespace Ariadne
 

@@ -40,6 +40,7 @@
 #include "algebra/vector.h"
 #include "algebra/covector.h"
 #include "algebra/matrix.h"
+#include "algebra/algebra_operations.h"
 
 namespace Ariadne {
 
@@ -69,6 +70,7 @@ Vector< AffineModel<ValidatedNumericType> > affine_models(const ExactBoxType& do
 //! An affine expression \f$f:\R^n\rightarrow\R\f$ given by \f$f(x) \approx \sum_{i=0}^{n-1} a_i x_i + b\f$.
 template<>
 class AffineModel<ApproximateNumericType>
+    : DispatchAlgebraOperations<AffineModel<ApproximateNumericType>,ApproximateNumericType>
 {
   public:
     typedef Float64Approximation CoefficientType;
@@ -102,33 +104,11 @@ class AffineModel<ApproximateNumericType>
     Covector<ApproximateNumericType> _g;
 };
 
-//! \relates AffineModel
-//! \brief Negation of an affine model.
-AffineModel<ApproximateNumericType> operator-(const AffineModel<ApproximateNumericType>& f);
-//! \relates AffineModel
-//! \brief Addition of two affine models.
-AffineModel<ApproximateNumericType> operator+(const AffineModel<ApproximateNumericType>& f1, const AffineModel<ApproximateNumericType>& f2);
-//! \relates AffineModel
-//! \brief Subtraction of two affine models.
-AffineModel<ApproximateNumericType> operator-(const AffineModel<ApproximateNumericType>& f1, const AffineModel<ApproximateNumericType>& f2);
-//! \relates AffineModel
-//! \brief Multiplication of two affine models.
-AffineModel<ApproximateNumericType> operator*(const AffineModel<ApproximateNumericType>& f1, const AffineModel<ApproximateNumericType>& f2);
-//! \relates AffineModel
-//! \brief Addition of a constant to an affine model.
-AffineModel<ApproximateNumericType>& operator+=(AffineModel<ApproximateNumericType>& f1, const ApproximateNumericType& c2);
-//! \relates AffineModel
-//! \brief Scalar multiplication of an affine model.
-AffineModel<ApproximateNumericType>& operator*=(AffineModel<ApproximateNumericType>& f1, const ApproximateNumericType& c2);
-
-//! \relates AffineModel
-//! \brief Write to an output stream.
-OutputStream& operator<<(OutputStream& os, const AffineModel<ApproximateNumericType>& f);
-
 
 //! An affine expression \f$f:[-1,+1]^n\rightarrow\R\f$ given by \f$f(x)=\sum_{i=0}^{n-1} a_i x_i + b \pm e\f$.
 template<>
 class AffineModel<ValidatedNumericType>
+    : DispatchAlgebraOperations<AffineModel<ValidatedNumericType>,ValidatedNumericType>
 {
   public:
     typedef Float64Value CoefficientType;
@@ -179,34 +159,6 @@ class AffineModel<ValidatedNumericType>
     Float64Error _e;
 };
 
-//! \relates AffineModel
-//! \brief Negation of an affine model.
-AffineModel<ValidatedNumericType> operator-(const AffineModel<ValidatedNumericType>& f);
-//! \relates AffineModel
-//! \brief Addition of two affine models.
-AffineModel<ValidatedNumericType> operator+(const AffineModel<ValidatedNumericType>& f1, const AffineModel<ValidatedNumericType>& f2);
-//! \relates AffineModel
-//! \brief Subtraction of two affine models.
-AffineModel<ValidatedNumericType> operator-(const AffineModel<ValidatedNumericType>& f1, const AffineModel<ValidatedNumericType>& f2);
-//! \relates AffineModel
-//! \brief Multiplication of two affine models.
-AffineModel<ValidatedNumericType> operator*(const AffineModel<ValidatedNumericType>& f1, const AffineModel<ValidatedNumericType>& f2);
-//! \relates AffineModel
-//! \brief Addition of a constant to an affine model.
-AffineModel<ValidatedNumericType>& operator+=(AffineModel<ValidatedNumericType>& f1, const ValidatedNumericType& c2);
-//! \relates AffineModel
-//! \brief Scalar multiplication of an affine model.
-AffineModel<ValidatedNumericType>& operator*=(AffineModel<ValidatedNumericType>& f1, const ValidatedNumericType& c2);
-
-//! \relates AffineModel \brief Scalar addition to an affine model.
-AffineModel<ValidatedNumericType> operator+(const ValidatedNumericType& c1, const AffineModel<ValidatedNumericType>& f2);
-AffineModel<ValidatedNumericType> operator+(const AffineModel<ValidatedNumericType>& f1, const ValidatedNumericType& c2);
-//! \relates AffineModel \brief Subtraction of an affine model from a scalar.
-AffineModel<ValidatedNumericType> operator-(const ValidatedNumericType& c1, const AffineModel<ValidatedNumericType>& f2);
-//! \relates AffineModel \brief Subtraction of a scalar from an affine model.
-AffineModel<ValidatedNumericType> operator-(const AffineModel<ValidatedNumericType>& f1, const ValidatedNumericType& c2);
-//! \relates AffineModel \brief Scalar multiplication of an affine model.
-AffineModel<ValidatedNumericType> operator*(const ValidatedNumericType& c1, const AffineModel<ValidatedNumericType>& f2);
 
 //! \relates AffineModel
 //! \brief Write to an output stream.

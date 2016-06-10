@@ -289,19 +289,19 @@ template<class R, class Op, class A1, class A2> inline
 Expression<R> make_expression(Op op, const Expression<A1>& e1, Expression<A2> e2) {
     return make_expression<R>(op.code(),e1,e2); }
 
-Expression<Boolean> operator&&(Expression<Boolean> e1, Expression<Boolean> e2) {
+Expression<Boolean> operator&&(Expression<Boolean> const& e1, Expression<Boolean> const& e2) {
     return make_expression<Boolean>(AndOp(),e1,e2); }
-Expression<Boolean> operator||(Expression<Boolean> e1, Expression<Boolean> e2) {
+Expression<Boolean> operator||(Expression<Boolean> const& e1, Expression<Boolean> const& e2) {
     return make_expression<Boolean>(OrOp(),e1,e2); }
-Expression<Boolean> operator!(Expression<Boolean> e) {
+Expression<Boolean> operator!(Expression<Boolean> const& e) {
     return make_expression<Boolean>(NotOp(),e); }
 
 
-Expression<Kleenean> operator&&(Expression<Kleenean> e1, Expression<Kleenean> e2) {
+Expression<Kleenean> operator&&(Expression<Kleenean> const& e1, Expression<Kleenean> const& e2) {
     return make_expression<Kleenean>(AndOp(),e1,e2); }
-Expression<Kleenean> operator||(Expression<Kleenean> e1, Expression<Kleenean> e2) {
+Expression<Kleenean> operator||(Expression<Kleenean> const& e1, Expression<Kleenean> const& e2) {
     return make_expression<Kleenean>(OrOp(),e1,e2); }
-Expression<Kleenean> operator!(Expression<Kleenean> e) {
+Expression<Kleenean> operator!(Expression<Kleenean> const& e) {
     return make_expression<Kleenean>(NotOp(),e); }
 
 
@@ -311,113 +311,113 @@ Expression<Boolean> operator!=(Variable<String> v1, const String& s2) {
     return make_expression<Boolean>(Unequal(),Expression<String>(v1),Expression<String>::constant(s2)); }
 
 
-Expression<Boolean> operator==(Expression<Integer> e1, Expression<Integer> e2) {
+Expression<Boolean> operator==(Expression<Integer> const& e1, Expression<Integer> const& e2) {
     return make_expression<Boolean>(Equal(),e1,e2); }
-Expression<Boolean> operator!=(Expression<Integer> e1, Expression<Integer> e2) {
+Expression<Boolean> operator!=(Expression<Integer> const& e1, Expression<Integer> const& e2) {
     return make_expression<Boolean>(Unequal(),e1,e2); }
-Expression<Boolean> operator>=(Expression<Integer> e1, Expression<Integer> e2) {
+Expression<Boolean> operator>=(Expression<Integer> const& e1, Expression<Integer> const& e2) {
     return make_expression<Boolean>(Geq(),e1,e2); }
-Expression<Boolean> operator<=(Expression<Integer> e1, Expression<Integer> e2) {
+Expression<Boolean> operator<=(Expression<Integer> const& e1, Expression<Integer> const& e2) {
     return make_expression<Boolean>(Leq(),e1,e2); }
-Expression<Boolean> operator>(Expression<Integer> e1, Expression<Integer> e2) {
+Expression<Boolean> operator>(Expression<Integer> const& e1, Expression<Integer> const& e2) {
     return make_expression<Boolean>(Gtr(),e1,e2); }
-Expression<Boolean> operator<(Expression<Integer> e1, Expression<Integer> e2) {
+Expression<Boolean> operator<(Expression<Integer> const& e1, Expression<Integer> const& e2) {
     return make_expression<Boolean>(Less(),e1,e2); }
 
 
 
-Expression<Integer> operator+(Expression<Integer> e) {
+Expression<Integer> operator+(Expression<Integer> const& e) {
     return make_expression<Integer>(Pos(),e); }
-Expression<Integer> operator-(Expression<Integer> e) {
+Expression<Integer> operator-(Expression<Integer> const& e) {
     return make_expression<Integer>(Neg(),e); }
-Expression<Integer> operator+(Expression<Integer> e1, Expression<Integer> e2) {
+Expression<Integer> operator+(Expression<Integer> const& e1, Expression<Integer> const& e2) {
     return make_expression<Integer>(Add(),e1,e2); }
-Expression<Integer> operator-(Expression<Integer> e1, Expression<Integer> e2) {
+Expression<Integer> operator-(Expression<Integer> const& e1, Expression<Integer> const& e2) {
     return make_expression<Integer>(Sub(),e1,e2); }
-Expression<Integer> operator*(Expression<Integer> e1, Expression<Integer> e2) {
+Expression<Integer> operator*(Expression<Integer> const& e1, Expression<Integer> const& e2) {
     return make_expression<Integer>(Mul(),e1,e2); }
 
 
 
-Expression<Kleenean> sgn(Expression<Real> e) {
+Expression<Kleenean> sgn(Expression<Real> const& e) {
     return make_expression<Kleenean>(Sgn(),e); }
 
-Expression<Kleenean> operator==(Expression<Real> e1, Expression<Real> e2) {
+Expression<Kleenean> operator==(Expression<Real> const& e1, Expression<Real> const& e2) {
     return make_expression<Kleenean>(Equal(),e1,e2); }
-Expression<Kleenean> operator!=(Expression<Real> e1, Expression<Real> e2) {
+Expression<Kleenean> operator!=(Expression<Real> const& e1, Expression<Real> const& e2) {
     return make_expression<Kleenean>(Unequal(),e1,e2); }
-Expression<Kleenean> operator>=(Expression<Real> e1, Expression<Real> e2) {
+Expression<Kleenean> operator>=(Expression<Real> const& e1, Expression<Real> const& e2) {
     return make_expression<Kleenean>(Geq(),e1,e2); }
-Expression<Kleenean> operator<=(Expression<Real> e1, Expression<Real> e2) {
+Expression<Kleenean> operator<=(Expression<Real> const& e1, Expression<Real> const& e2) {
     return make_expression<Kleenean>(Leq(),e1,e2); }
-Expression<Kleenean> operator>(Expression<Real> e1, Expression<Real> e2) {
+Expression<Kleenean> operator>(Expression<Real> const& e1, Expression<Real> const& e2) {
     return make_expression<Kleenean>(Gtr(),e1,e2); }
-Expression<Kleenean> operator<(Expression<Real> e1, Expression<Real> e2) {
+Expression<Kleenean> operator<(Expression<Real> const& e1, Expression<Real> const& e2) {
     return make_expression<Kleenean>(Less(),e1,e2); }
 
 
-Expression<Real> operator+(Expression<Real> e) {
+Expression<Real> operator+(Expression<Real> const& e) {
     return make_expression<Real>(Pos(),e); }
-Expression<Real> operator-(Expression<Real> e) {
+Expression<Real> operator-(Expression<Real> const& e) {
     return make_expression<Real>(Neg(),e); }
-Expression<Real> operator+(Expression<Real> e1, Expression<Real> e2) {
+Expression<Real> operator+(Expression<Real> const& e1, Expression<Real> const& e2) {
     return make_expression<Real>(Add(),e1,e2); }
-Expression<Real> operator-(Expression<Real> e1, Expression<Real> e2) {
+Expression<Real> operator-(Expression<Real> const& e1, Expression<Real> const& e2) {
     return make_expression<Real>(Sub(),e1,e2); }
-Expression<Real> operator*(Expression<Real> e1, Expression<Real> e2) {
+Expression<Real> operator*(Expression<Real> const& e1, Expression<Real> const& e2) {
     return make_expression<Real>(Mul(),e1,e2); }
-Expression<Real> operator/(Expression<Real> e1, Expression<Real> e2) {
+Expression<Real> operator/(Expression<Real> const& e1, Expression<Real> const& e2) {
     return make_expression<Real>(Div(),e1,e2); }
 
-Expression<Real> pow(Expression<Real> e, Int n) {
+Expression<Real> pow(Expression<Real> const& e, Int n) {
     return make_expression<Real>(Pow(),e,n); }
 
-Expression<Real> neg(Expression<Real> e) {
+Expression<Real> neg(Expression<Real> const& e) {
     return make_expression<Real>(Neg(),e); }
-Expression<Real> rec(Expression<Real> e) {
+Expression<Real> rec(Expression<Real> const& e) {
     return make_expression<Real>(Rec(),e); }
-Expression<Real> sqr(Expression<Real> e) {
+Expression<Real> sqr(Expression<Real> const& e) {
     return make_expression<Real>(Sqr(),e); }
-Expression<Real> sqrt(Expression<Real> e) {
+Expression<Real> sqrt(Expression<Real> const& e) {
     return make_expression<Real>(Sqrt(),e); }
-Expression<Real> exp(Expression<Real> e) {
+Expression<Real> exp(Expression<Real> const& e) {
     return make_expression<Real>(Exp(),e); }
-Expression<Real> log(Expression<Real> e) {
+Expression<Real> log(Expression<Real> const& e) {
     return make_expression<Real>(Log(),e); }
-Expression<Real> sin(Expression<Real> e) {
+Expression<Real> sin(Expression<Real> const& e) {
     return make_expression<Real>(Sin(),e); }
-Expression<Real> cos(Expression<Real> e) {
+Expression<Real> cos(Expression<Real> const& e) {
     return make_expression<Real>(Cos(),e); }
-Expression<Real> tan(Expression<Real> e) {
+Expression<Real> tan(Expression<Real> const& e) {
     return make_expression<Real>(Tan(),e); }
-Expression<Real> atan(Expression<Real> e) {
+Expression<Real> atan(Expression<Real> const& e) {
     return make_expression<Real>(Atan(),e); }
 
-Expression<Real> max(Expression<Real> e1, Expression<Real> e2) {
+Expression<Real> max(Expression<Real> const& e1, Expression<Real> const& e2) {
     return make_expression<Real>(Max(),e1,e2); }
-Expression<Real> min(Expression<Real> e1, Expression<Real> e2) {
+Expression<Real> min(Expression<Real> const& e1, Expression<Real> const& e2) {
     return make_expression<Real>(Min(),e1,e2); }
-Expression<Real> abs(Expression<Real> e) {
+Expression<Real> abs(Expression<Real> const& e) {
     return make_expression<Real>(Abs(),e); }
 
 
-Expression<Real> operator+(Expression<Real> e, Real c) { return e + Expression<Real>::constant(c); }
-Expression<Real> operator-(Expression<Real> e, Real c) { return e - Expression<Real>::constant(c); }
-Expression<Real> operator*(Expression<Real> e, Real c) { return e * Expression<Real>::constant(c); }
-Expression<Real> operator/(Expression<Real> e, Real c) { return e / Expression<Real>::constant(c); }
-Expression<Real> operator+(Real c, Expression<Real> e) { return Expression<Real>::constant(c) + e; }
-Expression<Real> operator-(Real c, Expression<Real> e) { return Expression<Real>::constant(c) - e; }
-Expression<Real> operator*(Real c, Expression<Real> e) { return Expression<Real>::constant(c) * e; }
-Expression<Real> operator/(Real c, Expression<Real> e) { return Expression<Real>::constant(c) / e; }
+Expression<Real> operator+(Expression<Real> const& e, Real const& c) { return e + Expression<Real>::constant(c); }
+Expression<Real> operator-(Expression<Real> const& e, Real const& c) { return e - Expression<Real>::constant(c); }
+Expression<Real> operator*(Expression<Real> const& e, Real const& c) { return e * Expression<Real>::constant(c); }
+Expression<Real> operator/(Expression<Real> const& e, Real const& c) { return e / Expression<Real>::constant(c); }
+Expression<Real> operator+(Real const& c, Expression<Real> const& e) { return Expression<Real>::constant(c) + e; }
+Expression<Real> operator-(Real const& c, Expression<Real> const& e) { return Expression<Real>::constant(c) - e; }
+Expression<Real> operator*(Real const& c, Expression<Real> const& e) { return Expression<Real>::constant(c) * e; }
+Expression<Real> operator/(Real const& c, Expression<Real> const& e) { return Expression<Real>::constant(c) / e; }
 
-Expression<Kleenean> operator<=(Expression<Real> e, Real c) { return e <= Expression<Real>::constant(c); }
-Expression<Kleenean> operator< (Expression<Real> e, Real c) { return e <  Expression<Real>::constant(c); }
-Expression<Kleenean> operator>=(Expression<Real> e, Real c) { return e >= Expression<Real>::constant(c); }
-Expression<Kleenean> operator> (Expression<Real> e, Real c) { return e >  Expression<Real>::constant(c); }
-Expression<Kleenean> operator<=(Real c, Expression<Real> e) { return Expression<Real>::constant(c) <= e; }
-Expression<Kleenean> operator< (Real c, Expression<Real> e) { return Expression<Real>::constant(c) <  e; }
-Expression<Kleenean> operator>=(Real c, Expression<Real> e) { return Expression<Real>::constant(c) >= e; }
-Expression<Kleenean> operator> (Real c, Expression<Real> e) { return Expression<Real>::constant(c) >  e; }
+Expression<Kleenean> operator<=(Expression<Real> const& e, Real const& c) { return e <= Expression<Real>::constant(c); }
+Expression<Kleenean> operator< (Expression<Real> const& e, Real const& c) { return e <  Expression<Real>::constant(c); }
+Expression<Kleenean> operator>=(Expression<Real> const& e, Real const& c) { return e >= Expression<Real>::constant(c); }
+Expression<Kleenean> operator> (Expression<Real> const& e, Real const& c) { return e >  Expression<Real>::constant(c); }
+Expression<Kleenean> operator<=(Real const& c, Expression<Real> const& e) { return Expression<Real>::constant(c) <= e; }
+Expression<Kleenean> operator< (Real const& c, Expression<Real> const& e) { return Expression<Real>::constant(c) <  e; }
+Expression<Kleenean> operator>=(Real const& c, Expression<Real> const& e) { return Expression<Real>::constant(c) >= e; }
+Expression<Kleenean> operator> (Real const& c, Expression<Real> const& e) { return Expression<Real>::constant(c) >  e; }
 
 
 

@@ -29,6 +29,11 @@
 
 namespace Ariadne {
 
+template<class A> class IsNormedAlgebra : False { };
+template<class A> class IsGradedAlgebra : False { };
+template<class A> using EnableIfNormedAlgebra = EnableIf<IsNormedAlgebra<A>,A>;
+template<class A> using EnableIfGradedAlgebra = EnableIf<IsGradedAlgebra<A>,A>;
+
 struct Factorial {
     Nat _n;
     Factorial(Nat n) : _n(n) { }

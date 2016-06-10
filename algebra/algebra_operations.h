@@ -116,6 +116,75 @@ template<class A> struct NormedAlgebraOperations {
     static A _atan(const A& a);
 };
 
+template<class A, class X> struct DeclareAlgebraOperators
+{
+    friend A operator+(A const& a);
+    friend A operator-(A const& a);
+    friend A operator+(A const& a1, A const& a2);
+    friend A operator-(A const& a1, A const& a2);
+    friend A operator*(A const& a1, A const& a2);
+    friend A& operator+=(A& a1, A const& a2);
+    friend A& operator-=(A& a1, A const& a2);
+    friend A& operator*=(A& a1, A const& a2);
+    friend A operator+(A const& a1, X const& x2);
+    friend A operator-(A const& a1, X const& x2);
+    friend A operator*(A const& a1, X const& x2);
+    friend A operator/(A const& a1, X const& x2);
+    friend A& operator+=(A& a1, X const& x2);
+    friend A& operator-=(A& a1, X const& x2);
+    friend A& operator*=(A& a1, X const& x2);
+    friend A& operator/=(A& a1, X const& x2);
+    friend A operator+(X const& x1, A const& a2);
+    friend A operator-(X const& x1, A const& a2);
+    friend A operator*(X const& x1, A const& a2);
+};
+
+template<class A, class X> struct DeclareAlgebraOperations
+    : DeclareAlgebraOperators<A,X>
+{
+    friend A nul(A const& a);
+    friend A pos(A const& a);
+    friend A neg(A const& a);
+    friend A half(A const& a);
+    friend A sqr(A const& a);
+    friend A add(A const& a1, A const& a2);
+    friend A sub(A const& a1, A const& a2);
+    friend A mul(A const& a1, A const& a2);
+
+    friend A add(A const& a1, X const& x2);
+    friend A sub(A const& a1, X const& x2);
+    friend A mul(A const& a1, X const& x2);
+    friend A div(A const& a1, X const& x2);
+    friend A add(X const& x1, A const& a2);
+    friend A sub(X const& x1, A const& a2);
+    friend A mul(X const& x1, A const& a2);
+    friend A pow(A const& a, Nat m);
+    friend A pow(A const& a, Int n);
+};
+
+template<class A, class X> struct DeclareDivisionAlgebraOperations : DeclareAlgebraOperations<A,X> {
+    friend A operator/(A const& a1, A const& a2);
+    friend A& operator/=(A& a1, A const& a2);
+    friend A operator/(X const& x1, A const& a2);
+
+    friend A rec(A const& a);
+    friend A div(A const& a1, A const& a2);
+    friend A div(X const& x1, A const& a2);
+    friend A pow(A const& a, Int n);
+};
+
+template<class A, class X> struct DeclareTranscendentalAlgebraOperations : DeclareDivisionAlgebraOperations<A,X> {
+    friend A sqrt(A const& a);
+    friend A exp(A const& a);
+    friend A log(A const& a);
+    friend A sin(A const& a);
+    friend A cos(A const& a);
+    friend A tan(A const& a);
+    friend A asin(A const& a);
+    friend A acos(A const& a);
+    friend A atan(A const& a);
+};
+
 template<class A, class Y> struct DispatchMixedAlgebraNumberOperations;
 
 template<class A> struct DispatchMixedAlgebraNumberOperations<A,int> {

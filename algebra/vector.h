@@ -79,6 +79,23 @@ template<class T> inline T zero_element(Covector<T> const& u) { return u.zero_el
 template<class T> inline T zero_element(Vector<T> const& v) { return v.zero_element(); }
 template<class T> inline T zero_element(Scalar<T> const& s) { return create_zero(s); }
 
+#ifdef SIMPLE_VECTOR_OPERATORS
+
+struct DeclareVectorOperations {
+    template<class X> friend Vector<X> operator+(Vector<X> const& v);
+    template<class X> friend Vector<NegationType<X>> operator-(Vector<X> const& v);
+    template<class X1, class X2> friend Vector<SumType<X1,X2>> operator+(Vector<X1> const& v1, Vector<X2> const& v2);
+    template<class X1, class X2> friend Vector<DifferenceType<X1,X2>> operator-(Vector<X1> const& v1, Vector<X2> const& v2);
+    template<class X1, class X2> friend Vector<ProductType<Scalar<X1>,X2>> operator*(X1 const& x1, Vector<X2> const& v2);
+    template<class X1, class X2> friend Vector<ProductType<X1,Scalar<X2>>> operator*(Vector<X1> const& v1, X2 const& x2);
+    template<class X1, class X2> friend Vector<QuotientType<X1,Scalar<X2>>> operator/(Vector<X1> const& v1, X2 const& x2);
+};
+
+#else // SIMPLE_VECTOR_OPERATORS
+
+struct DeclareVectorOperations { };
+
+#endif // SIMPLE_VECTOR_OPERATORS
 
 //! \ingroup LinearAlgebraSubModule
 //! \brief Vectors over some type \a X.
@@ -88,6 +105,7 @@ template<class T> inline T zero_element(Scalar<T> const& s) { return create_zero
 template<class X>
 class Vector
     : public VectorContainer<Vector<X>>
+    , public DeclareVectorOperations
 {
     Array<X> _ary;
   public:
@@ -187,9 +205,9 @@ class Vector
     friend template<class X1, class X2> decltype(declval<X1>()!=declval<X2>()) operator!=(const Vector<X1>& v1, const Vector<X2>& v2);
 
      //! \brief %Vector unary plus.
-    friend template<class X> Vector<decltype(+declval<X>())> operator+(const Vector<X>& v);
+    friend template<class X> Vector<X> operator+(const Vector<X>& v);
      //! \brief %Vector negation.
-    friend template<class X> Vector<decltype(-declval<X>())> operator-(const Vector<X>& v);
+    friend template<class X> Vector<NegationType<X>> operator-(const Vector<X>& v);
     //! \brief %Vector addition.
     friend template<class X1, class X2> Vector<decltype(declval<X1>()+declval<X2>())> operator+(const Vector<X1>& v1, const Vector<X2>& v2);
     //! \brief %Vector subtraction.
@@ -344,49 +362,52 @@ Vector<X>& operator/=(Vector<X>& v, const XX& s) {
 
 #ifdef SIMPLE_VECTOR_OPERATORS
 
-template<class X> Vector<decltype(+declval<X>())> operator+(Vector<X> const& v) {
-    Vector<decltype(+declval<X>())> r(v.size(),+v.zero_element());
-    for(SizeType i=0; i!=r.size(); ++i) { r[i]=+v[i]; }
-    return std::move(r);
-}
+struct ProvideVectorOperations {
+    template<class X> friend Vector<X> operator+(Vector<X> const& v) {
+        Vector<decltype(+declval<X>())> r(v.size(),+v.zero_element());
+        for(SizeType i=0; i!=r.size(); ++i) { r[i]=+v[i]; }
+        return std::move(r);
+    }
 
-template<class X> Vector<X> operator-(Vector<X> const& v) {
-    Vector<decltype(-declval<X>())> r(v.size(),-v.zero_element());
-    for(SizeType i=0; i!=r.size(); ++i) { r[i]=-v[i]; }
-    return std::move(r);
-}
+    template<class X> friend Vector<NegationType<X>> operator-(Vector<X> const& v) {
+        Vector<decltype(-declval<X>())> r(v.size(),-v.zero_element());
+        for(SizeType i=0; i!=r.size(); ++i) { r[i]=-v[i]; }
+        return std::move(r);
+    }
 
-template<class X1, class X2> Vector<decltype(declval<X1>()+declval<X2>())> operator+(Vector<X1> const& v1, Vector<X2> const& v2) {
-    ARIADNE_PRECONDITION(v1.size()==v2.size());
-    Vector<decltype(declval<X1>()+declval<X2>())> r(v1.size(),v1.zero_element()+v2.zero_element());
-    for(SizeType i=0; i!=r.size(); ++i) { r[i]=v1[i]+v2[i]; }
-    return std::move(r);
-}
+    template<class X1, class X2> friend Vector<SumType<X1,X2>> operator+(Vector<X1> const& v1, Vector<X2> const& v2) {
+        ARIADNE_PRECONDITION(v1.size()==v2.size());
+        Vector<decltype(declval<X1>()+declval<X2>())> r(v1.size(),v1.zero_element()+v2.zero_element());
+        for(SizeType i=0; i!=r.size(); ++i) { r[i]=v1[i]+v2[i]; }
+        return std::move(r);
+    }
 
-template<class X1, class X2> Vector<decltype(declval<X1>()-declval<X2>())> operator-(Vector<X1> const& v1, Vector<X2> const& v2) {
-    ARIADNE_PRECONDITION(v1.size()==v2.size());
-    Vector<decltype(declval<X1>()-declval<X2>())> r(v1.size(),v1.zero_element()-v2.zero_element());
-    for(SizeType i=0; i!=r.size(); ++i) { r[i]=v1[i]-v2[i]; }
-    return std::move(r);
-}
+    template<class X1, class X2> friend Vector<DifferenceType<X1,X2>> operator-(Vector<X1> const& v1, Vector<X2> const& v2) {
+        ARIADNE_PRECONDITION(v1.size()==v2.size());
+        Vector<decltype(declval<X1>()-declval<X2>())> r(v1.size(),v1.zero_element()-v2.zero_element());
+        for(SizeType i=0; i!=r.size(); ++i) { r[i]=v1[i]-v2[i]; }
+        return std::move(r);
+    }
 
-template<class X1, class X2, EnableIf<IsScalar<X1>> = dummy> Vector<decltype(declval<X1>()*declval<X2>())> operator*(X1 const& x1, Vector<X2> const& v2) {
-    Vector<decltype(declval<X1>()*declval<X2>())> r(v2.size(),x1*v2.zero_element());
-    for(SizeType i=0; i!=r.size(); ++i) { r[i]=x1*v2[i]; }
-    return std::move(r);
-}
+    template<class X1, class X2> friend Vector<ProductType<X1,Scalar<X2>>> operator*(X1 const& x1, Vector<X2> const& v2) {
+        Vector<decltype(declval<X1>()*declval<X2>())> r(v2.size(),x1*v2.zero_element());
+        for(SizeType i=0; i!=r.size(); ++i) { r[i]=x1*v2[i]; }
+        return std::move(r);
+    }
 
-template<class X1, class X2, EnableIf<IsScalar<X2>> = dummy> Vector<decltype(declval<X1>()*declval<X2>())> operator*(Vector<X1> const& v1, X2 const& x2) {
-    Vector<decltype(declval<X1>()*declval<X2>())> r(v1.size(),v1.zero_element()*x2);
-    for(SizeType i=0; i!=r.size(); ++i) { r[i]=v1[i]*x2; }
-    return std::move(r);
-}
+    template<class X1, class X2> friend Vector<ProductType<X1,Scalar<X2>>> operator*(Vector<X1> const& v1, X2 const& x2) {
+        Vector<decltype(declval<X1>()*declval<X2>())> r(v1.size(),v1.zero_element()*x2);
+        for(SizeType i=0; i!=r.size(); ++i) { r[i]=v1[i]*x2; }
+        return std::move(r);
+    }
 
-template<class X1, class X2, EnableIf<IsScalar<X2>> = dummy> Vector<decltype(declval<X1>()/declval<X2>())> operator/(Vector<X1> const& v1, X2 const& x2) {
-    Vector<decltype(declval<X1>()/declval<X2>())> r(v1.size(),v1.zero_element()/x2);
-    for(SizeType i=0; i!=r.size(); ++i) { r[i]=v1[i]/x2; }
-    return std::move(r);
-}
+    template<class X1, class X2> friend Vector<QuotientType<X1,Scalar<X2>>> operator/(Vector<X1> const& v1, X2 const& x2) {
+        Vector<decltype(declval<X1>()/declval<X2>())> r(v1.size(),v1.zero_element()/x2);
+        for(SizeType i=0; i!=r.size(); ++i) { r[i]=v1[i]/x2; }
+        return std::move(r);
+    }
+
+};
 
 #else
 

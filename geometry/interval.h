@@ -34,6 +34,8 @@
 
 #include "numeric/logical.h"
 #include "numeric/float.h"
+#include "numeric/mixins.h"
+#include "numeric/arithmetic.h"
 
 #include "interval.decl.h"
 
@@ -60,12 +62,26 @@ template<class U> using SplitEndType = typename SplitEndTypedef<U>::Type;
 class UnitIntervalType;
 class EmptyIntervalType;
 
+template<class U> struct DeclareIntervalArithmeticOperations { };
+template<> struct DeclareIntervalArithmeticOperations<Float64UpperBound>
+    : DeclareNumericOperations<Interval<Float64UpperBound>>
+    , DeclareMixedArithmeticOperators<Interval<Float64UpperBound>,Float64Bounds>
+    , DeclareFieldComparisons<Interval<Float64UpperBound>,Interval<Float64UpperBound>,ValidatedKleenean>
+    , DeclareFieldComparisons<Interval<Float64UpperBound>,Float64Bounds,ValidatedKleenean>
+    , DeclareFieldComparisons<Float64Bounds,Interval<Float64UpperBound>,ValidatedKleenean>
+{
+    friend Float64Error mag(Float64UpperInterval const&);
+};
+
+template<> struct DeclareIntervalArithmeticOperations<Float64Value> : DeclareIntervalArithmeticOperations<Float64UpperBound> { };
 
 //! \ingroup GeometryModule
 //! \brief Intervals with upper endoint of type \a U.
 //! \details
 //! Not intended for use in basic interval arithmetic; represents a \em geometric rather than a \em numerical object.
-template<class U> class Interval {
+template<class U> class Interval
+    : public DeclareIntervalArithmeticOperations<U>
+{
     typedef typename U::Paradigm P;
     typedef decltype(-declval<U>()) L;
     typedef decltype(declval<U>()+declval<L>()) C;
@@ -243,6 +259,7 @@ bool same(Interval<Float64UpperBound> const& ivl1, Interval<Float64UpperBound> c
 
 //! \related Float64UpperInterval \related FloatBounds \brief Allows the over-approximating interval \a ivl to be treated an over-approximation to a single point.
 Float64Bounds cast_singleton(Interval<Float64UpperBound> const& ivl);
+Float64UpperInterval make_interval(Float64Bounds const& x);
 
 //! \related Float64UpperInterval \brief An interval containing the given interval in its interior.
 Interval<Float64UpperBound> widen(Interval<Float64UpperBound> const& ivl);
@@ -266,111 +283,5 @@ class EmptyIntervalType { };
 
 #include "interval.inl.h"
 
-namespace Ariadne {
-
-inline Float64Bounds cast_singleton(Float64UpperInterval const& ivl) {
-    return Float64Bounds(ivl.lower(),ivl.upper()); }
-inline Float64UpperInterval make_interval(Float64Bounds const& x) {
-    return Float64UpperInterval(x.lower(),x.upper()); }
-
-inline Float64UpperInterval max(Float64UpperInterval ivl1, Float64UpperInterval ivl2) {
-    return make_interval(max(cast_singleton(ivl1),cast_singleton(ivl2))); }
-inline Float64UpperInterval min(Float64UpperInterval ivl1, Float64UpperInterval ivl2) {
-    return make_interval(min(cast_singleton(ivl1),cast_singleton(ivl2))); }
-inline Float64UpperInterval abs(Float64UpperInterval ivl) {
-    return make_interval(abs(cast_singleton(ivl))); }
-inline Float64UpperInterval pos(Float64UpperInterval ivl) {
-    return make_interval(pos(cast_singleton(ivl))); }
-inline Float64UpperInterval neg(Float64UpperInterval ivl) {
-    return make_interval(neg(cast_singleton(ivl))); }
-inline Float64UpperInterval sqr(Float64UpperInterval ivl) {
-    return make_interval(sqr(cast_singleton(ivl))); }
-inline Float64UpperInterval rec(Float64UpperInterval ivl) {
-    return make_interval(rec(cast_singleton(ivl))); }
-
-inline Float64UpperInterval add(Float64UpperInterval ivl1, Float64UpperInterval ivl2) {
-    return make_interval(add(cast_singleton(ivl1),cast_singleton(ivl2))); }
-inline Float64UpperInterval sub(Float64UpperInterval ivl1, Float64UpperInterval ivl2) {
-    return make_interval(sub(cast_singleton(ivl1),cast_singleton(ivl2))); }
-inline Float64UpperInterval mul(Float64UpperInterval ivl1, Float64UpperInterval ivl2) {
-    return make_interval(mul(cast_singleton(ivl1),cast_singleton(ivl2))); }
-inline Float64UpperInterval div(Float64UpperInterval ivl1, Float64UpperInterval ivl2) {
-    return make_interval(div(cast_singleton(ivl1),cast_singleton(ivl2))); }
-
-inline Float64UpperInterval pow(Float64UpperInterval ivl, Nat m) {
-    return make_interval(pow(cast_singleton(ivl),m)); }
-inline Float64UpperInterval pow(Float64UpperInterval ivl, Int n) {
-    return make_interval(pow(cast_singleton(ivl),n)); }
-
-inline Float64UpperInterval sqrt(Float64UpperInterval ivl) {
-    return make_interval(sqrt(cast_singleton(ivl))); }
-inline Float64UpperInterval exp(Float64UpperInterval ivl) {
-    return make_interval(exp(cast_singleton(ivl))); }
-inline Float64UpperInterval log(Float64UpperInterval ivl) {
-    return make_interval(log(cast_singleton(ivl))); }
-inline Float64UpperInterval sin(Float64UpperInterval ivl) {
-    return make_interval(sin(cast_singleton(ivl))); }
-inline Float64UpperInterval cos(Float64UpperInterval ivl) {
-    return make_interval(cos(cast_singleton(ivl))); }
-inline Float64UpperInterval tan(Float64UpperInterval ivl) {
-    return make_interval(tan(cast_singleton(ivl))); }
-inline Float64UpperInterval asin(Float64UpperInterval ivl) {
-    return make_interval(asin(cast_singleton(ivl))); }
-inline Float64UpperInterval acos(Float64UpperInterval ivl) {
-    return make_interval(acos(cast_singleton(ivl))); }
-inline Float64UpperInterval atan(Float64UpperInterval ivl) {
-    return make_interval(atan(cast_singleton(ivl))); }
-
-inline Float64Error mag(Float64UpperInterval ivl) {
-    return mag(cast_singleton(ivl)); }
-inline Float64LowerBound mig(Float64UpperInterval ivl) {
-    return mig(cast_singleton(ivl)); }
-
-inline Float64UpperInterval operator+(const Float64UpperInterval& ivl) { return pos(ivl); }
-inline Float64UpperInterval operator-(const Float64UpperInterval& ivl) { return neg(ivl); }
-inline Float64UpperInterval operator+(const Float64UpperInterval& ivl1, const Float64UpperInterval& ivl2) { return add(ivl1,ivl2); }
-inline Float64UpperInterval operator-(const Float64UpperInterval& ivl1, const Float64UpperInterval& ivl2) { return sub(ivl1,ivl2); }
-inline Float64UpperInterval operator*(const Float64UpperInterval& ivl1, const Float64UpperInterval& ivl2) { return mul(ivl1,ivl2); }
-inline Float64UpperInterval operator/(const Float64UpperInterval& ivl1, const Float64UpperInterval& ivl2) { return div(ivl1,ivl2); };
-inline Float64UpperInterval& operator+=(Float64UpperInterval& ivl1, const Float64UpperInterval& ivl2) { ivl1=add(ivl1,ivl2); return ivl1; }
-inline Float64UpperInterval& operator-=(Float64UpperInterval& ivl1, const Float64UpperInterval& ivl2) { ivl1=sub(ivl1,ivl2); return ivl1; }
-inline Float64UpperInterval& operator*=(Float64UpperInterval& ivl1, const Float64UpperInterval& ivl2) { ivl1=mul(ivl1,ivl2); return ivl1; }
-inline Float64UpperInterval& operator/=(Float64UpperInterval& ivl1, const Float64UpperInterval& ivl2) { ivl1=div(ivl1,ivl2); return ivl1; }
-
-inline Bool operator==(const Float64UpperInterval& ivl1, const Float64UpperInterval& ivl2) {
-    return ivl1.lower().raw() == ivl2.lower().raw() && ivl1.upper().raw() == ivl2.upper().raw(); }
-inline ValidatedKleenean operator!=(const Float64UpperInterval& ivl1, const Float64UpperInterval& ivl2) {
-    return ivl1.lower().raw() != ivl2.lower().raw() || ivl1.upper().raw() != ivl2.upper().raw(); }
-inline ValidatedKleenean operator<=(Float64UpperInterval ivl1, Float64UpperInterval ivl2) {
-    return cast_singleton(ivl1) <= cast_singleton(ivl2); }
-inline ValidatedKleenean operator>=(Float64UpperInterval ivl1, Float64UpperInterval ivl2) {
-    return cast_singleton(ivl1) >= cast_singleton(ivl2); }
-inline ValidatedKleenean operator< (Float64UpperInterval ivl1, Float64UpperInterval ivl2) {
-    return cast_singleton(ivl1) <  cast_singleton(ivl2); }
-inline ValidatedKleenean operator> (Float64UpperInterval ivl1, Float64UpperInterval ivl2) {
-    return cast_singleton(ivl1) >  cast_singleton(ivl2); }
-
-// Mixed operations
-inline Float64UpperInterval operator+(Float64UpperInterval ivl1, Float64Bounds x2) { return ivl1+make_interval(x2); }
-inline Float64UpperInterval operator-(Float64UpperInterval ivl1, Float64Bounds x2) { return ivl1-make_interval(x2); }
-inline Float64UpperInterval operator*(Float64UpperInterval ivl1, Float64Bounds x2) { return ivl1*make_interval(x2); }
-inline Float64UpperInterval operator/(Float64UpperInterval ivl1, Float64Bounds x2) { return ivl1/make_interval(x2); }
-inline Float64UpperInterval operator+(Float64Bounds x1, Float64UpperInterval ivl2) { return make_interval(x1)+ivl2; }
-inline Float64UpperInterval operator-(Float64Bounds x1, Float64UpperInterval ivl2) { return make_interval(x1)-ivl2; }
-inline Float64UpperInterval operator*(Float64Bounds x1, Float64UpperInterval ivl2) { return make_interval(x1)*ivl2; }
-inline Float64UpperInterval operator/(Float64Bounds x1, Float64UpperInterval ivl2) { return make_interval(x1)/ivl2; }
-inline Float64UpperInterval& operator+=(Float64UpperInterval& ivl1, Float64Bounds x2) { return ivl1+=make_interval(x2); }
-inline Float64UpperInterval& operator-=(Float64UpperInterval& ivl1, Float64Bounds x2) { return ivl1-=make_interval(x2); }
-inline Float64UpperInterval& operator*=(Float64UpperInterval& ivl1, Float64Bounds x2) { return ivl1*=make_interval(x2); }
-inline Float64UpperInterval& operator/=(Float64UpperInterval& ivl1, Float64Bounds x2) { return ivl1/=make_interval(x2); }
-inline ValidatedKleenean operator==(Float64UpperInterval ivl1, Float64Bounds x2) { return ivl1==make_interval(x2); }
-inline ValidatedKleenean operator!=(Float64UpperInterval ivl1, Float64Bounds x2) { return ivl1!=make_interval(x2); }
-inline ValidatedKleenean operator<=(Float64UpperInterval ivl1, Float64Bounds x2) { return ivl1<=make_interval(x2); }
-inline ValidatedKleenean operator>=(Float64UpperInterval ivl1, Float64Bounds x2) { return ivl1>=make_interval(x2); }
-inline ValidatedKleenean operator< (Float64UpperInterval ivl1, Float64Bounds x2) { return ivl1< make_interval(x2); }
-inline ValidatedKleenean operator> (Float64UpperInterval ivl1, Float64Bounds x2) { return ivl1> make_interval(x2); }
-
-
-} // namespace Ariadne
 #endif
 

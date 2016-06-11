@@ -191,21 +191,21 @@ template<class X> class DeclareAnalyticOperations
 //! \sa DeclareRingOperations, DeclareComparisons
 template<class X1, class X2, class R> struct DeclareFieldComparisons {
     //! \brief Tests if \a x1 is equal to \a x2.
-    friend R eq(X1 x1, X2 x2);
+    friend R eq(X1 const& x1, X2 const& x2);
     //! \brief Tests if \a x1 is less than \a x2.
-    friend R lt(X1 x1, X2 x2);
+    friend R lt(X1 const& x1, X2 const& x2);
     //! \brief Tests if \a x1 is equal to \a x2. If equality is undecidable, may not return \a true even if values are equal.
-    friend R operator==(X1 x1, X2 x2);
+    friend R operator==(X1 const& x1, X2 const& x2);
     //! \brief Tests if \a x1 is strictly less than \a x2.
-    friend R operator< (X1 x1, X2 x2);
+    friend R operator< (X1 const& x1, X2 const& x2);
     //! \brief Tests if \a x1 is not equal to \a x2.
-    friend R operator!=(X1 x1, X2 x2);
+    friend R operator!=(X1 const& x1, X2 const& x2);
     //! \brief Tests if \a x1 is strictly greater than \a x2.
-    friend R operator> (X1 x1, X2 x2);
+    friend R operator> (X1 const& x1, X2 const& x2);
     //! \brief Tests if \a x1 is less than or equal to \a x2.
-    friend R operator<=(X1 x1, X2 x2);
+    friend R operator<=(X1 const& x1, X2 const& x2);
     //! \brief Tests if \a x1 is greater than or equal to \a x2.
-    friend R operator>=(X1 x1, X2 x2);
+    friend R operator>=(X1 const& x1, X2 const& x2);
 };
 
 template<class X1, class X2, class R> struct ProvideConvertedOperations;
@@ -267,13 +267,15 @@ template<class X> struct ProvideFieldOperators : DeclareFieldOperations<X> {
 
 
 
-template<class X, class R=X> struct DeclareInplaceOperators {
+template<class X1, class X2, class R=X1> struct DeclareMixedInplaceOperators {
 };
-template<class X> struct DeclareInplaceOperators<X,X> {
-    friend X& operator+=(X& x1, X const& x2);
-    friend X& operator-=(X& x1, X const& x2);
-    friend X& operator*=(X& x1, X const& x2);
-    friend X& operator/=(X& x1, X const& x2);
+template<class X1, class X2> struct DeclareMixedInplaceOperators<X1,X2,X1> {
+    friend X1& operator+=(X1& x1, X2 const& x2);
+    friend X1& operator-=(X1& x1, X2 const& x2);
+    friend X1& operator*=(X1& x1, X2 const& x2);
+    friend X1& operator/=(X1& x1, X2 const& x2);
+};
+template<class X, class R=X> struct DeclareInplaceOperators : DeclareMixedInplaceOperators<X,X,R> {
 };
 
 template<class X, class R=X> struct DeclareArithmeticOperators
@@ -285,6 +287,19 @@ template<class X, class R=X> struct DeclareArithmeticOperators
     friend R operator-(X const& x1, X const& x2);
     friend R operator*(X const& x1, X const& x2);
     friend R operator/(X const& x1, X const& x2);
+};
+
+template<class X1, class X2=X1, class R=X1> struct DeclareMixedArithmeticOperators
+    : DeclareMixedInplaceOperators<X1,X2,R>
+{
+    friend R operator+(X1 const& x1, X2 const& x2);
+    friend R operator-(X1 const& x1, X2 const& x2);
+    friend R operator*(X1 const& x1, X2 const& x2);
+    friend R operator/(X1 const& x1, X2 const& x2);
+    friend R operator+(X2 const& x2, X1 const& x1);
+    friend R operator-(X2 const& x2, X1 const& x1);
+    friend R operator*(X2 const& x2, X1 const& x1);
+    friend R operator/(X2 const& x2, X1 const& x1);
 };
 
 template<class X, class NX, class R=X> struct DeclareDirectedInplaceOperators {
@@ -351,6 +366,7 @@ template<class X, class R=X> struct DeclareNumericOperations
     friend R atan(X const& x);
     friend X max(X const& x1, X const& x2);
     friend X min(X const& x1, X const& x2);
+    friend X abs(X const& x);
 };
 
 

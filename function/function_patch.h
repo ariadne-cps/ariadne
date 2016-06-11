@@ -306,6 +306,7 @@ template<class M> class FunctionPatch
     template<class OP> static FunctionPatch<M> _create(OP op, FunctionPatch<M> const& fp1, FunctionPatch<M> const& fp2);
     template<class OP> static FunctionPatch<M> _create(OP op, FunctionPatch<M> const& fp1, NumericType const& c2);
     template<class OP> static FunctionPatch<M> _create(OP op, NumericType const& c1, FunctionPatch<M> const& fp2);
+    static FunctionPatch<M> _create(Pow op, FunctionPatch<M> const& fp, Int n);
   private:
     FunctionPatch<M>* _derivative(SizeType j) const;
     FunctionPatch<M>* _clone() const;
@@ -328,6 +329,9 @@ template<class M> template<class OP> FunctionPatch<M> FunctionPatch<M>::_create(
 }
 template<class M> template<class OP> FunctionPatch<M> FunctionPatch<M>::_create(OP op, typename M::NumericType const& c1, FunctionPatch<M> const& fp2) {
     return FunctionPatch<M>(fp2.domain(),op(c1,fp2.model()));
+}
+template<class M> FunctionPatch<M> FunctionPatch<M>::_create(Pow op, FunctionPatch<M> const& fp, Int n) {
+    return FunctionPatch<M>(fp.domain(),op(fp.model(),n));
 }
 
 //! \brief Restrict to a subdomain.

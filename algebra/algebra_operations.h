@@ -34,9 +34,7 @@
 namespace Ariadne {
 
 
-
 template<class A, class X=typename A::NumericType> struct AlgebraOperations {
-  public:
     template<class OP> static A _create(OP, A const&);
     template<class OP> static A _create(OP, A const&, A const&);
     template<class OP> static A _create(OP, X const&, A const&);
@@ -116,27 +114,42 @@ template<class A> struct NormedAlgebraOperations {
     static A _atan(const A& a);
 };
 
-template<class A, class X> struct DeclareAlgebraOperators
+template<class V, class X> struct DeclareVectorOperators
 {
-    friend A operator+(A const& a);
-    friend A operator-(A const& a);
-    friend A operator+(A const& a1, A const& a2);
-    friend A operator-(A const& a1, A const& a2);
+    friend V operator+(V const& v);
+    friend V operator-(V const& v);
+    friend V operator+(V const& v1, V const& v2);
+    friend V operator-(V const& v1, V const& v2);
+    friend V operator*(V const& v1, X const& x2);
+    friend V operator/(V const& v1, X const& x2);
+    friend V operator*(X const& x1, V const& v2);
+    friend V& operator+=(V& v1, V const& v2);
+    friend V& operator-=(V& v1, V const& v2);
+    friend V& operator*=(V& v1, X const& x2);
+    friend V& operator/=(V& v1, X const& x2);
+};
+
+template<class V, class A, class X> struct DeclareVectorAlgebraOperators
+    : DeclareVectorOperators<V,A>
+{
+    friend V operator*(V const& v1, X const& x2);
+    friend V operator/(V const& v1, X const& x2);
+    friend V operator*(X const& x1, V const& v2);
+    friend V& operator*=(V& v1, X const& x2);
+    friend V& operator/=(V& v1, X const& x2);
+};
+
+template<class A, class X> struct DeclareAlgebraOperators
+    : DeclareVectorOperators<A,X>
+{
     friend A operator*(A const& a1, A const& a2);
-    friend A& operator+=(A& a1, A const& a2);
-    friend A& operator-=(A& a1, A const& a2);
     friend A& operator*=(A& a1, A const& a2);
     friend A operator+(A const& a1, X const& x2);
     friend A operator-(A const& a1, X const& x2);
-    friend A operator*(A const& a1, X const& x2);
-    friend A operator/(A const& a1, X const& x2);
-    friend A& operator+=(A& a1, X const& x2);
-    friend A& operator-=(A& a1, X const& x2);
-    friend A& operator*=(A& a1, X const& x2);
-    friend A& operator/=(A& a1, X const& x2);
     friend A operator+(X const& x1, A const& a2);
     friend A operator-(X const& x1, A const& a2);
-    friend A operator*(X const& x1, A const& a2);
+    friend A& operator+=(A& a1, X const& x2);
+    friend A& operator-=(A& a1, X const& x2);
 };
 
 template<class A, class X> struct DeclareAlgebraOperations
@@ -264,10 +277,12 @@ template<class A, class X> struct DispatchSymbolicAlgebraOperations
   public:
     friend A pos(A const& a) { return OperationsType::_create(Pos(),a); }
     friend A neg(A const& a) { return OperationsType::_create(Neg(),a); }
+    friend A sqr(A const& a) { return OperationsType::_create(Sqr(),a); }
     friend A add(A const& a1, A const& a2) { return OperationsType::_create(Add(),a1,a2); }
     friend A sub(A const& a1, A const& a2) { return OperationsType::_create(Sub(),a1,a2); }
     friend A mul(A const& a1, A const& a2) { return OperationsType::_create(Mul(),a1,a2); }
     friend A div(A const& a1, A const& a2) { return OperationsType::_create(Div(),a1,a2); }
+    friend A pow(A const& a, Int n) { return OperationsType::_create(Pow(),a,n); }
 
     friend A add(A const& a1, X const& x2) { return OperationsType::_create(Add(),a1,x2); }
     friend A sub(A const& a1, X const& x2) { return OperationsType::_create(Sub(),a1,x2); }

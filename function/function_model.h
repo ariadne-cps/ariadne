@@ -253,6 +253,10 @@ template<> class ScalarFunctionModel<ValidatedTag>
         ScalarFunctionModel<ValidatedTag> r=f2; r*=c1; return r; }
     friend inline ScalarFunctionModel<ValidatedTag> div(const ValidatedNumericType& c1, const ScalarFunctionModel<ValidatedTag>& f2) {
         ScalarFunctionModel<ValidatedTag> r=rec(f2); r*=c1; return r; }
+    friend inline ScalarFunctionModel<ValidatedTag> pow(const ScalarFunctionModel<ValidatedTag>& f, Nat m) {
+        ScalarFunctionModel<ValidatedTag> r=f; r*=0; r+=1; ScalarFunctionModel<ValidatedTag> p=f; while(m!=0) { if(m%2==1) { r=r*p; } p=p*p; m=m/2; } return r; }
+    friend inline ScalarFunctionModel<ValidatedTag> pow(const ScalarFunctionModel<ValidatedTag>& f, Int n) {
+        return n>=0 ? pow(f,uint(n)) : rec(pow(f,uint(-n))); }
 
     friend inline ScalarFunctionModel<ValidatedTag> operator+(const ScalarFunctionModel<ValidatedTag>& f1, const ValidatedNumericType& c2) {
         ScalarFunctionModel<ValidatedTag> r=f1; r+=c2; return r; }

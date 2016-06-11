@@ -139,6 +139,11 @@ template<class P> class FunctionFacade<P,BoxDomain,BoxDomain> {
     FunctionExpression<P,BoxDomain,BoxDomain> operator() (const Vector<RealVariable>& x) const;
 };
 
+template<class P, class D, class C> class DeclareFunctionOperations;
+template<class P, class D> class DeclareFunctionOperations<P,D,IntervalDomain>
+    : DeclareTranscendentalAlgebraOperations<Function<P,D,IntervalDomain>,CanonicalNumericType<P>> { };
+template<class P, class D> class DeclareFunctionOperations<P,D,BoxDomain>
+    : DeclareVectorAlgebraOperators<Function<P,D,BoxDomain>,Function<P,D,IntervalDomain>,CanonicalNumericType<P>> { };
 
 //! \ingroup FunctionModule
 //! \brief A generic scalar function which can be evaluated over the number type \a X,  \f$f:\X^n\rightarrow\X\f$.
@@ -146,6 +151,7 @@ template<class P, class D, class C>
 class Function
     : public FunctionConstructors<P>
     , public FunctionFacade<P,D,C>
+    , public DeclareFunctionOperations<P,D,C>
 {
     static_assert(IsStronger<P,ApproximateTag>::value,"P must be an information level/paradigm.");
     typedef CanonicalNumericType<P> Y;
@@ -218,6 +224,8 @@ class Function
     template<class X> friend auto evaluate(const Function<P,D,C>& f, const Argument<X>& x) -> decltype(f(x)) {
         return f(x); }
 
+    friend VectorFunction<P,D> operator*(ScalarFunction<P,D> const&, Vector<Y> const&);
+    
     Function<P,D,C> derivative(SizeType k) const {
         return Function<P,D,C>(this->reference()._derivative(k)); }
     friend Function<P,D,C> derivative(Function<P,D,C> const& f, SizeType k) {
@@ -368,68 +376,6 @@ template<class X> ScalarFunction<X> cos(const ScalarFunction<X>&);
 template<class X> ScalarFunction<X> tan(const ScalarFunction<X>&);
 */
 
-EffectiveScalarFunction operator+(const EffectiveScalarFunction&);
-EffectiveScalarFunction operator-(const EffectiveScalarFunction&);
-EffectiveScalarFunction operator+(const EffectiveScalarFunction&, const EffectiveScalarFunction&);
-EffectiveScalarFunction operator-(const EffectiveScalarFunction&, const EffectiveScalarFunction&);
-EffectiveScalarFunction operator*(const EffectiveScalarFunction&, const EffectiveScalarFunction&);
-EffectiveScalarFunction operator/(const EffectiveScalarFunction&, const EffectiveScalarFunction&);
-EffectiveScalarFunction operator+(const EffectiveScalarFunction&, const EffectiveNumericType&);
-EffectiveScalarFunction operator-(const EffectiveScalarFunction&, const EffectiveNumericType&);
-EffectiveScalarFunction operator*(const EffectiveScalarFunction&, const EffectiveNumericType&);
-EffectiveScalarFunction operator/(const EffectiveScalarFunction&, const EffectiveNumericType&);
-EffectiveScalarFunction operator+(const EffectiveNumericType&, const EffectiveScalarFunction&);
-EffectiveScalarFunction operator-(const EffectiveNumericType&, const EffectiveScalarFunction&);
-EffectiveScalarFunction operator*(const EffectiveNumericType&, const EffectiveScalarFunction&);
-EffectiveScalarFunction operator/(const EffectiveNumericType&, const EffectiveScalarFunction&);
-
-EffectiveScalarFunction pow(const EffectiveScalarFunction&, Int);
-EffectiveScalarFunction neg(const EffectiveScalarFunction&);
-EffectiveScalarFunction rec(const EffectiveScalarFunction&);
-EffectiveScalarFunction sqr(const EffectiveScalarFunction&);
-EffectiveScalarFunction sqrt(const EffectiveScalarFunction&);
-EffectiveScalarFunction exp(const EffectiveScalarFunction&);
-EffectiveScalarFunction log(const EffectiveScalarFunction&);
-EffectiveScalarFunction sin(const EffectiveScalarFunction&);
-EffectiveScalarFunction cos(const EffectiveScalarFunction&);
-EffectiveScalarFunction tan(const EffectiveScalarFunction&);
-EffectiveScalarFunction atan(const EffectiveScalarFunction&);
-
-ValidatedScalarFunction operator+(const ValidatedScalarFunction&);
-ValidatedScalarFunction operator-(const ValidatedScalarFunction&);
-ValidatedScalarFunction operator+(const ValidatedScalarFunction&, const ValidatedScalarFunction&);
-ValidatedScalarFunction operator-(const ValidatedScalarFunction&, const ValidatedScalarFunction&);
-ValidatedScalarFunction operator*(const ValidatedScalarFunction&, const ValidatedScalarFunction&);
-ValidatedScalarFunction operator/(const ValidatedScalarFunction&, const ValidatedScalarFunction&);
-ValidatedScalarFunction operator+(const ValidatedScalarFunction&, const ValidatedNumericType&);
-ValidatedScalarFunction operator-(const ValidatedScalarFunction&, const ValidatedNumericType&);
-ValidatedScalarFunction operator*(const ValidatedScalarFunction&, const ValidatedNumericType&);
-ValidatedScalarFunction operator/(const ValidatedScalarFunction&, const ValidatedNumericType&);
-ValidatedScalarFunction operator+(const ValidatedNumericType&, const ValidatedScalarFunction&);
-ValidatedScalarFunction operator-(const ValidatedNumericType&, const ValidatedScalarFunction&);
-ValidatedScalarFunction operator*(const ValidatedNumericType&, const ValidatedScalarFunction&);
-ValidatedScalarFunction operator/(const ValidatedNumericType&, const ValidatedScalarFunction&);
-
-ValidatedScalarFunction& operator+=(ValidatedScalarFunction&, const ValidatedScalarFunction&);
-ValidatedScalarFunction& operator-=(ValidatedScalarFunction&, const ValidatedScalarFunction&);
-ValidatedScalarFunction& operator+=(ValidatedScalarFunction&, const ValidatedNumericType&);
-ValidatedScalarFunction& operator-=(ValidatedScalarFunction&, const ValidatedNumericType&);
-ValidatedScalarFunction& operator*=(ValidatedScalarFunction&, const ValidatedNumericType&);
-ValidatedScalarFunction& operator/=(ValidatedScalarFunction&, const ValidatedNumericType&);
-
-ValidatedScalarFunction pow(const ValidatedScalarFunction&, Int);
-ValidatedScalarFunction pos(const ValidatedScalarFunction&);
-ValidatedScalarFunction neg(const ValidatedScalarFunction&);
-ValidatedScalarFunction rec(const ValidatedScalarFunction&);
-ValidatedScalarFunction sqr(const ValidatedScalarFunction&);
-ValidatedScalarFunction sqrt(const ValidatedScalarFunction&);
-ValidatedScalarFunction exp(const ValidatedScalarFunction&);
-ValidatedScalarFunction log(const ValidatedScalarFunction&);
-ValidatedScalarFunction sin(const ValidatedScalarFunction&);
-ValidatedScalarFunction cos(const ValidatedScalarFunction&);
-ValidatedScalarFunction tan(const ValidatedScalarFunction&);
-ValidatedScalarFunction atan(const ValidatedScalarFunction&);
-
 
 /*
 //! \ingroup FunctionModule
@@ -519,11 +465,6 @@ template<class X> VectorFunction<X> compose(const VectorFunction<X>& f, const Ve
 template<class X> ScalarFunction<X> lie_derivative(const ScalarFunction<X>& g, const VectorFunction<X>& f);
 */
 
-EffectiveVectorFunction operator*(const EffectiveScalarFunction& sf, const Vector<EffectiveNumericType>& e);
-EffectiveVectorFunction operator+(const EffectiveVectorFunction& f1, const EffectiveVectorFunction& f2);
-EffectiveVectorFunction operator-(const EffectiveVectorFunction& f1, const EffectiveVectorFunction& f2);
-EffectiveVectorFunction operator*(const EffectiveVectorFunction& vf, const EffectiveScalarFunction& sf);
-EffectiveVectorFunction operator*(const EffectiveScalarFunction& sf, const EffectiveVectorFunction& vf);
 EffectiveVectorFunction operator*(const EffectiveNumericType& c, const EffectiveVectorFunction& vf);
 
 EffectiveScalarFunction embed(SizeType as1, const EffectiveScalarFunction& f2, SizeType as3);
@@ -543,7 +484,6 @@ Formula<EffectiveNumericType> formula(const EffectiveScalarFunction& f);
 Vector< Formula<EffectiveNumericType> > formula(const EffectiveVectorFunction& f);
 
 
-ValidatedVectorFunction operator-(const ValidatedVectorFunction&, const ValidatedVectorFunction&);
 ValidatedVectorFunction join(const ValidatedVectorFunction& f1, const ValidatedVectorFunction& f2);
 ValidatedVectorFunction join(const ValidatedVectorFunction& f1, const ValidatedScalarFunction& f2);
 ValidatedScalarFunction compose(const ValidatedScalarFunction& f, const ValidatedVectorFunction& g);
@@ -552,7 +492,9 @@ ValidatedVectorFunction compose(const ValidatedVectorFunction& f, const Validate
 
 
 template<class P, class D>
-struct VectorFunctionElementReference {
+struct VectorFunctionElementReference
+    : DeclareFunctionOperations<P,D,IntervalDomain>
+{
     typedef IntervalDomain SC; typedef BoxDomain VC;
     typedef VectorFunctionElementReference<P,D> SelfType;
     typedef Function<P,D,SC> ElementType;

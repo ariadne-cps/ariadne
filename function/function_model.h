@@ -460,6 +460,7 @@ template<> class VectorFunctionModel<ValidatedTag>
     inline VectorFunctionModelInterface<ValidatedTag>& reference() { return *_ptr; }
     inline ScalarFunctionModel<ValidatedTag> create_zero() const { return this->_ptr->_create_zero(); }
     inline VectorFunctionModel<ValidatedTag> create_identity() const { return this->_ptr->_create_identity(); }
+    inline VectorFunctionModel<ValidatedTag> create(VectorFunction<ValidatedTag> const& vf) const { return compose(vf,this->create_identity()); }
     inline SizeType result_size() const { return this->_ptr->result_size(); }
     inline SizeType argument_size() const { return this->_ptr->argument_size(); }
     inline SizeType size() const { return this->_ptr->result_size(); }
@@ -480,6 +481,48 @@ template<> class VectorFunctionModel<ValidatedTag>
         return dfx.jacobian(); }
 
     inline Void restrict(const ExactBoxType& d) { this->_ptr->restrict(d); }
+  public:
+    friend inline ScalarFunctionModel<ValidatedTag> compose(const ValidatedScalarFunction& f, const VectorFunctionModel<ValidatedTag>& g) {
+        return g._ptr->_compose(f); }
+    friend inline ScalarFunctionModel<ValidatedTag> compose(const ScalarFunctionModel<ValidatedTag>& f, const VectorFunctionModel<ValidatedTag>& g) {
+        return g._ptr->_compose(f); }
+    friend inline VectorFunctionModel<ValidatedTag> compose(const ValidatedVectorFunction& f, const VectorFunctionModel<ValidatedTag>& g) {
+        return g._ptr->_compose(f); }
+    friend inline VectorFunctionModel<ValidatedTag> compose(const VectorFunctionModel<ValidatedTag>& f, const VectorFunctionModel<ValidatedTag>& g) {
+        return g._ptr->_compose(f); }
+
+    friend inline ScalarFunctionModel<ValidatedTag> unchecked_compose(const ScalarFunctionModel<ValidatedTag>& f, const VectorFunctionModel<ValidatedTag>& g) {
+        return g._ptr->_unchecked_compose(f); }
+    friend inline VectorFunctionModel<ValidatedTag> unchecked_compose(const VectorFunctionModel<ValidatedTag>& f, const VectorFunctionModel<ValidatedTag>& g) {
+        return g._ptr->_unchecked_compose(f); }
+
+    friend inline VectorFunctionModel<ValidatedTag> operator+(const VectorFunctionModel<ValidatedTag>& f) {
+        return f._ptr->_clone(); }
+    friend inline VectorFunctionModel<ValidatedTag> operator-(const VectorFunctionModel<ValidatedTag>& f) {
+        VectorFunctionModel<ValidatedTag> r=f; for(SizeType i=0; i!=r.size(); ++i) { r[i]=-f[i]; } return r; }
+    friend inline VectorFunctionModel<ValidatedTag> operator+(const VectorFunctionModel<ValidatedTag>& f1, const VectorFunctionModel<ValidatedTag>& f2) {
+        VectorFunctionModel<ValidatedTag> r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]+f2[i]; } return r; }
+    friend inline VectorFunctionModel<ValidatedTag> operator-(const VectorFunctionModel<ValidatedTag>& f1, const VectorFunctionModel<ValidatedTag>& f2) {
+        VectorFunctionModel<ValidatedTag> r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]-f2[i]; } return r; }
+    friend inline VectorFunctionModel<ValidatedTag> operator+(const VectorFunctionModel<ValidatedTag>& f1, const Vector<ValidatedNumericType>& c2) {
+        VectorFunctionModel<ValidatedTag> r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]+c2[i]; } return r; }
+    friend inline VectorFunctionModel<ValidatedTag> operator-(const VectorFunctionModel<ValidatedTag>& f1, const Vector<ValidatedNumericType>& c2) {
+        VectorFunctionModel<ValidatedTag> r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]-c2[i]; } return r; }
+    friend inline VectorFunctionModel<ValidatedTag> operator+(const Vector<ValidatedNumericType>& c1, const VectorFunctionModel<ValidatedTag>& f2);
+    friend inline VectorFunctionModel<ValidatedTag> operator-(const Vector<ValidatedNumericType>& c1, const VectorFunctionModel<ValidatedTag>& f2);
+    friend inline VectorFunctionModel<ValidatedTag> operator*(const VectorFunctionModel<ValidatedTag>& f1, const ValidatedNumericType& c2) {
+        VectorFunctionModel<ValidatedTag> r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]*c2; } return r; }
+    friend inline VectorFunctionModel<ValidatedTag> operator*(const ValidatedNumericType& c1, const VectorFunctionModel<ValidatedTag>& f2) {
+        VectorFunctionModel<ValidatedTag> r=f2; for(SizeType i=0; i!=r.size(); ++i) { r[i]=c1*f2[i]; } return r; }
+
+    friend inline VectorFunctionModel<ValidatedTag> operator+(const VectorFunctionModel<ValidatedTag>& f1, const VectorFunction<ValidatedTag>& f2) {
+        return f1+f1.create(f2); }
+    friend inline VectorFunctionModel<ValidatedTag> operator-(const VectorFunctionModel<ValidatedTag>& f1, const VectorFunction<ValidatedTag>& f2) {
+        return f1-f1.create(f2); }
+    friend inline VectorFunctionModel<ValidatedTag> operator+(const VectorFunction<ValidatedTag>& f1, const VectorFunctionModel<ValidatedTag>& f2) {
+        return f2.create(f1)+f2; }
+    friend inline VectorFunctionModel<ValidatedTag> operator-(const VectorFunction<ValidatedTag>& f1, const VectorFunctionModel<ValidatedTag>& f2) {
+        return f2.create(f1)-f2; }
 
 };
 
@@ -497,39 +540,12 @@ inline VectorFunctionModel<ValidatedTag> embed(const VectorFunctionModel<Validat
 inline VectorFunctionModel<ValidatedTag> restrict(const VectorFunctionModel<ValidatedTag>& f, const ExactBoxType& d) {
     VectorFunctionModelInterface<ValidatedTag>* rptr=f._ptr->_clone(); rptr->restrict(d); return rptr; }
 
-inline VectorFunctionModel<ValidatedTag> operator+(const VectorFunctionModel<ValidatedTag>& f) {
-    return f._ptr->_clone(); }
-inline VectorFunctionModel<ValidatedTag> operator-(const VectorFunctionModel<ValidatedTag>& f) {
-    VectorFunctionModel<ValidatedTag> r=f; for(SizeType i=0; i!=r.size(); ++i) { r[i]=-f[i]; } return r; }
-inline VectorFunctionModel<ValidatedTag> operator+(const VectorFunctionModel<ValidatedTag>& f1, const VectorFunctionModel<ValidatedTag>& f2) {
-    VectorFunctionModel<ValidatedTag> r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]+f2[i]; } return r; }
-inline VectorFunctionModel<ValidatedTag> operator-(const VectorFunctionModel<ValidatedTag>& f1, const VectorFunctionModel<ValidatedTag>& f2) {
-    VectorFunctionModel<ValidatedTag> r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]-f2[i]; } return r; }
-inline VectorFunctionModel<ValidatedTag> operator+(const VectorFunctionModel<ValidatedTag>& f1, const Vector<ValidatedNumericType>& c2) {
-    VectorFunctionModel<ValidatedTag> r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]+c2[i]; } return r; }
-inline VectorFunctionModel<ValidatedTag> operator-(const VectorFunctionModel<ValidatedTag>& f1, const Vector<ValidatedNumericType>& c2) {
-    VectorFunctionModel<ValidatedTag> r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]-c2[i]; } return r; }
-inline VectorFunctionModel<ValidatedTag> operator+(const Vector<ValidatedNumericType>& c1, const VectorFunctionModel<ValidatedTag>& f2);
-inline VectorFunctionModel<ValidatedTag> operator-(const Vector<ValidatedNumericType>& c1, const VectorFunctionModel<ValidatedTag>& f2);
-inline VectorFunctionModel<ValidatedTag> operator*(const VectorFunctionModel<ValidatedTag>& f1, const ValidatedNumericType& c2) {
-    VectorFunctionModel<ValidatedTag> r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]*c2; } return r; }
-inline VectorFunctionModel<ValidatedTag> operator*(const ValidatedNumericType& c1, const VectorFunctionModel<ValidatedTag>& f2) {
-    VectorFunctionModel<ValidatedTag> r=f2; for(SizeType i=0; i!=r.size(); ++i) { r[i]=c1*f2[i]; } return r; }
-
 inline ValidatedNumericType evaluate(const ScalarFunctionModel<ValidatedTag>& f, const Vector<ValidatedNumericType>& x) { return f(x); }
 //inline Vector<ValidatedNumericType> evaluate(const VectorFunctionModel<ValidatedTag>& f, const Vector<ValidatedNumericType>& x) {
 //    std::cerr<<"evaluate(const VectorFunctionModel<ValidatedTag>& f, const Vector<ValidatedNumericType>& x)\n"; return f._ptr->evaluate(x); }
 
 inline ValidatedNumericType unchecked_evaluate(const ScalarFunctionModel<ValidatedTag>& f, const Vector<ValidatedNumericType>& x) { return f._ptr->_unchecked_evaluate(x); }
 inline Vector<ValidatedNumericType> unchecked_evaluate(const VectorFunctionModel<ValidatedTag>& f, const Vector<ValidatedNumericType>& x) { return f._ptr->_unchecked_evaluate(x); }
-
-inline ScalarFunctionModel<ValidatedTag> compose(const ValidatedScalarFunction& f, const VectorFunctionModel<ValidatedTag>& g) { return g._ptr->_compose(f); }
-inline ScalarFunctionModel<ValidatedTag> compose(const ScalarFunctionModel<ValidatedTag>& f, const VectorFunctionModel<ValidatedTag>& g) { return g._ptr->_compose(f); }
-inline VectorFunctionModel<ValidatedTag> compose(const ValidatedVectorFunction& f, const VectorFunctionModel<ValidatedTag>& g) { return g._ptr->_compose(f); }
-inline VectorFunctionModel<ValidatedTag> compose(const VectorFunctionModel<ValidatedTag>& f, const VectorFunctionModel<ValidatedTag>& g) { return g._ptr->_compose(f); }
-
-inline ScalarFunctionModel<ValidatedTag> unchecked_compose(const ScalarFunctionModel<ValidatedTag>& f, const VectorFunctionModel<ValidatedTag>& g) { return g._ptr->_unchecked_compose(f); }
-inline VectorFunctionModel<ValidatedTag> unchecked_compose(const VectorFunctionModel<ValidatedTag>& f, const VectorFunctionModel<ValidatedTag>& g) { return g._ptr->_unchecked_compose(f); }
 
 inline ValidatedNumericType unchecked_evaluate(const ValidatedScalarFunction& f, const Vector<ValidatedNumericType>& x) {
     ScalarFunctionModelInterface<ValidatedTag> const* fptr = dynamic_cast<ScalarFunctionModelInterface<ValidatedTag> const*>(f.raw_pointer());
@@ -545,15 +561,6 @@ inline VectorFunctionModel<ValidatedTag> unchecked_compose(const ValidatedVector
     if(fptr) { return unchecked_compose(VectorFunctionModel<ValidatedTag>(*fptr),g); } else { return compose(f,g); } }
 
 //inline VectorFunctionModel<ValidatedTag> compose(const VectorFunctionModel<ValidatedTag>& f, const VectorFunctionModel<ValidatedTag>& g) { return g._ptr->_compose(f); }
-
-inline VectorFunctionModel<ValidatedTag> operator+(const VectorFunctionModel<ValidatedTag>& f1, const VectorFunction<ValidatedTag>& f2) {
-    return f1+compose(f2,f1.create_identity()); }
-inline VectorFunctionModel<ValidatedTag> operator-(const VectorFunctionModel<ValidatedTag>& f1, const VectorFunction<ValidatedTag>& f2) {
-    return f1-compose(f2,f1.create_identity()); }
-inline VectorFunctionModel<ValidatedTag> operator+(const VectorFunction<ValidatedTag>& f1, const VectorFunctionModel<ValidatedTag>& f2) {
-    return compose(f1,f2.create_identity())+f2; }
-inline VectorFunctionModel<ValidatedTag> operator-(const VectorFunction<ValidatedTag>& f1, const VectorFunctionModel<ValidatedTag>& f2) {
-    return compose(f1,f2.create_identity())-f2; }
 
 inline VectorFunctionModel<ValidatedTag> join(const ScalarFunctionModel<ValidatedTag>& f1, const ScalarFunctionModel<ValidatedTag>& f2);
 inline VectorFunctionModel<ValidatedTag> join(const ScalarFunctionModel<ValidatedTag>& f1, const VectorFunctionModel<ValidatedTag>& f2);

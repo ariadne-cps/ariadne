@@ -283,7 +283,7 @@ Void TestTaylorModel::test_range()
 {
     // Test range of cubic, which should be exact
     ValidatedTaylorModel t1 = x*x*x+x;
-    ARIADNE_TEST_EQUALS(t1.range(),ExactIntervalType(-2,+2));
+    ARIADNE_TEST_SAME(t1.range(),ExactIntervalType(-2,+2));
 
     //x^2+x = (x+1/2)^2-1/4; Range [-0.25,+2.0]
     // Test range of quadratic, which could be exact, but need not be

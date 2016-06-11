@@ -207,7 +207,7 @@ Void TestPaving::test_geometry() const {
     ARIADNE_TEST_EQUAL(intersection(paving_handle1,paving_handle2),paving_handle1);
     ARIADNE_TEST_EQUAL(difference(paving_handle2,paving_handle1),paving_handle4);
 
-    ARIADNE_TEST_EQUAL(geometric_union(paving_handle1,paving_handle3).bounding_box(),ExactBoxType({{0.25,1.0},{0.0,0.75}}));
+    ARIADNE_TEST_SAME(geometric_union(paving_handle1,paving_handle3).bounding_box(),UpperBoxType({{0.25,1.0},{0.0,0.75}}));
 
 
 }

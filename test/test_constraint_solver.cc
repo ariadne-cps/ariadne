@@ -136,7 +136,7 @@ class TestConstraintSolver
         propagator.verbosity=this->verbosity;
 
         ARIADNE_TEST_EXECUTE(propagator.hull_reduce(D,c[0]));
-        ARIADNE_TEST_EQUAL(D,ExactBoxType({{0.0,0.5},{0.0,1.0}}));
+        ARIADNE_TEST_SAME(D,UpperBoxType({{0.0,0.5},{0.0,1.0}}));
     }
 
     Void test_box_reduce() {
@@ -148,9 +148,9 @@ class TestConstraintSolver
         propagator.verbosity=this->verbosity;
 
         ARIADNE_TEST_EXECUTE(propagator.box_reduce(D,c,0));
-        ARIADNE_TEST_EQUAL(D,ExactBoxType({{0.0,0.75},{0.0,2.0}}));
+        ARIADNE_TEST_SAME(D,UpperBoxType({{0.0,0.75},{0.0,2.0}}));
         ARIADNE_TEST_EXECUTE(propagator.box_reduce(D,c,1));
-        ARIADNE_TEST_EQUAL(D,ExactBoxType({{0.0,0.75},{0.0,1.25}}));
+        ARIADNE_TEST_SAME(D,UpperBoxType({{0.0,0.75},{0.0,1.25}}));
     }
 
 
@@ -163,9 +163,9 @@ class TestConstraintSolver
         propagator.verbosity=this->verbosity;
 
         ARIADNE_TEST_EXECUTE(propagator.box_reduce(D,c,0));
-        ARIADNE_TEST_EQUAL(D,ExactBoxType({{0.0,0.75},{0.0,2.0}}));
+        ARIADNE_TEST_SAME(D,UpperBoxType({{0.0,0.75},{0.0,2.0}}));
         ARIADNE_TEST_EXECUTE(propagator.box_reduce(D,c,1));
-        ARIADNE_TEST_EQUAL(D,ExactBoxType({{0.0,0.75},{0.0,1.25}}));
+        ARIADNE_TEST_SAME(D,UpperBoxType({{0.0,0.75},{0.0,1.25}}));
     }
 
     Void test_split() {

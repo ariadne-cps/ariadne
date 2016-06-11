@@ -199,6 +199,9 @@ UpperIntervalType apply(ScalarFunction<ValidatedTag>const& f, const Box<UpperInt
 Box<UpperIntervalType> apply(VectorFunction<ValidatedTag>const& f, const Box<UpperIntervalType>& x);
 
 //! \relates Box \brief Project onto the variables \a rng.
+template<class I> inline Bool project(const Box<I> & bx, Array<SizeType> const& rng) { return Box<I>::_project(bx,rng); }
+
+//! \relates Box \brief Project onto the variables \a rng.
 template<class I> inline Box<I> project(const Box<I> & bx, Array<SizeType> const& rng) { return Box<I>::_project(bx,rng); }
 
 
@@ -214,6 +217,14 @@ template<class I> auto upper_bounds(const Box<I>& bx) -> typename Box<I>::Vertex
     return bx.upper_bounds();
 }
 
+
+template<class I> Bool same(const Box<I>& bx1, const Box<I>& bx2) {
+    if(bx1.size()!=bx2.size()) { return false; }
+    for(SizeType i=0; i!=bx1.size(); ++i) {
+        if(not same(bx1[i],bx2[i])) { return false; }
+    }
+    return true;
+}
 
 //! \relates EBoxType \brief The smallest box containing the two boxes.
 template<class I1, class I2> Box<decltype(hull(declval<I1>(),declval<I2>()))> hull(const Box<I1>& bx1, const Box<I2>& bx2) {

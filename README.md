@@ -4,4 +4,4 @@ The <stable> branch is the one to be used for compilation:
 
 >git checkout stable
 
-Further build and installation instructions are available in the README file in the root directory of the branch.
+Further build and installation instructions are available in the INSTALL file in the root directory of the branch.

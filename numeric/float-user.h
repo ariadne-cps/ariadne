@@ -640,6 +640,7 @@ template<class PR> class FloatError
     explicit FloatError<PR>(FloatUpperBound<PR> const& x) : FloatError<PR>(x.raw()) { }
     FloatError<PR>(PositiveFloatUpperBound<PR> const& x) : _e(x.raw()) { }
     template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy> FloatError<PR>(M m) : _e(m) { }
+    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy> FloatError<PR>(M m, PR pr) : _e(pr) { _e=m; }
     template<class F, EnableIf<IsSame<F,FloatUpperBound<PR>>> =dummy>
         explicit FloatError<PR>(F const& x) : _e(x) { }
 //    operator PositiveFloatUpperBound<PR>() const;

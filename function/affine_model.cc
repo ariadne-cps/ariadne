@@ -36,11 +36,14 @@
 namespace Ariadne {
 
 template<> struct AlgebraOperations<ValidatedAffineModel,ValidatedNumericType> {
+    typedef typename ValidatedAffineModel::PrecisionType PrecisionType;
 
     ValidatedAffineModel _add(const ValidatedAffineModel& a1, const ValidatedAffineModel& a2) {
         ARIADNE_ASSERT_MSG(a1.argument_size()==a2.argument_size(),"a1="<<a1<<" a2="<<a2);
         Nat n=a1.argument_size();
-        ValidatedAffineModel r(n);
+        PrecisionType prec=(a1.precision(),a2.precision());
+
+        ValidatedAffineModel r(n,prec);
         r=ValidatedAffineModel::CoefficientType( a1.value().raw()+a2.value().raw() );
         for(Nat i=0; i!=n; ++i) {
             r[i]=ValidatedAffineModel::CoefficientType(a1[i].raw()+a2[i].raw());
@@ -90,8 +93,10 @@ template<> struct AlgebraOperations<ValidatedAffineModel,ValidatedNumericType> {
 
     ValidatedAffineModel _mul(const ValidatedNumericType& c, const ValidatedAffineModel& a) {
         Nat n=a.argument_size();
+        PrecisionType prec=a.precision();
+
+        ValidatedAffineModel r(n,prec);
         RawFloat64 cm=c.value().raw();
-        ValidatedAffineModel r(n);
         r=ValidatedAffineModel::CoefficientType(a.value().raw()*cm);
         for(Nat i=0; i!=n; ++i) {
             r[i].raw()=a[i].raw()*cm;
@@ -130,7 +135,8 @@ template<> struct AlgebraOperations<ValidatedAffineModel,ValidatedNumericType> {
 
 
 ValidatedAffineModel affine_model(const ValidatedAffine& a) {
-    ValidatedAffineModel am(a.argument_size());
+    auto prec=a.value().precision();
+    ValidatedAffineModel am(a.argument_size(),prec);
     am = ValidatedAffineModel::CoefficientType( midpoint(a.value()).raw() );
     for(Nat j=0; j!=a.argument_size(); ++j) {
         am[j] = midpoint(a[j]);
@@ -147,7 +153,7 @@ ValidatedAffineModel affine_model(const ValidatedAffine& a) {
 }
 
 ValidatedAffineModel affine_model(const ValidatedTaylorModel& taylor_model) {
-    ValidatedAffineModel affine_model(taylor_model.argument_size());
+    ValidatedAffineModel affine_model(taylor_model.argument_size(),taylor_model.value().precision());
 
     Float64::RoundingModeType rnd=Float64::get_rounding_mode();
     Float64::set_rounding_upward();
@@ -173,7 +179,10 @@ ValidatedAffineModel affine_model(const ValidatedTaylorModel& taylor_model) {
 
 Vector< ValidatedAffineModel > affine_models(const Vector< ValidatedTaylorModel >& models)
 {
-    Vector< ValidatedAffineModel > result(models.size(),ValidatedAffineModel(models.size()==0?0u:models[0].argument_size()));
+    SizeType as=models.zero_element().argument_size();
+    auto zero=models.zero_element().value();
+
+    Vector< ValidatedAffineModel > result(models.size(),ValidatedAffineModel(as,zero));
     for(Nat i=0; i!=result.size(); ++i) { result[i]=affine_model(models[i]); }
     return result;
 }

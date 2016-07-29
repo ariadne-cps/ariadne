@@ -86,7 +86,7 @@ ValidatedAffineModel affine_model(const ValidatedAffine& a);
 
 ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const ExactBoxType& d,
                      const Vector<ValidatedAffine>& f)
-    : _domain(d), _space_models(f.size(),ValidatedAffineModel(d.size()))
+    : _domain(d), _space_models(f.size(),ValidatedAffineModel(d.size(),Precision64()))
 {
     if(d==ExactBoxType::unit_box(d.size())) {
         for(Nat i=0; i!=f.size(); ++i) {
@@ -98,7 +98,7 @@ ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Exa
 ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const ExactBoxType& d,
                      const Vector<ValidatedAffine>& f,
                      const List<ValidatedAffineConstraint>& c)
-    : _domain(d), _space_models(f.size(),ValidatedAffineModel(d.size())), _constraint_models()
+    : _domain(d), _space_models(f.size(),ValidatedAffineModel(d.size(),Precision64())), _constraint_models()
 {
     if(d==ExactBoxType::unit_box(d.size())) {
         for(Nat i=0; i!=f.size(); ++i) {
@@ -144,9 +144,9 @@ Void ValidatedAffineConstrainedImageSet::construct(const ExactBoxType& D, const 
 {
     ARIADNE_ASSERT_MSG(G.row_size()==h.size() && G.row_size()>0,"G="<<G<<", h="<<h);
     this->_domain=D;
-    this->_space_models=Vector<ValidatedAffineModel>(G.row_size(),ValidatedAffineModel(G.column_size()));
+    this->_space_models=Vector<ValidatedAffineModel>(G.row_size(),ValidatedAffineModel(G.column_size(),Precision64()));
     for(Nat i=0; i!=G.row_size(); ++i) {
-        AffineModel<ValidatedNumericType> x(G.column_size());
+        ValidatedAffineModel x(G.column_size(),Precision64());
         x=h[i];
         for(Nat j=0; j!=G.column_size(); ++j) {
             x[j]=G[i][j];
@@ -614,8 +614,8 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
     const SizeType np=nx+ne+nc;
 
     // Set up matrix of function values
-    AffineModel<ValidatedNumericType> const& xa=this->_space_models[xind];
-    AffineModel<ValidatedNumericType> const& ya=this->_space_models[yind];
+    ValidatedAffineModel const& xa=this->_space_models[xind];
+    ValidatedAffineModel const& ya=this->_space_models[yind];
 
     // The set is given by (x,y)=Gs+h, where As=b and l<=s<=u
     Matrix<Float64> G=Matrix<Float64>::zero(2,np);

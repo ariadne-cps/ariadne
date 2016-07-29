@@ -54,7 +54,7 @@ class CanvasInterface;
 class Point2d;
 
 
-typedef Constraint<AffineModel<ValidatedNumericType>,Float64Bounds> ValidatedAffineModelConstraint;
+typedef Constraint<AffineModel<ValidatedTag,Float64>,Float64Bounds> ValidatedAffineModelConstraint;
 typedef Constraint<Affine<ValidatedNumericType>,Float64Bounds> ValidatedAffineConstraint;
 typedef Constraint<Affine<EffectiveNumericType>,EffectiveNumericType> EffectiveAffineConstraint;
 typedef Affine<ValidatedNumericType> ValidatedAffineFunction;

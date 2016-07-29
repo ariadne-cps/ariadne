@@ -96,7 +96,7 @@ template<class X> class Matrix;
 template<class X> class Differential;
 template<class X> class Series;
 
-template<class X> class AffineModel;
+template<class P, class F> class AffineModel;
 template<class P, class F> class TaylorModel;
 template<class X> class Formula;
 template<class X> class Algebra;

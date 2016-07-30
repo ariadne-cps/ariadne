@@ -138,6 +138,8 @@ class Vector
     //! \brief Convert from an initializer list of the same type.
     Vector(InitializerList<X> lst) : _ary(lst.begin(),lst.end()) { }
 
+    //! \brief Convert from an initializer list of the same type.
+    template<class Y, class PR> Vector(Vector<Y> const& v, PR pr);
     //! \brief Convert from an %VectorExpression of a different type.
     template<class VE, EnableIf<IsConvertible<typename VE::ScalarType,X>> =dummy>
     Vector(VectorExpression<VE> const& ve) : _ary(ve().size(),ve().zero_element()) {
@@ -500,7 +502,7 @@ template<class V> using ScalarType = typename V::ScalarType;
 #endif
 
 template<class X> inline auto norm(const Vector<X>& v) -> decltype(abs(declval<X>())) {
-    decltype(abs(declval<X>())) r=0u;
+    decltype(abs(declval<X>())) r=abs(v.zero_element());
     for(SizeType i=0; i!=v.size(); ++i) {
         r=max(r,abs(v[i]));
     }
@@ -508,7 +510,7 @@ template<class X> inline auto norm(const Vector<X>& v) -> decltype(abs(declval<X
 }
 
 template<class X> inline auto sup_norm(const Vector<X>& v) -> decltype(mag(declval<X>())) {
-    decltype(mag(declval<X>())) r=0u;
+    decltype(mag(declval<X>())) r=abs(v.zero_element());
     for(SizeType i=0; i!=v.size(); ++i) {
         r=max(r,mag(v[i]));
     }
@@ -517,7 +519,7 @@ template<class X> inline auto sup_norm(const Vector<X>& v) -> decltype(mag(declv
 
 template<class X1, class X2> inline auto dot(const Vector<X1>& v1, const Vector<X2>& v2) -> decltype(v1[0]*v2[0]+v1[0]*v2[0]) {
     ARIADNE_PRECONDITION(v1.size()==v2.size());
-    decltype(declval<X1>()*declval<X2>()+declval<X1>()*declval<X2>()) r(0u);
+    decltype(declval<X1>()*declval<X2>()+declval<X1>()*declval<X2>()) r=abs(v1.zero_element()*v2.zero_element());
     for(SizeType i=0; i!=v1.size(); ++i) {
         r+=v1[i]*v2[i];
     }
@@ -589,7 +591,7 @@ Vector<X> join(const Vector<X>& v1, const Vector<X>& v2, const typename Vector<X
 
 
 template<class X> inline decltype(error(declval<X>())) error(const Vector<X>& v) {
-    decltype(error(declval<X>())) r=0u;
+    decltype(error(declval<X>())) r=error(v.zero_element());
     for(SizeType i=0; i!=v.size(); ++i) {
         r=max(r,error(v[i]));
     }
@@ -597,7 +599,7 @@ template<class X> inline decltype(error(declval<X>())) error(const Vector<X>& v)
 }
 
 template<class X> inline decltype(error(declval<X>())) sup_error(const Vector<X>& v) {
-    decltype(error(declval<X>())) r=0u;
+    decltype(error(declval<X>())) r=error(v.zero_element());
     for(SizeType i=0; i!=v.size(); ++i) {
         r=max(r,error(v[i]));
     }

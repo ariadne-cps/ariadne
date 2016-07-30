@@ -69,7 +69,7 @@ void TestFormula::test_constructors()
     ApproximateFormula y(ApproximateFormula::coordinate(1));
 
     ARIADNE_TEST_CONSTRUCT( ApproximateFormula, r, (sqrt(pow(x,2)+pow(y,2))) );
-    ARIADNE_TEST_EQUALS(evaluate(r,Vector<FloatApproximation>{6,8}),10);
+    ARIADNE_TEST_EQUALS(evaluate(r,Vector<Float64Approximation>{6.0,8.0}),10);
 }
 
 void TestFormula::test_pointer_constructor()

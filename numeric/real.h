@@ -93,13 +93,14 @@ class Real
     Real(Decimal const& d);
     Real(Rational const& q);
 
-    explicit Real(Float64Value x);
+    explicit Real(Float64Value x); //!< DEPRECATED
+    explicit Real(EffectiveNumber r); //!< DEPRECATED
 
     operator Number<EffectiveTag>() const;
 
-    // Extract floating-point properties
-    Float64UpperBound upper() const;
-    Float64LowerBound lower() const;
+    // Extract bounds
+    UpperReal upper() const;
+    LowerReal lower() const;
     Float64Approximation approx() const;
     double get_d() const;
 
@@ -113,7 +114,8 @@ class Real
 
     friend PositiveReal abs(Real const&);
 
-    friend Float64Error mag(Real const&);
+    friend PositiveUpperReal mag(Real const&);
+    friend Float64Error mag(Real const&, Precision64);
 
     friend PositiveReal dist(Real const&, Real const&);
 

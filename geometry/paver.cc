@@ -83,7 +83,7 @@ UpperIntervalType emulrng(const RawFloatVector& x, const RawFloatVector& z) {
 }
 
 Float64UpperBound total_widths(const UpperBoxType& bx) {
-    PositiveFloat64UpperBound res=0u;
+    PositiveFloat64UpperBound res=bx.zero_element().width();
     for(Nat i=0; i!=bx.size(); ++i) {
         res+=(bx[i].width());
     }
@@ -91,7 +91,7 @@ Float64UpperBound total_widths(const UpperBoxType& bx) {
 }
 
 Float64UpperBound average_width(const UpperBoxType& bx) {
-    PositiveFloat64UpperBound res=0u;
+    PositiveFloat64UpperBound res=bx.zero_element().width();
     for(Nat i=0; i!=bx.size(); ++i) {
         if(definitely(bx[i].lower()>bx[i].upper())) { return -infty; }
         res+=bx[i].width();
@@ -100,7 +100,7 @@ Float64UpperBound average_width(const UpperBoxType& bx) {
 }
 
 Float64UpperBound maximum_scaled_width(const UpperBoxType& bx, const Vector<PositiveFloat64Value>& sf) {
-    PositiveFloat64UpperBound res=0u;
+    PositiveFloat64UpperBound res=bx.zero_element().width();
     for(Nat i=0; i!=bx.size(); ++i) {
         res=max(bx[i].width()/sf[i],res);
     }
@@ -108,7 +108,7 @@ Float64UpperBound maximum_scaled_width(const UpperBoxType& bx, const Vector<Posi
 }
 
 Float64UpperBound average_scaled_width(const UpperBoxType& bx, const Vector<PositiveFloat64Value>& sf) {
-    PositiveFloat64UpperBound res=0u;
+    PositiveFloat64UpperBound res=bx.zero_element().width();
     for(Nat i=0; i!=bx.size(); ++i) {
         res+=(bx[i].width()/sf[i]);
     }
@@ -318,10 +318,11 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
 
     // When making a new starting primal point, need to move components away from zero
     // This constant shows how far away from zero the points are
-    static const double XSIGMA = 0.125;
-    static const double TERR = -1.0/((1<<e)*1024.0);
-    static const double XZMIN = 1.0/(1<<16);
-    static const Float64 inf = Ariadne::inf;
+    static const Float64Value XSIGMA { 0.125 };
+    static const Float64Value TERR { -1.0/((1<<e)*1024.0) };
+    static const Float64Value XZMIN { 1.0/(1<<16) };
+    static const Float64Value inf { Ariadne::inf };
+    Precision64 pr;
 
     // Set up the classes used for constraint propagation and
     // optimisation using the Kuhn-Tucker conditions
@@ -337,6 +338,7 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
 
     ExactPoint z(x.size());
     Float64Value t;
+    Float64Approximation one = 1.0_exact;
 
     Vector<Float64Approximation>& ax=reinterpret_cast<Vector<Float64Approximation>&>(x);
     Vector<Float64Approximation>& ay=reinterpret_cast<Vector<Float64Approximation>&>(y);
@@ -381,18 +383,18 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
     ARIADNE_LOG(4,"\n  t="<<t<<"\n  y="<<y<<"\n    x="<<x<<"\n    z="<<z<<"\n");
     ARIADNE_LOG(2,"  t="<<t<<", y="<<y<<"\n");
 
-    if(!(t.raw()<inf)) {
+    if(!(t<inf)) {
         ARIADNE_WARN("feasibility failed\n");
         char c; cin >> c;
         at=0;
         ay=midpoint(d);
-        ax=FloatApproximationVector(x.size(),1.0/x.size());
+        ax=FloatApproximationVector(x.size(),one/x.size());
     }
     ax = Float64Approximation(1-XSIGMA)*ax + Vector<Float64Approximation>(x.size(),XSIGMA/x.size());
 
     //assert(t>=-1000);
 
-    if(t.raw()<TERR) {
+    if(t<TERR) {
 
         // Probably disjoint, so try to prove this
         UpperBoxType nd=d;
@@ -404,7 +406,7 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
         EffectiveScalarFunction zero_function=EffectiveScalarFunction::zero(m);
         EffectiveVectorFunction identity_function=EffectiveVectorFunction::identity(m);
         ScalarTaylorFunction txg(domain,zero_function,sweeper);
-        Float64Bounds cnst=0;
+        Float64Bounds cnst = {0,pr};
         for(Nat j=0; j!=n; ++j) {
             txg = txg - (Float64Bounds(x[j])-Float64Bounds(x[n+j]))*ScalarTaylorFunction(domain,ValidatedScalarFunction(fg[j]),sweeper);
             cnst += (bx[j].upper()*x[j]-bx[j].lower()*x[n+j]);
@@ -417,7 +419,7 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
 
         ARIADNE_LOG(6,"    txg="<<txg<<"\n");
 
-        ValidatedConstraint constraint=(txg>=0);
+        ValidatedConstraint constraint=(txg>=0.0_exact);
 
         ARIADNE_LOG(6,"  dom="<<nd<<"\n");
         solver.hull_reduce(nd,txg,ExactIntervalType(0,inf));
@@ -472,12 +474,13 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
 Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingInterface& r, const ExactBoxType& d, const VectorTaylorFunction& fg, const ExactBoxType& c, const GridCell& b, ExactPoint& x, ExactPoint& y, Int e)
 {
     Sweeper sweeper = fg.sweeper();
+    Precision64 pr;
 
     // When making a new starting primal point, need to move components away from zero
     // This constant shows how far away from zero the points are
-    static const double XSIGMA = 0.125;
-    static const Float64Value TERR ( -1.0/((1<<e)*1024.0) );
-    static const Float64 inf = Ariadne::inf;
+    static const Float64Value XSIGMA = {TwoExp(-3),pr};
+    static const Float64Value  TERR = {TwoExp(-e-10),pr};
+    static const Float64Value inf { Ariadne::inf };
 
     const Nat m=fg.argument_size();
     const Nat n=fg.result_size();
@@ -487,7 +490,7 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
     ConstraintSolver solver;
     NonlinearInteriorPointOptimiser optimiser;
 
-    Float64Value t;
+    Float64Value t{pr};
     ExactPoint z(x.size());
 
     FloatApproximationVector& ax=reinterpret_cast<FloatApproximationVector&>(x);
@@ -516,7 +519,7 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
         // Use the computed dual variables to try to make a scalar function which is negative over the entire domain.
         // This should be easier than using all constraints separately
         ScalarTaylorFunction xg=ScalarTaylorFunction::zero(d,sweeper);
-        Float64Bounds cnst=0;
+        Float64Bounds cnst = {0,pr};
         for(Nat j=0; j!=n; ++j) {
             xg = xg - (x[j]-x[n+j])*ScalarTaylorFunction(d,fg[j],sweeper);
             cnst += (bx[j].upper()*x[j]-bx[j].lower()*x[n+j]);
@@ -584,7 +587,9 @@ Void subdivision_adjoin_outer_approximation(PavingInterface& paving,
 {
     List<ValidatedConstraint> constraints;
     for(Nat i=0; i!=constraint_functions.result_size(); ++i) {
-        constraints.append(ValidatedConstraint(constraint_bounds[i].lower(),constraint_functions[i],constraint_bounds[i].upper()));
+        // FIXME: Conversion from Float64Value to ValidatedNumber should be automatic
+        ExactNumber lower_bound=constraint_bounds[i].lower(); ExactNumber upper_bound=constraint_bounds[i].upper();
+        constraints.append(ValidatedConstraint(lower_bound,constraint_functions[i],upper_bound));
     }
 
     RawFloatVector errors(paving.dimension());

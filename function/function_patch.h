@@ -1407,8 +1407,8 @@ template<class M> VectorFunctionPatch<M> antiderivative(const VectorFunctionPatc
 
 
 template<class M> Float64Error norm(const VectorFunctionPatch<M>& f) {
-    Float64Error res=0u;
-    for(SizeType i=0; i!=f.result_size(); ++i) {
+    Float64Error res=norm(f[0]);;
+    for(SizeType i=1; i!=f.result_size(); ++i) {
         res=max(res,norm(f[i]));
     }
     return res;

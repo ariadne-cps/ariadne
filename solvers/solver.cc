@@ -143,7 +143,7 @@ ValidatedVectorFunctionModel operator*(const Matrix<ValidatedNumericType>& A,con
 }
 
 Float64Error sup_error(const ValidatedVectorFunctionModel& x) {
-    Float64Error r=0u;
+    Float64Error r; r=0u;
     for(Nat i=0; i!=x.size(); ++i) { r=max(r,x[i].error()); }
     return r;
 }

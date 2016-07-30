@@ -148,6 +148,7 @@ class AffineModel<ValidatedTag,F>
     Void set_value(const CoefficientType& c) { _c=c; }
     Void set_gradient(SizeType j, const CoefficientType& g) { _g[j]=g; }
     Void set_error(const ErrorType& e) { _e=e; }
+    Void set_error(Nat m) { _e=m; }
 
     Void resize(SizeType n) { this->_g.resize(n); }
 

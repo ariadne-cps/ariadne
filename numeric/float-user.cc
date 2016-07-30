@@ -108,6 +108,11 @@ template<class PR> FloatValue<PR>::operator Rational() const {
     return Rational(this->get_d());
 }
 
+template<class PR> FloatValue<PR>::FloatValue(int n, PR pr)
+    : _v(n,pr)
+{
+}
+
 template<class PR> FloatValue<PR>::FloatValue(TwoExp const& t, PR pr)
     : _v(pow(RawFloat<PR>(2.0,pr),t.exponent()))
 {
@@ -157,12 +162,16 @@ template<class PR> FloatBounds<PR>::FloatBounds(Real const& x, PR pr)
     : FloatBounds(x.get(pr)) {
 }
 
-template<class PR> FloatBounds<PR>::FloatBounds(Number<ValidatedTag> const& x, PR pr)
-    : FloatBounds(x.get(BoundedTag(),pr)) {
+template<class PR> FloatBounds<PR>::FloatBounds(ValidatedNumber const& y, PR pr)
+    : FloatBounds(y.get(BoundedTag(),pr)) {
 }
 
-template<class PR> FloatBounds<PR>::operator Number<ValidatedTag>() const {
-    return Number<ValidatedTag>(new NumberWrapper<FloatBounds<PR>>(*this));
+template<class PR> FloatBounds<PR>& FloatBounds<PR>::operator=(ValidatedNumber const& y) {
+    *this = FloatBounds<PR>(y,this->precision());
+}
+
+template<class PR> FloatBounds<PR>::operator ValidatedNumber() const {
+    return ValidatedNumber(new NumberWrapper<FloatBounds<PR>>(*this));
 }
 
 template<class PR> FloatUpperBound<PR>::FloatUpperBound(Rational const& q, PR pr)
@@ -173,12 +182,25 @@ template<class PR> FloatUpperBound<PR>::FloatUpperBound(Real const& r, PR pr)
     : FloatUpperBound(r.get(pr)) {
 }
 
-template<class PR> FloatUpperBound<PR>::FloatUpperBound(ValidatedUpperNumber const& x, PR pr)
-    : FloatUpperBound(x.get(UpperTag(),pr)) {
+template<class PR> FloatUpperBound<PR>::FloatUpperBound(ValidatedUpperNumber const& y, PR pr)
+    : FloatUpperBound(y.get(UpperTag(),pr)) {
+}
+
+template<class PR> FloatUpperBound<PR>& FloatUpperBound<PR>::operator=(ValidatedUpperNumber const& y) {
+    *this = FloatUpperBound<PR>(y,this->precision());
 }
 
 template<class PR> FloatUpperBound<PR>::operator ValidatedUpperNumber() const {
-    //return Number<ValidatedUpperTag>(new NumberWrapper<FloatUpperBound<PR>>(*this));
+    ARIADNE_NOT_IMPLEMENTED;
+    // return ValidatedUpperNumber(new NumberWrapper<FloatUpperBound<PR>>(*this));
+}
+
+template<class PR> FloatLowerBound<PR> FloatUpperBound<PR>::create(ValidatedLowerNumber const& x) const {
+    return FloatLowerBound<PR>(x,this->precision());
+}
+
+template<class PR> FloatUpperBound<PR> FloatUpperBound<PR>::create(ValidatedUpperNumber const& x) const {
+    return FloatUpperBound<PR>(x,this->precision());
 }
 
 template<class PR> FloatLowerBound<PR>::FloatLowerBound(Rational const& q, PR pr)
@@ -193,8 +215,21 @@ template<class PR> FloatLowerBound<PR>::FloatLowerBound(ValidatedLowerNumber con
     : FloatLowerBound(x.get(LowerTag(),pr)) {
 }
 
+template<class PR> FloatLowerBound<PR>& FloatLowerBound<PR>::operator=(ValidatedLowerNumber const& y) {
+    return *this=FloatLowerBound<PR>(y,this->precision());
+}
+
 template<class PR> FloatLowerBound<PR>::operator ValidatedLowerNumber() const {
-    // return ValidatedLowerNumber(new NumberWrapper<FloatLowerBound<PR>>(*this));
+    ARIADNE_NOT_IMPLEMENTED;
+    //return ValidatedLowerNumber(new NumberWrapper<FloatLowerBound<PR>>(*this));
+}
+
+template<class PR> FloatLowerBound<PR> FloatLowerBound<PR>::create(ValidatedLowerNumber const& x) const {
+    return FloatLowerBound<PR>(x,this->precision());
+}
+
+template<class PR> FloatUpperBound<PR> FloatLowerBound<PR>::create(ValidatedUpperNumber const& x) const {
+    return FloatUpperBound<PR>(x,this->precision());
 }
 
 template<class PR> FloatApproximation<PR>::FloatApproximation(Rational const& q, PR pr)
@@ -205,42 +240,15 @@ template<class PR> FloatApproximation<PR>::FloatApproximation(Real const& r, PR 
     : FloatApproximation(r.get(pr)) {
 }
 
-template<class PR> FloatApproximation<PR>::FloatApproximation(Number<ApproximateTag> const& x, PR pr)
+template<class PR> FloatApproximation<PR>::FloatApproximation(ApproximateNumber const& x, PR pr)
     : FloatApproximation(x.get(ApproximateTag(),pr)) {
 }
 
-template<class PR> FloatApproximation<PR>::operator Number<ApproximateTag>() const {
-    return Number<ApproximateTag>(new NumberWrapper<FloatApproximation<PR>>(*this));
+template<class PR> FloatApproximation<PR>::operator ApproximateNumber() const {
+    return ApproximateNumber(new NumberWrapper<FloatApproximation<PR>>(*this));
 }
 
 
-
-template<class PR> FloatValue<PR>::FloatValue(Integer const& z) : FloatValue(z,RawFloat<PR>::get_default_precision()) { }
-
-template<class PR> FloatBall<PR>::FloatBall(Integer const& z) : FloatBall(Rational(z)) { }
-template<class PR> FloatBall<PR>::FloatBall(Rational const& q) : FloatBall(q,RawFloat<PR>::get_default_precision()) { }
-template<class PR> FloatBall<PR>::FloatBall(Number<ValidatedTag> const& x) : FloatBall(x,RawFloat<PR>::get_default_precision()) { }
-
-template<class PR> FloatBounds<PR>::FloatBounds(Integer const& z) : FloatBounds(Rational(z)) { }
-template<class PR> FloatBounds<PR>::FloatBounds(Dyadic const& b) : FloatBounds(Rational(b)) { }
-template<class PR> FloatBounds<PR>::FloatBounds(Decimal const& d) : FloatBounds(Rational(d)) { }
-template<class PR> FloatBounds<PR>::FloatBounds(Rational const& q) : FloatBounds(q,RawFloat<PR>::get_default_precision()) { }
-template<class PR> FloatBounds<PR>::FloatBounds(Real const& x) : FloatBounds(x,RawFloat<PR>::get_default_precision()) { }
-template<class PR> FloatBounds<PR>::FloatBounds(Number<ValidatedTag> const& x) : FloatBounds(x,RawFloat<PR>::get_default_precision()) { }
-
-template<class PR> FloatUpperBound<PR>::FloatUpperBound(Integer const& z) : FloatUpperBound(Rational(z)) { }
-template<class PR> FloatUpperBound<PR>::FloatUpperBound(Rational const& q) : FloatUpperBound(q,RawFloat<PR>::get_default_precision()) { }
-template<class PR> FloatUpperBound<PR>::FloatUpperBound(Number<ValidatedUpperTag> const& x) : FloatUpperBound(x,RawFloat<PR>::get_default_precision()) { }
-
-template<class PR> FloatLowerBound<PR>::FloatLowerBound(Integer const& z) : FloatLowerBound(Rational(z)) { }
-template<class PR> FloatLowerBound<PR>::FloatLowerBound(Rational const& q) : FloatLowerBound(q,RawFloat<PR>::get_default_precision()) { }
-template<class PR> FloatLowerBound<PR>::FloatLowerBound(Number<ValidatedLowerTag> const& x) : FloatLowerBound(x,RawFloat<PR>::get_default_precision()) { }
-
-template<class PR> FloatApproximation<PR>::FloatApproximation(Integer const& z) : FloatApproximation(Rational(z)) { }
-template<class PR> FloatApproximation<PR>::FloatApproximation(Dyadic const& b) : FloatApproximation(Rational(b)) { }
-template<class PR> FloatApproximation<PR>::FloatApproximation(Decimal const& d) : FloatApproximation(Rational(d)) { }
-template<class PR> FloatApproximation<PR>::FloatApproximation(Rational const& q) : FloatApproximation(q,RawFloat<PR>::get_default_precision()) { }
-template<class PR> FloatApproximation<PR>::FloatApproximation(Number<ApproximateTag> const& x) : FloatApproximation(x,RawFloat<PR>::get_default_precision()) { }
 
 
 
@@ -1481,7 +1489,7 @@ template<class PR> FloatValue<PR>& operator/=(FloatValue<PR>& x, TwoExp y) {
 
 
 FloatValue<Precision64> cast_exact(Real const& x) {
-    return cast_exact(FloatApproximation<Precision64>(x));
+    return cast_exact(FloatApproximation<Precision64>(x,Precision64()));
 }
 
 template<class PR> Bool operator==(FloatValue<PR> const& x, const Rational& q) { return Rational(x)==q; }
@@ -1898,7 +1906,7 @@ Float64Value& operator/=(Float64Value& x1, TwoExp y2) { return x1=x1/y2; }
 
 
 
-Float64Error operator*(Nat y1, Float64Error const& x2) { return Float64Error(y1)*x2; }
+Float64Error operator*(Nat y1, Float64Error const& x2) { return Float64Error(y1,x2.precision())*x2; }
 Float64LowerBound rec(Float64Error const& x) { return Operations<Float64Error,Float64LowerBound>::_rec(x); }
 Float64UpperBound log(Float64Error const& x) { return Operations<Float64Error,Float64LowerBound>::_log(x); }
 Float64Error mag(Float64Error const& x) { return x; }
@@ -1911,7 +1919,7 @@ Bool refines(Float64Error const& x1, Float64Error const& x2) { return Operations
 Float64Error refinement(Float64Error const& x1, Float64Error const& x2) { return Operations<Float64Error,Float64LowerBound>::_refinement(x1,x2); }
 
 
-FloatMPError operator*(Nat y1, FloatMPError const& x2) { return FloatMPError(y1)*x2; }
+FloatMPError operator*(Nat y1, FloatMPError const& x2) { return FloatMPError(y1,x2.precision())*x2; }
 FloatMPLowerBound rec(FloatMPError const& x) { return Operations<FloatMPError,FloatMPLowerBound>::_rec(x); }
 FloatMPUpperBound log(FloatMPError const& x) { return Operations<FloatMPError,FloatMPLowerBound>::_log(x); }
 FloatMPError mag(FloatMPError const& x) { return x; }

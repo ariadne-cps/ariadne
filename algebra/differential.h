@@ -138,6 +138,7 @@ template<class X> template<class XX> UnivariateDifferential<X>::UnivariateDiffer
 template<class X>
 class Differential
     : public DispatchTranscendentalAlgebraOperations<Differential<X>,X>
+    , public DeclareMixedArithmeticOperators<Differential<X>,Int>
 {
     typedef Differential<X> SelfType;
 
@@ -258,6 +259,7 @@ class Differential
     Differential<X> create() const;
     Differential<X> create_zero() const;
     Differential<X> create_constant(const NumericType& c) const;
+    Differential<X> create_constant(Int c) const;
     //! \brief Set all coefficients to zero.
     Void clear();
     //! \brief Remove all terms with coefficient \f$0\f$.

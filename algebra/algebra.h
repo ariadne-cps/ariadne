@@ -43,6 +43,7 @@ template<class R, class A> R dynamic_handle_cast(A a) {
 
 //! \brief Generic class for elements of unital algebras.
 template<class X> class Algebra
+    : public DeclareMixedArithmeticOperators<Algebra<X>,Int>
 {
   private:
   public:

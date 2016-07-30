@@ -141,7 +141,8 @@ template<class P> class FunctionFacade<P,BoxDomain,BoxDomain> {
 
 template<class P, class D, class C> class DeclareFunctionOperations;
 template<class P, class D> class DeclareFunctionOperations<P,D,IntervalDomain>
-    : DeclareTranscendentalAlgebraOperations<Function<P,D,IntervalDomain>,CanonicalNumericType<P>> { };
+    : DeclareTranscendentalAlgebraOperations<Function<P,D,IntervalDomain>,CanonicalNumericType<P>>
+    , DeclareMixedArithmeticOperators<Function<P,D,IntervalDomain>,Int> { };
 template<class P, class D> class DeclareFunctionOperations<P,D,BoxDomain>
     : DeclareVectorAlgebraOperators<Function<P,D,BoxDomain>,Function<P,D,IntervalDomain>,CanonicalNumericType<P>> { };
 
@@ -225,7 +226,7 @@ class Function
         return f(x); }
 
     friend VectorFunction<P,D> operator*(ScalarFunction<P,D> const&, Vector<Y> const&);
-    
+
     Function<P,D,C> derivative(SizeType k) const {
         return Function<P,D,C>(this->reference()._derivative(k)); }
     friend Function<P,D,C> derivative(Function<P,D,C> const& f, SizeType k) {

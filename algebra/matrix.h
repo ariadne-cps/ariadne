@@ -670,9 +670,9 @@ struct ProvideMatrixOperations {
 
 template<class X> auto norm(Matrix<X> const& A) -> decltype(abs(declval<X>())+abs(declval<X>()))  {
     typedef decltype(abs(declval<X>())+abs(declval<X>())) R;
-    R r=0;
+    R r=abs(A.zero_element());
     for(SizeType i=0; i!=A.row_size(); ++i) {
-        R s=0;
+        R s=abs(A.zero_element());
         for(SizeType j=0; j!=A.column_size(); ++j) {
             s+=abs(A.at(i,j));
         }

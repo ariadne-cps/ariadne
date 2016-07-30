@@ -64,7 +64,7 @@ template<class O, class... AS> struct RealWrapper;
 
 template<class O, class A> struct RealWrapper<O,A> : virtual RealInterface, ExpressionTemplate<O,A>, Float64Bounds {
     RealWrapper(O o, A a) : ExpressionTemplate<O,A>(o,a)
-        , Float64Bounds(static_cast<ExpressionTemplate<O,A>const&>(*this).operator Float64Bounds()) { }
+        , Float64Bounds(this->_op(this->_arg.get(Precision64()))) { }
     virtual Float64Bounds _value() const { return static_cast<Float64Bounds const&>(*this); }
     virtual Float64Bounds _evaluate(Precision64 pr) const {  return static_cast<Float64Bounds>(*this); }
     virtual FloatMPBounds _evaluate(PrecisionMP pr) const {  return this->_op(this->_arg.get(pr)); }
@@ -73,7 +73,7 @@ template<class O, class A> struct RealWrapper<O,A> : virtual RealInterface, Expr
 
 template<class O, class A1, class A2> struct RealWrapper<O,A1,A2> : virtual RealInterface, ExpressionTemplate<O,A1,A2>, Float64Bounds {
     RealWrapper(O o, A1 a1, A2 a2) : ExpressionTemplate<O,A1,A2>(o,a1,a2)
-        , Float64Bounds(static_cast<ExpressionTemplate<O,A1,A2>const&>(*this).operator Float64Bounds()) { }
+        , Float64Bounds(this->_op(this->_arg1.get(Precision64()),this->_arg2.get(Precision64()))) { }
     virtual Float64Bounds _value() const { return static_cast<Float64Bounds const&>(*this); }
     virtual Float64Bounds _evaluate(Precision64 pr) const {  return static_cast<Float64Bounds>(*this); }
     virtual FloatMPBounds _evaluate(PrecisionMP pr) const {  return this->_op(this->_arg1.get(pr),this->_arg2.get(pr)); }
@@ -82,7 +82,7 @@ template<class O, class A1, class A2> struct RealWrapper<O,A1,A2> : virtual Real
 
 template<class A, class N> struct RealWrapper<Pow,A,N> : virtual RealInterface, ExpressionTemplate<Pow,A,N>, Float64Bounds {
     RealWrapper(Pow o, A a, N n) : ExpressionTemplate<Pow,A,N>(o,a,n)
-        , Float64Bounds(static_cast<ExpressionTemplate<Pow,A,N>const&>(*this).operator Float64Bounds()) { }
+        , Float64Bounds(this->_op(this->_arg.get(Precision64()),n)) { }
     virtual Float64Bounds _value() const { return static_cast<Float64Bounds const&>(*this); }
     virtual Float64Bounds _evaluate(Precision64 pr) const {  return static_cast<Float64Bounds>(*this); }
     virtual FloatMPBounds _evaluate(PrecisionMP pr) const {  return this->_op(this->_arg.get(pr),this->_n); }
@@ -92,10 +92,10 @@ template<class A, class N> struct RealWrapper<Pow,A,N> : virtual RealInterface, 
 template<class X> struct RealConstant : RealInterface, Float64Bounds {
     X _c;
   public:
-    RealConstant(X const& x) : Float64Bounds(x), _c(x) { }
+    RealConstant(X const& x) : Float64Bounds(x,Precision64()), _c(x) { }
     virtual Float64Bounds _value() const { return static_cast<Float64Bounds const&>(*this); }
-    virtual Float64Bounds _evaluate(Precision64 pr) const { return static_cast<Float64Bounds>(*this); }
-    virtual FloatMPBounds _evaluate(PrecisionMP pr) const { return FloatMPBounds(this->_c,pr); }
+    virtual Float64Bounds _evaluate(Precision64 pr) const { return static_cast<Float64Bounds const&>(*this); }
+    virtual FloatMPBounds _evaluate(PrecisionMP pr) const { return FloatMPBounds(Number<Ariadne::Paradigm<X>>(this->_c),pr); }
     virtual OutputStream& _write(OutputStream& os) const { return os << this->_c; }
 };
 
@@ -103,9 +103,9 @@ template<> struct RealConstant<Integer> : RealInterface, Float64Bounds {
     typedef Integer X;
     X _c;
   public:
-    RealConstant(X const& x) : Float64Bounds(x), _c(x) { }
+    RealConstant(X const& x) : Float64Bounds(x,Precision64()), _c(x) { }
     virtual Float64Bounds _value() const { return static_cast<Float64Bounds const&>(*this); }
-    virtual Float64Bounds _evaluate(Precision64 pr) const { return static_cast<Float64Bounds>(*this); }
+    virtual Float64Bounds _evaluate(Precision64 pr) const { return static_cast<Float64Bounds const&>(*this); }
     virtual FloatMPBounds _evaluate(PrecisionMP pr) const { return FloatMPBounds(this->_c,pr); }
     virtual OutputStream& _write(OutputStream& os) const { return os << this->_c; }
 };
@@ -113,9 +113,9 @@ template<> struct RealConstant<Integer> : RealInterface, Float64Bounds {
 template<> struct RealConstant<Float64Bounds> : RealInterface, Float64Bounds {
     typedef Float64Bounds X;
   public:
-    RealConstant(X const& x) : Float64Bounds(x) { }
+    RealConstant(X const& x) : Float64Bounds(x,Precision64()) { }
     virtual Float64Bounds _value() const { return static_cast<Float64Bounds const&>(*this); }
-    virtual Float64Bounds _evaluate(Precision64 pr) const { return static_cast<Float64Bounds>(*this); }
+    virtual Float64Bounds _evaluate(Precision64 pr) const { return static_cast<Float64Bounds const&>(*this); }
     virtual FloatMPBounds _evaluate(PrecisionMP pr) const { ARIADNE_NOT_IMPLEMENTED; }
     virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<Float64Bounds const&>(*this); }
 };
@@ -139,14 +139,11 @@ Real::Real(double x)
 {
 }
 
-Real::Real(Dyadic const& d) : Real(Rational(d)) { }
-Real::Real(Decimal const& d) : Real(Rational(d)) { }
 
-Float64UpperBound Real::upper() const { return this->_ptr->_value(); }
-Float64LowerBound Real::lower() const { return this->_ptr->_value(); }
-Float64Approximation Real::approx() const { return this->_ptr->_value(); }
+UpperReal Real::upper() const { return UpperReal(this->_ptr); }
+LowerReal Real::lower() const { return LowerReal(this->_ptr); }
 
-double Real::get_d() const { return this->approx().get_d(); }
+double Real::get_d() const { return this->get(Precision64()).get_d(); }
 
 /*
 template<class PR> FloatBall<PR>::Float(Real const& x) : FloatBall<PR>(x.lower(),x.upper()) { }
@@ -156,19 +153,21 @@ template<class PR> FloatLowerBound<PR>::Float(Real const& x) : FloatLowerBound<P
 template<class PR> FloatApproximation<PR>::Float(Real const& x) : FloatApproximation<PR>(x.approx()) { }
 */
 
-template<> FloatBall<Precision64>::FloatBall(Real const& x) : FloatBall<Precision64>(x.approx().raw(),max(sub_up(x.upper().raw(),x.approx().raw()),sub_up(x.approx().raw(),x.lower().raw()))) { }
-template<> FloatBounds<Precision64>::FloatBounds(Real const& x) : FloatBounds<Precision64>(x.lower(),x.upper()) { }
-template<> FloatUpperBound<Precision64>::FloatUpperBound(Real const& x) : FloatUpperBound<Precision64>(x.upper()) { }
-template<> FloatLowerBound<Precision64>::FloatLowerBound(Real const& x) : FloatLowerBound<Precision64>(x.lower()) { }
-template<> FloatApproximation<Precision64>::FloatApproximation(Real const& x) : FloatApproximation<Precision64>(x.approx()) { }
+template<> FloatBall<Precision64>::FloatBall(Real const& r, Precision64 pr) : FloatBall<Precision64>(r.get(pr)) { }
+template<> FloatBounds<Precision64>::FloatBounds(Real const& r, Precision64 pr) : FloatBounds<Precision64>(r.get(pr)) { }
+template<> FloatUpperBound<Precision64>::FloatUpperBound(Real const& r, Precision64 pr) : FloatUpperBound<Precision64>(r.upper().get(pr)) { }
+template<> FloatLowerBound<Precision64>::FloatLowerBound(Real const& r, Precision64 pr) : FloatLowerBound<Precision64>(r.lower().get(pr)) { }
+template<> FloatApproximation<Precision64>::FloatApproximation(Real const& r, Precision64 pr) : FloatApproximation<Precision64>(r.get(pr)) { }
 
 Real::Real(std::uint64_t m, Void*) : Real(std::make_shared<RealConstant<Integer>>(m)) { }
 Real::Real(std::int64_t n, Void*) : Real(std::make_shared<RealConstant<Integer>>(n)) { }
 
 Real::Real() : Real(std::make_shared<RealConstant<Integer>>(0)) { }
-Real::Real(Integer const& x) : Real(std::make_shared<RealConstant<Integer>>(x)) { }
-Real::Real(Rational const& x) : Real(std::make_shared<RealConstant<Rational>>(x)) { }
-Real::Real(Float64Value x) : Real(std::make_shared<RealConstant<Float64Value>>(x)) { }
+Real::Real(Integer const& z) : Real(std::make_shared<RealConstant<Integer>>(z)) { }
+Real::Real(Dyadic const& w) : Real(std::make_shared<RealConstant<Dyadic>>(w)) { }
+Real::Real(Decimal const& d) : Real(Rational(d)) { }
+Real::Real(Rational const& q) : Real(std::make_shared<RealConstant<Rational>>(q)) { }
+Real::Real(Float64Value x) : Real(Dyadic(x)) { }
 
 Real add(Real const& x1, Real const& x2) { return make_real(Add(),x1,x2); }
 Real sub(Real const& x1, Real const& x2) { return make_real(Sub(),x1,x2); }
@@ -193,15 +192,18 @@ PositiveReal abs(Real const& x) { return PositiveReal(make_real(Abs(),x)); }
 Real max(Real const& x1, Real const& x2) { return make_real(Max(),x1,x2); }
 Real min(Real const& x1, Real const& x2) { return make_real(Min(),x1,x2); }
 
-Float64Error mag(Real const& x) { return mag(static_cast<Float64Bounds>(x)); }
+PositiveUpperReal mag(Real const& r) { return abs(r); }
+Float64Error mag(Real const& r, Precision64 pr) { return mag(r.get(pr)); }
 
 OutputStream& operator<<(OutputStream& os, Real const& x) { return x._ptr->_write(os); }
 
-Bool same(Real const& x1, Real const& x2) {
-    return same(Float64Bounds(x1),Float64Bounds(x2));
+Bool same(Real const& r1, Real const& r2) {
+    // FIXME: Use symbolic approach
+    Precision64 pr;
+    return same(Float64Bounds(r1,pr),Float64Bounds(r2,pr));
 }
 
-PositiveReal dist(Real const& x1, Real const& x2) { return abs(sub(x1,x2)); }
+PositiveReal dist(Real const& r1, Real const& r2) { return abs(sub(r1,r2)); }
 
 template<class O, class... ARGS> struct LogicalWrapper;
 

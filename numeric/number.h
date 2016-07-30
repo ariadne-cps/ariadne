@@ -130,10 +130,13 @@ template<class P> class Number
     template<class N, EnableIf<IsIntegral<N>> =dummy> Number(const N& n) : Number<P>(Integer(n)) { }
     // Construct from a builtin floating-point number
     template<class X, EnableIf<And<IsSame<P,ApproximateTag>,IsFloatingPoint<X>>> =dummy> Number(const X& x) : Number<P>(Float<P,Precision64>(x)) { }
+    // Construct from a type which is convertible to Real.
+    template<class X, EnableIf<IsWeaker<P,ParadigmTag<X>>> =dummy, EnableIf<IsConvertible<X,Real>> = dummy>
+        Number<P>(X const & x) : Number<P>(x.operator Number<ParadigmTag<X>>()) { }
 
     // Construct from a type which is convertible to another Number type.
-    template<class X, EnableIf<IsWeaker<P,ParadigmTag<X>>> =dummy, EnableIf<IsConvertible<X,Number<ParadigmTag<X>>>> = dummy>
-        Number<P>(X const & x) : Number<P>(x.operator Number<ParadigmTag<X>>()) { }
+//    template<class X, EnableIf<IsWeaker<P,ParadigmTag<X>>> =dummy, EnableIf<IsConvertible<X,Number<ParadigmTag<X>>>> = dummy>
+//        Number<P>(X const & x) : Number<P>(x.operator Number<ParadigmTag<X>>()) { }
 
     //! \brief Get the value of the number as a double-precision floating-point type
     template<class WP, EnableIf<IsWeaker<WP,P>> =dummy>

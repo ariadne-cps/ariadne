@@ -68,7 +68,9 @@ template<> struct DeclareIntervalArithmeticOperations<Float64UpperBound>
     , DeclareMixedArithmeticOperators<Interval<Float64UpperBound>,Float64Bounds>
     , DeclareFieldComparisons<Interval<Float64UpperBound>,Interval<Float64UpperBound>,ValidatedKleenean>
     , DeclareFieldComparisons<Interval<Float64UpperBound>,Float64Bounds,ValidatedKleenean>
+    , DeclareFieldComparisons<Interval<Float64UpperBound>,Int,ValidatedKleenean>
     , DeclareFieldComparisons<Float64Bounds,Interval<Float64UpperBound>,ValidatedKleenean>
+    , DeclareMixedArithmeticOperators<Interval<Float64UpperBound>,Int>
 {
     friend Float64Error mag(Float64UpperInterval const&);
 };
@@ -142,11 +144,19 @@ template<class U> class Interval
     //! \brief Construct an interval with the given value.
     template<class UU, EnableIf<And<IsConstructible<U,UU>,Not<IsConvertible<UU,U>>>> =dummy>
         explicit Interval(Interval<UU> const& x) : _l(x.lower()), _u(x.upper()) { }
+    //! \brief Construct an interval with the given value.
+    template<class UU, class PR, EnableIf<IsConstructible<U,UU,PR>> =dummy>
+        explicit Interval(Interval<UU> const& x, PR pr) : _l(x.lower(),pr), _u(x.upper(),pr) { }
+    //! \brief Construct an interval with the given value.
+    template<class UU, EnableIf<IsConstructible<U,UU,Precision64>> =dummy>
+        explicit Interval(Interval<UU> const& x) : _l(x.lower(),Precision64()), _u(x.upper(),Precision64()) { }
 
     //! \brief Construct an interval with the given value.
     //! FIXME: Should be explicit, but this would clash with Box constructor from initializer list of double/Float64.
     template<class LL, class UU, EnableIf<And<IsConstructible<L,LL>,IsConstructible<U,UU>,Not<And<IsConvertible<LL,L>,IsConvertible<UU,U>>>>> =dummy>
         Interval(const LL& l, const UU& u) : _l(l), _u(u) { }
+    template<class LL, class UU, EnableIf<And<IsConstructible<L,LL,Precision64>,IsConstructible<U,UU,Precision64>,Not<And<IsConstructible<L,LL>,IsConstructible<U,UU>>>>> =dummy>
+        Interval(const LL& l, const UU& u) : _l(l,Precision64()), _u(u,Precision64()) { }
 
   public:
     //! \brief The dimension of the set; statically returns size one.

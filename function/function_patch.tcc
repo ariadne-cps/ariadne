@@ -359,6 +359,8 @@ inline Bool operator> (Float64Approximation x1, Int n2) { return x1.raw()> Float
 
 template<class M> Polynomial<Float64Bounds> FunctionPatch<M>::polynomial() const
 {
+    Float64Value zero(0,Precision64());
+
     Vector<Polynomial<Float64Bounds> > pid=Polynomial<NumericType>::coordinates(this->argument_size());
     return horner_evaluate(this->expansion(),unscale(pid,this->domain()))+Float64Bounds(-this->error(),+this->error());
 
@@ -370,7 +372,7 @@ template<class M> Polynomial<Float64Bounds> FunctionPatch<M>::polynomial() const
         ExactIntervalType const& domj=this->domain()[j];
         if(domj.lower()>=domj.upper()) {
             ARIADNE_ASSERT(this->domain()[j].width()==0);
-            s[j]=Polynomial<Float64Bounds>::constant(this->argument_size(),0);
+            s[j]=Polynomial<Float64Bounds>::constant(this->argument_size(),zero);
         } else {
             //s[j]=Ariadne::polynomial(ModelType::unscaling(this->argument_size(),j,this->domain()[j],this->sweeper()));
             s[j]=(Polynomial<Float64Bounds>::coordinate(this->argument_size(),j)-domj.midpoint())/domj.radius();
@@ -388,7 +390,7 @@ template<class M> ScalarFunctionType<M> FunctionPatch<M>::function() const
 
 template<class M> Bool FunctionPatch<M>::operator==(const FunctionPatch<M>& tv) const
 {
-    return this->_domain==tv._domain && this->_model==tv._model;
+    return this->_domain==tv._domain && same(this->_model,tv._model);
 }
 
 
@@ -716,8 +718,9 @@ template<class M> Vector<typename VectorFunctionPatch<M>::ErrorType> const Vecto
 
 template<class M> typename VectorFunctionPatch<M>::ErrorType const VectorFunctionPatch<M>::error() const
 {
-    Float64Error e=0u;
-    for(SizeType i=0; i!=this->result_size(); ++i) {
+    if(this->result_size()==0) { return Float64Error(); }
+    ErrorType e=this->models()[0].error();
+    for(SizeType i=1; i!=this->result_size(); ++i) {
         e=max(e,this->models()[i].error());
     }
     return e;
@@ -730,7 +733,8 @@ template<class M> VectorFunctionType<M> VectorFunctionPatch<M>::function() const
 
 template<class M> Bool VectorFunctionPatch<M>::operator==(const VectorFunctionPatch<M>& tm) const
 {
-    return this->_models==tm._models;
+    ARIADNE_NOT_IMPLEMENTED;
+    //return this->_models==tm._models;
 }
 
 

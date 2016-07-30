@@ -110,6 +110,14 @@ using PositiveFloatMPBounds = PositiveFloatBounds<PrecisionMP>;
 //using PositiveFloatMPBall = Float<PositiveMetricTag,PrecisionMP>;
 using PositiveFloatMPValue = PositiveFloatValue<PrecisionMP>;
 
+template<class F> using Approximation = FloatApproximation<typename F::PrecisionType>;
+template<class F> using LowerBound = FloatLowerBound<typename F::PrecisionType>;
+template<class F> using UpperBound = FloatUpperBound<typename F::PrecisionType>;
+template<class F> using Bounds = FloatBounds<typename F::PrecisionType>;
+template<class F> using Ball = FloatBall<typename F::PrecisionType>;
+template<class F> using Value = FloatValue<typename F::PrecisionType>;
+template<class F> using Error = FloatError<typename F::PrecisionType>;
+
 
 template<class X> struct IsFloat : False { };
 template<class PR> struct IsFloat<FloatApproximation<PR>> : True { };

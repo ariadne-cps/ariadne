@@ -101,15 +101,15 @@ template<class X, class NX=X> class DeclareDirectedFloatOperations : DeclareDire
 };
 
 
-template<class X, class Y, class R=X, class NR=R> class ProvideMixedOperators {
-    friend R operator+(Y const& y1, X const& x2) { return make_float(y1,x2.precision())+x2; }
+template<class X, class Y, class R=X> class ProvideMixedOperators : ProvideInplaceOperators<X,Y,R> {
     friend R operator+(X const& x1, Y const& y2) { return x1+make_float(y2,x1.precision()); }
-    friend NR operator-(Y const& y1, X const& x2) { return make_float(y1,x2.precision())-x2; }
     friend R operator-(X const& x1, Y const& y2) { return x1-make_float(y2,x1.precision()); }
-    friend R operator*(Y const& y1, X const& x2) { return make_float(y1,x2.precision())*x2; }
     friend R operator*(X const& x1, Y const& y2) { return x1*make_float(y2,x1.precision()); }
-    friend NR operator/(Y const& y1, X const& x2) { return make_float(y1,x2.precision())/x2; }
     friend R operator/(X const& x1, Y const& y2) { return x1/make_float(y2,x1.precision()); }
+    friend R operator+(Y const& y1, X const& x2) { return make_float(y1,x2.precision())+x2; }
+    friend R operator-(Y const& y1, X const& x2) { return make_float(y1,x2.precision())-x2; }
+    friend R operator*(Y const& y1, X const& x2) { return make_float(y1,x2.precision())*x2; }
+    friend R operator/(Y const& y1, X const& x2) { return make_float(y1,x2.precision())/x2; }
 };
 
 template<class PR> inline FloatBall<PR> make_float_ball(Real const& y, PR pr) { return FloatBall<PR>(make_float(y,pr)); }
@@ -241,30 +241,29 @@ template<class PR> class FloatApproximation
     , public DeclareComparisons<FloatApproximation<PR>,ApproximateKleenean>
     , public DispatchNumericOperations<FloatApproximation<PR>>
     , public ProvideMixedOperators<FloatApproximation<PR>,Real>
+    , public ProvideMixedOperators<FloatApproximation<PR>,double>
     , public ProvideComparisons<FloatApproximation<PR>,ApproximateKleenean>
+    , public DeclareFieldComparisons<FloatApproximation<PR>,double,ApproximateKleenean>
 {
     typedef ApproximateTag P; typedef RawFloat<PR> FLT;
   public:
     typedef ApproximateTag Paradigm;
     typedef FloatApproximation<PR> NumericType;
+    typedef ApproximateNumber GenericType;
     typedef FLT RawFloatType;
     typedef PR PrecisionType;
   public:
     FloatApproximation<PR>() : _a(0.0) { }
     FloatApproximation<PR>(PrecisionType pr) : _a(0.0,pr) { }
     explicit FloatApproximation<PR>(RawFloatType const& a) : _a(a) { }
-    template<class N, EnableIf<IsIntegral<N>> =dummy> FloatApproximation<PR>(N n) : _a(n) { }
-    template<class D, EnableIf<IsFloatingPoint<D>> =dummy> FloatApproximation<PR>(D x) : _a(x) { }
-    explicit FloatApproximation<PR>(const Integer& z);
-    explicit FloatApproximation<PR>(const Dyadic& d);
-    explicit FloatApproximation<PR>(const Decimal& d);
-    explicit FloatApproximation<PR>(const Rational& q);
-    explicit FloatApproximation<PR>(const Real& r);
-    explicit FloatApproximation<PR>(const Number<ApproximateTag>& x);
-    FloatApproximation<PR>(const Rational& q, PR pr);
-    FloatApproximation<PR>(const Real& r, PR pr);
-    FloatApproximation<PR>(const Number<ApproximateTag>& x, PR pr);
-    operator Number<ApproximateTag> () const;
+
+    template<class N, EnableIf<IsIntegral<N>> = dummy> FloatApproximation<PR>(N n, PR pr);
+    template<class D, EnableIf<IsFloatingPoint<D>> = dummy> FloatApproximation<PR>(D d, PR pr);
+        FloatApproximation<PR>(const Integer& z, PR pr);
+        FloatApproximation<PR>(const Dyadic& w, PR pr);
+        FloatApproximation<PR>(const Rational& q, PR pr);
+        FloatApproximation<PR>(const Real& r, PR pr);
+    FloatApproximation<PR>(const ApproximateNumber& y, PR pr);
 
     FloatApproximation<PR>(FloatError<PR> const& x); // FIXME: Remove
     FloatApproximation<PR>(FloatValue<PR> const& x);
@@ -272,6 +271,17 @@ template<class PR> class FloatApproximation
     FloatApproximation<PR>(FloatBounds<PR> const& x);
     FloatApproximation<PR>(FloatUpperBound<PR> const& x);
     FloatApproximation<PR>(FloatLowerBound<PR> const& x);
+
+    template<class N, EnableIf<IsIntegral<N>> =dummy> FloatApproximation<PR>& operator=(N n) { this->_a=n; return *this; }
+    template<class D, EnableIf<IsFloatingPoint<D>> =dummy> FloatApproximation<PR>& operator=(D x) { this->_a=x; return *this; }
+        FloatApproximation<PR>& operator=(const FloatLowerBound<PR>& x) { return *this=FloatApproximation<PR>(x); }
+        FloatApproximation<PR>& operator=(const FloatUpperBound<PR>& x) { return *this=FloatApproximation<PR>(x); }
+        FloatApproximation<PR>& operator=(const FloatBounds<PR>& x) { return *this=FloatApproximation<PR>(x); }
+        FloatApproximation<PR>& operator=(const FloatValue<PR>& x) { return *this=FloatApproximation<PR>(x); }
+    FloatApproximation<PR>& operator=(const ApproximateNumber& y);
+    FloatApproximation<PR> create(const ApproximateNumber& y) const;
+
+    operator ApproximateNumber () const;
 
     friend FloatApproximation<PR> round(FloatApproximation<PR> const& x);
 
@@ -300,6 +310,7 @@ template<class PR> class FloatLowerBound
     , public DispatchDirectedNumericOperations<FloatLowerBound<PR>,FloatUpperBound<PR>>
     , public ProvideMixedDirectedOperators<FloatLowerBound<PR>,Real,FloatUpperBound<PR>>
     , public ProvideDirectedComparisons<FloatUpperBound<PR>,FloatLowerBound<PR>,ValidatedSierpinskian>
+    , public ProvideDirectedComparisons<FloatLowerBound<PR>,ValidatedUpperNumber,ValidatedNegatedSierpinskian>
     , public DeclareFloatOperations<FloatApproximation<PR>>
     , public DeclareComparisons<FloatApproximation<PR>,ApproximateKleenean>
 {
@@ -307,6 +318,7 @@ template<class PR> class FloatLowerBound
   public:
     typedef LowerTag Paradigm;
     typedef FloatLowerBound<PR> NumericType;
+    typedef ValidatedLowerNumber GenericType;
     typedef FLT RawFloatType;
     typedef PR PrecisionType;
   public:
@@ -314,22 +326,20 @@ template<class PR> class FloatLowerBound
     FloatLowerBound<PR>(PrecisionType pr) : _l(0.0,pr) { }
     explicit FloatLowerBound<PR>(RawFloatType const& l) : _l(l) { }
 
-    template<class N, EnableIf<IsIntegral<N>> = dummy> FloatLowerBound<PR>(N n) : _l(n) { }
-    template<class X, EnableIf<IsFloatingPoint<X>> = dummy> explicit FloatLowerBound<PR>(X x) : _l(x) { }
+    FloatLowerBound<PR>(const Rational& q, PR pr);
+    FloatLowerBound<PR>(const Real& r, PR pr);
+    FloatLowerBound<PR>(const ValidatedLowerNumber& y, PR pr);
 
     FloatLowerBound<PR>(FloatBounds<PR> const& x);
     FloatLowerBound<PR>(FloatBall<PR> const& x);
     FloatLowerBound<PR>(FloatValue<PR> const& x);
 
-    FloatLowerBound<PR>(const Rational& q, PR pr);
-    FloatLowerBound<PR>(const Real& r, PR pr);
-    FloatLowerBound<PR>(const Number<ValidatedLowerTag>& x, PR pr);
-    operator Number<ValidatedLowerTag> () const;
+        FloatLowerBound<PR>& operator=(const FloatValue<PR>& x);
+    FloatLowerBound<PR>& operator=(const ValidatedLowerNumber&);
+    FloatLowerBound<PR> create(const ValidatedLowerNumber& y) const;
+    FloatUpperBound<PR> create(const ValidatedUpperNumber& y) const;
 
-    explicit FloatLowerBound<PR>(const Integer& x);
-    explicit FloatLowerBound<PR>(const Rational& x);
-    explicit FloatLowerBound<PR>(const Real& x);
-    explicit FloatLowerBound<PR>(const Number<ValidatedLowerTag>& x);
+    operator ValidatedLowerNumber () const;
 
     PrecisionType precision() const { return _l.precision(); }
     RawFloatType const& raw() const { return _l; }
@@ -354,6 +364,7 @@ template<class PR> class FloatUpperBound
     , public DispatchDirectedNumericOperations<FloatUpperBound<PR>,FloatLowerBound<PR>>
     , public ProvideMixedDirectedOperators<FloatUpperBound<PR>,Real,FloatLowerBound<PR>>
     , public ProvideDirectedComparisons<FloatLowerBound<PR>,FloatUpperBound<PR>,ValidatedNegatedSierpinskian>
+    , public ProvideDirectedComparisons<FloatUpperBound<PR>,ValidatedLowerNumber,ValidatedSierpinskian>
     , public DeclareFloatOperations<FloatApproximation<PR>>
     , public DeclareComparisons<FloatApproximation<PR>,ApproximateKleenean>
 {
@@ -361,6 +372,7 @@ template<class PR> class FloatUpperBound
   public:
     typedef UpperTag Paradigm;
     typedef FloatUpperBound<PR> NumericType;
+    typedef ValidatedUpperNumber GenericType;
     typedef FLT RawFloatType;
     typedef PR PrecisionType;
   public:
@@ -368,23 +380,21 @@ template<class PR> class FloatUpperBound
     FloatUpperBound<PR>(PrecisionType pr) : _u(0.0,pr) { }
     explicit FloatUpperBound<PR>(RawFloatType const& u) : _u(u) { }
 
-    template<class N, EnableIf<IsIntegral<N>> = dummy> FloatUpperBound<PR>(N n) : _u(n) { }
-    template<class X, EnableIf<IsFloatingPoint<X>> = dummy> explicit FloatUpperBound<PR>(X x) : _u(x) { }
+    FloatUpperBound<PR>(const Rational& q, PR pr);
+    FloatUpperBound<PR>(const Real& r, PR pr);
+    FloatUpperBound<PR>(const ValidatedUpperNumber& y, PR pr);
 
     FloatUpperBound<PR>(FloatBounds<PR> const& x);
     FloatUpperBound<PR>(FloatBall<PR> const& x);
     FloatUpperBound<PR>(FloatValue<PR> const& x);
     FloatUpperBound<PR>(FloatError<PR> const& x); // FIXME: Remove
 
-    explicit FloatUpperBound<PR>(const Integer& x);
-    explicit FloatUpperBound<PR>(const Rational& x);
-    explicit FloatUpperBound<PR>(const Real& x);
-    explicit FloatUpperBound<PR>(const Number<ValidatedUpperTag>& x);
+        FloatUpperBound<PR>& operator=(const FloatValue<PR>& x);
+    FloatUpperBound<PR>& operator=(const ValidatedUpperNumber& y);
+    FloatUpperBound<PR> create(const ValidatedUpperNumber& y) const;
+    FloatLowerBound<PR> create(const ValidatedLowerNumber& y) const;
 
-    FloatUpperBound<PR>(const Rational& q, PR pr);
-    FloatUpperBound<PR>(const Real& r, PR pr);
-    FloatUpperBound<PR>(const Number<ValidatedUpperTag>& x, PR pr);
-    operator Number<ValidatedUpperTag> () const;
+    operator ValidatedUpperNumber () const;
 
     PrecisionType precision() const { return _u.precision(); }
     RawFloatType const& raw() const { return _u; }
@@ -437,11 +447,13 @@ template<class PR> class FloatBounds
     , public DispatchNumericOperations<FloatBounds<PR>>
     , public ProvideMixedOperators<FloatBounds<PR>,Real>
     , public ProvideComparisons<FloatBounds<PR>,ValidatedKleenean>
+    , public ProvideMixedComparisons<FloatBounds<PR>,ValidatedNumber,ValidatedKleenean>
 {
     typedef BoundedTag P; typedef RawFloat<PR> FLT;
   public:
     typedef BoundedTag Paradigm;
     typedef FloatBounds<PR> NumericType;
+    typedef ValidatedNumber GenericType;
     typedef FLT RawFloatType;
     typedef PR PrecisionType;
   public:
@@ -450,26 +462,27 @@ template<class PR> class FloatBounds
     explicit FloatBounds<PR>(RawFloatType const& v) : _l(v), _u(v) { }
     FloatBounds<PR>(RawFloatType const& l, RawFloatType const& u) : _l(l), _u(u) { }
     FloatBounds<PR>(FloatLowerBound<PR> const& lower, FloatUpperBound<PR> const& upper) : _l(lower.raw()), _u(upper.raw()) { }
-    template<class N1, class N2, EnableIf<And<IsIntegral<N1>,IsIntegral<N2>>> = dummy> FloatBounds<PR>(N1 n1, N2 n2) : _l(n1), _u(n2) { }
+    FloatBounds<PR>(FloatLowerBound<PR> const& lower, ValidatedUpperNumber const& upper) : FloatBounds<PR>(lower,lower.create(upper)) { }
+    FloatBounds<PR>(ValidatedLowerNumber const& lower, FloatLowerBound<PR> const& upper) : FloatBounds<PR>(upper.create(lower),upper) { }
+    template<class N1, class N2, EnableIf<And<IsIntegral<N1>,IsIntegral<N2>>> = dummy> FloatBounds<PR>(N1 n1, N2 n2, PR pr) : _l(n1,pr), _u(n2,pr) { }
     FloatBounds<PR>(Rational const& ql, Rational const& qu, PrecisionType pr);
 
-    template<class N, EnableIf<IsIntegral<N>> = dummy> FloatBounds<PR>(N n) : _l(n), _u(n) { }
-    template<class X, EnableIf<IsFloatingPoint<X>> = dummy> explicit FloatBounds<PR>(X x) : _l(x), _u(x) { }
+    template<class N, EnableIf<IsIntegral<N>> = dummy> FloatBounds<PR>(N n, PR pr);
+        FloatBounds<PR>(const Integer& z, PR pr);
+        FloatBounds<PR>(const Dyadic& w, PR pr);
+        FloatBounds<PR>(const Rational& q, PR pr);
+        FloatBounds<PR>(const Real& x, PR pr);
+    FloatBounds<PR>(const ValidatedNumber& y, PR pr);
 
     FloatBounds<PR>(FloatBall<PR> const& x);
     FloatBounds<PR>(FloatValue<PR> const& x);
 
-    explicit FloatBounds<PR>(const Dyadic& x);
-    explicit FloatBounds<PR>(const Decimal& x);
-    explicit FloatBounds<PR>(const Integer& z);
-    explicit FloatBounds<PR>(const Rational& q);
-    explicit FloatBounds<PR>(const Real& x);
-    explicit FloatBounds<PR>(const Number<ValidatedTag>& x);
-    FloatBounds<PR>(const Integer& z, PR pr);
-    FloatBounds<PR>(const Rational& q, PR pr);
-    FloatBounds<PR>(const Real& x, PR pr);
-    FloatBounds<PR>(const Number<ValidatedTag>& x, PR pr);
-    operator Number<ValidatedTag> () const;
+    FloatBounds<PR>& operator=(const FloatValue<PR>& x) { return *this=FloatBounds<PR>(x); }
+    FloatBounds<PR>& operator=(const ValidatedNumber& y);
+    template<class N, EnableIf<IsIntegral<N>> = dummy> FloatBounds<PR>& operator=(N n) { return *this=ValidatedNumber(n); }
+
+    operator ValidatedNumber () const;
+
 
     FloatLowerBound<PR> const lower() const { return FloatLowerBound<PR>(lower_raw()); }
     FloatUpperBound<PR> const upper() const { return FloatUpperBound<PR>(upper_raw()); }
@@ -510,11 +523,13 @@ template<class PR> class FloatBall
     , public DispatchNumericOperations<FloatBall<PR>>
     , public ProvideMixedOperators<FloatBall<PR>,Real>
     , public ProvideComparisons<FloatBall<PR>,ValidatedKleenean>
+    , public ProvideMixedComparisons<FloatBall<PR>,ValidatedNumber,ValidatedKleenean>
 {
     typedef MetricTag P; typedef RawFloat<PR> FLT;
   public:
     typedef MetricTag Paradigm;
     typedef FloatBall<PR> NumericType;
+    typedef ValidatedNumber GenericType;
     typedef FLT RawFloatType;
     typedef PR PrecisionType;
   public:
@@ -525,19 +540,18 @@ template<class PR> class FloatBall
     FloatBall<PR>(FloatValue<PR> const& value, FloatError<PR> const& error) : _v(value.raw()), _e(error.raw()) { }
     FloatBall<PR>(FloatLowerBound<PR> const& lower, FloatUpperBound<PR> const& upper) =  delete;
 
+        FloatBall<PR>(const Integer& z, PR pr);
+        FloatBall<PR>(const Dyadic& w, PR pr);
+        FloatBall<PR>(const Rational& q, PR pr);
+        FloatBall<PR>(const Real& r, PR pr);
+    FloatBall<PR>(const ValidatedNumber& y, PR pr);
+
     explicit FloatBall<PR>(FloatBounds<PR> const& x);
     FloatBall<PR>(FloatValue<PR> const& x);
 
-    template<class N, EnableIf<IsIntegral<N>> = dummy> FloatBall<PR>(N n) : _v(n), _e(nul(_v)) { }
-    template<class X, EnableIf<IsFloatingPoint<X>> = dummy> explicit FloatBall<PR>(X x) : _v(x), _e(nul(_v)) { }
-    explicit FloatBall<PR>(const Integer& z);
-    explicit FloatBall<PR>(const Rational& q);
-    explicit FloatBall<PR>(const Real& x);
-    explicit FloatBall<PR>(const Number<ValidatedTag>& x);
-    FloatBall<PR>(const Rational& q, PR pr);
-    FloatBall<PR>(const Real& r, PR pr);
-    FloatBall<PR>(const Number<ValidatedTag>& x, PR pr);
-    operator Number<ValidatedTag> () const;
+    FloatBall<PR>& operator=(const ValidatedNumber& y);
+
+    operator ValidatedNumber () const;
 
     FloatLowerBound<PR> const lower() const { return FloatLowerBound<PR>(lower_raw()); }
     FloatUpperBound<PR> const upper() const { return FloatUpperBound<PR>(upper_raw()); }
@@ -579,22 +593,34 @@ template<class PR> class FloatValue
   public:
     typedef ExactTag Paradigm;
     typedef FloatValue<PR> NumericType;
+    typedef ExactNumber GenericType;
     typedef FLT RawFloatType;
     typedef PR PrecisionType;
   public:
     FloatValue<PR>() : _v(0.0) { }
     FloatValue<PR>(PrecisionType pr) : _v(0.0,pr) { }
     explicit FloatValue<PR>(RawFloatType const& v) : _v(v) { }
-    template<class N, EnableIf<IsIntegral<N>> =dummy> FloatValue<PR>(N n) : _v(n) { }
-    template<class X, EnableIf<IsFloatingPoint<X>> =dummy> explicit FloatValue<PR>(X x) : _v(x) { }
 
+    //template<class N, EnableIf<IsIntegral<N>> = dummy> FloatValue<PR>(N n, PR pr) : _v(n,pr) { }
+    FloatValue<PR>(double d, PR pr) = delete;
+    FloatValue<PR>(uint n, PR pr);
+    FloatValue<PR>(int n, PR pr);
+    FloatValue<PR>(const Integer& z, PR pr);
+    FloatValue<PR>(const TwoExp& t, PR pr);
+    FloatValue<PR>(const Dyadic& w, PR pr);
 
-    explicit FloatValue<PR>(const Integer& z);
-    explicit FloatValue<PR>(const Integer& z, PR pr);
-    explicit FloatValue<PR>(const TwoExp& ex, PR pr);
+    //template<class N, EnableIf<IsIntegral<N>> = dummy> FloatValue<PR>& operator=(N n) { _v=n; }
+    FloatValue<PR>& operator=(double d) = delete;
+    FloatValue<PR>& operator=(int n);
+    FloatValue<PR>& operator=(const Integer& z);
+    FloatValue<PR>& operator=(const Dyadic& w);
+    FloatValue<PR>& operator=(const TwoExp& ex);
+
+    operator ExactNumber () const;
+    explicit operator Dyadic () const;
     explicit operator Rational () const;
-    operator Number<ExactTag> () const;
-    explicit operator RawFloatType () const { return _v; }
+
+//    explicit operator RawFloatType () const { return _v; }
 
     PrecisionType precision() const { return _v.precision(); }
     RawFloatType const& raw() const { return _v; }
@@ -608,8 +634,8 @@ template<class PR> class FloatValue
     friend FloatValue<PR> half(FloatValue<PR> const&);
     friend FloatValue<PR> operator+(FloatValue<PR> const&);
     friend FloatValue<PR> operator-(FloatValue<PR> const&);
-    friend FloatValue<PR>& operator*=(FloatValue<PR>&, TwoExp);
-    friend FloatValue<PR>& operator/=(FloatValue<PR>&, TwoExp);
+    friend FloatValue<PR>& operator*=(FloatValue<PR>&, TwoExp const&);
+    friend FloatValue<PR>& operator/=(FloatValue<PR>&, TwoExp const&);
     friend FloatValue max(FloatValue<PR> const&, FloatValue<PR> const&);
     friend FloatValue min(FloatValue<PR> const&, FloatValue<PR> const&);
     friend FloatValue abs(FloatValue<PR> const&);
@@ -639,11 +665,8 @@ template<class PR> class FloatError
         ARIADNE_PRECONDITION_MSG(!(x<0),"x="<<x); }
     explicit FloatError<PR>(FloatUpperBound<PR> const& x) : FloatError<PR>(x.raw()) { }
     FloatError<PR>(PositiveFloatUpperBound<PR> const& x) : _e(x.raw()) { }
-    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy> FloatError<PR>(M m) : _e(m) { }
-    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy> FloatError<PR>(M m, PR pr) : _e(pr) { _e=m; }
-    template<class F, EnableIf<IsSame<F,FloatUpperBound<PR>>> =dummy>
-        explicit FloatError<PR>(F const& x) : _e(x) { }
-//    operator PositiveFloatUpperBound<PR>() const;
+    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy> FloatError<PR>(M m, PR pr) : _e(m,pr) { }
+    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy> FloatError<PR>& operator=(M m) { _e=m; return *this; }
     PrecisionType precision() const { return _e.precision(); }
     RawFloat<PR> const& raw() const { return _e; }
     RawFloat<PR>& raw() { return _e; }
@@ -655,6 +678,8 @@ template<class PR> class FloatError
     friend FloatError<PR> exp(FloatError<PR> const& x);
 
     friend FloatError<PR> operator*(Nat m1, FloatError<PR> const& x2);
+    friend FloatError<PR> operator*(FloatError<PR> const& x1, Nat m2);
+    friend FloatError<PR>& operator*=(FloatError<PR>& x1, Nat m2);
 
     friend Bool same(FloatError<PR> const&, FloatError<PR> const&);
     friend Bool refines(FloatError<PR> const&, FloatError<PR> const&);
@@ -694,11 +719,8 @@ template<class PR> inline const FloatError<PR> FloatBall<PR>::error() const {
 template<class PR> class PositiveFloatValue : public FloatValue<PR> {
   public:
     PositiveFloatValue<PR>() : FloatValue<PR>() { }
-    PositiveFloatValue<PR>(TwoExp ex) : FloatValue<PR>(ex) { }
-    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy>
-        PositiveFloatValue<PR>(M m) : FloatValue<PR>(m) { }
-    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy>
-        PositiveFloatValue<PR>(M m, PR pr) : FloatValue<PR>(m,pr) { }
+    PositiveFloatValue<PR>(TwoExp const& ex, PR pr) : FloatValue<PR>(ex,pr) { }
+    explicit PositiveFloatValue<PR>(Dyadic const& w, PR pr) : FloatValue<PR>(w,pr) { }
     explicit PositiveFloatValue<PR>(RawFloat<PR> const& x) : FloatValue<PR>(x) { }
     explicit PositiveFloatValue<PR>(FloatValue<PR> const& x) : FloatValue<PR>(x) { }
   public:
@@ -728,9 +750,7 @@ template<class PR> class PositiveFloatUpperBound : public FloatUpperBound<PR> {
     explicit PositiveFloatUpperBound<PR>(RawFloat<PR> const& x) : FloatUpperBound<PR>(x) {
         ARIADNE_PRECONDITION_MSG(!(x<0),"x="<<x); }
     explicit PositiveFloatUpperBound<PR>(FloatUpperBound<PR> const& x) : FloatUpperBound<PR>(x) { }
-    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy> PositiveFloatUpperBound<PR>(M m) : FloatUpperBound<PR>(m) { }
-    template<class F, EnableIf<IsSame<F,FloatUpperBound<PR>>> =dummy>
-        explicit PositiveFloatUpperBound<PR>(F const& x) : FloatUpperBound<PR>(x) { }
+    explicit PositiveFloatUpperBound<PR>(ValidatedUpperNumber const& y, PR pr) : FloatUpperBound<PR>(y,pr) { }
     PositiveFloatUpperBound<PR>(PositiveFloatValue<PR> const& x) : FloatUpperBound<PR>(x) { }
     PositiveFloatUpperBound<PR>(FloatError<PR> const& x) : FloatUpperBound<PR>(x.raw()) { }
   public:
@@ -752,6 +772,7 @@ template<class PR> class PositiveFloatLowerBound : public FloatLowerBound<PR> {
         PositiveFloatLowerBound<PR>(M m) : FloatLowerBound<PR>(m) { }
     explicit PositiveFloatLowerBound<PR>(RawFloat<PR> const& x) : FloatLowerBound<PR>(x) { }
     explicit PositiveFloatLowerBound<PR>(FloatLowerBound<PR> const& x) : FloatLowerBound<PR>(x) { }
+    explicit PositiveFloatLowerBound<PR>(ValidatedLowerNumber const& y, PR pr) : FloatLowerBound<PR>(y,pr) { }
     PositiveFloatLowerBound<PR>(PositiveFloatValue<PR> const& x) : FloatLowerBound<PR>(x) { }
   public:
     friend PositiveFloatLowerBound<PR> max(PositiveFloatLowerBound<PR> const&, PositiveFloatLowerBound<PR> const&);
@@ -765,6 +786,7 @@ template<class PR> class PositiveFloatApproximation : public FloatApproximation<
         PositiveFloatApproximation<PR>(M m) : FloatApproximation<PR>(m) { }
     explicit PositiveFloatApproximation<PR>(RawFloat<PR> const& x) : FloatApproximation<PR>(x) { }
     explicit PositiveFloatApproximation<PR>(FloatApproximation<PR> const& x) : FloatApproximation<PR>(x) { }
+    explicit PositiveFloatApproximation<PR>(ApproximateNumber const& y, PR pr) : FloatApproximation<PR>(y,pr) { }
     PositiveFloatApproximation<PR>(PositiveFloatLowerBound<PR> const& x) : FloatApproximation<PR>(x) { }
     PositiveFloatApproximation<PR>(PositiveFloatUpperBound<PR> const& x) : FloatApproximation<PR>(x) { }
     PositiveFloatApproximation<PR>(PositiveFloatValue<PR> const& x) : FloatApproximation<PR>(x) { }
@@ -795,12 +817,6 @@ template<class PR> inline OutputStream& operator<<(OutputStream& os, PositiveFlo
 
 
 template<class R, class A> R integer_cast(const A& _a);
-
-template<> FloatBall<Precision64>::FloatBall(Real const& x);
-template<> FloatBounds<Precision64>::FloatBounds(Real const& x);
-template<> FloatUpperBound<Precision64>::FloatUpperBound(Real const& x);
-template<> FloatLowerBound<Precision64>::FloatLowerBound(Real const& x);
-template<> FloatApproximation<Precision64>::FloatApproximation(Real const& x);
 
 template<class T, class F, EnableIf<Not<IsSame<T,F>>> =dummy> T convert(F const& x) { return T(x); }
 template<class T> T const& convert(T const& x) { return x; }

@@ -57,6 +57,8 @@ class Dyadic
   public:
     mpf_t _mpf;
   public:
+    typedef ExactTag Paradigm;
+
     //! \brief Construct the Dyadic number \a p/2<sup>q</sup>.
     Dyadic (Integer const& p, Nat q);
     Dyadic (Integer const& p, Int q) = delete;
@@ -84,6 +86,8 @@ class Dyadic
     explicit Dyadic(const RawFloat64& x);
     //! \brief Explicit construction from a floating-point value.
     explicit Dyadic(const RawFloatMP& x);
+    //! \brief Convert to a generic number.
+    operator Number<ExactTag> () const;
     //! \brief The smallest integer \a p such that \a x=p/2<sup>q</sup>
     Integer mantissa() const;
     //! \brief The (negative) integer \a -q such that \a x=p/2<sup>q</sup>

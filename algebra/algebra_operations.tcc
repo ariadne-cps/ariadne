@@ -37,7 +37,7 @@ template<class A> using EnableIfGradedAlgebra = EnableIf<IsGradedAlgebra<A>,A>;
 struct Factorial {
     Nat _n;
     Factorial(Nat n) : _n(n) { }
-    operator Float64Bounds() { Float64Bounds r=1; for(Nat i=1; i<=_n; ++i) { r*=i; } return r; }
+    operator Float64Bounds() { Float64Bounds r(1,Precision64()); for(Nat i=1; i<=_n; ++i) { r*=i; } return r; }
     friend Float64Bounds rec(Factorial x) { return rec(Float64Bounds(x)); }
 };
 
@@ -377,7 +377,7 @@ template<class A> A NormedAlgebraOperations<A>::_sin(const A& x)
     auto rng=avg.pm(rad);
     Int n=integer_cast<Int>( round(avg/pi) );
 
-    A y=x-(2*n)*X(pi);
+    A y=x-(2*n)*pi;
 
     A s=sqr(y);
 
@@ -416,7 +416,7 @@ template<class A> A NormedAlgebraOperations<A>::_cos(const A& x)
     Float64 two_pi_approx=2*pi_approx();
     Int n=integer_cast<Int>( round(avg/pi) );
 
-    A y=x-(2*n)*X(pi);
+    A y=x-(2*n)*pi;
 
     A s=sqr(y);
 

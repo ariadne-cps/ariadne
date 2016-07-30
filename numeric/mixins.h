@@ -370,13 +370,13 @@ template<class X, class R=X> struct DeclareNumericOperations
 };
 
 
-template<class X, class R=X> struct ProvideInplaceOperators {
+template<class X, class Y=X, class R=X> struct ProvideInplaceOperators {
 };
-template<class X> struct ProvideInplaceOperators<X,X> {
-    friend X& operator+=(X& x1, X const& x2) { return x1=add(x1,x2); }
-    friend X& operator-=(X& x1, X const& x2) { return x1=sub(x1,x2); }
-    friend X& operator*=(X& x1, X const& x2) { return x1=mul(x1,x2); }
-    friend X& operator/=(X& x1, X const& x2) { return x1=div(x1,x2); }
+template<class X, class Y> struct ProvideInplaceOperators<X,Y> {
+    friend X& operator+=(X& x1, Y const& y2) { return x1=operator+(x1,y2); }
+    friend X& operator-=(X& x1, Y const& y2) { return x1=operator-(x1,y2); }
+    friend X& operator*=(X& x1, Y const& y2) { return x1=operator*(x1,y2); }
+    friend X& operator/=(X& x1, Y const& y2) { return x1=operator/(x1,y2); }
 };
 
 template<class X, class R=X> struct ProvideArithmeticOperators

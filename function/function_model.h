@@ -182,6 +182,7 @@ template<> class ScalarFunctionModel<ValidatedTag>
     VectorFunctionModel<ValidatedTag> create_identity() const;
     ScalarFunctionModel<ValidatedTag> create(const ValidatedScalarFunction& f) const;
     Vector<ScalarFunctionModel<ValidatedTag>> create_coordinates(DomainType const&) const;
+    ScalarFunctionModel<ValidatedTag>& operator=(const ValidatedNumber& c);
     ScalarFunctionModel<ValidatedTag>& operator=(const ValidatedNumericType& c);
     ScalarFunctionModel<ValidatedTag>& operator=(const ValidatedScalarFunction& f);
     ScalarFunctionModel<ValidatedTag>& operator=(const ScalarTaylorFunction& f);
@@ -199,6 +200,7 @@ template<> class ScalarFunctionModel<ValidatedTag>
     inline ErrorType error() const { return this->_ptr->error(); }
 
     inline Void set_error(const ErrorType& e) { return this->_ptr->set_error(e); }
+    inline Void set_error(Nat e) { return this->_ptr->set_error(ErrorType(e,this->error().precision())); }
     inline Void clobber() { return this->_ptr->clobber(); }
 
     inline ScalarFunctionModel<ValidatedTag> apply(Operator op) const { return this->_ptr->_apply(op); }
@@ -210,6 +212,10 @@ template<> class ScalarFunctionModel<ValidatedTag>
     friend inline ScalarFunctionModel<ValidatedTag>& operator-=(ScalarFunctionModel<ValidatedTag>& f1, const ValidatedNumericType& c2) { f1._ptr->_iadd(neg(c2)); return f1; }
     friend inline ScalarFunctionModel<ValidatedTag>& operator*=(ScalarFunctionModel<ValidatedTag>& f1, const ValidatedNumericType& c2) { f1._ptr->_imul(c2); return f1; }
     friend inline ScalarFunctionModel<ValidatedTag>& operator/=(ScalarFunctionModel<ValidatedTag>& f1, const ValidatedNumericType& c2) { f1._ptr->_imul(rec(c2)); return f1; }
+    friend inline ScalarFunctionModel<ValidatedTag>& operator+=(ScalarFunctionModel<ValidatedTag>& f1, const ValidatedNumber& c2) { return f1+=ValidatedNumericType(c2,f1.value().precision()); }
+    friend inline ScalarFunctionModel<ValidatedTag>& operator-=(ScalarFunctionModel<ValidatedTag>& f1, const ValidatedNumber& c2) { return f1-=ValidatedNumericType(c2,f1.value().precision()); }
+    friend inline ScalarFunctionModel<ValidatedTag>& operator*=(ScalarFunctionModel<ValidatedTag>& f1, const ValidatedNumber& c2) { return f1*=ValidatedNumericType(c2,f1.value().precision()); }
+    friend inline ScalarFunctionModel<ValidatedTag>& operator/=(ScalarFunctionModel<ValidatedTag>& f1, const ValidatedNumber& c2) { return f1/=ValidatedNumericType(c2,f1.value().precision()); }
 
     friend inline ScalarFunctionModel<ValidatedTag> pos(const ScalarFunctionModel<ValidatedTag>& f) { return f.apply(Pos()); }
     friend inline ScalarFunctionModel<ValidatedTag> neg(const ScalarFunctionModel<ValidatedTag>& f) { return f.apply(Neg()); }
@@ -273,6 +279,23 @@ template<> class ScalarFunctionModel<ValidatedTag>
     friend inline ScalarFunctionModel<ValidatedTag> operator*(const ValidatedNumericType& c1, const ScalarFunctionModel<ValidatedTag>& f2) {
         ScalarFunctionModel<ValidatedTag> r=f2; r*=c1; return r; }
     friend inline ScalarFunctionModel<ValidatedTag> operator/(const ValidatedNumericType& c1, const ScalarFunctionModel<ValidatedTag>& f2) {
+        ScalarFunctionModel<ValidatedTag> r=rec(f2); r*=c1; return r; }
+
+    friend inline ScalarFunctionModel<ValidatedTag> operator+(const ScalarFunctionModel<ValidatedTag>& f1, const ValidatedNumber& c2) {
+        ScalarFunctionModel<ValidatedTag> r=f1; r+=c2; return r; }
+    friend inline ScalarFunctionModel<ValidatedTag> operator-(const ScalarFunctionModel<ValidatedTag>& f1, const ValidatedNumber& c2) {
+        ScalarFunctionModel<ValidatedTag> r=f1; r-=c2; return r; }
+    friend inline ScalarFunctionModel<ValidatedTag> operator*(const ScalarFunctionModel<ValidatedTag>& f1, const ValidatedNumber& c2) {
+        ScalarFunctionModel<ValidatedTag> r=f1; r*=c2; return r; }
+    friend inline ScalarFunctionModel<ValidatedTag> operator/(const ScalarFunctionModel<ValidatedTag>& f1, const ValidatedNumber& c2) {
+        ScalarFunctionModel<ValidatedTag> r=f1; r/=c2; return r; }
+    friend inline ScalarFunctionModel<ValidatedTag> operator+(const ValidatedNumber& c1, const ScalarFunctionModel<ValidatedTag>& f2) {
+        ScalarFunctionModel<ValidatedTag> r=f2; r+=c1; return r; }
+    friend inline ScalarFunctionModel<ValidatedTag> operator-(const ValidatedNumber& c1, const ScalarFunctionModel<ValidatedTag>& f2) {
+        ScalarFunctionModel<ValidatedTag> r=neg(f2); r+=c1; return r; }
+    friend inline ScalarFunctionModel<ValidatedTag> operator*(const ValidatedNumber& c1, const ScalarFunctionModel<ValidatedTag>& f2) {
+        ScalarFunctionModel<ValidatedTag> r=f2; r*=c1; return r; }
+    friend inline ScalarFunctionModel<ValidatedTag> operator/(const ValidatedNumber& c1, const ScalarFunctionModel<ValidatedTag>& f2) {
         ScalarFunctionModel<ValidatedTag> r=rec(f2); r*=c1; return r; }
 
     friend inline ScalarFunctionModel<ValidatedTag> operator+(const ScalarFunctionModel<ValidatedTag>& f1, const ValidatedScalarFunction& g2) {
@@ -431,6 +454,7 @@ template<class X> class VectorFunctionModelElement
     VectorFunctionModelElement<X>& operator=(const VectorFunctionModelElement<X>& sf) { return this->operator=(static_cast<ScalarFunctionModel<X>const>(sf)); }
     Void clobber() { ScalarFunctionModel<ValidatedTag> sf=_p->get(_i); sf.clobber(); _p->set(_i,sf); }
     Void set_error(ErrorType e) const { ScalarFunctionModel<ValidatedTag> sf=_p->get(_i); sf.set_error(e); _p->set(_i,sf); }
+    Void set_error(Nat e) const { ScalarFunctionModel<ValidatedTag> sf=_p->get(_i); sf.set_error(e); _p->set(_i,sf); }
 };
 template<class X> inline OutputStream& operator<<(OutputStream& os, const VectorFunctionModelElement<X>& function) {
     return os << static_cast< const ScalarFunctionModel<X> >(function);
@@ -633,11 +657,13 @@ template<> class FunctionModelFactoryInterface<ValidatedTag>
     inline VectorFunctionModel<ValidatedTag> create(const ExactBoxType& domain, const VectorFunctionInterface<ValidatedTag>& function) const;
     inline ScalarFunctionModel<ValidatedTag> create_zero(const ExactBoxType& domain) const;
     inline VectorFunctionModel<ValidatedTag> create_zeros(SizeType result_size, const ExactBoxType& domain) const;
+    inline ScalarFunctionModel<ValidatedTag> create_constant(const ExactBoxType& domain, const ValidatedNumber& value) const;
     inline ScalarFunctionModel<ValidatedTag> create_constant(const ExactBoxType& domain, const ValidatedNumericType& value) const;
     inline VectorFunctionModel<ValidatedTag> create_constants(const ExactBoxType& domain, const Vector<ValidatedNumericType>& values) const;
     inline ScalarFunctionModel<ValidatedTag> create_coordinate(const ExactBoxType& domain, SizeType index) const;
     inline ScalarFunctionModel<ValidatedTag> create_identity(const ExactIntervalType& domain) const;
     inline VectorFunctionModel<ValidatedTag> create_identity(const ExactBoxType& domain) const;
+    inline ValidatedNumericType create_number(const ValidatedNumber& y) const;
   private:
     virtual ScalarFunctionModelInterface<ValidatedTag>* _create(const ExactBoxType& domain, const ScalarFunctionInterface<ValidatedTag>& function) const = 0;
     virtual VectorFunctionModelInterface<ValidatedTag>* _create(const ExactBoxType& domain, const VectorFunctionInterface<ValidatedTag>& function) const = 0;
@@ -672,6 +698,8 @@ ScalarFunctionModel<ValidatedTag> FunctionModelFactoryInterface<ValidatedTag>::c
     return this->_create(domain,EffectiveScalarFunction::zero(domain.size())); }
 VectorFunctionModel<ValidatedTag> FunctionModelFactoryInterface<ValidatedTag>::create_zeros(SizeType result_size, const ExactBoxType& domain) const {
     return this->_create(domain,EffectiveVectorFunction::zeros(result_size,domain.size())); }
+ScalarFunctionModel<ValidatedTag> FunctionModelFactoryInterface<ValidatedTag>::create_constant(const ExactBoxType& domain, const ValidatedNumber& value) const {
+        ValidatedNumericType concrete_value(value,Precision64()); return this->create_constant(domain,concrete_value); }
 ScalarFunctionModel<ValidatedTag> FunctionModelFactoryInterface<ValidatedTag>::create_constant(const ExactBoxType& domain, const ValidatedNumericType& value) const {
     return ScalarFunctionModel<ValidatedTag>(this->_create(domain,EffectiveScalarFunction::zero(domain.size())))+value; };
 VectorFunctionModel<ValidatedTag> FunctionModelFactoryInterface<ValidatedTag>::create_constants(const ExactBoxType& domain, const Vector<ValidatedNumericType>& values) const {

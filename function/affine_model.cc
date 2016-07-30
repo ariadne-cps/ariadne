@@ -34,7 +34,7 @@
 #include "algebra/vector.h"
 
 namespace Ariadne {
-
+void foo() { Float64Value v; Float64UpperBound u; u<=v; }
 template<> struct AlgebraOperations<ValidatedAffineModel,ValidatedNumericType> {
     typedef typename ValidatedAffineModel::PrecisionType PrecisionType;
 

@@ -87,8 +87,9 @@ Map<DiscreteEvent,EffectiveScalarFunction> guard_functions(const HybridAutomaton
 Orbit<HybridPoint>
 HybridSimulator::orbit(const HybridAutomatonInterface& system, const HybridPoint& init_pt, const HybridTime& tmax) const
 {
+    Precision64 pr;
     HybridTime t(0.0,0);
-    Float64Approximation h=this->_step_size;
+    Float64Approximation h={this->_step_size,pr};
 
     DiscreteLocation location=init_pt.location();
     RealSpace space=system.continuous_state_space(location);

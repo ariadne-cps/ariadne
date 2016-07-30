@@ -104,6 +104,9 @@ class Box
     template<class II, EnableIf<And<IsConstructible<I,II>,Not<IsConvertible<II,I>>>> = dummy>
         explicit Box(const Vector<II>& bx) : Vector<I>(bx) { }
 
+    template<class II, class PR, EnableIf<IsConstructible<I,II,PR>> = dummy>
+        Box(const Vector<II>& bx, PR pr) : Vector<I>(bx,pr) { }
+
     //! The unit box \f$[-1,1]^n\f$ in \a n dimensions.
     static Box<IntervalType> unit_box(SizeType n);
     //! The upper quadrant box \f$[0,\infty]^n\f$ in \a n dimensions.
@@ -405,8 +408,10 @@ template<class I> inline auto cast_singleton(Box<I> const& bx) -> Vector<decltyp
 }
 
 template<class I> inline Void Box<I>::draw(CanvasInterface& c, const Projection2d& p) const {
-    return Ariadne::draw(c,p,ApproximateBoxType(*this)); }
+    Ariadne::draw(c,p,ApproximateBoxType(*this)); }
 
+template<> inline Void Box<Interval<Real>>::draw(CanvasInterface& c, const Projection2d& p) const {
+    Ariadne::draw(c,p,ApproximateBoxType(*this,Precision64())); }
 
 inline Float64ExactBox cast_exact_box(Float64ApproximationBox const& abx) {
     return Float64ExactBox(reinterpret_cast<Float64ExactBox const&>(abx));

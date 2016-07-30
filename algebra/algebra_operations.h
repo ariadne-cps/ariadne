@@ -200,19 +200,18 @@ template<class A, class X> struct DeclareTranscendentalAlgebraOperations : Decla
 
 template<class A, class Y> struct DispatchMixedAlgebraNumberOperations;
 
-template<class A> struct DispatchMixedAlgebraNumberOperations<A,int> {
-    template<class N, class T> using IfInt = typename EnableIf<IsIntegral<N>,T>::Type;
-    template<class N> friend IfInt<N,A> operator+(A a1, N x2);
-    friend A& operator+=(A& a1, int x2) { return a1+=ValidatedNumericType(x2); }
-    friend A& operator-=(A& a1, int x2) { return a1-=ValidatedNumericType(x2); }
-    friend A& operator*=(A& a1, int x2) { return a1*=ValidatedNumericType(x2); }
-    friend A& operator/=(A& a1, int x2) { return a1/=ValidatedNumericType(x2); }
-    friend A operator+(A a1, int x2) { a1+=x2; return std::move(a1); }
-    friend A operator-(A a1, int x2) { a1-=x2; return std::move(a1); }
-    friend A operator*(A a1, int x2) { a1*=x2; return std::move(a1); }
-    friend A operator/(A a1, int x2) { a1/=x2; return std::move(a1); }
-    friend A operator+(int x1, A a2) { return a2+x1; }
-    friend A operator-(int x1, A a2) { return (-a2)+x1; }
+template<class A, class X, class Y> struct DispatchConcreteGenericAlgebraNumberOperations {
+    friend X create(Y const& y, A const& a) { return X(y,a.precision()); }
+    friend A& operator+=(A& a1, Y const& y2) { X x2=create(y2,a1); return a1+=x2; }
+    friend A& operator-=(A& a1, Y const& y2) { X x2=create(y2,a1); return a1-=x2; }
+    friend A& operator*=(A& a1, Y const& y2) { X x2=create(y2,a1); return a1*=x2; }
+    friend A& operator/=(A& a1, Y const& y2) { X x2=create(y2,a1); return a1/=x2; }
+    friend A operator+(A a1, Y const& y2) { a1+=y2; return std::move(a1); }
+    friend A operator-(A a1, Y const& y2) { a1-=y2; return std::move(a1); }
+    friend A operator*(A a1, Y const& y2) { a1*=y2; return std::move(a1); }
+    friend A operator/(A a1, Y const& y2) { a1/=y2; return std::move(a1); }
+    friend A operator+(Y const& y1, A a2) { return a2+y1; }
+    friend A operator-(Y const& y1, A a2) { return (-a2)+y1; }
 };
 
 

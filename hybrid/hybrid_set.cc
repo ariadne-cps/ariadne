@@ -46,7 +46,7 @@
 namespace Ariadne {
 
 template<> inline Float64Value numeric_cast<Float64Value>(Real const& r) {
-    return cast_exact(Float64Approximation(r));
+    return cast_exact(r.get(Precision64()));
 }
 
 Orbit<HybridPoint>::Orbit(const HybridPoint& hpt)

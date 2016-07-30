@@ -95,6 +95,7 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
     static const Float64 inf = Ariadne::inf;
 
     ARIADNE_LOG(4,"domain="<<domain<<"\nfunction="<<function<<"\ncodomain="<<codomain<<"\n");
+    ARIADNE_ASSERT(codomain.dimension()>0);
 
     // Make codomain singleton
     UpperBoxType bounds=codomain;
@@ -114,6 +115,7 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
     const Nat n=codomain.size(); // The total number of nontrivial constraints
     const Nat l=(m+n)*2; // The total number of lagrange multipliers
 
+    Precision64 prec;
     FloatApproximationVector point(m); // The point in the domain which is the current test point
     Float64Approximation violation; // An upper bound on amount by which the constraints are violated by the test point
     FloatApproximationVector multipliers(l); // The lagrange multipliers for the constraints
@@ -152,7 +154,7 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
         // Use the computed dual variables to try to make a scalar function which is negative over the entire domain.
         // This should be easier than using all constraints separately
         ScalarTaylorFunction txg=ScalarTaylorFunction::zero(d,default_sweeper());
-        ValidatedNumericType cnst=0;
+        ValidatedNumericType cnst(0,prec);
         for(Nat j=0; j!=n; ++j) {
             txg = txg - (x_exact[j]-x_exact[n+j])*tfn[j];
             cnst += (c[j].upper()*x_exact[j]-c[j].lower()*x_exact[n+j]);
@@ -332,6 +334,8 @@ Bool ConstraintSolver::monotone_reduce(UpperBoxType& domain, const ValidatedScal
     static const Int MAX_STEPS=3;
     const Float64 size = lower.width().raw() / (1<<MAX_STEPS);
     do {
+        Float64UpperBound ub; Float64UpperInterval ivl; Float64Value val; ub=val;
+
         // Apply Newton contractor on lower and upper strips
         if(lower.width().raw()>size) {
             splitpoint=lower.midpoint();

@@ -692,10 +692,10 @@ compute_rt(const Vector<X>& xl, const Vector<X>& xu, const Array<Slackness>& vt,
     const SizeType m=d.size();
     const SizeType n=x.size();
     SizeType r=n;
-    X ds=(vt[p[s]]==LOWER ? +1 : -1);
+    Int ds=(vt[p[s]]==LOWER ? +1 : -1);
     XX t=xu[p[s]]-xl[p[s]];
     if(decide(t<inf)) { r=s; }
-    XX tk=0;
+    XX tk=x.zero_element();
     ARIADNE_LOG(7,"   xl="<<xl<<" x="<<x<<" xu="<<xu<<"\n");
     ARIADNE_LOG(7,"   vt="<<vt<<" p="<<p<<" d="<<d<<"\n");
     ARIADNE_LOG(7,"   s="<<s<<" p[s]="<<p[s]<<" vt[p[s]]="<<vt[p[s]]<<" ds="<<ds<<" xl[p[s]]="<<xl[p[s]]<<" xu[p[s]]="<<xu[p[s]]<<" r="<<r<<" t[r]="<<t<<"\n");

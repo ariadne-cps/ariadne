@@ -38,8 +38,6 @@
 namespace Ariadne {
 
 template<class X, class R> class Constraint;
-typedef Constraint<EffectiveScalarFunction,EffectiveNumericType> EffectiveConstraint;
-typedef Constraint<ValidatedScalarFunction,ValidatedNumericType> ValidatedConstraint;
 
 class InfeasibleProblemException : public std::runtime_error {
   public: InfeasibleProblemException() : std::runtime_error("InfeasibleProblemException") { }
@@ -103,6 +101,9 @@ class OptimiserBase
     : public OptimiserInterface
     , public Loggable
 {
+  protected:
+    static const Float64Value zero;
+    static const Float64Value one;
   public:
     virtual Vector<ValidatedNumericType> minimise(ValidatedScalarFunction f, ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C) const = 0;
     virtual Vector<ValidatedNumericType> minimise(ValidatedScalarFunction f, ExactBoxType D, ValidatedVectorFunction g, ValidatedVectorFunction h) const;

@@ -16,9 +16,11 @@ LIB_NUMERIC_SRC = \
 #	float-approximate.cc float-lower.cc float-upper.cc float-validated.cc float-exact.cc \
 
 TEST_NUMERIC_SRC = \
-	check_numeric.cc test_numeric.cc \
+	check_numeric.cc \
 	test_logical.cc test_integer.cc test_rational.cc test_real.cc \
 	test_float.cc test_validated_float.cc \
+
+#	test_numeric.cc \
 
 LIB_ALGEBRA_SRC = \
 	vector.cc matrix.cc series.cc multi_index.cc expansion.cc differential.cc algebra.cc \

@@ -745,7 +745,7 @@ template<class PR> Void TestFloatBounds<PR>::test_trigonometric_functions()
 }
 
 template<class PR> Void TestFloatBounds<PR>::regression_tests() {
-    RawFloatType inf=RawFloatType::inf();
+    RawFloatType inf=RawFloatType::inf(precision);
 
     // Regression test; fails dramatically on certain types of rounding
     {

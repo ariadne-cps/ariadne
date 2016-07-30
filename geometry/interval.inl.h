@@ -160,12 +160,12 @@ inline Bool same(Interval<Float64UpperBound> const& ivl1, Interval<Float64UpperB
 inline Interval<Float64UpperBound> widen(Interval<Float64UpperBound> const& ivl, Float64UpperBound e) {
     return Interval<Float64UpperBound>(ivl.lower()-e,ivl.upper()+e); }
 inline Interval<Float64UpperBound> widen(Interval<Float64UpperBound> const& ivl) {
-    return widen(ivl,Float64UpperBound(Float64::min())); }
+    return widen(ivl,Float64UpperBound(Float64::min(Precision64()))); }
 
 inline Interval<Float64LowerBound> narrow(Interval<Float64LowerBound> const& ivl, Float64UpperBound e) {
     return Interval<Float64LowerBound>(ivl.lower()+e,ivl.upper()-e); }
 inline Interval<Float64LowerBound> narrow(Interval<Float64LowerBound> const& ivl) {
-    return narrow(ivl,Float64UpperBound(Float64::min())); }
+    return narrow(ivl,Float64UpperBound(Float64::min(Precision64()))); }
 
 inline Interval<Float64Value> cast_exact(Interval<Float64Approximation> const& ivl) {
     return reinterpret_cast<ExactIntervalType const&>(ivl); }

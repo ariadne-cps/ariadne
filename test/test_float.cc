@@ -761,6 +761,8 @@ TestFloat<PR>::test_cosine()
 template<> Void
 TestFloat<Precision64>::test_arctan()
 {
+    Precision64 pr;
+
     static const Float64 pi_down=3.1415926535897931;
     //static const Float64 pi_near=3.1415926535897931;
     static const Float64 pi_up  =3.1415926535897936;
@@ -775,7 +777,7 @@ TestFloat<Precision64>::test_arctan()
 
     static const Float64 zero=0.0;
     static const Float64 one=1.0;
-    static const Float64 eps=Float64::eps();
+    static const Float64 eps=Float64::eps(pr);
 
     Float64::set_rounding_mode(Float64::upward);
     ARIADNE_TEST_EQUAL(atan(zero),zero);

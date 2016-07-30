@@ -34,6 +34,10 @@
 
 namespace Ariadne {
 
+// Rule for combining mixed precision
+inline PrecisionMP cmb(PrecisionMP pr1, PrecisionMP pr2) { return min(pr1,pr2); }
+inline PrecisionMP cmb(PrecisionMP pr1, PrecisionMP pr2, PrecisionMP pr3) { return cmb(cmb(pr1,pr2),pr3); }
+
 FloatMP::~FloatMP() {
     mpfr_clear(_mpfr);
 }
@@ -44,6 +48,16 @@ FloatMP::FloatMP() {
 
 FloatMP::FloatMP(NoInit) {
     mpfr_init(_mpfr);
+}
+
+FloatMP::FloatMP(double d) : FloatMP(d,get_default_precision()) {
+}
+
+FloatMP::FloatMP(double d, PrecisionMP pr) : FloatMP(d,MPFR_RNDN,pr) {
+    ARIADNE_ASSERT(d==this->get_d());
+}
+
+FloatMP::FloatMP(Float64 x, PrecisionMP pr) : FloatMP(x.get_d(),pr) {
 }
 
 FloatMP::FloatMP(PrecisionMP pr) {
@@ -60,6 +74,16 @@ FloatMP::FloatMP(Int32 n, PrecisionMP pr) {
     mpfr_set_si(_mpfr,n.get_si(),get_rounding_mode());
 }
 
+FloatMP::FloatMP(double d, RoundingModeType rnd, PrecisionMP pr) {
+    mpfr_init2(_mpfr,pr);
+    mpfr_set_d(_mpfr,d,rnd);
+}
+
+FloatMP::FloatMP(Float64 x, RoundingModeType rnd, PrecisionMP pr) {
+    mpfr_init2(_mpfr,pr);
+    mpfr_set_d(_mpfr,x.get_d(),rnd);
+}
+
 FloatMP::FloatMP(Integer const& z, RoundingModeType rnd, PrecisionMP pr) {
     mpfr_init2(_mpfr,pr);
     mpfr_set_z(_mpfr,z.get_mpz(),rnd);
@@ -68,16 +92,6 @@ FloatMP::FloatMP(Integer const& z, RoundingModeType rnd, PrecisionMP pr) {
 FloatMP::FloatMP(Rational const& q, RoundingModeType rnd, PrecisionMP pr) {
     mpfr_init2(_mpfr,pr);
     mpfr_set_q(_mpfr,q.get_mpq(),rnd);
-}
-
-FloatMP::FloatMP(double d, PrecisionMP pr) {
-    mpfr_init2(_mpfr,pr);
-    mpfr_set_d(_mpfr,d,get_rounding_mode());
-}
-
-FloatMP::FloatMP(Float64 x, PrecisionMP pr) {
-    mpfr_init(_mpfr);
-    mpfr_set_d(_mpfr,x.get_d(),get_rounding_mode());
 }
 
 FloatMP::FloatMP(const FloatMP& x) {
@@ -223,6 +237,45 @@ Bool is_nan(FloatMP const& x) {
 Bool is_inf(FloatMP const& x) {
     return mpfr_inf_p(x._mpfr);
 }
+
+
+FloatMP nul(FloatMP const& x) { return nul(x,FloatMP::get_rounding_mode()); }
+FloatMP half(FloatMP const& x) { return half(x,FloatMP::get_rounding_mode()); }
+FloatMP pos(FloatMP const& x) { return pos(x,FloatMP::get_rounding_mode()); }
+FloatMP neg(FloatMP const& x) { return neg(x,FloatMP::get_rounding_mode()); }
+FloatMP sqr(FloatMP const& x) { return sqr(x,FloatMP::get_rounding_mode()); }
+FloatMP rec(FloatMP const& x) { return rec(x,FloatMP::get_rounding_mode()); }
+FloatMP add(FloatMP const& x1, FloatMP const& x2) { return add(x1,x2,FloatMP::get_rounding_mode()); }
+FloatMP sub(FloatMP const& x1, FloatMP const& x2) { return sub(x1,x2,FloatMP::get_rounding_mode()); }
+FloatMP mul(FloatMP const& x1, FloatMP const& x2) { return mul(x1,x2,FloatMP::get_rounding_mode()); }
+FloatMP div(FloatMP const& x1, FloatMP const& x2) { return div(x1,x2,FloatMP::get_rounding_mode()); }
+FloatMP fma(FloatMP const& x1, FloatMP const& x2, FloatMP const& x3) { return fma(x1,x2,x3,FloatMP::get_rounding_mode()); }
+FloatMP pow(FloatMP const& x, Int n) { return pow(x,n,FloatMP::get_rounding_mode()); }
+FloatMP sqrt(FloatMP const& x) { return sqrt(x,FloatMP::get_rounding_mode()); }
+FloatMP exp(FloatMP const& x) { return exp(x,FloatMP::get_rounding_mode()); }
+FloatMP log(FloatMP const& x) { return log(x,FloatMP::get_rounding_mode()); }
+FloatMP sin(FloatMP const& x) { return sin(x,FloatMP::get_rounding_mode()); }
+FloatMP cos(FloatMP const& x) { return cos(x,FloatMP::get_rounding_mode()); }
+FloatMP tan(FloatMP const& x) { return tan(x,FloatMP::get_rounding_mode()); }
+FloatMP asin(FloatMP const& x) { return asin(x,FloatMP::get_rounding_mode()); }
+FloatMP acos(FloatMP const& x) { return acos(x,FloatMP::get_rounding_mode()); }
+FloatMP atan(FloatMP const& x) { return atan(x,FloatMP::get_rounding_mode()); }
+FloatMP FloatMP::pi(PrecisionMP pr) { return pi(pr,FloatMP::get_rounding_mode()); }
+
+FloatMP max(FloatMP const& x1, FloatMP const& x2) { return max(x1,x2,FloatMP::get_rounding_mode()); }
+FloatMP min(FloatMP const& x1, FloatMP const& x2) { return min(x1,x2,FloatMP::get_rounding_mode()); }
+FloatMP abs(FloatMP const& x) { return abs(x,FloatMP::get_rounding_mode()); }
+FloatMP mag(FloatMP const& x) { return mag(x,FloatMP::get_rounding_mode()); }
+
+    // Mixed operations
+FloatMP add(FloatMP const& x1, Dbl x2) { return add(x1,x2,FloatMP::get_rounding_mode()); }
+FloatMP sub(FloatMP const& x1, Dbl x2) { return sub(x1,x2,FloatMP::get_rounding_mode()); }
+FloatMP mul(FloatMP const& x1, Dbl x2) { return mul(x1,x2,FloatMP::get_rounding_mode()); }
+FloatMP div(FloatMP const& x1, Dbl x2) { return div(x1,x2,FloatMP::get_rounding_mode()); }
+FloatMP add(Dbl x1, FloatMP const& x2) { return add(x1,x2,FloatMP::get_rounding_mode()); }
+FloatMP sub(Dbl x1, FloatMP const& x2) { return sub(x1,x2,FloatMP::get_rounding_mode()); }
+FloatMP mul(Dbl x1, FloatMP const& x2) { return mul(x1,x2,FloatMP::get_rounding_mode()); }
+FloatMP div(Dbl x1, FloatMP const& x2) { return div(x1,x2,FloatMP::get_rounding_mode()); }
 
 FloatMP operator+(FloatMP const& x) {
     return x;
@@ -374,11 +427,15 @@ FloatMP abs(FloatMP const& x, FloatMP::RoundingModeType rnd) {
 }
 
 FloatMP max(FloatMP const& x1, FloatMP const& x2, FloatMP::RoundingModeType rnd) {
-    FloatMP r(std::max(x1.precision(),x2.precision()),NoInit()); mpfr_max(r._mpfr,x1._mpfr,x2._mpfr,rnd); return std::move(r);
+    FloatMP r(cmb(x1.precision(),x2.precision()),NoInit()); mpfr_max(r._mpfr,x1._mpfr,x2._mpfr,rnd); return std::move(r);
 }
 
 FloatMP min(FloatMP const& x1, FloatMP const& x2, FloatMP::RoundingModeType rnd) {
-    FloatMP r(std::max(x1.precision(),x2.precision()),NoInit()); mpfr_min(r._mpfr,x1._mpfr,x2._mpfr,rnd); return std::move(r);
+    FloatMP r(cmb(x1.precision(),x2.precision()),NoInit()); mpfr_min(r._mpfr,x1._mpfr,x2._mpfr,rnd); return std::move(r);
+}
+
+FloatMP mag(FloatMP const& x, FloatMP::RoundingModeType rnd) {
+    FloatMP r(x.precision(),NoInit()); mpfr_abs(r._mpfr,x._mpfr,MPFR_RNDN); return std::move(r);
 }
 
 FloatMP nul(FloatMP const& x, FloatMP::RoundingModeType rnd) {
@@ -447,16 +504,19 @@ FloatMP FloatMP::pi(PrecisionMP pr, FloatMP::RoundingModeType rnd) {
 }
 
 FloatMP add(FloatMP const& x1, FloatMP const& x2, FloatMP::RoundingModeType rnd) {
-    FloatMP r(std::min(x1.precision(),x2.precision()),NoInit()); mpfr_add(r._mpfr,x1._mpfr,x2._mpfr,rnd); return std::move(r);
+    FloatMP r(cmb(x1.precision(),x2.precision()),NoInit()); mpfr_add(r._mpfr,x1._mpfr,x2._mpfr,rnd); return std::move(r);
 }
 FloatMP sub(FloatMP const& x1, FloatMP const& x2, FloatMP::RoundingModeType rnd) {
-    FloatMP r(std::min(x1.precision(),x2.precision()),NoInit()); mpfr_sub(r._mpfr,x1._mpfr,x2._mpfr,rnd); return std::move(r);
+    FloatMP r(cmb(x1.precision(),x2.precision()),NoInit()); mpfr_sub(r._mpfr,x1._mpfr,x2._mpfr,rnd); return std::move(r);
 }
 FloatMP mul(FloatMP const& x1, FloatMP const& x2, FloatMP::RoundingModeType rnd) {
-    FloatMP r(std::min(x1.precision(),x2.precision()),NoInit()); mpfr_mul(r._mpfr,x1._mpfr,x2._mpfr,rnd); return std::move(r);
+    FloatMP r(cmb(x1.precision(),x2.precision()),NoInit()); mpfr_mul(r._mpfr,x1._mpfr,x2._mpfr,rnd); return std::move(r);
 }
 FloatMP div(FloatMP const& x1, FloatMP const& x2, FloatMP::RoundingModeType rnd) {
-    FloatMP r(std::min(x1.precision(),x2.precision()),NoInit()); mpfr_div(r._mpfr,x1._mpfr,x2._mpfr,rnd); return std::move(r);
+    FloatMP r(cmb(x1.precision(),x2.precision()),NoInit()); mpfr_div(r._mpfr,x1._mpfr,x2._mpfr,rnd); return std::move(r);
+}
+FloatMP fma(FloatMP const& x1, FloatMP const& x2, FloatMP const& x3, FloatMP::RoundingModeType rnd) {
+    FloatMP r(cmb(x1.precision(),x2.precision(),x3.precision()),NoInit()); mpfr_fma(r._mpfr,x1._mpfr,x2._mpfr,x3._mpfr,rnd); return std::move(r);
 }
 FloatMP pow(FloatMP const& x, Int n, FloatMP::RoundingModeType rnd) {
     FloatMP r(x.precision(),NoInit()); mpfr_pow_si(r._mpfr,x._mpfr,n,rnd); return std::move(r);

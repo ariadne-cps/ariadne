@@ -48,6 +48,9 @@ class Rational;
 
 
 class Precision64 {
+    friend constexpr Precision64 max(Precision64, Precision64) { return Precision64(); }
+    friend constexpr Precision64 min(Precision64, Precision64) { return Precision64(); }
+    friend constexpr bool operator<=(Precision64, Precision64) { return true; }
     friend constexpr bool operator==(Precision64, Precision64) { return true; }
     friend OutputStream& operator<<(OutputStream& os, Precision64 dp) { return os << "Precision64()"; }
 };
@@ -97,11 +100,11 @@ class Float64 {
     Precision64 precision() const;
     Void set_precision(Precision64);
   public:
-    static Float64 nan(Precision64 pr = get_default_precision());
-    static Float64 inf(Precision64 pr = get_default_precision());
-    static Float64 max(Precision64 pr = get_default_precision());;
-    static Float64 eps(Precision64 pr = get_default_precision());
-    static Float64 min(Precision64 pr = get_default_precision());
+    static Float64 nan(Precision64 pr);
+    static Float64 inf(Precision64 pr);
+    static Float64 max(Precision64 pr);
+    static Float64 eps(Precision64 pr);
+    static Float64 min(Precision64 pr);
   public:
     //! \brief Default constructor creates an uninitialised number.
     Float64() : dbl() { }
@@ -113,7 +116,7 @@ class Float64 {
     Float64(const Float64& x) : dbl(x.dbl) { }
 
     //! \brief Construct from a rational number with given rounding
-    explicit Float64(const Rational& q, RoundingModeType rnd, PrecisionType pr=get_default_precision());
+    explicit Float64(const Rational& q, RoundingModeType rnd, PrecisionType pr);
     //! \brief Convert to a rational number.
     explicit operator Rational () const;
   public:
@@ -151,7 +154,8 @@ class Float64 {
     friend Float64 acos(Float64 x);
     friend Float64 atan(Float64 x);
 
-    static Float64 pi(PrecisionType pr=get_default_precision(), RoundingModeType rnd=get_rounding_mode());
+    static Float64 pi(PrecisionType pr, RoundingModeType rnd);
+    static Float64 pi(PrecisionType pr);
 
     friend Float64 max(Float64 x1, Float64 x2);
     friend Float64 min(Float64 x1, Float64 x2);
@@ -181,7 +185,7 @@ class Float64 {
 
     friend OutputStream& operator<<(OutputStream& os, Float64 const&);
     friend InputStream& operator>>(InputStream& is, Float64&);
-    friend OutputStream& write(OutputStream& os, Float64 const& x, DecimalPlaces dgts, RoundingMode64 rnd);
+    friend OutputStream& write(OutputStream& os, Float64 const& x, DecimalPlaces dgts, RoundingModeType rnd);
 };
 
 // Correctly rounded algebraic and transcendental functions

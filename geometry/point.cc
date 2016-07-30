@@ -48,8 +48,9 @@ template<class X> Point<X>* Point<X>::clone() const {
 }
 
 template<class X> ExactBoxType Point<X>::bounding_box() const {
+    Float64 eps=Float64::eps(Precision64());
     ExactBoxType r(this->dimension());
-    UpperIntervalType e(-Float64::eps(),+Float64::eps());
+    UpperIntervalType e(-eps,+eps);
     for(Nat i=0; i!=this->dimension(); ++i) {
         r[i]=cast_exact_interval(cast_exact((*this)[i])+e); }
     return r;

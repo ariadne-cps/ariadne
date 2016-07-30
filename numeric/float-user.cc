@@ -43,7 +43,7 @@ template<class PR> Nat FloatApproximation<PR>::output_places = 4;
 template<class PR> Nat FloatBounds<PR>::output_places=8;
 template<class PR> Nat FloatValue<PR>::output_places = 16;
 
-const FloatValue<Precision64> infty = FloatValue<Precision64>(Float64::inf());
+const FloatValue<Precision64> infty = FloatValue<Precision64>(Float64::inf(Precision64()));
 
 FloatError<Precision64> operator"" _error(long double lx) {
     double x=lx;
@@ -726,8 +726,9 @@ template<class PR> struct Operations<FloatBounds<PR>> {
         }
         else {
             //ARIADNE_THROW(DivideByZeroException,"FloatBounds div(FloatBounds x1, FloatBounds x2)","x1="<<x1<<", x2="<<x2);
-            rl=-RawFloat<PR>::inf();
-            ru=+RawFloat<PR>::inf();
+            PR pr=max(x1.precision(),x2.precision());
+            rl=-RawFloat<PR>::inf(pr);
+            ru=+RawFloat<PR>::inf(pr);
         }
         return FloatBounds<PR>(rl,ru);
     }

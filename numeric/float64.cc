@@ -775,8 +775,9 @@ OutputStream& write(OutputStream& os, FloatMP const& x, DecimalPlaces dgts, Roun
 
 OutputStream& write(OutputStream& os, Float64 const& x, DecimalPlaces dgts, RoundingMode64 rnd) {
     assert(rnd==Float64::to_nearest || rnd==Float64::upward || rnd==Float64::downward);
+    PrecisionMP pr_mp(53);
     RoundingModeMP rnd_mp = (rnd==Float64::to_nearest) ? FloatMP::to_nearest : (rnd==Float64::downward) ? FloatMP::downward : FloatMP::upward;
-    return write(os,FloatMP(x),dgts,rnd_mp);
+    return write(os,FloatMP(x,pr_mp),dgts,rnd_mp);
 }
 
 

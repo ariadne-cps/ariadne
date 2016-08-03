@@ -142,7 +142,7 @@ class FloatMP {
   public:
     // Explcitly rounded operations
     friend FloatMP nul(FloatMP const& x, RoundingModeType rnd);
-    friend FloatMP half(FloatMP const& x, RoundingModeType rnd);
+    friend FloatMP hlf(FloatMP const& x, RoundingModeType rnd);
     friend FloatMP pos(FloatMP const& x, RoundingModeType rnd);
     friend FloatMP neg(FloatMP const& x, RoundingModeType rnd);
     friend FloatMP sqr(FloatMP const& x, RoundingModeType rnd);
@@ -181,7 +181,7 @@ class FloatMP {
 
     // Operations in current rounding mode
     friend FloatMP nul(FloatMP const& x);
-    friend FloatMP half(FloatMP const& x);
+    friend FloatMP hlf(FloatMP const& x);
     friend FloatMP pos(FloatMP const& x);
     friend FloatMP neg(FloatMP const& x);
     friend FloatMP sqr(FloatMP const& x);

@@ -40,7 +40,7 @@ template<class X, class NX=X, class R=X> class Operations {
     static X _nul(X const& x);
     static X _pos(X const& x);
     static X _neg(NX const& x);
-    static X _half(X const& x);
+    static X _hlf(X const& x);
     static R _sqr(X const& x);
     static R _rec(NX const& x);
     static R _add(X const& x1, X const& x2);
@@ -346,7 +346,7 @@ template<class X, class R=X> struct DeclareNumericOperations
     friend X nul(X const& x);
     friend X pos(X const& x);
     friend X neg(X const& x);
-    friend X half(X const& x);
+    friend X hlf(X const& x);
     friend R sqr(X const& x);
     friend R rec(X const& x);
     friend R add(X const& x1, X const& x2);
@@ -435,7 +435,7 @@ template<class X, class R=X> struct DispatchNumericOperations
     friend X nul(X const& x) { return Operations<X,X,R>::_nul(x); }
     friend X pos(X const& x) { return Operations<X,X,R>::_pos(x); }
     friend X neg(X const& x) { return Operations<X,X,R>::_neg(x); }
-    friend X half(X const& x) { return Operations<X,X,R>::_half(x); }
+    friend X hlf(X const& x) { return Operations<X,X,R>::_hlf(x); }
     friend R sqr(X const& x) { return Operations<X,X,R>::_sqr(x); }
     friend R rec(X const& x) { return Operations<X,X,R>::_rec(x); }
     friend R add(X const& x1, X const& x2) { return Operations<X,X,R>::_add(x1,x2); }

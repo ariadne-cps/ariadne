@@ -43,7 +43,7 @@ template<class A, class X=typename A::NumericType> struct AlgebraOperations {
     static A _nul(A const& a);
     static A _pos(A const& a);
     static A _neg(A const& a);
-    static A _half(A const& a);
+    static A _hlf(A const& a);
     static A _sqr(A const& a);
     static A _rec(A const& a);
     static A _add(A const& a1, A const& a2);
@@ -158,7 +158,7 @@ template<class A, class X> struct DeclareAlgebraOperations
     friend A nul(A const& a);
     friend A pos(A const& a);
     friend A neg(A const& a);
-    friend A half(A const& a);
+    friend A hlf(A const& a);
     friend A sqr(A const& a);
     friend A add(A const& a1, A const& a2);
     friend A sub(A const& a1, A const& a2);
@@ -248,7 +248,7 @@ template<class A, class X> struct DispatchAlgebraOperations
     friend A nul(A const& a) { return OperationsType()._nul(a); }
     friend A pos(A const& a) { return OperationsType()._pos(a); }
     friend A neg(A const& a) { return OperationsType()._neg(a); }
-    friend A half(A const& a) { return OperationsType()._half(a); }
+    friend A hlf(A const& a) { return OperationsType()._hlf(a); }
     friend A sqr(A const& a) { return OperationsType()._sqr(a); }
     friend A add(A const& a1, A const& a2) { return OperationsType()._add(a1, a2); }
     friend A sub(A const& a1, A const& a2) { return OperationsType()._sub(a1, a2); }

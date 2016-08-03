@@ -115,13 +115,13 @@ TestDirectedFloats<PR>::test_concept()
     FloatValueType ex(1);
 
     lx=+lx; lx=-ux; lx=lx+lx; lx=lx-ux; lx=lx*m; lx=lx/m;
-    ex=nul(lx); lx=pos(lx); lx=neg(ux); lx=half(lx);
+    ex=nul(lx); lx=pos(lx); lx=neg(ux); lx=hlf(lx);
     lx=add(lx,lx); lx=sub(lx,ux);
     lx=sqrt(lx); lx=exp(lx); lx=log(lx); lx=atan(lx);
     lx=max(lx,lx); lx=min(lx,lx);
 
     ux=+ux; ux=-lx; ux=ux+ux; ux=ux-lx; ux=ux*m; ux=ux/m;
-    ex=nul(ux); ux=pos(ux); ux=neg(lx); ux=half(ux);
+    ex=nul(ux); ux=pos(ux); ux=neg(lx); ux=hlf(ux);
     ux=add(ux,ux); ux=sub(ux,lx);
     ux=sqrt(ux); ux=exp(ux); ux=log(ux);
     ux=max(ux,ux); ux=min(ux,ux);
@@ -340,7 +340,7 @@ TestFloatBounds<PR>::test_concept()
     rx=n; rx=m; rx=x; rx=vx;
 
     // ExactTag operations
-    rx=nul(vx); rx=pos(vx); rx=neg(vx); rx=half(vx); rx=sqr(vx); rx=rec(vx);
+    rx=nul(vx); rx=pos(vx); rx=neg(vx); rx=hlf(vx); rx=sqr(vx); rx=rec(vx);
 
     rx=operator+(x,x); rx=operator+(x,vx); rx=operator+(vx,x); rx=operator+(vx,vx);
     rx=operator-(x,x); rx=operator-(x,vx); rx=operator-(vx,x); rx=operator-(vx,vx);

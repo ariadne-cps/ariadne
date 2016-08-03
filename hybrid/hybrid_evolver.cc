@@ -1568,7 +1568,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         result.step_kind=StepKind::SPACETIME_DEPENDENT_FINISHING_TIME;
         result.finishing_kind=FinishingKind::BEFORE_FINAL_TIME;
         Float64Value sf={1,Precision64()};
-        while(possibly(remaining_time_range.upper()*sf>step_size)) { sf = half(sf); }
+        while(possibly(remaining_time_range.upper()*sf>step_size)) { sf = hlf(sf); }
         temporal_evolution_time= Float64Bounds(sf)*(final_time_bounds-time_identity);
     } else { // remaining_time_range.lower()>step_size)
         // As far as timing goes, perform the evolution over a full time step
@@ -1813,8 +1813,8 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
             Float64Value h=result.step_size;
             Float64Value tmin=cast_exact(starting_time_range.lower());
             Float64Value tmax=cast_exact(starting_time_range.upper());
-            Float64Bounds a=1-(half(h)/(tmax-tmin));
-            Float64Bounds b=h*(tmax-half(tmin))/(tmax-tmin);
+            Float64Bounds a=1-(hlf(h)/(tmax-tmin));
+            Float64Bounds b=h*(tmax-hlf(tmin))/(tmax-tmin);
             result.parameter_dependent_finishing_time=a*starting_time_function+b;
         }
         ARIADNE_LOG(7,"Unwinding to time "<<result.parameter_dependent_finishing_time<<"\n");

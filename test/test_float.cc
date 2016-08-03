@@ -131,7 +131,7 @@ TestFloat<PR>::test_concept()
 
 
     // ExactTag operations
-    x=nul(x); x=pos(x); x=neg(x); x=half(x);
+    x=nul(x); x=pos(x); x=neg(x); x=hlf(x);
 
     // Rounded arithmetic operations
     x=add_near(x,x); x=add_approx(x,x); x=add_down(x,x); x=add_up(x,x); // x=add_chop(x,x);

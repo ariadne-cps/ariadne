@@ -141,7 +141,7 @@ class Float64 {
     friend Float64 round(Float64 x);
 
     friend Float64 nul(Float64 x);
-    friend Float64 half(Float64 x);
+    friend Float64 hlf(Float64 x);
     friend Float64 pos(Float64 x);
     friend Float64 neg(Float64 x);
     friend Float64 sqr(Float64 x);
@@ -215,7 +215,7 @@ inline Float64 abs(Float64 x) { return std::fabs(x.dbl); }
 inline Float64 nul(Float64 x) { return +0.0; }
 inline Float64 pos(Float64 x) { volatile double xv=x.dbl; return +xv; }
 inline Float64 neg(Float64 x) { volatile double xv=x.dbl; return -xv; }
-inline Float64 half(Float64 x) { volatile double xv=x.dbl; return xv/2; }
+inline Float64 hlf(Float64 x) { volatile double xv=x.dbl; return xv/2; }
 inline Float64 sqr(Float64 x) { volatile double xv=x.dbl; return xv*xv; }
 inline Float64 rec(Float64 x) { volatile double xv=x.dbl; return 1.0/xv; }
 inline Float64 add(Float64 x1, Float64 x2) { volatile double xv = x1.dbl; volatile double yv=x2.dbl; volatile double r=xv+yv; return r; }
@@ -296,14 +296,14 @@ inline Float64 fma_down(Float64 x, Float64 y, Float64 z) {
 //! \related Float64 \brief The average of two values, computed with nearest rounding. Also available with \c _ivl suffix.
 inline Float64 med_approx(Float64 x, Float64 y) {
     rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest);
-    Float64 r=half(add(x,y)); set_rounding_mode(rounding_mode); return r; }
+    Float64 r=hlf(add(x,y)); set_rounding_mode(rounding_mode); return r; }
 inline Float64 med_near(Float64 x, Float64 y) {
     rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest);
-    Float64 r=half(add(x,y)); set_rounding_mode(rounding_mode); return r; }
+    Float64 r=hlf(add(x,y)); set_rounding_mode(rounding_mode); return r; }
 //! \related Float64 \brief Half of the difference of two values, computed with upward rounding. Also available with \c _ivl suffix.
 inline Float64 rad_up(Float64 x, Float64 y) {
     rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward);
-    Float64 r=half(sub(y,x)); set_rounding_mode(rounding_mode); return r; }
+    Float64 r=hlf(sub(y,x)); set_rounding_mode(rounding_mode); return r; }
 
 inline Float64 sqrt_approx(Float64 x) { return std::sqrt(x.dbl); }
 inline Float64 exp_approx(Float64 x) { return std::exp(x.dbl); }

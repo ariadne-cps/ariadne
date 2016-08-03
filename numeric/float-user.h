@@ -57,7 +57,7 @@ template<class X, class NX=X> struct DeclareDirectedNumericOperators {
     friend X pos(X const& x);
     friend X neg(NX const& x);
     friend NX neg(X const& x);
-    friend X half(X const& x);
+    friend X hlf(X const& x);
     friend X add(X const& x1, X const& x2);
     friend X sub(X const& x1, NX const& x2);
     friend NX sub(NX const& x1, X const& x2);
@@ -494,7 +494,7 @@ template<class PR> class FloatBounds
 
     RawFloatType const& lower_raw() const { return _l; }
     RawFloatType const& upper_raw() const { return _u; }
-    RawFloatType const value_raw() const { return half(add_near(_l,_u)); }
+    RawFloatType const value_raw() const { return hlf(add_near(_l,_u)); }
     RawFloatType const error_raw() const { RawFloatType v=value_raw(); return max(sub_up(_u,v),sub_up(v,_l)); }
     double get_d() const { return value_raw().get_d(); }
 
@@ -631,7 +631,7 @@ template<class PR> class FloatValue
   public:
     friend FloatValue<PR> pos(FloatValue<PR> const&);
     friend FloatValue<PR> neg(FloatValue<PR> const&);
-    friend FloatValue<PR> half(FloatValue<PR> const&);
+    friend FloatValue<PR> hlf(FloatValue<PR> const&);
     friend FloatValue<PR> operator+(FloatValue<PR> const&);
     friend FloatValue<PR> operator-(FloatValue<PR> const&);
     friend FloatValue<PR>& operator*=(FloatValue<PR>&, TwoExp const&);

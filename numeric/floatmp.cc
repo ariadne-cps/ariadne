@@ -262,7 +262,7 @@ Bool is_inf(FloatMP const& x) {
 
 
 FloatMP nul(FloatMP const& x) { return nul(x,FloatMP::get_rounding_mode()); }
-FloatMP half(FloatMP const& x) { return half(x,FloatMP::get_rounding_mode()); }
+FloatMP hlf(FloatMP const& x) { return hlf(x,FloatMP::get_rounding_mode()); }
 FloatMP pos(FloatMP const& x) { return pos(x,FloatMP::get_rounding_mode()); }
 FloatMP neg(FloatMP const& x) { return neg(x,FloatMP::get_rounding_mode()); }
 FloatMP sqr(FloatMP const& x) { return sqr(x,FloatMP::get_rounding_mode()); }
@@ -476,7 +476,7 @@ FloatMP sqr(FloatMP const& x, FloatMP::RoundingModeType rnd) {
     FloatMP r(x.precision(),NoInit()); mpfr_sqr(r._mpfr,x._mpfr,rnd); return std::move(r);
 }
 
-FloatMP half(FloatMP const& x, FloatMP::RoundingModeType rnd) {
+FloatMP hlf(FloatMP const& x, FloatMP::RoundingModeType rnd) {
     FloatMP r(x.precision(),NoInit()); mpfr_div_si(r._mpfr,x._mpfr,2,rnd); return std::move(r);
 }
 
@@ -639,7 +639,7 @@ Bool operator> (Float64 x1, FloatMP const& x2) {
 FloatMP pos_exact(FloatMP const& x) { return pos(x,MPFR_RNDN); }
 FloatMP neg_exact(FloatMP const& x) { return neg(x,MPFR_RNDN); }
 FloatMP abs_exact(FloatMP const& x) { return abs(x,MPFR_RNDN); }
-FloatMP half_exact(FloatMP const& x) { return half(x,MPFR_RNDN); }
+FloatMP half_exact(FloatMP const& x) { return hlf(x,MPFR_RNDN); }
 
 FloatMP next_down(FloatMP const& x) { FloatMP r(x); mpfr_nextbelow(r._mpfr); return std::move(r); }
 FloatMP next_up(FloatMP const& x) { FloatMP r(x); mpfr_nextabove(r._mpfr); return std::move(r); }
@@ -683,8 +683,8 @@ FloatMP cos_approx(FloatMP const& x) { return cos(x,MPFR_RNDN); }
 FloatMP tan_approx(FloatMP const& x) { return tan(x,MPFR_RNDN); }
 FloatMP atan_approx(FloatMP const& x) { return atan(x,MPFR_RNDN); }
 
-FloatMP med_approx(FloatMP const& x1, FloatMP const& x2) { return half(add(x1,x2,MPFR_RNDN),MPFR_RNDN); }
-FloatMP rad_up(FloatMP const& x1, FloatMP const& x2) { return half(abs(sub(x2,x1,MPFR_RNDU),MPFR_RNDU),MPFR_RNDU); }
+FloatMP med_approx(FloatMP const& x1, FloatMP const& x2) { return hlf(add(x1,x2,MPFR_RNDN),MPFR_RNDN); }
+FloatMP rad_up(FloatMP const& x1, FloatMP const& x2) { return hlf(abs(sub(x2,x1,MPFR_RNDU),MPFR_RNDU),MPFR_RNDU); }
 
 FloatMP sqr_rnd(FloatMP const& x) { return sqr(x,FloatMP::get_rounding_mode()); }
 FloatMP add_rnd(FloatMP const& x, FloatMP const& y) { return add(x,y,FloatMP::get_rounding_mode()); }

@@ -59,6 +59,8 @@ class Dyadic
   public:
     typedef ExactTag Paradigm;
 
+    //! \brief Construct a Dyadic number from a GNU mpf object.
+    explicit Dyadic (mpf_t mpf);
     //! \brief Construct the Dyadic number \a p/2<sup>q</sup>.
     Dyadic (Integer const& p, Nat q);
     Dyadic (Integer const& p, Int q) = delete;
@@ -77,15 +79,13 @@ class Dyadic
     //! \brief Convert from a built-in integer.
     template<class N, EnableIf<And<IsIntegral<N>,IsSigned<N>>> = dummy> Dyadic(N n);
     //! \brief Convert from an integer.
-    Dyadic(const Integer& p);
+    Dyadic(const Integer& z);
+    //! \brief Convert from a power of two.
+    Dyadic(const TwoExp& t);
     //! \brief Explicit construction from a built-in double-precision value.
     //! \details Tests to ensure that the number is not 'accidentally' created from a rounded version of a string literal,
     //! by comparing the input with it's single-precision approximation.
     explicit Dyadic(double x);
-    //! \brief Explicit construction from a floating-point value.
-    explicit Dyadic(const RawFloat64& x);
-    //! \brief Explicit construction from a floating-point value.
-    explicit Dyadic(const RawFloatMP& x);
     //! \brief Convert to a generic number.
     operator Number<ExactTag> () const;
     //! \brief The smallest integer \a p such that \a x=p/2<sup>q</sup>
@@ -99,6 +99,8 @@ class Dyadic
     friend Dyadic operator"" _bin(long double x);
     //! \brief Halve a number.
     Dyadic hlf(Dyadic const&);
+    friend Rational rec(Rational const&);
+    friend Rational div(Rational const&, Rational const&);
     //! \brief Convert a floating-point literal to Dyadic i.e. long binary format.
     friend OutputStream& operator<<(OutputStream& os, Dyadic const& x);
 };
@@ -108,6 +110,7 @@ template<class N, EnableIf<And<IsIntegral<N>,IsSigned<N>>>> inline Dyadic::Dyadi
 
 
 inline Dyadic operator"" _bin(long double x) { return Dyadic(static_cast<double>(x)); }
+inline Dyadic operator"" _dyadic(long double x) { return Dyadic(static_cast<double>(x)); }
 
 
 

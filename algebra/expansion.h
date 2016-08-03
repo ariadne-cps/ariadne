@@ -238,6 +238,9 @@ class Expansion
     Expansion(SizeType as, InitializerList<PairType<InitializerList<Int>,X>> lst);
     Expansion(InitializerList<PairType<InitializerList<Int>,X>> lst);
 
+    template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>> =dummy>
+        Expansion(InitializerList<PairType<InitializerList<Int>,Y>> lst, PRS... prs);
+
     template<class XX, EnableIf<IsConvertible<XX,X>> =dummy>
         Expansion(const Expansion<XX>& p);
     template<class XX, EnableIf<IsConstructible<X,XX>> =dummy, DisableIf<IsConvertible<XX,X>> =dummy>
@@ -268,6 +271,9 @@ class Expansion
     Void append(const MultiIndex& a, const CoefficientType& c);
     Void prepend(const MultiIndex& a, const CoefficientType& c);
     Void append_sum(const MultiIndex& a1, const MultiIndex& a2, const CoefficientType& c);
+
+    template<class Y, EnableIf<IsAssignable<CoefficientType,Y>> =dummy>
+        Void append(const MultiIndex& a, const Y& c);
 
     const CoefficientType& operator[](const MultiIndex& a) const;
 //    ExpansionValueReference<X> operator[](const MultiIndex& a);
@@ -309,6 +315,7 @@ class Expansion
     Void _prepend(const MultiIndex& a, const CoefficientType& x);
     Void _append(const MultiIndex& a, const CoefficientType& x);
     Void _append(const MultiIndex&  a1, const MultiIndex&  a2, const CoefficientType& x);
+    CoefficientType& _at_end(const MultiIndex&  a);
   protected:
     template<class CMP> Void _sort(const CMP& cmp);
     template<class CMP> CoefficientType& _at(const MultiIndex& a,const CMP& cmp);
@@ -412,6 +419,24 @@ template<class X> Expansion<MidpointType<X>> midpoint(const Expansion<X>& e) {
     return r;
 }
 
+template<class X> template<class Y, EnableIf<IsAssignable<X,Y>>>  Void Expansion<X>::append(const MultiIndex& a, const Y& c) {
+    this->_at_end(a)=c;
+}
+
+template<class X> template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>>>
+Expansion<X>::Expansion(InitializerList<PairType<InitializerList<Int>,Y>> lst, PRS... prs)
+    : _argument_size(lst.size()==0?0u:lst.begin()->first.size())
+{
+    MultiIndex a;
+    Y y;
+    for(auto iter=lst.begin();
+        iter!=lst.end(); ++iter)
+    {
+        a=iter->first;
+        y=iter->second;
+        if(decide(y!=0)) { this->append(a,X(y,prs...)); }
+    }
+}
 
 
 } // namespace Ariadne

@@ -282,6 +282,9 @@ FloatMPBounds Real::evaluate(Accuracy accuracy) const {
 
 
 
+LowerReal::LowerReal(SharedPointer<RealInterface> p) : _ptr(p) {
+}
+
 LowerReal::LowerReal(Real r) : _ptr(r._ptr) {
 }
 
@@ -299,6 +302,9 @@ Float64LowerBound LowerReal::get(Precision64 pr) const {
 
 FloatMPLowerBound LowerReal::get(PrecisionMP pr) const {
     return this->_ptr->_evaluate(pr);
+}
+
+UpperReal::UpperReal(SharedPointer<RealInterface> p) : _ptr(p) {
 }
 
 UpperReal::UpperReal(Real r) : _ptr(r._ptr) {

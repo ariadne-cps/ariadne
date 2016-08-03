@@ -54,6 +54,9 @@ class Precision64 {
     friend constexpr bool operator==(Precision64, Precision64) { return true; }
     friend OutputStream& operator<<(OutputStream& os, Precision64 dp) { return os << "Precision64()"; }
 };
+static const Precision64 double_precision = Precision64();
+static const Precision64 pr64 = Precision64();
+static const Precision64 dp = Precision64();
 
 using RoundingMode64 = RoundingModeType;
 
@@ -112,11 +115,16 @@ class Float64 {
     //! \brief Convert from a built-in double-precision floating-point number.
     Float64(double x) : dbl(x) { }
     explicit Float64(double x, Precision64) : dbl(x) { }
+    explicit Float64(Dyadic const& x, Precision64);
     //! \brief Copy constructor.
     Float64(const Float64& x) : dbl(x.dbl) { }
 
+    //! \brief Construct from a double number using given rounding
+    explicit Float64(double d, RoundingModeType rnd, PrecisionType pr);
     //! \brief Construct from a rational number with given rounding
     explicit Float64(const Rational& q, RoundingModeType rnd, PrecisionType pr);
+    //! \brief Convert to a dyadic number.
+    explicit operator Dyadic () const;
     //! \brief Convert to a rational number.
     explicit operator Rational () const;
   public:

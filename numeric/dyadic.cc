@@ -46,6 +46,11 @@ Dyadic::~Dyadic() {
     mpf_clear(_mpf);
 }
 
+Dyadic::Dyadic(mpf_t mpf) {
+    mpf_init2(_mpf,maximum_precision);
+    mpf_set(_mpf,_mpf);
+}
+
 Dyadic::Dyadic(Integer const& p, Nat q) {
     mpf_init2(_mpf,maximum_precision);
     mpf_set_z(_mpf,p._mpz);
@@ -118,6 +123,12 @@ Dyadic& operator*=(Dyadic& x1, Dyadic const& x2) {
     return x1;
 }
 */
+
+Dyadic nul(Dyadic const& x) {
+    Dyadic r;
+    mpf_set_si(r._mpf,0);
+    return std::move(r);
+}
 
 Dyadic pos(Dyadic const& x) {
     Dyadic r;

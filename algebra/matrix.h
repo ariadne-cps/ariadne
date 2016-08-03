@@ -128,13 +128,19 @@ template<class X> class Matrix
     Matrix(SizeType m, SizeType n);
 
     //! Construct a matrix with \a r rows and \a c columns with values initialised to \a x.
-    Matrix(SizeType m, SizeType n, const X& x);
+    Matrix(SizeType m, SizeType n, const X& z);
+
+    //! Construct a matrix from parameters of \a X.
+    template<class... PRS, EnableIf<IsConstructible<X,PRS...>> =dummy> explicit Matrix(SizeType m, SizeType n, PRS... prs) : Matrix(m,n,X(prs...)) { }
 
     //! Construct a matrix with \a r rows and \a c columns, with values initialised from the C-style Array beginning at \a ptr in row-major format. The value in the \a i<sup>th</sup> row and \a j<sup>th</sup> column of the resulting matrix is \a ptr[i*c+j].
     Matrix(SizeType m, SizeType n, const X* p);
 
     //! Construct a matrix using initializer lists.
     Matrix(InitializerList<InitializerList<X>> lst);
+
+    //! Construct a matrix using initializer lists.
+    template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>> =dummy> Matrix(InitializerList<InitializerList<Y>> lst, PRS... pr);
 
     //! Construct a matrix as a linear map from functionals.
     Matrix(Vector<Covector<X>>);
@@ -170,6 +176,7 @@ template<class X> class Matrix
     const X& get(SizeType i, SizeType j) const ;
     //! \brief Set the value stored in the \a i<sup>th</sup> row and \a j<sup>th</sup> column to \a x.
     Void set(SizeType i, SizeType j, const X& x);
+    template<class Y, EnableIf<IsAssignable<X,Y>> =dummy> Void set(SizeType i, SizeType j, const Y& y);
     //! \brief A pointer to the first element of the data storage.
     const X* begin() const;
 
@@ -709,6 +716,23 @@ template<class X1, class X2> Vector<ArithmeticType<X1,X2>> operator*(MatrixTrans
         }
     }
     return std::move(v0);
+}
+
+template<class X> template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>>>
+Matrix<X>::Matrix(InitializerList<InitializerList<Y>> lst, PRS... prs) : _rs(lst.size()), _cs(lst.begin()->size()), _ary(_rs*_cs,X(prs...)) {
+    typename InitializerList<InitializerList<Y>>::const_iterator row_iter=lst.begin();
+    for(SizeType i=0; i!=this->row_size(); ++i, ++row_iter) {
+        ARIADNE_PRECONDITION(row_iter->size()==this->column_size());
+        typename InitializerList<Y>::const_iterator col_iter=row_iter->begin();
+        for(SizeType j=0; j!=this->column_size(); ++j, ++col_iter) {
+            this->at(i,j)=*col_iter;
+        }
+    }
+}
+
+template<class X> template<class Y, EnableIf<IsAssignable<X,Y>>>
+Void Matrix<X>::set(SizeType i, SizeType j, Y const& y) {
+    this->at(i,j)=y;
 }
 
 template<class X> Matrix<MidpointType<X>> midpoint(const Matrix<X>&);

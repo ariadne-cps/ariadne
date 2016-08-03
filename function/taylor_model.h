@@ -177,6 +177,9 @@ class TaylorModel<ValidatedTag,F>
     //! \brief Construct a constant quantity in \a as independent variables with value zero and uniform error \a e
     static TaylorModel<ValidatedTag,F> ball(SizeType as, ErrorType e, Sweeper swp) {
         TaylorModel<ValidatedTag,F> r(as,swp); r.set_error(e); return r; }
+    //! \brief Construct a constant quantity in \a as independent variables with value zero and uniform error \a e
+    static TaylorModel<ValidatedTag,F> unit_ball(SizeType as, Sweeper swp) {
+        TaylorModel<ValidatedTag,F> r(as,swp); r.set_error(1u); return r; }
 
     //! \brief Construct the quantity which scales the interval \a codom onto the unit interval.
     static TaylorModel<ValidatedTag,F> scaling(SizeType as, SizeType j, const ExactIntervalType& codom, Sweeper swp);

@@ -62,17 +62,8 @@ template<class X> Expansion<X>::Expansion(SizeType as, DegreeType deg, Initializ
 
 
 template<class X> Expansion<X>::Expansion(SizeType as, InitializerList<PairType<InitializerList<Int>,X>> lst)
-    : _argument_size(as)
+    : Expansion<X>(as,lst)
 {
-    MultiIndex a;
-    X x;
-    for(auto iter=lst.begin();
-        iter!=lst.end(); ++iter)
-    {
-        a=iter->first;
-        x=iter->second;
-        if(decide(x!=X(0))) { this->append(a,x); }
-    }
 }
 
 template<class X> Expansion<X>::Expansion(InitializerList<PairType<InitializerList<Int>,X>> lst)
@@ -211,6 +202,16 @@ template<class X> Void Expansion<X>::_prepend(const MultiIndex& a, const RealTyp
     //std::cerr<<"_prepend "<<*this<<" "<<a<<" "<<x<<std::endl;
     _coefficients.resize(_coefficients.size()+_element_size());
     _allocated_insert(begin(),a,x);
+}
+
+template<class X> X& Expansion<X>::_at_end(const MultiIndex& a) {
+    //std::cerr<<"_append "<<*this<<" "<<a<<" "<<x<<"... "<<std::flush;
+    _coefficients.resize(_coefficients.size()+_element_size());
+    WordType* vp=_end_ptr()-_element_size(); const WordType* ap=a.word_begin();
+    for(SizeType j=0; j!=_index_size(); ++j) { vp[j]=ap[j]; }
+    DataType* xp=reinterpret_cast<DataType*>(this->_end_ptr())-1;
+    return *xp;
+    //std::cerr<<"done"<<std::endl;
 }
 
 template<class X> Void Expansion<X>::_append(const MultiIndex& a, const RealType& x) {

@@ -348,6 +348,10 @@ template<class X> Differential<X> Differential<X>::create_constant(NumericType c
     return Differential<X>::constant(this->argument_size(),this->degree(),c);
 }
 
+template<class X> Differential<X> Differential<X>::create_constant(Int c) const {
+    X xc=this->value(); xc=c; return Differential<X>::constant(this->argument_size(),this->degree(),xc);
+}
+
 
 template<class X> Void Differential<X>::clear() {
     this->_expansion.clear();

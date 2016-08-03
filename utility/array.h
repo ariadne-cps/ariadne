@@ -86,6 +86,10 @@ class Array {
     template<class TT, EnableIf<IsConstructible<T,TT>> = dummy, DisableIf<IsConvertible<TT,T>> =dummy>
     explicit Array(InitializerList<TT> lst) : _size(lst.size()), _ptr(uninitialized_new(_size)) {
         this->_uninitialized_fill(lst.begin()); }
+    /*! \brief Constructs an Array from an initializer list and a precision parameter. */
+    template<class TT, class PR, EnableIf<IsConstructible<T,TT,PR>> = dummy>
+    Array(InitializerList<TT> lst, PR pr) : _size(lst.size()), _ptr(uninitialized_new(_size)) {
+        this->_uninitialized_fill(lst.begin(),pr); }
 
     /*! \brief Constructs an Array from the range \a first to \a last. */
     template<class ForwardIterator>
@@ -102,6 +106,11 @@ class Array {
     template<class TT, EnableIf<IsConstructible<T,TT>> = dummy, DisableIf<IsConvertible<TT,T>> =dummy>
     explicit Array(const Array<TT>& a) : _size(a.size()), _ptr(uninitialized_new(_size)) {
         this->_uninitialized_fill(a.begin()); }
+
+    /*! \brief Explicit construction with properties parameter. */
+    template<class TT, class PR, EnableIf<IsConstructible<T,TT,PR>> = dummy>
+    Array(const Array<TT>& a, PR pr) : _size(a.size()), _ptr(uninitialized_new(_size)) {
+        this->_uninitialized_fill(a.begin(),pr); }
 
     /*! \brief Copy constructor. */
     Array(const Array<T>& a) : _size(a.size()), _ptr(uninitialized_new(_size)) {
@@ -193,6 +202,9 @@ class Array {
     template<class InputIterator> void _uninitialized_fill(InputIterator first) {
         pointer curr=_ptr; pointer end=_ptr+_size;
         while(curr!=end) { new (curr) T(*first); ++curr; ++first; } }
+    template<class InputIterator, class Parameters> void _uninitialized_fill(InputIterator first, Parameters parameters) {
+        pointer curr=_ptr; pointer end=_ptr+_size;
+        while(curr!=end) { new (curr) T(*first,parameters); ++curr; ++first; } }
   private:
     SizeType _size;
     pointer _ptr;

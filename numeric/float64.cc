@@ -662,6 +662,17 @@ const Float64::RoundingModeType Float64::to_nearest = Ariadne::to_nearest;
 
 const Float64::RoundingModeType Float64::toward_zero = Ariadne::toward_zero;
 
+Float64::Float64(Dyadic const& w, PrecisionType)
+    : Float64(w.get_d())
+{
+    ARIADNE_ASSERT(Dyadic(*this)==w);
+}
+
+Float64::Float64(double d, RoundingModeType rnd, PrecisionType)
+    : Float64(d)
+{
+}
+
 Float64::Float64(Rational const& q, RoundingModeType rnd, PrecisionType)
     : Float64(q.get_d())
 {
@@ -676,6 +687,14 @@ Float64::Float64(Rational const& q, RoundingModeType rnd, PrecisionType)
         while (Rational(dbl)>q) { dbl-=std::numeric_limits<double>::min(); }
         set_rounding_mode(old_rnd);
     }
+}
+
+Float64::operator Dyadic () const {
+    return Dyadic(this->dbl);
+}
+
+Float64::operator Rational () const {
+    return Rational(this->dbl);
 }
 
 Float64 pow_rnd(Float64 x, Int n)

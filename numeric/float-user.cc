@@ -93,6 +93,11 @@ TwoExp::operator FloatValue<Precision64> () const {
     return FloatValue<Precision64>(this->get_d());
 }
 
+template<class PR> FloatValue<PR>::FloatValue(Dyadic const& w, PR pr)
+    : _v(w,RawFloat<PR>::to_nearest,pr)
+{
+    ARIADNE_ASSERT_MSG(Dyadic(this->_v)==w,"Dyadic number "<<w<<" cannot be converted exactly to a floating-point number with precision "<<pr);
+};
 
 /*
 template<class PR> FloatValue<PR>::FloatValue(Rational const& q, PR pr)
@@ -104,12 +109,16 @@ template<class PR> FloatValue<PR>::FloatValue(Rational const& q, PR pr)
 }
 */
 
-template<class PR> FloatValue<PR>::operator Rational() const {
-    return Rational(this->get_d());
+template<class PR> FloatValue<PR>::operator Dyadic() const {
+    return this->_v.operator Dyadic();
 }
 
-template<class PR> FloatValue<PR>::FloatValue(int n, PR pr)
-    : _v(n,pr)
+template<class PR> FloatValue<PR>::operator Rational() const {
+    return Rational(this->operator Dyadic());
+}
+
+template<class PR> FloatValue<PR>::FloatValue(ExactDouble d, PR pr)
+    : _v(d.get_d(),pr)
 {
 }
 
@@ -125,8 +134,20 @@ template<class PR> FloatValue<PR>::FloatValue(Integer const& z, PR pr)
     ARIADNE_PRECONDITION(z==q);
 }
 
+template<class PR> FloatValue<PR>& FloatValue<PR>::operator=(Dyadic const& w) {
+    _v=RawFloat<PR>(w,this->precision());
+    ARIADNE_ASSERT_MSG(Dyadic(_v)==w,"Dyadic number "<<w<<" cannot be assigned exactly to a floating-point number with precision "<<this->precision());
+};
+
 template<class PR> FloatValue<PR>::operator ExactNumber() const {
     return ExactNumber(new NumberWrapper<FloatValue<PR>>(*this));
+}
+
+template<class PR> FloatBall<PR>::FloatBall(Integer const& z, PR pr) : FloatBall<PR>(Rational(z),pr) {
+}
+
+template<class PR> FloatBall<PR>::FloatBall(Dyadic const& w, PR pr)
+    : _v(RawFloat<PR>(w,RawFloat<PR>::to_nearest,pr)), _e(abs(Dyadic(_v)-w),RawFloat<PR>::upward,pr) {
 }
 
 template<class PR> FloatBall<PR>::FloatBall(Rational const& q, PR pr)
@@ -146,16 +167,28 @@ template<class PR> FloatBall<PR>::operator ValidatedNumber() const {
 }
 
 
+template<class PR> FloatBounds<PR>::FloatBounds(ExactDouble d, PR pr)
+    : _l(d.get_d(),RawFloat<PR>::downward,pr),_u(d.get_d(),RawFloat<PR>::upward,pr) {
+}
+
 template<class PR> FloatBounds<PR>::FloatBounds(Integer const& z, PR pr)
-    : FloatBounds(RawFloat<PR>(z,RawFloat<PR>::downward,pr),RawFloat<PR>(z,RawFloat<PR>::upward,pr)) {
+    : _l(z,RawFloat<PR>::downward,pr),_u(z,RawFloat<PR>::upward,pr) {
+}
+
+template<class PR> FloatBounds<PR>::FloatBounds(Dyadic const& w, PR pr)
+    : _l(w,RawFloat<PR>::downward,pr),_u(w,RawFloat<PR>::upward,pr) {
 }
 
 template<class PR> FloatBounds<PR>::FloatBounds(Rational const& q, PR pr)
-    : FloatBounds(RawFloat<PR>(q,RawFloat<PR>::downward,pr),RawFloat<PR>(q,RawFloat<PR>::upward,pr)) {
+    : _l(q,RawFloat<PR>::downward,pr),_u(q,RawFloat<PR>::upward,pr) {
+}
+
+template<class PR> FloatBounds<PR>::FloatBounds(ExactDouble const& dl, ExactDouble const& du, PR pr)
+    : _l(dl.get_d(),RawFloat<PR>::downward,pr),_u(du.get_d(),RawFloat<PR>::upward,pr) {
 }
 
 template<class PR> FloatBounds<PR>::FloatBounds(Rational const& ql, Rational const& qu, PR pr)
-    : FloatBounds(RawFloat<PR>(ql,RawFloat<PR>::downward,pr),RawFloat<PR>(qu,RawFloat<PR>::upward,pr)) {
+    : _l(ql,RawFloat<PR>::downward,pr),_u(qu,RawFloat<PR>::upward,pr) {
 }
 
 template<class PR> FloatBounds<PR>::FloatBounds(Real const& x, PR pr)
@@ -232,8 +265,21 @@ template<class PR> FloatUpperBound<PR> FloatLowerBound<PR>::create(ValidatedUppe
     return FloatUpperBound<PR>(x,this->precision());
 }
 
+template<class PR> FloatApproximation<PR>::FloatApproximation(double d, PR pr)
+    : _a(d,RawFloat<PR>::to_nearest,pr)
+{
+}
+
+template<class PR> FloatApproximation<PR>::FloatApproximation(Integer const& z, PR pr)
+    : _a(z,RawFloat<PR>::to_nearest,pr) {
+}
+
+template<class PR> FloatApproximation<PR>::FloatApproximation(Dyadic const& w, PR pr)
+    : _a(w,RawFloat<PR>::to_nearest,pr) {
+}
+
 template<class PR> FloatApproximation<PR>::FloatApproximation(Rational const& q, PR pr)
-    : FloatApproximation(FloatBounds<PR>(q,pr)) {
+    : _a(q,RawFloat<PR>::to_nearest,pr) {
 }
 
 template<class PR> FloatApproximation<PR>::FloatApproximation(Real const& r, PR pr)

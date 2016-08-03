@@ -154,6 +154,9 @@ ValidatedKleenean operator< (Float64UpperInterval const& ivl1, Float64Bounds con
 ValidatedKleenean operator> (Float64UpperInterval const& ivl1, Float64Bounds const& x2) { return ivl1> make_interval(x2); }
 
 
+Float64UpperInterval make_interval(Int n) { return Float64UpperInterval(n,n); }
+Float64UpperInterval operator*(Float64UpperInterval const& ivl1, Int const& n2) { return ivl1*make_interval(n2); }
+Float64UpperInterval operator/(Float64UpperInterval const& ivl1, Int const& n2) { return ivl1*make_interval(n2); }
 
 
 

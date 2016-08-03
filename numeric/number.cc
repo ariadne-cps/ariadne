@@ -33,6 +33,7 @@
 #include "number.h"
 #include "logical.h"
 #include "integer.h"
+#include "dyadic.h"
 #include "rational.h"
 #include "real.h"
 #include "float64.h"
@@ -57,10 +58,12 @@ Real tan(Real const&);
 Real atan(Real const&);
 
 template class NumberWrapper<Integer>;
+template class NumberWrapper<Dyadic>;
 template class NumberWrapper<Rational>;
 template class NumberWrapper<Real>;
 
 Integer::operator ExactNumber() const { return ExactNumber(new NumberWrapper<Integer>(*this)); }
+Dyadic::operator ExactNumber() const { return ExactNumber(new NumberWrapper<Dyadic>(*this)); }
 Rational::operator ExactNumber() const { return ExactNumber(new NumberWrapper<Rational>(*this)); }
 Real::operator EffectiveNumber() const { return EffectiveNumber(new NumberWrapper<Real>(*this)); }
 

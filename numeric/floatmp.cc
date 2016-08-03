@@ -31,6 +31,8 @@
 #include "logical.h"
 #include "floatmp.h"
 #include "float64.h"
+#include "dyadic.h"
+#include "rational.h"
 
 namespace Ariadne {
 
@@ -74,6 +76,12 @@ FloatMP::FloatMP(Int32 n, PrecisionMP pr) {
     mpfr_set_si(_mpfr,n.get_si(),get_rounding_mode());
 }
 
+FloatMP::FloatMP(Dyadic const& w, PrecisionMP pr) {
+    mpfr_init2(_mpfr,pr);
+    mpfr_set_f(_mpfr,w.get_mpf(),get_rounding_mode());
+    ARIADNE_ASSERT(Dyadic(*this)==w);
+}
+
 FloatMP::FloatMP(double d, RoundingModeType rnd, PrecisionMP pr) {
     mpfr_init2(_mpfr,pr);
     mpfr_set_d(_mpfr,d,rnd);
@@ -87,6 +95,11 @@ FloatMP::FloatMP(Float64 x, RoundingModeType rnd, PrecisionMP pr) {
 FloatMP::FloatMP(Integer const& z, RoundingModeType rnd, PrecisionMP pr) {
     mpfr_init2(_mpfr,pr);
     mpfr_set_z(_mpfr,z.get_mpz(),rnd);
+}
+
+FloatMP::FloatMP(Dyadic const& w, RoundingModeType rnd, PrecisionMP pr) {
+    mpfr_init2(_mpfr,pr);
+    mpfr_set_f(_mpfr,w.get_mpf(),rnd);
 }
 
 FloatMP::FloatMP(Rational const& q, RoundingModeType rnd, PrecisionMP pr) {
@@ -114,6 +127,15 @@ FloatMP& FloatMP::operator=(const FloatMP& x) {
 FloatMP& FloatMP::operator=(FloatMP&& x) {
     mpfr_swap(_mpfr,x._mpfr);
     return *this;
+}
+
+FloatMP::operator Dyadic() const {
+    mpz_t num; mpz_init(num);
+    mpfr_exp_t exp = mpfr_get_z_2exp (num, this->_mpfr);
+    mpf_t res; mpf_init(res); mpf_set_z(res,num);
+    if(exp>=0) { mpf_mul_2exp(res,res,exp); }
+    else { mpf_div_2exp(res,res,-exp); }
+    return Dyadic(res);
 }
 
 FloatMP::operator Rational() const {

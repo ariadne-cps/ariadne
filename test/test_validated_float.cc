@@ -149,10 +149,10 @@ TestDirectedFloats<PR>::test_conversions()
     Rational five_thirds=5*one/3;
     Rational neg_five_thirds=-5*one/3;
 
-    ARIADNE_TEST_COMPARE(FloatLowerBoundType(five_thirds).raw(),<=,five_thirds);
-    ARIADNE_TEST_COMPARE(FloatLowerBoundType(neg_five_thirds).raw(),<=,neg_five_thirds);
-    ARIADNE_TEST_COMPARE(FloatUpperBoundType(five_thirds).raw(),>=,five_thirds);
-    ARIADNE_TEST_COMPARE(FloatUpperBoundType(neg_five_thirds).raw(),>=,neg_five_thirds);
+    ARIADNE_TEST_COMPARE(FloatLowerBoundType(five_thirds,precision).raw(),<=,five_thirds);
+    ARIADNE_TEST_COMPARE(FloatLowerBoundType(neg_five_thirds,precision).raw(),<=,neg_five_thirds);
+    ARIADNE_TEST_COMPARE(FloatUpperBoundType(five_thirds,precision).raw(),>=,five_thirds);
+    ARIADNE_TEST_COMPARE(FloatUpperBoundType(neg_five_thirds,precision).raw(),>=,neg_five_thirds);
 }
 
 template<class PR> Void
@@ -537,6 +537,7 @@ TestFloatBounds<PR>::test_exact_rounded_arithmetic()
 template<> Void
 TestFloatBounds<Precision64>::test_constructors()
 {
+    Precision64 pr;
     Float64 zero=0;
 
     // Construct from pair
@@ -551,18 +552,18 @@ TestFloatBounds<Precision64>::test_constructors()
         ARIADNE_TEST_BINARY_PREDICATE(same,xd2,FloatBoundsType(zero,zero));
     }
 
-    // Constructor with approximations
-    FloatBoundsType xd3(Rational(21,10));
+    // Constructor from Rational with approximations
+    FloatBoundsType xd3(Rational(21,10),pr);
     ARIADNE_TEST_COMPARE(Rational(xd3.lower_raw()),<,Rational(21,10));
     ARIADNE_TEST_COMPARE(Rational(xd3.upper_raw()),>,Rational(21,10));
 
-    // Constructor from approximate values
-    FloatBoundsType xd4(2.1,3.2);
+    // Constructor from rational bounds
+    FloatBoundsType xd4(2.1_q,3.2_q,pr);
     ARIADNE_TEST_COMPARE(xd4.lower_raw(),<=,2.1);
     ARIADNE_TEST_COMPARE(xd4.upper_raw(),>=,3.2);
 
-    // ApproximateTag constructor from a single value
-    FloatBoundsType xd5(Rational(1,3));
+    // Approximate constructor from a single value
+    FloatBoundsType xd5(Rational(1,3),pr);
     ARIADNE_TEST_COMPARE(Rational(xd5.lower_raw()),<,Rational(1,3));
     ARIADNE_TEST_COMPARE(Rational(xd5.upper_raw()),>,Rational(1,3));
 
@@ -590,19 +591,19 @@ TestFloatBounds<PR>::test_constructors()
     }
 
     // Constructor with approximations
-    FloatBoundsType xd3(Rational(21,10));
+    FloatBoundsType xd3(Rational(21,10),precision);
     ARIADNE_TEST_COMPARE(Rational(xd3.lower_raw()),<,Rational(21,10));
     ARIADNE_TEST_COMPARE(Rational(xd3.upper_raw()),>,Rational(21,10));
 
     // Constructor from approximate values
-    FloatBoundsType xd4(2.1,3.2);
+    FloatBoundsType xd4(2.1_q,3.2_q,precision);
     ARIADNE_TEST_COMPARE(xd4.lower_raw(),<=,2.1);
     ARIADNE_TEST_COMPARE(xd4.upper_raw(),>=,3.2);
 
     // ApproximateTag constructor from a single value
-    FloatBoundsType xd5(Rational(1,3));
-    ARIADNE_TEST_COMPARE(Rational(xd5.lower_raw()),<,Rational(1,3));
-    ARIADNE_TEST_COMPARE(Rational(xd5.upper_raw()),>,Rational(1,3));
+    FloatBoundsType xd5(Rational(1,3),precision);
+    ARIADNE_TEST_COMPARE(xd5.lower_raw(),<,Rational(1,3));
+    ARIADNE_TEST_COMPARE(xd5.upper_raw(),>,Rational(1,3));
 
     // ExactTag constructor from a single value
     FloatBoundsType xd6(RawFloatType(1.25));

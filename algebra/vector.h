@@ -130,6 +130,8 @@ class Vector
     explicit Vector(SizeType n) : _ary(n,X()) { static_assert(IsDefaultConstructible<X>::value,""); }
     //! \brief Construct a vector of size \a n, with elements initialised to \a t.
     explicit Vector(SizeType n, const X& t) : _ary(n,t) {  }
+    //! Construct a vector from parameters of \a X.
+    template<class... PRS, EnableIf<IsConstructible<X,PRS...>> =dummy> explicit Vector(SizeType n, PRS... prs) : Vector(n,X(prs...)) { }
     //! \brief Construct from an array of the same type.
     explicit Vector(const Array<X>& ary) : _ary(ary) { }
     explicit Vector(Array<X>&& ary) : _ary(ary) { }
@@ -138,8 +140,12 @@ class Vector
     //! \brief Convert from an initializer list of the same type.
     Vector(InitializerList<X> lst) : _ary(lst.begin(),lst.end()) { }
 
-    //! \brief Convert from an initializer list of the same type.
-    template<class Y, class PR> Vector(Vector<Y> const& v, PR pr);
+    //! \brief Convert from an initializer list of generic type and a precision parameter.
+    template<class Y, class PR, EnableIf<IsConstructible<X,Y,PR>> =dummy> Vector(InitializerList<Y> const& lst, PR pr) : _ary(lst,pr) { }
+    //! \brief Convert from an array of generic type and a precision parameter.
+    template<class Y, class PR, EnableIf<IsConstructible<X,Y,PR>> =dummy> Vector(Array<Y> const& ary, PR pr) : _ary(ary,pr) { }
+    //! \brief Convert from an vector of generic type and a precision parameter.
+    template<class Y, class PR, EnableIf<IsConstructible<X,Y,PR>> =dummy> Vector(Vector<Y> const& v, PR pr) : _ary(v.array(),pr) { }
     //! \brief Convert from an %VectorExpression of a different type.
     template<class VE, EnableIf<IsConvertible<typename VE::ScalarType,X>> =dummy>
     Vector(VectorExpression<VE> const& ve) : _ary(ve().size(),ve().zero_element()) {

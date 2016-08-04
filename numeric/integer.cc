@@ -275,8 +275,9 @@ Integer neg(Integer const& z) {
     return std::move(r);
 }
 
-Integer sqr(Integer const& z) {
-    return z*z;
+Natural sqr(Integer const& z) {
+    Natural r; mpz_mul(r._mpz,z._mpz,z._mpz);
+    return std::move(r);
 }
 
 Integer add(Integer const& z1, Integer const& z2) {
@@ -302,17 +303,25 @@ Integer pow(Integer const& z, Nat m) {
 }
 
 
-Integer abs(Integer const& z) {
-    Integer r; mpz_abs(r._mpz,z._mpz);
-    return std::move(r);
-}
-
 Integer min(Integer const& z1,Integer const& z2) {
     return (z1<z2)?z1:z2;
 }
 
 Integer max(Integer const& z1,Integer const& z2) {
     return (z1>z2)?z1:z2;
+}
+
+Natural abs(Integer const& z) {
+    Natural r; mpz_abs(r._mpz,z._mpz);
+    return std::move(r);
+}
+
+Natural max(Natural const& z1,Natural const& z2) {
+    return (z1>z2)?z1:z2;
+}
+
+Natural min(Natural const& z1,Natural const& z2) {
+    return (z1<z2)?z1:z2;
 }
 
 OutputStream& operator<<(OutputStream& os, Comparison const& cmp) {
@@ -327,6 +336,14 @@ OutputStream& operator<<(OutputStream& os, Comparison const& cmp) {
 Comparison cmp(Integer const& z1, Integer const& z2) {
     auto c=mpz_cmp(z1._mpz,z2._mpz);
     return c==0 ? Comparison::EQUAL : (c>0?Comparison::GREATER:Comparison::LESS);
+}
+
+Boolean eq(Integer const& z1, Integer const& z2) {
+    return mpz_cmp(z1._mpz,z2._mpz)==0;
+}
+
+Boolean lt(Integer const& z1, Integer const& z2) {
+    return mpz_cmp(z1._mpz,z2._mpz) < 0;
 }
 
 
@@ -361,6 +378,8 @@ Integer operator"" _z(unsigned long long int n) {
 }
 
 template<> String class_name<Integer>() { return "Integer"; }
+
+template<> String class_name<Natural>() { return "Natural"; }
 
 Int log2floor(Natural const& z) {
     return mpz_sizeinbase(z._mpz,2)-1;

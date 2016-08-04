@@ -39,7 +39,7 @@
 #include "algebra/multi_index.h"
 #include "algebra/expansion.h"
 #include "algebra/sweeper.h"
-#include "algebra/algebra_operations.h"
+#include "algebra/operations.h"
 #include "function/scaling.h"
 #include "geometry/interval.h"
 

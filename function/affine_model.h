@@ -40,7 +40,7 @@
 #include "algebra/vector.h"
 #include "algebra/covector.h"
 #include "algebra/matrix.h"
-#include "algebra/algebra_operations.h"
+#include "algebra/operations.h"
 
 namespace Ariadne {
 

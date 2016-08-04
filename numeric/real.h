@@ -63,12 +63,11 @@ extern const Real infinity;
 //! \ingroup UserNumericTypeSubModule
 //! \brief Computable real numbers definable in terms of elementary functions.
 class Real
-    : public DeclareReal<Real,PositiveReal>
-    , public TranscendentalField<Real>
-    , public DirectedLattice<Real,PositiveReal>
-    , public Ordered<Real,Kleenean,Sierpinskian>
-    , public DefineArithmeticOperators<Real>
-    , public ComparisonOperators<Real,Kleenean,Sierpinskian>
+    : public DeclareRealOperations<Real,PositiveReal>
+    , public DeclareAnalyticFieldOperations<Real>
+    , public DeclareLatticeOperations<Real,PositiveReal>
+    , public DeclareComparisonOperations<Real,Kleenean,NegatedSierpinskian>
+    , public DefineFieldOperators<Real>
 {
   private: public:
     class Interface;

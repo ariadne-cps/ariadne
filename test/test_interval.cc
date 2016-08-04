@@ -69,14 +69,14 @@ TestIntervalType::test()
 Void
 TestIntervalType::test_concept()
 {
+    Precision64 pr;
     Int n=1;
     Nat m=1;
     double d=1;
-    Float64Value x=1;
+    Float64Value x={1,pr};
     Float64 a,b;
     ExactIntervalType xivl;
     UpperIntervalType uivl;
-
 
     // Constructors
     uivl=I(); uivl=I(n); uivl=I(m); uivl=I(d); uivl=I(x); uivl=I(xivl);

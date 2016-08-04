@@ -22,7 +22,7 @@
  */
 
 #include "utility/exceptions.h"
-#include "algebra/algebra_operations.h"
+#include "algebra/operations.h"
 
 #include "algebra/series.h"
 #include "function/taylor_series.h"

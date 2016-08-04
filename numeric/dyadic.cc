@@ -198,6 +198,14 @@ Comparison cmp(Dyadic const& x1, Dyadic const& x2) {
     return c==0 ? Comparison::EQUAL : (c>0?Comparison::GREATER:Comparison::LESS);
 }
 
+Boolean eq(Dyadic const& x1, Dyadic const& x2) {
+    return mpf_cmp(x1._mpf,x2._mpf)==0;
+}
+
+Boolean lt(Dyadic const& x1, Dyadic const& x2) {
+    return mpf_cmp(x1._mpf,x2._mpf)<0;
+}
+
 
 //   mpf_get_str (char *str, mp_exp_t *expptr, int base, size_t n_digits, const mpf_t op)
 OutputStream& operator<<(OutputStream& os, Dyadic const& x) {

@@ -44,6 +44,8 @@ typedef Logical<EffectiveTag> Kleenean;
 typedef Logical<EffectiveUpperTag> Sierpinskian;
 typedef Logical<EffectiveLowerTag> NegatedSierpinskian;
 typedef Logical<ValidatedTag> ValidatedKleenean;
+typedef Logical<ValidatedUpperTag> ValidatedUpperKleenean;
+typedef Logical<ValidatedLowerTag> ValidatedLowerKleenean;
 typedef Logical<ValidatedUpperTag> ValidatedSierpinskian;
 typedef Logical<ValidatedLowerTag> ValidatedNegatedSierpinskian;
 typedef Logical<ApproximateTag> ApproximateKleenean;

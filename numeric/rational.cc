@@ -288,12 +288,12 @@ Rational pow(Rational const& q, Int n) {
     else { return pow(q,Nat(n)); }
 }
 
-Boolean neq(Rational const& q1, Rational const& q2) {
-    return Boolean(not mpq_equal(q1._mpq,q2._mpq));
+Boolean eq(Rational const& q1, Rational const& q2) {
+    return mpq_equal(q1._mpq,q2._mpq);
 }
 
-Boolean leq(Rational const& q1, Rational const& q2) {
-    return Boolean(mpq_cmp(q1._mpq,q2._mpq)!=+1);
+Boolean lt(Rational const& q1, Rational const& q2) {
+    return mpq_cmp(q1._mpq,q2._mpq)<0;
 }
 
 Comparison cmp(Rational const& q1, Rational const& q2) {

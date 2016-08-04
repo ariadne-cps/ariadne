@@ -52,11 +52,11 @@ enum class Comparison : char;
 //! \ingroup UserNumericTypeSubModule
 //! \brief %Rational numbers.
 class Rational
-    : Field<Rational>
-    , DirectedLattice<Rational>
-    , Ordered<Rational,Boolean>
-    , DefineArithmeticOperators<Rational>
-    , DefineComparisonOperators<Rational,Boolean>
+    : DeclareFieldOperations<Rational>
+    , DeclareLatticeOperations<Rational,Rational>
+    , DeclareComparisonOperations<Rational,Boolean,Boolean>
+    , DefineFieldOperators<Rational>
+    , DefineComparisonOperators<Rational,Boolean,Boolean>
 {
   public:
     mpq_t _mpq;

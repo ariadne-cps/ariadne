@@ -53,6 +53,8 @@ operator>>(InputStream& is, Interval<Float64Value>& ivl)
 }
 
 
+Float64UpperInterval DeclareIntervalArithmeticOperations<Float64UpperBound>::create(ValidatedNumber const& y) const {
+    return Float64UpperInterval(reinterpret_cast<Float64Bounds const&>(*this).create(y)); }
 
 Float64Bounds cast_singleton(Float64UpperInterval const& ivl) {
     return Float64Bounds(ivl.lower(),ivl.upper()); }
@@ -112,52 +114,10 @@ Float64Error mag(Float64UpperInterval const& ivl) {
 Float64LowerBound mig(Float64UpperInterval const& ivl) {
     return mig(cast_singleton(ivl)); }
 
-ValidatedKleenean operator==(Float64UpperInterval const& ivl1, Float64UpperInterval const& ivl2) {
-    return cast_singleton(ivl1) == cast_singleton(ivl2); }
-ValidatedKleenean operator!=(Float64UpperInterval const& ivl1, Float64UpperInterval const& ivl2) {
-    return cast_singleton(ivl1) != cast_singleton(ivl2); }
-ValidatedKleenean operator<=(Float64UpperInterval const& ivl1, Float64UpperInterval const& ivl2) {
-    return cast_singleton(ivl1) <= cast_singleton(ivl2); }
-ValidatedKleenean operator>=(Float64UpperInterval const& ivl1, Float64UpperInterval const& ivl2) {
-    return cast_singleton(ivl1) >= cast_singleton(ivl2); }
-ValidatedKleenean operator< (Float64UpperInterval const& ivl1, Float64UpperInterval const& ivl2) {
-    return cast_singleton(ivl1) <  cast_singleton(ivl2); }
-ValidatedKleenean operator> (Float64UpperInterval const& ivl1, Float64UpperInterval const& ivl2) {
-    return cast_singleton(ivl1) >  cast_singleton(ivl2); }
-
-Float64UpperInterval operator+(Float64UpperInterval const& ivl1, Float64UpperInterval const& ivl2) { return add(ivl1,ivl2); }
-Float64UpperInterval operator-(Float64UpperInterval const& ivl1, Float64UpperInterval const& ivl2) { return sub(ivl1,ivl2); }
-Float64UpperInterval operator*(Float64UpperInterval const& ivl1, Float64UpperInterval const& ivl2) { return mul(ivl1,ivl2); }
-Float64UpperInterval operator/(Float64UpperInterval const& ivl1, Float64UpperInterval const& ivl2) { return div(ivl1,ivl2); }
-Float64UpperInterval operator+(Float64UpperInterval const& ivl1, Float64Bounds const& x2) { return ivl1+make_interval(x2); }
-Float64UpperInterval operator-(Float64UpperInterval const& ivl1, Float64Bounds const& x2) { return ivl1-make_interval(x2); }
-Float64UpperInterval operator*(Float64UpperInterval const& ivl1, Float64Bounds const& x2) { return ivl1*make_interval(x2); }
-Float64UpperInterval operator/(Float64UpperInterval const& ivl1, Float64Bounds const& x2) { return ivl1/make_interval(x2); }
-Float64UpperInterval operator+(Float64Bounds const& x1, Float64UpperInterval const& ivl2) { return make_interval(x1)+ivl2; }
-Float64UpperInterval operator-(Float64Bounds const& x1, Float64UpperInterval const& ivl2) { return make_interval(x1)-ivl2; }
-Float64UpperInterval operator*(Float64Bounds const& x1, Float64UpperInterval const& ivl2) { return make_interval(x1)*ivl2; }
-Float64UpperInterval operator/(Float64Bounds const& x1, Float64UpperInterval const& ivl2) { return make_interval(x1)/ivl2; }
-Float64UpperInterval& operator+=(Float64UpperInterval& ivl1, Float64UpperInterval const& ivl2) { return ivl1=ivl1+ivl2; }
-Float64UpperInterval& operator-=(Float64UpperInterval& ivl1, Float64UpperInterval const& ivl2) { return ivl1=ivl1-ivl2; }
-Float64UpperInterval& operator*=(Float64UpperInterval& ivl1, Float64UpperInterval const& ivl2) { return ivl1=ivl1*ivl2; }
-Float64UpperInterval& operator/=(Float64UpperInterval& ivl1, Float64UpperInterval const& ivl2) { return ivl1=ivl1/ivl2; }
-Float64UpperInterval& operator+=(Float64UpperInterval& ivl1, Float64Bounds const& x2) { return ivl1+=make_interval(x2); }
-Float64UpperInterval& operator-=(Float64UpperInterval& ivl1, Float64Bounds const& x2) { return ivl1-=make_interval(x2); }
-Float64UpperInterval& operator*=(Float64UpperInterval& ivl1, Float64Bounds const& x2) { return ivl1*=make_interval(x2); }
-Float64UpperInterval& operator/=(Float64UpperInterval& ivl1, Float64Bounds const& x2) { return ivl1/=make_interval(x2); }
-
-ValidatedKleenean operator==(Float64UpperInterval const& ivl1, Float64Bounds const& x2) { return ivl1==make_interval(x2); }
-ValidatedKleenean operator!=(Float64UpperInterval const& ivl1, Float64Bounds const& x2) { return ivl1!=make_interval(x2); }
-ValidatedKleenean operator<=(Float64UpperInterval const& ivl1, Float64Bounds const& x2) { return ivl1<=make_interval(x2); }
-ValidatedKleenean operator>=(Float64UpperInterval const& ivl1, Float64Bounds const& x2) { return ivl1>=make_interval(x2); }
-ValidatedKleenean operator< (Float64UpperInterval const& ivl1, Float64Bounds const& x2) { return ivl1< make_interval(x2); }
-ValidatedKleenean operator> (Float64UpperInterval const& ivl1, Float64Bounds const& x2) { return ivl1> make_interval(x2); }
-
-
-Float64UpperInterval make_interval(Int n) { return Float64UpperInterval(n,n); }
-Float64UpperInterval operator*(Float64UpperInterval const& ivl1, Int const& n2) { return ivl1*make_interval(n2); }
-Float64UpperInterval operator/(Float64UpperInterval const& ivl1, Int const& n2) { return ivl1*make_interval(n2); }
-
+ValidatedKleenean eq(Float64UpperInterval const& ivl1, Float64UpperInterval const& ivl2) {
+    return eq(cast_singleton(ivl1),cast_singleton(ivl2)); }
+ValidatedKleenean lt(Float64UpperInterval const& ivl1, Float64UpperInterval const& ivl2) {
+    return lt(cast_singleton(ivl1),cast_singleton(ivl2)); }
 
 
 } // namespace Ariadne

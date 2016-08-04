@@ -36,7 +36,7 @@
 #include "algebra/vector.h"
 #include "function/taylor_model.h"
 
-#include "algebra/algebra_operations.h"
+#include "algebra/operations.h"
 #include "function/function_interface.h"
 #include "function/function_mixin.h"
 #include "function/function_model.h"
@@ -95,7 +95,7 @@ template<class X> X operator/(const GenericType<X>& y1, const X& x2) { return x2
 template<class M> class FunctionPatch
     : public ScalarFunctionModelMixin<FunctionPatch<M>, typename M::Paradigm>
     , public DispatchSymbolicAlgebraOperations<FunctionPatch<M>, NumericType<M>>
-    , public ProvideMixedConcreteGenericOperators<FunctionPatch<M>, ScalarFunction<typename M::Paradigm>>
+    , public ProvideConcreteGenericArithmeticOperators<FunctionPatch<M>, ScalarFunction<typename M::Paradigm>>
 {
     typedef typename M::Paradigm P;
   public:

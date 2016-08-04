@@ -139,6 +139,10 @@ template<class PR> FloatValue<PR>& FloatValue<PR>::operator=(Dyadic const& w) {
     ARIADNE_ASSERT_MSG(Dyadic(_v)==w,"Dyadic number "<<w<<" cannot be assigned exactly to a floating-point number with precision "<<this->precision());
 };
 
+template<class PR> FloatBall<PR> FloatValue<PR>::create(ValidatedNumber const& y) const {
+    return FloatBall<PR>(y,this->precision());
+}
+
 template<class PR> FloatValue<PR>::operator ExactNumber() const {
     return ExactNumber(new NumberWrapper<FloatValue<PR>>(*this));
 }
@@ -158,8 +162,12 @@ template<class PR> FloatBall<PR>::FloatBall(Real const& r, PR pr)
     : FloatBall(r.get(pr)) {
 }
 
-template<class PR> FloatBall<PR>::FloatBall(ValidatedNumber const& x, PR pr)
-    : FloatBall(x.get(MetricTag(),pr)) {
+template<class PR> FloatBall<PR>::FloatBall(ValidatedNumber const& y, PR pr)
+    : FloatBall(y.get(MetricTag(),pr)) {
+}
+
+template<class PR> FloatBall<PR> FloatBall<PR>::create(ValidatedNumber const& y) const {
+    return FloatBall<PR>(y,this->precision());
 }
 
 template<class PR> FloatBall<PR>::operator ValidatedNumber() const {
@@ -199,6 +207,10 @@ template<class PR> FloatBounds<PR>::FloatBounds(ValidatedNumber const& y, PR pr)
     : FloatBounds(y.get(BoundedTag(),pr)) {
 }
 
+template<class PR> FloatBounds<PR> FloatBounds<PR>::create(ValidatedNumber const& y) const {
+    return FloatBounds<PR>(y,this->precision());
+}
+
 template<class PR> FloatBounds<PR>& FloatBounds<PR>::operator=(ValidatedNumber const& y) {
     *this = FloatBounds<PR>(y,this->precision());
 }
@@ -228,12 +240,12 @@ template<class PR> FloatUpperBound<PR>::operator ValidatedUpperNumber() const {
     // return ValidatedUpperNumber(new NumberWrapper<FloatUpperBound<PR>>(*this));
 }
 
-template<class PR> FloatLowerBound<PR> FloatUpperBound<PR>::create(ValidatedLowerNumber const& x) const {
-    return FloatLowerBound<PR>(x,this->precision());
+template<class PR> FloatLowerBound<PR> FloatUpperBound<PR>::create(ValidatedLowerNumber const& y) const {
+    return FloatLowerBound<PR>(y,this->precision());
 }
 
-template<class PR> FloatUpperBound<PR> FloatUpperBound<PR>::create(ValidatedUpperNumber const& x) const {
-    return FloatUpperBound<PR>(x,this->precision());
+template<class PR> FloatUpperBound<PR> FloatUpperBound<PR>::create(ValidatedUpperNumber const& y) const {
+    return FloatUpperBound<PR>(y,this->precision());
 }
 
 template<class PR> FloatLowerBound<PR>::FloatLowerBound(Rational const& q, PR pr)
@@ -244,8 +256,8 @@ template<class PR> FloatLowerBound<PR>::FloatLowerBound(Real const& r, PR pr)
     : FloatLowerBound(r.get(pr)) {
 }
 
-template<class PR> FloatLowerBound<PR>::FloatLowerBound(ValidatedLowerNumber const& x, PR pr)
-    : FloatLowerBound(x.get(LowerTag(),pr)) {
+template<class PR> FloatLowerBound<PR>::FloatLowerBound(ValidatedLowerNumber const& y, PR pr)
+    : FloatLowerBound(y.get(LowerTag(),pr)) {
 }
 
 template<class PR> FloatLowerBound<PR>& FloatLowerBound<PR>::operator=(ValidatedLowerNumber const& y) {
@@ -257,12 +269,12 @@ template<class PR> FloatLowerBound<PR>::operator ValidatedLowerNumber() const {
     //return ValidatedLowerNumber(new NumberWrapper<FloatLowerBound<PR>>(*this));
 }
 
-template<class PR> FloatLowerBound<PR> FloatLowerBound<PR>::create(ValidatedLowerNumber const& x) const {
-    return FloatLowerBound<PR>(x,this->precision());
+template<class PR> FloatLowerBound<PR> FloatLowerBound<PR>::create(ValidatedLowerNumber const& y) const {
+    return FloatLowerBound<PR>(y,this->precision());
 }
 
-template<class PR> FloatUpperBound<PR> FloatLowerBound<PR>::create(ValidatedUpperNumber const& x) const {
-    return FloatUpperBound<PR>(x,this->precision());
+template<class PR> FloatUpperBound<PR> FloatLowerBound<PR>::create(ValidatedUpperNumber const& y) const {
+    return FloatUpperBound<PR>(y,this->precision());
 }
 
 template<class PR> FloatApproximation<PR>::FloatApproximation(double d, PR pr)
@@ -286,8 +298,12 @@ template<class PR> FloatApproximation<PR>::FloatApproximation(Real const& r, PR 
     : FloatApproximation(r.get(pr)) {
 }
 
-template<class PR> FloatApproximation<PR>::FloatApproximation(ApproximateNumber const& x, PR pr)
-    : FloatApproximation(x.get(ApproximateTag(),pr)) {
+template<class PR> FloatApproximation<PR>::FloatApproximation(ApproximateNumber const& y, PR pr)
+    : FloatApproximation(y.get(ApproximateTag(),pr)) {
+}
+
+template<class PR> FloatApproximation<PR> FloatApproximation<PR>::create(ApproximateNumber const& y) const {
+    return FloatApproximation<PR>(y,this->precision());
 }
 
 template<class PR> FloatApproximation<PR>::operator ApproximateNumber() const {
@@ -423,8 +439,8 @@ template<class PR> struct Operations<FloatApproximation<PR>> {
 
     static ApproximateKleenean _eq(FloatApproximation<PR> const& x1, FloatApproximation<PR> const& x2) {
         return x1._a==x2._a; }
-    static ApproximateKleenean _leq(FloatApproximation<PR> const& x1, FloatApproximation<PR> const& x2) {
-        return x1._a<=x2._a; }
+    static ApproximateKleenean _lt(FloatApproximation<PR> const& x1, FloatApproximation<PR> const& x2) {
+        return x1._a< x2._a; }
 
     static Bool _same(FloatApproximation<PR> const& x1, FloatApproximation<PR> const& x2) {
         return x1._a==x2._a; }
@@ -440,7 +456,7 @@ template<class PR> struct Operations<FloatApproximation<PR>> {
 };
 
 
-template<class PR> struct Operations<FloatLowerBound<PR>,FloatUpperBound<PR>> {
+template<class PR> struct Operations<FloatLowerBound<PR>> {
 
     static FloatLowerBound<PR> _max(FloatLowerBound<PR> const& x1, FloatLowerBound<PR> const& x2) {
         return FloatLowerBound<PR>(max_exact(x1._l,x2._l)); }
@@ -453,8 +469,8 @@ template<class PR> struct Operations<FloatLowerBound<PR>,FloatUpperBound<PR>> {
         return FloatLowerBound<PR>(pos_exact(x._l)); }
     static FloatLowerBound<PR> _pos(FloatLowerBound<PR> const& x) {
         return FloatLowerBound<PR>(pos_exact(x._l)); }
-    static FloatLowerBound<PR> _neg(FloatUpperBound<PR> const& x) {
-        return FloatLowerBound<PR>(neg_exact(x._u)); }
+    static FloatUpperBound<PR> _neg(FloatLowerBound<PR> const& x) {
+        return FloatUpperBound<PR>(neg_exact(x._l)); }
     static FloatLowerBound<PR> _hlf(FloatLowerBound<PR> const& x) {
         return FloatLowerBound<PR>(hlf_exact(x._l)); }
 
@@ -501,8 +517,8 @@ template<class PR> struct Operations<FloatLowerBound<PR>,FloatUpperBound<PR>> {
         else { return ValidatedNegatedSierpinskian(LogicalValue::INDETERMINATE); }
     }
 
-    static ValidatedNegatedSierpinskian _leq(FloatLowerBound<PR> const& x1, FloatUpperBound<PR> const& x2) {
-        if(x1._l>x2._u) { return false; }
+    static ValidatedNegatedSierpinskian _lt(FloatLowerBound<PR> const& x1, FloatUpperBound<PR> const& x2) {
+        if(x1._l>=x2._u) { return false; }
         else { return ValidatedNegatedSierpinskian(LogicalValue::LIKELY); }
     }
 
@@ -528,9 +544,7 @@ template<class PR> struct Operations<FloatLowerBound<PR>,FloatUpperBound<PR>> {
     }
 };
 
-
-
-template<class PR> struct Operations<FloatUpperBound<PR>,FloatLowerBound<PR>> {
+template<class PR> struct Operations<FloatUpperBound<PR>> {
     static FloatUpperBound<PR> _max(FloatUpperBound<PR> const& x1, FloatUpperBound<PR> const& x2) {
         return FloatUpperBound<PR>(max_exact(x1._u,x2._u)); }
 
@@ -546,8 +560,8 @@ template<class PR> struct Operations<FloatUpperBound<PR>,FloatLowerBound<PR>> {
     static FloatUpperBound<PR> _pos(FloatUpperBound<PR> const& x) {
         return FloatUpperBound<PR>(pos_exact(x._u)); }
 
-    static FloatUpperBound<PR> _neg(FloatLowerBound<PR> const& x) {
-        return FloatUpperBound<PR>(neg_exact(x._l)); }
+    static FloatLowerBound<PR> _neg(FloatUpperBound<PR> const& x) {
+        return FloatLowerBound<PR>(neg_exact(x._u)); }
 
     static FloatUpperBound<PR> _hlf(FloatUpperBound<PR> const& x) {
         return FloatUpperBound<PR>(hlf_exact(x._u)); }
@@ -603,8 +617,8 @@ template<class PR> struct Operations<FloatUpperBound<PR>,FloatLowerBound<PR>> {
         else { return ValidatedNegatedSierpinskian(LogicalValue::INDETERMINATE); }
     }
 
-    static ValidatedSierpinskian _leq(FloatUpperBound<PR> const& x1, FloatLowerBound<PR> const& x2) {
-        if(x1._u<=x2._l) { return true; }
+    static ValidatedSierpinskian _lt(FloatUpperBound<PR> const& x1, FloatLowerBound<PR> const& x2) {
+        if(x1._u< x2._l) { return true; }
         else { return ValidatedSierpinskian(LogicalValue::UNLIKELY); }
     }
 
@@ -887,9 +901,9 @@ template<class PR> struct Operations<FloatBounds<PR>> {
     }
 
     //! \related FloatBounds<PR> \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
-    static Logical<ValidatedTag> _leq(FloatBounds<PR> const& x1, FloatBounds<PR> const& x2) {
-        if(x1.upper_raw()<=x2.lower_raw()) { return true; }
-        else if(x1.lower_raw()> x2.upper_raw()) { return false; }
+    static Logical<ValidatedTag> _lt(FloatBounds<PR> const& x1, FloatBounds<PR> const& x2) {
+        if(x1.upper_raw()< x2.lower_raw()) { return true; }
+        else if(x1.lower_raw()>=x2.upper_raw()) { return false; }
         else { return indeterminate; }
     }
 
@@ -1214,8 +1228,8 @@ template<class PR> struct Operations<FloatBall<PR>> {
     }
 
     //! \related FloatBounds<PR> \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
-    static ValidatedKleenean _leq(FloatBall<PR> const& x1, FloatBall<PR> const& x2) {
-        return FloatBounds<PR>(x1) <= FloatBounds<PR>(x2);
+    static ValidatedKleenean _lt(FloatBall<PR> const& x1, FloatBall<PR> const& x2) {
+        return FloatBounds<PR>(x1) <  FloatBounds<PR>(x2);
     }
 
     static Bool _same(FloatBall<PR> const& x1, FloatBall<PR> const& x2) {
@@ -1408,7 +1422,7 @@ template<class PR> FloatBounds<PR> _div(FloatValue<PR> const& x1, FloatBounds<PR
 
 
 
-template<class PR> struct Operations<FloatValue<PR>,FloatValue<PR>,FloatBounds<PR>> {
+template<class PR> struct Operations<FloatValue<PR>> {
     static FloatValue<PR> _max(FloatValue<PR> const& x1,  FloatValue<PR> const& x2) {
         return FloatValue<PR>(max(x1._v,x2._v)); }
 
@@ -1497,8 +1511,8 @@ template<class PR> struct Operations<FloatValue<PR>,FloatValue<PR>,FloatBounds<P
     static Boolean _eq(FloatValue<PR> const& x1, FloatValue<PR> const& x2) {
         return x1._v == x2._v; }
 
-    static Boolean _leq(FloatValue<PR> const& x1, FloatValue<PR> const& x2) {
-        return x1._v <= x2._v; }
+    static Boolean _lt(FloatValue<PR> const& x1, FloatValue<PR> const& x2) {
+        return x1._v <  x2._v; }
 
     static Bool _same(FloatValue<PR> const& x1, FloatValue<PR> const& x2) {
         return x1._v==x2._v; }
@@ -1553,7 +1567,7 @@ template<class PR> Bool operator< (const Rational& q, FloatValue<PR> const& x) {
 template<class PR> Bool operator> (const Rational& q, FloatValue<PR> const& x) { return q> Rational(x); }
 
 
-template<class PR> struct Operations<FloatError<PR>,FloatLowerBound<PR>> {
+template<class PR> struct Operations<FloatError<PR>> {
     static FloatError<PR> _sqr(FloatError<PR> const& x) {
         return FloatError<PR>(mul_up(x._e,x._e));
     }
@@ -1767,100 +1781,63 @@ template class FloatBall<PrecisionMP>;
 template class FloatValue<PrecisionMP>;
 
 template class Operations<Float64Approximation>;
-template class Operations<Float64LowerBound,Float64UpperBound>;
-template class Operations<Float64UpperBound,Float64LowerBound>;
+template class Operations<Float64LowerBound>;
+template class Operations<Float64UpperBound>;
 template class Operations<Float64Bounds>;
 template class Operations<Float64Ball>;
-template class Operations<Float64Value,Float64Value,Float64Bounds>;
-template class Operations<Float64Error,Float64LowerBound>;
+template class Operations<Float64Value>;
+template class Operations<Float64Error>;
 
 template class Operations<FloatMPApproximation>;
-template class Operations<FloatMPLowerBound,FloatMPUpperBound>;
-template class Operations<FloatMPUpperBound,FloatMPLowerBound>;
+template class Operations<FloatMPLowerBound>;
+template class Operations<FloatMPUpperBound>;
 template class Operations<FloatMPBounds>;
 template class Operations<FloatMPBall>;
-template class Operations<FloatMPValue,FloatMPValue,FloatMPBounds>;
-template class Operations<FloatMPError,FloatMPLowerBound>;
+template class Operations<FloatMPValue>;
+template class Operations<FloatMPError>;
 
 
 
-
-OutputStream& operator<<(OutputStream& os, Float64Approximation const& x) { return Operations<Float64Approximation>::_write(os,x); }
-InputStream& operator>>(InputStream& is, Float64Approximation& x) { return Operations<Float64Approximation>::_read(is,x); }
 
 PositiveFloat64Approximation mag(Float64Approximation const& x) { return Operations<Float64Approximation>::_mag(x); }
 PositiveFloat64Approximation mig(Float64Approximation const& x) { return Operations<Float64Approximation>::_mig(x); }
 Float64Approximation round(Float64Approximation const& x) { return Operations<Float64Approximation>::_round(x); }
 Bool same(Float64Approximation const& x1, Float64Approximation const& x2) { return Operations<Float64Approximation>::_same(x1,x2); }
 
-ApproximateKleenean eq(Float64Approximation const& x1, Float64Approximation const& x2) { return Operations<Float64Approximation>::_eq(x1,x2); }
-ApproximateKleenean leq(Float64Approximation const& x1, Float64Approximation const& x2) { return Operations<Float64Approximation>::_leq(x1,x2); }
-
-
-OutputStream& operator<<(OutputStream& os, FloatMPApproximation const& x) { return Operations<FloatMPApproximation>::_write(os,x); }
-InputStream& operator>>(InputStream& is, FloatMPApproximation& x) { return Operations<FloatMPApproximation>::_read(is,x); }
 
 PositiveFloatMPApproximation mag(FloatMPApproximation const& x) { return Operations<FloatMPApproximation>::_mag(x); }
 PositiveFloatMPApproximation mig(FloatMPApproximation const& x) { return Operations<FloatMPApproximation>::_mig(x); }
 FloatMPApproximation round(FloatMPApproximation const& x) { return Operations<FloatMPApproximation>::_round(x); }
 Bool same(FloatMPApproximation const& x1, FloatMPApproximation const& x2) { return Operations<FloatMPApproximation>::_same(x1,x2); }
 
-ApproximateKleenean eq(FloatMPApproximation const& x1, FloatMPApproximation const& x2) { return Operations<FloatMPApproximation>::_eq(x1,x2); }
-ApproximateKleenean leq(FloatMPApproximation const& x1, FloatMPApproximation const& x2) { return Operations<FloatMPApproximation>::_leq(x1,x2); }
+
+
+Bool same(Float64LowerBound const& x1, Float64LowerBound const& x2) { return Operations<Float64LowerBound>::_same(x1,x2); }
+Bool refines(Float64LowerBound const& x1, Float64LowerBound const& x2) { return Operations<Float64LowerBound>::_refines(x1,x2); }
+Float64LowerBound refinement(Float64LowerBound const& x1, Float64LowerBound const& x2) { return Operations<Float64LowerBound>::_refinement(x1,x2); }
+
+
+Bool same(FloatMPLowerBound const& x1, FloatMPLowerBound const& x2) { return Operations<FloatMPLowerBound>::_same(x1,x2); }
+Bool refines(FloatMPLowerBound const& x1, FloatMPLowerBound const& x2) { return Operations<FloatMPLowerBound>::_refines(x1,x2); }
+FloatMPLowerBound refinement(FloatMPLowerBound const& x1, FloatMPLowerBound const& x2) { return Operations<FloatMPLowerBound>::_refinement(x1,x2); }
 
 
 
-OutputStream& operator<<(OutputStream& os, Float64LowerBound const& x) { return Operations<Float64LowerBound,Float64UpperBound>::_write(os,x); }
-InputStream& operator>>(InputStream& is, Float64LowerBound& x) { return Operations<Float64LowerBound,Float64UpperBound>::_read(is,x); }
 
-Bool same(Float64LowerBound const& x1, Float64LowerBound const& x2) { return Operations<Float64LowerBound,Float64UpperBound>::_same(x1,x2); }
-Bool refines(Float64LowerBound const& x1, Float64LowerBound const& x2) { return Operations<Float64LowerBound,Float64UpperBound>::_refines(x1,x2); }
-Float64LowerBound refinement(Float64LowerBound const& x1, Float64LowerBound const& x2) { return Operations<Float64LowerBound,Float64UpperBound>::_refinement(x1,x2); }
-
-ValidatedNegatedSierpinskian leq(Float64LowerBound const& x1, Float64UpperBound const& x2) { return Operations<Float64LowerBound,Float64UpperBound>::_leq(x1,x2); }
+Bool same(Float64UpperBound const& x1, Float64UpperBound const& x2) { return Operations<Float64UpperBound>::_same(x1,x2); }
+Bool refines(Float64UpperBound const& x1, Float64UpperBound const& x2) { return Operations<Float64UpperBound>::_refines(x1,x2); }
+Float64UpperBound refinement(Float64UpperBound const& x1, Float64UpperBound const& x2) { return Operations<Float64UpperBound>::_refinement(x1,x2); }
 
 
-OutputStream& operator<<(OutputStream& os, FloatMPLowerBound const& x) { return Operations<FloatMPLowerBound,FloatMPUpperBound>::_write(os,x); }
-InputStream& operator>>(InputStream& is, FloatMPLowerBound& x) { return Operations<FloatMPLowerBound,FloatMPUpperBound>::_read(is,x); }
-
-Bool same(FloatMPLowerBound const& x1, FloatMPLowerBound const& x2) { return Operations<FloatMPLowerBound,FloatMPUpperBound>::_same(x1,x2); }
-Bool refines(FloatMPLowerBound const& x1, FloatMPLowerBound const& x2) { return Operations<FloatMPLowerBound,FloatMPUpperBound>::_refines(x1,x2); }
-FloatMPLowerBound refinement(FloatMPLowerBound const& x1, FloatMPLowerBound const& x2) { return Operations<FloatMPLowerBound,FloatMPUpperBound>::_refinement(x1,x2); }
-
-ValidatedNegatedSierpinskian leq(FloatMPLowerBound const& x1, FloatMPUpperBound const& x2) { return Operations<FloatMPLowerBound,FloatMPUpperBound>::_leq(x1,x2); }
+Bool same(FloatMPUpperBound const& x1, FloatMPUpperBound const& x2) { return Operations<FloatMPUpperBound>::_same(x1,x2); }
+Bool refines(FloatMPUpperBound const& x1, FloatMPUpperBound const& x2) { return Operations<FloatMPUpperBound>::_refines(x1,x2); }
+FloatMPUpperBound refinement(FloatMPUpperBound const& x1, FloatMPUpperBound const& x2) { return Operations<FloatMPUpperBound>::_refinement(x1,x2); }
 
 
-
-OutputStream& operator<<(OutputStream& os, Float64UpperBound const& x) { return Operations<Float64UpperBound,Float64LowerBound>::_write(os,x); }
-InputStream& operator>>(InputStream& is, Float64UpperBound& x) { return Operations<Float64UpperBound,Float64LowerBound>::_read(is,x); }
-
-Bool same(Float64UpperBound const& x1, Float64UpperBound const& x2) { return Operations<Float64UpperBound,Float64LowerBound>::_same(x1,x2); }
-Bool refines(Float64UpperBound const& x1, Float64UpperBound const& x2) { return Operations<Float64UpperBound,Float64LowerBound>::_refines(x1,x2); }
-Float64UpperBound refinement(Float64UpperBound const& x1, Float64UpperBound const& x2) { return Operations<Float64UpperBound,Float64LowerBound>::_refinement(x1,x2); }
-
-ValidatedSierpinskian leq(Float64UpperBound const& x1, Float64LowerBound const& x2) { return Operations<Float64UpperBound,Float64LowerBound>::_leq(x1,x2); }
-
-
-OutputStream& operator<<(OutputStream& os, FloatMPUpperBound const& x) { return Operations<FloatMPUpperBound,FloatMPLowerBound>::_write(os,x); }
-InputStream& operator>>(InputStream& is, FloatMPUpperBound& x) { return Operations<FloatMPUpperBound,FloatMPLowerBound>::_read(is,x); }
-
-Bool same(FloatMPUpperBound const& x1, FloatMPUpperBound const& x2) { return Operations<FloatMPUpperBound,FloatMPLowerBound>::_same(x1,x2); }
-Bool refines(FloatMPUpperBound const& x1, FloatMPUpperBound const& x2) { return Operations<FloatMPUpperBound,FloatMPLowerBound>::_refines(x1,x2); }
-FloatMPUpperBound refinement(FloatMPUpperBound const& x1, FloatMPUpperBound const& x2) { return Operations<FloatMPUpperBound,FloatMPLowerBound>::_refinement(x1,x2); }
-
-ValidatedSierpinskian leq(FloatMPUpperBound const& x1, FloatMPLowerBound const& x2) { return Operations<FloatMPUpperBound,FloatMPLowerBound>::_leq(x1,x2); }
-
-
-
-OutputStream& operator<<(OutputStream& os, Float64Bounds const& x) { return Operations<Float64Bounds>::_write(os,x); }
-InputStream& operator>>(InputStream& is, Float64Bounds& x) { return Operations<Float64Bounds>::_read(is,x); }
 
 Float64Error mag(Float64Bounds const& x) { return Operations<Float64Bounds>::_mag(x); }
 Float64LowerBound mig(Float64Bounds const& x) { return Operations<Float64Bounds>::_mig(x); }
 Float64Bounds round(Float64Bounds const& x) { return Operations<Float64Bounds   >::_round(x); }
-
-ValidatedKleenean eq(Float64Bounds const& x1, Float64Bounds const& x2) { return Operations<Float64Bounds>::_eq(x1,x2); }
-ValidatedKleenean leq(Float64Bounds const& x1, Float64Bounds const& x2) { return Operations<Float64Bounds>::_leq(x1,x2); }
 
 Bool same(Float64Bounds const& x1, Float64Bounds const& x2) { return Operations<Float64Bounds>::_same(x1,x2); }
 Bool models(Float64Bounds const& x1, Float64Value const& x2) { return Operations<Float64Bounds>::_models(x1,x2); }
@@ -1870,15 +1847,9 @@ Bool inconsistent(Float64Bounds const& x1, Float64Bounds const& x2) { return Ope
 Float64Bounds refinement(Float64Bounds const& x1, Float64Bounds const& x2) { return Operations<Float64Bounds>::_refinement(x1,x2); }
 
 
-OutputStream& operator<<(OutputStream& os, FloatMPBounds const& x) { return Operations<FloatMPBounds>::_write(os,x); }
-InputStream& operator>>(InputStream& is, FloatMPBounds& x) { return Operations<FloatMPBounds>::_read(is,x); }
-
 FloatMPError mag(FloatMPBounds const& x) { return Operations<FloatMPBounds>::_mag(x); }
 FloatMPLowerBound mig(FloatMPBounds const& x) { return Operations<FloatMPBounds>::_mig(x); }
 FloatMPBounds round(FloatMPBounds const& x) { return Operations<FloatMPBounds>::_round(x); }
-
-ValidatedKleenean eq(FloatMPBounds const& x1, FloatMPBounds const& x2) { return Operations<FloatMPBounds>::_eq(x1,x2); }
-ValidatedKleenean leq(FloatMPBounds const& x1, FloatMPBounds const& x2) { return Operations<FloatMPBounds>::_leq(x1,x2); }
 
 Bool same(FloatMPBounds const& x1, FloatMPBounds const& x2) { return Operations<FloatMPBounds>::_same(x1,x2); }
 Bool models(FloatMPBounds const& x1, FloatMPValue const& x2) { return Operations<FloatMPBounds>::_models(x1,x2); }
@@ -1889,14 +1860,8 @@ FloatMPBounds refinement(FloatMPBounds const& x1, FloatMPBounds const& x2) { ret
 
 
 
-OutputStream& operator<<(OutputStream& os, Float64Ball const& x) { return Operations<Float64Ball>::_write(os,x); }
-InputStream& operator>>(InputStream& is, Float64Ball& x) { return Operations<Float64Ball>::_read(is,x); }
-
 Float64Error mag(Float64Ball const& x) { return Operations<Float64Ball>::_mag(x); }
 Float64LowerBound mig(Float64Ball const& x) { return Operations<Float64Ball>::_mig(x); }
-
-ValidatedKleenean eq(Float64Ball const& x1, Float64Ball const& x2) { return Operations<Float64Ball>::_eq(x1,x2); }
-ValidatedKleenean leq(Float64Ball const& x1, Float64Ball const& x2) { return Operations<Float64Ball>::_leq(x1,x2); }
 
 Bool same(Float64Ball const& x1, Float64Ball const& x2) { return Operations<Float64Ball>::_same(x1,x2); }
 Bool models(Float64Ball const& x1, Float64Value const& x2) { return Operations<Float64Ball>::_models(x1,x2); }
@@ -1906,14 +1871,8 @@ Bool inconsistent(Float64Ball const& x1, Float64Ball const& x2) { return Operati
 Float64Ball refinement(Float64Ball const& x1, Float64Ball const& x2) { return Operations<Float64Ball>::_refinement(x1,x2); }
 
 
-OutputStream& operator<<(OutputStream& os, FloatMPBall const& x) { return Operations<FloatMPBall>::_write(os,x); }
-InputStream& operator>>(InputStream& is, FloatMPBall& x) { return Operations<FloatMPBall>::_read(is,x); }
-
 FloatMPError mag(FloatMPBall const& x) { return Operations<FloatMPBall>::_mag(x); }
 FloatMPLowerBound mig(FloatMPBall const& x) { return Operations<FloatMPBall>::_mig(x); }
-
-ValidatedKleenean eq(FloatMPBall const& x1, FloatMPBall const& x2) { return Operations<FloatMPBall>::_eq(x1,x2); }
-ValidatedKleenean leq(FloatMPBall const& x1, FloatMPBall const& x2) { return Operations<FloatMPBall>::_leq(x1,x2); }
 
 Bool same(FloatMPBall const& x1, FloatMPBall const& x2) { return Operations<FloatMPBall>::_same(x1,x2); }
 Bool models(FloatMPBall const& x1, FloatMPValue const& x2) { return Operations<FloatMPBall>::_models(x1,x2); }
@@ -1924,22 +1883,10 @@ FloatMPBall refinement(FloatMPBall const& x1, FloatMPBall const& x2) { return Op
 
 
 
-OutputStream& operator<<(OutputStream& os, Float64Value const& x) { return Operations<Float64Value,Float64Value,Float64Bounds>::_write(os,x); }
-InputStream& operator>>(InputStream& is, Float64Value& x) { return Operations<Float64Value,Float64Value,Float64Bounds>::_read(is,x); }
-
-Float64Error mag(Float64Value const& x) { return Operations<Float64Value,Float64Value,Float64Bounds>::_mag(x); }
-
-Boolean eq(Float64Value const& x1, Float64Value const& x2) { return Operations<Float64Value,Float64Value,Float64Bounds>::_eq(x1,x2); }
-Boolean leq(Float64Value const& x1, Float64Value const& x2) { return Operations<Float64Value,Float64Value,Float64Bounds>::_leq(x1,x2); }
+Float64Error mag(Float64Value const& x) { return Operations<Float64Value>::_mag(x); }
 
 
-OutputStream& operator<<(OutputStream& os, FloatMPValue const& x) { return Operations<FloatMPValue,FloatMPValue,FloatMPBounds>::_write(os,x); }
-InputStream& operator>>(InputStream& is, FloatMPValue& x) { return Operations<FloatMPValue,FloatMPValue,FloatMPBounds>::_read(is,x); }
-
-FloatMPError mag(FloatMPValue const& x) { return Operations<FloatMPValue,FloatMPValue,FloatMPBounds>::_mag(x); }
-
-Boolean eq(FloatMPValue const& x1, FloatMPValue const& x2) { return Operations<FloatMPValue,FloatMPValue,FloatMPBounds>::_eq(x1,x2); }
-Boolean leq(FloatMPValue const& x1, FloatMPValue const& x2) { return Operations<FloatMPValue,FloatMPValue,FloatMPBounds>::_leq(x1,x2); }
+FloatMPError mag(FloatMPValue const& x) { return Operations<FloatMPValue>::_mag(x); }
 
 
 
@@ -1953,29 +1900,23 @@ Float64Value& operator/=(Float64Value& x1, TwoExp y2) { return x1=x1/y2; }
 
 
 Float64Error operator*(Nat y1, Float64Error const& x2) { return Float64Error(y1,x2.precision())*x2; }
-Float64LowerBound rec(Float64Error const& x) { return Operations<Float64Error,Float64LowerBound>::_rec(x); }
-Float64UpperBound log(Float64Error const& x) { return Operations<Float64Error,Float64LowerBound>::_log(x); }
+Float64Error rec(Float64LowerBound const& x) { return Operations<Float64Error>::_rec(x); }
+Float64UpperBound log(Float64Error const& x) { return Operations<Float64Error>::_log(x); }
 Float64Error mag(Float64Error const& x) { return x; }
 
-OutputStream& operator<<(OutputStream& os, Float64Error const& x) { return Operations<Float64Error,Float64LowerBound>::_write(os,x); }
-InputStream& operator>>(InputStream& is, Float64Error& x) { return Operations<Float64Error,Float64LowerBound>::_read(is,x); }
-
-Bool same(Float64Error const& x1, Float64Error const& x2) { return Operations<Float64Error,Float64LowerBound>::_same(x1,x2); }
-Bool refines(Float64Error const& x1, Float64Error const& x2) { return Operations<Float64Error,Float64LowerBound>::_refines(x1,x2); }
-Float64Error refinement(Float64Error const& x1, Float64Error const& x2) { return Operations<Float64Error,Float64LowerBound>::_refinement(x1,x2); }
+Bool same(Float64Error const& x1, Float64Error const& x2) { return Operations<Float64Error>::_same(x1,x2); }
+Bool refines(Float64Error const& x1, Float64Error const& x2) { return Operations<Float64Error>::_refines(x1,x2); }
+Float64Error refinement(Float64Error const& x1, Float64Error const& x2) { return Operations<Float64Error>::_refinement(x1,x2); }
 
 
 FloatMPError operator*(Nat y1, FloatMPError const& x2) { return FloatMPError(y1,x2.precision())*x2; }
-FloatMPLowerBound rec(FloatMPError const& x) { return Operations<FloatMPError,FloatMPLowerBound>::_rec(x); }
-FloatMPUpperBound log(FloatMPError const& x) { return Operations<FloatMPError,FloatMPLowerBound>::_log(x); }
+FloatMPError rec(FloatMPLowerBound const& x) { return Operations<FloatMPError>::_rec(x); }
+FloatMPUpperBound log(FloatMPError const& x) { return Operations<FloatMPError>::_log(x); }
 FloatMPError mag(FloatMPError const& x) { return x; }
 
-OutputStream& operator<<(OutputStream& os, FloatMPError const& x) { return Operations<FloatMPError,FloatMPLowerBound>::_write(os,x); }
-InputStream& operator>>(InputStream& is, FloatMPError& x) { return Operations<FloatMPError,FloatMPLowerBound>::_read(is,x); }
-
-Bool same(FloatMPError const& x1, FloatMPError const& x2) { return Operations<FloatMPError,FloatMPLowerBound>::_same(x1,x2); }
-Bool refines(FloatMPError const& x1, FloatMPError const& x2) { return Operations<FloatMPError,FloatMPLowerBound>::_refines(x1,x2); }
-FloatMPError refinement(FloatMPError const& x1, FloatMPError const& x2) { return Operations<FloatMPError,FloatMPLowerBound>::_refinement(x1,x2); }
+Bool same(FloatMPError const& x1, FloatMPError const& x2) { return Operations<FloatMPError>::_same(x1,x2); }
+Bool refines(FloatMPError const& x1, FloatMPError const& x2) { return Operations<FloatMPError>::_refines(x1,x2); }
+FloatMPError refinement(FloatMPError const& x1, FloatMPError const& x2) { return Operations<FloatMPError>::_refinement(x1,x2); }
 
 
 

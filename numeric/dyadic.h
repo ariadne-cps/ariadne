@@ -48,11 +48,11 @@ class Dyadic;
 //! \related Float64, ExactIntervalType
 //! \brief A floating-point number, which is taken to represent the \em exact value of a real quantity.
 class Dyadic
-    : Ring<Dyadic>
-    , DirectedLattice<Dyadic>
-    , Ordered<Dyadic,Boolean>
+    : DeclareRingOperations<Dyadic>
+    , DeclareLatticeOperations<Dyadic,Dyadic>
+    , DeclareComparisonOperations<Dyadic,Boolean,Boolean>
     , DefineRingOperators<Dyadic>
-    , DefineComparisonOperators<Dyadic,Boolean>
+    , DefineComparisonOperators<Dyadic,Boolean,Boolean>
 {
   public:
     mpf_t _mpf;

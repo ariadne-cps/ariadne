@@ -92,11 +92,11 @@ template<> struct IsNumericType<Integer> : True { };
 //! \ingroup UserNumericTypeSubModule
 //! \brief Arbitrarily-sized integers.
 class Integer
-    : Ring<Integer>
-    , DirectedLattice<Integer>
-    , Ordered<Integer,Boolean>
+    : DeclareRingOperations<Integer,Integer,Natural>
+    , DeclareLatticeOperations<Integer,Natural>
+    , DeclareComparisonOperations<Integer,Boolean,Boolean>
     , DefineRingOperators<Integer>
-    , DefineComparisonOperators<Integer,Boolean>
+    , DefineComparisonOperators<Integer,Boolean,Boolean>
 {
   public:
     mpz_t _mpz;

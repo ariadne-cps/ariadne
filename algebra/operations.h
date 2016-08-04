@@ -1,5 +1,5 @@
 /***************************************************************************
- *            algebra_operations.h
+ *            algebra/operations.h
  *
  *  Copyright 2010-15  Pieter Collins
  *
@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file algebra_operations.h
+/*! \file operations.h
  *  \brief Provide common algebra operations automatically.
  */
 
@@ -29,7 +29,7 @@
 #define ARIADNE_ALGEBRA_OPERATIONS_H
 
 #include "numeric/operators.h"
-#include "numeric/mixins.h"
+#include "numeric/arithmetic.h"
 
 namespace Ariadne {
 

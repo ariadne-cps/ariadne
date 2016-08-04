@@ -39,7 +39,7 @@
 #include "algebra/multi_index.h"
 #include "algebra/series.h"
 #include "algebra/expansion.h"
-#include "algebra/algebra_operations.h"
+#include "algebra/operations.h"
 #include <boost/concept_check.hpp>
 
 namespace Ariadne {

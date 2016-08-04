@@ -45,7 +45,7 @@
 
 #include "number_interface.h"
 
-#include "mixins.h"
+#include "arithmetic.h"
 #include "integer.h"
 #include "rational.h"
 #include "real.h"

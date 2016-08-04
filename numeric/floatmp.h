@@ -32,7 +32,6 @@
 
 #include "paradigm.h"
 #include "number.h"
-#include "mixins.h"
 #include <mpfr.h>
 
 namespace Ariadne {
@@ -102,7 +101,7 @@ class FloatMP {
     FloatMP(double);
 
     explicit FloatMP(PrecisionType);
-    FloatMP(double, PrecisionType);
+    explicit FloatMP(double, PrecisionType);
     explicit FloatMP(Float64, PrecisionType);
     explicit FloatMP(Dyadic const&, PrecisionType);
 

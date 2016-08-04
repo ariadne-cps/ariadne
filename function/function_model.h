@@ -40,7 +40,7 @@
 #include "numeric/numeric.h"
 #include "algebra/vector.h"
 #include "algebra/matrix.h"
-#include "algebra/algebra_operations.h"
+#include "algebra/operations.h"
 #include "geometry/box.h"
 
 namespace Ariadne {
@@ -443,8 +443,8 @@ template<class F> class VectorFunctionModelMixin<F,ValidatedTag>
 
 template<class X> class VectorFunctionModelElement
     : public DeclareArithmeticOperators<ScalarFunctionModel<ValidatedTag>>
-    , public DeclareMixedOperators<ScalarFunctionModel<ValidatedTag>,ValidatedNumericType>
-    , public DeclareMixedOperators<ScalarFunctionModel<ValidatedTag>,ValidatedScalarFunction>
+    , public DeclareMixedArithmeticOperators<ScalarFunctionModel<ValidatedTag>,ValidatedNumericType>
+    , public DeclareMixedArithmeticOperators<ScalarFunctionModel<ValidatedTag>,ValidatedScalarFunction>
 {
     VectorFunctionModel<X>* _p; SizeType _i;
   public:

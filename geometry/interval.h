@@ -34,7 +34,6 @@
 
 #include "numeric/logical.h"
 #include "numeric/float.h"
-#include "numeric/mixins.h"
 #include "numeric/arithmetic.h"
 
 #include "interval.decl.h"
@@ -54,25 +53,32 @@ enum class SplitPart : char { LOWER, MIDDLE, UPPER };
 InputStream& operator>>(InputStream& is, SplitPart& s);
 OutputStream& operator<<(OutputStream& os, const SplitPart& s);
 
-template<class U> struct SplitEndTypedef { typedef U Type; };
-template<> struct SplitEndTypedef<Float64UpperBound> { typedef Float64Value Type; };
-template<> struct SplitEndTypedef<Float64Bounds> { typedef Float64Value Type; };
-template<class U> using SplitEndType = typename SplitEndTypedef<U>::Type;
+template<class U> struct CentreTrait { typedef decltype(declval<U>()-declval<U>()) Type; };
+template<class PR> struct CentreTrait<FloatUpperBound<PR>> { typedef FloatApproximation<PR> Type; };
+template<class PR> struct CentreTrait<FloatLowerBound<PR>> { typedef FloatApproximation<PR> Type; };
+
+template<class U> struct MidpointTrait { typedef decltype(max(-declval<U>(),declval<U>())) Type; };
+template<class PR> struct MidpointTrait<FloatUpperBound<PR>> { typedef FloatValue<PR> Type; };
+template<class PR> struct MidpointTrait<FloatLowerBound<PR>> { typedef FloatValue<PR> Type; };
+template<class PR> struct MidpointTrait<FloatBounds<PR>> { typedef FloatValue<PR> Type; };
+template<class PR> struct MidpointTrait<FloatBall<PR>> { typedef FloatValue<PR> Type; };
 
 class UnitIntervalType;
 class EmptyIntervalType;
 
 template<class U> struct DeclareIntervalArithmeticOperations { };
 template<> struct DeclareIntervalArithmeticOperations<Float64UpperBound>
-    : DeclareNumericOperations<Interval<Float64UpperBound>>
-    , DeclareMixedArithmeticOperators<Interval<Float64UpperBound>,Float64Bounds>
-    , DeclareFieldComparisons<Interval<Float64UpperBound>,Interval<Float64UpperBound>,ValidatedKleenean>
-    , DeclareFieldComparisons<Interval<Float64UpperBound>,Float64Bounds,ValidatedKleenean>
-    , DeclareFieldComparisons<Interval<Float64UpperBound>,Int,ValidatedKleenean>
-    , DeclareFieldComparisons<Float64Bounds,Interval<Float64UpperBound>,ValidatedKleenean>
-    , DeclareMixedArithmeticOperators<Interval<Float64UpperBound>,Int>
+    : DeclareNumericOperations<Float64UpperInterval>
+    , DeclareComparisonOperations<Float64UpperInterval,ValidatedKleenean>
+    , DefineFieldOperators<Float64UpperInterval>
+    , DefineComparisonOperators<Float64UpperInterval,ValidatedKleenean>
+    , ProvideConvertedFieldOperations<Float64UpperInterval,Float64Bounds>
+    , ProvideConvertedComparisonOperations<Float64UpperInterval,Float64Bounds,Float64UpperInterval,ValidatedKleenean>
+    , ProvideConcreteGenericFieldOperations<Float64UpperInterval,ValidatedNumber>
+    , ProvideConcreteGenericComparisonOperations<Float64UpperInterval,ValidatedNumber,ValidatedKleenean>
 {
     friend Float64Error mag(Float64UpperInterval const&);
+    Float64UpperInterval create(ValidatedNumber const& y) const;
 };
 
 template<> struct DeclareIntervalArithmeticOperations<Float64Value> : DeclareIntervalArithmeticOperations<Float64UpperBound> { };
@@ -86,11 +92,10 @@ template<class U> class Interval
 {
     typedef typename U::Paradigm P;
     typedef decltype(-declval<U>()) L;
-    typedef decltype(declval<U>()+declval<L>()) C;
-    typedef typename SplitEndTypedef<U>::Type M;
+    typedef typename CentreTrait<U>::Type C;
+    typedef typename MidpointTrait<U>::Type M;
     typedef decltype(cast_positive(declval<U>()-declval<M>())) R;
     typedef decltype(cast_positive(declval<U>()-declval<L>())) W;
-
   public:
     //! \brief The computational paradigm used by the interval.
     typedef P Paradigm;
@@ -132,11 +137,14 @@ template<class U> class Interval
     static Interval<U> singleton_interval(MidpointType x);
 
     //! \brief Construct a singleton interval from a number.
-    template<class XX, EnableIf<And<IsConstructible<L,XX>,IsConstructible<U,XX>>> = dummy>
-        explicit Interval(const XX& x) : _l(x), _u(x) { }
+    template<class V, EnableIf<And<IsConstructible<L,V>,IsConstructible<U,V>>> = dummy>
+        explicit Interval(const V& v) : _l(v), _u(v) { }
     //! \brief Assign a singleton interval from a number.
-    template<class XX, EnableIf<And<IsAssignable<L,XX>,IsAssignable<U,XX>>> = dummy>
-        Interval<U>& operator=(const XX& x) { _l=x; _u=x; return *this; }
+    template<class V, EnableIf<And<IsAssignable<L,V>,IsAssignable<U,V>>> = dummy>
+        Interval<U>& operator=(const V& v) { _l=v; _u=v; return *this; }
+    //! \brief Construct a singleton interval from a number.
+    template<class Y, EnableIf<And<IsConstructible<L,Y,Precision64>,IsConstructible<U,Y,Precision64>>,Not<And<IsConstructible<L,Y>,IsConstructible<U,Y>>>> = dummy>
+        explicit Interval(const Y& y) : _l(y,Precision64()), _u(y,Precision64()) { }
 
     //! \brief Convert from an interval of a different type.
     template<class UU, EnableIf<IsConvertible<UU,U>> = dummy>

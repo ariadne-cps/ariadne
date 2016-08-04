@@ -38,7 +38,7 @@
 #include "algebra/multi_index.h"
 #include "algebra/expansion.h"
 #include "function/taylor_model.h"
-#include "algebra/algebra_operations.h"
+#include "algebra/operations.h"
 #include "algebra/differential.h"
 #include "algebra/evaluate.h"
 

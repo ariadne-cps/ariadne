@@ -334,22 +334,22 @@ inline UpperReal const& make_upper(Real const& r) { return reinterpret_cast<Uppe
 
 PositiveReal cast_positive(Real const& pr) { return static_cast<PositiveReal const&>(pr); }
 
-LowerReal max(LowerReal lr1, LowerReal lr2) { return make_lower(max(cast_real(lr1),cast_real(lr2))); }
-LowerReal min(LowerReal lr1, LowerReal lr2) { return make_lower(min(cast_real(lr1),cast_real(lr2))); }
-Real min(LowerReal lr1, Real r2) { return min(cast_real(lr1),r2); }
-Real min(Real r1, LowerReal lr2) { return min(r1,cast_real(lr2)); }
+LowerReal max(LowerReal const& lr1, LowerReal const& lr2) { return make_lower(max(cast_real(lr1),cast_real(lr2))); }
+LowerReal min(LowerReal const& lr1, LowerReal const& lr2) { return make_lower(min(cast_real(lr1),cast_real(lr2))); }
+Real min(LowerReal const& lr1, Real const& r2) { return min(cast_real(lr1),r2); }
+Real min(Real const& r1, LowerReal const& lr2) { return min(r1,cast_real(lr2)); }
 
-UpperReal max(UpperReal ur1, UpperReal ur2) { return make_upper(max(cast_real(ur1),cast_real(ur2))); }
-Real max(UpperReal ur1, Real r2) { return max(cast_real(ur1),r2); }
-Real max(Real r1, UpperReal ur2) { return max(r1,cast_real(ur2)); }
-UpperReal min(UpperReal ur1, UpperReal ur2) { return make_upper(min(cast_real(ur1),cast_real(ur2))); }
+UpperReal max(UpperReal const& ur1, UpperReal const& ur2) { return make_upper(max(cast_real(ur1),cast_real(ur2))); }
+Real max(UpperReal const& ur1, Real const& r2) { return max(cast_real(ur1),r2); }
+Real max(Real r1, UpperReal const& ur2) { return max(r1,cast_real(ur2)); }
+UpperReal min(UpperReal const& ur1, UpperReal const& ur2) { return make_upper(min(cast_real(ur1),cast_real(ur2))); }
 
-LowerReal neg(UpperReal ur) { return make_lower(neg(cast_real(ur))); }
-UpperReal neg(LowerReal lr) { return make_upper(neg(cast_real(lr))); }
-LowerReal add(LowerReal lr1, LowerReal lr2) { return make_lower(add(cast_real(lr1),cast_real(lr2))); }
-UpperReal add(UpperReal ur1, UpperReal ur2) { return make_upper(add(cast_real(ur1),cast_real(ur2))); }
-LowerReal add(LowerReal lr1, UpperReal ur2) { return make_lower(add(cast_real(lr1),cast_real(ur2))); }
-UpperReal add(UpperReal ur1, LowerReal lr2) { return make_upper(add(cast_real(ur1),cast_real(lr2))); }
+LowerReal neg(UpperReal const& ur) { return make_lower(neg(cast_real(ur))); }
+UpperReal neg(LowerReal const& lr) { return make_upper(neg(cast_real(lr))); }
+LowerReal add(LowerReal const& lr1, LowerReal const& lr2) { return make_lower(add(cast_real(lr1),cast_real(lr2))); }
+UpperReal add(UpperReal const& ur1, UpperReal const& ur2) { return make_upper(add(cast_real(ur1),cast_real(ur2))); }
+LowerReal add(LowerReal const& lr1, UpperReal const& ur2) { return make_lower(add(cast_real(lr1),cast_real(ur2))); }
+UpperReal add(UpperReal const& ur1, LowerReal const& lr2) { return make_upper(add(cast_real(ur1),cast_real(lr2))); }
 
 PositiveFloat64Bounds PositiveReal::get(Precision64 pr) const {
     return PositiveFloat64Bounds(this->_ptr->_evaluate(pr));
@@ -359,12 +359,14 @@ PositiveFloatMPBounds PositiveReal::get(PrecisionMP pr) const {
     return PositiveFloatMPBounds(this->_ptr->_evaluate(pr));
 }
 
-PositiveReal max(PositiveReal pr1, PositiveReal pr2) { return cast_positive(max(make_signed(pr1),make_signed(pr2))); }
-PositiveReal min(PositiveReal pr1, PositiveReal pr2) { return cast_positive(min(make_signed(pr1),make_signed(pr2))); }
-PositiveReal rec(PositiveReal pr) { return cast_positive(rec(make_signed(pr))); }
-PositiveReal add(PositiveReal pr1, PositiveReal pr2) { return cast_positive(add(make_signed(pr1),make_signed(pr2))); }
-PositiveReal mul(PositiveReal pr1, PositiveReal pr2) { return cast_positive(mul(make_signed(pr1),make_signed(pr2))); }
-PositiveReal div(PositiveReal pr1, PositiveReal pr2) { return cast_positive(div(make_signed(pr1),make_signed(pr2))); }
+PositiveReal max(PositiveReal const& pr1, PositiveReal const& pr2) { return cast_positive(max(make_signed(pr1),make_signed(pr2))); }
+PositiveReal min(PositiveReal const& pr1, PositiveReal const& pr2) { return cast_positive(min(make_signed(pr1),make_signed(pr2))); }
+PositiveReal add(PositiveReal const& pr1, PositiveReal const& pr2) { return cast_positive(add(make_signed(pr1),make_signed(pr2))); }
+PositiveReal mul(PositiveReal const& pr1, PositiveReal const& pr2) { return cast_positive(mul(make_signed(pr1),make_signed(pr2))); }
+PositiveReal div(PositiveReal const& pr1, PositiveReal const& pr2) { return cast_positive(div(make_signed(pr1),make_signed(pr2))); }
+PositiveReal rec(PositiveReal const& pr) { return cast_positive(rec(make_signed(pr))); }
+PositiveReal sqrt(PositiveReal const& pr) { return cast_positive(sqrt(make_signed(pr))); }
+PositiveReal atan(PositiveReal const& pr) { return cast_positive(atan(make_signed(pr))); }
 
 
 PositiveFloat64LowerBound PositiveLowerReal::get(Precision64 pr) const {

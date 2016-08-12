@@ -59,7 +59,6 @@ namespace Ariadne {
 template<class X> struct IsNumericType;
 
 class NumberInterface;
-template<class X> class NumberWrapper;
 
 template<class P> class Number;
 template<class P> struct IsNumericType<Number<P>> : True { };

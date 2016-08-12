@@ -57,9 +57,14 @@ Real cos(Real const&);
 Real tan(Real const&);
 Real atan(Real const&);
 
+template<> struct DispatchingTraits<Integer> { typedef Aware<Integer> AwareOfTypes; };
 template class NumberWrapper<Integer>;
+template<> struct DispatchingTraits<Dyadic> { typedef Aware<Dyadic,Integer> AwareOfTypes; };
 template class NumberWrapper<Dyadic>;
+template<> struct DispatchingTraits<Rational> { typedef Aware<Rational,Dyadic,Integer> AwareOfTypes; };
 template class NumberWrapper<Rational>;
+
+template<> struct DispatchingTraits<Real> { typedef Aware<Real> AwareOfTypes; };
 template class NumberWrapper<Real>;
 
 Integer::operator ExactNumber() const { return ExactNumber(new NumberWrapper<Integer>(*this)); }

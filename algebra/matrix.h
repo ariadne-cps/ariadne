@@ -48,6 +48,7 @@ template<class M> class MatrixRow;
 template<class M> class MatrixColumn;
 template<class X1, class X2> struct MatrixMatrixProduct;
 template<class X1, class X2> struct MatrixVectorProduct;
+template<class M> class MatrixTranspose;
 
 class PivotMatrix;
 template<class X> class PLUMatrix;
@@ -72,6 +73,8 @@ class DeclareMatrixOperations {
     template<class X1, class X2> friend Covector<ArithmeticType<X1,X2>> operator*(Covector<X1> const& u1, Matrix<X2> const& A2);
     template<class X1, class X2> friend Matrix<ProductType<X1,X2>> operator*(Vector<X1> const& v1, Covector<X2> const& u2);
 
+    template<class X1, class X2> friend Matrix<ArithmeticType<X1,X2>> operator*(Matrix<X1> const& A1, MatrixTranspose<Matrix<X2>> const& A2);
+    template<class X1, class X2> friend Matrix<ArithmeticType<X1,X2>> operator*(MatrixTranspose<X1> const& A1, Matrix<Matrix<X2>> const& A2);
     template<class X1, class X2> friend decltype(declval<X1>()==declval<X2>()) operator==(Matrix<X1> const& A1, Matrix<X2> const& A2);
 };
 

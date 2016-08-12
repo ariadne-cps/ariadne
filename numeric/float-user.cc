@@ -1020,7 +1020,7 @@ template<class PR> struct Operations<FloatBounds<PR>> {
         is >> _u;
         is >> cr;
         RawFloat<PR>::set_rounding_mode(rnd);
-        ARIADNE_ASSERT(is);
+        ARIADNE_ASSERT(not is.fail());
         ARIADNE_ASSERT(cl=='[' || cl=='(');
         ARIADNE_ASSERT(cm==':' || cm==',' || cm==';');
         ARIADNE_ASSERT(cr==']' || cr==')');
@@ -1271,7 +1271,7 @@ template<class PR> struct Operations<FloatBall<PR>> {
         RawFloat<PR>::set_rounding_upward();
         is >> _e;
         RawFloat<PR>::set_rounding_mode(rnd);
-        ARIADNE_ASSERT(is);
+        ARIADNE_ASSERT(not is.fail());
         ARIADNE_ASSERT(std::strcmp(cpm,pmstr));
         x._v=_v; x._e=_e;
         return is;
@@ -1525,7 +1525,7 @@ template<class PR> struct Operations<FloatValue<PR>> {
         ARIADNE_NOT_IMPLEMENTED;
         auto v = nul(x._v);
         is >> v;
-        ARIADNE_ASSERT(is);
+        ARIADNE_ASSERT(not is.fail());
         x._v=v;
         return is;
     }

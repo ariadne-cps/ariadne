@@ -394,6 +394,7 @@ class DifferentialCharacteristics {
 template<class X>
 class Vector< Differential<X> >
     : public VectorExpression< Vector< Differential<X> > >
+    , ProvideVectorOperations
 {
     //BOOST_CONCEPT_ASSERT((DifferentialVectorConcept<DifferentialVector<X> >));
   public:

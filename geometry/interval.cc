@@ -44,7 +44,7 @@ operator>>(InputStream& is, Interval<Float64Value>& ivl)
     Float64 l,u;
     char cl,cm,cr;
     is >> cl >> l >> cm >> u >> cr;
-    ARIADNE_ASSERT(is);
+    ARIADNE_ASSERT(not is.fail());
     ARIADNE_ASSERT(cl=='[' || cl=='(');
     ARIADNE_ASSERT(cm==':' || cm==',' || cm==';');
     ARIADNE_ASSERT(cr==']' || cr==')');

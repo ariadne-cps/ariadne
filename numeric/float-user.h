@@ -338,7 +338,7 @@ template<class PR> class FloatBounds
     explicit FloatBounds<PR>(RawFloatType const& l, RawFloatType const& u) : _l(l), _u(u) { }
     FloatBounds<PR>(FloatLowerBound<PR> const& lower, FloatUpperBound<PR> const& upper) : _l(lower.raw()), _u(upper.raw()) { }
     FloatBounds<PR>(FloatLowerBound<PR> const& lower, ValidatedUpperNumber const& upper) : FloatBounds<PR>(lower,lower.create(upper)) { }
-    FloatBounds<PR>(ValidatedLowerNumber const& lower, FloatLowerBound<PR> const& upper) : FloatBounds<PR>(upper.create(lower),upper) { }
+    FloatBounds<PR>(ValidatedLowerNumber const& lower, FloatUpperBound<PR> const& upper) : FloatBounds<PR>(upper.create(lower),upper) { }
     template<class N1, class N2, EnableIf<And<IsIntegral<N1>,IsIntegral<N2>>> = dummy> FloatBounds<PR>(N1 n1, N2 n2, PR pr) : _l(n1,pr), _u(n2,pr) { }
     FloatBounds<PR>(ExactDouble const& dl, ExactDouble const& du, PrecisionType pr);
     FloatBounds<PR>(Rational const& ql, Rational const& qu, PrecisionType pr);

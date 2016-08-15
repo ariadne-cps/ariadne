@@ -89,7 +89,7 @@ class Polynomial
     //! \brief A dense polynomial with coefficients given by an initializer list of doubles.
     explicit Polynomial(SizeType as, DegreeType deg, InitializerList<X> lst);
     //! \brief A sparse polynomial with coefficients given by an initializer list of indices and coefficients.
-    Polynomial(InitializerList<PairType<InitializerList<Int>,X>> lst);
+    Polynomial(InitializerList<Pair<InitializerList<Int>,X>> lst);
     //@}
 
     //! \brief Create the null polynomial in the same number of variables.

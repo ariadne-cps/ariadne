@@ -235,11 +235,11 @@ class Expansion
     explicit Expansion(); // DEPRECTATED
     explicit Expansion(SizeType as);
     Expansion(SizeType as, DegreeType deg, InitializerList<X> lst); // DEPRECTATED
-    Expansion(SizeType as, InitializerList<PairType<InitializerList<Int>,X>> lst);
-    Expansion(InitializerList<PairType<InitializerList<Int>,X>> lst);
+    Expansion(SizeType as, InitializerList<Pair<InitializerList<Int>,X>> lst);
+    Expansion(InitializerList<Pair<InitializerList<Int>,X>> lst);
 
     template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>> =dummy>
-        Expansion(InitializerList<PairType<InitializerList<Int>,Y>> lst, PRS... prs);
+        Expansion(InitializerList<Pair<InitializerList<Int>,Y>> lst, PRS... prs);
 
     template<class XX, EnableIf<IsConvertible<XX,X>> =dummy>
         Expansion(const Expansion<XX>& p);
@@ -424,7 +424,7 @@ template<class X> template<class Y, EnableIf<IsAssignable<X,Y>>>  Void Expansion
 }
 
 template<class X> template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>>>
-Expansion<X>::Expansion(InitializerList<PairType<InitializerList<Int>,Y>> lst, PRS... prs)
+Expansion<X>::Expansion(InitializerList<Pair<InitializerList<Int>,Y>> lst, PRS... prs)
     : _argument_size(lst.size()==0?0u:lst.begin()->first.size())
 {
     MultiIndex a;

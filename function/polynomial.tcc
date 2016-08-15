@@ -36,7 +36,7 @@ template<class X> Polynomial<X>::Polynomial(SizeType as)
 }
 
 template<class X>
-Polynomial<X>::Polynomial(InitializerList<PairType<InitializerList<Int>,X>> lst)
+Polynomial<X>::Polynomial(InitializerList<Pair<InitializerList<Int>,X>> lst)
     : _expansion(lst)
 {
     this->cleanup();

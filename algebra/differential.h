@@ -176,10 +176,10 @@ class Differential
     //! Terms in \a e of degree higher than \a deg are truncated
     explicit Differential(const Expansion<X>& e, DegreeType deg);
     //! \brief Construct a differential of degree \a deg from an initializer list list of (index,coefficient) pairs.
-    explicit Differential(SizeType as, DegreeType deg, InitializerList< PairType<InitializerList<Int>,X> > lst);
+    explicit Differential(SizeType as, DegreeType deg, InitializerList< Pair<InitializerList<Int>,X> > lst);
     //! \brief Construct a differential of degree \a deg from an initializer list list of (index,coefficient) pairs.
     template<class PR, EnableIf<IsConstructible<X,double,PR>> =dummy>
-        explicit Differential(SizeType as, DegreeType deg, InitializerList< PairType<InitializerList<Int>,double> > lst, PR pr);
+        explicit Differential(SizeType as, DegreeType deg, InitializerList< Pair<InitializerList<Int>,double> > lst, PR pr);
 
     //! \brief Construct a dense differential of degree \a deg in \a as variables from a list of coefficients beginning at \a ptr.
     template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>> =dummy> Differential(SizeType as, DegreeType deg, const Y* ptr, PRS... prs);
@@ -485,7 +485,7 @@ Vector<Differential<X>>& Vector<Differential<X>>::operator=(const VectorExpressi
 }
 
 template<class X> template<class PR, EnableIf<IsConstructible<X,double,PR>>>
-Differential<X>::Differential(SizeType as, DegreeType deg, InitializerList< PairType<InitializerList<Int>,double> > lst, PR pr)
+Differential<X>::Differential(SizeType as, DegreeType deg, InitializerList< Pair<InitializerList<Int>,double> > lst, PR pr)
     : Differential<X>(Expansion<X>(lst,pr),deg)
 { }
 

@@ -33,157 +33,20 @@
 
 namespace Ariadne {
 
-
-template<class T1, class T2> class Pair : public std::pair<T1,T2> {
-  public:
-    using std::pair<T1,T2>::pair;
-};
-
+template<class T1, class T2> using Pair = std::pair<T1,T2>;
 using std::make_pair;
+template<class T1, class T2> constexpr Pair<T1&,T2&> make_lpair(T1& t1, T2& t2) { return Pair<T1&,T2&>(t1,t2); }
 
-// A pair of references, suitable as use as an lvalue for a function returning a pair.
-template<class T1, class T2>
-struct LPair
-{
-    inline LPair(T1& t1, T2& t2) : first(t1), second(t2) { }
-    inline LPair<T1,T2> operator=(const std::pair<T1,T2>& rv) {
-        this->first=rv.first; this->second=rv.second; return *this; }
-    T1& first; T2& second;
-};
-
-template<class T1,class T2> inline
-LPair<T1,T2> make_lpair(T1& t1, T2& t2) {
-    return LPair<T1,T2>(t1,t2);
-}
+template<class... TS> using Tuple = std::tuple<TS...>;
+using std::make_tuple;
+template<class... TS> constexpr Tuple<TS&...> make_ltuple(TS&... ts) { return Tuple<TS&...>(std::tie(ts...)); }
 
 
-/*! \brief A Tuple of possibly different types. */
-template<class... ARGS> struct Tuple;
-
-/*! \brief A Tuple of references, suitable as use as an lvalue for a function returning a pair. */
-template<class T1, class T2=void, class T3=void, class T4=void> struct LTuple;
-
-
-template<class T1>
-struct Tuple<T1>
-{
-    inline Tuple(const T1& t1) : first(t1) { }
-    inline Tuple(const std::tuple<T1>& t) : first(std::get<0>(t)) { }
-    T1 first;
-};
-
-template<class T1, class T2>
-struct Tuple<T1,T2>
-{
-    inline Tuple(const T1& t1, const T2& t2) : first(t1), second(t2) { }
-    inline Tuple(const std::tuple<T1,T2>& t) : first(std::get<0>(t)), second(std::get<1>(t)) { }
-    T1 first; T2 second;
-};
-
-template<class T1, class T2, class T3>
-struct Tuple<T1,T2,T3>
-{
-    inline Tuple(const T1& t1, const T2& t2, const T3& t3) : first(t1), second(t2), third(t3) { }
-    inline Tuple(const std::tuple<T1,T2,T3>& t) : first(std::get<0>(t)), second(std::get<1>(t)), third(std::get<2>(t)) { }
-    T1 first; T2 second; T3 third;
-};
-
-template<class T1, class T2, class T3, class T4>
-struct Tuple<T1,T2,T3,T4>
-{
-    inline Tuple(const T1& t1, const T2& t2, const T3& t3, const T4& t4)
-        : first(t1), second(t2), third(t3), fourth(t4) { }
-    inline Tuple(const std::tuple<T1,T2,T3,T4>& t)
-        : first(std::get<0>(t)), second(std::get<1>(t)), third(std::get<2>(t)), fourth(std::get<3>(t)) { }
-    T1 first; T2 second; T3 third; T4 fourth;
-};
-
-
-
-template<class T1>
-struct LTuple<T1,void,void,void>
-{
-    inline LTuple(T1& t1) : first(t1) { }
-    inline LTuple<T1> operator=(const Tuple<T1>& rv) {
-        this->first=rv.first; return *this; }
-    inline LTuple<T1> operator=(const T1& rv) {
-        this->first=rv; return *this; }
-    T1& first;
-};
-
-template<class T1, class T2>
-struct LTuple<T1,T2,void,void>
-{
-    inline LTuple(T1& t1, T2& t2) : first(t1), second(t2) { }
-    inline LTuple<T1,T2> operator=(const Tuple<T1,T2>& rv) {
-        this->first=rv.first; this->second=rv.second; return *this; }
-    inline LTuple<T1,T2> operator=(const std::pair<T1,T2>& rv) {
-        this->first=rv.first; this->second=rv.second; return *this; }
-    T1& first; T2& second;
-};
-
-template<class T1, class T2, class T3>
-struct LTuple<T1,T2,T3,void>
-{
-    inline LTuple(T1& t1, T2& t2, T3& t3) : first(t1), second(t2), third(t3) { }
-    inline LTuple<T1,T2,T3> operator=(const Tuple<T1,T2,T3>& rv) {
-        this->first=rv.first; this->second=rv.second; this->third=rv.third; return *this; }
-    T1& first; T2& second; T3& third;
-};
-
-template<class T1, class T2, class T3, class T4>
-struct LTuple
-{
-    inline LTuple(T1& t1, T2& t2, T3& t3, T4& t4) : first(t1), second(t2), third(t3), fourth(t4) { }
-    inline LTuple<T1,T2,T3,T4> operator=(const Tuple<T1,T2,T3,T4>& rv) {
-        this->first=rv.first; this->second=rv.second; this->third=rv.third; this->fourth=rv.fourth; return *this; }
-    T1& first; T2& second; T3& third; T4& fourth;
-};
-
-
-
-template<class T1> inline
-Tuple<T1> make_tuple(const T1& t1) {
-    return Tuple<T1>(t1);
-}
-
-template<class T1,class T2> inline
-Tuple<T1,T2> make_tuple(const T1& t1, const T2& t2) {
-    return Tuple<T1,T2>(t1,t2);
-}
-
-template<class T1,class T2,class T3> inline
-Tuple<T1,T2,T3> make_tuple(const T1& t1, const T2& t2, const T3& t3) {
-    return Tuple<T1,T2,T3>(t1,t2,t3);
-}
-
-template<class T1,class T2,class T3,class T4> inline
-Tuple<T1,T2,T3,T4> make_tuple(const T1& t1, const T2& t2, const T3& t3, const T4& t4) {
-    return Tuple<T1,T2,T3,T4>(t1,t2,t3,t4);
-}
-
-
-template<class T1> inline
-LTuple<T1> make_ltuple(T1& t1) {
-    return LTuple<T1>(t1);
-}
-
-template<class T1,class T2> inline
-LTuple<T1,T2> make_ltuple(T1& t1, T2& t2) {
-    return LTuple<T1,T2>(t1,t2);
-}
-
-template<class T1,class T2,class T3> inline
-LTuple<T1,T2,T3> make_ltuple(T1& t1, T2& t2, T3& t3) {
-    return LTuple<T1,T2,T3>(t1,t2,t3);
-}
-
-template<class T1,class T2,class T3,class T4> inline
-LTuple<T1,T2,T3,T4> make_ltuple(T1& t1, T2& t2, T3& t3, T4& t4) {
-    return LTuple<T1,T2,T3,T4>(t1,t2,t3,t4);
-}
-
-
+template<class T> inline decltype(auto) get_first(T&& t) { return std::get<0>(std::forward<T>(t)); }
+template<class T> inline decltype(auto) get_second(T&& t) { return std::get<1>(std::forward<T>(t)); }
+template<class T> inline decltype(auto) get_third(T&& t) { return std::get<2>(std::forward<T>(t)); }
+template<class T> inline decltype(auto) get_fourth(T&& t) { return std::get<3>(std::forward<T>(t)); }
+template<class T> inline decltype(auto) get_fifth(T&& t) { return std::get<4>(std::forward<T>(t)); }
 
 
 } // namespace Ariadne

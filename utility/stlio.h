@@ -186,41 +186,6 @@ read_sequence(InputStream& is, Container& v,
     return is;
 }
 
-
-
-template<class T1>
-inline
-OutputStream&
-operator<<(OutputStream &os, const Tuple<T1>& t)
-{
-    return os << '(' << t.first << ',' << ')';
-}
-
-template<class T1, class T2>
-inline
-OutputStream&
-operator<<(OutputStream &os, const Tuple<T1,T2>& t)
-{
-    return os << '(' << t.first << ',' << t.second << ')';
-}
-
-template<class T1, class T2, class T3>
-inline
-OutputStream&
-operator<<(OutputStream &os, const Tuple<T1,T2,T3>& t)
-{
-    return os << '(' << t.first << ',' << t.second << ',' << t.third << ')';
-}
-
-template<class T1, class T2, class T3, class T4>
-inline
-OutputStream&
-operator<<(OutputStream &os, const Tuple<T1,T2,T3,T4>& t)
-{
-    return os << '(' << t.first << ',' << t.second << ',' << t.third << ',' << t.fourth << ')';
-}
-
-
 } // namespace Ariadne
 
 

@@ -129,7 +129,7 @@ template<class X> Differential<X>::Differential(const Map<MultiIndex,X>& map, De
 
 template<class X>
 Differential<X>::Differential(SizeType as, DegreeType deg,
-                              InitializerList< PairType<InitializerList<Int>,X> > lst)
+                              InitializerList< Pair<InitializerList<Int>,X> > lst)
     : _expansion(Expansion<X>(as,lst)), _degree(deg)
 {
     this->cleanup();

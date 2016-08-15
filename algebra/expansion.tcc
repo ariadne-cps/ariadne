@@ -61,7 +61,7 @@ template<class X> Expansion<X>::Expansion(SizeType as, DegreeType deg, Initializ
 }
 
 
-template<class X> Expansion<X>::Expansion(SizeType as, InitializerList<PairType<InitializerList<Int>,X>> lst)
+template<class X> Expansion<X>::Expansion(SizeType as, InitializerList<Pair<InitializerList<Int>,X>> lst)
     : _argument_size(as)
 {
     MultiIndex a;
@@ -75,7 +75,7 @@ template<class X> Expansion<X>::Expansion(SizeType as, InitializerList<PairType<
     }
 }
 
-template<class X> Expansion<X>::Expansion(InitializerList<PairType<InitializerList<Int>,X>> lst)
+template<class X> Expansion<X>::Expansion(InitializerList<Pair<InitializerList<Int>,X>> lst)
     : Expansion(lst.size()==0?0u:lst.begin()->first.size(),lst)
 { }
 

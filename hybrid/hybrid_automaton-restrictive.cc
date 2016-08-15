@@ -61,7 +61,7 @@ template<class T>
 List<T> filter(const List<Tuple<DiscretePredicate,List<T> > >& rules, const DiscreteLocation& q) {
     List<T> result;
     for(Nat i=0; i!=rules.size(); ++i) {
-        if(rules[i].first==q) { result.append(rules[i].second); }
+        if(get_first(rules[i])==q) { result.append(get_second(rules[i])); }
     }
     return result;
 }
@@ -70,7 +70,7 @@ template<class T1, class T2>
 List< Tuple<T1,T2> > filter(const List<Tuple<DiscretePredicate,T1,T2> >& rules, const DiscreteLocation& q) {
     List< Tuple<T1,T2> > result;
     for(Nat i=0; i!=rules.size(); ++i) {
-        if(rules[i].first==q) { result.append(make_tuple(rules[i].second,rules[i].third)); }
+        if(get_first(rules[i])==q) { result.append(make_tuple(get_second(rules[i]),get_third(rules[i]))); }
     }
     return result;
 }
@@ -79,7 +79,7 @@ template<class T>
 List<T> filter(const List<Tuple<DiscretePredicate,EventSet,List<T> > >& rules, const DiscreteLocation& q, const DiscreteEvent& e) {
     List<T> result;
     for(Nat i=0; i!=rules.size(); ++i) {
-        if(rules[i].first==q && rules[i].second.contains(e)) { result.append(rules[i].third); }
+        if(get_first(rules[i])==q && get_second(rules[i]).contains(e)) { result.append(get_third(rules[i])); }
     }
     return result;
 }
@@ -88,11 +88,11 @@ template<class T>
 T select(const List<Tuple<DiscretePredicate,EventSet,T> >& rules, const DiscreteLocation& q, const DiscreteEvent& e) {
     ARIADNE_ASSERT(rules.size()>0);
     Bool found=false;
-    T result=rules[0].third;
+    T result=get_third(rules[0]);
     for(Nat i=0; i!=rules.size(); ++i) {
-        if(rules[i].first==q && rules[i].second.contains(e)) {
+        if(get_first(rules[i])==q && get_second(rules[i]).contains(e)) {
             if(found) { ARIADNE_FAIL_MSG("More than one rule matching ("<<q<<","<<e<<") in "<<rules); }
-            found=true; result=rules[i].third;
+            found=true; result=get_third(rules[i]);
         }
     }
     if(found==false) { ARIADNE_FAIL_MSG("No rule matching ("<<q<<","<<e<<") in "<<rules); }
@@ -103,11 +103,11 @@ template<class T>
 T select(const List<Tuple<DiscretePredicate,DiscreteEvent,T> >& rules, const DiscreteLocation& q, const DiscreteEvent& e) {
     ARIADNE_ASSERT(rules.size()>0);
     Bool found=false;
-    T result=rules[0].third;
+    T result=get_third(rules[0]);
     for(Nat i=0; i!=rules.size(); ++i) {
-        if(rules[i].first==q && rules[i].second==e) {
+        if(get_first(rules[i])==q && get_second(rules[i])==e) {
             if(found) { ARIADNE_FAIL_MSG("More than one rule matching ("<<q<<","<<e<<") in "<<rules); }
-            found=true; result=rules[i].third;
+            found=true; result=get_third(rules[i]);
         }
     }
     if(found==false) { ARIADNE_FAIL_MSG("No rule matching ("<<q<<","<<e<<") in "<<rules); }
@@ -117,7 +117,7 @@ T select(const List<Tuple<DiscretePredicate,DiscreteEvent,T> >& rules, const Dis
 EventSet filter_join(const List< Tuple<DiscretePredicate,EventSet> >& events, const DiscreteLocation& q) {
     EventSet result;
     for(Nat i=0; i!=events.size(); ++i) {
-        if(events[i].first==q) { result=join(result,events[i].second); }
+        if(get_first(events[i])==q) { result=join(result,get_second(events[i])); }
     }
     return result;
 }
@@ -257,8 +257,8 @@ EventSet ignorable(const List< Tuple<EventSet,Set<Identifier> > >& rules, const 
     for(Set<Identifier>::ConstIterator var_iter=vars.begin(); var_iter!=vars.end(); ++var_iter) {
         EventSet variable_does_not_jump;
         for(Nat i=0; i!=rules.size(); ++i) {
-            if(rules[i].second.contains(*var_iter)) {
-                variable_does_not_jump.adjoin(rules[i].first);
+            if(get_second(rules[i]).contains(*var_iter)) {
+                variable_does_not_jump.adjoin(get_first(rules[i]));
             }
         }
         result.restrict(variable_does_not_jump);
@@ -358,16 +358,16 @@ RestrictiveDiscreteMode HybridSystem::compute_mode(const DiscreteLocation& locat
         // Compute the targets
         DiscreteLocation target;
         for(Nat i=0; i!=this->_nonjumping_discrete_variables.size(); ++i) {
-            if(this->_nonjumping_discrete_variables[i].first==location && this->_nonjumping_discrete_variables[i].second==event) {
-                Set<Identifier> const& nonjumping_variables=this->_nonjumping_discrete_variables[i].third;
+            if(get_first(this->_nonjumping_discrete_variables[i])==location && get_second(this->_nonjumping_discrete_variables[i])==event) {
+                Set<Identifier> const& nonjumping_variables=get_third(this->_nonjumping_discrete_variables[i]);
                 for(Set<Identifier>::ConstIterator var_iter=nonjumping_variables.begin(); var_iter!=nonjumping_variables.end(); ++var_iter) {
                     target[StringVariable(*var_iter)]=location[StringVariable(*var_iter)];
                 }
             }
         }
         for(Nat i=0; i!=this->_discrete_updates.size(); ++i) {
-            if(this->_discrete_updates[i].first==location && this->_discrete_updates[i].second==event) {
-                List<PrimedStringAssignment> const& updates=this->_discrete_updates[i].third;
+            if(get_first(this->_discrete_updates[i])==location && get_second(this->_discrete_updates[i])==event) {
+                List<PrimedStringAssignment> const& updates=get_third(this->_discrete_updates[i]);
                 for(List<PrimedStringAssignment>::ConstIterator asn_iter=updates.begin(); asn_iter!=updates.end(); ++asn_iter) {
                     const StringVariable lhs_var=asn_iter->lhs.base();
                     target[asn_iter->lhs.base()]=evaluate(asn_iter->rhs,location);
@@ -378,13 +378,13 @@ RestrictiveDiscreteMode HybridSystem::compute_mode(const DiscreteLocation& locat
         // Compute the resets
         List<PrimedRealAssignment> reset;
         for(Nat i=0; i!=this->_nonjumping_continuous_state_variables.size(); ++i) {
-            if(this->_nonjumping_continuous_state_variables[i].first==location && this->_nonjumping_continuous_state_variables[i].second==event) {
-                reset.append(primed_real_assignments(this->_nonjumping_continuous_state_variables[i].third));
+            if(get_first(this->_nonjumping_continuous_state_variables[i])==location && get_second(this->_nonjumping_continuous_state_variables[i])==event) {
+                reset.append(primed_real_assignments(get_third(this->_nonjumping_continuous_state_variables[i])));
             }
         }
         for(Nat i=0; i!=this->_primed_assignments.size(); ++i) {
-            if(this->_primed_assignments[i].first==location && this->_primed_assignments[i].second==event) {
-                reset.append(this->_primed_assignments[i].third);
+            if(get_first(this->_primed_assignments[i])==location && get_second(this->_primed_assignments[i])==event) {
+                reset.append(get_third(this->_primed_assignments[i]));
             }
         }
 
@@ -719,8 +719,8 @@ CompositionalHybridAutomaton::guard_events(DiscreteLocation q) const
 {
     Set<DiscreteEvent> result;
     for(Nat i=0; i!=this->_guard_predicates.size(); ++i) {
-        if(this->_guard_predicates[i].first == q) {
-            result.insert(this->_guard_predicates[i].second);
+        if(get_first(this->_guard_predicates[i]) == q) {
+            result.insert(get_second(this->_guard_predicates[i]));
         }
     }
     return result;
@@ -731,8 +731,8 @@ CompositionalHybridAutomaton::invariant_events(DiscreteLocation q) const
 {
     Set<DiscreteEvent> result;
     for(Nat i=0; i!=this->_invariant_predicates.size(); ++i) {
-        if(this->_invariant_predicates[i].first == q) {
-            result.insert(this->_invariant_predicates[i].second);
+        if(get_first(this->_invariant_predicates[i]) == q) {
+            result.insert(get_second(this->_invariant_predicates[i]));
         }
     }
     return result;
@@ -847,8 +847,8 @@ DiscreteLocation
 CompositionalHybridAutomaton::_compute_target(DiscreteLocation source, DiscreteEvent event) const {
     DiscreteLocation result;
     for(Nat i=0; i!=this->_discrete_updates.size(); ++i) {
-        if(this->_discrete_updates[i].second == event && this->_discrete_updates[i].first == source) {
-            DiscreteUpdate const& update = _discrete_updates[i].third;
+        if(get_second(this->_discrete_updates[i]) == event && get_first(this->_discrete_updates[i]) == source) {
+            DiscreteUpdate const& update = get_third(_discrete_updates[i]);
             for(Nat j=0; j!=update.size(); ++j) {
                 result.insert(update[j].variable().base(), evaluate(update[j].expression(),source));
             }
@@ -862,9 +862,9 @@ Map<DiscreteEvent, DiscreteLocation>
 CompositionalHybridAutomaton::_compute_targets(DiscreteLocation source) const {
     Map<DiscreteEvent,DiscreteLocation> result;
     for(Nat i=0; i!=this->_discrete_updates.size(); ++i) {
-        if(this->_discrete_updates[i].first == source) {
-            DiscreteEvent const& event = _discrete_updates[i].second;
-            DiscreteUpdate const& update = _discrete_updates[i].third;
+        if(get_first(this->_discrete_updates[i]) == source) {
+            DiscreteEvent const& event = get_second(_discrete_updates[i]);
+            DiscreteUpdate const& update = get_third(_discrete_updates[i]);
             DiscreteLocation& target = result[event];
             for(Nat j=0; j!=update.size(); ++j) {
                 target.insert(update[j].variable().base(), evaluate(update[j].expression(),source));

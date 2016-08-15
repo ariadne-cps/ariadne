@@ -413,7 +413,7 @@ template<class I> inline Void Box<I>::draw(CanvasInterface& c, const Projection2
 template<> inline Void Box<Interval<Real>>::draw(CanvasInterface& c, const Projection2d& p) const {
     Ariadne::draw(c,p,ApproximateBoxType(*this,Precision64())); }
 
-inline Float64ExactBox cast_exact_box(Float64ApproximationBox const& abx) {
+inline Float64ExactBox cast_exact_box(Float64ApproximateBox const& abx) {
     return Float64ExactBox(reinterpret_cast<Float64ExactBox const&>(abx));
 }
 
@@ -422,9 +422,9 @@ inline Box<Float64ExactInterval> cast_exact_box(Vector<Float64Bounds> const& bv)
 }
 
 
-inline Float64ApproximationBox widen(const Float64ApproximationBox& bx, Float64Approximation e) {
+inline Float64ApproximateBox widen(const Float64ApproximateBox& bx, Float64Approximation e) {
     Float64Approximation eps(e);
-    Float64ApproximationBox r(bx.dimension());
+    Float64ApproximateBox r(bx.dimension());
     for(Nat i=0; i!=bx.size(); ++i) {
         r[i]=ApproximateIntervalType(bx[i].lower()-eps,bx[i].upper()+eps);
     }

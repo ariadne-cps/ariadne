@@ -53,7 +53,7 @@ operator>>(InputStream& is, Interval<Float64Value>& ivl)
 }
 
 
-Float64UpperInterval DeclareIntervalArithmeticOperations<Float64UpperBound>::create(ValidatedNumber const& y) const {
+template<> Float64UpperInterval DeclareIntervalArithmeticOperations<Float64UpperBound>::create(ValidatedNumber const& y) const {
     return Float64UpperInterval(reinterpret_cast<Float64Bounds const&>(*this).create(y)); }
 
 Float64Bounds cast_singleton(Float64UpperInterval const& ivl) {
@@ -67,6 +67,8 @@ Float64UpperInterval min(Float64UpperInterval const& ivl1, Float64UpperInterval 
     return make_interval(min(cast_singleton(ivl1),cast_singleton(ivl2))); }
 Float64UpperInterval abs(Float64UpperInterval const& ivl) {
     return make_interval(abs(cast_singleton(ivl))); }
+Float64UpperInterval nul(Float64UpperInterval const& ivl) {
+    return make_interval(nul(cast_singleton(ivl))); }
 Float64UpperInterval pos(Float64UpperInterval const& ivl) {
     return make_interval(pos(cast_singleton(ivl))); }
 Float64UpperInterval neg(Float64UpperInterval const& ivl) {

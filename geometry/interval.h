@@ -67,21 +67,22 @@ class UnitIntervalType;
 class EmptyIntervalType;
 
 template<class U> struct DeclareIntervalArithmeticOperations { };
-template<> struct DeclareIntervalArithmeticOperations<Float64UpperBound>
-    : DeclareNumericOperations<Float64UpperInterval>
-    , DeclareComparisonOperations<Float64UpperInterval,ValidatedKleenean>
-    , DefineFieldOperators<Float64UpperInterval>
-    , DefineComparisonOperators<Float64UpperInterval,ValidatedKleenean>
-    , ProvideConvertedFieldOperations<Float64UpperInterval,Float64Bounds>
-    , ProvideConvertedComparisonOperations<Float64UpperInterval,Float64Bounds,Float64UpperInterval,ValidatedKleenean>
-    , ProvideConcreteGenericFieldOperations<Float64UpperInterval,ValidatedNumber>
-    , ProvideConcreteGenericComparisonOperations<Float64UpperInterval,ValidatedNumber,ValidatedKleenean>
+template<class PR> struct DeclareIntervalArithmeticOperations<FloatUpperBound<PR>>
+    : DeclareNumericOperations<FloatUpperInterval<PR>>
+    , DeclareComparisonOperations<FloatUpperInterval<PR>,ValidatedKleenean>
+    , DefineFieldOperators<FloatUpperInterval<PR>>
+    , DefineComparisonOperators<FloatUpperInterval<PR>,ValidatedKleenean>
+    , ProvideConvertedFieldOperations<FloatUpperInterval<PR>,FloatBounds<PR>>
+    , ProvideConvertedComparisonOperations<FloatUpperInterval<PR>,FloatBounds<PR>,FloatUpperInterval<PR>,ValidatedKleenean>
+    , ProvideConcreteGenericFieldOperations<FloatUpperInterval<PR>,ValidatedNumber>
+    , ProvideConcreteGenericComparisonOperations<FloatUpperInterval<PR>,ValidatedNumber,ValidatedKleenean>
 {
-    friend Float64Error mag(Float64UpperInterval const&);
-    Float64UpperInterval create(ValidatedNumber const& y) const;
+    typedef PR PrecisionType;
+    friend FloatError<PR> mag(FloatUpperInterval<PR> const&);
+    FloatUpperInterval<PR> create(ValidatedNumber const& y) const;
 };
 
-template<> struct DeclareIntervalArithmeticOperations<Float64Value> : DeclareIntervalArithmeticOperations<Float64UpperBound> { };
+template<class PR> struct DeclareIntervalArithmeticOperations<FloatValue<PR>> : DeclareIntervalArithmeticOperations<FloatUpperBound<PR>> { };
 
 //! \ingroup GeometryModule
 //! \brief Intervals with upper endoint of type \a U.

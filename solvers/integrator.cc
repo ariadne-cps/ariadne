@@ -34,6 +34,7 @@
 #include "algebra/vector.h"
 #include "algebra/matrix.h"
 #include "algebra/differential.h"
+#include "algebra/sweeper.h"
 #include "function/function.h"
 #include "function/function_model.h"
 

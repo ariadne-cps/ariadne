@@ -34,6 +34,7 @@
 #include <iosfwd>
 #include <type_traits>
 
+typedef unsigned char uchar;
 typedef unsigned int uint;
 
 namespace std {
@@ -69,7 +70,7 @@ using std::declval;
 
 using SizeType = std::size_t;
 using PointerDifferenceType = std::ptrdiff_t;
-using DegreeType = std::uint8_t;
+using DegreeType = std::uint16_t;
 
 template<class T> using SharedPointer = std::shared_ptr<T>;
 template<class T> using InitializerList = std::initializer_list<T>;

@@ -37,7 +37,6 @@
 
 #include "algebra/multi_index.h"
 #include "algebra/expansion.h"
-#include "function/taylor_model.h"
 #include "algebra/operations.h"
 #include "algebra/differential.h"
 #include "algebra/evaluate.h"
@@ -75,7 +74,8 @@ class Polynomial
     typedef typename X::Paradigm Paradigm;
     typedef typename X::NumericType NumericType;
     typedef Polynomial<X> SelfType;
-    typedef ReverseLexicographicKeyLess ComparisonType;
+    typedef ReverseLexicographicIndexLess ComparisonType;
+    typedef ReverseLexicographicLess IndexComparisonType;
   public:
     //@{
     //! \name Constructors
@@ -89,7 +89,7 @@ class Polynomial
     //! \brief A dense polynomial with coefficients given by an initializer list of doubles.
     explicit Polynomial(SizeType as, DegreeType deg, InitializerList<X> lst);
     //! \brief A sparse polynomial with coefficients given by an initializer list of indices and coefficients.
-    Polynomial(InitializerList<Pair<InitializerList<Int>,X>> lst);
+    Polynomial(InitializerList<Pair<InitializerList<DegreeType>,X>> lst);
     //@}
 
     //! \brief Create the null polynomial in the same number of variables.
@@ -122,9 +122,9 @@ class Polynomial
     //! \brief The number of variables in the argument of the polynomial.
     SizeType argument_size() const;
     //! \brief The number of structural nonzero terms.
-    SizeType number_of_nonzeros() const;
+    SizeType number_of_terms() const;
     //! \brief The order of the highest term.
-    SizeType degree() const;
+    DegreeType degree() const;
     //! \brief The value of the polynomial at zero.
     const X& value() const;
     //! \brief A reference to the coefficient of the term in \f$x^{a_1}\cdots x^{a_n}\f$.
@@ -210,7 +210,7 @@ class Polynomial
     Void _append(const MultiIndex& a, const X& c);
     Iterator _unique_key();
   private:
-    SortedExpansion<X,ReverseLexicographicKeyLess> _expansion;
+    SortedExpansion<X,ReverseLexicographicIndexLess> _expansion;
 };
 
 template<class X> struct AlgebraOperations<Polynomial<X>> {

@@ -450,8 +450,7 @@ template<class M> OutputStream& FunctionPatch<M>::write(OutputStream& os) const 
 
 template<class M> OutputStream& FunctionPatch<M>::repr(OutputStream& os) const
 {
-    return os << "FunctionPatch<M>(" << representation(this->domain()) << ", " << representation(this->model().expansion().raw())
-              << "," << representation(this->error().raw())<<","<<this->sweeper()<<")";
+    return os << "FunctionPatch<M>(" << representation(this->domain()) << ", " << representation(this->model())<<")";
 }
 
 /*

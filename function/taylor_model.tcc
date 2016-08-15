@@ -681,7 +681,7 @@ template<class F> class AlgebraOperations<TaylorModel<ValidatedTag,F>>
 
 
 template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::sort() {
-    this->_expansion.reverse_lexicographic_sort();
+    this->_expansion.sort();
 };
 
 template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::unique()
@@ -709,12 +709,12 @@ template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::uniq
 }
 
 template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::sweep() {
-    this->_sweeper.sweep(this->_expansion.raw(),this->_error.raw());
+    this->_sweeper.sweep(reinterpret_cast<Expansion<F>&>(*this),reinterpret_cast<F&>(this->_error));
     return *this;
 }
 
 template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::sweep(const Sweeper& sweeper) {
-    sweeper.sweep(this->_expansion.raw(),this->_error.raw());
+    sweeper.sweep(reinterpret_cast<Expansion<F>&>(*this),reinterpret_cast<F&>(this->_error));
     return *this;
 }
 
@@ -1482,7 +1482,7 @@ template<class F> OutputStream& TaylorModel<ValidatedTag,F>::str(OutputStream& o
     //os << "TaylorModel<ValidatedTag,F>";
     os << "TM["<<tm.argument_size()<<"](";
     Expansion<FloatValue<PR>> e=tm.expansion();
-    e.graded_sort();
+    e.sort(GradedIndexLess());
     e.write(os,variable_names);
     return os << "+/-" << tm.error() << ")";
 }
@@ -1840,7 +1840,7 @@ template<class F> ApproximateIntervalType TaylorModel<ApproximateTag,F>::range()
 }
 
 template<class F> TaylorModel<ApproximateTag,F>& TaylorModel<ApproximateTag,F>::sweep() {
-    this->_sweeper.sweep(this->_expansion.raw());
+    this->_sweeper.sweep(reinterpret_cast<Expansion<F>&>(this->_expansion));
     return *this;
 }
 

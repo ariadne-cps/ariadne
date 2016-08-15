@@ -40,6 +40,7 @@
 #include "algebra/expansion.h"
 #include "algebra/sweeper.h"
 #include "algebra/operations.h"
+#include "algebra/evaluate.h"
 #include "function/scaling.h"
 #include "geometry/interval.h"
 
@@ -98,7 +99,7 @@ class TaylorModel<ValidatedTag,F>
     typedef FloatValue<PR> CoefficientType;
     typedef FloatError<PR> ErrorType;
     typedef FloatError<PR> NormType;
-    typedef ReverseLexicographicKeyLess ComparisonType;
+    typedef ReverseLexicographicIndexLess ComparisonType;
     typedef SortedExpansion<CoefficientType,ComparisonType> ExpansionType;
 
     typedef ExactIntervalType CodomainType;
@@ -278,6 +279,7 @@ class TaylorModel<ValidatedTag,F>
     //! \brief The maximum degree of terms in the expansion.
     DegreeType degree() const;
     //! \brief The number of nonzero terms in the expansion.
+    SizeType number_of_terms() const { return this->_expansion.number_of_terms(); }
     SizeType number_of_nonzeros() const { return this->_expansion.number_of_nonzeros(); }
     //@}
 
@@ -474,7 +476,7 @@ class TaylorModel<ApproximateTag,F>
     typedef PR PrecisionType;
     typedef FloatApproximation<PR> CoefficientType;
     typedef ApproximateErrorType ErrorType;
-    typedef ReverseLexicographicKeyLess ComparisonType;
+    typedef ReverseLexicographicIndexLess ComparisonType;
     typedef SortedExpansion<CoefficientType,ComparisonType> ExpansionType;
 
     typedef ExactIntervalType CodomainType;

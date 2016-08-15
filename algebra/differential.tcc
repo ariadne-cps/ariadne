@@ -129,8 +129,8 @@ template<class X> Differential<X>::Differential(const Map<MultiIndex,X>& map, De
 
 template<class X>
 Differential<X>::Differential(SizeType as, DegreeType deg,
-                              InitializerList< Pair<InitializerList<Int>,X> > lst)
-    : _expansion(Expansion<X>(as,lst)), _degree(deg)
+                              InitializerList< Pair<InitializerList<DegreeType>,X> > lst)
+    : _expansion(Expansion<X>(lst)), _degree(deg)
 {
     this->cleanup();
 }
@@ -208,7 +208,7 @@ template<class X> EqualityType<X> Differential<X>::operator==(const Differential
     Differential<X> const& self=*this;
     if(self.argument_size()!=other.argument_size()) { return false; }
     EqualityType<X> result=true;
-    ComparisonType less;
+    IndexComparisonType less;
     ConstIterator self_iter=self.begin(); ConstIterator other_iter=other.begin();
     while(self_iter!=self.end() && other_iter!=other.end()) {
         if(self_iter->key()==other_iter->key()) {
@@ -358,7 +358,7 @@ template<class X> Void Differential<X>::clear() {
 }
 
 template<class X> Void Differential<X>::cleanup() {
-    this->_expansion.graded_sort();
+    this->_expansion.sort();
     this->_expansion.combine_terms();
     this->_expansion.remove_zeros();
 }

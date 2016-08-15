@@ -173,9 +173,9 @@ EXAMPLES_BIN = $(patsubst %.cc,$(EXAMPLES_BIN_DIR)/%,$(EXAMPLES_SRC))
 
 CXX = g++
 CXXWARNINGS=-Wall -Wno-reorder -Wno-unused-variable -Wno-unused-but-set-variable
-CXXFLAGS = -std=c++11  -Wno-non-template-friend -fPIC -O1
+CXXFLAGS = -std=c++17  -Wno-non-template-friend -fPIC -O1
 #CXX = clang++
-#CXXFLAGS = -std=c++11 -fPIC
+#CXXFLAGS = -std=c++1x -fPIC
 
 INCLUDE_PATHS =  -iquote.
 LINK_LIBS=-lgmpxx -lgmp -lmpfr -lcairo -lboost_system -lboost_serialization

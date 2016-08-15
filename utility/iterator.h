@@ -28,7 +28,7 @@
 #ifndef ARIADNE_ITERATOR_H
 #define ARIADNE_ITERATOR_H
 
-#include <Iterator>
+#include <iterator>
 
 namespace Ariadne {
 

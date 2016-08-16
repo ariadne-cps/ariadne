@@ -39,6 +39,8 @@ class TwoExp;
 class Precision64;
 class PrecisionMP;
 
+template<class F> using PrecisionType = typename F::PrecisionType;
+
 struct DecimalPlaces { int _places; DecimalPlaces(int plc) : _places(plc) { } operator int() const { return _places; } };
 struct DecimalPrecision { uint _figures; operator uint() const { return _figures; } };
 

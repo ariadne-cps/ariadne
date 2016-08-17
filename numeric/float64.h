@@ -60,6 +60,17 @@ static const Precision64 dp = Precision64();
 
 using RoundingMode64 = RoundingModeType;
 
+// Correctly rounded algebraic and transcendental functions
+double pow_rnd(double x, int n);
+double sqrt_rnd(double x);
+double exp_rnd(double x);
+double log_rnd(double x);
+double sin_rnd(double x);
+double cos_rnd(double x);
+double tan_rnd(double x);
+double atan_rnd(double x);
+
+
 //! \ingroup NumericModule
 //! \brief Floating point numbers (double precision) using approxiamate arithmetic.
 //! \details
@@ -194,146 +205,142 @@ class Float64 {
     friend OutputStream& operator<<(OutputStream& os, Float64 const&);
     friend InputStream& operator>>(InputStream& is, Float64&);
     friend OutputStream& write(OutputStream& os, Float64 const& x, DecimalPlaces dgts, RoundingModeType rnd);
+
+    friend Float64 max(Float64 x1, Float64 x2) { return std::max(x1.dbl,x2.dbl); }
+    friend Float64 min(Float64 x1, Float64 x2) { return std::min(x1.dbl,x2.dbl); }
+    friend Float64 abs(Float64 x) { return std::fabs(x.dbl); }
+
+    // Correctly rounded arithmetic
+    friend Float64 nul(Float64 x) { return +0.0; }
+    friend Float64 pos(Float64 x) { volatile double xv=x.dbl; return +xv; }
+    friend Float64 neg(Float64 x) { volatile double xv=x.dbl; return -xv; }
+    friend Float64 hlf(Float64 x) { volatile double xv=x.dbl; return xv/2; }
+    friend Float64 sqr(Float64 x) { volatile double xv=x.dbl; return xv*xv; }
+    friend Float64 rec(Float64 x) { volatile double xv=x.dbl; return 1.0/xv; }
+    friend Float64 add(Float64 x1, Float64 x2) { volatile double xv = x1.dbl; volatile double yv=x2.dbl; volatile double r=xv+yv; return r; }
+    friend Float64 sub(Float64 x1, Float64 x2) { volatile double xv = x1.dbl; volatile double yv=x2.dbl; volatile double r=xv-yv; return r; }
+    friend Float64 mul(Float64 x1, Float64 x2) { volatile double xv = x1.dbl; volatile double yv=x2.dbl; volatile double r=xv*yv; return r; }
+    friend Float64 div(Float64 x1, Float64 x2) { volatile double xv = x1.dbl; volatile double yv=x2.dbl; volatile double r=xv/yv; return r; }
+    friend Float64 pow(Float64 x, Int n) { return pow_rnd(x.dbl,n); }
+    friend Float64 sqrt(Float64 x) { return sqrt_rnd(x.dbl); }
+    friend Float64 exp(Float64 x) { return exp_rnd(x.dbl); }
+    friend Float64 log(Float64 x) { return log_rnd(x.dbl); }
+    friend Float64 sin(Float64 x) { return sin_rnd(x.dbl); }
+    friend Float64 cos(Float64 x) { return cos_rnd(x.dbl); }
+    friend Float64 tan(Float64 x) { return tan_rnd(x.dbl); }
+    friend Float64 asin(Float64 x) { return std::asin(x.dbl); }
+    friend Float64 acos(Float64 x) { return std::acos(x.dbl); }
+    friend Float64 atan(Float64 x) { return atan_rnd(x.dbl); }
+
+    // Opposite rounded arithmetic
+    friend Float64 pos_opp(Float64 x) { volatile double t=-x.dbl; return -t; }
+    friend Float64 neg_opp(Float64 x) { volatile double t=x.dbl; return -t; }
+    friend Float64 sqr_opp(Float64 x) { volatile double t=-x.dbl; t=t*x.dbl; return -t; }
+    friend Float64 rec_opp(Float64 x) { volatile double t=-1.0/(volatile double&)x.dbl; return -t; }
+    friend Float64 add_opp(Float64 x, Float64 y) { volatile double t=-x.dbl; t=t-y.dbl; return -t; }
+    friend Float64 sub_opp(Float64 x, Float64 y) { volatile double t=-x.dbl; t=t+y.dbl; return -t; }
+    friend Float64 mul_opp(Float64 x, Float64 y) { volatile double t=-x.dbl; t=t*y.dbl; return -t; }
+    friend Float64 div_opp(Float64 x, Float64 y) { volatile double t=x.dbl; t=t/y.dbl; return -t; }
+    friend Float64 pow_opp(Float64 x, int n);
+
+    template<class OP> friend Float64 apply(OP op, Float64 const& x1, Float64 const& x2, RoundingMode64 rnd) {
+        auto old_rnd=Float64::get_rounding_mode(); Float64::set_rounding_mode(rnd);
+        Float64 r=op(x1,x2); Float64::set_rounding_mode(old_rnd); return std::move(r);
+    }
+
+    template<class OP> friend Float64 apply(OP op, Float64 const& x, RoundingMode64 rnd) {
+        auto old_rnd=Float64::get_rounding_mode(); Float64::set_rounding_mode(rnd);
+        Float64 r=op(x); Float64::set_rounding_mode(old_rnd); return std::move(r);
+    }
+
+    template<class OP> friend Float64 apply(OP op, Float64 const& x, Int n, RoundingMode64 rnd) {
+        auto old_rnd=Float64::get_rounding_mode(); Float64::set_rounding_mode(rnd);
+        Float64 r=op(x,n); Float64::set_rounding_mode(old_rnd); return std::move(r);
+    }
+
+    friend Float64 add(Float64 const& x1, Float64 const& x2, Float64::RoundingModeType rnd) { return apply(Add(),x1,x2,rnd); }
+    friend Float64 sub(Float64 const& x1, Float64 const& x2, Float64::RoundingModeType rnd) { return apply(Sub(),x1,x2,rnd); }
+    friend Float64 mul(Float64 const& x1, Float64 const& x2, Float64::RoundingModeType rnd) { return apply(Mul(),x1,x2,rnd); }
+    friend Float64 div(Float64 const& x1, Float64 const& x2, Float64::RoundingModeType rnd) { return apply(Div(),x1,x2,rnd); }
+    friend Float64 pow(Float64 const& x, Int n, Float64::RoundingModeType rnd) { return apply(Pow(),x,n,rnd); }
+    friend Float64 sqr(Float64 const& x, Float64::RoundingModeType rnd) { return apply(Sqr(),x,rnd); }
+    friend Float64 rec(Float64 const& x, Float64::RoundingModeType rnd) { return apply(Rec(),x,rnd); }
+    friend Float64 sqrt(Float64 const& x, Float64::RoundingModeType rnd) { return apply(Sqrt(),x,rnd); }
+    friend Float64 exp(Float64 const& x, Float64::RoundingModeType rnd) { return apply(Exp(),x,rnd); }
+    friend Float64 log(Float64 const& x, Float64::RoundingModeType rnd) { return apply(Log(),x,rnd); }
+    friend Float64 sin(Float64 const& x, Float64::RoundingModeType rnd) { return apply(Sin(),x,rnd); }
+    friend Float64 cos(Float64 const& x, Float64::RoundingModeType rnd) { return apply(Cos(),x,rnd); }
+    friend Float64 tan(Float64 const& x, Float64::RoundingModeType rnd) { return apply(Tan(),x,rnd); }
+    friend Float64 atan(Float64 const& x, Float64::RoundingModeType rnd) { return apply(Atan(),x,rnd); }
+
+
+    //! \related Float64 \brief The nearest floating-point approximation to the constant \a pi.
+    friend const Float64 pi_approx() { return Float64(3.1415926535897931); }
+    friend const Float64 pi_near()   { return Float64(3.1415926535897931); }
+    friend const Float64 pi_down()   { return Float64(3.1415926535897931); }
+    friend const Float64 pi_up()     { return Float64(3.1415926535897936); }
+
+    friend Float64 fma_approx(Float64 x, Float64 y, Float64 z) {
+        rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest);
+        Float64 t=mul(x,y); Float64 r=add(t,z); set_rounding_mode(rounding_mode); return r; }
+
+    friend Float64 fma_up(Float64 x, Float64 y, Float64 z) {
+        rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward);
+        Float64 t=mul(x,y); Float64 r=add(t,z); set_rounding_mode(rounding_mode); return r; }
+
+    friend Float64 fma_down(Float64 x, Float64 y, Float64 z) {
+        rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(downward);
+        Float64 t=mul(x,y); Float64 r=add(t,z); set_rounding_mode(rounding_mode); return r; }
+
+    //! \related Float64 \brief The average of two values, computed with nearest rounding. Also available with \c _ivl suffix.
+    friend Float64 med_approx(Float64 x, Float64 y) {
+        rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest);
+        Float64 r=hlf(add(x,y)); set_rounding_mode(rounding_mode); return r; }
+    friend Float64 med_near(Float64 x, Float64 y) {
+        rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest);
+        Float64 r=hlf(add(x,y)); set_rounding_mode(rounding_mode); return r; }
+    //! \related Float64 \brief Half of the difference of two values, computed with upward rounding. Also available with \c _ivl suffix.
+    friend Float64 rad_up(Float64 x, Float64 y) {
+        rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward);
+        Float64 r=hlf(sub(y,x)); set_rounding_mode(rounding_mode); return r; }
+
+    friend Float64 sqrt_approx(Float64 x) { return std::sqrt(x.dbl); }
+    friend Float64 exp_approx(Float64 x) { return std::exp(x.dbl); }
+    friend Float64 log_approx(Float64 x) { return std::log(x.dbl); }
+    friend Float64 sin_approx(Float64 x) { return std::sin(x.dbl); }
+    friend Float64 cos_approx(Float64 x) { return std::cos(x.dbl); }
+    friend Float64 tan_approx(Float64 x) { return std::tan(x.dbl); }
+    friend Float64 asin_approx(Float64 x) { return std::asin(x.dbl); }
+    friend Float64 acos_approx(Float64 x) { return std::acos(x.dbl); }
+    friend Float64 atan_approx(Float64 x) { return std::atan(x.dbl); }
+
+
+
+    // Deprecated approximate operations
+    friend Float64 operator+(Float64 x1, Float64 x2) { return x1.dbl+x2.dbl; }
+    friend Float64 operator-(Float64 x1, Float64 x2) { return x1.dbl-x2.dbl; }
+    friend Float64 operator*(Float64 x1, Float64 x2) { return x1.dbl*x2.dbl; }
+    friend Float64 operator/(Float64 x1, Float64 x2) { return x1.dbl/x2.dbl; }
+    friend Float64& operator+=(Float64& x1, Float64 x2) { x1.dbl+=x2.dbl; return x1; }
+    friend Float64& operator-=(Float64& x1, Float64 x2) { x1.dbl-=x2.dbl; return x1; }
+    friend Float64& operator*=(Float64& x1, Float64 x2) { x1.dbl*=x2.dbl; return x1; }
+    friend Float64& operator/=(Float64& x1, Float64 x2) { x1.dbl/=x2.dbl; return x1; }
+
+    // Checking whether a Float64 is not-a-number
+    friend Bool isnan(Float64 x) { return std::isnan(x.dbl); }
+
+    // Discontinuous integer-valued functions
+    friend Float64 floor(Float64 x) { return std::floor(x.dbl); }
+    friend Float64 ceil(Float64 x) { return std::ceil(x.dbl); }
+    friend Float64 round(Float64 x) { return std::round(x.dbl); }
 };
 
-// Correctly rounded algebraic and transcendental functions
-double pow_rnd(double x, int n);
-double sqrt_rnd(double x);
-double exp_rnd(double x);
-double log_rnd(double x);
-double sin_rnd(double x);
-double cos_rnd(double x);
-double tan_rnd(double x);
-double atan_rnd(double x);
+const Float64 pi_approx();
+const Float64 pi_near();
+const Float64 pi_down();
+const Float64 pi_up();
 
 
-inline Float64 max(Float64 x1, Float64 x2) { return std::max(x1.dbl,x2.dbl); }
-inline Float64 min(Float64 x1, Float64 x2) { return std::min(x1.dbl,x2.dbl); }
-inline Float64 abs(Float64 x) { return std::fabs(x.dbl); }
-
-// Correctly rounded arithmetic
-inline Float64 nul(Float64 x) { return +0.0; }
-inline Float64 pos(Float64 x) { volatile double xv=x.dbl; return +xv; }
-inline Float64 neg(Float64 x) { volatile double xv=x.dbl; return -xv; }
-inline Float64 hlf(Float64 x) { volatile double xv=x.dbl; return xv/2; }
-inline Float64 sqr(Float64 x) { volatile double xv=x.dbl; return xv*xv; }
-inline Float64 rec(Float64 x) { volatile double xv=x.dbl; return 1.0/xv; }
-inline Float64 add(Float64 x1, Float64 x2) { volatile double xv = x1.dbl; volatile double yv=x2.dbl; volatile double r=xv+yv; return r; }
-inline Float64 sub(Float64 x1, Float64 x2) { volatile double xv = x1.dbl; volatile double yv=x2.dbl; volatile double r=xv-yv; return r; }
-inline Float64 mul(Float64 x1, Float64 x2) { volatile double xv = x1.dbl; volatile double yv=x2.dbl; volatile double r=xv*yv; return r; }
-inline Float64 div(Float64 x1, Float64 x2) { volatile double xv = x1.dbl; volatile double yv=x2.dbl; volatile double r=xv/yv; return r; }
-inline Float64 pow(Float64 x, Int n) { return pow_rnd(x.dbl,n); }
-inline Float64 sqrt(Float64 x) { return sqrt_rnd(x.dbl); }
-inline Float64 exp(Float64 x) { return exp_rnd(x.dbl); }
-inline Float64 log(Float64 x) { return log_rnd(x.dbl); }
-inline Float64 sin(Float64 x) { return sin_rnd(x.dbl); }
-inline Float64 cos(Float64 x) { return cos_rnd(x.dbl); }
-inline Float64 tan(Float64 x) { return tan_rnd(x.dbl); }
-inline Float64 asin(Float64 x) { return std::asin(x.dbl); }
-inline Float64 acos(Float64 x) { return std::acos(x.dbl); }
-inline Float64 atan(Float64 x) { return atan_rnd(x.dbl); }
-
-// Opposite rounded arithmetic
-inline Float64 pos_opp(Float64 x) { volatile double t=-x.dbl; return -t; }
-inline Float64 neg_opp(Float64 x) { volatile double t=x.dbl; return -t; }
-inline Float64 sqr_opp(Float64 x) { volatile double t=-x.dbl; t=t*x.dbl; return -t; }
-inline Float64 rec_opp(Float64 x) { volatile double t=-1.0/(volatile double&)x.dbl; return -t; }
-inline Float64 add_opp(Float64 x, Float64 y) { volatile double t=-x.dbl; t=t-y.dbl; return -t; }
-inline Float64 sub_opp(Float64 x, Float64 y) { volatile double t=-x.dbl; t=t+y.dbl; return -t; }
-inline Float64 mul_opp(Float64 x, Float64 y) { volatile double t=-x.dbl; t=t*y.dbl; return -t; }
-inline Float64 div_opp(Float64 x, Float64 y) { volatile double t=x.dbl; t=t/y.dbl; return -t; }
-Float64 pow_opp(Float64 x, int n);
-
-template<class OP> Float64 apply(OP op, Float64 const& x1, Float64 const& x2, RoundingMode64 rnd) {
-    auto old_rnd=Float64::get_rounding_mode(); Float64::set_rounding_mode(rnd);
-    Float64 r=op(x1,x2); Float64::set_rounding_mode(old_rnd); return std::move(r);
-}
-
-template<class OP> Float64 apply(OP op, Float64 const& x, RoundingMode64 rnd) {
-    auto old_rnd=Float64::get_rounding_mode(); Float64::set_rounding_mode(rnd);
-    Float64 r=op(x); Float64::set_rounding_mode(old_rnd); return std::move(r);
-}
-
-template<class OP> Float64 apply(OP op, Float64 const& x, Int n, RoundingMode64 rnd) {
-    auto old_rnd=Float64::get_rounding_mode(); Float64::set_rounding_mode(rnd);
-    Float64 r=op(x,n); Float64::set_rounding_mode(old_rnd); return std::move(r);
-}
-
-inline Float64 add(Float64 const& x1, Float64 const& x2, Float64::RoundingModeType rnd) { return apply(Add(),x1,x2,rnd); }
-inline Float64 sub(Float64 const& x1, Float64 const& x2, Float64::RoundingModeType rnd) { return apply(Sub(),x1,x2,rnd); }
-inline Float64 mul(Float64 const& x1, Float64 const& x2, Float64::RoundingModeType rnd) { return apply(Mul(),x1,x2,rnd); }
-inline Float64 div(Float64 const& x1, Float64 const& x2, Float64::RoundingModeType rnd) { return apply(Div(),x1,x2,rnd); }
-inline Float64 pow(Float64 const& x, Int n, Float64::RoundingModeType rnd) { return apply(Pow(),x,n,rnd); }
-inline Float64 sqr(Float64 const& x, Float64::RoundingModeType rnd) { return apply(Sqr(),x,rnd); }
-inline Float64 rec(Float64 const& x, Float64::RoundingModeType rnd) { return apply(Rec(),x,rnd); }
-inline Float64 sqrt(Float64 const& x, Float64::RoundingModeType rnd) { return apply(Sqrt(),x,rnd); }
-inline Float64 exp(Float64 const& x, Float64::RoundingModeType rnd) { return apply(Exp(),x,rnd); }
-inline Float64 log(Float64 const& x, Float64::RoundingModeType rnd) { return apply(Log(),x,rnd); }
-inline Float64 sin(Float64 const& x, Float64::RoundingModeType rnd) { return apply(Sin(),x,rnd); }
-inline Float64 cos(Float64 const& x, Float64::RoundingModeType rnd) { return apply(Cos(),x,rnd); }
-inline Float64 tan(Float64 const& x, Float64::RoundingModeType rnd) { return apply(Tan(),x,rnd); }
-inline Float64 atan(Float64 const& x, Float64::RoundingModeType rnd) { return apply(Atan(),x,rnd); }
-
-
-//! \related Float64 \brief The nearest floating-point approximation to the constant \a pi.
-inline const Float64 pi_approx() { return Float64(3.1415926535897931); }
-inline const Float64 pi_near()   { return Float64(3.1415926535897931); }
-inline const Float64 pi_down()   { return Float64(3.1415926535897931); }
-inline const Float64 pi_up()     { return Float64(3.1415926535897936); }
-
-inline Float64 fma_approx(Float64 x, Float64 y, Float64 z) {
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest);
-    Float64 t=mul(x,y); Float64 r=add(t,z); set_rounding_mode(rounding_mode); return r; }
-
-inline Float64 fma_up(Float64 x, Float64 y, Float64 z) {
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward);
-    Float64 t=mul(x,y); Float64 r=add(t,z); set_rounding_mode(rounding_mode); return r; }
-
-inline Float64 fma_down(Float64 x, Float64 y, Float64 z) {
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(downward);
-    Float64 t=mul(x,y); Float64 r=add(t,z); set_rounding_mode(rounding_mode); return r; }
-
-//! \related Float64 \brief The average of two values, computed with nearest rounding. Also available with \c _ivl suffix.
-inline Float64 med_approx(Float64 x, Float64 y) {
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest);
-    Float64 r=hlf(add(x,y)); set_rounding_mode(rounding_mode); return r; }
-inline Float64 med_near(Float64 x, Float64 y) {
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest);
-    Float64 r=hlf(add(x,y)); set_rounding_mode(rounding_mode); return r; }
-//! \related Float64 \brief Half of the difference of two values, computed with upward rounding. Also available with \c _ivl suffix.
-inline Float64 rad_up(Float64 x, Float64 y) {
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward);
-    Float64 r=hlf(sub(y,x)); set_rounding_mode(rounding_mode); return r; }
-
-inline Float64 sqrt_approx(Float64 x) { return std::sqrt(x.dbl); }
-inline Float64 exp_approx(Float64 x) { return std::exp(x.dbl); }
-inline Float64 log_approx(Float64 x) { return std::log(x.dbl); }
-inline Float64 sin_approx(Float64 x) { return std::sin(x.dbl); }
-inline Float64 cos_approx(Float64 x) { return std::cos(x.dbl); }
-inline Float64 tan_approx(Float64 x) { return std::tan(x.dbl); }
-inline Float64 asin_approx(Float64 x) { return std::asin(x.dbl); }
-inline Float64 acos_approx(Float64 x) { return std::acos(x.dbl); }
-inline Float64 atan_approx(Float64 x) { return std::atan(x.dbl); }
-
-
-
-// Deprecated approximate operations
-inline Float64 operator+(Float64 x1, Float64 x2) { return x1.dbl+x2.dbl; }
-inline Float64 operator-(Float64 x1, Float64 x2) { return x1.dbl-x2.dbl; }
-inline Float64 operator*(Float64 x1, Float64 x2) { return x1.dbl*x2.dbl; }
-inline Float64 operator/(Float64 x1, Float64 x2) { return x1.dbl/x2.dbl; }
-inline Float64& operator+=(Float64& x1, Float64 x2) { x1.dbl+=x2.dbl; return x1; }
-inline Float64& operator-=(Float64& x1, Float64 x2) { x1.dbl-=x2.dbl; return x1; }
-inline Float64& operator*=(Float64& x1, Float64 x2) { x1.dbl*=x2.dbl; return x1; }
-inline Float64& operator/=(Float64& x1, Float64 x2) { x1.dbl/=x2.dbl; return x1; }
-
-// Checking whether a Float64 is not-a-number
-inline Bool isnan(Float64 x) { return std::isnan(x.dbl); }
-
-// Discontinuous integer-valued functions
-inline Float64 floor(Float64 x) { return std::floor(x.dbl); }
-inline Float64 ceil(Float64 x) { return std::ceil(x.dbl); }
-inline Float64 round(Float64 x) { return std::round(x.dbl); }
 
 } // namespace Ariadne
 

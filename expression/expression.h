@@ -33,8 +33,6 @@
 #include <iosfwd>
 #include <iostream>
 
-#include <boost/pool/singleton_pool.hpp>
-
 #include "utility/macros.h"
 #include "utility/declarations.h"
 #include "utility/pointer.h"

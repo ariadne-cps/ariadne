@@ -45,7 +45,7 @@ class Constraint {
 //    typedef typename IntervalOfType<Real>::Type IntervalBoundsType;
   public:
     Constraint(LowerBoundType const& l, FunctionType const& f, UpperBoundType const& u)
-        : _function(f), _lower_bound(l), _upper_bound(u) { ARIADNE_ASSERT(l<=u); }
+        : _function(f), _lower_bound(l), _upper_bound(u) { ARIADNE_ASSERT(decide(l<=u)); }
 
     Constraint(FunctionType const& f, BoundType const& x)
         : _function(f), _lower_bound(x), _upper_bound(x) { }
@@ -107,7 +107,7 @@ inline EffectiveConstraint operator==(const EffectiveScalarFunction& f, double c
 }
 
 inline EffectiveConstraint operator<=(const EffectiveConstraint& nc, const EffectiveNumericType& c) {
-    ARIADNE_ASSERT(static_cast<Float64Approximation>(nc.upper_bound()).get_d()==inf);
+    ARIADNE_ASSERT(decide(nc.upper_bound()==infty));
     return EffectiveConstraint(nc.lower_bound(),nc.function(),c);
 }
 
@@ -161,7 +161,7 @@ inline ValidatedConstraint operator<=(const ValidatedNumericType& c, const Valid
 }
 
 inline ValidatedConstraint operator<=(const ValidatedConstraint& nc, const ValidatedNumericType& c) {
-    ARIADNE_ASSERT(nc.upper_bound()==infty);
+    ARIADNE_ASSERT(decide(nc.upper_bound()==infty));
     return ValidatedConstraint(nc.lower_bound(),nc.function(),c);
 }
 

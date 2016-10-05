@@ -78,7 +78,7 @@ class SimpleHybridScaling
     SimpleHybridScaling() : _scalings() { }
     SimpleHybridScaling(const Map<Identifier,Float64Value>& scalings) : _scalings(scalings) { }
     SimpleHybridScaling(const InitializerList<Pair<RealVariable,Float64>>& scalings);
-    Void set_scaling(const RealVariable& var, Float64Value res) { ARIADNE_ASSERT(res>0.0); _scalings[var.name()]=res; }
+    Void set_scaling(const RealVariable& var, Float64Value res) { ARIADNE_ASSERT(decide(res>0)); _scalings[var.name()]=res; }
     virtual SimpleHybridScaling* clone() const { return new SimpleHybridScaling(*this); }
     virtual Float64Value scaling(const DiscreteLocation& loc, const RealVariable& var) const {
         return (this->_scalings.has_key(var.name())) ? this->_scalings[var.name()] : Float64Value(1.0); }

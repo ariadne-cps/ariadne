@@ -69,7 +69,7 @@ ValidatedAffineConstraint operator<=(const ValidatedAffine& a, const Float64Boun
 ValidatedAffineConstraint operator==(const ValidatedAffine& a, const Float64Bounds& b) { return ValidatedAffineConstraint(b,a,b); }
 
 ValidatedAffineConstraint operator<=(const ValidatedAffineConstraint& c, const Float64Bounds& u) {
-    ARIADNE_ASSERT(c.upper_bound()==infty);
+    ARIADNE_ASSERT(decide(c.upper_bound()==infty));
     return ValidatedAffineConstraint(c.lower_bound(),c.function(),u);
 }
 
@@ -78,7 +78,7 @@ ValidatedAffineModelConstraint operator<=(const ValidatedAffineModel& a, const F
 ValidatedAffineModelConstraint operator==(const ValidatedAffineModel& a, const Float64Bounds& b) { return ValidatedAffineModelConstraint(b,a,b); }
 
 ValidatedAffineModelConstraint operator<=(const ValidatedAffineModelConstraint& c, const Float64Bounds& u) {
-    ARIADNE_ASSERT(c.upper_bound()==infty);
+    ARIADNE_ASSERT(decide(c.upper_bound()==infty));
     return ValidatedAffineModelConstraint(c.lower_bound(),c.function(),u);
 }
 

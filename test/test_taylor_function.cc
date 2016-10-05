@@ -280,7 +280,7 @@ Void TestScalarTaylorFunction::test_antiderivative()
 
     Vector<ExactIntervalType> hdom=h.domain();
     Vector<Float64Bounds> domv(reinterpret_cast<Vector<Float64Bounds>const&>(hdom));
-    ARIADNE_ASSERT(mag(h(domv))<1e-8);
+    ARIADNE_TEST_LESS(mag(h(domv)),1e-8);
 
 }
 

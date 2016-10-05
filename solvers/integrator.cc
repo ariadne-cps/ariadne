@@ -908,7 +908,7 @@ AffineIntegrator::flow_step(const ValidatedVectorFunction& f, const ExactBoxType
             if(a[n]==this->_temporal_order && a[n]+this->_spacial_order==a.degree()) {
                 const ValidatedNumericType& rng = iter->data();
                 const ValidatedNumericType& mid = mdphi[i][a];
-                ARIADNE_ASSERT(rng.lower()<=mid.lower() && mid.upper()<=rng.upper());
+                ARIADNE_ASSERT(rng.lower().raw()<=mid.lower().raw() && mid.upper().raw()<=rng.upper().raw());
                 Float64Error mag = Float64Error(max(rng.upper()-mid.lower(),mid.upper()-rng.lower()));
                 for(Nat j=0; j!=n+1; ++j) { mag *= pow(rad[j],Nat(a[j])); }
                 err[i] += mag;

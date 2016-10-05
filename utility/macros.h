@@ -33,9 +33,6 @@
 #include <sstream>
 #include <stdexcept>
 
-namespace Ariadne {
-bool decide(bool);
-}
 
 #define ARIADNE_USING_CONSTRUCTORS(Class,Base) \
     template<class T,typename std::enable_if<std::is_convertible<T,Base>::value,int>::type=0> \
@@ -53,7 +50,7 @@ bool decide(bool);
 
 #define ARIADNE_ASSERT(expression) \
     { \
-        bool result = decide(expression); \
+        bool result = static_cast<bool>(expression); \
         if(!result) { \
             ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<__FUNCTION__,"Assertion `" << #expression << "' failed.\n"); \
         } \
@@ -63,7 +60,7 @@ bool decide(bool);
 #ifndef NDEBUG
 #define ARIADNE_DEBUG_ASSERT_MSG(expression,error) \
     { \
-        bool result = decide(expression); \
+        bool result = static_cast<bool>(expression); \
         if(!result) { \
             ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Assertion `" << #expression << "' failed.\n"<<"  "<<error<<"\n"); \
         } \
@@ -78,7 +75,7 @@ bool decide(bool);
 #ifndef NDEBUG
 #define ARIADNE_DEBUG_ASSERT(expression) \
     { \
-        bool result = decide(expression); \
+        bool result = static_cast<bool>(expression); \
         if(!result) { \
             ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<__FUNCTION__,"Assertion `" << #expression << "' failed.\n"); \
         } \
@@ -92,7 +89,7 @@ bool decide(bool);
 
 #define ARIADNE_PRECONDITION_MSG(expression,error)             \
     { \
-        bool result = decide(expression); \
+        bool result = static_cast<bool>(expression); \
         if(!result) { \
             ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Precondition `" << #expression << "' failed.\n"<<"  "<<error<<"\n"); \
         } \
@@ -100,7 +97,7 @@ bool decide(bool);
 
 #define ARIADNE_PRECONDITION(expression)             \
     { \
-        bool result = decide(expression); \
+        bool result = static_cast<bool>(expression); \
         if(!result) { \
             ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Precondition `" << #expression << "' failed.\n"); \
         } \
@@ -109,7 +106,7 @@ bool decide(bool);
 #ifndef NDEBUG
 #define ARIADNE_DEBUG_PRECONDITION(expression) \
     { \
-        bool result = decide(expression); \
+        bool result = static_cast<bool>(expression); \
         if(!result) { \
             ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<__FUNCTION__,"Precondition `" << #expression << "' failed.\n"); \
         } \
@@ -127,7 +124,7 @@ bool decide(bool);
 
 #define ARIADNE_ASSERT_MSG(expression,error)             \
     { \
-        bool result = decide(expression); \
+        bool result = static_cast<bool>(expression); \
         if(!result) { \
             ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Assertion `" << #expression << "' failed.\n"<<"  "<<error<<"\n"); \
         } \
@@ -135,7 +132,7 @@ bool decide(bool);
 
 #define ARIADNE_ASSERT_EQUAL(expression1,expression2)    \
     { \
-        bool result = decide((expression1) == (expression2));       \
+        bool result = static_cast<bool>((expression1) == (expression2));       \
         if(!result) { \
             ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Assertion `" << #expression1 << "==" << #expression2 << "' failed.\n"<<"  "<<expression1<<" != "<<expression2<<"\n"); \
         } \

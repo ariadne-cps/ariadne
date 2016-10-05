@@ -1738,7 +1738,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
             ARIADNE_LOG(6,"  Event "<<event<<": "<<event_kind<<": "<<crossing_kind<<"\n");
             if(event_kind!=PERMISSIVE) {
                 UpperIntervalType guard_range = compose(guard_function,flow).range();
-                ARIADNE_ASSERT(guard_range.lower()<zero);
+                ARIADNE_ASSERT(decide(guard_range.lower()<zero));
                 UpperIntervalType guard_derivative_range = compose(lie_derivative(guard_function,dynamic),flow).range();
 
                 //Float64Value alpha=numeric_cast<Float64Value>(1+flow.step_size()*guard_derivative_range.lower()/guard_range.lower());

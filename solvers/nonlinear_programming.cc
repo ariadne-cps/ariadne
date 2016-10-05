@@ -1215,7 +1215,7 @@ minimisation_step(const ApproximateScalarFunction& f, const ExactBoxType& d, con
     ARIADNE_DEBUG_PRECONDITION(h.result_size()==l);
     ARIADNE_DEBUG_PRECONDITION(contains(d,cast_exact(x)));
     ARIADNE_DEBUG_PRECONDITION(contains(c,cast_exact(w)));
-    ARIADNE_DEBUG_PRECONDITION(mu>0);
+    ARIADNE_DEBUG_PRECONDITION(mu.raw()>0);
 
     ARIADNE_LOG(4,"NonlinearInteriorPointOptimiser::minimisation_step(f,D,g,C,h, x,w, kappa,lambda, mu)\n");
     ARIADNE_LOG(5,"x="<<x<<"\n");

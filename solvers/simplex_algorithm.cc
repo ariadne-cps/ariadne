@@ -89,8 +89,8 @@ extend_p(const Array<SizeType>& p, const SizeType n)
         q[j]=n;
     }
     for(SizeType k=0; k!=m; ++k) {
-        ARIADNE_ASSERT(p[k]<n);
-        ARIADNE_ASSERT(q[p[k]]==n);
+        ARIADNE_ASSERT(decide(p[k]<n));
+        ARIADNE_ASSERT(decide(q[p[k]]==n));
         q[p[k]]=k;
     }
     SizeType k=m;
@@ -167,7 +167,7 @@ SimplexSolver<X>::consistency_check(const Matrix<X>& A, const Array<SizeType>& p
     Matrix<XX> Z=B*A_B;
     ARIADNE_LOG(9,"        p_B="<<p_B<<" B="<<B<<" A_B="<<A_B<<" B*A_B-I="<<Z<<"\n");
     for(SizeType i=0; i!=m; ++i) { Z[i][i]-=1; }
-    ARIADNE_ASSERT_MSG(norm(Z)<MAXIMUM_ERROR, "A="<<A<<"\np="<<p<<"\nB="<<B<<"\nZ=B*A_B-I="<<Z<<"\nnorm(Z)="<<norm(Z));
+    ARIADNE_ASSERT_MSG(decide(norm(Z)<MAXIMUM_ERROR), "A="<<A<<"\np="<<p<<"\nB="<<B<<"\nZ=B*A_B-I="<<Z<<"\nnorm(Z)="<<norm(Z));
 }
 
 
@@ -178,7 +178,7 @@ SimplexSolver<X>::consistency_check(const Matrix<X>& A, const Vector<X>& b,const
 {
     static const X MAXIMUM_ERROR=X(1e-8);
     Vector<XX> z=A*b-x;
-    ARIADNE_ASSERT(norm(z)<MAXIMUM_ERROR);
+    ARIADNE_ASSERT(decide(norm(z)<MAXIMUM_ERROR));
 }
 
 
@@ -207,7 +207,7 @@ SimplexSolver<X>::consistency_check(const Vector<X>& xl, const Vector<X>& xu, co
     ARIADNE_LOG(9,"          p_B="<<p_B<<" B="<<B<<" A_B="<<A_B<<" B*A_B="<<I<<"\n");
     Matrix<XX> Z=I;
     for(SizeType i=0; i!=m; ++i) { Z[i][i]-=1; }
-    ARIADNE_ASSERT_MSG(norm(Z)*10000<=1,"vt="<<vt<<" p_B="<<p_B<<" B="<<B<<" A_B="<<A_B<<" B*A_B="<<I<<"\n");
+    ARIADNE_ASSERT_MSG(decide(norm(Z)*10000<=1),"vt="<<vt<<" p_B="<<p_B<<" B="<<B<<" A_B="<<A_B<<" B*A_B="<<I<<"\n");
 
     Vector<XX> Ax=A*x;
     ARIADNE_LOG(9,"          A="<<A<<" x="<<x<<" b="<<b<<" Ax="<<Ax<<"\n");
@@ -217,10 +217,10 @@ SimplexSolver<X>::consistency_check(const Vector<X>& xl, const Vector<X>& xu, co
         ARIADNE_ASSERT_MSG(vt[j]==LOWER || vt[j]==UPPER,
                            "vt["<<j<<"]="<<vt[j]<<"\n  A="<<A<<", b="<<b<<", xl="<<xl<<", xu="<<xu<<", vt="<<vt<<", p="<<p<<", x="<<x<<", Ax="<<Ax);
         XX xj = (vt[j]==LOWER ? xl[j] : xu[j]);
-        ARIADNE_ASSERT_MSG(x[j]==xj,"x["<<j<<"]="<<x[j]<<" xj="<<xj<<"\n  A="<<A<<", b="<<b<<", xl="<<xl<<", xu="<<xu<<", vt="<<vt<<", p="<<p<<", x="<<x<<", Ax="<<Ax);
+        ARIADNE_ASSERT_MSG(decide(x[j]==xj),"x["<<j<<"]="<<x[j]<<" xj="<<xj<<"\n  A="<<A<<", b="<<b<<", xl="<<xl<<", xu="<<xu<<", vt="<<vt<<", p="<<p<<", x="<<x<<", Ax="<<Ax);
     }
     Vector<XX> Axmb = Ax-b;
-    ARIADNE_ASSERT_MSG(norm(Axmb)*10000<=1,"A="<<A<<", b="<<b<<", xl="<<xl<<", xu="<<xu<<", vt="<<vt<<", p="<<p<<", x="<<x<<", Ax="<<Ax);
+    ARIADNE_ASSERT_MSG(decide(norm(Axmb)*10000<=1),"A="<<A<<", b="<<b<<", xl="<<xl<<", xu="<<xu<<", vt="<<vt<<", p="<<p<<", x="<<x<<", Ax="<<Ax);
 }
 
 
@@ -335,7 +335,7 @@ SimplexSolver<X>::compute_basis(const Matrix<X>& A) const
             }
         }
 
-        ARIADNE_DEBUG_ASSERT(U[k][k]!=0);
+        ARIADNE_DEBUG_ASSERT(decide(U[k][k]!=0));
 
         if(!found_unit) {
             // Update LU factorisation
@@ -528,7 +528,7 @@ compute_wx(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& xl, const Ve
     ARIADNE_LOG(9," x="<<x<<"\n");
 
     Vector<X> Axmb=A*x-b;
-    ARIADNE_ASSERT(norm(Axmb)<0.00001);
+    ARIADNE_ASSERT(decide(norm(Axmb)<0.00001));
     return make_pair(w,x);
 }
 
@@ -966,7 +966,7 @@ SimplexSolver<X>::validated_feasibility_step(const Vector<X>& xl, const Vector<X
             vt[p[r]] = LOWER;
         } else {
             SizeType pr=p[r];
-            ARIADNE_ASSERT(x[pr]==xl[pr] || x[pr]==xu[pr]);
+            ARIADNE_ASSERT(decide(x[pr]==xl[pr] || x[pr]==xu[pr]));
             if(definitely(x[pr]==xl[pr])) { vt[pr]=LOWER; } else { vt[pr]=UPPER; }
         }
 
@@ -1037,7 +1037,7 @@ SimplexSolver<X>::lpstep(const Vector<X>& xl, const Vector<X>& xu, const Matrix<
             vt[p[r]] = LOWER;
         } else {
             SizeType pr=p[r];
-            ARIADNE_ASSERT(x[pr]==xl[pr] || x[pr]==xu[pr]);
+            ARIADNE_ASSERT(decide(x[pr]==xl[pr] || x[pr]==xu[pr]));
             if(decide(x[pr]==xl[pr])) { vt[pr]=LOWER; } else { vt[pr]=UPPER; }
         }
 
@@ -1058,10 +1058,10 @@ SimplexSolver<X>::lpstep(const Vector<X>& xl, const Vector<X>& xu, const Matrix<
     x=Ariadne::compute_x<X>(xl,xu,A,b, vt,p,B);
     for(Nat i=0; i!=m; ++i) {
         if(decide(x[p[i]]<xl[p[i]])) {
-            ARIADNE_ASSERT(x[p[i]]>xl[p[i]]-X(ERROR_TOLERANCE));
+            ARIADNE_ASSERT(decide(x[p[i]]>xl[p[i]]-X(ERROR_TOLERANCE)));
             x[p[i]]=xl[p[i]];
         } else if(decide(x[p[i]]>xu[p[i]])) {
-            ARIADNE_ASSERT(x[p[i]]<xu[p[i]]+X(ERROR_TOLERANCE));
+            ARIADNE_ASSERT(decide(x[p[i]]<xu[p[i]]+X(ERROR_TOLERANCE)));
             x[p[i]]=xu[p[i]];
         }
     }
@@ -1149,8 +1149,8 @@ SimplexSolver<X>::_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matr
 
         infeasible=false;
         for(SizeType j=0; j!=n; ++j) {
-            if(vt[j]==LOWER) { ARIADNE_ASSERT(x[j]==xl[j]); }
-            if(vt[j]==UPPER) { ARIADNE_ASSERT(x[j]==xu[j]); }
+            if(vt[j]==LOWER) { ARIADNE_ASSERT(decide(x[j]==xl[j])); }
+            if(vt[j]==UPPER) { ARIADNE_ASSERT(decide(x[j]==xu[j])); }
             if(decide(x[j]<xl[j]+ROBUST_FEASIBILITY_THRESHOLD)) { cc[j]=-1; ll[j]=-inf; infeasible=true; }
             else if(decide(x[j]>xu[j]-ROBUST_FEASIBILITY_THRESHOLD)) { cc[j]=+1; uu[j]=+inf; infeasible=true; }
             else { cc[j]=0; ll[j]=xl[j]; uu[j]=xu[j]; }
@@ -1172,8 +1172,8 @@ SimplexSolver<X>::_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matr
 
     // Check solution
     for(SizeType i=0; i!=n; ++i) {
-        ARIADNE_ASSERT_MSG(x[i]>=xl[i]-X(BOUNDS_TOLERANCE), "A="<<A<<" b="<<b<<" xl="<<xl<<" xu="<<xu<<" vt="<<vt<<" B="<<B<<" x="<<x );
-        ARIADNE_ASSERT_MSG(x[i]<=xu[i]+X(BOUNDS_TOLERANCE), "A="<<A<<" b="<<b<<" xl="<<xl<<" xu="<<xu<<" vt="<<vt<<" B="<<B<<" x="<<x );
+        ARIADNE_ASSERT_MSG(decide(x[i]>=xl[i]-X(BOUNDS_TOLERANCE)), "A="<<A<<" b="<<b<<" xl="<<xl<<" xu="<<xu<<" vt="<<vt<<" B="<<B<<" x="<<x );
+        ARIADNE_ASSERT_MSG(decide(x[i]<=xu[i]+X(BOUNDS_TOLERANCE)), "A="<<A<<" b="<<b<<" xl="<<xl<<" xu="<<xu<<" vt="<<vt<<" B="<<B<<" x="<<x );
     }
     Vector<XX> Ax=A*x;
     for(SizeType i=0; i!=m; ++i) {

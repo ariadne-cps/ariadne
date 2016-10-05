@@ -522,7 +522,7 @@ template<class F> inline Void _sma(TaylorModel<ValidatedTag,F>& r, const TaylorM
     r.error()=x.error()+y.error();
     r.error()+=err;
 
-    ARIADNE_DEBUG_ASSERT_MSG(r.error()>=0,r);
+    ARIADNE_DEBUG_ASSERT_MSG(r.error().raw()>=0,r);
 }
 
 
@@ -595,14 +595,14 @@ template<class F> Void TaylorModel<ValidatedTag,F>::iadd(const ValidatedNumericT
 {
     _acc(*this,c);
     this->sweep();
-    ARIADNE_DEBUG_ASSERT_MSG(this->error()>=0,*this);
+    ARIADNE_DEBUG_ASSERT_MSG(this->error().raw()>=0,*this);
 }
 
 template<class F> Void TaylorModel<ValidatedTag,F>::imul(const ValidatedNumericType& c)
 {
     _scal(*this,c);
     this->sweep();
-    ARIADNE_DEBUG_ASSERT_MSG(this->error()>=0,*this);
+    ARIADNE_DEBUG_ASSERT_MSG(this->error().raw()>=0,*this);
 }
 
 template<class F> Void TaylorModel<ValidatedTag,F>::isma(const ValidatedNumericType& c, const TaylorModel<ValidatedTag,F>& y)
@@ -612,14 +612,14 @@ template<class F> Void TaylorModel<ValidatedTag,F>::isma(const ValidatedNumericT
     _sma(r,x,c,y);
     this->swap(r);
     this->sweep();
-    ARIADNE_DEBUG_ASSERT_MSG(this->error()>=0,*this);
+    ARIADNE_DEBUG_ASSERT_MSG(this->error().raw()>=0,*this);
 }
 
 template<class F> Void TaylorModel<ValidatedTag,F>::ifma(const TaylorModel<ValidatedTag,F>& x1, const TaylorModel<ValidatedTag,F>& x2)
 {
     _mul(*this,x1,x2);
     this->sweep();
-    ARIADNE_DEBUG_ASSERT_MSG(this->error()>=0,*this);
+    ARIADNE_DEBUG_ASSERT_MSG(this->error().raw()>=0,*this);
 }
 
 

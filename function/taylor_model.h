@@ -229,7 +229,7 @@ class TaylorModel<ValidatedTag,F>
 
 
     //! \brief Set the error of the expansion.
-    Void set_error(const ErrorType& ne) { ARIADNE_ASSERT(ne>=0); this->_error=ne; }
+    Void set_error(const ErrorType& ne) { ARIADNE_ASSERT(ne.raw()>=0.0); this->_error=ne; }
     //! \brief Set the constant term in the expansion.
     Void set_value(const CoefficientType& c) {
         this->_expansion.set(MultiIndex::zero(this->argument_size()),c); }

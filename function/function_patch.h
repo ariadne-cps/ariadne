@@ -807,7 +807,7 @@ template<class M> FunctionPatch<M> antiderivative(const FunctionPatch<M>& f, Siz
 
 template<class M> FunctionPatch<M> antiderivative(const FunctionPatch<M>& f, SizeType k, const NumericType<M>& c) {
     ARIADNE_ASSERT(k<f.argument_size());
-    ARIADNE_ASSERT(contains(f.domain()[k],c));
+    ARIADNE_ASSERT(decide(contains(f.domain()[k],c)));
 
     FunctionPatch<M> g = antiderivative(f,k);
     VectorFunctionPatch<M> h ( f.create_coordinates() );

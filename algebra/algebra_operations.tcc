@@ -233,7 +233,7 @@ sqrt(const A& x)
     }
 
     Float64Error eps=mag(rad/avg);
-    ARIADNE_DEBUG_ASSERT(eps<1);
+    ARIADNE_DEBUG_ASSERT(decide(eps<1));
 
     Series<X> sqrt_series=Series<X>::sqrt(X(1));
     Nat d=integer_cast<Int>((log((1-eps)*tol)/log(eps)+1));
@@ -265,7 +265,7 @@ rec(const A& x)
     }
 
     auto eps=mag(rad/avg);
-    ARIADNE_DEBUG_ASSERT(eps<1);
+    ARIADNE_DEBUG_ASSERT(decide(eps<1));
 
     // Compute the degree and truncation error
     Nat d=integer_cast<Nat>((log((1-eps)*tol)/log(eps))+1);
@@ -298,7 +298,7 @@ log(const A& x)
     }
 
     auto eps=mag(rad/avg);
-    ARIADNE_DEBUG_ASSERT(eps<1);
+    ARIADNE_DEBUG_ASSERT(decide(eps<1));
 
     Nat d=integer_cast<Nat>((log((1-eps)*tol)/log(eps)+1));
     auto trunc_err=pow(eps,d)/cast_positive(1-eps)/d;

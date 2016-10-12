@@ -765,8 +765,8 @@ Void Enclosure::reduce() const
     contractor.reduce(reinterpret_cast<UpperBoxType&>(this->_reduced_domain),constraints);
 
     for(Nat i=0; i!=this->number_of_parameters(); ++i) {
-        double l=this->_reduced_domain[i].lower().get_d();
-        double u=this->_reduced_domain[i].upper().get_d();
+        Float64 l=this->_reduced_domain[i].lower().raw();
+        Float64 u=this->_reduced_domain[i].upper().raw();
         if(isnan(l) || isnan(u)) {
             ARIADNE_WARN("Reducing domain "<<_domain<<" yields "<<this->_reduced_domain);
             _reduced_domain[i]=_domain[i];

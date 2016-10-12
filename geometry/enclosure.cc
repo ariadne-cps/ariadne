@@ -767,7 +767,7 @@ Void Enclosure::reduce() const
     for(Nat i=0; i!=this->number_of_parameters(); ++i) {
         Float64 l=this->_reduced_domain[i].lower().raw();
         Float64 u=this->_reduced_domain[i].upper().raw();
-        if(isnan(l) || isnan(u)) {
+        if(is_nan(l) || is_nan(u)) {
             ARIADNE_WARN("Reducing domain "<<_domain<<" yields "<<this->_reduced_domain);
             _reduced_domain[i]=_domain[i];
         }

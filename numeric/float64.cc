@@ -745,6 +745,10 @@ Float64 Float64::pi(Precision64 pr, RoundingModeType rnd) {
     }
 }
 
+Float64 Float64::pi(Precision64 pr) {
+    return pi(pr,Float64::get_rounding_mode());
+}
+
 Float64::RoundingModeType Float64::get_rounding_mode() { return Ariadne::get_rounding_mode(); }
 Void Float64::set_rounding_mode(RoundingModeType rnd) { Ariadne::set_rounding_mode(rnd); }
 Void Float64::set_rounding_downward() { Ariadne::set_rounding_downward(); }

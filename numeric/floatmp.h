@@ -251,8 +251,6 @@ class FloatMP {
     friend FloatMP operator-(Dbl x1, FloatMP const& x2);
     friend FloatMP operator*(Dbl x1, FloatMP const& x2);
     friend FloatMP operator/(Dbl x1, FloatMP const& x2);
-
-
   private:
     friend OutputStream& write(OutputStream& os, FloatMP const& x, DecimalPlaces dgts, RoundingModeMP rnd);
     friend String print(FloatMP const& x, DecimalPlaces dgts, RoundingModeMP rnd);

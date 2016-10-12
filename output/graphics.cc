@@ -32,13 +32,10 @@
 #include "geometry/box.h"
 #include "output/geometry2d.h"
 #include "output/graphics.h"
+#include "output/cairo.h"
 
 #ifdef HAVE_GTK_H
 #include <gtk/gtk.h>
-#endif
-
-#ifdef HAVE_CAIRO_H
-#include <cairo/cairo.h>
 #endif
 
 namespace Ariadne {
@@ -224,49 +221,8 @@ Void Figure::clear() {
     this->_data->objects.clear();
 }
 
-struct ImageSize2d {
-    Nat nx,ny;
-    ImageSize2d(Nat _nx,Nat _ny) : nx(_nx), ny(_ny) { }
-};
-
 
 #ifdef HAVE_CAIRO_H
-
-class CairoCanvas
-    : public CanvasInterface
-{
-    friend class Figure;
-  private:
-    cairo_t *cr;
-    double lw; // The line width in pixels
-    double dr; // The dot radius in pixels
-    Colour lc,fc; // The line and fill colours
-  public:
-    ~CairoCanvas();
-    CairoCanvas(const ImageSize2d& size, const Box2d& bounds);
-    CairoCanvas(cairo_t *c);
-    Void initialise(StringType x, StringType y, double xl, double xu, double yl, double yu);
-    Void finalise();
-    Void move_to(double x, double y) { cairo_move_to (cr, x, y); }
-    Void line_to(double x, double y) { cairo_line_to (cr, x, y); }
-    Void circle(double x, double y, double r) { cairo_arc (cr, x, y, r, 0, 2*M_PI); }
-    Void dot(double x, double y) { cairo_arc (cr, x, y, dr/1000, 0, 2*M_PI); }
-    Void stroke();
-    Void fill() { cairo_set_source_rgba(cr,fc.red,fc.green,fc.blue,fc.opacity); cairo_fill_preserve (cr); this->stroke(); }
-    Void set_dot_radius(double dr) { this->dr=dr; }
-    Void set_line_width(double lw) { this->lw=lw; }
-    Void set_line_colour(double r, double g, double b) { lc.red=r; lc.green=g; lc.blue=b; }
-    Void set_fill_opacity(double o) { fc.opacity=o; }
-    Void set_fill_colour(double r, double g, double b) { fc.red=r; fc.green=g; fc.blue=b; }
-
-    Vector2d scaling() const;
-    Box2d bounds() const;
-  public:
-    ImageSize2d size_in_pixels() const {
-        return ImageSize2d(cairo_image_surface_get_width(cairo_get_target(cr))-(LEFT_MARGIN+RIGHT_MARGIN),
-                           cairo_image_surface_get_height(cairo_get_target(cr))-(BOTTOM_MARGIN+TOP_MARGIN)); }
-};
-
 
 CairoCanvas::~CairoCanvas()
 {
@@ -279,18 +235,19 @@ CairoCanvas::CairoCanvas(cairo_t *c)
 {
 }
 
-// TODO: This function is incomplete and not ready for use
-CairoCanvas::CairoCanvas(const ImageSize2d& size, const Box2d& bounds)
+CairoCanvas::CairoCanvas(const ImageSize2d& size)
     : cr(0), lw(1.0), lc(0.0,0.0,0.0), fc(1.0,1.0,1.0, 1.0)
 {
-    //std::cerr<<"Figure::write(filename="<<cfilename<<")\n";
-    cairo_surface_t *surface;
-
     const Int canvas_width = size.nx+LEFT_MARGIN+RIGHT_MARGIN;
     const Int canvas_height = size.ny+BOTTOM_MARGIN+TOP_MARGIN;;
 
-    surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, canvas_width, canvas_height);
+    cairo_surface_t* surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, canvas_width, canvas_height);
     cr = cairo_create (surface);
+}
+
+CairoCanvas::CairoCanvas(const ImageSize2d& size, const Box2d& bounds)
+    : CairoCanvas(size)
+{
 }
 
 Vector2d CairoCanvas::scaling() const
@@ -324,6 +281,27 @@ Void CairoCanvas::stroke()
 
     cairo_restore(cr);
 }
+
+Void CairoCanvas::fill() { 
+    cairo_set_source_rgba(cr,fc.red,fc.green,fc.blue,fc.opacity); 
+    cairo_fill_preserve (cr); 
+    this->stroke(); 
+}
+
+ImageSize2d CairoCanvas::size_in_pixels() const {
+    return ImageSize2d(cairo_image_surface_get_width(cairo_get_target(cr))-(LEFT_MARGIN+RIGHT_MARGIN),
+                       cairo_image_surface_get_height(cairo_get_target(cr))-(BOTTOM_MARGIN+TOP_MARGIN)); 
+}
+
+Void CairoCanvas::move_to(double x, double y) { cairo_move_to (cr, x, y); }
+Void CairoCanvas::line_to(double x, double y) { cairo_line_to (cr, x, y); }
+Void CairoCanvas::circle(double x, double y, double r) { cairo_arc (cr, x, y, r, 0, 2*M_PI); }
+Void CairoCanvas::dot(double x, double y) { cairo_arc (cr, x, y, dr/1000, 0, 2*M_PI); }
+Void CairoCanvas::set_dot_radius(double dr) { this->dr=dr; }
+Void CairoCanvas::set_line_width(double lw) { this->lw=lw; }
+Void CairoCanvas::set_line_colour(double r, double g, double b) { lc.red=r; lc.green=g; lc.blue=b; }
+Void CairoCanvas::set_fill_opacity(double o) { fc.opacity=o; }
+Void CairoCanvas::set_fill_colour(double r, double g, double b) { fc.red=r; fc.green=g; fc.blue=b; }
 
 
 
@@ -425,6 +403,11 @@ Void CairoCanvas::initialise(StringType text_x, StringType text_y, double xl, do
     cairo_translate(cr, utr0, utr1);
 }
 
+Void CairoCanvas::write(const char* filename) const {
+    cairo_surface_t* surface = cairo_get_target (cr);
+    cairo_surface_write_to_png (surface, filename);
+}
+
 Void CairoCanvas::finalise()
 {
     cairo_t *cr=this->cr;
@@ -514,16 +497,7 @@ Figure::write(const char* cfilename) const
 Void
 Figure::write(const char* cfilename, Nat drawing_width, Nat drawing_height) const
 {
-    //std::cerr<<"Figure::write(filename="<<cfilename<<")\n";
-    cairo_surface_t *surface;
-    cairo_t *cr;
-
-    const Int canvas_width = drawing_width+LEFT_MARGIN+RIGHT_MARGIN;
-    const Int canvas_height = drawing_height+BOTTOM_MARGIN+TOP_MARGIN;;
-
-    surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, canvas_width, canvas_height);
-    cr = cairo_create (surface);
-    CairoCanvas canvas(cr);
+    CairoCanvas canvas(ImageSize2d(drawing_width,drawing_height));
 
     this->_paint_all(canvas);
 
@@ -532,9 +506,8 @@ Figure::write(const char* cfilename, Nat drawing_width, Nat drawing_height) cons
     } else {
         filename=filename+".png";
     }
-
-    cairo_surface_write_to_png (surface, filename.c_str());
-    //cairo_surface_destroy (surface);
+    
+    canvas.write(filename.c_str());
 }
 
 

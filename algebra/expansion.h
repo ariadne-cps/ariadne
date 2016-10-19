@@ -325,7 +325,7 @@ template<class X> class ExpansionConstIterator
     template<class XX> Bool equal(const ExpansionIterator<XX>& other) const { return this->_cp==other._cp; }
     template<class XX> Bool equal(const ExpansionConstIterator<XX>& other) const { return this->_cp==other._cp; }
     Void advance(PointerDifferenceType k) { this->_ip+=k*(_as+1u); _cp+=k; }
-    template<class XX> PointerDifferenceType distance_to(const ExpansionIterator<XX>& other) const { return other._cp - this->_cp; }
+    template<class XX> PointerDifferenceType distance_to(const ExpansionConstIterator<XX>& other) const { return other._cp - this->_cp; }
     ExpansionConstReference<X> dereference() { return ExpansionConstReference<X>(_as,_ip,_cp); }
     ExpansionConstReference<X>* operator->() { return reinterpret_cast<ExpansionConstReference<X>*>(this); }
     Void write(OutputStream& os) const { os << "{" << (void*)_ip << "," << _cp << "}"; }

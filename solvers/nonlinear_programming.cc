@@ -467,6 +467,8 @@ ExactBoxType widen(ExactBoxType bx, RawFloat64 e) {
 }
 
 
+const Float64Value OptimiserBase::zero = Float64Value(0,Precision64());
+const Float64Value OptimiserBase::one = Float64Value(1,Precision64());
 
 Bool OptimiserBase::
 almost_feasible_point(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C, ApproximateVector ax, Float64Approximation error) const

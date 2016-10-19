@@ -104,6 +104,10 @@ template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::creat
     return TaylorModel<ValidatedTag,F>::constant(this->argument_size(),c,this->_sweeper);
 }
 
+template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::create_constant(ValidatedNumber c) const {
+    return this->create_constant(ValidatedNumericType(c,this->precision()));
+}
+
 template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::create_coordinate(SizeType j) const {
     ARIADNE_PRECONDITION(j<this->argument_size());
     TaylorModel<ValidatedTag,F> r(this->argument_size(),this->_sweeper);
@@ -1487,6 +1491,9 @@ template<class F> OutputStream& TaylorModel<ValidatedTag,F>::str(OutputStream& o
     return os << "+/-" << tm.error() << ")";
 }
 
+template<class F> OutputStream& TaylorModel<ValidatedTag,F>::repr(OutputStream& os) const {
+    return this->str(os);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1653,6 +1660,11 @@ jacobian_range(const Vector<TaylorModel<ValidatedTag,F>>& f, const Array<SizeTyp
 
 
 
+template<class F> TaylorModel<ApproximateTag,F>::TaylorModel()
+    : _expansion(0), _sweeper()
+{
+}
+
 template<class F> TaylorModel<ApproximateTag,F>::TaylorModel(SizeType as)
     : _expansion(as), _sweeper()
 {
@@ -1666,6 +1678,10 @@ template<class F> TaylorModel<ApproximateTag,F>::TaylorModel(SizeType as, Sweepe
 template<class F> TaylorModel<ApproximateTag,F> TaylorModel<ApproximateTag,F>::create_constant(Float64Approximation c) const {
     TaylorModel<ApproximateTag,F> r(this->argument_size(),this->_sweeper);
     r._expansion.append(MultiIndex::zero(this->argument_size()),c);
+}
+
+template<class F> TaylorModel<ApproximateTag,F> TaylorModel<ApproximateTag,F>::create_constant(ApproximateNumber c) const {
+    return this->create_constant(NumericType(c,this->precision()));
 }
 
 template<class F> TaylorModel<ApproximateTag,F> TaylorModel<ApproximateTag,F>::create_ball(ErrorType) const {
@@ -1855,6 +1871,10 @@ template<class F> OutputStream& TaylorModel<ApproximateTag,F>::write(OutputStrea
 
 template<class F> OutputStream& TaylorModel<ApproximateTag,F>::str(OutputStream& os) const {
     return os << this->_expansion;
+}
+
+template<class F> OutputStream& TaylorModel<ApproximateTag,F>::repr(OutputStream& os) const {
+    return this->str(os);
 }
 
 } //namespace Ariadne

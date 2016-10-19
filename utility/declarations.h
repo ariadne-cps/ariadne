@@ -82,6 +82,7 @@ template<> struct InformationTypedef<ExactNumericType> { typedef ExactTag Type; 
 template<> struct InformationTypedef<EffectiveNumericType> { typedef EffectiveTag Type; };
 template<> struct InformationTypedef<ValidatedNumericType> { typedef ValidatedTag Type; };
 template<> struct InformationTypedef<ApproximateNumericType> { typedef ApproximateTag Type; };
+template<class P> struct InformationTypedef<Number<P>> { typedef P Type; };
 template<class X> using InformationTag = typename InformationTypedef<X>::Type;
 
 template<class X> using Scalar = X;

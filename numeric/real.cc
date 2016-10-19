@@ -120,6 +120,17 @@ template<> struct RealConstant<Float64Bounds> : RealInterface, Float64Bounds {
     virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<Float64Bounds const&>(*this); }
 };
 
+template<> struct RealConstant<EffectiveNumber> : RealInterface, Float64Bounds {
+    typedef EffectiveNumber X;
+    X _c;
+  public:
+    RealConstant(X const& x) : Float64Bounds(x,Precision64()) { }
+    virtual Float64Bounds _value() const { return static_cast<Float64Bounds const&>(*this); }
+    virtual Float64Bounds _evaluate(Precision64 pr) const { return static_cast<Float64Bounds const&>(*this); }
+    virtual FloatMPBounds _evaluate(PrecisionMP pr) const { this->_c.get(BoundedTag(),pr); }
+    virtual OutputStream& _write(OutputStream& os) const { return os << this->_c; }
+};
+
 template<class O, class... A> inline Real make_real(O o, A... a) {
     return Real(std::make_shared<RealWrapper<O,A...>>(o,a...));
 }
@@ -167,6 +178,7 @@ Real::Real(Integer const& z) : Real(std::make_shared<RealConstant<Integer>>(z)) 
 Real::Real(Dyadic const& w) : Real(std::make_shared<RealConstant<Dyadic>>(w)) { }
 Real::Real(Decimal const& d) : Real(Rational(d)) { }
 Real::Real(Rational const& q) : Real(std::make_shared<RealConstant<Rational>>(q)) { }
+Real::Real(EffectiveNumber q) : Real(std::make_shared<RealConstant<EffectiveNumber>>(q)) { }
 Real::Real(Float64Value x) : Real(Dyadic(x)) { }
 
 Real add(Real const& x1, Real const& x2) { return make_real(Add(),x1,x2); }

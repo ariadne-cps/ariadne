@@ -1469,6 +1469,12 @@ template<class PR> struct Operations<FloatValue<PR>> {
     static FloatBounds<PR> _div(FloatValue<PR> const& x1, FloatValue<PR> const& x2) {
         return FloatBounds<PR>(div_down(x1._v,x2._v),div_up(x1._v,x2._v)); }
 
+    static FloatValue<PR> _mul(FloatValue<PR> const& x, TwoExp y) {
+        FloatValue<PR> yv(y,x.precision()); return FloatValue<PR>(x.raw()*yv.raw()); }
+        
+    static FloatValue<PR> _div(FloatValue<PR> const& x, TwoExp y) {
+        FloatValue<PR> yv(y,x.precision()); return FloatValue<PR>(x.raw()/yv.raw()); }
+
     static FloatBounds<PR> _pow(FloatValue<PR> const& x, Nat m) {
         return pow(FloatBounds<PR>(x),m); }
 
@@ -1538,15 +1544,6 @@ template<class PR> struct Operations<FloatValue<PR>> {
 
 };
 
-template<class PR> FloatValue<PR> operator*(FloatValue<PR> const& x, TwoExp y) {
-    FloatValue<PR> yv=y; return FloatValue<PR>(x.raw()*yv.raw()); }
-template<class PR> FloatValue<PR> operator/(FloatValue<PR> const& x, TwoExp y) {
-    FloatValue<PR> yv=y; return FloatValue<PR>(x.raw()/yv.raw()); }
-template<class PR> FloatValue<PR>& operator*=(FloatValue<PR>& x, TwoExp y) {
-    FloatValue<PR> yv=y; return x=FloatValue<PR>(x.raw()*yv.raw()); }
-template<class PR> FloatValue<PR>& operator/=(FloatValue<PR>& x, TwoExp y) {
-    FloatValue<PR> yv=y; return x=FloatValue<PR>(x.raw()/yv.raw()); }
-
 
 FloatValue<Precision64> cast_exact(Real const& x) {
     return cast_exact(FloatApproximation<Precision64>(x,Precision64()));
@@ -1568,6 +1565,10 @@ template<class PR> Bool operator> (const Rational& q, FloatValue<PR> const& x) {
 
 
 template<class PR> struct Operations<FloatError<PR>> {
+    static FloatError<PR> _nul(FloatError<PR> const& x) {
+        return FloatError<PR>(nul(x._e));
+    }
+
     static FloatError<PR> _sqr(FloatError<PR> const& x) {
         return FloatError<PR>(mul_up(x._e,x._e));
     }
@@ -1884,18 +1885,12 @@ FloatMPBall refinement(FloatMPBall const& x1, FloatMPBall const& x2) { return Op
 
 
 Float64Error mag(Float64Value const& x) { return Operations<Float64Value>::_mag(x); }
-
-
 FloatMPError mag(FloatMPValue const& x) { return Operations<FloatMPValue>::_mag(x); }
 
 
 
 Float64Value operator+(TwoExp y) { return Float64Value(y); }
 Float64Value operator-(TwoExp y) { return neg(Float64Value(y)); }
-Float64Value operator*(Float64Value const& x1, TwoExp y2) { Float64Value x2(y2); return Float64Value(mul_near(x1._v,x2._v)); }
-Float64Value operator/(Float64Value const& x1, TwoExp y2) { Float64Value x2(y2); return Float64Value(div_near(x1._v,x2._v)); }
-Float64Value& operator*=(Float64Value& x1, TwoExp y2) { return x1=x1*y2; }
-Float64Value& operator/=(Float64Value& x1, TwoExp y2) { return x1=x1/y2; }
 
 
 

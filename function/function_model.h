@@ -663,7 +663,7 @@ template<> class FunctionModelFactoryInterface<ValidatedTag>
     inline ScalarFunctionModel<ValidatedTag> create_coordinate(const ExactBoxType& domain, SizeType index) const;
     inline ScalarFunctionModel<ValidatedTag> create_identity(const ExactIntervalType& domain) const;
     inline VectorFunctionModel<ValidatedTag> create_identity(const ExactBoxType& domain) const;
-    inline ValidatedNumericType create_number(const ValidatedNumber& y) const;
+    inline CanonicalNumericType<ValidatedTag> create_number(const ValidatedNumber& number) const;
   private:
     virtual ScalarFunctionModelInterface<ValidatedTag>* _create(const ExactBoxType& domain, const ScalarFunctionInterface<ValidatedTag>& function) const = 0;
     virtual VectorFunctionModelInterface<ValidatedTag>* _create(const ExactBoxType& domain, const VectorFunctionInterface<ValidatedTag>& function) const = 0;
@@ -711,7 +711,8 @@ ScalarFunctionModel<ValidatedTag> FunctionModelFactoryInterface<ValidatedTag>::c
 VectorFunctionModel<ValidatedTag> FunctionModelFactoryInterface<ValidatedTag>::create_identity(const ExactBoxType& domain) const {
     return this->_create(domain,EffectiveVectorFunction::identity(domain.size())); };
 
-
+inline CanonicalNumericType<ValidatedTag> FunctionModelFactoryInterface<ValidatedTag>::create_number(const ValidatedNumber& number) const {
+    return CanonicalNumericType<ValidatedTag>(number,typename CanonicalNumericType<ValidatedTag>::PrecisionType()); }
 
 
 } // namespace Ariadne

@@ -34,6 +34,7 @@
 #include "utility/macros.h"
 #include "utility/string.h"
 #include "numeric/logical.h"
+#include "numeric/twoexp.h"
 #include "numeric/rational.h"
 
 #include <limits>
@@ -62,6 +63,12 @@ Dyadic::Dyadic() : Dyadic(Integer(0)) {
 }
 
 Dyadic::Dyadic(Integer const& z) : Dyadic(z,1u) {
+}
+
+Dyadic::Dyadic(TwoExp const& w) : Dyadic(1u) {
+    const int q=w.exponent();
+    if(q>=0) { mpf_mul_2exp(_mpf,_mpf,q); }
+    else { mpf_div_2exp(_mpf,_mpf,-q); }
 }
 
 Dyadic::Dyadic(const Dyadic& x) {

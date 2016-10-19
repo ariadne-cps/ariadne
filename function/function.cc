@@ -701,6 +701,7 @@ EffectiveScalarFunction operator*(const Real& s1, const EffectiveScalarFunction&
     return f2*s1;
 }
 
+
 EffectiveScalarFunction operator/(const Real& s1, const EffectiveScalarFunction& f2)
 {
     const RealScalarFormulaFunction* e2=dynamic_cast<const RealScalarFormulaFunction*>(f2.raw_pointer());
@@ -752,6 +753,25 @@ EffectiveScalarFunction tan(const EffectiveScalarFunction& f) {
 
 EffectiveScalarFunction atan(const EffectiveScalarFunction& f) {
     return make_unary_function(Atan(),f); }
+
+// Deprecated
+EffectiveScalarFunction operator+(const Int& s1, const EffectiveScalarFunction& f2) { return EffectiveNumericType(s1)+f2; }
+EffectiveScalarFunction operator+(const EffectiveScalarFunction& f1, const Int& s2) { return f1+EffectiveNumericType(s2); }
+EffectiveScalarFunction operator-(const Int& s1, const EffectiveScalarFunction& f2) { return EffectiveNumericType(s1)-f2; }
+EffectiveScalarFunction operator-(const EffectiveScalarFunction& f1, const Int& s2) { return f1-EffectiveNumericType(s2); }
+EffectiveScalarFunction operator*(const Int& s1, const EffectiveScalarFunction& f2) { return EffectiveNumericType(s1)*f2; }
+EffectiveScalarFunction operator*(const EffectiveScalarFunction& f1, const Int& s2) { return f1*EffectiveNumericType(s2); }
+EffectiveScalarFunction operator/(const Int& s1, const EffectiveScalarFunction& f2) { return EffectiveNumericType(s1)/f2; }
+EffectiveScalarFunction operator/(const EffectiveScalarFunction& f1, const Int& s2) { return f1/EffectiveNumericType(s2); }
+
+ValidatedScalarFunction operator+(const Int& s1, const ValidatedScalarFunction& f2) { return ValidatedNumericType(s1)+f2; }
+ValidatedScalarFunction operator+(const ValidatedScalarFunction& f1, const Int& s2) { return f1+ValidatedNumericType(s2); }
+ValidatedScalarFunction operator-(const Int& s1, const ValidatedScalarFunction& f2) { return ValidatedNumericType(s1)-f2; }
+ValidatedScalarFunction operator-(const ValidatedScalarFunction& f1, const Int& s2) { return f1-ValidatedNumericType(s2); }
+ValidatedScalarFunction operator*(const Int& s1, const ValidatedScalarFunction& f2) { return ValidatedNumericType(s1)*f2; }
+ValidatedScalarFunction operator*(const ValidatedScalarFunction& f1, const Int& s2) { return f1*ValidatedNumericType(s2); }
+ValidatedScalarFunction operator/(const Int& s1, const ValidatedScalarFunction& f2) { return ValidatedNumericType(s1)/f2; }
+ValidatedScalarFunction operator/(const ValidatedScalarFunction& f1, const Int& s2) { return f1/ValidatedNumericType(s2); }
 
 
 

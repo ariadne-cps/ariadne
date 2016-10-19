@@ -491,6 +491,16 @@ template<class X, class CMP> auto SortedExpansion<X,CMP>::find(const MultiIndex&
     return std::lower_bound(this->begin(),this->end(),a,CMP());
 }
 */
+template<class X, class CMP> auto SortedExpansion<X,CMP>::get(const MultiIndex& a) const -> CoefficientType const& {
+    ExpansionValue<X> term(a,Expansion<X>::_zero_coefficient);
+    auto iter=std::lower_bound(this->begin(),this->end(),term,CMP());
+    if (iter->index()!=a) {
+        return this->_zero_coefficient;
+    } else {
+        return iter->coefficient();
+    }
+}
+
 template<class X, class CMP> auto SortedExpansion<X,CMP>::at(const MultiIndex& a) -> CoefficientType& {
     ExpansionValue<X> term(a,Expansion<X>::_zero_coefficient);
     auto iter=std::lower_bound(this->begin(),this->end(),term,CMP());

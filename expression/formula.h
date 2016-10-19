@@ -180,6 +180,7 @@ template<class Y> inline Formula<Y>::Formula(const Y& c) : _root(new ConstantFor
 template<class Y> inline Formula<Y>& Formula<Y>::operator=(const Y& c) { return *this=Formula<Y>::constant(c); }
 
 template<class Y> inline Formula<Y> Formula<Y>::create_zero() const { return Formula<Y>::constant(0); }
+template<class Y> inline Formula<Y> Formula<Y>::create_constant(const Y& c) const { return Formula<Y>::constant(c); }
 
 template<class Y> inline Formula<Y> Formula<Y>::zero() {
     return Formula<Y>(new ConstantFormulaNode<Y>(numeric_cast<Y>(0)),PointerTag()); }
@@ -197,6 +198,11 @@ template<class Y> inline Formula<Y> Formula<Y>::scalar(const Operator& op, Formu
     return Formula<Y>(new ScalarFormulaNode<Y>(op,a1,n2),PointerTag()); }
 template<class Y> inline Vector< Formula<Y> > Formula<Y>::identity(Nat n) {
     Vector< Formula<Y> > r(n); for(Nat i=0; i!=n; ++i) { r[i]=Formula<Y>::coordinate(i); } return r; }
+
+// DEPRECATED
+template<class Y> inline Formula<Y> Formula<Y>::constant(Int c) {
+    return Formula<Y>::constant(Y(c)); }
+
 
 template<class Y, class R> inline Formula<Y> make_formula(const R& c) {
     return Formula<Y>::constant(c); }

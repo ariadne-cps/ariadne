@@ -216,7 +216,7 @@ template<class PR> class FloatLowerBound
     FloatLowerBound<PR>(FloatBall<PR> const& x);
     FloatLowerBound<PR>(FloatValue<PR> const& x);
 
-        FloatLowerBound<PR>& operator=(const FloatValue<PR>& x);
+        FloatLowerBound<PR>& operator=(const FloatValue<PR>& x) { return *this=FloatLowerBound<PR>(x); }
     FloatLowerBound<PR>& operator=(const ValidatedLowerNumber&);
     FloatLowerBound<PR> create(const ValidatedLowerNumber& y) const;
     FloatUpperBound<PR> create(const ValidatedUpperNumber& y) const;
@@ -267,7 +267,7 @@ template<class PR> class FloatUpperBound
     FloatUpperBound<PR>(FloatValue<PR> const& x);
     FloatUpperBound<PR>(FloatError<PR> const& x); // FIXME: Remove
 
-        FloatUpperBound<PR>& operator=(const FloatValue<PR>& x);
+        FloatUpperBound<PR>& operator=(const FloatValue<PR>& x) { return *this=FloatUpperBound<PR>(x); }
     FloatUpperBound<PR>& operator=(const ValidatedUpperNumber& y);
     FloatUpperBound<PR> create(const ValidatedUpperNumber& y) const;
     FloatLowerBound<PR> create(const ValidatedLowerNumber& y) const;
@@ -508,6 +508,8 @@ template<class PR> class FloatValue
     friend FloatValue<PR> hlf(FloatValue<PR> const&);
     friend FloatValue<PR> operator+(FloatValue<PR> const&);
     friend FloatValue<PR> operator-(FloatValue<PR> const&);
+    friend FloatValue<PR> operator*(FloatValue<PR> const&, TwoExp const&);
+    friend FloatValue<PR> operator/(FloatValue<PR> const&, TwoExp const&);
     friend FloatValue<PR>& operator*=(FloatValue<PR>&, TwoExp const&);
     friend FloatValue<PR>& operator/=(FloatValue<PR>&, TwoExp const&);
     friend FloatValue max(FloatValue<PR> const&, FloatValue<PR> const&);
@@ -523,6 +525,16 @@ template<class PR> class FloatValue
     static Void set_output_places(Nat p) { output_places=p; }
   private: public:
     RawFloatType _v;
+  private:
+    friend FloatValue<PR> operator*(FloatValue<PR> const& x, TwoExp const& y) {
+        return FloatValue<PR>(x.raw()*RawFloat<PR>(y,x.precision())); }
+    friend FloatValue<PR> operator/(FloatValue<PR> const& x, TwoExp const& y) {
+        return FloatValue<PR>(x.raw()/RawFloat<PR>(y,x.precision())); }
+
+
+    friend FloatValue<PR> operator/(FloatValue<PR> const& x, TwoExp const& y);
+    friend FloatValue<PR>& operator*=(FloatValue<PR>& x, TwoExp const& y) { return x=x*y; }
+    friend FloatValue<PR>& operator/=(FloatValue<PR>& x, TwoExp const& y) { return x=x/y; }
 };
 
 template<class PR> class FloatError
@@ -558,8 +570,7 @@ template<class PR> class FloatError
 
     friend Bool same(FloatError<PR> const&, FloatError<PR> const&);
     friend Bool refines(FloatError<PR> const&, FloatError<PR> const&);
-    friend OutputStream& operator<<(OutputStream&, FloatError<PR> const&);
-    friend OutputStream& operator<<(OutputStream&, FloatError<PR> const&);
+    friend OutputStream& operator<<(OutputStream& os, FloatError<PR> const& x) { return Operations<FloatError<PR>>::_write(os,x); }
   public:
     friend FloatUpperBound<PR> operator+(Real const&, FloatUpperBound<PR> const&);
     friend FloatLowerBound<PR> operator-(Real const&, FloatUpperBound<PR> const&);
@@ -588,7 +599,6 @@ template<class PR> inline const FloatValue<PR> FloatBall<PR>::value() const {
 
 template<class PR> inline const FloatError<PR> FloatBall<PR>::error() const {
     return FloatError<PR>(this->_e); }
-
 
 
 template<class PR> class PositiveFloatValue : public FloatValue<PR> {

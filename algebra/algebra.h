@@ -109,6 +109,9 @@ template<class X> class Algebra
     friend Algebra<X> sqr(Algebra<X> const& a) { return mul(a,a); }
     friend Algebra<X> pow(Algebra<X> const& a, Nat m) { return Algebra<X>(a._ptr->_pow(m)); }
 
+    // DEPRECATED
+    friend Algebra<X> operator+(Algebra<X> const& a1, Int const& c2) { return add(a1,X(c2)); }
+
     friend Algebra<X> operator/(Algebra<X> const& a1, Algebra<X> const& a2) { return mul(a1,rec(a2)); }
     friend Algebra<X> operator/(X const& c1, Algebra<X> const& a2) { return mul(c1,rec(a2)); }
     friend Algebra<X>& operator/=(Algebra<X>& a1, Algebra<X> const& a2) { return a1=div(a1,a2); }

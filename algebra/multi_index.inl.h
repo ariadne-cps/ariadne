@@ -255,6 +255,9 @@ bin(const MultiIndex& n, const MultiIndex& k)
 }
 
 
+inline MultiIndexValueReference MultiIndexData::operator[](SizeType i) {
+    return static_cast<MultiIndex&>(*this)[i];
+}
 
 
 

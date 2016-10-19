@@ -255,7 +255,8 @@ class TaylorModel<ValidatedTag,F>
     //! \brief Set the coefficient of the term \f$df/dx_j\f$.
     Void set_gradient(SizeType j, const CoefficientType& c) {
         this->_expansion.set(MultiIndex::unit(this->argument_size(),j),c); }
-    Void set_gradient(SizeType j,const ExactNumber& c);
+    Void set_gradient(SizeType j,const Dyadic& c) {
+        this->set_gradient(j,CoefficientType(c,this->precision())); }
     //! \brief Set the error of the expansion.
     Void set_error(const ErrorType& ne) { ARIADNE_ASSERT(ne>=0); this->_error=ne; }
     Void set_error(Nat m) { this->_error=m; }

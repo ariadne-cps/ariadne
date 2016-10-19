@@ -125,6 +125,35 @@ template<class X> template<class XX> UnivariateDifferential<X>::UnivariateDiffer
 }
 
 
+template<class X, class Y> struct DispatchMixedArithmeticOperators;
+
+template<class X, class Y> struct DispatchMixedArithmeticOperators<Differential<X>,Y> {
+    friend Differential<X> operator+(Differential<X> const& x, Y const& y) {
+        return add(x,x.value().create(y)); }
+    friend Differential<X> operator-(Differential<X> const& x, Y const& y) {
+        return sub(x,x.value().create(y)); }
+    friend Differential<X> operator*(Differential<X> const& x, Y const& y) {
+        return mul(x,x.value().create(y)); }
+    friend Differential<X> operator/(Differential<X> const& x, Y const& y) {
+        return div(x,x.value().create(y)); }
+    friend Differential<X> operator+(Y const& y, Differential<X> const& x) {
+        return add(x.value().create(y),x); }
+    friend Differential<X> operator-(Y const& y, Differential<X> const& x) {
+        return sub(x.value().create(y),x); }
+    friend Differential<X> operator*(Y const& y, Differential<X> const& x) {
+        return mul(x.value().create(y),x); }
+    friend Differential<X> operator/(Y const& y, Differential<X> const& x) {
+        return div(x.value().create(y),x); }
+    friend Differential<X>& operator+=(Differential<X>& x, Y const& y) {
+        return x=add(x,x.value().create(y)); }
+    friend Differential<X>& operator-=(Differential<X>& x, Y const& y) {
+        return x=sub(x,x.value().create(y)); }
+    friend Differential<X>& operator*=(Differential<X>& x, Y const& y) {
+        return x=mul(x,x.value().create(y)); }
+    friend Differential<X>& operator/=(Differential<X>& x, Y const& y) {
+        return x=div(x,x.value().create(y)); }
+};
+
 
 //! \ingroup DifferentiationModule
 //! \brief A class representing the partial derivatives of a scalar quantity
@@ -138,7 +167,7 @@ template<class X> template<class XX> UnivariateDifferential<X>::UnivariateDiffer
 template<class X>
 class Differential
     : public DispatchTranscendentalAlgebraOperations<Differential<X>,X>
-    , public DeclareMixedArithmeticOperators<Differential<X>,Int>
+    , public DispatchMixedArithmeticOperators<Differential<X>,Int>
 {
     typedef Differential<X> SelfType;
 

@@ -50,7 +50,7 @@ inline MultiIndex::MultiIndex(SizeType n)
 inline MultiIndex::MultiIndex(SizeType n, const DegreeType* ary)
     : MultiIndexData(n,_allocate(n))
 {
-    DegreeType _d=*(_p+_n); _d=0u;
+    DegreeType& _d=*(_p+_n); _d=0u;
     for(SizeType i=0; i!=n; ++i) { _p[i]=ary[i]; _d+=ary[i]; }
 }
 

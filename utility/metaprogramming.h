@@ -86,9 +86,9 @@ struct DontCare { template<class T> DontCare(T); };
 template<class R> struct Return { };
 struct Any { };
 
-template<class T> struct IsDefined : IsConvertible<T,DontCare> { };
-template<class T=void> struct IsSomething : True { };
-template<> struct IsSomething<void> : False { };
+template<template<class>class F, class T, class = F<T>> True _has(int);
+template<template<class>class F, class T> False _has(...);
+template<template<class>class F, class T> struct Has : decltype(_has<F,T>(1)) { };
 
 template<class T> struct Self { typedef T Type; };
 template<class T> using SelfType = typename Self<T>::Type;

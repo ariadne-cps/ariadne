@@ -853,8 +853,41 @@ template<class X, class Y, class R=X> struct ProvideConcreteGenericFieldOperatio
     friend R div(const Y& y1, const X& x2) { return div(_create(y1,x2),x2); }
 };
 
-template<class X, class Y, class R=X> struct ProvideConcreteGenericArithmeticOperators : ProvideConcreteGenericFieldOperators<X,Y,R> { };
-template<class X, class Y, class R=X> struct ProvideConcreteGenericArithmeticOperations : ProvideConcreteGenericFieldOperations<X,Y,R> { };
+template<class X, class Y=Void, class R=X> struct ProvideConcreteGenericArithmeticOperators : ProvideConcreteGenericFieldOperators<X,Y,R> { };
+template<class X, class Y=Void, class R=X> struct ProvideConcreteGenericArithmeticOperations : ProvideConcreteGenericFieldOperations<X,Y,R> { };
+
+template<class X, class Y> struct ProvideConcreteGenericArithmeticOperators<X,Y,Void> {
+    friend decltype(auto) operator+(X const& x, Y const& y) { return add(x,factory(x).create(y)); }
+    friend decltype(auto) operator-(X const& x, Y const& y) { return sub(x,factory(x).create(y)); }
+    friend decltype(auto) operator*(X const& x, Y const& y) { return mul(x,factory(x).create(y)); }
+    friend decltype(auto) operator/(X const& x, Y const& y) { return div(x,factory(x).create(y)); }
+    friend decltype(auto) operator+(Y const& y, X const& x) { return add(factory(x).create(y),x); }
+    friend decltype(auto) operator-(Y const& y, X const& x) { return sub(factory(x).create(y),x); }
+    friend decltype(auto) operator*(Y const& y, X const& x) { return mul(factory(x).create(y),x); }
+    friend decltype(auto) operator/(Y const& y, X const& x) { return div(factory(x).create(y),x); }
+    friend decltype(auto) operator+=(X& x, Y const& y) { return x=add(x,factory(x).create(y)); }
+    friend decltype(auto) operator-=(X& x, Y const& y) { return x=sub(x,factory(x).create(y)); }
+    friend decltype(auto) operator*=(X& x, Y const& y) { return x=mul(x,factory(x).create(y)); }
+    friend decltype(auto) operator/=(X& x, Y const& y) { return x=div(x,factory(x).create(y)); }
+};
+
+template<class X> using GenericType = typename X::GenericType;
+template<class X> struct IsConcrete : Has<GenericType,X> { };
+
+template<class X> struct ProvideConcreteGenericArithmeticOperators<X,Void> {
+    template<class Y, DisableIf<IsConcrete<Y>> =dummy> friend decltype(auto) operator+(X const& x, Y const& y) { return add(x,factory(x).create(y)); }
+    template<class Y, DisableIf<IsConcrete<Y>> =dummy> friend decltype(auto) operator-(X const& x, Y const& y) { return sub(x,factory(x).create(y)); }
+    template<class Y, DisableIf<IsConcrete<Y>> =dummy> friend decltype(auto) operator*(X const& x, Y const& y) { return mul(x,factory(x).create(y)); }
+    template<class Y, DisableIf<IsConcrete<Y>> =dummy> friend decltype(auto) operator/(X const& x, Y const& y) { return div(x,factory(x).create(y)); }
+    template<class Y, DisableIf<IsConcrete<Y>> =dummy> friend decltype(auto) operator+(Y const& y, X const& x) { return add(factory(x).create(y),x); }
+    template<class Y, DisableIf<IsConcrete<Y>> =dummy> friend decltype(auto) operator-(Y const& y, X const& x) { return sub(factory(x).create(y),x); }
+    template<class Y, DisableIf<IsConcrete<Y>> =dummy> friend decltype(auto) operator*(Y const& y, X const& x) { return mul(factory(x).create(y),x); }
+    template<class Y, DisableIf<IsConcrete<Y>> =dummy> friend decltype(auto) operator/(Y const& y, X const& x) { return div(factory(x).create(y),x); }
+    template<class Y, DisableIf<IsConcrete<Y>> =dummy> friend decltype(auto) operator+=(X& x, Y const& y) { return x=add(x,factory(x).create(y)); }
+    template<class Y, DisableIf<IsConcrete<Y>> =dummy> friend decltype(auto) operator-=(X& x, Y const& y) { return x=sub(x,factory(x).create(y)); }
+    template<class Y, DisableIf<IsConcrete<Y>> =dummy> friend decltype(auto) operator*=(X& x, Y const& y) { return x=mul(x,factory(x).create(y)); }
+    template<class Y, DisableIf<IsConcrete<Y>> =dummy> friend decltype(auto) operator/=(X& x, Y const& y) { return x=div(x,factory(x).create(y)); }
+};
 
 
 template<class X, class Y, class R, class LT, class EQ=LT> struct ProvideConvertedComparisonOperations : DefineMixedComparisonOperators<X,Y,LT,EQ> {

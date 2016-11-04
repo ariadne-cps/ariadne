@@ -74,6 +74,7 @@ TEST_DYNAMICS_SRC = \
 	test_continuous_evolution.cc
 
 LIB_EXPRESSION_SRC = \
+	formula.cc \
 	expression.cc \
 	expression_set.cc \
 

@@ -50,6 +50,7 @@ template<class X> class Series;
 
 template<class X> class Expansion;
 template<class X> class Differential;
+template<class X> class UnivariateDifferential;
 
 typedef Differential<Float64> FloatDifferential;
 typedef Differential<Float64Approximation> FloatApproximationDifferential;
@@ -60,6 +61,20 @@ typedef Differential<UpperIntervalType> UpperIntervalDifferentialType;
 template<class X> using EqualityType = decltype(declval<X>()==declval<X>());
 template<class X> using InequalityType = decltype(declval<X>()!=declval<X>());
 
+
+template<class PR> class DifferentialFactory : public FloatFactory<PR> {
+  public:
+    DifferentialFactory<PR>(PR const& pr) : FloatFactory<PR>(pr) { }
+    template<class Y> using ConcreteNumberType = decltype(FloatFactory<PR>::create(declval<Y>()));
+    using FloatFactory<PR>::create;
+    template<class Y> UnivariateDifferential<ConcreteNumberType<Y>> create(UnivariateDifferential<Y> const&);
+    template<class Y> Differential<ConcreteNumberType<Y>> create(Differential<Y> const&);
+};
+template<class PR> inline DifferentialFactory<PR> differential_factory(PR const& pr) { return DifferentialFactory<PR>(pr); }
+template<class X> DifferentialFactory<PrecisionType<X>> factory(UnivariateDifferential<X> const& dx) {
+    return differential_factory(dx.value().precision()); }
+template<class X> DifferentialFactory<PrecisionType<X>> factory(Differential<X> const& dx) {
+    return differential_factory(dx.value().precision()); }
 
 
 
@@ -125,35 +140,6 @@ template<class X> template<class XX> UnivariateDifferential<X>::UnivariateDiffer
 }
 
 
-template<class X, class Y> struct DispatchMixedArithmeticOperators;
-
-template<class X, class Y> struct DispatchMixedArithmeticOperators<Differential<X>,Y> {
-    friend Differential<X> operator+(Differential<X> const& x, Y const& y) {
-        return add(x,x.value().create(y)); }
-    friend Differential<X> operator-(Differential<X> const& x, Y const& y) {
-        return sub(x,x.value().create(y)); }
-    friend Differential<X> operator*(Differential<X> const& x, Y const& y) {
-        return mul(x,x.value().create(y)); }
-    friend Differential<X> operator/(Differential<X> const& x, Y const& y) {
-        return div(x,x.value().create(y)); }
-    friend Differential<X> operator+(Y const& y, Differential<X> const& x) {
-        return add(x.value().create(y),x); }
-    friend Differential<X> operator-(Y const& y, Differential<X> const& x) {
-        return sub(x.value().create(y),x); }
-    friend Differential<X> operator*(Y const& y, Differential<X> const& x) {
-        return mul(x.value().create(y),x); }
-    friend Differential<X> operator/(Y const& y, Differential<X> const& x) {
-        return div(x.value().create(y),x); }
-    friend Differential<X>& operator+=(Differential<X>& x, Y const& y) {
-        return x=add(x,x.value().create(y)); }
-    friend Differential<X>& operator-=(Differential<X>& x, Y const& y) {
-        return x=sub(x,x.value().create(y)); }
-    friend Differential<X>& operator*=(Differential<X>& x, Y const& y) {
-        return x=mul(x,x.value().create(y)); }
-    friend Differential<X>& operator/=(Differential<X>& x, Y const& y) {
-        return x=div(x,x.value().create(y)); }
-};
-
 
 //! \ingroup DifferentiationModule
 //! \brief A class representing the partial derivatives of a scalar quantity
@@ -167,7 +153,7 @@ template<class X, class Y> struct DispatchMixedArithmeticOperators<Differential<
 template<class X>
 class Differential
     : public DispatchTranscendentalAlgebraOperations<Differential<X>,X>
-    , public DispatchMixedArithmeticOperators<Differential<X>,Int>
+    , public ProvideConcreteGenericArithmeticOperators<Differential<X>>
 {
     typedef Differential<X> SelfType;
 
@@ -346,6 +332,9 @@ class Differential
     OutputStream& _write(OutputStream& os) const;
 };
 
+template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumericType<Y>> =dummy>
+decltype(auto) operator+(Differential<X> const& x, Y const& y) { return x+factory(x).create(y); }
+
 template<class X> struct AlgebraOperations<Differential<X>> : GradedAlgebraOperations<Differential<X>> {
     static Differential<X> _pos(Differential<X> dx);
     static Differential<X> _neg(Differential<X> dx);
@@ -378,8 +367,6 @@ Differential<X>::Differential(const Differential<Y>& x, PRS... prs)
     : _expansion(x.expansion(),prs...), _degree(x.degree())
 {
 }
-
-
 
 
 template<class X> Vector<Differential<X>> compose(Vector<Differential<X>> const&, Vector<Differential<X>> const&);

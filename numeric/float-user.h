@@ -41,6 +41,7 @@
 
 namespace Ariadne {
 
+
 template<class X> class Positive;
 
 template<class X> struct NumericTraits;
@@ -374,6 +375,7 @@ template<class PR> class FloatBounds
     double get_d() const { return value_raw().get_d(); }
 
     PrecisionType precision() const { ARIADNE_DEBUG_ASSERT(_l.precision()==_u.precision()); return _u.precision(); }
+    GenericType generic() const;
 
     // DEPRECATED
     explicit operator RawFloatType () const { return value_raw(); }
@@ -742,78 +744,93 @@ Float64Approximation operator"" _approx(long double lx);
 template<class PR> FloatBounds<PR> make_bounds(FloatError<PR> const& e) {
     return FloatBounds<PR>(-e.raw(),+e.raw()); }
 
+template<class PR> class FloatFactory {
+    PR _pr;
+  public:
+    typedef PR PrecisionType;
+    FloatFactory(PR const& pr) : _pr(pr) { }
+    PR precision() const { return this->_pr; }
+  public:
+    FloatApproximation<PR> create(Number<ApproximateTag> const& y) { return FloatApproximation<PR>(y,_pr); }
+    FloatLowerBound<PR> create(Number<ValidatedLowerTag> const& y) { return FloatLowerBound<PR>(y,_pr); }
+    FloatUpperBound<PR> create(Number<ValidatedUpperTag> const& y) { return FloatUpperBound<PR>(y,_pr); }
+    FloatBounds<PR> create(Number<ValidatedTag> const& y) { return FloatBounds<PR>(y,_pr); }
+    FloatBounds<PR> create(Number<EffectiveTag> const& y) { return FloatBounds<PR>(y,_pr); }
+    FloatBounds<PR> create(Number<ExactTag> const& y) { return FloatBounds<PR>(y,_pr); }
+    FloatBounds<PR> create(Real const& y) { return FloatBounds<PR>(y,_pr); }
+    FloatBounds<PR> create(Rational const& y) { return FloatBounds<PR>(y,_pr); }
+    FloatValue<PR> create(Dyadic const& y) { return FloatValue<PR>(y,_pr); }
+    FloatValue<PR> create(Integer const& y) { return FloatValue<PR>(y,_pr); }
+    template<class N, EnableIf<IsIntegral<N>> =dummy> FloatValue<PR> create(N const& y) { return FloatValue<PR>(y,_pr); }
+    template<class D, EnableIf<IsFloatingPoint<D>> =dummy> FloatApproximation<PR> create(D const& y) { return FloatApproximation<PR>(RawFloat<PR>(y,_pr)); }
+  public:
+    template<class Y> using ConcreteType = decltype(FloatFactory<PR>::create(declval<Y>()));
+};
+template<class PR> inline FloatFactory<PR> float_factory(PR pr) { return FloatFactory<PR>(pr); }
+template<template<class>class FLT, class PR> inline FloatFactory<PR> factory(FLT<PR> flt) { return FloatFactory<PR>(flt.precision()); }
 
-template<class PR> inline FloatApproximation<PR> make_float(Number<ApproximateTag> const& y, PR pr) { return FloatApproximation<PR>(y,pr); }
-template<class PR> inline FloatLowerBound<PR> make_float(Number<ValidatedLowerTag> const& y, PR pr) { return FloatLowerBound<PR>(y,pr); }
-template<class PR> inline FloatUpperBound<PR> make_float(Number<ValidatedUpperTag> const& y, PR pr) { return FloatUpperBound<PR>(y,pr); }
-template<class PR> inline FloatBounds<PR> make_float(Number<ValidatedTag> const& y, PR pr) { return FloatBounds<PR>(y,pr); }
-template<class PR> inline FloatBounds<PR> make_float(Number<EffectiveTag> const& y, PR pr) { return FloatBounds<PR>(y,pr); }
-template<class PR> inline FloatBounds<PR> make_float(Number<ExactTag> const& y, PR pr) { return FloatBounds<PR>(y,pr); }
-template<class PR> inline FloatBounds<PR> make_float(Real const& y, PR pr) { return FloatBounds<PR>(y,pr); }
-template<class PR> inline FloatBounds<PR> make_float(Rational const& y, PR pr) { return FloatBounds<PR>(y,pr); }
-template<class PR> inline FloatValue<PR> make_float(Integer const& y, PR pr) { return FloatValue<PR>(y,pr); }
-template<class N, class PR, EnableIf<IsSignedIntegral<N>> =dummy> inline FloatValue<PR> make_float(N const& y, PR pr) { return FloatValue<PR>(y,pr); }
-template<class M, class PR, EnableIf<IsUnsignedIntegral<M>> =dummy> inline PositiveFloatValue<PR> make_float(M const& y, PR pr) { return PositiveFloatValue<PR>(y,pr); }
-template<class D, class PR, EnableIf<IsFloatingPoint<D>> =dummy> FloatApproximation<PR> make_float(D const& y, PR pr){
-    return FloatApproximation<PR>(RawFloat<PR>(y,pr)); }
+template<class Y, class PR> inline decltype(auto) make_float(Y const& y, PR pr) { return float_factory(pr).create(y); }
 
-template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumericType<Y>> =dummy> auto
-operator+(X const& x, Y const& y) -> decltype(x+make_float(y,x.precision())) { return x+make_float(y,x.precision()); }
-template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumericType<Y>> =dummy> auto
-operator-(X const& x, Y const& y) -> decltype(x-make_float(y,x.precision())) { return x-make_float(y,x.precision()); }
-template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumericType<Y>> =dummy> auto
-operator*(X const& x, Y const& y) -> decltype(x*make_float(y,x.precision())) { return x*make_float(y,x.precision()); }
-template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumericType<Y>> =dummy> auto
-operator/(X const& x, Y const& y) -> decltype(x/make_float(y,x.precision())) { return x/make_float(y,x.precision()); }
+template<class X, class Y> using AreConcreteGenericNumbers = And<IsFloat<X>,IsGenericNumericType<Y>>;
 
-template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumericType<Y>> =dummy> auto
-operator+(Y const& y, X const& x) -> decltype(make_float(y,x.precision())+x) { return make_float(y,x.precision())+x; }
-template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumericType<Y>> =dummy> auto
-operator-(Y const& y, X const& x) -> decltype(make_float(y,x.precision())-x) { return make_float(y,x.precision())-x; }
-template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumericType<Y>> =dummy> auto
-operator*(Y const& y, X const& x) -> decltype(make_float(y,x.precision())*x) { return make_float(y,x.precision())*x; }
-template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumericType<Y>> =dummy> auto
-operator/(Y const& y, X const& x) -> decltype(make_float(y,x.precision())/x) { return make_float(y,x.precision())/x; }
 
-template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumericType<Y>> =dummy> auto
-operator==(X const& x, Y const& y) -> decltype(x==make_float(y,x.precision())) { return x==make_float(y,x.precision()); }
-template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumericType<Y>> =dummy> auto
-operator!=(X const& x, Y const& y) -> decltype(x!=make_float(y,x.precision())) { return x!=make_float(y,x.precision()); }
-template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumericType<Y>> =dummy> auto
-operator<=(X const& x, Y const& y) -> decltype(x<=make_float(y,x.precision())) { return x<=make_float(y,x.precision()); }
-template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumericType<Y>> =dummy> auto
-operator>=(X const& x, Y const& y) -> decltype(x>=make_float(y,x.precision())) { return x>=make_float(y,x.precision()); }
-template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumericType<Y>> =dummy> auto
-operator< (X const& x, Y const& y) -> decltype(x< make_float(y,x.precision())) { return x< make_float(y,x.precision()); }
-template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumericType<Y>> =dummy> auto
-operator> (X const& x, Y const& y) -> decltype(x> make_float(y,x.precision())) { return x> make_float(y,x.precision()); }
+template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
+decltype(auto) operator+(X const& x, Y const& y) { return x+factory(x).create(y); }
+template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
+decltype(auto) operator-(X const& x, Y const& y) { return x-factory(x).create(y); }
+template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
+decltype(auto) operator*(X const& x, Y const& y) { return x*factory(x).create(y); }
+template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
+decltype(auto) operator/(X const& x, Y const& y) { return x/factory(x).create(y); }
 
-template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumericType<Y>> =dummy> auto
-operator==(Y const& y, X const& x) -> decltype(make_float(y,x.precision())==x) { return make_float(y,x.precision())==x; }
-template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumericType<Y>> =dummy> auto
-operator!=(Y const& y, X const& x) -> decltype(make_float(y,x.precision())!=x) { return make_float(y,x.precision())!=x; }
-template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumericType<Y>> =dummy> auto
-operator<=(Y const& y, X const& x) -> decltype(make_float(y,x.precision())<=x) { return make_float(y,x.precision())<=x; }
-template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumericType<Y>> =dummy> auto
-operator>=(Y const& y, X const& x) -> decltype(make_float(y,x.precision())>=x) { return make_float(y,x.precision())>=x; }
-template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumericType<Y>> =dummy> auto
-operator< (Y const& y, X const& x) -> decltype(make_float(y,x.precision())< x) { return make_float(y,x.precision())< x; }
-template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumericType<Y>> =dummy> auto
-operator> (Y const& y, X const& x) -> decltype(make_float(y,x.precision())> x) { return make_float(y,x.precision())> x; }
+template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
+decltype(auto) operator+(Y const& y, X const& x) { return factory(x).create(y)+x; }
+template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
+decltype(auto) operator-(Y const& y, X const& x) { return factory(x).create(y)-x; }
+template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
+decltype(auto) operator*(Y const& y, X const& x) { return factory(x).create(y)*x; }
+template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
+decltype(auto) operator/(Y const& y, X const& x) { return factory(x).create(y)/x; }
 
-template<class PR> auto operator==(FloatValue<PR> const& x, Rational const& q) -> decltype(Rational(x)==q) { return Rational(x)==q; }
-template<class PR> auto operator!=(FloatValue<PR> const& x, Rational const& q) -> decltype(Rational(x)!=q) { return Rational(x)!=q; }
-template<class PR> auto operator<=(FloatValue<PR> const& x, Rational const& q) -> decltype(Rational(x)<=q) { return Rational(x)<=q; }
-template<class PR> auto operator>=(FloatValue<PR> const& x, Rational const& q) -> decltype(Rational(x)>=q) { return Rational(x)>=q; }
-template<class PR> auto operator< (FloatValue<PR> const& x, Rational const& q) -> decltype(Rational(x)< q) { return Rational(x)< q; }
-template<class PR> auto operator> (FloatValue<PR> const& x, Rational const& q) -> decltype(Rational(x)> q) { return Rational(x)> q; }
+template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
+decltype(auto) operator==(X const& x, Y const& y) { return x==factory(x).create(y); }
+template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
+decltype(auto) operator!=(X const& x, Y const& y) { return x!=factory(x).create(y); }
+template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
+decltype(auto) operator<=(X const& x, Y const& y) { return x<=factory(x).create(y); }
+template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
+decltype(auto) operator>=(X const& x, Y const& y) { return x>=factory(x).create(y); }
+template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
+decltype(auto) operator< (X const& x, Y const& y) { return x< factory(x).create(y); }
+template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
+decltype(auto) operator> (X const& x, Y const& y) { return x> factory(x).create(y); }
 
-template<class PR> auto operator==(Rational const& q, FloatValue<PR> const& x) -> decltype(q==Rational(x)) { return q==Rational(x); }
-template<class PR> auto operator!=(Rational const& q, FloatValue<PR> const& x) -> decltype(q!=Rational(x)) { return q!=Rational(x); }
-template<class PR> auto operator<=(Rational const& q, FloatValue<PR> const& x) -> decltype(q<=Rational(x)) { return q<=Rational(x); }
-template<class PR> auto operator>=(Rational const& q, FloatValue<PR> const& x) -> decltype(q>=Rational(x)) { return q>=Rational(x); }
-template<class PR> auto operator< (Rational const& q, FloatValue<PR> const& x) -> decltype(q< Rational(x)) { return q< Rational(x); }
-template<class PR> auto operator> (Rational const& q, FloatValue<PR> const& x) -> decltype(q> Rational(x)) { return q> Rational(x); }
+template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
+decltype(auto) operator==(Y const& y, X const& x) { return factory(x).create(y)==x; }
+template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
+decltype(auto) operator!=(Y const& y, X const& x) { return factory(x).create(y)!=x; }
+template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
+decltype(auto) operator<=(Y const& y, X const& x) { return factory(x).create(y)<=x; }
+template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
+decltype(auto) operator>=(Y const& y, X const& x) { return factory(x).create(y)>=x; }
+template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
+decltype(auto) operator< (Y const& y, X const& x) { return factory(x).create(y)< x; }
+template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
+decltype(auto) operator> (Y const& y, X const& x) { return factory(x).create(y)> x; }
+
+template<class PR> decltype(auto) operator==(FloatValue<PR> const& x, Rational const& q) { return Rational(x)==q; }
+template<class PR> decltype(auto) operator!=(FloatValue<PR> const& x, Rational const& q) { return Rational(x)!=q; }
+template<class PR> decltype(auto) operator<=(FloatValue<PR> const& x, Rational const& q) { return Rational(x)<=q; }
+template<class PR> decltype(auto) operator>=(FloatValue<PR> const& x, Rational const& q) { return Rational(x)>=q; }
+template<class PR> decltype(auto) operator< (FloatValue<PR> const& x, Rational const& q) { return Rational(x)< q; }
+template<class PR> decltype(auto) operator> (FloatValue<PR> const& x, Rational const& q) { return Rational(x)> q; }
+
+template<class PR> decltype(auto) operator==(Rational const& q, FloatValue<PR> const& x) { return q==Rational(x); }
+template<class PR> decltype(auto) operator!=(Rational const& q, FloatValue<PR> const& x) { return q!=Rational(x); }
+template<class PR> decltype(auto) operator<=(Rational const& q, FloatValue<PR> const& x) { return q<=Rational(x); }
+template<class PR> decltype(auto) operator>=(Rational const& q, FloatValue<PR> const& x) { return q>=Rational(x); }
+template<class PR> decltype(auto) operator< (Rational const& q, FloatValue<PR> const& x) { return q< Rational(x); }
+template<class PR> decltype(auto) operator> (Rational const& q, FloatValue<PR> const& x) { return q> Rational(x); }
 
 Float64Value cast_exact(const Real& x);
 

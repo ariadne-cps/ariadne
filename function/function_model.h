@@ -246,11 +246,11 @@ inline ScalarFunctionModel<ValidatedTag> embed(const ScalarFunctionModel<Validat
     return embed(f,ExactBoxType(1,d)); }
 inline ScalarFunctionModel<ValidatedTag> restrict(const ScalarFunctionModel<ValidatedTag>& f, const ExactBoxType& d) {
     ScalarFunctionModelInterface<ValidatedTag>* rptr=f._ptr->_clone(); rptr->restrict(d); return rptr; }
-inline ScalarFunctionModel<ValidatedTag> intersection(const ScalarFunctionModel<ValidatedTag>& f1, const ScalarFunctionModel<ValidatedTag>& f2) {
-    return f1._ptr->_intersection(f2); }
 
-inline Boolean disjoint(const ScalarFunctionModel<ValidatedTag>& f1, const ScalarFunctionModel<ValidatedTag>& f2) {
-    return f1._ptr->_disjoint(f2); }
+inline ScalarFunctionModel<ValidatedTag> refinement(const ScalarFunctionModel<ValidatedTag>& f1, const ScalarFunctionModel<ValidatedTag>& f2) {
+    return f1._ptr->_refinement(f2); }
+inline Boolean inconsistent(const ScalarFunctionModel<ValidatedTag>& f1, const ScalarFunctionModel<ValidatedTag>& f2) {
+    return f1._ptr->_inconsistent(f2); }
 inline Boolean refines(const ScalarFunctionModel<ValidatedTag>& f1, const ScalarFunctionModel<ValidatedTag>& f2) {
     return f1._ptr->_refines(f2); }
 
@@ -434,9 +434,9 @@ inline VectorFunctionModel<ValidatedTag> combine(const VectorFunctionModel<Valid
 inline VectorFunctionModel<ValidatedTag> combine(const VectorFunctionModel<ValidatedTag>& f1, const VectorFunctionModel<ValidatedTag>& f2) {
     return f1._ptr->_combine(f2); }
 
-inline VectorFunctionModel<ValidatedTag> intersection(const VectorFunctionModel<ValidatedTag>& f1, const VectorFunctionModel<ValidatedTag>& f2) {
-    ARIADNE_ASSERT_MSG(f1.size()==f2.size(),"intersection(f1,f2): f1="<<f1<<", f2="<<f2<<")");
-    VectorFunctionModel<ValidatedTag> r=+f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=intersection(f1[i],f2[i]); } return r; }
+inline VectorFunctionModel<ValidatedTag> refinement(const VectorFunctionModel<ValidatedTag>& f1, const VectorFunctionModel<ValidatedTag>& f2) {
+    ARIADNE_ASSERT_MSG(f1.size()==f2.size(),"refinement(f1,f2): f1="<<f1<<", f2="<<f2<<")");
+    VectorFunctionModel<ValidatedTag> r=+f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=refinement(f1[i],f2[i]); } return r; }
 
 inline VectorFunctionModel<ValidatedTag> antiderivative(const VectorFunctionModel<ValidatedTag>& f, SizeType j) {
     VectorFunctionModel<ValidatedTag> r(f);

@@ -77,8 +77,8 @@ template<> class ScalarFunctionModelInterface<ValidatedTag>
     virtual ScalarFunctionModelInterface<ValidatedTag>* _antiderivative(SizeType j, ValidatedNumericType c) const = 0;
 
     virtual Boolean _refines(const ScalarFunctionModelInterface<ValidatedTag>& f) const = 0;
-    virtual Boolean _disjoint(const ScalarFunctionModelInterface<ValidatedTag>& f) const = 0;
-    virtual ScalarFunctionModelInterface<ValidatedTag>* _intersection(const ScalarFunctionModelInterface<ValidatedTag>& f) const = 0;
+    virtual Boolean _inconsistent(const ScalarFunctionModelInterface<ValidatedTag>& f) const = 0;
+    virtual ScalarFunctionModelInterface<ValidatedTag>* _refinement(const ScalarFunctionModelInterface<ValidatedTag>& f) const = 0;
 
     virtual Void _iadd(const ValidatedNumericType& c) = 0;
     virtual Void _imul(const ValidatedNumericType& c) = 0;

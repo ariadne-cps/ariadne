@@ -73,10 +73,10 @@ template<class F> class ScalarFunctionModelMixin<F,ValidatedTag>
         return new F(embed(d1,static_cast<const F&>(*this),d2)); }
     Boolean _refines(const ScalarFunctionModelInterface<ValidatedTag>& f) const {
         ARIADNE_ASSERT(dynamic_cast<const F*>(&f)); return refines(static_cast<const F&>(*this),dynamic_cast<const F&>(f)); }
-    Boolean _disjoint(const ScalarFunctionModelInterface<ValidatedTag>& f) const {
-        ARIADNE_ASSERT(dynamic_cast<const F*>(&f)); return disjoint(static_cast<const F&>(*this),dynamic_cast<const F&>(f)); }
-    ScalarFunctionModelInterface<ValidatedTag>* _intersection(const ScalarFunctionModelInterface<ValidatedTag>& f) const {
-        ARIADNE_ASSERT(dynamic_cast<const F*>(&f)); return new F(intersection(static_cast<const F&>(*this),dynamic_cast<const F&>(f))); }
+    Boolean _inconsistent(const ScalarFunctionModelInterface<ValidatedTag>& f) const {
+        ARIADNE_ASSERT(dynamic_cast<const F*>(&f)); return inconsistent(static_cast<const F&>(*this),dynamic_cast<const F&>(f)); }
+    ScalarFunctionModelInterface<ValidatedTag>* _refinement(const ScalarFunctionModelInterface<ValidatedTag>& f) const {
+        ARIADNE_ASSERT(dynamic_cast<const F*>(&f)); return new F(refinement(static_cast<const F&>(*this),dynamic_cast<const F&>(f))); }
     Void _iadd(const ValidatedNumericType& c) {
         static_cast<F&>(*this)+=c; }
     Void _imul(const ValidatedNumericType& c) {

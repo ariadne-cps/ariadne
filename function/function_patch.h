@@ -40,6 +40,7 @@
 #include "function/function_interface.h"
 #include "function/function_mixin.h"
 #include "function/function_model.h"
+#include "function/function_model_mixin.h"
 
 namespace Ariadne {
 

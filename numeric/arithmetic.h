@@ -40,6 +40,11 @@ using Int = int;
 class Natural;
 class Integer;
 
+template<class X> X generic_pow(X const& x, Nat m) {
+    X r=x; r*=0; r+=1; X p=x; while(m!=0) { if(m%2==1) { r=r*p; } p=p*p; m=m/2; } return r; }
+template<class X> X generic_pow(const X& x, Int n) {
+    return n>=0 ? generic_pow(x,Nat(n)) : rec(generic_pow(x,Nat(-n))); }
+
 template<class T, class NT=T> struct Directed {
     friend NT neg(T const&);
 };

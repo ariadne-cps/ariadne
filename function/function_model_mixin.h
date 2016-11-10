@@ -66,6 +66,8 @@ template<class F, class P> class ScalarFunctionModelMixin
         return new F(antiderivative(static_cast<const F&>(*this),j)); }
     ScalarFunctionModelInterface<P>* _antiderivative(SizeType j, CanonicalNumericType<P> c) const {
         return new F(antiderivative(static_cast<const F&>(*this),j,c)); }
+     ScalarFunctionModelInterface<P>* _restriction(const ExactBoxType& d) const {
+        return new F(restriction(static_cast<const F&>(*this),d)); }
     ScalarFunctionModelInterface<P>* _apply(OperatorCode op) const {
         return new F(this->apply(op)); }
     CanonicalNumericType<P> _unchecked_evaluate(const Vector<CanonicalNumericType<P>>& x) const {

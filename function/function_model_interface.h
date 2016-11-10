@@ -73,7 +73,7 @@ template<class P> class ScalarFunctionModelInterface
     virtual VectorFunctionModelInterface<P>* _create_vector(SizeType i) const = 0;
     virtual ScalarFunctionModelInterface<P>* _embed(const ExactBoxType& d1, const ExactBoxType& d2) const = 0;
     virtual VectorFunctionModelInterface<P>* _create_identity() const = 0;
-    virtual Void restrict(const ExactBoxType& d) = 0;
+    virtual ScalarFunctionModelInterface<P>* _restriction(const ExactBoxType& d) const = 0;
 
     virtual ScalarFunctionModelInterface<P>* _create_zero(DomainType const& dom) const = 0;
     virtual ScalarFunctionModelInterface<P>* _create_constant(DomainType const& dom, CanonicalNumericType<P> const& c) const = 0;

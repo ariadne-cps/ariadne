@@ -40,6 +40,34 @@
 
 namespace Ariadne {
 
+template<class P> ScalarFunctionModel<P> ScalarFunctionModel<P>::create_zero() const {
+    return ScalarFunctionModel<P>(this->_ptr->_create_zero(this->domain()));
+}
+
+template<class P> ScalarFunctionModel<P> ScalarFunctionModel<P>::create_constant(CanonicalNumericType<P> const& c) const {
+    return ScalarFunctionModel<P>(this->_ptr->_create_constant(this->domain(),c));
+}
+
+template<class P> inline ScalarFunctionModel<P> ScalarFunctionModel<P>::create_coordinate(SizeType j) const {
+    return ScalarFunctionModel<P>(this->_ptr->_create_coordinate(this->domain(),j));
+}
+
+template<class P> inline VectorFunctionModel<P> ScalarFunctionModel<P>::create_identity() const {
+    return this->_ptr->_create_identity();
+}
+
+template<class P> inline ScalarFunctionModel<P> ScalarFunctionModel<P>::create(const ScalarFunction<P>& g) const {
+    ScalarFunctionModel<P> const& f=*this; return compose(g,f.create_identity());
+}
+
+
+template<class P> inline Vector<ScalarFunctionModel<P>> ScalarFunctionModel<P>::create_coordinates(DomainType const& dom) const {
+    Vector<ScalarFunctionModel<P>> res(dom.dimension(),this->_ptr->_create_zero(dom));
+    for(SizeType i=0; i!=dom.dimension(); ++i) { res[i]=this->_ptr->_create_coordinate(dom,i); }
+    return res;
+}
+
+
 
 template<class P> ScalarFunctionModel<P> FunctionModelFactoryInterface<P>::create(const ExactBoxType& domain, const ScalarFunctionInterface<P>& function) const {
     return this->_create(domain,function);

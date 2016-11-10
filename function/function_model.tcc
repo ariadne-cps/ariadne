@@ -41,4 +41,34 @@
 namespace Ariadne {
 
 
+template<class P> ScalarFunctionModel<P> FunctionModelFactoryInterface<P>::create(const ExactBoxType& domain, const ScalarFunctionInterface<P>& function) const {
+    return this->_create(domain,function);
+}
+template<class P> VectorFunctionModel<P> FunctionModelFactoryInterface<P>::create(const ExactBoxType& domain, const VectorFunctionInterface<P>& function) const {
+    return this->_create(domain,function);
+}
+
+template<class P> ScalarFunctionModel<P> FunctionModelFactoryInterface<P>::create_zero(const ExactBoxType& domain) const {
+    return this->_create(domain,EffectiveScalarFunction::zero(domain.size())); }
+template<class P> VectorFunctionModel<P> FunctionModelFactoryInterface<P>::create_zeros(SizeType result_size, const ExactBoxType& domain) const {
+    return this->_create(domain,EffectiveVectorFunction::zeros(result_size,domain.size())); }
+template<class P> ScalarFunctionModel<P> FunctionModelFactoryInterface<P>::create_constant(const ExactBoxType& domain, const Number<P>& value) const {
+    CanonicalNumericType<P> concrete_value=this->create_number(value); return this->create_constant(domain,concrete_value); }
+template<class P> ScalarFunctionModel<P> FunctionModelFactoryInterface<P>::create_constant(const ExactBoxType& domain, const CanonicalNumericType<P>& value) const {
+    return ScalarFunctionModel<P>(this->_create(domain,EffectiveScalarFunction::zero(domain.size())))+value; };
+template<class P> VectorFunctionModel<P> FunctionModelFactoryInterface<P>::create_constants(const ExactBoxType& domain, const Vector<Number<P>>& values) const {
+    typename CanonicalNumericType<P>::PrecisionType pr; Vector<CanonicalNumericType<P>> concrete_values(values,pr); return this->create_constants(domain,concrete_values); }
+template<class P> VectorFunctionModel<P> FunctionModelFactoryInterface<P>::create_constants(const ExactBoxType& domain, const Vector<CanonicalNumericType<P>>& values) const {
+    return VectorFunctionModel<P>(this->_create(domain,EffectiveVectorFunction::zeros(values.size(),domain.size())))+values; };
+template<class P> ScalarFunctionModel<P> FunctionModelFactoryInterface<P>::create_coordinate(const ExactBoxType& domain, SizeType index) const {
+    return ScalarFunctionModel<P>(this->_create(domain,EffectiveScalarFunction::coordinate(domain.size(),index))); };
+template<class P> ScalarFunctionModel<P> FunctionModelFactoryInterface<P>::create_identity(const ExactIntervalType& domain) const {
+    return this->_create(ExactBoxType(1,domain),EffectiveScalarFunction::coordinate(1,0)); };
+template<class P> VectorFunctionModel<P> FunctionModelFactoryInterface<P>::create_identity(const ExactBoxType& domain) const {
+    return this->_create(domain,EffectiveVectorFunction::identity(domain.size())); };
+
+template<class P> CanonicalNumericType<P> FunctionModelFactoryInterface<P>::create_number(const Number<P>& number) const {
+    return CanonicalNumericType<P>(number,typename CanonicalNumericType<P>::PrecisionType()); }
+
+
 } // namespace Ariadne

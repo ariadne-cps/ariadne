@@ -26,6 +26,8 @@
 
 namespace Ariadne {
 
+template class FunctionModelFactoryInterface<ValidatedTag>;
+
 template class ScalarFunctionModel<ValidatedTag>;
 template class VectorFunctionModel<ValidatedTag>;
 

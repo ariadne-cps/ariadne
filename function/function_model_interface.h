@@ -133,17 +133,18 @@ template<class P> class FunctionModelFactoryInterface
   public:
     virtual FunctionModelFactoryInterface<P>* clone() const = 0;
     virtual Void write(OutputStream& os) const = 0;
-    inline ScalarFunctionModel<P> create(const ExactBoxType& domain, const ScalarFunctionInterface<P>& function) const;
-    inline VectorFunctionModel<P> create(const ExactBoxType& domain, const VectorFunctionInterface<P>& function) const;
-    inline ScalarFunctionModel<P> create_zero(const ExactBoxType& domain) const;
-    inline VectorFunctionModel<P> create_zeros(SizeType result_size, const ExactBoxType& domain) const;
-    inline ScalarFunctionModel<P> create_constant(const ExactBoxType& domain, const Number<P>& value) const;
-    inline ScalarFunctionModel<P> create_constant(const ExactBoxType& domain, const CanonicalNumericType<P>& value) const;
-    inline VectorFunctionModel<P> create_constants(const ExactBoxType& domain, const Vector<CanonicalNumericType<P>>& values) const;
-    inline ScalarFunctionModel<P> create_coordinate(const ExactBoxType& domain, SizeType index) const;
-    inline ScalarFunctionModel<P> create_identity(const ExactIntervalType& domain) const;
-    inline VectorFunctionModel<P> create_identity(const ExactBoxType& domain) const;
-    inline CanonicalNumericType<P> create_number(const Number<P>& number) const;
+    ScalarFunctionModel<P> create(const ExactBoxType& domain, const ScalarFunctionInterface<P>& function) const;
+    VectorFunctionModel<P> create(const ExactBoxType& domain, const VectorFunctionInterface<P>& function) const;
+    ScalarFunctionModel<P> create_zero(const ExactBoxType& domain) const;
+    VectorFunctionModel<P> create_zeros(SizeType result_size, const ExactBoxType& domain) const;
+    ScalarFunctionModel<P> create_constant(const ExactBoxType& domain, const Number<P>& value) const;
+    ScalarFunctionModel<P> create_constant(const ExactBoxType& domain, const CanonicalNumericType<P>& value) const;
+    VectorFunctionModel<P> create_constants(const ExactBoxType& domain, const Vector<Number<P>>& values) const;
+    VectorFunctionModel<P> create_constants(const ExactBoxType& domain, const Vector<CanonicalNumericType<P>>& values) const;
+    ScalarFunctionModel<P> create_coordinate(const ExactBoxType& domain, SizeType index) const;
+    ScalarFunctionModel<P> create_identity(const ExactIntervalType& domain) const;
+    VectorFunctionModel<P> create_identity(const ExactBoxType& domain) const;
+    CanonicalNumericType<P> create_number(const Number<P>& number) const;
     friend OutputStream& operator<<(OutputStream& os, FunctionModelFactoryInterface<P> const& factory) {
         factory.write(os); return os; }
   private:

@@ -76,7 +76,7 @@ class EuclideanDomain : public BoxDomain {
 template<class P>
 class FunctionConstructors {
     static_assert(Or<IsSame<P,ApproximateTag>,IsSame<P,ValidatedTag>,IsSame<P,EffectiveTag>>::value,"P must be an information level/paradigm.");
-    typedef CanonicalNumericType<P> Y;
+    typedef Number<P> Y;
   public:
     typedef Y NumericType;
 

@@ -278,6 +278,14 @@ template<class R, EnableIf<IsSame<R,Real>> =dummy> inline R make_constant(const 
     return c;
 }
 
+inline Real make_constant(const EffectiveNumber& c, const Real& x) {
+    return Real(c); }
+inline Formula<Real> make_constant(const EffectiveNumber& c, const Formula<Real>& x) {
+    return make_constant(Real(c),x); }
+template<class X, EnableIf<IsSame<X,Real>> =dummy> Algebra<X> make_constant(const EffectiveNumber& c, const Algebra<X>& x) {
+    return make_constant(Real(c),x); }
+
+
 template<class X, class Y> inline X make_constant(const Y& c, const X& x, EnableIf<IsNumericType<X>> = dummy) {
     return x.create(c);
 }

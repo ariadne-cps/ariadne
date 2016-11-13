@@ -548,8 +548,8 @@ Comparison cmp(FloatMP const& x1, FloatMP const& x2) {
     return Comparison(mpfr_cmp(x1._mpfr,x2._mpfr));
 }
 
-Comparison cmp(FloatMP const& x1, Float64 const& x2) {
-    return Comparison(mpfr_cmp_d(x1._mpfr,x2.dbl));
+Comparison cmp(FloatMP const& x1, Dbl x2) {
+    return Comparison(mpfr_cmp_d(x1._mpfr,x2));
 }
 
 FloatMP add(FloatMP const& x1, Dbl x2, FloatMP::RoundingModeType rnd) {
@@ -597,44 +597,24 @@ Bool operator> (FloatMP const& x1, FloatMP const& x2) {
 }
 
 
-Bool operator==(FloatMP const& x1, Float64 x2) {
+Bool operator==(FloatMP const& x1, Dbl x2) {
     return cmp(x1,x2)==Comparison::EQUAL;
 }
-Bool operator!=(FloatMP const& x1, Float64 x2) {
+Bool operator!=(FloatMP const& x1, Dbl x2) {
     return cmp(x1,x2)!=Comparison::EQUAL;
 }
-Bool operator<=(FloatMP const& x1, Float64 x2) {
+Bool operator<=(FloatMP const& x1, Dbl x2) {
     return cmp(x1,x2)<=Comparison::EQUAL;
 }
-Bool operator>=(FloatMP const& x1, Float64 x2) {
+Bool operator>=(FloatMP const& x1, Dbl x2) {
     return cmp(x1,x2)>=Comparison::EQUAL;
 }
-Bool operator< (FloatMP const& x1, Float64 x2) {
+Bool operator< (FloatMP const& x1, Dbl x2) {
     return cmp(x1,x2)< Comparison::EQUAL;
 }
-Bool operator> (FloatMP const& x1, Float64 x2) {
+Bool operator> (FloatMP const& x1, Dbl x2) {
     return cmp(x1,x2)> Comparison::EQUAL;
 }
-
-Bool operator==(Float64 x1, FloatMP const& x2) {
-    return cmp(x2,x1)==Comparison::EQUAL;
-}
-Bool operator!=(Float64 x1, FloatMP const& x2) {
-    return cmp(x2,x1)!=Comparison::EQUAL;
-}
-Bool operator<=(Float64 x1, FloatMP const& x2) {
-    return cmp(x2,x1)>=Comparison::EQUAL;
-}
-Bool operator>=(Float64 x1, FloatMP const& x2) {
-    return cmp(x2,x1)<=Comparison::EQUAL;
-}
-Bool operator< (Float64 x1, FloatMP const& x2) {
-    return cmp(x2,x1)> Comparison::EQUAL;
-}
-Bool operator> (Float64 x1, FloatMP const& x2) {
-    return cmp(x2,x1)< Comparison::EQUAL;
-}
-
 
 FloatMP pos_exact(FloatMP const& x) { return pos(x,MPFR_RNDN); }
 FloatMP neg_exact(FloatMP const& x) { return neg(x,MPFR_RNDN); }

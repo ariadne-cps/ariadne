@@ -177,10 +177,10 @@ void TestReal::test_comparison() {
 
 
 namespace Ariadne {
-Bool operator>=(FloatMP const& x1, Float64 x2);
-Bool operator<=(FloatMP const& x1, Float64 x2);
-Bool operator<=(Float64 x1, FloatMP const& x2);
-Bool operator>=(Float64 x1, FloatMP const& x2);
+Bool operator>=(FloatMP const& x1, Float64 x2) { return x1>=x2.get_d(); }
+Bool operator<=(FloatMP const& x1, Float64 x2) { return x1<=x2.get_d(); }
+Bool operator<=(Float64 x1, FloatMP const& x2) { return x2>=x1.get_d(); }
+Bool operator>=(Float64 x1, FloatMP const& x2) { return x2<=x1.get_d(); }
 }
 
 void TestReal::test_accuracy() {

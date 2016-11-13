@@ -230,7 +230,6 @@ class FloatMP {
     friend FloatMP& operator/=(FloatMP& x1, FloatMP const& x2);
 
     friend Comparison cmp(FloatMP const& x1, FloatMP const& x2);
-    friend Comparison cmp(FloatMP const& x1, Float64 const& x2);
 
     friend Bool operator==(FloatMP const& x1, FloatMP const& x2);
     friend Bool operator!=(FloatMP const& x1, FloatMP const& x2);
@@ -251,6 +250,14 @@ class FloatMP {
     friend FloatMP operator-(Dbl x1, FloatMP const& x2);
     friend FloatMP operator*(Dbl x1, FloatMP const& x2);
     friend FloatMP operator/(Dbl x1, FloatMP const& x2);
+
+    friend Comparison cmp(FloatMP const& x1, Dbl x2);
+    friend Bool operator==(FloatMP const& x1, Dbl x2);
+    friend Bool operator!=(FloatMP const& x1, Dbl x2);
+    friend Bool operator<=(FloatMP const& x1, Dbl x2);
+    friend Bool operator>=(FloatMP const& x1, Dbl x2);
+    friend Bool operator< (FloatMP const& x1, Dbl x2);
+    friend Bool operator> (FloatMP const& x1, Dbl x2);
   private:
     friend OutputStream& write(OutputStream& os, FloatMP const& x, DecimalPlaces dgts, RoundingModeMP rnd);
     friend String print(FloatMP const& x, DecimalPlaces dgts, RoundingModeMP rnd);

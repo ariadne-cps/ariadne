@@ -41,6 +41,7 @@ using namespace Ariadne;
 
 class TestFunction
 {
+    Precision64 pr;
   public:
     Void test();
   private:
@@ -90,14 +91,14 @@ Void TestFunction::test_scalar_function()
     ARIADNE_TEST_NAMED_CONSTRUCT(EffectiveScalarFunction,y,coordinate(3,1));
 
     ARIADNE_TEST_CONSTRUCT(EffectiveScalarFunction,f,(o+x*y));
-    ARIADNE_TEST_CONSTRUCT(Vector<Float64Approximation>,p,({2.0,3.0,5.0}));
-    ARIADNE_TEST_EQUAL(f(p),7.0);
+    ARIADNE_TEST_CONSTRUCT(Vector<Float64Approximation>,p,({2.0_approx,3.0_approx,5.0_approx}));
+    ARIADNE_TEST_EQUAL(f(p),7.0_approx);
 
     ARIADNE_TEST_PRINT(cos(f));
 
     EffectiveScalarFunction df=f.derivative(1);
     ARIADNE_TEST_PRINT(df);
-    ARIADNE_TEST_EQUAL(df(p),2.0);
+    ARIADNE_TEST_EQUAL(df(p),2.0_approx);
 }
 
 Void TestFunction::test_vector_function()
@@ -111,7 +112,7 @@ Void TestFunction::test_vector_function()
     EffectiveVectorFunction& id_ref=id;
     ARIADNE_TEST_PRINT(id_ref[0]);
 
-    Vector<Float64Approximation> v={2.0,3.0,5.0};
+    Vector<Float64Approximation> v={2.0_approx,3.0_approx,5.0_approx};
 
     ARIADNE_TEST_CONSTRUCT(EffectiveVectorFunction,f,(id));
     ARIADNE_TEST_EQUAL(f(v),v);
@@ -122,7 +123,8 @@ Void TestFunction::test_vector_function()
 
     // Regression test for function - vector product
     EffectiveScalarFunction x1=EffectiveScalarFunction::coordinate(3,1);
-    EffectiveVector e0={1,0};
+//    EffectiveVector e0={1,0};
+    Vector<EffectiveNumber> e0={1,0};
     ARIADNE_TEST_EQUAL((x1*e0)(v)[0],v[1]);
     ARIADNE_TEST_EQUAL((x1*e0)(v)[1],0);
 }
@@ -138,18 +140,36 @@ Void TestFunction::test_conversions()
 
 Void TestFunction::test_differentiation()
 {
-    EffectiveScalarFunction z=EffectiveScalarFunction::constant(2,0);
-    EffectiveScalarFunction o=EffectiveScalarFunction::constant(2,1);
-    EffectiveScalarFunction x=EffectiveScalarFunction::coordinate(2,0);
-    EffectiveScalarFunction y=EffectiveScalarFunction::coordinate(2,1);
+    EuclideanDomain dom(2);
+    DegreeType deg(3);
 
-    EffectiveScalarFunction af=3*x-2*y+1;
-    EffectiveScalarFunction daf=af.derivative(1);
-    ARIADNE_TEST_EQUAL(daf.evaluate(Vector<Float64Approximation>{2.4,1.3}),-2.0_exact);
+    EffectiveScalarFunction z=EffectiveScalarFunction::constant(dom,0);
+    EffectiveScalarFunction o=EffectiveScalarFunction::constant(dom,1);
+    EffectiveScalarFunction x=EffectiveScalarFunction::coordinate(dom,0);
+    EffectiveScalarFunction y=EffectiveScalarFunction::coordinate(dom,1);
 
-    ARIADNE_TEST_EQUAL(x.derivative(0).evaluate(Vector<Float64Approximation>{2.4,1.3}),1.0_exact);
-    ARIADNE_TEST_EQUAL(x.derivative(0).evaluate(Vector<Float64Bounds>{{2.4,2.4},{1.3,1.3}}),1.0_exact);
-    ARIADNE_TEST_EQUAL(x.derivative(1).evaluate(Vector<Float64Approximation>{2.4, 1.3}),0.0_exact);
+    ARIADNE_TEST_CONSTRUCT(EffectiveScalarFunction,f,(3*x-2*y+1));
+    ARIADNE_TEST_NAMED_CONSTRUCT(EffectiveScalarFunction,df0,constant(dom,3));
+    ARIADNE_TEST_NAMED_CONSTRUCT(EffectiveScalarFunction,df1,constant(dom,-2));
+
+    ARIADNE_TEST_CONSTRUCT(Vector<Float64Bounds>,v,({2.25_exact,1.375_exact}));
+    ARIADNE_TEST_CONSTRUCT(Vector<Float64Approximation>,va,(v));
+
+    ARIADNE_TEST_EVALUATE(f.differential(v,deg));
+    ARIADNE_TEST_EVALUATE(f.differential(va,deg));
+
+    ARIADNE_TEST_EQUAL(f.differential(v,deg).value(),f.evaluate(v));
+    ARIADNE_TEST_EQUAL(f.differential(v,deg).gradient()[0],df0.evaluate(v));
+    ARIADNE_TEST_EQUAL(f.differential(v,deg).gradient()[1],df1.evaluate(v));
+    ARIADNE_TEST_EQUAL(differential(f,v,deg),f.differential(v,deg));
+    ARIADNE_TEST_EQUAL(gradient(f,v),f.differential(v,deg).gradient());
+    ARIADNE_TEST_EQUAL(f.gradient(v),gradient(f,v));
+
+    ARIADNE_TEST_EQUAL(f.derivative(1).evaluate(v),df1.evaluate(v));
+    ARIADNE_TEST_EQUAL(derivative(f,1).evaluate(v),df1.evaluate(v));
+
+    ARIADNE_TEST_EQUAL(x.derivative(0).evaluate(v),1.0_exact);
+    ARIADNE_TEST_EQUAL(x.derivative(1).evaluate(v),0.0_exact);
 
 }
 

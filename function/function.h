@@ -111,6 +111,8 @@ class FunctionConstructors {
 
 };
 
+template<class P, class X> using EvaluateType = decltype(declval<ScalarFunctionInterface<P>>()._evaluate(declval<Vector<X>>()));
+
 template<class P, class D, class C> class FunctionFacade {
 };
 
@@ -127,7 +129,7 @@ template<class P> class FunctionFacade<P,IntervalDomain,BoxDomain> {
 template<class P> class FunctionFacade<P,BoxDomain,IntervalDomain> {
     typedef Number<P> Y;
   public:
-    template<class X> Covector<ArithmeticType<X,Y>> gradient(Vector<X> const& x) const;
+    template<class X> Covector<EvaluateType<P,X>> gradient(Vector<X> const& x) const;
     FunctionExpression<P,BoxDomain,IntervalDomain> operator() (const Vector<RealVariable>& x) const;
     //FunctionExpression<P,BoxDomain,IntervalDomain> operator() (const Vector<RealExpression>& x) const;
 };
@@ -135,7 +137,7 @@ template<class P> class FunctionFacade<P,BoxDomain,IntervalDomain> {
 template<class P> class FunctionFacade<P,BoxDomain,BoxDomain> {
     typedef Number<P> Y;
   public:
-    template<class X> Matrix<ArithmeticType<X,Y>> jacobian(Vector<X> const& x) const;
+    template<class X> Matrix<EvaluateType<P,X>> jacobian(Vector<X> const& x) const;
     FunctionExpression<P,BoxDomain,BoxDomain> operator() (const Vector<RealVariable>& x) const;
 };
 
@@ -145,6 +147,7 @@ template<class P, class D> class DeclareFunctionOperations<P,D,IntervalDomain>
     , DeclareMixedArithmeticOperators<Function<P,D,IntervalDomain>,Int> { };
 template<class P, class D> class DeclareFunctionOperations<P,D,BoxDomain>
     : DeclareVectorAlgebraOperators<Function<P,D,BoxDomain>,Function<P,D,IntervalDomain>,Number<P>> { };
+
 
 //! \ingroup FunctionModule
 //! \brief A generic scalar function which can be evaluated over the number type \a X,  \f$f:\X^n\rightarrow\X\f$.
@@ -230,8 +233,8 @@ class Function
     friend Function<P,D,C> derivative(Function<P,D,C> const& f, SizeType k) {
         return Function<P,D,C>(f.reference()._derivative(k)); }
 
-    template<class X> Result<Differential<ArithmeticType<X,Y>>> differential(const Argument<X>& x, DegreeType d) const {
-        return this->_ptr->_evaluate(Differential<ArithmeticType<X,Y>>::identity(d,x)); }
+    template<class X> decltype(auto) differential(const Argument<X>& x, DegreeType d) const {
+        return this->_ptr->_evaluate(Differential<X>::identity(d,x)); }
 
     Void set(SizeType i, ScalarFunction<P,D>);
     Function<P,D,IntervalDomain> get(SizeType i) const;
@@ -245,56 +248,44 @@ template<class P, class D, class C> inline OutputStream&
 operator<<(OutputStream& os, const Function<P,D,C>& f) {
     return f.write(os); }
 
-template<class P, class D, class C, class X> inline auto
-evaluate(const Function<P,D,C>& f, const ElementType<D,X>& x) -> decltype(f(x)) {
+template<class P, class D, class C, class X> inline decltype(auto)
+evaluate(const Function<P,D,C>& f, const ElementType<D,X>& x) {
     return f(x); }
-
-
-template<class P, class C, class X> inline auto
-differential(const Function<P,IntervalDomain,C>& f, const X& x, DegreeType d)
-    -> ElementType<C,Differential<ArithmeticType<Number<P>,X>>> {
-    auto dx=Differential<ArithmeticType<X,Number<P>>>::identity(d,x); return f(dx);
-}
-
-template<class P, class C, class X> inline auto
-differential(const Function<P,BoxDomain,C>& f, const Vector<X>& x, DegreeType d)
-    -> ElementType<C,Differential<ArithmeticType<Number<P>,X>>> {
-    auto dx=Differential<ArithmeticType<X,Number<P>>>::identity(d,x); return f(dx);
-}
 
 RealExpression evaluate(EffectiveScalarFunction const& f, Vector<RealVariable> const& vars);
 
-/*
-template<class P, class D, class C, class X> inline auto
-differential(const Function<P,D,C>& f, const ElementType<D,X>& x, DegreeType d)
-    -> ElementType<C,Differential<ArithmeticType<Number<P>,X>>> {
-    auto dx=Differential<X>::create_identity(x,d); return f(dx);
-}
-*/
+
+template<class P, class C, class X> inline decltype(auto)
+differential(const Function<P,IntervalDomain,C>& f, const X& x, DegreeType d) {
+    return f.differential(x,d); }
+
+template<class P, class C, class X> inline decltype(auto)
+differential(const Function<P,BoxDomain,C>& f, const Vector<X>& x, DegreeType d) {
+    return f.differential(x,d); }
 
 
-template<class P, class X> ArithmeticType<Number<P>,X>
-derivative(const ScalarUnivariateFunction<P>& f, const X& x) {
+template<class P, class X> Scalar<EvaluateType<P,X>>
+derivative(const ScalarUnivariateFunction<P>& f, const Scalar<X>& x) {
     return differential(f,x,1u).gradient(); }
 
-template<class P, class X> Vector<ArithmeticType<Number<P>,X>>
-tangent(const VectorUnivariateFunction<P>& f, const X& x) {
+template<class P, class X> Vector<EvaluateType<P,X>>
+tangent(const VectorUnivariateFunction<P>& f, const Scalar<X>& x) {
     return column(differential(f,x,1u).jacobian(),0u); }
 
-template<class P, class X> Covector<ArithmeticType<Number<P>,X>>
+template<class P, class X> Covector<EvaluateType<P,X>>
 gradient(const ScalarMultivariateFunction<P>& f, const Vector<X>& x) {
     return differential(f,x,1u).gradient(); }
 
-template<class P, class X> Matrix<ArithmeticType<Number<P>,X>>
+template<class P, class X> Matrix<EvaluateType<P,X>>
 jacobian(const VectorMultivariateFunction<P>& f, const Vector<X>& x) {
     return differential(f,x,1u).jacobian(); }
 
-template<class P> template<class X> Covector<ArithmeticType<X,Number<P>>>
+template<class P> template<class X> Covector<EvaluateType<P,X>>
 FunctionFacade<P,BoxDomain,IntervalDomain>::gradient(Vector<X> const& x) const {
     return Ariadne::gradient(static_cast<Function<P,BoxDomain,IntervalDomain>const&>(*this),x);
 }
 
-template<class P> template<class X> Matrix<ArithmeticType<X,Number<P>>>
+template<class P> template<class X> Matrix<EvaluateType<P,X>>
 FunctionFacade<P,BoxDomain,BoxDomain>::jacobian(Vector<X> const& x) const {
     return Ariadne::jacobian(static_cast<Function<P,BoxDomain,BoxDomain>const&>(*this),x);
 }

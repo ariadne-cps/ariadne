@@ -205,7 +205,7 @@ template<class Y> inline Formula<Y> Formula<Y>::constant(Int c) {
 
 
 template<class Y, class R> inline Formula<Y> make_formula(const R& c) {
-    return Formula<Y>::constant(c); }
+    return Formula<Y>::constant(static_cast<Y>(c)); }
 template<class Y> inline Formula<Y> make_formula(Cnst op, const Y& c) {
     return Formula<Y>::constant(c); }
 template<class Y> inline Formula<Y> make_formula(Ind op, Nat j) {
@@ -431,7 +431,7 @@ template<class Y> OutputStream& operator<<(OutputStream& os, const Formula<Y>& f
 // Declare conversion operators from an expression
 template<class X> class Expression;
 template<class X> class Space;
-Formula<Real> formula(const Expression<Real>& e, const Space<Real>& spc);
+Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Space<Real>& spc);
 
 //! \ingroup FunctionModule
 //! \brief Convert a power-series expansion into a formula using a version of Horner's rule.

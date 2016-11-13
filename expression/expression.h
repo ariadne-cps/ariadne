@@ -198,27 +198,26 @@ Expression<Real> indicator(Expression<Kleenean> p, Sign sign=POSITIVE);
 template<class T, class Y> Expression<T> substitute(const Expression<T>& e, const Variable<Y>& v, const Y& c);
 
 //! \brief Substitute all occurrences of variable \a v of type \c Y with expression value \a se.
-template<class T, class Y> Expression<T> substitute(const Expression<T>& e, const Variable<Y>& v, const Expression<Y>& se);
-
 template<class T, class Y> Expression<T> substitute(const Expression<T>& e, const List< Assignment< Variable<Y>,Expression<Y> > >& a);
+template<class T, class Y> Vector<Expression<T>> substitute(const Vector<Expression<T>>& e, const List< Assignment< Variable<Y>,Expression<Y> > >& a);
 
 //! \brief Simplify the expression \a e.
 Expression<Real> derivative(const Expression<Real>& e, Variable<Real> v);
 
 
-//! \brief Make a function on a Euclidean domain given an ordered list including all argument variables. // DEPRECATED
-ScalarFunction<EffectiveTag> make_function(const Expression<Real>& e, const Space<Real>& s);
+//! \brief Make a formula in terms of numbered coordinates from an expression in named variables.
+Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Space<Real>& spc);
+Vector<Formula<EffectiveNumber>> make_formula(const Vector<Expression<Real>>& e, const Space<Real> spc);
+
 //! \brief Make a function on the real line given an expression in a single argument variable.
 ScalarUnivariateFunction<EffectiveTag> make_function(const Variable<Real>& v, const Expression<Real>& e);
 //! \brief Make a function on a Euclidean domain given an ordered list including all argument variables.
 ScalarFunction<EffectiveTag> make_function(const Space<Real>& s, const Expression<Real>& e);
 //! \brief Make a function on a Euclidean domain given an ordered list including all argument variables.
 VectorFunction<EffectiveTag> make_function(const Space<Real>& s, const Vector<Expression<Real>>& e);
-//! \brief Make a function on coordinates given a mapping from variable names to indices.
-Formula<Real> formula(const Expression<Real>& e, const Map<Identifier,Nat>& v);
-Formula<Real> formula(const Expression<Real>& e, const List<Variable<Real>>& vars);
-Formula<Real> formula(const Expression<Real>& res, const List<Assignment<Variable<Real>,Expression<Real>>>& aux, const Space<Real> spc);
-List< Formula<Real> > formula(const List<Expression<Real>>& res, const List<Assignment<Variable<Real>,Expression<Real>>>& aux, const Space<Real> spc);
+
+//! \brief Make a function on a Euclidean domain given an ordered list including all argument variables. // DEPRECATED
+ScalarFunction<EffectiveTag> make_function(const Expression<Real>& e, const Space<Real>& s);
 
 //@}
 

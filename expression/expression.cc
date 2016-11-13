@@ -537,13 +537,26 @@ template<class X, class Y> Expression<X> substitute(const Expression<X>& e, cons
     return substitute(e,v.name(),Expression<Y>::constant(c));
 }
 
-template<class X, class Y> Expression<X> substitute(const Expression<X>& e, const List< Assignment< Variable<Y>, Expression<Y> > >& a) {
+template<class X, class Y> Expression<X> substitute(const Expression<X>& e, const Assignment<Variable<Y>,Expression<Y>>& a) {
+    return substitute(e,a.lhs,a.rhs);
+}
+
+template<class X, class Y> Expression<X> substitute(const Expression<X>& e, const List<Assignment<Variable<Y>,Expression<Y>>>& a) {
     Expression<X> r=e;
-    for(Nat i=0; i!=a.size(); ++i) {
-        r=substitute(r,a[i].lhs,a[i].rhs);
+    for(SizeType i=0; i!=a.size(); ++i) {
+        r=substitute(r,a[i]);
     }
     return r;
 }
+
+template<class X, class Y> SizeType substitute(const Vector<Expression<X>>& e, const List< Assignment< Variable<Y>, Expression<Y> > >& a) {
+    Vector<Expression<X>> r(e.size());
+    for(SizeType i=0; i!=e.size(); ++i) {
+        r[i]=substitute(e[i],a);
+    }
+    return r;
+}
+
 template Expression<Kleenean> substitute(const Expression<Kleenean>& e, const Variable<Kleenean>& v, const Kleenean& c);
 template Expression<Kleenean> substitute(const Expression<Kleenean>& e, const Variable<Real>& v, const Real& c);
 template Expression<Real> substitute(const Expression<Real>& e, const Variable<Real>& v, const Real& c);
@@ -811,56 +824,64 @@ SizeType len(const List< Variable<Real> >& vars)
 }
 
 
-const Formula<Real>& cached_formula(const Expression<Real>& e, const Map<Identifier,Nat>& v, Map< const Void*, Formula<Real> >& cache)
+const Formula<Real>& cached_make_formula(const Expression<Real>& e, const Map<Identifier,Nat>& v, Map< const Void*, Formula<Real> >& cache)
 {
     const ExpressionNode<Real>* eptr=e.node_ptr().operator->();
     if(cache.has_key(eptr)) { return cache.get(eptr); }
     switch(e.kind()) {
         case OperatorKind::VARIABLE: return insert( cache, eptr, make_formula<Real>(v[e.var()]) );
         case OperatorKind::NULLARY: return insert( cache, eptr, make_formula<Real>(e.val()) );
-        case OperatorKind::UNARY: return insert( cache, eptr, make_formula<Real>(e.op(),cached_formula(e.arg(),v,cache)));
-        case OperatorKind::BINARY: return insert( cache, eptr, make_formula<Real>(e.op(),cached_formula(e.arg1(),v,cache),cached_formula(e.arg2(),v,cache)) );
-        case OperatorKind::SCALAR: return insert( cache, eptr, make_formula<Real>(e.op(),cached_formula(e.arg(),v,cache),e.num()) );
+        case OperatorKind::UNARY: return insert( cache, eptr, make_formula<Real>(e.op(),cached_make_formula(e.arg(),v,cache)));
+        case OperatorKind::BINARY: return insert( cache, eptr, make_formula<Real>(e.op(),cached_make_formula(e.arg1(),v,cache),cached_make_formula(e.arg2(),v,cache)) );
+        case OperatorKind::SCALAR: return insert( cache, eptr, make_formula<Real>(e.op(),cached_make_formula(e.arg(),v,cache),e.num()) );
         default: ARIADNE_FAIL_MSG("Cannot convert expression "<<e<<" to use variables "<<v<<"\n");
     }
 }
 
-Formula<Real> formula(const Expression<Real>& e, const Map<Identifier,Nat>& v)
+Formula<Real> make_formula(const Expression<Real>& e, const Map<Identifier,Nat>& v)
 {
     Map< const Void*, Formula<Real> > cache;
-    return cached_formula(e,v,cache);
+    return cached_make_formula(e,v,cache);
 }
 
-Formula<Real> formula(const Expression<Real>& e, const Space<Real>& spc)
+Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Space<Real>& spc)
 {
-    typedef Real X;
+    typedef EffectiveNumber X;
     typedef Identifier I;
     switch(e.kind()) {
-        case OperatorKind::SCALAR: return make_formula(e.op(),formula(e.arg(),spc),e.num());
-        case OperatorKind::BINARY: return make_formula(e.op(),formula(e.arg1(),spc),formula(e.arg2(),spc));
-        case OperatorKind::UNARY: return make_formula(e.op(),formula(e.arg(),spc));
+        case OperatorKind::SCALAR: return make_formula(e.op(),make_formula(e.arg(),spc),e.num());
+        case OperatorKind::BINARY: return make_formula(e.op(),make_formula(e.arg1(),spc),make_formula(e.arg2(),spc));
+        case OperatorKind::UNARY: return make_formula(e.op(),make_formula(e.arg(),spc));
         case OperatorKind::NULLARY: return Formula<X>::constant(e.val());
         case OperatorKind::VARIABLE: return Formula<X>::coordinate(spc.index(e.var()));
         default: ARIADNE_FAIL_MSG("Cannot compute formula for expression "<<e.op()<<"of kind "<<e.kind()<<" in space "<<spc);
     }
 }
 
-
-Formula<Real> formula(const Expression<Real>& e, const List< Variable<Real> >& vars)
+Vector<Formula<EffectiveNumber>> make_formula(const Vector<Expression<Real>>& e, const Space<Real> spc)
 {
-    return formula(e,Space<Real>(vars));
+    Vector<Formula<EffectiveNumber>> res(e.size());
+    for(SizeType i=0; i!=e.size(); ++i) {
+        res[i]=make_formula(e[i],spc);
+    }
+    return res;
 }
 
-Formula<Real> formula(const Expression<Real>& out, const List< Assignment< Variable<Real>, Expression<Real> > >& aux, const Space<Real> spc)
+Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const List<Variable<Real>>& vars)
 {
-    return formula(substitute(out,aux),spc);
+    return make_formula(e,Space<Real>(vars));
 }
 
-List< Formula<Real> > formula(const List< Expression<Real> >& out, const List< Assignment< Variable<Real>, Expression<Real> > >& aux, const Space<Real> spc)
+Formula<EffectiveNumber> make_formula(const Expression<Real>& out, const List<Assignment<Variable<Real>,Expression<Real>>>& aux, const Space<Real> spc)
 {
-    List< Formula<Real> > res;
-    for(Nat i=0; i!=out.size(); ++i) {
-        res.append(formula(out[i],aux,spc));
+    return make_formula(substitute(out,aux),spc);
+}
+
+Vector<Formula<EffectiveNumber>> make_formula(const Vector<Expression<Real>>& out, const List<Assignment<Variable<Real>,Expression<Real>>>& aux, const Space<Real> spc)
+{
+    Vector<Formula<EffectiveNumber>> res(out.size());
+    for(SizeType i=0; i!=out.size(); ++i) {
+        res[i]=make_formula(out[i],aux,spc);
     }
     return res;
 }

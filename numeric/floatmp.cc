@@ -107,6 +107,11 @@ FloatMP::FloatMP(Rational const& q, RoundingModeType rnd, PrecisionMP pr) {
     mpfr_set_q(_mpfr,q.get_mpq(),rnd);
 }
 
+FloatMP::FloatMP(FloatMP const& x, RoundingModeType rnd, PrecisionMP pr) {
+    mpfr_init2(_mpfr,pr);
+    mpfr_set(_mpfr,x._mpfr,rnd);
+}
+
 FloatMP::FloatMP(const FloatMP& x) {
     mpfr_init2(_mpfr,mpfr_get_prec(x._mpfr));
     mpfr_set(_mpfr,x._mpfr,get_rounding_mode());

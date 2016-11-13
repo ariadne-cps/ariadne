@@ -132,6 +132,8 @@ class Float64 {
 
     //! \brief Construct from a double number using given rounding
     explicit Float64(double d, RoundingModeType rnd, PrecisionType pr);
+    //! \brief Construct from a number using given rounding
+    explicit Float64(Float64 d, RoundingModeType rnd, PrecisionType pr);
     //! \brief Construct from a rational number with given rounding
     explicit Float64(const Rational& q, RoundingModeType rnd, PrecisionType pr);
     //! \brief Convert to a dyadic number.

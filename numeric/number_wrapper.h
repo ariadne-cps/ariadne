@@ -193,16 +193,16 @@ template<class X> struct NumberGetterMixin : public virtual NumberInterface {
             return LogicalValue(this->_get(BoundedTag(),Precision64()) < y._get(BoundedTag(),Precision64())); }
         else { return LogicalValue(this->_get(ApproximateTag(),Precision64()) < y._get(ApproximateTag(),Precision64())); } }
 
-    virtual Float64Ball _get(MetricTag,Precision64) const {
-        return this->_get_as<Float64Ball>(); }
-    virtual Float64Bounds _get(BoundedTag,Precision64) const {
-        return this->_get_as<Float64Bounds>(); }
-    virtual Float64UpperBound _get(UpperTag,Precision64) const {
-        return this->_get_as<Float64UpperBound>(); }
-    virtual Float64LowerBound _get(LowerTag,Precision64) const {
-        return this->_get_as<Float64LowerBound>(); }
-    virtual Float64Approximation _get(ApproximateTag,Precision64) const {
-        return this->_get_as<Float64Approximation>(); }
+    virtual Float64Ball _get(MetricTag,Precision64 pr) const {
+        return this->_get_as<Float64Ball>(pr); }
+    virtual Float64Bounds _get(BoundedTag,Precision64 pr) const {
+        return this->_get_as<Float64Bounds>(pr); }
+    virtual Float64UpperBound _get(UpperTag,Precision64 pr) const {
+        return this->_get_as<Float64UpperBound>(pr); }
+    virtual Float64LowerBound _get(LowerTag,Precision64 pr) const {
+        return this->_get_as<Float64LowerBound>(pr); }
+    virtual Float64Approximation _get(ApproximateTag,Precision64 pr) const {
+        return this->_get_as<Float64Approximation>(pr); }
     virtual FloatMPBall _get(MetricTag, PrecisionMP pr) const {
         return this->_get_as<FloatMPBall>(pr); }
     virtual FloatMPBounds _get(BoundedTag, PrecisionMP pr) const {
@@ -220,14 +220,14 @@ template<class X> struct NumberGetterMixin : public virtual NumberInterface {
     virtual OutputStream& write(OutputStream& os) const { return os << _cast(*this); }
 
   private:
-    template<class R, typename std::enable_if<std::is_constructible<R,X>::value,Int>::type = 0>
+    template<class R, EnableIf<IsConvertible<X,R>> = dummy>
         inline R _get_as() const { return static_cast<R>(_cast(*this)); }
-    template<class R, typename std::enable_if<!std::is_constructible<R,X>::value,Int>::type = 0>
+    template<class R, DisableIf<IsConvertible<X,R>> = dummy>
         inline R _get_as() const { std::cerr<<"Warning: Cannot convert " << _cast(*this) << " of type " << this->_class_name() << " to " << class_name<R>() << "\n"; throw ParadigmError(); }
-    template<class R, typename std::enable_if<std::is_constructible<R,X,PrecisionMP>::value,Int>::type = 0>
-        inline R _get_as(PrecisionMP pr) const { return R(_cast(*this),pr); }
-    template<class R, typename std::enable_if<!std::is_constructible<R,X,PrecisionMP>::value,Int>::type = 0>
-        inline R _get_as(PrecisionMP) const { std::cerr<<"Warning: Cannot convert " << _cast(*this) << " of type " << this->_class_name() << " to " << class_name<R>() << " with given precision\n"; throw ParadigmError(); }
+    template<class R, class PR, EnableIf<IsConstructible<R,X,PR>> = dummy>
+        inline R _get_as(PR pr) const { return R(_cast(*this),pr); }
+    template<class R, class PR, DisableIf<IsConstructible<R,X,PR>> = dummy>
+        inline R _get_as(PR pr) const { std::cerr<<"Warning: Cannot convert " << _cast(*this) << " of type " << this->_class_name() << " to " << class_name<R>() << " with precision" << pr << "\n"; throw ParadigmError(); }
 };
 
 template<class X> struct DispatchingTraits { typedef Aware<X> AwareOfTypes; };

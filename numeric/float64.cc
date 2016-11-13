@@ -689,6 +689,11 @@ Float64::Float64(Rational const& q, RoundingModeType rnd, PrecisionType)
     }
 }
 
+Float64::Float64(Float64 x, RoundingModeType rnd, PrecisionType)
+    : Float64(x)
+{
+}
+
 Float64::operator Dyadic () const {
     return Dyadic(this->dbl);
 }

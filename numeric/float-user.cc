@@ -99,6 +99,12 @@ template<class PR> FloatValue<PR>::FloatValue(Dyadic const& w, PR pr)
     ARIADNE_ASSERT_MSG(Dyadic(this->_v)==w,"Dyadic number "<<w<<" cannot be converted exactly to a floating-point number with precision "<<pr);
 };
 
+template<class PR> FloatValue<PR>::FloatValue(FloatValue<PR> const& x, PR pr)
+    : _v(x._v,RawFloat<PR>::to_nearest,pr)
+{
+    ARIADNE_ASSERT_MSG(*this==x,"Exact FloatValueq "<<x<<" cannot be converted exactly to a floating-point number with precision "<<pr);
+};
+
 /*
 template<class PR> FloatValue<PR>::FloatValue(Rational const& q, PR pr)
     : _v(0.0,pr)
@@ -162,6 +168,13 @@ template<class PR> FloatBall<PR>::FloatBall(Real const& r, PR pr)
     : FloatBall(r.get(pr)) {
 }
 
+template<class PR> FloatBall<PR>::FloatBall(FloatBall<PR> const& x, PR pr)
+    : _v(x._v,RawFloat<PR>::to_nearest,pr),_e(x._e,RawFloat<PR>::to_nearest,pr)
+{
+    RawFloat<PR> d = (this->_v>=x._v) ? sub_up(this->_v,x._v) : sub_up(x._v,this->_v);
+    _e=add_up(_e,d);
+}
+
 template<class PR> FloatBall<PR>::FloatBall(ValidatedNumber const& y, PR pr)
     : FloatBall(y.get(MetricTag(),pr)) {
 }
@@ -193,6 +206,14 @@ template<class PR> FloatBounds<PR>::FloatBounds(Rational const& q, PR pr)
 
 template<class PR> FloatBounds<PR>::FloatBounds(ExactDouble const& dl, ExactDouble const& du, PR pr)
     : _l(dl.get_d(),RawFloat<PR>::downward,pr),_u(du.get_d(),RawFloat<PR>::upward,pr) {
+}
+
+template<class PR> FloatBounds<PR>::FloatBounds(Dyadic const& wl, Dyadic const& wu, PR pr)
+    : _l(wl,RawFloat<PR>::downward,pr),_u(wu,RawFloat<PR>::upward,pr) {
+}
+
+template<class PR> FloatBounds<PR>::FloatBounds(FloatBounds<PR> const& x, PR pr)
+    : _l(x._l,RawFloat<PR>::downward,pr), _u(x._u,RawFloat<PR>::upward,pr) {
 }
 
 template<class PR> FloatBounds<PR>::FloatBounds(Rational const& ql, Rational const& qu, PR pr)
@@ -227,6 +248,10 @@ template<class PR> FloatUpperBound<PR>::FloatUpperBound(Real const& r, PR pr)
     : FloatUpperBound(r.get(pr)) {
 }
 
+template<class PR> FloatUpperBound<PR>::FloatUpperBound(FloatUpperBound<PR> const& x, PR pr)
+    : _u(x._u,RawFloat<PR>::upward,pr) {
+}
+
 template<class PR> FloatUpperBound<PR>::FloatUpperBound(ValidatedUpperNumber const& y, PR pr)
     : FloatUpperBound(y.get(UpperTag(),pr)) {
 }
@@ -254,6 +279,10 @@ template<class PR> FloatLowerBound<PR>::FloatLowerBound(Rational const& q, PR pr
 
 template<class PR> FloatLowerBound<PR>::FloatLowerBound(Real const& r, PR pr)
     : FloatLowerBound(r.get(pr)) {
+}
+
+template<class PR> FloatLowerBound<PR>::FloatLowerBound(FloatLowerBound<PR> const& x, PR pr)
+    : _l(x._l,RawFloat<PR>::downward,pr) {
 }
 
 template<class PR> FloatLowerBound<PR>::FloatLowerBound(ValidatedLowerNumber const& y, PR pr)
@@ -292,6 +321,10 @@ template<class PR> FloatApproximation<PR>::FloatApproximation(Dyadic const& w, P
 
 template<class PR> FloatApproximation<PR>::FloatApproximation(Rational const& q, PR pr)
     : _a(q,RawFloat<PR>::to_nearest,pr) {
+}
+
+template<class PR> FloatApproximation<PR>::FloatApproximation(FloatApproximation<PR> const& x, PR pr)
+    : _a(x._a,RawFloat<PR>::to_nearest,pr) {
 }
 
 template<class PR> FloatApproximation<PR>::FloatApproximation(Real const& r, PR pr)

@@ -166,6 +166,7 @@ template<class PR> class FloatApproximation
         FloatApproximation<PR>(const Dyadic& w, PR pr);
         FloatApproximation<PR>(const Rational& q, PR pr);
         FloatApproximation<PR>(const Real& r, PR pr);
+        FloatApproximation<PR>(const FloatApproximation<PR>& r, PR pr);
     FloatApproximation<PR>(const ApproximateNumber& y, PR pr);
 
     FloatApproximation<PR>(FloatError<PR> const& x); // FIXME: Remove
@@ -227,6 +228,7 @@ template<class PR> class FloatLowerBound
     FloatLowerBound<PR>(ExactDouble d, PR pr);
     FloatLowerBound<PR>(const Rational& q, PR pr);
     FloatLowerBound<PR>(const Real& r, PR pr);
+    FloatLowerBound<PR>(const FloatLowerBound<PR>& x, PR pr);
     FloatLowerBound<PR>(const ValidatedLowerNumber& y, PR pr);
 
     FloatLowerBound<PR>(FloatBounds<PR> const& x);
@@ -276,6 +278,7 @@ template<class PR> class FloatUpperBound
     FloatUpperBound<PR>(ExactDouble d, PR pr);
     FloatUpperBound<PR>(const Rational& q, PR pr);
     FloatUpperBound<PR>(const Real& r, PR pr);
+    FloatUpperBound<PR>(const FloatUpperBound<PR>& x, PR pr);
     FloatUpperBound<PR>(const ValidatedUpperNumber& y, PR pr);
 
     FloatUpperBound<PR>(FloatBounds<PR> const& x);
@@ -357,6 +360,7 @@ template<class PR> class FloatBounds
     FloatBounds<PR>(ValidatedLowerNumber const& lower, FloatUpperBound<PR> const& upper) : FloatBounds<PR>(upper.create(lower),upper) { }
     template<class N1, class N2, EnableIf<And<IsIntegral<N1>,IsIntegral<N2>>> = dummy> FloatBounds<PR>(N1 n1, N2 n2, PR pr) : _l(n1,pr), _u(n2,pr) { }
     FloatBounds<PR>(ExactDouble const& dl, ExactDouble const& du, PrecisionType pr);
+    FloatBounds<PR>(Dyadic const& wl, Dyadic const& wu, PrecisionType pr);
     FloatBounds<PR>(Rational const& ql, Rational const& qu, PrecisionType pr);
 
     template<class N, EnableIf<IsIntegral<N>> = dummy> FloatBounds<PR>(N n, PR pr) : FloatBounds<PR>(ExactDouble(n),pr) { }
@@ -365,6 +369,7 @@ template<class PR> class FloatBounds
         FloatBounds<PR>(const Dyadic& w, PR pr);
         FloatBounds<PR>(const Rational& q, PR pr);
         FloatBounds<PR>(const Real& x, PR pr);
+        FloatBounds<PR>(const FloatBounds<PR>& x, PR pr);
     FloatBounds<PR>(const ValidatedNumber& y, PR pr);
 
     FloatBounds<PR>(FloatBall<PR> const& x);
@@ -438,6 +443,7 @@ template<class PR> class FloatBall
         FloatBall<PR>(const Dyadic& w, PR pr);
         FloatBall<PR>(const Rational& q, PR pr);
         FloatBall<PR>(const Real& r, PR pr);
+        FloatBall<PR>(const FloatBall<PR>& x, PR pr);
     FloatBall<PR>(const ValidatedNumber& y, PR pr);
 
     explicit FloatBall<PR>(FloatBounds<PR> const& x);
@@ -500,6 +506,7 @@ template<class PR> class FloatValue
     FloatValue<PR>(const Integer& z, PR pr);
     FloatValue<PR>(const TwoExp& t, PR pr);
     FloatValue<PR>(const Dyadic& w, PR pr);
+    FloatValue<PR>(const FloatValue<PR>& x, PR pr);
 
     template<class N, EnableIf<IsIntegral<N>> = dummy> FloatValue<PR>& operator=(N n) { _v=n; }
     FloatValue<PR>& operator=(const Integer& z);

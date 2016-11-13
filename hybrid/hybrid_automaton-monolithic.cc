@@ -63,7 +63,7 @@ MonolithicHybridAutomaton::new_mode(DiscreteLocation location,
                                     EffectiveVectorFunction dynamic)
 {
     List<Identifier> names;
-    for(Nat i=0; i!=dynamic.result_size(); ++i) {
+    for(SizeType i=0; i!=dynamic.result_size(); ++i) {
         StringStream ss;
         ss << "x" << i;
         names.append(ss.str());
@@ -203,7 +203,7 @@ MonolithicHybridAutomaton::transition(DiscreteLocation source, DiscreteEvent eve
 }
 
 
-Nat
+DimensionType
 MonolithicHybridAutomaton::dimension(DiscreteLocation location) const
 {
     return this->mode(location).dimension();

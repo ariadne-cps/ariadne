@@ -160,10 +160,10 @@ EffectiveVectorFunction dynamic_function(
     List<DottedRealAssignment> const& differential)
 {
     RealExpression default_expression;
-    List<RealExpression> results(differential.size(),default_expression);
-    for(Nat i=0; i!=differential.size(); ++i) { results[space.index(differential[i].lhs.base())]=substitute(differential[i].rhs,algebraic); }
+    Vector<RealExpression> results(differential.size(),default_expression);
+    for(SizeType i=0; i!=differential.size(); ++i) { results[space.index(differential[i].lhs.base())]=substitute(differential[i].rhs,algebraic); }
 
-    return EffectiveVectorFunction(Ariadne::dimension(space),Ariadne::formula(results,algebraic,space));
+    return make_function(space,results);
 }
 
 EffectiveVectorFunction reset_function(
@@ -172,10 +172,10 @@ EffectiveVectorFunction reset_function(
     List<PrimedRealAssignment> const& primed)
 {
     RealExpression default_expression;
-    List<RealExpression> results(primed.size(),default_expression);
-    for(Nat i=0; i!=primed.size(); ++i) { results[i]=substitute(primed[i].rhs,algebraic); }
+    Vector<RealExpression> results(primed.size(),default_expression);
+    for(SizeType i=0; i!=primed.size(); ++i) { results[i]=substitute(primed[i].rhs,algebraic); }
 
-    return EffectiveVectorFunction(EuclideanDomain(space.dimension()),Ariadne::formula(results,algebraic,space));
+    return make_function(space,results);
 }
 
 EffectiveScalarFunction constraint_function(
@@ -185,7 +185,7 @@ EffectiveScalarFunction constraint_function(
     Sign sign)
 {
     RealExpression constraint_expression=indicator(constraint,sign);
-    return EffectiveScalarFunction(EuclideanDomain(space.dimension()),Ariadne::formula(constraint_expression,algebraic,space));
+    return make_function(space,substitute(constraint_expression,algebraic));
 }
 
 HybridAutomaton::HybridAutomaton()
@@ -231,7 +231,7 @@ HybridAutomaton::_new_mode(DiscreteLocation location,
     Set<UntypedVariable> argument_variables;
 
     // Compute the auxiliary variables ordered by the given equations
-    for(Nat i=0; i!=auxiliary.size(); ++i) {
+    for(SizeType i=0; i!=auxiliary.size(); ++i) {
         if(defined_variables.contains(auxiliary[i].lhs)) {
             ARIADNE_THROW(SystemSpecificationError,"HybridAutomaton::new_mode",
                           "Variable "<<auxiliary[i].lhs<<" is defined twice by the algebraic equations "<<auxiliary<<" for mode "<<location);
@@ -241,7 +241,7 @@ HybridAutomaton::_new_mode(DiscreteLocation location,
     }
 
     // Compute the state variables ordered by the given differential equations
-    for(Nat i=0; i!=dynamic.size(); ++i) {
+    for(SizeType i=0; i!=dynamic.size(); ++i) {
         if(defined_variables.contains(dynamic[i].lhs.base())) {
             ARIADNE_THROW(SystemSpecificationError,"HybridAutomaton::new_mode",
                           "Variable "<<dynamic[i].lhs.base()<<" is defined by the differential equations "<<dynamic<<" for mode "<<location<<" is already defined");
@@ -458,7 +458,7 @@ List<RealVariable>
 HybridAutomaton::state_variables(DiscreteLocation location) const {
     List<RealVariable> result;
     const DiscreteMode& mode=this->mode(location);
-    for(Nat i=0; i!=mode._dynamic.size(); ++i) {
+    for(SizeType i=0; i!=mode._dynamic.size(); ++i) {
         result.append(mode._dynamic[i].lhs.base());
     }
     return result;
@@ -468,7 +468,7 @@ List<RealVariable>
 HybridAutomaton::auxiliary_variables(DiscreteLocation location) const {
     List<RealVariable> result;
     const DiscreteMode& mode=this->mode(location);
-    for(Nat i=0; i!=mode._auxiliary.size(); ++i) {
+    for(SizeType i=0; i!=mode._auxiliary.size(); ++i) {
         result.append(mode._auxiliary[i].lhs);
     }
     return result;
@@ -584,7 +584,7 @@ HybridAutomaton::reset_assignments(DiscreteLocation source, DiscreteEvent event)
     } else {
         List<PrimedRealAssignment> nonjump_assignments;
         List<RealVariable> state_variables=this->state_variables(source);
-        for(Nat i=0; i!=state_variables.size(); ++i) {
+        for(SizeType i=0; i!=state_variables.size(); ++i) {
             nonjump_assignments.append(next(state_variables[i])=state_variables[i]);
         }
         return nonjump_assignments;
@@ -626,7 +626,7 @@ Set<DiscreteEvent> HybridAutomaton::events(DiscreteLocation location) const {
     return join(join(mode._invariants.keys(),mode._guards.keys()),mode._targets.keys());
 }
 
-Nat HybridAutomaton::dimension(DiscreteLocation location) const {
+DimensionType HybridAutomaton::dimension(DiscreteLocation location) const {
     return this->mode(location)._dynamic.size();
 };
 
@@ -944,7 +944,7 @@ CompositeHybridAutomaton::target(DiscreteLocation source, DiscreteEvent event) c
 }
 
 
-Nat
+DimensionType
 CompositeHybridAutomaton::dimension(DiscreteLocation location) const {
     return this->state_variables(location).size();
 }
@@ -1053,9 +1053,9 @@ CompositeHybridAutomaton::auxiliary_function(DiscreteLocation location) const {
     RealExpression default_expression;
     Space<Real> space=this->state_variables(location);
     List<RealAssignment> algebraic=this->auxiliary_assignments(location);
-    List<RealExpression> results(algebraic.size(),default_expression);
-    for(Nat i=0; i!=algebraic.size(); ++i) { results[i]=algebraic[i].lhs; }
-    return EffectiveVectorFunction(Ariadne::dimension(space),Ariadne::formula(results,algebraic,space));
+    Vector<RealExpression> results(algebraic.size(),default_expression);
+    for(SizeType i=0; i!=algebraic.size(); ++i) { results[i]=algebraic[i].lhs; }
+    return make_function(space,results);
 }
 
 EffectiveVectorFunction
@@ -1064,10 +1064,9 @@ CompositeHybridAutomaton::dynamic_function(DiscreteLocation location) const {
     Space<Real> space=this->state_variables(location);
     List<RealAssignment> algebraic=this->auxiliary_assignments(location);
     List<DottedRealAssignment> differential=this->dynamic_assignments(location);
-    List<RealExpression> results(differential.size(),default_expression);
-    for(Nat i=0; i!=differential.size(); ++i) { results[space.index(differential[i].lhs.base())]=substitute(differential[i].rhs,algebraic); }
-
-    return EffectiveVectorFunction(Ariadne::dimension(space),Ariadne::formula(results,algebraic,space));
+    Vector<RealExpression> results(differential.size(),default_expression);
+    for(SizeType i=0; i!=differential.size(); ++i) { results[space.index(differential[i].lhs.base())]=substitute(differential[i].rhs,algebraic); }
+    return make_function(space,results);
 }
 
 EffectiveVectorFunction
@@ -1078,9 +1077,9 @@ CompositeHybridAutomaton::reset_function(DiscreteLocation source, DiscreteEvent 
     Space<Real> target_space=this->state_variables(target);
     List<RealAssignment> algebraic=this->auxiliary_assignments(source);
     List<PrimedRealAssignment> update=this->reset_assignments(source,event);
-    List<RealExpression> results(update.size(),default_expression);
-    for(Nat i=0; i!=update.size(); ++i) { results[target_space.index(update[i].lhs.base())]=update[i].rhs; }
-    return EffectiveVectorFunction(Ariadne::dimension(source_space),Ariadne::formula(results,algebraic,source_space));
+    Vector<RealExpression> results(update.size(),default_expression);
+    for(SizeType i=0; i!=update.size(); ++i) { results[target_space.index(update[i].lhs.base())]=substitute(update[i].rhs,algebraic); }
+    return make_function(source_space,results);
 }
 
 EffectiveScalarFunction
@@ -1088,7 +1087,7 @@ CompositeHybridAutomaton::invariant_function(DiscreteLocation location, Discrete
     Space<Real> space=this->state_variables(location);
     List<RealAssignment> algebraic=this->auxiliary_assignments(location);
     RealExpression invariant=indicator(invariant_predicate(location,event),NEGATIVE);
-    return EffectiveScalarFunction(EuclideanDomain(space.dimension()),Ariadne::formula(invariant,algebraic,space));
+    return make_function(space,substitute(invariant,algebraic));
 }
 
 EffectiveScalarFunction
@@ -1096,7 +1095,7 @@ CompositeHybridAutomaton::guard_function(DiscreteLocation location, DiscreteEven
     Space<Real> space=this->state_variables(location);
     List<RealAssignment> algebraic=this->auxiliary_assignments(location);
     RealExpression guard=indicator(guard_predicate(location,event),POSITIVE);
-    return EffectiveScalarFunction(EuclideanDomain(space.dimension()),Ariadne::formula(guard,algebraic,space));
+    return make_function(space,substitute(guard,algebraic));
 }
 
 
@@ -1117,7 +1116,7 @@ CompositeHybridAutomaton::write(OutputStream& os) const
 template<class LHS, class RHS>
 List<LHS> assigned(const List< Assignment<LHS,RHS> >& assignments) {
     List<LHS> result; result.reserve(assignments.size());
-    for(Nat i=0; i!=assignments.size(); ++i) {
+    for(SizeType i=0; i!=assignments.size(); ++i) {
         result.append(assignments[i].lhs);
     }
     return result;
@@ -1143,7 +1142,7 @@ Set<RealVariable> real_arguments(const Assignment<LHS,RHS>& assignment) {
 template<class LHS, class RHS>
 Set<RealVariable> real_arguments(const List< Assignment<LHS,RHS> >& assignments) {
     Set<RealVariable> result;
-    for(Nat i=0; i!=assignments.size(); ++i) {
+    for(SizeType i=0; i!=assignments.size(); ++i) {
         result.adjoin(real_arguments(assignments[i]));
     }
     return result;
@@ -1152,7 +1151,7 @@ Set<RealVariable> real_arguments(const List< Assignment<LHS,RHS> >& assignments)
 template<class Tp, template<class> class Dec>
 List< Variable<Tp> > base(const List< Dec<Tp> >& variables) {
     List< Variable<Tp> > result;
-    for(Nat i=0; i!=variables.size(); ++i) {
+    for(SizeType i=0; i!=variables.size(); ++i) {
         result.append(variables[i].base());
     }
     return result;
@@ -1166,7 +1165,7 @@ Set<T> make_set(const List<T>& list) {
 template<class Var>
 Bool unique(const List<Var>& variables) {
     Set<Var> found;
-    for(Nat i=0; i!=variables.size(); ++i) {
+    for(SizeType i=0; i!=variables.size(); ++i) {
         if(found.contains(variables[i])) {
             return false;
         } else {
@@ -1180,7 +1179,7 @@ template<class Var>
 Set<Var> duplicates(const List<Var>& variables) {
     Set<Var> result;
     Set<Var> found;
-    for(Nat i=0; i!=variables.size(); ++i) {
+    for(SizeType i=0; i!=variables.size(); ++i) {
         if(found.contains(variables[i])) {
             result.insert(variables[i]);
         } else {
@@ -1198,9 +1197,9 @@ List<RealAssignment> order(const List<RealAssignment>& assignments, const Set<Re
     List<RealAssignment> result;
 
     Map< RealVariable, Set<RealVariable> > unresolved_dependencies;
-    Map< RealVariable, Nat > assignment_table;
+    Map< RealVariable, SizeType > assignment_table;
 
-    for(Nat i=0; i!=assignments.size(); ++i) {
+    for(SizeType i=0; i!=assignments.size(); ++i) {
         unresolved_dependencies.insert(assignments[i].lhs,difference(real_arguments(assignments[i].rhs),inputs));
         assignment_table.insert(assignments[i].lhs,i);
     }
@@ -1365,14 +1364,12 @@ CompositeHybridAutomaton::discrete_reachability(const Set<DiscreteLocation>& ini
 {
     const CompositeHybridAutomaton& automaton=*this;
 
-    typedef Nat Nat;
-
     Set<DiscreteLocation> reached=initial_locations;
     Set<DiscreteLocation> working=initial_locations;
     Set<DiscreteLocation> found;
 
-    Map<DiscreteLocation,Nat> steps;
-    Nat step=0u;
+    Map<DiscreteLocation,Natural> steps;
+    Natural step=0u;
 
     for(Set<DiscreteLocation>::ConstIterator initial_iter=initial_locations.begin(); initial_iter!=initial_locations.end(); ++initial_iter) {
         steps.insert(*initial_iter,step);

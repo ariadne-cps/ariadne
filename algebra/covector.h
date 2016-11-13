@@ -57,6 +57,10 @@ template<class X> class Covector
     Array<X> _ary;
   public:
     template<class XX, EnableIf<IsConvertible<XX,X>> =dummy>
+        Covector(InitializerList<XX> const& lst) : _ary(lst) { }
+    template<class XX, EnableIf<IsConstructible<X,XX>> =dummy, DisableIf<IsConvertible<XX,X>> =dummy>
+        explicit Covector(InitializerList<XX> const& lst) : _ary(lst._ary) { }
+    template<class XX, EnableIf<IsConvertible<XX,X>> =dummy>
         Covector(Covector<XX> const& u) : _ary(u._ary) { }
     template<class XX, EnableIf<IsConstructible<X,XX>> =dummy, DisableIf<IsConvertible<XX,X>> =dummy>
         explicit Covector(Covector<XX> const& u) : _ary(u._ary) { }

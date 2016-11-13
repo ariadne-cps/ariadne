@@ -427,7 +427,6 @@ template<class X, class NX, class R=X> struct DeclareDirectedNumericOperations
     friend R atan(X const& x);
     friend X max(X const& x1, X const& x2);
     friend X min(X const& x1, X const& x2);
-    friend Void abs(X const& x);
 };
 
 template<class X, class R=X> struct DeclareNumericOperations
@@ -798,9 +797,9 @@ template<class X, class NX, class Y, class NY, class R=X, class NR=NX> struct Pr
     : DefineInplaceDirectedGroupOperators<X,Y,NY,R>
 {
     friend R operator+(const X& x1, const Y& y2) { return operator+(x1,x1.create(y2)); }
-    friend R operator/(const X& x1, const NY& ny2) { return operator-(x1,create(ny2,x1)); }
+    friend R operator-(const X& x1, const NY& ny2) { return operator-(x1,create(ny2,x1)); }
     friend R operator+(const Y& y1, const X& x2) { return operator+(x2.create(y1),x2); }
-    friend NR operator/(const NY& ny1, const X& x2) { return operator-(x2.create(ny1),x2); }
+    friend NR operator-(const NY& ny1, const X& x2) { return operator-(x2.create(ny1),x2); }
 };
 template<class X, class NX, class Y, class NY, class R=X, class NR=NX> struct ProvideConcreteGenericDirectedGroupOperations
     : ProvideConcreteGenericDirectedGroupOperators<X,NX,Y,NY,R,NR>
@@ -945,6 +944,8 @@ template<class X, class QX=X, class R=X, class QR=QX> class ProvideDirectedSemiF
 template<class X> class Operations {
     typedef decltype(add(declval<X>(),declval<X>())) R;
     typedef decltype(neg(declval<X>())) NX;
+    // FIXME: No function returning non-widened reciprocal
+    typedef decltype(neg(declval<X>())) QX;
     typedef decltype(rec(declval<X>())) QR;
     typedef R PR;
     typedef decltype(abs(declval<X>())) PX;
@@ -960,7 +961,7 @@ template<class X> class Operations {
     static R _add(X const& x1, X const& x2);
     static R _sub(X const& x1, NX const& x2);
     static R _mul(X const& x1, X const& x2);
-    static R _div(X const& x1, NX const& x2);
+    static R _div(X const& x1, QX const& x2);
     static R _pow(X const& x, Nat m);
     static R _pow(X const& x, Int n);
     static R _sqrt(X const& x);

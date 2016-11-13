@@ -77,6 +77,14 @@ template<class X, class NX=X> class DeclareDirectedFloatOperations
     friend InputStream& operator>>(InputStream&, X&);
 };
 
+template<class X, class QX=X> class DeclarePositiveDirectedFloatOperations
+//    : DeclarePositiveDirectedNumericOperations<X,QX>
+//    , DeclareMixedDirectedSemifieldOperators<X,QX,GenericTrait<X>,GenericTrait<QX>>
+{
+    friend OutputStream& operator<<(OutputStream&, X const&);
+    friend InputStream& operator>>(InputStream&, X&);
+};
+
 template<class X, class R=X> class DispatchFloatOperations
     : DispatchNumericOperations<X,R>
     , DispatchComparisonOperations<X,LessTrait<X>,EqualsTrait<X>>
@@ -92,6 +100,14 @@ template<class X> class DispatchDirectedFloatOperations
     , DispatchDirectedComparisonOperations<X,OppositeTrait<X>,LessTrait<X>,EqualsTrait<X>>
     , ProvideConcreteGenericDirectedGroupOperations<X,OppositeTrait<X>,GenericTrait<X>,GenericTrait<OppositeTrait<X>>>
     , ProvideConcreteGenericDirectedComparisonOperations<X,GenericTrait<OppositeTrait<X>>,LessTrait<X>,EqualsTrait<X>>
+{
+    friend OutputStream& operator<<(OutputStream& os, X const& x) { return Operations<X>::_write(os,x); }
+    friend InputStream& operator>>(InputStream& is, X& x) { return Operations<X>::_read(is,x); }
+};
+
+template<class X> class DispatchPositiveDirectedFloatOperations
+    : public DispatchPositiveDirectedNumericOperations<X,OppositeTrait<X>>
+    , public ProvideConcreteGenericDirectedSemiFieldOperations<X,OppositeTrait<X>,Nat,Nat>
 {
     friend OutputStream& operator<<(OutputStream& os, X const& x) { return Operations<X>::_write(os,x); }
     friend InputStream& operator>>(InputStream& is, X& x) { return Operations<X>::_read(is,x); }
@@ -229,7 +245,6 @@ template<class PR> class FloatLowerBound
     RawFloatType& raw() { return _l; }
     double get_d() const { return _l.get_d(); }
   public: // To be removed
-    friend FloatError<PR> rec(FloatLowerBound<PR> const&);
     friend Bool same(FloatLowerBound<PR> const&, FloatLowerBound<PR> const&);
     friend Bool refines(FloatLowerBound<PR> const&, FloatLowerBound<PR> const&);
     friend FloatLowerBound<PR> refinement(FloatLowerBound<PR> const&, FloatLowerBound<PR> const&);
@@ -382,8 +397,8 @@ template<class PR> class FloatBounds
     friend FloatApproximation<PR> round(FloatApproximation<PR> const& x);
     friend FloatValue<PR> midpoint(FloatBounds<PR> const& x);
   public:
-    friend FloatError<PR> mag(FloatBounds<PR> const&);
-    friend FloatLowerBound<PR> mig(FloatBounds<PR> const&);
+    friend PositiveFloatUpperBound<PR> mag(FloatBounds<PR> const&);
+    friend PositiveFloatLowerBound<PR> mig(FloatBounds<PR> const&);
     friend Bool same(FloatBounds<PR> const&, FloatBounds<PR> const&);
     friend Bool models(FloatBounds<PR> const&, FloatValue<PR> const&);
     friend Bool consistent(FloatBounds<PR> const&, FloatBounds<PR> const&);
@@ -447,8 +462,8 @@ template<class PR> class FloatBall
 
     PrecisionType precision() const { return _v.precision(); }
   public:
-    friend FloatError<PR> mag(FloatBall<PR> const&);
-    friend FloatLowerBound<PR> mig(FloatBall<PR> const&);
+    friend PositiveFloatUpperBound<PR> mag(FloatBall<PR> const&);
+    friend PositiveFloatLowerBound<PR> mig(FloatBall<PR> const&);
     friend Bool same(FloatBall<PR> const&, FloatBall<PR> const&);
     friend Bool same(FloatBall<PR> const&, FloatBall<PR> const&);
     friend Bool models(FloatBall<PR> const&, FloatValue<PR> const&);
@@ -539,75 +554,12 @@ template<class PR> class FloatValue
     friend FloatValue<PR>& operator/=(FloatValue<PR>& x, TwoExp const& y) { return x=x/y; }
 };
 
-template<class PR> class FloatError
-    : public DispatchPositiveDirectedNumericOperations<FloatError<PR>,FloatLowerBound<PR>>
-    , public ProvideConcreteGenericDirectedSemiFieldOperations<FloatError<PR>,FloatLowerBound<PR>,Nat,Nat>
-    , public DeclareDirectedNumericOperations<FloatUpperBound<PR>,FloatLowerBound<PR>>
-    , public DeclareDirectedComparisonOperations<FloatUpperBound<PR>,FloatLowerBound<PR>,ValidatedSierpinskian,ValidatedNegatedSierpinskian>
-{
-  private: public:
-    RawFloat<PR> _e;
-  public:
-    typedef PR PrecisionType;
-  public:
-    FloatError<PR>() : _e() { }
-    explicit FloatError<PR>(PR pr) : _e(pr) { }
-    explicit FloatError<PR>(RawFloat<PR> const& x) : _e(x) {
-        ARIADNE_PRECONDITION_MSG(!(x<0),"x="<<x); }
-    explicit FloatError<PR>(FloatUpperBound<PR> const& x) : FloatError<PR>(x.raw()) { }
-    FloatError<PR>(PositiveFloatValue<PR> const& x) : _e(x.raw()) { }
-    FloatError<PR>(PositiveFloatUpperBound<PR> const& x) : _e(x.raw()) { }
-    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy> FloatError<PR>(M m, PR pr) : _e(m,pr) { }
-    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy> FloatError<PR>& operator=(M m) { _e=m; return *this; }
-    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy> PositiveFloatValue<PR> create(M m) const;
-    PrecisionType precision() const { return _e.precision(); }
-    RawFloat<PR> const& raw() const { return _e; }
-    RawFloat<PR>& raw() { return _e; }
-  public:
-    friend FloatError<PR> mag(FloatError<PR> const& x);
-    friend FloatUpperBound<PR> operator+(FloatError<PR> const& x) { return FloatUpperBound<PR>(+x._e); }
-    friend FloatLowerBound<PR> operator-(FloatError<PR> const& x) { return FloatLowerBound<PR>(-x._e); }
-    friend FloatUpperBound<PR> log(FloatError<PR> const& x);
-    friend FloatError<PR> exp(FloatError<PR> const& x);
-
-    friend Bool same(FloatError<PR> const&, FloatError<PR> const&);
-    friend Bool refines(FloatError<PR> const&, FloatError<PR> const&);
-    friend OutputStream& operator<<(OutputStream& os, FloatError<PR> const& x) { return Operations<FloatError<PR>>::_write(os,x); }
-  public:
-    friend FloatUpperBound<PR> operator+(Real const&, FloatUpperBound<PR> const&);
-    friend FloatLowerBound<PR> operator-(Real const&, FloatUpperBound<PR> const&);
-    friend FloatLowerBound<PR> operator-(Int, FloatUpperBound<PR> const&);
-    friend ValidatedNegatedSierpinskian operator> (FloatUpperBound<PR> const&, double); // FIXME: Remove
-  public:
-    static Nat output_places;
-    static Void set_output_places(Nat p) { output_places=p; }
-};
-
-
-template<class PR> inline const FloatValue<PR> FloatBounds<PR>::value() const {
-    return FloatValue<PR>(med_near(this->_l,this->_u)); }
-
-template<class PR> inline const FloatError<PR> FloatBounds<PR>::error() const {
-    RawFloat<PR> _v=med_near(this->_l,this->_u); return FloatError<PR>(max(sub_up(this->_u,_v),sub_up(_v,this->_l))); }
-
-template<class PR> inline FloatValue<PR> value(FloatBounds<PR> const& x) {
-    return x.value(); }
-
-template<class PR> inline FloatError<PR> error(FloatBounds<PR> const& x) {
-    return x.error(); }
-
-template<class PR> inline const FloatValue<PR> FloatBall<PR>::value() const {
-    return FloatValue<PR>(this->_v); }
-
-template<class PR> inline const FloatError<PR> FloatBall<PR>::error() const {
-    return FloatError<PR>(this->_e); }
-
 
 template<class PR> class PositiveFloatValue : public FloatValue<PR> {
   public:
     PositiveFloatValue<PR>() : FloatValue<PR>() { }
-    PositiveFloatValue<PR>(Nat m, PR pr) : FloatValue<PR>(m,pr) { }
-    template<class N, EnableIf<IsIntegral<N>> =dummy> PositiveFloatValue<PR>(N n, PR pr) : FloatValue<PR>(n,pr) { }
+    explicit PositiveFloatValue<PR>(PR const& pr) : FloatValue<PR>(pr) { }
+    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy> PositiveFloatValue<PR>(M m, PR pr) : FloatValue<PR>(m,pr) { }
     PositiveFloatValue<PR>(TwoExp const& ex, PR pr) : FloatValue<PR>(ex,pr) { }
     explicit PositiveFloatValue<PR>(Dyadic const& w, PR pr) : FloatValue<PR>(w,pr) { }
     explicit PositiveFloatValue<PR>(RawFloat<PR> const& x) : FloatValue<PR>(x) { }
@@ -616,9 +568,6 @@ template<class PR> class PositiveFloatValue : public FloatValue<PR> {
     friend PositiveFloatValue<PR> max(PositiveFloatValue<PR> const&, PositiveFloatValue<PR> const&);
     friend PositiveFloatBounds<PR> operator*(PositiveFloatBounds<PR> const&, PositiveFloatBounds<PR> const&);
 };
-
-template<class PR> template<class M, EnableIf<IsUnsignedIntegral<M>>> PositiveFloatValue<PR> FloatError<PR>::create(M m) const {
-    return PositiveFloatValue<PR>(m,this->precision()); }
 
 template<class PR> class PositiveFloatBall : public FloatBall<PR> {
   public:
@@ -631,10 +580,8 @@ template<class PR> class PositiveFloatBall : public FloatBall<PR> {
 template<class PR> class PositiveFloatBounds : public FloatBounds<PR> {
   public:
     PositiveFloatBounds<PR>() : FloatBounds<PR>() { }
-    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy>
-        PositiveFloatBounds<PR>(M m) : FloatBounds<PR>(m) { }
-    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy>
-        PositiveFloatBounds<PR>(M m, PR pr) : FloatBounds<PR>(m,pr) { }
+    explicit PositiveFloatBounds<PR>(PR const& pr) : FloatBounds<PR>(pr) { }
+    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy> PositiveFloatBounds<PR>(M m, PR pr) : FloatBounds<PR>(m,pr) { }
     explicit PositiveFloatBounds<PR>(RawFloat<PR> const& x) : FloatBounds<PR>(x) { }
     explicit PositiveFloatBounds<PR>(RawFloat<PR> const& l, RawFloat<PR> const& u) : FloatBounds<PR>(l,u) { }
     explicit PositiveFloatBounds<PR>(FloatBounds<PR> const& x) : FloatBounds<PR>(x) { }
@@ -643,28 +590,29 @@ template<class PR> class PositiveFloatBounds : public FloatBounds<PR> {
     friend PositiveFloatBounds<PR> operator*(PositiveFloatBounds<PR> const&, PositiveFloatBounds<PR> const&);
 };
 
-template<class PR> class PositiveFloatUpperBound : public FloatUpperBound<PR> {
+template<class PR> class PositiveFloatUpperBound : public FloatUpperBound<PR>
+    , public DispatchPositiveDirectedNumericOperations<PositiveFloatUpperBound<PR>,PositiveFloatLowerBound<PR>>
+    , public ProvideConcreteGenericDirectedSemiFieldOperations<PositiveFloatUpperBound<PR>,PositiveFloatLowerBound<PR>,Nat,Nat>
+    , public DeclareDirectedNumericOperations<FloatUpperBound<PR>,FloatLowerBound<PR>>
+    , public DeclareDirectedComparisonOperations<FloatUpperBound<PR>,FloatLowerBound<PR>,ValidatedSierpinskian,ValidatedNegatedSierpinskian>
+{
   public:
     PositiveFloatUpperBound<PR>() : FloatUpperBound<PR>() { }
-    explicit PositiveFloatUpperBound<PR>(RawFloat<PR> const& x) : FloatUpperBound<PR>(x) {
-        ARIADNE_PRECONDITION_MSG(!(x<0),"x="<<x); }
-    explicit PositiveFloatUpperBound<PR>(FloatUpperBound<PR> const& x) : FloatUpperBound<PR>(x) { }
-    explicit PositiveFloatUpperBound<PR>(ValidatedUpperNumber const& y, PR pr) : FloatUpperBound<PR>(y,pr) { }
+    explicit PositiveFloatUpperBound<PR>(PR const& pr) : FloatUpperBound<PR>(pr) { }
+    explicit PositiveFloatUpperBound<PR>(RawFloat<PR> const& x) : FloatUpperBound<PR>(x) { }
+    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy> PositiveFloatUpperBound<PR>(M m, PR pr) : FloatUpperBound<PR>(m,pr) { }
+    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy> PositiveFloatValue<PR> create(M m) const { return PositiveFloatValue<PR>(m,this->precision()); }
+    explicit PositiveFloatUpperBound<PR>(FloatUpperBound<PR> const& x) : FloatUpperBound<PR>(x) { ARIADNE_PRECONDITION_MSG(!(this->_u<0),"x="<<x); }
+    explicit PositiveFloatUpperBound<PR>(ValidatedUpperNumber const& y, PR pr) : FloatUpperBound<PR>(y,pr) { ARIADNE_PRECONDITION_MSG(!(this->_u<0),"y="<<y); }
     PositiveFloatUpperBound<PR>(PositiveFloatValue<PR> const& x) : FloatUpperBound<PR>(x) { }
-    PositiveFloatUpperBound<PR>(FloatError<PR> const& x) : FloatUpperBound<PR>(x.raw()) { }
   public:
     friend PositiveFloatUpperBound<PR> max(PositiveFloatUpperBound<PR> const&, PositiveFloatUpperBound<PR> const&);
     friend PositiveFloatUpperBound<PR> operator*(PositiveFloatUpperBound<PR> const&, PositiveFloatUpperBound<PR> const&);
-    friend PositiveFloatUpperBound<PR> operator/(PositiveFloatUpperBound<PR> const&, PositiveFloatLowerBound<PR> const&);
-    friend PositiveFloatUpperBound<PR>& operator*=(PositiveFloatUpperBound<PR>&, PositiveFloatUpperBound<PR> const&);
-    friend PositiveFloatUpperBound<PR>& operator*=(PositiveFloatUpperBound<PR>&, PositiveFloatLowerBound<PR> const&);
-  public:
-    static Nat output_places;
-    static Void set_output_places(Nat p) { output_places=p; }
 };
-template<class PR> PositiveFloatUpperBound<PR> abs(PositiveFloatUpperBound<PR> const&);
 
-template<class PR> class PositiveFloatLowerBound : public FloatLowerBound<PR> {
+template<class PR> class PositiveFloatLowerBound : public FloatLowerBound<PR>
+    , public DispatchPositiveDirectedNumericOperations<PositiveFloatLowerBound<PR>,PositiveFloatUpperBound<PR>>
+{
   public:
     PositiveFloatLowerBound<PR>() : FloatLowerBound<PR>() { }
     template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy>
@@ -713,9 +661,68 @@ template<class PR> inline PositiveFloatBall<PR> cast_positive(FloatBall<PR> cons
 template<class PR> inline PositiveFloatValue<PR> cast_positive(FloatValue<PR> const& x) {
     return PositiveFloatValue<PR>(x); }
 
-template<class PR> inline OutputStream& operator<<(OutputStream& os, PositiveFloatApproximation<PR> const& x) {
-    return os << static_cast<FloatApproximation<PR>const&>(x); }
 
+template<class PR> class FloatError
+    : public DispatchPositiveDirectedNumericOperations<PositiveFloatUpperBound<PR>,PositiveFloatLowerBound<PR>>
+    , public ProvideConcreteGenericDirectedSemiFieldOperations<PositiveFloatUpperBound<PR>,PositiveFloatLowerBound<PR>,Nat,Nat>
+    , public DeclareDirectedNumericOperations<FloatUpperBound<PR>,FloatLowerBound<PR>>
+    , public DeclareDirectedComparisonOperations<FloatUpperBound<PR>,FloatLowerBound<PR>,ValidatedSierpinskian,ValidatedNegatedSierpinskian>
+{
+  private: public:
+    RawFloat<PR> _e;
+  public:
+    typedef PR PrecisionType;
+  public:
+    FloatError<PR>(PositiveFloatUpperBound<PR> const& x) : _e(x._u) { }
+    operator PositiveFloatUpperBound<PR> const& () const { return reinterpret_cast<PositiveFloatUpperBound<PR>const&>(*this); }
+    operator PositiveFloatUpperBound<PR>& () { return reinterpret_cast<PositiveFloatUpperBound<PR>&>(*this); }
+  public:
+    FloatError<PR>() : _e() { }
+    explicit FloatError<PR>(PR const& pr) : _e(pr) { }
+    explicit FloatError<PR>(RawFloat<PR> const& x) : _e(x) { ARIADNE_PRECONDITION_MSG((this->_e>=0),"e="<<*this); }
+    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy> FloatError<PR>(M m, PR pr) : _e(m,pr) { }
+    explicit FloatError<PR>(FloatUpperBound<PR> const& x) : FloatError<PR>(x._u) { }
+    explicit FloatError<PR>(ValidatedUpperNumber const& y, PR pr) : FloatError(FloatUpperBound<PR>(y,pr)) { }
+    FloatError<PR>(PositiveFloatValue<PR> const& x) : _e(x._v) { }
+    FloatError<PR>& operator=(Nat m) { reinterpret_cast<FloatUpperBound<PR>&>(*this)=m; return *this; }
+  public:
+    PrecisionType precision() const { return _e.precision(); }
+    RawFloat<PR> const& raw() const { return _e; }
+    RawFloat<PR>& raw() { return _e; }
+  public:
+    friend FloatError<PR> mag(FloatError<PR> const& x) { return x; }
+    friend FloatUpperBound<PR> operator+(FloatError<PR> const& x) { return FloatUpperBound<PR>(+x._e); }
+    friend FloatLowerBound<PR> operator-(FloatError<PR> const& x) { return FloatLowerBound<PR>(-x._e); }
+    friend FloatUpperBound<PR> operator+(FloatValue<PR> const& x1, FloatError<PR> const& x2) { return FloatUpperBound<PR>(add_up(x1._v,x2._e)); }
+    friend FloatLowerBound<PR> operator-(FloatValue<PR> const& x1, FloatError<PR> const& x2) { return FloatLowerBound<PR>(sub_down(x1._v,x2._e)); }
+
+    friend Bool same(FloatError<PR> const& x1, FloatError<PR> const& x2) { return x1._e==x2._e; }
+    friend Bool refines(FloatError<PR> const& x1, FloatError<PR> const& x2) { return x1._e<=x2._e; }
+    friend FloatError<PR> refinement(FloatError<PR> const& x1, FloatError<PR> const& x2) { return FloatError<PR>(min(x1._e,x2._e)); }
+    friend OutputStream& operator<<(OutputStream& os, FloatError<PR> const& x) { return Operations<FloatError<PR>>::_write(os,x); }
+  public:
+    static Nat output_places;
+    static Void set_output_places(Nat p) { output_places=p; }
+};
+
+
+template<class PR> inline const FloatValue<PR> FloatBounds<PR>::value() const {
+    return FloatValue<PR>(med_near(this->_l,this->_u)); }
+
+template<class PR> inline const FloatError<PR> FloatBounds<PR>::error() const {
+    RawFloat<PR> _v=med_near(this->_l,this->_u); return FloatError<PR>(max(sub_up(this->_u,_v),sub_up(_v,this->_l))); }
+
+template<class PR> inline FloatValue<PR> value(FloatBounds<PR> const& x) {
+    return x.value(); }
+
+template<class PR> inline FloatError<PR> error(FloatBounds<PR> const& x) {
+    return x.error(); }
+
+template<class PR> inline const FloatValue<PR> FloatBall<PR>::value() const {
+    return FloatValue<PR>(this->_v); }
+
+template<class PR> inline const FloatError<PR> FloatBall<PR>::error() const {
+    return FloatError<PR>(this->_e); }
 
 
 template<class R, class A> R integer_cast(const A& _a);
@@ -761,7 +768,8 @@ template<class PR> class FloatFactory {
     FloatBounds<PR> create(Rational const& y) { return FloatBounds<PR>(y,_pr); }
     FloatValue<PR> create(Dyadic const& y) { return FloatValue<PR>(y,_pr); }
     FloatValue<PR> create(Integer const& y) { return FloatValue<PR>(y,_pr); }
-    template<class N, EnableIf<IsIntegral<N>> =dummy> FloatValue<PR> create(N const& y) { return FloatValue<PR>(y,_pr); }
+    template<class N, EnableIf<IsSignedIntegral<N>> =dummy> FloatValue<PR> create(N const& y) { return FloatValue<PR>(y,_pr); }
+    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy> PositiveFloatValue<PR> create(M const& y) { return PositiveFloatValue<PR>(y,_pr); }
     template<class D, EnableIf<IsFloatingPoint<D>> =dummy> FloatApproximation<PR> create(D const& y) { return FloatApproximation<PR>(RawFloat<PR>(y,_pr)); }
   public:
     template<class Y> using ConcreteType = decltype(FloatFactory<PR>::create(declval<Y>()));

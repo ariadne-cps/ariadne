@@ -271,7 +271,6 @@ template<class A> A NormedAlgebraOperations<A>::_rec(const A& x)
 
     auto eps=mag(rad/avg);
     ARIADNE_DEBUG_ASSERT(eps<1);
-
     // Compute the degree and truncation error
     Nat d=integer_cast<Nat>((log((1-eps)*tol)/log(eps))+1);
     auto te=pow(eps,d)/cast_positive(1-eps);

@@ -134,8 +134,8 @@ template<class P> class Number
         Number<P>(X const & x) : Number<P>(x.operator Number<ParadigmTag<X>>()) { }
 
     // Construct from a type which is convertible to another Number type.
-//    template<class X, EnableIf<IsWeaker<P,ParadigmTag<X>>> =dummy, EnableIf<IsConvertible<X,Number<ParadigmTag<X>>>> = dummy>
-//        Number<P>(X const & x) : Number<P>(x.operator Number<ParadigmTag<X>>()) { }
+    template<class X, EnableIf<IsWeaker<P,ParadigmTag<X>>> =dummy, EnableIf<IsConvertible<X,Number<ParadigmTag<X>>>> = dummy, DisableIf<IsConvertible<X,Real>> = dummy>
+        explicit Number<P>(X const & x) : Number<P>(x.operator Number<ParadigmTag<X>>()) { }
 
     //! \brief Get the value of the number as a double-precision floating-point type
     template<class WP, EnableIf<IsWeaker<WP,P>> =dummy>

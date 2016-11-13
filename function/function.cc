@@ -66,29 +66,26 @@ template<class X> class Expression;
 template<class X> class Variable;
 template<class X> class Space;
 SizeType dimension(const Space<Real>& spc);
-SizeType len(const List< Variable<Real> >& vars);
-Formula<Real> formula(const Expression<Real>& expr, const Space<Real>& spc);
-Formula<Real> formula(const Expression<Real>& expr, const List< Variable<Real> >& vars);
+Formula<EffectiveNumber> make_formula(const Expression<Real>& expr, const Space<Real>& spc);
+Vector<Formula<EffectiveNumber>> make_formula(const Vector<Expression<Real>>& e, const Space<Real> spc);
 
+EffectiveScalarUnivariateFunction make_formula_function(SizeOne as, const Formula<EffectiveNumber>& fm) {
+    return EffectiveScalarUnivariateFunction(RealDomain(),fm); }
+EffectiveScalarFunction make_formula_function(SizeType as, const Formula<EffectiveNumber>& fm) {
+    return EffectiveScalarFunction(EuclideanDomain(as),fm); }
+EffectiveVectorFunction make_formula_function(SizeType as, const Vector<Formula<EffectiveNumber>>& fm) {
+    return EffectiveVectorFunction(EuclideanDomain(as),fm); }
+
+// DEPRECATED
 EffectiveScalarFunction make_function(const Expression<Real>& expr, const Space<Real>& spc) {
-    return EffectiveScalarFunction(EuclideanDomain(dimension(spc)),formula(expr,spc)); }
-EffectiveScalarFunction make_function(const Expression<Real>& expr, const List< Variable<Real> >& vars) {
-    return EffectiveScalarFunction(EuclideanDomain(len(vars)),formula(expr,vars)); }
-
-OutputStream& operator<<(OutputStream& os, Expression<Real> const&);
+    return make_formula_function(dimension(spc),make_formula(expr,spc)); }
 
 EffectiveScalarUnivariateFunction make_function(const Variable<Real>& var, const Expression<Real>& expr) {
-    Space<Real> spc={var}; return EffectiveScalarUnivariateFunction(RealDomain(),formula(expr,spc)); }
+    Space<Real> spc={var}; return make_formula_function(SizeOne(),make_formula(expr,{var})); }
 EffectiveScalarFunction make_function(const Space<Real>& spc, const Expression<Real>& expr) {
-    return EffectiveScalarFunction(EuclideanDomain(dimension(spc)),formula(expr,spc)); }
+    return make_formula_function(dimension(spc),make_formula(expr,spc)); }
 EffectiveVectorFunction make_function(const Space<Real>& spc, const Vector<Expression<Real>>& expr) {
-    List<EffectiveScalarFunction> lsf;
-    for(SizeType i=0; i!=expr.size(); ++i) {
-        lsf.append(make_function(spc,expr[i]));
-    }
-    return EffectiveVectorFunction(lsf);
-}
-
+    return make_formula_function(dimension(spc),make_formula(expr,spc)); }
 
 //------------------------ Vector of Scalar functions  -----------------------------------//
 
@@ -401,11 +398,6 @@ template<class P, class D, class C> Function<P,D,C>::Function(ResultSizeType rs,
     (*this) = make_zero_function<P,D>(rs,bx_dom);
 }
 
-template<class P, class D, class C> Function<P,D,C>::Function(EuclideanDomain dom, Result<Formula<Y>>const& e) {
-    BoxDomain const& bx_dom=dom;
-    (*this) = Function<P,D,C>(make_domain<D>(bx_dom),e);
-}
-
 template<class P, class D, class C> Function<P,D,C>::Function(DomainType dom) {
     ResultSizeType rs; (*this) = make_zero_function<P,D>(rs,dom);
 }
@@ -432,10 +424,6 @@ template<class P, class Y> VectorFunction<P,BoxDomain> make_formula_function(Box
 
 template<class P, class D, class C> Function<P,D,C>::Function(DomainType dom, Result<Formula<Y>>const& e) {
     *this = make_formula_function<P>(dom,e);
-}
-
-template<class P, class D, class C> Function<P,D,C>::Function(EuclideanDomain dom, List<Formula<Y>> const& e)
-    : Function(dom, checked_construct<Result<Formula<Y>>>(e)) {
 }
 
 template<class P, class D, class C> Function<P,D,C>::Function(ResultSizeType rs, ScalarFunction<P,D> sf)
@@ -605,122 +593,122 @@ EffectiveScalarFunction operator+(const EffectiveScalarFunction& f)
 
 EffectiveScalarFunction operator-(const EffectiveScalarFunction& f)
 {
-    const RealScalarFormulaFunction* ff=dynamic_cast<const RealScalarFormulaFunction*>(f.raw_pointer());
-    if(ff) { return function(ff->_argument_size,-ff->_formula); }
+    const EffectiveScalarFormulaFunction* ff=dynamic_cast<const EffectiveScalarFormulaFunction*>(f.raw_pointer());
+    if(ff) { return make_formula_function(ff->_argument_size,-ff->_formula); }
     return make_unary_function(Neg(),f);
 }
 
 EffectiveScalarFunction operator+(const EffectiveScalarFunction& f1, const EffectiveScalarFunction& f2)
 {
-    const RealScalarFormulaFunction* e1=dynamic_cast<const RealScalarFormulaFunction*>(f1.raw_pointer());
-    const RealScalarFormulaFunction* e2=dynamic_cast<const RealScalarFormulaFunction*>(f2.raw_pointer());
+    const EffectiveScalarFormulaFunction* e1=dynamic_cast<const EffectiveScalarFormulaFunction*>(f1.raw_pointer());
+    const EffectiveScalarFormulaFunction* e2=dynamic_cast<const EffectiveScalarFormulaFunction*>(f2.raw_pointer());
     if(e1 && e2 && e1->_argument_size==e2->_argument_size) {
-        return function(e1->_argument_size,e1->_formula+e2->_formula);
+        return make_formula_function(e1->_argument_size,e1->_formula+e2->_formula);
     }
     return make_binary_function(Add(),f1,f2);
 }
 
 EffectiveScalarFunction operator-(const EffectiveScalarFunction& f1, const EffectiveScalarFunction& f2)
 {
-    const RealScalarFormulaFunction* e1=dynamic_cast<const RealScalarFormulaFunction*>(f1.raw_pointer());
-    const RealScalarFormulaFunction* e2=dynamic_cast<const RealScalarFormulaFunction*>(f2.raw_pointer());
+    const EffectiveScalarFormulaFunction* e1=dynamic_cast<const EffectiveScalarFormulaFunction*>(f1.raw_pointer());
+    const EffectiveScalarFormulaFunction* e2=dynamic_cast<const EffectiveScalarFormulaFunction*>(f2.raw_pointer());
     if(e1 && e2 && e1->_argument_size==e2->_argument_size) {
-        return function(e1->_argument_size,e1->_formula-e2->_formula);
+        return make_formula_function(e1->_argument_size,e1->_formula-e2->_formula);
     }
     return make_binary_function(Sub(),f1,f2);
 }
 
 EffectiveScalarFunction operator*(const EffectiveScalarFunction& f1, const EffectiveScalarFunction& f2)
 {
-    const RealScalarFormulaFunction* e1=dynamic_cast<const RealScalarFormulaFunction*>(f1.raw_pointer());
-    const RealScalarFormulaFunction* e2=dynamic_cast<const RealScalarFormulaFunction*>(f2.raw_pointer());
+    const EffectiveScalarFormulaFunction* e1=dynamic_cast<const EffectiveScalarFormulaFunction*>(f1.raw_pointer());
+    const EffectiveScalarFormulaFunction* e2=dynamic_cast<const EffectiveScalarFormulaFunction*>(f2.raw_pointer());
     if(e1 && e2 && e1->_argument_size==e2->_argument_size) {
-        return function(e1->_argument_size,e1->_formula*e2->_formula);
+        return make_formula_function(e1->_argument_size,e1->_formula*e2->_formula);
     }
     return make_binary_function(Mul(),f1,f2);
 }
 
 EffectiveScalarFunction operator/(const EffectiveScalarFunction& f1, const EffectiveScalarFunction& f2)
 {
-    const RealScalarFormulaFunction* e1=dynamic_cast<const RealScalarFormulaFunction*>(f1.raw_pointer());
-    const RealScalarFormulaFunction* e2=dynamic_cast<const RealScalarFormulaFunction*>(f2.raw_pointer());
+    const EffectiveScalarFormulaFunction* e1=dynamic_cast<const EffectiveScalarFormulaFunction*>(f1.raw_pointer());
+    const EffectiveScalarFormulaFunction* e2=dynamic_cast<const EffectiveScalarFormulaFunction*>(f2.raw_pointer());
     if(e1 && e2 && e1->_argument_size==e2->_argument_size) {
-        return function(e1->_argument_size,e1->_formula/e2->_formula);
+        return make_formula_function(e1->_argument_size,e1->_formula/e2->_formula);
     }
     return make_binary_function(Div(),f1,f2);
 }
 
 
-EffectiveScalarFunction operator+(const EffectiveScalarFunction& f1, const Real& s2)
+EffectiveScalarFunction operator+(const EffectiveScalarFunction& f1, const EffectiveNumber& s2)
 {
-    const RealScalarFormulaFunction* e1=dynamic_cast<const RealScalarFormulaFunction*>(f1.raw_pointer());
-    if(e1) { return function(e1->_argument_size,e1->_formula+s2); }
+    const EffectiveScalarFormulaFunction* e1=dynamic_cast<const EffectiveScalarFormulaFunction*>(f1.raw_pointer());
+    if(e1) { return make_formula_function(e1->_argument_size,e1->_formula+s2); }
     return f1+EffectiveScalarFunction::constant(f1.argument_size(),s2);
 }
 
-EffectiveScalarFunction operator-(const EffectiveScalarFunction& f1, const Real& s2)
+EffectiveScalarFunction operator-(const EffectiveScalarFunction& f1, const EffectiveNumber& s2)
 {
-    const RealScalarFormulaFunction* e1=dynamic_cast<const RealScalarFormulaFunction*>(f1.raw_pointer());
-    if(e1) { return function(e1->_argument_size,e1->_formula-s2); }
+    const EffectiveScalarFormulaFunction* e1=dynamic_cast<const EffectiveScalarFormulaFunction*>(f1.raw_pointer());
+    if(e1) { return make_formula_function(e1->_argument_size,e1->_formula-s2); }
     return f1-EffectiveScalarFunction::constant(f1.argument_size(),s2);
 }
 
-EffectiveScalarFunction operator*(const EffectiveScalarFunction& f1, const Real& s2)
+EffectiveScalarFunction operator*(const EffectiveScalarFunction& f1, const EffectiveNumber& s2)
 {
-    const RealScalarFormulaFunction* e1=dynamic_cast<const RealScalarFormulaFunction*>(f1.raw_pointer());
-    if(e1) { return function(e1->_argument_size,e1->_formula*s2); }
+    const EffectiveScalarFormulaFunction* e1=dynamic_cast<const EffectiveScalarFormulaFunction*>(f1.raw_pointer());
+    if(e1) { return make_formula_function(e1->_argument_size,e1->_formula*s2); }
     return f1*EffectiveScalarFunction::constant(f1.argument_size(),s2);
 }
 
-EffectiveScalarFunction operator/(const EffectiveScalarFunction& f1, const Real& s2)
+EffectiveScalarFunction operator/(const EffectiveScalarFunction& f1, const EffectiveNumber& s2)
 {
-    const RealScalarFormulaFunction* e1=dynamic_cast<const RealScalarFormulaFunction*>(f1.raw_pointer());
-    if(e1) { return function(e1->_argument_size,e1->_formula/s2); }
+    const EffectiveScalarFormulaFunction* e1=dynamic_cast<const EffectiveScalarFormulaFunction*>(f1.raw_pointer());
+    if(e1) { return make_formula_function(e1->_argument_size,e1->_formula/s2); }
     return f1/EffectiveScalarFunction::constant(f1.argument_size(),s2);
 }
 
 EffectiveScalarFunction operator/(const EffectiveScalarFunction& f1, Int s2)
 {
-    return f1/Real(s2);
+    return f1/EffectiveNumber(s2);
 }
 
-EffectiveScalarFunction operator+(const Real& s1, const EffectiveScalarFunction& f2)
+EffectiveScalarFunction operator+(const EffectiveNumber& s1, const EffectiveScalarFunction& f2)
 {
     return f2+s1;
 }
 
-EffectiveScalarFunction operator-(const Real& s1, const EffectiveScalarFunction& f2)
+EffectiveScalarFunction operator-(const EffectiveNumber& s1, const EffectiveScalarFunction& f2)
 {
-    const RealScalarFormulaFunction* e2=dynamic_cast<const RealScalarFormulaFunction*>(f2.raw_pointer());
-    if(e2) { return function(e2->_argument_size,s1-e2->_formula); }
+    const EffectiveScalarFormulaFunction* e2=dynamic_cast<const EffectiveScalarFormulaFunction*>(f2.raw_pointer());
+    if(e2) { return make_formula_function(e2->_argument_size,s1-e2->_formula); }
     return EffectiveScalarFunction::constant(f2.argument_size(),s1)-f2;
 }
 
-EffectiveScalarFunction operator*(const Real& s1, const EffectiveScalarFunction& f2)
+EffectiveScalarFunction operator*(const EffectiveNumber& s1, const EffectiveScalarFunction& f2)
 {
     return f2*s1;
 }
 
 
-EffectiveScalarFunction operator/(const Real& s1, const EffectiveScalarFunction& f2)
+EffectiveScalarFunction operator/(const EffectiveNumber& s1, const EffectiveScalarFunction& f2)
 {
-    const RealScalarFormulaFunction* e2=dynamic_cast<const RealScalarFormulaFunction*>(f2.raw_pointer());
-    if(e2) { return function(e2->_argument_size,s1/e2->_formula); }
+    const EffectiveScalarFormulaFunction* e2=dynamic_cast<const EffectiveScalarFormulaFunction*>(f2.raw_pointer());
+    if(e2) { return make_formula_function(e2->_argument_size,s1/e2->_formula); }
     return EffectiveScalarFunction::constant(f2.argument_size(),s1)/f2;
 }
 
 EffectiveScalarFunction pow(const EffectiveScalarFunction& f, SizeType m)
 {
-    const RealScalarFormulaFunction* e=dynamic_cast<const RealScalarFormulaFunction*>(f.raw_pointer());
-    if(e) { return function(e->_argument_size,pow(e->_formula,m)); }
+    const EffectiveScalarFormulaFunction* e=dynamic_cast<const EffectiveScalarFormulaFunction*>(f.raw_pointer());
+    if(e) { return make_formula_function(e->_argument_size,pow(e->_formula,m)); }
     return make_binary_function(Pow(),f,m);
 }
 
 
 EffectiveScalarFunction pow(const EffectiveScalarFunction& f, Int n)
 {
-    const RealScalarFormulaFunction* e=dynamic_cast<const RealScalarFormulaFunction*>(f.raw_pointer());
-    if(e) { return function(e->_argument_size, pow(e->_formula,n)); }
+    const EffectiveScalarFormulaFunction* e=dynamic_cast<const EffectiveScalarFormulaFunction*>(f.raw_pointer());
+    if(e) { return make_formula_function(e->_argument_size, pow(e->_formula,n)); }
     return make_binary_function(Pow(),f,n);
 }
 
@@ -764,14 +752,14 @@ EffectiveScalarFunction operator*(const EffectiveScalarFunction& f1, const Int& 
 EffectiveScalarFunction operator/(const Int& s1, const EffectiveScalarFunction& f2) { return EffectiveNumericType(s1)/f2; }
 EffectiveScalarFunction operator/(const EffectiveScalarFunction& f1, const Int& s2) { return f1/EffectiveNumericType(s2); }
 
-ValidatedScalarFunction operator+(const Int& s1, const ValidatedScalarFunction& f2) { return ValidatedNumericType(s1)+f2; }
-ValidatedScalarFunction operator+(const ValidatedScalarFunction& f1, const Int& s2) { return f1+ValidatedNumericType(s2); }
-ValidatedScalarFunction operator-(const Int& s1, const ValidatedScalarFunction& f2) { return ValidatedNumericType(s1)-f2; }
-ValidatedScalarFunction operator-(const ValidatedScalarFunction& f1, const Int& s2) { return f1-ValidatedNumericType(s2); }
-ValidatedScalarFunction operator*(const Int& s1, const ValidatedScalarFunction& f2) { return ValidatedNumericType(s1)*f2; }
-ValidatedScalarFunction operator*(const ValidatedScalarFunction& f1, const Int& s2) { return f1*ValidatedNumericType(s2); }
-ValidatedScalarFunction operator/(const Int& s1, const ValidatedScalarFunction& f2) { return ValidatedNumericType(s1)/f2; }
-ValidatedScalarFunction operator/(const ValidatedScalarFunction& f1, const Int& s2) { return f1/ValidatedNumericType(s2); }
+ValidatedScalarFunction operator+(const Int& s1, const ValidatedScalarFunction& f2) { return ValidatedNumber(s1)+f2; }
+ValidatedScalarFunction operator+(const ValidatedScalarFunction& f1, const Int& s2) { return f1+ValidatedNumber(s2); }
+ValidatedScalarFunction operator-(const Int& s1, const ValidatedScalarFunction& f2) { return ValidatedNumber(s1)-f2; }
+ValidatedScalarFunction operator-(const ValidatedScalarFunction& f1, const Int& s2) { return f1-ValidatedNumber(s2); }
+ValidatedScalarFunction operator*(const Int& s1, const ValidatedScalarFunction& f2) { return ValidatedNumber(s1)*f2; }
+ValidatedScalarFunction operator*(const ValidatedScalarFunction& f1, const Int& s2) { return f1*ValidatedNumber(s2); }
+ValidatedScalarFunction operator/(const Int& s1, const ValidatedScalarFunction& f2) { return ValidatedNumber(s1)/f2; }
+ValidatedScalarFunction operator/(const ValidatedScalarFunction& f1, const Int& s2) { return f1/ValidatedNumber(s2); }
 
 
 
@@ -781,11 +769,11 @@ ValidatedScalarFunction operator/(const ValidatedScalarFunction& f1, const Int& 
 
 //------------------------ Vector function operators -------------------------------//
 
-EffectiveVectorFunction operator*(const EffectiveScalarFunction& f, const Vector<Real>& e) {
-    for(SizeType i=0; i!=e.size(); ++i) { ARIADNE_ASSERT(decide(e[i]==Real(0)) || decide(e[i]==Real(1))); }
+EffectiveVectorFunction operator*(const EffectiveScalarFunction& f, const Vector<EffectiveNumber>& e) {
+    for(SizeType i=0; i!=e.size(); ++i) { ARIADNE_ASSERT(decide(e[i]==EffectiveNumber(0)) || decide(e[i]==EffectiveNumber(1))); }
     VectorFunction<EffectiveTag> r(e.size(),f.domain());
     for(SizeType i=0; i!=e.size(); ++i) {
-        if(decide(e[i]==Real(1))) { r.set(i,f); }
+        if(decide(e[i]==EffectiveNumber(1))) { r.set(i,f); }
     }
     return r;
 }
@@ -828,7 +816,7 @@ EffectiveVectorFunction operator*(const EffectiveScalarFunction& sf, const Effec
     return r;
 }
 
-EffectiveVectorFunction operator*(const Real& c, const EffectiveVectorFunction& vf) {
+EffectiveVectorFunction operator*(const EffectiveNumber& c, const EffectiveVectorFunction& vf) {
     EffectiveVectorFunction r(vf.result_size(),vf.domain());
     for(SizeType i=0; i!=r.result_size(); ++i) {
         r.set(i,c*vf[i]);
@@ -956,21 +944,21 @@ template<class OP> ValidatedScalarFunction apply(OP op, ValidatedScalarFunction 
     }
 }
 
-template<class OP> ValidatedScalarFunction apply(OP op, ValidatedScalarFunction const& f1, ValidatedNumericType const& c2) {
+template<class OP> ValidatedScalarFunction apply(OP op, ValidatedScalarFunction const& f1, ValidatedNumber const& c2) {
     std::shared_ptr<ValidatedScalarFunctionModelInterface const>
         f1p=std::dynamic_pointer_cast<ValidatedScalarFunctionModelInterface const>(f1.managed_pointer());
     if(f1p) {
-        ValidatedScalarFunctionModel f1m=f1p; return op(f1m,c2);
+        ValidatedScalarFunctionModel f1m=f1p; return op(f1m,ValidatedNumericType(c2,ValidatedNumericType::PrecisionType()));
     } else {
         return ValidatedScalarFunction(new BinaryFunction<ValidatedTag>(op.code(),f1,f1.create_constant(c2)));
     }
 }
 
-template<class OP> ValidatedScalarFunction apply(OP op, ValidatedNumericType const& c1, ValidatedScalarFunction const& f2) {
+template<class OP> ValidatedScalarFunction apply(OP op, ValidatedNumber const& c1, ValidatedScalarFunction const& f2) {
     std::shared_ptr<ValidatedScalarFunctionModelInterface const>
         f2p=std::dynamic_pointer_cast<ValidatedScalarFunctionModelInterface const>(f2.managed_pointer());
     if(f2p) {
-        ValidatedScalarFunctionModel f2m=f2p; return op(c1,f2m);
+        ValidatedScalarFunctionModel f2m=f2p; return op(ValidatedNumericType(c1,ValidatedNumericType::PrecisionType()),f2m);
     } else {
         return ValidatedScalarFunction(new BinaryFunction<ValidatedTag>(op.code(),f2.create_constant(c1),f2));
     }
@@ -1014,35 +1002,35 @@ ValidatedScalarFunction operator/(ValidatedScalarFunction const& f1, ValidatedSc
     return apply(Div(),f1,f2);
 }
 
-ValidatedScalarFunction operator+(ValidatedScalarFunction const& f1, ValidatedNumericType const& c2) {
+ValidatedScalarFunction operator+(ValidatedScalarFunction const& f1, ValidatedNumber const& c2) {
     return apply(Add(),f1,c2);
 }
 
-ValidatedScalarFunction operator-(ValidatedScalarFunction const& f1, ValidatedNumericType const& c2) {
+ValidatedScalarFunction operator-(ValidatedScalarFunction const& f1, ValidatedNumber const& c2) {
     return apply(Sub(),f1,c2);
 }
 
-ValidatedScalarFunction operator*(ValidatedScalarFunction const& f1, ValidatedNumericType const& c2) {
+ValidatedScalarFunction operator*(ValidatedScalarFunction const& f1, ValidatedNumber const& c2) {
     return apply(Mul(),f1,c2);
 }
 
-ValidatedScalarFunction operator/(ValidatedScalarFunction const& f1, ValidatedNumericType const& c2) {
+ValidatedScalarFunction operator/(ValidatedScalarFunction const& f1, ValidatedNumber const& c2) {
     return apply(Div(),f1,c2);
 }
 
-ValidatedScalarFunction operator+(ValidatedNumericType const& c1, ValidatedScalarFunction const& f2) {
+ValidatedScalarFunction operator+(ValidatedNumber const& c1, ValidatedScalarFunction const& f2) {
     return apply(Add(),c1,f2);
 }
 
-ValidatedScalarFunction operator-(ValidatedNumericType const& c1, ValidatedScalarFunction const& f2) {
+ValidatedScalarFunction operator-(ValidatedNumber const& c1, ValidatedScalarFunction const& f2) {
     return apply(Sub(),c1,f2);
 }
 
-ValidatedScalarFunction operator*(ValidatedNumericType const& c1, ValidatedScalarFunction const& f2) {
+ValidatedScalarFunction operator*(ValidatedNumber const& c1, ValidatedScalarFunction const& f2) {
     return apply(Mul(),c1,f2);
 }
 
-ValidatedScalarFunction operator/(ValidatedNumericType const& c1, ValidatedScalarFunction const& f2) {
+ValidatedScalarFunction operator/(ValidatedNumber const& c1, ValidatedScalarFunction const& f2) {
     return apply(Div(),c1,f2);
 }
 
@@ -1055,19 +1043,19 @@ ValidatedScalarFunction& operator-=(ValidatedScalarFunction& f1, const Validated
     return f1=f1-f2;
 }
 
-ValidatedScalarFunction& operator+=(ValidatedScalarFunction& f1, const ValidatedNumericType& c2) {
+ValidatedScalarFunction& operator+=(ValidatedScalarFunction& f1, const ValidatedNumber& c2) {
     return f1=f1+c2;
 }
 
-ValidatedScalarFunction& operator-=(ValidatedScalarFunction& f1, const ValidatedNumericType& c2) {
+ValidatedScalarFunction& operator-=(ValidatedScalarFunction& f1, const ValidatedNumber& c2) {
     return f1=f1-c2;
 }
 
-ValidatedScalarFunction& operator*=(ValidatedScalarFunction& f1, const ValidatedNumericType& c2) {
+ValidatedScalarFunction& operator*=(ValidatedScalarFunction& f1, const ValidatedNumber& c2) {
     return f1=f1*c2;
 }
 
-ValidatedScalarFunction& operator/=(ValidatedScalarFunction& f1, const ValidatedNumericType& c2) {
+ValidatedScalarFunction& operator/=(ValidatedScalarFunction& f1, const ValidatedNumber& c2) {
     return f1=f1/c2;
 }
 

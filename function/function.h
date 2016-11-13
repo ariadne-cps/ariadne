@@ -125,7 +125,7 @@ template<class P> class FunctionFacade<P,IntervalDomain,BoxDomain> {
 };
 
 template<class P> class FunctionFacade<P,BoxDomain,IntervalDomain> {
-    typedef CanonicalNumericType<P> Y;
+    typedef Number<P> Y;
   public:
     template<class X> Covector<ArithmeticType<X,Y>> gradient(Vector<X> const& x) const;
     FunctionExpression<P,BoxDomain,IntervalDomain> operator() (const Vector<RealVariable>& x) const;
@@ -133,7 +133,7 @@ template<class P> class FunctionFacade<P,BoxDomain,IntervalDomain> {
 };
 
 template<class P> class FunctionFacade<P,BoxDomain,BoxDomain> {
-    typedef CanonicalNumericType<P> Y;
+    typedef Number<P> Y;
   public:
     template<class X> Matrix<ArithmeticType<X,Y>> jacobian(Vector<X> const& x) const;
     FunctionExpression<P,BoxDomain,BoxDomain> operator() (const Vector<RealVariable>& x) const;
@@ -141,10 +141,10 @@ template<class P> class FunctionFacade<P,BoxDomain,BoxDomain> {
 
 template<class P, class D, class C> class DeclareFunctionOperations;
 template<class P, class D> class DeclareFunctionOperations<P,D,IntervalDomain>
-    : DeclareTranscendentalAlgebraOperations<Function<P,D,IntervalDomain>,CanonicalNumericType<P>>
+    : DeclareTranscendentalAlgebraOperations<Function<P,D,IntervalDomain>,Number<P>>
     , DeclareMixedArithmeticOperators<Function<P,D,IntervalDomain>,Int> { };
 template<class P, class D> class DeclareFunctionOperations<P,D,BoxDomain>
-    : DeclareVectorAlgebraOperators<Function<P,D,BoxDomain>,Function<P,D,IntervalDomain>,CanonicalNumericType<P>> { };
+    : DeclareVectorAlgebraOperators<Function<P,D,BoxDomain>,Function<P,D,IntervalDomain>,Number<P>> { };
 
 //! \ingroup FunctionModule
 //! \brief A generic scalar function which can be evaluated over the number type \a X,  \f$f:\X^n\rightarrow\X\f$.
@@ -155,7 +155,7 @@ class Function
     , public DeclareFunctionOperations<P,D,C>
 {
     static_assert(IsStronger<P,ApproximateTag>::value,"P must be an information level/paradigm.");
-    typedef CanonicalNumericType<P> Y;
+    typedef Number<P> Y;
   protected:
     std::shared_ptr< const FunctionInterface<P,D,C> > _ptr;
   public:
@@ -176,8 +176,6 @@ class Function
     explicit Function(ResultSizeType rs, DomainType dom);
 
     explicit Function(DomainType dom, Result<Formula<Y>>const& e);
-    explicit Function(EuclideanDomain dom, Result<Formula<Y>>const& e);
-    explicit Function(EuclideanDomain dom, List<Formula<Y>>const& e);
     explicit Function(ResultSizeType rs, ScalarFunction<P,D> sf);
 
     Function(InitializerList<ScalarFunction<P,D>> const& lsf);
@@ -254,14 +252,14 @@ evaluate(const Function<P,D,C>& f, const ElementType<D,X>& x) -> decltype(f(x)) 
 
 template<class P, class C, class X> inline auto
 differential(const Function<P,IntervalDomain,C>& f, const X& x, DegreeType d)
-    -> ElementType<C,Differential<ArithmeticType<CanonicalNumericType<P>,X>>> {
-    auto dx=Differential<ArithmeticType<X,CanonicalNumericType<P>>>::identity(d,x); return f(dx);
+    -> ElementType<C,Differential<ArithmeticType<Number<P>,X>>> {
+    auto dx=Differential<ArithmeticType<X,Number<P>>>::identity(d,x); return f(dx);
 }
 
 template<class P, class C, class X> inline auto
 differential(const Function<P,BoxDomain,C>& f, const Vector<X>& x, DegreeType d)
-    -> ElementType<C,Differential<ArithmeticType<CanonicalNumericType<P>,X>>> {
-    auto dx=Differential<ArithmeticType<X,CanonicalNumericType<P>>>::identity(d,x); return f(dx);
+    -> ElementType<C,Differential<ArithmeticType<Number<P>,X>>> {
+    auto dx=Differential<ArithmeticType<X,Number<P>>>::identity(d,x); return f(dx);
 }
 
 RealExpression evaluate(EffectiveScalarFunction const& f, Vector<RealVariable> const& vars);
@@ -269,34 +267,34 @@ RealExpression evaluate(EffectiveScalarFunction const& f, Vector<RealVariable> c
 /*
 template<class P, class D, class C, class X> inline auto
 differential(const Function<P,D,C>& f, const ElementType<D,X>& x, DegreeType d)
-    -> ElementType<C,Differential<ArithmeticType<CanonicalNumericType<P>,X>>> {
+    -> ElementType<C,Differential<ArithmeticType<Number<P>,X>>> {
     auto dx=Differential<X>::create_identity(x,d); return f(dx);
 }
 */
 
 
-template<class P, class X> ArithmeticType<CanonicalNumericType<P>,X>
+template<class P, class X> ArithmeticType<Number<P>,X>
 derivative(const ScalarUnivariateFunction<P>& f, const X& x) {
     return differential(f,x,1u).gradient(); }
 
-template<class P, class X> Vector<ArithmeticType<CanonicalNumericType<P>,X>>
+template<class P, class X> Vector<ArithmeticType<Number<P>,X>>
 tangent(const VectorUnivariateFunction<P>& f, const X& x) {
     return column(differential(f,x,1u).jacobian(),0u); }
 
-template<class P, class X> Covector<ArithmeticType<CanonicalNumericType<P>,X>>
+template<class P, class X> Covector<ArithmeticType<Number<P>,X>>
 gradient(const ScalarMultivariateFunction<P>& f, const Vector<X>& x) {
     return differential(f,x,1u).gradient(); }
 
-template<class P, class X> Matrix<ArithmeticType<CanonicalNumericType<P>,X>>
+template<class P, class X> Matrix<ArithmeticType<Number<P>,X>>
 jacobian(const VectorMultivariateFunction<P>& f, const Vector<X>& x) {
     return differential(f,x,1u).jacobian(); }
 
-template<class P> template<class X> Covector<ArithmeticType<X,CanonicalNumericType<P>>>
+template<class P> template<class X> Covector<ArithmeticType<X,Number<P>>>
 FunctionFacade<P,BoxDomain,IntervalDomain>::gradient(Vector<X> const& x) const {
     return Ariadne::gradient(static_cast<Function<P,BoxDomain,IntervalDomain>const&>(*this),x);
 }
 
-template<class P> template<class X> Matrix<ArithmeticType<X,CanonicalNumericType<P>>>
+template<class P> template<class X> Matrix<ArithmeticType<X,Number<P>>>
 FunctionFacade<P,BoxDomain,BoxDomain>::jacobian(Vector<X> const& x) const {
     return Ariadne::jacobian(static_cast<Function<P,BoxDomain,BoxDomain>const&>(*this),x);
 }
@@ -305,21 +303,21 @@ FunctionFacade<P,BoxDomain,BoxDomain>::jacobian(Vector<X> const& x) const {
 /*
 template<class P, class D> class ScalarFunction : public Function<P,D,IntervalDomain> {
     typedef IntervalDomain C;
-    typedef CanonicalNumericType<P> X;
+    typedef Number<P> Y;
   public:
     typedef D DomainType;
     using Function<P,D,C>::Function;
     ScalarFunction<P,D>() : ScalarFunction(D()) { }
     ScalarFunction<P,D>(Function<P,D,C>const& f) : Function<P,D,C>(f) { }
     explicit ScalarFunction<P,D>(SizeType as) : ScalarFunction(D(as)) { }
-    ScalarFunction<P,D>(SizeType as, Formula<X> const& e) : ScalarFunction(D(as),e) { }
+    ScalarFunction<P,D>(SizeType as, Formula<Y> const& e) : ScalarFunction(D(as),e) { }
     explicit ScalarFunction<P,D>(D dom);
-    ScalarFunction<P,D>(D dom, Formula<X> const& e);
+    ScalarFunction<P,D>(D dom, Formula<Y> const& e);
 };
 
 template<class P, class D> class VectorFunction : public Function<P,D,BoxDomain> {
     typedef BoxDomain C;
-    typedef CanonicalNumericType<P> X;
+    typedef Number<P> Y;
   public:
     using Function<P,D,BoxDomain>::Function;
     VectorFunction();
@@ -329,7 +327,7 @@ template<class P, class D> class VectorFunction : public Function<P,D,BoxDomain>
     VectorFunction(List<ScalarFunction<P,D>> const& lsf);
     VectorFunction(Vector<ScalarFunction<P,D>> const& vsf);
     VectorFunction(SizeType rs, ScalarFunction<P,D> const& sf);
-    VectorFunction(SizeType as, List<Formula<X>> const& le);
+    VectorFunction(SizeType as, List<Formula<Y>> const& le);
 
     Void set(SizeType i, ScalarFunction<P,D> const& f);
     ScalarFunction<P,D> get(SizeType i) const;
@@ -385,11 +383,11 @@ template<class P>
 class VectorFunction
 {
     static_assert(IsStronger<P,ApproximateTag>::value,"P must be an information level/paradigm.");
-    typedef CanonicalNumericType<P> X;
+    typedef Number<P> Y;
   private:
     std::shared_ptr< const VectorFunctionInterface<P> > _ptr;
   public:
-    typedef X NumericType;
+    typedef Y NumericType;
 
     static VectorFunction<P> zeros(SizeType rs, SizeType as);
     static VectorFunction<P> identity(SizeType n);
@@ -466,6 +464,7 @@ template<class X> VectorFunction<X> compose(const VectorFunction<X>& f, const Ve
 template<class X> ScalarFunction<X> lie_derivative(const ScalarFunction<X>& g, const VectorFunction<X>& f);
 */
 
+inline ValidatedScalarFunction& operator*=(ValidatedScalarFunction& sf, const ExactNumber& c) { return sf*=ValidatedNumber(c); }
 EffectiveVectorFunction operator*(const EffectiveNumericType& c, const EffectiveVectorFunction& vf);
 
 EffectiveScalarFunction embed(SizeType as1, const EffectiveScalarFunction& f2, SizeType as3);

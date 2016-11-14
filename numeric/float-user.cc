@@ -1643,7 +1643,7 @@ template<class PR> struct Operations<PositiveFloatUpperBound<PR>> {
     }
 
     static PositiveFloatUpperBound<PR> _div(PositiveFloatUpperBound<PR> const& x1, FloatLowerBound<PR> const& x2) {
-        ARIADNE_ASSERT_MSG(x2._l>=0.0,x2); PositiveFloatUpperBound<PR>(div_up(x1._u,x2._l));
+        ARIADNE_ASSERT_MSG(x2._l>=0.0,x2); return PositiveFloatUpperBound<PR>(div_up(x1._u,x2._l));
     }
 
     static PositiveFloatUpperBound<PR> _pow(PositiveFloatUpperBound<PR> const& x1, Nat m2) {

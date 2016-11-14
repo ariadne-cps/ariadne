@@ -234,7 +234,7 @@ class Function
         return Function<P,D,C>(f.reference()._derivative(k)); }
 
     template<class X> decltype(auto) differential(const Argument<X>& x, DegreeType d) const {
-        return this->_ptr->_evaluate(Differential<X>::identity(d,x)); }
+        return this->_ptr->_evaluate(Differential<EvaluateType<P,X>>::identity(d,x)); }
 
     Void set(SizeType i, ScalarFunction<P,D>);
     Function<P,D,IntervalDomain> get(SizeType i) const;

@@ -143,8 +143,6 @@ class FunctionInterface<ValidatedTag,D,C>
 
     inline Result<ValidatedNumericType> _evaluate(const Argument<Float64Value>& x) const {
         return this->_evaluate(Argument<ValidatedNumericType>(x)); }
-    inline Result<Differential<ValidatedNumericType>> _evaluate(const Argument<Differential<Float64Value>>& x) const {
-        return this->_evaluate(Argument<Differential<ValidatedNumericType>>(x)); }
 
     virtual FunctionInterface<P,D,C>* _clone() const = 0;
     virtual FunctionInterface<P,D,C>* _derivative(SizeType i) const = 0;

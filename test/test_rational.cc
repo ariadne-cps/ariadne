@@ -25,6 +25,7 @@
 
 #include "numeric/rational.h"
 #include "numeric/integer.h"
+#include "numeric/dyadic.h"
 #include "numeric/logical.h"
 
 #include <iomanip>
@@ -42,11 +43,15 @@ class TestRational
   private:
     void test_concept();
     void test_literal();
+    void test_conversions();
+    void test_arithmetic();
 };
 
 void TestRational::test()
 {
     ARIADNE_TEST_CALL(test_literal());
+    ARIADNE_TEST_CALL(test_conversions());
+    ARIADNE_TEST_CALL(test_arithmetic());
 }
 
 void TestRational::test_concept() {
@@ -89,6 +94,21 @@ void TestRational::test_literal() {
     ARIADNE_TEST_FAIL(0.453591850358036834_q);
     ARIADNE_TEST_FAIL(3.1415926535897931_q);
 }
+
+void TestRational::test_conversions() {
+    ARIADNE_TEST_EQUAL(Rational(Integer(-3)),Rational(-3,1));
+    ARIADNE_TEST_EQUAL(Rational(Dyadic(-13)),Rational(-13));
+    ARIADNE_TEST_EQUAL(Rational(Dyadic(-13,3u)),Rational(-13,8));
+}
+
+void TestRational::test_arithmetic() {
+    ARIADNE_TEST_EQUAL(Rational(4,5)+Rational(-2,7),Rational(18,35));
+    ARIADNE_TEST_EQUAL(Rational(-4,5)-Rational(-2,7),Rational(-18,35));
+    ARIADNE_TEST_EQUAL(Rational(4,5)*Rational(-2,7),Rational(-8,35));
+    ARIADNE_TEST_EQUAL(Rational(4,5)/Rational(-2,7),Rational(-14,5));
+};
+
+
 
 int main() {
     std::cout<<std::setprecision(20);

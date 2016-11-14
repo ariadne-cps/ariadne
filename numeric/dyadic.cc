@@ -59,10 +59,13 @@ Dyadic::Dyadic(Integer const& p, Nat q) {
     //if(q>=0) { mpf_div_2exp(_mpf,_mpf,q); } else { mpf_mul_2exp(_mpf,_mpf,-q); }
 }
 
-Dyadic::Dyadic() : Dyadic(Integer(0)) {
+Dyadic::Dyadic() {
+    mpf_init2(_mpf,maximum_precision);
 }
 
-Dyadic::Dyadic(Integer const& z) : Dyadic(z,1u) {
+Dyadic::Dyadic(Integer const& z) {
+    mpf_init2(_mpf,maximum_precision);
+    mpf_set_z(_mpf,z._mpz);
 }
 
 Dyadic::Dyadic(TwoExp const& w) : Dyadic(1u) {

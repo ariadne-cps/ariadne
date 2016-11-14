@@ -226,8 +226,10 @@ template<class PR> class FloatLowerBound
 
     template<class N, EnableIf<IsIntegral<N>> = dummy> FloatLowerBound<PR>(N n, PR pr) : FloatLowerBound<PR>(ExactDouble(n),pr) { }
     FloatLowerBound<PR>(ExactDouble d, PR pr);
-    FloatLowerBound<PR>(const Rational& q, PR pr);
-    FloatLowerBound<PR>(const Real& r, PR pr);
+        FloatLowerBound<PR>(const Integer& z, PR pr);
+        FloatLowerBound<PR>(const Dyadic& w, PR pr);
+        FloatLowerBound<PR>(const Rational& q, PR pr);
+        FloatLowerBound<PR>(const Real& r, PR pr);
     FloatLowerBound<PR>(const FloatLowerBound<PR>& x, PR pr);
     FloatLowerBound<PR>(const ValidatedLowerNumber& y, PR pr);
 
@@ -276,8 +278,10 @@ template<class PR> class FloatUpperBound
 
     template<class N, EnableIf<IsIntegral<N>> = dummy> FloatUpperBound<PR>(N n, PR pr) : FloatUpperBound<PR>(ExactDouble(n),pr) { }
     FloatUpperBound<PR>(ExactDouble d, PR pr);
-    FloatUpperBound<PR>(const Rational& q, PR pr);
-    FloatUpperBound<PR>(const Real& r, PR pr);
+        FloatUpperBound<PR>(const Integer& z, PR pr);
+        FloatUpperBound<PR>(const Dyadic& w, PR pr);
+        FloatUpperBound<PR>(const Rational& q, PR pr);
+        FloatUpperBound<PR>(const Real& r, PR pr);
     FloatUpperBound<PR>(const FloatUpperBound<PR>& x, PR pr);
     FloatUpperBound<PR>(const ValidatedUpperNumber& y, PR pr);
 

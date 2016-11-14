@@ -106,7 +106,7 @@ class Dyadic
 };
 
 template<class M, EnableIf<And<IsIntegral<M>,IsUnsigned<M>>>> inline Dyadic::Dyadic(M m) : Dyadic(Integer(m)) { }
-template<class N, EnableIf<And<IsIntegral<N>,IsSigned<N>>>> inline Dyadic::Dyadic(N n) : Dyadic(Dyadic(n)) { }
+template<class N, EnableIf<And<IsIntegral<N>,IsSigned<N>>>> inline Dyadic::Dyadic(N n) : Dyadic(Integer(n)) { }
 
 
 inline Dyadic operator"" _bin(long double x) { return Dyadic(static_cast<double>(x)); }

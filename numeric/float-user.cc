@@ -240,8 +240,16 @@ template<class PR> FloatBounds<PR>::operator ValidatedNumber() const {
     return ValidatedNumber(new NumberWrapper<FloatBounds<PR>>(*this));
 }
 
+template<class PR> FloatUpperBound<PR>::FloatUpperBound(Integer const& z, PR pr)
+    : _u(z,RawFloat<PR>::upward,pr) {
+}
+
+template<class PR> FloatUpperBound<PR>::FloatUpperBound(Dyadic const& w, PR pr)
+    : _u(w,RawFloat<PR>::upward,pr) {
+}
+
 template<class PR> FloatUpperBound<PR>::FloatUpperBound(Rational const& q, PR pr)
-    : FloatUpperBound(FloatBounds<PR>(q,pr)) {
+    : _u(q,RawFloat<PR>::upward,pr) {
 }
 
 template<class PR> FloatUpperBound<PR>::FloatUpperBound(Real const& r, PR pr)
@@ -273,8 +281,16 @@ template<class PR> FloatUpperBound<PR> FloatUpperBound<PR>::create(ValidatedUppe
     return FloatUpperBound<PR>(y,this->precision());
 }
 
+template<class PR> FloatLowerBound<PR>::FloatLowerBound(Integer const& z, PR pr)
+    : _l(z,RawFloat<PR>::downward,pr) {
+}
+
+template<class PR> FloatLowerBound<PR>::FloatLowerBound(Dyadic const& w, PR pr)
+    : _l(w,RawFloat<PR>::downward,pr) {
+}
+
 template<class PR> FloatLowerBound<PR>::FloatLowerBound(Rational const& q, PR pr)
-    : FloatLowerBound(FloatBounds<PR>(q,pr)) {
+    : _l(q,RawFloat<PR>::downward,pr) {
 }
 
 template<class PR> FloatLowerBound<PR>::FloatLowerBound(Real const& r, PR pr)

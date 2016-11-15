@@ -405,7 +405,7 @@ template<class F> inline Void _acc(TaylorModel<ValidatedTag,F>& r, const Bounds<
     }
 
     if(r.expansion().empty()) { // Append a constant term zero
-        r._append(MultiIndex(r.argument_size()),FloatValue<PR>(-1,r.precision()));
+        r._append(MultiIndex(r.argument_size()),FloatValue<PR>(0,r.precision()));
     } else if((r.end()-1)->key().degree()>0) { // Append a constant term zero
         r._append(MultiIndex(r.argument_size()),FloatValue<PR>(0,r.precision()));
     }
@@ -978,24 +978,24 @@ compose(const AnalyticFunction& fn, const TaylorModel<ValidatedTag,F>& tm) {
     GradedSweeper const* graded_sweeper_ptr = dynamic_cast<GradedSweeper const*>(&sweeper);
     if(graded_sweeper_ptr) { max_degree=graded_sweeper_ptr->degree(); }
 
-    std::cerr<<"max_truncation_error="<<max_truncation_error<<"\nmax_degree="<<(uint)max_degree<<"\n";
+    //std::cerr<<"max_truncation_error="<<max_truncation_error<<"\nmax_degree="<<(uint)max_degree<<"\n";
 
     Nat d=max_degree;
     FloatValue<PR> c=tm.value();
     Float64Bounds r=cast_singleton(tm.range());
     Series<Float64Bounds> centre_series=fn.series(c);
     Series<Float64Bounds> range_series=fn.series(r);
-    std::cerr<<"c="<<c<<"\nr="<<r<<"\n";
-    std::cerr<<"cs="<<centre_series<<"\nrs="<<range_series<<"\n";
+    //std::cerr<<"c="<<c<<"\nr="<<r<<"\n";
+    //std::cerr<<"cs="<<centre_series<<"\nrs="<<range_series<<"\n";
 
 
     FloatError<PR> se=mag(range_series[d]-centre_series[d]);
     FloatError<PR> e=mag(r-c);
     FloatError<PR> p=pow(e,d);
-    std::cerr<<"se="<<se<<"\ne="<<e<<"\np="<<p<<"\n";
+    //std::cerr<<"se="<<se<<"\ne="<<e<<"\np="<<p<<"\n";
     // FIXME: Here we assume the dth derivative of f is monotone increasing
     FloatError<PR> truncation_error=se*p;
-    std::cerr<<"truncation_error="<<truncation_error<<"\n\n";
+    //std::cerr<<"truncation_error="<<truncation_error<<"\n\n";
     if(truncation_error.raw()>max_truncation_error) {
         ARIADNE_WARN("Truncation error estimate "<<truncation_error
                  <<" is greater than maximum allowable truncation error "<<max_truncation_error<<"\n");
@@ -1120,7 +1120,7 @@ template<class F> Void TaylorModel<ValidatedTag,F>::antidifferentiate(SizeType k
 
     FloatError<PR> e=nul(this->error());
     for(typename TaylorModel<ValidatedTag,F>::Iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-        MultiIndex& xa=xiter->key();
+        MultiIndexReference xa=xiter->key();
         FloatValue<PR>& xv=xiter->data();
         xa[k]+=1;
         Nat c=xa[k];
@@ -1153,7 +1153,7 @@ template<class F> Void TaylorModel<ValidatedTag,F>::differentiate(SizeType k) {
         FloatValue<PR> const& xv=xiter->data();
         Nat c=xa[k];
         if(c!=0) {
-            MultiIndex& ra=riter->key();
+            MultiIndexReference ra=riter->key();
             FloatValue<PR>& rv=riter->data();
             ra=xa; ra[k]-=1;
             rv=mul_err(xv,c,re);

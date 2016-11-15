@@ -167,7 +167,10 @@ class TaylorModel<ValidatedTag,F>
     static TaylorModel<ValidatedTag,F> zero(SizeType as, Sweeper swp) {
         TaylorModel<ValidatedTag,F> r(as,swp); return r; }
     //! \brief Construct a constant quantity in \a as independent variables.
-    static TaylorModel<ValidatedTag,F> constant(SizeType as, const NumericType& c, Sweeper swp) {
+    static TaylorModel<ValidatedTag,F> constant(SizeType as, const ValidatedNumericType& c, Sweeper swp) {
+        TaylorModel<ValidatedTag,F> r(as,swp); r.set_value(CoefficientType(1,r.precision())); r*=c; return r; }
+    //! \brief Construct a constant quantity in \a as independent variables.
+    static TaylorModel<ValidatedTag,F> constant(SizeType as, const ValidatedNumber& c, Sweeper swp) {
         TaylorModel<ValidatedTag,F> r(as,swp); r.set_value(CoefficientType(1,r.precision())); r*=c; return r; }
     //! \brief Construct the quantity with expansion \f$x_j\f$ in \a as independent variables.
     static TaylorModel<ValidatedTag,F> coordinate(SizeType as, SizeType j, Sweeper swp) {

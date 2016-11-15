@@ -289,6 +289,11 @@ template<class M> Vector<FunctionPatch<M>> FunctionPatch<M>::create_coordinates(
     return FunctionPatch<M>::coordinates(this->domain(),this->_model.sweeper());
 }
 
+template<class M> typename FunctionPatch<M>::NumericType FunctionPatch<M>::create(GenericNumericType const& c) const
+{
+    return NumericType(c,this->model().precision());
+}
+
 template<class M> FunctionPatch<M> FunctionPatch<M>::create(GenericType const& f) const
 {
     return FunctionPatch<M>(this->domain(),f,this->_model.sweeper());
@@ -390,7 +395,8 @@ template<class M> ScalarFunctionType<M> FunctionPatch<M>::function() const
 
 template<class M> Bool FunctionPatch<M>::operator==(const FunctionPatch<M>& tv) const
 {
-    return this->_domain==tv._domain && same(this->_model,tv._model);
+    ARIADNE_DEPRECATED("operator==(FunctionPatch<M>,FunctionPatch<M>)","Use same(...) instead.");
+    return same(*this,tv);
 }
 
 
@@ -603,7 +609,7 @@ template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBoxType
 template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBoxType& d,
                                            const VectorFunctionType<M>& f,
                                            const Sweeper& swp)
-    : _domain(d), _models(f.result_size())
+    : _domain(d), _models()
 {
     //ARIADNE_ASSERT_MSG(f.result_size()>0, "d="<<d<<", f="<<f<<", swp="<<swp);
     ARIADNE_ASSERT(d.size()==f.argument_size());
@@ -732,8 +738,8 @@ template<class M> VectorFunctionType<M> VectorFunctionPatch<M>::function() const
 
 template<class M> Bool VectorFunctionPatch<M>::operator==(const VectorFunctionPatch<M>& tm) const
 {
-    ARIADNE_NOT_IMPLEMENTED;
-    //return this->_models==tm._models;
+    ARIADNE_DEPRECATED("operator==(VectorFunctionPatch<M>,VectorFunctionPatch<M>)","Use same(...) instead.");
+    return same(*this,tm);
 }
 
 

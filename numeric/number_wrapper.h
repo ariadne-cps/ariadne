@@ -227,7 +227,7 @@ template<class X> struct NumberGetterMixin : public virtual NumberInterface {
     template<class R, class PR, EnableIf<IsConstructible<R,X,PR>> = dummy>
         inline R _get_as(PR pr) const { return R(_cast(*this),pr); }
     template<class R, class PR, DisableIf<IsConstructible<R,X,PR>> = dummy>
-        inline R _get_as(PR pr) const { std::cerr<<"Warning: Cannot convert " << _cast(*this) << " of type " << this->_class_name() << " to " << class_name<R>() << " with precision" << pr << "\n"; throw ParadigmError(); }
+        inline R _get_as(PR pr) const { std::cerr<<"Warning: Cannot convert " << _cast(*this) << " of type " << this->_class_name() << " to " << class_name<R>() << " with precision " << pr << "\n"; throw ParadigmError(); }
 };
 
 template<class X> struct DispatchingTraits { typedef Aware<X> AwareOfTypes; };

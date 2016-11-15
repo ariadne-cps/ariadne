@@ -86,8 +86,6 @@ class Polynomial
     template<class XX> Polynomial(const Polynomial<XX>& p);
     //! \brief Copy/conversion constructor.
     template<class XX> explicit Polynomial(const Expansion<XX>& e);
-    //! \brief A dense polynomial with coefficients given by an initializer list of doubles.
-    explicit Polynomial(SizeType as, DegreeType deg, InitializerList<X> lst);
     //! \brief A sparse polynomial with coefficients given by an initializer list of indices and coefficients.
     Polynomial(InitializerList<Pair<InitializerList<DegreeType>,X>> lst);
     //@}

@@ -212,6 +212,8 @@ template<class A, class X, class Y> struct DispatchConcreteGenericAlgebraNumberO
     friend A operator/(A a1, Y const& y2) { a1/=y2; return std::move(a1); }
     friend A operator+(Y const& y1, A a2) { return a2+y1; }
     friend A operator-(Y const& y1, A a2) { return (-a2)+y1; }
+    friend A operator*(Y const& y1, A a2) { return a2*y1; }
+    friend A operator/(Y const& y1, A a2) { return rec(a2)*y1; }
 };
 
 

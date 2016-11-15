@@ -548,11 +548,8 @@ class TaylorModel<ApproximateTag,F>
     //@{
     /*! \name Comparison operators. */
     //! \brief Equality operator. Tests equality of representation, including error term.
-    Bool operator==(const TaylorModel<ApproximateTag,F>& other) const {
-        return this->_expansion==other._expansion; }
-    //! \brief Inequality operator.
-    Bool operator!=(const TaylorModel<ApproximateTag,F>& other) const {
-        return !(*this==other); }
+    friend Bool same(const TaylorModel<ApproximateTag,F>& tm1, const TaylorModel<ApproximateTag,F>& tm2) {
+        return same(tm1._expansion, tm2._expansion); }
     //@}
 
     //@{

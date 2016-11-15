@@ -97,6 +97,7 @@ template<class M> class FunctionPatch
     : public ScalarFunctionModelMixin<FunctionPatch<M>, typename M::Paradigm>
     , public DispatchSymbolicAlgebraOperations<FunctionPatch<M>, NumericType<M>>
     , public ProvideConcreteGenericArithmeticOperators<FunctionPatch<M>, ScalarFunction<typename M::Paradigm>>
+    , public DispatchConcreteGenericAlgebraNumberOperations<FunctionPatch<M>,NumericType<M>,Number<typename M::Paradigm>>
 {
     typedef typename M::Paradigm P;
   public:
@@ -109,8 +110,10 @@ template<class M> class FunctionPatch
     typedef typename ModelType::ErrorType ErrorType;
     typedef typename ModelType::NumericType NumericType;
     typedef typename ModelType::Paradigm Paradigm;
+    typedef typename ModelType::PrecisionType PrecisionType;
     typedef ScalarFunction<Paradigm> FunctionType;
     typedef ScalarFunction<Paradigm> GenericType;
+    typedef Number<Paradigm> GenericNumericType;
   private:
     static const CoefficientType _zero;
     DomainType _domain;
@@ -173,6 +176,7 @@ template<class M> class FunctionPatch
     FunctionPatch<M> create_constant(NumericType const& c) const;
     FunctionPatch<M> create_coordinate(SizeType j) const;
     FunctionPatch<M> create(GenericType const& f) const;
+    NumericType create(GenericNumericType const& f) const;
 
     FunctionPatch<M> create_constant(DomainType const&, NumericType const& c) const;
     FunctionPatch<M> create_coordinate(DomainType const&, SizeType j) const;
@@ -198,6 +202,8 @@ template<class M> class FunctionPatch
     const ErrorType& error() const { return this->_model.error(); }
     /*! \brief The accuracy parameter used to control approximation of the Taylor function. */
     Sweeper sweeper() const { return this->_model.sweeper(); }
+    /*! \brief The precision of the numbers used. */
+    PrecisionType precision() const { return this->_model.precision(); }
     //! \brief A reference to the expansion.
     ExpansionType& expansion() { return this->_model.expansion(); }
     //! \brief A reference to the error of the expansion over the domain.
@@ -233,7 +239,6 @@ template<class M> class FunctionPatch
 
     //@{
     /*! \name Comparison operators. */
-    //! \brief Equality operator. Tests equality of representation, including error term.
     Bool operator==(const FunctionPatch<M>& tv) const;
     //! \brief Inequality operator.
     Bool operator!=(const FunctionPatch<M>& tv) const { return !(*this==tv); }
@@ -341,6 +346,8 @@ template<class M> FunctionPatch<M> restriction(const FunctionPatch<M>& x, const 
 //! The extension is performed keeping \a x constant over the new coordinates. // DEPRECATED
 template<class M> FunctionPatch<M> extension(const FunctionPatch<M>& x, const ExactBoxType& d);
 
+//! \brief Test if the function models have the same representation.
+template<class M> Bool same(const FunctionPatch<M>& x1, const FunctionPatch<M>& x2);
 //! \brief Test if the quantity is a better approximation than \a t throughout the domain.
 template<class M> Bool refines(const FunctionPatch<M>& x1, const FunctionPatch<M>& x2);
 //! \brief Test if the function models are inconsistent with representing the same exact function.
@@ -659,6 +666,8 @@ template<class M> VectorFunctionPatch<M> extension(const VectorFunctionPatch<M>&
 
 template<class M> VectorFunctionPatch<M> embed(const ExactBoxType& d1, const VectorFunctionPatch<M>& tv2,const ExactBoxType& d3);
 
+//! \brief Test if the function models have the same representation.
+template<class M> Bool same(const VectorFunctionPatch<M>& x1, const VectorFunctionPatch<M>& x2);
 //! \brief Tests if a function \a f refines another function \a g.
 //! To be a refinement, the domain of \a f must contain the domain of \a g.
 template<class M> Bool refines(const VectorFunctionPatch<M>& f, const VectorFunctionPatch<M>& g);
@@ -717,6 +726,9 @@ template<class M> template<class E> VectorFunctionPatch<M>::VectorFunctionPatch(
 }
 
 template<class M> class VectorFunctionPatchElementReference
+    : public DispatchSymbolicAlgebraOperations<FunctionPatch<M>, NumericType<M>>
+    , public ProvideConcreteGenericArithmeticOperators<FunctionPatch<M>, ScalarFunction<typename M::Paradigm>>
+    , public DispatchConcreteGenericAlgebraNumberOperations<FunctionPatch<M>,NumericType<M>,Number<typename M::Paradigm>>
 {
     typedef M ModelType;
     typedef typename M::NumericType NumericType;
@@ -903,6 +915,10 @@ template<class M> Pair<FunctionPatch<M>,FunctionPatch<M>> split(const FunctionPa
     return make_pair(FunctionPatch<M>(subdomains.first,models.first),
                      FunctionPatch<M>(subdomains.second,models.second));
 
+}
+
+template<class M> Bool same(const FunctionPatch<M>& tv1, const FunctionPatch<M>& tv2) {
+    return tv1.domain()==tv2.domain() && same(tv1.model(),tv2.model());
 }
 
 template<class M> Bool refines(const FunctionPatch<M>& tv1, const FunctionPatch<M>& tv2) {
@@ -1093,6 +1109,14 @@ template<class M> Pair<VectorFunctionPatch<M>,VectorFunctionPatch<M>> split(cons
     return make_pair(VectorFunctionPatch<M>(subdomains.first,models.first),
                      VectorFunctionPatch<M>(subdomains.second,models.second));
 
+}
+
+template<class M> Bool same(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2) {
+    if(!same(f1.domain(),f2.domain())) { return false; }
+    for(SizeType i=0; i!=f1.result_size(); ++i) {
+        if(!same(f1[i],f2[i])) { return false; }
+    }
+    return true;
 }
 
 template<class M> Bool refines(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2) {

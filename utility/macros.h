@@ -148,7 +148,7 @@ bool decide(bool);
     static bool first_time=true; \
     if(first_time) { \
         first_time=false; \
-        std::cerr << "WARNING: Function" << #fn << " is deprecated. " << #msg << std::endl; \
+        std::cerr << "WARNING: Function " << #fn << " is deprecated. " << #msg << std::endl; \
     } \
 
 #define ARIADNE_WARN(msg)          \

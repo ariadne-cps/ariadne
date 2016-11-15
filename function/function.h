@@ -495,17 +495,9 @@ struct VectorFunctionElementReference
     template<class WP> operator Function<WP,D,SC> () const;
     Void operator=(const Function<P,D,SC>& sf);
     VectorFunctionElementReference<P,D>& operator=(const VectorFunctionElementReference<P,D>& sfr);
+    D domain() const;
     template<class XX> XX evaluate(const Vector<XX> & x) const;
     template<class XX> XX operator()(const Vector<XX> & x) const;
-    friend ElementType operator+(SelfType const& vfe1, SelfType const& vfe2) { return ElementType(vfe1)+ElementType(vfe2); }
-    friend ElementType operator-(SelfType const& vfe1, SelfType const& vfe2) { return ElementType(vfe1)-ElementType(vfe2); }
-    friend ElementType operator*(SelfType const& vfe1, SelfType const& vfe2) { return ElementType(vfe1)*ElementType(vfe2); }
-    friend ElementType operator/(SelfType const& vfe1, SelfType const& vfe2) { return ElementType(vfe1)/ElementType(vfe2); }
-    friend ElementType operator*(NumericType const& c1, SelfType const& vfe2) { return c1*ElementType(vfe2); }
-    friend ElementType operator/(NumericType const& c1, SelfType const& vfe2) { return c1/ElementType(vfe2); }
-    friend ElementType operator*(SelfType const& vfe1, NumericType const& c2) { return ElementType(vfe1)*c2; }
-    friend ElementType operator/(SelfType const& vfe1, NumericType const& c2) { return ElementType(vfe1)/c2; }
-    friend ElementType sqr(SelfType const& vfe) { return sqr(ElementType(vfe)); }
 };
 
 template<class P, class D> template<class WP> inline
@@ -531,6 +523,8 @@ template<class P, class D> inline Void VectorFunctionElementReference<P,D>::oper
     _vf.set(_i,sf); }
 template<class P, class D> inline VectorFunctionElementReference<P,D>& VectorFunctionElementReference<P,D>::operator=(const VectorFunctionElementReference<P,D>& sfr) {
     _vf.set(_i,static_cast<Function<P,D,SC>>(sfr)); return *this; }
+template<class P, class D> inline D VectorFunctionElementReference<P,D>::domain() const {
+    return _vf.domain(); }
 template<class P, class D> template<class XX> inline XX VectorFunctionElementReference<P,D>::evaluate(const Vector<XX> & x) const {
     return static_cast<Function<P,D,SC>>(*this).evaluate(x); }
 template<class P, class D> template<class XX> inline XX VectorFunctionElementReference<P,D>::operator()(const Vector<XX> & x) const {

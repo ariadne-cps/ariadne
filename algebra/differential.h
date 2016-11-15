@@ -51,6 +51,7 @@ template<class X> class Series;
 template<class X> class Expansion;
 template<class X> class Differential;
 template<class X> class UnivariateDifferential;
+template<class X> class NonAssignableDifferential;
 
 typedef Differential<Float64> FloatDifferential;
 typedef Differential<Float64Approximation> FloatApproximationDifferential;
@@ -69,6 +70,7 @@ template<class PR> class DifferentialFactory : public FloatFactory<PR> {
     using FloatFactory<PR>::create;
     template<class Y> UnivariateDifferential<ConcreteNumberType<Y>> create(UnivariateDifferential<Y> const&);
     template<class Y> Differential<ConcreteNumberType<Y>> create(Differential<Y> const&);
+    template<class Z> Differential<Z>const& create(NonAssignableDifferential<Z> const& dx) { return dx; }
 };
 template<class PR> inline DifferentialFactory<PR> differential_factory(PR const& pr) { return DifferentialFactory<PR>(pr); }
 template<class X> DifferentialFactory<PrecisionType<X>> factory(UnivariateDifferential<X> const& dx) {
@@ -155,6 +157,7 @@ class Differential
     : public DispatchTranscendentalAlgebraOperations<Differential<X>,X>
     , public ProvideConcreteGenericArithmeticOperators<Differential<X>>
 {
+    static_assert(!IsSame<X,Float64Value>::value,"");
     typedef Differential<X> SelfType;
 
     static const DegreeType MAX_DEGREE=65535;
@@ -394,6 +397,11 @@ struct NonAssignableDifferential
         this->Differential<X>::operator=(c); return *this; }
     NonAssignableDifferential<X>& operator+=(const Differential<X>& x) {
         static_cast<Differential<X>&>(*this) += x; return *this; }
+    // FIXME: Operators below should not be necessary
+    friend Differential<X> operator+(const NonAssignableDifferential<X>& dx1, const NonAssignableDifferential<X>& dx2) {
+        return static_cast<Differential<X>const&>(dx1) + static_cast<Differential<X>const&>(dx2); }
+    friend Differential<X> operator*(const NonAssignableDifferential<X>& dx1, const NonAssignableDifferential<X>& dx2) {
+        return static_cast<Differential<X>const&>(dx1) * static_cast<Differential<X>const&>(dx2); }
 };
 
 class DifferentialCharacteristics {
@@ -484,7 +492,8 @@ Vector<Differential<X>>::Vector(const Vector<Differential<Y>>& dv, PRS... prs)
 }
 
 template<class X> template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>>>
-Vector<Differential<X>>::Vector(SizeType rs, SizeType as, DegreeType d, const Y* ptr, PRS... prs) {
+Vector<Differential<X>>::Vector(SizeType rs, SizeType as, DegreeType d, const Y* ptr, PRS... prs)
+    : _chars(as,d), _ary(rs,Differential<X>(as,d)) {
     for(SizeType i=0; i!=rs; ++i) { for(MultiIndex j(as); j.degree()<=d; ++j) { if(*ptr!=0) { (*this)[i][j]=X(*ptr,prs...); } ++ptr; } }
 }
 

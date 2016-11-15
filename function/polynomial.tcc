@@ -42,13 +42,6 @@ Polynomial<X>::Polynomial(InitializerList<Pair<InitializerList<DegreeType>,X>> l
     this->cleanup();
 }
 
-template<class X>
-Polynomial<X>::Polynomial(SizeType as, DegreeType deg, InitializerList<X> lst)
-    : _expansion(as)
-{
-    ARIADNE_NOT_IMPLEMENTED;
-}
-
 
 template<class X> Polynomial<X> Polynomial<X>::create_zero() const {
     return Polynomial<X>(this->argument_size());

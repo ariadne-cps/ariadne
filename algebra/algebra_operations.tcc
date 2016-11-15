@@ -226,7 +226,6 @@ template<class A> A NormedAlgebraOperations<A>::_sqrt(const A& x)
 {
     typedef typename A::NumericType X;
 
-    //std::cerr<<"rec(A)\n";
     // Use a special routine to minimise errors
     // Given range [rl,ru], rescale by constant a such that rl/a=1-d; ru/a=1+d
     auto tol=cast_exact(x.tolerance());
@@ -244,6 +243,7 @@ template<class A> A NormedAlgebraOperations<A>::_sqrt(const A& x)
     Nat d=integer_cast<Int>((log((1-eps)*tol)/log(eps)+1));
 
     auto trunc_err=pow(eps,d)/cast_positive(1-eps)*mag(sqrt_series[d]);
+    ARIADNE_DEBUG_ASSERT(0<=trunc_err.raw());
 
     A y=x/avg-1;
     A z=x.create();

@@ -59,8 +59,6 @@ template<class A> void display_difference(A const& res, A const& exp) {
     std::cerr<<"\nres="<<res<<"\nexp="<<exp<<"\ndif="<<dif<<"\nerr="<<err<<"\ntol="<<tol<<"\n";
 }
 
-
-
 class TestTaylorModel
 {
     typedef MultiIndex MI;
@@ -161,24 +159,29 @@ Void TestTaylorModel::test_concept()
 
 Void TestTaylorModel::test_constructors()
 {
-    ARIADNE_TEST_CONSTRUCT(ValidatedTaylorModel,tv1,(E(2,3, {1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0}), 0.25, swp));
-    ARIADNE_TEST_CONSTRUCT(ValidatedTaylorModel,tv2,(E({ {{0,0},1.0}, {{1,0},2.0}, {{0,1},3.0}, {{2,0},4.0}, {{1,1},5.0}, {{0,2},6.0}, {{3,0},7.0}, {{2,1},8.0}, {{1,2},9.0}, {{0,3},10.0} }), 0.25, swp));
+    Precision64 pr;
+    ARIADNE_TEST_CONSTRUCT(ValidatedTaylorModel,tv,(E({ {{0,0},1.0}, {{1,0},2.0}, {{0,1},3.0}, {{2,0},4.0}, {{1,1},5.0}, {{0,2},6.0}, {{3,0},7.0}, {{2,1},8.0}, {{1,2},9.0}, {{0,3},10.0} }), 0.25, swp));
 
-    ARIADNE_TEST_EQUAL(tv1.value(),1.0);
-    ARIADNE_TEST_EQUAL(tv1.error(),0.25);
-    ARIADNE_TEST_EQUAL(tv1.norm(),55.25);
+    ARIADNE_TEST_EQUAL(tv.value(),1.0);
+    ARIADNE_TEST_EQUAL(tv.error(),0.25);
+    ARIADNE_TEST_EQUAL(tv.norm(),55.25);
 
-    ARIADNE_TEST_SAME(tv2,tv1);
+    ARIADNE_TEST_EQUAL((tv[{0,0}]),1.0);
+    ARIADNE_TEST_EQUAL((tv[{1,0}]),2.0);
+    ARIADNE_TEST_EQUAL((tv[{0,1}]),3.0);
+    ARIADNE_TEST_EQUAL((tv[{2,1}]),8.0);
+
 }
 
 Void TestTaylorModel::test_predicates()
 {
     ARIADNE_TEST_BINARY_PREDICATE(refines,1+x+(x^2)/2+(x^3)/4,1+x+(x^2)/2+e/4);
-    ARIADNE_TEST_BINARY_PREDICATE(not refines,1+x+(x^2)/2+(x^3)/6+e/pow(2.0_exact,31),1+x+(x^2)/2+e/6);
-    ValidatedTaylorModel tv1=1+2*x+3*(x^2)+e*3/4;
-    ValidatedTaylorModel tv2=1+x*7/4+(x^2)*13/4+e/4;
-    ValidatedTaylorModel tv3=o*9/8+x*7/4+(x^2)*13/4+e/4;
-    ValidatedTaylorModel tv4=1+x*9/4+(x^2)*3-(x^4)/4+e/4;
+    ARIADNE_TEST_BINARY_PREDICATE(not refines,1+x+(x^2)/2+(x^3)/6+e/1048576,1+x+(x^2)/2+e/6);
+
+    ARIADNE_TEST_CONSTRUCT(ValidatedTaylorModel,tv1,(1+2*x+3*(x^2)+e*3/4));
+    ARIADNE_TEST_CONSTRUCT(ValidatedTaylorModel,tv2,(1+x*7/4+(x^2)*13/4+e/4));
+    ARIADNE_TEST_CONSTRUCT(ValidatedTaylorModel,tv3,(o*9/8+x*7/4+(x^2)*13/4+e/4));
+    ARIADNE_TEST_CONSTRUCT(ValidatedTaylorModel,tv4,(1+x*9/4+(x^2)*3-(x^4)/4+e/4));
 
     ARIADNE_TEST_BINARY_PREDICATE(refines,tv1,tv1);
     ARIADNE_TEST_BINARY_PREDICATE(refines,tv2,tv1);
@@ -210,7 +213,7 @@ Void TestTaylorModel::test_predicates()
 
 Void TestTaylorModel::test_approximation()
 {
-    ARIADNE_TEST_CONSTRUCT(ValidatedTaylorModel,tv2,(E(1,2, {1.0,2.0,3.0}),0.25, swp));
+    ARIADNE_TEST_CONSTRUCT(ValidatedTaylorModel,tv2,(E({{{0,0},1.0},{{1,0},2.0},{{0,1},3.0}}),0.25, swp));
 }
 
 
@@ -225,7 +228,7 @@ Void TestTaylorModel::test_unscale()
 
 Void TestTaylorModel::test_evaluate()
 {
-    Vector<Float64Bounds> iv={{0.25,0.5},{-0.75,-0.5}};
+    Vector<Float64Bounds> iv={{0.25_exact,0.5_exact},{-0.75_exact,-0.5_exact}};
     ValidatedTaylorModel tv=1+2*x+3*y+4*(x^2)+5*(x*y)+6*(y^2)+e/2;
     ARIADNE_TEST_EQUAL(evaluate(tv,iv),Float64Bounds(-1,1));
 }
@@ -233,45 +236,43 @@ Void TestTaylorModel::test_evaluate()
 
 Void TestTaylorModel::test_arithmetic()
 {
-    {
-        ValidatedTaylorModel x=ValidatedTaylorModel::coordinate(1,0,swp);
-        ValidatedTaylorModel e=ValidatedTaylorModel::error(1,1.0_error,swp);
-        ARIADNE_TEST_EQUALS(1-2*x+3*(x^2)+e*3/4, ValidatedTaylorModel({{{0},1.0},{{1},-2.0},{{2},3.0}}, 0.75,swp));
-    }
-
     //Operations which can be performed exactly with floating-point arithmetic.
-    ARIADNE_TEST_EQUALS(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}),0.75,swp)+(-3), ValidatedTaylorModel(E(1,2, {-2.0,-2.0,3.0}), 0.75,swp));
-    ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)-(-3), ValidatedTaylorModel(E(1,2, {4.0,-2.0,3.0}), 0.75,swp));
-    ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)*(-3), ValidatedTaylorModel(E(1,2, {-3.0,6.0,-9.0}), 2.25,swp));
-    ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)/(-4), ValidatedTaylorModel(E(1,2, {-0.25,0.5,-0.75}), 0.1875,swp));
-    ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)+Float64Bounds(-1,2), ValidatedTaylorModel(E(1,2, {1.5,-2.0,3.0}), 2.25,swp));
-    ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)-Float64Bounds(-1,2), ValidatedTaylorModel(E(1,2, {0.5,-2.0,3.0}), 2.25,swp));
-    ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)*Float64Bounds(-1,2), ValidatedTaylorModel(E(1,2, {0.5,-1.0,1.5}), 10.5,swp));
-    ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)/Float64Bounds(0.25,2.0), ValidatedTaylorModel(E(1,2, {2.25,-4.5,6.75}), 13.5,swp));
-    ARIADNE_TEST_EQUAL(+ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp), ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp));
-    ARIADNE_TEST_EQUAL(-ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp), ValidatedTaylorModel(E(1,2, {-1.0,2.0,-3.0}), 0.75,swp));
-    ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)+ValidatedTaylorModel(E(1,2, {3.0,2.0,-4.0}),0.5,swp), ValidatedTaylorModel(E(1,2, {4.0,0.0,-1.0}), 1.25,swp));
-    ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)-ValidatedTaylorModel(E(1,2, {3.0,2.0,-4.0}),0.5,swp), ValidatedTaylorModel(E(1,2, {-2.0,-4.0,7.0}), 1.25,swp));
-    ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {0.0,0.0,3.0}), 0.75,swp)*ValidatedTaylorModel(E(1,2, {3.0,2.0,-4.0}),0.5,swp), ValidatedTaylorModel(E(1,4, {0.0,0.0,9.0,6.0,-12.0}), 8.625,swp));
-    ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)*ValidatedTaylorModel(E(1,2, {3.0,2.0,-4.0}),0.5,swp), ValidatedTaylorModel(E(1,4, {3.0,-4.0,1.0,14.0,-12.0}), 10.125,swp));
+    ARIADNE_TEST_SAME(ValidatedTaylorModel({{{0},1.0},{{1},-2.0},{{2},3.0}},0.75,swp)+(-3), ValidatedTaylorModel({{{0},-2.0},{{1},-2.0},{{2},3.0}}, 0.75,swp));
+    ARIADNE_TEST_SAME(ValidatedTaylorModel({{{0},1.0},{{1},-2.0},{{2},3.0}},0.75,swp)-(-3), ValidatedTaylorModel({{{0},4.0},{{1},-2.0},{{2},3.0}}, 0.75,swp));
+    ARIADNE_TEST_SAME(ValidatedTaylorModel({{{0},1.0},{{1},-2.0},{{2},3.0}},0.75,swp)*(-3), ValidatedTaylorModel({{{0},-3.0},{{1},6.0},{{2},-9.0}}, 2.25,swp));
+    ARIADNE_TEST_SAME(ValidatedTaylorModel({{{0},1.0},{{1},-2.0},{{2},3.0}},0.75,swp)/(-4), ValidatedTaylorModel({{{0},-0.25},{{1},0.5},{{2},-0.75}}, 0.1875,swp));
+    ARIADNE_TEST_SAME(ValidatedTaylorModel({{{0},1.0},{{1},-2.0},{{2},3.0}},0.75,swp)+Float64Bounds(-1,2), ValidatedTaylorModel({{{0},1.5},{{1},-2.0},{{2},3.0}}, 2.25,swp));
+    ARIADNE_TEST_SAME(ValidatedTaylorModel({{{0},1.0},{{1},-2.0},{{2},3.0}},0.75,swp)-Float64Bounds(-1,2), ValidatedTaylorModel({{{0},0.5},{{1},-2.0},{{2},3.0}}, 2.25,swp));
+    ARIADNE_TEST_SAME(ValidatedTaylorModel({{{0},1.0},{{1},-2.0},{{2},3.0}},0.75,swp)*Float64Bounds(-1,2), ValidatedTaylorModel({{{0},0.5},{{1},-1.0},{{2},1.5}}, 10.5,swp));
+    ARIADNE_TEST_SAME(ValidatedTaylorModel({{{0},1.0},{{1},-2.0},{{2},3.0}},0.75,swp)/Float64Bounds(0.25,2.0), ValidatedTaylorModel({{{0},2.25},{{1},-4.5},{{2},6.75}}, 13.5,swp));
+    ARIADNE_TEST_SAME(+ValidatedTaylorModel({{{0},1.0},{{1},-2.0},{{2},3.0}},0.75,swp), ValidatedTaylorModel({{{0},1.0},{{1},-2.0},{{2},3.0}},0.75,swp));
+    ARIADNE_TEST_SAME(-ValidatedTaylorModel({{{0},1.0},{{1},-2.0},{{2},3.0}},0.75,swp), ValidatedTaylorModel({{{0},-1.0},{{1},2.0},{{2},-3.0}}, 0.75,swp));
+    ARIADNE_TEST_SAME(ValidatedTaylorModel({{{0},1.0},{{1},-2.0},{{2},3.0}},0.75,swp)+ValidatedTaylorModel({{{0},3.0},{{1},2.0},{{2},-4.0}},0.5,swp),
+                      ValidatedTaylorModel({{{0},4.0},{{1},0.0},{{2},-1.0}}, 1.25,swp));
+    ARIADNE_TEST_SAME(ValidatedTaylorModel({{{0},1.0},{{1},-2.0},{{2},3.0}},0.75,swp)-ValidatedTaylorModel({{{0},3.0},{{1},2.0},{{2},-4.0}},0.5,swp),
+                      ValidatedTaylorModel({{{0},-2.0},{{1},-4.0},{{2},7.0}}, 1.25,swp));
+    ARIADNE_TEST_SAME(ValidatedTaylorModel({{{0},0.0},{{1},0.0},{{2},3.0}}, 0.75,swp)*ValidatedTaylorModel({{{0},3.0},{{1},2.0},{{2},-4.0}},0.5,swp),
+                      ValidatedTaylorModel({{{0},0.0},{{1},0.0},{{2},9.0},{{3},6.0},{{4},-12.0}}, 8.625,swp));
+    ARIADNE_TEST_SAME(ValidatedTaylorModel({{{0},1.0},{{1},-2.0},{{2},3.0}},0.75,swp)*ValidatedTaylorModel({{{0},3.0},{{1},2.0},{{2},-4.0}},0.5,swp),
+                      ValidatedTaylorModel({{{0},3.0},{{1},-4.0},{{2},1.0},{{3},14.0},{{4},-12.0}}, 10.125,swp));
 
-    ValidatedTaylorModel o=ValidatedTaylorModel::constant(2,1.0_exact,swp);
-    ValidatedTaylorModel x=ValidatedTaylorModel::coordinate(2,0,swp);
-    ValidatedTaylorModel y=ValidatedTaylorModel::coordinate(2,1,swp);
-    ValidatedTaylorModel e=ValidatedTaylorModel::ball(2,1.0_error,swp);
+    ARIADNE_TEST_SAME(1-2*x+3*(x^2)+e*3/4, ValidatedTaylorModel({{{0,0},1.0},{{1,0},-2.0},{{2,0},3.0}}, 0.75,swp));
+    ARIADNE_TEST_CONSTRUCT(ValidatedTaylorModel,t,(1-2*x+3*(x^2)+e*3/4));
+    ARIADNE_TEST_SAME(t,ValidatedTaylorModel({{{0,0},1.0},{{1,0},-2.0},{{2,0},3.0}},0.75,swp));
 
-    ValidatedTaylorModel t=1-2*x+3*y;
+    // Reciprocal of a constant
+    ARIADNE_TEST_SAME(rec(o*4),o/4);
 
-    ARIADNE_TEST_EQUAL((1-2*x+3*y)*(3+2*x-4*y),3-4*x+5*y-4*(x^2)+14*(x*y)-12*(y^2));
-    ARIADNE_TEST_EQUAL(sqr(t),t*t);
-    ARIADNE_TEST_EQUAL(pow(t,0),o);
-    ARIADNE_TEST_EQUAL(pow(t,1),t);
-    ARIADNE_TEST_EQUAL(pow(t,2),t*t);
-    ARIADNE_TEST_EQUAL(pow(t,3),t*t*t);
+    ARIADNE_TEST_SAME((1-2*x+3*y)*(3+2*x-4*y),3-4*x+5*y-4*(x^2)+14*(x*y)-12*(y^2));
+    ARIADNE_TEST_SAME(sqr(t),t*t);
+    ARIADNE_TEST_SAME(pow(t,0),o);
+    ARIADNE_TEST_SAME(pow(t,1),t);
+    ARIADNE_TEST_SAME(pow(t,2),t*t);
+    ARIADNE_TEST_SAME(pow(t,3),t*t*t);
 
     ValidatedTaylorModel tm_inf(Expansion<Float64>(2),+inf,swp);
     ValidatedTaylorModel tm_zero_times_inf=0*tm_inf;
-    if(isnan(tm_zero_times_inf.error().raw())) {
+    if(is_nan(tm_zero_times_inf.error().raw())) {
         ARIADNE_TEST_WARN("Multiplying 0+/-inf by 0 yields 0+/-NaN");
     } else if(tm_zero_times_inf.error().raw()==+inf) {
         ARIADNE_TEST_WARN("Multiplying 0+/-inf by 0 yields 0+/-inf");
@@ -310,7 +311,7 @@ Void TestTaylorModel::test_functions()
     // Expected tolerance based on sweeper characteristics
     static const Float64Value xtol=Float64Value(x.tolerance());
     static const Float64Bounds tol=xtol*Float64Bounds(-1,+1);
-    Float64Value LAXITY=1;
+    Float64Value LAXITY(1);
 
     // exp, sin and cos have error bound e^N/N!*(1+1/N), where e is bound for |x| N is the first term omitted
     // ErrorTag bound for rec is e^(N-1); log is e^(N-1)/N; sqrt is ???, where e is bound for |x-1|
@@ -386,10 +387,10 @@ Void TestTaylorModel::test_refinement()
     ARIADNE_TEST_BINARY_PREDICATE(not refines,1+x+(x^2)/2+(x^3)/6+e/pow(2.0_exact,31),1+x+(x^2)/2+e/6);
 
     // Test refinement with no roundoff errors
-    ARIADNE_TEST_EQUAL(refinement(1-x*3/4+(x^3)*3+(x^4)*13/4+e/2,1+(x^2)/4+(x^3)*2+(x^4)*3+e),1-x*5/8+(x^3)*11/4+(x^4)*13/4+e/2);
+    ARIADNE_TEST_SAME(refinement(1-x*3/4+(x^3)*3+(x^4)*13/4+e/2,1+(x^2)/4+(x^3)*2+(x^4)*3+e),1-x*5/8+(x^3)*11/4+(x^4)*13/4+e/2);
 
     // Test refinement with roundoff errors
-    ARIADNE_TEST_EQUAL(refinement(Float64Value(2.0/3)*x+e/2,Float64Value(6.0/5)*x+e/4),
+    ARIADNE_TEST_SAME(refinement(Float64Value(2.0/3)*x+e/2,Float64Value(6.0/5)*x+e/4),
         Float64Value(1.05833333333333335)*x+Float64Value(0.108333333333333393)*e);
 
     // Code below computes expected values for second test
@@ -411,9 +412,9 @@ Void TestTaylorModel::test_split()
     ValidatedTaylorModel es3=1.25-1*x-1.5*y-1.25*x*x-3.5*x*y+11*y*y;
 
     ARIADNE_TEST_PRINT(t);
-    ARIADNE_TEST_EQUAL(split(t,0,SplitPart::LOWER),es1);
-    ARIADNE_TEST_EQUAL(split(t,0,SplitPart::MIDDLE),es2);
-    ARIADNE_TEST_EQUAL(split(t,0,SplitPart::UPPER),es3);
+    ARIADNE_TEST_SAME(split(t,0,SplitPart::LOWER),es1);
+    ARIADNE_TEST_SAME(split(t,0,SplitPart::MIDDLE),es2);
+    ARIADNE_TEST_SAME(split(t,0,SplitPart::UPPER),es3);
 }
 
 
@@ -423,31 +424,31 @@ Void TestTaylorModel::test_antiderivative()
     ValidatedTaylorModel tm=ValidatedTaylorModel::constant(2,1,swp);
     ValidatedTaylorModel atm=antiderivative(tm,1);
 
-    ARIADNE_TEST_EQUAL(antiderivative(2*o,0),2*x);
-    ARIADNE_TEST_EQUAL(antiderivative(2*o,1),2*y);
-    ARIADNE_TEST_EQUAL(antiderivative(3*x,0),(x^2)*3/2);
-    ARIADNE_TEST_EQUAL(antiderivative(2*o+3*x,0),x*2+(x^2)*3/2);
-    ARIADNE_TEST_EQUAL(antiderivative((x^2)*15/2,0),(x^3)*5/2);
-    ARIADNE_TEST_EQUAL(antiderivative((x^2)*(y^4)*15/2,0),(x^3)*(y^4)*5/2);
-    ARIADNE_TEST_EQUAL(antiderivative((x^2)*(y^4)*15/2,1),(x^2)*(y^5)*3/2);
+    ARIADNE_TEST_SAME(antiderivative(2*o,0),2*x);
+    ARIADNE_TEST_SAME(antiderivative(2*o,1),2*y);
+    ARIADNE_TEST_SAME(antiderivative(3*x,0),(x^2)*3/2);
+    ARIADNE_TEST_SAME(antiderivative(2*o+3*x,0),x*2+(x^2)*3/2);
+    ARIADNE_TEST_SAME(antiderivative((x^2)*15/2,0),(x^3)*5/2);
+    ARIADNE_TEST_SAME(antiderivative((x^2)*(y^4)*15/2,0),(x^3)*(y^4)*5/2);
+    ARIADNE_TEST_SAME(antiderivative((x^2)*(y^4)*15/2,1),(x^2)*(y^5)*3/2);
 
     ValidatedTaylorModel x=ValidatedTaylorModel::coordinate(1,0,swp);
     ValidatedTaylorModel e=ValidatedTaylorModel::zero(1,swp)+Float64Bounds(-1,+1);
-    ARIADNE_TEST_EQUAL(antiderivative(2.0*x*x,0),0.66666666666666663*x*x*x+5.5511151231257827021e-17*e);
-    ARIADNE_TEST_EQUAL(antiderivative(2.0*x*x+e,0),0.66666666666666663*x*x*x+1.0000000000000002*e);
-    ARIADNE_TEST_EQUAL(antiderivative(2*(x^2),0),Float64Value(0.66666666666666663)*(x^3)+Float64Value(5.5511151231257827021e-17)*e);
-    ARIADNE_TEST_EQUAL(antiderivative(2*(x^2)+e,0),Float64Value(0.66666666666666663)*(x^3)+Float64Value(1.0000000000000002)*e);
+    ARIADNE_TEST_SAME(antiderivative(2.0*x*x,0),0.66666666666666663*x*x*x+5.5511151231257827021e-17*e);
+    ARIADNE_TEST_SAME(antiderivative(2.0*x*x+e,0),0.66666666666666663*x*x*x+1.0000000000000002*e);
+    ARIADNE_TEST_SAME(antiderivative(2*(x^2),0),Float64Value(0.66666666666666663)*(x^3)+Float64Value(5.5511151231257827021e-17)*e);
+    ARIADNE_TEST_SAME(antiderivative(2*(x^2)+e,0),Float64Value(0.66666666666666663)*(x^3)+Float64Value(1.0000000000000002)*e);
 
     // Regression test
     ValidatedTaylorModel t1({ {{0,0},1.}, {{1,0},2.}, {{0,1},3.}, {{2,0},4.}, {{1,1},5.}, {{0,2},6.} }, 0., swp);
     ValidatedTaylorModel at1({ {{1,0},1.}, {{2,0},1.}, {{1,1},3.}, {{3,0},1.33333333333333333}, {{2,1},2.5}, {{1,2},6.} }, 1.1102230246251565404e-16, swp);
-    ARIADNE_TEST_EQUAL(antiderivative(t1,0),at1);
+    ARIADNE_TEST_SAME(antiderivative(t1,0),at1);
 }
 
 
 Void TestTaylorModel::test_compose()
 {
-    ARIADNE_TEST_EQUAL(compose(2-x*x-y/4,{2-x*x-y/4,x}),-2-(x^4)-(y^2)/16+4*(x^2)+y-(x^2)*y/2-x/4);
+    ARIADNE_TEST_SAME(compose(2-x*x-y/4,{2-x*x-y/4,x}),-2-(x^4)-(y^2)/16+4*(x^2)+y-(x^2)*y/2-x/4);
 
 }
 
@@ -456,8 +457,8 @@ Void TestTaylorModel::test_recondition()
     Sweeper swp;
     ARIADNE_TEST_CONSTRUCT( ValidatedTaylorModel, tm1, ({ {{0,0},2.0}, {{1,0},3.0}, {{0,1},5.0} }, 0.5, swp) );
     ARIADNE_TEST_CONSTRUCT( ValidatedTaylorModel, tm2, ({ {{0,0,1},0.5}, {{0,0,0},2.0}, {{1,0,0},3.0}, {{0,1,0},5.0} }, 0.0, swp) );
-    ARIADNE_TEST_EQUAL(embed_error(tm1),tm2);
-    ARIADNE_TEST_EQUAL(discard_variables(tm2,{2}),tm1);
+    ARIADNE_TEST_SAME(embed_error(tm1),tm2);
+    ARIADNE_TEST_SAME(discard_variables(tm2,{2}),tm1);
 }
 
 
@@ -469,3 +470,6 @@ Int main() {
 
     return ARIADNE_TEST_FAILURES;
 }
+
+
+

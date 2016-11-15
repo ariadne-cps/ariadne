@@ -55,9 +55,6 @@ henon(const Vector<DF>& x, const Vector<typename DF::NumericType>& p)
     Vector<DF> r(2,2,x.degree()); henon(r,x,p); return r;
 }
 
-// FIXME: Operators needed to prevent bad overloads
-template<class X> Differential<X> operator*(const typename Differential<X>::NumericType& c,const NonAssignableDifferential<X>& dx) {
-    return c * static_cast<Differential<X>const&>(dx); }
 
 
 template<class DF>
@@ -302,6 +299,10 @@ class TestDifferentialVector {
         DifferentialType z(2,4,az);
         ARIADNE_TEST_EQUAL(derivative(y,0),x);
         ARIADNE_TEST_EQUAL(antiderivative(y,0),z);
+        ARIADNE_TEST_PRINT(y);
+        ARIADNE_TEST_PRINT(antiderivative(y,0));
+        ARIADNE_TEST_PRINT(derivative(antiderivative(y,0),0));
+        ARIADNE_TEST_PRINT(derivative(antiderivative(y,0),0)-y);
         ARIADNE_TEST_EQUAL(derivative(antiderivative(y,0),0),y);
     }
 

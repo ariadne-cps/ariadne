@@ -597,8 +597,8 @@ TestFloatBounds<PR>::test_constructors()
 
     // Constructor from approximate values
     FloatBoundsType xd4(2.1_q,3.2_q,precision);
-    ARIADNE_TEST_COMPARE(xd4.lower_raw(),<=,2.1);
-    ARIADNE_TEST_COMPARE(xd4.upper_raw(),>=,3.2);
+    ARIADNE_TEST_COMPARE(xd4.lower_raw(),<=,Rational(21,10));
+    ARIADNE_TEST_COMPARE(xd4.upper_raw(),>=,Rational(32,10));
 
     // ApproximateTag constructor from a single value
     FloatBoundsType xd5(Rational(1,3),precision);

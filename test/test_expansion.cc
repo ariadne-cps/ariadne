@@ -45,6 +45,8 @@ template<class F> class TestExpansion
     typedef PrecisionType<F> PR;
     typedef MultiIndex MI;
     typedef Expansion<F> E;
+    typedef typename Expansion<F>::Iterator Iterator;
+    typedef typename Expansion<F>::ConstIterator ConstIterator;
   public:
     PR prec; F zero;
     GradedLess graded_less;
@@ -194,6 +196,11 @@ template<class F> Void TestExpansion<F>::test_data_access()
     ARIADNE_TEST_EQUAL(e.begin()->key(),MultiIndex({0,0,0}));
     ARIADNE_TEST_EQUAL(e.begin()->data(),2.0);
 
+    Expansion<F> const& ce=e;
+    ARIADNE_TEST_PRINT(ce.begin());
+    ARIADNE_TEST_PRINT(*ce.begin());
+    ARIADNE_TEST_EQUAL(ce.begin()->key(),MultiIndex({0,0,0}));
+    ARIADNE_TEST_EQUAL(ce.begin()->data(),2.0);
 
 
     // The behaviour of iterators is rather odd and not what might be expected
@@ -201,7 +208,7 @@ template<class F> Void TestExpansion<F>::test_data_access()
     // when the Iterator is incremented, but a F reference does not.
     // This behaviour should be changed in future versions if technologically
     // feasible.
-    typename Expansion<F>::Iterator iter=e.begin();
+    Iterator iter=e.begin();
     const MultiIndex& aref=iter->key();
     const F& xref=iter->data();
     F x1=iter->data();
@@ -219,8 +226,8 @@ template<class F> Void TestExpansion<F>::test_data_access()
 
 
     // Test hand-coded swap of values
-    ARIADNE_TEST_CONSTRUCT(typename Expansion<F>::Iterator,iter1,(e.begin()+1));
-    ARIADNE_TEST_CONSTRUCT(typename Expansion<F>::Iterator,iter2,(e.begin()+3));
+    ARIADNE_TEST_CONSTRUCT(Iterator,iter1,(e.begin()+1));
+    ARIADNE_TEST_CONSTRUCT(Iterator,iter2,(e.begin()+3));
 
     // Perform swap
     ARIADNE_TEST_CONSTRUCT(typename Expansion<F>::ValueType,tmp,(*iter2));
@@ -256,7 +263,6 @@ template<class F> Void TestExpansion<F>::test_equality()
     e2.clear(); e2.append(b,2.0); e2.append(a,1.0);
     if(!(e1==e2)) { ARIADNE_TEST_NOTIFY("Expansion<F> objects differing by order of set operators are considered nonequal."); }
 }
-
 
 template<class F> Void TestExpansion<F>::test_cleanup()
 {

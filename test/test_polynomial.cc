@@ -74,7 +74,6 @@ Void TestPolynomial::test_concept()
     p=Polynomial<Float64>(3);
     p=Polynomial<Float64>(cp);
 
-    p=Polynomial<Float64>(3,1, {1., 2.,3.,5.});
     p=Polynomial<Float64>({ {{0,0,0},1}, {{1,0,0},2}, {{0,0,0},3}, {{0,0,1},5.0} });
 
     //p=Polynomial<Float64>::variable(3u,0u);
@@ -103,8 +102,6 @@ Void TestPolynomial::test_concept()
 
 Void TestPolynomial::test_cleanup()
 {
-    typedef Expansion<Float64>::value_type ValueType;
-    typedef Expansion<Float64>::WordType WordType;
 /*
     {
         MultiIndex a(3);
@@ -167,7 +164,7 @@ Void TestPolynomial::test_constructors()
     // Empty polynomial
     ARIADNE_TEST_CONSTRUCT(Polynomial<Float64>,p1,(3));
     // Dense polynomial
-    ARIADNE_TEST_CONSTRUCT(Polynomial<Float64>,p2,(3,2, {0., 0.,0.,0., 5.,2.,0.,0.,3.,0.}));
+    ARIADNE_TEST_CONSTRUCT(Polynomial<Float64>,p2,({ {{0,0,0},0.}, {{1,0,0},0.},{{0,1,0},0.},{{0,0,1},0.}, {{2,0,0},5.},{{1,1,0},2.},{{1,0,1},0.},{{0,2,0},0.},{{0,1,2},3.},{{0,0,2},0.} }));
     ARIADNE_TEST_EQUAL(p2[MultiIndex({2,0,0})],5.0);
     // Sparse polynomial with unordered indiced
     ARIADNE_TEST_CONSTRUCT(Polynomial<Float64>,p3,({ {{1,2},5.0}, {{0,0},2.0}, {{1,0},3.0}, {{3,0},7.0}, {{0,1},11.0} }));
@@ -196,7 +193,7 @@ Void TestPolynomial::test_indexing()
     Polynomial<Float64> q(3);
     q[MultiIndex({0,0,0})]=2.0;
     q[MultiIndex({0,1,0})]=3.0;
-    ARIADNE_TEST_EQUALS(q.number_of_nonzeros(),2);
+    ARIADNE_TEST_EQUALS(q.number_of_terms(),2);
     ARIADNE_TEST_EQUALS(q[MultiIndex({0,0,0})],2.0);
     ARIADNE_TEST_EQUALS(q[MultiIndex({0,1,0})],3.0);
     q[MultiIndex({1,0,0})]=5.0;
@@ -213,11 +210,11 @@ Void TestPolynomial::test_indexing()
     p[MultiIndex({2,1,0})]=5.0;
     ARIADNE_TEST_PRINT(p.expansion());
     ARIADNE_TEST_EQUALS(pc[MultiIndex({0,0,0})],0.0);
-    ARIADNE_TEST_EQUALS(p.number_of_nonzeros(),3);
+    ARIADNE_TEST_EQUALS(p.number_of_terms(),3);
     ARIADNE_TEST_PRINT(p.expansion());
     ARIADNE_TEST_EXECUTE(p[MultiIndex({0,0,0})]=7);
     ARIADNE_TEST_PRINT(p.expansion());
-    ARIADNE_TEST_EQUALS(p.number_of_nonzeros(),4);
+    ARIADNE_TEST_EQUALS(p.number_of_terms(),4);
     p.expansion().graded_sort();
     ARIADNE_TEST_PRINT(p.expansion());
 

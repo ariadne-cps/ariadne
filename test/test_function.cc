@@ -31,6 +31,8 @@
 
 #include "config.h"
 #include "function/function.h"
+    #include "expression/formula.h"
+    #include "function/symbolic_function.h"
 
 #include "numeric/numeric.h"
 
@@ -89,6 +91,7 @@ Void TestFunction::test_scalar_function()
     ARIADNE_TEST_NAMED_CONSTRUCT(EffectiveScalarFunction,o,constant(3,1));
     ARIADNE_TEST_NAMED_CONSTRUCT(EffectiveScalarFunction,x,coordinate(3,0));
     ARIADNE_TEST_NAMED_CONSTRUCT(EffectiveScalarFunction,y,coordinate(3,1));
+
 
     ARIADNE_TEST_CONSTRUCT(EffectiveScalarFunction,f,(o+x*y));
     ARIADNE_TEST_CONSTRUCT(Vector<Float64Approximation>,p,({2.0_approx,3.0_approx,5.0_approx}));

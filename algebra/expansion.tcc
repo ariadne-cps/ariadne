@@ -91,7 +91,7 @@ template<class X> Expansion<X>::Expansion(const Expansion<X>& e)
 
 template<class X> Expansion<X>& Expansion<X>::operator=(const Expansion<X>& e)
 {
-    if(*this!=e) {
+    if(this!=&e) {
         // Perform memory reallocation if necessary
         if(this->_capacity<e._size) {
             SizeType new_capacity=e._capacity;
@@ -275,6 +275,9 @@ template<class X> Bool Expansion<X>::operator==(const Expansion<X>& other) const
     auto end1=this->end();
     auto end2=other.end();
 
+    if(this->size()!=other.size()) { return false; }
+    if(this->argument_size()!=other.argument_size()) { return false; }
+
     while(true) {
         if(iter1!=end1 && iter2!=end2) {
             if(!decide(*iter1 == *iter2)) { return false; }
@@ -415,6 +418,14 @@ template<class X> Void Expansion<X>::sort(GradedIndexLess) {
     std::sort(this->begin(),this->end(),IndexComparison<GradedLess>());
 }
 
+template<class X> Void Expansion<X>::reverse_lexicographic_sort() {
+    std::sort(this->begin(),this->end(),IndexComparison<ReverseLexicographicLess>());
+}
+
+template<class X> Void Expansion<X>::graded_sort() {
+    std::sort(this->begin(),this->end(),IndexComparison<GradedLess>());
+}
+
 
 template<class X>
 Expansion<X> Expansion<X>::_embed(SizeType before_size, SizeType after_size) const
@@ -437,7 +448,7 @@ Expansion<X> Expansion<X>::_embed(SizeType before_size, SizeType after_size) con
 }
 
 template<class X> OutputStream& Expansion<X>::write(OutputStream& os) const {
-    os << "\nExpansion<X>{"<<this->number_of_terms()<<"/"<<this->capacity()<<",\n";
+    os << "\nExpansion<X>{"<<this->number_of_terms()<<"/"<<this->capacity()<<","<<this->argument_size()<<"\n";
     for(auto iter=this->begin(); iter!=this->end(); ++iter) {
         os << "  "<<iter->index()<<":"<<iter->coefficient()<<",\n";
     }

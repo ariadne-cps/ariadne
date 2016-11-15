@@ -168,6 +168,9 @@ template<class X> class Expansion {
     Void sort(ReverseLexicographicIndexLess cmp);
     Void sort(GradedIndexLess cmp);
 
+    Void reverse_lexicographic_sort();
+    Void graded_sort();
+
     OutputStream& write(OutputStream& os) const;
     OutputStream& write(OutputStream& os, Array<String> const& vars) const;
   public:
@@ -231,17 +234,20 @@ template<class X> Void swap(ExpansionReference<X>, ExpansionReference<X>);
 template<class X> struct ExpansionReference
 {
     typedef X CoefficientType; typedef X& CoefficientReference;
-    SizeType _as; DegreeType* _ip; CoefficientType* _cp;
-    ExpansionReference(SizeType as, DegreeType* ip, CoefficientType* cp) : _as(as), _ip(ip), _cp(cp) { }
-    MultiIndexReference index() { return MultiIndexReference(_as,_ip); }
-    const MultiIndex& index() const { return static_cast<MultiIndex const&>(reinterpret_cast<MultiIndexData const&>(*this)); }
+  private:
+    MultiIndexReference _a; CoefficientType* _cp;
+  public:
+    ExpansionReference(SizeType as, DegreeType* ip, CoefficientType* cp) : _a(as,ip), _cp(cp) { }
+    ExpansionReference(MultiIndexReference& a, CoefficientType& c) : _a(a), _cp(&c) { }
+    MultiIndexReference& index() { return _a; }
+    const MultiIndex& index() const { return _a; }
     CoefficientReference coefficient() { return *_cp; }
     const CoefficientType& coefficient() const { return *_cp; }
-        MultiIndexReference key() { return MultiIndexReference(_as,_ip); }
-        const MultiIndex& key() const { return static_cast<MultiIndex const&>(reinterpret_cast<MultiIndexData const&>(*this)); }
+        MultiIndexReference& key() { return _a; }
+        const MultiIndex& key() const { return _a; }
         CoefficientReference data() { return *_cp; }
         const CoefficientType& data() const { return *_cp; }
-    operator ExpansionValue<X>() const { return ExpansionValue<X>(_as,_ip,_cp); }
+    operator ExpansionValue<X>() const { return ExpansionValue<X>(_a,*_cp); }
     ExpansionReference<X>& operator=(const ExpansionValue<X>&);
     ExpansionReference<X>& operator=(const ExpansionReference<X>&);
     ExpansionReference<X>& operator=(const ExpansionConstReference<X>&);
@@ -251,15 +257,16 @@ template<class X> Void swap(ExpansionReference<X>, ExpansionReference<X>);
 template<class X> struct ExpansionConstReference
 {
     typedef X CoefficientType;
-    SizeType _as; const DegreeType* _ip; const CoefficientType* _cp;
-    ExpansionConstReference(SizeType as, const DegreeType* ip, const CoefficientType* cp) : _as(as), _ip(ip), _cp(cp) { }
-    const MultiIndex& index() const { return *reinterpret_cast<const MultiIndex*>(&_as); }
+    const MultiIndexReference _a; const CoefficientType* _cp;
+    ExpansionConstReference(SizeType as, const DegreeType* ip, const CoefficientType* cp) : _a(as,const_cast<DegreeType*>(ip)), _cp(cp) { }
+    ExpansionConstReference(const MultiIndexReference& a, const CoefficientType& c) : _a(a), _cp(&c) { }
+    const MultiIndex& index() const { return _a; }
     const CoefficientType& coefficient() const { return *_cp; }
-        const MultiIndex& key() const { return *reinterpret_cast<const MultiIndex*>(&_as); }
+        const MultiIndex& key() const { return _a; }
         const CoefficientType& data() const { return *_cp; }
-    ExpansionConstReference(const ExpansionValue<X>& other) : ExpansionConstReference(other._as,other._ip,other._cp) { }
+    ExpansionConstReference(const ExpansionValue<X>& other) : ExpansionConstReference(other._a._n,other._a._ip,other._cp) { }
     ExpansionConstReference(const ExpansionReference<X>& other) : ExpansionConstReference(other.index().size(),other.index().begin(),other._cp) { }
-    operator ExpansionValue<X>() const { return ExpansionValue<X>(_as,_ip,_cp); }
+    operator ExpansionValue<X>() const { return ExpansionValue<X>(_a,*_cp); }
 };
 
 template<class X> Void swap(ExpansionReference<X> m1, ExpansionReference<X> m2) {
@@ -304,11 +311,10 @@ template<class X> class ExpansionIterator
     template<class XX> Bool equal(const ExpansionConstIterator<XX>& other) const { return this->_cp==other._cp; }
     Void advance(PointerDifferenceType k) { this->_ip+=k*(_as+1u); _cp+=k; }
     template<class XX> PointerDifferenceType distance_to(const ExpansionIterator<XX>& other) const { return other._cp - this->_cp; }
-    ExpansionReference<X> dereference() { return ExpansionReference<X>(_as,_ip,_cp); }
+    ExpansionReference<X>& dereference() { return reinterpret_cast<ExpansionReference<X>&>(*this); }
     ExpansionReference<X>* operator->() { return reinterpret_cast<ExpansionReference<X>*>(this); }
     Void write(OutputStream& os) const { os << "{" << (void*)_ip << ":" << MultiIndex(_as,_ip) << ", " << _cp << ":" << *_cp << "}"; }
 };
-
 template<class X> OutputStream& operator<<(OutputStream& os, const ExpansionIterator<X>& e) {
     e.write(os); return os; }
 
@@ -330,6 +336,8 @@ template<class X> class ExpansionConstIterator
     ExpansionConstReference<X>* operator->() { return reinterpret_cast<ExpansionConstReference<X>*>(this); }
     Void write(OutputStream& os) const { os << "{" << (void*)_ip << "," << _cp << "}"; }
 };
+template<class X> OutputStream& operator<<(OutputStream& os, const ExpansionConstIterator<X>& e) {
+    e.write(os); return os; }
 
 template<class X> class ExpansionValueReference {
     Expansion<X>& _e; MultiIndex const& _a;

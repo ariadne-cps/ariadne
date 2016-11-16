@@ -126,6 +126,8 @@ template<class U> class Interval
     explicit Interval();
     //! \brief Construct from an empty interval.
     Interval(EmptyIntervalType);
+    //! \brief Construct from a unit interval.
+    Interval(UnitIntervalType);
     //! \brief Construct an interval with the given lower and upper bounds.
     Interval(LowerBoundType l, UpperBoundType u);
 
@@ -209,6 +211,10 @@ template<class U> inline auto midpoint(Interval<U> const& ivl) -> decltype(ivl.m
 template<class U> inline auto radius(Interval<U> const& ivl) -> decltype(ivl.radius());
 template<class U> inline auto width(Interval<U> const& ivl) -> decltype(ivl.width());
 
+//! \related Interval \brief Make an interval with the given lower and upper bounds.
+template<class L, class U> inline Interval<U> make_interval(L l, U u) { return Interval<U>(l,u); }
+
+template<class U> inline auto is_empty(Interval<U> const& ivl) -> decltype(ivl.lower()>ivl.upper());
 //! \related Interval \brief Test if the interval is empty.
 template<class U> inline auto is_empty(Interval<U> const& ivl) -> decltype(ivl.lower()>ivl.upper());
 //! \related Interval \brief Test if the interval is a singleton.

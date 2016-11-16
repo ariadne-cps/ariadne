@@ -174,12 +174,14 @@ Real::Real(std::uint64_t m, Void*) : Real(std::make_shared<RealConstant<Integer>
 Real::Real(std::int64_t n, Void*) : Real(std::make_shared<RealConstant<Integer>>(n)) { }
 
 Real::Real() : Real(std::make_shared<RealConstant<Integer>>(0)) { }
+//Real::Real(ExactDouble d) : Real(std::make_shared<RealConstant<ExactDouble>>(d)) { }
+Real::Real(ExactDouble d) : Real(Dyadic(d)) { }
 Real::Real(Integer const& z) : Real(std::make_shared<RealConstant<Integer>>(z)) { }
 Real::Real(Dyadic const& w) : Real(std::make_shared<RealConstant<Dyadic>>(w)) { }
 Real::Real(Decimal const& d) : Real(Rational(d)) { }
 Real::Real(Rational const& q) : Real(std::make_shared<RealConstant<Rational>>(q)) { }
 Real::Real(EffectiveNumber q) : Real(std::make_shared<RealConstant<EffectiveNumber>>(q)) { }
-Real::Real(Float64Value x) : Real(Dyadic(x)) { }
+Real::Real(Float64Value x) : Real(Dyadic(x.get_d())) { ARIADNE_DEPRECATED("Real::Real(Float64Value)","Use Real([Exact]Double) or Real(Dyadic) instead."); }
 
 Real add(Real const& x1, Real const& x2) { return make_real(Add(),x1,x2); }
 Real sub(Real const& x1, Real const& x2) { return make_real(Sub(),x1,x2); }

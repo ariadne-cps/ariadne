@@ -351,7 +351,15 @@ template<class P> inline Logical<Equality<P>> eq(Number<P> y1, Number<Negated<P>
 
 template<class P> OutputStream& operator<<(OutputStream& os, Number<P> y) { return y._ptr->_write(os); }
 
+
 #endif /* ARIADNE_FRIEND_NUMBER */
+
+
+template<class P> class PositiveNumber : Number<P> {
+    explicit PositiveNumber<P>(Number<P>const& y);
+};
+template<class P> PositiveNumber<P> cast_positive(Number<P> y);
+
 
 } // namespace Ariadne
 

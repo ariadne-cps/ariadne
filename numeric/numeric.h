@@ -60,9 +60,9 @@ template<> inline float numeric_cast(const Float64& a) { return a.get_d(); }
 template<> inline float numeric_cast(const Real& a) { return a.get_d(); }
 template<> inline Float64 numeric_cast(const Float64Value& a) { return a.raw(); }
 
-template<> inline Real numeric_cast(const Float64& a) { return Real(Float64Value(a)); }
-template<> inline Real numeric_cast(const Float64Value& a) { return Real(a); }
-template<> inline Real numeric_cast(const Float64Bounds& a) { return Real(cast_exact(Float64Approximation(a))); }
+template<> inline Real numeric_cast(const Float64& a) { return Real(ExactDouble(a.get_d())); }
+template<> inline Real numeric_cast(const Float64Value& a) { return numeric_cast<Real>(a.raw()); }
+template<> inline Real numeric_cast(const Float64Bounds& a) { return numeric_cast<Real>(Float64Approximation(a).raw()); }
 
 } // namespace Ariadne
 

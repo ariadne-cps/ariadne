@@ -68,8 +68,9 @@ class Constraint {
     Nat argument_size() const { return this->_function.argument_size(); }
     LowerBoundType const& lower_bound() const { return this->_lower_bound; }
     UpperBoundType const& upper_bound() const { return this->_upper_bound; }
+
     // FIXME: This function should not be used as it breaks type safety
-    const ExactIntervalType bounds() const { ARIADNE_NOT_IMPLEMENTED; }
+    const Interval<Float64Value> bounds() const { Precision64 pr; return cast_exact(Interval<Float64UpperBound>({_lower_bound,pr},{_upper_bound,pr})); }
   private:
     F _function;
     R _lower_bound;

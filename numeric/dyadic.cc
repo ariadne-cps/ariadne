@@ -48,6 +48,10 @@ Dyadic::~Dyadic() {
     mpf_clear(_mpf);
 }
 
+Dyadic::Dyadic() {
+    mpf_init2(_mpf,maximum_precision);
+}
+
 Dyadic::Dyadic(mpf_t mpf) {
     mpf_init2(_mpf,maximum_precision);
     mpf_set(_mpf,_mpf);
@@ -60,13 +64,22 @@ Dyadic::Dyadic(Integer const& p, Nat q) {
     //if(q>=0) { mpf_div_2exp(_mpf,_mpf,q); } else { mpf_mul_2exp(_mpf,_mpf,-q); }
 }
 
-Dyadic::Dyadic() {
+Dyadic::Dyadic(Dbl x) {
+    static bool give_inf_warning=true;
+    if(std::isinf(x)) {
+        if(give_inf_warning) {
+            std::cerr<<"WARNING: Converting double inf to Dyadic is not supported by GMP; returning numeric_limits<double>::infinity()\n";
+            give_inf_warning=false;
+        }
+        const double max=std::numeric_limits<double>::max();
+        x=(x>0?+max:-max);
+    }
+    ARIADNE_ASSERT(std::isfinite(x));
     mpf_init2(_mpf,maximum_precision);
+    mpf_set_d(_mpf,x);
 }
 
-Dyadic::Dyadic(ExactDouble const& d) {
-    mpf_init2(_mpf,maximum_precision);
-    mpf_set_d(_mpf,d.get_d());
+Dyadic::Dyadic(ExactDouble const& d) : Dyadic(d.get_d()) {
 }
 
 Dyadic::Dyadic(Integer const& z) {
@@ -98,11 +111,6 @@ Dyadic& Dyadic::operator=(const Dyadic& x) {
 Dyadic& Dyadic::operator=(Dyadic&& x) {
     mpf_swap(_mpf,x._mpf);
     return *this;
-}
-
-Dyadic::Dyadic(Dbl x) {
-    mpf_init2(_mpf,maximum_precision);
-    mpf_set_d(_mpf,x);
 }
 
 Integer Dyadic::mantissa() const {

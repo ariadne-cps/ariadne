@@ -87,6 +87,7 @@ class Real
     template<class M, EnableIf<And<IsIntegral<M>,IsUnsigned<M>>> = dummy> Real(M m);
     template<class N, EnableIf<And<IsIntegral<N>,IsSigned<N>>> = dummy> Real(N n);
 
+    Real(ExactDouble d);
     Real(Integer const& n);
     Real(Dyadic const& d);
     Real(Decimal const& d);

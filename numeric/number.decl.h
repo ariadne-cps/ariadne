@@ -54,6 +54,8 @@ class Nat64;
 class Int32;
 class Int64;
 
+class ExactDouble;
+
 class Dyadic;
 class Decimal;
 

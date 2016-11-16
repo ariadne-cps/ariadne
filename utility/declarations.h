@@ -58,8 +58,12 @@ typedef int Int;
 //! Internal name for builtin unsigned integers.
 typedef uint Nat;
 
+// A class containing an exact double-precision value
+class ExactDouble;
+
 // Define as a class for consistency with other value types
 class String;
+
 
 typedef SizeType DimensionType;
 

@@ -141,7 +141,11 @@ class Vector
     Vector(InitializerList<X> lst) : _ary(lst.begin(),lst.end()) { }
 
     //! \brief Convert from an initializer list of generic type and a precision parameter.
-    template<class Y, class PR, EnableIf<IsConstructible<X,Y,PR>> =dummy> Vector(InitializerList<Y> const& lst, PR pr) : _ary(lst,pr) { }
+    template<class Y, class PR, EnableIf<IsConstructible<X,Y,PR>> =dummy> Vector(InitializerList<Y> const& lst, PR pr)
+        : _ary(lst,pr) { }
+    template<class PR, EnableIf<IsConstructible<X,ExactDouble,PR>> =dummy> Vector(InitializerList<Dbl> const& lst, PR pr)
+        : _ary(Array<ExactDouble>(lst),pr) { }
+    template<class PR, EnableIf<IsConstructible<X,Pair<ExactDouble,ExactDouble>,PR>> =dummy> Vector(InitializerList<Pair<Dbl,Dbl>> const& lst, PR pr);
     //! \brief Convert from an array of generic type and a precision parameter.
     template<class Y, class PR, EnableIf<IsConstructible<X,Y,PR>> =dummy> Vector(Array<Y> const& ary, PR pr) : _ary(ary,pr) { }
     //! \brief Convert from an vector of generic type and a precision parameter.
@@ -705,6 +709,17 @@ template<class X> inline Vector<ExactType<X>> cast_exact(const Vector<X>& v) {
     }
     return std::move(r);
 }
+
+template<class X>
+template<class PR, EnableIf<IsConstructible<X,Pair<ExactDouble,ExactDouble>,PR>>> Vector<X>::Vector(InitializerList<Pair<Dbl,Dbl>> const& lst, PR pr)
+    : _ary(lst.size(),X(pr))
+{
+    SizeType i=0;
+    for(auto iter=lst.begin(); iter!=lst.end(); ++iter) {
+        _ary[i]=X(ExactDouble(iter->first),ExactDouble(iter->second),pr); ++i;
+    }
+}
+
 
 template<class PR> class FloatApproximation;
 template<class PR> class FloatValue;

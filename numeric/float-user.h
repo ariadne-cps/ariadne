@@ -366,6 +366,7 @@ template<class PR> class FloatBounds
     FloatBounds<PR>(ExactDouble const& dl, ExactDouble const& du, PrecisionType pr);
     FloatBounds<PR>(Dyadic const& wl, Dyadic const& wu, PrecisionType pr);
     FloatBounds<PR>(Rational const& ql, Rational const& qu, PrecisionType pr);
+    FloatBounds<PR>(Pair<ExactDouble,ExactDouble> const& dlu, PrecisionType pr);
 
     template<class N, EnableIf<IsIntegral<N>> = dummy> FloatBounds<PR>(N n, PR pr) : FloatBounds<PR>(ExactDouble(n),pr) { }
     FloatBounds<PR>(ExactDouble d, PR pr);

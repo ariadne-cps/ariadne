@@ -106,7 +106,7 @@ class TestConstrainedImageSet
         plot("test_function_sets-geometry-parabola",widen(parabola.bounding_box(),0.5_exact),set_colour,parabola,box_colour,box1,box_colour,box2);
 
         // Test whether the second iterate of the Henon map intersects a box
-        Real hlf(0.5);
+        Real half(0.5);
         EffectiveBoxType d(2,EffectiveIntervalType(-half,+half));
         Real a(1.5); Real b(0.375);
         EffectiveVectorFunction h={a-x[0]*x[0]-b*x[1],x[0]};

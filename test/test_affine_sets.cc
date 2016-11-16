@@ -77,6 +77,7 @@ static const Colour colour(0.5,1.0,1.0);
 static const Colour expected_colour(1.0,0.25,0.25);
 
 namespace Ariadne {
+decltype(auto) operator<=(Affine<Float64Bounds>const& af, Dyadic w) { return af <= Float64Value(w,Precision64()); }
 Float64Value operator"" _ex (long double x) { return Float64Value((double)x); }
 Float64Bounds operator/(Int n1, Float64Value x2) { return Float64Value(n1)/x2; }
 }
@@ -153,7 +154,7 @@ class TestAffineSet
         ARIADNE_TEST_ASSERT(definitely(affine_set.separated(cell6)));
 
         figure.clear();
-        figure.set_bounding_box(widen(affine_set.bounding_box(),0.125));
+        figure.set_bounding_box(widen(affine_set.bounding_box(),0.125_x));
         figure << affine_set
                << fill_colour(0,0,1) << cell1
                << fill_colour(0,1,0) << cell2
@@ -181,7 +182,7 @@ class TestAffineSet
             ARIADNE_TEST_PRINT(paving);
 
             Figure figure;
-            figure.set_bounding_box(widen(set.bounding_box(),+0.125));
+            figure.set_bounding_box(widen(set.bounding_box(),0.125_x));
             figure.set_fill_opacity(0.5);
             figure.set_fill_colour(1.0,0.0,0.0);
             figure.draw(paving);
@@ -198,7 +199,7 @@ class TestAffineSet
             set.new_parameter_constraint(-0.5_ex*x[0]-1.0_ex*x[1]<=0.875_ex);
 
             Figure figure;
-            figure.set_bounding_box(widen(ExactBoxType{{-1.0,+1.0},{-1.0,+1.0}},+0.125));
+            figure.set_bounding_box(widen(ExactBoxType{{-1.0,+1.0},{-1.0,+1.0}},+0.125_x));
             figure.set_fill_opacity(0.5);
             figure.set_fill_colour(1.0,0.0,0.0);
             figure.draw(set.outer_approximation(Grid(2),3));
@@ -246,7 +247,7 @@ class TestAffineSet
             ARIADNE_TEST_PRINT(paving);
 
             Figure figure;
-            figure.set_bounding_box(widen(set.bounding_box(),+0.125));
+            figure.set_bounding_box(widen(set.bounding_box(),+0.125_x));
             figure.set_fill_opacity(0.5);
             figure.set_fill_colour(1.0,0.0,0.0);
             figure.draw(paving);

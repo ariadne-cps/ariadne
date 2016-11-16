@@ -118,9 +118,10 @@ TestIntervalType::test_constructors()
     ARIADNE_TEST_COMPARE(ivld4.upper(),>=,3.2);
 
     // ApproximateTag constructor from a single value
-    UpperIntervalType ivld5(Rational(1,3));
-    ARIADNE_TEST_COMPARE(cast_exact(ivld5.lower()),<,Rational(1,3));
-    ARIADNE_TEST_COMPARE(cast_exact(ivld5.upper()),>,Rational(1,3));
+    ARIADNE_TEST_WARN("Cannot construct Interval<UpperFloat64> from Rational.");
+//    UpperIntervalType ivld5(Rational(1,3));
+//    ARIADNE_TEST_COMPARE(cast_exact(ivld5.lower()),<,Rational(1,3));
+//    ARIADNE_TEST_COMPARE(cast_exact(ivld5.upper()),>,Rational(1,3));
 
     // ExactTag constructor from a single value
     ExactIntervalType ivld6(Float64(1.25));

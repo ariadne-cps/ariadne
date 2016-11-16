@@ -249,7 +249,7 @@ Void TestPaving::test_approximation() const {
     error_paving.remove(paving);
 
     Figure fig;
-    fig.set_bounding_box(widen(set.bounding_box(),0.5));
+    fig.set_bounding_box(widen(set.bounding_box(),0.5_x));
     fig << fill_colour(1.0,0.0,1.0) << paving;
     fig << fill_colour(0.5,0.0,0.5) << expected_paving;
     fig << fill_colour(0.0,0.0,1.0) << set;

@@ -62,6 +62,8 @@ Void TestMapEvolver::test() const
 {
     cout << __PRETTY_FUNCTION__ << endl;
 
+    Precision64 pr;
+
     typedef Enclosure EnclosureType;
 
     // Define the initial box
@@ -83,11 +85,11 @@ Void TestMapEvolver::test() const
     cout << "henon_function=" << henon << endl;
 
     //VectorUserFunction evaluation sanity check
-    Vector<ApproximateNumericType> p(2); p[0]=ApproximateNumericType(a); p[1]=ApproximateNumericType(b);
-    Vector<ApproximateNumericType> x(2); x[0]=0.5; x[1]=0.25;
-    Vector<ApproximateNumericType> hx(2); hx[0]=p[0]-x[0]*x[0]+x[1]*p[1]; hx[1]=x[0];
+    Vector<ApproximateNumericType> p={{a,b},pr};
+    Vector<ApproximateNumericType> x={{0.5,0.25},pr};
+    Vector<ApproximateNumericType> hx={p[0]-x[0]*x[0]+x[1]*p[1], x[0]};
     ARIADNE_TEST_EQUAL(henon.evaluate(x),hx);
-    Matrix<ApproximateNumericType> dhx(2,2); dhx[0][0]=-2*x[0]; dhx[0][1]=p[1]; dhx[1][0]=1.0;
+    Matrix<ApproximateNumericType> dhx={{-2*x[0],p[1]},{1.0_approx,0.0_approx}};
     ARIADNE_TEST_EQUAL(henon.jacobian(x),dhx);
 
 

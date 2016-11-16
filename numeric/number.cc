@@ -67,6 +67,7 @@ template class NumberWrapper<Rational>;
 template<> struct DispatchingTraits<Real> { typedef Aware<Real> AwareOfTypes; };
 template class NumberWrapper<Real>;
 
+ExactDouble::operator ExactNumber() const { return Dyadic(*this).operator ExactNumber(); }
 Integer::operator ExactNumber() const { return ExactNumber(new NumberWrapper<Integer>(*this)); }
 Dyadic::operator ExactNumber() const { return ExactNumber(new NumberWrapper<Dyadic>(*this)); }
 Rational::operator ExactNumber() const { return ExactNumber(new NumberWrapper<Rational>(*this)); }

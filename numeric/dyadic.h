@@ -42,6 +42,7 @@
 
 namespace Ariadne {
 
+class ExactDouble;
 class Dyadic;
 
 //! \ingroup NumericModule
@@ -78,6 +79,8 @@ class Dyadic
     template<class M, EnableIf<And<IsIntegral<M>,IsUnsigned<M>>> = dummy> Dyadic(M m);
     //! \brief Convert from a built-in integer.
     template<class N, EnableIf<And<IsIntegral<N>,IsSigned<N>>> = dummy> Dyadic(N n);
+    //! \brief Convert from an exact double-precision number.
+    Dyadic(const ExactDouble& d);
     //! \brief Convert from an integer.
     Dyadic(const Integer& z);
     //! \brief Convert from a power of two.

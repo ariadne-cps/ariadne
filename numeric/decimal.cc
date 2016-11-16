@@ -145,6 +145,9 @@ Decimal::operator Rational() const {
     return sign*q;
 }
 
+Decimal::operator ExactNumber() const {
+    return Rational(*this).operator ExactNumber();
+}
 
 } // namespace Ariadne
 

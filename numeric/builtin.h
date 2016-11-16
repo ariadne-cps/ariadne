@@ -32,15 +32,20 @@
 
 namespace Ariadne {
 
+class ExactTag;
+
 using ApproximateDouble = double;
 
 class ExactDouble {
-    double _x;
+    double _d;
   public:
-    double get_d() const { return this->_x; }
-    template<class N, EnableIf<IsIntegral<N>> =dummy> explicit ExactDouble(N n) : _x(n) { assert(_x==n); }
-    explicit ExactDouble(double x) : _x(x) { }
-    friend ExactDouble operator-(ExactDouble x) { return ExactDouble(-x._x); }
+    typedef ExactTag Paradigm;
+    double get_d() const { return this->_d; }
+    template<class N, EnableIf<IsIntegral<N>> =dummy> explicit ExactDouble(N n) : _d(n) { assert(_d==n); }
+    explicit ExactDouble(double d) : _d(d) { }
+    operator ExactNumber() const;
+    friend ExactDouble operator+(ExactDouble x) { return ExactDouble(+x._d); }
+    friend ExactDouble operator-(ExactDouble x) { return ExactDouble(-x._d); }
     friend ExactDouble operator"" _x (long double lx) { double x=lx; assert(x==lx); return ExactDouble(x); }
 };
 inline ExactDouble operator"" _x (long double lx);

@@ -35,6 +35,7 @@
 #include "utility/string.h"
 #include "numeric/logical.h"
 #include "numeric/twoexp.h"
+#include "numeric/builtin.h"
 #include "numeric/rational.h"
 
 #include <limits>
@@ -61,6 +62,11 @@ Dyadic::Dyadic(Integer const& p, Nat q) {
 
 Dyadic::Dyadic() {
     mpf_init2(_mpf,maximum_precision);
+}
+
+Dyadic::Dyadic(ExactDouble const& d) {
+    mpf_init2(_mpf,maximum_precision);
+    mpf_set_d(_mpf,d.get_d());
 }
 
 Dyadic::Dyadic(Integer const& z) {
@@ -240,7 +246,6 @@ Dyadic make_dyadic(unsigned long long int n) {
         return make_dyadic(q)*Dyadic(max)+Dyadic(rem);
     }
 }
-
 
 template<> String class_name<Dyadic>() { return "Dyadic"; }
 

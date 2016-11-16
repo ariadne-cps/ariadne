@@ -438,6 +438,10 @@ inline Float64UpperBox widen(const Float64UpperBox& bx, Float64UpperBound eps) {
     }
     return r;
 }
+// TODO: Add widen for other generic values
+inline Float64UpperBox widen(const Float64UpperBox& bx, ValidatedUpperNumber eps) {
+    return widen(bx,eps.get(UpperTag(),Precision64()));
+}
 
 inline Float64UpperBox widen(const Float64ExactBox& bx, Float64Value eps) {
     return widen(reinterpret_cast<const Float64UpperBox&>(bx),Float64UpperBound(eps));

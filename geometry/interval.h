@@ -33,6 +33,7 @@
 #include "utility/module.h"
 
 #include "numeric/logical.h"
+#include "numeric/number.h"
 #include "numeric/float.h"
 #include "numeric/arithmetic.h"
 
@@ -283,10 +284,12 @@ Float64UpperInterval make_interval(Float64Bounds const& x);
 //! \related Float64UpperInterval \brief An interval containing the given interval in its interior.
 Interval<Float64UpperBound> widen(Interval<Float64UpperBound> const& ivl);
 Interval<Float64UpperBound> widen(Interval<Float64UpperBound> const& ivl, Float64UpperBound e);
+Interval<Float64UpperBound> widen(Interval<Float64UpperBound> const& ivl, ValidatedUpperNumber e);
 Interval<Float64Value> widen_domain(Interval<Float64UpperBound> const& ivl);
 //! \related Float64LowerInterval \brief An interval contained in the interior of the given interval.
 Interval<Float64LowerBound> narrow(Interval<Float64LowerBound> const& ivl);
 Interval<Float64LowerBound> narrow(Interval<Float64LowerBound> const& ivl, Float64UpperBound e);
+Interval<Float64UpperBound> narrow(Interval<Float64LowerBound> const& ivl, ValidatedUpperNumber e);
 
 //! \related Interval \brief Read from an input stream.
 InputStream& operator>>(InputStream&, Interval<Float64Value>&);

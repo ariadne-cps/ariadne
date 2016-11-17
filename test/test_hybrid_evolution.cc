@@ -122,16 +122,9 @@ Void TestHybridEvolution::test_bouncing_ball() const {
                           "This may indicate over-zealous splitting, and/or errors in detecting the end conditions.");
     }
 
-
     Decimal exl(0.12), exu(+0.13), evl(-0.04), evu(+0.04); // Expected bounds
     HybridBoxType expected_orbit_final_bounding_box=HybridBoxType(q,{x.in(exl,exu),v.in(evl,evu)});
-    for(ListSet<HybridEnclosure>::ConstIterator iter=orbit_final.begin(); iter!=orbit_final.end(); ++iter) {
-        const HybridEnclosure& orbit_final_set=*iter;
-        ARIADNE_TEST_PRINT(orbit_final_set.bounding_box());
-        ARIADNE_TEST_BINARY_PREDICATE(inside,orbit_final_set,expected_orbit_final_bounding_box);
-    }
-    ARIADNE_TEST_PRINT(orbit.final().size());
-    ARIADNE_TEST_PRINT(expected_orbit_final_bounding_box);
+    ARIADNE_TEST_BINARY_PREDICATE(inside,orbit_final,expected_orbit_final_bounding_box);
 
     Dyadic xl(-0.5), xu(+2.5), vl(-4.0), vu(+4.0);
     Axes2d bounding_box={xl<=x<=xu,vl<=v<=vu};

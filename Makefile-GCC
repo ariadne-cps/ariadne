@@ -9,7 +9,7 @@ HDR = \
 # ariadne.h
 
 LIB_NUMERIC_SRC = \
-	logging.cc operators.cc logical.cc integer.cc rational.cc decimal.cc real.cc \
+	logging.cc operators.cc logical.cc integer.cc dyadic.cc rational.cc decimal.cc real.cc \
 	float64.cc floatmp.cc \
 	float-user.cc number.cc
 
@@ -17,8 +17,10 @@ LIB_NUMERIC_SRC = \
 
 TEST_NUMERIC_SRC = \
 	check_numeric.cc \
-	test_logical.cc test_integer.cc test_rational.cc test_real.cc \
+	test_logical.cc test_integer.cc test_rational.cc test_real.cc test_number.cc \
 	test_float.cc test_validated_float.cc \
+
+#	test_numeric.cc \
 
 LIB_ALGEBRA_SRC = \
 	vector.cc matrix.cc series.cc multi_index.cc expansion.cc differential.cc algebra.cc \
@@ -28,7 +30,7 @@ TEST_ALGEBRA_SRC = \
 
 LIB_FUNCTION_SRC = \
 	affine.cc polynomial.cc affine_model.cc taylor_model.cc  \
-	function.cc symbolic_function.cc taylor_function.cc  \
+	function.cc function_model.cc symbolic_function.cc taylor_function.cc  \
 
 TEST_FUNCTION_SRC = \
 	check_function.cc \
@@ -72,6 +74,7 @@ TEST_DYNAMICS_SRC = \
 	test_continuous_evolution.cc
 
 LIB_EXPRESSION_SRC = \
+	formula.cc \
 	expression.cc \
 	expression_set.cc \
 
@@ -171,9 +174,9 @@ EXAMPLES_BIN = $(patsubst %.cc,$(EXAMPLES_BIN_DIR)/%,$(EXAMPLES_SRC))
 
 CXX = g++
 CXXWARNINGS=-Wall -Wno-reorder -Wno-unused-variable -Wno-unused-but-set-variable
-CXXFLAGS = -std=c++11  -Wno-non-template-friend -fPIC -O1
+CXXFLAGS = -std=c++17  -Wno-non-template-friend -fPIC -O1
 #CXX = clang++
-#CXXFLAGS = -std=c++11 -fPIC
+#CXXFLAGS = -std=c++1x -fPIC
 
 INCLUDE_PATHS =  -iquote.
 LINK_LIBS=-lgmpxx -lgmp -lmpfr -lcairo -lboost_system -lboost_serialization
@@ -313,6 +316,9 @@ bin/check_numeric: $(TESTS_OBJ_DIR)/check_numeric.o
 
 bin/check_function: $(TESTS_OBJ_DIR)/check_function.o
 	$(CXX) $< $(LINK_FLAGS) -o $@
+
+bin/test_numeric: $(TESTS_OBJ_DIR)/test_numeric.o  libariadne-numeric.so
+	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_NUMERIC_LIB) $(LINK_LIBS) -o $@
 
 bin/test_logical: $(TESTS_OBJ_DIR)/test_logical.o  libariadne-numeric.so
 	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_NUMERIC_LIB) $(LINK_LIBS) -o $@

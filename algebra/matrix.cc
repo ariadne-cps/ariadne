@@ -154,7 +154,7 @@ template<> Matrix<Float64Bounds> dd_solve(const Matrix<Float64Bounds>& A, const 
             ARIADNE_THROW(std::runtime_error,"dd_solve(Matrix<Float64Bounds> A, Matrix<Float64Bounds> B)",
                           "Matrix A="<<A<<" is not diagonally-dominant.");
         }
-        c[i]=rec(rci);
+        c[i]=rec(cast_positive(rci));
     }
 
     // Compute initial solution

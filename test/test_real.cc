@@ -28,6 +28,7 @@
 #include "numeric/real.h"
 
 #include "numeric/integer.h"
+#include "numeric/dyadic.h"
 #include "numeric/rational.h"
 
 #include "numeric/float.h"
@@ -38,7 +39,7 @@ using namespace std;
 using namespace Ariadne;
 
 auto operator==(const Real& x1, double x2) -> decltype(x1==Float64Value(x2)) {
-    return Float64Bounds(x1)==Float64Bounds(x2);
+    return Float64Bounds(x1,Precision64())==Float64Bounds(x2);
 }
 
 class TestReal
@@ -90,31 +91,28 @@ void TestReal::test_conversions() {
 }
 
 void TestReal::test_constructors() {
+    Precision64 pr;
     ARIADNE_TEST_CONSTRUCT(Real,xv, );
-    ARIADNE_TEST_EQUALS(xv.lower().raw(),0);
-    ARIADNE_TEST_EQUALS(xv.approx().raw(),0);
-    ARIADNE_TEST_EQUALS(xv.upper().raw(),0);
+    ARIADNE_TEST_EQUALS(xv.get(pr),0);
+    ARIADNE_TEST_EQUALS(xv.lower().get(pr).raw(),0);
+    ARIADNE_TEST_EQUALS(xv.upper().get(pr).raw(),0);
     ARIADNE_TEST_CONSTRUCT(Real,xz,(1));
-    ARIADNE_TEST_EQUALS(xz.lower().raw(),1);
-    ARIADNE_TEST_EQUALS(xz.approx().raw(),1);
-    ARIADNE_TEST_EQUALS(xz.upper().raw(),1);
+    ARIADNE_TEST_EQUALS(xz.get(pr),1);
     ARIADNE_TEST_CONSTRUCT(Real,xe,(1.5_exact));
-    ARIADNE_TEST_EQUALS(xe.lower().raw(),1.5);
-    ARIADNE_TEST_EQUALS(xe.approx().raw(),1.5);
-    ARIADNE_TEST_EQUALS(xe.upper().raw(),1.5);
+    ARIADNE_TEST_EQUALS(xe.get(pr),1.5);
     ARIADNE_TEST_CONSTRUCT(Real,xlau,(3.14159,3.141593,3.14160));
     ARIADNE_TEST_CONSTRUCT(Real,xn,(1.1_q));
-    ARIADNE_TEST_COMPARE(Rational(xn.lower().raw()),<,Rational(11,10));
-    ARIADNE_TEST_COMPARE(Rational(xn.upper().raw()),>,Rational(11,10));
+    ARIADNE_TEST_COMPARE(Rational(xn.lower().get(pr).raw()),<,Rational(11,10));
+    ARIADNE_TEST_COMPARE(Rational(xn.upper().get(pr).raw()),>,Rational(11,10));
     ARIADNE_TEST_CONSTRUCT(Real,xq,(Rational(11,10)));
-    ARIADNE_TEST_COMPARE(Rational(xq.lower().raw()),<,Rational(11,10));
-    ARIADNE_TEST_COMPARE(Rational(xq.upper().raw()),>,Rational(11,10));
+    ARIADNE_TEST_COMPARE(Rational(xq.lower().get(pr).raw()),<,Rational(11,10));
+    ARIADNE_TEST_COMPARE(Rational(xq.upper().get(pr).raw()),>,Rational(11,10));
 }
 
 void TestReal::test_arithmetic() {
     Float64Approximation::set_output_places(18);
-    Real x(2.5_exact);
-    Real y(4.0_exact);
+    Real x(2.5_dyadic);
+    Real y(4.0_dyadic);
     ARIADNE_TEST_EQUALS(x, 2.5);
     ARIADNE_TEST_EQUALS(y, 4.0);
     ARIADNE_TEST_EQUALS(+x, 2.5);
@@ -136,9 +134,9 @@ void TestReal::test_arithmetic() {
 }
 
 void TestReal::test_transcendental() {
-    Float64Approximation eps=std::numeric_limits<double>::epsilon();
-    Real x(2.5_exact);
-    Float64Approximation ax(x);
+    Float64Approximation eps{Float64::eps(Precision64())};
+    Real x(2.5_dyadic);
+    Float64Approximation ax=x.get(Precision64());
     ARIADNE_TEST_EQUALS(sqrt(Real(4)),2.0);
     ARIADNE_TEST_EQUALS(exp(Real(0)),1.0);
     ARIADNE_TEST_EQUALS(log(Real(1)),0.0);
@@ -179,10 +177,10 @@ void TestReal::test_comparison() {
 
 
 namespace Ariadne {
-Bool operator>=(FloatMP const& x1, Float64 x2);
-Bool operator<=(FloatMP const& x1, Float64 x2);
-Bool operator<=(Float64 x1, FloatMP const& x2);
-Bool operator>=(Float64 x1, FloatMP const& x2);
+Bool operator>=(FloatMP const& x1, Float64 x2) { return x1>=x2.get_d(); }
+Bool operator<=(FloatMP const& x1, Float64 x2) { return x1<=x2.get_d(); }
+Bool operator<=(Float64 x1, FloatMP const& x2) { return x2>=x1.get_d(); }
+Bool operator>=(Float64 x1, FloatMP const& x2) { return x2<=x1.get_d(); }
 }
 
 void TestReal::test_accuracy() {

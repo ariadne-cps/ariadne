@@ -35,6 +35,7 @@
 #include "utility/metaprogramming.h"
 #include "utility/string.h"
 #include "numeric/integer.h"
+#include "numeric/arithmetic.h"
 #include "numeric/number.decl.h"
 #include "numeric/float.decl.h"
 
@@ -51,6 +52,11 @@ enum class Comparison : char;
 //! \ingroup UserNumericTypeSubModule
 //! \brief %Rational numbers.
 class Rational
+    : DeclareFieldOperations<Rational>
+    , DeclareLatticeOperations<Rational,Rational>
+    , DeclareComparisonOperations<Rational,Boolean,Boolean>
+    , DefineFieldOperators<Rational>
+    , DefineComparisonOperators<Rational,Boolean,Boolean>
 {
   public:
     mpq_t _mpq;
@@ -65,6 +71,7 @@ class Rational
     Rational(Int64);
     explicit Rational(Float64 const&);
     Rational(const Integer&);
+    Rational(const Dyadic&);
     explicit Rational(const String&);
     explicit Rational(const Float64Value&);
     explicit Rational(const mpq_t);
@@ -76,41 +83,10 @@ class Rational
     Integer get_num() const;
     Integer get_den() const;
     Integer numerator() const;
-    Integer denominator() const;
-    friend Rational operator+(Rational const& q);
-    friend Rational operator-(Rational const& q);
-    friend Rational operator+(Rational const& q1, Rational const& q2);
-    friend Rational operator-(Rational const& q1, Rational const& q2);
-    friend Rational operator*(Rational const& q1, Rational const& q2);
-    friend Rational operator/(Rational const& q1, Rational const& q2);
+    Natural denominator() const;
     friend Rational operator/(Integer const& z1, Integer const& z2);
-    friend Rational& operator+=(Rational& q1, Rational const& q2);
-    friend Rational& operator-=(Rational& q1, Rational const& q2);
-    friend Rational& operator*=(Rational& q1, Rational const& q2);
-    friend Rational& operator/=(Rational& q1, Rational const& q2);
-    friend Rational max(Rational const& q1, Rational const& q2);
-    friend Rational min(Rational const& q1, Rational const& q2);
-    friend Rational abs(Rational const& q);
-    friend Rational pos(Rational const& q);
-    friend Rational neg(Rational const& q);
-    friend Rational sqr(Rational const& q);
-    friend Rational rec(Rational const& q);
-    friend Rational add(Rational const& q1, Rational const& q2);
-    friend Rational sub(Rational const& q1, Rational const& q2);
-    friend Rational mul(Rational const& q1, Rational const& q2);
-    friend Rational div(Rational const& q1, Rational const& q2);
-    friend Rational pow(Rational const& q, Nat m);
-    friend Rational pow(Rational const& q, Int n);
 
-    friend Boolean eq(Rational const& q1, Rational const& q2);
     friend Comparison cmp(Rational const& q1, Rational const& q2);
-
-    friend Boolean operator==(Rational const& q1, Rational const& q2);
-    friend Boolean operator!=(Rational const& q1, Rational const& q2);
-    friend Boolean operator>=(Rational const& q1, Rational const& q2);
-    friend Boolean operator<=(Rational const& q1, Rational const& q2);
-    friend Boolean operator> (Rational const& q1, Rational const& q2);
-    friend Boolean operator< (Rational const& q1, Rational const& q2);
 
     friend OutputStream& operator<<(OutputStream& os, Rational const& q);
     friend InputStream& operator>>(InputStream& os, Rational& q);
@@ -127,6 +103,7 @@ template<> struct IsNumericType<Rational> : True { };
 Rational operator"" _q(long double x);
 
 template<class N, EnableIf<IsIntegral<N>>> inline Rational::Rational(N n) : Rational(Int64(n)) { }
+
 
 
 } // namespace Ariadne

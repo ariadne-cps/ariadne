@@ -186,7 +186,7 @@ RealExpressionConstraintSet::RealExpressionConstraintSet(const List<ContinuousPr
 
 ConstraintSet RealExpressionConstraintSet::euclidean_set(const RealSpace& space) const {
     const RealExpressionConstraintSet& set = *this;
-    List<RealConstraint> constraints;
+    List<EffectiveConstraint> constraints;
     for(Nat i=0; i!=set.constraints().size(); ++i) {
         RealExpression constraint_expression=indicator(set.constraints()[i],NEGATIVE);
         EffectiveScalarFunction constraint_function( Ariadne::make_function(constraint_expression,space) );
@@ -225,7 +225,7 @@ RealExpressionBoundedConstraintSet::RealExpressionBoundedConstraintSet(const Lis
 BoundedConstraintSet RealExpressionBoundedConstraintSet::euclidean_set(const RealSpace& space) const {
     const RealExpressionBoundedConstraintSet& set = *this;
     RealBox domain=RealVariablesBox(set.bounds()).euclidean_set(space);
-    List<RealConstraint> constraints;
+    List<EffectiveConstraint> constraints;
     for(Nat i=0; i!=set.constraints().size(); ++i) {
         RealExpression constraint_expression=indicator(set.constraints()[i],NEGATIVE);
         EffectiveScalarFunction constraint_function( Ariadne::make_function(constraint_expression,space) );

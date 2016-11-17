@@ -34,13 +34,14 @@
 #include <iosfwd>
 #include <type_traits>
 
+typedef unsigned char uchar;
 typedef unsigned int uint;
 
 namespace std {
 template<class T> class initializer_list;
 template<class T> class shared_ptr;
 template<class T1, class T2> class pair;
-template<class... Args> class tuple;
+template<class... TS> class tuple;
 template<class T1, class T2> struct pair;
 }
 
@@ -69,14 +70,12 @@ using std::declval;
 
 using SizeType = std::size_t;
 using PointerDifferenceType = std::ptrdiff_t;
-using DegreeType = std::uint8_t;
+using DegreeType = std::uint16_t;
 
 template<class T> using SharedPointer = std::shared_ptr<T>;
 template<class T> using InitializerList = std::initializer_list<T>;
-template<class T1, class T2> using PairType = std::pair<T1,T2>;
-
-template<class T1,class T2> class Pair;
-template<class... Args> class Tuple;
+template<class T1, class T2> using Pair = std::pair<T1,T2>;
+template<class... TS> using Tuple = std::tuple<TS...>;
 
 template<class T> class Array;
 template<class T> class List;

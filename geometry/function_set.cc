@@ -473,7 +473,7 @@ ConstrainedImageSet::affine_approximation() const
     for(List<EffectiveConstraint>::ConstIterator iter=this->_constraints.begin();
         iter!=this->_constraints.end(); ++iter)
     {
-        AffineModel<ValidatedNumericType> a=affine_model(D,iter->function());
+        AffineModel<ValidatedTag,Float64> a=affine_model(D,iter->function());
         ExactIntervalType b=iter->bounds();
         result.new_constraint(b.lower()<=a<=b.upper());
     }
@@ -492,8 +492,8 @@ ValidatedKleenean ConstrainedImageSet::satisfies(const EffectiveConstraint& nc) 
     const EffectiveBoxType& domain=this->_domain;
     List<EffectiveConstraint> all_constraints=this->_constraints;
     EffectiveScalarFunction composed_function = compose(nc.function(),this->_function);
-    const Real& lower_bound = nc.lower_bound();
-    const Real& upper_bound = nc.upper_bound();
+    const EffectiveNumber& lower_bound = nc.lower_bound();
+    const EffectiveNumber& upper_bound = nc.upper_bound();
 
     ValidatedKleenean result;
     if(definitely(upper_bound<+infinity)) {
@@ -569,13 +569,14 @@ ConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, Int 
 Pair<ConstrainedImageSet,ConstrainedImageSet>
 ConstrainedImageSet::split() const
 {
-    Nat k=this->number_of_parameters();
-    Float64 rmax=0.0;
-    for(Nat j=0; j!=this->number_of_parameters(); ++j) {
-       Float64UpperBound rj(this->domain()[j].radius());
-       if(rj.raw()>rmax) {
+    ARIADNE_ASSERT(this->number_of_parameters()>0);
+    auto rmax(this->domain()[0].radius());
+    Nat k=0;
+    for(Nat j=1; j!=this->number_of_parameters(); ++j) {
+       auto rj(this->domain()[j].radius());
+       if(decide(rj>rmax)) {
             k=j;
-            rmax=rj.raw();
+            rmax=rj;
         }
     }
     return this->split(k);
@@ -830,7 +831,10 @@ ValidatedConstrainedImageSet::affine_over_approximation() const
     constraint_models.reserve(this->number_of_constraints());
     for(Nat i=0; i!=this->number_of_constraints(); ++i) {
         const ValidatedConstraint& constraint=this->constraint(i);
-        constraint_models.append(ValidatedAffineModelConstraint(constraint.lower_bound(),affine_model(domain,constraint.function()),constraint.upper_bound()));
+        auto u=constraint.upper_bound();
+        constraint_models.append(ValidatedAffineModelConstraint(constraint.lower_bound(),affine_model(domain,constraint.function()),u));
+
+//        constraint_models.append(ValidatedAffineModelConstraint(constraint.lower_bound(),affine_model(domain,constraint.function()),constraint.upper_bound()));
     }
 
     return ValidatedAffineConstrainedImageSet(domain,space_models,constraint_models);
@@ -886,6 +890,7 @@ ValidatedAffineConstrainedImageSet ValidatedConstrainedImageSet::affine_approxim
     typedef List<ValidatedConstraint>::ConstIterator ConstIterator;
 
     Vector<ExactIntervalType> domain = this->domain();
+
     Vector<ValidatedAffineModel> space_models=affine_models(domain,this->function());
     List<ValidatedAffineModelConstraint> constraint_models;
     constraint_models.reserve(this->number_of_constraints());

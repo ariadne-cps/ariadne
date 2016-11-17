@@ -55,7 +55,7 @@ Int main(Int argc, char **argv)
     EffectiveVectorFunction x=EffectiveVectorFunction::identity(3);
     EffectiveVectorFunction afn1={0.05*x[0]+0.05*x[2]+0.15,0.05*x[1]+0.05*x[2]+0.6};
     ValidatedConstrainedImageSet s1(ExactBoxType::unit_box(3),afn1);
-    ApproximateBoxType bbx1=widen(s1.bounding_box(),0.25);
+    ApproximateBoxType bbx1=widen(s1.bounding_box(),0.25_x);
 
     EffectiveVectorFunction rf(1u, sqr(x[0])+sqr(x[1])-sqr(p));
     ConstraintSet cs1(rf,EffectiveBoxType(1u,EffectiveIntervalType(-1,0)));

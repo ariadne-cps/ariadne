@@ -68,11 +68,6 @@ template<> struct AlgebraTraits<Real> {
 };
 
 
-struct Ball {
-    explicit Ball(ErrorType r) : _radius(r) { }
-    ErrorType _radius;
-};
-
 //! \brief Interface for a unital algebra over a field \a X.
 template<class X> class AlgebraInterface
     : public virtual WritableInterface

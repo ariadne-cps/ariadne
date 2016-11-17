@@ -40,6 +40,7 @@
 #include "algebra/vector.h"
 #include "algebra/covector.h"
 #include "algebra/matrix.h"
+#include "algebra/operations.h"
 
 namespace Ariadne {
 
@@ -49,172 +50,131 @@ typedef Affine<ExactIntervalType> IntervalAffine;
 typedef Affine<ApproximateNumericType> ApproximateAffine;
 typedef Affine<ValidatedNumericType> ValidatedAffine;
 
-template<class X> class AffineModel;
-typedef AffineModel<Float64> FloatAffineModel;
-typedef AffineModel<ApproximateNumericType> ApproximateAffineModel;
-typedef AffineModel<ValidatedNumericType> ValidatedAffineModel;
+template<class P, class F> class AffineModel;
+typedef AffineModel<ApproximateTag,Float64> ApproximateAffineModel;
+typedef AffineModel<ValidatedTag,Float64> ValidatedAffineModel;
 
 template<class P, class F> class TaylorModel;
 typedef TaylorModel<ApproximateTag,Float64> ApproximateTaylorModel;
 typedef TaylorModel<ValidatedTag,Float64> ValidatedTaylorModel;
 
 
-AffineModel<ValidatedNumericType> affine_model(const Affine<ValidatedNumericType>& affine);
-AffineModel<ValidatedNumericType> affine_model(const Affine<EffectiveNumericType>& affine);
-AffineModel<ValidatedNumericType> affine_model(const TaylorModel<ValidatedTag,Float64>& taylor_model);
-AffineModel<ValidatedNumericType> affine_model(const ExactBoxType& domain, const ValidatedScalarFunction& function);
-Vector< AffineModel<ValidatedNumericType> > affine_models(const Vector< TaylorModel<ValidatedTag,Float64> >& taylor_models);
-Vector< AffineModel<ValidatedNumericType> > affine_models(const ExactBoxType& domain, const ValidatedVectorFunction& function);
+AffineModel<ValidatedTag,Float64> affine_model(const Affine<Float64Bounds>& affine);
+AffineModel<ValidatedTag,Float64> affine_model(const Affine<ValidatedNumber>& affine);
+AffineModel<ValidatedTag,Float64> affine_model(const TaylorModel<ValidatedTag,Float64>& taylor_model);
+AffineModel<ValidatedTag,Float64> affine_model(const ExactBoxType& domain, const ValidatedScalarFunction& function);
+Vector< AffineModel<ValidatedTag,Float64> > affine_models(const Vector< TaylorModel<ValidatedTag,Float64> >& taylor_models);
+Vector< AffineModel<ValidatedTag,Float64> > affine_models(const ExactBoxType& domain, const ValidatedVectorFunction& function);
 
 //! An affine expression \f$f:\R^n\rightarrow\R\f$ given by \f$f(x) \approx \sum_{i=0}^{n-1} a_i x_i + b\f$.
-template<>
-class AffineModel<ApproximateNumericType>
+template<class F>
+class AffineModel<ApproximateTag,F>
+    : DispatchAlgebraOperations<AffineModel<ApproximateTag,F>,ApproximateNumericType>
 {
+    typedef typename F::PrecisionType PR;
   public:
-    typedef Float64Approximation CoefficientType;
+    typedef PR PrecisionType;
+    typedef FloatApproximation<PR> CoefficientType;
 
     explicit AffineModel() : _c(), _g() { }
-    explicit AffineModel(Nat n) : _c(0.0), _g(n,0.0) { }
-    explicit AffineModel(const ApproximateNumericType& c, const Covector<ApproximateNumericType>& g) : _c(c), _g(g) { }
-    explicit AffineModel(ApproximateNumericType c, InitializerList<ApproximateNumericType> g) : _c(c), _g(g) { }
+    explicit AffineModel(SizeType n, PrecisionType prec) : _c(0,prec), _g(n,CoefficientType(0,prec)) { }
+    explicit AffineModel(SizeType n, const CoefficientType& c) : _c(c), _g(n,nul(c)) { }
+    explicit AffineModel(const CoefficientType& c, const Covector<CoefficientType>& g) : _c(c), _g(g) { }
+    explicit AffineModel(CoefficientType c, InitializerList<CoefficientType> g) : _c(c), _g(g) { }
 
-    AffineModel<ApproximateNumericType>& operator=(const ApproximateNumericType& c) {
-        this->_c=c; for(Nat i=0; i!=this->_g.size(); ++i) { this->_g[i]=0.0; } return *this; }
-    ApproximateNumericType& operator[](Nat i) { return this->_g[i]; }
-    const ApproximateNumericType& operator[](Nat i) const { return this->_g[i]; }
-    static AffineModel<ApproximateNumericType> constant(Nat n, const ApproximateNumericType& c) {
-        return AffineModel<ApproximateNumericType>(c,Covector<ApproximateNumericType>(n,0.0)); }
-    static AffineModel<ApproximateNumericType> variable(Nat n, Nat j) {
-        return AffineModel<ApproximateNumericType>(0.0,Covector<ApproximateNumericType>::unit(n,j)); }
+    AffineModel<ApproximateTag,F>& operator=(const CoefficientType& c) {
+        this->_c=c; for(SizeType i=0; i!=this->_g.size(); ++i) { this->_g[i]=0.0; } return *this; }
+    CoefficientType& operator[](SizeType i) { return this->_g[i]; }
+    const CoefficientType& operator[](SizeType i) const { return this->_g[i]; }
+    static AffineModel<ApproximateTag,F> constant(SizeType n, const CoefficientType& c) {
+        return AffineModel<ApproximateTag,F>(c,Covector<CoefficientType>(n,CoefficientType(0.0))); }
+    static AffineModel<ApproximateTag,F> variable(SizeType n, SizeType j) {
+        return AffineModel<ApproximateTag,F>(CoefficientType(0.0),Covector<CoefficientType>::unit(n,j)); }
 
-    const Covector<ApproximateNumericType>& a() const { return this->_g; }
-    const ApproximateNumericType& b() const { return this->_c; }
+    const Covector<CoefficientType>& a() const { return this->_g; }
+    const CoefficientType& b() const { return this->_c; }
 
-    const Covector<ApproximateNumericType>& gradient() const { return this->_g; }
-    const ApproximateNumericType& gradient(Nat i) const { return this->_g[i]; }
-    const ApproximateNumericType& value() const { return this->_c; }
+    const Covector<CoefficientType>& gradient() const { return this->_g; }
+    const CoefficientType& gradient(SizeType i) const { return this->_g[i]; }
+    const CoefficientType& value() const { return this->_c; }
 
-    Void resize(Nat n) { this->_g.resize(n); }
+    Void resize(SizeType n) { this->_g.resize(n); }
 
-    Nat argument_size() const { return this->_g.size(); }
+    SizeType argument_size() const { return this->_g.size(); }
   private:
-    ApproximateNumericType _c;
-    Covector<ApproximateNumericType> _g;
+    CoefficientType _c;
+    Covector<CoefficientType> _g;
 };
-
-//! \relates AffineModel
-//! \brief Negation of an affine model.
-AffineModel<ApproximateNumericType> operator-(const AffineModel<ApproximateNumericType>& f);
-//! \relates AffineModel
-//! \brief Addition of two affine models.
-AffineModel<ApproximateNumericType> operator+(const AffineModel<ApproximateNumericType>& f1, const AffineModel<ApproximateNumericType>& f2);
-//! \relates AffineModel
-//! \brief Subtraction of two affine models.
-AffineModel<ApproximateNumericType> operator-(const AffineModel<ApproximateNumericType>& f1, const AffineModel<ApproximateNumericType>& f2);
-//! \relates AffineModel
-//! \brief Multiplication of two affine models.
-AffineModel<ApproximateNumericType> operator*(const AffineModel<ApproximateNumericType>& f1, const AffineModel<ApproximateNumericType>& f2);
-//! \relates AffineModel
-//! \brief Addition of a constant to an affine model.
-AffineModel<ApproximateNumericType>& operator+=(AffineModel<ApproximateNumericType>& f1, const ApproximateNumericType& c2);
-//! \relates AffineModel
-//! \brief Scalar multiplication of an affine model.
-AffineModel<ApproximateNumericType>& operator*=(AffineModel<ApproximateNumericType>& f1, const ApproximateNumericType& c2);
-
-//! \relates AffineModel
-//! \brief Write to an output stream.
-OutputStream& operator<<(OutputStream& os, const AffineModel<ApproximateNumericType>& f);
 
 
 //! An affine expression \f$f:[-1,+1]^n\rightarrow\R\f$ given by \f$f(x)=\sum_{i=0}^{n-1} a_i x_i + b \pm e\f$.
-template<>
-class AffineModel<ValidatedNumericType>
+template<class F>
+class AffineModel<ValidatedTag,F>
+    : DispatchAlgebraOperations<AffineModel<ValidatedTag,F>,ValidatedNumericType>
 {
+    typedef typename ValidatedNumericType::PrecisionType PR;
   public:
+    typedef PR PrecisionType;
     typedef Float64Value CoefficientType;
     typedef Float64Error ErrorType;
+    typedef AffineModel<ValidatedTag,F> AffineModelType;
 
     explicit AffineModel() : _c(), _g() { }
-    explicit AffineModel(Nat n) : _c(0.0), _g(n,Float64Value(0.0)), _e(0u) { }
-    explicit AffineModel(const Float64Value& c, const Covector<Float64Value>& g, const Float64Error& e) : _c(c), _g(g), _e(e) { }
-    explicit AffineModel(Float64Value c, InitializerList<Float64Value> g) : _c(c), _g(g), _e(0u) { }
+    explicit AffineModel(SizeType n, PrecisionType prec) : _c(0,prec), _g(n,CoefficientType(0,prec)), _e(0u,prec) { }
+    explicit AffineModel(SizeType n, const CoefficientType& c) : _c(c), _g(n,nul(c)), _e(nul(c)) { }
+    explicit AffineModel(const CoefficientType& c, const Covector<CoefficientType>& g, const ErrorType& e) : _c(c), _g(g), _e(e) { }
+    explicit AffineModel(CoefficientType c, InitializerList<CoefficientType> g) : _c(c), _g(g), _e(0u) { }
 
-    AffineModel<ValidatedNumericType>& operator=(const Float64Value& c) {
-        this->_c=c; for(Nat i=0; i!=this->_g.size(); ++i) { this->_g[i]=0; } this->_e=0u; return *this; }
-    static AffineModel<ValidatedNumericType> constant(Nat n, const Float64Value& c) {
-        return AffineModel<ValidatedNumericType>(c,Covector<Float64Value>(n,0),Float64Error(0u)); }
-    static AffineModel<ValidatedNumericType> variable(Nat n, Nat j) {
-        return AffineModel<ValidatedNumericType>(0,Covector<Float64Value>::unit(n,j),0u); }
+    AffineModelType& operator=(const CoefficientType& c) {
+        this->_c=c; for(SizeType i=0; i!=this->_g.size(); ++i) { this->_g[i]=0; } this->_e=0u; return *this; }
+    static AffineModelType constant(SizeType n, const CoefficientType& c) {
+        PrecisionType prec=c.precision(); return AffineModelType(c,Covector<CoefficientType>(n,CoefficientType(0,prec)),ErrorType(0u,prec)); }
+    static AffineModelType variable(SizeType n, SizeType j, PrecisionType prec) {
+        return AffineModelType(CoefficientType(0,prec),Covector<CoefficientType>::unit(n,j),ErrorType(0u,prec)); }
 
 
-    const Covector<Float64Value>& a() const { return this->_g; }
-    const Float64Value& b() const { return this->_c; }
-    const Float64Error& e() const { return this->_e; }
+    PrecisionType precision() const { return this->_c.precision(); }
+    const Covector<CoefficientType>& a() const { return this->_g; }
+    const CoefficientType& b() const { return this->_c; }
+    const ErrorType& e() const { return this->_e; }
 
-    Float64Value& operator[](Nat i) { return this->_g[i]; }
-    const Float64Value& operator[](Nat i) const { return this->_g[i]; }
-    const Covector<Float64Value>& gradient() const { return this->_g; }
-    const Float64Value& gradient(Nat i) const { return this->_g[i]; }
-    const Float64Value& value() const { return this->_c; }
-    const Float64Error& error() const { return this->_e; }
+    CoefficientType& operator[](SizeType i) { return this->_g[i]; }
+    const CoefficientType& operator[](SizeType i) const { return this->_g[i]; }
+    const Covector<CoefficientType>& gradient() const { return this->_g; }
+    const CoefficientType& gradient(SizeType i) const { return this->_g[i]; }
+    const CoefficientType& value() const { return this->_c; }
+    const ErrorType& error() const { return this->_e; }
 
-    Void set_value(const Float64Value& c) { _c=c; }
-    Void set_gradient(Nat j, const Float64Value& g) { _g[j]=g; }
-    Void set_error(const Float64Error& e) { _e=e; }
+    Void set_value(const CoefficientType& c) { _c=c; }
+    Void set_gradient(SizeType j, const CoefficientType& g) { _g[j]=g; }
+    Void set_error(const ErrorType& e) { _e=e; }
+    Void set_error(Nat m) { _e=m; }
 
-    Void resize(Nat n) { this->_g.resize(n); }
+    Void resize(SizeType n) { this->_g.resize(n); }
 
-    Nat argument_size() const { return this->_g.size(); }
+    SizeType argument_size() const { return this->_g.size(); }
     template<class X> X evaluate(const Vector<X>& v) const {
         X r=v.zero_element()+static_cast<X>(this->_c);
-        for(Nat i=0; i!=this->_g.size(); ++i) {
+        for(SizeType i=0; i!=this->_g.size(); ++i) {
             r+=X(this->_g[i])*v[i]; }
         r+=ValidatedNumericType(-_e,+_e);
         return r;
     }
 
   private:
-    Float64Value _c;
-    Covector<Float64Value> _g;
-    Float64Error _e;
+    CoefficientType _c;
+    Covector<CoefficientType> _g;
+    ErrorType _e;
 };
 
-//! \relates AffineModel
-//! \brief Negation of an affine model.
-AffineModel<ValidatedNumericType> operator-(const AffineModel<ValidatedNumericType>& f);
-//! \relates AffineModel
-//! \brief Addition of two affine models.
-AffineModel<ValidatedNumericType> operator+(const AffineModel<ValidatedNumericType>& f1, const AffineModel<ValidatedNumericType>& f2);
-//! \relates AffineModel
-//! \brief Subtraction of two affine models.
-AffineModel<ValidatedNumericType> operator-(const AffineModel<ValidatedNumericType>& f1, const AffineModel<ValidatedNumericType>& f2);
-//! \relates AffineModel
-//! \brief Multiplication of two affine models.
-AffineModel<ValidatedNumericType> operator*(const AffineModel<ValidatedNumericType>& f1, const AffineModel<ValidatedNumericType>& f2);
-//! \relates AffineModel
-//! \brief Addition of a constant to an affine model.
-AffineModel<ValidatedNumericType>& operator+=(AffineModel<ValidatedNumericType>& f1, const ValidatedNumericType& c2);
-//! \relates AffineModel
-//! \brief Scalar multiplication of an affine model.
-AffineModel<ValidatedNumericType>& operator*=(AffineModel<ValidatedNumericType>& f1, const ValidatedNumericType& c2);
-
-//! \relates AffineModel \brief Scalar addition to an affine model.
-AffineModel<ValidatedNumericType> operator+(const ValidatedNumericType& c1, const AffineModel<ValidatedNumericType>& f2);
-AffineModel<ValidatedNumericType> operator+(const AffineModel<ValidatedNumericType>& f1, const ValidatedNumericType& c2);
-//! \relates AffineModel \brief Subtraction of an affine model from a scalar.
-AffineModel<ValidatedNumericType> operator-(const ValidatedNumericType& c1, const AffineModel<ValidatedNumericType>& f2);
-//! \relates AffineModel \brief Subtraction of a scalar from an affine model.
-AffineModel<ValidatedNumericType> operator-(const AffineModel<ValidatedNumericType>& f1, const ValidatedNumericType& c2);
-//! \relates AffineModel \brief Scalar multiplication of an affine model.
-AffineModel<ValidatedNumericType> operator*(const ValidatedNumericType& c1, const AffineModel<ValidatedNumericType>& f2);
 
 //! \relates AffineModel
 //! \brief Write to an output stream.
-OutputStream& operator<<(OutputStream& os, const AffineModel<ValidatedNumericType>& f);
+OutputStream& operator<<(OutputStream& os, const AffineModel<ValidatedTag,Float64>& f);
 
 //! \relates AffineModel
 //! \brief Create from a Taylor model.
-AffineModel<ValidatedNumericType> affine_model(const TaylorModel<ValidatedTag,Float64>& tm);
+AffineModel<ValidatedTag,Float64> affine_model(const TaylorModel<ValidatedTag,Float64>& tm);
 
 
 

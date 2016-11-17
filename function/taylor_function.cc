@@ -54,7 +54,7 @@ static double TAYLOR_FUNCTION_WRITING_ACCURACY = 1e-8;
 template class FunctionPatch<ValidatedTaylorModel>;
 template class VectorFunctionPatch<ValidatedTaylorModel>;
 
-ScalarFunctionModel<ValidatedTag>& ScalarFunctionModel<ValidatedTag>::operator=(const ScalarTaylorFunction& f) {
+template<> ScalarFunctionModel<ValidatedTag>& ScalarFunctionModel<ValidatedTag>::operator=(const ScalarTaylorFunction& f) {
     this->_ptr=clone_on_copy_ptr< ScalarFunctionModelInterface<ValidatedTag> >(new ScalarTaylorFunction(f)); return *this;
 }
 

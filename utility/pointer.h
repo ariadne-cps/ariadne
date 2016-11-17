@@ -38,6 +38,9 @@ namespace Ariadne {
 using std::shared_ptr;
 using OutputStream = std::ostream;
 
+// A tag used as a function argument to denote that the value is a pointer, and not possibly the integer 0
+struct PointerTag { };
+
 template<class T>
 class copy_on_write_ptr
 {

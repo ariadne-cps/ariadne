@@ -189,12 +189,12 @@ class HybridBasicSet
     HybridBasicSet(const DiscreteLocation& loc, const RealSpace& spc, const ContinuousSetType& ebs)
         : _tuple(loc,spc,ebs) { }
     //! \brief The location the set is contained in.
-    const DiscreteLocation& location() const { return this->_tuple.first; }
+    const DiscreteLocation& location() const { return get_first(this->_tuple); }
     //! \brief The ordering of variables used to define the set.
-    const RealSpace& space() const { return this->_tuple.second; }
+    const RealSpace& space() const { return get_second(this->_tuple); }
     //! \brief The continuous Euclidean subset.
-    const ContinuousSetType& continuous_set() const { return this->_tuple.third; }
-    ContinuousSetType& continuous_set() { return this->_tuple.third; }
+    const ContinuousSetType& continuous_set() const { return get_third(this->_tuple); }
+    ContinuousSetType& continuous_set() { return get_third(this->_tuple); }
 };
 //! \relates HybridBasicSet \brief Write to an output stream.
 template<class EBS> OutputStream& operator<<(OutputStream& os, const HybridBasicSet<EBS>& hbs) {

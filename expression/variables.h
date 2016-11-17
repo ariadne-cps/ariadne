@@ -41,6 +41,7 @@
 
 #include "numeric/logical.decl.h"
 #include "numeric/number.decl.h"
+#include "expression/operations.h"
 
 namespace Ariadne {
 
@@ -178,6 +179,7 @@ inline OutputStream& operator<<(OutputStream& os, const UntypedVariable& var) {
 //! representing a time derivative or updated value.
 template<class T> class ExtendedVariable
     : public UntypedVariable
+    , public DeclareExpressionOperations<T>
 {
   public:
     //! \brief The type (class) of data held by the variable.

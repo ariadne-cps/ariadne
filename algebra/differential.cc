@@ -26,7 +26,7 @@
 
 #include "algebra/differential.h"
 
-#include "algebra_operations.h"
+#include "operations.h"
 
 #include "differential.tcc"
 
@@ -41,5 +41,17 @@ template class Differential<Float64>;
 template class Differential<Float64Bounds>;
 template class Differential<Float64Approximation>;
 template class Differential<UpperIntervalType>;
+
+template class AlgebraOperations<Differential<Float64>>;
+template class AlgebraOperations<Differential<Float64Approximation>>;
+template class AlgebraOperations<Differential<Float64Bounds>>;
+template class GradedAlgebraOperations<Differential<Float64>>;
+template class GradedAlgebraOperations<Differential<Float64Approximation>>;
+template class GradedAlgebraOperations<Differential<Float64Bounds>>;
+
+template class Vector<Differential<Float64>>;
+template class Vector<Differential<Float64Bounds>>;
+template class Vector<Differential<Float64Approximation>>;
+//template class Vector<Differential<UpperIntervalType>>;
 
 }

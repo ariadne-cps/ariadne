@@ -25,13 +25,14 @@
 namespace Ariadne {
 
 template<class M> inline M make_split_point(M const& m) { return m; }
-template<class PR> inline Float<ExactTag,PR> make_split_point(Float<ApproximateTag,PR> const& am) { return cast_exact(am); }
-template<class PR> inline Float<ExactTag,PR> make_split_point(Float<BoundedTag,PR> const& vm) { return vm.value(); }
-template<class PR> inline Float<ExactTag,PR> make_split_point(Float<MetricTag,PR> const& bm) { return bm.value(); }
+template<class PR> inline FloatValue<PR> make_split_point(FloatApproximation<PR> const& am) { return cast_exact(am); }
+template<class PR> inline FloatValue<PR> make_split_point(FloatBounds<PR> const& vm) { return vm.value(); }
+template<class PR> inline FloatValue<PR> make_split_point(FloatBall<PR> const& bm) { return bm.value(); }
 
 
-template<class U> Interval<U>::Interval() : _l(+infty), _u(-infty) { }
-template<class U> Interval<U>::Interval(EmptyIntervalType) : _l(+infty), _u(-infty) { }
+template<class U> Interval<U>::Interval() : Interval(EmptyIntervalType()) { }
+template<class U> Interval<U>::Interval(EmptyIntervalType) : Interval(+infty,-infty) { }
+template<class U> Interval<U>::Interval(UnitIntervalType) : Interval(-1,+1) { }
 template<class U> Interval<U>::Interval(LowerBoundType l, UpperBoundType u) : _l(l), _u(u) { }
 
 template<class U> Interval<U> Interval<U>::create_zero() const { return Interval<U>(0,0); }
@@ -40,10 +41,10 @@ template<class U> auto Interval<U>::lower() const -> LowerBoundType const& { ret
 template<class U> auto Interval<U>::upper() const -> UpperBoundType const& { return _u; }
 template<class U> auto Interval<U>::centre() const -> CentreType { return (_l+_u)/2u; }
 template<class U> auto Interval<U>::midpoint() const -> MidpointType { auto m=((_l+_u)/2); return make_split_point(m); }
-template<class U> auto Interval<U>::radius() const -> RadiusType { return max(this->upper()-this->midpoint(),this->midpoint()-this->lower()); }
-template<class U> auto Interval<U>::width() const -> WidthType { return this->upper()-this->lower(); }
+template<class U> auto Interval<U>::radius() const -> RadiusType { return cast_positive(max(this->upper()-this->midpoint(),this->midpoint()-this->lower())); }
+template<class U> auto Interval<U>::width() const -> WidthType { return cast_positive(this->upper()-this->lower()); }
 
-template<class U> Interval<U> Interval<U>::empty_interval() { return Interval<U>(+infty,-infty); }
+template<class U> Interval<U> Interval<U>::empty_interval() { return Interval<U>(EmptyIntervalType()); }
 template<class U> Interval<U> Interval<U>::unit_interval() { return Interval<U>(-1,+1); }
 
 template<class U> auto Interval<U>::is_empty() const -> decltype(declval<L>()>declval<U>()) { return this->_l > this->_u; }
@@ -160,12 +161,12 @@ inline Bool same(Interval<Float64UpperBound> const& ivl1, Interval<Float64UpperB
 inline Interval<Float64UpperBound> widen(Interval<Float64UpperBound> const& ivl, Float64UpperBound e) {
     return Interval<Float64UpperBound>(ivl.lower()-e,ivl.upper()+e); }
 inline Interval<Float64UpperBound> widen(Interval<Float64UpperBound> const& ivl) {
-    return widen(ivl,Float64UpperBound(Float64::min())); }
+    return widen(ivl,Float64UpperBound(Float64::min(Precision64()))); }
 
 inline Interval<Float64LowerBound> narrow(Interval<Float64LowerBound> const& ivl, Float64UpperBound e) {
     return Interval<Float64LowerBound>(ivl.lower()+e,ivl.upper()-e); }
 inline Interval<Float64LowerBound> narrow(Interval<Float64LowerBound> const& ivl) {
-    return narrow(ivl,Float64UpperBound(Float64::min())); }
+    return narrow(ivl,Float64UpperBound(Float64::min(Precision64()))); }
 
 inline Interval<Float64Value> cast_exact(Interval<Float64Approximation> const& ivl) {
     return reinterpret_cast<ExactIntervalType const&>(ivl); }

@@ -36,15 +36,8 @@ template<class X> Polynomial<X>::Polynomial(SizeType as)
 }
 
 template<class X>
-Polynomial<X>::Polynomial(InitializerList<PairType<InitializerList<Int>,X>> lst)
+Polynomial<X>::Polynomial(InitializerList<Pair<InitializerList<DegreeType>,X>> lst)
     : _expansion(lst)
-{
-    this->cleanup();
-}
-
-template<class X>
-Polynomial<X>::Polynomial(SizeType as, DegreeType deg, InitializerList<X> lst)
-    : _expansion(as,deg,lst)
 {
     this->cleanup();
 }
@@ -87,9 +80,14 @@ template<class X> Polynomial<X>& Polynomial<X>::operator=(const X& x) {
 
 template<class X> SizeType Polynomial<X>::argument_size() const { return this->_expansion.argument_size(); }
 
-template<class X> SizeType Polynomial<X>::number_of_nonzeros() const { return this->_expansion.number_of_nonzeros(); }
+template<class X> SizeType Polynomial<X>::number_of_terms() const { return this->_expansion.number_of_terms(); }
 
-template<class X> SizeType Polynomial<X>::degree() const { return this->_expansion.degree(); }
+template<class X> DegreeType Polynomial<X>::degree() const {
+    DegreeType deg=0u; for(auto iter=this->_expansion.begin(); iter!=this->_expansion.end(); ++iter) {
+        deg=std::max(deg,iter->index().degree());
+    }
+    return deg;
+}
 
 template<class X> const X& Polynomial<X>::value() const { return this->_expansion[MultiIndex::zero(this->argument_size())]; }
 
@@ -189,7 +187,7 @@ template<class X>
 Void Polynomial<X>::cleanup()
 {
     Polynomial<X>* self=const_cast<Polynomial<X>*>(this);
-    self->_expansion.reverse_lexicographic_sort();
+    self->_expansion.index_sort(IndexComparisonType());
     Iterator new_end=unique_key(self->_expansion.begin(), self->_expansion.end(), std::plus<X>());
     self->_expansion.resize(new_end-self->_expansion.begin());
 }
@@ -203,7 +201,7 @@ Void Polynomial<X>::check() const
 
 
 
-template<class X> Polynomial<X> Polynomial<X>::_neg(const Polynomial<X>& p) {
+template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::_neg(const Polynomial<X>& p) {
     Polynomial<X> r(p.argument_size());
     for(auto iter=p.begin(); iter!=p.end(); ++iter) {
         r[iter->key()]-=iter->data();
@@ -212,12 +210,28 @@ template<class X> Polynomial<X> Polynomial<X>::_neg(const Polynomial<X>& p) {
 }
 
 
-template<class X> Polynomial<X>& Polynomial<X>::_iadd(Polynomial<X>& p, const X& c) {
+template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::_add(Polynomial<X> p, const X& c) {
+    p[MultiIndex(p.argument_size())]+=c;
+    return std::move(p);
+}
+
+template<class X> Polynomial<X>& AlgebraOperations<Polynomial<X>>::_iadd(Polynomial<X>& p, const X& c) {
     p[MultiIndex(p.argument_size())]+=c;
     return p;
 }
 
-template<class X> Polynomial<X>& Polynomial<X>::_imul(Polynomial<X>& p, const X& c) {
+template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::_mul(Polynomial<X> p, const X& c) {
+    if(is_null(c)) {
+        p.expansion().clear();
+    } else {
+        for(auto iter=p.begin(); iter!=p.end(); ++iter) {
+            iter->data()*=c;
+        }
+    }
+    return std::move(p);
+}
+
+template<class X> Polynomial<X>& AlgebraOperations<Polynomial<X>>::_imul(Polynomial<X>& p, const X& c) {
     if(is_null(c)) {
         p.expansion().clear();
     } else {
@@ -228,9 +242,9 @@ template<class X> Polynomial<X>& Polynomial<X>::_imul(Polynomial<X>& p, const X&
     return p;
 }
 
-template<class X> Polynomial<X> Polynomial<X>::_add(const Polynomial<X>& p1, const Polynomial<X>& p2) {
+template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::_add(const Polynomial<X>& p1, const Polynomial<X>& p2) {
     ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
-    ComparisonType less;
+    typename Polynomial<X>::IndexComparisonType less;
     Polynomial<X> r(p1.argument_size());
     auto iter1=p1.begin(); auto iter2=p2.begin();
     while (iter1!=p1.end() && iter2!=p2.end()) {
@@ -256,9 +270,9 @@ template<class X> Polynomial<X> Polynomial<X>::_add(const Polynomial<X>& p1, con
     return std::move(r);
 }
 
-template<class X> Polynomial<X> Polynomial<X>::_sub(const Polynomial<X>& p1, const Polynomial<X>& p2) {
+template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::_sub(const Polynomial<X>& p1, const Polynomial<X>& p2) {
     ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
-    ComparisonType less;
+    typename Polynomial<X>::IndexComparisonType less;
     Polynomial<X> r(p1.argument_size());
     auto iter1=p1.begin(); auto iter2=p2.begin();
     while (iter1!=p1.end() && iter2!=p2.end()) {
@@ -284,7 +298,7 @@ template<class X> Polynomial<X> Polynomial<X>::_sub(const Polynomial<X>& p1, con
     return std::move(r);
 }
 
-template<class X> Polynomial<X> Polynomial<X>::_mul(const Polynomial<X>& p1, const Polynomial<X>& p2) {
+template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::_mul(const Polynomial<X>& p1, const Polynomial<X>& p2) {
     ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
     Polynomial<X> r(p1.argument_size());
     for(auto iter1=p1.begin(); iter1!=p1.end(); ++iter1) {
@@ -296,7 +310,16 @@ template<class X> Polynomial<X> Polynomial<X>::_mul(const Polynomial<X>& p1, con
     return r;
 }
 
-template<class X> Polynomial<X>& Polynomial<X>::_imul(Polynomial<X>& p, const Monomial<X>& m) {
+template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::_mul(Polynomial<X> p, const Monomial<X>& m) {
+    if(is_null(m.data())) { p.clear(); }
+    for(auto iter=p.begin(); iter!=p.end(); ++iter) {
+        iter->key()+=m.key();
+        iter->data()*=m.data();
+    }
+    return std::move(p);
+}
+
+template<class X> Polynomial<X>& AlgebraOperations<Polynomial<X>>::_imul(Polynomial<X>& p, const Monomial<X>& m) {
     if(is_null(m.data())) { p.clear(); }
     for(auto iter=p.begin(); iter!=p.end(); ++iter) {
         iter->key()+=m.key();

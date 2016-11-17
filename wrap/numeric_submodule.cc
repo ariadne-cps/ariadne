@@ -33,11 +33,11 @@
 #include "numeric/floatmp.h"
 #include "numeric/float-user.h"
 
-#define DECLARE_NUMERIC_OPERATIONS(X,PX) \
-    X add(X,X); X sub(X,X); X mul(X,X); X div(X,X); \
-    X pos(X); X neg(X); X sqr(X); X rec(X); X pow(X,Int); \
-    X max(X,X); X min(X,X); PX abs(X); \
-    X sqrt(X); X exp(X); X log(X); X sin(X); X cos(X); X tan(X); X atan(X); \
+#define DECLARE_NUMERIC_OPERATIONS(Xcr,X,PX) \
+    X add(Xcr,Xcr); X sub(Xcr,Xcr); X mul(Xcr,Xcr); X div(Xcr,Xcr); \
+    X pos(Xcr); X neg(Xcr); X sqr(Xcr); X rec(Xcr); X pow(Xcr,Int); \
+    X max(Xcr,Xcr); X min(Xcr,Xcr); PX abs(Xcr); \
+    X sqrt(Xcr); X exp(Xcr); X log(Xcr); X sin(Xcr); X cos(Xcr); X tan(Xcr); X atan(Xcr); \
 
 
 namespace Ariadne {
@@ -47,7 +47,7 @@ Rational operator/(Integer const&, Integer const&);
 Integer pow(Integer const& z, Nat m);
 //Integer abs(Integer const& z);
 
-DECLARE_NUMERIC_OPERATIONS(Real,PositiveReal);
+DECLARE_NUMERIC_OPERATIONS(Real const&,Real,PositiveReal);
 //DECLARE_NUMERIC_OPERATIONS(FloatBall<PR>);
 //DECLARE_NUMERIC_OPERATIONS(FloatBounds<PR>);
 //DECLARE_NUMERIC_OPERATIONS(FloatApproximation<PR>64);
@@ -275,7 +275,12 @@ void export_real()
     real_class.define_transcendental_functions();
     real_class.define_self_comparisons();
 
-    def("exp", (Real(*)(Real)) &exp);
+    def("sqrt", (Real(*)(Real const&)) &sqrt);
+    def("exp", (Real(*)(Real const&)) &exp);
+    def("log", (Real(*)(Real const&)) &log);
+    def("sin", (Real(*)(Real const&)) &sin);
+    def("cos", (Real(*)(Real const&)) &cos);
+    def("tan", (Real(*)(Real const&)) &tan);
 
     real_class.def(self_ns::str(self));
     real_class.def(self_ns::repr(self));

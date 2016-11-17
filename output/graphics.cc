@@ -59,7 +59,7 @@ Void draw(Figure& fig, const DrawableInterface& shape) {
     fig.draw(shape);
 }
 
-Void draw(Figure& fig, Float64ApproximationBox const& box) {
+Void draw(Figure& fig, Float64ApproximateBox const& box) {
     fig.draw(box);
 }
 

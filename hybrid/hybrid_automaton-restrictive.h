@@ -245,7 +245,7 @@ class HybridSystem
 
 
     HybridSpace state_space() const;
-    Nat dimension(DiscreteLocation) const;
+    DimensionType dimension(DiscreteLocation) const;
     RealSpace continuous_state_space(DiscreteLocation) const;
     EffectiveVectorFunction output_function(DiscreteLocation) const;
     EffectiveVectorFunction dynamic_function(DiscreteLocation) const;
@@ -309,7 +309,7 @@ class HybridSystem
     //! \name Methods for extracting the continuous dynamics of the automaton for conformance with HybridAutomatonInterface.
 
     //! \brief The dimension of the state spacec in the given \a location.
-    virtual Nat dimension(DiscreteLocation location) const;
+    virtual DimensionType dimension(DiscreteLocation location) const;
     //! \brief The output function on Euclidean state space. Used for outputting auxiliary variables.
     virtual EffectiveVectorFunction output_function(DiscreteLocation location) const;
     //! \brief The function defining the differential equation \f$\dot{x}=f(x)\f$ valid in the \a location.

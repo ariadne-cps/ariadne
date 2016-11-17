@@ -58,8 +58,12 @@ typedef int Int;
 //! Internal name for builtin unsigned integers.
 typedef uint Nat;
 
+// A class containing an exact double-precision value
+class ExactDouble;
+
 // Define as a class for consistency with other value types
 class String;
+
 
 typedef SizeType DimensionType;
 
@@ -82,6 +86,7 @@ template<> struct InformationTypedef<ExactNumericType> { typedef ExactTag Type; 
 template<> struct InformationTypedef<EffectiveNumericType> { typedef EffectiveTag Type; };
 template<> struct InformationTypedef<ValidatedNumericType> { typedef ValidatedTag Type; };
 template<> struct InformationTypedef<ApproximateNumericType> { typedef ApproximateTag Type; };
+template<class P> struct InformationTypedef<Number<P>> { typedef P Type; };
 template<class X> using InformationTag = typename InformationTypedef<X>::Type;
 
 template<class X> using Scalar = X;
@@ -96,7 +101,7 @@ template<class X> class Matrix;
 template<class X> class Differential;
 template<class X> class Series;
 
-template<class X> class AffineModel;
+template<class P, class F> class AffineModel;
 template<class P, class F> class TaylorModel;
 template<class X> class Formula;
 template<class X> class Algebra;

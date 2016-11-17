@@ -37,6 +37,8 @@
 #include "numeric/number.decl.h"
 #include "numeric/float.decl.h"
 
+#include "numeric/arithmetic.h"
+
 namespace Ariadne {
 
 class Real;
@@ -61,6 +63,11 @@ extern const Real infinity;
 //! \ingroup UserNumericTypeSubModule
 //! \brief Computable real numbers definable in terms of elementary functions.
 class Real
+    : public DeclareRealOperations<Real,PositiveReal>
+    , public DeclareAnalyticFieldOperations<Real>
+    , public DeclareLatticeOperations<Real,PositiveReal>
+    , public DeclareComparisonOperations<Real,Kleenean,NegatedSierpinskian>
+    , public DefineFieldOperators<Real>
 {
   private: public:
     class Interface;
@@ -80,18 +87,20 @@ class Real
     template<class M, EnableIf<And<IsIntegral<M>,IsUnsigned<M>>> = dummy> Real(M m);
     template<class N, EnableIf<And<IsIntegral<N>,IsSigned<N>>> = dummy> Real(N n);
 
+    Real(ExactDouble d);
     Real(Integer const& n);
     Real(Dyadic const& d);
     Real(Decimal const& d);
     Real(Rational const& q);
 
-    explicit Real(Float64Value x);
+    explicit Real(Float64Value x); //!< DEPRECATED
+    explicit Real(EffectiveNumber r); //!< DEPRECATED
 
     operator Number<EffectiveTag>() const;
 
-    // Extract floating-point properties
-    Float64UpperBound upper() const;
-    Float64LowerBound lower() const;
+    // Extract bounds
+    UpperReal upper() const;
+    LowerReal lower() const;
     Float64Approximation approx() const;
     double get_d() const;
 
@@ -102,56 +111,15 @@ class Real
     FloatMPBounds get(PrecisionMP pr) const;
     FloatMPBounds evaluate(Accuracy acc) const;
 
-    // Non-templated to allow conversions
-    friend Real add(Real,Real);
-    friend Real sub(Real,Real);
-    friend Real mul(Real,Real);
-    friend Real div(Real,Real);
-    friend Real pow(Real, Nat);
-    friend Real pow(Real, Int);
-    friend Real pos(Real);
-    friend Real sqr(Real);
-    friend Real neg(Real);
-    friend Real rec(Real);
-    friend Real sqrt(Real);
-    friend Real exp(Real);
-    friend Real log(Real);
-    friend Real sin(Real);
-    friend Real cos(Real);
-    friend Real tan(Real);
-    friend Real atan(Real);
 
-    friend Real max(Real,Real);
-    friend Real min(Real,Real);
-    friend PositiveReal abs(Real);
+    friend PositiveReal abs(Real const&);
 
-    friend Float64Error mag(Real);
+    friend PositiveUpperReal mag(Real const&);
+    friend Float64Error mag(Real const&, Precision64);
 
-    friend NegatedSierpinskian eq(Real,Real);
-    friend Kleenean lt(Real,Real);
+    friend PositiveReal dist(Real const&, Real const&);
 
-    friend PositiveReal dist(Real,Real);
-
-    friend Real& operator+=(Real&,Real);
-    friend Real& operator-=(Real&,Real);
-    friend Real& operator*=(Real&,Real);
-    friend Real& operator/=(Real&,Real);
-
-    friend Real operator+(Real);
-    friend Real operator-(Real);
-    friend Real operator+(Real,Real);
-    friend Real operator-(Real,Real);
-    friend Real operator*(Real,Real);
-    friend Real operator/(Real,Real);
-
-    friend Falsifyable operator==(Real,Real);
-    friend Verifyable operator!=(Real,Real);
-    friend Quasidecidable operator<=(Real,Real);
-    friend Quasidecidable operator>=(Real,Real);
-    friend Quasidecidable operator< (Real,Real);
-    friend Quasidecidable operator> (Real,Real);
-
-    friend Bool same(Real,Real);
+    friend Bool same(Real const&, Real const&);
 
     friend OutputStream& operator<<(OutputStream&, Real const&);
 
@@ -171,6 +139,7 @@ template<class N, EnableIf<And<IsIntegral<N>,IsSigned<N>>>> inline Real::Real(N 
 //! \ingroup UserNumericTypeSubModule
 //! \brief Computable lower real numbers defined by conversion to concrete floats.
 class LowerReal
+    : public DirectedRing<LowerReal,UpperReal,PositiveLowerReal>
 {
   private: public:
     SharedPointer<Real::Interface> _ptr;
@@ -187,22 +156,28 @@ class LowerReal
     Float64LowerBound get(Precision64 pr) const;
     FloatMPLowerBound get(PrecisionMP pr) const;
   public:
-    LowerReal max(LowerReal,LowerReal);
+    friend LowerReal max(LowerReal const&, LowerReal const&);
+    friend LowerReal min(LowerReal const&, LowerReal const&);
 
-    LowerReal min(LowerReal,LowerReal);
-    Real min(Real,LowerReal);
-    Real min(LowerReal,Real);
+    friend LowerReal neg(UpperReal const&);
+    friend UpperReal neg(LowerReal const&);
+    friend LowerReal add(LowerReal const&, LowerReal const&);
+    friend LowerReal sub(LowerReal const&, UpperReal const&);
+    friend UpperReal sub(UpperReal const&, LowerReal const&);
 
-    LowerReal neg(UpperReal);
-    UpperReal neg(LowerReal);
-    LowerReal add(LowerReal,LowerReal);
-    LowerReal sub(LowerReal,UpperReal);
-    UpperReal sub(UpperReal,LowerReal);
+    friend PositiveLowerReal sqrt(PositiveLowerReal const&);
+    friend PositiveLowerReal exp(LowerReal const&);
+    friend LowerReal log(PositiveLowerReal const&);
+    friend LowerReal atan(LowerReal const&);
+
+    friend PositiveLowerReal add(PositiveLowerReal const&, PositiveLowerReal const&);
+    friend PositiveLowerReal mul(PositiveLowerReal const&, PositiveLowerReal const&);
 };
 
 //! \ingroup UserNumericTypeSubModule
 //! \brief Computable lower real numbers defined by conversion to concrete floats.
 class UpperReal
+    : public DirectedRing<UpperReal,LowerReal,PositiveUpperReal>
 {
   private: public:
     SharedPointer<Real::Interface> _ptr;
@@ -219,17 +194,22 @@ class UpperReal
     Float64UpperBound get(Precision64 pr) const;
     FloatMPUpperBound get(PrecisionMP pr) const;
   public:
-    UpperReal max(UpperReal,UpperReal);
-    Real max(Real,UpperReal);
-    Real max(UpperReal,Real);
+    friend UpperReal max(UpperReal const&, UpperReal const&);
+    friend UpperReal min(UpperReal const&, UpperReal const&);
 
-    UpperReal min(UpperReal,UpperReal);
+    friend UpperReal neg(LowerReal const&);
+    friend LowerReal neg(UpperReal const&);
+    friend UpperReal add(UpperReal const&, UpperReal const&);
+    friend UpperReal sub(UpperReal const&, LowerReal const&);
+    friend LowerReal sub(LowerReal const&, UpperReal const&);
 
-    UpperReal neg(LowerReal);
-    LowerReal neg(UpperReal);
-    UpperReal add(UpperReal,UpperReal);
-    UpperReal sub(UpperReal,LowerReal);
-    LowerReal sub(LowerReal,UpperReal);
+    friend PositiveUpperReal sqrt(PositiveUpperReal const&);
+    friend PositiveUpperReal exp(UpperReal const&);
+    friend UpperReal log(PositiveUpperReal const&);
+    friend UpperReal atan(UpperReal const&);
+
+    friend PositiveUpperReal add(PositiveUpperReal const&, PositiveUpperReal const&);
+    friend PositiveUpperReal mul(PositiveUpperReal const&, PositiveUpperReal const&);
 };
 
 //! \ingroup UserNumericTypeSubModule
@@ -243,16 +223,16 @@ class PositiveReal : public Real
     PositiveFloat64Bounds get(Precision64 pr) const;
     PositiveFloatMPBounds get(PrecisionMP pr) const;
   public:
-    PositiveReal max(PositiveReal,PositiveReal);
-    PositiveReal max(Real,PositiveReal);
-    PositiveReal max(PositiveReal,Real);
+    PositiveReal max(PositiveReal const&, PositiveReal const&);
+    PositiveReal max(Real const&, PositiveReal const&);
+    PositiveReal max(PositiveReal const&, Real const&);
 
-    PositiveReal min(PositiveReal,PositiveReal);
+    PositiveReal min(PositiveReal const&, PositiveReal const&);
 
-    PositiveReal rec(PositiveReal);
-    PositiveReal add(PositiveReal,PositiveReal);
-    PositiveReal mul(PositiveReal,PositiveReal);
-    PositiveReal div(PositiveReal,PositiveReal);
+    PositiveReal rec(PositiveReal const&);
+    PositiveReal add(PositiveReal const&, PositiveReal const&);
+    PositiveReal mul(PositiveReal const&, PositiveReal const&);
+    PositiveReal div(PositiveReal const&, PositiveReal const&);
 };
 
 //! \ingroup UserNumericTypeSubModule
@@ -265,12 +245,12 @@ class PositiveLowerReal : public LowerReal
     PositiveFloat64LowerBound get(Precision64 pr) const;
     PositiveFloatMPLowerBound get(PrecisionMP pr) const;
   public:
-    PositiveLowerReal rec(PositiveUpperReal);
-    PositiveUpperReal rec(PositiveLowerReal);
-    PositiveLowerReal add(PositiveLowerReal,PositiveLowerReal);
-    PositiveLowerReal mul(PositiveLowerReal,PositiveLowerReal);
-    PositiveLowerReal div(PositiveLowerReal,PositiveUpperReal);
-    PositiveUpperReal div(PositiveUpperReal,PositiveLowerReal);
+    PositiveLowerReal rec(PositiveUpperReal const&);
+    PositiveUpperReal rec(PositiveLowerReal const&);
+    PositiveLowerReal add(PositiveLowerReal const&, PositiveLowerReal const&);
+    PositiveLowerReal mul(PositiveLowerReal const&, PositiveLowerReal const&);
+    PositiveLowerReal div(PositiveLowerReal const&, PositiveUpperReal const&);
+    PositiveUpperReal div(PositiveUpperReal const&, PositiveLowerReal const&);
 };
 
 //! \ingroup UserNumericTypeSubModule
@@ -283,13 +263,15 @@ class PositiveUpperReal : public UpperReal
     PositiveFloat64UpperBound get(Precision64 pr) const;
     PositiveFloatMPUpperBound get(PrecisionMP pr) const;
   public:
-    PositiveUpperReal rec(PositiveLowerReal);
-    PositiveLowerReal rec(PositiveUpperReal);
-    PositiveUpperReal add(PositiveUpperReal,PositiveUpperReal);
-    PositiveUpperReal mul(PositiveUpperReal,PositiveUpperReal);
-    PositiveUpperReal div(PositiveUpperReal,PositiveLowerReal);
-    PositiveLowerReal div(PositiveLowerReal,PositiveUpperReal);
+    PositiveUpperReal rec(PositiveLowerReal const&);
+    PositiveLowerReal rec(PositiveUpperReal const&);
+    PositiveUpperReal add(PositiveUpperReal const&, PositiveUpperReal const&);
+    PositiveUpperReal mul(PositiveUpperReal const&, PositiveUpperReal const&);
+    PositiveUpperReal div(PositiveUpperReal const&, PositiveLowerReal const&);
+    PositiveLowerReal div(PositiveLowerReal const&, PositiveUpperReal const&);
 };
+
+PositiveReal cast_positive(Real const& x);
 
 } // namespace Ariadne
 

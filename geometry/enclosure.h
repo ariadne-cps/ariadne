@@ -69,8 +69,8 @@ template<class X> class FunctionModelFactoryInterface;
 typedef FunctionModelFactoryInterface<ValidatedTag> ValidatedFunctionModelFactoryInterface;
 
 template<class X, class R> class Constraint;
-typedef Constraint<EffectiveScalarFunction,EffectiveNumericType> EffectiveConstraint;
-typedef Constraint<ValidatedScalarFunction,ValidatedNumericType> ValidatedConstraint;
+typedef Constraint<EffectiveScalarFunction,EffectiveNumber> EffectiveConstraint;
+typedef Constraint<ValidatedScalarFunction,ValidatedNumber> ValidatedConstraint;
 
 class ValidatedAffineConstrainedImageSet;
 class BoundedConstraintSet;

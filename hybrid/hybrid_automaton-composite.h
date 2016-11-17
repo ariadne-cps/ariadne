@@ -533,7 +533,7 @@ class HybridAutomaton
     //! \brief The continuous state space in the given location.
     virtual RealSpace continuous_state_space(DiscreteLocation) const;
     //! \brief The dimension of the continuous state space in the given location.
-    virtual Nat dimension(DiscreteLocation) const;
+    virtual DimensionType dimension(DiscreteLocation) const;
 
     //! \brief Test if the hybrid automaton has a discrete mode corresponding to the given location.
     virtual Bool has_mode(DiscreteLocation location) const;
@@ -681,7 +681,7 @@ class CompositeHybridAutomaton
     //! \brief The continuous state space in the given location.
     RealSpace continuous_state_space(DiscreteLocation) const;
     //! \brief The dimension of the continuous state space in the given location.
-    Nat dimension(DiscreteLocation) const;
+    DimensionType dimension(DiscreteLocation) const;
 
     //! \brief The events which are active in the given location.
     Set<DiscreteEvent> events(DiscreteLocation) const;

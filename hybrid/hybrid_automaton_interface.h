@@ -144,7 +144,7 @@ class HybridAutomatonInterface {
 
     //@{
     //! \name Data access and queries.
-    
+
     //! \brief The name of the automaton.
     virtual const Identifier& name() const = 0;
 
@@ -178,7 +178,7 @@ class HybridAutomatonInterface {
     //! \name Methods for extracting the continuous dynamics.
 
     //! \brief The dimension of the state space in the given \a location.
-    virtual Nat dimension(DiscreteLocation location) const = 0;
+    virtual DimensionType dimension(DiscreteLocation location) const = 0;
 
     //! \brief The dynamic valid in the mode \a location.
     virtual EffectiveVectorFunction dynamic_function(DiscreteLocation location) const = 0;

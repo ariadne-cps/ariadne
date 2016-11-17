@@ -68,9 +68,7 @@ struct ScalarFormulaFunction
     template<class Y> Void _compute(Y& r, const Vector<Y>& x) const { r=Ariadne::evaluate(_formula,x); }
 };
 
-inline EffectiveScalarFunction function(SizeType n, Formula<Real> f) { return EffectiveScalarFunction(new ScalarFormulaFunction<Real>(n,f)); }
-
-typedef ScalarFormulaFunction<Real> RealScalarFormulaFunction;
+typedef ScalarFormulaFunction<EffectiveNumber> EffectiveScalarFormulaFunction;
 
 //! A vector function defined by formulae
 template<class X>
@@ -117,7 +115,7 @@ struct ConstantFunction
     virtual OutputStream& write(OutputStream& os) const { return os << this->_value; }
     virtual OutputStream& repr(OutputStream& os) const { return os << "CF[R"<<this->argument_size()<<"]("<<_value<<")"; }
     template<class XX> inline Void _compute(XX& r, const Vector<XX>& x) const {
-        r=x.zero_element()+static_cast<typename XX::NumericType>(_value); }
+        r=make_constant(this->_value,x.zero_element()); }
 };
 
 //! A coordinate function \f$f:\R^n\rightarrow\R\f$ given by \f$f(x)=x_i\f$.

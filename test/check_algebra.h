@@ -23,6 +23,7 @@
 
 #include "test.h"
 #include "test/utility.h"
+#include "utility/metaprogramming.h"
 #include "numeric/operators.h"
 
 namespace Ariadne {
@@ -32,36 +33,36 @@ template<class X> String vector_class_name() { return String("Vector<") + class_
 using namespace Ariadne;
 
 
-template<class V, class R=Return<DontCare>, class = Fallback> struct HasZeroElementMethod : False { };
-template<class V, class R> struct HasZeroElementMethod<V, Return<R>, EnableIf<IsConvertible<decltype(declval<V>().zero_element()),R>,Fallback>> : True { };
+template<class V> using DefinedScalarType = typename V::ScalarType;
+template<class V> struct HasScalarType : Has<DefinedScalarType,V> { };
 
-template<class V, class R=Return<DontCare>, class = Fallback> struct HasSizeMethod : False { };
-template<class V, class R> struct HasSizeMethod<V, Return<R>, EnableIf<IsConvertible<decltype(declval<V>().size()),R>,Fallback>> : True { };
+template<class A> using DefinedNumericType = typename A::NumericType;
+template<class V> struct HasNumericType : Has<DefinedNumericType,V> { };
 
-template<class V, class I, class R=DontCare, class = Fallback> struct HasSubscriptingMethod : False { };
-template<class V, class I, class R> struct HasSubscriptingMethod<V, I, Return<R>, EnableIf<IsConvertible<decltype(declval<V>()[declval<I>()]),R>,Fallback>> : True { };
+template<class T> using ZeroElementReturnType = decltype(declval<T>().zero_element());
+template<class V, class R=Return<DontCare>> struct HasZeroElementMethod : Is<R,ZeroElementReturnType,V> { };
 
-template<class A1, class A2, class R=Return<DontCare>, class = Fallback> struct HasJoin : False { };
-template<class A1, class A2, class R> struct HasJoin<A1, A2, Return<R>, EnableIf<IsConvertible<decltype(join(declval<A1>(),declval<A2>())),R>,Fallback>> : True { };
+template<class T> using SizeReturnType = decltype(declval<T>().size());
+template<class V, class R=Return<DontCare>> struct HasSizeMethod : Is<R,SizeReturnType,V> { };
 
-template<class V, class R=DontCare, class = Fallback> struct HasNorm : False { };
-template<class V, class R> struct HasNorm<V, Return<R>, EnableIf<IsConvertible<decltype(norm(declval<V>())),R>,Fallback>> : True { };
+template<class V, class I> using SubscriptingReturnType = decltype(declval<const V>().operator[](declval<I>()));
+template<class V, class I, class R=Return<DontCare>> struct HasSubscriptingMethod : Is<R,SubscriptingReturnType,V,I> { };
 
+template<class A1, class A2> using JoinReturnType = decltype(join(declval<A1>(),declval<A2>()));
+template<class A1, class A2, class R=Return<DontCare>> struct HasJoin : Is<R,JoinReturnType,A1,A2> { };
 
-template<class A, class R=DontCare, class = Fallback> struct HasNormMethod : False { };
-template<class A, class R> struct HasNormMethod<A, Return<R>, EnableIf<IsConvertible<decltype(declval<A>().norm()),R>,Fallback>> : True { };
+template<class V> using NormFunctionReturnType = decltype(norm(declval<V>()));
+template<class V, class R=Return<DontCare>> struct HasNorm : Is<R,NormFunctionReturnType,V> { };
 
-template<class A, class K=SizeType, class R=DontCare, class = Fallback> struct HasDerivative : False { };
-template<class A, class K, class R> struct HasDerivative<A, K, Return<R>, EnableIf<IsConvertible<decltype(derivative(declval<A>(),declval<K>())),R>,Fallback>> : True { };
+template<class V> using NormMethodReturnType = decltype(declval<V>().norm());
+template<class V, class R=Return<DontCare>> struct HasNormMethod : Is<R,NormMethodReturnType,V> { };
 
-template<class A, class K=SizeType, class R=DontCare, class = Fallback> struct HasAntiderivative : False { };
-template<class A, class K, class R> struct HasAntiderivative<A, K, Return<R>, EnableIf<IsConvertible<decltype(derivative(declval<A>(),declval<K>())),R>,Fallback>> : True { };
+template<class A, class K> using DerivativeReturnType = decltype(derivative(declval<A>(),declval<K>()));
+template<class A, class K=SizeType, class R=Return<DontCare>> struct HasDerivative : Is<R,DerivativeReturnType,A,K> { };
 
-template<class V, class = Fallback> struct HasScalarType : False { }; \
-template<class V> struct HasScalarType<V, EnableIf<IsDefined<typename V::ScalarType>,Fallback>> : True { }; \
+template<class A, class K> using AntiderivativeReturnType = decltype(antiderivative(declval<A>(),declval<K>()));
+template<class A, class K=SizeType, class R=Return<DontCare>> struct HasAntiderivative : Is<R,AntiderivativeReturnType,A,K> { };
 
-template<class V, class = Fallback> struct HasNumericType : False { }; \
-template<class V> struct HasNumericType<V, EnableIf<IsDefined<typename V::HasNumericType>,Fallback>> : True { }; \
 
 
 template<class V> class CheckVectorConcept {
@@ -199,8 +200,8 @@ template<class A> void CheckAlgebraConcept<A>::check_transcendental_operators_co
 
 template<class A> void CheckAlgebraConcept<A>::check_banach_algebra_concept()
 {
-    ARIADNE_TEST_STATIC_ASSERT(IsSomething<decltype(declval<A>().norm())>);
-    ARIADNE_TEST_STATIC_ASSERT(IsSomething<decltype(declval<A>().unit_coefficient())>);
+    ARIADNE_TEST_STATIC_ASSERT(HasNormMethod<A>);
+//    ARIADNE_TEST_STATIC_ASSERT(IsSomething<decltype(declval<A>().unit_coefficient())>);
 }
 
 template<class A> void CheckAlgebraConcept<A>::check_graded_algebra_concept()

@@ -46,18 +46,21 @@ namespace {
 
 namespace Ariadne {
 
-static const Float64Value zero=0;
+static const Float64Value zero={0,Precision64()};
 
 inline auto operator+(Int n, Float64Bounds x) -> decltype(Float64Value(n)+x) { return Float64Value(n)+x; }
 inline auto operator-(Int n, Float64Bounds x) -> decltype(Float64Value(n)-x) { return Float64Value(n)-x; }
 inline auto operator/(Float64Value x, Nat n) -> decltype(x/Float64Value(n)) { return x/Float64Value(n); }
 
-inline auto operator> (Float64LowerBound x, Real r) -> decltype(x> Float64Bounds(r)) { return x> Float64Bounds(r); }
-inline auto operator>=(Float64LowerBound x, Real r) -> decltype(x>=Float64Bounds(r)) { return x>=Float64Bounds(r); }
-inline auto operator> (Float64UpperBound x, Real r) -> decltype(x> Float64Bounds(r)) { return x> Float64Bounds(r); }
-inline auto operator<=(Float64UpperBound x, Real r) -> decltype(x<=Float64Bounds(r)) { return x<=Float64Bounds(r); }
+template<class PR> inline auto operator*(FloatUpperBound<PR> x1, PositiveFloatValue<PR> x2) -> FloatUpperBound<PR> {
+    return FloatUpperBound<PR>(mul_up(x1._u,x2._v)); }
+template<class PR> inline auto operator*(PositiveFloatUpperBound<PR> x1, PositiveFloatValue<PR> x2) -> PositiveFloatUpperBound<PR> {
+    return PositiveFloatUpperBound<PR>(mul_up(x1._u,x2._v)); }
 
-typedef Integer Natural;
+inline auto operator> (Float64LowerBound x, Real r) -> decltype(x> declval<Float64Bounds>()) { return x> Float64Bounds(r,Precision64()); }
+inline auto operator>=(Float64LowerBound x, Real r) -> decltype(x>=declval<Float64Bounds>()) { return x>=Float64Bounds(r,Precision64()); }
+inline auto operator> (Float64UpperBound x, Real r) -> decltype(x> declval<Float64Bounds>()) { return x> Float64Bounds(r,Precision64()); }
+inline auto operator<=(Float64UpperBound x, Real r) -> decltype(x<=declval<Float64Bounds>()) { return x<=Float64Bounds(r,Precision64()); }
 
 static const DiscreteEvent final_event("_tmax_");
 static const DiscreteEvent step_event("_h_");
@@ -733,7 +736,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
             DiscreteEvent event=crossing_iter->first;
             CrossingKind crossing_kind=crossing_iter->second.crossing_kind;
             UpperIntervalType crossing_time_range(-infty,+infty);
-            Float64Error crossing_time_error=0u;
+            Float64Error crossing_time_error={0u,Precision64()};
             if (crossing_kind==CrossingKind::TRANSVERSE) {
                 crossing_time_range=crossing_iter->second.crossing_time.range();
                 crossing_time_error=crossing_iter->second.crossing_time.error();
@@ -812,6 +815,8 @@ _apply_guard_step(HybridEnclosure& set,
     ValidatedScalarFunctionModel reach_step_time=embed(starting_state.domain(),timing_data.evolution_time_coordinate);
     ValidatedScalarFunctionModel step_time;
 
+
+    ARIADNE_LOG(5,"transition_data.event_kind="<<transition_data.event_kind<<"\n");
     switch(transition_data.event_kind) {
         case PERMISSIVE:
             // The continuous evolution is just the same as a reachability step,
@@ -820,6 +825,7 @@ _apply_guard_step(HybridEnclosure& set,
             jump_set.new_activation(event,transition_data.guard_function);
             break;
         case URGENT: case IMPACT:
+            ARIADNE_LOG(5,"crossing_data.crossing_kind="<<crossing_data.crossing_kind<<"\n");
             switch(crossing_data.crossing_kind) {
                 case CrossingKind::TRANSVERSE:
                     step_time=unchecked_compose(crossing_data.crossing_time,starting_state);
@@ -827,6 +833,7 @@ _apply_guard_step(HybridEnclosure& set,
                     if(timing_data.step_kind!=StepKind::CONSTANT_EVOLUTION_TIME && possibly((step_time-timing_data.parameter_dependent_evolution_time).range().upper()>zero)) {
                         jump_set.new_parameter_constraint(step_event,step_time<=timing_data.parameter_dependent_evolution_time);
                     }
+
                     jump_set.apply_evolve_step(flow,unchecked_compose(crossing_data.crossing_time,starting_state));
                     break;
                 case CrossingKind::INCREASING: case CrossingKind::CONVEX:
@@ -1010,7 +1017,7 @@ _evolution_in_mode(EvolutionData& evolution_data,
     typedef Set<DiscreteEvent>::ConstIterator event_iterator;
 
     const Real final_time=termination_criterion.maximum_time();
-    const Natural maximum_steps=termination_criterion.maximum_steps();
+    const Integer maximum_steps=termination_criterion.maximum_steps();
     const Set<DiscreteEvent>& terminating_events=termination_criterion.terminating_events();
 
     // Routine check for emptiness
@@ -1495,6 +1502,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
 
     const Nat n = flow.result_size();
     const Float64Value step_size=flow.domain()[flow.domain().size()-1].upper();
+    const Float64Bounds final_time_bounds(final_time,Precision64());
 
     TimingData result;
     result.step_size=flow.step_size();
@@ -1522,7 +1530,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
     ValidatedVectorFunctionModel const& starting_space_function=initial_set.space_function();
     ValidatedScalarFunctionModel const& starting_time_function=initial_set.time_function();
     UpperIntervalType starting_time_range=initial_set.time_range();
-    UpperIntervalType remaining_time_range=static_cast<UpperIntervalType>(final_time)-starting_time_range;
+    UpperIntervalType remaining_time_range=final_time_bounds-starting_time_range;
 
     ARIADNE_LOG(7,std::fixed<<"starting_time_range="<<starting_time_range<<" step_size="<<step_size<<" final_time="<<final_time<<"\n");
 
@@ -1530,7 +1538,8 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
     // The time-dependent part of the evolution time
     ValidatedScalarFunctionModel temporal_evolution_time=this->function_factory().create_zero(ExactIntervalVectorType(1u,time_domain));
 
-    if(definitely(remaining_time_range.lower()<zero)) {
+    ARIADNE_LOG(9,std::fixed<<"remaining_time_range="<<remaining_time_range<<"\n");
+    if(possibly(remaining_time_range.lower()<zero)) {
         // Some of the points may already have reached the final time.
         // Don't try anything fancy, just do a simple constant time step.
         if(definitely(remaining_time_range.upper()<=step_size)) {
@@ -1542,7 +1551,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
             } else {
                 result.step_kind=StepKind::CONSTANT_FINISHING_TIME;
                 result.finishing_kind=FinishingKind::AT_FINAL_TIME;
-                temporal_evolution_time=Float64Bounds(final_time)-time_identity;
+                temporal_evolution_time=final_time_bounds-time_identity;
             }
         } else {
             result.step_kind=StepKind::CONSTANT_EVOLUTION_TIME;
@@ -1559,7 +1568,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         // a Float64Value
         result.step_kind=StepKind::CONSTANT_FINISHING_TIME;
         result.finishing_kind=FinishingKind::AT_FINAL_TIME;
-        temporal_evolution_time=Float64Bounds(final_time)-time_identity;
+        temporal_evolution_time=final_time_bounds-time_identity;
     } else if(possibly(remaining_time_range.lower()<=step_size) && ALLOW_CREEP) {
         // Some of the evolved points can be evolved to the final time in a single step
         // The evolution is performed over a step size which moves points closer to the final time, but does not cross.
@@ -1568,9 +1577,9 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         // This method ensures that points do not pass the final time after the transition.
         result.step_kind=StepKind::SPACETIME_DEPENDENT_FINISHING_TIME;
         result.finishing_kind=FinishingKind::BEFORE_FINAL_TIME;
-        Float64Value sf=1;
-        while(possibly(remaining_time_range.upper()*sf>step_size)) { sf = half(sf); }
-        temporal_evolution_time= Float64Bounds(sf)*(Float64Bounds(final_time)-time_identity);
+        PositiveFloat64Value sf={1u,Precision64()};
+        while(possibly(remaining_time_range.upper()*sf>step_size)) { sf = hlf(sf); }
+        temporal_evolution_time= Float64Bounds(sf)*(final_time_bounds-time_identity);
     } else { // remaining_time_range.lower()>step_size)
         // As far as timing goes, perform the evolution over a full time step
         result.step_kind=StepKind::CONSTANT_EVOLUTION_TIME;
@@ -1814,8 +1823,8 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
             Float64Value h=result.step_size;
             Float64Value tmin=cast_exact(starting_time_range.lower());
             Float64Value tmax=cast_exact(starting_time_range.upper());
-            Float64Bounds a=1-(half(h)/(tmax-tmin));
-            Float64Bounds b=h*(tmax-half(tmin))/(tmax-tmin);
+            Float64Bounds a=1-(hlf(h)/(tmax-tmin));
+            Float64Bounds b=h*(tmax-hlf(tmin))/(tmax-tmin);
             result.parameter_dependent_finishing_time=a*starting_time_function+b;
         }
         ARIADNE_LOG(7,"Unwinding to time "<<result.parameter_dependent_finishing_time<<"\n");

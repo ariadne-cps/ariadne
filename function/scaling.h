@@ -34,19 +34,19 @@
 namespace Ariadne {
 
 inline ApproximateNumericType med_apprx(ExactIntervalType const& ivl) {
-    return ApproximateNumericType(half_exact(add_approx(ivl.lower().raw(),ivl.upper().raw())));
+    return ApproximateNumericType(hlf_exact(add_approx(ivl.lower().raw(),ivl.upper().raw())));
 }
 
 inline ApproximateNumericType rad_apprx(ExactIntervalType const& ivl) {
-    return ApproximateNumericType(half_exact(sub_approx(ivl.upper().raw(),ivl.lower().raw())));
+    return ApproximateNumericType(hlf_exact(sub_approx(ivl.upper().raw(),ivl.lower().raw())));
 }
 
 inline ValidatedNumericType med_val(ExactIntervalType const& ivl) {
-    return half(ivl.lower()+ivl.upper());
+    return hlf(ivl.lower()+ivl.upper());
 }
 
 inline ValidatedNumericType rad_val(ExactIntervalType const& ivl) {
-    return half(ivl.upper()-ivl.lower());
+    return hlf(ivl.upper()-ivl.lower());
 }
 
 

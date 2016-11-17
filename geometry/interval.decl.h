@@ -33,12 +33,27 @@ template<class U> class Interval;
 typedef Interval<Rational> RationalInterval;
 typedef Interval<Real> RealInterval;
 
-typedef Interval<Float64Value> Float64ExactInterval;
-typedef Interval<Float64Ball> Float64BallInterval;
-typedef Interval<Float64Bounds> Float64BoundsInterval;
-typedef Interval<Float64UpperBound> Float64UpperInterval;
-typedef Interval<Float64LowerBound> Float64LowerInterval;
-typedef Interval<Float64Approximation> Float64ApproximationInterval;
+template<class PR> using FloatExactInterval = Interval<FloatValue<PR>>;
+template<class PR> using FloatBallInterval = Interval<FloatBall<PR>> ;
+template<class PR> using FloatBoundsInterval = Interval<FloatBounds<PR>>;
+template<class PR> using FloatUpperInterval = Interval<FloatUpperBound<PR>>;
+template<class PR> using FloatLowerInterval = Interval<FloatLowerBound<PR>>;
+template<class PR> using FloatApproximateInterval = Interval<FloatApproximation<PR>>;
+
+using Float64ExactInterval = FloatExactInterval<Precision64>;
+using Float64BallInterval = FloatBallInterval<Precision64> ;
+using Float64BoundsInterval = FloatBoundsInterval<Precision64>;
+using Float64UpperInterval = FloatUpperInterval<Precision64>;
+using Float64LowerInterval = FloatLowerInterval<Precision64>;
+using Float64ApproximateInterval = FloatApproximateInterval<Precision64>;
+
+using FloatMPExactInterval = FloatExactInterval<PrecisionMP>;
+using FloatMPBallInterval = FloatBallInterval<PrecisionMP> ;
+using FloatMPBoundsInterval = FloatBoundsInterval<PrecisionMP>;
+using FloatMPUpperInterval = FloatUpperInterval<PrecisionMP>;
+using FloatMPLowerInterval = FloatLowerInterval<PrecisionMP>;
+using FloatMPApproximateInterval = FloatApproximateInterval<PrecisionMP>;
+
 
 typedef Interval<ExactNumericType> ExactIntervalType;
 typedef Interval<EffectiveNumericType> EffectiveIntervalType;

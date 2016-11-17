@@ -1,5 +1,5 @@
 /***************************************************************************
- *            float-exact.h
+ *            dyadic.h
  *
  *  Copyright 2008-14  Pieter Collins
  *
@@ -21,12 +21,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file float-exact.h
- *  \brief ExactTag floating-point number class, a subset of dyadic numbers.
+/*! \file dyadic.h
+ *  \brief Dyadic numbers.
  */
 
 #ifndef ARIADNE_DYADIC_H
 #define ARIADNE_DYADIC_H
+
+#include "external/gmp.h"
 
 #include <iostream> // For std::floor std::ceil etc
 #include <iomanip> // For std::setprecision
@@ -35,73 +37,83 @@
 #include <limits> // For std::numeric_limits<double>
 
 #include "numeric/logical.h"
-#include "numeric/rational.h"
-#include "numeric/float.h"
+#include "numeric/integer.h"
+#include "numeric/arithmetic.h"
 
 namespace Ariadne {
 
+class ExactDouble;
 class Dyadic;
 
 //! \ingroup NumericModule
 //! \related Float64, ExactIntervalType
 //! \brief A floating-point number, which is taken to represent the \em exact value of a real quantity.
-class Dyadic {
-    RawFloat64 _x;
+class Dyadic
+    : DeclareRingOperations<Dyadic>
+    , DeclareLatticeOperations<Dyadic,Dyadic>
+    , DeclareComparisonOperations<Dyadic,Boolean,Boolean>
+    , DefineRingOperators<Dyadic>
+    , DefineComparisonOperators<Dyadic,Boolean,Boolean>
+{
   public:
+    mpf_t _mpf;
+  public:
+    typedef ExactTag Paradigm;
+
+    //! \brief Construct a Dyadic number from a GNU mpf object.
+    explicit Dyadic (mpf_t mpf);
+    //! \brief Construct the Dyadic number \a p/2<sup>q</sup>.
+    Dyadic (Integer const& p, Nat q);
+    Dyadic (Integer const& p, Int q) = delete;
+    //! \brief Destructor.
+    ~Dyadic();
     //! \brief Default constructor creates the number 0 (zero).
-    Dyadic() : _x(0) { }
+    Dyadic();
+    //! \brief Copy constructor.
+    Dyadic(Dyadic const& n);
+    Dyadic(Dyadic&& n);
+    //! \brief Assignment constructor.
+    Dyadic& operator=(Dyadic const& n);
+    Dyadic& operator=(Dyadic&& n);
     //! \brief Convert from a built-in positive integer.
-    Dyadic(uint n) : _x(n) { }
+    template<class M, EnableIf<And<IsIntegral<M>,IsUnsigned<M>>> = dummy> Dyadic(M m);
     //! \brief Convert from a built-in integer.
-    Dyadic(int n) : _x(n) { }
+    template<class N, EnableIf<And<IsIntegral<N>,IsSigned<N>>> = dummy> Dyadic(N n);
+    //! \brief Convert from an exact double-precision number.
+    Dyadic(const ExactDouble& d);
+    //! \brief Convert from an integer.
+    Dyadic(const Integer& z);
+    //! \brief Convert from a power of two.
+    Dyadic(const TwoExp& t);
     //! \brief Explicit construction from a built-in double-precision value.
     //! \details Tests to ensure that the number is not 'accidentally' created from a rounded version of a string literal,
     //! by comparing the input with it's single-precision approximation.
-    explicit Dyadic(double x) : _x(x) { }
-    //! \brief Explicit construction from an approximate floating-point value.
-    explicit Dyadic(const RawFloat64& x) : _x(x) { }
-    //! \brief Convert to a rational number.
-    explicit operator Rational () const;
-    //! \brief The approximate floating-point number with the same value.
-    RawFloat64 value() const { return _x; }
+    explicit Dyadic(double x);
+    //! \brief Convert to a generic number.
+    operator Number<ExactTag> () const;
+    //! \brief The smallest integer \a p such that \a x=p/2<sup>q</sup>
+    Integer mantissa() const;
+    //! \brief The (negative) integer \a -q such that \a x=p/2<sup>q</sup>
+    Int exponent() const;
     //! \brief A double-precision approximateion.
-    double get_d() const { return _x.get_d(); }
+    double get_d() const;
+    mpf_t const& get_mpf() const;
+    //! \brief Convert a floating-point literal to Dyadic i.e. long binary format.
     friend Dyadic operator"" _bin(long double x);
+    //! \brief Halve a number.
+    Dyadic hlf(Dyadic const&);
+    friend Rational rec(Rational const&);
+    friend Rational div(Rational const&, Rational const&);
+    //! \brief Convert a floating-point literal to Dyadic i.e. long binary format.
+    friend OutputStream& operator<<(OutputStream& os, Dyadic const& x);
 };
 
+template<class M, EnableIf<And<IsIntegral<M>,IsUnsigned<M>>>> inline Dyadic::Dyadic(M m) : Dyadic(Integer(m)) { }
+template<class N, EnableIf<And<IsIntegral<N>,IsSigned<N>>>> inline Dyadic::Dyadic(N n) : Dyadic(Integer(n)) { }
+
+
 inline Dyadic operator"" _bin(long double x) { return Dyadic(static_cast<double>(x)); }
-
-inline Dyadic operator+(const Dyadic& x) { return Dyadic(+x.value()); }
-inline Dyadic operator-(const Dyadic& x) { return Dyadic(-x.value()); }
-inline Dyadic operator+(const Dyadic& x1,  const Dyadic& x2);
-inline Dyadic operator-(const Dyadic& x1,  const Dyadic& x2);
-inline Dyadic operator*(const Dyadic& x1,  const Dyadic& x2);
-inline Rational operator/(const Dyadic& x1,  const Dyadic& x2);
-inline OutputStream& operator<<(OutputStream& os, const Dyadic& x) { return os << std::showpoint << std::setprecision(18) << x.value(); }
-
-inline Bool operator==(const Dyadic& x1, const Dyadic& x2) { return x1.value()==x2.value(); }
-inline Bool operator!=(const Dyadic& x1, const Dyadic& x2) { return x1.value()!=x2.value(); }
-inline Bool operator<=(const Dyadic& x1, const Dyadic& x2) { return x1.value()<=x2.value(); }
-inline Bool operator>=(const Dyadic& x1, const Dyadic& x2) { return x1.value()>=x2.value(); }
-inline Bool operator< (const Dyadic& x1, const Dyadic& x2) { return x1.value()< x2.value(); }
-inline Bool operator> (const Dyadic& x1, const Dyadic& x2) { return x1.value()> x2.value(); }
-
-inline Dyadic::operator Rational () const { return Rational(this->get_d(),nullptr); }
-
-inline Bool operator==(const Dyadic& x, const Rational& q) { return Rational(x)==q; }
-inline Bool operator!=(const Dyadic& x, const Rational& q) { return Rational(x)!=q; }
-inline Bool operator<=(const Dyadic& x, const Rational& q) { return Rational(x)<=q; }
-inline Bool operator>=(const Dyadic& x, const Rational& q) { return Rational(x)>=q; }
-inline Bool operator< (const Dyadic& x, const Rational& q) { return Rational(x)< q; }
-inline Bool operator> (const Dyadic& x, const Rational& q) { return Rational(x)> q; }
-
-inline Bool operator==(const Rational& q, const Dyadic& x) { return q==Rational(x); }
-inline Bool operator!=(const Rational& q, const Dyadic& x) { return q!=Rational(x); }
-inline Bool operator<=(const Rational& q, const Dyadic& x) { return q<=Rational(x); }
-inline Bool operator>=(const Rational& q, const Dyadic& x) { return q>=Rational(x); }
-inline Bool operator< (const Rational& q, const Dyadic& x) { return q< Rational(x); }
-inline Bool operator> (const Rational& q, const Dyadic& x) { return q> Rational(x); }
-
+inline Dyadic operator"" _dyadic(long double x) { return Dyadic(static_cast<double>(x)); }
 
 
 

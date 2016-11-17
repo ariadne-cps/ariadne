@@ -32,21 +32,34 @@ namespace Ariadne {
     template class Expansion<Float64Value>;
     template class Expansion<Float64Bounds>;
     template class Expansion<Float64Approximation>;
-    template class Expansion<UpperIntervalType>;
 
-    template class SortedExpansion<Float64,GradedKeyLess>;
-    template class SortedExpansion<Float64Approximation,GradedKeyLess>;
-    template class SortedExpansion<Float64Bounds,GradedKeyLess>;
-    template class SortedExpansion<UpperIntervalType,GradedKeyLess>;
+    template class SortedExpansion<Float64,GradedIndexLess>;
+    template class SortedExpansion<Float64Approximation,GradedIndexLess>;
+    template class SortedExpansion<Float64Bounds,GradedIndexLess>;
 
-    template class SortedExpansion<Float64,ReverseLexicographicKeyLess>;
-    template class SortedExpansion<Float64Value,ReverseLexicographicKeyLess>;
-    template class SortedExpansion<Float64Bounds,ReverseLexicographicKeyLess>;
-    template class SortedExpansion<Float64Approximation,ReverseLexicographicKeyLess>;
-    template class SortedExpansion<UpperIntervalType,ReverseLexicographicKeyLess>;
-}
+    template class SortedExpansion<Float64,ReverseLexicographicIndexLess>;
+    template class SortedExpansion<Float64Value,ReverseLexicographicIndexLess>;
+    template class SortedExpansion<Float64Bounds,ReverseLexicographicIndexLess>;
+    template class SortedExpansion<Float64Approximation,ReverseLexicographicIndexLess>;
 
-#include "algebra/differential.h"
+    
+    template class Expansion<Float64UpperInterval>;
+    template class SortedExpansion<Float64UpperInterval,GradedIndexLess>;
+    template class SortedExpansion<Float64UpperInterval,ReverseLexicographicIndexLess>;
 
-namespace Ariadne {
+
+    template class Expansion<FloatMP>;
+    template class Expansion<FloatMPValue>;
+    template class Expansion<FloatMPBounds>;
+    template class Expansion<FloatMPApproximation>;
+
+    template class SortedExpansion<FloatMP,GradedIndexLess>;
+    template class SortedExpansion<FloatMPApproximation,GradedIndexLess>;
+    template class SortedExpansion<FloatMPBounds,GradedIndexLess>;
+
+    template class SortedExpansion<FloatMP,ReverseLexicographicIndexLess>;
+    template class SortedExpansion<FloatMPValue,ReverseLexicographicIndexLess>;
+    template class SortedExpansion<FloatMPBounds,ReverseLexicographicIndexLess>;
+    template class SortedExpansion<FloatMPApproximation,ReverseLexicographicIndexLess>;
+
 }

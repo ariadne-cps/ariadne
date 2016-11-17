@@ -133,7 +133,7 @@ class TestSeries
     void test_analytic_function() {
         Rec rec_operator;
         ARIADNE_TEST_CONSTRUCT( AnalyticFunction, rec_function, (rec_operator) );
-        ARIADNE_TEST_SAME( rec_function.series(0.5).coefficients(5), Series<Float64Approximation>(Rec(),0.5).coefficients(5) );
+        ARIADNE_TEST_SAME( rec_function.series(0.5_approx).coefficients(5), Series<Float64Approximation>(Rec(),0.5_approx).coefficients(5) );
     }
 };
 

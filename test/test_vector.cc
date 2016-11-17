@@ -28,7 +28,7 @@
 #include "config.h"
 #include "numeric/numeric.h"
 #include "numeric/float.h"
-#include "geometry/interval.h"
+#include "numeric/float-user.h"
 #include "algebra/vector.h"
 
 #include "test.h"
@@ -128,19 +128,19 @@ TestVector::test_arithmetic()
 Void
 TestVector::test_misc()
 {
-
+    Precision64 pr;
     Int n=3;
-    Float64Approximation vptr[3]={-4.0,3.0,1.0};
-    Float64Approximation x=1.5;
+    Array<Float64Approximation> vary={{-4.0,3.0,1.0},pr64};
+    Float64Approximation x={1.5,pr64};
 
     Vector<Float64Approximation> v0;
     cout << "v0.size()=" << v0.size() << endl;
     cout << "v0=" << flush; cout << v0 << endl;
     ARIADNE_TEST_NOTIFY("Constructor Vector<X>(SizeType, const X*) is unsafe and has been removed.");
-    Array<Float64Approximation> a1(vptr,vptr+3);
+    Array<Float64Approximation> a1(vary.begin(),vary.end());
     Vector<Float64Approximation> v1(a1);
     cout << "v1=" << v1 << endl;
-    Vector<Float64Approximation> v2=Vector<Float64Approximation>({2.375,4.25,-1.25});
+    Vector<Float64Approximation> v2=Vector<Float64Approximation>({2.375,4.25,-1.25},pr64);
     cout << "v2=" << v2 << endl;
     cout << "norm(v1)=" << norm(v1) << "  norm(v2)=" << norm(v2) << endl;
     ARIADNE_TEST_EQUAL(norm(v1).raw(),4);
@@ -150,14 +150,14 @@ TestVector::test_misc()
     cout << "v3=" << v3 << endl;
     Vector<Float64Approximation> v4=v2;
     cout << "v4=" << v4 << endl;
-    Vector<Float64Approximation> v5={-4.0,3.0,1.0};
+    Vector<Float64Approximation> v5={{-4.0,3.0,1.0},pr64};
     cout << "v5=" << v5 << endl;
     ARIADNE_TEST_EQUAL(v1,v5);
     cout << endl;
 
     Vector<Float64Approximation> vf0;
-    v1=Vector<Float64Approximation>({0.25,-1.5});
-    v2=Vector<Float64Approximation>({-0.5,2.25});
+    v1=Vector<Float64Approximation>({0.25,-1.5},pr64);
+    v2=Vector<Float64Approximation>({-0.5,2.25},pr64);
     vf0=-v1;
     cout << vf0 << " = -" << v1 << endl;
     vf0=Vector<Float64Approximation>(v1)+v2;
@@ -172,18 +172,18 @@ TestVector::test_misc()
     cout << vf0 << " = " << v1 << " / " << x << endl;
     cout << endl;
 
-    Vector< Float64Bounds > iv1=Vector<Float64Bounds>({Float64Bounds{0.984375,1.015625},{2.25,2.375},{4.0,4.375},{-0.03125,0.015625}});
+    Vector< Float64Bounds > iv1=Vector<Float64Bounds>({Float64Bounds{0.984375_x,1.015625_x,pr},{2.25_x,2.375_x,pr},{4.0_x,4.375_x,pr},{-0.03125_x,0.015625_x,pr}});
     cout << "iv1=" << iv1 << endl;
     cout << "norm(iv1)=" << norm(iv1) << endl;
     cout << "norm(iv1).upper()=" << norm(iv1).upper() << endl;
 
-    Vector< Float64Bounds > iv2=Vector<Float64Bounds>({{-1,1},{-1,1}});
+    Vector< Float64Bounds > iv2=Vector<Float64Bounds>({{-1.0_x,1.0_x,pr},{-1.0_x,1.0_x,pr}});
     cout << "iv2=" << iv2 << endl;
     Vector< Float64Bounds > iv3(3);
     cout << "iv3=" << iv3 << endl;
-    iv3=Vector<Float64Bounds>({{4.25,4.25},{2.375,2.375}});
+    iv3=Vector<Float64Bounds>({{4.25_x,4.25_x,pr},{2.375_x,2.375_x,pr}});
     cout << "iv3=" << iv3 << endl;
-    Float64Bounds ix=Float64Bounds(-2,1);
+    Float64Bounds ix=Float64Bounds(-2,1,pr);
 
     Vector< Float64Bounds > iv0;
     cout << "iv0=" << iv0 << endl;
@@ -237,8 +237,8 @@ TestVector::test_misc()
 
     iv0=ev1;
     iv0/=ix;
-    iv0=Vector<Float64Bounds>({2,1});
-    iv1=Vector<Float64Bounds>({0,1});
+    iv0=Vector<Float64Bounds>({2,1},pr64);
+    iv1=Vector<Float64Bounds>({0,1},pr64);
     /*
       ARIADNE_TEST_ASSERT( (iv0+=Vector<Float64Bounds>("[0,1]")) == Vector<Float64Bounds>("[2,2]") );
       ARIADNE_TEST_ASSERT( (iv0-=Vector<Float64Bounds>("[0,1]")) == Vector<Float64Bounds>("[2,1]") );

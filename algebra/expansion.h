@@ -1,7 +1,7 @@
 /***************************************************************************
- *            expansion.h
+ *            algebra/expansion.h
  *
- *  Copyright 2008-15  Pieter Collins
+ *  Copyright 2013-14  Pieter Collins
  *
  ****************************************************************************/
 
@@ -21,322 +21,174 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file expansion.h
- *  \brief Base class for power series expansions.
+/*! \file algebra/expansion.h
+ *  \brief
  */
 
-// Use vector-based expansion and casting of iterators to get a reference
+
 
 #ifndef ARIADNE_EXPANSION_H
 #define ARIADNE_EXPANSION_H
 
-#include <cassert>
-#include <cstring>
-#include <iostream>
-#include <vector>
-#include <map>
-#include <algorithm>
-#include <boost/iterator.hpp>
-#include <boost/iterator_adaptors.hpp>
+#include "multi_index.h"
 
-#include "algebra/vector.h"
-#include "algebra/multi_index.h"
-
-
+#include "utility/typedefs.h"
+#include "utility/iterator.h"
 
 namespace Ariadne {
 
-typedef MultiIndex::WordType WordType;
+/************ Expansion ******************************************************/
 
-template<class X> class Expansion;
-typedef Expansion<Float64> FloatExpansion;
+template<class X> class ExpansionValue;
+template<class X> class ExpansionReference;
+template<class X> class ExpansionConstReference;
+template<class X> class ExpansionIterator;
+template<class X> class ExpansionConstIterator;
+template<class X> class ExpansionValueReference;
+
+struct GradedIndexLess {
+    template<class M1, class M2> bool operator()(M1 const& m1, M2 const& m2) const {
+        return graded_less(m1.index(),m2.index());
+    }
+    template<class M> bool operator()(M const& m, typename M::IndexType const& a) const {
+        return graded_less(m.index(),a);
+    }
+};
+
+struct LexicographicIndexLess {
+    template<class M1, class M2> bool operator()(M1 const& m1, M2 const& m2) const {
+        return lexicographic_less(m1.index(),m2.index());
+    }
+    template<class M> bool operator()(M const& m, typename M::IndexType const& a) const {
+        return lexicographic_less(m.index(),a);
+    }
+};
+
+struct ReverseLexicographicIndexLess {
+    template<class M1, class M2> bool operator()(M1 const& m1, M2 const& m2) const {
+        return reverse_lexicographic_less(m1.index(),m2.index());
+    }
+    template<class M> bool operator()(M const& m, typename M::IndexType const& a) const {
+        return reverse_lexicographic_less(m.index(),a);
+    }
+};
+
+struct CoefficientLess {
+    template<class M1, class M2> bool operator()(M1 const& m1, M2 const& m2) const {
+        return m1.coefficient() < m2.coefficient();
+    }
+};
+
+struct CoefficientIsZero {
+    template<class M> bool operator()(M const& m) const {
+        return decide(m.coefficient() == 0);
+    }
+};
 
 
-
-template<class X>
-struct ExpansionValue {
-    typedef MultiIndex::SizeType SizeType;
-    typedef MultiIndex::WordType WordType;
-
-    ~ExpansionValue() { delete[] _p; }
-    ExpansionValue(const MultiIndex& a, const X& x)
-        : _n(a.size()), _nw(a.word_size()), _p() { _p=new WordType[_nw+_ds]; key()=a; data()=x;  }
-    ExpansionValue(const ExpansionValue<X>& v)
-        : _n(v._n), _nw(v._nw), _p() { _p=new WordType[v._nw+_ds]; _assign(v._p); }
-    ExpansionValue<X>& operator=(const ExpansionValue<X>& v) {
-        if(this!=&v) { _resize(v._n,v._nw); _assign(v._p); } return *this; }
-    const MultiIndex& key() const { return *reinterpret_cast<const MultiIndex*>(this); }
-    const X& data() const { return *reinterpret_cast<const X*>(_p+_nw); }
-    MultiIndex& key() { return *reinterpret_cast<MultiIndex*>(this); }
-    X& data() { return *reinterpret_cast<X*>(_p+_nw); }
-  private:
-    Void _resize(SizeType n, SizeType nw) {
-        if(_nw!=nw) { delete[] _p; _nw=nw; _p=new WordType[_nw+_ds]; }_n=n; }
-    Void _assign(const WordType* p) {
-        for(SizeType j=0; j!=_nw+_ds; ++j) { _p[j]=p[j]; } }
+template<class X> class Expansion {
+    static const SizeType DEFAULT_CAPACITY=16;
+    typedef typename X::PrecisionType PR;
   public:
-    SizeType _n; SizeType _nw; WordType* _p;
-    static const SizeType _ds=sizeof(X)/sizeof(WordType);
-};
-
-
-struct DataLess {
-    template<class X> Bool operator()(const ExpansionValue<X>& v1, const ExpansionValue<X>& v2) { return v1.data()<v2.data(); }
-    template<class X> Bool operator()(const ExpansionValue<X>& v1, const X& d2) { return v1.data()<d2; }
-};
-
-struct DataIsZero {
-    template<class X> Bool operator()(const ExpansionValue<X>& v) { return decide(v.data()==static_cast<X>(0)); }
-};
-
-struct KeyEquals {
-    template<class X> Bool operator()(const ExpansionValue<X>& v1, const ExpansionValue<X>& v2) { return v1.key()==v2.key(); }
-    template<class X> Bool operator()(const ExpansionValue<X>& v1, const MultiIndex& k2) { return v1.key()==k2; }
-    Bool operator()(const MultiIndex& k1, const MultiIndex& k2) { return k2==k2; }
-};
-
-struct GradedKeyLess {
-    template<class X> Bool operator()(const ExpansionValue<X>& v1, const ExpansionValue<X>& v2) {
-        return graded_less(v1.key(),v2.key()); }
-    template<class X> Bool operator()(const ExpansionValue<X>& v1, const MultiIndex& k2) {
-        return graded_less(v1.key(),k2); }
-    Bool operator()(const MultiIndex& k1, const MultiIndex& k2) {
-        return graded_less(k1,k2); }
-};
-
-struct LexicographicKeyLess {
-    template<class X> Bool operator()(const ExpansionValue<X>& v1, const ExpansionValue<X>& v2) {
-        return lexicographic_less(v1.key(),v2.key()); }
-    template<class X> Bool operator()(const ExpansionValue<X>& v1, const MultiIndex& k2) {
-        return lexicographic_less(v1.key(),k2);; }
-    Bool operator()(const MultiIndex& k1, const MultiIndex& k2) {
-        return lexicographic_less(k1,k2); }
-};
-
-struct ReverseLexicographicKeyLess {
-    template<class X> Bool operator()(const ExpansionValue<X>& v1, const ExpansionValue<X>& v2) {
-        return reverse_lexicographic_less(v1.key(),v2.key()); }
-    template<class X> Bool operator()(const ExpansionValue<X>& v1, const MultiIndex& k2) {
-        return reverse_lexicographic_less(v1.key(),k2);; }
-    Bool operator()(const MultiIndex& k1, const MultiIndex& k2) {
-        return reverse_lexicographic_less(k1,k2); }
-};
-
-
-
-template<class X>
-inline OutputStream& operator<<(OutputStream& os, const ExpansionValue<X>& dv) {
-    return os << "["<<dv._n<<","<<dv._nw<<","<<(Void*)dv._p<<"]"<<dv.key()<<":"<<dv.data();
-    //return os << dv.key() << ":" << dv.data();
-}
-
-
-template<class X, class Ref, class Ptr> class ExpansionIterator;
-template<class X, class Ref, class Ptr> OutputStream& operator<<(OutputStream&, const ExpansionIterator<X,Ref,Ptr>&);
-
-// Iterator for Expansion<X>
-// Has the same data layout as an ExpansionReference, so can be easily cast
-// into this class.
-// It would be possible to cache the increment in words, but is seems that
-// this does not increase performance
-template<class X, class Ref, class Ptr>
-class ExpansionIterator
-     : public boost::iterator_facade<ExpansionIterator<X,Ref,Ptr>,
-                                     ExpansionValue<X>,
-                                     boost::random_access_traversal_tag,
-                                     Ref >
-
-{
-    template<class X2, class Ref2, class Ptr2> friend class ExpansionIterator;
-    friend OutputStream& operator<< <>(OutputStream&,const ExpansionIterator<X,Ref,Ptr>&);
-    typedef ExpansionIterator<X,Ref,Ptr> Iter;
+    X _zero_coefficient;
+    SizeType _capacity;
+    SizeType _size;
+    SizeType _argument_size;
+    DegreeType* _indices;
+    X* _coefficients;
   public:
-    typedef MultiIndex::SizeType SizeType;
-    typedef MultiIndex::IndexType ByteType;
-    typedef MultiIndex::WordType WordType;
-    typedef X DataType;
-
-    typedef int difference_type;
-  public:
-    ExpansionIterator()
-        : _n(), _nw(), _p() { }
-    ExpansionIterator(SizeType n, SizeType nw, WordType* p)
-        : _n(n), _nw(nw), _p(p) { }
-    template<class Ref2,class Ptr2> ExpansionIterator(const ExpansionIterator<X,Ref2,Ptr2>& i)
-        : _n(i._n), _nw(i._nw), _p(i._p) { }
-    template<class Ref2,class Ptr2> Bool equal(const ExpansionIterator<X,Ref2,Ptr2>& i) const {
-        return _p==i._p; }
-    template<class Ref2,class Ptr2> difference_type distance_to(const ExpansionIterator<X,Ref2,Ptr2>& i) const {
-        return (i._p-_p)/difference_type(_nw+_ds); }
-    Ptr operator->() const {
-        return reinterpret_cast<Ptr>(const_cast<Iter*>(this)); }
-    Ref operator*() const {
-        return reinterpret_cast<Ref>(const_cast<Iter&>(*this)); }
-    Iter& increment() {
-        return advance(1); }
-    Iter& decrement() {
-        return advance(-1); }
-    Iter& advance(difference_type m) {
-        _p+=m*difference_type(_nw+_ds);
-        return *this; }
-    const WordType* _word_ptr() { return this->_p; }
-    const Void* _ptr() { return this->_p; }
-  private:
-    SizeType _n;
-    SizeType _nw;
-    WordType* _p;
-    static const SizeType _ds=sizeof(DataType)/sizeof(WordType);
-};
-
-
-template<class X, class Ref, class Ptr>
-inline OutputStream& operator<<(OutputStream& os, const ExpansionIterator<X,Ref,Ptr>& piter) {
-    const MultiIndex::ByteType* ap=reinterpret_cast<const MultiIndex::ByteType*>(piter._p);
-    const X* xp=reinterpret_cast<const X*>(piter._p+piter._nw);
-    os << "(n="<<piter._n<<", nw="<<piter._nw<<", p="<<(Void*)piter._p<<", a=";
-    for(MultiIndex::SizeType i=0; i!=piter._n; ++i) { os<<(i==0?"(":",")<<Int(ap[i]); }
-    os << "), x="<<*xp<<")";
-    return os;
-}
-
-template<class X>
-class Expansion
-{
-    static const Ariadne::SizeType DEFAULT_CAPACITY=16;
-  protected:
-    static X _zero;
-  public:
-    typedef X RealType;
+    typedef typename X::PrecisionType PrecisionType;
+    typedef ExpansionIterator<X> Iterator;
+    typedef ExpansionConstIterator<X> ConstIterator;
+    typedef MultiIndex MultiIndexType;
     typedef X CoefficientType;
-    typedef unsigned short int SmoothnessType;
-    typedef MultiIndex::SizeType SizeType;
-    typedef MultiIndex::ByteType ByteType;
-    typedef MultiIndex::WordType WordType;
-    typedef Int DifferenceType;
-    typedef MultiIndex KeyType;
-    typedef X DataType;
-  public:
-    typedef ExpansionValue<X> value_type;
-    typedef ExpansionValue<X>& reference;
-    typedef ExpansionValue<X>const& const_reference;
-    typedef ExpansionValue<X>* pointer;
-    typedef ExpansionValue<X>const* const_pointer;
-    typedef ExpansionIterator<X,ExpansionValue<X>&, ExpansionValue<X>* > iterator;
-    typedef ExpansionIterator<X,ExpansionValue<X>const&, ExpansionValue<X>const* > const_iterator;
-  public:
     typedef ExpansionValue<X> ValueType;
-    typedef ExpansionValue<X>& Reference;
-    typedef ExpansionValue<X>const& ConstReference;
-    typedef ExpansionIterator<X,ExpansionValue<X>&, ExpansionValue<X>* > Iterator;
-    typedef ExpansionIterator<X,ExpansionValue<X>const&, ExpansionValue<X>const* > ConstIterator;
+    typedef ExpansionReference<X> Reference;
+    typedef ExpansionConstReference<X> ConstReference;
 
-  public:
     ~Expansion();
-    explicit Expansion(); // DEPRECTATED
     explicit Expansion(SizeType as);
-    Expansion(SizeType as, DegreeType deg, InitializerList<X> lst); // DEPRECTATED
-    Expansion(SizeType as, InitializerList<PairType<InitializerList<Int>,X>> lst);
-    Expansion(InitializerList<PairType<InitializerList<Int>,X>> lst);
+    explicit Expansion(SizeType as, PrecisionType pr, SizeType cap=DEFAULT_CAPACITY);
+    explicit Expansion(SizeType as, X const& z, SizeType cap=DEFAULT_CAPACITY);
+    Expansion(InitializerList<Pair<InitializerList<DegreeType>,X>> lst);
+    template<class... PRS, EnableIf<IsConstructible<X,Dbl,PRS...>> =dummy>
+        Expansion(InitializerList<Pair<InitializerList<DegreeType>,Dbl>> lst, PRS... prs);
+    template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>> =dummy>
+        explicit Expansion(Expansion<Y> const&, PRS... prs);
+    Expansion(const Expansion<X>&);
+    Expansion<X>& operator=(const Expansion<X>&);
+    Expansion(Expansion<X>&&);
+    Expansion<X>& operator=(Expansion<X>&&);
+    Void swap(Expansion<X>&);
 
-    template<class XX, EnableIf<IsConvertible<XX,X>> =dummy>
-        Expansion(const Expansion<XX>& p);
-    template<class XX, EnableIf<IsConstructible<X,XX>> =dummy, DisableIf<IsConvertible<XX,X>> =dummy>
-        explicit Expansion(const Expansion<XX>& p);
-
-    // DEPRECTATED Conversions to raw type
-    Expansion<RawFloat64>& raw();
-    Expansion<RawFloat64>const& raw() const;
-
-    Void swap(Expansion<X>& other);
-
-    template<class XX> friend Bool same(const Expansion<XX>& self, const Expansion<XX>& other);
     Bool operator==(const Expansion<X>& other) const;
     Bool operator!=(const Expansion<X>& other) const;
 
-    SizeType argument_size() const;
-    DegreeType degree() const;
-
     Bool empty() const;
-    SizeType number_of_nonzeros() const; // Deprecated
+
+    SizeType argument_size() const;
     SizeType number_of_terms() const;
-    SizeType size() const; // Number of terms
+    SizeType number_of_nonzeros() const; // DEPRECATED
+    SizeType size() const;
     SizeType capacity() const;
-    Void reserve(SizeType nnz);
-    Void resize(SizeType nnz);
+    Void resize(SizeType sz);
+    Void reserve(SizeType cap);
 
-    Void append(Pair<MultiIndex,CoefficientType> const& ac);
-    Void append(const MultiIndex& a, const CoefficientType& c);
-    Void prepend(const MultiIndex& a, const CoefficientType& c);
-    Void append_sum(const MultiIndex& a1, const MultiIndex& a2, const CoefficientType& c);
-
+    CoefficientType const& zero_coefficient() const;
     const CoefficientType& operator[](const MultiIndex& a) const;
-//    ExpansionValueReference<X> operator[](const MultiIndex& a);
+    ExpansionValueReference<X> operator[](const MultiIndex& a);
+
+    Void set(const MultiIndex& a, const X& c);
+    CoefficientType& at(const MultiIndex& a);
+    const CoefficientType& get(const MultiIndex& a) const;
 
     Iterator begin();
-    ConstIterator begin() const;
     Iterator end();
+    ConstIterator begin() const;
     ConstIterator end() const;
+
+    Void prepend(const MultiIndex& a, const X& x);
+    Void append(const MultiIndex& a, const X& x);
+    Void append_sum(const MultiIndex& a1, const MultiIndex& a2, const X& x);
+
     Iterator find(const MultiIndex& a);
     ConstIterator find(const MultiIndex& a) const;
 
     Iterator insert(Iterator pos, const MultiIndex& a, const X& x);
-    Void erase(Iterator iter);
+    Iterator erase(Iterator pos);
 
     Void clear();
-    Void check() const;
-  public: // Deprecated
     Void remove_zeros();
     Void combine_terms();
-  public:
-    Void graded_sort();
-    Void lexicographic_sort();
-    Void reverse_lexicographic_sort();
-  public:
-    SizeType _vector_size() const;
-    SizeType _index_size() const;
-    SizeType _element_size() const;
-  protected:
-    static const unsigned int sizeof_byte=sizeof(ByteType);
-    static const unsigned int sizeof_word=sizeof(WordType);
-    static const unsigned int sizeof_data=sizeof(DataType);
+    Void check() const;
 
-    const WordType* _begin_ptr() const;
-    const WordType* _end_ptr() const;
-    WordType* _begin_ptr();
-    WordType* _end_ptr();
-    Iterator _insert(Iterator p, const MultiIndex& a, const CoefficientType& x);
-    Iterator _allocated_insert(Iterator p, const MultiIndex& a, const CoefficientType& x);
-    Void _prepend(const MultiIndex& a, const CoefficientType& x);
-    Void _append(const MultiIndex& a, const CoefficientType& x);
-    Void _append(const MultiIndex&  a1, const MultiIndex&  a2, const CoefficientType& x);
-  protected:
-    template<class CMP> Void _sort(const CMP& cmp);
-    template<class CMP> CoefficientType& _at(const MultiIndex& a,const CMP& cmp);
-    template<class CMP> Iterator _insert(const MultiIndex& a, const CoefficientType& x,const CMP& cmp);
-  private:
-    template<class T> friend Expansion<T> embed(SizeType, Expansion<T> const&, SizeType);
-    Expansion<X> _embed(SizeType before_size, SizeType after_size) const;
-    Bool _same(Expansion<X> const& other) const;
-  public:
-    OutputStream& write(OutputStream& os, const Array<StringType>& variables) const;
-    OutputStream& write_polynomial(OutputStream& os) const;
-    OutputStream& write_map(OutputStream& os) const;
+    //template<class CMP> Void sort(CMP cmp);
+    Void index_sort(ReverseLexicographicLess cmp);
+    Void index_sort(GradedLess cmp);
+    Void sort(ReverseLexicographicIndexLess cmp);
+    Void sort(GradedIndexLess cmp);
+
+    Void reverse_lexicographic_sort();
+    Void graded_sort();
+
     OutputStream& write(OutputStream& os) const;
+    OutputStream& write(OutputStream& os, Array<String> const& vars) const;
+  public:
+    friend OutputStream& operator<<(OutputStream& os, Expansion<X> const& self) { return self.write(os); }
+    friend Expansion<X> embed(SizeType as1, Expansion<X> const& e2, SizeType as3) {
+        return e2._embed(as1,as3); }
   private:
-    SizeType _argument_size;
-    std::vector<WordType> _coefficients;
+    Expansion<X> _embed(SizeType as1, SizeType as3) const;
 };
 
-template<class X> Expansion<MidpointType<X>> midpoint(const Expansion<X>& pse);
-template<class X> Expansion<X> embed(SizeType, Expansion<X> const&, SizeType);
-template<class X> OutputStream& operator<<(OutputStream& os, const Expansion<X>& p);
+template<class X> inline Bool same(const Expansion<X>& e1, const Expansion<X>& e2) {
+    return e1==e2; }
 
-template<class X, class CMP> class SortedExpansionValueReference;
+template<class X> inline OutputStream& operator<<(OutputStream& os, const Expansion<X>& e) {
+    e.write(os); return os; }
 
-template<class X, class CMP> class SortedExpansion
-    : public Expansion<X>
-{
-  public:
+template<class X, class CMP> class SortedExpansion : public Expansion<X> {
+public:
     typedef X CoefficientType;
     typedef typename Expansion<X>::Iterator Iterator;
     typedef typename Expansion<X>::ConstIterator ConstIterator;
@@ -344,78 +196,195 @@ template<class X, class CMP> class SortedExpansion
     using Expansion<X>::Expansion;
     SortedExpansion(Expansion<X> e);
     Void sort();
-
-    X const& operator[](const MultiIndex& a) const;
-    SortedExpansionValueReference<X,CMP> operator[](const MultiIndex& a);
-
-    Void insert(const MultiIndex& a, const CoefficientType& c);
-    Void set(const MultiIndex& a, const CoefficientType& c);
+    Void insert(const MultiIndex& a, const X& c);
+    Void set(const MultiIndex& a, const X& c);
     CoefficientType& at(const MultiIndex& a);
     CoefficientType const& get(const MultiIndex& a) const;
-    Iterator find(const MultiIndex& a);
-    ConstIterator find(const MultiIndex& a) const;
+//    Iterator find(const MultiIndex& a);
+//    ConstIterator find(const MultiIndex& a) const;
 };
 
-template<class X, class CMP> class SortedExpansionValueReference {
-    SortedExpansion<X,CMP>& _e; MultiIndex const& _a;
+
+
+template<class X> class ExpansionValue
+{
+    typedef X CoefficientType;
+    MultiIndex _a; CoefficientType _c;
   public:
-    SortedExpansionValueReference(SortedExpansion<X,CMP>& e, const MultiIndex& a) : _e(e), _a(a) { }
+    ExpansionValue(SizeType as, const DegreeType* ip, const CoefficientType* cp) : _a(as,ip), _c(*cp) { }
+  public:
+    ExpansionValue(MultiIndex const& a, CoefficientType const& c) : _a(a), _c(c) { }
+    MultiIndex& index() { return _a; }
+    const MultiIndex& index() const { return _a; }
+    CoefficientType& coefficient() { return _c; }
+    const CoefficientType& coefficient() const { return _c; }
+        MultiIndex& key() { return _a; }
+        const MultiIndex& key() const { return _a; }
+        CoefficientType& data() { return _c; }
+        const CoefficientType& data() const { return _c; }
+};
+template<class X> OutputStream& operator<<(OutputStream& os, const ExpansionValue<X>& m) {
+    return os << m.index()<<":" << m.coefficient(); }
+
+template<class X> struct ExpansionConstReference;
+
+template<class X> struct ExpansionReference;
+template<class X> Void swap(ExpansionReference<X>, ExpansionReference<X>);
+
+template<class X> struct ExpansionReference
+{
+    typedef X CoefficientType; typedef X& CoefficientReference;
+  private:
+    MultiIndexReference _a; CoefficientType* _cp;
+  public:
+    ExpansionReference(SizeType as, DegreeType* ip, CoefficientType* cp) : _a(as,ip), _cp(cp) { }
+    ExpansionReference(MultiIndexReference& a, CoefficientType& c) : _a(a), _cp(&c) { }
+    MultiIndexReference& index() { return _a; }
+    const MultiIndex& index() const { return _a; }
+    CoefficientReference coefficient() { return *_cp; }
+    const CoefficientType& coefficient() const { return *_cp; }
+        MultiIndexReference& key() { return _a; }
+        const MultiIndex& key() const { return _a; }
+        CoefficientReference data() { return *_cp; }
+        const CoefficientType& data() const { return *_cp; }
+    operator ExpansionValue<X>() const { return ExpansionValue<X>(_a,*_cp); }
+    ExpansionReference<X>& operator=(const ExpansionValue<X>&);
+    ExpansionReference<X>& operator=(const ExpansionReference<X>&);
+    ExpansionReference<X>& operator=(const ExpansionConstReference<X>&);
+};
+template<class X> Void swap(ExpansionReference<X>, ExpansionReference<X>);
+
+template<class X> struct ExpansionConstReference
+{
+    typedef X CoefficientType;
+    const MultiIndexReference _a; const CoefficientType* _cp;
+    ExpansionConstReference(SizeType as, const DegreeType* ip, const CoefficientType* cp) : _a(as,const_cast<DegreeType*>(ip)), _cp(cp) { }
+    ExpansionConstReference(const MultiIndexReference& a, const CoefficientType& c) : _a(a), _cp(&c) { }
+    const MultiIndex& index() const { return _a; }
+    const CoefficientType& coefficient() const { return *_cp; }
+        const MultiIndex& key() const { return _a; }
+        const CoefficientType& data() const { return *_cp; }
+    ExpansionConstReference(const ExpansionValue<X>& other) : ExpansionConstReference(other._a._n,other._a._ip,other._cp) { }
+    ExpansionConstReference(const ExpansionReference<X>& other) : ExpansionConstReference(other.index().size(),other.index().begin(),other._cp) { }
+    operator ExpansionValue<X>() const { return ExpansionValue<X>(_a,*_cp); }
+};
+
+template<class X> Void swap(ExpansionReference<X> m1, ExpansionReference<X> m2) {
+    swap(m1.index(),m2.index());
+    std::swap(m1.coefficient(),m2.coefficient());
+}
+
+template<class X> ExpansionReference<X>& ExpansionReference<X>::operator=(const ExpansionValue<X>& other) {
+    this->index()=other.index(); this->coefficient()=other.coefficient(); return *this; }
+
+template<class X> ExpansionReference<X>& ExpansionReference<X>::operator=(const ExpansionReference<X>& other) {
+    this->index()=other.index(); this->coefficient()=other.coefficient(); return *this; }
+
+template<class X> ExpansionReference<X>& ExpansionReference<X>::operator=(const ExpansionConstReference<X>& other) {
+    this->index()=other.index(); this->coefficient()=other.coefficient(); return *this; }
+
+template<class X> decltype(auto) operator==(const ExpansionConstReference<X>& m1, const ExpansionConstReference<X>& m2) {
+    return m1.index()==m2.index() && (m1.coefficient()==m2.coefficient());
+}
+
+template<class X> inline decltype(auto) operator!=(const ExpansionConstReference<X>& m1, const ExpansionConstReference<X>& m2) {
+    return !(m1==m2);
+}
+
+template<class X> OutputStream& operator<<(OutputStream& os, const ExpansionReference<X>& m) {
+    return os << ExpansionValue<X>(m); }
+
+template<class X> OutputStream& operator<<(OutputStream& os, const ExpansionConstReference<X>& m) {
+    return os << ExpansionValue<X>(m); }
+
+
+template<class X> class ExpansionIterator
+    : public IteratorFacade<ExpansionIterator<X>, ExpansionValue<X>, RandomAccessTraversalTag, ExpansionReference<X>>
+{
+    typedef X CoefficientType;
+    SizeType _as; DegreeType* _ip; CoefficientType* _cp;
+    friend class ExpansionConstIterator<X>;
+  public:
+    ExpansionIterator(SizeType as, DegreeType* ip, CoefficientType* cp) : _as(as), _ip(ip), _cp(cp) { }
+  public:
+    template<class XX> Bool equal(const ExpansionIterator<XX>& other) const { return this->_cp==other._cp; }
+    template<class XX> Bool equal(const ExpansionConstIterator<XX>& other) const { return this->_cp==other._cp; }
+    Void advance(PointerDifferenceType k) { this->_ip+=k*(_as+1u); _cp+=k; }
+    template<class XX> PointerDifferenceType distance_to(const ExpansionIterator<XX>& other) const { return other._cp - this->_cp; }
+    ExpansionReference<X>& dereference() { return reinterpret_cast<ExpansionReference<X>&>(*this); }
+    ExpansionReference<X>* operator->() { return reinterpret_cast<ExpansionReference<X>*>(this); }
+    Void write(OutputStream& os) const { os << "{" << (void*)_ip << ":" << MultiIndex(_as,_ip) << ", " << _cp << ":" << *_cp << "}"; }
+};
+template<class X> OutputStream& operator<<(OutputStream& os, const ExpansionIterator<X>& e) {
+    e.write(os); return os; }
+
+template<class X> class ExpansionConstIterator
+    : public IteratorFacade<ExpansionConstIterator<X>, ExpansionValue<X>, RandomAccessTraversalTag, ExpansionConstReference<X>>
+{
+    typedef X CoefficientType;
+    friend class ExpansionIterator<X>;
+    SizeType _as; DegreeType* _ip; CoefficientType* _cp;
+  public:
+    ExpansionConstIterator(SizeType as, DegreeType* ip, CoefficientType* cp) : _as(as), _ip(ip), _cp(cp) { }
+    ExpansionConstIterator(const ExpansionIterator<X>& other) : ExpansionConstIterator(other._as,other._ip,other._cp) { }
+  public:
+    template<class XX> Bool equal(const ExpansionIterator<XX>& other) const { return this->_cp==other._cp; }
+    template<class XX> Bool equal(const ExpansionConstIterator<XX>& other) const { return this->_cp==other._cp; }
+    Void advance(PointerDifferenceType k) { this->_ip+=k*(_as+1u); _cp+=k; }
+    template<class XX> PointerDifferenceType distance_to(const ExpansionConstIterator<XX>& other) const { return other._cp - this->_cp; }
+    ExpansionConstReference<X> dereference() { return ExpansionConstReference<X>(_as,_ip,_cp); }
+    ExpansionConstReference<X>* operator->() { return reinterpret_cast<ExpansionConstReference<X>*>(this); }
+    Void write(OutputStream& os) const { os << "{" << (void*)_ip << "," << _cp << "}"; }
+};
+template<class X> OutputStream& operator<<(OutputStream& os, const ExpansionConstIterator<X>& e) {
+    e.write(os); return os; }
+
+template<class X> class ExpansionValueReference {
+    Expansion<X>& _e; MultiIndex const& _a;
+  public:
+    ExpansionValueReference(Expansion<X>& e, const MultiIndex& a) : _e(e), _a(a) { }
     operator const X& () const { return _e.get(_a); }
     //operator X& () { return _e.at(_a); }
-    SortedExpansionValueReference<X,CMP>& operator=(const X& x) { _e.set(_a,x); return *this; }
-    SortedExpansionValueReference<X,CMP>& operator+=(X const& c) { _e.at(_a)+=c; return *this; }
-    SortedExpansionValueReference<X,CMP>& operator-=(X const& c) { _e.at(_a)-=c; return *this; }
-    SortedExpansionValueReference<X,CMP>& operator*=(X const& c) { _e.at(_a)*=c; return *this; }
-    SortedExpansionValueReference<X,CMP>& operator/=(X const& c) { _e.at(_a)/=c; return *this; }
+    ExpansionValueReference<X>& operator=(const X& x) { _e.at(_a)=x; return *this; }
+    ExpansionValueReference<X>& operator+=(X const& c) { _e.at(_a)+=c; return *this; }
+    ExpansionValueReference<X>& operator-=(X const& c) { _e.at(_a)-=c; return *this; }
+    ExpansionValueReference<X>& operator*=(X const& c) { _e.at(_a)*=c; return *this; }
+    ExpansionValueReference<X>& operator/=(X const& c) { _e.at(_a)/=c; return *this; }
 };
 
-template<class X, class CMP> inline const X& SortedExpansion<X,CMP>::operator[](const MultiIndex& a) const {
-    return const_cast<SortedExpansion<X,CMP>&>(*this).at(a); }
 
-template<class X, class CMP> inline SortedExpansionValueReference<X,CMP> SortedExpansion<X,CMP>::operator[](const MultiIndex& a) {
-    return SortedExpansionValueReference<X,CMP>(*this,a); }
 
-template<class X> inline Bool same(const Expansion<X>& self, const Expansion<X>& other) {
-    return self._same(other);
-}
-
-template<class X> inline Expansion<X> embed(SizeType before_size, Expansion<X> const& x, SizeType after_size) {
-    return x._embed(before_size,after_size);
-}
-
-template<class X> inline OutputStream& operator<<(OutputStream& os, Expansion<X> const& p) {
-    return p.write(os);
-}
-
-template<class X> template<class XX, EnableIf<IsConvertible<XX,X>>> inline
-Expansion<X>::Expansion(const Expansion<XX>& p)
-    : _argument_size(p.argument_size())
+template<class X> template<class... PRS, EnableIf<IsConstructible<X,Dbl,PRS...>>>
+Expansion<X>::Expansion(InitializerList<Pair<InitializerList<DegreeType>,Dbl>> lst, PRS... prs)
+    : Expansion(lst.begin()->first.size(),X(prs...))
 {
-    for(auto iter=p.begin(); iter!=p.end(); ++iter) {
-        this->append(iter->key(),iter->data());
+    MultiIndex a;
+    X x;
+    for(auto iter=lst.begin();
+        iter!=lst.end(); ++iter)
+    {
+        a=iter->first;
+        x=X(iter->second,prs...);
+        if(decide(x!=0)) { this->append(a,x); }
     }
 }
 
-template<class X> template<class XX, EnableIf<IsConstructible<X,XX>>, DisableIf<IsConvertible<XX,X>>> inline
-Expansion<X>::Expansion(const Expansion<XX>& e)
-    : _argument_size(e.argument_size())
+template<class X> template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>>>
+Expansion<X>::Expansion(Expansion<Y> const& other, PRS... prs)
+    : Expansion(other.argument_size(),X(prs...))
 {
-    for(auto iter=e.begin(); iter!=e.end(); ++iter) {
-        this->append(iter->key(),X(iter->data()));
+    MultiIndex a;
+    X x;
+    for(auto iter=other.begin();
+        iter!=other.end(); ++iter)
+    {
+        a=iter->index();
+        x=X(iter->coefficient(),prs...);
+        if(decide(x!=0)) { this->append(a,x); }
     }
 }
-
-template<class X> Expansion<MidpointType<X>> midpoint(const Expansion<X>& e) {
-    Expansion<MidpointType<X>> r(e.argument_size());
-    for(auto iter=e.begin(); iter!=e.end(); ++iter) {
-        r.append(iter->key(),midpoint(iter->data())); }
-    return r;
-}
-
 
 
 } // namespace Ariadne
 
-#include "evaluate.h"
-
-#endif /* ARIADNE_EXPANSION_H */
+#endif

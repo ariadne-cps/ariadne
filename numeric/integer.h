@@ -38,6 +38,7 @@
 #include "utility/metaprogramming.h"
 #include "numeric/sign.h"
 #include "numeric/logical.h"
+#include "numeric/arithmetic.h"
 #include "numeric/number.decl.h"
 
 namespace Ariadne {
@@ -91,6 +92,11 @@ template<> struct IsNumericType<Integer> : True { };
 //! \ingroup UserNumericTypeSubModule
 //! \brief Arbitrarily-sized integers.
 class Integer
+    : DeclareRingOperations<Integer,Integer,Natural>
+    , DeclareLatticeOperations<Integer,Natural>
+    , DeclareComparisonOperations<Integer,Boolean,Boolean>
+    , DefineRingOperators<Integer>
+    , DefineComparisonOperators<Integer,Boolean,Boolean>
 {
   public:
     mpz_t _mpz;
@@ -108,37 +114,17 @@ class Integer
     Integer& operator=(Integer&&);
     operator Number<ExactTag> () const;
 
-    friend Integer operator+(Integer const& z);
-    friend Integer operator-(Integer const& z);
-    friend Integer operator+(Integer const& z1, Integer const& z2);
-    friend Integer operator-(Integer const& z1, Integer const& z2);
-    friend Integer operator*(Integer const& z1, Integer const& z2);
     friend Rational operator/(Integer const& z1, Integer const& z2);
     friend Integer& operator++(Integer& z);
     friend Integer& operator--(Integer& z);
     friend Integer& operator+=(Integer& z1, Integer const& z2);
     friend Integer& operator*=(Integer& z1, Integer const& z2);
-    friend Integer const& max(Integer const& z1, Integer const& z2);
-    friend Integer const& min(Integer const& z1, Integer const& z2);
-    friend Integer abs(Integer const& z);
-    friend Integer pos(Integer const& z);
-    friend Integer neg(Integer const& z);
-    friend Integer sqr(Integer const& z);
-    friend Integer add(Integer const& z1, Integer const& z2);
-    friend Integer sub(Integer const& z1, Integer const& z2);
-    friend Integer mul(Integer const& z1, Integer const& z2);
-    friend Integer pow(Integer const& z, Nat m);
+
+    friend Int log2floor(Natural const& n);
 
     friend Rational rec(Integer const& z);
     friend Rational div(Integer const& z1, Integer const& z2);
     friend Rational pow(Integer const& z, Int n);
-
-    friend Boolean operator==(Integer const& z1, Integer const& z2);
-    friend Boolean operator!=(Integer const& z1, Integer const& z2);
-    friend Boolean operator>=(Integer const& z1, Integer const& z2);
-    friend Boolean operator<=(Integer const& z1, Integer const& z2);
-    friend Boolean operator> (Integer const& z1, Integer const& z2);
-    friend Boolean operator< (Integer const& z1, Integer const& z2);
 
     friend OutputStream& operator<<(OutputStream& os, Integer const& z);
     friend Integer operator"" _z(unsigned long long int n);
@@ -165,6 +151,17 @@ template<class N, EnableIf<IsIntegral<N>> = dummy> inline auto operator> (Intege
 template<class N, EnableIf<IsIntegral<N>> = dummy> inline auto operator<=(Integer const& x, N n) -> decltype(x!=Int64(n)) { return x<=Int64(n); }
 template<class N, EnableIf<IsIntegral<N>> = dummy> inline auto operator>=(Integer const& x, N n) -> decltype(x!=Int64(n)) { return x>=Int64(n); }
 
+class Natural : public Integer {
+  public:
+    Natural() : Integer() { }
+    Natural(uint m) : Integer(m) { }
+    Natural(int n) = delete;
+    explicit Natural(Integer const& z) : Integer(z) { assert(z>=Integer(0)); }
+    friend Natural& operator++(Natural& n) { ++static_cast<Integer&>(n); return n; }
+    friend Natural& operator+=(Natural& n1, Natural const& n2) { static_cast<Integer&>(n1)+=n2; return n1; }
+    friend Natural operator+(Natural const& n1, Natural const& n2) { return Natural(static_cast<Integer const&>(n1)+static_cast<Integer const&>(n2)); }
+    friend Natural operator*(Natural const& n1, Natural const& n2) { return Natural(static_cast<Integer const&>(n1)*static_cast<Integer const&>(n2)); }
+};
 
 } // namespace Ariadne
 

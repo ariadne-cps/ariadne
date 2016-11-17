@@ -104,6 +104,9 @@ class Box
     template<class II, EnableIf<And<IsConstructible<I,II>,Not<IsConvertible<II,I>>>> = dummy>
         explicit Box(const Vector<II>& bx) : Vector<I>(bx) { }
 
+    template<class II, class PR, EnableIf<IsConstructible<I,II,PR>> = dummy>
+        Box(const Vector<II>& bx, PR pr) : Vector<I>(bx,pr) { }
+
     //! The unit box \f$[-1,1]^n\f$ in \a n dimensions.
     static Box<IntervalType> unit_box(SizeType n);
     //! The upper quadrant box \f$[0,\infty]^n\f$ in \a n dimensions.
@@ -199,6 +202,9 @@ UpperIntervalType apply(ScalarFunction<ValidatedTag>const& f, const Box<UpperInt
 Box<UpperIntervalType> apply(VectorFunction<ValidatedTag>const& f, const Box<UpperIntervalType>& x);
 
 //! \relates Box \brief Project onto the variables \a rng.
+template<class I> inline Bool project(const Box<I> & bx, Array<SizeType> const& rng) { return Box<I>::_project(bx,rng); }
+
+//! \relates Box \brief Project onto the variables \a rng.
 template<class I> inline Box<I> project(const Box<I> & bx, Array<SizeType> const& rng) { return Box<I>::_project(bx,rng); }
 
 
@@ -214,6 +220,14 @@ template<class I> auto upper_bounds(const Box<I>& bx) -> typename Box<I>::Vertex
     return bx.upper_bounds();
 }
 
+
+template<class I> Bool same(const Box<I>& bx1, const Box<I>& bx2) {
+    if(bx1.size()!=bx2.size()) { return false; }
+    for(SizeType i=0; i!=bx1.size(); ++i) {
+        if(not same(bx1[i],bx2[i])) { return false; }
+    }
+    return true;
+}
 
 //! \relates EBoxType \brief The smallest box containing the two boxes.
 template<class I1, class I2> Box<decltype(hull(declval<I1>(),declval<I2>()))> hull(const Box<I1>& bx1, const Box<I2>& bx2) {
@@ -394,10 +408,12 @@ template<class I> inline auto cast_singleton(Box<I> const& bx) -> Vector<decltyp
 }
 
 template<class I> inline Void Box<I>::draw(CanvasInterface& c, const Projection2d& p) const {
-    return Ariadne::draw(c,p,ApproximateBoxType(*this)); }
+    Ariadne::draw(c,p,ApproximateBoxType(*this)); }
 
+template<> inline Void Box<Interval<Real>>::draw(CanvasInterface& c, const Projection2d& p) const {
+    Ariadne::draw(c,p,ApproximateBoxType(*this,Precision64())); }
 
-inline Float64ExactBox cast_exact_box(Float64ApproximationBox const& abx) {
+inline Float64ExactBox cast_exact_box(Float64ApproximateBox const& abx) {
     return Float64ExactBox(reinterpret_cast<Float64ExactBox const&>(abx));
 }
 
@@ -406,9 +422,9 @@ inline Box<Float64ExactInterval> cast_exact_box(Vector<Float64Bounds> const& bv)
 }
 
 
-inline Float64ApproximationBox widen(const Float64ApproximationBox& bx, Float64Approximation e) {
+inline Float64ApproximateBox widen(const Float64ApproximateBox& bx, Float64Approximation e) {
     Float64Approximation eps(e);
-    Float64ApproximationBox r(bx.dimension());
+    Float64ApproximateBox r(bx.dimension());
     for(Nat i=0; i!=bx.size(); ++i) {
         r[i]=ApproximateIntervalType(bx[i].lower()-eps,bx[i].upper()+eps);
     }
@@ -421,6 +437,10 @@ inline Float64UpperBox widen(const Float64UpperBox& bx, Float64UpperBound eps) {
         r[i]=widen(bx[i],eps);
     }
     return r;
+}
+// TODO: Add widen for other generic values
+inline Float64UpperBox widen(const Float64UpperBox& bx, ValidatedUpperNumber eps) {
+    return widen(bx,eps.get(UpperTag(),Precision64()));
 }
 
 inline Float64UpperBox widen(const Float64ExactBox& bx, Float64Value eps) {

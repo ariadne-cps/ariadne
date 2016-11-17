@@ -327,6 +327,15 @@ class ListSet<HybridEnclosure>
     List<HybridEnclosure> _list;
 };
 
+inline ValidatedSierpinskian inside(ListSet<HybridEnclosure> const& set, HybridBoxType const& bx) {
+    ValidatedSierpinskian result=true;
+    for(auto iter=set.begin(); iter!=set.end(); ++iter) {
+        result = result && inside(*iter,bx);
+    }
+    return result;
+}
+
+
 inline OutputStream& operator<<(OutputStream& os, const ListSet<HybridEnclosure>& hls) {
     return os << hls._list;
 }

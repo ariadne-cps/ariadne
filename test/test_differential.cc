@@ -55,19 +55,18 @@ henon(const Vector<DF>& x, const Vector<typename DF::NumericType>& p)
     Vector<DF> r(2,2,x.degree()); henon(r,x,p); return r;
 }
 
-// FIXME: Operators needed to prevent bad overloads
-template<class X> Differential<X> operator*(const typename Differential<X>::NumericType& c,const NonAssignableDifferential<X>& dx) {
-    return c * static_cast<Differential<X>const&>(dx); }
 
 
 template<class DF>
 class TestDifferential {
     typedef typename DF::ValueType X;
+    typedef typename X::PrecisionType PR;
     typedef X ScalarType;
     typedef typename DF::SeriesType SeriesType;
     typedef DF DifferentialType;
     typedef Vector<DF> DifferentialVectorType;
   private:
+    PR pr;
     X c1;
     DifferentialType x1,x2,x3;
   public:
@@ -78,9 +77,9 @@ class TestDifferential {
         double a2[15]={ 3.0, 1.0, 0.0, 0.25, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
         double a3[15]={ 2.0, 1.0, 0.0, 0.125, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
         c1=3.0;
-        x1=DifferentialType(2,4,a1);
-        x2=DifferentialType(2,4,a2);
-        x3=DifferentialType(1,4,a3);
+        x1=DifferentialType(2,4,a1,pr);
+        x2=DifferentialType(2,4,a2,pr);
+        x3=DifferentialType(1,4,a3,pr);
 
         ARIADNE_TEST_PRINT(x1);
         ARIADNE_TEST_PRINT(x2);
@@ -103,12 +102,12 @@ class TestDifferential {
     }
 
     Void test_neg() {
-        DifferentialType nx1(2,4, { {{0,0},-2.0}, {{1,0},-1.0}, {{2,0},-0.5} });
+        DifferentialType nx1(2,4, { {{0,0},-2.0}, {{1,0},-1.0}, {{2,0},-0.5} }, pr);
         ARIADNE_TEST_EQUALS(-x1,nx1);
     }
 
     Void test_add() {
-        DifferentialType x1px2(2,4, { {{0,0},5.0}, {{1,0},2.0}, {{2,0},0.75} });
+        DifferentialType x1px2(2,4, { {{0,0},5.0}, {{1,0},2.0}, {{2,0},0.75} }, pr);
         ARIADNE_TEST_EQUALS(x1+x2,x1px2);
         ARIADNE_TEST_EVALUATE(x1+c1);
         ARIADNE_TEST_EVALUATE(c1+x1);
@@ -116,7 +115,7 @@ class TestDifferential {
     }
 
     Void test_sub() {
-        DifferentialType x1mx2(2,4, { {{0,0},-1.0}, {{1,0},0.0}, {{2,0},0.25} });
+        DifferentialType x1mx2(2,4, { {{0,0},-1.0}, {{1,0},0.0}, {{2,0},0.25} }, pr);
         ARIADNE_TEST_EQUALS(x1-x2,x1mx2);
         ARIADNE_TEST_EVALUATE(x1-c1);
         ARIADNE_TEST_EVALUATE(c1-x1);
@@ -132,7 +131,7 @@ class TestDifferential {
         DifferentialType x2(2,2,a2);
         DifferentialType x1mx2(2,2,a1m2);
         DifferentialType cmx2(2,2,acm2);
-        X c=5;
+        X c={5,pr};
         ARIADNE_TEST_EQUAL(x1*x2,x1mx2);
         ARIADNE_TEST_EQUAL(c*x2,cmx2);
         ARIADNE_TEST_EQUAL(x2*c,cmx2);
@@ -182,7 +181,7 @@ class TestDifferential {
 
     Void test_gradient() {
         // Regression test based on errors in Henon evaluation.
-        Vector<Float64Approximation> x={0.875,-0.125};
+        Vector<Float64Approximation> x={{0.875,-0.125},pr};
         Vector< Differential<Float64Approximation> > dx=Differential<Float64Approximation>::variables(1u,x);
         Differential<Float64Approximation> dfx=1.5-dx[0]*dx[0]-0.25*dx[1];
         ARIADNE_TEST_PRINT(dfx);
@@ -194,9 +193,9 @@ class TestDifferential {
 
     Void test_hessian() {
         // Test Hessian matrix of
-        Float64Approximation a00=1.5; Float64Approximation a01=2.5; Float64Approximation a11=3.5;
+        Float64Approximation a00={1.5,pr}; Float64Approximation a01={2.5,pr}; Float64Approximation a11={3.5,pr};
         double x0=0.875; double x1=-1.25;
-        Vector<Float64Approximation> x={x0,x1};
+        Vector<Float64Approximation> x={{x0,x1},pr};
         Vector< Differential<Float64Approximation> > dx=Differential<Float64Approximation>::variables(2u,x);
         Differential<Float64Approximation> dfx=a00*dx[0]*dx[0]+a01*dx[0]*dx[1]+a11*dx[1]*dx[1];
         ARIADNE_TEST_PRINT(dfx);
@@ -216,12 +215,14 @@ class TestDifferential {
 template<class DF>
 class TestDifferentialVector {
     typedef typename DF::ValueType X;
+    typedef typename X::PrecisionType PrecisionType;
     typedef X ScalarType;
     typedef Vector<X> VectorType;
     typedef Series<X> SeriesType;
     typedef DF DifferentialType;
     typedef Vector<DF> DifferentialVectorType;
   private:
+    PrecisionType pr;
     DifferentialVectorType x1,x2,x3;
   public:
     TestDifferentialVector()
@@ -271,14 +272,14 @@ class TestDifferentialVector {
     }
 
     Void test_mul() {
-        X c=2;
+        X c={2,pr};
         cout << x1 << "*" << c << " = " << x1*c << std::endl;
         cout << c << "*" << x1 << " = " << c*x1 << std::endl;
         //assert((x1*x2)==DifferentialVectorType("[2,3,2,0]"));
     }
 
     Void test_div() {
-        X c=2;
+        X c={2,pr};
         cout << x1 << "/" << c << " = " << x1/c << std::endl;
     }
 
@@ -298,6 +299,10 @@ class TestDifferentialVector {
         DifferentialType z(2,4,az);
         ARIADNE_TEST_EQUAL(derivative(y,0),x);
         ARIADNE_TEST_EQUAL(antiderivative(y,0),z);
+        ARIADNE_TEST_PRINT(y);
+        ARIADNE_TEST_PRINT(antiderivative(y,0));
+        ARIADNE_TEST_PRINT(derivative(antiderivative(y,0),0));
+        ARIADNE_TEST_PRINT(derivative(antiderivative(y,0),0)-y);
         ARIADNE_TEST_EQUAL(derivative(antiderivative(y,0),0),y);
     }
 

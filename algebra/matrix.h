@@ -48,6 +48,7 @@ template<class M> class MatrixRow;
 template<class M> class MatrixColumn;
 template<class X1, class X2> struct MatrixMatrixProduct;
 template<class X1, class X2> struct MatrixVectorProduct;
+template<class M> class MatrixTranspose;
 
 class PivotMatrix;
 template<class X> class PLUMatrix;
@@ -58,10 +59,52 @@ class SingularMatrixException { };
 template<class M> struct MatrixExpression { const M& operator()() const { return static_cast<const M&>(*this); } };
 template<class M> struct MatrixContainer : public MatrixExpression<M> { };
 
+class DeclareMatrixOperations {
+    template<class X1, class X2> friend Matrix<ProductType<Scalar<X1>,X2>> operator*(X1 const& s, Matrix<X2> const& A);
+    template<class X1, class X2> friend Matrix<ProductType<X1,Scalar<X2>>> operator*(Matrix<X1> const& A, X2 const& s);
+    template<class X1, class X2> friend Matrix<QuotientType<X1,Scalar<X2>>> operator/(Matrix<X1> const& A, X2 const& s);
+
+    template<class X> friend Matrix<X> operator+(Matrix<X> A);
+    template<class X> friend Matrix<X> operator-(Matrix<X> A);
+    template<class X1, class X2> friend Matrix<SumType<X1,X2>> operator+(Matrix<X1> const& A1, Matrix<X2> const& A2);
+    template<class X1, class X2> friend Matrix<DifferenceType<X1,X2>> operator-(Matrix<X1> const& A1, Matrix<X2> const& A2);
+    template<class X1, class X2> friend Matrix<ArithmeticType<X1,X2>> operator*(Matrix<X1> const& A1, Matrix<X2> const& A2);
+    template<class X1, class X2> friend Vector<ArithmeticType<X1,X2>> operator*(Matrix<X1> const& A1, Vector<X2> const& v2);
+    template<class X1, class X2> friend Covector<ArithmeticType<X1,X2>> operator*(Covector<X1> const& u1, Matrix<X2> const& A2);
+    template<class X1, class X2> friend Matrix<ProductType<X1,X2>> operator*(Vector<X1> const& v1, Covector<X2> const& u2);
+
+    template<class X1, class X2> friend Matrix<ArithmeticType<X1,X2>> operator*(Matrix<X1> const& A1, MatrixTranspose<Matrix<X2>> const& A2);
+    template<class X1, class X2> friend Matrix<ArithmeticType<X1,X2>> operator*(MatrixTranspose<X1> const& A1, Matrix<Matrix<X2>> const& A2);
+    template<class X1, class X2> friend decltype(declval<X1>()==declval<X2>()) operator==(Matrix<X1> const& A1, Matrix<X2> const& A2);
+};
+
+/*
+
+template<class X1, class X2=Void> struct MatrixOperations;
+
+class DispatchMatrixOperations {
+    template<class X1, class X2> friend Matrix<ProductType<Scalar<X1>,X2>> operator*(X1 const& s, Matrix<X2> const& A) { return MatrixOperations<X1,X2>::_mul(s,A); }
+    template<class X1, class X2> friend Matrix<ProductType<X1,Scalar<X2>>> operator*(Matrix<X1> const& A, X2 const& s) { return MatrixOperations<X1,X2>::_mul(A,s); }
+    template<class X1, class X2> friend Matrix<QuotientType<X1,Scalar<X2>>> operator/(Matrix<X1> const& A, X2 const& s) { return MatrixOperations<X1,X2>::_div(A,s); }
+
+    template<class X> friend Matrix<X> operator+(Matrix<X> A) { return MatrixOperations<X>::_pos(A); }
+    template<class X> friend Matrix<X> operator-(Matrix<X> A) { return MatrixOperations<X>::_neg(A); }
+    template<class X1, class X2> friend Matrix<SumType<X1,X2>> operator+(Matrix<X1> const& A1, Matrix<X2> const& A2) { return MatrixOperations<X1,X2>::_add(A1,A2); }
+    template<class X1, class X2> friend Matrix<DifferenceType<X1,X2>> operator-(Matrix<X1> const& A1, Matrix<X2> const& A2) { return MatrixOperations<X1,X2>::_sub(A1,A2); }
+    template<class X1, class X2> friend Matrix<ArithmeticType<X1,X2>> operator*(Matrix<X1> const& A1, Matrix<X2> const& A2) { return MatrixOperations<X1,X2>::_mul(A1,A2); }
+    template<class X1, class X2> friend Vector<ArithmeticType<X1,X2>> operator*(Matrix<X1> const& A1, Vector<X2> const& v2) { return MatrixOperations<X1,X2>::_mul(A1,v2); }
+    template<class X1, class X2> friend Covector<ArithmeticType<X1,X2>> operator*(Covector<X1> const& u1, Matrix<X2> const& A2) { return MatrixOperations<X1,X2>::_mul(u1,A2); }
+    template<class X1, class X2> friend Matrix<ProductType<X1,X2>> operator*(Vector<X1> const& v1, Covector<X2> const& u2) { return MatrixOperations<X1,X2>::_mul(v1,u2); }
+
+    template<class X1, class X2> friend decltype(declval<X1>()==declval<X2>()) operator==(Matrix<X1> const& A1, Matrix<X2> const& A2);
+};
+*/
+
 //! \ingroup LinearAlgebraSubModule
 //! \brief Matrices over some type \a X.
 template<class X> class Matrix
     : public MatrixContainer<Matrix<X>>
+    , public DeclareMatrixOperations
 {
     X _zero;
     SizeType _rs;
@@ -88,13 +131,19 @@ template<class X> class Matrix
     Matrix(SizeType m, SizeType n);
 
     //! Construct a matrix with \a r rows and \a c columns with values initialised to \a x.
-    Matrix(SizeType m, SizeType n, const X& x);
+    Matrix(SizeType m, SizeType n, const X& z);
+
+    //! Construct a matrix from parameters of \a X.
+    template<class... PRS, EnableIf<IsConstructible<X,PRS...>> =dummy> explicit Matrix(SizeType m, SizeType n, PRS... prs) : Matrix(m,n,X(prs...)) { }
 
     //! Construct a matrix with \a r rows and \a c columns, with values initialised from the C-style Array beginning at \a ptr in row-major format. The value in the \a i<sup>th</sup> row and \a j<sup>th</sup> column of the resulting matrix is \a ptr[i*c+j].
     Matrix(SizeType m, SizeType n, const X* p);
 
     //! Construct a matrix using initializer lists.
     Matrix(InitializerList<InitializerList<X>> lst);
+
+    //! Construct a matrix using initializer lists.
+    template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>> =dummy> Matrix(InitializerList<InitializerList<Y>> lst, PRS... pr);
 
     //! Construct a matrix as a linear map from functionals.
     Matrix(Vector<Covector<X>>);
@@ -130,6 +179,7 @@ template<class X> class Matrix
     const X& get(SizeType i, SizeType j) const ;
     //! \brief Set the value stored in the \a i<sup>th</sup> row and \a j<sup>th</sup> column to \a x.
     Void set(SizeType i, SizeType j, const X& x);
+    template<class Y, EnableIf<IsAssignable<X,Y>> =dummy> Void set(SizeType i, SizeType j, const Y& y);
     //! \brief A pointer to the first element of the data storage.
     const X* begin() const;
 
@@ -157,21 +207,6 @@ template<class X> class Matrix
 
 template<class X> struct IsMatrix<Matrix<X>> : True { };
 template<class X> struct IsMatrixExpression<Matrix<X>> : True { };
-
-template<class X1, class X2, EnableIf<IsScalar<X1>> =dummy> Matrix<ProductType<X1,X2>> operator*(X1 const& s, Matrix<X2> const& A);
-template<class X1, class X2, EnableIf<IsScalar<X2>> =dummy> Matrix<ProductType<X1,X2>> operator*(Matrix<X1> const& A, X2 const& s);
-template<class X1, class X2, EnableIf<IsScalar<X2>> =dummy> Matrix<QuotientType<X1,X2>> operator/(Matrix<X1> const& A, X2 const& s);
-
-template<class X> Matrix<X> operator+(Matrix<X> A);
-template<class X> Matrix<X> operator-(Matrix<X> A);
-template<class X1, class X2> Matrix<SumType<X1,X2>> operator+(Matrix<X1> const& A1, Matrix<X2> const& A2);
-template<class X1, class X2> Matrix<DifferenceType<X1,X2>> operator-(Matrix<X1> const& A1, Matrix<X2> const& A2);
-template<class X1, class X2> Matrix<ArithmeticType<X1,X2>> operator*(Matrix<X1> const& A1, Matrix<X2> const& A2);
-template<class X1, class X2> Vector<ArithmeticType<X1,X2>> operator*(Matrix<X1> const& A1, Vector<X2> const& v2);
-template<class X1, class X2> Covector<ArithmeticType<X1,X2>> operator*(Covector<X1> const& u1, Matrix<X2> const& A2);
-template<class X1, class X2> Matrix<ProductType<X1,X2>> operator*(Vector<X1> const& v1, Covector<X2> const& u2);
-
-template<class X1, class X2> decltype(declval<X1>()==declval<X2>()) operator==(Matrix<X1> const& A1, Matrix<X2> const& A2);
 
 template<class M1, class M2, EnableIf<And<IsMatrixExpression<M1>,IsMatrixExpression<M2>>> =dummy>
 auto operator==(M1 const& A1, M2 const& A2) -> decltype(declval<ScalarType<M1>>()==declval<ScalarType<M2>>());
@@ -494,160 +529,166 @@ template<class X0, class X1, class X2> Void _mul_assign(Matrix<X0>& A0, Matrix<X
     }
 }
 
-template<class X> inline Matrix<X> operator+(Matrix<X> A) {
-    return std::move(A);
-}
+struct ProvideMatrixOperations {
 
-template<class X> inline Matrix<X> operator-(Matrix<X> A) {
-    for(SizeType i=0; i!=A.row_size(); ++i) {
-        for(SizeType j=0; j!=A.column_size(); ++j) {
-            A[i][j]=-A[i][j];
-        }
+    template<class X> friend inline Matrix<X> operator+(Matrix<X> A) {
+        return std::move(A);
     }
-    return std::move(A);
-}
 
-template<class X1, class X2> inline Matrix<SumType<X1,X2>> operator+(Matrix<X1> const& A1, Matrix<X2> const& A2) {
-    ARIADNE_PRECONDITION(A1.row_size()==A2.row_size());
-    ARIADNE_PRECONDITION(A1.column_size()==A2.column_size());
-    Matrix<SumType<X1,X2>> R(A1.row_size(),A1.column_size());
-    for(SizeType i=0; i!=A1.row_size(); ++i) {
-        for(SizeType j=0; j!=A1.column_size(); ++j) {
-            R[i][j]=A1[i][j]+A2[i][j];
-        }
-    }
-    return std::move(R);
-}
-
-template<class X1, class X2> inline Matrix<DifferenceType<X1,X2>> operator-(Matrix<X1> const& A1, Matrix<X2> const& A2) {
-    ARIADNE_PRECONDITION(A1.row_size()==A2.row_size());
-    ARIADNE_PRECONDITION(A1.column_size()==A2.column_size());
-    Matrix<DifferenceType<X1,X2>> R(A1.row_size(),A1.column_size());
-    for(SizeType i=0; i!=A1.row_size(); ++i) {
-        for(SizeType j=0; j!=A1.column_size(); ++j) {
-            R[i][j]=A1[i][j]-A2[i][j];
-        }
-    }
-    return std::move(R);
-}
-
-template<class X1, class X2, EnableIf<IsScalar<X1>>> inline Matrix<ProductType<X1,X2>> operator*(X1 const& s1, Matrix<X2> const& A2) {
-    Matrix<ProductType<X1,X2>> R(A2.row_size(),A2.row_size());
-    for(SizeType i=0; i!=A2.row_size(); ++i) {
-        for(SizeType j=0; j!=A2.column_size(); ++j) {
-            R[i][j]=s1*A2[i][j];
-        }
-    }
-    return std::move(R);
-}
-
-template<class X1, class X2, EnableIf<IsScalar<X2>>> inline Matrix<ProductType<X1,X2>> operator*(Matrix<X1> const& A1, X2 const& s2) {
-    Matrix<ProductType<X1,X2>> R(A1.row_size(),A1.row_size());
-    for(SizeType i=0; i!=A1.row_size(); ++i) {
-        for(SizeType j=0; j!=A1.column_size(); ++j) {
-            R[i][j]=A1[i][j]*s2;
-        }
-    }
-    return std::move(R);
-}
-
-template<class X1, class X2,EnableIf<IsScalar<X2>>> inline Matrix<QuotientType<X1,X2>> operator/(Matrix<X1> const& A1, X2 const& s2) {
-    Matrix<QuotientType<X1,X2>> R(A1.row_size(),A1.row_size());
-    for(SizeType i=0; i!=A1.row_size(); ++i) {
-        for(SizeType j=0; j!=A1.column_size(); ++j) {
-            R[i][j]=A1[i][j]/s2;
-        }
-    }
-    return std::move(R);
-}
-
-//template<class X1, class X2> inline MatrixMatrixProduct<X1,X2> operator*(Matrix<X1> const& A1, Matrix<X2> const& A2) {
-//    return MatrixMatrixProduct<X1,X2>(A1,A2); }
-
-template<class X1, class X2> Matrix<ArithmeticType<X1,X2>> operator*(Matrix<X1> const& A1, Matrix<X2> const& A2) {
-    typedef ArithmeticType<X1,X2> X0;
-    ARIADNE_PRECONDITION(A1.column_size()==A2.row_size());
-    Matrix<X0> A0(A1.row_size(), A2.column_size());
-    for(SizeType i=0; i!=A0.row_size(); ++i) {
-        for(SizeType j=0; j!=A0.column_size(); ++j) {
-            for(SizeType k=0; k!=A1.column_size(); ++k) {
-                A0.at(i,j)+=A1.at(i,k)*A2.at(k,j);
+    template<class X> friend inline Matrix<X> operator-(Matrix<X> A) {
+        for(SizeType i=0; i!=A.row_size(); ++i) {
+            for(SizeType j=0; j!=A.column_size(); ++j) {
+                A[i][j]=-A[i][j];
             }
         }
+        return std::move(A);
     }
-    return std::move(A0);
-}
 
-template<class X1, class X2> Matrix<ArithmeticType<X1,X2>> operator*(Matrix<X1> const& A1, MatrixTranspose<Matrix<X2>> const& A2) {
-    typedef ArithmeticType<X1,X2> X0;
-    ARIADNE_PRECONDITION(A1.column_size()==A2.row_size());
-    Matrix<X0> A0(A1.row_size(), A2.column_size());
-    for(SizeType i=0; i!=A0.row_size(); ++i) {
-        for(SizeType j=0; j!=A0.column_size(); ++j) {
-            for(SizeType k=0; k!=A1.column_size(); ++k) {
-                A0.at(i,j)+=A1.at(i,k)*A2.at(k,j);
+    template<class X1, class X2> friend inline Matrix<SumType<X1,X2>> operator+(Matrix<X1> const& A1, Matrix<X2> const& A2) {
+        ARIADNE_PRECONDITION(A1.row_size()==A2.row_size());
+        ARIADNE_PRECONDITION(A1.column_size()==A2.column_size());
+        Matrix<SumType<X1,X2>> R(A1.row_size(),A1.column_size());
+        for(SizeType i=0; i!=A1.row_size(); ++i) {
+            for(SizeType j=0; j!=A1.column_size(); ++j) {
+                R[i][j]=A1[i][j]+A2[i][j];
             }
         }
+        return std::move(R);
     }
-    return std::move(A0);
-}
 
-template<class X1, class X2> Vector<ArithmeticType<X1,X2>> operator*(Matrix<X1> const& A1, Vector<X2> const& v2) {
-    typedef ArithmeticType<X1,X2> X0;
-    ARIADNE_PRECONDITION(A1.column_size()==v2.size());
-    Vector<X0> v0(A1.row_size());
-    for(SizeType i=0; i!=v0.size(); ++i) {
-        for(SizeType j=0; j!=v2.size(); ++j) {
-            v0.at(i)+=A1.at(i,j)*v2.at(j);
+    template<class X1, class X2> friend inline Matrix<DifferenceType<X1,X2>> operator-(Matrix<X1> const& A1, Matrix<X2> const& A2) {
+        ARIADNE_PRECONDITION(A1.row_size()==A2.row_size());
+        ARIADNE_PRECONDITION(A1.column_size()==A2.column_size());
+        Matrix<DifferenceType<X1,X2>> R(A1.row_size(),A1.column_size());
+        for(SizeType i=0; i!=A1.row_size(); ++i) {
+            for(SizeType j=0; j!=A1.column_size(); ++j) {
+                R[i][j]=A1[i][j]-A2[i][j];
+            }
         }
+        return std::move(R);
     }
-    return std::move(v0);
-}
 
-template<class X1, class X2> Covector<ArithmeticType<X1,X2>> operator*(Covector<X1> const& u1, Matrix<X2> const& A2) {
-    typedef ArithmeticType<X1,X2> X0;
-    ARIADNE_PRECONDITION(u1.size()==A2.row_size());
-    Covector<X0> u0(A2.column_size());
-    for(SizeType j=0; j!=u0.size(); ++j) {
-        for(SizeType i=0; i!=u1.size(); ++i) {
-            u0.at(j)+=u1.at(i)*A2.at(i,j);
+    template<class X1, class X2> friend inline Matrix<ProductType<Scalar<X1>,X2>> operator*(X1 const& s1, Matrix<X2> const& A2) {
+        Matrix<ProductType<X1,X2>> R(A2.row_size(),A2.row_size());
+        for(SizeType i=0; i!=A2.row_size(); ++i) {
+            for(SizeType j=0; j!=A2.column_size(); ++j) {
+                R[i][j]=s1*A2[i][j];
+            }
         }
+        return std::move(R);
     }
-    return std::move(u0);
-}
 
-template<class X1, class X2> inline
-auto operator==(Matrix<X1> const& A1, Matrix<X2> const& A2) -> decltype(declval<X1>()==declval<X2>()) {
-    if(A1.row_size()!=A2.row_size() || A1.column_size()!=A2.column_size()) { return false; }
-    decltype(declval<X1>()==declval<X2>()) r=true;
-    for(SizeType i=0; i!=A1.row_size(); ++i) {
-        for(SizeType j=0; j!=A1.column_size(); ++j) {
-            r=r and (A1.at(i,j)==A2.at(i,j));
+    template<class X1, class X2> friend inline Matrix<ProductType<X1,Scalar<X2>>> operator*(Matrix<X1> const& A1, X2 const& s2) {
+        Matrix<ProductType<X1,X2>> R(A1.row_size(),A1.row_size());
+        for(SizeType i=0; i!=A1.row_size(); ++i) {
+            for(SizeType j=0; j!=A1.column_size(); ++j) {
+                R[i][j]=A1[i][j]*s2;
+            }
         }
+        return std::move(R);
     }
-    return r;
-}
+
+    template<class X1, class X2> friend inline Matrix<QuotientType<X1,Scalar<X2>>> operator/(Matrix<X1> const& A1, X2 const& s2) {
+        Matrix<QuotientType<X1,X2>> R(A1.row_size(),A1.row_size());
+        for(SizeType i=0; i!=A1.row_size(); ++i) {
+            for(SizeType j=0; j!=A1.column_size(); ++j) {
+                R[i][j]=A1[i][j]/s2;
+            }
+        }
+        return std::move(R);
+    }
+
+    //template<class X1, class X2> friend inline MatrixMatrixProduct<X1,X2> operator*(Matrix<X1> const& A1, Matrix<X2> const& A2) {
+    //    return MatrixMatrixProduct<X1,X2>(A1,A2); }
+
+    template<class X1, class X2> friend Matrix<ArithmeticType<X1,X2>> operator*(Matrix<X1> const& A1, Matrix<X2> const& A2) {
+        typedef ArithmeticType<X1,X2> X0;
+        ARIADNE_PRECONDITION(A1.column_size()==A2.row_size());
+        Matrix<X0> A0(A1.row_size(), A2.column_size());
+        for(SizeType i=0; i!=A0.row_size(); ++i) {
+            for(SizeType j=0; j!=A0.column_size(); ++j) {
+                for(SizeType k=0; k!=A1.column_size(); ++k) {
+                    A0.at(i,j)+=A1.at(i,k)*A2.at(k,j);
+                }
+            }
+        }
+        return std::move(A0);
+    }
+
+    template<class X1, class X2> friend Matrix<ArithmeticType<X1,X2>> operator*(Matrix<X1> const& A1, MatrixTranspose<Matrix<X2>> const& A2) {
+        typedef ArithmeticType<X1,X2> X0;
+        ARIADNE_PRECONDITION(A1.column_size()==A2.row_size());
+        Matrix<X0> A0(A1.row_size(), A2.column_size());
+        for(SizeType i=0; i!=A0.row_size(); ++i) {
+            for(SizeType j=0; j!=A0.column_size(); ++j) {
+                for(SizeType k=0; k!=A1.column_size(); ++k) {
+                    A0.at(i,j)+=A1.at(i,k)*A2.at(k,j);
+                }
+            }
+        }
+        return std::move(A0);
+    }
+
+    template<class X1, class X2> friend Vector<ArithmeticType<X1,X2>> operator*(Matrix<X1> const& A1, Vector<X2> const& v2) {
+        typedef ArithmeticType<X1,X2> X0;
+        ARIADNE_PRECONDITION(A1.column_size()==v2.size());
+        Vector<X0> v0(A1.row_size());
+        for(SizeType i=0; i!=v0.size(); ++i) {
+            for(SizeType j=0; j!=v2.size(); ++j) {
+                v0.at(i)+=A1.at(i,j)*v2.at(j);
+            }
+        }
+        return std::move(v0);
+    }
+
+    template<class X1, class X2> friend Covector<ArithmeticType<X1,X2>> operator*(Covector<X1> const& u1, Matrix<X2> const& A2) {
+        typedef ArithmeticType<X1,X2> X0;
+        ARIADNE_PRECONDITION(u1.size()==A2.row_size());
+        Covector<X0> u0(A2.column_size());
+        for(SizeType j=0; j!=u0.size(); ++j) {
+            for(SizeType i=0; i!=u1.size(); ++i) {
+                u0.at(j)+=u1.at(i)*A2.at(i,j);
+            }
+        }
+        return std::move(u0);
+    }
+
+    template<class X1, class X2> friend inline
+    auto operator==(Matrix<X1> const& A1, Matrix<X2> const& A2) -> decltype(declval<X1>()==declval<X2>()) {
+        if(A1.row_size()!=A2.row_size() || A1.column_size()!=A2.column_size()) { return false; }
+        decltype(declval<X1>()==declval<X2>()) r=true;
+        for(SizeType i=0; i!=A1.row_size(); ++i) {
+            for(SizeType j=0; j!=A1.column_size(); ++j) {
+                r=r and (A1.at(i,j)==A2.at(i,j));
+            }
+        }
+        return r;
+    }
+
+    template<class X> friend inline Matrix<X>& operator*=(Matrix<X>& A, typename Matrix<X>::ScalarType const& s) {
+        for(SizeType i=0; i!=A.row_size(); ++i) {
+            for(SizeType j=0; j!=A.column_size(); ++j) {
+                A.at(i,j)*=s;
+            }
+        }
+        return A;
+    }
+
+
+};
+
 
 template<class X> auto norm(Matrix<X> const& A) -> decltype(abs(declval<X>())+abs(declval<X>()))  {
     typedef decltype(abs(declval<X>())+abs(declval<X>())) R;
-    R r=0;
+    R r=abs(A.zero_element());
     for(SizeType i=0; i!=A.row_size(); ++i) {
-        R s=0;
+        R s=abs(A.zero_element());
         for(SizeType j=0; j!=A.column_size(); ++j) {
             s+=abs(A.at(i,j));
         }
         r=max(r,s);
     }
     return r;
-}
-
-template<class X> inline Matrix<X>& operator*=(Matrix<X>& A, typename Matrix<X>::ScalarType const& s) {
-    for(SizeType i=0; i!=A.row_size(); ++i) {
-        for(SizeType j=0; j!=A.column_size(); ++j) {
-            A.at(i,j)*=s;
-        }
-    }
-    return A;
 }
 
 template<class X> Transpose<Matrix<X>> transpose(const Matrix<X>& A) {
@@ -678,6 +719,23 @@ template<class X1, class X2> Vector<ArithmeticType<X1,X2>> operator*(MatrixTrans
         }
     }
     return std::move(v0);
+}
+
+template<class X> template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>>>
+Matrix<X>::Matrix(InitializerList<InitializerList<Y>> lst, PRS... prs) : _rs(lst.size()), _cs(lst.begin()->size()), _ary(_rs*_cs,X(prs...)) {
+    typename InitializerList<InitializerList<Y>>::const_iterator row_iter=lst.begin();
+    for(SizeType i=0; i!=this->row_size(); ++i, ++row_iter) {
+        ARIADNE_PRECONDITION(row_iter->size()==this->column_size());
+        typename InitializerList<Y>::const_iterator col_iter=row_iter->begin();
+        for(SizeType j=0; j!=this->column_size(); ++j, ++col_iter) {
+            this->at(i,j)=*col_iter;
+        }
+    }
+}
+
+template<class X> template<class Y, EnableIf<IsAssignable<X,Y>>>
+Void Matrix<X>::set(SizeType i, SizeType j, Y const& y) {
+    this->at(i,j)=y;
 }
 
 template<class X> Matrix<MidpointType<X>> midpoint(const Matrix<X>&);
@@ -715,9 +773,6 @@ template<class X> Matrix<X> normalise_rows(const Matrix<X>& A);
 Tuple< Matrix<Float64Approximation>, PivotMatrix> triangular_factor(const Matrix<Float64Approximation>& A);
 Matrix<Float64Approximation> triangular_multiplier(const Matrix<Float64Approximation>& A);
 
-
-inline Matrix<Float64Value>& cast_exact(Matrix<Float64Approximation>& A) {
-    return reinterpret_cast<Matrix<Float64Value>&>(A); }
 
 } // namespace Ariadne
 

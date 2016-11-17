@@ -44,7 +44,7 @@ class Constraint {
 //    typedef typename IntervalOfType<Real>::Type IntervalBoundsType;
   public:
     Constraint(LowerBoundType const& l, FunctionType const& f, UpperBoundType const& u)
-        : _function(f), _lower_bound(l), _upper_bound(u) { ARIADNE_ASSERT(l<=u); }
+        : _function(f), _lower_bound(l), _upper_bound(u) { ARIADNE_ASSERT_MSG(l<=u,"f="<<f<<"\nl="<<l<<", u="<<u); }
 
     Constraint(FunctionType const& f, BoundType const& x)
         : _function(f), _lower_bound(x), _upper_bound(x) { }
@@ -81,6 +81,10 @@ typedef Constraint<RealScalarFunction,Real> RealConstraint;
 typedef Constraint<EffectiveScalarFunction,EffectiveNumber> EffectiveConstraint;
 typedef Constraint<ValidatedScalarFunction,ValidatedNumber> ValidatedConstraint;
 typedef Constraint<ValidatedScalarFunction,ExactNumber> ValidatedExactConstraint;
+
+template<class X, class R> OutputStream& operator<<(OutputStream& os, const Constraint<X,R>& c) {
+    return os << c.lower_bound() << "<=" << c.function() << "<=" << c.upper_bound();
+}
 
 inline EffectiveConstraint operator<=(const EffectiveNumber& c, const EffectiveScalarFunction& f) {
     return EffectiveConstraint(c,f,infinity);
@@ -160,10 +164,6 @@ inline ValidatedConstraint operator<=(const ValidatedConstraint& nc, const Valid
     return ValidatedConstraint(nc.lower_bound(),nc.function(),c);
 }
 
-
-template<class X, class R> OutputStream& operator<<(OutputStream& os, const Constraint<X,R>& c) {
-    return os << c.lower_bound() << "<=" << c.function() << "<=" << c.upper_bound();
-}
 
 
 } //namespace Ariadne

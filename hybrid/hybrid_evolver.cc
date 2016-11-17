@@ -52,6 +52,11 @@ inline auto operator+(Int n, Float64Bounds x) -> decltype(Float64Value(n)+x) { r
 inline auto operator-(Int n, Float64Bounds x) -> decltype(Float64Value(n)-x) { return Float64Value(n)-x; }
 inline auto operator/(Float64Value x, Nat n) -> decltype(x/Float64Value(n)) { return x/Float64Value(n); }
 
+template<class PR> inline auto operator*(FloatUpperBound<PR> x1, PositiveFloatValue<PR> x2) -> FloatUpperBound<PR> {
+    return FloatUpperBound<PR>(mul_up(x1._u,x2._v)); }
+template<class PR> inline auto operator*(PositiveFloatUpperBound<PR> x1, PositiveFloatValue<PR> x2) -> PositiveFloatUpperBound<PR> {
+    return PositiveFloatUpperBound<PR>(mul_up(x1._u,x2._v)); }
+
 inline auto operator> (Float64LowerBound x, Real r) -> decltype(x> declval<Float64Bounds>()) { return x> Float64Bounds(r,Precision64()); }
 inline auto operator>=(Float64LowerBound x, Real r) -> decltype(x>=declval<Float64Bounds>()) { return x>=Float64Bounds(r,Precision64()); }
 inline auto operator> (Float64UpperBound x, Real r) -> decltype(x> declval<Float64Bounds>()) { return x> Float64Bounds(r,Precision64()); }
@@ -810,6 +815,8 @@ _apply_guard_step(HybridEnclosure& set,
     ValidatedScalarFunctionModel reach_step_time=embed(starting_state.domain(),timing_data.evolution_time_coordinate);
     ValidatedScalarFunctionModel step_time;
 
+
+    ARIADNE_LOG(5,"transition_data.event_kind="<<transition_data.event_kind<<"\n");
     switch(transition_data.event_kind) {
         case PERMISSIVE:
             // The continuous evolution is just the same as a reachability step,
@@ -818,6 +825,7 @@ _apply_guard_step(HybridEnclosure& set,
             jump_set.new_activation(event,transition_data.guard_function);
             break;
         case URGENT: case IMPACT:
+            ARIADNE_LOG(5,"crossing_data.crossing_kind="<<crossing_data.crossing_kind<<"\n");
             switch(crossing_data.crossing_kind) {
                 case CrossingKind::TRANSVERSE:
                     step_time=unchecked_compose(crossing_data.crossing_time,starting_state);
@@ -825,6 +833,7 @@ _apply_guard_step(HybridEnclosure& set,
                     if(timing_data.step_kind!=StepKind::CONSTANT_EVOLUTION_TIME && possibly((step_time-timing_data.parameter_dependent_evolution_time).range().upper()>zero)) {
                         jump_set.new_parameter_constraint(step_event,step_time<=timing_data.parameter_dependent_evolution_time);
                     }
+
                     jump_set.apply_evolve_step(flow,unchecked_compose(crossing_data.crossing_time,starting_state));
                     break;
                 case CrossingKind::INCREASING: case CrossingKind::CONVEX:
@@ -1529,7 +1538,8 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
     // The time-dependent part of the evolution time
     ValidatedScalarFunctionModel temporal_evolution_time=this->function_factory().create_zero(ExactIntervalVectorType(1u,time_domain));
 
-    if(definitely(remaining_time_range.lower()<zero)) {
+    ARIADNE_LOG(9,std::fixed<<"remaining_time_range="<<remaining_time_range<<"\n");
+    if(possibly(remaining_time_range.lower()<zero)) {
         // Some of the points may already have reached the final time.
         // Don't try anything fancy, just do a simple constant time step.
         if(definitely(remaining_time_range.upper()<=step_size)) {
@@ -1567,7 +1577,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         // This method ensures that points do not pass the final time after the transition.
         result.step_kind=StepKind::SPACETIME_DEPENDENT_FINISHING_TIME;
         result.finishing_kind=FinishingKind::BEFORE_FINAL_TIME;
-        Float64Value sf={1,Precision64()};
+        PositiveFloat64Value sf={1u,Precision64()};
         while(possibly(remaining_time_range.upper()*sf>step_size)) { sf = hlf(sf); }
         temporal_evolution_time= Float64Bounds(sf)*(final_time_bounds-time_identity);
     } else { // remaining_time_range.lower()>step_size)

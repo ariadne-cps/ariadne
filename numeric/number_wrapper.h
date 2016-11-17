@@ -172,6 +172,8 @@ template<class X, class I, class W> struct SameArithmeticMixin : public virtual 
     virtual I* _rdiv(I const* other) const final { return _heap_move(add(_cast(*other),_cast(*this))); }
 };
 
+struct A{};
+void foo(A);
 
 template<class X> struct NumberGetterMixin : public virtual NumberInterface {
   //  operator X const& () const { return static_cast<NumberMixin<X>const&>(*this); }
@@ -184,14 +186,24 @@ template<class X> struct NumberGetterMixin : public virtual NumberInterface {
     virtual NumberInterface* _copy() const { return new NumberWrapper<X>(_cast(*this)); }
     virtual NumberInterface* _move() { return new NumberWrapper<X>(std::move(_cast(*this))); }
 
+    // FIXME: Proper comparisons for ExactNumber.
     virtual LogicalValue _equals(NumberInterface const& y) const {
+        if (this->_paradigm() == ParadigmCode::EXACT && y._paradigm() == ParadigmCode::EXACT) {
+            return LogicalValue(this->_get(BoundedTag(),Precision64()) == y._get(BoundedTag(),Precision64())); }
         if (this->_paradigm() == ParadigmCode::VALIDATED && y._paradigm() == ParadigmCode::VALIDATED) {
             return LogicalValue(this->_get(BoundedTag(),Precision64()) == y._get(BoundedTag(),Precision64())); }
-        else { return LogicalValue(this->_get(ApproximateTag(),Precision64()) == y._get(ApproximateTag(),Precision64())); } }
+        else {
+            return LogicalValue(this->_get(ApproximateTag(),Precision64()) == y._get(ApproximateTag(),Precision64())); }
+    }
     virtual LogicalValue _less(NumberInterface const& y) const {
-        if (this->_paradigm() == ParadigmCode::VALIDATED && y._paradigm() == ParadigmCode::VALIDATED) {
+        if (this->_paradigm() == ParadigmCode::EXACT && y._paradigm() == ParadigmCode::EXACT) {
             return LogicalValue(this->_get(BoundedTag(),Precision64()) < y._get(BoundedTag(),Precision64())); }
-        else { return LogicalValue(this->_get(ApproximateTag(),Precision64()) < y._get(ApproximateTag(),Precision64())); } }
+        else if (this->_paradigm() == ParadigmCode::VALIDATED && y._paradigm() == ParadigmCode::VALIDATED) {
+            return LogicalValue(this->_get(BoundedTag(),Precision64()) < y._get(BoundedTag(),Precision64())); }
+        else {
+            return LogicalValue(this->_get(ApproximateTag(),Precision64()) < y._get(ApproximateTag(),Precision64()));
+        }
+    }
 
     virtual Float64Ball _get(MetricTag,Precision64 pr) const {
         return this->_get_as<Float64Ball>(pr); }

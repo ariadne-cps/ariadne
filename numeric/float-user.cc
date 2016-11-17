@@ -1945,6 +1945,8 @@ Float64Value operator-(TwoExp y) { return neg(Float64Value(y)); }
 
 
 
+PositiveFloat64Value hlf(PositiveFloat64Value const& x) { return PositiveFloat64Value(hlf(x._v)); }
+PositiveFloatMPValue hlf(PositiveFloatMPValue const& x) { return PositiveFloatMPValue(hlf(x._v)); }
 
 PositiveFloat64Approximation max(PositiveFloat64Approximation const& x1, PositiveFloat64Approximation const& x2) {
     return PositiveFloat64Approximation(max(x1._a,x2._a)); }

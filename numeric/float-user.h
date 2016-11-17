@@ -578,6 +578,7 @@ template<class PR> class PositiveFloatValue : public FloatValue<PR> {
     explicit PositiveFloatValue<PR>(FloatValue<PR> const& x) : FloatValue<PR>(x) { }
   public:
     friend PositiveFloatValue<PR> max(PositiveFloatValue<PR> const&, PositiveFloatValue<PR> const&);
+    friend PositiveFloatValue<PR> hlf(PositiveFloatValue<PR> const&);
     friend PositiveFloatBounds<PR> operator*(PositiveFloatBounds<PR> const&, PositiveFloatBounds<PR> const&);
 };
 

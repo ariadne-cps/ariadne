@@ -92,6 +92,7 @@ struct DefineBuiltinFloatOperators {
 //template<class P1, class P2> struct DisableIfWeaker { typedef typename std::enable_if<not std::is_convertible<P2,P1>::value,Dummy>::type Type; };
 template<class P1, class P2> using DisableIfWeaker = DisableIf<IsWeaker<P1,P2>>;
 
+
 //! \ingroup NumericModule
 //! \brief Generic numbers with computational paradigm \a P, which may be %EffectiveTag, %ValidatedTag, %UpperTag, %LowerTag or %ApproximateTag.
 // Number
@@ -186,29 +187,29 @@ template<class P> class Number
     friend Number<NP> operator-(Number<NP> const& y1, Number<P> const& y2);
     friend Number<NP> operator/(Number<NP> const& y1, Number<P> const& y2);
 
-    friend Number<NP> pos(Number<P> const& y) { return Number<NP>(y.ref()._pos()); }
-    friend Number<NP> neg(Number<P> const& y) { return Number<NP>(y.ref()._neg()); }
-    friend Number<NP> sqr(Number<P> const& y) { return Number<NP>(y.ref()._sqr()); }
-    friend Number<NP> rec(Number<P> const& y) { return Number<NP>(y.ref()._rec()); }
-    friend Number<P> add(Number<P> const& y1, Number<P> const& y2) { return Number<P>(y1.ref()._add(y2.ref())); }
-    friend Number<P> sub(Number<P> const& y1, Number<NP> const& y2) { return Number<P>(y1.ref()._sub(y2.ref())); }
-    friend Number<P> mul(Number<P> const& y1, Number<P> const& y2) { return Number<P>(y1.ref()._mul(y2.ref())); }
-    friend Number<P> div(Number<P> const& y1, Number<NP> const& y2) { return Number<P>(y1.ref()._div(y2.ref())); }
+    friend Number<NP> pos(Number<P> const& y) { return Number<NP>(y.ref()._apply(Pos())); }
+    friend Number<NP> neg(Number<P> const& y) { return Number<NP>(y.ref()._apply(Neg())); }
+    friend Number<NP> sqr(Number<P> const& y) { return Number<NP>(y.ref()._apply(Sqr())); }
+    friend Number<NP> rec(Number<P> const& y) { return Number<NP>(y.ref()._apply(Rec())); }
+    friend Number<P> add(Number<P> const& y1, Number<P> const& y2) { return Number<P>(y1.ref()._apply(Add(),&y2.ref())); }
+    friend Number<P> sub(Number<P> const& y1, Number<NP> const& y2) { return Number<P>(y1.ref()._apply(Sub(),&y2.ref())); }
+    friend Number<P> mul(Number<P> const& y1, Number<P> const& y2) { return Number<P>(y1.ref()._apply(Mul(),&y2.ref())); }
+    friend Number<P> div(Number<P> const& y1, Number<NP> const& y2) { return Number<P>(y1.ref()._apply(Div(),&y2.ref())); }
 
-    friend Number<P> sqrt(Number<P> const& y) { return Number<P>(y.ref()._sqrt()); }
-    friend Number<P> exp(Number<P> const& y) { return Number<P>(y.ref()._exp()); }
-    friend Number<P> log(Number<P> const& y) { return Number<P>(y.ref()._log()); }
-    friend Number<SP> sin(Number<P> const& y) { return Number<SP>(y.ref()._sin()); }
-    friend Number<SP> cos(Number<P> const& y) { return Number<SP>(y.ref()._cos()); }
-    friend Number<P> tan(Number<P> const& y) { return Number<P>(y.ref()._tan()); }
-    friend Number<P> atan(Number<P> const& y) { return Number<P>(y.ref()._atan()); }
+    friend Number<P> sqrt(Number<P> const& y) { return Number<P>(y.ref()._apply(Sqrt())); }
+    friend Number<P> exp(Number<P> const& y) { return Number<P>(y.ref()._apply(Exp())); }
+    friend Number<P> log(Number<P> const& y) { return Number<P>(y.ref()._apply(Log())); }
+    friend Number<SP> sin(Number<P> const& y) { return Number<SP>(y.ref()._apply(Sin())); }
+    friend Number<SP> cos(Number<P> const& y) { return Number<SP>(y.ref()._apply(Cos())); }
+    friend Number<P> tan(Number<P> const& y) { return Number<P>(y.ref()._apply(Tan())); }
+    friend Number<P> atan(Number<P> const& y) { return Number<P>(y.ref()._apply(Atan())); }
 
-    friend Number<P> pow(Number<P> const& y, Nat m) { return Number<P>(y.ref()._pow(m)); }
-    friend Number<SP> pow(Number<P> const& y, Int n) { return Number<SP>(y.ref()._pow(n)); }
+    friend Number<P> pow(Number<P> const& y, Nat m) { return Number<P>(y.ref()._apply(Pow(),m)); }
+    friend Number<SP> pow(Number<P> const& y, Int n) { return Number<SP>(y.ref()._apply(Pow(),n)); }
 
-    friend Number<P> abs(Number<P> const& y) { return Number<P>(y.ref()._abs()); }
-    friend Number<P> max(Number<P> const& y1, Number<P> const& y2) { return Number<P>(y1.ref()._min(y2.ref())); }
-    friend Number<P> min(Number<P> const& y1, Number<P> const& y2) { return Number<P>(y1.ref()._max(y2.ref())); }
+    friend Number<P> abs(Number<P> const& y) { return Number<P>(y.ref()._apply(Abs())); }
+    friend Number<P> max(Number<P> const& y1, Number<P> const& y2) { return Number<P>(y1.ref()._apply(Min(),&y2.ref())); }
+    friend Number<P> min(Number<P> const& y1, Number<P> const& y2) { return Number<P>(y1.ref()._apply(Max(),&y2.ref())); }
 
     friend Logical<Equality<P>> operator==(Number<P> const& y1, Number<NP> const& y2) {
         return Logical<Equality<P>>(y1.ref()._equals(y2.ref())); }
@@ -217,7 +218,7 @@ template<class P> class Number
     friend Logical<LessThan<Negated<P>>> operator> (Number<P> const& y1, Number<Negated<P>> const& y2) { return (y2<y1); }
     friend Logical<Negated<Equality<P>>> operator!=(Number<P> const& y1, Number<Negated<P>> const& y2) { return !(y1==y2); }
     friend Logical<LessThan<P>> operator<=(Number<P> const& y1, Number<Negated<P>> const& y2) { return !(y1>y2); }
-    friend Logical<LessThan<Negated<P>>> operator>=(Number<P> const& y1, Number<Negated<P>> const& y2) { return !(y2<y1); }
+    friend Logical<LessThan<Negated<P>>> operator>=(Number<P> const& y1, Number<Negated<P>> const& y2) { return !(y1<y2); }
 
     friend OutputStream& operator<<(OutputStream& os, Number<P> const& y) { return os << y.ref(); }
 

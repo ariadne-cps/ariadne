@@ -17,7 +17,7 @@ LIB_NUMERIC_SRC = \
 
 TEST_NUMERIC_SRC = \
 	check_numeric.cc \
-	test_logical.cc test_integer.cc test_rational.cc test_real.cc \
+	test_logical.cc test_integer.cc test_rational.cc test_real.cc test_number.cc \
 	test_float.cc test_validated_float.cc \
 
 #	test_numeric.cc \

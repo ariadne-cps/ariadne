@@ -84,7 +84,7 @@ typedef Vector<ExactIntervalType> ExactIntervalVectorType;
 inline ValidatedConstraintModel operator>=(ValidatedScalarFunctionModel const& f, ValidatedNumericType const& l) {
     return ValidatedConstraintModel(l,f,infty); }
 inline ValidatedConstraintModel operator<=(ValidatedScalarFunctionModel const& f, ValidatedNumericType const& u) {
-    return ValidatedConstraintModel(infty,f,u); }
+    return ValidatedConstraintModel(-infty,f,u); }
 inline ValidatedConstraintModel operator==(ValidatedScalarFunctionModel const& f, ValidatedNumericType const& c) {
     return ValidatedConstraintModel(c,f,c); }
 

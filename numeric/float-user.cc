@@ -143,6 +143,7 @@ template<class PR> FloatValue<PR>::FloatValue(Integer const& z, PR pr)
 template<class PR> FloatValue<PR>& FloatValue<PR>::operator=(Dyadic const& w) {
     _v=RawFloat<PR>(w,this->precision());
     ARIADNE_ASSERT_MSG(Dyadic(_v)==w,"Dyadic number "<<w<<" cannot be assigned exactly to a floating-point number with precision "<<this->precision());
+    return *this;
 };
 
 template<class PR> FloatBall<PR> FloatValue<PR>::create(ValidatedNumber const& y) const {
@@ -233,7 +234,7 @@ template<class PR> FloatBounds<PR> FloatBounds<PR>::create(ValidatedNumber const
 }
 
 template<class PR> FloatBounds<PR>& FloatBounds<PR>::operator=(ValidatedNumber const& y) {
-    *this = FloatBounds<PR>(y,this->precision());
+    return *this = FloatBounds<PR>(y,this->precision());
 }
 
 template<class PR> FloatBounds<PR>::operator ValidatedNumber() const {
@@ -265,7 +266,7 @@ template<class PR> FloatUpperBound<PR>::FloatUpperBound(ValidatedUpperNumber con
 }
 
 template<class PR> FloatUpperBound<PR>& FloatUpperBound<PR>::operator=(ValidatedUpperNumber const& y) {
-    *this = FloatUpperBound<PR>(y,this->precision());
+    return *this = FloatUpperBound<PR>(y,this->precision());
 }
 
 template<class PR> FloatUpperBound<PR>::operator ValidatedUpperNumber() const {
@@ -721,7 +722,7 @@ template<class PR> struct Operations<FloatBounds<PR>> {
         } else if(x.upper_raw()<=0) {
             return FloatBounds<PR>(neg(x.upper_raw()),neg(x.lower_raw()));
         } else {
-            return FloatBounds<PR>(static_cast<RawFloat<PR>>(0.0,x.precision()),max(neg(x.lower_raw()),x.upper_raw()));
+            return FloatBounds<PR>(RawFloat<PR>(0.0,x.precision()),max(neg(x.lower_raw()),x.upper_raw()));
         }
     }
 
@@ -1683,7 +1684,7 @@ template<class PR> struct Operations<PositiveFloatUpperBound<PR>> {
     }
 
     static InputStream& _read(InputStream& is, PositiveFloatUpperBound<PR>& x) {
-        FloatUpperBound<PR> xu; is >> xu; x=PositiveFloatUpperBound<PR>(xu);
+        FloatUpperBound<PR> xu; is >> xu; x=PositiveFloatUpperBound<PR>(xu); return is;
     }
 
 };
@@ -1756,7 +1757,7 @@ template<class PR> struct Operations<PositiveFloatLowerBound<PR>> {
     }
 
     static InputStream& _read(InputStream& is, PositiveFloatLowerBound<PR>& x) {
-        FloatLowerBound<PR> xu; is >> xu; x=PositiveFloatLowerBound<PR>(xu);
+        FloatLowerBound<PR> xu; is >> xu; x=PositiveFloatLowerBound<PR>(xu); return is;
     }
 
 };
@@ -1768,7 +1769,7 @@ template<class PR> struct Operations<FloatError<PR>> {
     }
 
     static InputStream& _read(InputStream& is, FloatError<PR>& x) {
-        FloatUpperBound<PR> xu; is >> xu; x=FloatError<PR>(xu);
+        FloatUpperBound<PR> xu; is >> xu; x=FloatError<PR>(xu); return is;
     }
 };
 

@@ -127,7 +127,7 @@ template<> struct RealConstant<EffectiveNumber> : RealInterface, Float64Bounds {
     RealConstant(X const& x) : Float64Bounds(x,Precision64()) { }
     virtual Float64Bounds _value() const { return static_cast<Float64Bounds const&>(*this); }
     virtual Float64Bounds _evaluate(Precision64 pr) const { return static_cast<Float64Bounds const&>(*this); }
-    virtual FloatMPBounds _evaluate(PrecisionMP pr) const { this->_c.get(BoundedTag(),pr); }
+    virtual FloatMPBounds _evaluate(PrecisionMP pr) const { return this->_c.get(BoundedTag(),pr); }
     virtual OutputStream& _write(OutputStream& os) const { return os << this->_c; }
 };
 

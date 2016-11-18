@@ -589,7 +589,7 @@ Bool operator!=(FloatMP const& x1, FloatMP const& x2) {
     return not mpfr_equal_p(x1._mpfr,x2._mpfr);
 }
 Bool operator<=(FloatMP const& x1, FloatMP const& x2) {
-    mpfr_lessequal_p(x1._mpfr,x2._mpfr);
+    return mpfr_lessequal_p(x1._mpfr,x2._mpfr);
 }
 Bool operator>=(FloatMP const& x1, FloatMP const& x2) {
     return mpfr_greaterequal_p(x1._mpfr,x2._mpfr);

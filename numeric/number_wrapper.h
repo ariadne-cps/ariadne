@@ -79,7 +79,7 @@ template<class OP> inline NumberInterface* make_symbolic(OP op, NumberInterface 
 template<class I, class X, class OP> inline I* _apply(X const& self, OP op, I const* self_ptr, I const* other_ptr) {
     auto aware_other_ptr=dynamic_cast<OperableInterface<I,OP,X>const*>(other_ptr);
     if(aware_other_ptr) { return aware_other_ptr->_apply_right(op,self); }
-    else { other_ptr->_rapply(op,self_ptr); }
+    else { return other_ptr->_rapply(op,self_ptr); }
 }
 template<class I, class X, class OP> inline I* _rapply(X const& self, OP op, I const* self_ptr, I const* other_ptr) {
     auto aware_other_ptr=dynamic_cast<OperableInterface<I,OP,X>const*>(other_ptr);

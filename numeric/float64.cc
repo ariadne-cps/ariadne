@@ -747,6 +747,7 @@ Float64 Float64::pi(Precision64 pr, RoundingModeType rnd) {
         case upward: return _pi_up;
         case downward: return _pi_down;
         case to_nearest: return _pi_near;
+        default: assert(false);
     }
 }
 

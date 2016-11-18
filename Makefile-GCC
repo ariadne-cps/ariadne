@@ -1,5 +1,17 @@
 all: lib tests wrap examples
 
+CXX = $(GCC_CXX)
+CXXWARNINGS = $(GCC_CXXWARNINGS)
+CXXFLAGS = $(GCC_CXXFLAGS)
+
+GCC_CXX = g++
+GCC_CXXWARNINGS=-Wall -Wno-reorder -Wno-unused-variable -Wno-unused-but-set-variable
+GCC_CXXFLAGS = -std=c++17  -Wno-non-template-friend -fPIC -O1
+
+CLANG_CXX = clang++
+CLANG_CXXFLAGS = -std=c++14 -fPIC
+CLANG_CXXWARNINGS=-Wall
+
 VPATH = utility numeric expression algebra function geometry solvers dynamics hybrid output \
 	test wrap examples
 
@@ -171,12 +183,6 @@ TEST_FUNCTION_BIN = $(patsubst %.cc,$(TESTS_BIN_DIR)/%,$(TEST_FUNCTION_SRC))
 WRAP_OBJ = $(patsubst %.cc,$(WRAP_OBJ_DIR)/%.o,$(WRAP_SRC))
 EXAMPLES_OBJ = $(patsubst %.cc,$(EXAMPLES_OBJ_DIR)/%.o,$(EXAMPLES_SRC))
 EXAMPLES_BIN = $(patsubst %.cc,$(EXAMPLES_BIN_DIR)/%,$(EXAMPLES_SRC))
-
-CXX = g++
-CXXWARNINGS=-Wall -Wno-reorder -Wno-unused-variable -Wno-unused-but-set-variable
-CXXFLAGS = -std=c++17  -Wno-non-template-friend -fPIC -O1
-#CXX = clang++
-#CXXFLAGS = -std=c++1x -fPIC
 
 INCLUDE_PATHS =  -iquote.
 LINK_LIBS=-lgmpxx -lgmp -lmpfr -lcairo -lboost_system -lboost_serialization

@@ -100,8 +100,8 @@ TestHybridSystem::test_build_hybrid_system()
 
     HybridSystem valve_component;
 
-    valve_component.disable_events(valve==open || valve==opening,complement({start_closing,finished_opening}));
-    valve_component.disable_events((valve==closed || valve==closing),complement({start_opening,finished_closing}));
+    valve_component.disable_events(valve==open || valve==opening,complement(EventSet{start_closing,finished_opening}));
+    valve_component.disable_events((valve==closed || valve==closing),complement(EventSet{start_opening,finished_closing}));
     valve_component.disable_events(valve==open,finished_opening);
     valve_component.disable_events(valve==closed,finished_closing);
 

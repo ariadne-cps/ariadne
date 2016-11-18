@@ -96,7 +96,7 @@ TestMatrix::test_misc()
     Float64Approximation x={2.25,pr};
     Float64Bounds ix={1.5_exact,2.25_exact};
     Array<Float64Approximation> Aary={{-1.0,3.0,1.0, -1.0,1.0,2.0, 2.0,1.0,1.0},pr};
-    Array<Float64Bounds> iAary={{-1,3, -1,1},pr};
+    Array<Float64Bounds> iAary={{-1.0_x,3.0_x, -1.0_x,1.0_x},pr};
     Float64Approximation* Aptr=Aary.begin();
     Float64Bounds* iAptr=iAary.begin();
 

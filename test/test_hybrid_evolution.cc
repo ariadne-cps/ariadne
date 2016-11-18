@@ -135,7 +135,7 @@ Void TestHybridEvolution::test_bouncing_ball() const {
          initial_set_colour,orbit.initial());
 }
 
-OutputStream& operator<<(OutputStream& os, Dot<Real> const& dv) { os << dv._lhs; }
+OutputStream& operator<<(OutputStream& os, Dot<Real> const& dv) { return os << dv._lhs; }
 
 Void TestHybridEvolution::test_water_tank() const {
     // Declare some constants

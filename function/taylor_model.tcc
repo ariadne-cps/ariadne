@@ -686,6 +686,7 @@ template<class F> class AlgebraOperations<TaylorModel<ValidatedTag,F>>
 
 template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::sort() {
     this->_expansion.sort();
+    return *this;
 };
 
 template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::unique()
@@ -1553,7 +1554,7 @@ jacobian(const Vector<TaylorModel<ValidatedTag,F>>& f, const Vector<ValidatedNum
 // Compute the Jacobian over an arbitrary domain
 template<class F> Matrix<ValidatedNumericType>
 jacobian(const Vector<TaylorModel<ValidatedTag,F>>& f, const Vector<ValidatedNumericType>& x, const Array<SizeType>& p) {
-    Vector<Differential<ValidatedNumericType>> dx(x.size());
+    Vector<Differential<ValidatedNumericType>> dx(x.size(),x.size(),1u);
     for(SizeType j=0; j!=x.size(); ++j) {
         dx[j]=Differential<ValidatedNumericType>::constant(p.size(),1u,x[j]); }
     for(SizeType k=0; k!=p.size(); ++k) {
@@ -1678,6 +1679,7 @@ template<class F> TaylorModel<ApproximateTag,F>::TaylorModel(SizeType as, Sweepe
 template<class F> TaylorModel<ApproximateTag,F> TaylorModel<ApproximateTag,F>::create_constant(Float64Approximation c) const {
     TaylorModel<ApproximateTag,F> r(this->argument_size(),this->_sweeper);
     r._expansion.append(MultiIndex::zero(this->argument_size()),c);
+    return std::move(r);
 }
 
 template<class F> TaylorModel<ApproximateTag,F> TaylorModel<ApproximateTag,F>::create_constant(ApproximateNumber c) const {

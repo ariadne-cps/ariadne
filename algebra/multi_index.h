@@ -206,7 +206,7 @@ class MultiIndexReference
         for(SizeType i=0; i!=a1.size()+1; ++i) { t=a1._p[i]; a1._p[i]=a2._p[i]; a2._p[i]=t; } }
 
     MultiIndexReference& operator+=(MultiIndexData const& a) {
-        ARIADNE_ASSERT(this->_n==a._n); for(SizeType i=0; i!=this->size()+1; ++i) { this->_p[i]+=a._p[i]; } }
+        ARIADNE_ASSERT(this->_n==a._n); for(SizeType i=0; i!=this->size()+1; ++i) { this->_p[i]+=a._p[i]; } return *this; }
 
     friend OutputStream& operator<<(OutputStream& os, const MultiIndex& a);
 };

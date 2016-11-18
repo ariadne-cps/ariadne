@@ -162,6 +162,7 @@ template<class PR> class FloatApproximation
     explicit FloatApproximation<PR>(RawFloatType const& a) : _a(a) { }
 
         FloatApproximation<PR>(double d, PR pr);
+        FloatApproximation<PR>(ExactDouble d, PR pr);
         FloatApproximation<PR>(const Integer& z, PR pr);
         FloatApproximation<PR>(const Dyadic& w, PR pr);
         FloatApproximation<PR>(const Rational& q, PR pr);
@@ -513,7 +514,7 @@ template<class PR> class FloatValue
     FloatValue<PR>(const Dyadic& w, PR pr);
     FloatValue<PR>(const FloatValue<PR>& x, PR pr);
 
-    template<class N, EnableIf<IsIntegral<N>> = dummy> FloatValue<PR>& operator=(N n) { _v=n; }
+    template<class N, EnableIf<IsIntegral<N>> = dummy> FloatValue<PR>& operator=(N n) { _v=n; return *this; }
     FloatValue<PR>& operator=(const Integer& z);
     FloatValue<PR>& operator=(const TwoExp& t);
     FloatValue<PR>& operator=(const Dyadic& w);

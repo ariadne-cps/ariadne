@@ -83,10 +83,6 @@ template<class T> class FinitarySet
     Void adjoin(const FinitarySet<T>& set) { *this=join(*this,set); }
     Void restrict(const FinitarySet<T>& set) { *this=intersection(*this,set); }
 };
-template<class T> FinitarySet<T> complement(const InitializerList<T>& s) {
-    return complement(FinitarySet<T>(s)); }
-template<class T> FinitarySet<T> complement(const Set<T>& s) {
-    return complement(FinitarySet<T>(s)); }
 template<class T> FinitarySet<T> complement(const FinitarySet<T>& s) {
     return FinitarySet<T>(!s.is_infinite(),s._underlying_set()); }
 template<class T> FinitarySet<T> difference(const FinitarySet<T>& s1,const FinitarySet<T>& s2) {

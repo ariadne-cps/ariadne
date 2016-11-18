@@ -197,7 +197,7 @@ class Function
     Function<P,D,C>& operator=(const FunctionInterface<P,D,C>& f) {
         _ptr=std::shared_ptr< FunctionInterface<P,D,C> >(f._clone()); return *this; }
     Function<P,D,C>& operator=(const Result<NumericType>& c) {
-        (*this)=this->create_constant(c); }
+        return (*this)=this->create_constant(c); }
 
     template<class PP, EnableIf<IsStronger<PP,P>> =dummy>
     Function(const Function<PP,D,C>& f)

@@ -229,21 +229,21 @@ template<class P> class Number
 };
 
 template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
-operator+(N const& y1, D const& d2) -> decltype(y1+Number<ApproximateTag>(d2)) { y1+Number<ApproximateTag>(d2); }
+operator+(N const& y1, D const& d2) -> decltype(y1+Number<ApproximateTag>(d2)) { return y1+Number<ApproximateTag>(d2); }
 template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
-operator-(N const& y1, D const& d2) -> decltype(y1-Number<ApproximateTag>(d2)) { y1-Number<ApproximateTag>(d2); }
+operator-(N const& y1, D const& d2) -> decltype(y1-Number<ApproximateTag>(d2)) { return y1-Number<ApproximateTag>(d2); }
 template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
-operator*(N const& y1, D const& d2) -> decltype(y1*Number<ApproximateTag>(d2)) { y1*Number<ApproximateTag>(d2); }
+operator*(N const& y1, D const& d2) -> decltype(y1*Number<ApproximateTag>(d2)) { return y1*Number<ApproximateTag>(d2); }
 template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
-operator/(N const& y1, D const& d2) -> decltype(y1/Number<ApproximateTag>(d2)) { y1/Number<ApproximateTag>(d2); }
+operator/(N const& y1, D const& d2) -> decltype(y1/Number<ApproximateTag>(d2)) { return y1/Number<ApproximateTag>(d2); }
 template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
-operator+(D const& d1, N const& y2) -> decltype(Number<ApproximateTag>(d1)+y2) { Number<ApproximateTag>(d1)+y2; }
+operator+(D const& d1, N const& y2) -> decltype(Number<ApproximateTag>(d1)+y2) { return Number<ApproximateTag>(d1)+y2; }
 template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
-operator-(D const& d1, N const& y2) -> decltype(Number<ApproximateTag>(d1)-y2) { Number<ApproximateTag>(d1)-y2; }
+operator-(D const& d1, N const& y2) -> decltype(Number<ApproximateTag>(d1)-y2) { return Number<ApproximateTag>(d1)-y2; }
 template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
-operator*(D const& d1, N const& y2) -> decltype(Number<ApproximateTag>(d1)*y2) { Number<ApproximateTag>(d1)*y2; }
+operator*(D const& d1, N const& y2) -> decltype(Number<ApproximateTag>(d1)*y2) { return Number<ApproximateTag>(d1)*y2; }
 template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
-operator/(D const& d1, N const& y2) -> decltype(Number<ApproximateTag>(d1)/y2) { Number<ApproximateTag>(d1)/y2; }
+operator/(D const& d1, N const& y2) -> decltype(Number<ApproximateTag>(d1)/y2) { return Number<ApproximateTag>(d1)/y2; }
 
 
 template<class R> struct IsConcreteNumericType : IsConvertible<R,Real> { };

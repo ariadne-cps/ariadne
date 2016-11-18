@@ -195,7 +195,7 @@ template<class M> class FunctionPatch
     ModelType& model() { return this->_model; }
 
     //! \brief An over-approximation to the range of the quantity; not necessarily tight.
-    const CodomainType codomain() const { this->_model.codomain(); }
+    const CodomainType codomain() const { return this->_model.codomain(); }
     //! \brief The scaled expansion over a unit box.
     const ExpansionType& expansion() const { return this->_model.expansion(); }
     //! \brief The error of the expansion over the domain.

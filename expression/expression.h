@@ -59,7 +59,7 @@ template<class T> class Space;
 template<class T> class Expression;
 template<class LHS,class RHS> class Assignment;
 
-template<class T, class V> class Valuation;
+template<class T, class X> class Valuation;
 typedef Valuation<String,String> StringValuation;
 typedef Valuation<Integer,Integer> IntegerValuation;
 class DiscreteValuation;

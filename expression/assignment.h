@@ -233,7 +233,7 @@ template<class T> struct Dot {
     List< Assignment<DottedVariable<T>, Expression<T> > > operator=(const List<Expression<T> >&);
 };
 template<class T> inline Dot<T> dot(const List<Variable<T> >& lhs) { return Dot<T>(lhs); }
-template<class T> inline Dot<T> dot(const InitializerList<Variable<T> >& lhs) { return Dot<T>(List<Variable<T>>(lhs)); }
+inline Dot<Real> dot(const InitializerList<Variable<Real>>& lhs) { return dot(List<Variable<Real>>(lhs)); }
 template<class T> inline List< Assignment<DottedVariable<T>, Expression<T> > > Dot<T>::operator=(const List<Expression<T> >& rhs) {
     assert(this->_lhs.size()==rhs.size());
     List< Assignment<DottedVariable<T>,Expression<T> > > result;
@@ -260,7 +260,7 @@ template<class T> struct Primed {
     List< Assignment<PrimedVariable<T>, Expression<T> > > operator=(const List<Expression<T> >&);
 };
 template<class T> inline Primed<T> next(const List<Variable<T> >& lhs) { return Primed<T>(lhs); }
-template<class T> inline Primed<T> next(const InitializerList<Variable<T> >& lhs) { return Primed<T>(List<Variable<T>>(lhs)); }
+inline Primed<Real> next(const InitializerList<Variable<Real> >& lhs) { return next(List<Variable<Real>>(lhs)); }
 template<class T> inline List< Assignment<PrimedVariable<T>, Expression<T> > > Primed<T>::operator=(const List<Expression<T> >& rhs) {
     assert(this->_lhs.size()==rhs.size());
     List< Assignment<PrimedVariable<T>,Expression<T> > > result;

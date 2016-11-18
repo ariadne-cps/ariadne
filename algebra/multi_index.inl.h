@@ -174,6 +174,7 @@ MultiIndex& MultiIndex::operator+=(const MultiIndex& a) {
     for(SizeType i=0; i!=this->size()+1; ++i) {
         this->_p[i]+=a._p[i];
     }
+    return *this;
 }
 
 inline
@@ -190,6 +191,7 @@ MultiIndex& MultiIndex::operator*=(const IndexType& s) {
     for(SizeType i=0; i!=this->size()+1; ++i) {
         this->_p[i]*=s;
     }
+    return *this;
 }
 
 inline

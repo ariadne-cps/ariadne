@@ -389,7 +389,7 @@ template<class P, class D, class C> Function<P,D,C>::Function() : _ptr() {
 }
 
 template<class P, class D, class C> Function<P,D,C>::Function(EuclideanDomain dom) {
-    ResultSizeType rs; BoxDomain bx_dom=dom;
+    ResultSizeType rs=ResultSizeType(); BoxDomain bx_dom=dom;
     (*this) = make_zero_function<P,D>(rs,bx_dom);
 }
 
@@ -399,7 +399,7 @@ template<class P, class D, class C> Function<P,D,C>::Function(ResultSizeType rs,
 }
 
 template<class P, class D, class C> Function<P,D,C>::Function(DomainType dom) {
-    ResultSizeType rs; (*this) = make_zero_function<P,D>(rs,dom);
+    ResultSizeType rs=ResultSizeType(); (*this) = make_zero_function<P,D>(rs,dom);
 }
 
 template<class P, class D, class C> Function<P,D,C>::Function(ResultSizeType rs, DomainType dom) {

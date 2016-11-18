@@ -48,6 +48,7 @@
 
 namespace Ariadne {
 
+// FIXME: Redefine ApproximateFormula to Formula<ApproximateNumber>
 template<class Y> class Formula;
 typedef Formula<ApproximateNumericType> ApproximateFormula;
 typedef Formula<ValidatedNumericType> ValidatedFormula;
@@ -281,7 +282,7 @@ template<class R, EnableIf<IsSame<R,Real>> =dummy> inline R make_constant(const 
 inline Real make_constant(const EffectiveNumber& c, const Real& x) {
     return Real(c); }
 inline Formula<Real> make_constant(const EffectiveNumber& c, const Formula<Real>& x) {
-    return make_constant(Real(c),x); }
+    return Formula<Real>::constant(Real(c)); }
 template<class X, EnableIf<IsSame<X,Real>> =dummy> Algebra<X> make_constant(const EffectiveNumber& c, const Algebra<X>& x) {
     return make_constant(Real(c),x); }
 

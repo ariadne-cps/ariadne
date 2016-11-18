@@ -328,6 +328,10 @@ template<class PR> FloatApproximation<PR>::FloatApproximation(double d, PR pr)
 {
 }
 
+template<class PR> FloatApproximation<PR>::FloatApproximation(ExactDouble d, PR pr)
+    : _a(d.get_d(),RawFloat<PR>::to_nearest,pr) {
+}
+
 template<class PR> FloatApproximation<PR>::FloatApproximation(Integer const& z, PR pr)
     : _a(z,RawFloat<PR>::to_nearest,pr) {
 }

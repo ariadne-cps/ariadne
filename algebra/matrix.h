@@ -143,7 +143,7 @@ template<class X> class Matrix
     Matrix(InitializerList<InitializerList<X>> lst);
 
     //! Construct a matrix using initializer lists.
-    template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>> =dummy> Matrix(InitializerList<InitializerList<Y>> lst, PRS... pr);
+    template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>> =dummy> Matrix(InitializerList<InitializerList<double>> lst, PRS... pr);
 
     //! Construct a matrix as a linear map from functionals.
     Matrix(Vector<Covector<X>>);
@@ -248,7 +248,7 @@ template<class M> class MatrixRow {
     SizeType size() const { return _A.column_size(); }
     auto zero_element() const -> decltype(_A.zero_element()) { return _A.zero_element(); }
     auto operator[](SizeType j) -> decltype(_A.at(_i,j)) { return _A.at(_i,j); }
-    MatrixRow<M>& operator=(Covector<ScalarType> const& u) { for(SizeType j=0; j!=u.size(); ++j) { _A.set(_i,j,u[j]); } }
+    MatrixRow<M>& operator=(Covector<ScalarType> const& u) { for(SizeType j=0; j!=u.size(); ++j) { _A.set(_i,j,u[j]); } return *this; }
 };
 template<class M> struct IsCovectorExpression<MatrixRow<M>> : True { };
 
@@ -721,14 +721,14 @@ template<class X1, class X2> Vector<ArithmeticType<X1,X2>> operator*(MatrixTrans
     return std::move(v0);
 }
 
-template<class X> template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>>>
-Matrix<X>::Matrix(InitializerList<InitializerList<Y>> lst, PRS... prs) : _rs(lst.size()), _cs(lst.begin()->size()), _ary(_rs*_cs,X(prs...)) {
-    typename InitializerList<InitializerList<Y>>::const_iterator row_iter=lst.begin();
+template<class X> template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>>>
+Matrix<X>::Matrix(InitializerList<InitializerList<double>> lst, PRS... prs) : _rs(lst.size()), _cs(lst.begin()->size()), _ary(_rs*_cs,X(prs...)) {
+    typename InitializerList<InitializerList<double>>::const_iterator row_iter=lst.begin();
     for(SizeType i=0; i!=this->row_size(); ++i, ++row_iter) {
         ARIADNE_PRECONDITION(row_iter->size()==this->column_size());
-        typename InitializerList<Y>::const_iterator col_iter=row_iter->begin();
+        typename InitializerList<double>::const_iterator col_iter=row_iter->begin();
         for(SizeType j=0; j!=this->column_size(); ++j, ++col_iter) {
-            this->at(i,j)=*col_iter;
+            this->at(i,j)=ExactDouble(*col_iter);
         }
     }
 }

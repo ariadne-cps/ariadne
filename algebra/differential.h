@@ -66,7 +66,7 @@ template<class X> using InequalityType = decltype(declval<X>()!=declval<X>());
 template<class PR> class DifferentialFactory : public FloatFactory<PR> {
   public:
     DifferentialFactory<PR>(PR const& pr) : FloatFactory<PR>(pr) { }
-    template<class Y> using ConcreteNumberType = decltype(FloatFactory<PR>::create(declval<Y>()));
+    template<class Y> using ConcreteNumberType = decltype(declval<FloatFactory<PR>>().create(declval<Y>()));
     using FloatFactory<PR>::create;
     template<class Y> UnivariateDifferential<ConcreteNumberType<Y>> create(UnivariateDifferential<Y> const&);
     template<class Y> Differential<ConcreteNumberType<Y>> create(Differential<Y> const&);

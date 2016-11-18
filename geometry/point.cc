@@ -38,8 +38,14 @@ namespace Ariadne {
 inline ExactIntervalType make_interval(ApproximateNumericType x) { return ExactIntervalType(x.raw(),x.raw()); }
 inline ExactIntervalType make_interval(ExactNumericType x) { return ExactIntervalType(x.raw(),x.raw()); }
 
+template<class X, EnableIf<IsConstructible<X,ExactDouble>> =dummy> Vector<X> make_vector(InitializerList<double> lst) {
+    return Vector<X>(Array<ExactDouble>(Array<double>(lst))); }
+
+template<class X, EnableIf<IsConstructible<X,ExactDouble,Precision64>> =dummy> Vector<X> make_vector(InitializerList<double> lst) {
+    return Vector<X>(lst,Precision64()); }
+
 template<class X> Point<X>::Point(InitializerList<double> lst)
-    : Vector<X>(Vector<Float64Value>(Vector<Float64>(lst)))
+    : Vector<X>(make_vector<X>(lst))
 {
 }
 

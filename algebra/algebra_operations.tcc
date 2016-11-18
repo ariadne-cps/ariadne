@@ -75,7 +75,7 @@ template<class A> EnableIfNormedAlgebra<A> compose(const TaylorSeries<Float64Bou
         r.sweep(eps);
     }
     //std::cerr<<"    r="<<r<<std::endl;
-    r+=ts.error;
+    r+=ts.error();
     //std::cerr<<"    r="<<r<<std::endl;
     vref=vtmp;
     return r;
@@ -100,8 +100,8 @@ template<class A> EnableIfNormedAlgebra<A> _compose1(const AnalyticFunction& fn,
     Series<Float64Bounds> centre_series=fn.series(Float64Bounds(c));
     Series<Float64Bounds> range_series=fn.series(r);
 
-    Float64 truncation_error_estimate=mag(range_series[d])*pow(mag(r-c),d);
-    if(truncation_error_estimate>TRUNCATION_ERROR) {
+    Float64UpperBound truncation_error_estimate=mag(range_series[d])*pow(mag(r-c),d);
+    if(truncation_error_estimate.raw()>TRUNCATION_ERROR) {
         ARIADNE_WARN("Truncation error estimate "<<truncation_error_estimate
                      <<" is greater than maximum allowable truncation error "<<TRUNCATION_ERROR<<"\n");
     }

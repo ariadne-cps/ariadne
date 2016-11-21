@@ -356,6 +356,10 @@ template<class PR> FloatApproximation<PR>::FloatApproximation(ApproximateNumber 
     : FloatApproximation(y.get(ApproximateTag(),pr)) {
 }
 
+template<class PR> FloatApproximation<PR>& FloatApproximation<PR>::operator=(ApproximateNumber const& y) {
+    return *this=FloatApproximation<PR>(y,this->precision());
+}
+
 template<class PR> FloatApproximation<PR> FloatApproximation<PR>::create(ApproximateNumber const& y) const {
     return FloatApproximation<PR>(y,this->precision());
 }

@@ -715,6 +715,12 @@ Vector<X>::Vector(InitializerList<double> const& lst, PR pr)
 {
 }
 
+template<class X> template<class PR, EnableIf<IsConstructible<X,Real,PR>>>
+Vector<X>::Vector(InitializerList<Real> const& lst, PR pr)
+    : _ary(Array<Real>(lst),pr)
+{
+}
+
 template<class X> template<class PR, EnableIf<IsConstructible<X,Pair<ExactDouble,ExactDouble>,PR>>> Vector<X>::Vector(InitializerList<Pair<double,double>> const& lst, PR pr)
     : _ary(lst.size(),X(pr))
 {

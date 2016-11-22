@@ -5,6 +5,9 @@ project (Ariadne)
 enable_testing()
 include (CTest)
 
+# add support for precompiled headers and single compilation unit
+include (cotire)
+
 set (Ariadne_VERSION_MAJOR 0)
 set (Ariadne_VERSION_MINOR 5)
 
@@ -105,7 +108,6 @@ add_library(pyariadne $<TARGET_OBJECTS:pyariadne-src>)
 set_target_properties(pyariadne PROPERTIES PREFIX "" OUTPUT_NAME "ariadne")
 target_link_libraries (pyariadne ariadne boost_python)
 
-
 add_library(pynumeric $<TARGET_OBJECTS:pynumeric-src>)
 set_target_properties(pynumeric PROPERTIES PREFIX "" OUTPUT_NAME "numeric")
 target_link_libraries (pynumeric ariadne boost_python)
@@ -113,3 +115,8 @@ target_link_libraries (pynumeric ariadne boost_python)
 add_library(pyalgebra $<TARGET_OBJECTS:pyalgebra-src>)
 set_target_properties(pyalgebra PROPERTIES PREFIX "" OUTPUT_NAME "algebra")
 target_link_libraries (pyalgebra ariadne boost_python)
+
+cotire(ariadne)
+cotire(pyariadne)
+cotire(pynumeric)
+cotire(pyalgebra)

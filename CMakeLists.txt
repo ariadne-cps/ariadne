@@ -5,16 +5,17 @@ project (Ariadne)
 enable_testing()
 include (CTest)
 
-# add support for precompiled headers and single compilation unit
-include (cotire)
-
 set (Ariadne_VERSION_MAJOR 0)
 set (Ariadne_VERSION_MINOR 5)
 
 set(BUILD_SHARED_LIBS ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
 set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
+# add support for precompiled headers and single compilation unit
+include (cotire)
 
 include (CheckTypeSize)
 include (CheckIncludeFile)

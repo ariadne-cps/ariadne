@@ -160,8 +160,10 @@ class RealVariablesBox {
     friend OutputStream& operator<<(OutputStream& os, const RealVariablesBox& ebx);
 };
 
+
 template<class T> template<class IVL> inline RealVariablesBox Variables<T>::in(const List<IVL>& bx) const {
-    ARIADNE_FAIL_MESSAGE("Can't create interval in variables "<<*this<<"\n");
+    static_assert(IsSame<T,Real>::value,"Can only make box in Real variables.");
+    assert(false);
 }
 
 template<> template<class IVL> inline RealVariablesBox Variables<Real>::in(const List<IVL>& bx) const {

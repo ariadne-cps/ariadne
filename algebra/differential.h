@@ -164,8 +164,8 @@ class Differential
     static const X _zero;
     static const X _one;
 
-    DegreeType _degree;
     SortedExpansion<X,GradedIndexLess> _expansion;
+    DegreeType _degree;
   public:
     //! \brief The type used for a power series.
     typedef UnivariateDifferential<X> SeriesType;

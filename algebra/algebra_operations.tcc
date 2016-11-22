@@ -391,7 +391,7 @@ template<class A> A NormedAlgebraOperations<A>::_sin(const A& x)
 
     // Compute x(1-y/6+y^2/120-y^3/5040+... = x(1-y/6*(1-y/20*(1-y/42*...)
     A z=x.create_constant(1);
-    for(Int i=0; i!=deg; ++i) {
+    for(DegreeType i=0; i!=deg; ++i) {
         z/=X(-Int(2*(deg-i)*(2*(deg-i)+1)));
         z*=s;
         z+=1;
@@ -430,7 +430,7 @@ template<class A> A NormedAlgebraOperations<A>::_cos(const A& x)
 
     // Compute 1-y/2+y^2/24-y^3/720+... = (1-y/2*(1-y/12*(1-y/30*...)
     A z=x.create_constant(1);
-    for(Int i=0; i!=deg; ++i) {
+    for(DegreeType i=0; i!=deg; ++i) {
         z/=X(-Int(2*(deg-i)*(2*(deg-i)-1)));
         z*=s;
         z+=1;

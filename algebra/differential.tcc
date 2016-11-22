@@ -55,7 +55,7 @@ template<class X> UnivariateDifferential<X>::UnivariateDifferential(DegreeType d
 template<class X> UnivariateDifferential<X>::UnivariateDifferential(DegreeType d, InitializerList<X> lst)
     : _ary(d+1,X(0))
 {
-    ARIADNE_PRECONDITION(lst.size()==d+1);
+    ARIADNE_PRECONDITION(lst.size()==d+1u);
     std::copy(lst.begin(),lst.end(),_ary.begin());
 }
 

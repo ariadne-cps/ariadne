@@ -140,6 +140,7 @@ template<class N, EnableIf<And<IsIntegral<N>,IsSigned<N>>>> inline Real::Real(N 
 //! \brief Computable lower real numbers defined by conversion to concrete floats.
 class LowerReal
     : public DirectedRing<LowerReal,UpperReal,PositiveLowerReal>
+    , public DirectedRing<UpperReal,LowerReal,PositiveUpperReal>
 {
   private: public:
     SharedPointer<Real::Interface> _ptr;
@@ -178,6 +179,7 @@ class LowerReal
 //! \brief Computable lower real numbers defined by conversion to concrete floats.
 class UpperReal
     : public DirectedRing<UpperReal,LowerReal,PositiveUpperReal>
+    , public DirectedRing<LowerReal,UpperReal,PositiveLowerReal>
 {
   private: public:
     SharedPointer<Real::Interface> _ptr;

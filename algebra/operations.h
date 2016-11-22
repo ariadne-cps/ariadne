@@ -309,9 +309,10 @@ template<class A, class X> struct DispatchSymbolicAlgebraOperations
 template<class A, class X> struct DispatchTranscendentalAlgebraOperations : DispatchAlgebraOperations<A,X> {
     typedef AlgebraOperations<A,X> OperationsType;
   public:
-    friend A operator/(A const& a1, X const& x2);
-    friend A div(A const& a1, X const& x2);
-    friend A pow(A const& a, Nat m);
+    // BUG: Cannot declare these due to bug in Clang
+    // friend A operator/(A const& a1, X const& x2);
+    // friend A div(A const& a1, X const& x2);
+    // friend A pow(A const& a, Nat m);
 
     friend A operator/(A const& a1, A const& a2) { return div(a1,a2); }
     friend A& operator/=(A& a1, A const& a2) { return a1=div(a1,a2); }

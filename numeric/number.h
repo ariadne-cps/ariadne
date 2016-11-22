@@ -92,6 +92,17 @@ struct DefineBuiltinFloatOperators {
 //template<class P1, class P2> struct DisableIfWeaker { typedef typename std::enable_if<not std::is_convertible<P2,P1>::value,Dummy>::type Type; };
 template<class P1, class P2> using DisableIfWeaker = DisableIf<IsWeaker<P1,P2>>;
 
+class DeclareNumberOperators {
+    friend ApproximateNumber operator+(ApproximateNumber const&, ApproximateNumber const&);
+    friend ApproximateNumber operator-(ApproximateNumber const&, ApproximateNumber const&);
+    friend ApproximateNumber operator*(ApproximateNumber const&, ApproximateNumber const&);
+    friend ApproximateNumber operator/(ApproximateNumber const&, ApproximateNumber const&);
+
+    friend ValidatedLowerNumber operator+(ValidatedLowerNumber const& y1, ValidatedLowerNumber const& y2);
+    friend ValidatedLowerNumber operator-(ValidatedLowerNumber const& y1, ValidatedUpperNumber const& y2);
+    friend ValidatedUpperNumber operator+(ValidatedUpperNumber const& y1, ValidatedUpperNumber const& y2);
+    friend ValidatedUpperNumber operator-(ValidatedUpperNumber const& y1, ValidatedLowerNumber const& y2);
+};
 
 //! \ingroup NumericModule
 //! \brief Generic numbers with computational paradigm \a P, which may be %EffectiveTag, %ValidatedTag, %UpperTag, %LowerTag or %ApproximateTag.
@@ -184,9 +195,6 @@ template<class P> class Number
     friend Number<P>& operator*=(Number<P>& y1, Number<P> const& y2) { return y1=y1*y2; }
     friend Number<P>& operator/=(Number<P>& y1, Number<NP> const& y2) { return y1=y1/y2; }
 
-    friend Number<NP> operator-(Number<NP> const& y1, Number<P> const& y2);
-    friend Number<NP> operator/(Number<NP> const& y1, Number<P> const& y2);
-
     friend Number<NP> pos(Number<P> const& y) { return Number<NP>(y.ref()._apply(Pos())); }
     friend Number<NP> neg(Number<P> const& y) { return Number<NP>(y.ref()._apply(Neg())); }
     friend Number<NP> sqr(Number<P> const& y) { return Number<NP>(y.ref()._apply(Sqr())); }
@@ -221,11 +229,6 @@ template<class P> class Number
     friend Logical<LessThan<Negated<P>>> operator>=(Number<P> const& y1, Number<Negated<P>> const& y2) { return !(y1<y2); }
 
     friend OutputStream& operator<<(OutputStream& os, Number<P> const& y) { return os << y.ref(); }
-
-    friend Number<SP> operator+(Number<SP> const&, Number<SP> const&);
-    friend Number<SP> operator-(Number<SP> const&, Number<SP> const&);
-    friend Number<SP> operator*(Number<SP> const&, Number<SP> const&);
-    friend Number<SP> operator/(Number<SP> const&, Number<SP> const&);
 };
 
 template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto

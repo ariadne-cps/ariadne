@@ -66,6 +66,7 @@ template<class PR> class PositiveFloatApproximation;
 template<class PR> class PositiveFloatLowerBound;
 template<class PR> class PositiveFloatUpperBound;
 template<class PR> class PositiveFloatBounds;
+template<class PR> class PositiveFloatBall;
 template<class PR> class PositiveFloatValue;
 
 template<class P, class PR> class FloatTypedef;
@@ -95,7 +96,7 @@ using PositiveFloat64Approximation = PositiveFloatApproximation<Precision64>;
 using PositiveFloat64LowerBound = PositiveFloatLowerBound<Precision64>;
 using PositiveFloat64UpperBound = PositiveFloatUpperBound<Precision64>;
 using PositiveFloat64Bounds = PositiveFloatBounds<Precision64>;
-//using PositiveFloat64Ball = Float<PositiveMetricTag,Precision64>;
+using PositiveFloat64Ball = PositiveFloatBall<Precision64>;
 using PositiveFloat64Value = PositiveFloatValue<Precision64>;
 
 using FloatMPApproximation = Float<ApproximateTag,PrecisionMP>;
@@ -109,7 +110,7 @@ using PositiveFloatMPApproximation = PositiveFloatApproximation<PrecisionMP>;
 using PositiveFloatMPLowerBound = PositiveFloatLowerBound<PrecisionMP>;
 using PositiveFloatMPUpperBound = PositiveFloatUpperBound<PrecisionMP>;
 using PositiveFloatMPBounds = PositiveFloatBounds<PrecisionMP>;
-//using PositiveFloatMPBall = Float<PositiveMetricTag,PrecisionMP>;
+using PositiveFloatMPBall = PositiveFloatBall<PrecisionMP>;
 using PositiveFloatMPValue = PositiveFloatValue<PrecisionMP>;
 
 template<class F> using Approximation = FloatApproximation<typename F::PrecisionType>;

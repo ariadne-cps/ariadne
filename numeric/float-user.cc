@@ -1622,6 +1622,37 @@ template<class PR> Bool operator< (const Rational& q, FloatValue<PR> const& x) {
 template<class PR> Bool operator> (const Rational& q, FloatValue<PR> const& x) { return q> Rational(x); }
 
 
+template<class PR> struct Operations<PositiveFloatApproximation<PR>> {
+    static PositiveFloatApproximation<PR> _nul(PositiveFloatApproximation<PR> const& x) {
+        return PositiveFloatApproximation<PR>(nul(x._a)); }
+    static PositiveFloatApproximation<PR> _sqr(PositiveFloatApproximation<PR> const& x) {
+        return PositiveFloatApproximation<PR>(mul_near(x._a,x._a)); }
+    static PositiveFloatApproximation<PR> _rec(PositiveFloatApproximation<PR> const& x) {
+        return PositiveFloatApproximation<PR>(rec_near(x._a)); }
+    static PositiveFloatApproximation<PR> _add(PositiveFloatApproximation<PR> const& x1, PositiveFloatApproximation<PR> const& x2) {
+        return PositiveFloatApproximation<PR>(add_near(x1._a,x2._a)); }
+    static PositiveFloatApproximation<PR> _mul(PositiveFloatApproximation<PR> const& x1, PositiveFloatApproximation<PR> const& x2) {
+        return PositiveFloatApproximation<PR>(mul_near(x1._a,x2._a)); }
+    static PositiveFloatApproximation<PR> _div(PositiveFloatApproximation<PR> const& x1, PositiveFloatApproximation<PR> const& x2) {
+        return PositiveFloatApproximation<PR>(div_near(x1._a,x2._a)); }
+    static PositiveFloatApproximation<PR> _pow(PositiveFloatApproximation<PR> const& x1, Int n2) {
+        return PositiveFloatApproximation<PR>(pow_approx(x1._a,n2)); }
+    static FloatApproximation<PR> _log(PositiveFloatApproximation<PR> const& x) {
+        return FloatApproximation<PR>(log_approx(x._a)); }
+    static PositiveFloatApproximation<PR> _max(PositiveFloatApproximation<PR> const& x1, PositiveFloatApproximation<PR> const& x2) {
+        return PositiveFloatApproximation<PR>(max(x1._a,x2._a)); }
+    static PositiveFloatApproximation<PR> _min(PositiveFloatApproximation<PR> const& x1, PositiveFloatApproximation<PR> const& x2) {
+        return PositiveFloatApproximation<PR>(min(x1._a,x2._a)); }
+    static PositiveFloatApproximation<PR> _abs(PositiveFloatApproximation<PR> const& x) {
+        return PositiveFloatApproximation<PR>(x._a); }
+    static Bool _same(PositiveFloatApproximation<PR> const& x1, PositiveFloatApproximation<PR> const& x2) {
+        return x1._a == x2._a; }
+    static OutputStream& _write(OutputStream& os, PositiveFloatApproximation<PR> const& x) {
+        return write(os,x.raw(),FloatApproximation<PR>::output_places,RawFloat<PR>::upward); }
+    static InputStream& _read(InputStream& is, PositiveFloatApproximation<PR>& x) {
+        FloatApproximation<PR> xa; is >> xa; x=PositiveFloatApproximation<PR>(xa); return is; }
+};
+
 template<class PR> struct Operations<PositiveFloatUpperBound<PR>> {
     static PositiveFloatUpperBound<PR> _nul(PositiveFloatUpperBound<PR> const& x) {
         return PositiveFloatUpperBound<PR>(nul(x._u));
@@ -1770,6 +1801,38 @@ template<class PR> struct Operations<PositiveFloatLowerBound<PR>> {
 
 };
 
+template<class PR> struct Operations<PositiveFloatBounds<PR>> {
+    static PositiveFloatBounds<PR> _nul(PositiveFloatBounds<PR> const& x) {
+        return PositiveFloatBounds<PR>(nul(x._l),nul(x._u)); }
+    static PositiveFloatBounds<PR> _sqr(PositiveFloatBounds<PR> const& x) {
+        return PositiveFloatBounds<PR>(mul_down(x._l,x._l),mul_up(x._u,x._u)); }
+    static PositiveFloatBounds<PR> _rec(PositiveFloatBounds<PR> const& x) {
+        return PositiveFloatBounds<PR>(rec_down(x._u),rec_up(x._l)); }
+    static PositiveFloatBounds<PR> _add(PositiveFloatBounds<PR> const& x1, PositiveFloatBounds<PR> const& x2) {
+        return PositiveFloatBounds<PR>(add_down(x1._l,x2._l),add_up(x1._u,x2._u)); }
+    static PositiveFloatBounds<PR> _mul(PositiveFloatBounds<PR> const& x1, PositiveFloatBounds<PR> const& x2) {
+        return PositiveFloatBounds<PR>(mul_down(x1._l,x2._l),mul_up(x1._u,x2._u)); }
+    static PositiveFloatBounds<PR> _div(PositiveFloatBounds<PR> const& x1, PositiveFloatBounds<PR> const& x2) {
+        return PositiveFloatBounds<PR>(div_down(x1._l,x2._u),div_up(x1._u,x2._l)); }
+    static PositiveFloatBounds<PR> _pow(PositiveFloatBounds<PR> const& x1, Nat m2) {
+        return PositiveFloatBounds<PR>(pow_down(x1._l,m2),pow_up(x1._u,m2)); }
+    static PositiveFloatBounds<PR> _pow(PositiveFloatBounds<PR> const& x1, Int n2) {
+        if(n2>=0) { return _pow(x1,Nat(n2)); } else { return _rec(_pow(x1,Nat(-n2))); } }
+    static FloatBounds<PR> _log(PositiveFloatBounds<PR> const& x) {
+        return FloatBounds<PR>(log_down(x._l),log_up(x._u)); }
+    static PositiveFloatBounds<PR> _max(PositiveFloatBounds<PR> const& x1, PositiveFloatBounds<PR> const& x2) {
+        return PositiveFloatBounds<PR>(max(x1._l,x2._l),max(x1._u,x2._u)); }
+    static PositiveFloatBounds<PR> _min(PositiveFloatBounds<PR> const& x1, PositiveFloatBounds<PR> const& x2) {
+        return PositiveFloatBounds<PR>(min(x1._l,x2._l),min(x1._u,x2._u)); }
+    static PositiveFloatBounds<PR> _abs(PositiveFloatBounds<PR> const& x) {
+        return PositiveFloatBounds<PR>(x._l,x._u); }
+    static Bool _same(PositiveFloatBounds<PR> const& x1, PositiveFloatBounds<PR> const& x2) {
+        return x1._l == x2._l && x1._u == x2._u; }
+    static OutputStream& _write(OutputStream& os, PositiveFloatBounds<PR> const& x) {
+        return os << static_cast<FloatBounds<PR>const&>(x); }
+    static InputStream& _read(InputStream& is, PositiveFloatBounds<PR>& x) {
+        FloatBounds<PR> xb; is >> xb; x=PositiveFloatBounds<PR>(xb); return is; }
+};
 
 template<class PR> struct Operations<FloatError<PR>> {
     static OutputStream& _write(OutputStream& os, FloatError<PR> const& x) {
@@ -1840,8 +1903,10 @@ template class Operations<Float64UpperBound>;
 template class Operations<Float64Bounds>;
 template class Operations<Float64Ball>;
 template class Operations<Float64Value>;
+template class Operations<PositiveFloat64Approximation>;
 template class Operations<PositiveFloat64LowerBound>;
 template class Operations<PositiveFloat64UpperBound>;
+template class Operations<PositiveFloat64Bounds>;
 template class Operations<Float64Error>;
 
 template class Operations<FloatMPApproximation>;
@@ -1850,8 +1915,10 @@ template class Operations<FloatMPUpperBound>;
 template class Operations<FloatMPBounds>;
 template class Operations<FloatMPBall>;
 template class Operations<FloatMPValue>;
+template class Operations<PositiveFloatMPApproximation>;
 template class Operations<PositiveFloatMPLowerBound>;
 template class Operations<PositiveFloatMPUpperBound>;
+template class Operations<PositiveFloatMPBounds>;
 template class Operations<FloatMPError>;
 
 
@@ -1957,12 +2024,6 @@ Float64Value operator-(TwoExp y) { return neg(Float64Value(y)); }
 PositiveFloat64Value hlf(PositiveFloat64Value const& x) { return PositiveFloat64Value(hlf(x._v)); }
 PositiveFloatMPValue hlf(PositiveFloatMPValue const& x) { return PositiveFloatMPValue(hlf(x._v)); }
 
-PositiveFloat64Approximation max(PositiveFloat64Approximation const& x1, PositiveFloat64Approximation const& x2) {
-    return PositiveFloat64Approximation(max(x1._a,x2._a)); }
-PositiveFloat64Bounds max(PositiveFloat64Bounds const& x1, PositiveFloat64Bounds const& x2) {
-    return PositiveFloat64Bounds(max(x1._l,x2._l),max(x1._u,x2._u)); }
-PositiveFloat64Approximation operator*(PositiveFloat64Approximation const& x1, PositiveFloat64Approximation const& x2) {
-    return PositiveFloat64Approximation(mul_near(x1._a,x2._a)); }
 Float64Error operator/(Float64Error const& x1, PositiveFloat64LowerBound const& x2) {
     return Float64Error(div_up(x1._e,x2._l)); }
 

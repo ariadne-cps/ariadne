@@ -149,6 +149,19 @@ template<class X, class NX, class R=X> struct DeclareInplaceDirectedGroupOperato
 };
 
 //! \ingroup NumericAlgebraSubModule
+//! \brief Declare operators corresponding to \a X being a mutable semifield.
+template<class X, class Y, class QY, class R=X> struct DeclareInplaceMixedDirectedSemifieldOperators {
+};
+template<class X, class Y, class QY> struct DeclareInplaceMixedDirectedSemifieldOperators<X,Y,QY,X>
+{
+    friend X& operator+=(X& x1, Y const& x2);
+    friend X& operator*=(X& x1, Y const& x2);
+    friend X& operator/=(X& x1, QY const& x2);
+};
+template<class X, class QX, class R=X> struct DeclareInplaceDirectedSemifieldOperators : DeclareInplaceMixedDirectedSemifieldOperators<X,X,QX,R> {
+};
+
+//! \ingroup NumericAlgebraSubModule
 //! \brief Declare operators corresponding to \a X being a mutable field.
 template<class X, class Y, class R=X> struct DeclareInplaceMixedFieldOperators {
 };
@@ -384,6 +397,23 @@ template<class X, class NX, class Y, class NY, class R=X, class NR=NX> struct De
     friend NR operator-(NY const& y1, X const& x2);
 };
 
+template<class X, class QX, class Y, class QY, class R=X, class QR=QX> struct DeclareMixedDirectedSemifieldOperators
+    : DeclareInplaceMixedDirectedSemifieldOperators<X,Y,QY,R>, DeclareInplaceMixedDirectedGroupOperators<QX,QY,Y,QR>
+{
+    friend R operator+(X const& x1, Y const& y2);
+    friend R operator*(X const& x1, Y const& y2);
+    friend R operator/(X const& x1, QY const& y2);
+    friend QR operator+(QX const& x1, QY const& y2);
+    friend QR operator*(QX const& x1, QY const& y2);
+    friend QR operator/(QX const& x1, Y const& y2);
+    friend R operator+(Y const& y1, X const& x2);
+    friend R operator*(Y const& y1, X const& x2);
+    friend R operator/(Y const& y1, QX const& x2);
+    friend QR operator+(QY const& y1, QX const& x2);
+    friend QR operator*(QY const& y1, QX const& x2);
+    friend QR operator/(QY const& y1, X const& x2);
+};
+
 template<class X, class Y, class R=X> struct DeclareMixedFieldOperators
     : DeclareInplaceMixedFieldOperators<X,Y,R>
 {
@@ -480,6 +510,19 @@ template<class X, class NX=X> struct DeclareDirectedNumericOperators {
 
     friend X max(X const& x1, X const& x2);
     friend X min(X const& x1, X const& x2);
+};
+
+template<class X, class QX> struct DeclarePositiveDirectedNumericOperations {
+    friend X add(X const&, X const&);
+    friend X mul(X const&, X const&);
+    friend X pow(X const&, Natural const&);
+    friend X div(X const&, QX const&);
+    friend QX rec(X const&);
+    friend X sqrt(X const&);
+    friend X atan(X const&);
+
+    friend X max(X const&, X const&);
+    friend X min(X const&, X const&);
 };
 
 
@@ -585,8 +628,9 @@ template<class X, class Y, class NY> struct DefineInplaceDirectedGroupOperators<
     friend X& operator-=(X& x1, NY const& y2) { return x1=operator-(x1,y2); }
 };
 template<class X, class NX> class DefineDirectedGroupOperators {
-    friend X operator-(NX const&);
-    friend NX operator-(NX const&, X const&);
+    // BUG: Cannot declare these due to bug in Clang
+    // friend X operator-(NX const&);
+    // friend NX operator-(NX const&, X const&);
     friend X operator+(X const& x) { return pos(x); }
     friend NX operator-(X const& x) { return neg(x); }
     friend X operator+(X const& x1, X const& x2) { return add(x1,x2); }
@@ -608,7 +652,8 @@ template<class X, class QX, class R=X, class QR=QX> struct DefineDirectedSemiFie
     friend R operator+(const X& x1, const X& x2) { return add(x1,x2); }
     friend R operator*(const X& x1, const X& x2) { return mul(x1,x2); }
     friend R operator/(const X& x1, const QX& qx2) { return div(x1,qx2); }
-    friend QR operator/(const QX& qx1, const X& x2);
+    // BUG: Cannot declare this due to bug in Clang
+    // friend QR operator/(const QX& qx1, const X& x2);
 };
 template<class X, class QX, class Y, class QY, class R=X, class QR=QX> struct DefineMixedDirectedSemiFieldOperators
     : DefineInplaceDirectedSemiFieldOperators<X,Y,QY,R>
@@ -707,12 +752,13 @@ template<class X, class NX, class LT, class EQ> struct DefineDirectedComparisonO
     friend GEQ operator>=(X const& x1, NX const& nx2) { return not lt(x1,nx2); }
     friend GEQ operator<=(NX const& nx1, X const& x2) { return not lt(x2,nx1); }
 
-    friend EQ  operator==(NX const& nx1, X const& x2);
-    friend NEQ operator!=(NX const& nx1, X const& x2);
-    friend GT  operator< (NX const& nx1, X const& x2);
-    friend GT  operator> (X const& x1, NX const& nx2);
-    friend LEQ operator>=(NX const& nx1, X const& x2);
-    friend LEQ operator<=(X const& x1, NX const& nx2);
+    // BUG: Cannot declare these due to bug in Clang
+    // friend EQ  operator==(NX const& nx1, X const& x2);
+    // friend NEQ operator!=(NX const& nx1, X const& x2);
+    // friend GT  operator< (NX const& nx1, X const& x2);
+    // friend GT  operator> (X const& x1, NX const& nx2);
+    // friend LEQ operator>=(NX const& nx1, X const& x2);
+    // friend LEQ operator<=(X const& x1, NX const& nx2);
 };
 
 template<class X, class NY, class LT, class EQ> struct DefineMixedDirectedComparisonOperators {
@@ -924,7 +970,6 @@ template<class X, class NX, class Y, class NY, class LT, class EQ> struct Provid
 
 template<class X, class QX=X, class R=X, class QR=QX> class ProvideDirectedSemiFieldOperators
 {
-    friend R rec(QX const&);
     friend R operator+(X const& x1, X const& x2) { return add(x1,x2); }
     friend R operator*(X const& x1, X const& x2) { return mul(x1,x2); }
     friend R operator/(X const& x1, QX const& x2) { return div(x1,x2); }
@@ -932,8 +977,10 @@ template<class X, class QX=X, class R=X, class QR=QX> class ProvideDirectedSemiF
     friend X& operator*=(X& x1, X const& x2) { return x1=mul(x1,x2); }
     friend X& operator/=(X& x1, QX const& x2) { return x1=div(x1,x2); }
 
-    friend QR rec(X const&);
-    friend QR operator/(QX const&, X const&);
+    // BUG: Cannot declare these due to bug in Clang
+    // friend R rec(QX const&);
+    // friend QR rec(X const&);
+    // friend QR operator/(QX const&, X const&);
 };
 
 

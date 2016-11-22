@@ -87,6 +87,7 @@ template<class P> class ScalarFunctionModel
     , public ProvideConcreteGenericArithmeticOperators<ScalarFunctionModel<P>>
 {
   public:
+    typedef ScalarFunction<P> GenericType;
     typedef ExactBoxType DomainType;
     typedef CanonicalCoefficientType<P> CoefficientType;
     typedef CanonicalErrorType<P> ErrorType;
@@ -140,6 +141,8 @@ template<class P> class ScalarFunctionModel
     friend FunctionModelBuilder<P> factory(ScalarFunctionModel<P> const& f) {
         return FunctionModelBuilder<P>(f); }
   public:
+    friend inline ScalarFunctionModel<P> operator/(const ScalarFunctionModel<P>& f1, const ScalarFunctionModel<P>& f2) {
+        return mul(f1,rec(f2)); }
     friend inline ScalarFunctionModel<P> neg(ScalarFunctionModel<P> f) {
         f._ptr->_imul(CanonicalNumericType<P>(-1)); return std::move(f); }
     friend inline ScalarFunctionModel<P> add(ScalarFunctionModel<P> f1, const ScalarFunctionModel<P>& f2) {
@@ -227,12 +230,12 @@ template<class M> struct Element<VectorFunctionPatch<M>> { typedef FunctionPatch
 typedef FunctionPatch<ValidatedTaylorModel> ScalarTaylorFunction;
 
 template<class P> class VectorFunctionModelElement
-    : public DeclareArithmeticOperators<ScalarFunctionModel<P>>
-    , public DeclareMixedArithmeticOperators<ScalarFunctionModel<P>,CanonicalNumericType<P>>
-    , public DeclareMixedArithmeticOperators<ScalarFunctionModel<P>,ScalarFunction<P>>
+    : public DispatchAlgebraOperators<ScalarFunctionModel<P>, CanonicalNumericType<P>>
+    , public ProvideConcreteGenericArithmeticOperators<ScalarFunctionModel<P>>
 {
     VectorFunctionModel<P>* _p; SizeType _i;
   public:
+    typedef typename ScalarFunctionModel<P>::GenericType GenericType;
     operator const ScalarFunctionModel<P> () const;
     VectorFunctionModelElement(VectorFunctionModel<P>* p, SizeType i) : _p(p), _i(i) { }
     VectorFunctionModelElement<P>& operator=(const ScalarFunctionModel<P>& sf) { _p->set(_i,sf); return *this; }
@@ -240,7 +243,8 @@ template<class P> class VectorFunctionModelElement
     Void clobber() { ScalarFunctionModel<P> sf=_p->get(_i); sf.clobber(); _p->set(_i,sf); }
     Void set_error(CanonicalErrorType<P> e) const { ScalarFunctionModel<P> sf=_p->get(_i); sf.set_error(e); _p->set(_i,sf); }
     Void set_error(Nat e) const { ScalarFunctionModel<P> sf=_p->get(_i); sf.set_error(e); _p->set(_i,sf); }
-    friend ScalarFunctionModel<P> antiderivative(ScalarFunctionModel<P> const& f, SizeType k);
+    friend ScalarFunctionModel<P> antiderivative(VectorFunctionModelElement<P> const& f, SizeType k) {
+        return antiderivative(ScalarFunctionModel<P>(f),k); }
 };
 template<class P> inline OutputStream& operator<<(OutputStream& os, const VectorFunctionModelElement<P>& function) {
     return os << static_cast< const ScalarFunctionModel<P> >(function);

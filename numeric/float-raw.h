@@ -75,6 +75,7 @@ inline Float64 next_down(Float64 x) { return sub_down(x,Float64::min(Precision64
 inline Float64 next_up(Float64 x) { return add_up(x,Float64::min(Precision64())); }
 
 inline Float64 rec_approx(Float64 x) { return rec(x,Float64::to_nearest); }
+inline Float64 rec_near(Float64 x) { return rec(x,Float64::to_nearest); }
 inline Float64 rec_up(Float64 x) { return rec(x,Float64::upward); }
 inline Float64 rec_down(Float64 x) { return rec(x,Float64::downward); }
 
@@ -139,6 +140,7 @@ inline FloatMP next_down(FloatMP const& x) { return sub_down(x,FloatMP::min(x.pr
 inline FloatMP next_up(FloatMP const& x) { return add_up(x,FloatMP::min(x.precision())); }
 
 inline FloatMP rec_approx(FloatMP const& x) { return rec(x,FloatMP::to_nearest); }
+inline FloatMP rec_near(FloatMP const& x) { return rec(x,FloatMP::to_nearest); }
 inline FloatMP rec_up(FloatMP const& x) { return rec(x,FloatMP::upward); }
 inline FloatMP rec_down(FloatMP const& x) { return rec(x,FloatMP::downward); }
 

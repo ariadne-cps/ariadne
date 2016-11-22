@@ -121,6 +121,7 @@ class FunctionMixin<F,ValidatedTag,D,C>
     template<class X> using Argument = typename ElementTraits<D>::template Type<X>;
     template<class X> using Result = typename ElementTraits<C>::template Type<X>;
   public:
+    using FunctionMixin<F,ApproximateTag,D,C>::_evaluate;
     virtual FunctionInterface<ValidatedTag,D,C>* _clone() const;
     virtual Result<ValidatedNumericType> _evaluate(const Argument<ValidatedNumericType>& x) const;
     virtual Result<ValidatedDifferential> _evaluate(const Argument<ValidatedDifferential>& x) const;
@@ -141,6 +142,7 @@ class FunctionMixin<F,EffectiveTag,D,C>
     template<class X> using Argument = typename ElementTraits<D>::template Type<X>;
     template<class X> using Result = typename ElementTraits<C>::template Type<X>;
   public:
+    using FunctionMixin<F,ValidatedTag,D,C>::_evaluate;
     virtual FunctionInterface<EffectiveTag,D,C>* _clone() const;
     virtual Result<EffectiveNumericType> _evaluate(const Argument<EffectiveNumericType>& x) const;
     virtual Result<EffectiveFormula> _evaluate(const Argument<EffectiveFormula>& x) const;

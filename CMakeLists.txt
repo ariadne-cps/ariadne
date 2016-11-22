@@ -116,8 +116,3 @@ target_link_libraries (pynumeric ariadne boost_python)
 add_library(pyalgebra $<TARGET_OBJECTS:pyalgebra-src>)
 set_target_properties(pyalgebra PROPERTIES PREFIX "" OUTPUT_NAME "algebra")
 target_link_libraries (pyalgebra ariadne boost_python)
-
-cotire(ariadne)
-cotire(pyariadne)
-cotire(pynumeric)
-cotire(pyalgebra)

@@ -76,7 +76,7 @@ typedef Expression<String> StringExpression;
 typedef Expression<Integer> IntegerExpression;
 typedef Expression<Real> RealExpression;
 
-template<class T> class DeclareExpressionOperations;
+template<class T> struct DeclareExpressionOperations;
 
 
 template<class X> struct ExpressionNode;

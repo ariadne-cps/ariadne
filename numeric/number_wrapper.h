@@ -48,7 +48,7 @@ namespace Ariadne {
 
 /************ Number *********************************************************/
 
-template<class... AWS> class Aware;
+template<class... AWS> struct Aware;
 template<class X> class NumberMixin;
 template<class X> class NumberWrapper;
 
@@ -172,10 +172,8 @@ template<class X, class I, class W> struct SameArithmeticMixin : public virtual 
     virtual I* _rdiv(I const* other) const final { return _heap_move(add(_cast(*other),_cast(*this))); }
 };
 
-struct A{};
-void foo(A);
-
-template<class X> struct NumberGetterMixin : public virtual NumberInterface {
+template<class X> class NumberGetterMixin : public virtual NumberInterface {
+  public:
   //  operator X const& () const { return static_cast<NumberMixin<X>const&>(*this); }
     static X const& _cast(NumberGetterMixin<X> const& self) { return static_cast<NumberMixin<X>const&>(self); }
     static X& _cast(NumberGetterMixin<X>& self) { return static_cast<NumberMixin<X>&>(self); }
@@ -245,7 +243,7 @@ template<class X> struct NumberGetterMixin : public virtual NumberInterface {
 template<class X> struct DispatchingTraits { typedef Aware<X> AwareOfTypes; };
 template<class X> using Awares = typename DispatchingTraits<X>::AwareOfTypes;
 
-template<class X> struct NumberMixin
+template<class X> class NumberMixin
     : public AwareFieldMixin<X,NumberInterface>
     , public AwareLatticeMixin<X,NumberInterface>
     , public UnaryOperationsMixin<X,NumberInterface>
@@ -253,6 +251,7 @@ template<class X> struct NumberMixin
     , public LatticeAware<X,NumberInterface,Awares<X>>
     , public NumberGetterMixin<X>
 {
+  public:
     operator X const& () const { return static_cast<NumberWrapper<X>const&>(*this); }
     operator X& () { return static_cast<NumberWrapper<X>&>(*this); }
 };

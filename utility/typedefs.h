@@ -40,9 +40,8 @@ typedef unsigned int uint;
 namespace std {
 template<class T> class initializer_list;
 template<class T> class shared_ptr;
-template<class T1, class T2> class pair;
-template<class... TS> class tuple;
 template<class T1, class T2> struct pair;
+template<class... TS> class tuple;
 }
 
 namespace Ariadne {

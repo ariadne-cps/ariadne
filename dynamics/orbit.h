@@ -90,7 +90,7 @@ class Orbit<ExactPoint>
 template<>
 class Orbit<GridCell>
 {
-    class Data;
+    struct Data;
   public:
     typedef GridCell EnclosureType;
     typedef GridTreeSet EnclosureListType;

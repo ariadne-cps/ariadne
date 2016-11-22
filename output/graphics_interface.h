@@ -40,7 +40,7 @@ struct Point2d;
 struct Box2d;
 
 typedef ApproximateBoxType GraphicsBoundingBoxType;
-class Colour;
+struct Colour;
 
 class DrawableInterface;
 class FigureInterface;

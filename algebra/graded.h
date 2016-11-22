@@ -78,8 +78,9 @@ template<class X> Polynomial<X> create(const Polynomial<X>& x) { return Polynomi
 template<class X> Differential<X> create(const Differential<X>& x) { return Differential<X>(x.argument_size(),x.degree()); }
 
 
-template<class A> struct Graded : public List<A>
+template<class A> class Graded : public List<A>
 {
+  public:
     typedef Graded<A> SelfType;
     Graded() : List<A>() { }
     Graded(const A& a) : List<A>(1u,a) { }

@@ -90,8 +90,9 @@ typedef Set< Variable<Real> > RealVariableSet;
 //! \ingroup ExpressionModule
 //! \brief An assignment statement.
 template<class LHS, class RHS>
-struct Assignment
+class Assignment
 {
+  public:
 //    template<class XLHS> explicit Assignment(const Assignment<XLHS,RHS>& a)
 //        : lhs(a.lhs), rhs(a.rhs) { }
     Assignment(const LHS& l, const RHS& r) : lhs(l), rhs(r) { }
@@ -104,8 +105,9 @@ struct Assignment
 };
 
 template<class T>
-struct Assignment< Variable<T>, T>
+class Assignment< Variable<T>, T>
 {
+  public:
     Assignment(const Variable<T>& l, const T& r) : lhs(l), rhs(r) { }
     operator Assignment< Variable<T>,Expression<T> > () const { return Assignment<Variable<T>,Expression<T> >(this->lhs,Expression<T>::constant(this->rhs)); }
     operator List< Assignment<Variable<T>,T > >() const { return List< Assignment<Variable<T>,T > >(1u,*this); }

@@ -34,12 +34,12 @@
 namespace Ariadne {
 
 
-template<class A, class X=typename A::NumericType> struct AlgebraOperations {
+template<class A, class X=typename A::NumericType> class AlgebraOperations {
     template<class OP> static A _create(OP, A const&);
     template<class OP> static A _create(OP, A const&, A const&);
     template<class OP> static A _create(OP, X const&, A const&);
     template<class OP> static A _create(OP, A const&, X const&);
-
+  public:
     static A _nul(A const& a);
     static A _pos(A const& a);
     static A _neg(A const& a);
@@ -71,8 +71,9 @@ template<class A, class X=typename A::NumericType> struct AlgebraOperations {
     static A _atan(A const& a);
 };
 
-template<class A> struct GradedAlgebraOperations {
+template<class A> class GradedAlgebraOperations {
     typedef typename A::NumericType X;
+  public:
     static A _sqr(A const& a) {
         return a*a; }
     static A _div(A const& a1, A const& a2) {
@@ -92,8 +93,9 @@ template<class A> struct GradedAlgebraOperations {
     static A _atan(const A& a) { return _compose(Series<X>::atan(a.value()),a); }
 };
 
-template<class A> struct NormedAlgebraOperations {
+template<class A> class NormedAlgebraOperations {
     typedef typename A::NumericType X;
+  public:
     static A _sqr(A const& a) {
         return a*a; }
     static A _pow(A const& a, Nat m) {

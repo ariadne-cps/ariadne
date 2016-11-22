@@ -227,13 +227,14 @@ template<class X> class ExpansionValue
 template<class X> OutputStream& operator<<(OutputStream& os, const ExpansionValue<X>& m) {
     return os << m.index()<<":" << m.coefficient(); }
 
-template<class X> struct ExpansionConstReference;
+template<class X> class ExpansionConstReference;
 
-template<class X> struct ExpansionReference;
+template<class X> class ExpansionReference;
 template<class X> Void swap(ExpansionReference<X>, ExpansionReference<X>);
 
-template<class X> struct ExpansionReference
+template<class X> class ExpansionReference
 {
+  public:
     typedef X CoefficientType; typedef X& CoefficientReference;
   private:
     MultiIndexReference _a; CoefficientType* _cp;
@@ -255,10 +256,13 @@ template<class X> struct ExpansionReference
 };
 template<class X> Void swap(ExpansionReference<X>, ExpansionReference<X>);
 
-template<class X> struct ExpansionConstReference
+template<class X> class ExpansionConstReference
 {
+  public:
     typedef X CoefficientType;
+  private:
     const MultiIndexReference _a; const CoefficientType* _cp;
+  public:
     ExpansionConstReference(SizeType as, const DegreeType* ip, const CoefficientType* cp) : _a(as,const_cast<DegreeType*>(ip)), _cp(cp) { }
     ExpansionConstReference(const MultiIndexReference& a, const CoefficientType& c) : _a(a), _cp(&c) { }
     const MultiIndex& index() const { return _a; }

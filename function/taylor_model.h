@@ -60,7 +60,8 @@ template<class P, class F> struct IsScalar< TaylorModel<P,F> > { static const Bo
 
 class IntersectionException;
 
-struct IntersectionException : public std::runtime_error {
+class IntersectionException : public std::runtime_error {
+  public:
     IntersectionException(const StringType& what) : std::runtime_error(what) { }
 };
 

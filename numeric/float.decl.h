@@ -69,7 +69,7 @@ template<class PR> class PositiveFloatBounds;
 template<class PR> class PositiveFloatBall;
 template<class PR> class PositiveFloatValue;
 
-template<class P, class PR> class FloatTypedef;
+template<class P, class PR> struct FloatTypedef;
 template<class PR> struct FloatTypedef<ApproximateTag,PR> { typedef FloatApproximation<PR> Type; };
 template<class PR> struct FloatTypedef<LowerTag,PR> { typedef FloatLowerBound<PR> Type; };
 template<class PR> struct FloatTypedef<UpperTag,PR> { typedef FloatUpperBound<PR> Type; };

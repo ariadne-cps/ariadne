@@ -34,7 +34,7 @@ namespace Ariadne {
 
 typedef Void Void;
 class CanvasInterface;
-class PlanarProjectionMap;
+struct PlanarProjectionMap;
 typedef PlanarProjectionMap Projection2d;
 class ValidatedConstrainedImageSet;
 

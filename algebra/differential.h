@@ -164,8 +164,8 @@ class Differential
     static const X _zero;
     static const X _one;
 
-    DegreeType _degree;
     SortedExpansion<X,GradedIndexLess> _expansion;
+    DegreeType _degree;
   public:
     //! \brief The type used for a power series.
     typedef UnivariateDifferential<X> SeriesType;
@@ -385,9 +385,10 @@ template<class X> Vector<Differential<X>> lie_derivative(const Vector<Differenti
 
 
 template<class X>
-struct NonAssignableDifferential
+class NonAssignableDifferential
     : public Differential<X>
 {
+  public:
     NonAssignableDifferential<X>& operator=(const Differential<X>& other) {
         ARIADNE_PRECONDITION_MSG( this->argument_size()==other.argument_size(),
                                   "\n  self="<<*this<<"\n  other="<<other<<"\n"<<std::flush  );

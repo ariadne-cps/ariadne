@@ -44,14 +44,15 @@ template<class X> class Vector;
 template<class X> class Covector;
 
 template<class X> class Matrix;
-template<class M> class MatrixRow;
-template<class M> class MatrixColumn;
+template<class M> struct MatrixRow;
+template<class M> struct MatrixColumn;
 template<class X1, class X2> struct MatrixMatrixProduct;
 template<class X1, class X2> struct MatrixVectorProduct;
-template<class M> class MatrixTranspose;
+template<class M> struct MatrixTranspose;
 
 class PivotMatrix;
-template<class X> class PLUMatrix;
+template<class X> struct PLUMatrix;
+template<class X> struct QRMatrix;
 
 class SingularMatrixException { };
 
@@ -216,8 +217,9 @@ template<class M, EnableIf<IsMatrixExpression<M>> =dummy> OutputStream& operator
 
 /************ Combinatorial Matrices *********************************************************/
 
-struct PivotMatrix {
+class PivotMatrix {
     Array<SizeType> _ary;
+  public:
     PivotMatrix(SizeType n=0u) : _ary(n) {
         for(SizeType i=0; i!=n; ++i) { _ary[i]=i; } }
     SizeType size() const { return _ary.size(); }
@@ -240,7 +242,7 @@ template<class X> struct QRMatrix {
 
 /************ Matrix expressions *********************************************************/
 
-template<class M> class MatrixRow {
+template<class M> struct MatrixRow {
     M& _A; SizeType _i;
   public:
     typedef typename M::ScalarType ScalarType;
@@ -252,7 +254,7 @@ template<class M> class MatrixRow {
 };
 template<class M> struct IsCovectorExpression<MatrixRow<M>> : True { };
 
-template<class M> class MatrixColumn {
+template<class M> struct MatrixColumn {
     M& _A; SizeType _j;
   public:
     typedef typename M::ScalarType ScalarType;
@@ -280,8 +282,9 @@ template<class M> struct IsMatrixExpression<MatrixTranspose<M>> : True { };
 template<class M> using Transpose = MatrixTranspose<M>;
 
 template<class M1, class M2> struct MatrixMatrixProduct {
-    typedef ArithmeticType<typename M1::ScalarType,typename M2::ScalarType> ScalarType;
     M1 const& _A1; M2 const& _A2;
+  public:
+    typedef ArithmeticType<typename M1::ScalarType,typename M2::ScalarType> ScalarType;
     MatrixMatrixProduct(M1 const& A1, M2 const& A2) : _A1(A1), _A2(A2) { }
     SizeType row_size() const { return _A1.row_size(); }
     SizeType column_size() const { return _A2.column_size(); }
@@ -293,7 +296,8 @@ template<class M1,class M2> struct IsMatrixExpression<MatrixMatrixProduct<M1,M2>
 
 template<class M1, class V2> struct MatrixVectorProduct {
    typedef ArithmeticType<typename M1::ScalarType,typename V2::ScalarType> ScalarType;
-     M1 const& _A1; V2 const& _v2;
+  public:
+    M1 const& _A1; V2 const& _v2;
     MatrixVectorProduct(M1 const& A1, V2 const& v2) : _A1(A1), _v2(v2) { }
     SizeType size() const { return _A1.row_size(); }
     ScalarType zero_element() const { return _A1.zero_element()*_v2.zero_element(); }
@@ -303,8 +307,9 @@ template<class M1, class V2> struct MatrixVectorProduct {
 template<class M1,class V2> struct IsVectorExpression<MatrixVectorProduct<M1,V2>> : True { };
 
 template<class M1, class X2> struct MatrixScalarQuotient {
-    typedef QuotientType<typename M1::ScalarType,X2> ScalarType;
     const M1& _a1; const X2& _x2;
+  public:
+    typedef QuotientType<typename M1::ScalarType,X2> ScalarType;
     MatrixScalarQuotient(const M1& a1, const X2& x2) : _a1(a1), _x2(x2) { }
     SizeType row_size() const { return _a1.row_size(); }
     SizeType column_size() const { return _a1.column_size(); }
@@ -315,8 +320,9 @@ template<class M1, class X2> struct IsMatrixExpression<MatrixScalarQuotient<M1,X
 template<class M> struct MatrixContainerRange
     : public MatrixContainer< MatrixContainerRange<M> >
 {
-    typedef typename M::ScalarType ScalarType;
     M& _A; Range _rng1; Range _rng2;
+  public:
+    typedef typename M::ScalarType ScalarType;
     MatrixContainerRange(M& A, Range rng1, Range rng2) : _A(A), _rng1(rng1), _rng2(rng2) { }
     SizeType row_size() const { return _rng1.size(); }
     SizeType column_size() const { return _rng2.size(); }
@@ -334,8 +340,9 @@ template<class M> struct IsMatrixExpression<MatrixContainerRange<M>> : True { };
 template<class M> struct MatrixRange
     : public MatrixExpression< MatrixRange<M> >
 {
-    typedef typename M::ScalarType ScalarType;
     const M& _A; Range _rng1; Range _rng2;
+  public:
+    typedef typename M::ScalarType ScalarType;
     MatrixRange(const M& A, Range rng1, Range rng2) : _A(A), _rng1(rng1), _rng2(rng2) { }
     SizeType row_size() const { return _rng1.size(); }
     SizeType column_size() const { return _rng2.size(); }

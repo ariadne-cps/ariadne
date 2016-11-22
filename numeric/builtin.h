@@ -32,7 +32,7 @@
 
 namespace Ariadne {
 
-class ExactTag;
+struct ExactTag;
 
 using ApproximateDouble = double;
 

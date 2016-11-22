@@ -93,7 +93,7 @@ inline MultiIndex MultiIndex::unit(SizeType n, SizeType i)
     MultiIndex r(n);
     r._p[i]=1u;
     r._p[r._n]=1u;
-    return std::move(r);
+    return r;
 }
 
 inline MultiIndex MultiIndex::first(SizeType n, DegreeType d)
@@ -101,7 +101,7 @@ inline MultiIndex MultiIndex::first(SizeType n, DegreeType d)
     MultiIndex r(n);
     r._p[0]=d;
     r._p[r._n]=d;
-    return std::move(r);
+    return r;
 }
 
 inline Void MultiIndex::clear()
@@ -203,22 +203,22 @@ Void iadd(MultiIndex& r, const MultiIndex& a1, const MultiIndex& a2) {
 
 inline
 MultiIndex operator+(MultiIndex a1, const MultiIndex& a2) {
-    a1+=a2; return std::move(a1);
+    a1+=a2; return a1;
 }
 
 inline
 MultiIndex operator-(MultiIndex a1, const MultiIndex& a2) {
-    a1-=a2; return std::move(a1);
+    a1-=a2; return a1;
 }
 
 inline
 MultiIndex operator*(MultiIndex a, DegreeType s) {
-    a*=s; return std::move(a);
+    a*=s; return a;
 }
 
 inline
 MultiIndex operator*(DegreeType s, MultiIndex a) {
-    a*=s; return std::move(a);
+    a*=s; return a;
 }
 
 

@@ -42,8 +42,9 @@ typedef Integer DiscreteTimeType;
 //! stop when <em>either</em> the continuous time or the discrete time reaches the bounding
 //! value. This is to ensure that the evolution time is finite; in particular, that no
 //! Zeno behaviour occurs.
-struct HybridTime
+class HybridTime
 {
+  public:
     //! \brief The type used for continuous (real, physical) time.
     typedef Real ContinuousTimeType;
     //! \brief The type used for discrete time (steps).
@@ -53,7 +54,7 @@ struct HybridTime
     const ContinuousTimeType& continuous_time() const { return this->_continuous_time; }
     //! \brief The number of discrete steps taken.
     const DiscreteTimeType& discrete_time() const { return this->_discrete_time; }
-
+  private: public:
     //! \brief The continuous (real, physical) time.
     ContinuousTimeType _continuous_time;
     //! \brief The number of discrete steps taken.

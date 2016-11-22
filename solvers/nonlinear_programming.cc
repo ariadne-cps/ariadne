@@ -2017,9 +2017,9 @@ Void NonlinearInteriorPointOptimiser::compute_z(const ExactBoxType& d, const App
 
 
 ValidatedKleenean ApproximateOptimiser::
-feasible(ExactBoxType D, ValidatedVectorFunction h) const
+feasible_zero(ExactBoxType D, ValidatedVectorFunction h) const
 {
-    ARIADNE_LOG(2,"ApproximateOptimiser::feasible(D,h)\n");
+    ARIADNE_LOG(2,"ApproximateOptimiser::feasible_zero(D,h)\n");
     ARIADNE_LOG(3,"D="<<D<<", h="<<h<<"\n");
     FloatApproximationVector x=midpoint(D);
     FloatApproximationVector y(h.result_size(),zero);
@@ -2317,9 +2317,9 @@ feasibility_step(const ExactBoxType& D, const ApproximateVectorFunction& g, cons
 
 // Solve equations y Dh(x) - 1/(x-xl) + 1/(xu-x) = 0; h(x) = 0
 ValidatedKleenean IntervalOptimiser::
-feasible(ExactBoxType D, ValidatedVectorFunction h) const
+feasible_zero(ExactBoxType D, ValidatedVectorFunction h) const
 {
-    ARIADNE_LOG(2,"IntervalOptimiser::feasible(D,h)\n");
+    ARIADNE_LOG(2,"IntervalOptimiser::feasible_zero(D,h)\n");
     ARIADNE_LOG(3,"D="<<D<<", h="<<h<<"\n");
 
     const Nat n=D.size();

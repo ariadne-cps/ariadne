@@ -208,7 +208,7 @@ class AtomicHybridAutomaton
         return this->HybridAutomaton::mode(this->_variable|location); }
 
     //! \brief The target for \a event from location \a source. Returns \a source if \a event is not present.
-    StringConstant target(StringConstant source, DiscreteEvent event) const {
+    StringConstant get_target(StringConstant source, DiscreteEvent event) const {
         DiscreteLocation source_mode(this->_variable|source);
         DiscreteLocation target_mode=this->HybridAutomaton::target(source_mode,event);
         return StringConstant(target_mode[this->_variable]); }

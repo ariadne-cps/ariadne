@@ -119,7 +119,8 @@ class Formula {
 template<class Y> OutputStream& operator<<(OutputStream& os, const Formula<Y>& f);
 
 template<class Y>
-struct FormulaNode {
+class FormulaNode {
+  public:
     mutable Nat count;
     Operator op;
     virtual ~FormulaNode();

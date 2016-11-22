@@ -50,7 +50,7 @@ TwoExp Accuracy::error() const {
 
 typedef Real::Interface RealInterface;
 
-struct Real::Interface {
+class Real::Interface {
   public:
     virtual ~Interface() = default;
     virtual Float64Bounds _value() const = 0;

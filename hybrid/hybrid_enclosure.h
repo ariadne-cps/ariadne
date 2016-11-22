@@ -46,7 +46,7 @@
 namespace Ariadne {
 
 template<class X> class Vector;
-template<class X> class LinearProgram;
+template<class X> struct LinearProgram;
 
 template<class X> class FunctionModelFactoryInterface;
 typedef FunctionModelFactoryInterface<ValidatedTag> IntervalFunctionModelFactoryInterface;

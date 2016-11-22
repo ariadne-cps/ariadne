@@ -116,7 +116,7 @@ class Figure
     Void write(const char* filename, Nat nx, Nat ny) const;
     Void write(const char* filename) const;
   public:
-    class Data;
+    struct Data;
   public:
     Void _paint_all(CanvasInterface& canvas) const; // Writes all shapes to the canvas
   private:

@@ -60,7 +60,8 @@ template<class P, class F> struct IsScalar< TaylorModel<P,F> > { static const Bo
 
 class IntersectionException;
 
-struct IntersectionException : public std::runtime_error {
+class IntersectionException : public std::runtime_error {
+  public:
     IntersectionException(const StringType& what) : std::runtime_error(what) { }
 };
 
@@ -690,15 +691,15 @@ template<class F> Vector<TaylorModel<ValidatedTag,F>> refinement(const Vector<Ta
 
 
 
-template<class F> Vector<TaylorModel<ValidatedTag,F>> partial_evaluate(const Vector<TaylorModel<ValidatedTag,F>>& tf, SizeType k, const ValidatedNumericType& c) {
-    Vector<TaylorModel<ValidatedTag,F>> r(tf.size(),ValidatedTaylorModel::zero(tf.zero_element().argument_size()-1,tf.zero_element().sweeper()));
-    for(SizeType i=0; i!=r.size(); ++i) { r[i]=partial_evaluate(tf[i],k,c); }
-    return std::move(r);
-}
-
 template<class F> Vector<ValidatedNumericType> evaluate(const Vector<TaylorModel<ValidatedTag,F>>& tf, const Vector<ValidatedNumericType>& x) {
     Vector<ValidatedNumericType> r(tf.size());
     for(SizeType i=0; i!=r.size(); ++i) { r[i]=evaluate(tf[i],x); }
+    return r;
+}
+
+template<class F> Vector<TaylorModel<ValidatedTag,F>> partial_evaluate(const Vector<TaylorModel<ValidatedTag,F>>& tf, SizeType k, const ValidatedNumericType& c) {
+    Vector<TaylorModel<ValidatedTag,F>> r(tf.size(),ValidatedTaylorModel::zero(tf.zero_element().argument_size()-1,tf.zero_element().sweeper()));
+    for(SizeType i=0; i!=r.size(); ++i) { r[i]=partial_evaluate(tf[i],k,c); }
     return std::move(r);
 }
 

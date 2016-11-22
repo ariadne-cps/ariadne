@@ -52,9 +52,9 @@ typedef Space<Real> RealSpace;
 //! \brief A space defined as a list of named variables of type \a T.
 //!   Allows conversion between Euclidean space \f$\mathbb{R}^n\f$ and a space defined by named variables.
 //!  \details \sa Variable
-template<class T> struct Space
+template<class T> class Space
 {
-    typedef std::size_t SizeType;
+  public:
     typedef Variable<T> VariableType;
   public:
     //! \brief The trivial space \f$\R^0\f$.

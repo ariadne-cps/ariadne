@@ -66,13 +66,13 @@ class FunctionMixin<F,Void,D,C>
     FunctionMixin() { }
     template<class X> ElementType<C,X> _base_evaluate(const ElementType<D,X>& x) const;
   public:
-    virtual DomainType const domain() const { return make_domain<D>(this->argument_size()); }
+    virtual DomainType const domain() const override { return make_domain<D>(this->argument_size()); }
     virtual CodomainType const codomain() const override { return make_domain<C>(this->result_size()); }
     virtual SizeType argument_size() const override { return this->domain().dimension(); }
     virtual SizeType result_size() const override { return this->codomain().dimension(); }
 
-    virtual OutputStream& write(OutputStream& os) const = 0;
-    virtual OutputStream& repr(OutputStream& os) const { return this->write(os); }
+    virtual OutputStream& write(OutputStream& os) const override = 0;
+    virtual OutputStream& repr(OutputStream& os) const override { return this->write(os); }
 };
 
 template<class F, class D>
@@ -86,13 +86,13 @@ class FunctionMixin<F,Void,D,IntervalDomain>
     FunctionMixin() { }
     template<class X> X _base_evaluate(const ElementType<D,X>& x) const;
   public:
-    virtual DomainType const domain() const { return make_domain<D>(this->argument_size()); }
+    virtual DomainType const domain() const override { return make_domain<D>(this->argument_size()); }
     virtual CodomainType const codomain() const override { return make_domain<C>(this->result_size()); }
     virtual SizeType argument_size() const override { return this->domain().dimension(); }
     virtual SizeType result_size() const override { return 1u; }
 
-    virtual OutputStream& write(OutputStream& os) const = 0;
-    virtual OutputStream& repr(OutputStream& os) const { return this->write(os); }
+    virtual OutputStream& write(OutputStream& os) const override = 0;
+    virtual OutputStream& repr(OutputStream& os) const override { return this->write(os); }
 };
 
 
@@ -104,12 +104,12 @@ class FunctionMixin<F,ApproximateTag,D,C>
     template<class X> using Argument = typename ElementTraits<D>::template Type<X>;
     template<class X> using Result = typename ElementTraits<C>::template Type<X>;
   public:
-    virtual FunctionInterface<ApproximateTag,D,C>* _clone() const;
-    virtual Result<ApproximateNumericType> _evaluate(const Argument<ApproximateNumericType>& x) const;
-    virtual Result<ApproximateDifferential> _evaluate(const Argument<ApproximateDifferential>& x) const;
-    virtual Result<ApproximateFormula> _evaluate(const Argument<ApproximateFormula>& x) const;
-    virtual Result<ApproximateTaylorModel> _evaluate(const Argument<ApproximateTaylorModel>& x) const;
-    virtual Result<ApproximateAlgebra> _evaluate(const Argument<ApproximateAlgebra>& x) const;
+    virtual FunctionInterface<ApproximateTag,D,C>* _clone() const override;
+    virtual Result<ApproximateNumericType> _evaluate(const Argument<ApproximateNumericType>& x) const override;
+    virtual Result<ApproximateDifferential> _evaluate(const Argument<ApproximateDifferential>& x) const override;
+    virtual Result<ApproximateFormula> _evaluate(const Argument<ApproximateFormula>& x) const override;
+    virtual Result<ApproximateTaylorModel> _evaluate(const Argument<ApproximateTaylorModel>& x) const override;
+    virtual Result<ApproximateAlgebra> _evaluate(const Argument<ApproximateAlgebra>& x) const override;
 };
 
 // A wrapper for classes with non-static _compute and _compute_approx methods
@@ -121,14 +121,15 @@ class FunctionMixin<F,ValidatedTag,D,C>
     template<class X> using Argument = typename ElementTraits<D>::template Type<X>;
     template<class X> using Result = typename ElementTraits<C>::template Type<X>;
   public:
-    virtual FunctionInterface<ValidatedTag,D,C>* _clone() const;
-    virtual Result<ValidatedNumericType> _evaluate(const Argument<ValidatedNumericType>& x) const;
-    virtual Result<ValidatedDifferential> _evaluate(const Argument<ValidatedDifferential>& x) const;
-    virtual Result<ValidatedFormula> _evaluate(const Argument<ValidatedFormula>& x) const;
-    virtual Result<ValidatedTaylorModel> _evaluate(const Argument<ValidatedTaylorModel>& x) const;
-    virtual Result<ValidatedAlgebra> _evaluate(const Argument<ValidatedAlgebra>& x) const;
+    using FunctionMixin<F,ApproximateTag,D,C>::_evaluate;
+    virtual FunctionInterface<ValidatedTag,D,C>* _clone() const override;
+    virtual Result<ValidatedNumericType> _evaluate(const Argument<ValidatedNumericType>& x) const override;
+    virtual Result<ValidatedDifferential> _evaluate(const Argument<ValidatedDifferential>& x) const override;
+    virtual Result<ValidatedFormula> _evaluate(const Argument<ValidatedFormula>& x) const override;
+    virtual Result<ValidatedTaylorModel> _evaluate(const Argument<ValidatedTaylorModel>& x) const override;
+    virtual Result<ValidatedAlgebra> _evaluate(const Argument<ValidatedAlgebra>& x) const override;
 
-    virtual Result<ValidatedScalarFunction> _evaluate(const Argument<ValidatedScalarFunction>& x) const;
+    virtual Result<ValidatedScalarFunction> _evaluate(const Argument<ValidatedScalarFunction>& x) const override;
 
 };
 
@@ -141,10 +142,11 @@ class FunctionMixin<F,EffectiveTag,D,C>
     template<class X> using Argument = typename ElementTraits<D>::template Type<X>;
     template<class X> using Result = typename ElementTraits<C>::template Type<X>;
   public:
-    virtual FunctionInterface<EffectiveTag,D,C>* _clone() const;
-    virtual Result<EffectiveNumericType> _evaluate(const Argument<EffectiveNumericType>& x) const;
-    virtual Result<EffectiveFormula> _evaluate(const Argument<EffectiveFormula>& x) const;
-    virtual Result<EffectiveAlgebra> _evaluate(const Argument<EffectiveAlgebra>& x) const;
+    using FunctionMixin<F,ValidatedTag,D,C>::_evaluate;
+    virtual FunctionInterface<EffectiveTag,D,C>* _clone() const override;
+    virtual Result<EffectiveNumericType> _evaluate(const Argument<EffectiveNumericType>& x) const override;
+    virtual Result<EffectiveFormula> _evaluate(const Argument<EffectiveFormula>& x) const override;
+    virtual Result<EffectiveAlgebra> _evaluate(const Argument<EffectiveAlgebra>& x) const override;
 };
 
 template<class F, class P, class D> class ScalarFunctionMixin

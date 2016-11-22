@@ -96,7 +96,7 @@ template<> class SymbolicAlgebraWrapper<Expression<Real>,Real>
     virtual AlgebraInterface<X>* _apply(Mul op, AlgebraInterface<X>const& other) const { return _eval(Times(),*this,other); }
     virtual AlgebraInterface<X>* _apply(Add op, X const& cnst) const { return _eval(Plus(),*this,cnst); }
     virtual AlgebraInterface<X>* _apply(Mul op, X const& cnst) const { return _eval(Times(),*this,cnst); }
-    virtual OutputStream& write(OutputStream& os) const { return os << _cast(*this); }
+    virtual OutputStream& _write(OutputStream& os) const { return os << _cast(*this); }
     virtual SymbolicAlgebraInterface<X>* _apply(OperatorCode op);
   private:
     template<class OP> SymbolicAlgebraInterface<X>* _apply(OP op) { return new SymbolicAlgebraWrapper<A>(op(static_cast<A const&>(*this))); }

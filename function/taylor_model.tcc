@@ -1034,7 +1034,7 @@ Array<SizeType> complement(SizeType nmax, Array<SizeType> vars) {
             ++kv;
         }
     }
-    return std::move(cmpl);
+    return cmpl;
 }
 
 

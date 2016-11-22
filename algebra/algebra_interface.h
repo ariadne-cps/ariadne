@@ -133,8 +133,9 @@ template<class X> class TranscendentalAlgebraInterface
     // Overrides for AlgebraInterface operations
     virtual TranscendentalAlgebraInterface<X>* _create_copy() const = 0;
     virtual TranscendentalAlgebraInterface<X>* _create_zero() const = 0;
-    virtual TranscendentalAlgebraInterface<X>* _create_constant(X c) const = 0;
+    virtual TranscendentalAlgebraInterface<X>* _create_constant(X const& c) const = 0;
 
+    using AlgebraInterface<X>::_apply;
     virtual TranscendentalAlgebraInterface<X>* _apply(Rec) const;
     virtual TranscendentalAlgebraInterface<X>* _apply(Sqrt) const;
     virtual TranscendentalAlgebraInterface<X>* _apply(Exp) const;
@@ -160,8 +161,8 @@ template<class X> class NormedAlgebraInterface
     // Overrides for AlgebraInterface operations
     virtual NormedAlgebraInterface<X>* _create_copy() const = 0;
     virtual NormedAlgebraInterface<X>* _create_zero() const = 0;
-    virtual NormedAlgebraInterface<X>* _create_constant(X c) const = 0;
-    virtual NormedAlgebraInterface<X>* _create_ball(ErrorType r) const = 0;
+    virtual NormedAlgebraInterface<X>* _create_constant(X const& c) const = 0;
+    virtual NormedAlgebraInterface<X>* _create_ball(ErrorType const& r) const = 0;
 
     //! \brief A value \c e such that analytic functions are evaluated to a tolerance of \c e.
     virtual RawFloat64 tolerance() const = 0;
@@ -203,6 +204,7 @@ template<class X> class SymbolicAlgebraInterface
     virtual SymbolicAlgebraInterface<X>* _create_copy() const = 0;
     virtual SymbolicAlgebraInterface<X>* _create_zero() const = 0;
 
+    using AlgebraInterface<X>::_apply;
     virtual SymbolicAlgebraInterface<X>* _apply(OperatorCode op) = 0;
 };
 

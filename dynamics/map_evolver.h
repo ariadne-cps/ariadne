@@ -101,15 +101,15 @@ class MapEvolver
 
 
     //! \brief Compute an approximation to the evolution set using upper semantics.
-    EnclosureListType evolve(const EnclosureType& initial_set, const TerminationType& termination) const {
+    EnclosureListType evolve(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-        this->_evolution(final,reachable,intermediate,initial_set,termination,UPPER_SEMANTICS,false);
+        this->_evolution(final,reachable,intermediate,initial_set,termination,semantics,false);
         return final; }
 
     //! \brief Compute an approximation to the evolution set under upper semantics.
-    EnclosureListType reach(const EnclosureType& initial_set, const TerminationType& termination) const {
+    EnclosureListType reach(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-        this->_evolution(final,reachable,intermediate,initial_set,termination,UPPER_SEMANTICS,true);
+        this->_evolution(final,reachable,intermediate,initial_set,termination,semantics,true);
         return intermediate; }
 
   protected:

@@ -246,17 +246,17 @@ class Float64 {
 
     template<class OP> friend Float64 apply(OP op, Float64 const& x1, Float64 const& x2, RoundingMode64 rnd) {
         auto old_rnd=Float64::get_rounding_mode(); Float64::set_rounding_mode(rnd);
-        Float64 r=op(x1,x2); Float64::set_rounding_mode(old_rnd); return std::move(r);
+        Float64 r=op(x1,x2); Float64::set_rounding_mode(old_rnd); return r;
     }
 
     template<class OP> friend Float64 apply(OP op, Float64 const& x, RoundingMode64 rnd) {
         auto old_rnd=Float64::get_rounding_mode(); Float64::set_rounding_mode(rnd);
-        Float64 r=op(x); Float64::set_rounding_mode(old_rnd); return std::move(r);
+        Float64 r=op(x); Float64::set_rounding_mode(old_rnd); return r;
     }
 
     template<class OP> friend Float64 apply(OP op, Float64 const& x, Int n, RoundingMode64 rnd) {
         auto old_rnd=Float64::get_rounding_mode(); Float64::set_rounding_mode(rnd);
-        Float64 r=op(x,n); Float64::set_rounding_mode(old_rnd); return std::move(r);
+        Float64 r=op(x,n); Float64::set_rounding_mode(old_rnd); return r;
     }
 
     friend Float64 add(Float64 const& x1, Float64 const& x2, RoundingModeType rnd) { return apply(Add(),x1,x2,rnd); }

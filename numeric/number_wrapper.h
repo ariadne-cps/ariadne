@@ -48,7 +48,7 @@ namespace Ariadne {
 
 /************ Number *********************************************************/
 
-template<class... AWS> class Aware;
+template<class... AWS> struct Aware;
 template<class X> class NumberMixin;
 template<class X> class NumberWrapper;
 
@@ -172,10 +172,8 @@ template<class X, class I, class W> struct SameArithmeticMixin : public virtual 
     virtual I* _rdiv(I const* other) const final { return _heap_move(add(_cast(*other),_cast(*this))); }
 };
 
-struct A{};
-void foo(A);
-
-template<class X> struct NumberGetterMixin : public virtual NumberInterface {
+template<class X> class NumberGetterMixin : public virtual NumberInterface {
+  public:
   //  operator X const& () const { return static_cast<NumberMixin<X>const&>(*this); }
     static X const& _cast(NumberGetterMixin<X> const& self) { return static_cast<NumberMixin<X>const&>(self); }
     static X& _cast(NumberGetterMixin<X>& self) { return static_cast<NumberMixin<X>&>(self); }
@@ -183,11 +181,11 @@ template<class X> struct NumberGetterMixin : public virtual NumberInterface {
     typedef Paradigm<X> P;
     friend class Number<P>;
 
-    virtual NumberInterface* _copy() const { return new NumberWrapper<X>(_cast(*this)); }
-    virtual NumberInterface* _move() { return new NumberWrapper<X>(std::move(_cast(*this))); }
+    virtual NumberInterface* _copy() const override { return new NumberWrapper<X>(_cast(*this)); }
+    virtual NumberInterface* _move() override { return new NumberWrapper<X>(std::move(_cast(*this))); }
 
     // FIXME: Proper comparisons for ExactNumber.
-    virtual LogicalValue _equals(NumberInterface const& y) const {
+    virtual LogicalValue _equals(NumberInterface const& y) const override {
         if (this->_paradigm() == ParadigmCode::EXACT && y._paradigm() == ParadigmCode::EXACT) {
             return LogicalValue(this->_get(BoundedTag(),Precision64()) == y._get(BoundedTag(),Precision64())); }
         if (this->_paradigm() == ParadigmCode::VALIDATED && y._paradigm() == ParadigmCode::VALIDATED) {
@@ -195,7 +193,7 @@ template<class X> struct NumberGetterMixin : public virtual NumberInterface {
         else {
             return LogicalValue(this->_get(ApproximateTag(),Precision64()) == y._get(ApproximateTag(),Precision64())); }
     }
-    virtual LogicalValue _less(NumberInterface const& y) const {
+    virtual LogicalValue _less(NumberInterface const& y) const override {
         if (this->_paradigm() == ParadigmCode::EXACT && y._paradigm() == ParadigmCode::EXACT) {
             return LogicalValue(this->_get(BoundedTag(),Precision64()) < y._get(BoundedTag(),Precision64())); }
         else if (this->_paradigm() == ParadigmCode::VALIDATED && y._paradigm() == ParadigmCode::VALIDATED) {
@@ -205,31 +203,30 @@ template<class X> struct NumberGetterMixin : public virtual NumberInterface {
         }
     }
 
-    virtual Float64Ball _get(MetricTag,Precision64 pr) const {
+    virtual Float64Ball _get(MetricTag,Precision64 pr) const override {
         return this->_get_as<Float64Ball>(pr); }
-    virtual Float64Bounds _get(BoundedTag,Precision64 pr) const {
+    virtual Float64Bounds _get(BoundedTag,Precision64 pr) const override {
         return this->_get_as<Float64Bounds>(pr); }
-    virtual Float64UpperBound _get(UpperTag,Precision64 pr) const {
+    virtual Float64UpperBound _get(UpperTag,Precision64 pr) const override {
         return this->_get_as<Float64UpperBound>(pr); }
-    virtual Float64LowerBound _get(LowerTag,Precision64 pr) const {
+    virtual Float64LowerBound _get(LowerTag,Precision64 pr) const override {
         return this->_get_as<Float64LowerBound>(pr); }
-    virtual Float64Approximation _get(ApproximateTag,Precision64 pr) const {
+    virtual Float64Approximation _get(ApproximateTag,Precision64 pr) const override {
         return this->_get_as<Float64Approximation>(pr); }
-    virtual FloatMPBall _get(MetricTag, PrecisionMP pr) const {
+    virtual FloatMPBall _get(MetricTag, PrecisionMP pr) const override {
         return this->_get_as<FloatMPBall>(pr); }
-    virtual FloatMPBounds _get(BoundedTag, PrecisionMP pr) const {
+    virtual FloatMPBounds _get(BoundedTag, PrecisionMP pr) const override {
         return this->_get_as<FloatMPBounds>(pr); }
-    virtual FloatMPUpperBound _get(UpperTag, PrecisionMP pr) const {
+    virtual FloatMPUpperBound _get(UpperTag, PrecisionMP pr) const override {
         return this->_get_as<FloatMPUpperBound>(pr); }
-    virtual FloatMPLowerBound _get(LowerTag, PrecisionMP pr) const {
+    virtual FloatMPLowerBound _get(LowerTag, PrecisionMP pr) const override {
         return this->_get_as<FloatMPLowerBound>(pr); }
-    virtual FloatMPApproximation _get(ApproximateTag, PrecisionMP pr) const {
+    virtual FloatMPApproximation _get(ApproximateTag, PrecisionMP pr) const override {
         return this->_get_as<FloatMPApproximation>(pr); }
 
-    virtual ParadigmCode _paradigm() const { return P::code(); }
-    virtual String _class_name() const { return class_name<X>(); }
-    virtual OutputStream& _write(OutputStream& os) const { return os << _cast(*this); }
-    virtual OutputStream& write(OutputStream& os) const { return os << _cast(*this); }
+    virtual ParadigmCode _paradigm() const override { return P::code(); }
+    virtual String _class_name() const override { return class_name<X>(); }
+    virtual OutputStream& _write(OutputStream& os) const override { return os << _cast(*this); }
 
   private:
     template<class R, EnableIf<IsConvertible<X,R>> = dummy>
@@ -245,7 +242,7 @@ template<class X> struct NumberGetterMixin : public virtual NumberInterface {
 template<class X> struct DispatchingTraits { typedef Aware<X> AwareOfTypes; };
 template<class X> using Awares = typename DispatchingTraits<X>::AwareOfTypes;
 
-template<class X> struct NumberMixin
+template<class X> class NumberMixin
     : public AwareFieldMixin<X,NumberInterface>
     , public AwareLatticeMixin<X,NumberInterface>
     , public UnaryOperationsMixin<X,NumberInterface>
@@ -253,6 +250,7 @@ template<class X> struct NumberMixin
     , public LatticeAware<X,NumberInterface,Awares<X>>
     , public NumberGetterMixin<X>
 {
+  public:
     operator X const& () const { return static_cast<NumberWrapper<X>const&>(*this); }
     operator X& () { return static_cast<NumberWrapper<X>&>(*this); }
 };

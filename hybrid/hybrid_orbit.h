@@ -90,7 +90,7 @@ operator<<(OutputStream& os, const Orbit< HybridPoint >& orb);
 template<>
 class Orbit<HybridGridCell>
 {
-    class Data;
+    struct Data;
   public:
     typedef HybridGridCell EnclosureType;
     typedef HybridGridTreeSet EnclosureListType;

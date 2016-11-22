@@ -223,6 +223,11 @@ template<class M> FunctionPatch<M> FunctionPatch<M>::constant(const ExactBoxType
     return FunctionPatch<M>(d,ModelType::constant(d.size(),c,swp));
 }
 
+template<class M> FunctionPatch<M> FunctionPatch<M>::unit_ball(const ExactBoxType& d, Sweeper swp)
+{
+    return FunctionPatch<M>(d,ModelType::unit_ball(d.size(),swp));
+}
+
 template<class M> FunctionPatch<M> FunctionPatch<M>::coordinate(const ExactBoxType& d, SizeType j, Sweeper swp)
 {
     ARIADNE_ASSERT(j<d.size());

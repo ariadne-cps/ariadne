@@ -34,6 +34,7 @@
 
 #include "utility/typedefs.h"
 #include "utility/iterator.h"
+#include "utility/macros.h"
 
 namespace Ariadne {
 
@@ -111,8 +112,8 @@ template<class X> class Expansion {
     explicit Expansion(SizeType as, PrecisionType pr, SizeType cap=DEFAULT_CAPACITY);
     explicit Expansion(SizeType as, X const& z, SizeType cap=DEFAULT_CAPACITY);
     Expansion(InitializerList<Pair<InitializerList<DegreeType>,X>> lst);
-    template<class... PRS, EnableIf<IsConstructible<X,Dbl,PRS...>> =dummy>
-        Expansion(InitializerList<Pair<InitializerList<DegreeType>,Dbl>> lst, PRS... prs);
+    template<class PRS, EnableIf<IsConstructible<X,Dbl,PRS>> =dummy>
+        Expansion(InitializerList<Pair<InitializerList<DegreeType>,Dbl>> lst, PRS prs);
     template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>> =dummy>
         explicit Expansion(Expansion<Y> const&, PRS... prs);
     Expansion(const Expansion<X>&);
@@ -353,10 +354,9 @@ template<class X> class ExpansionValueReference {
 };
 
 
-
-template<class X> template<class... PRS, EnableIf<IsConstructible<X,Dbl,PRS...>>>
-Expansion<X>::Expansion(InitializerList<Pair<InitializerList<DegreeType>,Dbl>> lst, PRS... prs)
-    : Expansion(lst.begin()->first.size(),X(prs...))
+template<class X> template<class PRS, EnableIf<IsConstructible<X,Dbl,PRS>>>
+Expansion<X>::Expansion(InitializerList<Pair<InitializerList<DegreeType>,Dbl>> lst, PRS prs)
+    : Expansion( ((ARIADNE_PRECONDITION(lst.size()!=0)),lst.begin()->first.size()), X(prs) )
 {
     MultiIndex a;
     X x;
@@ -364,7 +364,7 @@ Expansion<X>::Expansion(InitializerList<Pair<InitializerList<DegreeType>,Dbl>> l
         iter!=lst.end(); ++iter)
     {
         a=iter->first;
-        x=X(iter->second,prs...);
+        x=X(iter->second,prs);
         if(decide(x!=0)) { this->append(a,x); }
     }
 }

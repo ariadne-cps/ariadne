@@ -292,6 +292,9 @@ template<class F> Void TestExpansion<F>::test_cleanup()
 
 template<class F> Void TestExpansion<F>::test_constructors()
 {
+    // Empty initialiser list causes failure
+    ARIADNE_TEST_FAIL(Expansion<F> e0({}));
+
     // Empty expansion
     ARIADNE_TEST_CONSTRUCT(Expansion<F>,e1,(3,prec));
     // Expansion with all entries; useful for checking ordering of indices

@@ -171,9 +171,8 @@ Void TestScalarTaylorFunction::test_create()
 Void TestScalarTaylorFunction::test_predicates()
 {
     ScalarTaylorFunction x=ScalarTaylorFunction::coordinate(d(1),0,swp);
-    ScalarTaylorFunction e(d(1), { }, 1.0, swp);
+    ScalarTaylorFunction e=ScalarTaylorFunction::unit_ball(d(1),swp);
 
-    //ScalarTaylorFunction tv1=1.0_near+2.0_near*x+3.0_near*(x*x)+0.75_exact*e;
     ScalarTaylorFunction tv1(d(1),{{{0},1.00},{{1},2.00},{{2},3.00}}, 0.75, swp);
     ScalarTaylorFunction tv2(d(1),{{{0},1.00},{{1},1.75},{{2},3.25}}, 0.25, swp);
     ScalarTaylorFunction tv3(d(1),{{{0},1.125},{{1},1.75},{{2},3.25}}, 0.25, swp);

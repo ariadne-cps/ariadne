@@ -58,8 +58,9 @@ template<class X> Expansion<X>::Expansion(SizeType as, X const& z, SizeType cap)
     , _indices(new DegreeType[_capacity*(_argument_size+1)]), _coefficients(new CoefficientType[_capacity])
 { }
 
+
 template<class X> Expansion<X>::Expansion(InitializerList<Pair<InitializerList<DegreeType>,X>> lst)
-    : Expansion(lst.size()==0 ? 0u : lst.begin()->first.size(), nul(lst.begin()->second))
+    : Expansion( ( (ARIADNE_PRECONDITION(lst.size()!=0)) , Expansion(lst.begin()->first.size(),nul(lst.begin()->second)) ) )
 {
     MultiIndex a;
     X x;
@@ -73,6 +74,9 @@ template<class X> Expansion<X>::Expansion(InitializerList<Pair<InitializerList<D
 }
 
 
+//template<class X> Expansion<X>::Expansion(InitializerList<Pair<InitializerList<DegreeType>,X>> lst) : Expansion(3) {
+//    ARIADNE_PRECONDITION(lst.size()!=0);
+//}
 
 /*
 // Call std::memcpy(dest,src,count) with same arguments as std::copy(src_begin,src_end,dest)

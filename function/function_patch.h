@@ -154,6 +154,8 @@ template<class M> class FunctionPatch
     static FunctionPatch<M> constant(const DomainType& d, const NumericType& c, Sweeper swp);
     //! \brief Construct the quantity \f$x_j\f$ over the domain \a d.
     static FunctionPatch<M> coordinate(const DomainType& d, SizeType j, Sweeper swp);
+    //! \brief Construct a constant quantity in \a as independent variables with value zero and uniform error \a 1
+    static FunctionPatch<M> unit_ball(const DomainType& d, Sweeper swp);
     //! \brief Construct the quantity \f$x_j\f$ over the domain \a d.
     static VectorFunctionPatch<M> identity(const DomainType& d, Sweeper swp);
 

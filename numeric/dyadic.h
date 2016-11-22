@@ -45,6 +45,10 @@ namespace Ariadne {
 class ExactDouble;
 class Dyadic;
 
+class InfinityException : public std::runtime_error {
+    using std::runtime_error::runtime_error;
+};
+
 //! \ingroup NumericModule
 //! \related Float64, ExactIntervalType
 //! \brief A floating-point number, which is taken to represent the \em exact value of a real quantity.

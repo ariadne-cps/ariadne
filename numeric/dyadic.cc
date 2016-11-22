@@ -64,22 +64,23 @@ Dyadic::Dyadic(Integer const& p, Nat q) {
     //if(q>=0) { mpf_div_2exp(_mpf,_mpf,q); } else { mpf_mul_2exp(_mpf,_mpf,-q); }
 }
 
-Dyadic::Dyadic(Dbl x) {
+Dyadic::Dyadic(Dbl d) : Dyadic(ExactDouble(d)) {
+}
+
+Dyadic::Dyadic(ExactDouble const& x) {
     static bool give_inf_warning=true;
-    if(std::isinf(x)) {
+    Dbl d=x.get_d();
+    if(std::isinf(d)) {
         if(give_inf_warning) {
-            std::cerr<<"WARNING: Converting double inf to Dyadic is not supported by GMP; returning numeric_limits<double>::infinity()\n";
+            std::cerr<<"WARNING: Converting Double inf to Dyadic is not supported by GMP; returning numeric_limits<double>::max()\n";
             give_inf_warning=false;
         }
         const double max=std::numeric_limits<double>::max();
-        x=(x>0?+max:-max);
+        d=(d>0?+max:-max);
     }
-    ARIADNE_ASSERT(std::isfinite(x));
+    ARIADNE_ASSERT(std::isfinite(d));
     mpf_init2(_mpf,maximum_precision);
-    mpf_set_d(_mpf,x);
-}
-
-Dyadic::Dyadic(ExactDouble const& d) : Dyadic(d.get_d()) {
+    mpf_set_d(_mpf,d);
 }
 
 Dyadic::Dyadic(Integer const& z) {

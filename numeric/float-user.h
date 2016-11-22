@@ -867,19 +867,24 @@ decltype(auto) operator< (Y const& y, X const& x) { return factory(x).create(y)<
 template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
 decltype(auto) operator> (Y const& y, X const& x) { return factory(x).create(y)> x; }
 
-template<class PR> decltype(auto) operator==(FloatValue<PR> const& x, Rational const& q) { return Rational(x)==q; }
-template<class PR> decltype(auto) operator!=(FloatValue<PR> const& x, Rational const& q) { return Rational(x)!=q; }
-template<class PR> decltype(auto) operator<=(FloatValue<PR> const& x, Rational const& q) { return Rational(x)<=q; }
-template<class PR> decltype(auto) operator>=(FloatValue<PR> const& x, Rational const& q) { return Rational(x)>=q; }
-template<class PR> decltype(auto) operator< (FloatValue<PR> const& x, Rational const& q) { return Rational(x)< q; }
-template<class PR> decltype(auto) operator> (FloatValue<PR> const& x, Rational const& q) { return Rational(x)> q; }
+template<class PR> Bool operator==(FloatValue<PR> const& x, Rational const& q) { return cmp(x.raw(),q)==Comparison::EQUAL; }
+template<class PR> Bool operator!=(FloatValue<PR> const& x, Rational const& q) { return cmp(x.raw(),q)!=Comparison::EQUAL; }
+template<class PR> Bool operator<=(FloatValue<PR> const& x, Rational const& q) { return cmp(x.raw(),q)!=Comparison::GREATER; }
+template<class PR> Bool operator>=(FloatValue<PR> const& x, Rational const& q) { return cmp(x.raw(),q)!=Comparison::LESS; }
+template<class PR> Bool operator< (FloatValue<PR> const& x, Rational const& q) { return cmp(x.raw(),q)==Comparison::LESS; }
+template<class PR> Bool operator> (FloatValue<PR> const& x, Rational const& q) { return cmp(x.raw(),q)==Comparison::GREATER; }
+template<class PR> Bool operator>=(Rational const& q, FloatValue<PR> const& x);
 
-template<class PR> decltype(auto) operator==(Rational const& q, FloatValue<PR> const& x) { return q==Rational(x); }
-template<class PR> decltype(auto) operator!=(Rational const& q, FloatValue<PR> const& x) { return q!=Rational(x); }
-template<class PR> decltype(auto) operator<=(Rational const& q, FloatValue<PR> const& x) { return q<=Rational(x); }
-template<class PR> decltype(auto) operator>=(Rational const& q, FloatValue<PR> const& x) { return q>=Rational(x); }
-template<class PR> decltype(auto) operator< (Rational const& q, FloatValue<PR> const& x) { return q< Rational(x); }
-template<class PR> decltype(auto) operator> (Rational const& q, FloatValue<PR> const& x) { return q> Rational(x); }
+
+// FIXME: Should be able to use cmp directly in >=
+template<class PR> Bool operator==(Rational const& q, FloatValue<PR> const& x ) { return cmp(x.raw(),q)==Comparison::EQUAL; }
+template<class PR> Bool operator!=(Rational const& q, FloatValue<PR> const& x ) { return cmp(x.raw(),q)!=Comparison::EQUAL; }
+template<class PR> Bool operator>=(Rational const& q, FloatValue<PR> const& x ) { return cmp(x.raw(),q)!=Comparison::GREATER; return q>=Rational(x); }
+template<class PR> Bool operator<=(Rational const& q, FloatValue<PR> const& x ) { return cmp(x.raw(),q)!=Comparison::LESS; }
+template<class PR> Bool operator< (Rational const& q, FloatValue<PR> const& x ) { return cmp(x.raw(),q)==Comparison::GREATER; }
+template<class PR> Bool operator> (Rational const& q, FloatValue<PR> const& x ) { return cmp(x.raw(),q)==Comparison::LESS; }
+
+
 
 Float64Value cast_exact(const Real& x);
 

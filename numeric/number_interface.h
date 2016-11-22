@@ -89,6 +89,8 @@ class NumberInterface
     virtual NumberInterface* _rapply(Max op, NumberInterface const* y) const = 0;
     virtual NumberInterface* _rapply(Min op, NumberInterface const* y) const = 0;
 
+    virtual Rational _get_q() const = 0;
+
     virtual Float64Ball _get(MetricTag, Precision64) const = 0;
     virtual Float64Bounds _get(BoundedTag, Precision64) const = 0;
     virtual Float64UpperBound _get(UpperTag, Precision64) const = 0;

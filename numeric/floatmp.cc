@@ -550,11 +550,18 @@ FloatMP pow(FloatMP const& x, Int n, FloatMP::RoundingModeType rnd) {
 }
 
 Comparison cmp(FloatMP const& x1, FloatMP const& x2) {
-    return Comparison(mpfr_cmp(x1._mpfr,x2._mpfr));
+    auto c=mpfr_cmp(x1._mpfr,x2._mpfr);
+    return c==0 ? Comparison::EQUAL : (c>0?Comparison::GREATER:Comparison::LESS);
 }
 
 Comparison cmp(FloatMP const& x1, Dbl x2) {
-    return Comparison(mpfr_cmp_d(x1._mpfr,x2));
+    auto c=mpfr_cmp_d(x1._mpfr,x2);
+    return c==0 ? Comparison::EQUAL : (c>0?Comparison::GREATER:Comparison::LESS);
+}
+
+Comparison cmp(FloatMP const& x1, Rational const& q2) {
+    auto c=mpfr_cmp_q(x1._mpfr,q2.get_mpq());
+    return c==0 ? Comparison::EQUAL : (c>0?Comparison::GREATER:Comparison::LESS);
 }
 
 FloatMP add(FloatMP const& x1, Dbl x2, FloatMP::RoundingModeType rnd) {

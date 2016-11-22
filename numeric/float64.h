@@ -45,7 +45,7 @@ class Float64;
 typedef Float64 RawFloat64;
 
 class Rational;
-
+enum class Comparison : char;
 
 class Precision64 {
     friend constexpr Precision64 max(Precision64, Precision64) { return Precision64(); }
@@ -331,6 +331,8 @@ class Float64 {
     friend Float64 floor(Float64 x) { return std::floor(x.dbl); }
     friend Float64 ceil(Float64 x) { return std::ceil(x.dbl); }
     friend Float64 round(Float64 x) { return std::round(x.dbl); }
+
+    friend Comparison cmp(Float64 x, Rational const& q);
 };
 
 

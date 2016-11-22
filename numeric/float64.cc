@@ -790,6 +790,11 @@ Bool operator> (Float64 x1, Float64 x2) { return x1.dbl> x2.dbl; }
 
 Bool is_nan(Float64 x) { return std::isnan(x.dbl); }
 
+Comparison cmp(Float64 x1, Rational const& q2) {
+    if(std::isfinite(x1.get_d())) { return cmp(Rational(x1),q2); }
+    else { return x1.get_d()>0.0 ? Comparison::GREATER : Comparison::LESS; }
+}
+
 /*
 OutputStream& write(OutputStream& os, Float64 const& x, Nat bits, RoundingMode64 rnd) {
     Nat dgts = std::ceil(bits*std::log(2))/std::log(10);

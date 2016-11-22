@@ -34,6 +34,7 @@
 #include "rational.h"
 #include "logical.h"
 #include "number.h"
+#include "builtin.h"
 #include "integer.h"
 #include "dyadic.h"
 #include "sign.h"
@@ -104,13 +105,24 @@ Rational::Rational(Integer const& znum, Integer const& zden) {
 Rational::Rational(Int64 n) : Rational(Integer(n)) {
 }
 
-Rational::Rational(double d, std::nullptr_t dummy) {
+Rational::Rational(ExactDouble const& x) {
+    static bool give_inf_warning=true;
+    Dbl d=x.get_d();
+    if(std::isinf(d)) {
+        if(give_inf_warning) {
+            std::cerr<<"WARNING: Converting Double inf to Rational is not supported by GMP; returning numeric_limits<double>::max()\n";
+            give_inf_warning=false;
+        }
+        const double max=std::numeric_limits<double>::max();
+        d=(d>0?+max:-max);
+    }
+    ARIADNE_ASSERT(std::isfinite(d));
     mpq_init(_mpq);
     mpq_set_d(_mpq,d);
     mpq_canonicalize(_mpq);
 }
 
-Rational::Rational(Float64 const& x) : Rational(x.get_d(),nullptr) {
+Rational::Rational(Float64 const& x) : Rational(ExactDouble(x.get_d())) {
 }
 
 Rational::Rational(Float64Value const& x) : Rational(reinterpret_cast<Float64 const&>(x)) {
@@ -306,9 +318,23 @@ Boolean lt(Rational const& q1, Rational const& q2) {
 }
 
 Comparison cmp(Rational const& q1, Rational const& q2) {
-    return Comparison(mpq_cmp(q1._mpq,q2._mpq));
+    auto c=mpq_cmp(q1._mpq,q2._mpq);
+    return c==0 ? Comparison::EQUAL : (c>0?Comparison::GREATER:Comparison::LESS);
 }
 
+Comparison cmp(Rational const& q1, ExactDouble const& x2) {
+    double d2=x2.get_d();
+    assert(not std::isnan(d2));
+    if(std::isfinite(d2)) {
+        return cmp(q1,Rational(x2));
+    } else {
+        return d2 > 0.0 ? Comparison::LESS : Comparison::GREATER;
+    }
+}
+
+Comparison cmp(ExactDouble const& x1, Rational const& q2) {
+    return Comparison(-(int)cmp(q2,x1));
+}
 
 Rational operator"" _q(long double x) {
     static const uint32_t max_cf_coef = std::numeric_limits<uint32_t>::max();
@@ -317,7 +343,7 @@ Rational operator"" _q(long double x) {
     // See if the long double value is an exact single-precision value
     volatile float sx=static_cast<float>(x);
     if(static_cast<long double>(sx)==x) {
-        return Rational(static_cast<double>(sx),nullptr);
+        return Rational(ExactDouble(sx));
     }
     // Compute the continued fraction expansion of x, storing coefficients in cf
     // Stop if a coefficient is larger than max_cf_coef, since then the result
@@ -338,14 +364,14 @@ Rational operator"" _q(long double x) {
                       "x="<<x<<" is not a sufficiently close approximation to a simple rational number.");
     }
     // Compute the result from the continued fraction coefficients
-    Rational q = Rational(static_cast<double>(cf[i]),nullptr);
+    Rational q = Rational(ExactDouble(cf[i]));
     while(i!=0) {
         --i;
-        q=Rational(cf[i],nullptr)+rec(q);
+        q=Rational(ExactDouble(cf[i]))+rec(q);
     }
     if(s==-1) { q=-q; }
     double xd=static_cast<double>(x);
-    Rational xq=Rational(xd,nullptr);
+    Rational xq=Rational(ExactDouble(xd));
     //volatile double qd=q.get_d();
     double ae=std::abs((q-xq).get_d());
     double re=ae/std::max(1.0,std::abs(xd));

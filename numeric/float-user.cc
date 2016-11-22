@@ -154,6 +154,10 @@ template<class PR> FloatValue<PR>::operator ExactNumber() const {
     return ExactNumber(new NumberWrapper<FloatValue<PR>>(*this));
 }
 
+template<class PR> FloatBall<PR>::FloatBall(ExactDouble d, PR pr)
+    : _v(d.get_d(),RawFloat<PR>::to_nearest,pr), _e(0,pr) {
+}
+
 template<class PR> FloatBall<PR>::FloatBall(Integer const& z, PR pr) : FloatBall<PR>(Rational(z),pr) {
 }
 
@@ -241,6 +245,10 @@ template<class PR> FloatBounds<PR>::operator ValidatedNumber() const {
     return ValidatedNumber(new NumberWrapper<FloatBounds<PR>>(*this));
 }
 
+template<class PR> FloatUpperBound<PR>::FloatUpperBound(ExactDouble d, PR pr)
+    : _u(d.get_d(),RawFloat<PR>::upward,pr) {
+}
+
 template<class PR> FloatUpperBound<PR>::FloatUpperBound(Integer const& z, PR pr)
     : _u(z,RawFloat<PR>::upward,pr) {
 }
@@ -280,6 +288,10 @@ template<class PR> FloatLowerBound<PR> FloatUpperBound<PR>::create(ValidatedLowe
 
 template<class PR> FloatUpperBound<PR> FloatUpperBound<PR>::create(ValidatedUpperNumber const& y) const {
     return FloatUpperBound<PR>(y,this->precision());
+}
+
+template<class PR> FloatLowerBound<PR>::FloatLowerBound(ExactDouble d, PR pr)
+    : _l(d.get_d(),RawFloat<PR>::downward,pr) {
 }
 
 template<class PR> FloatLowerBound<PR>::FloatLowerBound(Integer const& z, PR pr)
@@ -1606,20 +1618,6 @@ template<class PR> struct Operations<FloatValue<PR>> {
 FloatValue<Precision64> cast_exact(Real const& x) {
     return cast_exact(FloatApproximation<Precision64>(x,Precision64()));
 }
-
-template<class PR> Bool operator==(FloatValue<PR> const& x, const Rational& q) { return Rational(x)==q; }
-template<class PR> Bool operator!=(FloatValue<PR> const& x, const Rational& q) { return Rational(x)!=q; }
-template<class PR> Bool operator<=(FloatValue<PR> const& x, const Rational& q) { return Rational(x)<=q; }
-template<class PR> Bool operator>=(FloatValue<PR> const& x, const Rational& q) { return Rational(x)>=q; }
-template<class PR> Bool operator< (FloatValue<PR> const& x, const Rational& q) { return Rational(x)< q; }
-template<class PR> Bool operator> (FloatValue<PR> const& x, const Rational& q) { return Rational(x)> q; }
-
-template<class PR> Bool operator==(const Rational& q, FloatValue<PR> const& x) { return q==Rational(x); }
-template<class PR> Bool operator!=(const Rational& q, FloatValue<PR> const& x) { return q!=Rational(x); }
-template<class PR> Bool operator<=(const Rational& q, FloatValue<PR> const& x) { return q<=Rational(x); }
-template<class PR> Bool operator>=(const Rational& q, FloatValue<PR> const& x) { return q>=Rational(x); }
-template<class PR> Bool operator< (const Rational& q, FloatValue<PR> const& x) { return q< Rational(x); }
-template<class PR> Bool operator> (const Rational& q, FloatValue<PR> const& x) { return q> Rational(x); }
 
 
 template<class PR> struct Operations<PositiveFloatApproximation<PR>> {

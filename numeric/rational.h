@@ -70,6 +70,7 @@ class Rational
     template<class N, EnableIf<IsIntegral<N>> = dummy> Rational(N n);
     Rational(Int64);
     explicit Rational(Float64 const&);
+    Rational(const ExactDouble&);
     Rational(const Integer&);
     Rational(const Dyadic&);
     explicit Rational(const String&);
@@ -87,6 +88,8 @@ class Rational
     friend Rational operator/(Integer const& z1, Integer const& z2);
 
     friend Comparison cmp(Rational const& q1, Rational const& q2);
+    friend Comparison cmp(Rational const& q1, ExactDouble const& d2);
+    friend Comparison cmp(ExactDouble const& d1, Rational const& q2);
 
     friend OutputStream& operator<<(OutputStream& os, Rational const& q);
     friend InputStream& operator>>(InputStream& os, Rational& q);
@@ -96,8 +99,6 @@ class Rational
     mpq_t const& get_mpq() const;
   private:
     friend class Dyadic;
-  private:
-    explicit Rational(double, std::nullptr_t dummy);
 };
 template<> struct IsNumericType<Rational> : True { };
 Rational operator"" _q(long double x);

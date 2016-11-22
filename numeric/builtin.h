@@ -29,10 +29,18 @@
 #define ARIADNE_BUILTIN_H
 
 #include <cassert>
+#include <iostream>
+#include <iomanip>
+#include <limits>
+
+#include "utility/metaprogramming.h"
+#include "numeric/number.decl.h"
+
 
 namespace Ariadne {
 
 struct ExactTag;
+enum class Comparison : char;
 
 using ApproximateDouble = double;
 
@@ -43,10 +51,14 @@ class ExactDouble {
     double get_d() const { return this->_d; }
     template<class N, EnableIf<IsIntegral<N>> =dummy> explicit ExactDouble(N n) : _d(n) { assert(_d==n); }
     explicit ExactDouble(double d) : _d(d) { }
+    static ExactDouble infinity() { return ExactDouble(std::numeric_limits<double>::infinity()); }
     operator ExactNumber() const;
     friend ExactDouble operator+(ExactDouble x) { return ExactDouble(+x._d); }
     friend ExactDouble operator-(ExactDouble x) { return ExactDouble(-x._d); }
+    friend Comparison cmp(ExactDouble const& x1, ExactDouble const& x2) {
+        return Comparison( (x1.get_d()==x2.get_d()) ? 0 : (x1.get_d()<x2.get_d()) ? -1 : +1 ); }
     friend ExactDouble operator"" _x (long double lx) { double x=lx; assert(x==lx); return ExactDouble(x); }
+    friend OutputStream& operator<<(OutputStream& os, ExactDouble x) { return os << std::setprecision(18) << x.get_d(); }
 };
 inline ExactDouble operator"" _x (long double lx);
 

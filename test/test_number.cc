@@ -21,6 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "numeric/builtin.h"
 #include "numeric/rational.h"
 #include "numeric/number.h"
 
@@ -50,6 +51,7 @@ Int main() {
     TestNumber<ExactNumber>().test();
 
     std::cerr<<"INCOMPLETE ";
+    return ARIADNE_TEST_FAILURES;
 //    TestNumber<ValidatedUpperNumber>().test();
 //    TestNumber<ValidatedLowerNumber>().test();
 }
@@ -98,6 +100,8 @@ template<> Void
 TestNumber<ExactNumber>::test_comparisons() {
     ARIADNE_TEST_CONSTRUCT(ExactNumber,y1,(Rational(2,3)));
     ARIADNE_TEST_CONSTRUCT(ExactNumber,y2,(Rational(683,1024)));
+    ARIADNE_TEST_CONSTRUCT(ExactNumber,pinf,(+ExactDouble::infinity()));
+    ARIADNE_TEST_CONSTRUCT(ExactNumber,ninf,(-ExactDouble::infinity()));
 
 /*
     ARIADNE_TEST_BINARY_PREDICATE( operator==,y1,y1);
@@ -125,4 +129,13 @@ TestNumber<ExactNumber>::test_comparisons() {
     ARIADNE_TEST_BINARY_PREDICATE(!operator< ,y2,y2);
 
     ARIADNE_TEST_BINARY_PREDICATE(operator==,y1,y1);
+
+    ARIADNE_TEST_BINARY_PREDICATE(operator==,pinf,pinf);
+    ARIADNE_TEST_BINARY_PREDICATE(operator!=,ninf,pinf);
+    ARIADNE_TEST_BINARY_PREDICATE(operator< ,ninf,pinf);
+    ARIADNE_TEST_BINARY_PREDICATE(operator!=,y1,pinf);
+    ARIADNE_TEST_BINARY_PREDICATE(operator!=,pinf,y1);
+    ARIADNE_TEST_BINARY_PREDICATE(operator<,y1,pinf);
+    ARIADNE_TEST_BINARY_PREDICATE(operator<,ninf,y1);
+
 }

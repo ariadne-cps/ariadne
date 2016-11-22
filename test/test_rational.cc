@@ -24,6 +24,7 @@
 #include "config.h"
 
 #include "numeric/rational.h"
+#include "numeric/builtin.h"
 #include "numeric/integer.h"
 #include "numeric/dyadic.h"
 #include "numeric/logical.h"
@@ -45,6 +46,7 @@ class TestRational
     void test_literal();
     void test_conversions();
     void test_arithmetic();
+    void test_comparisons();
 };
 
 void TestRational::test()
@@ -52,6 +54,7 @@ void TestRational::test()
     ARIADNE_TEST_CALL(test_literal());
     ARIADNE_TEST_CALL(test_conversions());
     ARIADNE_TEST_CALL(test_arithmetic());
+    ARIADNE_TEST_CALL(test_comparisons());
 }
 
 void TestRational::test_concept() {
@@ -106,6 +109,17 @@ void TestRational::test_arithmetic() {
     ARIADNE_TEST_EQUAL(Rational(-4,5)-Rational(-2,7),Rational(-18,35));
     ARIADNE_TEST_EQUAL(Rational(4,5)*Rational(-2,7),Rational(-8,35));
     ARIADNE_TEST_EQUAL(Rational(4,5)/Rational(-2,7),Rational(-14,5));
+};
+
+void TestRational::test_comparisons() {
+    ExactDouble inf=ExactDouble::infinity();
+    ExactDouble max=ExactDouble(std::numeric_limits<double>::max());
+    ARIADNE_TEST_BINARY_PREDICATE(operator<,Rational(-max),Rational(+max));
+    ARIADNE_TEST_BINARY_PREDICATE(operator<,Rational(-max),Rational(-4,5));
+    ARIADNE_TEST_BINARY_PREDICATE(operator<,Rational(-max),Rational(2,3));
+    ARIADNE_TEST_BINARY_PREDICATE(operator<,Rational(-4,5),Rational(-2,7));
+    ARIADNE_TEST_BINARY_PREDICATE(operator<,-inf,Rational(18,35));
+    ARIADNE_TEST_BINARY_PREDICATE(operator<,Rational(18,35),+inf);
 };
 
 

@@ -52,6 +52,33 @@ template<class... AWS> struct Aware;
 template<class X> class NumberMixin;
 template<class X> class NumberWrapper;
 
+template<class X> inline X const* extract(NumberInterface const* y) {
+     return dynamic_cast<NumberWrapper<X>const*>(y);
+}
+
+inline OutputStream& operator<<(OutputStream& os, NumberInterface const& y) { return y._write(os); }
+
+inline OutputStream& operator<<(OutputStream& os, Comparison c) {
+    return os << ( (c==Comparison::EQUAL) ? "EQUAL" : (c==Comparison::LESS) ? "LESS" : "GREATER" );
+}
+inline OutputStream& operator<<(OutputStream& os, Sign s) {
+    return os << ( (s==Sign::ZERO) ? "ZERO" : (s==Sign::NEGATIVE) ? "NEGATIVE" : "POSITIVE" );
+}
+
+// FIXME: Should test for other potential infiniteis
+inline Comparison cmp(NumberInterface const& y1, NumberInterface const& y2) {
+    Comparison res;
+    Float64Value const* x1=extract<Float64Value>(&y1);
+    Float64Value const* x2=extract<Float64Value>(&y2);
+    if(x1) {
+        if(x2) { res= cmp(ExactDouble(x1->raw().get_d()),ExactDouble(x2->raw().get_d())); }
+        else { res= cmp(ExactDouble(x1->raw().get_d()),y2._get_q()); }
+    } else {
+        if(x2) { res= cmp(y1._get_q(),ExactDouble(x2->raw().get_d())); }
+        else { res= cmp(y1._get_q(),y2._get_q()); }
+    }
+    return res;
+}
 
 template<class I, class OP, class Y> struct OperableInterface {
     virtual ~OperableInterface() = default;
@@ -187,7 +214,7 @@ template<class X> class NumberGetterMixin : public virtual NumberInterface {
     // FIXME: Proper comparisons for ExactNumber.
     virtual LogicalValue _equals(NumberInterface const& y) const override {
         if (this->_paradigm() == ParadigmCode::EXACT && y._paradigm() == ParadigmCode::EXACT) {
-            return LogicalValue(this->_get(BoundedTag(),Precision64()) == y._get(BoundedTag(),Precision64())); }
+            return LogicalValue( cmp(*this,y)==Comparison::EQUAL ? LogicalValue::TRUE : LogicalValue::FALSE ); }
         if (this->_paradigm() == ParadigmCode::VALIDATED && y._paradigm() == ParadigmCode::VALIDATED) {
             return LogicalValue(this->_get(BoundedTag(),Precision64()) == y._get(BoundedTag(),Precision64())); }
         else {
@@ -195,13 +222,16 @@ template<class X> class NumberGetterMixin : public virtual NumberInterface {
     }
     virtual LogicalValue _less(NumberInterface const& y) const override {
         if (this->_paradigm() == ParadigmCode::EXACT && y._paradigm() == ParadigmCode::EXACT) {
-            return LogicalValue(this->_get(BoundedTag(),Precision64()) < y._get(BoundedTag(),Precision64())); }
+            return LogicalValue( cmp(*this,y)==Comparison::LESS ? LogicalValue::TRUE : LogicalValue::FALSE ); }
         else if (this->_paradigm() == ParadigmCode::VALIDATED && y._paradigm() == ParadigmCode::VALIDATED) {
             return LogicalValue(this->_get(BoundedTag(),Precision64()) < y._get(BoundedTag(),Precision64())); }
         else {
             return LogicalValue(this->_get(ApproximateTag(),Precision64()) < y._get(ApproximateTag(),Precision64()));
         }
     }
+
+    virtual Rational _get_q() const override {
+        return this->_get_as<Rational>(); }
 
     virtual Float64Ball _get(MetricTag,Precision64 pr) const override {
         return this->_get_as<Float64Ball>(pr); }
@@ -229,9 +259,9 @@ template<class X> class NumberGetterMixin : public virtual NumberInterface {
     virtual OutputStream& _write(OutputStream& os) const override { return os << _cast(*this); }
 
   private:
-    template<class R, EnableIf<IsConvertible<X,R>> = dummy>
+    template<class R, EnableIf<IsConstructible<R,X>> = dummy>
         inline R _get_as() const { return static_cast<R>(_cast(*this)); }
-    template<class R, DisableIf<IsConvertible<X,R>> = dummy>
+    template<class R, DisableIf<IsConstructible<R,X>> = dummy>
         inline R _get_as() const { std::cerr<<"Warning: Cannot convert " << _cast(*this) << " of type " << this->_class_name() << " to " << class_name<R>() << "\n"; throw ParadigmError(); }
     template<class R, class PR, EnableIf<IsConstructible<R,X,PR>> = dummy>
         inline R _get_as(PR pr) const { return R(_cast(*this),pr); }

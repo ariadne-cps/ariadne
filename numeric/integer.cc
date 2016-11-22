@@ -360,10 +360,10 @@ Boolean lt(Integer const& z1, Integer const& z2) {
 // i.e., at least maq1(n + 2, 7). The extra two bytes are for a possible minus sign,
 // and for the terminating null character, and the value 7 accounts for -@Inf@ plus the terminating null character.
 OutputStream& operator<<(OutputStream& os, Integer const& z) {
-    char str[255];
-    str[254]='\0';
+    char str[511];
+    str[510]='\0';
     mpz_get_str (str, 10, z._mpz);
-    assert(str[254]=='\0');
+    assert(str[510]=='\0');
     return os << str;
 }
 

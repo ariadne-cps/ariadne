@@ -174,8 +174,8 @@ Real::Real(std::uint64_t m, Void*) : Real(std::make_shared<RealConstant<Integer>
 Real::Real(std::int64_t n, Void*) : Real(std::make_shared<RealConstant<Integer>>(n)) { }
 
 Real::Real() : Real(std::make_shared<RealConstant<Integer>>(0)) { }
-//Real::Real(ExactDouble d) : Real(std::make_shared<RealConstant<ExactDouble>>(d)) { }
-Real::Real(ExactDouble d) : Real(Dyadic(d)) { }
+Real::Real(ExactDouble d) : Real(std::make_shared<RealConstant<ExactDouble>>(d)) { }
+//Real::Real(ExactDouble d) : Real(Dyadic(d)) { }
 Real::Real(Integer const& z) : Real(std::make_shared<RealConstant<Integer>>(z)) { }
 Real::Real(Dyadic const& w) : Real(std::make_shared<RealConstant<Dyadic>>(w)) { }
 Real::Real(Decimal const& d) : Real(Rational(d)) { }

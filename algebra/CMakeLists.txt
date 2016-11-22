@@ -9,3 +9,5 @@ add_library(ariadne-algebra OBJECT
     differential.cc
     algebra.cc
 )
+
+cotire(ariadne-algebra)

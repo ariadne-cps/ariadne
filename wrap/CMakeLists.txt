@@ -43,3 +43,6 @@ add_library(pyariadne-src OBJECT
     graphics_submodule.cc
 )
 
+cotire(pynumeric-src)
+cotire(pyalgebra-src)
+cotire(pyariadne-src)

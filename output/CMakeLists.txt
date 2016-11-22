@@ -6,3 +6,5 @@ add_library(ariadne-output OBJECT
     drawer.cc
     textplot.cc
 )
+
+cotire(ariadne-output)

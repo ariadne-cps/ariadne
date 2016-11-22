@@ -9,3 +9,5 @@ add_library(ariadne-function OBJECT
     taylor_model.cc
     taylor_function.cc
 )
+
+cotire(ariadne-function)

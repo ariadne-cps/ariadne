@@ -224,53 +224,62 @@ Rational min(Rational const& q1, Rational const& q2) {
 }
 
 Rational abs(Rational const& q) {
-    Rational r; mpq_abs(r._mpq,q._mpq);
-    return std::move(r);
+    Rational r;
+    mpq_abs(r._mpq,q._mpq);
+    return r;
 }
 
 Rational nul(Rational const& q) {
     Rational r; mpq_set_si(r._mpq,0,1u);
-    return std::move(r);
+    return r;
 }
 
 Rational pos(Rational const& q) {
-    Rational r; mpq_set(r._mpq,q._mpq);
-    return std::move(r);
+    Rational r;
+    mpq_set(r._mpq,q._mpq);
+    return r;
 }
 
 Rational neg(Rational const& q) {
-    Rational r; mpq_neg(r._mpq,q._mpq);
-    return std::move(r);
+    Rational r;
+    mpq_neg(r._mpq,q._mpq);
+    return r;
 }
 
 Rational sqr(Rational const& q) {
-    Rational r; mpq_mul(r._mpq,q._mpq,q._mpq);
-    return std::move(r);
+    Rational r;
+    mpq_mul(r._mpq,q._mpq,q._mpq);
+    return r;
 }
 
 Rational rec(Rational const& q) {
-    Rational r; mpq_inv(r._mpq,q._mpq);
-    return std::move(r);
+    Rational r;
+    mpq_inv(r._mpq,q._mpq);
+    return r;
 }
 
 Rational add(Rational const& q1, Rational const& q2) {
-    Rational r; mpq_add(r._mpq,q1._mpq,q2._mpq);
-    return std::move(r);
+    Rational r;
+    mpq_add(r._mpq,q1._mpq,q2._mpq);
+    return r;
 }
 
 Rational sub(Rational const& q1, Rational const& q2) {
-    Rational r; mpq_sub(r._mpq,q1._mpq,q2._mpq);
-    return std::move(r);
+    Rational r;
+    mpq_sub(r._mpq,q1._mpq,q2._mpq);
+    return r;
 }
 
 Rational mul(Rational const& q1, Rational const& q2) {
-    Rational r; mpq_mul(r._mpq,q1._mpq,q2._mpq);
-    return std::move(r);
+    Rational r;
+    mpq_mul(r._mpq,q1._mpq,q2._mpq);
+    return r;
 }
 
 Rational div(Rational const& q1, Rational const& q2) {
-    Rational r; mpq_div(r._mpq,q1._mpq,q2._mpq);
-    return std::move(r);
+    Rational r;
+    mpq_div(r._mpq,q1._mpq,q2._mpq);
+    return r;
 }
 
 Rational div(Integer const& z1, Integer const& z2) {
@@ -280,7 +289,7 @@ Rational div(Integer const& z1, Integer const& z2) {
 Rational pow(Rational const& q, Nat m) {
     Rational r=1; Rational p=q;
     while(m!=0) { if(m%2==1) { r=r*p; } p=p*p; m/=2; }
-    return std::move(r);
+    return r;
 }
 
 Rational pow(Rational const& q, Int n) {

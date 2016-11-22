@@ -261,45 +261,52 @@ Integer& operator*=(Integer& z1, Integer const& z2) {
 */
 
 Integer nul(Integer const& z) {
-    Integer r; mpz_set_si(r._mpz,0);
-    return std::move(r);
+    Integer r;
+    mpz_set_si(r._mpz,0);
+    return r;
 }
 
 Integer pos(Integer const& z) {
-    Integer r; mpz_set(r._mpz,z._mpz);
-    return std::move(r);
+    Integer r;
+    mpz_set(r._mpz,z._mpz);
+    return r;
 }
 
 Integer neg(Integer const& z) {
-    Integer r; mpz_neg(r._mpz,z._mpz);
-    return std::move(r);
+    Integer r;
+    mpz_neg(r._mpz,z._mpz);
+    return r;
 }
 
 Natural sqr(Integer const& z) {
-    Natural r; mpz_mul(r._mpz,z._mpz,z._mpz);
-    return std::move(r);
+    Natural r;
+    mpz_mul(r._mpz,z._mpz,z._mpz);
+    return r;
 }
 
 Integer add(Integer const& z1, Integer const& z2) {
-    Integer r; mpz_add(r._mpz,z1._mpz,z2._mpz);
-    return std::move(r);
+    Integer r;
+    mpz_add(r._mpz,z1._mpz,z2._mpz);
+    return r;
 }
 
 Integer sub(Integer const& z1, Integer const& z2) {
-    Integer r; mpz_sub(r._mpz,z1._mpz,z2._mpz);
-    return std::move(r);
+    Integer r;
+    mpz_sub(r._mpz,z1._mpz,z2._mpz);
+    return r;
 }
 
 Integer mul(Integer const& z1, Integer const& z2) {
-    Integer r; mpz_mul(r._mpz,z1._mpz,z2._mpz);
-    return std::move(r);
+    Integer r;
+    mpz_mul(r._mpz,z1._mpz,z2._mpz);
+    return r;
 }
 
 Integer pow(Integer const& z, Nat m) {
     unsigned long int lm=m;
     Integer r;
     mpz_pow_ui(r._mpz,z._mpz,lm);
-    return std::move(r);
+    return r;
 }
 
 
@@ -312,8 +319,9 @@ Integer max(Integer const& z1,Integer const& z2) {
 }
 
 Natural abs(Integer const& z) {
-    Natural r; mpz_abs(r._mpz,z._mpz);
-    return std::move(r);
+    Natural r;
+    mpz_abs(r._mpz,z._mpz);
+    return r;
 }
 
 Natural max(Natural const& z1,Natural const& z2) {

@@ -20,7 +20,6 @@ GCC_CXXWARNINGS=-Wall  -Wno-non-template-friend -Wno-sign-compare -Wno-unused
 CLANG_CXX = clang++
 CLANG_CXXFLAGS = -std=c++14 -fPIC
 CLANG_CXXWARNINGS=-Wall \
-	-Wno-pessimizing-move -Wno-redundant-move \
 	-Wno-mismatched-tags -Wno-inconsistent-missing-override  -Wno-overloaded-virtual \
 	-Wno-unused-local-typedef -Wno-unused-const-variable -Wno-unused-variable  -Wno-unused-function -Wno-unused-comparison
 

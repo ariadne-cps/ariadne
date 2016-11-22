@@ -49,7 +49,7 @@ template<class D, EnableIf<IsSame<D,double>> =dummy> ValidatedTaylorModel operat
 
 // Allow carat for power
 ValidatedTaylorModel operator^(ValidatedTaylorModel tm, Nat m) { return pow(tm,m); }
-ValidatedTaylorModel clobber(ValidatedTaylorModel tm) { tm.clobber(); return std::move(tm); }
+ValidatedTaylorModel clobber(ValidatedTaylorModel tm) { tm.clobber(); return tm; }
 
 template<class A> void display_difference(A const& res, A const& exp) {
     auto tol=exp.error();

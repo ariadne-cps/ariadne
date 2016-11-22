@@ -151,19 +151,19 @@ Dyadic& operator*=(Dyadic& x1, Dyadic const& x2) {
 Dyadic nul(Dyadic const& x) {
     Dyadic r;
     mpf_set_si(r._mpf,0);
-    return std::move(r);
+    return r;
 }
 
 Dyadic pos(Dyadic const& x) {
     Dyadic r;
     mpf_set(r._mpf,x._mpf);
-    return std::move(r);
+    return r;
 }
 
 Dyadic neg(Dyadic const& x) {
     Dyadic r;
     mpf_neg(r._mpf,x._mpf);
-    return std::move(r);
+    return r;
 }
 
 Dyadic sqr(Dyadic const& x) {
@@ -173,39 +173,39 @@ Dyadic sqr(Dyadic const& x) {
 Dyadic add(Dyadic const& x1, Dyadic const& x2) {
     Dyadic r;
     mpf_add(r._mpf,x1._mpf,x2._mpf);
-    return std::move(r);
+    return r;
 }
 
 Dyadic sub(Dyadic const& x1, Dyadic const& x2) {
     Dyadic r;
     mpf_sub(r._mpf,x1._mpf,x2._mpf);
-    return std::move(r);
+    return r;
 }
 
 Dyadic mul(Dyadic const& x1, Dyadic const& x2) {
     Dyadic r;
     mpf_mul(r._mpf,x1._mpf,x2._mpf);
-    return std::move(r);
+    return r;
 }
 
 Dyadic hlf(Dyadic const& x) {
     Dyadic r;
     mpf_div_2exp(r._mpf,x._mpf,1);
-    return std::move(r);
+    return r;
 }
 
 Dyadic pow(Dyadic const& x, Nat m) {
     unsigned long int lm=m;
     Dyadic r;
     mpf_pow_ui(r._mpf,x._mpf,lm);
-    return std::move(r);
+    return r;
 }
 
 
 Dyadic abs(Dyadic const& x) {
     Dyadic r;
     mpf_abs(r._mpf,x._mpf);
-    return std::move(r);
+    return r;
 }
 
 Dyadic min(Dyadic const& x1,Dyadic const& x2) {

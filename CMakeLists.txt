@@ -1,5 +1,12 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8.12)
 project (Ariadne)
+
+if(POLICY CMP0045)
+  cmake_policy(SET CMP0045 OLD)
+endif()
+if(POLICY CMP0058)
+  cmake_policy(SET CMP0058 NEW)
+endif()
 
 # enable dashboard scripting
 enable_testing()
@@ -9,6 +16,7 @@ set (Ariadne_VERSION_MAJOR 0)
 set (Ariadne_VERSION_MINOR 5)
 
 set(BUILD_SHARED_LIBS ON)
+set(CMAKE_MACOSX_RPATH 1)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")

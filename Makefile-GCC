@@ -252,7 +252,7 @@ check: tests
 examples: dirs $(EXAMPLES_BIN) $(EXAMPLES_OBJ) lib
 
 clean:
-	@rm -f */*.gch $(OBJ_DIR)/*/*.o *.so $(BIN_DIR)/*
+	@rm -f */*.gch $(OBJ_DIR)/*.o *.so $(BIN_DIR)/*
 
 shiny: clean
 	@rm -rf $(DEP_DIR) $(OBJ_DIR) $(BIN_DIR) $(CHECK_DIR)
@@ -350,6 +350,9 @@ bin/test_rational: $(TESTS_OBJ_DIR)/test_rational.o  libariadne-numeric.so
 	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_NUMERIC_LIB) $(LINK_LIBS) -o $@
 
 bin/test_real: $(TESTS_OBJ_DIR)/test_real.o  libariadne-numeric.so
+	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_NUMERIC_LIB) $(LINK_LIBS) -o $@
+
+bin/test_number: $(TESTS_OBJ_DIR)/test_number.o  libariadne-numeric.so
 	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_NUMERIC_LIB) $(LINK_LIBS) -o $@
 
 bin/test_float: $(TESTS_OBJ_DIR)/test_float.o  libariadne-numeric.so

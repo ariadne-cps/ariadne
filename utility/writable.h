@@ -42,10 +42,10 @@ class WritableInterface {
     virtual ~WritableInterface() = default;
     friend OutputStream& operator<<(OutputStream& os, const WritableInterface& w);
   public:
-    inline OutputStream& _write(OutputStream& os) const { return this->write(os); }
+    inline OutputStream& write(OutputStream& os) const { return this->_write(os); }
   protected:
   public:
-    virtual OutputStream& write(OutputStream&) const = 0;
+    virtual OutputStream& _write(OutputStream&) const = 0;
 };
 inline OutputStream& operator<<(OutputStream& os, const WritableInterface& w) { w._write(os); return os; }
 

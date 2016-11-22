@@ -19,9 +19,9 @@ GCC_CXXWARNINGS=-Wall  -Wno-non-template-friend -Wno-sign-compare -Wno-unused
 
 CLANG_CXX = clang++
 CLANG_CXXFLAGS = -std=c++14 -fPIC
-CLANG_CXXWARNINGS=-Wall \
-	-Wno-inconsistent-missing-override  \
-	-Wno-unused-local-typedef -Wno-unused-const-variable -Wno-unused-variable  -Wno-unused-function -Wno-unused-comparison
+CLANG_CXXWARNINGS=-Wall -Wno-unused \
+
+#   -Wno-unused-local-typedef -Wno-unused-const-variable -Wno-unused-variable  -Wno-unused-function -Wno-unused-comparison
 
 VPATH = utility numeric expression algebra function geometry solvers dynamics hybrid output \
 	test wrap examples

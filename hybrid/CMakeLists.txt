@@ -11,3 +11,5 @@ add_library(ariadne-hybrid OBJECT
     hybrid_reachability_analyser.cc
     hybrid_graphics.cc
 )
+
+cotire(ariadne-hybrid)

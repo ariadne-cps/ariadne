@@ -1,5 +1,12 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8.12)
 project (Ariadne)
+
+if(POLICY CMP0045)
+  cmake_policy(SET CMP0045 OLD)
+endif()
+if(POLICY CMP0058)
+  cmake_policy(SET CMP0058 NEW)
+endif()
 
 # enable dashboard scripting
 enable_testing()
@@ -9,9 +16,12 @@ set (Ariadne_VERSION_MAJOR 0)
 set (Ariadne_VERSION_MINOR 5)
 
 set(BUILD_SHARED_LIBS ON)
+set(CMAKE_MACOSX_RPATH 1)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
+set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 
-set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+include(cotire)
 
 include (CheckTypeSize)
 include (CheckIncludeFile)
@@ -76,9 +86,9 @@ add_subdirectory(output)
 add_subdirectory(hybrid)
 
 add_subdirectory(test)
-add_subdirectory(wrap)
+#add_subdirectory(wrap)
 add_subdirectory(examples)
-add_subdirectory(python)
+#add_subdirectory(python)
 
 add_library(ariadne SHARED
     $<TARGET_OBJECTS:ariadne-numeric>
@@ -101,15 +111,15 @@ target_link_libraries(ariadne boost_system)
 target_link_libraries(ariadne cairo)
 target_link_libraries (ariadne boost_serialization)
 
-add_library(pyariadne $<TARGET_OBJECTS:pyariadne-src>)
-set_target_properties(pyariadne PROPERTIES PREFIX "" OUTPUT_NAME "ariadne")
-target_link_libraries (pyariadne ariadne boost_python)
+#add_library(pyariadne $<TARGET_OBJECTS:pyariadne-src>)
+#set_target_properties(pyariadne PROPERTIES PREFIX "" OUTPUT_NAME "ariadne")
+#target_link_libraries (pyariadne ariadne boost_python)
 
 
-add_library(pynumeric $<TARGET_OBJECTS:pynumeric-src>)
-set_target_properties(pynumeric PROPERTIES PREFIX "" OUTPUT_NAME "numeric")
-target_link_libraries (pynumeric ariadne boost_python)
+#add_library(pynumeric $<TARGET_OBJECTS:pynumeric-src>)
+#set_target_properties(pynumeric PROPERTIES PREFIX "" OUTPUT_NAME "numeric")
+#target_link_libraries (pynumeric ariadne boost_python)
 
-add_library(pyalgebra $<TARGET_OBJECTS:pyalgebra-src>)
-set_target_properties(pyalgebra PROPERTIES PREFIX "" OUTPUT_NAME "algebra")
-target_link_libraries (pyalgebra ariadne boost_python)
+#add_library(pyalgebra $<TARGET_OBJECTS:pyalgebra-src>)
+#set_target_properties(pyalgebra PROPERTIES PREFIX "" OUTPUT_NAME "algebra")
+#target_link_libraries (pyalgebra ariadne boost_python)

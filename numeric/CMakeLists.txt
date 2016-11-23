@@ -12,3 +12,5 @@ add_library(ariadne-numeric OBJECT
     floatmp.cc
     float-user.cc
 )
+
+cotire(ariadne-numeric)

@@ -463,8 +463,8 @@ _apply_invariants(HybridEnclosure& initial_set,
 Void
 HybridEvolverBase::
 _process_starting_events(EvolutionData& evolution_data,
-                        HybridEnclosure const& initial_set,
-                        Map<DiscreteEvent,TransitionData> const& transitions) const
+                         HybridEnclosure const& initial_set,
+                         Map<DiscreteEvent,TransitionData> const& transitions) const
 {
     ARIADNE_LOG(3,"HybridEvolverBase::_process_starting_events(...)\n");
     ARIADNE_ASSERT(evolution_data.working_sets.empty());
@@ -566,9 +566,13 @@ _compute_active_events(EffectiveVectorFunction const& dynamic,
     for(Set<DiscreteEvent>::Iterator event_iter=events.begin(); event_iter!=events.end(); ++event_iter) {
         const DiscreteEvent event=*event_iter;
         const EffectiveScalarFunction& guard_function=guards[event];
-        ARIADNE_LOG(8,"event="<<event<<", guard="<<guard_function<<", flow_derivative="<<lie_derivative(guard_function,dynamic)<<"\n");
+        EffectiveScalarFunction flow_derivative = lie_derivative(guard_function,dynamic);
+        ARIADNE_LOG(8,"event="<<event<<", guard="<<guard_function<<", flow_derivative="<<flow_derivative<<"\n");
         // First try a simple test based on the bounding box
         UpperIntervalType guard_range=apply(guard_function,reach_set.space_bounding_box());
+        // For IMPACT events, also look at flow direction
+        UpperIntervalType flow_derivative_range=apply(flow_derivative,reach_set.space_bounding_box());
+        ARIADNE_LOG(9,"guard_range="<<guard_range<<", flow_derivative_range="<<flow_derivative_range<<"\n");
         if(possibly(guard_range.upper()>=zero)) {
             // Now make a set containing the complement of the constraint,
             // and test for emptiness. If the set is empty, then the guard is
@@ -577,15 +581,6 @@ _compute_active_events(EffectiveVectorFunction const& dynamic,
             test_set.new_activation(event,guard_function);
             if(!definitely(test_set.is_empty())) {
                 active_events.insert(*event_iter);
-/*
-                // FIXME: Need to allow permissive events with strictly decreasing guard.
-                // Test direction of guard increase
-                EffectiveScalarFunction flow_derivative = lie_derivative(guard_function,dynamic);
-                ExactIntervalType flow_derivative_range = flow_derivative(flow_bounds);
-                if(flow_derivative_range.upper()>zero) {
-                    active_events.insert(*event_iter);
-                }
-*/
             }
         }
     }
@@ -815,7 +810,6 @@ _apply_guard_step(HybridEnclosure& set,
     ValidatedScalarFunctionModel reach_step_time=embed(starting_state.domain(),timing_data.evolution_time_coordinate);
     ValidatedScalarFunctionModel step_time;
 
-
     ARIADNE_LOG(5,"transition_data.event_kind="<<transition_data.event_kind<<"\n");
     switch(transition_data.event_kind) {
         case PERMISSIVE:
@@ -824,7 +818,17 @@ _apply_guard_step(HybridEnclosure& set,
             jump_set.apply_reach_step(flow,timing_data.parameter_dependent_evolution_time);
             jump_set.new_activation(event,transition_data.guard_function);
             break;
-        case URGENT: case IMPACT:
+        case IMPACT: {
+            EffectiveScalarFunction flow_derivative_function=lie_derivative(transition_data.guard_function,dynamic);
+            UpperIntervalType flow_derivative_range=apply(flow_derivative_function,jump_set.space_bounding_box());
+            ARIADNE_LOG(9,"flow_derivative_range="<<flow_derivative_range<<"\n");
+            if(possibly(flow_derivative_range.lower()<=0)) {
+                jump_set.new_activation(event,flow_derivative_function);
+            }
+            // Filter through to URGENT
+            if(definitely(jump_set.is_empty())) { return; }
+        }
+        case URGENT:
             ARIADNE_LOG(5,"crossing_data.crossing_kind="<<crossing_data.crossing_kind<<"\n");
             switch(crossing_data.crossing_kind) {
                 case CrossingKind::TRANSVERSE:
@@ -858,10 +862,7 @@ _apply_guard_step(HybridEnclosure& set,
                 case CrossingKind::NEGATIVE:
                 case CrossingKind::POSITIVE:
                 case CrossingKind::DECREASING:
-                    // Since guard must be satisfied on impact, the jump set is empty
-                    if(transition_data.event_kind==IMPACT) {
-                        jump_set.new_invariant(event,transition_data.guard_function*0+1);
-                    } else {
+                    {
                         ARIADNE_WARN("Crossing "<<crossing_data<<" does not introduce additional restrictions on flow\n");
                     }
                     break;
@@ -872,6 +873,8 @@ _apply_guard_step(HybridEnclosure& set,
         default:
             ARIADNE_FAIL_MSG("Invalid event kind "<<transition_data.event_kind<<" for transition.");
     }
+
+
 
 }
 

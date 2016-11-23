@@ -92,7 +92,7 @@ Void TestHybridEvolution::_set_evolver(const HybridAutomatonInterface& system) c
 
 Void TestHybridEvolution::test() const {
     ARIADNE_TEST_CALL(test_bouncing_ball());
-    ARIADNE_TEST_CALL(test_water_tank());
+//    ARIADNE_TEST_CALL(test_water_tank());
 };
 
 Void TestHybridEvolution::test_bouncing_ball() const {
@@ -100,6 +100,7 @@ Void TestHybridEvolution::test_bouncing_ball() const {
     Real one(1);
     RealVariable x("x");
     RealVariable v("v");
+    TimeVariable t;
 
     Real lambda(0.5);
     bouncing_ball.new_mode(q,{dot(x)=v,dot(v)=-one});
@@ -109,7 +110,9 @@ Void TestHybridEvolution::test_bouncing_ball() const {
     double height=2.0;
     double radius=1.0/64;
     HybridBoxType initial(q,bouncing_ball.continuous_state_space(q),ExactBoxType{{height-radius,height+radius},{-radius,+radius}});
-    HybridTime time(4.5,3);
+    Decimal tmax(4.5);
+    Natural maxsteps=5u;
+    HybridTime time(tmax,maxsteps);
 
     this->_set_evolver(bouncing_ball);
 
@@ -129,6 +132,18 @@ Void TestHybridEvolution::test_bouncing_ball() const {
     Dyadic xl(-0.5), xu(+2.5), vl(-4.0), vu(+4.0);
     Axes2d bounding_box={xl<=x<=xu,vl<=v<=vu};
     plot("test_hybrid_evolution-bouncing_ball",bounding_box,
+         reach_set_colour,orbit.reach(),
+         intermediate_set_colour,orbit.intermediate(),
+         final_set_colour,orbit.final(),
+         initial_set_colour,orbit.initial());
+    Axes2d time_bounding_box={0<=t<=tmax,xl<=x<=xu};
+    plot("test_hybrid_evolution-bouncing_ball-time",time_bounding_box,
+         reach_set_colour,orbit.reach(),
+         intermediate_set_colour,orbit.intermediate(),
+         final_set_colour,orbit.final(),
+         initial_set_colour,orbit.initial());
+    Axes2d velocity_bounding_box={0<=t<=tmax,vl<=v<=vu};
+    plot("test_hybrid_evolution-bouncing_ball-velocity",velocity_bounding_box,
          reach_set_colour,orbit.reach(),
          intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(),

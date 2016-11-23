@@ -451,6 +451,8 @@ template<class PR> class FloatBounds
     PrecisionType precision() const { ARIADNE_DEBUG_ASSERT(_l.precision()==_u.precision()); return _u.precision(); }
     GenericType generic() const;
 
+    FloatBounds<PR> pm(FloatError<PR> e) const;
+
     // DEPRECATED
     explicit operator RawFloatType () const { return value_raw(); }
     friend FloatApproximation<PR> round(FloatApproximation<PR> const& x);
@@ -521,6 +523,7 @@ template<class PR> class FloatBall
     double get_d() const { return _v.get_d(); }
 
     PrecisionType precision() const { return _v.precision(); }
+    FloatBall<PR> pm(FloatError<PR> e) const;
   public:
     friend PositiveFloatUpperBound<PR> mag(FloatBall<PR> const&);
     friend PositiveFloatLowerBound<PR> mig(FloatBall<PR> const&);

@@ -37,6 +37,38 @@
 using std::cout; using std::cerr; using std::endl;
 using namespace Ariadne;
 
+
+template<class T, class = decltype(declval<T>().clobber())> True has_clobber(int);
+template<class T> False has_clobber(...);
+template<class T> using HasClobber = decltype(has_clobber<T>(1));
+
+template<class T, EnableIf<HasClobber<T>> =dummy> void do_clobber(T& t) { t=t.clobber(); }
+template<class T, DisableIf<HasClobber<T>> =dummy> void do_clobber(T& t) { }
+
+template<class T, class = decltype(declval<T>().norm())> decltype(declval<T>().norm()) norm(T& t, int=0) { return t.norm(); }
+template<class T> T norm(T const& t) { return t; }
+
+#define ARIADNE_TEST_REFINES(expression,expected)                         \
+    {                                                                   \
+        std::cout << "refines(" << #expression << "," << #expected << "): " << std::flush; \
+        auto result = (expression); \
+        Bool ok = decide(refines(result,(expected)));                       \
+        if(ok) {                                                        \
+            std::cout << "true\n" << std::endl;                         \
+        } else {                                                        \
+            ++ARIADNE_TEST_FAILURES;                                    \
+            std::cout << "false\nERROR: refines(" << #expression << "," << #expected << "):\n"; \
+            std::cout << "    " << #expression << "=" << (result) << "\n    #expected="<< (expected) << std::endl; \
+            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": "; \
+            std::cerr << "`refines(" << #expression << "," << #expected << ")' failed;\n"; \
+            std::cerr << "result=" << (result) << "\nexpected="<< (expected) << std::endl; \
+            auto difference=(result-(expected)); do_clobber(difference); \
+            std::cerr << "difference=" << difference << "=" << (result) << #expected << "=" << (expected) << std::endl; \
+            std::cerr<<"  norm="<<norm(difference)<<" error="<<(result).error()<<" tolerance="<<(expected).error()<<"\n"; \
+        }                                                               \
+    }                                                                   \
+
+
 Vector<Float64Value> v(Nat n, Nat i) { return Vector<Float64Value>::unit(n,i); }
 ValidatedTaylorModel ctm(Nat m, double c, Sweeper swp) { return ValidatedTaylorModel::constant(m,Float64Value(c),swp); }
 ValidatedTaylorModel ctm(Nat m, Sweeper swp) { return ValidatedTaylorModel::constant(m,Float64Value(1.0),swp); }
@@ -175,7 +207,7 @@ Void TestTaylorModel::test_constructors()
 
 Void TestTaylorModel::test_predicates()
 {
-    ARIADNE_TEST_BINARY_PREDICATE(refines,1+x+(x^2)/2+(x^3)/4,1+x+(x^2)/2+e/4);
+    ARIADNE_TEST_REFINES(1+x+(x^2)/2+(x^3)/4,1+x+(x^2)/2+e/4);
     ARIADNE_TEST_BINARY_PREDICATE(not refines,1+x+(x^2)/2+(x^3)/6+e/1048576,1+x+(x^2)/2+e/6);
 
     ARIADNE_TEST_CONSTRUCT(ValidatedTaylorModel,tv1,(1+2*x+3*(x^2)+e*3/4));
@@ -183,10 +215,10 @@ Void TestTaylorModel::test_predicates()
     ARIADNE_TEST_CONSTRUCT(ValidatedTaylorModel,tv3,(o*9/8+x*7/4+(x^2)*13/4+e/4));
     ARIADNE_TEST_CONSTRUCT(ValidatedTaylorModel,tv4,(1+x*9/4+(x^2)*3-(x^4)/4+e/4));
 
-    ARIADNE_TEST_BINARY_PREDICATE(refines,tv1,tv1);
-    ARIADNE_TEST_BINARY_PREDICATE(refines,tv2,tv1);
+    ARIADNE_TEST_REFINES(tv1,tv1);
+    ARIADNE_TEST_REFINES(tv2,tv1);
     ARIADNE_TEST_BINARY_PREDICATE(not refines,tv3,tv1);
-    ARIADNE_TEST_BINARY_PREDICATE(refines,tv4,tv1);
+    ARIADNE_TEST_REFINES(tv4,tv1);
 
     Float64Value h(0.5);
     ARIADNE_TEST_BINARY_PREDICATE(consistent,1+2*x+3*y+e*3/4,1+2*x+3*y+e*3/4);
@@ -296,75 +328,94 @@ Void TestTaylorModel::test_range()
         ARIADNE_TEST_WARN("ValidatedTaylorModel::range() not exact for quadratic functions."); }
 }
 
+
 Void TestTaylorModel::test_functions()
 {
     ValidatedTaylorModel x=ValidatedTaylorModel::coordinate(1,0,swp);
     ValidatedTaylorModel hx=x/2;
     ValidatedTaylorModel ophx=1+x/2;
     Float64Bounds e(-1,+1);
+    Float64Error::set_output_places(8);
 
     ARIADNE_TEST_PRINT(exp(x));
     ARIADNE_TEST_PRINT(sin(x));
     ARIADNE_TEST_PRINT(cos(x));
     ARIADNE_TEST_PRINT(x.tolerance());
 
-    // Expected tolerance based on sweeper characteristics
-    static const Float64Value xtol=Float64Value(x.tolerance());
-    static const Float64Bounds tol=xtol*Float64Bounds(-1,+1);
-    Float64Value LAXITY(1);
+    Float64Value LAXITY(128);
+    // Threshold based on sweeper characteristics
+    static const Float64Value threshold=Float64Value(x.tolerance());
+    static const Float64Bounds tolerance=threshold*Float64Bounds(-1,+1)*LAXITY;
 
-    // exp, sin and cos have error bound e^N/N!*(1+1/N), where e is bound for |x| N is the first term omitted
+    // exp, sin and cos have error bound e^N/N!*(1+1/N), where e is bound for |x|, N is the first term omitted
     // ErrorTag bound for rec is e^(N-1); log is e^(N-1)/N; sqrt is ???, where e is bound for |x-1|
 
     //Functions based on their natural defining points with variable dependence 1.0
-    ValidatedTaylorModel expected_exp_x = 1+x+(x^2)/2+(x^3)/6+(x^4)/24+(x^5)/120+(x^6)/720+e/4410+tol;
-    ValidatedTaylorModel expected_sin_x = x-(x^3)/6+(x^5)/120+e/4410+tol;
-    ValidatedTaylorModel expected_cos_x = 1-(x^2)/2+(x^4)/24-(x^6)/720+e/35840+tol;
-    ARIADNE_TEST_BINARY_PREDICATE(refines,exp(x),expected_exp_x);
-    ARIADNE_TEST_BINARY_PREDICATE(refines,sin(x),expected_sin_x);
-    ARIADNE_TEST_BINARY_PREDICATE(refines,cos(x),expected_cos_x);
+    ValidatedTaylorModel expected_exp_x
+        = 1+x+(x^2)/2+(x^3)/6+(x^4)/24+(x^5)/120+(x^6)/720+(x^7)/5040+(x^8)/40320+(x^9)/362880+(x^10)/3628800+(x^11)/39916800+(x^12)/479001600+e/5782233600;
+    ValidatedTaylorModel expected_sin_x
+        = x-(x^3)/6+(x^5)/120-(x^7)/5040+(x^9)/362880-(x^11)/39916800+e/5782233600;
+    ValidatedTaylorModel expected_cos_x
+        = 1-(x^2)/2+(x^4)/24-(x^6)/720+(x^8)/40320-(x^10)/3628800+(x^12)/479001600+e/81366405120;
+    ARIADNE_TEST_REFINES(exp(x),expected_exp_x+tolerance);
+    ARIADNE_TEST_REFINES(sin(x),expected_sin_x+tolerance);
+    ARIADNE_TEST_REFINES(cos(x),expected_cos_x+tolerance);
 
     //Functions based on their natural defining points with variable dependence 0.5
-    ValidatedTaylorModel expected_exp_hx = 1+hx+(hx^2)/2+(hx^3)/6+(hx^4)/24+(hx^5)/120+(hx^6)/720+e/128/4410+tol;
-    ValidatedTaylorModel expected_sin_hx = hx-(hx^3)/6+(hx^5)/120+e/128/4410+tol;
-    ValidatedTaylorModel expected_cos_hx = 1-(hx^2)/2+(hx^4)/24-(hx^6)/720+e/128/4410+tol;
+    //ValidatedTaylorModel expected_exp_hx = 1+hx+(hx^2)/2+(hx^3)/6+(hx^4)/24+(hx^5)/120+(hx^6)/720+(hx^7)/5040+e/128/4410+tol;
+    ValidatedTaylorModel expected_exp_hx
+        = 1+x/2+(x^2)/8+(x^3)/48+(x^4)/384+(x^5)/3840+(x^6)/46080+(x^7)/645120+(x^8)/10321920+(x^9)/185794560+(x^10)/3715891200+e/2048/36590400;
+    ValidatedTaylorModel expected_sin_hx
+        = x/2-(x^3)/48+(x^5)/3840-(x^7)/645120+(x^9)/185794560+e/2048/36590400;
+    ValidatedTaylorModel expected_cos_hx
+        = 1-(x^2)/8+(x^4)/384-(x^6)/46080+(x^8)/10321920-(x^10)/3715891200+e/4096/5748019200*13;
     // Uncomment the last line so that expected_cos_hx contains error term base on x^8 term rather than x^7 term.
     //ValidatedTaylorModel expected_cos_hx = 1-(hx^2)/2+(hx^4)/24-(hx^6)/720+e/256/35840+tol;
 
-    ARIADNE_TEST_BINARY_PREDICATE(refines,exp(hx),expected_exp_hx);
-    ARIADNE_TEST_BINARY_PREDICATE(refines,sin(hx),expected_sin_hx);
-    ARIADNE_TEST_BINARY_PREDICATE(refines,cos(hx),expected_cos_hx);
+    ARIADNE_TEST_REFINES(exp(hx),expected_exp_hx+tolerance);
+    ARIADNE_TEST_REFINES(sin(hx),expected_sin_hx+tolerance);
+    ARIADNE_TEST_REFINES(cos(hx),expected_cos_hx+tolerance);
 
-    ValidatedTaylorModel expected_rec_ophx = 1-hx+(hx^2)-(hx^3)+(hx^4)-(hx^5)+(hx^6)+e/64+tol;
-    ValidatedTaylorModel expected_sqrt_ophx = 1+hx/2-(hx^2)/8+(hx^3)/16-(hx^4)*5/128+(hx^5)*7/256-(hx^6)*21/1024+e/64+tol;
-    ValidatedTaylorModel expected_log_ophx = hx-(hx^2)/2+(hx^3)/3-(hx^4)/4+(hx^5)/5-(hx^6)/6+e/64/7+tol;
-    ARIADNE_TEST_BINARY_PREDICATE(refines,rec(ophx),expected_rec_ophx);
-    ARIADNE_TEST_BINARY_PREDICATE(refines,sqrt(ophx),expected_sqrt_ophx);
-    ARIADNE_TEST_BINARY_PREDICATE(refines,log(ophx),expected_log_ophx);
+    // Series for sqrt(1+x) is
+    // 1, 1/2, -1/8, 1/16, -5/128, 7/256, -21/1024, 33/2048, -273/16384, 35/2048, -357/20480
+    // Series for sqrt(1+x/2) is
+    // 1, 1/4, -1/32, 1/128, -5/2048, 7/8192, -21/65536, 33/262144, 429/8388608, 715/33554432, 2431/268435456
+    ValidatedTaylorModel expected_rec_ophx
+        = 1-x/2+(x^2)/4-(x^3)/8+(x^4)/16-(x^5)/32+(x^6)/64-(x^7)/128+(x^8)/256-(x^9)/512+(x^10)/1024+e/1024;
+    ValidatedTaylorModel expected_sqrt_ophx
+        = 1+x/4-(x^2)/32+(x^3)/128-(x^4)*5/2048+(x^5)*7/8192-(x^6)*21/65536+(x^7)*33/262144-(x^8)*429/8388608+(x^9)*715/33554432+e*2431/268435456;
+    ValidatedTaylorModel expected_log_ophx
+        = x/2-(x^2)/4/2+(x^3)/8/3-(x^4)/16/4+(x^5)/32/5-(x^6)/64/6+(x^7)/128/7-(x^8)/256/8+(x^9)/512/9-(x^10)/1024/10+e/1024/10;
+    ARIADNE_TEST_REFINES(rec(ophx),expected_rec_ophx+tolerance);
+    ARIADNE_TEST_REFINES(sqrt(ophx),expected_sqrt_ophx+tolerance*128);
+    ARIADNE_TEST_REFINES(log(ophx),expected_log_ophx+tolerance);
+
+    ARIADNE_TEST_REFINES(sqrt(ophx)*sqrt(ophx),ophx+tolerance);
 
     // Doubling formulae
-    ARIADNE_TEST_BINARY_PREDICATE(refines,exp(2*x),expected_exp_x^2);
-    ARIADNE_TEST_BINARY_PREDICATE(refines,sin(2*x),2*expected_sin_x*expected_cos_x);
-    ARIADNE_TEST_BINARY_PREDICATE(refines,cos(2*x),2*(expected_cos_x^2)-1);
+    ARIADNE_TEST_REFINES(exp(2*x),(expected_exp_x^2)+tolerance);
+    ARIADNE_TEST_REFINES(sin(2*x),2*expected_sin_x*expected_cos_x+tolerance);
+    ARIADNE_TEST_REFINES(cos(2*x),2*(expected_cos_x^2)-1+tolerance);
 
-    ARIADNE_TEST_BINARY_PREDICATE(refines,rec(3*ophx),expected_rec_ophx/3);
-    ARIADNE_TEST_BINARY_PREDICATE(refines,sqrt(9*ophx),expected_sqrt_ophx*3);
-    ARIADNE_TEST_BINARY_PREDICATE(refines,log(3*ophx),expected_log_ophx+log(Float64Value(3)));
+    ARIADNE_TEST_REFINES(rec(3*ophx),expected_rec_ophx/3+tolerance);
+    ARIADNE_TEST_REFINES(sqrt(9*ophx),expected_sqrt_ophx*3+tolerance.pm(expected_sqrt_ophx.error()*4u));
+    ARIADNE_TEST_REFINES(log(3*ophx),expected_log_ophx+log(Float64Value(3))+tolerance);
 
     Nat rn=3; Float64Value c(2); Float64Value r(rn);
     ARIADNE_TEST_PRINT(c);
     ARIADNE_TEST_PRINT(r);
-    ARIADNE_TEST_BINARY_PREDICATE(refines,exp(c+r*hx),exp(c)*pow(expected_exp_hx,rn)+tol);
-    ARIADNE_TEST_BINARY_PREDICATE(refines,sin(c+hx),sin(c)*expected_cos_hx+cos(c)*expected_sin_hx+tol);
-    ARIADNE_TEST_BINARY_PREDICATE(refines,cos(c+hx),cos(c)*expected_cos_hx-sin(c)*expected_sin_hx+tol);
+    ARIADNE_TEST_REFINES(exp(hx),expected_exp_hx+tolerance);
+    ARIADNE_TEST_REFINES(exp(c+r*hx),exp(c)*pow(expected_exp_hx,rn)+tolerance);
+    ARIADNE_TEST_REFINES(sin(c+hx),sin(c)*expected_cos_hx+cos(c)*expected_sin_hx+tolerance);
+    ARIADNE_TEST_REFINES(cos(c+hx),cos(c)*expected_cos_hx-sin(c)*expected_sin_hx+tolerance);
 
     c=Float64Value(10);
-    ARIADNE_TEST_BINARY_PREDICATE(refines,sin(c+hx),sin(c)*expected_cos_hx+cos(c)*expected_sin_hx+LAXITY*tol);
-    ARIADNE_TEST_BINARY_PREDICATE(refines,cos(c+hx),cos(c)*expected_cos_hx-sin(c)*expected_sin_hx+LAXITY*tol);
+    ARIADNE_TEST_REFINES(sin(c+hx),sin(c)*expected_cos_hx+cos(c)*expected_sin_hx+tolerance);
+    ARIADNE_TEST_REFINES(cos(c+hx),cos(c)*expected_cos_hx-sin(c)*expected_sin_hx+tolerance);
 
     // Test exponential based at log2; exp(log(2)+x/2)=2*exp(x/2)
     Float64Value log2_apprx(0.693147);
-    ARIADNE_TEST_BINARY_PREDICATE(refines,exp(log2_apprx+x/2),
+    ARIADNE_TEST_REFINES(exp(log2_apprx+x/2),
                                   2*(1+hx+(hx^2)/2+(hx^3)/6+(hx^4)/24+(hx^5)/120+(hx^6)/720)+e*6/100000);
 }
 
@@ -383,7 +434,7 @@ Void TestTaylorModel::test_refinement()
     ValidatedTaylorModel y=ValidatedTaylorModel::coordinate(2,1,swp);
     ValidatedTaylorModel e=ValidatedTaylorModel::error(2,1.0_error,swp);
 
-    ARIADNE_TEST_BINARY_PREDICATE(refines,1+x+(x^2)/2+(x^3)/4,1+x+(x^2)/2+e/4);
+    ARIADNE_TEST_REFINES(1+x+(x^2)/2+(x^3)/4,1+x+(x^2)/2+e/4);
     ARIADNE_TEST_BINARY_PREDICATE(not refines,1+x+(x^2)/2+(x^3)/6+e/pow(2.0_exact,31),1+x+(x^2)/2+e/6);
 
     // Test refinement with no roundoff errors

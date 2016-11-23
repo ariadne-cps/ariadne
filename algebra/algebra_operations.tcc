@@ -377,7 +377,8 @@ template<class A> A NormedAlgebraOperations<A>::_sin(const A& x)
     auto rng=avg.pm(rad);
     Int n=integer_cast<Int>( round(avg/pi) );
 
-    A y=x-(2*n)*pi;
+    // Range reduce; use sin(x)=sin(x-2*n*pi)=sin((2*n+1)*pi-x)
+    A y=(n%2) ? n*pi-x : x-n*pi;
 
     A s=sqr(y);
 
@@ -413,10 +414,11 @@ template<class A> A NormedAlgebraOperations<A>::_cos(const A& x)
     auto avg=x.average();
     auto rad=x.radius();
 
+    // Range reduce; use cos(x)=cos(x-2*n*pi)=-cos(x-pi)
     Float64 two_pi_approx=2*Float64::pi(Precision64());
     Int n=integer_cast<Int>( round(avg/pi) );
-
-    A y=x-(2*n)*pi;
+    A y=x-n*pi;
+    int c=(n%2)?-1:+1; // If n is odd, take minus the usual series
 
     A s=sqr(y);
 
@@ -429,11 +431,11 @@ template<class A> A NormedAlgebraOperations<A>::_cos(const A& x)
     } while(decide(trunc_err>tol));
 
     // Compute 1-y/2+y^2/24-y^3/720+... = (1-y/2*(1-y/12*(1-y/30*...)
-    A z=x.create_constant(1);
+    A z=x.create_constant(c);
     for(DegreeType i=0; i!=deg; ++i) {
         z/=X(-Int(2*(deg-i)*(2*(deg-i)-1)));
         z*=s;
-        z+=1;
+        z+=c;
     }
 
     z+=z.create_ball(trunc_err);

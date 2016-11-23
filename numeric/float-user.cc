@@ -436,8 +436,16 @@ template<class PR> FloatBall<PR>::FloatBall(FloatValue<PR> const& x) : _v(x.raw(
 }
 
 
-template<class PR> FloatBall<PR> FloatValue<PR>::pm(FloatError<PR> _e) const {
-    FloatValue<PR> const& _v=*this; return FloatBall<PR>(_v,_e);
+template<class PR> FloatBall<PR> FloatValue<PR>::pm(FloatError<PR> e) const {
+    FloatValue<PR> const& v=*this; return FloatBall<PR>(v,e);
+}
+
+template<class PR> FloatBall<PR> FloatBall<PR>::pm(FloatError<PR> e) const {
+    return FloatBall(this->_v,add_up(this->_e,e._e));
+}
+
+template<class PR> FloatBounds<PR> FloatBounds<PR>::pm(FloatError<PR> e) const {
+    return FloatBounds(sub_down(this->_l,e._e),add_up(this->_u,e._e));
 }
 
 

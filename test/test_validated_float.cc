@@ -356,7 +356,7 @@ TestFloatBounds<PR>::test_concept()
     rx=pow(x,n); rx=pow(x,n);
 
     // Order
-    rx=max(vx,vx); rx==min(vx,vx); rx=abs(vx);
+    rx=max(vx,vx); rx=min(vx,vx); rx=abs(vx);
 
     // Transcendental functions
     rx=sqrt(vx);

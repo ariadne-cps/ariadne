@@ -114,9 +114,9 @@ Int main(Int argc, const char* argv[])
     /// Create the resets
 
     /// Reset the time (t^=0,vi^=vi,vo^=vo)
-    PrimedRealAssignments resettime_r( next((t,vi,vo)) = (0,vi,vo) );
+    PrimedRealAssignments resettime_r( next({t,vi,vo}) = {Real(0),vi,vo} );
     /// Do nothing (t^=t,vi^=vi,vo^=vo)
-    PrimedRealAssignments noop_r( next((t,vi,vo)) = (t,vi,vo) );
+    PrimedRealAssignments noop_r( next({t,vi,vo}) = {t,vi,vo} );
 
     /// Create the guards
     Real f=dp[1];

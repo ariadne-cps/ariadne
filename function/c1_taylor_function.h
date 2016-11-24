@@ -85,11 +85,11 @@ class C1TaylorFunction
     Array<Float64> _derivative_errors;
   private:
   public:
-    C1TaylorFunction() { };
-    C1TaylorFunction(Nat as);
+    C1TaylorFunction();
+    C1TaylorFunction(SizeType as);
   public:
-    static C1TaylorFunction constant(Nat as, Float64 c);
-    static C1TaylorFunction coordinate(Nat as, Nat ind);
+    static C1TaylorFunction constant(SizeType as, Float64 c);
+    static C1TaylorFunction coordinate(SizeType as, SizeType ind);
   public:
     ExactBoxType domain() const;
     Nat argument_size() const;

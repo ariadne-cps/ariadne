@@ -111,7 +111,7 @@ template<class X> X const& DiagonalMatrix<X>::get(SizeType i, SizeType j) const 
 
 template<class X> Void DiagonalMatrix<X>::set(SizeType i, SizeType j, X const& x) {
     ARIADNE_PRECONDITION(i==j);
-    _ary[i]==x;
+    _ary[i]=x;
 }
 
 template<class X> Vector<X> DiagonalMatrix<X>::diagonal () const {

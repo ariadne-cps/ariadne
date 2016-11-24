@@ -191,7 +191,7 @@ C1TaylorSeries operator+(C1TaylorSeries f1, C1TaylorSeries f2) {
     VOLATILE Float64 mvl=(-f1a[0])-f2a[0];
     r._zero_error=(vu+mvl)/2;
     r._uniform_error=(vu+mvl)/2;
-    for(Nat i=1; i!=min(f1a.size(),f2a.size()); ++i) {
+    for(SizeType i=1u; i!=std::min(f1a.size(),f2a.size()); ++i) {
         vu=f1a[i]+f2a[i];
         mvl=(-f1a[i])-f2a[i];
         r._uniform_error+=(vu+mvl)/2;
@@ -267,7 +267,7 @@ C1TaylorSeries operator*(C1TaylorSeries f1, C1TaylorSeries f2) {
     for(Nat ir=1; ir!=f1a.size()+f2a.size()-1; ++ir) {
         vu=0.0;
         mvl=0.0;
-        for(Nat i1=std::max(0,Int(ir)-Int(f2a.size()-1)); i1!=min(Int(ir+1),Int(f1a.size())); ++i1) {
+        for(Nat i1=std::max(0,Int(ir)-Int(f2a.size()-1)); i1!=std::min(Int(ir+1),Int(f1a.size())); ++i1) {
             Nat i2=ir-i1;
             // std::cerr<<"ir="<<ir<<", i1="<<i1<<", i2="<<i2<<"\n";
             ARIADNE_DEBUG_ASSERT(i2<f2a.size());
@@ -344,8 +344,10 @@ OutputStream& operator<<(OutputStream& os, const C1TaylorSeries& f) {
 
 
 
+C1TaylorFunction::C1TaylorFunction()
+    : C1TaylorFunction(0u) { }
 
-C1TaylorFunction::C1TaylorFunction(Nat as)
+C1TaylorFunction::C1TaylorFunction(SizeType as)
     : _expansion(as)
     , _zero_error(0)
     , _uniform_error(0)
@@ -361,7 +363,7 @@ C1TaylorFunction::C1TaylorFunction(Nat as)
     _expansion.reverse_lexicographic_sort();
 }
 
-C1TaylorFunction C1TaylorFunction::constant(Nat as, Float64 c) {
+C1TaylorFunction C1TaylorFunction::constant(SizeType as, Float64 c) {
     C1TaylorFunction result(as);
     MultiIndex ind=MultiIndex::zero(as);
     //result._expansion[ind]=Float64(c);
@@ -369,9 +371,9 @@ C1TaylorFunction C1TaylorFunction::constant(Nat as, Float64 c) {
     return result;
 }
 
-C1TaylorFunction C1TaylorFunction::coordinate(Nat as, Nat i) {
+C1TaylorFunction C1TaylorFunction::coordinate(SizeType as, SizeType j) {
     C1TaylorFunction result(as);
-    MultiIndex ind=MultiIndex::unit(as,i);
+    MultiIndex ind=MultiIndex::unit(as,j);
     //result._expansion[ind]=1;
     result._expansion.append(ind,1.0);
     return result;
@@ -685,7 +687,7 @@ OutputStream& operator<<(OutputStream& os, const C1TaylorFunction& f) {
        << ")";
     return os;
 
-    for(Expansion<Float64>::Iterator iter=f._expansion.begin();
+    for(Expansion<Float64>::ConstIterator iter=f._expansion.begin();
         iter!=f._expansion.end(); ++iter)
     {
         os << *iter;

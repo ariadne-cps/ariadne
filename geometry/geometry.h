@@ -109,7 +109,7 @@ image_separated(const ExactBoxType& d, const F& f, const ExactBoxType& b, const 
     } else if(definitely(inside(fc,b))) {
         //cout << "evaluation of the midpoint is inside\n";
         return false;
-    } else if(d.radius().upper()<cast_exact(eps)) {
+    } else if(d.radius().upper().raw()<eps) {
         //cout << "radius limit reached\n";
         return indeterminate;
     } else {

@@ -252,7 +252,13 @@ template<class P, class D, class C, class X> inline decltype(auto)
 evaluate(const Function<P,D,C>& f, const ElementType<D,X>& x) {
     return f(x); }
 
-RealExpression evaluate(EffectiveScalarFunction const& f, Vector<RealVariable> const& vars);
+template<class P, class D, class C, class X> inline decltype(auto)
+evaluate(const Function<P,D,C>& f, const Scalar<X>& x) {
+    return f(x); }
+
+template<class P, class D, class C, class X> inline decltype(auto)
+evaluate(const Function<P,D,C>& f, const Vector<X>& x) {
+    return f(x); }
 
 
 template<class P, class C, class X> inline decltype(auto)
@@ -309,10 +315,14 @@ EffectiveScalarFunction lie_derivative(const EffectiveScalarFunction& g, const E
 
 Formula<EffectiveNumericType> formula(const EffectiveScalarFunction& f);
 Vector< Formula<EffectiveNumericType> > formula(const EffectiveVectorFunction& f);
+//RealExpression evaluate(EffectiveScalarFunction const& f, Vector<RealVariable> const& vars);
 
 
-ValidatedVectorFunction join(const ValidatedVectorFunction& f1, const ValidatedVectorFunction& f2);
+
+ValidatedVectorFunction join(const ValidatedScalarFunction& f1, const ValidatedScalarFunction& f2);
+ValidatedVectorFunction join(const ValidatedScalarFunction& f1, const ValidatedVectorFunction& f2);
 ValidatedVectorFunction join(const ValidatedVectorFunction& f1, const ValidatedScalarFunction& f2);
+ValidatedVectorFunction join(const ValidatedVectorFunction& f1, const ValidatedVectorFunction& f2);
 ValidatedScalarFunction compose(const ValidatedScalarFunction& f, const ValidatedVectorFunction& g);
 ValidatedVectorFunction compose(const ValidatedVectorFunction& f, const ValidatedVectorFunction& g);
 
@@ -368,18 +378,13 @@ template<class P, class D> template<class XX> inline XX VectorFunctionElementRef
 
 
 
-inline UpperIntervalType evaluate_range(ScalarFunction<ValidatedTag>const& f, const Vector<UpperIntervalType>& x) {
-    return static_cast<UpperIntervalType>(f(reinterpret_cast<Vector<ValidatedNumericType>const&>(x))); }
-inline Vector<UpperIntervalType> evaluate_range(VectorFunction<ValidatedTag>const& f, const Vector<UpperIntervalType>& x) {
-    return static_cast<Vector<UpperIntervalType>>(f(reinterpret_cast<Vector<ValidatedNumericType>const&>(x))); }
-inline Vector<Differential<UpperIntervalType>> derivative_range(VectorFunction<ValidatedTag>const& f, const Vector<Differential<UpperIntervalType>>& x) {
-    return static_cast<Vector<Differential<UpperIntervalType>>>(f(reinterpret_cast<Vector<Differential<ValidatedNumericType>>const&>(x))); }
+UpperIntervalType evaluate_range(ScalarFunction<ValidatedTag>const& f, const Vector<UpperIntervalType>& x);
+Vector<UpperIntervalType> evaluate_range(VectorFunction<ValidatedTag>const& f, const Vector<UpperIntervalType>& x);
+Vector<Differential<UpperIntervalType>> derivative_range(VectorFunction<ValidatedTag>const& f, const Vector<Differential<UpperIntervalType>>& x);
+Covector<UpperIntervalType> gradient_range(ValidatedScalarFunction const& f, const Vector<UpperIntervalType>& x);
+Matrix<UpperIntervalType> jacobian_range(ValidatedVectorFunction const& f, const Vector<UpperIntervalType>& x);
 
 
-inline Covector<UpperIntervalType> gradient_range(ValidatedScalarFunction const& f, const Vector<UpperIntervalType>& x) {
-    return static_cast<Covector<UpperIntervalType>>(static_cast<Covector<ValidatedNumericType>>(gradient(f,reinterpret_cast<Vector<ValidatedNumericType>const&>(x)))); }
-inline Matrix<UpperIntervalType> jacobian_range(ValidatedVectorFunction const& f, const Vector<UpperIntervalType>& x) {
-    return static_cast<Matrix<UpperIntervalType>>(static_cast<Matrix<ValidatedNumericType>>(jacobian(f,reinterpret_cast<Vector<ValidatedNumericType>const&>(x)))); }
 
 /*
 inline Matrix<UpperIntervalType> jacobian(VectorFunction<ValidatedTag>const& f, const Vector<UpperIntervalType>& x) {

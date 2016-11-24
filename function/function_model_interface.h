@@ -67,6 +67,7 @@ template<class P> class ScalarFunctionModelInterface
 
     virtual ScalarFunctionModelInterface<P>* _apply(OperatorCode op) const = 0;
     virtual CanonicalNumericType<P> _unchecked_evaluate(const Vector<CanonicalNumericType<P>>& x) const = 0;
+    virtual ScalarFunctionModelInterface<P>* _partial_evaluate(SizeType j, const CanonicalNumericType<P>& c) const = 0;
 
     virtual ScalarFunctionModelInterface<P>* _clone() const = 0;
     virtual ScalarFunctionModelInterface<P>* _create() const = 0;

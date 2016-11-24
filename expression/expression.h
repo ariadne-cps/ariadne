@@ -72,6 +72,8 @@ template<class X> class Algebra;
 
 typedef Expression<Boolean> DiscretePredicate;
 typedef Expression<Kleenean> ContinuousPredicate;
+typedef Expression<Boolean> BooleanExpression;
+typedef Expression<Kleenean> KleeneanExpression;
 typedef Expression<String> StringExpression;
 typedef Expression<Integer> IntegerExpression;
 typedef Expression<Real> RealExpression;

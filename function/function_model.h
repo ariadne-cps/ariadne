@@ -143,6 +143,8 @@ template<class P> class ScalarFunctionModel
   public:
     friend inline ScalarFunctionModel<P> operator/(const ScalarFunctionModel<P>& f1, const ScalarFunctionModel<P>& f2) {
         return mul(f1,rec(f2)); }
+    friend inline ScalarFunctionModel<P> operator/(const CanonicalNumericType<P>& c1, const ScalarFunctionModel<P>& f2) {
+        return mul(c1,rec(f2)); }
     friend inline ScalarFunctionModel<P> neg(ScalarFunctionModel<P> f) {
         f._ptr->_imul(CanonicalNumericType<P>(-1)); return std::move(f); }
     friend inline ScalarFunctionModel<P> add(ScalarFunctionModel<P> f1, const ScalarFunctionModel<P>& f2) {
@@ -178,6 +180,9 @@ template<class P> class ScalarFunctionModel
         return f.apply(Rec()); }
 
   public:
+    friend ScalarFunctionModel<P> partial_evaluate(const ScalarFunctionModel<P>& f, SizeType j, const CanonicalNumericType<P>& c) {
+        return f._ptr->_partial_evaluate(j,c); }
+
     friend NormType norm(const ScalarFunctionModel<P>& f) { return f._ptr->_norm(); }
     friend ScalarFunctionModel<P> derivative(const ScalarFunctionModel<P>& f, SizeType j) { return f._ptr->_derivative(j); }
     friend ScalarFunctionModel<P> antiderivative(const ScalarFunctionModel<P>& f, SizeType j) { return f._ptr->_antiderivative(j); }
@@ -196,7 +201,8 @@ template<class P> class ScalarFunctionModel
     friend ScalarFunctionModel<P> restriction(const ScalarFunctionModel<P>& f, const ExactBoxType& d) {
         return f._ptr->_restriction(d); }
 
-    friend VectorFunctionModel<P> join(const ScalarFunctionModel<P>& f1, const ScalarFunctionModel<P>& f2);
+    friend VectorFunctionModel<P> join(const ScalarFunctionModel<P>& f1, const ScalarFunctionModel<P>& f2) {
+        return join(VectorFunctionModel<P>(1,f1),f2); }
     friend VectorFunctionModel<P> combine(const ScalarFunctionModel<P>& f1, const ScalarFunctionModel<P>& f2);
   public:
     friend OutputStream& operator<<(OutputStream& os, const ScalarFunctionModel<P>& f) {
@@ -367,8 +373,9 @@ template<class P> class VectorFunctionModel
         VectorFunctionModelInterface<P> const* fptr = dynamic_cast<VectorFunctionModelInterface<P> const*>(f.raw_pointer());
         if(fptr) { return unchecked_compose(VectorFunctionModel<P>(*fptr),g); } else { return compose(f,g); } }
 
-    friend VectorFunctionModel<P> join(const ScalarFunctionModel<P>& f1, const ScalarFunctionModel<P>& f2);
-    friend VectorFunctionModel<P> join(const ScalarFunctionModel<P>& f1, const VectorFunctionModel<P>& f2);
+    //friend VectorFunctionModel<P> join(const ScalarFunctionModel<P>& f1, const ScalarFunctionModel<P>& f2);
+    friend VectorFunctionModel<P> join(const ScalarFunctionModel<P>& f1, const VectorFunctionModel<P>& f2) {
+        return join(VectorFunctionModel<P>(1u,f1),f2); }
     friend VectorFunctionModel<P> join(const VectorFunctionModel<P>& f1, const ScalarFunctionModel<P>& f2) {
         VectorFunctionModel<P> r=f1._ptr->_clone(); r._ptr->_adjoin(f2); return r; }
     friend VectorFunctionModel<P> join(const VectorFunctionModel<P>& f1, const VectorFunctionModel<P>& f2) {

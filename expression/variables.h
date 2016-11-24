@@ -90,6 +90,7 @@ typedef PrimedVariable<Real> PrimedRealVariable;
 typedef Variable<Real> RealVariable;
 typedef Constant<Real> RealConstant;
 typedef Variables<Real> RealVariables;
+typedef Variable<Kleenean> KleeneanVariable;
 
 class RealVariableInterval;
 class RealVariablesBox;

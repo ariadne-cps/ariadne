@@ -72,6 +72,8 @@ template<class F, class P> class ScalarFunctionModelMixin
         return new F(this->apply(op)); }
     CanonicalNumericType<P> _unchecked_evaluate(const Vector<CanonicalNumericType<P>>& x) const override {
         return unchecked_evaluate(static_cast<const F&>(*this),x); }
+    ScalarFunctionModelInterface<P>* _partial_evaluate(SizeType j, const CanonicalNumericType<P>& c) const override {
+        return heap_copy(partial_evaluate(static_cast<const F&>(*this),j,c)); }
     ScalarFunctionModelInterface<P>* _embed(const ExactBoxType& d1, const ExactBoxType& d2) const override {
         return new F(embed(d1,static_cast<const F&>(*this),d2)); }
     Boolean _refines(const ScalarFunctionModelInterface<P>& f) const override {

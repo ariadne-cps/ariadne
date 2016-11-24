@@ -298,6 +298,7 @@ inline DottedVariable<Real> dot(const Variable<Real>& var) {
 template<class T> PrimedVariable<T> prime(const Variable<T>&);
 template<class T> PrimedVariable<T> next(const Variable<T>&);
 
+
 //! \brief A named variable of type \a T decorated by a prime representing a value after a discrete jump.
 template<class T> class PrimedVariable
     : public ExtendedVariable<T>
@@ -323,6 +324,17 @@ template<class T> inline PrimedVariable<T> prime(const Variable<T>& var) {
     return PrimedVariable<T>(var); }
 template<class T> inline PrimedVariable<T> next(const Variable<T>& var) {
     return prime(var); }
+
+
+template<class T> struct PrimedVariables;
+template<class T> struct DottedVariables;
+template<class T> inline PrimedVariables<T> prime(const List<Variable<T>>& vars);
+template<class T> inline PrimedVariables<T> next(const List<Variable<T>>& vars);
+template<class T> inline DottedVariables<T> dot(const List<Variable<T>>& vars);
+
+inline PrimedVariables<Real> prime(const InitializerList<Variable<Real>>& vars);
+inline PrimedVariables<Real> next(const InitializerList<Variable<Real>>& vars);
+inline DottedVariables<Real> dot(const InitializerList<Variable<Real>>& vars);
 
 } // namespace Ariadne
 

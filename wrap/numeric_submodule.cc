@@ -48,6 +48,7 @@ Integer pow(Integer const& z, Nat m);
 //Integer abs(Integer const& z);
 
 DECLARE_NUMERIC_OPERATIONS(Real const&,Real,PositiveReal);
+//DECLARE_NUMERIC_OPERATIONS(Float64Approximation const&,Float64Approximation,PositiveFloat64Approximation);
 //DECLARE_NUMERIC_OPERATIONS(FloatBall<PR>);
 //DECLARE_NUMERIC_OPERATIONS(FloatBounds<PR>);
 //DECLARE_NUMERIC_OPERATIONS(FloatApproximation<PR>64);
@@ -415,8 +416,8 @@ template<class PR> void export_exact_float()
     //exact_float_class.define_mixed_arithmetic<ValidatedNumericType>();
     exact_float_class.define_self_comparisons();
 
-    def("pos", (FloatValue<PR>(*)(FloatValue<PR> const&)) &pos);
-    def("neg", (FloatValue<PR>(*)(FloatValue<PR> const&)) &neg);
+    exact_float_class.def(pos(self));
+    exact_float_class.def(neg(self));
 
     exact_float_class.def("precision", &FloatValue<PR>::precision);
     exact_float_class.def("get_d",&FloatValue<PR>::get_d);
@@ -439,7 +440,7 @@ template<class PR> void export_error_float()
     error_float_class.def(+self);
     error_float_class.def(self+self);
     error_float_class.def(self*self);
-    error_float_class.def("get_d",&FloatError<PR>::get_d);
+//    error_float_class.def("raw",(RawFloat<PR>&(FloatError<PR>::*)())&FloatError<PR>::raw,reference_existing_object());
     error_float_class.def(self_ns::str(self));
     error_float_class.def(self_ns::repr(self));
 
@@ -451,12 +452,12 @@ template<class PR> void export_error_float()
 template<class PR> void export_metric_float()
 {
     class_<FloatBall<PR>> metric_float_class("Float"+class_tag<PR>()+"Ball");
-    metric_float_class.def(init<double,double>());
+//    metric_float_class.def(init<double,double,PR>());
     metric_float_class.def(init<FloatValue<PR>,FloatError<PR>>());
     metric_float_class.def(init<Real,PR>());
 
-    metric_float_class.def(init<double>());
-    metric_float_class.def(init<ValidatedNumericType>());
+    metric_float_class.def(init<ExactDouble,PR>());
+    metric_float_class.def(init<ValidatedNumber,PR>());
     metric_float_class.def(init<FloatValue<PR>>());
     metric_float_class.def(init<FloatBall<PR>>());
     metric_float_class.def(init<FloatBounds<PR>>());
@@ -497,8 +498,8 @@ template<class PR> void export_bounded_float()
     bounded_float_class.def(init<FloatLowerBound<PR>,FloatUpperBound<PR>>());
     bounded_float_class.def(init<Real,PR>());
 
-    bounded_float_class.def(init<double>());
-    bounded_float_class.def(init<ValidatedNumericType>());
+    bounded_float_class.def(init<ExactDouble,PR>());
+    bounded_float_class.def(init<ValidatedNumber,PR>());
     bounded_float_class.def(init<FloatValue<PR>>());
     bounded_float_class.def(init<FloatBall<PR>>());
     bounded_float_class.def(init<FloatBounds<PR>>());
@@ -544,7 +545,7 @@ template<class PR> void export_upper_float()
     upper_float_class.def(init<FloatBall<PR>>());
     upper_float_class.def(init<FloatBounds<PR>>());
     upper_float_class.def(init<FloatUpperBound<PR>>());
-    upper_float_class.def(init<UpperNumericType>());
+    upper_float_class.def(init<ValidatedUpperNumber,PR>());
     upper_float_class.def(self_ns::str(self));
     upper_float_class.def(self_ns::repr(self));
 
@@ -593,7 +594,7 @@ template<class PR> void export_lower_float()
     lower_float_class.def(init<FloatBall<PR>>());
     lower_float_class.def(init<FloatBounds<PR>>());
     lower_float_class.def(init<FloatLowerBound<PR>>());
-    lower_float_class.def(init<LowerNumericType>());
+    lower_float_class.def(init<ValidatedLowerNumber,PR>());
     lower_float_class.def(self_ns::str(self));
     lower_float_class.def(self_ns::repr(self));
 
@@ -646,7 +647,7 @@ template<class PR> void export_approximate_float()
     approximate_float_class.def(init<FloatLowerBound<PR>>());
     approximate_float_class.def(init<FloatUpperBound<PR>>());
     approximate_float_class.def(init<FloatApproximation<PR>>());
-    approximate_float_class.def(init<ApproximateNumericType>());
+    approximate_float_class.def(init<ApproximateNumber,PR>());
 
     approximate_float_class.define_self_arithmetic();
     approximate_float_class.template define_mixed_arithmetic<FloatApproximation<PR>>();

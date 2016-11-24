@@ -147,7 +147,9 @@ OutputStream& operator<<(OutputStream& os, const PythonRepresentation<RawFloat64
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Rational>& repr);
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Real>& repr);
 
-template<class P> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Float<P,PrecisionMP>>& repr) {
+template<class X> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<X>& repr) {
+    return os << repr.reference(); }
+template<class PR> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<FloatValue<PR>>& repr) {
     return os << repr.reference(); }
 
 template<class X> OutputStream& operator<<(OutputStream& os, const PythonRepresentation< Vector<X> >& repr) {

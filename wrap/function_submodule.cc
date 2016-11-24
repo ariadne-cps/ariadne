@@ -56,6 +56,8 @@ using namespace boost::python;
 
 namespace Ariadne {
 
+RealExpression evaluate(EffectiveScalarFunction const& f, Vector<RealVariable> const& vars);
+
 template<>
 struct from_python< MultiIndex >
 {
@@ -277,7 +279,7 @@ Void export_univariate_function()
     function_class.def("__call__", (Float64Bounds(EffectiveScalarUnivariateFunction::*)(const Float64Bounds&)const)&EffectiveScalarUnivariateFunction::operator() );
     function_class.def("__call__", (Differential<Float64Bounds>(EffectiveScalarUnivariateFunction::*)(const Differential<Float64Bounds>&)const)&EffectiveScalarUnivariateFunction::operator() );
 
-    function_class.def("constant", (EffectiveScalarUnivariateFunction(*)(Real)) &EffectiveScalarUnivariateFunction::constant);
+    function_class.def("constant", (EffectiveScalarUnivariateFunction(*)(IntervalDomain,EffectiveNumber)) &EffectiveScalarUnivariateFunction::constant);
     function_class.def("coordinate", (EffectiveScalarUnivariateFunction(*)()) &EffectiveScalarUnivariateFunction::coordinate);
     function_class.staticmethod("constant");
     function_class.staticmethod("coordinate");
@@ -285,130 +287,128 @@ Void export_univariate_function()
 }
 
 
-Void export_scalar_function()
+template<class P> Void export_scalar_function()
 {
-    class_<EffectiveScalarFunction>
-        scalar_function_class("EffectiveScalarFunction", init<EffectiveScalarFunction>());
-    scalar_function_class.def(init<SizeType>());
-    scalar_function_class.def("argument_size", &EffectiveScalarFunction::argument_size);
-    scalar_function_class.def("derivative", &EffectiveScalarFunction::derivative);
-    scalar_function_class.def("__call__", (Float64Bounds(EffectiveScalarFunction::*)(const Vector<Float64Bounds>&)const)&EffectiveScalarFunction::operator() );
-    scalar_function_class.def("__call__", (Float64Approximation(EffectiveScalarFunction::*)(const Vector<Float64Approximation>&)const)&EffectiveScalarFunction::operator() );
-    scalar_function_class.def("__call__", (Differential<Float64Bounds>(EffectiveScalarFunction::*)(const Vector<Differential<Float64Bounds>>&)const)&EffectiveScalarFunction::evaluate );
-    scalar_function_class.def("__call__", (Differential<Float64Approximation>(EffectiveScalarFunction::*)(const Vector<Differential<Float64Approximation>>&)const)&EffectiveScalarFunction::evaluate );
-    scalar_function_class.def("gradient", (Covector<Float64Bounds>(EffectiveScalarFunction::*)(const Vector<Float64Bounds>&)const)&EffectiveScalarFunction::gradient );
-    scalar_function_class.def("gradient", (Covector<Float64Bounds>(EffectiveScalarFunction::*)(const Vector<Float64Bounds>&)const)&EffectiveScalarFunction::gradient );
-    scalar_function_class.def("differential", (Differential<Float64Bounds>(EffectiveScalarFunction::*)(const Vector<Float64Bounds>&,DegreeType)const) &EffectiveScalarFunction::differential);
-    scalar_function_class.def("differential", (Differential<Float64Approximation>(EffectiveScalarFunction::*)(const Vector<Float64Approximation>&,DegreeType)const) &EffectiveScalarFunction::differential);
-    scalar_function_class.def("__pos__", &__pos__<EffectiveScalarFunction,EffectiveScalarFunction>);
-    scalar_function_class.def("__neg__", &__neg__<EffectiveScalarFunction,EffectiveScalarFunction>);
-    scalar_function_class.def("__add__", &__add__<EffectiveScalarFunction,EffectiveScalarFunction,EffectiveScalarFunction>);
-    scalar_function_class.def("__sub__", &__sub__<EffectiveScalarFunction,EffectiveScalarFunction,EffectiveScalarFunction>);
-    scalar_function_class.def("__mul__", &__mul__<EffectiveScalarFunction,EffectiveScalarFunction,EffectiveScalarFunction>);
-    scalar_function_class.def("__div__", &__div__<EffectiveScalarFunction,EffectiveScalarFunction,EffectiveScalarFunction>);
-    scalar_function_class.def("__add__", &__add__<EffectiveScalarFunction,EffectiveScalarFunction,Real>);
-    scalar_function_class.def("__sub__", &__sub__<EffectiveScalarFunction,EffectiveScalarFunction,Real>);
-    scalar_function_class.def("__mul__", &__mul__<EffectiveScalarFunction,EffectiveScalarFunction,Real>);
-    scalar_function_class.def("__div__", &__div__<EffectiveScalarFunction,EffectiveScalarFunction,Real>);
-    scalar_function_class.def("__radd__", &__radd__<EffectiveScalarFunction,EffectiveScalarFunction,Real>);
-    scalar_function_class.def("__rsub__", &__rsub__<EffectiveScalarFunction,EffectiveScalarFunction,Real>);
-    scalar_function_class.def("__rmul__", &__rmul__<EffectiveScalarFunction,EffectiveScalarFunction,Real>);
-    scalar_function_class.def("__rdiv__", &__rdiv__<EffectiveScalarFunction,EffectiveScalarFunction,Real>);
-    scalar_function_class.def("__eq__", &__eq__<EffectiveConstraint,EffectiveScalarFunction,Real>);
-    scalar_function_class.def("__le__", &__le__<EffectiveConstraint,EffectiveScalarFunction,Real>);
-    scalar_function_class.def("__ge__", &__ge__<EffectiveConstraint,EffectiveScalarFunction,Real>);
-    scalar_function_class.def("__str__", &__cstr__<EffectiveScalarFunction>);
-    scalar_function_class.def("__repr__", &__crepr__<EffectiveScalarFunction>);
+    typedef ScalarFunction<P> SF;
+    SF pow(SF const&, Int);
+    SF pos(SF const&); SF neg(SF const&); SF sqr(SF const&); SF rec(SF const&);
+    SF sqrt(SF const&); SF exp(SF const&); SF log(SF const&); SF atan(SF const&);
+    SF sin(SF const&); SF cos(SF const&); SF tan(SF const&);
 
-    scalar_function_class.def("constant", (EffectiveScalarFunction(*)(SizeType,Real)) &EffectiveScalarFunction::constant);
-    scalar_function_class.def("coordinate", (EffectiveScalarFunction(*)(SizeType,SizeType)) &EffectiveScalarFunction::coordinate);
+    class_<ScalarFunction<P>>
+        scalar_function_class((class_name<P>()+"ScalarFunction").c_str(), init<ScalarFunction<P>>());
+    scalar_function_class.def(init<SizeType>());
+    scalar_function_class.def("argument_size", &ScalarFunction<P>::argument_size);
+    scalar_function_class.def("derivative", &ScalarFunction<P>::derivative);
+    scalar_function_class.def("__pos__", &__pos__<ScalarFunction<P>,ScalarFunction<P>>);
+    scalar_function_class.def("__neg__", &__neg__<ScalarFunction<P>,ScalarFunction<P>>);
+    scalar_function_class.def("__add__", &__add__<ScalarFunction<P>,ScalarFunction<P>,ScalarFunction<P>>);
+    scalar_function_class.def("__sub__", &__sub__<ScalarFunction<P>,ScalarFunction<P>,ScalarFunction<P>>);
+    scalar_function_class.def("__mul__", &__mul__<ScalarFunction<P>,ScalarFunction<P>,ScalarFunction<P>>);
+    scalar_function_class.def("__div__", &__div__<ScalarFunction<P>,ScalarFunction<P>,ScalarFunction<P>>);
+    scalar_function_class.def("__add__", &__add__<ScalarFunction<P>,ScalarFunction<P>,Number<P>>);
+    scalar_function_class.def("__sub__", &__sub__<ScalarFunction<P>,ScalarFunction<P>,Number<P>>);
+    scalar_function_class.def("__mul__", &__mul__<ScalarFunction<P>,ScalarFunction<P>,Number<P>>);
+    scalar_function_class.def("__div__", &__div__<ScalarFunction<P>,ScalarFunction<P>,Number<P>>);
+    scalar_function_class.def("__radd__", &__radd__<ScalarFunction<P>,ScalarFunction<P>,Number<P>>);
+    scalar_function_class.def("__rsub__", &__rsub__<ScalarFunction<P>,ScalarFunction<P>,Number<P>>);
+    scalar_function_class.def("__rmul__", &__rmul__<ScalarFunction<P>,ScalarFunction<P>,Number<P>>);
+    scalar_function_class.def("__rdiv__", &__rdiv__<ScalarFunction<P>,ScalarFunction<P>,Number<P>>);
+
+//FIXME
+//    scalar_function_class.def("__eq__", &__eq__<Constraint<ScalarFunction<P>,Number<P>>,ScalarFunction<P>,Number<P>>);
+//    scalar_function_class.def("__le__", &__le__<Constraint<ScalarFunction<P>,Number<P>>,ScalarFunction<P>,Number<P>>);
+//    scalar_function_class.def("__ge__", &__ge__<Constraint<ScalarFunction<P>,Number<P>>,ScalarFunction<P>,Number<P>>);
+
+    scalar_function_class.def("__call__", (Float64Bounds(ScalarFunction<P>::*)(const Vector<Float64Bounds>&)const)&ScalarFunction<P>::operator() );
+    scalar_function_class.def("__call__", (Float64Approximation(ScalarFunction<P>::*)(const Vector<Float64Approximation>&)const)&ScalarFunction<P>::operator() );
+    scalar_function_class.def("__call__", (Differential<Float64Bounds>(ScalarFunction<P>::*)(const Vector<Differential<Float64Bounds>>&)const)&ScalarFunction<P>::evaluate );
+    scalar_function_class.def("__call__", (Differential<Float64Approximation>(ScalarFunction<P>::*)(const Vector<Differential<Float64Approximation>>&)const)&ScalarFunction<P>::evaluate );
+    scalar_function_class.def("gradient", (Covector<Float64Bounds>(ScalarFunction<P>::*)(const Vector<Float64Bounds>&)const)&ScalarFunction<P>::gradient );
+    scalar_function_class.def("gradient", (Covector<Float64Bounds>(ScalarFunction<P>::*)(const Vector<Float64Bounds>&)const)&ScalarFunction<P>::gradient );
+    scalar_function_class.def("differential", (Differential<Float64Bounds>(ScalarFunction<P>::*)(const Vector<Float64Bounds>&,DegreeType)const) &ScalarFunction<P>::differential);
+    scalar_function_class.def("differential", (Differential<Float64Approximation>(ScalarFunction<P>::*)(const Vector<Float64Approximation>&,DegreeType)const) &ScalarFunction<P>::differential);
+
+    scalar_function_class.def("__str__", &__cstr__<ScalarFunction<P>>);
+    scalar_function_class.def("__repr__", &__crepr__<ScalarFunction<P>>);
+
+    scalar_function_class.def("constant", (ScalarFunction<P>(*)(SizeType,Number<P>)) &ScalarFunction<P>::constant);
+    scalar_function_class.def("coordinate", (ScalarFunction<P>(*)(SizeType,SizeType)) &ScalarFunction<P>::coordinate);
     scalar_function_class.staticmethod("constant");
     scalar_function_class.staticmethod("coordinate");
 
-    def("evaluate", (Float64Approximation(*)(const EffectiveScalarFunction&,const Vector<Float64Approximation>&)) &evaluate);
-    def("evaluate", (Float64Bounds(*)(const EffectiveScalarFunction&,const Vector<Float64Bounds>&)) &evaluate);
+    def("pow", (ScalarFunction<P>(*)(const ScalarFunction<P>&,Int)) &pow);
+    def("rec", (ScalarFunction<P>(*)(const ScalarFunction<P>&)) &rec);
+    def("sqr", (ScalarFunction<P>(*)(const ScalarFunction<P>&)) &sqr);
+    def("sqrt", (ScalarFunction<P>(*)(const ScalarFunction<P>&)) &sqrt);
+    def("exp", (ScalarFunction<P>(*)(const ScalarFunction<P>&)) &exp);
+    def("log", (ScalarFunction<P>(*)(const ScalarFunction<P>&)) &log);
+    def("sin", (ScalarFunction<P>(*)(const ScalarFunction<P>&)) &sin);
+    def("cos", (ScalarFunction<P>(*)(const ScalarFunction<P>&)) &cos);
+    def("tan", (ScalarFunction<P>(*)(const ScalarFunction<P>&)) &tan);
 
-    def("derivative", (EffectiveScalarFunction(EffectiveScalarFunction::*)(SizeType)const) &EffectiveScalarFunction::derivative);
+    def("evaluate", (Float64Approximation(*)(const ScalarFunction<P>&,const Vector<Float64Approximation>&)) &evaluate);
+    def("evaluate", (Float64Bounds(*)(const ScalarFunction<P>&,const Vector<Float64Bounds>&)) &evaluate);
 
-    def("pow", (EffectiveScalarFunction(*)(const EffectiveScalarFunction&,Int)) &pow);
-    def("rec", (EffectiveScalarFunction(*)(const EffectiveScalarFunction&)) &rec);
-    def("sqr", (EffectiveScalarFunction(*)(const EffectiveScalarFunction&)) &sqr);
-    def("sqrt", (EffectiveScalarFunction(*)(const EffectiveScalarFunction&)) &sqrt);
-    def("exp", (EffectiveScalarFunction(*)(const EffectiveScalarFunction&)) &exp);
-    def("log", (EffectiveScalarFunction(*)(const EffectiveScalarFunction&)) &log);
-    def("sin", (EffectiveScalarFunction(*)(const EffectiveScalarFunction&)) &sin);
-    def("cos", (EffectiveScalarFunction(*)(const EffectiveScalarFunction&)) &cos);
-    def("tan", (EffectiveScalarFunction(*)(const EffectiveScalarFunction&)) &tan);
-
-    def("lie_derivative", (EffectiveScalarFunction(*)(const EffectiveScalarFunction&,const EffectiveVectorFunction&)) &lie_derivative);
-
-    //scalar_function_class.def("__call__", (RealScalarFunctionExpression(EffectiveScalarFunction::*)(const Vector<RealVariable>&)const)&EffectiveScalarFunction::operator() );
-
-    scalar_function_class.def("__call__", (RealExpression(*)(EffectiveScalarFunction const&, Vector<RealVariable> const&)) &evaluate);
-    def("evaluate", (RealExpression(*)(EffectiveScalarFunction const&, Vector<RealVariable> const&)) &evaluate);
+    def("derivative", (ScalarFunction<P>(ScalarFunction<P>::*)(SizeType)const) &ScalarFunction<P>::derivative);
 
 
-    class_<ValidatedScalarFunction> interval_scalar_function_class("ValidatedScalarFunction", init<ValidatedScalarFunction>());
-    interval_scalar_function_class.def(init<EffectiveScalarFunction>());
-    interval_scalar_function_class.def(init<Nat>());
-    interval_scalar_function_class.def("argument_size", &ValidatedScalarFunction::argument_size);
-    interval_scalar_function_class.def("__str__", &__cstr__<ValidatedScalarFunction>);
-    interval_scalar_function_class.def("__repr__", &__crepr__<ValidatedScalarFunction>);
 
-    implicitly_convertible<EffectiveScalarFunction,ValidatedScalarFunction>();
 }
 
 
-Void export_vector_function()
+template<class P> Void export_vector_function()
 {
+    typedef VectorFunction<P> VF;
 
-    class_<EffectiveVectorFunction>
-        vector_function_class("EffectiveVectorFunction", init<EffectiveVectorFunction>());
+    class_<VectorFunction<P>>
+        vector_function_class("VectorFunction<P>", init<VectorFunction<P>>());
     vector_function_class.def(init<Nat,Nat>());
 
-    vector_function_class.def("result_size", &EffectiveVectorFunction::result_size);
-    vector_function_class.def("argument_size", &EffectiveVectorFunction::argument_size);
-    vector_function_class.def("__getitem__", &EffectiveVectorFunction::get);
-    vector_function_class.def("__setitem__", &EffectiveVectorFunction::set);
-    vector_function_class.def("__call__", (Vector<Float64Bounds>(EffectiveVectorFunction::*)(const Vector<Float64Bounds>&)const)&EffectiveVectorFunction::operator() );
-    vector_function_class.def("__call__", (Vector<Float64Approximation>(EffectiveVectorFunction::*)(const Vector<Float64Approximation>&)const)&EffectiveVectorFunction::operator() );
-    vector_function_class.def("__call__", (Vector<Differential<Float64Bounds>>(EffectiveVectorFunction::*)(const Vector<Differential<Float64Bounds>>&)const)&EffectiveVectorFunction::evaluate );
-    vector_function_class.def("__call__", (Vector<Differential<Float64Approximation>>(EffectiveVectorFunction::*)(const Vector<Differential<Float64Approximation>>&)const)&EffectiveVectorFunction::evaluate );
-    vector_function_class.def("jacobian", (Matrix<Float64Bounds>(EffectiveVectorFunction::*)(const Vector<Float64Bounds>&)const) &EffectiveVectorFunction::jacobian);
-    vector_function_class.def("jacobian", (Matrix<Float64Approximation>(EffectiveVectorFunction::*)(const Vector<Float64Approximation>&)const) &EffectiveVectorFunction::jacobian);
-    vector_function_class.def("differential", (Vector<Differential<Float64Bounds> >(EffectiveVectorFunction::*)(const Vector<Float64Bounds>&,DegreeType)const) &EffectiveVectorFunction::differential);
-    vector_function_class.def("differential", (Vector<Differential<Float64Approximation> >(EffectiveVectorFunction::*)(const Vector<Float64Approximation>&,DegreeType)const) &EffectiveVectorFunction::differential);
-    vector_function_class.def("__str__", &__cstr__<EffectiveVectorFunction>);
-    vector_function_class.def("__repr__", &__crepr__<EffectiveVectorFunction>);
+    vector_function_class.def("result_size", &VectorFunction<P>::result_size);
+    vector_function_class.def("argument_size", &VectorFunction<P>::argument_size);
+    vector_function_class.def("__getitem__", &VectorFunction<P>::get);
+    vector_function_class.def("__setitem__", &VectorFunction<P>::set);
+    vector_function_class.def("__call__", (Vector<Float64Bounds>(VectorFunction<P>::*)(const Vector<Float64Bounds>&)const)&VectorFunction<P>::operator() );
+    vector_function_class.def("__call__", (Vector<Float64Approximation>(VectorFunction<P>::*)(const Vector<Float64Approximation>&)const)&VectorFunction<P>::operator() );
+    vector_function_class.def("__call__", (Vector<Differential<Float64Bounds>>(VectorFunction<P>::*)(const Vector<Differential<Float64Bounds>>&)const)&VectorFunction<P>::evaluate );
+    vector_function_class.def("__call__", (Vector<Differential<Float64Approximation>>(VectorFunction<P>::*)(const Vector<Differential<Float64Approximation>>&)const)&VectorFunction<P>::evaluate );
+    vector_function_class.def("jacobian", (Matrix<Float64Bounds>(VectorFunction<P>::*)(const Vector<Float64Bounds>&)const) &VectorFunction<P>::jacobian);
+    vector_function_class.def("jacobian", (Matrix<Float64Approximation>(VectorFunction<P>::*)(const Vector<Float64Approximation>&)const) &VectorFunction<P>::jacobian);
+    vector_function_class.def("differential", (Vector<Differential<Float64Bounds> >(VectorFunction<P>::*)(const Vector<Float64Bounds>&,DegreeType)const) &VectorFunction<P>::differential);
+    vector_function_class.def("differential", (Vector<Differential<Float64Approximation> >(VectorFunction<P>::*)(const Vector<Float64Approximation>&,DegreeType)const) &VectorFunction<P>::differential);
+    vector_function_class.def("__str__", &__cstr__<VectorFunction<P>>);
+    vector_function_class.def("__repr__", &__crepr__<VectorFunction<P>>);
 
-    vector_function_class.def("identity", (EffectiveVectorFunction(*)(SizeType)) &EffectiveVectorFunction::identity);
+    vector_function_class.def("identity", (VectorFunction<P>(*)(SizeType)) &VectorFunction<P>::identity);
     vector_function_class.staticmethod("identity");
 
-    def("evaluate", (Vector<Float64Approximation>(*)(const EffectiveVectorFunction&,const Vector<Float64Approximation>&)) &evaluate);
-    def("evaluate", (Vector<Float64Bounds>(*)(const EffectiveVectorFunction&,const Vector<Float64Bounds>&)) &evaluate);
+    def("evaluate", (Vector<Float64Approximation>(*)(const VectorFunction<P>&,const Vector<Float64Approximation>&)) &evaluate);
+    def("evaluate", (Vector<Float64Bounds>(*)(const VectorFunction<P>&,const Vector<Float64Bounds>&)) &evaluate);
 
-    def("join", (EffectiveVectorFunction(*)(const EffectiveScalarFunction&, const EffectiveScalarFunction&)) &join);
-    def("join", (EffectiveVectorFunction(*)(const EffectiveVectorFunction&, const EffectiveScalarFunction&)) &join);
-    def("join", (EffectiveVectorFunction(*)(const EffectiveScalarFunction&, const EffectiveVectorFunction&)) &join);
-    def("join", (EffectiveVectorFunction(*)(const EffectiveVectorFunction&, const EffectiveVectorFunction&)) &join);
+    def("join", (VectorFunction<P>(*)(const ScalarFunction<P>&, const ScalarFunction<P>&)) &join);
+    def("join", (VectorFunction<P>(*)(const VectorFunction<P>&, const ScalarFunction<P>&)) &join);
+    def("join", (VectorFunction<P>(*)(const ScalarFunction<P>&, const VectorFunction<P>&)) &join);
+    def("join", (VectorFunction<P>(*)(const VectorFunction<P>&, const VectorFunction<P>&)) &join);
 
-    def("compose", (EffectiveScalarFunction(*)(const EffectiveScalarFunction&,const EffectiveVectorFunction&)) &compose);
-    def("compose", (EffectiveVectorFunction(*)(const EffectiveVectorFunction&,const EffectiveVectorFunction&)) &compose);
+    def("compose", (ScalarFunction<P>(*)(const ScalarFunction<P>&,const VectorFunction<P>&)) &compose);
+    def("compose", (VectorFunction<P>(*)(const VectorFunction<P>&,const VectorFunction<P>&)) &compose);
 
-    from_python<EffectiveVectorFunction>();
-
-    class_<ValidatedVectorFunction> interval_vector_function_class("ValidatedVectorFunction", init<ValidatedVectorFunction>());
-    interval_vector_function_class.def(init<EffectiveVectorFunction>());
-    interval_vector_function_class.def(init<Nat,Nat>());
-    interval_vector_function_class.def("result_size", &ValidatedVectorFunction::result_size);
-    interval_vector_function_class.def("argument_size", &ValidatedVectorFunction::argument_size);
-    interval_vector_function_class.def("__getitem__", &ValidatedVectorFunction::get);
-    interval_vector_function_class.def("__setitem__", &ValidatedVectorFunction::set);
-    interval_vector_function_class.def("__str__", &__cstr__<ValidatedVectorFunction>);
-    interval_vector_function_class.def("__repr__", &__crepr__<ValidatedVectorFunction>);
-
-    implicitly_convertible<EffectiveVectorFunction,ValidatedVectorFunction>();
 }
+
+Void export_scalar_functions() {
+    export_scalar_function<EffectiveTag>();
+    export_scalar_function<ValidatedTag>();
+    implicitly_convertible<ScalarFunction<EffectiveTag>,ScalarFunction<ValidatedTag>>();
+    def("lie_derivative", (ScalarFunction<EffectiveTag>(*)(const ScalarFunction<EffectiveTag>&,const VectorFunction<EffectiveTag>&)) &lie_derivative);
+};
+
+Void export_vector_functions() {
+    export_vector_function<EffectiveTag>();
+    export_vector_function<ValidatedTag>();
+    implicitly_convertible<VectorFunction<EffectiveTag>,VectorFunction<ValidatedTag>>();
+    from_python<VectorFunction<EffectiveTag>>();
+};
 
 
 Void export_scalar_python_function()
@@ -431,8 +431,8 @@ Void function_submodule() {
     export_multi_index();
 
     export_univariate_function();
-    export_scalar_function();
-    export_vector_function();
+    export_scalar_functions();
+    export_vector_functions();
 
     //export_scalar_python_function();
     //export_vector_python_function();

@@ -425,7 +425,7 @@ Void export_affine_set()
     affine_set_class.def(init<Vector<ExactIntervalType>, Matrix<Float64Value>, Vector<Float64Value> >());
     affine_set_class.def(init<Matrix<Float64Value>, Vector<Float64Value> >());
     affine_set_class.def("new_parameter_constraint", (Void(ValidatedAffineConstrainedImageSet::*)(const Constraint<Affine<Float64Bounds>,Float64Bounds>&)) &ValidatedAffineConstrainedImageSet::new_parameter_constraint);
-    affine_set_class.def("new_constraint", (Void(ValidatedAffineConstrainedImageSet::*)(const Constraint<AffineModel<Float64Bounds>,Float64Bounds>&)) &ValidatedAffineConstrainedImageSet::new_constraint);
+    affine_set_class.def("new_constraint", (Void(ValidatedAffineConstrainedImageSet::*)(const Constraint<AffineModel<ApproximateTag,Float64>,Float64Bounds>&)) &ValidatedAffineConstrainedImageSet::new_constraint);
     affine_set_class.def("dimension", &ValidatedAffineConstrainedImageSet::dimension);
     affine_set_class.def("is_bounded", &ValidatedAffineConstrainedImageSet::is_bounded);
     affine_set_class.def("is_empty", &ValidatedAffineConstrainedImageSet::is_empty);

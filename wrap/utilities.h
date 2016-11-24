@@ -139,25 +139,12 @@ struct to_python<std::map<K,V> > {
 
 
 template<class T1, class T2>
-struct to_python< Ariadne::Pair<T1,T2> > {
-    to_python() { boost::python::to_python_converter< Ariadne::Pair<T1,T2>, to_python< Ariadne::Pair<T1,T2> > >(); }
-    static PyObject* convert(const Ariadne::Pair<T1,T2>& tup) {
-        boost::python::list lst;
-        lst.append(boost::python::object(tup.first));
-        lst.append(boost::python::object(tup.second));
-        boost::python::tuple result(lst);
-        return boost::python::incref(boost::python::tuple(result).ptr());
-    }
-    static const PyTypeObject* get_pytype() { return &PyTuple_Type; }
-};
-
-template<class T1, class T2>
-struct to_python< Ariadne::Tuple<T1,T2> > {
+struct to_python< std::tuple<T1,T2> > {
     to_python() { boost::python::to_python_converter< Ariadne::Tuple<T1,T2>, to_python< Ariadne::Tuple<T1,T2> > >(); }
     static PyObject* convert(const Ariadne::Tuple<T1,T2>& tup) {
         boost::python::list lst;
-        lst.append(boost::python::object(tup.first));
-        lst.append(boost::python::object(tup.second));
+        lst.append(boost::python::object(std::get<0>(tup)));
+        lst.append(boost::python::object(std::get<1>(tup)));
         boost::python::tuple result(lst);
         return boost::python::incref(boost::python::tuple(result).ptr());
     }
@@ -165,13 +152,13 @@ struct to_python< Ariadne::Tuple<T1,T2> > {
 };
 
 template<class T1, class T2, class T3>
-struct to_python< Ariadne::Tuple<T1,T2,T3> > {
+struct to_python< std::tuple<T1,T2,T3> > {
     to_python() { boost::python::to_python_converter< Ariadne::Tuple<T1,T2,T3>, to_python< Ariadne::Tuple<T1,T2,T3> > >(); }
     static PyObject* convert(const Ariadne::Tuple<T1,T2,T3>& tup) {
         boost::python::list lst;
-        lst.append(boost::python::object(tup.first));
-        lst.append(boost::python::object(tup.second));
-        lst.append(boost::python::object(tup.third));
+        lst.append(boost::python::object(std::get<0>(tup)));
+        lst.append(boost::python::object(std::get<1>(tup)));
+        lst.append(boost::python::object(std::get<2>(tup)));
         boost::python::tuple result(lst);
         return boost::python::incref(boost::python::tuple(result).ptr());
     }
@@ -179,14 +166,14 @@ struct to_python< Ariadne::Tuple<T1,T2,T3> > {
 };
 
 template<class T1, class T2, class T3, class T4>
-struct to_python< Ariadne::Tuple<T1,T2,T3,T4> > {
+struct to_python< std::tuple<T1,T2,T3,T4> > {
     to_python() { boost::python::to_python_converter< Ariadne::Tuple<T1,T2,T3,T4>, to_python< Ariadne::Tuple<T1,T2,T3,T4> > >(); }
     static PyObject* convert(const Ariadne::Tuple<T1,T2,T3,T4>& tup) {
         boost::python::list lst;
-        lst.append(boost::python::object(tup.first));
-        lst.append(boost::python::object(tup.second));
-        lst.append(boost::python::object(tup.third));
-        lst.append(boost::python::object(tup.fourth));
+        lst.append(boost::python::object(std::get<0>(tup)));
+        lst.append(boost::python::object(std::get<1>(tup)));
+        lst.append(boost::python::object(std::get<2>(tup)));
+        lst.append(boost::python::object(std::get<3>(tup)));
         boost::python::tuple result(lst);
         return boost::python::incref(boost::python::tuple(result).ptr());
     }

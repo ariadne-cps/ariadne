@@ -252,21 +252,21 @@ Void export_differential(const char* name)
     differential_class.staticmethod("variable");
     differential_class.staticmethod("variables");
 
-    def("derivative", (D(*)(const D&, SizeType))&derivative);
-    def("antiderivative", (D(*)(const D&, SizeType))&antiderivative);
+    def("derivative", (D(*)(const D&, SizeType))&D::_derivative);
+    def("antiderivative", (D(*)(const D&, SizeType))&D::_antiderivative);
 
-    def("pos",(D(*)(const D&))&pos);
-    def("neg",(D(*)(const D&))&neg);
-    def("rec",(D(*)(const D&))&rec);
-    def("pow",(D(*)(const D&, Int))&pow);
-
-    def("sqrt", (D(*)(const D&))&sqrt);
-    def("exp", (D(*)(const D&))&exp);
-    def("log", (D(*)(const D&))&log);
-    def("sin", (D(*)(const D&))&sin);
-    def("cos", (D(*)(const D&))&cos);
-    def("tan", (D(*)(const D&))&tan);
-    def("atan", (D(*)(const D&))&atan);
+    typedef AlgebraOperations<D> Operations;
+    def("pos",&Operations::_pos);
+    def("neg",&Operations::_neg);
+    def("rec",&Operations::_rec);
+///    def("pow",&Operations::_pow);
+    def("sqrt",&Operations::_sqrt);
+    def("exp",&Operations::_exp);
+    def("log",&Operations::_log);
+    def("sin",&Operations::_sin);
+    def("cos",&Operations::_cos);
+    def("tan",&Operations::_tan);
+    def("atan",&Operations::_atan);
 }
 
 template<class DIFF>
@@ -300,10 +300,10 @@ export_differential_vector(const char* name)
     differential_vector_class.def("jacobian", &DV::jacobian);
     differential_vector_class.def(self_ns::str(self));
 
-    def("compose",(D(*)(const D&,const DV&))&compose);
-    def("compose",(DV(*)(const DV&,const DV&))&compose);
+    def("compose",(D(*)(const D&,const DV&))&D::_compose);
+    def("compose",(DV(*)(const DV&,const DV&))&DV::_compose);
 
-    def("lie_derivative", (DV(*)(const DV&,const DV&))&lie_derivative);
+    //def("lie_derivative", (DV(*)(const DV&,const DV&))&lie_derivative);
 }
 
 template Void export_differential< Differential<Float64Approximation> >(const char*);

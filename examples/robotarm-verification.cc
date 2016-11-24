@@ -130,7 +130,7 @@ Int main(Int argc, char** argv)
     std::cout << "Evolution parameters:" << evolver.configuration() << std::endl;
 
     // Define the initial box
-    RealVariablesBox initial_box((x==0,vx==0,t==0));
+    RealVariablesBox initial_box({x==0,vx==0,t==0});
 
     cout << "initial_box=" << initial_box << endl;
 

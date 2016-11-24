@@ -479,7 +479,7 @@ TestHybridAutomaton::test_build_hybrid_system()
 
     ARIADNE_TEST_PRINT(valve_automaton);
 
-    CompositeHybridAutomaton watertank_system((tank_automaton,valve_automaton));
+    CompositeHybridAutomaton watertank_system({tank_automaton,valve_automaton});
     std::cout << "watertank_system:\n" << watertank_system << "\n";
 
     _system=watertank_system;

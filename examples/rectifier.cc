@@ -145,18 +145,18 @@ Int main(Int argc, const char* argv[])
 
     /// Dynamics for the case of both diodes being off
     /// t'=1, vi'= A*cos(2*pi*f*t), vo'=-vo/(Rl*Cl)
-    DottedRealAssignments offoff_d( dot((t,vi,vo)) = (one,amplitude*2*pi*frequency*cos(2*pi*frequency*t),-vo/(Rl*Cl)) );
+    DottedRealAssignments offoff_d( dot({t,vi,vo}) = {one,amplitude*2*pi*frequency*cos(2*pi*frequency*t),-vo/(Rl*Cl)} );
     /// Dynamics for the case of the first diode being on, the second being off
     /// t'=1, vi'= A*cos(2*pi*f*t), vo'=-vo/(Rl*Cl)+(vi-vo)/(Ron*Cl)
-    RealExpressions onoff_d((one,amplitude*2*pi*frequency*cos(2*pi*frequency*t),-vo/(Rl*Cl)+(vi-vo)/(Ron*Cl)));
+    RealExpressions onoff_d({one,amplitude*2*pi*frequency*cos(2*pi*frequency*t),-vo/(Rl*Cl)+(vi-vo)/(Ron*Cl)});
     /// Dynamics for the case of the first diode being off, the second being on
     /// t'=1, vi'= A*cos(2*pi*f*t), vo'=-vo/(Rl*Cl)-(vi+vo)/(Ron*Cl)
-    RealExpressions offon_d((one,amplitude*2*pi*frequency*cos(2*pi*frequency*t),-vo/(Rl*Cl)+(vo-vi)/(Ron*Cl)));
+    RealExpressions offon_d({one,amplitude*2*pi*frequency*cos(2*pi*frequency*t),-vo/(Rl*Cl)+(vo-vi)/(Ron*Cl)});
     /// Dynamics for the case of both diodes being on
     /// t'=1, vi'= A*cos(2*pi*f*t), vo'=-vo/(Rl*Cl)-2*vo/(Ron*Cl)
-    RealExpressions onon_d((one,amplitude*2*pi*frequency*cos(2*pi*frequency*t),-vo/(Rl*Cl)-2*vo/(Ron*Cl)));
+    RealExpressions onon_d({one,amplitude*2*pi*frequency*cos(2*pi*frequency*t),-vo/(Rl*Cl)-2*vo/(Ron*Cl)});
 
-    List<RealVariable> space( (t,vi,vo) );
+    List<RealVariable> space( {t,vi,vo} );
     /// Locations
     rectifier.new_mode(offoff,offoff_d);
     rectifier.new_mode(onoff,dot(space)=onoff_d);
@@ -203,7 +203,7 @@ Int main(Int argc, const char* argv[])
 
     std::cout << "Computing evolution..." << std::endl;
 
-    RealVariablesBox initial_box((t==0, vi==0, vo==Real(0.8_dec)*dp[0]));
+    RealVariablesBox initial_box({t==0, vi==0, vo==Real(0.8_dec)*dp[0]});
     HybridSet initial_set(rectifier|offoff,initial_box);
 
 //    ExactBoxType initial_box(3, 0.002836,0.002836, 3.110529,3.110529, 3.110529,3.110529);

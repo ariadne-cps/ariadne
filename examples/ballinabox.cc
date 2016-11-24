@@ -102,7 +102,7 @@ Int main(Int argc, const char* argv[])
     std::cout << "Computing evolution..." << std::endl;
 
     Decimal x0l(0.48), x0u(0.52), vx0(2.5), y0l(0.78), y0u(0.81), vy0(1.0);
-    RealVariablesBox initial_box((x0l<=x<=x0u, vx0<=vx<=vx0, y0l<=y<=y0u, vy0<=vy<=vy0));
+    RealVariablesBox initial_box({x0l<=x<=x0u, vx0<=vx<=vx0, y0l<=y<=y0u, vy0<=vy<=vy0});
     HybridSet initial_set(free,initial_box);
 
     HybridTime evolution_time(10.0,3);

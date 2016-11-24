@@ -72,7 +72,7 @@ add_definitions(-iquote${PROJECT_SOURCE_DIR})
 #include_directories(${PROJECT_SOURCE_DIR})
 
 #Non-portable fix to avoid user header directories being searched for by system headers
-add_definitions(-Wno-non-template-friend)
+#add_definitions(-Wno-non-template-friend)
 
 add_subdirectory(utility)
 add_subdirectory(numeric)

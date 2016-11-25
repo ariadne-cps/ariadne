@@ -116,7 +116,7 @@ CompositeHybridAutomaton create_heating_system()
 
     // Create the clock subsystem
     HybridAutomaton clock;
-    clock.new_mode( (dot(C)=1.0) );
+    clock.new_mode( {dot(C)=1.0} );
     clock.new_transition( midnight, next(C)=0, C>=1, urgent );
 
     CompositeHybridAutomaton heating_system({clock,heater});

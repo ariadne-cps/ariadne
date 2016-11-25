@@ -235,7 +235,7 @@ Int main(Int argc, const char* argv[])
     HybridReachabilityAnalyser analyser(evolver);
     analyser.parameters().lock_to_grid_time = LOCK_TOGRID_TIME;
     analyser.parameters().maximum_grid_depth= MAX_GRID_DEPTH;
-    rectifier.set_grid(Grid(Vector<Float64>(3, 0.25/dp[1], 1.0, 0.5)));
+    rectifier.set_grid(Grid(Vector<Float64>({3, 0.25/dp[1], 1.0, 0.5})));
     std::cout <<  analyser.parameters() << std::endl;
 
     analyser.verbosity=VERBOSITY;

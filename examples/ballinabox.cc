@@ -62,11 +62,11 @@ Int main(Int argc, const char* argv[])
     DiscreteEvent b_xl("b_xl"); // When the ball bounced on the lower boundary for x
 
     /// Create the dynamics
-    DottedRealAssignments free_d((dot(x)=vx,dot(vx)=0,dot(y)=vy,dot(vy)=0));
+    DottedRealAssignments free_d({dot(x)=vx,dot(vx)=0,dot(y)=vy,dot(vy)=0});
 
     /// Create the resets
-    PrimedRealAssignments x_r((next(x)=x,next(vx)=-ax*vx,next(y)=y,next(vy)=vy)); // Bounces on a boundary for x
-    PrimedRealAssignments y_r((next(x)=x,next(vx)=vx,next(y)=y,next(vy)=-ay*vy)); // Bounces on a boundary for y
+    PrimedRealAssignments x_r({next(x)=x,next(vx)=-ax*vx,next(y)=y,next(vy)=vy}); // Bounces on a boundary for x
+    PrimedRealAssignments y_r({next(x)=x,next(vx)=vx,next(y)=y,next(vy)=-ay*vy}); // Bounces on a boundary for y
 
     /// Create the guards
     /// Guards are true when g(x) > 0

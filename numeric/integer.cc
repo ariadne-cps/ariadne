@@ -232,29 +232,6 @@ long int Integer::get_si() const {
     return mpz_get_si(this->_mpz);
 }
 
-Integer operator+(Integer const& z) {
-    return Integer(z);
-}
-
-Integer operator-(Integer const& z) {
-    Integer r; mpz_neg(r._mpz,z._mpz);
-    return std::move(r);
-}
-
-Integer operator+(Integer const& z1, Integer const& z2) {
-    Integer r; mpz_add(r._mpz,z1._mpz,z2._mpz);
-    return std::move(r);
-}
-
-Integer operator-(Integer const& z1, Integer const& z2) {
-    Integer r; mpz_sub(r._mpz,z1._mpz,z2._mpz);
-    return std::move(r);
-}
-
-Integer operator*(Integer const& z1, Integer const& z2) {
-    Integer r; mpz_mul(r._mpz,z1._mpz,z2._mpz);
-    return std::move(r);
-}
 
 Integer& operator++(Integer& z) {
     mpz_add_ui(z._mpz,z._mpz,1u);
@@ -266,6 +243,7 @@ Integer& operator--(Integer& z) {
     return z;
 }
 
+/*
 Integer& operator+=(Integer& z1, Integer const& z2) {
     mpz_add(z1._mpz,z1._mpz,z2._mpz);
     return z1;
@@ -280,55 +258,78 @@ Integer& operator*=(Integer& z1, Integer const& z2) {
     mpz_mul(z1._mpz,z1._mpz,z2._mpz);
     return z1;
 }
+*/
+
+Integer nul(Integer const& z) {
+    Integer r;
+    mpz_set_si(r._mpz,0);
+    return r;
+}
 
 Integer pos(Integer const& z) {
-    Integer r; mpz_set(r._mpz,z._mpz);
-    return std::move(r);
+    Integer r;
+    mpz_set(r._mpz,z._mpz);
+    return r;
 }
 
 Integer neg(Integer const& z) {
-    Integer r; mpz_neg(r._mpz,z._mpz);
-    return std::move(r);
+    Integer r;
+    mpz_neg(r._mpz,z._mpz);
+    return r;
 }
 
-Integer sqr(Integer const& z) {
-    return z*z;
+Natural sqr(Integer const& z) {
+    Natural r;
+    mpz_mul(r._mpz,z._mpz,z._mpz);
+    return r;
 }
 
 Integer add(Integer const& z1, Integer const& z2) {
-    Integer r; mpz_add(r._mpz,z1._mpz,z2._mpz);
-    return std::move(r);
+    Integer r;
+    mpz_add(r._mpz,z1._mpz,z2._mpz);
+    return r;
 }
 
 Integer sub(Integer const& z1, Integer const& z2) {
-    Integer r; mpz_sub(r._mpz,z1._mpz,z2._mpz);
-    return std::move(r);
+    Integer r;
+    mpz_sub(r._mpz,z1._mpz,z2._mpz);
+    return r;
 }
 
 Integer mul(Integer const& z1, Integer const& z2) {
-    Integer r; mpz_mul(r._mpz,z1._mpz,z2._mpz);
-    return std::move(r);
+    Integer r;
+    mpz_mul(r._mpz,z1._mpz,z2._mpz);
+    return r;
 }
 
 Integer pow(Integer const& z, Nat m) {
     unsigned long int lm=m;
     Integer r;
     mpz_pow_ui(r._mpz,z._mpz,lm);
-    return std::move(r);
+    return r;
 }
 
 
-Integer abs(Integer const& z) {
-    Integer r; mpz_abs(r._mpz,z._mpz);
-    return std::move(r);
-}
-
-Integer const& min(Integer const& z1,Integer const& z2) {
+Integer min(Integer const& z1,Integer const& z2) {
     return (z1<z2)?z1:z2;
 }
 
-Integer const& max(Integer const& z1,Integer const& z2) {
+Integer max(Integer const& z1,Integer const& z2) {
     return (z1>z2)?z1:z2;
+}
+
+Natural abs(Integer const& z) {
+    Natural r;
+    mpz_abs(r._mpz,z._mpz);
+    return r;
+}
+
+Natural max(Natural const& z1,Natural const& z2) {
+    return (z1>z2)?z1:z2;
+}
+
+Natural min(Natural const& z1,Natural const& z2) {
+    return (z1<z2)?z1:z2;
 }
 
 OutputStream& operator<<(OutputStream& os, Comparison const& cmp) {
@@ -345,39 +346,24 @@ Comparison cmp(Integer const& z1, Integer const& z2) {
     return c==0 ? Comparison::EQUAL : (c>0?Comparison::GREATER:Comparison::LESS);
 }
 
-Boolean operator==(Integer const& z1, Integer const& z2) {
-    return cmp(z1,z2)==Comparison::EQUAL;
+Boolean eq(Integer const& z1, Integer const& z2) {
+    return mpz_cmp(z1._mpz,z2._mpz)==0;
 }
 
-Boolean operator!=(Integer const& z1, Integer const& z2) {
-    return cmp(z1,z2)!=Comparison::EQUAL;
+Boolean lt(Integer const& z1, Integer const& z2) {
+    return mpz_cmp(z1._mpz,z2._mpz) < 0;
 }
 
-Boolean operator<=(Integer const& z1, Integer const& z2) {
-    return cmp(z1,z2)!=Comparison::GREATER;
-}
-
-Boolean operator>=(Integer const& z1, Integer const& z2) {
-    return cmp(z1,z2)!=Comparison::LESS;
-}
-
-Boolean operator< (Integer const& z1, Integer const& z2) {
-    return cmp(z1,z2)==Comparison::LESS;
-}
-
-Boolean operator> (Integer const& z1, Integer const& z2) {
-    return cmp(z1,z2)==Comparison::GREATER;
-}
 
 //   mpz_get_str (char *str, mpz_exp_t *expptr, Int b, SizeType n, mpz_t op, mpz_rnd_t rnd)
 // If str is not a null pointer, it should point to a block of storage large enough for the significand,
 // i.e., at least maq1(n + 2, 7). The extra two bytes are for a possible minus sign,
 // and for the terminating null character, and the value 7 accounts for -@Inf@ plus the terminating null character.
 OutputStream& operator<<(OutputStream& os, Integer const& z) {
-    char str[255];
-    str[254]='\0';
+    char str[511];
+    str[510]='\0';
     mpz_get_str (str, 10, z._mpz);
-    assert(str[254]=='\0');
+    assert(str[510]=='\0');
     return os << str;
 }
 
@@ -400,5 +386,12 @@ Integer operator"" _z(unsigned long long int n) {
 }
 
 template<> String class_name<Integer>() { return "Integer"; }
+
+template<> String class_name<Natural>() { return "Natural"; }
+
+Int log2floor(Natural const& z) {
+    return mpz_sizeinbase(z._mpz,2)-1;
+}
+
 
 } // namespace Ariadne

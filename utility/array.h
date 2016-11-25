@@ -39,6 +39,7 @@ namespace Ariadne {
 
 using SizeType=std::size_t;
 template<class T> using InitializerList=std::initializer_list<T>;
+class ExactDouble;
 
 struct Uninitialised { };
 
@@ -79,13 +80,15 @@ class Array {
     Array(const SizeType n, const ValueType& x) : _size(n), _ptr(uninitialized_new(n)) { this->_uninitialized_fill(x); }
 
     /*! \brief Converts an initializer list to an Array. */
-    template<class TT, EnableIf<IsConvertible<TT,T>> = dummy>
-    Array(InitializerList<TT> lst) : _size(lst.size()), _ptr(uninitialized_new(_size)) {
+    Array(InitializerList<T> lst) : _size(lst.size()), _ptr(uninitialized_new(_size)) {
         this->_uninitialized_fill(lst.begin()); }
-    /*! \brief Constructs an Array from an initializer list. */
-    template<class TT, EnableIf<IsConstructible<T,TT>> = dummy, DisableIf<IsConvertible<TT,T>> =dummy>
-    explicit Array(InitializerList<TT> lst) : _size(lst.size()), _ptr(uninitialized_new(_size)) {
-        this->_uninitialized_fill(lst.begin()); }
+    /*! \brief Constructs an Array from an initializer list of doubles and a precision parameter. */
+    template<class PR, EnableIf<IsConstructible<T,double,PR>> = dummy>
+    Array(InitializerList<double> lst, PR pr) : _size(lst.size()), _ptr(uninitialized_new(_size)) {
+        this->_uninitialized_fill(lst.begin(),pr); }
+    template<class PR, EnableIf<IsConstructible<T,ExactDouble,PR>> = dummy>
+    Array(InitializerList<ExactDouble> lst, PR pr) : _size(lst.size()), _ptr(uninitialized_new(_size)) {
+        this->_uninitialized_fill(lst.begin(),pr); }
 
     /*! \brief Constructs an Array from the range \a first to \a last. */
     template<class ForwardIterator>
@@ -102,6 +105,11 @@ class Array {
     template<class TT, EnableIf<IsConstructible<T,TT>> = dummy, DisableIf<IsConvertible<TT,T>> =dummy>
     explicit Array(const Array<TT>& a) : _size(a.size()), _ptr(uninitialized_new(_size)) {
         this->_uninitialized_fill(a.begin()); }
+
+    /*! \brief Explicit construction with properties parameter. */
+    template<class TT, class PR, EnableIf<IsConstructible<T,TT,PR>> = dummy>
+    Array(const Array<TT>& a, PR pr) : _size(a.size()), _ptr(uninitialized_new(_size)) {
+        this->_uninitialized_fill(a.begin(),pr); }
 
     /*! \brief Copy constructor. */
     Array(const Array<T>& a) : _size(a.size()), _ptr(uninitialized_new(_size)) {
@@ -193,6 +201,9 @@ class Array {
     template<class InputIterator> void _uninitialized_fill(InputIterator first) {
         pointer curr=_ptr; pointer end=_ptr+_size;
         while(curr!=end) { new (curr) T(*first); ++curr; ++first; } }
+    template<class InputIterator, class Parameters> void _uninitialized_fill(InputIterator first, Parameters parameters) {
+        pointer curr=_ptr; pointer end=_ptr+_size;
+        while(curr!=end) { new (curr) T(*first,parameters); ++curr; ++first; } }
   private:
     SizeType _size;
     pointer _ptr;

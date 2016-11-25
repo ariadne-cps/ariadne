@@ -33,6 +33,7 @@
 #include "number.h"
 #include "logical.h"
 #include "integer.h"
+#include "dyadic.h"
 #include "rational.h"
 #include "real.h"
 #include "float64.h"
@@ -48,19 +49,28 @@ namespace Ariadne {
 using NumberHandle = Handle<NumberInterface>;
 
 // Declare operations for Integer and Rational numbers
-Real sqrt(Real);
-Real exp(Real);
-Real log(Real);
-Real sin(Real);
-Real cos(Real);
-Real tan(Real);
-Real atan(Real);
+Real sqrt(Real const&);
+Real exp(Real const&);
+Real log(Real const&);
+Real sin(Real const&);
+Real cos(Real const&);
+Real tan(Real const&);
+Real atan(Real const&);
 
+template<> struct DispatchingTraits<Integer> { typedef Aware<Integer> AwareOfTypes; };
 template class NumberWrapper<Integer>;
+template<> struct DispatchingTraits<Dyadic> { typedef Aware<Dyadic,Integer> AwareOfTypes; };
+template class NumberWrapper<Dyadic>;
+template<> struct DispatchingTraits<Rational> { typedef Aware<Rational,Dyadic,Integer> AwareOfTypes; };
 template class NumberWrapper<Rational>;
+
+template<> struct DispatchingTraits<Real> { typedef Aware<Real> AwareOfTypes; };
 template class NumberWrapper<Real>;
 
+ExactDouble::operator ExactNumber() const { return Dyadic(*this).operator ExactNumber(); }
+//ExactDouble::operator ExactNumber() const { if(std::isfinite(this->get_d()) { return Dyadic(*this).operator ExactNumber(); } else { return ExactNumber(new NumberWrapper<ExactDouble>(*this)); } }
 Integer::operator ExactNumber() const { return ExactNumber(new NumberWrapper<Integer>(*this)); }
+Dyadic::operator ExactNumber() const { return ExactNumber(new NumberWrapper<Dyadic>(*this)); }
 Rational::operator ExactNumber() const { return ExactNumber(new NumberWrapper<Rational>(*this)); }
 Real::operator EffectiveNumber() const { return EffectiveNumber(new NumberWrapper<Real>(*this)); }
 
@@ -72,8 +82,8 @@ template class NumberWrapper<Float64Ball>;
 template class NumberWrapper<Float64Value>;
 
 template<> Float64Approximation::operator ApproximateNumber() const { return ApproximateNumber(new NumberWrapper<Float64Approximation>(*this)); }
-template<> Float64LowerBound::operator ValidatedLowerNumber() const { return ValidatedLowerNumber(new NumberWrapper<Float64LowerBound>(*this)); }
-template<> Float64UpperBound::operator ValidatedUpperNumber() const { return ValidatedUpperNumber(new NumberWrapper<Float64UpperBound>(*this)); }
+//template<> Float64LowerBound::operator ValidatedLowerNumber() const { return ValidatedLowerNumber(new NumberWrapper<Float64LowerBound>(*this)); }
+//template<> Float64UpperBound::operator ValidatedUpperNumber() const { return ValidatedUpperNumber(new NumberWrapper<Float64UpperBound>(*this)); }
 template<> Float64Bounds::operator ValidatedNumber() const { return ValidatedNumber(new NumberWrapper<Float64Bounds>(*this)); }
 template<> Float64Ball::operator ValidatedNumber() const { return ValidatedNumber(new NumberWrapper<Float64Ball>(*this)); }
 template<> Float64Value::operator ExactNumber() const { return ExactNumber(new NumberWrapper<Float64Value>(*this)); }
@@ -83,14 +93,14 @@ template class NumberWrapper<FloatMPApproximation>;
 //template class NumberWrapper<FloatMPUpperBound>;
 template class NumberWrapper<FloatMPBounds>;
 template class NumberWrapper<FloatMPBall>;
-//template class NumberWrapper<FloatMPValue>;
+template class NumberWrapper<FloatMPValue>;
 
-template<> FloatMPValue::operator ExactNumber() const { return ExactNumber(new NumberWrapper<FloatMPValue>(*this)); }
-//template<> FloatMPBall::operator ValidatedNumber() const { return ValidatedNumber(new NumberWrapper<FloatMPBall>(*this)); }
-//template<> FloatMPBounds::operator ValidatedNumber() const { return ValidatedNumber(new NumberWrapper<FloatMPBounds>(*this)); }
-//template<> FloatMPUpperBound::operator ValidatedUpperNumber() const { return ValidatedUpperNumber(new NumberWrapper<FloatMPUpperBound>(*this)); }
+template<> FloatMPApproximation::operator ApproximateNumber() const { return ApproximateNumber(new NumberWrapper<FloatMPApproximation>(*this)); }
 //template<> FloatMPLowerBound::operator ValidatedLowerNumber() const { return ValidatedLowerNumber(new NumberWrapper<FloatMPLowerBound>(*this)); }
-//template<> FloatMPApproximation::operator ApproximateNumber() const { return ApproximateNumber(new NumberWrapper<FloatMPApproximation>(*this)); }
+//template<> FloatMPUpperBound::operator ValidatedUpperNumber() const { return ValidatedUpperNumber(new NumberWrapper<FloatMPUpperBound>(*this)); }
+template<> FloatMPBounds::operator ValidatedNumber() const { return ValidatedNumber(new NumberWrapper<FloatMPBounds>(*this)); }
+template<> FloatMPBall::operator ValidatedNumber() const { return ValidatedNumber(new NumberWrapper<FloatMPBall>(*this)); }
+template<> FloatMPValue::operator ExactNumber() const { return ExactNumber(new NumberWrapper<FloatMPValue>(*this)); }
 
 template<> String class_name<NumberHandle>() { return "NumberHandle"; }
 

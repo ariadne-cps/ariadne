@@ -143,7 +143,7 @@ ValidatedVectorFunctionModel operator*(const Matrix<ValidatedNumericType>& A,con
 }
 
 Float64Error sup_error(const ValidatedVectorFunctionModel& x) {
-    Float64Error r=0u;
+    Float64Error r; r=0u;
     for(Nat i=0; i!=x.size(); ++i) { r=max(r,x[i].error()); }
     return r;
 }
@@ -324,7 +324,7 @@ SolverBase::zero(const ValidatedVectorFunction& f,
     if(!consistent(f.evaluate(r),Vector<ValidatedNumericType>(f.result_size()))) {
         ARIADNE_THROW(NoSolutionException,"SolverBase::zero","No result found in "<<bx<<"; f("<<r<<") is inconsistent with zero");
     } else {
-        Float64UpperBound widen=Float64Value(Float64::eps())*sup_error(r);
+        Float64Error widen=Float64Error(Float64::eps(Precision64()))*sup_error(r);
         r+=Vector<ValidatedNumericType>(r.size(),ValidatedNumericType(-widen,+widen));
         nr=this->step(f,r);
         if(refines(nr,r)) {
@@ -364,7 +364,7 @@ SolverBase::implicit(const ValidatedVectorFunction& f,
 
     Nat steps_remaining=this->maximum_number_of_steps();
     Nat number_unrefined=n;
-    Array<Bool> refinement(n,false);
+    Array<Bool> is_refinement(n,false);
 
     while(steps_remaining>0) {
         ARIADNE_LOG(5,"\n");
@@ -376,10 +376,10 @@ SolverBase::implicit(const ValidatedVectorFunction& f,
 
         if(ALLOW_PARTIAL_FUNCTION) {
             for(Nat i=0; i!=n; ++i) {
-                if(!refinement[i]) {
+                if(!is_refinement[i]) {
                     ARIADNE_LOG(6,"refines(nh["<<i<<"],x["<<i<<"])="<<refines(nh[i],h[i])<<"\n");
                     if(refines(nh[i],h[i])) {
-                        refinement[i]=true;
+                        is_refinement[i]=true;
                         --number_unrefined;
                     } else if(definitely(disjoint(ValidatedScalarFunctionModel(nh[i]).range(),ix[i]))) {
                         ARIADNE_THROW(NoSolutionException,"SolverBase::implicit","No result found in "<<ix<<"; function "<<nh<<" is disjoint from "<<h<<" for at least one point.");
@@ -387,7 +387,7 @@ SolverBase::implicit(const ValidatedVectorFunction& f,
                 }
             }
 
-            ARIADNE_LOG(6,"refinement="<<refinement<<"\n");
+            ARIADNE_LOG(6,"is_refinement="<<is_refinement<<"\n");
             ARIADNE_LOG(6,"nh.range()="<<nh.range()<<"\n");
             ARIADNE_LOG(6,"sup_error(nh)="<<sup_error(nh)<<"\n");
             ARIADNE_LOG(6,"sup_error(fnh)="<<sup_error(fnh)<<"\n");
@@ -396,17 +396,17 @@ SolverBase::implicit(const ValidatedVectorFunction& f,
 
         } else { // !ALLOW_PARTIAL_FUNCTION
             for(Nat i=0; i!=n; ++i) {
-                if(!refinement[i]) {
+                if(!is_refinement[i]) {
                     if(refines(nh[i],h[i])) {
-                        refinement[i]=true;
+                        is_refinement[i]=true;
                         --number_unrefined;
-                    } else if(disjoint(nh[i],h[i])) {
+                    } else if(inconsistent(nh[i],h[i])) {
                         ARIADNE_THROW(NoSolutionException,"SolverBase::implicit","No result found in "<<ix<<"; "<<nh<<" is disjoint from "<<h);
                     }
                 }
             }
 
-            h=intersection(nh,h);
+            h=refinement(nh,h);
         }
 
         steps_remaining=steps_remaining-1;

@@ -68,24 +68,23 @@ class TextPlot
     virtual Void set_bounding_box(const GraphicsBoundingBoxType& bx) override { };
     virtual Void set_dot_radius(double) override { };
 
-    Void set_projection(Nat, Nat, Nat) { };
+    Void set_projection(Nat, Nat, Nat) override { };
 
-    Void set_line_style(Bool) { };
-    Void set_line_width(double) { };
-    Void set_line_colour(Colour) { };
-    Void set_fill_style(Bool) { };
-    Void set_fill_opacity(double) { };
-    Void set_fill_colour(Colour) { };
+    Void set_line_style(Bool) override { };
+    Void set_line_width(double) override { };
+    Void set_line_colour(Colour) override { };
+    Void set_fill_opacity(double) override { };
+    Void set_fill_colour(Colour) override { };
 
     Void set_line_colour(double, double, double) { };
     Void set_fill_colour(double, double, double) { };
 
-    Bool get_line_style() const { return true; }
-    double get_line_width() const { return 1.0; }
-    Colour get_line_colour() const { return black; }
-    Bool get_fill_style() const { return false; };
-    double get_fill_opacity() const { return 0.0; };
-    Colour get_fill_colour() const { return white; };
+    Bool get_line_style() const override { return true; }
+    double get_line_width() const override { return 1.0; }
+    Colour get_line_colour() const override { return black; }
+    Bool get_fill_style() const override { return false; };
+    double get_fill_opacity() const override { return 0.0; };
+    Colour get_fill_colour() const override { return white; };
 
     Void open(const char* filename);
     Void open(const char* filename, ios::openmode mode);
@@ -94,7 +93,7 @@ class TextPlot
 //    Void draw(const Polytope&);
     Void draw(const InterpolatedCurve&);
     Void draw(const GridTreeSubset&);
-    Void draw(const DrawableInterface&);
+    Void draw(const DrawableInterface&) override;
     Void close();
   private:
     Void _draw(const std::vector<ExactPoint>&);

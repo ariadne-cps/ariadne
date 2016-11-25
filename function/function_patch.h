@@ -36,10 +36,11 @@
 #include "algebra/vector.h"
 #include "function/taylor_model.h"
 
-#include "algebra/algebra_operations.h"
+#include "algebra/operations.h"
 #include "function/function_interface.h"
 #include "function/function_mixin.h"
 #include "function/function_model.h"
+#include "function/function_model_mixin.h"
 
 namespace Ariadne {
 
@@ -56,24 +57,20 @@ template<class M> using ScalarFunctionPatch = FunctionPatch<M>;
 template<class M> class VectorFunctionPatch;
 template<class M> class VectorFunctionPatchElementReference;
 
-// Declare basic algebra operators
-template<class M> struct IsAlgebra<FunctionPatch<M>> : True { };
-template<class M> struct IsSymbolicAlgebra<FunctionPatch<M>> : True { };
-
-// Declare basic algebra operators
-template<class A> A operator+(const A& ca1, const GenericType<A>& ga2) { return ca1+ca1.create(ga2); }
-template<class A> A operator-(const A& ca1, const GenericType<A>& ga2) { return ca1-ca1.create(ga2); }
-template<class A> A operator*(const A& ca1, const GenericType<A>& ga2) { return ca1*ca1.create(ga2); }
-template<class A> A operator/(const A& ca1, const GenericType<A>& ga2) { return ca1/ca1.create(ga2); }
-template<class A> A operator+(const GenericType<A>& ga1, const A& ca2) { return ca2.create(ga1)+ca2; }
-template<class A> A operator-(const GenericType<A>& ga1, const A& ca2) { return ca2.create(ga1)+ca2; }
-template<class A> A operator*(const GenericType<A>& ga1, const A& ca2) { return ca2.create(ga1)+ca2; }
-template<class A> A operator/(const GenericType<A>& ga1, const A& ca2) { return ca2.create(ga1)+ca2; }
-
 inline Float64Approximation convert_error_to_bounds(const PositiveFloat64Approximation& e) { return Float64Approximation(0.0); }
 inline Float64Bounds convert_error_to_bounds(const PositiveFloat64UpperBound& e) { return Float64Bounds(-e.raw(),+e.raw()); }
+inline Float64Bounds convert_error_to_bounds(const Float64Error& e) { return Float64Bounds(-e.raw(),+e.raw()); }
 
-
+/*
+template<class X> X operator+(const X& x1, const GenericType<X>& y2) { return x1+x1.create(y2); }
+template<class X> X operator-(const X& x1, const GenericType<X>& y2) { return x1-x1.create(y2); }
+template<class X> X operator*(const X& x1, const GenericType<X>& y2) { return x1*x1.create(y2); }
+template<class X> X operator/(const X& x1, const GenericType<X>& y2) { return x1/x1.create(y2); }
+template<class X> X operator+(const GenericType<X>& y1, const X& x2) { return x2.create(y1)+x2; }
+template<class X> X operator-(const GenericType<X>& y1, const X& x2) { return x2.create(y1)-x2; }
+template<class X> X operator*(const GenericType<X>& y1, const X& x2) { return x2.create(y1)*x2; }
+template<class X> X operator/(const GenericType<X>& y1, const X& x2) { return x2.create(y1)/x2; }
+*/
 
 /*! \ingroup FunctionModelSubModule
  *  \brief A ScalarTaylorFunction is a type of FunctionModel in which a the restriction of a scalar function \f$f:\R^n\rightarrow\R\f$ on a domain \f$D\f$ is approximated by polynomial \f$p\f$ with uniform error \f$e\f$.
@@ -98,6 +95,9 @@ inline Float64Bounds convert_error_to_bounds(const PositiveFloat64UpperBound& e)
  */
 template<class M> class FunctionPatch
     : public ScalarFunctionModelMixin<FunctionPatch<M>, typename M::Paradigm>
+    , public DispatchSymbolicAlgebraOperations<FunctionPatch<M>, NumericType<M>>
+    , public ProvideConcreteGenericArithmeticOperators<FunctionPatch<M>, ScalarFunction<typename M::Paradigm>>
+    , public DispatchConcreteGenericAlgebraNumberOperations<FunctionPatch<M>,NumericType<M>,Number<typename M::Paradigm>>
 {
     typedef typename M::Paradigm P;
   public:
@@ -110,8 +110,10 @@ template<class M> class FunctionPatch
     typedef typename ModelType::ErrorType ErrorType;
     typedef typename ModelType::NumericType NumericType;
     typedef typename ModelType::Paradigm Paradigm;
+    typedef typename ModelType::PrecisionType PrecisionType;
     typedef ScalarFunction<Paradigm> FunctionType;
     typedef ScalarFunction<Paradigm> GenericType;
+    typedef Number<Paradigm> GenericNumericType;
   private:
     static const CoefficientType _zero;
     DomainType _domain;
@@ -152,6 +154,8 @@ template<class M> class FunctionPatch
     static FunctionPatch<M> constant(const DomainType& d, const NumericType& c, Sweeper swp);
     //! \brief Construct the quantity \f$x_j\f$ over the domain \a d.
     static FunctionPatch<M> coordinate(const DomainType& d, SizeType j, Sweeper swp);
+    //! \brief Construct a constant quantity in \a as independent variables with value zero and uniform error \a 1
+    static FunctionPatch<M> unit_ball(const DomainType& d, Sweeper swp);
     //! \brief Construct the quantity \f$x_j\f$ over the domain \a d.
     static VectorFunctionPatch<M> identity(const DomainType& d, Sweeper swp);
 
@@ -174,6 +178,7 @@ template<class M> class FunctionPatch
     FunctionPatch<M> create_constant(NumericType const& c) const;
     FunctionPatch<M> create_coordinate(SizeType j) const;
     FunctionPatch<M> create(GenericType const& f) const;
+    NumericType create(GenericNumericType const& f) const;
 
     FunctionPatch<M> create_constant(DomainType const&, NumericType const& c) const;
     FunctionPatch<M> create_coordinate(DomainType const&, SizeType j) const;
@@ -192,13 +197,15 @@ template<class M> class FunctionPatch
     ModelType& model() { return this->_model; }
 
     //! \brief An over-approximation to the range of the quantity; not necessarily tight.
-    const CodomainType codomain() const { this->_model.codomain(); }
+    const CodomainType codomain() const { return this->_model.codomain(); }
     //! \brief The scaled expansion over a unit box.
     const ExpansionType& expansion() const { return this->_model.expansion(); }
     //! \brief The error of the expansion over the domain.
     const ErrorType& error() const { return this->_model.error(); }
     /*! \brief The accuracy parameter used to control approximation of the Taylor function. */
     Sweeper sweeper() const { return this->_model.sweeper(); }
+    /*! \brief The precision of the numbers used. */
+    PrecisionType precision() const { return this->_model.precision(); }
     //! \brief A reference to the expansion.
     ExpansionType& expansion() { return this->_model.expansion(); }
     //! \brief A reference to the error of the expansion over the domain.
@@ -234,7 +241,6 @@ template<class M> class FunctionPatch
 
     //@{
     /*! \name Comparison operators. */
-    //! \brief Equality operator. Tests equality of representation, including error term.
     Bool operator==(const FunctionPatch<M>& tv) const;
     //! \brief Inequality operator.
     Bool operator!=(const FunctionPatch<M>& tv) const { return !(*this==tv); }
@@ -303,6 +309,12 @@ template<class M> class FunctionPatch
         r=Ariadne::horner_evaluate(this->_model.expansion(),Ariadne::unscale(a,this->_domain))
             + convert_error_to_bounds(this->_model.error());
     }
+  public:
+    template<class OP> static FunctionPatch<M> _create(OP op, FunctionPatch<M> const& fp);
+    template<class OP> static FunctionPatch<M> _create(OP op, FunctionPatch<M> const& fp1, FunctionPatch<M> const& fp2);
+    template<class OP> static FunctionPatch<M> _create(OP op, FunctionPatch<M> const& fp1, NumericType const& c2);
+    template<class OP> static FunctionPatch<M> _create(OP op, NumericType const& c1, FunctionPatch<M> const& fp2);
+    static FunctionPatch<M> _create(Pow op, FunctionPatch<M> const& fp, Int n);
   private:
     FunctionPatch<M>* _derivative(SizeType j) const;
     FunctionPatch<M>* _clone() const;
@@ -314,12 +326,30 @@ template<class M> class FunctionPatch
     VectorFunctionModelInterface<Paradigm>* _create_vector(SizeType i) const;
 };
 
+template<class M> template<class OP> FunctionPatch<M> FunctionPatch<M>::_create(OP op, FunctionPatch<M> const& fp1, FunctionPatch<M> const& fp2) {
+    assert(fp1.domain()==fp2.domain()); return FunctionPatch<M>(fp1.domain(),op(fp1.model(),fp2.model()));
+}
+template<class M> template<class OP> FunctionPatch<M> FunctionPatch<M>::_create(OP op, FunctionPatch<M> const& fp) {
+    return FunctionPatch<M>(fp.domain(),op(fp.model()));
+}
+template<class M> template<class OP> FunctionPatch<M> FunctionPatch<M>::_create(OP op, FunctionPatch<M> const& fp1, typename M::NumericType const& c2) {
+    return FunctionPatch<M>(fp1.domain(),op(fp1.model(),c2));
+}
+template<class M> template<class OP> FunctionPatch<M> FunctionPatch<M>::_create(OP op, typename M::NumericType const& c1, FunctionPatch<M> const& fp2) {
+    return FunctionPatch<M>(fp2.domain(),op(c1,fp2.model()));
+}
+template<class M> FunctionPatch<M> FunctionPatch<M>::_create(Pow op, FunctionPatch<M> const& fp, Int n) {
+    return FunctionPatch<M>(fp.domain(),op(fp.model(),n));
+}
+
 //! \brief Restrict to a subdomain.
 template<class M> FunctionPatch<M> restriction(const FunctionPatch<M>& x, const ExactBoxType& d);
 //! \brief Extend over a larger domain. Only possible if the larger domain is only larger where the smaller domain is a singleton.
 //! The extension is performed keeping \a x constant over the new coordinates. // DEPRECATED
 template<class M> FunctionPatch<M> extension(const FunctionPatch<M>& x, const ExactBoxType& d);
 
+//! \brief Test if the function models have the same representation.
+template<class M> Bool same(const FunctionPatch<M>& x1, const FunctionPatch<M>& x2);
 //! \brief Test if the quantity is a better approximation than \a t throughout the domain.
 template<class M> Bool refines(const FunctionPatch<M>& x1, const FunctionPatch<M>& x2);
 //! \brief Test if the function models are inconsistent with representing the same exact function.
@@ -638,6 +668,8 @@ template<class M> VectorFunctionPatch<M> extension(const VectorFunctionPatch<M>&
 
 template<class M> VectorFunctionPatch<M> embed(const ExactBoxType& d1, const VectorFunctionPatch<M>& tv2,const ExactBoxType& d3);
 
+//! \brief Test if the function models have the same representation.
+template<class M> Bool same(const VectorFunctionPatch<M>& x1, const VectorFunctionPatch<M>& x2);
 //! \brief Tests if a function \a f refines another function \a g.
 //! To be a refinement, the domain of \a f must contain the domain of \a g.
 template<class M> Bool refines(const VectorFunctionPatch<M>& f, const VectorFunctionPatch<M>& g);
@@ -696,6 +728,9 @@ template<class M> template<class E> VectorFunctionPatch<M>::VectorFunctionPatch(
 }
 
 template<class M> class VectorFunctionPatchElementReference
+    : public DispatchSymbolicAlgebraOperations<FunctionPatch<M>, NumericType<M>>
+    , public ProvideConcreteGenericArithmeticOperators<FunctionPatch<M>, ScalarFunction<typename M::Paradigm>>
+    , public DispatchConcreteGenericAlgebraNumberOperations<FunctionPatch<M>,NumericType<M>,Number<typename M::Paradigm>>
 {
     typedef M ModelType;
     typedef typename M::NumericType NumericType;
@@ -882,6 +917,10 @@ template<class M> Pair<FunctionPatch<M>,FunctionPatch<M>> split(const FunctionPa
     return make_pair(FunctionPatch<M>(subdomains.first,models.first),
                      FunctionPatch<M>(subdomains.second,models.second));
 
+}
+
+template<class M> Bool same(const FunctionPatch<M>& tv1, const FunctionPatch<M>& tv2) {
+    return tv1.domain()==tv2.domain() && same(tv1.model(),tv2.model());
 }
 
 template<class M> Bool refines(const FunctionPatch<M>& tv1, const FunctionPatch<M>& tv2) {
@@ -1072,6 +1111,14 @@ template<class M> Pair<VectorFunctionPatch<M>,VectorFunctionPatch<M>> split(cons
     return make_pair(VectorFunctionPatch<M>(subdomains.first,models.first),
                      VectorFunctionPatch<M>(subdomains.second,models.second));
 
+}
+
+template<class M> Bool same(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2) {
+    if(!same(f1.domain(),f2.domain())) { return false; }
+    for(SizeType i=0; i!=f1.result_size(); ++i) {
+        if(!same(f1[i],f2[i])) { return false; }
+    }
+    return true;
 }
 
 template<class M> Bool refines(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2) {
@@ -1387,8 +1434,8 @@ template<class M> VectorFunctionPatch<M> antiderivative(const VectorFunctionPatc
 
 
 template<class M> Float64Error norm(const VectorFunctionPatch<M>& f) {
-    Float64Error res=0u;
-    for(SizeType i=0; i!=f.result_size(); ++i) {
+    Float64Error res=norm(f[0]);;
+    for(SizeType i=1; i!=f.result_size(); ++i) {
         res=max(res,norm(f[i]));
     }
     return res;

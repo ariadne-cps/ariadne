@@ -117,6 +117,12 @@ InterpolatedCurve::insert(const ParameterType& s, const PointType& pt) {
 }
 
 Void
+InterpolatedCurve::insert(const Dyadic& s, const PointType& pt) {
+    decltype(auto) spr = this->_points.begin()->first.precision();
+    this->insert(ParameterType(s,spr),pt);
+}
+
+Void
 InterpolatedCurve::insert(const RawFloat64& s, const Vector<RawFloat64>& pt) {
     if(!this->_points.empty()) { ARIADNE_ASSERT(pt.size()==this->dimension()); }
     this->insert(ParameterType(s),PointType(reinterpret_cast<Vector<Float64Value>const&>(pt)));

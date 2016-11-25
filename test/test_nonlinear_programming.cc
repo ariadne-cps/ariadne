@@ -42,6 +42,7 @@ class TestOptimiser
 {
   private:
     std::unique_ptr<OptimiserInterface> optimiser;
+    Precision64 pr;
   public:
     TestOptimiser(const OptimiserInterface& opt)
         : optimiser(opt.clone()) { }
@@ -177,18 +178,18 @@ class TestOptimiser
         ARIADNE_TEST_CONSTRUCT( ExactIntervalVectorType, D, ({{-1.0, 1.0},{-1.0,1.0}}) );
         ARIADNE_TEST_CONSTRUCT( ExactIntervalVectorType, C, ({{0.0,0.0}}) );
 
-        ARIADNE_TEST_CONSTRUCT( FloatBoundsVector, X1, ({{0.30,0.40},{0.60,0.70}}) );
+        ARIADNE_TEST_CONSTRUCT( FloatBoundsVector, X1, ({{0.30,0.40},{0.60,0.70}},pr) );
         ARIADNE_TEST_ASSERT( definitely(optimiser->contains_feasible_point(D,g,C,X1)) );
 
         // The following test fails since it is difficult to find the feasible
         // point in the box.
-        ARIADNE_TEST_CONSTRUCT( FloatBoundsVector, X2, ({{0.30,0.40},{0.65,0.65}}) );
+        ARIADNE_TEST_CONSTRUCT( FloatBoundsVector, X2, ({{0.30,0.40},{0.65,0.65}},pr) );
         ARIADNE_TEST_ASSERT( optimiser->contains_feasible_point(D,g,C,X2) );
 
-        ARIADNE_TEST_CONSTRUCT( FloatBoundsVector, X3, ({{0.30,0.40},{0.65,0.68}}) );
+        ARIADNE_TEST_CONSTRUCT( FloatBoundsVector, X3, ({{0.30,0.40},{0.65,0.68}},pr) );
         ARIADNE_TEST_ASSERT( definitely(optimiser->contains_feasible_point(D,g,C,X3)) );
 
-        ARIADNE_TEST_CONSTRUCT(ExactFloatVector, x2, ({Float64Value(0.35),Float64Value(0.655)}) );
+        ARIADNE_TEST_CONSTRUCT(ExactFloatVector, x2, ({0.35,0.655},pr) );
         ARIADNE_TEST_ASSERT( optimiser->validate_feasibility(D,g,C,x2) );
     }
 

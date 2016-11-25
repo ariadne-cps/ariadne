@@ -30,10 +30,10 @@ using namespace Ariadne;
 namespace Ariadne {
 
 
-template<class T1, class T2> struct IsEqualityComparible : HasBinaryOperator<Equal,T1,T2> { };
-template<class T1, class T2> struct IsLessThanCompartible : HasBinaryOperator<Less,T1,T2> { };
+template<class T1, class T2> struct IsEqualityComparible : HasOperator<Equal,T1,T2> { };
+template<class T1, class T2> struct IsLessThanCompartible : HasOperator<Less,T1,T2> { };
 
-template<class X, class N, class R=Return<DontCare>, class = Fallback> struct HasPow : IsConvertible<SafeType<Pow,X,N>,R> { };
+template<class X, class N, class R=Return<DontCare>> struct HasPow : HasOperator<Pow,X,N,R> { };
 
 
 template<class N> class CheckNumericTypeConcepts {

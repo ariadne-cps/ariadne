@@ -21,16 +21,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include<type_traits>
+
 #include "boost_python.h"
 #include "utilities.h"
-
-#include <boost/python.hpp>
 
 #include "algebra/expansion.tcc"
 #include "function/function_interface.h"
 #include "function/polynomial.h"
 #include "function/function.h"
+
 #include "function/function_model.h"
+#include "function/taylor_model.h"
 #include "function/taylor_function.h"
 
 using namespace boost::python;
@@ -38,6 +40,21 @@ using namespace Ariadne;
 
 namespace Ariadne {
 
+ValidatedNumericType evaluate(const ValidatedScalarFunctionModel& f, const Vector<ValidatedNumericType>& x) { return f(x); }
+Vector<ValidatedNumericType> evaluate(const ValidatedVectorFunctionModel& f, const Vector<ValidatedNumericType>& x) { return f(x); }
+
+ValidatedScalarFunctionModel partial_evaluate(const ValidatedScalarFunctionModel&, SizeType, const ValidatedNumericType&);
+ValidatedVectorFunctionModel partial_evaluate(const ValidatedVectorFunctionModel& f, SizeType j, const ValidatedNumericType& c);
+
+ValidatedScalarFunctionModel compose(const ValidatedScalarFunctionModel&, const ValidatedVectorFunctionModel&);
+ValidatedScalarFunctionModel compose(const ValidatedScalarFunction&, const ValidatedVectorFunctionModel&);
+ValidatedVectorFunctionModel compose(const ValidatedVectorFunctionModel&, const ValidatedVectorFunctionModel&);
+ValidatedVectorFunctionModel compose(const ValidatedVectorFunction&, const ValidatedVectorFunctionModel&);
+
+ValidatedVectorFunctionModel join(const ValidatedScalarFunctionModel&, const ValidatedScalarFunctionModel&);
+ValidatedVectorFunctionModel join(const ValidatedScalarFunctionModel&, const ValidatedVectorFunctionModel&);
+ValidatedVectorFunctionModel join(const ValidatedVectorFunctionModel&, const ValidatedScalarFunctionModel&);
+ValidatedVectorFunctionModel join(const ValidatedVectorFunctionModel&, const ValidatedVectorFunctionModel&);
 
 template<class X> OutputStream& operator<<(OutputStream& os, const Representation< ScalarFunctionModel<X> >& frepr) {
     static_cast<const ScalarFunctionInterface<X>&>(frepr.reference()).repr(os); return os;
@@ -46,7 +63,6 @@ template<class X> OutputStream& operator<<(OutputStream& os, const Representatio
 template<class X> OutputStream& operator<<(OutputStream& os, const Representation< VectorFunctionModel<X> >& frepr) {
     static_cast<const VectorFunctionInterface<X>&>(frepr.reference()).write(os); return os;
 }
-
 
 VectorTaylorFunction __getslice__(const VectorTaylorFunction& tf, Int start, Int stop) {
     if(start<0) { start+=tf.result_size(); }
@@ -87,7 +103,7 @@ struct from_python< Expansion<T> > {
         if (!PyDict_Check(obj_ptr)) { return 0; } return obj_ptr; }
     static Void construct(PyObject* obj_ptr,boost::python::converter::rvalue_from_python_stage1_data* data) {
         Void* storage = ((boost::python::converter::rvalue_from_python_storage< Expansion<T> >*)data)->storage.bytes;
-        Expansion<T> r;
+        Expansion<T> r(0);
         boost::python::dict dct=boost::python::extract<boost::python::dict>(obj_ptr);
         boost::python::list lst=dct.items();
         MultiIndex a;
@@ -118,9 +134,9 @@ struct from_python< Vector<X> >
     static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
         list lst=boost::python::extract<list>(obj_ptr);
         Void* storage = ((converter::rvalue_from_python_storage< Vector<X> >*) data)->storage.bytes;
-        Vector<X> res(len(lst));
-        for(SizeType i=0; i!=res.size(); ++i) { res[i]=boost::python::extract<X>(lst[i]); }
-        new (storage) Vector<X>(res);
+        Array<X> ary(len(lst),Uninitialised());
+        for(SizeType i=0; i!=ary.size(); ++i) { new (&ary[i]) X(boost::python::extract<X>(lst[i])); }
+        new (storage) Vector<X>(std::move(ary));
         data->convertible = storage;
     }
 };
@@ -324,17 +340,18 @@ Void export_validated_taylor_model()
     //def("min",(ValidatedTaylorModel(*)(const ValidatedTaylorModel&,const ValidatedTaylorModel&))&min);
     //def("abs",(ValidatedTaylorModel(*)(const ValidatedTaylorModel&))&abs);
 
-    def("neg",(ValidatedTaylorModel(*)(const ValidatedTaylorModel&))&neg);
-    def("rec",(ValidatedTaylorModel(*)(const ValidatedTaylorModel&))&rec);
-    def("sqr",(ValidatedTaylorModel(*)(const ValidatedTaylorModel&))&sqr);
-    def("pow",(ValidatedTaylorModel(*)(const ValidatedTaylorModel&, Int))&pow);
-
-    def("sqrt", (ValidatedTaylorModel(*)(const ValidatedTaylorModel&))&sqrt);
-    def("exp", (ValidatedTaylorModel(*)(const ValidatedTaylorModel&))&exp);
-    def("log", (ValidatedTaylorModel(*)(const ValidatedTaylorModel&))&log);
-    def("sin", (ValidatedTaylorModel(*)(const ValidatedTaylorModel&))&sin);
-    def("cos", (ValidatedTaylorModel(*)(const ValidatedTaylorModel&))&cos);
-    def("tan", (ValidatedTaylorModel(*)(const ValidatedTaylorModel&))&tan);
+    typedef AlgebraOperations<ValidatedTaylorModel> Operations;
+    def("pos",&Operations::_pos);
+    def("neg",&Operations::_neg);
+    def("rec",&Operations::_rec);
+///    def("pow",&Operations::_pow);
+    def("sqrt",&Operations::_sqrt);
+    def("exp",&Operations::_exp);
+    def("log",&Operations::_log);
+    def("sin",&Operations::_sin);
+    def("cos",&Operations::_cos);
+    def("tan",&Operations::_tan);
+    def("atan",&Operations::_atan);
 
     taylor_model_class.def("range", (UpperIntervalType(ValidatedTaylorModel::*)()const) &ValidatedTaylorModel::range);
 
@@ -344,12 +361,6 @@ Void export_validated_taylor_model()
     from_python< Vector<ValidatedTaylorModel> >();
     to_python< Vector<ValidatedTaylorModel> >();
 
-/*
-    class_< TMV > taylor_model_vector_class("TaylorModelVector");
-    taylor_model_vector_class.def("__getitem__", &__getitem__<TMV,Int,ValidatedTaylorModel>);
-    taylor_model_vector_class.def("__setitem__", &__setitem__<TMV,Int,ValidatedTaylorModel>);
-    taylor_model_vector_class.def(self_ns::str(self));
-*/
 }
 
 Void export_approximate_taylor_model()
@@ -403,37 +414,30 @@ Void export_approximate_taylor_model()
     //def("min",(ApproximateTaylorModel(*)(const ApproximateTaylorModel&,const ApproximateTaylorModel&))&min);
     //def("abs",(ApproximateTaylorModel(*)(const ApproximateTaylorModel&))&abs);
 
-    def("neg",(ApproximateTaylorModel(*)(const ApproximateTaylorModel&))&neg);
-    def("rec",(ApproximateTaylorModel(*)(const ApproximateTaylorModel&))&rec);
-    def("sqr",(ApproximateTaylorModel(*)(const ApproximateTaylorModel&))&sqr);
-    def("pow",(ApproximateTaylorModel(*)(const ApproximateTaylorModel&, Int))&pow);
-
-    def("sqrt", (ApproximateTaylorModel(*)(const ApproximateTaylorModel&))&sqrt);
-    def("exp", (ApproximateTaylorModel(*)(const ApproximateTaylorModel&))&exp);
-    def("log", (ApproximateTaylorModel(*)(const ApproximateTaylorModel&))&log);
-    def("sin", (ApproximateTaylorModel(*)(const ApproximateTaylorModel&))&sin);
-    def("cos", (ApproximateTaylorModel(*)(const ApproximateTaylorModel&))&cos);
-    def("tan", (ApproximateTaylorModel(*)(const ApproximateTaylorModel&))&tan);
-
-    taylor_model_class.def("range", (ApproximateIntervalType(ApproximateTaylorModel::*)()const) &ApproximateTaylorModel::range);
+    typedef AlgebraOperations<ApproximateTaylorModel> Operations;
+    def("pos",&Operations::_pos);
+    def("neg",&Operations::_neg);
+    def("rec",&Operations::_rec);
+///    def("pow",&Operations::_pow);
+    def("sqrt",&Operations::_sqrt);
+    def("exp",&Operations::_exp);
+    def("log",&Operations::_log);
+    def("sin",&Operations::_sin);
+    def("cos",&Operations::_cos);
+    def("tan",&Operations::_tan);
+    def("atan",&Operations::_atan);
 
     //def("evaluate", (ApproximateNumericType(*)(const ApproximateTaylorModel&, const Vector<ApproximateNumericType>&))&evaluate);
     //def("split",(ApproximateTaylorModel(*)(const ApproximateTaylorModel&,SizeType,SplitPart)) &split);
 
     from_python< Vector<ApproximateTaylorModel> >();
     to_python< Vector<ApproximateTaylorModel> >();
-
-/*
-    class_< TMV > taylor_model_vector_class("TaylorModelVector");
-    taylor_model_vector_class.def("__getitem__", &__getitem__<TMV,Int,ApproximateTaylorModel>);
-    taylor_model_vector_class.def("__setitem__", &__setitem__<TMV,Int,ApproximateTaylorModel>);
-    taylor_model_vector_class.def(self_ns::str(self));
-*/
 }
+
 
 Void export_scalar_function_model()
 {
-    class_<ValidatedScalarFunctionModel> scalar_function_model_class("ValidatedScalarFunctionModel",init<ValidatedScalarFunctionModel>());
+     class_<ValidatedScalarFunctionModel> scalar_function_model_class("ValidatedScalarFunctionModel",init<ValidatedScalarFunctionModel>());
     scalar_function_model_class.def(init<ScalarTaylorFunction>());
     scalar_function_model_class.def("argument_size", &ValidatedScalarFunctionModel::argument_size);
     scalar_function_model_class.def("domain", &ValidatedScalarFunctionModel::domain);
@@ -458,12 +462,15 @@ Void export_scalar_function_model()
     scalar_function_model_class.def("__repr__", &__crepr__<ValidatedScalarFunctionModel>);
     //scalar_function_model_class.def("__repr__",&__repr__<ValidatedScalarFunctionModel>);
 
-    //def("evaluate", (ValidatedNumericType(*)(const ValidatedScalarFunctionModel&,const Vector<ValidatedNumericType>&)) &evaluate);
-    //def("partial_evaluate", (ValidatedScalarFunctionModel(*)(const ValidatedScalarFunctionModel&,SizeType,const ValidatedNumericType&)) &partial_evaluate);
-    def("compose", (ValidatedScalarFunctionModel(*)(const ValidatedScalarFunctionModel&,const ValidatedVectorFunctionModel&)) &compose);
-    def("compose", (ValidatedScalarFunctionModel(*)(const ValidatedScalarFunction&,const ValidatedVectorFunctionModel&)) &compose);
+    def("evaluate", (ValidatedNumericType(*)(const ValidatedScalarFunctionModel&,const Vector<ValidatedNumericType>&)) &evaluate);
+    def("partial_evaluate", (ValidatedScalarFunctionModel(*)(const ValidatedScalarFunctionModel&,SizeType,const ValidatedNumericType&)) &partial_evaluate);
+
+    def("compose", (ValidatedScalarFunctionModel(*)(const ValidatedScalarFunctionModel&, const ValidatedVectorFunctionModel&)) &compose);
+    def("compose", (ValidatedScalarFunctionModel(*)(const ValidatedScalarFunction&, const ValidatedVectorFunctionModel&)) &compose);
 
     def("unrestrict", (ValidatedScalarFunction(*)(const ValidatedScalarFunctionModel&)) &unrestrict);
+
+
 }
 
 Void export_vector_function_model()
@@ -485,16 +492,19 @@ Void export_vector_function_model()
     vector_function_model_class.def("__repr__", &__crepr__<ValidatedVectorFunctionModel>);
     //export_vector_function_model.def("__repr__",&__repr__<ValidatedVectorFunctionModel>);
 
-    //def("evaluate", (Vector<ValidatedNumericType>(*)(const ValidatedVectorFunctionModel&,const Vector<ValidatedNumericType>&)) &evaluate);
+    def("evaluate", (Vector<ValidatedNumericType>(*)(const ValidatedVectorFunctionModel&,const Vector<ValidatedNumericType>&)) &evaluate);
+
     def("compose", (ValidatedVectorFunctionModel(*)(const ValidatedVectorFunctionModel&,const ValidatedVectorFunctionModel&)) &compose);
     def("compose", (ValidatedVectorFunctionModel(*)(const ValidatedVectorFunction&,const ValidatedVectorFunctionModel&)) &compose);
 
     def("unrestrict", (ValidatedVectorFunction(*)(const ValidatedVectorFunctionModel&)) &unrestrict);
 
+    def("join", (ValidatedVectorFunctionModel(*)(const ValidatedScalarFunctionModel&,const ValidatedScalarFunctionModel&)) &join);
+    def("join", (ValidatedVectorFunctionModel(*)(const ValidatedScalarFunctionModel&,const ValidatedVectorFunctionModel&)) &join);
     def("join", (ValidatedVectorFunctionModel(*)(const ValidatedVectorFunctionModel&,const ValidatedScalarFunctionModel&)) &join);
+    def("join", (ValidatedVectorFunctionModel(*)(const ValidatedVectorFunctionModel&,const ValidatedVectorFunctionModel&)) &join);
 
     to_python< List<ValidatedVectorFunctionModel> >();
-
 }
 
 
@@ -609,17 +619,26 @@ Void export_scalar_taylor_function()
     def("min",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const ScalarTaylorFunction&))&min<>);
     def("abs",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&))&abs<>);
 
-    def("neg",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&))&neg<>);
-    def("rec",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&))&rec<>);
-    def("sqr",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&))&sqr<>);
-    def("pow",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&, Int))&pow<>);
+/*
+    typedef ScalarTaylorFunction SF; typedef SF const& SFcr;
+    SF neg(SFcr); SF rec(SFcr); SF sqr(SFcr); SF pow(SFcr,Int);
+    SF sqrt(SFcr); SF exp(SFcr); SF log(SFcr); SF atan(SFcr);
+    SF sin(SFcr); SF cos(SFcr); SF tan(SFcr);
 
-    def("sqrt", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&))&sqrt<>);
-    def("exp", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&))&exp<>);
-    def("log", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&))&log<>);
-    def("sin", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&))&sin<>);
-    def("cos", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&))&cos<>);
-    def("tan", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&))&tan<>);
+
+    def("neg",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&))&neg);
+    def("rec",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&))&rec);
+    def("sqr",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&))&sqr);
+    def("pow",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&, Int))&pow);
+
+    def("sqrt", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&))&sqrt);
+    def("exp", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&))&exp);
+    def("log", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&))&log);
+    def("sin", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&))&sin);
+    def("cos", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&))&cos);
+    def("tan", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&))&tan);
+    def("atan", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&))&atan);
+*/
 
     to_python< Vector<ScalarTaylorFunction> >();
 }
@@ -728,12 +747,12 @@ Void calculus_submodule()
 {
     export_expansion();
     export_sweeper();
-    export_approximate_taylor_model();
-    export_validated_taylor_model();
-    export_scalar_function_model();
-    export_vector_function_model();
-    export_scalar_taylor_function();
-    export_vector_taylor_function();
+//    export_approximate_taylor_model();
+//    export_validated_taylor_model();
+//    export_scalar_function_model();
+//    export_vector_function_model();
+//    export_scalar_taylor_function();
+//    export_vector_taylor_function();
 }
 
 

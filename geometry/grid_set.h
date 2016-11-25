@@ -1556,7 +1556,7 @@ inline GridTreeSubset GridTreeCursor::operator*() {
 }
 
 inline const GridTreeSubset GridTreeCursor::operator*() const {
-    return (const GridTreeSubset & ) *(* this);
+    return const_cast<GridTreeCursor&>(*this).operator*();
 }
 
 /****************************************GridTreeConstIterator************************************/

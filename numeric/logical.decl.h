@@ -44,8 +44,11 @@ typedef Logical<EffectiveTag> Kleenean;
 typedef Logical<EffectiveUpperTag> Sierpinskian;
 typedef Logical<EffectiveLowerTag> NegatedSierpinskian;
 typedef Logical<ValidatedTag> ValidatedKleenean;
+typedef Logical<ValidatedUpperTag> ValidatedUpperKleenean;
+typedef Logical<ValidatedLowerTag> ValidatedLowerKleenean;
 typedef Logical<ValidatedUpperTag> ValidatedSierpinskian;
 typedef Logical<ValidatedLowerTag> ValidatedNegatedSierpinskian;
+typedef Logical<ApproximateTag> ApproximateKleenean;
 typedef Logical<ApproximateTag> Fuzzy;
 
 /*
@@ -70,6 +73,10 @@ using Decidable = Logical<ExactTag>;
 using Quasidecidable = Logical<EffectiveTag>;
 using Verifyable = Logical<EffectiveUpperTag>;
 using Falsifyable = Logical<EffectiveLowerTag>;
+
+Boolean operator!(Boolean const&);
+NegatedSierpinskian operator!(Sierpinskian const&);
+Kleenean operator!(Kleenean const&);
 
 }
 

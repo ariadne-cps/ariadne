@@ -82,7 +82,7 @@ inline Grid HybridGrid::operator[](const DiscreteLocation& loc) const
     RealSpace continuous_space = this->_space[loc];
     Vector<RawFloat64> lengths(continuous_space.size());
     for(Nat i=0; i!=continuous_space.size(); ++i) {
-        lengths[i] = static_cast<RawFloat64>(this->_scaling.scaling(loc,continuous_space.variable(i)));
+        lengths[i] = (this->_scaling.scaling(loc,continuous_space.variable(i))).raw();
     }
     return Grid(lengths);
 }

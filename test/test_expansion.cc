@@ -40,11 +40,20 @@ template<class K, class V> struct MapValue {
 };
 
 
-class TestExpansion
+template<class F> class TestExpansion
 {
+    typedef PrecisionType<F> PR;
     typedef MultiIndex MI;
-    typedef Expansion<Float64> E;
+    typedef Expansion<F> E;
+    typedef typename Expansion<F>::Iterator Iterator;
+    typedef typename Expansion<F>::ConstIterator ConstIterator;
   public:
+    PR prec; F zero;
+    GradedLess graded_less;
+    LexicographicLess lexicographic_less;
+    ReverseLexicographicLess reverse_lexicographic_less;
+  public:
+    TestExpansion(F const& z);
     Void test();
   private:
     Void test_working();
@@ -60,7 +69,12 @@ class TestExpansion
 };
 
 
-Void TestExpansion::test()
+template<class F> TestExpansion<F>::TestExpansion(F const& z)
+    : prec(z.precision()), zero(z)
+{
+}
+
+template<class F> Void TestExpansion<F>::test()
 {
     ARIADNE_TEST_CALL(test_working());
     ARIADNE_TEST_CALL(test_data_access());
@@ -73,9 +87,9 @@ Void TestExpansion::test()
 }
 
 
-Void TestExpansion::test_working()
+template<class F> Void TestExpansion<F>::test_working()
 {
-    Expansion<Float64> e(3);
+    Expansion<F> e=Expansion<F>(3,zero);
     ARIADNE_TEST_PRINT(e);
     ARIADNE_TEST_PRINT(e.size());
     // Append values
@@ -83,46 +97,46 @@ Void TestExpansion::test_working()
     ARIADNE_TEST_EXECUTE(e.append({1,0,0},3.0));
     ARIADNE_TEST_EXECUTE(e.append({0,1,0},5.0));
     ARIADNE_TEST_EXECUTE(e.append({1,0,1},7.0));
+    ARIADNE_TEST_PRINT(e);
 
     ARIADNE_TEST_EQUAL(e.find({0,0,0}),e.begin());
     //assert(false);
 }
 
 
-Void TestExpansion::test_concept()
+template<class F> Void TestExpansion<F>::test_concept()
 {
-    Float64 x=0;
-    MI a(3);
-    Expansion<Float64> e(3);
-    const Expansion<Float64> ce(3);
+    PR prec=zero.precision();
+    F x(5,prec);
+    SizeType as(3);
 
-    e=Expansion<Float64>();
-    e=Expansion<Float64>(3);
-    e=Expansion<Float64>(ce);
+    Expansion<F> e(as,prec);
+    const Expansion<F> ce(as,prec);
 
-    e=Expansion<Float64>(3,1, {0.0, 0.0,0.0,0.0});
-    e=Expansion<Float64>(3,1, {1, 2,3,5.0});
-    e=Expansion<Float64>(3, { {{0,0},1}, {{1,0,0},2}, {{0,1,0},3}, {{0,0,1},5.0} });
-    e=Expansion<Float64>({ {{0,0},1}, {{1,0,0},2}, {{0,1,0},3}, {{0,0,1},5.0} });
+    e=Expansion<F>(as,zero);
+    e=Expansion<F>(ce);
 
-    //e=Expansion<Float64>::variable(3u,0u);
-    //e=Expansion<Float64>::variables(3u)[0u];
+    //e=Expansion<F>(3,1, {0.0, 0.0,0.0,0.0}, prec);
+    //e=Expansion<F>(3,1, {1, 2,3,5.0}, prec);
+    e=Expansion<F>({ {{0,0},1}, {{1,0,0},2}, {{0,1,0},3}, {{0,0,1},5.0} }, prec);
+    e=Expansion<F>({ {{0,0},1}, {{1,0,0},2}, {{0,1,0},3}, {{0,0,1},5.0} }, prec);
 
-    //e=x;
-
+    MultiIndex a(as);
     e.reserve(2u);
-    //e.insert(a,x);
+    e.set(a,x);
     e.prepend(a,x);
     e.append(a,x);
     e.append_sum(a,a,x);
     e.clear();
 
-    e.graded_sort();
-    e.reverse_lexicographic_sort();
+    e.index_sort(GradedLess());
+    e.index_sort(LexicographicLess());
+    e.index_sort(GradedIndexLess());
+    e.sort(ReverseLexicographicIndexLess());
 
     x=ce[a];
 
-    ce.number_of_nonzeros();
+    ce.number_of_terms();
     ce.argument_size();
 
     e.erase(e.begin());
@@ -130,28 +144,22 @@ Void TestExpansion::test_concept()
     ce.check();
 }
 
-Void TestExpansion::test_iterator_concept()
+template<class F> Void TestExpansion<F>::test_iterator_concept()
 {
-    MI a(3);
-    Expansion<Float64> e(3);
-    const Expansion<Float64> cp(3);
+    MultiIndex a(3);
+    Expansion<F> e(3,zero);
+    const Expansion<F> cp(3,zero);
 
-    Expansion<Float64>::Iterator iter=e.begin(); iter=e.end(); iter=e.find(a);
-    Expansion<Float64>::ConstIterator citer=e.begin(); citer=e.end(); citer=e.find(a);
+    typename Expansion<F>::Iterator iter=e.begin(); iter=e.end(); iter=e.find(a);
+    typename Expansion<F>::ConstIterator citer=e.begin(); citer=e.end(); citer=e.find(a);
     citer=e.begin(); citer=cp.end(); citer=cp.find(a);
 
-    Expansion<Float64>::value_type val=*iter;
-    Expansion<Float64>::reference ref=*iter;
-    Expansion<Float64>::pointer ptr=iter.operator->();
-    Expansion<Float64>::const_reference ncref=*iter;
+    typename Expansion<F>::ValueType val=*iter;
+    typename Expansion<F>::Reference ref=*iter;
+    typename Expansion<F>::ConstReference ncref=*iter;
 
-    //WARNING: Cannot convert non-constant pointer to constant pointer
-    Expansion<Float64>::const_pointer ncptr=iter.operator->();
-    ncptr=citer.operator->();
-
-    Expansion<Float64>::value_type cval=*citer;
-    Expansion<Float64>::const_reference cref=*citer;
-    Expansion<Float64>::const_pointer cptr=citer.operator->();
+    typename Expansion<F>::ValueType cval=*citer;
+    typename Expansion<F>::ConstReference cref=*citer;
 
     Bool res;
 
@@ -161,22 +169,13 @@ Void TestExpansion::test_iterator_concept()
     res=(iter==iter); res=(iter!=iter); res=(citer==citer); res=(citer!=citer);
     res=(citer==iter); res=(citer!=iter); res=(iter==citer); res=(iter!=citer);
 
-    ref=cref; cptr=ptr; ref=ncref; ncptr=ptr;
+    ref=cref; ref=ncref;
 }
 
 // Test dereferencing of iterators
-Void TestExpansion::test_data_access()
+template<class F> Void TestExpansion<F>::test_data_access()
 {
-    // Test index and element size values for a large expansion
-    Expansion<Float64> e5(5);
-    ARIADNE_TEST_EQUAL(e5._index_size(),2);
-    ARIADNE_TEST_EQUAL(e5._element_size(),4);
-
-    Expansion<Float64> e(3);
-
-    // Test index and element size values
-    ARIADNE_TEST_EQUAL(e._index_size(),1);
-    ARIADNE_TEST_EQUAL(e._element_size(),3);
+    Expansion<F> e(3,prec);
 
     // Append values
     ARIADNE_TEST_EXECUTE(e.append({0,0,0},2.0));
@@ -187,9 +186,9 @@ Void TestExpansion::test_data_access()
     // Test Iterator difference
     ARIADNE_TEST_PRINT(e.begin());
     ARIADNE_TEST_PRINT(e.end());
-    ARIADNE_TEST_EQUAL(e.begin()+e.number_of_nonzeros(),e.end());
-    ARIADNE_TEST_EQUAL(e.end()-e.number_of_nonzeros(),e.begin());
-    ARIADNE_TEST_EQUAL(e.end()-e.begin(),Expansion<Float64>::DifferenceType(e.number_of_nonzeros()));
+    ARIADNE_TEST_EQUAL(e.begin()+e.number_of_terms(),e.end());
+    ARIADNE_TEST_EQUAL(e.end()-e.number_of_terms(),e.begin());
+    ARIADNE_TEST_EQUAL(e.end()-e.begin(),PointerDifferenceType(e.number_of_terms()));
 
     // Test derefencing of iterators
     ARIADNE_TEST_PRINT(e.begin());
@@ -197,17 +196,22 @@ Void TestExpansion::test_data_access()
     ARIADNE_TEST_EQUAL(e.begin()->key(),MultiIndex({0,0,0}));
     ARIADNE_TEST_EQUAL(e.begin()->data(),2.0);
 
+    Expansion<F> const& ce=e;
+    ARIADNE_TEST_PRINT(ce.begin());
+    ARIADNE_TEST_PRINT(*ce.begin());
+    ARIADNE_TEST_EQUAL(ce.begin()->key(),MultiIndex({0,0,0}));
+    ARIADNE_TEST_EQUAL(ce.begin()->data(),2.0);
 
 
     // The behaviour of iterators is rather odd and not what might be expected
     // A MultiIndex reference assigned to by iter->key() changes its value
-    // when the Iterator is incremented, but a Float64 reference does not.
+    // when the Iterator is incremented, but a F reference does not.
     // This behaviour should be changed in future versions if technologically
     // feasible.
-    Expansion<Float64>::Iterator iter=e.begin();
+    Iterator iter=e.begin();
     const MultiIndex& aref=iter->key();
-    const Float64& xref=iter->data();
-    Float64 x1=iter->data();
+    const F& xref=iter->data();
+    F x1=iter->data();
     ++iter;
     MultiIndex a2=iter->key();
     ARIADNE_TEST_ASSERT(a2==aref);
@@ -222,11 +226,11 @@ Void TestExpansion::test_data_access()
 
 
     // Test hand-coded swap of values
-    ARIADNE_TEST_CONSTRUCT(Expansion<Float64>::Iterator,iter1,(e.begin()+1));
-    ARIADNE_TEST_CONSTRUCT(Expansion<Float64>::Iterator,iter2,(e.begin()+3));
+    ARIADNE_TEST_CONSTRUCT(Iterator,iter1,(e.begin()+1));
+    ARIADNE_TEST_CONSTRUCT(Iterator,iter2,(e.begin()+3));
 
     // Perform swap
-    ARIADNE_TEST_CONSTRUCT(Expansion<Float64>::value_type,tmp,(*iter2));
+    ARIADNE_TEST_CONSTRUCT(typename Expansion<F>::ValueType,tmp,(*iter2));
     ARIADNE_TEST_ASSERT(tmp.key()==MultiIndex({1,0,1}));
     ARIADNE_TEST_ASSERT(tmp.data()==7.0);
     ARIADNE_TEST_EXECUTE(*iter2=*iter1);
@@ -239,11 +243,11 @@ Void TestExpansion::test_data_access()
 
 }
 
-Void TestExpansion::test_equality()
+template<class F> Void TestExpansion<F>::test_equality()
 {
-    MI a(2);
-    MI b(2); ++b;
-    Expansion<Float64> e1(2),e2(2);
+    MultiIndex a(2);
+    MultiIndex b(2); ++b;
+    Expansion<F> e1(2,zero),e2(2,zero);
     e1.append(a,1.0); e1.append(b,2.0);
     e2.append(a,1.0); e2.append(b,3.0);
     ARIADNE_TEST_COMPARE(e1,!=,e2);
@@ -251,26 +255,25 @@ Void TestExpansion::test_equality()
     ARIADNE_TEST_EQUAL(e1,e2);
     e1.clear(); e1.append(b,2.0);
     e2.clear(); e2.append(a,0.0); e2.append(b,2.0);
-    if(!(e1==e2)) { ARIADNE_TEST_NOTIFY("Expansion<Float64> objects differing by explicit zeros are considered nonequal."); }
+    if(!(e1==e2)) { ARIADNE_TEST_NOTIFY("Expansion<F> objects differing by explicit zeros are considered nonequal."); }
     e1.clear(); e1.append(a,-0.0);
     e1.clear(); e1.append(a,+0.0);
-    if(!(e1==e2)) { ARIADNE_TEST_NOTIFY("Expansion<Float64> objects differing by +0 versus -0 coefficients are considered nonequal."); }
+    if(!(e1==e2)) { ARIADNE_TEST_NOTIFY("Expansion<F> objects differing by +0 versus -0 coefficients are considered nonequal."); }
     e1.clear(); e1.append(a,1.0); e1.append(b,2.0);
     e2.clear(); e2.append(b,2.0); e2.append(a,1.0);
-    if(!(e1==e2)) { ARIADNE_TEST_NOTIFY("Expansion<Float64> objects differing by order of set operators are considered nonequal."); }
+    if(!(e1==e2)) { ARIADNE_TEST_NOTIFY("Expansion<F> objects differing by order of set operators are considered nonequal."); }
 }
 
-
-Void TestExpansion::test_cleanup()
+template<class F> Void TestExpansion<F>::test_cleanup()
 {
     // Test to see if the cleanup/sort operations work.
     // Since these are used in the constructors, we can't use the main constructors to test this
-    MI a(3);
-    MI b(3); ++b;
+    MultiIndex a(3);
+    MultiIndex b(3); ++b;
     ARIADNE_TEST_PRINT(a);
     ARIADNE_TEST_PRINT(b);
 
-    Expansion<Float64> e(3);
+    Expansion<F> e(3,zero);
     ARIADNE_TEST_PRINT(e);
     for(Nat i=0; i!=2; ++i) {
         if(i%2) { e.append(a,1/(1.+i)); ++b; ++b; a=b; ++b; } else { e.append(b,1/(1.+i));}
@@ -278,106 +281,58 @@ Void TestExpansion::test_cleanup()
     }
 
     ARIADNE_TEST_PRINT(e);
-    ARIADNE_TEST_EXECUTE(e.graded_sort());
+    ARIADNE_TEST_EXECUTE(e.index_sort(graded_less));
+    ARIADNE_TEST_PRINT(e);
+    ARIADNE_TEST_EXECUTE(e.combine_terms());
     ARIADNE_TEST_PRINT(e);
     ARIADNE_TEST_EXECUTE(e.remove_zeros());
     ARIADNE_TEST_PRINT(e);
 
 }
 
-Void TestExpansion::test_constructors()
+template<class F> Void TestExpansion<F>::test_constructors()
 {
+    // Empty initialiser list causes failure
+    ARIADNE_TEST_FAIL(Expansion<F> e0({}));
+
     // Empty expansion
-    ARIADNE_TEST_CONSTRUCT(Expansion<Float64>,e1,(3));
+    ARIADNE_TEST_CONSTRUCT(Expansion<F>,e1,(3,prec));
     // Expansion with all entries; useful for checking ordering of indices
-    ARIADNE_TEST_CONSTRUCT(Expansion<Float64>,e2,(3,4, {1., 2.,3.,4., 5.,6.,7.,8.,9.,10.,
-        11.,12.,13.,14.,15.,16.,17.,18.,19.,20., 21.,22.,23.,24.,25.,26.,27.,28.,29.,30.,31.,32.,33.,34.,35}));
+    //ARIADNE_TEST_CONSTRUCT(Expansion<F>,e2,(3,4, {1., 2.,3.,4., 5.,6.,7.,8.,9.,10.,
+    //    11.,12.,13.,14.,15.,16.,17.,18.,19.,20., 21.,22.,23.,24.,25.,26.,27.,28.,29.,30.,31.,32.,33.,34.,35}));
 
     // Dense expansion
-    ARIADNE_TEST_CONSTRUCT(Expansion<Float64>,e3,(3,2, {0., 0.,0.,0., 5.,2.,0.,0.,3.,0.}));
+    ARIADNE_TEST_CONSTRUCT(Expansion<F>,e3,({{{2,0,0},5.},{{1,1,0},2.},{{1,0,1},0.},{{0,2,0},0.},{{0,1,1},3.},{{0,2,0},0.}}, prec));
+    //ARIADNE_TEST_CONSTRUCT(Expansion<F>,e3,(3,2, {0., 0.,0.,0., 5.,2.,0.,0.,3.,0.}));
     ARIADNE_TEST_PRINT(e3);
     ARIADNE_TEST_COMPARE(e3.find(MultiIndex({2,0,0})),!=,e3.end());
     ARIADNE_TEST_EQUAL(e3[MultiIndex({2,0,0})],5.0);
 
     // Sparse expansion with unordered indiced
-    Expansion<Float64> pp3{{{1,2},5.0}, {{0,0},2.0}, {{1,0},3.0}, {{3,0},7.0}, {{0,1},11.0}};
-    ARIADNE_TEST_CONSTRUCT(Expansion<Float64>,p3,({{{1,2},5.0}, {{0,0},2.0}, {{1,0},3.0}, {{3,0},7.0}, {{0,1},11.0}}));
+    Expansion<F> pp3({{{1,2},5.0}, {{0,0},2.0}, {{1,0},3.0}, {{3,0},7.0}, {{0,1},11.0}}, prec);
+    ARIADNE_TEST_CONSTRUCT(Expansion<F>,p3,({{{1,2},5.0}, {{0,0},2.0}, {{1,0},3.0}, {{3,0},7.0}, {{0,1},11.0}}, prec));
     ARIADNE_TEST_EQUAL(p3[MultiIndex({1,2})],5.0);
     ARIADNE_TEST_EQUAL(p3[MultiIndex({0,0})],2.0);
 
     // Unordered indices
-    ARIADNE_TEST_COMPARE(E({{{1,2},5.0}, {{0,0},2.0}, {{1,0},3.0}, {{3,0},7.0}, {{0,1},11.0}}),!=,E({{{0,0},2.0}, {{1,0},3.0}, {{0,1},11.0}, {{3,0},7.0}, {{1,2},5.0}}));
+    ARIADNE_TEST_COMPARE(E({{{1,2},5.0}, {{0,0},2.0}, {{1,0},3.0}, {{3,0},7.0}, {{0,1},11.0}}, prec),!=,E({{{0,0},2.0}, {{1,0},3.0}, {{0,1},11.0}, {{3,0},7.0}, {{1,2},5.0}}, prec));
     // Repeated indices; do not sum in expansion class
-    ARIADNE_TEST_COMPARE(E({{{1,0},2.0}, {{1,0},3.0}, {{0,2},7.0}}),!=,E({{{1,0},5.0}, {{0,2},7.0}}));
+    ARIADNE_TEST_COMPARE(E({{{1,0},2.0}, {{1,0},3.0}, {{0,2},7.0}}, prec),!=,E({{{1,0},5.0}, {{0,2},7.0}}, prec));
 
-    // Regression tests for expansions with only zeroes
-    ARIADNE_TEST_CONSTRUCT(Expansion<Float64>,pr2,({{{},0.0}}));
-    ARIADNE_TEST_CONSTRUCT(Expansion<Float64>,pr1,({{{3,0,0},0.0}}));
+    // Regression tests for expansions with only preces
+    ARIADNE_TEST_CONSTRUCT(Expansion<F>,pr2,({{{},0.0}},prec));
+    ARIADNE_TEST_CONSTRUCT(Expansion<F>,pr1,({{{3,0,0},0.0}},prec));
 
     // Regression tests for higher-order expansions
-    ARIADNE_TEST_CONSTRUCT(Expansion<Float64>,ho1,({{{0,1,0,0,0},2.0}, {{0,1,0,0,1},3.0}, {{2,0,1,0,0},5.0}, {{0,0,0,0,0},7.0}}));
+    ARIADNE_TEST_CONSTRUCT(Expansion<F>,ho1,({{{0,1,0,0,0},2.0}, {{0,1,0,0,1},3.0}, {{2,0,1,0,0},5.0}, {{0,0,0,0,0},7.0}},prec));
 }
 
 
 
-
-/* Not needed since we cannot look up by index without order
-Void TestExpansion::test_indexing()
+template<class F> Void TestExpansion<F>::test_find()
 {
-    Expansion<Float64> e(3,4, 0,0,0,2.0,  1,0,0,3.0, 1,0,1,5.0, 2,1,0,7.0);
-    const Expansion<Float64>& pc=e;
-    ARIADNE_TEST_EQUAL(e[MI(3, 1,0,0)],3.0);
-
-    e[MI(3, 1,0,0)]-=0.5;
-    ARIADNE_TEST_EQUAL(e[MI(3, 1,0,0)],2.5);
-
-    e[MI(3, 1,1,0)]=11.0;
-    ARIADNE_TEST_EQUAL(e[MI(3, 1,1,0)],11.0);
-
-    e.clear();
-    e[MI(3, 0,0,0)]=2.0;
-    e[MI(3, 0,1,0)]=3.0;
-    ARIADNE_TEST_PRINT(e);
-    ARIADNE_TEST_EQUAL(e.number_of_nonzeros(),2);
-    ARIADNE_TEST_EQUAL(e[MI(3, 0,0,0)],2.0);
-    ARIADNE_TEST_EQUAL(e[MI(3, 0,1,0)],3.0);
-    ARIADNE_TEST_EXECUTE(e[MI(3, 1,0,0)]=5.0);
-    ARIADNE_TEST_EQUAL(e[MI(3, 1,0,0)],5.0);
-    ARIADNE_TEST_EQUAL(e[MI(3, 0,1,0)],3.0);
-    ARIADNE_TEST_EXECUTE(e[MI(3, 0,0,1)]=7.0);
-    ARIADNE_TEST_EQUAL(e[MI(3, 0,0,1)],7.0);
-
-    // Test insert at beginning
-    e.clear();
-    e[MI(3, 0,1,0)]=2.0;
-    e[MI(3, 0,0,1)]=3.0;
-    e[MI(3, 2,1,0)]=5.0;
-    ARIADNE_TEST_PRINT(e);
-    ARIADNE_TEST_EQUAL(pc[MI(3, 0,0,0)],0.0);
-    ARIADNE_TEST_EQUAL(e.number_of_nonzeros(),3);
-    ARIADNE_TEST_EXECUTE(e[MI(3, 0,0,0)]=7);
-    ARIADNE_TEST_PRINT(e);
-    ARIADNE_TEST_EQUAL(e.number_of_nonzeros(),4);
-    Expansion<Float64>::ConstIterator iter=e.begin();
-    ARIADNE_TEST_EQUAL(iter->key(),MI(3, 0,1,0));
-    ARIADNE_TEST_EQUAL(iter->data(),2.0);
-    ++iter;
-    ARIADNE_TEST_EQUAL(iter->key(),MI(3, 0,0,1));
-    ARIADNE_TEST_EQUAL(iter->data(),3.0);
-    ++iter;
-    ARIADNE_TEST_EQUAL(iter->key(),MI(3, 2,1,0));
-    ARIADNE_TEST_EQUAL(iter->data(),5.0);
-    ++iter;
-    ARIADNE_TEST_EQUAL(iter->key(),MI(3, 0,0,0));
-    ARIADNE_TEST_EQUAL(iter->data(),7.0);
-}
-*/
-
-
-Void TestExpansion::test_find()
-{
-    Expansion<Float64> e({ {{1,2},5.0}, {{0,0},2.0}, {{1,0},3.0}, {{3,0},7.0}, {{0,1},11.0} });
-    MI a(2);
+    Expansion<F> e({ {{1,2},5.0}, {{0,0},2.0}, {{1,0},3.0}, {{3,0},7.0}, {{0,1},11.0} }, prec);
+    MultiIndex a(2);
     a[0]=1; a[1]=2;
     ARIADNE_TEST_PRINT(e);
     ARIADNE_TEST_PRINT(e.find(a)-e.begin());
@@ -389,16 +344,19 @@ Void TestExpansion::test_find()
 
 }
 
-Void TestExpansion::test_embed()
+template<class F> Void TestExpansion<F>::test_embed()
 {
-    ARIADNE_TEST_CONSTRUCT(Expansion<Float64>,e,({ {{1,2},5.0}, {{0,0},2.0}, {{1,0},3.0}, {{3,0},7.0}, {{0,1},11.0} }));
-    ARIADNE_TEST_EQUAL(embed(0,e,2),Expansion<Float64>({ {{1,2,0,0},5.0}, {{0,0,0,0},2.0}, {{1,0,0,0},3.0}, {{3,0,0,0},7.0}, {{0,1,0,0},11.0} }));
-    ARIADNE_TEST_EQUAL(embed(1,e,0),Expansion<Float64>({ {{0,1,2},5.0}, {{0,0,0},2.0}, {{0,1,0},3.0}, {{0,3,0},7.0}, {{0,0,1},11.0} }));
-    ARIADNE_TEST_EQUAL(embed(1,e,2),Expansion<Float64>({ {{0,1,2,0,0},5.0}, {{0,0,0,0,0},2.0}, {{0,1,0,0,0},3.0}, {{0,3,0,0,0},7.0}, {{0,0,1,0,0},11.0} }));
+    ARIADNE_TEST_CONSTRUCT(Expansion<F>,e,({ {{1,2},5.0}, {{0,0},2.0}, {{1,0},3.0}, {{3,0},7.0}, {{0,1},11.0} }));
+    ARIADNE_TEST_EQUAL(embed(0,e,2),Expansion<F>({ {{1,2,0,0},5.0}, {{0,0,0,0},2.0}, {{1,0,0,0},3.0}, {{3,0,0,0},7.0}, {{0,1,0,0},11.0} }));
+    ARIADNE_TEST_EQUAL(embed(1,e,0),Expansion<F>({ {{0,1,2},5.0}, {{0,0,0},2.0}, {{0,1,0},3.0}, {{0,3,0},7.0}, {{0,0,1},11.0} }));
+    ARIADNE_TEST_EQUAL(embed(1,e,2),Expansion<F>({ {{0,1,2,0,0},5.0}, {{0,0,0,0,0},2.0}, {{0,1,0,0,0},3.0}, {{0,3,0,0,0},7.0}, {{0,0,1,0,0},11.0} }));
 
 }
 
 Int main() {
-    TestExpansion().test();
+    Float64 zero_64{Precision64()};
+    FloatMP zero_mp{PrecisionMP(128)};
+    TestExpansion<Float64>(zero_64).test();
+    TestExpansion<FloatMP>(zero_mp).test();
     return ARIADNE_TEST_FAILURES;
 }

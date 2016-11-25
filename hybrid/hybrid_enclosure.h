@@ -46,7 +46,7 @@
 namespace Ariadne {
 
 template<class X> class Vector;
-template<class X> class LinearProgram;
+template<class X> struct LinearProgram;
 
 template<class X> class FunctionModelFactoryInterface;
 typedef FunctionModelFactoryInterface<ValidatedTag> IntervalFunctionModelFactoryInterface;
@@ -326,6 +326,15 @@ class ListSet<HybridEnclosure>
   private:
     List<HybridEnclosure> _list;
 };
+
+inline ValidatedSierpinskian inside(ListSet<HybridEnclosure> const& set, HybridBoxType const& bx) {
+    ValidatedSierpinskian result=true;
+    for(auto iter=set.begin(); iter!=set.end(); ++iter) {
+        result = result && inside(*iter,bx);
+    }
+    return result;
+}
+
 
 inline OutputStream& operator<<(OutputStream& os, const ListSet<HybridEnclosure>& hls) {
     return os << hls._list;

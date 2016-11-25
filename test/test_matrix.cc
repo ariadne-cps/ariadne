@@ -43,6 +43,7 @@ using namespace Ariadne;
 
 
 class TestMatrix {
+    Precision64 pr;
   public:
     Void test();
   private:
@@ -92,18 +93,20 @@ TestMatrix::test_concept()
 Void
 TestMatrix::test_misc()
 {
-    Float64Approximation x=2.25;
-    Float64Bounds ix(1.5,2.25);
-    Float64Approximation Aptr[9]={-1.0,3.0,1.0, -1.0,1.0,2.0, 2.0,1.0,1.0};
-    Float64Bounds iAptr[4]={-1,3, -1,1};
+    Float64Approximation x={2.25,pr};
+    Float64Bounds ix={1.5_exact,2.25_exact};
+    Array<Float64Approximation> Aary={{-1.0,3.0,1.0, -1.0,1.0,2.0, 2.0,1.0,1.0},pr};
+    Array<Float64Bounds> iAary={{-1.0_x,3.0_x, -1.0_x,1.0_x},pr};
+    Float64Approximation* Aptr=Aary.begin();
+    Float64Bounds* iAptr=iAary.begin();
 
     Matrix<Float64Approximation> A0;
     ARIADNE_TEST_PRINT(A0);
-    Matrix<Float64Approximation> A1(3,2);
+    Matrix<Float64Approximation> A1(3,2,pr);
     ARIADNE_TEST_PRINT(A1);
-    Matrix<Float64Approximation> A2(3,3,Aptr);
+    Matrix<Float64Approximation> A2(3,3,Aary.begin());
     ARIADNE_TEST_PRINT(A2);
-    Matrix<Float64Approximation> A3({{-1.0,3.0,1.0}, {-1.0,1.0,2.0}, {2.0,1.0,1.0}});
+    Matrix<Float64Approximation> A3({{-1.0,3.0,1.0}, {-1.0,1.0,2.0}, {2.0,1.0,1.0}},pr);
     ARIADNE_TEST_PRINT(A3);
 
     for(SizeType i=0; i!=A2.row_size(); ++i) {
@@ -129,17 +132,17 @@ TestMatrix::test_misc()
     ARIADNE_TEST_PRINT(A1);
 
     typedef FloatApproximationMatrix MatrixType;
-    ARIADNE_TEST_EQUALS(+FloatApproximationMatrix({{1.,2.},{3.,4.}}),FloatApproximationMatrix({{1.,2.},{3.,4.}}));
-    ARIADNE_TEST_EQUALS(-FloatApproximationMatrix({{1.,2.},{3.,4.}}),FloatApproximationMatrix({{-1.,-2.},{-3.,-4.}}));
-    ARIADNE_TEST_EQUALS(FloatApproximationMatrix({{1.,2.},{3.,4.}})+FloatApproximationMatrix({{5.,7.},{8.,6.}}),FloatApproximationMatrix({{6.,9.},{11.,10.}}));
-    ARIADNE_TEST_EQUALS(FloatApproximationMatrix({{1.,2.},{3.,4.}})-FloatApproximationMatrix({{5.,7.},{8.,6.}}),FloatApproximationMatrix({{-4.,-5.},{-5.,-2.}}));
-    ARIADNE_TEST_EQUALS(FloatApproximationMatrix({{1.,2.},{3.,4.}})*FloatApproximationMatrix({{5.,7.},{8.,6.}}),FloatApproximationMatrix({{21.,19.},{47.,45.}}));
+    ARIADNE_TEST_EQUALS(+FloatApproximationMatrix({{1.,2.},{3.,4.}},pr),FloatApproximationMatrix({{1.,2.},{3.,4.}},pr));
+    ARIADNE_TEST_EQUALS(-FloatApproximationMatrix({{1.,2.},{3.,4.}},pr),FloatApproximationMatrix({{-1.,-2.},{-3.,-4.}},pr));
+    ARIADNE_TEST_EQUALS(FloatApproximationMatrix({{1.,2.},{3.,4.}},pr)+FloatApproximationMatrix({{5.,7.},{8.,6.}},pr),FloatApproximationMatrix({{6.,9.},{11.,10.}},pr));
+    ARIADNE_TEST_EQUALS(FloatApproximationMatrix({{1.,2.},{3.,4.}},pr)-FloatApproximationMatrix({{5.,7.},{8.,6.}},pr),FloatApproximationMatrix({{-4.,-5.},{-5.,-2.}},pr));
+    ARIADNE_TEST_EQUALS(FloatApproximationMatrix({{1.,2.},{3.,4.}},pr)*FloatApproximationMatrix({{5.,7.},{8.,6.}},pr),FloatApproximationMatrix({{21.,19.},{47.,45.}},pr));
 
     // Transpose operations
-    ARIADNE_TEST_EQUALS(FloatApproximationMatrix(transpose(FloatApproximationMatrix({{1.,2.,3.},{4.,5.,6.}}))),FloatApproximationMatrix({{1.,4.},{2.,5.},{3.,6.}}));
-    ARIADNE_TEST_EQUALS(transpose(FloatApproximationMatrix({{1.,2.},{3.,4.}}))*FloatApproximationMatrix({{5.,7.},{8.,6.}}),FloatApproximationMatrix({{1.,3.},{2.,4.}})*FloatApproximationMatrix({{5.,7.},{8.,6.}}));
-    ARIADNE_TEST_EQUALS(FloatApproximationMatrix({{1.,2.},{3.,4.}})*transpose(FloatApproximationMatrix({{5.,7.},{8.,6.}})),FloatApproximationMatrix({{1.,2.},{3.,4.}})*FloatApproximationMatrix({{5.,8.},{7.,6.}}));
-    ARIADNE_TEST_EQUALS(transpose(FloatApproximationMatrix({{1.,2.,3.},{4.,5.,6.}}))*FloatApproximationVector({5.,7.}),FloatApproximationMatrix({{1.,4.},{2.,5.},{3.,6.}})*FloatApproximationVector({5.,7.}));
+    ARIADNE_TEST_EQUALS(FloatApproximationMatrix(transpose(FloatApproximationMatrix({{1.,2.,3.},{4.,5.,6.}},pr))),FloatApproximationMatrix({{1.,4.},{2.,5.},{3.,6.}},pr));
+    ARIADNE_TEST_EQUALS(transpose(FloatApproximationMatrix({{1.,2.},{3.,4.}},pr))*FloatApproximationMatrix({{5.,7.},{8.,6.}},pr),FloatApproximationMatrix({{1.,3.},{2.,4.}},pr)*FloatApproximationMatrix({{5.,7.},{8.,6.}},pr));
+    ARIADNE_TEST_EQUALS(FloatApproximationMatrix({{1.,2.},{3.,4.}},pr)*transpose(FloatApproximationMatrix({{5.,7.},{8.,6.}},pr)),FloatApproximationMatrix({{1.,2.},{3.,4.}},pr)*FloatApproximationMatrix({{5.,8.},{7.,6.}},pr));
+    ARIADNE_TEST_EQUALS(transpose(FloatApproximationMatrix({{1.,2.,3.},{4.,5.,6.}},pr))*FloatApproximationVector({5.,7.},pr),FloatApproximationMatrix({{1.,4.},{2.,5.},{3.,6.}},pr)*FloatApproximationVector({5.,7.},pr));
 }
 
 Int main() {

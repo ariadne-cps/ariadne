@@ -48,7 +48,8 @@
 
 namespace Ariadne {
 
-template<class X> class Formula;
+// FIXME: Redefine ApproximateFormula to Formula<ApproximateNumber>
+template<class Y> class Formula;
 typedef Formula<ApproximateNumericType> ApproximateFormula;
 typedef Formula<ValidatedNumericType> ValidatedFormula;
 
@@ -61,60 +62,65 @@ struct Index {
 inline OutputStream& operator<<(OutputStream& os, const Index& ind) {
     return os << Nat(ind); }
 
-template<class X> class FormulaNode;
+template<class Y> class FormulaNode;
 
 //! \brief A formula defining a real function.
 //!
 //! The Formula class is implemented as a directed acyclic graph, with
 //! each node being an atomic operation.
-template<class X>
+template<class Y>
 class Formula {
     typedef Index I;
   public:
-    typedef typename X::Paradigm Paradigm;
-    typedef X NumericType;
-    typedef X ConstantType;
+    typedef typename Y::Paradigm Paradigm;
+    typedef Y NumericType;
+    typedef Y ConstantType;
     typedef I IndexType;
   private:
-    explicit Formula(const FormulaNode<X>* fptr) : _root(fptr) { }
-    explicit Formula(counted_pointer< const FormulaNode<X> > fptr) : _root(fptr) { }
+    explicit Formula(const FormulaNode<Y>* fptr, PointerTag) : _root(fptr) { }
+    explicit Formula(counted_pointer< const FormulaNode<Y> > fptr, PointerTag) : _root(fptr) { }
   public:
-    //! \brief Construct the constant expression with the default value of \a X.
+    //! \brief Construct the constant expression with the default value of \a Y.
     Formula();
-
+    //! \brief Construct the constant expression with value \a c.
+    Formula(Y const& c);
     //! \brief Set equal to a constant.
-    Formula<X>& operator=(const X& c);
+    Formula<Y>& operator=(const Y& c);
   public:
     //! \brief Return the constant formula zero.
-    Formula<X> create_zero() const;
+    Formula<Y> create_zero() const;
+    //! \brief Return the constant formula with value \a c.
+    Formula<Y> create_constant(const Y& c) const;
   public:
-    static Formula<X> zero();
-    static Formula<X> constant(const X& c);
-    static Formula<X> coordinate(Nat i);
-    static Vector<Formula<X>> coordinates(Nat n);
-    static Formula<X> unary(const Operator& op, Formula<X> const& a);
-    static Formula<X> binary(const Operator& op, Formula<X> const& a1, Formula<X> const& a2);
-    static Formula<X> scalar(const Operator& op, Formula<X> const& a1, Int n2);
-    static Vector< Formula<X> > identity(Nat n);
+    static Formula<Y> zero();
+    static Formula<Y> constant(const Y& c);
+    static Formula<Y> constant(Int c);
+    static Formula<Y> coordinate(Nat i);
+    static Vector<Formula<Y>> coordinates(Nat n);
+    static Formula<Y> unary(const Operator& op, Formula<Y> const& a);
+    static Formula<Y> binary(const Operator& op, Formula<Y> const& a1, Formula<Y> const& a2);
+    static Formula<Y> scalar(const Operator& op, Formula<Y> const& a1, Int n2);
+    static Vector< Formula<Y> > identity(Nat n);
   public:
     const Operator& op() const;
     OperatorCode code() const;
     OperatorKind kind() const;
-    const X& val() const;
+    const Y& val() const;
     const I& ind() const;
-    const Formula<X>& arg() const;
+    const Formula<Y>& arg() const;
     const Int& num() const;
-    const Formula<X>& arg1() const;
-    const Formula<X>& arg2() const;
+    const Formula<Y>& arg1() const;
+    const Formula<Y>& arg2() const;
   public:
-    const FormulaNode<X>* node_ptr() const { return _root.operator->(); }
+    const FormulaNode<Y>* node_ptr() const { return _root.operator->(); }
   private:
-    counted_pointer< const FormulaNode<X> > _root;
+    counted_pointer< const FormulaNode<Y> > _root;
 };
-template<class X> OutputStream& operator<<(OutputStream& os, const Formula<X>& f);
+template<class Y> OutputStream& operator<<(OutputStream& os, const Formula<Y>& f);
 
-template<class X>
-struct FormulaNode {
+template<class Y>
+class FormulaNode {
+  public:
     mutable Nat count;
     Operator op;
     virtual ~FormulaNode();
@@ -122,166 +128,193 @@ struct FormulaNode {
     explicit FormulaNode(OperatorCode cd, OperatorKind knd) : count(0u), op(cd,knd) { }
 };
 
-template<class X> struct ConstantFormulaNode : public FormulaNode<X> {
-    X val;
-    ConstantFormulaNode(const X& v) : FormulaNode<X>(OperatorCode::CNST,OperatorKind::NULLARY), val(v) { }
+template<class Y> struct ConstantFormulaNode : public FormulaNode<Y> {
+    Y val;
+    ConstantFormulaNode(const Y& v) : FormulaNode<Y>(OperatorCode::CNST,OperatorKind::NULLARY), val(v) { }
 };
-template<class X> struct IndexFormulaNode : public FormulaNode<X> {
+template<class Y> struct IndexFormulaNode : public FormulaNode<Y> {
     Index ind;
-    IndexFormulaNode(Nat i) : FormulaNode<X>(OperatorCode::IND,OperatorKind::COORDINATE), ind(i) { }
-    IndexFormulaNode(const Index& i) : FormulaNode<X>(OperatorCode::IND,OperatorKind::COORDINATE), ind(i) { }
+    IndexFormulaNode(Nat i) : FormulaNode<Y>(OperatorCode::IND,OperatorKind::COORDINATE), ind(i) { }
+    IndexFormulaNode(const Index& i) : FormulaNode<Y>(OperatorCode::IND,OperatorKind::COORDINATE), ind(i) { }
 };
-template<class X, class A=X> struct UnaryFormulaNode : public FormulaNode<X> {
-    Formula<X> arg;
-    UnaryFormulaNode(const Operator& op, Formula<X> const& a) : FormulaNode<X>(op), arg(a) { }
+template<class Y, class A=Y> struct UnaryFormulaNode : public FormulaNode<Y> {
+    Formula<Y> arg;
+    UnaryFormulaNode(const Operator& op, Formula<Y> const& a) : FormulaNode<Y>(op), arg(a) { }
 };
-template<class X, class A1=X, class A2=A1> struct BinaryFormulaNode {
-    Formula<X> arg1; Formula<X> arg2;
+template<class Y, class A1=Y, class A2=A1> struct BinaryFormulaNode {
+    Formula<Y> arg1; Formula<Y> arg2;
 };
-template<class X> struct BinaryFormulaNode<X> : public FormulaNode<X> {
-    Formula<X> arg1; Formula<X> arg2;
-    BinaryFormulaNode(const Operator& op, Formula<X> const& a1, Formula<X> const& a2)
-        : FormulaNode<X>(op), arg1(a1), arg2(a2) { }
+template<class Y> struct BinaryFormulaNode<Y> : public FormulaNode<Y> {
+    Formula<Y> arg1; Formula<Y> arg2;
+    BinaryFormulaNode(const Operator& op, Formula<Y> const& a1, Formula<Y> const& a2)
+        : FormulaNode<Y>(op), arg1(a1), arg2(a2) { }
 };
-template<class X> struct ScalarFormulaNode : public UnaryFormulaNode<X> {
+template<class Y> struct ScalarFormulaNode : public UnaryFormulaNode<Y> {
     Int num;
-    ScalarFormulaNode(const Operator& op, Formula<X> const& a, Int n)
-        : UnaryFormulaNode<X>(op,a), num(n) { }
+    ScalarFormulaNode(const Operator& op, Formula<Y> const& a, Int n)
+        : UnaryFormulaNode<Y>(op,a), num(n) { }
 };
 
-template<class X> FormulaNode<X>::~FormulaNode() { }
+template<class Y> FormulaNode<Y>::~FormulaNode() { }
 
-template<class X> inline const Operator& Formula<X>::op() const {
+template<class Y> inline const Operator& Formula<Y>::op() const {
     return node_ptr()->op; }
-template<class X> inline OperatorCode Formula<X>::code() const {
+template<class Y> inline OperatorCode Formula<Y>::code() const {
     return node_ptr()->op.code(); }
-template<class X> inline OperatorKind Formula<X>::kind() const {
+template<class Y> inline OperatorKind Formula<Y>::kind() const {
     return node_ptr()->op.kind(); }
-template<class X> inline const X& Formula<X>::val() const {
-    return static_cast<const ConstantFormulaNode<X>*>(node_ptr())->val; }
-template<class X> inline const Index& Formula<X>::ind() const {
-    return static_cast<const IndexFormulaNode<X>*>(node_ptr())->ind; }
-template<class X> inline const Formula<X>& Formula<X>::arg() const {
-    return static_cast<const UnaryFormulaNode<X>*>(node_ptr())->arg; }
-template<class X> inline const Int& Formula<X>::num() const {
-    return static_cast<const ScalarFormulaNode<X>*>(node_ptr())->num; }
-template<class X> inline const Formula<X>& Formula<X>::arg1() const {
-    return static_cast<const BinaryFormulaNode<X>*>(node_ptr())->arg1; }
-template<class X> inline const Formula<X>& Formula<X>::arg2() const {
-    return static_cast<const BinaryFormulaNode<X>*>(node_ptr())->arg2; }
+template<class Y> inline const Y& Formula<Y>::val() const {
+    return static_cast<const ConstantFormulaNode<Y>*>(node_ptr())->val; }
+template<class Y> inline const Index& Formula<Y>::ind() const {
+    return static_cast<const IndexFormulaNode<Y>*>(node_ptr())->ind; }
+template<class Y> inline const Formula<Y>& Formula<Y>::arg() const {
+    return static_cast<const UnaryFormulaNode<Y>*>(node_ptr())->arg; }
+template<class Y> inline const Int& Formula<Y>::num() const {
+    return static_cast<const ScalarFormulaNode<Y>*>(node_ptr())->num; }
+template<class Y> inline const Formula<Y>& Formula<Y>::arg1() const {
+    return static_cast<const BinaryFormulaNode<Y>*>(node_ptr())->arg1; }
+template<class Y> inline const Formula<Y>& Formula<Y>::arg2() const {
+    return static_cast<const BinaryFormulaNode<Y>*>(node_ptr())->arg2; }
 
 
-template<class X> inline Formula<X>::Formula() : _root(new ConstantFormulaNode<X>(X())) { }
-template<class X> inline Formula<X>& Formula<X>::operator=(const X& c) { return *this=Formula<X>::constant(c); }
+template<class Y> inline Formula<Y>::Formula() : _root(new ConstantFormulaNode<Y>(Y())) { }
+template<class Y> inline Formula<Y>::Formula(const Y& c) : _root(new ConstantFormulaNode<Y>(c)) { }
+template<class Y> inline Formula<Y>& Formula<Y>::operator=(const Y& c) { return *this=Formula<Y>::constant(c); }
 
-template<class X> inline Formula<X> Formula<X>::create_zero() const { return Formula<X>::constant(0); }
+template<class Y> inline Formula<Y> Formula<Y>::create_zero() const { return Formula<Y>::constant(0); }
+template<class Y> inline Formula<Y> Formula<Y>::create_constant(const Y& c) const { return Formula<Y>::constant(c); }
 
-template<class X> inline Formula<X> Formula<X>::zero() {
-    return Formula<X>(new ConstantFormulaNode<X>(numeric_cast<X>(0))); }
-template<class X> inline Formula<X> Formula<X>::constant(const X& c) {
-    return Formula<X>(new ConstantFormulaNode<X>(c)); }
-template<class X> inline Formula<X> Formula<X>::coordinate(Nat j) {
-    return Formula<X>(new IndexFormulaNode<X>(Index(j))); }
-template<class X> inline Vector<Formula<X>> Formula<X>::coordinates(Nat n) {
-    Vector<Formula<X>> r(n); for(SizeType i=0; i!=n; ++i) { r[i]=Formula<X>::coordinate(i); } return r; }
-template<class X> inline Formula<X> Formula<X>::unary(const Operator& op, Formula<X> const& a) {
-    return Formula<X>(new UnaryFormulaNode<X>(op,a)); }
-template<class X> inline Formula<X> Formula<X>::binary(const Operator& op, Formula<X> const& a1, Formula<X> const& a2) {
-    return Formula<X>(new BinaryFormulaNode<X>(op,a1,a2)); }
-template<class X> inline Formula<X> Formula<X>::scalar(const Operator& op, Formula<X> const& a1, Int n2) {
-    return Formula<X>(new ScalarFormulaNode<X>(op,a1,n2)); }
-template<class X> inline Vector< Formula<X> > Formula<X>::identity(Nat n) {
-    Vector< Formula<X> > r(n); for(Nat i=0; i!=n; ++i) { r[i]=Formula<X>::coordinate(i); } return r; }
+template<class Y> inline Formula<Y> Formula<Y>::zero() {
+    return Formula<Y>(new ConstantFormulaNode<Y>(numeric_cast<Y>(0)),PointerTag()); }
+template<class Y> inline Formula<Y> Formula<Y>::constant(const Y& c) {
+    return Formula<Y>(new ConstantFormulaNode<Y>(c),PointerTag()); }
+template<class Y> inline Formula<Y> Formula<Y>::coordinate(Nat j) {
+    return Formula<Y>(new IndexFormulaNode<Y>(Index(j)),PointerTag()); }
+template<class Y> inline Vector<Formula<Y>> Formula<Y>::coordinates(Nat n) {
+    Vector<Formula<Y>> r(n); for(SizeType i=0; i!=n; ++i) { r[i]=Formula<Y>::coordinate(i); } return r; }
+template<class Y> inline Formula<Y> Formula<Y>::unary(const Operator& op, Formula<Y> const& a) {
+    return Formula<Y>(new UnaryFormulaNode<Y>(op,a),PointerTag()); }
+template<class Y> inline Formula<Y> Formula<Y>::binary(const Operator& op, Formula<Y> const& a1, Formula<Y> const& a2) {
+    return Formula<Y>(new BinaryFormulaNode<Y>(op,a1,a2),PointerTag()); }
+template<class Y> inline Formula<Y> Formula<Y>::scalar(const Operator& op, Formula<Y> const& a1, Int n2) {
+    return Formula<Y>(new ScalarFormulaNode<Y>(op,a1,n2),PointerTag()); }
+template<class Y> inline Vector< Formula<Y> > Formula<Y>::identity(Nat n) {
+    Vector< Formula<Y> > r(n); for(Nat i=0; i!=n; ++i) { r[i]=Formula<Y>::coordinate(i); } return r; }
 
-template<class X, class R> inline Formula<X> make_formula(const R& c) {
-    return Formula<X>::constant(c); }
-template<class X> inline Formula<X> make_formula(Cnst op, const X& c) {
-    return Formula<X>::constant(c); }
-template<class X> inline Formula<X> make_formula(Ind op, Nat j) {
-    return Formula<X>::index(j); }
-template<class X> inline Formula<X> make_formula(const Operator& op, const Formula<X>& arg) {
-    return Formula<X>::unary(op,arg); }
-template<class X> inline Formula<X> make_formula(const Operator& op, const Formula<X>& arg1, const Formula<X>& arg2) {
-    return Formula<X>::binary(op,arg1,arg2); }
-template<class X> inline Formula<X> make_formula(const Operator& op, const Formula<X>& arg, Int num) {
-    return Formula<X>::scalar(op,arg,num); }
+// DEPRECATED
+template<class Y> inline Formula<Y> Formula<Y>::constant(Int c) {
+    return Formula<Y>::constant(Y(c)); }
 
-template<class X> inline Formula<X>& operator+=(Formula<X>& f1, const Formula<X>& f2) { Formula<X> r=f1+f2; return f1=r; }
-template<class X> inline Formula<X>& operator*=(Formula<X>& f1, const Formula<X>& f2) { Formula<X> r=f1*f2; return f1=r; }
 
-template<class X> inline Formula<X> operator+(const Formula<X>& f) { return make_formula(Pos(),f); }
-template<class X> inline Formula<X> operator-(const Formula<X>& f) { return make_formula(Neg(),f); }
-template<class X> inline Formula<X> operator+(const Formula<X>& f1, const Formula<X>& f2) { return make_formula(Add(),f1,f2); }
-template<class X> inline Formula<X> operator-(const Formula<X>& f1, const Formula<X>& f2) { return make_formula(Sub(),f1,f2); }
-template<class X> inline Formula<X> operator*(const Formula<X>& f1, const Formula<X>& f2) { return make_formula(Mul(),f1,f2); }
-template<class X> inline Formula<X> operator/(const Formula<X>& f1, const Formula<X>& f2) { return make_formula(Div(),f1,f2); }
+template<class Y, class R> inline Formula<Y> make_formula(const R& c) {
+    return Formula<Y>::constant(static_cast<Y>(c)); }
+template<class Y> inline Formula<Y> make_formula(Cnst op, const Y& c) {
+    return Formula<Y>::constant(c); }
+template<class Y> inline Formula<Y> make_formula(Ind op, Nat j) {
+    return Formula<Y>::index(j); }
+template<class Y> inline Formula<Y> make_formula(const Operator& op, const Formula<Y>& arg) {
+    return Formula<Y>::unary(op,arg); }
+template<class Y> inline Formula<Y> make_formula(const Operator& op, const Formula<Y>& arg1, const Formula<Y>& arg2) {
+    return Formula<Y>::binary(op,arg1,arg2); }
+template<class Y> inline Formula<Y> make_formula(const Operator& op, const Formula<Y>& arg, Int num) {
+    return Formula<Y>::scalar(op,arg,num); }
 
-template<class X> inline Formula<X> pos(const Formula<X>& f) { return make_formula(Pos(),f); }
-template<class X> inline Formula<X> neg(const Formula<X>& f) { return make_formula(Neg(),f); }
-template<class X> inline Formula<X> rec(const Formula<X>& f) { return make_formula(Rec(),f); }
-template<class X> inline Formula<X> sqr(const Formula<X>& f) { return make_formula(Sqr(),f); }
-template<class X> inline Formula<X> pow(const Formula<X>& f, Int n) { return make_formula(Pow(),f,n); }
-template<class X> inline Formula<X> sqrt(const Formula<X>& f) { return make_formula(Sqrt(),f); }
-template<class X> inline Formula<X> exp(const Formula<X>& f) { return make_formula(Exp(),f); }
-template<class X> inline Formula<X> log(const Formula<X>& f) { return make_formula(Log(),f); }
-template<class X> inline Formula<X> sin(const Formula<X>& f) { return make_formula(Sin(),f); }
-template<class X> inline Formula<X> cos(const Formula<X>& f) { return make_formula(Cos(),f); }
-template<class X> inline Formula<X> tan(const Formula<X>& f) { return make_formula(Tan(),f); }
-template<class X> inline Formula<X> atan(const Formula<X>& f) { return make_formula(Atan(),f); }
+template<class Y> inline Formula<Y>& operator+=(Formula<Y>& f1, const Formula<Y>& f2) { Formula<Y> r=f1+f2; return f1=r; }
+template<class Y> inline Formula<Y>& operator*=(Formula<Y>& f1, const Formula<Y>& f2) { Formula<Y> r=f1*f2; return f1=r; }
 
-template<class X, class R> inline EnableIfNumericType<R,Formula<X> > operator+(Formula<X> f, R c) { return f + make_formula<X>(c); }
-template<class X, class R> inline EnableIfNumericType<R,Formula<X> > operator-(Formula<X> f, R c) { return f - make_formula<X>(c); }
-template<class X, class R> inline EnableIfNumericType<R,Formula<X> > operator*(Formula<X> f, R c) { return f * make_formula<X>(c); }
-template<class X, class R> inline EnableIfNumericType<R,Formula<X> > operator/(Formula<X> f, R c) { return f / make_formula<X>(c); }
-template<class X, class R> inline EnableIfNumericType<R,Formula<X> > operator+(R c, Formula<X> f) { return make_formula<X>(c) + f; }
-template<class X, class R> inline EnableIfNumericType<R,Formula<X> > operator-(R c, Formula<X> f) { return make_formula<X>(c) - f; }
-template<class X, class R> inline EnableIfNumericType<R,Formula<X> > operator*(R c, Formula<X> f) { return make_formula<X>(c) * f; }
-template<class X, class R> inline EnableIfNumericType<R,Formula<X> > operator/(R c, Formula<X> f) { return make_formula<X>(c) / f; }
-template<class X, class R> inline EnableIfNumericType<R,Formula<X> >& operator+=(Formula<X>& f, const R& c) { return f+=make_formula<X>(c); }
-template<class X, class R> inline EnableIfNumericType<R,Formula<X> >& operator*=(Formula<X>& f, const R& c) { return f*=make_formula<X>(c); }
+template<class Y> inline Formula<Y> operator+(const Formula<Y>& f) { return make_formula(Pos(),f); }
+template<class Y> inline Formula<Y> operator-(const Formula<Y>& f) { return make_formula(Neg(),f); }
+template<class Y> inline Formula<Y> operator+(const Formula<Y>& f1, const Formula<Y>& f2) { return make_formula(Add(),f1,f2); }
+template<class Y> inline Formula<Y> operator-(const Formula<Y>& f1, const Formula<Y>& f2) { return make_formula(Sub(),f1,f2); }
+template<class Y> inline Formula<Y> operator*(const Formula<Y>& f1, const Formula<Y>& f2) { return make_formula(Mul(),f1,f2); }
+template<class Y> inline Formula<Y> operator/(const Formula<Y>& f1, const Formula<Y>& f2) { return make_formula(Div(),f1,f2); }
 
-// Make a constant of type T with value c based on a prototype vector v
-template<class P, class PR, class Y> inline Float<P,PR> make_constant(const Y& c, const Float<P,PR>& x) {
-    return Float<P,PR>(c,x.precision());
-}
+template<class Y> inline Formula<Y> pos(const Formula<Y>& f) { return make_formula(Pos(),f); }
+template<class Y> inline Formula<Y> neg(const Formula<Y>& f) { return make_formula(Neg(),f); }
+template<class Y> inline Formula<Y> rec(const Formula<Y>& f) { return make_formula(Rec(),f); }
+template<class Y> inline Formula<Y> sqr(const Formula<Y>& f) { return make_formula(Sqr(),f); }
+template<class Y> inline Formula<Y> pow(const Formula<Y>& f, Int n) { return make_formula(Pow(),f,n); }
+template<class Y> inline Formula<Y> sqrt(const Formula<Y>& f) { return make_formula(Sqrt(),f); }
+template<class Y> inline Formula<Y> exp(const Formula<Y>& f) { return make_formula(Exp(),f); }
+template<class Y> inline Formula<Y> log(const Formula<Y>& f) { return make_formula(Log(),f); }
+template<class Y> inline Formula<Y> sin(const Formula<Y>& f) { return make_formula(Sin(),f); }
+template<class Y> inline Formula<Y> cos(const Formula<Y>& f) { return make_formula(Cos(),f); }
+template<class Y> inline Formula<Y> tan(const Formula<Y>& f) { return make_formula(Tan(),f); }
+template<class Y> inline Formula<Y> atan(const Formula<Y>& f) { return make_formula(Atan(),f); }
+
+template<class Y, class R> inline EnableIfNumericType<R,Formula<Y> > operator+(Formula<Y> f, R c) { return f + make_formula<Y>(c); }
+template<class Y, class R> inline EnableIfNumericType<R,Formula<Y> > operator-(Formula<Y> f, R c) { return f - make_formula<Y>(c); }
+template<class Y, class R> inline EnableIfNumericType<R,Formula<Y> > operator*(Formula<Y> f, R c) { return f * make_formula<Y>(c); }
+template<class Y, class R> inline EnableIfNumericType<R,Formula<Y> > operator/(Formula<Y> f, R c) { return f / make_formula<Y>(c); }
+template<class Y, class R> inline EnableIfNumericType<R,Formula<Y> > operator+(R c, Formula<Y> f) { return make_formula<Y>(c) + f; }
+template<class Y, class R> inline EnableIfNumericType<R,Formula<Y> > operator-(R c, Formula<Y> f) { return make_formula<Y>(c) - f; }
+template<class Y, class R> inline EnableIfNumericType<R,Formula<Y> > operator*(R c, Formula<Y> f) { return make_formula<Y>(c) * f; }
+template<class Y, class R> inline EnableIfNumericType<R,Formula<Y> > operator/(R c, Formula<Y> f) { return make_formula<Y>(c) / f; }
+template<class Y, class R> inline EnableIfNumericType<R,Formula<Y> >& operator+=(Formula<Y>& f, const R& c) { return f+=make_formula<Y>(c); }
+template<class Y, class R> inline EnableIfNumericType<R,Formula<Y> >& operator*=(Formula<Y>& f, const R& c) { return f*=make_formula<Y>(c); }
+
+template<class X> using NumericType = typename X::NumericType;
+template<class X> using GenericType = typename X::GenericType;
+template<class X> using GenericNumericType = GenericType<NumericType<X>>;
 
 // FIXME: Should allow change of precision!
-template<class PW, class PR, class PS> inline Float<PW,PR> make_constant(const Float<PS,PR>& c, const Float<PW,PR>& x) {
-    return Float<PW,PR>(c);
-}
+template<class PR> inline FloatApproximation<PR> make_constant(const FloatApproximation<PR>& c, const FloatApproximation<PR>& x) {
+    return FloatApproximation<PR>(c,x.precision()); }
+
+template<class PR> inline FloatApproximation<PR> make_constant(const FloatApproximation<PR>& c, const FloatBounds<PR>& x) {
+    return FloatApproximation<PR>(c,x.precision()); }
+
+template<class PR> inline FloatBounds<PR> make_constant(const FloatBounds<PR>& c, const FloatApproximation<PR>& x) {
+    return FloatBounds<PR>(c,x.precision()); }
+
+template<class PR> inline FloatBounds<PR> make_constant(const FloatBounds<PR>& c, const FloatBounds<PR>& x) {
+    return FloatBounds<PR>(c,x.precision()); }
+
+template<class PR> inline FloatBounds<PR> make_constant(const Real& c, const FloatApproximation<PR>& x) {
+    return FloatBounds<PR>(c,x.precision()); }
+
+template<class PR> inline FloatBounds<PR> make_constant(const Real& c, const FloatBounds<PR>& x) {
+    return FloatBounds<PR>(c,x.precision()); }
 
 template<class R, EnableIf<IsSame<R,Real>> =dummy> inline R make_constant(const R& c, const R& x) {
     return c;
 }
 
-template<class X, class Y> inline X make_constant(const Y& c, const X& x, EnableIf<IsNumericType<X>> =-dummy) {
+inline Real make_constant(const EffectiveNumber& c, const Real& x) {
+    return Real(c); }
+inline Formula<Real> make_constant(const EffectiveNumber& c, const Formula<Real>& x) {
+    return Formula<Real>::constant(Real(c)); }
+template<class X, EnableIf<IsSame<X,Real>> =dummy> Algebra<X> make_constant(const EffectiveNumber& c, const Algebra<X>& x) {
+    return make_constant(Real(c),x); }
+
+
+template<class X, class Y> inline X make_constant(const Y& c, const X& x, EnableIf<IsNumericType<X>> = dummy) {
     return x.create(c);
 }
 
-template<class X, class Y> inline Differential<X> make_constant(const Y& c, const Differential<X>& x) {
-    return x.create_constant(numeric_cast<X>(c));
+template<class A> inline A make_constant(const NumericType<A>& c, const A& a, DisableIf<IsNumericType<A>> = dummy, DisableIf<IsVector<A>> = dummy) {
+    return a.create_constant(c);
 }
 
-template<class A, class Y> inline A make_constant(const Y& c, const A& a, DisableIf<IsNumericType<A>> =-dummy) {
-    return a.create_constant(numeric_cast<typename A::NumericType>(c));
+template<class A> inline A make_constant(const GenericNumericType<A>& c, const A& a, DisableIf<IsNumericType<A>> = dummy, DisableIf<IsVector<A>> = dummy) {
+    typedef NumericType<A> X; return a.create_constant(X(c,Precision64()));
 }
 
-// Make a constant of type T with value c based on a prototype vector v
-//template<class X, class T> inline T make_constant(const X& c, const Vector<T>& v, EnableIf< Not< IsNumericType<T> >, Void >* =0 ) {
-//    return v.zero_element()+numeric_cast<typename T::NumericType>(c);
+//template<class A> inline A make_constant(const Real& c, const A& a, DisableIf<IsNumericType<A>> = dummy, DisableIf<IsVector<A>> = dummy) {
+//    typedef NumericType<A> X; return a.create_constant(X(c,Precision64()));
 //}
 
-// Make a constant of type T with value c based on a prototype vector v
+// Make a constant of type Y with value c based on a prototype vector v
 template<class X, class Y> inline X make_constant(const Y& c, const Vector<X>& v) {
     return make_constant(c,v.zero_element());
 }
 
-// Make a constant of type T with value c based on a prototype vector v
-template<class X, class T> inline Formula<T> make_constant(const X& c, const Vector< Formula<T> >& v) {
-    return Formula<T>::constant(static_cast<T>(c));
+// Make a constant of type X with value c based on a prototype vector v
+template<class Y> inline Formula<Y> make_constant(const Y& c, const Vector< Formula<Y> >& v) {
+    return Formula<Y>::constant(c);
 }
 
-template<class X, class T> T evaluate(const Formula<X>& f, const Vector<T>& x) {
+template<class X, class Y> X evaluate(const Formula<Y>& f, const Vector<X>& x) {
     switch(f.kind()) {
         case OperatorKind::COORDINATE: return x[f.ind()];
         case OperatorKind::NULLARY: return make_constant(f.val(),x);
@@ -294,8 +327,8 @@ template<class X, class T> T evaluate(const Formula<X>& f, const Vector<T>& x) {
 
 
 //! \brief Convert the expression with index type \c I to one with variables indexed by \a J.
-template<class X, class T> const T& cached_evaluate(const Formula<X>& f, const Vector<T>& x, Map<const Void*,T>& cache) {
-    const FormulaNode<X>* fptr=f.node_ptr();
+template<class X, class Y> const X& cached_evaluate(const Formula<Y>& f, const Vector<X>& x, Map<const Void*,X>& cache) {
+    const FormulaNode<Y>* fptr=f.node_ptr();
     if(cache.has_key(fptr)) { return cache.get(fptr); }
     switch(f.kind()) {
         case OperatorKind::COORDINATE: return insert( cache, fptr, x[f.ind()] );
@@ -307,29 +340,29 @@ template<class X, class T> const T& cached_evaluate(const Formula<X>& f, const V
     }
 }
 
-template<class X, class T> inline T cached_evaluate(const Formula<X>& f, const Vector<T>& v) {
-    Map<const Void*,T> cache;
+template<class X, class Y> inline X cached_evaluate(const Formula<Y>& f, const Vector<X>& v) {
+    Map<const Void*,X> cache;
     return cached_evaluate(f.handle(),v,cache);
 }
 
-template<class X, class T> Vector<T> cached_evaluate(const Vector< Formula<X> >& f, const Vector<T>& v) {
+template<class X, class Y> Vector<X> cached_evaluate(const Vector< Formula<Y> >& f, const Vector<X>& v) {
     assert(v.size()!=0);
-    Vector<T> r(f.size(),zero_element(v));
-    Map<const Void*,T> cache;
+    Vector<X> r(f.size(),zero_element(v));
+    Map<const Void*,X> cache;
     for(Nat i=0; i!=r.size(); ++i) {
         r[i]=cached_evaluate(f[i],v,cache);
     }
     return r;
 }
 
-template<class X> Formula<X> derivative(const Formula<X>& f, Nat j)
+template<class Y> Formula<Y> derivative(const Formula<Y>& f, Nat j)
 {
     switch(f.op()) {
         case OperatorCode::CNST:
-            return Formula<X>::constant(0);
+            return Formula<Y>::constant(0);
         case OperatorCode::IND:
-            if(f.ind()==j) { return Formula<X>::constant(1); }
-            else { return Formula<X>::constant(0); }
+            if(f.ind()==j) { return Formula<Y>::constant(1); }
+            else { return Formula<Y>::constant(0); }
         case OperatorCode::ADD:
             return derivative(f.arg1(),j)+derivative(f.arg2(),j);
         case OperatorCode::SUB:
@@ -343,7 +376,7 @@ template<class X> Formula<X> derivative(const Formula<X>& f, Nat j)
         case OperatorCode::REC:
             return  - derivative(f.arg(),j) * rec(sqr(f.arg()));
         case OperatorCode::SQR:
-            return static_cast<X>(2) * derivative(f.arg(),j) * f.arg();
+            return static_cast<Y>(2) * derivative(f.arg(),j) * f.arg();
         case OperatorCode::EXP:
             return derivative(f.arg(),j) * f.arg();
         case OperatorCode::LOG:
@@ -353,15 +386,15 @@ template<class X> Formula<X> derivative(const Formula<X>& f, Nat j)
         case OperatorCode::COS:
             return -derivative(f.arg(),j) * sin(f.arg());
         case OperatorCode::TAN:
-            return derivative(f.arg(),j) * (static_cast<X>(1)-sqr(f.arg()));
+            return derivative(f.arg(),j) * (static_cast<Y>(1)-sqr(f.arg()));
         default:
-            ARIADNE_THROW(std::runtime_error,"derivative(Formual<X>)",
+            ARIADNE_THROW(std::runtime_error,"derivative(Formula<Y>)",
                           "Cannot compute derivative of "<<f<<"\n");
     }
 }
 
 //! \brief Write to an output stream
-template<class X> OutputStream& operator<<(OutputStream& os, const Formula<X>& f) {
+template<class Y> OutputStream& operator<<(OutputStream& os, const Formula<Y>& f) {
     switch(f.op()) {
         //case OperatorCode::CNST: return os << std::fixed << std::setprecision(4) << fptr->val;
         case OperatorCode::CNST:
@@ -400,7 +433,7 @@ template<class X> OutputStream& operator<<(OutputStream& os, const Formula<X>& f
 // Declare conversion operators from an expression
 template<class X> class Expression;
 template<class X> class Space;
-Formula<Real> formula(const Expression<Real>& e, const Space<Real>& spc);
+Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Space<Real>& spc);
 
 //! \ingroup FunctionModule
 //! \brief Convert a power-series expansion into a formula using a version of Horner's rule.

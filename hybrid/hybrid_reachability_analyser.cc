@@ -83,11 +83,11 @@ inline Float64Bounds operator*(Integer n1,  const Float64Value& x2) {
 }
 
 template<> inline Float64Approximation numeric_cast<Float64Approximation>(Real const& x) {
-    return Float64Approximation(x);
+    return Float64Approximation(x,Precision64());
 }
 
 template<> inline Float64Value numeric_cast<Float64Value>(Real const& x) {
-    return Float64Value(Float64Approximation(x).raw());
+    return Float64Value(numeric_cast<Float64Approximation>(x).raw());
 }
 
 inline DiscreteTimeType div_floor(Real const& t, ExactNumericType h) {

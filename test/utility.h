@@ -29,107 +29,72 @@ namespace Ariadne {
 
 // Compare with double's as if they were Float64Value
 
-template<class X> auto operator==(X const& x, double d) -> decltype(x==Float64Value(d)) { return x==Float64Value(d); }
-template<class X> auto operator!=(X const& x, double d) -> decltype(x!=Float64Value(d)) { return x!=Float64Value(d); }
-template<class X> auto operator< (X const& x, double d) -> decltype(x< Float64Value(d)) { return x< Float64Value(d); }
-template<class X> auto operator> (X const& x, double d) -> decltype(x> Float64Value(d)) { return x> Float64Value(d); }
-template<class X> auto operator<=(X const& x, double d) -> decltype(x<=Float64Value(d)) { return x<=Float64Value(d); }
-template<class X> auto operator>=(X const& x, double d) -> decltype(x>=Float64Value(d)) { return x>=Float64Value(d); }
-
-
-#define ARIADNE_HAS_TYPEDEF(typename_to_check) \
-    template<class A, class = Fallback> struct Has##typename_to_check : False { }; \
-    template<class A> struct Has##typename_to_check<A, EnableIf<IsDefined<typename A::typename_to_check>,Fallback>> : True { }; \
-
-#define ARIADNE_HAS_METHOD(method_to_check) \
-    template<class A, class = Fallback> struct Has_##method_to_check : False { }; \
-    template<class A> struct Has_##method_to_check<A, EnableIf<IsDefined<decltype(declval<A>().method_to_check())>,Fallback>> : True { }; \
+template<class X> decltype(auto) operator==(X const& x, double d) { return x==Float64Value(d); }
+template<class X> decltype(auto) operator!=(X const& x, double d) { return x!=Float64Value(d); }
+template<class X> decltype(auto) operator< (X const& x, double d) { return x< Float64Value(d); }
+template<class X> decltype(auto) operator> (X const& x, double d) { return x> Float64Value(d); }
+template<class X> decltype(auto) operator<=(X const& x, double d) { return x<=Float64Value(d); }
+template<class X> decltype(auto) operator>=(X const& x, double d) { return x>=Float64Value(d); }
 
 struct OperatorPlus {
-    template<class A> auto operator()(A a) const -> decltype(+a) { return +a; }
-    template<class A1, class A2> auto operator()(A1 a1, A2 a2) const -> decltype(a1+a2) { return a1+a2; }
+    template<class A> decltype(auto) operator()(A a) const { return +a; }
+    template<class A1, class A2> decltype(auto) operator()(A1 a1, A2 a2) const { return a1+a2; }
 };
 struct OperatorMinus {
-    template<class A> auto operator()(A a) const -> decltype(-a) { return -a; }
-    template<class A1, class A2> auto operator()(A1 a1, A2 a2) const -> decltype(a1-a2) { return a1-a2; }
+    template<class A> decltype(auto) operator()(A a) const { return -a; }
+    template<class A1, class A2> decltype(auto) operator()(A1 a1, A2 a2) const { return a1-a2; }
 };
 struct OperatorTimes {
-    template<class A1, class A2> auto operator()(A1 a1, A2 a2) const -> decltype(a1*a2) { return a1*a2; }
+    template<class A1, class A2> decltype(auto) operator()(A1 a1, A2 a2) const { return a1*a2; }
 };
 struct OperatorDivides {
-    template<class A1, class A2> auto operator()(A1 a1, A2 a2) const -> decltype(a1/a2) { return a1/a2; }
+    template<class A1, class A2> decltype(auto) operator()(A1 a1, A2 a2) const { return a1/a2; }
 };
 
-struct OperatorAnd { template<class A1, class A2> auto operator()(A1 a1, A2 a2) const -> decltype(a1 && a2) { return a1 && a2; } };
-struct OperatorOr { template<class A1, class A2> auto operator()(A1 a1, A2 a2) const -> decltype(a1 || a2) { return a1 || a2; } };
-struct OperatorNot { template<class A> auto operator()(A a) const -> decltype(!a) { return !a; } };
+struct OperatorAnd { template<class A1, class A2> decltype(auto) operator()(A1 a1, A2 a2) const { return a1 && a2; } };
+struct OperatorOr { template<class A1, class A2> decltype(auto) operator()(A1 a1, A2 a2) const { return a1 || a2; } };
+struct OperatorNot { template<class A> decltype(auto) operator()(A a) const { return !a; } };
 
-struct OperatorEqual { template<class A1, class A2> auto operator()(A1 a1, A2 a2) const -> decltype(a1==a2) { return a1==a2; } };
-struct OperatorEquals { template<class A1, class A2> auto operator()(A1 a1, A2 a2) const -> decltype(a1==a2) { return a1==a2; } };
-struct OperatorLess { template<class A1, class A2> auto operator()(A1 a1, A2 a2) const -> decltype(a1< a2) { return a1< a2; } };
+struct OperatorEqual { template<class A1, class A2> decltype(auto) operator()(A1 a1, A2 a2) const { return a1==a2; } };
+struct OperatorEquals { template<class A1, class A2> decltype(auto) operator()(A1 a1, A2 a2) const { return a1==a2; } };
+struct OperatorLess { template<class A1, class A2> decltype(auto) operator()(A1 a1, A2 a2) const { return a1< a2; } };
 
 namespace Detail {
-#ifndef ARIADNE_COMPILE_TIME_CHECK
-template<class F, class A1, class = Fallback> struct SafeUnaryTypedef {
-    typedef Fallback Type; };
-template<class F, class A1>
-struct SafeUnaryTypedef<F,A1, EnableIf<IsConvertible<decltype(declval<F>()(declval<A1>())),DontCare>,Fallback>> {
-    typedef decltype(declval<F>()(declval<A1>()) ) Type; };
-//template<class F, class A1> struct SafeUnaryTypedef<F,A1, EnableIf<IsDefined<ResultOf(F(A1))>,Fallback>> {
-//    typedef ResultOf(F(A1)) Type; };
-template<class F, class A1, class A2, class = Fallback> struct SafeBinaryTypedef {
-    typedef Fallback Type; };
-template<class F, class A1, class A2>
-struct SafeBinaryTypedef<F,A1,A2, EnableIf<IsConvertible<decltype(declval<F>()(declval<A1>(),declval<A2>())),DontCare>,Fallback>> {
-    typedef decltype(declval<F>()(declval<A1>(),declval<A2>()) ) Type; };
-//template<class F, class A1, class A2> struct SafeBinaryTypedef<F,A1,A2, EnableIf<IsDefined<ResultOf(F(A1,A2))>,Fallback>> {
-//    typedef ResultOf(F(A1,A2)) Type; };
-template<class F, class A1, class A2, class A3, class = Fallback> struct SafeTernaryTypedef {
-    typedef Fallback Type; };
-template<class F, class A1, class A2, class A3>
-struct SafeTernaryTypedef<F,A1,A2,A3, EnableIf<IsConvertible<decltype(declval<F>()(declval<A1>(),declval<A2>(),declval<A3>())),DontCare>,Fallback>> {
-    typedef decltype(declval<F>()(declval<A1>(),declval<A2>(),declval<A3>()) ) Type; };
-//template<class F, class A1, class A2, class A3> struct SafeTernaryTypedef<F,A1,A2,A3, EnableIf<IsDefined<ResultOf(F(A1,A2,A3))>,Fallback>> {
-//    typedef ResultOf(F(A1,A2,A3)) Type; };
-template<class F, class... AS> struct SafeTypedef;
-template<class F, class A1> struct SafeTypedef<F,A1> : SafeUnaryTypedef<F,A1> { };
-template<class F, class A1, class A2> struct SafeTypedef<F,A1,A2> : SafeBinaryTypedef<F,A1,A2> { };
-template<class F, class A1, class A2, class A3> struct SafeTypedef<F,A1,A2,A3> : SafeTernaryTypedef<F,A1,A2,A3> { };
-#else // ARIADNE_COMPILE_TIME_CHECK
-template<class F, class... AS> struct SafeTypedef { typedef ResultOf<F(AS...)> Type; };
-template<class F, class A1> struct SafeTypedef<F,A1> {
-    typedef decltype(declval<F>()(declval<A1>())) Type; };
-template<class F, class A1, class A2> struct SafeTypedef<F,A1,A2> {
-    typedef decltype(declval<F>()(declval<A1>(),declval<A2>())) Type; };
-template<class F, class A1, class A2, class A3> struct SafeTypedef<F,A1,A2,A3> {
-    typedef decltype(declval<F>()(declval<A1>(),declval<A2>(),declval<A3>())) Type; };
-#endif
+
+template<class OP, class... AS> struct SafeTypedef {
+    template<class O, class = ResultOf<O(AS...)>> static ResultOf<O(AS...)> safe(int);
+    template<class O> static Fallback safe(...);
+    typedef decltype(safe<OP>(1)) Type;
+};
+
+template<class R, template<class>class T, class A1, class = decltype(declval<R>()=declval<T<A1>>())> True is(int);
+template<class R, template<class>class T, class A1> False is(...);
+template<class R, template<class,class>class T, class A1, class A2, class = decltype(declval<R>()=declval<T<A1,A2>>())> True is(int,int);
+template<class R, template<class,class>class T, class A1, class A2> False is(...);
+template<class R, template<class,class,class>class T, class A1, class A2, class A3, class = decltype(declval<R>()=declval<T<A1,A2,A3>>())> True is(int,int,int);
+template<class R, template<class,class,class>class T, class A1, class A2, class A3> False is(...);
+
+
 } //namespace Detail
 
-template<class F, class... AS> using SafeType = typename Detail::SafeTypedef<F,AS...>::Type;
-
-template<class R, class Op, class A, class = Fallback> struct HasUnaryOperatorReturning : False { };
-template<class R, class Op, class A> struct HasUnaryOperatorReturning<R,Op,A,EnableIf<IsConvertible<ResultOf<Op(A)>,R>,Fallback>> : True { };
-template<class R, class Op, class A1, class A2, class = Fallback>  struct HasBinaryOperatorReturning : False { };
-template<class R, class Op, class A1, class A2> struct HasBinaryOperatorReturning<R,Op,A1,A2,EnableIf<IsConvertible<ResultOf<Op(A1,A2)>,R>,Fallback>> : True { };
-
-template<class R, class Op, class A1, class A2=Void, class = Fallback> struct HasOperatorReturning : False { };
-template<class R, class Op, class A> struct HasOperatorReturning<R,Op,A,Void,EnableIf<IsConvertible<ResultOf<Op(A)>,R>,Fallback>> : True { };
-template<class R, class Op, class A1, class A2> struct HasOperatorReturning<R,Op,A1,A2,EnableIf<IsConvertible<ResultOf<Op(A1,A2)>,R>,Fallback>> : True { };
+template<class R, template<class...>class T, class... AS> struct Is;
+template<class R, template<class>class T, class A> struct Is<Return<R>,T,A> : decltype(Detail::is<R,T,A>(1)) { };
+template<class R, template<class,class>class T, class A1, class A2> struct Is<Return<R>,T,A1,A2> : decltype(Detail::is<R,T,A1,A2>(1,2)) { };
+template<class R, template<class,class,class>class T, class A1, class A2, class A3> struct Is<Return<R>,T,A1,A2,A3> : decltype(Detail::is<R,T,A1,A2,A3>(1,2,3)) { };
 
 
-//template<Op, class A, class = Fallback> struct HasUnaryOperator : False { };
-//template<class Op, class A> struct HasUnaryOperator<Op,A,EnableIf<IsConvertible<ResultOf<Op(A)>,DontCare>,Fallback>> : True { };
-//template<class Op, class A1, class A2, class = Fallback>  struct HasBinaryOperator : False { };
-//template<class Op, class A1, class A2> struct HasBinaryOperator<R,Op,A1,A2,EnableIf<IsConvertible<ResultOf<Op(A1,A2)>,R>,Fallback>> : True { };
+template<class OP, class... AS> using ReturnType = decltype(declval<OP>().operator()(declval<AS...>()));
+template<class OP, class A1> using UnaryReturnType = decltype(declval<OP>().operator()(declval<A1>()));
+template<class OP, class A1, class A2> using BinaryReturnType = decltype(declval<OP>().operator()(declval<A1>(),declval<A2>()));
 
-template<class Op, class A> struct HasUnaryOperator : HasUnaryOperatorReturning<DontCare,Op,A> { };
-template<class Op, class A1, class A2> struct HasBinaryOperator : HasBinaryOperatorReturning<DontCare,Op,A1,A2> { };
-template<class Op, class A1, class A2=Void, class R=Void> struct HasOperator;
-template<class Op, class A1, class A2> struct HasOperator<Op,A1,A2,Void> : HasBinaryOperator<Op,A1,A2> { };
-template<class Op, class A> struct HasOperator<Op,A,Void> : HasUnaryOperator<Op,A> { };
-template<class Op, class A1, class A2, class R> struct HasOperator<Op,A1,A2,Return<R>> : HasBinaryOperatorReturning<R,Op,A1,A2> { };
-template<class Op, class A, class R> struct HasOperator<Op,A,Return<R>> : HasUnaryOperatorReturning<R,Op,A> { };
+template<class OP, class... AS> struct HasOperator;
+template<class OP, class A1> struct HasOperator<OP,A1> : Is<Return<DontCare>, UnaryReturnType, OP, A1> { };
+template<class OP, class A1, class A2> struct HasOperator<OP,A1,A2> : Is<Return<DontCare>, BinaryReturnType, OP, A1, A2> { };
+template<class OP, class A1, class R> struct HasOperator<OP,A1,Return<R>> : Is<Return<R>, UnaryReturnType, OP, A1> { };
+template<class OP, class A1, class A2, class R> struct HasOperator<OP,A1,A2,Return<R>> : Is<Return<R>, BinaryReturnType, OP, A1, A2> { };
+template<class R, class OP, class... AS> struct HasOperatorReturning : Is<Return<R>, ReturnType, OP, AS...> { };
+
+template<class OP, class... AS> using SafeType = typename Detail::SafeTypedef<OP,AS...>::Type;
 
 template<class T> struct Expect { template<class U, EnableIf<IsSame<T,U>> =dummy> Expect<T>& operator=(U const&) { return *this; } };
 

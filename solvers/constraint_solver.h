@@ -41,8 +41,6 @@ namespace Ariadne {
 class GridTreeSet;
 
 template<class X, class R> class Constraint;
-typedef Constraint<EffectiveScalarFunction,EffectiveNumericType> EffectiveConstraint;
-typedef Constraint<ValidatedScalarFunction,ValidatedNumericType> ValidatedConstraint;
 
 template<class X> class Procedure;
 typedef Procedure<ValidatedNumericType> ValidatedProcedure;

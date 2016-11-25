@@ -114,9 +114,9 @@ Int main(Int argc, const char* argv[])
     /// Create the resets
 
     /// Reset the time (t^=0,vi^=vi,vo^=vo)
-    PrimedRealAssignments resettime_r( next((t,vi,vo)) = (0,vi,vo) );
+    PrimedRealAssignments resettime_r( next({t,vi,vo}) = {Real(0),vi,vo} );
     /// Do nothing (t^=t,vi^=vi,vo^=vo)
-    PrimedRealAssignments noop_r( next((t,vi,vo)) = (t,vi,vo) );
+    PrimedRealAssignments noop_r( next({t,vi,vo}) = {t,vi,vo} );
 
     /// Create the guards
     Real f=dp[1];
@@ -145,18 +145,18 @@ Int main(Int argc, const char* argv[])
 
     /// Dynamics for the case of both diodes being off
     /// t'=1, vi'= A*cos(2*pi*f*t), vo'=-vo/(Rl*Cl)
-    DottedRealAssignments offoff_d( dot((t,vi,vo)) = (one,amplitude*2*pi*frequency*cos(2*pi*frequency*t),-vo/(Rl*Cl)) );
+    DottedRealAssignments offoff_d( dot({t,vi,vo}) = {one,amplitude*2*pi*frequency*cos(2*pi*frequency*t),-vo/(Rl*Cl)} );
     /// Dynamics for the case of the first diode being on, the second being off
     /// t'=1, vi'= A*cos(2*pi*f*t), vo'=-vo/(Rl*Cl)+(vi-vo)/(Ron*Cl)
-    RealExpressions onoff_d((one,amplitude*2*pi*frequency*cos(2*pi*frequency*t),-vo/(Rl*Cl)+(vi-vo)/(Ron*Cl)));
+    RealExpressions onoff_d({one,amplitude*2*pi*frequency*cos(2*pi*frequency*t),-vo/(Rl*Cl)+(vi-vo)/(Ron*Cl)});
     /// Dynamics for the case of the first diode being off, the second being on
     /// t'=1, vi'= A*cos(2*pi*f*t), vo'=-vo/(Rl*Cl)-(vi+vo)/(Ron*Cl)
-    RealExpressions offon_d((one,amplitude*2*pi*frequency*cos(2*pi*frequency*t),-vo/(Rl*Cl)+(vo-vi)/(Ron*Cl)));
+    RealExpressions offon_d({one,amplitude*2*pi*frequency*cos(2*pi*frequency*t),-vo/(Rl*Cl)+(vo-vi)/(Ron*Cl)});
     /// Dynamics for the case of both diodes being on
     /// t'=1, vi'= A*cos(2*pi*f*t), vo'=-vo/(Rl*Cl)-2*vo/(Ron*Cl)
-    RealExpressions onon_d((one,amplitude*2*pi*frequency*cos(2*pi*frequency*t),-vo/(Rl*Cl)-2*vo/(Ron*Cl)));
+    RealExpressions onon_d({one,amplitude*2*pi*frequency*cos(2*pi*frequency*t),-vo/(Rl*Cl)-2*vo/(Ron*Cl)});
 
-    List<RealVariable> space( (t,vi,vo) );
+    List<RealVariable> space( {t,vi,vo} );
     /// Locations
     rectifier.new_mode(offoff,offoff_d);
     rectifier.new_mode(onoff,dot(space)=onoff_d);
@@ -203,7 +203,7 @@ Int main(Int argc, const char* argv[])
 
     std::cout << "Computing evolution..." << std::endl;
 
-    RealVariablesBox initial_box((t==0, vi==0, vo==Real(0.8_dec)*dp[0]));
+    RealVariablesBox initial_box({t==0, vi==0, vo==Real(0.8_dec)*dp[0]});
     HybridSet initial_set(rectifier|offoff,initial_box);
 
 //    ExactBoxType initial_box(3, 0.002836,0.002836, 3.110529,3.110529, 3.110529,3.110529);
@@ -235,7 +235,7 @@ Int main(Int argc, const char* argv[])
     HybridReachabilityAnalyser analyser(evolver);
     analyser.parameters().lock_to_grid_time = LOCK_TOGRID_TIME;
     analyser.parameters().maximum_grid_depth= MAX_GRID_DEPTH;
-    rectifier.set_grid(Grid(Vector<Float64>(3, 0.25/dp[1], 1.0, 0.5)));
+    rectifier.set_grid(Grid(Vector<Float64>({3, 0.25/dp[1], 1.0, 0.5})));
     std::cout <<  analyser.parameters() << std::endl;
 
     analyser.verbosity=VERBOSITY;

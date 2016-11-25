@@ -121,11 +121,23 @@ RealExpression operator+(const Real& x, const RealVariable& v) { return RealExpr
 RealExpression operator-(const Real& x, const RealVariable& v) { return RealExpression(x)-RealExpression(v); }
 RealExpression operator*(const Real& x, const RealVariable& v) { return RealExpression(x)*RealExpression(v); }
 RealExpression operator/(const Real& x, const RealVariable& v) { return RealExpression(x)/RealExpression(v); }
+RealExpression neg(const RealExpression&);
+RealExpression rec(const RealExpression&);
+RealExpression sqr(const RealExpression&);
+RealExpression pow(const RealExpression&,Int);
+RealExpression sqrt(const RealExpression&);
+RealExpression exp(const RealExpression&);
+RealExpression log(const RealExpression&);
+RealExpression sin(const RealExpression&);
+RealExpression cos(const RealExpression&);
+RealExpression tan(const RealExpression&);
+KleeneanExpression sgn(const RealExpression&);
+
+Int length(const Array<StringType>& a) { return a.size(); }
 
 } // namespace Ariadne
 
 
-namespace Ariadne { Int length(const Array<StringType>& a) { return a.size(); } }
 
 Void export_formula()
 {
@@ -264,8 +276,8 @@ Void export_formula()
     class_<RealSpace> real_space_class("RealSpace", init<RealSpace>());
     real_space_class.def("dimension", &RealSpace::dimension);
     real_space_class.def("variable", &RealSpace::variable);
-    real_space_class.def("index", (RealSpace::SizeType(RealSpace::*)(const String&)const) &RealSpace::index);
-    real_space_class.def("index", (RealSpace::SizeType(RealSpace::*)(const RealVariable&)const) &RealSpace::index);
+    real_space_class.def("index", (SizeType(RealSpace::*)(const String&)const) &RealSpace::index);
+    real_space_class.def("index", (SizeType(RealSpace::*)(const RealVariable&)const) &RealSpace::index);
     real_space_class.def(self_ns::str(self));
 
     from_python<RealSpace>();
@@ -298,16 +310,16 @@ Void export_formula()
     real_expression_class.def("__rmul__", &__rmul__<RealExpression,RealExpression,Real>);
     real_expression_class.def("__rdiv__", &__rdiv__<RealExpression,RealExpression,Real>);
 
-    def("neg", (RealExpression(*)(RealExpression)) &neg);
-    def("rec", (RealExpression(*)(RealExpression)) &rec);
-    def("sqr", (RealExpression(*)(RealExpression)) &sqr);
-    def("pow", (RealExpression(*)(RealExpression,Int)) &pow);
-    def("sqrt", (RealExpression(*)(RealExpression)) &sqrt);
-    def("exp", (RealExpression(*)(RealExpression)) &exp);
-    def("log", (RealExpression(*)(RealExpression)) &log);
-    def("sin", (RealExpression(*)(RealExpression)) &sin);
-    def("cos", (RealExpression(*)(RealExpression)) &cos);
-    def("tan", (RealExpression(*)(RealExpression)) &tan);
+    def("neg", (RealExpression(*)(RealExpression const&)) &neg);
+    def("rec", (RealExpression(*)(RealExpression const&)) &rec);
+    def("sqr", (RealExpression(*)(RealExpression const&)) &sqr);
+    def("pow", (RealExpression(*)(RealExpression const&,Int)) &pow);
+    def("sqrt", (RealExpression(*)(RealExpression const&)) &sqrt);
+    def("exp", (RealExpression(*)(RealExpression const&)) &exp);
+    def("log", (RealExpression(*)(RealExpression const&)) &log);
+    def("sin", (RealExpression(*)(RealExpression const&)) &sin);
+    def("cos", (RealExpression(*)(RealExpression const&)) &cos);
+    def("tan", (RealExpression(*)(RealExpression const&)) &tan);
 
     class_<RealAssignment> real_assignment_class("RealAssignment",no_init);
     real_assignment_class.def(self_ns::str(self));
@@ -321,9 +333,6 @@ Void export_formula()
     integer_assignment_class.def(self_ns::str(self));
     class_<PrimedIntegerAssignment> primed_integer_assignment_class("PrimedIntegerAssignment",no_init);
     primed_integer_assignment_class.def(self_ns::str(self));
-
-    typedef Variable<Kleenean> KleeneanVariable;
-    typedef Expression<Kleenean> KleeneanExpression;
 
     to_python< List<KleeneanExpression> >();
 

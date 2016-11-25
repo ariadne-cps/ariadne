@@ -78,8 +78,9 @@ template<class X> Polynomial<X> create(const Polynomial<X>& x) { return Polynomi
 template<class X> Differential<X> create(const Differential<X>& x) { return Differential<X>(x.argument_size(),x.degree()); }
 
 
-template<class A> struct Graded : public List<A>
+template<class A> class Graded : public List<A>
 {
+  public:
     typedef Graded<A> SelfType;
     Graded() : List<A>() { }
     Graded(const A& a) : List<A>(1u,a) { }
@@ -380,7 +381,7 @@ Pair<List<Float64>,Float64> midpoint_error(const Graded<ExactIntervalType>& x) {
     List<Float64> m(x.degree()+1);
     Float64 e;
     for(Nat i=0; i<=x.degree(); ++i) {
-        m[i]=static_cast<Float64>(midpoint(x[i]));
+        m[i]=midpoint(x[i]).raw();
         e=add_up(e,max(sub_up(m[i],x[i].lower().raw()),sub_up(x[i].upper().raw(),m[i])));
     }
     return Pair<List<Float64>,Float64>(m,e);

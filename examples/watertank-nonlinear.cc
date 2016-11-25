@@ -206,9 +206,9 @@ Int main()
 
     std::cout << "Computing evolution starting from location l2, x = 6.0, y = 1.0" << std::endl;
 
-    //RealVariablesBox initial_box((height==0.5, aperture==0.0));
+    //RealVariablesBox initial_box({height==0.5, aperture==0.0});
     Decimal h0l(0.5),h0u(0.5001), a0l(0.0),a0u(0.0001);
-    RealVariablesBox initial_box((h0l<=height<=h0u, a0l<=aperture<=a0u));
+    RealVariablesBox initial_box({h0l<=height<=h0u, a0l<=aperture<=a0u});
     HybridSet initial_set(opening,initial_box);
 
     HybridTime evolution_time(tmax,jmax);

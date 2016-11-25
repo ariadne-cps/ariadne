@@ -142,7 +142,7 @@ class Flt64 {
     friend inline Flt64 div(Flt64 x1, Flt64 x2) { return Flt64{x1.d/x2.d}; }
 
     friend inline Flt64 pos(Flt64 x) { return Flt64{x.d}; }
-    friend inline Flt64 half(Flt64 x) { return Flt64{x.d/2}; }
+    friend inline Flt64 hlf(Flt64 x) { return Flt64{x.d/2}; }
     friend inline Flt64 sqr(Flt64 x) { return Flt64{x.d*x.d}; }
 
     friend inline Flt64 neg(Flt64 x) { return Flt64{-x.d}; }
@@ -190,7 +190,7 @@ inline Flt64 Flt64::inf() { return Flt64{1.0/0.0}; }
 
 /************ Rounded arithmetic of Flt64 ***************************************************/
 
-Flt64 half_exact(Flt64);
+Flt64 hlf_exact(Flt64);
 
 Flt64 next_down(Flt64);
 Flt64 next_up(Flt64);

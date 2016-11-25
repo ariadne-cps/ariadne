@@ -29,11 +29,11 @@
 #define ARIADNE_DECIMAL_H
 
 #include <string>
+#include <iostream>
 #include "utility/typedefs.h"
+#include "numeric/number.decl.h"
 
 namespace Ariadne {
-
-class Rational;
 
 //! \ingroup NumericModule
 //! \related Rational, Real
@@ -41,6 +41,7 @@ class Rational;
 class Decimal {
     StringType _str;
   public:
+    typedef ExactTag Paradigm;
     //! \brief Default constructor creates the number 0 (zero).
     Decimal() : _str("0.0") { }
     //! \brief Construct from a double-precision floating-point number representation.
@@ -49,6 +50,8 @@ class Decimal {
     explicit Decimal(StringType);
     //! \brief Convert to a rational number.
     explicit operator Rational () const;
+    //! \brief Convert to an generic number.
+    operator ExactNumber () const;
     friend OutputStream& operator<<(OutputStream& os, Decimal const& d);
     friend Decimal operator"" _dec (long double dbl);
 };

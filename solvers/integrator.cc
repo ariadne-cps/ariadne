@@ -34,6 +34,7 @@
 #include "algebra/vector.h"
 #include "algebra/matrix.h"
 #include "algebra/differential.h"
+#include "algebra/sweeper.h"
 #include "function/function.h"
 #include "function/function_model.h"
 
@@ -43,7 +44,7 @@
 
 namespace Ariadne {
 
-static const Float64Value zero=0;
+static const Float64Value zero=Float64Value(0,Precision64());
 
 inline UpperBoxType operator+(Vector<ExactIntervalType> bx, Vector<UpperIntervalType> const& ex) {
     return Vector<UpperIntervalType>(bx) + ex;
@@ -198,7 +199,7 @@ IntegratorBase::flow_to(const ValidatedVectorFunction& vf, const ExactBoxType& d
                 step_function=this->flow_step(vf,dx,h,bx);
                 flow_successfully_computed=true;
             } catch(FlowTimeStepException e) {
-                h=half(h);
+                h=hlf(h);
             }
         }
         step_function=partial_evaluate(step_function,n,numeric_cast<Float64Bounds>(h));
@@ -213,8 +214,9 @@ List<ValidatedVectorFunctionModel>
 IntegratorBase::flow(const ValidatedVectorFunction& vf, const ExactBoxType& dx0, const Real& tmin, const Real& tmax) const
 {
     ARIADNE_LOG(1,"IntegratorBase::flow(ValidatedVectorFunction vf, ExactBoxType dx0, Real tmin, Real tmax)\n");
-    Float64LowerBound tminl=Float64Bounds(tmin).lower();
-    Float64UpperBound tmaxu=Float64Bounds(tmax).upper();
+    Precision64 precision;
+    Float64LowerBound tminl=Float64Bounds(tmin,precision).lower();
+    Float64UpperBound tmaxu=Float64Bounds(tmax,precision).upper();
     ValidatedVectorFunctionModel evolve_function=this->flow_to(vf,dx0,tmin);
     Float64Value t=cast_exact(tminl);
     List<ValidatedVectorFunctionModel> result;
@@ -256,7 +258,7 @@ IntegratorBase::flow_step(const ValidatedVectorFunction& vf, const ExactBoxType&
         try {
             return this->flow_step(vf,dx,h,bx);
         } catch(FlowTimeStepException e) {
-            h=half(h);
+            h=hlf(h);
         }
     }
 }
@@ -893,10 +895,13 @@ AffineIntegrator::flow_step(const ValidatedVectorFunction& f, const ExactBoxType
     ARIADNE_WARN("AffineIntegrator may compute overly optimistic error bounds.");
 
     const Nat n=dom.size();
-    Vector<Float64Error> err(n);
+    Precision64 prec;
+    Float64Error zero_err(prec);
+
+    Vector<Float64Error> err(n,zero_err);
 
     Float64::set_rounding_upward();
-    Vector<Float64Error> rad(n+1,0u);
+    Vector<Float64Error> rad(n+1,zero_err);
     for(Nat i=0; i!=n; ++i) {
         rad[i] = cast_positive(max(dom[i].upper()-mid[i].lower(),mid[i].upper()-dom[i].lower()));
     }

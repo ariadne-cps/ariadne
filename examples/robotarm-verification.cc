@@ -96,7 +96,7 @@ Int main(Int argc, char** argv)
     // First mode: free run
     StringVariable robotarm("robot_arm");
     DiscreteLocation free(robotarm|"free");
-    DottedRealAssignments free_dyn(( dot(x)=vx, dot(vx) = ddot_xd + fifth*b/m * (dot_xd - vx) + fifth*k/m * (xd - x), dot(t)=1.0));
+    DottedRealAssignments free_dyn({ dot(x)=vx, dot(vx) = ddot_xd + fifth*b/m * (dot_xd - vx) + fifth*k/m * (xd - x), dot(t)=1.0});
     std::cout << "free_dyn = " << free_dyn << std::endl;
     robotarm_automaton.new_mode(free, free_dyn);
     DiscreteEvent finv("finv");
@@ -104,11 +104,11 @@ Int main(Int argc, char** argv)
 
     // Second mode: contact
     DiscreteLocation contact(robotarm|"contact");
-    robotarm_automaton.new_mode(contact, (dot(x)=vx,dot(vx)=ddot_xd + fifth*b/m * (dot_xd - vx) + fifth*k/m * (xd - x) + kFx * ke * (xc - x),dot(t)=1));
+    robotarm_automaton.new_mode(contact, {dot(x)=vx,dot(vx)=ddot_xd + fifth*b/m * (dot_xd - vx) + fifth*k/m * (xd - x) + kFx * ke * (xc - x),dot(t)=1});
 
     // transition from free to contact
     DiscreteEvent f2c("f2c");
-    PrimedRealAssignments reset_id( (next(x)=x,next(vx)=vx,next(t)=t) );
+    PrimedRealAssignments reset_id( {next(x)=x,next(vx)=vx,next(t)=t} );
     robotarm_automaton.new_transition(free, f2c, contact, reset_id, (x >= xc - delta), permissive);
 
     std::cout << "RobotArm = " << std::endl;
@@ -130,7 +130,7 @@ Int main(Int argc, char** argv)
     std::cout << "Evolution parameters:" << evolver.configuration() << std::endl;
 
     // Define the initial box
-    RealVariablesBox initial_box((x==0,vx==0,t==0));
+    RealVariablesBox initial_box({x==0,vx==0,t==0});
 
     cout << "initial_box=" << initial_box << endl;
 

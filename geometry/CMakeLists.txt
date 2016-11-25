@@ -11,3 +11,5 @@ add_library(ariadne-geometry OBJECT
     enclosure.cc
     paver.cc
 )
+
+cotire(ariadne-geometry)

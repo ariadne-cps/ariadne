@@ -26,20 +26,25 @@
  */
 
 
-
 #ifndef ARIADNE_SIGN_H
 #define ARIADNE_SIGN_H
 
+#include <iosfwd>
+
 namespace Ariadne {
+
+using OutputStream = std::ostream;
 
 //! \brief The sign of a numerical value.
 enum class Sign : char { NEGATIVE=-1, ZERO=0, POSITIVE=+1 };
+OutputStream& operator<<(OutputStream& os, Sign s);
 static const Sign NEGATIVE = Sign::NEGATIVE;
 static const Sign ZERO = Sign::ZERO;
 static const Sign POSITIVE = Sign::POSITIVE;
 
 //! \brief The result of a comparison operation.
 enum class Comparison : char { LESS=-1, EQUAL=0, GREATER=+1 };
+OutputStream& operator<<(OutputStream& os, Comparison c);
 static const Comparison LESS = Comparison::LESS;
 static const Comparison EQUAL = Comparison::EQUAL;
 static const Comparison GREATER = Comparison::GREATER;

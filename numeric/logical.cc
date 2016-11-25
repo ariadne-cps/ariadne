@@ -33,12 +33,10 @@
 
 namespace Ariadne {
 
-namespace{
 inline LogicalValue operator!(LogicalValue lv) { return negation(lv); }
 inline LogicalValue operator&&(LogicalValue lv1, LogicalValue lv2) { return conjunction(lv1,lv2); }
 inline LogicalValue operator||(LogicalValue lv1, LogicalValue lv2) { return disjunction(lv1,lv2); }
 inline LogicalValue operator^(LogicalValue lv1, LogicalValue lv2) { return exclusive(lv1,lv2); }
-} // namespace
 
 Logical<ExactTag> operator||(Bool b1, Logical<ExactTag> l2) { return Logical<ExactTag>(b1) || l2; }
 Logical<ExactTag> operator||(Logical<ExactTag> l1, Bool b2) { return l1 || Logical<ExactTag>(b2); }
@@ -67,6 +65,7 @@ template<class OP, class ARG> struct LogicalExpression<OP,ARG>
 template<class OP, class ARG1, class ARG2> struct LogicalExpression<OP,ARG1,ARG2>
     : virtual LogicalInterface, ExpressionTemplate<OP,ARG1,ARG2>
 {
+
     using ExpressionTemplate<OP,ARG1,ARG2>::ExpressionTemplate;
     virtual LogicalValue _check(Effort e) const { return this->_op(check(this->_arg1,e),check(this->_arg2,e)); }
     virtual OutputStream& _write(OutputStream& os) const {

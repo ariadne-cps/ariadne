@@ -43,7 +43,7 @@
 
 namespace Ariadne {
 
-template<class X> class LinearProgram;
+template<class X> struct LinearProgram;
 
 class Grid;
 class PavingInterface;
@@ -51,10 +51,10 @@ class GridCell;
 class DiscreteEvent;
 class Figure;
 class CanvasInterface;
-class Point2d;
+struct Point2d;
 
 
-typedef Constraint<AffineModel<ValidatedNumericType>,Float64Bounds> ValidatedAffineModelConstraint;
+typedef Constraint<AffineModel<ValidatedTag,Float64>,Float64Bounds> ValidatedAffineModelConstraint;
 typedef Constraint<Affine<ValidatedNumericType>,Float64Bounds> ValidatedAffineConstraint;
 typedef Constraint<Affine<EffectiveNumericType>,EffectiveNumericType> EffectiveAffineConstraint;
 typedef Affine<ValidatedNumericType> ValidatedAffineFunction;

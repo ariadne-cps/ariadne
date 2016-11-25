@@ -1,5 +1,6 @@
 SED_COMMAND="
 s/\bAriadne:://g
+s/ >/>/g
 
 s/\bvoid\b/Void/g
 s/\bbool\b/Bool/g
@@ -11,14 +12,9 @@ s/\blong int\b/LInt/g
 s/\bunsigned int\b/Nat/g
 s/\bint\b/Int/g
 
-s/__gmp_expr<__gmpf_value, __gmpf_value>/MPFloat/g
-s/__gmp_expr<__gmpq_value, __gmpq_value>/Rational/g
-s/__gmp_expr<__gmpz_value, __gmpz_value>/Integer/g
-s/__gmp_expr<__mpz_struct \[1\], __mpz_struct \[1\]>/Integer/g
-s/__gmp_expr<__mpq_struct \[1\], __mpq_struct \[1\]>/Rational/g
-
-s/Ariadne:://g
-s/ >/>/g
+s/__gmp_expr<__gmpf_value, __gmpf_value>/GMPFloat/g
+s/__gmp_expr<__gmpq_value, __gmpq_value>/GMPRational/g
+s/__gmp_expr<__gmpz_value, __gmpz_value>/GMPInteger/g
 
 s/std::vector/vector/g
 s/std::pair/pair/g
@@ -50,12 +46,15 @@ s/Variable<String>/StringVariable/g
 s/Variable<Integer>/IntegerVariable/g
 s/Variable<Real>/RealVariable/g
 
-s/Number<\(\w*\)>/\1Number/g
+s/Number<\(\w*\)Tag>/\1Number/g
 s/Float<\(\w\w*\), Precision\(..\)>/\1Float\2/g
 s/ValidatedMetricTag/MetricTag/g
 s/ValidatedBoundedTag/BoundedTag/g
 s/ValidatedLowerTag/LowerTag/g
 s/ValidatedUpperTag/UpperTag/g
+
+s/Float\(\w\w*\)<Precision\(\w\w\)>/Float\2\1/g
+#s/FloatValue<Precision64>/Float64Value/g
 
 s/Interval<Float64Value>/IntervalDomain/g
 s/Box<IntervalDomain>/BoxDomain/g

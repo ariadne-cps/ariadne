@@ -54,6 +54,8 @@ class Nat64;
 class Int32;
 class Int64;
 
+class ExactDouble;
+
 class Dyadic;
 class Decimal;
 
@@ -99,7 +101,7 @@ using ValidatedNumericType=Float64Bounds;
 using UpperNumericType=Float64UpperBound;
 using LowerNumericType=Float64LowerBound;
 using ApproximateNumericType=Float64Approximation;
-using PositiveUpperNumericType=PositiveFloat64UpperBound;
+using ErrorNumericType=Float64Error;
 
 } // namespace Ariadne
 

@@ -40,7 +40,7 @@ static const Float64 inf = std::numeric_limits<double>::infinity();
 inline Float64 nul_exact(Float64 x) { return nul(x); }
 inline Float64 pos_exact(Float64 x) { return pos(x); }
 inline Float64 neg_exact(Float64 x) { return neg(x); }
-inline Float64 half_exact(Float64 x) { return half(x); }
+inline Float64 hlf_exact(Float64 x) { return hlf(x); }
 
 inline Float64 max_exact(Float64 x1, Float64 x2) { return max(x1,x2); }
 inline Float64 min_exact(Float64 x1, Float64 x2) { return min(x1,x2); }
@@ -71,10 +71,11 @@ inline Float64 pow_approx(Float64 x, Int n) { return pow(x,n,Float64::to_nearest
 inline Float64 pow_up(Float64 x, Int n) { return pow(x,n,Float64::upward); }
 inline Float64 pow_down(Float64 x, Int n) { return pow(x,n,Float64::downward); }
 
-inline Float64 next_down(Float64 x) { return sub_down(x,Float64::min()); }
-inline Float64 next_up(Float64 x) { return add_up(x,Float64::min()); }
+inline Float64 next_down(Float64 x) { return sub_down(x,Float64::min(Precision64())); }
+inline Float64 next_up(Float64 x) { return add_up(x,Float64::min(Precision64())); }
 
 inline Float64 rec_approx(Float64 x) { return rec(x,Float64::to_nearest); }
+inline Float64 rec_near(Float64 x) { return rec(x,Float64::to_nearest); }
 inline Float64 rec_up(Float64 x) { return rec(x,Float64::upward); }
 inline Float64 rec_down(Float64 x) { return rec(x,Float64::downward); }
 
@@ -104,7 +105,7 @@ inline Float64 pi_down(Precision64 const& pr) { return Float64::pi(pr,Float64::d
 inline FloatMP nul_exact(FloatMP x) { return nul(x); }
 inline FloatMP pos_exact(FloatMP x) { return pos(x); }
 inline FloatMP neg_exact(FloatMP x) { return neg(x); }
-inline FloatMP half_exact(FloatMP x) { return half(x); }
+inline FloatMP hlf_exact(FloatMP x) { return hlf(x); }
 
 inline FloatMP max_exact(FloatMP x1, FloatMP x2) { return max(x1,x2); }
 inline FloatMP min_exact(FloatMP x1, FloatMP x2) { return min(x1,x2); }
@@ -135,10 +136,11 @@ inline FloatMP pow_approx(FloatMP const& x, Int n) { return pow(x,n,FloatMP::to_
 inline FloatMP pow_up(FloatMP const& x, Int n) { return pow(x,n,FloatMP::upward); }
 inline FloatMP pow_down(FloatMP const& x, Int n) { return pow(x,n,FloatMP::downward); }
 
-inline FloatMP next_down(FloatMP const& x) { return sub_down(x,FloatMP::min()); }
-inline FloatMP next_up(FloatMP const& x) { return add_up(x,FloatMP::min()); }
+inline FloatMP next_down(FloatMP const& x) { return sub_down(x,FloatMP::min(x.precision())); }
+inline FloatMP next_up(FloatMP const& x) { return add_up(x,FloatMP::min(x.precision())); }
 
 inline FloatMP rec_approx(FloatMP const& x) { return rec(x,FloatMP::to_nearest); }
+inline FloatMP rec_near(FloatMP const& x) { return rec(x,FloatMP::to_nearest); }
 inline FloatMP rec_up(FloatMP const& x) { return rec(x,FloatMP::upward); }
 inline FloatMP rec_down(FloatMP const& x) { return rec(x,FloatMP::downward); }
 
@@ -164,8 +166,8 @@ inline FloatMP pi_up(PrecisionMP const& pr) { return FloatMP::pi(pr,FloatMP::upw
 inline FloatMP pi_approx(PrecisionMP const& pr) { return FloatMP::pi(pr,FloatMP::to_nearest); }
 inline FloatMP pi_down(PrecisionMP const& pr) { return FloatMP::pi(pr,FloatMP::downward); }
 
-inline FloatMP med_near(FloatMP x1, FloatMP x2) { return half(add_near(x1,x2)); }
-inline FloatMP rad_up(FloatMP x1, FloatMP x2) { return half(sub_up(x2,x1)); }
+inline FloatMP med_near(FloatMP x1, FloatMP x2) { return hlf(add_near(x1,x2)); }
+inline FloatMP rad_up(FloatMP x1, FloatMP x2) { return hlf(sub_up(x2,x1)); }
 
 /*
 inline Float64 max_exact(Float64 const& x1, Float64 const& x2) { return max(x1,x2); }
@@ -181,7 +183,7 @@ inline Float64 pow(Float64 const& x, Int n, Float64::RoundingModeType rnd) { ret
 inline Float64 nul_exact(Float64 const& x) { return nul(x); }
 inline Float64 pos_exact(Float64 const& x) { return pos(x); }
 inline Float64 neg_exact(Float64 const& x) { return neg(x); }
-inline Float64 half_exact(Float64 const& x) { return half(x); }
+inline Float64 hlf_exact(Float64 const& x) { return hlf(x); }
 
 inline Float64 add_up(Float64 const& x1, Float64 const& x2) { return add(x1,x2,Float64::upward); }
 inline Float64 add_down(Float64 const& x1, Float64 const& x2) { return add(x1,x2,Float64::downward); }
@@ -210,8 +212,8 @@ inline Float64 fma_approx(Float64 const& x1, Float64 const& x2, Float64 const& y
 inline Float64 next_up(Float64 const& x) { return add_up(x,Float64::min()); }
 inline Float64 next_down(Float64 const& x) { return sub_down(x,Float64::min()); }
 
-inline Float64 rad_up(Float64 const& x1, Float64 const& x2) { return half(sub_up(x2,x1)); }
-inline Float64 med_near(Float64 const& x1, Float64 const& x2) { return half(add_near(x2,x1)); }
+inline Float64 rad_up(Float64 const& x1, Float64 const& x2) { return hlf(sub_up(x2,x1)); }
+inline Float64 med_near(Float64 const& x1, Float64 const& x2) { return hlf(add_near(x2,x1)); }
 
 inline Float64 pow_up(Float64 const& x, Int n) { return pow(x,n,Float64::upward); }
 inline Float64 pow_down(Float64 const& x, Int n) { return pow(x,n,Float64::downward); }

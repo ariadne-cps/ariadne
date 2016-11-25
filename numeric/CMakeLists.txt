@@ -1,6 +1,7 @@
 message(${PROJECT_SOURCE_DIR})
 
 add_library(ariadne-numeric OBJECT
+    dyadic.cc
     logical.cc
     operators.cc
     integer.cc
@@ -12,3 +13,5 @@ add_library(ariadne-numeric OBJECT
     floatmp.cc
     float-user.cc
 )
+
+cotire(ariadne-numeric)

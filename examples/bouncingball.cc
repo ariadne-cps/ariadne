@@ -81,7 +81,7 @@ Int main(Int argc, const char* argv[])
     std::cout << "Computing evolution starting from location l1, x = 2.0, v = 0.0" << std::endl;
 
     // FIXME: Currently fails with singleton initial set
-    // HybridSet initial_set(freefall,(2<=x<=2,v.in(0,0)));
+    // HybridSet initial_set(freefall,{2<=x<=2,v.in(0,0)});
     std::cout << "WARNING: Cannot compute on initial set with empty interior.";
     Real e(1.0/1024/1024);
     HybridSet initial_set(freefall,{2-e<=x<=2+e,v.in(0-e,0+e)});

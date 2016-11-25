@@ -72,7 +72,8 @@ inline LogicalValue check(LogicalValue l) { return l; }
 OutputStream& operator<<(OutputStream& os, LogicalValue b);
 
 class LogicalHandle;
-LogicalValue check(LogicalHandle const& l, Effort e=Effort::get_default());
+LogicalValue check(LogicalHandle const& l, Effort e);
+LogicalValue check(LogicalHandle const& l); //!< DEPRECATED
 
 class LogicalInterface {
     friend LogicalValue check(LogicalHandle const& l, Effort e);
@@ -95,6 +96,7 @@ class LogicalHandle {
     friend LogicalHandle exclusive(LogicalHandle l1, LogicalHandle l2);
     friend LogicalHandle negation(LogicalHandle l);
     friend LogicalValue check(LogicalHandle const& l, Effort e) { return l._ptr->_check(e); }
+    friend LogicalValue check(LogicalHandle const& l) { return check(l, Effort::get_default()); } //!< DEPRECATED
     friend OutputStream& operator<<(OutputStream& os, LogicalHandle const& l) { return l._ptr->_write(os); }
 };
 
@@ -146,7 +148,7 @@ template<class P> class Logical
     //! \brief %Logical exclusive or.
     friend inline Logical<P> operator^(Logical<P> l1, Logical<P> l2) { return Logical<P>(negation(equality(l1._v,l2._v))); }
     //! \brief %Logical negation.
-    friend inline Logical<Negated<P>> operator!(Logical<P> l) { return Logical<Negated<P>>(negation(l._v)); }
+    friend inline Logical<Negated<P>> operator!(Logical<P> const& l) { return Logical<Negated<P>>(negation(l._v)); }
     //! \brief Returns \c true only if \a l represents the result of a logical predicate which is definitely true.
     //! Returns \c false for values other than LogicalValue::TRUE.
     friend inline Bool definitely(Logical<P> l) { return l._v == LogicalValue::TRUE; }
@@ -204,11 +206,14 @@ template<> class Logical<EffectiveTag>
         return Logical<EffectiveTag>(disjunction(l1._v,l2._v)); }
     friend Logical<EffectiveTag> operator^(Logical<EffectiveTag> l1, Logical<EffectiveTag> l2) {
         return Logical<EffectiveTag>(exclusive(l1._v,l2._v)); }
-    friend Logical<EffectiveTag> operator!(Logical<EffectiveTag> l) {
+    friend Logical<EffectiveTag> operator!(Logical<EffectiveTag> const& l) {
         return Logical<EffectiveTag>(negation(l._v)); }
-    friend Bool decide(Logical<EffectiveTag> l, Effort e=Effort::get_default()) { return decide(l.check(e)); }
-    friend Bool definitely(Logical<EffectiveTag> l, Effort e=Effort::get_default()) { return definitely(l.check(e)); }
-    friend Bool possibly(Logical<EffectiveTag> l, Effort e=Effort::get_default()) { return possibly(l.check(e)); }
+    friend Bool decide(Logical<EffectiveTag> l, Effort e) { return decide(l.check(e)); }
+    friend Bool definitely(Logical<EffectiveTag> l, Effort e) { return definitely(l.check(e)); }
+    friend Bool possibly(Logical<EffectiveTag> l, Effort e) { return possibly(l.check(e)); }
+    friend Bool decide(Logical<EffectiveTag> l) { return decide(l.check(Effort::get_default())); }  //!< DEPRECATED
+    friend Bool definitely(Logical<EffectiveTag> l) { return definitely(l.check(Effort::get_default())); }  //!< DEPRECATED
+    friend Bool possibly(Logical<EffectiveTag> l) { return possibly(l.check(Effort::get_default())); }  //!< DEPRECATED
     friend inline OutputStream& operator<<(OutputStream& os, Logical<EffectiveTag> l) { return os << l._v; }
 };
 
@@ -226,10 +231,11 @@ template<> class Logical<EffectiveUpperTag>
         return Logical<EffectiveUpperTag>(conjunction(l1._v,l2._v)); }
     friend Logical<EffectiveUpperTag> operator||(Logical<EffectiveUpperTag> l1, Logical<EffectiveUpperTag> l2) {
         return Logical<EffectiveUpperTag>(disjunction(l1._v,l2._v)); }
-    friend Logical<EffectiveLowerTag> operator!(Logical<EffectiveUpperTag> l);
-    friend Logical<EffectiveUpperTag> operator!(Logical<EffectiveLowerTag> l);
+    friend Logical<EffectiveLowerTag> operator!(Logical<EffectiveUpperTag> const& l);
+    friend Logical<EffectiveUpperTag> operator!(Logical<EffectiveLowerTag> const& l);
     friend Logical<ValidatedUpperTag> check(Logical<EffectiveUpperTag> l, Effort e) { return Logical<ValidatedUpperTag>(Ariadne::check(l._v,e)); }
-    friend Bool decide(Logical<EffectiveUpperTag> l, Effort e=Effort::get_default()) { return decide(l.check(e)); }
+    friend Bool decide(Logical<EffectiveUpperTag> l, Effort e) { return decide(l.check(e)); }
+    friend Bool decide(Logical<EffectiveUpperTag> l) { return decide(l.check(Effort::get_default())); } //!< DEPRECATED
     friend inline OutputStream& operator<<(OutputStream& os, Logical<EffectiveUpperTag> l) { return os << l._v; }
 };
 
@@ -248,11 +254,12 @@ template<> class Logical<EffectiveLowerTag>
         return Logical<EffectiveLowerTag>(conjunction(l1._v,l2._v)); }
     friend Logical<EffectiveLowerTag> operator||(Logical<EffectiveLowerTag> l1, Logical<EffectiveLowerTag> l2) {
         return Logical<EffectiveLowerTag>(disjunction(l1._v,l2._v)); }
-    friend Logical<EffectiveUpperTag> operator!(Logical<EffectiveLowerTag> l) {
+    friend Logical<EffectiveUpperTag> operator!(Logical<EffectiveLowerTag> const& l) {
         return Logical<EffectiveUpperTag>(negation(l._v)); }
-    friend Logical<EffectiveLowerTag> operator!(Logical<EffectiveUpperTag> l) {
+    friend Logical<EffectiveLowerTag> operator!(Logical<EffectiveUpperTag> const& l) {
         return Logical<EffectiveLowerTag>(negation(l._v)); }
-     friend Bool decide(Logical<EffectiveLowerTag> l, Effort e=Effort::get_default()) { return decide(l.check(e)); }
+    friend Bool decide(Logical<EffectiveLowerTag> l, Effort e) { return decide(l.check(e)); }
+    friend Bool decide(Logical<EffectiveLowerTag> l) { return decide(l.check(Effort::get_default())); } //!< DEPRECATED
     friend inline OutputStream& operator<<(OutputStream& os, Logical<EffectiveLowerTag> l) { return os << l._v; }
 };
 

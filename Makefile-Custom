@@ -1,5 +1,28 @@
 all: lib tests wrap examples
 
+COMPILER = gcc
+
+ifeq ($(COMPILER),clang)
+	CXX = $(CLANG_CXX)
+	CXXWARNINGS = $(CLANG_CXXWARNINGS)
+	CXXFLAGS = $(CLANG_CXXFLAGS) $(CXXWARNINGS)
+else
+	CXX = $(GCC_CXX)
+	CXXWARNINGS = $(GCC_CXXWARNINGS)
+	CXXFLAGS = $(GCC_CXXFLAGS) $(CXXWARNINGS)
+endif
+
+
+GCC_CXX = g++
+GCC_CXXFLAGS = -std=c++14  -fPIC -O1
+GCC_CXXWARNINGS=-Wall  -Wno-non-template-friend -Wno-unused
+
+CLANG_CXX = clang++
+CLANG_CXXFLAGS = -std=c++14 -fPIC -O1
+CLANG_CXXWARNINGS=-Wall -Wno-unused
+
+#   -Wno-unused-local-typedef -Wno-unused-const-variable -Wno-unused-variable  -Wno-unused-function -Wno-unused-comparison
+
 VPATH = utility numeric expression algebra function geometry solvers dynamics hybrid output \
 	test wrap examples
 
@@ -9,7 +32,7 @@ HDR = \
 # ariadne.h
 
 LIB_NUMERIC_SRC = \
-	logging.cc operators.cc logical.cc integer.cc rational.cc decimal.cc real.cc \
+	logging.cc operators.cc logical.cc integer.cc dyadic.cc rational.cc decimal.cc real.cc \
 	float64.cc floatmp.cc \
 	float-user.cc number.cc
 
@@ -17,8 +40,10 @@ LIB_NUMERIC_SRC = \
 
 TEST_NUMERIC_SRC = \
 	check_numeric.cc \
-	test_logical.cc test_integer.cc test_rational.cc test_real.cc \
+	test_logical.cc test_integer.cc test_rational.cc test_real.cc test_number.cc \
 	test_float.cc test_validated_float.cc \
+
+#	test_numeric.cc \
 
 LIB_ALGEBRA_SRC = \
 	vector.cc matrix.cc series.cc multi_index.cc expansion.cc differential.cc algebra.cc \
@@ -28,7 +53,7 @@ TEST_ALGEBRA_SRC = \
 
 LIB_FUNCTION_SRC = \
 	affine.cc polynomial.cc affine_model.cc taylor_model.cc  \
-	function.cc symbolic_function.cc taylor_function.cc  \
+	function.cc function_model.cc symbolic_function.cc taylor_function.cc  \
 
 TEST_FUNCTION_SRC = \
 	check_function.cc \
@@ -72,6 +97,7 @@ TEST_DYNAMICS_SRC = \
 	test_continuous_evolution.cc
 
 LIB_EXPRESSION_SRC = \
+	formula.cc \
 	expression.cc \
 	expression_set.cc \
 
@@ -169,12 +195,6 @@ WRAP_OBJ = $(patsubst %.cc,$(WRAP_OBJ_DIR)/%.o,$(WRAP_SRC))
 EXAMPLES_OBJ = $(patsubst %.cc,$(EXAMPLES_OBJ_DIR)/%.o,$(EXAMPLES_SRC))
 EXAMPLES_BIN = $(patsubst %.cc,$(EXAMPLES_BIN_DIR)/%,$(EXAMPLES_SRC))
 
-CXX = g++
-CXXWARNINGS=-Wall -Wno-reorder -Wno-unused-variable -Wno-unused-but-set-variable
-CXXFLAGS = -std=c++11  -Wno-non-template-friend -fPIC -O1
-#CXX = clang++
-#CXXFLAGS = -std=c++11 -fPIC
-
 INCLUDE_PATHS =  -iquote.
 LINK_LIBS=-lgmpxx -lgmp -lmpfr -lcairo -lboost_system -lboost_serialization
 
@@ -201,6 +221,8 @@ help:
 	@echo "\nEXAMPLES_SRC="$(EXAMPLES_SRC)
 	@echo "EXAMPLES_OBJ="$(EXAMPLES_OBJ)
 	@echo "EXAMPLES_BIN="$(EXAMPLES_BIN)
+	@echo "\nCOMPILER="$(COMPILER)
+	@echo "CXX="$(CXX)
 
 dirs:
 	@mkdir -p $(DEP_DIR)
@@ -229,7 +251,7 @@ check: tests
 examples: dirs $(EXAMPLES_BIN) $(EXAMPLES_OBJ) lib
 
 clean:
-	@rm -f */*.gch $(OBJ_DIR)/*/*.o *.so $(BIN_DIR)/*
+	@rm -f */*.gch $(OBJ_DIR)/*.o *.so $(BIN_DIR)/*
 
 shiny: clean
 	@rm -rf $(DEP_DIR) $(OBJ_DIR) $(BIN_DIR) $(CHECK_DIR)
@@ -314,6 +336,9 @@ bin/check_numeric: $(TESTS_OBJ_DIR)/check_numeric.o
 bin/check_function: $(TESTS_OBJ_DIR)/check_function.o
 	$(CXX) $< $(LINK_FLAGS) -o $@
 
+bin/test_numeric: $(TESTS_OBJ_DIR)/test_numeric.o  libariadne-numeric.so
+	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_NUMERIC_LIB) $(LINK_LIBS) -o $@
+
 bin/test_logical: $(TESTS_OBJ_DIR)/test_logical.o  libariadne-numeric.so
 	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_NUMERIC_LIB) $(LINK_LIBS) -o $@
 
@@ -324,6 +349,9 @@ bin/test_rational: $(TESTS_OBJ_DIR)/test_rational.o  libariadne-numeric.so
 	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_NUMERIC_LIB) $(LINK_LIBS) -o $@
 
 bin/test_real: $(TESTS_OBJ_DIR)/test_real.o  libariadne-numeric.so
+	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_NUMERIC_LIB) $(LINK_LIBS) -o $@
+
+bin/test_number: $(TESTS_OBJ_DIR)/test_number.o  libariadne-numeric.so
 	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_NUMERIC_LIB) $(LINK_LIBS) -o $@
 
 bin/test_float: $(TESTS_OBJ_DIR)/test_float.o  libariadne-numeric.so

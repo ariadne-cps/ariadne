@@ -5,3 +5,5 @@ add_library(ariadne-dynamics OBJECT
     map_evolver.cc
     vector_field_evolver.cc
 )
+
+cotire(ariadne-dynamics)

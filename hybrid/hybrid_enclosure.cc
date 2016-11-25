@@ -312,8 +312,8 @@ Void HybridEnclosure::apply_full_reach_step(const ValidatedVectorFunctionModel& 
 
 
 Void HybridEnclosure::bound_time(Real tmax) {
-    if(possibly(this->time_range().upper()>ValidatedNumericType(tmax).lower())) {
-        this->_set.new_negative_parameter_constraint(this->time_function()-ValidatedNumericType(tmax));
+    if(possibly(this->time_range().upper()>tmax)) {
+       this->_set.new_negative_parameter_constraint(this->time_function()-tmax);
     }
 }
 
@@ -323,7 +323,7 @@ Void HybridEnclosure::bound_time(ValidatedScalarFunction tmax) {
 
 Void HybridEnclosure::set_time(Real time)
 {
-    this->_set.new_zero_parameter_constraint(this->time_function()-ValidatedNumericType(time));
+    this->_set.new_zero_parameter_constraint(this->time_function()-time);
 }
 
 Void HybridEnclosure::set_time(ValidatedScalarFunction time)

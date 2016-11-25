@@ -37,7 +37,7 @@ typedef Box<Float64BallInterval> Float64BallBox;
 typedef Box<Float64BoundsInterval> Float64BoundsBox;
 typedef Box<Float64UpperInterval> Float64UpperBox;
 typedef Box<Float64LowerInterval> Float64LowerBox;
-typedef Box<Float64ApproximationInterval> Float64ApproximationBox;
+typedef Box<Float64ApproximateInterval> Float64ApproximateBox;
 
 typedef Box<ExactIntervalType> ExactBoxType;
 typedef Box<EffectiveIntervalType> EffectiveBoxType;

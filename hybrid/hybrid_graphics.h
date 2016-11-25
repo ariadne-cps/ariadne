@@ -46,7 +46,7 @@ template<> class Interval<RawFloat64> {
     RawFloat64 _l, _u;
   public:
     Interval(RawFloat64 l, RawFloat64 u) :_l(l), _u(u) { }
-    template<class UB> Interval(Interval<UB> const& ivl) : _l(ivl.lower()), _u(ivl.upper()) { }
+    template<class UB> Interval(Interval<UB> const& ivl) : _l(ivl.lower().raw()), _u(ivl.upper().raw()) { }
     RawFloat64 lower() const { return _l; }
     RawFloat64 upper() const { return _u; }
 };

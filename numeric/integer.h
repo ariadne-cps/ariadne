@@ -38,6 +38,7 @@
 #include "utility/metaprogramming.h"
 #include "numeric/sign.h"
 #include "numeric/logical.h"
+#include "numeric/arithmetic.h"
 #include "numeric/number.decl.h"
 
 namespace Ariadne {
@@ -45,23 +46,30 @@ namespace Ariadne {
 /************  Ints ********************************************************/
 
 class Nat32 {
-    uint32_t _n;
+    uint32_t _m;
   public:
-    template<class N, EnableIf<IsIntegral<N>> = dummy> Nat32(N n) : _n(n) { assert(_n==n); }
-    uint32_t get_ui() const { return _n; }
+    Nat32() : _m(0u) { }
+    template<class M, EnableIf<And<IsIntegral<M>,IsUnsigned<M>>> = dummy> Nat32(M m) : _m(m) { assert(_m==m); }
+    template<class N, EnableIf<And<IsIntegral<N>,IsSigned<N>>> = dummy> Nat32(N n) : _m(n) { assert(n>=0); assert((int64_t)_m==n); }
+    uint32_t get_ui() const { return _m; }
 };
 
 class Nat64 {
-    uint64_t _n;
+    uint64_t _m;
   public:
-    template<class N, EnableIf<IsIntegral<N>> = dummy> Nat64(N n) : _n(n) { assert(_n==n); }
-    uint64_t get_ui() const { return _n; }
+    Nat64() : _m(0u) { }
+    template<class M, EnableIf<And<IsIntegral<M>,IsUnsigned<M>>> = dummy> Nat64(M m) : _m(m) { assert(_m==m); }
+    template<class N, EnableIf<And<IsIntegral<N>,IsSigned<N>>> = dummy> Nat64(N n) : _m(n) { assert(n>=0); assert((int64_t)_m==n);
+        assert(uint64_t(int64_t(_m))==_m); }
+    uint64_t get_ui() const { return _m; }
 };
 
 class Int32 {
     int32_t _n;
   public:
-    template<class N, EnableIf<IsIntegral<N>> = dummy> Int32(N n) : _n(n) { assert(_n==n); }
+    Int32() : _n(0) { }
+    template<class M, EnableIf<And<IsIntegral<M>,IsUnsigned<M>>> = dummy> Int32(M m) : _n(m) { assert(_n>=0); assert((uint32_t)_n==m); }
+    template<class N, EnableIf<And<IsIntegral<N>,IsSigned<N>>> = dummy> Int32(N n) : _n(n) { assert(_n==n); }
     int32_t get_si() const { return _n; }
 };
 
@@ -69,7 +77,8 @@ class Int64 {
     int64_t _n;
   public:
     Int64() : _n(0) { }
-    template<class N, EnableIf<IsIntegral<N>> = dummy> Int64(N n) : _n(n) { assert(_n==n); }
+    template<class M, EnableIf<And<IsIntegral<M>,IsUnsigned<M>>> = dummy> Int64(M m) : _n(m) { assert(_n>=0); assert((uint64_t)_n==m); }
+    template<class N, EnableIf<And<IsIntegral<N>,IsSigned<N>>> = dummy> Int64(N n) : _n(n) { assert(_n==n); }
     int64_t get_si() const { return _n; }
 };
 
@@ -91,6 +100,11 @@ template<> struct IsNumericType<Integer> : True { };
 //! \ingroup UserNumericTypeSubModule
 //! \brief Arbitrarily-sized integers.
 class Integer
+    : DeclareRingOperations<Integer,Integer,Natural>
+    , DeclareLatticeOperations<Integer,Natural>
+    , DeclareComparisonOperations<Integer,Boolean,Boolean>
+    , DefineRingOperators<Integer>
+    , DefineComparisonOperators<Integer,Boolean,Boolean>
 {
   public:
     mpz_t _mpz;
@@ -108,37 +122,17 @@ class Integer
     Integer& operator=(Integer&&);
     operator Number<ExactTag> () const;
 
-    friend Integer operator+(Integer const& z);
-    friend Integer operator-(Integer const& z);
-    friend Integer operator+(Integer const& z1, Integer const& z2);
-    friend Integer operator-(Integer const& z1, Integer const& z2);
-    friend Integer operator*(Integer const& z1, Integer const& z2);
     friend Rational operator/(Integer const& z1, Integer const& z2);
     friend Integer& operator++(Integer& z);
     friend Integer& operator--(Integer& z);
     friend Integer& operator+=(Integer& z1, Integer const& z2);
     friend Integer& operator*=(Integer& z1, Integer const& z2);
-    friend Integer const& max(Integer const& z1, Integer const& z2);
-    friend Integer const& min(Integer const& z1, Integer const& z2);
-    friend Integer abs(Integer const& z);
-    friend Integer pos(Integer const& z);
-    friend Integer neg(Integer const& z);
-    friend Integer sqr(Integer const& z);
-    friend Integer add(Integer const& z1, Integer const& z2);
-    friend Integer sub(Integer const& z1, Integer const& z2);
-    friend Integer mul(Integer const& z1, Integer const& z2);
-    friend Integer pow(Integer const& z, Nat m);
+
+    friend Int log2floor(Natural const& n);
 
     friend Rational rec(Integer const& z);
     friend Rational div(Integer const& z1, Integer const& z2);
     friend Rational pow(Integer const& z, Int n);
-
-    friend Boolean operator==(Integer const& z1, Integer const& z2);
-    friend Boolean operator!=(Integer const& z1, Integer const& z2);
-    friend Boolean operator>=(Integer const& z1, Integer const& z2);
-    friend Boolean operator<=(Integer const& z1, Integer const& z2);
-    friend Boolean operator> (Integer const& z1, Integer const& z2);
-    friend Boolean operator< (Integer const& z1, Integer const& z2);
 
     friend OutputStream& operator<<(OutputStream& os, Integer const& z);
     friend Integer operator"" _z(unsigned long long int n);
@@ -165,6 +159,17 @@ template<class N, EnableIf<IsIntegral<N>> = dummy> inline auto operator> (Intege
 template<class N, EnableIf<IsIntegral<N>> = dummy> inline auto operator<=(Integer const& x, N n) -> decltype(x!=Int64(n)) { return x<=Int64(n); }
 template<class N, EnableIf<IsIntegral<N>> = dummy> inline auto operator>=(Integer const& x, N n) -> decltype(x!=Int64(n)) { return x>=Int64(n); }
 
+class Natural : public Integer {
+  public:
+    Natural() : Integer() { }
+    Natural(uint m) : Integer(m) { }
+    Natural(int n) = delete;
+    explicit Natural(Integer const& z) : Integer(z) { assert(z>=Integer(0)); }
+    friend Natural& operator++(Natural& n) { ++static_cast<Integer&>(n); return n; }
+    friend Natural& operator+=(Natural& n1, Natural const& n2) { static_cast<Integer&>(n1)+=n2; return n1; }
+    friend Natural operator+(Natural const& n1, Natural const& n2) { return Natural(static_cast<Integer const&>(n1)+static_cast<Integer const&>(n2)); }
+    friend Natural operator*(Natural const& n1, Natural const& n2) { return Natural(static_cast<Integer const&>(n1)*static_cast<Integer const&>(n2)); }
+};
 
 } // namespace Ariadne
 

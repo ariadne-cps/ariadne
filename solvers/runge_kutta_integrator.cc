@@ -56,10 +56,10 @@ RungeKutta4Integrator::step(const ApproximateVectorFunction& f, const FloatAppro
 List< Pair<Float64Approximation,FloatApproximationVector> >
 RungeKutta4Integrator::evolve(const ApproximateVectorFunction& f, const FloatApproximationVector& x0, const Float64Approximation& tmax) const
 {
-    static const Float64Approximation h=this->_step_size;
+    static const Float64Approximation h(this->_step_size,Precision64());
 
     List< Pair<Float64Approximation,FloatApproximationVector> > res;
-    Float64Approximation t=0.0;
+    Float64Approximation t(0.0,Precision64());
     FloatApproximationVector x=x0;
 
     res.push_back(make_pair(t,x));

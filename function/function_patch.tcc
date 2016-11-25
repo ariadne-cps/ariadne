@@ -81,6 +81,11 @@ inline OutputStream& operator<<(OutputStream& os, const Representation<PositiveF
     return os << reinterpret_cast<Representation<Float64>const&>(flt_repr);
 }
 
+inline OutputStream& operator<<(OutputStream& os, const Representation<Float64Error>& flt_repr)
+{
+    return os << reinterpret_cast<Representation<Float64>const&>(flt_repr);
+}
+
 inline OutputStream& operator<<(OutputStream& os, const Representation<ExactIntervalType>& ivl_repr)
 {
     const ExactIntervalType& ivl=*ivl_repr.pointer;
@@ -218,6 +223,11 @@ template<class M> FunctionPatch<M> FunctionPatch<M>::constant(const ExactBoxType
     return FunctionPatch<M>(d,ModelType::constant(d.size(),c,swp));
 }
 
+template<class M> FunctionPatch<M> FunctionPatch<M>::unit_ball(const ExactBoxType& d, Sweeper swp)
+{
+    return FunctionPatch<M>(d,ModelType::unit_ball(d.size(),swp));
+}
+
 template<class M> FunctionPatch<M> FunctionPatch<M>::coordinate(const ExactBoxType& d, SizeType j, Sweeper swp)
 {
     ARIADNE_ASSERT(j<d.size());
@@ -282,6 +292,11 @@ template<class M> FunctionPatch<M> FunctionPatch<M>::create_coordinate(SizeType 
 template<class M> Vector<FunctionPatch<M>> FunctionPatch<M>::create_coordinates() const
 {
     return FunctionPatch<M>::coordinates(this->domain(),this->_model.sweeper());
+}
+
+template<class M> typename FunctionPatch<M>::NumericType FunctionPatch<M>::create(GenericNumericType const& c) const
+{
+    return NumericType(c,this->model().precision());
 }
 
 template<class M> FunctionPatch<M> FunctionPatch<M>::create(GenericType const& f) const
@@ -354,6 +369,8 @@ inline Bool operator> (Float64Approximation x1, Int n2) { return x1.raw()> Float
 
 template<class M> Polynomial<Float64Bounds> FunctionPatch<M>::polynomial() const
 {
+    Float64Value zero(0,Precision64());
+
     Vector<Polynomial<Float64Bounds> > pid=Polynomial<NumericType>::coordinates(this->argument_size());
     return horner_evaluate(this->expansion(),unscale(pid,this->domain()))+Float64Bounds(-this->error(),+this->error());
 
@@ -365,7 +382,7 @@ template<class M> Polynomial<Float64Bounds> FunctionPatch<M>::polynomial() const
         ExactIntervalType const& domj=this->domain()[j];
         if(domj.lower()>=domj.upper()) {
             ARIADNE_ASSERT(this->domain()[j].width()==0);
-            s[j]=Polynomial<Float64Bounds>::constant(this->argument_size(),0);
+            s[j]=Polynomial<Float64Bounds>::constant(this->argument_size(),zero);
         } else {
             //s[j]=Ariadne::polynomial(ModelType::unscaling(this->argument_size(),j,this->domain()[j],this->sweeper()));
             s[j]=(Polynomial<Float64Bounds>::coordinate(this->argument_size(),j)-domj.midpoint())/domj.radius();
@@ -383,7 +400,8 @@ template<class M> ScalarFunctionType<M> FunctionPatch<M>::function() const
 
 template<class M> Bool FunctionPatch<M>::operator==(const FunctionPatch<M>& tv) const
 {
-    return this->_domain==tv._domain && this->_model==tv._model;
+    ARIADNE_DEPRECATED("operator==(FunctionPatch<M>,FunctionPatch<M>)","Use same(...) instead.");
+    return same(*this,tv);
 }
 
 
@@ -443,8 +461,7 @@ template<class M> OutputStream& FunctionPatch<M>::write(OutputStream& os) const 
 
 template<class M> OutputStream& FunctionPatch<M>::repr(OutputStream& os) const
 {
-    return os << "FunctionPatch<M>(" << representation(this->domain()) << ", " << representation(this->model().expansion().raw())
-              << "," << representation(this->error().raw())<<","<<this->sweeper()<<")";
+    return os << "FunctionPatch<M>(" << representation(this->domain()) << ", " << representation(this->model())<<")";
 }
 
 /*
@@ -597,7 +614,7 @@ template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBoxType
 template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBoxType& d,
                                            const VectorFunctionType<M>& f,
                                            const Sweeper& swp)
-    : _domain(d), _models(f.result_size())
+    : _domain(d), _models()
 {
     //ARIADNE_ASSERT_MSG(f.result_size()>0, "d="<<d<<", f="<<f<<", swp="<<swp);
     ARIADNE_ASSERT(d.size()==f.argument_size());
@@ -711,8 +728,9 @@ template<class M> Vector<typename VectorFunctionPatch<M>::ErrorType> const Vecto
 
 template<class M> typename VectorFunctionPatch<M>::ErrorType const VectorFunctionPatch<M>::error() const
 {
-    Float64Error e=0u;
-    for(SizeType i=0; i!=this->result_size(); ++i) {
+    if(this->result_size()==0) { return Float64Error(); }
+    ErrorType e=this->models()[0].error();
+    for(SizeType i=1; i!=this->result_size(); ++i) {
         e=max(e,this->models()[i].error());
     }
     return e;
@@ -725,7 +743,8 @@ template<class M> VectorFunctionType<M> VectorFunctionPatch<M>::function() const
 
 template<class M> Bool VectorFunctionPatch<M>::operator==(const VectorFunctionPatch<M>& tm) const
 {
-    return this->_models==tm._models;
+    ARIADNE_DEPRECATED("operator==(VectorFunctionPatch<M>,VectorFunctionPatch<M>)","Use same(...) instead.");
+    return same(*this,tm);
 }
 
 

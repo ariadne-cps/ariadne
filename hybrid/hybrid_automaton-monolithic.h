@@ -89,7 +89,7 @@ class DiscreteMode {
         return this->_invariants.find(event)->second; }
 
     //! \brief The dimension of the discrete mode.
-    Nat dimension() const;
+    DimensionType dimension() const;
 
     //! \brief Write to an output stream.
     OutputStream& write(OutputStream& os) const;
@@ -171,7 +171,7 @@ class MonolithicHybridAutomaton
         EffectiveVectorFunction _dynamic;
         Map< DiscreteEvent, Invariant >  _invariants;
         Map< DiscreteEvent, Transition >  _transitions;
-        Nat dimension() const { return _dynamic.result_size(); }
+        DimensionType dimension() const { return _dynamic.result_size(); }
     };
     friend OutputStream& operator<<(OutputStream&, const MonolithicHybridAutomaton&);
   public:
@@ -276,7 +276,7 @@ class MonolithicHybridAutomaton
     Bool has_transition(DiscreteLocation source, DiscreteEvent event) const;
 
     //! \brief The dimension of the state space of in the mode \a location.
-    Nat dimension(DiscreteLocation location) const;
+    DimensionType dimension(DiscreteLocation location) const;
 
     //! \brief The dynamic valid in the mode \a location.
     virtual EffectiveVectorFunction dynamic_function(DiscreteLocation location) const;

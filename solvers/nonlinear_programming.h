@@ -38,8 +38,6 @@
 namespace Ariadne {
 
 template<class X, class R> class Constraint;
-typedef Constraint<EffectiveScalarFunction,EffectiveNumericType> EffectiveConstraint;
-typedef Constraint<ValidatedScalarFunction,ValidatedNumericType> ValidatedConstraint;
 
 class InfeasibleProblemException : public std::runtime_error {
   public: InfeasibleProblemException() : std::runtime_error("InfeasibleProblemException") { }
@@ -103,6 +101,9 @@ class OptimiserBase
     : public OptimiserInterface
     , public Loggable
 {
+  protected:
+    static const Float64Value zero;
+    static const Float64Value one;
   public:
     virtual Vector<ValidatedNumericType> minimise(ValidatedScalarFunction f, ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C) const = 0;
     virtual Vector<ValidatedNumericType> minimise(ValidatedScalarFunction f, ExactBoxType D, ValidatedVectorFunction g, ValidatedVectorFunction h) const;
@@ -255,7 +256,7 @@ class IntervalOptimiser
     : public NonlinearInteriorPointOptimiser
 {
     virtual IntervalOptimiser* clone() const { return new IntervalOptimiser(*this); }
-    virtual ValidatedKleenean feasible(ExactBoxType D, ValidatedVectorFunction h) const;
+    virtual ValidatedKleenean feasible_zero(ExactBoxType D, ValidatedVectorFunction h) const;
     Void feasibility_step(const ExactFloatVector& xl, const ExactFloatVector& xu, const ValidatedVectorFunction& h,
                           FloatBoundsVector& x, FloatBoundsVector& y, FloatBoundsVector& zl, FloatBoundsVector zu, Float64Bounds& mu) const;
 };
@@ -265,7 +266,7 @@ class ApproximateOptimiser
     : public NonlinearInteriorPointOptimiser
 {
     virtual ApproximateOptimiser* clone() const { return new ApproximateOptimiser(*this); }
-    virtual ValidatedKleenean feasible(ExactBoxType D, ValidatedVectorFunction h) const;
+    virtual ValidatedKleenean feasible_zero(ExactBoxType D, ValidatedVectorFunction h) const;
     Void feasibility_step(const ExactBoxType& D, const ApproximateVectorFunction& h,
                           FloatApproximationVector& X, FloatApproximationVector& Lambda) const;
 };

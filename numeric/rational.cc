@@ -34,7 +34,9 @@
 #include "rational.h"
 #include "logical.h"
 #include "number.h"
+#include "builtin.h"
 #include "integer.h"
+#include "dyadic.h"
 #include "sign.h"
 #include <limits>
 
@@ -51,8 +53,8 @@ class InvalidRationalLiteralException {
 };
 
 // Shortened version of raw float classes sufficient for comparison operator
-struct Float64 { volatile double dbl; double get_d() const { return dbl; } };
-template<> struct Float<ExactTag,Precision64> { Float64 _v; Float64 raw() const { return _v; } };
+class Float64 { volatile double _dbl; public: double get_d() const { return _dbl; } };
+template<> class FloatValue<Precision64> { Float64 _v; public: Float64 raw() const { return _v; } };
 
 Rational rec(Integer const& z) {
     return Rational(1,z);
@@ -88,6 +90,11 @@ Rational::Rational(Integer const& z) {
     mpq_set_z(_mpq,z._mpz);
 }
 
+Rational::Rational(Dyadic const& f) {
+    mpq_init(_mpq);
+    mpq_set_f(_mpq,f._mpf);
+}
+
 Rational::Rational(Integer const& znum, Integer const& zden) {
     mpq_init(_mpq);
     mpq_set_num(_mpq,znum._mpz);
@@ -98,16 +105,27 @@ Rational::Rational(Integer const& znum, Integer const& zden) {
 Rational::Rational(Int64 n) : Rational(Integer(n)) {
 }
 
-Rational::Rational(double d, std::nullptr_t dummy) {
+Rational::Rational(ExactDouble const& x) {
+    static bool give_inf_warning=true;
+    Dbl d=x.get_d();
+    if(std::isinf(d)) {
+        if(give_inf_warning) {
+            std::cerr<<"WARNING: Converting Double inf to Rational is not supported by GMP; returning numeric_limits<double>::max()\n";
+            give_inf_warning=false;
+        }
+        const double max=std::numeric_limits<double>::max();
+        d=(d>0?+max:-max);
+    }
+    ARIADNE_ASSERT(std::isfinite(d));
     mpq_init(_mpq);
     mpq_set_d(_mpq,d);
     mpq_canonicalize(_mpq);
 }
 
-Rational::Rational(Float64 const& x) : Rational(x.get_d(),nullptr) {
+Rational::Rational(Float64 const& x) : Rational(ExactDouble(x.get_d())) {
 }
 
-Rational::Rational(Float64Value const& x) : Rational(x.raw()) {
+Rational::Rational(Float64Value const& x) : Rational(reinterpret_cast<Float64 const&>(x)) {
 }
 
 Rational::Rational(const String& s) {
@@ -170,44 +188,23 @@ Integer Rational::numerator() const {
     return z;
 }
 
-Integer Rational::denominator() const {
-    Integer z;
-    mpq_get_den(z._mpz,this->_mpq);
-    return z;
-}
-
-Rational operator+(Rational const& q) {
-    return Rational(q);
-}
-
-Rational operator-(Rational const& q) {
-    Rational r; mpq_neg(r._mpq,q._mpq);
-    return std::move(r);
-}
-
-Rational operator+(Rational const& q1, Rational const& q2) {
-    Rational r; mpq_add(r._mpq,q1._mpq,q2._mpq);
-    return std::move(r);
-}
-
-Rational operator-(Rational const& q1, Rational const& q2) {
-    Rational r; mpq_sub(r._mpq,q1._mpq,q2._mpq);
-    return std::move(r);
-}
-
-Rational operator*(Rational const& q1, Rational const& q2) {
-    Rational r; mpq_mul(r._mpq,q1._mpq,q2._mpq);
-    return std::move(r);
-}
-
-Rational operator/(Rational const& q1, Rational const& q2) {
-    Rational r; mpq_div(r._mpq,q1._mpq,q2._mpq);
-    return std::move(r);
+Natural Rational::denominator() const {
+    Natural n;
+    mpq_get_den(n._mpz,this->_mpq);
+    return n;
 }
 
 Rational operator/(Integer const& z1, Integer const& z2) {
     return Rational(z1,z2);
 }
+
+/*
+Rational operator+(Rational const& q) { return pos(q); }
+Rational operator-(Rational const& q) { return neg(q); }
+Rational operator+(Rational const& q1, Rational const& q2) { return add(q1,q2); }
+Rational operator-(Rational const& q1, Rational const& q2) { return sub(q1,q2); }
+Rational operator*(Rational const& q1, Rational const& q2) { return mul(q1,q2); }
+Rational operator/(Rational const& q1, Rational const& q2) { return div(q1,q2); }
 
 Rational& operator+=(Rational& q1, Rational const& q2) {
     mpq_add(q1._mpq,q1._mpq,q2._mpq);
@@ -228,6 +225,7 @@ Rational& operator/=(Rational& q1, Rational const& q2) {
     mpq_div(q1._mpq,q1._mpq,q2._mpq);
     return q1;
 }
+*/
 
 Rational max(Rational const& q1, Rational const& q2) {
     return q1>q2 ? q1 :  q2;
@@ -238,48 +236,62 @@ Rational min(Rational const& q1, Rational const& q2) {
 }
 
 Rational abs(Rational const& q) {
-    Rational r; mpq_abs(r._mpq,q._mpq);
-    return std::move(r);
+    Rational r;
+    mpq_abs(r._mpq,q._mpq);
+    return r;
+}
+
+Rational nul(Rational const& q) {
+    Rational r; mpq_set_si(r._mpq,0,1u);
+    return r;
 }
 
 Rational pos(Rational const& q) {
-    Rational r; mpq_set(r._mpq,q._mpq);
-    return std::move(r);
+    Rational r;
+    mpq_set(r._mpq,q._mpq);
+    return r;
 }
 
 Rational neg(Rational const& q) {
-    Rational r; mpq_neg(r._mpq,q._mpq);
-    return std::move(r);
+    Rational r;
+    mpq_neg(r._mpq,q._mpq);
+    return r;
 }
 
 Rational sqr(Rational const& q) {
-    Rational r; mpq_mul(r._mpq,q._mpq,q._mpq);
-    return std::move(r);
+    Rational r;
+    mpq_mul(r._mpq,q._mpq,q._mpq);
+    return r;
 }
 
 Rational rec(Rational const& q) {
-    Rational r; mpq_inv(r._mpq,q._mpq);
-    return std::move(r);
+    Rational r;
+    mpq_inv(r._mpq,q._mpq);
+    return r;
 }
 
 Rational add(Rational const& q1, Rational const& q2) {
-    Rational r; mpq_add(r._mpq,q1._mpq,q2._mpq);
-    return std::move(r);
+    Rational r;
+    mpq_add(r._mpq,q1._mpq,q2._mpq);
+    return r;
 }
 
 Rational sub(Rational const& q1, Rational const& q2) {
-    Rational r; mpq_sub(r._mpq,q1._mpq,q2._mpq);
-    return std::move(r);
+    Rational r;
+    mpq_sub(r._mpq,q1._mpq,q2._mpq);
+    return r;
 }
 
 Rational mul(Rational const& q1, Rational const& q2) {
-    Rational r; mpq_mul(r._mpq,q1._mpq,q2._mpq);
-    return std::move(r);
+    Rational r;
+    mpq_mul(r._mpq,q1._mpq,q2._mpq);
+    return r;
 }
 
 Rational div(Rational const& q1, Rational const& q2) {
-    Rational r; mpq_div(r._mpq,q1._mpq,q2._mpq);
-    return std::move(r);
+    Rational r;
+    mpq_div(r._mpq,q1._mpq,q2._mpq);
+    return r;
 }
 
 Rational div(Integer const& z1, Integer const& z2) {
@@ -289,7 +301,7 @@ Rational div(Integer const& z1, Integer const& z2) {
 Rational pow(Rational const& q, Nat m) {
     Rational r=1; Rational p=q;
     while(m!=0) { if(m%2==1) { r=r*p; } p=p*p; m/=2; }
-    return std::move(r);
+    return r;
 }
 
 Rational pow(Rational const& q, Int n) {
@@ -298,13 +310,31 @@ Rational pow(Rational const& q, Int n) {
 }
 
 Boolean eq(Rational const& q1, Rational const& q2) {
-    return Boolean(mpq_equal(q1._mpq,q2._mpq));
+    return mpq_equal(q1._mpq,q2._mpq);
+}
+
+Boolean lt(Rational const& q1, Rational const& q2) {
+    return mpq_cmp(q1._mpq,q2._mpq)<0;
 }
 
 Comparison cmp(Rational const& q1, Rational const& q2) {
-    return Comparison(mpq_cmp(q1._mpq,q2._mpq));
+    auto c=mpq_cmp(q1._mpq,q2._mpq);
+    return c==0 ? Comparison::EQUAL : (c>0?Comparison::GREATER:Comparison::LESS);
 }
 
+Comparison cmp(Rational const& q1, ExactDouble const& x2) {
+    double d2=x2.get_d();
+    assert(not std::isnan(d2));
+    if(std::isfinite(d2)) {
+        return cmp(q1,Rational(x2));
+    } else {
+        return d2 > 0.0 ? Comparison::LESS : Comparison::GREATER;
+    }
+}
+
+Comparison cmp(ExactDouble const& x1, Rational const& q2) {
+    return Comparison(-(int)cmp(q2,x1));
+}
 
 Rational operator"" _q(long double x) {
     static const uint32_t max_cf_coef = std::numeric_limits<uint32_t>::max();
@@ -313,7 +343,7 @@ Rational operator"" _q(long double x) {
     // See if the long double value is an exact single-precision value
     volatile float sx=static_cast<float>(x);
     if(static_cast<long double>(sx)==x) {
-        return Rational(static_cast<double>(sx),nullptr);
+        return Rational(ExactDouble(sx));
     }
     // Compute the continued fraction expansion of x, storing coefficients in cf
     // Stop if a coefficient is larger than max_cf_coef, since then the result
@@ -334,14 +364,14 @@ Rational operator"" _q(long double x) {
                       "x="<<x<<" is not a sufficiently close approximation to a simple rational number.");
     }
     // Compute the result from the continued fraction coefficients
-    Rational q = Rational(static_cast<double>(cf[i]),nullptr);
+    Rational q = Rational(ExactDouble(cf[i]));
     while(i!=0) {
         --i;
-        q=Rational(cf[i],nullptr)+rec(q);
+        q=Rational(ExactDouble(cf[i]))+rec(q);
     }
     if(s==-1) { q=-q; }
     double xd=static_cast<double>(x);
-    Rational xq=Rational(xd,nullptr);
+    Rational xq=Rational(ExactDouble(xd));
     //volatile double qd=q.get_d();
     double ae=std::abs((q-xq).get_d());
     double re=ae/std::max(1.0,std::abs(xd));
@@ -378,17 +408,6 @@ OutputStream& operator<<(OutputStream& os, Rational const& q1) {
     if(mpz_cmp_si(den,1)!=0) { os << "/"; write(os,den); }
     mpz_clear(num); mpz_clear(den);
     return os;
-}
-
-Boolean operator==(Rational const& q1, Rational const& q2) { return cmp(q1,q2)==Comparison::EQUAL; }
-Boolean operator!=(Rational const& q1, Rational const& q2) { return cmp(q1,q2)!=Comparison::EQUAL; }
-Boolean operator<=(Rational const& q1, Rational const& q2) { return cmp(q1,q2)!=Comparison::GREATER; }
-Boolean operator>=(Rational const& q1, Rational const& q2) { return cmp(q1,q2)!=Comparison::LESS; }
-Boolean operator< (Rational const& q1, Rational const& q2) { return cmp(q1,q2)==Comparison::LESS; }
-Boolean operator> (Rational const& q1, Rational const& q2) { return cmp(q1,q2)==Comparison::GREATER; }
-
-Boolean eq(Rational const& q1, Float64 const& x2) {
-    return eq(q1,Rational(x2));
 }
 
 Comparison cmp(Rational const& q1, Float64 const& x2) {

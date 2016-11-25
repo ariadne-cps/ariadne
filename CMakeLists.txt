@@ -1,21 +1,34 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8.12)
 project (Ariadne)
+
+if(POLICY CMP0045)
+  cmake_policy(SET CMP0045 OLD)
+endif()
+if(POLICY CMP0058)
+  cmake_policy(SET CMP0058 NEW)
+endif()
 
 # enable dashboard scripting
 enable_testing()
-include (CTest)
+include(CTest)
 
-set (Ariadne_VERSION_MAJOR 0)
-set (Ariadne_VERSION_MINOR 5)
+set(Ariadne_VERSION_MAJOR 0)
+set(Ariadne_VERSION_MINOR 5)
+
+if (CMAKE_CXX_COMPILER_ID MATCHES "Intel")
+  message(WARNING "Intel compiler not supported.")
+elseif (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+  message(WARNING "Microsoft compiler not supported.")
+endif()
 
 set(BUILD_SHARED_LIBS ON)
+set(CMAKE_MACOSX_RPATH 1)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
-
-set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -O1")
 
 # add support for precompiled headers and single compilation unit
-include (cotire)
+include(cotire)
 
 include (CheckTypeSize)
 include (CheckIncludeFile)
@@ -24,20 +37,20 @@ include (CheckLibraryExists)
 
 check_type_size("int" SIZEOF_INT)
 
-check_include_file (gmp.h HAVE_GMP_H)
-check_include_file_cxx (gmpxx.h HAVE_GMPXX_H)
+check_include_file(gmp.h HAVE_GMP_H)
+check_include_file_cxx(gmpxx.h HAVE_GMPXX_H)
 if(NOT HAVE_GMPXX_H)
     message(WARNING "Unable to find gmpxx.h.")
 endif()
 
-check_include_file (mpfr.h HAVE_MPFR_H)
+check_include_file(mpfr.h HAVE_MPFR_H)
 
-check_include_file (cairo/cairo.h HAVE_CAIRO_H)
+check_include_file(cairo/cairo.h HAVE_CAIRO_H)
 if(NOT HAVE_CAIRO_H)
     message(WARNING "Unable to find cairo.h.")
 endif()
 
-set (Boost_REQUIRED_VERSION 1.36.0)
+set(Boost_REQUIRED_VERSION 1.36.0)
 find_package(Boost ${Boost_REQUIRED_VERSION})
 
 IF(Boost_FOUND)
@@ -66,7 +79,9 @@ add_definitions(-iquote${PROJECT_SOURCE_DIR})
 #include_directories(${PROJECT_SOURCE_DIR})
 
 #Non-portable fix to avoid user header directories being searched for by system headers
-add_definitions(-Wno-non-template-friend)
+IF(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+  add_definitions(-Wno-non-template-friend)
+ENDIF()
 
 add_subdirectory(utility)
 add_subdirectory(numeric)

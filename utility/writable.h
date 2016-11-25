@@ -42,16 +42,16 @@ class WritableInterface {
     virtual ~WritableInterface() = default;
     friend OutputStream& operator<<(OutputStream& os, const WritableInterface& w);
   public:
-    inline OutputStream& _write(OutputStream& os) const { return this->write(os); }
+    inline OutputStream& write(OutputStream& os) const { return this->_write(os); }
   protected:
   public:
-    virtual OutputStream& write(OutputStream&) const = 0;
+    virtual OutputStream& _write(OutputStream&) const = 0;
 };
 inline OutputStream& operator<<(OutputStream& os, const WritableInterface& w) { w._write(os); return os; }
 
-
-template<class T, class = Fallback> struct IsWritable : False { };
-template<class T> struct IsWritable<T, EnableIf<IsDefined<decltype(declval<T>()._write(declval<OutputStream>()))>,Fallback>> : True { };
+template<class T, class = decltype(declval<T>()._write(declval<OutputStream>()))> True has_write(int);
+template<class T> False has_write(...);
+template<class T, class = Fallback> struct IsWritable : decltype(has_write<T>(1)) { };
 
 template<class T> EnableIf<IsWritable<T>,OutputStream&> operator<<(OutputStream& os, const T& t) {
     return t._write(os);

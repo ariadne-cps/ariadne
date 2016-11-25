@@ -467,6 +467,8 @@ ExactBoxType widen(ExactBoxType bx, RawFloat64 e) {
 }
 
 
+const Float64Value OptimiserBase::zero = Float64Value(0,Precision64());
+const Float64Value OptimiserBase::one = Float64Value(1,Precision64());
 
 Bool OptimiserBase::
 almost_feasible_point(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C, ApproximateVector ax, Float64Approximation error) const
@@ -1176,14 +1178,14 @@ minimise(ValidatedScalarFunction f, ExactBoxType D, ValidatedVectorFunction g, E
     FloatApproximationVector x = midpoint(D);
     FloatApproximationVector w = midpoint(intersection(UpperBoxType(gD),C));
 
-    FloatApproximationVector kappa(g.result_size(),0.0);
-    FloatApproximationVector lambda(h.result_size(),0.0);
-    Float64Approximation mu = 1.0;
+    FloatApproximationVector kappa(g.result_size(),zero);
+    FloatApproximationVector lambda(h.result_size(),zero);
+    Float64Approximation mu = one;
 
 
     for(Nat i=0; i!=12; ++i) {
         this->minimisation_step(f,D,g,C,h, x,w, kappa,lambda, mu);
-        if(i%3==0 && i<=10) { mu *= 0.25; }
+        if(i%3==0 && i<=10) { mu *= 0.25_exact; }
     }
 
     return ValidatedVector(cast_exact(x));
@@ -1327,14 +1329,14 @@ minimisation_step(const ApproximateScalarFunction& f, const ExactBoxType& d, con
     FloatApproximationVector dw = A * dx - rkappa;
     FloatApproximationVector dkappa = rw - C * dw;
 
-    static const Float64Approximation ALPHA_SCALE_FACTOR = 0.75;
-    static const Float64Approximation MINIMUM_ALPHA = 1e-16;
+    static const Float64Approximation ALPHA_SCALE_FACTOR = 0.75_approx;
+    static const Float64Approximation MINIMUM_ALPHA = 1e-16_approx;
 
     // Compute distance to move variables preserving feasibility
     // FIXME: Current implementation might fail due to getting too close to boundary!
     FloatApproximationVector newx(n);
     FloatApproximationVector neww(m);
-    Float64Approximation alpha = 1.0;
+    Float64Approximation alpha = 1.0_approx;
     Bool success = false;
     do {
         newx = x - alpha * dx;
@@ -1408,9 +1410,9 @@ NonlinearInteriorPointOptimiser::feasibility_step(
 {
     static const double inf = std::numeric_limits<double>::infinity();
 
-    static const Float64Approximation gamma=1.0/1024;
-    static const Float64Approximation sigma=1.0/8;
-    static const Float64Approximation scale=0.75;
+    static const Float64Approximation gamma=0.0009765625_approx; // 1.0/1024;
+    static const Float64Approximation sigma=0.125_approx;
+    static const Float64Approximation scale=0.75_approx;
 
     const Nat m=d.size();
     const Nat n=c.size();
@@ -1666,7 +1668,7 @@ compute_mu(const ExactBoxType& D, const ApproximateVectorFunction& g, const Exac
            const FloatApproximationVector& x, const FloatApproximationVector& lambda) const
 {
     // Compute the relaxation parameter mu as the average of the product of the Lyapunov exponents and constraint satisfactions
-    Float64Approximation mu = 0.0;
+    Float64Approximation mu=zero;
     FloatApproximationVector gx = g(x);
 
     for(Nat i=0; i!=C.size(); ++i) {
@@ -1689,7 +1691,7 @@ setup_feasibility(const ExactBoxType& d, const ApproximateVectorFunction& g, con
 {
     const Nat l=2*(d.size()+c.size());
     y=midpoint(d);
-    x=FloatApproximationVector(l,1.0/l);
+    x=FloatApproximationVector(l,one/l);
     //compute_tz(d,g,c,y,t,z);
 }
 
@@ -1716,8 +1718,6 @@ feasible(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C) const
     ARIADNE_LOG(2,"PenaltyFunctionOptimiser::feasible(D,g,C)\n");
     ARIADNE_LOG(3,"D="<<D<<" g="<<g<<" C="<<C<<" \n");
 
-    Float64Approximation one=1.0;
-
     FloatApproximationVector x=midpoint(D);
 
     FloatApproximationVector w=midpoint(C);
@@ -1726,7 +1726,7 @@ feasible(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C) const
         else if(C[i].lower()==-infty) { w[i]=C[i].upper()-one; }
     }
 
-    FloatApproximationVector y(C.size(),0.0);
+    FloatApproximationVector y(C.size(),zero);
 
     ARIADNE_LOG(5,"x="<<x<<" w="<<w<<" y="<<y<<"\n");
 
@@ -1805,9 +1805,9 @@ feasibility_step(const ExactBoxType& X, const ApproximateVectorFunction& g, cons
     FloatApproximationVector newx(n);
     FloatApproximationVector neww(m);
 
-    static const Float64Approximation ALPHA_SCALE_FACTOR = 0.75;
+    static const Float64Approximation ALPHA_SCALE_FACTOR = 0.75_approx;
 
-    Float64Approximation alpha = 1.0;
+    Float64Approximation alpha = 1.0_approx;
     do {
         newx = x - alpha * dx;
         neww = w - alpha * dw;
@@ -1936,7 +1936,7 @@ feasibility_step(ExactBoxType const& D, ApproximateVectorFunction const& g, Exac
     sx = project(swxy,range(m,m+n));
     sy = project(swxy,range(m+n,m+n+m));
 
-    ApproximateNumericType al=1.0;
+    ApproximateNumericType al=one;
     ApproximateVector nw=w+al*sw;
     ApproximateVector nx=x+al*sx;
     ApproximateVector ny(m);
@@ -2017,12 +2017,12 @@ Void NonlinearInteriorPointOptimiser::compute_z(const ExactBoxType& d, const App
 
 
 ValidatedKleenean ApproximateOptimiser::
-feasible(ExactBoxType D, ValidatedVectorFunction h) const
+feasible_zero(ExactBoxType D, ValidatedVectorFunction h) const
 {
-    ARIADNE_LOG(2,"ApproximateOptimiser::feasible(D,h)\n");
+    ARIADNE_LOG(2,"ApproximateOptimiser::feasible_zero(D,h)\n");
     ARIADNE_LOG(3,"D="<<D<<", h="<<h<<"\n");
     FloatApproximationVector x=midpoint(D);
-    FloatApproximationVector y(h.result_size(),0.0);
+    FloatApproximationVector y(h.result_size(),zero);
 
     for(Nat i=0; i!=8; ++i) {
         this->feasibility_step(D,h,x,y);
@@ -2030,7 +2030,7 @@ feasible(ExactBoxType D, ValidatedVectorFunction h) const
 
     if( decide(norm(h(x))<1e-10) ) { return true; }
 
-    if(!possibly(contains(UpperIntervalType(dot(UpperIntervalVectorType(cast_exact(y)),apply(h,D))),Float64Value(0.0)))) { return false; }
+    if(!possibly(contains(UpperIntervalType(dot(UpperIntervalVectorType(cast_exact(y)),apply(h,D))),zero))) { return false; }
 
     return indeterminate;
 }
@@ -2077,7 +2077,7 @@ feasibility_step(const ExactBoxType& D, const ApproximateVectorFunction& h,
     FloatApproximationVector dx = Hinv * ( rx - transpose(A) * dy);
     ARIADNE_LOG(5,"dx="<<dx<<" dy="<<dy<<"\n");
 
-    Float64Approximation ax = 1.0;
+    Float64Approximation ax = one;
     FloatApproximationVector nx = x-ax*dx;
     while(!contains(D,cast_exact(nx))) {
         ax*=SCALE_FACTOR;
@@ -2317,9 +2317,9 @@ feasibility_step(const ExactBoxType& D, const ApproximateVectorFunction& g, cons
 
 // Solve equations y Dh(x) - 1/(x-xl) + 1/(xu-x) = 0; h(x) = 0
 ValidatedKleenean IntervalOptimiser::
-feasible(ExactBoxType D, ValidatedVectorFunction h) const
+feasible_zero(ExactBoxType D, ValidatedVectorFunction h) const
 {
-    ARIADNE_LOG(2,"IntervalOptimiser::feasible(D,h)\n");
+    ARIADNE_LOG(2,"IntervalOptimiser::feasible_zero(D,h)\n");
     ARIADNE_LOG(3,"D="<<D<<", h="<<h<<"\n");
 
     const Nat n=D.size();
@@ -2399,7 +2399,7 @@ feasibility_step(const ExactFloatVector& xl, const ExactFloatVector& xu, const V
     ARIADNE_LOG(6,"h(x)="<<h(nx)<<"\n");
 
     x = refinement(x,nx); y=refinement(y,ny);
-    Float64Bounds nmu = 0;
+    Float64Bounds nmu = zero;
     for(Nat i=0; i!=m; ++i) { nmu += sqr(y[i]); }
     mu=refinement(mu,nmu);
 }

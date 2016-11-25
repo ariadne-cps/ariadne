@@ -41,205 +41,261 @@
 #include "floatmp.h"
 #include "float-user.h"
 
+#include "expression/templates.h"
 #include "numeric/operators.h"
 
 namespace Ariadne {
 
 /************ Number *********************************************************/
 
-
-class UnaryOperatorInterface {
-  public:
-    virtual NumberInterface* _compute(Real) const = 0;
-    virtual NumberInterface* _compute(Float64Value) const = 0;
-    virtual NumberInterface* _compute(Float64Ball) const = 0;
-    virtual NumberInterface* _compute(Float64Bounds) const = 0;
-    virtual NumberInterface* _compute(Float64Approximation) const = 0;
-    virtual NumberInterface* _compute(FloatMPValue) const = 0;
-    virtual NumberInterface* _compute(FloatMPBall) const = 0;
-    virtual NumberInterface* _compute(FloatMPBounds) const = 0;
-    virtual NumberInterface* _compute(FloatMPApproximation) const = 0;
-};
-
+template<class... AWS> struct Aware;
+template<class X> class NumberMixin;
 template<class X> class NumberWrapper;
 
-template<class R> inline NumberInterface* _heap_move_number(R&& r) {
-    return new NumberWrapper<R>(r); }
+template<class X> inline X const* extract(NumberInterface const* y) {
+     return dynamic_cast<NumberWrapper<X>const*>(y);
+}
 
-template<class R> inline NumberInterface* _heap_move_number(R const& r) {
-    return new NumberWrapper<R>(r); }
+inline OutputStream& operator<<(OutputStream& os, NumberInterface const& y) { return y._write(os); }
 
-template<class O, class A1> class UnaryOperator : public UnaryOperatorInterface {
-    O _op; A1 _arg1;
-  public:
-    UnaryOperator(A1 a1) : _arg1(a1) { }
-    UnaryOperator(O o, A1 a1) : _op(o), _arg1(a1) { }
-    virtual NumberInterface* _compute(Real a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(Float64Value a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(Float64Ball a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(Float64Bounds a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(Float64Approximation a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(FloatMPValue a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(FloatMPBall a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(FloatMPBounds a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(FloatMPApproximation a2) const { return _heap_move_number(_op(_arg1,a2)); }
+inline OutputStream& operator<<(OutputStream& os, Comparison c) {
+    return os << ( (c==Comparison::EQUAL) ? "EQUAL" : (c==Comparison::LESS) ? "LESS" : "GREATER" );
+}
+inline OutputStream& operator<<(OutputStream& os, Sign s) {
+    return os << ( (s==Sign::ZERO) ? "ZERO" : (s==Sign::NEGATIVE) ? "NEGATIVE" : "POSITIVE" );
+}
+
+// FIXME: Should test for other potential infiniteis
+inline Comparison cmp(NumberInterface const& y1, NumberInterface const& y2) {
+    Comparison res;
+    Float64Value const* x1=extract<Float64Value>(&y1);
+    Float64Value const* x2=extract<Float64Value>(&y2);
+    if(x1) {
+        if(x2) { res= cmp(ExactDouble(x1->raw().get_d()),ExactDouble(x2->raw().get_d())); }
+        else { res= cmp(ExactDouble(x1->raw().get_d()),y2._get_q()); }
+    } else {
+        if(x2) { res= cmp(y1._get_q(),ExactDouble(x2->raw().get_d())); }
+        else { res= cmp(y1._get_q(),y2._get_q()); }
+    }
+    return res;
+}
+
+template<class I, class OP, class Y> struct OperableInterface {
+    virtual ~OperableInterface() = default;
+    virtual I* _apply_left(OP op, Y const& y) const = 0;
+    virtual I* _apply_right(OP op, Y const& y) const = 0;
+};
+template<class X, class I, class OP, class Y> struct OperableMixin : virtual OperableInterface<I,OP,Y> {
+    static X const& _cast(OperableMixin<X,I,OP,Y> const& self) { return static_cast<NumberMixin<X> const&>(self); }
+    template<class R> static I* _make_wrapper(R&& r) { return new NumberWrapper<R>(r); }
+    virtual I* _apply_left(OP op, Y const& other) const { return _make_wrapper(op(other,_cast(*this))); }
+    virtual I* _apply_right(OP op, Y const& other) const { return _make_wrapper(op(_cast(*this),other)); }
+};
+template<class X, class I, class OP, class AW> struct Operable;
+template<class X, class I, class OP, class Y, class... YS> struct Operable<X,I,OP,Aware<Y,YS...>>
+    : OperableMixin<X,I,OP,Y>, Operable<X,I,OP,Aware<YS...>> { };
+template<class X, class I, class OP> struct Operable<X,I,OP,Aware<>> { };
+
+
+template<class OP> inline NumberInterface* make_symbolic(OP op, NumberInterface const* yp1, NumberInterface const* yp2) {
+    Handle<NumberInterface> y1(const_cast<NumberInterface*>(yp1)->shared_from_this());
+    Handle<NumberInterface> y2(const_cast<NumberInterface*>(yp2)->shared_from_this());
+    return nullptr;
 };
 
-template<class T1, class T2> inline auto add(T1&& t1, T2&& t2) -> decltype(t1+t2) { return std::forward<T1>(t1) + std::forward<T2>(t2); }
-template<class T1, class T2> inline auto sub(T1&& t1, T2&& t2) -> decltype(t1-t2) { return std::forward<T1>(t1) - std::forward<T2>(t2); }
-template<class T1, class T2> inline auto mul(T1&& t1, T2&& t2) -> decltype(t1*t2) { return std::forward<T1>(t1) * std::forward<T2>(t2); }
-template<class T1, class T2> inline auto div(T1&& t1, T2&& t2) -> decltype(t1/t2) { return std::forward<T1>(t1) / std::forward<T2>(t2); }
+template<class I, class X, class OP> inline I* _apply(X const& self, OP op, I const* self_ptr, I const* other_ptr) {
+    auto aware_other_ptr=dynamic_cast<OperableInterface<I,OP,X>const*>(other_ptr);
+    if(aware_other_ptr) { return aware_other_ptr->_apply_right(op,self); }
+    else { return other_ptr->_rapply(op,self_ptr); }
+}
+template<class I, class X, class OP> inline I* _rapply(X const& self, OP op, I const* self_ptr, I const* other_ptr) {
+    auto aware_other_ptr=dynamic_cast<OperableInterface<I,OP,X>const*>(other_ptr);
+    if(aware_other_ptr) { return aware_other_ptr->_apply_left(op,self); }
+    else { return make_symbolic(op,self_ptr,other_ptr); }
+}
 
-template<class O, class P> class UnaryOperator<O,Float<P,Precision64>> : public UnaryOperatorInterface {
-    typedef Float<P,Precision64> A1;
-    O _op; A1 _arg1;
-  public:
-    UnaryOperator(A1 a1) : _arg1(a1) { }
-    UnaryOperator(O o, A1 a1) : _op(o), _arg1(a1) { }
-    virtual NumberInterface* _compute(Real a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(Float64Value a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(Float64Ball a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(Float64Bounds a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(Float64Approximation a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(FloatMPValue a2) const { assert(false); }
-    virtual NumberInterface* _compute(FloatMPBall a2) const { assert(false); }
-    virtual NumberInterface* _compute(FloatMPBounds a2) const { assert(false); }
-    virtual NumberInterface* _compute(FloatMPApproximation a2) const { assert(false); }
+
+
+template<class X, class I, class OP> struct UnaryOperationMixin : public virtual I {
+    static X const& _cast(UnaryOperationMixin<X,I,OP> const& self) { return static_cast<NumberMixin<X> const&>(self); }
+    template<class R> static I* _make_wrapper(R&& r) { return new NumberWrapper<R>(r); }
+    virtual I* _apply(OP op) const final { return _make_wrapper(pos(_cast(*this))); }
 };
 
-template<class O, class P> class UnaryOperator<O,Float<P,PrecisionMP>> : public UnaryOperatorInterface {
-    typedef Float<P,PrecisionMP> A1;
-    O _op; A1 _arg1;
-  public:
-    UnaryOperator(A1 a1) : _arg1(a1) { }
-    UnaryOperator(O o, A1 a1) : _op(o), _arg1(a1) { }
-    virtual NumberInterface* _compute(Real a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(Float64Value a2) const { assert(false); }
-    virtual NumberInterface* _compute(Float64Ball a2) const { assert(false); }
-    virtual NumberInterface* _compute(Float64Bounds a2) const { assert(false); }
-    virtual NumberInterface* _compute(Float64Approximation a2) const { assert(false); }
-    virtual NumberInterface* _compute(FloatMPValue a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(FloatMPBall a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(FloatMPBounds a2) const { return _heap_move_number(_op(_arg1,a2)); }
-    virtual NumberInterface* _compute(FloatMPApproximation a2) const { return _heap_move_number(_op(_arg1,a2)); }
+template<class I, class OP> struct BinaryOperationInterface {
+    virtual ~BinaryOperationInterface() = default;
+    virtual I* _apply(OP op, I const* other) const = 0;
+    virtual I* _rapply(OP op, I const* other) const = 0;
 };
+
+template<class X, class I, class OP, class J=I> struct BinaryOperationMixin : public virtual J {
+    static X const& _cast(BinaryOperationMixin<X,I,OP,J> const& self) { return static_cast<NumberMixin<X> const&>(self); }
+    virtual I* _apply(OP op, I const* other) const final { return Ariadne::_apply<I,X>(_cast(*this),op,this,other); }
+    virtual I* _rapply(OP op, I const* other) const final { return Ariadne::_rapply<I,X>(_cast(*this),op,this,other); }
+};
+
+
+template<class X, class I, class AW> struct FieldAware
+    : Operable<X,I,Add,AW>, Operable<X,I,Sub,AW>, Operable<X,I,Mul,AW>, Operable<X,I,Div,AW> {
+};
+template<class X, class I, class AW> struct LatticeAware
+    : Operable<X,I,Max,AW>, Operable<X,I,Min,AW> {
+};
+template<class X, class I, class AW> struct LatticeFieldAware
+    : FieldAware<X,I,AW>, LatticeAware<X,I,AW> {
+};
+
+template<class X, class I> struct UnaryOperationsMixin : public virtual I {
+    static X const& _cast(UnaryOperationsMixin<X,I> const& self) { return static_cast<NumberMixin<X> const&>(self); }
+    template<class R> static I* _make_wrapper(R&& r) { return new NumberWrapper<R>(r); }
+    virtual I* _apply(Pos op) const final { return _make_wrapper(pos(_cast(*this))); }
+    virtual I* _apply(Neg op) const final { return _make_wrapper(neg(_cast(*this))); }
+    virtual I* _apply(Sqr op) const final { return _make_wrapper(sqr(_cast(*this))); }
+    virtual I* _apply(Rec op) const final { return _make_wrapper(rec(_cast(*this))); }
+    virtual I* _apply(Pow op, Int n) const final { return _make_wrapper(pow(_cast(*this),n)); }
+    virtual I* _apply(Sqrt op) const final { return _make_wrapper(sqrt(_cast(*this))); }
+    virtual I* _apply(Exp op) const final { return _make_wrapper(exp(_cast(*this))); }
+    virtual I* _apply(Log op) const final { return _make_wrapper(log(_cast(*this))); }
+    virtual I* _apply(Sin op) const final { return _make_wrapper(sin(_cast(*this))); }
+    virtual I* _apply(Cos op) const final { return _make_wrapper(cos(_cast(*this))); }
+    virtual I* _apply(Tan op) const final { return _make_wrapper(tan(_cast(*this))); }
+    virtual I* _apply(Atan op) const final { return _make_wrapper(atan(_cast(*this))); }
+    virtual I* _apply(Abs op) const final { return _make_wrapper(abs(_cast(*this))); }
+};
+
+
+template<class X, class I, class J=I> struct AwareFieldMixin : public virtual J {
+    static X const& _cast(AwareFieldMixin<X,I,J> const& self) { return static_cast<NumberMixin<X> const&>(self); }
+    virtual I* _apply(Add op, I const* other) const final { return Ariadne::_apply<I,X>(_cast(*this),op,this,other); }
+    virtual I* _apply(Sub op, I const* other) const final { return Ariadne::_apply<I,X>(_cast(*this),op,this,other); }
+    virtual I* _apply(Mul op, I const* other) const final { return Ariadne::_apply<I,X>(_cast(*this),op,this,other); }
+    virtual I* _apply(Div op, I const* other) const final { return Ariadne::_apply<I,X>(_cast(*this),op,this,other); }
+    virtual I* _rapply(Add op, I const* other) const final { return Ariadne::_rapply<I,X>(_cast(*this),op,this,other); }
+    virtual I* _rapply(Sub op, I const* other) const final { return Ariadne::_rapply<I,X>(_cast(*this),op,this,other); }
+    virtual I* _rapply(Mul op, I const* other) const final { return Ariadne::_rapply<I,X>(_cast(*this),op,this,other); }
+    virtual I* _rapply(Div op, I const* other) const final { return Ariadne::_rapply<I,X>(_cast(*this),op,this,other); }
+};
+
+template<class X, class I, class J=I> struct AwareLatticeMixin : public virtual J {
+    static X const& _cast(AwareLatticeMixin<X,I,J> const& self) { return static_cast<NumberMixin<X> const&>(self); }
+    virtual I* _apply(Max op, I const* other) const final { return Ariadne::_apply<I,X>(_cast(*this),op,this,other); }
+    virtual I* _apply(Min op, I const* other) const final { return Ariadne::_apply<I,X>(_cast(*this),op,this,other); }
+    virtual I* _rapply(Max op, I const* other) const final { return Ariadne::_rapply<I,X>(_cast(*this),op,this,other); }
+    virtual I* _rapply(Min op, I const* other) const final { return Ariadne::_rapply<I,X>(_cast(*this),op,this,other); }
+};
+
+
+template<class X, class I, class W> struct SameArithmeticMixin : public virtual I {
+    X const& _cast(X const& self) { return self; }
+    X const& _cast(I const& other) { return dynamic_cast<Wrapper<X,I>const&>(other); }
+    I* _heap_move(X&& x) { return new W(x); }
+    virtual I* _add(I const* other) const final { return _heap_move(add(_cast(*this),_cast(*other))); }
+    virtual I* _sub(I const* other) const final { return _heap_move(add(_cast(*this),_cast(*other))); }
+    virtual I* _mul(I const* other) const final { return _heap_move(add(_cast(*this),_cast(*other))); }
+    virtual I* _div(I const* other) const final { return _heap_move(add(_cast(*this),_cast(*other))); }
+    virtual I* _radd(I const* other) const final { return _heap_move(add(_cast(*other),_cast(*this))); }
+    virtual I* _rsub(I const* other) const final { return _heap_move(add(_cast(*other),_cast(*this))); }
+    virtual I* _rmul(I const* other) const final { return _heap_move(add(_cast(*other),_cast(*this))); }
+    virtual I* _rdiv(I const* other) const final { return _heap_move(add(_cast(*other),_cast(*this))); }
+};
+
+template<class X> class NumberGetterMixin : public virtual NumberInterface {
+  public:
+  //  operator X const& () const { return static_cast<NumberMixin<X>const&>(*this); }
+    static X const& _cast(NumberGetterMixin<X> const& self) { return static_cast<NumberMixin<X>const&>(self); }
+    static X& _cast(NumberGetterMixin<X>& self) { return static_cast<NumberMixin<X>&>(self); }
+
+    typedef Paradigm<X> P;
+    friend class Number<P>;
+
+    virtual NumberInterface* _copy() const override { return new NumberWrapper<X>(_cast(*this)); }
+    virtual NumberInterface* _move() override { return new NumberWrapper<X>(std::move(_cast(*this))); }
+
+    // FIXME: Proper comparisons for ExactNumber.
+    virtual LogicalValue _equals(NumberInterface const& y) const override {
+        if (this->_paradigm() == ParadigmCode::EXACT && y._paradigm() == ParadigmCode::EXACT) {
+            return LogicalValue( cmp(*this,y)==Comparison::EQUAL ? LogicalValue::TRUE : LogicalValue::FALSE ); }
+        if (this->_paradigm() == ParadigmCode::VALIDATED && y._paradigm() == ParadigmCode::VALIDATED) {
+            return LogicalValue(this->_get(BoundedTag(),Precision64()) == y._get(BoundedTag(),Precision64())); }
+        else {
+            return LogicalValue(this->_get(ApproximateTag(),Precision64()) == y._get(ApproximateTag(),Precision64())); }
+    }
+    virtual LogicalValue _less(NumberInterface const& y) const override {
+        if (this->_paradigm() == ParadigmCode::EXACT && y._paradigm() == ParadigmCode::EXACT) {
+            return LogicalValue( cmp(*this,y)==Comparison::LESS ? LogicalValue::TRUE : LogicalValue::FALSE ); }
+        else if (this->_paradigm() == ParadigmCode::VALIDATED && y._paradigm() == ParadigmCode::VALIDATED) {
+            return LogicalValue(this->_get(BoundedTag(),Precision64()) < y._get(BoundedTag(),Precision64())); }
+        else {
+            return LogicalValue(this->_get(ApproximateTag(),Precision64()) < y._get(ApproximateTag(),Precision64()));
+        }
+    }
+
+    virtual Rational _get_q() const override {
+        return this->_get_as<Rational>(); }
+
+    virtual Float64Ball _get(MetricTag,Precision64 pr) const override {
+        return this->_get_as<Float64Ball>(pr); }
+    virtual Float64Bounds _get(BoundedTag,Precision64 pr) const override {
+        return this->_get_as<Float64Bounds>(pr); }
+    virtual Float64UpperBound _get(UpperTag,Precision64 pr) const override {
+        return this->_get_as<Float64UpperBound>(pr); }
+    virtual Float64LowerBound _get(LowerTag,Precision64 pr) const override {
+        return this->_get_as<Float64LowerBound>(pr); }
+    virtual Float64Approximation _get(ApproximateTag,Precision64 pr) const override {
+        return this->_get_as<Float64Approximation>(pr); }
+    virtual FloatMPBall _get(MetricTag, PrecisionMP pr) const override {
+        return this->_get_as<FloatMPBall>(pr); }
+    virtual FloatMPBounds _get(BoundedTag, PrecisionMP pr) const override {
+        return this->_get_as<FloatMPBounds>(pr); }
+    virtual FloatMPUpperBound _get(UpperTag, PrecisionMP pr) const override {
+        return this->_get_as<FloatMPUpperBound>(pr); }
+    virtual FloatMPLowerBound _get(LowerTag, PrecisionMP pr) const override {
+        return this->_get_as<FloatMPLowerBound>(pr); }
+    virtual FloatMPApproximation _get(ApproximateTag, PrecisionMP pr) const override {
+        return this->_get_as<FloatMPApproximation>(pr); }
+
+    virtual ParadigmCode _paradigm() const override { return P::code(); }
+    virtual String _class_name() const override { return class_name<X>(); }
+    virtual OutputStream& _write(OutputStream& os) const override { return os << _cast(*this); }
+
+  private:
+    template<class R, EnableIf<IsConstructible<R,X>> = dummy>
+        inline R _get_as() const { return static_cast<R>(_cast(*this)); }
+    template<class R, DisableIf<IsConstructible<R,X>> = dummy>
+        inline R _get_as() const { std::cerr<<"Warning: Cannot convert " << _cast(*this) << " of type " << this->_class_name() << " to " << class_name<R>() << "\n"; throw ParadigmError(); }
+    template<class R, class PR, EnableIf<IsConstructible<R,X,PR>> = dummy>
+        inline R _get_as(PR pr) const { return R(_cast(*this),pr); }
+    template<class R, class PR, DisableIf<IsConstructible<R,X,PR>> = dummy>
+        inline R _get_as(PR pr) const { std::cerr<<"Warning: Cannot convert " << _cast(*this) << " of type " << this->_class_name() << " to " << class_name<R>() << " with precision " << pr << "\n"; throw ParadigmError(); }
+};
+
+template<class X> struct DispatchingTraits { typedef Aware<X> AwareOfTypes; };
+template<class X> using Awares = typename DispatchingTraits<X>::AwareOfTypes;
+
+template<class X> class NumberMixin
+    : public AwareFieldMixin<X,NumberInterface>
+    , public AwareLatticeMixin<X,NumberInterface>
+    , public UnaryOperationsMixin<X,NumberInterface>
+    , public FieldAware<X,NumberInterface,Awares<X>>
+    , public LatticeAware<X,NumberInterface,Awares<X>>
+    , public NumberGetterMixin<X>
+{
+  public:
+    operator X const& () const { return static_cast<NumberWrapper<X>const&>(*this); }
+    operator X& () { return static_cast<NumberWrapper<X>&>(*this); }
+};
+
 
 template<class X> class NumberWrapper
-    : public virtual NumberInterface
-    , public X
+    : public X, public NumberMixin<X>
 {
+    inline static const X& _cast(const NumberWrapper<X>& x) { return static_cast<const X&>(x); }
     static_assert(Not<IsSame<X,Handle<NumberInterface>>>::value,"X must be a concrete number, not a handle");
-    typedef Paradigm<X> P;
-    static_assert(Not<IsSame<X,Number<P>>>::value,"X must be a concrete number, not a generic number");
-    friend class Number<P>;
+    static_assert(Not<IsSame<X,Number<Paradigm<X>>>>::value,"X must be a concrete number, not a generic number");
   public:
     NumberWrapper(const X& a) : X(a) { }
     NumberWrapper(X&& a) : X(std::forward<X>(a)) { }
-  private:
-    inline static const X& _cast(const NumberWrapper<X>& x) {
-        return static_cast<const X&>(x); }
-    inline static const X& _cast(const NumberInterface& x) {
-        const NumberWrapper<X>* p=dynamic_cast<const NumberWrapper<X>*>(&x);
-        if(p==nullptr) { std::cerr << "Number "<<x<<" of type " << x._class_name() << " does not have the same type as "<<class_name<X>()<<"\n"; throw std::bad_cast(); }
-        return static_cast<const X&>(*p); }
-    virtual NumberInterface* _copy() const { return new NumberWrapper<X>(static_cast<const X&>(*this)); }
-    virtual NumberInterface* _move() { return new NumberWrapper<X>(std::move(static_cast<X&>(*this))); }
-    virtual NumberInterface* _nul() const {
-        return _heap_move_number(0*_cast(*this)); }
-    virtual NumberInterface* _pos() const {
-        return _heap_move_number(pos(_cast(*this))); }
-    virtual NumberInterface* _sqr() const {
-        return _heap_move_number(sqr(_cast(*this))); }
-    virtual NumberInterface* _neg() const {
-        return _heap_move_number(neg(_cast(*this))); }
-    virtual NumberInterface* _rec() const {
-        return _heap_move_number(rec(_cast(*this))); }
-    virtual NumberInterface* _pow(Int n) const {
-        return _heap_move_number(pow(_cast(*this),n)); }
-    virtual NumberInterface* _add(NumberInterface const& y) const {
-        const NumberWrapper<X>* p=dynamic_cast<const NumberWrapper<X>*>(&y);
-        if(p==nullptr) { return y._apply(UnaryOperator<Add,X>(_cast(*this))); }
-        return _heap_move_number(add(_cast(*this),_cast(*p))); }
-    virtual NumberInterface* _sub(NumberInterface const& y) const {
-        const NumberWrapper<X>* p=dynamic_cast<const NumberWrapper<X>*>(&y);
-        if(p==nullptr) { return y._apply(UnaryOperator<Sub,X>(_cast(*this))); }
-        return _heap_move_number(sub(_cast(*this),_cast(y))); }
-    virtual NumberInterface* _mul(NumberInterface const& y) const {
-        const NumberWrapper<X>* p=dynamic_cast<const NumberWrapper<X>*>(&y);
-        if(p==nullptr) { return y._apply(UnaryOperator<Mul,X>(_cast(*this))); }
-        return _heap_move_number(mul(_cast(*this),_cast(y))); }
-    virtual NumberInterface* _div(NumberInterface const& y) const {
-        const NumberWrapper<X>* p=dynamic_cast<const NumberWrapper<X>*>(&y);
-        if(p==nullptr) { return y._apply(UnaryOperator<Div,X>(_cast(*this))); }
-        return _heap_move_number(div(_cast(*this),_cast(y))); }
-
-    virtual NumberInterface* _sqrt() const {
-        return _heap_move_number(sqrt(_cast(*this))); }
-    virtual NumberInterface* _exp() const {
-        return _heap_move_number(exp(_cast(*this))); }
-    virtual NumberInterface* _log() const {
-        return _heap_move_number(log(_cast(*this))); }
-    virtual NumberInterface* _sin() const {
-        return _heap_move_number(sin(_cast(*this))); }
-    virtual NumberInterface* _cos() const {
-        return _heap_move_number(cos(_cast(*this))); }
-    virtual NumberInterface* _tan() const {
-        return _heap_move_number(tan(_cast(*this))); }
-    virtual NumberInterface* _atan() const {
-        return _heap_move_number(atan(_cast(*this))); }
-    virtual NumberInterface* _abs() const {
-        return _heap_move_number(abs(_cast(*this))); }
-    virtual NumberInterface* _max(NumberInterface const& y) const {
-        const NumberWrapper<X>* p=&dynamic_cast<const NumberWrapper<X>&>(y);
-        return _heap_move_number(max(_cast(*this),_cast(*p))); }
-    virtual NumberInterface* _min(NumberInterface const& y) const {
-        const NumberWrapper<X>* p=&dynamic_cast<const NumberWrapper<X>&>(y);
-        return _heap_move_number(min(_cast(*this),_cast(*p))); }
-    virtual LogicalValue _equals(NumberInterface const& y) const {
-        if (this->_paradigm() == ParadigmCode::VALIDATED && y._paradigm() == ParadigmCode::VALIDATED) {
-            return LogicalValue(this->_get(BoundedTag(),Precision64()) == y._get(BoundedTag(),Precision64())); }
-        else { return LogicalValue(this->_get(ApproximateTag(),Precision64()) == y._get(ApproximateTag(),Precision64())); } }
-    virtual LogicalValue _less(NumberInterface const& y) const {
-        if (this->_paradigm() == ParadigmCode::VALIDATED && y._paradigm() == ParadigmCode::VALIDATED) {
-            return LogicalValue(this->_get(BoundedTag(),Precision64()) < y._get(BoundedTag(),Precision64())); }
-        else { return LogicalValue(this->_get(ApproximateTag(),Precision64()) < y._get(ApproximateTag(),Precision64())); } }
-    virtual Float64Ball _get(MetricTag,Precision64) const {
-        return this->_get_as<Float64Ball>(); }
-    virtual Float64Bounds _get(BoundedTag,Precision64) const {
-        return this->_get_as<Float64Bounds>(); }
-    virtual Float64UpperBound _get(UpperTag,Precision64) const {
-        return this->_get_as<Float64UpperBound>(); }
-    virtual Float64LowerBound _get(LowerTag,Precision64) const {
-        return this->_get_as<Float64LowerBound>(); }
-    virtual Float64Approximation _get(ApproximateTag,Precision64) const {
-        return this->_get_as<Float64Approximation>(); }
-    virtual FloatMPBall _get(MetricTag, PrecisionMP pr) const {
-        return this->_get_as<FloatMPBall>(pr); }
-    virtual FloatMPBounds _get(BoundedTag, PrecisionMP pr) const {
-        return this->_get_as<FloatMPBounds>(pr); }
-    virtual FloatMPUpperBound _get(UpperTag, PrecisionMP pr) const {
-        return this->_get_as<FloatMPUpperBound>(pr); }
-    virtual FloatMPLowerBound _get(LowerTag, PrecisionMP pr) const {
-        return this->_get_as<FloatMPLowerBound>(pr); }
-    virtual FloatMPApproximation _get(ApproximateTag, PrecisionMP pr) const {
-        return this->_get_as<FloatMPApproximation>(pr); }
-    virtual ParadigmCode _paradigm() const { return P::code(); }
-    virtual String _class_name() const { return class_name<X>(); }
-    virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<const X&>(*this); }
-    virtual OutputStream& write(OutputStream& os) const { return os << static_cast<const X&>(*this); }
-    virtual NumberInterface* _apply(const UnaryOperatorInterface& o) const { return o._compute(static_cast<const X&>(*this)); }
-
-  private:
-    template<class R, typename std::enable_if<std::is_constructible<R,X>::value,Int>::type = 0>
-        inline R _get_as() const { return static_cast<R>(static_cast<const X&>(*this)); }
-    template<class R, typename std::enable_if<!std::is_constructible<R,X>::value,Int>::type = 0>
-        inline R _get_as() const { std::cerr<<"Warning: Cannot convert " << _cast(*this) << " of type " << this->_class_name() << " to " << class_name<R>() << "\n"; throw ParadigmError(); }
-    template<class R, typename std::enable_if<std::is_constructible<R,X,PrecisionMP>::value,Int>::type = 0>
-        inline R _get_as(PrecisionMP pr) const { return R(static_cast<const X&>(*this),pr); }
-    template<class R, typename std::enable_if<!std::is_constructible<R,X,PrecisionMP>::value,Int>::type = 0>
-        inline R _get_as(PrecisionMP) const { std::cerr<<"Warning: Cannot convert " << _cast(*this) << " of type " << this->_class_name() << " to " << class_name<R>() << " with given precision\n"; throw ParadigmError(); }
 };
-
 
 
 } // namespace Ariadne

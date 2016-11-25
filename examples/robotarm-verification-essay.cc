@@ -243,8 +243,8 @@ Int main(Int argc, char** argv)
     //
 
     // Define the initial box
-    RealVariablesBox initial_box((x==0, vx==0, z==0, vz==0,
-        phi==pi/2, vphi==0, t==0, xc==0, zc==0));
+    RealVariablesBox initial_box({x==0, vx==0, z==0, vz==0,
+        phi==pi/2, vphi==0, t==0, xc==0, zc==0});
 
     cout << "initial_box=" << initial_box << endl;
 

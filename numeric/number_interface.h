@@ -35,6 +35,7 @@
 
 #include "number.decl.h"
 #include "float.decl.h"
+#include "operators.h"
 
 namespace Ariadne {
 
@@ -42,40 +43,53 @@ namespace Ariadne {
 
 class NumberInterface;
 class UnaryOperatorInterface;
+template<class... YS> struct Aware;
+template<class X> class NumberWrapper;
 
 
 
 class NumberInterface
-    : public virtual WritableInterface
+    : public std::enable_shared_from_this<NumberInterface>
+    , public virtual WritableInterface
     , public virtual ClonableInterface
 {
-    template<class N> friend class NumberWrapper;
+    template<class X> friend class NumberWrapper;
     friend class Handle<NumberInterface>;
   public:
     virtual ~NumberInterface() { }
   public:
     virtual NumberInterface* _copy() const = 0;
     virtual NumberInterface* _move() = 0;
-    virtual NumberInterface* _pos() const = 0;
-    virtual NumberInterface* _neg() const = 0;
-    virtual NumberInterface* _sqr() const = 0;
-    virtual NumberInterface* _rec() const = 0;
-    virtual NumberInterface* _pow(Int n) const = 0;
-    virtual NumberInterface* _add(NumberInterface const& y) const = 0;
-    virtual NumberInterface* _sub(NumberInterface const& y) const = 0;
-    virtual NumberInterface* _mul(NumberInterface const& y) const = 0;
-    virtual NumberInterface* _div(NumberInterface const& y) const = 0;
-    virtual NumberInterface* _sqrt() const = 0;
-    virtual NumberInterface* _exp() const = 0;
-    virtual NumberInterface* _log() const = 0;
-    virtual NumberInterface* _sin() const = 0;
-    virtual NumberInterface* _cos() const = 0;
-    virtual NumberInterface* _tan() const = 0;
-    virtual NumberInterface* _atan() const = 0;
-    virtual NumberInterface* _abs() const = 0;
-    virtual NumberInterface* _max(NumberInterface const& y) const = 0;
-    virtual NumberInterface* _min(NumberInterface const& y) const = 0;
-    virtual NumberInterface* _apply(UnaryOperatorInterface const& o) const = 0;
+
+    virtual NumberInterface* _apply(Add op, NumberInterface const* y) const = 0;
+    virtual NumberInterface* _apply(Sub op, NumberInterface const* y) const = 0;
+    virtual NumberInterface* _apply(Mul op, NumberInterface const* y) const = 0;
+    virtual NumberInterface* _apply(Div op, NumberInterface const* y) const = 0;
+    virtual NumberInterface* _rapply(Add op, NumberInterface const* y) const = 0;
+    virtual NumberInterface* _rapply(Sub op, NumberInterface const* y) const = 0;
+    virtual NumberInterface* _rapply(Mul op, NumberInterface const* y) const = 0;
+    virtual NumberInterface* _rapply(Div op, NumberInterface const* y) const = 0;
+
+    virtual NumberInterface* _apply(Pos op) const = 0;
+    virtual NumberInterface* _apply(Neg op) const = 0;
+    virtual NumberInterface* _apply(Sqr op) const = 0;
+    virtual NumberInterface* _apply(Rec op) const = 0;
+    virtual NumberInterface* _apply(Pow op, Int n) const = 0;
+    virtual NumberInterface* _apply(Sqrt op) const = 0;
+    virtual NumberInterface* _apply(Exp op) const = 0;
+    virtual NumberInterface* _apply(Log op) const = 0;
+    virtual NumberInterface* _apply(Sin op) const = 0;
+    virtual NumberInterface* _apply(Cos op) const = 0;
+    virtual NumberInterface* _apply(Tan op) const = 0;
+    virtual NumberInterface* _apply(Atan op) const = 0;
+
+    virtual NumberInterface* _apply(Abs op) const = 0;
+    virtual NumberInterface* _apply(Max op, NumberInterface const* y) const = 0;
+    virtual NumberInterface* _apply(Min op, NumberInterface const* y) const = 0;
+    virtual NumberInterface* _rapply(Max op, NumberInterface const* y) const = 0;
+    virtual NumberInterface* _rapply(Min op, NumberInterface const* y) const = 0;
+
+    virtual Rational _get_q() const = 0;
 
     virtual Float64Ball _get(MetricTag, Precision64) const = 0;
     virtual Float64Bounds _get(BoundedTag, Precision64) const = 0;

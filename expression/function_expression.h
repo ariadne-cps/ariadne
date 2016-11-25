@@ -53,7 +53,7 @@ inline BoxDomain preimage(Projection const& prj, BoxDomain const& bx) {
     BoxDomain dbx(prj.argument_size(),IntervalDomain(-infty,+infty));
     for(SizeType i=0; i!=prj.result_size(); ++i) {
         IntervalDomain& dbxj=dbx[prj.index(i)]; dbxj=intersection(dbxj,bx[i]); }
-    return std::move(dbx);
+    return dbx;
 }
 
 VariableIntervalDomain _make_domain(RealVariable const& arg, IntervalDomain const& dom) {
@@ -63,7 +63,7 @@ VariableIntervalDomain _make_domain(RealVariable const& arg, IntervalDomain cons
 VariablesBoxDomain _make_domain(Vector<RealVariable> const& args, BoxDomain const& dom) {
     Map<RealVariable,Float64ExactInterval> domain;
     for(SizeType i=0; i!=args.size(); ++i) { domain[args[i]]=dom[i]; }
-    return std::move(domain);
+    return domain;
 }
 
 template<class P,class C> class FunctionExpression<P,BoxDomain,C> {

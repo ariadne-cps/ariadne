@@ -44,6 +44,7 @@
 #include "numeric/operators.h"
 #include "expression/valuation.h"
 #include "expression/variables.h"
+//#include "expression/operations.h"
 
 namespace Ariadne {
 
@@ -58,7 +59,7 @@ template<class T> class Space;
 template<class T> class Expression;
 template<class LHS,class RHS> class Assignment;
 
-template<class T, class V> class Valuation;
+template<class T, class X> class Valuation;
 typedef Valuation<String,String> StringValuation;
 typedef Valuation<Integer,Integer> IntegerValuation;
 class DiscreteValuation;
@@ -71,10 +72,13 @@ template<class X> class Algebra;
 
 typedef Expression<Boolean> DiscretePredicate;
 typedef Expression<Kleenean> ContinuousPredicate;
+typedef Expression<Boolean> BooleanExpression;
+typedef Expression<Kleenean> KleeneanExpression;
 typedef Expression<String> StringExpression;
 typedef Expression<Integer> IntegerExpression;
 typedef Expression<Real> RealExpression;
 
+template<class T> struct DeclareExpressionOperations;
 
 
 template<class X> struct ExpressionNode;
@@ -92,7 +96,9 @@ template<class X> struct ExpressionNode;
 //!
 //! \sa Variable \sa Assignment
 template<class T>
-class Expression {
+class Expression
+    : public DeclareExpressionOperations<T>
+{
     typedef SharedPointer<const ExpressionNode<T>> Pointer;
   public:
     typedef Real NumericType;
@@ -100,7 +106,7 @@ class Expression {
     typedef Constant<T> ConstantType;
     typedef Variable<T> VariableType;
   public:
-    explicit Expression(SharedPointer<const ExpressionNode<T>> eptr) : _root(eptr) { }
+    explicit Expression(SharedPointer<const ExpressionNode<T>> const& eptr) : _root(eptr) { }
   public:
     //! \brief Default expression is a constant with value \c 0.
     Expression();
@@ -192,159 +198,31 @@ Expression<Real> indicator(Expression<Kleenean> p, Sign sign=POSITIVE);
 template<class T, class Y> Expression<T> substitute(const Expression<T>& e, const Variable<Y>& v, const Y& c);
 
 //! \brief Substitute all occurrences of variable \a v of type \c Y with expression value \a se.
-template<class T, class Y> Expression<T> substitute(const Expression<T>& e, const Variable<Y>& v, const Expression<Y>& se);
-
 template<class T, class Y> Expression<T> substitute(const Expression<T>& e, const List< Assignment< Variable<Y>,Expression<Y> > >& a);
+template<class T, class Y> Vector<Expression<T>> substitute(const Vector<Expression<T>>& e, const List< Assignment< Variable<Y>,Expression<Y> > >& a);
 
 //! \brief Simplify the expression \a e.
 Expression<Real> derivative(const Expression<Real>& e, Variable<Real> v);
 
 
-//! \brief Make a function on a Euclidean domain given an ordered list including all argument variables. // DEPRECATED
-ScalarFunction<EffectiveTag> make_function(const Expression<Real>& e, const Space<Real>& s);
+//! \brief Make a formula in terms of numbered coordinates from an expression in named variables.
+Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Space<Real>& spc);
+Vector<Formula<EffectiveNumber>> make_formula(const Vector<Expression<Real>>& e, const Space<Real> spc);
+
 //! \brief Make a function on the real line given an expression in a single argument variable.
 ScalarUnivariateFunction<EffectiveTag> make_function(const Variable<Real>& v, const Expression<Real>& e);
 //! \brief Make a function on a Euclidean domain given an ordered list including all argument variables.
 ScalarFunction<EffectiveTag> make_function(const Space<Real>& s, const Expression<Real>& e);
 //! \brief Make a function on a Euclidean domain given an ordered list including all argument variables.
 VectorFunction<EffectiveTag> make_function(const Space<Real>& s, const Vector<Expression<Real>>& e);
-//! \brief Make a function on coordinates given a mapping from variable names to indices.
-Formula<Real> formula(const Expression<Real>& e, const Map<Identifier,Nat>& v);
-Formula<Real> formula(const Expression<Real>& e, const List<Variable<Real>>& vars);
-Formula<Real> formula(const Expression<Real>& res, const List<Assignment<Variable<Real>,Expression<Real>>>& aux, const Space<Real> spc);
-List< Formula<Real> > formula(const List<Expression<Real>>& res, const List<Assignment<Variable<Real>,Expression<Real>>>& aux, const Space<Real> spc);
+
+//! \brief Make a function on a Euclidean domain given an ordered list including all argument variables. // DEPRECATED
+ScalarFunction<EffectiveTag> make_function(const Expression<Real>& e, const Space<Real>& s);
 
 //@}
 
 
-//@{
-//! \name Methods for building expressions
-//! \related Expression
 
-//! \related Expression \brief Logical disjunction.
-Expression<Boolean> operator&&(Expression<Boolean> e1, Expression<Boolean> e2);
-//! \related Expression \brief Logical conjunction.
-Expression<Boolean> operator||(Expression<Boolean> e1, Expression<Boolean> e2);
-//! \related Expression \brief Logical negation.
-Expression<Boolean> operator!(Expression<Boolean> e);
-
-//! \related Expression \brief Fuzzy logical disjunction.
-Expression<Kleenean> operator&&(Expression<Kleenean> e1, Expression<Kleenean> e2);
-//! \related Expression \brief Fuzzy logical conjunction.
-Expression<Kleenean> operator||(Expression<Kleenean> e1, Expression<Kleenean> e2);
-//! \related Expression \brief Fuzzy logical negation.
-Expression<Kleenean> operator!(Expression<Kleenean> e);
-
-//! \related Expression \brief %String equality.
-Expression<Boolean> operator==(Variable<String> v1, const String& s2);
-//! \related Expression \brief %String inequality.
-Expression<Boolean> operator!=(Variable<String> v1, const String& s2);
-
-
-//! \related Expression \brief %Integer equality predicate.
-Expression<Boolean> operator==(Expression<Integer> e1, Expression<Integer> e2);
-//! \related Expression \brief %Integer inequality predicate.
-Expression<Boolean> operator!=(Expression<Integer> e1, Expression<Integer> e2);
-//! \related Expression \brief %Integer comparison predicate (greater or equal).
-Expression<Boolean> operator>=(Expression<Integer> e1, Expression<Integer> e2);
-//! \related Expression \brief %Integer comparison (less or equal)..
-Expression<Boolean> operator<=(Expression<Integer> e1, Expression<Integer> e2);
-//! \related Expression \brief %Integer comparison (greater).
-Expression<Boolean> operator> (Expression<Integer> e1, Expression<Integer> e2);
-//! \related Expression \brief %Integer comparison (less).
-Expression<Boolean> operator< (Expression<Integer> e1, Expression<Integer> e2);
-
-//! \related Expression \brief %Integer unary plus expression (identity).
-Expression<Integer> operator+(Expression<Integer> e);
-//! \related Expression \brief %Integer unary minus expression.
-Expression<Integer> operator-(Expression<Integer> e);
-//! \related Expression \brief %Integer addition expression.
-Expression<Integer> operator+(Expression<Integer> e1, Expression<Integer> e2);
-//! \related Expression \brief %Integer subtraction expression.
-Expression<Integer> operator-(Expression<Integer> e1, Expression<Integer> e2);
-//! \related Expression \brief %Integer multiplication expression.
-Expression<Integer> operator*(Expression<Integer> e1, Expression<Integer> e2);
-
-
-
-//! \related Expression \brief Positivity test.
-//! Returns \c indeterminate if the value cannot be distinguished from zero.
-Expression<Kleenean> sgn(Expression<Real> e);
-//! \related Expression \brief Fuzzy inequality comparison predicate (less) of real expressions.
-Expression<Kleenean> operator<=(Expression<Real> e1, Expression<Real> e2);
-//! \related Expression \brief Fuzzy inequality comparison predicate (greater) of real expressions.
-Expression<Kleenean> operator>=(Expression<Real> e1, Expression<Real> e2);
-//! \related Expression \brief Fuzzy inequality comparison predicate (less) of real expressions.
-Expression<Kleenean> operator< (Expression<Real> e1, Expression<Real> e2);
-//! \related Expression \brief Fuzzy inequality comparison predicate (greater) of real expressions.
-Expression<Kleenean> operator> (Expression<Real> e1, Expression<Real> e2);
-
-//! \related Expression \brief %Real unary plus expression.
-Expression<Real> operator+(Expression<Real> e);
-//! \related Expression \brief %Real unary minus expression.
-Expression<Real> operator-(Expression<Real> e);
-//! \related Expression \brief %Real addition expression.
-Expression<Real> operator+(Expression<Real> e1, Expression<Real> e2);
-//! \related Expression \brief %Real subtraction expression.
-Expression<Real> operator-(Expression<Real> e1, Expression<Real> e2);
-//! \related Expression \brief %Real multiplication expression.
-Expression<Real> operator*(Expression<Real> e1, Expression<Real> e2);
-//! \related Expression \brief %Real division expression.
-Expression<Real> operator/(Expression<Real> e1, Expression<Real> e2);
-
-//! \related Expression \brief %Real integer power expression.
-Expression<Real> pow(Expression<Real> e, Int n);
-
-//! \related Expression \brief %Real negation expression.
-//! Equivalent to -\a e.
-Expression<Real> neg(Expression<Real> e);
-//! \related Expression \brief %Real reciprocal expression.
-//! Equivalent to 1/\a e.
-Expression<Real> rec(Expression<Real> e);
-//! \related Expression \brief %Real square expression.
-Expression<Real> sqr(Expression<Real> e);
-//! \related Expression \brief %Real square root expression.
-Expression<Real> sqrt(Expression<Real> e);
-//! \related Expression \brief %Real exponential expression.
-Expression<Real> exp(Expression<Real> e);
-//! \related Expression \brief %Real natural logarithm expression.
-Expression<Real> log(Expression<Real> e);
-//! \related Expression \brief %Real sine expression.
-Expression<Real> sin(Expression<Real> e);
-//! \related Expression \brief %Real cosine expression.
-Expression<Real> cos(Expression<Real> e);
-//! \related Expression \brief %Real tangent expression.
-Expression<Real> tan(Expression<Real> e);
-//! \related Expression \brief %Real arctangent expression.
-Expression<Real> atan(Expression<Real> e);
-
-//! \related Expression \brief Real maximum expression.
-Expression<Real> max(Expression<Real> e1, Expression<Real> e2);
-//! \related Expression \brief %Real minimum expression.
-Expression<Real> min(Expression<Real> e1, Expression<Real> e2);
-//! \related Expression \brief %Real absolute value expression.
-Expression<Real> abs(Expression<Real> e);
-
-Expression<Real> operator+(Expression<Real> e, Real c);
-Expression<Real> operator-(Expression<Real> e, Real c);
-Expression<Real> operator*(Expression<Real> e, Real c);
-Expression<Real> operator/(Expression<Real> e, Real c);
-Expression<Real> operator+(Real c, Expression<Real> e);
-Expression<Real> operator-(Real c, Expression<Real> e);
-Expression<Real> operator*(Real c, Expression<Real> e);
-Expression<Real> operator/(Real c, Expression<Real> e);
-
-Expression<Kleenean> operator<=(Expression<Real> e, Real c);
-Expression<Kleenean> operator< (Expression<Real> e, Real c);
-Expression<Kleenean> operator>=(Expression<Real> e, Real c);
-Expression<Kleenean> operator> (Expression<Real> e, Real c);
-Expression<Kleenean> operator<=(Real c, Expression<Real> e);
-Expression<Kleenean> operator< (Real c, Expression<Real> e);
-Expression<Kleenean> operator>=(Real c, Expression<Real> e);
-Expression<Kleenean> operator> (Real c, Expression<Real> e);
-
-
-//@}
 
 } // namespace Ariadne
 

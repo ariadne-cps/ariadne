@@ -86,9 +86,14 @@ struct DontCare { template<class T> DontCare(T); };
 template<class R> struct Return { };
 struct Any { };
 
-template<class T> struct IsDefined : IsConvertible<T,DontCare> { };
-template<class T=void> struct IsSomething : True { };
-template<> struct IsSomething<void> : False { };
+template<template<class...>class F, class... T> False _has(...);
+template<template<class>class F, class T, class = F<T>> True _has(int);
+template<template<class,class>class F, class T1, class T2, class = F<T1,T2>> True _has(int,int);
+template<template<class,class,class>class F, class T1, class T2, class T3, class = F<T1,T2,T3>> True _has(int,int,int);
+template<template<class...>class F, class... T> struct Has : decltype(_has<F,T...>()) { };
+template<template<class>class F, class T> struct Has<F,T> : decltype(_has<F,T>(1)) { };
+template<template<class,class>class F, class T1, class T2> struct Has<F,T1,T2> : decltype(_has<F,T1,T2>(1,2)) { };
+template<template<class,class,class>class F, class T1, class T2, class T3> struct Has<F,T1,T2,T3> : decltype(_has<F,T1,T2,T3>(1,2,3)) { };
 
 template<class T> struct Self { typedef T Type; };
 template<class T> using SelfType = typename Self<T>::Type;

@@ -47,7 +47,7 @@ class TestMultiIndex
     }
 
     Void test_constructor() {
-        Int a1[3]={2,0,3};
+        DegreeType a1[3]={2,0,3};
         MultiIndex i1(3u,a1);
         ARIADNE_TEST_EQUAL((Int)i1.number_of_variables(),3);
         ARIADNE_TEST_EQUAL((Int)i1.degree(),5);
@@ -55,7 +55,7 @@ class TestMultiIndex
         ARIADNE_TEST_EQUAL((Int)i1[1],0);
         ARIADNE_TEST_EQUAL((Int)i1[2],3);
 
-        Int a2[5]={2,0,3,0,5};
+        DegreeType a2[5]={2,0,3,0,5};
         MultiIndex i2(5,a2);
         ARIADNE_TEST_EQUAL((Int)i2.number_of_variables(),5);
         ARIADNE_TEST_EQUAL((Int)i2.degree(),10);
@@ -70,9 +70,9 @@ class TestMultiIndex
     }
 
     Void test_comparison() {
-        Int a1[3]={2,0,3};
-        Int a2[3]={1,0,4};
-        Int a3[3]={3,0,1};
+        DegreeType a1[3]={2,0,3};
+        DegreeType a2[3]={1,0,4};
+        DegreeType a3[3]={3,0,1};
         ARIADNE_TEST_CONSTRUCT(MultiIndex,i1,(3,a1));
         ARIADNE_TEST_CONSTRUCT(MultiIndex,i2,(3,a2));
         ARIADNE_TEST_CONSTRUCT(MultiIndex,i3,(3,a3));
@@ -93,13 +93,13 @@ class TestMultiIndex
     }
 
     Void test_addition() {
-        Int a1[3]={2,0,3}, a2[3]={1,1,0}, a3[3]={3,1,3};
+        DegreeType a1[3]={2,0,3}, a2[3]={1,1,0}, a3[3]={3,1,3};
         ARIADNE_TEST_EQUAL(MultiIndex(3,a1)+MultiIndex(3,a2),MultiIndex(3,a3));
     }
 
     Void test_increment() {
         MultiIndex a(4);
-        Int n=0;
+        SizeType n=0;
         while(a.degree()<=5) {
             MultiIndex b=a; ++a; ++n;
             ARIADNE_TEST_BINARY_PREDICATE(graded_less,b,a);

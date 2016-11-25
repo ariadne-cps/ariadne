@@ -29,10 +29,11 @@ namespace Ariadne {
 template class Series<Float64Bounds>;
 
 template class TaylorModel<ValidatedTag,Float64>;
-template int instantiate_transcendental<TaylorModel<ValidatedTag,Float64>>();
-template int instantiate_ordered<TaylorModel<ValidatedTag,Float64>>();
+template class AlgebraOperations<TaylorModel<ValidatedTag,Float64>>;
+template class NormedAlgebraOperations<TaylorModel<ValidatedTag,Float64>>;
 
 template class TaylorModel<ApproximateTag,Float64>;
-template int instantiate_transcendental<TaylorModel<ApproximateTag,Float64>>();
+template class AlgebraOperations<TaylorModel<ApproximateTag,Float64>>;
+template class NormedAlgebraOperations<TaylorModel<ApproximateTag,Float64>>;
 
 } // namespace Ariadne

@@ -10,40 +10,46 @@ endif()
 
 # enable dashboard scripting
 enable_testing()
-include (CTest)
+include(CTest)
 
-set (Ariadne_VERSION_MAJOR 0)
-set (Ariadne_VERSION_MINOR 5)
+set(Ariadne_VERSION_MAJOR 0)
+set(Ariadne_VERSION_MINOR 5)
+
+if (CMAKE_CXX_COMPILER_ID MATCHES "Intel")
+  message(WARNING "Intel compiler not supported.")
+elseif (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+  message(WARNING "Microsoft compiler not supported.")
+endif()
 
 set(BUILD_SHARED_LIBS ON)
 set(CMAKE_MACOSX_RPATH 1)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
-set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1z -O1")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1z -O1")
 
 include(cotire)
 
-include (CheckTypeSize)
-include (CheckIncludeFile)
-include (CheckIncludeFileCXX)
-include (CheckLibraryExists)
+include(CheckTypeSize)
+include(CheckIncludeFile)
+include(CheckIncludeFileCXX)
+include(CheckLibraryExists)
 
 check_type_size("int" SIZEOF_INT)
 
-check_include_file (gmp.h HAVE_GMP_H)
-check_include_file_cxx (gmpxx.h HAVE_GMPXX_H)
+check_include_file(gmp.h HAVE_GMP_H)
+check_include_file_cxx(gmpxx.h HAVE_GMPXX_H)
 if(NOT HAVE_GMPXX_H)
     message(WARNING "Unable to find gmpxx.h.")
 endif()
 
-check_include_file (mpfr.h HAVE_MPFR_H)
+check_include_file(mpfr.h HAVE_MPFR_H)
 
-check_include_file (cairo/cairo.h HAVE_CAIRO_H)
+check_include_file(cairo/cairo.h HAVE_CAIRO_H)
 if(NOT HAVE_CAIRO_H)
     message(WARNING "Unable to find cairo.h.")
 endif()
 
-set (Boost_REQUIRED_VERSION 1.36.0)
+set(Boost_REQUIRED_VERSION 1.36.0)
 find_package(Boost ${Boost_REQUIRED_VERSION})
 
 IF(Boost_FOUND)
@@ -72,7 +78,9 @@ add_definitions(-iquote${PROJECT_SOURCE_DIR})
 #include_directories(${PROJECT_SOURCE_DIR})
 
 #Non-portable fix to avoid user header directories being searched for by system headers
-#add_definitions(-Wno-non-template-friend)
+IF(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+  add_definitions(-Wno-non-template-friend)
+ENDIF()
 
 add_subdirectory(utility)
 add_subdirectory(numeric)
@@ -86,9 +94,9 @@ add_subdirectory(output)
 add_subdirectory(hybrid)
 
 add_subdirectory(test)
-#add_subdirectory(wrap)
+add_subdirectory(wrap)
 add_subdirectory(examples)
-#add_subdirectory(python)
+add_subdirectory(python)
 
 add_library(ariadne SHARED
     $<TARGET_OBJECTS:ariadne-numeric>
@@ -111,15 +119,14 @@ target_link_libraries(ariadne boost_system)
 target_link_libraries(ariadne cairo)
 target_link_libraries (ariadne boost_serialization)
 
-#add_library(pyariadne $<TARGET_OBJECTS:pyariadne-src>)
-#set_target_properties(pyariadne PROPERTIES PREFIX "" OUTPUT_NAME "ariadne")
-#target_link_libraries (pyariadne ariadne boost_python)
+add_library(pyariadne $<TARGET_OBJECTS:pyariadne-src>)
+set_target_properties(pyariadne PROPERTIES PREFIX "" OUTPUT_NAME "ariadne")
+target_link_libraries (pyariadne ariadne boost_python)
 
+add_library(pynumeric $<TARGET_OBJECTS:pynumeric-src>)
+set_target_properties(pynumeric PROPERTIES PREFIX "" OUTPUT_NAME "numeric")
+target_link_libraries (pynumeric ariadne boost_python)
 
-#add_library(pynumeric $<TARGET_OBJECTS:pynumeric-src>)
-#set_target_properties(pynumeric PROPERTIES PREFIX "" OUTPUT_NAME "numeric")
-#target_link_libraries (pynumeric ariadne boost_python)
-
-#add_library(pyalgebra $<TARGET_OBJECTS:pyalgebra-src>)
-#set_target_properties(pyalgebra PROPERTIES PREFIX "" OUTPUT_NAME "algebra")
-#target_link_libraries (pyalgebra ariadne boost_python)
+add_library(pyalgebra $<TARGET_OBJECTS:pyalgebra-src>)
+set_target_properties(pyalgebra PROPERTIES PREFIX "" OUTPUT_NAME "algebra")
+target_link_libraries (pyalgebra ariadne boost_python)

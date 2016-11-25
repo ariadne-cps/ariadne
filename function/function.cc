@@ -1179,6 +1179,34 @@ ValidatedVectorFunction join(ValidatedVectorFunction const& f1, const ValidatedS
     return r;
 }
 
+ValidatedVectorFunction join(ValidatedScalarFunction const& f1, const ValidatedVectorFunction& f2) {
+    ScalarTaylorFunction const*
+        f1p=dynamic_cast<ScalarTaylorFunction const*>(f1.raw_pointer());
+    VectorTaylorFunction const*
+        f2p=dynamic_cast<VectorTaylorFunction const*>(f2.raw_pointer());
+    if(f1p && f2p) {
+        return join(*f1p,*f2p);
+    }
+    VectorOfScalarFunction<ValidatedTag> r(f1.result_size()+1u,f1.domain());
+    r[0u]=f1;
+    for(SizeType i=0; i!=f1.result_size(); ++i) { r[i+1]=f2[i]; }
+    return r;
+}
+
+ValidatedVectorFunction join(ValidatedScalarFunction const& f1, const ValidatedScalarFunction& f2) {
+    ScalarTaylorFunction const*
+        f1p=dynamic_cast<ScalarTaylorFunction const*>(f1.raw_pointer());
+    ValidatedScalarFunction const*
+        f2p=dynamic_cast<ValidatedScalarFunction const*>(f2.raw_pointer());
+    if(f1p && f2p) {
+        return join(*f1p,*f2p);
+    }
+    VectorOfScalarFunction<ValidatedTag> r(2u,f1.domain());
+    r[0u]=f1;
+    r[1u]=f2;
+    return r;
+}
+
 
 UpperIntervalType evaluate_range(ScalarFunction<ValidatedTag>const& f, const Vector<UpperIntervalType>& x) {
     return static_cast<UpperIntervalType>(f(reinterpret_cast<Vector<ValidatedNumericType>const&>(x))); }

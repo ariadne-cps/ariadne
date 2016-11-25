@@ -56,7 +56,29 @@ using namespace boost::python;
 
 namespace Ariadne {
 
+typedef ScalarFunction<EffectiveTag> ESF;
+ESF pow(ESF const&, Int);
+ESF pos(ESF const&); ESF neg(ESF const&); ESF sqr(ESF const&); ESF rec(ESF const&);
+ESF sqrt(ESF const&); ESF exp(ESF const&); ESF log(ESF const&); ESF atan(ESF const&);
+ESF sin(ESF const&); ESF cos(ESF const&); ESF tan(ESF const&);
+
+typedef ScalarFunction<ValidatedTag> VSF;
+VSF pow(VSF const&, Int);
+VSF pos(VSF const&); VSF neg(VSF const&); VSF sqr(VSF const&); VSF rec(VSF const&);
+VSF sqrt(VSF const&); VSF exp(VSF const&); VSF log(VSF const&); VSF atan(VSF const&);
+VSF sin(VSF const&); VSF cos(VSF const&); VSF tan(VSF const&);
+
+/*
 RealExpression evaluate(EffectiveScalarFunction const& f, Vector<RealVariable> const& vars);
+Float64Approximation evaluate(const ScalarFunction<ValidatedTag>&, const Vector<Float64Approximation>&);
+Float64Approximation evaluate(const ScalarFunction<EffectiveTag>&, const Vector<Float64Approximation>&);
+Float64Bounds evaluate(const ScalarFunction<ValidatedTag>&, const Vector<Float64Bounds>&);
+Float64Bounds evaluate(const ScalarFunction<EffectiveTag>&, const Vector<Float64Bounds>&);
+Vector<Float64Approximation> evaluate(const VectorFunction<ValidatedTag>&, const Vector<Float64Approximation>&);
+Vector<Float64Approximation> evaluate(const VectorFunction<EffectiveTag>&, const Vector<Float64Approximation>&);
+Vector<Float64Bounds> evaluate(const VectorFunction<ValidatedTag>&, const Vector<Float64Bounds>&);
+Vector<Float64Bounds> evaluate(const VectorFunction<EffectiveTag>&, const Vector<Float64Bounds>&);
+*/
 
 template<>
 struct from_python< MultiIndex >
@@ -289,12 +311,6 @@ Void export_univariate_function()
 
 template<class P> Void export_scalar_function()
 {
-    typedef ScalarFunction<P> SF;
-    SF pow(SF const&, Int);
-    SF pos(SF const&); SF neg(SF const&); SF sqr(SF const&); SF rec(SF const&);
-    SF sqrt(SF const&); SF exp(SF const&); SF log(SF const&); SF atan(SF const&);
-    SF sin(SF const&); SF cos(SF const&); SF tan(SF const&);
-
     class_<ScalarFunction<P>>
         scalar_function_class((class_name<P>()+"ScalarFunction").c_str(), init<ScalarFunction<P>>());
     scalar_function_class.def(init<SizeType>());
@@ -347,8 +363,8 @@ template<class P> Void export_scalar_function()
     def("cos", (ScalarFunction<P>(*)(const ScalarFunction<P>&)) &cos);
     def("tan", (ScalarFunction<P>(*)(const ScalarFunction<P>&)) &tan);
 
-    def("evaluate", (Float64Approximation(*)(const ScalarFunction<P>&,const Vector<Float64Approximation>&)) &evaluate);
-    def("evaluate", (Float64Bounds(*)(const ScalarFunction<P>&,const Vector<Float64Bounds>&)) &evaluate);
+    def("evaluate", (Float64Approximation(*)(const ScalarFunction<P>&,const Vector<Float64Approximation>&)) &evaluate<P,IntervalDomain,Float64Approximation>);
+    def("evaluate", (Float64Bounds(*)(const ScalarFunction<P>&,const Vector<Float64Bounds>&)) &evaluate<P,IntervalDomain,Float64Bounds>);
 
     def("derivative", (ScalarFunction<P>(ScalarFunction<P>::*)(SizeType)const) &ScalarFunction<P>::derivative);
 
@@ -383,8 +399,8 @@ template<class P> Void export_vector_function()
     vector_function_class.def("identity", (VectorFunction<P>(*)(SizeType)) &VectorFunction<P>::identity);
     vector_function_class.staticmethod("identity");
 
-    def("evaluate", (Vector<Float64Approximation>(*)(const VectorFunction<P>&,const Vector<Float64Approximation>&)) &evaluate);
-    def("evaluate", (Vector<Float64Bounds>(*)(const VectorFunction<P>&,const Vector<Float64Bounds>&)) &evaluate);
+    def("evaluate", (Vector<Float64Approximation>(*)(const VectorFunction<P>&,const Vector<Float64Approximation>&)) &evaluate<P,BoxDomain,Float64Approximation>);
+    def("evaluate", (Vector<Float64Bounds>(*)(const VectorFunction<P>&,const Vector<Float64Bounds>&)) &evaluate<P,BoxDomain,Float64Bounds>);
 
     def("join", (VectorFunction<P>(*)(const ScalarFunction<P>&, const ScalarFunction<P>&)) &join);
     def("join", (VectorFunction<P>(*)(const VectorFunction<P>&, const ScalarFunction<P>&)) &join);

@@ -223,8 +223,6 @@ class Function
         return this->reference()._evaluate(x); }
     template<class X> auto evaluate(const Argument<X>& x) const -> decltype(this->reference()._evaluate(x)) {
         return this->reference()._evaluate(x); }
-    template<class X> friend auto evaluate(const Function<P,D,C>& f, const Argument<X>& x) -> decltype(f(x)) {
-        return f(x); }
 
     friend VectorFunction<P,D> operator*(ScalarFunction<P,D> const&, Vector<Y> const&);
 
@@ -248,16 +246,12 @@ template<class P, class D, class C> inline OutputStream&
 operator<<(OutputStream& os, const Function<P,D,C>& f) {
     return f.write(os); }
 
-template<class P, class D, class C, class X> inline decltype(auto)
-evaluate(const Function<P,D,C>& f, const ElementType<D,X>& x) {
+template<class P, class C, class X> inline decltype(auto)
+evaluate(const Function<P,IntervalDomain,C>& f, const Scalar<X>& x) {
     return f(x); }
 
-template<class P, class D, class C, class X> inline decltype(auto)
-evaluate(const Function<P,D,C>& f, const Scalar<X>& x) {
-    return f(x); }
-
-template<class P, class D, class C, class X> inline decltype(auto)
-evaluate(const Function<P,D,C>& f, const Vector<X>& x) {
+template<class P, class C, class X> inline decltype(auto)
+evaluate(const Function<P,BoxDomain,C>& f, const Vector<X>& x) {
     return f(x); }
 
 

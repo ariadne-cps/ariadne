@@ -73,7 +73,11 @@ template<> struct IsNumericType<Integer>;
 template<> struct IsNumericType<Rational>;
 template<> struct IsNumericType<Real>;
 
-template<class X> struct IsGenericNumericType : IsConvertible<X,Real> { };
+template<class X> struct IsGenericNumericType : IsConvertible<X,Rational> { };
+template<> struct IsGenericNumericType<ExactDouble> : True { };
+template<> struct IsGenericNumericType<Integer> : True { };
+template<> struct IsGenericNumericType<Dyadic> : True { };
+template<> struct IsGenericNumericType<Rational> : True { };
 template<> struct IsGenericNumericType<Real> : True { };
 template<> struct IsGenericNumericType<Dbl> : True { };
 template<class P> struct IsGenericNumericType<Number<P>> : True { };

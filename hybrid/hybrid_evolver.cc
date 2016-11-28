@@ -626,7 +626,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
             ValidatedScalarFunctionModel crossing_time;
             try {
                 crossing_time=solver.implicit(compose(guard,flow),flow_spacial_domain,flow_time_domain);
-                if(decide(crossing_time.error()>1e-8)) { ARIADNE_LOG(2,event<<": crossing_time: error="<<crossing_time.error()<<", range="<<crossing_time.range()<<"\n"); }
+                if(crossing_time.error().raw()>1e-8) { ARIADNE_LOG(2,event<<": crossing_time: error="<<crossing_time.error()<<", range="<<crossing_time.range()<<"\n"); }
                 crossings[event]=CrossingData(CrossingKind::TRANSVERSE,crossing_time);
                 ARIADNE_LOG(8,"crossing_time="<<crossing_time<<"\n");
             }
@@ -705,7 +705,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                 // time is $(g(\phi(x_0,t))<=0 /\ t<=\mu(x_0)) \/ g(\phi(x_0,\mu(x_0)))<=0$
                 try {
                     ValidatedScalarFunctionModel critical_time=solver.implicit(compose(derivative,flow),flow_spacial_domain,flow_time_domain);
-                    if(decide(critical_time.error()>1e-8)) { ARIADNE_LOG(2,event<<": critical_time: error="<<critical_time.error()<<", range="<<critical_time.range()<<"\n"); }
+                    if(critical_time.error().raw()>1e-8) { ARIADNE_LOG(2,event<<": critical_time: error="<<critical_time.error()<<", range="<<critical_time.range()<<"\n"); }
                     crossings[event]=CrossingData(CrossingKind::GRAZING);
                     crossings[event].critical_time=critical_time;
                 }

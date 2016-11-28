@@ -985,6 +985,65 @@ template<class X, class QX=X, class R=X, class QR=QX> class ProvideDirectedSemiF
 
 
 
+template<class Y> struct IsGenericNumericType;
+template<class Y> using IsGenericNumber = IsGenericNumericType<Y>;
+template<class X> struct DefineConcreteGenericOperators {
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator+(X const& x, Y const& y) { return x+factory(x).create(y); }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator-(X const& x, Y const& y) { return x-factory(x).create(y); }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator*(X const& x, Y const& y) { return x*factory(x).create(y); }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator/(X const& x, Y const& y) { return x/factory(x).create(y); }
+
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator+(Y const& y, X const& x) { return factory(x).create(y)+x; }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator-(Y const& y, X const& x) { return factory(x).create(y)-x; }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator*(Y const& y, X const& x) { return factory(x).create(y)*x; }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator/(Y const& y, X const& x) { return factory(x).create(y)/x; }
+
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator+=(X& x, Y const& y) { return x+=factory(x).create(y); }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator-=(X& x, Y const& y) { return x-=factory(x).create(y); }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator*=(X& x, Y const& y) { return x*=factory(x).create(y); }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator/=(X& x, Y const& y) { return x/=factory(x).create(y); }
+
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator==(X const& x, Y const& y) { return x==factory(x).create(y); }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator!=(X const& x, Y const& y) { return x!=factory(x).create(y); }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator<=(X const& x, Y const& y) { return x<=factory(x).create(y); }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator>=(X const& x, Y const& y) { return x>=factory(x).create(y); }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator< (X const& x, Y const& y) { return x< factory(x).create(y); }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator> (X const& x, Y const& y) { return x> factory(x).create(y); }
+
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator==(Y const& y, X const& x) { return factory(x).create(y)==x; }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator!=(Y const& y, X const& x) { return factory(x).create(y)!=x; }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator<=(Y const& y, X const& x) { return factory(x).create(y)<=x; }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator>=(Y const& y, X const& x) { return factory(x).create(y)>=x; }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator< (Y const& y, X const& x) { return factory(x).create(y)< x; }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator> (Y const& y, X const& x) { return factory(x).create(y)> x; }
+};
+
+
+
 
 
 

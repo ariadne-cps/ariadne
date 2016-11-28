@@ -136,6 +136,15 @@ class Integer
 
     friend OutputStream& operator<<(OutputStream& os, Integer const& z);
     friend Integer operator"" _z(unsigned long long int n);
+/*
+    // Comparisons with arbitary ints go through Int64
+    template<class N, EnableIf<IsIntegral<N>> = dummy> friend inline auto operator==(Integer const& x, N n) -> decltype(x==Int64(n)) { return x==Int64(n); }
+    template<class N, EnableIf<IsIntegral<N>> = dummy> friend inline auto operator!=(Integer const& x, N n) -> decltype(x!=Int64(n)) { return x!=Int64(n); }
+    template<class N, EnableIf<IsIntegral<N>> = dummy> friend inline auto operator< (Integer const& x, N n) -> decltype(x!=Int64(n)) { return x< Int64(n); }
+    template<class N, EnableIf<IsIntegral<N>> = dummy> friend inline auto operator> (Integer const& x, N n) -> decltype(x!=Int64(n)) { return x> Int64(n); }
+    template<class N, EnableIf<IsIntegral<N>> = dummy> friend inline auto operator<=(Integer const& x, N n) -> decltype(x!=Int64(n)) { return x<=Int64(n); }
+    template<class N, EnableIf<IsIntegral<N>> = dummy> friend inline auto operator>=(Integer const& x, N n) -> decltype(x!=Int64(n)) { return x>=Int64(n); }
+*/
   public:
     long int get_si() const;
     mpz_t const& get_mpz() const;
@@ -151,13 +160,6 @@ template<class M, EnableIf<And<IsIntegral<M>,IsUnsigned<M>>>> inline Integer::In
 template<class N, EnableIf<And<IsIntegral<N>,IsSigned<N>>>> inline Integer::Integer(N n) : Integer(Int64(n)) { }
 Integer operator"" _z(unsigned long long int n);
 
-// Comparisons with arbitary ints go through Int64
-template<class N, EnableIf<IsIntegral<N>> = dummy> inline auto operator==(Integer const& x, N n) -> decltype(x==Int64(n)) { return x==Int64(n); }
-template<class N, EnableIf<IsIntegral<N>> = dummy> inline auto operator!=(Integer const& x, N n) -> decltype(x!=Int64(n)) { return x!=Int64(n); }
-template<class N, EnableIf<IsIntegral<N>> = dummy> inline auto operator< (Integer const& x, N n) -> decltype(x!=Int64(n)) { return x< Int64(n); }
-template<class N, EnableIf<IsIntegral<N>> = dummy> inline auto operator> (Integer const& x, N n) -> decltype(x!=Int64(n)) { return x> Int64(n); }
-template<class N, EnableIf<IsIntegral<N>> = dummy> inline auto operator<=(Integer const& x, N n) -> decltype(x!=Int64(n)) { return x<=Int64(n); }
-template<class N, EnableIf<IsIntegral<N>> = dummy> inline auto operator>=(Integer const& x, N n) -> decltype(x!=Int64(n)) { return x>=Int64(n); }
 
 class Natural : public Integer {
   public:

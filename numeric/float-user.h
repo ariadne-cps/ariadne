@@ -44,6 +44,9 @@ namespace Ariadne {
 
 template<class X> class Positive;
 
+static_assert(not IsGenericNumericType<FloatValue<Precision64>>::value,"");
+static_assert(not IsGenericNumericType<FloatValue<PrecisionMP>>::value,"");
+
 template<class X> struct NumericTraits;
 
 template<class PR> struct NumericTraits<FloatApproximation<PR>> {
@@ -93,7 +96,7 @@ template<class X> using EqualsTrait = typename NumericTraits<X>::EqualsType;
 
 template<class PR> inline FloatBall<PR> make_float_ball(Real const& y, PR pr) { return FloatBall<PR>(make_float(y,pr)); }
 
-template<class X, class R=X> class DeclareFloatOperations
+template<class X, class R=X> struct DeclareFloatOperations
     : public DeclareRealOperations<X,R>
     , public DeclareComparisonOperations<X,LessTrait<X>,EqualsTrait<X>>
     , public DeclareMixedFieldOperators<X,GenericTrait<X>,R>
@@ -102,7 +105,7 @@ template<class X, class R=X> class DeclareFloatOperations
     friend InputStream& operator>>(InputStream&, X&);
 };
 
-template<class X, class NX=OppositeTrait<X>> class DeclareDirectedFloatOperations
+template<class X, class NX=OppositeTrait<X>> struct DeclareDirectedFloatOperations
     : DeclareDirectedNumericOperations<X,NX>
     , DeclareMixedDirectedGroupOperators<X,NX,GenericTrait<X>,GenericTrait<NX>>
 {
@@ -110,7 +113,7 @@ template<class X, class NX=OppositeTrait<X>> class DeclareDirectedFloatOperation
     friend InputStream& operator>>(InputStream&, X&);
 };
 
-template<class PX, class QPX=OppositeTrait<PX>> class DeclarePositiveDirectedFloatOperations
+template<class PX, class QPX=OppositeTrait<PX>> struct DeclarePositiveDirectedFloatOperations
     : DeclarePositiveDirectedNumericOperations<PX,QPX>
     , DeclareMixedDirectedSemifieldOperators<PX,QPX,GenericTrait<PX>,GenericTrait<QPX>>
 {
@@ -118,46 +121,50 @@ template<class PX, class QPX=OppositeTrait<PX>> class DeclarePositiveDirectedFlo
     friend InputStream& operator>>(InputStream&, PX&);
 };
 
-template<class PX> class DeclarePositiveFloatOperations
+template<class PX> struct DeclarePositiveFloatOperations
     : DeclarePositiveDirectedFloatOperations<PX,PX>
 {
 };
 
-template<class X, class R=X> class DispatchFloatOperations
+template<class X, class R=X> struct DispatchFloatOperations
     : DispatchNumericOperations<X,R>
     , DispatchComparisonOperations<X,LessTrait<X>,EqualsTrait<X>>
-    , ProvideConcreteGenericFieldOperations<X,GenericTrait<X>,R>
-    , ProvideConcreteGenericComparisonOperations<X,GenericTrait<X>,LessTrait<X>,EqualsTrait<X>>
+    , DefineConcreteGenericOperators<X>
+//    , ProvideConcreteGenericFieldOperations<X,GenericTrait<X>,R>
+//    , ProvideConcreteGenericComparisonOperations<X,GenericTrait<X>,LessTrait<X>,EqualsTrait<X>>
 {
     friend OutputStream& operator<<(OutputStream& os, X const& x) { return Operations<X>::_write(os,x); }
     friend InputStream& operator>>(InputStream& is, X& x) { return Operations<X>::_read(is,x); }
 };
 
-template<class X> class DispatchDirectedFloatOperations
+template<class X> struct DispatchDirectedFloatOperations
     : DispatchDirectedNumericOperations<X,OppositeTrait<X>>
     , DispatchDirectedNumericOperations<OppositeTrait<X>,X>
     , DispatchDirectedComparisonOperations<X,OppositeTrait<X>,LessTrait<X>,EqualsTrait<X>>
     , DispatchDirectedComparisonOperations<OppositeTrait<X>,X,LessTrait<OppositeTrait<X>>,EqualsTrait<OppositeTrait<X>>>
-    , ProvideConcreteGenericDirectedGroupOperations<X,OppositeTrait<X>,GenericTrait<X>,GenericTrait<OppositeTrait<X>>>
-    , ProvideConcreteGenericDirectedGroupOperations<OppositeTrait<X>,X,GenericTrait<OppositeTrait<X>>,GenericTrait<X>>
-    , ProvideConcreteGenericDirectedComparisonOperations<X,GenericTrait<OppositeTrait<X>>,LessTrait<X>,EqualsTrait<X>>
-    , ProvideConcreteGenericDirectedComparisonOperations<OppositeTrait<X>,GenericTrait<X>,LessTrait<OppositeTrait<X>>,EqualsTrait<OppositeTrait<X>>>
+    , DefineConcreteGenericOperators<X>
+//    , ProvideConcreteGenericDirectedGroupOperations<X,OppositeTrait<X>,GenericTrait<X>,GenericTrait<OppositeTrait<X>>>
+//    , ProvideConcreteGenericDirectedGroupOperations<OppositeTrait<X>,X,GenericTrait<OppositeTrait<X>>,GenericTrait<X>>
+//    , ProvideConcreteGenericDirectedComparisonOperations<X,GenericTrait<OppositeTrait<X>>,LessTrait<X>,EqualsTrait<X>>
+//    , ProvideConcreteGenericDirectedComparisonOperations<OppositeTrait<X>,GenericTrait<X>,LessTrait<OppositeTrait<X>>,EqualsTrait<OppositeTrait<X>>>
 {
     friend OutputStream& operator<<(OutputStream& os, X const& x) { return Operations<X>::_write(os,x); }
     friend InputStream& operator>>(InputStream& is, X& x) { return Operations<X>::_read(is,x); }
 };
 
-template<class PX, class QPX=OppositeTrait<PX>> class DispatchPositiveDirectedFloatOperations
+template<class PX, class QPX=OppositeTrait<PX>> struct DispatchPositiveDirectedFloatOperations
     : public DispatchPositiveDirectedNumericOperations<PX,QPX>
     , public DispatchPositiveDirectedNumericOperations<QPX,PX>
-    , public ProvideConcreteGenericDirectedSemiFieldOperations<PX,QPX,Nat,Nat>
-    , public ProvideConcreteGenericDirectedSemiFieldOperations<QPX,PX,Nat,Nat>
+    , DefineConcreteGenericOperators<PX>
+//    , public ProvideConcreteGenericDirectedSemiFieldOperations<PX,QPX,Nat,Nat>
+//    , public ProvideConcreteGenericDirectedSemiFieldOperations<QPX,PX,Nat,Nat>
 {
 };
 
-template<class PX> class DispatchPositiveFloatOperations
+template<class PX> struct DispatchPositiveFloatOperations
     : public DispatchPositiveDirectedNumericOperations<PX,PX>
-    , public ProvideConcreteGenericDirectedSemiFieldOperations<PX,PX,Nat,Nat>
+    , DefineConcreteGenericOperators<PX>
+//    , public ProvideConcreteGenericDirectedSemiFieldOperations<PX,PX,Nat,Nat>
 {
 };
 
@@ -524,6 +531,7 @@ template<class PR> class FloatBall
 
     PrecisionType precision() const { return _v.precision(); }
     FloatBall<PR> pm(FloatError<PR> e) const;
+    friend FloatApproximation<PR> round(FloatApproximation<PR> const& x);
   public:
     friend PositiveFloatUpperBound<PR> mag(FloatBall<PR> const&);
     friend PositiveFloatLowerBound<PR> mig(FloatBall<PR> const&);
@@ -544,6 +552,10 @@ template<class PR> class FloatValue
     : DispatchNumericOperations<FloatValue<PR>,FloatBounds<PR>>
     , DispatchComparisonOperations<FloatValue<PR>,Boolean>
     , DefineMixedComparisonOperators<FloatValue<PR>,ExactNumber,Boolean>
+    , DefineMixedComparisonOperators<FloatValue<PR>,Rational,Boolean>
+//        , public DispatchFloatOperations<FloatBall<PR>>
+        , public DispatchFloatOperations<FloatBounds<PR>>
+    , DefineConcreteGenericOperators<FloatValue<PR>>
 {
     typedef ExactTag P; typedef RawFloat<PR> FLT;
   public:
@@ -592,6 +604,11 @@ template<class PR> class FloatValue
     friend Bool same(FloatValue<PR> const&, FloatValue<PR> const&);
     friend OutputStream& operator<<(OutputStream&, FloatValue<PR> const&);
   public:
+    friend Comparison cmp(FloatValue<PR> const& x1, Rational const& q2) { return cmp(x1.raw(),q2); }
+    friend Boolean eq(FloatValue<PR> const& x1, Rational const& q2) { return cmp(x1,q2)==Comparison::EQUAL; }
+    friend Boolean lt(FloatValue<PR> const& x1, Rational const& q2) { return cmp(x1,q2)==Comparison::LESS; }
+    friend Boolean gt(FloatValue<PR> const& x1, Rational const& q2) { return cmp(x1,q2)==Comparison::GREATER; }
+  public:
     static Nat output_places;
     static Void set_output_places(Nat p) { output_places=p; }
   private: public:
@@ -607,6 +624,7 @@ template<class PR> class FloatValue
         return Operations<FloatValue<PR>>::_write(os,x); }
 };
 
+static_assert(IsSame<decltype(declval<Float64Value>() < declval<Rational>()),Boolean>::value,"");
 
 template<class PR> class PositiveFloatValue : public FloatValue<PR> {
   public:
@@ -823,73 +841,8 @@ template<template<class>class FLT, class PR> inline FloatFactory<PR> factory(FLT
 
 template<class Y, class PR> inline decltype(auto) make_float(Y const& y, PR pr) { return float_factory(pr).create(y); }
 
-template<class X, class Y> using AreConcreteGenericNumbers = And<IsFloat<X>,IsGenericNumericType<Y>>;
 
 
-template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
-decltype(auto) operator+(X const& x, Y const& y) { return x+factory(x).create(y); }
-template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
-decltype(auto) operator-(X const& x, Y const& y) { return x-factory(x).create(y); }
-template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
-decltype(auto) operator*(X const& x, Y const& y) { return x*factory(x).create(y); }
-template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
-decltype(auto) operator/(X const& x, Y const& y) { return x/factory(x).create(y); }
-
-template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
-decltype(auto) operator+(Y const& y, X const& x) { return factory(x).create(y)+x; }
-template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
-decltype(auto) operator-(Y const& y, X const& x) { return factory(x).create(y)-x; }
-template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
-decltype(auto) operator*(Y const& y, X const& x) { return factory(x).create(y)*x; }
-template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
-decltype(auto) operator/(Y const& y, X const& x) { return factory(x).create(y)/x; }
-
-template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
-decltype(auto) operator==(X const& x, Y const& y) { return x==factory(x).create(y); }
-template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
-decltype(auto) operator!=(X const& x, Y const& y) { return x!=factory(x).create(y); }
-template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
-decltype(auto) operator<=(X const& x, Y const& y) { return x<=factory(x).create(y); }
-template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
-decltype(auto) operator>=(X const& x, Y const& y) { return x>=factory(x).create(y); }
-template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
-decltype(auto) operator< (X const& x, Y const& y) { return x< factory(x).create(y); }
-template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
-decltype(auto) operator> (X const& x, Y const& y) { return x> factory(x).create(y); }
-
-template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
-decltype(auto) operator==(Y const& y, X const& x) { return factory(x).create(y)==x; }
-template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
-decltype(auto) operator!=(Y const& y, X const& x) { return factory(x).create(y)!=x; }
-template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
-decltype(auto) operator<=(Y const& y, X const& x) { return factory(x).create(y)<=x; }
-template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
-decltype(auto) operator>=(Y const& y, X const& x) { return factory(x).create(y)>=x; }
-template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
-decltype(auto) operator< (Y const& y, X const& x) { return factory(x).create(y)< x; }
-template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>
-decltype(auto) operator> (Y const& y, X const& x) { return factory(x).create(y)> x; }
-
-template<class PR> Bool operator==(FloatValue<PR> const& x, Rational const& q) { return cmp(x.raw(),q)==Comparison::EQUAL; }
-template<class PR> Bool operator!=(FloatValue<PR> const& x, Rational const& q) { return cmp(x.raw(),q)!=Comparison::EQUAL; }
-template<class PR> Bool operator<=(FloatValue<PR> const& x, Rational const& q) { return cmp(x.raw(),q)!=Comparison::GREATER; }
-template<class PR> Bool operator>=(FloatValue<PR> const& x, Rational const& q) { return cmp(x.raw(),q)!=Comparison::LESS; }
-template<class PR> Bool operator< (FloatValue<PR> const& x, Rational const& q) { return cmp(x.raw(),q)==Comparison::LESS; }
-template<class PR> Bool operator> (FloatValue<PR> const& x, Rational const& q) { return cmp(x.raw(),q)==Comparison::GREATER; }
-template<class PR> Bool operator>=(Rational const& q, FloatValue<PR> const& x);
-
-
-// FIXME: Should be able to use cmp directly in >=
-template<class PR> Bool operator==(Rational const& q, FloatValue<PR> const& x ) { return cmp(x.raw(),q)==Comparison::EQUAL; }
-template<class PR> Bool operator!=(Rational const& q, FloatValue<PR> const& x ) { return cmp(x.raw(),q)!=Comparison::EQUAL; }
-template<class PR> Bool operator>=(Rational const& q, FloatValue<PR> const& x ) { return cmp(x.raw(),q)!=Comparison::GREATER; return q>=Rational(x); }
-template<class PR> Bool operator<=(Rational const& q, FloatValue<PR> const& x ) { return cmp(x.raw(),q)!=Comparison::LESS; }
-template<class PR> Bool operator< (Rational const& q, FloatValue<PR> const& x ) { return cmp(x.raw(),q)==Comparison::GREATER; }
-template<class PR> Bool operator> (Rational const& q, FloatValue<PR> const& x ) { return cmp(x.raw(),q)==Comparison::LESS; }
-
-
-
-Float64Value cast_exact(const Real& x);
 
 inline Float64Value const& cast_exact(RawFloat64 const& x) { return reinterpret_cast<Float64Value const&>(x); }
 inline Float64Value const& cast_exact(Float64Approximation const& x) { return reinterpret_cast<Float64Value const&>(x); }
@@ -901,6 +854,8 @@ template<template<class>class T> inline const T<Float64Value>& cast_exact(const 
 template<template<class>class T> inline const T<Float64Value>& cast_exact(const T<Float64Approximation>& t) {
     return reinterpret_cast<const T<Float64Value>&>(t); }
 template<template<class>class T> inline const T<Float64Value>& cast_exact(const T<Float64Value>& t) {
+    return reinterpret_cast<const T<Float64Value>&>(t); }
+template<template<class>class T> inline const T<Float64Value>& cast_exact(const T<Float64Error>& t) {
     return reinterpret_cast<const T<Float64Value>&>(t); }
 
 inline RawFloat64 const& cast_raw(RawFloat64 const& x) { return reinterpret_cast<RawFloat64 const&>(x); }

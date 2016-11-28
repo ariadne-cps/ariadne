@@ -381,7 +381,7 @@ template<class M> Polynomial<Float64Bounds> FunctionPatch<M>::polynomial() const
     for(SizeType j=0; j!=this->argument_size(); ++j) {
         ExactIntervalType const& domj=this->domain()[j];
         if(domj.lower()>=domj.upper()) {
-            ARIADNE_ASSERT(this->domain()[j].width()==0);
+            ARIADNE_ASSERT(this->domain()[j].is_singleton());
             s[j]=Polynomial<Float64Bounds>::constant(this->argument_size(),zero);
         } else {
             //s[j]=Ariadne::polynomial(ModelType::unscaling(this->argument_size(),j,this->domain()[j],this->sweeper()));

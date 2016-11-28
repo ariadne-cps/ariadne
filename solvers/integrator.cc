@@ -189,10 +189,10 @@ IntegratorBase::flow_to(const ValidatedVectorFunction& vf, const ExactBoxType& d
     ValidatedVectorFunctionModel step_function;
     while(possibly(t<tmax)) {
         ExactBoxType dx=flow_function.codomain();
-        Float64Value h_max=cast_exact(tmax-Real(t));
+        Float64Bounds h_max=Float64Bounds(tmax,Precision64())-t;
         Float64Value h;
         UpperBoxType bx;
-        make_lpair(h,bx) = this->flow_bounds(vf,dx,h_max.raw());
+        make_lpair(h,bx) = this->flow_bounds(vf,dx,h_max.upper().raw());
         Bool flow_successfully_computed=false;
         while(!flow_successfully_computed) {
             try {
@@ -202,9 +202,9 @@ IntegratorBase::flow_to(const ValidatedVectorFunction& vf, const ExactBoxType& d
                 h=hlf(h);
             }
         }
-        step_function=partial_evaluate(step_function,n,numeric_cast<Float64Bounds>(h));
+        step_function=partial_evaluate(step_function,n,h);
         flow_function=compose(step_function,flow_function);
-        t=t+Rational(h.get_d());
+        t=t+Rational(h);
     }
     return flow_function;
 }

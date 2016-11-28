@@ -1622,9 +1622,8 @@ template<class PR> struct Operations<FloatValue<PR>> {
 
 };
 
-
-FloatValue<Precision64> cast_exact(Real const& x) {
-    return cast_exact(FloatApproximation<Precision64>(x,Precision64()));
+Rational cast_exact(Real const& x) {
+    return Rational(cast_exact(FloatApproximation<Precision64>(x,Precision64())));
 }
 
 

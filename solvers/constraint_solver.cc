@@ -188,7 +188,7 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
         Vector<Float64Approximation> nx = Float64Approximation(1.0_approx-XSIGMA)*x + Vector<Float64Approximation>(x.size(),XSIGMA/x.size());
         Vector<Float64Approximation> ny = midpoint(sd.first);
         ValidatedKleenean result=this->feasible(sd.first, fn, c).first;
-        nx = Float64Approximation(1.0-XSIGMA)*x + Vector<Float64Approximation>(x.size(),XSIGMA/x.size());
+        nx = Float64Approximation(1-XSIGMA)*x + Vector<Float64Approximation>(x.size(),XSIGMA/x.size());
         ny = midpoint(sd.second);
         result = result || this->feasible(sd.second, fn, c).first;
         return make_pair(result,ExactPoint());

@@ -63,6 +63,8 @@ class Integer;
 class Rational;
 class Real;
 
+template<class X> class Positive;
+
 template<class P=Void> class Number;
 
 template<> struct IsNumericType<Nat>;
@@ -91,7 +93,6 @@ using ValidatedNumber=Number<ValidatedTag>;
 using ValidatedUpperNumber=Number<ValidatedUpperTag>;
 using ValidatedLowerNumber=Number<ValidatedLowerTag>;
 using ApproximateNumber=Number<ApproximateTag>;
-using PositiveUpperNumber=Number<PositiveUpperTag>;
 
 } // namespace Ariadne
 

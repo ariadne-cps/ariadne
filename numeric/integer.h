@@ -160,13 +160,20 @@ template<class M, EnableIf<And<IsIntegral<M>,IsUnsigned<M>>>> inline Integer::In
 template<class N, EnableIf<And<IsIntegral<N>,IsSigned<N>>>> inline Integer::Integer(N n) : Integer(Int64(n)) { }
 Integer operator"" _z(unsigned long long int n);
 
-
-class Natural : public Integer {
+template<> class Positive<Integer> : public Integer {
   public:
-    Natural() : Integer() { }
-    Natural(uint m) : Integer(m) { }
+    Positive<Integer>() : Integer() { }
+    Positive<Integer>(uint m) : Integer(m) { }
+    Positive<Integer>(int n) = delete;
+    Positive<Integer>(Integer const& z) : Integer(z) { assert(z>=0); }
+};
+
+class Natural : public Positive<Integer> {
+  public:
+    Natural() : Positive<Integer>() { }
+    Natural(uint m) : Positive<Integer>(m) { }
     Natural(int n) = delete;
-    explicit Natural(Integer const& z) : Integer(z) { assert(z>=Integer(0)); }
+    explicit Natural(Integer const& z) : Positive<Integer>(z) { assert(z>=Integer(0)); }
     friend Natural& operator++(Natural& n) { ++static_cast<Integer&>(n); return n; }
     friend Natural& operator+=(Natural& n1, Natural const& n2) { static_cast<Integer&>(n1)+=n2; return n1; }
     friend Natural operator+(Natural const& n1, Natural const& n2) { return Natural(static_cast<Integer const&>(n1)+static_cast<Integer const&>(n2)); }

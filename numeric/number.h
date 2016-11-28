@@ -359,10 +359,10 @@ template<class P> OutputStream& operator<<(OutputStream& os, Number<P> y) { retu
 #endif /* ARIADNE_FRIEND_NUMBER */
 
 
-template<class P> class PositiveNumber : Number<P> {
-    explicit PositiveNumber<P>(Number<P>const& y);
+template<class P> class Positive<Number<P>> : Number<P> {
+    explicit Positive<Number<P>>(Number<P>const& y);
 };
-template<class P> PositiveNumber<P> cast_positive(Number<P> y);
+template<class P> Positive<Number<P>> cast_positive(Number<P> y);
 
 
 } // namespace Ariadne

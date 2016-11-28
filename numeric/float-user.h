@@ -626,83 +626,83 @@ template<class PR> class FloatValue
 
 static_assert(IsSame<decltype(declval<Float64Value>() < declval<Rational>()),Boolean>::value,"");
 
-template<class PR> class PositiveFloatValue : public FloatValue<PR> {
+template<class PR> class Positive<FloatValue<PR>> : public FloatValue<PR> {
   public:
-    PositiveFloatValue<PR>() : FloatValue<PR>() { }
-    explicit PositiveFloatValue<PR>(PR const& pr) : FloatValue<PR>(pr) { }
-    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy> PositiveFloatValue<PR>(M m, PR pr) : FloatValue<PR>(m,pr) { }
-    PositiveFloatValue<PR>(TwoExp const& ex, PR pr) : FloatValue<PR>(ex,pr) { }
-    explicit PositiveFloatValue<PR>(Dyadic const& w, PR pr) : FloatValue<PR>(w,pr) { }
-    explicit PositiveFloatValue<PR>(RawFloat<PR> const& x) : FloatValue<PR>(x) { }
-    explicit PositiveFloatValue<PR>(FloatValue<PR> const& x) : FloatValue<PR>(x) { }
+    Positive<FloatValue<PR>>() : FloatValue<PR>() { }
+    explicit Positive<FloatValue<PR>>(PR const& pr) : FloatValue<PR>(pr) { }
+    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy> Positive<FloatValue<PR>>(M m, PR pr) : FloatValue<PR>(m,pr) { }
+    Positive<FloatValue<PR>>(TwoExp const& ex, PR pr) : FloatValue<PR>(ex,pr) { }
+    explicit Positive<FloatValue<PR>>(Dyadic const& w, PR pr) : FloatValue<PR>(w,pr) { }
+    explicit Positive<FloatValue<PR>>(RawFloat<PR> const& x) : FloatValue<PR>(x) { }
+    explicit Positive<FloatValue<PR>>(FloatValue<PR> const& x) : FloatValue<PR>(x) { }
   public:
-    friend PositiveFloatValue<PR> hlf(PositiveFloatValue<PR> const&);
+    friend Positive<FloatValue<PR>> hlf(Positive<FloatValue<PR>> const&);
 };
 
-template<class PR> class PositiveFloatBall : public FloatBall<PR> {
+template<class PR> class Positive<FloatBall<PR>> : public FloatBall<PR> {
   public:
-    PositiveFloatBall<PR>() : FloatBounds<PR>() { }
+    Positive<FloatBall<PR>>() : FloatBounds<PR>() { }
     template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy>
-        PositiveFloatBall<PR>(M m, PR pr) : FloatBall<PR>(m,pr) { }
-    explicit PositiveFloatBall<PR>(FloatBall<PR> const& x) : FloatBall<PR>(x) { }
+        Positive<FloatBall<PR>>(M m, PR pr) : FloatBall<PR>(m,pr) { }
+    explicit Positive<FloatBall<PR>>(FloatBall<PR> const& x) : FloatBall<PR>(x) { }
 };
 
-template<class PR> class PositiveFloatBounds : public FloatBounds<PR>
+template<class PR> class Positive<FloatBounds<PR>> : public FloatBounds<PR>
     , public DispatchPositiveFloatOperations<PositiveFloatBounds<PR>>
 {
   public:
-    PositiveFloatBounds<PR>() : FloatBounds<PR>() { }
-    explicit PositiveFloatBounds<PR>(PR const& pr) : FloatBounds<PR>(pr) { }
-    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy> PositiveFloatBounds<PR>(M m, PR pr) : FloatBounds<PR>(m,pr) { }
-    explicit PositiveFloatBounds<PR>(RawFloat<PR> const& x) : FloatBounds<PR>(x) { }
-    explicit PositiveFloatBounds<PR>(RawFloat<PR> const& l, RawFloat<PR> const& u) : FloatBounds<PR>(l,u) { }
-    explicit PositiveFloatBounds<PR>(FloatBounds<PR> const& x) : FloatBounds<PR>(x) { }
+    Positive<FloatBounds<PR>>() : FloatBounds<PR>() { }
+    explicit Positive<FloatBounds<PR>>(PR const& pr) : FloatBounds<PR>(pr) { }
+    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy> Positive<FloatBounds<PR>>(M m, PR pr) : FloatBounds<PR>(m,pr) { }
+    explicit Positive<FloatBounds<PR>>(RawFloat<PR> const& x) : FloatBounds<PR>(x) { }
+    explicit Positive<FloatBounds<PR>>(RawFloat<PR> const& l, RawFloat<PR> const& u) : FloatBounds<PR>(l,u) { }
+    explicit Positive<FloatBounds<PR>>(FloatBounds<PR> const& x) : FloatBounds<PR>(x) { }
   public:
 };
 
-template<class PR> class PositiveFloatUpperBound : public FloatUpperBound<PR>
+template<class PR> class Positive<FloatUpperBound<PR>> : public FloatUpperBound<PR>
     , public DispatchPositiveDirectedFloatOperations<PositiveFloatUpperBound<PR>,PositiveFloatLowerBound<PR>>
 {
   public:
-    PositiveFloatUpperBound<PR>() : FloatUpperBound<PR>() { }
-    explicit PositiveFloatUpperBound<PR>(PR const& pr) : FloatUpperBound<PR>(pr) { }
-    explicit PositiveFloatUpperBound<PR>(RawFloat<PR> const& x) : FloatUpperBound<PR>(x) { }
-    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy> PositiveFloatUpperBound<PR>(M m, PR pr) : FloatUpperBound<PR>(m,pr) { }
+    Positive<FloatUpperBound<PR>>() : FloatUpperBound<PR>() { }
+    explicit Positive<FloatUpperBound<PR>>(PR const& pr) : FloatUpperBound<PR>(pr) { }
+    explicit Positive<FloatUpperBound<PR>>(RawFloat<PR> const& x) : FloatUpperBound<PR>(x) { }
+    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy> Positive<FloatUpperBound<PR>>(M m, PR pr) : FloatUpperBound<PR>(m,pr) { }
     template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy> PositiveFloatValue<PR> create(M m) const { return PositiveFloatValue<PR>(m,this->precision()); }
-    explicit PositiveFloatUpperBound<PR>(FloatUpperBound<PR> const& x) : FloatUpperBound<PR>(x) { ARIADNE_PRECONDITION_MSG(!(this->_u<0),"x="<<x); }
-    explicit PositiveFloatUpperBound<PR>(ValidatedUpperNumber const& y, PR pr) : FloatUpperBound<PR>(y,pr) { ARIADNE_PRECONDITION_MSG(!(this->_u<0),"y="<<y); }
-    PositiveFloatUpperBound<PR>(PositiveFloatValue<PR> const& x) : FloatUpperBound<PR>(x) { }
+    explicit Positive<FloatUpperBound<PR>>(FloatUpperBound<PR> const& x) : FloatUpperBound<PR>(x) { ARIADNE_PRECONDITION_MSG(!(this->_u<0),"x="<<x); }
+    explicit Positive<FloatUpperBound<PR>>(ValidatedUpperNumber const& y, PR pr) : FloatUpperBound<PR>(y,pr) { ARIADNE_PRECONDITION_MSG(!(this->_u<0),"y="<<y); }
+    Positive<FloatUpperBound<PR>>(PositiveFloatValue<PR> const& x) : FloatUpperBound<PR>(x) { }
   public:
 };
 
-template<class PR> class PositiveFloatLowerBound : public FloatLowerBound<PR>
+template<class PR> class Positive<FloatLowerBound<PR>> : public FloatLowerBound<PR>
     , public DispatchPositiveDirectedFloatOperations<PositiveFloatLowerBound<PR>,PositiveFloatUpperBound<PR>>
 {
   public:
-    PositiveFloatLowerBound<PR>() : FloatLowerBound<PR>() { }
+    Positive<FloatLowerBound<PR>>() : FloatLowerBound<PR>() { }
     template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy>
-        PositiveFloatLowerBound<PR>(M m) : FloatLowerBound<PR>(m) { }
-    explicit PositiveFloatLowerBound<PR>(RawFloat<PR> const& x) : FloatLowerBound<PR>(x) { }
-    explicit PositiveFloatLowerBound<PR>(FloatLowerBound<PR> const& x) : FloatLowerBound<PR>(x) { }
-    explicit PositiveFloatLowerBound<PR>(ValidatedLowerNumber const& y, PR pr) : FloatLowerBound<PR>(y,pr) { }
-    PositiveFloatLowerBound<PR>(PositiveFloatValue<PR> const& x) : FloatLowerBound<PR>(x) { }
+        Positive<FloatLowerBound<PR>>(M m) : FloatLowerBound<PR>(m) { }
+    explicit Positive<FloatLowerBound<PR>>(RawFloat<PR> const& x) : FloatLowerBound<PR>(x) { }
+    explicit Positive<FloatLowerBound<PR>>(FloatLowerBound<PR> const& x) : FloatLowerBound<PR>(x) { }
+    explicit Positive<FloatLowerBound<PR>>(ValidatedLowerNumber const& y, PR pr) : FloatLowerBound<PR>(y,pr) { }
+    Positive<FloatLowerBound<PR>>(PositiveFloatValue<PR> const& x) : FloatLowerBound<PR>(x) { }
   public:
 };
 
-template<class PR> class PositiveFloatApproximation : public FloatApproximation<PR>
+template<class PR> class Positive<FloatApproximation<PR>> : public FloatApproximation<PR>
     , public DispatchPositiveFloatOperations<PositiveFloatApproximation<PR>>
 {
   public:
-    PositiveFloatApproximation<PR>() : FloatApproximation<PR>() { }
+    Positive<FloatApproximation<PR>>() : FloatApproximation<PR>() { }
     template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy>
-        PositiveFloatApproximation<PR>(M m) : FloatApproximation<PR>(m) { }
-    explicit PositiveFloatApproximation<PR>(RawFloat<PR> const& x) : FloatApproximation<PR>(x) { }
-    explicit PositiveFloatApproximation<PR>(FloatApproximation<PR> const& x) : FloatApproximation<PR>(x) { }
-    explicit PositiveFloatApproximation<PR>(ApproximateNumber const& y, PR pr) : FloatApproximation<PR>(y,pr) { }
-    PositiveFloatApproximation<PR>(PositiveFloatLowerBound<PR> const& x) : FloatApproximation<PR>(x) { }
-    PositiveFloatApproximation<PR>(PositiveFloatUpperBound<PR> const& x) : FloatApproximation<PR>(x) { }
-    PositiveFloatApproximation<PR>(PositiveFloatValue<PR> const& x) : FloatApproximation<PR>(x) { }
-    PositiveFloatApproximation<PR>(FloatError<PR> const& x) : FloatApproximation<PR>(x) { }
+        Positive<FloatApproximation<PR>>(M m) : FloatApproximation<PR>(m) { }
+    explicit Positive<FloatApproximation<PR>>(RawFloat<PR> const& x) : FloatApproximation<PR>(x) { }
+    explicit Positive<FloatApproximation<PR>>(FloatApproximation<PR> const& x) : FloatApproximation<PR>(x) { }
+    explicit Positive<FloatApproximation<PR>>(ApproximateNumber const& y, PR pr) : FloatApproximation<PR>(y,pr) { }
+    Positive<FloatApproximation<PR>>(PositiveFloatLowerBound<PR> const& x) : FloatApproximation<PR>(x) { }
+    Positive<FloatApproximation<PR>>(PositiveFloatUpperBound<PR> const& x) : FloatApproximation<PR>(x) { }
+    Positive<FloatApproximation<PR>>(PositiveFloatValue<PR> const& x) : FloatApproximation<PR>(x) { }
+    Positive<FloatApproximation<PR>>(FloatError<PR> const& x) : FloatApproximation<PR>(x) { }
   public:
 };
 
@@ -837,7 +837,12 @@ template<class PR> class FloatFactory {
 template<class Y, class PR> using ConcreteType = decltype(declval<FloatFactory<PR>>().create(declval<Y>()));
 
 template<class PR> inline FloatFactory<PR> float_factory(PR pr) { return FloatFactory<PR>(pr); }
-template<template<class>class FLT, class PR> inline FloatFactory<PR> factory(FLT<PR> flt) { return FloatFactory<PR>(flt.precision()); }
+template<class PR> inline FloatFactory<PR> factory(FloatApproximation<PR> const& flt) { return FloatFactory<PR>(flt.precision()); }
+template<class PR> inline FloatFactory<PR> factory(FloatLowerBound<PR> const& flt) { return FloatFactory<PR>(flt.precision()); }
+template<class PR> inline FloatFactory<PR> factory(FloatUpperBound<PR> const& flt) { return FloatFactory<PR>(flt.precision()); }
+template<class PR> inline FloatFactory<PR> factory(FloatBounds<PR> const& flt) { return FloatFactory<PR>(flt.precision()); }
+template<class PR> inline FloatFactory<PR> factory(FloatBall<PR> const& flt) { return FloatFactory<PR>(flt.precision()); }
+template<class PR> inline FloatFactory<PR> factory(FloatValue<PR> const& flt) { return FloatFactory<PR>(flt.precision()); }
 
 template<class Y, class PR> inline decltype(auto) make_float(Y const& y, PR pr) { return float_factory(pr).create(y); }
 

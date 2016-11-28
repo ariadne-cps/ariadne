@@ -62,12 +62,12 @@ template<class PR> class FloatBall;
 template<class PR> class FloatValue;
 template<class PR> class FloatError;
 
-template<class PR> class PositiveFloatApproximation;
-template<class PR> class PositiveFloatLowerBound;
-template<class PR> class PositiveFloatUpperBound;
-template<class PR> class PositiveFloatBounds;
-template<class PR> class PositiveFloatBall;
-template<class PR> class PositiveFloatValue;
+template<class PR> using PositiveFloatApproximation = Positive<FloatApproximation<PR>>;
+template<class PR> using PositiveFloatLowerBound = Positive<FloatLowerBound<PR>>;
+template<class PR> using PositiveFloatUpperBound = Positive<FloatUpperBound<PR>>;
+template<class PR> using PositiveFloatBounds = Positive<FloatBounds<PR>>;
+template<class PR> using PositiveFloatBall = Positive<FloatBall<PR>>;
+template<class PR> using PositiveFloatValue = Positive<FloatValue<PR>>;
 
 template<class P, class PR> struct FloatTypedef;
 template<class PR> struct FloatTypedef<ApproximateTag,PR> { typedef FloatApproximation<PR> Type; };

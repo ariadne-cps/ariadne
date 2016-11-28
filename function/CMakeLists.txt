@@ -1,5 +1,3 @@
-message(${PROJECT_SOURCE_DIR})
-
 add_library(ariadne-function OBJECT
     affine.cc
     polynomial.cc

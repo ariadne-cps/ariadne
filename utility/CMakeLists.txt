@@ -1,1 +1,0 @@
-message(${PROJECT_SOURCE_DIR})

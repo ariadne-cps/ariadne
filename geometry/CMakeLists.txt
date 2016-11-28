@@ -1,5 +1,3 @@
-message(${PROJECT_SOURCE_DIR})
-
 add_library(ariadne-geometry OBJECT
     point.cc
     interval.cc

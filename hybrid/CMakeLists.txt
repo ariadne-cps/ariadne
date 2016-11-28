@@ -1,5 +1,3 @@
-message(${PROJECT_SOURCE_DIR})
-
 add_library(ariadne-hybrid OBJECT
     hybrid_set.cc
     hybrid_enclosure.cc

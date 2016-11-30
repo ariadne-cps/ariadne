@@ -229,6 +229,12 @@ template<class PR> FloatBounds<PR>::FloatBounds(Real const& x, PR pr)
     : FloatBounds(x.get(pr)) {
 }
 
+template<class PR> FloatBounds<PR>::FloatBounds(FloatLowerBound<PR> const& lower, ValidatedUpperNumber const& upper)
+    : FloatBounds<PR>(lower,lower.create(upper)) { }
+
+template<class PR> FloatBounds<PR>::FloatBounds(ValidatedLowerNumber const& lower, FloatUpperBound<PR> const& upper)
+    : FloatBounds<PR>(upper.create(lower),upper) { }
+
 template<class PR> FloatBounds<PR>::FloatBounds(ValidatedNumber const& y, PR pr)
     : FloatBounds(y.get(BoundedTag(),pr)) {
 }

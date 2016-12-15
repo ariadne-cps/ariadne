@@ -292,12 +292,36 @@ template<class X, class Y> inline X make_constant(const Y& c, const X& x, Enable
     return x.create(c);
 }
 
+template<class X, class Y> inline Differential<X> make_constant(const Y& c, const Differential<X>& a) {
+    return a.create_constant(X(c,a.value().precision()));
+}
+
+template<class X, class Y> inline Formula<X> make_constant(const Y& c, const Formula<X>& a) {
+    ARIADNE_FAIL_MSG("Cannot make formula from constant");
+}
+template<class P> inline Formula<Number<P>> make_constant(const SelfType<Number<P>>& c, const Formula<Number<P>>& a) {
+    return Formula<Number<P>>(c);
+}
+template<class P> inline Formula<Float64Bounds> make_constant(const Number<P>& c, const Formula<Float64Bounds>& a) {
+    return Formula<Float64Bounds>(Float64Bounds(c,Precision64()));
+}
+template<class P> inline Formula<Float64Approximation> make_constant(const Number<P>& c, const Formula<Float64Approximation>& a) {
+    return Formula<Float64Approximation>(Float64Approximation(c,Precision64()));
+}
+
+template<class X, class Y> inline Algebra<X> make_constant(const Y& c, const Algebra<X>& a) {
+    ARIADNE_FAIL_MSG("Cannot make algebra from constant");
+}
+template<class X> inline Algebra<X> make_constant(const X& c, const Algebra<X>& a) {
+    return a.create_constant(c);
+}
+
 template<class A> inline A make_constant(const NumericType<A>& c, const A& a, DisableIf<IsNumericType<A>> = dummy, DisableIf<IsVector<A>> = dummy) {
     return a.create_constant(c);
 }
 
 template<class A> inline A make_constant(const GenericNumericType<A>& c, const A& a, DisableIf<IsNumericType<A>> = dummy, DisableIf<IsVector<A>> = dummy) {
-    typedef NumericType<A> X; return a.create_constant(X(c,Precision64()));
+    typedef NumericType<A> X; return a.create_constant(X(c,a.precision()));
 }
 
 //template<class A> inline A make_constant(const Real& c, const A& a, DisableIf<IsNumericType<A>> = dummy, DisableIf<IsVector<A>> = dummy) {

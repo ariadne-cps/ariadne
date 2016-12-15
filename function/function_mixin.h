@@ -105,10 +105,12 @@ class FunctionMixin<F,ApproximateTag,D,C>
     template<class X> using Result = typename ElementTraits<C>::template Type<X>;
   public:
     virtual FunctionInterface<ApproximateTag,D,C>* _clone() const override;
-    virtual Result<ApproximateNumericType> _evaluate(const Argument<ApproximateNumericType>& x) const override;
-    virtual Result<ApproximateDifferential> _evaluate(const Argument<ApproximateDifferential>& x) const override;
-    virtual Result<ApproximateFormula> _evaluate(const Argument<ApproximateFormula>& x) const override;
+    virtual Result<Float64Approximation> _evaluate(const Argument<Float64Approximation>& x) const override;
+    virtual Result<FloatMPApproximation> _evaluate(const Argument<FloatMPApproximation>& x) const override;
+    virtual Result<Differential<Float64Approximation>> _evaluate(const Argument<Differential<Float64Approximation>>& x) const override;
+    virtual Result<Differential<FloatMPApproximation>> _evaluate(const Argument<Differential<FloatMPApproximation>>& x) const override;
     virtual Result<ApproximateTaylorModel> _evaluate(const Argument<ApproximateTaylorModel>& x) const override;
+    virtual Result<ApproximateFormula> _evaluate(const Argument<ApproximateFormula>& x) const override;
     virtual Result<ApproximateAlgebra> _evaluate(const Argument<ApproximateAlgebra>& x) const override;
 };
 
@@ -123,8 +125,10 @@ class FunctionMixin<F,ValidatedTag,D,C>
   public:
     using FunctionMixin<F,ApproximateTag,D,C>::_evaluate;
     virtual FunctionInterface<ValidatedTag,D,C>* _clone() const override;
-    virtual Result<ValidatedNumericType> _evaluate(const Argument<ValidatedNumericType>& x) const override;
-    virtual Result<ValidatedDifferential> _evaluate(const Argument<ValidatedDifferential>& x) const override;
+    virtual Result<Float64Bounds> _evaluate(const Argument<Float64Bounds>& x) const override;
+    virtual Result<FloatMPBounds> _evaluate(const Argument<FloatMPBounds>& x) const override;
+    virtual Result<Differential<Float64Bounds>> _evaluate(const Argument<Differential<Float64Bounds>>& x) const override;
+    virtual Result<Differential<FloatMPBounds>> _evaluate(const Argument<Differential<FloatMPBounds>>& x) const override;
     virtual Result<ValidatedFormula> _evaluate(const Argument<ValidatedFormula>& x) const override;
     virtual Result<ValidatedTaylorModel> _evaluate(const Argument<ValidatedTaylorModel>& x) const override;
     virtual Result<ValidatedAlgebra> _evaluate(const Argument<ValidatedAlgebra>& x) const override;

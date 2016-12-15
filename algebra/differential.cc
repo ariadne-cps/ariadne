@@ -54,4 +54,14 @@ template class Vector<Differential<Float64Bounds>>;
 template class Vector<Differential<Float64Approximation>>;
 //template class Vector<Differential<UpperIntervalType>>;
 
+template class Differential<FloatMPBounds>;
+template class Differential<FloatMPApproximation>;
+template class AlgebraOperations<Differential<FloatMPApproximation>>;
+template class AlgebraOperations<Differential<FloatMPBounds>>;
+template class GradedAlgebraOperations<Differential<FloatMPApproximation>>;
+template class GradedAlgebraOperations<Differential<FloatMPBounds>>;
+
+template class Vector<Differential<FloatMPBounds>>;
+template class Vector<Differential<FloatMPApproximation>>;
+
 }

@@ -93,9 +93,19 @@ template<class X1, class X2> auto operator==(const Covector<X1>& u1, const Covec
 
 class ProvideCovectorOperations {
 
+    template<class X> friend Covector<NegationType<X>> operator-(Covector<X> const& u) {
+        Covector<NegationType<X>> r(u.size()); for(SizeType i=0; i!=r.size(); ++i) { r[i]=-u[i]; } return std::move(r); }
+
+    template<class X1,class X2> friend Covector<DifferenceType<X1,X2>> operator-(Covector<X1> const& u1, Covector<X2> const& u2) {
+        ARIADNE_PRECONDITION(u1.size()==u2.size()); Covector<DifferenceType<X1,X2>> r(u1.size());
+        for(SizeType i=0; i!=r.size(); ++i) { r[i]=u1[i]-u2[i]; } return std::move(r); }
+
     template<class X1,class X2> friend Covector<SumType<X1,X2>> operator+(Covector<X1> const& u1, Covector<X2> const& u2) {
         ARIADNE_PRECONDITION(u1.size()==u2.size()); Covector<SumType<X1,X2>> r(u1.size());
         for(SizeType i=0; i!=r.size(); ++i) { r[i]=u1[i]+u2[i]; } return std::move(r); }
+
+    template<class X1,class X2> friend Covector<ProductType<X1,X2>> operator*(X1 const& s1, Covector<X2> const& u2) {
+        Covector<ProductType<X1,X2>> r(u2.size()); for(SizeType i=0; i!=r.size(); ++i) { r[i]=s1*u2[i]; } return std::move(r); }
 
     template<class X1,class X2> friend Covector<ProductType<X1,X2>> operator*(Covector<X1> const& u1, X2 const& s2) {
         Covector<ProductType<X1,X2>> r(u1.size()); for(SizeType i=0; i!=r.size(); ++i) { r[i]=u1[i]*s2; } return std::move(r); }

@@ -82,8 +82,6 @@ ValidatedAffineModelConstraint operator<=(const ValidatedAffineModelConstraint& 
     return ValidatedAffineModelConstraint(c.lower_bound(),c.function(),u);
 }
 
-ValidatedAffineModel affine_model(const ValidatedAffine& a);
-
 ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const ExactBoxType& d,
                      const Vector<ValidatedAffine>& f)
     : _domain(d), _space_models(f.size(),ValidatedAffineModel(d.size(),Precision64()))

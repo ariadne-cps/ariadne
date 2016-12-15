@@ -461,6 +461,7 @@ Matrix<Float64Value> cast_exact(Matrix<Float64Bounds> vA) {
 ValidatedAffineConstrainedImageSet
 ConstrainedImageSet::affine_approximation() const
 {
+    Precision64 prec;
     const Vector<ExactIntervalType> D=approximation(this->domain());
     Vector<Float64Value> m=midpoint(D);
     Matrix<Float64Value> G=cast_exact(jacobian(this->_function,m));
@@ -473,7 +474,7 @@ ConstrainedImageSet::affine_approximation() const
     for(List<EffectiveConstraint>::ConstIterator iter=this->_constraints.begin();
         iter!=this->_constraints.end(); ++iter)
     {
-        AffineModel<ValidatedTag,Float64> a=affine_model(D,iter->function());
+        AffineModel<ValidatedTag,Float64> a=affine_model(D,iter->function(),prec);
         ExactIntervalType b=iter->bounds();
         result.new_constraint(b.lower()<=a<=b.upper());
     }
@@ -824,17 +825,16 @@ ValidatedAffineConstrainedImageSet
 ValidatedConstrainedImageSet::affine_over_approximation() const
 {
     typedef List<ValidatedConstraint>::ConstIterator ConstIterator;
+    Precision64 prec;
 
     Vector<ExactIntervalType> domain = this->domain();
-    Vector<ValidatedAffineModel> space_models=affine_models(domain,this->function());
+    Vector<ValidatedAffineModel> space_models=affine_models(domain,this->function(),prec);
     List<ValidatedAffineModelConstraint> constraint_models;
     constraint_models.reserve(this->number_of_constraints());
     for(Nat i=0; i!=this->number_of_constraints(); ++i) {
         const ValidatedConstraint& constraint=this->constraint(i);
-        auto u=constraint.upper_bound();
-        constraint_models.append(ValidatedAffineModelConstraint(constraint.lower_bound(),affine_model(domain,constraint.function()),u));
-
-//        constraint_models.append(ValidatedAffineModelConstraint(constraint.lower_bound(),affine_model(domain,constraint.function()),constraint.upper_bound()));
+        auto am=affine_model(domain,constraint.function(),prec);
+        constraint_models.append(ValidatedAffineModelConstraint(constraint.lower_bound(),am,constraint.upper_bound()));
     }
 
     return ValidatedAffineConstrainedImageSet(domain,space_models,constraint_models);
@@ -887,16 +887,17 @@ ValidatedConstrainedImageSet::affine_over_approximation() const
 
 ValidatedAffineConstrainedImageSet ValidatedConstrainedImageSet::affine_approximation() const
 {
-    typedef List<ValidatedConstraint>::ConstIterator ConstIterator;
+    Precision64 prec;
 
     Vector<ExactIntervalType> domain = this->domain();
 
-    Vector<ValidatedAffineModel> space_models=affine_models(domain,this->function());
+    Vector<ValidatedAffineModel> space_models=affine_models(domain,this->function(),prec);
     List<ValidatedAffineModelConstraint> constraint_models;
     constraint_models.reserve(this->number_of_constraints());
     for(Nat i=0; i!=this->number_of_constraints(); ++i) {
         const ValidatedConstraint& constraint=this->constraint(i);
-        constraint_models.append(ValidatedAffineModelConstraint(constraint.lower_bound(),affine_model(domain,constraint.function()),constraint.upper_bound()));
+        auto am=affine_model(domain,constraint.function(),prec);
+        constraint_models.append(ValidatedAffineModelConstraint(constraint.lower_bound(),am,constraint.upper_bound()));
     }
 
     for(Nat i=0; i!=space_models.size(); ++i) { space_models[i].set_error(0u); }

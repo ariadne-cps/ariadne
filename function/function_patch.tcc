@@ -148,9 +148,9 @@ inline OutputStream& operator<<(OutputStream& os, const Representation< ExactBox
     return os;
 }
 
-inline OutputStream& operator<<(OutputStream& os, const Representation< Sweeper >& swp_repr)
+template<class F> inline OutputStream& operator<<(OutputStream& os, const Representation< Sweeper<F> >& swp_repr)
 {
-    const Sweeper& swp=*swp_repr.pointer;
+    const Sweeper<F>& swp=*swp_repr.pointer;
     Int precision=os.precision(); std::ios_base::fmtflags flags = os.flags();
     os.precision(17); os.setf(std::ios_base::showpoint);
     os << swp;
@@ -177,17 +177,17 @@ template<class M> FunctionPatch<M>::FunctionPatch()
     : _domain(), _model()
 { }
 
-template<class M> FunctionPatch<M>::FunctionPatch(const ExactBoxType& d, Sweeper swp)
+template<class M> FunctionPatch<M>::FunctionPatch(const ExactBoxType& d, SweeperType swp)
     : _domain(d), _model(d.size(),swp)
 {
 }
 
-template<class M> FunctionPatch<M>::FunctionPatch(const ExactBoxType& d, const Expansion<RawFloat64>& p, const RawFloat64& e, const Sweeper& swp)
+template<class M> FunctionPatch<M>::FunctionPatch(const ExactBoxType& d, const Expansion<RawFloat64>& p, const RawFloat64& e, const Sweeper<Float64>& swp)
     : _domain(d), _model(p,e,swp)
 {
 }
 
-template<class M> FunctionPatch<M>::FunctionPatch(const ExactBoxType& d, const Expansion<Float64Value>& p, const Float64Error& e, const Sweeper& swp)
+template<class M> FunctionPatch<M>::FunctionPatch(const ExactBoxType& d, const Expansion<Float64Value>& p, const Float64Error& e, const Sweeper<Float64>& swp)
     : _domain(d), _model(p,e,swp)
 {
 }
@@ -197,7 +197,7 @@ template<class M> FunctionPatch<M>::FunctionPatch(const ExactBoxType& d, const M
 {
 }
 
-template<class M> FunctionPatch<M>::FunctionPatch(const ExactBoxType& d, const ScalarFunctionType<M>& f, Sweeper swp)
+template<class M> FunctionPatch<M>::FunctionPatch(const ExactBoxType& d, const ScalarFunctionType<M>& f, SweeperType swp)
     : _domain(d), _model(f.argument_size(),swp)
 {
     ARIADNE_ASSERT_MSG(d.size()==f.argument_size(),"d="<<d<<" f="<<f);
@@ -213,34 +213,34 @@ template<class M> FunctionPatch<M>& FunctionPatch<M>::operator=(const ValidatedS
 
 
 
-template<class M> FunctionPatch<M> FunctionPatch<M>::zero(const ExactBoxType& d, Sweeper swp)
+template<class M> FunctionPatch<M> FunctionPatch<M>::zero(const ExactBoxType& d, SweeperType swp)
 {
     return FunctionPatch<M>(d,ModelType::zero(d.size(),swp));
 }
 
-template<class M> FunctionPatch<M> FunctionPatch<M>::constant(const ExactBoxType& d, const NumericType& c, Sweeper swp)
+template<class M> FunctionPatch<M> FunctionPatch<M>::constant(const ExactBoxType& d, const NumericType& c, SweeperType swp)
 {
     return FunctionPatch<M>(d,ModelType::constant(d.size(),c,swp));
 }
 
-template<class M> FunctionPatch<M> FunctionPatch<M>::unit_ball(const ExactBoxType& d, Sweeper swp)
+template<class M> FunctionPatch<M> FunctionPatch<M>::unit_ball(const ExactBoxType& d, SweeperType swp)
 {
     return FunctionPatch<M>(d,ModelType::unit_ball(d.size(),swp));
 }
 
-template<class M> FunctionPatch<M> FunctionPatch<M>::coordinate(const ExactBoxType& d, SizeType j, Sweeper swp)
+template<class M> FunctionPatch<M> FunctionPatch<M>::coordinate(const ExactBoxType& d, SizeType j, SweeperType swp)
 {
     ARIADNE_ASSERT(j<d.size());
     return FunctionPatch<M>(d,ModelType::scaling(d.size(),j,d[j],swp));
 }
 
-template<class M> VectorFunctionPatch<M> FunctionPatch<M>::identity(const ExactBoxType& d, Sweeper swp)
+template<class M> VectorFunctionPatch<M> FunctionPatch<M>::identity(const ExactBoxType& d, SweeperType swp)
 {
     return VectorFunctionPatch<M>(d,ModelType::scalings(d,swp));
 }
 
 
-template<class M> Vector<FunctionPatch<M>> FunctionPatch<M>::constants(const ExactBoxType& d, const Vector<NumericType>& c, Sweeper swp)
+template<class M> Vector<FunctionPatch<M>> FunctionPatch<M>::constants(const ExactBoxType& d, const Vector<NumericType>& c, SweeperType swp)
 {
     ARIADNE_DEPRECATED("FunctionPatch<M>::constants","Use VectorFunctionPatch<M>::constant instead");
     Vector<FunctionPatch<M>> x(c.size(),FunctionPatch<M>(d,swp));
@@ -250,7 +250,7 @@ template<class M> Vector<FunctionPatch<M>> FunctionPatch<M>::constants(const Exa
     return x;
 }
 
-template<class M> Vector<FunctionPatch<M>> FunctionPatch<M>::coordinates(const ExactBoxType& d, Sweeper swp)
+template<class M> Vector<FunctionPatch<M>> FunctionPatch<M>::coordinates(const ExactBoxType& d, SweeperType swp)
 {
     ARIADNE_DEPRECATED("FunctionPatch<M>::coordinates","Use VectorFunctionPatch<M>::identity instead");
     Vector<FunctionPatch<M>> x(d.dimension(),FunctionPatch<M>(d,swp));
@@ -260,7 +260,7 @@ template<class M> Vector<FunctionPatch<M>> FunctionPatch<M>::coordinates(const E
     return x;
 }
 
-template<class M> Vector<FunctionPatch<M>> FunctionPatch<M>::coordinates(const ExactBoxType& d, SizeType imin, SizeType imax, Sweeper swp)
+template<class M> Vector<FunctionPatch<M>> FunctionPatch<M>::coordinates(const ExactBoxType& d, SizeType imin, SizeType imax, SweeperType swp)
 {
     ARIADNE_DEPRECATED("FunctionPatch<M>::coordinates","Use VectorFunctionPatch<M>::projection instead");
     ARIADNE_ASSERT(imin<=imax);
@@ -316,7 +316,7 @@ template<class M> FunctionPatch<M>* FunctionPatch<M>::_create() const
 
 template<class M> VectorFunctionModelInterface<typename M::Paradigm>* FunctionPatch<M>::_create_identity() const
 {
-    Sweeper sweeper=this->sweeper();
+    SweeperType sweeper=this->sweeper();
     VectorFunctionPatch<M>* result = new VectorFunctionPatch<M>(this->domain().size(), FunctionPatch<M>(this->domain(),sweeper));
     for(SizeType i=0; i!=result->size(); ++i) { (*result)[i]=FunctionPatch<M>::coordinate(this->domain(),i,sweeper); }
     return result;
@@ -501,24 +501,27 @@ template<class M> OutputStream& operator<<(OutputStream& os, const ModelRepresen
 
 template<class M> OutputStream& operator<<(OutputStream& os, const ModelRepresentation<FunctionPatch<M>>& frepr)
 {
+    typedef typename M::RawFloatType F;
     FunctionPatch<M> const& f=*frepr.pointer;
     FunctionPatch<M> tf=f;
     tf.clobber();
-    tf.sweep(ThresholdSweeper(frepr.threshold));
+    tf.sweep(ThresholdSweeper<F>(frepr.precision(),frepr.threshold));
     os << "("<<tf.model()<<"+/-"<<f.error();
     return os;
 }
 
 template<class M> OutputStream& operator<<(OutputStream& os, const PolynomialRepresentation<FunctionPatch<M>>& frepr)
 {
+    typedef typename M::RawFloatType F;
+    typedef typename F::PrecisionType PR;
     FunctionPatch<M> const& function=*frepr.pointer;
     FunctionPatch<M> truncated_function = function;
     truncated_function.clobber();
-    truncated_function.sweep(ThresholdSweeper(frepr.threshold));
-    Float64Error truncatation_error = truncated_function.error();
+    truncated_function.sweep(ThresholdSweeper<F>(frepr.precision(),frepr.threshold));
+    FloatError<PR> truncatation_error = truncated_function.error();
     truncated_function.clobber();
-    Polynomial<Float64Bounds> validated_polynomial_function=polynomial(truncated_function);
-    Polynomial<Float64Value> polynomial_function = midpoint(validated_polynomial_function);
+    Polynomial<FloatBounds<PR>> validated_polynomial_function=polynomial(truncated_function);
+    Polynomial<FloatValue<PR>> polynomial_function = midpoint(validated_polynomial_function);
     if(frepr.names.empty()) { os << polynomial_function; }
     else { os << named_argument_repr(polynomial_function,frepr.names); }
     os << "+/-" << truncatation_error << "+/-" << function.error();
@@ -542,7 +545,7 @@ template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(SizeType k)
 {
 }
 
-template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(SizeType m, const ExactBoxType& d, Sweeper swp)
+template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(SizeType m, const ExactBoxType& d, SweeperType swp)
     : _domain(d), _models(m,ModelType(d.size(),swp))
 {
 }
@@ -581,7 +584,7 @@ template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBoxType
 template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBoxType& d,
                                            const Vector<Expansion<Float64Value>>& f,
                                            const Vector<Float64Error>& e,
-                                           Sweeper swp)
+                                           SweeperType swp)
     : _domain(d), _models(f.size(),ModelType(d.size(),swp))
 {
     ARIADNE_ASSERT(f.size()==e.size());
@@ -593,7 +596,7 @@ template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBoxType
 
 template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBoxType& d,
                                            const Vector<Expansion<Float64Value>>& f,
-                                           Sweeper swp)
+                                           SweeperType swp)
     : VectorFunctionPatch<M>(d,f,Vector<Float64Error>(f.size()),swp)
 {
 }
@@ -601,7 +604,7 @@ template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBoxType
 template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBoxType& d,
                                            const Vector<Expansion<RawFloat64>>& f,
                                            const Vector<RawFloat64>& e,
-                                           Sweeper swp)
+                                           SweeperType swp)
     : VectorFunctionPatch<M>(d,reinterpret_cast<Vector<Expansion<Float64Value>>const&>(f),
                            reinterpret_cast<Vector<Float64Error>const&>(e),swp)
 {
@@ -609,7 +612,7 @@ template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBoxType
 
 template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBoxType& d,
                                            const Vector<Expansion<RawFloat64>>& f,
-                                           Sweeper swp)
+                                           SweeperType swp)
     : VectorFunctionPatch<M>(d,reinterpret_cast<Vector<Expansion<Float64Value>>const&>(f),Vector<Float64Error>(f.size()),swp)
 {
 }
@@ -618,7 +621,7 @@ template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBoxType
 
 template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBoxType& d,
                                            const VectorFunctionType<M>& f,
-                                           const Sweeper& swp)
+                                           const SweeperType& swp)
     : _domain(d), _models()
 {
     //ARIADNE_ASSERT_MSG(f.result_size()>0, "d="<<d<<", f="<<f<<", swp="<<swp);
@@ -676,7 +679,7 @@ template<class M> FunctionPatch<M>* VectorFunctionPatch<M>::_create_zero() const
 
 template<class M> VectorFunctionPatch<M>* VectorFunctionPatch<M>::_create_identity() const
 {
-    Sweeper sweeper=this->sweeper();
+    SweeperType sweeper=this->sweeper();
     VectorFunctionPatch<M>* result = new VectorFunctionPatch<M>(this->domain().size(), FunctionPatch<M>(this->domain(),sweeper));
     for(SizeType i=0; i!=result->size(); ++i) { (*result)[i]=FunctionPatch<M>::coordinate(this->domain(),i,sweeper); }
     return result;
@@ -688,17 +691,17 @@ template<class M> VectorFunctionPatch<M>* VectorFunctionPatch<M>::_create_identi
 
 
 
-template<class M> VectorFunctionPatch<M> VectorFunctionPatch<M>::constant(const ExactBoxType& d, const Vector<NumericType>& c, Sweeper swp)
+template<class M> VectorFunctionPatch<M> VectorFunctionPatch<M>::constant(const ExactBoxType& d, const Vector<NumericType>& c, SweeperType swp)
 {
     return VectorFunctionPatch<M>(d,ModelType::constants(d.size(),c,swp));
 }
 
-template<class M> VectorFunctionPatch<M> VectorFunctionPatch<M>::identity(const ExactBoxType& d, Sweeper swp)
+template<class M> VectorFunctionPatch<M> VectorFunctionPatch<M>::identity(const ExactBoxType& d, SweeperType swp)
 {
     return VectorFunctionPatch<M>(d,ModelType::scalings(d,swp));
 }
 
-template<class M> VectorFunctionPatch<M> VectorFunctionPatch<M>::projection(const ExactBoxType& d, SizeType imin, SizeType imax, Sweeper swp)
+template<class M> VectorFunctionPatch<M> VectorFunctionPatch<M>::projection(const ExactBoxType& d, SizeType imin, SizeType imax, SweeperType swp)
 {
     return VectorFunctionPatch<M>(FunctionPatch<M>::coordinates(d,imin,imax,swp));
 }
@@ -761,13 +764,13 @@ template<class M> Bool VectorFunctionPatch<M>::operator!=(const VectorFunctionPa
 
 
 
-template<class M> Sweeper VectorFunctionPatch<M>::sweeper() const
+template<class M> auto VectorFunctionPatch<M>::sweeper() const -> SweeperType
 {
     ARIADNE_ASSERT(this->size()>0); return this->_models[0].sweeper();
 }
 
 
-template<class M> Void VectorFunctionPatch<M>::set_sweeper(Sweeper swp)
+template<class M> Void VectorFunctionPatch<M>::set_sweeper(SweeperType swp)
 {
     for(SizeType i=0; i!=this->result_size(); ++i) {
         this->_models[i].set_sweeper(swp);
@@ -914,7 +917,7 @@ template<class M> VectorFunctionPatch<M>& VectorFunctionPatch<M>::sweep()
     return *this;
 }
 
-template<class M> VectorFunctionPatch<M>& VectorFunctionPatch<M>::sweep(const SweeperInterface& sweeper)
+template<class M> VectorFunctionPatch<M>& VectorFunctionPatch<M>::sweep(const SweeperInterface<F>& sweeper)
 {
     for(SizeType i=0; i!=this->size(); ++i) {
         this->_models[i].sweep(sweeper);

@@ -121,5 +121,13 @@ ValidatedKleenean eq(Float64UpperInterval const& ivl1, Float64UpperInterval cons
 ValidatedKleenean lt(Float64UpperInterval const& ivl1, Float64UpperInterval const& ivl2) {
     return lt(cast_singleton(ivl1),cast_singleton(ivl2)); }
 
+FloatMPBounds cast_singleton(FloatMPUpperInterval const& ivl) {
+    return FloatMPBounds(ivl.lower(),ivl.upper()); }
+FloatMPUpperInterval make_interval(FloatMPBounds const& x) {
+    return FloatMPUpperInterval(x.lower(),x.upper()); }
+FloatMPError mag(FloatMPUpperInterval const& ivl) {
+    return mag(cast_singleton(ivl)); }
+FloatMPLowerBound mig(FloatMPUpperInterval const& ivl) {
+    return mig(cast_singleton(ivl)); }
 
 } // namespace Ariadne

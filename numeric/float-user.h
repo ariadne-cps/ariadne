@@ -180,9 +180,7 @@ template<class PR> inline const FloatValue<PR> FloatBall<PR>::value() const {
 template<class PR> inline const FloatError<PR> FloatBall<PR>::error() const {
     return FloatError<PR>(this->_e); }
 
-
-
-extern const FloatValue<Precision64> infty;
+extern const Float64Value infty;
 
 // Literals operation
 Float64Value operator"" _exact(long double lx);
@@ -229,6 +227,10 @@ template<template<class>class T> inline const T<Float64Approximation>& cast_appr
     return reinterpret_cast<const T<Float64Approximation>&>(t); }
 template<template<class>class T> inline const T<Float64Approximation>& cast_approximate(const T<Float64Value>& t) {
     return reinterpret_cast<const T<Float64Approximation>&>(t); }
+
+inline FloatMPValue const& cast_exact(RawFloatMP const& x) { return reinterpret_cast<FloatMPValue const&>(x); }
+inline FloatMPValue const& cast_exact(FloatMPApproximation const& x) { return reinterpret_cast<FloatMPValue const&>(x); }
+
 
 } // namespace Ariadne
 

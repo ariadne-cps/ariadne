@@ -80,8 +80,8 @@ Matrix<Float64> nonlinearities_zeroth_order(const VectorTaylorFunction& f, const
     Matrix<Float64> nonlinearities=Matrix<Float64>::zero(m,n);
     MultiIndex a;
     for(Nat i=0; i!=m; ++i) {
-        const ValidatedTaylorModel& tm=g.model(i);
-        for(ValidatedTaylorModel::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
+        const ValidatedTaylorModel64& tm=g.model(i);
+        for(ValidatedTaylorModel64::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
             a=iter->key();
             if(a.degree()>1) {
                 for(Nat j=0; j!=n; ++j) {

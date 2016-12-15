@@ -69,7 +69,7 @@ VectorTaylorFunction __getslice__(const VectorTaylorFunction& tf, Int start, Int
     if(stop<0) { stop+=tf.result_size(); }
     ARIADNE_ASSERT_MSG(0<=start&&start<=stop&&SizeType(stop)<=tf.result_size(),
             "result_size="<<tf.result_size()<<", start="<<start<<", stop="<<stop);
-    return VectorTaylorFunction(tf.domain(),Vector<ValidatedTaylorModel>(project(tf.models(),range(start,stop))));
+    return VectorTaylorFunction(tf.domain(),Vector<ValidatedTaylorModel64>(project(tf.models(),range(start,stop))));
 }
 
 
@@ -233,9 +233,9 @@ OutputStream& operator<<(OutputStream& os, const PythonRepresentation<VectorTayl
     return os;
 }
 
-List<MultiIndex> keys(const ValidatedTaylorModel& tm) {
+List<MultiIndex> keys(const ValidatedTaylorModel64& tm) {
     List<MultiIndex> r;
-    for(ValidatedTaylorModel::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
+    for(ValidatedTaylorModel64::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
         r.append(iter->key());
     }
     return r;
@@ -250,9 +250,9 @@ ValidatedVectorFunction unrestrict(const ValidatedVectorFunctionModel& fm) {
 }
 
 
-ExactIntervalType _range1(const ValidatedTaylorModel&);
-ExactIntervalType _range2(const ValidatedTaylorModel&);
-ExactIntervalType _range3(const ValidatedTaylorModel&);
+ExactIntervalType _range1(const ValidatedTaylorModel64&);
+ExactIntervalType _range2(const ValidatedTaylorModel64&);
+ExactIntervalType _range3(const ValidatedTaylorModel64&);
 
 } // namespace Ariadne
 
@@ -284,30 +284,30 @@ Void export_sweeper()
 
 }
 
-Expansion<Float64Value>const& get_expansion(ValidatedTaylorModel const& tm) { return tm.expansion(); }
+Expansion<Float64Value>const& get_expansion(ValidatedTaylorModel64 const& tm) { return tm.expansion(); }
 
 Void export_validated_taylor_model()
 {
     typedef SizeType SizeType;
-    typedef ValidatedTaylorModel ValidatedTaylorModel;
+    typedef ValidatedTaylorModel64 ValidatedTaylorModel64;
     typedef VectorTaylorFunction VectorTaylorFunction;
 
-    class_<ValidatedTaylorModel> taylor_model_class("ValidatedTaylorModel", init<ValidatedTaylorModel>());
+    class_<ValidatedTaylorModel64> taylor_model_class("ValidatedTaylorModel64", init<ValidatedTaylorModel64>());
     taylor_model_class.def( init< SizeType,Sweeper >());
-    taylor_model_class.def("keys", (List<MultiIndex>(*)(const ValidatedTaylorModel&))&keys);
-    taylor_model_class.def("value", (const Float64Value&(ValidatedTaylorModel::*)()const) &ValidatedTaylorModel::value, return_value_policy<copy_const_reference>());
-    taylor_model_class.def("gradient", (const Float64Value&(ValidatedTaylorModel::*)(SizeType)const) &ValidatedTaylorModel::gradient_value, return_value_policy<copy_const_reference>());
-    taylor_model_class.def("error", (const Float64Error&(ValidatedTaylorModel::*)()const) &ValidatedTaylorModel::error, return_value_policy<copy_const_reference>());
-    taylor_model_class.def("expansion", (const Expansion<Float64Value>&(*)(ValidatedTaylorModel const&)) &get_expansion, return_value_policy<copy_const_reference>());
-    taylor_model_class.def("set_error", (Void(ValidatedTaylorModel::*)(const Float64Error&)) &ValidatedTaylorModel::set_error);
-    taylor_model_class.def("argument_size", &ValidatedTaylorModel::argument_size);
-    taylor_model_class.def("domain", &ValidatedTaylorModel::domain);
-    taylor_model_class.def("range", &ValidatedTaylorModel::range);
-    taylor_model_class.def("set_sweeper", &ValidatedTaylorModel::set_sweeper);
-    taylor_model_class.def("sweeper", &ValidatedTaylorModel::sweeper);
-    taylor_model_class.def("sweep", (ValidatedTaylorModel&(ValidatedTaylorModel::*)()) &ValidatedTaylorModel::sweep, return_value_policy<reference_existing_object>());
-    taylor_model_class.def("__getitem__", &__getitem__<ValidatedTaylorModel,MultiIndex,Float64Value>);
-    taylor_model_class.def("__setitem__",&__setitem__<ValidatedTaylorModel,MultiIndex,Float64Value>);
+    taylor_model_class.def("keys", (List<MultiIndex>(*)(const ValidatedTaylorModel64&))&keys);
+    taylor_model_class.def("value", (const Float64Value&(ValidatedTaylorModel64::*)()const) &ValidatedTaylorModel64::value, return_value_policy<copy_const_reference>());
+    taylor_model_class.def("gradient", (const Float64Value&(ValidatedTaylorModel64::*)(SizeType)const) &ValidatedTaylorModel64::gradient_value, return_value_policy<copy_const_reference>());
+    taylor_model_class.def("error", (const Float64Error&(ValidatedTaylorModel64::*)()const) &ValidatedTaylorModel64::error, return_value_policy<copy_const_reference>());
+    taylor_model_class.def("expansion", (const Expansion<Float64Value>&(*)(ValidatedTaylorModel64 const&)) &get_expansion, return_value_policy<copy_const_reference>());
+    taylor_model_class.def("set_error", (Void(ValidatedTaylorModel64::*)(const Float64Error&)) &ValidatedTaylorModel64::set_error);
+    taylor_model_class.def("argument_size", &ValidatedTaylorModel64::argument_size);
+    taylor_model_class.def("domain", &ValidatedTaylorModel64::domain);
+    taylor_model_class.def("range", &ValidatedTaylorModel64::range);
+    taylor_model_class.def("set_sweeper", &ValidatedTaylorModel64::set_sweeper);
+    taylor_model_class.def("sweeper", &ValidatedTaylorModel64::sweeper);
+    taylor_model_class.def("sweep", (ValidatedTaylorModel64&(ValidatedTaylorModel64::*)()) &ValidatedTaylorModel64::sweep, return_value_policy<reference_existing_object>());
+    taylor_model_class.def("__getitem__", &__getitem__<ValidatedTaylorModel64,MultiIndex,Float64Value>);
+    taylor_model_class.def("__setitem__",&__setitem__<ValidatedTaylorModel64,MultiIndex,Float64Value>);
     taylor_model_class.def(+self);
     taylor_model_class.def(-self);
     taylor_model_class.def(self+self);
@@ -330,17 +330,17 @@ Void export_validated_taylor_model()
     taylor_model_class.def(self-=self);
     taylor_model_class.def(self_ns::str(self));
 
-    taylor_model_class.def("constant",(ValidatedTaylorModel(*)(SizeType, const ValidatedNumericType&,Sweeper))&ValidatedTaylorModel::constant);
-    taylor_model_class.def("coordinate",(ValidatedTaylorModel(*)(SizeType, SizeType,Sweeper))&ValidatedTaylorModel::coordinate);
+    taylor_model_class.def("constant",(ValidatedTaylorModel64(*)(SizeType, const ValidatedNumericType&,Sweeper))&ValidatedTaylorModel64::constant);
+    taylor_model_class.def("coordinate",(ValidatedTaylorModel64(*)(SizeType, SizeType,Sweeper))&ValidatedTaylorModel64::coordinate);
 
     taylor_model_class.staticmethod("constant");
     taylor_model_class.staticmethod("coordinate");
 
-    //def("max",(ValidatedTaylorModel(*)(const ValidatedTaylorModel&,const ValidatedTaylorModel&))&max);
-    //def("min",(ValidatedTaylorModel(*)(const ValidatedTaylorModel&,const ValidatedTaylorModel&))&min);
-    //def("abs",(ValidatedTaylorModel(*)(const ValidatedTaylorModel&))&abs);
+    //def("max",(ValidatedTaylorModel64(*)(const ValidatedTaylorModel64&,const ValidatedTaylorModel64&))&max);
+    //def("min",(ValidatedTaylorModel64(*)(const ValidatedTaylorModel64&,const ValidatedTaylorModel64&))&min);
+    //def("abs",(ValidatedTaylorModel64(*)(const ValidatedTaylorModel64&))&abs);
 
-    typedef AlgebraOperations<ValidatedTaylorModel> Operations;
+    typedef AlgebraOperations<ValidatedTaylorModel64> Operations;
     def("pos",&Operations::_pos);
     def("neg",&Operations::_neg);
     def("rec",&Operations::_rec);
@@ -353,35 +353,35 @@ Void export_validated_taylor_model()
     def("tan",&Operations::_tan);
     def("atan",&Operations::_atan);
 
-    taylor_model_class.def("range", (UpperIntervalType(ValidatedTaylorModel::*)()const) &ValidatedTaylorModel::range);
+    taylor_model_class.def("range", (UpperIntervalType(ValidatedTaylorModel64::*)()const) &ValidatedTaylorModel64::range);
 
-    //def("evaluate", (ValidatedNumericType(*)(const ValidatedTaylorModel&, const Vector<ValidatedNumericType>&))&evaluate);
-    //def("split",(ValidatedTaylorModel(*)(const ValidatedTaylorModel&,SizeType,SplitPart)) &split);
+    //def("evaluate", (ValidatedNumericType(*)(const ValidatedTaylorModel64&, const Vector<ValidatedNumericType>&))&evaluate);
+    //def("split",(ValidatedTaylorModel64(*)(const ValidatedTaylorModel64&,SizeType,SplitPart)) &split);
 
-    from_python< Vector<ValidatedTaylorModel> >();
-    to_python< Vector<ValidatedTaylorModel> >();
+    from_python< Vector<ValidatedTaylorModel64> >();
+    to_python< Vector<ValidatedTaylorModel64> >();
 
 }
 
 Void export_approximate_taylor_model()
 {
     typedef SizeType SizeType;
-    typedef ApproximateTaylorModel ApproximateTaylorModel;
+    typedef ApproximateTaylorModel64 ApproximateTaylorModel64;
 
-    class_<ApproximateTaylorModel> taylor_model_class("ApproximateTaylorModel", init<ApproximateTaylorModel>());
+    class_<ApproximateTaylorModel64> taylor_model_class("ApproximateTaylorModel64", init<ApproximateTaylorModel64>());
     taylor_model_class.def( init< SizeType,Sweeper >());
-    taylor_model_class.def("keys", (List<MultiIndex>(*)(const ApproximateTaylorModel&))&keys);
-    taylor_model_class.def("value", (const Float64Approximation&(ApproximateTaylorModel::*)()const) &ApproximateTaylorModel::value, return_value_policy<copy_const_reference>());
-    taylor_model_class.def("gradient", (const Float64Approximation&(ApproximateTaylorModel::*)(SizeType)const) &ApproximateTaylorModel::gradient_value, return_value_policy<copy_const_reference>());
-    taylor_model_class.def("expansion", (const Expansion<Float64Approximation>&(*)(ApproximateTaylorModel const&)) &get_expansion, return_value_policy<copy_const_reference>());
-    taylor_model_class.def("argument_size", &ApproximateTaylorModel::argument_size);
-    taylor_model_class.def("domain", &ApproximateTaylorModel::domain);
-    taylor_model_class.def("range", &ApproximateTaylorModel::range);
-    taylor_model_class.def("set_sweeper", &ApproximateTaylorModel::set_sweeper);
-    taylor_model_class.def("sweeper", &ApproximateTaylorModel::sweeper);
-    taylor_model_class.def("sweep", (ApproximateTaylorModel&(ApproximateTaylorModel::*)()) &ApproximateTaylorModel::sweep, return_value_policy<reference_existing_object>());
-    taylor_model_class.def("__getitem__", &__getitem__<ApproximateTaylorModel,MultiIndex,Float64Approximation>);
-    taylor_model_class.def("__setitem__",&__setitem__<ApproximateTaylorModel,MultiIndex,Float64Approximation>);
+    taylor_model_class.def("keys", (List<MultiIndex>(*)(const ApproximateTaylorModel64&))&keys);
+    taylor_model_class.def("value", (const Float64Approximation&(ApproximateTaylorModel64::*)()const) &ApproximateTaylorModel64::value, return_value_policy<copy_const_reference>());
+    taylor_model_class.def("gradient", (const Float64Approximation&(ApproximateTaylorModel64::*)(SizeType)const) &ApproximateTaylorModel64::gradient_value, return_value_policy<copy_const_reference>());
+    taylor_model_class.def("expansion", (const Expansion<Float64Approximation>&(*)(ApproximateTaylorModel64 const&)) &get_expansion, return_value_policy<copy_const_reference>());
+    taylor_model_class.def("argument_size", &ApproximateTaylorModel64::argument_size);
+    taylor_model_class.def("domain", &ApproximateTaylorModel64::domain);
+    taylor_model_class.def("range", &ApproximateTaylorModel64::range);
+    taylor_model_class.def("set_sweeper", &ApproximateTaylorModel64::set_sweeper);
+    taylor_model_class.def("sweeper", &ApproximateTaylorModel64::sweeper);
+    taylor_model_class.def("sweep", (ApproximateTaylorModel64&(ApproximateTaylorModel64::*)()) &ApproximateTaylorModel64::sweep, return_value_policy<reference_existing_object>());
+    taylor_model_class.def("__getitem__", &__getitem__<ApproximateTaylorModel64,MultiIndex,Float64Approximation>);
+    taylor_model_class.def("__setitem__",&__setitem__<ApproximateTaylorModel64,MultiIndex,Float64Approximation>);
     taylor_model_class.def(+self);
     taylor_model_class.def(-self);
     taylor_model_class.def(self+self);
@@ -404,17 +404,17 @@ Void export_approximate_taylor_model()
     taylor_model_class.def(self-=self);
     taylor_model_class.def(self_ns::str(self));
 
-    taylor_model_class.def("constant",(ApproximateTaylorModel(*)(SizeType, const ApproximateNumericType&,Sweeper))&ApproximateTaylorModel::constant);
-    taylor_model_class.def("coordinate",(ApproximateTaylorModel(*)(SizeType, SizeType,Sweeper))&ApproximateTaylorModel::coordinate);
+    taylor_model_class.def("constant",(ApproximateTaylorModel64(*)(SizeType, const ApproximateNumericType&,Sweeper))&ApproximateTaylorModel64::constant);
+    taylor_model_class.def("coordinate",(ApproximateTaylorModel64(*)(SizeType, SizeType,Sweeper))&ApproximateTaylorModel64::coordinate);
 
     taylor_model_class.staticmethod("constant");
     taylor_model_class.staticmethod("coordinate");
 
-    //def("max",(ApproximateTaylorModel(*)(const ApproximateTaylorModel&,const ApproximateTaylorModel&))&max);
-    //def("min",(ApproximateTaylorModel(*)(const ApproximateTaylorModel&,const ApproximateTaylorModel&))&min);
-    //def("abs",(ApproximateTaylorModel(*)(const ApproximateTaylorModel&))&abs);
+    //def("max",(ApproximateTaylorModel64(*)(const ApproximateTaylorModel64&,const ApproximateTaylorModel64&))&max);
+    //def("min",(ApproximateTaylorModel64(*)(const ApproximateTaylorModel64&,const ApproximateTaylorModel64&))&min);
+    //def("abs",(ApproximateTaylorModel64(*)(const ApproximateTaylorModel64&))&abs);
 
-    typedef AlgebraOperations<ApproximateTaylorModel> Operations;
+    typedef AlgebraOperations<ApproximateTaylorModel64> Operations;
     def("pos",&Operations::_pos);
     def("neg",&Operations::_neg);
     def("rec",&Operations::_rec);
@@ -427,11 +427,11 @@ Void export_approximate_taylor_model()
     def("tan",&Operations::_tan);
     def("atan",&Operations::_atan);
 
-    //def("evaluate", (ApproximateNumericType(*)(const ApproximateTaylorModel&, const Vector<ApproximateNumericType>&))&evaluate);
-    //def("split",(ApproximateTaylorModel(*)(const ApproximateTaylorModel&,SizeType,SplitPart)) &split);
+    //def("evaluate", (ApproximateNumericType(*)(const ApproximateTaylorModel64&, const Vector<ApproximateNumericType>&))&evaluate);
+    //def("split",(ApproximateTaylorModel64(*)(const ApproximateTaylorModel64&,SizeType,SplitPart)) &split);
 
-    from_python< Vector<ApproximateTaylorModel> >();
-    to_python< Vector<ApproximateTaylorModel> >();
+    from_python< Vector<ApproximateTaylorModel64> >();
+    to_python< Vector<ApproximateTaylorModel64> >();
 }
 
 
@@ -512,7 +512,7 @@ Void export_vector_function_model()
 Void export_scalar_taylor_function()
 {
     class_<ScalarTaylorFunction> scalar_taylor_function_class("ScalarTaylorFunction",init<ScalarTaylorFunction>());
-    scalar_taylor_function_class.def(init<ExactBoxType,ValidatedTaylorModel>());
+    scalar_taylor_function_class.def(init<ExactBoxType,ValidatedTaylorModel64>());
     scalar_taylor_function_class.def(init< ExactBoxType,Sweeper >());
     scalar_taylor_function_class.def(init< ExactBoxType, const EffectiveScalarFunction&,Sweeper >());
     scalar_taylor_function_class.def(init< ExactBoxType, Expansion<Float64Value>, Float64Error, Sweeper >());
@@ -522,7 +522,7 @@ Void export_scalar_taylor_function()
     scalar_taylor_function_class.def("domain", &ScalarTaylorFunction::domain);
     scalar_taylor_function_class.def("codomain", &ScalarTaylorFunction::codomain);
     scalar_taylor_function_class.def("range", &ScalarTaylorFunction::range);
-    scalar_taylor_function_class.def("model", (const ValidatedTaylorModel&(ScalarTaylorFunction::*)()const)&ScalarTaylorFunction::model, return_value_policy<copy_const_reference>());
+    scalar_taylor_function_class.def("model", (const ValidatedTaylorModel64&(ScalarTaylorFunction::*)()const)&ScalarTaylorFunction::model, return_value_policy<copy_const_reference>());
     scalar_taylor_function_class.def("polynomial", (Polynomial<ExactIntervalType>(ScalarTaylorFunction::*)()const)&ScalarTaylorFunction::polynomial);
     scalar_taylor_function_class.def("number_of_nonzeros", (SizeType(ScalarTaylorFunction::*)()const)&ScalarTaylorFunction::number_of_nonzeros);
     scalar_taylor_function_class.def("set_sweeper", &ScalarTaylorFunction::set_sweeper);

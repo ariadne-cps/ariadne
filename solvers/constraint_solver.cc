@@ -48,7 +48,7 @@ namespace Ariadne {
 typedef Vector<Float64Approximation> FloatApproximationVector;
 typedef Vector<Float64Value> ExactFloatVector;
 
-inline Sweeper default_sweeper() { return Sweeper(); }
+inline Sweeper<Float64> default_sweeper() { return Sweeper<Float64>(); }
 
 Sign sign(const Float64& x) {
     if(x>0) { return NEGATIVE; }

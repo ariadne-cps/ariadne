@@ -41,16 +41,16 @@ namespace Ariadne {
 
 namespace {
 
-Vector<UpperIntervalType> ranges(const Vector<ValidatedTaylorModel>& f) {
+Vector<UpperIntervalType> ranges(const Vector<ValidatedTaylorModel64>& f) {
     Vector<UpperIntervalType> r(f.size()); for(Nat i=0; i!=f.size(); ++i) { r[i]=f[i].range(); } return r;
 }
 
-Vector<ValidatedTaylorModel>& clobber(Vector<ValidatedTaylorModel>& h) {
+Vector<ValidatedTaylorModel64>& clobber(Vector<ValidatedTaylorModel64>& h) {
     for(Nat i=0; i!=h.size(); ++i) { h[i].set_error(0u); } return h; }
 
 // Compute the Jacobian over an arbitrary domain
 Matrix<ValidatedNumericType>
-jacobian2(const Vector<ValidatedTaylorModel>& f, const Vector<ValidatedNumericType>& x)
+jacobian2(const Vector<ValidatedTaylorModel64>& f, const Vector<ValidatedNumericType>& x)
 {
     Vector< Differential<ValidatedNumericType> > dx(x.size(), f.size(), 1u);
     for(Nat i=0; i!=x.size()-f.size(); ++i) {
@@ -68,7 +68,7 @@ jacobian2(const Vector<ValidatedTaylorModel>& f, const Vector<ValidatedNumericTy
 
 // Compute the Jacobian over the unit domain
 Matrix<Float64Value>
-jacobian2_value(const Vector<ValidatedTaylorModel>& f)
+jacobian2_value(const Vector<ValidatedTaylorModel64>& f)
 {
     const Nat rs=f.size();
     const Nat fas=f.zero_element().argument_size();
@@ -85,14 +85,14 @@ jacobian2_value(const Vector<ValidatedTaylorModel>& f)
 
 // Compute the Jacobian over the unit domain
 Matrix<ValidatedNumericType>
-jacobian2_range(const Vector<ValidatedTaylorModel>& f)
+jacobian2_range(const Vector<ValidatedTaylorModel64>& f)
 {
     Nat rs=f.size();
     Nat fas=f.zero_element().argument_size();
     Nat has=fas-rs;
     Matrix<ValidatedNumericType> J(rs,rs);
     for(Nat i=0; i!=rs; ++i) {
-        for(ValidatedTaylorModel::ConstIterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
+        for(ValidatedTaylorModel64::ConstIterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
             for(Nat k=0; k!=rs; ++k) {
                 const Nat c=iter->key()[has+k];
                 if(c>0) {

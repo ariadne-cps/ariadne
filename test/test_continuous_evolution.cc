@@ -128,7 +128,7 @@ Void TestContinuousEvolution::test() const
     evolver.configuration().maximum_step_size(step_size);
 
     // Over-approximate the initial set by a grid cell
-    TaylorFunctionFactory function_factory(ThresholdSweeper(1e-10));
+    TaylorFunctionFactory function_factory(ThresholdSweeper<Float64>(Precision64(),1e-10));
     EnclosureType initial_set(initial_box,function_factory);
     ARIADNE_TEST_PRINT(initial_set);
 
@@ -186,7 +186,7 @@ Void TestContinuousEvolution::failure_test() const
     evolverone.configuration().maximum_enclosure_radius(enclosure_radius);
     evolverone.configuration().maximum_step_size(step_size);
 
-    TaylorFunctionFactory function_factory(ThresholdSweeper(1e-10));
+    TaylorFunctionFactory function_factory(ThresholdSweeper<Float64>(Precision64(),1e-10));
     EnclosureType initial_set(initial_box,function_factory);
     // cout << "initial_set=" << initial_set << endl << endl;
 

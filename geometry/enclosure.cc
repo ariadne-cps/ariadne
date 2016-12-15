@@ -179,15 +179,15 @@ Void Enclosure::_solve_zero_constraints() {
     this->_check();
     for(List<ValidatedScalarFunctionModel>::Iterator iter=this->_zero_constraints.begin(); iter!=this->_zero_constraints.end(); ) {
         const ExactBoxType& domain=this->domain();
-        const ValidatedTaylorModel& model=iter->model();
+        const ValidatedTaylorModel64& model=iter->model();
         const Nat k=model.argument_size()-1u;
-        ValidatedTaylorModel zeroth_order(k,this->sweeper());
-        ValidatedTaylorModel first_order(k,this->sweeper());
+        ValidatedTaylorModel64 zeroth_order(k,this->sweeper());
+        ValidatedTaylorModel64 first_order(k,this->sweeper());
         Bool is_zeroth_order=true;
         Bool is_first_order=true;
         MultiIndex r(k);
         // Try linear approach in last coefficient
-        for(ValidatedTaylorModel::ConstIterator tmiter=model.begin(); tmiter!=model.end(); ++tmiter) {
+        for(ValidatedTaylorModel64::ConstIterator tmiter=model.begin(); tmiter!=model.end(); ++tmiter) {
             if(tmiter->key()[k]==0) {
                 assign_all_but_last(r,tmiter->key());
                 zeroth_order.expansion().append(r,tmiter->data());
@@ -201,7 +201,7 @@ Void Enclosure::_solve_zero_constraints() {
         }
         if(is_first_order && !is_zeroth_order) {
             const ExactBoxType new_domain=project(domain,range(0,k));
-            ValidatedTaylorModel substitution_model=-zeroth_order/first_order;
+            ValidatedTaylorModel64 substitution_model=-zeroth_order/first_order;
             this->_space_function=this->function_factory().create(new_domain,Ariadne::substitute(this->_space_function.models(),k,substitution_model));
             for(List<ValidatedScalarFunctionModel>::Iterator constraint_iter=this->_negative_constraints.begin();
                     constraint_iter!=this->_negative_constraints.end(); ++constraint_iter) {
@@ -1155,10 +1155,10 @@ Enclosure::kuhn_recondition()
     }
 
     const VectorTaylorFunction& function=dynamic_cast<const VectorTaylorFunction&>(this->space_function().reference());
-    const Vector<ValidatedTaylorModel>& models = function.models();
+    const Vector<ValidatedTaylorModel64>& models = function.models();
     Matrix<Float64> dependencies(this->dimension(),this->number_of_parameters());
     for(SizeType i=0; i!=dependencies.row_size(); ++i) {
-        for(ValidatedTaylorModel::ConstIterator iter=models[i].begin(); iter!=models[i].end(); ++iter) {
+        for(ValidatedTaylorModel64::ConstIterator iter=models[i].begin(); iter!=models[i].end(); ++iter) {
             for(SizeType j=0; j!=dependencies.column_size(); ++j) {
                 if(iter->key()[j]!=0) {
                     dependencies[i][j]+=abs(iter->data()).raw();
@@ -1182,7 +1182,7 @@ Enclosure::kuhn_recondition()
     std::sort(kept_parameters.begin(),kept_parameters.end());
     std::sort(discarded_parameters.begin(),discarded_parameters.end());
 
-    Vector<ValidatedTaylorModel> new_models(models.size(),ValidatedTaylorModel(number_of_kept_parameters+number_of_error_parameters,function.sweeper()));
+    Vector<ValidatedTaylorModel64> new_models(models.size(),ValidatedTaylorModel64(number_of_kept_parameters+number_of_error_parameters,function.sweeper()));
     for(SizeType i=0; i!=this->dimension(); ++i) {
         new_models[i] = Ariadne::recondition(models[i],discarded_parameters,number_of_error_parameters,i);
     }
@@ -1445,10 +1445,10 @@ struct ValidatedAffineModel {
     ValidatedAffineModel(Float64 c, const Vector<Float64>& g, Float64 e) : _c(c), _g(g), _e(e) { }
 };
 
-ValidatedAffineModel _affine_model(const ValidatedTaylorModel& tm) {
+ValidatedAffineModel _affine_model(const ValidatedTaylorModel64& tm) {
     ValidatedAffineModel result(0.0,Vector<Float64>(tm.argument_size(),0.0),tm.error());
     Float64::set_rounding_upward();
-    for(ValidatedTaylorModel::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
+    for(ValidatedTaylorModel64::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
         if(iter->key().degree()>=2) { result._e+=abs(iter->data()); }
         else if(iter->key().degree()==0) {result. _c=iter->data(); }
         else {
@@ -1473,7 +1473,7 @@ Enclosure::affine_over_approximation() const
     const Nat nc=this->number_of_constraints();
     const Nat np=this->number_of_parameters();
 
-    AffineSweeper affine_sweeper;
+    AffineSweeper<Float64> affine_sweeper(Precision64());
     VectorTaylorFunction space_function=dynamic_cast<const VectorTaylorFunction&>(this->_space_function.reference());
     ScalarTaylorFunction time_function=dynamic_cast<const ScalarTaylorFunction&>(this->_time_function.reference());
     List<ScalarTaylorFunction> constraint_functions;
@@ -1489,7 +1489,7 @@ Enclosure::affine_over_approximation() const
     //std::cerr<<"\n"<<*this<<"\n"<<result<<"\n\n";
 
     for(Nat i=0; i!=this->number_of_constraints(); ++i) {
-        ValidatedTaylorModel const& constraint_model=constraint_functions[i].model();
+        ValidatedTaylorModel64 const& constraint_model=constraint_functions[i].model();
         ValidatedAffineModel affine_constraint_model=affine_model(constraint_model);
         ExactIntervalType constraint_bound=this->constraint(i).bounds();
         result.new_constraint(constraint_bound.lower()<=affine_constraint_model<=constraint_bound.upper());

@@ -37,8 +37,8 @@ typedef Differential<ApproximateNumericType> ApproximateDifferential;
 typedef Differential<ValidatedNumericType> ValidatedDifferential;
 typedef UnivariateDifferential<ApproximateNumericType> ApproximateUnivariateDifferential;
 typedef UnivariateDifferential<ValidatedNumericType> ValidatedUnivariateDifferential;
-typedef TaylorModel<ApproximateTag,Float64> ApproximateTaylorModel;
-typedef TaylorModel<ValidatedTag,Float64> ValidatedTaylorModel;
+typedef TaylorModel<ApproximateTag,Float64> ApproximateTaylorModel64;
+typedef TaylorModel<ValidatedTag,Float64> ValidatedTaylorModel64;
 typedef Formula<ApproximateNumericType> ApproximateFormula;
 typedef Formula<ValidatedNumericType> ValidatedFormula;
 typedef Formula<EffectiveNumericType> EffectiveFormula;
@@ -109,7 +109,7 @@ class FunctionMixin<F,ApproximateTag,D,C>
     virtual Result<FloatMPApproximation> _evaluate(const Argument<FloatMPApproximation>& x) const override;
     virtual Result<Differential<Float64Approximation>> _evaluate(const Argument<Differential<Float64Approximation>>& x) const override;
     virtual Result<Differential<FloatMPApproximation>> _evaluate(const Argument<Differential<FloatMPApproximation>>& x) const override;
-    virtual Result<ApproximateTaylorModel> _evaluate(const Argument<ApproximateTaylorModel>& x) const override;
+    virtual Result<ApproximateTaylorModel64> _evaluate(const Argument<ApproximateTaylorModel64>& x) const override;
     virtual Result<ApproximateFormula> _evaluate(const Argument<ApproximateFormula>& x) const override;
     virtual Result<ApproximateAlgebra> _evaluate(const Argument<ApproximateAlgebra>& x) const override;
 };
@@ -130,7 +130,7 @@ class FunctionMixin<F,ValidatedTag,D,C>
     virtual Result<Differential<Float64Bounds>> _evaluate(const Argument<Differential<Float64Bounds>>& x) const override;
     virtual Result<Differential<FloatMPBounds>> _evaluate(const Argument<Differential<FloatMPBounds>>& x) const override;
     virtual Result<ValidatedFormula> _evaluate(const Argument<ValidatedFormula>& x) const override;
-    virtual Result<ValidatedTaylorModel> _evaluate(const Argument<ValidatedTaylorModel>& x) const override;
+    virtual Result<ValidatedTaylorModel64> _evaluate(const Argument<ValidatedTaylorModel64>& x) const override;
     virtual Result<ValidatedAlgebra> _evaluate(const Argument<ValidatedAlgebra>& x) const override;
 
     virtual Result<ValidatedScalarFunction> _evaluate(const Argument<ValidatedScalarFunction>& x) const override;

@@ -53,8 +53,6 @@ typedef Vector< Procedure<ValidatedNumericType> > ValidatedVectorProcedure;
 typedef FunctionModelFactoryInterface<ValidatedTag> ValidatedFunctionModelFactoryInterface;
 typedef std::shared_ptr<const ValidatedFunctionModelFactoryInterface> FunctionFactoryPointer;
 
-class Sweeper;
-
 struct LipschitzConstant : Attribute<double> { LipschitzConstant(double v) : Attribute<double>(v) { } };
 struct StepMaximumError : Attribute<double> { StepMaximumError(double v) : Attribute<double>(v) { } };
 struct StepSweepThreshold : Attribute<double> { StepSweepThreshold(double v) : Attribute<double>(v) { } };

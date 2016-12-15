@@ -100,7 +100,7 @@ Void TestMapEvolver::test() const
 
 
     // Over-approximate the initial set by a grid cell
-    EnclosureType initial_set(initial_box,TaylorFunctionFactory(ThresholdSweeper(1e-10)));
+    EnclosureType initial_set(initial_box,TaylorFunctionFactory(ThresholdSweeper<Float64>(Precision64(),1e-10)));
     cout << "initial_set=" << initial_set << endl << endl << endl;
 
     // Set up the evolution parameters and grid

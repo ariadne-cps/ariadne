@@ -104,6 +104,8 @@ template<class M> class FunctionPatch
     , public DispatchConcreteGenericAlgebraNumberOperations<FunctionPatch<M>,NumericType<M>,Number<typename M::Paradigm>>
 {
     typedef typename M::Paradigm P;
+    typedef typename M::RawFloatType F;
+    typedef typename M::PrecisionType PR;
   public:
     typedef BoxDomain DomainType;
     typedef M ModelType;
@@ -118,6 +120,7 @@ template<class M> class FunctionPatch
     typedef ScalarFunction<Paradigm> FunctionType;
     typedef ScalarFunction<Paradigm> GenericType;
     typedef Number<Paradigm> GenericNumericType;
+    typedef Sweeper<F> SweeperType;
   private:
     static const CoefficientType _zero;
     DomainType _domain;
@@ -130,18 +133,18 @@ template<class M> class FunctionPatch
     explicit FunctionPatch();
     //! \brief Construct a FunctionPatch<M> over the domain \a d.
     //explicit FunctionPatch(const DomainType& d);
-    explicit FunctionPatch(const DomainType& d, Sweeper swp);
+    explicit FunctionPatch(const DomainType& d, SweeperType swp);
     //! \brief Construct a FunctionPatch<M> over the domain \a d, based on the scaled model \a m.
     explicit FunctionPatch(const DomainType& d, const ModelType& m);
 
-    explicit FunctionPatch(const ExactBoxType& d, const Expansion<Float64Value>& p, const Float64Error& e, const Sweeper& swp);
-    explicit FunctionPatch(const ExactBoxType& d, const Expansion<RawFloat64>& p, const RawFloat64& e, const Sweeper& swp);
+    explicit FunctionPatch(const ExactBoxType& d, const Expansion<Float64Value>& p, const Float64Error& e, const Sweeper<Float64>& swp);
+    explicit FunctionPatch(const ExactBoxType& d, const Expansion<RawFloat64>& p, const RawFloat64& e, const Sweeper<Float64>& swp);
 
     explicit FunctionPatch(const ScalarFunctionModel<ValidatedTag>& f);
     FunctionPatch& operator=(const ScalarFunctionModel<ValidatedTag>& f);
 
     //! \brief Construct a FunctionPatch over the domain \a d from the function \a f.
-    explicit FunctionPatch(const DomainType& d, const ScalarFunctionType<M>& f, Sweeper swp);
+    explicit FunctionPatch(const DomainType& d, const ScalarFunctionType<M>& f, SweeperType swp);
     //@}
 
     //@{
@@ -153,27 +156,27 @@ template<class M> class FunctionPatch
     //@{
     /*! \name Named constructors. */
     //! \brief Construct a zero function over domain \a d.
-    static FunctionPatch<M> zero(const DomainType& d, Sweeper swp);
+    static FunctionPatch<M> zero(const DomainType& d, SweeperType swp);
     //! \brief Construct a constant quantity in \a as independent variables.
-    static FunctionPatch<M> constant(const DomainType& d, const NumericType& c, Sweeper swp);
+    static FunctionPatch<M> constant(const DomainType& d, const NumericType& c, SweeperType swp);
     //! \brief Construct the quantity \f$x_j\f$ over the domain \a d.
-    static FunctionPatch<M> coordinate(const DomainType& d, SizeType j, Sweeper swp);
+    static FunctionPatch<M> coordinate(const DomainType& d, SizeType j, SweeperType swp);
     //! \brief Construct a constant quantity in \a as independent variables with value zero and uniform error \a 1
-    static FunctionPatch<M> unit_ball(const DomainType& d, Sweeper swp);
+    static FunctionPatch<M> unit_ball(const DomainType& d, SweeperType swp);
     //! \brief Construct the quantity \f$x_j\f$ over the domain \a d.
-    static VectorFunctionPatch<M> identity(const DomainType& d, Sweeper swp);
+    static VectorFunctionPatch<M> identity(const DomainType& d, SweeperType swp);
 
     //! \brief Construct the quantity \f$c+\sum g_jx_j\f$ over the domain \a d. // DEPRECATED
-    static FunctionPatch<M> affine(const DomainType& d, const CoefficientType& c, const Vector<CoefficientType>& g, Sweeper swp);
+    static FunctionPatch<M> affine(const DomainType& d, const CoefficientType& c, const Vector<CoefficientType>& g, SweeperType swp);
     //! \brief Construct the quantity \f$c+\sum g_jx_j \pm e\f$ over domain \a d. // DEPRECATED
-    static FunctionPatch<M> affine(const DomainType& d, const CoefficientType& x, const Vector<CoefficientType>& g, const ErrorType& e, Sweeper swp) ;
+    static FunctionPatch<M> affine(const DomainType& d, const CoefficientType& x, const Vector<CoefficientType>& g, const ErrorType& e, SweeperType swp) ;
 
     //! \brief Return the vector of constants with interval values \a c over domain \a d.
-    static Vector<FunctionPatch<M>> constants(const DomainType& d, const Vector<NumericType>& c, Sweeper swp);
+    static Vector<FunctionPatch<M>> constants(const DomainType& d, const Vector<NumericType>& c, SweeperType swp);
     //! \brief Return the vector of variables with values \a x over domain \a d.
-    static Vector<FunctionPatch<M>> coordinates(const DomainType& d, Sweeper swp);
+    static Vector<FunctionPatch<M>> coordinates(const DomainType& d, SweeperType swp);
     //! \brief Return the vector of variables in the range \a imin to \a imax with values \a x over domain \a d.
-    static Vector<FunctionPatch<M>> coordinates(const DomainType& d, SizeType imin, SizeType imax, Sweeper swp);
+    static Vector<FunctionPatch<M>> coordinates(const DomainType& d, SizeType imin, SizeType imax, SweeperType swp);
     //@}
 
     //@{
@@ -208,7 +211,7 @@ template<class M> class FunctionPatch
     //! \brief The error of the expansion over the domain.
     const ErrorType& error() const { return this->_model.error(); }
     /*! \brief The accuracy parameter used to control approximation of the Taylor function. */
-    Sweeper sweeper() const { return this->_model.sweeper(); }
+    SweeperType sweeper() const { return this->_model.sweeper(); }
     /*! \brief The precision of the numbers used. */
     PrecisionType precision() const { return this->_model.precision(); }
     //! \brief A reference to the expansion.
@@ -271,13 +274,13 @@ template<class M> class FunctionPatch
     FunctionPatch<M>& sweep() { this->_model.sweep(); return *this; }
     //! \brief Remove all terms whose degree is higher than \a deg or
     //! whose coefficient has magnitude less than \a eps.
-    FunctionPatch<M>& sweep(const SweeperInterface& swp) { this->_model.sweep(swp); return *this; }
+    FunctionPatch<M>& sweep(const SweeperInterface<F>& swp) { this->_model.sweep(swp); return *this; }
     //@}
 
     //@{
     /*! \name Accuracy parameters. */
     //! \copydoc TaylorModel<Float64Bounds>::set_sweeper()
-    Void set_sweeper(const Sweeper& swp) { this->_model.set_sweeper(swp); }
+    Void set_sweeper(const SweeperType& swp) { this->_model.set_sweeper(swp); }
     //@}
 
     //@{
@@ -413,6 +416,7 @@ template<class M> class VectorFunctionPatch
 {
     friend class VectorFunctionPatchElementReference<M>;
     typedef typename M::Paradigm P;
+    typedef typename M::RawFloatType F;
   public:
     typedef ExactBoxType DomainType;
     typedef M ModelType;
@@ -422,6 +426,7 @@ template<class M> class VectorFunctionPatch
     typedef typename ModelType::CoefficientType CoefficientType;
     typedef typename ModelType::ErrorType ErrorType;
     typedef typename ModelType::NumericType NumericType;
+    typedef Sweeper<F> SweeperType;
     typedef P Paradigm;
 
     /*! \brief Default constructor constructs a Taylor model of order zero with no arguments and no result variables. */
@@ -431,7 +436,7 @@ template<class M> class VectorFunctionPatch
     explicit VectorFunctionPatch<M>(SizeType result_size);
 
     /*! \brief Construct from a result size and a domain. */
-    VectorFunctionPatch<M>(SizeType result_size, const ExactBoxType& domain, Sweeper swp);
+    VectorFunctionPatch<M>(SizeType result_size, const ExactBoxType& domain, SweeperType swp);
 
     /*! \brief Construct a vector function all of whose components are the same. */
     VectorFunctionPatch<M>(SizeType result_size, const FunctionPatch<M>& scalar_function);
@@ -439,24 +444,24 @@ template<class M> class VectorFunctionPatch
     /*! \brief Construct from a domain and the expansion. */
     VectorFunctionPatch<M>(const ExactBoxType& domain,
                          const Vector<Expansion<Float64Value>>& expansion,
-                         Sweeper swp);
+                         SweeperType swp);
 
     /*! \brief Construct from a domain, and expansion and errors. */
     VectorFunctionPatch<M>(const ExactBoxType& domain,
                          const Vector<Expansion<Float64Value>>& expansion,
                          const Vector<Float64Error>& error,
-                         Sweeper swp);
+                         SweeperType swp);
 
     /*! \brief Construct from a domain, and expansion and errors. */
     VectorFunctionPatch<M>(const ExactBoxType& domain,
                          const Vector<Expansion<RawFloat64>>& expansion,
                          const Vector<RawFloat64>& error,
-                         Sweeper swp);
+                         SweeperType swp);
 
     /*! \brief Construct from a domain, and expansion and errors. */
     VectorFunctionPatch<M>(const ExactBoxType& domain,
                          const Vector<Expansion<RawFloat64>>& expansion,
-                         Sweeper swp);
+                         SweeperType swp);
 
     /*! \brief Construct from a domain and the models. */
     explicit VectorFunctionPatch<M>(const ExactBoxType& domain, const Vector< ModelType >& variables);
@@ -464,7 +469,7 @@ template<class M> class VectorFunctionPatch
     /*! \brief Construct from a domain, a function, and a sweeper determining the accuracy. */
     VectorFunctionPatch<M>(const ExactBoxType& domain,
                          const VectorFunctionType<M>& function,
-                         const Sweeper& sweeper);
+                         const SweeperType& sweeper);
 
     /*! \brief Construct from a vector of scalar Taylor functions. */
     explicit VectorFunctionPatch<M>(const Vector<FunctionPatch<M>>& components);
@@ -488,9 +493,9 @@ template<class M> class VectorFunctionPatch
 
     // Data access
     /*! \brief The sweeper used to control approximation of the Taylor function. */
-    Sweeper sweeper() const;
+    SweeperType sweeper() const;
     /*! \brief Set the sweeper used to control approximation of the Taylor function. */
-    Void set_sweeper(Sweeper swp);
+    Void set_sweeper(SweeperType swp);
     /*! \brief The data used to define the domain of the Taylor model. */
     const ExactBoxType domain() const;
     /*! \brief A rough bound for the range of the function. */
@@ -538,16 +543,16 @@ template<class M> class VectorFunctionPatch
     //! lower than the cutoff threshold of the quantity.
     VectorFunctionPatch<M>& sweep();
     //! \brief Remove all terms as specified by \a sweeper.
-    VectorFunctionPatch<M>& sweep(const SweeperInterface& sweeper);
+    VectorFunctionPatch<M>& sweep(const SweeperInterface<F>& sweeper);
     /*! \brief Set the error to zero. */
     Void clobber();
 
     /*! \brief The constant Taylor model with range \a r and argument domain \a d. */
-    static VectorFunctionPatch<M> constant(const ExactBoxType& d, const Vector<NumericType>& r, Sweeper swp);
+    static VectorFunctionPatch<M> constant(const ExactBoxType& d, const Vector<NumericType>& r, SweeperType swp);
     /*! \brief The identity Taylor model on domain \a d. */
-    static VectorFunctionPatch<M> identity(const ExactBoxType& d, Sweeper swp);
+    static VectorFunctionPatch<M> identity(const ExactBoxType& d, SweeperType swp);
     //! \brief Return the vector of variables in the range with values \a x over domain \a d.
-    static VectorFunctionPatch<M> projection(const ExactBoxType& d, SizeType imin, SizeType imax, Sweeper swp);
+    static VectorFunctionPatch<M> projection(const ExactBoxType& d, SizeType imin, SizeType imax, SweeperType swp);
 
     /*! \brief Convert to an interval polynomial. */
     Vector<Polynomial<Float64Bounds>> polynomials() const;

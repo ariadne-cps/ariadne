@@ -169,7 +169,7 @@ class TestSolver
         r=ExactIntervalType(-1,1);
         f=EffectiveScalarFunction(x-2*a);
         ARIADNE_TEST_PRINT(f);
-        ValidatedScalarFunctionModel g=ScalarTaylorFunction(join(p,r),f,ThresholdSweeper(1e-12));
+        ValidatedScalarFunctionModel g=ScalarTaylorFunction(join(p,r),f,ThresholdSweeper<Float64>(Precision64(),1e-12));
         ARIADNE_TEST_PRINT(g);
         try {
             h=solver->implicit(g,p,r);

@@ -55,8 +55,8 @@ typedef AffineModel<ApproximateTag,Float64> ApproximateAffineModel;
 typedef AffineModel<ValidatedTag,Float64> ValidatedAffineModel;
 
 template<class P, class F> class TaylorModel;
-typedef TaylorModel<ApproximateTag,Float64> ApproximateTaylorModel;
-typedef TaylorModel<ValidatedTag,Float64> ValidatedTaylorModel;
+typedef TaylorModel<ApproximateTag,Float64> ApproximateTaylorModel64;
+typedef TaylorModel<ValidatedTag,Float64> ValidatedTaylorModel64;
 
 
 

@@ -51,8 +51,8 @@ namespace Ariadne {
 
 static double TAYLOR_FUNCTION_WRITING_ACCURACY = 1e-8;
 
-template class FunctionPatch<ValidatedTaylorModel>;
-template class VectorFunctionPatch<ValidatedTaylorModel>;
+template class FunctionPatch<ValidatedTaylorModel64>;
+template class VectorFunctionPatch<ValidatedTaylorModel64>;
 
 
 
@@ -104,11 +104,11 @@ VectorTaylorFunction TaylorFunctionFactory::create_identity(const ExactBoxType& 
 
 
 FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory() {
-    return new TaylorFunctionFactory(Sweeper());
+    return new TaylorFunctionFactory(Sweeper<Float64>());
 }
 
 FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory(double sweep_threshold) {
-    return new TaylorFunctionFactory(ThresholdSweeper(sweep_threshold));
+    return new TaylorFunctionFactory(ThresholdSweeper<Float64>(Precision64(),sweep_threshold));
 }
 
 

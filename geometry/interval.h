@@ -160,7 +160,7 @@ template<class U> class Interval
     template<class UU, class PR, EnableIf<IsConstructible<U,UU,PR>> =dummy>
         explicit Interval(Interval<UU> const& x, PR pr) : _l(x.lower(),pr), _u(x.upper(),pr) { }
     //! \brief Construct an interval with the given value.
-    template<class UU, EnableIf<IsConstructible<U,UU,Precision64>> =dummy>
+    template<class UU, EnableIf<And<IsConstructible<U,UU,Precision64>,Not<IsConstructible<U,UU>>>> =dummy>
         explicit Interval(Interval<UU> const& x) : _l(x.lower(),Precision64()), _u(x.upper(),Precision64()) { }
 
     //! \brief Construct an interval with the given value.
@@ -196,7 +196,7 @@ template<class U> class Interval
     //! Test if the interval is a singleton.
     auto is_singleton() const -> decltype(declval<L>() == declval<U>());
     //! Test if the interval is bounded.
-    auto is_bounded() const -> decltype(declval<U>()<infty);
+    auto is_bounded() const -> decltype(declval<U>()<declval<L>());
   public:
     L _l; U _u;
 };
@@ -220,7 +220,7 @@ template<class U> inline auto is_empty(Interval<U> const& ivl) -> decltype(ivl.l
 //! \related Interval \brief Test if the interval is a singleton.
 template<class U> inline auto is_singleton(Interval<U> const& ivl) -> decltype(ivl.lower()==ivl.upper());
 //! \related Interval \brief Test if the interval is bounded.
-template<class U> inline auto is_bounded(Interval<U> const& ivl) -> decltype(ivl.upper()<infty);
+template<class U> inline auto is_bounded(Interval<U> const& ivl) -> decltype(ivl.upper()<ivl.lower());
 
 //! \related Interval \brief Test if \a x1 is an element of the interval \a ivl2.
 template<class U, class X> inline auto element(X const& x1, Interval<U> const& ivl2) -> decltype(ivl2.lower()<=x1 && ivl2.upper()>=x1);
@@ -273,29 +273,35 @@ template<class U> inline auto operator!=(Interval<U> const& ivl1, Interval<U> co
 
 //! \related Float64ApproximationInterval \related Float64ExactInterval \brief Allows the over-approximating interval \a ivl to be treated as exact.
 Interval<Float64Value> cast_exact(Interval<Float64Approximation> const& ivl);
+Interval<FloatMPValue> cast_exact(Interval<FloatMPApproximation> const& ivl);
 Interval<Float64Value> cast_exact_interval(Interval<Float64Approximation> const& ivl);
+Interval<FloatMPValue> cast_exact_interval(Interval<FloatMPApproximation> const& ivl);
 
 //! \related Float64UpperInterval \brief Computes a common refinement of \a ivl1 and \a ivl2 ivl.e. the intersection.
-Interval<Float64UpperBound> refinement(Interval<Float64UpperBound> const& ivl1, Interval<Float64UpperBound> const& ivl2);
+template<class PR> Interval<FloatUpperBound<PR>> refinement(Interval<FloatUpperBound<PR>> const& ivl1, Interval<FloatUpperBound<SelfType<PR>>> const& ivl2);
 //! \related Float64UpperInterval \brief Tests if \a ivl1 provides a better over-approximation to the exact interval than \a ivl2.
 //! ivl.e. \a ivl1 is a subset of \a ivl2.
-bool refines(Interval<Float64UpperBound> const& ivl1, Interval<Float64UpperBound> const& ivl2);
+template<class PR> bool refines(Interval<FloatUpperBound<PR>> const& ivl1, Interval<FloatUpperBound<SelfType<PR>>> const& ivl2);
 //! \related Float64UpperInterval \brief Tests if two intervals have the same representation.
-bool same(Interval<Float64UpperBound> const& ivl1, Interval<Float64UpperBound> const& ivl2);
+template<class PR> bool same(Interval<FloatUpperBound<PR>> const& ivl1, Interval<FloatUpperBound<SelfType<PR>>> const& ivl2);
 
 //! \related Float64UpperInterval \related FloatBounds \brief Allows the over-approximating interval \a ivl to be treated an over-approximation to a single point.
 Float64Bounds cast_singleton(Interval<Float64UpperBound> const& ivl);
 Float64UpperInterval make_interval(Float64Bounds const& x);
+FloatMPBounds cast_singleton(Interval<FloatMPUpperBound> const& ivl);
+FloatMPUpperInterval make_interval(FloatMPBounds const& x);
 
 //! \related Float64UpperInterval \brief An interval containing the given interval in its interior.
-Interval<Float64UpperBound> widen(Interval<Float64UpperBound> const& ivl);
-Interval<Float64UpperBound> widen(Interval<Float64UpperBound> const& ivl, Float64UpperBound e);
-Interval<Float64UpperBound> widen(Interval<Float64UpperBound> const& ivl, ValidatedUpperNumber e);
-Interval<Float64Value> widen_domain(Interval<Float64UpperBound> const& ivl);
-//! \related Float64LowerInterval \brief An interval contained in the interior of the given interval.
-Interval<Float64LowerBound> narrow(Interval<Float64LowerBound> const& ivl);
-Interval<Float64LowerBound> narrow(Interval<Float64LowerBound> const& ivl, Float64UpperBound e);
-Interval<Float64UpperBound> narrow(Interval<Float64LowerBound> const& ivl, ValidatedUpperNumber e);
+template<class PR> Interval<FloatUpperBound<PR>> widen(Interval<FloatValue<PR>> const& ivl);
+template<class PR> Interval<FloatUpperBound<PR>> widen(Interval<FloatUpperBound<PR>> const& ivl);
+template<class PR> Interval<FloatUpperBound<PR>> widen(Interval<FloatUpperBound<PR>> const& ivl, FloatUpperBound<PR> e);
+template<class PR> Interval<FloatUpperBound<PR>> widen(Interval<FloatUpperBound<PR>> const& ivl, ValidatedUpperNumber e);
+template<class PR> Interval<FloatValue<PR>> widen_domain(Interval<FloatUpperBound<PR>> const& ivl);
+//! \related FloatLowerInterval<PR> \brief An interval contained in the interior of the given interval.
+template<class PR> Interval<FloatLowerBound<PR>> narrow(Interval<FloatValue<PR>> const& ivl);
+template<class PR> Interval<FloatLowerBound<PR>> narrow(Interval<FloatLowerBound<PR>> const& ivl);
+template<class PR> Interval<FloatLowerBound<PR>> narrow(Interval<FloatLowerBound<PR>> const& ivl, FloatUpperBound<PR> e);
+template<class PR> Interval<FloatUpperBound<PR>> narrow(Interval<FloatLowerBound<PR>> const& ivl, ValidatedUpperNumber e);
 
 //! \related Interval \brief Read from an input stream.
 InputStream& operator>>(InputStream&, Interval<Float64Value>&);

@@ -36,6 +36,9 @@ namespace Ariadne {
 
 inline SizeType word_size(SizeType as) { return (1u+as)/sizeof(int)+1; }
 
+inline double nul(double d) { return 0.0; }
+inline double abs(double d) { return std::fabs(d); }
+
 
 template<class X> Expansion<X>::~Expansion()
 {
@@ -47,10 +50,6 @@ template<class X> Expansion<X>::~Expansion()
 
 template<class X> Expansion<X>::Expansion(SizeType as)
     : Expansion<X>(as,X()) {
-}
-
-template<class X> Expansion<X>::Expansion(SizeType as, PrecisionType pr, SizeType cap)
-    : Expansion<X>(as,X(pr),cap) {
 }
 
 template<class X> Expansion<X>::Expansion(SizeType as, X const& z, SizeType cap)

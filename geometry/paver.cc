@@ -402,7 +402,7 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
 
         // Use the computed dual variables to try to make a scalar function which is negative over the entire domain.
         // This should be easier than using all constraints separately
-        TrivialSweeper sweeper;
+        TrivialSweeper<Float64> sweeper{Precision64()};
         EffectiveScalarFunction zero_function=EffectiveScalarFunction::zero(m);
         EffectiveVectorFunction identity_function=EffectiveVectorFunction::identity(m);
         ScalarTaylorFunction txg(domain,zero_function,sweeper);
@@ -473,7 +473,7 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
 
 Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingInterface& r, const ExactBoxType& d, const VectorTaylorFunction& fg, const ExactBoxType& c, const GridCell& b, ExactPoint& x, ExactPoint& y, Int e)
 {
-    Sweeper sweeper = fg.sweeper();
+    Sweeper<Float64> sweeper = fg.sweeper();
     Precision64 pr;
 
     // When making a new starting primal point, need to move components away from zero
@@ -669,7 +669,7 @@ Void optimal_constraint_adjoin_outer_approximation(PavingInterface& p, const Exa
             }
         }
     } else {
-        ThresholdSweeper swp(1e-12);
+        ThresholdSweeper<Float64> swp(Precision64(),1e-12);
         fg=VectorTaylorFunction(d,join(f,g),swp);
     }
     ::hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(p,d,fg,rc,b,x,y,e);

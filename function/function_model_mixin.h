@@ -120,6 +120,8 @@ template<class F, class P> class VectorFunctionModelMixin
          return norm(static_cast<const F&>(*this)); }
     VectorFunctionModelInterface<P>* _embed(const ExactBoxType& d1, const ExactBoxType& d2) const override {
         return heap_copy(embed(d1,static_cast<const F&>(*this),d2)); }
+    VectorFunctionModelInterface<P>* _restriction(const ExactBoxType& d) const override {
+        return new F(restriction(static_cast<const F&>(*this),d)); }
     Void _adjoin(const ScalarFunctionModelInterface<P>& f) override {
         static_cast<F&>(*this).F::adjoin(dynamic_cast<const ScalarFunctionType&>(f)); }
     VectorFunctionModelInterface<P>* _join(const VectorFunctionModelInterface<P>& f) const override {

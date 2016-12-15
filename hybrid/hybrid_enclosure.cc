@@ -95,7 +95,7 @@ HybridEnclosure::HybridEnclosure()
 
 HybridEnclosure::HybridEnclosure(const HybridBoundedConstraintSet& hybrid_set,
                                  const RealSpace& space,
-                                 const IntervalFunctionModelFactoryInterface& factory)
+                                 const ValidatedFunctionModelFactoryInterface& factory)
     : _location(hybrid_set.location()), _events(), _space(space.variable_names()), _set(),
       _variables(space.dimension(),INITIAL)
 {
@@ -104,13 +104,13 @@ HybridEnclosure::HybridEnclosure(const HybridBoundedConstraintSet& hybrid_set,
 }
 
 HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const RealSpace& space,
-                                 const ExactBoxType& box, const IntervalFunctionModelFactoryInterface& factory)
+                                 const ExactBoxType& box, const ValidatedFunctionModelFactoryInterface& factory)
     : _location(location), _events(), _space(space.variable_names()), _set(box,factory),
       _variables(box.dimension(),INITIAL)
 {
 }
 
-HybridEnclosure::HybridEnclosure(const HybridBoxType& hbox, const IntervalFunctionModelFactoryInterface& factory)
+HybridEnclosure::HybridEnclosure(const HybridBoxType& hbox, const ValidatedFunctionModelFactoryInterface& factory)
     : _location(hbox.location()), _events(), _space(hbox.space().variable_names()), _set(hbox.continuous_set(),factory),
       _variables(hbox.continuous_set().dimension(),INITIAL)
 {
@@ -141,7 +141,7 @@ HybridEnclosure::previous_events() const
     return this->_events;
 }
 
-IntervalFunctionModelFactoryInterface const&
+ValidatedFunctionModelFactoryInterface const&
 HybridEnclosure::function_factory() const
 {
     return this->_set.function_factory();

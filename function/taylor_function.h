@@ -82,6 +82,7 @@ class TaylorFunctionFactory
     ScalarTaylorFunction create_identity(const ExactIntervalType& domain) const;
     VectorTaylorFunction create_identity(const ExactBoxType& domain) const;
   private:
+    CanonicalNumericType<ValidatedTag,Precision64> _create(const Number<ValidatedTag>& number) const;
     ScalarTaylorFunction* _create(const ExactBoxType& domain, const ValidatedScalarFunctionInterface& function) const;
     VectorTaylorFunction* _create(const ExactBoxType& domain, const ValidatedVectorFunctionInterface& function) const;
 };

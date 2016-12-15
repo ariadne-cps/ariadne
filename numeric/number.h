@@ -128,6 +128,7 @@ template<class P> class Number
     Handle<NumberInterface> handle() const { return this->_handle; }
   public:
     typedef P Paradigm;
+    typedef Number<P> NumericType;
 
     Number() : Number(Integer(0)) { }
 

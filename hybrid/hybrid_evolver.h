@@ -50,9 +50,6 @@
 
 namespace Ariadne {
 
-template<class X> class FunctionModelFactoryInterface;
-typedef FunctionModelFactoryInterface<ValidatedTag> ValidatedFunctionModelFactoryInterface;
-
 typedef Map< DiscreteLocation, Vector<Float64Value> > HybridExactFloatVector;
 
 class IntegratorInterface;

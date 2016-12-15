@@ -44,7 +44,6 @@
 namespace Ariadne {
 
 template<class X> class Vector;
-template<class X> class FunctionModelFactoryInterface;
 
 /*! \ingroup \ingroup Solvers
  *  \brief %Common functionality for solving (nonlinear) equations.

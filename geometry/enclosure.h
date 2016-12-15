@@ -65,9 +65,6 @@ extern DiscretisationMethod DISCRETISATION_METHOD;
 
 namespace Ariadne {
 
-template<class X> class FunctionModelFactoryInterface;
-typedef FunctionModelFactoryInterface<ValidatedTag> ValidatedFunctionModelFactoryInterface;
-
 template<class X, class R> class Constraint;
 typedef Constraint<EffectiveScalarFunction,EffectiveNumber> EffectiveConstraint;
 typedef Constraint<ValidatedScalarFunction,ValidatedNumber> ValidatedConstraint;

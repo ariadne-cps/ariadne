@@ -48,9 +48,6 @@ namespace Ariadne {
 template<class X> class Vector;
 template<class X> struct LinearProgram;
 
-template<class X> class FunctionModelFactoryInterface;
-typedef FunctionModelFactoryInterface<ValidatedTag> IntervalFunctionModelFactoryInterface;
-
 class Enclosure;
 class Grid;
 class GridTreeSet;
@@ -128,11 +125,11 @@ class HybridEnclosure
     //! \brief An empty enclosure.
     HybridEnclosure();
     //! \brief An enclosure corresponding to the hybrid set \a set using \a space to order the continuous variables.
-    HybridEnclosure(const HybridBoundedConstraintSet& set, const RealSpace& space, const IntervalFunctionModelFactoryInterface& factory);
+    HybridEnclosure(const HybridBoundedConstraintSet& set, const RealSpace& space, const ValidatedFunctionModelFactoryInterface& factory);
     //! \brief An enclosure corresponding to a Euclidean box \a bx in location \a q with variables ordered by \a spc.
-    HybridEnclosure(const DiscreteLocation& q, const RealSpace& spc, const ExactBoxType& bx, const IntervalFunctionModelFactoryInterface& fac);
+    HybridEnclosure(const DiscreteLocation& q, const RealSpace& spc, const ExactBoxType& bx, const ValidatedFunctionModelFactoryInterface& fac);
     //! \brief An enclosure corresponding to a hybrid box \a hbx.
-    HybridEnclosure(const HybridBoxType& hbx, const IntervalFunctionModelFactoryInterface& fac);
+    HybridEnclosure(const HybridBoxType& hbx, const ValidatedFunctionModelFactoryInterface& fac);
     //! \brief An enclosure constructed from a location \a q, a real space \a spc, and a (timed) enclosure \a es.
     HybridEnclosure(const DiscreteLocation& q, const RealSpace& spc, const Enclosure& es);
     //! \brief Destructor.
@@ -145,7 +142,7 @@ class HybridEnclosure
     //! \brief The Euclidean space of the location.
     const RealSpace space() const;
     //! \brief The factory used to create functions.
-    const IntervalFunctionModelFactoryInterface& function_factory() const;
+    const ValidatedFunctionModelFactoryInterface& function_factory() const;
     //! \brief The list of previous events.
     const List<DiscreteEvent>& previous_events() const;
     //! \brief The number of independent parameters.

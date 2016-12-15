@@ -26,9 +26,12 @@
 
 namespace Ariadne {
 
-template class FunctionModelFactoryInterface<ValidatedTag>;
+template class FunctionModelFactoryInterface<ValidatedTag,Precision64,Precision64>;
+template class FunctionModelFactoryInterface<ValidatedTag,PrecisionMP,PrecisionMP>;
 
-template class ScalarFunctionModel<ValidatedTag>;
-template class VectorFunctionModel<ValidatedTag>;
+template class ScalarFunctionModel<ValidatedTag,Precision64>;
+template class ScalarFunctionModel<ValidatedTag,PrecisionMP>;
+template class VectorFunctionModel<ValidatedTag,Precision64>;
+template class VectorFunctionModel<ValidatedTag,PrecisionMP>;
 
 } // namespace Ariadne

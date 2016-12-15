@@ -337,6 +337,11 @@ template<class M> FunctionPatch<M>* FunctionPatch<M>::_create_constant(DomainTyp
     return new FunctionPatch<M>(FunctionPatch<M>::constant(dom,c,this->sweeper()));
 }
 
+template<class M> FunctionPatch<M>* FunctionPatch<M>::_create_constant(DomainType const& dom, GenericNumericType const& c) const
+{
+    return new FunctionPatch<M>(FunctionPatch<M>::constant(dom,NumericType(c,this->model().precision()),this->sweeper()));
+}
+
 template<class M> FunctionPatch<M>* FunctionPatch<M>::_create_coordinate(DomainType const& dom, SizeType j) const
 {
     return new FunctionPatch<M>(FunctionPatch<M>::coordinate(dom,j,this->sweeper()));
@@ -876,9 +881,16 @@ template<class M> Void VectorFunctionPatch<M>::set(SizeType i, const FunctionPat
 
 
 
+template<class M> template<class T, class> Void FunctionPatch<M>::_compute(T& r, const Vector<T>& a) const
+{
+    typedef typename T::NumericType R;
+    r=Ariadne::horner_evaluate(this->_model.expansion(),Ariadne::unscale(a,this->_domain))
+        + convert_error_to_bounds(this->_model.error());
+
+}
 
 
-template<class M> template<class T> Void VectorFunctionPatch<M>::_compute(Vector<T>& r, const Vector<T>& a) const
+template<class M> template<class T, class> Void VectorFunctionPatch<M>::_compute(Vector<T>& r, const Vector<T>& a) const
 {
     typedef typename T::NumericType X;
     const VectorFunctionPatch<M>& f=*this;
@@ -886,7 +898,7 @@ template<class M> template<class T> Void VectorFunctionPatch<M>::_compute(Vector
     Vector<T> sx=Ariadne::unscale(a,f._domain);
     for(SizeType i=0; i!=r.size(); ++i) {
         T ri=Ariadne::evaluate(this->_models[i].expansion(),sx);
-        X e=convert_error_to_bounds(this->_models[i].error());
+        X e=static_cast<X>(convert_error_to_bounds(this->_models[i].error()));
         r[i]=ri+e;
     }
 }

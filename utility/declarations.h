@@ -38,6 +38,8 @@
 #include "numeric/number.decl.h"
 #include "numeric/float.decl.h"
 
+#include "function/function.decl.h"
+
 #include "geometry/interval.decl.h"
 #include "geometry/box.decl.h"
 
@@ -67,25 +69,15 @@ class String;
 
 typedef SizeType DimensionType;
 
-typedef Float64Error ValidatedNormType;
-typedef Float64Approximation ApproximateNormType;
+typedef Float64Error ValidatedNormType; // FIXME: Remove this typedef
+typedef Float64Approximation ApproximateNormType; // FIXME: Remove this typedef
 
 typedef Float64Error NormType; // FIXME: Remove this typedef
 typedef Float64Error ErrorType; // FIXME: Remove this typedef
 typedef Float64Approximation ApproximateErrorType; // FIXME: Remove this typedef
 
-template<class I> struct CanonicalNumericTypedef;
-template<> struct CanonicalNumericTypedef<ExactTag> { typedef ExactNumericType Type; };
-template<> struct CanonicalNumericTypedef<EffectiveTag> { typedef EffectiveNumericType Type; };
-template<> struct CanonicalNumericTypedef<ValidatedTag> { typedef ValidatedNumericType Type; };
-template<> struct CanonicalNumericTypedef<ApproximateTag> { typedef ApproximateNumericType Type; };
-template<class I> using CanonicalNumericType = typename CanonicalNumericTypedef<I>::Type;
-
 template<class X> struct InformationTypedef;
-template<> struct InformationTypedef<ExactNumericType> { typedef ExactTag Type; };
-template<> struct InformationTypedef<EffectiveNumericType> { typedef EffectiveTag Type; };
-template<> struct InformationTypedef<ValidatedNumericType> { typedef ValidatedTag Type; };
-template<> struct InformationTypedef<ApproximateNumericType> { typedef ApproximateTag Type; };
+template<> struct InformationTypedef<Real> { typedef EffectiveTag Type; };
 template<class P> struct InformationTypedef<Number<P>> { typedef P Type; };
 template<class X> using InformationTag = typename InformationTypedef<X>::Type;
 
@@ -133,61 +125,6 @@ typedef Point<ApproximateNumericType> ApproximatePoint;
 typedef Point<ValidatedNumericType> ValidatedPoint;
 typedef Point<EffectiveNumericType> EffectivePoint;
 typedef Point<ExactNumericType> ExactPoint;
-
-
-// Domain declarations
-using IntervalDomain = ExactIntervalType;
-using BoxDomain = ExactBoxType;
-
-// Function declarations
-template<class P, class D, class F> class Function;
-template<class P, class D=BoxDomain> using ScalarFunction = Function<P,D,IntervalDomain>;
-template<class P, class D=BoxDomain> using VectorFunction = Function<P,D,BoxDomain>;
-template<class P, class C> using UnivariateFunction = Function<P,IntervalDomain,C>;
-template<class P, class C> using MultivariateFunction = Function<P,BoxDomain,C>;
-
-template<class P> using ScalarUnivariateFunction = Function<P,IntervalDomain,IntervalDomain>;
-template<class P> using VectorUnivariateFunction = Function<P,IntervalDomain,BoxDomain>;
-template<class P> using ScalarMultivariateFunction = Function<P,BoxDomain,IntervalDomain>;
-template<class P> using VectorMultivariateFunction = Function<P,BoxDomain,BoxDomain>;
-
-typedef ScalarUnivariateFunction<ApproximateTag> ApproximateScalarUnivariateFunction;
-typedef ScalarUnivariateFunction<ValidatedTag> ValidatedScalarUnivariateFunction;
-typedef ScalarUnivariateFunction<EffectiveTag> EffectiveScalarUnivariateFunction;
-typedef EffectiveScalarUnivariateFunction RealScalarUnivariateFunction;
-
-typedef ScalarFunction<ApproximateTag> ApproximateScalarFunction;
-typedef ScalarFunction<ValidatedTag> ValidatedScalarFunction;
-typedef ScalarFunction<EffectiveTag> EffectiveScalarFunction;
-typedef EffectiveScalarFunction RealScalarFunction;
-
-typedef VectorFunction<ApproximateTag> ApproximateVectorFunction;
-typedef VectorFunction<ValidatedTag> ValidatedVectorFunction;
-typedef VectorFunction<EffectiveTag> EffectiveVectorFunction;
-typedef EffectiveVectorFunction RealVectorFunction;
-
-// Function interface declarations
-template<class P, class D, class C> class FunctionInterface;
-template<class P, class D=BoxDomain> using ScalarFunctionInterface = FunctionInterface<P,D,IntervalDomain>;
-template<class P, class D=BoxDomain> using VectorFunctionInterface = FunctionInterface<P,D,BoxDomain>;
-
-typedef ScalarFunctionInterface<ApproximateTag> ApproximateScalarFunctionInterface;
-typedef ScalarFunctionInterface<ValidatedTag> ValidatedScalarFunctionInterface;
-typedef ScalarFunctionInterface<EffectiveTag> EffectiveScalarFunctionInterface;
-
-typedef VectorFunctionInterface<ApproximateTag> ApproximateVectorFunctionInterface;
-typedef VectorFunctionInterface<ValidatedTag> ValidatedVectorFunctionInterface;
-typedef VectorFunctionInterface<EffectiveTag> EffectiveVectorFunctionInterface;
-
-// Function model declarations
-template<class P> class ScalarFunctionModel;
-template<class P> class VectorFunctionModel;
-
-typedef ScalarFunctionModel<ApproximateTag> ApproximateScalarFunctionModel;
-typedef ScalarFunctionModel<ValidatedTag> ValidatedScalarFunctionModel;
-
-typedef VectorFunctionModel<ApproximateTag> ApproximateVectorFunctionModel;
-typedef VectorFunctionModel<ValidatedTag> ValidatedVectorFunctionModel;
 
 
 } // namespace Ariadne

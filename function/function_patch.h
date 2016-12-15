@@ -61,6 +61,10 @@ inline Float64Approximation convert_error_to_bounds(const PositiveFloat64Approxi
 inline Float64Bounds convert_error_to_bounds(const PositiveFloat64UpperBound& e) { return Float64Bounds(-e.raw(),+e.raw()); }
 inline Float64Bounds convert_error_to_bounds(const Float64Error& e) { return Float64Bounds(-e.raw(),+e.raw()); }
 
+inline FloatMPApproximation convert_error_to_bounds(const PositiveFloatMPApproximation& e) { return FloatMPApproximation(0.0,e.precision()); }
+inline FloatMPBounds convert_error_to_bounds(const PositiveFloatMPUpperBound& e) { return FloatMPBounds(-e.raw(),+e.raw()); }
+inline FloatMPBounds convert_error_to_bounds(const FloatMPError& e) { return FloatMPBounds(-e.raw(),+e.raw()); }
+
 /*
 template<class X> X operator+(const X& x1, const GenericType<X>& y2) { return x1+x1.create(y2); }
 template<class X> X operator-(const X& x1, const GenericType<X>& y2) { return x1-x1.create(y2); }
@@ -176,6 +180,7 @@ template<class M> class FunctionPatch
     /*! \name Prototype constructors. */
     FunctionPatch<M> create_zero() const;
     FunctionPatch<M> create_constant(NumericType const& c) const;
+    FunctionPatch<M> create_constant(GenericNumericType const& c) const;
     FunctionPatch<M> create_coordinate(SizeType j) const;
     FunctionPatch<M> create(GenericType const& f) const;
     NumericType create(GenericNumericType const& f) const;
@@ -304,11 +309,9 @@ template<class M> class FunctionPatch
     friend class ScalarFunctionMixin<FunctionPatch<M>, ValidatedTag>;
     friend class ScalarFunctionModelMixin<FunctionPatch<M>, ValidatedTag>;
   public:
-    template<class T> Void _compute(T& r, const Vector<T>& a) const {
-        typedef typename T::NumericType R;
-        r=Ariadne::horner_evaluate(this->_model.expansion(),Ariadne::unscale(a,this->_domain))
-            + convert_error_to_bounds(this->_model.error());
-    }
+    template<class T, class=ArithmeticType<T,NumericType>> Void _compute(T& r, const Vector<T>& a) const;
+    template<class T, class U> Void _compute(T& r, const Vector<U>& a) const {
+        ARIADNE_FAIL_MSG("Cannot evaluate "<<*this<<" on "<<a); }
   public:
     template<class OP> static FunctionPatch<M> _create(OP op, FunctionPatch<M> const& fp);
     template<class OP> static FunctionPatch<M> _create(OP op, FunctionPatch<M> const& fp1, FunctionPatch<M> const& fp2);
@@ -321,6 +324,7 @@ template<class M> class FunctionPatch
     FunctionPatch<M>* _create() const;
     virtual ScalarFunctionPatch<M>* _create_zero(DomainType const&) const;
     virtual ScalarFunctionPatch<M>* _create_constant(DomainType const&, NumericType const&) const;
+    virtual ScalarFunctionPatch<M>* _create_constant(DomainType const&, GenericNumericType const&) const;
     virtual ScalarFunctionPatch<M>* _create_coordinate(DomainType const&, SizeType) const;
     VectorFunctionModelInterface<Paradigm>* _create_identity() const;
     VectorFunctionModelInterface<Paradigm>* _create_vector(SizeType i) const;
@@ -581,7 +585,9 @@ template<class M> class VectorFunctionPatch
     friend class VectorFunctionMixin<VectorFunctionPatch<M>,ValidatedTag>;
     friend class TaylorFunctionFactory;
   public:
-    template<class X> Void _compute(Vector<X>& r, const Vector<X>& a) const;
+    template<class X, class=ArithmeticType<X,NumericType>> Void _compute(Vector<X>& r, const Vector<X>& a) const;
+    template<class X, class Y> Void _compute(Vector<X>& r, const Vector<Y>& a) const {
+        ARIADNE_FAIL_MSG("Cannot evaluate "<<*this<<" on "<<a); }
   private:
     /* Domain of definition. */
     ExactBoxType _domain;

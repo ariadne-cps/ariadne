@@ -824,36 +824,37 @@ SizeType len(const List< Variable<Real> >& vars)
 }
 
 
-const Formula<Real>& cached_make_formula(const Expression<Real>& e, const Map<Identifier,Nat>& v, Map< const Void*, Formula<Real> >& cache)
+const Formula<EffectiveNumber>& cached_make_formula(const Expression<Real>& e, const Map<Identifier,Nat>& v, Map< const Void*, Formula<EffectiveNumber> >& cache)
 {
+    typedef EffectiveNumber Y;
     const ExpressionNode<Real>* eptr=e.node_ptr().operator->();
     if(cache.has_key(eptr)) { return cache.get(eptr); }
     switch(e.kind()) {
-        case OperatorKind::VARIABLE: return insert( cache, eptr, make_formula<Real>(v[e.var()]) );
-        case OperatorKind::NULLARY: return insert( cache, eptr, make_formula<Real>(e.val()) );
-        case OperatorKind::UNARY: return insert( cache, eptr, make_formula<Real>(e.op(),cached_make_formula(e.arg(),v,cache)));
-        case OperatorKind::BINARY: return insert( cache, eptr, make_formula<Real>(e.op(),cached_make_formula(e.arg1(),v,cache),cached_make_formula(e.arg2(),v,cache)) );
-        case OperatorKind::SCALAR: return insert( cache, eptr, make_formula<Real>(e.op(),cached_make_formula(e.arg(),v,cache),e.num()) );
+        case OperatorKind::VARIABLE: return insert( cache, eptr, make_formula<Y>(v[e.var()]) );
+        case OperatorKind::NULLARY: return insert( cache, eptr, make_formula<Y>(e.val()) );
+        case OperatorKind::UNARY: return insert( cache, eptr, make_formula<Y>(e.op(),cached_make_formula(e.arg(),v,cache)));
+        case OperatorKind::BINARY: return insert( cache, eptr, make_formula<Y>(e.op(),cached_make_formula(e.arg1(),v,cache),cached_make_formula(e.arg2(),v,cache)) );
+        case OperatorKind::SCALAR: return insert( cache, eptr, make_formula<Y>(e.op(),cached_make_formula(e.arg(),v,cache),e.num()) );
         default: ARIADNE_FAIL_MSG("Cannot convert expression "<<e<<" to use variables "<<v<<"\n");
     }
 }
 
-Formula<Real> make_formula(const Expression<Real>& e, const Map<Identifier,Nat>& v)
+Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Map<Identifier,Nat>& v)
 {
-    Map< const Void*, Formula<Real> > cache;
+    Map< const Void*, Formula<EffectiveNumber> > cache;
     return cached_make_formula(e,v,cache);
 }
 
 Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Space<Real>& spc)
 {
-    typedef EffectiveNumber X;
+    typedef EffectiveNumber Y;
     typedef Identifier I;
     switch(e.kind()) {
-        case OperatorKind::SCALAR: return make_formula(e.op(),make_formula(e.arg(),spc),e.num());
-        case OperatorKind::BINARY: return make_formula(e.op(),make_formula(e.arg1(),spc),make_formula(e.arg2(),spc));
-        case OperatorKind::UNARY: return make_formula(e.op(),make_formula(e.arg(),spc));
-        case OperatorKind::NULLARY: return Formula<X>::constant(e.val());
-        case OperatorKind::VARIABLE: return Formula<X>::coordinate(spc.index(e.var()));
+        case OperatorKind::SCALAR: return make_formula<Y>(e.op(),make_formula(e.arg(),spc),e.num());
+        case OperatorKind::BINARY: return make_formula<Y>(e.op(),make_formula(e.arg1(),spc),make_formula(e.arg2(),spc));
+        case OperatorKind::UNARY: return make_formula<Y>(e.op(),make_formula(e.arg(),spc));
+        case OperatorKind::NULLARY: return Formula<Y>::constant(e.val());
+        case OperatorKind::VARIABLE: return Formula<Y>::coordinate(spc.index(e.var()));
         default: ARIADNE_FAIL_MSG("Cannot compute formula for expression "<<e.op()<<"of kind "<<e.kind()<<" in space "<<spc);
     }
 }

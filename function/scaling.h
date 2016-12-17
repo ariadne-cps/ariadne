@@ -58,11 +58,6 @@ inline Dyadic rad(ExactIntervalType const& ivl) {
     return hlf(sub( Dyadic(ivl.upper().raw()), Dyadic(ivl.lower().raw()) ));
 }
 
-template<class X> class Formula;
-template<class X> class Algebra;
-template<class X> Formula<X> unscale(Formula<X> x, const ExactIntervalType& d) { assert(false); }
-template<class X> Algebra<X> unscale(Algebra<X> x, const ExactIntervalType& d) { assert(false); }
-
 template<class T, EnableIf<IsSame<Paradigm<T>,ApproximateTag>> =dummy>
 inline T unscale(T x, const ExactIntervalType& d) {
     return (std::move(x)-med(d))/rad(d);

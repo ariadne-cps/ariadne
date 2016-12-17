@@ -334,7 +334,6 @@ class TaylorModel<ValidatedTag,F>
 
     friend TaylorModel<ValidatedTag,F> evaluate(const TaylorModel<ValidatedTag,F>& f, const Vector<TaylorModel<ValidatedTag,F>>& g) { return compose(f,g); }
     template<class A> ArithmeticType<A,FloatValue<PR>> operator() (Vector<A> const&) const;
-    template<class Y> Formula<Y> operator() (Vector<Formula<Y>> const&) const;
     //@}
 
     //@{
@@ -484,9 +483,6 @@ Covector<FloatMPBounds> gradient(const TaylorModel<ValidatedTag,FloatMP>& x, con
 // FIXME: Needed to dispatch gradient of FunctionPatch
 template<class F> template<class A> auto TaylorModel<ValidatedTag,F>::operator() (Vector<A> const& x) const -> ArithmeticType<A,FloatValue<PR>> {
     return horner_evaluate(this->expansion(),x)+FloatBounds<typename F::PrecisionType>(-this->error(),+this->error());
-}
-template<class F> template<class Y> auto TaylorModel<ValidatedTag,F>::operator() (Vector<Formula<Y>> const& x) const -> Formula<Y> {
-    assert(false);
 }
 
 

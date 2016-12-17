@@ -47,8 +47,8 @@ template<class X> class Formula;
 template<class X> class Graded;
 
 template<class X> class Procedure;
-typedef Procedure<ApproximateNumericType> ApproximateProcedure;
-typedef Procedure<ValidatedNumericType> ValidatedProcedure;
+typedef Procedure<ApproximateNumber> ApproximateProcedure;
+typedef Procedure<ValidatedNumber> ValidatedProcedure;
 
 struct ProcedureInstruction
 {
@@ -115,7 +115,7 @@ template<class X, class T> Void _execute(List<T>& v, const List<ProcedureInstruc
     for(SizeType i=0; i!=p.size(); ++i) {
         const ProcedureInstruction& instruction=p[i];
         switch(instruction.op) {
-            case OperatorCode::CNST: v.append(z+static_cast<T>(c[instruction.arg])); break;
+            case OperatorCode::CNST: v.append(z+c[instruction.arg]); break;
             case OperatorCode::IND:  v.append(x[instruction.arg]); break;
             case OperatorCode::ADD:  v.append(v[instruction.arg1]+v[instruction.arg2]); break;
             case OperatorCode::SUB:  v.append(v[instruction.arg1]-v[instruction.arg2]); break;

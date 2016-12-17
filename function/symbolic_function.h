@@ -115,7 +115,7 @@ struct ConstantFunction
     virtual OutputStream& write(OutputStream& os) const { return os << this->_value; }
     virtual OutputStream& repr(OutputStream& os) const { return os << "CF[R"<<this->argument_size()<<"]("<<_value<<")"; }
     template<class X> inline Void _compute(X& r, const Vector<X>& x) const {
-        r=make_constant(this->_value,x.zero_element()); }
+        r=make_constant(_value,x.zero_element()); }
 };
 
 //! A coordinate function \f$f:\R^n\rightarrow\R\f$ given by \f$f(x)=x_i\f$.

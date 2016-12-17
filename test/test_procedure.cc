@@ -107,7 +107,7 @@ Void TestProcedure::test_construct_from_formula()
     Vector< ApproximateProcedure > p(f);
     ARIADNE_TEST_PRINT(p);
 
-    p0+=Float64Approximation(5);
+    p0+=ApproximateNumber(5);
     ARIADNE_TEST_PRINT(p0);
 }
 
@@ -118,7 +118,7 @@ Void TestProcedure::test_construct_from_expansion()
         ARIADNE_TEST_PRINT(e);
         e.reverse_lexicographic_sort();
         ARIADNE_TEST_PRINT(e);
-        ApproximateProcedure p(e);
+        Procedure<Float64Approximation> p(e);
         ARIADNE_TEST_PRINT(p);
         Vector<Float64Approximation> x({2.0,3.0},pr);
         ARIADNE_TEST_EQUAL(evaluate(p,x),simple_evaluate(e,x));
@@ -127,8 +127,10 @@ Void TestProcedure::test_construct_from_expansion()
     {
         Expansion<Float64Approximation> e({ {{0,0},1.0}, {{1,0},2.0}, {{0,1},3.0}, {{2,0},4.0}, {{1,1},5.0}, {{0,2},6.0} },pr);
         e.reverse_lexicographic_sort();
-        ApproximateProcedure p(e);
+        Procedure<Float64Approximation> p(e);
         ARIADNE_TEST_PRINT(p);
+        Vector<Float64Approximation> x({2.0,3.0},pr);
+        ARIADNE_TEST_EQUAL(evaluate(p,x),simple_evaluate(e,x));
     }
 }
 

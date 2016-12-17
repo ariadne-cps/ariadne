@@ -1221,12 +1221,11 @@ Matrix<UpperIntervalType> jacobian_range(ValidatedVectorFunction const& f, const
 
 
 RealExpression evaluate(EffectiveScalarFunction const& f, Vector<RealVariable> const& vars) {
-    typedef Algebra<EffectiveNumericType> EffectiveAlgebra;
-    EffectiveAlgebra az(RealExpression::constant(0));
-    Vector<EffectiveAlgebra> va(vars.size(),az);
-    for(SizeType i=0; i!=va.size(); ++i) { va[i]=EffectiveAlgebra(RealExpression(vars[i])); }
-    //Vector<EffectiveAlgebra> va=Vector<EffectiveAlgebra>(Vector<RealExpression>(vars));
-    EffectiveAlgebra fa=f(va);
+    typedef Algebra<Real> RealAlgebra;
+    RealAlgebra az(RealExpression::constant(0));
+    Vector<RealAlgebra> va(vars.size(),az);
+    for(SizeType i=0; i!=va.size(); ++i) { va[i]=RealAlgebra(RealExpression(vars[i])); }
+    RealAlgebra fa=f(va);
     return fa.template extract<RealExpression>();
 }
 

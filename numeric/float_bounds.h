@@ -77,11 +77,11 @@ template<class PR> class FloatBounds
     : public DispatchFloatOperations<FloatBounds<PR>>
 //    , public ProvideConvertedFieldOperations<FloatBounds<PR>,FloatValue<PR>>
 {
-    typedef BoundedTag P; typedef RawFloat<PR> FLT;
+    typedef ValidatedTag P; typedef RawFloat<PR> FLT;
   public:
-    typedef BoundedTag Paradigm;
+    typedef P Paradigm;
     typedef FloatBounds<PR> NumericType;
-    typedef ValidatedNumber GenericType;
+    typedef Number<P> GenericType;
     typedef FLT RawFloatType;
     typedef PR PrecisionType;
   public:

@@ -326,9 +326,9 @@ Void TaylorPicardIntegrator::write(OutputStream& os) const {
 namespace Ariadne {
 
 class FormulaFunction;
-typedef Procedure<ValidatedNumericType> ValidatedProcedure;
-typedef Differential<ValidatedNumericType> ValidatedDifferential;
-typedef Polynomial<ValidatedNumericType> ValidatedPolynomial;
+typedef Procedure<ValidatedNumber> ValidatedProcedure;
+typedef Differential<Float64Bounds> ValidatedDifferential;
+typedef Polynomial<Float64Bounds> ValidatedPolynomial;
 typedef Graded<ValidatedDifferential> GradedValidatedDifferential;
 Bool operator<(const MultiIndex& a1, const MultiIndex& a2);
 

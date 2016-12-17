@@ -49,11 +49,11 @@ template<class PR> class FloatBall
     , public ProvideConvertedFieldOperations<FloatBounds<PR>,FloatBall<PR>>
     , public ProvideConvertedFieldOperations<FloatBall<PR>,FloatValue<PR>>
 {
-    typedef MetricTag P; typedef RawFloat<PR> FLT;
+    typedef ValidatedTag P; typedef RawFloat<PR> FLT;
   public:
-    typedef MetricTag Paradigm;
+    typedef P Paradigm;
     typedef FloatBall<PR> NumericType;
-    typedef ValidatedNumber GenericType;
+    typedef Number<P> GenericType;
     typedef FLT RawFloatType;
     typedef PR PrecisionType;
   public:

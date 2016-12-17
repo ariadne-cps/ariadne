@@ -114,6 +114,8 @@ template<class X> class UnivariateDifferential
     X& operator[](SizeType k);
 
     SelfType& operator=(const NumericType& c);
+    template<class T, EnableIf<IsAssignable<X,T>> =dummy>
+        SelfType& operator=(const T& c) { X xc=nul(this->value()); xc=c; return (*this)=xc; }
 
     SelfType& operator+=(const SelfType& x);
     SelfType& operator-=(const SelfType& x);
@@ -207,6 +209,8 @@ class Differential
 
     //! \brief Set the differential equal to a constant, without changing the degree or number of arguments.
     Differential<X>& operator=(const X& c);
+    template<class W, EnableIf<IsAssignable<X,W>> =dummy>
+        Differential<X>& operator=(const W& c) { X xc=nul(this->value()); xc=c; return (*this)=xc; }
 
     //! \brief A constant differential of degree \a deg in \a as arguments with value \a c.
     static Differential<X> constant(SizeType as, DegreeType deg, const X& c);

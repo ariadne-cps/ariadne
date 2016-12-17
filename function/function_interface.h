@@ -113,8 +113,8 @@ class FunctionInterface<ApproximateTag,D,C>
     virtual Result<Differential<FloatMPApproximation>> _evaluate(const Argument< Differential<FloatMPApproximation> >& x) const = 0;
     virtual Result<TaylorModel<ApproximateTag,Float64>> _evaluate(const Argument< TaylorModel<ApproximateTag,Float64> >& x) const = 0;
     virtual Result<TaylorModel<ApproximateTag,FloatMP>> _evaluate(const Argument< TaylorModel<ApproximateTag,FloatMP> >& x) const = 0;
-    virtual Result<Formula<ApproximateNumericType>> _evaluate(const Argument< Formula<ApproximateNumericType> >& x) const = 0;
-    virtual Result<Algebra<ApproximateNumericType>> _evaluate(const Argument< Algebra<ApproximateNumericType> >& x) const = 0;
+    virtual Result<Formula<ApproximateNumber>> _evaluate(const Argument< Formula<ApproximateNumber> >& x) const = 0;
+    virtual Result<Algebra<ApproximateNumber>> _evaluate(const Argument< Algebra<ApproximateNumber> >& x) const = 0;
 
     virtual FunctionInterface<P,D,C>* _clone() const = 0;
     virtual FunctionInterface<P,D,C>* _derivative(SizeType i) const = 0;
@@ -142,13 +142,15 @@ class FunctionInterface<ValidatedTag,D,C>
     virtual Result<Differential<FloatMPBounds>> _evaluate(const Argument< Differential<FloatMPBounds> >& x) const = 0;
     virtual Result<TaylorModel<ValidatedTag,Float64>> _evaluate(const Argument< TaylorModel<ValidatedTag,Float64> >& x) const = 0;
     virtual Result<TaylorModel<ValidatedTag,FloatMP>> _evaluate(const Argument< TaylorModel<ValidatedTag,FloatMP> >& x) const = 0;
-    virtual Result<Formula<ValidatedNumericType>> _evaluate(const Argument< Formula<ValidatedNumericType> >& x) const = 0;
-    virtual Result<Algebra<ValidatedNumericType>> _evaluate(const Argument< Algebra<ValidatedNumericType> >& x) const = 0;
+    virtual Result<Formula<ValidatedNumber>> _evaluate(const Argument< Formula<ValidatedNumber> >& x) const = 0;
+    virtual Result<Algebra<ValidatedNumber>> _evaluate(const Argument< Algebra<ValidatedNumber> >& x) const = 0;
 
     virtual Result<ScalarFunction<ValidatedTag>> _evaluate(const Argument< ScalarFunction<ValidatedTag> >& x) const = 0;
 
-    inline Result<ValidatedNumericType> _evaluate(const Argument<Float64Value>& x) const {
-        return this->_evaluate(Argument<ValidatedNumericType>(x)); }
+    inline Result<Float64Bounds> _evaluate(const Argument<Float64Value>& x) const {
+        return this->_evaluate(Argument<Float64Bounds>(x)); }
+    inline Result<FloatMPBounds> _evaluate(const Argument<FloatMPValue>& x) const {
+        return this->_evaluate(Argument<FloatMPBounds>(x)); }
 
     virtual FunctionInterface<P,D,C>* _clone() const = 0;
     virtual FunctionInterface<P,D,C>* _derivative(SizeType i) const = 0;
@@ -170,9 +172,11 @@ class FunctionInterface<EffectiveTag,D,C>
     template<class X> using Result = typename ElementTraits<C>::template Type<X>;
   public:
     using FunctionInterface<WP,D,C>::_evaluate;
-    virtual Result<EffectiveNumericType> _evaluate(const Argument<EffectiveNumericType>& x) const = 0;
-    virtual Result<Formula<EffectiveNumericType>> _evaluate(const Argument<Formula<EffectiveNumericType>>& x) const = 0;
-    virtual Result<Algebra<EffectiveNumericType>> _evaluate(const Argument<Algebra<EffectiveNumericType>>& x) const = 0;
+    virtual Result<Real> _evaluate(const Argument<Real>& x) const = 0;
+    virtual Result<Algebra<Real>> _evaluate(const Argument<Algebra<Real>>& x) const = 0;
+    virtual Result<Formula<Real>> _evaluate(const Argument<Formula<Real>>& x) const = 0;
+    virtual Result<Algebra<EffectiveNumber>> _evaluate(const Argument<Algebra<EffectiveNumber>>& x) const = 0;
+    virtual Result<Formula<EffectiveNumber>> _evaluate(const Argument<Formula<EffectiveNumber>>& x) const = 0;
 
     virtual FunctionInterface<P,D,C>* _clone() const = 0;
     virtual FunctionInterface<P,D,C>* _derivative(SizeType i) const = 0;

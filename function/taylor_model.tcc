@@ -56,6 +56,7 @@ static const double MACHINE_EPSILON = 2.2204460492503131e-16;
 Bool operator<(const MultiIndex& a1, const MultiIndex& a2) {
     return reverse_lexicographic_less(a1,a2); }
 
+
 Interval<Float64Value> const& convert_interval(ExactIntervalType const& ivl, Precision64) { return ivl; }
 Interval<FloatMPValue> convert_interval(ExactIntervalType const& ivl, PrecisionMP pr) {
     return Interval<FloatMPValue>(FloatMP(ivl.lower().get_d(),pr),FloatMP(ivl.upper().get_d(),pr)); }
@@ -74,8 +75,14 @@ Interval<Float64Value> convert_exact_interval(Interval<FloatMPUpperBound> const&
     Float64 l(Dyadic(ivl.lower().raw()),downward,pr); Float64 u(Dyadic(ivl.lower().raw()),upward,pr);
     return Interval<Float64Value>(Float64Value(l),Float64Value(u)); }
 
-} // namespace
+inline Box<Interval<Float64Value>> const& convert_box(ExactBoxType const& bx, Precision64) { return bx; }
+Box<Interval<FloatMPValue>> convert_box(ExactBoxType const& bx, PrecisionMP pr) {
+    Box<Interval<FloatMPValue>> r(bx.dimension(),Interval<FloatMPValue>(FloatMPValue(pr),FloatMPValue(pr)));
+    for(SizeType i=0; i!=r.dimension(); ++i) { r[i]=convert_interval(bx[i],pr); }
+    return r;
+}
 
+} // namespace
 
 
 template<class F> TaylorModel<ValidatedTag,F>::TaylorModel()
@@ -1049,19 +1056,7 @@ compose(const AnalyticFunction& fn, const TaylorModel<ValidatedTag,F>& tm) {
 // Inplace operators manipulating the error term
 
 // Given an array of ordered indices below some maximum, make an array of the indices not in the array
-Array<SizeType> complement(SizeType nmax, Array<SizeType> vars) {
-    Array<SizeType> cmpl(nmax-vars.size());
-    SizeType kr=0; SizeType kv=0;
-    for(SizeType j=0; j!=nmax; ++j) {
-        if(kv==vars.size() || j!=vars[kv]) {
-            cmpl[kr]=j; ++kr;
-        } else {
-            ++kv;
-        }
-    }
-    return cmpl;
-}
-
+Array<SizeType> complement(SizeType nmax, Array<SizeType> vars);
 
 template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::_embed_error(const TaylorModel<ValidatedTag,F>& tm) {
     typedef typename F::PrecisionType PR;

@@ -1072,7 +1072,7 @@ uniform_error_recondition()
 
 }
 
-// In TaylorModel code file
+// In MultiIndex code file
 Array<SizeType> complement(SizeType nmax, Array<SizeType> vars);
 
 TaylorModel<ValidatedTag,Float64> recondition(const TaylorModel<ValidatedTag,Float64>& tm, Array<SizeType>& discarded_variables, SizeType number_of_error_variables, SizeType index_of_error)

@@ -118,11 +118,13 @@ template<class P, class D, class C> class FunctionFacade {
 
 template<class P> class FunctionFacade<P,IntervalDomain,IntervalDomain> {
   public:
+    template<class X> Scalar<EvaluateType<P,X>> derivative(X const& x) const;
     FunctionExpression<P,IntervalDomain,IntervalDomain> operator() (const RealVariable& x) const;
 };
 
 template<class P> class FunctionFacade<P,IntervalDomain,BoxDomain> {
   public:
+    template<class X> Vector<EvaluateType<P,X>> tangent(X const& x) const;
     FunctionExpression<P,IntervalDomain,BoxDomain> operator() (const RealVariable& x) const;
 };
 

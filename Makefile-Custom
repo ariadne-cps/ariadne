@@ -206,7 +206,7 @@ PYTHON_LINK_LIBS=-lboost_python -l$(PYTHON_LIBRARY)
 # Pull in dependency information
 include $(DEPS)
 
-phony: all help dirs deps lib tests wrap examples check clean shiny
+phony: all help dirs deps hdr lib tests wrap examples check clean shiny
 
 help:
 	@echo "\nDEPS"=$(DEPS)
@@ -239,7 +239,9 @@ deps: dirs $(DEPS)
 helpdep:
 	Secho $(DEPS)
 
-lib: dirs deps libariadne.so libariadne-function.so
+hdr: dirs deps $(PCH)
+
+lib: dirs deps hdr libariadne.so libariadne-function.so
 
 wrap: lib $(WRAP_OBJ) ariadne.so numeric.so
 

@@ -47,6 +47,12 @@ template Expansion<Float64Value>& Polynomial<Float64Value>::expansion();
 template OutputStream& Polynomial<Float64Value>::_write(OutputStream&) const;
 template OutputStream& Polynomial<Float64Value>::_write(OutputStream&, List<String> const&) const;
 
+
+template class Polynomial<FloatMPApproximation>;
+template class Polynomial<FloatMPBounds>;
+template class AlgebraOperations<Polynomial<FloatMPApproximation>>;
+template class AlgebraOperations<Polynomial<FloatMPBounds>>;
+
 } //namespace Ariadne
 
 

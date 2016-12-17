@@ -97,12 +97,14 @@ class TaylorModel<ValidatedTag,F>
     , public DispatchConcreteGenericAlgebraNumberOperations<TaylorModel<ValidatedTag,F>,CanonicalNumericType<ValidatedTag,typename F::PrecisionType>,ValidatedNumber>
 {
     typedef typename F::PrecisionType PR;
+    typedef typename F::PrecisionType PRE;
   public:
     typedef PR PrecisionType;
+    typedef PRE ErrorPrecisionType;
 
     typedef F RawFloatType;
     typedef FloatValue<PR> CoefficientType;
-    typedef FloatError<PR> ErrorType;
+    typedef FloatError<PRE> ErrorType;
     typedef FloatError<PR> NormType;
     typedef ReverseLexicographicIndexLess ComparisonType;
     typedef SortedExpansion<CoefficientType,ComparisonType> ExpansionType;
@@ -117,6 +119,9 @@ class TaylorModel<ValidatedTag,F>
     //! \brief The type used for algebraic operations.
     typedef FloatBounds<PR> NumericType;
     typedef ValidatedNumber GenericNumericType;
+
+    typedef FloatBounds<PR> ValidatedNumericType;
+    typedef FloatApproximation<PR> ApproximateNumericType;
 
     typedef ValidatedScalarFunction FunctionType;
     typedef ValidatedScalarFunction ScalarFunctionType;
@@ -313,7 +318,7 @@ class TaylorModel<ValidatedTag,F>
     friend ValidatedNumericType evaluate(const TaylorModel<ValidatedTag,F>& f, const Vector<ValidatedNumericType>& x) {
         return TaylorModel<ValidatedTag,F>::_evaluate(f,x); }
     //! \brief Evaluate the gradient over the interval of points \a x.
-    friend Covector<ValidatedNumericType> gradient(const TaylorModel<ValidatedTag,F>& f, const Vector<ValidatedNumericType>& x) {
+    friend Covector<FloatBounds<PR>> gradient(const TaylorModel<ValidatedTag,F>& f, const Vector<FloatBounds<PR>>& x) {
         return TaylorModel<ValidatedTag,F>::_gradient(f,x); }
     //! \brief Substite \a c for the \a k th variable.
     friend TaylorModel<ValidatedTag,F> partial_evaluate(const TaylorModel<ValidatedTag,F>& x, SizeType k, ValidatedNumericType c) {
@@ -327,6 +332,9 @@ class TaylorModel<ValidatedTag,F>
     //! \brief Scale the variable by post-composing with an affine map taking the interval ivl to the unit interval
     friend TaylorModel<ValidatedTag,F> compose(const TaylorModel<ValidatedTag,F>& tf, const VectorUnscaling& u);
 
+    friend TaylorModel<ValidatedTag,F> evaluate(const TaylorModel<ValidatedTag,F>& f, const Vector<TaylorModel<ValidatedTag,F>>& g) { return compose(f,g); }
+    template<class A> ArithmeticType<A,FloatValue<PR>> operator() (Vector<A> const&) const;
+    template<class Y> Formula<Y> operator() (Vector<Formula<Y>> const&) const;
     //@}
 
     //@{
@@ -469,7 +477,18 @@ class TaylorModel<ValidatedTag,F>
     static FloatApproximation<PR> _evaluate(const TaylorModel<ValidatedTag,F>& x, Vector<FloatApproximation<PR>> const& v);
 };
 
-Covector<ValidatedNumericType> gradient(const TaylorModel<ValidatedTag,Float64>& x, const Vector<ValidatedNumericType>& v);
+// FIXME: Needed to dispatch gradient of FunctionPatch
+Covector<Float64Bounds> gradient(const TaylorModel<ValidatedTag,Float64>& x, const Vector<Float64Bounds>& v);
+Covector<FloatMPBounds> gradient(const TaylorModel<ValidatedTag,FloatMP>& x, const Vector<FloatMPBounds>& v);
+
+// FIXME: Needed to dispatch gradient of FunctionPatch
+template<class F> template<class A> auto TaylorModel<ValidatedTag,F>::operator() (Vector<A> const& x) const -> ArithmeticType<A,FloatValue<PR>> {
+    return horner_evaluate(this->expansion(),x)+FloatBounds<typename F::PrecisionType>(-this->error(),+this->error());
+}
+template<class F> template<class Y> auto TaylorModel<ValidatedTag,F>::operator() (Vector<Formula<Y>> const& x) const -> Formula<Y> {
+    assert(false);
+}
+
 
 /*! \brief A class representing a power series expansion, scaled to the unit box, with an error term.
  *
@@ -700,14 +719,14 @@ template<class F> Vector<TaylorModel<ValidatedTag,F>> refinement(const Vector<Ta
 
 
 
-template<class F> Vector<ValidatedNumericType> evaluate(const Vector<TaylorModel<ValidatedTag,F>>& tf, const Vector<ValidatedNumericType>& x) {
-    Vector<ValidatedNumericType> r(tf.size());
+template<class F> Vector<FloatBounds<PrecisionType<F>>> evaluate(const Vector<TaylorModel<ValidatedTag,F>>& tf, const Vector<FloatBounds<PrecisionType<F>>>& x) {
+    Vector<FloatBounds<PrecisionType<F>>> r(tf.size());
     for(SizeType i=0; i!=r.size(); ++i) { r[i]=evaluate(tf[i],x); }
     return r;
 }
 
-template<class F> Vector<TaylorModel<ValidatedTag,F>> partial_evaluate(const Vector<TaylorModel<ValidatedTag,F>>& tf, SizeType k, const ValidatedNumericType& c) {
-    Vector<TaylorModel<ValidatedTag,F>> r(tf.size(),ValidatedTaylorModel64::zero(tf.zero_element().argument_size()-1,tf.zero_element().sweeper()));
+template<class F> Vector<TaylorModel<ValidatedTag,F>> partial_evaluate(const Vector<TaylorModel<ValidatedTag,F>>& tf, SizeType k, const FloatBounds<PrecisionType<F>>& c) {
+    Vector<TaylorModel<ValidatedTag,F>> r(tf.size(),ValidatedTaylorModel<F>::zero(tf.zero_element().argument_size()-1,tf.zero_element().sweeper()));
     for(SizeType i=0; i!=r.size(); ++i) { r[i]=partial_evaluate(tf[i],k,c); }
     return std::move(r);
 }

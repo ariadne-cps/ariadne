@@ -73,6 +73,8 @@ template<class P, class PR, class PRE> class ScalarFunctionModel
     typedef CanonicalCoefficientType<P,PR> CoefficientType;
     typedef CanonicalErrorType<P,PRE> ErrorType;
     typedef CanonicalNumericType<P,PR,PRE> NumericType;
+    typedef FloatError<PR> NormType;
+    typedef Interval<FloatUpperBound<PR>> RangeType;
   public:
     clone_on_copy_ptr< ScalarFunctionModelInterface<P,PR,PRE> > _ptr;
   public:
@@ -107,7 +109,7 @@ template<class P, class PR, class PRE> class ScalarFunctionModel
         return this->_ptr->_evaluate(x); }
     inline ExactBoxType const domain() const { return this->_ptr->domain(); }
     inline ExactIntervalType const codomain() const { return this->_ptr->codomain(); }
-    inline UpperIntervalType const range() const { return this->_ptr->range(); }
+    inline RangeType const range() const { return this->_ptr->range(); }
 
     inline CoefficientType value() const { return this->_ptr->value(); }
     inline CoefficientType gradient_value(SizeType j) const { return this->_ptr->gradient_value(j); }
@@ -254,6 +256,7 @@ template<class P, class PR, class PRE> class VectorFunctionModel
     typedef CanonicalCoefficientType<P,PR> CoefficientType;
     typedef CanonicalErrorType<P,PRE> ErrorType;
     typedef CanonicalNumericType<P,PR,PRE> NumericType;
+    typedef Box<Interval<FloatUpperBound<PR>>> RangeType;
   public:
     inline VectorFunctionModel() : _ptr() { }
     inline VectorFunctionModel(SizeType n, const ScalarFunctionModelInterface<P,PR,PRE>& sf)
@@ -284,7 +287,7 @@ template<class P, class PR, class PRE> class VectorFunctionModel
     inline VectorFunctionModelElement<P,PR,PRE> operator[](SizeType i) { return VectorFunctionModelElement<P,PR,PRE>(this,i); }
     inline ExactBoxType const domain() const { return this->_ptr->domain(); }
     inline ExactBoxType const codomain() const { return this->_ptr->codomain(); }
-    inline UpperBoxType const range() const { return this->_ptr->range(); }
+    inline RangeType const range() const { return this->_ptr->range(); }
     inline Vector<ErrorType> const errors() const { return this->_ptr->errors(); }
     inline ErrorType const error() const { return this->_ptr->error(); }
     inline Void clobber() { this->_ptr->clobber(); }
@@ -453,7 +456,16 @@ template<class P, class PR, class PRE> inline CanonicalNumericType<P,PR,PRE> Fun
 // Full output
 template<class T> struct Representation { const T* pointer; Representation(const T& t) : pointer(&t) { } const T& reference() const { return *pointer; } };
 template<class T> inline Representation<T> representation(const T& t) { return Representation<T>(t); }
-template<class T> inline OutputStream& operator<<(OutputStream& os, const Representation<T>& obj) { obj.reference().repr(os); return os; }
+
+template<class T> class HasRepr {
+    template<class TT, class = decltype(declval<TT>().repr(declval<OutputStream&>()))> static True test(int);
+    template<class TT> static False test(...);
+  public:
+    static const bool value = decltype(test<T>(1))::value;
+};
+
+template<class T, EnableIf<HasRepr<T>> =dummy> inline OutputStream& operator<<(OutputStream& os, const Representation<T>& obj) { obj.reference().repr(os); return os; }
+template<class T, DisableIf<HasRepr<T>> =dummy> inline OutputStream& operator<<(OutputStream& os, const Representation<T>& obj) { return os << obj.reference(); }
 
 } // namespace Ariadne
 

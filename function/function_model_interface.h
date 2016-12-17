@@ -41,8 +41,10 @@ template<class P, class PR, class PRE> class ScalarFunctionModelInterface
 {
   public:
     typedef ExactBoxType DomainType;
+    typedef Interval<FloatUpperBound<PR>> RangeType;
+    typedef FloatError<PR> NormType;
   public:
-    virtual UpperIntervalType range() const = 0;
+    virtual RangeType range() const = 0;
 
     virtual CanonicalCoefficientType<P,PR> const& value() const = 0;
     virtual CanonicalCoefficientType<P,PR> const gradient_value(SizeType i) const = 0;
@@ -87,8 +89,10 @@ template<class P, class PR, class PRE> class VectorFunctionModelInterface
     : public virtual VectorFunctionInterface<P>
 {
     typedef ExactBoxType DomainType;
+    typedef Box<Interval<FloatUpperBound<PR>>> RangeType;
+    typedef FloatError<PR> NormType;
   public:
-    virtual UpperBoxType const range() const = 0;
+    virtual RangeType const range() const = 0;
     virtual Vector<CanonicalErrorType<P,PRE>> const errors() const = 0;
     virtual CanonicalErrorType<P,PRE> const error() const = 0;
     virtual Void clobber() = 0;
@@ -105,7 +109,7 @@ template<class P, class PR, class PRE> class VectorFunctionModelInterface
     virtual VectorFunctionModelInterface<P,PR,PRE>* _join(const VectorFunctionModelInterface<P,PR,PRE>& f2) const = 0;
     virtual VectorFunctionModelInterface<P,PR,PRE>* _combine(const VectorFunctionModelInterface<P,PR,PRE>& f2) const = 0;
     virtual Void _adjoin(const ScalarFunctionModelInterface<P,PR,PRE>& f2) = 0;
-    virtual Vector<ValidatedNumericType> _unchecked_evaluate(const Vector<CanonicalNumericType<P,PR,PRE>>& x) const = 0;
+    virtual Vector<CanonicalNumericType<P,PR,PRE>> _unchecked_evaluate(const Vector<CanonicalNumericType<P,PR,PRE>>& x) const = 0;
     virtual ScalarFunctionModelInterface<P,PR,PRE>* _compose(const ScalarFunctionInterface<P>& f) const = 0;
     virtual VectorFunctionModelInterface<P,PR,PRE>* _compose(const VectorFunctionInterface<P>& f) const = 0;
     virtual ScalarFunctionModelInterface<P,PR,PRE>* _unchecked_compose(const ScalarFunctionInterface<P>& f) const = 0;

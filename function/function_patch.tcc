@@ -45,6 +45,22 @@
 
 namespace Ariadne {
 
+namespace {
+
+Interval<Float64Value> const& convert_interval(ExactIntervalType const& ivl, Precision64);
+Interval<FloatMPValue> convert_interval(ExactIntervalType const& ivl, PrecisionMP pr);
+
+Box<Interval<Float64Value>> const& convert_box(ExactBoxType const& bx, Precision64);
+Box<Interval<FloatMPValue>> convert_box(ExactBoxType const& bx, PrecisionMP pr);
+
+} // namespace
+
+decltype(auto) contains(ExactIntervalType const& bx, Scalar<FloatMPBounds> const& x) { return contains(convert_interval(bx,x.precision()),x); }
+decltype(auto) contains(ExactIntervalType const& bx, Scalar<FloatMPApproximation> const& x) { return contains(convert_interval(bx,x.precision()),x); }
+decltype(auto) contains(ExactBoxType const& bx, Vector<FloatMPBounds> const& x) { return contains(convert_box(bx,x.zero_element().precision()),x); }
+decltype(auto) contains(ExactBoxType const& bx, Vector<FloatMPApproximation> const& x) { return contains(convert_box(bx,x.zero_element().precision()),x); }
+
+
 template<class M> Void _set_scaling(FunctionPatch<M>& x, const ExactIntervalType& ivl, SizeType j)
 {
     Float64::RoundingModeType rounding_mode=Float64::get_rounding_mode();
@@ -76,17 +92,22 @@ inline OutputStream& operator<<(OutputStream& os, const Representation<Float64>&
     return os;
 }
 
-inline OutputStream& operator<<(OutputStream& os, const Representation<PositiveFloat64UpperBound>& flt_repr)
+inline OutputStream& operator<<(OutputStream& os, const Representation<FloatMP>& flt_repr)
 {
-    return os << reinterpret_cast<Representation<Float64>const&>(flt_repr);
+    return os << *flt_repr.pointer;
 }
 
-inline OutputStream& operator<<(OutputStream& os, const Representation<Float64Error>& flt_repr)
+template<class PR> inline OutputStream& operator<<(OutputStream& os, const Representation<PositiveFloatUpperBound<PR>>& flt_repr)
 {
-    return os << reinterpret_cast<Representation<Float64>const&>(flt_repr);
+    return os << reinterpret_cast<Representation<RawFloat<PR>>const&>(flt_repr);
 }
 
-inline OutputStream& operator<<(OutputStream& os, const Representation<ExactIntervalType>& ivl_repr)
+template<class PR> inline OutputStream& operator<<(OutputStream& os, const Representation<FloatError<PR>>& flt_repr)
+{
+    return os << reinterpret_cast<Representation<RawFloat<PR>>const&>(flt_repr);
+}
+
+template<class PR> inline OutputStream& operator<<(OutputStream& os, const Representation<ExactIntervalType>& ivl_repr)
 {
     const ExactIntervalType& ivl=*ivl_repr.pointer;
     Int precision=os.precision(); std::ios_base::fmtflags flags = os.flags();
@@ -96,14 +117,13 @@ inline OutputStream& operator<<(OutputStream& os, const Representation<ExactInte
     return os;
 }
 
-
-inline OutputStream& operator<<(OutputStream& os, const Representation< Expansion<Float64> >& exp_repr)
+template<class PR> inline OutputStream& operator<<(OutputStream& os, const Representation< Expansion<RawFloat<PR>> >& exp_repr)
 {
-    const Expansion<Float64>& exp=*exp_repr.pointer;
+    const Expansion<RawFloat<PR>>& exp=*exp_repr.pointer;
     Int precision=os.precision(); std::ios_base::fmtflags flags = os.flags();
     os.precision(17); os.setf(std::ios_base::showpoint);
-    os << "Expansion<Float64>(" << exp.argument_size() << "," << exp.number_of_nonzeros();
-    for(Expansion<Float64>::ConstIterator iter=exp.begin(); iter!=exp.end(); ++iter) {
+    os << "Expansion<Float<PR>>(" << exp.argument_size() << "," << exp.number_of_nonzeros();
+    for(typename Expansion<RawFloat<PR>>::ConstIterator iter=exp.begin(); iter!=exp.end(); ++iter) {
         for(SizeType j=0; j!=iter->key().size(); ++j) {
             os << "," << Nat(iter->key()[j]);
         }
@@ -114,12 +134,12 @@ inline OutputStream& operator<<(OutputStream& os, const Representation< Expansio
     return os;
 }
 
-inline OutputStream& operator<<(OutputStream& os, const Representation< Expansion<Float64Value> >& exp_repr) {
-    return os << reinterpret_cast<Expansion<Float64>const&>(exp_repr);
+template<class PR> inline OutputStream& operator<<(OutputStream& os, const Representation< Expansion<FloatValue<PR>> >& exp_repr) {
+    return os << reinterpret_cast<Expansion<RawFloat<PR>>const&>(exp_repr);
 }
 
-inline OutputStream& operator<<(OutputStream& os, const Representation< Expansion<Float64Approximation> >& exp_repr) {
-    return os << reinterpret_cast<Expansion<Float64>const&>(exp_repr);
+template<class PR> inline OutputStream& operator<<(OutputStream& os, const Representation< Expansion<FloatApproximation<PR>> >& exp_repr) {
+    return os << reinterpret_cast<Expansion<RawFloat<PR>>const&>(exp_repr);
 }
 
 template<class X> inline OutputStream& operator<<(OutputStream& os, const Representation< Vector<X> >& vec_repr)
@@ -182,12 +202,12 @@ template<class M> FunctionPatch<M>::FunctionPatch(const ExactBoxType& d, Sweeper
 {
 }
 
-template<class M> FunctionPatch<M>::FunctionPatch(const ExactBoxType& d, const Expansion<RawFloat64>& p, const RawFloat64& e, const Sweeper<Float64>& swp)
+template<class M> FunctionPatch<M>::FunctionPatch(const ExactBoxType& d, const Expansion<RawFloat<PR>>& p, const RawFloat<PR>& e, const Sweeper<RawFloat<PR>>& swp)
     : _domain(d), _model(p,e,swp)
 {
 }
 
-template<class M> FunctionPatch<M>::FunctionPatch(const ExactBoxType& d, const Expansion<Float64Value>& p, const Float64Error& e, const Sweeper<Float64>& swp)
+template<class M> FunctionPatch<M>::FunctionPatch(const ExactBoxType& d, const Expansion<FloatValue<PR>>& p, const FloatError<PR>& e, const Sweeper<RawFloat<PR>>& swp)
     : _domain(d), _model(p,e,swp)
 {
 }
@@ -314,7 +334,7 @@ template<class M> FunctionPatch<M>* FunctionPatch<M>::_create() const
     return new FunctionPatch<M>(this->domain(),this->_model.sweeper());
 }
 
-template<class M> VectorFunctionModelInterface<typename M::Paradigm>* FunctionPatch<M>::_create_identity() const
+template<class M> auto FunctionPatch<M>::_create_identity() const -> VectorFunctionModelInterface<P,PR,PRE>*
 {
     SweeperType sweeper=this->sweeper();
     VectorFunctionPatch<M>* result = new VectorFunctionPatch<M>(this->domain().size(), FunctionPatch<M>(this->domain(),sweeper));
@@ -322,7 +342,7 @@ template<class M> VectorFunctionModelInterface<typename M::Paradigm>* FunctionPa
     return result;
 }
 
-template<class M> VectorFunctionModelInterface<typename M::Paradigm>* FunctionPatch<M>::_create_vector(SizeType i) const
+template<class M> auto FunctionPatch<M>::_create_vector(SizeType i) const -> VectorFunctionModelInterface<P,PR,PRE>*
 {
     return new VectorFunctionPatch<M>(i,this->domain(),this->_model.sweeper());
 }
@@ -372,25 +392,25 @@ inline Bool operator> (Float64Value x1, Int n2) { return x1.raw()> Float64(n2); 
 inline Bool operator> (Float64Bounds x1, Int n2) { return x1.lower_raw()> Float64(n2); }
 inline Bool operator> (Float64Approximation x1, Int n2) { return x1.raw()> Float64(n2); }
 
-template<class M> Polynomial<Float64Bounds> FunctionPatch<M>::polynomial() const
+template<class M> auto FunctionPatch<M>::polynomial() const -> Polynomial<FloatBounds<PR>>
 {
-    Float64Value zero(0,Precision64());
+    FloatBounds<PR> zero(0,this->model().precision());
 
-    Vector<Polynomial<Float64Bounds> > pid=Polynomial<NumericType>::coordinates(this->argument_size());
-    return horner_evaluate(this->expansion(),unscale(pid,this->domain()))+Float64Bounds(-this->error(),+this->error());
+    Vector<Polynomial<FloatBounds<PR>> > pid=Polynomial<NumericType>::coordinates(this->argument_size());
+    return horner_evaluate(this->expansion(),unscale(pid,this->domain()))+FloatBounds<PR>(-this->error(),+this->error());
 
-    Polynomial<Float64Bounds> z(this->argument_size());
-    Polynomial<Float64Bounds> p;//=Ariadne::polynomial(this->model());
+    Polynomial<FloatBounds<PR>> z(this->argument_size());
+    Polynomial<FloatBounds<PR>> p;//=Ariadne::polynomial(this->model());
 
-    Vector<Polynomial<Float64Bounds> > s(this->argument_size(),z);
+    Vector<Polynomial<FloatBounds<PR>> > s(this->argument_size(),z);
     for(SizeType j=0; j!=this->argument_size(); ++j) {
-        ExactIntervalType const& domj=this->domain()[j];
+        auto domj=convert_interval(this->domain()[j],this->precision());
         if(domj.lower()>=domj.upper()) {
             ARIADNE_ASSERT(this->domain()[j].is_singleton());
-            s[j]=Polynomial<Float64Bounds>::constant(this->argument_size(),zero);
+            s[j]=Polynomial<FloatBounds<PR>>::constant(this->argument_size(),zero);
         } else {
             //s[j]=Ariadne::polynomial(ModelType::unscaling(this->argument_size(),j,this->domain()[j],this->sweeper()));
-            s[j]=(Polynomial<Float64Bounds>::coordinate(this->argument_size(),j)-domj.midpoint())/domj.radius();
+            s[j]=(Polynomial<FloatBounds<PR>>::coordinate(this->argument_size(),j)-domj.midpoint())/domj.radius();
         }
     }
 
@@ -417,17 +437,17 @@ template<class M> FunctionPatch<M>* FunctionPatch<M>::_derivative(SizeType j) co
 }
 
 
-template<class M> ApproximateNumericType FunctionPatch<M>::operator() (const Vector<ApproximateNumericType>& x) const
+template<class M> auto FunctionPatch<M>::operator() (const Vector<FloatApproximation<PR>>& x) const -> FloatApproximation<PR>
 {
     const FunctionPatch<M>& f=*this;
-    if(!contains(f.domain(),cast_exact(x))) {
+    if(!decide(contains(f.domain(),x))) {
         ARIADNE_THROW(DomainException,"tf.evaluate(ax) with tf="<<f<<", ax="<<x," ax is not an element of tf.domain()="<<f.domain());
     }
-    Vector<ApproximateNumericType> sx=Ariadne::unscale(x,f._domain);
+    Vector<FloatApproximation<PR>> sx=Ariadne::unscale(x,f._domain);
     return Ariadne::evaluate(this->_model.expansion(),sx);
 }
 
-template<class M> ValidatedNumericType FunctionPatch<M>::operator()(const Vector<ValidatedNumericType>& x) const
+template<class M> auto FunctionPatch<M>::operator()(const Vector<FloatBounds<PR>>& x) const -> FloatBounds<PR>
 {
     const FunctionPatch<M>& f=*this;
     if(!definitely(contains(f.domain(),x))) {
@@ -436,16 +456,31 @@ template<class M> ValidatedNumericType FunctionPatch<M>::operator()(const Vector
     return unchecked_evaluate(f,x);
 }
 
-template<class M> ValidatedNumericType FunctionPatch<M>::operator()(const Vector<ExactNumericType>& x) const
+template<class M> auto FunctionPatch<M>::operator()(const Vector<FloatValue<PR>>& x) const -> FloatBounds<PR>
 {
-    return Ariadne::evaluate(*this,Vector<ValidatedNumericType>(x));
+    return Ariadne::evaluate(*this,Vector<FloatBounds<PR>>(x));
 }
 
-template<class M> Covector<NumericType<M>> FunctionPatch<M>::gradient(const Vector<NumericType>& x) const
+template<class M> auto FunctionPatch<M>::gradient(const Vector<NumericType>& x) const -> Covector<NumericType>
 {
-    Covector<NumericType> g=Ariadne::gradient(this->_model,unscale(x,this->_domain));
+    {
+        Precision64 prec;
+        TaylorModel<ValidatedTag,Float64> model(2,AffineSweeper<Float64>(prec));
+        Vector<Float64Bounds> vec(2,prec);
+        Ariadne::gradient(model,vec);
+    }
+
+    {
+        PrecisionMP prec(128);
+        TaylorModel<ValidatedTag,FloatMP> model(2,AffineSweeper<FloatMP>(prec));
+        Vector<FloatMPBounds> vec(2,prec);
+        Ariadne::gradient(model,vec);
+    }
+
+    Vector<NumericType> s=unscale(x,this->_domain);
+    Covector<NumericType> g=Ariadne::gradient(this->_model,s);
     for(SizeType j=0; j!=g.size(); ++j) {
-        NumericType rad=rad_val(this->_domain[j]);
+        NumericType rad=convert_interval(this->_domain[j],this->model().precision()).radius();
         g[j]/=rad;
     }
     return g;
@@ -454,8 +489,8 @@ template<class M> Covector<NumericType<M>> FunctionPatch<M>::gradient(const Vect
 
 
 template<class M> OutputStream& FunctionPatch<M>::write(OutputStream& os) const {
-    Polynomial<Float64Bounds> p=this->polynomial();
-    Polynomial<Float64Approximation> ap=p;
+    Polynomial<FloatBounds<PR>> p=this->polynomial();
+    Polynomial<FloatApproximation<PR>> ap=p;
     os << "FP" << this->domain();
     os << "(";
     os << ap;
@@ -582,8 +617,8 @@ template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBoxType
 }
 
 template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBoxType& d,
-                                           const Vector<Expansion<Float64Value>>& f,
-                                           const Vector<Float64Error>& e,
+                                           const Vector<Expansion<FloatValue<PR>>>& f,
+                                           const Vector<FloatError<PR>>& e,
                                            SweeperType swp)
     : _domain(d), _models(f.size(),ModelType(d.size(),swp))
 {
@@ -595,25 +630,25 @@ template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBoxType
 }
 
 template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBoxType& d,
-                                           const Vector<Expansion<Float64Value>>& f,
+                                           const Vector<Expansion<FloatValue<PR>>>& f,
                                            SweeperType swp)
-    : VectorFunctionPatch<M>(d,f,Vector<Float64Error>(f.size()),swp)
+    : VectorFunctionPatch<M>(d,f,Vector<FloatError<PR>>(f.size()),swp)
 {
 }
 
 template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBoxType& d,
-                                           const Vector<Expansion<RawFloat64>>& f,
-                                           const Vector<RawFloat64>& e,
+                                           const Vector<Expansion<RawFloat<PR>>>& f,
+                                           const Vector<RawFloat<PR>>& e,
                                            SweeperType swp)
-    : VectorFunctionPatch<M>(d,reinterpret_cast<Vector<Expansion<Float64Value>>const&>(f),
-                           reinterpret_cast<Vector<Float64Error>const&>(e),swp)
+    : VectorFunctionPatch<M>(d,reinterpret_cast<Vector<Expansion<FloatValue<PR>>>const&>(f),
+                           reinterpret_cast<Vector<FloatError<PR>>const&>(e),swp)
 {
 }
 
 template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBoxType& d,
-                                           const Vector<Expansion<RawFloat64>>& f,
+                                           const Vector<Expansion<RawFloat<PR>>>& f,
                                            SweeperType swp)
-    : VectorFunctionPatch<M>(d,reinterpret_cast<Vector<Expansion<Float64Value>>const&>(f),Vector<Float64Error>(f.size()),swp)
+    : VectorFunctionPatch<M>(d,reinterpret_cast<Vector<Expansion<FloatValue<PR>>>const&>(f),Vector<FloatError<PR>>(f.size()),swp)
 {
 }
 
@@ -707,37 +742,37 @@ template<class M> VectorFunctionPatch<M> VectorFunctionPatch<M>::projection(cons
 }
 
 
-template<class M> Vector<Polynomial<Float64Bounds>> VectorFunctionPatch<M>::polynomials() const
+template<class M> auto VectorFunctionPatch<M>::polynomials() const -> Vector<Polynomial<FloatBounds<PR>>>
 {
-    Vector<Polynomial<Float64Bounds> > p(this->result_size(),Polynomial<Float64Bounds>(this->argument_size()));
+    Vector<Polynomial<FloatBounds<PR>> > p(this->result_size(),Polynomial<FloatBounds<PR>>(this->argument_size()));
     for(SizeType i=0; i!=this->result_size(); ++i) {
         p[i]=static_cast<FunctionPatch<M>>((*this)[i]).polynomial();
     }
     return p;
 }
 
-template<class M> Vector<Expansion<Float64Value>> const VectorFunctionPatch<M>::expansions() const
+template<class M> auto VectorFunctionPatch<M>::expansions() const -> Vector<Expansion<FloatValue<PR>>> const
 {
-    Vector<Expansion<Float64Value>> e(this->result_size(),Expansion<Float64Value>(this->argument_size()));
+    Vector<Expansion<FloatValue<PR>>> e(this->result_size(),Expansion<FloatValue<PR>>(this->argument_size()));
     for(SizeType i=0; i!=this->result_size(); ++i) {
         e[i]=this->models()[i].expansion();
     }
     return e;
 }
 
-template<class M> Vector<typename VectorFunctionPatch<M>::ErrorType> const VectorFunctionPatch<M>::errors() const
+template<class M> auto VectorFunctionPatch<M>::errors() const -> Vector<ErrorType> const
 {
-    Vector<Float64Error> e(this->result_size());
+    Vector<FloatError<PR>> e(this->result_size());
     for(SizeType i=0; i!=this->result_size(); ++i) {
         e[i]=this->models()[i].error();
     }
     return e;
 }
 
-template<class M> typename VectorFunctionPatch<M>::ErrorType const VectorFunctionPatch<M>::error() const
+template<class M> auto VectorFunctionPatch<M>::error() const -> ErrorType const
 {
-    if(this->result_size()==0) { return Float64Error(); }
-    ErrorType e=this->models()[0].error();
+    if(this->result_size()==0) { return FloatError<PR>(); }
+    FloatError<PR> e=this->models()[0].error();
     for(SizeType i=1; i!=this->result_size(); ++i) {
         e=max(e,this->models()[i].error());
     }
@@ -792,19 +827,19 @@ template<class M> const ExactBoxType VectorFunctionPatch<M>::codomain() const
 }
 
 
-template<class M> const UpperBoxType VectorFunctionPatch<M>::range() const
+template<class M> const typename VectorFunctionPatch<M>::RangeType VectorFunctionPatch<M>::range() const
 {
-    Vector<UpperIntervalType> result(this->result_size());
+    RangeType result(this->result_size(),this->_models.zero_element().range());
     for(SizeType i=0; i!=result.size(); ++i) {
         result[i]=this->_models[i].range();
     }
-    return UpperBoxType(result);
+    return result;
 }
 
 
 template<class M> const Vector<typename VectorFunctionPatch<M>::CoefficientType> VectorFunctionPatch<M>::centre() const
 {
-    Vector<Float64Value> result(this->result_size());
+    Vector<CoefficientType> result(this->result_size());
     for(SizeType i=0; i!=result.size(); ++i) {
         result[i]=this->_models[i].value();
     }
@@ -884,29 +919,15 @@ template<class M> Void VectorFunctionPatch<M>::set(SizeType i, const FunctionPat
 
 
 
-template<class M> template<class T, class> Void FunctionPatch<M>::_compute(T& r, const Vector<T>& a) const
+
+
+/*
+template<class M> template<class T> Void FunctionPatch<M>::_compute(T& r, const Vector<T>& a) const
 {
-    typedef typename T::NumericType R;
-    r=Ariadne::horner_evaluate(this->_model.expansion(),Ariadne::unscale(a,this->_domain))
-        + convert_error_to_bounds(this->_model.error());
-
+    Vector<T> sx=Ariadne::unscale(a,this->_domain);
+    r=Ariadne::safe_evaluate(this->_model.expansion(),this->_model.error(),sx);
 }
-
-
-template<class M> template<class T, class> Void VectorFunctionPatch<M>::_compute(Vector<T>& r, const Vector<T>& a) const
-{
-    typedef typename T::NumericType X;
-    const VectorFunctionPatch<M>& f=*this;
-    ARIADNE_DEBUG_ASSERT_MSG(r.size()==f.result_size(),"\nr="<<r<<"\nf="<<f<<"\n");
-    Vector<T> sx=Ariadne::unscale(a,f._domain);
-    for(SizeType i=0; i!=r.size(); ++i) {
-        T ri=Ariadne::evaluate(this->_models[i].expansion(),sx);
-        X e=static_cast<X>(convert_error_to_bounds(this->_models[i].error()));
-        r[i]=ri+e;
-    }
-}
-
-
+*/
 
 
 template<class M> VectorFunctionPatch<M>& VectorFunctionPatch<M>::sweep()
@@ -937,7 +958,7 @@ template<class M> Void VectorFunctionPatch<M>::clobber()
 
 
 
-template<class M> Vector<ApproximateNumericType> VectorFunctionPatch<M>::operator()(const Vector<ApproximateNumericType>& x) const
+template<class M> auto VectorFunctionPatch<M>::operator()(const Vector<ApproximateNumericType>& x) const -> Vector<ApproximateNumericType>
 {
     const VectorFunctionPatch<M>& f=*this;
     if(!decide(contains(f.domain(),x))) {
@@ -951,7 +972,7 @@ template<class M> Vector<ApproximateNumericType> VectorFunctionPatch<M>::operato
     return r;
 }
 
-template<class M> Vector<ValidatedNumericType> VectorFunctionPatch<M>::operator()(const Vector<ValidatedNumericType>& x) const
+template<class M> auto VectorFunctionPatch<M>::operator()(const Vector<ValidatedNumericType>& x) const -> Vector<ValidatedNumericType>
 {
     const VectorFunctionPatch<M>& f=*this;
     if(!definitely(contains(f.domain(),x))) {
@@ -961,7 +982,7 @@ template<class M> Vector<ValidatedNumericType> VectorFunctionPatch<M>::operator(
     return Ariadne::evaluate(f._models,sx);
 }
 
-template<class M> Matrix<typename VectorFunctionPatch<M>::NumericType> VectorFunctionPatch<M>::jacobian(const Vector<NumericType>& x) const
+template<class M> auto VectorFunctionPatch<M>::jacobian(const Vector<NumericType>& x) const -> Matrix<NumericType>
 {
     Vector<NumericType> y=unscale(x,this->_domain);
     Matrix<NumericType> J(this->size(),x.size());
@@ -969,9 +990,9 @@ template<class M> Matrix<typename VectorFunctionPatch<M>::NumericType> VectorFun
         J[i]=gradient(this->_models[i],y);
     }
     for(SizeType j=0; j!=J.column_size(); ++j) {
-        NumericType rad=rad_val(this->_domain[j]);
+        auto r=rad(this->_domain[j]);
         for(SizeType i=0; i!=J.row_size(); ++i) {
-            J[i][j]/=rad;
+            J[i][j]/=r;
         }
     }
     return J;

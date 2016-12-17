@@ -109,7 +109,8 @@ class FunctionMixin<F,ApproximateTag,D,C>
     virtual Result<FloatMPApproximation> _evaluate(const Argument<FloatMPApproximation>& x) const override;
     virtual Result<Differential<Float64Approximation>> _evaluate(const Argument<Differential<Float64Approximation>>& x) const override;
     virtual Result<Differential<FloatMPApproximation>> _evaluate(const Argument<Differential<FloatMPApproximation>>& x) const override;
-    virtual Result<ApproximateTaylorModel64> _evaluate(const Argument<ApproximateTaylorModel64>& x) const override;
+    virtual Result<TaylorModel<ApproximateTag,Float64>> _evaluate(const Argument<TaylorModel<ApproximateTag,Float64>>& x) const override;
+    virtual Result<TaylorModel<ApproximateTag,FloatMP>> _evaluate(const Argument<TaylorModel<ApproximateTag,FloatMP>>& x) const override;
     virtual Result<ApproximateFormula> _evaluate(const Argument<ApproximateFormula>& x) const override;
     virtual Result<ApproximateAlgebra> _evaluate(const Argument<ApproximateAlgebra>& x) const override;
 };
@@ -129,8 +130,9 @@ class FunctionMixin<F,ValidatedTag,D,C>
     virtual Result<FloatMPBounds> _evaluate(const Argument<FloatMPBounds>& x) const override;
     virtual Result<Differential<Float64Bounds>> _evaluate(const Argument<Differential<Float64Bounds>>& x) const override;
     virtual Result<Differential<FloatMPBounds>> _evaluate(const Argument<Differential<FloatMPBounds>>& x) const override;
+    virtual Result<TaylorModel<ValidatedTag,Float64>> _evaluate(const Argument<TaylorModel<ValidatedTag,Float64>>& x) const override;
+    virtual Result<TaylorModel<ValidatedTag,FloatMP>> _evaluate(const Argument<TaylorModel<ValidatedTag,FloatMP>>& x) const override;
     virtual Result<ValidatedFormula> _evaluate(const Argument<ValidatedFormula>& x) const override;
-    virtual Result<ValidatedTaylorModel64> _evaluate(const Argument<ValidatedTaylorModel64>& x) const override;
     virtual Result<ValidatedAlgebra> _evaluate(const Argument<ValidatedAlgebra>& x) const override;
 
     virtual Result<ValidatedScalarFunction> _evaluate(const Argument<ValidatedScalarFunction>& x) const override;

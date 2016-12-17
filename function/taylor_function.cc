@@ -42,8 +42,9 @@
 #include "function/function_patch.h"
 #include "function/taylor_function.h"
 
-#include "function_mixin.tcc"
+#include "taylor_model.tcc"
 #include "function_patch.tcc"
+#include "function_mixin.tcc"
 
 #define VOLATILE ;
 
@@ -54,7 +55,8 @@ static double TAYLOR_FUNCTION_WRITING_ACCURACY = 1e-8;
 template class FunctionPatch<ValidatedTaylorModel64>;
 template class VectorFunctionPatch<ValidatedTaylorModel64>;
 
-
+template class FunctionPatch<ValidatedTaylorModelMP>;
+template class VectorFunctionPatch<ValidatedTaylorModelMP>;
 
 CanonicalNumericType<ValidatedTag> TaylorFunctionFactory::_create(const Number<ValidatedTag>& number) const
 {

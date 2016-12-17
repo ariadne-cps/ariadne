@@ -48,98 +48,100 @@
 
 namespace Ariadne {
 
-template<class F, class P> class ScalarFunctionModelMixin;
-template<class F, class P> class VectorFunctionModelMixin;
+template<class FM, class P, class PR=Precision64, class PRE=PR> class ScalarFunctionModelMixin;
+template<class FM, class P, class PR=Precision64, class PRE=PR> class VectorFunctionModelMixin;
 
-template<class F, class P> class ScalarFunctionModelMixin
-    : public virtual ScalarFunctionModelInterface<P>
-    , public ScalarFunctionMixin<F,P>
+template<class FM, class P, class PR, class PRE> class ScalarFunctionModelMixin
+    : public virtual ScalarFunctionModelInterface<P,PR,PRE>
+    , public ScalarFunctionMixin<FM,P>
 {
+    typedef FloatError<PR> NormType;
   public:
-    F apply(OperatorCode op) const;
+    FM apply(OperatorCode op) const;
   public:
-    ScalarFunctionModelInterface<P>* _clone() const override {
-        return new F(static_cast<const F&>(*this)); }
+    ScalarFunctionModelInterface<P,PR,PRE>* _clone() const override {
+        return new FM(static_cast<const FM&>(*this)); }
     NormType const _norm() const override {
-        return norm(static_cast<const F&>(*this)); }
-    ScalarFunctionModelInterface<P>* _antiderivative(SizeType j) const override {
-        return new F(antiderivative(static_cast<const F&>(*this),j)); }
-    ScalarFunctionModelInterface<P>* _antiderivative(SizeType j, CanonicalNumericType<P> c) const override {
-        return new F(antiderivative(static_cast<const F&>(*this),j,c)); }
-     ScalarFunctionModelInterface<P>* _restriction(const ExactBoxType& d) const override {
-        return new F(restriction(static_cast<const F&>(*this),d)); }
-    ScalarFunctionModelInterface<P>* _apply(OperatorCode op) const override {
-        return new F(this->apply(op)); }
-    CanonicalNumericType<P> _unchecked_evaluate(const Vector<CanonicalNumericType<P>>& x) const override {
-        return unchecked_evaluate(static_cast<const F&>(*this),x); }
-    ScalarFunctionModelInterface<P>* _partial_evaluate(SizeType j, const CanonicalNumericType<P>& c) const override {
-        return heap_copy(partial_evaluate(static_cast<const F&>(*this),j,c)); }
-    ScalarFunctionModelInterface<P>* _embed(const ExactBoxType& d1, const ExactBoxType& d2) const override {
-        return new F(embed(d1,static_cast<const F&>(*this),d2)); }
-    Boolean _refines(const ScalarFunctionModelInterface<P>& f) const override {
-        ARIADNE_ASSERT(dynamic_cast<const F*>(&f)); return refines(static_cast<const F&>(*this),dynamic_cast<const F&>(f)); }
-    Boolean _inconsistent(const ScalarFunctionModelInterface<P>& f) const override {
-        ARIADNE_ASSERT(dynamic_cast<const F*>(&f)); return inconsistent(static_cast<const F&>(*this),dynamic_cast<const F&>(f)); }
-    ScalarFunctionModelInterface<P>* _refinement(const ScalarFunctionModelInterface<P>& f) const override {
-        ARIADNE_ASSERT(dynamic_cast<const F*>(&f)); return new F(refinement(static_cast<const F&>(*this),dynamic_cast<const F&>(f))); }
-    Void _iadd(const CanonicalNumericType<P>& c) override {
-        static_cast<F&>(*this)+=c; }
-    Void _imul(const CanonicalNumericType<P>& c) override {
-        static_cast<F&>(*this)*=c; }
-    Void _isma(const CanonicalNumericType<P>& c, const ScalarFunctionModelInterface<P>& f) override {
-        static_cast<F&>(*this)+=c*dynamic_cast<const F&>(f); }
-    Void _ifma(const ScalarFunctionModelInterface<P>& f1, const ScalarFunctionModelInterface<P>& f2) override {
-        static_cast<F&>(*this)+=dynamic_cast<const F&>(f1)*dynamic_cast<const F&>(f2); }
+        return norm(static_cast<const FM&>(*this)); }
+    ScalarFunctionModelInterface<P,PR,PRE>* _antiderivative(SizeType j) const override {
+        return new FM(antiderivative(static_cast<const FM&>(*this),j)); }
+    ScalarFunctionModelInterface<P,PR,PRE>* _antiderivative(SizeType j, CanonicalNumericType<P,PR,PRE> c) const override {
+        return new FM(antiderivative(static_cast<const FM&>(*this),j,c)); }
+     ScalarFunctionModelInterface<P,PR,PRE>* _restriction(const ExactBoxType& d) const override {
+        return new FM(restriction(static_cast<const FM&>(*this),d)); }
+    ScalarFunctionModelInterface<P,PR,PRE>* _apply(OperatorCode op) const override {
+        return new FM(this->apply(op)); }
+    CanonicalNumericType<P,PR,PRE> _unchecked_evaluate(const Vector<CanonicalNumericType<P,PR,PRE>>& x) const override {
+        return unchecked_evaluate(static_cast<const FM&>(*this),x); }
+    ScalarFunctionModelInterface<P,PR,PRE>* _partial_evaluate(SizeType j, const CanonicalNumericType<P,PR,PRE>& c) const override {
+        return heap_copy(partial_evaluate(static_cast<const FM&>(*this),j,c)); }
+    ScalarFunctionModelInterface<P,PR,PRE>* _embed(const ExactBoxType& d1, const ExactBoxType& d2) const override {
+        return new FM(embed(d1,static_cast<const FM&>(*this),d2)); }
+    Boolean _refines(const ScalarFunctionModelInterface<P,PR,PRE>& f) const override {
+        ARIADNE_ASSERT(dynamic_cast<const FM*>(&f)); return refines(static_cast<const FM&>(*this),dynamic_cast<const FM&>(f)); }
+    Boolean _inconsistent(const ScalarFunctionModelInterface<P,PR,PRE>& f) const override {
+        ARIADNE_ASSERT(dynamic_cast<const FM*>(&f)); return inconsistent(static_cast<const FM&>(*this),dynamic_cast<const FM&>(f)); }
+    ScalarFunctionModelInterface<P,PR,PRE>* _refinement(const ScalarFunctionModelInterface<P,PR,PRE>& f) const override {
+        ARIADNE_ASSERT(dynamic_cast<const FM*>(&f)); return new FM(refinement(static_cast<const FM&>(*this),dynamic_cast<const FM&>(f))); }
+    Void _iadd(const CanonicalNumericType<P,PR,PRE>& c) override {
+        static_cast<FM&>(*this)+=c; }
+    Void _imul(const CanonicalNumericType<P,PR,PRE>& c) override {
+        static_cast<FM&>(*this)*=c; }
+    Void _isma(const CanonicalNumericType<P,PR,PRE>& c, const ScalarFunctionModelInterface<P,PR,PRE>& f) override {
+        static_cast<FM&>(*this)+=c*dynamic_cast<const FM&>(f); }
+    Void _ifma(const ScalarFunctionModelInterface<P,PR,PRE>& f1, const ScalarFunctionModelInterface<P,PR,PRE>& f2) override {
+        static_cast<FM&>(*this)+=dynamic_cast<const FM&>(f1)*dynamic_cast<const FM&>(f2); }
 };
 
-template<class F, class P> F ScalarFunctionModelMixin<F,P>::apply(OperatorCode op) const {
-    const F& f=static_cast<const F&>(*this);
+template<class FM, class P, class PR, class PRE> FM ScalarFunctionModelMixin<FM,P,PR,PRE>::apply(OperatorCode op) const {
+    const FM& f=static_cast<const FM&>(*this);
     switch(op) {
         case OperatorCode::NEG: return neg(f);
         case OperatorCode::REC: return rec(f);
         case OperatorCode::EXP: return exp(f);
-        default: ARIADNE_FAIL_MSG("ScalarFunctionModel<P>::apply(OperatorCode op): Operator op="<<op<<" not implemented\n");
+        default: ARIADNE_FAIL_MSG("ScalarFunctionModel<P,PR,PRE>::apply(OperatorCode op): Operator op="<<op<<" not implemented\n");
     }
 }
 
 
-template<class F, class P> class VectorFunctionModelMixin
-    : public virtual VectorFunctionModelInterface<P>
-    , public  VectorFunctionMixin<F,P>
+template<class FM, class P, class PR, class PRE> class VectorFunctionModelMixin
+    : public virtual VectorFunctionModelInterface<P,PR,PRE>
+    , public VectorFunctionMixin<FM,P>
 {
-    typedef typename Element<F>::Type ScalarFunctionType;
+    typedef typename Element<FM>::Type ScalarFunctionType;
+    typedef FloatError<PR> NormType;
   public:
-    virtual VectorFunctionModelInterface<P>* _clone() const override { return new F(static_cast<const F&>(*this)); }
-    virtual Void _set(SizeType i, const ScalarFunctionModelInterface<P>& sf) override {
-        if(!dynamic_cast<const typename F::ScalarFunctionType*>(&sf)) {
+    virtual VectorFunctionModelInterface<P,PR,PRE>* _clone() const override { return new FM(static_cast<const FM&>(*this)); }
+    virtual Void _set(SizeType i, const ScalarFunctionModelInterface<P,PR,PRE>& sf) override {
+        if(!dynamic_cast<const typename FM::ScalarFunctionType*>(&sf)) {
             ARIADNE_FAIL_MSG("Cannot set element of VectorFunctionModel "<<*this<<" to "<<sf<<"\n"); }
-        static_cast<F&>(*this).F::set(i,dynamic_cast<const ScalarFunctionType&>(sf)); }
-    virtual VectorFunctionModelInterface<P>* _derivative(SizeType j) const override {
+        static_cast<FM&>(*this).FM::set(i,dynamic_cast<const ScalarFunctionType&>(sf)); }
+    virtual VectorFunctionModelInterface<P,PR,PRE>* _derivative(SizeType j) const override {
         ARIADNE_NOT_IMPLEMENTED; }
     NormType const _norm() const override {
-         return norm(static_cast<const F&>(*this)); }
-    VectorFunctionModelInterface<P>* _embed(const ExactBoxType& d1, const ExactBoxType& d2) const override {
-        return heap_copy(embed(d1,static_cast<const F&>(*this),d2)); }
-    VectorFunctionModelInterface<P>* _restriction(const ExactBoxType& d) const override {
-        return new F(restriction(static_cast<const F&>(*this),d)); }
-    Void _adjoin(const ScalarFunctionModelInterface<P>& f) override {
-        static_cast<F&>(*this).F::adjoin(dynamic_cast<const ScalarFunctionType&>(f)); }
-    VectorFunctionModelInterface<P>* _join(const VectorFunctionModelInterface<P>& f) const override {
-        return heap_copy(join(static_cast<const F&>(*this),dynamic_cast<const F&>(f))); }
-    VectorFunctionModelInterface<P>* _combine(const VectorFunctionModelInterface<P>& f) const override {
-        return heap_copy(combine(static_cast<const F&>(*this),dynamic_cast<const F&>(f))); }
-    Vector<CanonicalNumericType<P>> _unchecked_evaluate(const Vector<CanonicalNumericType<P>>& x) const override {
-        return unchecked_evaluate(static_cast<const F&>(*this),x); }
-    ScalarFunctionModelInterface<P>* _compose(const ScalarFunctionInterface<P>& f) const override {
-        return heap_copy(compose(f,static_cast<const F&>(*this))); }
-    VectorFunctionModelInterface<P>* _compose(const VectorFunctionInterface<P>& f) const override {
-        return heap_copy(compose(f,static_cast<const F&>(*this))); }
-    ScalarFunctionModelInterface<P>* _unchecked_compose(const ScalarFunctionInterface<P>& f) const override {
-        return heap_copy(unchecked_compose(dynamic_cast<const ScalarFunctionType&>(f),static_cast<const F&>(*this))); }
-    VectorFunctionModelInterface<P>* _unchecked_compose(const VectorFunctionInterface<P>& f) const override {
-        return heap_copy(unchecked_compose(dynamic_cast<const F&>(f),static_cast<const F&>(*this))); }
-    VectorFunctionModelInterface<P>* _partial_evaluate(SizeType j, const CanonicalNumericType<P>& c) const override {
-        return heap_copy(partial_evaluate(static_cast<const F&>(*this),j,c)); }
+         return norm(static_cast<const FM&>(*this)); }
+    VectorFunctionModelInterface<P,PR,PRE>* _embed(const ExactBoxType& d1, const ExactBoxType& d2) const override {
+        return heap_copy(embed(d1,static_cast<const FM&>(*this),d2)); }
+    VectorFunctionModelInterface<P,PR,PRE>* _restriction(const ExactBoxType& d) const override {
+        return new FM(restriction(static_cast<const FM&>(*this),d)); }
+    Void _adjoin(const ScalarFunctionModelInterface<P,PR,PRE>& f) override {
+        static_cast<FM&>(*this).FM::adjoin(dynamic_cast<const ScalarFunctionType&>(f)); }
+    VectorFunctionModelInterface<P,PR,PRE>* _join(const VectorFunctionModelInterface<P,PR,PRE>& f) const override {
+        return heap_copy(join(static_cast<const FM&>(*this),dynamic_cast<const FM&>(f))); }
+    VectorFunctionModelInterface<P,PR,PRE>* _combine(const VectorFunctionModelInterface<P,PR,PRE>& f) const override {
+        return heap_copy(combine(static_cast<const FM&>(*this),dynamic_cast<const FM&>(f))); }
+    Vector<CanonicalNumericType<P,PR,PRE>> _unchecked_evaluate(const Vector<CanonicalNumericType<P,PR,PRE>>& x) const override {
+        return unchecked_evaluate(static_cast<const FM&>(*this),x); }
+    ScalarFunctionModelInterface<P,PR,PRE>* _compose(const ScalarFunctionInterface<P>& f) const override {
+        return heap_copy(compose(f,static_cast<const FM&>(*this))); }
+    VectorFunctionModelInterface<P,PR,PRE>* _compose(const VectorFunctionInterface<P>& f) const override {
+        return heap_copy(compose(f,static_cast<const FM&>(*this))); }
+    ScalarFunctionModelInterface<P,PR,PRE>* _unchecked_compose(const ScalarFunctionInterface<P>& f) const override {
+        return heap_copy(unchecked_compose(dynamic_cast<const ScalarFunctionType&>(f),static_cast<const FM&>(*this))); }
+    VectorFunctionModelInterface<P,PR,PRE>* _unchecked_compose(const VectorFunctionInterface<P>& f) const override {
+        return heap_copy(unchecked_compose(dynamic_cast<const FM&>(f),static_cast<const FM&>(*this))); }
+    VectorFunctionModelInterface<P,PR,PRE>* _partial_evaluate(SizeType j, const CanonicalNumericType<P,PR,PRE>& c) const override {
+        return heap_copy(partial_evaluate(static_cast<const FM&>(*this),j,c)); }
 };
 
 } // namespace Ariadne

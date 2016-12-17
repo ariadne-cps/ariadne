@@ -209,6 +209,20 @@ class Polynomial
     Iterator _unique_key();
   private:
     SortedExpansion<X,ReverseLexicographicIndexLess> _expansion;
+  private: // FIXME: Put these concrete-generic operations in proper place
+    template<class Y, EnableIf<IsAssignable<X,Y>> =dummy>
+        friend Polynomial<X> operator+(Polynomial<X> p, const Y& c) {
+            X xc=p.value(); xc=c; return p+xc; }
+    template<class Y, EnableIf<IsAssignable<X,Y>> =dummy>
+        friend Polynomial<X> operator-(Polynomial<X> p, const Y& c) {
+            X xc=p.value(); xc=c; return p-xc; }
+    template<class Y, EnableIf<IsAssignable<X,Y>> =dummy>
+        friend Polynomial<X> operator*(Polynomial<X> p, const Y& c) {
+            X xc=p.value(); xc=c; return p*xc; }
+    template<class Y, EnableIf<IsAssignable<X,Y>> =dummy>
+        friend Polynomial<X> operator/(Polynomial<X> p, const Y& c) {
+            X xc=p.value(); xc=c; return p/xc; }
+
 };
 
 template<class X> struct AlgebraOperations<Polynomial<X>> {
@@ -223,6 +237,7 @@ template<class X> struct AlgebraOperations<Polynomial<X>> {
     static Polynomial<X>& _iadd(Polynomial<X>& p, const X& c);
     static Polynomial<X>& _imul(Polynomial<X>& p, const X& c);
     static Polynomial<X>& _imul(Polynomial<X>& p, const Monomial<X>& m);
+
 };
 
 

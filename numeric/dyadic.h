@@ -108,6 +108,7 @@ class Dyadic
     friend Dyadic hlf(Dyadic const&);
     friend Rational rec(Rational const&);
     friend Rational div(Rational const&, Rational const&);
+    friend Integer round(Dyadic const&);
     //! \brief Convert a floating-point literal to Dyadic i.e. long binary format.
     friend OutputStream& operator<<(OutputStream& os, Dyadic const& x);
 };

@@ -33,6 +33,7 @@
 #include "number.decl.h"
 #include "float.decl.h"
 
+#include "logical.h"
 #include "builtin.h"
 #include "twoexp.h"
 
@@ -56,9 +57,13 @@ template<class PR> class FloatValue
     , DispatchComparisonOperations<FloatValue<PR>,Boolean>
     , DefineMixedComparisonOperators<FloatValue<PR>,ExactNumber,Boolean>
     , DefineMixedComparisonOperators<FloatValue<PR>,Rational,Boolean>
+//    , DefineMixedComparisonOperators<FloatValue<PR>,Dyadic,Boolean>
+//    , DefineMixedComparisonOperators<FloatValue<PR>,Integer,Boolean>
+//    , DefineMixedComparisonOperators<FloatValue<PR>,Int,Boolean>
 //        , public DispatchFloatOperations<FloatBall<PR>>
         , public DispatchFloatOperations<FloatBounds<PR>>
-    , DefineConcreteGenericOperators<FloatValue<PR>>
+    , DefineConcreteGenericArithmeticOperators<FloatValue<PR>>
+    , DefineConcreteGenericComparisonOperators<FloatValue<PR>>
 {
     typedef ExactTag P; typedef RawFloat<PR> FLT;
   public:
@@ -108,9 +113,8 @@ template<class PR> class FloatValue
     friend OutputStream& operator<<(OutputStream&, FloatValue<PR> const&);
   public:
     friend Comparison cmp(FloatValue<PR> const& x1, Rational const& q2) { return cmp(x1.raw(),q2); }
-    friend Boolean eq(FloatValue<PR> const& x1, Rational const& q2) { return cmp(x1,q2)==Comparison::EQUAL; }
-    friend Boolean lt(FloatValue<PR> const& x1, Rational const& q2) { return cmp(x1,q2)==Comparison::LESS; }
-    friend Boolean gt(FloatValue<PR> const& x1, Rational const& q2) { return cmp(x1,q2)==Comparison::GREATER; }
+    friend Comparison cmp(FloatValue<PR> const& x1, Dyadic const& w2) { return cmp(x1.raw(),w2); }
+    friend Comparison cmp(FloatValue<PR> const& x1, Integer const& z2) { return cmp(x1.raw(),z2); }
   public:
     static Nat output_places;
     static Void set_output_places(Nat p) { output_places=p; }

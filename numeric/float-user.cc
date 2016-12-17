@@ -1621,8 +1621,9 @@ template<class PR> struct Operations<FloatValue<PR>> {
     }
 
     static Integer integer_cast(FloatValue<PR> const& x) {
-        Integer z=static_cast<int>(x._v.get_d());
-        ARIADNE_ASSERT(z==x);
+        Dyadic w(x);
+        Integer z=round(w);
+        ARIADNE_ASSERT(z==w);
         return z;
     }
 

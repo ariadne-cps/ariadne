@@ -104,8 +104,6 @@ TestFloat<PR>::test()
 }
 
 
-
-
 // Test that the type implements all operations of
 // the Float concept without testing correctness
 template<class PR> Void
@@ -215,24 +213,43 @@ TestFloat<PR>::test_class()
 {
     cout << __PRETTY_FUNCTION__ << endl;
     // Construct from an Int
-    RawFloat<PR> f1(2);
-    ARIADNE_TEST_ASSERT(f1==2);
+    ARIADNE_TEST_CONSTRUCT(RawFloat<PR>,f1,(2));
+    ARIADNE_TEST_EQUALS(f1,2);
     // Construct from a double
-    RawFloat<PR> f2(1.25);
-    ARIADNE_TEST_ASSERT(f2==1.25);
+    ARIADNE_TEST_CONSTRUCT(RawFloat<PR>,f2,(1.25));
+    ARIADNE_TEST_EQUALS(f2,1.25);
     // Copy constructor
-    RawFloat<PR> f3(f2);
-    ARIADNE_TEST_ASSERT(f3==f2);
+    ARIADNE_TEST_CONSTRUCT(RawFloat<PR>,f3,(f2));
+    ARIADNE_TEST_EQUAL(f3,f2);
+
 
     // Assign from an Int
-    f1=3;
-    ARIADNE_TEST_ASSERT(f1==3);
+    ARIADNE_TEST_EXECUTE(f1=3);
+    ARIADNE_TEST_EQUALS(f1,3);
     // Assign from a double
-    f2=2.25;
-    ARIADNE_TEST_ASSERT(f2==2.25);
+    ARIADNE_TEST_EXECUTE(f2=2.25);
+    ARIADNE_TEST_EQUALS(f2,2.25);
     // Copy assignment
-    f3=f2;
-    ARIADNE_TEST_ASSERT(f3==f2);
+    ARIADNE_TEST_EXECUTE(f3=f2);
+    ARIADNE_TEST_EQUAL(f3,f2);
+    // Self-assignment
+    ARIADNE_TEST_EXECUTE(f3=f3);
+    ARIADNE_TEST_EQUAL(f3,f2);
+
+    if(not (precision==RawFloat<PR>::get_default_precision())) {
+        PR low_precision=min(precision,RawFloat<PR>::get_default_precision());
+        PR high_precision=max(precision,RawFloat<PR>::get_default_precision());
+        ARIADNE_TEST_CONSTRUCT(RawFloat<PR>,f4,(2.25,high_precision));
+        ARIADNE_TEST_CONSTRUCT(RawFloat<PR>,f5,(3.75,low_precision));
+        ARIADNE_TEST_EXECUTE(f5=f4);
+        ARIADNE_TEST_EQUAL(f5.precision(),high_precision);
+        ARIADNE_TEST_EQUAL(f5,f4);
+        ARIADNE_TEST_CONSTRUCT(RawFloat<PR>,f6,(low_precision));
+        ARIADNE_TEST_EXECUTE(f6=std::move(f4));
+        ARIADNE_TEST_EQUAL(f6.precision(),high_precision);
+        ARIADNE_TEST_EQUAL(f6,f5);
+    }
+
 
 }
 

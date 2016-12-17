@@ -105,7 +105,7 @@ class Dyadic
     //! \brief Convert a floating-point literal to Dyadic i.e. long binary format.
     friend Dyadic operator"" _bin(long double x);
     //! \brief Halve a number.
-    Dyadic hlf(Dyadic const&);
+    friend Dyadic hlf(Dyadic const&);
     friend Rational rec(Rational const&);
     friend Rational div(Rational const&, Rational const&);
     //! \brief Convert a floating-point literal to Dyadic i.e. long binary format.

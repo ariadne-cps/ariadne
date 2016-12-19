@@ -33,6 +33,7 @@
 #include <cstdint>
 #include <iosfwd>
 #include <type_traits>
+#include <memory>
 
 typedef unsigned char uchar;
 typedef unsigned int uint;

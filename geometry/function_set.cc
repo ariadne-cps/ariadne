@@ -38,6 +38,7 @@
 #include "solvers/constraint_solver.h"
 #include "geometry/paver.h"
 #include "geometry/affine_set.h"
+#include "algebra/algebra.h"
 
 #include "output/graphics_interface.h"
 #include "output/drawer.h"

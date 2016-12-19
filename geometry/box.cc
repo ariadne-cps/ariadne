@@ -29,11 +29,14 @@
 
 #include "numeric/module.h"
 #include "function/function.h"
+#include "function/taylor_model.h"
 
 #include "box.h"
 #include "box.tcc"
 
+#include "expression/formula.h"
 
+#include "algebra/algebra.h"
 
 namespace Ariadne {
 

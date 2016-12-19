@@ -28,18 +28,9 @@
 
 #include "utility/macros.h"
 #include "utility/logging.h"
-#include "function/polynomial.h"
-#include "function/function.h"
-#include "function/taylor_function.h"
-#include "function/procedure.h"
 #include "geometry/function_set.h"
 #include "geometry/affine_set.h"
-#include "geometry/paving_interface.h"
 #include "geometry/grid_set.h"
-#include "solvers/nonlinear_programming.h"
-#include "solvers/constraint_solver.h"
-#include "geometry/paver.h"
-#include "geometry/affine_set.h"
 
 #include "output/graphics_interface.h"
 

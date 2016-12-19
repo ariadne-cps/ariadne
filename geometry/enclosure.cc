@@ -37,7 +37,6 @@
 #include "algebra/differential.h"
 #include "function/polynomial.h"
 #include "function/function.h"
-#include "function/procedure.h"
 
 #include "function/function_model.h"
 #include "function/taylor_function.h"

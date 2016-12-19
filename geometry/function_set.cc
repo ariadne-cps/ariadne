@@ -29,15 +29,12 @@
 #include "function/polynomial.h"
 #include "function/function.h"
 #include "function/taylor_function.h"
-#include "function/procedure.h"
-#include "geometry/function_set.h"
-#include "geometry/affine_set.h"
-#include "geometry/paving_interface.h"
-#include "geometry/grid_set.h"
 #include "solvers/nonlinear_programming.h"
 #include "solvers/constraint_solver.h"
-#include "geometry/paver.h"
+#include "geometry/function_set.h"
 #include "geometry/affine_set.h"
+#include "geometry/grid_set.h"
+#include "geometry/paver.h"
 
 #include "output/graphics_interface.h"
 #include "output/drawer.h"
@@ -778,13 +775,6 @@ ConstrainedImageSet::write(OutputStream& os) const
 
 
 
-} // namespace Ariadne
-
-#include "function/procedure.h"
-#include "utility/container.h"
-#include "algebra/vector.h"
-
-namespace Ariadne {
 
 template<class SF> struct FunctionTraits;
 template<class X> struct FunctionTraits< ScalarFunction<X> > { typedef VectorFunction<X> VectorFunctionType; };

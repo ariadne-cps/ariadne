@@ -41,9 +41,10 @@
 
 #include "utility/logging.h"
 
-#include "expression/formula.h"
 #include "utility/container.h"
 #include "expression/valuation.h"
+#include "expression/assignment.h"
+#include "expression/expression.h"
 
 #include "hybrid/discrete_location.h"
 

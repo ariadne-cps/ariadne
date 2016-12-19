@@ -32,13 +32,9 @@
 
 #include "algebra/differential.h"
 
-#include "expression/formula.h"
-#include "function/procedure.h"
 #include "function/affine.h"
 #include "function/polynomial.h"
 #include "function/function.h"
 #include "function/function_model.h"
-//#include "function/taylor_function.h"
-#include "function/symbolic_function.h"
 
 #endif

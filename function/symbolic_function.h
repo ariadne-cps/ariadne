@@ -44,6 +44,7 @@
 
 #include "function/function_mixin.h"
 #include "expression/operators.tcc"
+#include "expression/formula.h"
 
 namespace Ariadne {
 
@@ -65,7 +66,7 @@ struct ScalarFormulaFunction
     virtual ScalarFunctionInterface<P>* _derivative(SizeType j) const final { return new ScalarFormulaFunction<Y>(_argument_size,Ariadne::derivative(_formula,j)); }
     virtual OutputStream& write(OutputStream& os) const final { return os << this->_formula; }
     virtual OutputStream& repr(OutputStream& os) const final { return os << "FormulaFunction("<<this->_argument_size<<","<<this->_formula<<")"; }
-    template<class X> Void _compute(X& r, const Vector<X>& x) const { r=Ariadne::evaluate(_formula,x); }
+    template<class X> Void _compute(X& r, const Vector<X>& x) const { r=Ariadne::cached_evaluate(_formula,x); }
 };
 
 typedef ScalarFormulaFunction<EffectiveNumber> EffectiveScalarFormulaFunction;

@@ -39,6 +39,7 @@
 #include "solvers/nonlinear_programming.h"
 #include "solvers/constraint_solver.h"
 #include "geometry/affine_set.h"
+#include "algebra/algebra.h"
 
 namespace Ariadne {
 

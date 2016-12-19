@@ -30,6 +30,7 @@
 #include "utility/stlio.h"
 #include "algebra/vector.h"
 #include "function/function.h"
+#include "function/constraint.h"
 #include "geometry/enclosure.h"
 #include "dynamics/orbit.h"
 

@@ -2,3 +2,6 @@ build/
 *~
 config.h
 .project
+dep/
+obj/
+*.gch

@@ -277,10 +277,10 @@ $(DEP_DIR)/boost_python.h.gch.d: wrap/boost_python.h | dirs
 $(DEP_DIR)/%.o.d: %.cc | dirs
 	@echo "Making dependencies for "$<
 	@$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -I$(PYTHON_INCLUDE_PATH) -MM $< > $(DEP_DIR)/$*.o.d
-	@sed -i 's|$*.o:|$(OBJ_DIR)/$*.o:|' $(DEP_DIR)/$*.o.d
-	@sed -i 's|utility\/standard\.h|utility\/standard\.h\.gch|g' $(DEP_DIR)/$*.o.d
-	@sed -i 's|numeric\/numeric\.h|numeric\/numeric\.h\.gch|g' $(DEP_DIR)/$*.o.d
-	@sed -i 's|function\/functional\.h|function\/function\.h\.gch|g' $(DEP_DIR)/$*.o.d
+	@sed -i '' 's|$*.o:|$(OBJ_DIR)/$*.o:|' $(DEP_DIR)/$*.o.d
+	@sed -i '' 's|utility\/standard\.h|utility\/standard\.h\.gch|g' $(DEP_DIR)/$*.o.d
+	@sed -i '' 's|numeric\/numeric\.h|numeric\/numeric\.h\.gch|g' $(DEP_DIR)/$*.o.d
+	@sed -i '' 's|function\/functional\.h|function\/function\.h\.gch|g' $(DEP_DIR)/$*.o.d
 
 
 libariadne.so: $(LIB_OBJ)

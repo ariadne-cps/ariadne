@@ -26,6 +26,7 @@
 
 #include <iomanip>
 
+#include "function/constraint.h"
 #include "geometry/enclosure.h"
 
 #include "utility/macros.h"
@@ -35,6 +36,7 @@
 #include "algebra/matrix.h"
 #include "algebra/multi_index.h"
 #include "algebra/differential.h"
+#include "algebra/algebra.h"
 #include "function/polynomial.h"
 #include "function/function.h"
 #include "function/procedure.h"

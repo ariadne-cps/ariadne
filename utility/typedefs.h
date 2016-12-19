@@ -37,13 +37,6 @@
 typedef unsigned char uchar;
 typedef unsigned int uint;
 
-namespace std {
-template<class T> class initializer_list;
-template<class T> class shared_ptr;
-template<class T1, class T2> struct pair;
-template<class... TS> class tuple;
-}
-
 namespace Ariadne {
 
 using OutputStream = std::ostream;

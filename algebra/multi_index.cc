@@ -112,7 +112,7 @@ BigSizeType MultiIndex::factorial() const
 BigSizeType MultiIndex::position() const
 {
     DegreeType deg=this->degree()-1;
-    SizeType nvar=this->size();
+    DegreeType nvar=this->size();
     BigSizeType result=bin(deg+nvar,nvar);
     for(SizeType k=0; k!=this->size()-1; ++k) {
         --nvar;

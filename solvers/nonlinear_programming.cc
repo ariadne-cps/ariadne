@@ -39,6 +39,7 @@
 #include "algebra/matrix.h"
 #include "algebra/diagonal_matrix.h"
 #include "algebra/differential.h"
+#include "algebra/algebra.h"
 #include "function/function.h"
 #include "function/function_mixin.h"
 #include "function/taylor_function.h"

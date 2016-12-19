@@ -29,6 +29,7 @@
 #include "utility/tribool.h"
 #include "numeric/numeric.h"
 #include "algebra/vector.h"
+#include "algebra/algebra.h"
 #include "geometry/box.h"
 #include "geometry/grid_set.h"
 #include "function/polynomial.h"

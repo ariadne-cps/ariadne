@@ -25,6 +25,7 @@
 #include "config.h"
 
 #include "algebra/vector.h"
+#include "algebra/algebra.h"
 #include "function/function.h"
 #include "function/taylor_model.h"
 #include "function/affine_model.h"
@@ -32,6 +33,8 @@
 #include "function/affine.h"
 #include "function/taylor_function.h"
 #include "algebra/vector.h"
+
+#include "expression/formula.h"
 
 namespace Ariadne {
 

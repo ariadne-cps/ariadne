@@ -49,8 +49,11 @@ template<class X> class Polynomial;
 template<class T> using NumericType = typename T::NumericType;
 template<class T> using FunctionType = typename T::FunctionType;
 template<class T> using GenericType = typename T::GenericType;
-template<class T> using ScalarFunctionType = typename T::ScalarFunctionType;
-template<class T> using VectorFunctionType = typename T::VectorFunctionType;
+
+template<class M> using ScalarFunctionType = typename M::ScalarFunctionType;
+template<class M> using VectorFunctionType = typename M::VectorFunctionType;
+template<class M> using ScalarFunctionModelType = ScalarFunctionModel<Paradigm<M>,PrecisionType<M>,ErrorPrecisionType<M>>;
+template<class M> using VectorFunctionModelType = VectorFunctionModel<Paradigm<M>,PrecisionType<M>,ErrorPrecisionType<M>>;
 
 template<class M> class FunctionPatch;
 template<class M> using ScalarFunctionPatch = FunctionPatch<M>;
@@ -133,6 +136,8 @@ template<class M> class FunctionPatch
     typedef typename ModelType::NumericType NumericType;
     typedef typename ModelType::Paradigm Paradigm;
     typedef typename ModelType::PrecisionType PrecisionType;
+    typedef typename ModelType::NormType NormType;
+    typedef FunctionPatch<M> FunctionPatchType;
     typedef ScalarFunction<Paradigm> FunctionType;
     typedef ScalarFunction<Paradigm> GenericType;
     typedef Number<Paradigm> GenericNumericType;
@@ -144,7 +149,7 @@ template<class M> class FunctionPatch
   public:
 
     //@{
-    /*! \name Constructors and destructors. */
+    //! \name Constructors and destructors.
     //! \brief Default constructor.
     explicit FunctionPatch();
     //! \brief Construct a FunctionPatch<M> over the domain \a d.
@@ -156,21 +161,21 @@ template<class M> class FunctionPatch
     explicit FunctionPatch(const ExactBoxType& d, const Expansion<FloatValue<PR>>& p, const FloatError<PR>& e, const Sweeper<RawFloat<PR>>& swp);
     explicit FunctionPatch(const ExactBoxType& d, const Expansion<RawFloat<PR>>& p, const RawFloat<PR>& e, const Sweeper<RawFloat<PR>>& swp);
 
-    explicit FunctionPatch(const ScalarFunctionModel<ValidatedTag>& f);
-    FunctionPatch& operator=(const ScalarFunctionModel<ValidatedTag>& f);
+    explicit FunctionPatch(const ScalarFunctionModelType<M>& f);
+    FunctionPatch& operator=(const ScalarFunctionModelType<M>& f);
 
     //! \brief Construct a FunctionPatch over the domain \a d from the function \a f.
     explicit FunctionPatch(const DomainType& d, const ScalarFunctionType<M>& f, SweeperType swp);
     //@}
 
     //@{
-    /*! \name Assignment to constant values. */
+    //! \name Assignment to constant values.
     //! \brief Set equal to an interval constant, keeping the same number of arguments.
     FunctionPatch<M>& operator=(const NumericType& c) { this->_model=c; return *this; }
     //@}
 
     //@{
-    /*! \name Named constructors. */
+    //! \name Named constructors.
     //! \brief Construct a zero function over domain \a d.
     static FunctionPatch<M> zero(const DomainType& d, SweeperType swp);
     //! \brief Construct a constant quantity in \a as independent variables.
@@ -196,7 +201,7 @@ template<class M> class FunctionPatch
     //@}
 
     //@{
-    /*! \name Prototype constructors. */
+    //! \name Prototype constructors.
     FunctionPatch<M> create_zero() const;
     FunctionPatch<M> create_constant(NumericType const& c) const;
     FunctionPatch<M> create_constant(GenericNumericType const& c) const;
@@ -212,7 +217,7 @@ template<class M> class FunctionPatch
     //@}
 
     //@{
-    /*! \name Data access */
+    //! \name Data access
     //! \brief The domain of the quantity.
     const DomainType domain() const { return this->_domain; }
     //! \brief The scaled expansion over a unit box with error bound.
@@ -226,9 +231,9 @@ template<class M> class FunctionPatch
     const ExpansionType& expansion() const { return this->_model.expansion(); }
     //! \brief The error of the expansion over the domain.
     const ErrorType& error() const { return this->_model.error(); }
-    /*! \brief The accuracy parameter used to control approximation of the Taylor function. */
+    //! \brief The accuracy parameter used to control approximation of the Taylor function.
     SweeperType sweeper() const { return this->_model.sweeper(); }
-    /*! \brief The precision of the numbers used. */
+    //! \brief The precision of the numbers used.
     PrecisionType precision() const { return this->_model.precision(); }
     //! \brief A reference to the expansion.
     ExpansionType& expansion() { return this->_model.expansion(); }
@@ -266,14 +271,14 @@ template<class M> class FunctionPatch
     //@}
 
     //@{
-    /*! \name Comparison operators. */
+    //! \name Comparison operators.
     Bool operator==(const FunctionPatch<M>& tv) const;
     //! \brief Inequality operator.
     Bool operator!=(const FunctionPatch<M>& tv) const { return !(*this==tv); }
     //@}
 
     //@{
-    /*! \name Function operations. */
+    //! \name Function operations.
     //! \brief An over-approximation to the range of the function.
     RangeType range() const { return this->_model.range(); }
     //! \brief Evaluate the function at the point \a x.
@@ -281,12 +286,12 @@ template<class M> class FunctionPatch
     FloatBounds<PR> operator()(const Vector<FloatValue<PR>>& x) const;
     FloatApproximation<PR> operator()(const Vector<FloatApproximation<PR>>& x) const;
 
-    /*! \brief Compute an approximation to gradient derivative of the function at the point \a x. */
+    //! \brief Compute an approximation to gradient derivative of the function at the point \a x.
     Covector<NumericType> gradient(const Vector<NumericType>& x) const;
     //@}
 
     //@{
-    /*! \name Simplification operations. */
+    //! \name Simplification operations.
    //! \brief Remove all terms whose coefficient has magnitude
     //! lower than the cutoff threshold of the quantity.
     FunctionPatch<M>& sweep() { this->_model.sweep(); return *this; }
@@ -296,27 +301,22 @@ template<class M> class FunctionPatch
     //@}
 
     //@{
-    /*! \name Accuracy parameters. */
+    //! \name Accuracy parameters.
     //! \copydoc TaylorModel::set_sweeper()
     Void set_sweeper(const SweeperType& swp) { this->_model.set_sweeper(swp); }
     //@}
 
     //@{
-    /*! \name Non-arithmetic operations. */
+    //! \name Non-arithmetic operations.
     //! \brief Restrict to a subdomain.
     Void restrict(const DomainType& d);
-
-
-    //@}
-
-    /*! \name Arithmetic operations. */
     //@}
 
     //@{
-    /*! \name Stream input/output operators. */
+    //! \name Stream input/output operators.
     //! \brief Write to an output stream.
     OutputStream& write(OutputStream& os) const;
-    /*! \brief Write a full representation to an output stream. */
+    //! \brief Write a full representation to an output stream.
     OutputStream& repr(OutputStream& os) const;
     //! \brief Write to an output stream.
     friend OutputStream& operator<<(OutputStream& os, const FunctionPatch<M>& x) {
@@ -327,8 +327,8 @@ template<class M> class FunctionPatch
     Void clobber() { this->_model.clobber(); }
   private:
     friend class TaylorFunctionFactory;
-    friend class ScalarFunctionMixin<FunctionPatch<M>, ValidatedTag>;
-    friend class ScalarFunctionModelMixin<FunctionPatch<M>, ValidatedTag>;
+    friend class ScalarFunctionMixin<FunctionPatch<M>, P>;
+    friend class ScalarFunctionModelMixin<FunctionPatch<M>, P>;
   public:
     template<class X, EnableIf<CanCall<X,M,Vector<X>>> =dummy> Void _compute(X& r, const Vector<X>& a) const;
     template<class X, DisableIf<CanCall<X,M,Vector<X>>> =dummy> Void _compute(X& r, const Vector<X>& a) const;
@@ -348,6 +348,113 @@ template<class M> class FunctionPatch
     virtual ScalarFunctionPatch<M>* _create_coordinate(DomainType const&, SizeType) const;
     VectorFunctionModelInterface<P,PR,PRE>* _create_identity() const;
     VectorFunctionModelInterface<P,PR,PRE>* _create_vector(SizeType i) const;
+
+
+  public:
+    VectorFunctionPatch<M> join(const FunctionPatch<M>& f1, const FunctionPatch<M>& f2);
+    VectorFunctionPatch<M> combine(const FunctionPatch<M>& f1, const FunctionPatch<M>& f2);
+
+    //! \brief Restrict to a subdomain.
+    friend FunctionPatch<M> restriction(const FunctionPatch<M>& fp, const ExactBoxType& dom) {
+        if(not(subset(dom,fp.domain()))) { ARIADNE_THROW(DomainException,"restiction(FunctionPatch<M>,ExactBoxType)","fp="<<fp<<", dom="<<dom); }
+        return unchecked_compose(fp,FunctionPatch<M>::identity(dom,fp.sweeper()));
+    }
+    //! \brief Restrict a component to a subdomain
+    // To scale from a model on [a,b] to a model on [c,d], use scale factor s=(d-c)/(b-a)
+    // and translation t=((c+d)-(a+b))/(b-a)
+    // Because we are scaling the model on [-1,+1], this is not the same as
+    // the mapping taking [a,b] to [c,d]
+    friend FunctionPatch<M> partial_restriction(const FunctionPatch<M>& fp, SizeType k, const ExactIntervalType& ivl) {
+        ExactBoxType dom=fp.domain(); dom[k]=ivl; return restriction(fp,dom);
+    }
+    //! \brief Extend over a larger domain. Only possible if the larger domain is only larger where the smaller domain is a singleton.
+    //! The extension is performed keeping \a x constant over the new coordinates. // DEPRECATED
+    friend FunctionPatch<M> extension(const FunctionPatch<M>& fp, const ExactBoxType& dom) {
+        return unchecked_compose(fp,FunctionPatch<M>::identity(dom,fp.sweeper()));
+    }
+    //! \brief Pre-compose with a projection from the Cartesian product of the given domains.
+    friend FunctionPatch<M> embed(const ExactBoxType& dom1, const FunctionPatch<M>& tv2,const ExactBoxType& dom3) {
+        return FunctionPatch<M>(product(dom1,tv2.domain(),dom3),embed(dom1.size(),tv2.model(),dom3.size())); }
+    //! \brief Split the domain into two.
+    friend Pair<FunctionPatch<M>,FunctionPatch<M>> split(const FunctionPatch<M>& tv, SizeType j) {
+        Pair<ModelType,ModelType> models={split(tv.model(),j,SplitPart::LOWER),split(tv.model(),j,SplitPart::LOWER)};
+        Pair<ExactBoxType,ExactBoxType> subdomains=split(tv.domain(),j);
+        return make_pair(FunctionPatch<M>(subdomains.first,models.first),
+                         FunctionPatch<M>(subdomains.second,models.second));
+    }
+
+    template<class OP> static FunctionPatch<M> _apply(OP op, FunctionPatch<M> const& f);
+    template<class OP> static FunctionPatch<M> _apply(OP op, FunctionPatch<M> const& f1, FunctionPatch<M> const& f2);
+
+/*
+    friend FunctionPatch<M>& operator+=(FunctionPatch<M>& f, const NumericType& c) { f.model()+=c; return f; }
+    friend FunctionPatch<M>& operator*=(FunctionPatch<M>& f, const NumericType& c) { f.model()*=c; return f; }
+    friend FunctionPatch<M> operator-(const FunctionPatch<M>& f) { return apply(Neg(),f); }
+    friend FunctionPatch<M> operator+(const FunctionPatch<M>& f1, const FunctionPatch<M>& f2) { return apply(Add(),f1,f2); }
+    friend FunctionPatch<M> operator-(const FunctionPatch<M>& f1, const FunctionPatch<M>& f2) { return apply(Sub(),f1,f2); }
+    friend FunctionPatch<M> operator*(const FunctionPatch<M>& f1, const FunctionPatch<M>& f2) { return apply(Mul(),f1,f2); }
+    friend FunctionPatch<M> operator/(const FunctionPatch<M>& f1, const FunctionPatch<M>& f2) { return apply(Div(),f1,f2); }
+*/
+    friend FunctionPatch<M> max(const FunctionPatch<M>& f1, const FunctionPatch<M>& f2) { return _apply(Max(),f1,f2); }
+    friend FunctionPatch<M> min(const FunctionPatch<M>& f1, const FunctionPatch<M>& f2) { return _apply(Min(),f1,f2); }
+    friend FunctionPatch<M> abs(const FunctionPatch<M>& f) { return _apply(Abs(),f); }
+
+    friend FunctionPatch<M> antiderivative(const FunctionPatch<M>& f, SizeType k) {
+        return FunctionPatch<M>(f.domain(),antiderivative(f.model(),k)*rad(f.domain()[k])); }
+    friend FunctionPatch<M> antiderivative(const FunctionPatch<M>& f, SizeType k, const NumericType& c) {
+        ARIADNE_ASSERT(k<f.argument_size());
+        ARIADNE_ASSERT(decide(contains(f.domain()[k],c)));
+        FunctionPatch<M> g = antiderivative(f,k);
+        VectorFunctionPatch<M> h ( f.create_coordinates() );
+        h[k] = f.create_constant(c);
+        return g-compose(g,h);
+    }
+    friend FunctionPatch<M> derivative(const FunctionPatch<M>& f, SizeType k) {
+        return FunctionPatch<M>(f.domain(),derivative(f.model(),k)*rec(rad(f.domain()[k]))); }
+
+
+    friend FunctionPatch<M> partial_evaluate(const FunctionPatch<M>& te, SizeType k, const NumericType& c) {
+        // Scale c to domain
+        const SizeType as=te.argument_size();
+        ARIADNE_ASSERT(k<as);
+        const ExactBoxType& domain=te.domain();
+        const ExactIntervalType& dk=domain[k];
+        NumericType sc=(c-med(dk))/rad(dk);
+
+        ExactBoxType new_domain(as-1);
+        for(SizeType i=0; i!=k; ++i) { new_domain[i]=domain[i]; }
+        for(SizeType i=k; i!=as-1; ++i) { new_domain[i]=domain[i+1]; }
+
+        M new_model=partial_evaluate(te.model(),k,sc);
+
+        return FunctionPatch<M>(new_domain,new_model);
+    }
+    friend NumericType evaluate(const FunctionPatch<M>& f, const Vector<NumericType>& x) {
+        if(!definitely(contains(f.domain(),x))) {
+            ARIADNE_THROW(DomainException,"evaluate(f,x) with f="<<f<<", x="<<x,"x is not an element of f.domain()="<<f.domain());
+        }
+        return unchecked_evaluate(f,x);
+    }
+    friend NumericType unchecked_evaluate(const FunctionPatch<M>& f, const Vector<NumericType>& x) {
+        return evaluate(f.model(),unscale(x,f.domain()));
+    }
+
+
+    friend NormType norm(const FunctionPatch<M>& f) {
+        return norm(f.model());
+    }
+    friend NormType distance(const FunctionPatch<M>& f1, const FunctionPatch<M>& f2) {
+        return norm(f1-f2);
+    }
+    friend NormType distance(const FunctionPatch<M>& f1, const ScalarFunction<P>& f2) {
+        return distance(f1,FunctionPatch<M>(f1.domain(),f2,f1.sweeper()));
+    }
+
+
+    friend Polynomial<NumericType> polynomial(const FunctionPatch<M>& tfn) {
+        return tfn.polynomial();
+    }
+
 };
 
 template<class M> template<class X, EnableIf<CanCall<X,M,Vector<X>>>> Void FunctionPatch<M>::_compute(X& r, const Vector<X>& a) const {
@@ -355,6 +462,24 @@ template<class M> template<class X, EnableIf<CanCall<X,M,Vector<X>>>> Void Funct
 }
 template<class M> template<class X, DisableIf<CanCall<X,M,Vector<X>>>> Void FunctionPatch<M>::_compute(X& r, const Vector<X>& a) const {
     assert(false);
+}
+
+template<class FP1, class FP2> Void check_function_patch_domain(String const& op_str, const FP1& fp1, const FP2& fp2) {
+    ARIADNE_ASSERT_MSG(!is_empty(intersection(fp1.domain(),fp2.domain())),
+                    op_str<<"((Vector)FunctionPatch<M> fp1, (Vector)FunctionPatch<M> fp2) with fp1="<<fp1<<" fp2="<<fp2<<
+                    ": domains are disjoint");
+}
+template<class M> template<class OP> FunctionPatch<M> FunctionPatch<M>::_apply(OP op, FunctionPatch<M> const& f) {
+    return FunctionPatch<M>(f.domain(),op(f.model()));
+}
+template<class M> template<class OP> FunctionPatch<M> FunctionPatch<M>::_apply(OP op, FunctionPatch<M> const& f1, FunctionPatch<M> const& f2) {
+    check_function_patch_domain(to_str(op),f1,f2);
+    if(f1.domain()==f2.domain()) {
+        return FunctionPatch<M>(f1.domain(),op(f1.model(),f2.model()));
+    } else {
+        ExactBoxType domain=intersection(f1.domain(),f2.domain());
+        return FunctionPatch<M>(domain,op(restriction(f1,domain).model(),restriction(f2,domain).model()));
+    }
 }
 
 
@@ -374,57 +499,38 @@ template<class M> FunctionPatch<M> FunctionPatch<M>::_create(Pow op, FunctionPat
     return FunctionPatch<M>(fp.domain(),op(fp.model(),n));
 }
 
-//! \brief Restrict to a subdomain.
-template<class M> FunctionPatch<M> restriction(const FunctionPatch<M>& x, const ExactBoxType& d);
-//! \brief Extend over a larger domain. Only possible if the larger domain is only larger where the smaller domain is a singleton.
-//! The extension is performed keeping \a x constant over the new coordinates. // DEPRECATED
-template<class M> FunctionPatch<M> extension(const FunctionPatch<M>& x, const ExactBoxType& d);
-
 //! \brief Test if the function models have the same representation.
-template<class M> Bool same(const FunctionPatch<M>& x1, const FunctionPatch<M>& x2);
+template<class M> Bool same(const FunctionPatch<M>& tv1, const FunctionPatch<M>& tv2) {
+    return tv1.domain()==tv2.domain() && same(tv1.model(),tv2.model());
+}
 //! \brief Test if the quantity is a better approximation than \a t throughout the domain.
-template<class M> Bool refines(const FunctionPatch<M>& x1, const FunctionPatch<M>& x2);
+template<class M> Bool refines(const FunctionPatch<M>& tv1, const FunctionPatch<M>& tv2) {
+    if(tv1.domain()==tv2.domain()) { return refines(tv1.model(),tv2.model()); }
+    if(subset(tv2.domain(),tv1.domain())) { return refines(restriction(tv1,tv2.domain()).model(),tv2.model()); }
+    else { return false; }
+}
 //! \brief Test if the function models are inconsistent with representing the same exact function.
-template<class M> Bool inconsistent(const FunctionPatch<M>& x1, const FunctionPatch<M>& x2);
+template<class M> Bool inconsistent(const FunctionPatch<M>& tv1, const FunctionPatch<M>& tv2) {
+    if(tv1.domain()==tv2.domain()) {
+        return inconsistent(tv1.model(),tv2.model());
+    } else {
+        ExactBoxType domain=intersection(tv1.domain(),tv2.domain());
+        return inconsistent(restriction(tv1,domain).model(),restriction(tv2,domain).model());
+    }
+}
 //! \brief Compute an over-approximation to the common refinement of \a x1 and \a x2.
-template<class M> FunctionPatch<M> refinement(const FunctionPatch<M>& x1, const FunctionPatch<M>& x2);
+template<class M> FunctionPatch<M> refinement(const FunctionPatch<M>& tv1, const FunctionPatch<M>& tv2) {
+    ARIADNE_ASSERT(tv1.domain()==tv2.domain());
+    return FunctionPatch<M>(tv1.domain(),refinement(tv1.model(),tv2.model()));
+}
+//! \brief Remove the error term.
+template<class M> FunctionPatch<M> midpoint(const FunctionPatch<M>& f) {
+    M tm=f.model();
+    tm.set_error(0u);
+    return FunctionPatch<M>(f.domain(),tm);
+}
 
 
-// Normed algebra
-template<class M> typename M::NormType norm(const FunctionPatch<M>& f);
-
-// Differential algebra
-template<class M> FunctionPatch<M> antiderivative(const FunctionPatch<M>& x, SizeType k, const NumericType<M>& c);
-template<class M> FunctionPatch<M> antiderivative(const FunctionPatch<M>& x, SizeType k);
-template<class M> FunctionPatch<M> derivative(const FunctionPatch<M>& x, SizeType k);
-
-// Function algebra
-template<class M> FunctionPatch<M> embed(const ExactBoxType& dom1, const FunctionPatch<M>& tv2,const ExactBoxType& dom3);
-// Set the value of the \a kth variable to c
-template<class M> FunctionPatch<M> partial_evaluate(const FunctionPatch<M>& f, SizeType k, const NumericType<M>& c);
-// Evaluate a scalar Taylor function on a vector.
-template<class M> NumericType<M> unchecked_evaluate(const FunctionPatch<M>&, const Vector<NumericType<M>>&);
-template<class M> NumericType<M> evaluate(const FunctionPatch<M>&, const Vector<NumericType<M>>&);
-
-// Compose with an function.
-template<class M> FunctionPatch<M> compose(const FunctionType<M>& x, const VectorFunctionPatch<M>& y);
-template<class M> FunctionPatch<M> unchecked_compose(const FunctionPatch<M>&, const VectorFunctionPatch<M>&);
-
-// Split the variable over two domains, subdividing along the independent variable j.
-template<class M> Pair<FunctionPatch<M>,FunctionPatch<M>> split(const FunctionPatch<M>& x, SizeType j);
-
-
-template<class M> FunctionPatch<M>& operator+=(FunctionPatch<M>& f, const NumericType<M>& c);
-template<class M> FunctionPatch<M>& operator*=(FunctionPatch<M>& f, const NumericType<M>& c);
-
-template<class M> FunctionPatch<M> operator-(const FunctionPatch<M>& f);
-template<class M> FunctionPatch<M> operator+(const FunctionPatch<M>& f1, const FunctionPatch<M>& f2);
-template<class M> FunctionPatch<M> operator*(const FunctionPatch<M>& f1, const FunctionPatch<M>& f2);
-
-template<class M, class OP> FunctionPatch<M> apply(OP op, FunctionPatch<M> const& f);
-
-// Remove the error term
-template<class M> FunctionPatch<M> midpoint(const FunctionPatch<M>& x);
 
 
 
@@ -453,6 +559,7 @@ template<class M> class VectorFunctionPatch
     typedef typename ModelType::CoefficientType CoefficientType;
     typedef typename ModelType::ErrorType ErrorType;
     typedef typename ModelType::NumericType NumericType;
+    typedef typename ModelType::NormType NormType;
     typedef Sweeper<F> SweeperType;
     typedef P Paradigm;
     typedef PR PrecisionType;
@@ -463,114 +570,117 @@ template<class M> class VectorFunctionPatch
     typedef FloatValue<PR> ExactNumericType;
 
 
-    /*! \brief Default constructor constructs a Taylor model of order zero with no arguments and no result variables. */
+    //! \brief Default constructor constructs a Taylor model of order zero with no arguments and no result variables.
     VectorFunctionPatch<M>();
 
-    /*! \brief Construct the zero vector function over an unspecified domain. */
+    //! \brief Construct the zero vector function over an unspecified domain.
     explicit VectorFunctionPatch<M>(SizeType result_size);
 
-    /*! \brief Construct from a result size and a domain. */
+    //! \brief Construct from a result size and a domain.
     VectorFunctionPatch<M>(SizeType result_size, const ExactBoxType& domain, SweeperType swp);
 
-    /*! \brief Construct a vector function all of whose components are the same. */
+    //! \brief Construct a vector function all of whose components are the same.
     VectorFunctionPatch<M>(SizeType result_size, const FunctionPatch<M>& scalar_function);
 
-    /*! \brief Construct from a domain and the expansion. */
+    //! \brief Construct from a domain and the expansion.
     VectorFunctionPatch<M>(const ExactBoxType& domain,
                          const Vector<Expansion<FloatValue<PR>>>& expansion,
                          SweeperType swp);
 
-    /*! \brief Construct from a domain, and expansion and errors. */
+    //! \brief Construct from a domain, and expansion and errors.
     VectorFunctionPatch<M>(const ExactBoxType& domain,
                          const Vector<Expansion<FloatValue<PR>>>& expansion,
                          const Vector<FloatError<PR>>& error,
                          SweeperType swp);
 
-    /*! \brief Construct from a domain, and expansion and errors. */
+    //! \brief Construct from a domain, and expansion and errors.
     VectorFunctionPatch<M>(const ExactBoxType& domain,
                          const Vector<Expansion<RawFloat<PR>>>& expansion,
                          const Vector<RawFloat<PR>>& error,
                          SweeperType swp);
 
-    /*! \brief Construct from a domain, and expansion and errors. */
+    //! \brief Construct from a domain, and expansion and errors.
     VectorFunctionPatch<M>(const ExactBoxType& domain,
                          const Vector<Expansion<RawFloat<PR>>>& expansion,
                          SweeperType swp);
 
-    /*! \brief Construct from a domain and the models. */
+    //! \brief Construct from a domain and the models.
     explicit VectorFunctionPatch<M>(const ExactBoxType& domain, const Vector< ModelType >& variables);
 
-    /*! \brief Construct from a domain, a function, and a sweeper determining the accuracy. */
+    //! \brief Construct from a domain, a function, and a sweeper determining the accuracy.
     VectorFunctionPatch<M>(const ExactBoxType& domain,
                          const VectorFunctionType<M>& function,
                          const SweeperType& sweeper);
 
-    /*! \brief Construct from a vector of scalar Taylor functions. */
+    //! \brief Construct from a vector of scalar Taylor functions.
     explicit VectorFunctionPatch<M>(const Vector<FunctionPatch<M>>& components);
 
-    /*! \brief Construct from a list of scalar Taylor functions. */
+    //! \brief Construct from a list of scalar Taylor functions.
     explicit VectorFunctionPatch<M>(const List<FunctionPatch<M>>& components);
 
-    /*! \brief Construct from an initializer list of scalar Taylor functions. */
+    //! \brief Construct from an initializer list of scalar Taylor functions.
     VectorFunctionPatch<M>(InitializerList<FunctionPatch<M>> components);
 
-    /*! \brief Construct from a vector expression. */
+    //! \brief Construct from a vector expression.
     template<class E> explicit VectorFunctionPatch<M>(const VectorExpression<E>& ve);
 
-    explicit VectorFunctionPatch<M> (const VectorFunctionModel<ValidatedTag>& f);
-    VectorFunctionPatch<M>& operator=(const VectorFunctionModel<ValidatedTag>& f);
+    explicit VectorFunctionPatch<M> (const VectorFunctionModelType<M>& f);
+    VectorFunctionPatch<M>& operator=(const VectorFunctionModelType<M>& f);
 
-    /*! \brief Equality operator. */
+    //! \brief Equality operator.
     Bool operator==(const VectorFunctionPatch<M>& p) const;
-    /*! \brief Inequality operator. */
+    //! \brief Inequality operator.
     Bool operator!=(const VectorFunctionPatch<M>& p) const;
 
     // Data access
-    /*! \brief The sweeper used to control approximation of the Taylor function. */
+    //! \brief The sweeper used to control approximation of the Taylor function.
     SweeperType sweeper() const;
-    /*! \brief Set the sweeper used to control approximation of the Taylor function. */
+    //! \brief Set the sweeper used to control approximation of the Taylor function.
     Void set_sweeper(SweeperType swp);
-    /*! \brief The data used to define the domain of the Taylor model. */
+    //! \brief The data used to define the domain of the Taylor model.
     const ExactBoxType domain() const;
-    /*! \brief A rough bound for the range of the function. */
+    //! \brief A rough bound for the range of the function.
     const ExactBoxType codomain() const;
-    /*! \brief The centre of the Taylor model. */
+    //! \brief The centre of the Taylor model.
     const Vector<CoefficientType> centre() const;
-    /*! \brief The range of the Taylor model. */
+    //! \brief The range of the Taylor model.
     const RangeType range() const;
-    /*! \brief The data used to define the Taylor models. */
+    //! \brief The data used to define the Taylor models.
     const Vector<ModelType>& models() const;
     Vector<ModelType>& models();
-    /*! \brief The data used to define the centre of the Taylor models. */
+    //! \brief The data used to define the centre of the Taylor models.
     const Vector<Expansion<FloatValue<PR>>> expansions() const;
 
-    /*! \brief The \a i<sup>th</sup> Taylor model used to define the function. */
+    //! \brief The \a i<sup>th</sup> Taylor model used to define the function.
     const ModelType& model(SizeType i) const;
-    /*! \brief The \a i<sup>th</sup> Taylor model used to define the function. */
+    //! \brief The \a i<sup>th</sup> Taylor model used to define the function.
     ModelType& model(SizeType i);
 
-    /*! \brief The size of the argument. */
+    //! \brief The size of the argument.
     SizeType argument_size() const;
-    /*! \brief The size of the result. */
+    //! \brief The size of the result.
     SizeType result_size() const;
 
-    // For compatibility wit Vector.
-    SizeType size() const { return this->result_size(); }
-    /*! \brief Get the \a ith Taylor variable */
+    // For compatibility with Vector.
+    //! \brief The number of scalar function components.
+    SizeType size() const;
+    //! \brief A null function compatible with the elements.
+    FunctionPatch<M> zero_element() const;
+    //! \brief Get the \a ith Taylor variable
     FunctionPatch<M> get(SizeType i) const;
-    /*! \brief Set the \a ith Taylor variable */
+    //! \brief Set the \a ith Taylor variable
     Void set(SizeType i, const FunctionPatch<M>& te);
-    /*! \brief The \a ith Taylor variable */
+    //! \brief The \a ith Taylor variable
     FunctionPatch<M> const operator[](SizeType i) const;
-    /*! \brief The \a ith Taylor variable */
+    //! \brief The \a ith Taylor variable
     VectorFunctionPatchElementReference<M> operator[](SizeType i);
 
 
-    /*! \brief Evaluate the Taylor model at the point \a x. */
+    //! \brief Evaluate the Taylor model at the point \a x.
     Vector<ValidatedNumericType> operator()(const Vector<ValidatedNumericType>& x) const;
     Vector<ApproximateNumericType> operator()(const Vector<ApproximateNumericType>& x) const;
     Vector<ValidatedNumericType> operator()(const Vector<ExactNumericType>& x) const;
-    /*! \brief Compute an approximation to Jacobian derivative of the Taylor model sat the point \a x. */
+    //! \brief Compute an approximation to Jacobian derivative of the Taylor model sat the point \a x.
     Matrix<NumericType> jacobian(const Vector<NumericType>& x) const;
 
     //! \brief Remove all terms whose coefficient has magnitude
@@ -578,36 +688,36 @@ template<class M> class VectorFunctionPatch
     VectorFunctionPatch<M>& sweep();
     //! \brief Remove all terms as specified by \a sweeper.
     VectorFunctionPatch<M>& sweep(const SweeperInterface<F>& sweeper);
-    /*! \brief Set the error to zero. */
+    //! \brief Set the error to zero.
     Void clobber();
 
-    /*! \brief The constant Taylor model with range \a r and argument domain \a d. */
+    //! \brief The constant Taylor model with range \a r and argument domain \a d.
     static VectorFunctionPatch<M> constant(const ExactBoxType& d, const Vector<NumericType>& r, SweeperType swp);
-    /*! \brief The identity Taylor model on domain \a d. */
+    //! \brief The identity Taylor model on domain \a d.
     static VectorFunctionPatch<M> identity(const ExactBoxType& d, SweeperType swp);
     //! \brief Return the vector of variables in the range with values \a x over domain \a d.
     static VectorFunctionPatch<M> projection(const ExactBoxType& d, SizeType imin, SizeType imax, SweeperType swp);
 
-    /*! \brief Convert to an interval polynomial. */
+    //! \brief Convert to an interval polynomial.
     Vector<Polynomial<FloatBounds<PR>>> polynomials() const;
-    /*! \brief The vector of roundoff/truncation errors of each component. */
+    //! \brief The vector of roundoff/truncation errors of each component.
     Vector<ErrorType> const errors() const;
-    /*! \brief The maximum roundoff/truncation error of the components. */
+    //! \brief The maximum roundoff/truncation error of the components.
     ErrorType const error() const;
     //! \brief A multivalued function equal to the model on the domain.
     VectorFunctionType<M> function() const;
 
-    /*! \brief Truncate terms higher than \a bd. */
+    //! \brief Truncate terms higher than \a bd.
     VectorFunctionPatch<M>& truncate(const MultiIndexBound& bd);
-    /*! \brief Restrict to a subdomain. */
+    //! \brief Restrict to a subdomain.
     Void restrict(const ExactBoxType& d);
     //! \brief Adjoin a scalar function.
     Void adjoin(const FunctionPatch<M>& sf);
 
-    /*! \brief Write to an output stream. */
+    //! \brief Write to an output stream.
     OutputStream& write(OutputStream& os) const;
 
-    /*! \brief Write a full representation to an output stream. */
+    //! \brief Write a full representation to an output stream.
     OutputStream& repr(OutputStream& os) const;
 
   private:
@@ -621,7 +731,7 @@ template<class M> class VectorFunctionPatch
     virtual VectorFunctionPatch<M>* _create_identity() const;
     virtual ScalarFunctionPatch<M>* _create_zero() const;
   private:
-    friend class VectorFunctionMixin<VectorFunctionPatch<M>,ValidatedTag>;
+    friend class VectorFunctionMixin<VectorFunctionPatch<M>,P>;
     friend class TaylorFunctionFactory;
   public:
     template<class X, EnableIf<CanEvaluate<X,M,Vector<X>>> =dummy> Void _compute(Vector<X>& r, const Vector<X>& a) const;
@@ -630,6 +740,271 @@ template<class M> class VectorFunctionPatch
     /* Domain of definition. */
     ExactBoxType _domain;
     Vector< ModelType > _models;
+
+  public:
+    //! \brief Compute the function \f$(f \oplus g)(x)=(f(x),g(x))\f$.
+    friend VectorFunctionPatch<M> join(const VectorFunctionPatch<M>& f1, const FunctionPatch<M>& f2) {
+        ARIADNE_ASSERT_MSG(f1.domain()==f2.domain(),"f1="<<f1<<", f2="<<f2);
+        return VectorFunctionPatch<M>(f1.domain(),join(f1.models(),f2.model()));
+    }
+    friend VectorFunctionPatch<M> join(const VectorFunctionPatch<M>& f, const VectorFunctionPatch<M>& g) {
+        ARIADNE_ASSERT(f.domain()==g.domain());
+        return VectorFunctionPatch<M>(f.domain(),join(f.models(),g.models()));
+    }
+    friend VectorFunctionPatch<M> join(const FunctionPatch<M>& f1, const FunctionPatch<M>& f2) {
+        ARIADNE_ASSERT(f1.domain()==f2.domain());
+        return VectorFunctionPatch<M>(f1.domain(),{f1.model(),f2.model()});
+    }
+    friend VectorFunctionPatch<M> join(const FunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2) {
+        ARIADNE_ASSERT(f1.domain()==f2.domain());
+        return VectorFunctionPatch<M>(f1.domain(),join(f1.model(),f2.models()));
+    }
+
+    //! \brief Compute the function \f$(f\otimes g)(x,y)=(f(x),g(y))\f$.
+    friend VectorFunctionPatch<M> combine(const FunctionPatch<M>& f1, const FunctionPatch<M>& f2) {
+        return VectorFunctionPatch<M>(product(f1.domain(),f2.domain()),combine(Vector<M>(1u,f1.model()),{f2.model()}));
+    }
+    friend VectorFunctionPatch<M> combine(const FunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2) {
+        return VectorFunctionPatch<M>(product(f1.domain(),f2.domain()),combine({f1.model()},f2.models()));
+    }
+    friend VectorFunctionPatch<M> combine(const VectorFunctionPatch<M>& f1, const FunctionPatch<M>& f2) {
+        return VectorFunctionPatch<M>(product(f1.domain(),f2.domain()),combine(f1.models(),{f2.model()}));
+    }
+    friend VectorFunctionPatch<M> combine(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2) {
+        return VectorFunctionPatch<M>(product(f1.domain(),f2.domain()),combine(f1.models(),f2.models()));
+    }
+
+    friend VectorFunctionPatch<M> embed(const VectorFunctionPatch<M>& f, const ExactIntervalType& d) {
+        return embed(ExactBoxType(),f,ExactBoxType(1u,d));
+    }
+    friend VectorFunctionPatch<M> embed(const VectorFunctionPatch<M>& f, const ExactBoxType& d) {
+        return embed(ExactBoxType(),f,d);
+    }
+    friend VectorFunctionPatch<M> embed(const ExactBoxType& d, const VectorFunctionPatch<M>& f) {
+        return embed(d,f,ExactBoxType());
+    }
+    friend VectorFunctionPatch<M> embed(const ExactBoxType& d1, const VectorFunctionPatch<M>& f, const ExactBoxType& d2) {
+        return VectorFunctionPatch<M>(product(d1,f.domain(),d2),embed(d1.size(),f.models(),d2.size()));
+    }
+
+    friend VectorFunctionPatch<M> restriction(const VectorFunctionPatch<M>& f, const ExactBoxType& d) {
+        ARIADNE_ASSERT_MSG(subset(d,f.domain()),"Cannot restriction "<<f<<" to non-sub-domain "<<d);
+        if(d==f.domain()) { return f; }
+        VectorFunctionPatch<M> r(f.result_size(),d,f.sweeper());
+        for(SizeType i=0; i!=r.result_size(); ++i) {
+            r.set(i,restriction(f[i],d));
+        }
+        return r;
+    }
+    friend VectorFunctionPatch<M> partial_restriction(const VectorFunctionPatch<M>& tf, SizeType k, const ExactIntervalType& d) {
+        VectorFunctionPatch<M> r(tf.result_size(),tf.domain(),tf.sweeper());
+        for(SizeType i=0; i!=tf.result_size(); ++i) {
+            r[i]=partial_restriction(tf[i],k,d);
+        }
+        return r;
+    }
+    friend VectorFunctionPatch<M> restriction(const VectorFunctionPatch<M>& tf, SizeType k, const ExactIntervalType& d) {
+        return partial_restriction(tf,k,d);
+    }
+    friend Pair<VectorFunctionPatch<M>,VectorFunctionPatch<M>> split(const VectorFunctionPatch<M>& tf, SizeType j) {
+        typedef M ModelType;
+        Pair<Vector<ModelType>,Vector<ModelType>> models=split(tf.models(),j);
+        Pair<ExactBoxType,ExactBoxType> subdomains=split(tf.domain(),j);
+        return make_pair(VectorFunctionPatch<M>(subdomains.first,models.first),
+                        VectorFunctionPatch<M>(subdomains.second,models.second));
+
+    }
+
+    friend VectorFunctionPatch<M>& operator+=(VectorFunctionPatch<M>& f, const VectorFunctionPatch<M>& g) {
+        ARIADNE_ASSERT(f.result_size()==g.result_size());
+        ARIADNE_ASSERT(subset(f.domain(),g.domain()));
+        ARIADNE_ASSERT(f.domain()==g.domain());
+        f.models()+=g.models();
+        return f;
+    }
+    friend VectorFunctionPatch<M>& operator-=(VectorFunctionPatch<M>& f, const VectorFunctionPatch<M>& g) {
+        ARIADNE_ASSERT(f.result_size()==g.result_size());
+        ARIADNE_ASSERT(subset(f.domain(),g.domain()));
+        ARIADNE_ASSERT(f.domain()==g.domain());
+        f.models()+=g.models();
+        return f;
+    }
+    friend VectorFunctionPatch<M>& operator+=(VectorFunctionPatch<M>& f, const Vector<NumericType>& c) {
+        ARIADNE_ASSERT(f.result_size()==c.size());
+        f.models()+=c;
+        return f;
+    }
+    friend VectorFunctionPatch<M>& operator-=(VectorFunctionPatch<M>& f, const Vector<NumericType>& c) {
+        ARIADNE_ASSERT(f.result_size()==c.size());
+        f.models()-=c;
+        return f;
+    }
+    friend VectorFunctionPatch<M>& operator*=(VectorFunctionPatch<M>& f, const NumericType& c) {
+        f.models()*=c;
+        return f;
+    }
+    friend VectorFunctionPatch<M>& operator/=(VectorFunctionPatch<M>& f, const NumericType& c) {
+        f.models()/=c;
+        return f;
+    }
+
+    template<class OP> static VectorFunctionPatch<M> _apply(OP op, const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2);
+    template<class OP> static VectorFunctionPatch<M> _apply(OP op, const FunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2);
+    friend VectorFunctionPatch<M> operator+(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2) {
+        return _apply(Plus(),f1,f2); }
+    friend VectorFunctionPatch<M> operator-(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2) {
+        return _apply(Minus(),f1,f2); }
+    friend VectorFunctionPatch<M> operator*(const FunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2) {
+        return _apply(Times(),f1,f2); }
+    friend VectorFunctionPatch<M> operator*(const VectorFunctionPatch<M>& f1, const FunctionPatch<M>& f2) {
+        return _apply(Times(),f1,f2); }
+    friend VectorFunctionPatch<M> operator/(const VectorFunctionPatch<M>& f1, const FunctionPatch<M>& f2) {
+        return _apply(Divides(),f1,f2); }
+
+
+    friend VectorFunctionPatch<M> operator-(const VectorFunctionPatch<M>& f) {
+        return VectorFunctionPatch<M>(f.domain(),Vector<M>(-f.models())); }
+    friend VectorFunctionPatch<M> operator*(const NumericType& c, const VectorFunctionPatch<M>& f) {
+        return VectorFunctionPatch<M>(f.domain(),Vector<M>(f.models()*c)); }
+    friend VectorFunctionPatch<M> operator*(const VectorFunctionPatch<M>& f, const NumericType& c) {
+        return VectorFunctionPatch<M>(f.domain(),Vector<M>(f.models()*c)); }
+    friend VectorFunctionPatch<M> operator/(const VectorFunctionPatch<M>& f, const NumericType& c) {
+        return VectorFunctionPatch<M>(f.domain(),Vector<M>(f.models()/c)); }
+    friend VectorFunctionPatch<M> operator+(const VectorFunctionPatch<M>& f, const Vector<NumericType>& c) {
+        return VectorFunctionPatch<M>(f.domain(),Vector<M>(f.models()+c)); }
+    friend VectorFunctionPatch<M> operator-(const VectorFunctionPatch<M>& f, const Vector<NumericType>& c) {
+        return VectorFunctionPatch<M>(f.domain(),Vector<M>(f.models()-c)); }
+
+    friend VectorFunctionPatch<M> operator*(const Matrix<NumericType>& A, const VectorFunctionPatch<M>& f) {
+        ARIADNE_PRECONDITION(A.column_size()==f.size());
+        return VectorFunctionPatch<M>(f.domain(),A*f.models());
+    }
+    friend VectorFunctionPatch<M> operator+(const VectorFunction<P>& f1, const VectorFunctionPatch<M>& tf2) {
+        return VectorFunctionPatch<M>(tf2.domain(),f1,tf2.sweeper())+tf2; }
+    friend VectorFunctionPatch<M> operator-(const VectorFunction<P>& f1, const VectorFunctionPatch<M>& tf2) {
+        return VectorFunctionPatch<M>(tf2.domain(),f1,tf2.sweeper())-tf2; }
+    friend VectorFunctionPatch<M> operator*(const ScalarFunction<P>& f1, const VectorFunctionPatch<M>& tf2) {
+        return FunctionPatch<M>(tf2.domain(),f1,tf2.sweeper())*tf2; }
+    friend VectorFunctionPatch<M> operator*(const VectorFunction<P>& f1, const FunctionPatch<M>& tf2) {
+        return VectorFunctionPatch<M>(tf2.domain(),f1,tf2.sweeper())*tf2; }
+    friend VectorFunctionPatch<M> operator/(const VectorFunction<P>& f1, const FunctionPatch<M>& tf2) {
+        return VectorFunctionPatch<M>(tf2.domain(),f1,tf2.sweeper())/tf2; }
+    friend VectorFunctionPatch<M> operator+(const VectorFunctionPatch<M>& tf1, const VectorFunction<P>& f2) {
+        return tf1+VectorFunctionPatch<M>(tf1.domain(),f2,tf1.sweeper()); }
+    friend VectorFunctionPatch<M> operator-(const VectorFunctionPatch<M>& tf1, const VectorFunction<P>& f2) {
+        return tf1-VectorFunctionPatch<M>(tf1.domain(),f2,tf1.sweeper()); }
+    friend VectorFunctionPatch<M> operator*(const FunctionPatch<M>& tf1, const VectorFunction<P>& f2) {
+        return tf1*VectorFunctionPatch<M>(tf1.domain(),f2,tf1.sweeper()); }
+    friend VectorFunctionPatch<M> operator*(const VectorFunctionPatch<M>& tf1, const ScalarFunction<P>& f2) {
+        return tf1*FunctionPatch<M>(tf1.domain(),f2,tf1.sweeper()); }
+    friend VectorFunctionPatch<M> operator/(const VectorFunctionPatch<M>& tf1, const ScalarFunction<P>& f2) {
+        return tf1/FunctionPatch<M>(tf1.domain(),f2,tf1.sweeper()); }
+
+
+
+    friend VectorFunctionPatch<M> partial_evaluate(const VectorFunctionPatch<M>& tf, SizeType k, const NumericType& c) {
+        // Scale c to domain
+        const SizeType as=tf.argument_size();
+        ARIADNE_ASSERT(k<as);
+        const Vector<ExactIntervalType>& domain=tf.domain();
+        const ExactIntervalType& dk=domain[k];
+        NumericType sc=(c-med(dk))/rad(dk);
+
+        Vector<ExactIntervalType> new_domain(as-1);
+        for(SizeType i=0; i!=k; ++i) { new_domain[i]=domain[i]; }
+        for(SizeType i=k; i!=as-1; ++i) { new_domain[i]=domain[i+1]; }
+
+        Vector<M> new_models=partial_evaluate(tf.models(),k,sc);
+
+        return VectorFunctionPatch<M>(new_domain,new_models);
+    }
+    friend Vector<NumericType> evaluate(const VectorFunctionPatch<M>& f, const Vector<NumericType>& x) {
+        if(!definitely(contains(f.domain(),x))) {
+            ARIADNE_THROW(DomainException,"evaluate(f,x) with f="<<f<<", x="<<x,"x is not a subset of f.domain()="<<f.domain());
+        }
+        return unchecked_evaluate(f,x);
+    }
+    friend Vector<NumericType> unchecked_evaluate(const VectorFunctionPatch<M>& f, const Vector<NumericType>& x) {
+        return evaluate(f.models(),unscale(x,f.domain()));
+    }
+
+    friend FunctionPatch<M> compose(const ScalarFunction<P>& g, const VectorFunctionPatch<M>& f) {
+        return FunctionPatch<M>(f.domain(),g.evaluate(f.models()));
+    }
+    friend FunctionPatch<M> compose(const FunctionPatch<M>& g, const VectorFunctionPatch<M>& f) {
+        if(!subset(f.codomain(),g.domain())) {
+            ARIADNE_THROW(DomainException,"compose(g,f) with g="<<g<<", f="<<f,"f.codomain()="<<f.codomain()<<" is not a subset of g.domain()="<<g.domain());
+        }
+        return unchecked_compose(g,f);
+    }
+    friend FunctionPatch<M> unchecked_compose(const FunctionPatch<M>& g, const VectorFunctionPatch<M>& f) {
+        return FunctionPatch<M>(f.domain(),compose(g.model(),unscale(f.models(),g.domain())));
+    }
+
+
+    friend VectorFunctionPatch<M> compose(const VectorFunction<P>& g, const VectorFunctionPatch<M>& f) {
+        return VectorFunctionPatch<M>(f.domain(),g.evaluate(f.models()));
+    }
+    friend VectorFunctionPatch<M> compose(const VectorFunctionPatch<M>& g, const VectorFunctionPatch<M>& f) {
+        if(!subset(f.codomain(),g.domain())) {
+            ARIADNE_THROW(DomainException,"compose(g,f) with g="<<g<<", f="<<f,"f.codomain()="<<f.codomain()<<" is not a subset of g.domain()="<<g.domain());
+        }
+        return unchecked_compose(g,f);
+    }
+    friend VectorFunctionPatch<M> unchecked_compose(const VectorFunctionPatch<M>& g, const VectorFunctionPatch<M>& f) {
+        return VectorFunctionPatch<M>(f.domain(),compose(g.models(),unscale(f.models(),g.domain())));
+    }
+
+
+
+    friend VectorFunctionPatch<M> derivative(const VectorFunctionPatch<M>& f, SizeType k) {
+        ARIADNE_ASSERT_MSG(k<f.argument_size(),"f="<<f<<"\n f.argument_size()="<<f.argument_size()<<" k="<<k);
+        VectorFunctionPatch<M> g=f;
+        for(SizeType i=0; i!=g.size(); ++i) {
+            g[i]=derivative(f[i],k);
+        }
+        return g;
+    }
+    friend VectorFunctionPatch<M> antiderivative(const VectorFunctionPatch<M>& f, SizeType k) {
+        ARIADNE_ASSERT_MSG(k<f.argument_size(),"f="<<f<<"\n f.argument_size()="<<f.argument_size()<<" k="<<k);
+        VectorFunctionPatch<M> g=f;
+        for(SizeType i=0; i!=g.size(); ++i) {
+            g[i]=antiderivative(f[i],k);
+        }
+        return g;
+    }
+    friend VectorFunctionPatch<M> antiderivative(const VectorFunctionPatch<M>& f, SizeType k, NumericType c) {
+        ARIADNE_ASSERT_MSG(k<f.argument_size(),"f="<<f<<"\n f.argument_size()="<<f.argument_size()<<" k="<<k);
+        VectorFunctionPatch<M> g=f;
+        for(SizeType i=0; i!=g.size(); ++i) {
+            g[i]=antiderivative(f[i],k,c);
+        }
+        return g;
+    }
+
+    friend NormType norm(const VectorFunctionPatch<M>& f) {
+        NormType res=norm(f.zero_element());;
+        for(SizeType i=1; i!=f.result_size(); ++i) {
+            res=max(res,norm(f[i]));
+        }
+        return res;
+    }
+    NormType distance(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2) {
+        return norm(f1-f2);
+    }
+    NormType distance(const VectorFunctionPatch<M>& f1, const VectorFunction<P>& f2) {
+        return distance(f1,VectorFunctionPatch<M>(f1.domain(),f2,f1.sweeper()));
+    }
+
+    friend OutputStream& operator<<(OutputStream& os, const VectorFunctionPatch<M>& p) {
+        return p.write(os);
+    }
+
+
+    friend Vector< Polynomial<NumericType> > polynomials(const VectorFunctionPatch<M>& tfn) {
+        return tfn.polynomials();
+    }
+
 };
 
 template<class M> template<class X, EnableIf<CanEvaluate<X,M,Vector<X>>>> Void VectorFunctionPatch<M>::_compute(Vector<X>& r, const Vector<X>& a) const {
@@ -643,128 +1018,80 @@ template<class M> template<class X, DisableIf<CanEvaluate<X,M,Vector<X>>>> Void 
     assert(false);
 }
 
-/*! \brief Inplace addition. */
-template<class M> VectorFunctionPatch<M>& operator+=(VectorFunctionPatch<M>& f, const VectorFunctionPatch<M>& g);
-/*! \brief Inplace subtraction. */
-template<class M> VectorFunctionPatch<M>& operator-=(VectorFunctionPatch<M>& f, const VectorFunctionPatch<M>& g);
-/*! \brief Inplace addition. */
-template<class M> VectorFunctionPatch<M>& operator+=(VectorFunctionPatch<M>& f, const Vector<NumericType<M>>& c);
-/*! \brief Inplace subtraction. */
-template<class M> VectorFunctionPatch<M>& operator-=(VectorFunctionPatch<M>& f, const Vector<NumericType<M>>& c);
-/*! \brief Inplace scalar multiplication. */
-template<class M> VectorFunctionPatch<M>& operator*=(VectorFunctionPatch<M>& f, const NumericType<M>& c);
-/*! \brief Inplace scalar division. */
-template<class M> VectorFunctionPatch<M>& operator/=(VectorFunctionPatch<M>& f, const NumericType<M>& c);
+template<class M> template<class OP>
+VectorFunctionPatch<M> VectorFunctionPatch<M>::_apply(OP op, const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2) {
+    check_function_patch_domain(to_str(op),f1,f2);
+    if(f1.domain()==f2.domain()) {
+        return VectorFunctionPatch<M>(f1.domain(),Vector<ModelType>(op(f1.models(),f2.models())));
+    } else {
+        ExactBoxType new_domain=intersection(f1.domain(),f2.domain());
+        return op(restriction(f1,new_domain),restriction(f2,new_domain));
+    }
+}
+template<class M> template<class OP>
+VectorFunctionPatch<M> VectorFunctionPatch<M>::_apply(OP op, const FunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2) {
+    check_function_patch_domain(to_str(op),f1,f2);
+    if(f1.domain()==f2.domain()) {
+        return VectorFunctionPatch<M>(f1.domain(),Vector<ModelType>(op(f1.models(),f2.models())));
+    } else {
+        ExactBoxType new_domain=intersection(f1.domain(),f2.domain());
+        return op(restriction(f1,new_domain),restriction(f2,new_domain));
+    }
+}
 
-/*! \brief Negation. */
-template<class M> VectorFunctionPatch<M> operator-(const VectorFunctionPatch<M>& f);
-/*! \brief Addition. */
-template<class M> VectorFunctionPatch<M> operator+(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2);
-/*! \brief Subtraction. */
-template<class M> VectorFunctionPatch<M> operator-(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2);
-/*! \brief Multiplication. */
-template<class M> VectorFunctionPatch<M> operator*(const FunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2);
-/*! \brief Multiplication. */
-template<class M> VectorFunctionPatch<M> operator*(const VectorFunctionPatch<M>& f1, const FunctionPatch<M>& f2);
-/*! \brief Division. */
-template<class M> VectorFunctionPatch<M> operator/(const VectorFunctionPatch<M>& f1, const FunctionPatch<M>& f2);
+template<class M> template<class E> VectorFunctionPatch<M>::VectorFunctionPatch(const VectorExpression<E>& ve)
+    : _domain(), _models(ve().size(),ve().zero_element().model())
+{
+    if(ve().size()!=0) { this->_domain=ve().zero_element().domain(); }
+    for(SizeType i=0; i!=ve().size(); ++i) { this->set(i,ve()[i]); }
+}
 
-/*! \brief Addition of a constant. */
-template<class M> VectorFunctionPatch<M> operator+(const VectorFunctionPatch<M>& f, const Vector<NumericType<M>>& c);
-/*! \brief Subtraction of a constant. */
-template<class M> VectorFunctionPatch<M> operator-(const VectorFunctionPatch<M>& f, const Vector<NumericType<M>>& c);
-/*! \brief Multiplication by a scalar. */
-template<class M> VectorFunctionPatch<M> operator*(const NumericType<M>& c, const VectorFunctionPatch<M>& f);
-/*! \brief Multiplication by a scalar. */
-template<class M> VectorFunctionPatch<M> operator*(const VectorFunctionPatch<M>& f, const NumericType<M>& c);
-/*! \brief Division by a scalar. */
-template<class M> VectorFunctionPatch<M> operator/(const VectorFunctionPatch<M>& f, const NumericType<M>& c);
-/*! \brief Multiplication by a matrix. */
-template<class M> VectorFunctionPatch<M> operator*(const Matrix<ExactNumericType>& A, const VectorFunctionPatch<M>& f);
-/*! \brief Multiplication by a matrix. */
-template<class M> VectorFunctionPatch<M> operator*(const Matrix<NumericType<M>>& A, const VectorFunctionPatch<M>& f);
-
-template<class M> VectorFunctionPatch<M> operator+(const VectorFunctionType<M>& f1, const VectorFunctionPatch<M>& tf2);
-template<class M> VectorFunctionPatch<M> operator-(const VectorFunctionType<M>& f1, const VectorFunctionPatch<M>& tf2);
-template<class M> VectorFunctionPatch<M> operator*(const ScalarFunctionType<M>& f1, const VectorFunctionPatch<M>& tf2);
-template<class M> VectorFunctionPatch<M> operator*(const VectorFunctionType<M>& f1, const FunctionPatch<M>& tf2);
-template<class M> VectorFunctionPatch<M> operator/(const VectorFunctionType<M>& f1, const FunctionPatch<M>& tf2);
-template<class M> VectorFunctionPatch<M> operator+(const VectorFunctionPatch<M>& tf1, const VectorFunctionType<M>& f2);
-template<class M> VectorFunctionPatch<M> operator-(const VectorFunctionPatch<M>& tf1, const VectorFunctionType<M>& f2);
-template<class M> VectorFunctionPatch<M> operator*(const FunctionPatch<M>& tf1, const VectorFunctionType<M>& f2);
-template<class M> VectorFunctionPatch<M> operator*(const VectorFunctionPatch<M>& tf1, const ScalarFunctionType<M>& f2);
-template<class M> VectorFunctionPatch<M> operator/(const VectorFunctionPatch<M>& tf1, const ScalarFunctionType<M>& f2);
-
-//! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
-template<class M> FunctionPatch<M> compose(const FunctionType<M>& f, const VectorFunctionPatch<M>& g);
-//! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
-template<class M> VectorFunctionPatch<M> compose(const VectorFunctionType<M>& f, const VectorFunctionPatch<M>& g);
-//! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
-template<class M> FunctionPatch<M> compose(const FunctionPatch<M>& f, const VectorFunctionPatch<M>& g);
-//! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
-template<class M> VectorFunctionPatch<M> compose(const VectorFunctionPatch<M>& f, const VectorFunctionPatch<M>& g);
-
-//! \brief Weak derivative of \a f with respect to variable \a k.
-template<class M> VectorFunctionPatch<M> derivative(const VectorFunctionPatch<M>& f, SizeType k);
-//! \brief Antiderivative of \a f with respect to variable \a k.
-template<class M> VectorFunctionPatch<M> antiderivative(const VectorFunctionPatch<M>& f, SizeType k);
-//! \brief Antiderivative of \a f with respect to variable \a k, taking value \c 0 when \a x[k]=c.
-template<class M> VectorFunctionPatch<M> antiderivative(const VectorFunctionPatch<M>& f, SizeType k, const NumericType<M>& c);
-
-template<class M> typename VectorFunctionPatch<M>::NormType norm(const VectorFunctionPatch<M>& f);
-template<class M> typename VectorFunctionPatch<M>::NormType distance(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2);
-template<class M> typename VectorFunctionPatch<M>::NormType distance(const VectorFunctionPatch<M>& f1, const VectorFunctionType<M>& f2);
-
-//! \brief Restrict the function \a f to a subdomain \a d.
-template<class M> VectorFunctionPatch<M> restriction(const VectorFunctionPatch<M>& f, const ExactBoxType& d);
-//! \brief Restrict the function \a f to a larger domain \a d.
-template<class M> VectorFunctionPatch<M> extension(const VectorFunctionPatch<M>& f, const ExactBoxType& d);
-
-template<class M> VectorFunctionPatch<M> embed(const ExactBoxType& d1, const VectorFunctionPatch<M>& tv2,const ExactBoxType& d3);
 
 //! \brief Test if the function models have the same representation.
-template<class M> Bool same(const VectorFunctionPatch<M>& x1, const VectorFunctionPatch<M>& x2);
+template<class M> Bool same(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2) {
+    if(!same(f1.domain(),f2.domain())) { return false; }
+    for(SizeType i=0; i!=f1.result_size(); ++i) {
+        if(!same(f1[i],f2[i])) { return false; }
+    }
+    return true;
+}
 //! \brief Tests if a function \a f refines another function \a g.
 //! To be a refinement, the domain of \a f must contain the domain of \a g.
-template<class M> Bool refines(const VectorFunctionPatch<M>& f, const VectorFunctionPatch<M>& g);
-template<class M> Bool inconsistent(const VectorFunctionPatch<M>&, const VectorFunctionPatch<M>&);
-template<class M> VectorFunctionPatch<M> refinement(const VectorFunctionPatch<M>&, const VectorFunctionPatch<M>&);
-
-//! \brief Compute the function \f$(f \oplus g)(x)=(f(x),g(x))\f$.
-template<class M> VectorFunctionPatch<M> join(const VectorFunctionPatch<M>& f, const VectorFunctionPatch<M>& g);
-template<class M> VectorFunctionPatch<M> join(const VectorFunctionPatch<M>& f, const FunctionPatch<M>& g);
-template<class M> VectorFunctionPatch<M> join(const FunctionPatch<M>& f, const FunctionPatch<M>& g);
-template<class M> VectorFunctionPatch<M> join(const FunctionPatch<M>& f, const VectorFunctionPatch<M>& g);
-//! \brief Compute the function \f$(f\otimes g)(x,y)=(f(x),g(y))\f$.
-template<class M> VectorFunctionPatch<M> combine(const VectorFunctionPatch<M>& f, const VectorFunctionPatch<M>& g);
-template<class M> VectorFunctionPatch<M> combine(const VectorFunctionPatch<M>& f, const FunctionPatch<M>& g);
-template<class M> VectorFunctionPatch<M> combine(const FunctionPatch<M>& f, const VectorFunctionPatch<M>& g);
-template<class M> VectorFunctionPatch<M> combine(const FunctionPatch<M>& f, const FunctionPatch<M>& g);
-
-template<class M> VectorFunctionPatch<M> partial_evaluate(const VectorFunctionPatch<M>& f, SizeType k, const NumericType<M>& c);
-
-template<class M> Vector<NumericType<M>> unchecked_evaluate(const VectorFunctionPatch<M>&, const Vector<NumericType<M>>&);
-template<class M> FunctionPatch<M> unchecked_compose(const FunctionPatch<M>&, const VectorFunctionPatch<M>&);
-template<class M> VectorFunctionPatch<M> unchecked_compose(const VectorFunctionPatch<M>&, const VectorFunctionPatch<M>&);
-
-// Split the domain into halves along the \a j<sup>th</sup> coordinate.
-template<class M> Pair<VectorFunctionPatch<M>,VectorFunctionPatch<M>> split(const VectorFunctionPatch<M>& x, SizeType j);
-
-template<class M> OutputStream& operator<<(OutputStream&, const VectorFunctionPatch<M>&);
-
-// Conversion operatations
-template<class M> Polynomial<NumericType<M>> polynomial(const FunctionPatch<M>& tfn);
-template<class M> Vector< Polynomial<NumericType<M>> > polynomials(const VectorFunctionPatch<M>& tfn);
-
+template<class M> Bool refines(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2) {
+    ARIADNE_ASSERT(f1.result_size()==f2.result_size());
+    for(SizeType i=0; i!=f1.result_size(); ++i) {
+        if(!refines(f1[i],f2[i])) { return false; }
+    }
+    return true;
+}
+template<class M> Bool inconsistent(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2) {
+    ARIADNE_ASSERT(f1.result_size()==f2.result_size());
+    for(SizeType i=0; i!=f1.result_size(); ++i) {
+        if(inconsistent(f1[i],f2[i])) { return true; }
+    }
+    return false;
+}
+template<class M> VectorFunctionPatch<M> refinement(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2) {
+    ARIADNE_ASSERT(f1.result_size()==f2.result_size());
+    VectorFunctionPatch<M> r(f1.result_size());
+    for(SizeType i=0; i!=r.result_size(); ++i) {
+        r[i]=refinement(f1[i],f2[i]);
+    }
+    return r;
+}
 
 // Sanitised output
-template<class M> OutputStream& operator<<(OutputStream&, const Representation<FunctionPatch<M>>&);
-template<class M> OutputStream& operator<<(OutputStream&, const Representation<VectorFunctionPatch<M>>&);
+template<class M> OutputStream& operator<<(OutputStream& os, const Representation<FunctionPatch<M>>& repr) {
+    return repr.pointer->repr(os); }
+template<class M> OutputStream& operator<<(OutputStream& os, const Representation<VectorFunctionPatch<M>>& repr) {
+    return repr.pointer->repr(os); }
+
 template<class F> struct ModelRepresentation { const F* pointer; double threshold; };
 template<class F> ModelRepresentation<F> model_representation(const F& f, double swpt) {
     ModelRepresentation<F> r={&f,swpt}; return r; }
 template<class M> OutputStream& operator<<(OutputStream&,const ModelRepresentation<FunctionPatch<M>>&);
 template<class M> OutputStream& operator<<(OutputStream&,const ModelRepresentation<VectorFunctionPatch<M>>&);
+
 template<class F> struct PolynomialRepresentation { const F* pointer; double threshold; List<String> names; };
 template<class F> PolynomialRepresentation<F> polynomial_representation(const F& f, double swpt) {
     PolynomialRepresentation<F> r={&f,swpt}; return r; }
@@ -774,261 +1101,25 @@ template<class M> OutputStream& operator<<(OutputStream&,const PolynomialReprese
 template<class M> OutputStream& operator<<(OutputStream&,const PolynomialRepresentation<VectorFunctionPatch<M>>&);
 
 
-template<class M> template<class E> VectorFunctionPatch<M>::VectorFunctionPatch(const VectorExpression<E>& ve)
-    : _domain(), _models(ve().size(),ve().zero_element().model())
-{
-    if(ve().size()!=0) { this->_domain=ve().zero_element().domain(); }
-    for(SizeType i=0; i!=ve().size(); ++i) { this->set(i,ve()[i]); }
-}
-
-template<class M> class VectorFunctionPatchElementReference
-    : public DispatchSymbolicAlgebraOperations<FunctionPatch<M>, NumericType<M>>
-    , public ProvideConcreteGenericArithmeticOperators<FunctionPatch<M>, ScalarFunction<typename M::Paradigm>>
-    , public DispatchConcreteGenericAlgebraNumberOperations<FunctionPatch<M>,NumericType<M>,Number<typename M::Paradigm>>
-{
-    typedef M ModelType;
-    typedef typename M::NumericType NumericType;
-    typedef typename M::NormType NormType;
-    typedef VectorFunctionPatchElementReference<M> SelfType;
-    typedef FunctionPatch<M> FunctionType;
- public:
-    VectorFunctionPatchElementReference(VectorFunctionPatch<M>& c, SizeType i) : _c(&c), _i(i) { }
-    operator ScalarFunctionPatch<M> () const { return this->_c->get(this->_i); }
-    Void operator=(const VectorFunctionPatchElementReference<M>& x) { this->_c->set(this->_i,x._c->get(x._i)); }
-    Void operator=(const ScalarFunctionPatch<M>& x) { this->_c->set(this->_i,x); }
-    ScalarFunctionPatch<M> element() const { return this->_c->get(this->_i); }
-    ExactBoxType const& domain() const { return this->_c->domain(); }
-    const ModelType& model() const { return this->_c->_models[this->_i]; }
-    ErrorType error() const { return this->_c->_models[this->_i].error(); }
-    Void set_error(const ErrorType& e) { this->_c->_models[this->_i].set_error(e); }
-    Void sweep() { this->_c->_models[this->_i].sweep(); }
-    template<class X> X operator()(const Vector<X>& x) const { return this->_c->get(this->_i).operator()(x); }
-    friend OutputStream& operator<<(OutputStream& os, const VectorFunctionPatchElementReference<M>& f) { return os<<f.element(); }
-  public:
-    friend FunctionType operator+(SelfType e1, SelfType e2) { return e1.element()+e2.element(); }
-    friend FunctionType operator+(NumericType c, SelfType e) { return c+e.element(); }
-    friend FunctionType operator+(SelfType e, NumericType c) { return e.element()+c; }
-    friend FunctionType operator+(FunctionType f, SelfType e) { return f+e.element(); }
-    friend FunctionType operator+(SelfType e, FunctionType f) { return e.element()+f; }
-    friend FunctionType operator*(SelfType e1, SelfType e2) { return e1.element()*e2.element(); }
-    friend FunctionType operator*(NumericType c, SelfType e) { return c*e.element(); }
-    friend FunctionType operator*(SelfType e, NumericType c) { return e.element()*c; }
-    friend FunctionType operator*(FunctionType f, SelfType e) { return f*e.element(); }
-    friend FunctionType operator*(SelfType e, FunctionType f) { return e.element()*f; }
-  private:
-    VectorFunctionPatch<M>* _c; SizeType _i;
-};
-
-
-
-
-
-// Non-member template code
-template<class M> FunctionPatch<M>::FunctionPatch(const ScalarFunctionModel<ValidatedTag>& f) {
-     ARIADNE_ASSERT_MSG(dynamic_cast<const FunctionPatch<M>*>(f._ptr.operator->())," f="<<f);
-     *this=dynamic_cast<const FunctionPatch<M>&>(*f._ptr);
-}
-
-// To scale from a model on [a,b] to a model on [c,d], use scale factor s=(d-c)/(b-a)
-// and translation t=((c+d)-(a+b))/(b-a)
-// Because we are scaling the model on [-1,+1], this is not the same as
-// the mapping taking [a,b] to [c,d]
-template<class M> FunctionPatch<M> partial_restriction(const FunctionPatch<M>& fp, SizeType k, const ExactIntervalType& ivl) {
-    ExactBoxType dom=fp.domain(); dom[k]=ivl; return restriction(fp,dom);
-}
-
-template<class M> FunctionPatch<M> restriction(const FunctionPatch<M>& fp, const ExactBoxType& dom) {
-    if(not(subset(dom,fp.domain()))) { ARIADNE_THROW(DomainException,"restiction(FunctionPatch<M>,ExactBoxType)","fp="<<fp<<", dom="<<dom); }
-    return unchecked_compose(fp,FunctionPatch<M>::identity(dom,fp.sweeper()));
-}
-
-template<class M> FunctionPatch<M> extension(const FunctionPatch<M>& fp, const ExactBoxType& dom) {
-    return unchecked_compose(fp,FunctionPatch<M>::identity(dom,fp.sweeper()));
-}
-
-
-
-template<class M, class OP> FunctionPatch<M> apply(OP op, FunctionPatch<M> const& f) {
-    return FunctionPatch<M>(f.domain(),op(f.model()));
-}
-
-template<class M, class OP> FunctionPatch<M> apply(OP op, FunctionPatch<M> const& f1, FunctionPatch<M> const& f2) {
-    if(f1.domain()==f2.domain()) {
-        return FunctionPatch<M>(f1.domain(),op(f1.model(),f2.model()));
-    } else {
-        ExactBoxType domain=intersection(f1.domain(),f2.domain());
-        return FunctionPatch<M>(domain,op(restriction(f1,domain).model(),restriction(f2,domain).model()));
+template<class M> OutputStream& operator<<(OutputStream& os, const PolynomialRepresentation<VectorFunctionPatch<M>>& repr) {
+    const VectorFunctionPatch<M>& function = *repr.pointer;
+    os << "[";
+    for(SizeType i=0; i!=function.result_size(); ++i) {
+        if(i!=0) { os << ","; }
+        os << polynomial_representation(function[i],repr.threshold,repr.names);
     }
+    return os << "]";
 }
 
-
-template<class M> FunctionPatch<M>& operator+=(FunctionPatch<M>& f, const NumericType<M>& c) {
-    f.model()+=c; return f; }
-
-template<class M> FunctionPatch<M>& operator*=(FunctionPatch<M>& f, const NumericType<M>& c) {
-    f.model()*=c; return f;
-}
-
-template<class M> FunctionPatch<M> operator-(const FunctionPatch<M>& f) {
-    return apply(Neg(),f); }
-
-template<class M> FunctionPatch<M> operator+(const FunctionPatch<M>& f1, const FunctionPatch<M>& f2) {
-    return apply(Add(),f1,f2); }
-
-template<class M> FunctionPatch<M> operator-(const FunctionPatch<M>& f1, const FunctionPatch<M>& f2) {
-    return apply(Sub(),f1,f2); }
-
-template<class M> FunctionPatch<M> operator*(const FunctionPatch<M>& f1, const FunctionPatch<M>& f2) {
-    return apply(Mul(),f1,f2); }
-
-template<class M> FunctionPatch<M> max(const FunctionPatch<M>& f1, const FunctionPatch<M>& f2) {
-    return apply(Max(),f1,f2); }
-
-template<class M> FunctionPatch<M> min(const FunctionPatch<M>& f1, const FunctionPatch<M>& f2) {
-    return apply(Min(),f1,f2); }
-
-template<class M> FunctionPatch<M> abs(const FunctionPatch<M>& f) {
-    return apply(Abs(),f); }
-
-
-template<class M> FunctionPatch<M> antiderivative(const FunctionPatch<M>& f, SizeType k) {
-    ValidatedNumericType sf=rad_val(f.domain()[k]);
-    return FunctionPatch<M>(f.domain(),antiderivative(f.model(),k)*sf); }
-
-template<class M> FunctionPatch<M> antiderivative(const FunctionPatch<M>& f, SizeType k, const NumericType<M>& c) {
-    ARIADNE_ASSERT(k<f.argument_size());
-    ARIADNE_ASSERT(decide(contains(f.domain()[k],c)));
-
-    FunctionPatch<M> g = antiderivative(f,k);
-    VectorFunctionPatch<M> h ( f.create_coordinates() );
-    h[k] = f.create_constant(c);
-
-    return g-compose(g,h);
-}
-
-template<class M> FunctionPatch<M> derivative(const FunctionPatch<M>& f, SizeType k) {
-    ValidatedNumericType sf=rec(rad_val(f.domain()[k]));
-    return FunctionPatch<M>(f.domain(),derivative(f.model(),k)*sf); }
-
-template<class M> FunctionPatch<M> embed(const ExactBoxType& dom1, const FunctionPatch<M>& tv2,const ExactBoxType& dom3) {
-    return FunctionPatch<M>(product(dom1,tv2.domain(),dom3),embed(dom1.size(),tv2.model(),dom3.size())); }
-
-template<class M> NumericType<M> evaluate(const FunctionPatch<M>& f, const Vector<NumericType<M>>& x) {
-    if(!definitely(contains(f.domain(),x))) {
-        ARIADNE_THROW(DomainException,"evaluate(f,x) with f="<<f<<", x="<<x,"x is not an element of f.domain()="<<f.domain());
+template<class M> OutputStream& operator<<(OutputStream& os, const PolynomialRepresentation<List<FunctionPatch<M>>>& repr) {
+    const List<FunctionPatch<M>>& functions = *repr.pointer;
+    os << "[";
+    for(SizeType i=0; i!=functions.size(); ++i) {
+        if(i!=0) { os << ","; }
+        os << polynomial_representation(functions[i],repr.threshold);
     }
-    return unchecked_evaluate(f,x);
+    return os << "]";
 }
-
-template<class M> NumericType<M> unchecked_evaluate(const FunctionPatch<M>& f, const Vector<NumericType<M>>& x) {
-    return evaluate(f.model(),unscale(x,f.domain()));
-}
-
-
-template<class M> FunctionPatch<M> compose(const FunctionType<M>& g, const VectorFunctionPatch<M>& f) {
-    return FunctionPatch<M>(f.domain(),g.evaluate(f.models()));
-}
-
-template<class M> FunctionPatch<M> compose(const FunctionPatch<M>& g, const VectorFunctionPatch<M>& f) {
-    if(!subset(f.codomain(),g.domain())) {
-        ARIADNE_THROW(DomainException,"compose(g,f) with g="<<g<<", f="<<f,"f.codomain()="<<f.codomain()<<" is not a subset of g.domain()="<<g.domain());
-    }
-    return unchecked_compose(g,f);
-}
-
-template<class M> FunctionPatch<M> unchecked_compose(const FunctionPatch<M>& g, const VectorFunctionPatch<M>& f) {
-    return FunctionPatch<M>(f.domain(),compose(g.model(),unscale(f.models(),g.domain())));
-}
-
-
-
-template<class M> FunctionPatch<M> partial_evaluate(const FunctionPatch<M>& te, SizeType k, const NumericType<M>& c) {
-    // Scale c to domain
-    const SizeType as=te.argument_size();
-    ARIADNE_ASSERT(k<as);
-    const ExactBoxType& domain=te.domain();
-    const ExactIntervalType& dk=domain[k];
-    NumericType<M> sc=(c-med(dk))/rad(dk);
-
-    ExactBoxType new_domain(as-1);
-    for(SizeType i=0; i!=k; ++i) { new_domain[i]=domain[i]; }
-    for(SizeType i=k; i!=as-1; ++i) { new_domain[i]=domain[i+1]; }
-
-    M new_model=partial_evaluate(te.model(),k,sc);
-
-    return FunctionPatch<M>(new_domain,new_model);
-}
-
-
-
-
-
-
-
-template<class M> Pair<FunctionPatch<M>,FunctionPatch<M>> split(const FunctionPatch<M>& tv, SizeType j) {
-    typedef M ModelType;
-    Pair<ModelType,ModelType> models={split(tv.model(),j,SplitPart::LOWER),split(tv.model(),j,SplitPart::LOWER)};
-    Pair<ExactBoxType,ExactBoxType> subdomains=split(tv.domain(),j);
-    return make_pair(FunctionPatch<M>(subdomains.first,models.first),
-                     FunctionPatch<M>(subdomains.second,models.second));
-
-}
-
-template<class M> Bool same(const FunctionPatch<M>& tv1, const FunctionPatch<M>& tv2) {
-    return tv1.domain()==tv2.domain() && same(tv1.model(),tv2.model());
-}
-
-template<class M> Bool refines(const FunctionPatch<M>& tv1, const FunctionPatch<M>& tv2) {
-    if(tv1.domain()==tv2.domain()) { return refines(tv1.model(),tv2.model()); }
-    if(subset(tv2.domain(),tv1.domain())) { return refines(restriction(tv1,tv2.domain()).model(),tv2.model()); }
-    else { return false; }
-}
-
-template<class M> Bool inconsistent(const FunctionPatch<M>& tv1, const FunctionPatch<M>& tv2) {
-    if(tv1.domain()==tv2.domain()) {
-        return inconsistent(tv1.model(),tv2.model());
-    } else {
-        ExactBoxType domain=intersection(tv1.domain(),tv2.domain());
-        return inconsistent(restriction(tv1,domain).model(),restriction(tv2,domain).model());
-    }
-}
-
-template<class M> FunctionPatch<M> refinement(const FunctionPatch<M>& tv1, const FunctionPatch<M>& tv2) {
-    ARIADNE_ASSERT(tv1.domain()==tv2.domain());
-    return FunctionPatch<M>(tv1.domain(),refinement(tv1.model(),tv2.model()));
-}
-
-template<class M> typename M::NormType norm(const FunctionPatch<M>& f) {
-    return norm(f.model());
-}
-
-template<class M> typename M::NormType distance(const FunctionPatch<M>& f1, const FunctionPatch<M>& f2) {
-    return norm(f1-f2);
-}
-
-template<class M> typename M::NormType distance(const FunctionPatch<M>& f1, const ValidatedScalarFunction& f2) {
-    return distance(f1,FunctionPatch<M>(f1.domain(),f2,f1.sweeper()));
-}
-
-
-template<class M> FunctionPatch<M> midpoint(const FunctionPatch<M>& f) {
-    M tm=f.model();
-    tm.set_error(0u);
-    return FunctionPatch<M>(f.domain(),tm);
-}
-
-template<class M> OutputStream& operator<<(OutputStream& os, const FunctionPatch<M>& tf) {
-    return tf.write(os);
-}
-
-template<class M> OutputStream& operator<<(OutputStream& os, const Representation<FunctionPatch<M>>& tf) {
-    return tf.pointer->repr(os);
-}
-
-
-
-
-
 
 #ifdef ARIADNE_UNDEF
 
@@ -1078,474 +1169,46 @@ template<class M> Vector<typename M::RangeType> ranges(const Vector<FunctionPatc
 
 #endif // ARIADNE_UNDEF
 
-
-
-
-
-template<class M> VectorFunctionPatch<M> join(const VectorFunctionPatch<M>& f1, const FunctionPatch<M>& f2)
-{
-    ARIADNE_ASSERT_MSG(f1.domain()==f2.domain(),"f1="<<f1<<", f2="<<f2);
-    return VectorFunctionPatch<M>(f1.domain(),join(f1.models(),f2.model()));
-}
-
-template<class M> VectorFunctionPatch<M> join(const VectorFunctionPatch<M>& f, const VectorFunctionPatch<M>& g)
-{
-    ARIADNE_ASSERT(f.domain()==g.domain());
-    return VectorFunctionPatch<M>(f.domain(),join(f.models(),g.models()));
-}
-
-template<class M> VectorFunctionPatch<M> join(const FunctionPatch<M>& f1, const FunctionPatch<M>& f2)
-{
-    ARIADNE_ASSERT(f1.domain()==f2.domain());
-    return VectorFunctionPatch<M>(f1.domain(),{f1.model(),f2.model()});
-}
-
-template<class M> VectorFunctionPatch<M> join(const FunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2)
-{
-    ARIADNE_ASSERT(f1.domain()==f2.domain());
-    return VectorFunctionPatch<M>(f1.domain(),join(f1.model(),f2.models()));
-}
-
-template<class M> VectorFunctionPatch<M> combine(const FunctionPatch<M>& f1, const FunctionPatch<M>& f2)
-{
-    return VectorFunctionPatch<M>(product(f1.domain(),f2.domain()),combine(Vector<M>(1u,f1.model()),{f2.model()}));
-}
-
-template<class M> VectorFunctionPatch<M> combine(const FunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2)
-{
-    return VectorFunctionPatch<M>(product(f1.domain(),f2.domain()),combine({f1.model()},f2.models()));
-}
-
-template<class M> VectorFunctionPatch<M> combine(const VectorFunctionPatch<M>& f1, const FunctionPatch<M>& f2)
-{
-    return VectorFunctionPatch<M>(product(f1.domain(),f2.domain()),combine(f1.models(),{f2.model()}));
-}
-
-template<class M> VectorFunctionPatch<M> combine(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2)
-{
-    return VectorFunctionPatch<M>(product(f1.domain(),f2.domain()),combine(f1.models(),f2.models()));
-}
-
-
-template<class M> VectorFunctionPatch<M> embed(const VectorFunctionPatch<M>& f, const ExactIntervalType& d)
-{
-    return embed(ExactBoxType(),f,ExactBoxType(1u,d));
-}
-
-template<class M> VectorFunctionPatch<M> embed(const VectorFunctionPatch<M>& f, const ExactBoxType& d)
-{
-    return embed(ExactBoxType(),f,d);
-}
-
-template<class M> VectorFunctionPatch<M> embed(const ExactBoxType& d, const VectorFunctionPatch<M>& f)
-{
-    return embed(d,f,ExactBoxType());
-}
-
-template<class M> VectorFunctionPatch<M> embed(const ExactBoxType& d1, const VectorFunctionPatch<M>& f, const ExactBoxType& d2)
-{
-    return VectorFunctionPatch<M>(product(d1,f.domain(),d2),embed(d1.size(),f.models(),d2.size()));
-}
-
-template<class M> VectorFunctionPatch<M> restriction(const VectorFunctionPatch<M>& f, const ExactBoxType& d)
-{
-    ARIADNE_ASSERT_MSG(subset(d,f.domain()),"Cannot restriction "<<f<<" to non-sub-domain "<<d);
-    if(d==f.domain()) { return f; }
-    VectorFunctionPatch<M> r(f.result_size(),d,f.sweeper());
-    for(SizeType i=0; i!=r.result_size(); ++i) {
-        r.set(i,restriction(f[i],d));
-    }
-    return r;
-}
-
-template<class M> Pair<VectorFunctionPatch<M>,VectorFunctionPatch<M>> split(const VectorFunctionPatch<M>& tf, SizeType j)
+template<class M> class VectorFunctionPatchElementReference
+    : public DispatchSymbolicAlgebraOperations<FunctionPatch<M>, NumericType<M>>
+    , public ProvideConcreteGenericArithmeticOperators<FunctionPatch<M>, ScalarFunction<typename M::Paradigm>>
+    , public DispatchConcreteGenericAlgebraNumberOperations<FunctionPatch<M>,NumericType<M>,Number<typename M::Paradigm>>
 {
     typedef M ModelType;
-    Pair< Vector<ModelType>,Vector<ModelType> > models=split(tf.models(),j);
-    Pair<ExactBoxType,ExactBoxType> subdomains=split(tf.domain(),j);
-    return make_pair(VectorFunctionPatch<M>(subdomains.first,models.first),
-                     VectorFunctionPatch<M>(subdomains.second,models.second));
+    typedef typename M::NumericType NumericType;
+    typedef typename M::NormType NormType;
+    typedef VectorFunctionPatchElementReference<M> SelfType;
+    typedef FunctionPatch<M> FunctionType;
+ public:
+    VectorFunctionPatchElementReference(VectorFunctionPatch<M>& c, SizeType i) : _c(&c), _i(i) { }
+    operator ScalarFunctionPatch<M> () const { return this->_c->get(this->_i); }
+    Void operator=(const VectorFunctionPatchElementReference<M>& x) { this->_c->set(this->_i,x._c->get(x._i)); }
+    Void operator=(const ScalarFunctionPatch<M>& x) { this->_c->set(this->_i,x); }
+    ScalarFunctionPatch<M> element() const { return this->_c->get(this->_i); }
+    ExactBoxType const& domain() const { return this->_c->domain(); }
+    const ModelType& model() const { return this->_c->_models[this->_i]; }
+    ErrorType error() const { return this->_c->_models[this->_i].error(); }
+    Void set_error(const ErrorType& e) { this->_c->_models[this->_i].set_error(e); }
+    Void sweep() { this->_c->_models[this->_i].sweep(); }
+    template<class X> X operator()(const Vector<X>& x) const { return this->_c->get(this->_i).operator()(x); }
+    friend OutputStream& operator<<(OutputStream& os, const VectorFunctionPatchElementReference<M>& f) { return os<<f.element(); }
+  public:
+    friend FunctionType operator+(SelfType e1, SelfType e2) { return e1.element()+e2.element(); }
+    friend FunctionType operator+(NumericType c, SelfType e) { return c+e.element(); }
+    friend FunctionType operator+(SelfType e, NumericType c) { return e.element()+c; }
+    friend FunctionType operator+(FunctionType f, SelfType e) { return f+e.element(); }
+    friend FunctionType operator+(SelfType e, FunctionType f) { return e.element()+f; }
+    friend FunctionType operator*(SelfType e1, SelfType e2) { return e1.element()*e2.element(); }
+    friend FunctionType operator*(NumericType c, SelfType e) { return c*e.element(); }
+    friend FunctionType operator*(SelfType e, NumericType c) { return e.element()*c; }
+    friend FunctionType operator*(FunctionType f, SelfType e) { return f*e.element(); }
+    friend FunctionType operator*(SelfType e, FunctionType f) { return e.element()*f; }
+  private:
+    VectorFunctionPatch<M>* _c; SizeType _i;
+};
 
-}
 
-template<class M> Bool same(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2) {
-    if(!same(f1.domain(),f2.domain())) { return false; }
-    for(SizeType i=0; i!=f1.result_size(); ++i) {
-        if(!same(f1[i],f2[i])) { return false; }
-    }
-    return true;
-}
 
-template<class M> Bool refines(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2) {
-    ARIADNE_ASSERT(f1.result_size()==f2.result_size());
-    for(SizeType i=0; i!=f1.result_size(); ++i) {
-        if(!refines(f1[i],f2[i])) { return false; }
-    }
-    return true;
-}
-
-template<class M> Bool inconsistent(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2) {
-    ARIADNE_ASSERT(f1.result_size()==f2.result_size());
-    for(SizeType i=0; i!=f1.result_size(); ++i) {
-        if(inconsistent(f1[i],f2[i])) { return true; }
-    }
-    return false;
-}
-
-template<class M> VectorFunctionPatch<M> refinement(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2) {
-    ARIADNE_ASSERT(f1.result_size()==f2.result_size());
-    VectorFunctionPatch<M> r(f1.result_size());
-    for(SizeType i=0; i!=r.result_size(); ++i) {
-        r[i]=refinement(f1[i],f2[i]);
-    }
-    return r;
-}
-
-template<class M> VectorFunctionPatch<M>& operator+=(VectorFunctionPatch<M>& f, const VectorFunctionPatch<M>& g)
-{
-    ARIADNE_ASSERT(f.result_size()==g.result_size());
-    ARIADNE_ASSERT(subset(f.domain(),g.domain()));
-    ARIADNE_ASSERT(f.domain()==g.domain());
-    f.models()+=g.models();
-    return f;
-}
-
-template<class M> VectorFunctionPatch<M>& operator-=(VectorFunctionPatch<M>& f, const VectorFunctionPatch<M>& g)
-{
-    ARIADNE_ASSERT(f.result_size()==g.result_size());
-    ARIADNE_ASSERT(subset(f.domain(),g.domain()));
-    ARIADNE_ASSERT(f.domain()==g.domain());
-    f.models()+=g.models();
-    return f;
-}
-
-template<class M> VectorFunctionPatch<M>& operator+=(VectorFunctionPatch<M>& f, const Vector<NumericType<M>>& c)
-{
-    ARIADNE_ASSERT(f.result_size()==c.size());
-    f.models()+=c;
-    return f;
-}
-
-template<class M> VectorFunctionPatch<M>& operator-=(VectorFunctionPatch<M>& f, const Vector<NumericType<M>>& c)
-{
-    ARIADNE_ASSERT(f.result_size()==c.size());
-    f.models()-=c;
-    return f;
-}
-
-template<class M> VectorFunctionPatch<M>& operator*=(VectorFunctionPatch<M>& f, const NumericType<M>& c)
-{
-    f.models()*=c;
-    return f;
-}
-
-template<class M> VectorFunctionPatch<M>& operator/=(VectorFunctionPatch<M>& f, const NumericType<M>& c)
-{
-    f.models()/=c;
-    return f;
-}
-
-
-template<class M> VectorFunctionPatch<M> operator+(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2)
-{
-    typedef M ModelType;
-    ARIADNE_ASSERT_MSG(!is_empty(intersection(f1.domain(),f2.domain())),
-                       "operator+(VectorFunctionPatch<M> f1, VectorFunctionPatch<M> f2) with f1="<<f1<<" f2="<<f2<<
-                       ": domains are disjoint");
-    if(f1.domain()==f2.domain()) {
-        return VectorFunctionPatch<M>(f1.domain(),Vector<ModelType>(f1.models()+f2.models()));
-    } else {
-        ExactBoxType new_domain=intersection(f1.domain(),f2.domain());
-        return operator+(restriction(f1,new_domain),restriction(f2,new_domain));
-    }
-}
-
-
-template<class M> VectorFunctionPatch<M> operator-(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2)
-{
-    typedef M ModelType;
-    ARIADNE_ASSERT(!is_empty(intersection(f1.domain(),f2.domain())));
-    if(f1.domain()==f2.domain()) {
-        return VectorFunctionPatch<M>(f1.domain(),Vector<ModelType>(f1.models()-f2.models()));
-    } else {
-        ExactBoxType new_domain=intersection(f1.domain(),f2.domain());
-        return operator-(restriction(f1,new_domain),restriction(f2,new_domain));
-    }
-}
-
-template<class M> VectorFunctionPatch<M> operator*(const FunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2)
-{
-    typedef M ModelType;
-    ARIADNE_ASSERT(!is_empty(intersection(f1.domain(),f2.domain())));
-    if(f1.domain()==f2.domain()) {
-        return VectorFunctionPatch<M>(f1.domain(),Vector<ModelType>(f1.model()*f2.models()));
-    } else {
-        ExactBoxType new_domain=intersection(f1.domain(),f2.domain());
-        return operator*(restriction(f1,new_domain),restriction(f2,new_domain));
-    }
-}
-
-template<class M> VectorFunctionPatch<M> operator*(const VectorFunctionPatch<M>& f1, const FunctionPatch<M>& f2)
-{
-    typedef M ModelType;
-    ARIADNE_ASSERT(!is_empty(intersection(f1.domain(),f2.domain())));
-    if(f1.domain()==f2.domain()) {
-        return VectorFunctionPatch<M>(f1.domain(),Vector<ModelType>(f1.models()*f2.model()));
-    } else {
-        ExactBoxType new_domain=intersection(f1.domain(),f2.domain());
-        return operator*(restriction(f1,new_domain),restriction(f2,new_domain));
-    }
-}
-
-template<class M> VectorFunctionPatch<M> operator/(const VectorFunctionPatch<M>& f1, const FunctionPatch<M>& f2)
-{
-    return f1 * rec(f2);
-}
-
-
-
-template<class M> VectorFunctionPatch<M> operator-(const VectorFunctionPatch<M>& f)
-{
-    return VectorFunctionPatch<M>(f.domain(),Vector<M>(-f.models()));
-}
-
-template<class M> VectorFunctionPatch<M> operator*(const NumericType<M>& c, const VectorFunctionPatch<M>& f)
-{
-    return VectorFunctionPatch<M>(f.domain(),Vector<M>(f.models()*c));
-}
-
-template<class M> VectorFunctionPatch<M> operator*(const VectorFunctionPatch<M>& f, const NumericType<M>& c)
-{
-    return VectorFunctionPatch<M>(f.domain(),Vector<M>(f.models()*c));
-}
-
-template<class M> VectorFunctionPatch<M> operator/(const VectorFunctionPatch<M>& f, const NumericType<M>& c)
-{
-    return VectorFunctionPatch<M>(f.domain(),Vector<M>(f.models()/c));
-}
-
-template<class M> VectorFunctionPatch<M> operator+(const VectorFunctionPatch<M>& f, const Vector<NumericType<M>>& c)
-{
-    return VectorFunctionPatch<M>(f.domain(),Vector<M>(f.models()+c));
-}
-
-template<class M> VectorFunctionPatch<M> operator-(const VectorFunctionPatch<M>& f, const Vector<NumericType<M>>& c)
-{
-    return VectorFunctionPatch<M>(f.domain(),Vector<M>(f.models()-c));
-}
-
-template<class M> VectorFunctionPatch<M> operator*(const Matrix<RawFloat<typename M::PrecisionType>>& A, const VectorFunctionPatch<M>& f)
-{
-    ARIADNE_PRECONDITION(A.column_size()==f.size());
-    Vector<M> models(A.row_size(),M(f.argument_size(),f.sweeper()));
-    for(SizeType i=0; i!=A.row_size(); ++i) {
-        for(SizeType j=0; j!=A.column_size(); ++j) {
-            models[i] += A.get(i,j) * f.model(j);
-        }
-    }
-    return VectorFunctionPatch<M>(f.domain(),models);
-}
-
-template<class M> VectorFunctionPatch<M> operator*(const Matrix<NumericType<M>>& A, const VectorFunctionPatch<M>& f)
-{
-    ARIADNE_PRECONDITION(A.column_size()==f.size());
-    Vector<M> models(A.row_size(),M(f.argument_size(),f.sweeper()));
-    for(SizeType i=0; i!=A.row_size(); ++i) {
-        for(SizeType j=0; j!=A.column_size(); ++j) {
-            models[i] += A.get(i,j) * f.model(j);
-        }
-    }
-    return VectorFunctionPatch<M>(f.domain(),models);
-}
-
-template<class M> VectorFunctionPatch<M> operator+(const ValidatedVectorFunction& f1, const VectorFunctionPatch<M>& tf2) {
-    return VectorFunctionPatch<M>(tf2.domain(),f1,tf2.sweeper())+tf2; }
-template<class M> VectorFunctionPatch<M> operator-(const ValidatedVectorFunction& f1, const VectorFunctionPatch<M>& tf2) {
-    return VectorFunctionPatch<M>(tf2.domain(),f1,tf2.sweeper())-tf2; }
-template<class M> VectorFunctionPatch<M> operator*(const ValidatedScalarFunction& f1, const VectorFunctionPatch<M>& tf2) {
-    return FunctionPatch<M>(tf2.domain(),f1,tf2.sweeper())*tf2; }
-template<class M> VectorFunctionPatch<M> operator*(const ValidatedVectorFunction& f1, const FunctionPatch<M>& tf2) {
-    return VectorFunctionPatch<M>(tf2.domain(),f1,tf2.sweeper())*tf2; }
-template<class M> VectorFunctionPatch<M> operator/(const ValidatedVectorFunction& f1, const FunctionPatch<M>& tf2) {
-    return VectorFunctionPatch<M>(tf2.domain(),f1,tf2.sweeper())/tf2; }
-template<class M> VectorFunctionPatch<M> operator+(const VectorFunctionPatch<M>& tf1, const ValidatedVectorFunction& f2) {
-    return tf1+VectorFunctionPatch<M>(tf1.domain(),f2,tf1.sweeper()); }
-template<class M> VectorFunctionPatch<M> operator-(const VectorFunctionPatch<M>& tf1, const ValidatedVectorFunction& f2) {
-    return tf1-VectorFunctionPatch<M>(tf1.domain(),f2,tf1.sweeper()); }
-template<class M> VectorFunctionPatch<M> operator*(const FunctionPatch<M>& tf1, const ValidatedVectorFunction& f2) {
-    return tf1*VectorFunctionPatch<M>(tf1.domain(),f2,tf1.sweeper()); }
-template<class M> VectorFunctionPatch<M> operator*(const VectorFunctionPatch<M>& tf1, const ValidatedScalarFunction& f2) {
-    return tf1*FunctionPatch<M>(tf1.domain(),f2,tf1.sweeper()); }
-template<class M> VectorFunctionPatch<M> operator/(const VectorFunctionPatch<M>& tf1, const ValidatedScalarFunction& f2) {
-    return tf1/FunctionPatch<M>(tf1.domain(),f2,tf1.sweeper()); }
-
-
-
-
-
-
-template<class M> VectorFunctionPatch<M> partial_evaluate(const VectorFunctionPatch<M>& tf, SizeType k, const NumericType<M>& c)
-{
-    // Scale c to domain
-    const SizeType as=tf.argument_size();
-    ARIADNE_ASSERT(k<as);
-    const Vector<ExactIntervalType>& domain=tf.domain();
-    const ExactIntervalType& dk=domain[k];
-    NumericType<M> sc=(c-med(dk))/rad(dk);
-
-    Vector<ExactIntervalType> new_domain(as-1);
-    for(SizeType i=0; i!=k; ++i) { new_domain[i]=domain[i]; }
-    for(SizeType i=k; i!=as-1; ++i) { new_domain[i]=domain[i+1]; }
-
-    Vector<M> new_models=partial_evaluate(tf.models(),k,sc);
-
-    return VectorFunctionPatch<M>(new_domain,new_models);
-}
-
-
-template<class M> VectorFunctionPatch<M> partial_restriction(const VectorFunctionPatch<M>& tf, SizeType k, const ExactIntervalType& d)
-{
-    VectorFunctionPatch<M> r(tf.result_size(),tf.domain(),tf.sweeper());
-    for(SizeType i=0; i!=tf.result_size(); ++i) {
-        r[i]=partial_restriction(tf[i],k,d);
-    }
-    return r;
-}
-
-template<class M> VectorFunctionPatch<M> restriction(const VectorFunctionPatch<M>& tf, SizeType k, const ExactIntervalType& d)
-{
-    return partial_restriction(tf,k,d);
-}
-
-
-template<class M> Vector<ValidatedNumericType> evaluate(const VectorFunctionPatch<M>& f, const Vector<ValidatedNumericType>& x) {
-    if(!definitely(contains(f.domain(),x))) {
-        ARIADNE_THROW(DomainException,"evaluate(f,x) with f="<<f<<", x="<<x,"x is not a subset of f.domain()="<<f.domain());
-    }
-    return unchecked_evaluate(f,x);
-}
-
-template<class M> Vector<NumericType<M>> unchecked_evaluate(const VectorFunctionPatch<M>& f, const Vector<NumericType<M>>& x) {
-    return evaluate(f.models(),unscale(x,f.domain()));
-}
-
-template<class M> VectorFunctionPatch<M> compose(const VectorFunctionType<M>& g, const VectorFunctionPatch<M>& f) {
-    return VectorFunctionPatch<M>(f.domain(),g.evaluate(f.models()));
-}
-
-template<class M> VectorFunctionPatch<M> compose(const VectorFunctionPatch<M>& g, const VectorFunctionPatch<M>& f)
-{
-    if(!subset(f.codomain(),g.domain())) {
-        ARIADNE_THROW(DomainException,"compose(g,f) with g="<<g<<", f="<<f,"f.codomain()="<<f.codomain()<<" is not a subset of g.domain()="<<g.domain());
-    }
-    return unchecked_compose(g,f);
-}
-
-
-template<class M> VectorFunctionPatch<M> unchecked_compose(const VectorFunctionPatch<M>& g, const VectorFunctionPatch<M>& f)
-{
-    return VectorFunctionPatch<M>(f.domain(),compose(g.models(),unscale(f.models(),g.domain())));
-}
-
-
-
-template<class M> VectorFunctionPatch<M> derivative(const VectorFunctionPatch<M>& f, SizeType k)
-{
-    ARIADNE_ASSERT_MSG(k<f.argument_size(),"f="<<f<<"\n f.argument_size()="<<f.argument_size()<<" k="<<k);
-    ValidatedNumericType fdomkrad=rad_val(f.domain()[k]);
-    VectorFunctionPatch<M> g=f;
-    for(SizeType i=0; i!=g.size(); ++i) {
-        g[i]=derivative(f[i],k);
-    }
-    return g;
-}
-
-template<class M> VectorFunctionPatch<M> antiderivative(const VectorFunctionPatch<M>& f, SizeType k)
-{
-    ARIADNE_ASSERT_MSG(k<f.argument_size(),"f="<<f<<"\n f.argument_size()="<<f.argument_size()<<" k="<<k);
-    ValidatedNumericType fdomkrad=rad_val(f.domain()[k]);
-    VectorFunctionPatch<M> g=f;
-    for(SizeType i=0; i!=g.size(); ++i) {
-        g.models()[i].antidifferentiate(k);
-        g.models()[i]*=fdomkrad;
-    }
-    return g;
-}
-
-template<class M> VectorFunctionPatch<M> antiderivative(const VectorFunctionPatch<M>& f, SizeType k, NumericType<M> c)
-{
-    ARIADNE_ASSERT_MSG(k<f.argument_size(),"f="<<f<<"\n f.argument_size()="<<f.argument_size()<<" k="<<k);
-    ValidatedNumericType fdomkrad=rad_val(f.domain()[k]);
-    VectorFunctionPatch<M> g=f;
-    for(SizeType i=0; i!=g.size(); ++i) {
-        g[i]=antiderivative(f[i],k,c);
-    }
-    return g;
-}
-
-
-
-
-
-
-template<class M> typename M::NormType norm(const VectorFunctionPatch<M>& f) {
-    typename M::NormType res=norm(f[0]);;
-    for(SizeType i=1; i!=f.result_size(); ++i) {
-        res=max(res,norm(f[i]));
-    }
-    return res;
-}
-
-template<class M> typename M::NormType distance(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2) {
-    return norm(f1-f2);
-}
-
-template<class M> typename M::NormType distance(const VectorFunctionPatch<M>& f1, const ValidatedVectorFunction& f2) {
-    return distance(f1,VectorFunctionPatch<M>(f1.domain(),f2,f1.sweeper()));
-}
-
-
-template<class M> OutputStream& operator<<(OutputStream& os, const Representation<VectorFunctionPatch<M>>& repr)
-{
-    return repr.pointer->repr(os);
-}
-
-template<class M> OutputStream& operator<<(OutputStream& os, const PolynomialRepresentation<VectorFunctionPatch<M>>& repr)
-{
-    const VectorFunctionPatch<M>& function = *repr.pointer;
-    os << "[";
-    for(SizeType i=0; i!=function.result_size(); ++i) {
-        if(i!=0) { os << ","; }
-        os << polynomial_representation(function[i],repr.threshold,repr.names);
-    }
-    return os << "]";
-}
-
-template<class M> OutputStream& operator<<(OutputStream& os, const PolynomialRepresentation< List<FunctionPatch<M>> >& repr)
-{
-    const List<FunctionPatch<M>>& functions = *repr.pointer;
-    os << "[";
-    for(SizeType i=0; i!=functions.size(); ++i) {
-        if(i!=0) { os << ","; }
-        os << polynomial_representation(functions[i],repr.threshold);
-    }
-    return os << "]";
-}
-
-
-
-template<class M> OutputStream& operator<<(OutputStream& os, const VectorFunctionPatch<M>& p)
-{
-    return p.write(os);
-}
-
-template<class M> Polynomial<NumericType<M>> polynomial(const FunctionPatch<M>& tfn) {
-    return tfn.polynomial();
-}
-
-template<class M> Vector< Polynomial<NumericType<M>> > polynomials(const VectorFunctionPatch<M>& tfn) {
-    return tfn.polynomials();
-}
 
 
 } // namespace Ariadne

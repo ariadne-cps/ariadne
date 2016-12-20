@@ -226,7 +226,12 @@ template<class M> FunctionPatch<M>::FunctionPatch(const ExactBoxType& d, const S
     this->_model.sweep();
 }
 
-template<class M> FunctionPatch<M>& FunctionPatch<M>::operator=(const ValidatedScalarFunctionModel& f)
+template<class M> FunctionPatch<M>::FunctionPatch(const ScalarFunctionModelType<M>& f) {
+     ARIADNE_ASSERT_MSG(dynamic_cast<const FunctionPatch<M>*>(f._ptr.operator->())," f="<<f);
+     *this=dynamic_cast<const FunctionPatch<M>&>(*f._ptr);
+}
+
+template<class M> FunctionPatch<M>& FunctionPatch<M>::operator=(const ScalarFunctionModelType<M>& f)
 {
     return (*this)=FunctionPatch<M>(this->domain(),f,this->sweeper());
 }
@@ -419,7 +424,7 @@ template<class M> auto FunctionPatch<M>::polynomial() const -> Polynomial<FloatB
 
 template<class M> ScalarFunctionType<M> FunctionPatch<M>::function() const
 {
-    return ValidatedScalarFunction(new FunctionPatch<M>(*this));
+    return ScalarFunctionType<M>(new FunctionPatch<M>(*this));
 }
 
 
@@ -433,7 +438,7 @@ template<class M> Bool FunctionPatch<M>::operator==(const FunctionPatch<M>& tv) 
 
 template<class M> FunctionPatch<M>* FunctionPatch<M>::_derivative(SizeType j) const
 {
-    return new FunctionPatch<M>(Ariadne::derivative(*this,j));
+    return new FunctionPatch<M>(derivative(*this,j));
 }
 
 
@@ -458,25 +463,11 @@ template<class M> auto FunctionPatch<M>::operator()(const Vector<FloatBounds<PR>
 
 template<class M> auto FunctionPatch<M>::operator()(const Vector<FloatValue<PR>>& x) const -> FloatBounds<PR>
 {
-    return Ariadne::evaluate(*this,Vector<FloatBounds<PR>>(x));
+    return evaluate(*this,Vector<FloatBounds<PR>>(x));
 }
 
 template<class M> auto FunctionPatch<M>::gradient(const Vector<NumericType>& x) const -> Covector<NumericType>
 {
-    {
-        Precision64 prec;
-        TaylorModel<ValidatedTag,Float64> model(2,AffineSweeper<Float64>(prec));
-        Vector<Float64Bounds> vec(2,prec);
-        Ariadne::gradient(model,vec);
-    }
-
-    {
-        PrecisionMP prec(128);
-        TaylorModel<ValidatedTag,FloatMP> model(2,AffineSweeper<FloatMP>(prec));
-        Vector<FloatMPBounds> vec(2,prec);
-        Ariadne::gradient(model,vec);
-    }
-
     Vector<NumericType> s=unscale(x,this->_domain);
     Covector<NumericType> g=Ariadne::gradient(this->_model,s);
     for(SizeType j=0; j!=g.size(); ++j) {
@@ -590,14 +581,14 @@ template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(SizeType k, const 
 {
 }
 
-template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ValidatedVectorFunctionModel& f)
+template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const VectorFunctionModelType<M>& f)
     : _domain(), _models()
 {
     ARIADNE_ASSERT(dynamic_cast<const VectorFunctionPatch<M>*>(&f.reference()));
     *this = dynamic_cast<const VectorFunctionPatch<M>&>(f.reference());
 }
 
-template<class M> VectorFunctionPatch<M>& VectorFunctionPatch<M>::operator=(const ValidatedVectorFunctionModel& f)
+template<class M> VectorFunctionPatch<M>& VectorFunctionPatch<M>::operator=(const VectorFunctionModelType<M>& f)
 {
     ARIADNE_ASSERT(dynamic_cast<const VectorFunctionPatch<M>*>(&f.reference()));
     *this = dynamic_cast<const VectorFunctionPatch<M>&>(f.reference());
@@ -781,7 +772,7 @@ template<class M> auto VectorFunctionPatch<M>::error() const -> ErrorType const
 
 template<class M> VectorFunctionType<M> VectorFunctionPatch<M>::function() const
 {
-    return ValidatedVectorFunction(new VectorFunctionPatch<M>(*this));
+    return VectorFunctionType<M>(new VectorFunctionPatch<M>(*this));
 }
 
 template<class M> Bool VectorFunctionPatch<M>::operator==(const VectorFunctionPatch<M>& tm) const
@@ -882,6 +873,16 @@ template<class M> SizeType VectorFunctionPatch<M>::result_size() const
 }
 
 
+template<class M> SizeType VectorFunctionPatch<M>::size() const
+{
+    return this->_models.size();
+}
+
+template<class M> FunctionPatch<M> VectorFunctionPatch<M>::zero_element() const
+{
+    return FunctionPatch<M>(this->_domain,this->_models.zero_element());
+}
+
 template<class M> FunctionPatch<M> const VectorFunctionPatch<M>::operator[](SizeType i) const
 {
     return this->get(i);
@@ -958,27 +959,27 @@ template<class M> Void VectorFunctionPatch<M>::clobber()
 
 
 
-template<class M> auto VectorFunctionPatch<M>::operator()(const Vector<ApproximateNumericType>& x) const -> Vector<ApproximateNumericType>
+template<class M> auto VectorFunctionPatch<M>::operator()(const Vector<FloatApproximation<PR>>& x) const -> Vector<FloatApproximation<PR>>
 {
     const VectorFunctionPatch<M>& f=*this;
     if(!decide(contains(f.domain(),x))) {
         ARIADNE_THROW(DomainException,"tf.evaluate(ax) with tf="<<f<<", ax="<<x,"ax is not an element of tf.domain()="<<f.domain());
     }
-    Vector<ApproximateNumericType> sx=Ariadne::unscale(x,f._domain);
-    Vector<ApproximateNumericType> r(this->result_size());
+    Vector<FloatApproximation<PR>> sx=Ariadne::unscale(x,f._domain);
+    Vector<FloatApproximation<PR>> r(this->result_size());
     for(SizeType i=0; i!=r.size(); ++i) {
         r[i]=Ariadne::evaluate(this->_models[i].expansion(),sx);
     }
     return r;
 }
 
-template<class M> auto VectorFunctionPatch<M>::operator()(const Vector<ValidatedNumericType>& x) const -> Vector<ValidatedNumericType>
+template<class M> auto VectorFunctionPatch<M>::operator()(const Vector<FloatBounds<PR>>& x) const -> Vector<FloatBounds<PR>>
 {
     const VectorFunctionPatch<M>& f=*this;
     if(!definitely(contains(f.domain(),x))) {
         ARIADNE_THROW(DomainException,"tf.evaluate(vx) with tf="<<f<<", x="<<x,"vx is not a definitely and element of tf.domain()="<<f.domain());
     }
-    Vector<ValidatedNumericType> sx=Ariadne::unscale(x,f._domain);
+    Vector<FloatBounds<PR>> sx=Ariadne::unscale(x,f._domain);
     return Ariadne::evaluate(f._models,sx);
 }
 

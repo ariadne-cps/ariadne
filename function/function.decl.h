@@ -106,6 +106,8 @@ template<class P, class PR=Precision64, class PRE=PR> using CanonicalNumericType
 template<class P, class PR=Precision64> using CanonicalCoefficientType = typename FunctionModelTraits<P,PR>::CoefficientType;
 template<class P, class PRE=Precision64> using CanonicalErrorType = typename FunctionModelTraits<P,PRE,PRE>::ErrorType;
 
+template<class X> using PrecisionType = typename X::PrecisionType;
+template<class X> using ErrorPrecisionType = typename X::ErrorPrecisionType;
 
 typedef ScalarFunctionModelInterface<ValidatedTag,Precision64> ValidatedScalarFunctionModelInterface;
 typedef VectorFunctionModelInterface<ValidatedTag,Precision64> ValidatedVectorFunctionModelInterface;

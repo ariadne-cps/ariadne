@@ -33,13 +33,13 @@ namespace Ariadne {
 
 template class Affine<Float64Approximation>;
 template class Affine<Float64Bounds>;
-template class ProvideAlgebraOperations<Affine<Float64Approximation>,Float64Approximation>;
-template class ProvideAlgebraOperations<Affine<Float64Bounds>,Float64Bounds>;
+template struct ProvideAlgebraOperations<Affine<Float64Approximation>,Float64Approximation>;
+template struct ProvideAlgebraOperations<Affine<Float64Bounds>,Float64Bounds>;
 
 template class Affine<FloatMPApproximation>;
 template class Affine<FloatMPBounds>;
-template class ProvideAlgebraOperations<Affine<FloatMPApproximation>,FloatMPApproximation>;
-template class ProvideAlgebraOperations<Affine<FloatMPBounds>,FloatMPBounds>;
+template struct ProvideAlgebraOperations<Affine<FloatMPApproximation>,FloatMPApproximation>;
+template struct ProvideAlgebraOperations<Affine<FloatMPBounds>,FloatMPBounds>;
 
 } //namespace Ariadne
 

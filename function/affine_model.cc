@@ -38,17 +38,17 @@
 
 namespace Ariadne {
 
-template struct AffineModel<ApproximateTag,Float64>;
-template struct AffineModel<ApproximateTag,FloatMP>;
+template class AffineModel<ApproximateTag,Float64>;
+template class AffineModel<ApproximateTag,FloatMP>;
 
-template struct AffineModel<ValidatedTag,Float64>;
-template struct AffineModel<ValidatedTag,FloatMP>;
+template class AffineModel<ValidatedTag,Float64>;
+template class AffineModel<ValidatedTag,FloatMP>;
 
-template struct AlgebraOperations<AffineModel<ApproximateTag,Float64>,FloatBounds<Precision64>>;
-template struct AlgebraOperations<AffineModel<ApproximateTag,FloatMP>,FloatBounds<PrecisionMP>>;
+template class AlgebraOperations<AffineModel<ApproximateTag,Float64>,FloatBounds<Precision64>>;
+template class AlgebraOperations<AffineModel<ApproximateTag,FloatMP>,FloatBounds<PrecisionMP>>;
 
-template struct AlgebraOperations<AffineModel<ValidatedTag,Float64>,FloatBounds<Precision64>>;
-template struct AlgebraOperations<AffineModel<ValidatedTag,FloatMP>,FloatBounds<PrecisionMP>>;
+template class AlgebraOperations<AffineModel<ValidatedTag,Float64>,FloatBounds<Precision64>>;
+template class AlgebraOperations<AffineModel<ValidatedTag,FloatMP>,FloatBounds<PrecisionMP>>;
 
 template AffineModel<ValidatedTag,Float64> affine_model(const ExactBoxType&, const ScalarFunction<ValidatedTag>&, Precision64);
 

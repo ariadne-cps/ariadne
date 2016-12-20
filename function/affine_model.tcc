@@ -35,7 +35,7 @@
 
 namespace Ariadne {
 
-template<class F> struct AlgebraOperations<AffineModel<ApproximateTag,F>,FloatBounds<PrecisionType<F>>> {
+template<class F> struct AlgebraOperations<AffineModel<ApproximateTag,F>> {
     typedef typename F::PrecisionType PrecisionType;
     typedef AffineModel<ApproximateTag,F> AffineModelType;
     typedef typename AffineModelType::NumericType NumericType;
@@ -107,7 +107,7 @@ template<class F> struct AlgebraOperations<AffineModel<ApproximateTag,F>,FloatBo
 };
 
 
-template<class F> struct AlgebraOperations<AffineModel<ValidatedTag,F>,FloatBounds<PrecisionType<F>>> {
+template<class F> struct AlgebraOperations<AffineModel<ValidatedTag,F>> {
     typedef typename F::PrecisionType PrecisionType;
     typedef AffineModel<ValidatedTag,F> AffineModelType;
     typedef typename AffineModelType::NumericType NumericType;
@@ -182,7 +182,7 @@ template<class F> struct AlgebraOperations<AffineModel<ValidatedTag,F>,FloatBoun
 
         F tre(prec); // truncation error
         for(SizeType j1=0; j1!=n; ++j1) {
-            for(SizeType j2=0; j1!=n; ++j2) {
+            for(SizeType j2=0; j2!=n; ++j2) {
                 tre = tre + abs(a1.gradient(j1).raw()) * abs(a2.gradient(j2).raw());
             }
         }
@@ -191,7 +191,7 @@ template<class F> struct AlgebraOperations<AffineModel<ValidatedTag,F>,FloatBoun
         F nrm2=abs(a2.value().raw());
         for(SizeType j=0; j!=n; ++j) {
             nrm1==nrm1+abs(a1.value().raw());
-            nrm1==nrm1+abs(a1.value().raw());
+            nrm2==nrm2+abs(a2.value().raw());
         }
         F ace = a1.error().raw()*nrm2 + nrm1 * a1.error().raw();  // accumulated error
         r.set_error( ErrorType(tre + roe + ace) );

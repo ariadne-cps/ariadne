@@ -244,17 +244,21 @@ template<class T> inline List< Assignment<DottedVariable<T>, Expression<T> > > D
     return result;
 }
 
+/*
 template<> struct DottedVariables<Void> {
     const List<Identifier> _lhs;
     DottedVariables(const List<Identifier>& lhs) : _lhs(lhs) { }
     template<class T> List< Assignment<DottedVariable<T>, Expression<T> > > operator=(const List<Expression<T> >&);
 };
 inline DottedVariables<Void> dot(const List<Identifier>& lhs) { return DottedVariables<Void>(lhs); }
+inline DottedVariables<Void> dot(const InitializerList<Identifier>& lhs) { return dot(List<Identifier>(lhs)); }
+
 template<class T> inline List< Assignment<DottedVariable<T>, Expression<T> > > DottedVariables<Void>::operator=(const List<Expression<T> >& rhs) {
     List< Assignment<DottedVariable<T>,Expression<T> > > result;
     for(Nat i=0; i!=rhs.size(); ++i) { result.append(DottedVariable<T>(this->_lhs[i])=rhs[i]); }
     return result;
 }
+*/
 
 template<class T> struct PrimedVariables {
     const List< Variable<T> > _lhs;

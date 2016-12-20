@@ -162,7 +162,7 @@ class Function
     static_assert(IsStronger<P,ApproximateTag>::value,"P must be an information level/paradigm.");
     typedef Number<P> Y;
   protected:
-    std::shared_ptr< const FunctionInterface<P,D,C> > _ptr;
+    SharedPointer< const FunctionInterface<P,D,C> > _ptr;
   public:
     typedef P InformationTag;
     typedef P Paradigm;
@@ -207,7 +207,7 @@ class Function
     template<class PP, EnableIf<IsStronger<PP,P>> =dummy>
         Function<P,D,C>& operator=(Result<NumericType> const& c); // { return *this=this->create_constant(c); }
 
-    shared_ptr< const FunctionInterface<P,D,C> > managed_pointer() const  { return _ptr; }
+    SharedPointer< const FunctionInterface<P,D,C> > managed_pointer() const  { return _ptr; }
     const FunctionInterface<P,D,C>* raw_pointer() const  { return _ptr.operator->(); }
     const FunctionInterface<P,D,C>& reference() const  { return _ptr.operator*(); }
     operator const FunctionInterface<P,D,C>& () const { return _ptr.operator*(); }
@@ -407,11 +407,11 @@ typedef FunctionFactory<ValidatedTag> ValidatedFunctionFactory;
 template<>
 class FunctionFactory<ValidatedTag>
 {
-    std::shared_ptr< const FunctionFactoryInterface<ValidatedTag> > _ptr;
+    SharedPointer< const FunctionFactoryInterface<ValidatedTag> > _ptr;
   public:
     FunctionFactory(const FunctionFactoryInterface<ValidatedTag>& ref) : _ptr(ref.clone()) { }
     FunctionFactory(const FunctionFactoryInterface<ValidatedTag>* ptr) : _ptr(ptr) { }
-    FunctionFactory(std::shared_ptr< const FunctionFactoryInterface<ValidatedTag> > ptr) : _ptr(ptr) { }
+    FunctionFactory(SharedPointer< const FunctionFactoryInterface<ValidatedTag> > ptr) : _ptr(ptr) { }
     inline ValidatedScalarFunction create(const ExactBoxType& d, const ValidatedScalarFunctionInterface& f) const;
     inline ValidatedVectorFunction create(const ExactBoxType& d, const ValidatedVectorFunctionInterface& f) const;
     inline ValidatedScalarFunction create_zero(const ExactBoxType& d) const;

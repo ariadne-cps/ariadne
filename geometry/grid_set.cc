@@ -1239,7 +1239,7 @@ std::vector<GridOpenCell> GridOpenCell::intersection( const GridOpenCell & theLe
                 GridTreeSet theRightCellSet = theRightOpenCell.closure();
 
                 //03 Then we compute their intersection
-                GridTreeSet intersectionSet = ::intersection( theLeftCellSet, theRightCellSet );
+                GridTreeSet intersectionSet = Ariadne::intersection( theLeftCellSet, theRightCellSet );
                 //NOTE: It seems to me there is no need to recombine the resulting set, it will not reduce anything
 
                 //04 Iterate through all the cells in the intersection and first add their interiors to the resulting set, second

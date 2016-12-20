@@ -56,9 +56,6 @@
 
 #include "output/graphics_interface.h"
 
-using namespace std;
-using namespace Ariadne;
-
 namespace Ariadne {
 
 /*Some type definitions*/
@@ -310,7 +307,7 @@ class BinaryTreeNode {
     Void tree_to_binary_words( BinaryWord & tree, BinaryWord & leaves ) const;
 
     /*! \brief Stores the binary tree node as a string*/
-    string node_to_string() const;
+    String node_to_string() const;
 
     /*! \brief Finds(creates) the leaf node defined by the \a path and marks it as enabled.
      * If some prefix of the \a path references an enabled node then nothing is done.
@@ -1353,8 +1350,8 @@ inline Void BinaryTreeNode::recombine() {
     recombine_node(this);
 }
 
-inline string BinaryTreeNode::node_to_string() const {
-    stringstream tmp_stream;
+inline String BinaryTreeNode::node_to_string() const {
+    std::stringstream tmp_stream;
     tmp_stream << "BinaryTreeNode( isLeaf = " << is_leaf() << ", isEnabled = " << is_enabled() << ", isDisabled = " << is_disabled() << " )";
     return tmp_stream.str();
 }

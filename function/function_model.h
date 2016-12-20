@@ -80,7 +80,7 @@ template<class P, class PR, class PRE> class ScalarFunctionModel
   public:
     ScalarFunctionModel() : _ptr() { }
     ScalarFunctionModel(ScalarFunctionModelInterface<P,PR,PRE>* p) : _ptr(p) { }
-    ScalarFunctionModel(const shared_ptr<const ScalarFunctionModelInterface<P,PR,PRE>> p) : _ptr(p->_clone()) { }
+    ScalarFunctionModel(const SharedPointer<const ScalarFunctionModelInterface<P,PR,PRE>> p) : _ptr(p->_clone()) { }
     ScalarFunctionModel(const ScalarFunctionModel<P,PR,PRE>& f) : _ptr(f._ptr) { }
     ScalarFunctionModel(const ScalarFunctionModelInterface<P,PR,PRE>& f) : _ptr(f._clone()) { }
     ScalarFunctionModel(const ScalarFunction<P>& f) : _ptr(dynamic_cast<ScalarFunctionModelInterface<P,PR,PRE>*>(f.raw_pointer()->_clone())) { }

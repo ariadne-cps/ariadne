@@ -385,7 +385,7 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
 
     if(!(t<inf)) {
         ARIADNE_WARN("feasibility failed\n");
-        char c; cin >> c;
+        char c; std::cin >> c;
         at=0;
         ay=midpoint(d);
         ax=FloatApproximationVector(x.size(),one/x.size());
@@ -597,7 +597,7 @@ Void subdivision_adjoin_outer_approximation(PavingInterface& paving,
         errors[i]=paving.grid().lengths()[i]/(1<<depth);
     }
 
-    ::subdivision_adjoin_outer_approximation_recursion(paving,subdomain,function,constraints,depth,errors);
+    Ariadne::subdivision_adjoin_outer_approximation_recursion(paving,subdomain,function,constraints,depth,errors);
 }
 
 Void affine_adjoin_outer_approximation(PavingInterface& paving,
@@ -624,7 +624,7 @@ constraint_adjoin_outer_approximation(PavingInterface& p, const ExactBoxType& d,
     const Nat l=(d.size()+f.result_size()+g.result_size())*2;
     ExactPoint x(l); for(Nat k=0; k!=l; ++k) { x[k]=Float64Value(1.0/l); }
 
-    ::hotstarted_constraint_adjoin_outer_approximation_recursion(p,d,f,g,rc,b,x,y,e);
+    Ariadne::hotstarted_constraint_adjoin_outer_approximation_recursion(p,d,f,g,rc,b,x,y,e);
 }
 
 Void
@@ -672,7 +672,7 @@ Void optimal_constraint_adjoin_outer_approximation(PavingInterface& p, const Exa
         ThresholdSweeper<Float64> swp(Precision64(),1e-12);
         fg=VectorTaylorFunction(d,join(f,g),swp);
     }
-    ::hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(p,d,fg,rc,b,x,y,e);
+    Ariadne::hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(p,d,fg,rc,b,x,y,e);
 }
 
 } // namespace

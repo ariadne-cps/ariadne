@@ -244,7 +244,7 @@ List<EffectiveConstraint> constraints(const EffectiveVectorFunction& f, const Ef
 ConstraintSet::ConstraintSet(const EffectiveVectorFunction& f, const EffectiveBoxType& b)
     : _dimension(f.argument_size()), _constraints()
 {
-    this->_constraints=::constraints(f,b);
+    this->_constraints=Ariadne::constraints(f,b);
 }
 
 ConstraintSet::ConstraintSet(const List<EffectiveConstraint>& c)
@@ -254,12 +254,12 @@ ConstraintSet::ConstraintSet(const List<EffectiveConstraint>& c)
 
 EffectiveVectorFunction const ConstraintSet::constraint_function() const
 {
-    return ::constraint_function(this->dimension(),this->constraints());
+    return Ariadne::constraint_function(this->dimension(),this->constraints());
 }
 
 EffectiveBoxType const ConstraintSet::constraint_bounds() const
 {
-    return ::constraint_bounds(this->constraints());
+    return Ariadne::constraint_bounds(this->constraints());
 }
 
 ConstraintSet*
@@ -313,7 +313,7 @@ BoundedConstraintSet::BoundedConstraintSet(const EffectiveBoxType& bx)
 }
 
 BoundedConstraintSet::BoundedConstraintSet(const EffectiveBoxType& d, const EffectiveVectorFunction& f, const EffectiveBoxType& b)
-    : _domain(d), _constraints(::constraints(f,b))
+    : _domain(d), _constraints(Ariadne::constraints(f,b))
 {
     ARIADNE_ASSERT(b.size()==f.result_size());
     ARIADNE_ASSERT(d.size()==f.argument_size());
@@ -326,12 +326,12 @@ BoundedConstraintSet::BoundedConstraintSet(const EffectiveBoxType& d, const List
 
 EffectiveVectorFunction const BoundedConstraintSet::constraint_function() const
 {
-    return ::constraint_function(this->dimension(),this->constraints());
+    return Ariadne::constraint_function(this->dimension(),this->constraints());
 }
 
 EffectiveBoxType const BoundedConstraintSet::constraint_bounds() const
 {
-    return ::constraint_bounds(this->constraints());
+    return Ariadne::constraint_bounds(this->constraints());
 }
 
 BoundedConstraintSet*

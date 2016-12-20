@@ -32,7 +32,7 @@
 #include "hybrid/hybrid_simulator.h"
 #include "hybrid/hybrid_graphics.h"
 
-template<class T> Void write(const char* filename, const T& t) {
+template<class T> void write(const char* filename, const T& t) {
     std::ofstream ofs(filename); ofs << t; ofs.close();
 }
 

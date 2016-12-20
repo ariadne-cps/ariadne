@@ -46,22 +46,22 @@ class UnivariateDifferential
     template<class T, class Y> friend UnivariateDifferential<Y> compose(const Series<T>&,const UnivariateDifferential<Y>&);
   public:
     explicit UnivariateDifferential() : _data(1) { }
-    explicit UnivariateDifferential(Nat d) : _data(d+1) { }
-    explicit UnivariateDifferential(Nat d, const X& x) : _data(d+1,x) { }
-    template<class XX> UnivariateDifferential(Nat d, const XX* ptr) : _data(ptr,ptr+(d+1)) { }
+    explicit UnivariateDifferential(DegreeType d) : _data(d+1) { }
+    explicit UnivariateDifferential(DegreeType d, const X& x) : _data(d+1,x) { }
+    template<class XX> UnivariateDifferential(DegreeType d, const XX* ptr) : _data(ptr,ptr+(d+1)) { }
 
-    static UnivariateDifferential<X> constant(Nat d, const X& c) {
+    static UnivariateDifferential<X> constant(DegreeType d, const X& c) {
         UnivariateDifferential<X> result(d,create_zero(c)); result._data[0]=c; return result; }
-    static UnivariateDifferential<X> variable(Nat d, const X& x) {
+    static UnivariateDifferential<X> variable(DegreeType d, const X& x) {
         UnivariateDifferential<X> result(d,create_zero(x)); result._data[0]=x; result._data[1]=1; return result; }
 
     UnivariateDifferential<X>& operator=(const X& c) {
-        X z=create_zero(_data[0]); _data[0]=c; for(Nat i=1; i!=_data.size(); ++i) { _data[i]=z; } return *this; }
-    Nat degree() const { return this->_data.size()-1; }
+        X z=create_zero(_data[0]); _data[0]=c; for(DegreeType i=1; i!=_data.size(); ++i) { _data[i]=z; } return *this; }
+    DegreeType degree() const { return this->_data.size()-1; }
     const X& value() const { return this->_data[0]; }
     const X& gradient() const { return this->_data[1]; }
-    const X& operator[](Nat i) const { return this->_data[i]; }
-    X& operator[](Nat i) { return this->_data[i]; }
+    const X& operator[](DegreeType i) const { return this->_data[i]; }
+    X& operator[](DegreeType i) { return this->_data[i]; }
   private:
     Array<X> _data;
 };

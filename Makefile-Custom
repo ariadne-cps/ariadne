@@ -113,12 +113,12 @@ LIB_HYBRID_SRC = \
 	hybrid_simulator.cc \
 	hybrid_evolver.cc \
 	hybrid_reachability_analyser.cc \
-	hybrid_graphics.cc
+	hybrid_graphics.cc \
 
 TEST_HYBRID_SRC = \
-	test_hybrid_set.cc test_hybrid_automaton.cc \
-	test_hybrid_simulator.cc test_hybrid_evolver.cc \
-	test_hybrid_evolution.cc test_hybrid_reachability_analyser.cc test_hybrid_graphics.cc \
+	test_hybrid_set.cc test_hybrid_graphics.cc \
+	test_hybrid_automaton.cc test_hybrid_simulator.cc \
+	test_hybrid_evolver.cc test_hybrid_evolution.cc test_hybrid_reachability_analyser.cc
 
 LIB_EXTRAS_SRC = \
 	c1_taylor_function.cc \
@@ -253,7 +253,7 @@ check: tests
 examples: dirs $(EXAMPLES_BIN) $(EXAMPLES_OBJ) lib
 
 clean:
-	@rm -f */*.gch $(OBJ_DIR)/*.o *.so $(BIN_DIR)/*
+	@rm -f */*.gch* $(OBJ_DIR)/*.o *.so $(BIN_DIR)/*
 
 shiny: clean
 	@rm -rf $(DEP_DIR) $(OBJ_DIR) $(BIN_DIR) $(CHECK_DIR)

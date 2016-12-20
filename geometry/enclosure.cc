@@ -1472,7 +1472,7 @@ Enclosure::affine_over_approximation() const
     const Nat nc=this->number_of_constraints();
     const Nat np=this->number_of_parameters();
 
-    AffineSweeper<Float64> affine_sweeper(Precision64());
+    AffineSweeper<Float64> affine_sweeper((Precision64()));
     VectorTaylorFunction space_function=dynamic_cast<const VectorTaylorFunction&>(this->_space_function.reference());
     ScalarTaylorFunction time_function=dynamic_cast<const ScalarTaylorFunction&>(this->_time_function.reference());
     List<ScalarTaylorFunction> constraint_functions;

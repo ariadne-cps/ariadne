@@ -25,10 +25,13 @@
 
 #include "config.h"
 #include "function/function.h"
+#include "function/taylor_model.h"
+#include "algebra/algebra.h"
 #include "geometry/box.h"
 #include "geometry/grid_set.h"
 #include "geometry/affine_set.h"
 #include "geometry/function_set.h"
+#include "expression/formula.h"
 #include "output/graphics.h"
 
 #include "test.h"

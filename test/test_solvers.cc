@@ -32,8 +32,10 @@
 #include "function/function.h"
 #include "function/taylor_function.h"
 #include "algebra/vector.h"
+#include "algebra/algebra.h"
 #include "expression/expression.h"
 #include "expression/space.h"
+#include "expression/formula.h"
 
 #include "test.h"
 

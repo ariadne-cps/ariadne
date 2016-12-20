@@ -30,6 +30,7 @@
 #include "algebra/matrix.h"
 #include "algebra/multi_index.h"
 #include "algebra/expansion.h"
+#include "algebra/algebra.h"
 #include "function/taylor_model.h"
 #include "function/taylor_function.h"
 #include "algebra/differential.h"

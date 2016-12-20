@@ -31,8 +31,10 @@
 #include "expression/assignment.h"
 #include "expression/valuation.h"
 #include "expression/space.h"
+#include "expression/formula.h"
 #include "algebra/algebra.h"
 #include "function/function.h"
+#include "function/taylor_model.h"
 
 #include "test.h"
 

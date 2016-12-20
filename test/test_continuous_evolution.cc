@@ -30,6 +30,7 @@
 #include "algebra/matrix.h"
 #include "function/function.h"
 #include "function/taylor_function.h"
+#include "function/constraint.h"
 #include "geometry/enclosure.h"
 #include "geometry/box.h"
 #include "geometry/list_set.h"

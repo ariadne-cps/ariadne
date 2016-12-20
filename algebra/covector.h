@@ -48,6 +48,8 @@ struct DeclareCovectorOperations {
     template<class X1, class X2> friend Covector<ProductType<X1,Scalar<X2>>> operator*(Covector<X1> const& v1, X2 const& x2);
     template<class X1, class X2> friend Covector<QuotientType<X1,Scalar<X2>>> operator/(Covector<X1> const& v1, X2 const& x2);
     template<class X1, class X2> friend ArithmeticType<X1,X2> operator*(const Covector<X1>& u1, const Vector<X2>& v2);
+    template<class X1, class X2> friend EqualsType<X1,X2> operator==(const Covector<X1>& u1, const Covector<X2>& u2);
+    template<class X> friend OutputStream& operator<<(OutputStream& os, const Covector<X>& u);
 };
 
 template<class X> class Covector
@@ -76,7 +78,6 @@ template<class X> class Covector
     const X& at(SizeType j) const { return _ary.at(j); }
     X& at(SizeType j) { return _ary.at(j); }
     X zero_element() const { ARIADNE_DEBUG_ASSERT(not _ary.empty()); return create_zero(_ary[0]); }
-    OutputStream& write(OutputStream& os) const;
 };
 
 template<class X> inline Covector<X> const& transpose(Vector<X> const& v) {
@@ -85,10 +86,6 @@ template<class X> inline Covector<X> const& transpose(Vector<X> const& v) {
 template<class X> inline Vector<X> const& transpose(Covector<X> const& u) {
     return reinterpret_cast<Vector<X> const&>(u); }
 
-
-template<class X1, class X2> auto operator==(const Covector<X1>& u1, const Covector<X2>& u2) -> decltype(u1[0]==u2[0]) {
-    if(u1.size()!=u2.size()) { return false; }
-    decltype(u1[0]==u2[0]) r=true; for(SizeType i=0; i!=u1.size(); ++i) { r = r && (u1[i]==u2[i]); } return r; }
 
 
 class ProvideCovectorOperations {
@@ -111,25 +108,17 @@ class ProvideCovectorOperations {
         Covector<ProductType<X1,X2>> r(u1.size()); for(SizeType i=0; i!=r.size(); ++i) { r[i]=u1[i]*s2; } return std::move(r); }
 
     template<class X1, class X2> friend ArithmeticType<X1,X2> operator*(const Covector<X1>& u1, const Vector<X2>& v2) {
-        ARIADNE_PRECONDITION(u1.size()==v2.size());
-        ArithmeticType<X1,X2> r=0u;
-        for(SizeType i=0; i!=v2.size(); ++i) {
-            r+=u1[i]*v2[i];
-        }
-        return r;
-    }
+        ARIADNE_PRECONDITION(u1.size()==v2.size()); ArithmeticType<X1,X2> r=0u;
+        for(SizeType i=0; i!=v2.size(); ++i) { r+=u1[i]*v2[i]; } return r; }
+
+    template<class X1, class X2> friend EqualsType<X1,X2> operator==(const Covector<X1>& u1, const Covector<X2>& u2) {
+        if(u1.size()!=u2.size()) { return false; } decltype(u1[0]==u2[0]) r=true;
+        for(SizeType i=0; i!=u1.size(); ++i) { r = r && (u1[i]==u2[i]); } return r; }
+
+    template<class X> friend OutputStream& operator<<(OutputStream& os, const Covector<X>& u) {
+        if(u.size()==0) { os << "{"; } for(SizeType i=0; i!=u.size(); ++i) { os << (i==0u?"{":",") << u[i]; } return os << "}"; }
 
 };
-
-template<class X> OutputStream& Covector<X>::write(OutputStream& os) const {
-    if(size()==0) { os << "{"; }
-    for(SizeType i=0; i!=size(); ++i) { os << (i==0u?"{":",") << this->_ary[i]; }
-    return os << "}";
-}
-
-template<class X> OutputStream& operator<<(OutputStream& os, const Covector<X>& u) {
-    return u.write(os);
-}
 
 
 } // namespace Ariadne

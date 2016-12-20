@@ -104,7 +104,8 @@ Int main(Int argc, char** argv)
 
     // Second mode: contact
     DiscreteLocation contact(robotarm|"contact");
-    robotarm_automaton.new_mode(contact, {dot(x)=vx,dot(vx)=ddot_xd + fifth*b/m * (dot_xd - vx) + fifth*k/m * (xd - x) + kFx * ke * (xc - x),dot(t)=1});
+    DottedRealAssignments contact_dyn(List< Assignment<DottedVariable<Real>, Expression<Real> > >({dot(x)=vx,dot(vx)=ddot_xd + fifth*b/m * (dot_xd - vx) + fifth*k/m * (xd - x) + kFx * ke * (xc - x),dot(t)=1}));
+    robotarm_automaton.new_mode(contact, contact_dyn);
 
     // transition from free to contact
     DiscreteEvent f2c("f2c");

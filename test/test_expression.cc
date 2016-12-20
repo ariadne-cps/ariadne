@@ -119,12 +119,12 @@ class TestExpression {
         RealVariable z("z");
 
         RealExpression e1=c;
-        EffectiveScalarFunction f1=make_function(e1,RealSpace({x,y,z}));
+        EffectiveScalarFunction f1=make_function(e1,RealSpace(InitializerList<RealVariable>({x,y,z})));
         ARIADNE_TEST_PRINT(f1);
         ARIADNE_TEST_EQUAL(f1.evaluate(tv), tc);
 
         RealExpression e2=c+x;
-        EffectiveScalarFunction f2=make_function(e2,RealSpace({x,y,z}));
+        EffectiveScalarFunction f2=make_function(e2,RealSpace(InitializerList<RealVariable>({x,y,z})));
         ARIADNE_TEST_PRINT(f2);
         ARIADNE_TEST_EQUAL(f2.evaluate(tv), tc+tx);
 

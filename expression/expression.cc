@@ -451,8 +451,7 @@ evaluate(const Expression<T>& e, const Map<Identifier,T>& x)
     }
 }
 
-
-
+template Real evaluate(const Expression<Real>& e, const Map<Identifier,Real>& x);
 
 String evaluate(const Expression<String>& e, const StringValuation& x) {
     switch(e.op()) {

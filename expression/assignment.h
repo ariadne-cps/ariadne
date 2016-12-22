@@ -233,6 +233,9 @@ template<class T> struct DottedVariables {
     const List< Variable<T> > _lhs;
     DottedVariables(const List< Variable<T> >& lhs) : _lhs(lhs) { }
     List< Assignment<DottedVariable<T>, Expression<T> > > operator=(const List<Expression<T> >&);
+    List< Assignment<DottedVariable<T>, Expression<T> > > operator=(const InitializerList<Expression<T> >&);
+    List< Assignment<DottedVariable<T>, Expression<T> > > operator=(const InitializerList<Assignment<DottedVariable<T>,Expression<T> > >&);
+
     friend OutputStream& operator<<(OutputStream& os, DottedVariables<T> const& dv) { return os << "dot("<<dv._lhs<<")"; }
 };
 template<class T> inline DottedVariables<T> dot(const List<Variable<T> >& lhs) { return DottedVariables<T>(lhs); }
@@ -243,22 +246,15 @@ template<class T> inline List< Assignment<DottedVariable<T>, Expression<T> > > D
     for(Nat i=0; i!=rhs.size(); ++i) { result.append(dot(this->_lhs[i])=rhs[i]); }
     return result;
 }
+template<class T> inline List< Assignment<DottedVariable<T>, Expression<T> > > DottedVariables<T>::operator=(const InitializerList<Expression<T> >& rhs) {
+    return DottedVariables<T>::operator=(List<Expression<T>>(rhs));
+}
 
-/*
-template<> struct DottedVariables<Void> {
-    const List<Identifier> _lhs;
-    DottedVariables(const List<Identifier>& lhs) : _lhs(lhs) { }
-    template<class T> List< Assignment<DottedVariable<T>, Expression<T> > > operator=(const List<Expression<T> >&);
-};
-inline DottedVariables<Void> dot(const List<Identifier>& lhs) { return DottedVariables<Void>(lhs); }
-inline DottedVariables<Void> dot(const InitializerList<Identifier>& lhs) { return dot(List<Identifier>(lhs)); }
-
-template<class T> inline List< Assignment<DottedVariable<T>, Expression<T> > > DottedVariables<Void>::operator=(const List<Expression<T> >& rhs) {
+template<class T> inline List< Assignment<DottedVariable<T>, Expression<T> > > DottedVariables<T>::operator=(const InitializerList<Assignment<DottedVariable<T>,Expression<T> >>& rhs) {
     List< Assignment<DottedVariable<T>,Expression<T> > > result;
-    for(Nat i=0; i!=rhs.size(); ++i) { result.append(DottedVariable<T>(this->_lhs[i])=rhs[i]); }
+    for(Nat i=0; i!=rhs.size(); ++i) { result.append(rhs[i]); }
     return result;
 }
-*/
 
 template<class T> struct PrimedVariables {
     const List< Variable<T> > _lhs;

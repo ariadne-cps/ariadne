@@ -30,9 +30,6 @@
 
 namespace Ariadne {
 
-typedef ApproximateNumericType ApproximateNumericType;
-typedef ValidatedNumericType ValidatedNumericType;
-typedef EffectiveNumericType EffectiveNumericType;
 typedef Differential<ApproximateNumericType> ApproximateDifferential;
 typedef Differential<ValidatedNumericType> ValidatedDifferential;
 typedef UnivariateDifferential<ApproximateNumericType> ApproximateUnivariateDifferential;

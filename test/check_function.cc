@@ -24,7 +24,9 @@
 #include "function/functional.h"
 
 #include "function/function.h"
+#include "function/taylor_model.h"
 #include "geometry/box.h"
+#include "algebra/algebra.h"
 
 #include "numeric/float.decl.h"
 

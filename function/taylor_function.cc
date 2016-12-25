@@ -40,10 +40,10 @@
 
 #include "function/function.h"
 #include "function/function_patch.h"
+
 #include "function/taylor_function.h"
 
-#include "function_mixin.tcc"
-#include "function_patch.tcc"
+#include "function_mixin.h"
 
 #define VOLATILE ;
 

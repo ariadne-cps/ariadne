@@ -20,6 +20,9 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+ 
+#ifndef ARIADNE_FUNCTION_MIXIN_TCC
+#define ARIADNE_FUNCTION_MIXIN_TCC
 
 #include "numeric/numeric.h"
 #include "algebra/vector.h"
@@ -103,3 +106,5 @@ FunctionMixin<F,EffectiveTag,D,C>::_evaluate(const Argument<EffectiveFormula>& x
 
 
 } // namespace Ariadne
+
+#endif

@@ -21,6 +21,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#ifndef FUNCTION_PATCH_TCC
+#define FUNCTION_PATCH_TCC
+
 #include "function/functional.h"
 #include "config.h"
 
@@ -991,3 +994,5 @@ template<class M> OutputStream& VectorFunctionPatch<M>::repr(OutputStream& os) c
 
 
 } // namespace Ariadne
+
+#endif

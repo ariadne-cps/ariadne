@@ -82,8 +82,6 @@ template<class T> class Space
     const VariableType operator[](SizeType i) const { return VariableType(_variables.at(i)); }
     const VariableType variable(SizeType i) const { return VariableType(_variables.at(i)); }
 
-    List<VariableType> operator=(const InitializerList<VariableType>&) const;
-
     //! \brief A list giving ordered variables.
     List<Identifier> variable_names() const { return this->_variables; }
     //! \brief A list giving ordered variables.
@@ -145,13 +143,6 @@ template<class T> inline OutputStream& operator<<(OutputStream& os, const Space<
 
 template<class T> inline Space<T> join(const Space<T>& spc1, const Space<T>& spc2) {
     Space<T> r(spc1); r.adjoin(spc2); return r; }
-
-template<class T> inline List<Variable<T>>
-Space<T>::operator=(const InitializerList<Variable<T>>& rhs) const {
-    List<Variable<T>> result;
-    for(Nat i=0; i!=rhs.size(); ++i) { result.append(rhs[i]); }
-    return result;
-}
 
 // Compiled conversion operators to allow conversion between expression and function.
 SizeType dimension(const Space<Real>& spc);

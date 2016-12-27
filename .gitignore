@@ -1,9 +1,4 @@
 build/
-Makefile
-cmake_install.cmake
-CMakeFiles
-CMakeCache.txt
-DartConfiguration.tcl
 *~
 config.h
 .project
@@ -12,5 +7,3 @@ config.h
 dep/
 obj/
 *.gch
-*.cmake
-!cmake/*

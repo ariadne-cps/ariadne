@@ -1,8 +1,16 @@
 build/
+Makefile
+cmake_install.cmake
+CMakeFiles
+CMakeCache.txt
+DartConfiguration.tcl
 *~
 config.h
 .project
+.cproject
 .pydevproject
 dep/
 obj/
 *.gch
+*.cmake
+!cmake/*

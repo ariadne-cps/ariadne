@@ -2,6 +2,7 @@ set(EXPERIMENTAL_EXAMPLES
 	circle
 	exponential
 	laser
+	bouncing-walls
 )
 
 foreach(example ${EXPERIMENTAL_EXAMPLES})

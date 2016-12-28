@@ -38,13 +38,13 @@ AtomicHybridAutomaton getSkinExposure()
     DiscreteEvent comes("comes");
     DiscreteEvent leaves("leaves");
 
-	RealExpression distance = sqr(x-x0);
+	RealExpression sqr_distance = sqr(x-x0);
 
 	automaton.new_mode(far, {dot(p)=0});
-	automaton.new_mode(close, {dot(p)=-vx*pi/L/L * (x-x0) * sin(Ariadne::pi/L/L * distance)});
+	automaton.new_mode(close, {dot(p)=-vx*pi/L/L * (x-x0) * sin(Ariadne::pi/L/L * sqr_distance)});
 
-	automaton.new_transition(far,comes,close,{next(p)=0},distance<=L);
-	automaton.new_transition(close,leaves,far,{next(p)=0},distance>=L);
+	automaton.new_transition(far,comes,close,{next(p)=0},sqr_distance<=L*L);
+	automaton.new_transition(close,leaves,far,{next(p)=0},sqr_distance>=L*L);
 
 	return automaton;
 }

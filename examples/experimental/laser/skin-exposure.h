@@ -43,10 +43,7 @@ AtomicHybridAutomaton getSkinExposure()
 	automaton.new_mode(far, {dot(p)=0});
 	automaton.new_mode(close, {dot(p)=-vx*pi/L/L * (x-x0) * sin(Ariadne::pi/L/L * sqr_distance)});
 
-	automaton.new_guard(DiscreteLocation(automaton|far),comes,sqr_distance<=L*L,impact);
-	automaton.new_update(DiscreteLocation(automaton|far),comes,DiscreteLocation(automaton|close),{next(p)=0});
-
-	//automaton.new_transition(far,comes,close,{next(p)=0},sqr_distance<=L*L);
+	automaton.new_transition(far,comes,close,{next(p)=0},sqr_distance<=L*L);
 	automaton.new_transition(close,leaves,far,{next(p)=0},sqr_distance>=L*L);
 
 	return automaton;

@@ -41,8 +41,9 @@ AtomicHybridAutomaton getLaserTrajectory()
 
 	automaton.new_guard(DiscreteLocation(automaton|scanning),switch_right,x<=0,impact);
 	automaton.new_update(DiscreteLocation(automaton|scanning),switch_right,DiscreteLocation(automaton|scanning),{next(x)=0,next(vx)=velocity});
-	automaton.new_transition(scanning,switch_left,scanning,{next(x)=width,next(vx)=-velocity},x>=width);
-	//automaton.new_transition(scanning,switch_right,scanning,{next(x)=0,next(vx)=velocity},x<=0);
+
+	automaton.new_guard(DiscreteLocation(automaton|scanning),switch_left,x>=width,impact);
+	automaton.new_update(DiscreteLocation(automaton|scanning),switch_left,DiscreteLocation(automaton|scanning),{next(x)=width,next(vx)=-velocity});
 
 	return automaton;
 }

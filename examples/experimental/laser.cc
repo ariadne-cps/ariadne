@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
 
     // Set the evolution parameters
     evolver.configuration().set_maximum_enclosure_radius(0.5);
-    evolver.configuration().set_maximum_step_size(0.001);
+    evolver.configuration().set_maximum_step_size(0.0001);
     std::cout << evolver.configuration() << std::endl;
 
     // Declare the type to be used for the system evolution

@@ -116,8 +116,10 @@ template<class M, EnableIf<And<IsIntegral<M>,IsUnsigned<M>>>> inline Dyadic::Dya
 template<class N, EnableIf<And<IsIntegral<N>,IsSigned<N>>>> inline Dyadic::Dyadic(N n) : Dyadic(Integer(n)) { }
 
 
-inline Dyadic operator"" _bin(long double x) { return Dyadic(static_cast<double>(x)); }
 inline Dyadic operator"" _dyadic(long double x) { return Dyadic(static_cast<double>(x)); }
+inline Dyadic operator"" _dy(long double x) { return operator"" _dyadic(x); }
+inline Dyadic operator"" _q2(long double x) { return operator"" _dyadic(x); }
+inline Dyadic operator"" _bin(long double x) { return operator"" _dyadic(x); }
 
 
 

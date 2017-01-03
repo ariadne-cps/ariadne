@@ -1,7 +1,7 @@
 /***************************************************************************
- *            string.h
+ *            hybrid_automata.h
  *
- *  Copyright 2013-14  Pieter Collins
+ *  Copyright  2004-16  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 
@@ -21,35 +21,20 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file string.h
- *  \brief Wrapper for string class
+/*! \file hybrid_automata.h
+ *  \brief Main hybrid system classes.
  */
 
-#ifndef ARIADNE_STRING_H
-#define ARIADNE_STRING_H
-
-#include <string>
-#include <sstream>
+#ifndef ARIADNE_HYBRID_AUTOMATA_H
+#define ARIADNE_HYBRID_AUTOMATA_H
 
 namespace Ariadne {
 
-class String : public std::string {
-  public:
-    using std::string::string;
-    String(std::string const& str) : std::string(str) { };
-    String() = default;
-    String(String const&) = default;
-};
+}
 
-inline const char* c_str(const String& str) {
-    return str.c_str(); }
-template<class T> inline String to_string(const T& t) {
-    std::stringstream ss; ss << t; return ss.str(); }
-template<class T> inline String to_str(T const& t) {
-    return to_string(t); }
+#include "hybrid/hybrid_automaton_interface.h"
+#include "hybrid/hybrid_automaton.h"
+#include "hybrid/hybrid_automaton-composite.h"
+#include "hybrid/hybrid_automaton-restrictive.h"
 
-template<class T> String class_name();
-
-} // namespace Ariadne
-
-#endif /* ARIADNE_STRING_H */
+#endif // ARIADNE_HYBRID_AUTOMATA_H

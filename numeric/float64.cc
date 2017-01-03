@@ -823,6 +823,10 @@ InputStream& operator>>(InputStream& is, Float64& x) {
     double r; is >> r; x.dbl=r; return is;
 }
 
+template<> inline String class_name<double>() { return "double"; }
+
+template<> inline String class_name<Float64>() { return "Float64"; }
+
 } // namespace Ariadne
 
 

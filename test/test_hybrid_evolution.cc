@@ -33,7 +33,7 @@
 #include "geometry/list_set.h"
 #include "solvers/integrator.h"
 #include "dynamics/orbit.h"
-#include "hybrid/hybrid_automaton.h"
+#include "hybrid/hybrid_automata.h"
 #include "hybrid/hybrid_time.h"
 #include "hybrid/hybrid_set.h"
 #include "hybrid/hybrid_evolver.h"

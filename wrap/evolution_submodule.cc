@@ -30,7 +30,7 @@
 #include "dynamics/vector_field_evolver.h"
 
 #include "hybrid/hybrid_evolver.h"
-#include "hybrid/hybrid_automaton.h"
+#include "hybrid/hybrid_automata.h"
 #include "hybrid/hybrid_enclosure.h"
 #include "hybrid/hybrid_time.h"
 

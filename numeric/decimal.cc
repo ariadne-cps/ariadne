@@ -41,6 +41,12 @@ Decimal operator"" _dec(long double x)
     return operator"" _decimal(x);
 }
 
+Decimal operator-(Decimal const& d)
+{
+    if(d._str[0]=='-') { return Decimal(std::string(d._str.c_str()+1)); }
+    else { return Decimal(std::string("-")+d._str); }
+}
+
 Decimal::Decimal(double x)
 {
     StringStream ss;

@@ -1,7 +1,7 @@
 add_library(ariadne-hybrid OBJECT
     hybrid_set.cc
     hybrid_enclosure.cc
-    hybrid_automaton-monolithic.cc
+    hybrid_automaton.cc
     hybrid_automaton-composite.cc
     hybrid_automaton-restrictive.cc
     hybrid_simulator.cc

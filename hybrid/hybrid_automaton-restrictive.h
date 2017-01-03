@@ -57,8 +57,6 @@ typedef HybridRealExpressionBoundedConstraintSet HybridExpressionSet;
 
 class DiscreteMode;
 class DiscreteTransition;
-class AtomicHybridAutomaton;
-class CompositeHybridAutomaton;
 
 typedef ContinuousPredicate RealPredicate;
 

@@ -33,7 +33,7 @@
 #include "expression/expression.h"
 #include "expression/space.h"
 #include "hybrid/discrete_event.h"
-#include "hybrid/hybrid_automaton.h"
+#include "hybrid/hybrid_automata.h"
 #include "hybrid/hybrid_time.h"
 #include "hybrid/hybrid_set.h"
 
@@ -410,16 +410,16 @@ Void export_hybrid_automaton()
     hybrid_time_class.def("continuous_time",&HybridTime::continuous_time,return_value_policy<copy_const_reference>());
     hybrid_time_class.def("discrete_time",&HybridTime::discrete_time,return_value_policy<copy_const_reference>());
 
-    class_<MonolithicHybridAutomaton> hybrid_automaton_class("MonolithicHybridAutomaton",init<>());
-    hybrid_automaton_class.def("locations", &MonolithicHybridAutomaton::locations);
-    hybrid_automaton_class.def("events", &MonolithicHybridAutomaton::events);
-    hybrid_automaton_class.def("event_kind", &MonolithicHybridAutomaton::event_kind);
-    hybrid_automaton_class.def("dynamic_function", &MonolithicHybridAutomaton::dynamic_function);
-    hybrid_automaton_class.def("guard_function", &MonolithicHybridAutomaton::guard_function);
-    hybrid_automaton_class.def("reset_function", &MonolithicHybridAutomaton::reset_function);
-    hybrid_automaton_class.def("new_mode",(Void(MonolithicHybridAutomaton::*)(DiscreteLocation,EffectiveVectorFunction)) &MonolithicHybridAutomaton::new_mode, return_value_policy<reference_existing_object>());
-    hybrid_automaton_class.def("new_invariant",(Void(MonolithicHybridAutomaton::*)(DiscreteLocation,EffectiveScalarFunction,DiscreteEvent)) &MonolithicHybridAutomaton::new_invariant);
-    hybrid_automaton_class.def("new_transition",(Void(MonolithicHybridAutomaton::*)(DiscreteLocation,DiscreteEvent,DiscreteLocation,EffectiveVectorFunction,EffectiveScalarFunction,EventKind)) &MonolithicHybridAutomaton::new_transition);
+    class_<HybridAutomaton> hybrid_automaton_class("HybridAutomaton",init<>());
+    hybrid_automaton_class.def("locations", &HybridAutomaton::locations);
+    hybrid_automaton_class.def("events", &HybridAutomaton::events);
+    hybrid_automaton_class.def("event_kind", &HybridAutomaton::event_kind);
+    hybrid_automaton_class.def("dynamic_function", &HybridAutomaton::dynamic_function);
+    hybrid_automaton_class.def("guard_function", &HybridAutomaton::guard_function);
+    hybrid_automaton_class.def("reset_function", &HybridAutomaton::reset_function);
+    hybrid_automaton_class.def("new_mode",(Void(HybridAutomaton::*)(DiscreteLocation,List<DottedRealAssignment> const&)) &HybridAutomaton::new_mode, return_value_policy<reference_existing_object>());
+    hybrid_automaton_class.def("new_invariant",(Void(HybridAutomaton::*)(DiscreteLocation,ContinuousPredicate const&,DiscreteEvent)) &HybridAutomaton::new_invariant);
+    hybrid_automaton_class.def("new_transition",(Void(HybridAutomaton::*)(DiscreteLocation,DiscreteEvent,DiscreteLocation,List<PrimedRealAssignment> const&,ContinuousPredicate const&,EventKind)) &HybridAutomaton::new_transition);
     hybrid_automaton_class.def(self_ns::str(self));
 
 }

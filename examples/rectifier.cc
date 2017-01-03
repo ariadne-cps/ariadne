@@ -1,5 +1,5 @@
 /***************************************************************************
- *            rectifier.cc
+ *            rectifier_automaton.cc
  ****************************************************************************/
 
 #include <cstdarg>
@@ -91,8 +91,8 @@ Int main(Int argc, const char* argv[])
 
     /// Build the Hybrid System
 
-    /// Create a MonolithicHybridAutomaton object
-    AtomicHybridAutomaton rectifier("rectifier");
+    /// Create a HybridAutomaton object
+    HybridAutomaton rectifier_automaton("rectifier_automaton");
 
     // Create the coordinates
     RealVariable t("t"); // Time
@@ -102,10 +102,11 @@ Int main(Int argc, const char* argv[])
     Real one=1;
 
     /// Create the discrete states
-    AtomicDiscreteLocation offoff("offoff");
-    AtomicDiscreteLocation onoff("onoff");
-    AtomicDiscreteLocation offon("offon");
-    AtomicDiscreteLocation onon("onon");
+    StringVariable rectifier("rectifier");
+    DiscreteLocation offoff(rectifier|"offoff");
+    DiscreteLocation onoff(rectifier|"onoff");
+    DiscreteLocation offon(rectifier|"offon");
+    DiscreteLocation onon(rectifier|"onon");
 
     /// Create the discrete events
     DiscreteEvent resettime(1);
@@ -158,26 +159,26 @@ Int main(Int argc, const char* argv[])
 
     List<RealVariable> space( {t,vi,vo} );
     /// Locations
-    rectifier.new_mode(offoff,offoff_d);
-    rectifier.new_mode(onoff,dot(space)=onoff_d);
-    rectifier.new_mode(offon,dot(space)=offon_d);
-    rectifier.new_mode(onon,dot(space)=onon_d);
+    rectifier_automaton.new_mode(offoff,offoff_d);
+    rectifier_automaton.new_mode(onoff,dot(space)=onoff_d);
+    rectifier_automaton.new_mode(offon,dot(space)=offon_d);
+    rectifier_automaton.new_mode(onon,dot(space)=onon_d);
     /// OffOff events
-    rectifier.new_transition(offoff,resettime,offoff,resettime_r,resettime_g,urgent);
-    rectifier.new_transition(offoff,jump1,onoff,noop_r,offoff_onoff_g,urgent);
-    rectifier.new_transition(offoff,jump2,offon,noop_r,offoff_offon_g,urgent);
+    rectifier_automaton.new_transition(offoff,resettime,offoff,resettime_r,resettime_g,urgent);
+    rectifier_automaton.new_transition(offoff,jump1,onoff,noop_r,offoff_onoff_g,urgent);
+    rectifier_automaton.new_transition(offoff,jump2,offon,noop_r,offoff_offon_g,urgent);
     /// OnOff events
-    rectifier.new_transition(onoff,resettime,onoff,resettime_r,resettime_g,urgent);
-    rectifier.new_transition(onoff,jump1,offoff,noop_r,onoff_offoff_g,urgent);
-    rectifier.new_transition(onoff,jump3,onon,noop_r,onoff_onon_g,urgent);
+    rectifier_automaton.new_transition(onoff,resettime,onoff,resettime_r,resettime_g,urgent);
+    rectifier_automaton.new_transition(onoff,jump1,offoff,noop_r,onoff_offoff_g,urgent);
+    rectifier_automaton.new_transition(onoff,jump3,onon,noop_r,onoff_onon_g,urgent);
     /// OffOn events
-    rectifier.new_transition(offon,resettime,offon,resettime_r,resettime_g,urgent);
-    rectifier.new_transition(offon,jump1,offoff,noop_r,offon_offoff_g,urgent);
-    rectifier.new_transition(offon,jump3,onon,noop_r,offon_onon_g,urgent);
+    rectifier_automaton.new_transition(offon,resettime,offon,resettime_r,resettime_g,urgent);
+    rectifier_automaton.new_transition(offon,jump1,offoff,noop_r,offon_offoff_g,urgent);
+    rectifier_automaton.new_transition(offon,jump3,onon,noop_r,offon_onon_g,urgent);
     /// OnOn events
-    rectifier.new_transition(onon,resettime,onon,resettime_r,resettime_g,urgent);
-    rectifier.new_transition(onon,jump2,onoff,noop_r,onon_onoff_g,urgent);
-    rectifier.new_transition(onon,jump3,offon,noop_r,onon_offon_g,urgent);
+    rectifier_automaton.new_transition(onon,resettime,onon,resettime_r,resettime_g,urgent);
+    rectifier_automaton.new_transition(onon,jump2,onoff,noop_r,onon_onoff_g,urgent);
+    rectifier_automaton.new_transition(onon,jump3,offon,noop_r,onon_offon_g,urgent);
 
 
     /// Finished building the automaton
@@ -187,7 +188,7 @@ Int main(Int argc, const char* argv[])
     /// Compute the system evolution
 
     /// Create a GeneralHybridEvolver object
-    GeneralHybridEvolver evolver(rectifier);
+    GeneralHybridEvolver evolver(rectifier_automaton);
     evolver.verbosity = evolver_verbosity;
 
     /// Set the evolution parameters
@@ -204,7 +205,7 @@ Int main(Int argc, const char* argv[])
     std::cout << "Computing evolution..." << std::endl;
 
     RealVariablesBox initial_box({t==0, vi==0, vo==Real(0.8_dec)*dp[0]});
-    HybridSet initial_set(rectifier|offoff,initial_box);
+    HybridSet initial_set(offoff,initial_box);
 
 //    ExactBoxType initial_box(3, 0.002836,0.002836, 3.110529,3.110529, 3.110529,3.110529);
 //    HybridEnclosureType initial_enclosure(onoff,initial_box);
@@ -235,7 +236,7 @@ Int main(Int argc, const char* argv[])
     HybridReachabilityAnalyser analyser(evolver);
     analyser.parameters().lock_to_grid_time = LOCK_TOGRID_TIME;
     analyser.parameters().maximum_grid_depth= MAX_GRID_DEPTH;
-    rectifier.set_grid(Grid(Vector<Float64>({3, 0.25/dp[1], 1.0, 0.5})));
+    rectifier_automaton.set_grid(Grid(Vector<Float64>({3, 0.25/dp[1], 1.0, 0.5})));
     std::cout <<  analyser.parameters() << std::endl;
 
     analyser.verbosity=VERBOSITY;

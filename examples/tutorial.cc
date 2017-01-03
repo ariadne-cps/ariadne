@@ -144,10 +144,12 @@ Void compute_evolution(const CompositeHybridAutomaton& heating_system,const Gene
 {
 
     // Redefine the two discrete states
-    AtomicDiscreteVariable clock("clock");
-    StringVariable heater("heater");
-    DiscreteLocation heating_off(StringVariable("heating")|"off");
-    DiscreteLocation heating_on(StringVariable("heating")|"on");
+    StringVariable clock("clock");
+    StringVariable heating("heating");
+    StringConstant on("on");
+    StringConstant off("off");
+    DiscreteLocation heating_off(heating|off);
+    DiscreteLocation heating_on(heating|on);
     RealVariable T("T");
     RealVariable C("C");
     TimeVariable time;
@@ -236,9 +238,11 @@ Void compute_reachable_sets(const GeneralHybridEvolver& evolver)
 
     // Define the initial set
     HybridImageSet initial_set;
-    AtomicDiscreteLocation heater_off(2);
-    ExactBoxType initial_box(2, 0.0,0.015625/4, 16.0,16.0+0.0625/16);
-    initial_set[heater_off]=initial_box;
+    StringVariable heating("heating");
+    DiscreteLocation heating_off(heating|"off");
+    RealVariable T("T");
+    RealVariable C("C");
+    initial_set[heating_off]={0.0<=C<=0.015625/4, 16.0<=T<=16.0+0.0625/16};
 
     // Set the maximum evolution time
     HybridTime reach_time(1.5,4);
@@ -254,7 +258,7 @@ Void compute_reachable_sets(const GeneralHybridEvolver& evolver)
     HybridGridTreeSet lower_reach_set = analyser.lower_reach(heating_system,initial_set,reach_time);
     std::cout << "done." << std::endl;
 
-    plot("tutorial-lower_reach_evolve.png",ExactBoxType(2, 0.0,1.0, 14.0,21.0),
+    plot("tutorial-lower_reach_evolve.png",Axes2d(0.0,C,1.0, 14.0,T,21.0),
          Colour(0.0,0.5,1.0), lower_reach_set,
          Colour(0.0,0.25,0.5), initial_set,
          Colour(0.25,0.0,0.5), lower_evolve_set);
@@ -271,7 +275,7 @@ Void compute_reachable_sets(const GeneralHybridEvolver& evolver)
     HybridGridTreeSet upper_reach_set = analyser.upper_reach(heating_system,initial_set,reach_time);
     std::cout << "done." << std::endl;
 
-    plot("tutorial-upper_reach_evolve.png",ExactBoxType(2, 0.0,1.0, 14.0,21.0),
+    plot("tutorial-upper_reach_evolve.png",Axes2d(0.0,C,1.0, 14.0,T,21.0),
          Colour(0.0,0.5,1.0), upper_reach_set,
          Colour(0.0,0.25,0.5), initial_set,
          Colour(0.25,0.0,0.5), upper_evolve_set);
@@ -280,7 +284,7 @@ Void compute_reachable_sets(const GeneralHybridEvolver& evolver)
     std::cout << "Computing chain reach set... " << std::flush;
     HybridGridTreeSet chain_reach_set = analyser.chain_reach(heating_system,initial_set);
     std::cout << "done." << std::endl;
-    plot("tutorial-chain_reach.png",ExactBoxType(2, 0.0,1.0, 14.0,21.0), Colour(0.0,0.5,1.0), chain_reach_set);
+    plot("tutorial-chain_reach.png",Axes2d(0.0,C,1.0, 14.0,T,21.0), Colour(0.0,0.5,1.0), chain_reach_set);
 */
 }
 
@@ -291,9 +295,10 @@ Void compute_reachable_sets_with_serialisation(const CompositeHybridAutomaton& h
 /*
     // Define the initial set
     HybridImageSet initial_set;
-    AtomicDiscreteLocation heater_off(2);
-    ExactBoxType initial_box(2, 0.0,0.015625, 16.0,16.0625);
-    initial_set[heater_off]=initial_box;
+    StringVariable heating("heating");
+    DiscreteLocation heating_off(heating|"off");
+    ExactBoxType initial_box({0.0<=C<=0.015625, 16.0<=T<=16.0625);
+    initial_set[heating_off]=initial_box;
 
 
     // Compute the reach set for times between tlower and tupper.
@@ -305,7 +310,7 @@ Void compute_reachable_sets_with_serialisation(const CompositeHybridAutomaton& h
     HybridTime recurrent_time(tupper-tlower,16);
 
     const HybridGridTreeSet upper_intermediate_set = analyser.upper_evolve(heating_system,initial_set,transient_time);
-    plot("tutorial-upper_intermediate.png",ExactBoxType(2, 0.0,1.0, 14.0,18.0), Colour(0.0,0.5,1.0), upper_intermediate_set);
+    plot("tutorial-upper_intermediate.png",Axis2d(0.0,C,1.0, 14.0,T,18.0), Colour(0.0,0.5,1.0), upper_intermediate_set);
 
     std::ofstream output_file_stream("tutorial-transient.txt");
     text_oarchive output_archive(output_file_stream);
@@ -320,7 +325,7 @@ Void compute_reachable_sets_with_serialisation(const CompositeHybridAutomaton& h
     input_file_stream.close();
 
     HybridGridTreeSet upper_recurrent_set = analyser.upper_reach(heating_system,initial_set,recurrent_time);
-    plot("tutorial-upper_recurrent.png",ExactBoxType(2, 0.0,1.0, 14.0,18.0), Colour(0.0,0.5,1.0), upper_recurrent_set);
+    plot("tutorial-upper_recurrent.png",Axis2d(0.0,C,1.0, 14.0,T,18.0), Colour(0.0,0.5,1.0), upper_recurrent_set);
 */
 }
 

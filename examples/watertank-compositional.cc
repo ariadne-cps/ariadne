@@ -1,7 +1,7 @@
 /***************************************************************************
- *            watertank.cc
+ *            watertank-compositional.cc
  *
- *  Copyright  2008-9  Davide Bresolin, Pieter Collins
+ *  Copyright  2008-16  Davide Bresolin, Pieter Collins
  *
  ****************************************************************************/
 
@@ -38,19 +38,20 @@ Int main()
     RealConstant lambda("lambda",0.02_decimal);
     RealConstant rate("rate",0.3_decimal);
 
-    // Declare the system variables
-    RealVariable height("height");
-    RealVariable aperture("aperture");
+    // Declare the shared system variables
     TimeVariable time;
+    RealVariable aperture("aperture");
+
     // Create the tank object
-    AtomicHybridAutomaton tank("tank");
+    HybridAutomaton tank_automaton("tank_automaton");
+    RealVariable height("height");
 
     // Declare a trivial discrete mode.
-    AtomicDiscreteLocation draining("draining");
+    DiscreteLocation draining;
     // The water level is always given by the same dynamic
     // The inflow is controlled by the valve aperture, the outflow depends on the
     // pressure, which is proportional to the water height.
-    tank.new_mode(draining,{dot(height)=-lambda*height+rate*aperture});
+    tank_automaton.new_mode(draining,{dot(height)=-lambda*height+rate*aperture});
 
     // Describe the valve model
 
@@ -60,21 +61,22 @@ Int main()
     DiscreteEvent finished_opening("finished_opening");
     DiscreteEvent finished_closing("finished_closing");
 
-    // Declare the locations we use
-    AtomicDiscreteLocation open("open");
-    AtomicDiscreteLocation opening("opening");
-    AtomicDiscreteLocation closed("closed");
-    AtomicDiscreteLocation closing("closing");
 
-    AtomicHybridAutomaton valve("valve");
+    HybridAutomaton valve_automaton("valve_automaton");
+    StringVariable valve("valve");
+    // Declare the values the valve can variable can have
+    StringConstant open("open");
+    StringConstant opening("opening");
+    StringConstant closed("closed");
+    StringConstant closing("closing");
 
     // Since aperture is a known constant when the valve is open or closed,
     // specify aperture by an algebraic equation.
-    valve.new_mode(open,{aperture=+1.0});
-    valve.new_mode(closed,{aperture=-1.0});
+    valve_automaton.new_mode(valve|open,{aperture=+1.0});
+    valve_automaton.new_mode(valve|closed,{aperture=-1.0});
     // Specify the differential equation for how the valve opens/closes.
-    valve.new_mode(opening,{dot(aperture)=+1/T});
-    valve.new_mode(closing,{dot(aperture)=-1/T});
+    valve_automaton.new_mode(valve|opening,{dot(aperture)=+1/T});
+    valve_automaton.new_mode(valve|closing,{dot(aperture)=-1/T});
 
     // Specify the invariants valid in each mode. Note that every invariant
     // must have an action label. This is used internally, for example, to
@@ -86,18 +88,18 @@ Int main()
     //valve.new_invariant(closing,height>=hmin,start_opening);
     //valve.new_invariant(closing,aperture>=0.0,finished_closing);
 
-    valve.new_transition(closed,start_opening,opening,{next(aperture)=aperture},height<=hmin);
-    valve.new_transition(closing,start_opening,opening,{next(aperture)=aperture},height<=hmin);
-    valve.new_transition(open,start_closing,closing,{next(aperture)=aperture},height>=hmax);
-    valve.new_transition(opening,start_closing,closing,{next(aperture)=aperture},height>=hmax);
+    valve_automaton.new_transition(valve|closed,start_opening,valve|opening,{next(aperture)=aperture},height<=hmin);
+    valve_automaton.new_transition(valve|closing,start_opening,valve|opening,{next(aperture)=aperture},height<=hmin);
+    valve_automaton.new_transition(valve|open,start_closing,valve|closing,{next(aperture)=aperture},height>=hmax);
+    valve_automaton.new_transition(valve|opening,start_closing,valve|closing,{next(aperture)=aperture},height>=hmax);
 
     // Set the transitions for when the valve finished opening.
     // Since aperture is defined by an algebraic equation in the new mode,
     // it may not be specified in the reset.
-    valve.new_transition(opening,finished_opening,open,aperture>=1);
-    valve.new_transition(closing,finished_closing,closed,aperture<=0);
+    valve_automaton.new_transition(valve|opening,finished_opening,valve|open,aperture>=1);
+    valve_automaton.new_transition(valve|closing,finished_closing,valve|closed,aperture<=0);
 
-    CompositeHybridAutomaton watertank_system({tank,valve});
+    CompositeHybridAutomaton watertank_system({tank_automaton,valve_automaton});
     std::cout << "watertank_system:\n" << watertank_system << "\n";
 
     // Compute the system evolution
@@ -117,8 +119,8 @@ Int main()
     typedef GeneralHybridEvolver::EnclosureListType EnclosureListType;
 
     std::cout << "Computing evolution starting from location l2, x = 0.0, y = 0.0" << std::endl;
-    DiscreteLocation initial_location={tank|draining,valve|opening};
-    HybridSet initial_set({tank|draining,valve|opening},{height==0,aperture==0});
+    DiscreteLocation initial_location={valve|opening};
+    HybridSet initial_set({valve|opening},{height==0,aperture==0});
 
     HybridTime evolution_time(80.0,5);
 

@@ -168,7 +168,7 @@ Void TestHybridSystem::test_static_analysis()
     //ARIADNE_TEST_EXECUTE(_system.check_reachable_modes((tank|draining,valve|opening)));
     //ARIADNE_TEST_EXECUTE(_system.discrete_reachability((tank|draining,valve|opening)));
 
-    //DiscreteLocation invalid_location=(AtomicDiscreteLocation("nonexistent"),AtomicDiscreteLocation("opening"));
+    //DiscreteLocation invalid_location=(tank|"nonexistent",valve|"opening");
     //ARIADNE_TEST_FAIL(_system.discrete_reachability(invalid_location));
 }
 
@@ -191,7 +191,6 @@ class TestHybridAutomaton {
 
 
     Void test_build_hybrid_system();
-    Void test_build_atomic_hybrid_automaton();
     Void test_build_intensional_hybrid_automaton();
     Void test_static_analysis();
   private:
@@ -215,7 +214,6 @@ TestHybridAutomaton::test()
     ARIADNE_TEST_CALL(test_underspecified_reset());
     return;
     ARIADNE_TEST_CALL(test_build_hybrid_system());
-    ARIADNE_TEST_CALL(test_build_atomic_hybrid_automaton());
     ARIADNE_TEST_CALL(test_static_analysis());
 }
 
@@ -514,72 +512,6 @@ TestHybridAutomaton::test_static_analysis()
     ARIADNE_TEST_EXECUTE(_system.discrete_reachability(valve_opening));
 }
 
-Void
-TestHybridAutomaton::test_build_atomic_hybrid_automaton()
-{
-    // Declare some constants. Note that system parameters should be given as variables.
-    RealConstant T("T",4.0_dec);
-    RealConstant hmin("hmin",5.5_dec);
-    RealConstant hmax("hmax",8.0_dec);
-    RealConstant delta("delta",0.05_dec);
-    RealConstant lambda("lambda",0.02_dec);
-    RealConstant rate("rate",0.3_dec);
-
-    // Declare the system variables
-    RealVariable height("height");
-    RealVariable alpha("alpha");
-
-    // Describe the valve model
-
-    // Declare the events we use in the valve automaton
-    DiscreteEvent start_opening("start_opening");
-    DiscreteEvent start_closing("start_closing");
-    DiscreteEvent finished_opening("finished_opening");
-    DiscreteEvent finished_closing("finished_closing");
-
-    // Declare the locations we use
-    StringConstant open("open");
-    StringConstant opening("opening");
-    StringConstant closed("closed");
-    StringConstant closing("closing");
-
-    RealVariable beta("beta");
-
-    AtomicHybridAutomaton valve_automaton("valve");
-
-    // Since alpha is a known constant when the valve is open or closed,
-    // specify alpha by an algebraic equation.
-    valve_automaton.new_mode(open,{alpha=1.0});
-    valve_automaton.new_mode(closed,{alpha=-1.0});
-    // Specify the differential equation for how the valve opens/closes.
-    valve_automaton.new_mode(opening,{dot(alpha)=1/T});
-    valve_automaton.new_mode(closing,{dot(alpha)=-1/T});
-
-    // Specify the invariants valid in each mode. Note that every invariant
-    // must have an action label. This is used internally, for example, to
-    // check non-blockingness of urgent actions.
-    //valve_automaton.new_invariant(open,start_closing,height<=hmax || (height>=hmin && !(height<=hmin+1)));
-    valve_automaton.new_invariant(open,height<=hmax,start_closing);
-    valve_automaton.new_invariant(opening,height<=hmax,start_closing);
-    valve_automaton.new_invariant(opening,alpha<=1,finished_opening);
-    valve_automaton.new_invariant(closed,height>=hmin,start_opening);
-    valve_automaton.new_invariant(closing,height>=hmin,start_opening);
-    valve_automaton.new_invariant(closing,alpha>=0,finished_closing);
-
-    valve_automaton.new_transition(closed,start_opening,opening,{next(alpha)=alpha},height<=hmin,PERMISSIVE);
-    valve_automaton.new_transition(closing,start_opening,opening,{next(alpha)=alpha},height<=hmin,PERMISSIVE);
-    valve_automaton.new_transition(open,start_closing,closing,{next(alpha)=alpha},height>=hmax,PERMISSIVE);
-    valve_automaton.new_transition(opening,start_closing,closing,{next(alpha)=alpha},height>=hmax,PERMISSIVE);
-
-    // Set the transitions for when the valve finished opening.
-    // Since alpha is defined by an algebraic equation in the new mode,
-    // it may not be specified in the reset.
-    valve_automaton.new_transition(opening,finished_opening,open,alpha>=1,PERMISSIVE);
-    valve_automaton.new_transition(closing,finished_closing,closed,alpha<=0,PERMISSIVE);
-
-    ARIADNE_TEST_PRINT(valve_automaton);
-
-}
 
 
 Void

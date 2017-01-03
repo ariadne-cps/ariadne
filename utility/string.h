@@ -41,14 +41,14 @@ class String : public std::string {
     String(String const&) = default;
 };
 
-template<class T> String class_name();
-template<> inline String class_name<int>() { return "int"; }
-template<> inline String class_name<double>() { return "double"; }
-
+inline const char* c_str(const String& str) {
+    return str.c_str(); }
 template<class T> inline String to_string(const T& t) {
     std::stringstream ss; ss << t; return ss.str(); }
 template<class T> inline String to_str(T const& t) {
     return to_string(t); }
+
+template<class T> String class_name();
 
 } // namespace Ariadne
 

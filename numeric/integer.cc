@@ -385,6 +385,11 @@ Integer operator"" _z(unsigned long long int n) {
     return Integer(Nat64(n));
 }
 
+
+template<> inline String class_name<uint>() { return "uint"; }
+
+template<> inline String class_name<int>() { return "int"; }
+
 template<> String class_name<Integer>() { return "Integer"; }
 
 template<> String class_name<Natural>() { return "Natural"; }

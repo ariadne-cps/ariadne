@@ -47,7 +47,7 @@
 
 #include "dynamics/orbit.h"
 
-#include "hybrid/hybrid_automaton.h"
+#include "hybrid/hybrid_automata.h"
 #include "dynamics/evolver_interface.h"
 #include "dynamics/evolver_base.h"
 #include "evolution_parameters.h"

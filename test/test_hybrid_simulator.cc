@@ -30,7 +30,7 @@
 #include "hybrid/hybrid_set.h"
 #include "hybrid/hybrid_orbit.h"
 #include "hybrid/hybrid_time.h"
-#include "hybrid/hybrid_automaton.h"
+#include "hybrid/hybrid_automata.h"
 #include "hybrid/hybrid_simulator.h"
 #include "output/graphics.h"
 #include "utility/logging.h"

@@ -33,7 +33,7 @@
 #include "expression/expression.h"
 #include "expression/space.h"
 #include "hybrid/discrete_event.h"
-#include "hybrid/hybrid_automaton.h"
+#include "hybrid/hybrid_automata.h"
 #include "hybrid/hybrid_time.h"
 #include "hybrid/hybrid_set.h"
 

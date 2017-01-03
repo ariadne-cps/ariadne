@@ -29,7 +29,7 @@
 
 #include "expression/expression.h"
 #include "expression/valuation.h"
-#include "hybrid/hybrid_automaton.h"
+#include "hybrid/hybrid_automata.h"
 #include <boost/concept_check.hpp>
 
 using namespace std;

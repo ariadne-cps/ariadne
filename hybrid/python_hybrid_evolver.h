@@ -62,7 +62,6 @@ class ScalarTaylorFunction;
 class VectorTaylorFunction;
 class TaylorConstrainedImageSet;
 typedef Pair<DiscreteLocation,TaylorConstrainedImageSet> HybridTaylorConstrainedImageSet;
-class MonolithicHybridAutomaton;
 template<class ES> class Orbit;
 
 class EvolutionParameters;
@@ -80,7 +79,7 @@ class HybridTime;
  * The actual evolution steps are performed by the HybridEvolver class.
  */
 class PythonHybridEvolver
-    : public EvolverBase<MonolithicHybridAutomaton,HybridTaylorConstrainedImageSet>
+    : public EvolverBase<HybridAutomaton,HybridTaylorConstrainedImageSet>
     , public Loggable
 {
     typedef VectorFunction FunctionType;
@@ -94,11 +93,11 @@ class PythonHybridEvolver
     typedef TaylorConstrainedImageSet TimedSetModelType;
   public:
     typedef ContinuousEvolutionParameters EvolutionParametersType;
-    typedef MonolithicHybridAutomaton::TimeType TimeType;
+    typedef HybridAutomaton::TimeType TimeType;
     typedef Int IntegerType;
     typedef Float64 RealType;
     typedef List<DiscreteEvent> EventListType;
-    typedef MonolithicHybridAutomaton SystemType;
+    typedef HybridAutomaton SystemType;
     typedef TaylorConstrainedImageSet ContinuousEnclosureType;
     typedef Pair<DiscreteLocation,TaylorConstrainedImageSet> HybridEnclosureType;
     typedef HybridEnclosureType EnclosureType;
@@ -212,7 +211,7 @@ PythonHybridEvolver::initialise_python()
             enclosure_list_class("HybridTaylorConstrainedImageSetList",boost::python::no_init);
         enclosure_list_class.def("__init__",boost::python::make_constructor(&make_hybrid_list_set<TaylorConstrainedImageSet>));
 
-        boost::python::class_<MonolithicHybridAutomaton>("MonolithicHybridAutomaton",boost::python::no_init);
+        boost::python::class_<HybridAutomaton>("HybridAutomaton",boost::python::no_init);
         boost::python::class_<EnclosureType>("HybridTaylorConstrainedImageSet",boost::python::no_init);
         boost::python::class_<HybridTime>("HybridTime",boost::python::no_init);
         //boost::python::enum_<Semantics>("Semantics")

@@ -76,7 +76,7 @@ template<class k, class V> class Map;
 //! at each discrete mode, coupled by instantaneous discrete transitions.
 //! The state space is given by a hybrid set.
 //! UNDER DEVELOPMENT
-//! \sa \ref MonolithicHybridAutomaton.
+//! \sa \ref HybridAutomaton.
 class HybridSystem
     : public Loggable
 {

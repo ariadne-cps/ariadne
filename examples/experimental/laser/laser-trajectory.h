@@ -14,12 +14,12 @@
 
 namespace Ariadne {
 
-AtomicHybridAutomaton getLaserTrajectory()
+HybridAutomaton getLaserTrajectory()
 {
     /// Build the Hybrid System
 
     /// Create a HybridAutomaton object
-	AtomicHybridAutomaton automaton("trajectory");
+	HybridAutomaton automaton("trajectory");
 
     // Parameters
     RealConstant velocity("velocity",0.092_dec); // Velocity in modulus
@@ -27,7 +27,7 @@ AtomicHybridAutomaton getLaserTrajectory()
 
     /// Modes
 
-    AtomicDiscreteLocation scanning("scanning");
+    DiscreteLocation scanning("scanning");
 
     // Variables
 
@@ -39,11 +39,11 @@ AtomicHybridAutomaton getLaserTrajectory()
 
 	automaton.new_mode(scanning, {dot(x)=vx,dot(vx)=0});
 
-	automaton.new_guard(DiscreteLocation(automaton|scanning),switch_right,x<=0,impact);
-	automaton.new_update(DiscreteLocation(automaton|scanning),switch_right,DiscreteLocation(automaton|scanning),{next(x)=0,next(vx)=velocity});
+	automaton.new_guard(scanning,switch_right,x<=0,impact);
+	automaton.new_update(scanning,switch_right,scanning,{next(x)=0,next(vx)=velocity});
 
-	automaton.new_guard(DiscreteLocation(automaton|scanning),switch_left,x>=width,impact);
-	automaton.new_update(DiscreteLocation(automaton|scanning),switch_left,DiscreteLocation(automaton|scanning),{next(x)=width,next(vx)=-velocity});
+	automaton.new_guard(scanning,switch_left,x>=width,impact);
+	automaton.new_update(scanning,switch_left,scanning,{next(x)=width,next(vx)=-velocity});
 
 	return automaton;
 }

@@ -14,7 +14,7 @@
 
 namespace Ariadne {
 
-AtomicHybridAutomaton getCuttingDepth()
+HybridAutomaton getCuttingDepth()
 {
     /// Parameters
 	RealConstant kcut("kcut",1.78833087e-8_dec);
@@ -27,12 +27,12 @@ AtomicHybridAutomaton getCuttingDepth()
     /// Build the Hybrid System
 
     /// Create a HybridAutomaton object
-	AtomicHybridAutomaton automaton("depth");
+	HybridAutomaton automaton("depth");
 
     /// Create the discrete states
-	AtomicDiscreteLocation ablating("ablating");
-	AtomicDiscreteLocation idle("idle");
-	AtomicDiscreteLocation carbonization("carbonization");
+	DiscreteLocation ablating("ablating");
+	DiscreteLocation idle("idle");
+	DiscreteLocation carbonization("carbonization");
 
     RealVariable p("p");
     RealVariable z("z"); // The cutting depth

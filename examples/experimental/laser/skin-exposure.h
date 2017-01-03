@@ -14,7 +14,7 @@
 
 namespace Ariadne {
 
-AtomicHybridAutomaton getSkinExposure()
+HybridAutomaton getSkinExposure()
 {
     /// Parameters
 	RealConstant velocity("velocity",0.092_dec);
@@ -24,11 +24,11 @@ AtomicHybridAutomaton getSkinExposure()
     /// Build the Hybrid System
 
     /// Create a HybridAutomaton object
-	AtomicHybridAutomaton automaton("skin-exposure");
+	HybridAutomaton automaton("skin-exposure");
 
     /// Create the discrete states
-	AtomicDiscreteLocation close("close");
-	AtomicDiscreteLocation far("far");
+	DiscreteLocation close("close");
+	DiscreteLocation far("far");
 
     RealVariable x("x");
     RealVariable vx("vx");

@@ -215,7 +215,7 @@ Bool operator==(const DiscreteLocation& q1, const DiscreteLocation& q2) {
         }
     }
     if(q1iter!=q1sm.end() || q2iter!=q2sm.end()) { identical=false; }
-    if(!identical) { ARIADNE_THROW(std::runtime_error,"operator==(DiscreteLocation,DiscreteLocation)",
+    if(!identical) { ARIADNE_THROW(IndistinguishableLocationsError,"operator==(DiscreteLocation,DiscreteLocation)",
                                "Locations "<<q1<<" and "<<q2<<" are not identical, but no values differ."); }
     return true;
 }

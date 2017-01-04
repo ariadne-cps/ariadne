@@ -179,6 +179,7 @@ class TestHybridAutomaton {
     Void test();
 
     Void test_distinct_modes();
+    Void test_overspecified_location();
     Void test_overspecified_dynamic();
     Void test_algebraic_loops();
     Void test_nonexistent_mode();
@@ -203,6 +204,7 @@ TestHybridAutomaton::test()
     std::clog<<std::boolalpha;
     std::cerr<<std::boolalpha;
     ARIADNE_TEST_CALL(test_distinct_modes());
+    ARIADNE_TEST_CALL(test_overspecified_location());
     ARIADNE_TEST_CALL(test_overspecified_dynamic());
     ARIADNE_TEST_CALL(test_algebraic_loops());
     ARIADNE_TEST_CALL(test_nonexistent_mode());
@@ -227,6 +229,37 @@ TestHybridAutomaton::test_distinct_modes()
     ARIADNE_TEST_EXECUTE(system.new_mode(q1|"s1"));
     ARIADNE_TEST_EXECUTE(system.new_mode(q1|"s2"));
     ARIADNE_TEST_THROWS(system.new_mode(q2|"s3"),IndistinguishableModeError);
+}
+
+Void
+TestHybridAutomaton::test_overspecified_location()
+{
+    StringVariable q1("q1");
+    StringVariable q2("q2");
+    StringVariable q3("q3");
+
+    HybridAutomaton system1;
+    ARIADNE_TEST_EXECUTE(system1.new_mode(q1|"s1"));
+    DiscreteLocation loc1({q1|"s1"});
+    ARIADNE_TEST_ASSERT(system1.has_mode(loc1));
+    ARIADNE_TEST_ASSERT(system1.has_partial_mode(loc1));
+    ARIADNE_TEST_PRINT(system1.mode(loc1));
+    DiscreteLocation loc1e({q1|"s1",q3|"s3"});
+    ARIADNE_TEST_ASSERT(not system1.has_mode(loc1e));
+    ARIADNE_TEST_ASSERT(system1.has_partial_mode(loc1e));
+    ARIADNE_TEST_PRINT(system1.mode(loc1e));
+
+    HybridAutomaton system2;
+    ARIADNE_TEST_EXECUTE(system2.new_mode(q2|"s2"));
+    CompositeHybridAutomaton system({system1,system2});
+    DiscreteLocation loc({q1|"s1",q2|"s2"});
+    ARIADNE_TEST_ASSERT(system.has_mode(loc));
+    ARIADNE_TEST_ASSERT(system.has_partial_mode(loc));
+    ARIADNE_TEST_PRINT(system.mode(loc));
+    DiscreteLocation loce({q1|"s1",q2|"s2",q3|"s3"});
+    ARIADNE_TEST_ASSERT(not system.has_mode(loce));
+    ARIADNE_TEST_ASSERT(system.has_partial_mode(loce));
+    ARIADNE_TEST_PRINT(system.mode(loce));
 }
 
 Void

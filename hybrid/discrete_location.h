@@ -72,6 +72,11 @@ inline Bool are_distinguishable(const DiscreteLocation& location1, const Discret
     return false;
 }
 
+//! \relates DiscreteLocation \brief Test if \a location1 and \a location2 are the same i.e. define the same values.
+inline Bool are_same(const DiscreteLocation& location1, const DiscreteLocation& location2) {
+    return location1._values == location2._values;
+}
+
 //! \relates DiscreteLocation \brief Test if \a partial_location is defined by a restricted set of variables of \a full_location.
 inline Bool is_restriction(const DiscreteLocation& partial_location, const DiscreteLocation& full_location) {
     for(Map<Identifier,String>::ConstIterator value_iter=partial_location._values.begin(); value_iter!=partial_location._values.end(); ++value_iter) {

@@ -37,7 +37,7 @@
 #include "geometry/box.h"
 
 #include "numeric/operators.h"
-#include "expression/formula.h"
+#include "function/formula.h"
 #include "algebra/expansion.h"
 
 namespace Ariadne {

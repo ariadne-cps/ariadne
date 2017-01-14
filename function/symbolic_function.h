@@ -40,11 +40,11 @@
 #include "utility/metaprogramming.h"
 
 #include "numeric/numeric.h"
+#include "numeric/operators.tcc"
 #include "algebra/vector.h"
 
 #include "function/function_mixin.h"
-#include "expression/operators.tcc"
-#include "expression/formula.h"
+#include "function/formula.h"
 
 namespace Ariadne {
 

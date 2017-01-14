@@ -36,7 +36,7 @@
 #include "algebra/vector.h"
 #include "algebra/expansion.h"
 #include "algebra/evaluate.h"
-#include "expression/formula.h"
+#include "function/formula.h"
 
 #include "test.h"
 

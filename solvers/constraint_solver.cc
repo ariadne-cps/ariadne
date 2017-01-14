@@ -33,7 +33,7 @@
 #include "geometry/grid_set.h"
 #include "function/polynomial.h"
 #include "function/function.h"
-#include "expression/formula.h"
+#include "function/formula.h"
 #include "function/procedure.h"
 #include "function/constraint.h"
 #include "solvers/nonlinear_programming.h"

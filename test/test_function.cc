@@ -31,7 +31,7 @@
 
 #include "config.h"
 #include "function/function.h"
-    #include "expression/formula.h"
+    #include "function/formula.h"
     #include "function/symbolic_function.h"
 
 #include "numeric/numeric.h"

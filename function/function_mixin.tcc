@@ -25,7 +25,7 @@
 #include "algebra/vector.h"
 #include "algebra/differential.h"
 #include "function/taylor_model.h"
-#include "expression/formula.h"
+#include "function/formula.h"
 #include "algebra/algebra.h"
 
 #include "function/function_mixin.h"

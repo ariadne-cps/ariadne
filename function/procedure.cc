@@ -1,7 +1,7 @@
 /***************************************************************************
- *            symbolic_function.cc
+ *            procedure.cc
  *
- *  Copyright 2008-12  Pieter Collins
+ *  Copyright 2016  Pieter Collins
  *
  ****************************************************************************/
 
@@ -20,21 +20,9 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#include "function/functional.h"
 
-#include "config.h"
-
-#include "numeric/numeric.h"
-#include "algebra/differential.h"
-#include "function/function.h"
-#include "numeric/operators.h"
-#include "function/formula.h"
-#include "algebra/algebra.h"
-
-#include "function/symbolic_function.h"
-
+#include "procedure.h"
 
 namespace Ariadne {
-
 
 } // namespace Ariadne

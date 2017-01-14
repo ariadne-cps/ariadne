@@ -30,7 +30,7 @@
 
 #include "config.h"
 
-#include "expression/formula.h"
+#include "function/formula.h"
 #include "numeric/numeric.h"
 
 #include "test.h"

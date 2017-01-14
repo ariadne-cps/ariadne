@@ -30,7 +30,6 @@
 #include "utility/macros.h"
 #include "utility/container.h"
 #include "utility/stlio.h"
-#include "expression/formula.h"
 #include "expression/expression.h"
 #include "expression/space.h"
 #include "function/function.h"

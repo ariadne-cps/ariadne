@@ -24,6 +24,8 @@
 #include "utility/standard.h"
 #include "config.h"
 
+#include "numeric/operators.tcc"
+
 #include "algebra/algebra.h"
 #include "algebra/algebra_wrapper.h"
 
@@ -32,8 +34,7 @@
 #include "expression/space.h"
 #include "expression/valuation.h"
 
-#include "expression/formula.h"
-#include "expression/operators.tcc"
+#include "function/formula.h"
 
 namespace Ariadne {
 

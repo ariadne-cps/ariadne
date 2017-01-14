@@ -28,7 +28,7 @@
 #include "expression/variables.h"
 #include "expression/expression.h"
 #include "expression/space.h"
-#include "expression/formula.h"
+#include "function/formula.h"
 #include "algebra/algebra.h"
 #include "function/taylor_model.h"
 

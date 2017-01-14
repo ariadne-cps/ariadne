@@ -81,13 +81,13 @@ template<class Y> inline Formula<Y> make_formula(Cnst op, const Y& c) {
     return Formula<Y>::constant(c); }
 template<class Y> inline Formula<Y> make_formula(Ind op, Nat j) {
     return Formula<Y>::index(j); }
-template<class Y> inline Formula<Y> make_formula(const Operator& op, const Formula<Y>& arg) {
+template<class Y> inline Formula<Y> make_formula(const OperatorCode& op, const Formula<Y>& arg) {
     return Formula<Y>::unary(op,arg); }
-template<class Y> inline Formula<Y> make_formula(const Operator& op, const Formula<Y>& arg1, const Formula<Y>& arg2) {
+template<class Y> inline Formula<Y> make_formula(const OperatorCode& op, const Formula<Y>& arg1, const Formula<Y>& arg2) {
     return Formula<Y>::binary(op,arg1,arg2); }
-template<class Y> inline Formula<Y> make_formula(const Operator& op, const Formula<Y>& arg1, const Y& arg2) {
+template<class Y> inline Formula<Y> make_formula(const OperatorCode& op, const Formula<Y>& arg1, const Y& arg2) {
     return Formula<Y>::binary(op,arg1,make_formula(arg2)); }
-template<class Y> inline Formula<Y> make_formula(const Operator& op, const Formula<Y>& arg, Int num) {
+template<class Y> inline Formula<Y> make_formula(const OperatorCode& op, const Formula<Y>& arg, Int num) {
     return Formula<Y>::graded(op,arg,num); }
 template<class Y, class OP> inline Formula<Y> make_formula(const OP& op, Y const& cnst, const Formula<Y>& arg) {
     OperatorCode op_code=static_cast<OperatorCode>((char)op.code()+((char)OperatorCode::SADD-(char)OperatorCode::ADD));

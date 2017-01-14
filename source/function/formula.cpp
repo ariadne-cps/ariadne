@@ -34,11 +34,11 @@ template<class Y> Formula<Y> Formula<Y>::_derivative(SizeType j) const
     switch(f.kind()) {
         case OperatorKind::NULLARY: return Formula<Y>::constant(0);
         case OperatorKind::COORDINATE: return Formula<Y>::constant(f.ind()==j?1:0);
-        case OperatorKind::UNARY: return derivative(f.op(),f.arg(),derivative(f.arg(),j));
-        case OperatorKind::BINARY: return derivative(f.op(),f.arg1(),derivative(f.arg1(),j),f.arg2(),derivative(f.arg2(),j));
-        case OperatorKind::GRADED: return derivative(f.op(),f.arg(),derivative(f.arg(),j),f.num());
+        case OperatorKind::UNARY: return compute_derivative(f.op(),f.arg(),derivative(f.arg(),j));
+        case OperatorKind::BINARY: return compute_derivative(f.op(),f.arg1(),derivative(f.arg1(),j),f.arg2(),derivative(f.arg2(),j));
+        case OperatorKind::GRADED: return compute_derivative(f.op(),f.arg(),derivative(f.arg(),j),f.num());
         default:
-            ARIADNE_THROW(std::runtime_error,"derivative(Formula<Y>)",
+            ARIADNE_THROW(std::runtime_error,"compute_derivative(Formula<Y>)",
                           "Cannot compute derivative of "<<f<<"\n");
     }
 }

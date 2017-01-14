@@ -82,6 +82,12 @@ template<class T> using IsBuiltinUnsigned = std::is_unsigned<T>;
 template<class T> using IsBuiltinSignedIntegral = std::integral_constant<bool,std::is_integral<T>::value and std::is_signed<T>::value>;
 template<class T> using IsBuiltinUnsignedIntegral = std::integral_constant<bool,std::is_integral<T>::value and std::is_unsigned<T>::value>;
 
+template<class T, class... US> struct IsOneOf;
+template<class T> struct IsOneOf<T> : False { };
+template<class T, class... US> struct IsOneOf<T,T,US...> : True { };
+template<class T, class U0, class... US> struct IsOneOf<T,U0,US...> : IsOneOf<T,US...> { };
+
+
 template<class SIG> using ResultOf = typename std::result_of<SIG>::type;
 
 template<class T1, class T2, class T3> using AreSame = And<IsSame<T1,T2>,IsSame<T2,T3>>;

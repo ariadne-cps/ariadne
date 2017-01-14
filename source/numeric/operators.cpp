@@ -36,6 +36,7 @@ double div(double,double);
 #include "../numeric/integer.hpp"
 #include "../numeric/real.hpp"
 #include "../numeric/operators.hpp"
+#include "../numeric/operators.tpl.hpp"
 
 namespace Ariadne {
 
@@ -71,6 +72,7 @@ OutputStream& operator<<(OutputStream& os, const OperatorKind& knd) {
         case OperatorKind::BINARY: return os << "BINARY";
         case OperatorKind::TERNARY: return os << "TERNARY";
         case OperatorKind::SCALAR: return os << "SCALAR";
+        case OperatorKind::GRADED: return os << "GRADED";
         case OperatorKind::COMPARISON: return os << "COMPARISON";
         default: return os << "UNKNOWN";
     }
@@ -93,6 +95,7 @@ const char* name(const OperatorCode& op) {
         case OperatorCode::SMUL:  return "smul"; break;
         case OperatorCode::SDIV:  return "sdiv"; break;
         case OperatorCode::POW:  return "pow"; break;
+        case OperatorCode::ROOT:  return "root"; break;
         case OperatorCode::NOT:  return "not"; break;
         case OperatorCode::AND:  return "and"; break;
         case OperatorCode::OR:   return "or"; break;
@@ -173,7 +176,7 @@ OperatorKind kind(OperatorCode op) {
         case OperatorCode::SIN: case OperatorCode::COS: case OperatorCode::TAN: case OperatorCode::ATAN:
         case OperatorCode::ABS:
             return OperatorKind::UNARY;
-        case OperatorCode::POW:
+        case OperatorCode::POW: case OperatorCode::ROOT:
             return OperatorKind::GRADED;
         case OperatorCode::AND: case OperatorCode::OR:
             return OperatorKind::BINARY;
@@ -186,7 +189,9 @@ OperatorKind kind(OperatorCode op) {
     }
 }
 
-
+OperatorKind get_kind(OperatorCode op) {
+    return kind(op);
+}
 
 template<> Boolean compare(OperatorCode cmp, const String& s1, const String& s2) {
     switch(cmp) {
@@ -273,6 +278,26 @@ template<> Integer compute(OperatorCode op, const Integer& z) {
     }
 }
 
+template<> Real compute(OperatorCode op, Real const& r) {
+    switch(op) {
+        case OperatorCode::POS: return pos(r);
+        case OperatorCode::NEG: return neg(r);
+        case OperatorCode::SQR: return sqr(r);
+        case OperatorCode::REC: return rec(r);
+        case OperatorCode::SQRT: return sqrt(r);
+        case OperatorCode::EXP: return exp(r);
+        case OperatorCode::LOG: return log(r);
+        case OperatorCode::SIN: return sin(r);
+        case OperatorCode::COS: return cos(r);
+        case OperatorCode::TAN: return tan(r);
+//        case OperatorCode::ASIN: return asin(r);
+//        case OperatorCode::ACOS: return acos(r);
+        case OperatorCode::ATAN: return atan(r);
+        default: assert(false);
+    }
+}
+
+
 
 template<> String compute(OperatorCode op, const String& s, Int n) {
     switch(op) {
@@ -285,6 +310,15 @@ template<> Integer compute(OperatorCode op, const Integer& z, Int n) {
         default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on one integer argument and a builtin.");
     }
 }
+
+template<> Real compute(OperatorCode op, const Real& r, Int n) {
+    switch(op) {
+        case OperatorCode::POW: return pow(r,n);
+        case OperatorCode::ROOT:
+        default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on one real argument and an integer.");
+    }
+}
+
 
 } // namespace Ariadne
 

@@ -30,6 +30,7 @@
 #define ARIADNE_OPERATORS_HPP
 
 #include <iostream>
+#include <cassert>
 
 #include "logical.decl.hpp"
 #include "number.decl.hpp"
@@ -43,22 +44,49 @@ typedef int Int;
 
 typedef std::ostream OutputStream;
 
+template<class X> struct Logic;
+template<> struct Logic<String> { typedef Boolean Type; };
+template<> struct Logic<Integer> { typedef Boolean Type; };
+template<> struct Logic<Real> { typedef Kleenean Type; };
+template<class X> using LogicType = typename Logic<X>::Type;
 
-enum class OperatorKind : char {
+
+class Operator {
+  public:
+    enum class Code : char;
+    enum class Kind : char;
+    friend Kind get_kind(Code);
+  private:
+    Code _code;
+    Kind _kind;
+  public:
+    Operator(Code c, Kind k) : _code(c), _kind(k) { }
+    Operator(Code c) : _code(c), _kind(get_kind(_code)) { }
+    template<class OP> Operator(const OP& op) : _code(op.code()), _kind(op.kind()) { }
+
+    operator Code () const { return _code; }
+    Code code() const { return _code; }
+    Kind kind() const { return _kind; }
+};
+
+using OperatorCode=Operator::Code;
+using OperatorKind=Operator::Kind;
+
+
+
+enum class Operator::Kind : char {
     VARIABLE,
     COORDINATE,
     NULLARY,
     UNARY,
     BINARY,
     TERNARY,
-    SCALAR,
     GRADED,
+    SCALAR,
     COMPARISON
 };
 
-OutputStream& operator<<(OutputStream& os, const OperatorKind& knd);
-
-enum class OperatorCode : char {
+enum class Operator::Code : char {
     CNST,  // A constant value
     VAR,   // A named variable
     IND,   // A numbered index
@@ -68,6 +96,7 @@ enum class OperatorCode : char {
     DIV,   // Division
     FMA,   // Fused multiply-and-add
     POW,   // Integer power
+    ROOT,   // Integer root
     NUL,   // Zero
     POS,   // Unary plus
     NEG,   // Unary negation
@@ -84,9 +113,9 @@ enum class OperatorCode : char {
     ACOS,   // ArcCosine
     ATAN,   // ArcTangent
     SADD,  // Addition of a scalar constant
-    SSUB,  // Subtraction from a scalar constant
+    SSUB,   // Scalar Subtraction
     SMUL,  // Multiplication by a scalar constant
-    SDIV,  // Division into a scalar constant
+    SDIV,   // Scalar Division
     SFMA,   // Fused multiply-and-add with scalar constants
     ABS,   // Absolute value
     MAX,   // Maximum
@@ -99,51 +128,33 @@ enum class OperatorCode : char {
     ITOR,   // Conversion of Int to Real
     PUSH,
     PULL,
-    EQ=-1,    // Equal
-    NEQ=-2,   // Not equal
-    GEQ=-3,   // Greater or equal
-    LEQ=-4,   // Less or equal
-    GT=-5,    // Greater than
-    LT=-6,    // Less than
+    EQ=-6,    // Equal
+    NEQ=-5,   // Not equal
+    GEQ=-4,   // Greater or equal
+    LEQ=-3,   // Less or equal
+    GT=-2,    // Greater than
+    LT=-1,    // Less than
     SGN=-7,   // Compare with zero
     SUBS=-8,   // Compare as a subset
     DISJ=-9    // Compare disjointness
 };
 
+OutputStream& operator<<(OutputStream& os, const OperatorKind& knd);
 OutputStream& operator<<(OutputStream&, const OperatorCode& op);
 const char* name(const OperatorCode& op);
 const char* symbol(const OperatorCode& op);
 
-OperatorKind kind(OperatorCode op);
-
-class Operator {
-    OperatorCode _code;
-    OperatorKind _kind;
-  public:
-    Operator(OperatorCode c, OperatorKind k) : _code(c), _kind(k) { }
-    Operator(OperatorCode c) : _code(c), _kind(Ariadne::kind(_code)) { }
-    template<class OP> Operator(const OP& op) : _code(op.code()), _kind(op.kind()) { }
-
-    operator OperatorCode () const { return _code; }
-    OperatorCode code() const { return _code; }
-    OperatorKind kind() const { return _kind; }
-};
-
-template<class X> struct Logic;
-template<> struct Logic<String> { typedef Boolean Type; };
-template<> struct Logic<Integer> { typedef Boolean Type; };
-template<> struct Logic<Real> { typedef Kleenean Type; };
-template<class X> using LogicType = typename Logic<X>::Type;
 
 template<class X> LogicType<X> compare(OperatorCode op, const X& x1, const X& x2);
 template<class X> X compute(OperatorCode op, const X& x);
 template<class X1, class X2> X2 compute(OperatorCode op, const X1& x1, const X2& x2);
 template<class X> X compute(OperatorCode op, const X& x, Int n);
+template<class X1, class X2> X2 compute(OperatorCode op, const X1& x1, const X2& x2);
 
-template<class X> X derivative(OperatorCode op, const X& x);
-template<class X, class D> D derivative(OperatorCode op, const X& x, const D& dx);
-template<class X, class D> D derivative(OperatorCode op, const X& x1, const D& dx1, const X& x2, const D& dx2);
-template<class X, class D> D derivative(OperatorCode op, const X& x, const D& dx, Int n);
+template<class X> X compute_derivative(OperatorCode op, const X& x);
+template<class X, class D> D compute_derivative(OperatorCode op, const X& x, const D& dx);
+template<class X, class D> D compute_derivative(OperatorCode op, const X& x1, const D& dx1, const X& x2, const D& dx2);
+template<class X, class D> D compute_derivative(OperatorCode op, const X& x, const D& dx, Int n);
 
 template<class OBJ> struct Object { OBJ const& upcast() const { return static_cast<OBJ const&>(*this); } };
 template<class OP> struct OperatorObject : Object<OP> { };
@@ -151,6 +162,7 @@ template<class CMP> struct ComparisonObject : Object<CMP> { };
 
 template<class OP> inline OutputStream& operator<<(OutputStream& os, OperatorObject<OP> const& op) {
     return os << op.upcast().code(); }
+
 template<class CMP> inline OutputStream& operator<<(OutputStream& os, ComparisonObject<CMP> const& cmp) {
     return os << cmp.upcast().code(); }
 
@@ -282,6 +294,11 @@ struct Pow : OperatorObject<Pow> {
     template<class X, class N> X derivative(const X& a, N n) const { return n*pow(a,n-1); }
     template<class X,class D, class N> D derivative(const X& a, const D& d, N n) const { return derivative(a,n)*d; }
 };
+struct Root : OperatorObject<Root> {
+    OperatorCode code() const { return OperatorCode::ROOT; } OperatorKind kind() const { return OperatorKind::GRADED; }
+    template<class A, class N> friend auto root(A&& a, N&& n) -> decltype(exp(log(a)/n)) { return exp(log(a)/n); }
+    template<class A, class N> auto operator()(A&& a, N&& n) const -> decltype(root(a,n)) { return root(a,n); }
+};
 struct Fma : OperatorObject<Fma> {
     static constexpr OperatorCode code() { return OperatorCode::FMA; } static constexpr OperatorKind kind() { return OperatorKind::TERNARY; }
     template<class A1, class A2, class A3> auto operator()(A1&& a1, A2&& a2, A3&& a3) const -> decltype(a1*a2+a3) { return a1*a2+a3; }
@@ -405,6 +422,131 @@ struct Sgn : ComparisonObject<Sgn> {
     static constexpr OperatorCode code() { return OperatorCode::SGN; }
     Kleenean operator()(const Real& a) const;
 };
+
+
+/*
+template<class OP> struct CodedOperator {
+    typedef OP CodeType;
+    operator Operator() const { return Operator(static_cast<Operator::Code>(_code)); }
+    CodeType code() const { return _code; }
+  protected:
+    CodeType _code;
+};
+struct SpecialOperator : CodedOperator<SpecialOperator::Code> {
+    enum class Code : char;
+};
+*/
+
+struct SpecialOperator {
+    enum class Code : char;
+    operator Operator() const { return Operator(static_cast<Operator::Code>(_code)); }
+    Code code() const { return _code; }
+  private:
+    Code _code;
+};
+
+struct UnaryLogicalOperator {
+    enum class Code : char;
+    template<class OP, EnableIf<IsOneOf<OP,NotOp>> =dummy> UnaryLogicalOperator(OP op) : _code(op) { }
+    template<class L> decltype(not declval<L>()) operator()(L&& l) const;
+    Code _code;
+};
+struct UnaryArithmeticOperator {
+    enum class Code : char;
+    template<class OP, EnableIf<IsOneOf<OP,Nul,Pos,Neg,Sqr,Rec>> =dummy> UnaryArithmeticOperator(OP op) : _code(op) { }
+    template<class X> X operator()(X&& x) const;
+    Code _code;
+};
+struct UnaryElementaryOperator {
+    enum class Code : char;
+    explicit UnaryElementaryOperator(OperatorCode cd);
+    UnaryElementaryOperator(Code cd) : _code(cd) { }
+    template<class OP, EnableIf<IsOneOf<OP,Pos,Neg,Sqr,Hlf,Rec,Sqrt,Exp,Log,Sin,Cos,Tan,Atan,Abs>> =dummy> UnaryElementaryOperator(OP op) : _code(op) { }
+    template<class X> X operator()(X&& x) const;
+    Code _code;
+};
+struct UnaryLatticeOperator {
+    enum class Code : char;
+    explicit UnaryLatticeOperator(OperatorCode cd);
+    template<class OP, EnableIf<IsOneOf<OP,Abs>> =dummy> UnaryLatticeOperator(OP op) : _code(op) { }
+    template<class X> X operator()(X&& x) const;
+    Code _code;
+};
+
+struct BinaryLogicalOperator {
+    enum class Code : char;
+    explicit BinaryLogicalOperator(OperatorCode cd);
+    template<class OP, EnableIf<IsOneOf<OP,AndOp,OrOp>> =dummy> BinaryLogicalOperator(OP op) : _code(op) { }
+    template<class L> L operator()(L&& l1, L&& l2) const;
+    Code _code;
+};
+struct BinaryComparisonOperator {
+    enum struct Code : char;
+    explicit BinaryComparisonOperator(OperatorCode cd);
+    template<class OP, EnableIf<IsOneOf<OP,Equal,Unequal,Less,Gtr,Leq,Geq>> =dummy> BinaryComparisonOperator(OP op) : _code(op) { }
+    template<class X> typename Logic<X>::Type operator()(const X& x1, const X& x2) const;
+    Code _code;
+};
+struct BinaryLatticeOperator {
+    enum struct Code : char;
+    explicit BinaryLatticeOperator(OperatorCode cd);
+    template<class OP, EnableIf<IsOneOf<OP,Max,Min>> =dummy> BinaryLatticeOperator(OP op) : _code(op) { }
+    template<class X> X operator()(X&& x1, X&& x2) const;
+    Code _code;
+};
+struct BinaryArithmeticOperator {
+    enum struct Code : char;
+    explicit BinaryArithmeticOperator(OperatorCode cd);
+    template<class OP, EnableIf<IsOneOf<OP,Add,Sub,Mul,Div>> =dummy> BinaryArithmeticOperator(OP op) : _code(op) { }
+    template<class X1, class X2> ArithmeticType<X1,X2> operator()(X1&& x1, X2&& x2) const;
+    Code _code;
+};
+struct BinaryElementaryOperator {
+    enum struct Code : char;
+    BinaryElementaryOperator(Code cd) : _code(cd) { }
+    explicit BinaryElementaryOperator(OperatorCode cd);
+    template<class OP, EnableIf<IsOneOf<OP,Add,Sub,Mul,Div,Max,Min>> =dummy> BinaryElementaryOperator(OP op) : _code(op) { }
+    template<class X1, class X2> ArithmeticType<X1,X2> operator()(X1&& x1, X2&& x2) const;
+    Code _code;
+};
+
+struct GradedElementaryOperator {
+    enum struct Code : char;
+    explicit GradedElementaryOperator(OperatorCode cd);
+    template<class OP, EnableIf<IsOneOf<OP,Pow>> =dummy> GradedElementaryOperator(OP op) : _code(op) { }
+    template<class X> X operator()(X&& x, Integer const& n) const;
+    Code _code;
+};
+
+struct TernaryArithmeticOperator {
+    enum struct Code : char;
+    template<class OP, EnableIf<IsOneOf<OP,Fma>> =dummy> TernaryArithmeticOperator(OP op) : _code(op) { }
+    template<class X> X operator()(X&& x1, X&& x2, X&& x3) const;
+    Code _code;
+};
+
+enum class SpecialOperator::Code : char { CNST=(char)OperatorCode::CNST, VAR, IND };
+enum class UnaryLogicalOperator::Code : char { NOT=(char)OperatorCode::NOT };
+enum class UnaryLatticeOperator::Code : char { ABS=(char)OperatorCode::ABS };
+enum class UnaryArithmeticOperator::Code : char { POS=(char)OperatorCode::POS, NEG, REC, SQR };
+enum class BinaryLogicalOperator::Code : char { AND=(char)OperatorCode::AND, OR, XOR, IMPL };
+enum class BinaryComparisonOperator::Code : char { EQ=(char)OperatorCode::EQ, NEQ, GEQ, LEQ, GT, LT };
+enum class BinaryLatticeOperator::Code : char { MAX=(char)OperatorCode::MAX, MIN };
+enum class BinaryArithmeticOperator::Code : char { ADD=(char)OperatorCode::ADD, SUB, MUL, DIV };
+
+enum class UnaryElementaryOperator::Code : char { POS=(char)OperatorCode::POS, NEG, HLF, REC, SQR, SQRT, EXP, LOG, SIN, COS, TAN, ASIN, ACOS, ATAN, ABS=(char)OperatorCode::ABS };
+enum class BinaryElementaryOperator::Code : char { ADD=(char)OperatorCode::ADD, SUB, MUL, DIV, MAX=(char)OperatorCode::MAX, MIN };
+enum class GradedElementaryOperator::Code : char { POW=(char)OperatorCode::POW, ROOT };
+
+inline BinaryComparisonOperator::BinaryComparisonOperator(OperatorCode cd) : _code(static_cast<Code>(cd)) { assert(Code::EQ <= _code && _code <= Code::LT); }
+
+static_assert((char)UnaryElementaryOperator::Code::ATAN==(char)Operator::Code::ATAN,"");
+static_assert((char)BinaryLogicalOperator::Code::IMPL==(char)Operator::Code::IMPL,"");
+static_assert((char)BinaryLatticeOperator::Code::MIN==(char)Operator::Code::MIN,"");
+static_assert((char)BinaryComparisonOperator::Code::LT==(char)Operator::Code::LT,"");
+static_assert((char)BinaryArithmeticOperator::Code::DIV==(char)Operator::Code::DIV,"");
+static_assert((char)BinaryElementaryOperator::Code::DIV==(char)Operator::Code::DIV,"");
+static_assert((char)BinaryElementaryOperator::Code::MIN==(char)Operator::Code::MIN,"");
 
 
 class UnaryOperator {

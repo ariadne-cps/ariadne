@@ -458,9 +458,9 @@ Expression<Real> derivative(const Expression<Real>& e, Variable<Real> v)
     switch(e.kind()) {
         case OperatorKind::NULLARY: return Expression<Real>::constant(0);
         case OperatorKind::VARIABLE: return Expression<Real>::constant(e.var()==v.name()?1:0);
-        case OperatorKind::UNARY: return derivative(e.op(),e.arg(),derivative(e.arg(),v));
-        case OperatorKind::BINARY: return derivative(e.op(),e.arg1(),derivative(e.arg1(),v),e.arg2(),derivative(e.arg2(),v));
-        case OperatorKind::GRADED: return derivative(e.op(), e.arg(), derivative(e.arg(),v), e.num());
+        case OperatorKind::UNARY: return compute_derivative(e.op(),e.arg(),derivative(e.arg(),v));
+        case OperatorKind::BINARY: return compute_derivative(e.op(),e.arg1(),derivative(e.arg1(),v),e.arg2(),derivative(e.arg2(),v));
+        case OperatorKind::GRADED: return compute_derivative(e.op(), e.arg(), derivative(e.arg(),v), e.num());
         default:
             ARIADNE_THROW(std::runtime_error,"derivative(Expression<Real> e, Variable<Real> v)",
                           "Cannot compute derivative of "<<e<<"\n");

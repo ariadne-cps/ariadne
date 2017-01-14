@@ -199,7 +199,7 @@ struct UnaryFunction
     }
 
     virtual ScalarFunction<P,D> derivative(ElementIndexType<D> j) const {
-        return Ariadne::derivative(_op, _arg, _arg.derivative(j));
+        return compute_derivative(_op, _arg, _arg.derivative(j));
     }
 
     virtual OutputStream& repr(OutputStream& os) const {
@@ -208,7 +208,7 @@ struct UnaryFunction
         return os << _op << '(' << _arg << ')'; }
 
     template<class X> inline Void _compute(X& r, const ElementType<D,X>& x) const {
-        r=Ariadne::compute(_op,_arg.evaluate(x)); }
+        r=compute(_op,_arg.evaluate(x)); }
 
     OperatorCode _op;
     ScalarFunction<P,D> _arg;
@@ -246,7 +246,7 @@ struct BinaryFunction
         return static_cast<const ScalarFunctionInterface<P,D>&>(this->derivative(j))._clone(); }
 
     virtual ScalarFunction<P,D> derivative(ElementIndexType<D> j) const {
-        return Ariadne::derivative(_op,_arg1,_arg1.derivative(j),_arg2,_arg2.derivative(j)); }
+        return compute_derivative(_op,_arg1,_arg1.derivative(j),_arg2,_arg2.derivative(j)); }
 
     virtual OutputStream& repr(OutputStream& os) const {
         return os << "BF[R" << this->argument_size() << "](" << *this << ")"; }
@@ -255,7 +255,7 @@ struct BinaryFunction
         else { return os << _arg1 << symbol(_op) << _arg2; } }
 
     template<class X> inline Void _compute(X& r, const ElementType<D,X>& x) const {
-        r=Ariadne::compute(_op,_arg1.evaluate(x),_arg2.evaluate(x)); }
+        r=compute(_op,_arg1.evaluate(x),_arg2.evaluate(x)); }
 
     OperatorCode _op;
     ScalarFunction<P,D> _arg1;
@@ -287,7 +287,7 @@ class GradedFunction
     }
 
     virtual ScalarFunction<P,D> derivative(ElementIndexType<D> j) const {
-        return Ariadne::derivative(_op, _arg1, _arg1.derivative(j), _arg2);
+        return compute_derivative(_op, _arg1, _arg1.derivative(j), _arg2);
     }
 
     virtual OutputStream& repr(OutputStream& os) const {

@@ -447,7 +447,7 @@ evaluate(const Expression<T>& e, const Map<Identifier,T>& x)
         case OperatorKind::NULLARY: return e.val();
         case OperatorKind::UNARY: return compute(e.op(),evaluate(e.arg(),x));
         case OperatorKind::BINARY: return compute(e.op(),evaluate(e.arg1(),x),evaluate(e.arg2(),x));
-        case OperatorKind::SCALAR: return compute(e.op(),evaluate(e.arg(),x),e.num());
+        case OperatorKind::GRADED: return compute(e.op(),evaluate(e.arg(),x),e.num());
         default: ARIADNE_FAIL_MSG("Cannot evaluate expression "<<e<<" on "<<x<<"\n");
     }
 }
@@ -835,7 +835,7 @@ const Formula<EffectiveNumber>& cached_make_formula(const Expression<Real>& e, c
         case OperatorKind::NULLARY: return insert( cache, eptr, make_formula<Y>(e.val()) );
         case OperatorKind::UNARY: return insert( cache, eptr, make_formula<Y>(e.op(),cached_make_formula(e.arg(),v,cache)));
         case OperatorKind::BINARY: return insert( cache, eptr, make_formula<Y>(e.op(),cached_make_formula(e.arg1(),v,cache),cached_make_formula(e.arg2(),v,cache)) );
-        case OperatorKind::SCALAR: return insert( cache, eptr, make_formula<Y>(e.op(),cached_make_formula(e.arg(),v,cache),e.num()) );
+        case OperatorKind::GRADED: return insert( cache, eptr, make_formula<Y>(e.op(),cached_make_formula(e.arg(),v,cache),e.num()) );
         default: ARIADNE_FAIL_MSG("Cannot convert expression "<<e<<" to use variables "<<v<<"\n");
     }
 }
@@ -851,7 +851,7 @@ Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Space<Rea
     typedef EffectiveNumber Y;
     typedef Identifier I;
     switch(e.kind()) {
-        case OperatorKind::SCALAR: return make_formula<Y>(e.op(),make_formula(e.arg(),spc),e.num());
+        case OperatorKind::GRADED: return make_formula<Y>(e.op(),make_formula(e.arg(),spc),e.num());
         case OperatorKind::BINARY: return make_formula<Y>(e.op(),make_formula(e.arg1(),spc),make_formula(e.arg2(),spc));
         case OperatorKind::UNARY: return make_formula<Y>(e.op(),make_formula(e.arg(),spc));
         case OperatorKind::NULLARY: return Formula<Y>::constant(e.val());

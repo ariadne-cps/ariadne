@@ -22,7 +22,51 @@
  */
 
 #include "procedure.h"
+#include "procedure.tcc"
+
+#include "algebra/differential.h"
+#include "algebra/graded.h"
 
 namespace Ariadne {
+
+template class Procedure<ApproximateNumber>;
+template class Procedure<ValidatedNumber>;
+
+template class Vector<Procedure<ApproximateNumber>>;
+template class Vector<Procedure<ValidatedNumber>>;
+
+template Void _execute(List<Float64Bounds>& v, const List<ProcedureInstruction>& p, const List<ValidatedNumber>& c, const Vector<Float64Bounds>& x);
+template Void _execute(List<Graded<Differential<Float64Bounds>>>& v, const List<ProcedureInstruction>& p, const List<ValidatedNumber>& c, const Vector<Graded<Differential<Float64Bounds>>>& x);
+
+inline
+Void restrict(UpperIntervalType& r, const UpperIntervalType& x) {
+    r.set_lower(max(r.lower(),x.lower()));
+    r.set_upper(min(r.upper(),x.upper()));
+};
+
+Void simple_hull_reduce(UpperBoxType& dom, const ValidatedProcedure& f, ExactIntervalType codom)
+{
+    const List<ProcedureInstruction>& p=f._instructions;
+    const List<ValidatedNumber>& c=f._constants;
+    List<UpperIntervalType> t(p.size());
+    _execute(t,p,c,dom);
+    restrict(t.back(),codom);
+    _backpropagate(dom,t,p,c);
+}
+
+Void simple_hull_reduce(UpperBoxType& dom, const Vector<ValidatedProcedure>& f, ExactBoxType codom)
+{
+    const List<ProcedureInstruction>& p=f._instructions;
+    const List<ValidatedNumber>& c=f._constants;
+    List<UpperIntervalType> t(p.size());
+
+    ARIADNE_ASSERT(codom.size()==f._results.size());
+
+    _execute(t,p,c,dom);
+    for(SizeType i=0; i!=codom.size(); ++i) {
+        restrict(t[f._results[i]],codom[i]);
+    }
+    _backpropagate(dom,t,p,c);
+}
 
 } // namespace Ariadne

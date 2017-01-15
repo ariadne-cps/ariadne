@@ -68,19 +68,19 @@ make_expression(Op op, const A1& a1, const A2& a2, const A3& a3) {
 
 
 
-Bool compatible(const Float64& x1, const Float64& x2) { return true; }
-template<class X> Bool compatible(const Polynomial<X>& x1, const Polynomial<X>& x2) { return x1.argument_size()==x2.argument_size(); }
-template<class X> Bool compatible(const Differential<X>& x1, const Differential<X>& x2) { return x1.argument_size()==x2.argument_size(); }
+inline Bool compatible(const Float64& x1, const Float64& x2) { return true; }
+template<class X> inline Bool compatible(const Differential<X>& x1, const Differential<X>& x2) { return x1.argument_size()==x2.argument_size(); }
 
-Float64 create(const Float64& x) { return Float64(0); }
-ExactIntervalType create(const ExactIntervalType& x) { return ExactIntervalType(0); }
-template<class X> Polynomial<X> create(const Polynomial<X>& x) { return Polynomial<X>(x.argument_size()); }
-template<class X> Differential<X> create(const Differential<X>& x) { return Differential<X>(x.argument_size(),x.degree()); }
+inline Float64 create(const Float64& x) { return Float64(0); }
+inline ExactIntervalType create(const ExactIntervalType& x) { return ExactIntervalType(0); }
+template<class X> inline Differential<X> create(const Differential<X>& x) { return Differential<X>(x.argument_size(),x.degree()); }
 
+template<class X> inline X create(const X& x) { return nul(x); }
 
 template<class A> class Graded : public List<A>
 {
   public:
+    typedef typename A::NumericType NumericType;
     typedef Graded<A> SelfType;
     Graded() : List<A>() { }
     Graded(const A& a) : List<A>(1u,a) { }
@@ -104,7 +104,7 @@ template<class A> OutputStream& operator<<(OutputStream& os, const Graded<A>& g)
     os << "}";
     return os;
 }
-template<> OutputStream& operator<<(OutputStream& os, const Graded<Float64>& g) {
+template<> inline OutputStream& operator<<(OutputStream& os, const Graded<Float64>& g) {
     if(g.size()==0) { return os << "G[-]{}"; }
     os << "G[" << g.degree() << "]{";
     Bool nonzero=false;
@@ -125,7 +125,7 @@ template<> OutputStream& operator<<(OutputStream& os, const Graded<Float64>& g) 
     os << "}";
     return os;
 }
-template<> OutputStream& operator<<(OutputStream& os, const Graded<ExactIntervalType>& g) {
+template<> inline OutputStream& operator<<(OutputStream& os, const Graded<ExactIntervalType>& g) {
     if(g.size()==0) { return os << "0"; }
     os << g[0];
     for(Nat i=1; i<=g.degree(); ++i) {
@@ -160,31 +160,40 @@ template<class A, class B> Graded<A> operator*(const Graded<A>& a, const B& c) {
 template<class A> Graded<A> operator*(const Graded<A>& a, Int c) {
     Graded<A> r(a); if(c==0) { for(Nat i=0; i!=r.size(); ++i) { r[i]*=c; } } else { r*=c; } return r;  }
 
-template<class A> ClosureExpression<Neg,Graded<A> > operator-(const Graded<A>& a) {
+template<class A> Graded<A> operator+(const GenericNumericType<A>& c, const Graded<A>& a) {
+    Graded<A> r(a); r[0]+=c; return r;  }
+template<class A> Graded<A> operator-(const GenericNumericType<A>& c, const Graded<A>& a) {
+    ARIADNE_NOT_IMPLEMENTED; }
+template<class A> Graded<A> operator*(const GenericNumericType<A>& c, const Graded<A>& a) {
+    Graded<A> r(a); r[0]*=c; return r;  }
+template<class A> Graded<A> operator/(const GenericNumericType<A>& c, const Graded<A>& a) {
+    ARIADNE_NOT_IMPLEMENTED; }
+
+template<class A> ClosureExpression<Neg,Graded<A>> operator-(const Graded<A>& a) {
     return make_expression(Neg(),a); }
-template<class A> ClosureExpression<Add,Graded<A>,Graded<A> > operator+(const Graded<A>& a1, const Graded<A>& a2) {
+template<class A> ClosureExpression<Add,Graded<A>,Graded<A>> operator+(const Graded<A>& a1, const Graded<A>& a2) {
     return make_expression(Add(),a1,a2); }
-template<class A> ClosureExpression<Sub,Graded<A>,Graded<A> > operator-(const Graded<A>& a1, const Graded<A>& a2) {
+template<class A> ClosureExpression<Sub,Graded<A>,Graded<A>> operator-(const Graded<A>& a1, const Graded<A>& a2) {
     return make_expression(Sub(),a1,a2); }
-template<class A> ClosureExpression<Mul,Graded<A>,Graded<A> > operator*(const Graded<A>& a1, const Graded<A>& a2) {
+template<class A> ClosureExpression<Mul,Graded<A>,Graded<A>> operator*(const Graded<A>& a1, const Graded<A>& a2) {
     return make_expression(Mul(),a1,a2); }
-template<class A> ClosureExpression<Div,Graded<A>,Graded<A> > operator/(const Graded<A>& a1, const Graded<A>& a2) {
+template<class A> ClosureExpression<Div,Graded<A>,Graded<A>> operator/(const Graded<A>& a1, const Graded<A>& a2) {
     return make_expression(Div(),a1,a2); }
-template<class A> ClosureExpression<Neg,Graded<A> > neg(const Graded<A>& a) {
+template<class A> ClosureExpression<Neg,Graded<A>> neg(const Graded<A>& a) {
     return make_expression(Neg(),a); }
-template<class A> ClosureExpression<Sqr,Graded<A> > sqr(const Graded<A>& a) {
+template<class A> ClosureExpression<Sqr,Graded<A>> sqr(const Graded<A>& a) {
     return make_expression(Sqr(),a); }
-template<class A> ClosureExpression<Sqrt,Graded<A> > sqrt(const Graded<A>& a) {
+template<class A> ClosureExpression<Sqrt,Graded<A>> sqrt(const Graded<A>& a) {
     return make_expression(Sqrt(),a); }
-template<class A> ClosureExpression<Exp,Graded<A> > exp(const Graded<A>& a) {
+template<class A> ClosureExpression<Exp,Graded<A>> exp(const Graded<A>& a) {
     return make_expression(Exp(),a); }
-template<class A> ClosureExpression<Log,Graded<A> > log(const Graded<A>& a) {
+template<class A> ClosureExpression<Log,Graded<A>> log(const Graded<A>& a) {
     return make_expression(Log(),a); }
-template<class A> ClosureExpression<Rec,Graded<A> > rec(const Graded<A>& a) {
+template<class A> ClosureExpression<Rec,Graded<A>> rec(const Graded<A>& a) {
     return make_expression(Rec(),a); }
-template<class A> ClosureExpression<Sin,Graded<A> > sin(const Graded<A>& a) {
+template<class A> ClosureExpression<Sin,Graded<A>> sin(const Graded<A>& a) {
     return make_expression(Sin(),a); }
-template<class A> ClosureExpression<Cos,Graded<A> > cos(const Graded<A>& a) {
+template<class A> ClosureExpression<Cos,Graded<A>> cos(const Graded<A>& a) {
     return make_expression(Cos(),a); }
 
 template<class A> Graded<A> pos(const Graded<A>& a) { ARIADNE_NOT_IMPLEMENTED; }
@@ -355,15 +364,15 @@ template<class A> Void cos(Graded<A>& r, const Graded<A>& a) {
 }
 
 
-template<class A> template<class Op> Void Graded<A>::operator=(const ClosureExpression<Op,Graded<A>,Graded<A> >& expr) {
+template<class A> template<class Op> Void Graded<A>::operator=(const ClosureExpression<Op,Graded<A>,Graded<A>>& expr) {
     compute(*this,Op(),expr.arg1,expr.arg2);
 }
 
-template<class A> template<class Op> Void Graded<A>::operator=(const ClosureExpression<Op,Graded<A> >& expr) {
+template<class A> template<class Op> Void Graded<A>::operator=(const ClosureExpression<Op,Graded<A>>& expr) {
     compute(*this,Op(),expr.arg);
 }
 
-template<class A> Void Graded<A>::operator=(const ClosureExpression<AntiDiff,Graded<A> >& expr) {
+template<class A> Void Graded<A>::operator=(const ClosureExpression<AntiDiff,Graded<A>>& expr) {
     antidifferentiate(*this,expr.arg);
 }
 
@@ -372,12 +381,12 @@ template<class A> Void antidifferentiate(Graded<A>& r, const Graded<A>& a) {
     r.append(a.back()/(r.degree()+1u));
 }
 
-template<class A> ClosureExpression<AntiDiff,Graded<A> > antidifferential(const Graded<A>& a) {
-    return ClosureExpression<AntiDiff,Graded<A> >(a);
+template<class A> ClosureExpression<AntiDiff,Graded<A>> antidifferential(const Graded<A>& a) {
+    return ClosureExpression<AntiDiff,Graded<A>>(a);
 }
 
 
-Pair<List<Float64>,Float64> midpoint_error(const Graded<ExactIntervalType>& x) {
+Pair<List<Float64>,Float64> inline midpoint_error(const Graded<ExactIntervalType>& x) {
     List<Float64> m(x.degree()+1);
     Float64 e;
     for(Nat i=0; i<=x.degree(); ++i) {
@@ -397,8 +406,8 @@ template<class X> Graded<X> create_graded(const X&) {
 
 
 
-template<class X, class A> Void compute(const Vector< Procedure<X> >& p, Vector< Graded<A> >& r, List< Graded<A> >& t, const Vector< Graded<A> >& a) {
-    _compute(t,p._instructions,p._constants,a);
+template<class X, class A> Void compute(const Vector<Procedure<X>>& p, Vector<Graded<A>>& r, List<Graded<A>>& t, const Vector<Graded<A>>& a) {
+    execute(t,p,a);
     for(Nat i=0; i!=p._results.size(); ++i) { r[i]=t[p._results[i]]; }
 }
 

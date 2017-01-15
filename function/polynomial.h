@@ -284,6 +284,8 @@ template<class X> inline Polynomial<X> truncate(Polynomial<X> p, DegreeType deg)
 template<class X> inline OutputStream& operator<<(OutputStream& os, const Polynomial<X>& p) {
     return p._write(os); }
 
+template<class X> inline Bool compatible(const Polynomial<X>& x1, const Polynomial<X>& x2) {
+    return x1.argument_size()==x2.argument_size(); }
 
 template<class F> struct NamedArgumentRepresentation {
     const F& function; const List<String>& argument_names;

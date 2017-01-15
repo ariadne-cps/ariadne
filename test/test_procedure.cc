@@ -31,6 +31,7 @@
 #include "config.h"
 
 #include "function/procedure.h"
+#include "function/procedure.tcc"
 
 #include "numeric/numeric.h"
 #include "algebra/vector.h"
@@ -81,17 +82,19 @@ Void TestProcedure::test()
 Void TestProcedure::test_formula()
 {
     ApproximateFormula o(ApproximateFormula::constant(1.0));
+    ApproximateFormula t(ApproximateFormula::constant(2.0));
     ApproximateFormula x(ApproximateFormula::coordinate(0));
     ApproximateFormula y(ApproximateFormula::coordinate(1));
 
-    ApproximateFormula r(sqrt(pow(x,2)+pow(y,2)));
+    ApproximateFormula r(sqrt(pow(x,2)+pow(y,2))/t);
     ARIADNE_TEST_PRINT(r);
 
-    //Vector< ApproximateFormula > f((sqrt(pow(x,2)+pow(y,2)), atan(y/x)));
+    //Vector<ApproximateFormula> f((sqrt(pow(x,2)+pow(y,2)), atan(y/x)));
 }
 
 Void TestProcedure::test_construct_from_formula()
 {
+    ApproximateNumber c(2.0);
     ApproximateFormula o(ApproximateFormula::constant(1.0));
     ApproximateFormula x(ApproximateFormula::coordinate(0));
     ApproximateFormula y(ApproximateFormula::coordinate(1));
@@ -99,16 +102,15 @@ Void TestProcedure::test_construct_from_formula()
     ApproximateFormula xs=pow(x,2);
     ApproximateFormula ys=pow(y,2);
 
-    Vector< ApproximateFormula > f={sqrt(xs+ys), atan(y/x), xs-ys};
+    ARIADNE_TEST_PRINT(y*c);
+    ARIADNE_TEST_PRINT(c*y);
+    Vector<ApproximateFormula> f={sqrt(xs+c*ys), atan(y/x), xs*c-ys};
     ARIADNE_TEST_PRINT(f);
 
     ApproximateProcedure p0(f[0]);
     ARIADNE_TEST_PRINT(p0);
-    Vector< ApproximateProcedure > p(f);
+    Vector<ApproximateProcedure> p(f);
     ARIADNE_TEST_PRINT(p);
-
-    p0+=ApproximateNumber(5);
-    ARIADNE_TEST_PRINT(p0);
 }
 
 Void TestProcedure::test_construct_from_expansion()
@@ -118,7 +120,7 @@ Void TestProcedure::test_construct_from_expansion()
         ARIADNE_TEST_PRINT(e);
         e.reverse_lexicographic_sort();
         ARIADNE_TEST_PRINT(e);
-        Procedure<Float64Approximation> p(e);
+        Procedure<ApproximateNumber> p(e);
         ARIADNE_TEST_PRINT(p);
         Vector<Float64Approximation> x({2.0,3.0},pr);
         ARIADNE_TEST_EQUAL(evaluate(p,x),simple_evaluate(e,x));
@@ -127,7 +129,7 @@ Void TestProcedure::test_construct_from_expansion()
     {
         Expansion<Float64Approximation> e({ {{0,0},1.0}, {{1,0},2.0}, {{0,1},3.0}, {{2,0},4.0}, {{1,1},5.0}, {{0,2},6.0} },pr);
         e.reverse_lexicographic_sort();
-        Procedure<Float64Approximation> p(e);
+        Procedure<ApproximateNumber> p(e);
         ARIADNE_TEST_PRINT(p);
         Vector<Float64Approximation> x({2.0,3.0},pr);
         ARIADNE_TEST_EQUAL(evaluate(p,x),simple_evaluate(e,x));
@@ -138,18 +140,20 @@ Void TestProcedure::test_construct_from_expansion()
 Void TestProcedure::test_evaluate()
 {
     ApproximateProcedure p;
-    p.new_unary_instruction(OperatorCode::IND,0u);
-    p.new_unary_instruction(OperatorCode::IND,1u);
-    p.new_power_instruction(OperatorCode::POW,0u,2);
-    p.new_unary_instruction(OperatorCode::SQR,1u);
+    p.new_unary_instruction(OperatorCode::IND,0ul);
+    p.new_unary_instruction(OperatorCode::IND,1ul);
+    p.new_graded_instruction(OperatorCode::POW,0ul,2);
+    p.new_unary_instruction(OperatorCode::SQR,1ul);
     p.new_binary_instruction(OperatorCode::ADD,2ul,3ul);
-    p.new_unary_instruction(OperatorCode::SQRT,4u);
+    p.new_constant(9.0);
+    p.new_scalar_instruction(OperatorCode::SMUL,0ul,4ul);
+    p.new_unary_instruction(OperatorCode::SQRT,5ul);
     ARIADNE_TEST_PRINT(p);
 
     Vector<Float64Approximation> x({3.0,4.0},pr);
     ARIADNE_TEST_PRINT(x);
 
-    ARIADNE_TEST_EQUALS(evaluate(p,x),5.0);
+    ARIADNE_TEST_EQUALS(evaluate(p,x),15.0);
 }
 
 Void TestProcedure::test_propagate()
@@ -161,7 +165,9 @@ Void TestProcedure::test_propagate()
         p.new_unary_instruction(OperatorCode::SQR,0u);
         p.new_unary_instruction(OperatorCode::SQR,1u);
         p.new_binary_instruction(OperatorCode::ADD,2u,3u);
-        p.new_unary_instruction(OperatorCode::SQRT,4u);
+        p.new_constant(1.125_decimal);
+        p.new_scalar_instruction(OperatorCode::SMUL,0ul,4ul);
+        p.new_unary_instruction(OperatorCode::SQRT,5u);
         ARIADNE_TEST_PRINT(p);
 
         UpperBoxType x=ExactBoxType{ {0.25,2.0}, {0.5,3.0} };
@@ -176,9 +182,9 @@ Void TestProcedure::test_propagate()
     ValidatedFormula x(ValidatedFormula::coordinate(0));
     ValidatedFormula y(ValidatedFormula::coordinate(1));
 
-    Vector< ValidatedFormula > ff={sqrt(sqr(x)+sqr(y)),2*x-y};
+    Vector<ValidatedFormula> ff={sqrt(sqr(x)+sqr(y)),2*x-y};
     ARIADNE_TEST_PRINT(ff);
-    Vector< ValidatedProcedure > pp(ff);
+    Vector<ValidatedProcedure> pp(ff);
     ARIADNE_TEST_PRINT(pp);
     UpperBoxType xx=ExactBoxType{ {0.125,2.0}, {0.25,3.0} };
     ExactBoxType cc=ExactBoxType{ {1.0,1.0}, {1.0,1.0} };

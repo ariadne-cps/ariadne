@@ -41,28 +41,12 @@
 
 #include "numeric/logical.decl.h"
 #include "numeric/number.decl.h"
+#include "expression/identifier.h"
 #include "expression/operations.h"
 
 namespace Ariadne {
 
-class Identifier;
-
 template<class T> class Set;
-
-class String;
-
-//! \ingroup ExpressionModule
-//! \brief A class representing the name of a variable.
-//! \details A proxy for a standard string; used to distinguish a string used as a variable name from a value.
-//! \sa Variable
-class Identifier : public String
-{
-  public:
-    Identifier() : String() { }
-    Identifier(const char* cstr) : String(cstr) { }
-    //! \brief Construct an identifier from a standard string.
-    Identifier(const StringType& str) : String(str) { }
-};
 
 class UntypedVariable;
 template<class T> class ExtendedVariable;
@@ -94,29 +78,6 @@ typedef Variable<Kleenean> KleeneanVariable;
 
 class RealVariableInterval;
 class RealVariablesBox;
-
-//! \ingroup ExpressionModule
-//! A named constant of type \a T.
-template<class T> class Constant
-    : public T
-{
-  public:
-    explicit Constant(const String& str, const T& value)
-        : T(value), _name(str) { }
-    const Identifier& name() const { return _name; }
-    const T& value() const { return *this; }
-  private:
-    Identifier _name;
-};
-
-template<> class Constant<String>
-    : public String
-{
-  public:
-    explicit Constant(const String& value) : String(value) { }
-    const Identifier& name() const { return static_cast<const Identifier&>(static_cast<const String&>(*this)); }
-    const String& value() const { return *this; }
-};
 
 enum VariableType { type_bool, type_tribool, type_enumerated, type_string, type_integer, type_real };
 enum VariableCategory { simple, dotted, primed };

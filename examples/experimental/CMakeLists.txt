@@ -3,6 +3,7 @@ set(EXPERIMENTAL_EXAMPLES
 	exponential
 	laser
 	bouncing-walls
+    compute_crossings_issue
 )
 
 foreach(example ${EXPERIMENTAL_EXAMPLES})

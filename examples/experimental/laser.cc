@@ -26,13 +26,13 @@ int main(int argc, char* argv[])
     /// Build the Hybrid System
 
     /// Get the automata
-    HybridAutomaton laser_trajectory_automaton = getLaserTrajectory();
-    HybridAutomaton exposure_automaton = getSkinExposure();
-    HybridAutomaton skin_temperature_automaton = getSkinTemperature();
-    HybridAutomaton cutting_depth_automaton = getCuttingDepth();
+    AtomicHybridAutomaton laser_trajectory = getLaserTrajectory();
+    AtomicHybridAutomaton exposure = getSkinExposure();
+    AtomicHybridAutomaton skin_temperature = getSkinTemperature();
+    AtomicHybridAutomaton cutting_depth = getCuttingDepth();
 
     //CompositeHybridAutomaton laser_system({laser_trajectory,exposure,skin_temperature,cutting_depth});
-    CompositeHybridAutomaton laser_system({laser_trajectory_automaton,exposure_automaton});
+    CompositeHybridAutomaton laser_system({laser_trajectory,exposure});
     std::cout << "laser_system:\n" << laser_system << "\n";
 
     // Compute the system evolution
@@ -51,12 +51,11 @@ int main(int argc, char* argv[])
     typedef GeneralHybridEvolver::OrbitType OrbitType;
     typedef GeneralHybridEvolver::EnclosureListType EnclosureListType;
 
-    StringVariable q("q");
-	StringConstant scanning("scanning");
-	StringConstant far("far");
-	StringConstant varying("varying");
-	StringConstant idle("idle");
-	DiscreteLocation initial_location={q|scanning,q|far};//,skin_temperature|varying,cutting_depth|idle};
+	AtomicDiscreteLocation scanning("scanning");
+	AtomicDiscreteLocation far("far");
+	AtomicDiscreteLocation varying("varying");
+	AtomicDiscreteLocation idle("idle");
+	DiscreteLocation initial_location={laser_trajectory|scanning,exposure|far};//,skin_temperature|varying,cutting_depth|idle};
     RealVariable p("p"), z("z"), zi("zi"), T("T"), vx("vx"), x("x");
     //HybridSet initial_set(initial_location,{p==0,z==0,zi==0,T==37,vx==Real(-0.092),x==Real(0.0033)});
     HybridSet initial_set(initial_location,{p==0,vx==Real(-0.092),x==Real(0.0033)});
@@ -67,4 +66,5 @@ int main(int argc, char* argv[])
 
     OrbitType orbit = evolver.orbit(initial_set,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
+
 }

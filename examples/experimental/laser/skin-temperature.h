@@ -14,7 +14,7 @@
 
 namespace Ariadne {
 
-HybridAutomaton getSkinTemperature()
+AtomicHybridAutomaton getSkinTemperature()
 {
     /// Parameters
 	RealConstant lambda("lambda",6825.5643_dec);
@@ -25,11 +25,11 @@ HybridAutomaton getSkinTemperature()
     /// Build the Hybrid System
 
     /// Create a HybridAutomaton object
-	HybridAutomaton automaton("skin-T");
+	AtomicHybridAutomaton automaton("skin-T");
 
     /// Create the discrete states
-	DiscreteLocation varying("varying");
-	DiscreteLocation evaporating("evaporating");
+	AtomicDiscreteLocation varying("varying");
+	AtomicDiscreteLocation evaporating("evaporating");
 
     RealVariable p("p");
     RealVariable T("T");

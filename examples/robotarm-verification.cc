@@ -96,7 +96,7 @@ Int main(Int argc, char** argv)
     // First mode: free run
     StringVariable robotarm("robot_arm");
     DiscreteLocation free(robotarm|"free");
-    DottedRealAssignments free_dyn({ dot(x)=vx, dot(vx) = ddot_xd + fifth*b/m * (dot_xd - vx) + fifth*k/m * (xd - x), dot(t)=1.0});
+    DottedRealAssignments free_dyn({ dot(x)=vx, dot(vx) = ddot_xd + fifth*b/m * (dot_xd - vx) + fifth*k/m * (xd - x), dot(t)=1});
     std::cout << "free_dyn = " << free_dyn << std::endl;
     robotarm_automaton.new_mode(free, free_dyn);
     DiscreteEvent finv("finv");

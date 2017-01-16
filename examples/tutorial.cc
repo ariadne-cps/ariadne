@@ -116,7 +116,7 @@ CompositeHybridAutomaton create_heating_system()
 
     // Create the clock subsystem
     HybridAutomaton clock;
-    clock.new_mode( {dot(C)=1.0} );
+    clock.new_mode( {dot(C)=1.0_decimal} );
     clock.new_transition( midnight, next(C)=0, C>=1, urgent );
 
     CompositeHybridAutomaton heating_system({clock,heater});
@@ -159,7 +159,7 @@ Void compute_evolution(const CompositeHybridAutomaton& heating_system,const Gene
     simulator.set_step_size(0.03125);
 
     // Set an initial point for the simulation
-    HybridPoint initial_point(heating_off, {C=0.0,T=18.0} );
+    HybridPoint initial_point(heating_off, {C=0.0_dec,T=18.0_dec} );
     cout << "initial_point=" << initial_point << endl;
     // Set the maximum simulation time
     HybridTime simulation_time(8.0,9);

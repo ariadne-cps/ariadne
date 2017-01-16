@@ -107,8 +107,8 @@ TestHybridSystem::test_build_hybrid_system()
 
     // Since alpha is a known constant when the valve is open or closed,
     // specify alpha by an algebraic equation.
-    valve_component.new_auxiliary(valve==open,{alpha=1.0});
-    valve_component.new_auxiliary(valve==closed,{alpha=-1.0});
+    valve_component.new_auxiliary(valve==open,{alpha=1});
+    valve_component.new_auxiliary(valve==closed,{alpha=-1});
     // Specify the differential equation for how the valve opens/closes.
     valve_component.new_dynamic(valve==opening,{dot(alpha)=1/T});
     valve_component.new_dynamic(valve==closing,{dot(alpha)=-1/T});

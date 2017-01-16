@@ -268,7 +268,7 @@ Void HybridEnclosure::apply_reset(DiscreteEvent event, DiscreteLocation target, 
     ARIADNE_ASSERT_MSG(map.argument_size()==this->dimension(),"*this="<<*this<<", event="<<event<<", space="<<space<<", target="<<target<<", map="<<map);
     this->_events.append(event);
     this->_location=target;
-    this->_space=space.variable_names();
+    this->_space=space.variables();
     this->_set.apply_map(map);
 }
 

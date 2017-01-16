@@ -79,6 +79,7 @@ typedef Expression<Kleenean> KleeneanExpression;
 typedef Expression<String> StringExpression;
 typedef Expression<Integer> IntegerExpression;
 typedef Expression<Real> RealExpression;
+typedef List<Expression<Real>> RealExpressions;
 
 template<class T> struct DeclareExpressionOperations;
 

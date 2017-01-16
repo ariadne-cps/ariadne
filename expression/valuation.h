@@ -49,7 +49,7 @@ namespace Ariadne {
 
 
 // Sequencing operators to make Valuation objects or objects convertible to Valuations.
-template<class X> Pair<Variable<X>,X> operator|(const Variable<X>& v, const typename Variable<X>::ValueType& c) { return Pair<Variable<X>,X>(v,c); }
+template<class X> Pair<Variable<X>,X> operator|(const Variable<X>& v, const typename Variable<X>::Type& c) { return Pair<Variable<X>,X>(v,c); }
 template<class X> Pair<Variable<X>,X> operator|(const Variable<X>& v, const Constant<X>& c) { return Pair<Variable<X>,X>(v,c.value()); }
 
 template<class T, class X> class Valuation;

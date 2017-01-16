@@ -101,6 +101,7 @@ template<> Nat __hash__<DiscreteEvent>(const DiscreteEvent& e) {
 template<> Nat __hash__<DiscreteLocation>(const DiscreteLocation& q) {
     return reinterpret_cast<const ushort&>(to_string(q).c_str()[0]); }
 
+DottedRealVariable dot(const RealVariable&);
 
 RealExpression var(const StringType& s) { return RealExpression(RealVariable(s)); }
 RealExpression operator+(const RealVariable& v) { return +RealExpression(v); }
@@ -188,7 +189,7 @@ Void export_formula()
 
 
     class_<IntegerVariable> integer_variable_class("IntegerVariable", init<StringType>());
-    integer_variable_class.def("__lshift__", (IntegerAssignment(IntegerVariable::*)(const IntegerExpression&)const) &IntegerVariable::operator=);
+    integer_variable_class.def("__lshift__", (IntegerAssignment(LetIntegerVariable::*)(const IntegerExpression&)const) &LetIntegerVariable::operator=);
     integer_variable_class.def("__pos__", &__pos__<IntegerExpression,IntegerVariable>);
     integer_variable_class.def("__neg__", &__neg__<IntegerExpression,IntegerVariable>);
     integer_variable_class.def("__add__", &__add__<IntegerExpression,IntegerVariable,IntegerExpression>);
@@ -253,8 +254,7 @@ Void export_formula()
     real_variable_class.def("__ge__", &__ge__<ContinuousPredicate,RealVariable,RealExpression>);
     real_variable_class.def("__lt__", &__lt__<ContinuousPredicate,RealVariable,RealExpression>);
     real_variable_class.def("__gt__", &__gt__<ContinuousPredicate,RealVariable,RealExpression>);
-    real_variable_class.def("__lshift__", (RealAssignment(RealVariable::*)(const RealExpression&)const) &RealVariable::operator=);
-    real_variable_class.def("eq", (RealAssignment(RealVariable::*)(const RealExpression&)const) &RealVariable::operator=);
+    real_variable_class.def("__lshift__", (RealAssignment(LetRealVariable::*)(const RealExpression&)const) &LetRealVariable::operator=);
     real_variable_class.def(self_ns::str(self));
 
     class_<RealVariables> real_variables_class("RealVariables", init<StringType,SizeType>());

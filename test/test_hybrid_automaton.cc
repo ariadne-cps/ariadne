@@ -32,7 +32,6 @@
 #include "hybrid/hybrid_automata.h"
 #include <boost/concept_check.hpp>
 
-using namespace std;
 using namespace Ariadne;
 
 class TestHybridSystem {
@@ -107,8 +106,8 @@ TestHybridSystem::test_build_hybrid_system()
 
     // Since alpha is a known constant when the valve is open or closed,
     // specify alpha by an algebraic equation.
-    valve_component.new_auxiliary(valve==open,{alpha=1});
-    valve_component.new_auxiliary(valve==closed,{alpha=-1});
+    valve_component.new_auxiliary(valve==open,{let(alpha)=1});
+    valve_component.new_auxiliary(valve==closed,{let(alpha)=-1});
     // Specify the differential equation for how the valve opens/closes.
     valve_component.new_dynamic(valve==opening,{dot(alpha)=1/T});
     valve_component.new_dynamic(valve==closing,{dot(alpha)=-1/T});
@@ -211,7 +210,6 @@ TestHybridAutomaton::test()
     ARIADNE_TEST_CALL(test_multiple_guard());
     ARIADNE_TEST_CALL(test_multiple_transition());
     ARIADNE_TEST_CALL(test_overspecified_reset());
-
     ARIADNE_TEST_CALL(test_underspecified_mode());
     ARIADNE_TEST_CALL(test_underspecified_reset());
     return;
@@ -268,10 +266,10 @@ TestHybridAutomaton::test_overspecified_dynamic()
     HybridAutomaton system;
     RealVariable x("x");
     RealVariable y("y");
-    ARIADNE_TEST_EXECUTE( system.new_mode( {x=y},{dot(y)=x} ) );
-    ARIADNE_TEST_THROWS( system.new_mode( {x=1,x=x+2} ),SystemSpecificationError);
+    ARIADNE_TEST_EXECUTE( system.new_mode( {let(x)=y},{dot(y)=x} ) );
+    ARIADNE_TEST_THROWS( system.new_mode( {let(x)=1,let(x)=x+2} ),SystemSpecificationError);
     ARIADNE_TEST_THROWS( system.new_mode( {dot(x)=1,dot(x)=0} ),SystemSpecificationError);
-    ARIADNE_TEST_THROWS( system.new_mode( {x=1},{dot(x)=0} ),SystemSpecificationError);
+    ARIADNE_TEST_THROWS( system.new_mode( {let(x)=1},{dot(x)=0} ),SystemSpecificationError);
 }
 
 Void
@@ -281,10 +279,10 @@ TestHybridAutomaton::test_algebraic_loops()
     RealVariable x("x");
     RealVariable y("y");
     RealVariable z("z");
-    ARIADNE_TEST_THROWS( HybridAutomaton().new_mode( {x=y+1,y=x} ),AlgebraicLoopError);
-    ARIADNE_TEST_THROWS( HybridAutomaton().new_mode( {x=2*x+1} ),AlgebraicLoopError);
-    ARIADNE_TEST_EXECUTE( HybridAutomaton().new_mode( {x=y,y=z} ) );
-    ARIADNE_TEST_EXECUTE( HybridAutomaton().new_mode( {x=y,y=z},{dot(z)=x+y+z} ) );
+    ARIADNE_TEST_THROWS( HybridAutomaton().new_mode( {let(x)=y+1,let(y)=x} ),AlgebraicLoopError);
+    ARIADNE_TEST_THROWS( HybridAutomaton().new_mode( {let(x)=2*x+1} ),AlgebraicLoopError);
+    ARIADNE_TEST_EXECUTE( HybridAutomaton().new_mode( {let(x)=y,let(y)=z} ) );
+    ARIADNE_TEST_EXECUTE( HybridAutomaton().new_mode( {let(x)=y,let(y)=z},{dot(z)=x+y+z} ) );
 }
 
 Void
@@ -358,7 +356,7 @@ TestHybridAutomaton::test_overspecified_reset()
     RealVariable x("x");
     RealVariable y("y");
     RealVariable z("z");
-    ARIADNE_TEST_EXECUTE( system.new_mode( q1,{x=1}, {dot(y)=1} ) );
+    ARIADNE_TEST_EXECUTE( system.new_mode( q1,{let(x)=1}, {dot(y)=1} ) );
     ARIADNE_TEST_EXECUTE( system.new_transition( q1, e1, q1 ) ); // OK, underspecified
     ARIADNE_TEST_EXECUTE( system.new_transition( q1, e2, q1, {prime(y)=y+1} ) );
     ARIADNE_TEST_EXECUTE( system.new_transition( q1, e3, q1, {prime(y)=y+1,prime(z)=x} ) ); // OK, z in another component
@@ -383,13 +381,12 @@ TestHybridAutomaton::test_underspecified_mode()
     RealVariable z("z");
 
     // The following mode should be valid
-    ARIADNE_TEST_EXECUTE( system.new_mode( qs,{x=y+1},{dot(y)=x+y} ) );
+    ARIADNE_TEST_EXECUTE( system.new_mode( qs,{let(x)=y+1},{dot(y)=x+y} ) );
     ARIADNE_TEST_EXECUTE( system.new_action( qs, x+y<=1, e, x+y>=0 ) );
     ARIADNE_TEST_EXECUTE( system.new_update( qs, e, qs, {prime(y)=x+y} ) );
     ARIADNE_TEST_EXECUTE( system.check_mode( qs ) );
-
     // Test invalidity of the following modes
-    ARIADNE_TEST_EXECUTE( system.new_mode( q1,{x=y} ) );
+    ARIADNE_TEST_EXECUTE( system.new_mode( q1,{let(x)=y} ) );
     ARIADNE_TEST_THROWS( system.check_mode( q1 ), UnderspecifiedDynamicError );
     ARIADNE_TEST_EXECUTE( system.new_mode( q2,{dot(x)=x+y} ) );
     ARIADNE_TEST_THROWS( system.check_mode( q2 ), UnderspecifiedDynamicError );
@@ -418,7 +415,7 @@ TestHybridAutomaton::test_underspecified_reset()
     RealVariable y("y");
     RealVariable z("z");
 
-    ARIADNE_TEST_EXECUTE( system.new_mode( qt,{x=1},{dot(y)=1} ) );
+    ARIADNE_TEST_EXECUTE( system.new_mode( qt,{let(x)=1},{dot(y)=1} ) );
     ARIADNE_TEST_EXECUTE( system.new_mode( q1,{dot(x)=x} ) );
     ARIADNE_TEST_EXECUTE( system.new_mode( q2,{dot(x)=x} ) );
     ARIADNE_TEST_EXECUTE( system.new_mode( q3,{dot(x)=x} ) );
@@ -478,8 +475,8 @@ TestHybridAutomaton::test_build_hybrid_system()
 
     // Since alpha is a known constant when the valve is open or closed,
     // specify alpha by an algebraic equation.
-    valve_automaton.new_mode({valve|open},{alpha=1});
-    valve_automaton.new_mode({valve|closed},{alpha=-1});
+    valve_automaton.new_mode({valve|open},{let(alpha)=1});
+    valve_automaton.new_mode({valve|closed},{let(alpha)=-1});
     // Specify the differential equation for how the valve opens/closes.
     valve_automaton.new_mode({valve|opening},{dot(alpha)=1/T});
     valve_automaton.new_mode({valve|closing},{dot(alpha)=-1/T});
@@ -583,8 +580,8 @@ TestHybridAutomaton::test_build_intensional_hybrid_automaton()
 
     // Since alpha is a known constant when the valve is open or closed,
     // specify alpha by an algebraic equation.
-    valve_automaton.new_mode({valve|open},(alpha=1));
-    valve_automaton.new_mode({valve|closed},(alpha=-1));
+    valve_automaton.new_mode({valve|open},(let(alpha)=1));
+    valve_automaton.new_mode({valve|closed},(let(alpha)=-1));
     // Specify the differential equation for how the valve opens/closes.
     valve_automaton.new_mode({valve|opening},{dot(alpha)=1/T});
     valve_automaton.new_mode({valve|closing},{dot(alpha)=-1/T});

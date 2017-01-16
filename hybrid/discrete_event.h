@@ -44,14 +44,11 @@ class DiscreteEvent {
     Bool operator>=(const DiscreteEvent& e) const { return this->_id>=e._id; }
     Bool operator< (const DiscreteEvent& e) const { return this->_id< e._id; }
     Bool operator> (const DiscreteEvent& e) const { return this->_id> e._id; }
-    friend OutputStream& operator<<(OutputStream& os, const DiscreteEvent& e);
+    friend OutputStream& operator<<(OutputStream& os, const DiscreteEvent& e) {
+        return os << e._id; }
   private:
     StringType _id;
 };
-
-inline OutputStream& operator<<(OutputStream& os, const DiscreteEvent& e) {
-    return os << e._id;
-}
 
 #ifdef ARIADNE_ENABLE_SERIALIZATION
   template<class A> inline Void serialize(A& archive, DiscreteEvent& event, const Nat version) {

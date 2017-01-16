@@ -31,7 +31,6 @@
 #include <string>
 #include "utility/container.h"
 #include "expression/valuation.h"
-#include <boost/iterator/iterator_concepts.hpp>
 
 namespace Ariadne {
 
@@ -43,11 +42,11 @@ class DiscreteLocation
   public:
     //! \brief Construct a location which does not set any discrete variables.
     DiscreteLocation() : StringValuation() { }
-    explicit DiscreteLocation(const StringType& str) : StringValuation() { this->insert(StringVariable("q"),str); }
+    explicit DiscreteLocation(const StringType& str) : StringValuation() { this->insert(StringVariable("q"),str); } [[deprecated]]
     //! \brief Construct a location for which the string variable named \a var is given value \a val.
     explicit DiscreteLocation(const Identifier& var, const String& val) : StringValuation() { this->insert(StringVariable(var),val); }
     explicit DiscreteLocation(const StringType& var, const StringType& val) : StringValuation() { this->insert(StringVariable(var),val); }
-    explicit DiscreteLocation(const Int& num) : StringValuation() { this->insert(StringVariable("q"),to_str(num)); }
+    explicit DiscreteLocation(const Int& num) : StringValuation() { this->insert(StringVariable("q"),to_str(num)); } [[deprecated]]
     DiscreteLocation(const StringValuation& val) : StringValuation(val) { }
     DiscreteLocation(const DiscreteLocation&) = default;
     DiscreteLocation(const Map<Identifier,String>& sm) : StringValuation(sm) { }
@@ -58,43 +57,25 @@ class DiscreteLocation
 
 //! \relates DiscreteLocation \brief Combine the values of variables of two locations.
 DiscreteLocation join(const DiscreteLocation& loc1, const DiscreteLocation& loc2);
+//! \relates DiscreteLocation \brief Equality test.
+//! Throws an IndistinguishableLocationsError if the valuations are not identical but have no variable with distinct values.
 Bool operator==(const DiscreteLocation& loc1, const DiscreteLocation& loc2);
+//! \relates DiscreteLocation \brief Inequality test.
 Bool operator!=(const DiscreteLocation& loc1, const DiscreteLocation& loc2);
+//! \relates DiscreteLocation \brief A total order on DiscreteLocation, allowing comparison of non-distinuishable valuations.
 Bool operator<(const DiscreteLocation& loc1, const DiscreteLocation& loc2);
 
 //! \relates DiscreteLocation \brief Test if two locations are distinguishable i.e. specify a common variable which takes different values.
-inline Bool are_distinguishable(const DiscreteLocation& location1, const DiscreteLocation& location2) {
-    for(Map<Identifier,String>::ConstIterator iter1=location1._values.begin(); iter1!=location1._values.end(); ++iter1) {
-        if(location2._values.has_key(iter1->first) && location2._values[iter1->first] != iter1->second) {
-            return true;
-        }
-    }
-    return false;
-}
+Bool are_distinguishable(const DiscreteLocation& location1, const DiscreteLocation& location2);
 
 //! \relates DiscreteLocation \brief Test if \a location1 and \a location2 are the same i.e. define the same values.
-inline Bool are_same(const DiscreteLocation& location1, const DiscreteLocation& location2) {
-    return location1._values == location2._values;
-}
+Bool are_same(const DiscreteLocation& location1, const DiscreteLocation& location2);
 
 //! \relates DiscreteLocation \brief Test if \a partial_location is defined by a restricted set of variables of \a full_location.
-inline Bool is_restriction(const DiscreteLocation& partial_location, const DiscreteLocation& full_location) {
-    for(Map<Identifier,String>::ConstIterator value_iter=partial_location._values.begin(); value_iter!=partial_location._values.end(); ++value_iter) {
-        if(!full_location._values.has_key(value_iter->first) || full_location[StringVariable(value_iter->first)]!=value_iter->second) {
-            return false;
-        }
-    }
-    return true;
-}
+Bool is_restriction(const DiscreteLocation& partial_location, const DiscreteLocation& full_location);
 
-inline DiscreteLocation restrict(const DiscreteLocation& location, const Set<Identifier>& variables) {
-    ARIADNE_ASSERT_MSG(subset(location._values.keys(),variables)," location "<<location<<" variables not a subset of "<<variables);
-    return restrict_keys(location._values,variables);
-}
-
-inline DiscreteLocation restrict(const DiscreteLocation& location, const List<Identifier>& variables) {
-    return restrict(location._values,Set<Identifier>(variables));
-}
+//! \relates DiscreteLocation \brief Retrict the variables defined in \a location to those of \a variables.
+DiscreteLocation restrict(const DiscreteLocation& location, const Set<Identifier>& variables);
 
 } //namespace Ariadne
 

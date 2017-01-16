@@ -504,10 +504,8 @@ HybridAutomaton::sort(const List<RealAssignment>& auxiliary) {
                 }
                 dependencies.erase(iter->name());
                 found=true;
-                LinkedList<RealVariable>::Iterator next=iter;
-                ++next;
                 lhs_list.erase(iter);
-                iter=next;
+                iter=lhs_list.begin();
             } else {
                 ++iter;
             }
@@ -517,6 +515,7 @@ HybridAutomaton::sort(const List<RealAssignment>& auxiliary) {
                           "Algebraic dependencies among variables "<<lhs_list<<" in auxiliary equations "<<auxiliary);
         }
     }
+    ARIADNE_ASSERT(auxiliary.size()==sorted_auxiliary.size());
     return sorted_auxiliary;
 }
 

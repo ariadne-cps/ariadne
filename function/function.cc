@@ -23,13 +23,10 @@
 
 #include "numeric/numeric.h"
 
-#include "algebra/differential.h"
 #include "numeric/operators.h"
-#include "expression/variables.h"
-#include "expression/expression.h"
-#include "expression/space.h"
-#include "function/formula.h"
+#include "algebra/differential.h"
 #include "algebra/algebra.h"
+#include "function/formula.h"
 #include "function/taylor_model.h"
 
 #include "function/function.h"
@@ -60,32 +57,6 @@ template<class R, class A, DisableIf<IsConvertible<A,R>> =dummy> R checked_conve
 template<class R, class A, EnableIf<IsConstructible<R,A>> =dummy> R checked_construct(A const& a) { return R(a); }
 template<class R, class A, DisableIf<IsConstructible<R,A>> =dummy> R checked_construct(A const& a) {
     ARIADNE_THROW(std::runtime_error,"checked_construct<R,A> with R="<<class_name<R>()<<", A="<<class_name<A>(),"argument "<<a<<" is not explicitly convertible to result."); }
-
-// Functions for converting from Expression classes to Function classes via Formula
-template<class X> class Expression;
-template<class X> class Variable;
-template<class X> class Space;
-SizeType dimension(const Space<Real>& spc);
-Formula<EffectiveNumber> make_formula(const Expression<Real>& expr, const Space<Real>& spc);
-Vector<Formula<EffectiveNumber>> make_formula(const Vector<Expression<Real>>& e, const Space<Real> spc);
-
-EffectiveScalarUnivariateFunction make_formula_function(SizeOne as, const Formula<EffectiveNumber>& fm) {
-    return EffectiveScalarUnivariateFunction(RealDomain(),fm); }
-EffectiveScalarFunction make_formula_function(SizeType as, const Formula<EffectiveNumber>& fm) {
-    return EffectiveScalarFunction(EuclideanDomain(as),fm); }
-EffectiveVectorFunction make_formula_function(SizeType as, const Vector<Formula<EffectiveNumber>>& fm) {
-    return EffectiveVectorFunction(EuclideanDomain(as),fm); }
-
-// DEPRECATED
-EffectiveScalarFunction make_function(const Expression<Real>& expr, const Space<Real>& spc) {
-    return make_formula_function(dimension(spc),make_formula(expr,spc)); }
-
-EffectiveScalarUnivariateFunction make_function(const Variable<Real>& var, const Expression<Real>& expr) {
-    Space<Real> spc={var}; return make_formula_function(SizeOne(),make_formula(expr,{var})); }
-EffectiveScalarFunction make_function(const Space<Real>& spc, const Expression<Real>& expr) {
-    return make_formula_function(dimension(spc),make_formula(expr,spc)); }
-EffectiveVectorFunction make_function(const Space<Real>& spc, const Vector<Expression<Real>>& expr) {
-    return make_formula_function(dimension(spc),make_formula(expr,spc)); }
 
 //------------------------ Vector of Scalar functions  -----------------------------------//
 
@@ -187,7 +158,35 @@ struct FunctionElement
 
 
 
-//------------------------ Conversion to a formula -----------------------------------//
+//------------------------ Converting to and from Expression classes to Function classes via Formula -----------------------------------//
+
+template<class X> class Expression;
+template<class X> class Variable;
+template<class X> class Space;
+
+SizeType dimension(const Space<Real>& spc);
+
+Formula<EffectiveNumber> make_formula(const Expression<Real>& expr, const Variable<Real>& var);
+Formula<EffectiveNumber> make_formula(const Expression<Real>& expr, const Space<Real>& spc);
+Vector<Formula<EffectiveNumber>> make_formula(const Vector<Expression<Real>>& e, const Space<Real>& spc);
+
+EffectiveScalarUnivariateFunction make_formula_function(SizeOne as, const Formula<EffectiveNumber>& fm) {
+    return EffectiveScalarUnivariateFunction(RealDomain(),fm); }
+EffectiveScalarFunction make_formula_function(SizeType as, const Formula<EffectiveNumber>& fm) {
+    return EffectiveScalarFunction(EuclideanDomain(as),fm); }
+EffectiveVectorFunction make_formula_function(SizeType as, const Vector<Formula<EffectiveNumber>>& fm) {
+    return EffectiveVectorFunction(EuclideanDomain(as),fm); }
+
+EffectiveScalarUnivariateFunction make_function(const Variable<Real>& var, const Expression<Real>& expr) {
+    return make_formula_function(SizeOne(),make_formula(expr,var)); }
+EffectiveScalarFunction make_function(const Space<Real>& spc, const Expression<Real>& expr) {
+    return make_formula_function(dimension(spc),make_formula(expr,spc)); }
+EffectiveVectorFunction make_function(const Space<Real>& spc, const Vector<Expression<Real>>& expr) {
+    return make_formula_function(dimension(spc),make_formula(expr,spc)); }
+
+[[DEPRECATED]]
+EffectiveScalarFunction make_function(const Expression<Real>& expr, const Space<Real>& spc) {
+    return make_function(spc,expr); }
 
 Formula<Real> formula(const EffectiveScalarFunction& f) {
     const ScalarFunctionInterface<EffectiveTag>* fptr=f.raw_pointer();
@@ -206,7 +205,7 @@ Formula<Real> formula(const EffectiveScalarFunction& f) {
     ARIADNE_FAIL_MSG("Cannot compute formula for function "<<f<<"\n");
 }
 
-Vector< Formula<Real> > formula(const EffectiveVectorFunction& f) {
+Vector<Formula<Real>> formula(const EffectiveVectorFunction& f) {
     const VectorFunctionInterface<EffectiveTag>& fi=f;
     const VectorFormulaFunction<Real>* ff;
     const VectorOfScalarFunction<EffectiveTag>* vf;
@@ -221,6 +220,23 @@ Vector< Formula<Real> > formula(const EffectiveVectorFunction& f) {
     }
 }
 
+//------------------------ Formula Function ----------------------------------//
+
+template<class P, class Y> ScalarFunction<P,IntervalDomain> make_formula_function(IntervalDomain dom, Scalar<Formula<Y>> const& e) {
+    assert(false);
+}
+
+template<class P, class Y> VectorFunction<P,IntervalDomain> make_formula_function(IntervalDomain dom, Vector<Formula<Y>> const& e) {
+    assert(false);
+}
+
+template<class P, class Y> ScalarFunction<P,BoxDomain> make_formula_function(BoxDomain dom, Scalar<Formula<Y>> const& e) {
+    return ScalarFunction<P,BoxDomain>(new ScalarFormulaFunction<Y>(dom.dimension(),e));
+}
+
+template<class P, class Y> VectorFunction<P,BoxDomain> make_formula_function(BoxDomain dom, Vector<Formula<Y>> const& e) {
+    return VectorFunction<P,BoxDomain>(new VectorFormulaFunction<Y>(dom.dimension(),e));
+}
 
 
 //------------------------ Function Constructors -----------------------------------//
@@ -406,22 +422,6 @@ template<class P, class D, class C> Function<P,D,C>::Function(ResultSizeType rs,
     (*this) = make_zero_function<P,D>(rs,dom);
 }
 
-template<class P, class Y> ScalarFunction<P,IntervalDomain> make_formula_function(IntervalDomain dom, Scalar<Formula<Y>> const& e) {
-    assert(false);
-}
-
-template<class P, class Y> VectorFunction<P,IntervalDomain> make_formula_function(IntervalDomain dom, Vector<Formula<Y>> const& e) {
-    assert(false);
-}
-
-template<class P, class Y> ScalarFunction<P,BoxDomain> make_formula_function(BoxDomain dom, Scalar<Formula<Y>> const& e) {
-    return ScalarFunction<P,BoxDomain>(new ScalarFormulaFunction<Y>(dom.dimension(),e));
-}
-
-template<class P, class Y> VectorFunction<P,BoxDomain> make_formula_function(BoxDomain dom, Vector<Formula<Y>> const& e) {
-    return VectorFunction<P,BoxDomain>(new VectorFormulaFunction<Y>(dom.dimension(),e));
-}
-
 template<class P, class D, class C> Function<P,D,C>::Function(DomainType dom, Result<Formula<Y>>const& e) {
     *this = make_formula_function<P>(dom,e);
 }
@@ -457,18 +457,6 @@ template<class P, class D, class C> Function<P,D,C>::Function(Vector<ScalarFunct
 }
 
 //------------------------ Scalar Function ----------------------------------//
-
-/*
-template<class P, class D> ScalarFunction<P,D>::ScalarFunction(DomainType dom)
-    : ScalarFunction<P,D>(dom,Formula<X>::zero())
-{
-}
-
-template<class P, class D> ScalarFunction<P,D>::ScalarFunction(DomainType dom, Formula<X> const& e)
-    : Function<P,D,C>(new ScalarFormulaFunction<X>(dom.dimension(),e))
-{
-}
-*/
 
 //------------------------ Vector Function ----------------------------------//
 
@@ -1219,18 +1207,12 @@ Covector<UpperIntervalType> gradient_range(ValidatedScalarFunction const& f, con
 Matrix<UpperIntervalType> jacobian_range(ValidatedVectorFunction const& f, const Vector<UpperIntervalType>& x) {
     return static_cast<Matrix<UpperIntervalType>>(static_cast<Matrix<ValidatedNumericType>>(jacobian(f,reinterpret_cast<Vector<ValidatedNumericType>const&>(x)))); }
 
-
-RealExpression evaluate(EffectiveScalarFunction const& f, Vector<RealVariable> const& vars) {
-    typedef Algebra<Real> RealAlgebra;
-    RealAlgebra az(RealExpression::constant(0));
-    Vector<RealAlgebra> va(vars.size(),az);
-    for(SizeType i=0; i!=va.size(); ++i) { va[i]=RealAlgebra(RealExpression(vars[i])); }
-    RealAlgebra fa=f(va);
-    return fa.template extract<RealExpression>();
+Formula<Real> make_formula(const EffectiveScalarFunction& f) {
+    Vector<Formula<Real>> x(f.argument_size());
+    for(SizeType i=0; i!=x.size(); ++i) {
+        x[i]=Formula<Real>::coordinate(i);
+    }
+    return f(x);
 }
-
-
-
-
 
 } // namespace Ariadne

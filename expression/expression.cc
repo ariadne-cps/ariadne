@@ -860,7 +860,12 @@ Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Space<Rea
     }
 }
 
-Vector<Formula<EffectiveNumber>> make_formula(const Vector<Expression<Real>>& e, const Space<Real> spc)
+Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Variable<Real>& var)
+{
+    return make_formula(e,Space<Real>({var}));
+}
+
+Vector<Formula<EffectiveNumber>> make_formula(const Vector<Expression<Real>>& e, const Space<Real>& spc)
 {
     Vector<Formula<EffectiveNumber>> res(e.size());
     for(SizeType i=0; i!=e.size(); ++i) {
@@ -888,6 +893,21 @@ Vector<Formula<EffectiveNumber>> make_formula(const Vector<Expression<Real>>& ou
     return res;
 }
 
+
+Expression<Real> make_expression(const Formula<Real>& f, const Space<Real>& s) {
+    const List<RealVariable>& vars=s.variables();
+    typedef Algebra<Real> RealAlgebra;
+    RealAlgebra az(RealExpression::constant(0));
+    Vector<RealAlgebra> va(vars.size(),az);
+    for(SizeType i=0; i!=va.size(); ++i) { va[i]=RealAlgebra(RealExpression(vars[i])); }
+    RealAlgebra fa=evaluate(f,va);
+    return fa.template extract<RealExpression>();
+}
+
+Formula<Real> make_formula(const EffectiveScalarFunction& f);
+Expression<Real> make_expression(const Formula<Real>& f, const Space<Real>& s);
+Expression<Real> make_expression(const ScalarFunction<EffectiveTag>& f, const Space<Real>& s) {
+    return make_expression(make_formula(f),s); }
 
 
 } // namespace Ariadne

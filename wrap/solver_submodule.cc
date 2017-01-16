@@ -43,6 +43,9 @@ namespace Ariadne {
 typedef Vector<ValidatedNumericType> ValidatedPointType;
 typedef Vector<ApproximateNumericType> ApproximatePointType;
 
+template<class X1, class X2>
+Bool operator<(const Vector<X1>& v1, const Vector<X2>& v2);
+
 class SolverWrapper
   : public SolverInterface, public wrapper< SolverInterface >
 {

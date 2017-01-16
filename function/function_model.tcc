@@ -60,6 +60,10 @@ template<class P, class PR, class PRE> inline ScalarFunctionModel<P,PR,PRE> Scal
     ScalarFunctionModel<P,PR,PRE> const& f=*this; return compose(g,f.create_identity());
 }
 
+template<class P, class PR, class PRE> inline VectorFunctionModel<P,PR,PRE> ScalarFunctionModel<P,PR,PRE>::create(const VectorFunction<P>& g) const {
+    ScalarFunctionModel<P,PR,PRE> const& f=*this; return compose(g,f.create_identity());
+}
+
 
 template<class P, class PR, class PRE> inline Vector<ScalarFunctionModel<P,PR,PRE>> ScalarFunctionModel<P,PR,PRE>::create_coordinates(DomainType const& dom) const {
     Vector<ScalarFunctionModel<P,PR,PRE>> res(dom.dimension(),this->_ptr->_create_zero(dom));

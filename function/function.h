@@ -309,8 +309,8 @@ EffectiveVectorFunction compose(const EffectiveVectorFunction& f, const Effectiv
 
 EffectiveScalarFunction lie_derivative(const EffectiveScalarFunction& g, const EffectiveVectorFunction& f);
 
-Formula<EffectiveNumericType> formula(const EffectiveScalarFunction& f);
-Vector< Formula<EffectiveNumericType> > formula(const EffectiveVectorFunction& f);
+Formula<EffectiveNumericType> make_formula(const EffectiveScalarFunction& f);
+Vector<Formula<EffectiveNumericType>> make_formula(const EffectiveVectorFunction& f);
 //RealExpression evaluate(EffectiveScalarFunction const& f, Vector<RealVariable> const& vars);
 
 

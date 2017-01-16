@@ -52,6 +52,7 @@ template<class P, class PR=Precision64, class PRE=PR> class FunctionModelBuilder
     ScalarFunctionModel<P,PR,PRE> const& _prototype;
   public:
     FunctionModelBuilder(ScalarFunctionModel<P,PR,PRE> const& f);
+    FunctionModelBuilder(VectorFunctionModel<P,PR,PRE> const& f);
 
     ScalarFunctionModel<P,PR,PRE> create(ScalarFunction<P> const& f);
     VectorFunctionModel<P,PR,PRE> create(VectorFunction<P> const& f);
@@ -66,6 +67,7 @@ template<class P, class PR=Precision64, class PRE=PR> class FunctionModelBuilder
 template<class P, class PR, class PRE> class ScalarFunctionModel
     : public DispatchAlgebraOperators<ScalarFunctionModel<P,PR,PRE>, CanonicalNumericType<P,PR,PRE>>
     , public ProvideConcreteGenericArithmeticOperators<ScalarFunctionModel<P,PR,PRE>>
+    , public ProvideConcreteGenericArithmeticOperators<ScalarFunctionModel<P,PR,PRE>,Number<P>>
 {
   public:
     typedef ScalarFunction<P> GenericType;
@@ -95,6 +97,7 @@ template<class P, class PR, class PRE> class ScalarFunctionModel
     ScalarFunctionModel<P,PR,PRE> create_coordinate(SizeType j) const;
     VectorFunctionModel<P,PR,PRE> create_identity() const;
     ScalarFunctionModel<P,PR,PRE> create(const ScalarFunction<P>& f) const;
+    VectorFunctionModel<P,PR,PRE> create(const VectorFunction<P>& f) const;
     CanonicalNumericType<P,PR,PRE> create(const Number<P>& f) const;
     Vector<ScalarFunctionModel<P,PR,PRE>> create_coordinates(DomainType const&) const;
     ScalarFunctionModel<P,PR,PRE>& operator=(const Number<P>& c);
@@ -156,6 +159,23 @@ template<class P, class PR, class PRE> class ScalarFunctionModel
         return add(neg(std::move(f2)),c1); }
     friend inline ScalarFunctionModel<P,PR,PRE> div(const CanonicalNumericType<P,PR,PRE>& c1, ScalarFunctionModel<P,PR,PRE> f2) {
         return mul(rec(std::move(f2)),c1); }
+
+    friend inline ScalarFunctionModel<P,PR,PRE> add(ScalarFunctionModel<P,PR,PRE> f1, const Number<P>& c2) {
+        CanonicalNumericType<P,PR,PRE> s2=factory(f1).create(c2); return add(f1,s2); }
+    friend inline ScalarFunctionModel<P,PR,PRE> sub(ScalarFunctionModel<P,PR,PRE> f1, const Number<P>& c2) {
+        return add(f1,neg(c2)); }
+    friend inline ScalarFunctionModel<P,PR,PRE> mul(ScalarFunctionModel<P,PR,PRE> f1, const Number<P>& c2) {
+        CanonicalNumericType<P,PR,PRE> s2=factory(f1).create(c2); return mul(f1,s2); }
+    friend inline ScalarFunctionModel<P,PR,PRE> div(ScalarFunctionModel<P,PR,PRE> f1, const Number<P>& c2) {
+        return mul(f1,rec(c2)); }
+    friend inline ScalarFunctionModel<P,PR,PRE> add(const Number<P>& c1, ScalarFunctionModel<P,PR,PRE> f2) {
+        return add(f2,c1); }
+    friend inline ScalarFunctionModel<P,PR,PRE> sub(const Number<P>& c1, ScalarFunctionModel<P,PR,PRE> f2) {
+        return add(neg(f2),c1); }
+    friend inline ScalarFunctionModel<P,PR,PRE> mul(const Number<P>& c1, ScalarFunctionModel<P,PR,PRE> f2) {
+        return mul(f2,c1); }
+    friend inline ScalarFunctionModel<P,PR,PRE> div(const Number<P>& c1, ScalarFunctionModel<P,PR,PRE> f2) {
+        return mul(rec(f2),c1); }
 
     friend inline ScalarFunctionModel<P,PR,PRE> pow(const ScalarFunctionModel<P,PR,PRE>& f1, Int n2) {
         return generic_pow(f1,n2); }
@@ -259,6 +279,8 @@ template<class P, class PR, class PRE> class VectorFunctionModel
     typedef Box<Interval<FloatUpperBound<PR>>> RangeType;
   public:
     inline VectorFunctionModel() : _ptr() { }
+    inline VectorFunctionModel(SharedPointer<const VectorFunctionModelInterface<P,PR,PRE>> vfp)
+        : _ptr(vfp->_clone()) { }
     inline VectorFunctionModel(SizeType n, const ScalarFunctionModelInterface<P,PR,PRE>& sf)
         : _ptr(sf._create_vector(n)) { for(SizeType i=0; i!=n; ++i) { (*this)[i]=sf; } }
     inline VectorFunctionModel(Array<ScalarFunctionModel<P,PR,PRE>> const& asf)
@@ -296,6 +318,9 @@ template<class P, class PR, class PRE> class VectorFunctionModel
         return dfx.jacobian(); }
 
     inline Void restrict(const ExactBoxType& d) { this->_ptr->restrict(d); }
+  public:
+    friend FunctionModelBuilder<P,PR,PRE> factory(VectorFunctionModel<P,PR,PRE> const& f) {
+        return FunctionModelBuilder<P,PR,PRE>(f); }
   public:
     friend inline ScalarFunctionModel<P,PR,PRE> compose(const ScalarFunction<P>& f, const VectorFunctionModel<P,PR,PRE>& g) {
         return g._ptr->_compose(f); }
@@ -445,6 +470,8 @@ template<class P, class PR, class PRE> VectorFunctionModelElement<P,PR,PRE>::ope
 
 template<class P, class PR, class PRE> inline FunctionModelBuilder<P,PR,PRE>::FunctionModelBuilder(ScalarFunctionModel<P,PR,PRE> const& f)
     : _prototype(f) { }
+template<class P, class PR, class PRE> inline FunctionModelBuilder<P,PR,PRE>::FunctionModelBuilder(VectorFunctionModel<P,PR,PRE> const& f)
+    : _prototype(f.create_zero()) { }
 template<class P, class PR, class PRE> inline ScalarFunctionModel<P,PR,PRE> FunctionModelBuilder<P,PR,PRE>::create(ScalarFunction<P> const& f) {
     return _prototype.create(f); }
 template<class P, class PR, class PRE> inline VectorFunctionModel<P,PR,PRE> FunctionModelBuilder<P,PR,PRE>::create(VectorFunction<P> const& f) {

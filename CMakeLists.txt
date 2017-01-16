@@ -94,7 +94,7 @@ add_subdirectory(output)
 add_subdirectory(hybrid)
 
 add_subdirectory(test)
-#add_subdirectory(wrap)
+add_subdirectory(wrap)
 add_subdirectory(python)
 add_subdirectory(examples)
 

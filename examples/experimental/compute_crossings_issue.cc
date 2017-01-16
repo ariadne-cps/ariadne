@@ -1,18 +1,4 @@
-/*****************************************************************************************************
- *            laser.cc
- *
- *  Testing the laser cutting system.
- *
- *  Copyright  2016  Luca Geretti
- *
- *****************************************************************************************************/
-
 #include "ariadne.h"
-
-#include "laser/skin-exposure.h"
-#include "laser/laser-trajectory.h"
-#include "laser/cutting-depth.h"
-#include "laser/skin-temperature.h"
 
 using namespace Ariadne;
 
@@ -25,41 +11,45 @@ int main(int argc, char* argv[])
 
     /// Build the Hybrid System
 
+	RealConstant velocity("velocity",0.092_dec);
+	RealConstant L("L",0.00025_dec);
+	RealConstant x0("x0",0.0023_dec);
 
-    /// Get the automata
-    AtomicHybridAutomaton laser_trajectory = getLaserTrajectory();
-    AtomicHybridAutomaton exposure = getSkinExposure();
-    AtomicHybridAutomaton skin_temperature = getSkinTemperature();
-    AtomicHybridAutomaton cutting_depth = getCuttingDepth();
+    /// Create a HybridAutomaton object
+	AtomicHybridAutomaton automaton("compute_crossings_issue");
 
-    //CompositeHybridAutomaton laser_system({laser_trajectory,exposure,skin_temperature,cutting_depth});
-    CompositeHybridAutomaton laser_system({laser_trajectory,exposure});
-    std::cout << "laser_system:\n" << laser_system << "\n";
+    /// Modes
 
-    // Compute the system evolution
+    AtomicDiscreteLocation far("far");
+    AtomicDiscreteLocation close("close");
+
+    // Variables
+
+    RealVariable x("x"); // X position
+
+	automaton.new_mode(far, {dot(x)=velocity});
+	automaton.new_mode(close, {dot(x)=velocity});
+
+    DiscreteEvent comes("comes");
+
+	RealExpression sqr_distance = sqr(x-x0);
+
+	automaton.new_transition(far,comes,close,{next(x)=x},sqr_distance<=L*L);
 
     // Create a GeneralHybridEvolver object
-    GeneralHybridEvolver evolver(laser_system);
+    GeneralHybridEvolver evolver(automaton);
     evolver.verbosity = VERBOSITY;
 
     // Set the evolution parameters
     evolver.configuration().set_maximum_enclosure_radius(0.5);
     evolver.configuration().set_maximum_step_size(0.0001);
-    std::cout << evolver.configuration() << std::endl;
 
     // Declare the type to be used for the system evolution
     typedef GeneralHybridEvolver::EnclosureType HybridEnclosureType;
     typedef GeneralHybridEvolver::OrbitType OrbitType;
     typedef GeneralHybridEvolver::EnclosureListType EnclosureListType;
 
-	AtomicDiscreteLocation scanning("scanning");
-	AtomicDiscreteLocation far("far");
-	AtomicDiscreteLocation varying("varying");
-	AtomicDiscreteLocation idle("idle");
-	DiscreteLocation initial_location={laser_trajectory|scanning,exposure|far};//,skin_temperature|varying,cutting_depth|idle};
-    RealVariable p("p"), z("z"), zi("zi"), T("T"), vx("vx"), x("x");
-    //HybridSet initial_set(initial_location,{p==0,z==0,zi==0,T==37,vx==Real(-0.092),x==Real(0.0033)});
-    HybridSet initial_set(initial_location,{p==0,vx==Real(0.092),x==0});
+    HybridSet initial_set({automaton|far},{x==0});
 
     HybridTime evolution_time(0.5,2);
 

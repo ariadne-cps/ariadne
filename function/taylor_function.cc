@@ -32,6 +32,7 @@
 #include "numeric/numeric.h"
 #include "algebra/vector.h"
 #include "algebra/matrix.h"
+#include "algebra/algebra.h"
 #include "algebra/multi_index.h"
 #include "function/polynomial.h"
 #include "algebra/differential.h"
@@ -44,6 +45,7 @@
 #include "function/taylor_function.h"
 
 #include "function_mixin.h"
+#include "function_mixin.tcc"
 
 #define VOLATILE ;
 
@@ -52,7 +54,11 @@ namespace Ariadne {
 static double TAYLOR_FUNCTION_WRITING_ACCURACY = 1e-8;
 
 template class FunctionPatch<ValidatedTaylorModel>;
+template class FunctionMixin<FunctionPatch<ValidatedTaylorModel>,ApproximateTag,BoxDomain,IntervalDomain>;
+template class FunctionMixin<FunctionPatch<ValidatedTaylorModel>,ValidatedTag,BoxDomain,IntervalDomain>;
 template class VectorFunctionPatch<ValidatedTaylorModel>;
+template class FunctionMixin<VectorFunctionPatch<ValidatedTaylorModel>,ApproximateTag,BoxDomain,BoxDomain>;
+template class FunctionMixin<VectorFunctionPatch<ValidatedTaylorModel>,ValidatedTag,BoxDomain,BoxDomain>;
 
 template<> ScalarFunctionModel<ValidatedTag>& ScalarFunctionModel<ValidatedTag>::operator=(const ScalarTaylorFunction& f) {
     this->_ptr=clone_on_copy_ptr< ScalarFunctionModelInterface<ValidatedTag> >(new ScalarTaylorFunction(f)); return *this;

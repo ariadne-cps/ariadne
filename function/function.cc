@@ -35,6 +35,7 @@
 #include "function/function.h"
 
 #include "function/function_mixin.h"
+#include "function/function_mixin.tcc"
 
 #include "function/function_model.h"
 

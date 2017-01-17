@@ -1035,18 +1035,18 @@ uniform_error_recondition()
     List<Nat> large_error_indices;
 
     for(Nat i=0; i!=this->_space_function.result_size(); ++i) {
-        Float64 error=this->_space_function.get(i).error().raw();
-        if(error > MAXIMUM_ERROR) {
+        Float64Error error=this->_space_function.get(i).error();
+        if(error.raw() > MAXIMUM_ERROR) {
             large_error_indices.append(i);
         }
     }
 
     ExactBoxType error_domains(large_error_indices.size());
-    for(Nat i=0; i!=large_error_indices.size(); ++i) {
-        Float64 error=this->_space_function.get(large_error_indices[i]).error().raw();
-        error_domains[i]=ExactIntervalType(-error,+error);
+    for(Nat j=0; j!=large_error_indices.size(); ++j) {
+        Nat i=large_error_indices[j];
+        Float64Error error=this->_space_function.get(j).error();
+        error_domains[i]=ExactIntervalType(-error.raw(),+error.raw());
     }
-    error_domains=ExactBoxType(large_error_indices.size(),ExactIntervalType(-1,+1));
     Nat k=this->number_of_parameters();
 
     this->_domain=product(this->_domain,error_domains);
@@ -1056,13 +1056,11 @@ uniform_error_recondition()
         this->_constraints[i].function()=embed(this->_constraints[i].function(),error_domains);
     }
 
-    for(Nat i=0; i!=large_error_indices.size(); ++i) {
-        Float64 error=this->_space_function.get(large_error_indices[i]).error().raw();
-        if(error > MAXIMUM_ERROR) {
-            this->_space_function[i].set_error(0u);
-            this->_space_function[i] = this->_space_function.get(i) + this->function_factory().create_coordinate(this->_domain,k)*Float64Bounds(+error);
-            ++k;
-        }
+    for(Nat j=0; j!=large_error_indices.size(); ++j) {
+        Nat i=large_error_indices[j];
+        Float64Error error=this->_space_function.get(i).error();
+        this->_space_function[i].set_error(0u);
+        this->_space_function[i] = this->_space_function.get(i) + this->function_factory().create_coordinate(this->_domain,j);
     }
 
     ExactIntervalVectorType new_variables = project(this->parameter_domain(),range(old_number_of_parameters,this->number_of_parameters()));

@@ -92,6 +92,8 @@ Identifier name_composition(const List<HybridAutomaton>& components)
 
 } // namespace
 
+List<RealAssignment> algebraic_sort(const List<RealAssignment>& auxiliary);
+
 CompositeHybridAutomaton::CompositeHybridAutomaton()
     : _name("system"),_components() { }
 
@@ -290,6 +292,11 @@ CompositeHybridAutomaton::continuous_state_space(DiscreteLocation location) cons
     return RealSpace(this->state_variables(location));
 }
 
+RealSpace
+CompositeHybridAutomaton::continuous_auxiliary_space(DiscreteLocation location) const {
+    return RealSpace(this->auxiliary_variables(location));
+}
+
 List<RealVariable>
 CompositeHybridAutomaton::variables(DiscreteLocation location) const {
     return catenate(this->state_variables(location),this->auxiliary_variables(location));
@@ -323,9 +330,13 @@ CompositeHybridAutomaton::auxiliary_assignments(DiscreteLocation location) const
     for(Nat i=0; i!=this->_components.size(); ++i) {
         result.append(this->_components[i].auxiliary_assignments(location));
     }
-    // TODO: Sort the result to eliminate algebraic loops
-    // sort(result);
     return result;
+}
+
+// Find all algebraic equations valid in the location
+List<RealAssignment>
+CompositeHybridAutomaton::sorted_auxiliary_assignments(DiscreteLocation location) const {
+    return algebraic_sort(this->auxiliary_assignments(location));
 }
 
 List<DottedRealAssignment>

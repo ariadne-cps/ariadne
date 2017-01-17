@@ -139,6 +139,63 @@ DiscreteTransition::write(OutputStream& os) const
 }
 
 
+List<RealAssignment>
+algebraic_sort(const List<RealAssignment>& auxiliary) {
+    List<RealVariable> lhs_array=left_hand_sides(auxiliary);
+    LinkedList<RealVariable> lhs_list(lhs_array.begin(),lhs_array.end());
+    Map<Identifier, Set<UntypedVariable> > dependencies;
+    Set<UntypedVariable> variables(lhs_array.begin(),lhs_array.end());
+
+    for(List<RealAssignment>::ConstIterator asgn_iter=auxiliary.begin();
+        asgn_iter!=auxiliary.end(); ++asgn_iter)
+    {
+        dependencies.insert(asgn_iter->lhs.base().name(), intersection(asgn_iter->rhs.arguments(),variables));
+    }
+
+    List<RealAssignment> sorted_auxiliary;
+    sorted_auxiliary.reserve(auxiliary.size());
+    if(!lhs_list.empty()) {
+        Bool found=false;
+        for(LinkedList<RealVariable>::Iterator iter=lhs_list.begin(); iter!=lhs_list.end(); ) {
+            if(dependencies[iter->name()].empty()) {
+                for(Map<Identifier, Set<UntypedVariable> >::Iterator dep_iter=dependencies.begin(); dep_iter!=dependencies.end(); ++dep_iter) {
+                    dep_iter->second.remove(static_cast<UntypedVariable>(*iter));
+                }
+                for(List<RealAssignment>::ConstIterator asgn_iter=auxiliary.begin();
+                    asgn_iter!=auxiliary.end(); ++asgn_iter)
+                {
+                    if(asgn_iter->lhs.name()==iter->name()) {
+                        sorted_auxiliary.append(*asgn_iter);
+                        break;
+                    }
+                }
+                dependencies.erase(iter->name());
+                found=true;
+                lhs_list.erase(iter);
+                iter=lhs_list.begin();
+            } else {
+                ++iter;
+            }
+        }
+        if(!found) {
+            ARIADNE_THROW(AlgebraicLoopError,"HybridAutomaton::sort(List<RealAssignment>)",
+                          "Algebraic dependencies among variables "<<lhs_list<<" in auxiliary equations "<<auxiliary);
+        }
+    }
+    ARIADNE_ASSERT(auxiliary.size()==sorted_auxiliary.size());
+    return sorted_auxiliary;
+}
+
+EffectiveVectorFunction auxiliary_function(
+    Space<Real> const& space,
+    List<RealAssignment> const& sorted_algebraic)
+{
+    RealExpression default_expression;
+    Vector<RealExpression> results(sorted_algebraic.size(),default_expression);
+    for(SizeType i=0; i!=sorted_algebraic.size(); ++i) { results[i]=substitute(sorted_algebraic[i].rhs,sorted_algebraic); }
+    return make_function(space,results);
+}
+
 EffectiveVectorFunction dynamic_function(
     Space<Real> const& space,
     List<RealAssignment> const& algebraic,
@@ -235,7 +292,7 @@ HybridAutomaton::_new_mode(DiscreteLocation location,
         argument_variables.adjoin(dynamic[i].rhs.arguments());
     }
 
-    List<RealAssignment> sorted_auxiliary = sort(auxiliary);
+    List<RealAssignment> sorted_auxiliary = algebraic_sort(auxiliary);
 
     // TODO: Compute function
     DiscreteMode new_mode=DiscreteMode(location,sorted_auxiliary,dynamic);
@@ -472,53 +529,6 @@ HybridAutomaton::auxiliary_variables(DiscreteLocation location) const {
     return result;
 }
 
-List<RealAssignment>
-HybridAutomaton::sort(const List<RealAssignment>& auxiliary) {
-    List<RealVariable> lhs_array=left_hand_sides(auxiliary);
-    LinkedList<RealVariable> lhs_list(lhs_array.begin(),lhs_array.end());
-    Map<Identifier, Set<UntypedVariable> > dependencies;
-    Set<UntypedVariable> variables(lhs_array.begin(),lhs_array.end());
-
-    for(List<RealAssignment>::ConstIterator asgn_iter=auxiliary.begin();
-        asgn_iter!=auxiliary.end(); ++asgn_iter)
-    {
-        dependencies.insert(asgn_iter->lhs.base().name(), intersection(asgn_iter->rhs.arguments(),variables));
-    }
-
-    List<RealAssignment> sorted_auxiliary;
-    sorted_auxiliary.reserve(auxiliary.size());
-    if(!lhs_list.empty()) {
-        Bool found=false;
-        for(LinkedList<RealVariable>::Iterator iter=lhs_list.begin(); iter!=lhs_list.end(); ) {
-            if(dependencies[iter->name()].empty()) {
-                for(Map<Identifier, Set<UntypedVariable> >::Iterator dep_iter=dependencies.begin(); dep_iter!=dependencies.end(); ++dep_iter) {
-                    dep_iter->second.remove(static_cast<UntypedVariable>(*iter));
-                }
-                for(List<RealAssignment>::ConstIterator asgn_iter=auxiliary.begin();
-                    asgn_iter!=auxiliary.end(); ++asgn_iter)
-                {
-                    if(asgn_iter->lhs.name()==iter->name()) {
-                        sorted_auxiliary.append(*asgn_iter);
-                        break;
-                    }
-                }
-                dependencies.erase(iter->name());
-                found=true;
-                lhs_list.erase(iter);
-                iter=lhs_list.begin();
-            } else {
-                ++iter;
-            }
-        }
-        if(!found) {
-            ARIADNE_THROW(AlgebraicLoopError,"HybridAutomaton::sort(List<RealAssignment>)",
-                          "Algebraic dependencies among variables "<<lhs_list<<" in auxiliary equations "<<auxiliary);
-        }
-    }
-    ARIADNE_ASSERT(auxiliary.size()==sorted_auxiliary.size());
-    return sorted_auxiliary;
-}
-
 Set<RealVariable>
 HybridAutomaton::input_variables(DiscreteLocation location) const {
     Set<UntypedVariable> used;
@@ -567,6 +577,15 @@ HybridAutomaton::target(DiscreteLocation source, DiscreteEvent event) const {
 List<RealAssignment>
 HybridAutomaton::auxiliary_assignments(DiscreteLocation location) const {
     return this->mode(location)._auxiliary;
+}
+
+List<RealAssignment>
+HybridAutomaton::sorted_auxiliary_assignments(DiscreteLocation location) const {
+    DiscreteMode const& mode=this->mode(location);
+    if(mode._sorted_auxiliary.size()!=mode._auxiliary.size()) {
+        mode._sorted_auxiliary = algebraic_sort(mode._auxiliary);
+    }
+    return mode._sorted_auxiliary;
 }
 
 List<DottedRealAssignment>
@@ -631,12 +650,17 @@ RealSpace HybridAutomaton::continuous_state_space(DiscreteLocation location) con
     return RealSpace(left_hand_sides(this->mode(location)._dynamic));
 };
 
+RealSpace HybridAutomaton::continuous_auxiliary_space(DiscreteLocation location) const {
+    return RealSpace(left_hand_sides(this->mode(location)._sorted_auxiliary));
+};
+
 EventKind HybridAutomaton::event_kind(DiscreteLocation location, DiscreteEvent event) const {
     return this->mode(location)._kinds[event];
 }
 
 EffectiveVectorFunction HybridAutomaton::auxiliary_function(DiscreteLocation location) const {
-    ARIADNE_NOT_IMPLEMENTED;
+    DiscreteMode const& mode=this->mode(location);
+    return Ariadne::auxiliary_function(this->continuous_state_space(location),mode._auxiliary);
 }
 
 EffectiveVectorFunction HybridAutomaton::dynamic_function(DiscreteLocation location) const {

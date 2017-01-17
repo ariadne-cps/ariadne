@@ -137,6 +137,7 @@ class DiscreteMode {
 
     // The algebraic equations
     List<RealAssignment> _auxiliary;
+    mutable List<RealAssignment> _sorted_auxiliary;
 
     // The algebraic equations
     List<DottedRealAssignment> _dynamic;
@@ -224,7 +225,7 @@ class HybridAutomaton
     //! \brief The type used to describe the state space.
     typedef HybridSpace StateSpaceType;
 
-    static List<RealAssignment> sort(const List<RealAssignment>& auxiliary);
+    friend List<RealAssignment> algebraic_sort(const List<RealAssignment>& auxiliary);
 
   protected:
 
@@ -513,8 +514,11 @@ class HybridAutomaton
     Set<RealVariable> input_variables(DiscreteLocation location) const;
     //! \brief The target location when the \a event occurs in the \a source location.
     DiscreteLocation target_location(DiscreteLocation source, DiscreteEvent event) const;
-    //! \brief The algebraic equations valid in the given location.
+    //! \brief The algebraic equations valid in the location.
     List<RealAssignment> auxiliary_assignments(DiscreteLocation location) const;
+    //! \brief The algebraic equations valid in the location, ordered so that the defining equation for a variable
+    //! occurs before any equation using that variable.
+    List<RealAssignment> sorted_auxiliary_assignments(DiscreteLocation location) const;
     //! \brief The differential equations valid in the given location.
     List<DottedRealAssignment> dynamic_assignments(DiscreteLocation location) const;
     //! \brief The invariant predicates valid in the given location.
@@ -531,6 +535,8 @@ class HybridAutomaton
     virtual HybridSpace state_space() const;
     //! \brief The continuous state space in the given location.
     virtual RealSpace continuous_state_space(DiscreteLocation) const;
+    //! \brief The space of continuous auxiliary variables in the given location.
+    virtual RealSpace continuous_auxiliary_space(DiscreteLocation) const;
     //! \brief The dimension of the continuous state space in the given location.
     virtual DimensionType dimension(DiscreteLocation) const;
 

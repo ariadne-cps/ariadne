@@ -42,15 +42,14 @@ class DiscreteLocation
   public:
     //! \brief Construct a location which does not set any discrete variables.
     DiscreteLocation() : StringValuation() { }
-    explicit DiscreteLocation(const StringType& str) : StringValuation() { this->insert(StringVariable("q"),str); } [[deprecated]]
-    //! \brief Construct a location for which the string variable named \a var is given value \a val.
-    explicit DiscreteLocation(const Identifier& var, const String& val) : StringValuation() { this->insert(StringVariable(var),val); }
-    explicit DiscreteLocation(const StringType& var, const StringType& val) : StringValuation() { this->insert(StringVariable(var),val); }
-    explicit DiscreteLocation(const Int& num) : StringValuation() { this->insert(StringVariable("q"),to_str(num)); } [[deprecated]]
+    //! \brief Construct the location q|n.
+    DiscreteLocation(Int n);
+    DiscreteLocation(StringVariable var, String val) : DiscreteLocation({var|val}) { }
+    DiscreteLocation(Pair<StringVariable,String> svarstr) : StringValuation({svarstr}) { }
     DiscreteLocation(const StringValuation& val) : StringValuation(val) { }
     DiscreteLocation(const DiscreteLocation&) = default;
     DiscreteLocation(const Map<Identifier,String>& sm) : StringValuation(sm) { }
-    DiscreteLocation(const Pair<StringVariable,String>& salst) : StringValuation({salst}) { }
+    DiscreteLocation(const Map<StringVariable,String>& sm) : StringValuation(sm) { }
     DiscreteLocation(const InitializerList<Pair<StringVariable,String>>& salst) : StringValuation(salst) { }
     Void adjoin(const DiscreteLocation& loc) { this->_values.adjoin(loc._values); }
 };

@@ -30,6 +30,9 @@ DiscreteLocation join(const DiscreteLocation& loc1, const DiscreteLocation& loc2
     return DiscreteLocation(join(loc1.values(),loc2.values()));
 }
 
+DiscreteLocation::DiscreteLocation(Int n) : DiscreteLocation(StringVariable("q")|to_str(n)) {
+}
+
 Bool operator==(const DiscreteLocation& q1, const DiscreteLocation& q2) {
     Bool identical=true;
     const Map<Identifier,String>& q1sm=q1.values();

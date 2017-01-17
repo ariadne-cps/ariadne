@@ -94,7 +94,7 @@ class TestHybridReachabilityAnalyser
         std::cout<<std::setprecision(20);
         std::cerr<<std::setprecision(20);
         std::clog<<std::setprecision(20);
-        DiscreteLocation location(StringVariable("q")|"1");
+        DiscreteLocation location(1);
 
         RealVariable x("x");
         RealVariable y("y");
@@ -125,7 +125,7 @@ class TestHybridReachabilityAnalyser
           axes({-1<=RealVariable("x")<=3,-2<=RealVariable("y")<=2})
     {
         analyser.verbosity=analyser_verbosity;
-        DiscreteLocation location(StringVariable("q")|"1");
+        DiscreteLocation location(1);
 
         RealVariable x("x");
         RealVariable y("y");

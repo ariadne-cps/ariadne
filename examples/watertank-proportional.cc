@@ -94,9 +94,10 @@ Int main(Int argc,char *argv[])
     HybridAutomaton watertank_system;
 
     /// Create discrete states
-    DiscreteLocation zero_saturated("zero_saturated");      // Zero saturated
-    DiscreteLocation not_saturated("not_saturated");      // Not saturated
-    DiscreteLocation one_saturated("one_saturated");      // One saturated
+    StringVariable tank("tank");      // Tank variable
+    DiscreteLocation zero_saturated(tank|"zero_saturated");      // Zero saturated
+    DiscreteLocation not_saturated(tank|"not_saturated");      // Not saturated
+    DiscreteLocation one_saturated(tank|"one_saturated");      // One saturated
 
     /// Create the discrete events
     DiscreteEvent event_zero_to_not("e0?");

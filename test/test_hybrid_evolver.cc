@@ -60,7 +60,7 @@ Real one=1;
 Dyadic half(0.5);
 Dyadic quarter(0.25);
 Dyadic eighth(0.125);
-DiscreteLocation q("q");
+DiscreteLocation q;
 DiscreteEvent e("e");
 
 Colour reach_set_colour(0.25,0.25,0.50);
@@ -606,7 +606,6 @@ TestHybridEvolver::test_affine_flow() const
 {
     RealVariable x0("x");
     RealVariable x1("x1");
-    DiscreteLocation q("q");
 
     HybridAutomaton system;
     system.new_mode(q,{dot(x0)=1-x0-2*x1,dot(x1)=+2*x0-x1});
@@ -783,7 +782,7 @@ Void TestHybridEvolver::test_constant_derivative_system() const
     // Test the system (d(x),d(y))=(1,0) with reset (x',y')=(x-2,y) when x+y>0
     // Starting in a small box near the origin, the system should return to
     // the initial condition after time 2
-    DiscreteLocation q1("q1"), q2("q2");
+    DiscreteLocation q1(1), q2(2);
     DiscreteEvent e("e");
     RealVariable x("x"), y("y");
 
@@ -821,7 +820,7 @@ Void TestHybridEvolver::test_constant_derivative_system() const
 
 Void TestHybridEvolver::test_transverse_linear_crossing() const
 {
-    DiscreteLocation q1("q1"), q2("q2");
+    DiscreteLocation q1(1), q2(2);
     RealVariable x("x"), y("y");
     Real r(1.0/8);
     Float64 tol=1e-5;
@@ -860,7 +859,7 @@ Void TestHybridEvolver::test_transverse_linear_crossing() const
 
 Void TestHybridEvolver::test_transverse_cubic_crossing() const
 {
-    DiscreteLocation q1("q1"), q2("q2");
+    DiscreteLocation q1(1), q2(2);
     RealVariable x("x"), y("y");
     Real r(1.0/8);
     RealExpression guard=x-(1+y/2+y*y*y);
@@ -886,7 +885,7 @@ Void TestHybridEvolver::test_transverse_cubic_crossing() const
 
 Void TestHybridEvolver::test_transverse_cube_root_crossing() const
 {
-    DiscreteLocation q1("q1"), q2("q2");
+    DiscreteLocation q1(1), q2(2);
     RealVariable x("x"), y("y");
     Real r=Real(1.0/32);
     Real eps(1.0/64);

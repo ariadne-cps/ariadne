@@ -394,8 +394,6 @@ Void export_hybrid_automaton()
     discrete_state_class.def("__ne__", &__ne__<Bool,DiscreteLocation,DiscreteLocation>);
     discrete_state_class.def("__hash__", &__hash__<DiscreteLocation>);
     discrete_state_class.def(self_ns::str(self));
-    implicitly_convertible<Int,DiscreteLocation>();
-    implicitly_convertible<StringType,DiscreteLocation>();
 
     class_<DiscreteEvent> discrete_event_class("DiscreteEvent",init<DiscreteEvent>());
     discrete_event_class.def("__eq__", &__eq__<Bool,DiscreteEvent,DiscreteEvent>);

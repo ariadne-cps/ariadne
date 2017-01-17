@@ -218,6 +218,8 @@ class HybridPoint
   public:
     HybridPoint() : HybridBasicSet<ExactPoint>() { }
     HybridPoint(const DiscreteLocation& q, const RealSpace& spc, const ExactPoint& pt) : HybridBasicSet<ExactPoint>(q,spc,pt) { }
+    HybridPoint(const DiscreteLocation& q, const Map<RealVariable,ValueType>& val);
+    HybridPoint(const DiscreteLocation& q, const Map<RealVariable,Real>& val);
     HybridPoint(const DiscreteLocation& q, const List< Assignment<RealVariable,Real> >& val);
     HybridPoint(const DiscreteLocation& q, const InitializerList< Assignment<RealVariable,Real> >& val);
     ExactPoint& point() { return this->continuous_set(); }

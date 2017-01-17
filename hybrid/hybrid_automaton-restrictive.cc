@@ -193,55 +193,6 @@ Set<Var> duplicates(const List<Var>& variables) {
 
 
 
-DiscreteLocation join(const DiscreteLocation& loc1, const DiscreteLocation& loc2) {
-    return DiscreteLocation(join(loc1.values(),loc2.values()));
-}
-
-Bool operator==(const DiscreteLocation& q1, const DiscreteLocation& q2) {
-    Bool identical=true;
-    const Map<Identifier,String>& q1sm=q1.values();
-    const Map<Identifier,String>& q2sm=q2.values();
-    Map<Identifier,String>::ConstIterator q1iter=q1sm.begin();
-    Map<Identifier,String>::ConstIterator q2iter=q2sm.begin();
-
-    while(q1iter!=q1sm.end() && q2iter!=q2sm.end()) {
-        if(q1iter->first==q2iter->first) {
-            if(q1iter->second != q2iter->second) { return false; }
-            ++q1iter; ++q2iter;
-        } else if(q1iter->first<q2iter->first) {
-            identical=false; ++q1iter;
-        } else {
-            identical=false; ++q2iter;
-        }
-    }
-    if(q1iter!=q1sm.end() || q2iter!=q2sm.end()) { identical=false; }
-    if(!identical) { ARIADNE_THROW(std::runtime_error,"operator==(DiscreteLocation,DiscreteLocation)",
-                               "Locations "<<q1<<" and "<<q2<<" are not identical, but no values differ."); }
-    return true;
-}
-
-Bool operator!=(const DiscreteLocation& q1, const DiscreteLocation& q2) {
-    return !(q1==q2);
-}
-
-Bool operator<(const DiscreteLocation& q1, const DiscreteLocation& q2) {
-    const Map<Identifier,String>& q1sm=q1.values();
-    const Map<Identifier,String>& q2sm=q2.values();
-    Map<Identifier,String>::ConstIterator q1iter=q1sm.begin();
-    Map<Identifier,String>::ConstIterator q2iter=q2sm.begin();
-
-    while(q1iter!=q1sm.end() && q2iter!=q2sm.end()) {
-        if(q1iter->first!=q2iter->first) {
-            return (q1iter->first<q2iter->first);
-        } else if(q1iter->second != q2iter->second) {
-            return q1iter->second < q2iter->second;
-        } else {
-            ++q1iter; ++q2iter;
-        }
-    }
-    return q2iter!=q2sm.end();
-}
-
 
 Set<Identifier> names(const Set<RealVariable>& v) {
     Set<Identifier> r;

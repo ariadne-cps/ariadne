@@ -59,18 +59,8 @@ template<class T> class Space
   public:
     //! \brief The trivial space \f$\R^0\f$.
     Space() : _variables() { }
-    //Space(const Set<Identifier>& vs) : _variables(vs.begin(),vs.end()) { }
-    //Space(const List<Identifier>& vl) { for(Nat i=0; i!=vl.size(); ++i) { this->append(VariableType(vl[i])); } }
-    Space(const InitializerList<VariableType>& vl) { for(Nat i=0; i!=vl.size(); ++i) { this->append(vl.begin()[i]); } }
     Space(const List<VariableType>& vl) { for(Nat i=0; i!=vl.size(); ++i) { this->append(vl[i]); } }
-
-    //template<class... ARGS> Space(VariableType, ARGS... args);
-    //template<class... ARGS> Space(List<VariableType>, VariableType, ARGS... args);
-    //template<class... ARGS> Space(List<VariableType>, List<VariableType>, ARGS... args);
-
-    //explicit Space(const List<String>& vnl) { for(Nat i=0; i!=vnl.size(); ++i) { this->append(VariableType(vnl[i])); } }
-    //explicit Space(const String& vn) { this->append(VariableType(vn)); }
-
+    Space(const InitializerList<VariableType>& vl) { for(Nat i=0; i!=vl.size(); ++i) { this->append(vl.begin()[i]); } }
 
     Bool operator==(const Space<T>& other) const { return this->_variables==other._variables; }
     Bool operator!=(const Space<T>& other) const { return !(*this == other); }

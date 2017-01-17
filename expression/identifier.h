@@ -1,7 +1,7 @@
 /***************************************************************************
- *            test_hybrid_graphics.cc
+ *            identifier.h
  *
- *  Copyright 2011  Pieter Collins
+ *  Copyright 2008-16  Pieter Collins
  *
  ****************************************************************************/
 
@@ -21,34 +21,31 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "config.h"
-#include "test.h"
 
-#include "numeric/logical.h"
-#include "numeric/real.h"
-#include "expression/variables.h"
-#include "expression/assignment.h"
+/*! \file identifier.h
+ *  \brief Strings used as names for constants and variables.
+ */
 
-#include "hybrid/hybrid_graphics.h"
-#include "hybrid/hybrid_set.h"
+#ifndef ARIADNE_IDENTIFIER_H
+#define ARIADNE_IDENTIFIER_H
 
-using namespace Ariadne;
+#include "utility/string.h"
 
+namespace Ariadne {
 
-Int main(Int argc, char **argv) {
-    RealVariable x("x"),y("y"),z("z");
-    DiscreteLocation location(1);
-    HybridBoxType hbx1(location,{0<=x<=1,2<=y<=3,5<=z<=7});
-    HybridBoxType hbx2(location,{x,y,z},ExactBoxType{{1.,2.},{3.,4.},{6.,8.}});
+//! \ingroup ExpressionModule
+//! \brief A class representing the name of a variable.
+//! \details A proxy for a standard string; used to distinguish a string used as a variable name from a value.
+//! \sa Variable
+class Identifier : public String
+{
+  public:
+    Identifier() : String() { }
+    Identifier(const char* cstr) : String(cstr) { }
+    //! \brief Construct an identifier from a standard string.
+    Identifier(const std::string& str) : String(str) { }
+};
 
-    HybridFigure hfig;
-    hfig.set_locations({location});
-    hfig.set_bounds(x,-8,8);
-    hfig.set_bounds(y,-8,8);
-    hfig.set_bounds(z,-8,8);
-    hfig.set_variables(x,y);
+} // namespace Ariadne
 
-    hfig << FillColour(1,0,0) << hbx1;
-    hfig << FillColour(0,1,0) << hbx2;
-    hfig.write("test_hybrid_graphics");
-}
+#endif /* ARIADNE_IDENTIFIER_H */

@@ -59,19 +59,26 @@ class TestExpression {
     }
 
     Void test_assignment() {
-        RealVariable x("x"), y("y");
-        Real z(0), o(1);
-        Assignment<Variable<Real>,Real> ac = (x=o);
-        Assignment<Variable<Real>,Expression<Real> > a = (x=o);
-        Valuation<Real> v(ac);
+        Real zero(0), one(1);
+        RealVariable x("x"), y("y"), z("x");
+        RealExpression e(x*y+o);
 
-        List< Assignment<Variable<Real>,Real> > lac;
-        lac = {x=z,y=o};
-        List< Assignment<Variable<Real>,Expression<Real> > > la;
-        la = {x=z,y=o};
-        ARIADNE_TEST_PRINT( la );
-        v = Valuation<Real>(lac);
-        v = lac;
+        ARIADNE_TEST_ASSERT((not IsAssignable<Variable<Real>,Expression<Real>>::value));
+        ARIADNE_TEST_ASSERT((not IsConstructible<Assignment<Variable<Real>,Expression<Real>>,Assignment<Variable<Real>,Real>>::value));
+
+        typedef Assignment<Variable<Real>,Real> ConstantRealAssignment;
+        ARIADNE_TEST_CONSTRUCT(ConstantRealAssignment,ac,(x=one));
+        ARIADNE_TEST_CONSTRUCT(List<ConstantRealAssignment>,lac,({x=zero,y=one}));
+        ARIADNE_TEST_CONSTRUCT(Valuation<Real>,va,(lac));
+        //ARIADNE_TEST_CONSTRUCT(Valuation<Real>,va,({x=zero,y=one})); Fails due to ambiguous overload
+
+        ARIADNE_TEST_CONSTRUCT(RealAssignment,a,(let(x)=one));
+        ARIADNE_TEST_CONSTRUCT(PrimedRealAssignment,pa,(prime(x)=one));
+        ARIADNE_TEST_CONSTRUCT(DottedRealAssignment,da,(dot(x)=one));
+
+        ARIADNE_TEST_CONSTRUCT(List<RealAssignment>,la,(let({x,y,z})={zero,x,e}));
+        ARIADNE_TEST_CONSTRUCT(List<PrimedRealAssignment>,lpa,(prime({x,y,z})={zero,x,e}));
+        ARIADNE_TEST_CONSTRUCT(List<DottedRealAssignment>,lda,(dot({x,y,z})={zero,x,e}));
     }
 
     Void test_evaluate() {

@@ -536,6 +536,8 @@ class HybridAutomaton
 
     //! \brief Test if the hybrid automaton has a discrete mode corresponding to the given location.
     virtual Bool has_mode(DiscreteLocation location) const;
+    //! \brief Test if the hybrid automaton has a discrete mode corresponding to a subset of variables of the given location.
+    virtual Bool has_partial_mode(DiscreteLocation location) const;
     //! \brief Test if the hybrid automaton has an invariant (either explicit or from an urgent transition) with the given \a event label in \a location.
     virtual Bool has_invariant(DiscreteLocation location, DiscreteEvent event) const;
     //! \brief Tests if the automaton has an invariant or transition corresponding to the given location and event.

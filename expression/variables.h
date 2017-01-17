@@ -83,7 +83,7 @@ class RealVariablesBox;
 
 enum class VariableType : char { BOOLEAN, KLEENEAN, ENUMERATED, STRING, INTEGER, REAL };
 
-template<class T> inline constexpr VariableType variable_type() { ARIADNE_FAIL_MSG("Unknown variable type"); }
+template<class T> inline VariableType variable_type() { ARIADNE_FAIL_MSG("Unknown variable type"); }
 template<> inline constexpr VariableType variable_type<Boolean>() { return VariableType::BOOLEAN; }
 template<> inline constexpr VariableType variable_type<Kleenean>() { return VariableType::KLEENEAN; }
 template<> inline constexpr VariableType variable_type<String>() { return VariableType::STRING; }
@@ -242,13 +242,15 @@ template<class T> class DottedVariable
 {
   public:
     //! \brief Decorate a simple variable with a dot.
-    friend DottedVariable<Real> dot(const Variable<Real>& var) { return DottedVariable<Real>(var); }
+    friend DottedVariable<Real> dot(const Variable<Real>& var);
     //! \brief Construct an assignment statement representing the differential equation \a dot(var) := \a expr.
     inline Assignment<DottedVariable<T>,Expression<T>> operator=(const Expression<T>& e) const;
     inline Assignment<DottedVariable<T>,Expression<T>> operator=(const T& c) const;
   private:
     explicit DottedVariable(const Variable<T>& var) : ExtendedVariable<T>(var,VariableCategory::DOTTED) { }
 };
+DottedVariable<Real> inline dot(const Variable<Real>& var) { return DottedVariable<Real>(var); }
+
 
 
 template<class T> struct LetVariables {

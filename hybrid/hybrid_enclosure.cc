@@ -184,6 +184,12 @@ HybridEnclosure::space_bounding_box() const
 }
 
 UpperIntervalType
+HybridEnclosure::range_of(EffectiveScalarFunction const& g) const
+{
+    return apply(compose(g,this->space_function()),this->_set.reduced_domain());
+}
+
+UpperIntervalType
 HybridEnclosure::time_range() const
 {
     ARIADNE_LOG(8,"time_codomain="<<this->time_function().codomain()<<" time_range="<<apply(this->time_function(),this->_set.reduced_domain())<<"\n");

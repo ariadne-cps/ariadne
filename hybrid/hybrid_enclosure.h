@@ -242,6 +242,8 @@ class HybridEnclosure
 
     //! \brief Returns a bounding box for the set. Computed by a simple interval evaluation of \f$f(D)\f$.
     HybridBoxType bounding_box() const;
+    //! \brief Returns an over-approximation to the range of \a g over the set.
+    UpperIntervalType range_of(EffectiveScalarFunction const& g) const;
     //! \brief Tests whether the set is disjoint from the box \a hbx.
     ValidatedSierpinskian separated(const HybridBoxType& hbx) const;
     //! \brief Tests whether the set is a subset of the interior of the box \a hbx.

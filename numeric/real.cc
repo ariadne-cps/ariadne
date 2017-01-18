@@ -178,7 +178,7 @@ Real::Real(ExactDouble d) : Real(std::make_shared<RealConstant<ExactDouble>>(d))
 //Real::Real(ExactDouble d) : Real(Dyadic(d)) { }
 Real::Real(Integer const& z) : Real(std::make_shared<RealConstant<Integer>>(z)) { }
 Real::Real(Dyadic const& w) : Real(std::make_shared<RealConstant<Dyadic>>(w)) { }
-Real::Real(Decimal const& d) : Real(Rational(d)) { }
+Real::Real(Decimal const& d) : Real(std::make_shared<RealConstant<Decimal>>(d)) { }
 Real::Real(Rational const& q) : Real(std::make_shared<RealConstant<Rational>>(q)) { }
 Real::Real(EffectiveNumber q) : Real(std::make_shared<RealConstant<EffectiveNumber>>(q)) { }
 Real::Real(Float64Value x) : Real(Dyadic(x.get_d())) { ARIADNE_DEPRECATED("Real::Real(Float64Value)","Use Real([Exact]Double) or Real(Dyadic) instead."); }

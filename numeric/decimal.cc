@@ -25,11 +25,42 @@
 #include "config.h"
 
 #include "utility/macros.h"
+#include "numeric/integer.h"
+#include "numeric/dyadic.h"
 #include "numeric/decimal.h"
 #include "numeric/rational.h"
 #include "numeric/float.h"
 
 namespace Ariadne {
+
+const Integer Decimal::_ten = Integer(10);
+
+namespace {
+static const Integer& ten=Decimal::_ten;
+}
+
+void Decimal::canonicalize()
+{
+    while(this->_q>0u && rem(this->_p,ten)==0) {
+        this->_p = quot(this->_p,ten);
+        --this->_q;
+    }
+}
+
+
+Decimal::Decimal(Integer p, Nat q) : _p(p), _q(q)
+{
+}
+
+Decimal::Decimal(Dyadic const& w)
+{
+    assert(w.exponent()>=0);
+    this->_p=w.mantissa();
+    this->_q=w.exponent();
+    Integer five(5);
+    this->_p *= pow(five,this->_q);
+    this->canonicalize();
+}
 
 Decimal operator"" _decimal(long double x)
 {
@@ -43,59 +74,129 @@ Decimal operator"" _dec(long double x)
 
 Decimal operator+(Decimal const& d)
 {
-    return Decimal(d._str);
+    return Decimal(d._p,d._q);
 }
 
 Decimal operator-(Decimal const& d)
 {
-    if(d._str[0]=='-') { return Decimal(std::string(d._str.c_str()+1)); }
-    else { return Decimal(std::string("-")+d._str); }
+    return Decimal(-d._p,d._q);
+}
+
+Decimal operator+(Decimal const& d1, Decimal const& d2)
+{
+    Integer q1=pow(ten,d1._q);
+    Integer q2=pow(ten,d2._q);
+    Decimal r(d1._p*q2+d2._p*q1,d1._q+d2._q);
+    r.canonicalize();
+    return r;
+}
+
+Decimal operator-(Decimal const& d1, Decimal const& d2)
+{
+    Integer q1=pow(ten,d1._q);
+    Integer q2=pow(ten,d2._q);
+    Decimal r(d1._p*q2-d2._p*q1,d1._q+d2._q);
+    r.canonicalize();
+    return r;
+}
+
+Decimal operator*(Decimal const& d1, Decimal const& d2)
+{
+    return Decimal(d1._p*d2._p,d1._q+d2._q);
+}
+
+Decimal abs(Decimal const& d)
+{
+    return Decimal(abs(d._p),d._q);
+}
+
+Decimal max(Decimal const& d1, Decimal const& d2)
+{
+    return std::max(d1,d2);
+}
+
+Decimal min(Decimal const& d1, Decimal const& d2)
+{
+    return std::min(d1,d2);
+}
+
+Rational operator/(Decimal const& d1, Decimal const& d2)
+{
+    Rational q(d1._p,d2._p);
+    int e=int(d1._q)-int(d2._q);
+    if(e>0) { return q/pow(ten,e); }
+    else { return q*pow(ten,-e); }
+}
+
+Comparison cmp(Integer const& z1, Integer const& z2);
+Boolean eq(Integer const& d1, Integer const& d2);
+Boolean lt(Integer const& d1, Integer const& d2);
+
+Comparison cmp(Decimal const& d1, Decimal const& d2)
+{
+    return cmp(d1._p*pow(ten,d2._q),d2._p*pow(ten,d1._q));
+}
+
+Boolean eq(Decimal const& d1, Decimal const& d2)
+{
+    return eq(d1._p*pow(ten,d2._q),d2._p*pow(ten,d1._q));
+}
+
+Boolean lt(Decimal const& d1, Decimal const& d2)
+{
+    return lt(d1._p*pow(ten,d2._q),d2._p*pow(ten,d1._q));
 }
 
 Decimal::Decimal(double x)
 {
-    StringStream ss;
-    Int s=+1;
-    if(x==0) { _str="0.0"; return; }
-    if(x<0) { s=-1; ss<<'-'; }
-    double y=s*x;
-    static const Nat sf=9;
-    static const double acc=1e-9;
-    static const double tol=1e-15;
-    Int exp=0; double pow=1;
-    while(y<1.0) { y*=10; exp-=1; pow/=10; }
-    while(y>=1.0) { y/=10; exp+=1; pow*=10; }
-    long int n=std::floor(y/acc+0.5);
-    double re=y-n*acc;
+    static const Nat sf=9; // The number of significant figures allowed
+    static const double acc=1/std::pow(10.0,sf);  // The accuracy at the number of significant figures
+    static const double tol=1e-15; // The tolerance of the result
+
+    if(x==0) { *this=Decimal(0,0u); return; }
+
+    Int sgn = x>0 ? +1 : -1;
+    double y = sgn*x;
+
+    Int exp=0;
+    while(y<1.0) { y*=10; exp-=1; }
+    while(y>=1.0) { y/=10; exp+=1; }
+    // Now 0.1<=y<1.0; and |x| = y*10^exp
+    long int n=std::floor(y/acc+0.5); // An approximation of y*10^sf
+    exp-=sf;
+    double re=std::fabs(y-n*acc); // The error of
+
     if(std::fabs(re)>=tol) {
         ARIADNE_THROW(std::runtime_error,"Decimal(double)","double-precision floating-point number must have a relative error of "<<tol<<" with respect to its approximation to "<<sf<<" significant figures; number "<<std::setprecision(17)<<x<<" has a relative error of "<<re<<"");
     }
-    long int m=1e9; Int c=0;
-    if(exp<=0) { ss << '0'; }
-    if(exp<0) { ss << '.'; for(Int i=0; i!=-exp; ++i) { ss << "0"; } }
-    while(n!=0) {
-        if(exp==0) { ss << "."; }
-        m/=10;
-        c=n/m;
-        n=n%m;
-        ss << c;
-        --exp;
+
+    this->_p=sgn*n;
+    if(exp>0) {
+        this->_p *= pow(ten,Nat(exp));
+        this->_q=0u;
+    } else {
+        this->_q=-exp;
     }
-    while(exp>0) { --exp; ss << '0'; }
-    if(exp==0) { ss << '.'; }
-    _str=ss.str();
+
+    this->canonicalize();
 }
 
-Decimal::Decimal(StringType str)
-    : _str(str)
+Decimal::Decimal(String const& str)
 {
     // Parse string to ensure correctness
     Bool found_decimal_point=false;
     const char* c_ptr=str.c_str();
     const char& c=*c_ptr;
-    if(c=='-' || c=='+') {
+
+    Int s = +1;
+    if(c=='-') {
+        s = -1; ++c_ptr;
+    } else if (c=='+') {
         ++c_ptr;
     }
+
+    this->_p=0;
+    this->_q=0u;
     while(*c_ptr != 0) {
         const char& c=*c_ptr;
         if(c=='.') {
@@ -107,54 +208,34 @@ Decimal::Decimal(StringType str)
             }
         } else if(c<'0' || c>'9') {
             ARIADNE_THROW(std::runtime_error,"Decimal(String)","invalid symbol '"<<c<<"' in string literal \""<<str<<"\"");
+        } else {
+            Int d=(c-'0');
+            assert(0<=d && d<=9);
+            this->_p *= 10;
+            this->_p += d;
+            if(found_decimal_point) {
+                ++this->_q;
+            }
         }
         ++c_ptr;
     }
-    if(!found_decimal_point) {
-        _str+='.';
-    }
+    this->_p *= s;
+
 }
 
 OutputStream& operator<<(OutputStream& os, Decimal const& d) {
-    return os << d._str;
+    Integer p=abs(d._p);
+    Integer q=pow(ten,d._q);
+    Integer n = quot(p,q);
+    Integer r = p-n*q;
+    if(d._p<0) { os << '-'; }
+    return os << n << "." << r;
 }
 
 Decimal::operator Rational() const {
-    Rational q;
-    Bool decimal_point=false;
-    Nat decimal_places=0;
-    Int sign=1;
-    const char* c_ptr=this->_str.c_str();
-    const char& c=*c_ptr;
-    if(c=='-') {
-        sign=-1;
-        ++c_ptr;
-    } else if(c=='+') {
-        ++c_ptr;
-    }
-    while(*c_ptr != 0) {
-        const char& c=*c_ptr;
-        if(c=='.') {
-            if(decimal_point) {
-                ARIADNE_THROW(std::runtime_error,"Decimal::operator Rational()","Invalid decimal literal: "<<this->_str<<"\" has more than one decimal point.");
-            }
-            else {
-                decimal_point=true;
-            }
-        } else if(c>='0' && c<='9') {
-            q=q*10+(c-'0');
-            if(decimal_point) {
-                ++decimal_places;
-            }
-        } else {
-            ARIADNE_THROW(std::runtime_error,"Decimal::operator Rational()","invalid symbol '"<<c<<"' in decimal literal \""<<this->_str<<"\"");
-        }
-        ++c_ptr;
-    }
-    for(Nat i=0; i!=decimal_places; ++i) {
-        q=q/10;
-    }
-    return sign*q;
+    Integer const& num=this->_p;
+    Integer den=pow(ten,this->_q);
+    return Rational(num,den);
 }
 
 Decimal::operator ExactNumber() const {

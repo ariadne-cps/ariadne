@@ -165,6 +165,10 @@ template<class PR> FloatBall<PR>::FloatBall(Dyadic const& w, PR pr)
     : _v(RawFloat<PR>(w,RawFloat<PR>::to_nearest,pr)), _e(abs(Dyadic(_v)-w),RawFloat<PR>::upward,pr) {
 }
 
+template<class PR> FloatBall<PR>::FloatBall(Decimal const& d, PR pr)
+    : FloatBall(Rational(d),pr) {
+}
+
 template<class PR> FloatBall<PR>::FloatBall(Rational const& q, PR pr)
     : _v(RawFloat<PR>(q,RawFloat<PR>::to_nearest,pr)), _e(abs(Rational(_v)-q),RawFloat<PR>::upward,pr) {
 }
@@ -203,6 +207,10 @@ template<class PR> FloatBounds<PR>::FloatBounds(Integer const& z, PR pr)
 
 template<class PR> FloatBounds<PR>::FloatBounds(Dyadic const& w, PR pr)
     : _l(w,RawFloat<PR>::downward,pr),_u(w,RawFloat<PR>::upward,pr) {
+}
+
+template<class PR> FloatBounds<PR>::FloatBounds(Decimal const& d, PR pr)
+    : FloatBounds(Rational(d),pr) {
 }
 
 template<class PR> FloatBounds<PR>::FloatBounds(Rational const& q, PR pr)
@@ -257,6 +265,10 @@ template<class PR> FloatUpperBound<PR>::FloatUpperBound(Dyadic const& w, PR pr)
     : _u(w,RawFloat<PR>::upward,pr) {
 }
 
+template<class PR> FloatUpperBound<PR>::FloatUpperBound(Decimal const& d, PR pr)
+    : FloatUpperBound(Rational(d),pr) {
+}
+
 template<class PR> FloatUpperBound<PR>::FloatUpperBound(Rational const& q, PR pr)
     : _u(q,RawFloat<PR>::upward,pr) {
 }
@@ -300,6 +312,10 @@ template<class PR> FloatLowerBound<PR>::FloatLowerBound(Integer const& z, PR pr)
 
 template<class PR> FloatLowerBound<PR>::FloatLowerBound(Dyadic const& w, PR pr)
     : _l(w,RawFloat<PR>::downward,pr) {
+}
+
+template<class PR> FloatLowerBound<PR>::FloatLowerBound(Decimal const& d, PR pr)
+    : FloatLowerBound(Rational(d),pr) {
 }
 
 template<class PR> FloatLowerBound<PR>::FloatLowerBound(Rational const& q, PR pr)
@@ -350,6 +366,10 @@ template<class PR> FloatApproximation<PR>::FloatApproximation(Integer const& z, 
 
 template<class PR> FloatApproximation<PR>::FloatApproximation(Dyadic const& w, PR pr)
     : _a(w,RawFloat<PR>::to_nearest,pr) {
+}
+
+template<class PR> FloatApproximation<PR>::FloatApproximation(Decimal const& d, PR pr)
+    : FloatApproximation<PR>(Rational(d),pr) {
 }
 
 template<class PR> FloatApproximation<PR>::FloatApproximation(Rational const& q, PR pr)

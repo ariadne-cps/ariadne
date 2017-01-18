@@ -213,6 +213,7 @@ template<class PR> class FloatApproximation
         FloatApproximation<PR>(ExactDouble d, PR pr);
         FloatApproximation<PR>(const Integer& z, PR pr);
         FloatApproximation<PR>(const Dyadic& w, PR pr);
+        FloatApproximation<PR>(const Decimal& d, PR pr);
         FloatApproximation<PR>(const Rational& q, PR pr);
         FloatApproximation<PR>(const Real& r, PR pr);
         FloatApproximation<PR>(const FloatApproximation<PR>& r, PR pr);
@@ -277,6 +278,7 @@ template<class PR> class FloatLowerBound
     FloatLowerBound<PR>(ExactDouble d, PR pr);
         FloatLowerBound<PR>(const Integer& z, PR pr);
         FloatLowerBound<PR>(const Dyadic& w, PR pr);
+        FloatLowerBound<PR>(const Decimal& d, PR pr);
         FloatLowerBound<PR>(const Rational& q, PR pr);
         FloatLowerBound<PR>(const Real& r, PR pr);
     FloatLowerBound<PR>(const FloatLowerBound<PR>& x, PR pr);
@@ -329,6 +331,7 @@ template<class PR> class FloatUpperBound
     FloatUpperBound<PR>(ExactDouble d, PR pr);
         FloatUpperBound<PR>(const Integer& z, PR pr);
         FloatUpperBound<PR>(const Dyadic& w, PR pr);
+        FloatUpperBound<PR>(const Decimal& d, PR pr);
         FloatUpperBound<PR>(const Rational& q, PR pr);
         FloatUpperBound<PR>(const Real& r, PR pr);
     FloatUpperBound<PR>(const FloatUpperBound<PR>& x, PR pr);
@@ -421,6 +424,7 @@ template<class PR> class FloatBounds
     FloatBounds<PR>(ExactDouble d, PR pr);
         FloatBounds<PR>(const Integer& z, PR pr);
         FloatBounds<PR>(const Dyadic& w, PR pr);
+        FloatBounds<PR>(const Decimal& w, PR pr);
         FloatBounds<PR>(const Rational& q, PR pr);
         FloatBounds<PR>(const Real& x, PR pr);
         FloatBounds<PR>(const FloatBounds<PR>& x, PR pr);
@@ -497,6 +501,7 @@ template<class PR> class FloatBall
     FloatBall<PR>(ExactDouble d, PR pr);
         FloatBall<PR>(const Integer& z, PR pr);
         FloatBall<PR>(const Dyadic& w, PR pr);
+        FloatBall<PR>(const Decimal& d, PR pr);
         FloatBall<PR>(const Rational& q, PR pr);
         FloatBall<PR>(const Real& r, PR pr);
         FloatBall<PR>(const FloatBall<PR>& x, PR pr);
@@ -810,6 +815,7 @@ template<class PR> class FloatFactory {
     FloatBounds<PR> create(Number<ExactTag> const& y) { return FloatBounds<PR>(y,_pr); }
     FloatBounds<PR> create(Real const& y) { return FloatBounds<PR>(y,_pr); }
     FloatBounds<PR> create(Rational const& y) { return FloatBounds<PR>(y,_pr); }
+    FloatBounds<PR> create(Decimal const& y) { return FloatBounds<PR>(y,_pr); }
     FloatValue<PR> create(Dyadic const& y) { return FloatValue<PR>(y,_pr); }
     FloatValue<PR> create(Integer const& y) { return FloatValue<PR>(y,_pr); }
     template<class N, EnableIf<IsSignedIntegral<N>> =dummy> FloatValue<PR> create(N const& y) { return FloatValue<PR>(y,_pr); }

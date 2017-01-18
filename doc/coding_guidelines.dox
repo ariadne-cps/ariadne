@@ -30,27 +30,23 @@
 
 \page coding_guidelines_page Coding Guidelines
 
-\section gdblibtoolusage Using GDB with libtool
- - To use the GNU debugger under libtool, run <code>libtool --mode=execute gdb test_xxx</code> (This works with libtool 2.2.6)
 
+\section svnusage Git Usage
 
-\section svnusage Subversion Usage
+ - Ensure that the \c master branch is always usable!!! It should compile with both \c gcc and \c clang.
 
- - Try to ensure that the \c trunk/ is always usable!!!
-
- - When merging \em major changes from a branch into the \c trunk/, it is often better to \em first merge changes from the current trunk into the branch. This allows changes made to the trunk to first be assimilated before the final commit to the trunk is made.
-   \n\n
-   For example, to merge changes from \c branches/working/ from revision 42 into \c trunk/, use:
-   \code
-    svn merge $ARIADNE/trunk/@42 $ARIADNE/trunk/@HEAD working/
-   \endcode
-   Now any conflicts (which can be substantial...) can be worked on in the branch.
-   Once the conflicts have been resolved (which may take several revisions), and assuming no further changes have been made to the \c trunk/, the changes can be safely merged back using:
-  \code svn merge $ARIADNE/trunk/@HEAD $ARIADNE/branches/working/@HEAD trunk/ \endcode
-
-
+ - When merging \em major changes from a branch into \c master, it is often better to \em first \c merge (or \c rebase) changes from the current \c master into the branch.
+   This allows changes made to the trunk to first be assimilated before the final commit to the trunk is made.
+   Once the conflicts have been resolved (which may take several revisions), and assuming no further changes have been made to the \c master, the changes can be safely merged.
 
 \section cppcodingstandards C++ Coding Standards
+
+\subsection cppindentation Indentation
+
+ - The basic indentation size is four spaces.
+ - Tabs must not be used for indentation
+ - Namespaces should not be indented
+ - Scope classifiers (public, protected, private) should be indented by half the basic indentation.
 
 \subsection cppgeneralguidelines General guidelines
 
@@ -59,21 +55,28 @@
  - Remember that identifiers beginning with two underscores __XXX, __xxx or an underscore and a capital letter _Xxx are reserved for the compiler.
 
  - Each class should be in a single header file, which should include strongly related classes and methods.
+    - Source files xxx.cc should contain ordinary non-inline source code, internal code only used in the source file and explicit template instantiations.
     - Header files xxx.h should contain the interface, inline functions, templated code which is not explicitly instantiated and Doxygen documentation.
-    - Source files xxx.cc should contain ordinary non-inline source code, templated code which is meant to be explicitly instantiated, internal code only used in the source file and explicit template instantiations.
-
- - For wrappers and classes with only inline functions, the function definitions may be in the class body or in the file xxx.h.
+    - Header files xxx.decl.h should contain forward declarations.
+    - Header files xxx.inl.h may be used for inline functions.
+    - Header files xxx.tpl.h should contain templated code which is meant to be explicitly instantiated.
 
  - To ease template instantiation, non-member functions related to a class should not require explicit instantiation.
+   They must then be in the main xxx.h file or xxx.inl.h, but may be simple forwarding functions to (static) class methods.
 
  - The use of a private static _instantiate() method to enforce template instantiation does not work with all compilers and all optimization settings, and must not be used.
 
-\subsection cppindentation C++ Indentation
+\subsection cppgotchas Common mistakes
+ - A class static constant should be declared inside the class and initialised outside the class body. This initialisation should go in a source code file (.cc or .tpl.h). An exception is an integer constant, which may be initialised in the class definition.
 
- - The basic indentation size is four spaces.
- - Tabs must not be used for indentation
- - Namespaces should not be indented
- - Scope classifiers (public, protected, private) should be indented by half the basic indentation.
+\section pythoncodingstandards Python Coding Standards
+ - Every executable Python code file should begin with <c>#!/usr/bin/python</c>. This is the proper location for the Python interpreter following the Linux <a href="http://www.pathname.com/fhs/">Filesystem Hierarchy Standard</a> (FHS).
+
+\section gdblibtoolusage Using GDB with libtool
+ - To use the GNU debugger under libtool, run <code>libtool --mode=execute gdb test_xxx</code> (This works with libtool 2.2.6)
+
+
+ \section cppidioms C++ Idioms
 
 \subsection cpphierarchies Handle/Body Hierarchies
 
@@ -110,14 +113,6 @@ struct Derived : public Base {
         assert(dynamic_cast<const DerivedBody*>(other.pointer())); }
 };
 \endcode
-
-
-
-\subsection cppgotchas Common mistakes
- - A class static constant should be declared inside the class and initialised outside the class body. This initialisation should go in a source code file (.cc or .code.h or .template.h). An exception is an integer constant, which may be initialised in the class definition.
-
-\section pythoncodingstandards Python Coding Standards
- - Every executable Python code file should begin with <c>#!/usr/bin/python</c>. This is the proper location for the Python interpreter following the Linux <a href="http://www.pathname.com/fhs/">Filesystem Hierarchy Standard</a> (FHS).
 
 
 */

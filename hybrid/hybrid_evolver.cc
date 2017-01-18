@@ -153,6 +153,24 @@ OutputStream& operator<<(OutputStream& os, const CrossingData& crossing_data) {
     return os;
 }
 
+template<class T> struct LogOutput { T const& _ref; operator T const& () const { return _ref; } };
+template<class T> LogOutput<T> log_output(T const& t) { return LogOutput<T>{t}; }
+
+template<class K, class V> OutputStream& operator<<(OutputStream& os, LogOutput<Map<K,V>> const& map_output) {
+    Map<K,V>const& map=map_output;
+    os << "{"; for(auto iter=map.begin(); iter!=map.end(); ++iter) { os << (iter==map.begin()?"":",") << iter->first << ":" << log_output(iter->second); } return os << "}"; }
+template<class T> OutputStream& operator<<(OutputStream& os, LogOutput<List<T>> const& lst) {
+    os << "["; for(SizeType i=0; i!=lst._ref.size(); ++i) { os<<(i==0?"":",")<<LogOutput<T>{lst._ref[i]}; } return os << "]"; }
+OutputStream& operator<<(OutputStream& os, LogOutput<CrossingData> const& crossing_data_output) {
+    CrossingData const& crossing_data = crossing_data_output._ref;
+    os << "{kind="<<crossing_data.crossing_kind;
+    if(crossing_data.crossing_kind==CrossingKind::TRANSVERSE) {
+        os<<",crossing_time_range="<<crossing_data.crossing_time.range();
+        os<<",crossing_time_error="<<crossing_data.crossing_time.error();
+    }
+    return os;
+}
+
 // Test if an event 'blocks' continuous evolution.
 Bool is_blocking(EventKind evk) {
     switch(evk) {
@@ -614,6 +632,9 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
         EffectiveScalarFunction const& guard=guards[event];
         ARIADNE_LOG(8,"guard="<<guard<<"\n");
 
+        // Compute the value of the guard function g over the flow of $\dot(x)=f(x)$
+        UpperIntervalType guard_range=apply(guard,flow_bounds);
+        ARIADNE_LOG(8,"guard_range="<<guard_range<<"\n");
         // Compute the derivative of the guard function g along flow lines of $\dot(x)=f(x)$
         // This is given by the Lie derivative at a point x, defined as $L_{f}g(x) = (\nabla g\cdot f)(x)$
         EffectiveScalarFunction derivative=lie_derivative(guard,dynamic);
@@ -709,9 +730,42 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                 // time is $(g(\phi(x_0,t))<=0 /\ t<=\mu(x_0)) \/ g(\phi(x_0,\mu(x_0)))<=0$
                 try {
                     ValidatedScalarFunctionModel critical_time=solver.implicit(compose(derivative,flow),flow_spacial_domain,flow_time_domain);
-                    if(decide(critical_time.error()>1e-8)) { ARIADNE_LOG(2,event<<": critical_time: error="<<critical_time.error()<<", range="<<critical_time.range()<<"\n"); }
-                    crossings[event]=CrossingData(CrossingKind::GRAZING);
-                    crossings[event].critical_time=critical_time;
+                    UpperIntervalType critical_time_range=critical_time.range();
+                    ARIADNE_LOG(8,"critical_time_range="<<critical_time_range<<"\n");
+                    if(decide(critical_time.error()>1e-8)) {
+                        ARIADNE_LOG(2,event<<": critical_time: error="<<critical_time.error()<<", range="<<critical_time.range()<<"\n"); }
+
+                    HybridEnclosure evolve_set_at_critical_time=initial_set;
+                    evolve_set_at_critical_time.apply_evolve_step(flow,critical_time);
+                    UpperIntervalType guard_range_at_critical_time=evolve_set_at_critical_time.range_of(guard);
+                    ARIADNE_LOG(8,"guard_range_at_critical_time="<<guard_range_at_critical_time<<"\n");
+                    if(definitely(guard_range_at_critical_time.upper()<0)) {
+                        // No crossing
+                        const_cast<Set<DiscreteEvent>&>(active_events).erase(event); // WARNING: Maybe removing event is unsafe
+                    } else if(definitely(guard_range_at_critical_time.lower()>0)) {
+                        // Transverse crossing
+                        // FIXME: Find a more reliable way of solving the implicit equation for the crossing time
+                        //   which takes into account the fact that the derivative over the domain goes negative
+                        static const Rational INTERVAL_REDUCTION_FACTOR(15,16);
+                        UpperIntervalType crossing_flow_time_range(0, critical_time_range.upper());
+                        ARIADNE_LOG(8,"crossing_flow_time_range="<<crossing_flow_time_range<<"\n");
+                        ExactIntervalType crossing_flow_time_domain = cast_exact_interval(INTERVAL_REDUCTION_FACTOR*UpperIntervalType(0, critical_time_range.upper()));
+                        ARIADNE_LOG(8,"crossing_flow_time_domain="<<crossing_flow_time_domain<<"\n");
+                        try {
+                            ValidatedScalarFunctionModel crossing_time=solver.implicit(compose(guard,flow),flow_spacial_domain,crossing_flow_time_domain);
+                            UpperIntervalType crossing_time_range=crossing_time.range();
+                            ARIADNE_LOG(8,"crossing_time_range="<<crossing_time_range<<"\n");
+                            crossings[event]=CrossingData(CrossingKind::TRANSVERSE,crossing_time);
+                        } catch(const SolverException& e) {
+                            ARIADNE_LOG(2,"ErrorTag in computing crossing time over reduced time interval for event "<<*event_iter<<":\n  "<<e.what()<<"\n");
+                            // NOTE: Use GRAZING here since this will later put in a block on continuous evolution at critical time.
+                            crossings[event]=CrossingData(CrossingKind::GRAZING);
+                            crossings[event].critical_time=critical_time;
+                        }
+                    } else {
+                        crossings[event]=CrossingData(CrossingKind::GRAZING);
+                        crossings[event].critical_time=critical_time;
+                    }
                 }
                 catch(const SolverException& e) {
                     ARIADNE_LOG(2,"ErrorTag in computing critical time for event "<<*event_iter<<":\n  "<<e.what()<<"\n");
@@ -730,19 +784,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
         }
     }
     if(!crossings.empty()) {
-        Map<DiscreteEvent,Tuple<CrossingKind,UpperIntervalType,Float64Error> > crossing_log_data;
-        for (Map<DiscreteEvent,CrossingData>::ConstIterator crossing_iter=crossings.begin(); crossing_iter!=crossings.end(); ++crossing_iter) {
-            DiscreteEvent event=crossing_iter->first;
-            CrossingKind crossing_kind=crossing_iter->second.crossing_kind;
-            UpperIntervalType crossing_time_range(-infty,+infty);
-            Float64Error crossing_time_error={0u,Precision64()};
-            if (crossing_kind==CrossingKind::TRANSVERSE) {
-                crossing_time_range=crossing_iter->second.crossing_time.range();
-                crossing_time_error=crossing_iter->second.crossing_time.error();
-            }
-            crossing_log_data.insert(event,make_tuple(crossing_kind,crossing_time_range,crossing_time_error));
-        }
-        ARIADNE_LOG(2,"crossings: "<<crossing_log_data<<"\n");
+        ARIADNE_LOG(2,"crossings: "<<log_output(crossings)<<"\n");
     }
     return crossings;
 }
@@ -913,10 +955,10 @@ _apply_guard(List<HybridEnclosure>& sets,
 
         switch(crossing_data.crossing_kind) {
             case CrossingKind::TRANSVERSE:
-                //set.new_state_constraint(event, guard_function <= zero);
                 set.new_invariant(event, guard_function);
                 // Alternatively:
                 // set.new_parameter_constraint(event, elapsed_time <= compose(crossing_data.crossing_time,starting_state) );
+                // set.new_state_constraint(event, guard_function <= zero);
                 break;
             case CrossingKind::CONVEX: case CrossingKind::INCREASING:
                 //set.new_state_constraint(event, guard_function <= zero);
@@ -957,11 +999,12 @@ _apply_guard(List<HybridEnclosure>& sets,
                 // Split the set into two components, one corresponding to
                 // points which miss the guard completely, the other to points which
                 // eventually hit the guard, ensuring that the set stops at the first crossing
-                HybridEnclosure extra_set=set;
-                set.new_parameter_constraint(event,maximal_guard<=zero);
-                extra_set.new_parameter_constraint( event, elapsed_time <= critical_time );
-                extra_set.new_state_constraint(event,guard_function<=zero);
-                sets.append(extra_set);
+                HybridEnclosure hitting_set=set;
+                HybridEnclosure& missing_set=set;
+                missing_set.new_parameter_constraint(event,maximal_guard<=zero);
+                hitting_set.new_parameter_constraint( event, elapsed_time <= critical_time );
+                hitting_set.new_state_constraint(event,guard_function<=zero);
+                sets.append(hitting_set);
                 break;
                 // Code below is always exact, but uses two sets
                 // set1.new_parameter_constraint(event,final_guard <= zero);
@@ -1150,7 +1193,7 @@ _evolution_step(EvolutionData& evolution_data,
     const FlowFunctionModel flow_model=this->_compute_flow(dynamic,starting_bounding_box,Float64Value(this->configuration().maximum_step_size()));
     ARIADNE_LOG(4,"flow_model.domain()="<<flow_model.domain()<<" flow_model.range()="<<flow_model.range()<<"\n");
 
-    // Compute possibly active urgent events with increasing guards, and crossing times
+    // Compute possibly active events
     Set<DiscreteEvent> active_events =
         this->_compute_active_events(dynamic,guard_functions,flow_model,starting_set);
     if(!active_events.empty()) {

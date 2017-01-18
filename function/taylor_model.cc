@@ -22,7 +22,7 @@
  */
 
 #include "numeric/numeric.h"
-#include "function/taylor_model.tcc"
+#include "function/taylor_model.tpl.h"
 
 namespace Ariadne {
 

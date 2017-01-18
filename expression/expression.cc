@@ -35,7 +35,7 @@
 #include "expression/valuation.h"
 
 #include "expression/formula.h"
-#include "expression/operators.tcc"
+#include "expression/operators.tpl.h"
 
 namespace Ariadne {
 

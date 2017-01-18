@@ -22,7 +22,7 @@
  */
 
 #include "function/function_model.h"
-#include "function/function_model.tcc"
+#include "function/function_model.tpl.h"
 #include "function/taylor_model.h"
 
 #include "algebra/algebra.h"

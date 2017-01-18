@@ -1,5 +1,5 @@
 /***************************************************************************
- *            function_mixin.tcc
+ *            function_mixin.tpl.h
  *
  *  Copyright 2008-10  Pieter Collins
  *

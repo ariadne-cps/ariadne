@@ -1,5 +1,5 @@
 /***************************************************************************
- *            operators.tcc
+ *            operators.tpl.h
  *
  *  Copyright 2008-15 Pieter Collins
  *

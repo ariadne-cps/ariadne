@@ -1,5 +1,5 @@
 /***************************************************************************
- *            function_patch.tcc
+ *            function_patch.tpl.h
  *
  *  Copyright 2008-15  Pieter Collins
  *

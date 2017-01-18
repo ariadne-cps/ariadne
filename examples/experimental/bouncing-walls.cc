@@ -21,7 +21,7 @@ int main(int argc, char* argv[])
     /// Build the Hybrid System
 
     /// Create a HybridAutomaton object
-	HybridAutomaton automaton("bouncing-walls");
+	AtomicHybridAutomaton automaton("bouncing-walls");
 
     // Parameters
     RealConstant velocity("velocity",1.0_dec); // Velocity in modulus
@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
 
     /// Modes
 
-    DiscreteLocation scanning("scanning");
+    AtomicDiscreteLocation scanning("scanning");
 
     // Variables
 
@@ -60,7 +60,7 @@ int main(int argc, char* argv[])
     typedef GeneralHybridEvolver::OrbitType OrbitType;
     typedef GeneralHybridEvolver::EnclosureListType EnclosureListType;
 
-    HybridSet initial_set(scanning,{vx==-velocity,x==Real(0.5)});
+    HybridSet initial_set(automaton|scanning,{vx==-velocity,x==Real(0.5)});
 
     HybridTime evolution_time(10.0,10);
 

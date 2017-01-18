@@ -1,5 +1,5 @@
 /***************************************************************************
- *            taylor_model.tcc
+ *            taylor_model.tpl.h
  *
  *  Copyright 2008-15  Pieter Collins
  *
@@ -40,7 +40,7 @@
 #include "function/function.h"
 #include "utility/exceptions.h"
 
-#include "algebra/algebra_operations.tcc"
+#include "algebra/algebra_operations.tpl.h"
 
 #define VOLATILE ;
 #include "algebra/multi_index-noaliasing.h"

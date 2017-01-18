@@ -76,31 +76,31 @@ int test_case_counter = 0;
 /*! \brief Print the title for the test case */
 #define ARIADNE_PRINT_TEST_CASE_TITLE( pTitle )                         \
     {                                                                   \
-        cout << endl << "***" << ++test_case_counter << ": "<< pTitle << "***" << endl; \
-        cout.flush();                                                   \
+        std::cout << std::endl << "***" << ++test_case_counter << ": "<< pTitle << "***" << std::endl; \
+        std::cout.flush();                                                   \
     }                                                                   \
 
 /*! \brief Print the comment for the test */
 #define ARIADNE_PRINT_TEST_COMMENT( pComment )                          \
     {                                                                   \
-        cout << "* COMMENT: " << pComment << "" << endl;                \
-        cout.flush();                                                   \
+        std::cout << "* COMMENT: " << pComment << "" << std::endl;                \
+        std::cout.flush();                                                   \
     }                                                                   \
 
 
 /*! \brief Provide a warning message */
 #define ARIADNE_TEST_WARN( message )                                    \
     {                                                                   \
-        cout << "WARNING: " << message << "" << endl;                \
-        cerr << "WARNING: " << message << "" << endl;                \
+        std::cout << "WARNING: " << message << "" << std::endl;                \
+        std::cerr << "WARNING: " << message << "" << std::endl;                \
     }                                                                   \
 
 
 /*! \brief Notify the user about a possibly unintuitive feature */
 #define ARIADNE_TEST_NOTIFY( message )                                    \
     {                                                                   \
-        cout << "NOTIFICATION: " << message << "" << endl;                \
-        cerr << "NOTIFICATION: " << message << "" << endl;                \
+        std::cout << "NOTIFICATION: " << message << "" << std::endl;                \
+        std::cerr << "NOTIFICATION: " << message << "" << std::endl;                \
     }                                                                   \
 
 

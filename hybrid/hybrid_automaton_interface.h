@@ -125,6 +125,21 @@ class UnderspecifiedResetError : public UnderspecifiedSystemError {
 };
 
 
+class StateSpecificationError : public std::runtime_error {
+  public:
+    StateSpecificationError(const StringType& what) : std::runtime_error(what) { }
+};
+
+class IndistinguishableLocationsError : public StateSpecificationError {
+  public:
+    IndistinguishableLocationsError(const StringType& what) : StateSpecificationError(what) { }
+};
+
+class OverspecifiedLocationException : public IndistinguishableLocationsError {
+  public:
+    OverspecifiedLocationException(const StringType& what) : IndistinguishableLocationsError(what) { }
+};
+
 
 //! \ingroup SystemModule
 //! \brief Base interface for hybrid systems, to allow different types to be used in evolution routines.

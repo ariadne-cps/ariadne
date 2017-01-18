@@ -125,22 +125,24 @@ CompositeHybridAutomaton::component(Nat k) const {
 
 typedef Map<DiscreteLocation,DiscreteMode>::ConstIterator ModesConstIterator;
 
-Bool has_mode(const HybridAutomaton& automaton, const DiscreteLocation& location) {
-    const Map<DiscreteLocation,DiscreteMode>& modes=automaton.modes();
-    for(ModesConstIterator iter=modes.begin(); iter!=modes.end(); ++iter) {
-        const DiscreteMode& mode=iter->second;
-        if(is_restriction(mode.location(),location)) {
-            return true;
-        }
-    }
-    return false;
-}
-
 
 Bool
 CompositeHybridAutomaton::has_mode(DiscreteLocation location) const {
+    DiscreteLocation automaton_location;
     for(Nat i=0; i!=this->_components.size(); ++i) {
-        if(!this->_components[i].has_mode(location)) {
+        if(!this->_components[i].has_partial_mode(location)) {
+            return false;
+        }
+        automaton_location.adjoin(_components[i].mode(location).location());
+    }
+    ARIADNE_ASSERT(is_restriction(automaton_location,location));
+    return are_same(automaton_location,location);
+}
+
+Bool
+CompositeHybridAutomaton::has_partial_mode(DiscreteLocation location) const {
+    for(Nat i=0; i!=this->_components.size(); ++i) {
+        if(!this->_components[i].has_partial_mode(location)) {
             return false;
         }
     }
@@ -190,48 +192,55 @@ DiscreteMode const& CompositeHybridAutomaton::mode(DiscreteLocation location) co
 
 Void CompositeHybridAutomaton::_cache_mode(DiscreteLocation location) const
 {
-    DiscreteMode& result=this->_cached_mode;
-    result=DiscreteMode(location);
+    DiscreteMode& cached_mode=this->_cached_mode;
+    cached_mode=DiscreteMode();
 
     for(List<HybridAutomaton>::ConstIterator component_iter=this->_components.begin();
         component_iter!=this->_components.end(); ++component_iter)
     {
         const DiscreteMode& component_mode=component_iter->mode(location);
-        result._auxiliary.append(component_mode._auxiliary);
-        result._dynamic.append(component_mode._dynamic);
+
+        cached_mode._location.adjoin(component_mode._location);
+        cached_mode._auxiliary.append(component_mode._auxiliary);
+        cached_mode._dynamic.append(component_mode._dynamic);
 
         for(Map<DiscreteEvent,ContinuousPredicate>::ConstIterator invariant_iter=component_mode._invariants.begin();
             invariant_iter!=component_mode._invariants.end(); ++invariant_iter)
         {
-            result._invariants.insert(*invariant_iter);
+            cached_mode._invariants.insert(*invariant_iter);
         }
 
         for(Map<DiscreteEvent,ContinuousPredicate>::ConstIterator guard_iter=component_mode._guards.begin();
             guard_iter!=component_mode._guards.end(); ++guard_iter)
         {
-            result._guards.insert(*guard_iter);
+            cached_mode._guards.insert(*guard_iter);
         }
 
         for(Map<DiscreteEvent,EventKind>::ConstIterator kind_iter=component_mode._kinds.begin();
             kind_iter!=component_mode._kinds.end(); ++kind_iter)
         {
-            result._kinds.insert(*kind_iter);
+            cached_mode._kinds.insert(*kind_iter);
         }
 
         // FIXME: Need to introduce missing updates
         for(Map<DiscreteEvent,DiscreteLocation>::ConstIterator target_iter=component_mode._targets.begin();
             target_iter!=component_mode._targets.end(); ++target_iter)
         {
-            DiscreteLocation& target=result._targets[target_iter->first];
+            DiscreteLocation& target=cached_mode._targets[target_iter->first];
             target=join(target,target_iter->second);
         }
 
         for(Map<DiscreteEvent,List<PrimedRealAssignment> >::ConstIterator reset_iter=component_mode._resets.begin();
             reset_iter!=component_mode._resets.end(); ++reset_iter)
         {
-            List<PrimedRealAssignment>& reset=result._resets[reset_iter->first];
+            List<PrimedRealAssignment>& reset=cached_mode._resets[reset_iter->first];
             reset.append(reset_iter->second);
         }
+    }
+    ARIADNE_DEBUG_ASSERT(is_restriction(cached_mode._location,location));
+    // TODO: Should we throw an exception here? I think it's worth allowing this to go through...
+    if(false and not are_same(cached_mode._location,location)) {
+        ARIADNE_THROW(OverspecifiedLocationException,"CompositeHybridAutomaton::mode(DiscreteLocation)","Automaton has mode "<<cached_mode._location<<" overspecified by location "<<location);
     }
 }
 
@@ -290,7 +299,7 @@ List<RealVariable>
 CompositeHybridAutomaton::state_variables(DiscreteLocation location) const {
     List<RealVariable> result;
     for(Nat i=0; i!=this->_components.size(); ++i) {
-        ARIADNE_ASSERT(this->_components[i].has_mode(location));
+        ARIADNE_ASSERT(this->_components[i].has_partial_mode(location));
         // Append state space in mode i; note that this automatically checks whether a variable is already present
         result.append(this->_components[i].state_variables(location));
     }
@@ -301,7 +310,6 @@ List<RealVariable>
 CompositeHybridAutomaton::auxiliary_variables(DiscreteLocation location) const {
     List<RealVariable> result;
     for(Nat i=0; i!=this->_components.size(); ++i) {
-        ARIADNE_ASSERT(this->_components[i].has_mode(location));
         // Append state space in mode i; note that this automatically checks whether a variable is already present
         result.append(this->_components[i].auxiliary_variables(location));
     }

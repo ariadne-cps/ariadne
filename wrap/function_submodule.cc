@@ -51,7 +51,7 @@
 #include "expression/function_expression.h"
 #include "solvers/constraint_solver.h"
 
-#include "function/function_mixin.tcc"
+#include "function/function_mixin.tpl.h"
 
 using namespace boost::python;
 

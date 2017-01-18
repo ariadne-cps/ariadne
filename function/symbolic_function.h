@@ -43,7 +43,7 @@
 #include "algebra/vector.h"
 
 #include "function/function_mixin.h"
-#include "expression/operators.tcc"
+#include "expression/operators.tpl.h"
 
 namespace Ariadne {
 

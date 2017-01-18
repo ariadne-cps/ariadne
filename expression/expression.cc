@@ -27,13 +27,15 @@
 #include "algebra/algebra.h"
 #include "algebra/algebra_wrapper.h"
 
+#include "expression/constant.h"
+#include "expression/variables.h"
 #include "expression/expression.h"
 #include "expression/assignment.h"
 #include "expression/space.h"
 #include "expression/valuation.h"
 
 #include "expression/formula.h"
-#include "expression/operators.tcc"
+#include "expression/operators.tpl.h"
 
 namespace Ariadne {
 

@@ -22,7 +22,7 @@
  */
 
 #include "expansion.h"
-#include "expansion.tcc"
+#include "expansion.tpl.h"
 
 #include "numeric/float.h"
 #include "geometry/interval.h"

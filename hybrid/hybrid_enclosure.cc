@@ -89,7 +89,7 @@ HybridEnclosure::~HybridEnclosure() {
 }
 
 HybridEnclosure::HybridEnclosure()
-    : _location(""), _events(), _space(), _set(), _variables()
+    : _location(), _events(), _space(), _set(), _variables()
 {
 }
 

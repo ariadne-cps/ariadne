@@ -45,7 +45,7 @@
 #include "function/taylor_function.h"
 
 #include "function_mixin.h"
-#include "function_mixin.tcc"
+#include "function_mixin.tpl.h"
 
 #define VOLATILE ;
 

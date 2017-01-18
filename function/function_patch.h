@@ -1495,6 +1495,6 @@ template<class M> Vector< Polynomial<NumericType<M>> > polynomials(const VectorF
 
 } // namespace Ariadne
 
-#include "function_patch.tcc"
+#include "function_patch.tpl.h"
 
 #endif // ARIADNE_FUNCTION_PATCH_H

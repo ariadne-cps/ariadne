@@ -1,7 +1,7 @@
 /***************************************************************************
- *            algebra.cc
+ *            identifier.h
  *
- *  Copyright 2011-15  Pieter Collins
+ *  Copyright 2008-16  Pieter Collins
  *
  ****************************************************************************/
 
@@ -21,13 +21,31 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/numeric.h"
-#include "config.h"
 
-#include "algebra.h"
-#include "algebra_mixin.h"
-#include "algebra_operations.tpl.h"
+/*! \file identifier.h
+ *  \brief Strings used as names for constants and variables.
+ */
+
+#ifndef ARIADNE_IDENTIFIER_H
+#define ARIADNE_IDENTIFIER_H
+
+#include "utility/string.h"
 
 namespace Ariadne {
 
+//! \ingroup ExpressionModule
+//! \brief A class representing the name of a variable.
+//! \details A proxy for a standard string; used to distinguish a string used as a variable name from a value.
+//! \sa Variable
+class Identifier : public String
+{
+  public:
+    Identifier() : String() { }
+    Identifier(const char* cstr) : String(cstr) { }
+    //! \brief Construct an identifier from a standard string.
+    Identifier(const std::string& str) : String(str) { }
+};
+
 } // namespace Ariadne
+
+#endif /* ARIADNE_IDENTIFIER_H */

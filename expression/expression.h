@@ -42,9 +42,10 @@
 #include "numeric/number.decl.h"
 
 #include "numeric/operators.h"
-#include "expression/valuation.h"
+#include "expression/constant.h"
 #include "expression/variables.h"
-//#include "expression/operations.h"
+#include "expression/valuation.h"
+#include "expression/operations.h"
 
 namespace Ariadne {
 
@@ -54,6 +55,7 @@ template<class T> class Set;
 
 class Identifier;
 
+template<class T> class Constant;
 template<class T> class Variable;
 template<class T> class Space;
 template<class T> class Expression;
@@ -77,6 +79,7 @@ typedef Expression<Kleenean> KleeneanExpression;
 typedef Expression<String> StringExpression;
 typedef Expression<Integer> IntegerExpression;
 typedef Expression<Real> RealExpression;
+typedef List<Expression<Real>> RealExpressions;
 
 template<class T> struct DeclareExpressionOperations;
 

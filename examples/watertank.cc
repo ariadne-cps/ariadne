@@ -76,15 +76,15 @@ Int main(Int argc, const char* argv[])
     DottedRealAssignment tank_dynamic(dot(height)=a*height+b*aperture);
     DottedRealAssignment valve_opening_dynamic(dot(aperture)=1/T);
     DottedRealAssignment valve_closing_dynamic(dot(aperture)=-1/T);
-    DottedRealAssignment valve_constant_dynamic(dot(aperture)=0.0);
-    RealAssignment valve_open_dynamic(let(aperture)=1.0);
-    RealAssignment valve_closed_dynamic(let(aperture)=0.0);
+    DottedRealAssignment valve_constant_dynamic(dot(aperture)=0.0_dec);
+    RealAssignment valve_open_dynamic(let(aperture)=1.0_dec);
+    RealAssignment valve_closed_dynamic(let(aperture)=0.0_dec);
 
     /// Create the resets
     PrimedRealAssignment tank_reset(next(height)=height);
     PrimedRealAssignment valve_reset(next(aperture)=aperture);
-    PrimedRealAssignment valve_open_reset(next(aperture)=1.0);
-    PrimedRealAssignment valve_closed_reset(next(aperture)=0.0);
+    PrimedRealAssignment valve_open_reset(next(aperture)=1.0_dec);
+    PrimedRealAssignment valve_closed_reset(next(aperture)=0.0_dec);
     cout << "tank_reset=" << tank_reset << endl << endl;
     cout << "valve_reset=" << valve_reset << endl << endl;
 

@@ -45,7 +45,7 @@ endif()
 
 check_include_file(mpfr.h HAVE_MPFR_H)
 
-find_package(GTK2 REQUIRED)
+find_package(GTK2)
 find_package(Cairo REQUIRED)
 
 set(Boost_REQUIRED_VERSION 1.36.0)

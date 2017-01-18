@@ -233,7 +233,7 @@ Map<RealVariable,Float64Value> HybridPoint::values() const {
 
 
 
-template<class BS> Void draw(CanvasInterface& canvas, const DiscreteLocation& location, const Variables2d& axes, const HybridBasicSet<BS>& set)
+template<class BS> Void draw_hybrid_basic_set(CanvasInterface& canvas, const DiscreteLocation& location, const Variables2d& axes, const HybridBasicSet<BS>& set)
 {
     if(set.location()==location) {
         Projection2d projection(set.continuous_set().dimension(),set.space().index(axes.x_variable()),set.space().index(axes.y_variable()));
@@ -241,9 +241,18 @@ template<class BS> Void draw(CanvasInterface& canvas, const DiscreteLocation& lo
     }
 }
 
-Void HybridBoxType::draw(CanvasInterface& c, const Set<DiscreteLocation>& q, const Variables2d& p) const {
-    if(q.empty() || q.contains(this->location())) {
-        this->continuous_set().draw(c,projection(this->space(),p));
+Void HybridBoxType::draw(CanvasInterface& c, const Set<DiscreteLocation>& qs, const Variables2d& p) const {
+    DiscreteLocation const& q=this->location();
+    if(qs.empty() || qs.contains(q)) {
+        Ariadne::draw_hybrid_basic_set(c,q,p,static_cast<HybridBasicSet<ExactBoxType>const&>(*this));
+    }
+}
+
+Void HybridBoxSet::draw(CanvasInterface& c, const Set<DiscreteLocation>& qs, const Variables2d& vs) const {
+    if(qs.empty() || qs.contains(this->location())) {
+        RealSpace spc(List<RealVariable>(this->variables()));
+        Projection2d prj(spc.dimension(),spc.index(vs.x_variable()),spc.index(vs.y_variable()));
+        this->euclidean_set(spc).draw(c,prj);
     }
 }
 

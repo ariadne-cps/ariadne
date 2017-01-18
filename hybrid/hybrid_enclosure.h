@@ -38,7 +38,7 @@
 #include "hybrid/discrete_location.h"
 #include "hybrid/discrete_event.h"
 #include "geometry/enclosure.h"
-#include "output/graphics_interface.h"
+#include "hybrid/hybrid_graphics_interface.h"
 #include "utility/container.h"
 #include "geometry/box.h"
 #include "utility/logging.h"

@@ -3,6 +3,7 @@ set(EXPERIMENTAL_EXAMPLES
 	exponential
 	laser
 	bouncing-walls
+	vanderpol
 )
 
 foreach(example ${EXPERIMENTAL_EXAMPLES})

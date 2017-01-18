@@ -45,10 +45,8 @@ endif()
 
 check_include_file(mpfr.h HAVE_MPFR_H)
 
-check_include_file(cairo/cairo.h HAVE_CAIRO_H)
-if(NOT HAVE_CAIRO_H)
-    message(WARNING "Unable to find cairo.h.")
-endif()
+find_package(GTK2 REQUIRED)
+find_package(Cairo REQUIRED)
 
 set(Boost_REQUIRED_VERSION 1.36.0)
 find_package(Boost ${Boost_REQUIRED_VERSION})

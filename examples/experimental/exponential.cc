@@ -26,10 +26,10 @@ int main(int argc, char* argv[])
     /// Build the Hybrid System
 
     /// Create a HybridAutomaton object
-    HybridAutomaton automaton("exponential");
+    AtomicHybridAutomaton automaton("exponential");
 
     /// Create the discrete states
-    DiscreteLocation work("work");
+    AtomicDiscreteLocation work("work");
 
     RealVariable x("x");
     Real A_real(A);
@@ -49,7 +49,7 @@ int main(int argc, char* argv[])
     typedef GeneralHybridEvolver::EnclosureListType EnclosureListType;
     typedef GeneralHybridEvolver::OrbitType OrbitType;
 
-    HybridSet initial_set(work,{1<=x<=1});
+    HybridSet initial_set(automaton|work,{1<=x<=1});
     HybridTime evolution_time(EVOL_TIME,4);
 
     std::cout << "Computing orbit... " << std::flush;

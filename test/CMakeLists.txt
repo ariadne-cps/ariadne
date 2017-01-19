@@ -32,6 +32,7 @@ set(UNIT_TESTS
     test_hybrid_evolver
     test_hybrid_evolution
     test_hybrid_reachability_analyser
+    test_crossings_issue
 )
 
 foreach(test ${UNIT_TESTS})

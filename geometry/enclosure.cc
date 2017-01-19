@@ -1053,33 +1053,36 @@ uniform_error_recondition()
         }
     }
 
-    ExactBoxType error_domains(large_error_indices.size());
-    for(Nat i=0; i!=large_error_indices.size(); ++i) {
-        Float64 error=this->_space_function.get(large_error_indices[i]).error().raw();
-        error_domains[i]=ExactIntervalType(-error,+error);
-    }
-    error_domains=ExactBoxType(large_error_indices.size(),ExactIntervalType(-1,+1));
-    Nat k=this->number_of_parameters();
+    if (large_error_indices.size() > 0) {
 
-    this->_domain=product(this->_domain,error_domains);
-    this->_reduced_domain=product(this->_reduced_domain,error_domains);
-    this->_space_function=embed(this->_space_function,error_domains);
-    for(Nat i=0; i!=this->_constraints.size(); ++i) {
-        this->_constraints[i].function()=embed(this->_constraints[i].function(),error_domains);
-    }
+		ExactBoxType error_domains(large_error_indices.size());
+		for(Nat i=0; i!=large_error_indices.size(); ++i) {
+			Float64 error=this->_space_function.get(large_error_indices[i]).error().raw();
+			error_domains[i]=ExactIntervalType(-error,+error);
+		}
+		error_domains=ExactBoxType(large_error_indices.size(),ExactIntervalType(-1,+1));
+		Nat k=this->number_of_parameters();
 
-    for(Nat i=0; i!=large_error_indices.size(); ++i) {
-        Float64 error=this->_space_function.get(large_error_indices[i]).error().raw();
-        if(error > MAXIMUM_ERROR) {
-            this->_space_function[i].set_error(0u);
-            this->_space_function[i] = this->_space_function.get(i) + this->function_factory().create_coordinate(this->_domain,k)*Float64Bounds(+error);
-            ++k;
-        }
-    }
+		this->_domain=product(this->_domain,error_domains);
+		this->_reduced_domain=product(this->_reduced_domain,error_domains);
+		this->_space_function=embed(this->_space_function,error_domains);
+		for(Nat i=0; i!=this->_constraints.size(); ++i) {
+			this->_constraints[i].function()=embed(this->_constraints[i].function(),error_domains);
+		}
 
-    ExactIntervalVectorType new_variables = project(this->parameter_domain(),range(old_number_of_parameters,this->number_of_parameters()));
-    this->_time_function = embed(this->_time_function,new_variables);
-    this->_dwell_time_function = embed(this->_dwell_time_function,new_variables);
+		for(Nat i=0; i!=large_error_indices.size(); ++i) {
+			Float64 error=this->_space_function.get(large_error_indices[i]).error().raw();
+			if(error > MAXIMUM_ERROR) {
+				this->_space_function[i].set_error(0u);
+				this->_space_function[i] = this->_space_function.get(i) + this->function_factory().create_coordinate(this->_domain,k)*Float64Bounds(+error);
+				++k;
+			}
+		}
+
+		ExactIntervalVectorType new_variables = project(this->parameter_domain(),range(old_number_of_parameters,this->number_of_parameters()));
+		this->_time_function = embed(this->_time_function,new_variables);
+		this->_dwell_time_function = embed(this->_dwell_time_function,new_variables);
+    }
 
 }
 
@@ -1125,7 +1128,7 @@ TaylorModel<ValidatedTag,Float64> recondition(const TaylorModel<ValidatedTag,Flo
         Bool keep=true;
         for(SizeType k=0; k!=number_of_discarded_variables; ++k) {
             if(xa[discarded_variables[k]]!=0) {
-                error *= mag(xv);
+                error += mag(xv);
                 keep=false;
                 break;
             }
@@ -1224,8 +1227,6 @@ Enclosure::kuhn_recondition()
     new_set._dwell_time_function=ScalarTaylorFunction(new_domain,Ariadne::recondition(dwell_time.model(),discarded_parameters,number_of_error_parameters));
 
     (*this)=new_set;
-    //ScalarTaylorFunction const& dwell_time=dynamic_cast<const ScalarTaylorFunction&>(this->_dwell_time.reference());
-    //this->_dwell_time =ScalarTaylorFunction(new_domain,Ariadne::recondition(dwell_time.model(),discarded_parameters,number_of_error_parameters));
 
     this->_check();
 }

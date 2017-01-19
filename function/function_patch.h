@@ -734,8 +734,8 @@ template<class M> class VectorFunctionPatch
     friend class VectorFunctionMixin<VectorFunctionPatch<M>,P>;
     friend class TaylorFunctionFactory;
   public:
-    template<class X, EnableIf<CanEvaluate<X,M,Vector<X>>> =dummy> Void _compute(Vector<X>& r, const Vector<X>& a) const;
-    template<class X, DisableIf<CanEvaluate<X,M,Vector<X>>> =dummy> Void _compute(Vector<X>& r, const Vector<X>& a) const;
+    template<class X, EnableIf<CanCall<X,M,Vector<X>>> =dummy> Void _compute(Vector<X>& r, const Vector<X>& a) const;
+    template<class X, DisableIf<CanCall<X,M,Vector<X>>> =dummy> Void _compute(Vector<X>& r, const Vector<X>& a) const;
   private:
     /* Domain of definition. */
     ExactBoxType _domain;
@@ -1007,14 +1007,14 @@ template<class M> class VectorFunctionPatch
 
 };
 
-template<class M> template<class X, EnableIf<CanEvaluate<X,M,Vector<X>>>> Void VectorFunctionPatch<M>::_compute(Vector<X>& r, const Vector<X>& a) const {
+template<class M> template<class X, EnableIf<CanCall<X,M,Vector<X>>>> Void VectorFunctionPatch<M>::_compute(Vector<X>& r, const Vector<X>& a) const {
     ARIADNE_DEBUG_ASSERT_MSG(r.size()==this->result_size(),"\nr="<<r<<"\nf="<<(*this)<<"\n");
     Vector<X> sa=Ariadne::unscale(a,this->_domain);
     for(SizeType i=0; i!=r.size(); ++i) {
-        r[i]=evaluate(this->_models[i],sa);
+        r[i]=this->_models[i](sa);
     }
 }
-template<class M> template<class X, DisableIf<CanEvaluate<X,M,Vector<X>>>> Void VectorFunctionPatch<M>::_compute(Vector<X>& r, const Vector<X>& a) const {
+template<class M> template<class X, DisableIf<CanCall<X,M,Vector<X>>>> Void VectorFunctionPatch<M>::_compute(Vector<X>& r, const Vector<X>& a) const {
     assert(false);
 }
 

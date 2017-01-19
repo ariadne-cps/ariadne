@@ -331,6 +331,7 @@ template<class V, EnableIf<IsVectorExpression<V>> =dummy> OutputStream& operator
 template<class X1, class X2>
 auto operator==(const Vector<X1>& v1, const Vector<X2>& v2) -> decltype(v1[0]==v2[0]) {
     decltype(v1[0]==v2[0]) r=true;
+    if(v1.size()!=v2.size()) { r=false; return r; }
     for(SizeType i=0; i!=v1.size(); ++i) {
         r = r && (v1[i]==v2[i]);
     }
@@ -340,6 +341,7 @@ auto operator==(const Vector<X1>& v1, const Vector<X2>& v2) -> decltype(v1[0]==v
 template<class X1, class X2>
 auto operator!=(const Vector<X1>& v1, const Vector<X2>& v2) -> decltype(v1[0]!=v2[0]) {
     decltype(v1[0]!=v2[0]) r=false;
+    if(v1.size()!=v2.size()) { r=true; return r; }
     for(SizeType i=0; i!=v1.size(); ++i) {
         r = r || (v1[i]!=v2[i]);
     }

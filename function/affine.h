@@ -42,6 +42,8 @@
 
 namespace Ariadne {
 
+template<class PR> class FloatFactory;
+
 template<class X> class Affine;
 typedef Affine<ApproximateNumericType> ApproximateAffine;
 typedef Affine<ValidatedNumericType> ValidatedAffine;
@@ -130,7 +132,7 @@ template<class X> struct ProvideAlgebraOperations<Affine<X>,X> {
 };
 
 template<class X> FloatFactory<PrecisionType<X>> factory(Affine<X> const& a) {
-    return float_factory(a.value().precision()); }
+    return FloatFactory<PrecisionType<X>>(a.value().precision()); }
 
 /*
 template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumericType<Y>> =dummy>

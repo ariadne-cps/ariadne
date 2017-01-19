@@ -45,9 +45,16 @@
 
 namespace Ariadne {
 
-Void BoxDrawer::draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) { ARIADNE_NOT_IMPLEMENTED; }
 Void SubdivisionDrawer::draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) { ARIADNE_NOT_IMPLEMENTED; }
 Void GridDrawer::draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) { ARIADNE_NOT_IMPLEMENTED; }
+
+Void box_draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set)
+{
+    cast_exact_box(apply(set.function(),set.domain())).draw(cnvs,proj);
+}
+
+Void BoxDrawer::draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) { box_draw(cnvs,proj,set); }
+
 
 Void affine_draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set, Int depth)
 {

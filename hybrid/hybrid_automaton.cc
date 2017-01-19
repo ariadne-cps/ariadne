@@ -41,6 +41,7 @@
 
 namespace Ariadne {
 
+List<RealAssignment> algebraic_sort(const List<RealAssignment>& auxiliary);
 
 DiscreteMode::DiscreteMode()
 {
@@ -58,6 +59,7 @@ DiscreteMode(DiscreteLocation location,
              List<DottedRealAssignment> const& dynamic)
     : _location(location), _auxiliary(auxiliary), _dynamic(dynamic)
 {
+    _sorted_auxiliary=algebraic_sort(auxiliary);
 }
 
 
@@ -292,10 +294,7 @@ HybridAutomaton::_new_mode(DiscreteLocation location,
         argument_variables.adjoin(dynamic[i].rhs.arguments());
     }
 
-    List<RealAssignment> sorted_auxiliary = algebraic_sort(auxiliary);
-
-    // TODO: Compute function
-    DiscreteMode new_mode=DiscreteMode(location,sorted_auxiliary,dynamic);
+    DiscreteMode new_mode=DiscreteMode(location,auxiliary,dynamic);
 
     this->_modes.insert(location,new_mode);
 }
@@ -582,9 +581,7 @@ HybridAutomaton::auxiliary_assignments(DiscreteLocation location) const {
 List<RealAssignment>
 HybridAutomaton::sorted_auxiliary_assignments(DiscreteLocation location) const {
     DiscreteMode const& mode=this->mode(location);
-    if(mode._sorted_auxiliary.size()!=mode._auxiliary.size()) {
-        mode._sorted_auxiliary = algebraic_sort(mode._auxiliary);
-    }
+    assert(mode._sorted_auxiliary.size()==mode._auxiliary.size());
     return mode._sorted_auxiliary;
 }
 
@@ -660,17 +657,17 @@ EventKind HybridAutomaton::event_kind(DiscreteLocation location, DiscreteEvent e
 
 EffectiveVectorFunction HybridAutomaton::auxiliary_function(DiscreteLocation location) const {
     DiscreteMode const& mode=this->mode(location);
-    return Ariadne::auxiliary_function(this->continuous_state_space(location),mode._auxiliary);
+    return Ariadne::auxiliary_function(this->continuous_state_space(location),mode._sorted_auxiliary);
 }
 
 EffectiveVectorFunction HybridAutomaton::dynamic_function(DiscreteLocation location) const {
     DiscreteMode const& mode=this->mode(location);
-    return Ariadne::dynamic_function(this->continuous_state_space(location),mode._auxiliary,mode._dynamic);
+    return Ariadne::dynamic_function(this->continuous_state_space(location),mode._sorted_auxiliary,mode._dynamic);
 }
 
 EffectiveVectorFunction HybridAutomaton::reset_function(DiscreteLocation location, DiscreteEvent event) const {
     DiscreteMode const& mode=this->mode(location);
-    return Ariadne::reset_function(this->continuous_state_space(location),mode._auxiliary,mode._resets[event]);
+    return Ariadne::reset_function(this->continuous_state_space(location),mode._sorted_auxiliary,mode._resets[event]);
 }
 
 EffectiveScalarFunction HybridAutomaton::invariant_function(DiscreteLocation location, DiscreteEvent event) const {
@@ -680,7 +677,7 @@ EffectiveScalarFunction HybridAutomaton::invariant_function(DiscreteLocation loc
 
 EffectiveScalarFunction HybridAutomaton::guard_function(DiscreteLocation location, DiscreteEvent event) const {
     DiscreteMode const& mode=this->mode(location);
-    return Ariadne::constraint_function(this->continuous_state_space(location),mode._auxiliary,mode._guards[event],POSITIVE);
+    return Ariadne::constraint_function(this->continuous_state_space(location),mode._sorted_auxiliary,mode._guards[event],POSITIVE);
 }
 
 

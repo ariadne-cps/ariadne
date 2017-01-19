@@ -263,7 +263,6 @@ class TestHybridReachabilityAnalyser
     Void test() {
         //ValidatedTaylorModel::set_default_sweep_threshold(1e-6);
         //ValidatedTaylorModel::set_default_maximum_degree(6u);
-
         ARIADNE_TEST_CALL(test_lower_reach_lower_evolve());
         ARIADNE_TEST_CALL(test_lower_reach_evolve());
         ARIADNE_TEST_CALL(test_upper_reach_upper_evolve());

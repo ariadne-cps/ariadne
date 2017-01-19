@@ -812,7 +812,7 @@ Void TestHybridEvolver::test_constant_derivative_system() const
     HybridEnclosure expected_final_set=evolver_ptr->enclosure(HybridSet(q2,initial_box));
     ARIADNE_TEST_PRINT(expected_final_set);
 
-    ARIADNE_TEST_COMPARE(norm(final_set[0].space_function()-expected_final_set.space_function()),<,1e-14);
+    ARIADNE_TEST_COMPARE(norm(final_set[0].state_function()-expected_final_set.state_function()),<,1e-14);
 
 }
 
@@ -846,8 +846,8 @@ Void TestHybridEvolver::test_transverse_linear_crossing() const
     expected_final_enclosure.apply_map(function);
 
     Vector<Float64Bounds> tolerance(2,Float64Bounds(-tol,+tol));
-    ARIADNE_TEST_BINARY_PREDICATE(refines,expected_final_enclosure.space_function()[0],final_enclosure.space_function()[0]);
-    ARIADNE_TEST_BINARY_PREDICATE(refines,final_enclosure.space_function()[0],expected_final_enclosure.space_function()[0]+tolerance[0]);
+    ARIADNE_TEST_BINARY_PREDICATE(refines,expected_final_enclosure.state_function()[0],final_enclosure.state_function()[0]);
+    ARIADNE_TEST_BINARY_PREDICATE(refines,final_enclosure.state_function()[0],expected_final_enclosure.state_function()[0]+tolerance[0]);
 
     Real xl(-1.0), xu(3.0), yl(-1.0), yu(3.0);
     Axes2d axes={xl<=x<=xu, yl<=y<=yu};

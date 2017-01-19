@@ -59,6 +59,8 @@ class DiscreteEvent;
 class Figure;
 class CanvasInterface;
 
+template<class L, class R> class Assignment;
+typedef Assignment<RealVariable,RealExpression> RealAssignment;
 template<class X> class Space;
 typedef Space<Real> RealSpace;
 template<class ES> class ListSet;
@@ -121,7 +123,8 @@ class HybridEnclosure
   private:
     DiscreteLocation _location;
     List<DiscreteEvent> _events;
-    List<RealVariable> _space;
+    List<RealVariable> _state_space;
+    List<RealVariable> _auxiliary_space;
     Enclosure _set;
     List<EnclosureVariableType> _variables;
   public:
@@ -133,6 +136,8 @@ class HybridEnclosure
     HybridEnclosure(const DiscreteLocation& q, const RealSpace& spc, const ExactBoxType& bx, const IntervalFunctionModelFactoryInterface& fac);
     //! \brief An enclosure corresponding to a hybrid box \a hbx.
     HybridEnclosure(const HybridBoxType& hbx, const IntervalFunctionModelFactoryInterface& fac);
+    //! \brief An enclosure corresponding to a hybrid box \a hbx.
+    HybridEnclosure(const HybridBoxType& hbx, List<RealAssignment> aux, const IntervalFunctionModelFactoryInterface& fac);
     //! \brief An enclosure constructed from a location \a q, a real space \a spc, and a (timed) enclosure \a es.
     HybridEnclosure(const DiscreteLocation& q, const RealSpace& spc, const Enclosure& es);
     //! \brief Destructor.
@@ -142,8 +147,14 @@ class HybridEnclosure
 
     //! \brief The current location.
     const DiscreteLocation& location() const;
-    //! \brief The Euclidean space of the location.
-    const RealSpace space() const;
+    //! \brief The Euclidean space of the location, including state, time and auxiliary functions.
+    const RealSpace state_time_auxiliary_space() const;
+    //! \brief The Euclidean state space of the location.
+    const RealSpace state_space() const;
+    //! \brief The global evolution time variable.
+    const RealVariable time_variable() const;
+    //! \brief The Euclidean state space of the location.
+    const RealSpace auxiliary_space() const;
     //! \brief The factory used to create functions.
     const IntervalFunctionModelFactoryInterface& function_factory() const;
     //! \brief The list of previous events.
@@ -154,18 +165,22 @@ class HybridEnclosure
     SizeType number_of_constraints() const;
     //! \brief The continuous state set.
     const ExactBoxType parameter_domain() const;
-    //! \brief The function related to space.
-    const ValidatedVectorFunctionModel& space_function() const;
+    //! \brief The function related to the state space.
+    const ValidatedVectorFunctionModel& state_function() const;
     //! \brief The function related to time.
     const ValidatedScalarFunctionModel& time_function() const;
     //! \brief The function giving the time since the last event.
     const ValidatedScalarFunctionModel& dwell_time_function() const;
+    //! \brief The function related to the auxiliary space.
+    const ValidatedVectorFunctionModel auxiliary_function() const;
+    //! \brief The function related to the auxiliary space.
+    const ValidatedVectorFunctionModel state_time_auxiliary_function() const;
 
     //! \brief Set the evolution time function to \a omega.
     Void set_time_function(const ValidatedScalarFunctionModel& omega);
 
     //! \brief A bounding box for the space.
-    UpperBoxType space_bounding_box() const;
+    UpperBoxType state_bounding_box() const;
     //! \brief The range of times since the starting time that the set represents.
     UpperIntervalType time_range() const;
     //! \brief The range of times since the last event.
@@ -173,6 +188,11 @@ class HybridEnclosure
 
     //! \brief The continuous state set.
     const ContinuousStateSetType& continuous_set() const;
+
+    //! \brief Set the time function to zero.
+    Void clear_time();
+    //! \brief Clears the list of previous events.
+    Void clear_events();
 
     //! \brief Apply the reset map \a r corresponding to event \a e with target location \a q.
     //! Corresponds to replacing \f$\xi\f$ by \f$r\circ \xi\f$.
@@ -212,6 +232,9 @@ class HybridEnclosure
     //! \brief \deprecated
     Void new_time_step_bound(DiscreteEvent e, ValidatedScalarFunction tau);
 
+    //! \brief Sets the auxiliary variables and functions.
+    Void set_auxiliary(List<RealVariable> vars, EffectiveVectorFunction aux);
+
     //! \brief Introduces a new parameter with domain \a ivl.
     Void new_parameter(ExactIntervalType ivl, EnclosureVariableType);
     //! \brief Introduce a new independent variable with domain \a ivl.
@@ -235,8 +258,10 @@ class HybridEnclosure
     Void new_guard(DiscreteEvent e, ValidatedScalarFunction g, ValidatedScalarFunction ct);
 
 
-    //! \brief The dimension of the set.
+    //! \brief The dimension of the set. Returns the state-space dimension.
     DimensionType dimension() const;
+    //! \brief The dimension of the state space of the set.
+    DimensionType state_dimension() const;
     //! \brief Tests whether the set is empty.
     ValidatedSierpinskian is_empty() const;
     //! \brief Tests whether the set satisfies the constraint \a c.

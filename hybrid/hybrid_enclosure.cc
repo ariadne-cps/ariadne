@@ -89,38 +89,39 @@ HybridEnclosure::~HybridEnclosure() {
 }
 
 HybridEnclosure::HybridEnclosure()
-    : _location(), _events(), _space(), _set(), _variables()
+    : _location(), _events(), _state_space(), _set(), _variables()
 {
 }
 
 HybridEnclosure::HybridEnclosure(const HybridBoundedConstraintSet& hybrid_set,
-                                 const RealSpace& space,
+                                 const RealSpace& state_space,
                                  const IntervalFunctionModelFactoryInterface& factory)
-    : _location(hybrid_set.location()), _events(), _space(space.variable_names()), _set(),
-      _variables(space.dimension(),INITIAL)
+    : _location(hybrid_set.location()), _events(), _state_space(state_space.variable_names()), _set(),
+      _variables(state_space.dimension(),INITIAL)
 {
-    BoundedConstraintSet euclidean_set=hybrid_set.euclidean_set(this->_location,space);
+    BoundedConstraintSet euclidean_set=hybrid_set.euclidean_set(this->_location,state_space);
     this->_set=Enclosure(euclidean_set,factory);
 }
 
-HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const RealSpace& space,
+HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const RealSpace& state_space,
                                  const ExactBoxType& box, const IntervalFunctionModelFactoryInterface& factory)
-    : _location(location), _events(), _space(space.variable_names()), _set(box,factory),
+    : _location(location), _events(), _state_space(state_space.variable_names()), _set(box,factory),
       _variables(box.dimension(),INITIAL)
 {
 }
 
 HybridEnclosure::HybridEnclosure(const HybridBoxType& hbox, const IntervalFunctionModelFactoryInterface& factory)
-    : _location(hbox.location()), _events(), _space(hbox.space().variable_names()), _set(hbox.continuous_set(),factory),
+    : _location(hbox.location()), _events(), _state_space(hbox.space().variable_names()), _set(hbox.continuous_set(),factory),
       _variables(hbox.continuous_set().dimension(),INITIAL)
 {
 }
 
-
+template<class T> List<T> catenate(List<T> lst1, T const& val2, List<T> const& lst3) {
+    lst1.append(val2); return catenate(lst1,lst3); }
 
 HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const RealSpace& spc, const Enclosure& set)
-    : _location(location), _events(), _space(spc.variable_names()), _set(set),
-      _variables(catenate(List<EnclosureVariableType>(set.dimension(),INITIAL),List<EnclosureVariableType>(set.number_of_parameters()-set.dimension(),UNKNOWN)))
+    : _location(location), _events(), _state_space(spc.variable_names()), _set(set),
+      _variables(catenate(List<EnclosureVariableType>(set.state_dimension(),INITIAL),TEMPORAL,List<EnclosureVariableType>(set.number_of_parameters()-set.state_dimension()-1u,UNKNOWN)))
 {
 }
 
@@ -130,9 +131,27 @@ HybridEnclosure* HybridEnclosure::clone() const {
 }
 
 const RealSpace
-HybridEnclosure::space() const
+HybridEnclosure::state_time_auxiliary_space() const
 {
-    return RealSpace(this->_space);
+    return join(join(this->state_space(),this->time_variable()),this->auxiliary_space());
+}
+
+const RealSpace
+HybridEnclosure::state_space() const
+{
+    return RealSpace(this->_state_space);
+}
+
+const RealVariable
+HybridEnclosure::time_variable() const
+{
+    return TimeVariable();
+}
+
+const RealSpace
+HybridEnclosure::auxiliary_space() const
+{
+    return RealSpace(this->_auxiliary_space);
 }
 
 List<DiscreteEvent> const&
@@ -148,9 +167,9 @@ HybridEnclosure::function_factory() const
 }
 
 ValidatedVectorFunctionModel const&
-HybridEnclosure::space_function() const
+HybridEnclosure::state_function() const
 {
-    return this->_set.space_function();
+    return this->_set.state_function();
 }
 
 ValidatedScalarFunctionModel const&
@@ -165,6 +184,13 @@ HybridEnclosure::dwell_time_function() const
     return this->_set.dwell_time_function();
 }
 
+ValidatedVectorFunctionModel const
+HybridEnclosure::state_time_auxiliary_function() const
+{
+    return this->_set.state_time_auxiliary_function();
+}
+
+
 Void HybridEnclosure::set_time_function(const ValidatedScalarFunctionModel& time_function)
 {
     ARIADNE_NOT_IMPLEMENTED;
@@ -176,17 +202,17 @@ Void HybridEnclosure::set_time_function(const ValidatedScalarFunctionModel& time
 }
 
 UpperBoxType
-HybridEnclosure::space_bounding_box() const
+HybridEnclosure::state_bounding_box() const
 {
-    ARIADNE_LOG(8,"space_codomain="<<this->space_function().codomain()<<" space_range="<<apply(this->space_function(),this->_set.reduced_domain())<<"\n");
-    //return this->space_function()(this->_set.reduced_domain());
+    ARIADNE_LOG(8,"space_codomain="<<this->state_function().codomain()<<" space_range="<<apply(this->state_function(),this->_set.reduced_domain())<<"\n");
+    //return this->state_function()(this->_set.reduced_domain());
     return cast_exact_box(this->_set.bounding_box());
 }
 
 UpperIntervalType
 HybridEnclosure::range_of(EffectiveScalarFunction const& g) const
 {
-    return apply(compose(g,this->space_function()),this->_set.reduced_domain());
+    return apply(compose(g,this->state_function()),this->_set.reduced_domain());
 }
 
 UpperIntervalType
@@ -226,9 +252,18 @@ HybridEnclosure::parameter_domain() const
 HybridUpperBoxType
 HybridEnclosure::bounding_box() const
 {
-    return HybridUpperBoxType(this->_location,this->_space,cast_exact_box(this->space_bounding_box()));
+    return HybridUpperBoxType(this->_location,this->_state_space,cast_exact_box(this->state_bounding_box()));
 }
 
+
+Void HybridEnclosure::set_auxiliary(List<RealVariable> vars, EffectiveVectorFunction aux)
+{
+    if(vars.size()!=aux.result_size()) { std::cerr<<vars<<" "<<aux<<"\n"; }
+    ARIADNE_ASSERT(this->_state_space.size()==aux.argument_size());
+    ARIADNE_ASSERT(vars.size()==aux.result_size());
+    this->_auxiliary_space=vars;
+    this->_set.set_auxiliary(aux);
+}
 
 Void HybridEnclosure::new_parameter(ExactIntervalType ivl, EnclosureVariableType vt)
 {
@@ -273,12 +308,22 @@ Void HybridEnclosure::new_constraint(DiscreteEvent event, ValidatedConstraint co
 }
 
 
-Void HybridEnclosure::apply_reset(DiscreteEvent event, DiscreteLocation target, RealSpace space, const ValidatedVectorFunction& map)
+Void HybridEnclosure::clear_time()
 {
-    ARIADNE_ASSERT_MSG(map.argument_size()==this->dimension(),"*this="<<*this<<", event="<<event<<", space="<<space<<", target="<<target<<", map="<<map);
+    this->_set.clear_time();
+}
+
+Void HybridEnclosure::clear_events()
+{
+    this->_events.clear();
+}
+
+Void HybridEnclosure::apply_reset(DiscreteEvent event, DiscreteLocation target, RealSpace state_space, const ValidatedVectorFunction& map)
+{
+    ARIADNE_ASSERT_MSG(map.argument_size()==this->state_dimension(),"*this="<<*this<<", event="<<event<<", state_space="<<state_space<<", target="<<target<<", map="<<map);
     this->_events.append(event);
     this->_location=target;
-    this->_space=space.variables();
+    this->_state_space=state_space.variables();
     this->_set.apply_map(map);
 }
 
@@ -364,7 +409,7 @@ const DiscreteLocation& HybridEnclosure::location() const {
 
 /*
 ValidatedConstrainedImageSet HybridEnclosure::continuous_set() const {
-    return ValidatedConstrainedImageSet(this->_set.domain(),this->space_function(),this->_constraints);
+    return ValidatedConstrainedImageSet(this->_set.domain(),this->state_function(),this->_constraints);
 }
 */
 
@@ -376,7 +421,11 @@ HybridEnclosure::continuous_set() const {
 
 
 DimensionType HybridEnclosure::dimension() const {
-    return this->space_function().result_size();
+    return this->_set.dimension();
+}
+
+DimensionType HybridEnclosure::state_dimension() const {
+    return this->_set.state_dimension();
 }
 
 ValidatedSierpinskian HybridEnclosure::is_empty() const {
@@ -462,7 +511,7 @@ HybridEnclosure::_check() const
     //this->_set.check();
     const ExactIntervalVectorType& reduced_domain = this->_set.reduced_domain();
     check_subset(reduced_domain,this->_set.domain(),"domain");
-    check_subset(reduced_domain,this->space_function().domain(),"function domain");
+    check_subset(reduced_domain,this->state_function().domain(),"function domain");
     for(Nat i=0; i!=this->_set.constraints().size(); ++i) {
         check_subset(reduced_domain,this->_set.constraint(i).function().domain(),"constraint");
     }
@@ -471,9 +520,10 @@ HybridEnclosure::_check() const
 
 Void HybridEnclosure::draw(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& axes) const
 {
-    Projection2d proj=Ariadne::projection(this->space(),axes);
+    Projection2d proj=Ariadne::projection(this->state_time_auxiliary_space(),axes);
     this->continuous_set().draw(canvas,proj);
 }
+
 
 OutputStream& HybridEnclosure::write(OutputStream& os) const
 {
@@ -481,12 +531,12 @@ OutputStream& HybridEnclosure::write(OutputStream& os) const
               << "( variables = " << variable_names(this->_variables)
               << ", events=" << this->_events
               << ", location=" << this->_location
-              << ", space=" << this->space()
-              << ", range=" << apply(this->space_function(),this->_set.domain())
+              << ", state_space=" << this->state_space()
+              << ", range=" << apply(this->state_function(),this->_set.domain())
               << ", domain=" << this->_set.domain()
               << ", subdomain=" << this->_set.reduced_domain()
               << ", empty=" << this->_set.reduced_domain().is_empty()
-              << ", state=" << this->_set.space_function()
+              << ", state=" << this->_set.state_function()
               << ", constraints=" << this->_set.constraints()
               << ", time="<< this->_set.time_function()
               << ")";
@@ -497,7 +547,7 @@ OutputStream& HybridEnclosure::print(OutputStream& os) const
     return os << "HybridEnclosure"
               << "( events=" << this->_events
               << ", location=" << this->_location
-              << ", range=" << apply(this->space_function(),this->_set.domain())
+              << ", range=" << apply(this->state_function(),this->_set.domain())
               << ", domain=" << this->_set.domain()
               << ", subdomain=" << this->_set.reduced_domain()
               << ", subdomain=" << this->_set.reduced_domain()
@@ -511,7 +561,7 @@ OutputStream& HybridEnclosure::repr(OutputStream& os) const
               << "( " << this->_location
               << ", " << this->_set.domain()
               << ", " << this->_set.reduced_domain()
-              << ", " << this->_set.space_function()
+              << ", " << this->_set.state_function()
               << ", " << this->_set.constraints()
               << ", " << this->time_function() << ")";
 }

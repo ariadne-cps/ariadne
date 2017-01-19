@@ -242,6 +242,7 @@ class HybridSystem
     DimensionType dimension(DiscreteLocation) const;
     RealSpace continuous_state_space(DiscreteLocation) const;
     EffectiveVectorFunction output_function(DiscreteLocation) const;
+    EffectiveVectorFunction auxiliary_function(DiscreteLocation) const;
     EffectiveVectorFunction dynamic_function(DiscreteLocation) const;
     EffectiveVectorFunction reset_function(DiscreteLocation, DiscreteEvent) const;
     EffectiveScalarFunction constraint_function(DiscreteLocation, DiscreteEvent) const;

@@ -42,6 +42,14 @@ template<class Y> Formula<Y> Formula<Y>::_derivative(SizeType j) const
             return f.arg1()*derivative(f.arg2(),j)+derivative(f.arg1(),j)*f.arg2();
         case OperatorCode::DIV:
             return derivative(f.arg1() * rec(f.arg2()),j);
+        case OperatorCode::SADD:
+            return derivative(f.arg(),j);
+        case OperatorCode::SSUB:
+            return -derivative(f.arg(),j);
+        case OperatorCode::SMUL:
+            return f.cnst()*derivative(f.arg(),j);
+        case OperatorCode::SDIV:
+            return f.cnst() * derivative(rec(f.arg()),j);
         case OperatorCode::NEG:
             return  - derivative(f.arg(),j);
         case OperatorCode::REC:

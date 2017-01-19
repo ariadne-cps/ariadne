@@ -263,6 +263,10 @@ Void HybridEnclosure::new_state_constraint(DiscreteEvent event, ValidatedConstra
     this->_set.new_state_constraint(constraint);
 }
 
+Void HybridEnclosure::new_state_time_constraint(DiscreteEvent event, ValidatedConstraint constraint) {
+    this->_set.new_state_time_constraint(constraint);
+}
+
 
 Void HybridEnclosure::new_constraint(DiscreteEvent event, ValidatedConstraint constraint) {
     this->new_state_constraint(event,constraint);

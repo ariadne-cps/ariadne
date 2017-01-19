@@ -392,9 +392,9 @@ class HybridEvolverBase
     virtual
     Void
     _apply_guard(List<HybridEnclosure>& sets,
+                 const ValidatedScalarFunctionModel& sets_elapsed_time,
                  const HybridEnclosure& starting_set,
                  const ValidatedVectorFunctionModel& flow,
-                 const ValidatedScalarFunctionModel& evolve_time,
                  const TransitionData& transition_data,
                  const CrossingData crossing_data,
                  const Semantics semantics) const;

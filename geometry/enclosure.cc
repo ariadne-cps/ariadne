@@ -559,6 +559,15 @@ Void Enclosure::new_state_constraint(ValidatedConstraint constraint) {
     this->_constraints.append(ValidatedConstraintModel(lower_bound,composed_function_model,upper_bound));
 }
 
+Void Enclosure::new_state_time_constraint(ValidatedConstraint constraint) {
+    ARIADNE_ASSERT(constraint.function().argument_size()==this->dimension()+1u);
+    this->_is_fully_reduced=false;
+    ValidatedNumericType lower_bound=this->function_factory().create_number(constraint.lower_bound());
+    ValidatedScalarFunctionModel composed_function_model=compose(constraint.function(),join(this->_space_function,this->_time_function));
+    ValidatedNumericType upper_bound=this->function_factory().create_number(constraint.upper_bound());
+    this->_constraints.append(ValidatedConstraintModel(lower_bound,composed_function_model,upper_bound));
+}
+
 Void Enclosure::new_parameter_constraint(ValidatedConstraint constraint) {
     ARIADNE_ASSERT(constraint.function().argument_size()==this->number_of_parameters());
     this->_is_fully_reduced=false;

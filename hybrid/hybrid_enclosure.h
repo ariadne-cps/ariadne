@@ -220,6 +220,8 @@ class HybridEnclosure
     Void new_constraint(DiscreteEvent e, ValidatedConstraint c);
     //! \brief Introduces a new state constraint \f$C\f$ on \f$x\f$.
     Void new_state_constraint(DiscreteEvent e, ValidatedConstraint c);
+    //! \brief Introduces a new state constraint \f$C\f$ on \f$(x,t)\f$.
+    Void new_state_time_constraint(DiscreteEvent e, ValidatedConstraint c);
     //! \brief Introduces a new constraint \f$C\f$ on \f$s\f$.
     Void new_parameter_constraint(DiscreteEvent e, ValidatedConstraint c);
     //! \brief Introduces the new invariant (progress predicate) \f$c(x)\leq0\f$.

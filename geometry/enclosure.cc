@@ -1073,8 +1073,8 @@ uniform_error_recondition()
 		for(Nat i=0; i!=large_error_indices.size(); ++i) {
 			Float64 error=this->_space_function.get(large_error_indices[i]).error().raw();
 			if(error > MAXIMUM_ERROR) {
-				this->_space_function[i].set_error(0u);
-				this->_space_function[i] = this->_space_function.get(i) + this->function_factory().create_coordinate(this->_domain,k)*Float64Bounds(+error);
+				this->_space_function[large_error_indices[i]].set_error(0u);
+				this->_space_function[large_error_indices[i]] = this->_space_function.get(large_error_indices[i]) + this->function_factory().create_coordinate(this->_domain,k)*Float64Bounds(+error);
 				++k;
 			}
 		}

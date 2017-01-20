@@ -53,8 +53,6 @@ Int evolver_verbosity=0;
 EffectiveScalarFunction c=EffectiveScalarFunction::constant(2,1);
 EffectiveScalarFunction x0=EffectiveScalarFunction::coordinate(2,0);
 EffectiveScalarFunction x1=EffectiveScalarFunction::coordinate(2,1);
-DiscreteLocation q("q");
-DiscreteEvent e("e");
 
 Colour reach_set_colour(0.25,0.25,0.50);
 Colour intermediate_set_colour(0.50,0.50,0.75);
@@ -98,6 +96,8 @@ Void TestHybridEvolution::test() const {
 Void TestHybridEvolution::test_bouncing_ball() const {
     HybridAutomaton bouncing_ball;
     Real one(1);
+    DiscreteLocation q;
+    DiscreteEvent e("e");
     RealVariable x("x");
     RealVariable v("v");
     TimeVariable t;
@@ -164,10 +164,11 @@ Void TestHybridEvolution::test_water_tank() const {
     Real zero(0);
     Real one(1);
 
-    DiscreteLocation open("open");
-    DiscreteLocation opening("opening");
-    DiscreteLocation closed("closed");
-    DiscreteLocation closing("closing");
+    StringVariable valve("valve");
+    DiscreteLocation open(valve|"open");
+    DiscreteLocation opening(valve|"opening");
+    DiscreteLocation closed(valve|"closed");
+    DiscreteLocation closing(valve|"closing");
 
     DiscreteEvent start_opening("start_opening");
     DiscreteEvent start_closing("start_closing");

@@ -65,6 +65,7 @@ template<class PR> class FloatUpperBound
     FloatUpperBound<PR>(ExactDouble d, PR pr);
         FloatUpperBound<PR>(const Integer& z, PR pr);
         FloatUpperBound<PR>(const Dyadic& w, PR pr);
+        FloatUpperBound<PR>(const Decimal& d, PR pr);
         FloatUpperBound<PR>(const Rational& q, PR pr);
         FloatUpperBound<PR>(const Real& r, PR pr);
     FloatUpperBound<PR>(const FloatUpperBound<PR>& x, PR pr);

@@ -42,6 +42,7 @@
 #include "function/affine.h"
 #include "function/taylor_function.h"
 #include "function/constraint.h"
+#include "function/procedure.h"
 #include "function/function.h"
 #include "function/function_mixin.h"
 #include "expression/expression.h"
@@ -50,7 +51,7 @@
 #include "expression/function_expression.h"
 #include "solvers/constraint_solver.h"
 
-#include "function/function_mixin.tcc"
+#include "function/function_mixin.tpl.h"
 
 using namespace boost::python;
 

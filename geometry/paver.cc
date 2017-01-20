@@ -39,6 +39,7 @@
 #include "geometry/paving_interface.h"
 #include "geometry/grid_set.h"
 #include "geometry/affine_set.h"
+#include "algebra/algebra.h"
 
 namespace Ariadne {
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            function_patch.tcc
+ *            function_patch.tpl.h
  *
  *  Copyright 2008-15  Pieter Collins
  *
@@ -20,6 +20,9 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+
+#ifndef FUNCTION_PATCH_TCC
+#define FUNCTION_PATCH_TCC
 
 #include "function/functional.h"
 #include "config.h"
@@ -55,10 +58,10 @@ Box<Interval<FloatMPValue>> convert_box(ExactBoxType const& bx, PrecisionMP pr);
 
 } // namespace
 
-decltype(auto) contains(ExactIntervalType const& bx, Scalar<FloatMPBounds> const& x) { return contains(convert_interval(bx,x.precision()),x); }
-decltype(auto) contains(ExactIntervalType const& bx, Scalar<FloatMPApproximation> const& x) { return contains(convert_interval(bx,x.precision()),x); }
-decltype(auto) contains(ExactBoxType const& bx, Vector<FloatMPBounds> const& x) { return contains(convert_box(bx,x.zero_element().precision()),x); }
-decltype(auto) contains(ExactBoxType const& bx, Vector<FloatMPApproximation> const& x) { return contains(convert_box(bx,x.zero_element().precision()),x); }
+inline decltype(auto) contains(ExactIntervalType const& bx, Scalar<FloatMPBounds> const& x) { return contains(convert_interval(bx,x.precision()),x); }
+inline decltype(auto) contains(ExactIntervalType const& bx, Scalar<FloatMPApproximation> const& x) { return contains(convert_interval(bx,x.precision()),x); }
+inline decltype(auto) contains(ExactBoxType const& bx, Vector<FloatMPBounds> const& x) { return contains(convert_box(bx,x.zero_element().precision()),x); }
+inline decltype(auto) contains(ExactBoxType const& bx, Vector<FloatMPApproximation> const& x) { return contains(convert_box(bx,x.zero_element().precision()),x); }
 
 
 template<class M> Void _set_scaling(FunctionPatch<M>& x, const ExactIntervalType& ivl, SizeType j)
@@ -1028,3 +1031,5 @@ template<class M> OutputStream& VectorFunctionPatch<M>::repr(OutputStream& os) c
 
 
 } // namespace Ariadne
+
+#endif

@@ -125,6 +125,21 @@ class UnderspecifiedResetError : public UnderspecifiedSystemError {
 };
 
 
+class StateSpecificationError : public std::runtime_error {
+  public:
+    StateSpecificationError(const StringType& what) : std::runtime_error(what) { }
+};
+
+class IndistinguishableLocationsError : public StateSpecificationError {
+  public:
+    IndistinguishableLocationsError(const StringType& what) : StateSpecificationError(what) { }
+};
+
+class OverspecifiedLocationException : public IndistinguishableLocationsError {
+  public:
+    OverspecifiedLocationException(const StringType& what) : IndistinguishableLocationsError(what) { }
+};
+
 
 //! \ingroup SystemModule
 //! \brief Base interface for hybrid systems, to allow different types to be used in evolution routines.
@@ -180,6 +195,9 @@ class HybridAutomatonInterface {
     //! \brief The dimension of the state space in the given \a location.
     virtual DimensionType dimension(DiscreteLocation location) const = 0;
 
+    //! \brief The function giving the auxiliary variables in the mode \a location.
+    virtual EffectiveVectorFunction auxiliary_function(DiscreteLocation location) const = 0;
+
     //! \brief The dynamic valid in the mode \a location.
     virtual EffectiveVectorFunction dynamic_function(DiscreteLocation location) const = 0;
 
@@ -197,6 +215,9 @@ class HybridAutomatonInterface {
 
     //! \brief The continuous state space in the \a location.
     virtual RealSpace continuous_state_space(DiscreteLocation location) const = 0;
+
+    //! \brief The continuous state space in the \a location.
+    virtual RealSpace continuous_auxiliary_space(DiscreteLocation location) const = 0;
 
 
     //@}

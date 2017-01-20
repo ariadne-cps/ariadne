@@ -137,6 +137,7 @@ class DiscreteMode {
 
     // The algebraic equations
     List<RealAssignment> _auxiliary;
+    mutable List<RealAssignment> _sorted_auxiliary;
 
     // The algebraic equations
     List<DottedRealAssignment> _dynamic;
@@ -224,7 +225,7 @@ class HybridAutomaton
     //! \brief The type used to describe the state space.
     typedef HybridSpace StateSpaceType;
 
-    static List<RealAssignment> sort(const List<RealAssignment>& auxiliary);
+    friend List<RealAssignment> algebraic_sort(const List<RealAssignment>& auxiliary);
 
   protected:
 
@@ -513,8 +514,11 @@ class HybridAutomaton
     Set<RealVariable> input_variables(DiscreteLocation location) const;
     //! \brief The target location when the \a event occurs in the \a source location.
     DiscreteLocation target_location(DiscreteLocation source, DiscreteEvent event) const;
-    //! \brief The algebraic equations valid in the given location.
+    //! \brief The algebraic equations valid in the location.
     List<RealAssignment> auxiliary_assignments(DiscreteLocation location) const;
+    //! \brief The algebraic equations valid in the location, ordered so that the defining equation for a variable
+    //! occurs before any equation using that variable.
+    List<RealAssignment> sorted_auxiliary_assignments(DiscreteLocation location) const;
     //! \brief The differential equations valid in the given location.
     List<DottedRealAssignment> dynamic_assignments(DiscreteLocation location) const;
     //! \brief The invariant predicates valid in the given location.
@@ -531,11 +535,15 @@ class HybridAutomaton
     virtual HybridSpace state_space() const;
     //! \brief The continuous state space in the given location.
     virtual RealSpace continuous_state_space(DiscreteLocation) const;
+    //! \brief The space of continuous auxiliary variables in the given location.
+    virtual RealSpace continuous_auxiliary_space(DiscreteLocation) const;
     //! \brief The dimension of the continuous state space in the given location.
     virtual DimensionType dimension(DiscreteLocation) const;
 
     //! \brief Test if the hybrid automaton has a discrete mode corresponding to the given location.
     virtual Bool has_mode(DiscreteLocation location) const;
+    //! \brief Test if the hybrid automaton has a discrete mode corresponding to a subset of variables of the given location.
+    virtual Bool has_partial_mode(DiscreteLocation location) const;
     //! \brief Test if the hybrid automaton has an invariant (either explicit or from an urgent transition) with the given \a event label in \a location.
     virtual Bool has_invariant(DiscreteLocation location, DiscreteEvent event) const;
     //! \brief Tests if the automaton has an invariant or transition corresponding to the given location and event.

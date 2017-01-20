@@ -56,7 +56,7 @@
 #include "output/serialization.h"
 #endif /* ARIADNE_ENABLE_SERIALIZATION */
 
-#include "output/graphics_interface.h"
+#include "hybrid/hybrid_graphics_interface.h"
 
 namespace Ariadne {
 
@@ -80,6 +80,7 @@ template<class DS, class HBS> class HybridSetConstIterator;
 //! \ingroup ExpressionSetSubModule
 //! \ingroup HybridSetSubModule
 //! \brief A hybrid set defined by a box in a single location.
+// FIXME: Merge with HybridBox
 class HybridBoxSet
     : public Pair<DiscreteLocation,RealVariablesBox>
     , public virtual HybridDrawableInterface
@@ -195,21 +196,22 @@ class HybridBasicSet
     //! \brief The continuous Euclidean subset.
     const ContinuousSetType& continuous_set() const { return get_third(this->_tuple); }
     ContinuousSetType& continuous_set() { return get_third(this->_tuple); }
-};
-//! \relates HybridBasicSet \brief Write to an output stream.
-template<class EBS> OutputStream& operator<<(OutputStream& os, const HybridBasicSet<EBS>& hbs) {
-    return os << "HybridBasicSet{ " << hbs.location() << ", " << hbs.space() << ", " << hbs.continuous_set() << " )";
-}
 
-template<class EBS> inline
-Bool operator==(const HybridBasicSet<EBS> hset1, const HybridBasicSet<EBS>& hset2) {
-    if(hset1.location()==hset2.location()) {
-        ARIADNE_ASSERT(hset1.space()==hset2.space());
-        return hset1.continuous_set() == hset2.continuous_set();
-    } else {
-        return false;
+    //! \brief Write to an output stream.
+    friend OutputStream& operator<<(OutputStream& os, const HybridBasicSet<EBS>& hbs) {
+        return os << "HybridBasicSet{ " << hbs.location() << ", " << hbs.space() << ", " << hbs.continuous_set() << " )";
     }
-}
+
+    //! \brief Test for equality
+    friend Bool operator==(const HybridBasicSet<EBS>& hset1, const HybridBasicSet<EBS>& hset2) {
+        if(hset1.location()==hset2.location()) {
+            ARIADNE_ASSERT(hset1.space()==hset2.space());
+            return hset1.continuous_set() == hset2.continuous_set();
+        } else {
+            return false;
+        }
+    }
+};
 
 class HybridPoint
     : public HybridBasicSet<ExactPoint>
@@ -218,8 +220,8 @@ class HybridPoint
   public:
     HybridPoint() : HybridBasicSet<ExactPoint>() { }
     HybridPoint(const DiscreteLocation& q, const RealSpace& spc, const ExactPoint& pt) : HybridBasicSet<ExactPoint>(q,spc,pt) { }
-    HybridPoint(const DiscreteLocation& q, const Map<Identifier,ValueType>& val);
-    HybridPoint(const DiscreteLocation& q, const Map<Identifier,Real>& val);
+    HybridPoint(const DiscreteLocation& q, const Map<RealVariable,ValueType>& val);
+    HybridPoint(const DiscreteLocation& q, const Map<RealVariable,Real>& val);
     HybridPoint(const DiscreteLocation& q, const List< Assignment<RealVariable,Real> >& val);
     HybridPoint(const DiscreteLocation& q, const InitializerList< Assignment<RealVariable,Real> >& val);
     ExactPoint& point() { return this->continuous_set(); }
@@ -231,6 +233,7 @@ class HybridPoint
 //! \ingroup HybridSetSubModule
 //! \brief A box in a location of a hybrid space.
 //! \details Primarily used as a basic set against which abstract set properties can be tested.
+// FIXME: Merge with HybridBoxSet
 class HybridBoxType
     : public HybridBasicSet<ExactBoxType>
     , public virtual HybridDrawableInterface

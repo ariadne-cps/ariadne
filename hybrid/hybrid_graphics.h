@@ -39,6 +39,7 @@
 
 #include "expression/expression_set.h"
 #include "hybrid/discrete_location.h"
+#include "hybrid/hybrid_graphics_interface.h"
 
 namespace Ariadne {
 

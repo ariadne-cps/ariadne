@@ -65,6 +65,7 @@ template<class PR> class FloatLowerBound
     FloatLowerBound<PR>(ExactDouble d, PR pr);
         FloatLowerBound<PR>(const Integer& z, PR pr);
         FloatLowerBound<PR>(const Dyadic& w, PR pr);
+        FloatLowerBound<PR>(const Decimal& d, PR pr);
         FloatLowerBound<PR>(const Rational& q, PR pr);
         FloatLowerBound<PR>(const Real& r, PR pr);
     FloatLowerBound<PR>(const FloatLowerBound<PR>& x, PR pr);

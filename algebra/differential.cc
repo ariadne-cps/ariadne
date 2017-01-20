@@ -28,7 +28,7 @@
 
 #include "operations.h"
 
-#include "differential.tcc"
+#include "differential.tpl.h"
 
 namespace Ariadne {
 

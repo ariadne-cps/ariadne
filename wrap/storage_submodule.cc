@@ -58,15 +58,17 @@ PyGridTreeSetConstIterator py_cells_end(const GridTreeSubset& gts) {
 
 
 // Iterator through the boxes of a GridTreeSet set
-class PyGridTreeSetBoxConstIterator {
+class PyGridTreeSetBoxConstIterator
+: public boost::iterator_facade< GridTreeConstIterator, ExactBoxType const, boost::forward_traversal_tag > {
   public:
-    typedef boost::forward_traversal_tag iterator_category;
+    //typedef boost::forward_traversal_tag iterator_category;
     typedef ExactBoxType value_type;
+    typedef ExactBoxType value;
     typedef SizeType difference_type;
     typedef const ExactBoxType reference;
     typedef const ExactBoxType* pointer;
 
-    PyGridTreeSetBoxConstIterator(GridTreeSet::ConstIterator iter) : _iter(iter) { }
+    PyGridTreeSetBoxConstIterator(PyGridTreeSetConstIterator iter) : _iter(iter) { }
     const ExactBoxType operator*() const { return this->_iter->box(); }
     PyGridTreeSetBoxConstIterator& operator++() { ++this->_iter; return *this; }
     PyGridTreeSetBoxConstIterator operator++(Int) { PyGridTreeSetBoxConstIterator ret(*this); ++this->_iter; return ret; }

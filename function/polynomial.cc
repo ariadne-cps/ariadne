@@ -26,7 +26,7 @@
 
 #include "geometry/interval.h"
 #include "function/polynomial.h"
-#include "function/polynomial.tcc"
+#include "function/polynomial.tpl.h"
 
 namespace Ariadne {
 

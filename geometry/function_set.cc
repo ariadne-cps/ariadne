@@ -1064,6 +1064,24 @@ ValidatedConstrainedImageSet::draw(CanvasInterface& cnvs, const Projection2d& pr
     AffineDrawer(Depth(8)).draw(cnvs,proj,*this);
 }
 
+Void
+ValidatedConstrainedImageSet::box_draw(CanvasInterface& cnvs, const Projection2d& proj) const
+{
+    BoxDrawer().draw(cnvs,proj,*this);
+}
+
+Void
+ValidatedConstrainedImageSet::affine_draw(CanvasInterface& cnvs, const Projection2d& proj, Int depth) const
+{
+    AffineDrawer(depth).draw(cnvs,proj,*this);
+}
+
+Void
+ValidatedConstrainedImageSet::grid_draw(CanvasInterface& cnvs, const Projection2d& proj) const
+{
+    GridDrawer().draw(cnvs,proj,*this);
+}
+
 ValidatedConstrainedImageSet
 join(const ValidatedConstrainedImageSet& set1, const ValidatedConstrainedImageSet& set2)
 {

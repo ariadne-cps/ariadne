@@ -27,6 +27,7 @@
 #include "algebra/vector.h"
 #include "algebra/matrix.h"
 #include "algebra/multi_index.h"
+#include "algebra/algebra.h"
 #include "function/polynomial.h"
 
 #include "test.h"

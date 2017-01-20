@@ -27,6 +27,7 @@
 #include "numeric/builtin.h"
 #include "numeric/integer.h"
 #include "numeric/dyadic.h"
+#include "numeric/decimal.h"
 #include "numeric/logical.h"
 
 #include <iomanip>
@@ -47,6 +48,9 @@ class TestRational
     void test_conversions();
     void test_arithmetic();
     void test_comparisons();
+
+    void test_decimal();
+
 };
 
 void TestRational::test()
@@ -55,6 +59,8 @@ void TestRational::test()
     ARIADNE_TEST_CALL(test_conversions());
     ARIADNE_TEST_CALL(test_arithmetic());
     ARIADNE_TEST_CALL(test_comparisons());
+
+    ARIADNE_TEST_CALL(test_decimal());
 }
 
 void TestRational::test_concept() {
@@ -120,6 +126,29 @@ void TestRational::test_comparisons() {
     ARIADNE_TEST_BINARY_PREDICATE(operator<,Rational(-4,5),Rational(-2,7));
     ARIADNE_TEST_BINARY_PREDICATE(operator<,-inf,Rational(18,35));
     ARIADNE_TEST_BINARY_PREDICATE(operator<,Rational(18,35),+inf);
+};
+
+void TestRational::test_decimal() {
+    ARIADNE_TEST_CONSTRUCT(Decimal,d1,(23,1u));
+    ARIADNE_TEST_CONSTRUCT(Decimal,d2,(-42,2u));
+    ARIADNE_TEST_EQUALS(Decimal(-3.14),Decimal(-314,2u));
+    ARIADNE_TEST_FAIL(Decimal d(0.33333333333));
+    ARIADNE_TEST_EQUALS(Decimal(Dyadic(7,3u)),Decimal(875,3u));
+    ARIADNE_TEST_EQUALS(Decimal(Dyadic(140,1u)),Decimal(70,0u));
+    ARIADNE_TEST_EQUALS(Decimal("-3.14"),Decimal(-314,2u));
+    ARIADNE_TEST_EQUALS(Decimal("-3.1400"),Decimal(-314,2u));
+    ARIADNE_TEST_EQUALS(Decimal("-0.0031400"),Decimal(-314,5u));
+    ARIADNE_TEST_EQUALS(Decimal("3140"),Decimal(3140,0u));
+    ARIADNE_TEST_EQUALS(Decimal("3.14159265")*Decimal("3.14159265"),Decimal("9.8696043785340225"));
+    ARIADNE_TEST_PRINT(Decimal("3.14159265")*Decimal("3.14159265"));
+    ARIADNE_TEST_EQUALS(Rational(d1),Rational(23,10));
+    ARIADNE_TEST_EQUALS(Rational(d2),Rational(-21,50));
+    ARIADNE_TEST_EQUAL(Rational(+d2),+Rational(d2));
+    ARIADNE_TEST_EQUAL(Rational(-d2),-Rational(d2));
+    ARIADNE_TEST_EQUAL(Rational(d1+d2),Rational(d1)+Rational(d2));
+    ARIADNE_TEST_EQUAL(Rational(d1-d2),Rational(d1)-Rational(d2));
+    ARIADNE_TEST_EQUAL(Rational(d1*d2),Rational(d1)*Rational(d2));
+    ARIADNE_TEST_EQUAL(d1/d2,Rational(d1)/Rational(d2));
 };
 
 

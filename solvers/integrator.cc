@@ -35,8 +35,10 @@
 #include "algebra/matrix.h"
 #include "algebra/differential.h"
 #include "algebra/sweeper.h"
+#include "algebra/algebra.h"
 #include "function/function.h"
 #include "function/function_model.h"
+#include "function/taylor_model.h"
 
 #include "function/polynomial.h"
 #include "function/function.h"

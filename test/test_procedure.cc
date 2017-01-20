@@ -31,7 +31,7 @@
 #include "config.h"
 
 #include "function/procedure.h"
-#include "function/procedure.tcc"
+#include "function/procedure.tpl.h"
 
 #include "numeric/numeric.h"
 #include "algebra/vector.h"

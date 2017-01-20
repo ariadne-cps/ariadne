@@ -1,5 +1,5 @@
 /***************************************************************************
- *            differential.tcc
+ *            differential.tpl.h
  *
  *  Copyright 2008-15  Pieter Collins
  *

@@ -22,6 +22,9 @@
  */
 
 #include "function/functional.h"
+
+#include "algebra/algebra.h"
+
 #include "config.h"
 
 #include "hybrid/hybrid_simulator.h"
@@ -35,6 +38,7 @@
 #include "expression/space.h"
 
 #include "function/function.h"
+#include "function/taylor_model.h"
 
 #include "utility/logging.h"
 

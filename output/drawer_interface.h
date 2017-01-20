@@ -41,6 +41,7 @@ class ValidatedConstrainedImageSet;
 //! \brief A class for computing outer approximations to sets defined by functions.
 class DrawerInterface
 {
+  public:
     virtual Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) = 0;
 };
 

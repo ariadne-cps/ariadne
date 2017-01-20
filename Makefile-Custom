@@ -24,7 +24,8 @@ CLANG_CXXWARNINGS=-Wall -Wno-unused
 #   -Wno-unused-local-typedef -Wno-unused-const-variable -Wno-unused-variable  -Wno-unused-function -Wno-unused-comparison
 
 VPATH = utility numeric expression algebra function geometry solvers dynamics hybrid output \
-	test wrap examples
+	test wrap examples \
+	examples/experimental
 
 HDR = \
 	standard.h numeric.h functional.h
@@ -105,6 +106,7 @@ TEST_EXPRESSION_SRC = \
 	test_expression.cc \
 
 LIB_HYBRID_SRC = \
+	discrete_location.cc \
 	hybrid_set.cc \
 	hybrid_enclosure.cc \
 	hybrid_automaton.cc \
@@ -145,17 +147,20 @@ UNUSED_TESTS_SRC = \
 
 
 EXAMPLES_SRC = \
-	tutorial.cc \
-	bouncingball.cc \
-	watertank.cc \
-	heating.cc \
-	ballinabox.cc \
-	watertank-compositional.cc \
-	watertank-proportional.cc \
-	watertank-nonlinear.cc \
-	rectifier.cc \
-	robotarm-verification.cc \
-	robotarm-verification-essay.cc \
+    tutorial.cc \
+    bouncingball.cc \
+    watertank.cc \
+    heating.cc \
+    ballinabox.cc \
+    watertank-compositional.cc \
+    rectifier.cc \
+
+EXAMPLES_EXPERIMENTAL_SRC = \
+    exponential.cc \
+    laser.cc \
+    circle.cc \
+    bouncing-walls.cc \
+    compute_crossings_issue.cc
 
 DEP_DIR = dep
 OBJ_DIR = obj
@@ -194,6 +199,8 @@ TEST_FUNCTION_BIN = $(patsubst %.cc,$(TESTS_BIN_DIR)/%,$(TEST_FUNCTION_SRC))
 WRAP_OBJ = $(patsubst %.cc,$(WRAP_OBJ_DIR)/%.o,$(WRAP_SRC))
 EXAMPLES_OBJ = $(patsubst %.cc,$(EXAMPLES_OBJ_DIR)/%.o,$(EXAMPLES_SRC))
 EXAMPLES_BIN = $(patsubst %.cc,$(EXAMPLES_BIN_DIR)/%,$(EXAMPLES_SRC))
+EXAMPLES_EXPERIMENTAL_OBJ = $(patsubst %.cc,$(EXAMPLES_OBJ_DIR)/%.o,$(EXAMPLES_EXPERIMENTAL_SRC))
+EXAMPLES_EXPERIMENTAL_BIN = $(patsubst %.cc,$(EXAMPLES_BIN_DIR)/%,$(EXAMPLES_EXPERIMENTAL_SRC))
 
 INCLUDE_PATHS =  -iquote.
 LINK_LIBS=-lgmpxx -lgmp -lmpfr -lcairo -lboost_system -lboost_serialization
@@ -251,6 +258,8 @@ check: tests
 	@tried=0; failed=0; red='[0;31m'; green='[0;32m'; blue='[1;34m'; black='[m'; for test_exe in $(TESTS_BIN); do test_name=`basename $$test_exe`; echo "$$test_name:"; ./$$test_exe 1>$$test_exe.log; fails=$$?; tried=$$((tried+1)); if test $$fails -gt 0; then echo $$red"FAIL $$test_name: $$fails check(s) failed"$$black; failed=$$((failed+1)); else echo $$green"PASS $$test_name"$$black; fi; done; echo "$$failed out of $$tried tests failed"; mv test_*.png bin;
 
 examples: dirs $(EXAMPLES_BIN) $(EXAMPLES_OBJ) lib
+
+examples-experimental: dirs $(EXAMPLES_EXPERIMENTAL_BIN) $(EXAMPLES_EXPERIMENTAL_OBJ) lib
 
 clean:
 	@rm -f */*.gch* $(OBJ_DIR)/*.o *.so $(BIN_DIR)/*

@@ -40,7 +40,7 @@
 #include "utility/metaprogramming.h"
 
 #include "numeric/numeric.h"
-#include "numeric/operators.tcc"
+#include "numeric/operators.tpl.h"
 #include "algebra/vector.h"
 
 #include "function/function_mixin.h"

@@ -22,7 +22,7 @@
  */
 
 #include "procedure.h"
-#include "procedure.tcc"
+#include "procedure.tpl.h"
 
 #include "algebra/differential.h"
 #include "algebra/graded.h"

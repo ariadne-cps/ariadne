@@ -39,6 +39,7 @@
 #include "algebra/matrix.h"
 #include "algebra/diagonal_matrix.h"
 #include "algebra/differential.h"
+#include "algebra/algebra.h"
 #include "function/function.h"
 #include "function/function_mixin.h"
 #include "function/taylor_function.h"
@@ -1379,7 +1380,7 @@ feasible(ExactBoxType d, ValidatedVectorFunction g, ExactBoxType c) const
     for(Nat i=0; i!=12; ++i) {
         ARIADNE_LOG(4,"  t="<<t<<", y="<<y<<", g(y)="<<g(y)<<", x="<<x<<", z="<<z<<"\n");
         this->feasibility_step(d,g,c,x,y);
-        if(probably(t>0)) {
+        if(probably(LogicalValue(t>0))) {
             ARIADNE_LOG(2,"  y="<<y<<", g(y)="<<g(y)<<"\n");
             if(this->is_feasible_point(d,g,c,cast_exact(y))) {
                 return true;

@@ -45,6 +45,8 @@ endif()
 
 check_include_file(mpfr.h HAVE_MPFR_H)
 
+find_package(GTK2)
+
 check_include_file(cairo/cairo.h HAVE_CAIRO_H)
 if(NOT HAVE_CAIRO_H)
     message(WARNING "Unable to find cairo.h.")
@@ -74,11 +76,10 @@ ENDIF()
 configure_file (${PROJECT_SOURCE_DIR}/config.h.cmake ${PROJECT_SOURCE_DIR}/config.h)
 
 #Non-portable fix to avoid user header directories being searched for by system headers
-add_definitions(-iquote${PROJECT_SOURCE_DIR})
+#add_definitions(-iquote${PROJECT_SOURCE_DIR})
 #Should ideally be able to use line below
-#include_directories(${PROJECT_SOURCE_DIR})
+include_directories(${PROJECT_SOURCE_DIR} ${CAIRO_INCLUDE_DIRS})
 
-#Non-portable fix to avoid user header directories being searched for by system headers
 IF(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   add_definitions(-Wno-non-template-friend)
 ENDIF()
@@ -96,8 +97,8 @@ add_subdirectory(hybrid)
 
 add_subdirectory(test)
 add_subdirectory(wrap)
-add_subdirectory(examples)
 add_subdirectory(python)
+add_subdirectory(examples)
 
 add_library(ariadne SHARED
     $<TARGET_OBJECTS:ariadne-numeric>
@@ -120,14 +121,14 @@ target_link_libraries(ariadne boost_system)
 target_link_libraries(ariadne cairo)
 target_link_libraries (ariadne boost_serialization)
 
-add_library(pyariadne $<TARGET_OBJECTS:pyariadne-src>)
-set_target_properties(pyariadne PROPERTIES PREFIX "" OUTPUT_NAME "ariadne")
-target_link_libraries (pyariadne ariadne boost_python)
+#add_library(pyariadne $<TARGET_OBJECTS:pyariadne-src>)
+#set_target_properties(pyariadne PROPERTIES PREFIX "" OUTPUT_NAME "ariadne")
+#target_link_libraries (pyariadne ariadne boost_python)
 
-add_library(pynumeric $<TARGET_OBJECTS:pynumeric-src>)
-set_target_properties(pynumeric PROPERTIES PREFIX "" OUTPUT_NAME "numeric")
-target_link_libraries (pynumeric ariadne boost_python)
+#add_library(pynumeric $<TARGET_OBJECTS:pynumeric-src>)
+#set_target_properties(pynumeric PROPERTIES PREFIX "" OUTPUT_NAME "numeric")
+#target_link_libraries (pynumeric ariadne boost_python)
 
-add_library(pyalgebra $<TARGET_OBJECTS:pyalgebra-src>)
-set_target_properties(pyalgebra PROPERTIES PREFIX "" OUTPUT_NAME "algebra")
-target_link_libraries (pyalgebra ariadne boost_python)
+#add_library(pyalgebra $<TARGET_OBJECTS:pyalgebra-src>)
+#set_target_properties(pyalgebra PROPERTIES PREFIX "" OUTPUT_NAME "algebra")
+#target_link_libraries (pyalgebra ariadne boost_python)

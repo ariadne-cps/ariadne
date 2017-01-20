@@ -27,6 +27,8 @@
 #include <iomanip>
 
 #include "function/constraint.h"
+#include "function/formula.h"
+#include "function/procedure.h"
 #include "geometry/enclosure.h"
 
 #include "utility/macros.h"

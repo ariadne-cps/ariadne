@@ -38,6 +38,7 @@
 #include "expression/space.h"
 
 #include "function/function.h"
+#include "function/formula.h"
 #include "function/taylor_model.h"
 
 #include "utility/logging.h"

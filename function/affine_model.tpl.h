@@ -190,8 +190,8 @@ template<class F> struct AlgebraOperations<AffineModel<ValidatedTag,F>> {
         F nrm1=abs(a1.value().raw());
         F nrm2=abs(a2.value().raw());
         for(SizeType j=0; j!=n; ++j) {
-            nrm1==nrm1+abs(a1.value().raw());
-            nrm2==nrm2+abs(a2.value().raw());
+            nrm1=nrm1+abs(a1.value().raw());
+            nrm2=nrm2+abs(a2.value().raw());
         }
         F ace = a1.error().raw()*nrm2 + nrm1 * a1.error().raw();  // accumulated error
         r.set_error( ErrorType(tre + roe + ace) );

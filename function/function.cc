@@ -38,6 +38,8 @@
 
 #include "function/symbolic_function.h"
 
+#include "expression/expression.h"
+
 
 namespace Ariadne {
 
@@ -320,7 +322,7 @@ EffectiveScalarFunction make_function(const Space<Real>& spc, const Expression<R
 EffectiveVectorFunction make_function(const Space<Real>& spc, const Vector<Expression<Real>>& expr) {
     return make_formula_function(dimension(spc),make_formula(expr,spc)); }
 
-[[DEPRECATED]]
+[[deprecated]]
 EffectiveScalarFunction make_function(const Expression<Real>& expr, const Space<Real>& spc) {
     return make_function(spc,expr); }
 

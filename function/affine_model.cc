@@ -24,8 +24,10 @@
 #include "numeric/numeric.h"
 #include "config.h"
 
+#include "algebra/algebra.h"
 #include "algebra/vector.h"
 #include "function/function.h"
+#include "function/formula.h"
 #include "function/taylor_model.h"
 #include "function/affine_model.h"
 

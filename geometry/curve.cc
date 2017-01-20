@@ -23,6 +23,7 @@
 
 #include "function/functional.h"
 #include "function/taylor_model.h"
+#include "function/formula.h"
 
 #include "config.h"
 

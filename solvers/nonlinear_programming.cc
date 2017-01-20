@@ -43,6 +43,8 @@
 #include "function/function.h"
 #include "function/function_mixin.h"
 #include "function/taylor_function.h"
+#include "function/formula.h"
+#include "function/procedure.h"
 
 #include "solvers/nonlinear_programming.h"
 #include "solvers/solver.h"

@@ -35,6 +35,7 @@
 #include "algebra/differential.h"
 #include "algebra/algebra.h"
 #include "function/taylor_model.h"
+#include "function/formula.h"
 #include "function/function.h"
 #include "function/function_model.h"
 

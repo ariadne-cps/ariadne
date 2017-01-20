@@ -28,6 +28,7 @@
 #include "algebra/vector.h"
 #include "numeric/operators.h"
 #include "function/function.h"
+#include "function/procedure.h"
 #include "function/constraint.h"
 #include "function/polynomial.h"
 #include "function/taylor_function.h"

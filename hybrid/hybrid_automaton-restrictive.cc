@@ -30,15 +30,14 @@
 #include "utility/macros.h"
 #include "utility/stlio.h"
 #include "utility/tuple.h"
-#include "expression/formula.h"
 #include "expression/expression.h"
+#include "expression/assignment.h"
 #include "expression/space.h"
 #include "function/function.h"
 #include "hybrid/hybrid_time.h"
 #include "hybrid/hybrid_space.h"
 
 #include "hybrid/hybrid_automaton-restrictive.h"
-#include "expression/assignment.h"
 
 namespace Ariadne {
 

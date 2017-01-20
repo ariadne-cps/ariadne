@@ -42,8 +42,20 @@ class DivideByZeroError : public std::runtime_error {
     using std::runtime_error::runtime_error;
 };
 
+
 template<class X> struct IsNumericType : False { };
 template<class X, class T> using EnableIfNumericType = EnableIf<IsNumericType<X>,T>;
+
+template<class X> using NumericType = typename X::NumericType;
+
+template<class X> struct NumericTraits;
+template<class X> using GenericTrait = typename NumericTraits<X>::GenericType;
+template<class X> using PositiveTrait = typename NumericTraits<X>::PositiveType;
+template<class X> using OppositeTrait = typename NumericTraits<X>::OppositeType;
+template<class X> using LessTrait = typename NumericTraits<X>::LessType;
+template<class X> using EqualsTrait = typename NumericTraits<X>::EqualsType;
+
+
 
 typedef uint Nat;
 typedef int Int;
@@ -63,6 +75,10 @@ class Integer;
 class Rational;
 class Real;
 
+template<class R, class A> R integer_cast(const A& _a);
+
+template<class X> class Positive;
+
 template<class P=Void> class Number;
 
 template<> struct IsNumericType<Nat>;
@@ -73,7 +89,11 @@ template<> struct IsNumericType<Integer>;
 template<> struct IsNumericType<Rational>;
 template<> struct IsNumericType<Real>;
 
-template<class X> struct IsGenericNumericType : IsConvertible<X,Real> { };
+template<class X> struct IsGenericNumericType : IsConvertible<X,Rational> { };
+template<> struct IsGenericNumericType<ExactDouble> : True { };
+template<> struct IsGenericNumericType<Integer> : True { };
+template<> struct IsGenericNumericType<Dyadic> : True { };
+template<> struct IsGenericNumericType<Rational> : True { };
 template<> struct IsGenericNumericType<Real> : True { };
 template<> struct IsGenericNumericType<Dbl> : True { };
 template<class P> struct IsGenericNumericType<Number<P>> : True { };
@@ -87,7 +107,6 @@ using ValidatedNumber=Number<ValidatedTag>;
 using ValidatedUpperNumber=Number<ValidatedUpperTag>;
 using ValidatedLowerNumber=Number<ValidatedLowerTag>;
 using ApproximateNumber=Number<ApproximateTag>;
-using PositiveUpperNumber=Number<PositiveUpperTag>;
 
 } // namespace Ariadne
 

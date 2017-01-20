@@ -46,9 +46,13 @@ template<class X> class Covector;
 template<class X> class Matrix;
 template<class M> struct MatrixRow;
 template<class M> struct MatrixColumn;
-template<class X1, class X2> struct MatrixMatrixProduct;
-template<class X1, class X2> struct MatrixVectorProduct;
 template<class M> struct MatrixTranspose;
+template<class M1, class M2> struct MatrixMatrixProduct;
+template<class M1, class V2> struct MatrixVectorProduct;
+
+template<class M> using Row = MatrixRow<M>;
+template<class M> using Column = MatrixColumn<M>;
+template<class M> using Transpose = MatrixTranspose<M>;
 
 class PivotMatrix;
 template<class X> struct PLUMatrix;
@@ -74,8 +78,12 @@ class DeclareMatrixOperations {
     template<class X1, class X2> friend Covector<ArithmeticType<X1,X2>> operator*(Covector<X1> const& u1, Matrix<X2> const& A2);
     template<class X1, class X2> friend Matrix<ProductType<X1,X2>> operator*(Vector<X1> const& v1, Covector<X2> const& u2);
 
-    template<class X1, class X2> friend Matrix<ArithmeticType<X1,X2>> operator*(Matrix<X1> const& A1, MatrixTranspose<Matrix<X2>> const& A2);
-    template<class X1, class X2> friend Matrix<ArithmeticType<X1,X2>> operator*(MatrixTranspose<X1> const& A1, Matrix<Matrix<X2>> const& A2);
+    template<class X1, class X2> friend Matrix<ArithmeticType<X1,X2>> operator*(Matrix<X1> const& A1, Transpose<Matrix<X2>> const& A2);
+    template<class X1, class X2> friend Matrix<ArithmeticType<X1,X2>> operator*(Transpose<Matrix<X1>> const& A1, Matrix<X2> const& A2);
+    template<class X1, class X2> friend Vector<ArithmeticType<X1,X2>> operator*(Transpose<Matrix<X1>> const& A1, Vector<X2> const& v2);
+
+    template<class X> friend decltype(abs(declval<X>()+declval<X>())) norm(Matrix<X> const& A);
+
     template<class X1, class X2> friend decltype(declval<X1>()==declval<X2>()) operator==(Matrix<X1> const& A1, Matrix<X2> const& A2);
 };
 
@@ -279,7 +287,6 @@ template<class M> struct MatrixTranspose {
     ScalarType const& get(SizeType i, SizeType j) const { return _AT.at(j,i); }
 };
 template<class M> struct IsMatrixExpression<MatrixTranspose<M>> : True { };
-template<class M> using Transpose = MatrixTranspose<M>;
 
 template<class M1, class M2> struct MatrixMatrixProduct {
     M1 const& _A1; M2 const& _A2;
@@ -318,7 +325,7 @@ template<class M1, class X2> struct MatrixScalarQuotient {
 template<class M1, class X2> struct IsMatrixExpression<MatrixScalarQuotient<M1,X2>> : True { };
 
 template<class M> struct MatrixContainerRange
-    : public MatrixContainer< MatrixContainerRange<M> >
+    : public MatrixContainer<MatrixContainerRange<M>>
 {
     M& _A; Range _rng1; Range _rng2;
   public:
@@ -453,8 +460,8 @@ template<class M> inline MatrixRange<M> project(const MatrixExpression<M>& Ae, R
     return MatrixRange<M>(Ae(),rw_rng,cl_rng);
 }
 
-template<class X> inline MatrixContainerRange< Matrix<X> > project(Matrix<X>& A, Range rw_rng, Range cl_rng) {
-    return MatrixContainerRange< Matrix<X> >(A,rw_rng,cl_rng);
+template<class X> inline MatrixContainerRange<Matrix<X>> project(Matrix<X>& A, Range rw_rng, Range cl_rng) {
+    return MatrixContainerRange<Matrix<X>>(A,rw_rng,cl_rng);
 }
 
 template<class M> inline MatrixColumn<const M> column(const M& A, SizeType j) {
@@ -622,20 +629,6 @@ struct ProvideMatrixOperations {
         return std::move(A0);
     }
 
-    template<class X1, class X2> friend Matrix<ArithmeticType<X1,X2>> operator*(Matrix<X1> const& A1, MatrixTranspose<Matrix<X2>> const& A2) {
-        typedef ArithmeticType<X1,X2> X0;
-        ARIADNE_PRECONDITION(A1.column_size()==A2.row_size());
-        Matrix<X0> A0(A1.row_size(), A2.column_size());
-        for(SizeType i=0; i!=A0.row_size(); ++i) {
-            for(SizeType j=0; j!=A0.column_size(); ++j) {
-                for(SizeType k=0; k!=A1.column_size(); ++k) {
-                    A0.at(i,j)+=A1.at(i,k)*A2.at(k,j);
-                }
-            }
-        }
-        return std::move(A0);
-    }
-
     template<class X1, class X2> friend Vector<ArithmeticType<X1,X2>> operator*(Matrix<X1> const& A1, Vector<X2> const& v2) {
         typedef ArithmeticType<X1,X2> X0;
         ARIADNE_PRECONDITION(A1.column_size()==v2.size());
@@ -660,6 +653,55 @@ struct ProvideMatrixOperations {
         return std::move(u0);
     }
 
+    template<class X1, class X2> friend Matrix<ArithmeticType<X1,X2>> operator*(Matrix<X1> const& A1, Transpose<Matrix<X2>> const& A2) {
+        typedef ArithmeticType<X1,X2> X0;
+        ARIADNE_PRECONDITION(A1.column_size()==A2.row_size());
+        Matrix<X0> A0(A1.row_size(), A2.column_size());
+        for(SizeType i=0; i!=A0.row_size(); ++i) {
+            for(SizeType j=0; j!=A0.column_size(); ++j) {
+                for(SizeType k=0; k!=A1.column_size(); ++k) {
+                    A0.at(i,j)+=A1.at(i,k)*A2.at(k,j);
+                }
+            }
+        }
+        return std::move(A0);
+    }
+
+    template<class X1, class X2> friend Matrix<ArithmeticType<X1,X2>> operator*(Transpose<Matrix<X1>> const& A1, Matrix<X2> const& A2) {
+        Matrix<X1> const& A1T=A1._AT;
+        ARIADNE_PRECONDITION(A1T.row_size()==A2.row_size());
+        Matrix<ArithmeticType<X1,X2>> A0(A1T.column_size(),A2.column_size());
+        for(SizeType i=0; i!=A1T.column_size(); ++i) {
+            for(SizeType j=0; j!=A2.column_size(); ++j) {
+                for(SizeType k=0; k!=A1T.row_size(); ++k) {
+                    A0.at(i,j)+=A1T.at(k,i)*A2.at(k,j);
+                }
+            }
+        }
+        return std::move(A0);
+    }
+
+    template<class X1, class X2> friend Vector<ArithmeticType<X1,X2>> operator*(MatrixTranspose<Matrix<X1>> const& A1, Vector<X2> const& v2) {
+        Matrix<X1> const& A1T=A1._AT;
+        ARIADNE_PRECONDITION(A1T.row_size()==v2.size());
+        Vector<ArithmeticType<X1,X2>> v0(A1T.column_size());
+        for(SizeType i=0; i!=v0.size(); ++i) {
+            for(SizeType j=0; j!=v2.size(); ++j) {
+                v0.at(i)+=A1T.at(j,i)*v2.at(j);
+            }
+        }
+        return std::move(v0);
+    }
+
+    template<class X> friend inline Matrix<X>& operator*=(Matrix<X>& A, typename Matrix<X>::ScalarType const& s) {
+        for(SizeType i=0; i!=A.row_size(); ++i) {
+            for(SizeType j=0; j!=A.column_size(); ++j) {
+                A.at(i,j)*=s;
+            }
+        }
+        return A;
+    }
+
     template<class X1, class X2> friend inline
     auto operator==(Matrix<X1> const& A1, Matrix<X2> const& A2) -> decltype(declval<X1>()==declval<X2>()) {
         if(A1.row_size()!=A2.row_size() || A1.column_size()!=A2.column_size()) { return false; }
@@ -672,61 +714,20 @@ struct ProvideMatrixOperations {
         return r;
     }
 
-    template<class X> friend inline Matrix<X>& operator*=(Matrix<X>& A, typename Matrix<X>::ScalarType const& s) {
+    template<class X> friend decltype(abs(declval<X>()+declval<X>())) norm(Matrix<X> const& A) {
+        typedef decltype(abs(declval<X>()+declval<X>())) R;
+        R r=abs(A.zero_element());
         for(SizeType i=0; i!=A.row_size(); ++i) {
+            R s=abs(A.zero_element());
             for(SizeType j=0; j!=A.column_size(); ++j) {
-                A.at(i,j)*=s;
+                s+=abs(A.at(i,j));
             }
+            r=max(r,s);
         }
-        return A;
+        return r;
     }
-
 
 };
-
-
-template<class X> auto norm(Matrix<X> const& A) -> decltype(abs(declval<X>())+abs(declval<X>()))  {
-    typedef decltype(abs(declval<X>())+abs(declval<X>())) R;
-    R r=abs(A.zero_element());
-    for(SizeType i=0; i!=A.row_size(); ++i) {
-        R s=abs(A.zero_element());
-        for(SizeType j=0; j!=A.column_size(); ++j) {
-            s+=abs(A.at(i,j));
-        }
-        r=max(r,s);
-    }
-    return r;
-}
-
-template<class X> Transpose<Matrix<X>> transpose(const Matrix<X>& A) {
-    return Transpose<Matrix<X>>(A);
-}
-
-template<class X1,class X2> Matrix<ArithmeticType<X1,X2>> operator*(MatrixTranspose<Matrix<X1>> const& A1, Matrix<X2> A2) {
-    Matrix<X1> const& A1T=A1._AT;
-    ARIADNE_PRECONDITION(A1T.row_size()==A2.row_size());
-    Matrix<ArithmeticType<X1,X2>> A0(A1T.column_size(),A2.column_size());
-    for(SizeType i=0; i!=A1T.column_size(); ++i) {
-        for(SizeType j=0; j!=A2.column_size(); ++j) {
-            for(SizeType k=0; k!=A1T.row_size(); ++k) {
-                A0.at(i,j)+=A1T.at(k,i)*A2.at(k,j);
-            }
-        }
-    }
-    return std::move(A0);
-}
-
-template<class X1, class X2> Vector<ArithmeticType<X1,X2>> operator*(MatrixTranspose<Matrix<X1>> const& A1, Vector<X2> v2) {
-    Matrix<X1> const& A1T=A1._AT;
-    ARIADNE_PRECONDITION(A1T.row_size()==v2.size());
-    Vector<ArithmeticType<X1,X2>> v0(A1T.column_size());
-    for(SizeType i=0; i!=v0.size(); ++i) {
-        for(SizeType j=0; j!=v2.size(); ++j) {
-            v0.at(i)+=A1T.at(j,i)*v2.at(j);
-        }
-    }
-    return std::move(v0);
-}
 
 template<class X> template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>>>
 Matrix<X>::Matrix(InitializerList<InitializerList<double>> lst, PRS... prs) : _rs(lst.size()), _cs(lst.begin()->size()), _ary(_rs*_cs,X(prs...)) {
@@ -748,6 +749,9 @@ Void Matrix<X>::set(SizeType i, SizeType j, Y const& y) {
 template<class X> Matrix<MidpointType<X>> midpoint(const Matrix<X>&);
 template<class X> Matrix<SingletonType<X>> cast_singleton(const Matrix<X>&);
 
+
+// Construct transpose
+template<class X> inline Transpose<Matrix<X>> transpose(const Matrix<X>& A) { return Transpose<Matrix<X>>(A); }
 
 // Invert matrices and solve linear systems
 template<class X> Matrix<ArithmeticType<X>> inverse(Matrix<X> const& A);

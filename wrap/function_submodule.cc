@@ -37,6 +37,7 @@
 #include "algebra/multi_index.h"
 #include "function/taylor_model.h"
 #include "algebra/differential.h"
+#include "function/formula.h"
 #include "function/polynomial.h"
 #include "function/affine.h"
 #include "function/taylor_function.h"
@@ -47,7 +48,6 @@
 #include "expression/expression.h"
 #include "expression/space.h"
 #include "expression/assignment.h"
-#include "expression/formula.h"
 #include "expression/function_expression.h"
 #include "solvers/constraint_solver.h"
 
@@ -225,9 +225,9 @@ typedef Matrix<Float64Approximation> FMx;
 typedef Matrix<ExactIntervalType> IMx;
 typedef Vector< Differential<Float64Approximation> > FSDV;
 typedef Vector< Differential<ExactIntervalType> > ISDV;
-typedef Vector<ValidatedTaylorModel> TMV;
+typedef Vector<ValidatedTaylorModel64> TMV;
 typedef VectorTaylorFunction TFM;
-typedef ValidatedTaylorModel TM;
+typedef ValidatedTaylorModel64 TM;
 
 template<class X> using Monomial = ExpansionValue<X>;
 

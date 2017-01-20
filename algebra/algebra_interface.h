@@ -46,23 +46,44 @@ template<class X> class SymbolicAlgebra;
 
 template<class X> struct AlgebraTraits;
 
-template<> struct AlgebraTraits<Float64Approximation> {
-    typedef Float64Approximation ValueType;
-    typedef ApproximateIntervalType RangeType;
-    typedef Float64Approximation NormType;
-    typedef ApproximateNumericType NumericType;
+template<> struct AlgebraTraits<ApproximateNumber> {
+    typedef ApproximateNumber ValueType;
+    typedef Interval<ApproximateNumber> RangeType;
+    typedef Positive<ApproximateNumber> NormType;
+    typedef ApproximateNumber NumericType;
 };
 
-template<> struct AlgebraTraits<Float64Bounds> {
-    typedef Float64Value ValueType;
-    typedef UpperIntervalType RangeType;
+template<> struct AlgebraTraits<ValidatedNumber> {
+    typedef ExactNumber ValueType;
+    typedef Interval<ValidatedUpperNumber> RangeType;
+    typedef Positive<ValidatedNumber> NormType;
+    typedef ValidatedNumber NumericType;
+};
+
+template<> struct AlgebraTraits<EffectiveNumber> {
+    typedef EffectiveNumber ValueType;
+    typedef Interval<EffectiveUpperNumber> RangeType;
+    typedef Positive<EffectiveNumber> NormType;
+    typedef EffectiveNumber NumericType;
+};
+
+template<class PR> struct AlgebraTraits<FloatApproximation<PR>> {
+    typedef FloatApproximation<PR> ValueType;
+    typedef Interval<FloatApproximation<PR>> RangeType;
+    typedef PositiveFloatApproximation<PR> NormType;
+    typedef FloatApproximation<PR> NumericType;
+};
+
+template<class PR> struct AlgebraTraits<FloatBounds<PR>> {
+    typedef FloatValue<PR> ValueType;
+    typedef Interval<FloatUpperBound<PR>> RangeType;
     typedef Float64Error NormType;
-    typedef ValidatedNumericType NumericType;
+    typedef FloatBounds<PR> NumericType;
 };
 
 template<> struct AlgebraTraits<Real> {
     typedef Float64Value ValueType;
-    typedef UpperIntervalType RangeType;
+    typedef Interval<Float64UpperBound> RangeType;
     typedef Float64Error NormType;
     typedef Real NumericType;
 };

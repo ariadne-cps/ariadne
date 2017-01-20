@@ -59,11 +59,11 @@ TextPlot::TextPlot(const char* cfilename)
     } else {
         filename=filename+".txt";
     }
-    this->_fstream.open(filename.c_str(), ios::out | ios::trunc);
+    this->_fstream.open(filename.c_str(), std::ios::out | std::ios::trunc);
 }
 
 
-TextPlot::TextPlot(const char* cfilename, ios_base::openmode mode)
+TextPlot::TextPlot(const char* cfilename, std::ios_base::openmode mode)
 {
     StringType filename(cfilename);
     if(filename.rfind(".") != StringType::npos) {
@@ -81,11 +81,11 @@ Void TextPlot::open(const char* cfilename)
     } else {
         filename=filename+".txt";
     }
-    this->_fstream.open(filename.c_str(), ios::out | ios::trunc);
+    this->_fstream.open(filename.c_str(), std::ios::out | std::ios::trunc);
 }
 
 
-Void TextPlot::open(const char* cfilename, ios_base::openmode mode)
+Void TextPlot::open(const char* cfilename, std::ios_base::openmode mode)
 {
     StringType filename(cfilename);
     if(filename.rfind(".") != StringType::npos) {

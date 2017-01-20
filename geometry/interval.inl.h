@@ -48,7 +48,7 @@ template<class U> Interval<U> Interval<U>::empty_interval() { return Interval<U>
 template<class U> Interval<U> Interval<U>::unit_interval() { return Interval<U>(-1,+1); }
 
 template<class U> auto Interval<U>::is_empty() const -> decltype(declval<L>()>declval<U>()) { return this->_l > this->_u; }
-template<class U> auto Interval<U>::is_bounded() const -> decltype(declval<U>()<infty) { return this->_l > -infty && this->_u < +infty; }
+template<class U> auto Interval<U>::is_bounded() const -> decltype(declval<U>()<declval<L>()) { return Ariadne::is_bounded(*this); }
 template<class U> auto Interval<U>::is_singleton() const -> decltype(declval<L>() == declval<U>()) { return this->_l == this->_u; }
 
 template<class U> auto Interval<U>::set_lower(LowerBoundType l) -> void { _l=l; }
@@ -69,7 +69,9 @@ template<class U> inline auto width(Interval<U> const& ivl) -> decltype(ivl.widt
 
 template<class U> inline auto is_empty(Interval<U> const& ivl) -> decltype(ivl.lower()>ivl.upper()) { return ivl.lower()>ivl.upper(); }
 template<class U> inline auto is_singleton(Interval<U> const& ivl) -> decltype(ivl.lower()==ivl.upper()) { return ivl.lower()==ivl.upper(); }
-template<class U> inline auto is_bounded(Interval<U> const& ivl) -> decltype(ivl.upper()<inf) { return -ivl.lower()<inf && ivl.upper()<inf; }
+
+template<class U> inline auto is_bounded(Interval<U> const& ivl) -> decltype(ivl.upper()<ivl.lower()) { return -ivl.lower().raw()<inf && ivl.upper().raw()<inf; }
+template<> inline auto is_bounded(Interval<Real> const& ivl) -> decltype(ivl.upper()<ivl.lower()) {return -ivl.lower()<infinity && ivl.upper()<infinity; }
 
 
 template<class U, class X> inline auto element(X const& x1, Interval<U> const& ivl2) -> decltype(ivl2.lower()<=x1 && ivl2.upper()>=x1) {
@@ -151,26 +153,42 @@ template<class U> inline auto operator!=(Interval<U> const& ivl1, Interval<U> co
     return ivl1.lower()!=ivl2.lower() || ivl1.upper()!=ivl2.upper(); }
 
 
-inline Interval<Float64UpperBound> refinement(Interval<Float64UpperBound> const& ivl1, Interval<Float64UpperBound> const& ivl2) {
-    return Interval<Float64UpperBound>(max(ivl1.lower().raw(),ivl2.lower().raw()),min(ivl1.upper().raw(),ivl2.upper().raw())); }
-inline Bool refines(Interval<Float64UpperBound> const& ivl1, Interval<Float64UpperBound> const& ivl2) {
+template<class U1, class U2> inline decltype(auto) refinement(Interval<U1> const& ivl1, Interval<U2> const& ivl2) {
+    return make_interval(refinement(ivl1.lower(),ivl2.lower()),refinement(ivl1.upper(),ivl2.upper())); }
+template<class U1, class U2> inline bool refines(Interval<U1> const& ivl1, Interval<U2> const& ivl2) {
+    return refines(ivl1.lower(),ivl2.lower()) and refines(ivl1.upper(),ivl2.upper()); }
+template<class U1, class U2> inline bool same(Interval<U1> const& ivl1, Interval<U2> const& ivl2) {
+    return same(ivl1.lower(),ivl2.lower()) and same(ivl1.upper(),ivl2.upper()); }
+
+template<class PR> inline Interval<FloatUpperBound<PR>> refinement(Interval<FloatUpperBound<PR>> const& ivl1, Interval<FloatUpperBound<SelfType<PR>>> const& ivl2) {
+    return Interval<FloatUpperBound<PR>>(max(ivl1.lower().raw(),ivl2.lower().raw()),min(ivl1.upper().raw(),ivl2.upper().raw())); }
+template<class PR> inline Bool refines(Interval<FloatUpperBound<PR>> const& ivl1, Interval<FloatUpperBound<SelfType<PR>>> const& ivl2) {
     return ivl1.lower().raw()>=ivl2.lower().raw() && ivl1.upper().raw()<=ivl2.upper().raw(); }
-inline Bool same(Interval<Float64UpperBound> const& ivl1, Interval<Float64UpperBound> const& ivl2) {
+template<class PR> inline Bool same(Interval<FloatUpperBound<PR>> const& ivl1, Interval<FloatUpperBound<SelfType<PR>>> const& ivl2) {
     return ivl1.lower().raw()==ivl2.lower().raw() && ivl1.upper().raw()==ivl2.upper().raw(); }
 
-inline Interval<Float64UpperBound> widen(Interval<Float64UpperBound> const& ivl, Float64UpperBound e) {
-    return Interval<Float64UpperBound>(ivl.lower()-e,ivl.upper()+e); }
-inline Interval<Float64UpperBound> widen(Interval<Float64UpperBound> const& ivl) {
-    return widen(ivl,Float64UpperBound(Float64::min(Precision64()))); }
+template<class PR> inline Interval<FloatUpperBound<PR>> widen(Interval<FloatUpperBound<PR>> const& ivl, FloatUpperBound<PR> e) {
+    return Interval<FloatUpperBound<PR>>(ivl.lower()-e,ivl.upper()+e); }
+template<class PR> inline Interval<FloatUpperBound<PR>> widen(Interval<FloatUpperBound<PR>> const& ivl) {
+    return widen(ivl,FloatUpperBound<PR>(RawFloat<PR>::min(ivl.upper().precision()))); }
+template<class PR> inline Interval<FloatUpperBound<PR>> widen(Interval<FloatValue<PR>> const& ivl) {
+    return widen(Interval<FloatUpperBound<PR>>(ivl),FloatUpperBound<PR>(RawFloat<PR>::min(ivl.upper().precision()))); }
 
-inline Interval<Float64LowerBound> narrow(Interval<Float64LowerBound> const& ivl, Float64UpperBound e) {
-    return Interval<Float64LowerBound>(ivl.lower()+e,ivl.upper()-e); }
-inline Interval<Float64LowerBound> narrow(Interval<Float64LowerBound> const& ivl) {
-    return narrow(ivl,Float64UpperBound(Float64::min(Precision64()))); }
+template<class PR> inline Interval<FloatLowerBound<PR>> narrow(Interval<FloatLowerBound<PR>> const& ivl, FloatUpperBound<PR> e) {
+    return Interval<FloatLowerBound<PR>>(ivl.lower()+e,ivl.upper()-e); }
+template<class PR> inline Interval<FloatLowerBound<PR>> narrow(Interval<FloatLowerBound<PR>> const& ivl) {
+    return narrow(ivl,FloatUpperBound<PR>(RawFloat<PR>::min(ivl.upper().precision()))); }
+template<class PR> inline Interval<FloatLowerBound<PR>> narrow(Interval<FloatValue<PR>> const& ivl) {
+    return narrow(Interval<FloatLowerBound<PR>>(ivl),FloatUpperBound<PR>(RawFloat<PR>::min(ivl.upper().precision()))); }
 
 inline Interval<Float64Value> cast_exact(Interval<Float64Approximation> const& ivl) {
-    return reinterpret_cast<ExactIntervalType const&>(ivl); }
+    return reinterpret_cast<Interval<Float64Value> const&>(ivl); }
+inline Interval<FloatMPValue> cast_exact(Interval<FloatMPApproximation> const& ivl) {
+    return reinterpret_cast<Interval<FloatMPValue> const&>(ivl); }
 inline Interval<Float64Value> cast_exact_interval(Interval<Float64Approximation> const& ivl) {
     return reinterpret_cast<Interval<Float64Value> const&>(ivl); }
+inline Interval<FloatMPValue> cast_exact_interval(Interval<FloatMPApproximation> const& ivl) {
+    return reinterpret_cast<Interval<FloatMPValue> const&>(ivl); }
+
 
 } // namespace Ariadne

@@ -209,6 +209,20 @@ class Polynomial
     Iterator _unique_key();
   private:
     SortedExpansion<X,ReverseLexicographicIndexLess> _expansion;
+  private: // FIXME: Put these concrete-generic operations in proper place
+    template<class Y, EnableIf<IsAssignable<X,Y>> =dummy>
+        friend Polynomial<X> operator+(Polynomial<X> p, const Y& c) {
+            X xc=p.value(); xc=c; return p+xc; }
+    template<class Y, EnableIf<IsAssignable<X,Y>> =dummy>
+        friend Polynomial<X> operator-(Polynomial<X> p, const Y& c) {
+            X xc=p.value(); xc=c; return p-xc; }
+    template<class Y, EnableIf<IsAssignable<X,Y>> =dummy>
+        friend Polynomial<X> operator*(Polynomial<X> p, const Y& c) {
+            X xc=p.value(); xc=c; return p*xc; }
+    template<class Y, EnableIf<IsAssignable<X,Y>> =dummy>
+        friend Polynomial<X> operator/(Polynomial<X> p, const Y& c) {
+            X xc=p.value(); xc=c; return p/xc; }
+
 };
 
 template<class X> struct AlgebraOperations<Polynomial<X>> {
@@ -223,6 +237,7 @@ template<class X> struct AlgebraOperations<Polynomial<X>> {
     static Polynomial<X>& _iadd(Polynomial<X>& p, const X& c);
     static Polynomial<X>& _imul(Polynomial<X>& p, const X& c);
     static Polynomial<X>& _imul(Polynomial<X>& p, const Monomial<X>& m);
+
 };
 
 
@@ -269,6 +284,8 @@ template<class X> inline Polynomial<X> truncate(Polynomial<X> p, DegreeType deg)
 template<class X> inline OutputStream& operator<<(OutputStream& os, const Polynomial<X>& p) {
     return p._write(os); }
 
+template<class X> inline Bool compatible(const Polynomial<X>& x1, const Polynomial<X>& x2) {
+    return x1.argument_size()==x2.argument_size(); }
 
 template<class F> struct NamedArgumentRepresentation {
     const F& function; const List<String>& argument_names;

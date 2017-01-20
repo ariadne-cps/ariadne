@@ -106,7 +106,7 @@ class TestHybridReachabilityAnalyser
 
     static HybridReachabilityAnalyser build_analyser(const HybridAutomatonInterface& system)
     {
-        TaylorFunctionFactory function_factory(ThresholdSweeper(1e-8));
+        TaylorFunctionFactory function_factory(ThresholdSweeper<Float64>(Precision64(),1e-8));
         GeneralHybridEvolver evolver(system,function_factory);
 
         HybridReachabilityAnalyser analyser(system,evolver);
@@ -261,8 +261,8 @@ class TestHybridReachabilityAnalyser
     }
 
     Void test() {
-        //ValidatedTaylorModel::set_default_sweep_threshold(1e-6);
-        //ValidatedTaylorModel::set_default_maximum_degree(6u);
+        //ValidatedTaylorModel64::set_default_sweep_threshold(1e-6);
+        //ValidatedTaylorModel64::set_default_maximum_degree(6u);
 
         ARIADNE_TEST_CALL(test_lower_reach_lower_evolve());
         ARIADNE_TEST_CALL(test_lower_reach_evolve());

@@ -829,8 +829,8 @@ HybridSetConstIterator<DS,HBS>::increment_loc()
 
 #ifdef ARIADNE_ENABLE_SERIALIZATION
   namespace boost { namespace serialization {
-  template<class A> Void serialize(A& archive, const Ariadne::HybridGridTreeSet& set, const Nat version);
-  template<class A> Void serialize(A& archive, const Ariadne::DiscreteLocation& state, const Nat version);
+  template<class A> void serialize(A& archive, const Ariadne::HybridGridTreeSet& set, const unsigned int version);
+  template<class A> void serialize(A& archive, const Ariadne::DiscreteLocation& state, const unsigned int version);
   }}
 #endif /* ARIADNE_ENABLE_SERIALIZATION */
 

@@ -52,6 +52,7 @@ enum class OperatorKind : char {
     BINARY,
     TERNARY,
     SCALAR,
+    GRADED,
     COMPARISON
 };
 
@@ -81,7 +82,9 @@ enum class OperatorCode : char {
     ACOS,   // ArcCosine
     ATAN,   // ArcTangent
     SADD,  // Addition of a scalar constant
+    SSUB,  // Subtraction from a scalar constant
     SMUL,  // Multiplication by a scalar constant
+    SDIV,  // Division into a scalar constant
     SFMA,   // Fused multiply-and-add with scalar constants
     ABS,   // Absolute value
     MAX,   // Maximum
@@ -131,7 +134,7 @@ template<> struct Logic<Real> { typedef Kleenean Type; };
 
 template<class X> typename Logic<X>::Type compare(OperatorCode op, const X& x1, const X& x2);
 template<class X> X compute(OperatorCode op, const X& x);
-template<class X> X compute(OperatorCode op, const X& x1, const X& x2);
+template<class X1, class X2> X2 compute(OperatorCode op, const X1& x1, const X2& x2);
 template<class X> X compute(OperatorCode op, const X& x, Int n);
 
 template<class OBJ> struct Object { OBJ const& upcast() const { return static_cast<OBJ const&>(*this); } };
@@ -258,7 +261,7 @@ struct Div : OperatorObject<Div> {
 };
 
 struct Pow : OperatorObject<Pow> {
-    OperatorCode code() const { return OperatorCode::POW; } OperatorKind kind() const { return OperatorKind::SCALAR; }
+    OperatorCode code() const { return OperatorCode::POW; } OperatorKind kind() const { return OperatorKind::GRADED; }
     template<class A, class N> auto operator()(A&& a, N&& n) const -> decltype(pow(a,n)) { return pow(a,n); }
 };
 struct Fma : OperatorObject<Fma> {

@@ -45,32 +45,33 @@ namespace Ariadne {
 template<class P, class F> class TaylorModel;
 class TaylorFunctionFactory;
 
-typedef ScalarFunctionPatch<ValidatedTaylorModel> ScalarTaylorFunction;
-typedef VectorFunctionPatch<ValidatedTaylorModel> VectorTaylorFunction;
+typedef ScalarFunctionPatch<ValidatedTaylorModel64> ScalarTaylorFunction;
+typedef VectorFunctionPatch<ValidatedTaylorModel64> VectorTaylorFunction;
 
 /*
-class ScalarTaylorFunction : public FunctionPatch<ValidatedTaylorModel> {
+class ScalarTaylorFunction : public FunctionPatch<ValidatedTaylorModel64> {
   public:
-    using FunctionPatch<ValidatedTaylorModel>::FunctionPatch;
-    ScalarTaylorFunction() : FunctionPatch<ValidatedTaylorModel>() { }
-    ScalarTaylorFunction(FunctionPatch<ValidatedTaylorModel> const& f) : FunctionPatch<ValidatedTaylorModel>(f) { }
+    using FunctionPatch<ValidatedTaylorModel64>::FunctionPatch;
+    ScalarTaylorFunction() : FunctionPatch<ValidatedTaylorModel64>() { }
+    ScalarTaylorFunction(FunctionPatch<ValidatedTaylorModel64> const& f) : FunctionPatch<ValidatedTaylorModel64>(f) { }
 };
 
-class VectorTaylorFunction : public VectorFunctionPatch<ValidatedTaylorModel> {
+class VectorTaylorFunction : public VectorFunctionPatch<ValidatedTaylorModel64> {
   public:
-    using VectorFunctionPatch<ValidatedTaylorModel>::VectorFunctionPatch;
-    VectorTaylorFunction() : VectorFunctionPatch<ValidatedTaylorModel>() { }
-    VectorTaylorFunction(VectorFunctionPatch<ValidatedTaylorModel> const& f) : VectorFunctionPatch<ValidatedTaylorModel>(f) { }
+    using VectorFunctionPatch<ValidatedTaylorModel64>::VectorFunctionPatch;
+    VectorTaylorFunction() : VectorFunctionPatch<ValidatedTaylorModel64>() { }
+    VectorTaylorFunction(VectorFunctionPatch<ValidatedTaylorModel64> const& f) : VectorFunctionPatch<ValidatedTaylorModel64>(f) { }
 };
 */
 
 class TaylorFunctionFactory
     : public FunctionModelFactoryInterface<ValidatedTag>
 {
-    Sweeper _sweeper;
+    typedef Sweeper<Float64> SweeperType;
+    SweeperType _sweeper;
   public:
-    explicit TaylorFunctionFactory(Sweeper sweeper) : _sweeper(sweeper) { }
-    Sweeper sweeper() const { return this->_sweeper; }
+    explicit TaylorFunctionFactory(SweeperType sweeper) : _sweeper(sweeper) { }
+    SweeperType sweeper() const { return this->_sweeper; }
     TaylorFunctionFactory* clone() const { return new TaylorFunctionFactory(this->_sweeper); }
     Void write(OutputStream& os) const { os << "TaylorFunctionFactory( sweeper=" << this->_sweeper << " )"; }
     ScalarTaylorFunction create(const ExactBoxType& domain, const ValidatedScalarFunctionInterface& function) const;
@@ -82,6 +83,7 @@ class TaylorFunctionFactory
     ScalarTaylorFunction create_identity(const ExactIntervalType& domain) const;
     VectorTaylorFunction create_identity(const ExactBoxType& domain) const;
   private:
+    CanonicalNumericType<ValidatedTag,Precision64> _create(const Number<ValidatedTag>& number) const;
     ScalarTaylorFunction* _create(const ExactBoxType& domain, const ValidatedScalarFunctionInterface& function) const;
     VectorTaylorFunction* _create(const ExactBoxType& domain, const ValidatedVectorFunctionInterface& function) const;
 };

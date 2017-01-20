@@ -51,7 +51,7 @@
 
 namespace Ariadne {
 
-inline Sweeper default_sweeper() { return Sweeper(); }
+inline Sweeper<Float64> default_sweeper() { return Sweeper<Float64>(); }
 
 typedef VectorRange<RawFloatVector> RawFloatVectorRange;
 typedef Vector<Float64> FloatVector;

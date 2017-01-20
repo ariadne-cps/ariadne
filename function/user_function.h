@@ -43,7 +43,7 @@
 #include "algebra/matrix.h"
 #include "function/taylor_model.h"
 #include "algebra/differential.h"
-#include "expression/formula.h"
+#include "function/formula.h"
 
 #include "function_mixin.h"
 

@@ -43,7 +43,7 @@ template<class PR> Nat FloatApproximation<PR>::output_places = 4;
 template<class PR> Nat FloatBounds<PR>::output_places=8;
 template<class PR> Nat FloatValue<PR>::output_places = 16;
 
-const FloatValue<Precision64> infty = FloatValue<Precision64>(Float64::inf(Precision64()));
+const Float64Value infty = Float64Value(Float64::inf(Precision64()));
 
 FloatError<Precision64> operator"" _error(long double lx) {
     double x=lx;
@@ -96,13 +96,13 @@ TwoExp::operator FloatValue<Precision64> () const {
 template<class PR> FloatValue<PR>::FloatValue(Dyadic const& w, PR pr)
     : _v(w,RawFloat<PR>::to_nearest,pr)
 {
-    ARIADNE_ASSERT_MSG(Dyadic(this->_v)==w,"Dyadic number "<<w<<" cannot be converted exactly to a floating-point number with precision "<<pr);
+    ARIADNE_ASSERT_MSG(Dyadic(this->_v)==w,"Dyadic number "<<w<<" cannot be converted exactly to a floating-point number with precision "<<pr<<"; nearest is "<<(*this));
 };
 
 template<class PR> FloatValue<PR>::FloatValue(FloatValue<PR> const& x, PR pr)
     : _v(x._v,RawFloat<PR>::to_nearest,pr)
 {
-    ARIADNE_ASSERT_MSG(*this==x,"Exact FloatValueq "<<x<<" cannot be converted exactly to a floating-point number with precision "<<pr);
+    ARIADNE_ASSERT_MSG(*this==x,"Exact FloatValue "<<x<<" cannot be converted exactly to a floating-point number with precision "<<pr<<"; nearest is "<<(*this));
 };
 
 /*
@@ -142,7 +142,7 @@ template<class PR> FloatValue<PR>::FloatValue(Integer const& z, PR pr)
 
 template<class PR> FloatValue<PR>& FloatValue<PR>::operator=(Dyadic const& w) {
     _v=RawFloat<PR>(w,this->precision());
-    ARIADNE_ASSERT_MSG(Dyadic(_v)==w,"Dyadic number "<<w<<" cannot be assigned exactly to a floating-point number with precision "<<this->precision());
+    ARIADNE_ASSERT_MSG(Dyadic(_v)==w,"Dyadic number "<<w<<" cannot be assigned exactly to a floating-point number with precision "<<this->precision()<<"; nearest is "<<(*this));
     return *this;
 };
 
@@ -236,6 +236,12 @@ template<class PR> FloatBounds<PR>::FloatBounds(Rational const& ql, Rational con
 template<class PR> FloatBounds<PR>::FloatBounds(Real const& x, PR pr)
     : FloatBounds(x.get(pr)) {
 }
+
+template<class PR> FloatBounds<PR>::FloatBounds(FloatLowerBound<PR> const& lower, ValidatedUpperNumber const& upper)
+    : FloatBounds<PR>(lower,lower.create(upper)) { }
+
+template<class PR> FloatBounds<PR>::FloatBounds(ValidatedLowerNumber const& lower, FloatUpperBound<PR> const& upper)
+    : FloatBounds<PR>(upper.create(lower),upper) { }
 
 template<class PR> FloatBounds<PR>::FloatBounds(ValidatedNumber const& y, PR pr)
     : FloatBounds(y.get(BoundedTag(),pr)) {
@@ -1635,16 +1641,16 @@ template<class PR> struct Operations<FloatValue<PR>> {
     }
 
     static Integer integer_cast(FloatValue<PR> const& x) {
-        Integer z=static_cast<int>(x._v.get_d());
-        ARIADNE_ASSERT(z==x);
+        Dyadic w(x);
+        Integer z=round(w);
+        ARIADNE_ASSERT(z==w);
         return z;
     }
 
 };
 
-
-FloatValue<Precision64> cast_exact(Real const& x) {
-    return cast_exact(FloatApproximation<Precision64>(x,Precision64()));
+Rational cast_exact(Real const& x) {
+    return Rational(cast_exact(FloatApproximation<Precision64>(x,Precision64())));
 }
 
 
@@ -1895,6 +1901,11 @@ template<> Int integer_cast<Int,Float64LowerBound>(Float64LowerBound const& x) {
 template<> Int integer_cast<Int,Float64Bounds>(Float64Bounds const& x) {
     return std::round((x.lower().get_d()+x.upper().get_d())/2); }
 
+template<> Nat integer_cast<Nat,FloatMPApproximation>(FloatMPApproximation const& x) {
+    return std::round(x.get_d()); }
+template<> Int integer_cast<Int,FloatMPApproximation>(FloatMPApproximation const& x) {
+    return std::round(x.get_d()); }
+
 
 
 
@@ -2036,6 +2047,8 @@ FloatMPBall refinement(FloatMPBall const& x1, FloatMPBall const& x2) { return Op
 
 Float64Error mag(Float64Value const& x) { return Operations<Float64Value>::_mag(x); }
 FloatMPError mag(FloatMPValue const& x) { return Operations<FloatMPValue>::_mag(x); }
+Bool same(Float64Value const& x1, Float64Value const& x2) { return Operations<Float64Value>::_same(x1,x2); }
+Bool same(FloatMPValue const& x1, FloatMPValue const& x2) { return Operations<FloatMPValue>::_same(x1,x2); }
 
 
 

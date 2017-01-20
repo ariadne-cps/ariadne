@@ -50,11 +50,8 @@ template<class X> class Procedure;
 template<class X> class Polynomial;
 typedef Differential<ValidatedNumericType> ValidatedDifferential;
 typedef Vector< Procedure<ValidatedNumericType> > ValidatedVectorProcedure;
-template<class X> class FunctionModelFactoryInterface;
 typedef FunctionModelFactoryInterface<ValidatedTag> ValidatedFunctionModelFactoryInterface;
 typedef std::shared_ptr<const ValidatedFunctionModelFactoryInterface> FunctionFactoryPointer;
-
-class Sweeper;
 
 struct LipschitzConstant : Attribute<double> { LipschitzConstant(double v) : Attribute<double>(v) { } };
 struct StepMaximumError : Attribute<double> { StepMaximumError(double v) : Attribute<double>(v) { } };

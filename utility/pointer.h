@@ -35,7 +35,7 @@
 
 namespace Ariadne {
 
-using std::shared_ptr;
+template<class T> using SharedPointer = std::shared_ptr<T>;
 using OutputStream = std::ostream;
 
 // A tag used as a function argument to denote that the value is a pointer, and not possibly the integer 0

@@ -24,6 +24,8 @@
 #include "utility/standard.h"
 #include "config.h"
 
+#include "numeric/operators.tpl.h"
+
 #include "algebra/algebra.h"
 #include "algebra/algebra_wrapper.h"
 
@@ -34,8 +36,7 @@
 #include "expression/space.h"
 #include "expression/valuation.h"
 
-#include "expression/formula.h"
-#include "expression/operators.tpl.h"
+#include "function/formula.h"
 
 namespace Ariadne {
 
@@ -448,7 +449,7 @@ evaluate(const Expression<T>& e, const Map<Identifier,T>& x)
         case OperatorKind::NULLARY: return e.val();
         case OperatorKind::UNARY: return compute(e.op(),evaluate(e.arg(),x));
         case OperatorKind::BINARY: return compute(e.op(),evaluate(e.arg1(),x),evaluate(e.arg2(),x));
-        case OperatorKind::SCALAR: return compute(e.op(),evaluate(e.arg(),x),e.num());
+        case OperatorKind::GRADED: return compute(e.op(),evaluate(e.arg(),x),e.num());
         default: ARIADNE_FAIL_MSG("Cannot evaluate expression "<<e<<" on "<<x<<"\n");
     }
 }
@@ -825,41 +826,47 @@ SizeType len(const List< Variable<Real> >& vars)
 }
 
 
-const Formula<Real>& cached_make_formula(const Expression<Real>& e, const Map<Identifier,Nat>& v, Map< const Void*, Formula<Real> >& cache)
+const Formula<EffectiveNumber>& cached_make_formula(const Expression<Real>& e, const Map<Identifier,Nat>& v, Map< const Void*, Formula<EffectiveNumber> >& cache)
 {
+    typedef EffectiveNumber Y;
     const ExpressionNode<Real>* eptr=e.node_ptr().operator->();
     if(cache.has_key(eptr)) { return cache.get(eptr); }
     switch(e.kind()) {
-        case OperatorKind::VARIABLE: return insert( cache, eptr, make_formula<Real>(v[e.var()]) );
-        case OperatorKind::NULLARY: return insert( cache, eptr, make_formula<Real>(e.val()) );
-        case OperatorKind::UNARY: return insert( cache, eptr, make_formula<Real>(e.op(),cached_make_formula(e.arg(),v,cache)));
-        case OperatorKind::BINARY: return insert( cache, eptr, make_formula<Real>(e.op(),cached_make_formula(e.arg1(),v,cache),cached_make_formula(e.arg2(),v,cache)) );
-        case OperatorKind::SCALAR: return insert( cache, eptr, make_formula<Real>(e.op(),cached_make_formula(e.arg(),v,cache),e.num()) );
+        case OperatorKind::VARIABLE: return insert( cache, eptr, make_formula<Y>(v[e.var()]) );
+        case OperatorKind::NULLARY: return insert( cache, eptr, make_formula<Y>(e.val()) );
+        case OperatorKind::UNARY: return insert( cache, eptr, make_formula<Y>(e.op(),cached_make_formula(e.arg(),v,cache)));
+        case OperatorKind::BINARY: return insert( cache, eptr, make_formula<Y>(e.op(),cached_make_formula(e.arg1(),v,cache),cached_make_formula(e.arg2(),v,cache)) );
+        case OperatorKind::GRADED: return insert( cache, eptr, make_formula<Y>(e.op(),cached_make_formula(e.arg(),v,cache),e.num()) );
         default: ARIADNE_FAIL_MSG("Cannot convert expression "<<e<<" to use variables "<<v<<"\n");
     }
 }
 
-Formula<Real> make_formula(const Expression<Real>& e, const Map<Identifier,Nat>& v)
+Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Map<Identifier,Nat>& v)
 {
-    Map< const Void*, Formula<Real> > cache;
+    Map< const Void*, Formula<EffectiveNumber> > cache;
     return cached_make_formula(e,v,cache);
 }
 
 Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Space<Real>& spc)
 {
-    typedef EffectiveNumber X;
+    typedef EffectiveNumber Y;
     typedef Identifier I;
     switch(e.kind()) {
-        case OperatorKind::SCALAR: return make_formula(e.op(),make_formula(e.arg(),spc),e.num());
-        case OperatorKind::BINARY: return make_formula(e.op(),make_formula(e.arg1(),spc),make_formula(e.arg2(),spc));
-        case OperatorKind::UNARY: return make_formula(e.op(),make_formula(e.arg(),spc));
-        case OperatorKind::NULLARY: return Formula<X>::constant(e.val());
-        case OperatorKind::VARIABLE: return Formula<X>::coordinate(spc.index(e.var()));
+        case OperatorKind::GRADED: return make_formula<Y>(e.op(),make_formula(e.arg(),spc),e.num());
+        case OperatorKind::BINARY: return make_formula<Y>(e.op(),make_formula(e.arg1(),spc),make_formula(e.arg2(),spc));
+        case OperatorKind::UNARY: return make_formula<Y>(e.op(),make_formula(e.arg(),spc));
+        case OperatorKind::NULLARY: return Formula<Y>::constant(e.val());
+        case OperatorKind::VARIABLE: return Formula<Y>::coordinate(spc.index(e.var()));
         default: ARIADNE_FAIL_MSG("Cannot compute formula for expression "<<e.op()<<"of kind "<<e.kind()<<" in space "<<spc);
     }
 }
 
-Vector<Formula<EffectiveNumber>> make_formula(const Vector<Expression<Real>>& e, const Space<Real> spc)
+Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Variable<Real>& var)
+{
+    return make_formula(e,Space<Real>({var}));
+}
+
+Vector<Formula<EffectiveNumber>> make_formula(const Vector<Expression<Real>>& e, const Space<Real>& spc)
 {
     Vector<Formula<EffectiveNumber>> res(e.size());
     for(SizeType i=0; i!=e.size(); ++i) {
@@ -887,6 +894,21 @@ Vector<Formula<EffectiveNumber>> make_formula(const Vector<Expression<Real>>& ou
     return res;
 }
 
+
+Expression<Real> make_expression(const Formula<Real>& f, const Space<Real>& s) {
+    const List<RealVariable>& vars=s.variables();
+    typedef Algebra<Real> RealAlgebra;
+    RealAlgebra az(RealExpression::constant(0));
+    Vector<RealAlgebra> va(vars.size(),az);
+    for(SizeType i=0; i!=va.size(); ++i) { va[i]=RealAlgebra(RealExpression(vars[i])); }
+    RealAlgebra fa=evaluate(f,va);
+    return fa.template extract<RealExpression>();
+}
+
+Formula<Real> make_formula(const EffectiveScalarFunction& f);
+Expression<Real> make_expression(const Formula<Real>& f, const Space<Real>& s);
+Expression<Real> make_expression(const ScalarFunction<EffectiveTag>& f, const Space<Real>& s) {
+    return make_expression(make_formula(f),s); }
 
 
 } // namespace Ariadne

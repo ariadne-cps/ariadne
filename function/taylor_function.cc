@@ -40,11 +40,13 @@
 #include "function/taylor_model.h"
 
 #include "function/function.h"
+#include "function/function_mixin.h"
 #include "function/function_patch.h"
 
 #include "function/taylor_function.h"
 
-#include "function_mixin.h"
+#include "taylor_model.tpl.h"
+#include "function_patch.tpl.h"
 #include "function_mixin.tpl.h"
 
 #define VOLATILE ;
@@ -53,18 +55,20 @@ namespace Ariadne {
 
 static double TAYLOR_FUNCTION_WRITING_ACCURACY = 1e-8;
 
-template class FunctionPatch<ValidatedTaylorModel>;
-template class FunctionMixin<FunctionPatch<ValidatedTaylorModel>,ApproximateTag,BoxDomain,IntervalDomain>;
-template class FunctionMixin<FunctionPatch<ValidatedTaylorModel>,ValidatedTag,BoxDomain,IntervalDomain>;
-template class VectorFunctionPatch<ValidatedTaylorModel>;
-template class FunctionMixin<VectorFunctionPatch<ValidatedTaylorModel>,ApproximateTag,BoxDomain,BoxDomain>;
-template class FunctionMixin<VectorFunctionPatch<ValidatedTaylorModel>,ValidatedTag,BoxDomain,BoxDomain>;
+template class FunctionPatch<ValidatedTaylorModel64>;
+template class FunctionMixin<FunctionPatch<ValidatedTaylorModel64>,ApproximateTag,BoxDomain,IntervalDomain>;
+template class FunctionMixin<FunctionPatch<ValidatedTaylorModel64>,ValidatedTag,BoxDomain,IntervalDomain>;
+template class VectorFunctionPatch<ValidatedTaylorModel64>;
+template class FunctionMixin<VectorFunctionPatch<ValidatedTaylorModel64>,ApproximateTag,BoxDomain,BoxDomain>;
+template class FunctionMixin<VectorFunctionPatch<ValidatedTaylorModel64>,ValidatedTag,BoxDomain,BoxDomain>;
 
-template<> ScalarFunctionModel<ValidatedTag>& ScalarFunctionModel<ValidatedTag>::operator=(const ScalarTaylorFunction& f) {
-    this->_ptr=clone_on_copy_ptr< ScalarFunctionModelInterface<ValidatedTag> >(new ScalarTaylorFunction(f)); return *this;
+template class FunctionPatch<ValidatedTaylorModelMP>;
+template class VectorFunctionPatch<ValidatedTaylorModelMP>;
+
+CanonicalNumericType<ValidatedTag> TaylorFunctionFactory::_create(const Number<ValidatedTag>& number) const
+{
+    return CanonicalNumericType<ValidatedTag>(number,Precision64());
 }
-
-
 
 ScalarTaylorFunction TaylorFunctionFactory::create(const ExactBoxType& domain, const ValidatedScalarFunctionInterface& function) const
 {
@@ -109,11 +113,11 @@ VectorTaylorFunction TaylorFunctionFactory::create_identity(const ExactBoxType& 
 
 
 FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory() {
-    return new TaylorFunctionFactory(Sweeper());
+    return new TaylorFunctionFactory(Sweeper<Float64>());
 }
 
 FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory(double sweep_threshold) {
-    return new TaylorFunctionFactory(ThresholdSweeper(sweep_threshold));
+    return new TaylorFunctionFactory(ThresholdSweeper<Float64>(Precision64(),sweep_threshold));
 }
 
 

@@ -109,8 +109,8 @@ TestIntervalType::test_constructors()
     // Constructor without approximations
     RationalInterval ivld3(Rational(21,8),Rational(17,4));
     cout<<ivld3<<std::endl;
-    ARIADNE_TEST_COMPARE(cast_exact(ivld3.lower()),==,Rational(21,8));
-    ARIADNE_TEST_COMPARE(cast_exact(ivld3.upper()),==,Rational(17,4));
+    ARIADNE_TEST_COMPARE(ivld3.lower(),==,Rational(21,8));
+    ARIADNE_TEST_COMPARE(ivld3.upper(),==,Rational(17,4));
 
     // Constructor from approximate values
     UpperIntervalType ivld4(2.1,3.2);

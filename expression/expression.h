@@ -210,7 +210,8 @@ Expression<Real> derivative(const Expression<Real>& e, Variable<Real> v);
 
 //! \brief Make a formula in terms of numbered coordinates from an expression in named variables.
 Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Space<Real>& spc);
-Vector<Formula<EffectiveNumber>> make_formula(const Vector<Expression<Real>>& e, const Space<Real> spc);
+Vector<Formula<EffectiveNumber>> make_formula(const Vector<Expression<Real>>& e, const Space<Real>& spc);
+Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Variable<Real>& var);
 
 //! \brief Make a function on the real line given an expression in a single argument variable.
 ScalarUnivariateFunction<EffectiveTag> make_function(const Variable<Real>& v, const Expression<Real>& e);
@@ -221,6 +222,10 @@ VectorFunction<EffectiveTag> make_function(const Space<Real>& s, const Vector<Ex
 
 //! \brief Make a function on a Euclidean domain given an ordered list including all argument variables. // DEPRECATED
 ScalarFunction<EffectiveTag> make_function(const Expression<Real>& e, const Space<Real>& s);
+
+//! \brief Make a function on a Euclidean domain given an ordered list including all argument variables.
+Expression<Real> make_expression(const ScalarFunction<EffectiveTag>& f, const Space<Real>& s);
+
 
 //@}
 

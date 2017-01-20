@@ -157,4 +157,19 @@ MultiIndex& MultiIndex::operator++()
 }
 
 
+
+Array<SizeType> complement(SizeType nmax, Array<SizeType> vars) {
+    Array<SizeType> cmpl(nmax-vars.size());
+    SizeType kr=0; SizeType kv=0;
+    for(SizeType j=0; j!=nmax; ++j) {
+        if(kv==vars.size() || j!=vars[kv]) {
+            cmpl[kr]=j; ++kr;
+        } else {
+            ++kv;
+        }
+    }
+    return cmpl;
+}
+
+
 } // namespace Ariadne

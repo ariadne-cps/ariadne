@@ -34,7 +34,7 @@
 #include "geometry/grid_set.h"
 #include "function/polynomial.h"
 #include "function/function.h"
-#include "expression/formula.h"
+#include "function/formula.h"
 #include "function/procedure.h"
 #include "function/constraint.h"
 #include "solvers/nonlinear_programming.h"
@@ -49,7 +49,7 @@ namespace Ariadne {
 typedef Vector<Float64Approximation> FloatApproximationVector;
 typedef Vector<Float64Value> ExactFloatVector;
 
-inline Sweeper default_sweeper() { return Sweeper(); }
+inline Sweeper<Float64> default_sweeper() { return Sweeper<Float64>(); }
 
 Sign sign(const Float64& x) {
     if(x>0) { return NEGATIVE; }
@@ -189,7 +189,7 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
         Vector<Float64Approximation> nx = Float64Approximation(1.0_approx-XSIGMA)*x + Vector<Float64Approximation>(x.size(),XSIGMA/x.size());
         Vector<Float64Approximation> ny = midpoint(sd.first);
         ValidatedKleenean result=this->feasible(sd.first, fn, c).first;
-        nx = Float64Approximation(1.0-XSIGMA)*x + Vector<Float64Approximation>(x.size(),XSIGMA/x.size());
+        nx = Float64Approximation(1-XSIGMA)*x + Vector<Float64Approximation>(x.size(),XSIGMA/x.size());
         ny = midpoint(sd.second);
         result = result || this->feasible(sd.second, fn, c).first;
         return make_pair(result,ExactPoint());
@@ -305,8 +305,8 @@ Bool ConstraintSolver::hull_reduce(UpperBoxType& domain, const ValidatedScalarFu
     ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(ExactBoxType domain, ValidatedScalarFunction function, ExactIntervalType bounds): "
                   "function="<<function<<", bounds="<<bounds<<", domain="<<domain<<"\n");
 
-    Formula<ValidatedNumericType> formula=function.evaluate(Formula<ValidatedNumericType>::identity(function.argument_size()));
-    Procedure<ValidatedNumericType> procedure(formula);
+    Formula<ValidatedNumber> formula=function.evaluate(Formula<ValidatedNumber>::identity(function.argument_size()));
+    Procedure<ValidatedNumber> procedure(formula);
     return this->hull_reduce(domain,procedure,bounds);
 }
 
@@ -315,8 +315,8 @@ Bool ConstraintSolver::hull_reduce(UpperBoxType& domain, const ValidatedVectorFu
     ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(ExactBoxType domain, ValidatedScalarFunction function, ExactIntervalType bounds): "
                   "function="<<function<<", bounds="<<bounds<<", domain="<<domain<<"\n");
 
-    Vector< Formula<ValidatedNumericType> > formula=function.evaluate(Formula<ValidatedNumericType>::identity(function.argument_size()));
-    Vector< Procedure<ValidatedNumericType> > procedure(formula);
+    Vector< Formula<ValidatedNumber> > formula=function.evaluate(Formula<ValidatedNumber>::identity(function.argument_size()));
+    Vector< Procedure<ValidatedNumber> > procedure(formula);
     return this->hull_reduce(domain,procedure,bounds);
 }
 

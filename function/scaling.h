@@ -28,6 +28,7 @@
 #ifndef ARIADNE_SCALING_H
 #define ARIADNE_SCALING_H
 
+#include "numeric/dyadic.h"
 #include "geometry/interval.h"
 #include "geometry/box.h"
 
@@ -49,20 +50,23 @@ inline ValidatedNumericType rad_val(ExactIntervalType const& ivl) {
     return hlf(ivl.upper()-ivl.lower());
 }
 
+inline Dyadic med(ExactIntervalType const& ivl) {
+    return hlf(add( Dyadic(ivl.lower().raw()), Dyadic(ivl.upper().raw()) ));
+}
+
+inline Dyadic rad(ExactIntervalType const& ivl) {
+    return hlf(sub( Dyadic(ivl.upper().raw()), Dyadic(ivl.lower().raw()) ));
+}
 
 template<class T, EnableIf<IsSame<Paradigm<T>,ApproximateTag>> =dummy>
 inline T unscale(T x, const ExactIntervalType& d) {
-    ApproximateNumericType c(med_apprx(d));
-    ApproximateNumericType r(rad_apprx(d));
-    return (std::move(x)-c)/r;
+    return (std::move(x)-med(d))/rad(d);
 }
 
 template<class T, EnableIf<IsStronger<Paradigm<T>,ValidatedTag>> =dummy>
 inline T unscale(T x, const ExactIntervalType& d) {
-    ValidatedNumericType c(med_val(d));
-    if(d.lower()==d.upper()) { c=0; return std::move(x)*c; }
-    ValidatedNumericType r(rad_val(d));
-    return (std::move(x)-c)/r;
+    if(d.lower()==d.upper()) { return std::move(x)*Dyadic(0); }
+    return (std::move(x)-med(d))/rad(d);
 }
 
 template<class X> Vector<X> unscale(const Vector<X>& x, const ExactBoxType& d) {

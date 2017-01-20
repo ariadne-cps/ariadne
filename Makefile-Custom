@@ -54,6 +54,7 @@ TEST_ALGEBRA_SRC = \
 
 LIB_FUNCTION_SRC = \
 	affine.cc polynomial.cc affine_model.cc taylor_model.cc  \
+	formula.cc procedure.cc \
 	function.cc function_model.cc symbolic_function.cc taylor_function.cc  \
 
 TEST_FUNCTION_SRC = \
@@ -98,7 +99,6 @@ TEST_DYNAMICS_SRC = \
 	test_continuous_evolution.cc
 
 LIB_EXPRESSION_SRC = \
-	formula.cc \
 	expression.cc \
 	expression_set.cc \
 
@@ -115,12 +115,12 @@ LIB_HYBRID_SRC = \
 	hybrid_simulator.cc \
 	hybrid_evolver.cc \
 	hybrid_reachability_analyser.cc \
-	hybrid_graphics.cc
+	hybrid_graphics.cc \
 
 TEST_HYBRID_SRC = \
-	test_hybrid_set.cc test_hybrid_automaton.cc \
-	test_hybrid_simulator.cc test_hybrid_evolver.cc \
-	test_hybrid_evolution.cc test_hybrid_reachability_analyser.cc test_hybrid_graphics.cc \
+	test_hybrid_set.cc test_hybrid_graphics.cc \
+	test_hybrid_automaton.cc test_hybrid_simulator.cc \
+	test_hybrid_evolver.cc test_hybrid_evolution.cc test_hybrid_reachability_analyser.cc
 
 LIB_EXTRAS_SRC = \
 	c1_taylor_function.cc \
@@ -213,7 +213,7 @@ PYTHON_LINK_LIBS=-lboost_python -l$(PYTHON_LIBRARY)
 # Pull in dependency information
 include $(DEPS)
 
-phony: all help dirs deps lib tests wrap examples check clean shiny
+phony: all help dirs deps hdr lib tests wrap examples check clean shiny
 
 help:
 	@echo "\nDEPS"=$(DEPS)
@@ -246,7 +246,9 @@ deps: dirs $(DEPS)
 helpdep:
 	Secho $(DEPS)
 
-lib: dirs deps libariadne.so libariadne-function.so
+hdr: dirs deps $(PCH)
+
+lib: dirs deps hdr libariadne.so libariadne-function.so
 
 wrap: lib $(WRAP_OBJ) ariadne.so numeric.so
 
@@ -260,7 +262,7 @@ examples: dirs $(EXAMPLES_BIN) $(EXAMPLES_OBJ) lib
 examples-experimental: dirs $(EXAMPLES_EXPERIMENTAL_BIN) $(EXAMPLES_EXPERIMENTAL_OBJ) lib
 
 clean:
-	@rm -f */*.gch $(OBJ_DIR)/*.o *.so $(BIN_DIR)/*
+	@rm -f */*.gch* $(OBJ_DIR)/*.o *.so $(BIN_DIR)/*
 
 shiny: clean
 	@rm -rf $(DEP_DIR) $(OBJ_DIR) $(BIN_DIR) $(CHECK_DIR)

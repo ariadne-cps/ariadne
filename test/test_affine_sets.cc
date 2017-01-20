@@ -276,7 +276,7 @@ class TestAffineSet
     }
 
     Void test_uniform_error() {
-        double e=0.25;
+        Float64Value e=0.25_ex;
         ExactIntervalType I = ExactIntervalType(-1,+1);
         ValidatedNumericType E = ValidatedNumericType(-e,+e);
         D = ExactBoxType::unit_box(2);
@@ -366,7 +366,7 @@ class TestAffineSet
             a=Affine<ValidatedNumericType>::variables(1);
             dom=ExactBoxType::unit_box(1);
             offsets=ExactFloatVector2d{1.0,1.0};
-            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+0.5_ex*a[0],o[1]+0.25_ex*a[0]},{0*a[0]<=1.0_ex,a[0]==0.75_ex});
+            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+0.5_ex*a[0],o[1]+0.25_ex*a[0]},{0.0_ex*a[0]<=1.0_ex,a[0]==0.75_ex});
             expected_set=Polytope2d(1, 0.375, 0.1875) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
@@ -384,7 +384,7 @@ class TestAffineSet
             a=Affine<ValidatedNumericType>::variables(2);
             dom=ExactBoxType::unit_box(2);
             offsets=ExactFloatVector2d{7.0,1.0};
-            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{0*a[0]<=1.0_ex,a[0]+a[1]==0.5_ex});
+            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{0.0_ex*a[0]<=1.0_ex,a[0]+a[1]==0.5_ex});
             expected_set=Polytope2d(2, -0.5,+1.0, +1.0,-0.5) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
@@ -432,7 +432,7 @@ class TestAffineSet
         {
             // Test draw of set repeated constraints
             offsets=ExactFloatVector2d{7.0,4.0};
-            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{a[0]+2*a[1]<=2,a[0]*(1/3.0_ex)+a[1]*(2/3.0_ex)<=(2/3.0_ex)});
+            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{a[0]+2.0_ex*a[1]<=2.0_ex,a[0]*(1/3.0_ex)+a[1]*(2/3.0_ex)<=(2/3.0_ex)});
             expected_set=Polytope2d(5, -1.0,-1.0, +1.0,-1.0, +1.0,0.5, 0.0,+1.0, -1.0,+1.0) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
@@ -442,10 +442,11 @@ class TestAffineSet
             a=Affine<ValidatedNumericType>::variables(3);
             dom=ExactBoxType::unit_box(3);
             offsets=ExactFloatVector2d{10.0,4.0};
-            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{a[0]+2*a[1]+a[2]==1.5_ex});
+            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{a[0]+2.0_ex*a[1]+a[2]==1.5_ex});
             expected_set=Polytope2d(5, +1.0,-0.25, +1.0,+0.75, +0.5,+1.0, -1.0,+1.0, -1.0,+0.75) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
+
         {
             // Test draw of two-dimensional set with nondegenerate inequality and equality constraints
             offsets=ExactFloatVector2d{1.0,7.0};

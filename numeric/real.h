@@ -127,6 +127,15 @@ class Real
     friend Number<EffectiveTag> operator-(Number<EffectiveTag>, Number<EffectiveTag>);
     friend Number<EffectiveTag> operator*(Number<EffectiveTag>, Number<EffectiveTag>);
     friend Number<EffectiveTag> operator/(Number<EffectiveTag>, Number<EffectiveTag>);
+
+    template<class N, EnableIf<IsIntegral<N>> =dummy> friend inline decltype(auto) operator==(const Real& x1, N n2) { return x1==Real(n2); }
+    template<class N, EnableIf<IsIntegral<N>> =dummy> friend inline decltype(auto) operator!=(const Real& x1, N n2) { return x1!=Real(n2); }
+    template<class N, EnableIf<IsIntegral<N>> =dummy> friend inline decltype(auto) operator<=(const Real& x1, N n2) { return x1<=Real(n2); }
+    template<class N, EnableIf<IsIntegral<N>> =dummy> friend inline decltype(auto) operator>=(const Real& x1, N n2) { return x1>=Real(n2); }
+    template<class N, EnableIf<IsIntegral<N>> =dummy> friend inline decltype(auto) operator< (const Real& x1, N n2) { return x1< Real(n2); }
+    template<class N, EnableIf<IsIntegral<N>> =dummy> friend inline decltype(auto) operator> (const Real& x1, N n2) { return x1> Real(n2); }
+
+
   private:
     Real(std::int64_t n, Void*);
     Real(std::uint64_t m, Void*);
@@ -280,13 +289,6 @@ PositiveReal cast_positive(Real const& x);
 #include "numeric/logical.h"
 
 namespace Ariadne {
-
-template<class N, EnableIf<IsIntegral<N>> =dummy> inline decltype(auto) operator==(const Real& x1, N n2) { return x1==Real(n2); }
-template<class N, EnableIf<IsIntegral<N>> =dummy> inline decltype(auto) operator!=(const Real& x1, N n2) { return x1!=Real(n2); }
-template<class N, EnableIf<IsIntegral<N>> =dummy> inline decltype(auto) operator<=(const Real& x1, N n2) { return x1<=Real(n2); }
-template<class N, EnableIf<IsIntegral<N>> =dummy> inline decltype(auto) operator>=(const Real& x1, N n2) { return x1>=Real(n2); }
-template<class N, EnableIf<IsIntegral<N>> =dummy> inline decltype(auto) operator< (const Real& x1, N n2) { return x1< Real(n2); }
-template<class N, EnableIf<IsIntegral<N>> =dummy> inline decltype(auto) operator> (const Real& x1, N n2) { return x1> Real(n2); }
 
 /*
 template<class D, EnableIf<IsFloatingPoint<D>> =dummy> inline auto

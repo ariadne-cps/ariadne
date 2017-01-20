@@ -36,10 +36,10 @@
 
 #include "expression/variables.h"
 
-typedef Void Void;
-typedef OutputStream OutputStream;
-
 namespace Ariadne {
+
+typedef void Void;
+typedef std::ostream OutputStream;
 
 
 //! \ingroup HybridModule

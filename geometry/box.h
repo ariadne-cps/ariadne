@@ -40,8 +40,6 @@
 
 namespace Ariadne {
 
-extern const Float64Value infty;
-
 struct DoubleInput {
     double _d;
     DoubleInput(double d) : _d(d) { }

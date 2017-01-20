@@ -23,13 +23,10 @@
 
 #include "numeric/numeric.h"
 
-#include "algebra/differential.h"
 #include "numeric/operators.h"
-#include "expression/variables.h"
-#include "expression/expression.h"
-#include "expression/space.h"
-#include "expression/formula.h"
+#include "algebra/differential.h"
 #include "algebra/algebra.h"
+#include "function/formula.h"
 #include "function/taylor_model.h"
 
 #include "function/function.h"
@@ -40,7 +37,6 @@
 #include "function/function_model.h"
 
 #include "function/symbolic_function.h"
-#include "function/taylor_function.h"
 
 
 namespace Ariadne {
@@ -61,166 +57,99 @@ template<class R, class A, EnableIf<IsConstructible<R,A>> =dummy> R checked_cons
 template<class R, class A, DisableIf<IsConstructible<R,A>> =dummy> R checked_construct(A const& a) {
     ARIADNE_THROW(std::runtime_error,"checked_construct<R,A> with R="<<class_name<R>()<<", A="<<class_name<A>(),"argument "<<a<<" is not explicitly convertible to result."); }
 
-// Functions for converting from Expression classes to Function classes via Formula
-template<class X> class Expression;
-template<class X> class Variable;
-template<class X> class Space;
-SizeType dimension(const Space<Real>& spc);
-Formula<EffectiveNumber> make_formula(const Expression<Real>& expr, const Space<Real>& spc);
-Vector<Formula<EffectiveNumber>> make_formula(const Vector<Expression<Real>>& e, const Space<Real> spc);
-
-EffectiveScalarUnivariateFunction make_formula_function(SizeOne as, const Formula<EffectiveNumber>& fm) {
-    return EffectiveScalarUnivariateFunction(RealDomain(),fm); }
-EffectiveScalarFunction make_formula_function(SizeType as, const Formula<EffectiveNumber>& fm) {
-    return EffectiveScalarFunction(EuclideanDomain(as),fm); }
-EffectiveVectorFunction make_formula_function(SizeType as, const Vector<Formula<EffectiveNumber>>& fm) {
-    return EffectiveVectorFunction(EuclideanDomain(as),fm); }
-
-// DEPRECATED
-EffectiveScalarFunction make_function(const Expression<Real>& expr, const Space<Real>& spc) {
-    return make_formula_function(dimension(spc),make_formula(expr,spc)); }
-
-EffectiveScalarUnivariateFunction make_function(const Variable<Real>& var, const Expression<Real>& expr) {
-    Space<Real> spc={var}; return make_formula_function(SizeOne(),make_formula(expr,{var})); }
-EffectiveScalarFunction make_function(const Space<Real>& spc, const Expression<Real>& expr) {
-    return make_formula_function(dimension(spc),make_formula(expr,spc)); }
-EffectiveVectorFunction make_function(const Space<Real>& spc, const Vector<Expression<Real>>& expr) {
-    return make_formula_function(dimension(spc),make_formula(expr,spc)); }
-
-//------------------------ Vector of Scalar functions  -----------------------------------//
 
 
-template<class P, class D=BoxDomain> class NonResizableScalarFunction : public ScalarFunction<P,D> {
-  public:
-    NonResizableScalarFunction<P,D>& operator=(const ScalarFunction<P,D>& f) {
-        ARIADNE_ASSERT(this->argument_size()==f.argument_size());
-        this->ScalarFunction<P,D>::operator=(f);
-        return *this;
-    }
-};
+//------------------------ Formula Function ----------------------------------//
 
-template<class P, class D=BoxDomain>
-struct VectorOfScalarFunction
-    : VectorFunctionMixin<VectorOfScalarFunction<P,D>,P,D>
-    , public virtual VectorOfFunctionInterface<P,D>
-{
-    typedef D DomainType;
-    VectorOfScalarFunction(SizeType rs, SizeType as)
-        : VectorOfScalarFunction(rs, BoxDomain(as,IntervalDomain(-inf,+inf))) { }
-    VectorOfScalarFunction(SizeType rs, DomainType dom)
-        : _dom(dom), _vec(rs,ScalarFunction<P,D>(dom)) { }
-    VectorOfScalarFunction(SizeType rs, const ScalarFunction<P,D>& f)
-        : _dom(f.domain()), _vec(rs,f) { }
-    VectorOfScalarFunction(const Vector<ScalarFunction<P,D>>& vsf)
-        : _dom(vsf.zero_element().domain()), _vec(vsf) { }
-
-    Void set(SizeType i, ScalarFunction<P,D> f) {
-        if(this->argument_size()==0u) { this->_dom=f.domain(); }
-        ARIADNE_ASSERT(f.argument_size()==this->argument_size());
-        this->_vec[i]=f; }
-    ScalarFunction<P,D> get(SizeType i) const {
-        return this->_vec[i]; }
-
-    virtual SizeType result_size() const final {
-        return _vec.size(); }
-    virtual SizeType argument_size() const final {
-        return dimension(_dom); }
-    virtual DomainType const domain() const final {
-        return _dom; }
-
-    virtual ScalarFunctionInterface<P,D>* _get(SizeType i) const final {
-        return this->_vec[i].raw_pointer()->_clone(); }
-    virtual Void _set(SizeType i, const ScalarFunctionInterface<P,D>* sf) final {
-        this->_vec[i]=ScalarFunction<P,D>(sf->_clone()); }
-    virtual VectorFunctionInterface<P,D>* _derivative(SizeType i) const {
-        ARIADNE_NOT_IMPLEMENTED; }
-
-    const ScalarFunction<P,D> operator[](SizeType i) const {
-        return this->_vec[i]; }
-
-    NonResizableScalarFunction<P,D>& operator[](SizeType i) {
-        return static_cast<NonResizableScalarFunction<P,D>&>(this->_vec[i]); }
-
-    virtual OutputStream& write(OutputStream& os) const {
-        os << "[";
-        for(SizeType i=0; i!=this->_vec.size(); ++i) {
-            if(i!=0) { os << ","; }
-            this->_vec[i].raw_pointer()->write(os); }
-        return os << "]"; }
-
-    virtual OutputStream& repr(OutputStream& os) const {
-        //os << "VoSF[R" << this->argument_size() << "->R" << this->result_size() << "]";
-        os << "[";
-        for(SizeType i=0; i!=this->_vec.size(); ++i) {
-            if(i!=0) { os << ","; }
-            this->_vec[i].raw_pointer()->repr(os); }
-        return os << "]"; }
-
-    template<class X> inline Void _compute(Vector<X>& r, const ElementType<D,X>& x) const {
-        r=Vector<X>(this->_vec.size(),zero_element(x));
-        for(SizeType i=0; i!=r.size(); ++i) {
-            r[i]=_vec[i].evaluate(x); } }
-
-    DomainType _dom;
-    Vector< ScalarFunction<P,D> > _vec;
-
-};
-
-
-template<class X>
-struct FunctionElement
-    : ScalarFunctionMixin<FunctionElement<X>,X>
-{
-    FunctionElement(const VectorFunction<X>& f, SizeType i)
-        : _f(f), _i(i) { ARIADNE_ASSERT(i<f.result_size()); }
-
-    virtual SizeType argument_size() const { return _f.argument_size(); }
-    virtual OutputStream& write(OutputStream& os) const { return os<<_f<<"["<<_i<<"]"; }
-    virtual ScalarFunctionInterface<X>* _derivative(SizeType j) const { ARIADNE_NOT_IMPLEMENTED; }
-
-    template<class XX> inline Void _compute(XX& r, const Vector<XX>& x) const {
-        r=this->_f.evaluate(x)[_i]; }
-
-    VectorFunction<X> _f;
-    SizeType _i;
-};
-
-
-
-//------------------------ Conversion to a formula -----------------------------------//
-
-Formula<Real> formula(const EffectiveScalarFunction& f) {
-    const ScalarFunctionInterface<EffectiveTag>* fptr=f.raw_pointer();
-    const ScalarFormulaFunction<Real>* ff=dynamic_cast<const ScalarFormulaFunction<Real>*>(fptr);
-    if(ff) { return ff->_formula; }
-    const RealConstantFunction* cf=dynamic_cast<const RealConstantFunction*>(fptr);
-    const EffectiveCoordinateFunction* indf=dynamic_cast<const EffectiveCoordinateFunction*>(fptr);
-    const EffectiveUnaryFunction* uf=dynamic_cast<const EffectiveUnaryFunction*>(fptr);
-    const EffectiveBinaryFunction* bf=dynamic_cast<const EffectiveBinaryFunction*>(fptr);
-    const EffectivePowerFunction* pf=dynamic_cast<const EffectivePowerFunction*>(fptr);
-    if(cf) { return Formula<Real>::constant(cf->_value); }
-    if(indf) { return Formula<Real>::coordinate(indf->_index); }
-    if(uf) { return make_formula(uf->_op,formula(uf->_arg)); }
-    if(bf) { return make_formula(bf->_op,formula(bf->_arg1),formula(bf->_arg2)); }
-    if(pf) { return make_formula(pf->_op,formula(pf->_arg1),pf->_arg2); }
-    ARIADNE_FAIL_MSG("Cannot compute formula for function "<<f<<"\n");
+template<class P, class Y> ScalarFunction<P,IntervalDomain> make_formula_function(IntervalDomain dom, Scalar<Formula<Y>> const& e) {
+    assert(false);
 }
 
-Vector< Formula<Real> > formula(const EffectiveVectorFunction& f) {
-    const VectorFunctionInterface<EffectiveTag>& fi=f;
-    const VectorFormulaFunction<Real>* ff;
-    const VectorOfScalarFunction<EffectiveTag>* vf;
-    if( (vf=dynamic_cast<const VectorOfScalarFunction<EffectiveTag>*>(&fi)) ) {
-        Vector< Formula<Real> > r(vf->result_size());
-        for(SizeType i=0; i!=r.size(); ++i) { r[i]=formula((*vf)[i]); }
-        return r;
-    } else if( (ff=dynamic_cast<const VectorFormulaFunction<Real>*>(&fi)) ) {
-        return ff->_formulae;
-    } else {
-        ARIADNE_FAIL_MSG("Cannot compute formula for function "<<f<<"\n");
-    }
+template<class P, class Y> VectorFunction<P,IntervalDomain> make_formula_function(IntervalDomain dom, Vector<Formula<Y>> const& e) {
+    assert(false);
 }
 
+template<class P, class Y> ScalarFunction<P,BoxDomain> make_formula_function(BoxDomain dom, Scalar<Formula<Y>> const& e) {
+    return ScalarFunction<P,BoxDomain>(new ScalarFormulaFunction<Y>(dom.dimension(),e));
+}
+
+template<class P, class Y> VectorFunction<P,BoxDomain> make_formula_function(BoxDomain dom, Vector<Formula<Y>> const& e) {
+    return VectorFunction<P,BoxDomain>(new VectorFormulaFunction<Y>(dom.dimension(),e));
+}
+
+//------------------------ Function ----------------------------------//
+
+namespace {
+OutputStream& operator<<(OutputStream& os, SizeOne so) { return os << "1u"; }
+OutputStream& operator<<(OutputStream& os, RealDomain const& dom) { return os << "R"; }
+OutputStream& operator<<(OutputStream& os, EuclideanDomain const& dom) { return os << "R" << dom.dimension(); }
+
+template<class D, class DD> D make_domain(DD dom);
+template<> IntervalDomain make_domain<IntervalDomain,BoxDomain>(BoxDomain dom) { throw std::runtime_error(""); }
+template<> BoxDomain make_domain<BoxDomain,IntervalDomain>(IntervalDomain dom) { throw std::runtime_error(""); }
+template<> IntervalDomain make_domain<IntervalDomain,IntervalDomain>(IntervalDomain dom) { return dom; }
+template<> BoxDomain make_domain<BoxDomain,BoxDomain>(BoxDomain dom) { return dom; }
+
+template<class P, class D, class DD> ScalarFunction<P,D> make_zero_function(SizeOne rs, DD dom) {
+    return FunctionConstructors<P>::zero(make_domain<D>(dom)); }
+template<class P, class D, class DD> VectorFunction<P,D> make_zero_function(SizeType rs, DD dom) {
+    return  FunctionConstructors<P>::zeros(rs,make_domain<D>(dom)); }
+}
+
+template<class P, class D, class C> Function<P,D,C>::Function() : _ptr() {
+}
+
+template<class P, class D, class C> Function<P,D,C>::Function(EuclideanDomain dom) {
+    ResultSizeType rs=ResultSizeType(); BoxDomain bx_dom=dom;
+    (*this) = make_zero_function<P,D>(rs,bx_dom);
+}
+
+template<class P, class D, class C> Function<P,D,C>::Function(ResultSizeType rs, EuclideanDomain dom) {
+    BoxDomain const& bx_dom=dom;
+    (*this) = make_zero_function<P,D>(rs,bx_dom);
+}
+
+template<class P, class D, class C> Function<P,D,C>::Function(DomainType dom) {
+    ResultSizeType rs=ResultSizeType(); (*this) = make_zero_function<P,D>(rs,dom);
+}
+
+template<class P, class D, class C> Function<P,D,C>::Function(ResultSizeType rs, DomainType dom) {
+    (*this) = make_zero_function<P,D>(rs,dom);
+}
+
+template<class P, class D, class C> Function<P,D,C>::Function(ResultSizeType rs, ScalarFunction<P,D> sf)
+    : Function(Vector<ScalarFunction<P,D>>(SizeType(rs),sf)) {
+}
+
+template<class P, class D, class C> Function<P,D,C>::Function(InitializerList<ScalarFunction<P,D>> const& lsf)
+    : Function(Vector<ScalarFunction<P,D>>(lsf)) {
+}
+
+template<class P, class D, class C> Function<P,D,C>::Function(List<ScalarFunction<P,D>> const& lsf)
+    : Function(Vector<ScalarFunction<P,D>>(lsf)) {
+}
+
+template<class P, class D, class C> Function<P,D,C>::Function(DomainType dom, Result<Formula<Y>>const& e) {
+    *this = make_formula_function<P>(dom,e);
+}
+
+template<class P, class D, class C> struct MakeVectorFunction;
+template<class P, class D> struct MakeVectorFunction<P,D,IntervalDomain> {
+    Function<P,D,IntervalDomain> create(Vector<ScalarFunction<P,D>> const& lsf) {
+        ARIADNE_FAIL_MSG("Cannot construct scalar function from list."); }
+};
+template<class P, class D> struct MakeVectorFunction<P,D,BoxDomain> {
+    Function<P,D,BoxDomain> create(Vector<ScalarFunction<P,D>> const& lsf) {
+        return Function<P,D,BoxDomain>(std::make_shared<VectorOfScalarFunction<P,D>>(lsf)); }
+};
+
+template<class P, class D, class C> Function<P,D,C> make_vector_function(Vector<ScalarFunction<P,D>> const& lsf) {
+    return MakeVectorFunction<P,D,C>().create(lsf);
+}
+
+template<class P, class D, class C> Function<P,D,C>::Function(Vector<ScalarFunction<P,D>> const& vsf)
+    : Function<P,D,C>(make_vector_function<P,D,C>(vsf)) {
+}
 
 
 //------------------------ Function Constructors -----------------------------------//
@@ -364,111 +293,61 @@ template class FunctionConstructors<ApproximateTag>;
 template class FunctionConstructors<ValidatedTag>;
 template class FunctionConstructors<EffectiveTag>;
 
-//------------------------ Function ----------------------------------//
+//------------------------ Converting to and from Expression classes to Function classes via Formula -----------------------------------//
 
-namespace {
-OutputStream& operator<<(OutputStream& os, SizeOne so) { return os << "1u"; }
-OutputStream& operator<<(OutputStream& os, RealDomain const& dom) { return os << "R"; }
-OutputStream& operator<<(OutputStream& os, EuclideanDomain const& dom) { return os << "R" << dom.dimension(); }
+template<class X> class Expression;
+template<class X> class Variable;
+template<class X> class Space;
 
-template<class D, class DD> D make_domain(DD dom);
-template<> IntervalDomain make_domain<IntervalDomain,BoxDomain>(BoxDomain dom) { throw std::runtime_error(""); }
-template<> BoxDomain make_domain<BoxDomain,IntervalDomain>(IntervalDomain dom) { throw std::runtime_error(""); }
-template<> IntervalDomain make_domain<IntervalDomain,IntervalDomain>(IntervalDomain dom) { return dom; }
-template<> BoxDomain make_domain<BoxDomain,BoxDomain>(BoxDomain dom) { return dom; }
+SizeType dimension(const Space<Real>& spc);
 
-template<class P, class D, class DD> ScalarFunction<P,D> make_zero_function(SizeOne rs, DD dom) {
-    return FunctionConstructors<P>::zero(make_domain<D>(dom)); }
-template<class P, class D, class DD> VectorFunction<P,D> make_zero_function(SizeType rs, DD dom) {
-    return  FunctionConstructors<P>::zeros(rs,make_domain<D>(dom)); }
+Formula<EffectiveNumber> make_formula(const Expression<Real>& expr, const Variable<Real>& var);
+Formula<EffectiveNumber> make_formula(const Expression<Real>& expr, const Space<Real>& spc);
+Vector<Formula<EffectiveNumber>> make_formula(const Vector<Expression<Real>>& e, const Space<Real>& spc);
+
+
+EffectiveScalarUnivariateFunction make_formula_function(SizeOne as, const Formula<EffectiveNumber>& fm) {
+    return EffectiveScalarUnivariateFunction(RealDomain(),fm); }
+EffectiveScalarFunction make_formula_function(SizeType as, const Formula<EffectiveNumber>& fm) {
+    return EffectiveScalarFunction(EuclideanDomain(as),fm); }
+EffectiveVectorFunction make_formula_function(SizeType as, const Vector<Formula<EffectiveNumber>>& fm) {
+    return EffectiveVectorFunction(EuclideanDomain(as),fm); }
+
+EffectiveScalarUnivariateFunction make_function(const Variable<Real>& var, const Expression<Real>& expr) {
+    return make_formula_function(SizeOne(),make_formula(expr,var)); }
+EffectiveScalarFunction make_function(const Space<Real>& spc, const Expression<Real>& expr) {
+    return make_formula_function(dimension(spc),make_formula(expr,spc)); }
+EffectiveVectorFunction make_function(const Space<Real>& spc, const Vector<Expression<Real>>& expr) {
+    return make_formula_function(dimension(spc),make_formula(expr,spc)); }
+
+[[DEPRECATED]]
+EffectiveScalarFunction make_function(const Expression<Real>& expr, const Space<Real>& spc) {
+    return make_function(spc,expr); }
+
+Formula<Real> make_formula(const EffectiveScalarFunction& f) {
+    Vector<Formula<Real>> x(f.argument_size());
+    for(SizeType i=0; i!=x.size(); ++i) {
+        x[i]=Formula<Real>::coordinate(i);
+    }
+    return f(x);
 }
 
-
-
-template<class P, class D, class C> Function<P,D,C>::Function() : _ptr() {
-}
-
-template<class P, class D, class C> Function<P,D,C>::Function(EuclideanDomain dom) {
-    ResultSizeType rs=ResultSizeType(); BoxDomain bx_dom=dom;
-    (*this) = make_zero_function<P,D>(rs,bx_dom);
-}
-
-template<class P, class D, class C> Function<P,D,C>::Function(ResultSizeType rs, EuclideanDomain dom) {
-    BoxDomain const& bx_dom=dom;
-    (*this) = make_zero_function<P,D>(rs,bx_dom);
-}
-
-template<class P, class D, class C> Function<P,D,C>::Function(DomainType dom) {
-    ResultSizeType rs=ResultSizeType(); (*this) = make_zero_function<P,D>(rs,dom);
-}
-
-template<class P, class D, class C> Function<P,D,C>::Function(ResultSizeType rs, DomainType dom) {
-    (*this) = make_zero_function<P,D>(rs,dom);
-}
-
-template<class P, class Y> ScalarFunction<P,IntervalDomain> make_formula_function(IntervalDomain dom, Scalar<Formula<Y>> const& e) {
-    assert(false);
-}
-
-template<class P, class Y> VectorFunction<P,IntervalDomain> make_formula_function(IntervalDomain dom, Vector<Formula<Y>> const& e) {
-    assert(false);
-}
-
-template<class P, class Y> ScalarFunction<P,BoxDomain> make_formula_function(BoxDomain dom, Scalar<Formula<Y>> const& e) {
-    return ScalarFunction<P,BoxDomain>(new ScalarFormulaFunction<Y>(dom.dimension(),e));
-}
-
-template<class P, class Y> VectorFunction<P,BoxDomain> make_formula_function(BoxDomain dom, Vector<Formula<Y>> const& e) {
-    return VectorFunction<P,BoxDomain>(new VectorFormulaFunction<Y>(dom.dimension(),e));
-}
-
-template<class P, class D, class C> Function<P,D,C>::Function(DomainType dom, Result<Formula<Y>>const& e) {
-    *this = make_formula_function<P>(dom,e);
-}
-
-template<class P, class D, class C> Function<P,D,C>::Function(ResultSizeType rs, ScalarFunction<P,D> sf)
-    : Function(Vector<ScalarFunction<P,D>>(SizeType(rs),sf)) {
-}
-
-template<class P, class D, class C> Function<P,D,C>::Function(InitializerList<ScalarFunction<P,D>> const& lsf)
-    : Function(Vector<ScalarFunction<P,D>>(lsf)) {
-}
-
-template<class P, class D, class C> Function<P,D,C>::Function(List<ScalarFunction<P,D>> const& lsf)
-    : Function(Vector<ScalarFunction<P,D>>(lsf)) {
-}
-
-template<class P, class D, class C> struct MakeVectorFunction;
-template<class P, class D> struct MakeVectorFunction<P,D,IntervalDomain> {
-    Function<P,D,IntervalDomain> create(Vector<ScalarFunction<P,D>> const& lsf) {
-        ARIADNE_FAIL_MSG("Cannot construct scalar function from list."); }
-};
-template<class P, class D> struct MakeVectorFunction<P,D,BoxDomain> {
-    Function<P,D,BoxDomain> create(Vector<ScalarFunction<P,D>> const& lsf) {
-        return Function<P,D,BoxDomain>(std::make_shared<VectorOfScalarFunction<P,D>>(lsf)); }
-};
-
-template<class P, class D, class C> Function<P,D,C> make_vector_function(Vector<ScalarFunction<P,D>> const& lsf) {
-    return MakeVectorFunction<P,D,C>().create(lsf);
-}
-
-template<class P, class D, class C> Function<P,D,C>::Function(Vector<ScalarFunction<P,D>> const& vsf)
-    : Function<P,D,C>(make_vector_function<P,D,C>(vsf)) {
+Vector<Formula<Real>> make_formula(const EffectiveVectorFunction& f) {
+    const VectorFunctionInterface<EffectiveTag>& fi=f;
+    const VectorFormulaFunction<Real>* ff;
+    const VectorOfScalarFunction<EffectiveTag>* vf;
+    if( (vf=dynamic_cast<const VectorOfScalarFunction<EffectiveTag>*>(&fi)) ) {
+        Vector< Formula<Real> > r(vf->result_size());
+        for(SizeType i=0; i!=r.size(); ++i) { r[i]=make_formula((*vf)[i]); }
+        return r;
+    } else if( (ff=dynamic_cast<const VectorFormulaFunction<Real>*>(&fi)) ) {
+        return ff->_formulae;
+    } else {
+        ARIADNE_FAIL_MSG("Cannot compute formula for function "<<f<<"\n");
+    }
 }
 
 //------------------------ Scalar Function ----------------------------------//
-
-/*
-template<class P, class D> ScalarFunction<P,D>::ScalarFunction(DomainType dom)
-    : ScalarFunction<P,D>(dom,Formula<X>::zero())
-{
-}
-
-template<class P, class D> ScalarFunction<P,D>::ScalarFunction(DomainType dom, Formula<X> const& e)
-    : Function<P,D,C>(new ScalarFormulaFunction<X>(dom.dimension(),e))
-{
-}
-*/
 
 //------------------------ Vector Function ----------------------------------//
 
@@ -549,6 +428,8 @@ template class VectorFunction<EffectiveTag>;
 
 */
 
+//------------------------ Instantiate functions -----------------------------------//
+
 template class Function<ApproximateTag,IntervalDomain,IntervalDomain>;
 template class Function<ApproximateTag,IntervalDomain,BoxDomain>;
 template class Function<ApproximateTag,BoxDomain,IntervalDomain>;
@@ -583,7 +464,7 @@ EffectiveScalarFunction make_binary_function(OP op, const EffectiveScalarFunctio
 
 template<class OP> inline
 EffectiveScalarFunction make_binary_function(OP op, const EffectiveScalarFunction& f1, const Int& n2) {
-    return EffectiveScalarFunction(new EffectivePowerFunction(op.code(),f1,n2)); }
+    return EffectiveScalarFunction(new EffectiveGradedFunction(op.code(),f1,n2)); }
 
 
 EffectiveScalarFunction operator+(const EffectiveScalarFunction& f)
@@ -914,7 +795,7 @@ EffectiveScalarFunction lie_derivative(const EffectiveScalarFunction& g, const E
 
 
 
-//------------------------ ValidatedNumber function operators -------------------------------//
+//------------------------ Validated function operators -------------------------------//
 
 
 namespace {
@@ -948,7 +829,7 @@ template<class OP> ValidatedScalarFunction apply(OP op, ValidatedScalarFunction 
     std::shared_ptr<ValidatedScalarFunctionModelInterface const>
         f1p=std::dynamic_pointer_cast<ValidatedScalarFunctionModelInterface const>(f1.managed_pointer());
     if(f1p) {
-        ValidatedScalarFunctionModel f1m=f1p; return op(f1m,ValidatedNumericType(c2,ValidatedNumericType::PrecisionType()));
+        ValidatedScalarFunctionModel f1m=f1p; return op(f1,c2);
     } else {
         return ValidatedScalarFunction(new BinaryFunction<ValidatedTag>(op.code(),f1,f1.create_constant(c2)));
     }
@@ -958,7 +839,7 @@ template<class OP> ValidatedScalarFunction apply(OP op, ValidatedNumber const& c
     std::shared_ptr<ValidatedScalarFunctionModelInterface const>
         f2p=std::dynamic_pointer_cast<ValidatedScalarFunctionModelInterface const>(f2.managed_pointer());
     if(f2p) {
-        ValidatedScalarFunctionModel f2m=f2p; return op(ValidatedNumericType(c1,ValidatedNumericType::PrecisionType()),f2m);
+        ValidatedScalarFunctionModel f2m=f2p; return op(c1,f2m);
     } else {
         return ValidatedScalarFunction(new BinaryFunction<ValidatedTag>(op.code(),f2.create_constant(c1),f2));
     }
@@ -970,7 +851,7 @@ ValidatedScalarFunction apply(Pow op, ValidatedScalarFunction const& f, Int n) {
     if(fp) {
         ValidatedScalarFunctionModel fm=fp; return op(fm,n);
     } else {
-        return ValidatedScalarFunction(new PowerFunction<ValidatedTag>(op.code(),f,n));
+        return ValidatedScalarFunction(new GradedFunction<ValidatedTag>(op.code(),f,n));
     }
 }
 
@@ -1059,6 +940,22 @@ ValidatedScalarFunction& operator/=(ValidatedScalarFunction& f1, const Validated
     return f1=f1/c2;
 }
 
+
+ValidatedScalarFunction add(ValidatedScalarFunction const& f1, const ValidatedNumber& c2) {
+    return apply(Add(),f1,c2);
+}
+
+ValidatedScalarFunction sub(ValidatedScalarFunction const& f1, const ValidatedNumber& c2) {
+    return apply(Sub(),f1,c2);
+}
+
+ValidatedScalarFunction mul(ValidatedScalarFunction const& f1, const ValidatedNumber& c2) {
+    return apply(Mul(),f1,c2);
+}
+
+ValidatedScalarFunction div(ValidatedScalarFunction const& f1, const ValidatedNumber& c2) {
+    return apply(Div(),f1,c2);
+}
 
 ValidatedScalarFunction pos(ValidatedScalarFunction const& f) {
     return apply(Pos(),f);
@@ -1152,59 +1049,76 @@ ValidatedVectorFunction compose(const ValidatedVectorFunction& f, const Validate
 }
 
 ValidatedVectorFunction join(ValidatedVectorFunction const& f1, const ValidatedVectorFunction& f2) {
-    VectorTaylorFunction const*
-        f1p=dynamic_cast<VectorTaylorFunction const*>(f1.raw_pointer());
-    VectorTaylorFunction const*
-        f2p=dynamic_cast<VectorTaylorFunction const*>(f2.raw_pointer());
+    std::shared_ptr<ValidatedVectorFunctionModelInterface const>
+        f1p=std::dynamic_pointer_cast<ValidatedVectorFunctionModelInterface const>(f1.managed_pointer());
+    std::shared_ptr<ValidatedVectorFunctionModelInterface const>
+        f2p=std::dynamic_pointer_cast<ValidatedVectorFunctionModelInterface const>(f2.managed_pointer());
     if(f1p && f2p) {
-        return join(*f1p,*f2p);
+        ValidatedVectorFunctionModel f1m(f1p); ValidatedVectorFunctionModel f2m(f2p); return join(f1m,f2m);
+    } else if(f1p) {
+        ValidatedVectorFunctionModel f1m(f1p); ValidatedVectorFunctionModel f2m=factory(f1m).create(f2); return join(f1m,f2m);
+    } else if(f2p) {
+        ValidatedVectorFunctionModel f2m(f2p); ValidatedVectorFunctionModel f1m=factory(f2m).create(f1); return join(f1m,f2m);
+    } else {
+        return ValidatedVectorFunction(new JoinedFunction<ValidatedTag>(f1,f2));
     }
-    VectorOfScalarFunction<ValidatedTag> r(f1.result_size()+f2.result_size(),f1.domain());
-    for(SizeType i=0; i!=f1.result_size(); ++i) { r[i]=f1[i]; }
-    for(SizeType i=0; i!=f2.result_size(); ++i) { r[i+f1.result_size()]=f2[i]; }
-    return r;
 }
 
 ValidatedVectorFunction join(ValidatedVectorFunction const& f1, const ValidatedScalarFunction& f2) {
-    VectorTaylorFunction const*
-        f1p=dynamic_cast<VectorTaylorFunction const*>(f1.raw_pointer());
-    ScalarTaylorFunction const*
-        f2p=dynamic_cast<ScalarTaylorFunction const*>(f2.raw_pointer());
+    std::shared_ptr<ValidatedVectorFunctionModelInterface const>
+        f1p=std::dynamic_pointer_cast<ValidatedVectorFunctionModelInterface const>(f1.managed_pointer());
+    std::shared_ptr<ValidatedScalarFunctionModelInterface const>
+        f2p=std::dynamic_pointer_cast<ValidatedScalarFunctionModelInterface const>(f2.managed_pointer());
     if(f1p && f2p) {
-        return join(*f1p,*f2p);
+        ValidatedVectorFunctionModel f1m(f1p); ValidatedScalarFunctionModel f2m(f2p); return join(f1m,f2m);
+    } else if(f1p) {
+        ValidatedVectorFunctionModel f1m(f1p); ValidatedScalarFunctionModel f2m=factory(f1m).create(f2); return join(f1m,f2m);
+    } else if(f2p) {
+        ValidatedScalarFunctionModel f2m(f2p); ValidatedVectorFunctionModel f1m=factory(f2m).create(f1); return join(f1m,f2m);
+    } else {
+        VectorOfScalarFunction<ValidatedTag> r(f1.result_size()+1u,f1.domain());
+        for(SizeType i=0; i!=f1.result_size(); ++i) { r[i]=f1[i]; }
+        r[f1.result_size()]=f2;
+        return r;
     }
-    VectorOfScalarFunction<ValidatedTag> r(f1.result_size()+1u,f1.domain());
-    for(SizeType i=0; i!=f1.result_size(); ++i) { r[i]=f1[i]; }
-    r[f1.result_size()]=f2;
-    return r;
 }
 
 ValidatedVectorFunction join(ValidatedScalarFunction const& f1, const ValidatedVectorFunction& f2) {
-    ScalarTaylorFunction const*
-        f1p=dynamic_cast<ScalarTaylorFunction const*>(f1.raw_pointer());
-    VectorTaylorFunction const*
-        f2p=dynamic_cast<VectorTaylorFunction const*>(f2.raw_pointer());
+    std::shared_ptr<ValidatedScalarFunctionModelInterface const>
+        f1p=std::dynamic_pointer_cast<ValidatedScalarFunctionModelInterface const>(f1.managed_pointer());
+    std::shared_ptr<ValidatedVectorFunctionModelInterface const>
+        f2p=std::dynamic_pointer_cast<ValidatedVectorFunctionModelInterface const>(f2.managed_pointer());
     if(f1p && f2p) {
-        return join(*f1p,*f2p);
+        ValidatedScalarFunctionModel f1m(f1p); ValidatedVectorFunctionModel f2m(f2p); return join(f1m,f2m);
+    } else if(f1p) {
+        ValidatedScalarFunctionModel f1m(f1p); ValidatedVectorFunctionModel f2m=factory(f1m).create(f2); return join(f1m,f2m);
+    } else if(f2p) {
+        ValidatedVectorFunctionModel f2m(f2p); ValidatedScalarFunctionModel f1m=factory(f2m).create(f1); return join(f1m,f2m);
+    } else {
+        VectorOfScalarFunction<ValidatedTag> r(f1.result_size()+1u,f1.domain());
+        r[0u]=f1;
+        for(SizeType i=0; i!=f1.result_size(); ++i) { r[i+1]=f2[i]; }
+        return r;
     }
-    VectorOfScalarFunction<ValidatedTag> r(f1.result_size()+1u,f1.domain());
-    r[0u]=f1;
-    for(SizeType i=0; i!=f1.result_size(); ++i) { r[i+1]=f2[i]; }
-    return r;
 }
 
 ValidatedVectorFunction join(ValidatedScalarFunction const& f1, const ValidatedScalarFunction& f2) {
-    ScalarTaylorFunction const*
-        f1p=dynamic_cast<ScalarTaylorFunction const*>(f1.raw_pointer());
-    ValidatedScalarFunction const*
-        f2p=dynamic_cast<ValidatedScalarFunction const*>(f2.raw_pointer());
+    std::shared_ptr<ValidatedScalarFunctionModelInterface const>
+        f1p=std::dynamic_pointer_cast<ValidatedScalarFunctionModelInterface const>(f1.managed_pointer());
+    std::shared_ptr<ValidatedScalarFunctionModelInterface const>
+        f2p=std::dynamic_pointer_cast<ValidatedScalarFunctionModelInterface const>(f2.managed_pointer());
     if(f1p && f2p) {
-        return join(*f1p,*f2p);
+        ValidatedScalarFunctionModel f1m(f1p); ValidatedScalarFunctionModel f2m(f2p); return join(f1m,f2m);
+    } else if(f1p) {
+        ValidatedScalarFunctionModel f1m(f1p); ValidatedScalarFunctionModel f2m=factory(f1m).create(f2); return join(f1m,f2m);
+    } else if(f2p) {
+        ValidatedScalarFunctionModel f2m(f2p); ValidatedScalarFunctionModel f1m=factory(f2m).create(f1); return join(f1m,f2m);
+    } else {
+        VectorOfScalarFunction<ValidatedTag> r(2u,f1.domain());
+        r[0u]=f1;
+        r[1u]=f2;
+        return r;
     }
-    VectorOfScalarFunction<ValidatedTag> r(2u,f1.domain());
-    r[0u]=f1;
-    r[1u]=f2;
-    return r;
 }
 
 
@@ -1218,20 +1132,6 @@ Covector<UpperIntervalType> gradient_range(ValidatedScalarFunction const& f, con
     return static_cast<Covector<UpperIntervalType>>(static_cast<Covector<ValidatedNumericType>>(gradient(f,reinterpret_cast<Vector<ValidatedNumericType>const&>(x)))); }
 Matrix<UpperIntervalType> jacobian_range(ValidatedVectorFunction const& f, const Vector<UpperIntervalType>& x) {
     return static_cast<Matrix<UpperIntervalType>>(static_cast<Matrix<ValidatedNumericType>>(jacobian(f,reinterpret_cast<Vector<ValidatedNumericType>const&>(x)))); }
-
-
-RealExpression evaluate(EffectiveScalarFunction const& f, Vector<RealVariable> const& vars) {
-    typedef Algebra<EffectiveNumericType> EffectiveAlgebra;
-    EffectiveAlgebra az(RealExpression::constant(0));
-    Vector<EffectiveAlgebra> va(vars.size(),az);
-    for(SizeType i=0; i!=va.size(); ++i) { va[i]=EffectiveAlgebra(RealExpression(vars[i])); }
-    //Vector<EffectiveAlgebra> va=Vector<EffectiveAlgebra>(Vector<RealExpression>(vars));
-    EffectiveAlgebra fa=f(va);
-    return fa.template extract<RealExpression>();
-}
-
-
-
 
 
 } // namespace Ariadne

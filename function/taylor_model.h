@@ -53,8 +53,12 @@ enum class SplitPart : char;
 template<class T1, class T2> struct Product;
 
 template<class P, class F> class TaylorModel;
-typedef TaylorModel<ApproximateTag,Float64> ApproximateTaylorModel;
-typedef TaylorModel<ValidatedTag,Float64> ValidatedTaylorModel;
+template<class F> using ValidatedTaylorModel = TaylorModel<ValidatedTag,F>;
+template<class F> using ApproximateTaylorModel = TaylorModel<ApproximateTag,F>;
+using ValidatedTaylorModel64 = TaylorModel<ValidatedTag,Float64>;
+using ValidatedTaylorModelMP = TaylorModel<ValidatedTag,FloatMP>;
+using ApproximateTaylorModel64 = TaylorModel<ApproximateTag,Float64>;
+using ApproximateTaylorModelMP = TaylorModel<ApproximateTag,FloatMP>;
 
 template<class P, class F> struct IsScalar< TaylorModel<P,F> > { static const Bool value = true; };
 
@@ -88,29 +92,36 @@ template<class P, class F> struct AlgebraOperations<TaylorModel<P,F>> : NormedAl
  */
 template<class F>
 class TaylorModel<ValidatedTag,F>
-    : public DispatchTranscendentalAlgebraOperations<TaylorModel<ValidatedTag,F>,ValidatedNumericType>
-    , public DispatchOrderedAlgebraOperations<TaylorModel<ValidatedTag,F>,ValidatedNumericType>
-    , public DispatchConcreteGenericAlgebraNumberOperations<TaylorModel<ValidatedTag,F>,ValidatedNumericType,ValidatedNumber>
+    : public DispatchTranscendentalAlgebraOperations<TaylorModel<ValidatedTag,F>,CanonicalNumericType<ValidatedTag,typename F::PrecisionType>>
+    , public DispatchOrderedAlgebraOperations<TaylorModel<ValidatedTag,F>,CanonicalNumericType<ValidatedTag,typename F::PrecisionType>>
+    , public DispatchConcreteGenericAlgebraNumberOperations<TaylorModel<ValidatedTag,F>,CanonicalNumericType<ValidatedTag,typename F::PrecisionType>,ValidatedNumber>
 {
     typedef typename F::PrecisionType PR;
+    typedef typename F::PrecisionType PRE;
   public:
     typedef PR PrecisionType;
+    typedef PRE ErrorPrecisionType;
 
     typedef F RawFloatType;
     typedef FloatValue<PR> CoefficientType;
-    typedef FloatError<PR> ErrorType;
+    typedef FloatError<PRE> ErrorType;
     typedef FloatError<PR> NormType;
     typedef ReverseLexicographicIndexLess ComparisonType;
     typedef SortedExpansion<CoefficientType,ComparisonType> ExpansionType;
+    typedef Sweeper<F> SweeperType;
 
     typedef ExactIntervalType CodomainType;
-    typedef ApproximateIntervalType RangeType;
+    typedef Interval<FloatUpperBound<PR>> RangeType;
 
     //! \brief The computational paradigm.
     typedef ValidatedTag Paradigm;
 
-    //! \brief The type used for the coefficients.
-    typedef ValidatedNumericType NumericType;
+    //! \brief The type used for algebraic operations.
+    typedef FloatBounds<PR> NumericType;
+    typedef ValidatedNumber GenericNumericType;
+
+    typedef FloatBounds<PR> ValidatedNumericType;
+    typedef FloatApproximation<PR> ApproximateNumericType;
 
     typedef ValidatedScalarFunction FunctionType;
     typedef ValidatedScalarFunction ScalarFunctionType;
@@ -128,17 +139,18 @@ class TaylorModel<ValidatedTag,F>
   private:
     ExpansionType _expansion;
     ErrorType _error;
-    mutable Sweeper _sweeper;
+    mutable SweeperType _sweeper;
   public:
     //@{
     /*! \name Constructors and destructors. */
     //! \brief Default constructor.
     TaylorModel<ValidatedTag,F>();
     //! \brief Construct a TaylorModel in \a as arguments with the given accuracy control.
-    TaylorModel<ValidatedTag,F>(SizeType as, Sweeper swp);
+    TaylorModel<ValidatedTag,F>(SizeType as, SweeperType swp);
     //! \brief Construct from a map giving the expansion, a constant giving the error, and an accuracy parameter.
-    TaylorModel<ValidatedTag,F>(const Expansion<CoefficientType>& f, const ErrorType& e, Sweeper swp);
-    TaylorModel<ValidatedTag,F>(const Expansion<RawFloatType>& f, const RawFloatType& e, Sweeper swp);
+    TaylorModel<ValidatedTag,F>(const Expansion<double>& f, const double& e, SweeperType swp);
+    TaylorModel<ValidatedTag,F>(const Expansion<CoefficientType>& f, const ErrorType& e, SweeperType swp);
+    TaylorModel<ValidatedTag,F>(const Expansion<RawFloatType>& f, const RawFloatType& e, SweeperType swp);
     //! \brief Fast swap with another Taylor model.
     Void swap(TaylorModel<ValidatedTag,F>& tm);
     //! \brief The zero element of the algebra of Taylor models, with the same number of arguments and accuracy parameters.
@@ -146,8 +158,8 @@ class TaylorModel<ValidatedTag,F>
     //! \brief The zero element of the algebra of Taylor models, with the same number of arguments and accuracy parameters.
     TaylorModel<ValidatedTag,F> create_zero() const;
     //! \brief A constant element of the algebra of Taylor models, with the same number of arguments and accuracy parameters.
-    TaylorModel<ValidatedTag,F> create_constant(ValidatedNumericType c) const;
-    TaylorModel<ValidatedTag,F> create_constant(ValidatedNumber) const;
+    TaylorModel<ValidatedTag,F> create_constant(NumericType c) const;
+    TaylorModel<ValidatedTag,F> create_constant(GenericNumericType) const;
     //! \brief The \a j<sup>th</sup> coordinate element of the algebra of Taylor models, with the same number of arguments and accuracy parameters.
     TaylorModel<ValidatedTag,F> create_coordinate(SizeType j) const;
     //! \brief Set to zero.
@@ -159,45 +171,45 @@ class TaylorModel<ValidatedTag,F>
     /*! \name Assignment to constant values. */
     //! \brief Set equal to an interval constant, keeping the same number of arguments.
     TaylorModel<ValidatedTag,F>& operator=(const NumericType& c);
-    TaylorModel<ValidatedTag,F>& operator=(const ValidatedNumber& c);
+    TaylorModel<ValidatedTag,F>& operator=(const GenericNumericType& c);
     //@}
 
     //@{
     /*! \name Named constructors. */
     //! \brief Construct the zero quantity in \a as independent variables.
-    static TaylorModel<ValidatedTag,F> zero(SizeType as, Sweeper swp) {
+    static TaylorModel<ValidatedTag,F> zero(SizeType as, SweeperType swp) {
         TaylorModel<ValidatedTag,F> r(as,swp); return r; }
     //! \brief Construct a constant quantity in \a as independent variables.
-    static TaylorModel<ValidatedTag,F> constant(SizeType as, const ValidatedNumericType& c, Sweeper swp) {
+    static TaylorModel<ValidatedTag,F> constant(SizeType as, const ValidatedNumericType& c, SweeperType swp) {
         TaylorModel<ValidatedTag,F> r(as,swp); r.set_value(CoefficientType(1,r.precision())); r*=c; return r; }
     //! \brief Construct a constant quantity in \a as independent variables.
-    static TaylorModel<ValidatedTag,F> constant(SizeType as, const ValidatedNumber& c, Sweeper swp) {
+    static TaylorModel<ValidatedTag,F> constant(SizeType as, const ValidatedNumber& c, SweeperType swp) {
         TaylorModel<ValidatedTag,F> r(as,swp); r.set_value(CoefficientType(1,r.precision())); r*=c; return r; }
     //! \brief Construct the quantity with expansion \f$x_j\f$ in \a as independent variables.
-    static TaylorModel<ValidatedTag,F> coordinate(SizeType as, SizeType j, Sweeper swp) {
+    static TaylorModel<ValidatedTag,F> coordinate(SizeType as, SizeType j, SweeperType swp) {
         TaylorModel<ValidatedTag,F> r(as,swp); r.set_gradient(j,1); return r; }
     //! \brief Construct a constant quantity in \a as independent variables with value zero and uniform error \a e
-    static TaylorModel<ValidatedTag,F> error(SizeType as, ErrorType e, Sweeper swp) {
+    static TaylorModel<ValidatedTag,F> error(SizeType as, ErrorType e, SweeperType swp) {
         TaylorModel<ValidatedTag,F> r(as,swp); r.set_error(e); return r; }
     //! \brief Construct a constant quantity in \a as independent variables with value zero and uniform error \a e
-    static TaylorModel<ValidatedTag,F> ball(SizeType as, ErrorType e, Sweeper swp) {
+    static TaylorModel<ValidatedTag,F> ball(SizeType as, ErrorType e, SweeperType swp) {
         TaylorModel<ValidatedTag,F> r(as,swp); r.set_error(e); return r; }
     //! \brief Construct a constant quantity in \a as independent variables with value zero and uniform error \a e
-    static TaylorModel<ValidatedTag,F> unit_ball(SizeType as, Sweeper swp) {
+    static TaylorModel<ValidatedTag,F> unit_ball(SizeType as, SweeperType swp) {
         TaylorModel<ValidatedTag,F> r(as,swp); r.set_error(1u); return r; }
 
     //! \brief Construct the quantity which scales the interval \a codom onto the unit interval.
-    static TaylorModel<ValidatedTag,F> scaling(SizeType as, SizeType j, const ExactIntervalType& codom, Sweeper swp);
+    static TaylorModel<ValidatedTag,F> scaling(SizeType as, SizeType j, const ExactIntervalType& codom, SweeperType swp);
 
     //! \brief Return the vector of zero variables of size \a rs in \a as arguments.
-    static Vector<TaylorModel<ValidatedTag,F>> zeros(SizeType rs, SizeType as, Sweeper swp);
+    static Vector<TaylorModel<ValidatedTag,F>> zeros(SizeType rs, SizeType as, SweeperType swp);
     //! \brief Return the vector of constants with values \a c in \a as arguments.
-    static Vector<TaylorModel<ValidatedTag,F>> constants(SizeType as, const Vector<ValidatedNumericType>& c, Sweeper swp);
+    static Vector<TaylorModel<ValidatedTag,F>> constants(SizeType as, const Vector<ValidatedNumericType>& c, SweeperType swp);
     //! \brief Return the vector of variables on the unit domain.
-    static Vector<TaylorModel<ValidatedTag,F>> coordinates(SizeType as, Sweeper swp);
+    static Vector<TaylorModel<ValidatedTag,F>> coordinates(SizeType as, SweeperType swp);
 
     //! \brief Return the vector scaling the box \a codom onto the unit box.
-    static Vector<TaylorModel<ValidatedTag,F>> scalings(const Vector<ExactIntervalType>& codom, Sweeper swp);
+    static Vector<TaylorModel<ValidatedTag,F>> scalings(const Vector<ExactIntervalType>& codom, SweeperType swp);
     //@}
 
     //@{
@@ -250,7 +262,7 @@ class TaylorModel<ValidatedTag,F>
 
 
     //! \brief A value \c e such that analytic functions are evaluated to a tolerance of \c e. Equal to the sweep threshold.
-    RawFloat64 tolerance() const;
+    F tolerance() const;
 
 
     //! \brief Set the constant term in the expansion.
@@ -295,10 +307,10 @@ class TaylorModel<ValidatedTag,F>
     //! \brief The codomain of the quantity.
     ExactIntervalType codomain() const;
     //! \brief An over-approximation to the range of the quantity.
-    UpperIntervalType range() const;
+    RangeType range() const;
     //! \brief Compute the gradient of the expansion with respect to the \a jth variable over the domain.
-    UpperIntervalType gradient_range(SizeType j) const;
-    Covector<UpperIntervalType> gradient_range() const;
+    RangeType gradient_range(SizeType j) const;
+    Covector<RangeType> gradient_range() const;
 
     //! \brief Evaluate the quantity over the interval of points \a x.
     friend ApproximateNumericType evaluate(const TaylorModel<ValidatedTag,F>& f, const Vector<ApproximateNumericType>& x) {
@@ -306,7 +318,7 @@ class TaylorModel<ValidatedTag,F>
     friend ValidatedNumericType evaluate(const TaylorModel<ValidatedTag,F>& f, const Vector<ValidatedNumericType>& x) {
         return TaylorModel<ValidatedTag,F>::_evaluate(f,x); }
     //! \brief Evaluate the gradient over the interval of points \a x.
-    friend Covector<ValidatedNumericType> gradient(const TaylorModel<ValidatedTag,F>& f, const Vector<ValidatedNumericType>& x) {
+    friend Covector<FloatBounds<PR>> gradient(const TaylorModel<ValidatedTag,F>& f, const Vector<FloatBounds<PR>>& x) {
         return TaylorModel<ValidatedTag,F>::_gradient(f,x); }
     //! \brief Substite \a c for the \a k th variable.
     friend TaylorModel<ValidatedTag,F> partial_evaluate(const TaylorModel<ValidatedTag,F>& x, SizeType k, ValidatedNumericType c) {
@@ -320,6 +332,8 @@ class TaylorModel<ValidatedTag,F>
     //! \brief Scale the variable by post-composing with an affine map taking the interval ivl to the unit interval
     friend TaylorModel<ValidatedTag,F> compose(const TaylorModel<ValidatedTag,F>& tf, const VectorUnscaling& u);
 
+    friend TaylorModel<ValidatedTag,F> evaluate(const TaylorModel<ValidatedTag,F>& f, const Vector<TaylorModel<ValidatedTag,F>>& g) { return compose(f,g); }
+    template<class A> ArithmeticType<A,FloatValue<PR>> operator() (Vector<A> const&) const;
     //@}
 
     //@{
@@ -380,7 +394,7 @@ class TaylorModel<ValidatedTag,F>
         return TaylorModel<ValidatedTag,F>::_discard_variables(tm,variables); }
 
     //! \brief Remove all terms based on the \a swp conditions.
-    TaylorModel<ValidatedTag,F>& sweep(const Sweeper& swp);
+    TaylorModel<ValidatedTag,F>& sweep(const SweeperType& swp);
 
     //! \brief Remove all terms whose coefficient has magnitude
     //! lower than the cutoff threshold of the quantity.
@@ -401,21 +415,21 @@ class TaylorModel<ValidatedTag,F>
     //@{
     /*! \name Accuracy parameters. */
     //! \brief Specify a policy to use to remove low-impact terms.
-    Void set_sweeper(Sweeper swp) { this->_sweeper=swp; }
+    Void set_sweeper(SweeperType swp) { this->_sweeper=swp; }
     //! \brief A shared pointer to an object using for removing low-impact terms.
-    Sweeper sweeper() const { return this->_sweeper; }
+    SweeperType sweeper() const { return this->_sweeper; }
     //! \brief The precision of the coefficients.
-    PrecisionType precision() const { return this->value().precision(); }
+    PrecisionType precision() const { return this->sweeper().precision(); }
     //@}
 
     //@{
     /*! \name Inplace arithmetic operations. */
     //! \brief Add a constant numerical scalar \c r+=c .
-    Void iadd(const ValidatedNumericType& c);
+    Void iadd(const NumericType& c);
     //! \brief Multiply by a numerical scalar \c r*=c .
-    Void imul(const ValidatedNumericType& c);
+    Void imul(const NumericType& c);
     //! \brief Scalar multiply and add \c r+=c*x .
-    Void isma(const ValidatedNumericType& c, const TaylorModel<ValidatedTag,F>& x);
+    Void isma(const NumericType& c, const TaylorModel<ValidatedTag,F>& x);
     //! \brief Fused multiply and add \c r+=x1*x2 .
     Void ifma(const TaylorModel<ValidatedTag,F>& x1, const TaylorModel<ValidatedTag,F>& x2);
 
@@ -441,7 +455,7 @@ class TaylorModel<ValidatedTag,F>
     OutputStream& str(OutputStream&) const;
     OutputStream& repr(OutputStream&) const;
   public: // FIXME: Should be private
-    Void _set_error(const RawFloat64& ne) { ARIADNE_ASSERT(ne>=0); this->_error=ErrorType(ne); }
+    Void _set_error(const RawFloat<PR>& ne) { ARIADNE_ASSERT(ne>=0); this->_error=ErrorType(ne); }
     Void _append(MultiIndex const& a, CoefficientType const& v) { this->_expansion.append(a,v); }
     static Bool _consistent(const TaylorModel<ValidatedTag,F>& tm1, const TaylorModel<ValidatedTag,F>& tm2);
     static Bool _inconsistent(const TaylorModel<ValidatedTag,F>& tm1, const TaylorModel<ValidatedTag,F>& tm2);
@@ -456,44 +470,54 @@ class TaylorModel<ValidatedTag,F>
     static TaylorModel<ValidatedTag,F> _compose(TaylorModel<ValidatedTag,F> const& tf, const Vector<TaylorModel<ValidatedTag,F>>& tg);
     static TaylorModel<ValidatedTag,F> _compose(Unscaling const& uf, TaylorModel<ValidatedTag,F> const& tg);
     static TaylorModel<ValidatedTag,F> _compose(TaylorModel<ValidatedTag,F> const& tf, VectorUnscaling const& u, const Vector<TaylorModel<ValidatedTag,F>>& tg);
-    static TaylorModel<ValidatedTag,F> _partial_evaluate(const TaylorModel<ValidatedTag,F>& x, SizeType k, ValidatedNumericType c);
-    static Covector<ValidatedNumericType> _gradient(const TaylorModel<ValidatedTag,F>& x, Vector<ValidatedNumericType> const& v);
-    static ValidatedNumericType _evaluate(const TaylorModel<ValidatedTag,F>& x, Vector<ValidatedNumericType> const& v);
-    static ApproximateNumericType _evaluate(const TaylorModel<ValidatedTag,F>& x, Vector<ApproximateNumericType> const& v);
+    static TaylorModel<ValidatedTag,F> _partial_evaluate(const TaylorModel<ValidatedTag,F>& x, SizeType k, NumericType c);
+    static Covector<FloatBounds<PR>> _gradient(const TaylorModel<ValidatedTag,F>& x, Vector<FloatBounds<PR>> const& v);
+    static FloatBounds<PR> _evaluate(const TaylorModel<ValidatedTag,F>& x, Vector<FloatBounds<PR>> const& v);
+    static FloatApproximation<PR> _evaluate(const TaylorModel<ValidatedTag,F>& x, Vector<FloatApproximation<PR>> const& v);
 };
 
-Covector<ValidatedNumericType> gradient(const TaylorModel<ValidatedTag,Float64>& x, const Vector<ValidatedNumericType>& v);
+// FIXME: Needed to dispatch gradient of FunctionPatch
+Covector<Float64Bounds> gradient(const TaylorModel<ValidatedTag,Float64>& x, const Vector<Float64Bounds>& v);
+Covector<FloatMPBounds> gradient(const TaylorModel<ValidatedTag,FloatMP>& x, const Vector<FloatMPBounds>& v);
 
+// FIXME: Needed to dispatch gradient of FunctionPatch
+template<class F> template<class A> auto TaylorModel<ValidatedTag,F>::operator() (Vector<A> const& x) const -> ArithmeticType<A,FloatValue<PR>> {
+    return horner_evaluate(this->expansion(),x)+FloatBounds<typename F::PrecisionType>(-this->error(),+this->error());
+}
 
 
 /*! \brief A class representing a power series expansion, scaled to the unit box, with an error term.
  *
- * See also Expansion, Polynomila, TaylorModel<ValidatedTag,F><ExactIntervalType>.
+ * See also Expansion, Polynomial, TaylorModel<ValidatedTag,F><ExactIntervalType>.
  */
 template<class F>
 class TaylorModel<ApproximateTag,F>
-    : public DispatchTranscendentalAlgebraOperations<TaylorModel<ApproximateTag,F>,ApproximateNumericType>
-    , public DispatchOrderedAlgebraOperations<TaylorModel<ApproximateTag,F>,ApproximateNumericType>
-    , public DispatchConcreteGenericAlgebraNumberOperations<TaylorModel<ApproximateTag,F>,ApproximateNumericType,ApproximateNumber>
+    : public DispatchTranscendentalAlgebraOperations<TaylorModel<ApproximateTag,F>,FloatApproximation<PrecisionType<F>>>
+    , public DispatchOrderedAlgebraOperations<TaylorModel<ApproximateTag,F>,FloatApproximation<PrecisionType<F>>>
+    , public DispatchConcreteGenericAlgebraNumberOperations<TaylorModel<ApproximateTag,F>,FloatApproximation<PrecisionType<F>>,ApproximateNumber>
 {
     typedef typename F::PrecisionType PR;
   public:
     typedef PR PrecisionType;
     typedef FloatApproximation<PR> CoefficientType;
-    typedef ApproximateErrorType ErrorType;
+    typedef FloatApproximation<PR> ErrorType;
     typedef ReverseLexicographicIndexLess ComparisonType;
     typedef SortedExpansion<CoefficientType,ComparisonType> ExpansionType;
 
     typedef ExactIntervalType CodomainType;
     typedef ApproximateIntervalType RangeType;
-    typedef Float64Approximation NormType;
+    typedef FloatApproximation<PR> NormType;
 
-    //! \brief The type used for the coefficients.
-    typedef ApproximateNumericType NumericType;
+    //! \brief The type used algebraic operations.
+    typedef FloatApproximation<PR> NumericType;
+    typedef ApproximateNumber GenericNumericType;
     //! \brief The type used to index the coefficients.
     typedef MultiIndex IndexType;
     //! \brief The type used for the coefficients.
     typedef CoefficientType ValueType;
+
+    //! \brief The type used to determine the accuracy.
+    typedef Sweeper<F> SweeperType;
 
     //! \brief An Iterator through the (index,coefficient) pairs of the expansion.
     typedef typename ExpansionType::Iterator Iterator;
@@ -501,7 +525,7 @@ class TaylorModel<ApproximateTag,F>
     typedef typename ExpansionType::ConstIterator ConstIterator;
   private:
     ExpansionType _expansion;
-    mutable Sweeper _sweeper;
+    mutable SweeperType _sweeper;
   private:
     static const CoefficientType _zero;
 
@@ -509,24 +533,24 @@ class TaylorModel<ApproximateTag,F>
     //@{
     /*! \name Constructors and destructors. */
     explicit TaylorModel<ApproximateTag,F>();
-    //! \brief Construct a TaylorModel<ApproximateTag,F> in \a as arguments with a default Sweeper.
+    //! \brief Construct a TaylorModel<ApproximateTag,F> in \a as arguments with a default SweeperType.
     explicit TaylorModel<ApproximateTag,F>(SizeType as);
     //! \brief Construct a TaylorModel<ApproximateTag,F> in \a as arguments with sweeper \a swp.
-    TaylorModel<ApproximateTag,F>(SizeType as, Sweeper swp);
+    TaylorModel<ApproximateTag,F>(SizeType as, SweeperType swp);
 
     TaylorModel<ApproximateTag,F> create() const { return TaylorModel<ApproximateTag,F>(this->argument_size(),this->_sweeper); }
     TaylorModel<ApproximateTag,F> create_zero() const { return TaylorModel<ApproximateTag,F>(this->argument_size(),this->_sweeper); }
     TaylorModel<ApproximateTag,F> create_constant(NumericType) const;
-    TaylorModel<ApproximateTag,F> create_constant(ApproximateNumber) const;
+    TaylorModel<ApproximateTag,F> create_constant(GenericNumericType) const;
     TaylorModel<ApproximateTag,F> create_variable(SizeType i) const;
     TaylorModel<ApproximateTag,F> create_ball(ErrorType r) const;
 
 
     //! \brief Construct a constant quantity in \a as independent variables.
-    static TaylorModel<ApproximateTag,F> constant(SizeType as, const NumericType& c, Sweeper swp) {
+    static TaylorModel<ApproximateTag,F> constant(SizeType as, const NumericType& c, SweeperType swp) {
         TaylorModel<ApproximateTag,F> r(as,swp); r[MultiIndex::zero(as)]=1; r*=c; return r; }
     //! \brief Construct the quantity with expansion \f$x_j\f$ in \a as independent variables.
-    static TaylorModel<ApproximateTag,F> coordinate(SizeType as, SizeType j, Sweeper swp) {
+    static TaylorModel<ApproximateTag,F> coordinate(SizeType as, SizeType j, SweeperType swp) {
         TaylorModel<ApproximateTag,F> r(as,swp); r[MultiIndex::unit(as,j)]=1; return r; }
 
     //! \brief Fast swap with another Taylor model.
@@ -540,10 +564,10 @@ class TaylorModel<ApproximateTag,F>
     //@{
     /*! \name Assignment to constant values. */
     //! \brief Set equal to a constant, keeping the same number of arguments.
-    TaylorModel<ApproximateTag,F>& operator=(const ApproximateNumericType& c) {
+    TaylorModel<ApproximateTag,F>& operator=(const NumericType& c) {
         this->_expansion.clear(); this->_expansion.append(MultiIndex(this->argument_size()),c); return *this; }
     //! \brief Set equal to an interval constant, keeping the same number of arguments.
-    TaylorModel<ApproximateTag,F>& operator=(const ApproximateNumber& c) { return (*this)=ApproximateNumericType(c,this->precision()); }
+    TaylorModel<ApproximateTag,F>& operator=(const GenericNumericType& c) { return (*this)=NumericType(c,this->precision()); }
     //@}
 
     //@{
@@ -599,11 +623,11 @@ class TaylorModel<ApproximateTag,F>
     //@{
     /*! \name Accuracy parameters. */
     //! \brief Specify a policy to use to remove low-impact terms.
-    Void set_sweeper(Sweeper swp) { this->_sweeper=swp; }
+    Void set_sweeper(SweeperType swp) { this->_sweeper=swp; }
     //! \brief A shared pointer to an object using for removing low-impact terms.
-    Sweeper sweeper() const { return this->_sweeper; }
+    SweeperType sweeper() const { return this->_sweeper; }
     //! \brief The precision of the coefficients.
-    PrecisionType precision() const { return this->value().precision(); }
+    PrecisionType precision() const { return this->sweeper().precision(); }
     //@}
 
     //@{
@@ -625,17 +649,17 @@ class TaylorModel<ApproximateTag,F>
     //! \brief An approximation to the average value of the function.
     CoefficientType average() const;
     //! \brief The tolerance to which analytic functions should be computed.
-    RawFloat64 tolerance() const;
+    F tolerance() const;
     //! \brief The radius of the ball containing the functions.
     NormType radius() const;
     //! \brief Write to an output stream.
     OutputStream& write(OutputStream&) const;
     //! \brief Inplace addition of a scalar constant.
-    Void iadd(const ApproximateNumericType& c);
+    Void iadd(const FloatApproximation<PR>& c);
     //! \brief Inplace multiplication of a scalar constant.
-    Void imul(const ApproximateNumericType& c);
+    Void imul(const FloatApproximation<PR>& c);
     //! \brief Inplace addition of a scalar multiple of a Taylor model.
-    Void isma(const ApproximateNumericType& c, const TaylorModel<ApproximateTag,F>& x);
+    Void isma(const FloatApproximation<PR>& c, const TaylorModel<ApproximateTag,F>& x);
     //! \brief Inplace addition of a product of Taylor models.
     Void ifma(const TaylorModel<ApproximateTag,F>& x1, const TaylorModel<ApproximateTag,F>& x2);
 
@@ -691,14 +715,14 @@ template<class F> Vector<TaylorModel<ValidatedTag,F>> refinement(const Vector<Ta
 
 
 
-template<class F> Vector<ValidatedNumericType> evaluate(const Vector<TaylorModel<ValidatedTag,F>>& tf, const Vector<ValidatedNumericType>& x) {
-    Vector<ValidatedNumericType> r(tf.size());
+template<class F> Vector<FloatBounds<PrecisionType<F>>> evaluate(const Vector<TaylorModel<ValidatedTag,F>>& tf, const Vector<FloatBounds<PrecisionType<F>>>& x) {
+    Vector<FloatBounds<PrecisionType<F>>> r(tf.size());
     for(SizeType i=0; i!=r.size(); ++i) { r[i]=evaluate(tf[i],x); }
     return r;
 }
 
-template<class F> Vector<TaylorModel<ValidatedTag,F>> partial_evaluate(const Vector<TaylorModel<ValidatedTag,F>>& tf, SizeType k, const ValidatedNumericType& c) {
-    Vector<TaylorModel<ValidatedTag,F>> r(tf.size(),ValidatedTaylorModel::zero(tf.zero_element().argument_size()-1,tf.zero_element().sweeper()));
+template<class F> Vector<TaylorModel<ValidatedTag,F>> partial_evaluate(const Vector<TaylorModel<ValidatedTag,F>>& tf, SizeType k, const FloatBounds<PrecisionType<F>>& c) {
+    Vector<TaylorModel<ValidatedTag,F>> r(tf.size(),ValidatedTaylorModel<F>::zero(tf.zero_element().argument_size()-1,tf.zero_element().sweeper()));
     for(SizeType i=0; i!=r.size(); ++i) { r[i]=partial_evaluate(tf[i],k,c); }
     return std::move(r);
 }

@@ -131,7 +131,6 @@ double Dyadic::get_d() const {
 }
 
 
-
 /*
 Dyadic& operator+=(Dyadic& x1, Dyadic const& x2) {
     mpf_add(x1._mpf,x1._mpf,x2._mpf);
@@ -148,6 +147,13 @@ Dyadic& operator*=(Dyadic& x1, Dyadic const& x2) {
     return x1;
 }
 */
+
+Integer round(Dyadic const& x) {
+    Integer r;
+    mpz_set_f(r._mpz,x._mpf);
+    return r;
+}
+
 
 Dyadic nul(Dyadic const& x) {
     Dyadic r;

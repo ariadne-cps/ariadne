@@ -37,11 +37,9 @@
 #include "output/graphics_interface.h"
 #include "output/colour.h"
 
-typedef unsigned int Nat;
-
 namespace Ariadne {
 
-using namespace std;
+typedef unsigned int Nat;
 
 template<class X> class Point;
 typedef Point<ExactNumericType> ExactPoint;
@@ -62,7 +60,7 @@ class TextPlot
     ~TextPlot();
     TextPlot();
     TextPlot(const char* filename);
-    TextPlot(const char* filename, ios::openmode mode);
+    TextPlot(const char* filename, std::ios::openmode mode);
 
     virtual Void set_projection_map(const PlanarProjectionMap& prj) override { };
     virtual Void set_bounding_box(const GraphicsBoundingBoxType& bx) override { };
@@ -87,7 +85,7 @@ class TextPlot
     Colour get_fill_colour() const override { return white; };
 
     Void open(const char* filename);
-    Void open(const char* filename, ios::openmode mode);
+    Void open(const char* filename, std::ios::openmode mode);
     Void draw(const ExactPoint&);
     Void draw(const ExactBoxType&);
 //    Void draw(const Polytope&);

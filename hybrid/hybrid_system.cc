@@ -31,7 +31,7 @@
 #include "utility/logging.h"
 
 #include "utility/stlio.h"
-#include "expression/formula.h"
+#include "expression/expression.h"
 #include "function/function.h"
 #include "hybrid/hybrid_time.h"
 #include "hybrid/hybrid_system.h"

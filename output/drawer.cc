@@ -28,26 +28,24 @@
 
 #include "utility/macros.h"
 #include "utility/logging.h"
-#include "function/polynomial.h"
-#include "function/function.h"
-#include "function/taylor_function.h"
-#include "function/procedure.h"
 #include "geometry/function_set.h"
 #include "geometry/affine_set.h"
-#include "geometry/paving_interface.h"
 #include "geometry/grid_set.h"
-#include "solvers/nonlinear_programming.h"
-#include "solvers/constraint_solver.h"
-#include "geometry/paver.h"
-#include "geometry/affine_set.h"
 
 #include "output/graphics_interface.h"
 
 namespace Ariadne {
 
-Void BoxDrawer::draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) { ARIADNE_NOT_IMPLEMENTED; }
 Void SubdivisionDrawer::draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) { ARIADNE_NOT_IMPLEMENTED; }
 Void GridDrawer::draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) { ARIADNE_NOT_IMPLEMENTED; }
+
+Void box_draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set)
+{
+    cast_exact_box(apply(set.function(),set.domain())).draw(cnvs,proj);
+}
+
+Void BoxDrawer::draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) { box_draw(cnvs,proj,set); }
+
 
 Void affine_draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set, Int depth)
 {

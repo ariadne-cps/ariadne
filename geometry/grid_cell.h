@@ -54,9 +54,6 @@
 #include "geometry/grid.h"
 
 
-using namespace std;
-using namespace Ariadne;
-
 namespace Ariadne {
 
 /*Some type definitions*/

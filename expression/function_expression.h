@@ -31,9 +31,9 @@
 #include "expression/expression.h"
 #include "expression/expression_set.h"
 #include "expression/space.h"
-#include "expression/formula.h"
 
 #include "function/function.h"
+#include "function/formula.h"
 #include "function/function_model.h"
 #include "function/taylor_function.h"
 

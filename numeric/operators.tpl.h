@@ -1,5 +1,5 @@
 /***************************************************************************
- *            operators.tpl.h
+ *            operators.tcc
  *
  *  Copyright 2008-15 Pieter Collins
  *
@@ -33,7 +33,7 @@ template<class X> typename Logic<X>::Type compare(OperatorCode cmp, const X& x1,
 template<> Boolean compare(OperatorCode cmp, const String& s1, const String& s2);
 template<> Boolean compare(OperatorCode cmp, const Integer& z1, const Integer& z2);
 
-template<class X> X compute(OperatorCode op, const X& x1, const X& x2);
+template<class X1, class X2> X2 compute(OperatorCode op, const X1& x1, const X2& x2);
 template<> Boolean compute(OperatorCode op, const Boolean& b1, const Boolean& b2);
 template<> Kleenean compute(OperatorCode op, const Kleenean& b1, const Kleenean& b2);
 template<> String compute(OperatorCode op, const String& s1, const String& s2);
@@ -60,12 +60,13 @@ template<class X> typename Logic<X>::Type compare(OperatorCode cmp, const X& x1,
 }
 
 
-template<class X> X compute(OperatorCode op, const X& x1, const X& x2) {
+template<class X1, class X2> X2 compute(OperatorCode op, const X1& x1, const X2& x2) {
+    // FIXME: Should return ArithmeticType<X1,X2>
     switch(op) {
-        case OperatorCode::ADD: return x1+x2;
-        case OperatorCode::SUB: return x1-x2;
-        case OperatorCode::MUL: return x1*x2;
-        case OperatorCode::DIV: return x1/x2;
+        case OperatorCode::ADD: case OperatorCode::SADD: return x1+x2;
+        case OperatorCode::SUB: case OperatorCode::SSUB: return x1-x2;
+        case OperatorCode::MUL: case OperatorCode::SMUL: return x1*x2;
+        case OperatorCode::DIV: case OperatorCode::SDIV: return x1/x2;
         default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on two real arguments.");
     }
 }

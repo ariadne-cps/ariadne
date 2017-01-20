@@ -94,62 +94,62 @@ bind(const F& f,const A1& a1,const A2& a2) {
 
 
 namespace Ariadne {
-Void _mul_clear(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const ValidatedTaylorModel& y);
-Void _mul_full(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const ValidatedTaylorModel& y);
+Void _mul_clear(ValidatedTaylorModel64& r, const ValidatedTaylorModel64& x, const ValidatedTaylorModel64& y);
+Void _mul_full(ValidatedTaylorModel64& r, const ValidatedTaylorModel64& x, const ValidatedTaylorModel64& y);
 }
 
 
-ValidatedTaylorModel copy(const ValidatedTaylorModel& x) {
+ValidatedTaylorModel64 copy(const ValidatedTaylorModel64& x) {
     return x;
 }
 
-ValidatedTaylorModel& isweep(ValidatedTaylorModel& x) {
+ValidatedTaylorModel64& isweep(ValidatedTaylorModel64& x) {
     x.sweep(); return x;
 }
 
-ValidatedTaylorModel& ivladd(ValidatedTaylorModel& x, const ExactIntervalType& ivl) {
+ValidatedTaylorModel64& ivladd(ValidatedTaylorModel64& x, const ExactIntervalType& ivl) {
     return x+=ivl;
 }
 
-ValidatedTaylorModel& ivlscal(ValidatedTaylorModel& x, const ExactIntervalType& ivl) {
+ValidatedTaylorModel64& ivlscal(ValidatedTaylorModel64& x, const ExactIntervalType& ivl) {
     return x*=ivl;
 }
 
-ValidatedTaylorModel& fscal(ValidatedTaylorModel& x, const Float64& c) {
+ValidatedTaylorModel64& fscal(ValidatedTaylorModel64& x, const Float64& c) {
     return x*=c;
 }
 
-ValidatedTaylorModel& isum(ValidatedTaylorModel& x, const ValidatedTaylorModel& y) {
+ValidatedTaylorModel64& isum(ValidatedTaylorModel64& x, const ValidatedTaylorModel64& y) {
     return x+=y;
 }
 
-ValidatedTaylorModel sum(const ValidatedTaylorModel x1, const ValidatedTaylorModel& x2) {
+ValidatedTaylorModel64 sum(const ValidatedTaylorModel64 x1, const ValidatedTaylorModel64& x2) {
     return x1+x2;
 }
 
-ValidatedTaylorModel prod(const ValidatedTaylorModel x1, const ValidatedTaylorModel& x2) {
+ValidatedTaylorModel64 prod(const ValidatedTaylorModel64 x1, const ValidatedTaylorModel64& x2) {
     return x1*x2;
 }
 
-ValidatedTaylorModel prod_full(const ValidatedTaylorModel x1, const ValidatedTaylorModel& x2) {
-    ValidatedTaylorModel r(x2.argument_size(),x2.sweeper()); _mul_full(r,x1,x2); return r;
+ValidatedTaylorModel64 prod_full(const ValidatedTaylorModel64 x1, const ValidatedTaylorModel64& x2) {
+    ValidatedTaylorModel64 r(x2.argument_size(),x2.sweeper()); _mul_full(r,x1,x2); return r;
 }
 
-ValidatedTaylorModel prod_clear(const ValidatedTaylorModel x1, const ValidatedTaylorModel& x2) {
-    ValidatedTaylorModel r(x2.argument_size(),x2.sweeper()); _mul_clear(r,x1,x2); return r;
+ValidatedTaylorModel64 prod_clear(const ValidatedTaylorModel64 x1, const ValidatedTaylorModel64& x2) {
+    ValidatedTaylorModel64 r(x2.argument_size(),x2.sweeper()); _mul_clear(r,x1,x2); return r;
 }
 
 
-ValidatedTaylorModel exp_cos(const ValidatedTaylorModel x, const ValidatedTaylorModel& y) {
+ValidatedTaylorModel64 exp_cos(const ValidatedTaylorModel64 x, const ValidatedTaylorModel64& y) {
     return exp(x)*cos(y);
 }
 
-ValidatedTaylorModel sigmoid(const ValidatedTaylorModel x, const ValidatedTaylorModel& y) {
+ValidatedTaylorModel64 sigmoid(const ValidatedTaylorModel64 x, const ValidatedTaylorModel64& y) {
     const double a=10;
     return exp(-x/a);
 }
 
-typedef ValidatedTaylorModel(*TaylorFunctionPtr)(const Vector<ValidatedTaylorModel>&);
+typedef ValidatedTaylorModel64(*TaylorFunctionPtr)(const Vector<ValidatedTaylorModel64>&);
 
 
 template<class T>
@@ -185,12 +185,12 @@ Int main(Int argc, const char* argv[]) {
     Int i;
 
     TrivialSweeper trivial_sweeper;
-    Vector<ValidatedTaylorModel> v(2,ValidatedTaylorModel(2,trivial_sweeper));
-    v[0]=ValidatedTaylorModel::variable(2,0,trivial_sweeper);
-    v[1]=ValidatedTaylorModel::constant(2,1.0,trivial_sweeper);
+    Vector<ValidatedTaylorModel64> v(2,ValidatedTaylorModel64(2,trivial_sweeper));
+    v[0]=ValidatedTaylorModel64::variable(2,0,trivial_sweeper);
+    v[1]=ValidatedTaylorModel64::constant(2,1.0,trivial_sweeper);
 
     // Use in clean()
-    ValidatedTaylorModel w(3,trivial_sweeper);
+    ValidatedTaylorModel64 w(3,trivial_sweeper);
     i=0;
     for(MultiIndex a(3); a.degree()<=9; ++a) {
         if(i%7<3) { w.expansion().append(a,1/(1.0+i*i*i*i*i)); }
@@ -204,8 +204,8 @@ Int main(Int argc, const char* argv[]) {
 
     ExactIntervalType ivl(0.33,0.49);
     Float64 cnst=0.41;
-    ValidatedTaylorModel x(3,threshold_sweeper);
-    ValidatedTaylorModel y(3,threshold_sweeper);
+    ValidatedTaylorModel64 x(3,threshold_sweeper);
+    ValidatedTaylorModel64 y(3,threshold_sweeper);
 
     for(MultiIndex a(3); a.degree()<=7; ++a) {
         if(i%7<4) { x.expansion().append(a,1/(1.0+i)); }
@@ -220,7 +220,7 @@ Int main(Int argc, const char* argv[]) {
     threshold_sweeper = ThresholdSweeper(1e-3);
     y.set_sweeper(threshold_sweeper);
 
-    ValidatedTaylorModel z(Expansion<Float64>({ {{0,0,0},1.0}, {{1,0,0},0.5}, {{0,1,0},-0.25}, {{0,0,1},0.625} }),0.0,threshold_sweeper);
+    ValidatedTaylorModel64 z(Expansion<Float64>({ {{0,0,0},1.0}, {{1,0,0},0.5}, {{0,1,0},-0.25}, {{0,0,1},0.625} }),0.0,threshold_sweeper);
 
     std::cout << std::setw(20) << std::left << "name" << std::right
               << std::setw(11) << "time(us)"
@@ -228,7 +228,7 @@ Int main(Int argc, const char* argv[]) {
               << std::setw(8) << "size"
               << std::endl;
 
-    typedef ValidatedTaylorModel TM;
+    typedef ValidatedTaylorModel64 TM;
     //std::cerr<<"\n\nexp("<<z<<")=\n  "<<exp(z)<<"\n\n";
     //std::cerr<<"exp(1)="<<Ariadne::exp(1.0)<<"  exp([1:1])="<<Ariadne::exp(ExactIntervalType(1))<<"\n";
 

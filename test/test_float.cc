@@ -104,8 +104,6 @@ TestFloat<PR>::test()
 }
 
 
-
-
 // Test that the type implements all operations of
 // the Float concept without testing correctness
 template<class PR> Void
@@ -215,24 +213,43 @@ TestFloat<PR>::test_class()
 {
     cout << __PRETTY_FUNCTION__ << endl;
     // Construct from an Int
-    RawFloat<PR> f1(2);
-    ARIADNE_TEST_ASSERT(f1==2);
+    ARIADNE_TEST_CONSTRUCT(RawFloat<PR>,f1,(2));
+    ARIADNE_TEST_EQUALS(f1,2);
     // Construct from a double
-    RawFloat<PR> f2(1.25);
-    ARIADNE_TEST_ASSERT(f2==1.25);
+    ARIADNE_TEST_CONSTRUCT(RawFloat<PR>,f2,(1.25));
+    ARIADNE_TEST_EQUALS(f2,1.25);
     // Copy constructor
-    RawFloat<PR> f3(f2);
-    ARIADNE_TEST_ASSERT(f3==f2);
+    ARIADNE_TEST_CONSTRUCT(RawFloat<PR>,f3,(f2));
+    ARIADNE_TEST_EQUAL(f3,f2);
+
 
     // Assign from an Int
-    f1=3;
-    ARIADNE_TEST_ASSERT(f1==3);
+    ARIADNE_TEST_EXECUTE(f1=3);
+    ARIADNE_TEST_EQUALS(f1,3);
     // Assign from a double
-    f2=2.25;
-    ARIADNE_TEST_ASSERT(f2==2.25);
+    ARIADNE_TEST_EXECUTE(f2=2.25);
+    ARIADNE_TEST_EQUALS(f2,2.25);
     // Copy assignment
-    f3=f2;
-    ARIADNE_TEST_ASSERT(f3==f2);
+    ARIADNE_TEST_EXECUTE(f3=f2);
+    ARIADNE_TEST_EQUAL(f3,f2);
+    // Self-assignment
+    ARIADNE_TEST_EXECUTE(f3=f3);
+    ARIADNE_TEST_EQUAL(f3,f2);
+
+    if(not (precision==RawFloat<PR>::get_default_precision())) {
+        PR low_precision=min(precision,RawFloat<PR>::get_default_precision());
+        PR high_precision=max(precision,RawFloat<PR>::get_default_precision());
+        ARIADNE_TEST_CONSTRUCT(RawFloat<PR>,f4,(2.25,high_precision));
+        ARIADNE_TEST_CONSTRUCT(RawFloat<PR>,f5,(3.75,low_precision));
+        ARIADNE_TEST_EXECUTE(f5=f4);
+        ARIADNE_TEST_EQUAL(f5.precision(),high_precision);
+        ARIADNE_TEST_EQUAL(f5,f4);
+        ARIADNE_TEST_CONSTRUCT(RawFloat<PR>,f6,(low_precision));
+        ARIADNE_TEST_EXECUTE(f6=std::move(f4));
+        ARIADNE_TEST_EQUAL(f6.precision(),high_precision);
+        ARIADNE_TEST_EQUAL(f6,f5);
+    }
+
 
 }
 
@@ -366,7 +383,11 @@ TestFloat<PR>::test_comparison()
 {
     cout << __PRETTY_FUNCTION__ << endl;
 
-    RawFloat<PR> f1(1.25); RawFloat<PR> f2(-1.25); RawFloat<PR> f3(-2.25); RawFloat<PR> f4(1.25);
+    ARIADNE_TEST_CONSTRUCT(RawFloat<PR>,f0,(3.00));
+    ARIADNE_TEST_CONSTRUCT(RawFloat<PR>,f1,(1.25));
+    ARIADNE_TEST_CONSTRUCT(RawFloat<PR>,f2,(-1.25));
+    ARIADNE_TEST_CONSTRUCT(RawFloat<PR>,f3,(-2.25));
+    ARIADNE_TEST_CONSTRUCT(RawFloat<PR>,f4,(1.25));
 
     // Test comparison of two equal numbers
     ARIADNE_TEST_ASSERT(f1==f4); ARIADNE_TEST_ASSERT(!(f1!=f4));
@@ -384,7 +405,7 @@ TestFloat<PR>::test_comparison()
     ARIADNE_TEST_ASSERT(!(f2<=f3)); ARIADNE_TEST_ASSERT(f2> f3);
     ARIADNE_TEST_ASSERT(f2>=f3); ARIADNE_TEST_ASSERT(!(f2< f3));
 
-    // Test comparison with in integer
+    // Test comparison with in int
     Int i2=1;
     ARIADNE_TEST_ASSERT(!(f1==i2)); ARIADNE_TEST_ASSERT(f1!=i2);
     ARIADNE_TEST_ASSERT(!(f1<=i2)); ARIADNE_TEST_ASSERT(f1> i2);
@@ -406,16 +427,29 @@ TestFloat<PR>::test_comparison()
     ARIADNE_TEST_ASSERT(!(x1<=f2)); ARIADNE_TEST_ASSERT(x1> f2);
     ARIADNE_TEST_ASSERT(x1>=f2); ARIADNE_TEST_ASSERT(!(x1< f2));
 
-    // Test comparison with a rational
-    //Rational q2=1;
-    //ARIADNE_TEST_ASSERT(!(f1==q2)); ARIADNE_TEST_ASSERT(f1!=q2);
-    //ARIADNE_TEST_ASSERT(!(f1<=q2)); ARIADNE_TEST_ASSERT(f1> q2);
-    //ARIADNE_TEST_ASSERT(f1>=q2); ARIADNE_TEST_ASSERT(!(f1< q2));
+/*
+    // Test comparison with an integer
+    ARIADNE_TEST_CONSTRUCT(Integer,z0,(-3));
+    ARIADNE_TEST_ASSERT(!(f1==z0)); ARIADNE_TEST_ASSERT(f1!=z0));
+    ARIADNE_TEST_ASSERT(!(f1<=z0)); ARIADNE_TEST_ASSERT(f1> z0);
+    ARIADNE_TEST_ASSERT(f1>=z0); ARIADNE_TEST_ASSERT(!(f1< z0));
+    ARIADNE_TEST_ASSERT(!(z0==f1)); ARIADNE_TEST_ASSERT(z0<f1);
 
-    //Rational q1=Rational(-5,4);
-    //ARIADNE_TEST_ASSERT(q1==f2)); ARIADNE_TEST_ASSERT(!(q1!=f2));
-    //ARIADNE_TEST_ASSERT(q1<=f2)); ARIADNE_TEST_ASSERT(!(q1> f2));
-    //ARIADNE_TEST_ASSERT(!(q1>=f2)); ARIADNE_TEST_ASSERT(q1< f2);
+    // Test comparison with a dyadic
+    ARIADNE_TEST_CONSTRUCT(Dyadic,w2,(-5,2u));
+    ARIADNE_TEST_ASSERT(!(f1==w2)); ARIADNE_TEST_ASSERT(f1!=w2);
+    ARIADNE_TEST_ASSERT(!(w2==f1)); ARIADNE_TEST_ASSERT(w2<f1);
+    ARIADNE_TEST_ASSERT(!(f1<=w2)); ARIADNE_TEST_ASSERT(f1> w2);
+    ARIADNE_TEST_ASSERT(f1>=w2); ARIADNE_TEST_ASSERT(!(f1< w2));
+    ARIADNE_TEST_ASSERT(f2==w2); ARIADNE_TEST_ASSERT(!(f1!=w2));
+
+    // Test comparison with a rational
+    ARIADNE_TEST_CONSTRUCT(Rational,q2,(-5,4));
+    ARIADNE_TEST_ASSERT(!(f1==q2)); ARIADNE_TEST_ASSERT(f1!=q2);
+    ARIADNE_TEST_ASSERT(!(f1<=q2)); ARIADNE_TEST_ASSERT(f1> q2);
+    ARIADNE_TEST_ASSERT(f1>=q2); ARIADNE_TEST_ASSERT(!(f1< q2));
+    ARIADNE_TEST_ASSERT(f2==q2); ARIADNE_TEST_ASSERT(!(f1!=q2));
+*/
 
 }
 

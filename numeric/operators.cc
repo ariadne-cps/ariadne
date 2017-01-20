@@ -63,6 +63,10 @@ const char* name(const OperatorCode& op) {
         case OperatorCode::SUB:  return "sub"; break;
         case OperatorCode::MUL:  return "mul"; break;
         case OperatorCode::DIV:  return "div"; break;
+        case OperatorCode::SADD:  return "sadd"; break;
+        case OperatorCode::SSUB:  return "ssub"; break;
+        case OperatorCode::SMUL:  return "smul"; break;
+        case OperatorCode::SDIV:  return "sdiv"; break;
         case OperatorCode::POW:  return "pow"; break;
         case OperatorCode::NOT:  return "not"; break;
         case OperatorCode::AND:  return "and"; break;
@@ -136,13 +140,15 @@ OperatorKind kind(OperatorCode op) {
         case OperatorCode::ADD: case OperatorCode::SUB: case OperatorCode::MUL: case OperatorCode::DIV:
         case OperatorCode::MAX: case OperatorCode::MIN:
             return OperatorKind::BINARY;
+        case OperatorCode::SADD: case OperatorCode::SSUB: case OperatorCode::SMUL: case OperatorCode::SDIV:
+            return OperatorKind::SCALAR;
         case OperatorCode::POS: case OperatorCode::NEG: case OperatorCode::REC: case OperatorCode::SQR:
         case OperatorCode::SQRT: case OperatorCode::EXP: case OperatorCode::LOG:
         case OperatorCode::SIN: case OperatorCode::COS: case OperatorCode::TAN: case OperatorCode::ATAN:
         case OperatorCode::ABS:
             return OperatorKind::UNARY;
         case OperatorCode::POW:
-            return OperatorKind::SCALAR;
+            return OperatorKind::GRADED;
         case OperatorCode::AND: case OperatorCode::OR:
             return OperatorKind::BINARY;
         case OperatorCode::NOT:

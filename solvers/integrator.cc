@@ -191,10 +191,10 @@ IntegratorBase::flow_to(const ValidatedVectorFunction& vf, const ExactBoxType& d
     ValidatedVectorFunctionModel step_function;
     while(possibly(t<tmax)) {
         ExactBoxType dx=flow_function.codomain();
-        Float64Value h_max=cast_exact(tmax-Real(t));
+        Float64Bounds h_max=Float64Bounds(tmax,Precision64())-t;
         Float64Value h;
         UpperBoxType bx;
-        make_lpair(h,bx) = this->flow_bounds(vf,dx,h_max.raw());
+        make_lpair(h,bx) = this->flow_bounds(vf,dx,h_max.upper().raw());
         Bool flow_successfully_computed=false;
         while(!flow_successfully_computed) {
             try {
@@ -204,9 +204,9 @@ IntegratorBase::flow_to(const ValidatedVectorFunction& vf, const ExactBoxType& d
                 h=hlf(h);
             }
         }
-        step_function=partial_evaluate(step_function,n,numeric_cast<Float64Bounds>(h));
+        step_function=partial_evaluate(step_function,n,h);
         flow_function=compose(step_function,flow_function);
-        t=t+Rational(h.get_d());
+        t=t+Rational(h);
     }
     return flow_function;
 }
@@ -271,7 +271,7 @@ TaylorPicardIntegrator::flow_step(const ValidatedVectorFunction& f, const ExactB
     ARIADNE_LOG(3,"TaylorPicardIntegrator::flow_step(ValidatedVectorFunction vf, ExactBoxType dx, Float64Value h, UpperBoxType bx)\n");
     ARIADNE_LOG(3," dx="<<dx<<" h="<<h<<" bx="<<bx<<"\n");
     const Nat nx=dx.size();
-    Sweeper sweeper(new ThresholdSweeper(this->_step_sweep_threshold));
+    Sweeper<Float64> sweeper(new ThresholdSweeper<Float64>(Precision64(),this->_step_sweep_threshold));
 
     ExactBoxType dom=join(dx,ExactIntervalType(-h,h));
     ARIADNE_LOG(7,"dom="<<dom<<"\n");
@@ -328,9 +328,9 @@ Void TaylorPicardIntegrator::write(OutputStream& os) const {
 namespace Ariadne {
 
 class FormulaFunction;
-typedef Procedure<ValidatedNumericType> ValidatedProcedure;
-typedef Differential<ValidatedNumericType> ValidatedDifferential;
-typedef Polynomial<ValidatedNumericType> ValidatedPolynomial;
+typedef Procedure<ValidatedNumber> ValidatedProcedure;
+typedef Differential<Float64Bounds> ValidatedDifferential;
+typedef Polynomial<Float64Bounds> ValidatedPolynomial;
 typedef Graded<ValidatedDifferential> GradedValidatedDifferential;
 Bool operator<(const MultiIndex& a1, const MultiIndex& a2);
 
@@ -482,11 +482,11 @@ Vector<ValidatedDifferential> flow_differential(Vector<GradedValidatedDifferenti
 
 VectorTaylorFunction flow_function(const Vector<ValidatedDifferential>& dphi, const ExactBoxType& dx, const Float64Value& h, double swpt, Int verbosity=0) {
     const Nat n=dphi.size();
-    Sweeper sweeper(new ThresholdSweeper(swpt));
+    Sweeper<Float64> sweeper(new ThresholdSweeper<Float64>(Precision64(),swpt));
     VectorTaylorFunction tphi(n,join(dx,ExactIntervalType(-h,+h)),sweeper);
 
     for(Nat i=0; i!=n; ++i) {
-        ValidatedTaylorModel& model=tphi.model(i);
+        ValidatedTaylorModel64& model=tphi.model(i);
         Expansion<Float64Value>& expansion=model.expansion();
         Float64Error& error=model.error();
         error=0u;
@@ -527,9 +527,9 @@ differential_flow_step(const ValidatedVectorFunction& f, const ExactBoxType& dx,
         dphib=antiderivative(f(dphib),n)*h+idb;
     }
 
-    VectorTaylorFunction tphi(n,join(dx,ExactIntervalType(-h,+h)),ThresholdSweeper(swpt));
+    VectorTaylorFunction tphi(n,join(dx,ExactIntervalType(-h,+h)),ThresholdSweeper<Float64>(Precision64(),swpt));
     for(Nat i=0; i!=n; ++i) {
-        ValidatedTaylorModel& model=tphi.model(i);
+        ValidatedTaylorModel64& model=tphi.model(i);
         Expansion<Float64Value>& expansion=model.expansion();
         Float64Error& error=model.error();
         error=0u;
@@ -578,9 +578,9 @@ differential_space_time_flow_step(const ValidatedVectorFunction& f, const ExactB
         dphib=antiderivative(f(dphib),n)*cast_exact(h)+idb;
     }
 
-    VectorTaylorFunction tphi(n,join(dx,ExactIntervalType(-h,+h)),ThresholdSweeper(swpt));
+    VectorTaylorFunction tphi(n,join(dx,ExactIntervalType(-h,+h)),ThresholdSweeper<Float64>(Precision64(),swpt));
     for(Nat i=0; i!=n; ++i) {
-        ValidatedTaylorModel& model=tphi.model(i);
+        ValidatedTaylorModel64& model=tphi.model(i);
         Expansion<Float64Value>& expansion=model.expansion();
         Float64Error& error=model.error();
         error=0u;

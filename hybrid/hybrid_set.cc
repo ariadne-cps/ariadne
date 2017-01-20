@@ -71,7 +71,7 @@ Orbit<HybridPoint>::insert(HybridTime ht, const HybridPoint& hpt)
     ARIADNE_ASSERT(ht.discrete_time()<=this->size());
     // FIXME: Should allow non-exact times
     Real time=ht.continuous_time();
-    Float64Value flt_time=cast_exact(time);
+    Float64Value flt_time=cast_exact(time.get(Precision64()));
     ARIADNE_ASSERT(decide(Real(flt_time)==time));
     if(this->size()==ht.discrete_time()) {
         this->_curves_ptr->push_back(HybridInterpolatedCurve(hpt.location(),hpt.space(),InterpolatedCurve(flt_time,hpt.point())));

@@ -30,11 +30,9 @@
 #include <fenv.h>
 
 #include "config.h"
-#include "algebra/algebra.h"
 #include "function/function.h"
-#include "function/taylor_model.h"
-#include "expression/formula.h"
-#include "function/symbolic_function.h"
+    #include "function/formula.h"
+    #include "function/symbolic_function.h"
 
 #include "numeric/numeric.h"
 

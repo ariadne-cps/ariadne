@@ -77,7 +77,7 @@ class C1TaylorSeries
 class C1TaylorFunction
 {
   public:
-    typedef ExactIntervalType NumericType;
+    typedef Float64Bounds NumericType;
   public:
     Expansion<Float64> _expansion;
     Float64 _zero_error;
@@ -94,14 +94,14 @@ class C1TaylorFunction
     ExactBoxType domain() const;
     Nat argument_size() const;
     Void sweep(Float64 threshold);
-    C1TaylorFunction& operator=(ExactIntervalType c);
+    C1TaylorFunction& operator=(NumericType c);
     Void clear();
   public:
     friend C1TaylorFunction& operator+=(C1TaylorFunction& f, Float64 c);
     friend C1TaylorFunction& operator*=(C1TaylorFunction& f, Float64 c);
     friend C1TaylorFunction operator+(C1TaylorFunction f1, C1TaylorFunction f2);
     friend C1TaylorFunction operator*(C1TaylorFunction f1, C1TaylorFunction f2);
-    friend ValidatedNumericType evaluate(C1TaylorFunction f, Vector<ValidatedNumericType> x);
+    friend NumericType evaluate(C1TaylorFunction f, Vector<NumericType> x);
     friend C1TaylorFunction compose(C1TaylorSeries f, C1TaylorFunction g);
     friend C1TaylorFunction compose(C1TaylorFunction f, Vector<C1TaylorFunction> g);
     friend OutputStream& operator<< (OutputStream& os, const C1TaylorFunction& f);

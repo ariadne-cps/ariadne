@@ -52,6 +52,13 @@ FloatMP::FloatMP(NoInit) {
     mpfr_init(_mpfr);
 }
 
+/*
+FloatMP::FloatMP(const mpfr_t x) : FloatMP(NoInit()) {
+    mpfr_set_prec(this->_mpfr,mpfr_get_prec(x));
+    mpfr_set(this->_mpfr,x,MPFR_RNDN);
+}
+*/
+
 FloatMP::FloatMP(double d) : FloatMP(d,get_default_precision()) {
 }
 
@@ -123,27 +130,30 @@ FloatMP::FloatMP(FloatMP&& x) {
 }
 
 FloatMP& FloatMP::operator=(const FloatMP& x) {
-    // TOOD: Decide whether equality changes precision
-    mpfr_set_prec(_mpfr,x.precision());
+    // TODO: Decide whether equality changes precision
+    // NOTE: mpfr_set_prec clears a number, even if precision does not change
+    //   Hence we should check for self-assignment explicitly, and/or only
+    //   change precision when necessary
+    if(this->precision()!=x.precision()) {
+        mpfr_set_prec(_mpfr,x.precision());
+    }
     mpfr_set(_mpfr,x._mpfr,get_rounding_mode());
     return *this;
 }
 
 FloatMP& FloatMP::operator=(FloatMP&& x) {
-    mpfr_swap(_mpfr,x._mpfr);
+        mpfr_swap(_mpfr,x._mpfr);
     return *this;
 }
 
 FloatMP::operator Dyadic() const {
-    mpz_t num; mpz_init(num);
-    mpfr_exp_t exp = mpfr_get_z_2exp (num, this->_mpfr);
-    mpf_t res; mpf_init(res); mpf_set_z(res,num);
-    if(exp>=0) { mpf_mul_2exp(res,res,exp); }
-    else { mpf_div_2exp(res,res,-exp); }
-    return Dyadic(res);
+    Dyadic res;
+    mpfr_get_f(res._mpf,this->_mpfr, MPFR_RNDN);
+    return res;
 }
 
 FloatMP::operator Rational() const {
+    return Rational(Dyadic(*this));
     mpz_t num; mpz_init(num);
     mpfr_exp_t exp = mpfr_get_z_2exp (num, this->_mpfr);
     mpq_t res; mpq_init(res); mpq_set_z(res,num);

@@ -31,6 +31,7 @@
 #include "utility/metaprogramming.h"
 #include "logical.decl.h"
 #include "sign.h"
+#include "logical.h" // TODO: Try to remove; needed for specialisation of Boolean DefineMixedComparisonOperators
 
 namespace Ariadne {
 
@@ -741,6 +742,25 @@ template<class X, class Y, class LT, class EQ=LT> struct DefineMixedComparisonOp
     friend LEQ operator>=(Y const& y1, X const& x2) { return not gt(x2,y1); }
 };
 
+template<class X, class Y> struct DefineMixedComparisonOperators<X,Y,Boolean> {
+    friend Comparison cmp(X const& x1, Y const& y2);
+    friend Boolean eq(X const& x1, Y const& y2) { return cmp(x1,y2)==Comparison::EQUAL; }
+    friend Boolean lt(X const& x1, Y const& y2) { return cmp(x1,y2)==Comparison::LESS; }
+    friend Boolean gt(X const& x1, Y const& y2) { return cmp(x1,y2)==Comparison::GREATER; }
+    friend Boolean operator==(X const& x1, Y const& y2) { return eq(x1,y2); }
+    friend Boolean operator!=(X const& x1, Y const& y2) { return not eq(x1,y2); }
+    friend Boolean operator<=(X const& x1, Y const& y2) { return not gt(x1,y2); }
+    friend Boolean operator>=(X const& x1, Y const& y2) { return not lt(x1,y2); }
+    friend Boolean operator< (X const& x1, Y const& y2) { return lt(x1,y2); }
+    friend Boolean operator> (X const& x1, Y const& y2) { return gt(x1,y2); }
+    friend Boolean operator==(Y const& y1, X const& x2) { return eq(x2,y1); }
+    friend Boolean operator!=(Y const& y1, X const& x2) { return not eq(x2,y1); }
+    friend Boolean operator< (Y const& y1, X const& x2) { return gt(x2,y1); }
+    friend Boolean operator> (Y const& y1, X const& x2) { return lt(x2,y1); }
+    friend Boolean operator<=(Y const& y1, X const& x2) { return not lt(x2,y1); }
+    friend Boolean operator>=(Y const& y1, X const& x2) { return not gt(x2,y1); }
+};
+
 template<class X, class NX, class LT, class EQ> struct DefineDirectedComparisonOperators {
     typedef decltype(not declval<EQ>()) NEQ; typedef decltype(not declval<LT>()) GT; typedef LT LEQ; typedef GT GEQ;
     friend EQ eq(X const& x1, NX const& nx2);
@@ -984,6 +1004,68 @@ template<class X, class QX=X, class R=X, class QR=QX> class ProvideDirectedSemiF
 };
 
 
+
+template<class Y> struct IsGenericNumericType;
+template<class Y> using IsGenericNumber = IsGenericNumericType<Y>;
+template<class X> struct DefineConcreteGenericArithmeticOperators {
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator+(X const& x, Y const& y) { return x+factory(x).create(y); }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator-(X const& x, Y const& y) { return x-factory(x).create(y); }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator*(X const& x, Y const& y) { return x*factory(x).create(y); }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator/(X const& x, Y const& y) { return x/factory(x).create(y); }
+
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator+(Y const& y, X const& x) { return factory(x).create(y)+x; }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator-(Y const& y, X const& x) { return factory(x).create(y)-x; }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator*(Y const& y, X const& x) { return factory(x).create(y)*x; }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator/(Y const& y, X const& x) { return factory(x).create(y)/x; }
+
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator+=(X& x, Y const& y) { return x+=factory(x).create(y); }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator-=(X& x, Y const& y) { return x-=factory(x).create(y); }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator*=(X& x, Y const& y) { return x*=factory(x).create(y); }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator/=(X& x, Y const& y) { return x/=factory(x).create(y); }
+};
+
+template<class X> struct DefineConcreteGenericComparisonOperators {
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator==(X const& x, Y const& y) { return x==factory(x).create(y); }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator!=(X const& x, Y const& y) { return x!=factory(x).create(y); }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator<=(X const& x, Y const& y) { return x<=factory(x).create(y); }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator>=(X const& x, Y const& y) { return x>=factory(x).create(y); }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator< (X const& x, Y const& y) { return x< factory(x).create(y); }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator> (X const& x, Y const& y) { return x> factory(x).create(y); }
+
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator==(Y const& y, X const& x) { return factory(x).create(y)==x; }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator!=(Y const& y, X const& x) { return factory(x).create(y)!=x; }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator<=(Y const& y, X const& x) { return factory(x).create(y)<=x; }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator>=(Y const& y, X const& x) { return factory(x).create(y)>=x; }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator< (Y const& y, X const& x) { return factory(x).create(y)< x; }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) operator> (Y const& y, X const& x) { return factory(x).create(y)> x; }
+};
+
+template<class X> struct DefineConcreteGenericOperators
+    : DefineConcreteGenericArithmeticOperators<X>, DefineConcreteGenericComparisonOperators<X> { };
 
 
 

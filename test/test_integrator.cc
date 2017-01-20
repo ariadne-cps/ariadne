@@ -34,7 +34,7 @@
 #include "function/taylor_function.h"
 #include "algebra/vector.h"
 #include "algebra/algebra.h"
-#include "expression/formula.h"
+#include "function/formula.h"
 
 #include "test.h"
 
@@ -133,7 +133,7 @@ class TestIntegrator
         ARIADNE_TEST_PRINT(flow);
         ARIADNE_TEST_PRINT(expected_flow);
         ARIADNE_TEST_PRINT(flow.errors());
-        ARIADNE_TEST_PRINT(dynamic_cast<VectorTaylorFunction&>((flow-expected_flow).reference()).sweep(GradedSweeper(3)));
+        ARIADNE_TEST_PRINT(flow-expected_flow);
         ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(flow-expected_flow),1e-3);
 
     };
@@ -175,8 +175,6 @@ class TestIntegrator
         ARIADNE_TEST_PRINT(expected_flow);
         ARIADNE_TEST_PRINT(taylor_flow.errors());
         ARIADNE_TEST_PRINT(taylor_flow-expected_flow);
-        ARIADNE_TEST_PRINT((taylor_flow-expected_flow).sweep(GradedSweeper(3)));
-        ARIADNE_TEST_PRINT((taylor_flow-expected_flow).sweep(ThresholdSweeper(1e-10)));
         ARIADNE_TEST_BINARY_PREDICATE(operator<,taylor_flow.error(),0.01);
         ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(taylor_flow-expected_flow),0.01+0.004);
     };

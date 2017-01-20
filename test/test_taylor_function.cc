@@ -37,7 +37,7 @@
 #include "function/polynomial.h"
 #include "function/function.h"
 
-#include "expression/formula.h"
+#include "function/formula.h"
 #include "function/symbolic_function.h"
 
 #include "test.h"
@@ -47,7 +47,7 @@ using namespace Ariadne;
 
 Vector<Real> e(Nat n, Nat i) { return Vector<Real>::unit(n,i); }
 Polynomial<Float64> p(Nat n, Nat j) { return Polynomial<Float64>::variable(n,j); }
-ScalarTaylorFunction t(ExactBoxType d, Nat j,Sweeper swp) { return ScalarTaylorFunction::coordinate(d,j,swp); }
+ScalarTaylorFunction t(ExactBoxType d, Nat j,Sweeper<Float64> swp) { return ScalarTaylorFunction::coordinate(d,j,swp); }
 
 template<class X> Vector< Expansion<X> > operator*(const Expansion<X>& e, const Vector<Float64> v) {
     Vector< Expansion<X> > r(v.size(),Expansion<X>(e.argument_size()));
@@ -58,9 +58,9 @@ template<class X> Vector< Expansion<X> > operator*(const Expansion<X>& e, const 
 class TestScalarTaylorFunction
 {
     Precision64 pr;
-    Sweeper swp;
+    Sweeper<Float64> swp;
   public:
-    TestScalarTaylorFunction(Sweeper sweeper);
+    TestScalarTaylorFunction(Sweeper<Float64> sweeper);
     Void test();
   private:
     Void test_concept();
@@ -83,7 +83,7 @@ class TestScalarTaylorFunction
 };
 
 
-TestScalarTaylorFunction::TestScalarTaylorFunction(Sweeper sweeper)
+TestScalarTaylorFunction::TestScalarTaylorFunction(Sweeper<Float64> sweeper)
     : swp(sweeper)
 {
 }
@@ -293,8 +293,8 @@ Void TestScalarTaylorFunction::test_antiderivative()
 Void TestScalarTaylorFunction::test_conversion() {
     {
         SizeType as=2;
-        ValidatedTaylorModel ty=ValidatedTaylorModel::coordinate(as,1,swp);
-        ValidatedTaylorModel tc=ValidatedTaylorModel::constant(as, 2, swp);
+        ValidatedTaylorModel64 ty=ValidatedTaylorModel64::coordinate(as,1,swp);
+        ValidatedTaylorModel64 tc=ValidatedTaylorModel64::constant(as, 2, swp);
         ARIADNE_TEST_PRINT(ty);
         ARIADNE_TEST_PRINT(tc);
         ARIADNE_TEST_PRINT(rec(tc));
@@ -359,9 +359,9 @@ VectorTaylorFunction henon(const VectorTaylorFunction& x, const Vector<Float64Va
 class TestVectorTaylorFunction
 {
     Precision64 pr;
-    Sweeper swp;
+    Sweeper<Float64> swp;
   public:
-    TestVectorTaylorFunction(Sweeper sweeper);
+    TestVectorTaylorFunction(Sweeper<Float64> sweeper);
     Void test();
   private:
     Void test_constructors();
@@ -376,7 +376,7 @@ class TestVectorTaylorFunction
 };
 
 
-TestVectorTaylorFunction::TestVectorTaylorFunction(Sweeper sweeper)
+TestVectorTaylorFunction::TestVectorTaylorFunction(Sweeper<Float64> sweeper)
     : swp(sweeper)
 {
   std::cout<<std::setprecision(17);
@@ -669,7 +669,7 @@ Void TestTaylorFunctionFactory::test()
 
 Void TestTaylorFunctionFactory::test_create()
 {
-    Sweeper sweeper(new ThresholdSweeper(1e-4));
+    Sweeper<Float64> sweeper(new ThresholdSweeper<Float64>(Precision64(),1e-4));
     TaylorFunctionFactory factory(sweeper);
 
     Vector<ExactIntervalType> dom={{-1,+1},{0.5,3.5}};
@@ -695,7 +695,7 @@ Void TestTaylorFunctionFactory::test_create()
 
 
 Int main() {
-    ThresholdSweeper sweeper(std::numeric_limits<float>::epsilon());
+    ThresholdSweeper<Float64> sweeper(Precision64(),std::numeric_limits<float>::epsilon());
     TestScalarTaylorFunction(sweeper).test();
     TestVectorTaylorFunction(sweeper).test();
     TestTaylorFunctionFactory().test();

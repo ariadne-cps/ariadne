@@ -22,7 +22,7 @@
  */
 
 /*! \file algebra/symmetric_matrix.h
- *  \brief 
+ *  \brief
  */
 
 
@@ -43,8 +43,8 @@ template<class X> class SymmetricMatrix : public Matrix<X>
 {
   public:
     SymmetricMatrix(SizeType n) : Matrix<X>(n,n) { }
+    template<class X1, class X2> friend Covector<ArithmeticType<X1,X2>> operator*(SymmetricMatrix<X1> const& S, Vector<X2> const& v);
 };
-template<class X1, class X2> Covector<ArithmeticType<X1,X2>> operator*(SymmetricMatrix<X1> const& S, Vector<X2> const& v);
 
 
 } // namespace Ariadne

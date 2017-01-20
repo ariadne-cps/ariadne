@@ -43,7 +43,7 @@ class GridTreeSet;
 template<class X, class R> class Constraint;
 
 template<class X> class Procedure;
-typedef Procedure<ValidatedNumericType> ValidatedProcedure;
+typedef Procedure<ValidatedNumber> ValidatedProcedure;
 
 template<class P,class F> class TaylorModel;
 template<class M> class VectorFunctionPatch;

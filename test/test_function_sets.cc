@@ -31,7 +31,7 @@
 #include "geometry/grid_set.h"
 #include "geometry/affine_set.h"
 #include "geometry/function_set.h"
-#include "expression/formula.h"
+#include "function/formula.h"
 #include "output/graphics.h"
 
 #include "test.h"
@@ -46,7 +46,9 @@ class TestConstrainedImageSet
   public:
     Void test() {
         figure.set_bounding_box(ExactBoxType{{-4.0,+4.0},{-4.0,+4.0}});
+        ARIADNE_TEST_CALL(test_separated()); return;
         ARIADNE_TEST_CALL(test_constructor());
+        ARIADNE_TEST_CALL(test_domain());
         ARIADNE_TEST_CALL(test_geometry());
         ARIADNE_TEST_CALL(test_separated());
         ARIADNE_TEST_CALL(test_split());
@@ -63,6 +65,17 @@ class TestConstrainedImageSet
         set.new_parameter_constraint(0<=s[0]+s[1]<=1);
         set.new_space_constraint(x[0]+x[1]<=2);
         set.apply({x[0]+x[1],x[0]-x[1]*x[1]});
+    }
+
+    Void test_domain() {
+        List<EffectiveScalarFunction> s=EffectiveScalarFunction::coordinates(3);
+        EffectiveBoxType d(3,EffectiveIntervalType(Decimal(-1.1),Decimal(+2.1)));
+        EffectiveConstrainedImageSet set(d,{s[0],s[0]*s[0]/4+s[1]+s[2]/2});
+        set.new_parameter_constraint(0<=s[0]+s[1]<=1);
+
+        ExactBoxType bx(cast_exact_box(set.bounding_box()));
+        ValidatedSierpinskian overlaps = set.overlaps(bx);
+//        ValidatedSierpinskian separated = set.separated(bx);
     }
 
     Void test_geometry() {
@@ -142,6 +155,7 @@ class TestConstrainedImageSet
         List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
 
         EffectiveBoxType d(3,EffectiveIntervalType(Decimal(-1.1),Decimal(+2.1)));
+//        EffectiveBoxType d(3,EffectiveIntervalType(Decimal(-0.1015625),Decimal(+2.1015625)));
         EffectiveConstrainedImageSet set(d,{s[0],s[0]*s[0]/4+s[1]+s[2]/2});
         set.new_parameter_constraint(0<=s[0]+s[1]<=1);
 

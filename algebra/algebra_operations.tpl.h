@@ -236,7 +236,7 @@ template<class A> A NormedAlgebraOperations<A>::_sqrt(const A& x)
         ARIADNE_THROW(DomainException,"log(A x)","x="<<x<<"\n");
     }
 
-    Float64Error eps=mag(rad/avg);
+    auto eps=mag(rad/avg);
     ARIADNE_DEBUG_ASSERT(decide(eps<1));
 
     Series<X> sqrt_series=Series<X>::sqrt(X(1));
@@ -331,18 +331,19 @@ template<class A> A NormedAlgebraOperations<A>::_exp(const A& x)
 
     // Scale to unit interval
     Nat sfp=0; // A number such that 2^sfp>rad(x.range())
-    while(decide(Float64Value(two_exp(sfp))<rad)) { ++sfp; }
-    Float64Value sf=two_exp(sfp);
+    while(decide(Dyadic(two_exp(sfp))<rad)) { ++sfp; }
+    Dyadic sf=two_exp(sfp);
     A y = (x-avg)/sf;
-    auto yrad=rad*mag(sf);
+    auto yrad=rad*mag((avg-avg)+sf);
 
     // Find the required degree
     Nat deg = 0;
-    auto trunc_err=pow(yrad,0u);
-    trunc_err*=2u;
+    auto term_mag=pow(yrad,0u);
+    auto trunc_err=term_mag;
     do {
         ++deg;
-        trunc_err=pow(yrad,deg)*mag(rec(Factorial(deg))*(deg+1u)/deg);
+        term_mag *= (yrad/deg);
+        trunc_err = term_mag*(2u*deg+2u)/deg;
     } while(decide(trunc_err>tol));
 
     A z=x.create_constant(1);
@@ -384,10 +385,12 @@ template<class A> A NormedAlgebraOperations<A>::_sin(const A& x)
 
     // Find the required degree
     Nat deg = 0;
-    auto trunc_err=pow(rad,0u)*2u;
+    auto term_mag=pow(rad,0u);
+    auto trunc_err=term_mag;
     do {
         ++deg;
-        trunc_err=pow(rad,deg)*mag(rec(Factorial(deg))*(deg+1u)/deg);
+        term_mag *= (rad/deg);
+        trunc_err = term_mag*(2u*deg+2u)/deg;
     } while(decide(trunc_err>tol));
 
     // Compute x(1-y/6+y^2/120-y^3/5040+... = x(1-y/6*(1-y/20*(1-y/42*...)
@@ -424,10 +427,12 @@ template<class A> A NormedAlgebraOperations<A>::_cos(const A& x)
 
     // Find the required degree
     Nat deg = 0;
-    auto trunc_err=pow(rad,0u)*2u;
+    auto term_mag=pow(rad,0u);
+    auto trunc_err=term_mag;
     do {
         ++deg;
-        trunc_err=pow(rad,deg)*mag(rec(Factorial(deg))*(deg+1)/deg);
+        term_mag *= (rad/deg);
+        trunc_err=term_mag*(2u*deg+2u)/deg;
     } while(decide(trunc_err>tol));
 
     // Compute 1-y/2+y^2/24-y^3/720+... = (1-y/2*(1-y/12*(1-y/30*...)

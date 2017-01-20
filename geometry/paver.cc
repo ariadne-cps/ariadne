@@ -32,12 +32,12 @@
 #include "function/function.h"
 #include "function/taylor_function.h"
 #include "function/procedure.h"
+#include "solvers/nonlinear_programming.h"
+#include "solvers/constraint_solver.h"
 #include "geometry/function_set.h"
 #include "geometry/affine_set.h"
 #include "geometry/paving_interface.h"
 #include "geometry/grid_set.h"
-#include "solvers/nonlinear_programming.h"
-#include "solvers/constraint_solver.h"
 #include "geometry/affine_set.h"
 #include "algebra/algebra.h"
 
@@ -69,8 +69,8 @@ Void optimal_constraint_adjoin_outer_approximation(PavingInterface& paving, cons
 namespace {
 
 ValidatedProcedure make_procedure(const ValidatedScalarFunction& f) {
-    Formula<ValidatedNumericType> e=f(Formula<ValidatedNumericType>::identity(f.argument_size()));
-    return Procedure<ValidatedNumericType>(e);
+    Formula<ValidatedNumber> e=f(Formula<ValidatedNumber>::identity(f.argument_size()));
+    return Procedure<ValidatedNumber>(e);
 }
 
 UpperIntervalType emulrng(const ExactFloatVector& x, const ExactFloatVector& z) {
@@ -386,7 +386,7 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
 
     if(!(t<inf)) {
         ARIADNE_WARN("feasibility failed\n");
-        char c; cin >> c;
+        char c; std::cin >> c;
         at=0;
         ay=midpoint(d);
         ax=FloatApproximationVector(x.size(),one/x.size());
@@ -403,7 +403,7 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
 
         // Use the computed dual variables to try to make a scalar function which is negative over the entire domain.
         // This should be easier than using all constraints separately
-        TrivialSweeper sweeper;
+        TrivialSweeper<Float64> sweeper{Precision64()};
         EffectiveScalarFunction zero_function=EffectiveScalarFunction::zero(m);
         EffectiveVectorFunction identity_function=EffectiveVectorFunction::identity(m);
         ScalarTaylorFunction txg(domain,zero_function,sweeper);
@@ -474,7 +474,7 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
 
 Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingInterface& r, const ExactBoxType& d, const VectorTaylorFunction& fg, const ExactBoxType& c, const GridCell& b, ExactPoint& x, ExactPoint& y, Int e)
 {
-    Sweeper sweeper = fg.sweeper();
+    Sweeper<Float64> sweeper = fg.sweeper();
     Precision64 pr;
 
     // When making a new starting primal point, need to move components away from zero
@@ -552,10 +552,10 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
         //Pair<ExactBoxType,ExactBoxType> sd=solver.split(List<EffectiveConstraint>(1u,constraint),d);
         ARIADNE_LOG(4,"  Splitting domain\n");
         Pair<ExactBoxType,ExactBoxType> sd=split(d);
-        ExactPoint nx = cast_exact(Float64Approximation(1.0-XSIGMA)*ax + Vector<Float64Approximation>(x.size(),XSIGMA/x.size()));
+        ExactPoint nx = cast_exact((1-XSIGMA)*ax + Vector<Float64Approximation>(x.size(),XSIGMA/x.size()));
         ExactPoint ny = midpoint(sd.first);
         hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(r, sd.first, fg, c, b, nx, ny, e);
-        nx = cast_exact(Float64Approximation(1.0-XSIGMA)*x + Vector<Float64Approximation>(x.size(),XSIGMA/x.size()));
+        nx = cast_exact((1-XSIGMA)*x + Vector<Float64Approximation>(x.size(),XSIGMA/x.size()));
         ny = midpoint(sd.second);
         hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(r, sd.second, fg, c, b, x, ny, e);
     }
@@ -566,7 +566,7 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
     } else {
         ARIADNE_LOG(4,"  Splitting cell; t="<<t<<"\n");
         Pair<GridCell,GridCell> sb = b.split();
-        ExactPoint sx = cast_exact(Float64Approximation(1-XSIGMA)*x + Vector<Float64Approximation>(x.size(),XSIGMA/x.size()));
+        ExactPoint sx = cast_exact((1-XSIGMA)*x + Vector<Float64Approximation>(x.size(),XSIGMA/x.size()));
         ExactPoint sy = y;
         hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(r,d,fg,c,sb.first,sx,sy,e);
         sx = cast_exact(Float64Approximation(1-XSIGMA)*x + Vector<Float64Approximation>(x.size(),XSIGMA/x.size()));
@@ -598,7 +598,7 @@ Void subdivision_adjoin_outer_approximation(PavingInterface& paving,
         errors[i]=paving.grid().lengths()[i]/(1<<depth);
     }
 
-    ::subdivision_adjoin_outer_approximation_recursion(paving,subdomain,function,constraints,depth,errors);
+    Ariadne::subdivision_adjoin_outer_approximation_recursion(paving,subdomain,function,constraints,depth,errors);
 }
 
 Void affine_adjoin_outer_approximation(PavingInterface& paving,
@@ -625,7 +625,7 @@ constraint_adjoin_outer_approximation(PavingInterface& p, const ExactBoxType& d,
     const Nat l=(d.size()+f.result_size()+g.result_size())*2;
     ExactPoint x(l); for(Nat k=0; k!=l; ++k) { x[k]=Float64Value(1.0/l); }
 
-    ::hotstarted_constraint_adjoin_outer_approximation_recursion(p,d,f,g,rc,b,x,y,e);
+    Ariadne::hotstarted_constraint_adjoin_outer_approximation_recursion(p,d,f,g,rc,b,x,y,e);
 }
 
 Void
@@ -670,10 +670,10 @@ Void optimal_constraint_adjoin_outer_approximation(PavingInterface& p, const Exa
             }
         }
     } else {
-        ThresholdSweeper swp(1e-12);
+        ThresholdSweeper<Float64> swp(Precision64(),1e-12);
         fg=VectorTaylorFunction(d,join(f,g),swp);
     }
-    ::hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(p,d,fg,rc,b,x,y,e);
+    Ariadne::hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(p,d,fg,rc,b,x,y,e);
 }
 
 } // namespace

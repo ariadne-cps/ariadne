@@ -34,7 +34,7 @@
 #include "box.h"
 #include "box.tpl.h"
 
-#include "expression/formula.h"
+#include "function/formula.h"
 
 #include "algebra/algebra.h"
 

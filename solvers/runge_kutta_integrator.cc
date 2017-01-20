@@ -34,7 +34,7 @@
 #include "algebra/algebra.h"
 #include "function/function.h"
 #include "function/taylor_model.h"
-#include "expression/formula.h"
+#include "function/formula.h"
 
 namespace Ariadne {
 

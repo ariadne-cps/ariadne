@@ -27,7 +27,11 @@
 #include "numeric/float.h"
 #include "geometry/interval.h"
 
+
 namespace Ariadne {
+    template class Expansion<double>;
+    template class Expansion<Dyadic>;
+
     template class Expansion<Float64>;
     template class Expansion<Float64Value>;
     template class Expansion<Float64Bounds>;
@@ -42,7 +46,7 @@ namespace Ariadne {
     template class SortedExpansion<Float64Bounds,ReverseLexicographicIndexLess>;
     template class SortedExpansion<Float64Approximation,ReverseLexicographicIndexLess>;
 
-    
+
     template class Expansion<Float64UpperInterval>;
     template class SortedExpansion<Float64UpperInterval,GradedIndexLess>;
     template class SortedExpansion<Float64UpperInterval,ReverseLexicographicIndexLess>;

@@ -42,7 +42,106 @@ template<class T> using InitializerList = InitializerList<T>;
 template<class X> class Matrix;
 template<class X> class SymmetricMatrix;
 
+
+template<class X> class DiagonalMatrix;
+
+struct DiagonalMatrixOperations {
+
+    template<class X> friend OutputStream& operator<<(OutputStream& os, DiagonalMatrix<X> const& A) {
+        return A.write(os);
+    }
+
+    template<class X> friend DiagonalMatrix<ProductType<X,X>> operator+(DiagonalMatrix<X> A1, DiagonalMatrix<X> const& A2) {
+        ARIADNE_PRECONDITION(A1.size()==A2.size());
+        for(SizeType i=0; i!=A1.size(); ++i) { const_cast<X&>(A1.at(i,i))+=A2.at(i,i); }
+        return std::move(A1);
+    }
+
+    template<class X> friend DiagonalMatrix<ProductType<X,X>> operator-(DiagonalMatrix<X> A1, DiagonalMatrix<X> const& A2) {
+        ARIADNE_PRECONDITION(A1.size()==A2.size());
+        for(SizeType i=0; i!=A1.size(); ++i) { const_cast<X&>(A1.at(i,i))-=A2.at(i,i); }
+        return std::move(A1);
+    }
+
+    template<class X> friend DiagonalMatrix<ProductType<X,X>> operator*(DiagonalMatrix<X> A1, DiagonalMatrix<X> const& A2) {
+        if(A1.size()!=A2.size()) { std::cerr<<"A1="<<A1<<", A2="<<A2<<"\n"; }
+        ARIADNE_PRECONDITION(A1.size()==A2.size());
+        for(SizeType i=0; i!=A1.size(); ++i) { const_cast<X&>(A1.at(i,i))*=A2.at(i,i); }
+        return std::move(A1);
+    }
+
+    template<class X> friend DiagonalMatrix<ProductType<X,X>> operator/(DiagonalMatrix<X> A1, DiagonalMatrix<X> const& A2) {
+        if(A1.size()!=A2.size()) { std::cerr<<"A1="<<A1<<", A2="<<A2<<"\n"; }
+        ARIADNE_PRECONDITION(A1.size()==A2.size());
+        for(SizeType i=0; i!=A1.size(); ++i) { const_cast<X&>(A1.at(i,i))/=A2.at(i,i); }
+        return std::move(A1);
+    }
+
+    template<class X> friend Matrix<X> operator+(Matrix<X> A, DiagonalMatrix<X> const& D) {
+        ARIADNE_PRECONDITION(A.row_size()==D.size() && A.column_size()==D.size());
+        for(SizeType i=0; i!=D.size(); ++i) { A.at(i,i)+=D.at(i,i); }
+        return std::move(A);
+    }
+
+    template<class X> friend Matrix<X> operator*(Matrix<X> A, DiagonalMatrix<X> const& D) {
+        ARIADNE_PRECONDITION(A.column_size()==D.size());
+        for(SizeType j=0; j!=A.column_size(); ++j) {
+            for(SizeType i=0; i!=A.row_size(); ++i) {
+                A.at(i,j)*=D.at(j,j);
+            }
+        }
+        return std::move(A);
+    }
+
+    template<class X> friend Matrix<X> operator*(DiagonalMatrix<X> const& D, Matrix<X> A) {
+        ARIADNE_PRECONDITION(D.size()==A.row_size())
+        for(SizeType i=0; i!=A.row_size(); ++i) {
+            for(SizeType j=0; j!=A.column_size(); ++j) {
+                A.at(i,j)*=D.at(i,i);
+            }
+        }
+        return std::move(A);
+    }
+
+    template<class X> friend Matrix<X> operator*(DiagonalMatrix<X> const& D, Transpose<Matrix<X>> const& A) {
+        ARIADNE_PRECONDITION(D.size()==A.row_size())
+        Matrix<X> R(A.row_size(),A.column_size());
+        for(SizeType i=0; i!=A.row_size(); ++i) {
+            for(SizeType j=0; j!=A.column_size(); ++j) {
+                R.at(i,j)=D.at(i,i)*A.at(i,j);
+            }
+        }
+        return std::move(A);
+    }
+
+    template<class X> friend Vector<X> operator*(DiagonalMatrix<X> const& D, Vector<X> v) {
+        ARIADNE_PRECONDITION(D.size()==v.size())
+        for(SizeType i=0; i!=v.size(); ++i) {
+            v.at(i)*=D.at(i,i);
+        }
+        return std::move(v);
+    }
+
+    template<class X> friend Vector<X> operator*(Vector<X> v, DiagonalMatrix<X> const& D) {
+        ARIADNE_PRECONDITION(D.size()==v.size())
+        for(SizeType i=0; i!=v.size(); ++i) {
+            v.at(i)*=D.at(i,i);
+        }
+        return std::move(v);
+    }
+
+    template<class X> friend Vector<X> operator/(Vector<X> v, DiagonalMatrix<X> const& D) {
+        ARIADNE_PRECONDITION(D.size()==v.size())
+        for(SizeType i=0; i!=v.size(); ++i) {
+            v.at(i)/=D.at(i,i);
+        }
+        return std::move(v);
+    }
+};
+
+
 template<class X> class DiagonalMatrix
+    : DiagonalMatrixOperations
 {
     X _zero;
     Array<X> _ary;
@@ -128,97 +227,6 @@ template<class X> OutputStream& DiagonalMatrix<X>::write(OutputStream& os) const
     return os << "diag(" << this->_ary << ")";
 }
 
-
-template<class X> OutputStream& operator<<(OutputStream& os, DiagonalMatrix<X> const& A) {
-    return A.write(os);
-}
-
-template<class X> DiagonalMatrix<ProductType<X,X>> operator+(DiagonalMatrix<X> A1, DiagonalMatrix<X> const& A2) {
-    ARIADNE_PRECONDITION(A1.size()==A2.size());
-    for(SizeType i=0; i!=A1.size(); ++i) { const_cast<X&>(A1.at(i,i))+=A2.at(i,i); }
-    return std::move(A1);
-}
-
-template<class X> DiagonalMatrix<ProductType<X,X>> operator-(DiagonalMatrix<X> A1, DiagonalMatrix<X> const& A2) {
-    ARIADNE_PRECONDITION(A1.size()==A2.size());
-    for(SizeType i=0; i!=A1.size(); ++i) { const_cast<X&>(A1.at(i,i))-=A2.at(i,i); }
-    return std::move(A1);
-}
-
-template<class X> DiagonalMatrix<ProductType<X,X>> operator*(DiagonalMatrix<X> A1, DiagonalMatrix<X> const& A2) {
-    if(A1.size()!=A2.size()) { std::cerr<<"A1="<<A1<<", A2="<<A2<<"\n"; }
-    ARIADNE_PRECONDITION(A1.size()==A2.size());
-    for(SizeType i=0; i!=A1.size(); ++i) { const_cast<X&>(A1.at(i,i))*=A2.at(i,i); }
-    return std::move(A1);
-}
-
-template<class X> DiagonalMatrix<ProductType<X,X>> operator/(DiagonalMatrix<X> A1, DiagonalMatrix<X> const& A2) {
-    if(A1.size()!=A2.size()) { std::cerr<<"A1="<<A1<<", A2="<<A2<<"\n"; }
-    ARIADNE_PRECONDITION(A1.size()==A2.size());
-    for(SizeType i=0; i!=A1.size(); ++i) { const_cast<X&>(A1.at(i,i))/=A2.at(i,i); }
-    return std::move(A1);
-}
-
-template<class X> Matrix<X> operator+(Matrix<X> A, DiagonalMatrix<X> const& D) {
-    ARIADNE_PRECONDITION(A.row_size()==D.size() && A.column_size()==D.size());
-    for(SizeType i=0; i!=D.size(); ++i) { A.at(i,i)+=D.at(i,i); }
-    return std::move(A);
-}
-
-template<class X> Matrix<X> operator*(Matrix<X> A, DiagonalMatrix<X> const& D) {
-    ARIADNE_PRECONDITION(A.column_size()==D.size());
-    for(SizeType j=0; j!=A.column_size(); ++j) {
-        for(SizeType i=0; i!=A.row_size(); ++i) {
-            A.at(i,j)*=D.at(j,j);
-        }
-    }
-    return std::move(A);
-}
-
-template<class X> Matrix<X> operator*(DiagonalMatrix<X> const& D, Matrix<X> A) {
-    ARIADNE_PRECONDITION(D.size()==A.row_size())
-    for(SizeType i=0; i!=A.row_size(); ++i) {
-        for(SizeType j=0; j!=A.column_size(); ++j) {
-            A.at(i,j)*=D.at(i,i);
-        }
-    }
-    return std::move(A);
-}
-
-template<class X> Matrix<X> operator*(DiagonalMatrix<X> const& D, Transpose<Matrix<X>> const& A) {
-    ARIADNE_PRECONDITION(D.size()==A.row_size())
-    Matrix<X> R(A.row_size(),A.column_size());
-    for(SizeType i=0; i!=A.row_size(); ++i) {
-        for(SizeType j=0; j!=A.column_size(); ++j) {
-            R.at(i,j)=D.at(i,i)*A.at(i,j);
-        }
-    }
-    return std::move(A);
-}
-
-template<class X> Vector<X> operator*(DiagonalMatrix<X> const& D, Vector<X> v) {
-    ARIADNE_PRECONDITION(D.size()==v.size())
-    for(SizeType i=0; i!=v.size(); ++i) {
-        v.at(i)*=D.at(i,i);
-    }
-    return std::move(v);
-}
-
-template<class X> Vector<X> operator*(Vector<X> v, DiagonalMatrix<X> const& D) {
-    ARIADNE_PRECONDITION(D.size()==v.size())
-    for(SizeType i=0; i!=v.size(); ++i) {
-        v.at(i)*=D.at(i,i);
-    }
-    return std::move(v);
-}
-
-template<class X> Vector<X> operator/(Vector<X> v, DiagonalMatrix<X> const& D) {
-    ARIADNE_PRECONDITION(D.size()==v.size())
-    for(SizeType i=0; i!=v.size(); ++i) {
-        v.at(i)/=D.at(i,i);
-    }
-    return std::move(v);
-}
 
 } // namespace Ariadne
 

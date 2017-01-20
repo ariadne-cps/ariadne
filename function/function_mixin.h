@@ -34,14 +34,15 @@ typedef Differential<ApproximateNumericType> ApproximateDifferential;
 typedef Differential<ValidatedNumericType> ValidatedDifferential;
 typedef UnivariateDifferential<ApproximateNumericType> ApproximateUnivariateDifferential;
 typedef UnivariateDifferential<ValidatedNumericType> ValidatedUnivariateDifferential;
-typedef TaylorModel<ApproximateTag,Float64> ApproximateTaylorModel;
-typedef TaylorModel<ValidatedTag,Float64> ValidatedTaylorModel;
-typedef Formula<ApproximateNumericType> ApproximateFormula;
-typedef Formula<ValidatedNumericType> ValidatedFormula;
-typedef Formula<EffectiveNumericType> EffectiveFormula;
-typedef Algebra<ApproximateNumericType> ApproximateAlgebra;
-typedef Algebra<ValidatedNumericType> ValidatedAlgebra;
-typedef Algebra<EffectiveNumericType> EffectiveAlgebra;
+typedef TaylorModel<ApproximateTag,Float64> ApproximateTaylorModel64;
+typedef TaylorModel<ValidatedTag,Float64> ValidatedTaylorModel64;
+
+typedef Formula<ApproximateNumber> ApproximateFormula;
+typedef Formula<ValidatedNumber> ValidatedFormula;
+typedef Formula<EffectiveNumber> EffectiveFormula;
+typedef Algebra<ApproximateNumber> ApproximateAlgebra;
+typedef Algebra<ValidatedNumber> ValidatedAlgebra;
+typedef Algebra<EffectiveNumber> EffectiveAlgebra;
 
 template<class F, class P, class D, class C> class FunctionMixin { };
 template<class F, class P, class D=BoxDomain> class ScalarFunctionMixin;
@@ -102,11 +103,14 @@ class FunctionMixin<F,ApproximateTag,D,C>
     template<class X> using Result = typename ElementTraits<C>::template Type<X>;
   public:
     virtual FunctionInterface<ApproximateTag,D,C>* _clone() const override;
-    virtual Result<ApproximateNumericType> _evaluate(const Argument<ApproximateNumericType>& x) const override;
-    virtual Result<ApproximateDifferential> _evaluate(const Argument<ApproximateDifferential>& x) const override;
-    virtual Result<ApproximateFormula> _evaluate(const Argument<ApproximateFormula>& x) const override;
-    virtual Result<ApproximateTaylorModel> _evaluate(const Argument<ApproximateTaylorModel>& x) const override;
-    virtual Result<ApproximateAlgebra> _evaluate(const Argument<ApproximateAlgebra>& x) const override;
+    virtual Result<Float64Approximation> _evaluate(const Argument<Float64Approximation>& x) const override;
+    virtual Result<FloatMPApproximation> _evaluate(const Argument<FloatMPApproximation>& x) const override;
+    virtual Result<Differential<Float64Approximation>> _evaluate(const Argument<Differential<Float64Approximation>>& x) const override;
+    virtual Result<Differential<FloatMPApproximation>> _evaluate(const Argument<Differential<FloatMPApproximation>>& x) const override;
+    virtual Result<TaylorModel<ApproximateTag,Float64>> _evaluate(const Argument<TaylorModel<ApproximateTag,Float64>>& x) const override;
+    virtual Result<TaylorModel<ApproximateTag,FloatMP>> _evaluate(const Argument<TaylorModel<ApproximateTag,FloatMP>>& x) const override;
+    virtual Result<Formula<ApproximateNumber>> _evaluate(const Argument<Formula<ApproximateNumber>>& x) const override;
+    virtual Result<Algebra<ApproximateNumber>> _evaluate(const Argument<Algebra<ApproximateNumber>>& x) const override;
 };
 
 // A wrapper for classes with non-static _compute and _compute_approx methods
@@ -120,11 +124,14 @@ class FunctionMixin<F,ValidatedTag,D,C>
   public:
     using FunctionMixin<F,ApproximateTag,D,C>::_evaluate;
     virtual FunctionInterface<ValidatedTag,D,C>* _clone() const override;
-    virtual Result<ValidatedNumericType> _evaluate(const Argument<ValidatedNumericType>& x) const override;
-    virtual Result<ValidatedDifferential> _evaluate(const Argument<ValidatedDifferential>& x) const override;
-    virtual Result<ValidatedFormula> _evaluate(const Argument<ValidatedFormula>& x) const override;
-    virtual Result<ValidatedTaylorModel> _evaluate(const Argument<ValidatedTaylorModel>& x) const override;
-    virtual Result<ValidatedAlgebra> _evaluate(const Argument<ValidatedAlgebra>& x) const override;
+    virtual Result<Float64Bounds> _evaluate(const Argument<Float64Bounds>& x) const override;
+    virtual Result<FloatMPBounds> _evaluate(const Argument<FloatMPBounds>& x) const override;
+    virtual Result<Differential<Float64Bounds>> _evaluate(const Argument<Differential<Float64Bounds>>& x) const override;
+    virtual Result<Differential<FloatMPBounds>> _evaluate(const Argument<Differential<FloatMPBounds>>& x) const override;
+    virtual Result<TaylorModel<ValidatedTag,Float64>> _evaluate(const Argument<TaylorModel<ValidatedTag,Float64>>& x) const override;
+    virtual Result<TaylorModel<ValidatedTag,FloatMP>> _evaluate(const Argument<TaylorModel<ValidatedTag,FloatMP>>& x) const override;
+    virtual Result<Formula<ValidatedNumber>> _evaluate(const Argument<Formula<ValidatedNumber>>& x) const override;
+    virtual Result<Algebra<ValidatedNumber>> _evaluate(const Argument<Algebra<ValidatedNumber>>& x) const override;
 
     virtual Result<ValidatedScalarFunction> _evaluate(const Argument<ValidatedScalarFunction>& x) const override;
 
@@ -141,9 +148,11 @@ class FunctionMixin<F,EffectiveTag,D,C>
   public:
     using FunctionMixin<F,ValidatedTag,D,C>::_evaluate;
     virtual FunctionInterface<EffectiveTag,D,C>* _clone() const override;
-    virtual Result<EffectiveNumericType> _evaluate(const Argument<EffectiveNumericType>& x) const override;
-    virtual Result<EffectiveFormula> _evaluate(const Argument<EffectiveFormula>& x) const override;
-    virtual Result<EffectiveAlgebra> _evaluate(const Argument<EffectiveAlgebra>& x) const override;
+    virtual Result<Real> _evaluate(const Argument<Real>& x) const override;
+    virtual Result<Algebra<Real>> _evaluate(const Argument<Algebra<Real>>& x) const override;
+    virtual Result<Formula<Real>> _evaluate(const Argument<Formula<Real>>& x) const override;
+    virtual Result<Algebra<EffectiveNumber>> _evaluate(const Argument<Algebra<EffectiveNumber>>& x) const override;
+    virtual Result<Formula<EffectiveNumber>> _evaluate(const Argument<Formula<EffectiveNumber>>& x) const override;
 };
 
 template<class F, class P, class D> class ScalarFunctionMixin

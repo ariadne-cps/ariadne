@@ -37,6 +37,10 @@ template class UnivariateDifferential<Float64Approximation>;
 template class UnivariateDifferential<Float64Bounds>;
 template class UnivariateDifferential<UpperIntervalType>;
 
+template class UnivariateDifferential<FloatMPApproximation>;
+template class UnivariateDifferential<FloatMPBounds>;
+
+
 template class Differential<Float64>;
 template class Differential<Float64Bounds>;
 template class Differential<Float64Approximation>;
@@ -53,5 +57,15 @@ template class Vector<Differential<Float64>>;
 template class Vector<Differential<Float64Bounds>>;
 template class Vector<Differential<Float64Approximation>>;
 //template class Vector<Differential<UpperIntervalType>>;
+
+template class Differential<FloatMPBounds>;
+template class Differential<FloatMPApproximation>;
+template class AlgebraOperations<Differential<FloatMPApproximation>>;
+template class AlgebraOperations<Differential<FloatMPBounds>>;
+template class GradedAlgebraOperations<Differential<FloatMPApproximation>>;
+template class GradedAlgebraOperations<Differential<FloatMPBounds>>;
+
+template class Vector<Differential<FloatMPBounds>>;
+template class Vector<Differential<FloatMPApproximation>>;
 
 }

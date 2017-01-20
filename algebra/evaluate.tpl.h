@@ -66,7 +66,7 @@ template<class X, class Y> Y horner_evaluate(const Expansion<X>& e, const Vector
         assert(a[k]>na[k]);
         // Set r[k]=(((c+r[0])*x[0]^a[0]+r[1])*x[1]^a[1]+...+r[k])*x[k]^(a[k]-na[k])
         // Omit zero terms where possible
-        t=numeric_cast<typename Y::NumericType>(c);
+        t=c;
         for(SizeType i=0; i!=std::min(j,k); ++i) {
             for(Nat ii=0; ii!=a[i]; ++ii) {
                 t=t*x[i];

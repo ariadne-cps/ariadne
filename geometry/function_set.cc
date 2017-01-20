@@ -29,16 +29,12 @@
 #include "function/polynomial.h"
 #include "function/function.h"
 #include "function/taylor_function.h"
-#include "function/procedure.h"
-#include "geometry/function_set.h"
-#include "geometry/affine_set.h"
-#include "geometry/paving_interface.h"
-#include "geometry/grid_set.h"
 #include "solvers/nonlinear_programming.h"
 #include "solvers/constraint_solver.h"
-#include "geometry/paver.h"
+#include "geometry/function_set.h"
 #include "geometry/affine_set.h"
-#include "algebra/algebra.h"
+#include "geometry/grid_set.h"
+#include "geometry/paver.h"
 
 #include "output/graphics_interface.h"
 #include "output/drawer.h"
@@ -81,8 +77,8 @@ Matrix<Float64> nonlinearities_zeroth_order(const VectorTaylorFunction& f, const
     Matrix<Float64> nonlinearities=Matrix<Float64>::zero(m,n);
     MultiIndex a;
     for(Nat i=0; i!=m; ++i) {
-        const ValidatedTaylorModel& tm=g.model(i);
-        for(ValidatedTaylorModel::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
+        const ValidatedTaylorModel64& tm=g.model(i);
+        for(ValidatedTaylorModel64::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
             a=iter->key();
             if(a.degree()>1) {
                 for(Nat j=0; j!=n; ++j) {
@@ -248,7 +244,7 @@ List<EffectiveConstraint> constraints(const EffectiveVectorFunction& f, const Ef
 ConstraintSet::ConstraintSet(const EffectiveVectorFunction& f, const EffectiveBoxType& b)
     : _dimension(f.argument_size()), _constraints()
 {
-    this->_constraints=::constraints(f,b);
+    this->_constraints=Ariadne::constraints(f,b);
 }
 
 ConstraintSet::ConstraintSet(const List<EffectiveConstraint>& c)
@@ -258,12 +254,12 @@ ConstraintSet::ConstraintSet(const List<EffectiveConstraint>& c)
 
 EffectiveVectorFunction const ConstraintSet::constraint_function() const
 {
-    return ::constraint_function(this->dimension(),this->constraints());
+    return Ariadne::constraint_function(this->dimension(),this->constraints());
 }
 
 EffectiveBoxType const ConstraintSet::constraint_bounds() const
 {
-    return ::constraint_bounds(this->constraints());
+    return Ariadne::constraint_bounds(this->constraints());
 }
 
 ConstraintSet*
@@ -317,7 +313,7 @@ BoundedConstraintSet::BoundedConstraintSet(const EffectiveBoxType& bx)
 }
 
 BoundedConstraintSet::BoundedConstraintSet(const EffectiveBoxType& d, const EffectiveVectorFunction& f, const EffectiveBoxType& b)
-    : _domain(d), _constraints(::constraints(f,b))
+    : _domain(d), _constraints(Ariadne::constraints(f,b))
 {
     ARIADNE_ASSERT(b.size()==f.result_size());
     ARIADNE_ASSERT(d.size()==f.argument_size());
@@ -330,12 +326,12 @@ BoundedConstraintSet::BoundedConstraintSet(const EffectiveBoxType& d, const List
 
 EffectiveVectorFunction const BoundedConstraintSet::constraint_function() const
 {
-    return ::constraint_function(this->dimension(),this->constraints());
+    return Ariadne::constraint_function(this->dimension(),this->constraints());
 }
 
 EffectiveBoxType const BoundedConstraintSet::constraint_bounds() const
 {
-    return ::constraint_bounds(this->constraints());
+    return Ariadne::constraint_bounds(this->constraints());
 }
 
 BoundedConstraintSet*
@@ -462,6 +458,7 @@ Matrix<Float64Value> cast_exact(Matrix<Float64Bounds> vA) {
 ValidatedAffineConstrainedImageSet
 ConstrainedImageSet::affine_approximation() const
 {
+    Precision64 prec;
     const Vector<ExactIntervalType> D=approximation(this->domain());
     Vector<Float64Value> m=midpoint(D);
     Matrix<Float64Value> G=cast_exact(jacobian(this->_function,m));
@@ -474,7 +471,7 @@ ConstrainedImageSet::affine_approximation() const
     for(List<EffectiveConstraint>::ConstIterator iter=this->_constraints.begin();
         iter!=this->_constraints.end(); ++iter)
     {
-        AffineModel<ValidatedTag,Float64> a=affine_model(D,iter->function());
+        AffineModel<ValidatedTag,Float64> a=affine_model(D,iter->function(),prec);
         ExactIntervalType b=iter->bounds();
         result.new_constraint(b.lower()<=a<=b.upper());
     }
@@ -778,13 +775,6 @@ ConstrainedImageSet::write(OutputStream& os) const
 
 
 
-} // namespace Ariadne
-
-#include "function/procedure.h"
-#include "utility/container.h"
-#include "algebra/vector.h"
-
-namespace Ariadne {
 
 template<class SF> struct FunctionTraits;
 template<class X> struct FunctionTraits< ScalarFunction<X> > { typedef VectorFunction<X> VectorFunctionType; };
@@ -825,17 +815,16 @@ ValidatedAffineConstrainedImageSet
 ValidatedConstrainedImageSet::affine_over_approximation() const
 {
     typedef List<ValidatedConstraint>::ConstIterator ConstIterator;
+    Precision64 prec;
 
     Vector<ExactIntervalType> domain = this->domain();
-    Vector<ValidatedAffineModel> space_models=affine_models(domain,this->function());
+    Vector<ValidatedAffineModel> space_models=affine_models(domain,this->function(),prec);
     List<ValidatedAffineModelConstraint> constraint_models;
     constraint_models.reserve(this->number_of_constraints());
     for(Nat i=0; i!=this->number_of_constraints(); ++i) {
         const ValidatedConstraint& constraint=this->constraint(i);
-        auto u=constraint.upper_bound();
-        constraint_models.append(ValidatedAffineModelConstraint(constraint.lower_bound(),affine_model(domain,constraint.function()),u));
-
-//        constraint_models.append(ValidatedAffineModelConstraint(constraint.lower_bound(),affine_model(domain,constraint.function()),constraint.upper_bound()));
+        auto am=affine_model(domain,constraint.function(),prec);
+        constraint_models.append(ValidatedAffineModelConstraint(constraint.lower_bound(),am,constraint.upper_bound()));
     }
 
     return ValidatedAffineConstrainedImageSet(domain,space_models,constraint_models);
@@ -888,16 +877,17 @@ ValidatedConstrainedImageSet::affine_over_approximation() const
 
 ValidatedAffineConstrainedImageSet ValidatedConstrainedImageSet::affine_approximation() const
 {
-    typedef List<ValidatedConstraint>::ConstIterator ConstIterator;
+    Precision64 prec;
 
     Vector<ExactIntervalType> domain = this->domain();
 
-    Vector<ValidatedAffineModel> space_models=affine_models(domain,this->function());
+    Vector<ValidatedAffineModel> space_models=affine_models(domain,this->function(),prec);
     List<ValidatedAffineModelConstraint> constraint_models;
     constraint_models.reserve(this->number_of_constraints());
     for(Nat i=0; i!=this->number_of_constraints(); ++i) {
         const ValidatedConstraint& constraint=this->constraint(i);
-        constraint_models.append(ValidatedAffineModelConstraint(constraint.lower_bound(),affine_model(domain,constraint.function()),constraint.upper_bound()));
+        auto am=affine_model(domain,constraint.function(),prec);
+        constraint_models.append(ValidatedAffineModelConstraint(constraint.lower_bound(),am,constraint.upper_bound()));
     }
 
     for(Nat i=0; i!=space_models.size(); ++i) { space_models[i].set_error(0u); }
@@ -1072,6 +1062,24 @@ Void
 ValidatedConstrainedImageSet::draw(CanvasInterface& cnvs, const Projection2d& proj) const
 {
     AffineDrawer(Depth(8)).draw(cnvs,proj,*this);
+}
+
+Void
+ValidatedConstrainedImageSet::box_draw(CanvasInterface& cnvs, const Projection2d& proj) const
+{
+    BoxDrawer().draw(cnvs,proj,*this);
+}
+
+Void
+ValidatedConstrainedImageSet::affine_draw(CanvasInterface& cnvs, const Projection2d& proj, Int depth) const
+{
+    AffineDrawer(depth).draw(cnvs,proj,*this);
+}
+
+Void
+ValidatedConstrainedImageSet::grid_draw(CanvasInterface& cnvs, const Projection2d& proj) const
+{
+    GridDrawer().draw(cnvs,proj,*this);
 }
 
 ValidatedConstrainedImageSet

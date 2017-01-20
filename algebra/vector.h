@@ -90,6 +90,12 @@ struct DeclareVectorOperations {
     template<class X1, class X2> friend Vector<ProductType<Scalar<X1>,X2>> operator*(X1 const& x1, Vector<X2> const& v2);
     template<class X1, class X2> friend Vector<ProductType<X1,Scalar<X2>>> operator*(Vector<X1> const& v1, X2 const& x2);
     template<class X1, class X2> friend Vector<QuotientType<X1,Scalar<X2>>> operator/(Vector<X1> const& v1, X2 const& x2);
+    template<class X> friend decltype(abs(declval<X>())) norm(Vector<X> const& v);
+    template<class X> friend decltype(mag(declval<X>())) sup_norm(Vector<X> const& v);
+    template<class X1, class X2> friend ArithmeticType<X1,X2> dot(Vector<X1> const& v1, Vector<X2> const& v2);
+    template<class X1, class X2> friend EqualsType<X1,X2> operator==(Vector<X1> const& v1, Vector<X2> const& v2);
+    template<class X1, class X2> friend decltype(declval<X1>()!=declval<X2>()) operator!=(Vector<X1> const& v1, Vector<X2> const& v2);
+    template<class X> friend OutputStream& operator<<(OutputStream& os, Vector<X> const& v);
 };
 
 #else // SIMPLE_VECTOR_OPERATORS
@@ -310,43 +316,14 @@ template<class V> struct VectorContainerRange
 
 template<class V> inline VectorRange<V> project(const VectorExpression<V>& v, Range rng) {
     return VectorRange<V>(v(),rng); }
-template<class X> inline VectorContainerRange< Vector<X> > project(Vector<X>& v, Range rng) {
+template<class X> inline VectorContainerRange<Vector<X>> project(Vector<X>& v, Range rng) {
     return VectorContainerRange< Vector<X> >(v,rng); }
-
-
-
-
-template<class X> OutputStream& operator<<(OutputStream& os, Vector<X> const& v) {
-    if(v.size()==0) { os << "["; }
-    for(SizeType i=0; i!=v.size(); ++i) { os << (i==0u?"[":",") << v[i]; }
-    return os << "]";
-}
 
 template<class V, EnableIf<IsVectorExpression<V>> =dummy> OutputStream& operator<<(OutputStream& os, const V& v) {
     typedef decltype(v[0]) X;
     return os << Vector<X>(v);
 }
 
-
-template<class X1, class X2>
-auto operator==(const Vector<X1>& v1, const Vector<X2>& v2) -> decltype(v1[0]==v2[0]) {
-    decltype(v1[0]==v2[0]) r=true;
-    if(v1.size()!=v2.size()) { r=false; return r; }
-    for(SizeType i=0; i!=v1.size(); ++i) {
-        r = r && (v1[i]==v2[i]);
-    }
-    return r;
-}
-
-template<class X1, class X2>
-auto operator!=(const Vector<X1>& v1, const Vector<X2>& v2) -> decltype(v1[0]!=v2[0]) {
-    decltype(v1[0]!=v2[0]) r=false;
-    if(v1.size()!=v2.size()) { r=true; return r; }
-    for(SizeType i=0; i!=v1.size(); ++i) {
-        r = r || (v1[i]!=v2[i]);
-    }
-    return r;
-}
 
 
 template<class X, class XX, EnableIf<IsConvertible<decltype(declval<X>()+declval<XX>()),X>> =dummy> inline
@@ -420,7 +397,59 @@ struct ProvideVectorOperations {
         return std::move(r);
     }
 
+    template<class X1, class X2> friend ArithmeticType<X1,X2> dot(const Vector<X1>& v1, const Vector<X2>& v2) {
+        ARIADNE_PRECONDITION(v1.size()==v2.size());
+        ArithmeticType<X1,X2> r=abs(v1.zero_element()*v2.zero_element());
+        for(SizeType i=0; i!=v1.size(); ++i) {
+            r+=v1[i]*v2[i];
+        }
+        return r;
+    }
+
+    template<class X> friend decltype(abs(declval<X>())) norm(const Vector<X>& v) {
+        decltype(abs(declval<X>())) r=abs(v.zero_element());
+        for(SizeType i=0; i!=v.size(); ++i) {
+            r=max(r,abs(v[i]));
+        }
+        return r;
+    }
+
+    template<class X> friend decltype(mag(declval<X>())) sup_norm(const Vector<X>& v) {
+        decltype(mag(declval<X>())) r=abs(v.zero_element());
+        for(SizeType i=0; i!=v.size(); ++i) {
+            r=max(r,mag(v[i]));
+        }
+        return r;
+    }
+
+    template<class X1, class X2> friend EqualsType<X1,X2> operator==(const Vector<X1>& v1, const Vector<X2>& v2) {
+        decltype(v1[0]==v2[0]) r=true;
+        for(SizeType i=0; i!=v1.size(); ++i) {
+            r = r && (v1[i]==v2[i]);
+        }
+        return r;
+    }
+
+    template<class X1, class X2> friend decltype(declval<X1>()!=declval<X2>()) operator!=(const Vector<X1>& v1, const Vector<X2>& v2) {
+        decltype(v1[0]!=v2[0]) r=false;
+        for(SizeType i=0; i!=v1.size(); ++i) {
+            r = r || (v1[i]!=v2[i]);
+        }
+        return r;
+    }
+
+    template<class X> friend OutputStream& operator<<(OutputStream& os, Vector<X> const& v) {
+        if(v.size()==0) { os << "["; }
+        for(SizeType i=0; i!=v.size(); ++i) { os << (i==0u?"[":",") << v[i]; }
+        return os << "]";
+    }
+
 };
+
+template<class X1, class X2> EqualsType<X1,X2> operator==(const Vector<X1>& v1, const Vector<X2>& v2);
+template<class X1, class X2> decltype(declval<X1>()!=declval<X2>()) operator!=(const Vector<X1>& v1, const Vector<X2>& v2);
+
+
 
 #else
 
@@ -511,31 +540,6 @@ VectorScalarQuotient<V1,X2> operator/(const V1& v1, const X2& x2) {
 template<class V> using ScalarType = typename V::ScalarType;
 
 #endif
-
-template<class X> inline auto norm(const Vector<X>& v) -> decltype(abs(declval<X>())) {
-    decltype(abs(declval<X>())) r=abs(v.zero_element());
-    for(SizeType i=0; i!=v.size(); ++i) {
-        r=max(r,abs(v[i]));
-    }
-    return r;
-}
-
-template<class X> inline auto sup_norm(const Vector<X>& v) -> decltype(mag(declval<X>())) {
-    decltype(mag(declval<X>())) r=abs(v.zero_element());
-    for(SizeType i=0; i!=v.size(); ++i) {
-        r=max(r,mag(v[i]));
-    }
-    return r;
-}
-
-template<class X1, class X2> inline auto dot(const Vector<X1>& v1, const Vector<X2>& v2) -> decltype(v1[0]*v2[0]+v1[0]*v2[0]) {
-    ARIADNE_PRECONDITION(v1.size()==v2.size());
-    decltype(declval<X1>()*declval<X2>()+declval<X1>()*declval<X2>()) r=abs(v1.zero_element()*v2.zero_element());
-    for(SizeType i=0; i!=v1.size(); ++i) {
-        r+=v1[i]*v2[i];
-    }
-    return r;
-}
 
 
 

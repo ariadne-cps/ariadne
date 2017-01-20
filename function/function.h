@@ -118,11 +118,13 @@ template<class P, class D, class C> class FunctionFacade {
 
 template<class P> class FunctionFacade<P,IntervalDomain,IntervalDomain> {
   public:
+    template<class X> Scalar<EvaluateType<P,X>> derivative(X const& x) const;
     FunctionExpression<P,IntervalDomain,IntervalDomain> operator() (const RealVariable& x) const;
 };
 
 template<class P> class FunctionFacade<P,IntervalDomain,BoxDomain> {
   public:
+    template<class X> Vector<EvaluateType<P,X>> tangent(X const& x) const;
     FunctionExpression<P,IntervalDomain,BoxDomain> operator() (const RealVariable& x) const;
 };
 
@@ -160,7 +162,7 @@ class Function
     static_assert(IsStronger<P,ApproximateTag>::value,"P must be an information level/paradigm.");
     typedef Number<P> Y;
   protected:
-    std::shared_ptr< const FunctionInterface<P,D,C> > _ptr;
+    SharedPointer< const FunctionInterface<P,D,C> > _ptr;
   public:
     typedef P InformationTag;
     typedef P Paradigm;
@@ -205,7 +207,7 @@ class Function
     template<class PP, EnableIf<IsStronger<PP,P>> =dummy>
         Function<P,D,C>& operator=(Result<NumericType> const& c); // { return *this=this->create_constant(c); }
 
-    shared_ptr< const FunctionInterface<P,D,C> > managed_pointer() const  { return _ptr; }
+    SharedPointer< const FunctionInterface<P,D,C> > managed_pointer() const  { return _ptr; }
     const FunctionInterface<P,D,C>* raw_pointer() const  { return _ptr.operator->(); }
     const FunctionInterface<P,D,C>& reference() const  { return _ptr.operator*(); }
     operator const FunctionInterface<P,D,C>& () const { return _ptr.operator*(); }
@@ -307,8 +309,8 @@ EffectiveVectorFunction compose(const EffectiveVectorFunction& f, const Effectiv
 
 EffectiveScalarFunction lie_derivative(const EffectiveScalarFunction& g, const EffectiveVectorFunction& f);
 
-Formula<EffectiveNumericType> formula(const EffectiveScalarFunction& f);
-Vector< Formula<EffectiveNumericType> > formula(const EffectiveVectorFunction& f);
+Formula<EffectiveNumericType> make_formula(const EffectiveScalarFunction& f);
+Vector<Formula<EffectiveNumericType>> make_formula(const EffectiveVectorFunction& f);
 //RealExpression evaluate(EffectiveScalarFunction const& f, Vector<RealVariable> const& vars);
 
 
@@ -405,11 +407,11 @@ typedef FunctionFactory<ValidatedTag> ValidatedFunctionFactory;
 template<>
 class FunctionFactory<ValidatedTag>
 {
-    std::shared_ptr< const FunctionFactoryInterface<ValidatedTag> > _ptr;
+    SharedPointer< const FunctionFactoryInterface<ValidatedTag> > _ptr;
   public:
     FunctionFactory(const FunctionFactoryInterface<ValidatedTag>& ref) : _ptr(ref.clone()) { }
     FunctionFactory(const FunctionFactoryInterface<ValidatedTag>* ptr) : _ptr(ptr) { }
-    FunctionFactory(std::shared_ptr< const FunctionFactoryInterface<ValidatedTag> > ptr) : _ptr(ptr) { }
+    FunctionFactory(SharedPointer< const FunctionFactoryInterface<ValidatedTag> > ptr) : _ptr(ptr) { }
     inline ValidatedScalarFunction create(const ExactBoxType& d, const ValidatedScalarFunctionInterface& f) const;
     inline ValidatedVectorFunction create(const ExactBoxType& d, const ValidatedVectorFunctionInterface& f) const;
     inline ValidatedScalarFunction create_zero(const ExactBoxType& d) const;

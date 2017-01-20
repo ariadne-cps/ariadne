@@ -87,7 +87,6 @@ cat(Tags<A1S...>,Tags<A2S...>,Tags<A3S...>) -> Tags<A1S...,A2S...,A3S...>;
 template<class... A1S, class... A2S, class... A3S, class... A4S> auto
 cat(Tags<A1S...>,Tags<A2S...>,Tags<A3S...>,Tags<A4S...>) -> Tags<A1S...,A2S...,A3S...,A4S...>;
 
-
 template<class X> using SafeNegationType = SafeType<OperatorMinus,X>;
 template<class X1, class X2=X1> using SafeSumType = SafeType<OperatorPlus,X1,X2>;
 template<class X1, class X2=X1> using SafeDifferenceType = SafeType<OperatorMinus,X1,X2>;

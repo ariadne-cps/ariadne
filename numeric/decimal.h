@@ -52,6 +52,7 @@ class Decimal {
     explicit operator Rational () const;
     //! \brief Convert to an generic number.
     operator ExactNumber () const;
+    friend Decimal operator+(Decimal const& d);
     //! \brief The negation of a decimal value.
     friend Decimal operator-(Decimal const& d);
     friend OutputStream& operator<<(OutputStream& os, Decimal const& d);

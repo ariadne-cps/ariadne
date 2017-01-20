@@ -350,6 +350,19 @@ HybridAutomaton::has_mode(DiscreteLocation location) const
     for(Map<DiscreteLocation,DiscreteMode>::ConstIterator mode_iter=this->_modes.begin();
         mode_iter!=this->_modes.end(); ++mode_iter)
     {
+        if(are_same(mode_iter->first,location)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+Bool
+HybridAutomaton::has_partial_mode(DiscreteLocation location) const
+{
+    for(Map<DiscreteLocation,DiscreteMode>::ConstIterator mode_iter=this->_modes.begin();
+        mode_iter!=this->_modes.end(); ++mode_iter)
+    {
         if(is_restriction(mode_iter->first,location)) {
             return true;
         }
@@ -360,13 +373,13 @@ HybridAutomaton::has_mode(DiscreteLocation location) const
 Bool
 HybridAutomaton::has_transition(DiscreteLocation source, DiscreteEvent event) const
 {
-   return this->has_mode(source) && this->mode(source)._targets.has_key(event);
+   return this->has_partial_mode(source) && this->mode(source)._targets.has_key(event);
 }
 
 Bool
 HybridAutomaton::has_invariant(DiscreteLocation source, DiscreteEvent event) const
 {
-   return this->has_mode(source) && this->mode(source)._invariants.has_key(event);
+   return this->has_partial_mode(source) && this->mode(source)._invariants.has_key(event);
 }
 
 
@@ -490,10 +503,8 @@ HybridAutomaton::sort(const List<RealAssignment>& auxiliary) {
                 }
                 dependencies.erase(iter->name());
                 found=true;
-                LinkedList<RealVariable>::Iterator next=iter;
-                ++next;
                 lhs_list.erase(iter);
-                iter=next;
+                iter=lhs_list.begin();
             } else {
                 ++iter;
             }
@@ -503,6 +514,7 @@ HybridAutomaton::sort(const List<RealAssignment>& auxiliary) {
                           "Algebraic dependencies among variables "<<lhs_list<<" in auxiliary equations "<<auxiliary);
         }
     }
+    ARIADNE_ASSERT(auxiliary.size()==sorted_auxiliary.size());
     return sorted_auxiliary;
 }
 

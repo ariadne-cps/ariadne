@@ -118,7 +118,7 @@ class HybridEnclosure
   private:
     DiscreteLocation _location;
     List<DiscreteEvent> _events;
-    List<Identifier> _space;
+    List<RealVariable> _space;
     Enclosure _set;
     List<EnclosureVariableType> _variables;
   public:

@@ -32,6 +32,7 @@
 #include "numeric/numeric.h"
 #include "algebra/vector.h"
 #include "algebra/matrix.h"
+#include "algebra/algebra.h"
 #include "algebra/multi_index.h"
 #include "function/polynomial.h"
 #include "algebra/differential.h"
@@ -39,7 +40,9 @@
 #include "function/taylor_model.h"
 
 #include "function/function.h"
+#include "function/function_mixin.h"
 #include "function/function_patch.h"
+
 #include "function/taylor_function.h"
 
 #include "taylor_model.tcc"
@@ -53,7 +56,11 @@ namespace Ariadne {
 static double TAYLOR_FUNCTION_WRITING_ACCURACY = 1e-8;
 
 template class FunctionPatch<ValidatedTaylorModel64>;
+template class FunctionMixin<FunctionPatch<ValidatedTaylorModel64>,ApproximateTag,BoxDomain,IntervalDomain>;
+template class FunctionMixin<FunctionPatch<ValidatedTaylorModel64>,ValidatedTag,BoxDomain,IntervalDomain>;
 template class VectorFunctionPatch<ValidatedTaylorModel64>;
+template class FunctionMixin<VectorFunctionPatch<ValidatedTaylorModel64>,ApproximateTag,BoxDomain,BoxDomain>;
+template class FunctionMixin<VectorFunctionPatch<ValidatedTaylorModel64>,ValidatedTag,BoxDomain,BoxDomain>;
 
 template class FunctionPatch<ValidatedTaylorModelMP>;
 template class VectorFunctionPatch<ValidatedTaylorModelMP>;

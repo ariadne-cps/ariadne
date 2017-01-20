@@ -105,6 +105,7 @@ TEST_EXPRESSION_SRC = \
 	test_expression.cc \
 
 LIB_HYBRID_SRC = \
+	discrete_location.cc \
 	hybrid_set.cc \
 	hybrid_enclosure.cc \
 	hybrid_automaton.cc \
@@ -151,11 +152,7 @@ EXAMPLES_SRC = \
 	heating.cc \
 	ballinabox.cc \
 	watertank-compositional.cc \
-	watertank-proportional.cc \
-	watertank-nonlinear.cc \
 	rectifier.cc \
-	robotarm-verification.cc \
-	robotarm-verification-essay.cc \
 
 DEP_DIR = dep
 OBJ_DIR = obj

@@ -404,7 +404,7 @@ Void BinaryTreeNode::restore_node( BinaryTreeNode * pCurrentNode, Nat & arr_inde
             restore_node( pCurrentNode->_pRightNode, ++arr_index, leaf_counter, theTree, theEnabledCells );
         } else {
             //If we are in a leaf node then chek if it needs to be enabled/disabled
-            pCurrentNode->_isEnabled = theEnabledCells[leaf_counter];
+            pCurrentNode->_isEnabled = ValidatedKleenean(theEnabledCells[leaf_counter]);
 
             leaf_counter++;
         }

@@ -112,6 +112,8 @@ class CompositeHybridAutomaton
     DiscreteMode const& mode(DiscreteLocation) const;
     //! \brief Tests if the automaton has a mode corresponding to the given location.
     Bool has_mode(DiscreteLocation) const;
+    //! \brief Test if the hybrid automaton has a discrete mode corresponding to a subset of variables of the given location.
+    Bool has_partial_mode(DiscreteLocation location) const;
     //! \brief Tests if the automaton has an invariant corresponding to the given location and event.
     Bool has_invariant(DiscreteLocation, DiscreteEvent) const;
     //! \brief Tests if the automaton has an invariant or transition corresponding to the given location and event.

@@ -190,20 +190,20 @@ Map<RealVariable,RealInterval> make_map(const List<RealVariableInterval>& b) {
     return res;
 }
 
-HybridPoint::HybridPoint(const DiscreteLocation& q, const Map<Identifier,Real>& x)
+HybridPoint::HybridPoint(const DiscreteLocation& q, const Map<RealVariable,Real>& x)
     : HybridBasicSet<ExactPoint>(q,make_list(x.keys()),ExactPoint(x.size()))
 {
     Nat i=0;
-    for(Map<Identifier,Real>::ConstIterator iter=x.begin(); iter!=x.end(); ++iter, ++i) {
+    for(Map<RealVariable,Real>::ConstIterator iter=x.begin(); iter!=x.end(); ++iter, ++i) {
         this->point()[i]=numeric_cast<Float64Value>(iter->second);
     }
 }
 
-HybridPoint::HybridPoint(const DiscreteLocation& q, const Map<Identifier,Float64Value>& x)
+HybridPoint::HybridPoint(const DiscreteLocation& q, const Map<RealVariable,Float64Value>& x)
     : HybridBasicSet<ExactPoint>(q,make_list(x.keys()),ExactPoint(x.size()))
 {
     Nat i=0;
-    for(Map<Identifier,Float64Value>::ConstIterator iter=x.begin(); iter!=x.end(); ++iter, ++i) {
+    for(Map<RealVariable,Float64Value>::ConstIterator iter=x.begin(); iter!=x.end(); ++iter, ++i) {
         this->point()[i]=iter->second;
     }
 }

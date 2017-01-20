@@ -31,7 +31,10 @@
 #include "utility/container.h"
 #include "numeric/numeric.h"
 #include "algebra/vector.h"
+#include "algebra/algebra.h"
 #include "function/function.h"
+#include "function/taylor_model.h"
+#include "function/formula.h"
 
 namespace Ariadne {
 

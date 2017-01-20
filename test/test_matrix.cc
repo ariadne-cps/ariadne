@@ -33,6 +33,7 @@
 #include "numeric/numeric.h"
 #include "algebra/vector.h"
 #include "algebra/matrix.h"
+#include "algebra/covector.h"
 
 namespace Ariadne {
 typedef Matrix<Float64Approximation> FloatApproximationMatrix;

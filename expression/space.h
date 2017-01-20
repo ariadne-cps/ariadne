@@ -59,18 +59,8 @@ template<class T> class Space
   public:
     //! \brief The trivial space \f$\R^0\f$.
     Space() : _variables() { }
-    Space(const Set<Identifier>& vs) : _variables(vs.begin(),vs.end()) { }
-    Space(const List<Identifier>& vl) { for(Nat i=0; i!=vl.size(); ++i) { this->append(VariableType(vl[i])); } }
     Space(const List<VariableType>& vl) { for(Nat i=0; i!=vl.size(); ++i) { this->append(vl[i]); } }
     Space(const InitializerList<VariableType>& vl) { for(Nat i=0; i!=vl.size(); ++i) { this->append(vl.begin()[i]); } }
-
-    template<class... ARGS> Space(VariableType, ARGS... args);
-    template<class... ARGS> Space(List<VariableType>, VariableType, ARGS... args);
-    template<class... ARGS> Space(List<VariableType>, List<VariableType>, ARGS... args);
-
-    explicit Space(const List<String>& vnl) { for(Nat i=0; i!=vnl.size(); ++i) { this->append(VariableType(vnl[i])); } }
-    explicit Space(const String& vn) { this->append(VariableType(vn)); }
-
 
     Bool operator==(const Space<T>& other) const { return this->_variables==other._variables; }
     Bool operator!=(const Space<T>& other) const { return !(*this == other); }
@@ -91,15 +81,15 @@ template<class T> class Space
         Map<Identifier,SizeType> indices;
         for(Nat i=0; i!=this->_variables.size(); ++i) {
             ARIADNE_ASSERT_MSG(!indices.has_key(_variables[i]),"Repeated variable "<<_variables[i]<<" in space "<<_variables)
-            indices.insert(this->_variables[i].name(),i);
+            indices.insert(this->_variables[i],i);
         }
         return indices; }
     //! \brief A map giving the index of a given variable.
     Map<VariableType,SizeType> indices() const {
         Map<VariableType,SizeType> indices;
         for(Nat i=0; i!=this->_variables.size(); ++i) {
-            ARIADNE_ASSERT_MSG(!indices.has_key(_variables[i]),"Repeated variable "<<_variables[i]<<" in space "<<_variables)
-            indices.insert(this->_variables[i],i);
+            ARIADNE_ASSERT_MSG(!indices.has_key(VariableType(_variables[i])),"Repeated variable "<<_variables[i]<<" in space "<<_variables)
+            indices.insert(VariableType(this->_variables[i]),i);
         }
         return indices; }
 
@@ -122,11 +112,11 @@ template<class T> class Space
     //! \brief Append the named variable \a v to the variables defining the space; ignores if the variable is already in the space.
     Space<T>& insert(const VariableType& v) {
         for(Nat i=0; i!=_variables.size(); ++i) {
-            if(_variables[i]==v) { return *this; } }
-        _variables.push_back(v); return *this; }
+            if(_variables[i]==v.name()) { return *this; } }
+        _variables.push_back(v.name()); return *this; }
     //! \brief Adjoins the variables in \a spc.
     Space<T>& adjoin(const Space<T>& spc) {
-        for(Nat i=0; i!=spc._variables.size(); ++i) { this->insert(spc._variables[i]); } return *this; }
+        for(Nat i=0; i!=spc._variables.size(); ++i) { this->insert(VariableType(spc._variables[i])); } return *this; }
     //! \brief Append the named variable \a v to the variables defining the space.
     Space<T>& append(const VariableType& v) {
         for(Nat i=0; i!=_variables.size(); ++i) {
@@ -137,11 +127,12 @@ template<class T> class Space
     List<Identifier> _variables;
 };
 
+template class Space<Real>;
+
 template<class T> inline OutputStream& operator<<(OutputStream& os, const Space<T>& spc) { return os << spc.variables(); }
 
 template<class T> inline Space<T> join(const Space<T>& spc1, const Space<T>& spc2) {
     Space<T> r(spc1); r.adjoin(spc2); return r; }
-
 
 // Compiled conversion operators to allow conversion between expression and function.
 SizeType dimension(const Space<Real>& spc);

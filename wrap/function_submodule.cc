@@ -42,6 +42,7 @@
 #include "function/affine.h"
 #include "function/taylor_function.h"
 #include "function/constraint.h"
+#include "function/procedure.h"
 #include "function/function.h"
 #include "function/function_mixin.h"
 #include "expression/expression.h"

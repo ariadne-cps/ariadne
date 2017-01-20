@@ -27,9 +27,11 @@
 #include "utilities.h"
 
 #include "algebra/expansion.tcc"
+#include "algebra/algebra.h"
 #include "function/function_interface.h"
 #include "function/polynomial.h"
 #include "function/function.h"
+#include "function/procedure.h"
 
 #include "function/function_model.h"
 #include "function/taylor_model.h"

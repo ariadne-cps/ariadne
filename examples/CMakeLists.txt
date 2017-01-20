@@ -1,18 +1,17 @@
-add_executable(tutorial tutorial.cc)
-add_executable(bouncingball bouncingball.cc)
-add_executable(watertank watertank.cc)
-add_executable(heating heating.cc)
-add_executable(ballinabox ballinabox.cc)
-add_executable(rectifier rectifier.cc)
-add_executable(robotarm-verification robotarm-verification.cc)
-add_executable(watertank-compositional watertank-compositional.cc)
+set(EXAMPLES 
+    tutorial
+    ballinabox
+    bouncingball
+    watertank
+    heating
+    rectifier
+    watertank-compositional
+)
 
-target_link_libraries (tutorial ariadne)
-target_link_libraries (bouncingball ariadne)
-target_link_libraries (watertank ariadne)
-target_link_libraries (heating ariadne)
-target_link_libraries (ballinabox ariadne)
-target_link_libraries (rectifier ariadne)
-target_link_libraries (robotarm-verification ariadne)
-target_link_libraries (watertank-compositional ariadne)
 
+foreach(example ${EXAMPLES})
+    add_executable(${example} ${example}.cc)
+    target_link_libraries(${example} ariadne)
+endforeach()
+
+add_subdirectory(experimental)

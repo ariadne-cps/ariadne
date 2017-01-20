@@ -2,6 +2,8 @@ build/
 *~
 config.h
 .project
+.cproject
+.pydevproject
 dep/
 obj/
 *.gch

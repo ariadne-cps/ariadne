@@ -23,6 +23,11 @@
 
 #include "function/function_model.h"
 #include "function/function_model.tcc"
+#include "function/taylor_model.h"
+
+#include "algebra/algebra.h"
+
+#include "function/formula.h"
 
 namespace Ariadne {
 

@@ -610,13 +610,16 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
         event_iter!=active_events.end(); ++event_iter)
     {
         const DiscreteEvent event=*event_iter;
+        ARIADNE_LOG(8,"event="<<event<<"\n");
         EffectiveScalarFunction const& guard=guards[event];
+        ARIADNE_LOG(8,"guard="<<guard<<"\n");
 
         // Compute the derivative of the guard function g along flow lines of $\dot(x)=f(x)$
         // This is given by the Lie derivative at a point x, defined as $L_{f}g(x) = (\nabla g\cdot f)(x)$
         EffectiveScalarFunction derivative=lie_derivative(guard,dynamic);
         UpperIntervalType derivative_range=apply(derivative,flow_bounds);
-        if(possibly(derivative_range.lower()>zero)) {
+        ARIADNE_LOG(8,"derivative_range="<<derivative_range<<"\n");
+        if(definitely(derivative_range.lower()>zero)) {
             // If the derivative $L_{f}g$is strictly positive over the bounding box for the flow,
             // then the guard function is strictly increasing.
             // There is at most one crossing with the guard, and the time of this
@@ -661,6 +664,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
             UpperIntervalType second_derivative_bounds_range=apply(second_derivative,flow_bounds);
             UpperIntervalType second_derivative_flow_range=compose(second_derivative,flow).range();
             UpperIntervalType second_derivative_range=intersection(second_derivative_bounds_range,second_derivative_flow_range);
+            ARIADNE_LOG(8,"second_derivative_range="<<second_derivative_range<<"\n");
             if(definitely(second_derivative_range.lower()>zero)) {
                 // If the second derivative is positive, then either
                 //    (i) the event is immediately active

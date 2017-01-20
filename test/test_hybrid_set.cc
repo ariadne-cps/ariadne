@@ -82,8 +82,9 @@ TestHybridSet::test_hybrid_list_set()
     HybridListSet<ExactBoxType> hls;
     DiscreteLocation loc1(123);
     DiscreteLocation loc2(105);
-    RealSpace spc1("x");
-    RealSpace spc2((Identifier("x"),"y"));
+    RealVariable x("x"), y("y");
+    RealSpace spc1({x});
+    RealSpace spc2({x,y});
 
     ExactBoxType bx1={{0,1}};
     ExactBoxType bx2={{2,3}};

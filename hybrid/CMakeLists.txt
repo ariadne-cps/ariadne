@@ -1,4 +1,5 @@
 add_library(ariadne-hybrid OBJECT
+    discrete_location.cc
     hybrid_set.cc
     hybrid_enclosure.cc
     hybrid_automaton.cc

@@ -35,6 +35,7 @@
 
 #include "function/function.h"
 #include "function/constraint.h"
+#include "function/procedure.h"
 #include "solvers/linear_programming.h"
 #include "solvers/nonlinear_programming.h"
 #include "solvers/constraint_solver.h"

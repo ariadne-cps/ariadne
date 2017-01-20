@@ -142,9 +142,11 @@ class CompositeHybridAutomaton
     //! but are required in one of the dynamic equations, constraints or resets.
     Set<RealVariable> input_variables(DiscreteLocation) const;
 
+    //! \brief The algebraic equations valid in the location.
+    List<RealAssignment> auxiliary_assignments(DiscreteLocation location) const;
     //! \brief The algebraic equations valid in the location, ordered so that the defining equation for a variable
     //! occurs before any equation using that variable.
-    List<RealAssignment> auxiliary_assignments(DiscreteLocation location) const;
+    List<RealAssignment> sorted_auxiliary_assignments(DiscreteLocation location) const;
     //! \brief The differential equations valid in the location.
     List<DottedRealAssignment> dynamic_assignments(DiscreteLocation location) const;
     //! \brief The reset equations used when the \a event occurs in the \a source location.
@@ -162,6 +164,8 @@ class CompositeHybridAutomaton
     HybridSpace state_space() const;
     //! \brief The continuous state space in the given location.
     RealSpace continuous_state_space(DiscreteLocation) const;
+    //! \brief The space of continuous auxiliary variables in the given location.
+    RealSpace continuous_auxiliary_space(DiscreteLocation) const;
     //! \brief The dimension of the continuous state space in the given location.
     DimensionType dimension(DiscreteLocation) const;
 
@@ -172,7 +176,7 @@ class CompositeHybridAutomaton
 
     //! \brief The function outputting the auxiliary variables \f$y=h(x)\f$ in the location.
     EffectiveVectorFunction auxiliary_function(DiscreteLocation location) const;
-    //! \brief The function outputting the differential equations \f$\dot{x}=f(x)\f$ in the location.
+    //! \brief The function outputting the differential equations \f$dx/dt =f(x)\f$ in the location.
     EffectiveVectorFunction dynamic_function(DiscreteLocation location) const;
     //! \brief The reset function \f$x'=r(x)\f$ for the given event.
     EffectiveVectorFunction reset_function(DiscreteLocation location, DiscreteEvent event) const;

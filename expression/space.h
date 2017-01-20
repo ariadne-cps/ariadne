@@ -133,6 +133,8 @@ template<class T> inline OutputStream& operator<<(OutputStream& os, const Space<
 
 template<class T> inline Space<T> join(const Space<T>& spc1, const Space<T>& spc2) {
     Space<T> r(spc1); r.adjoin(spc2); return r; }
+template<class T> inline Space<T> join(const Space<T>& spc1, const Variable<T>& var2) {
+    Space<T> r(spc1); r.append(var2); return r; }
 
 // Compiled conversion operators to allow conversion between expression and function.
 SizeType dimension(const Space<Real>& spc);

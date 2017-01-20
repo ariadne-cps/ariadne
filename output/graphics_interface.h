@@ -144,32 +144,6 @@ class DrawableInterface {
     virtual OutputStream& write(OutputStream& os) const { return os << "Drawable"; }
 };
 
-
-
-
-class Real;
-template<class T> class Variable;
-typedef Variable<Real> RealVariable;
-template<class T> class Space;
-typedef Space<Real> RealSpace;
-class DiscreteLocation;
-
-struct Variables2d;
-
-Bool valid_axis_variables(const RealSpace& space, const Variables2d& variables);
-Projection2d projection(const RealSpace& spc, const Variables2d& variables);
-
-//! \ingroup GraphicsModule
-//! \brief Base interface for drawable objects
-class HybridDrawableInterface {
-  public:
-    //! brief Virtual destructor.
-    virtual ~HybridDrawableInterface() { }
-    //! brief Draw the object on the canvas \a c using line segments and fill/stroke commands.
-    virtual Void draw(CanvasInterface& c, const Set<DiscreteLocation>& q, const Variables2d& v) const = 0;
-};
-
-
 } // namespace Ariadne
 
 

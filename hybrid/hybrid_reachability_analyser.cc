@@ -134,24 +134,27 @@ HybridReachabilityAnalyser::_reach_evolve_resume(const ListSet<HybridEnclosure>&
     for(ListSet<HybridEnclosure>::ConstIterator encl_iter=initial_enclosures.begin(); encl_iter!=initial_enclosures.end(); ++encl_iter) {
         ListSet<HybridEnclosure> current_reach_enclosures;
         ListSet<HybridEnclosure> current_evolve_enclosures;
+
         make_lpair(current_reach_enclosures,current_evolve_enclosures) = evolver.reach_evolve(*encl_iter,time,semantics);
 
         for(ListSet<HybridEnclosure>::ConstIterator enclosure_iter=current_reach_enclosures.begin(); enclosure_iter!=current_reach_enclosures.end(); ++enclosure_iter) {
             enclosure_iter->adjoin_outer_approximation_to(reach_cells,accuracy);
         }
+        ARIADNE_LOG(3,"  final reach size = "<<reach_cells.size()<<"\n");
+
         for(ListSet<HybridEnclosure>::ConstIterator enclosure_iter=current_evolve_enclosures.begin(); enclosure_iter!=current_evolve_enclosures.end(); ++enclosure_iter) {
-            const Enclosure& orig_encl = enclosure_iter->continuous_set();
-            evolve_enclosures.adjoin(HybridEnclosure(enclosure_iter->location(),enclosure_iter->space(),
-                                                        Enclosure(orig_encl.domain(),orig_encl.space_function(),
-                                                                  ValidatedScalarFunction::zero(orig_encl.time_function().argument_size()),
-                                                                  orig_encl.constraints(),orig_encl.function_factory())));
-            enclosure_iter->adjoin_outer_approximation_to(evolve_cells,accuracy);
+            const HybridEnclosure& enclosure = *enclosure_iter;
+            ARIADNE_LOG(4,"  enclosure = "<<enclosure<<"\n");
+            enclosure.adjoin_outer_approximation_to(evolve_cells,accuracy);
+            HybridEnclosure new_enclosure = enclosure;
+            new_enclosure.clear_time();
+            new_enclosure.clear_events();
+            evolve_enclosures.adjoin(new_enclosure);
         }
     }
-
-    ARIADNE_LOG(3,"  final reach size = "<<reach_cells.size()<<"\n");
     ARIADNE_LOG(3,"  final evolve size = "<<evolve_cells.size()<<"\n");
     ARIADNE_LOG(3,"  final evolve enclosures size = "<<evolve_enclosures.size()<<"\n");
+
     ARIADNE_LOG(2,"Done.\n");
     return result;
 }

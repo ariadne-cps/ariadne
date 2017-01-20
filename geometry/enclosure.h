@@ -85,7 +85,8 @@ class Enclosure
     , public CompactSetInterface
 {
     ExactBoxType _domain;
-    ValidatedVectorFunctionModel _space_function;
+    EffectiveVectorFunction _auxiliary_mapping;
+    ValidatedVectorFunctionModel _state_function;
     ValidatedScalarFunctionModel _time_function;
     ValidatedScalarFunctionModel _dwell_time_function;
     List<ValidatedConstraintModel> _constraints;
@@ -121,13 +122,18 @@ class Enclosure
     ExactBoxType reduced_domain() const;
     //! \brief An over-approximation to the image of \f$D\f$ under \f$f\f$.
     ExactBoxType codomain() const;
-    //! \brief The image function \f$f\f$.
-    ValidatedVectorFunctionModel const& function() const;
-    ValidatedVectorFunctionModel const& space_function() const;
+    //! \brief The function giving the state \c x in terms of parameters \c s, \f$x=\xi(s)\f$.
+    ValidatedVectorFunctionModel const  state_time_auxiliary_function() const;
+    ValidatedVectorFunctionModel const& state_function() const;
     ValidatedScalarFunctionModel const& time_function() const;
+    ValidatedVectorFunctionModel const  auxiliary_function() const;
     ValidatedScalarFunctionModel const& dwell_time_function() const;
-    ValidatedVectorFunctionModel const constraint_function() const;
+    ValidatedVectorFunctionModel const  constraint_function() const;
+    ValidatedScalarFunctionModel const  get_function(SizeType i) const;
     ExactBoxType const constraint_bounds() const;
+
+    //! \brief Set the auxiliary function.
+    Void set_auxiliary(EffectiveVectorFunction const& aux);
 
     //! \brief Introduces a new parameter with values in the interval \a ivl. The set itself does not change.
     Void new_parameter(ExactIntervalType ivl);
@@ -140,9 +146,12 @@ class Enclosure
     //! \brief Substitutes the expression \f$x_j=c\f$ into the function and constraints.
     Void substitute(SizeType j, Float64 c);
 
-    //! \brief Apply the map \f$r\f$ to the map \f$f\f$.
+    //! \brief Set the time function to zero.
+    Void clear_time();
+
+    //! \brief Apply the map \f$r\f$ to the enclosure, obtaining \f$\phi'(s)=r(\phi(s))(x,h)\f$ and \f$\tau'(s)=\tau(s)\f$. \f$f\f$.
     Void apply_map(ValidatedVectorFunction r);
-    //! \brief Apply the flow \f$\phi(x,h)\f$ to the map \f$f\f$.
+    //! \brief Apply the flow \f$\xi'(s)=\phi(\xi(s),h)\f$ and \f$\tau'(s)=\tau(s)+h\f$.
     Void apply_fixed_evolve_step(ValidatedVectorFunction phi, Float64Value h);
     //! \brief Apply the flow \f$xi'(s)=\phi(\xi(s),\epsilon(\xi(s)))\f$, \f$\tau'(s)=\tau(s)+\epsilon(\xi(s))\f$.
     Void apply_space_evolve_step(ValidatedVectorFunction phi, ValidatedScalarFunction elps);
@@ -152,11 +161,12 @@ class Enclosure
     Void apply_parameter_evolve_step(ValidatedVectorFunction phi, ValidatedScalarFunction elps);
     //! \brief Set \f$\xi'(s)=\phi(\xi(s),\omega(s)-\tau(s))\f$ and \f$\tau'(s)=\omega(s)\f$.
     Void apply_finishing_parameter_evolve_step(ValidatedVectorFunction phi, ValidatedScalarFunction omega);
-    //! \brief Set \f$\xi'(s,r)=\phi(\xi(s),r)\f$ and \f$\tau'(s,r)=\tau(s)+r\f$ for $r\leq h.
+
+    //! \brief Set \f$\xi'(s,r)=\phi(\xi(s),r)\f$ and \f$\tau'(s,r)=\tau(s)+r\f$ for $0\leq r\leq h.
     Void apply_full_reach_step(ValidatedVectorFunctionModel phi);
-    //! \brief Apply the flow \f$xi'(s,r)=\phi(\xi(s),r)\f$, \f$\tau'(s,r)=\tau(s)+r\f$, \f$r\leq\epsilon(s)\f$
+    //! \brief Apply the flow \f$xi'(s,r)=\phi(\xi(s),r)\f$, \f$\tau'(s,r)=\tau(s)+r\f$, \f$0\leq r\leq\epsilon(\xi(s),\tau(s))\f$
     Void apply_spacetime_reach_step(ValidatedVectorFunctionModel phi, ValidatedScalarFunction elps);
-    //! \brief Set \f$\xi'(s,r)=\phi(\xi(s),r)\f$ and \f$\tau'(s,r)=\tau(s)+r\f$ for $r-\epsilon(s)\leq 0$.
+    //! \brief Set \f$\xi'(s,r)=\phi(\xi(s),r)\f$ and \f$\tau'(s,r)=\tau(s)+r\f$ for $0\leq r\leq\epsilon(s)$.
     Void apply_parameter_reach_step(ValidatedVectorFunctionModel phi, ValidatedScalarFunction elps);
 /*
     //! \brief Apply the flow \f$\phi(x,t)\f$ for \f$t\in[0,h]\f$
@@ -167,6 +177,8 @@ class Enclosure
 
     //! \brief Introduces the constraint \f$c\f$ applied to the state \f$x=f(s)\f$.
     Void new_state_constraint(ValidatedConstraint c);
+    //! \brief Introduces the constraint \f$c\f$ applied to the state and time \f$(x,t)\f$.
+    Void new_state_time_constraint(ValidatedConstraint c);
     //! \brief Introduces the constraint \f$c\f$ applied to the parameter \f$s\f$.
     Void new_parameter_constraint(ValidatedConstraint c);
 
@@ -200,6 +212,8 @@ class Enclosure
 
     //! \brief The dimension of the set.
     DimensionType dimension() const;
+    //! \brief The state dimension of the set.
+    DimensionType state_dimension() const;
     //! \brief The number of parameters i.e. the dimension of the parameter domain.
     SizeType number_of_parameters() const;
     //! \brief A bounding box for the set.

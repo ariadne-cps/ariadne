@@ -45,6 +45,8 @@ endif()
 
 check_include_file(mpfr.h HAVE_MPFR_H)
 
+find_package(GTK2)
+
 check_include_file(cairo/cairo.h HAVE_CAIRO_H)
 if(NOT HAVE_CAIRO_H)
     message(WARNING "Unable to find cairo.h.")
@@ -76,7 +78,7 @@ configure_file (${PROJECT_SOURCE_DIR}/config.h.cmake ${PROJECT_SOURCE_DIR}/confi
 #Non-portable fix to avoid user header directories being searched for by system headers
 #add_definitions(-iquote${PROJECT_SOURCE_DIR})
 #Should ideally be able to use line below
-include_directories(${PROJECT_SOURCE_DIR})
+include_directories(${PROJECT_SOURCE_DIR} ${CAIRO_INCLUDE_DIRS})
 
 IF(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   add_definitions(-Wno-non-template-friend)

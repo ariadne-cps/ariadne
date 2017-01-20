@@ -66,6 +66,7 @@ template<class PR> class FloatApproximation
         FloatApproximation<PR>(ExactDouble d, PR pr);
         FloatApproximation<PR>(const Integer& z, PR pr);
         FloatApproximation<PR>(const Dyadic& w, PR pr);
+        FloatApproximation<PR>(const Decimal& d, PR pr);
         FloatApproximation<PR>(const Rational& q, PR pr);
         FloatApproximation<PR>(const Real& r, PR pr);
         FloatApproximation<PR>(const FloatApproximation<PR>& r, PR pr);

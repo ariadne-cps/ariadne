@@ -67,6 +67,7 @@ template<class PR> class FloatBall
     FloatBall<PR>(ExactDouble d, PR pr);
         FloatBall<PR>(const Integer& z, PR pr);
         FloatBall<PR>(const Dyadic& w, PR pr);
+        FloatBall<PR>(const Decimal& d, PR pr);
         FloatBall<PR>(const Rational& q, PR pr);
         FloatBall<PR>(const Real& r, PR pr);
         FloatBall<PR>(const FloatBall<PR>& x, PR pr);

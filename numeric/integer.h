@@ -133,6 +133,9 @@ class Integer
     friend Rational rec(Integer const& z);
     friend Rational div(Integer const& z1, Integer const& z2);
     friend Rational pow(Integer const& z, Int n);
+    friend Integer quot(Integer const& z1, Integer const& z2);
+    friend Integer rem(Integer const& z1, Integer const& z2);
+    friend Integer operator%(Integer const& z1, Integer const& z2);
 
     friend OutputStream& operator<<(OutputStream& os, Integer const& z);
     friend Integer operator"" _z(unsigned long long int n);

@@ -102,6 +102,7 @@ template<class PR> class FloatBounds
     FloatBounds<PR>(ExactDouble d, PR pr);
         FloatBounds<PR>(const Integer& z, PR pr);
         FloatBounds<PR>(const Dyadic& w, PR pr);
+        FloatBounds<PR>(const Decimal& d, PR pr);
         FloatBounds<PR>(const Rational& q, PR pr);
         FloatBounds<PR>(const Real& x, PR pr);
         FloatBounds<PR>(const FloatBounds<PR>& x, PR pr);

@@ -32,7 +32,7 @@
 #include "function/taylor_model.h"
 
 #include "box.h"
-#include "box.tcc"
+#include "box.tpl.h"
 
 #include "function/formula.h"
 

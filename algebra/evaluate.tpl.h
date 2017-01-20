@@ -1,5 +1,5 @@
 /***************************************************************************
- *            expansion.tcc
+ *            expansion.tpl.h
  *
  *  Copyright 2008-15  Pieter Collins
  *

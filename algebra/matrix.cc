@@ -33,7 +33,7 @@
 #include "algebra/vector.h"
 #include "algebra/covector.h"
 
-#include "matrix.tcc"
+#include "matrix.tpl.h"
 
 namespace Ariadne {
 

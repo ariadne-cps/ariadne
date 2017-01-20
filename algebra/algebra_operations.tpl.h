@@ -1,5 +1,5 @@
 /***************************************************************************
- *            algebra_operations.tcc
+ *            algebra_operations.tpl.h
  *
  *  Copyright 2011-15  Pieter Collins
  *

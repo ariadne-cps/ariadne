@@ -52,6 +52,6 @@ template<class X, class A> Vector<A> evaluate(const Vector< Expansion<X> >& e, c
 
 } // namespace Ariadne
 
-#include "evaluate.tcc"
+#include "evaluate.tpl.h"
 
 #endif /* ARIADNE_EVALUATE_H */

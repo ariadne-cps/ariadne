@@ -45,9 +45,9 @@
 
 #include "function/taylor_function.h"
 
-#include "taylor_model.tcc"
-#include "function_patch.tcc"
-#include "function_mixin.tcc"
+#include "taylor_model.tpl.h"
+#include "function_patch.tpl.h"
+#include "function_mixin.tpl.h"
 
 #define VOLATILE ;
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            matrix.tcc
+ *            matrix.tpl.h
  *
  *  Copyright 2005-13  Alberto Casagrande, Pieter Collins
  *

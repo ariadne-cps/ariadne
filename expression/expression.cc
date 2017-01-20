@@ -24,7 +24,7 @@
 #include "utility/standard.h"
 #include "config.h"
 
-#include "numeric/operators.tcc"
+#include "numeric/operators.tpl.h"
 
 #include "algebra/algebra.h"
 #include "algebra/algebra_wrapper.h"

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            algebra/expansion.tcc
+ *            algebra/expansion.tpl.h
  *
  *  Copyright 2013-14  Pieter Collins
  *
@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file algebra/expansion.tcc
+/*! \file algebra/expansion.tpl.h
  *  \brief
  */
 

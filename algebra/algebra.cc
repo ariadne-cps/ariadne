@@ -26,7 +26,7 @@
 
 #include "algebra.h"
 #include "algebra_mixin.h"
-#include "algebra_operations.tcc"
+#include "algebra_operations.tpl.h"
 
 namespace Ariadne {
 

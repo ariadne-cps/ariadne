@@ -33,7 +33,7 @@
 #include "function/taylor_function.h"
 #include "algebra/vector.h"
 
-#include "function/affine_model.tcc"
+#include "function/affine_model.tpl.h"
 
 
 namespace Ariadne {

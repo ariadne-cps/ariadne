@@ -1,5 +1,5 @@
 /***************************************************************************
- *            function_model.tcc
+ *            function_model.tpl.h
  *
  *  Copyright 2011  Pieter Collins
  *

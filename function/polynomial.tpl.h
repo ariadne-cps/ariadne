@@ -1,5 +1,5 @@
 /***************************************************************************
- *            polynomial.tcc
+ *            polynomial.tpl.h
  *
  *  Copyright 2008-15  Pieter Collins
  *

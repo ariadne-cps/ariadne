@@ -88,16 +88,16 @@ Int main()
     //valve.new_invariant(closing,height>=hmin,start_opening);
     //valve.new_invariant(closing,aperture>=0.0,finished_closing);
 
-    valve_automaton.new_transition(valve|closed,start_opening,valve|opening,{next(aperture)=aperture},height<=hmin);
-    valve_automaton.new_transition(valve|closing,start_opening,valve|opening,{next(aperture)=aperture},height<=hmin);
-    valve_automaton.new_transition(valve|open,start_closing,valve|closing,{next(aperture)=aperture},height>=hmax);
-    valve_automaton.new_transition(valve|opening,start_closing,valve|closing,{next(aperture)=aperture},height>=hmax);
+    valve_automaton.new_transition(valve|closed,start_opening,valve|opening,{next(aperture)=aperture},height<=hmin,urgent);
+    valve_automaton.new_transition(valve|closing,start_opening,valve|opening,{next(aperture)=aperture},height<=hmin,urgent);
+    valve_automaton.new_transition(valve|open,start_closing,valve|closing,{next(aperture)=aperture},height>=hmax,urgent);
+    valve_automaton.new_transition(valve|opening,start_closing,valve|closing,{next(aperture)=aperture},height>=hmax,urgent);
 
     // Set the transitions for when the valve finished opening.
     // Since aperture is defined by an algebraic equation in the new mode,
     // it may not be specified in the reset.
-    valve_automaton.new_transition(valve|opening,finished_opening,valve|open,aperture>=1);
-    valve_automaton.new_transition(valve|closing,finished_closing,valve|closed,aperture<=0);
+    valve_automaton.new_transition(valve|opening,finished_opening,valve|open,aperture>=1,urgent);
+    valve_automaton.new_transition(valve|closing,finished_closing,valve|closed,aperture<=0,urgent);
 
     CompositeHybridAutomaton watertank_system({tank_automaton,valve_automaton});
     std::cout << "watertank_system:\n" << watertank_system << "\n";

@@ -27,15 +27,6 @@
 namespace Ariadne {
 //namespace Test {
 
-// Compare with double's as if they were Float64Value
-
-template<class X> decltype(auto) operator==(X const& x, double d) { return x==Float64Value(d); }
-template<class X> decltype(auto) operator!=(X const& x, double d) { return x!=Float64Value(d); }
-template<class X> decltype(auto) operator< (X const& x, double d) { return x< Float64Value(d); }
-template<class X> decltype(auto) operator> (X const& x, double d) { return x> Float64Value(d); }
-template<class X> decltype(auto) operator<=(X const& x, double d) { return x<=Float64Value(d); }
-template<class X> decltype(auto) operator>=(X const& x, double d) { return x>=Float64Value(d); }
-
 struct OperatorPlus {
     template<class A> decltype(auto) operator()(A a) const { return +a; }
     template<class A1, class A2> decltype(auto) operator()(A1 a1, A2 a2) const { return a1+a2; }

@@ -45,6 +45,7 @@ template<class X> class Covector;
 
 template<class X> class Matrix;
 template<class M> struct MatrixRow;
+template<class M> struct MatrixRows;
 template<class M> struct MatrixColumn;
 template<class M> struct MatrixTranspose;
 template<class M1, class M2> struct MatrixMatrixProduct;
@@ -197,9 +198,15 @@ template<class X> class Matrix
     X& operator[][](SizeType i, SizeType j);
     //! \brief C-style constant subscripting operator.
     const X& operator[][](SizeType i, SizeType j) const;
+    //! \brief C-style range subscripting operator.
+    X& operator[][](Range is, Range js);
+    //! \brief C-style constant subscripting operator.
+    const X& operator[][](Range i, Range js) const;
 #else
     MatrixRow<const Matrix<X>> operator[](SizeType i) const;
     MatrixRow<Matrix<X>> operator[](SizeType i);
+    MatrixRows<const Matrix<X>> operator[](Range is) const;
+    MatrixRows<Matrix<X>> operator[](Range is);
 #endif
     //! \brief The zero element of the field/algebra of the matrix.
     X zero_element() const;
@@ -250,6 +257,7 @@ template<class X> struct QRMatrix {
 
 /************ Matrix expressions *********************************************************/
 
+
 template<class M> struct MatrixRow {
     M& _A; SizeType _i;
   public:
@@ -258,6 +266,7 @@ template<class M> struct MatrixRow {
     SizeType size() const { return _A.column_size(); }
     auto zero_element() const -> decltype(_A.zero_element()) { return _A.zero_element(); }
     auto operator[](SizeType j) -> decltype(_A.at(_i,j)) { return _A.at(_i,j); }
+    decltype(auto) operator[](Range js) { return project(*this,js); }
     MatrixRow<M>& operator=(Covector<ScalarType> const& u) { for(SizeType j=0; j!=u.size(); ++j) { _A.set(_i,j,u[j]); } return *this; }
 };
 template<class M> struct IsCovectorExpression<MatrixRow<M>> : True { };
@@ -357,6 +366,21 @@ template<class M> struct MatrixRange
     ScalarType zero_element() const { return _A.zero_element(); }
 };
 template<class M> struct IsMatrixExpression<MatrixRange<M>> : True { };
+
+template<class M> struct MatrixRows {
+    M& _A; Range _is;
+  public:
+    typedef typename M::ScalarType ScalarType;
+    MatrixRows(M& A, Range is) : _A(A), _is(is) { }
+    SizeType row_size() const { return _is.size(); }
+    SizeType column_size() const { return _A.column_size(); }
+    auto zero_element() const -> decltype(_A.zero_element()) { return _A.zero_element(); }
+    decltype(auto) operator[](SizeType j) { return project(MatrixColumn<M>(_A,j),_is); }
+    MatrixRange<M> operator[](Range js) { return MatrixRange<M>(_A,_is,js); }
+    MatrixRows<M>& operator=(Matrix<ScalarType> const& B) {
+        for(SizeType i=0; i!=B.row_size(); ++i) { SizeType pi=_is[i]; for(SizeType j=0; j!=B.column_size(); ++j) { _A.set(pi,j,B[i,j]); } } return *this; }
+};
+template<class M> struct IsMatrixExpression<MatrixRows<M>> : True { };
 
 /* Dispatching Matrix expression template operators
 

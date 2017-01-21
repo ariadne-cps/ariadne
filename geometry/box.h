@@ -116,6 +116,8 @@ class Box
     const IntervalType& operator[](SizeType i) const;
     IntervalType& operator[](SizeType i);
 
+    const Box<IntervalType> operator[](Range is) const;
+
     //! The (mid)point of the box.
     MidpointType midpoint() const;
     //! The exact centre of the box.
@@ -397,6 +399,10 @@ template<class I> inline const I& Box<I>::operator[](SizeType i) const {
 
 template<class I> inline I& Box<I>::operator[](SizeType i) {
     return this->Vector<I>::operator[](i);
+}
+
+template<class I> inline const Box<I> Box<I>::operator[](Range rng) const {
+    return Box<I>(Vector<I>(project(*this,rng)));
 }
 
 template<class I> inline auto cast_singleton(Box<I> const& bx) -> Vector<decltype(cast_singleton(declval<I>()))> {

@@ -524,6 +524,25 @@ class CombinedFunction
 };
 
 
+template<class P>
+class ProjectedFunction
+    : VectorFunctionMixin<ProjectedFunction<P>,P>
+{
+    ProjectedFunction(VectorFunction<P> f, Projection prj)
+        : _f(f), _prj(prj) { ARIADNE_PRECONDITION(f.result_size()==prj.argument_size()); }
+    virtual SizeType result_size() const { return _prj.result_size(); }
+    virtual SizeType argument_size() const { return _f.argument_size(); }
+    virtual OutputStream& write(OutputStream& os) const { return os << "ProjectedFunction( f="<<_f<<", prj="<<_prj<<" )"; }
+
+    virtual VectorFunctionInterface<P>* _derivative(SizeType j) const { ARIADNE_NOT_IMPLEMENTED; }
+
+    template<class X> inline Void _compute(Vector<X>& r, const Vector<X>& x) const {
+        return r=_prj(_f(x)); }
+    VectorFunction<P> _f;
+    Projection _prj;
+};
+
+
 // A Lie deriviative \f$\nabla g\cdot f\f$.
 template<class P>
 struct LieDerivativeFunction

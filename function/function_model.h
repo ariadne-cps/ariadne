@@ -307,6 +307,8 @@ template<class P, class PR, class PRE> class VectorFunctionModel
     inline Void set(SizeType i, ScalarFunctionModel<P,PR,PRE> const& sf) { this->_ptr->_set(i,sf); }
     inline ScalarFunctionModel<P,PR,PRE> const operator[](SizeType i) const { return this->get(i); }
     inline VectorFunctionModelElement<P,PR,PRE> operator[](SizeType i) { return VectorFunctionModelElement<P,PR,PRE>(this,i); }
+    inline VectorFunctionModel<P,PR,PRE> operator[](Range rng) { VectorFunctionModel<P,PR,PRE> r(rng.size(),this->create_zero());
+        for(SizeType i=0; i!=rng.size(); ++i) { r[i]=this->operator[](rng[i]); } return r; }
     inline ExactBoxType const domain() const { return this->_ptr->domain(); }
     inline ExactBoxType const codomain() const { return this->_ptr->codomain(); }
     inline RangeType const range() const { return this->_ptr->range(); }

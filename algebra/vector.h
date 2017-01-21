@@ -80,6 +80,9 @@ template<class T> inline T zero_element(Covector<T> const& u) { return u.zero_el
 template<class T> inline T zero_element(Vector<T> const& v) { return v.zero_element(); }
 template<class T> inline T zero_element(Scalar<T> const& s) { return create_zero(s); }
 
+class Range;
+template<class X> class VectorRange;
+
 #ifdef SIMPLE_VECTOR_OPERATORS
 
 struct DeclareVectorOperations {
@@ -205,10 +208,14 @@ class Vector
     const X& get(SizeType i) const { ARIADNE_PRECONDITION_MSG(i<this->size(),*this<<"["<<i<<"]"); return (*this)[i]; }
     //! \brief Set the value stored in the \a i<sup>th</sup> element to \a x.
     Void set(SizeType i, const X& x) { ARIADNE_PRECONDITION_MSG(i<this->size(),*this<<"["<<i<<"]"); (*this)[i] = x; }
-    //! \brief C-style subscripting operator.
+    //! \brief Subscripting operator.
     X& operator[](SizeType i) { ARIADNE_PRECONDITION_MSG(i<this->size(),*this<<"["<<i<<"]"); return this->_ary[i]; }
-    //! \brief C-style constant subscripting operator.
+    //! \brief Constant subscripting operator.
     const X& operator[](SizeType i) const { ARIADNE_PRECONDITION_MSG(i<this->size(),*this<<"["<<i<<"]"); return this->_ary[i]; }
+    //! \brief Range subscripting operator.
+    VectorRange<Vector<X>> operator[](Range rng); // { ARIADNE_PRECONDITION_MSG(rng.stop()<this->size(),*this<<"["<<r<<"]"); return VectorRange<X>(*this,rng); }
+    //! \brief Constant range subscripting operator.
+    VectorRange<const Vector<X>> operator[](Range rng) const;
     //! \brief The zero of the ring containing the Vector's elements. This may be dependent on class parameters.
     const X zero_element() const { if(this->size()!=0) { return create_zero((*this)[0]); } else { return X(); } }
     //! \brief The raw data array.
@@ -264,6 +271,7 @@ template<class X> struct IsVector<Vector<X>> : True { };
 class Range {
     SizeType _start; SizeType _stop;
   public:
+    SizeType operator[](SizeType i) { return _start+i; }
     Range(SizeType start, SizeType stop) : _start(start), _stop(stop) { }
     SizeType size() const { return this->_stop-this->_start; }
     SizeType start() const { return this->_start; }
@@ -275,6 +283,7 @@ class Slice {
     SizeType _size; SizeType _start; SizeType _stride;
   public:
     Slice(SizeType size, SizeType start, SizeType stride) : _size(size), _start(start), _stride(stride) { }
+    SizeType operator[](SizeType i) { return _start+i*_stride; }
     SizeType size() const { return this->_size; }
     SizeType start() const { return this->_start; }
     SizeType stride() const { return this->_stride; }
@@ -318,6 +327,10 @@ template<class V> inline VectorRange<V> project(const VectorExpression<V>& v, Ra
     return VectorRange<V>(v(),rng); }
 template<class X> inline VectorContainerRange<Vector<X>> project(Vector<X>& v, Range rng) {
     return VectorContainerRange< Vector<X> >(v,rng); }
+template<class X> inline VectorRange<Vector<X>> Vector<X>::operator[](Range rng) {
+    return project(*this,rng); }
+template<class X> inline VectorRange<const Vector<X>> Vector<X>::operator[](Range rng) const {
+    return project(*this,rng); }
 
 template<class V, EnableIf<IsVectorExpression<V>> =dummy> OutputStream& operator<<(OutputStream& os, const V& v) {
     typedef decltype(v[0]) X;

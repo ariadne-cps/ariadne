@@ -239,6 +239,7 @@ class Function
     Void set(SizeType i, ScalarFunction<P,D>);
     Function<P,D,IntervalDomain> get(SizeType i) const;
     const Function<P,D,IntervalDomain> operator[](SizeType i) const;
+    const Function<P,D,BoxDomain> operator[](Range rng) const;
     VectorFunctionElementReference<P,D> operator[](SizeType i);
 
     friend OutputStream& operator<<(OutputStream& os, Function<P,D,C> const& f) { f._ptr->write(os); return os; }

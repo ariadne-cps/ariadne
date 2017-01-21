@@ -56,7 +56,7 @@ class ScalarTaylorFunction : public FunctionPatch<ValidatedTaylorModel64> {
     ScalarTaylorFunction(FunctionPatch<ValidatedTaylorModel64> const& f) : FunctionPatch<ValidatedTaylorModel64>(f) { }
 };
 
-class VectorTaylorFunction : public VectorFunctionPatch<ValidatedTaylorModel64> {
+class VectorTaylorFunction : public VectorFunctionPatch<Vali_datedTaylorModel64> {
   public:
     using VectorFunctionPatch<ValidatedTaylorModel64>::VectorFunctionPatch;
     VectorTaylorFunction() : VectorFunctionPatch<ValidatedTaylorModel64>() { }
@@ -68,10 +68,12 @@ class TaylorFunctionFactory
     : public FunctionModelFactoryInterface<ValidatedTag>
 {
     typedef Sweeper<Float64> SweeperType;
-    SweeperType _sweeper;
+    typedef SweeperType PropertiesType;
+    PropertiesType _sweeper;
   public:
     explicit TaylorFunctionFactory(SweeperType sweeper) : _sweeper(sweeper) { }
     SweeperType sweeper() const { return this->_sweeper; }
+    PropertiesType properties() const { return this->_sweeper; }
     TaylorFunctionFactory* clone() const { return new TaylorFunctionFactory(this->_sweeper); }
     Void write(OutputStream& os) const { os << "TaylorFunctionFactory( sweeper=" << this->_sweeper << " )"; }
     ScalarTaylorFunction create(const ExactBoxType& domain, const ValidatedScalarFunctionInterface& function) const;

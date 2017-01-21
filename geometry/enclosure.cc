@@ -1220,7 +1220,7 @@ Enclosure::kuhn_recondition()
     std::sort(kept_parameters.begin(),kept_parameters.end());
     std::sort(discarded_parameters.begin(),discarded_parameters.end());
 
-    Vector<ValidatedTaylorModel64> new_models(models.size(),ValidatedTaylorModel64(number_of_kept_parameters+number_of_error_parameters,function.sweeper()));
+    Vector<ValidatedTaylorModel64> new_models(models.size(),ValidatedTaylorModel64(number_of_kept_parameters+number_of_error_parameters,function.properties()));
     for(SizeType i=0; i!=this->state_dimension(); ++i) {
         new_models[i] = Ariadne::recondition(models[i],discarded_parameters,number_of_error_parameters,i);
     }

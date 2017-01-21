@@ -758,6 +758,14 @@ template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::swee
     return *this;
 }
 
+template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::simplify() {
+    return this->sweep();
+}
+
+template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::simplify(const PropertiesType& properties) {
+    return this->sweep(properties);
+}
+
 template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::cleanup() {
     this->sort();
     this->unique();

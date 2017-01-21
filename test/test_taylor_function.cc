@@ -134,7 +134,7 @@ Void TestScalarTaylorFunction::test_concept()
     //tr=asin(t); tr=acos(t); tr=atan(t);
     tr=max(tr,tr); tr=min(tr,tr); tr=abs(tr);
 
-    tr.sweep(); tr.clobber();
+    tr.simplify(); tr.clobber();
 
     t(vi); evaluate(t,vi);
     t.domain(); t.range(); t.expansion(); t.error();
@@ -423,7 +423,7 @@ Void TestVectorTaylorFunction::test_constructors()
     VectorTaylorFunction t=VectorTaylorFunction::identity(domain,swp);
     //VectorTaylorFunction variables_model((1.5-t[0]*t[0]+0.25*t[1])*e0+t[0]*e1);
     ARIADNE_TEST_CONSTRUCT(VectorTaylorFunction,variables_model,(ScalarTaylorFunction(1.5_exact-t[0]*t[0]+0.25_exact*t[1])*e0+ScalarTaylorFunction(t[0])*e1));
-    variables_model.sweep();
+    variables_model.simplify();
     ARIADNE_TEST_SAME(variables_model,VectorTaylorFunction(domain,expansion,errors,swp));
 
 }
@@ -677,7 +677,7 @@ Void TestTaylorFunctionFactory::test_create()
 
     ScalarTaylorFunction stf=factory.create(dom, EffectiveScalarFunction::zero(dom.size()) );
     ARIADNE_TEST_PRINT(stf);
-    ARIADNE_TEST_EQUALS(&stf.sweeper(),&sweeper);
+    ARIADNE_TEST_EQUALS(&stf.properties(),&sweeper);
     ARIADNE_TEST_EQUALS(stf(args),Float64Bounds(0.0));
     ARIADNE_TEST_EQUALS(evaluate(stf,args),Float64Bounds(0.0));
 

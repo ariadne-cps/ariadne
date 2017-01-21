@@ -115,6 +115,8 @@ class TaylorModel<ValidatedTag,F>
 
     //! \brief The computational paradigm.
     typedef ValidatedTag Paradigm;
+    //! \brief The properties needed to define the TaylorModel calculus.
+    typedef Sweeper<F> PropertiesType;
 
     //! \brief The type used for algebraic operations.
     typedef FloatBounds<PR> NumericType;
@@ -395,10 +397,12 @@ class TaylorModel<ValidatedTag,F>
 
     //! \brief Remove all terms based on the \a swp conditions.
     TaylorModel<ValidatedTag,F>& sweep(const SweeperType& swp);
+    TaylorModel<ValidatedTag,F>& simplify(const PropertiesType& prp);
 
     //! \brief Remove all terms whose coefficient has magnitude
     //! lower than the cutoff threshold of the quantity.
     TaylorModel<ValidatedTag,F>& sweep();
+    TaylorModel<ValidatedTag,F>& simplify();
     //! \brief Sorts keys.
     TaylorModel<ValidatedTag,F>& sort();
     //! \brief Remove terms with the same keys. Assumes sorted.
@@ -416,8 +420,11 @@ class TaylorModel<ValidatedTag,F>
     /*! \name Accuracy parameters. */
     //! \brief Specify a policy to use to remove low-impact terms.
     Void set_sweeper(SweeperType swp) { this->_sweeper=swp; }
+    Void set_properties(PropertiesType prp) { this->_sweeper=prp; }
     //! \brief A shared pointer to an object using for removing low-impact terms.
     SweeperType sweeper() const { return this->_sweeper; }
+    //! \brief The precision of the coefficients.
+    PropertiesType properties() const { return this->sweeper(); }
     //! \brief The precision of the coefficients.
     PrecisionType precision() const { return this->sweeper().precision(); }
     //@}
@@ -511,6 +518,7 @@ class TaylorModel<ApproximateTag,F>
     //! \brief The type used algebraic operations.
     typedef FloatApproximation<PR> NumericType;
     typedef ApproximateNumber GenericNumericType;
+    typedef Sweeper<F> PropertiesType;
     //! \brief The type used to index the coefficients.
     typedef MultiIndex IndexType;
     //! \brief The type used for the coefficients.
@@ -624,8 +632,10 @@ class TaylorModel<ApproximateTag,F>
     /*! \name Accuracy parameters. */
     //! \brief Specify a policy to use to remove low-impact terms.
     Void set_sweeper(SweeperType swp) { this->_sweeper=swp; }
+    Void set_properties(PropertiesType prp) { this->set_sweeper(prp); }
     //! \brief A shared pointer to an object using for removing low-impact terms.
     SweeperType sweeper() const { return this->_sweeper; }
+    PropertiesType properties() const { return this->_sweeper; }
     //! \brief The precision of the coefficients.
     PrecisionType precision() const { return this->sweeper().precision(); }
     //@}
@@ -635,6 +645,7 @@ class TaylorModel<ApproximateTag,F>
     //! \brief Remove all terms whose coefficient has magnitude
     //! lower than the cutoff threshold of the quantity.
     TaylorModel<ApproximateTag,F>& sweep();
+    TaylorModel<ApproximateTag,F>& simplify();
     //! \brief Combine terms with the same index; requires sorted.
     TaylorModel<ApproximateTag,F>& unique();
     //! \brief Sort the terms in index order.

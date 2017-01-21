@@ -71,6 +71,7 @@ class AffineModel<ApproximateTag,F>
   public:
     typedef P Paradigm;
     typedef PR PrecisionType;
+    typedef PR PropertiesType;
     typedef FloatApproximation<PR> NumericType;
     typedef FloatApproximation<PR> CoefficientType;
 
@@ -99,6 +100,7 @@ class AffineModel<ApproximateTag,F>
 
     SizeType argument_size() const { return this->_g.size(); }
     PrecisionType precision() const { return this->_c.precision(); }
+    PropertiesType properties() const { return this->_c.precision(); }
     const Covector<CoefficientType>& a() const { return this->_g; }
     const CoefficientType& b() const { return this->_c; }
 

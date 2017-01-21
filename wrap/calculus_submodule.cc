@@ -219,7 +219,7 @@ OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ScalarTayl
        << "(" << python_representation(stf.domain())
        << "," << python_representation(stf.expansion())
        << "," << python_representation(stf.error())
-       << "," << python_representation(stf.sweeper())
+       << "," << python_representation(stf.properties())
        << ")";
     return os;
 }
@@ -231,7 +231,7 @@ OutputStream& operator<<(OutputStream& os, const PythonRepresentation<VectorTayl
        << "(" << python_representation(vtf.domain())
        << "," << python_representation(vtf.expansions())
        << "," << python_representation(vtf.errors())
-       << "," << python_representation(vtf.sweeper())
+       << "," << python_representation(vtf.properties())
        << ")";
     return os;
 }

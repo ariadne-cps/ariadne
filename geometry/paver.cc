@@ -474,8 +474,8 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
 
 Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingInterface& r, const ExactBoxType& d, const VectorTaylorFunction& fg, const ExactBoxType& c, const GridCell& b, ExactPoint& x, ExactPoint& y, Int e)
 {
-    Sweeper<Float64> sweeper = fg.sweeper();
-    Precision64 pr;
+    auto properties = fg.properties();
+    auto pr = properties.precision();
 
     // When making a new starting primal point, need to move components away from zero
     // This constant shows how far away from zero the points are
@@ -519,14 +519,14 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
 
         // Use the computed dual variables to try to make a scalar function which is negative over the entire domain.
         // This should be easier than using all constraints separately
-        ScalarTaylorFunction xg=ScalarTaylorFunction::zero(d,sweeper);
+        ScalarTaylorFunction xg=ScalarTaylorFunction::zero(d,properties);
         Float64Bounds cnst = {0,pr};
         for(Nat j=0; j!=n; ++j) {
-            xg = xg - (x[j]-x[n+j])*ScalarTaylorFunction(d,fg[j],sweeper);
+            xg = xg - (x[j]-x[n+j])*ScalarTaylorFunction(d,fg[j],properties);
             cnst += (bx[j].upper()*x[j]-bx[j].lower()*x[n+j]);
         }
         for(Nat i=0; i!=m; ++i) {
-            xg = xg - (x[2*n+i]-x[2*n+m+i])*ScalarTaylorFunction::coordinate(d,i,sweeper);
+            xg = xg - (x[2*n+i]-x[2*n+m+i])*ScalarTaylorFunction::coordinate(d,i,properties);
             cnst += (d[i].upper()*x[2*n+i]-d[i].lower()*x[2*n+m+i]);
         }
         xg = (cnst) + xg;
@@ -664,7 +664,7 @@ Void optimal_constraint_adjoin_outer_approximation(PavingInterface& p, const Exa
             fg=join(*tfptr,*tgptr);
         } else {
             if(g.result_size()>0) {
-                fg=join(*tfptr,VectorTaylorFunction(tfptr->domain(),g,tfptr->sweeper()));
+                fg=join(*tfptr,VectorTaylorFunction(tfptr->domain(),g,tfptr->properties()));
             } else {
                 fg=*tfptr;
             }

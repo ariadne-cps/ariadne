@@ -162,11 +162,11 @@ Void TestScalarTaylorFunction::test_create()
     ValidatedScalarFunctionModel fm1=pf1;
     ValidatedScalarFunctionModel fm2=pf2;
     ValidatedScalarFunction f2=fm2;
-    ARIADNE_TEST_EQUAL(pf1.create(pf2).range(),c2);
-    ARIADNE_TEST_EQUAL(pf1.create(fm2).range(),c2);
-    ARIADNE_TEST_EQUAL(pf1.create(f2).range(),c2);
-    ARIADNE_TEST_EQUAL(fm1.create(fm2).range(),c2);
-    ARIADNE_TEST_EQUAL(fm1.create(f2).range(),c2);
+    ARIADNE_TEST_EQUAL(factory(pf1).create(pf2).range(),c2);
+    ARIADNE_TEST_EQUAL(factory(pf1).create(fm2).range(),c2);
+    ARIADNE_TEST_EQUAL(factory(pf1).create(f2).range(),c2);
+    ARIADNE_TEST_EQUAL(factory(fm1).create(fm2).range(),c2);
+    ARIADNE_TEST_EQUAL(factory(fm1).create(f2).range(),c2);
 }
 
 Void TestScalarTaylorFunction::test_predicates()
@@ -421,9 +421,8 @@ Void TestVectorTaylorFunction::test_constructors()
     Vector<Float64Bounds> e0(e(2,0),pr); Vector<Float64Bounds> e1(e(2,1),pr);
 
     VectorTaylorFunction t=VectorTaylorFunction::identity(domain,swp);
-    //VectorTaylorFunction variables_model((1.5-t[0]*t[0]+0.25*t[1])*e0+t[0]*e1);
-    ARIADNE_TEST_CONSTRUCT(VectorTaylorFunction,variables_model,(ScalarTaylorFunction(1.5_exact-t[0]*t[0]+0.25_exact*t[1])*e0+ScalarTaylorFunction(t[0])*e1));
-    variables_model.simplify();
+    ARIADNE_TEST_CONSTRUCT(VectorTaylorFunction,variables_model,((1.5_exact-t[0]*t[0]+0.25_exact*t[1])*e0+t[0]*e1));
+    ARIADNE_TEST_EXECUTE(variables_model.simplify());
     ARIADNE_TEST_SAME(variables_model,VectorTaylorFunction(domain,expansion,errors,swp));
 
 }

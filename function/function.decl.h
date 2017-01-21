@@ -119,6 +119,8 @@ template<class P, class PR=Precision64, class PRE=PR> class FunctionModelFactory
 typedef FunctionModelFactoryInterface<ValidatedTag,Precision64> ValidatedFunctionModelFactoryInterface;
 template<class P, class PR=Precision64, class PRE=PR> class FunctionModelFactory;
 typedef FunctionModelFactory<ValidatedTag,Precision64> ValidatedFunctionModelFactory;
+template<class FMF> class FunctionModelCreator;
+
 
 
 } // namespace Ariadne

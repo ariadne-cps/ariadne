@@ -55,6 +55,9 @@ namespace Ariadne {
 
 static double TAYLOR_FUNCTION_WRITING_ACCURACY = 1e-8;
 
+template class FunctionPatchFactory<ValidatedTaylorModel64>;
+template class FunctionModelCreator<FunctionPatchFactory<ValidatedTaylorModel64>>;
+
 template class FunctionPatch<ValidatedTaylorModel64>;
 template class FunctionMixin<FunctionPatch<ValidatedTaylorModel64>,ApproximateTag,BoxDomain,IntervalDomain>;
 template class FunctionMixin<FunctionPatch<ValidatedTaylorModel64>,ValidatedTag,BoxDomain,IntervalDomain>;
@@ -62,55 +65,10 @@ template class VectorFunctionPatch<ValidatedTaylorModel64>;
 template class FunctionMixin<VectorFunctionPatch<ValidatedTaylorModel64>,ApproximateTag,BoxDomain,BoxDomain>;
 template class FunctionMixin<VectorFunctionPatch<ValidatedTaylorModel64>,ValidatedTag,BoxDomain,BoxDomain>;
 
+template class FunctionPatchFactory<ValidatedTaylorModelMP>;
+template class FunctionModelCreator<FunctionPatchFactory<ValidatedTaylorModelMP>>;
 template class FunctionPatch<ValidatedTaylorModelMP>;
 template class VectorFunctionPatch<ValidatedTaylorModelMP>;
-
-CanonicalNumericType<ValidatedTag> TaylorFunctionFactory::_create(const Number<ValidatedTag>& number) const
-{
-    return CanonicalNumericType<ValidatedTag>(number,Precision64());
-}
-
-ScalarTaylorFunction TaylorFunctionFactory::create(const ExactBoxType& domain, const ValidatedScalarFunctionInterface& function) const
-{
-    return ScalarTaylorFunction(domain,function,this->_sweeper);
-}
-
-ScalarTaylorFunction* TaylorFunctionFactory::_create(const ExactBoxType& domain, const ValidatedScalarFunctionInterface& function) const
-{
-    return new ScalarTaylorFunction(domain,function,this->_sweeper);
-}
-
-VectorTaylorFunction TaylorFunctionFactory::create(const ExactBoxType& domain, const ValidatedVectorFunctionInterface& function) const
-{
-    return VectorTaylorFunction(domain,function,this->_sweeper);
-}
-
-VectorTaylorFunction* TaylorFunctionFactory::_create(const ExactBoxType& domain, const ValidatedVectorFunctionInterface& function) const
-{
-    return new VectorTaylorFunction(domain,function,this->_sweeper);
-}
-
-ScalarTaylorFunction TaylorFunctionFactory::create_zero(const ExactBoxType& domain) const
-{
-    return ScalarTaylorFunction::zero(domain,this->_sweeper);
-}
-
-ScalarTaylorFunction TaylorFunctionFactory::create_constant(const ExactBoxType& domain, ValidatedNumericType value) const
-{
-    return ScalarTaylorFunction::constant(domain,value,this->_sweeper);
-}
-
-ScalarTaylorFunction TaylorFunctionFactory::create_coordinate(const ExactBoxType& domain, SizeType k) const
-{
-    return ScalarTaylorFunction::coordinate(domain,k,this->_sweeper);
-}
-
-
-VectorTaylorFunction TaylorFunctionFactory::create_identity(const ExactBoxType& domain) const
-{
-    return VectorTaylorFunction::identity(domain,this->_sweeper);
-}
-
 
 FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory() {
     return new TaylorFunctionFactory(Sweeper<Float64>());

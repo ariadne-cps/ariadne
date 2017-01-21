@@ -65,29 +65,15 @@ class VectorTaylorFunction : public VectorFunctionPatch<Vali_datedTaylorModel64>
 */
 
 class TaylorFunctionFactory
-    : public FunctionModelFactoryInterface<ValidatedTag>
+    : public FunctionPatchFactory<TaylorModel<ValidatedTag,Float64>>
 {
-    typedef Sweeper<Float64> SweeperType;
-    typedef SweeperType PropertiesType;
-    PropertiesType _sweeper;
+    typedef TaylorModel<ValidatedTag,Float64> M;
   public:
-    explicit TaylorFunctionFactory(SweeperType sweeper) : _sweeper(sweeper) { }
-    SweeperType sweeper() const { return this->_sweeper; }
-    PropertiesType properties() const { return this->_sweeper; }
-    TaylorFunctionFactory* clone() const { return new TaylorFunctionFactory(this->_sweeper); }
-    Void write(OutputStream& os) const { os << "TaylorFunctionFactory( sweeper=" << this->_sweeper << " )"; }
-    ScalarTaylorFunction create(const ExactBoxType& domain, const ValidatedScalarFunctionInterface& function) const;
-    VectorTaylorFunction create(const ExactBoxType& domain, const ValidatedVectorFunctionInterface& function) const;
-    ScalarTaylorFunction create_zero(const ExactBoxType& domain) const;
-    ScalarTaylorFunction create_constant(const ExactBoxType& domain, ValidatedNumericType c) const;
-    ScalarTaylorFunction create_coordinate(const ExactBoxType& domain, SizeType k) const;
-    VectorTaylorFunction create_zero(SizeType i, const ExactBoxType& domain) const;
-    ScalarTaylorFunction create_identity(const ExactIntervalType& domain) const;
-    VectorTaylorFunction create_identity(const ExactBoxType& domain) const;
-  private:
-    CanonicalNumericType<ValidatedTag,Precision64> _create(const Number<ValidatedTag>& number) const;
-    ScalarTaylorFunction* _create(const ExactBoxType& domain, const ValidatedScalarFunctionInterface& function) const;
-    VectorTaylorFunction* _create(const ExactBoxType& domain, const ValidatedVectorFunctionInterface& function) const;
+    typedef typename M::SweeperType SweeperType;
+    using FunctionPatchFactory<M>::FunctionPatchFactory;
+    explicit TaylorFunctionFactory(SweeperType sweeper) : FunctionPatchFactory<M>(sweeper) { }
+    SweeperType sweeper() const { return this->properties(); }
+    friend OutputStream& operator<<(OutputStream& os, TaylorFunctionFactory const& factory) { return os << "TaylorFunctionFactory( sweeper=" << factory.sweeper() << " )"; }
 };
 
 

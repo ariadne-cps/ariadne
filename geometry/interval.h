@@ -67,6 +67,12 @@ template<class PR> struct MidpointTrait<FloatBall<PR>> { typedef FloatValue<PR> 
 class UnitIntervalType;
 class EmptyIntervalType;
 
+template<class PR> struct FloatUpperIntervalFactory {
+    PR _precision;
+    FloatUpperIntervalFactory(PR precision) : _precision(precision) { }
+    FloatUpperInterval<PR> create(ValidatedNumber const& y) const;
+};
+
 template<class U> struct DeclareIntervalArithmeticOperations { };
 template<class PR> struct DeclareIntervalArithmeticOperations<FloatUpperBound<PR>>
     : DeclareNumericOperations<FloatUpperInterval<PR>>
@@ -80,7 +86,7 @@ template<class PR> struct DeclareIntervalArithmeticOperations<FloatUpperBound<PR
 {
     typedef PR PrecisionType;
     friend FloatError<PR> mag(FloatUpperInterval<PR> const&);
-    FloatUpperInterval<PR> create(ValidatedNumber const& y) const;
+    friend FloatUpperIntervalFactory<PR> factory(FloatUpperInterval<PR> const& ivl) { return FloatUpperIntervalFactory<PR>(ivl.upper().precision()); }
 };
 
 template<class PR> struct DeclareIntervalArithmeticOperations<FloatValue<PR>> : DeclareIntervalArithmeticOperations<FloatUpperBound<PR>> { };

@@ -119,7 +119,7 @@ FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory();
 
 ValidatedVectorFunctionModel operator*(const Matrix<Float64Value>& A,const ValidatedVectorFunctionModel& v) {
     ARIADNE_ASSERT(v.size()!=0);
-    ValidatedVectorFunctionModel r(A.row_size(),v[0].create_zero());
+    ValidatedVectorFunctionModel r(A.row_size(),factory(v).create_zero());
     for(Nat i=0; i!=r.size(); ++i) {
         ValidatedScalarFunctionModel t=r[i];
         for(Nat j=0; j!=v.size(); ++j) {
@@ -132,7 +132,7 @@ ValidatedVectorFunctionModel operator*(const Matrix<Float64Value>& A,const Valid
 
 ValidatedVectorFunctionModel operator*(const Matrix<ValidatedNumericType>& A,const ValidatedVectorFunctionModel& v) {
     ARIADNE_ASSERT(v.size()!=0);
-    ValidatedVectorFunctionModel r(A.row_size(),v[0].create_zero());
+    ValidatedVectorFunctionModel r(A.row_size(),factory(v).create_zero());
     for(Nat i=0; i!=r.size(); ++i) {
         ValidatedScalarFunctionModel t=r[i];
         for(Nat j=0; j!=v.size(); ++j) {

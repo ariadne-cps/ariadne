@@ -66,6 +66,7 @@ class TestIntegrator
     }
 
     Int test() {
+        ARIADNE_TEST_PRINT(integrator_ptr.operator->());
         ARIADNE_TEST_PRINT(*integrator_ptr);
         ARIADNE_TEST_CALL(test_constant_derivative());
         ARIADNE_TEST_CALL(test_quadratic_flow());
@@ -190,6 +191,7 @@ Int main(Int argc, const char **argv) {
             minimum_spacial_order=1,minimum_temporal_order=4,
             maximum_spacial_order=3,maximum_temporal_order=8);
     taylor_series_integrator.verbosity=verbosity;
+    ARIADNE_TEST_PRINT(taylor_series_integrator);
     TestIntegrator(taylor_series_integrator).test();
 
     ARIADNE_TEST_PRINT("Testing TaylorPicardIntegrator");

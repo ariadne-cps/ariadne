@@ -93,6 +93,9 @@ template<class R, class F, class X> class CanCall {
     static const bool value = decltype(test<R,F,X>(1))::value;
 };
 
+template<class M> class FunctionPatchFactory;
+template<class M> class FunctionPatchCreator;
+
 
 /*! \ingroup FunctionModelSubModule
  *  \brief A ScalarTaylorFunction is a type of FunctionModel in which a the restriction of a scalar function \f$f:\R^n\rightarrow\R\f$ on a domain \f$D\f$ is approximated by polynomial \f$p\f$ with uniform error \f$e\f$.
@@ -202,18 +205,10 @@ template<class M> class FunctionPatch
 
     //@{
     //! \name Prototype constructors.
+    friend FunctionPatchCreator<M> factory(FunctionPatch<M>const& f) {
+        return FunctionPatchCreator<M>(f.domain(),f.properties()); }
+    //! \brief Construct a zero function over the same domain with the same computational properties.
     FunctionPatch<M> create_zero() const;
-    FunctionPatch<M> create_constant(NumericType const& c) const;
-    FunctionPatch<M> create_constant(GenericNumericType const& c) const;
-    FunctionPatch<M> create_coordinate(SizeType j) const;
-    FunctionPatch<M> create(GenericType const& f) const;
-    NumericType create(GenericNumericType const& f) const;
-
-    FunctionPatch<M> create_constant(DomainType const&, NumericType const& c) const;
-    FunctionPatch<M> create_coordinate(DomainType const&, SizeType j) const;
-
-    Vector<FunctionPatch<M>> create_coordinates() const;
-    Vector<FunctionPatch<M>> create_coordinates(DomainType const&) const;
     //@}
 
     //@{
@@ -344,14 +339,7 @@ template<class M> class FunctionPatch
     FunctionPatch<M>* _derivative(SizeType j) const;
     FunctionPatch<M>* _clone() const;
     FunctionPatch<M>* _create() const;
-    virtual ScalarFunctionPatch<M>* _create_zero(DomainType const&) const;
-    virtual ScalarFunctionPatch<M>* _create_constant(DomainType const&, NumericType const&) const;
-    virtual ScalarFunctionPatch<M>* _create_constant(DomainType const&, GenericNumericType const&) const;
-    virtual ScalarFunctionPatch<M>* _create_coordinate(DomainType const&, SizeType) const;
-    VectorFunctionModelInterface<P,PR,PRE>* _create_identity() const;
-    VectorFunctionModelInterface<P,PR,PRE>* _create_vector(SizeType i) const;
-
-
+    virtual FunctionPatchFactory<M>* _factory() const;
   public:
     VectorFunctionPatch<M> join(const FunctionPatch<M>& f1, const FunctionPatch<M>& f2);
     VectorFunctionPatch<M> combine(const FunctionPatch<M>& f1, const FunctionPatch<M>& f2);
@@ -407,8 +395,8 @@ template<class M> class FunctionPatch
         ARIADNE_ASSERT(k<f.argument_size());
         ARIADNE_ASSERT(decide(contains(f.domain()[k],c)));
         FunctionPatch<M> g = antiderivative(f,k);
-        VectorFunctionPatch<M> h ( f.create_coordinates() );
-        h[k] = f.create_constant(c);
+        VectorFunctionPatch<M> h ( VectorFunctionPatch<M>::identity(f.domain(),f.properties()) );
+        h[k] = FunctionPatch<M>::constant(f.domain(),c,f.properties());
         return g-compose(g,h);
     }
     friend FunctionPatch<M> derivative(const FunctionPatch<M>& f, SizeType k) {
@@ -692,6 +680,9 @@ template<class M> class VectorFunctionPatch
     //! \brief Set the error to zero.
     Void clobber();
 
+    friend FunctionPatchCreator<M> factory(VectorFunctionPatch<M>const& f) {
+        return FunctionPatchCreator<M>(f.domain(),f.properties()); }
+
     //! \brief The constant Taylor model with range \a r and argument domain \a d.
     static VectorFunctionPatch<M> constant(const ExactBoxType& d, const Vector<NumericType>& r, PropertiesType prp);
     //! \brief The identity Taylor model on domain \a d.
@@ -731,8 +722,7 @@ template<class M> class VectorFunctionPatch
     virtual ScalarFunctionPatch<M>* _get(SizeType i) const { return new FunctionPatch<M>(this->_domain,this->_models[i]); }
     virtual VectorFunctionPatch<M>* _clone() const;
     virtual VectorFunctionPatch<M>* _create() const;
-    virtual VectorFunctionPatch<M>* _create_identity() const;
-    virtual ScalarFunctionPatch<M>* _create_zero() const;
+    virtual FunctionPatchFactory<M>* _factory() const;
   private:
     friend class VectorFunctionMixin<VectorFunctionPatch<M>,P>;
     friend class TaylorFunctionFactory;
@@ -1211,6 +1201,52 @@ template<class M> class VectorFunctionPatchElementReference
 };
 
 
+template<class M> class FunctionPatchFactory
+    : public FunctionModelFactoryMixin<FunctionPatchFactory<M>, ValidatedTag, typename M::PrecisionType, typename M::ErrorPrecisionType>
+{
+    typedef typename M::Paradigm P;
+    typedef typename M::PrecisionType PR;
+    typedef typename M::ErrorPrecisionType PRE;
+  public:
+    typedef P Paradigm;
+    typedef PR PrecisionType;
+    typedef PRE ErrorPrecisionType;
+    typedef typename M::PropertiesType PropertiesType;
+    typedef BoxDomain DomainType;
+
+    explicit FunctionPatchFactory<M>(PropertiesType properties) : _properties(properties) { }
+    PropertiesType properties() const { return this->_properties; }
+
+    CanonicalNumericType<P,PR,PRE> create(const Number<P>& number) const;
+    ScalarFunctionPatch<M> create(const ExactBoxType& domain, const ScalarFunctionInterface<P>& function) const;
+    VectorFunctionPatch<M> create(const ExactBoxType& domain, const VectorFunctionInterface<P>& function) const;
+
+    FunctionPatch<M> create_zero(const DomainType& domain) const;
+    FunctionPatch<M> create_constant(const DomainType& domain, Number<P> const& value) const;
+    ScalarFunctionModel<P,PR,PRE> create_constant(const ExactBoxType& domain, const CanonicalNumericType<P,PR,PRE>& value) const {
+        return create_constant(domain,Number<P>(value)); };
+    FunctionPatch<M> create_coordinate(const DomainType& domain, SizeType index) const;
+    VectorFunctionPatch<M> create_zeros(SizeType result_size, const DomainType& domain) const;
+    VectorFunctionPatch<M> create_constants(const DomainType& domain, Vector<Number<P>> const& values) const;
+    VectorFunctionPatch<M> create_identity(const DomainType& domain) const;
+    ScalarFunctionPatch<M> create_identity(const ExactIntervalType& domain) const { return this->create_coordinate(ExactBoxType(1u,domain),0u); };
+    CanonicalNumericType<P,PR,PRE> create_number(const Number<P>& number) const { return this->create(number); }
+    friend OutputStream& operator<<(OutputStream& os, FunctionPatchFactory<M> const& factory) {
+        return os << "FunctionPatchFactory( properties=" << factory._properties << " )"; }
+  private:
+    PropertiesType _properties;
+};
+
+template<class M> class FunctionPatchCreator
+    : public FunctionModelCreator<FunctionPatchFactory<M>>
+{
+  public:
+    typedef BoxDomain DomainType;
+    typedef typename M::PropertiesType PropertiesType;
+    explicit FunctionPatchCreator<M>(DomainType domain, PropertiesType properties)
+        : FunctionModelCreator<FunctionPatchFactory<M>>(domain,FunctionPatchFactory<M>(properties)) { }
+    PropertiesType properties() const { return this->_factory.properties(); }
+};
 
 
 

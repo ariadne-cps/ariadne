@@ -817,9 +817,9 @@ template<class OP> ValidatedScalarFunction apply(OP op, ValidatedScalarFunction 
     if(f1p && f2p) {
         ValidatedScalarFunctionModel f1m(f1p); ValidatedScalarFunctionModel f2m(f2p); return op(f1m,f2m);
     } else if(f1p) {
-        ValidatedScalarFunctionModel f1m(f1p); return op(f1m,f1m.create(f2));
+        ValidatedScalarFunctionModel f1m(f1p); return op(f1m,factory(f1m).create(f2));
     } else if(f2p) {
-        ValidatedScalarFunctionModel f2m(f2p); return op(f2m.create(f1),f2m);
+        ValidatedScalarFunctionModel f2m(f2p); return op(factory(f2m).create(f1),f2m);
     } else {
         return ValidatedScalarFunction(new BinaryFunction<ValidatedTag>(op.code(),f1,f2));
     }

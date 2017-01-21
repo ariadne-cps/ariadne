@@ -301,35 +301,9 @@ template<class M> Vector<FunctionPatch<M>> FunctionPatch<M>::coordinates(const E
     return x;
 }
 
-
 template<class M> FunctionPatch<M> FunctionPatch<M>::create_zero() const
 {
-    return FunctionPatch<M>(this->domain(),this->_model.properties());
-}
-
-template<class M> FunctionPatch<M> FunctionPatch<M>::create_constant(NumericType const& c) const
-{
-    return FunctionPatch<M>::constant(this->domain(),c,this->_model.properties());
-}
-
-template<class M> FunctionPatch<M> FunctionPatch<M>::create_coordinate(SizeType j) const
-{
-    return FunctionPatch<M>::coordinate(this->domain(),j,this->_model.properties());
-}
-
-template<class M> Vector<FunctionPatch<M>> FunctionPatch<M>::create_coordinates() const
-{
-    return FunctionPatch<M>::coordinates(this->domain(),this->_model.properties());
-}
-
-template<class M> typename FunctionPatch<M>::NumericType FunctionPatch<M>::create(GenericNumericType const& c) const
-{
-    return NumericType(c,this->model().precision());
-}
-
-template<class M> FunctionPatch<M> FunctionPatch<M>::create(GenericType const& f) const
-{
-    return FunctionPatch<M>(this->domain(),f,this->_model.properties());
+    return FunctionPatch<M>(this->domain(),this->properties());
 }
 
 template<class M> FunctionPatch<M>* FunctionPatch<M>::_clone() const
@@ -337,43 +311,16 @@ template<class M> FunctionPatch<M>* FunctionPatch<M>::_clone() const
     return new FunctionPatch<M>(*this);
 }
 
+template<class M> FunctionPatchFactory<M>* FunctionPatch<M>::_factory() const
+{
+    return new FunctionPatchFactory<M>(this->_model.properties());
+}
+
 template<class M> FunctionPatch<M>* FunctionPatch<M>::_create() const
 {
     return new FunctionPatch<M>(this->domain(),this->_model.properties());
 }
 
-template<class M> auto FunctionPatch<M>::_create_identity() const -> VectorFunctionModelInterface<P,PR,PRE>*
-{
-    PropertiesType properties=this->properties();
-    VectorFunctionPatch<M>* result = new VectorFunctionPatch<M>(this->domain().size(), FunctionPatch<M>(this->domain(),properties));
-    for(SizeType i=0; i!=result->size(); ++i) { (*result)[i]=FunctionPatch<M>::coordinate(this->domain(),i,properties); }
-    return result;
-}
-
-template<class M> auto FunctionPatch<M>::_create_vector(SizeType i) const -> VectorFunctionModelInterface<P,PR,PRE>*
-{
-    return new VectorFunctionPatch<M>(i,this->domain(),this->_model.properties());
-}
-
-template<class M> FunctionPatch<M>* FunctionPatch<M>::_create_zero(DomainType const& dom) const
-{
-    return new FunctionPatch<M>(dom,this->properties());
-}
-
-template<class M> FunctionPatch<M>* FunctionPatch<M>::_create_constant(DomainType const& dom, NumericType const& c) const
-{
-    return new FunctionPatch<M>(FunctionPatch<M>::constant(dom,c,this->properties()));
-}
-
-template<class M> FunctionPatch<M>* FunctionPatch<M>::_create_constant(DomainType const& dom, GenericNumericType const& c) const
-{
-    return new FunctionPatch<M>(FunctionPatch<M>::constant(dom,NumericType(c,this->model().precision()),this->properties()));
-}
-
-template<class M> FunctionPatch<M>* FunctionPatch<M>::_create_coordinate(DomainType const& dom, SizeType j) const
-{
-    return new FunctionPatch<M>(FunctionPatch<M>::coordinate(dom,j,this->properties()));
-}
 
 template<class M> Void VectorFunctionPatch<M>::adjoin(const FunctionPatch<M>& sf)
 {
@@ -702,27 +649,15 @@ template<class M> VectorFunctionPatch<M>* VectorFunctionPatch<M>::_clone() const
     return new VectorFunctionPatch<M>(*this);
 }
 
+template<class M> FunctionPatchFactory<M>* VectorFunctionPatch<M>::_factory() const
+{
+    return new FunctionPatchFactory<M>(this->_models.zero_element().properties());
+}
+
 template<class M> VectorFunctionPatch<M>* VectorFunctionPatch<M>::_create() const
 {
     return new VectorFunctionPatch<M>(this->result_size(), FunctionPatch<M>(this->domain(),this->properties()));
 }
-
-template<class M> FunctionPatch<M>* VectorFunctionPatch<M>::_create_zero() const
-{
-    return new FunctionPatch<M>(this->domain(),this->properties());
-}
-
-template<class M> VectorFunctionPatch<M>* VectorFunctionPatch<M>::_create_identity() const
-{
-    PropertiesType properties=this->properties();
-    VectorFunctionPatch<M>* result = new VectorFunctionPatch<M>(this->domain().size(), FunctionPatch<M>(this->domain(),properties));
-    for(SizeType i=0; i!=result->size(); ++i) { (*result)[i]=FunctionPatch<M>::coordinate(this->domain(),i,properties); }
-    return result;
-}
-
-
-
-
 
 
 
@@ -1038,6 +973,43 @@ template<class M> OutputStream& VectorFunctionPatch<M>::repr(OutputStream& os) c
               << representation(this->domain()) << ", " << representation(this->expansions()) << ", "
               << representation(this->errors()) << ", " << representation(this->properties()) << ")";
 }
+
+
+
+
+
+template<class M> auto FunctionPatchFactory<M>::create(const Number<P>& number) const -> CanonicalNumericType<P,PR,PRE> {
+    return CanonicalNumericType<P,PR>(number,this->_properties.precision());
+}
+template<class M> FunctionPatch<M> FunctionPatchFactory<M>::create(const DomainType& domain, const ScalarFunctionInterface<P>& function) const {
+    return FunctionPatch<M>(domain,function,this->_properties);
+}
+template<class M> VectorFunctionPatch<M> FunctionPatchFactory<M>::create(const DomainType& domain, const VectorFunctionInterface<P>& function) const {
+    return VectorFunctionPatch<M>(domain,function,this->_properties);
+}
+template<class M> FunctionPatch<M> FunctionPatchFactory<M>::create_zero(const DomainType& domain) const {
+    return FunctionPatch<M>(domain,this->_properties);
+}
+template<class M> FunctionPatch<M> FunctionPatchFactory<M>::create_constant(const DomainType& domain, Number<P> const& value) const {
+    auto concrete_value=this->create(value);
+    return FunctionPatch<M>::constant(domain,concrete_value,this->_properties);
+}
+template<class M> FunctionPatch<M> FunctionPatchFactory<M>::create_coordinate(const DomainType& domain, SizeType k) const {
+    return FunctionPatch<M>::coordinate(domain,k,this->_properties);
+}
+template<class M> VectorFunctionPatch<M> FunctionPatchFactory<M>::create_zeros(SizeType n, const DomainType& domain) const {
+    return VectorFunctionPatch<M>(n,domain,this->_properties);
+}
+template<class M> VectorFunctionPatch<M> FunctionPatchFactory<M>::create_constants(const DomainType& domain, Vector<Number<P>> const& values) const {
+    Vector<CanonicalNumericType<P,PR,PRE>> concrete_values(values.size(),this->_properties.precision());
+    for(SizeType i=0; i!=values.size(); ++i) { concrete_values[i]=values[i]; }
+    return VectorFunctionPatch<M>::constant(domain,concrete_values,this->_properties);
+}
+template<class M> VectorFunctionPatch<M> FunctionPatchFactory<M>::create_identity(const DomainType& domain) const {
+    return VectorFunctionPatch<M>::identity(domain,this->_properties);
+}
+
+
 
 
 

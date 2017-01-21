@@ -1841,8 +1841,8 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         EffectiveVectorFunction dynamic=this->system().dynamic_function(initial_set.location());
         ExactIntervalVectorType flow_spacial_domain=project(flow.domain(),range(0,flow.argument_size()-1u));
         ExactIntervalType flow_time_domain=flow.domain()[flow.argument_size()-1u];
-        ValidatedScalarFunctionModel zero_function=flow[0].create_zero();
-        ValidatedVectorFunctionModel identity_function=flow.create_identity();
+        ValidatedScalarFunctionModel zero_function=factory(flow).create_zero();
+        ValidatedVectorFunctionModel identity_function=factory(flow).create_identity();
         ValidatedVectorFunctionModel space_projection=flow*zero;
         for(Nat i=0; i!=n; ++i) { space_projection[i]=space_projection[i]+identity_function[i]; }
 

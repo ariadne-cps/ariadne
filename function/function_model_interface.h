@@ -36,6 +36,10 @@
 
 namespace Ariadne {
 
+template<class P, class PR, class PRE> class FunctionModelFactoryInterface;
+template<class P, class PR, class PRE> class FunctionModelCreatorInterface;
+
+
 template<class P, class PR, class PRE> class ScalarFunctionModelInterface
     : public virtual ScalarFunctionInterface<P>
 {
@@ -59,16 +63,11 @@ template<class P, class PR, class PRE> class ScalarFunctionModelInterface
     virtual CanonicalNumericType<P,PR,PRE> _unchecked_evaluate(const Vector<CanonicalNumericType<P,PR,PRE>>& x) const = 0;
     virtual ScalarFunctionModelInterface<P,PR,PRE>* _partial_evaluate(SizeType j, const CanonicalNumericType<P,PR,PRE>& c) const = 0;
 
+    virtual FunctionModelFactoryInterface<P,PR,PRE>* _factory() const = 0;
     virtual ScalarFunctionModelInterface<P,PR,PRE>* _clone() const = 0;
     virtual ScalarFunctionModelInterface<P,PR,PRE>* _create() const = 0;
-    virtual VectorFunctionModelInterface<P,PR,PRE>* _create_vector(SizeType i) const = 0;
     virtual ScalarFunctionModelInterface<P,PR,PRE>* _embed(const ExactBoxType& d1, const ExactBoxType& d2) const = 0;
-    virtual VectorFunctionModelInterface<P,PR,PRE>* _create_identity() const = 0;
     virtual ScalarFunctionModelInterface<P,PR,PRE>* _restriction(const ExactBoxType& d) const = 0;
-
-    virtual ScalarFunctionModelInterface<P,PR,PRE>* _create_zero(DomainType const& dom) const = 0;
-    virtual ScalarFunctionModelInterface<P,PR,PRE>* _create_constant(DomainType const& dom, Number<P> const& c) const = 0;
-    virtual ScalarFunctionModelInterface<P,PR,PRE>* _create_coordinate(DomainType const& dom, SizeType j) const = 0;
 
     virtual ScalarFunctionModelInterface<P,PR,PRE>* _derivative(SizeType j) const = 0;
     virtual ScalarFunctionModelInterface<P,PR,PRE>* _antiderivative(SizeType j) const = 0;
@@ -99,9 +98,8 @@ template<class P, class PR, class PRE> class VectorFunctionModelInterface
 
     virtual NormType const _norm() const = 0;
 
+    virtual FunctionModelFactoryInterface<P,PR,PRE>* _factory() const = 0;
     virtual VectorFunctionModelInterface<P,PR,PRE>* _clone() const = 0;
-    virtual ScalarFunctionModelInterface<P,PR,PRE>* _create_zero() const = 0;
-    virtual VectorFunctionModelInterface<P,PR,PRE>* _create_identity() const = 0;
     virtual Void _set(SizeType, ScalarFunctionModelInterface<P,PR,PRE> const&) = 0;
     virtual ScalarFunctionModelInterface<P,PR,PRE>* _get(SizeType) const = 0;
     virtual VectorFunctionModelInterface<P,PR,PRE>* _embed(const ExactBoxType& d1, const ExactBoxType& d2) const = 0;
@@ -118,33 +116,44 @@ template<class P, class PR, class PRE> class VectorFunctionModelInterface
     virtual Void restrict(const ExactBoxType& d) = 0;
 };
 
+
 template<class P, class PR, class PRE> class FunctionModelFactoryInterface
 {
     typedef ExactBoxType DomainType;
+    friend class FunctionModelFactory<P,PR,PRE>;
   public:
     virtual FunctionModelFactoryInterface<P,PR,PRE>* clone() const = 0;
-    virtual Void write(OutputStream& os) const = 0;
-    ScalarFunctionModel<P,PR,PRE> create(const ExactBoxType& domain, const ScalarFunctionInterface<P>& function) const;
-    VectorFunctionModel<P,PR,PRE> create(const ExactBoxType& domain, const VectorFunctionInterface<P>& function) const;
-    ScalarFunctionModel<P,PR,PRE> create_zero(const ExactBoxType& domain) const;
-    VectorFunctionModel<P,PR,PRE> create_zeros(SizeType result_size, const ExactBoxType& domain) const;
-    ScalarFunctionModel<P,PR,PRE> create_constant(const ExactBoxType& domain, const Number<P>& value) const;
-    ScalarFunctionModel<P,PR,PRE> create_constant(const ExactBoxType& domain, const CanonicalNumericType<P,PR,PRE>& value) const;
-    VectorFunctionModel<P,PR,PRE> create_constants(const ExactBoxType& domain, const Vector<Number<P>>& values) const;
-    VectorFunctionModel<P,PR,PRE> create_constants(const ExactBoxType& domain, const Vector<CanonicalNumericType<P,PR,PRE>>& values) const;
-    ScalarFunctionModel<P,PR,PRE> create_coordinate(const ExactBoxType& domain, SizeType index) const;
-    ScalarFunctionModel<P,PR,PRE> create_identity(const ExactIntervalType& domain) const;
-    VectorFunctionModel<P,PR,PRE> create_identity(const ExactBoxType& domain) const;
-    CanonicalNumericType<P,PR,PRE> create_number(const Number<P>& number) const;
-    friend OutputStream& operator<<(OutputStream& os, FunctionModelFactoryInterface<P,PR,PRE> const& factory) {
-        factory.write(os); return os; }
+    virtual OutputStream& _write(OutputStream& os) const = 0;
+    friend OutputStream& operator<<(OutputStream& os, FunctionModelFactoryInterface<P,PR,PRE> const& factory) { factory._write(os); return os; }
   private:
     virtual CanonicalNumericType<P,PR,PRE> _create(const Number<P>& number) const = 0;
     virtual ScalarFunctionModelInterface<P,PR,PRE>* _create(const ExactBoxType& domain, const ScalarFunctionInterface<P>& function) const = 0;
     virtual VectorFunctionModelInterface<P,PR,PRE>* _create(const ExactBoxType& domain, const VectorFunctionInterface<P>& function) const = 0;
 
+    virtual ScalarFunctionModelInterface<P,PR,PRE>* _create_zero(const ExactBoxType& domain) const = 0;
+    virtual ScalarFunctionModelInterface<P,PR,PRE>* _create_constant(const ExactBoxType& domain, const Number<P>& value) const = 0;
+    virtual ScalarFunctionModelInterface<P,PR,PRE>* _create_coordinate(const ExactBoxType& domain, SizeType index) const = 0;
+    virtual VectorFunctionModelInterface<P,PR,PRE>* _create_zeros(SizeType result_size, const ExactBoxType& domain) const = 0;
+    virtual VectorFunctionModelInterface<P,PR,PRE>* _create_constants(const ExactBoxType& domain, const Vector<Number<P>>& values) const = 0;
+    virtual VectorFunctionModelInterface<P,PR,PRE>* _create_identity(const ExactBoxType& domain) const = 0;
+  public:
+    CanonicalNumericType<P,PR,PRE> create(const Number<P>& number) const { return this->_create(number); };
+    ScalarFunctionModel<P,PR,PRE> create(const ExactBoxType& domain, const ScalarFunctionInterface<P>& function) const { return this->_create(domain,function); };
+    VectorFunctionModel<P,PR,PRE> create(const ExactBoxType& domain, const VectorFunctionInterface<P>& function) const { return this->_create(domain,function); };
+
+    ScalarFunctionModel<P,PR,PRE> create_zero(const ExactBoxType& domain) const { return _create_zero(domain); };
+    ScalarFunctionModel<P,PR,PRE> create_constant(const ExactBoxType& domain, const Number<P>& value) const { return _create_constant(domain,value); };
+    ScalarFunctionModel<P,PR,PRE> create_constant(const ExactBoxType& domain, const CanonicalNumericType<P,PR,PRE>& value) const {
+        return _create_constant(domain,Number<P>(value)); };
+    ScalarFunctionModel<P,PR,PRE> create_coordinate(const ExactBoxType& domain, SizeType index) const { return _create_coordinate(domain,index); };
+    VectorFunctionModel<P,PR,PRE> create_zeros(SizeType result_size, const ExactBoxType& domain) const { return _create_zeros(result_size,domain); };
+    VectorFunctionModel<P,PR,PRE> create_constants(const ExactBoxType& domain, const Vector<Number<P>>& values) const { return _create_constants(domain,values); };
+    VectorFunctionModel<P,PR,PRE> create_identity(const ExactBoxType& domain) const { return _create_identity(domain); };
+    ScalarFunctionModel<P,PR,PRE> create_identity(const ExactIntervalType& domain) const { return _create_coordinate(ExactBoxType(1u,domain),0u); };
+    CanonicalNumericType<P,PR,PRE> create_number(const Number<P>& number) const { return this->_create(number); }
 
 };
+
 
 } // namespace Ariadne
 

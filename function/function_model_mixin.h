@@ -144,6 +144,54 @@ template<class FM, class P, class PR, class PRE> class VectorFunctionModelMixin
         return heap_copy(partial_evaluate(static_cast<const FM&>(*this),j,c)); }
 };
 
+
+template<class FCTRY, class P, class PR, class PRE> class FunctionModelFactoryMixin
+    : public FunctionModelFactoryInterface<P,PR,PRE>
+{
+    typedef ExactBoxType DomainType;
+    friend class FunctionModelFactory<P,PR,PRE>;
+  public:
+    virtual FunctionModelFactoryInterface<P,PR,PRE>* clone() const { return new FCTRY(this->upcast()); }
+    virtual OutputStream& _write(OutputStream& os) const { return os << this->upcast(); }
+/*
+    CanonicalNumericType<P,PR,PRE> create(const Number<P>& number) const;
+    ScalarFunctionModel<P,PR,PRE> create(const ExactBoxType& domain, const ScalarFunctionInterface<P>& function) const;
+    VectorFunctionModel<P,PR,PRE> create(const ExactBoxType& domain, const VectorFunctionInterface<P>& function) const;
+    ScalarFunctionModel<P,PR,PRE> create_zero(const ExactBoxType& domain) const;
+    VectorFunctionModel<P,PR,PRE> create_zeros(SizeType result_size, const ExactBoxType& domain) const;
+    ScalarFunctionModel<P,PR,PRE> create_constant(const ExactBoxType& domain, const Number<P>& value) const;
+    ScalarFunctionModel<P,PR,PRE> create_constant(const ExactBoxType& domain, const CanonicalNumericType<P,PR,PRE>& value) const;
+    VectorFunctionModel<P,PR,PRE> create_constants(const ExactBoxType& domain, const Vector<Number<P>>& values) const;
+    VectorFunctionModel<P,PR,PRE> create_constants(const ExactBoxType& domain, const Vector<CanonicalNumericType<P,PR,PRE>>& values) const;
+    ScalarFunctionModel<P,PR,PRE> create_coordinate(const ExactBoxType& domain, SizeType index) const;
+    ScalarFunctionModel<P,PR,PRE> create_identity(const ExactIntervalType& domain) const;
+    VectorFunctionModel<P,PR,PRE> create_identity(const ExactBoxType& domain) const;
+    CanonicalNumericType<P,PR,PRE> create_number(const Number<P>& number) const;
+*/
+  private:
+    template<class T> static inline T* heap_move(T&& t) { return new T(std::forward<T>(t)); }
+    inline FCTRY const& upcast() const { return static_cast<FCTRY const&>(*this); }
+    virtual CanonicalNumericType<P,PR,PRE> _create(const Number<P>& number) const {
+        return this->upcast().create(number); }
+    virtual ScalarFunctionModelInterface<P,PR,PRE>* _create(const ExactBoxType& domain, const ScalarFunctionInterface<P>& function) const override {
+        return heap_move(this->upcast().create(domain,function)); };
+    virtual VectorFunctionModelInterface<P,PR,PRE>* _create(const ExactBoxType& domain, const VectorFunctionInterface<P>& function) const override {
+        return heap_move(this->upcast().create(domain,function)); };
+    virtual ScalarFunctionModelInterface<P,PR,PRE>* _create_zero(const ExactBoxType& domain) const override {
+        return heap_move(this->upcast().create_zero(domain)); };
+    virtual ScalarFunctionModelInterface<P,PR,PRE>* _create_constant(const ExactBoxType& domain, const Number<P>& value) const override {
+        return heap_move(this->upcast().create_constant(domain,value)); };
+    virtual ScalarFunctionModelInterface<P,PR,PRE>* _create_coordinate(const ExactBoxType& domain, SizeType j) const override {
+        return heap_move(this->upcast().create_coordinate(domain,j)); };
+    virtual VectorFunctionModelInterface<P,PR,PRE>* _create_zeros(SizeType n, const ExactBoxType& domain) const override {
+        return heap_move(this->upcast().create_zeros(n,domain)); };
+    virtual VectorFunctionModelInterface<P,PR,PRE>* _create_constants(const ExactBoxType& domain, const Vector<Number<P>>& values) const override {
+        return heap_move(this->upcast().create_constants(domain,values)); };
+    virtual VectorFunctionModelInterface<P,PR,PRE>* _create_identity(const ExactBoxType& domain) const override {
+        return heap_move(this->upcast().create_identity(domain)); };
+};
+
+
 } // namespace Ariadne
 
 #endif

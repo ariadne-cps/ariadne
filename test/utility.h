@@ -58,6 +58,17 @@ template<class OP, class... AS> struct SafeTypedef {
     typedef decltype(safe<OP>(1)) Type;
 };
 
+template<class A1, class A2> struct SafeTypedef<OperatorEquals,A1,A2> {
+    template<class AA1, class AA2, class = decltype(declval<AA1>()==declval<AA2>())> static decltype(declval<AA1>()==declval<AA2>()) safe(int);
+    template<class AA1, class AA2> static Fallback safe(...);
+    typedef decltype(safe<A1,A2>(1)) Type;
+};
+template<class A1, class A2> struct SafeTypedef<OperatorLess,A1,A2> {
+    template<class AA1, class AA2, class = decltype(declval<AA1>()<declval<AA2>())> static decltype(declval<AA1>()<declval<AA2>()) safe(int);
+    template<class AA1, class AA2> static Fallback safe(...);
+    typedef decltype(safe<A1,A2>(1)) Type;
+};
+
 template<class R, template<class>class T, class A1, class = decltype(declval<R>()=declval<T<A1>>())> True is(int);
 template<class R, template<class>class T, class A1> False is(...);
 template<class R, template<class,class>class T, class A1, class A2, class = decltype(declval<R>()=declval<T<A1,A2>>())> True is(int,int);

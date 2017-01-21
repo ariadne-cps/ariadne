@@ -72,6 +72,7 @@ template<class PR> class FloatValue
     typedef ExactNumber GenericType;
     typedef FLT RawFloatType;
     typedef PR PrecisionType;
+    typedef PR PropertiesType;
   public:
     FloatValue<PR>() : _v(0.0) { }
     explicit FloatValue<PR>(PrecisionType pr) : _v(0.0,pr) { }
@@ -97,6 +98,8 @@ template<class PR> class FloatValue
 //    explicit operator RawFloatType () const { return _v; }
 
     PrecisionType precision() const { return _v.precision(); }
+    PropertiesType properties() const { return _v.precision(); }
+    GenericType generic() const { return this->operator GenericType(); }
     RawFloatType const& raw() const { return _v; }
     RawFloatType& raw() { return _v; }
     double get_d() const { return _v.get_d(); }

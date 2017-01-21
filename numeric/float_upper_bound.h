@@ -56,6 +56,7 @@ template<class PR> class FloatUpperBound
     typedef ValidatedUpperNumber GenericType;
     typedef FLT RawFloatType;
     typedef PR PrecisionType;
+    typedef PR PropertiesType;
   public:
     FloatUpperBound<PR>() : _u(0.0) { }
     explicit FloatUpperBound<PR>(PrecisionType pr) : _u(0.0,pr) { }
@@ -84,6 +85,8 @@ template<class PR> class FloatUpperBound
     operator ValidatedUpperNumber () const;
 
     PrecisionType precision() const { return _u.precision(); }
+    PropertiesType properties() const { return _u.precision(); }
+    GenericType generic() const { return this->operator GenericType(); }
     RawFloatType const& raw() const { return _u; }
     RawFloatType& raw() { return _u; }
     double get_d() const { return _u.get_d(); }

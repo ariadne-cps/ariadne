@@ -45,22 +45,22 @@ namespace Ariadne {
 template<class P, class F> class TaylorModel;
 class TaylorFunctionFactory;
 
-typedef ScalarScaledFunctionPatch<ValidatedTaylorModel64> ScalarTaylorFunction;
-typedef VectorScaledFunctionPatch<ValidatedTaylorModel64> VectorTaylorFunction;
+typedef ScalarScaledFunctionPatch<ValidatedTaylorModel64> ValidatedScalarTaylorFunctionModel64;
+typedef VectorScaledFunctionPatch<ValidatedTaylorModel64> ValidatedVectorTaylorFunctionModel64;
 
 /*
-class ScalarTaylorFunction : public ScaledFunctionPatch<ValidatedTaylorModel64> {
+class ValidatedScalarTaylorFunctionModel64 : public ScaledFunctionPatch<ValidatedTaylorModel64> {
   public:
     using ScaledFunctionPatch<ValidatedTaylorModel64>::ScaledFunctionPatch;
-    ScalarTaylorFunction() : ScaledFunctionPatch<ValidatedTaylorModel64>() { }
-    ScalarTaylorFunction(ScaledFunctionPatch<ValidatedTaylorModel64> const& f) : ScaledFunctionPatch<ValidatedTaylorModel64>(f) { }
+    ValidatedScalarTaylorFunctionModel64() : ScaledFunctionPatch<ValidatedTaylorModel64>() { }
+    ValidatedScalarTaylorFunctionModel64(ScaledFunctionPatch<ValidatedTaylorModel64> const& f) : ScaledFunctionPatch<ValidatedTaylorModel64>(f) { }
 };
 
-class VectorTaylorFunction : public VectorScaledFunctionPatch<Vali_datedTaylorModel64> {
+class ValidatedVectorTaylorFunctionModel64 : public VectorScaledFunctionPatch<Vali_datedTaylorModel64> {
   public:
     using VectorScaledFunctionPatch<ValidatedTaylorModel64>::VectorScaledFunctionPatch;
-    VectorTaylorFunction() : VectorScaledFunctionPatch<ValidatedTaylorModel64>() { }
-    VectorTaylorFunction(VectorScaledFunctionPatch<ValidatedTaylorModel64> const& f) : VectorScaledFunctionPatch<ValidatedTaylorModel64>(f) { }
+    ValidatedVectorTaylorFunctionModel64() : VectorScaledFunctionPatch<ValidatedTaylorModel64>() { }
+    ValidatedVectorTaylorFunctionModel64(VectorScaledFunctionPatch<ValidatedTaylorModel64> const& f) : VectorScaledFunctionPatch<ValidatedTaylorModel64>(f) { }
 };
 */
 

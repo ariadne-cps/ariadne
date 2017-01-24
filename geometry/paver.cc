@@ -406,14 +406,14 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
         TrivialSweeper<Float64> sweeper{Precision64()};
         EffectiveScalarFunction zero_function=EffectiveScalarFunction::zero(m);
         EffectiveVectorFunction identity_function=EffectiveVectorFunction::identity(m);
-        ScalarTaylorFunction txg(domain,zero_function,sweeper);
+        ValidatedScalarTaylorFunctionModel64 txg(domain,zero_function,sweeper);
         Float64Bounds cnst = {0,pr};
         for(Nat j=0; j!=n; ++j) {
-            txg = txg - (Float64Bounds(x[j])-Float64Bounds(x[n+j]))*ScalarTaylorFunction(domain,ValidatedScalarFunction(fg[j]),sweeper);
+            txg = txg - (Float64Bounds(x[j])-Float64Bounds(x[n+j]))*ValidatedScalarTaylorFunctionModel64(domain,ValidatedScalarFunction(fg[j]),sweeper);
             cnst += (bx[j].upper()*x[j]-bx[j].lower()*x[n+j]);
         }
         for(Nat i=0; i!=m; ++i) {
-            txg = txg - (Float64Bounds(x[2*n+i])-Float64Bounds(x[2*n+m+i]))*ScalarTaylorFunction(domain,ValidatedScalarFunction(identity_function[i]),sweeper);
+            txg = txg - (Float64Bounds(x[2*n+i])-Float64Bounds(x[2*n+m+i]))*ValidatedScalarTaylorFunctionModel64(domain,ValidatedScalarFunction(identity_function[i]),sweeper);
             cnst += (d[i].upper()*x[2*n+i]-d[i].lower()*x[2*n+m+i]);
         }
         txg = Float64Bounds(cnst) + txg;
@@ -472,7 +472,7 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
 }
 
 
-Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingInterface& r, const ExactBoxType& d, const VectorTaylorFunction& fg, const ExactBoxType& c, const GridCell& b, ExactPoint& x, ExactPoint& y, Int e)
+Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingInterface& r, const ExactBoxType& d, const ValidatedVectorTaylorFunctionModel64& fg, const ExactBoxType& c, const GridCell& b, ExactPoint& x, ExactPoint& y, Int e)
 {
     auto properties = fg.properties();
     auto pr = properties.precision();
@@ -519,14 +519,14 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
 
         // Use the computed dual variables to try to make a scalar function which is negative over the entire domain.
         // This should be easier than using all constraints separately
-        ScalarTaylorFunction xg=ScalarTaylorFunction::zero(d,properties);
+        ValidatedScalarTaylorFunctionModel64 xg=ValidatedScalarTaylorFunctionModel64::zero(d,properties);
         Float64Bounds cnst = {0,pr};
         for(Nat j=0; j!=n; ++j) {
-            xg = xg - (x[j]-x[n+j])*ScalarTaylorFunction(d,fg[j],properties);
+            xg = xg - (x[j]-x[n+j])*ValidatedScalarTaylorFunctionModel64(d,fg[j],properties);
             cnst += (bx[j].upper()*x[j]-bx[j].lower()*x[n+j]);
         }
         for(Nat i=0; i!=m; ++i) {
-            xg = xg - (x[2*n+i]-x[2*n+m+i])*ScalarTaylorFunction::coordinate(d,i,properties);
+            xg = xg - (x[2*n+i]-x[2*n+m+i])*ValidatedScalarTaylorFunctionModel64::coordinate(d,i,properties);
             cnst += (d[i].upper()*x[2*n+i]-d[i].lower()*x[2*n+m+i]);
         }
         xg = (cnst) + xg;
@@ -656,22 +656,22 @@ Void optimal_constraint_adjoin_outer_approximation(PavingInterface& p, const Exa
     const Nat l=(d.size()+f.result_size()+g.result_size())*2;
     ExactPoint x(l); for(Nat k=0; k!=l; ++k) { x[k]=Float64Value(1.0/l); }
 
-    VectorTaylorFunction fg;
-    const VectorTaylorFunction* tfptr;
-    if( (tfptr=dynamic_cast<const VectorTaylorFunction*>(f.raw_pointer())) ) {
-        const VectorTaylorFunction* tgptr;
-        if( ( tgptr = dynamic_cast<const VectorTaylorFunction*>(g.raw_pointer()) ) ) {
+    ValidatedVectorTaylorFunctionModel64 fg;
+    const ValidatedVectorTaylorFunctionModel64* tfptr;
+    if( (tfptr=dynamic_cast<const ValidatedVectorTaylorFunctionModel64*>(f.raw_pointer())) ) {
+        const ValidatedVectorTaylorFunctionModel64* tgptr;
+        if( ( tgptr = dynamic_cast<const ValidatedVectorTaylorFunctionModel64*>(g.raw_pointer()) ) ) {
             fg=join(*tfptr,*tgptr);
         } else {
             if(g.result_size()>0) {
-                fg=join(*tfptr,VectorTaylorFunction(tfptr->domain(),g,tfptr->properties()));
+                fg=join(*tfptr,ValidatedVectorTaylorFunctionModel64(tfptr->domain(),g,tfptr->properties()));
             } else {
                 fg=*tfptr;
             }
         }
     } else {
         ThresholdSweeper<Float64> swp(Precision64(),1e-12);
-        fg=VectorTaylorFunction(d,join(f,g),swp);
+        fg=ValidatedVectorTaylorFunctionModel64(d,join(f,g),swp);
     }
     Ariadne::hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(p,d,fg,rc,b,x,y,e);
 }

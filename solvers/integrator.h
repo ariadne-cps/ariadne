@@ -50,8 +50,8 @@ template<class X> class Procedure;
 template<class X> class Polynomial;
 typedef Differential<ValidatedNumericType> ValidatedDifferential;
 typedef Vector< Procedure<ValidatedNumericType> > ValidatedVectorProcedure;
-typedef FunctionModelFactoryInterface<ValidatedTag> ValidatedFunctionModelFactoryInterface;
-typedef std::shared_ptr<const ValidatedFunctionModelFactoryInterface> FunctionFactoryPointer;
+typedef FunctionModelFactoryInterface<ValidatedTag> ValidatedFunctionModel64FactoryInterface;
+typedef std::shared_ptr<const ValidatedFunctionModel64FactoryInterface> FunctionFactoryPointer;
 
 struct LipschitzConstant : Attribute<double> { LipschitzConstant(double v) : Attribute<double>(v) { } };
 struct StepMaximumError : Attribute<double> { StepMaximumError(double v) : Attribute<double>(v) { } };
@@ -94,9 +94,9 @@ class IntegratorBase
     Void set_maximum_step_size(double hmax) { this->_maximum_step_size = hmax; }
 
     //! \brief The class which constructs functions for representing the flow.
-    const ValidatedFunctionModelFactoryInterface& function_factory() const;
+    const ValidatedFunctionModel64FactoryInterface& function_factory() const;
     //! \brief Set the class which constructs functions for representing the flow.
-    Void set_function_factory(const ValidatedFunctionModelFactoryInterface& factory);
+    Void set_function_factory(const ValidatedFunctionModel64FactoryInterface& factory);
 
 
     virtual Pair<Float64Value,UpperBoxType>
@@ -104,30 +104,30 @@ class IntegratorBase
                 const ExactBoxType& state_domain,
                 const RawFloat64& suggested_time_step) const;
 
-    virtual ValidatedVectorFunctionModel
+    virtual ValidatedVectorFunctionModel64
     flow_step(const ValidatedVectorFunction& vector_field,
               const ExactBoxType& state_domain,
               RawFloat64& suggested_time_step) const;
 
-    virtual ValidatedVectorFunctionModel
+    virtual ValidatedVectorFunctionModel64
     flow_to(const ValidatedVectorFunction& vector_field,
          const ExactBoxType& state_domain,
          const Real& time) const;
 
     //! \brief Solve \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$ for \f$t\in[0,T_{\max}]\f$.
-    virtual List<ValidatedVectorFunctionModel>
+    virtual List<ValidatedVectorFunctionModel64>
     flow(const ValidatedVectorFunction& vector_field,
          const ExactBoxType& state_domain,
          const Real& minimum_time,
          const Real& maximum_time) const;
 
     //! \brief Solve \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$ for \f$t\in[0,T_{\max}]\f$.
-    virtual List<ValidatedVectorFunctionModel>
+    virtual List<ValidatedVectorFunctionModel64>
     flow(const ValidatedVectorFunction& vector_field,
          const ExactBoxType& state_domain,
          const Real& maximum_time) const;
 
-    virtual ValidatedVectorFunctionModel
+    virtual ValidatedVectorFunctionModel64
     flow_step(const ValidatedVectorFunction& vector_field,
               const ExactBoxType& state_domain,
               const Float64Value& suggested_time_step,
@@ -171,7 +171,7 @@ class TaylorPicardIntegrator
     virtual TaylorPicardIntegrator* clone() const { return new TaylorPicardIntegrator(*this); }
     virtual Void write(OutputStream& os) const;
 
-    virtual ValidatedVectorFunctionModel
+    virtual ValidatedVectorFunctionModel64
     flow_step(const ValidatedVectorFunction& vector_field,
               const ExactBoxType& state_domain,
               const Float64Value& time_step,
@@ -234,7 +234,7 @@ class TaylorSeriesIntegrator
                 const ExactBoxType& state_domain,
                 const RawFloat64& suggested_time_step) const;
 
-    virtual ValidatedVectorFunctionModel
+    virtual ValidatedVectorFunctionModel64
     flow_step(const ValidatedVectorFunction& vector_field,
               const ExactBoxType& state_domain,
               const Float64Value& time_step,
@@ -264,7 +264,7 @@ class AffineIntegrator
     virtual AffineIntegrator* clone() const { return new AffineIntegrator(*this); }
     virtual Void write(OutputStream& os) const;
 
-    virtual ValidatedVectorFunctionModel
+    virtual ValidatedVectorFunctionModel64
     flow_step(const ValidatedVectorFunction& vector_field,
               const ExactBoxType& state_domain,
               const Float64Value& time_step,

@@ -226,7 +226,7 @@ typedef Matrix<ExactIntervalType> IMx;
 typedef Vector< Differential<Float64Approximation> > FSDV;
 typedef Vector< Differential<ExactIntervalType> > ISDV;
 typedef Vector<ValidatedTaylorModel64> TMV;
-typedef VectorTaylorFunction TFM;
+typedef ValidatedVectorTaylorFunctionModel64 TFM;
 typedef ValidatedTaylorModel64 TM;
 
 template<class X> using Monomial = ExpansionValue<X>;

@@ -88,7 +88,7 @@ template<class P, class F> struct AlgebraOperations<TaylorModel<P,F>> : NormedAl
 
 /*! \brief A class representing a power series expansion, scaled to the unit box, with an error term.
  *
- * See also Expansion, ScalarTaylorFunction, VectorTaylorFunction, TaylorConstrainedImageSet.
+ * See also Expansion, ValidatedScalarTaylorFunctionModel64, ValidatedVectorTaylorFunctionModel64, TaylorConstrainedImageSet.
  */
 template<class F>
 class TaylorModel<ValidatedTag,F>

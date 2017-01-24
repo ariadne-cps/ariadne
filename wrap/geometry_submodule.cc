@@ -468,7 +468,7 @@ Void export_constrained_image_set()
     constrained_image_set_class.def(init<ExactBoxType,EffectiveVectorFunction>());
     constrained_image_set_class.def(init<ExactBoxType,ValidatedVectorFunction>());
     constrained_image_set_class.def(init<ExactBoxType,ValidatedVectorFunction,List<ValidatedConstraint> >());
-    constrained_image_set_class.def(init<ExactBoxType,ValidatedVectorFunctionModel>());
+    constrained_image_set_class.def(init<ExactBoxType,ValidatedVectorFunctionModel64>());
     constrained_image_set_class.def("domain", &ValidatedConstrainedImageSet::domain,return_value_policy<copy_const_reference>());
     constrained_image_set_class.def("function", &ValidatedConstrainedImageSet::function,return_value_policy<copy_const_reference>());
     constrained_image_set_class.def("constraint", &ValidatedConstrainedImageSet::constraint);

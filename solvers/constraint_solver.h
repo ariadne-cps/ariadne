@@ -47,7 +47,7 @@ typedef Procedure<ValidatedNumber> ValidatedProcedure;
 
 template<class P,class F> class TaylorModel;
 template<class M> class VectorScaledFunctionPatch;
-typedef VectorScaledFunctionPatch<TaylorModel<ValidatedTag,Float64>> VectorTaylorFunction;
+typedef VectorScaledFunctionPatch<TaylorModel<ValidatedTag,Float64>> ValidatedVectorTaylorFunctionModel64;
 
 template<class X> struct FeasibilityState {
     X t;
@@ -103,9 +103,9 @@ class ConstraintSolver
     //! \brief Reduce the \a domain by testing intersection of \a multipliers inner product \a function(\a domain)
     //! with \a multipliers innner product \a codomain, centering at \a centre.
     //! Reduces \f$(\lambda\cdot f)(X) \cap (\lambda\cdot C)\f$, evaluating \f$g(x)=g(x^*)+Dg(X) (X-x^*)\f$.
-    Bool lyapunov_reduce(UpperBoxType& domain, const VectorTaylorFunction& function, const ExactBoxType& codomain,
+    Bool lyapunov_reduce(UpperBoxType& domain, const ValidatedVectorTaylorFunctionModel64& function, const ExactBoxType& codomain,
                          Vector<Float64Value> centre, Vector<Float64Value> multpliers) const;
-    Bool lyapunov_reduce(UpperBoxType& domain, const VectorTaylorFunction& function, const ExactBoxType& codomain,
+    Bool lyapunov_reduce(UpperBoxType& domain, const ValidatedVectorTaylorFunctionModel64& function, const ExactBoxType& codomain,
                          Vector<ApproximateNumericType> centre, Vector<ApproximateNumericType> multpliers) const;
     //! \brief Try to enforce hull consistency by reducing a constraint with respect to one variable.
     Bool box_reduce(UpperBoxType& bx, const ValidatedScalarFunction& function, const ExactIntervalType&, Nat j) const;

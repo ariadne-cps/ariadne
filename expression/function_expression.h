@@ -132,30 +132,39 @@ template<class M> ScaledFunctionPatch<M> compose(ScaledFunctionPatch<M> const& f
     }
 }
 
-template<class P> ScalarFunctionModel<P> compose(ScalarFunctionModel<P> const& f, Projection const& prj) {
-    auto fpp = std::dynamic_pointer_cast<const ScalarTaylorFunction>(f.managed_pointer());
+template<class P, class PR, class PRE> ScalarFunctionModel<P,PR,PRE> compose(ScalarFunctionModel<P,PR,PRE> const& f, Projection const& prj) {
+    auto fpp = std::dynamic_pointer_cast<const ValidatedScalarTaylorFunctionModel64>(f.managed_pointer());
     if(fpp) {
-        return compose(ScalarTaylorFunction(fpp),prj);
+        return compose(ValidatedScalarTaylorFunctionModel64(fpp),prj);
     }
     SizeType as=prj.argument_size();
     auto f_dom=f.domain();
     BoxDomain dom=preimage(prj,f_dom);
-    Vector<ScalarFunctionModel<P>> id=f.create_coordinates(dom);
-    Vector<ScalarFunctionModel<P>> pid=prj(id);
-    VectorFunctionModel<P> vpid(pid.array());
+    Vector<ScalarFunctionModel<P,PR,PRE>> id=f.create_coordinates(dom);
+    Vector<ScalarFunctionModel<P,PR,PRE>> pid=prj(id);
+    VectorFunctionModel<P,PR,PRE> vpid(pid.array());
     return compose(f,vpid);
 }
 
-template<class P> ScalarFunction<P> compose(ScalarFunction<P> const& f, Projection const& prj) {
-    auto fmp = std::dynamic_pointer_cast<const ScalarFunctionModelInterface<P>>(f.managed_pointer());
+template<class P> ScalarFunction<P,BoxDomain> compose(ScalarFunction<P,BoxDomain> const& f, Projection const& prj) {
+    auto fmp = std::dynamic_pointer_cast<const ScalarFunctionModel64Interface<P>>(f.managed_pointer());
     if(fmp) {
-        return compose(ScalarFunctionModel<P>(fmp),prj);
+        return compose(ScalarFunctionModel64<P>(fmp),prj);
     }
     SizeType as=prj.argument_size();
     auto f_dom=f.domain();
     BoxDomain dom=preimage(prj,f_dom);
-    Vector<ScalarFunction<P>> id(ScalarFunction<P>::coordinates(dom));
-    VectorFunction<P> pid=prj(id);
+    Vector<ScalarFunction<P,BoxDomain>> id(ScalarFunction<P,BoxDomain>::coordinates(dom));
+    VectorFunction<P,BoxDomain> pid=prj(id);
+    return compose(f,pid);
+}
+
+template<class P> ScalarFunction<P,EuclideanDomain> compose(ScalarFunction<P,EuclideanDomain> const& f, Projection const& prj) {
+    SizeType as=prj.argument_size();
+    auto f_dom=f.domain();
+    BoxDomain dom=preimage(prj,f_dom);
+    Vector<ScalarFunction<P,EuclideanDomain>> id(ScalarFunction<P,EuclideanDomain>::coordinates(dom));
+    VectorFunction<P,EuclideanDomain> pid=prj(id);
     return compose(f,pid);
 }
 

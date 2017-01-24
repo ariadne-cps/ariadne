@@ -115,7 +115,7 @@ template<class F> TaylorModel<ValidatedTag,F> compose(const TaylorModel<Validate
     return std::move(r);
 }
 
-template<class M> FunctionPatch<M> compose(FunctionPatch<M> const& f, Projection const& prj) {
+template<class M> ScaledFunctionPatch<M> compose(ScaledFunctionPatch<M> const& f, Projection const& prj) {
     SizeType as=prj.argument_size();
     auto f_dom=f.domain();
     BoxDomain dom=preimage(prj,f_dom);
@@ -125,10 +125,10 @@ template<class M> FunctionPatch<M> compose(FunctionPatch<M> const& f, Projection
         if(not same(f_dom[i],dom[prj.index(i)])) { has_strict_subdomain=true; }
     }
     if (has_strict_subdomain) {
-        Vector<FunctionPatch<M>> id=f.create_coordinates(dom);
+        Vector<ScaledFunctionPatch<M>> id=f.create_coordinates(dom);
         return compose(f,prj(id));
     } else {
-        return FunctionPatch<M>(dom,compose(f.model(),prj));
+        return ScaledFunctionPatch<M>(dom,compose(f.model(),prj));
     }
 }
 

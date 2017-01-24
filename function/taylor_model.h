@@ -483,11 +483,11 @@ class TaylorModel<ValidatedTag,F>
     static FloatApproximation<PR> _evaluate(const TaylorModel<ValidatedTag,F>& x, Vector<FloatApproximation<PR>> const& v);
 };
 
-// FIXME: Needed to dispatch gradient of FunctionPatch
+// FIXME: Needed to dispatch gradient of ScaledFunctionPatch
 Covector<Float64Bounds> gradient(const TaylorModel<ValidatedTag,Float64>& x, const Vector<Float64Bounds>& v);
 Covector<FloatMPBounds> gradient(const TaylorModel<ValidatedTag,FloatMP>& x, const Vector<FloatMPBounds>& v);
 
-// FIXME: Needed to dispatch gradient of FunctionPatch
+// FIXME: Needed to dispatch gradient of ScaledFunctionPatch
 template<class F> template<class A> auto TaylorModel<ValidatedTag,F>::operator() (Vector<A> const& x) const -> ArithmeticType<A,FloatValue<PR>> {
     return horner_evaluate(this->expansion(),x)+FloatBounds<typename F::PrecisionType>(-this->error(),+this->error());
 }

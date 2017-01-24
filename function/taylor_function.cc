@@ -41,12 +41,12 @@
 
 #include "function/function.h"
 #include "function/function_mixin.h"
-#include "function/function_patch.h"
+#include "function/scaled_function_patch.h"
 
 #include "function/taylor_function.h"
 
 #include "taylor_model.tpl.h"
-#include "function_patch.tpl.h"
+#include "scaled_function_patch.tpl.h"
 #include "function_mixin.tpl.h"
 
 #define VOLATILE ;
@@ -55,20 +55,20 @@ namespace Ariadne {
 
 static double TAYLOR_FUNCTION_WRITING_ACCURACY = 1e-8;
 
-template class FunctionPatchFactory<ValidatedTaylorModel64>;
-template class FunctionModelCreator<FunctionPatchFactory<ValidatedTaylorModel64>>;
+template class ScaledFunctionPatchFactory<ValidatedTaylorModel64>;
+template class FunctionModelCreator<ScaledFunctionPatchFactory<ValidatedTaylorModel64>>;
 
-template class FunctionPatch<ValidatedTaylorModel64>;
-template class FunctionMixin<FunctionPatch<ValidatedTaylorModel64>,ApproximateTag,BoxDomain,IntervalDomain>;
-template class FunctionMixin<FunctionPatch<ValidatedTaylorModel64>,ValidatedTag,BoxDomain,IntervalDomain>;
-template class VectorFunctionPatch<ValidatedTaylorModel64>;
-template class FunctionMixin<VectorFunctionPatch<ValidatedTaylorModel64>,ApproximateTag,BoxDomain,BoxDomain>;
-template class FunctionMixin<VectorFunctionPatch<ValidatedTaylorModel64>,ValidatedTag,BoxDomain,BoxDomain>;
+template class ScaledFunctionPatch<ValidatedTaylorModel64>;
+template class FunctionMixin<ScaledFunctionPatch<ValidatedTaylorModel64>,ApproximateTag,BoxDomain,IntervalDomain>;
+template class FunctionMixin<ScaledFunctionPatch<ValidatedTaylorModel64>,ValidatedTag,BoxDomain,IntervalDomain>;
+template class VectorScaledFunctionPatch<ValidatedTaylorModel64>;
+template class FunctionMixin<VectorScaledFunctionPatch<ValidatedTaylorModel64>,ApproximateTag,BoxDomain,BoxDomain>;
+template class FunctionMixin<VectorScaledFunctionPatch<ValidatedTaylorModel64>,ValidatedTag,BoxDomain,BoxDomain>;
 
-template class FunctionPatchFactory<ValidatedTaylorModelMP>;
-template class FunctionModelCreator<FunctionPatchFactory<ValidatedTaylorModelMP>>;
-template class FunctionPatch<ValidatedTaylorModelMP>;
-template class VectorFunctionPatch<ValidatedTaylorModelMP>;
+template class ScaledFunctionPatchFactory<ValidatedTaylorModelMP>;
+template class FunctionModelCreator<ScaledFunctionPatchFactory<ValidatedTaylorModelMP>>;
+template class ScaledFunctionPatch<ValidatedTaylorModelMP>;
+template class VectorScaledFunctionPatch<ValidatedTaylorModelMP>;
 
 FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory() {
     return new TaylorFunctionFactory(Sweeper<Float64>());

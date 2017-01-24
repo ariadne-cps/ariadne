@@ -264,11 +264,11 @@ template<class P, class PR, class PRE> inline ScalarFunctionModel<P,PR,PRE>& Sca
 
 template<class V> struct Element;
 
-template<class M> class FunctionPatch;
-template<class M> class VectorFunctionPatch;
-template<class M> struct Element<VectorFunctionPatch<M>> { typedef FunctionPatch<M> Type; };
+template<class M> class ScaledFunctionPatch;
+template<class M> class VectorScaledFunctionPatch;
+template<class M> struct Element<VectorScaledFunctionPatch<M>> { typedef ScaledFunctionPatch<M> Type; };
 
-typedef FunctionPatch<ValidatedTaylorModel64> ScalarTaylorFunction;
+typedef ScaledFunctionPatch<ValidatedTaylorModel64> ScalarTaylorFunction;
 
 template<class P, class PR, class PRE> class VectorFunctionModelElement
     : public DispatchAlgebraOperators<ScalarFunctionModel<P,PR,PRE>, CanonicalNumericType<P,PR,PRE>>

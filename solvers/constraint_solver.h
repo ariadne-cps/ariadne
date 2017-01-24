@@ -46,8 +46,8 @@ template<class X> class Procedure;
 typedef Procedure<ValidatedNumber> ValidatedProcedure;
 
 template<class P,class F> class TaylorModel;
-template<class M> class VectorFunctionPatch;
-typedef VectorFunctionPatch<TaylorModel<ValidatedTag,Float64>> VectorTaylorFunction;
+template<class M> class VectorScaledFunctionPatch;
+typedef VectorScaledFunctionPatch<TaylorModel<ValidatedTag,Float64>> VectorTaylorFunction;
 
 template<class X> struct FeasibilityState {
     X t;

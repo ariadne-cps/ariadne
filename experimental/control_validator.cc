@@ -43,7 +43,7 @@ template<> struct Vector<RealVariable> : List<RealVariable> {
 
 
 #include "function/function.h"
-#include "function/function_patch.h"
+#include "function/scaled_function_patch.h"
 #include "function/taylor_function.h"
 
 

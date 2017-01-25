@@ -795,9 +795,9 @@ template<class F> F TaylorModel<ValidatedTag,F>::tolerance() const {
 
 // Basic function operators (domain, range, evaluate)
 
-template<class F> Box<UnitInterval> TaylorModel<ValidatedTag,F>::domain() const
+template<class F> UnitBox TaylorModel<ValidatedTag,F>::domain() const
 {
-    return Box<UnitInterval>(this->argument_size(),UnitInterval());
+    return UnitBox(this->argument_size(),UnitInterval());
 }
 
 template<class F> auto TaylorModel<ValidatedTag,F>::codomain() const -> CodomainType

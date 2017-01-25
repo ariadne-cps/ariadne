@@ -337,7 +337,7 @@ struct VectorOfScalarFunction
     virtual SizeType result_size() const final {
         return _vec.size(); }
     virtual SizeType argument_size() const final {
-        return dimension(_dom); }
+        return _dom.dimension(); }
     virtual DomainType const domain() const final {
         return _dom; }
 

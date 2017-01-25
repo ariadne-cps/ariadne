@@ -152,7 +152,7 @@ class Function
     typedef Y NumericType;
     typedef D DomainType;
     typedef C CodomainType;
-    typedef decltype(dimension(declval<C>())) ResultSizeType;
+    typedef decltype(declval<C>().dimension()) ResultSizeType;
 
     template<class Y> using Argument = typename ElementTraits<D>::template Type<Y>;
     template<class Y> using Result = typename ElementTraits<C>::template Type<Y>;

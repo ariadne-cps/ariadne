@@ -44,8 +44,6 @@ namespace Ariadne {
 //! \defgroup GeometryModule Geometry Module
 //!  \brief Classes describing sets in Euclidean space.
 
-class UnitInterval;
-
 struct SizeOne { operator SizeType() const { return 1u; } };
 
 enum class SplitPart : char;
@@ -66,6 +64,7 @@ template<class PR> struct MidpointTrait<FloatBall<PR>> { typedef FloatValue<PR> 
 
 class UnitInterval;
 class EmptyInterval;
+class EntireInterval;
 
 template<class PR> struct FloatUpperIntervalFactory {
     PR _precision;
@@ -131,9 +130,11 @@ template<class U> class Interval
     //! \brief Construct an empty interval.
     explicit Interval();
     //! \brief Construct from an empty interval.
-    Interval(EmptyInterval);
+    Interval(EmptyInterval const&);
     //! \brief Construct from a unit interval.
-    Interval(UnitInterval);
+    Interval(UnitInterval const&);
+    //! \brief Construct from the entire real line.
+    Interval(EntireInterval const&);
     //! \brief Construct an interval with the given lower and upper bounds.
     Interval(LowerBoundType l, UpperBoundType u);
 
@@ -311,11 +312,6 @@ template<class PR> Interval<FloatUpperBound<PR>> narrow(Interval<FloatLowerBound
 
 //! \related Interval \brief Read from an input stream.
 InputStream& operator>>(InputStream&, Interval<Float64Value>&);
-
-class UnitInterval : public ExactIntervalType {
-  public:
-    UnitInterval() : ExactIntervalType(-1,+1) { }
-};
 
 class EmptyInterval { };
 

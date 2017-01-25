@@ -1882,10 +1882,10 @@ template<class F> UnitBox TaylorModel<ApproximateTag,F>::domain() const {
     return UnitBox(this->argument_size(),UnitInterval());
 }
 
-template<class F> ApproximateIntervalType TaylorModel<ApproximateTag,F>::range() const {
+template<class F> auto TaylorModel<ApproximateTag,F>::range() const -> RangeType {
     FloatApproximation<PR> av=this->average();
     FloatApproximation<PR> rad=this->radius();
-    return ApproximateIntervalType(av-rad,av+rad);
+    return Interval<FloatApproximation<PR>>(av-rad,av+rad);
 }
 
 template<class F> TaylorModel<ApproximateTag,F>& TaylorModel<ApproximateTag,F>::sweep() {

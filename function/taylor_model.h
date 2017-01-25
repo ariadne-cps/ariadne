@@ -508,7 +508,7 @@ class TaylorModel<ApproximateTag,F>
     typedef SortedExpansion<CoefficientType,ComparisonType> ExpansionType;
 
     typedef IntervalDomainType CodomainType;
-    typedef ApproximateIntervalType RangeType;
+    typedef Interval<FloatApproximation<PR>> RangeType;
     typedef FloatApproximation<PR> NormType;
 
     //! \brief The type used algebraic operations.
@@ -605,9 +605,9 @@ class TaylorModel<ApproximateTag,F>
     //! \brief A coarse over-approximation to the range of the quantity.
     IntervalDomainType codomain() const;
     //! \brief An over-approximation to the range of the quantity.
-    ApproximateIntervalType range() const;
+    RangeType range() const;
     //! \brief Compute the gradient of the expansion with respect to the \a jth variable over the domain.
-    ApproximateIntervalType gradient_range(SizeType j) const;
+    RangeType gradient_range(SizeType j) const;
     //@}
 
     //@{

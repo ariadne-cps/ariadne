@@ -62,6 +62,9 @@ template<class PR> struct MidpointTrait<FloatLowerBound<PR>> { typedef FloatValu
 template<class PR> struct MidpointTrait<FloatBounds<PR>> { typedef FloatValue<PR> Type; };
 template<class PR> struct MidpointTrait<FloatBall<PR>> { typedef FloatValue<PR> Type; };
 
+template<class U> struct RadiusTrait { using M=typename MidpointTrait<U>::Type; typedef decltype(cast_positive(declval<U>()-declval<M>())) Type; };
+template<class U> struct WidthTrait { using L=decltype(-declval<U>()); typedef decltype(cast_positive(declval<U>()-declval<L>())) Type; };
+
 class UnitInterval;
 class EmptyInterval;
 class EntireInterval;
@@ -101,8 +104,8 @@ template<class U> class Interval
     typedef decltype(-declval<U>()) L;
     typedef typename CentreTrait<U>::Type C;
     typedef typename MidpointTrait<U>::Type M;
-    typedef decltype(cast_positive(declval<U>()-declval<M>())) R;
-    typedef decltype(cast_positive(declval<U>()-declval<L>())) W;
+    typedef typename RadiusTrait<U>::Type R;
+    typedef typename WidthTrait<U>::Type W;
   public:
     //! \brief The computational paradigm used by the interval.
     typedef P Paradigm;
@@ -154,28 +157,27 @@ template<class U> class Interval
     template<class V, EnableIf<And<IsAssignable<L,V>,IsAssignable<U,V>>> = dummy>
         Interval<U>& operator=(const V& v) { _l=v; _u=v; return *this; }
     //! \brief Construct a singleton interval from a number.
-    template<class Y, EnableIf<And<IsConstructible<L,Y,Precision64>,IsConstructible<U,Y,Precision64>>,Not<And<IsConstructible<L,Y>,IsConstructible<U,Y>>>> = dummy>
-        explicit Interval(const Y& y) : _l(y,Precision64()), _u(y,Precision64()) { }
+    template<class Y, class PR, EnableIf<And<IsConstructible<L,Y,PR>,IsConstructible<U,Y,PR>>> = dummy>
+        explicit Interval(const Y& y, PR pr) : _l(y,pr), _u(y,pr) { }
 
     //! \brief Convert from an interval of a different type.
     template<class UU, EnableIf<IsConvertible<UU,U>> = dummy>
         Interval(Interval<UU> const& x) : _l(x.lower()), _u(x.upper()) { }
-    //! \brief Construct an interval with the given value.
+    //! \brief Construct from an interval of a different type.
     template<class UU, EnableIf<And<IsConstructible<U,UU>,Not<IsConvertible<UU,U>>>> =dummy>
         explicit Interval(Interval<UU> const& x) : _l(x.lower()), _u(x.upper()) { }
-    //! \brief Construct an interval with the given value.
+    //! \brief Construct from an interval of a different type using the given precision.
     template<class UU, class PR, EnableIf<IsConstructible<U,UU,PR>> =dummy>
         explicit Interval(Interval<UU> const& x, PR pr) : _l(x.lower(),pr), _u(x.upper(),pr) { }
-    //! \brief Construct an interval with the given value.
-    template<class UU, EnableIf<And<IsConstructible<U,UU,Precision64>,Not<IsConstructible<U,UU>>>> =dummy>
-        explicit Interval(Interval<UU> const& x) : _l(x.lower(),Precision64()), _u(x.upper(),Precision64()) { }
 
-    //! \brief Construct an interval with the given value.
+    //! \brief Construct an interval with the lower and upper bounds.
     //! FIXME: Should be explicit, but this would clash with Box constructor from initializer list of double/Float64.
     template<class LL, class UU, EnableIf<And<IsConstructible<L,LL>,IsConstructible<U,UU>,Not<And<IsConvertible<LL,L>,IsConvertible<UU,U>>>>> =dummy>
         Interval(const LL& l, const UU& u) : _l(l), _u(u) { }
-    template<class LL, class UU, EnableIf<And<IsConstructible<L,LL,Precision64>,IsConstructible<U,UU,Precision64>,Not<And<IsConstructible<L,LL>,IsConstructible<U,UU>>>>> =dummy>
-        Interval(const LL& l, const UU& u) : _l(l,Precision64()), _u(u,Precision64()) { }
+
+    //! \brief Construct an interval with the lower and upper bounds using the given precision.
+    template<class LL, class UU, class PR, EnableIf<And<IsConstructible<L,LL,PR>,IsConstructible<U,UU,PR>>> =dummy>
+        Interval(const LL& l, const UU& u, PR pr) : _l(l,pr), _u(u,pr) { }
 
   public:
     //! \brief The dimension of the set; statically returns size one.

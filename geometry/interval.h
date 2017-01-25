@@ -65,7 +65,7 @@ template<class PR> struct MidpointTrait<FloatBounds<PR>> { typedef FloatValue<PR
 template<class PR> struct MidpointTrait<FloatBall<PR>> { typedef FloatValue<PR> Type; };
 
 class UnitInterval;
-class EmptyIntervalType;
+class EmptyInterval;
 
 template<class PR> struct FloatUpperIntervalFactory {
     PR _precision;
@@ -131,7 +131,7 @@ template<class U> class Interval
     //! \brief Construct an empty interval.
     explicit Interval();
     //! \brief Construct from an empty interval.
-    Interval(EmptyIntervalType);
+    Interval(EmptyInterval);
     //! \brief Construct from a unit interval.
     Interval(UnitInterval);
     //! \brief Construct an interval with the given lower and upper bounds.
@@ -317,7 +317,7 @@ class UnitInterval : public ExactIntervalType {
     UnitInterval() : ExactIntervalType(-1,+1) { }
 };
 
-class EmptyIntervalType { };
+class EmptyInterval { };
 
 } // namespace Ariadne
 

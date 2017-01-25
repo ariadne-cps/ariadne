@@ -30,8 +30,8 @@ template<class PR> inline FloatValue<PR> make_split_point(FloatBounds<PR> const&
 template<class PR> inline FloatValue<PR> make_split_point(FloatBall<PR> const& bm) { return bm.value(); }
 
 
-template<class U> Interval<U>::Interval() : Interval(EmptyIntervalType()) { }
-template<class U> Interval<U>::Interval(EmptyIntervalType) : Interval(+infty,-infty) { }
+template<class U> Interval<U>::Interval() : Interval(EmptyInterval()) { }
+template<class U> Interval<U>::Interval(EmptyInterval) : Interval(+infty,-infty) { }
 template<class U> Interval<U>::Interval(UnitInterval) : Interval(-1,+1) { }
 template<class U> Interval<U>::Interval(LowerBoundType l, UpperBoundType u) : _l(l), _u(u) { }
 
@@ -44,7 +44,7 @@ template<class U> auto Interval<U>::midpoint() const -> MidpointType { auto m=((
 template<class U> auto Interval<U>::radius() const -> RadiusType { return cast_positive(max(this->upper()-this->midpoint(),this->midpoint()-this->lower())); }
 template<class U> auto Interval<U>::width() const -> WidthType { return cast_positive(this->upper()-this->lower()); }
 
-template<class U> Interval<U> Interval<U>::empty_interval() { return Interval<U>(EmptyIntervalType()); }
+template<class U> Interval<U> Interval<U>::empty_interval() { return Interval<U>(EmptyInterval()); }
 template<class U> Interval<U> Interval<U>::unit_interval() { return Interval<U>(-1,+1); }
 
 template<class U> auto Interval<U>::is_empty() const -> decltype(declval<L>()>declval<U>()) { return this->_l > this->_u; }

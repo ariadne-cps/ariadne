@@ -406,7 +406,7 @@ int test_case_counter = 0;
 /*! \brief Constructs object \a variable of type \a Class from \a expression. */
 #define ARIADNE_TEST_NAMED_CONSTRUCT(Class,variable,expression)               \
     {                                                                   \
-        std::cout << #Class << " " << #variable << "=" << #Class << "::" << #expression << ": " << std::flush; \
+        std::cout << #Class << " " << #variable << " = " << #Class << "::" << #expression << ": " << std::flush; \
         try {                                                           \
             Class variable = Class :: expression;                                  \
             std::cout << #variable << "==" << variable << "\n" << std::endl; \
@@ -416,10 +416,22 @@ int test_case_counter = 0;
     Class variable = Class :: expression;                                          \
 
 
+/*! \brief Construct object \a variable of type \a Class from \a expression using assignment syntax. */
+#define ARIADNE_TEST_ASSIGN_CONSTRUCT(Class,variable, expression)       \
+    {                                                                   \
+        std::cout << #Class << " " << #variable << " = " << #expression << ": " << std::flush; \
+        try {                                                           \
+            Class variable = expression;                                \
+            std::cout << #variable << "==" << variable << "\n" << std::endl;                 \
+        }                                                               \
+        ARIADNE_TEST_CATCH("Assignment `" << #variable << "=" << #expression << "'") \
+    }                                                                   \
+    Class variable = expression;                                        \
+
 /*! \brief Assigns object \a variable from \a expression. */
 #define ARIADNE_TEST_ASSIGN(variable, expression)                       \
     {                                                                   \
-        std::cout << #variable << "=" << #expression << ": " << std::flush; \
+        std::cout << #variable << " = " << #expression << ": " << std::flush; \
         try {                                                           \
             variable=(expression);                                      \
             std::cout << variable << "\n" << std::endl;                 \

@@ -81,7 +81,7 @@ class Scaling {
     IntervalDomainType _codom;
   public:
     Scaling(IntervalDomainType codom) : _codom(codom) { }
-    UnitIntervalType domain() const { return UnitIntervalType(); }
+    UnitInterval domain() const { return UnitInterval(); }
     IntervalDomainType codomain() const { return _codom; }
     template<class X> X operator() (X) const;
 };
@@ -101,7 +101,7 @@ class Unscaling {
   public:
     Unscaling(IntervalDomainType dom) : _dom(dom) { }
     IntervalDomainType domain() const { return _dom; }
-    UnitIntervalType codomain() const { return UnitIntervalType(); }
+    UnitInterval codomain() const { return UnitInterval(); }
     template<class X> X operator() (X) const;
 };
 

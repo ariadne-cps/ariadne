@@ -46,8 +46,8 @@
 
 namespace Ariadne {
 
-class UnitIntervalType;
-typedef Box<UnitIntervalType> UnitBoxType;
+class UnitInterval;
+typedef Box<UnitInterval> UnitBox;
 enum class SplitPart : char;
 
 template<class T1, class T2> struct Product;
@@ -305,7 +305,7 @@ class TaylorModel<ValidatedTag,F>
     //@{
     /*! \name Function evaluation. */
     //! \brief The domain of the quantity, always given by \f$[-1,1]^{\mathrm{as}}\f$.
-    UnitBoxType domain() const;
+    UnitBox domain() const;
     //! \brief The codomain of the quantity.
     IntervalDomainType codomain() const;
     //! \brief An over-approximation to the range of the quantity.
@@ -605,7 +605,7 @@ class TaylorModel<ApproximateTag,F>
     //@{
     /*! \name Function evaluation. */
     //! \brief The domain of the quantity.
-    UnitBoxType domain() const;
+    UnitBox domain() const;
     //! \brief A coarse over-approximation to the range of the quantity.
     IntervalDomainType codomain() const;
     //! \brief An over-approximation to the range of the quantity.

@@ -32,7 +32,7 @@ template<class PR> inline FloatValue<PR> make_split_point(FloatBall<PR> const& b
 
 template<class U> Interval<U>::Interval() : Interval(EmptyIntervalType()) { }
 template<class U> Interval<U>::Interval(EmptyIntervalType) : Interval(+infty,-infty) { }
-template<class U> Interval<U>::Interval(UnitIntervalType) : Interval(-1,+1) { }
+template<class U> Interval<U>::Interval(UnitInterval) : Interval(-1,+1) { }
 template<class U> Interval<U>::Interval(LowerBoundType l, UpperBoundType u) : _l(l), _u(u) { }
 
 template<class U> Interval<U> Interval<U>::create_zero() const { return Interval<U>(0,0); }

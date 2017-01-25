@@ -795,9 +795,9 @@ template<class F> F TaylorModel<ValidatedTag,F>::tolerance() const {
 
 // Basic function operators (domain, range, evaluate)
 
-template<class F> Box<UnitIntervalType> TaylorModel<ValidatedTag,F>::domain() const
+template<class F> Box<UnitInterval> TaylorModel<ValidatedTag,F>::domain() const
 {
-    return Box<UnitIntervalType>(this->argument_size(),UnitIntervalType());
+    return Box<UnitInterval>(this->argument_size(),UnitInterval());
 }
 
 template<class F> auto TaylorModel<ValidatedTag,F>::codomain() const -> CodomainType
@@ -1878,8 +1878,8 @@ template<class F> typename TaylorModel<ApproximateTag,F>::NormType TaylorModel<A
     return NormType(r);
 }
 
-template<class F> UnitBoxType TaylorModel<ApproximateTag,F>::domain() const {
-    return UnitBoxType(this->argument_size(),UnitIntervalType());
+template<class F> UnitBox TaylorModel<ApproximateTag,F>::domain() const {
+    return UnitBox(this->argument_size(),UnitInterval());
 }
 
 template<class F> ApproximateIntervalType TaylorModel<ApproximateTag,F>::range() const {

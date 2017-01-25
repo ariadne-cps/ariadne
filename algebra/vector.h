@@ -44,9 +44,6 @@ namespace Ariadne {
 
 /************ Vector *********************************************************/
 
-template<class V> struct VectorExpression { const V& operator()() const { return static_cast<const V&>(*this); } };
-template<class V> struct VectorContainer : public VectorExpression<V> { };
-
 template<class X> class Vector;
 template<class X> class Covector;
 template<class X> class Matrix;
@@ -107,6 +104,9 @@ struct DeclareVectorOperations { };
 
 #endif // SIMPLE_VECTOR_OPERATORS
 
+template<class V> struct VectorExpression : public DeclareVectorOperations { const V& operator()() const { return static_cast<const V&>(*this); } };
+template<class V> struct VectorContainer : public VectorExpression<V> { };
+
 //! \ingroup LinearAlgebraSubModule
 //! \brief Vectors over some type \a X.
 //! Corresponds to elements of a \em module over a mathematical \em ring, or a <em>vector space</em> over a field.
@@ -115,7 +115,6 @@ struct DeclareVectorOperations { };
 template<class X>
 class Vector
     : public VectorContainer<Vector<X>>
-    , public DeclareVectorOperations
 {
     Array<X> _ary;
   public:
@@ -205,13 +204,13 @@ class Vector
     //! \brief A constant reference to the value stored in the \a i<sup>th</sup> element.
     const X& at(SizeType i) const { ARIADNE_PRECONDITION_MSG(i<this->size(),*this<<"["<<i<<"]"); return (*this)[i]; }
     //! \brief Get the value stored in the \a i<sup>th</sup> element.
-    const X& get(SizeType i) const { ARIADNE_PRECONDITION_MSG(i<this->size(),*this<<"["<<i<<"]"); return (*this)[i]; }
+    const X& get(SizeType i) const { return this->_ary[i]; }
     //! \brief Set the value stored in the \a i<sup>th</sup> element to \a x.
-    Void set(SizeType i, const X& x) { ARIADNE_PRECONDITION_MSG(i<this->size(),*this<<"["<<i<<"]"); (*this)[i] = x; }
-    //! \brief Subscripting operator.
-    X& operator[](SizeType i) { ARIADNE_PRECONDITION_MSG(i<this->size(),*this<<"["<<i<<"]"); return this->_ary[i]; }
+    Void set(SizeType i, const X& x) { this->_ary[i] = x; }
+    //! \brief Subscripting operator. Unchecked access.
+    X& operator[](SizeType i) { return this->_ary[i]; }
     //! \brief Constant subscripting operator.
-    const X& operator[](SizeType i) const { ARIADNE_PRECONDITION_MSG(i<this->size(),*this<<"["<<i<<"]"); return this->_ary[i]; }
+    const X& operator[](SizeType i) const { return this->_ary[i]; }
     //! \brief Range subscripting operator.
     VectorRange<Vector<X>> operator[](Range rng); // { ARIADNE_PRECONDITION_MSG(rng.stop()<this->size(),*this<<"["<<r<<"]"); return VectorRange<X>(*this,rng); }
     //! \brief Constant range subscripting operator.
@@ -298,35 +297,23 @@ template<class V> struct VectorRange
     : public VectorContainer< VectorRange<V> >
 {
     typedef typename V::ScalarType ScalarType;
-    typedef typename V::ValueType ValueType;
     const V& _v; Range _rng;
     VectorRange(const V& v, Range rng) : _v(v), _rng(rng) { }
     SizeType size() const { return _rng.size(); }
     ScalarType zero_element() const { return _v.zero_element(); }
     ScalarType operator[](SizeType i) const { return _v[i+_rng.start()]; }
-};
 
-template<class V> struct VectorContainerRange
-    : public VectorExpression< VectorContainerRange<V> >
-{
-    typedef typename V::ScalarType ScalarType;
-    typedef typename V::ValueType ValueType;
-    V& _v; Range _rng;
-    VectorContainerRange(V& v, Range rng) : _v(v), _rng(rng) { }
-    SizeType size() const { return _rng.size(); }
-    ValueType operator[](SizeType i) const { return _v[i+_rng.start()]; }
-    ValueType& operator[](SizeType i) { return _v[i+_rng.start()]; }
-    const ScalarType zero_element() const { return _v.zero_element(); }
-    Void set(SizeType i, const ValueType& x) { _v[i+_rng.start()]=x; }
-    template<class VE> VectorContainerRange<V>& operator=(const VectorExpression<VE>& ve) {
+    Void set(SizeType i, const ScalarType& x) { _v[i+_rng.start()]=x; }
+    ScalarType& operator[](SizeType i) { return _v[i+_rng.start()]; }
+    template<class VE> VectorRange<V>& operator=(const VectorExpression<VE>& ve) {
         ARIADNE_PRECONDITION(this->size()==ve().size());
         for(SizeType i=0; i!=this->size(); ++i) { (*this)[i]=ve()[i]; } return *this; }
 };
 
-template<class V> inline VectorRange<V> project(const VectorExpression<V>& v, Range rng) {
+template<class V> inline VectorRange<const V> project(const VectorExpression<V>& v, Range rng) {
+    return VectorRange<const V>(v(),rng); }
+template<class V> inline VectorRange<V> project(VectorContainer<V>& v, Range rng) {
     return VectorRange<V>(v(),rng); }
-template<class X> inline VectorContainerRange<Vector<X>> project(Vector<X>& v, Range rng) {
-    return VectorContainerRange< Vector<X> >(v,rng); }
 template<class X> inline VectorRange<Vector<X>> Vector<X>::operator[](Range rng) {
     return project(*this,rng); }
 template<class X> inline VectorRange<const Vector<X>> Vector<X>::operator[](Range rng) const {

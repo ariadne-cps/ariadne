@@ -33,6 +33,7 @@
 #include <initializer_list>
 
 #include "vector.h"
+#include "covector.h"
 
 namespace Ariadne {
 
@@ -62,9 +63,6 @@ template<class X> struct QRMatrix;
 class SingularMatrixException { };
 
 
-template<class M> struct MatrixExpression { const M& operator()() const { return static_cast<const M&>(*this); } };
-template<class M> struct MatrixContainer : public MatrixExpression<M> { };
-
 class DeclareMatrixOperations {
     template<class X1, class X2> friend Matrix<ProductType<Scalar<X1>,X2>> operator*(X1 const& s, Matrix<X2> const& A);
     template<class X1, class X2> friend Matrix<ProductType<X1,Scalar<X2>>> operator*(Matrix<X1> const& A, X2 const& s);
@@ -87,6 +85,9 @@ class DeclareMatrixOperations {
 
     template<class X1, class X2> friend decltype(declval<X1>()==declval<X2>()) operator==(Matrix<X1> const& A1, Matrix<X2> const& A2);
 };
+
+template<class M> struct MatrixExpression : DeclareMatrixOperations { const M& operator()() const { return static_cast<const M&>(*this); } };
+template<class M> struct MatrixContainer : public MatrixExpression<M> { };
 
 /*
 
@@ -114,7 +115,6 @@ class DispatchMatrixOperations {
 //! \brief Matrices over some type \a X.
 template<class X> class Matrix
     : public MatrixContainer<Matrix<X>>
-    , public DeclareMatrixOperations
 {
     X _zero;
     SizeType _rs;
@@ -258,27 +258,33 @@ template<class X> struct QRMatrix {
 /************ Matrix expressions *********************************************************/
 
 
-template<class M> struct MatrixRow {
+template<class M> struct MatrixRow
+    : public CovectorExpression< MatrixRow<M> >
+{
     M& _A; SizeType _i;
   public:
     typedef typename M::ScalarType ScalarType;
     MatrixRow(M& A, SizeType i) : _A(A), _i(i) { }
     SizeType size() const { return _A.column_size(); }
     auto zero_element() const -> decltype(_A.zero_element()) { return _A.zero_element(); }
+    auto operator[](SizeType j) const -> decltype(_A.at(_i,j)) { return _A.at(_i,j); }
     auto operator[](SizeType j) -> decltype(_A.at(_i,j)) { return _A.at(_i,j); }
     decltype(auto) operator[](Range js) { return project(*this,js); }
     MatrixRow<M>& operator=(Covector<ScalarType> const& u) { for(SizeType j=0; j!=u.size(); ++j) { _A.set(_i,j,u[j]); } return *this; }
 };
 template<class M> struct IsCovectorExpression<MatrixRow<M>> : True { };
 
-template<class M> struct MatrixColumn {
-    M& _A; SizeType _j;
+template<class M> struct MatrixColumn
+    : public VectorExpression< MatrixColumn<M> >
+{
+     M& _A; SizeType _j;
   public:
     typedef typename M::ScalarType ScalarType;
     MatrixColumn(M& A, SizeType j) : _A(A), _j(j) { }
     SizeType size() const { return _A.row_size(); }
     auto zero_element() const -> decltype(_A.zero_element()) { return _A.zero_element(); }
-    auto operator[](SizeType i) -> decltype(_A.at(i,_j)) { return _A->at(i,_j); }
+    auto operator[](SizeType i) const -> decltype(_A.at(i,_j)) { return _A[i][_j]; }
+    auto operator[](SizeType i) -> decltype(_A.at(i,_j)) { return _A.at(i,_j); }
     operator Vector<ScalarType> () const {
         Vector<ScalarType> r(size(),zero_element()); for(SizeType i=0; i!=size(); ++i) { r[i]=_A.at(i,_j); } return r; }
 };
@@ -333,37 +339,23 @@ template<class M1, class X2> struct MatrixScalarQuotient {
 };
 template<class M1, class X2> struct IsMatrixExpression<MatrixScalarQuotient<M1,X2>> : True { };
 
-template<class M> struct MatrixContainerRange
-    : public MatrixContainer<MatrixContainerRange<M>>
+template<class M> struct MatrixRange
+    : public MatrixContainer< MatrixRange<M> >
 {
     M& _A; Range _rng1; Range _rng2;
   public:
     typedef typename M::ScalarType ScalarType;
-    MatrixContainerRange(M& A, Range rng1, Range rng2) : _A(A), _rng1(rng1), _rng2(rng2) { }
+    MatrixRange(M& A, Range rng1, Range rng2) : _A(A), _rng1(rng1), _rng2(rng2) { }
     SizeType row_size() const { return _rng1.size(); }
     SizeType column_size() const { return _rng2.size(); }
+    ScalarType zero_element() const { return _A.zero_element(); }
     ScalarType get(SizeType i, SizeType j) const { return _A.get(i+_rng1.start(),j+_rng2.start()); }
-    Void set(SizeType i, SizeType j, const ScalarType& x) { _A.set(i+_rng1.start(),j+_rng2.start(),x); }
-    template<class ME> MatrixContainerRange<M>& operator=(const MatrixExpression<ME>& Ae) {
+    decltype(auto) operator[](SizeType i) { return _A[_rng1[i]][_rng2]; }
+    Void set(SizeType i, SizeType j, ScalarType const& x) const { _A.set(i+_rng1.start(),j+_rng2.start(),x); }
+    template<class ME> MatrixRange<M>& operator=(const MatrixExpression<ME>& Ae) {
         ARIADNE_PRECONDITION(this->row_size()==Ae().row_size() && this->column_size()==Ae().column_size());
         for(SizeType i=0; i!=this->row_size(); ++i) { for(SizeType j=0; j!=this->column_size(); ++j) { this->set(i,j,Ae().get(i,j)); } }
         return *this; }
-    ScalarType zero_element() const { return _A.zero_element(); }
-};
-template<class M> struct IsMatrix<MatrixContainerRange<M>> : True { };
-template<class M> struct IsMatrixExpression<MatrixContainerRange<M>> : True { };
-
-template<class M> struct MatrixRange
-    : public MatrixExpression< MatrixRange<M> >
-{
-    const M& _A; Range _rng1; Range _rng2;
-  public:
-    typedef typename M::ScalarType ScalarType;
-    MatrixRange(const M& A, Range rng1, Range rng2) : _A(A), _rng1(rng1), _rng2(rng2) { }
-    SizeType row_size() const { return _rng1.size(); }
-    SizeType column_size() const { return _rng2.size(); }
-    ScalarType get(SizeType i, SizeType j) const { return _A.get(i+_rng1.start(),j+_rng2.start()); }
-    ScalarType zero_element() const { return _A.zero_element(); }
 };
 template<class M> struct IsMatrixExpression<MatrixRange<M>> : True { };
 
@@ -382,11 +374,18 @@ template<class M> struct MatrixRows {
 };
 template<class M> struct IsMatrixExpression<MatrixRows<M>> : True { };
 
-/* Dispatching Matrix expression template operators
+template<class X> inline MatrixRows<const Matrix<X>> Matrix<X>::operator[](Range is) const {
+    return MatrixRows<const Matrix<X>>(*this,is);
+}
+template<class X> inline MatrixRows<Matrix<X>> Matrix<X>::operator[](Range is) {
+    return MatrixRows<Matrix<X>>(*this,is);
+}
 
 template<class M1, class M2, EnableIf<And<IsMatrixExpression<M1>,IsMatrixExpression<M2>>>> inline
 auto operator==(M1 const& A1, M2 const& A2) -> decltype(declval<ScalarType<M1>>()==declval<ScalarType<M2>>()) {
     typedef ScalarType<M1> X1;typedef ScalarType<M2> X2; return Matrix<X1>(A1)==Matrix<X2>(A2); }
+
+/* Dispatching Matrix expression template operators
 
 
 template<class M, EnableIf<IsMatrix<M>> =dummy> inline
@@ -480,12 +479,12 @@ template<class X> OutputStream& Matrix<X>::write(OutputStream& os) const {
 
 
 
-template<class M> inline MatrixRange<M> project(const MatrixExpression<M>& Ae, Range rw_rng, Range cl_rng) {
-    return MatrixRange<M>(Ae(),rw_rng,cl_rng);
+template<class M> inline MatrixRange<const M> project(const MatrixExpression<M>& Ae, Range rw_rng, Range cl_rng) {
+    return MatrixRange<const M>(Ae(),rw_rng,cl_rng);
 }
 
-template<class X> inline MatrixContainerRange<Matrix<X>> project(Matrix<X>& A, Range rw_rng, Range cl_rng) {
-    return MatrixContainerRange<Matrix<X>>(A,rw_rng,cl_rng);
+template<class X> inline MatrixRange<Matrix<X>> project(Matrix<X>& A, Range rw_rng, Range cl_rng) {
+    return MatrixRange<Matrix<X>>(A,rw_rng,cl_rng);
 }
 
 template<class M> inline MatrixColumn<const M> column(const M& A, SizeType j) {
@@ -760,7 +759,7 @@ Matrix<X>::Matrix(InitializerList<InitializerList<double>> lst, PRS... prs) : _r
         ARIADNE_PRECONDITION(row_iter->size()==this->column_size());
         typename InitializerList<double>::const_iterator col_iter=row_iter->begin();
         for(SizeType j=0; j!=this->column_size(); ++j, ++col_iter) {
-            this->at(i,j)=ExactDouble(*col_iter);
+            this->at(i,j)=X(ExactDouble(*col_iter),prs...);
         }
     }
 }

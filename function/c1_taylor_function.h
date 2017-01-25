@@ -34,7 +34,7 @@
 #include "numeric/numeric.h"
 #include "numeric/float.h"
 #include "algebra/expansion.h"
-#include "geometry/box.h"
+#include "function/domain.h"
 
 namespace Ariadne {
 

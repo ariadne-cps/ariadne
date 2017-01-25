@@ -34,7 +34,7 @@
 #include "utility/container.h"
 #include "algebra/vector.h"
 
-#include "geometry/box.h"
+#include "function/domain.h"
 
 #include "numeric/operators.h"
 #include "function/formula.h"

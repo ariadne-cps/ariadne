@@ -41,14 +41,10 @@
 #include "algebra/sweeper.h"
 #include "algebra/operations.h"
 #include "algebra/evaluate.h"
+#include "function/domain.h"
 #include "function/scaling.h"
-#include "geometry/interval.h"
 
 namespace Ariadne {
-
-class UnitInterval;
-typedef Box<UnitInterval> UnitBox;
-enum class SplitPart : char;
 
 template<class T1, class T2> struct Product;
 

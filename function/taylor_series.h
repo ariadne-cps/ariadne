@@ -31,7 +31,7 @@
 
 #include "numeric/numeric.h"
 #include "algebra/series.h"
-#include "geometry/interval.h"
+#include "function/domain.h"
 #include "utility/container.h"
 
 namespace Ariadne {

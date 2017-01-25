@@ -44,16 +44,9 @@
 #include "algebra/vector.h"
 #include "algebra/covector.h"
 #include "algebra/differential.h"
-
-#include "geometry/interval.h"
-#include "geometry/box.h"
+#include "function/domain.h"
 
 namespace Ariadne {
-
-inline SizeOne dimension(IntervalDomainType dom) { return SizeOne(); }
-inline SizeType dimension(BoxDomainType dom) { return dom.dimension(); }
-
-template<class S, class X> using ElementType = typename ElementTraits<S>::template Type<X>;
 
 template<class P, class D=BoxDomainType> struct VectorFunctionElementReference;
 
@@ -62,16 +55,6 @@ typedef Variable<Real> RealVariable;
 template<class T> class Expression;
 typedef Expression<Real> RealExpression;
 template<class P, class D, class C> class FunctionExpression;
-
-class RealDomain : public IntervalDomainType {
-  public:
-    RealDomain() : IntervalDomainType(-inf,+inf) { }
-};
-
-class EuclideanDomain : public BoxDomainType {
-  public:
-    EuclideanDomain(SizeType n) : BoxDomainType(n,RealDomain()) { }
-};
 
 template<class P>
 class FunctionConstructors {

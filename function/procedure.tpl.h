@@ -27,12 +27,11 @@
 #include "utility/container.h"
 #include "algebra/vector.h"
 
-#include "geometry/box.h"
-
 #include "numeric/operators.h"
 #include "function/formula.h"
 #include "algebra/evaluate.h"
 #include "algebra/expansion.h"
+#include "geometry/box.h"
 
 namespace Ariadne {
 

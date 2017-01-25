@@ -32,7 +32,6 @@
 #include "function/function_interface.h"
 
 #include "numeric/operators.h"
-#include "geometry/box.decl.h"
 
 namespace Ariadne {
 

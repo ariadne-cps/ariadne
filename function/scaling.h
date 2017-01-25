@@ -29,8 +29,7 @@
 #define ARIADNE_SCALING_H
 
 #include "numeric/dyadic.h"
-#include "geometry/interval.h"
-#include "geometry/box.h"
+#include "function/domain.h"
 
 namespace Ariadne {
 

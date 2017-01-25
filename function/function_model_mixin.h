@@ -40,7 +40,7 @@
 #include "algebra/vector.h"
 #include "algebra/matrix.h"
 #include "algebra/operations.h"
-#include "geometry/box.h"
+#include "function/domain.h"
 
 #include "function/function_interface.h"
 #include "function/function_mixin.h"

@@ -29,15 +29,15 @@
 #define ARIADNE_FUNCTION_INTERFACE_H
 
 #include <iosfwd>
+
 #include "utility/declarations.h"
+#include "function/function.decl.h"
 
 namespace Ariadne {
 
 static const Int SMOOTH=255;
 
 template<class S> struct ElementTraits;
-template<> struct ElementTraits<IntervalDomainType> { template<class X> using Type=Scalar<X>; };
-template<> struct ElementTraits<BoxDomainType> { template<class X> using Type=Vector<X>; };
 template<class S, class X> using ElementType = typename ElementTraits<S>::template Type<X>;
 
 template<class P, class D, class C> class FunctionInterface;

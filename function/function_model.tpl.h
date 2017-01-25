@@ -75,7 +75,7 @@ template<class P, class PR, class PRE> VectorFunctionModel<P,PR,PRE> FunctionMod
     return VectorFunctionModel<P,PR,PRE>(this->_create(domain,EffectiveVectorFunction::zeros(values.size(),domain.size())))+values; };
 template<class P, class PR, class PRE> ScalarFunctionModel<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create_coordinate(const DomainType& domain, SizeType index) const {
     return ScalarFunctionModel<P,PR,PRE>(this->_create(domain,EffectiveScalarFunction::coordinate(domain.size(),index))); };
-template<class P, class PR, class PRE> ScalarFunctionModel<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create_identity(const ExactIntervalType& domain) const {
+template<class P, class PR, class PRE> ScalarFunctionModel<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create_identity(const IntervalDomainType& domain) const {
     return this->_create(DomainType(1,domain),EffectiveScalarFunction::coordinate(1,0)); };
 template<class P, class PR, class PRE> VectorFunctionModel<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create_identity(const DomainType& domain) const {
     return this->_create(domain,EffectiveVectorFunction::identity(domain.size())); };

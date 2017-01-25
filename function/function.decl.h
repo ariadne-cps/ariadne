@@ -34,20 +34,20 @@
 namespace Ariadne {
 
 // Domain declarations
-using IntervalDomain = ExactIntervalType;
-using BoxDomain = ExactBoxType;
+using IntervalDomainType = ExactIntervalType;
+using BoxDomainType = ExactBoxType;
 
 // Function declarations
 template<class P, class D, class C> class Function;
-template<class P, class D=BoxDomain> using ScalarFunction = Function<P,D,IntervalDomain>;
-template<class P, class D=BoxDomain> using VectorFunction = Function<P,D,BoxDomain>;
-template<class P, class C> using UnivariateFunction = Function<P,IntervalDomain,C>;
-template<class P, class C> using MultivariateFunction = Function<P,BoxDomain,C>;
+template<class P, class D=BoxDomainType> using ScalarFunction = Function<P,D,IntervalDomainType>;
+template<class P, class D=BoxDomainType> using VectorFunction = Function<P,D,BoxDomainType>;
+template<class P, class C> using UnivariateFunction = Function<P,IntervalDomainType,C>;
+template<class P, class C> using MultivariateFunction = Function<P,BoxDomainType,C>;
 
-template<class P> using ScalarUnivariateFunction = Function<P,IntervalDomain,IntervalDomain>;
-template<class P> using VectorUnivariateFunction = Function<P,IntervalDomain,BoxDomain>;
-template<class P> using ScalarMultivariateFunction = Function<P,BoxDomain,IntervalDomain>;
-template<class P> using VectorMultivariateFunction = Function<P,BoxDomain,BoxDomain>;
+template<class P> using ScalarUnivariateFunction = Function<P,IntervalDomainType,IntervalDomainType>;
+template<class P> using VectorUnivariateFunction = Function<P,IntervalDomainType,BoxDomainType>;
+template<class P> using ScalarMultivariateFunction = Function<P,BoxDomainType,IntervalDomainType>;
+template<class P> using VectorMultivariateFunction = Function<P,BoxDomainType,BoxDomainType>;
 
 typedef ScalarUnivariateFunction<ApproximateTag> ApproximateScalarUnivariateFunction;
 typedef ScalarUnivariateFunction<ValidatedTag> ValidatedScalarUnivariateFunction;
@@ -66,8 +66,8 @@ typedef EffectiveVectorFunction RealVectorFunction;
 
 // Function interface declarations
 template<class P, class D, class C> class FunctionInterface;
-template<class P, class D=BoxDomain> using ScalarFunctionInterface = FunctionInterface<P,D,IntervalDomain>;
-template<class P, class D=BoxDomain> using VectorFunctionInterface = FunctionInterface<P,D,BoxDomain>;
+template<class P, class D=BoxDomainType> using ScalarFunctionInterface = FunctionInterface<P,D,IntervalDomainType>;
+template<class P, class D=BoxDomainType> using VectorFunctionInterface = FunctionInterface<P,D,BoxDomainType>;
 
 typedef ScalarFunctionInterface<ApproximateTag> ApproximateScalarFunctionInterface;
 typedef ScalarFunctionInterface<ValidatedTag> ValidatedScalarFunctionInterface;

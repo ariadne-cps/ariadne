@@ -54,7 +54,7 @@ template<class P, class PR, class PRE> class FunctionModelFactory {
     typedef P Paradigm;
     typedef PR PrecisionType;
     typedef PRE ErrorPrecisionType;
-    typedef BoxDomain DomainType;
+    typedef BoxDomainType DomainType;
 
     explicit FunctionModelFactory(const FunctionModelFactoryInterface<P,PR,PRE>* p) : _ptr(p) { }
     explicit FunctionModelFactory(SharedPointer<const FunctionModelFactoryInterface<P,PR,PRE>> p) : _ptr(p) { }
@@ -67,7 +67,7 @@ template<class P, class PR, class PRE> class FunctionModelFactory {
     ScalarFunctionModel<P,PR,PRE> create_coordinate(DomainType const& dom, SizeType j) const { return this->_ptr->_create_cordinate(dom,j); }
     VectorFunctionModel<P,PR,PRE> create_zeros(SizeType n, DomainType const& dom) const { return this->_ptr->_create_zeros(n,dom); }
     VectorFunctionModel<P,PR,PRE> create_identity(DomainType const& dom) const { return this->_ptr->_create_identity(dom); }
-    ScalarFunctionModel<P,PR,PRE> create_identity(IntervalDomain const& dom) const { return this->_ptr->_create_coordinate(BoxDomain(1u,dom),0u); }
+    ScalarFunctionModel<P,PR,PRE> create_identity(IntervalDomainType const& dom) const { return this->_ptr->_create_coordinate(BoxDomainType(1u,dom),0u); }
 
     friend OutputStream& operator<<(OutputStream& os, FunctionModelFactory<P,PR,PRE> const& factory) { return factory._ptr->_write(os); }
 };
@@ -78,7 +78,7 @@ template<class FCTRY> class FunctionModelCreator {
     typedef typename FCTRY::ErrorPrecisionType PRE;
   public:
     typedef FCTRY FactoryType;
-    typedef BoxDomain DomainType;
+    typedef BoxDomainType DomainType;
     typedef P Paradigm;
 
     explicit FunctionModelCreator(DomainType domain, FactoryType factory) : _factory(factory), _domain(domain) { }
@@ -106,7 +106,8 @@ template<class P, class PR, class PRE> class ScalarFunctionModel
 {
   public:
     typedef ScalarFunction<P> GenericType;
-    typedef ExactBoxType DomainType;
+    typedef BoxDomainType DomainType;
+    typedef IntervalDomainType CodomainType;
     typedef CanonicalCoefficientType<P,PR> CoefficientType;
     typedef CanonicalErrorType<P,PRE> ErrorType;
     typedef CanonicalNumericType<P,PR,PRE> NumericType;
@@ -137,8 +138,8 @@ template<class P, class PR, class PRE> class ScalarFunctionModel
         return this->_ptr->_evaluate(x); }
     template<class X> X evaluate(const Vector<X>& x) const {
         return this->_ptr->_evaluate(x); }
-    inline ExactBoxType const domain() const { return this->_ptr->domain(); }
-    inline ExactIntervalType const codomain() const { return this->_ptr->codomain(); }
+    inline DomainType const domain() const { return this->_ptr->domain(); }
+    inline CodomainType const codomain() const { return this->_ptr->codomain(); }
     inline RangeType const range() const { return this->_ptr->range(); }
 
     inline CoefficientType value() const { return this->_ptr->value(); }
@@ -150,7 +151,7 @@ template<class P, class PR, class PRE> class ScalarFunctionModel
     inline Void clobber() { return this->_ptr->clobber(); }
 
     inline ScalarFunctionModel<P,PR,PRE> apply(Operator op) const { return this->_ptr->_apply(op); }
-    inline Void restrict(const ExactBoxType& d) { *this=restriction(*this,d); }
+    inline Void restrict(const DomainType& d) { *this=restriction(*this,d); }
   public:
     friend FunctionModelCreator<FunctionModelFactory<P,PR,PRE>> factory(ScalarFunctionModel<P,PR,PRE> const& f) {
         FunctionModelFactory<P,PR,PRE> factory(f._ptr->_factory()); return FunctionModelCreator<FunctionModelFactory<P,PR,PRE>>(f.domain(),factory); }
@@ -219,17 +220,17 @@ template<class P, class PR, class PRE> class ScalarFunctionModel
     friend ScalarFunctionModel<P,PR,PRE> antiderivative(const ScalarFunctionModel<P,PR,PRE>& f, SizeType j) { return f._ptr->_antiderivative(j); }
     friend ScalarFunctionModel<P,PR,PRE> antiderivative(const ScalarFunctionModel<P,PR,PRE>& f, SizeType j, CanonicalNumericType<P,PR,PRE> c) { return f._ptr->_antiderivative(j,c); }
 
-    friend ScalarFunctionModel<P,PR,PRE> embed(const ExactBoxType& d1, const ScalarFunctionModel<P,PR,PRE>& f, const ExactBoxType& d2) {
+    friend ScalarFunctionModel<P,PR,PRE> embed(const DomainType& d1, const ScalarFunctionModel<P,PR,PRE>& f, const DomainType& d2) {
         return f._ptr->_embed(d1,d2); }
-    friend ScalarFunctionModel<P,PR,PRE> embed(const ExactBoxType& d, const ScalarFunctionModel<P,PR,PRE>& f) {
-        return embed(d,f,ExactBoxType()); }
-    friend ScalarFunctionModel<P,PR,PRE> embed(const ScalarFunctionModel<P,PR,PRE>& f, const ExactBoxType& d) {
-        return embed(ExactBoxType(),f,d); }
-    friend ScalarFunctionModel<P,PR,PRE> embed(const ScalarFunctionModel<P,PR,PRE>& f, const ExactIntervalType& d) {
-        return embed(f,ExactBoxType(1,d)); }
-    friend ScalarFunctionModel<P,PR,PRE> restrict(const ScalarFunctionModel<P,PR,PRE>& f, const ExactBoxType& d) {
+    friend ScalarFunctionModel<P,PR,PRE> embed(const DomainType& d, const ScalarFunctionModel<P,PR,PRE>& f) {
+        return embed(d,f,DomainType()); }
+    friend ScalarFunctionModel<P,PR,PRE> embed(const ScalarFunctionModel<P,PR,PRE>& f, const DomainType& d) {
+        return embed(DomainType(),f,d); }
+    friend ScalarFunctionModel<P,PR,PRE> embed(const ScalarFunctionModel<P,PR,PRE>& f, const IntervalDomainType& d) {
+        return embed(f,DomainType(1,d)); }
+    friend ScalarFunctionModel<P,PR,PRE> restrict(const ScalarFunctionModel<P,PR,PRE>& f, const DomainType& d) {
         return f._ptr->_restriction(d); }
-    friend ScalarFunctionModel<P,PR,PRE> restriction(const ScalarFunctionModel<P,PR,PRE>& f, const ExactBoxType& d) {
+    friend ScalarFunctionModel<P,PR,PRE> restriction(const ScalarFunctionModel<P,PR,PRE>& f, const DomainType& d) {
         return f._ptr->_restriction(d); }
 
     friend VectorFunctionModel<P,PR,PRE> join(const ScalarFunctionModel<P,PR,PRE>& f1, const ScalarFunctionModel<P,PR,PRE>& f2) {
@@ -248,7 +249,7 @@ inline Boolean refines(const ScalarFunctionModel64<ValidatedTag>& f1, const Scal
     return f1._ptr->_refines(f2); }
 
 // FIXME: Should not be needed since ScalarFunctionModel has a representation
-template<class P> inline ScalarFunctionModel64<P> embed(const ScalarFunction<P>& f, const ExactIntervalType& d) {
+template<class P> inline ScalarFunctionModel64<P> embed(const ScalarFunction<P>& f, const IntervalDomainType& d) {
     return embed(ScalarFunctionModel64<P>(f),d); }
 
 template<class P, class PR, class PRE> inline ScalarFunctionModel<P,PR,PRE>& ScalarFunctionModel<P,PR,PRE>::operator=(const CanonicalNumericType<P,PR,PRE>& c) {
@@ -300,6 +301,8 @@ template<class P, class PR, class PRE> class VectorFunctionModel
   public:
     clone_on_copy_ptr< VectorFunctionModelInterface<P,PR,PRE> > _ptr;
   public:
+    typedef BoxDomainType DomainType;
+    typedef BoxDomainType CodomainType;
     typedef CanonicalCoefficientType<P,PR> CoefficientType;
     typedef CanonicalErrorType<P,PRE> ErrorType;
     typedef CanonicalNumericType<P,PR,PRE> NumericType;
@@ -334,8 +337,8 @@ template<class P, class PR, class PRE> class VectorFunctionModel
     inline VectorFunctionModelElement<P,PR,PRE> operator[](SizeType i) { return VectorFunctionModelElement<P,PR,PRE>(this,i); }
     inline VectorFunctionModel<P,PR,PRE> operator[](Range rng) { VectorFunctionModel<P,PR,PRE> r=factory(*this).create_zeros(rng.size());
         for(SizeType i=0; i!=rng.size(); ++i) { r[i]=this->operator[](rng[i]); } return r; }
-    inline ExactBoxType const domain() const { return this->_ptr->domain(); }
-    inline ExactBoxType const codomain() const { return this->_ptr->codomain(); }
+    inline DomainType const domain() const { return this->_ptr->domain(); }
+    inline CodomainType const codomain() const { return this->_ptr->codomain(); }
     inline RangeType const range() const { return this->_ptr->range(); }
     inline Vector<ErrorType> const errors() const { return this->_ptr->errors(); }
     inline ErrorType const error() const { return this->_ptr->error(); }
@@ -344,7 +347,7 @@ template<class P, class PR, class PRE> class VectorFunctionModel
         Vector<Differential<NumericType>> dfx=this->_ptr->_evaluate(Differential<NumericType>::variables(1u,x));
         return dfx.jacobian(); }
 
-    inline Void restrict(const ExactBoxType& d) { this->_ptr->restrict(d); }
+    inline Void restrict(const DomainType& d) { this->_ptr->restrict(d); }
   public:
     friend FunctionModelCreator<FunctionModelFactory<P,PR,PRE>> factory(VectorFunctionModel<P,PR,PRE> const& f) {
         FunctionModelFactory<P,PR,PRE> factory(f._ptr->_factory()); return FunctionModelCreator<FunctionModelFactory<P,PR,PRE>>(f.domain(),factory); }
@@ -395,15 +398,15 @@ template<class P, class PR, class PRE> class VectorFunctionModel
   public:
     friend NormType norm(const VectorFunctionModel<P,PR,PRE>& f) {
         return f._ptr->_norm(); }
-    friend VectorFunctionModel<P,PR,PRE> embed(const ExactBoxType& d1, const VectorFunctionModel<P,PR,PRE>& f, const ExactBoxType& d2) {
+    friend VectorFunctionModel<P,PR,PRE> embed(const DomainType& d1, const VectorFunctionModel<P,PR,PRE>& f, const DomainType& d2) {
         return f._ptr->_embed(d1,d2); }
-    friend VectorFunctionModel<P,PR,PRE> embed(const VectorFunctionModel<P,PR,PRE>& f, const ExactBoxType& d) {
-        return embed(ExactBoxType(),f,d); }
-    friend VectorFunctionModel<P,PR,PRE> embed(const VectorFunctionModel<P,PR,PRE>& f, const ExactIntervalType& d) {
-        return embed(f,ExactBoxType(1,d)); }
-    friend VectorFunctionModel<P,PR,PRE> restrict(const VectorFunctionModel<P,PR,PRE>& f, const ExactBoxType& d) {
+    friend VectorFunctionModel<P,PR,PRE> embed(const VectorFunctionModel<P,PR,PRE>& f, const DomainType& d) {
+        return embed(DomainType(),f,d); }
+    friend VectorFunctionModel<P,PR,PRE> embed(const VectorFunctionModel<P,PR,PRE>& f, const IntervalDomainType& d) {
+        return embed(f,DomainType(1,d)); }
+    friend VectorFunctionModel<P,PR,PRE> restrict(const VectorFunctionModel<P,PR,PRE>& f, const DomainType& d) {
         VectorFunctionModelInterface<P,PR,PRE>* rptr=f._ptr->_clone(); rptr->restrict(d); return rptr; }
-    friend VectorFunctionModel<P,PR,PRE> restriction(const VectorFunctionModel<P,PR,PRE>& f, const ExactBoxType& d) {
+    friend VectorFunctionModel<P,PR,PRE> restriction(const VectorFunctionModel<P,PR,PRE>& f, const DomainType& d) {
         VectorFunctionModelInterface<P,PR,PRE>* rptr=f._ptr->_clone(); rptr->restrict(d); return rptr; }
 
     friend Vector<CanonicalNumericType<P,PR,PRE>> unchecked_evaluate(const VectorFunctionModel<P,PR,PRE>& f, const Vector<CanonicalNumericType<P,PR,PRE>>& x) {
@@ -482,9 +485,9 @@ template<class PR, class PRE> ScalarFunctionModel<ValidatedTag,PR,PRE> unchecked
     return g._ptr->_unchecked_compose(f); }
 template<class PR, class PRE> VectorFunctionModel<ValidatedTag,PR,PRE> unchecked_compose(const VectorFunctionModel<ValidatedTag,PR,PRE>& f, const VectorFunctionModel<ValidatedTag,PR,PRE>& g) {
     return g._ptr->_unchecked_compose(f); }
-template<class PR, class PRE> ScalarFunctionModel<ValidatedTag,PR,PRE> restrict(const ScalarFunctionModel<ValidatedTag,PR,PRE>& f, const ExactBoxType& dom) {
+template<class PR, class PRE> ScalarFunctionModel<ValidatedTag,PR,PRE> restrict(const ScalarFunctionModel<ValidatedTag,PR,PRE>& f, const BoxDomainType& dom) {
     return f._ptr->_restriction(dom); }
-template<class PR, class PRE> VectorFunctionModel<ValidatedTag,PR,PRE> restrict(const VectorFunctionModel<ValidatedTag,PR,PRE>& f, const ExactBoxType& dom) {
+template<class PR, class PRE> VectorFunctionModel<ValidatedTag,PR,PRE> restrict(const VectorFunctionModel<ValidatedTag,PR,PRE>& f, const BoxDomainType& dom) {
     return f._ptr->_restriction(dom); }
 
 

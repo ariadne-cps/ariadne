@@ -50,21 +50,21 @@ namespace Ariadne {
 
 namespace {
 
-Interval<Float64Value> const& convert_interval(ExactIntervalType const& ivl, Precision64);
-Interval<FloatMPValue> convert_interval(ExactIntervalType const& ivl, PrecisionMP pr);
+Interval<Float64Value> const& convert_interval(IntervalDomainType const& ivl, Precision64);
+Interval<FloatMPValue> convert_interval(IntervalDomainType const& ivl, PrecisionMP pr);
 
-Box<Interval<Float64Value>> const& convert_box(ExactBoxType const& bx, Precision64);
-Box<Interval<FloatMPValue>> convert_box(ExactBoxType const& bx, PrecisionMP pr);
+Box<Interval<Float64Value>> const& convert_box(BoxDomainType const& bx, Precision64);
+Box<Interval<FloatMPValue>> convert_box(BoxDomainType const& bx, PrecisionMP pr);
 
 } // namespace
 
-inline decltype(auto) contains(ExactIntervalType const& bx, Scalar<FloatMPBounds> const& x) { return contains(convert_interval(bx,x.precision()),x); }
-inline decltype(auto) contains(ExactIntervalType const& bx, Scalar<FloatMPApproximation> const& x) { return contains(convert_interval(bx,x.precision()),x); }
-inline decltype(auto) contains(ExactBoxType const& bx, Vector<FloatMPBounds> const& x) { return contains(convert_box(bx,x.zero_element().precision()),x); }
-inline decltype(auto) contains(ExactBoxType const& bx, Vector<FloatMPApproximation> const& x) { return contains(convert_box(bx,x.zero_element().precision()),x); }
+inline decltype(auto) contains(IntervalDomainType const& bx, Scalar<FloatMPBounds> const& x) { return contains(convert_interval(bx,x.precision()),x); }
+inline decltype(auto) contains(IntervalDomainType const& bx, Scalar<FloatMPApproximation> const& x) { return contains(convert_interval(bx,x.precision()),x); }
+inline decltype(auto) contains(BoxDomainType const& bx, Vector<FloatMPBounds> const& x) { return contains(convert_box(bx,x.zero_element().precision()),x); }
+inline decltype(auto) contains(BoxDomainType const& bx, Vector<FloatMPApproximation> const& x) { return contains(convert_box(bx,x.zero_element().precision()),x); }
 
 
-template<class M> Void _set_scaling(ScaledFunctionPatch<M>& x, const ExactIntervalType& ivl, SizeType j)
+template<class M> Void _set_scaling(ScaledFunctionPatch<M>& x, const IntervalDomainType& ivl, SizeType j)
 {
     Float64::RoundingModeType rounding_mode=Float64::get_rounding_mode();
     Float64::set_rounding_upward();
@@ -110,12 +110,12 @@ template<class PR> inline OutputStream& operator<<(OutputStream& os, const Repre
     return os << reinterpret_cast<Representation<RawFloat<PR>>const&>(flt_repr);
 }
 
-template<class PR> inline OutputStream& operator<<(OutputStream& os, const Representation<ExactIntervalType>& ivl_repr)
+template<class PR> inline OutputStream& operator<<(OutputStream& os, const Representation<IntervalDomainType>& ivl_repr)
 {
-    const ExactIntervalType& ivl=*ivl_repr.pointer;
+    const IntervalDomainType& ivl=*ivl_repr.pointer;
     Int precision=os.precision(); std::ios_base::fmtflags flags = os.flags();
     os.precision(17); os.setf(std::ios_base::showpoint);
-    os << "ExactIntervalType("<<ivl.lower()<<","<<ivl.upper()<<")";
+    os << "IntervalDomainType("<<ivl.lower()<<","<<ivl.upper()<<")";
     os.precision(precision); os.flags(flags);
     return os;
 }
@@ -158,9 +158,9 @@ template<class X> inline OutputStream& operator<<(OutputStream& os, const Repres
     return os;
 }
 
-inline OutputStream& operator<<(OutputStream& os, const Representation< ExactBoxType >& box_repr)
+inline OutputStream& operator<<(OutputStream& os, const Representation< BoxDomainType >& box_repr)
 {
-    const Vector<ExactIntervalType>& vec=*box_repr.pointer;
+    const Vector<IntervalDomainType>& vec=*box_repr.pointer;
     ARIADNE_ASSERT(vec.size()!=0);
     os << "(";
     for(SizeType i=0; i!=vec.size(); ++i) {
@@ -200,27 +200,27 @@ template<class M> ScaledFunctionPatch<M>::ScaledFunctionPatch()
     : _domain(), _model()
 { }
 
-template<class M> ScaledFunctionPatch<M>::ScaledFunctionPatch(const ExactBoxType& d, PropertiesType prp)
+template<class M> ScaledFunctionPatch<M>::ScaledFunctionPatch(const BoxDomainType& d, PropertiesType prp)
     : _domain(d), _model(d.size(),prp)
 {
 }
 
-template<class M> ScaledFunctionPatch<M>::ScaledFunctionPatch(const ExactBoxType& d, const Expansion<RawFloat<PR>>& p, const RawFloat<PR>& e, const Sweeper<RawFloat<PR>>& prp)
+template<class M> ScaledFunctionPatch<M>::ScaledFunctionPatch(const BoxDomainType& d, const Expansion<RawFloat<PR>>& p, const RawFloat<PR>& e, const Sweeper<RawFloat<PR>>& prp)
     : _domain(d), _model(p,e,prp)
 {
 }
 
-template<class M> ScaledFunctionPatch<M>::ScaledFunctionPatch(const ExactBoxType& d, const Expansion<FloatValue<PR>>& p, const FloatError<PR>& e, const Sweeper<RawFloat<PR>>& prp)
+template<class M> ScaledFunctionPatch<M>::ScaledFunctionPatch(const BoxDomainType& d, const Expansion<FloatValue<PR>>& p, const FloatError<PR>& e, const Sweeper<RawFloat<PR>>& prp)
     : _domain(d), _model(p,e,prp)
 {
 }
 
-template<class M> ScaledFunctionPatch<M>::ScaledFunctionPatch(const ExactBoxType& d, const ModelType& m)
+template<class M> ScaledFunctionPatch<M>::ScaledFunctionPatch(const BoxDomainType& d, const ModelType& m)
     : _domain(d), _model(m)
 {
 }
 
-template<class M> ScaledFunctionPatch<M>::ScaledFunctionPatch(const ExactBoxType& d, const ScalarFunctionType<M>& f, PropertiesType prp)
+template<class M> ScaledFunctionPatch<M>::ScaledFunctionPatch(const BoxDomainType& d, const ScalarFunctionType<M>& f, PropertiesType prp)
     : _domain(d), _model(f.argument_size(),prp)
 {
     ARIADNE_ASSERT_MSG(d.size()==f.argument_size(),"d="<<d<<" f="<<f);
@@ -241,34 +241,34 @@ template<class M> ScaledFunctionPatch<M>& ScaledFunctionPatch<M>::operator=(cons
 
 
 
-template<class M> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::zero(const ExactBoxType& d, PropertiesType prp)
+template<class M> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::zero(const BoxDomainType& d, PropertiesType prp)
 {
     return ScaledFunctionPatch<M>(d,ModelType::zero(d.size(),prp));
 }
 
-template<class M> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::constant(const ExactBoxType& d, const NumericType& c, PropertiesType prp)
+template<class M> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::constant(const BoxDomainType& d, const NumericType& c, PropertiesType prp)
 {
     return ScaledFunctionPatch<M>(d,ModelType::constant(d.size(),c,prp));
 }
 
-template<class M> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::unit_ball(const ExactBoxType& d, PropertiesType prp)
+template<class M> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::unit_ball(const BoxDomainType& d, PropertiesType prp)
 {
     return ScaledFunctionPatch<M>(d,ModelType::unit_ball(d.size(),prp));
 }
 
-template<class M> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::coordinate(const ExactBoxType& d, SizeType j, PropertiesType prp)
+template<class M> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::coordinate(const BoxDomainType& d, SizeType j, PropertiesType prp)
 {
     ARIADNE_ASSERT(j<d.size());
     return ScaledFunctionPatch<M>(d,ModelType::scaling(d.size(),j,d[j],prp));
 }
 
-template<class M> VectorScaledFunctionPatch<M> ScaledFunctionPatch<M>::identity(const ExactBoxType& d, PropertiesType prp)
+template<class M> VectorScaledFunctionPatch<M> ScaledFunctionPatch<M>::identity(const BoxDomainType& d, PropertiesType prp)
 {
     return VectorScaledFunctionPatch<M>(d,ModelType::scalings(d,prp));
 }
 
 
-template<class M> Vector<ScaledFunctionPatch<M>> ScaledFunctionPatch<M>::constants(const ExactBoxType& d, const Vector<NumericType>& c, PropertiesType prp)
+template<class M> Vector<ScaledFunctionPatch<M>> ScaledFunctionPatch<M>::constants(const BoxDomainType& d, const Vector<NumericType>& c, PropertiesType prp)
 {
     ARIADNE_DEPRECATED("ScaledFunctionPatch<M>::constants","Use VectorScaledFunctionPatch<M>::constant instead");
     Vector<ScaledFunctionPatch<M>> x(c.size(),ScaledFunctionPatch<M>(d,prp));
@@ -278,7 +278,7 @@ template<class M> Vector<ScaledFunctionPatch<M>> ScaledFunctionPatch<M>::constan
     return x;
 }
 
-template<class M> Vector<ScaledFunctionPatch<M>> ScaledFunctionPatch<M>::coordinates(const ExactBoxType& d, PropertiesType prp)
+template<class M> Vector<ScaledFunctionPatch<M>> ScaledFunctionPatch<M>::coordinates(const BoxDomainType& d, PropertiesType prp)
 {
     ARIADNE_DEPRECATED("ScaledFunctionPatch<M>::coordinates","Use VectorScaledFunctionPatch<M>::identity instead");
     Vector<ScaledFunctionPatch<M>> x(d.dimension(),ScaledFunctionPatch<M>(d,prp));
@@ -288,7 +288,7 @@ template<class M> Vector<ScaledFunctionPatch<M>> ScaledFunctionPatch<M>::coordin
     return x;
 }
 
-template<class M> Vector<ScaledFunctionPatch<M>> ScaledFunctionPatch<M>::coordinates(const ExactBoxType& d, SizeType imin, SizeType imax, PropertiesType prp)
+template<class M> Vector<ScaledFunctionPatch<M>> ScaledFunctionPatch<M>::coordinates(const BoxDomainType& d, SizeType imin, SizeType imax, PropertiesType prp)
 {
     ARIADNE_DEPRECATED("ScaledFunctionPatch<M>::coordinates","Use VectorScaledFunctionPatch<M>::projection instead");
     ARIADNE_ASSERT(imin<=imax);
@@ -329,7 +329,7 @@ template<class M> Void VectorScaledFunctionPatch<M>::adjoin(const ScaledFunction
 }
 
 
-template<class M> Void ScaledFunctionPatch<M>::restrict(const ExactBoxType& dom) {
+template<class M> Void ScaledFunctionPatch<M>::restrict(const BoxDomainType& dom) {
     (*this)=restriction(*this,dom);
 }
 
@@ -527,7 +527,7 @@ template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(SizeTy
 {
 }
 
-template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(SizeType m, const ExactBoxType& d, PropertiesType prp)
+template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(SizeType m, const BoxDomainType& d, PropertiesType prp)
     : _domain(d), _models(m,ModelType(d.size(),prp))
 {
 }
@@ -554,7 +554,7 @@ template<class M> VectorScaledFunctionPatch<M>& VectorScaledFunctionPatch<M>::op
 
 
 
-template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const ExactBoxType& d,
+template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const BoxDomainType& d,
                                            const Vector<ModelType>& f)
     : _domain(d), _models(f)
 {
@@ -563,7 +563,7 @@ template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const 
     }
 }
 
-template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const ExactBoxType& d,
+template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const BoxDomainType& d,
                                            const Vector<Expansion<FloatValue<PR>>>& f,
                                            const Vector<FloatError<PR>>& e,
                                            PropertiesType prp)
@@ -576,14 +576,14 @@ template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const 
     }
 }
 
-template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const ExactBoxType& d,
+template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const BoxDomainType& d,
                                            const Vector<Expansion<FloatValue<PR>>>& f,
                                            PropertiesType prp)
     : VectorScaledFunctionPatch<M>(d,f,Vector<FloatError<PR>>(f.size()),prp)
 {
 }
 
-template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const ExactBoxType& d,
+template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const BoxDomainType& d,
                                            const Vector<Expansion<RawFloat<PR>>>& f,
                                            const Vector<RawFloat<PR>>& e,
                                            PropertiesType prp)
@@ -592,7 +592,7 @@ template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const 
 {
 }
 
-template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const ExactBoxType& d,
+template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const BoxDomainType& d,
                                            const Vector<Expansion<RawFloat<PR>>>& f,
                                            PropertiesType prp)
     : VectorScaledFunctionPatch<M>(d,reinterpret_cast<Vector<Expansion<FloatValue<PR>>>const&>(f),Vector<FloatError<PR>>(f.size()),prp)
@@ -601,7 +601,7 @@ template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const 
 
 
 
-template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const ExactBoxType& d,
+template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const BoxDomainType& d,
                                            const VectorFunctionType<M>& f,
                                            const PropertiesType& prp)
     : _domain(d), _models()
@@ -661,17 +661,17 @@ template<class M> VectorScaledFunctionPatch<M>* VectorScaledFunctionPatch<M>::_c
 
 
 
-template<class M> VectorScaledFunctionPatch<M> VectorScaledFunctionPatch<M>::constant(const ExactBoxType& d, const Vector<NumericType>& c, PropertiesType prp)
+template<class M> VectorScaledFunctionPatch<M> VectorScaledFunctionPatch<M>::constant(const BoxDomainType& d, const Vector<NumericType>& c, PropertiesType prp)
 {
     return VectorScaledFunctionPatch<M>(d,ModelType::constants(d.size(),c,prp));
 }
 
-template<class M> VectorScaledFunctionPatch<M> VectorScaledFunctionPatch<M>::identity(const ExactBoxType& d, PropertiesType prp)
+template<class M> VectorScaledFunctionPatch<M> VectorScaledFunctionPatch<M>::identity(const BoxDomainType& d, PropertiesType prp)
 {
     return VectorScaledFunctionPatch<M>(d,ModelType::scalings(d,prp));
 }
 
-template<class M> VectorScaledFunctionPatch<M> VectorScaledFunctionPatch<M>::projection(const ExactBoxType& d, SizeType imin, SizeType imax, PropertiesType prp)
+template<class M> VectorScaledFunctionPatch<M> VectorScaledFunctionPatch<M>::projection(const BoxDomainType& d, SizeType imin, SizeType imax, PropertiesType prp)
 {
     return VectorScaledFunctionPatch<M>(ScaledFunctionPatch<M>::coordinates(d,imin,imax,prp));
 }
@@ -752,14 +752,14 @@ template<class M> Void VectorScaledFunctionPatch<M>::set_properties(PropertiesTy
     }
 }
 
-template<class M> const ExactBoxType VectorScaledFunctionPatch<M>::domain() const
+template<class M> const BoxDomainType VectorScaledFunctionPatch<M>::domain() const
 {
     return this->_domain;
 }
 
-template<class M> const ExactBoxType VectorScaledFunctionPatch<M>::codomain() const
+template<class M> const BoxDomainType VectorScaledFunctionPatch<M>::codomain() const
 {
-    ExactBoxType result(this->result_size());
+    BoxDomainType result(this->result_size());
     for(SizeType i=0; i!=result.size(); ++i) {
         result[i]=this->_models[i].codomain();
     }
@@ -948,7 +948,7 @@ template<class M> auto VectorScaledFunctionPatch<M>::jacobian(const Vector<Numer
     return J;
 }
 
-template<class M> Void VectorScaledFunctionPatch<M>::restrict(const ExactBoxType& x)
+template<class M> Void VectorScaledFunctionPatch<M>::restrict(const BoxDomainType& x)
 {
     *this=restriction(*this,x);
 }

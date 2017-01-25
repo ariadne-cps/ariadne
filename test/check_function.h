@@ -38,8 +38,8 @@ template<> String class_name<EffectiveTag>() { return "EffectiveTag"; }
 using namespace Ariadne;
 using std::cout; using std::cerr; using std::endl;
 
-typedef ExactIntervalType IntervalDomain;
-typedef ExactBoxType BoxDomain;
+typedef ExactIntervalType IntervalDomainType;
+typedef ExactBoxType BoxDomainType;
 template<class P> using Function = ScalarFunction<P>;
 typedef ScalarFunction<EffectiveTag> EffectiveFunction;
 
@@ -129,8 +129,8 @@ template<class F> void CheckFunctionConcept<F>::check_evaluable_concept()
     typedef typename F::DomainType D;
     typedef typename F::CodomainType C;
 
-    ARIADNE_TEST_STATIC_ASSERT(IsConvertible<D,BoxDomain>);
-    ARIADNE_TEST_STATIC_ASSERT(IsConvertible<C,IntervalDomain>);
+    ARIADNE_TEST_STATIC_ASSERT(IsConvertible<D,BoxDomainType>);
+    ARIADNE_TEST_STATIC_ASSERT(IsConvertible<C,IntervalDomainType>);
 
     ARIADNE_TEST_STATIC_ASSERT(IsSame<decltype(declval<F>().domain()),D>);
     ARIADNE_TEST_STATIC_ASSERT(IsSame<decltype(declval<F>().codomain()),C>);
@@ -237,8 +237,8 @@ template<class F> void CheckVectorFunctionConcept<F>::check_evaluable_concept()
     typedef typename F::DomainType D;
     typedef typename F::CodomainType C;
 
-    ARIADNE_TEST_STATIC_ASSERT(IsConvertible<D,BoxDomain>);
-    ARIADNE_TEST_STATIC_ASSERT(IsConvertible<C,BoxDomain>);
+    ARIADNE_TEST_STATIC_ASSERT(IsConvertible<D,BoxDomainType>);
+    ARIADNE_TEST_STATIC_ASSERT(IsConvertible<C,BoxDomainType>);
 
     ARIADNE_TEST_STATIC_ASSERT(IsSame<decltype(declval<F>().domain()),D>);
     ARIADNE_TEST_STATIC_ASSERT(IsSame<decltype(declval<F>().codomain()),C>);
@@ -510,7 +510,7 @@ void CheckFunctionConcept::check_mixed_operators()
     SymbolicFunction<ApproximateTag> asf=SymbolicFunction<ApproximateTag>::constant(2,ac);
 
     Sweeper swp;
-    BoxDomain dom=BoxDomain(2,IntervalDomain(-1,+1));
+    BoxDomainType dom=BoxDomainType(2,IntervalDomainType(-1,+1));
     PolynomialFunctionModel<ValidatedTag> vtf(dom,swp);
     PolynomialFunctionModel<ApproximateTag> atf(dom,swp);
     Function<ValidatedTag> vvtf(vtf);
@@ -628,7 +628,7 @@ void CheckFunctionConcept::check_mixed_evaluation()
     SymbolicFunction<ApproximateTag> asf=SymbolicFunction<ApproximateTag>::constant(2,ac);
 
     Sweeper swp;
-    BoxDomain dom=BoxDomain(2,IntervalDomain(-1,+1));
+    BoxDomainType dom=BoxDomainType(2,IntervalDomainType(-1,+1));
     PolynomialFunctionModel<ValidatedTag> vtf(dom,swp);
     PolynomialFunctionModel<ApproximateTag> atf(dom,swp);
     Function<ValidatedTag> vvtf(vtf);

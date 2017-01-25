@@ -61,20 +61,20 @@ template<class R, class A, DisableIf<IsConstructible<R,A>> =dummy> R checked_con
 
 //------------------------ Formula Function ----------------------------------//
 
-template<class P, class Y> ScalarFunction<P,IntervalDomain> make_formula_function(IntervalDomain dom, Scalar<Formula<Y>> const& e) {
+template<class P, class Y> ScalarFunction<P,IntervalDomainType> make_formula_function(IntervalDomainType dom, Scalar<Formula<Y>> const& e) {
     assert(false);
 }
 
-template<class P, class Y> VectorFunction<P,IntervalDomain> make_formula_function(IntervalDomain dom, Vector<Formula<Y>> const& e) {
+template<class P, class Y> VectorFunction<P,IntervalDomainType> make_formula_function(IntervalDomainType dom, Vector<Formula<Y>> const& e) {
     assert(false);
 }
 
-template<class P, class Y> ScalarFunction<P,BoxDomain> make_formula_function(BoxDomain dom, Scalar<Formula<Y>> const& e) {
-    return ScalarFunction<P,BoxDomain>(new ScalarFormulaFunction<Y>(dom.dimension(),e));
+template<class P, class Y> ScalarFunction<P,BoxDomainType> make_formula_function(BoxDomainType dom, Scalar<Formula<Y>> const& e) {
+    return ScalarFunction<P,BoxDomainType>(new ScalarFormulaFunction<Y>(dom.dimension(),e));
 }
 
-template<class P, class Y> VectorFunction<P,BoxDomain> make_formula_function(BoxDomain dom, Vector<Formula<Y>> const& e) {
-    return VectorFunction<P,BoxDomain>(new VectorFormulaFunction<Y>(dom.dimension(),e));
+template<class P, class Y> VectorFunction<P,BoxDomainType> make_formula_function(BoxDomainType dom, Vector<Formula<Y>> const& e) {
+    return VectorFunction<P,BoxDomainType>(new VectorFormulaFunction<Y>(dom.dimension(),e));
 }
 
 //------------------------ Function ----------------------------------//
@@ -85,10 +85,10 @@ OutputStream& operator<<(OutputStream& os, RealDomain const& dom) { return os <<
 OutputStream& operator<<(OutputStream& os, EuclideanDomain const& dom) { return os << "R" << dom.dimension(); }
 
 template<class D, class DD> D make_domain(DD dom);
-template<> IntervalDomain make_domain<IntervalDomain,BoxDomain>(BoxDomain dom) { throw std::runtime_error(""); }
-template<> BoxDomain make_domain<BoxDomain,IntervalDomain>(IntervalDomain dom) { throw std::runtime_error(""); }
-template<> IntervalDomain make_domain<IntervalDomain,IntervalDomain>(IntervalDomain dom) { return dom; }
-template<> BoxDomain make_domain<BoxDomain,BoxDomain>(BoxDomain dom) { return dom; }
+template<> IntervalDomainType make_domain<IntervalDomainType,BoxDomainType>(BoxDomainType dom) { throw std::runtime_error(""); }
+template<> BoxDomainType make_domain<BoxDomainType,IntervalDomainType>(IntervalDomainType dom) { throw std::runtime_error(""); }
+template<> IntervalDomainType make_domain<IntervalDomainType,IntervalDomainType>(IntervalDomainType dom) { return dom; }
+template<> BoxDomainType make_domain<BoxDomainType,BoxDomainType>(BoxDomainType dom) { return dom; }
 
 template<class P, class D, class DD> ScalarFunction<P,D> make_zero_function(SizeOne rs, DD dom) {
     return FunctionConstructors<P>::zero(make_domain<D>(dom)); }
@@ -100,12 +100,12 @@ template<class P, class D, class C> Function<P,D,C>::Function() : _ptr() {
 }
 
 template<class P, class D, class C> Function<P,D,C>::Function(EuclideanDomain dom) {
-    ResultSizeType rs=ResultSizeType(); BoxDomain bx_dom=dom;
+    ResultSizeType rs=ResultSizeType(); BoxDomainType bx_dom=dom;
     (*this) = make_zero_function<P,D>(rs,bx_dom);
 }
 
 template<class P, class D, class C> Function<P,D,C>::Function(ResultSizeType rs, EuclideanDomain dom) {
-    BoxDomain const& bx_dom=dom;
+    BoxDomainType const& bx_dom=dom;
     (*this) = make_zero_function<P,D>(rs,bx_dom);
 }
 
@@ -134,13 +134,13 @@ template<class P, class D, class C> Function<P,D,C>::Function(DomainType dom, Re
 }
 
 template<class P, class D, class C> struct MakeVectorFunction;
-template<class P, class D> struct MakeVectorFunction<P,D,IntervalDomain> {
-    Function<P,D,IntervalDomain> create(Vector<ScalarFunction<P,D>> const& lsf) {
+template<class P, class D> struct MakeVectorFunction<P,D,IntervalDomainType> {
+    Function<P,D,IntervalDomainType> create(Vector<ScalarFunction<P,D>> const& lsf) {
         ARIADNE_FAIL_MSG("Cannot construct scalar function from list."); }
 };
-template<class P, class D> struct MakeVectorFunction<P,D,BoxDomain> {
-    Function<P,D,BoxDomain> create(Vector<ScalarFunction<P,D>> const& lsf) {
-        return Function<P,D,BoxDomain>(std::make_shared<VectorOfScalarFunction<P,D>>(lsf)); }
+template<class P, class D> struct MakeVectorFunction<P,D,BoxDomainType> {
+    Function<P,D,BoxDomainType> create(Vector<ScalarFunction<P,D>> const& lsf) {
+        return Function<P,D,BoxDomainType>(std::make_shared<VectorOfScalarFunction<P,D>>(lsf)); }
 };
 
 template<class P, class D, class C> Function<P,D,C> make_vector_function(Vector<ScalarFunction<P,D>> const& lsf) {
@@ -154,32 +154,32 @@ template<class P, class D, class C> Function<P,D,C>::Function(Vector<ScalarFunct
 
 //------------------------ Function Constructors -----------------------------------//
 
-template<class P> ScalarFunction<P> FunctionConstructors<P>::zero(BoxDomain dom) {
+template<class P> ScalarFunction<P> FunctionConstructors<P>::zero(BoxDomainType dom) {
     return ConstantFunction<Y>(dom, Y(0));
 }
 
 
-template<class P> ScalarFunction<P> FunctionConstructors<P>::constant(BoxDomain dom, NumericType c) {
+template<class P> ScalarFunction<P> FunctionConstructors<P>::constant(BoxDomainType dom, NumericType c) {
     return ConstantFunction<Y>(dom, c);
 }
 
-template<class P> ScalarFunction<P> FunctionConstructors<P>::coordinate(BoxDomain dom, SizeType j) {
+template<class P> ScalarFunction<P> FunctionConstructors<P>::coordinate(BoxDomainType dom, SizeType j) {
     return CoordinateFunction<P>(dom, j);
 }
 
-template<class P> List<ScalarFunction<P>> FunctionConstructors<P>::coordinates(BoxDomain dom) {
+template<class P> List<ScalarFunction<P>> FunctionConstructors<P>::coordinates(BoxDomainType dom) {
     List<ScalarFunction<P>> r; r.reserve(dom.dimension());
     for(SizeType j=0; j!=dom.dimension(); ++j) { r.append(coordinate(dom,j)); }
     return std::move(r);
 }
 
-template<class P> VectorFunction<P> FunctionConstructors<P>::zeros(SizeType rs, BoxDomain dom) {
+template<class P> VectorFunction<P> FunctionConstructors<P>::zeros(SizeType rs, BoxDomainType dom) {
     return VectorFunction<P>(new VectorOfScalarFunction<P>(rs,zero(dom)));
 }
 
-template<class P> VectorFunction<P> FunctionConstructors<P>::identity(BoxDomain dom) {
+template<class P> VectorFunction<P> FunctionConstructors<P>::identity(BoxDomainType dom) {
     SizeType n=dom.dimension();
-    ScalarFunction<P> z=ScalarFunction<P,BoxDomain>::zero(dom);
+    ScalarFunction<P> z=ScalarFunction<P,BoxDomainType>::zero(dom);
     VectorOfScalarFunction<P>* res = new VectorOfScalarFunction<P>(n,z);
     for(SizeType i=0; i!=n; ++i) {
         res->_vec[i]=ScalarFunction<P>::coordinate(dom,i);
@@ -188,24 +188,24 @@ template<class P> VectorFunction<P> FunctionConstructors<P>::identity(BoxDomain 
 }
 
 
-template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::zero(IntervalDomain dom) {
+template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::zero(IntervalDomainType dom) {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::constant(IntervalDomain dom, NumericType c) {
+template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::constant(IntervalDomainType dom, NumericType c) {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::coordinate(IntervalDomain dom, SizeType j) {
+template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::coordinate(IntervalDomainType dom, SizeType j) {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-template<class P> VectorUnivariateFunction<P> FunctionConstructors<P>::zeros(SizeType rs, IntervalDomain dom) {
+template<class P> VectorUnivariateFunction<P> FunctionConstructors<P>::zeros(SizeType rs, IntervalDomainType dom) {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
 
-template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::identity(IntervalDomain dom) {
+template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::identity(IntervalDomainType dom) {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
@@ -260,7 +260,7 @@ template<class P> List<ScalarFunction<P>> FunctionConstructors<P>::coordinates(S
 }
 
 template<class P> VectorFunction<P> FunctionConstructors<P>::identity(SizeType n) {
-    ScalarFunction<P> z=ScalarFunction<P,BoxDomain>::zero(n);
+    ScalarFunction<P> z=ScalarFunction<P,BoxDomainType>::zero(n);
     VectorOfScalarFunction<P>* res = new VectorOfScalarFunction<P>(n,n);
     for(SizeType i=0; i!=n; ++i) {
         res->_vec[i]=ScalarFunction<P>::coordinate(n,i);
@@ -268,9 +268,9 @@ template<class P> VectorFunction<P> FunctionConstructors<P>::identity(SizeType n
     return VectorFunction<P>(res);
 }
 
-template<class P> VectorFunction<P,BoxDomain> FunctionConstructors<P>::constant(BoxDomain dom, Vector<NumericType> c) {
+template<class P> VectorFunction<P,BoxDomainType> FunctionConstructors<P>::constant(BoxDomainType dom, Vector<NumericType> c) {
     SizeType n=c.size();
-    ScalarFunction<P> z=ScalarFunction<P,BoxDomain>::zero(dom);
+    ScalarFunction<P> z=ScalarFunction<P,BoxDomainType>::zero(dom);
     VectorOfScalarFunction<P>* res = new VectorOfScalarFunction<P>(n,z);
     for(SizeType i=0; i!=n; ++i) {
         res->_vec[i]=ScalarFunction<P>::constant(dom,c[i]);
@@ -278,14 +278,14 @@ template<class P> VectorFunction<P,BoxDomain> FunctionConstructors<P>::constant(
     return VectorFunction<P>(res);
 }
 
-template<class P> VectorFunction<P,IntervalDomain> FunctionConstructors<P>::constant(IntervalDomain dom, Vector<NumericType> c) {
+template<class P> VectorFunction<P,IntervalDomainType> FunctionConstructors<P>::constant(IntervalDomainType dom, Vector<NumericType> c) {
     SizeType n=c.size();
-    ScalarFunction<P,IntervalDomain> z=ScalarFunction<P,IntervalDomain>::zero(dom);
-    VectorOfScalarFunction<P,IntervalDomain>* res = new VectorOfScalarFunction<P,IntervalDomain>(n,z);
+    ScalarFunction<P,IntervalDomainType> z=ScalarFunction<P,IntervalDomainType>::zero(dom);
+    VectorOfScalarFunction<P,IntervalDomainType>* res = new VectorOfScalarFunction<P,IntervalDomainType>(n,z);
     for(SizeType i=0; i!=n; ++i) {
-        res->_vec[i]=ScalarFunction<P,IntervalDomain>::constant(dom,c[i]);
+        res->_vec[i]=ScalarFunction<P,IntervalDomainType>::constant(dom,c[i]);
     }
-    return VectorFunction<P,IntervalDomain>(res);
+    return VectorFunction<P,IntervalDomainType>(res);
 }
 
 
@@ -430,20 +430,20 @@ template class VectorFunction<EffectiveTag>;
 
 //------------------------ Instantiate functions -----------------------------------//
 
-template class Function<ApproximateTag,IntervalDomain,IntervalDomain>;
-template class Function<ApproximateTag,IntervalDomain,BoxDomain>;
-template class Function<ApproximateTag,BoxDomain,IntervalDomain>;
-template class Function<ApproximateTag,BoxDomain,BoxDomain>;
+template class Function<ApproximateTag,IntervalDomainType,IntervalDomainType>;
+template class Function<ApproximateTag,IntervalDomainType,BoxDomainType>;
+template class Function<ApproximateTag,BoxDomainType,IntervalDomainType>;
+template class Function<ApproximateTag,BoxDomainType,BoxDomainType>;
 
-template class Function<ValidatedTag,IntervalDomain,IntervalDomain>;
-template class Function<ValidatedTag,IntervalDomain,BoxDomain>;
-template class Function<ValidatedTag,BoxDomain,IntervalDomain>;
-template class Function<ValidatedTag,BoxDomain,BoxDomain>;
+template class Function<ValidatedTag,IntervalDomainType,IntervalDomainType>;
+template class Function<ValidatedTag,IntervalDomainType,BoxDomainType>;
+template class Function<ValidatedTag,BoxDomainType,IntervalDomainType>;
+template class Function<ValidatedTag,BoxDomainType,BoxDomainType>;
 
-template class Function<EffectiveTag,IntervalDomain,IntervalDomain>;
-template class Function<EffectiveTag,IntervalDomain,BoxDomain>;
-template class Function<EffectiveTag,BoxDomain,IntervalDomain>;
-template class Function<EffectiveTag,BoxDomain,BoxDomain>;
+template class Function<EffectiveTag,IntervalDomainType,IntervalDomainType>;
+template class Function<EffectiveTag,IntervalDomainType,BoxDomainType>;
+template class Function<EffectiveTag,BoxDomainType,IntervalDomainType>;
+template class Function<EffectiveTag,BoxDomainType,BoxDomainType>;
 
 
 

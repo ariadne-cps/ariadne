@@ -46,7 +46,7 @@ typedef Box<UpperIntervalType> UpperBoxType;
 typedef Box<LowerIntervalType> LowerBoxType;
 typedef Box<ApproximateIntervalType> ApproximateBoxType;
 
-using BoxDomain = Float64ExactBox;
+using BoxDomainType = Float64ExactBox;
 
 template<class X> class Vector;
 

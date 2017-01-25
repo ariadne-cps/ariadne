@@ -59,11 +59,11 @@ template class ScaledFunctionPatchFactory<ValidatedTaylorModel64>;
 template class FunctionModelCreator<ScaledFunctionPatchFactory<ValidatedTaylorModel64>>;
 
 template class ScaledFunctionPatch<ValidatedTaylorModel64>;
-template class FunctionMixin<ScaledFunctionPatch<ValidatedTaylorModel64>,ApproximateTag,BoxDomain,IntervalDomain>;
-template class FunctionMixin<ScaledFunctionPatch<ValidatedTaylorModel64>,ValidatedTag,BoxDomain,IntervalDomain>;
+template class FunctionMixin<ScaledFunctionPatch<ValidatedTaylorModel64>,ApproximateTag,BoxDomainType,IntervalDomainType>;
+template class FunctionMixin<ScaledFunctionPatch<ValidatedTaylorModel64>,ValidatedTag,BoxDomainType,IntervalDomainType>;
 template class VectorScaledFunctionPatch<ValidatedTaylorModel64>;
-template class FunctionMixin<VectorScaledFunctionPatch<ValidatedTaylorModel64>,ApproximateTag,BoxDomain,BoxDomain>;
-template class FunctionMixin<VectorScaledFunctionPatch<ValidatedTaylorModel64>,ValidatedTag,BoxDomain,BoxDomain>;
+template class FunctionMixin<VectorScaledFunctionPatch<ValidatedTaylorModel64>,ApproximateTag,BoxDomainType,BoxDomainType>;
+template class FunctionMixin<VectorScaledFunctionPatch<ValidatedTaylorModel64>,ValidatedTag,BoxDomainType,BoxDomainType>;
 
 template class ScaledFunctionPatchFactory<ValidatedTaylorModelMP>;
 template class FunctionModelCreator<ScaledFunctionPatchFactory<ValidatedTaylorModelMP>>;

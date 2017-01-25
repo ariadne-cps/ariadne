@@ -227,7 +227,7 @@ template<class X, class Y> Void _backpropagate(Vector<X>& x, List<X>& v, const L
     // POSTCONDITION: No nan's get propagated to x
 }
 
-Void simple_hull_reduce(UpperBoxType& dom, const ValidatedProcedure& f, ExactIntervalType codom);
-Void simple_hull_reduce(UpperBoxType& dom, const Vector<ValidatedProcedure>& f, ExactBoxType codom);
+Void simple_hull_reduce(UpperBoxType& dom, const ValidatedProcedure& f, IntervalDomainType codom);
+Void simple_hull_reduce(UpperBoxType& dom, const Vector<ValidatedProcedure>& f, BoxDomainType codom);
 
 } // namespace Ariadne

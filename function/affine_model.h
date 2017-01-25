@@ -46,7 +46,7 @@ namespace Ariadne {
 
 template<class X> class Affine;
 typedef Affine<Float64> FloatAffine;
-typedef Affine<ExactIntervalType> IntervalAffine;
+typedef Affine<IntervalDomainType> IntervalAffine;
 typedef Affine<ApproximateNumericType> ApproximateAffine;
 typedef Affine<ValidatedNumericType> ValidatedAffine;
 
@@ -84,7 +84,7 @@ class AffineModel<ApproximateTag,F>
     explicit AffineModel(const Affine<FloatApproximation<PR>>& affine);
     explicit AffineModel(const Affine<ApproximateNumber>& affine, PrecisionType precision);
 
-    AffineModel(const ExactBoxType& domain, const ApproximateScalarFunction& function, PrecisionType precision);
+    AffineModel(const BoxDomainType& domain, const ApproximateScalarFunction& function, PrecisionType precision);
     AffineModel(const TaylorModel<ApproximateTag,F>&);
 
     AffineModel<ApproximateTag,F>& operator=(const CoefficientType& c) {
@@ -94,8 +94,8 @@ class AffineModel<ApproximateTag,F>
         AffineModel<ApproximateTag,F> res(n, c.precision()); res._c=c; return res; }
     static AffineModel<ApproximateTag,F> coordinate(SizeType n, SizeType j, PrecisionType pr) {
         AffineModel<ApproximateTag,F> res(n, pr); res._g[j]=1; return res; }
-    static AffineModel<ApproximateTag,F> scaling(SizeType n, SizeType j, const ExactIntervalType& codom, PrecisionType precision);
-    static Vector<AffineModel<ApproximateTag,F>> scalings(const ExactBoxType& codom, PrecisionType precision);
+    static AffineModel<ApproximateTag,F> scaling(SizeType n, SizeType j, const IntervalDomainType& codom, PrecisionType precision);
+    static Vector<AffineModel<ApproximateTag,F>> scalings(const BoxDomainType& codom, PrecisionType precision);
 
 
     SizeType argument_size() const { return this->_g.size(); }
@@ -159,8 +159,8 @@ class AffineModel<ValidatedTag,F>
     static AffineModelType coordinate(SizeType n, SizeType j, PrecisionType prec) {
         AffineModel<ValidatedTag,F> res(n,prec); res._g[j]=1;  return res; }
 
-    static AffineModel<ValidatedTag,F> scaling(SizeType n, SizeType j, const ExactIntervalType& codom, PrecisionType precision);
-    static Vector<AffineModel<ValidatedTag,F>> scalings(const Vector<ExactIntervalType>& codom, PrecisionType precision);
+    static AffineModel<ValidatedTag,F> scaling(SizeType n, SizeType j, const IntervalDomainType& codom, PrecisionType precision);
+    static Vector<AffineModel<ValidatedTag,F>> scalings(const Vector<IntervalDomainType>& codom, PrecisionType precision);
 
     SizeType argument_size() const { return this->_g.size(); }
     PrecisionType precision() const { return this->_c.precision(); }
@@ -222,12 +222,12 @@ template<class P, class F> inline Vector<AffineModel<P,F>> affine_models(const V
 
 
 // DEPRECATED
-template<class P, class PR> AffineModel<P,RawFloat<PR>> affine_model(const ExactBoxType& domain, const ScalarFunction<P>& function, PR precision);
-template<class P, class PR> inline Vector<AffineModel<P,RawFloat<PR>>> affine_models(const ExactBoxType& domain, const VectorFunction<P>& function, PR precision);
+template<class P, class PR> AffineModel<P,RawFloat<PR>> affine_model(const BoxDomainType& domain, const ScalarFunction<P>& function, PR precision);
+template<class P, class PR> inline Vector<AffineModel<P,RawFloat<PR>>> affine_models(const BoxDomainType& domain, const VectorFunction<P>& function, PR precision);
 
-template<class PR> inline AffineModel<ValidatedTag,RawFloat<PR>> affine_model(const ExactBoxType& domain, const ScalarFunction<EffectiveTag>& function, PR precision) {
+template<class PR> inline AffineModel<ValidatedTag,RawFloat<PR>> affine_model(const BoxDomainType& domain, const ScalarFunction<EffectiveTag>& function, PR precision) {
     return affine_model(domain,ScalarFunction<ValidatedTag>(function),precision); }
-template<class PR> inline Vector<AffineModel<ValidatedTag,RawFloat<PR>>> affine_models(const ExactBoxType& domain, const VectorFunction<EffectiveTag>& function, PR precision) {
+template<class PR> inline Vector<AffineModel<ValidatedTag,RawFloat<PR>>> affine_models(const BoxDomainType& domain, const VectorFunction<EffectiveTag>& function, PR precision) {
     return affine_models(domain,VectorFunction<ValidatedTag>(function),precision); }
 
 
@@ -247,7 +247,7 @@ template<class P, class F> Vector<AffineModel<P,F>> affine_models(const Vector<T
     return result;
 }
 
-template<class P, class PR> Vector<AffineModel<P,RawFloat<PR>>> affine_models(const ExactBoxType& domain, const VectorFunction<P>& function, PR precision)
+template<class P, class PR> Vector<AffineModel<P,RawFloat<PR>>> affine_models(const BoxDomainType& domain, const VectorFunction<P>& function, PR precision)
 {
     typedef RawFloat<PR> F;
     SizeType rs=function.result_size();

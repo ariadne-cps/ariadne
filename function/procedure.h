@@ -54,8 +54,8 @@ template<class Y, class X> Formula<Y> to_formula(const Expansion<X>& e) {
 };
 
 
-Void simple_hull_reduce(UpperBoxType& dom, const ValidatedProcedure& f, ExactIntervalType codom);
-Void simple_hull_reduce(UpperBoxType& dom, const Vector<ValidatedProcedure>& f, ExactBoxType codom);
+Void simple_hull_reduce(UpperBoxType& dom, const ValidatedProcedure& f, IntervalDomainType codom);
+Void simple_hull_reduce(UpperBoxType& dom, const Vector<ValidatedProcedure>& f, BoxDomainType codom);
 
 struct ProcedureInstruction {
     explicit ProcedureInstruction(OperatorCode o, SizeType a) : op(o), arg(a) { }

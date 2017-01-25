@@ -985,7 +985,7 @@ _apply_guard(List<HybridEnclosure>& sets,
 
     ValidatedVectorFunctionModel64 starting_state_function=starting_set.state_function();
     if(elapsed_time_function.domain().dimension()>starting_set.parameter_domain().dimension()) {
-        IntervalDomain elapsed_time_domain=elapsed_time_function.domain()[elapsed_time_function.argument_size()-1u];
+        IntervalDomainType elapsed_time_domain=elapsed_time_function.domain()[elapsed_time_function.argument_size()-1u];
         starting_state_function = embed(starting_state_function,elapsed_time_domain);
     }
 

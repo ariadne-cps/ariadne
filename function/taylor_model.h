@@ -110,7 +110,7 @@ class TaylorModel<ValidatedTag,F>
     typedef SortedExpansion<CoefficientType,ComparisonType> ExpansionType;
     typedef Sweeper<F> SweeperType;
 
-    typedef ExactIntervalType CodomainType;
+    typedef IntervalDomainType CodomainType;
     typedef Interval<FloatUpperBound<PR>> RangeType;
 
     //! \brief The computational paradigm.
@@ -201,7 +201,7 @@ class TaylorModel<ValidatedTag,F>
         TaylorModel<ValidatedTag,F> r(as,swp); r.set_error(1u); return r; }
 
     //! \brief Construct the quantity which scales the interval \a codom onto the unit interval.
-    static TaylorModel<ValidatedTag,F> scaling(SizeType as, SizeType j, const ExactIntervalType& codom, SweeperType swp);
+    static TaylorModel<ValidatedTag,F> scaling(SizeType as, SizeType j, const IntervalDomainType& codom, SweeperType swp);
 
     //! \brief Return the vector of zero variables of size \a rs in \a as arguments.
     static Vector<TaylorModel<ValidatedTag,F>> zeros(SizeType rs, SizeType as, SweeperType swp);
@@ -211,7 +211,7 @@ class TaylorModel<ValidatedTag,F>
     static Vector<TaylorModel<ValidatedTag,F>> coordinates(SizeType as, SweeperType swp);
 
     //! \brief Return the vector scaling the box \a codom onto the unit box.
-    static Vector<TaylorModel<ValidatedTag,F>> scalings(const Vector<ExactIntervalType>& codom, SweeperType swp);
+    static Vector<TaylorModel<ValidatedTag,F>> scalings(const Vector<IntervalDomainType>& codom, SweeperType swp);
     //@}
 
     //@{
@@ -307,7 +307,7 @@ class TaylorModel<ValidatedTag,F>
     //! \brief The domain of the quantity, always given by \f$[-1,1]^{\mathrm{as}}\f$.
     UnitBoxType domain() const;
     //! \brief The codomain of the quantity.
-    ExactIntervalType codomain() const;
+    IntervalDomainType codomain() const;
     //! \brief An over-approximation to the range of the quantity.
     RangeType range() const;
     //! \brief Compute the gradient of the expansion with respect to the \a jth variable over the domain.
@@ -341,13 +341,13 @@ class TaylorModel<ValidatedTag,F>
     //@{
     /*! \name Inplace modifications. */
     //! \brief Scales the model by a function mapping \a dom into the unit interval.
-    Void unscale(ExactIntervalType const& dom);
+    Void unscale(IntervalDomainType const& dom);
     //! \brief Compute the antiderivative (in place).
     Void antidifferentiate(SizeType k);
     //! \brief Compute the weak derivative (in place).
     Void differentiate(SizeType k);
 
-    friend TaylorModel<ValidatedTag,F> unscale(TaylorModel<ValidatedTag,F> tm, ExactIntervalType const& dom) {
+    friend TaylorModel<ValidatedTag,F> unscale(TaylorModel<ValidatedTag,F> tm, IntervalDomainType const& dom) {
         tm.unscale(dom); return std::move(tm); }
     friend TaylorModel<ValidatedTag,F> antiderivative(TaylorModel<ValidatedTag,F> tm, SizeType k) {
         tm.antidifferentiate(k); return std::move(tm); }
@@ -495,7 +495,7 @@ template<class F> template<class A> auto TaylorModel<ValidatedTag,F>::operator()
 
 /*! \brief A class representing a power series expansion, scaled to the unit box, with an error term.
  *
- * See also Expansion, Polynomial, TaylorModel<ValidatedTag,F><ExactIntervalType>.
+ * See also Expansion, Polynomial, TaylorModel<ValidatedTag,F><IntervalDomainType>.
  */
 template<class F>
 class TaylorModel<ApproximateTag,F>
@@ -511,7 +511,7 @@ class TaylorModel<ApproximateTag,F>
     typedef ReverseLexicographicIndexLess ComparisonType;
     typedef SortedExpansion<CoefficientType,ComparisonType> ExpansionType;
 
-    typedef ExactIntervalType CodomainType;
+    typedef IntervalDomainType CodomainType;
     typedef ApproximateIntervalType RangeType;
     typedef FloatApproximation<PR> NormType;
 
@@ -607,7 +607,7 @@ class TaylorModel<ApproximateTag,F>
     //! \brief The domain of the quantity.
     UnitBoxType domain() const;
     //! \brief A coarse over-approximation to the range of the quantity.
-    ExactIntervalType codomain() const;
+    IntervalDomainType codomain() const;
     //! \brief An over-approximation to the range of the quantity.
     ApproximateIntervalType range() const;
     //! \brief Compute the gradient of the expansion with respect to the \a jth variable over the domain.
@@ -617,13 +617,13 @@ class TaylorModel<ApproximateTag,F>
     //@{
     /*! \name Inplace modifications. */
     //! \brief Scale so that the old codomain maps into the unit interval.
-    Void unscale(const ExactIntervalType& dom);
+    Void unscale(const IntervalDomainType& dom);
     //! \brief Compute the antiderivative (in place).
     Void antidifferentiate(SizeType k);
     //! \brief Compute the derivative (in place).
     Void differentiate(SizeType k);
 
-    friend TaylorModel<ApproximateTag,F> unscale(TaylorModel<ApproximateTag,F> tm, const ExactIntervalType& dom) {
+    friend TaylorModel<ApproximateTag,F> unscale(TaylorModel<ApproximateTag,F> tm, const IntervalDomainType& dom) {
         tm.unscale(dom); return std::move(tm); }
 
     //@}
@@ -744,7 +744,7 @@ template<class F> Vector<TaylorModel<ValidatedTag,F>> compose(const Vector<Taylo
     return std::move(r);
 }
 
-template<class P, class F> Vector<TaylorModel<P,F>> unscale(const Vector<TaylorModel<P,F>>& x, const Vector<ExactIntervalType>& dom) {
+template<class P, class F> Vector<TaylorModel<P,F>> unscale(const Vector<TaylorModel<P,F>>& x, const Vector<IntervalDomainType>& dom) {
     Vector<TaylorModel<P,F>> r(x.size());
     for(SizeType i=0; i!=r.size(); ++i) { r[i]=unscale(x[i],dom[i]); }
     return std::move(r);

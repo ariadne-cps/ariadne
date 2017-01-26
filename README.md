@@ -85,7 +85,7 @@ export LD_LIBRARY_PATH=/usr/local/lib
 ```
 ### Contribution guidelines ###
 
-* If you would like to contribute to Ariadne, please contact the developers. In particular, we are especially interested to hear how the documentation and user interface could be improved.
+* If you would like to contribute to Ariadne, please contact the developers. We are especially interested to hear how the documentation and user interface could be improved.
 
 * Pieter Collins <pieter.collins@maastrichtuniversity.nl>
 * Luca Geretti <luca.geretti@univr.it>

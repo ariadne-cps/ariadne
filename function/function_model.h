@@ -231,7 +231,7 @@ template<class P, class PR, class PRE> inline ScalarFunctionModel<P,PR,PRE>& Sca
 template<class P, class PR, class PRE> inline ScalarFunctionModel<P,PR,PRE>& ScalarFunctionModel<P,PR,PRE>::operator=(const ScalarFunction<P>& f) {
         return (*this)=factory(*this).create(f); }
 template<class P, class PR, class PRE> inline ScalarFunctionModel<P,PR,PRE>& ScalarFunctionModel<P,PR,PRE>::operator=(const ScalarFunctionModelInterface<P,PR,PRE>& f) {
-        ARIADNE_NOT_IMPLEMENTED; }
+        return (*this)=f._clone(); }
 
 
 

@@ -86,7 +86,12 @@ Void __msetitem__(Matrix<X>& A, const boost::python::tuple& tup, const X& x)
     A[i][j]=x;
 }
 
+template<class X> using UniformNormType = decltype(abs(declval<X>()+declval<X>()));
+template<class X> using SupremumNormType = decltype(max(abs(declval<X>()),abs(declval<X>())));
+template<class X> using EuclideanNormType = decltype(sqrt(sqr(declval<X>())+sqr(declval<X>())));
+
 template<class X> Matrix<X> transpose(const Matrix<X>& A) { return MatrixTranspose< Matrix<X> >(A); }
+template<class X> UniformNormType<X> norm(const Matrix<X>& A);
 
 
 template<class X>
@@ -163,12 +168,11 @@ template<class X> OutputStream& operator<<(OutputStream& os, const PythonReprese
         if(j!=0) { os << ","; } os << python_representation(A[i][j]); } os << "]"; } os << "]"; return os;
 }
 
-template<class X> auto __norm__(const Vector<X>& v) -> decltype(norm(v)) { return norm(v); }
-template<class X> auto __dot__(const Vector<X>& v1, const Vector<X>& v2) -> decltype(dot(v1,v2)) { return dot(v1,v2); }
-template<class X> Vector<X> __join__(const Vector<X>& v1, const Vector<X>& v2) { return join(v1,v2); }
-template<class X> Vector<X> __join__(const Vector<X>& v1, const X& s2) { return join(v1,s2); }
-template<class X> Vector<X> __join__(const X& s1, const Vector<X>& v2) { return join(s1,v2); }
-template<class X> Vector<X> __join__(const X& s1, const X& s2) { return Vector<X>{s1,s2}; }
+template<class V> decltype(auto) __norm__(const V& v) { return norm(v); }
+template<class V> decltype(auto) __dot__(const V& v1, const V& v2) { return dot(v1,v2); }
+template<class V1, class V2> decltype(auto) __join__(const V1& v1, const V2& v2) { return join(v1,v2); }
+template<class X> decltype(auto) __sjoin__(const X& s1, const X& s2) { return Vector<X>{s1,s2}; }
+template<class M> decltype(auto) __transpose__(const M& A) { return transpose(A); }
 
 } // namespace Ariadne
 
@@ -199,15 +203,13 @@ Void export_vector_class(class_<Vector<X> >& vector_class)
     vector_class.staticmethod("unit");
     vector_class.staticmethod("basis");
 
-    def("join",(Vector<X>(*)(const Vector<X>&,const Vector<X>&)) &__join__);
-    def("join",(Vector<X>(*)(const Vector<X>&,const X&)) &__join__);
-    def("join",(Vector<X>(*)(const X&,const Vector<X>&)) &__join__);
-    def("join",(Vector<X>(*)(const X&,const X&)) &__join__);
+    def("join", &__join__<Vector<X>,Vector<X>>);
+    def("join", &__join__<Vector<X>,X>);
+    def("join", &__join__<X,Vector<X>>);
+    def("join", &__sjoin__<X>);
 
     from_python< Vector<X> >();
     to_python< Array< Vector<X> > >();
-
-
 }
 
 template<class Y, class X>
@@ -261,8 +263,8 @@ template<> Void export_vector<Float64Bounds>()
     class_< Vector<X> > vector_class(python_name<X>("Vector"),init< Vector<X> >());
     export_vector_class<X>(vector_class);
     export_vector_arithmetic<X,X>(vector_class);
-    def("norm",&__norm__<X>);
-    def("dot", &__dot__<X>);
+    def("norm",&__norm__<Vector<X>>);
+    def("dot", &__dot__<Vector<X>>);
 
     export_vector_conversion<Float64Value,Float64Bounds>(vector_class);
 }
@@ -279,9 +281,6 @@ template<> Void export_vector<Float64Approximation>()
 
     export_vector_conversion<Float64Bounds,Float64Approximation>(vector_class);
 }
-
-
-
 
 template<class X>
 Void export_matrix_class(class_<Matrix<X> >& matrix_class)
@@ -329,7 +328,8 @@ Void export_matrix_arithmetic(class_<Matrix<X> >& matrix_class)
 template<class X>
 Void export_matrix_operations(class_<Matrix<X> >& matrix_class)
 {
-    def("norm",(ArithmeticType<X>(*)(const Matrix<X>&)) &norm);
+    typedef decltype(abs(declval<X>()+declval<X>())) NormType;
+    def("norm",(UniformNormType<X>(*)(const Matrix<X>&)) &norm);
     def("transpose",(Matrix<X>(*)(const Matrix<X>&)) &transpose);
 
     def("inverse",(Matrix<ArithmeticType<X>>(*)(const Matrix<X>&)) &inverse);
@@ -411,19 +411,20 @@ template<class X> Void export_diagonal_matrix()
     diagonal_matrix_class.def(init< Vector<X> >());
     diagonal_matrix_class.def("__setitem__", &DiagonalMatrix<X>::set);
     diagonal_matrix_class.def("__getitem__", &DiagonalMatrix<X>::get, return_value_policy<copy_const_reference>());
-    diagonal_matrix_class.def("__add__", (DiagonalMatrix<X>(*)(DiagonalMatrix<X>,const DiagonalMatrix<X>&)) operator+ );
-    diagonal_matrix_class.def("__sub__", (DiagonalMatrix<X>(*)(DiagonalMatrix<X>,const DiagonalMatrix<X>&)) operator- );
-    diagonal_matrix_class.def("__mul__", (DiagonalMatrix<X>(*)(DiagonalMatrix<X>,const DiagonalMatrix<X>&)) operator* );
-    diagonal_matrix_class.def("__div__", (DiagonalMatrix<X>(*)(DiagonalMatrix<X>,const DiagonalMatrix<X>&)) operator/ );
-    diagonal_matrix_class.def("__mul__", (Vector<X>(*)(const DiagonalMatrix<X>&,Vector<X>)) operator* );
-    diagonal_matrix_class.def("__mul__", (Matrix<X>(*)(const DiagonalMatrix<X>&,Matrix<X>)) operator* );
     diagonal_matrix_class.def("__str__",&__cstr__< DiagonalMatrix<X> >);
-    //diagonal_matrix_class.def("__mul__", &__mul__< DiagonalMatrix<X>, DiagonalMatrix<X>, DiagonalMatrix<X> >);
-    //diagonal_matrix_class.def("__div__", &__div__< DiagonalMatrix<X>, DiagonalMatrix<X>, DiagonalMatrix<X> >);
-    //diagonal_matrix_class.def("__mul__", &__mul__< Vector<X>, DiagonalMatrix<X>, Vector<X> >);
-    //diagonal_matrix_class.def("__mul__", &__mul__< Matrix<X>, DiagonalMatrix<X>, Matrix<X> >);
-    //diagonal_matrix_class.def("__rmul__", &__prod__< Vector<X>, Vector<X>, DiagonalMatrix<X> >);
-    //diagonal_matrix_class.def("__rmul__", &__prod__< Matrix<X>, DiagonalMatrix<X>, DiagonalMatrix<X> >);
+    diagonal_matrix_class.def("__mul__", &__mul__< DiagonalMatrix<X>, DiagonalMatrix<X>, DiagonalMatrix<X> >);
+    diagonal_matrix_class.def("__div__", &__div__< DiagonalMatrix<X>, DiagonalMatrix<X>, DiagonalMatrix<X> >);
+    diagonal_matrix_class.def("__mul__", &__mul__< Vector<X>, DiagonalMatrix<X>, Vector<X> >);
+    diagonal_matrix_class.def("__mul__", &__mul__< Matrix<X>, DiagonalMatrix<X>, Matrix<X> >);
+    //diagonal_matrix_class.def("__rmul__", &__mul__< Covector<X>, Covector<X>, DiagonalMatrix<X> >);
+    diagonal_matrix_class.def("__rmul__", &__mul__< Matrix<X>, DiagonalMatrix<X>, DiagonalMatrix<X> >);
+    //diagonal_matrix_class.def("__neg__", (DiagonalMatrix<X>(*)(DiagonalMatrix<X>) operator- );
+    //diagonal_matrix_class.def("__add__", (DiagonalMatrix<X>(*)(DiagonalMatrix<X>,const DiagonalMatrix<X>&)) operator+ );
+    //diagonal_matrix_class.def("__sub__", (DiagonalMatrix<X>(*)(DiagonalMatrix<X>,const DiagonalMatrix<X>&)) operator- );
+    //diagonal_matrix_class.def("__mul__", (DiagonalMatrix<X>(*)(DiagonalMatrix<X>,const DiagonalMatrix<X>&)) operator* );
+    //diagonal_matrix_class.def("__div__", (DiagonalMatrix<X>(*)(DiagonalMatrix<X>,const DiagonalMatrix<X>&)) operator/ );
+    //diagonal_matrix_class.def("__mul__", (Vector<X>(*)(const DiagonalMatrix<X>&,Vector<X>)) operator* );
+    //diagonal_matrix_class.def("__mul__", (Matrix<X>(*)(const DiagonalMatrix<X>&,Matrix<X>)) operator* );
     //def("inverse", (DiagonalMatrix<X>(*)(const DiagonalMatrix<X>&)) &inverse<X>);
 }
 

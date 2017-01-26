@@ -2,11 +2,8 @@
 
 Ariadne is a tool for reachability analysis and model checking of hybrid systems. Additionally, it is a framework for rigorous computation featuring arithmetic, linear algebra, calculus, geometry, algebraic and differential equations, and optimization solvers.
 
-### What is this repository for? ###
-
-* This repository contains the main development fork.
+* This repository contains the main development fork of the tool. For a more stable version with a less sophisticated user interface, see the *stable* repository
 * The latest semi-stable tagged version is internal_release-0.6.0. However, the code in the master branch should always be usable.
-* For a more stable version with a less sophisticated user interface, see the *stable* repository
 
 ### Installation ###
 

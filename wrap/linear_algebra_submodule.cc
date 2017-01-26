@@ -282,6 +282,30 @@ template<> Void export_vector<Float64Approximation>()
     export_vector_conversion<Float64Bounds,Float64Approximation>(vector_class);
 }
 
+
+template<class X>
+Void export_covector(class_<Covector<X> >& covector_class)
+{
+    covector_class.def(init<Int>());
+    covector_class.def(init<Int,X>());
+    covector_class.def("size", &Covector<X>::size);
+    covector_class.def("__len__", &Covector<X>::size);
+    covector_class.def("__setitem__", &__setitem__<Covector<X>>);
+    covector_class.def("__setitem__", &__setitem__<Covector<X>>);
+    covector_class.def("__getitem__", &__getitem__<Covector<X>>);
+    covector_class.def("__str__",&__cstr__< Covector<X> >);
+
+    covector_class.def("__add__",__add__< Covector<SumType<X,X>>, Covector<X>, Covector<X> >);
+    covector_class.def("__sub__",__sub__< Covector<DifferenceType<X,X>>, Covector<X>, Covector<X> >);
+    covector_class.def("__rmul__",__rmul__< Covector<ProductType<X,X>>, Covector<X>, X >);
+    covector_class.def("__mul__",__mul__< Covector<QuotientType<X,X>>, Covector<X>, X >);
+    covector_class.def("__div__",__div__< Covector<QuotientType<X,X>>, Covector<X>, X >);
+
+    def("transpose", (Covector<X>(*)(Vector<X>const&)) &transpose);
+    def("transpose", (Vector<X>(*)(Covector<X>const&)) &transpose);
+}
+
+
 template<class X>
 Void export_matrix_class(class_<Matrix<X> >& matrix_class)
 {

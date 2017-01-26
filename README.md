@@ -4,10 +4,9 @@ Ariadne is a tool for reachability analysis and model checking of hybrid systems
 
 ### What is this repository for? ###
 
-* Quick summary
-* The latest semi-stable version is internal_release-0.6.0. For a more stable version with a less sophisticated user interface, see the *stable* repository
-
-### Installation ###
+* This repository contains the main development fork.
+* The latest semi-stable tagged version is internal_release-0.6.0. However, the code in the master branch should always be usable.
+* For a more stable version with a less sophisticated user interface, see the *stable* repository
 
 ### Installation ###
 
@@ -27,7 +26,7 @@ $ cd build
 The library dependencies of ARIADNE are the following:
 
 ##### Ubuntu
-Aptitude packages required: `git cmake libboost-system-dev libboost-serialization-dev libboost-thread-dev libgtk2.0-dev libcairo2-dev libbdd-dev`
+Aptitude packages required: `git cmake libgmp-dev libmpfr-dev libboost-system-dev libboost-serialization-dev libboost-thread-dev libgtk2.0-dev libcairo2-dev libbdd-dev`
 
 ##### OSX
 1. Install the Command Line Developer Tools (will also be asked when installing Homebrew) from the Apple Store
@@ -89,7 +88,7 @@ export LD_LIBRARY_PATH=/usr/local/lib
 ```
 ### Contribution guidelines ###
 
-* If you would like to contribute to Ariadne, please contact the developers
+* If you would like to contribute to Ariadne, please contact the developers. In particular, we are especially interested to hear how the documentation and user interface could be improved.
 
 * Pieter Collins <pieter.collins@maastrichtuniversity.nl>
 * Luca Geretti <luca.geretti@univr.it>

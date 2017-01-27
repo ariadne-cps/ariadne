@@ -533,7 +533,10 @@ class HybridAutomaton
     //@{
     //! \name Functions for conformance to HybridAutomatonInterface
 
+    //! \brief The continuous state space for each location.
     virtual HybridSpace state_space() const;
+    //! \brief The continuous space for each location.
+    virtual HybridSpace state_auxiliary_space() const;
     //! \brief The continuous state space in the given location.
     virtual RealSpace continuous_state_space(DiscreteLocation) const;
     //! \brief The space of continuous auxiliary variables in the given location.

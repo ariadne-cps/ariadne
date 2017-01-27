@@ -34,6 +34,7 @@
 #include "function/taylor_function.h"
 #include "geometry/box.h"
 #include "geometry/grid_set.h"
+#include "hybrid/hybrid_set.h"
 #include "hybrid/hybrid_time.h"
 #include "hybrid/discrete_event.h"
 #include "hybrid/discrete_location.h"
@@ -167,6 +168,21 @@ HybridEnclosure::function_factory() const
     return this->_set.function_factory();
 }
 
+ValidatedScalarFunctionModel const
+HybridEnclosure::function(RealVariable var) const
+{
+    if(this->state_space().contains(var)) {
+        return this->state_function()[this->state_space().index(var)];
+    } else if(this->auxiliary_space().contains(var)) {
+        return this->auxiliary_function()[this->auxiliary_space().index(var)];
+    } else if(TimeVariable()==var) {
+        return this->time_function();
+    } else {
+        ARIADNE_THROW(std::runtime_error,"HybridEnclosure::function(RealVariable var) const",
+                      "Variable "<<var<<" is not defined by HybridEnclosure with variables "<<this->state_time_auxiliary_space());
+    }
+}
+
 ValidatedVectorFunctionModel const&
 HybridEnclosure::state_function() const
 {
@@ -183,6 +199,12 @@ ValidatedScalarFunctionModel const&
 HybridEnclosure::dwell_time_function() const
 {
     return this->_set.dwell_time_function();
+}
+
+ValidatedVectorFunctionModel const
+HybridEnclosure::auxiliary_function() const
+{
+    return this->_set.auxiliary_function();
 }
 
 ValidatedVectorFunctionModel const
@@ -408,11 +430,27 @@ const DiscreteLocation& HybridEnclosure::location() const {
     return this->_location;
 }
 
-/*
-ValidatedConstrainedImageSet HybridEnclosure::continuous_set() const {
-    return ValidatedConstrainedImageSet(this->_set.domain(),this->state_function(),this->_constraints);
+HybridBasicSet<Enclosure> HybridEnclosure::state_set() const {
+    ValidatedConstrainedImageSet set(this->parameter_domain(),this->state_function(),this->constraints());
+    return HybridBasicSet<Enclosure>(this->location(),this->state_space(),this->continuous_set());
 }
-*/
+
+HybridBasicSet<Enclosure> HybridEnclosure::state_auxiliary_set() const {
+    auto state_auxiliary_space=join(this->state_space(),this->auxiliary_space());
+    auto state_auxiliary_function=join(this->state_function(),this->auxiliary_function());
+//    ValidatedConstrainedImageSet set(this->parameter_domain(),join(this->state_function(),this->auxiliary_function()),this->constraints());
+//    ValidatedConstrainedImageSet set(this->parameter_domain(),join(this->state_function(),this->auxiliary_function()),this->constraints());
+    Enclosure enclosure(this->parameter_domain(),state_auxiliary_function,this->time_function(),this->constraints(),this->function_factory());
+    HybridBasicSet<Enclosure> hset(this->location(),state_auxiliary_space,enclosure);
+    return hset;
+}
+
+HybridBasicSet<Enclosure> project(HybridEnclosure const& encl, RealSpace const& spc) {
+    ValidatedVectorFunctionModel spc_funct=encl.function_factory().create_zeros(spc.dimension(),encl.parameter_domain());
+    for(SizeType i=0; i!=spc.dimension(); ++i) { spc_funct[i] = encl.function(spc[i]); }
+    Enclosure spc_set(encl.parameter_domain(),spc_funct,encl.time_function(),encl.constraints(),encl.function_factory());
+    return HybridBasicSet<Enclosure>(encl.location(),spc,spc_set);
+}
 
 
 const Enclosure&
@@ -569,9 +607,21 @@ OutputStream& HybridEnclosure::repr(OutputStream& os) const
 
 
 Void HybridEnclosure::adjoin_outer_approximation_to(HybridGridTreeSet& hgts, Int depth) const {
+    DiscreteLocation location=this->location();
     const Enclosure& set = this->continuous_set();
-    GridTreeSet& paving = hgts[this->location()];
-    set.adjoin_outer_approximation_to(paving,depth);
+    GridTreeSet& paving = hgts[location];
+    RealSpace paving_space=hgts.space(location);
+    RealSpace state_space=this->state_space();
+    RealSpace auxiliary_space=this->auxiliary_space();
+    if(state_space==paving_space) {
+        auto state_set = Enclosure(this->parameter_domain(),this->state_function(),this->time_function(),this->constraints(),this->function_factory());
+        state_set.adjoin_outer_approximation_to(paving,depth);
+    } else if(join(state_space,auxiliary_space)==paving_space) {
+        set.adjoin_outer_approximation_to(paving,depth);
+    } else {
+        ARIADNE_FAIL_MSG("HybridEnclosure's state variables "<<state_space<<" and auxiliary variables "<<auxiliary_space<<
+                         " do not match variables "<<paving_space<<" of paving in location "<<location);
+    }
 }
 
 HybridGridTreeSet outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, Int depth) {

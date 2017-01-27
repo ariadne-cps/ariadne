@@ -306,7 +306,7 @@ typedef GradedFunction<EffectiveTag> EffectiveGradedFunction;
 template<class P, class D=BoxDomain> class NonResizableScalarFunction : public ScalarFunction<P,D> {
   public:
     NonResizableScalarFunction<P,D>& operator=(const ScalarFunction<P,D>& f) {
-        ARIADNE_ASSERT(this->domain()==f.domain());
+        ARIADNE_ASSERT_MSG(this->domain()==f.domain(), "this->domain()="<<this->domain()<<", f.domain()="<<f.domain());
         this->ScalarFunction<P,D>::operator=(f);
         return *this;
     }

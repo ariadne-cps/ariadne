@@ -1507,8 +1507,8 @@ _apply_evolution_step(EvolutionData& evolution_data,
             HybridEnclosure& jump_set=*jump_set_iter;
             if(!definitely(jump_set.is_empty())) {
                 DiscreteLocation const& target=transitions[event].target;
-                jump_set.apply_reset(event,target,transitions[event].target_space,transitions[event].reset_function);
                 ARIADNE_LOG(9,"target="<<target<<", auxiliary_space="<<this->system().continuous_auxiliary_space(target)<<", auxiliary_function="<<this->system().auxiliary_function(target)<<"\n");
+                jump_set.apply_reset(event,target,transitions[event].target_space,transitions[event].reset_function);
                 jump_set.set_auxiliary(this->system().continuous_auxiliary_space(target).variables(),this->system().auxiliary_function(target));
                 evolution_data.initial_sets.append(jump_set);
                 _step_data.events.insert(event);

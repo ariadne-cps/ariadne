@@ -649,6 +649,15 @@ HybridSpace HybridAutomaton::state_space() const {
     return space;
 }
 
+HybridSpace HybridAutomaton::state_auxiliary_space() const {
+    MonolithicHybridSpace space;
+    for(Map<DiscreteLocation,DiscreteMode>::ConstIterator iter=this->_modes.begin(); iter!=this->_modes.end(); ++iter) {
+        const DiscreteLocation& loc=iter->first;
+        space.new_location(loc,join(this->continuous_state_space(loc),this->continuous_auxiliary_space(loc)));
+    }
+    return space;
+}
+
 Set<DiscreteEvent> HybridAutomaton::events(DiscreteLocation location) const {
     const DiscreteMode& mode=this->mode(location);
     return join(join(mode._invariants.keys(),mode._guards.keys()),mode._targets.keys());

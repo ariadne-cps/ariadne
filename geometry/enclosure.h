@@ -124,6 +124,7 @@ class Enclosure
     ExactBoxType codomain() const;
     //! \brief The function giving the state \c x in terms of parameters \c s, \f$x=\xi(s)\f$.
     ValidatedVectorFunctionModel const  state_time_auxiliary_function() const;
+    ValidatedVectorFunctionModel const  state_auxiliary_function() const;
     ValidatedVectorFunctionModel const& state_function() const;
     ValidatedScalarFunctionModel const& time_function() const;
     ValidatedVectorFunctionModel const  auxiliary_function() const;

@@ -161,11 +161,16 @@ class CompositeHybridAutomaton
     //@{
     //! \name Functions for conformance to HybridAutomatonInterface
 
-    HybridSpace state_space() const;
+    //! \brief The continuous state space for each location.
+    virtual HybridSpace state_space() const;
+    //! \brief The continuous space for each location.
+    virtual HybridSpace state_auxiliary_space() const;
     //! \brief The continuous state space in the given location.
     RealSpace continuous_state_space(DiscreteLocation) const;
     //! \brief The space of continuous auxiliary variables in the given location.
     RealSpace continuous_auxiliary_space(DiscreteLocation) const;
+    //! \brief The space of continuous state and auxiliary variables in the given location.
+    RealSpace continuous_state_auxiliary_space(DiscreteLocation) const;
     //! \brief The dimension of the continuous state space in the given location.
     DimensionType dimension(DiscreteLocation) const;
 

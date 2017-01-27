@@ -655,6 +655,10 @@ ValidatedVectorFunctionModel const Enclosure::state_time_auxiliary_function() co
     return join(join(this->state_function(),this->time_function()),this->auxiliary_function());
 }
 
+ValidatedVectorFunctionModel const Enclosure::state_auxiliary_function() const {
+    return join(this->state_function(),this->auxiliary_function());
+}
+
 ValidatedVectorFunctionModel const& Enclosure::state_function() const {
     return this->_state_function;
 }
@@ -708,7 +712,7 @@ ExactBoxType const Enclosure::constraint_bounds() const {
 }
 
 DimensionType Enclosure::dimension() const {
-    return this->_state_function.result_size();
+    return this->_state_function.result_size() + this->_auxiliary_mapping.result_size();
 }
 
 DimensionType Enclosure::state_dimension() const {
@@ -973,7 +977,7 @@ Void Enclosure::adjoin_outer_approximation_to(PavingInterface& paving, Int depth
 {
     PavingInterface& p=paving;
     const ExactBoxType& d=this->domain();
-    const ValidatedVectorFunction& f=this->state_function();
+    const ValidatedVectorFunction f=this->state_auxiliary_function();
 
     ValidatedVectorFunctionModel g=this->constraint_function();
     ExactIntervalVectorType c=this->constraint_bounds();

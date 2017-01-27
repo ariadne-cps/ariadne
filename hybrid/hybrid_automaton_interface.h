@@ -28,6 +28,7 @@
 #ifndef ARIADNE_HYBRID_AUTOMATON_INTERFACE_H
 #define ARIADNE_HYBRID_AUTOMATON_INTERFACE_H
 
+#include <cassert>
 #include "function/function.h"
 #include "hybrid/discrete_event.h"
 #include "hybrid/discrete_location.h"
@@ -213,11 +214,17 @@ class HybridAutomatonInterface {
     //! \brief The hybrid state space.
     virtual HybridSpace state_space() const = 0;
 
+    //! \brief The hybrid space of state and auxiliary variables.
+    virtual HybridSpace state_auxiliary_space() const = 0;
+
     //! \brief The continuous state space in the \a location.
     virtual RealSpace continuous_state_space(DiscreteLocation location) const = 0;
 
     //! \brief The continuous state space in the \a location.
     virtual RealSpace continuous_auxiliary_space(DiscreteLocation location) const = 0;
+
+    //! \brief The continuous state space in the \a location.
+    virtual List<RealExpression> auxiliary_expressions(DiscreteLocation location) const { assert(false); }
 
 
     //@}

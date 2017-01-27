@@ -69,7 +69,7 @@ template<class BS> class HybridBasicSet;
 class HybridBoxType;
 class HybridGridTreeSet;
 class HybridBoundedConstraintSet;
-
+class HybridValidatedConstrainedImageSet;
 
 enum EnclosureVariableType { INITIAL, TEMPORAL, PARAMETER, INPUT, NOISE, ERROR, UNKNOWN };
 
@@ -172,6 +172,8 @@ class HybridEnclosure
     const ValidatedVectorFunctionModel auxiliary_function() const;
     //! \brief The function related to the auxiliary space.
     const ValidatedVectorFunctionModel state_time_auxiliary_function() const;
+    //! \brief The function related to the auxiliary space.
+    const ValidatedScalarFunctionModel function(RealVariable var) const;
 
     //! \brief Set the evolution time function to \a omega.
     Void set_time_function(const ValidatedScalarFunctionModel& omega);
@@ -184,6 +186,12 @@ class HybridEnclosure
     UpperIntervalType dwell_time_range() const;
 
     //! \brief The continuous state set.
+    friend HybridBasicSet<Enclosure> project(HybridEnclosure const&, RealSpace const& spc);
+    //! \brief The continuous state set.
+    HybridBasicSet<Enclosure> state_set() const;
+    //! \brief The continuous state set.
+    HybridBasicSet<Enclosure> state_auxiliary_set() const;
+    //! \brief The continuous enclosure.
     const ContinuousStateSetType& continuous_set() const;
 
     //! \brief Set the time function to zero.

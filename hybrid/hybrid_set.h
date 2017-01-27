@@ -192,10 +192,28 @@ class HybridBasicSet
     //! \brief The location the set is contained in.
     const DiscreteLocation& location() const { return get_first(this->_tuple); }
     //! \brief The ordering of variables used to define the set.
+    const Set<RealVariable> variables() const { return space().variables(); }
+    //! \brief The ordering of variables used to define the set.
     const RealSpace& space() const { return get_second(this->_tuple); }
     //! \brief The continuous Euclidean subset.
     const ContinuousSetType& continuous_set() const { return get_third(this->_tuple); }
     ContinuousSetType& continuous_set() { return get_third(this->_tuple); }
+
+    const Set<DiscreteLocation> locations() const { return Set<DiscreteLocation>({this->location()}); }
+    const Set<RealVariable> variables(DiscreteLocation loc) const { if(loc==this->location()) { return this->variables(); } else { return Set<RealVariable>(); } }
+
+    ValidatedSierpinskian inside(const HybridBoxes& hbx) const;
+    ValidatedSierpinskian inside(const HybridBoxType& hbx) const;
+    ValidatedSierpinskian overlaps(const HybridBoxType& hbx) const;
+    ValidatedSierpinskian separated(const HybridBoxType& hbx) const;
+    ValidatedSierpinskian covers(const HybridBoxType& hbx) const;
+
+    Void adjoin_outer_approximation_to(HybridGridTreeSet& paving, Int depth) const;
+
+    Void draw(CanvasInterface& c, const Set<DiscreteLocation>& q, const Variables2d& v) const;
+
+    HybridUpperBoxType bounding_box() const;
+    HybridUpperBoxes bounding_boxes() const;
 
     //! \brief Write to an output stream.
     friend OutputStream& operator<<(OutputStream& os, const HybridBasicSet<EBS>& hbs) {
@@ -211,6 +229,48 @@ class HybridBasicSet
             return false;
         }
     }
+};
+
+//! \ingroup ExpressionSetSubModule
+//! \ingroup HybridSetSubModule
+//! \brief A hybrid set defined by the intersection of a box and a constraint system in each location.
+class HybridValidatedConstrainedImageSet
+    : public virtual HybridLocatedSetInterface
+    , public virtual HybridDrawableInterface
+    , public HybridBasicSet<ValidatedConstrainedImageSet>
+{
+    typedef HybridBasicSet<ValidatedConstrainedImageSet> Base;
+  public:
+    using HybridBasicSet<ValidatedConstrainedImageSet>::HybridBasicSet;
+
+    virtual HybridValidatedConstrainedImageSet* clone() const override {
+        return new HybridValidatedConstrainedImageSet(*this); }
+
+    virtual Set<RealVariable> variables(DiscreteLocation loc) const override {
+        return this->Base::variables(loc); }
+    virtual Set<DiscreteLocation> locations() const override {
+        return this->Base::locations(); }
+
+    virtual ValidatedSierpinskian overlaps(const HybridBoxType& hbx) const {
+        return this->Base::overlaps(hbx); }
+    inline ValidatedSierpinskian inside(const HybridBoxes& hbxs) const override {
+        return this->Base::inside(hbxs); }
+    virtual ValidatedSierpinskian separated(const HybridBoxType& hbx) const override {
+        return this->Base::separated(hbx); }
+    virtual HybridUpperBoxes bounding_box() const override;
+
+    virtual OutputStream& write(OutputStream& os) const override {
+        return os << static_cast<const Base&>(*this); }
+    virtual Void draw(CanvasInterface& cnvs, const Set<DiscreteLocation>& locs, const Variables2d& vars) const override {
+        return this->Base::draw(cnvs,locs,vars); }
+
+    Void adjoin_outer_approximation_to(HybridGridTreeSet& paving, Int depth) const;
+    friend OutputStream& operator<<(OutputStream& os, const HybridValidatedConstrainedImageSet& hset) { return os << static_cast<const Base&>(hset); }
+  protected:
+    virtual ValidatedConstrainedImageSet* _euclidean_set(DiscreteLocation loc, RealSpace spc) const override {
+        ARIADNE_ASSERT(loc==this->location());
+        ARIADNE_ASSERT(spc==this->space());
+        return new ValidatedConstrainedImageSet(this->Base::continuous_set()); }
 };
 
 class HybridPoint
@@ -263,6 +323,9 @@ class HybridBoxes
 {
   public:
     //! \brief Set the continuous state set in location \a loc to \a vbx.
+    Void insert(const HybridBoxType& hbx) {
+        this->Map<DiscreteLocation,ExactVariablesBoxType>::insert(hbx.location(),ExactVariablesBoxType(hbx.space(),hbx.continuous_set())); }
+    //! \brief Set the continuous state set in location \a loc to \a vbx.
     Void insert(const DiscreteLocation& loc, const ExactVariablesBoxType& vbx) {
         this->Map<DiscreteLocation,ExactVariablesBoxType>::insert(loc,vbx); }
     //! \brief Set the continuous state set in location \a loc to box \a bx using \a spc to order the variables.
@@ -281,8 +344,48 @@ class HybridBoxes
         return this->operator[](loc).euclidean_set(spc); }
 };
 
+template<class EBS> ValidatedSierpinskian HybridBasicSet<EBS>::inside(const HybridBoxes& hbxs) const {
+    auto bx = hbxs.euclidean_set(this->location(),this->space());
+    return this->continuous_set().inside(bx);
+}
+template<class EBS> ValidatedSierpinskian HybridBasicSet<EBS>::inside(const HybridBoxType& hbx) const {
+    if(this->location()!=hbx.location()) { return this->continuous_set().is_empty(); }
+    auto bx = hbx.euclidean_set(this->space());
+    return this->continuous_set().inside(bx);
+}
+template<class EBS> ValidatedSierpinskian HybridBasicSet<EBS>::overlaps(const HybridBoxType& hbx) const {
+    if(this->location()!=hbx.location()) { return false; }
+    auto bx = hbx.euclidean_set(this->space());
+    return this->continuous_set().overlaps(bx);
+}
+template<class EBS> ValidatedSierpinskian HybridBasicSet<EBS>::separated(const HybridBoxType& hbx) const {
+    if(this->location()!=hbx.location()) { return true; }
+    auto bx = hbx.euclidean_set(this->space());
+    return this->continuous_set().separated(bx);
+}
+template<class EBS> ValidatedSierpinskian HybridBasicSet<EBS>::covers(const HybridBoxType& hbx) const {
+    if(this->location()!=hbx.location()) { return hbx.continuous_set().is_empty(); }
+    auto bx = hbx.euclidean_set(this->space());
+    return this->continuous_set().covers(bx);
+}
 
-template<class ES> class HybridListSetConstIterator;
+template<class EBS> HybridUpperBoxType HybridBasicSet<EBS>::bounding_box() const {
+    return HybridUpperBoxType(this->location(),this->space(),cast_exact_box(this->continuous_set().bounding_box()));
+}
+
+template<class EBS> HybridUpperBoxes HybridBasicSet<EBS>::bounding_boxes() const {
+    HybridUpperBoxes res; res.insert(this->bounding_box()); return res;
+}
+
+
+
+template<class EBS> Void draw_hybrid_basic_set(CanvasInterface& canvas, const DiscreteLocation& location, const Variables2d& vars, const HybridBasicSet<EBS>& set);
+template<class EBS> Void HybridBasicSet<EBS>::draw(CanvasInterface& c, const Set<DiscreteLocation>& qs, const Variables2d& vs) const {
+    DiscreteLocation const& q=this->location();
+    if(qs.empty() || qs.contains(q)) {
+        draw_hybrid_basic_set(c,q,vs,*this);
+    }
+}
 
 template<class ES>
 class HybridListSetConstIterator
@@ -823,6 +926,12 @@ HybridSetConstIterator<DS,HBS>::increment_loc()
         _bs_iter=_loc_iter->second.begin();
     }
 }
+
+inline HybridUpperBoxes HybridValidatedConstrainedImageSet::bounding_box() const {
+    return this->Base::bounding_boxes();
+}
+
+template<class ES> class HybridListSetConstIterator;
 
 
 } // namespace Ariadne

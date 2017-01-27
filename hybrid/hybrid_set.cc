@@ -440,4 +440,19 @@ Void HybridBoundedConstraintSet::draw(CanvasInterface& c, const Set<DiscreteLoca
     }
 }
 
+template<class EBS> Void HybridBasicSet<EBS>::adjoin_outer_approximation_to(HybridGridTreeSet& paving, Int depth) const {
+    if(this->space()==paving.space(this->location())) {
+        this->continuous_set().adjoin_outer_approximation_to(paving[this->location()],depth);
+    } else {
+        ARIADNE_FAIL_MSG("HybridSet's state variables "<<this->space()<<
+                         " do not match variables "<<paving.space()<<" of paving in location "<<this->location());
+    }
+}
+
+template Void HybridBasicSet<Enclosure>::adjoin_outer_approximation_to(HybridGridTreeSet& paving, Int depth) const;
+
+Void HybridValidatedConstrainedImageSet::adjoin_outer_approximation_to(HybridGridTreeSet& paving, Int depth) const {
+    return this->Base::adjoin_outer_approximation_to(paving,depth);
+}
+
 } // namespace Ariadne

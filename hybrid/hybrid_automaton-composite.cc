@@ -394,7 +394,7 @@ CompositeHybridAutomaton::auxiliary_function(DiscreteLocation location) const {
     Space<Real> space=this->state_variables(location);
     List<RealAssignment> algebraic=this->auxiliary_assignments(location);
     Vector<RealExpression> results(algebraic.size(),default_expression);
-    for(SizeType i=0; i!=algebraic.size(); ++i) { results[i]=algebraic[i].lhs; }
+    for(SizeType i=0; i!=algebraic.size(); ++i) { results[i]=algebraic[i].rhs; }
     return make_function(space,results);
 }
 

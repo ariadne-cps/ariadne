@@ -57,6 +57,7 @@ template<class PR> class FloatApproximation
     typedef ApproximateNumber GenericType;
     typedef FLT RawFloatType;
     typedef PR PrecisionType;
+    typedef PR PropertiesType;
   public:
     FloatApproximation<PR>() : _a(0.0) { }
     explicit FloatApproximation<PR>(PrecisionType pr) : _a(0.0,pr) { }
@@ -93,6 +94,8 @@ template<class PR> class FloatApproximation
     friend FloatApproximation<PR> round(FloatApproximation<PR> const& x);
 
     PrecisionType precision() const { return _a.precision(); }
+    PropertiesType properties() const { return _a.precision(); }
+    GenericType generic() const { return this->operator GenericType(); }
     explicit operator RawFloatType () const { return this->_a; }
     RawFloatType const& raw() const { return this->_a; }
     RawFloatType& raw() { return this->_a; }

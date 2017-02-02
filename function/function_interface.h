@@ -29,15 +29,15 @@
 #define ARIADNE_FUNCTION_INTERFACE_H
 
 #include <iosfwd>
+
 #include "utility/declarations.h"
+#include "function/function.decl.h"
 
 namespace Ariadne {
 
 static const Int SMOOTH=255;
 
 template<class S> struct ElementTraits;
-template<> struct ElementTraits<IntervalDomain> { template<class X> using Type=Scalar<X>; };
-template<> struct ElementTraits<BoxDomain> { template<class X> using Type=Vector<X>; };
 template<class S, class X> using ElementType = typename ElementTraits<S>::template Type<X>;
 
 template<class P, class D, class C> class FunctionInterface;
@@ -46,25 +46,25 @@ template<class P, class D, class C> class FunctionInterface;
 //! \ingroup FunctionModule
 //! \brief Interface for vector functions \f$\F^n\rightarrow\F^m\f$ whose derivatives can be computed.
 //! \sa \ref ScalarFunctionInterface
-template<class P,class D,class C=BoxDomain>
+template<class P,class D,class C=BoxDomainType>
 class VectorOfFunctionInterface
 {
 };
 
-template<class D> class VectorOfFunctionInterface<ApproximateTag,D,BoxDomain> {
+template<class D> class VectorOfFunctionInterface<ApproximateTag,D,BoxDomainType> {
   public:
     virtual ~VectorOfFunctionInterface<ApproximateTag,D>() = default;
     virtual ScalarFunctionInterface<ApproximateTag,D>* _get(SizeType i) const = 0;
 };
 
-template<class D> class VectorOfFunctionInterface<ValidatedTag,D,BoxDomain>
+template<class D> class VectorOfFunctionInterface<ValidatedTag,D,BoxDomainType>
     : public virtual VectorOfFunctionInterface<ApproximateTag,D>
 {
   public:
     virtual ScalarFunctionInterface<ValidatedTag,D>* _get(SizeType i) const override = 0;
 };
 
-template<class D> class VectorOfFunctionInterface<EffectiveTag,D,BoxDomain>
+template<class D> class VectorOfFunctionInterface<EffectiveTag,D,BoxDomainType>
     : public virtual VectorOfFunctionInterface<ValidatedTag,D>
 {
   public:
@@ -196,17 +196,17 @@ template<class X> class FunctionFactoryInterface;
 
 template<> class FunctionFactoryInterface<ValidatedTag>
 {
-    typedef ExactBoxType DomainType;
+    typedef BoxDomainType DomainType;
   public:
     virtual FunctionFactoryInterface<ValidatedTag>* clone() const = 0;
     virtual Void write(OutputStream& os) const = 0;
-    inline ValidatedScalarFunction create(const ExactBoxType& domain, const ScalarFunctionInterface<ValidatedTag>& function) const;
-    inline ValidatedVectorFunction create(const ExactBoxType& domain, const VectorFunctionInterface<ValidatedTag>& function) const;
-    inline ValidatedScalarFunction create_zero(const ExactBoxType& domain) const;
-    inline ValidatedVectorFunction create_identity(const ExactBoxType& domain) const;
+    inline ValidatedScalarFunction create(const BoxDomainType& domain, const ScalarFunctionInterface<ValidatedTag>& function) const;
+    inline ValidatedVectorFunction create(const BoxDomainType& domain, const VectorFunctionInterface<ValidatedTag>& function) const;
+    inline ValidatedScalarFunction create_zero(const BoxDomainType& domain) const;
+    inline ValidatedVectorFunction create_identity(const BoxDomainType& domain) const;
   private:
-    virtual ScalarFunctionInterface<ValidatedTag>* _create(const ExactBoxType& domain, const ScalarFunctionInterface<ValidatedTag>& function) const = 0;
-    virtual VectorFunctionInterface<ValidatedTag>* _create(const ExactBoxType& domain, const VectorFunctionInterface<ValidatedTag>& function) const = 0;
+    virtual ScalarFunctionInterface<ValidatedTag>* _create(const BoxDomainType& domain, const ScalarFunctionInterface<ValidatedTag>& function) const = 0;
+    virtual VectorFunctionInterface<ValidatedTag>* _create(const BoxDomainType& domain, const VectorFunctionInterface<ValidatedTag>& function) const = 0;
 };
 
 template<class X> inline OutputStream& operator<<(OutputStream& os, const FunctionFactoryInterface<ValidatedTag>& factory) {

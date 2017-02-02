@@ -48,7 +48,7 @@ Curve::~Curve()
 
 
 
-Curve::Curve(const Function<EffectiveTag,IntervalDomain,BoxDomain>& f)
+Curve::Curve(const Function<EffectiveTag,IntervalDomainType,BoxDomainType>& f)
     : _function(f)
 {
     assert(this->_function.argument_size()==1);

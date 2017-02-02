@@ -34,7 +34,7 @@
 #include "numeric/numeric.h"
 #include "numeric/float.h"
 #include "algebra/expansion.h"
-#include "geometry/box.h"
+#include "function/domain.h"
 
 namespace Ariadne {
 
@@ -61,7 +61,7 @@ class C1TaylorSeries
     static C1TaylorSeries constant(Float64);
     static C1TaylorSeries coordinate();
   public:
-    ExactIntervalType domain() const;
+    IntervalDomainType domain() const;
     Nat degree() const;
     Void sweep(Float64 threshold);
   public:
@@ -91,7 +91,7 @@ class C1TaylorFunction
     static C1TaylorFunction constant(SizeType as, Float64 c);
     static C1TaylorFunction coordinate(SizeType as, SizeType ind);
   public:
-    ExactBoxType domain() const;
+    BoxDomainType domain() const;
     Nat argument_size() const;
     Void sweep(Float64 threshold);
     C1TaylorFunction& operator=(NumericType c);

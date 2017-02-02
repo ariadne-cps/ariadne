@@ -27,15 +27,6 @@
 namespace Ariadne {
 //namespace Test {
 
-// Compare with double's as if they were Float64Value
-
-template<class X> decltype(auto) operator==(X const& x, double d) { return x==Float64Value(d); }
-template<class X> decltype(auto) operator!=(X const& x, double d) { return x!=Float64Value(d); }
-template<class X> decltype(auto) operator< (X const& x, double d) { return x< Float64Value(d); }
-template<class X> decltype(auto) operator> (X const& x, double d) { return x> Float64Value(d); }
-template<class X> decltype(auto) operator<=(X const& x, double d) { return x<=Float64Value(d); }
-template<class X> decltype(auto) operator>=(X const& x, double d) { return x>=Float64Value(d); }
-
 struct OperatorPlus {
     template<class A> decltype(auto) operator()(A a) const { return +a; }
     template<class A1, class A2> decltype(auto) operator()(A1 a1, A2 a2) const { return a1+a2; }
@@ -65,6 +56,17 @@ template<class OP, class... AS> struct SafeTypedef {
     template<class O, class = ResultOf<O(AS...)>> static ResultOf<O(AS...)> safe(int);
     template<class O> static Fallback safe(...);
     typedef decltype(safe<OP>(1)) Type;
+};
+
+template<class A1, class A2> struct SafeTypedef<OperatorEquals,A1,A2> {
+    template<class AA1, class AA2, class = decltype(declval<AA1>()==declval<AA2>())> static decltype(declval<AA1>()==declval<AA2>()) safe(int);
+    template<class AA1, class AA2> static Fallback safe(...);
+    typedef decltype(safe<A1,A2>(1)) Type;
+};
+template<class A1, class A2> struct SafeTypedef<OperatorLess,A1,A2> {
+    template<class AA1, class AA2, class = decltype(declval<AA1>()<declval<AA2>())> static decltype(declval<AA1>()<declval<AA2>()) safe(int);
+    template<class AA1, class AA2> static Fallback safe(...);
+    typedef decltype(safe<A1,A2>(1)) Type;
 };
 
 template<class R, template<class>class T, class A1, class = decltype(declval<R>()=declval<T<A1>>())> True is(int);

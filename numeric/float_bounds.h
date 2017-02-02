@@ -84,6 +84,7 @@ template<class PR> class FloatBounds
     typedef Number<P> GenericType;
     typedef FLT RawFloatType;
     typedef PR PrecisionType;
+    typedef PR PropertiesType;
   public:
     FloatBounds<PR>() : _l(0.0), _u(0.0) { }
     explicit FloatBounds<PR>(PrecisionType pr) : _l(0.0,pr), _u(0.0,pr) { }
@@ -131,7 +132,8 @@ template<class PR> class FloatBounds
     double get_d() const { return value_raw().get_d(); }
 
     PrecisionType precision() const { ARIADNE_DEBUG_ASSERT(_l.precision()==_u.precision()); return _u.precision(); }
-    GenericType generic() const;
+    PropertiesType properties() const { ARIADNE_DEBUG_ASSERT(_l.precision()==_u.precision()); return _u.precision(); }
+    GenericType generic() const { return this->operator GenericType(); }
 
     FloatBounds<PR> pm(FloatError<PR> e) const;
 

@@ -58,8 +58,8 @@ namespace Ariadne {
 
 template<class Sys, class BS> class Evolver;
 
-class ScalarTaylorFunction;
-class VectorTaylorFunction;
+class ValidatedScalarTaylorFunctionModel64;
+class ValidatedVectorTaylorFunctionModel64;
 class TaylorConstrainedImageSet;
 typedef Pair<DiscreteLocation,TaylorConstrainedImageSet> HybridTaylorConstrainedImageSet;
 template<class ES> class Orbit;
@@ -84,10 +84,10 @@ class PythonHybridEvolver
 {
     typedef VectorFunction FunctionType;
     typedef Vector<ExactIntervalType> BoxType;
-    typedef VectorTaylorFunction FunctionModelType;
-    typedef VectorTaylorFunction MapModelType;
-    typedef VectorTaylorFunction FlowModelType;
-    typedef ScalarTaylorFunction ConstraintModelType;
+    typedef ValidatedVectorTaylorFunctionModel64 FunctionModelType;
+    typedef ValidatedVectorTaylorFunctionModel64 MapModelType;
+    typedef ValidatedVectorTaylorFunctionModel64 FlowModelType;
+    typedef ValidatedScalarTaylorFunctionModel64 ConstraintModelType;
     typedef TaylorModel TimeModelType;
     typedef TaylorConstrainedImageSet SetModelType;
     typedef TaylorConstrainedImageSet TimedSetModelType;

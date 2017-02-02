@@ -78,7 +78,7 @@ class TestSolver
         EffectiveScalarFunction bb;
         ExactIntervalVectorType p,r;
         EffectiveVectorFunction f;
-        ValidatedVectorFunctionModel h;
+        ValidatedVectorFunctionModel64 h;
         EffectiveVectorFunction e;
         Float64Value tol;
 
@@ -147,7 +147,7 @@ class TestSolver
         // Uses scalar implicit
         ExactIntervalVectorType p; ExactIntervalType r;
         EffectiveScalarFunction e,f,s; // s is unscaling functions
-        ValidatedScalarFunctionModel h;
+        ValidatedScalarFunctionModel64 h;
 
         ARIADNE_TEST_PRINT(*solver);
 
@@ -171,7 +171,7 @@ class TestSolver
         r=ExactIntervalType(-1,1);
         f=EffectiveScalarFunction(x-2*a);
         ARIADNE_TEST_PRINT(f);
-        ValidatedScalarFunctionModel g=ScalarTaylorFunction(join(p,r),f,ThresholdSweeper<Float64>(Precision64(),1e-12));
+        ValidatedScalarFunctionModel64 g=ValidatedScalarTaylorFunctionModel64(join(p,r),f,ThresholdSweeper<Float64>(Precision64(),1e-12));
         ARIADNE_TEST_PRINT(g);
         try {
             h=solver->implicit(g,p,r);
@@ -191,8 +191,8 @@ class TestSolver
 Int main(Int argc, const char **argv) {
 /*
     ExactIntervalVectorType D={{-1,+1},{-1,+1}};
-    VectorTaylorFunction x=VectorTaylorFunction::identity(D,ThresholdSweeper(1e-10));
-    ScalarTaylorFunction f=2*x[0]-x[1];
+    ValidatedVectorTaylorFunctionModel64 x=ValidatedVectorTaylorFunctionModel64::identity(D,ThresholdSweeper(1e-10));
+    ValidatedScalarTaylorFunctionModel64 f=2*x[0]-x[1];
     std::cerr<<"D="<<D<<"\n";
     ExactIntervalType D0=D[0];
     std::cerr<<"f="<<representation(f)<<"\n";

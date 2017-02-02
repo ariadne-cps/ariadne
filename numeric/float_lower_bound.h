@@ -56,6 +56,7 @@ template<class PR> class FloatLowerBound
     typedef ValidatedLowerNumber GenericType;
     typedef FLT RawFloatType;
     typedef PR PrecisionType;
+    typedef PR PropertiesType;
   public:
     FloatLowerBound<PR>() : _l(0.0) { }
     explicit FloatLowerBound<PR>(PrecisionType pr) : _l(0.0,pr) { }
@@ -83,6 +84,8 @@ template<class PR> class FloatLowerBound
     operator ValidatedLowerNumber () const;
 
     PrecisionType precision() const { return _l.precision(); }
+    PropertiesType properties() const { return _l.precision(); }
+    GenericType generic() const { return this->operator GenericType(); }
     RawFloatType const& raw() const { return _l; }
     RawFloatType& raw() { return _l; }
     double get_d() const { return _l.get_d(); }

@@ -52,12 +52,17 @@ struct DeclareCovectorOperations {
     template<class X> friend OutputStream& operator<<(OutputStream& os, const Covector<X>& u);
 };
 
+template<class U> struct CovectorExpression : public DeclareCovectorOperations { const U& operator()() const { return static_cast<const U&>(*this); } };
+template<class U> struct CovectorContainer : public CovectorExpression<U> { };
+
+
 template<class X> class Covector
-    : DeclareCovectorOperations
+    : public CovectorContainer<Covector<X>>
 {
   private: public:
     Array<X> _ary;
   public:
+    typedef X ScalarType;
     template<class XX, EnableIf<IsConvertible<XX,X>> =dummy>
         Covector(InitializerList<XX> const& lst) : _ary(lst) { }
     template<class XX, EnableIf<IsConstructible<X,XX>> =dummy, DisableIf<IsConvertible<XX,X>> =dummy>
@@ -73,11 +78,18 @@ template<class X> class Covector
     static Covector<X> unit(SizeType n, SizeType j) { Covector<X> r(n); r[j]=1; return r; }
     SizeType size() const { return _ary.size(); }
     Void resize(SizeType n) { _ary.resize(n); }
-    const X& operator[](SizeType j) const { return _ary.at(j); }
-    X& operator[](SizeType j) { return _ary.at(j); }
-    const X& at(SizeType j) const { return _ary.at(j); }
-    X& at(SizeType j) { return _ary.at(j); }
+    const X& operator[](SizeType j) const { return _ary[j]; }
+    X& operator[](SizeType j) { return _ary[j]; }
+    const X& at(SizeType j) const { ARIADNE_PRECONDITION_MSG(j<this->size(),*this<<"["<<j<<"]"); return _ary[j]; }
+    X& at(SizeType j) { ARIADNE_PRECONDITION_MSG(j<this->size(),*this<<"["<<j<<"]");  return _ary[j]; }
     X zero_element() const { ARIADNE_DEBUG_ASSERT(not _ary.empty()); return create_zero(_ary[0]); }
+
+    template<class CVE, EnableIf<IsConvertible<typename CVE::ScalarType,X>> =dummy>
+    Covector(CovectorExpression<CVE> const& cve) : _ary(cve().size(),cve().zero_element()) {
+        for(SizeType i=0; i!=this->size(); ++i) { this->_ary[i]=cve()[i]; } }
+    template<class CVE, EnableIf<IsAssignable<typename CVE::ScalarType,X>> =dummy>
+    Covector<X> const& operator=(CovectorExpression<CVE> const& cve) {
+        this->resize(cve.size()); for(SizeType i=0; i!=this->size(); ++i) { this->_ary[i]=cve()[i]; } }
 };
 
 template<class X> inline Covector<X> const& transpose(Vector<X> const& v) {
@@ -87,6 +99,19 @@ template<class X> inline Vector<X> const& transpose(Covector<X> const& u) {
     return reinterpret_cast<Vector<X> const&>(u); }
 
 
+template<class U> struct CovectorRange
+    : public CovectorContainer< CovectorRange<U> >
+{
+    typedef typename U::ScalarType ScalarType;
+    const U& _u; Range _rng;
+    CovectorRange(const U& u, Range rng) : _u(u), _rng(rng) { }
+    SizeType size() const { return _rng.size(); }
+    ScalarType zero_element() const { return _u.zero_element(); }
+    ScalarType operator[](SizeType i) const { return _u[i+_rng.start()]; }
+};
+
+template<class V> inline CovectorRange<V> project(const CovectorExpression<V>& v, Range rng) {
+    return CovectorRange<V>(v(),rng); }
 
 class ProvideCovectorOperations {
 

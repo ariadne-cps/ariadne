@@ -55,6 +55,8 @@ template<class X> using OppositeTrait = typename NumericTraits<X>::OppositeType;
 template<class X> using LessTrait = typename NumericTraits<X>::LessType;
 template<class X> using EqualsTrait = typename NumericTraits<X>::EqualsType;
 
+template<class X> using PropertiesType = typename X::PropertiesType;
+template<class X> using GenericType = typename X::GenericType;
 
 
 typedef uint Nat;

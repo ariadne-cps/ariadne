@@ -44,6 +44,7 @@
 #include "algebra/vector.h"
 
 #include "function/function_mixin.h"
+#include "function/projection.h"
 #include "function/formula.h"
 
 namespace Ariadne {
@@ -103,14 +104,14 @@ struct ConstantFunction
 {
     typedef InformationTag<Y> P;
   public:
-    BoxDomain _domain;
+    BoxDomainType _domain;
     Y _value;
 
     //ConstantFunction(SizeType as, const Y& c) : _argument_size(as), _value(c) { }
-    ConstantFunction(BoxDomain dom, const Y& c) : _domain(dom), _value(c) { }
+    ConstantFunction(BoxDomainType dom, const Y& c) : _domain(dom), _value(c) { }
     operator Y() const { return _value; }
 
-    virtual const BoxDomain domain() const { return _domain; }
+    virtual const BoxDomainType domain() const { return _domain; }
     virtual SizeType argument_size() const { return _domain.dimension(); }
     virtual ScalarFunctionInterface<P>* _derivative(SizeType j) const { return new ConstantFunction<Y>(_domain,Y(0)); }
     virtual OutputStream& write(OutputStream& os) const { return os << this->_value; }
@@ -127,14 +128,14 @@ struct CoordinateFunction
 {
     typedef Number<P> Y;
 
-    BoxDomain _domain;
+    BoxDomainType _domain;
     SizeType _index;
 
     //CoordinateFunction(SizeType as, SizeType i) : _argument_size(as), _index(i) { }
-    CoordinateFunction(BoxDomain dom, SizeType i) : _domain(dom), _index(i) { }
+    CoordinateFunction(BoxDomainType dom, SizeType i) : _domain(dom), _index(i) { }
     SizeType index() const { return _index; }
 
-    virtual const BoxDomain domain() const { return _domain; }
+    virtual const BoxDomainType domain() const { return _domain; }
     virtual SizeType argument_size() const { return _domain.dimension(); }
     virtual ScalarFunctionInterface<P>* _derivative(SizeType j) const {
         if(j==_index) { return new ConstantFunction<Y>(_domain,Y(1)); }
@@ -156,7 +157,7 @@ struct UnaryFunction
     UnaryFunction(const OperatorCode& op, const ScalarFunction<P>& arg)
         : _op(op), _arg(arg) { }
     virtual UnaryFunction<P>* clone() const { return new UnaryFunction<P>(*this); }
-    virtual const BoxDomain domain() const {
+    virtual const BoxDomainType domain() const {
         return this->_arg.domain(); }
     virtual SizeType argument_size() const {
         return this->_arg.argument_size(); }
@@ -211,7 +212,7 @@ struct BinaryFunction
     BinaryFunction(OperatorCode op, const ScalarFunction<P>& arg1, const ScalarFunction<P>& arg2)
         : _op(op), _arg1(arg1), _arg2(arg2) { ARIADNE_ASSERT_MSG(arg1.argument_size()==arg2.argument_size(),"op='"<<op<<"', arg1="<<arg1<<", arg2="<<arg2); }
     virtual BinaryFunction<P>* clone() const { return new BinaryFunction<P>(*this); }
-    virtual const BoxDomain domain() const {
+    virtual const BoxDomainType domain() const {
         return intersection(this->_arg1.domain(),this->_arg2.domain()); }
     virtual SizeType argument_size() const {
         return this->_arg1.argument_size(); }
@@ -263,7 +264,7 @@ class GradedFunction
     GradedFunction(OperatorCode op, const ScalarFunction<P>& arg1, const Int& arg2)
         : _op(op), _arg1(arg1), _arg2(arg2) {  }
     virtual GradedFunction<P>* clone() const { return new GradedFunction<P>(*this); }
-    virtual const BoxDomain domain() const {
+    virtual const BoxDomainType domain() const {
         return this->_arg1.domain(); }
     virtual SizeType argument_size() const {
         return this->_arg1.argument_size(); }
@@ -303,7 +304,7 @@ typedef GradedFunction<EffectiveTag> EffectiveGradedFunction;
 
 //------------------------ Vector of Scalar functions  -----------------------------------//
 
-template<class P, class D=BoxDomain> class NonResizableScalarFunction : public ScalarFunction<P,D> {
+template<class P, class D=BoxDomainType> class NonResizableScalarFunction : public ScalarFunction<P,D> {
   public:
     NonResizableScalarFunction<P,D>& operator=(const ScalarFunction<P,D>& f) {
         ARIADNE_ASSERT_MSG(this->domain()==f.domain(), "this->domain()="<<this->domain()<<", f.domain()="<<f.domain());
@@ -312,7 +313,7 @@ template<class P, class D=BoxDomain> class NonResizableScalarFunction : public S
     }
 };
 
-template<class P, class D=BoxDomain>
+template<class P, class D=BoxDomainType>
 struct VectorOfScalarFunction
     : VectorFunctionMixin<VectorOfScalarFunction<P,D>,P,D>
     , public virtual VectorOfFunctionInterface<P,D>
@@ -337,7 +338,7 @@ struct VectorOfScalarFunction
     virtual SizeType result_size() const final {
         return _vec.size(); }
     virtual SizeType argument_size() const final {
-        return dimension(_dom); }
+        return _dom.dimension(); }
     virtual DomainType const domain() const final {
         return _dom; }
 
@@ -380,7 +381,7 @@ struct VectorOfScalarFunction
 };
 
 
-template<class P, class D=BoxDomain>
+template<class P, class D=BoxDomainType>
 struct FunctionElement
     : ScalarFunctionMixin<FunctionElement<P,D>,P>
 {
@@ -485,7 +486,7 @@ template<class P>
 struct JoinedFunction
     : VectorFunctionMixin<JoinedFunction<P>,P>
 {
-    typedef BoxDomain D;
+    typedef BoxDomainType D;
     JoinedFunction(VectorFunction<P,D> f1, VectorFunction<P,D> f2)
         : _f1(f1), _f2(f2) { ARIADNE_ASSERT(f1.argument_size()==f2.argument_size()); }
     virtual SizeType result_size() const { return _f1.result_size()+_f2.result_size(); }
@@ -521,6 +522,25 @@ class CombinedFunction
 
     VectorFunction<P> _f1;
     VectorFunction<P> _f2;
+};
+
+
+template<class P>
+class ProjectedFunction
+    : VectorFunctionMixin<ProjectedFunction<P>,P>
+{
+    ProjectedFunction(VectorFunction<P> f, Projection prj)
+        : _f(f), _prj(prj) { ARIADNE_PRECONDITION(f.result_size()==prj.argument_size()); }
+    virtual SizeType result_size() const { return _prj.result_size(); }
+    virtual SizeType argument_size() const { return _f.argument_size(); }
+    virtual OutputStream& write(OutputStream& os) const { return os << "ProjectedFunction( f="<<_f<<", prj="<<_prj<<" )"; }
+
+    virtual VectorFunctionInterface<P>* _derivative(SizeType j) const { ARIADNE_NOT_IMPLEMENTED; }
+
+    template<class X> inline Void _compute(Vector<X>& r, const Vector<X>& x) const {
+        return r=_prj(_f(x)); }
+    VectorFunction<P> _f;
+    Projection _prj;
 };
 
 

@@ -44,34 +44,17 @@
 #include "algebra/vector.h"
 #include "algebra/covector.h"
 #include "algebra/differential.h"
-
-#include "geometry/interval.h"
-#include "geometry/box.h"
+#include "function/domain.h"
 
 namespace Ariadne {
 
-inline SizeOne dimension(IntervalDomain dom) { return SizeOne(); }
-inline SizeType dimension(BoxDomain dom) { return dom.dimension(); }
-
-template<class S, class X> using ElementType = typename ElementTraits<S>::template Type<X>;
-
-template<class P, class D=BoxDomain> struct VectorFunctionElementReference;
+template<class P, class D=BoxDomainType> struct VectorFunctionElementReference;
 
 template<class T> class Variable;
 typedef Variable<Real> RealVariable;
 template<class T> class Expression;
 typedef Expression<Real> RealExpression;
 template<class P, class D, class C> class FunctionExpression;
-
-class RealDomain : public IntervalDomain {
-  public:
-    RealDomain() : IntervalDomain(-inf,+inf) { }
-};
-
-class EuclideanDomain : public BoxDomain {
-  public:
-    EuclideanDomain(SizeType n) : BoxDomain(n,RealDomain()) { }
-};
 
 template<class P>
 class FunctionConstructors {
@@ -80,34 +63,34 @@ class FunctionConstructors {
   public:
     typedef Y NumericType;
 
-    static ScalarFunction<P,BoxDomain> zero(SizeType as);
-    static ScalarFunction<P,BoxDomain> constant(SizeType as, NumericType c);
-    static ScalarFunction<P,BoxDomain> coordinate(SizeType as, SizeType j);
-    static List<ScalarFunction<P,BoxDomain>> coordinates(SizeType ns);
-    static VectorFunction<P,BoxDomain> zeros(SizeType rs, SizeType as);
-    static VectorFunction<P,BoxDomain> identity(SizeType ns);
+    static ScalarFunction<P,BoxDomainType> zero(SizeType as);
+    static ScalarFunction<P,BoxDomainType> constant(SizeType as, NumericType c);
+    static ScalarFunction<P,BoxDomainType> coordinate(SizeType as, SizeType j);
+    static List<ScalarFunction<P,BoxDomainType>> coordinates(SizeType ns);
+    static VectorFunction<P,BoxDomainType> zeros(SizeType rs, SizeType as);
+    static VectorFunction<P,BoxDomainType> identity(SizeType ns);
 
-    static ScalarFunction<P,BoxDomain> zero(BoxDomain dom);
-    static ScalarFunction<P,BoxDomain> constant(BoxDomain dom, NumericType c);
-    static ScalarFunction<P,BoxDomain> coordinate(BoxDomain dom, SizeType j);
-    static List<ScalarFunction<P,BoxDomain>> coordinates(BoxDomain dom);
-    static VectorFunction<P,BoxDomain> zeros(SizeType rs, BoxDomain dom);
-    static VectorFunction<P,BoxDomain> identity(BoxDomain dom);
+    static ScalarFunction<P,BoxDomainType> zero(BoxDomainType dom);
+    static ScalarFunction<P,BoxDomainType> constant(BoxDomainType dom, NumericType c);
+    static ScalarFunction<P,BoxDomainType> coordinate(BoxDomainType dom, SizeType j);
+    static List<ScalarFunction<P,BoxDomainType>> coordinates(BoxDomainType dom);
+    static VectorFunction<P,BoxDomainType> zeros(SizeType rs, BoxDomainType dom);
+    static VectorFunction<P,BoxDomainType> identity(BoxDomainType dom);
 
-    static ScalarFunction<P,IntervalDomain> zero();
-    static ScalarFunction<P,IntervalDomain> constant(NumericType c);
-    static ScalarFunction<P,IntervalDomain> coordinate();
-    static VectorFunction<P,IntervalDomain> zeros(SizeType rs);
-    static ScalarFunction<P,IntervalDomain> identity();
+    static ScalarFunction<P,IntervalDomainType> zero();
+    static ScalarFunction<P,IntervalDomainType> constant(NumericType c);
+    static ScalarFunction<P,IntervalDomainType> coordinate();
+    static VectorFunction<P,IntervalDomainType> zeros(SizeType rs);
+    static ScalarFunction<P,IntervalDomainType> identity();
 
-    static ScalarFunction<P,IntervalDomain> zero(IntervalDomain dom);
-    static ScalarFunction<P,IntervalDomain> constant(IntervalDomain dom, NumericType c);
-    static ScalarFunction<P,IntervalDomain> coordinate(IntervalDomain dom, SizeType j);
-    static VectorFunction<P,IntervalDomain> zeros(SizeType rs, IntervalDomain dom);
-    static ScalarFunction<P,IntervalDomain> identity(IntervalDomain dom);
+    static ScalarFunction<P,IntervalDomainType> zero(IntervalDomainType dom);
+    static ScalarFunction<P,IntervalDomainType> constant(IntervalDomainType dom, NumericType c);
+    static ScalarFunction<P,IntervalDomainType> coordinate(IntervalDomainType dom, SizeType j);
+    static VectorFunction<P,IntervalDomainType> zeros(SizeType rs, IntervalDomainType dom);
+    static ScalarFunction<P,IntervalDomainType> identity(IntervalDomainType dom);
 
-    static VectorFunction<P,BoxDomain> constant(BoxDomain dom, Vector<NumericType> c);
-    static VectorFunction<P,IntervalDomain> constant(IntervalDomain dom, Vector<NumericType> c);
+    static VectorFunction<P,BoxDomainType> constant(BoxDomainType dom, Vector<NumericType> c);
+    static VectorFunction<P,IntervalDomainType> constant(IntervalDomainType dom, Vector<NumericType> c);
 
 };
 
@@ -116,39 +99,39 @@ template<class P, class X> using EvaluateType = decltype(declval<ScalarFunctionI
 template<class P, class D, class C> class FunctionFacade {
 };
 
-template<class P> class FunctionFacade<P,IntervalDomain,IntervalDomain> {
+template<class P> class FunctionFacade<P,IntervalDomainType,IntervalDomainType> {
   public:
     template<class X> Scalar<EvaluateType<P,X>> derivative(X const& x) const;
-    FunctionExpression<P,IntervalDomain,IntervalDomain> operator() (const RealVariable& x) const;
+    FunctionExpression<P,IntervalDomainType,IntervalDomainType> operator() (const RealVariable& x) const;
 };
 
-template<class P> class FunctionFacade<P,IntervalDomain,BoxDomain> {
+template<class P> class FunctionFacade<P,IntervalDomainType,BoxDomainType> {
   public:
     template<class X> Vector<EvaluateType<P,X>> tangent(X const& x) const;
-    FunctionExpression<P,IntervalDomain,BoxDomain> operator() (const RealVariable& x) const;
+    FunctionExpression<P,IntervalDomainType,BoxDomainType> operator() (const RealVariable& x) const;
 };
 
-template<class P> class FunctionFacade<P,BoxDomain,IntervalDomain> {
+template<class P> class FunctionFacade<P,BoxDomainType,IntervalDomainType> {
     typedef Number<P> Y;
   public:
     template<class X> Covector<EvaluateType<P,X>> gradient(Vector<X> const& x) const;
-    FunctionExpression<P,BoxDomain,IntervalDomain> operator() (const Vector<RealVariable>& x) const;
-    //FunctionExpression<P,BoxDomain,IntervalDomain> operator() (const Vector<RealExpression>& x) const;
+    FunctionExpression<P,BoxDomainType,IntervalDomainType> operator() (const Vector<RealVariable>& x) const;
+    //FunctionExpression<P,BoxDomainType,IntervalDomainType> operator() (const Vector<RealExpression>& x) const;
 };
 
-template<class P> class FunctionFacade<P,BoxDomain,BoxDomain> {
+template<class P> class FunctionFacade<P,BoxDomainType,BoxDomainType> {
     typedef Number<P> Y;
   public:
     template<class X> Matrix<EvaluateType<P,X>> jacobian(Vector<X> const& x) const;
-    FunctionExpression<P,BoxDomain,BoxDomain> operator() (const Vector<RealVariable>& x) const;
+    FunctionExpression<P,BoxDomainType,BoxDomainType> operator() (const Vector<RealVariable>& x) const;
 };
 
 template<class P, class D, class C> class DeclareFunctionOperations;
-template<class P, class D> class DeclareFunctionOperations<P,D,IntervalDomain>
-    : DeclareTranscendentalAlgebraOperations<Function<P,D,IntervalDomain>,Number<P>>
-    , DeclareMixedArithmeticOperators<Function<P,D,IntervalDomain>,Int> { };
-template<class P, class D> class DeclareFunctionOperations<P,D,BoxDomain>
-    : DeclareVectorAlgebraOperators<Function<P,D,BoxDomain>,Function<P,D,IntervalDomain>,Number<P>> { };
+template<class P, class D> class DeclareFunctionOperations<P,D,IntervalDomainType>
+    : DeclareTranscendentalAlgebraOperations<Function<P,D,IntervalDomainType>,Number<P>>
+    , DeclareMixedArithmeticOperators<Function<P,D,IntervalDomainType>,Int> { };
+template<class P, class D> class DeclareFunctionOperations<P,D,BoxDomainType>
+    : DeclareVectorAlgebraOperators<Function<P,D,BoxDomainType>,Function<P,D,IntervalDomainType>,Number<P>> { };
 
 
 //! \ingroup FunctionModule
@@ -169,7 +152,7 @@ class Function
     typedef Y NumericType;
     typedef D DomainType;
     typedef C CodomainType;
-    typedef decltype(dimension(declval<C>())) ResultSizeType;
+    typedef decltype(declval<C>().dimension()) ResultSizeType;
 
     template<class Y> using Argument = typename ElementTraits<D>::template Type<Y>;
     template<class Y> using Result = typename ElementTraits<C>::template Type<Y>;
@@ -237,8 +220,9 @@ class Function
         return this->_ptr->_evaluate(Differential<EvaluateType<P,X>>::identity(d,x)); }
 
     Void set(SizeType i, ScalarFunction<P,D>);
-    Function<P,D,IntervalDomain> get(SizeType i) const;
-    const Function<P,D,IntervalDomain> operator[](SizeType i) const;
+    Function<P,D,IntervalDomainType> get(SizeType i) const;
+    const Function<P,D,IntervalDomainType> operator[](SizeType i) const;
+    const Function<P,D,BoxDomainType> operator[](Range rng) const;
     VectorFunctionElementReference<P,D> operator[](SizeType i);
 
     friend OutputStream& operator<<(OutputStream& os, Function<P,D,C> const& f) { f._ptr->write(os); return os; }
@@ -249,20 +233,20 @@ operator<<(OutputStream& os, const Function<P,D,C>& f) {
     return f.write(os); }
 
 template<class P, class C, class X> inline decltype(auto)
-evaluate(const Function<P,IntervalDomain,C>& f, const Scalar<X>& x) {
+evaluate(const Function<P,IntervalDomainType,C>& f, const Scalar<X>& x) {
     return f(x); }
 
 template<class P, class C, class X> inline decltype(auto)
-evaluate(const Function<P,BoxDomain,C>& f, const Vector<X>& x) {
+evaluate(const Function<P,BoxDomainType,C>& f, const Vector<X>& x) {
     return f(x); }
 
 
 template<class P, class C, class X> inline decltype(auto)
-differential(const Function<P,IntervalDomain,C>& f, const X& x, DegreeType d) {
+differential(const Function<P,IntervalDomainType,C>& f, const X& x, DegreeType d) {
     return f.differential(x,d); }
 
 template<class P, class C, class X> inline decltype(auto)
-differential(const Function<P,BoxDomain,C>& f, const Vector<X>& x, DegreeType d) {
+differential(const Function<P,BoxDomainType,C>& f, const Vector<X>& x, DegreeType d) {
     return f.differential(x,d); }
 
 
@@ -283,13 +267,13 @@ jacobian(const VectorMultivariateFunction<P>& f, const Vector<X>& x) {
     return differential(f,x,1u).jacobian(); }
 
 template<class P> template<class X> Covector<EvaluateType<P,X>>
-FunctionFacade<P,BoxDomain,IntervalDomain>::gradient(Vector<X> const& x) const {
-    return Ariadne::gradient(static_cast<Function<P,BoxDomain,IntervalDomain>const&>(*this),x);
+FunctionFacade<P,BoxDomainType,IntervalDomainType>::gradient(Vector<X> const& x) const {
+    return Ariadne::gradient(static_cast<Function<P,BoxDomainType,IntervalDomainType>const&>(*this),x);
 }
 
 template<class P> template<class X> Matrix<EvaluateType<P,X>>
-FunctionFacade<P,BoxDomain,BoxDomain>::jacobian(Vector<X> const& x) const {
-    return Ariadne::jacobian(static_cast<Function<P,BoxDomain,BoxDomain>const&>(*this),x);
+FunctionFacade<P,BoxDomainType,BoxDomainType>::jacobian(Vector<X> const& x) const {
+    return Ariadne::jacobian(static_cast<Function<P,BoxDomainType,BoxDomainType>const&>(*this),x);
 }
 
 
@@ -326,9 +310,9 @@ ValidatedVectorFunction compose(const ValidatedVectorFunction& f, const Validate
 
 template<class P, class D>
 struct VectorFunctionElementReference
-    : DeclareFunctionOperations<P,D,IntervalDomain>
+    : DeclareFunctionOperations<P,D,IntervalDomainType>
 {
-    typedef IntervalDomain SC; typedef BoxDomain VC;
+    typedef IntervalDomainType SC; typedef BoxDomainType VC;
     typedef VectorFunctionElementReference<P,D> SelfType;
     typedef Function<P,D,SC> ElementType;
     typedef typename ElementType::NumericType NumericType;
@@ -359,7 +343,7 @@ template<class P, class D, class C> inline ScalarFunction<P,D> const Function<P,
     return this->get(i); }
 
 template<class P, class D> inline OutputStream& operator<<(OutputStream& os, const VectorFunctionElementReference<P,D>& vfe) {
-    return  os << static_cast< Function<P,D,IntervalDomain> >(vfe); }
+    return  os << static_cast< Function<P,D,IntervalDomainType> >(vfe); }
 
 template<class P, class D> inline Void VectorFunctionElementReference<P,D>::operator=(const Function<P,D,SC>& sf) {
     _vf.set(_i,sf); }
@@ -412,29 +396,29 @@ class FunctionFactory<ValidatedTag>
     FunctionFactory(const FunctionFactoryInterface<ValidatedTag>& ref) : _ptr(ref.clone()) { }
     FunctionFactory(const FunctionFactoryInterface<ValidatedTag>* ptr) : _ptr(ptr) { }
     FunctionFactory(SharedPointer< const FunctionFactoryInterface<ValidatedTag> > ptr) : _ptr(ptr) { }
-    inline ValidatedScalarFunction create(const ExactBoxType& d, const ValidatedScalarFunctionInterface& f) const;
-    inline ValidatedVectorFunction create(const ExactBoxType& d, const ValidatedVectorFunctionInterface& f) const;
-    inline ValidatedScalarFunction create_zero(const ExactBoxType& d) const;
-    inline ValidatedVectorFunction create_identity(const ExactBoxType& d) const;
+    inline ValidatedScalarFunction create(const BoxDomainType& d, const ValidatedScalarFunctionInterface& f) const;
+    inline ValidatedVectorFunction create(const BoxDomainType& d, const ValidatedVectorFunctionInterface& f) const;
+    inline ValidatedScalarFunction create_zero(const BoxDomainType& d) const;
+    inline ValidatedVectorFunction create_identity(const BoxDomainType& d) const;
     friend OutputStream& operator<<(OutputStream& os, const FunctionFactory<ValidatedTag>& factory);
 };
 
-inline ValidatedScalarFunction FunctionFactoryInterface<ValidatedTag>::create(const ExactBoxType& domain, const ValidatedScalarFunctionInterface& function) const {
+inline ValidatedScalarFunction FunctionFactoryInterface<ValidatedTag>::create(const BoxDomainType& domain, const ValidatedScalarFunctionInterface& function) const {
     return ValidatedScalarFunction(SharedPointer<ValidatedScalarFunctionInterface>(this->_create(domain,function))); }
-inline ValidatedVectorFunction FunctionFactoryInterface<ValidatedTag>::create(const ExactBoxType& domain, const ValidatedVectorFunctionInterface& function) const {
+inline ValidatedVectorFunction FunctionFactoryInterface<ValidatedTag>::create(const BoxDomainType& domain, const ValidatedVectorFunctionInterface& function) const {
     return ValidatedVectorFunction(SharedPointer<ValidatedVectorFunctionInterface>(this->_create(domain,function))); }
-inline ValidatedScalarFunction FunctionFactoryInterface<ValidatedTag>::create_zero(const ExactBoxType& domain) const {
+inline ValidatedScalarFunction FunctionFactoryInterface<ValidatedTag>::create_zero(const BoxDomainType& domain) const {
     return this->create(domain,EffectiveScalarFunction::zero(domain.dimension())); }
-inline ValidatedVectorFunction FunctionFactoryInterface<ValidatedTag>::create_identity(const ExactBoxType& domain) const {
+inline ValidatedVectorFunction FunctionFactoryInterface<ValidatedTag>::create_identity(const BoxDomainType& domain) const {
     return this->create(domain,EffectiveVectorFunction::identity(domain.dimension())); }
 
-inline ValidatedScalarFunction FunctionFactory<ValidatedTag>::create(const ExactBoxType& domain, const ValidatedScalarFunctionInterface& function) const {
+inline ValidatedScalarFunction FunctionFactory<ValidatedTag>::create(const BoxDomainType& domain, const ValidatedScalarFunctionInterface& function) const {
     return this->_ptr->create(domain,function); }
-inline ValidatedVectorFunction FunctionFactory<ValidatedTag>::create(const ExactBoxType& domain, const ValidatedVectorFunctionInterface& function) const {
+inline ValidatedVectorFunction FunctionFactory<ValidatedTag>::create(const BoxDomainType& domain, const ValidatedVectorFunctionInterface& function) const {
     return this->_ptr->create(domain,function); }
-inline ValidatedScalarFunction FunctionFactory<ValidatedTag>::create_zero(const ExactBoxType& domain) const {
+inline ValidatedScalarFunction FunctionFactory<ValidatedTag>::create_zero(const BoxDomainType& domain) const {
     return this->_ptr->create_zero(domain); }
-inline ValidatedVectorFunction FunctionFactory<ValidatedTag>::create_identity(const ExactBoxType& domain) const {
+inline ValidatedVectorFunction FunctionFactory<ValidatedTag>::create_identity(const BoxDomainType& domain) const {
     return this->_ptr->create_identity(domain); }
 
 inline OutputStream& operator<<(OutputStream& os, const ValidatedFunctionFactory& factory) {

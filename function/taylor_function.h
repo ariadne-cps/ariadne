@@ -38,54 +38,42 @@
 #include "function/function_interface.h"
 #include "function/function_mixin.h"
 #include "function/function_model.h"
-#include "function/function_patch.h"
+#include "function/scaled_function_patch.h"
 
 namespace Ariadne {
 
 template<class P, class F> class TaylorModel;
 class TaylorFunctionFactory;
 
-typedef ScalarFunctionPatch<ValidatedTaylorModel64> ScalarTaylorFunction;
-typedef VectorFunctionPatch<ValidatedTaylorModel64> VectorTaylorFunction;
+typedef ScalarScaledFunctionPatch<ValidatedTaylorModel64> ValidatedScalarTaylorFunctionModel64;
+typedef VectorScaledFunctionPatch<ValidatedTaylorModel64> ValidatedVectorTaylorFunctionModel64;
 
 /*
-class ScalarTaylorFunction : public FunctionPatch<ValidatedTaylorModel64> {
+class ValidatedScalarTaylorFunctionModel64 : public ScaledFunctionPatch<ValidatedTaylorModel64> {
   public:
-    using FunctionPatch<ValidatedTaylorModel64>::FunctionPatch;
-    ScalarTaylorFunction() : FunctionPatch<ValidatedTaylorModel64>() { }
-    ScalarTaylorFunction(FunctionPatch<ValidatedTaylorModel64> const& f) : FunctionPatch<ValidatedTaylorModel64>(f) { }
+    using ScaledFunctionPatch<ValidatedTaylorModel64>::ScaledFunctionPatch;
+    ValidatedScalarTaylorFunctionModel64() : ScaledFunctionPatch<ValidatedTaylorModel64>() { }
+    ValidatedScalarTaylorFunctionModel64(ScaledFunctionPatch<ValidatedTaylorModel64> const& f) : ScaledFunctionPatch<ValidatedTaylorModel64>(f) { }
 };
 
-class VectorTaylorFunction : public VectorFunctionPatch<ValidatedTaylorModel64> {
+class ValidatedVectorTaylorFunctionModel64 : public VectorScaledFunctionPatch<Vali_datedTaylorModel64> {
   public:
-    using VectorFunctionPatch<ValidatedTaylorModel64>::VectorFunctionPatch;
-    VectorTaylorFunction() : VectorFunctionPatch<ValidatedTaylorModel64>() { }
-    VectorTaylorFunction(VectorFunctionPatch<ValidatedTaylorModel64> const& f) : VectorFunctionPatch<ValidatedTaylorModel64>(f) { }
+    using VectorScaledFunctionPatch<ValidatedTaylorModel64>::VectorScaledFunctionPatch;
+    ValidatedVectorTaylorFunctionModel64() : VectorScaledFunctionPatch<ValidatedTaylorModel64>() { }
+    ValidatedVectorTaylorFunctionModel64(VectorScaledFunctionPatch<ValidatedTaylorModel64> const& f) : VectorScaledFunctionPatch<ValidatedTaylorModel64>(f) { }
 };
 */
 
 class TaylorFunctionFactory
-    : public FunctionModelFactoryInterface<ValidatedTag>
+    : public ScaledFunctionPatchFactory<TaylorModel<ValidatedTag,Float64>>
 {
-    typedef Sweeper<Float64> SweeperType;
-    SweeperType _sweeper;
+    typedef TaylorModel<ValidatedTag,Float64> M;
   public:
-    explicit TaylorFunctionFactory(SweeperType sweeper) : _sweeper(sweeper) { }
-    SweeperType sweeper() const { return this->_sweeper; }
-    TaylorFunctionFactory* clone() const { return new TaylorFunctionFactory(this->_sweeper); }
-    Void write(OutputStream& os) const { os << "TaylorFunctionFactory( sweeper=" << this->_sweeper << " )"; }
-    ScalarTaylorFunction create(const ExactBoxType& domain, const ValidatedScalarFunctionInterface& function) const;
-    VectorTaylorFunction create(const ExactBoxType& domain, const ValidatedVectorFunctionInterface& function) const;
-    ScalarTaylorFunction create_zero(const ExactBoxType& domain) const;
-    ScalarTaylorFunction create_constant(const ExactBoxType& domain, ValidatedNumericType c) const;
-    ScalarTaylorFunction create_coordinate(const ExactBoxType& domain, SizeType k) const;
-    VectorTaylorFunction create_zero(SizeType i, const ExactBoxType& domain) const;
-    ScalarTaylorFunction create_identity(const ExactIntervalType& domain) const;
-    VectorTaylorFunction create_identity(const ExactBoxType& domain) const;
-  private:
-    CanonicalNumericType<ValidatedTag,Precision64> _create(const Number<ValidatedTag>& number) const;
-    ScalarTaylorFunction* _create(const ExactBoxType& domain, const ValidatedScalarFunctionInterface& function) const;
-    VectorTaylorFunction* _create(const ExactBoxType& domain, const ValidatedVectorFunctionInterface& function) const;
+    typedef typename M::SweeperType SweeperType;
+    using ScaledFunctionPatchFactory<M>::ScaledFunctionPatchFactory;
+    explicit TaylorFunctionFactory(SweeperType sweeper) : ScaledFunctionPatchFactory<M>(sweeper) { }
+    SweeperType sweeper() const { return this->properties(); }
+    friend OutputStream& operator<<(OutputStream& os, TaylorFunctionFactory const& factory) { return os << "TaylorFunctionFactory( sweeper=" << factory.sweeper() << " )"; }
 };
 
 

@@ -310,9 +310,9 @@ template<class F> AffineModel<ValidatedTag,F>::AffineModel(const TaylorModel<Val
     F::set_rounding_mode(rnd);
 }
 
-template<class P, class PR> AffineModel<P,RawFloat<PR>> affine_model(const ExactBoxType& domain, const ScalarFunction<P>& function, PR precision)
+template<class P, class PR> AffineModel<P,RawFloat<PR>> affine_model(const BoxDomainType& domain, const ScalarFunction<P>& function, PR precision)
 {
-    ScalarTaylorFunction tf(domain,function,AffineSweeper<RawFloat<PR>>(precision));
+    ValidatedScalarTaylorFunctionModel64 tf(domain,function,AffineSweeper<RawFloat<PR>>(precision));
     return affine_model(tf.model());
 }
 
@@ -320,7 +320,7 @@ inline decltype(auto) operator<(FloatMPApproximation x,const Float64Value y) { r
 inline decltype(auto) operator<(FloatMPValue x,const Float64Value y) { return x<FloatMPValue(Dyadic(y.get_d()),x.precision()); }
 
 // FIXME: Clean up construction of interval with precision PrecisionType<F>
-template<class F> AffineModel<ApproximateTag,F> AffineModel<ApproximateTag,F>::scaling(SizeType n, SizeType j, const ExactIntervalType& codom, PrecisionType pr)
+template<class F> AffineModel<ApproximateTag,F> AffineModel<ApproximateTag,F>::scaling(SizeType n, SizeType j, const IntervalDomainType& codom, PrecisionType pr)
 {
     AffineModel<ApproximateTag,F> r(n,pr);
     FloatApproximation<PR> l(codom.lower().get_d(),pr);
@@ -330,7 +330,7 @@ template<class F> AffineModel<ApproximateTag,F> AffineModel<ApproximateTag,F>::s
     return r;
 }
 
-template<class F> AffineModel<ValidatedTag,F> AffineModel<ValidatedTag,F>::scaling(SizeType n, SizeType j, const ExactIntervalType& codom, PrecisionType pr)
+template<class F> AffineModel<ValidatedTag,F> AffineModel<ValidatedTag,F>::scaling(SizeType n, SizeType j, const IntervalDomainType& codom, PrecisionType pr)
 {
     AffineModel<ValidatedTag,F> r(n,pr);
     FloatValue<PR> l(Dyadic(codom.lower()),pr);

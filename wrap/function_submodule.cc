@@ -226,7 +226,7 @@ typedef Matrix<ExactIntervalType> IMx;
 typedef Vector< Differential<Float64Approximation> > FSDV;
 typedef Vector< Differential<ExactIntervalType> > ISDV;
 typedef Vector<ValidatedTaylorModel64> TMV;
-typedef VectorTaylorFunction TFM;
+typedef ValidatedVectorTaylorFunctionModel64 TFM;
 typedef ValidatedTaylorModel64 TM;
 
 template<class X> using Monomial = ExpansionValue<X>;
@@ -302,7 +302,7 @@ Void export_univariate_function()
     function_class.def("__call__", (Float64Bounds(EffectiveScalarUnivariateFunction::*)(const Float64Bounds&)const)&EffectiveScalarUnivariateFunction::operator() );
     function_class.def("__call__", (Differential<Float64Bounds>(EffectiveScalarUnivariateFunction::*)(const Differential<Float64Bounds>&)const)&EffectiveScalarUnivariateFunction::operator() );
 
-    function_class.def("constant", (EffectiveScalarUnivariateFunction(*)(IntervalDomain,EffectiveNumber)) &EffectiveScalarUnivariateFunction::constant);
+    function_class.def("constant", (EffectiveScalarUnivariateFunction(*)(IntervalDomainType,EffectiveNumber)) &EffectiveScalarUnivariateFunction::constant);
     function_class.def("coordinate", (EffectiveScalarUnivariateFunction(*)()) &EffectiveScalarUnivariateFunction::coordinate);
     function_class.staticmethod("constant");
     function_class.staticmethod("coordinate");
@@ -364,8 +364,8 @@ template<class P> Void export_scalar_function()
     def("cos", (ScalarFunction<P>(*)(const ScalarFunction<P>&)) &cos);
     def("tan", (ScalarFunction<P>(*)(const ScalarFunction<P>&)) &tan);
 
-    def("evaluate", (Float64Approximation(*)(const ScalarFunction<P>&,const Vector<Float64Approximation>&)) &evaluate<P,IntervalDomain,Float64Approximation>);
-    def("evaluate", (Float64Bounds(*)(const ScalarFunction<P>&,const Vector<Float64Bounds>&)) &evaluate<P,IntervalDomain,Float64Bounds>);
+    def("evaluate", (Float64Approximation(*)(const ScalarFunction<P>&,const Vector<Float64Approximation>&)) &evaluate<P,IntervalDomainType,Float64Approximation>);
+    def("evaluate", (Float64Bounds(*)(const ScalarFunction<P>&,const Vector<Float64Bounds>&)) &evaluate<P,IntervalDomainType,Float64Bounds>);
 
     def("derivative", (ScalarFunction<P>(ScalarFunction<P>::*)(SizeType)const) &ScalarFunction<P>::derivative);
 
@@ -400,8 +400,8 @@ template<class P> Void export_vector_function()
     vector_function_class.def("identity", (VectorFunction<P>(*)(SizeType)) &VectorFunction<P>::identity);
     vector_function_class.staticmethod("identity");
 
-    def("evaluate", (Vector<Float64Approximation>(*)(const VectorFunction<P>&,const Vector<Float64Approximation>&)) &evaluate<P,BoxDomain,Float64Approximation>);
-    def("evaluate", (Vector<Float64Bounds>(*)(const VectorFunction<P>&,const Vector<Float64Bounds>&)) &evaluate<P,BoxDomain,Float64Bounds>);
+    def("evaluate", (Vector<Float64Approximation>(*)(const VectorFunction<P>&,const Vector<Float64Approximation>&)) &evaluate<P,BoxDomainType,Float64Approximation>);
+    def("evaluate", (Vector<Float64Bounds>(*)(const VectorFunction<P>&,const Vector<Float64Bounds>&)) &evaluate<P,BoxDomainType,Float64Bounds>);
 
     def("join", (VectorFunction<P>(*)(const ScalarFunction<P>&, const ScalarFunction<P>&)) &join);
     def("join", (VectorFunction<P>(*)(const VectorFunction<P>&, const ScalarFunction<P>&)) &join);

@@ -34,20 +34,20 @@
 namespace Ariadne {
 
 // Domain declarations
-using IntervalDomain = ExactIntervalType;
-using BoxDomain = ExactBoxType;
+using IntervalDomainType = ExactIntervalType;
+using BoxDomainType = ExactBoxType;
 
 // Function declarations
 template<class P, class D, class C> class Function;
-template<class P, class D=BoxDomain> using ScalarFunction = Function<P,D,IntervalDomain>;
-template<class P, class D=BoxDomain> using VectorFunction = Function<P,D,BoxDomain>;
-template<class P, class C> using UnivariateFunction = Function<P,IntervalDomain,C>;
-template<class P, class C> using MultivariateFunction = Function<P,BoxDomain,C>;
+template<class P, class D=BoxDomainType> using ScalarFunction = Function<P,D,IntervalDomainType>;
+template<class P, class D=BoxDomainType> using VectorFunction = Function<P,D,BoxDomainType>;
+template<class P, class C> using UnivariateFunction = Function<P,IntervalDomainType,C>;
+template<class P, class C> using MultivariateFunction = Function<P,BoxDomainType,C>;
 
-template<class P> using ScalarUnivariateFunction = Function<P,IntervalDomain,IntervalDomain>;
-template<class P> using VectorUnivariateFunction = Function<P,IntervalDomain,BoxDomain>;
-template<class P> using ScalarMultivariateFunction = Function<P,BoxDomain,IntervalDomain>;
-template<class P> using VectorMultivariateFunction = Function<P,BoxDomain,BoxDomain>;
+template<class P> using ScalarUnivariateFunction = Function<P,IntervalDomainType,IntervalDomainType>;
+template<class P> using VectorUnivariateFunction = Function<P,IntervalDomainType,BoxDomainType>;
+template<class P> using ScalarMultivariateFunction = Function<P,BoxDomainType,IntervalDomainType>;
+template<class P> using VectorMultivariateFunction = Function<P,BoxDomainType,BoxDomainType>;
 
 typedef ScalarUnivariateFunction<ApproximateTag> ApproximateScalarUnivariateFunction;
 typedef ScalarUnivariateFunction<ValidatedTag> ValidatedScalarUnivariateFunction;
@@ -66,8 +66,8 @@ typedef EffectiveVectorFunction RealVectorFunction;
 
 // Function interface declarations
 template<class P, class D, class C> class FunctionInterface;
-template<class P, class D=BoxDomain> using ScalarFunctionInterface = FunctionInterface<P,D,IntervalDomain>;
-template<class P, class D=BoxDomain> using VectorFunctionInterface = FunctionInterface<P,D,BoxDomain>;
+template<class P, class D=BoxDomainType> using ScalarFunctionInterface = FunctionInterface<P,D,IntervalDomainType>;
+template<class P, class D=BoxDomainType> using VectorFunctionInterface = FunctionInterface<P,D,BoxDomainType>;
 
 typedef ScalarFunctionInterface<ApproximateTag> ApproximateScalarFunctionInterface;
 typedef ScalarFunctionInterface<ValidatedTag> ValidatedScalarFunctionInterface;
@@ -82,13 +82,18 @@ typedef VectorFunctionInterface<EffectiveTag> EffectiveVectorFunctionInterface;
 // Function models declarations
 
 
-template<class P, class PR=Precision64, class PRE=PR> class ScalarFunctionModelInterface;
-template<class P, class PR=Precision64, class PRE=PR> class VectorFunctionModelInterface;
+template<class P, class PR, class PRE=PR> class ScalarFunctionModelInterface;
+template<class P, class PR, class PRE=PR> class VectorFunctionModelInterface;
 
-template<class P, class PR=Precision64, class PRE=PR> class ScalarFunctionModel;
-template<class P, class PR=Precision64, class PRE=PR> class VectorFunctionModel;
+template<class P, class PR, class PRE=PR> class ScalarFunctionModel;
+template<class P, class PR, class PRE=PR> class VectorFunctionModel;
 
-template<class P, class PR=Precision64, class PRE=PR> struct FunctionModelTraits;
+template<class P, class PR, class PRE=PR> struct FunctionModelTraits;
+
+template<class P> using ScalarFunctionModel64Interface = ScalarFunctionModelInterface<P,Precision64>;
+template<class P> using VectorFunctionModel64Interface = VectorFunctionModelInterface<P,Precision64>;
+template<class P> using ScalarFunctionModel64 = ScalarFunctionModel<P,Precision64>;
+template<class P> using VectorFunctionModel64 = VectorFunctionModel<P,Precision64>;
 
 template<class PR> struct FunctionModelTraits<ApproximateTag,PR> {
     typedef FloatApproximation<PR> CoefficientType;
@@ -102,23 +107,29 @@ template<class PR, class PRE> struct FunctionModelTraits<ValidatedTag,PR,PRE> {
     typedef FloatBounds<PR> NumericType;
 };
 
-template<class P, class PR=Precision64, class PRE=PR> using CanonicalNumericType = typename FunctionModelTraits<P,PR,PRE>::NumericType;
-template<class P, class PR=Precision64> using CanonicalCoefficientType = typename FunctionModelTraits<P,PR>::CoefficientType;
-template<class P, class PRE=Precision64> using CanonicalErrorType = typename FunctionModelTraits<P,PRE,PRE>::ErrorType;
+template<class P, class PR, class PRE=PR> using CanonicalNumericType = typename FunctionModelTraits<P,PR,PRE>::NumericType;
+template<class P, class PR> using CanonicalCoefficientType = typename FunctionModelTraits<P,PR>::CoefficientType;
+template<class P, class PRE> using CanonicalErrorType = typename FunctionModelTraits<P,PRE,PRE>::ErrorType;
+
+template<class P> using CanonicalNumeric64Type = typename FunctionModelTraits<P,Precision64>::NumericType;
+template<class P> using CanonicalCoefficient64Type = typename FunctionModelTraits<P,Precision64>::CoefficientType;
+template<class P> using CanonicalError64Type = typename FunctionModelTraits<P,Precision64,Precision64>::ErrorType;
 
 template<class X> using PrecisionType = typename X::PrecisionType;
 template<class X> using ErrorPrecisionType = typename X::ErrorPrecisionType;
 
-typedef ScalarFunctionModelInterface<ValidatedTag,Precision64> ValidatedScalarFunctionModelInterface;
-typedef VectorFunctionModelInterface<ValidatedTag,Precision64> ValidatedVectorFunctionModelInterface;
+using ValidatedScalarFunctionModel64Interface = ScalarFunctionModelInterface<ValidatedTag,Precision64>;
+using ValidatedVectorFunctionModel64Interface = VectorFunctionModelInterface<ValidatedTag,Precision64>;
 
-typedef ScalarFunctionModel<ValidatedTag,Precision64> ValidatedScalarFunctionModel;
-typedef VectorFunctionModel<ValidatedTag,Precision64> ValidatedVectorFunctionModel;
+using ValidatedScalarFunctionModel64 = ScalarFunctionModel<ValidatedTag,Precision64>;
+using ValidatedVectorFunctionModel64 = VectorFunctionModel<ValidatedTag,Precision64>;
 
 template<class P, class PR=Precision64, class PRE=PR> class FunctionModelFactoryInterface;
-typedef FunctionModelFactoryInterface<ValidatedTag,Precision64> ValidatedFunctionModelFactoryInterface;
+typedef FunctionModelFactoryInterface<ValidatedTag,Precision64> ValidatedFunctionModel64FactoryInterface;
 template<class P, class PR=Precision64, class PRE=PR> class FunctionModelFactory;
-typedef FunctionModelFactory<ValidatedTag,Precision64> ValidatedFunctionModelFactory;
+typedef FunctionModelFactory<ValidatedTag,Precision64> ValidatedFunctionModel64Factory;
+template<class FMF> class FunctionModelCreator;
+
 
 
 } // namespace Ariadne

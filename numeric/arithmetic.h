@@ -659,12 +659,12 @@ template<class X, class QX, class R=X, class QR=QX> struct DefineDirectedSemiFie
 template<class X, class QX, class Y, class QY, class R=X, class QR=QX> struct DefineMixedDirectedSemiFieldOperators
     : DefineInplaceDirectedSemiFieldOperators<X,Y,QY,R>
 {
-    friend R operator+(const X& x1, const Y& y2) { return operator+(x1,x1.create(y2)); }
-    friend R operator*(const X& x1, const Y& y2) { return operator*(x1,x1.create(y2)); }
+    friend R operator+(const X& x1, const Y& y2) { return operator+(x1,factory(x1).create(y2)); }
+    friend R operator*(const X& x1, const Y& y2) { return operator*(x1,factory(x1).create(y2)); }
     friend R operator/(const X& x1, const QY& qy2) { return operator/(x1,create(qy2,x1)); }
-    friend R operator+(const Y& y1, const X& x2) { return operator+(x2.create(y1),x2); }
-    friend R operator*(const Y& y1, const X& x2) { return operator*(x2.create(y1),x2); }
-    friend QR operator/(const QY& y1, const X& x2) { return operator/(x2.create(y1),x2); }
+    friend R operator+(const Y& y1, const X& x2) { return operator+(factory(x2).create(y1),x2); }
+    friend R operator*(const Y& y1, const X& x2) { return operator*(factory(x2).create(y1),x2); }
+    friend QR operator/(const QY& y1, const X& x2) { return operator/(factory(x2).create(y1),x2); }
 };
 
 
@@ -902,7 +902,7 @@ template<class X, class Y, class R=X> struct ProvideConcreteGenericFieldOperator
     : DefineInplaceFieldOperators<X,Y,R>
 {
     //static R create(Y const& y, X const& x) { return X(y,x.precision()); }
-    friend R _create(Y const& y, X const& x) { return x.create(y); }
+    friend R _create(Y const& y, X const& x) { return factory(x).create(y); }
     friend R operator+(const X& x1, const Y& y2) { return operator+(x1,_create(y2,x1)); }
     friend R operator-(const X& x1, const Y& y2) { return operator-(x1,_create(y2,x1)); }
     friend R operator*(const X& x1, const Y& y2) { return operator*(x1,_create(y2,x1)); }
@@ -969,16 +969,16 @@ template<class X, class Y, class R, class LT, class EQ=LT> struct ProvideConvert
 
 template<class X, class Y, class LT, class EQ=LT> struct ProvideConcreteGenericComparisonOperations : DefineMixedComparisonOperators<X,Y,LT,EQ> {
     typedef LT GT;
-    friend LT lt(const X& x1, const Y& y2) { return lt(x1,x1.create(y2)); }
-    friend GT gt(const X& x1, const Y& y2) { return lt(x1.create(y2),x1); }
-    friend EQ eq(const X& x1, const Y& y2) { return eq(x1,x1.create(y2)); }
+    friend LT lt(const X& x1, const Y& y2) { return lt(x1,factory(x1).create(y2)); }
+    friend GT gt(const X& x1, const Y& y2) { return lt(factory(x1).create(y2),x1); }
+    friend EQ eq(const X& x1, const Y& y2) { return eq(x1,factory(x1).create(y2)); }
 };
 
 template<class X, class NY, class LT, class EQ> struct ProvideConcreteGenericDirectedComparisonOperations : DefineMixedDirectedComparisonOperators<X,NY,LT,EQ> {
     typedef decltype(not declval<LT>()) GT;
-    friend EQ eq(const X& x1, const NY& ny2) { return eq(x1,x1.create(ny2)); }
-    friend LT lt(const X& x1, const NY& ny2) { return lt(x1,x1.create(ny2)); }
-    friend GT gt(const X& x1, const NY& ny2) { return lt(x1.create(ny2),x1); }
+    friend EQ eq(const X& x1, const NY& ny2) { return eq(x1,factory(x1).create(ny2)); }
+    friend LT lt(const X& x1, const NY& ny2) { return lt(x1,factory(x1).create(ny2)); }
+    friend GT gt(const X& x1, const NY& ny2) { return lt(factory(x1).create(ny2),x1); }
 };
 
 template<class X, class Y, class R, class LT, class EQ=LT> struct ProvideConcreteGenericOperations

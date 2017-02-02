@@ -43,7 +43,7 @@ template<> struct Vector<RealVariable> : List<RealVariable> {
 
 
 #include "function/function.h"
-#include "function/function_patch.h"
+#include "function/scaled_function_patch.h"
 #include "function/taylor_function.h"
 
 
@@ -195,36 +195,36 @@ class ControlSystem {
         os << "ControlSystem( dynamics="<< cs._dynamics << ", parameter_ranges=" << cs._parameter_ranges << " )"; }
 };
 
-ValidatedVectorFunctionModel join(ValidatedVectorFunctionModel vf1, ValidatedVectorFunctionModel vf2, ValidatedVectorFunctionModel vf3) {
+ValidatedVectorFunctionModel64 join(ValidatedVectorFunctionModel64 vf1, ValidatedVectorFunctionModel64 vf2, ValidatedVectorFunctionModel64 vf3) {
     return join(join(vf1,vf2),vf3);
 }
 
-ValidatedVectorFunctionModel join(ValidatedVectorFunctionModel vf1, ValidatedVectorFunctionModel vf2, ValidatedScalarFunctionModel sf3) {
+ValidatedVectorFunctionModel64 join(ValidatedVectorFunctionModel64 vf1, ValidatedVectorFunctionModel64 vf2, ValidatedScalarFunctionModel64 sf3) {
     return join(join(vf1,vf2),sf3);
 }
 
 
-ValidatedVectorFunctionModel antiderivative(ValidatedVectorFunction const& vf, SizeType k, ValidatedNumericType a) {
-    auto vfp = std::dynamic_pointer_cast<ValidatedVectorFunctionModelInterface const>(vf.managed_pointer());
-    if(vfp) { return antiderivative(ValidatedVectorFunctionModel(vfp->_clone()),k,a); }
+ValidatedVectorFunctionModel64 antiderivative(ValidatedVectorFunction const& vf, SizeType k, ValidatedNumericType a) {
+    auto vfp = std::dynamic_pointer_cast<ValidatedVectorFunctionModel64Interface const>(vf.managed_pointer());
+    if(vfp) { return antiderivative(ValidatedVectorFunctionModel64(vfp->_clone()),k,a); }
     std::cerr<<"\n\nvf="<<vf<<"\n\n\n"; assert(false);
 }
 
 ValidatedVectorFunction operator+(ValidatedVectorFunction const& vf1, ValidatedVectorFunction const& vf2) {
-    auto vfp1 = std::dynamic_pointer_cast<ValidatedVectorFunctionModelInterface const>(vf1.managed_pointer());
-    auto vfp2 = std::dynamic_pointer_cast<ValidatedVectorFunctionModelInterface const>(vf1.managed_pointer());
-    if(vfp1 && vfp2) { return ValidatedVectorFunctionModel(vfp1->_clone())+ValidatedVectorFunctionModel(vfp2->_clone()); }
+    auto vfp1 = std::dynamic_pointer_cast<ValidatedVectorFunctionModel64Interface const>(vf1.managed_pointer());
+    auto vfp2 = std::dynamic_pointer_cast<ValidatedVectorFunctionModel64Interface const>(vf1.managed_pointer());
+    if(vfp1 && vfp2) { return ValidatedVectorFunctionModel64(vfp1->_clone())+ValidatedVectorFunctionModel64(vfp2->_clone()); }
     std::cerr<<"vf1="<<vf1<<"\n"; std::cerr<<"vf2="<<vf2<<"\n"; assert(false);
 }
 
 // Solve dot(x) = f(a,x,u) with x(0)=x0 and u=mu(a,u0,t) on a given domain
 // The result is a function phi(a,x0,u0,t)
-ValidatedVectorFunctionModel
+ValidatedVectorFunctionModel64
 flow_step(const ValidatedVectorFunction& control_system,
           const ExactBoxType& parameter_domain,
           const ExactBoxType& state_domain,
           const FloatValueType& step_size,
-          const ValidatedVectorFunctionModel& inputs);
+          const ValidatedVectorFunctionModel64& inputs);
 
 
 // Solve dot(x) = f(a,x,u) with x(0)=x0 and u=mu(a,u0,t) on a given domain
@@ -278,21 +278,21 @@ control_flow_step(const ControlSystem& control_system,
 
     ARIADNE_PRINT(typeid(input_function.reference()).name());
     ARIADNE_PRINT(typeid(input_function.raw_pointer()).name());
-    ValidatedScalarFunctionModel input_function_model(dynamic_cast<ValidatedScalarFunctionModelInterface const&>(input_function.reference()));
+    ValidatedScalarFunctionModel64 input_function_model(dynamic_cast<ValidatedScalarFunctionModel64Interface const&>(input_function.reference()));
     ARIADNE_PRINT(input_function_model);
 
-    ValidatedScalarFunctionModel zero=input_function_model.create_zero();
-    ValidatedVectorFunctionModel identity=input_function_model.create_identity();
+    ValidatedScalarFunctionModel64 zero=input_function_model.create_zero();
+    ValidatedVectorFunctionModel64 identity=input_function_model.create_identity();
     ARIADNE_PRINT(identity);
-    Map<RealVariable,ValidatedScalarFunctionModel> coordinates;
+    Map<RealVariable,ValidatedScalarFunctionModel64> coordinates;
     for(SizeType i=0; i!=flow_space.dimension(); ++i) { coordinates[flow_space[i]]=identity[i]; }
     ARIADNE_PRINT(coordinates);
     std::cout<<std::endl;
 
-    List<ValidatedScalarFunctionModel> parameter_functions;
+    List<ValidatedScalarFunctionModel64> parameter_functions;
     for(SizeType i=0; i!=parameters.size(); ++i) {
         parameter_functions.append(coordinates[parameters[i]]); }
-    List<ValidatedScalarFunctionModel> initial_state_functions;
+    List<ValidatedScalarFunctionModel64> initial_state_functions;
     for(SizeType i=0; i!=state_variables.size(); ++i) {
         initial_state_functions.append(coordinates[state_variables[i]]); }
 
@@ -309,23 +309,23 @@ control_flow_step(const ControlSystem& control_system,
     ARIADNE_ASSERT(subset(dynamic_arguments,dynamic_space));
     ARIADNE_ASSERT(subset(join(parameters,state_variables),input_arguments));
 
-    ValidatedVectorFunctionModel parameter_function ( parameter_functions );
-    ValidatedVectorFunctionModel initial_state_function = initial_state_functions;
+    ValidatedVectorFunctionModel64 parameter_function ( parameter_functions );
+    ValidatedVectorFunctionModel64 initial_state_function = initial_state_functions;
 
-    ValidatedVectorFunctionModel state_function = initial_state_function;
-    ValidatedVectorFunctionModel old_state_function = initial_state_function;
+    ValidatedVectorFunctionModel64 state_function = initial_state_function;
+    ValidatedVectorFunctionModel64 old_state_function = initial_state_function;
 
     TimeVariable t;
     SizeType time_index = input_space.index(t);
 
     for(Nat i=0; i!=12; ++i) {
         state_function.clobber();
-        ValidatedVectorFunctionModel dynamic_flow_function =
-            compose(dynamic_function,ValidatedVectorFunctionModel(join(state_function,parameter_function,input_function)));
+        ValidatedVectorFunctionModel64 dynamic_flow_function =
+            compose(dynamic_function,ValidatedVectorFunctionModel64(join(state_function,parameter_function,input_function)));
         //ARIADNE_PRINT(dynamic_flow_function);
 
-        //ValidatedVectorFunctionModel antiderivative_dynamic_flow_function = antiderivative(dynamic_flow_function,time_index);
-        ValidatedVectorFunctionModel antiderivative_dynamic_flow_function = antiderivative(dynamic_flow_function,time_index,Float64Value(0));
+        //ValidatedVectorFunctionModel64 antiderivative_dynamic_flow_function = antiderivative(dynamic_flow_function,time_index);
+        ValidatedVectorFunctionModel64 antiderivative_dynamic_flow_function = antiderivative(dynamic_flow_function,time_index,Float64Value(0));
         //ARIADNE_PRINT(antiderivative_dynamic_flow_function);
 
         old_state_function = state_function;
@@ -400,14 +400,14 @@ int main() {
     ExactFloatBox domain = {{0.5,1.5},{1,2},{-0.5,0.5},{0,1},{0,0.125}};
     ThresholdSweeper sweeper(1e-12);
     //ValidatedVectorFunction idv=ValidatedVectorFunction::identity(domain);
-    VectorTaylorFunction idv=VectorTaylorFunction::identity(domain,sweeper);
-    Array<ScalarTaylorFunction> id={idv[0],idv[1],idv[2],idv[3],idv[4]};
+    ValidatedVectorTaylorFunctionModel64 idv=ValidatedVectorTaylorFunctionModel64::identity(domain,sweeper);
+    Array<ValidatedScalarTaylorFunctionModel64> id={idv[0],idv[1],idv[2],idv[3],idv[4]};
     ControlSystem system={ dot(x)=-a*x+u, a.in(1,4) };
     ExactVariablesBoxType parameter_domain={a.in(2,3)};
     ExactVariablesBoxType state_domain={x.in(0,1)};
     FloatValueType step_size=0.5_exact;
     ARIADNE_PRINT(step_size);
-    ValidatedScalarFunctionModel ufm=id[3]*exp(-id[1]*id[4]);
+    ValidatedScalarFunctionModel64 ufm=id[3]*exp(-id[1]*id[4]);
     ARIADNE_PRINT(ufm.range());
     ValidatedScalarFunction uf=ufm;
     ARIADNE_PRINT(uf);

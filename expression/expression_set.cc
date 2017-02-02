@@ -91,15 +91,18 @@ Set<Identifier> arguments(const List<ContinuousPredicate>& c) {
 
 
 ExactIntervalType over_approximation(RealInterval ivl) {
-    return cast_exact_interval(UpperIntervalType(ivl));
+    Precision64 prec;
+    return cast_exact_interval(UpperIntervalType(ivl,prec));
 }
 
 ExactIntervalType under_approximation(RealInterval ivl) {
-    return cast_exact_interval(LowerIntervalType(ivl));
+    Precision64 prec;
+    return cast_exact_interval(LowerIntervalType(ivl,prec));
 }
 
 ExactIntervalType approximation(RealInterval ivl) {
-    return cast_exact_interval(ApproximateIntervalType(ivl));
+    Precision64 prec;
+    return cast_exact_interval(ApproximateIntervalType(ivl,prec));
 }
 
 
@@ -201,7 +204,8 @@ OutputStream& operator<<(OutputStream& os, const RealExpressionBoundedConstraint
 }
 
 ValidatedConstrainedImageSet approximate_euclidean_set(const RealExpressionBoundedConstraintSet& set, const RealSpace& space) {
-    ExactIntervalVectorType domain=cast_exact_box(ApproximateBoxType(RealVariablesBox(set.bounds()).euclidean_set(space)));
+    RealBox real_domain = RealVariablesBox(set.bounds()).euclidean_set(space);
+    ExactBoxType domain=cast_exact_box(ApproximateBoxType(real_domain,Precision64()));
     ValidatedVectorFunction identity=ValidatedVectorFunction::identity(domain.size());
 
     ValidatedConstrainedImageSet result(domain,identity);

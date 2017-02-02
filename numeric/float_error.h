@@ -46,6 +46,7 @@ template<class PR> class FloatError
     RawFloat<PR> _e;
   public:
     typedef PR PrecisionType;
+    typedef PR PropertiesType;
   public:
     FloatError<PR>(PositiveFloatUpperBound<PR> const& x) : _e(x._u) { }
     operator PositiveFloatUpperBound<PR> const& () const { return reinterpret_cast<PositiveFloatUpperBound<PR>const&>(*this); }
@@ -61,6 +62,7 @@ template<class PR> class FloatError
     FloatError<PR>& operator=(Nat m) { reinterpret_cast<FloatUpperBound<PR>&>(*this)=m; return *this; }
   public:
     PrecisionType precision() const { return _e.precision(); }
+    PropertiesType properties() const { return _e.precision(); }
     RawFloat<PR> const& raw() const { return _e; }
     RawFloat<PR>& raw() { return _e; }
   public:

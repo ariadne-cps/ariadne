@@ -53,8 +53,8 @@ operator>>(InputStream& is, Interval<Float64Value>& ivl)
 }
 
 
-template<> Float64UpperInterval DeclareIntervalArithmeticOperations<Float64UpperBound>::create(ValidatedNumber const& y) const {
-    return Float64UpperInterval(reinterpret_cast<Float64Bounds const&>(*this).create(y)); }
+template<> Float64UpperInterval FloatUpperIntervalFactory<Precision64>::create(ValidatedNumber const& y) const {
+    return Float64UpperInterval(Float64Bounds(y,this->_precision)); }
 
 Float64Bounds cast_singleton(Float64UpperInterval const& ivl) {
     return Float64Bounds(ivl.lower(),ivl.upper()); }

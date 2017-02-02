@@ -78,7 +78,7 @@ class IntegratorInterface
     //! Returns: A validated version \f$\hat{\phi}\f$ of the flow over a short step represented as a single function over a box.
     //! <br>
     //! Arguments: \f$f\f$ is the \a vector_field, \f$D\f$ is the \a state_domain, and \f$h_\mathrm{sug}\f$ is the \a suggested_time_step.
-    virtual ValidatedVectorFunctionModel
+    virtual ValidatedVectorFunctionModel64
     flow_step(const ValidatedVectorFunction& vector_field,
               const ExactBoxType& state_domain,
               RawFloat64& suggested_time_step) const = 0;
@@ -92,7 +92,7 @@ class IntegratorInterface
     //! Arguments: \f$f\f$ is the \a vector_field, \f$D\f$ is the \a state_domain, \f$h\f$ is the \a time_step, and \f$B\f$ is the \a state_bounding_box.
     //! <br>
     //! Throws: A FlowTimeStepException if the flow cannot be computed sufficiently accurately for the given time step.
-    virtual ValidatedVectorFunctionModel
+    virtual ValidatedVectorFunctionModel64
     flow_step(const ValidatedVectorFunction& vector_field,
               const ExactBoxType& state_domain,
               const Float64Value& time_step,
@@ -105,7 +105,7 @@ class IntegratorInterface
     //! Arguments: \f$f\f$ is the \a vector_field, \f$D\f$ is the \a state_domain, and \f$t_f\f$ is the \a final_time.
     //! <br>
     //! Throws: A FlowTimeStepException if the flow cannot be represented as a single function to sufficiently accurately for the given time interval.
-    virtual ValidatedVectorFunctionModel
+    virtual ValidatedVectorFunctionModel64
     flow_to(const ValidatedVectorFunction& vector_field,
             const ExactBoxType& state_domain,
             const Real& final_time) const = 0;
@@ -115,7 +115,7 @@ class IntegratorInterface
     //! Returns: A validated version of the flow represented as a list of functions whose spacial domains are all \f$D\f$ and whose time domains have union \f$[t_b,t_f]\f$.
     //! <br>
     //! Arguments: \f$f\f$ is the \a vector_field, \f$D\f$ is the \a state_domain, \f$t_b\f$ is the \a beginning_time, and \f$t_f\f$ is the \a final_time.
-    virtual List<ValidatedVectorFunctionModel>
+    virtual List<ValidatedVectorFunctionModel64>
     flow(const ValidatedVectorFunction& vector_field,
          const ExactBoxType& state_domain,
          const Real& beginning_time,
@@ -124,7 +124,7 @@ class IntegratorInterface
     //! \brief Solve \f$\dt{\phi}(x,t)=f(\phi(x,t))\f$ for initial conditions in \f$x\in D\f$ over the interval \f$[0,t_f]\f$..
     //! <br>
     //! Arguments: \f$f\f$ is the \a vector_field, \f$D\f$ is the \a state_domain,  and \f$t_f\f$ is the \a final_time.
-    virtual List<ValidatedVectorFunctionModel>
+    virtual List<ValidatedVectorFunctionModel64>
     flow(const ValidatedVectorFunction& vector_field,
          const ExactBoxType& state_domain,
          const Real& final_time) const = 0;

@@ -57,8 +57,8 @@ Bool operator<(const MultiIndex& a1, const MultiIndex& a2) {
     return reverse_lexicographic_less(a1,a2); }
 
 
-Interval<Float64Value> const& convert_interval(ExactIntervalType const& ivl, Precision64) { return ivl; }
-Interval<FloatMPValue> convert_interval(ExactIntervalType const& ivl, PrecisionMP pr) {
+Interval<Float64Value> const& convert_interval(IntervalDomainType const& ivl, Precision64) { return ivl; }
+Interval<FloatMPValue> convert_interval(IntervalDomainType const& ivl, PrecisionMP pr) {
     return Interval<FloatMPValue>(FloatMP(ivl.lower().get_d(),pr),FloatMP(ivl.upper().get_d(),pr)); }
 
 Interval<Float64UpperBound> const& convert_interval(Interval<Float64UpperBound> const& ivl, Precision64) { return ivl; }
@@ -75,8 +75,8 @@ Interval<Float64Value> convert_exact_interval(Interval<FloatMPUpperBound> const&
     Float64 l(Dyadic(ivl.lower().raw()),downward,pr); Float64 u(Dyadic(ivl.lower().raw()),upward,pr);
     return Interval<Float64Value>(Float64Value(l),Float64Value(u)); }
 
-inline Box<Interval<Float64Value>> const& convert_box(ExactBoxType const& bx, Precision64) { return bx; }
-Box<Interval<FloatMPValue>> convert_box(ExactBoxType const& bx, PrecisionMP pr) {
+inline Box<Interval<Float64Value>> const& convert_box(BoxDomainType const& bx, Precision64) { return bx; }
+Box<Interval<FloatMPValue>> convert_box(BoxDomainType const& bx, PrecisionMP pr) {
     Box<Interval<FloatMPValue>> r(bx.dimension(),Interval<FloatMPValue>(FloatMPValue(pr),FloatMPValue(pr)));
     for(SizeType i=0; i!=r.dimension(); ++i) { r[i]=convert_interval(bx[i],pr); }
     return r;
@@ -113,7 +113,7 @@ template<class F> TaylorModel<ValidatedTag,F>::TaylorModel(const Expansion<doubl
 {
 }
 
-template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::scaling(SizeType as, SizeType j, const ExactIntervalType& codom, SweeperType swp) {
+template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::scaling(SizeType as, SizeType j, const IntervalDomainType& codom, SweeperType swp) {
     TaylorModel<ValidatedTag,F> r(as,swp);
     auto ivl=convert_interval(codom,r.precision());
     r.set_gradient(j,1);
@@ -758,6 +758,14 @@ template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::swee
     return *this;
 }
 
+template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::simplify() {
+    return this->sweep();
+}
+
+template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::simplify(const PropertiesType& properties) {
+    return this->sweep(properties);
+}
+
 template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::cleanup() {
     this->sort();
     this->unique();
@@ -787,9 +795,9 @@ template<class F> F TaylorModel<ValidatedTag,F>::tolerance() const {
 
 // Basic function operators (domain, range, evaluate)
 
-template<class F> Box<UnitIntervalType> TaylorModel<ValidatedTag,F>::domain() const
+template<class F> UnitBox TaylorModel<ValidatedTag,F>::domain() const
 {
-    return Box<UnitIntervalType>(this->argument_size(),UnitIntervalType());
+    return UnitBox(this->argument_size(),UnitInterval());
 }
 
 template<class F> auto TaylorModel<ValidatedTag,F>::codomain() const -> CodomainType
@@ -1242,7 +1250,7 @@ TaylorModel<ValidatedTag,F>::_compose(TaylorModel<ValidatedTag,F> const& x, Vect
     return horner_evaluate(x.expansion(),y)+NumericType(-x.error(),+x.error());
 }
 
-template<class F> Void TaylorModel<ValidatedTag,F>::unscale(ExactIntervalType const& codom) {
+template<class F> Void TaylorModel<ValidatedTag,F>::unscale(IntervalDomainType const& codom) {
     // Scale tv so that the interval ivl maps into [-1,1]
     // The result is given by  (tv-c)*s where c is the centre
     // and s the reciprocal of the radius of ivl
@@ -1545,7 +1553,7 @@ template<class F> Vector<TaylorModel<ValidatedTag,F>> TaylorModel<ValidatedTag,F
     return result;
 }
 
-template<class F> Vector<TaylorModel<ValidatedTag,F>> TaylorModel<ValidatedTag,F>::scalings(const Vector<ExactIntervalType>& d, SweeperType swp)
+template<class F> Vector<TaylorModel<ValidatedTag,F>> TaylorModel<ValidatedTag,F>::scalings(const Vector<IntervalDomainType>& d, SweeperType swp)
 {
     Vector<TaylorModel<ValidatedTag,F>> result(d.size(),TaylorModel<ValidatedTag,F>::zero(d.size(),swp));
     for(SizeType i=0; i!=d.size(); ++i) {
@@ -1839,7 +1847,7 @@ template<class F> class AlgebraOperations<TaylorModel<ApproximateTag,F>>
     static TaylorModel<ApproximateTag,F> _abs(TaylorModel<ApproximateTag,F> const& x) { ARIADNE_NOT_IMPLEMENTED; }
 };
 
-template<class F> Void TaylorModel<ApproximateTag,F>::unscale(ExactIntervalType const& dom) {
+template<class F> Void TaylorModel<ApproximateTag,F>::unscale(IntervalDomainType const& dom) {
     auto ivl=convert_interval(dom,this->precision());
     TaylorModel<ApproximateTag,F>& x=*this;
     x-=ivl.midpoint();
@@ -1870,14 +1878,14 @@ template<class F> typename TaylorModel<ApproximateTag,F>::NormType TaylorModel<A
     return NormType(r);
 }
 
-template<class F> UnitBoxType TaylorModel<ApproximateTag,F>::domain() const {
-    return UnitBoxType(this->argument_size(),UnitIntervalType());
+template<class F> UnitBox TaylorModel<ApproximateTag,F>::domain() const {
+    return UnitBox(this->argument_size(),UnitInterval());
 }
 
-template<class F> ApproximateIntervalType TaylorModel<ApproximateTag,F>::range() const {
+template<class F> auto TaylorModel<ApproximateTag,F>::range() const -> RangeType {
     FloatApproximation<PR> av=this->average();
     FloatApproximation<PR> rad=this->radius();
-    return ApproximateIntervalType(av-rad,av+rad);
+    return Interval<FloatApproximation<PR>>(av-rad,av+rad);
 }
 
 template<class F> TaylorModel<ApproximateTag,F>& TaylorModel<ApproximateTag,F>::sweep() {

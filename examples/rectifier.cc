@@ -222,7 +222,7 @@ Int main(Int argc, const char* argv[])
     std::cout << "Orbit.final size="<<orbit.final().size()<<std::endl;
 
     Axes2d graphic_axes(0.0<=t<=1.0/dp[1].get_d(),-dp[0]<=vi<=dp[0]);
-    Axes2d graphic_axes2(-dp[0]<=t<=dp[0],2.0<=vi<=dp[0]);
+    Axes2d graphic_axes2(-dp[0]<=t<=dp[0],2<=vi<=dp[0]);
 
     std::cout << "Plotting results..." << std::flush;
 

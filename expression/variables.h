@@ -76,9 +76,12 @@ typedef LetVariable<Real> LetRealVariable;
 typedef PrimedVariable<Real> PrimedRealVariable;
 typedef DottedVariable<Real> DottedRealVariable;
 
-
-class RealVariableInterval;
-class RealVariablesBox;
+template<class UB> class Interval;
+template<class UB> class VariableInterval;
+template<class IVL> class VariablesBox;
+typedef Interval<Real> RealInterval;
+typedef VariableInterval<Real> RealVariableInterval;
+typedef VariablesBox<RealInterval> RealVariablesBox;
 
 
 enum class VariableType : char { BOOLEAN, KLEENEAN, ENUMERATED, STRING, INTEGER, REAL };
@@ -139,8 +142,8 @@ template<class T> class Variable
     Variable<T> const& base() const { return *this; }
     inline Variable<T>& operator=(const Variable<T>& e) = default;
     inline Assignment<Variable<T>,T> operator=(const T& c) const;
-    template<class XL, class XU> inline RealVariableInterval in(const XL& l, const XU& u);
-    template<class IVL> inline RealVariableInterval in(const IVL& ivl);
+    template<class XL, class XU> inline VariableInterval<XU> in(const XL& l, const XU& u);
+    template<class XU> inline VariableInterval<XU> in(const Interval<XU>& ivl);
     Expression<T> create_zero() const { return Expression<T>::constant(0); }
   public:
     friend LetVariable<T> let(const Variable<T>&);
@@ -162,7 +165,7 @@ template<class T> class Variables : public List<Variable<T>> {
         this->reserve(num); for(SizeType i=0; i!=num; ++i) { this->append(Variable<T>(name+to_str(i))); } }
     Variables<T>& operator=(Variables<T> const&) = default;
     inline List<Assignment<Variable<T>,T>> operator=(const List<T>& c) const;
-    template<class IVL> inline RealVariablesBox in(const List<IVL>& bx) const;
+    template<class IVL> inline VariablesBox<IVL> in(const List<IVL>& bx) const;
 };
 
 

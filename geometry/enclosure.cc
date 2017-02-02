@@ -237,6 +237,11 @@ Enclosure* Enclosure::clone() const
     return new Enclosure(*this);
 }
 
+Enclosure::Enclosure(const RealBox& box, const ValidatedFunctionModelFactoryInterface& factory)
+    : Enclosure(BoundedConstraintSet(box),factory)
+{
+}
+
 Enclosure::Enclosure(const BoundedConstraintSet& set, const ValidatedFunctionModelFactoryInterface& factory)
     : _function_factory_ptr(factory.clone())
 {

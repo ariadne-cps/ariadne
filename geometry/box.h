@@ -200,9 +200,6 @@ UpperIntervalType apply(ScalarFunction<ValidatedTag>const& f, const Box<UpperInt
 Box<UpperIntervalType> apply(VectorFunction<ValidatedTag>const& f, const Box<UpperIntervalType>& x);
 
 //! \relates Box \brief Project onto the variables \a rng.
-template<class I> inline Bool project(const Box<I> & bx, Array<SizeType> const& rng) { return Box<I>::_project(bx,rng); }
-
-//! \relates Box \brief Project onto the variables \a rng.
 template<class I> inline Box<I> project(const Box<I> & bx, Array<SizeType> const& rng) { return Box<I>::_project(bx,rng); }
 
 

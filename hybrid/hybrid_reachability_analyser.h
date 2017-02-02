@@ -31,6 +31,7 @@
 #include <boost/smart_ptr.hpp>
 
 #include "solvers/configuration_interface.h"
+#include "hybrid/hybrid_set.decl.h"
 #include "hybrid/hybrid_set_interface.h"
 #include "hybrid/hybrid_evolver_interface.h"
 #include "hybrid/hybrid_reachability_analyser_interface.h"
@@ -48,9 +49,6 @@ template<class ES> class Orbit;
 
 class DiscreteLocation;
 class HybridAutomatonInterface;
-
-template<class BS> class HybridBasicSet;
-class HybridBoxType;
 
 class HybridGrid;
 class HybridGridCell;
@@ -284,7 +282,7 @@ class HybridReachabilityAnalyserConfiguration : public ConfigurationInterface {
     //! If defined, this property combines with _maximum_grid_height to define the actual bounding domain.
     //!  <br>
     //! This property is only used in the chain_reach() routines.
-    std::shared_ptr<HybridBoxes> _bounding_domain_ptr;
+    std::shared_ptr<HybridExactBoxes> _bounding_domain_ptr;
 
     //! \brief The grid used for approximation.
     //! \details Provided as a pointer in order to avoid double construction. It must always be defined.
@@ -318,9 +316,9 @@ class HybridReachabilityAnalyserConfiguration : public ConfigurationInterface {
     const IntType& maximum_grid_height() const { return _maximum_grid_height; }
     Void set_maximum_grid_height(const IntType value) { _maximum_grid_height = value; }
 
-    const std::shared_ptr<HybridBoxes>& bounding_domain_ptr() const { return _bounding_domain_ptr; }
+    const std::shared_ptr<HybridExactBoxes>& bounding_domain_ptr() const { return _bounding_domain_ptr; }
     //! \brief Check the consistency in respect to the system space, then set the bounding domain.
-    Void set_bounding_domain_ptr(const std::shared_ptr<HybridBoxes> value);
+    Void set_bounding_domain_ptr(const std::shared_ptr<HybridExactBoxes> value);
 
     const HybridGrid& grid() const { return *_grid_ptr; }
     HybridGrid& grid() { return *_grid_ptr; }

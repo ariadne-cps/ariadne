@@ -69,6 +69,10 @@ template<class X> Void Point<X>::draw(CanvasInterface& canv, const Projection2d&
     canv.stroke();
 }
 
+template<> String class_name<Point<Float64Approximation>>() { return "Point<Float64Approximation>"; }
+template<> String class_name<Point<Float64Bounds>>() { return "Point<Float64Bounds>"; }
+template<> String class_name<Point<Float64Value>>() { return "Point<Float64Value>"; }
+
 template class Point<ExactNumericType>;
 template class Point<EffectiveNumericType>;
 template class Point<ValidatedNumericType>;

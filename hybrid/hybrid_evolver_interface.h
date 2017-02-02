@@ -31,7 +31,7 @@
 #include "dynamics/evolver_interface.h"
 
 #include "hybrid/hybrid_time.h"
-#include "hybrid/hybrid_set.h"
+#include "hybrid/hybrid_set.decl.h"
 #include "hybrid/hybrid_orbit.h"
 
 #include "hybrid/discrete_event.h"
@@ -66,7 +66,7 @@ class HybridTerminationCriterion {
     const Set<DiscreteEvent>& terminating_events() const { return this->_terminating_events; }
 };
 OutputStream& operator<<(OutputStream& os, const HybridTerminationCriterion& termination);
-    
+
 //! \brief Interface for hybrid evolvers using HybridEnclosure as the enclosure type.
 //! \details The class is loggable in order to allow verbosity tuning at the analyser layer.
 class HybridEvolverInterface
@@ -86,10 +86,10 @@ class HybridEvolverInterface
 
     //! \brief Compute an approximation to the orbit set using the given semantics, starting from a box.
     //!   Useful for computing the evolution starting from a cell of a grid.
-    virtual Orbit<EnclosureType> orbit(const HybridBoxType& initial_box,const TerminationType& termination,Semantics semantics) const = 0;
+    virtual Orbit<EnclosureType> orbit(const HybridExactBoxType& initial_box,const TerminationType& termination,Semantics semantics) const = 0;
     //! \brief Compute an approximation to the orbit set using the given semantics, starting from a set described by bounds and constraints.
     //!   Useful for computing the evolution starting from user-provided set.
-    virtual Orbit<EnclosureType> orbit(const HybridSet& initial_set,const TerminationType& termination,Semantics semantics) const = 0;
+    virtual Orbit<EnclosureType> orbit(const HybridRealBoundedConstraintSet& initial_set,const TerminationType& termination,Semantics semantics) const = 0;
 
     //! \brief Compute an approximation to the evolution set under the given semantics.
     virtual Pair<EnclosureListType,EnclosureListType> reach_evolve(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const = 0;
@@ -99,9 +99,9 @@ class HybridEvolverInterface
     //! \name Auxiliary set conversion functionality
 
     //! \brief Set construct an enclosure from a box, such as one obtained from a grid.
-    virtual EnclosureType enclosure(const HybridBoxType& initial_box) const = 0;
+    virtual EnclosureType enclosure(const HybridExactBoxType& initial_box) const = 0;
     //! \brief Set construct an enclosure from a user-provided set.
-    virtual EnclosureType enclosure(const HybridSet& initial_set) const = 0;
+    virtual EnclosureType enclosure(const HybridRealBoundedConstraintSet& initial_set) const = 0;
 
     //@}
 

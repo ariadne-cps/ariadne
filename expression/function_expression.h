@@ -46,8 +46,9 @@ template<class P, class D=BoxDomain> using VectorFunctionExpression = FunctionEx
 using ValidatedScalarFunctionExpression = FunctionExpression<ValidatedTag,BoxDomain,IntervalDomain>;
 using ValidatedVectorFunctionExpression = FunctionExpression<ValidatedTag,BoxDomain,BoxDomain>;
 
-using VariableIntervalDomain = ExactFloat64VariableInterval;
-using VariablesBoxDomain = ExactFloat64VariablesBox;
+
+using VariableIntervalDomain = VariableInterval<IntervalDomain::UpperBoundType>;
+using VariablesBoxDomain = VariablesBox<IntervalDomain>;
 
 inline BoxDomain preimage(Projection const& prj, BoxDomain const& bx) {
     BoxDomain dbx(prj.argument_size(),IntervalDomain(-infty,+infty));

@@ -29,10 +29,10 @@
 #define ARIADNE_HYBRID_SIMULATOR_H
 
 #include "utility/logging.h"
+#include "hybrid/hybrid_set.decl.h"
 
 namespace Ariadne {
 
-class HybridPoint;
 class HybridTime;
 class HybridAutomatonInterface;
 
@@ -45,7 +45,7 @@ template<class T> class Orbit;
 class HybridSimulator
     : public Loggable
 {
-    typedef HybridPoint EnclosureType;
+    typedef HybridExactPoint EnclosureType;
     double _step_size;
   public:
 
@@ -56,7 +56,7 @@ class HybridSimulator
     //@{
     //! \name Evolution using abstract sets.
     //! \brief Compute an approximation to the orbit set using upper semantics.
-    Orbit<HybridPoint> orbit(const HybridAutomatonInterface& system, const HybridPoint& initial_point, const HybridTime& time) const;
+    Orbit<HybridExactPoint> orbit(const HybridAutomatonInterface& system, const HybridExactPoint& initial_point, const HybridTime& time) const;
 };
 
 

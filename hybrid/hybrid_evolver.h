@@ -132,7 +132,7 @@ class HybridEvolverBase
     const ConfigurationType& configuration() const;
 
     //! \brief Change the configuration from a \a domain and \a lengths (NOT IMPLEMENTED).
-    virtual Void reconfigure(const HybridBoxes& domain, const HybridExactFloatVector& lengths) { }
+    virtual Void reconfigure(const HybridExactBoxes& domain, const HybridExactFloatVector& lengths) { }
 
     //! \brief The class which constructs functions for the enclosures.
     const FunctionFactoryType& function_factory() const;
@@ -151,8 +151,9 @@ class HybridEvolverBase
     //@{
     //! \name Main evolution functions.
 
-    Orbit<EnclosureType> orbit(const HybridBoxType& initial_box, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const;
-    Orbit<EnclosureType> orbit(const HybridSet& initial_set, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const;
+    Orbit<EnclosureType> orbit(const HybridExactBoxType& initial_box, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const;
+    Orbit<EnclosureType> orbit(const HybridRealBoxSet& initial_box, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const;
+    Orbit<EnclosureType> orbit(const HybridRealBoundedConstraintSet& initial_set, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const;
 
     //! \brief Compute an approximation to the orbit set using the given semantics, starting from an initial enclosure.
     Orbit<EnclosureType> orbit(const EnclosureType& initial_enclosure, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const;
@@ -171,9 +172,9 @@ class HybridEvolverBase
     //! \name Auxiliary set conversion functionality
 
     //! \brief Set construct an enclosure from a box, such as one obtained from a grid.
-    virtual EnclosureType enclosure(const HybridBoxType& initial_box) const;
+    virtual EnclosureType enclosure(const HybridExactBox& initial_box) const;
     //! \brief Set construct an enclosure from a user-provided set.
-    virtual EnclosureType enclosure(const HybridSet& initial_set) const;
+    virtual EnclosureType enclosure(const HybridRealBoundedConstraintSet& initial_set) const;
 
     //@}
 

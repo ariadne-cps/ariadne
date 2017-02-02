@@ -253,11 +253,11 @@ HybridEvolverBase::reach_evolve(const EnclosureType& initial_set, const Terminat
 
 Orbit<HybridEnclosure>
 HybridEvolverBase::
-orbit(const HybridBoxType& initial_box,
+orbit(const HybridExactBoxType& initial_box,
       const HybridTerminationCriterion& termination,
       Semantics semantics) const
 {
-    ARIADNE_LOG(2,"HybridEvolverBase::orbit(HybridAutomaton, HybridBoxType, HybridTime, Semantics)\n");
+    ARIADNE_LOG(2,"HybridEvolverBase::orbit(HybridAutomaton, HybridExactBox, HybridTime, Semantics)\n");
     ARIADNE_LOG(3,"factory="<<this->function_factory()<<"\n");
     ARIADNE_LOG(3,"initial_box="<<initial_box<<"\n");
     HybridEnclosure initial_enclosure(initial_box,this->function_factory());
@@ -267,7 +267,21 @@ orbit(const HybridBoxType& initial_box,
 
 Orbit<HybridEnclosure>
 HybridEvolverBase::
-orbit(const HybridSet& initial_set,
+orbit(const HybridRealBoxSet& initial_box,
+      const HybridTerminationCriterion& termination,
+      Semantics semantics) const
+{
+    ARIADNE_LOG(2,"HybridEvolverBase::orbit(HybridAutomaton, HybridRealBox, HybridTime, Semantics)\n");
+    ARIADNE_LOG(3,"factory="<<this->function_factory()<<"\n");
+    ARIADNE_LOG(3,"initial_box="<<initial_box<<"\n");
+    HybridEnclosure initial_enclosure(initial_box,this->system().continuous_state_space(initial_box.location()),this->function_factory());
+    ARIADNE_LOG(3,"initial_enclosure="<<initial_enclosure<<"\n");
+    return this->orbit(initial_enclosure,termination,semantics);
+}
+
+Orbit<HybridEnclosure>
+HybridEvolverBase::
+orbit(const HybridRealBoundedConstraintSet& initial_set,
       const HybridTerminationCriterion& termination,
       Semantics semantics) const
 {
@@ -379,13 +393,13 @@ HybridEvolverBase::set_solver(const SolverInterface& solver)
 
 
 HybridEvolverBase::EnclosureType
-HybridEvolverBase::enclosure(const HybridBoxType& initial_box) const
+HybridEvolverBase::enclosure(const HybridExactBox& initial_box) const
 {
     return HybridEnclosure(initial_box,this->function_factory());
 }
 
 HybridEvolverBase::EnclosureType
-HybridEvolverBase::enclosure(const HybridSet& initial_set) const
+HybridEvolverBase::enclosure(const HybridRealBoundedConstraintSet& initial_set) const
 {
     return HybridEnclosure(initial_set,this->system().continuous_state_space(initial_set.location()),this->function_factory());
 }
@@ -1507,8 +1521,8 @@ _apply_evolution_step(EvolutionData& evolution_data,
             HybridEnclosure& jump_set=*jump_set_iter;
             if(!definitely(jump_set.is_empty())) {
                 DiscreteLocation const& target=transitions[event].target;
-                jump_set.apply_reset(event,target,transitions[event].target_space,transitions[event].reset_function);
                 ARIADNE_LOG(9,"target="<<target<<", auxiliary_space="<<this->system().continuous_auxiliary_space(target)<<", auxiliary_function="<<this->system().auxiliary_function(target)<<"\n");
+                jump_set.apply_reset(event,target,transitions[event].target_space,transitions[event].reset_function);
                 jump_set.set_auxiliary(this->system().continuous_auxiliary_space(target).variables(),this->system().auxiliary_function(target));
                 evolution_data.initial_sets.append(jump_set);
                 _step_data.events.insert(event);

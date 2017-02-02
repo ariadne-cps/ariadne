@@ -30,6 +30,7 @@
 namespace Ariadne {
 
 template<class U> class Interval;
+template<class U> class VariableInterval;
 typedef Interval<Rational> RationalInterval;
 typedef Interval<Real> RealInterval;
 

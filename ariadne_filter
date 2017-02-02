@@ -56,8 +56,11 @@ s/ValidatedUpperTag/UpperTag/g
 s/Float\(\w\w*\)<Precision\(\w\w\)>/Float\2\1/g
 #s/FloatValue<Precision64>/Float64Value/g
 
+s/VariablesBox<Interval<Float\(\w\w\)Value>>/ExactFloat\1VariablesBox/g
+s/VariablesBox<Interval<\(\w\w*\)>>/\1VariablesBox/g
+s/Interval<Float64Value>/ExactFloat64Interval/g
 s/Interval<Float64Value>/IntervalDomain/g
-s/Box<IntervalDomain>/BoxDomain/g
+s/\bBox<IntervalDomain>/BoxDomain/g
 s/Box<\(\w*\)Interval>/\1Box/g
 
 s/\/usr\/lib\/gcc\/.*\/include\/c++\/.\..\..\///g

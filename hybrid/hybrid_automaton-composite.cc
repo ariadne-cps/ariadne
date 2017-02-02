@@ -40,6 +40,27 @@
 
 namespace Ariadne {
 
+class CompositeHybridStateSpace
+    : public HybridSpaceInterface
+{
+  public:
+    ~CompositeHybridStateSpace() { _system_ptr = 0; }
+    CompositeHybridStateSpace(const CompositeHybridAutomaton& ha) : _system_ptr(&ha) { }
+    virtual CompositeHybridStateSpace* clone() const { return new CompositeHybridStateSpace(*this); }
+    virtual Bool has_location(const DiscreteLocation& q) const { return this->_system_ptr->has_mode(q); }
+    virtual RealSpace operator[](const DiscreteLocation& q) const { return this->_system_ptr->continuous_state_space(q); }
+    virtual OutputStream& write(OutputStream& os) const { return os << "CompositeHybridSpace( " << *this->_system_ptr << " )"; }
+    ValidatedKleenean operator==(const HybridSpaceInterface& other) const {
+        const CompositeHybridStateSpace* chs_ptr = dynamic_cast<const CompositeHybridStateSpace* >(&other);
+        if (!chs_ptr) return indeterminate;
+        if (&*chs_ptr->_system_ptr == &*_system_ptr)
+            return true;
+        else return indeterminate;
+    }
+  private:
+    const CompositeHybridAutomaton* _system_ptr;
+};
+
 class CompositeHybridSpace
     : public HybridSpaceInterface
 {
@@ -48,7 +69,7 @@ class CompositeHybridSpace
     CompositeHybridSpace(const CompositeHybridAutomaton& ha) : _system_ptr(&ha) { }
     virtual CompositeHybridSpace* clone() const { return new CompositeHybridSpace(*this); }
     virtual Bool has_location(const DiscreteLocation& q) const { return this->_system_ptr->has_mode(q); }
-    virtual RealSpace operator[](const DiscreteLocation& q) const { return this->_system_ptr->continuous_state_space(q); }
+    virtual RealSpace operator[](const DiscreteLocation& q) const { return this->_system_ptr->continuous_state_auxiliary_space(q); }
     virtual OutputStream& write(OutputStream& os) const { return os << "CompositeHybridSpace( " << *this->_system_ptr << " )"; }
     ValidatedKleenean operator==(const HybridSpaceInterface& other) const {
         const CompositeHybridSpace* chs_ptr = dynamic_cast<const CompositeHybridSpace* >(&other);
@@ -283,6 +304,11 @@ CompositeHybridAutomaton::dimension(DiscreteLocation location) const {
 
 HybridSpace
 CompositeHybridAutomaton::state_space() const {
+    return new CompositeHybridStateSpace(*this);
+}
+
+HybridSpace
+CompositeHybridAutomaton::state_auxiliary_space() const {
     return new CompositeHybridSpace(*this);
 }
 
@@ -294,6 +320,11 @@ CompositeHybridAutomaton::continuous_state_space(DiscreteLocation location) cons
 RealSpace
 CompositeHybridAutomaton::continuous_auxiliary_space(DiscreteLocation location) const {
     return RealSpace(this->auxiliary_variables(location));
+}
+
+RealSpace
+CompositeHybridAutomaton::continuous_state_auxiliary_space(DiscreteLocation location) const {
+    return join(this->continuous_state_space(location),this->continuous_auxiliary_space(location));
 }
 
 List<RealVariable>
@@ -394,7 +425,7 @@ CompositeHybridAutomaton::auxiliary_function(DiscreteLocation location) const {
     Space<Real> space=this->state_variables(location);
     List<RealAssignment> algebraic=this->auxiliary_assignments(location);
     Vector<RealExpression> results(algebraic.size(),default_expression);
-    for(SizeType i=0; i!=algebraic.size(); ++i) { results[i]=algebraic[i].lhs; }
+    for(SizeType i=0; i!=algebraic.size(); ++i) { results[i]=algebraic[i].rhs; }
     return make_function(space,results);
 }
 

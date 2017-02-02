@@ -97,6 +97,8 @@ class Enclosure
     //! \brief Construct a set with \f$D=\emptyset\f$ in \f$\mathbb{R}^0\f$.
     explicit Enclosure();
     //! \brief Construct a representation of the box \a bx.
+    explicit Enclosure(const RealBox& bx, const ValidatedFunctionModelFactoryInterface& fac);
+    //! \brief Construct a representation of the box \a bx.
     explicit Enclosure(const ExactBoxType& bx, const ValidatedFunctionModelFactoryInterface& fac);
     //! \brief Construct the set with parameter domain \a d and image function \a f.
     explicit Enclosure(const ExactBoxType& d, const ValidatedVectorFunction& f, const ValidatedFunctionModelFactoryInterface& fac);
@@ -124,6 +126,7 @@ class Enclosure
     ExactBoxType codomain() const;
     //! \brief The function giving the state \c x in terms of parameters \c s, \f$x=\xi(s)\f$.
     ValidatedVectorFunctionModel const  state_time_auxiliary_function() const;
+    ValidatedVectorFunctionModel const  state_auxiliary_function() const;
     ValidatedVectorFunctionModel const& state_function() const;
     ValidatedScalarFunctionModel const& time_function() const;
     ValidatedVectorFunctionModel const  auxiliary_function() const;

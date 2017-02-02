@@ -97,21 +97,21 @@ TestHybridSet::test_hybrid_list_set()
     ARIADNE_TEST_EXECUTE(hls.adjoin(loc2,spc2,bx3));
     ARIADNE_TEST_EXECUTE(hls.adjoin(loc2,bx4));
     ARIADNE_TEST_PRINT(hls);
-    ARIADNE_TEST_EXECUTE(hls.adjoin(HybridBoxType(loc1,spc1,bx2)));
+    ARIADNE_TEST_EXECUTE(hls.adjoin(HybridExactBox(loc1,spc1,bx2)));
     ARIADNE_TEST_EXECUTE(hls.adjoin(loc2,bx5));
 
     ARIADNE_TEST_PRINT(hls);
 
     HybridListSet<ExactBoxType>::ConstIterator iter=hls.begin();
-    ARIADNE_TEST_EQUAL(*iter,HybridBoxType(loc2,spc2,bx3));
+    ARIADNE_TEST_EQUAL(*iter,HybridExactBox(loc2,spc2,bx3));
     ++iter;
-    ARIADNE_TEST_EQUAL(*iter,HybridBoxType(loc2,spc2,bx4));
+    ARIADNE_TEST_EQUAL(*iter,HybridExactBox(loc2,spc2,bx4));
     ++iter;
-    ARIADNE_TEST_EQUAL(*iter,HybridBoxType(loc2,spc2,bx5));
+    ARIADNE_TEST_EQUAL(*iter,HybridExactBox(loc2,spc2,bx5));
     ++iter;
-    ARIADNE_TEST_EQUAL(*iter,HybridBoxType(loc1,spc1,bx1));
+    ARIADNE_TEST_EQUAL(*iter,HybridExactBox(loc1,spc1,bx1));
     ++iter;
-    ARIADNE_TEST_EQUAL(*iter,HybridBoxType(loc1,spc1,bx2));
+    ARIADNE_TEST_EQUAL(*iter,HybridExactBox(loc1,spc1,bx2));
     ++iter;
     ARIADNE_TEST_ASSERT(iter==hls.end());
 

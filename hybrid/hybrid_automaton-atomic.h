@@ -122,13 +122,23 @@ class AtomicHybridAutomaton
     }
 
 
-    //! \brief Adds a new internal/output event with a given enabling \a guard condition and triggering \a invariant.
+    //! \brief Adds a new internal/output event with a given enabling \a activation condition and triggering \a invariant.
     Void new_action(AtomicDiscreteLocation location,
                     ContinuousPredicate invariant,
                     DiscreteEvent event,
-                    ContinuousPredicate guard,
+                    ContinuousPredicate activation,
                     EventKind kind=PERMISSIVE) {
-        this->HybridAutomaton::new_action(this->_variable|location,invariant,event,guard,kind);
+        ARIADNE_ASSERT(kind==PERMISSIVE);
+        this->HybridAutomaton::new_action(this->_variable|location,invariant,event,activation,kind);
+    }
+
+    //! \brief Adds a new urgent internal/output event with a given enabling \a guard.
+    Void new_action(AtomicDiscreteLocation location,
+                    DiscreteEvent event,
+                    ContinuousPredicate guard,
+                    EventKind kind=URGENT) {
+        ARIADNE_ASSERT(kind==URGENT || kind==IMPACT);
+        this->HybridAutomaton::new_guard(this->_variable|location,event,guard,kind);
     }
 
     //! \brief Adds a discrete mode to the automaton.

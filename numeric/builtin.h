@@ -42,7 +42,17 @@ namespace Ariadne {
 struct ExactTag;
 enum class Comparison : char;
 
-using ApproximateDouble = double;
+class ApproximateDouble {
+    double _d;
+  public:
+    typedef ApproximateTag Paradigm;
+    ApproximateDouble(int n) : _d(n) { }
+    ApproximateDouble(double d) : _d(d) { }
+    template<class X> ApproximateDouble(X const& x) : _d(x.get_d()) { }
+    friend ApproximateDouble operator+(ApproximateDouble x) { return ApproximateDouble(+x._d); }
+    friend ApproximateDouble operator-(ApproximateDouble x) { return ApproximateDouble(-x._d); }
+    operator double() const { return _d; }
+};
 
 class ExactDouble {
     double _d;

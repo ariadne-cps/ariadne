@@ -109,7 +109,7 @@ Void TestHybridEvolution::test_bouncing_ball() const {
 
     double height=2.0;
     double radius=1.0/64;
-    HybridBoxType initial(q,bouncing_ball.continuous_state_space(q),ExactBoxType{{height-radius,height+radius},{-radius,+radius}});
+    HybridExactBox initial(q,bouncing_ball.continuous_state_space(q),ExactBoxType{{height-radius,height+radius},{-radius,+radius}});
     Decimal tmax(4.5);
     Natural maxsteps=5u;
     HybridTime time(tmax,maxsteps);
@@ -125,8 +125,8 @@ Void TestHybridEvolution::test_bouncing_ball() const {
                           "This may indicate over-zealous splitting, and/or errors in detecting the end conditions.");
     }
 
-    Decimal exl(0.12), exu(+0.13), evl(-0.04), evu(+0.04); // Expected bounds
-    HybridBoxType expected_orbit_final_bounding_box=HybridBoxType(q,{x.in(exl,exu),v.in(evl,evu)});
+    Float64Value exl(0.12), exu(+0.13), evl(-0.04), evu(+0.04); // Expected bounds
+    HybridExactBox expected_orbit_final_bounding_box=HybridExactBox(q,{x.in(exl,exu),v.in(evl,evu)});
     ARIADNE_TEST_BINARY_PREDICATE(inside,orbit_final,expected_orbit_final_bounding_box);
 
     Dyadic xl(-0.5), xu(+2.5), vl(-4.0), vu(+4.0);
@@ -191,7 +191,7 @@ Void TestHybridEvolution::test_water_tank() const {
     ARIADNE_TEST_PRINT(watertank);
 
     DiscreteLocation initial_location=opening;
-    HybridBoxType initial_box(initial_location,{0<=height<=one/16,0<=aperture<=one/64});
+    HybridRealBox initial_box(initial_location,{0<=height<=one/16,0<=aperture<=one/64});
     HybridSet initial(initial_location,{0<=height<=one/16,0<=aperture<=one/64});
 
     //HybridTime evolution_time(80.0,5);
@@ -208,7 +208,7 @@ Void TestHybridEvolution::test_water_tank() const {
     HybridEnclosure final_enclosure=HybridEnclosure(*orbit.final().begin());
     ARIADNE_TEST_PRINT(final_enclosure.bounding_box());
     Dyadic ehl(7.6875), ehu(8.0); Decimal eal(0.999), eau(1.001); // Expected bounds
-    ARIADNE_TEST_BINARY_PREDICATE(inside,final_enclosure,HybridBoxType(open,{height.in(ehl,ehu),aperture.in(eal,eau)}));
+    ARIADNE_TEST_BINARY_PREDICATE(inside,final_enclosure,HybridRealBox(open,{height.in(ehl,ehu),aperture.in((Rational)eal,(Rational)eau)}));
 
     Decimal hl(-0.1), hu(+9.1), al(-0.3), au(+1.3);
     Axes2d bounding_box={hl<=height<=hu, al<=aperture<=au};

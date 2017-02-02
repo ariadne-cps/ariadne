@@ -88,51 +88,7 @@ Set<Identifier> arguments(const List<ContinuousPredicate>& c) {
 }
 
 
-const RealInterval RealVariableInterval::interval() const {
-    return RealInterval(this->_lower,this->_upper);
-}
 
-
-OutputStream& operator<<(OutputStream& os, const RealVariableInterval& eivl) {
-    return os << eivl.variable() << ".in(" << eivl.lower() << "," << eivl.upper() << ")";
-}
-
-
-RealVariablesBox::RealVariablesBox(const InitializerList<RealVariableInterval>& lst)
-    : RealVariablesBox(List<RealVariableInterval>(lst))
-{
-}
-
-RealVariablesBox::RealVariablesBox(const List<RealVariableInterval>& lst)
-{
-    for(Nat i=0; i!=lst.size(); ++i) {
-        _bounds.insert(lst[i].variable(),lst[i].interval());
-    }
-}
-
-RealVariablesBox::RealVariablesBox(const RealSpace& spc, const RealBox& bx)
-{
-    ARIADNE_ASSERT(spc.size()==bx.size());
-    for(Nat i=0; i!=spc.size(); ++i) {
-        _bounds.insert(spc[i],bx[i]);
-    }
-}
-
-RealBox RealVariablesBox::euclidean_set(const RealSpace& spc) const {
-    RealBox bx(spc.size());
-    for(Nat i=0; i!=spc.size(); ++i) {
-        bx[i]=(*this)[spc[i]];
-    }
-    return bx;
-}
-
-RealBox RealVariablesBox::box(const RealSpace& spc) const {
-    return this->euclidean_set(spc);
-}
-
-OutputStream& operator<<(OutputStream& os, const RealVariablesBox& ebx) {
-    return os << ebx._bounds;
-}
 
 ExactIntervalType over_approximation(RealInterval ivl) {
     return cast_exact_interval(UpperIntervalType(ivl));

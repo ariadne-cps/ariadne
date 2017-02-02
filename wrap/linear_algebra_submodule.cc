@@ -168,11 +168,12 @@ template<class X> OutputStream& operator<<(OutputStream& os, const PythonReprese
         if(j!=0) { os << ","; } os << python_representation(A[i][j]); } os << "]"; } os << "]"; return os;
 }
 
-template<class V> decltype(auto) __norm__(const V& v) { return norm(v); }
-template<class V> decltype(auto) __dot__(const V& v1, const V& v2) { return dot(v1,v2); }
-template<class V1, class V2> decltype(auto) __join__(const V1& v1, const V2& v2) { return join(v1,v2); }
-template<class X> decltype(auto) __sjoin__(const X& s1, const X& s2) { return Vector<X>{s1,s2}; }
-template<class M> decltype(auto) __transpose__(const M& A) { return transpose(A); }
+// NOTE: g++ (version 5.4.1) does not accept decltype(auto) here
+template<class V> auto __norm__(const V& v) -> decltype(norm(v)) { return norm(v); }
+template<class V> auto __dot__(const V& v1, const V& v2) -> decltype(dot(v1,v2)) { return dot(v1,v2); }
+template<class V1, class V2> auto __join__(const V1& v1, const V2& v2) -> decltype(join(v1,v2)) { return join(v1,v2); }
+template<class X> Vector<X> __sjoin__(const X& s1, const X& s2) { return Vector<X>{s1,s2}; }
+template<class M> auto __transpose__(const M& A) -> decltype(transpose(A)) { return transpose(A); }
 
 } // namespace Ariadne
 

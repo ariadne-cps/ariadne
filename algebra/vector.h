@@ -270,7 +270,7 @@ template<class X> struct IsVector<Vector<X>> : True { };
 class Range {
     SizeType _start; SizeType _stop;
   public:
-    SizeType operator[](SizeType i) { return _start+i; }
+    SizeType operator[](SizeType i) const { return _start+i; }
     Range(SizeType start, SizeType stop) : _start(start), _stop(stop) { }
     SizeType size() const { return this->_stop-this->_start; }
     SizeType start() const { return this->_start; }
@@ -293,11 +293,12 @@ inline Range range(SizeType start, SizeType stop) { return Range(start,stop); }
 inline Slice slice(SizeType size, SizeType start, SizeType stride) { return Slice(size,start,stride); }
 
 
-template<class V> struct VectorRange
+template<class V> class VectorRange
     : public VectorContainer< VectorRange<V> >
 {
-    typedef typename V::ScalarType ScalarType;
     const V& _v; Range _rng;
+  public:
+    typedef typename V::ScalarType ScalarType;
     VectorRange(const V& v, Range rng) : _v(v), _rng(rng) { }
     SizeType size() const { return _rng.size(); }
     ScalarType zero_element() const { return _v.zero_element(); }

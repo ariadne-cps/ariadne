@@ -94,10 +94,10 @@ class RealHybridVariablesBox
     using HybridVariablesBox<RealInterval>::variables;
     using HybridVariablesBox<RealInterval>::euclidean_set;
 
-    virtual RealHybridVariablesBox* clone() const;
-    virtual SetInterface* _euclidean_set(DiscreteLocation, RealSpace) const;
-    virtual Set<DiscreteLocation> locations() const;
-    virtual Set<RealVariable> variables(DiscreteLocation) const;
+    virtual RealHybridVariablesBox* clone() const override;
+    virtual SetInterface* _euclidean_set(DiscreteLocation, RealSpace) const override;
+    virtual Set<DiscreteLocation> locations() const override;
+    virtual Set<RealVariable> variables(DiscreteLocation) const override;
     virtual RealSpace space(DiscreteLocation) const;
 
     virtual ValidatedSierpinskian overlaps(const HybridExactBox& bx) const override;

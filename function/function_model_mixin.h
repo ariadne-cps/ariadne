@@ -151,8 +151,8 @@ template<class FCTRY, class P, class PR, class PRE> class FunctionModelFactoryMi
     typedef BoxDomainType DomainType;
     friend class FunctionModelFactory<P,PR,PRE>;
   public:
-    virtual FunctionModelFactoryInterface<P,PR,PRE>* clone() const { return new FCTRY(this->upcast()); }
-    virtual OutputStream& _write(OutputStream& os) const { return os << this->upcast(); }
+    virtual FunctionModelFactoryInterface<P,PR,PRE>* clone() const override { return new FCTRY(this->upcast()); }
+    virtual OutputStream& _write(OutputStream& os) const override { return os << this->upcast(); }
 /*
     CanonicalNumericType<P,PR,PRE> create(const Number<P>& number) const;
     ScalarFunctionModel<P,PR,PRE> create(const BoxDomainType& domain, const ScalarFunctionInterface<P>& function) const;
@@ -171,7 +171,7 @@ template<class FCTRY, class P, class PR, class PRE> class FunctionModelFactoryMi
   private:
     template<class T> static inline T* heap_move(T&& t) { return new T(std::forward<T>(t)); }
     inline FCTRY const& upcast() const { return static_cast<FCTRY const&>(*this); }
-    virtual CanonicalNumericType<P,PR,PRE> _create(const Number<P>& number) const {
+    virtual CanonicalNumericType<P,PR,PRE> _create(const Number<P>& number) const override {
         return this->upcast().create(number); }
     virtual ScalarFunctionModelInterface<P,PR,PRE>* _create(const BoxDomainType& domain, const ScalarFunctionInterface<P>& function) const override {
         return heap_move(this->upcast().create(domain,function)); };

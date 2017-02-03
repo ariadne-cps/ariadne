@@ -290,7 +290,7 @@ class HybridValidatedConstrainedImageSet
     virtual Set<DiscreteLocation> locations() const override {
         return {this->Base::location()}; }
 
-    virtual ValidatedSierpinskian overlaps(const HybridExactBoxType& hbx) const {
+    virtual ValidatedSierpinskian overlaps(const HybridExactBoxType& hbx) const override {
         return this->Base::overlaps(hbx); }
     inline ValidatedSierpinskian inside(const HybridExactBoxesType& hbxs) const override {
         return this->Base::inside(hbxs); }

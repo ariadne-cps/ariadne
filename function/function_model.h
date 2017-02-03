@@ -491,6 +491,9 @@ template<class PR, class PRE> VectorFunctionModel<ValidatedTag,PR,PRE> restrict(
     return f._ptr->_restriction(dom); }
 
 
+// Not in function_model_interface.h since DomainType (ExactFloat64Box) is undefined.
+template<class P, class PR, class PRE> ScalarFunctionModel<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create_identity(const IntervalDomainType& domain) const {
+    return _create_coordinate(DomainType(1u,domain),0u); };
 
 template<class P, class PR, class PRE> VectorFunctionModelElement<P,PR,PRE>::operator const ScalarFunctionModel<P,PR,PRE> () const {
     return _p->get(_i); }

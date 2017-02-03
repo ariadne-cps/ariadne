@@ -148,7 +148,7 @@ template<class P, class PR, class PRE> class FunctionModelFactoryInterface
     VectorFunctionModel<P,PR,PRE> create_zeros(SizeType result_size, const DomainType& domain) const { return _create_zeros(result_size,domain); };
     VectorFunctionModel<P,PR,PRE> create_constants(const DomainType& domain, const Vector<Number<P>>& values) const { return _create_constants(domain,values); };
     VectorFunctionModel<P,PR,PRE> create_identity(const DomainType& domain) const { return _create_identity(domain); };
-    ScalarFunctionModel<P,PR,PRE> create_identity(const IntervalDomainType& domain) const { return _create_coordinate(DomainType(1u,domain),0u); };
+    ScalarFunctionModel<P,PR,PRE> create_identity(const IntervalDomainType& domain) const;
     CanonicalNumericType<P,PR,PRE> create_number(const Number<P>& number) const { return this->_create(number); }
 
 };

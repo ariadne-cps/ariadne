@@ -55,7 +55,7 @@ template<class PR> class FloatError
     FloatError<PR>() : _e() { }
     explicit FloatError<PR>(PR const& pr) : _e(pr) { }
     explicit FloatError<PR>(RawFloat<PR> const& x) : _e(x) { ARIADNE_PRECONDITION_MSG((this->_e>=0),"e="<<*this); }
-    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy> FloatError<PR>(M m, PR pr) : _e(m,pr) { }
+    template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>> =dummy> FloatError<PR>(M m, PR pr) : _e(m,pr) { }
     explicit FloatError<PR>(FloatUpperBound<PR> const& x) : FloatError<PR>(x._u) { }
     explicit FloatError<PR>(ValidatedUpperNumber const& y, PR pr) : FloatError(FloatUpperBound<PR>(y,pr)) { }
     FloatError<PR>(PositiveFloatValue<PR> const& x) : _e(x._v) { }

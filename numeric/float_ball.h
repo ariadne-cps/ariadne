@@ -115,7 +115,7 @@ template<class PR> class FloatBall
 template<class PR> class Positive<FloatBall<PR>> : public FloatBall<PR> {
   public:
     Positive<FloatBall<PR>>() : FloatBounds<PR>() { }
-    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy>
+    template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>> =dummy>
         Positive<FloatBall<PR>>(M m, PR pr) : FloatBall<PR>(m,pr) { }
     explicit Positive<FloatBall<PR>>(FloatBall<PR> const& x) : FloatBall<PR>(x) { }
 };

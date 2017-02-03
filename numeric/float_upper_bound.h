@@ -62,7 +62,7 @@ template<class PR> class FloatUpperBound
     explicit FloatUpperBound<PR>(PrecisionType pr) : _u(0.0,pr) { }
     explicit FloatUpperBound<PR>(RawFloatType const& u) : _u(u) { }
 
-    template<class N, EnableIf<IsIntegral<N>> = dummy> FloatUpperBound<PR>(N n, PR pr) : FloatUpperBound<PR>(ExactDouble(n),pr) { }
+    template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> FloatUpperBound<PR>(N n, PR pr) : FloatUpperBound<PR>(ExactDouble(n),pr) { }
     FloatUpperBound<PR>(ExactDouble d, PR pr);
         FloatUpperBound<PR>(const Integer& z, PR pr);
         FloatUpperBound<PR>(const Dyadic& w, PR pr);
@@ -106,8 +106,8 @@ template<class PR> class Positive<FloatUpperBound<PR>> : public FloatUpperBound<
     Positive<FloatUpperBound<PR>>() : FloatUpperBound<PR>() { }
     explicit Positive<FloatUpperBound<PR>>(PR const& pr) : FloatUpperBound<PR>(pr) { }
     explicit Positive<FloatUpperBound<PR>>(RawFloat<PR> const& x) : FloatUpperBound<PR>(x) { }
-    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy> Positive<FloatUpperBound<PR>>(M m, PR pr) : FloatUpperBound<PR>(m,pr) { }
-    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy> PositiveFloatValue<PR> create(M m) const { return PositiveFloatValue<PR>(m,this->precision()); }
+    template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>> =dummy> Positive<FloatUpperBound<PR>>(M m, PR pr) : FloatUpperBound<PR>(m,pr) { }
+    template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>> =dummy> PositiveFloatValue<PR> create(M m) const { return PositiveFloatValue<PR>(m,this->precision()); }
     explicit Positive<FloatUpperBound<PR>>(FloatUpperBound<PR> const& x) : FloatUpperBound<PR>(x) { ARIADNE_PRECONDITION_MSG(!(this->_u<0),"x="<<x); }
     explicit Positive<FloatUpperBound<PR>>(ValidatedUpperNumber const& y, PR pr) : FloatUpperBound<PR>(y,pr) { ARIADNE_PRECONDITION_MSG(!(this->_u<0),"y="<<y); }
     Positive<FloatUpperBound<PR>>(PositiveFloatValue<PR> const& x) : FloatUpperBound<PR>(x) { }

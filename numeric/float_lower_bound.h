@@ -62,7 +62,7 @@ template<class PR> class FloatLowerBound
     explicit FloatLowerBound<PR>(PrecisionType pr) : _l(0.0,pr) { }
     explicit FloatLowerBound<PR>(RawFloatType const& l) : _l(l) { }
 
-    template<class N, EnableIf<IsIntegral<N>> = dummy> FloatLowerBound<PR>(N n, PR pr) : FloatLowerBound<PR>(ExactDouble(n),pr) { }
+    template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> FloatLowerBound<PR>(N n, PR pr) : FloatLowerBound<PR>(ExactDouble(n),pr) { }
     FloatLowerBound<PR>(ExactDouble d, PR pr);
         FloatLowerBound<PR>(const Integer& z, PR pr);
         FloatLowerBound<PR>(const Dyadic& w, PR pr);
@@ -103,7 +103,7 @@ template<class PR> class Positive<FloatLowerBound<PR>> : public FloatLowerBound<
 {
   public:
     Positive<FloatLowerBound<PR>>() : FloatLowerBound<PR>() { }
-    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy>
+    template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>> =dummy>
         Positive<FloatLowerBound<PR>>(M m) : FloatLowerBound<PR>(m) { }
     explicit Positive<FloatLowerBound<PR>>(RawFloat<PR> const& x) : FloatLowerBound<PR>(x) { }
     explicit Positive<FloatLowerBound<PR>>(FloatLowerBound<PR> const& x) : FloatLowerBound<PR>(x) { }

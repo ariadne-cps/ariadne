@@ -71,12 +71,13 @@ template<class T, class U> using IsStrictlyConstructible = And<IsConstructible<T
 template<class T> using IsDefaultConstructible = std::is_default_constructible<T>;
 template<class T, class U> using IsAssignable = std::is_assignable<T,U>;
 template<class T, class U> using IsBaseOf = std::is_base_of<T,U>;
-template<class T> using IsIntegral = std::is_integral<T>;
-template<class T> using IsSigned = std::is_signed<T>;
-template<class T> using IsUnsigned = std::is_unsigned<T>;
-template<class T> using IsFloatingPoint = std::is_floating_point<T>;
-template<class T> using IsSignedIntegral = std::integral_constant<bool,std::is_integral<T>::value and std::is_signed<T>::value>;
-template<class T> using IsUnsignedIntegral = std::integral_constant<bool,std::is_integral<T>::value and std::is_unsigned<T>::value>;
+template<class T> using IsBuiltinArithmetic = std::is_arithmetic<T>;
+template<class T> using IsBuiltinIntegral = std::is_integral<T>;
+template<class T> using IsBuiltinFloatingPoint = std::is_floating_point<T>;
+template<class T> using IsBuiltinSigned = std::is_signed<T>;
+template<class T> using IsBuiltinUnsigned = std::is_unsigned<T>;
+template<class T> using IsBuiltinSignedIntegral = std::integral_constant<bool,std::is_integral<T>::value and std::is_signed<T>::value>;
+template<class T> using IsBuiltinUnsignedIntegral = std::integral_constant<bool,std::is_integral<T>::value and std::is_unsigned<T>::value>;
 
 template<class SIG> using ResultOf = typename std::result_of<SIG>::type;
 

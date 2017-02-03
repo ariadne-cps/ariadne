@@ -47,8 +47,8 @@ class ApproximateDouble {
   public:
     typedef ApproximateTag Paradigm;
     ApproximateDouble(int n) : _d(n) { }
-    ApproximateDouble(double d) : _d(d) { }
-    template<class X> ApproximateDouble(X const& x) : _d(x.get_d()) { }
+    template<class X, EnableIf<IsBuiltinArithmetic<X>> =dummy> ApproximateDouble(X const& x) : _d(x) { }
+    template<class X, DisableIf<IsBuiltinArithmetic<X>> =dummy> ApproximateDouble(X const& x) : _d(x.get_d()) { }
     friend ApproximateDouble operator+(ApproximateDouble x) { return ApproximateDouble(+x._d); }
     friend ApproximateDouble operator-(ApproximateDouble x) { return ApproximateDouble(-x._d); }
     operator double() const { return _d; }
@@ -59,8 +59,8 @@ class ExactDouble {
   public:
     typedef ExactTag Paradigm;
     double get_d() const { return this->_d; }
-    template<class N, EnableIf<IsIntegral<N>> =dummy> explicit ExactDouble(N n) : _d(n) { assert(_d==n); }
-    explicit ExactDouble(double d) : _d(d) { }
+    template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> ExactDouble(N n) : _d(n) { assert(_d==n); }
+    template<class X, EnableIf<IsBuiltinFloatingPoint<X>> =dummy> explicit ExactDouble(X const& x) : _d(x) { assert(_d==x); }
     static ExactDouble infinity() { return ExactDouble(std::numeric_limits<double>::infinity()); }
     operator ExactNumber() const;
     friend ExactDouble operator+(ExactDouble x) { return ExactDouble(+x._d); }

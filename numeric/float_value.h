@@ -78,14 +78,14 @@ template<class PR> class FloatValue
     explicit FloatValue<PR>(PrecisionType pr) : _v(0.0,pr) { }
     explicit FloatValue<PR>(RawFloatType const& v) : _v(v) { }
 
-    template<class N, EnableIf<IsIntegral<N>> = dummy> FloatValue<PR>(N n, PR pr) : FloatValue<PR>(ExactDouble(n),pr) { }
+    template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> FloatValue<PR>(N n, PR pr) : FloatValue<PR>(ExactDouble(n),pr) { }
     FloatValue<PR>(ExactDouble d, PR pr);
     FloatValue<PR>(const Integer& z, PR pr);
     FloatValue<PR>(const TwoExp& t, PR pr);
     FloatValue<PR>(const Dyadic& w, PR pr);
     FloatValue<PR>(const FloatValue<PR>& x, PR pr);
 
-    template<class N, EnableIf<IsIntegral<N>> = dummy> FloatValue<PR>& operator=(N n) { _v=n; return *this; }
+    template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> FloatValue<PR>& operator=(N n) { _v=n; return *this; }
     FloatValue<PR>& operator=(const Integer& z);
     FloatValue<PR>& operator=(const TwoExp& t);
     FloatValue<PR>& operator=(const Dyadic& w);
@@ -138,7 +138,7 @@ template<class PR> class Positive<FloatValue<PR>> : public FloatValue<PR> {
   public:
     Positive<FloatValue<PR>>() : FloatValue<PR>() { }
     explicit Positive<FloatValue<PR>>(PR const& pr) : FloatValue<PR>(pr) { }
-    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy> Positive<FloatValue<PR>>(M m, PR pr) : FloatValue<PR>(m,pr) { }
+    template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>> =dummy> Positive<FloatValue<PR>>(M m, PR pr) : FloatValue<PR>(m,pr) { }
     Positive<FloatValue<PR>>(TwoExp const& ex, PR pr) : FloatValue<PR>(ex,pr) { }
     explicit Positive<FloatValue<PR>>(Dyadic const& w, PR pr) : FloatValue<PR>(w,pr) { }
     explicit Positive<FloatValue<PR>>(RawFloat<PR> const& x) : FloatValue<PR>(x) { }

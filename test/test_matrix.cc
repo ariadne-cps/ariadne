@@ -58,7 +58,6 @@ TestMatrix::test()
 {
     ARIADNE_TEST_CALL(test_concept());
     ARIADNE_TEST_CALL(test_project());
-    return;
     ARIADNE_TEST_CALL(test_misc());
 }
 
@@ -93,7 +92,6 @@ TestMatrix::test_concept()
     fA=fA*fA; iA=eA*eA; iA=eA*iA; iA=iA*eA; iA=iA*iA;
 }
 
-
 Void
 TestMatrix::test_project()
 {
@@ -110,6 +108,7 @@ TestMatrix::test_project()
     ARIADNE_TEST_EQUALS(A[range(0,2)][range(1,4)].column_size(),3);
     ARIADNE_TEST_CONSTRUCT(MatrixRange<Matrix<X>>,AR,(A[range(0,2)][range(1,4)]));
     ARIADNE_TEST_CONSTRUCT(Matrix<X>,ACR,(A[range(0,2)][range(1,4)]));
+
     ARIADNE_TEST_EQUAL(AR[1][2],A[1][3]);
     ARIADNE_TEST_EQUAL(ACR[1][2],A[1][3]);
     ARIADNE_TEST_EXECUTE(AR=B);

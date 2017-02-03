@@ -258,6 +258,24 @@ template<class X> struct QRMatrix {
 /************ Matrix expressions *********************************************************/
 
 
+// NOTE: Can't just use project(MatrixRow,Range) as the MatrixRow lifetime is too short
+template<class M> struct MatrixRowColumns
+    : CovectorExpression<MatrixRowColumns<M>>
+{
+  public:
+    M& _A; SizeType _i; Range _js;
+  public:
+    typedef typename M::ScalarType ScalarType;
+    MatrixRowColumns(M& A, SizeType i, Range js) : _A(A), _i(i), _js(js) { }
+    SizeType size() const { return _js.size(); }
+    auto zero_element() const -> decltype(_A.zero_element()) { return _A.zero_element(); }
+    decltype(auto) operator[](SizeType j) { return _A[_i][_js[j]]; }
+    decltype(auto) operator[](SizeType j) const { return _A[_i][_js[j]]; }
+    MatrixRowColumns<M>& operator=(Covector<ScalarType> const& u) {
+        for(SizeType j=0; j!=u.size(); ++j) { _A.set(_i,_js[j],u[j]); } return *this; }
+};
+template<class M> struct IsCovectorExpression<MatrixRowColumns<M>> : True { };
+
 template<class M> struct MatrixRow
     : public CovectorExpression< MatrixRow<M> >
 {
@@ -269,7 +287,7 @@ template<class M> struct MatrixRow
     auto zero_element() const -> decltype(_A.zero_element()) { return _A.zero_element(); }
     auto operator[](SizeType j) const -> decltype(_A.at(_i,j)) { return _A.at(_i,j); }
     auto operator[](SizeType j) -> decltype(_A.at(_i,j)) { return _A.at(_i,j); }
-    decltype(auto) operator[](Range js) { return project(*this,js); }
+    MatrixRowColumns<M> operator[](Range js) { return MatrixRowColumns<M>(_A,_i,js); }
     MatrixRow<M>& operator=(Covector<ScalarType> const& u) { for(SizeType j=0; j!=u.size(); ++j) { _A.set(_i,j,u[j]); } return *this; }
 };
 template<class M> struct IsCovectorExpression<MatrixRow<M>> : True { };
@@ -359,7 +377,25 @@ template<class M> struct MatrixRange
 };
 template<class M> struct IsMatrixExpression<MatrixRange<M>> : True { };
 
+template<class M> struct MatrixRowsColumn
+    : VectorExpression<MatrixRowsColumn<M>>
+{
+  public:
+    M& _A; Range _is; SizeType _j;
+  public:
+    typedef typename M::ScalarType ScalarType;
+    MatrixRowsColumn(M& A, Range is, SizeType j) : _A(A), _is(is), _j(j) { }
+    SizeType size() const { return _is.size(); }
+    auto zero_element() const -> decltype(_A.zero_element()) { return _A.zero_element(); }
+    decltype(auto) operator[](SizeType i) { return _A[_is[i]][_j]; }
+    decltype(auto) operator[](SizeType i) const { return _A[_is[i]][_j]; }
+    MatrixRowsColumn<M>& operator=(Vector<ScalarType> const& v) {
+        for(SizeType i=0; i!=v.size(); ++i) { _A.set(_is[i],_j,v[i]); } return *this; }
+};
+template<class M> struct IsVectorExpression<MatrixRowsColumn<M>> : True { };
+
 template<class M> struct MatrixRows {
+  public:
     M& _A; Range _is;
   public:
     typedef typename M::ScalarType ScalarType;
@@ -367,7 +403,8 @@ template<class M> struct MatrixRows {
     SizeType row_size() const { return _is.size(); }
     SizeType column_size() const { return _A.column_size(); }
     auto zero_element() const -> decltype(_A.zero_element()) { return _A.zero_element(); }
-    decltype(auto) operator[](SizeType j) { return project(MatrixColumn<M>(_A,j),_is); }
+    // Note: Can't project to VectorExpression below since j in MatrixColumn(_A,j) would be destroyed before use
+    MatrixRowsColumn<M> operator[](SizeType j) { return MatrixRowsColumn<M>(_A,_is,j); }
     MatrixRange<M> operator[](Range js) { return MatrixRange<M>(_A,_is,js); }
     MatrixRows<M>& operator=(Matrix<ScalarType> const& B) {
         for(SizeType i=0; i!=B.row_size(); ++i) { SizeType pi=_is[i]; for(SizeType j=0; j!=B.column_size(); ++j) { _A.set(pi,j,B[i,j]); } } return *this; }

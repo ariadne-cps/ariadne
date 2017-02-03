@@ -27,6 +27,8 @@
 
 #include "config.h"
 #include "function/taylor_function.h"
+#include "function/formula.h"
+#include "algebra/algebra.h"
 #include "geometry/function_set.h"
 #include "geometry/grid_set.h"
 #include "hybrid/hybrid_time.h"

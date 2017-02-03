@@ -28,6 +28,7 @@
 #include "utility/tuple.h"
 #include "algebra/vector.h"
 #include "algebra/matrix.h"
+#include "algebra/algebra.h"
 #include "function/function.h"
 #include "function/taylor_function.h"
 #include "function/constraint.h"

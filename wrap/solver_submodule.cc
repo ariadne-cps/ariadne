@@ -26,7 +26,9 @@
 
 #include <boost/python.hpp>
 
+#include "algebra/algebra.h"
 #include "function/function.h"
+#include "function/formula.h"
 #include "solvers/solver_interface.h"
 #include "solvers/solver.h"
 #include "function/taylor_function.h"

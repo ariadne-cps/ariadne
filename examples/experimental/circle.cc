@@ -14,7 +14,7 @@ using namespace Ariadne;
 int main(int argc, char* argv[])
 {
     /// Constants
-    float EVOL_TIME = 32;   /// Evolution time
+    double EVOL_TIME = 32;   /// Evolution time
     float MAX_ENCL_WIDTH = 0.1;   /// Maximum enclosure width
     float MAX_STEP_SIZE = 4e-3;     /// Maximum step size
     int VERBOSITY = 1;              /// Verbosity of the HybridEvolver

@@ -26,6 +26,7 @@
 
 #include "numeric/numeric.h"
 #include "algebra/vector.h"
+#include "algebra/algebra.h"
 #include "numeric/operators.h"
 #include "function/function.h"
 #include "function/procedure.h"

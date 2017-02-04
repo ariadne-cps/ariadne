@@ -77,7 +77,8 @@ Int main(Int argc, const char* argv[])
     DottedRealAssignment valve_opening_dynamic(dot(aperture)=1/T);
     DottedRealAssignment valve_closing_dynamic(dot(aperture)=-1/T);
     DottedRealAssignment valve_constant_dynamic(dot(aperture)=0.0_dec);
-    RealAssignment valve_open_dynamic(let(aperture)=1.0_dec);
+//    RealAssignment valve_open_dynamic(let(aperture)=1.0_dec);
+    RealAssignment valve_open_dynamic(let(aperture)=1.01_dec);
     RealAssignment valve_closed_dynamic(let(aperture)=0.0_dec);
 
     /// Create the resets
@@ -90,7 +91,7 @@ Int main(Int argc, const char* argv[])
 
     /// Create the guards.
     /// Guards are true when g(x) >= 0
-    ContinuousPredicate finish_opening_guard(aperture>=1);
+    ContinuousPredicate finish_opening_guard(aperture>=1.01_dec);
     cout << "finish_opening_guard=" << finish_opening_guard << endl << endl;
     ContinuousPredicate start_closing_guard(height>=hmax-Delta);
     cout << "start_closing_guard=" << start_closing_guard << endl << endl;
@@ -110,16 +111,20 @@ Int main(Int argc, const char* argv[])
 
     /// Build the automaton
     watertank_system.new_mode(opening,{tank_dynamic,valve_opening_dynamic});
-    watertank_system.new_mode(open,{tank_dynamic,valve_constant_dynamic});
+//    watertank_system.new_mode(open,{tank_dynamic,valve_constant_dynamic});
+    watertank_system.new_mode(open,{valve_open_dynamic},{tank_dynamic});
     watertank_system.new_mode(closing,{tank_dynamic,valve_closing_dynamic});
-    watertank_system.new_mode(closed,{tank_dynamic,valve_constant_dynamic});
+//    watertank_system.new_mode(closed,{tank_dynamic,valve_constant_dynamic});
+    watertank_system.new_mode(closed,{valve_closed_dynamic},{tank_dynamic});
 
     watertank_system.new_invariant(open,start_closing_invariant,must_start_closing);
     watertank_system.new_invariant(closed,start_opening_invariant,must_start_opening);
 
-    watertank_system.new_transition(opening,finish_opening,open,{tank_reset,valve_open_reset},finish_opening_guard,urgent);
+//    watertank_system.new_transition(opening,finish_opening,open,{tank_reset,valve_open_reset},finish_opening_guard,urgent);
+    watertank_system.new_transition(opening,finish_opening,open,{tank_reset},finish_opening_guard,urgent);
     watertank_system.new_transition(open,start_closing,closing,{tank_reset,valve_reset},start_closing_guard,permissive);
-    watertank_system.new_transition(closing,finish_closing,closed,{tank_reset,valve_closed_reset},finish_closing_guard,urgent);
+//    watertank_system.new_transition(closing,finish_closing,closed,{tank_reset,valve_closed_reset},finish_closing_guard,urgent);
+    watertank_system.new_transition(closing,finish_closing,closed,{tank_reset},finish_closing_guard,urgent);
     watertank_system.new_transition(closed,start_opening,opening,{tank_reset,valve_reset},start_opening_guard,permissive);
 
     /// Finished building the automaton
@@ -167,13 +172,16 @@ Int main(Int argc, const char* argv[])
     std::cout << "done." << std::endl;
 
 
+//    HybridGrid grid(watertank_system.state_space());
+    HybridGrid grid(watertank_system.state_auxiliary_space());
+    std::cerr << "grid=" << grid << std::endl;
+
     std::cout << "Discretising orbit" << std::flush;
-    HybridGrid grid(watertank_system.state_space());
     HybridGridTreeSet hgts(grid);
     for (ListSet<EnclosureType>::ConstIterator it = orbit.reach().begin(); it != orbit.reach().end(); it++)
     {
         std::cout<<"."<<std::flush;
-        it->adjoin_outer_approximation_to(hgts,4);
+        it->state_auxiliary_set().adjoin_outer_approximation_to(hgts,4);
     }
     std::cout << "done." << std::endl;
 

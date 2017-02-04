@@ -239,11 +239,11 @@ class HybridAutomaton
                    List<RealAssignment> const& auxilary,
                    List<DottedRealAssignment> const& dynamic);
 
-    Void _new_invariant_(DiscreteLocation location,
+    Void _new_invariant(DiscreteLocation location,
                          ContinuousPredicate invariant,
                          DiscreteEvent event);
 
-    Void _new_guard_(DiscreteLocation location,
+    Void _new_guard(DiscreteLocation location,
                      DiscreteEvent event,
                      ContinuousPredicate guard,
                      EventKind kind);
@@ -323,22 +323,23 @@ class HybridAutomaton
         this->_new_mode(DiscreteLocation(),auxiliary,List<DottedRealAssignment>());
     }
 
-    //! \brief Adds a new internal/output event with a given enabling \a guard condition and triggering \a invariant.
+    //! \brief Adds a new internal/output event with a given enabling \a activation condition and triggering \a invariant.
     Void new_action(DiscreteLocation location,
                     ContinuousPredicate invariant,
                     DiscreteEvent event,
-                    ContinuousPredicate guard,
+                    ContinuousPredicate activation,
                     EventKind kind=PERMISSIVE) {
-        this->_new_action(location,invariant,event,guard,kind);
+        ARIADNE_ASSERT(kind==PERMISSIVE);
+        this->_new_action(location,invariant,event,activation,kind);
     }
 
-    //! \brief Adds a new internal/output event with a given enabling \a guard condition and triggering \a invariant.
+    //! \brief Adds a new urgent internal/output event with a given enabling \a guard.
     Void new_action(DiscreteLocation location,
                     DiscreteEvent event,
                     ContinuousPredicate guard,
                     EventKind kind=URGENT) {
-        ARIADNE_ASSERT(kind==URGENT);
-        this->_new_action(location,!guard,event,guard,kind);
+        ARIADNE_ASSERT(kind==URGENT || kind==IMPACT);
+        this->_new_guard(location,event,guard,kind);
     }
 
     //! \brief Adds an invariant to the automaton.
@@ -346,7 +347,7 @@ class HybridAutomaton
                        ContinuousPredicate const& invariant,
                        DiscreteEvent event) {
         //this->_new_action(location,event,invariant,ContinuousPredicate(ValidatedKleenean(false)),INVARIANT);
-        this->_new_invariant_(location,invariant,event);
+        this->_new_invariant(location,invariant,event);
     }
 
     Void set_invariant(DiscreteLocation location,
@@ -363,7 +364,7 @@ class HybridAutomaton
                    ContinuousPredicate const& guard,
                    EventKind kind) {
         //this->_new_action(location,event,ContinuousPredicate(true),guard,kind);
-        this->_new_guard_(location,event,guard,kind);
+        this->_new_guard(location,event,guard,kind);
     }
 
     Void set_guard(DiscreteLocation location,
@@ -424,9 +425,9 @@ class HybridAutomaton
                         DiscreteLocation target,
                         const List<PrimedRealAssignment>& reset,
                         const ContinuousPredicate& guard,
-                        EventKind kind=urgent) {
+                        EventKind kind) {
         if(kind==urgent || kind==impact) { this->_new_action(source,!guard,event,guard,kind); }
-        else if(kind==permissive) { this->_new_guard_(source,event,guard,kind); }
+        else if(kind==permissive) { this->_new_guard(source,event,guard,kind); }
         else { ARIADNE_FAIL_MSG("Unhandled event kind "<<kind); }
         this->_new_update(source,event,target,reset);
     }
@@ -437,7 +438,7 @@ class HybridAutomaton
                         DiscreteEvent event,
                         DiscreteLocation target,
                         ContinuousPredicate const& guard,
-                        EventKind kind=urgent) {
+                        EventKind kind) {
         this->new_transition(source,event,target,List<PrimedRealAssignment>(),guard,kind);
     }
 
@@ -447,7 +448,7 @@ class HybridAutomaton
                         DiscreteEvent event,
                         ContinuousPredicate const& guard,
                         DiscreteLocation target,
-                        EventKind kind=urgent) {
+                        EventKind kind) {
         this->new_transition(source,event,target,List<PrimedRealAssignment>(),guard,kind);
     }
 
@@ -472,7 +473,7 @@ class HybridAutomaton
     Void new_transition(DiscreteEvent event,
                         List<PrimedRealAssignment> const & reset,
                         ContinuousPredicate const& guard,
-                        EventKind kind=urgent) {
+                        EventKind kind) {
         this->new_transition(DiscreteLocation(),event,DiscreteLocation(),reset,guard,kind);
     }
 
@@ -532,7 +533,10 @@ class HybridAutomaton
     //@{
     //! \name Functions for conformance to HybridAutomatonInterface
 
+    //! \brief The continuous state space for each location.
     virtual HybridSpace state_space() const;
+    //! \brief The continuous space for each location.
+    virtual HybridSpace state_auxiliary_space() const;
     //! \brief The continuous state space in the given location.
     virtual RealSpace continuous_state_space(DiscreteLocation) const;
     //! \brief The space of continuous auxiliary variables in the given location.

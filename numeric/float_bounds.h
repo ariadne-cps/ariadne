@@ -84,6 +84,7 @@ template<class PR> class FloatBounds
     typedef Number<P> GenericType;
     typedef FLT RawFloatType;
     typedef PR PrecisionType;
+    typedef PR PropertiesType;
   public:
     FloatBounds<PR>() : _l(0.0), _u(0.0) { }
     explicit FloatBounds<PR>(PrecisionType pr) : _l(0.0,pr), _u(0.0,pr) { }
@@ -92,13 +93,13 @@ template<class PR> class FloatBounds
     FloatBounds<PR>(FloatLowerBound<PR> const& lower, FloatUpperBound<PR> const& upper);
     FloatBounds<PR>(FloatLowerBound<PR> const& lower, ValidatedUpperNumber const& upper);
     FloatBounds<PR>(ValidatedLowerNumber const& lower, FloatUpperBound<PR> const& upper);
-    template<class N1, class N2, EnableIf<And<IsIntegral<N1>,IsIntegral<N2>>> = dummy> FloatBounds<PR>(N1 n1, N2 n2, PR pr) : _l(n1,pr), _u(n2,pr) { }
+    template<class N1, class N2, EnableIf<And<IsBuiltinIntegral<N1>,IsBuiltinIntegral<N2>>> = dummy> FloatBounds<PR>(N1 n1, N2 n2, PR pr) : _l(n1,pr), _u(n2,pr) { }
     FloatBounds<PR>(ExactDouble const& dl, ExactDouble const& du, PrecisionType pr);
     FloatBounds<PR>(Dyadic const& wl, Dyadic const& wu, PrecisionType pr);
     FloatBounds<PR>(Rational const& ql, Rational const& qu, PrecisionType pr);
     FloatBounds<PR>(Pair<ExactDouble,ExactDouble> const& dlu, PrecisionType pr);
 
-    template<class N, EnableIf<IsIntegral<N>> = dummy> FloatBounds<PR>(N n, PR pr) : FloatBounds<PR>(ExactDouble(n),pr) { }
+    template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> FloatBounds<PR>(N n, PR pr) : FloatBounds<PR>(ExactDouble(n),pr) { }
     FloatBounds<PR>(ExactDouble d, PR pr);
         FloatBounds<PR>(const Integer& z, PR pr);
         FloatBounds<PR>(const Dyadic& w, PR pr);
@@ -113,7 +114,7 @@ template<class PR> class FloatBounds
 
         FloatBounds<PR>& operator=(const FloatValue<PR>& x) { return *this=FloatBounds<PR>(x); }
     FloatBounds<PR>& operator=(const ValidatedNumber& y);
-    template<class N, EnableIf<IsIntegral<N>> = dummy> FloatBounds<PR>& operator=(N n) { return *this=ValidatedNumber(n); }
+    template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> FloatBounds<PR>& operator=(N n) { return *this=ValidatedNumber(n); }
 
     operator ValidatedNumber () const;
 
@@ -131,7 +132,8 @@ template<class PR> class FloatBounds
     double get_d() const { return value_raw().get_d(); }
 
     PrecisionType precision() const { ARIADNE_DEBUG_ASSERT(_l.precision()==_u.precision()); return _u.precision(); }
-    GenericType generic() const;
+    PropertiesType properties() const { ARIADNE_DEBUG_ASSERT(_l.precision()==_u.precision()); return _u.precision(); }
+    GenericType generic() const { return this->operator GenericType(); }
 
     FloatBounds<PR> pm(FloatError<PR> e) const;
 
@@ -161,7 +163,7 @@ template<class PR> class Positive<FloatBounds<PR>> : public FloatBounds<PR>
   public:
     Positive<FloatBounds<PR>>() : FloatBounds<PR>() { }
     explicit Positive<FloatBounds<PR>>(PR const& pr) : FloatBounds<PR>(pr) { }
-    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy> Positive<FloatBounds<PR>>(M m, PR pr) : FloatBounds<PR>(m,pr) { }
+    template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>> =dummy> Positive<FloatBounds<PR>>(M m, PR pr) : FloatBounds<PR>(m,pr) { }
     explicit Positive<FloatBounds<PR>>(RawFloat<PR> const& x) : FloatBounds<PR>(x) { }
     explicit Positive<FloatBounds<PR>>(RawFloat<PR> const& l, RawFloat<PR> const& u) : FloatBounds<PR>(l,u) { }
     explicit Positive<FloatBounds<PR>>(FloatBounds<PR> const& x) : FloatBounds<PR>(x) { }

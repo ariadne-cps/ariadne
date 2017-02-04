@@ -43,15 +43,26 @@
 
 namespace Ariadne {
 
-template<> class Interval<RawFloat64> {
-    RawFloat64 _l, _u;
+template<> class Interval<Float64> {
+    Float64 _l, _u;
   public:
-    Interval(RawFloat64 l, RawFloat64 u) :_l(l), _u(u) { }
-    template<class UB> Interval(Interval<UB> const& ivl) : _l(ivl.lower().raw()), _u(ivl.upper().raw()) { }
-    RawFloat64 lower() const { return _l; }
-    RawFloat64 upper() const { return _u; }
+    Interval(Float64 l, Float64 u) : _l(l), _u(u) { }
+    template<class UB> Interval(Interval<UB> const& ivl) : _l(ivl.lower()), _u(ivl.upper()) { }
+    Float64 lower() const { return _l; }
+    Float64 upper() const { return _u; }
 };
-typedef Interval<RawFloat64> Float64Interval;
+
+template<> class Interval<ApproximateDouble> {
+    ApproximateDouble _l, _u;
+  public:
+    Interval(ApproximateDouble l, ApproximateDouble u) : _l(l), _u(u) { }
+    template<class UB> Interval(Interval<UB> const& ivl) : _l(ivl.lower()), _u(ivl.upper()) { }
+    ApproximateDouble lower() const { return _l; }
+    ApproximateDouble upper() const { return _u; }
+};
+using ApproximateDoubleInterval = Interval<ApproximateDouble>;
+using ApproximateDoubleVariableInterval = VariableInterval<ApproximateDouble>;
+
 
 struct HybridGraphicsObject {
     HybridGraphicsObject(const GraphicsProperties& gp, const HybridDrawableInterface& sh)
@@ -68,45 +79,25 @@ struct Variables2d {
 };
 
 
-struct FloatVariableLowerInterval {
-    RawFloat64 _lower; RealVariable _variable;
-    FloatVariableLowerInterval(const RawFloat64& l, const RealVariable& v) : _lower(l), _variable(v) { }
-};
-
-class FloatVariableInterval {
-  private:
-    RawFloat64 _lower; Variable<Real> _variable; RawFloat64 _upper;
-  public:
-    FloatVariableInterval(const RawFloat64& l, const Variable<Real>& v, const RawFloat64& u)
-        : _lower(l), _variable(v), _upper(u) { ARIADNE_ASSERT_MSG(l<=u,"ExactIntervalType("<<l<<","<<u<<") not provably nonempty"); }
-    FloatVariableInterval(const RealVariableInterval& rvivl)
-        : _lower(rvivl.lower().get_d()), _variable(rvivl.variable()), _upper(rvivl.upper().get_d()) { }
-    Variable<Real> const& variable() const { return this->_variable; }
-    const Float64Interval interval() const { return Float64Interval(this->_lower,this->_upper); }
-    const RawFloat64 lower() const { return this->_lower; }
-    const RawFloat64 upper() const { return this->_upper; }
-};
-inline FloatVariableLowerInterval operator<=(double l, RealVariable const& v) {
-    return FloatVariableLowerInterval(l,v); }
-inline FloatVariableInterval operator<=(FloatVariableLowerInterval lv, double u) {
-    return FloatVariableInterval(lv._lower,lv._variable,u); }
-inline FloatVariableInterval operator<=(FloatVariableLowerInterval lv, RawFloat64 u) {
-    return FloatVariableInterval(lv._lower,lv._variable,u); }
-inline FloatVariableInterval operator<=(FloatVariableLowerInterval lv, Real u) {
-    return FloatVariableInterval(lv._lower,lv._variable,RawFloat64(u.get_d())); }
 
 struct Axes2d {
-    Axes2d(const FloatVariableInterval x, const FloatVariableInterval& y)
-            : variables(x.variable(),y.variable()), bounds() {
-        bounds.insert(x.variable(),x.interval());
-        bounds.insert(y.variable(),y.interval()); }
-    Axes2d(double xl, const RealVariable& x, double xu, double yl, const RealVariable& y, double yu)
-            : variables(x,y), bounds() {
-        bounds.insert(x,Float64Interval(xl,xu));
-        bounds.insert(y,Float64Interval(yl,yu)); }
+    Axes2d(const ApproximateDoubleVariableInterval x, const ApproximateDoubleVariableInterval& y);
+    Axes2d(ApproximateDouble xl, const RealVariable& x, ApproximateDouble xu, ApproximateDouble yl, const RealVariable& y, ApproximateDouble yu);
     Variables2d variables;
-    Map<RealVariable,Float64Interval> bounds;
+    Map<RealVariable,ApproximateDoubleInterval> bounds;
 };
+
+inline Axes2d::Axes2d(const ApproximateDoubleVariableInterval x, const ApproximateDoubleVariableInterval& y)
+        : variables(x.variable(),y.variable()), bounds() {
+    bounds.insert(x.variable(),x.interval());
+    bounds.insert(y.variable(),y.interval());
+}
+
+inline Axes2d::Axes2d(ApproximateDouble xl, const RealVariable& x, ApproximateDouble xu, ApproximateDouble yl, const RealVariable& y, ApproximateDouble yu)
+        : variables(x,y), bounds() {
+    bounds.insert(x,ApproximateDoubleInterval(xl,xu));
+    bounds.insert(y,ApproximateDoubleInterval(yl,yu));
+}
 
 //! \brief Class for plotting figures of hybrid sets.
 class HybridFigure
@@ -117,9 +108,9 @@ class HybridFigure
 
     Void set_locations(const List<DiscreteLocation>& l) { locations=Set<DiscreteLocation>(l); }
     Void set_axes(const Axes2d& axes) { bounds=axes.bounds; variables=axes.variables; }
-    Void set_bounds(const RealVariable& x, const RawFloat64& l, const RawFloat64& u) { bounds.insert(x,ExactIntervalType(l,u)); }
-    Void set_bounds(const RealVariable& x, const Float64Interval& ivl) { bounds.insert(x,ivl); }
-    Void set_bounds(const Map<RealVariable,Float64Interval>& b) { bounds=b; };
+    Void set_bounds(const RealVariable& x, const ApproximateDouble& l, const ApproximateDouble& u) { bounds.insert(x,ApproximateDoubleInterval(l,u)); }
+    Void set_bounds(const RealVariable& x, const ApproximateDoubleInterval& ivl) { bounds.insert(x,ivl); }
+    Void set_bounds(const Map<RealVariable,ApproximateDoubleInterval>& b) { bounds=b; };
     Void set_variables(const RealVariable& x, const RealVariable& y) { variables=Variables2d(x,y); }
 
     Void set_line_style(Bool ls) { properties.line_style=ls; }
@@ -147,7 +138,7 @@ class HybridFigure
     Void _paint_all(CanvasInterface& canvas) const; // Writes all shapes to the canvas
   private:
   public:
-    Map<RealVariable,Float64Interval> bounds;
+    Map<RealVariable,ApproximateDoubleInterval> bounds;
     Set<DiscreteLocation> locations;
     Variables2d variables;
     GraphicsProperties properties;

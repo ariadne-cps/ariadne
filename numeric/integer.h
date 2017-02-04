@@ -49,8 +49,8 @@ class Nat32 {
     uint32_t _m;
   public:
     Nat32() : _m(0u) { }
-    template<class M, EnableIf<And<IsIntegral<M>,IsUnsigned<M>>> = dummy> Nat32(M m) : _m(m) { assert(_m==m); }
-    template<class N, EnableIf<And<IsIntegral<N>,IsSigned<N>>> = dummy> Nat32(N n) : _m(n) { assert(n>=0); assert((int64_t)_m==n); }
+    template<class M, EnableIf<And<IsBuiltinIntegral<M>,IsBuiltinUnsigned<M>>> = dummy> Nat32(M m) : _m(m) { assert(_m==m); }
+    template<class N, EnableIf<And<IsBuiltinIntegral<N>,IsBuiltinSigned<N>>> = dummy> Nat32(N n) : _m(n) { assert(n>=0); assert((int64_t)_m==n); }
     uint32_t get_ui() const { return _m; }
 };
 
@@ -58,8 +58,8 @@ class Nat64 {
     uint64_t _m;
   public:
     Nat64() : _m(0u) { }
-    template<class M, EnableIf<And<IsIntegral<M>,IsUnsigned<M>>> = dummy> Nat64(M m) : _m(m) { assert(_m==m); }
-    template<class N, EnableIf<And<IsIntegral<N>,IsSigned<N>>> = dummy> Nat64(N n) : _m(n) { assert(n>=0); assert((int64_t)_m==n);
+    template<class M, EnableIf<And<IsBuiltinIntegral<M>,IsBuiltinUnsigned<M>>> = dummy> Nat64(M m) : _m(m) { assert(_m==m); }
+    template<class N, EnableIf<And<IsBuiltinIntegral<N>,IsBuiltinSigned<N>>> = dummy> Nat64(N n) : _m(n) { assert(n>=0); assert((int64_t)_m==n);
         assert(uint64_t(int64_t(_m))==_m); }
     uint64_t get_ui() const { return _m; }
 };
@@ -68,8 +68,8 @@ class Int32 {
     int32_t _n;
   public:
     Int32() : _n(0) { }
-    template<class M, EnableIf<And<IsIntegral<M>,IsUnsigned<M>>> = dummy> Int32(M m) : _n(m) { assert(_n>=0); assert((uint32_t)_n==m); }
-    template<class N, EnableIf<And<IsIntegral<N>,IsSigned<N>>> = dummy> Int32(N n) : _n(n) { assert(_n==n); }
+    template<class M, EnableIf<And<IsBuiltinIntegral<M>,IsBuiltinUnsigned<M>>> = dummy> Int32(M m) : _n(m) { assert(_n>=0); assert((uint32_t)_n==m); }
+    template<class N, EnableIf<And<IsBuiltinIntegral<N>,IsBuiltinSigned<N>>> = dummy> Int32(N n) : _n(n) { assert(_n==n); }
     int32_t get_si() const { return _n; }
 };
 
@@ -77,8 +77,8 @@ class Int64 {
     int64_t _n;
   public:
     Int64() : _n(0) { }
-    template<class M, EnableIf<And<IsIntegral<M>,IsUnsigned<M>>> = dummy> Int64(M m) : _n(m) { assert(_n>=0); assert((uint64_t)_n==m); }
-    template<class N, EnableIf<And<IsIntegral<N>,IsSigned<N>>> = dummy> Int64(N n) : _n(n) { assert(_n==n); }
+    template<class M, EnableIf<And<IsBuiltinIntegral<M>,IsBuiltinUnsigned<M>>> = dummy> Int64(M m) : _n(m) { assert(_n>=0); assert((uint64_t)_n==m); }
+    template<class N, EnableIf<And<IsBuiltinIntegral<N>,IsBuiltinSigned<N>>> = dummy> Int64(N n) : _n(n) { assert(_n==n); }
     int64_t get_si() const { return _n; }
 };
 
@@ -113,8 +113,8 @@ class Integer
   public:
     ~Integer();
     Integer();
-    template<class M, EnableIf<And<IsIntegral<M>,IsUnsigned<M>>> = dummy> Integer(M m);
-    template<class N, EnableIf<And<IsIntegral<N>,IsSigned<N>>> = dummy> Integer(N n);
+    template<class M, EnableIf<And<IsBuiltinIntegral<M>,IsBuiltinUnsigned<M>>> = dummy> Integer(M m);
+    template<class N, EnableIf<And<IsBuiltinIntegral<N>,IsBuiltinSigned<N>>> = dummy> Integer(N n);
     explicit Integer(const mpz_t);
     Integer(const Integer&);
     Integer(Integer&&);
@@ -141,12 +141,12 @@ class Integer
     friend Integer operator"" _z(unsigned long long int n);
 /*
     // Comparisons with arbitary ints go through Int64
-    template<class N, EnableIf<IsIntegral<N>> = dummy> friend inline auto operator==(Integer const& x, N n) -> decltype(x==Int64(n)) { return x==Int64(n); }
-    template<class N, EnableIf<IsIntegral<N>> = dummy> friend inline auto operator!=(Integer const& x, N n) -> decltype(x!=Int64(n)) { return x!=Int64(n); }
-    template<class N, EnableIf<IsIntegral<N>> = dummy> friend inline auto operator< (Integer const& x, N n) -> decltype(x!=Int64(n)) { return x< Int64(n); }
-    template<class N, EnableIf<IsIntegral<N>> = dummy> friend inline auto operator> (Integer const& x, N n) -> decltype(x!=Int64(n)) { return x> Int64(n); }
-    template<class N, EnableIf<IsIntegral<N>> = dummy> friend inline auto operator<=(Integer const& x, N n) -> decltype(x!=Int64(n)) { return x<=Int64(n); }
-    template<class N, EnableIf<IsIntegral<N>> = dummy> friend inline auto operator>=(Integer const& x, N n) -> decltype(x!=Int64(n)) { return x>=Int64(n); }
+    template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> friend inline auto operator==(Integer const& x, N n) -> decltype(x==Int64(n)) { return x==Int64(n); }
+    template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> friend inline auto operator!=(Integer const& x, N n) -> decltype(x!=Int64(n)) { return x!=Int64(n); }
+    template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> friend inline auto operator< (Integer const& x, N n) -> decltype(x!=Int64(n)) { return x< Int64(n); }
+    template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> friend inline auto operator> (Integer const& x, N n) -> decltype(x!=Int64(n)) { return x> Int64(n); }
+    template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> friend inline auto operator<=(Integer const& x, N n) -> decltype(x!=Int64(n)) { return x<=Int64(n); }
+    template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> friend inline auto operator>=(Integer const& x, N n) -> decltype(x!=Int64(n)) { return x>=Int64(n); }
 */
   public:
     long int get_si() const;
@@ -159,8 +159,8 @@ class Integer
     Integer(Int64 n);
 };
 
-template<class M, EnableIf<And<IsIntegral<M>,IsUnsigned<M>>>> inline Integer::Integer(M m) : Integer(Nat64(m)) { }
-template<class N, EnableIf<And<IsIntegral<N>,IsSigned<N>>>> inline Integer::Integer(N n) : Integer(Int64(n)) { }
+template<class M, EnableIf<And<IsBuiltinIntegral<M>,IsBuiltinUnsigned<M>>>> inline Integer::Integer(M m) : Integer(Nat64(m)) { }
+template<class N, EnableIf<And<IsBuiltinIntegral<N>,IsBuiltinSigned<N>>>> inline Integer::Integer(N n) : Integer(Int64(n)) { }
 Integer operator"" _z(unsigned long long int n);
 
 template<> class Positive<Integer> : public Integer {

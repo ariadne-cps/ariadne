@@ -38,6 +38,7 @@
 #include "numeric/numeric.h"
 #include "output/graphics_interface.h"
 #include "geometry/function_set.h"
+#include "hybrid/hybrid_set.h"
 #include "hybrid/hybrid_enclosure.h"
 
 #include "dynamics/orbit.h"
@@ -60,21 +61,18 @@ class HybridGridTreeSet;
 class HybridTime;
 
 class DiscreteLocation;
-template<class BS> class HybridBasicSet;
 
-class HybridPoint;
-class HybridBoxType;
 typedef HybridBasicSet<InterpolatedCurve> HybridInterpolatedCurve;
 
 template<class ES> OutputStream& operator<<(OutputStream&, const Orbit<ES>&);
 
 template<>
-class Orbit<HybridPoint>
+class Orbit<HybridExactPoint>
     : public HybridDrawableInterface
 {
   public:
-    Orbit(const HybridPoint& hpt);
-    Void insert(HybridTime ht, const HybridPoint& hpt);
+    Orbit(const HybridExactPoint& hpt);
+    Void insert(HybridTime ht, const HybridExactPoint& hpt);
     Nat size() const;
     const InterpolatedCurve& curve(Nat m) const;
     const std::vector<HybridInterpolatedCurve>& curves() const { return *this->_curves_ptr; }
@@ -85,7 +83,7 @@ class Orbit<HybridPoint>
 
 template<>
 OutputStream&
-operator<<(OutputStream& os, const Orbit< HybridPoint >& orb);
+operator<<(OutputStream& os, const Orbit< HybridExactPoint >& orb);
 
 template<>
 class Orbit<HybridGridCell>

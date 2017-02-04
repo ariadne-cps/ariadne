@@ -46,6 +46,7 @@ template<class PR> class FloatError
     RawFloat<PR> _e;
   public:
     typedef PR PrecisionType;
+    typedef PR PropertiesType;
   public:
     FloatError<PR>(PositiveFloatUpperBound<PR> const& x) : _e(x._u) { }
     operator PositiveFloatUpperBound<PR> const& () const { return reinterpret_cast<PositiveFloatUpperBound<PR>const&>(*this); }
@@ -54,13 +55,14 @@ template<class PR> class FloatError
     FloatError<PR>() : _e() { }
     explicit FloatError<PR>(PR const& pr) : _e(pr) { }
     explicit FloatError<PR>(RawFloat<PR> const& x) : _e(x) { ARIADNE_PRECONDITION_MSG((this->_e>=0),"e="<<*this); }
-    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy> FloatError<PR>(M m, PR pr) : _e(m,pr) { }
+    template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>> =dummy> FloatError<PR>(M m, PR pr) : _e(m,pr) { }
     explicit FloatError<PR>(FloatUpperBound<PR> const& x) : FloatError<PR>(x._u) { }
     explicit FloatError<PR>(ValidatedUpperNumber const& y, PR pr) : FloatError(FloatUpperBound<PR>(y,pr)) { }
     FloatError<PR>(PositiveFloatValue<PR> const& x) : _e(x._v) { }
     FloatError<PR>& operator=(Nat m) { reinterpret_cast<FloatUpperBound<PR>&>(*this)=m; return *this; }
   public:
     PrecisionType precision() const { return _e.precision(); }
+    PropertiesType properties() const { return _e.precision(); }
     RawFloat<PR> const& raw() const { return _e; }
     RawFloat<PR>& raw() { return _e; }
   public:

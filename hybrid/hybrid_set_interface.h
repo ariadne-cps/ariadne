@@ -39,19 +39,9 @@
 #include "expression/space.h"
 #include "geometry/set.h"
 #include "expression/expression_set.h"
+#include "hybrid/hybrid_set.decl.h"
 
 namespace Ariadne {
-
-class RealVariablesBox;
-class ExactFloat64VariablesBox;
-typedef ExactFloat64VariablesBox ExactVariablesBoxType;
-
-class HybridSpace;
-template<class BS> class HybridBasicSet;
-
-class HybridPoint;
-class HybridBoxType;
-class HybridBoxes;
 
 //! \ingroup HybridSetSubmodule
 //! \ingroup ExpressionSet
@@ -77,8 +67,8 @@ class HybridBoundedSetInterface
     virtual HybridBoundedSetInterface* clone() const = 0;
     virtual Set<DiscreteLocation> locations() const = 0;
     inline BoundedSet euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
-    virtual ValidatedSierpinskian inside(const HybridBoxes& bx) const = 0;
-    virtual HybridBoxes bounding_box() const = 0;
+    virtual ValidatedSierpinskian inside(const HybridExactBoxes& bx) const = 0;
+    virtual HybridUpperBoxes bounding_box() const = 0;
   protected:
     virtual BoundedSetInterface* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
 };
@@ -90,7 +80,7 @@ class HybridOvertSetInterface
   public:
     virtual HybridOvertSetInterface* clone() const = 0;
     inline OvertSet euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
-    virtual ValidatedSierpinskian overlaps(const HybridBoxType& bx) const = 0;
+    virtual ValidatedSierpinskian overlaps(const HybridExactBox& bx) const = 0;
   protected:
     virtual OvertSetInterface* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
 };
@@ -102,7 +92,7 @@ class HybridOpenSetInterface
   public:
     virtual HybridOpenSetInterface* clone() const = 0;
     inline OpenSet euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
-    virtual ValidatedSierpinskian covers(const HybridBoxType& bx) const = 0;
+    virtual ValidatedSierpinskian covers(const HybridExactBox& bx) const = 0;
   protected:
     virtual OpenSetInterface* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
 };
@@ -114,7 +104,7 @@ class HybridClosedSetInterface
   public:
     virtual HybridClosedSetInterface* clone() const = 0;
     inline ClosedSet euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
-    virtual ValidatedSierpinskian separated(const HybridBoxType& bx) const = 0;
+    virtual ValidatedSierpinskian separated(const HybridExactBox& bx) const = 0;
   protected:
     virtual ClosedSetInterface* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
 };

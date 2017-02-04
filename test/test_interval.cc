@@ -129,7 +129,7 @@ TestIntervalType::test_constructors()
     ARIADNE_TEST_EQUAL(ivld6.upper().raw(),Float64(1.25));
 
     // Empty interval
-    EmptyIntervalType empty_interval;
+    EmptyInterval empty_interval;
     ExactIntervalType ivld7(empty_interval);
     ARIADNE_TEST_ASSERT(ivld7.lower().raw()==+inf); ARIADNE_TEST_ASSERT(ivld7.upper().raw()==-inf);
 }
@@ -185,7 +185,7 @@ Void TestIntervalType::test_comparison() {
 
 Void TestIntervalType::test_geometric_predicates()
 {
-    ExactIntervalType empty_interval=EmptyIntervalType();
+    ExactIntervalType empty_interval=EmptyInterval();
 
     ARIADNE_TEST_PRINT(empty_interval);
 

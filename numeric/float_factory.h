@@ -36,8 +36,10 @@ template<class PR> class FloatFactory {
     PR _pr;
   public:
     typedef PR PrecisionType;
+    typedef PR PropertiesType;
     FloatFactory(PR const& pr) : _pr(pr) { }
     PR precision() const { return this->_pr; }
+    PR properties() const { return this->_pr; }
   public:
     FloatApproximation<PR> create(Number<ApproximateTag> const& y) { return FloatApproximation<PR>(y,_pr); }
     FloatLowerBound<PR> create(Number<ValidatedLowerTag> const& y) { return FloatLowerBound<PR>(y,_pr); }
@@ -51,9 +53,9 @@ template<class PR> class FloatFactory {
     FloatBounds<PR> create(Integer const& y) { return FloatBounds<PR>(y,_pr); }
     FloatValue<PR> create(Dyadic const& y, ExactTag) { return FloatValue<PR>(y,_pr); }
     FloatValue<PR> create(Integer const& y, ExactTag) { return FloatValue<PR>(y,_pr); }
-    template<class N, EnableIf<IsSignedIntegral<N>> =dummy> FloatValue<PR> create(N const& y) { return FloatValue<PR>(y,_pr); }
-    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy> PositiveFloatValue<PR> create(M const& y) { return PositiveFloatValue<PR>(y,_pr); }
-    template<class D, EnableIf<IsFloatingPoint<D>> =dummy> FloatApproximation<PR> create(D const& y) { return FloatApproximation<PR>(RawFloat<PR>(y,_pr)); }
+    template<class N, EnableIf<IsBuiltinSignedIntegral<N>> =dummy> FloatValue<PR> create(N const& y) { return FloatValue<PR>(y,_pr); }
+    template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>> =dummy> PositiveFloatValue<PR> create(M const& y) { return PositiveFloatValue<PR>(y,_pr); }
+    template<class D, EnableIf<IsBuiltinFloatingPoint<D>> =dummy> FloatApproximation<PR> create(D const& y) { return FloatApproximation<PR>(RawFloat<PR>(y,_pr)); }
 };
 template<class Y, class PR> using ConcreteType = decltype(declval<FloatFactory<PR>>().create(declval<Y>()));
 

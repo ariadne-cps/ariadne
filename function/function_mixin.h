@@ -45,14 +45,14 @@ typedef Algebra<ValidatedNumber> ValidatedAlgebra;
 typedef Algebra<EffectiveNumber> EffectiveAlgebra;
 
 template<class F, class P, class D, class C> class FunctionMixin { };
-template<class F, class P, class D=BoxDomain> class ScalarFunctionMixin;
-template<class F, class P, class D=BoxDomain> class VectorFunctionMixin;
+template<class F, class P, class D=BoxDomainType> class ScalarFunctionMixin;
+template<class F, class P, class D=BoxDomainType> class VectorFunctionMixin;
 
 template<class T> T* heap_copy(const T& t) { return new T(t); }
 
 template<class D> D make_domain(SizeType d);
-template<> inline IntervalDomain make_domain(SizeType d) { assert(d==1u); return IntervalDomain(-inf,+inf); }
-template<> inline BoxDomain make_domain(SizeType d) { return BoxDomain(d,IntervalDomain(-inf,+inf)); }
+template<> inline IntervalDomainType make_domain(SizeType d) { assert(d==1u); return IntervalDomainType(-inf,+inf); }
+template<> inline BoxDomainType make_domain(SizeType d) { return BoxDomainType(d,IntervalDomainType(-inf,+inf)); }
 
 template<class F, class D, class C>
 class FunctionMixin<F,Void,D,C>
@@ -74,10 +74,10 @@ class FunctionMixin<F,Void,D,C>
 };
 
 template<class F, class D>
-class FunctionMixin<F,Void,D,IntervalDomain>
-    : public virtual FunctionInterface<Void,D,IntervalDomain>
+class FunctionMixin<F,Void,D,IntervalDomainType>
+    : public virtual FunctionInterface<Void,D,IntervalDomainType>
 {
-    typedef IntervalDomain C;
+    typedef IntervalDomainType C;
     typedef typename FunctionInterface<Void,D,C>::DomainType DomainType;
     typedef typename FunctionInterface<Void,D,C>::CodomainType CodomainType;
   protected:
@@ -156,10 +156,10 @@ class FunctionMixin<F,EffectiveTag,D,C>
 };
 
 template<class F, class P, class D> class ScalarFunctionMixin
-    : public FunctionMixin<F,P,D,IntervalDomain> { };
+    : public FunctionMixin<F,P,D,IntervalDomainType> { };
 
 template<class F, class P, class D> class VectorFunctionMixin
-    : public FunctionMixin<F,P,D,BoxDomain>
+    : public FunctionMixin<F,P,D,BoxDomainType>
     , public virtual VectorOfFunctionInterface<P,D>
 {
     virtual ScalarFunctionInterface<P,D>* _get(SizeType i) const override = 0;

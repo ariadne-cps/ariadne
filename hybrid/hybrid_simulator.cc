@@ -51,7 +51,6 @@
 
 namespace Ariadne {
 
-class HybridPoint;
 template<class T> class Orbit;
 
 class DegenerateCrossingException { };
@@ -67,7 +66,7 @@ Void HybridSimulator::set_step_size(double h)
 }
 
 
-ExactPoint make_point(const HybridPoint& hpt, const RealSpace& spc) {
+ExactPoint make_point(const HybridExactPoint& hpt, const RealSpace& spc) {
     if(hpt.space()==spc) { return hpt.point(); }
     Map<RealVariable,Float64Value> values=hpt.values();
     ExactPoint pt(spc.dimension());
@@ -89,8 +88,8 @@ Map<DiscreteEvent,EffectiveScalarFunction> guard_functions(const HybridAutomaton
     return guards;
 }
 
-Orbit<HybridPoint>
-HybridSimulator::orbit(const HybridAutomatonInterface& system, const HybridPoint& init_pt, const HybridTime& tmax) const
+Orbit<HybridExactPoint>
+HybridSimulator::orbit(const HybridAutomatonInterface& system, const HybridExactPoint& init_pt, const HybridTime& tmax) const
 {
     Precision64 pr;
     HybridTime t(0.0,0);
@@ -101,7 +100,7 @@ HybridSimulator::orbit(const HybridAutomatonInterface& system, const HybridPoint
     ApproximatePoint point=make_point(init_pt,space);
     ApproximatePoint next_point;
 
-    Orbit<HybridPoint> orbit(HybridPoint(location,space,cast_exact(point)));
+    Orbit<HybridExactPoint> orbit(HybridExactPoint(location,space,cast_exact(point)));
 
     EffectiveVectorFunction dynamic=system.dynamic_function(location);
     Map<DiscreteEvent,EffectiveScalarFunction> guards=guard_functions(system,location);
@@ -148,7 +147,7 @@ HybridSimulator::orbit(const HybridAutomatonInterface& system, const HybridPoint
             t._continuous_time += Real(Float64Value(h.raw()));
         }
         point=next_point;
-        orbit.insert(t,HybridPoint(location,space,cast_exact(point)));
+        orbit.insert(t,HybridExactPoint(location,space,cast_exact(point)));
     }
 
     return orbit;

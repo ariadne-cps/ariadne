@@ -56,6 +56,7 @@ template<class PR> class FloatBall
     typedef Number<P> GenericType;
     typedef FLT RawFloatType;
     typedef PR PrecisionType;
+    typedef PR PropertiesType;
   public:
     FloatBall<PR>() : _v(0.0), _e(0.0) { }
     explicit FloatBall<PR>(PrecisionType pr) : _v(0.0,pr), _e(0.0,pr) { }
@@ -94,6 +95,8 @@ template<class PR> class FloatBall
     double get_d() const { return _v.get_d(); }
 
     PrecisionType precision() const { return _v.precision(); }
+    PropertiesType properties() const { return _v.precision(); }
+    GenericType generic() const { return this->operator GenericType(); }
     FloatBall<PR> pm(FloatError<PR> e) const;
     friend FloatApproximation<PR> round(FloatApproximation<PR> const& x);
   public:
@@ -112,7 +115,7 @@ template<class PR> class FloatBall
 template<class PR> class Positive<FloatBall<PR>> : public FloatBall<PR> {
   public:
     Positive<FloatBall<PR>>() : FloatBounds<PR>() { }
-    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy>
+    template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>> =dummy>
         Positive<FloatBall<PR>>(M m, PR pr) : FloatBall<PR>(m,pr) { }
     explicit Positive<FloatBall<PR>>(FloatBall<PR> const& x) : FloatBall<PR>(x) { }
 };

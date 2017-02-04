@@ -119,8 +119,8 @@ _evolution(EnclosureListType& final_sets,
 {
     typedef EffectiveVectorFunction FunctionType;
     typedef Vector<ExactIntervalType> BoxType;
-    typedef ValidatedVectorFunctionModel FunctionModelType;
-    typedef ValidatedVectorFunctionModel FlowModelType;
+    typedef ValidatedVectorFunctionModel64 FunctionModelType;
+    typedef ValidatedVectorFunctionModel64 FlowModelType;
 
     ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n");
 
@@ -195,8 +195,8 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
 {
     typedef EffectiveVectorFunction FunctionType;
     typedef Vector<ExactIntervalType> BoxType;
-    typedef ValidatedVectorFunctionModel MapModelType;
-    typedef ValidatedVectorFunctionModel FlowModelType;
+    typedef ValidatedVectorFunctionModel64 MapModelType;
+    typedef ValidatedVectorFunctionModel64 FlowModelType;
     typedef Enclosure EnclosureType;
 
     EnclosureType current_set_model;

@@ -36,72 +36,53 @@
 #include "algebra/vector.h"
 #include "algebra/matrix.h"
 #include "algebra/operations.h"
-#include "geometry/box.h"
+#include "function/domain.h"
 
 namespace Ariadne {
 
-template<class P, class PR, class PRE> ScalarFunctionModel<P,PR,PRE> ScalarFunctionModel<P,PR,PRE>::create_zero() const {
-    return ScalarFunctionModel<P,PR,PRE>(this->_ptr->_create_zero(this->domain()));
-}
 
-template<class P, class PR, class PRE> ScalarFunctionModel<P,PR,PRE> ScalarFunctionModel<P,PR,PRE>::create_constant(Number<P> const& c) const {
-    return ScalarFunctionModel<P,PR,PRE>(this->_ptr->_create_constant(this->domain(),c));
-}
-
-template<class P, class PR, class PRE> inline ScalarFunctionModel<P,PR,PRE> ScalarFunctionModel<P,PR,PRE>::create_coordinate(SizeType j) const {
-    return ScalarFunctionModel<P,PR,PRE>(this->_ptr->_create_coordinate(this->domain(),j));
-}
-
-template<class P, class PR, class PRE> inline VectorFunctionModel<P,PR,PRE> ScalarFunctionModel<P,PR,PRE>::create_identity() const {
-    return this->_ptr->_create_identity();
-}
-
-template<class P, class PR, class PRE> inline ScalarFunctionModel<P,PR,PRE> ScalarFunctionModel<P,PR,PRE>::create(const ScalarFunction<P>& g) const {
-    ScalarFunctionModel<P,PR,PRE> const& f=*this; return compose(g,f.create_identity());
-}
-
-template<class P, class PR, class PRE> inline VectorFunctionModel<P,PR,PRE> ScalarFunctionModel<P,PR,PRE>::create(const VectorFunction<P>& g) const {
-    ScalarFunctionModel<P,PR,PRE> const& f=*this; return compose(g,f.create_identity());
-}
+/*
+template<class P, class PR, class PRE> ScalarFunctionModel<P,PR,PRE> FunctionModelFactory<P,PR,PRE>::create_constant(const DomainType& domain, const CanonicalNumericType<P,PR,PRE>& value) const {
+    return ScalarFunctionModel<P,PR,PRE>(this->_ptr->_create(domain,EffectiveScalarFunction::zero(domain.size())))+value; };
+template<class P, class PR, class PRE> VectorFunctionModel<P,PR,PRE> FunctionModelFactory<P,PR,PRE>::create_constants(const DomainType& domain, const Vector<Number<P>>& values) const {
+    typename CanonicalNumericType<P,PR,PRE>::PrecisionType pr=this->_ptr->create_number(0).precision();
+    Vector<CanonicalNumericType<P,PR,PRE>> concrete_values(values,pr); return this->_ptr->create_constants(domain,concrete_values); }
+template<class P, class PR, class PRE> VectorFunctionModel<P,PR,PRE> FunctionModelFactory<P,PR,PRE>::create_constants(const DomainType& domain, const Vector<CanonicalNumericType<P,PR,PRE>>& values) const {
+    return VectorFunctionModel<P,PR,PRE>(this->_ptr->_create(domain,EffectiveVectorFunction::zeros(values.size(),domain.size())))+values; };
+*/
 
 
-template<class P, class PR, class PRE> inline Vector<ScalarFunctionModel<P,PR,PRE>> ScalarFunctionModel<P,PR,PRE>::create_coordinates(DomainType const& dom) const {
-    Vector<ScalarFunctionModel<P,PR,PRE>> res(dom.dimension(),this->_ptr->_create_zero(dom));
-    for(SizeType i=0; i!=dom.dimension(); ++i) { res[i]=this->_ptr->_create_coordinate(dom,i); }
-    return res;
-}
-
-
-
-template<class P, class PR, class PRE> ScalarFunctionModel<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create(const ExactBoxType& domain, const ScalarFunctionInterface<P>& function) const {
+/*
+template<class P, class PR, class PRE> ScalarFunctionModel<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create(const DomainType& domain, const ScalarFunctionInterface<P>& function) const {
     return this->_create(domain,function);
 }
-template<class P, class PR, class PRE> VectorFunctionModel<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create(const ExactBoxType& domain, const VectorFunctionInterface<P>& function) const {
+template<class P, class PR, class PRE> VectorFunctionModel<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create(const DomainType& domain, const VectorFunctionInterface<P>& function) const {
     return this->_create(domain,function);
 }
 
-template<class P, class PR, class PRE> ScalarFunctionModel<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create_zero(const ExactBoxType& domain) const {
+template<class P, class PR, class PRE> ScalarFunctionModel<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create_zero(const DomainType& domain) const {
     return this->_create(domain,EffectiveScalarFunction::zero(domain.size())); }
-template<class P, class PR, class PRE> VectorFunctionModel<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create_zeros(SizeType result_size, const ExactBoxType& domain) const {
+template<class P, class PR, class PRE> VectorFunctionModel<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create_zeros(SizeType result_size, const DomainType& domain) const {
     return this->_create(domain,EffectiveVectorFunction::zeros(result_size,domain.size())); }
-template<class P, class PR, class PRE> ScalarFunctionModel<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create_constant(const ExactBoxType& domain, const Number<P>& value) const {
+template<class P, class PR, class PRE> ScalarFunctionModel<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create_constant(const DomainType& domain, const Number<P>& value) const {
     CanonicalNumericType<P,PR,PRE> concrete_value=this->create_number(value); return this->create_constant(domain,concrete_value); }
-template<class P, class PR, class PRE> ScalarFunctionModel<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create_constant(const ExactBoxType& domain, const CanonicalNumericType<P,PR,PRE>& value) const {
+template<class P, class PR, class PRE> ScalarFunctionModel<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create_constant(const DomainType& domain, const CanonicalNumericType<P,PR,PRE>& value) const {
     return ScalarFunctionModel<P,PR,PRE>(this->_create(domain,EffectiveScalarFunction::zero(domain.size())))+value; };
-template<class P, class PR, class PRE> VectorFunctionModel<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create_constants(const ExactBoxType& domain, const Vector<Number<P>>& values) const {
+template<class P, class PR, class PRE> VectorFunctionModel<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create_constants(const DomainType& domain, const Vector<Number<P>>& values) const {
     typename CanonicalNumericType<P,PR,PRE>::PrecisionType pr=this->create_number(0).precision();
     Vector<CanonicalNumericType<P,PR,PRE>> concrete_values(values,pr); return this->create_constants(domain,concrete_values); }
-template<class P, class PR, class PRE> VectorFunctionModel<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create_constants(const ExactBoxType& domain, const Vector<CanonicalNumericType<P,PR,PRE>>& values) const {
+template<class P, class PR, class PRE> VectorFunctionModel<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create_constants(const DomainType& domain, const Vector<CanonicalNumericType<P,PR,PRE>>& values) const {
     return VectorFunctionModel<P,PR,PRE>(this->_create(domain,EffectiveVectorFunction::zeros(values.size(),domain.size())))+values; };
-template<class P, class PR, class PRE> ScalarFunctionModel<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create_coordinate(const ExactBoxType& domain, SizeType index) const {
+template<class P, class PR, class PRE> ScalarFunctionModel<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create_coordinate(const DomainType& domain, SizeType index) const {
     return ScalarFunctionModel<P,PR,PRE>(this->_create(domain,EffectiveScalarFunction::coordinate(domain.size(),index))); };
-template<class P, class PR, class PRE> ScalarFunctionModel<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create_identity(const ExactIntervalType& domain) const {
-    return this->_create(ExactBoxType(1,domain),EffectiveScalarFunction::coordinate(1,0)); };
-template<class P, class PR, class PRE> VectorFunctionModel<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create_identity(const ExactBoxType& domain) const {
+template<class P, class PR, class PRE> ScalarFunctionModel<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create_identity(const IntervalDomainType& domain) const {
+    return this->_create(DomainType(1,domain),EffectiveScalarFunction::coordinate(1,0)); };
+template<class P, class PR, class PRE> VectorFunctionModel<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create_identity(const DomainType& domain) const {
     return this->_create(domain,EffectiveVectorFunction::identity(domain.size())); };
-
 template<class P, class PR, class PRE> CanonicalNumericType<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create_number(const Number<P>& number) const {
     return this->_create(number); }
+*/
+
 
 
 } // namespace Ariadne

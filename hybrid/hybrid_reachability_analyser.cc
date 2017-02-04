@@ -697,7 +697,7 @@ HybridReachabilityAnalyserConfiguration::write(OutputStream& os) const
 
 
 Void
-HybridReachabilityAnalyserConfiguration::set_bounding_domain_ptr(const std::shared_ptr<HybridBoxes> value)
+HybridReachabilityAnalyserConfiguration::set_bounding_domain_ptr(const std::shared_ptr<HybridExactBoxes> value)
 {
  //   ARIADNE_ASSERT_MSG(possibly(value_ptr->space() == _analyser.system().state_space()),
  //           "The bounding domain to set has a different hybrid space than the system.");

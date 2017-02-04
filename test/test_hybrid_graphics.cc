@@ -38,8 +38,8 @@ using namespace Ariadne;
 Int main(Int argc, char **argv) {
     RealVariable x("x"),y("y"),z("z");
     DiscreteLocation location(1);
-    HybridBoxType hbx1(location,{0<=x<=1,2<=y<=3,5<=z<=7});
-    HybridBoxType hbx2(location,{x,y,z},ExactBoxType{{1.,2.},{3.,4.},{6.,8.}});
+    HybridRealBox hbx1(location,{0<=x<=1,2<=y<=3,5<=z<=7});
+    HybridExactBox hbx2(location,{x,y,z},ExactBoxType{{1.,2.},{3.,4.},{6.,8.}});
 
     HybridFigure hfig;
     hfig.set_locations({location});

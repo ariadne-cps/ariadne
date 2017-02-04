@@ -28,8 +28,11 @@
 using namespace Ariadne;
 using std::cout; using std::endl;
 
-Int main()
+Int main(Int argc, const char* argv[])
 {
+    Nat evolver_verbosity = 0;
+    if(argc>1) { evolver_verbosity=atoi(argv[1]); }
+
     // Declare some constants. Note that system parameters should be given as variables.
     RealConstant T("T",4.0_decimal);
     RealConstant hmin("hmin",5.5_decimal);
@@ -73,7 +76,7 @@ Int main()
     // Since aperture is a known constant when the valve is open or closed,
     // specify aperture by an algebraic equation.
     valve_automaton.new_mode(valve|open,{let(aperture)=+1.0_decimal});
-    valve_automaton.new_mode(valve|closed,{let(aperture)=-1.0_decimal});
+    valve_automaton.new_mode(valve|closed,{let(aperture)=0.0_decimal});
     // Specify the differential equation for how the valve opens/closes.
     valve_automaton.new_mode(valve|opening,{dot(aperture)=+1/T});
     valve_automaton.new_mode(valve|closing,{dot(aperture)=-1/T});
@@ -88,16 +91,16 @@ Int main()
     //valve.new_invariant(closing,height>=hmin,start_opening);
     //valve.new_invariant(closing,aperture>=0.0,finished_closing);
 
-    valve_automaton.new_transition(valve|closed,start_opening,valve|opening,{next(aperture)=aperture},height<=hmin);
-    valve_automaton.new_transition(valve|closing,start_opening,valve|opening,{next(aperture)=aperture},height<=hmin);
-    valve_automaton.new_transition(valve|open,start_closing,valve|closing,{next(aperture)=aperture},height>=hmax);
-    valve_automaton.new_transition(valve|opening,start_closing,valve|closing,{next(aperture)=aperture},height>=hmax);
+    valve_automaton.new_transition(valve|closed,start_opening,valve|opening,{next(aperture)=aperture},height<=hmin,urgent);
+    valve_automaton.new_transition(valve|closing,start_opening,valve|opening,{next(aperture)=aperture},height<=hmin,urgent);
+    valve_automaton.new_transition(valve|open,start_closing,valve|closing,{next(aperture)=aperture},height>=hmax,urgent);
+    valve_automaton.new_transition(valve|opening,start_closing,valve|closing,{next(aperture)=aperture},height>=hmax,urgent);
 
     // Set the transitions for when the valve finished opening.
     // Since aperture is defined by an algebraic equation in the new mode,
     // it may not be specified in the reset.
-    valve_automaton.new_transition(valve|opening,finished_opening,valve|open,aperture>=1);
-    valve_automaton.new_transition(valve|closing,finished_closing,valve|closed,aperture<=0);
+    valve_automaton.new_transition(valve|opening,finished_opening,valve|open,aperture>=1,urgent);
+    valve_automaton.new_transition(valve|closing,finished_closing,valve|closed,aperture<=0,urgent);
 
     CompositeHybridAutomaton watertank_system({tank_automaton,valve_automaton});
     std::cout << "watertank_system:\n" << watertank_system << "\n";
@@ -106,7 +109,7 @@ Int main()
 
     // Create a GeneralHybridEvolver object
     GeneralHybridEvolver evolver(watertank_system);
-    evolver.verbosity = 0;
+    evolver.verbosity = evolver_verbosity;
 
     // Set the evolution parameters
     evolver.configuration().set_maximum_enclosure_radius(0.25);
@@ -125,29 +128,31 @@ Int main()
     HybridTime evolution_time(80.0,5);
 
     std::cout << "Computing orbit... " << std::flush;
-
     OrbitType orbit = evolver.orbit(initial_set,evolution_time,UPPER_SEMANTICS);
-    std::cout << "done." << orbit << std::endl;
+    std::cout << "done." << std::endl;
 
     std::cout << "Orbit.final size="<<orbit.final().size()<<std::endl;
 
     // FIXME: Aperture variable not a state variable in all modes, so cannot be plotted
     // Axes2d axes(-0.1<=height<=9.1, -0.1<=aperture<=1.1);
-    Axes2d axes(0<=time<=80,-0.1<=height<=9.1);
-    std::cout << "Plotting orbit... "<<std::flush;
-    plot("watertank_compositional-orbit",axes, Colour(0.0,0.5,1.0), orbit);
+    std::cout << "Plotting trajectory... "<<std::flush;
+    Axes2d time_height_axes(0<=time<=80,-0.1<=height<=9.1);
+    plot("watertank_compositional-orbit",time_height_axes, Colour(0.0,0.5,1.0), orbit);
     std::cout << "done." << std::endl;
 
+    std::cout << "Plotting orbit... "<<std::flush;
     Axes2d height_aperture_axes(-0.1,height,9.1, -0.1,aperture,1.3);
+    plot("watertank_compositional-height_aperture",height_aperture_axes, Colour(0.0,0.5,1.0), orbit);
+    std::cout << "done." << std::endl;
 
     std::cout << "Discretising orbit" << std::flush;
-    HybridGrid grid(watertank_system.state_space());
+    HybridGrid grid(watertank_system.state_auxiliary_space());
     HybridGridTreeSet hgts(grid);
 
     for (ListSet<HybridEnclosure>::ConstIterator it = orbit.reach().begin(); it != orbit.reach().end(); it++)
     {
         std::cout<<"."<<std::flush;
-        it->adjoin_outer_approximation_to(hgts,4);
+        it->state_auxiliary_set().adjoin_outer_approximation_to(hgts,4);
     }
     std::cout << "done." << std::endl;
 

@@ -66,7 +66,7 @@ extern const RoundingModeType ROUND_ZERO;
 
 // ----------------- RawTag Float64 class ---------------------------------------------------------
 
-template<class Z, EnableIf<IsIntegral<Z>> =dummy> Z integer_cast(Flt64);
+template<class Z, EnableIf<IsBuiltinIntegral<Z>> =dummy> Z integer_cast(Flt64);
 
 // ----------------- RawTag Float64 class ---------------------------------------------------------
 

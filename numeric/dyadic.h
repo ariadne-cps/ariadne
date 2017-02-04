@@ -80,9 +80,9 @@ class Dyadic
     Dyadic& operator=(Dyadic const& n);
     Dyadic& operator=(Dyadic&& n);
     //! \brief Convert from a built-in positive integer.
-    template<class M, EnableIf<And<IsIntegral<M>,IsUnsigned<M>>> = dummy> Dyadic(M m);
+    template<class M, EnableIf<And<IsBuiltinIntegral<M>,IsBuiltinUnsigned<M>>> = dummy> Dyadic(M m);
     //! \brief Convert from a built-in integer.
-    template<class N, EnableIf<And<IsIntegral<N>,IsSigned<N>>> = dummy> Dyadic(N n);
+    template<class N, EnableIf<And<IsBuiltinIntegral<N>,IsBuiltinSigned<N>>> = dummy> Dyadic(N n);
     //! \brief Convert from an exact double-precision number.
     Dyadic(const ExactDouble& d);
     //! \brief Convert from an integer.
@@ -113,8 +113,8 @@ class Dyadic
     friend OutputStream& operator<<(OutputStream& os, Dyadic const& x);
 };
 
-template<class M, EnableIf<And<IsIntegral<M>,IsUnsigned<M>>>> inline Dyadic::Dyadic(M m) : Dyadic(Integer(m)) { }
-template<class N, EnableIf<And<IsIntegral<N>,IsSigned<N>>>> inline Dyadic::Dyadic(N n) : Dyadic(Integer(n)) { }
+template<class M, EnableIf<And<IsBuiltinIntegral<M>,IsBuiltinUnsigned<M>>>> inline Dyadic::Dyadic(M m) : Dyadic(Integer(m)) { }
+template<class N, EnableIf<And<IsBuiltinIntegral<N>,IsBuiltinSigned<N>>>> inline Dyadic::Dyadic(N n) : Dyadic(Integer(n)) { }
 
 
 inline Dyadic operator"" _dyadic(long double x) { return Dyadic(static_cast<double>(x)); }

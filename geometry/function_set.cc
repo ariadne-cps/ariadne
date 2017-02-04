@@ -71,11 +71,11 @@ Matrix<Float64> nonlinearities_zeroth_order(const ValidatedVectorFunction& f, co
 Pair<Nat,double> nonlinearity_index_and_error(const ValidatedVectorFunction& function, const ExactBoxType domain);
 Pair<Nat,double> lipschitz_index_and_error(const ValidatedVectorFunction& function, const ExactBoxType& domain);
 
-Matrix<Float64> nonlinearities_zeroth_order(const VectorTaylorFunction& f, const ExactBoxType& dom)
+Matrix<Float64> nonlinearities_zeroth_order(const ValidatedVectorTaylorFunctionModel64& f, const ExactBoxType& dom)
 {
     const Nat m=f.result_size();
     const Nat n=f.argument_size();
-    VectorTaylorFunction g=restriction(f,dom);
+    ValidatedVectorTaylorFunctionModel64 g=restriction(f,dom);
 
     Matrix<Float64> nonlinearities=Matrix<Float64>::zero(m,n);
     MultiIndex a;
@@ -164,7 +164,7 @@ Matrix<Float64> nonlinearities_second_order(const ValidatedVectorFunction& f, co
     return nonlinearities;
 }
 
-Pair<Nat,double> nonlinearity_index_and_error(const VectorTaylorFunction& function, const ExactBoxType domain) {
+Pair<Nat,double> nonlinearity_index_and_error(const ValidatedVectorTaylorFunctionModel64& function, const ExactBoxType domain) {
     Matrix<Float64> nonlinearities=Ariadne::nonlinearities_zeroth_order(function,domain);
 
     // Compute the row of the nonlinearities Array which has the highest norm
@@ -192,16 +192,24 @@ Pair<Nat,double> nonlinearity_index_and_error(const VectorTaylorFunction& functi
 }
 
 
+ExactIntervalType over_approximating_interval(ValidatedLowerNumber const& lb, ValidatedUpperNumber const& ub) {
+    Precision64 prec;
+    return cast_exact_interval(UpperIntervalType(lb,ub,prec));
+}
+
 ExactBoxType under_approximation(const EffectiveBoxType& rbx) {
-    return cast_exact_box(LowerBoxType(rbx));
+    Precision64 prec;
+    return cast_exact_box(LowerBoxType(rbx,prec));
 }
 
 ExactBoxType over_approximation(const EffectiveBoxType& rbx) {
-    return cast_exact_box(UpperBoxType(rbx));
+    Precision64 prec;
+    return cast_exact_box(UpperBoxType(rbx,prec));
 }
 
 ExactBoxType approximation(const EffectiveBoxType& rbx) {
-    return cast_exact_box(ApproximateBoxType(rbx));
+    Precision64 prec;
+    return cast_exact_box(ApproximateBoxType(rbx,prec));
 }
 
 
@@ -623,13 +631,13 @@ ConstrainedImageSet image(const BoundedConstraintSet& set, const EffectiveVector
 
 
 
-Matrix<Float64> nonlinearities_zeroth_order(const VectorTaylorFunction& f, const ExactBoxType& dom);
+Matrix<Float64> nonlinearities_zeroth_order(const ValidatedVectorTaylorFunctionModel64& f, const ExactBoxType& dom);
 
 
 Matrix<Float64> nonlinearities_zeroth_order(const ValidatedVectorFunction& f, const ExactBoxType& dom)
 {
-    ARIADNE_ASSERT(dynamic_cast<const VectorTaylorFunction*>(f.raw_pointer()));
-    return nonlinearities_zeroth_order(dynamic_cast<const VectorTaylorFunction&>(*f.raw_pointer()),dom);
+    ARIADNE_ASSERT(dynamic_cast<const ValidatedVectorTaylorFunctionModel64*>(f.raw_pointer()));
+    return nonlinearities_zeroth_order(dynamic_cast<const ValidatedVectorTaylorFunctionModel64&>(*f.raw_pointer()),dom);
 }
 
 /*
@@ -781,7 +789,7 @@ ConstrainedImageSet::write(OutputStream& os) const
 
 template<class SF> struct FunctionTraits;
 template<class X> struct FunctionTraits< ScalarFunction<X> > { typedef VectorFunction<X> VectorFunctionType; };
-template<> struct FunctionTraits< ScalarTaylorFunction > { typedef VectorTaylorFunction VectorFunctionType; };
+template<> struct FunctionTraits< ValidatedScalarTaylorFunctionModel64 > { typedef ValidatedVectorTaylorFunctionModel64 VectorFunctionType; };
 
 template<class SF> class TemplatedConstraintSet;
 template<class SF> class TemplatedConstrainedImageSet;
@@ -799,9 +807,10 @@ ValidatedVectorFunction ValidatedConstrainedImageSet::constraint_function() cons
 
 ExactBoxType ValidatedConstrainedImageSet::constraint_bounds() const
 {
+    Precision64 prec;
     ExactBoxType result(this->number_of_constraints());
     for(Nat i=0; i!=this->number_of_constraints(); ++i) {
-        result[i]=cast_exact_interval(UpperIntervalType(this->constraint(i).lower_bound(),this->constraint(i).upper_bound()));
+        result[i]=over_approximating_interval(this->constraint(i).lower_bound(),this->constraint(i).upper_bound());
     }
     return result;
 }
@@ -848,7 +857,7 @@ ValidatedConstrainedImageSet::affine_over_approximation() const
     Matrix<Float64> G(nx,np+nerr);
     Nat ierr=0; // The index where the error bound should go
     for(Nat i=0; i!=nx; ++i) {
-        ScalarTaylorFunction component_function=function[i];
+        ValidatedScalarTaylorFunctionModel64 component_function=function[i];
         h[i]=component_function.model().value();
         for(Nat j=0; j!=np; ++j) {
             G[i][j]=component_function.model().gradient(j);
@@ -865,7 +874,7 @@ ValidatedConstrainedImageSet::affine_over_approximation() const
     Float64 b;
 
     for(ConstIterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
-        ScalarTaylorFunction constraint_function(this->_reduced_domain,iter->function(),affine_sweeper);
+        ValidatedScalarTaylorFunctionModel64 constraint_function(this->_reduced_domain,iter->function(),affine_sweeper);
         b=sub_up(constraint_function.model().error(),constraint_function.model().value());
         for(Nat j=0; j!=np; ++j) { a[j]=constraint_function.model().gradient(j); }
         result.new_parameter_constraint(-inf,a,b);
@@ -1116,19 +1125,19 @@ join(const ValidatedConstrainedImageSet& set1, const ValidatedConstrainedImageSe
 
     ExactBoxType new_domain = hull(domain1,domain2);
 
-    ValidatedVectorFunctionModel function1
-        = ValidatedVectorFunctionModel( dynamic_cast<VectorFunctionModelInterface<ValidatedTag> const&>(set1.function().reference()));
+    ValidatedVectorFunctionModel64 function1
+        = ValidatedVectorFunctionModel64( dynamic_cast<VectorFunctionModel64Interface<ValidatedTag> const&>(set1.function().reference()));
     Vector<Float64Error> function_error1=function1.errors();
     function1.clobber();
     function1.restrict(new_domain);
 
-    ValidatedVectorFunctionModel function2
-        = ValidatedVectorFunctionModel( dynamic_cast<VectorFunctionModelInterface<ValidatedTag> const&>(set2.function().reference()));
+    ValidatedVectorFunctionModel64 function2
+        = ValidatedVectorFunctionModel64( dynamic_cast<VectorFunctionModel64Interface<ValidatedTag> const&>(set2.function().reference()));
     Vector<Float64Error> function_error2=function2.errors();
     function2.clobber();
     function2.restrict(new_domain);
 
-    ValidatedVectorFunctionModel new_function=(function1+function2)*Float64Value(0.5);
+    ValidatedVectorFunctionModel64 new_function=(function1+function2)*Float64Value(0.5);
     new_function.clobber();
     for(Nat i=0; i!=new_function.result_size(); ++i) {
         function_error1[i]=norm(new_function[i]-function1[i])+function_error1[i];

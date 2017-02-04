@@ -49,6 +49,7 @@ class TestMatrix {
     Void test();
   private:
     Void test_concept();
+    Void test_project();
     Void test_misc();
 };
 
@@ -56,6 +57,7 @@ Void
 TestMatrix::test()
 {
     ARIADNE_TEST_CALL(test_concept());
+    ARIADNE_TEST_CALL(test_project());
     ARIADNE_TEST_CALL(test_misc());
 }
 
@@ -88,6 +90,33 @@ TestMatrix::test_concept()
 
     fv=fA*fv; iv=eA*ev; iv=eA*iv; iv=iA*ev; iv=iA*iv;
     fA=fA*fA; iA=eA*eA; iA=eA*iA; iA=iA*eA; iA=iA*iA;
+}
+
+Void
+TestMatrix::test_project()
+{
+    typedef Float64 X;
+    ARIADNE_TEST_CONSTRUCT(Matrix<X>,A,({{11,12,13,14,15},{21,22,23,24,25},{31,32,33,34,35}},pr));
+    ARIADNE_TEST_CONSTRUCT(Matrix<X>,B,({{120,130,140},{220,230,240}},pr));
+
+    ARIADNE_TEST_ASSIGN_CONSTRUCT(Vector<X>,v,A[range(0,2)][1]);
+    ARIADNE_TEST_EQUAL(v[1],A[1][1]);
+    ARIADNE_TEST_ASSIGN_CONSTRUCT(Covector<X>,u,A[2][range(1,4)]);
+    ARIADNE_TEST_EQUAL(u[2],A[2][3]);
+
+    ARIADNE_TEST_EQUALS(A[range(0,2)][range(1,4)].row_size(),2);
+    ARIADNE_TEST_EQUALS(A[range(0,2)][range(1,4)].column_size(),3);
+    ARIADNE_TEST_CONSTRUCT(MatrixRange<Matrix<X>>,AR,(A[range(0,2)][range(1,4)]));
+    ARIADNE_TEST_CONSTRUCT(Matrix<X>,ACR,(A[range(0,2)][range(1,4)]));
+
+    ARIADNE_TEST_EQUAL(AR[1][2],A[1][3]);
+    ARIADNE_TEST_EQUAL(ACR[1][2],A[1][3]);
+    ARIADNE_TEST_EXECUTE(AR=B);
+    ARIADNE_TEST_PRINT(A);
+    ARIADNE_TEST_EQUALS(A[range(0,2)][range(1,4)],B);
+//    ARIADNE_TEST_EQUALS(AR,B);
+//    ARIADNE_TEST_EQUALS(ACR,B);
+
 }
 
 

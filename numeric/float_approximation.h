@@ -57,6 +57,7 @@ template<class PR> class FloatApproximation
     typedef ApproximateNumber GenericType;
     typedef FLT RawFloatType;
     typedef PR PrecisionType;
+    typedef PR PropertiesType;
   public:
     FloatApproximation<PR>() : _a(0.0) { }
     explicit FloatApproximation<PR>(PrecisionType pr) : _a(0.0,pr) { }
@@ -79,8 +80,8 @@ template<class PR> class FloatApproximation
     FloatApproximation<PR>(FloatUpperBound<PR> const& x);
     FloatApproximation<PR>(FloatLowerBound<PR> const& x);
 
-    template<class N, EnableIf<IsIntegral<N>> =dummy> FloatApproximation<PR>& operator=(N n) { this->_a=n; return *this; }
-    template<class D, EnableIf<IsFloatingPoint<D>> =dummy> FloatApproximation<PR>& operator=(D x) { this->_a=x; return *this; }
+    template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> FloatApproximation<PR>& operator=(N n) { this->_a=n; return *this; }
+    template<class D, EnableIf<IsBuiltinFloatingPoint<D>> =dummy> FloatApproximation<PR>& operator=(D x) { this->_a=x; return *this; }
         FloatApproximation<PR>& operator=(const FloatLowerBound<PR>& x) { return *this=FloatApproximation<PR>(x); }
         FloatApproximation<PR>& operator=(const FloatUpperBound<PR>& x) { return *this=FloatApproximation<PR>(x); }
         FloatApproximation<PR>& operator=(const FloatBounds<PR>& x) { return *this=FloatApproximation<PR>(x); }
@@ -93,6 +94,8 @@ template<class PR> class FloatApproximation
     friend FloatApproximation<PR> round(FloatApproximation<PR> const& x);
 
     PrecisionType precision() const { return _a.precision(); }
+    PropertiesType properties() const { return _a.precision(); }
+    GenericType generic() const { return this->operator GenericType(); }
     explicit operator RawFloatType () const { return this->_a; }
     RawFloatType const& raw() const { return this->_a; }
     RawFloatType& raw() { return this->_a; }
@@ -113,7 +116,7 @@ template<class PR> class Positive<FloatApproximation<PR>> : public FloatApproxim
 {
   public:
     Positive<FloatApproximation<PR>>() : FloatApproximation<PR>() { }
-    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy>
+    template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>> =dummy>
         Positive<FloatApproximation<PR>>(M m) : FloatApproximation<PR>(m) { }
     explicit Positive<FloatApproximation<PR>>(RawFloat<PR> const& x) : FloatApproximation<PR>(x) { }
     explicit Positive<FloatApproximation<PR>>(FloatApproximation<PR> const& x) : FloatApproximation<PR>(x) { }

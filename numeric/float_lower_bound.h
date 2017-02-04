@@ -56,12 +56,13 @@ template<class PR> class FloatLowerBound
     typedef ValidatedLowerNumber GenericType;
     typedef FLT RawFloatType;
     typedef PR PrecisionType;
+    typedef PR PropertiesType;
   public:
     FloatLowerBound<PR>() : _l(0.0) { }
     explicit FloatLowerBound<PR>(PrecisionType pr) : _l(0.0,pr) { }
     explicit FloatLowerBound<PR>(RawFloatType const& l) : _l(l) { }
 
-    template<class N, EnableIf<IsIntegral<N>> = dummy> FloatLowerBound<PR>(N n, PR pr) : FloatLowerBound<PR>(ExactDouble(n),pr) { }
+    template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> FloatLowerBound<PR>(N n, PR pr) : FloatLowerBound<PR>(ExactDouble(n),pr) { }
     FloatLowerBound<PR>(ExactDouble d, PR pr);
         FloatLowerBound<PR>(const Integer& z, PR pr);
         FloatLowerBound<PR>(const Dyadic& w, PR pr);
@@ -83,6 +84,8 @@ template<class PR> class FloatLowerBound
     operator ValidatedLowerNumber () const;
 
     PrecisionType precision() const { return _l.precision(); }
+    PropertiesType properties() const { return _l.precision(); }
+    GenericType generic() const { return this->operator GenericType(); }
     RawFloatType const& raw() const { return _l; }
     RawFloatType& raw() { return _l; }
     double get_d() const { return _l.get_d(); }
@@ -100,7 +103,7 @@ template<class PR> class Positive<FloatLowerBound<PR>> : public FloatLowerBound<
 {
   public:
     Positive<FloatLowerBound<PR>>() : FloatLowerBound<PR>() { }
-    template<class M, EnableIf<IsUnsignedIntegral<M>> =dummy>
+    template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>> =dummy>
         Positive<FloatLowerBound<PR>>(M m) : FloatLowerBound<PR>(m) { }
     explicit Positive<FloatLowerBound<PR>>(RawFloat<PR> const& x) : FloatLowerBound<PR>(x) { }
     explicit Positive<FloatLowerBound<PR>>(FloatLowerBound<PR> const& x) : FloatLowerBound<PR>(x) { }

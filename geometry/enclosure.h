@@ -77,7 +77,7 @@ template<class BS> class ListSet;
 class Grid;
 class PavingInterface;
 
-typedef Constraint<ValidatedScalarFunctionModel,ValidatedNumericType> ValidatedConstraintModel;
+typedef Constraint<ValidatedScalarFunctionModel64,ValidatedNumericType> ValidatedConstraintModel;
 
 //! \brief A set of the form \f$x=f(s)\f$ for \f$s\in D\f$ satisfying \f$g(s)\leq0\f$ and \f$h(s)=0\f$.
 class Enclosure
@@ -86,35 +86,37 @@ class Enclosure
 {
     ExactBoxType _domain;
     EffectiveVectorFunction _auxiliary_mapping;
-    ValidatedVectorFunctionModel _state_function;
-    ValidatedScalarFunctionModel _time_function;
-    ValidatedScalarFunctionModel _dwell_time_function;
+    ValidatedVectorFunctionModel64 _state_function;
+    ValidatedScalarFunctionModel64 _time_function;
+    ValidatedScalarFunctionModel64 _dwell_time_function;
     List<ValidatedConstraintModel> _constraints;
-    ValidatedFunctionModelFactoryInterface* _function_factory_ptr;
+    ValidatedFunctionModel64FactoryInterface* _function_factory_ptr;
     mutable ExactBoxType _reduced_domain;
     mutable Bool _is_fully_reduced;
   public:
     //! \brief Construct a set with \f$D=\emptyset\f$ in \f$\mathbb{R}^0\f$.
     explicit Enclosure();
     //! \brief Construct a representation of the box \a bx.
-    explicit Enclosure(const ExactBoxType& bx, const ValidatedFunctionModelFactoryInterface& fac);
+    explicit Enclosure(const RealBox& bx, const ValidatedFunctionModel64FactoryInterface& fac);
+    //! \brief Construct a representation of the box \a bx.
+    explicit Enclosure(const ExactBoxType& bx, const ValidatedFunctionModel64FactoryInterface& fac);
     //! \brief Construct the set with parameter domain \a d and image function \a f.
-    explicit Enclosure(const ExactBoxType& d, const ValidatedVectorFunction& f, const ValidatedFunctionModelFactoryInterface& fac);
+    explicit Enclosure(const ExactBoxType& d, const ValidatedVectorFunction& f, const ValidatedFunctionModel64FactoryInterface& fac);
     //! \brief Construct the set with parameter domain \a d, image function \a f and constraints \a c.
-    explicit Enclosure(const ExactBoxType& d, const ValidatedVectorFunction& f, const List<ValidatedConstraint>& c, const ValidatedFunctionModelFactoryInterface& fac);
+    explicit Enclosure(const ExactBoxType& d, const ValidatedVectorFunction& f, const List<ValidatedConstraint>& c, const ValidatedFunctionModel64FactoryInterface& fac);
     //! \brief Construct the set with parameter domain \a d, image function \a sf, time function \a tf and constraints \a c.
-    explicit Enclosure(const ExactBoxType& d, const ValidatedVectorFunction& sf, const ValidatedScalarFunction& tf, const List<ValidatedConstraint>& c, const ValidatedFunctionModelFactoryInterface& fac);
+    explicit Enclosure(const ExactBoxType& d, const ValidatedVectorFunction& sf, const ValidatedScalarFunction& tf, const List<ValidatedConstraint>& c, const ValidatedFunctionModel64FactoryInterface& fac);
     //! \brief Construct the set with domain \a d, space function \a sf, time function \a tf, negative constraints \a g and equality constraints \a h.
     //!   (Not currently implemented.)
-    explicit Enclosure(const ExactBoxType& d, const ValidatedVectorFunction& sf, const ValidatedScalarFunction tf, const ValidatedVectorFunction& g, const ValidatedVectorFunction& h, const ValidatedFunctionModelFactoryInterface& fac);
+    explicit Enclosure(const ExactBoxType& d, const ValidatedVectorFunction& sf, const ValidatedScalarFunction tf, const ValidatedVectorFunction& g, const ValidatedVectorFunction& h, const ValidatedFunctionModel64FactoryInterface& fac);
     //! \brief Construct from an exact singleton constraint \a set.
-    explicit Enclosure(const BoundedConstraintSet& set, const ValidatedFunctionModelFactoryInterface& fac);
+    explicit Enclosure(const BoundedConstraintSet& set, const ValidatedFunctionModel64FactoryInterface& fac);
 
     //! \brief Create a dynamically-allocated copy.
     Enclosure* clone() const;
 
     //! \brief The class used to create new function instances.
-    const ValidatedFunctionModelFactoryInterface& function_factory() const;
+    const ValidatedFunctionModel64FactoryInterface& function_factory() const;
     //! \brief The parameter domain \f$D\f$.
     ExactBoxType domain() const;
     ExactBoxType parameter_domain() const;
@@ -123,14 +125,23 @@ class Enclosure
     //! \brief An over-approximation to the image of \f$D\f$ under \f$f\f$.
     ExactBoxType codomain() const;
     //! \brief The function giving the state \c x in terms of parameters \c s, \f$x=\xi(s)\f$.
-    ValidatedVectorFunctionModel const  state_time_auxiliary_function() const;
-    ValidatedVectorFunctionModel const& state_function() const;
-    ValidatedScalarFunctionModel const& time_function() const;
-    ValidatedVectorFunctionModel const  auxiliary_function() const;
-    ValidatedScalarFunctionModel const& dwell_time_function() const;
-    ValidatedVectorFunctionModel const  constraint_function() const;
-    ValidatedScalarFunctionModel const  get_function(SizeType i) const;
+    ValidatedVectorFunctionModel64 const& state_function() const;
+    //! \brief The function giving the time \c t in terms of parameters \c s, \f$t=\tau(s)\f$.
+    ValidatedScalarFunctionModel64 const& time_function() const;
+    //! \brief The function giving the auxiliary variables in terms of parameters \c s.
+    ValidatedVectorFunctionModel64 const  auxiliary_function() const;
+    //! \brief The function giving the state and auxiliary variables in terms of parameters \c s.
+    ValidatedVectorFunctionModel64 const  state_auxiliary_function() const;
+    //! \brief The function giving the state, time and auxiliary variables in terms of parameters \c s.
+    ValidatedVectorFunctionModel64 const  state_time_auxiliary_function() const;
+    //! \brief The function giving the time since the last discrete jump in terms of the parameters \c s.
+    ValidatedScalarFunctionModel64 const& dwell_time_function() const;
+    //! \brief The function \c g of the constrants \f$g(s)\in C\f$.
+    ValidatedVectorFunctionModel64 const  constraint_function() const;
+    //! \brief The bounds \c C of the constrants \f$g(s)\in C\f$.
     ExactBoxType const constraint_bounds() const;
+    //! \brief The function of parameters \a s giving the \a i<sup>th</sup> state variable.
+    ValidatedScalarFunctionModel64 const  get_function(SizeType i) const;
 
     //! \brief Set the auxiliary function.
     Void set_auxiliary(EffectiveVectorFunction const& aux);
@@ -142,7 +153,7 @@ class Enclosure
     Void new_variable(ExactIntervalType ivl);
     //! \brief Substitutes the expression \f$x_j=v(x_1,\ldots,x_{j-1},x_{j+1}\ldots,x_n)\f$ into the function and constraints.
     //! Requires that \f$v(D_1,\ldots,D_{j-1},D_{j+1}\ldots,D_n) \subset D_j\f$ where \f$D\f$ is the domain.
-    Void substitute(SizeType j, ValidatedScalarFunctionModel v);
+    Void substitute(SizeType j, ValidatedScalarFunctionModel64 v);
     //! \brief Substitutes the expression \f$x_j=c\f$ into the function and constraints.
     Void substitute(SizeType j, Float64 c);
 
@@ -163,11 +174,11 @@ class Enclosure
     Void apply_finishing_parameter_evolve_step(ValidatedVectorFunction phi, ValidatedScalarFunction omega);
 
     //! \brief Set \f$\xi'(s,r)=\phi(\xi(s),r)\f$ and \f$\tau'(s,r)=\tau(s)+r\f$ for $0\leq r\leq h.
-    Void apply_full_reach_step(ValidatedVectorFunctionModel phi);
+    Void apply_full_reach_step(ValidatedVectorFunctionModel64 phi);
     //! \brief Apply the flow \f$xi'(s,r)=\phi(\xi(s),r)\f$, \f$\tau'(s,r)=\tau(s)+r\f$, \f$0\leq r\leq\epsilon(\xi(s),\tau(s))\f$
-    Void apply_spacetime_reach_step(ValidatedVectorFunctionModel phi, ValidatedScalarFunction elps);
+    Void apply_spacetime_reach_step(ValidatedVectorFunctionModel64 phi, ValidatedScalarFunction elps);
     //! \brief Set \f$\xi'(s,r)=\phi(\xi(s),r)\f$ and \f$\tau'(s,r)=\tau(s)+r\f$ for $0\leq r\leq\epsilon(s)$.
-    Void apply_parameter_reach_step(ValidatedVectorFunctionModel phi, ValidatedScalarFunction elps);
+    Void apply_parameter_reach_step(ValidatedVectorFunctionModel64 phi, ValidatedScalarFunction elps);
 /*
     //! \brief Apply the flow \f$\phi(x,t)\f$ for \f$t\in[0,h]\f$
     Void apply_reach_step(ValidatedVectorFunction phi, Float64 h);
@@ -344,7 +355,7 @@ Enclosure product(const Enclosure& set1, const Enclosure& set2);
 //! \related Enclosure \brief The image of the \a set under the \a function.
 Enclosure apply(const ValidatedVectorFunction& function, const Enclosure& set);
 //! \related Enclosure \brief The image of the \a set under the \a function. Does not perform domain-checking.
-Enclosure unchecked_apply(const ValidatedVectorFunctionModel& function, const Enclosure& set);
+Enclosure unchecked_apply(const ValidatedVectorFunctionModel64& function, const Enclosure& set);
 
 } //namespace Ariadne
 

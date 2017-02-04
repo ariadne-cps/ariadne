@@ -1,15 +1,19 @@
 all: lib tests wrap examples
 
-COMPILER = gcc
+COMPILER = clang
 
 ifeq ($(COMPILER),clang)
 	CXX = $(CLANG_CXX)
 	CXXWARNINGS = $(CLANG_CXXWARNINGS)
 	CXXFLAGS = $(CLANG_CXXFLAGS) $(CXXWARNINGS)
-else
+else ifeq ($(COMPILER),gcc)
 	CXX = $(GCC_CXX)
 	CXXWARNINGS = $(GCC_CXXWARNINGS)
 	CXXFLAGS = $(GCC_CXXFLAGS) $(CXXWARNINGS)
+else
+	CXX = $(COMPILER)
+    CXXWARNINGS = $(OTHER_CXXWARNINGS)
+    CXXFLAGS = $(OTHER_CXXWARNINGS) $(CXXWARNINGS)
 endif
 
 
@@ -20,6 +24,9 @@ GCC_CXXWARNINGS=-Wall  -Wno-non-template-friend -Wno-unused
 CLANG_CXX = clang++
 CLANG_CXXFLAGS = -std=c++14 -fPIC -O1
 CLANG_CXXWARNINGS=-Wall -Wno-unused
+
+OTHER_CXXFLAGS = -std=c++14 -fPIC -O1
+OTHER_CXXWARNINGS=-Wall
 
 #   -Wno-unused-local-typedef -Wno-unused-const-variable -Wno-unused-variable  -Wno-unused-function -Wno-unused-comparison
 
@@ -147,20 +154,20 @@ UNUSED_TESTS_SRC = \
 
 
 EXAMPLES_SRC = \
-    tutorial.cc \
-    bouncingball.cc \
-    watertank.cc \
-    heating.cc \
-    ballinabox.cc \
-    watertank-compositional.cc \
-    rectifier.cc \
+	tutorial.cc \
+	bouncingball.cc \
+	watertank.cc \
+	heating.cc \
+	ballinabox.cc \
+	watertank-compositional.cc \
+	rectifier.cc \
 
 EXAMPLES_EXPERIMENTAL_SRC = \
-    exponential.cc \
-    laser.cc \
-    circle.cc \
-    bouncing-walls.cc \
-    compute_crossings_issue.cc
+	exponential.cc \
+	laser.cc \
+	circle.cc \
+	bouncing-walls.cc \
+	compute_crossings_issue.cc
 
 DEP_DIR = dep
 OBJ_DIR = obj

@@ -84,8 +84,8 @@ class Real
 
     explicit Real(double);
 
-    template<class M, EnableIf<And<IsIntegral<M>,IsUnsigned<M>>> = dummy> Real(M m);
-    template<class N, EnableIf<And<IsIntegral<N>,IsSigned<N>>> = dummy> Real(N n);
+    template<class M, EnableIf<And<IsBuiltinIntegral<M>,IsBuiltinUnsigned<M>>> = dummy> Real(M m);
+    template<class N, EnableIf<And<IsBuiltinIntegral<N>,IsBuiltinSigned<N>>> = dummy> Real(N n);
 
     Real(ExactDouble d);
     Real(Integer const& n);
@@ -128,12 +128,12 @@ class Real
     friend Number<EffectiveTag> operator*(Number<EffectiveTag>, Number<EffectiveTag>);
     friend Number<EffectiveTag> operator/(Number<EffectiveTag>, Number<EffectiveTag>);
 
-    template<class N, EnableIf<IsIntegral<N>> =dummy> friend inline decltype(auto) operator==(const Real& x1, N n2) { return x1==Real(n2); }
-    template<class N, EnableIf<IsIntegral<N>> =dummy> friend inline decltype(auto) operator!=(const Real& x1, N n2) { return x1!=Real(n2); }
-    template<class N, EnableIf<IsIntegral<N>> =dummy> friend inline decltype(auto) operator<=(const Real& x1, N n2) { return x1<=Real(n2); }
-    template<class N, EnableIf<IsIntegral<N>> =dummy> friend inline decltype(auto) operator>=(const Real& x1, N n2) { return x1>=Real(n2); }
-    template<class N, EnableIf<IsIntegral<N>> =dummy> friend inline decltype(auto) operator< (const Real& x1, N n2) { return x1< Real(n2); }
-    template<class N, EnableIf<IsIntegral<N>> =dummy> friend inline decltype(auto) operator> (const Real& x1, N n2) { return x1> Real(n2); }
+    template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> friend inline decltype(auto) operator==(const Real& x1, N n2) { return x1==Real(n2); }
+    template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> friend inline decltype(auto) operator!=(const Real& x1, N n2) { return x1!=Real(n2); }
+    template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> friend inline decltype(auto) operator<=(const Real& x1, N n2) { return x1<=Real(n2); }
+    template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> friend inline decltype(auto) operator>=(const Real& x1, N n2) { return x1>=Real(n2); }
+    template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> friend inline decltype(auto) operator< (const Real& x1, N n2) { return x1< Real(n2); }
+    template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> friend inline decltype(auto) operator> (const Real& x1, N n2) { return x1> Real(n2); }
 
 
   private:
@@ -141,8 +141,8 @@ class Real
     Real(std::uint64_t m, Void*);
 };
 
-template<class M, EnableIf<And<IsIntegral<M>,IsUnsigned<M>>>> inline Real::Real(M m) : Real(std::uint64_t(m),nullptr) { };
-template<class N, EnableIf<And<IsIntegral<N>,IsSigned<N>>>> inline Real::Real(N n) : Real(std::int64_t(n),nullptr) { };
+template<class M, EnableIf<And<IsBuiltinIntegral<M>,IsBuiltinUnsigned<M>>>> inline Real::Real(M m) : Real(std::uint64_t(m),nullptr) { };
+template<class N, EnableIf<And<IsBuiltinIntegral<N>,IsBuiltinSigned<N>>>> inline Real::Real(N n) : Real(std::int64_t(n),nullptr) { };
 
 
 //! \ingroup UserNumericTypeSubModule
@@ -291,17 +291,17 @@ PositiveReal cast_positive(Real const& x);
 namespace Ariadne {
 
 /*
-template<class D, EnableIf<IsFloatingPoint<D>> =dummy> inline auto
+template<class D, EnableIf<IsBuiltinFloatingPoint<D>> =dummy> inline auto
     operator==(Real r, D d) -> decltype(r==Float64Approximation(d)) { return r==Float64Approximation(d); }
-template<class D, EnableIf<IsFloatingPoint<D>> =dummy> inline auto
+template<class D, EnableIf<IsBuiltinFloatingPoint<D>> =dummy> inline auto
     operator!=(Real r, D d) -> decltype(r!=Float64Approximation(d)) { return r!=Float64Approximation(d); }
-template<class D, EnableIf<IsFloatingPoint<D>> =dummy> inline auto
+template<class D, EnableIf<IsBuiltinFloatingPoint<D>> =dummy> inline auto
     operator< (Real r, D d) -> decltype(r< Float64Approximation(d)) { return r< Float64Approximation(d); }
-template<class D, EnableIf<IsFloatingPoint<D>> =dummy> inline auto
+template<class D, EnableIf<IsBuiltinFloatingPoint<D>> =dummy> inline auto
     operator> (Real r, D d) -> decltype(r> Float64Approximation(d)) { return r> Float64Approximation(d); }
-template<class D, EnableIf<IsFloatingPoint<D>> =dummy> inline auto
+template<class D, EnableIf<IsBuiltinFloatingPoint<D>> =dummy> inline auto
     operator<=(Real r, D d) -> decltype(r<=Float64Approximation(d)) { return r<=Float64Approximation(d); }
-template<class D, EnableIf<IsFloatingPoint<D>> =dummy> inline auto
+template<class D, EnableIf<IsBuiltinFloatingPoint<D>> =dummy> inline auto
     operator>=(Real r, D d) -> decltype(r>=Float64Approximation(d)) { return r>=Float64Approximation(d); }
 */
 /*

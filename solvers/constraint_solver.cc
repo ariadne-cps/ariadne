@@ -124,7 +124,7 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
 
     Float64Approximation& t=violation; FloatApproximationVector& x=multipliers; FloatApproximationVector& y=point; FloatApproximationVector& z=slack; // Aliases for the main quantities used
     const ExactBoxType& d=domain; const ValidatedVectorFunction& fn=function; const ExactBoxType& c=codomain; // Aliases for the main quantities used
-    VectorTaylorFunction tfn(d,fn,default_sweeper());
+    ValidatedVectorTaylorFunctionModel64 tfn(d,fn,default_sweeper());
 
     point=static_cast<FloatApproximationVector>(midpoint(d));
     for(Nat k=0; k!=l; ++k) { multipliers[k]=1.0/l; }
@@ -154,14 +154,14 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
         Vector<Float64Value> x_exact=cast_exact(x);
         // Use the computed dual variables to try to make a scalar function which is negative over the entire domain.
         // This should be easier than using all constraints separately
-        ScalarTaylorFunction txg=ScalarTaylorFunction::zero(d,default_sweeper());
+        ValidatedScalarTaylorFunctionModel64 txg=ValidatedScalarTaylorFunctionModel64::zero(d,default_sweeper());
         ValidatedNumericType cnst(0,prec);
         for(Nat j=0; j!=n; ++j) {
             txg = txg - (x_exact[j]-x_exact[n+j])*tfn[j];
             cnst += (c[j].upper()*x_exact[j]-c[j].lower()*x_exact[n+j]);
         }
         for(Nat i=0; i!=m; ++i) {
-            txg = txg - (x_exact[2*n+i]-x_exact[2*n+m+i])*ScalarTaylorFunction::coordinate(d,i,default_sweeper());
+            txg = txg - (x_exact[2*n+i]-x_exact[2*n+m+i])*ValidatedScalarTaylorFunctionModel64::coordinate(d,i,default_sweeper());
             cnst += (d[i].upper()*x_exact[2*n+i]-d[i].lower()*x_exact[2*n+m+i]);
         }
         txg = cnst + txg;
@@ -361,17 +361,17 @@ Bool ConstraintSolver::monotone_reduce(UpperBoxType& domain, const ValidatedScal
 
 
 
-Bool ConstraintSolver::lyapunov_reduce(UpperBoxType& domain, const VectorTaylorFunction& function, const ExactBoxType& bounds,
+Bool ConstraintSolver::lyapunov_reduce(UpperBoxType& domain, const ValidatedVectorTaylorFunctionModel64& function, const ExactBoxType& bounds,
                                        FloatApproximationVector centre, FloatApproximationVector multipliers) const
 {
     return this->lyapunov_reduce(domain,function,bounds,cast_exact(centre),cast_exact(multipliers));
 }
 
 
-Bool ConstraintSolver::lyapunov_reduce(UpperBoxType& domain, const VectorTaylorFunction& function, const ExactBoxType& bounds,
+Bool ConstraintSolver::lyapunov_reduce(UpperBoxType& domain, const ValidatedVectorTaylorFunctionModel64& function, const ExactBoxType& bounds,
                                        ExactFloatVector centre, ExactFloatVector multipliers) const
 {
-    ScalarTaylorFunction g(function.domain(),default_sweeper());
+    ValidatedScalarTaylorFunctionModel64 g(function.domain(),default_sweeper());
     UpperIntervalType C(0);
     for(Nat i=0; i!=function.result_size(); ++i) {
         g += cast_exact(multipliers[i]) * function[i];

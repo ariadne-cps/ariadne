@@ -26,6 +26,7 @@
 
 #include "numeric/numeric.h"
 #include "algebra/vector.h"
+#include "algebra/algebra.h"
 #include "numeric/operators.h"
 #include "function/function.h"
 #include "function/procedure.h"
@@ -34,6 +35,7 @@
 #include "function/taylor_function.h"
 #include "geometry/box.h"
 #include "geometry/grid_set.h"
+#include "hybrid/hybrid_set.h"
 #include "hybrid/hybrid_time.h"
 #include "hybrid/discrete_event.h"
 #include "hybrid/discrete_location.h"
@@ -46,6 +48,7 @@
 #include "output/graphics_interface.h"
 #include "hybrid/hybrid_enclosure.h"
 #include "hybrid/hybrid_set.h"
+#include "hybrid/hybrid_expression_set.h"
 
 
 namespace Ariadne {
@@ -76,6 +79,10 @@ List<String> variable_names(const List<EnclosureVariableType>& vt) {
     return result;
 }
 
+template<class T> List<T> catenate(List<T> lst1, T const& val2, List<T> const& lst3) {
+    std::cerr<<"catenate(List<T>,T,List<T>): "<<lst1<<"; "<<val2<<"; "<<lst3<<"\n";
+    lst1.append(val2); return catenate(lst1,lst3); }
+
 struct Variables2d {
     RealVariable _x,_y;
     Variables2d(const RealVariable& x, const RealVariable& y) : _x(x), _y(y) { }
@@ -94,36 +101,52 @@ HybridEnclosure::HybridEnclosure()
 {
 }
 
+HybridEnclosure::HybridEnclosure(const HybridRealBoxSet& hbox,
+                                 const RealSpace& state_space,
+                                 const ValidatedFunctionModel64FactoryInterface& factory)
+    : HybridEnclosure(hbox.location(),state_space,hbox.euclidean_set(state_space),factory)
+{
+}
+
 HybridEnclosure::HybridEnclosure(const HybridBoundedConstraintSet& hybrid_set,
                                  const RealSpace& state_space,
-                                 const ValidatedFunctionModelFactoryInterface& factory)
-    : _location(hybrid_set.location()), _events(), _state_space(state_space.variable_names()), _set(),
+                                 const ValidatedFunctionModel64FactoryInterface& factory)
+    : _location(hybrid_set.location()), _events(), _state_space(state_space.variables()), _set(),
       _variables(state_space.dimension(),INITIAL)
 {
     BoundedConstraintSet euclidean_set=hybrid_set.euclidean_set(this->_location,state_space);
     this->_set=Enclosure(euclidean_set,factory);
 }
 
+
 HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const RealSpace& state_space,
-                                 const ExactBoxType& box, const ValidatedFunctionModelFactoryInterface& factory)
-    : _location(location), _events(), _state_space(state_space.variable_names()), _set(box,factory),
+                                 const RealBox& box, const ValidatedFunctionModel64FactoryInterface& factory)
+    : _location(location), _events(), _state_space(state_space.variables()), _set(box,factory),
       _variables(box.dimension(),INITIAL)
 {
 }
 
-HybridEnclosure::HybridEnclosure(const HybridBoxType& hbox, const ValidatedFunctionModelFactoryInterface& factory)
-    : _location(hbox.location()), _events(), _state_space(hbox.space().variable_names()), _set(hbox.continuous_set(),factory),
-      _variables(hbox.continuous_set().dimension(),INITIAL)
+HybridEnclosure::HybridEnclosure(const HybridRealBox& hbox, const ValidatedFunctionModel64FactoryInterface& factory)
+    : HybridEnclosure(hbox.location(),hbox.space(),hbox.euclidean_set(),factory)
 {
 }
 
-template<class T> List<T> catenate(List<T> lst1, T const& val2, List<T> const& lst3) {
-    lst1.append(val2); return catenate(lst1,lst3); }
+HybridEnclosure::HybridEnclosure(const HybridExactBoxType& hbox, const ValidatedFunctionModel64FactoryInterface& factory)
+    : HybridEnclosure(hbox.location(),hbox.space(),Enclosure(hbox.euclidean_set(),factory))
+{
+}
+
 
 HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const RealSpace& spc, const Enclosure& set)
-    : _location(location), _events(), _state_space(spc.variable_names()), _set(set),
-      _variables(catenate(List<EnclosureVariableType>(set.state_dimension(),INITIAL),TEMPORAL,List<EnclosureVariableType>(set.number_of_parameters()-set.state_dimension()-1u,UNKNOWN)))
+    : _location(location), _events(), _state_space(spc.variables()), _set(set),
+      _variables(set.state_dimension(),INITIAL)
 {
+    if(_variables.size()<set.number_of_parameters()) {
+        _variables.append(TEMPORAL);
+        while(_variables.size()<set.number_of_parameters()) {
+            _variables.append(UNKNOWN);
+        }
+    }
 }
 
 
@@ -161,38 +184,59 @@ HybridEnclosure::previous_events() const
     return this->_events;
 }
 
-ValidatedFunctionModelFactoryInterface const&
+ValidatedFunctionModel64FactoryInterface const&
 HybridEnclosure::function_factory() const
 {
     return this->_set.function_factory();
 }
 
-ValidatedVectorFunctionModel const&
+ValidatedScalarFunctionModel64 const
+HybridEnclosure::function(RealVariable var) const
+{
+    if(this->state_space().contains(var)) {
+        return this->state_function()[this->state_space().index(var)];
+    } else if(this->auxiliary_space().contains(var)) {
+        return this->auxiliary_function()[this->auxiliary_space().index(var)];
+    } else if(TimeVariable()==var) {
+        return this->time_function();
+    } else {
+        ARIADNE_THROW(std::runtime_error,"HybridEnclosure::function(RealVariable var) const",
+                      "Variable "<<var<<" is not defined by HybridEnclosure with variables "<<this->state_time_auxiliary_space());
+    }
+}
+
+ValidatedVectorFunctionModel64 const&
 HybridEnclosure::state_function() const
 {
     return this->_set.state_function();
 }
 
-ValidatedScalarFunctionModel const&
+ValidatedScalarFunctionModel64 const&
 HybridEnclosure::time_function() const
 {
     return this->_set.time_function();
 }
 
-ValidatedScalarFunctionModel const&
+ValidatedScalarFunctionModel64 const&
 HybridEnclosure::dwell_time_function() const
 {
     return this->_set.dwell_time_function();
 }
 
-ValidatedVectorFunctionModel const
+ValidatedVectorFunctionModel64 const
+HybridEnclosure::auxiliary_function() const
+{
+    return this->_set.auxiliary_function();
+}
+
+ValidatedVectorFunctionModel64 const
 HybridEnclosure::state_time_auxiliary_function() const
 {
     return this->_set.state_time_auxiliary_function();
 }
 
 
-Void HybridEnclosure::set_time_function(const ValidatedScalarFunctionModel& time_function)
+Void HybridEnclosure::set_time_function(const ValidatedScalarFunctionModel64& time_function)
 {
     ARIADNE_NOT_IMPLEMENTED;
     ARIADNE_ASSERT_MSG(Ariadne::subset(this->parameter_domain(),time_function.domain()),
@@ -328,39 +372,39 @@ Void HybridEnclosure::apply_reset(DiscreteEvent event, DiscreteLocation target, 
     this->_set.apply_map(map);
 }
 
-Void HybridEnclosure::apply_fixed_evolve_step(const ValidatedVectorFunctionModel& phi, const Float64Value& elps)
+Void HybridEnclosure::apply_fixed_evolve_step(const ValidatedVectorFunctionModel64& phi, const Float64Value& elps)
 {
     this->_set.apply_fixed_evolve_step(phi,elps);
 }
 
-Void HybridEnclosure::apply_spacetime_evolve_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& elps)
+Void HybridEnclosure::apply_spacetime_evolve_step(const ValidatedVectorFunctionModel64& phi, const ValidatedScalarFunctionModel64& elps)
 {
     this->_set.apply_spacetime_evolve_step(phi,elps);
 }
 
-Void HybridEnclosure::apply_spacetime_reach_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& elps)
+Void HybridEnclosure::apply_spacetime_reach_step(const ValidatedVectorFunctionModel64& phi, const ValidatedScalarFunctionModel64& elps)
 {
     this->_set.apply_spacetime_reach_step(phi,elps);
 }
 
 
-Void HybridEnclosure::apply_evolve_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& elps)
+Void HybridEnclosure::apply_evolve_step(const ValidatedVectorFunctionModel64& phi, const ValidatedScalarFunctionModel64& elps)
 {
     this->_set.apply_parameter_evolve_step(phi,elps);
 }
 
-Void HybridEnclosure::apply_finishing_evolve_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& omega)
+Void HybridEnclosure::apply_finishing_evolve_step(const ValidatedVectorFunctionModel64& phi, const ValidatedScalarFunctionModel64& omega)
 {
     this->_set.apply_finishing_parameter_evolve_step(phi,omega);
 }
 
 
-Void HybridEnclosure::apply_reach_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& elps)
+Void HybridEnclosure::apply_reach_step(const ValidatedVectorFunctionModel64& phi, const ValidatedScalarFunctionModel64& elps)
 {
     this->_set.apply_parameter_reach_step(phi,elps);
 }
 
-Void HybridEnclosure::apply_full_reach_step(const ValidatedVectorFunctionModel& phi)
+Void HybridEnclosure::apply_full_reach_step(const ValidatedVectorFunctionModel64& phi)
 {
     this->_set.apply_full_reach_step(phi);
 }
@@ -408,11 +452,27 @@ const DiscreteLocation& HybridEnclosure::location() const {
     return this->_location;
 }
 
-/*
-ValidatedConstrainedImageSet HybridEnclosure::continuous_set() const {
-    return ValidatedConstrainedImageSet(this->_set.domain(),this->state_function(),this->_constraints);
+HybridBasicSet<Enclosure> HybridEnclosure::state_set() const {
+    ValidatedConstrainedImageSet set(this->parameter_domain(),this->state_function(),this->constraints());
+    return HybridBasicSet<Enclosure>(this->location(),this->state_space(),this->continuous_set());
 }
-*/
+
+HybridBasicSet<Enclosure> HybridEnclosure::state_auxiliary_set() const {
+    auto state_auxiliary_space=join(this->state_space(),this->auxiliary_space());
+    auto state_auxiliary_function=join(this->state_function(),this->auxiliary_function());
+//    ValidatedConstrainedImageSet set(this->parameter_domain(),join(this->state_function(),this->auxiliary_function()),this->constraints());
+//    ValidatedConstrainedImageSet set(this->parameter_domain(),join(this->state_function(),this->auxiliary_function()),this->constraints());
+    Enclosure enclosure(this->parameter_domain(),state_auxiliary_function,this->time_function(),this->constraints(),this->function_factory());
+    HybridBasicSet<Enclosure> hset(this->location(),state_auxiliary_space,enclosure);
+    return hset;
+}
+
+HybridBasicSet<Enclosure> project(HybridEnclosure const& encl, RealSpace const& spc) {
+    ValidatedVectorFunctionModel64 spc_funct=encl.function_factory().create_zeros(spc.dimension(),encl.parameter_domain());
+    for(SizeType i=0; i!=spc.dimension(); ++i) { spc_funct[i] = encl.function(spc[i]); }
+    Enclosure spc_set(encl.parameter_domain(),spc_funct,encl.time_function(),encl.constraints(),encl.function_factory());
+    return HybridBasicSet<Enclosure>(encl.location(),spc,spc_set);
+}
 
 
 const Enclosure&
@@ -433,13 +493,13 @@ ValidatedSierpinskian HybridEnclosure::is_empty() const {
     return this->_set.is_empty();
 }
 
-ValidatedSierpinskian HybridEnclosure::inside(const HybridBoxType& hbx) const {
-    if(this->_location==hbx.location()) { return this->continuous_set().inside(hbx.continuous_set()); }
+ValidatedSierpinskian HybridEnclosure::inside(const HybridExactBox& hbx) const {
+    if(this->_location==hbx.location()) { return this->continuous_set().inside(hbx.euclidean_set()); }
     else { return this->continuous_set().is_empty(); }
 }
 
-ValidatedSierpinskian HybridEnclosure::separated(const HybridBoxType& hbx) const {
-    if(this->_location==hbx.location()) { return this->continuous_set().separated(hbx.continuous_set()); }
+ValidatedSierpinskian HybridEnclosure::separated(const HybridExactBox& hbx) const {
+    if(this->_location==hbx.location()) { return this->continuous_set().separated(hbx.euclidean_set()); }
     else { return true; }
 }
 
@@ -567,11 +627,28 @@ OutputStream& HybridEnclosure::repr(OutputStream& os) const
               << ", " << this->time_function() << ")";
 }
 
+HybridExactBox under_approximation(const HybridRealBox& hbx);
+
+ValidatedSierpinskian inside(const HybridEnclosure& he, const HybridRealBox& hbx) {
+    return he.inside(under_approximation(hbx));
+}
 
 Void HybridEnclosure::adjoin_outer_approximation_to(HybridGridTreeSet& hgts, Int depth) const {
+    DiscreteLocation location=this->location();
     const Enclosure& set = this->continuous_set();
-    GridTreeSet& paving = hgts[this->location()];
-    set.adjoin_outer_approximation_to(paving,depth);
+    GridTreeSet& paving = hgts[location];
+    RealSpace paving_space=hgts.space(location);
+    RealSpace state_space=this->state_space();
+    RealSpace auxiliary_space=this->auxiliary_space();
+    if(state_space==paving_space) {
+        auto state_set = Enclosure(this->parameter_domain(),this->state_function(),this->time_function(),this->constraints(),this->function_factory());
+        state_set.adjoin_outer_approximation_to(paving,depth);
+    } else if(join(state_space,auxiliary_space)==paving_space) {
+        set.adjoin_outer_approximation_to(paving,depth);
+    } else {
+        ARIADNE_FAIL_MSG("HybridEnclosure's state variables "<<state_space<<" and auxiliary variables "<<auxiliary_space<<
+                         " do not match variables "<<paving_space<<" of paving in location "<<location);
+    }
 }
 
 HybridGridTreeSet outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, Int depth) {

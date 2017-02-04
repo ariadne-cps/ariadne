@@ -299,16 +299,32 @@ HybridAutomaton::_new_mode(DiscreteLocation location,
 }
 
 
-Void HybridAutomaton::_new_invariant_(DiscreteLocation location, ContinuousPredicate invariant, DiscreteEvent event)
+Void HybridAutomaton::_new_invariant(DiscreteLocation location, ContinuousPredicate invariant, DiscreteEvent event)
 {
+    if(!this->has_location(location)) {
+        ARIADNE_THROW(NonExistentModeError,"HybridAutomaton::new_invariant",
+                      "mode "<<location<<" is not a location of the automaton with locations "<<this->locations());
+    }
     DiscreteMode& mode=this->_modes.value(location);
+    if(mode._kinds.has_key(event)) {
+        ARIADNE_THROW(MultipleGuardError,"HybridAutomaton::new_invariant",
+                      "Constraint for event "<<event<<" is already defined in mode "<<mode);
+    }
     mode._invariants.insert(event,invariant);
     mode._kinds.insert(event,INVARIANT);
 }
 
-Void HybridAutomaton::_new_guard_(DiscreteLocation location, DiscreteEvent event, ContinuousPredicate guard, EventKind kind)
+Void HybridAutomaton::_new_guard(DiscreteLocation location, DiscreteEvent event, ContinuousPredicate guard, EventKind kind)
 {
+    if(!this->has_location(location)) {
+        ARIADNE_THROW(NonExistentModeError,"HybridAutomaton::new_guard",
+                      "mode "<<location<<" is not a location of the automaton with locations "<<this->locations());
+    }
     DiscreteMode& mode=this->_modes.value(location);
+    if(mode._kinds.has_key(event)) {
+        ARIADNE_THROW(MultipleGuardError,"HybridAutomaton::new_guard",
+                      "Constraint for event "<<event<<" is already defined in mode "<<mode);
+    }
     mode._guards.insert(event,guard);
     mode._kinds.insert(event,kind);
 }
@@ -328,7 +344,7 @@ HybridAutomaton::_new_action(DiscreteLocation location,
     DiscreteMode& mode=this->_modes.value(location);
     if(mode._kinds.has_key(event)) {
         ARIADNE_THROW(MultipleGuardError,"HybridAutomaton::new_action",
-                      "Guard/invariant for event "<<event<<" is already defined in mode "<<mode);
+                      "Constraint for event "<<event<<" is already defined in mode "<<mode);
     }
     mode._invariants.insert(event,invariant);
     mode._guards.insert(event,guard);
@@ -629,6 +645,15 @@ HybridSpace HybridAutomaton::state_space() const {
     for(Map<DiscreteLocation,DiscreteMode>::ConstIterator iter=this->_modes.begin(); iter!=this->_modes.end(); ++iter) {
         const DiscreteLocation& loc=iter->first;
         space.new_location(loc,this->continuous_state_space(loc));
+    }
+    return space;
+}
+
+HybridSpace HybridAutomaton::state_auxiliary_space() const {
+    MonolithicHybridSpace space;
+    for(Map<DiscreteLocation,DiscreteMode>::ConstIterator iter=this->_modes.begin(); iter!=this->_modes.end(); ++iter) {
+        const DiscreteLocation& loc=iter->first;
+        space.new_location(loc,join(this->continuous_state_space(loc),this->continuous_auxiliary_space(loc)));
     }
     return space;
 }

@@ -88,62 +88,21 @@ Set<Identifier> arguments(const List<ContinuousPredicate>& c) {
 }
 
 
-const RealInterval RealVariableInterval::interval() const {
-    return RealInterval(this->_lower,this->_upper);
-}
 
-
-OutputStream& operator<<(OutputStream& os, const RealVariableInterval& eivl) {
-    return os << eivl.variable() << ".in(" << eivl.lower() << "," << eivl.upper() << ")";
-}
-
-
-RealVariablesBox::RealVariablesBox(const InitializerList<RealVariableInterval>& lst)
-    : RealVariablesBox(List<RealVariableInterval>(lst))
-{
-}
-
-RealVariablesBox::RealVariablesBox(const List<RealVariableInterval>& lst)
-{
-    for(Nat i=0; i!=lst.size(); ++i) {
-        _bounds.insert(lst[i].variable(),lst[i].interval());
-    }
-}
-
-RealVariablesBox::RealVariablesBox(const RealSpace& spc, const RealBox& bx)
-{
-    ARIADNE_ASSERT(spc.size()==bx.size());
-    for(Nat i=0; i!=spc.size(); ++i) {
-        _bounds.insert(spc[i],bx[i]);
-    }
-}
-
-RealBox RealVariablesBox::euclidean_set(const RealSpace& spc) const {
-    RealBox bx(spc.size());
-    for(Nat i=0; i!=spc.size(); ++i) {
-        bx[i]=(*this)[spc[i]];
-    }
-    return bx;
-}
-
-RealBox RealVariablesBox::box(const RealSpace& spc) const {
-    return this->euclidean_set(spc);
-}
-
-OutputStream& operator<<(OutputStream& os, const RealVariablesBox& ebx) {
-    return os << ebx._bounds;
-}
 
 ExactIntervalType over_approximation(RealInterval ivl) {
-    return cast_exact_interval(UpperIntervalType(ivl));
+    Precision64 prec;
+    return cast_exact_interval(UpperIntervalType(ivl,prec));
 }
 
 ExactIntervalType under_approximation(RealInterval ivl) {
-    return cast_exact_interval(LowerIntervalType(ivl));
+    Precision64 prec;
+    return cast_exact_interval(LowerIntervalType(ivl,prec));
 }
 
 ExactIntervalType approximation(RealInterval ivl) {
-    return cast_exact_interval(ApproximateIntervalType(ivl));
+    Precision64 prec;
+    return cast_exact_interval(ApproximateIntervalType(ivl,prec));
 }
 
 
@@ -245,7 +204,8 @@ OutputStream& operator<<(OutputStream& os, const RealExpressionBoundedConstraint
 }
 
 ValidatedConstrainedImageSet approximate_euclidean_set(const RealExpressionBoundedConstraintSet& set, const RealSpace& space) {
-    ExactIntervalVectorType domain=cast_exact_box(ApproximateBoxType(RealVariablesBox(set.bounds()).euclidean_set(space)));
+    RealBox real_domain = RealVariablesBox(set.bounds()).euclidean_set(space);
+    ExactBoxType domain=cast_exact_box(ApproximateBoxType(real_domain,Precision64()));
     ValidatedVectorFunction identity=ValidatedVectorFunction::identity(domain.size());
 
     ValidatedConstrainedImageSet result(domain,identity);

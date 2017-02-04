@@ -29,47 +29,46 @@
 #define ARIADNE_SCALING_H
 
 #include "numeric/dyadic.h"
-#include "geometry/interval.h"
-#include "geometry/box.h"
+#include "function/domain.h"
 
 namespace Ariadne {
 
-inline ApproximateNumericType med_apprx(ExactIntervalType const& ivl) {
+inline ApproximateNumericType med_apprx(IntervalDomainType const& ivl) {
     return ApproximateNumericType(hlf_exact(add_approx(ivl.lower().raw(),ivl.upper().raw())));
 }
 
-inline ApproximateNumericType rad_apprx(ExactIntervalType const& ivl) {
+inline ApproximateNumericType rad_apprx(IntervalDomainType const& ivl) {
     return ApproximateNumericType(hlf_exact(sub_approx(ivl.upper().raw(),ivl.lower().raw())));
 }
 
-inline ValidatedNumericType med_val(ExactIntervalType const& ivl) {
+inline ValidatedNumericType med_val(IntervalDomainType const& ivl) {
     return hlf(ivl.lower()+ivl.upper());
 }
 
-inline ValidatedNumericType rad_val(ExactIntervalType const& ivl) {
+inline ValidatedNumericType rad_val(IntervalDomainType const& ivl) {
     return hlf(ivl.upper()-ivl.lower());
 }
 
-inline Dyadic med(ExactIntervalType const& ivl) {
+inline Dyadic med(IntervalDomainType const& ivl) {
     return hlf(add( Dyadic(ivl.lower().raw()), Dyadic(ivl.upper().raw()) ));
 }
 
-inline Dyadic rad(ExactIntervalType const& ivl) {
+inline Dyadic rad(IntervalDomainType const& ivl) {
     return hlf(sub( Dyadic(ivl.upper().raw()), Dyadic(ivl.lower().raw()) ));
 }
 
 template<class T, EnableIf<IsSame<Paradigm<T>,ApproximateTag>> =dummy>
-inline T unscale(T x, const ExactIntervalType& d) {
+inline T unscale(T x, const IntervalDomainType& d) {
     return (std::move(x)-med(d))/rad(d);
 }
 
 template<class T, EnableIf<IsStronger<Paradigm<T>,ValidatedTag>> =dummy>
-inline T unscale(T x, const ExactIntervalType& d) {
+inline T unscale(T x, const IntervalDomainType& d) {
     if(d.lower()==d.upper()) { return std::move(x)*Dyadic(0); }
     return (std::move(x)-med(d))/rad(d);
 }
 
-template<class X> Vector<X> unscale(const Vector<X>& x, const ExactBoxType& d) {
+template<class X> Vector<X> unscale(const Vector<X>& x, const BoxDomainType& d) {
     Vector<X> r(x);
     for(SizeType i=0; i!=r.size(); ++i) {
         r[i]=unscale(x[i],d[i]);
@@ -78,40 +77,40 @@ template<class X> Vector<X> unscale(const Vector<X>& x, const ExactBoxType& d) {
 }
 
 class Scaling {
-    ExactIntervalType _codom;
+    IntervalDomainType _codom;
   public:
-    Scaling(ExactIntervalType codom) : _codom(codom) { }
-    UnitIntervalType domain() const { return UnitIntervalType(); }
-    ExactIntervalType codomain() const { return _codom; }
+    Scaling(IntervalDomainType codom) : _codom(codom) { }
+    UnitInterval domain() const { return UnitInterval(); }
+    IntervalDomainType codomain() const { return _codom; }
     template<class X> X operator() (X) const;
 };
 
 class VectorScaling {
-    Box<ExactIntervalType> _codom;
+    Box<IntervalDomainType> _codom;
   public:
-    VectorScaling(Box<ExactIntervalType> codom) : _codom(codom) { }
+    VectorScaling(Box<IntervalDomainType> codom) : _codom(codom) { }
     SizeType size() const { return _codom.dimension(); }
     Scaling operator[] (SizeType i) const { return Scaling(_codom[i]); }
-    Box<ExactIntervalType> const& codomain() const { return _codom; }
+    Box<IntervalDomainType> const& codomain() const { return _codom; }
     template<class X> Vector<X> operator() (Vector<X> const&) const;
 };
 
 class Unscaling {
-    ExactIntervalType _dom;
+    IntervalDomainType _dom;
   public:
-    Unscaling(ExactIntervalType dom) : _dom(dom) { }
-    ExactIntervalType domain() const { return _dom; }
-    UnitIntervalType codomain() const { return UnitIntervalType(); }
+    Unscaling(IntervalDomainType dom) : _dom(dom) { }
+    IntervalDomainType domain() const { return _dom; }
+    UnitInterval codomain() const { return UnitInterval(); }
     template<class X> X operator() (X) const;
 };
 
 class VectorUnscaling {
-    Box<ExactIntervalType> _dom;
+    Box<IntervalDomainType> _dom;
   public:
-    VectorUnscaling(Box<ExactIntervalType> dom) : _dom(dom) { }
+    VectorUnscaling(Box<IntervalDomainType> dom) : _dom(dom) { }
     SizeType size() const { return _dom.dimension(); }
     Unscaling operator[] (SizeType i) const { return Unscaling(_dom[i]); }
-    Box<ExactIntervalType> const& domain() const { return _dom; }
+    Box<IntervalDomainType> const& domain() const { return _dom; }
     template<class X> Vector<X> operator() (Vector<X> const&) const;
 };
 

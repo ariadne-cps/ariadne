@@ -33,15 +33,19 @@
 #include <list>
 #include <iostream>
 
+#include "utility/logging.h"
 #include "utility/declarations.h"
 #include "utility/pointer.h"
+#include "utility/container.h"
+
+#include "hybrid/hybrid_set.decl.h"
 #include "hybrid/discrete_location.h"
 #include "hybrid/discrete_event.h"
-#include "geometry/enclosure.h"
 #include "hybrid/hybrid_graphics_interface.h"
-#include "utility/container.h"
+#include "hybrid/hybrid_set.decl.h"
+
 #include "geometry/box.h"
-#include "utility/logging.h"
+#include "geometry/enclosure.h"
 
 namespace Ariadne {
 
@@ -62,14 +66,9 @@ template<class X> class Space;
 typedef Space<Real> RealSpace;
 template<class ES> class ListSet;
 template<class ES> class HybridListSet;
+
 class HybridEnclosure;
 template<> class ListSet<HybridEnclosure>;
-
-template<class BS> class HybridBasicSet;
-class HybridBoxType;
-class HybridGridTreeSet;
-class HybridBoundedConstraintSet;
-
 
 enum EnclosureVariableType { INITIAL, TEMPORAL, PARAMETER, INPUT, NOISE, ERROR, UNKNOWN };
 
@@ -127,16 +126,23 @@ class HybridEnclosure
   public:
     //! \brief An empty enclosure.
     HybridEnclosure();
+    //! \brief An enclosure corresponding to a hybrid box \a hbx with variables canonically ordered by \a spc.
+    HybridEnclosure(const HybridRealBoxSet& hbx, const RealSpace& spc, const ValidatedFunctionModel64FactoryInterface& fac);
     //! \brief An enclosure corresponding to the hybrid set \a set using \a space to order the continuous variables.
-    HybridEnclosure(const HybridBoundedConstraintSet& set, const RealSpace& space, const ValidatedFunctionModelFactoryInterface& factory);
+    HybridEnclosure(const HybridRealBoundedConstraintSet& set, const RealSpace& space, const ValidatedFunctionModel64FactoryInterface& factory);
+
     //! \brief An enclosure corresponding to a Euclidean box \a bx in location \a q with variables ordered by \a spc.
-    HybridEnclosure(const DiscreteLocation& q, const RealSpace& spc, const ExactBoxType& bx, const ValidatedFunctionModelFactoryInterface& fac);
+    HybridEnclosure(const DiscreteLocation& q, const RealSpace& spc, const RealBox& bx, const ValidatedFunctionModel64FactoryInterface& fac);
     //! \brief An enclosure corresponding to a hybrid box \a hbx.
-    HybridEnclosure(const HybridBoxType& hbx, const ValidatedFunctionModelFactoryInterface& fac);
+    explicit HybridEnclosure(const HybridRealBox& hbx, const ValidatedFunctionModel64FactoryInterface& fac);
+
     //! \brief An enclosure corresponding to a hybrid box \a hbx.
-    HybridEnclosure(const HybridBoxType& hbx, List<RealAssignment> aux, const ValidatedFunctionModelFactoryInterface& fac);
+    explicit HybridEnclosure(const HybridExactBoxType& hbx, const ValidatedFunctionModel64FactoryInterface& fac);
+    //! \brief An enclosure corresponding to a hybrid box \a hbx.
+    explicit HybridEnclosure(const HybridExactBoxType& hbx, List<RealAssignment> aux, const ValidatedFunctionModel64FactoryInterface& fac);
     //! \brief An enclosure constructed from a location \a q, a real space \a spc, and a (timed) enclosure \a es.
-    HybridEnclosure(const DiscreteLocation& q, const RealSpace& spc, const Enclosure& es);
+    explicit HybridEnclosure(const DiscreteLocation& q, const RealSpace& spc, const Enclosure& es);
+
     //! \brief Destructor.
     ~HybridEnclosure();
     //! \brief Create a dynamically-allocated copy.
@@ -153,7 +159,7 @@ class HybridEnclosure
     //! \brief The Euclidean state space of the location.
     const RealSpace auxiliary_space() const;
     //! \brief The factory used to create functions.
-    const ValidatedFunctionModelFactoryInterface& function_factory() const;
+    const ValidatedFunctionModel64FactoryInterface& function_factory() const;
     //! \brief The list of previous events.
     const List<DiscreteEvent>& previous_events() const;
     //! \brief The number of independent parameters.
@@ -163,18 +169,20 @@ class HybridEnclosure
     //! \brief The continuous state set.
     const ExactBoxType parameter_domain() const;
     //! \brief The function related to the state space.
-    const ValidatedVectorFunctionModel& state_function() const;
+    const ValidatedVectorFunctionModel64& state_function() const;
     //! \brief The function related to time.
-    const ValidatedScalarFunctionModel& time_function() const;
+    const ValidatedScalarFunctionModel64& time_function() const;
     //! \brief The function giving the time since the last event.
-    const ValidatedScalarFunctionModel& dwell_time_function() const;
+    const ValidatedScalarFunctionModel64& dwell_time_function() const;
     //! \brief The function related to the auxiliary space.
-    const ValidatedVectorFunctionModel auxiliary_function() const;
+    const ValidatedVectorFunctionModel64 auxiliary_function() const;
     //! \brief The function related to the auxiliary space.
-    const ValidatedVectorFunctionModel state_time_auxiliary_function() const;
+    const ValidatedVectorFunctionModel64 state_time_auxiliary_function() const;
+    //! \brief The function related to the variable \a var.
+    const ValidatedScalarFunctionModel64 function(RealVariable var) const;
 
     //! \brief Set the evolution time function to \a omega.
-    Void set_time_function(const ValidatedScalarFunctionModel& omega);
+    Void set_time_function(const ValidatedScalarFunctionModel64& omega);
 
     //! \brief A bounding box for the space.
     UpperBoxType state_bounding_box() const;
@@ -184,6 +192,12 @@ class HybridEnclosure
     UpperIntervalType dwell_time_range() const;
 
     //! \brief The continuous state set.
+    friend HybridBasicSet<Enclosure> project(HybridEnclosure const&, RealSpace const& spc);
+    //! \brief The continuous state set.
+    HybridBasicSet<Enclosure> state_set() const;
+    //! \brief The continuous state set.
+    HybridBasicSet<Enclosure> state_auxiliary_set() const;
+    //! \brief The continuous enclosure.
     const ContinuousStateSetType& continuous_set() const;
 
     //! \brief Set the time function to zero.
@@ -195,19 +209,19 @@ class HybridEnclosure
     //! Corresponds to replacing \f$\xi\f$ by \f$r\circ \xi\f$.
     Void apply_reset(DiscreteEvent e, DiscreteLocation q, RealSpace s, const ValidatedVectorFunction& r);
     //! \brief Apply the evolve step \xi'(s) = phi(xi(s),eps) and tau'(s)=tau(s)+eps
-    Void apply_fixed_evolve_step(const ValidatedVectorFunctionModel& phi, const Float64Value& eps);
+    Void apply_fixed_evolve_step(const ValidatedVectorFunctionModel64& phi, const Float64Value& eps);
     //! \brief Apply the evolve step \xi'(s) = phi(xi(s),eps(xi(s),tau(s))) and tau'(s)=tau(s)+eps(xi(s),tau(s))
-    Void apply_spacetime_evolve_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& eps);
+    Void apply_spacetime_evolve_step(const ValidatedVectorFunctionModel64& phi, const ValidatedScalarFunctionModel64& eps);
     //! \brief Apply the reach step \xi'(s) = phi(xi(s),t-tau(s)) and tau'(s)=tau(s)+t for 0<=t<=eps(xi(s),tau(s))
-    Void apply_spacetime_reach_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& eps);
+    Void apply_spacetime_reach_step(const ValidatedVectorFunctionModel64& phi, const ValidatedScalarFunctionModel64& eps);
     // Compute the evolve step \xi'(s) = phi(xi(s),eps(s)) and tau'(s)=tau(s)+eps(s)
-    Void apply_evolve_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& eps);
+    Void apply_evolve_step(const ValidatedVectorFunctionModel64& phi, const ValidatedScalarFunctionModel64& eps);
     // Compute the evolve step \xi'(s) = phi(xi(s),\omega(s)-tau(s)) and tau'(s)=omega(s)
-    Void apply_finishing_evolve_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& omega);
+    Void apply_finishing_evolve_step(const ValidatedVectorFunctionModel64& phi, const ValidatedScalarFunctionModel64& omega);
     //! \brief Compute the reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h] and t <= eps(s) , assuming eps(s)<= h throughout.
-    Void apply_reach_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& eps);
+    Void apply_reach_step(const ValidatedVectorFunctionModel64& phi, const ValidatedScalarFunctionModel64& eps);
     //! \brief Compute the reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h].
-    Void apply_full_reach_step(const ValidatedVectorFunctionModel& phi);
+    Void apply_full_reach_step(const ValidatedVectorFunctionModel64& phi);
 
 
     //! \brief Set the time of evolution to \a \f$t_{\max}\f$.
@@ -265,13 +279,13 @@ class HybridEnclosure
     ValidatedKleenean satisfies(EffectiveConstraint c) const;
 
     //! \brief Returns a bounding box for the set. Computed by a simple interval evaluation of \f$f(D)\f$.
-    HybridBoxType bounding_box() const;
+    HybridUpperBoxType bounding_box() const;
     //! \brief Returns an over-approximation to the range of \a g over the set.
     UpperIntervalType range_of(EffectiveScalarFunction const& g) const;
     //! \brief Tests whether the set is disjoint from the box \a hbx.
-    ValidatedSierpinskian separated(const HybridBoxType& hbx) const;
+    ValidatedSierpinskian separated(const HybridExactBox& hbx) const;
     //! \brief Tests whether the set is a subset of the interior of the box \a hbx.
-    ValidatedSierpinskian inside(const HybridBoxType& hbx) const;
+    ValidatedSierpinskian inside(const HybridExactBox& hbx) const;
     //! \brief Restricts to a subdomain of the \em parameter domain.
     Void restrict(const ExactBoxType& subdomain);
     //! \brief Adjoins an outer approximation of the set to the grid-based set \a paving, with accuracy given by
@@ -312,8 +326,9 @@ class HybridEnclosure
 
 };
 
-inline ValidatedSierpinskian inside(const HybridEnclosure& he, const HybridBoxType& hbx) { return he.inside(hbx); }
-inline ValidatedSierpinskian separated(const HybridEnclosure& he, const HybridBoxType& hbx) { return he.separated(hbx); }
+ValidatedSierpinskian inside(const HybridEnclosure& he, const HybridRealBox& hbx);
+inline ValidatedSierpinskian inside(const HybridEnclosure& he, const HybridExactBox& hbx) { return he.inside(hbx); }
+inline ValidatedSierpinskian separated(const HybridEnclosure& he, const HybridExactBox& hbx) { return he.separated(hbx); }
 
 inline OutputStream& operator<<(OutputStream& os, const HybridEnclosure& s) { return s.write(os); }
 inline OutputStream& operator<<(OutputStream& os, const Representation<HybridEnclosure>& s) { return s.pointer->repr(os); }
@@ -353,7 +368,7 @@ class ListSet<HybridEnclosure>
     List<HybridEnclosure> _list;
 };
 
-inline ValidatedSierpinskian inside(ListSet<HybridEnclosure> const& set, HybridBoxType const& bx) {
+inline ValidatedSierpinskian inside(ListSet<HybridEnclosure> const& set, HybridExactBox const& bx) {
     ValidatedSierpinskian result=true;
     for(auto iter=set.begin(); iter!=set.end(); ++iter) {
         result = result && inside(*iter,bx);

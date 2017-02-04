@@ -27,6 +27,8 @@
 
 #include "config.h"
 #include "function/taylor_function.h"
+#include "function/formula.h"
+#include "algebra/algebra.h"
 #include "geometry/function_set.h"
 #include "geometry/grid_set.h"
 #include "hybrid/hybrid_time.h"
@@ -53,10 +55,10 @@ Colour bounding_box_colour(0.75,0.75,0.875);
 
 namespace Ariadne {
 
-HybridBoxes
+HybridExactBoxes
 bounding_boxes(const HybridSpaceInterface& space, ExactIntervalType bound)
 {
-    HybridBoxes result;
+    HybridExactBoxes result;
     Set<DiscreteLocation> locations = dynamic_cast<const MonolithicHybridSpace&>(space).locations();
     for(Set<DiscreteLocation>::ConstIterator loc_iter=locations.begin();
         loc_iter!=locations.end(); ++loc_iter)
@@ -132,7 +134,7 @@ class TestHybridReachabilityAnalyser
 
         //ImageSet initial_box(make_box("[1.99,2.01]x[-0.01,0.01]"));
         Decimal x0l(2.01), x0u(2.02), y0l(0.01), y0u(0.02);
-        initial_set=HybridSet(location,{x.in(x0l,x0u),y.in(y0l,y0u)});
+        initial_set=HybridSet(location,{x.in(x0l,(Real)x0u),y.in(y0l,(Real)y0u)});
         cout << "Done creating initial set\n" << endl;
 
         cout << "system=" << system << endl;
@@ -217,12 +219,11 @@ class TestHybridReachabilityAnalyser
     Void test_infinite_time_lower_reach() {
 
         DiscreteLocation loc(1);
-        HybridBoxes bounding_boxes
+        HybridExactBoxes bounding_boxes
             =Ariadne::bounding_boxes(system.state_space(),bound);
-        ExactVariablesBoxType bounding_box=bounding_boxes[loc];
 
         analyser.configuration().set_transient_time(4.0);
-        analyser.configuration().set_bounding_domain_ptr(shared_ptr<HybridBoxes>(new HybridBoxes(bounding_boxes)));
+        analyser.configuration().set_bounding_domain_ptr(shared_ptr<HybridExactBoxes>(new HybridExactBoxes(bounding_boxes)));
         cout << analyser.configuration();
 
         cout << "Computing infinite time lower reachable set" << endl;
@@ -237,12 +238,11 @@ class TestHybridReachabilityAnalyser
     Void test_outer_chain_reach() {
         cout << "Computing outer chain reachable set" << endl;
         DiscreteLocation loc(1);
-        HybridBoxes bounding_boxes
+        HybridExactBoxes bounding_boxes
             =Ariadne::bounding_boxes(system.state_space(),bound);
-        ExactVariablesBoxType bounding_box=bounding_boxes[loc];
 
         analyser.configuration().set_transient_time(4.0);
-        analyser.configuration().set_bounding_domain_ptr(shared_ptr<HybridBoxes>(new HybridBoxes(bounding_boxes)));
+        analyser.configuration().set_bounding_domain_ptr(shared_ptr<HybridExactBoxes>(new HybridExactBoxes(bounding_boxes)));
         cout << analyser.configuration();
 
         HybridGridTreeSet outer_chain_reach_set=analyser.outer_chain_reach(initial_set);

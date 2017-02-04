@@ -41,14 +41,10 @@
 #include "algebra/sweeper.h"
 #include "algebra/operations.h"
 #include "algebra/evaluate.h"
+#include "function/domain.h"
 #include "function/scaling.h"
-#include "geometry/interval.h"
 
 namespace Ariadne {
-
-class UnitIntervalType;
-typedef Box<UnitIntervalType> UnitBoxType;
-enum class SplitPart : char;
 
 template<class T1, class T2> struct Product;
 
@@ -88,7 +84,7 @@ template<class P, class F> struct AlgebraOperations<TaylorModel<P,F>> : NormedAl
 
 /*! \brief A class representing a power series expansion, scaled to the unit box, with an error term.
  *
- * See also Expansion, ScalarTaylorFunction, VectorTaylorFunction, TaylorConstrainedImageSet.
+ * See also Expansion, ValidatedScalarTaylorFunctionModel64, ValidatedVectorTaylorFunctionModel64, TaylorConstrainedImageSet.
  */
 template<class F>
 class TaylorModel<ValidatedTag,F>
@@ -110,11 +106,13 @@ class TaylorModel<ValidatedTag,F>
     typedef SortedExpansion<CoefficientType,ComparisonType> ExpansionType;
     typedef Sweeper<F> SweeperType;
 
-    typedef ExactIntervalType CodomainType;
+    typedef IntervalDomainType CodomainType;
     typedef Interval<FloatUpperBound<PR>> RangeType;
 
     //! \brief The computational paradigm.
     typedef ValidatedTag Paradigm;
+    //! \brief The properties needed to define the TaylorModel calculus.
+    typedef Sweeper<F> PropertiesType;
 
     //! \brief The type used for algebraic operations.
     typedef FloatBounds<PR> NumericType;
@@ -199,7 +197,7 @@ class TaylorModel<ValidatedTag,F>
         TaylorModel<ValidatedTag,F> r(as,swp); r.set_error(1u); return r; }
 
     //! \brief Construct the quantity which scales the interval \a codom onto the unit interval.
-    static TaylorModel<ValidatedTag,F> scaling(SizeType as, SizeType j, const ExactIntervalType& codom, SweeperType swp);
+    static TaylorModel<ValidatedTag,F> scaling(SizeType as, SizeType j, const IntervalDomainType& codom, SweeperType swp);
 
     //! \brief Return the vector of zero variables of size \a rs in \a as arguments.
     static Vector<TaylorModel<ValidatedTag,F>> zeros(SizeType rs, SizeType as, SweeperType swp);
@@ -209,7 +207,7 @@ class TaylorModel<ValidatedTag,F>
     static Vector<TaylorModel<ValidatedTag,F>> coordinates(SizeType as, SweeperType swp);
 
     //! \brief Return the vector scaling the box \a codom onto the unit box.
-    static Vector<TaylorModel<ValidatedTag,F>> scalings(const Vector<ExactIntervalType>& codom, SweeperType swp);
+    static Vector<TaylorModel<ValidatedTag,F>> scalings(const Vector<IntervalDomainType>& codom, SweeperType swp);
     //@}
 
     //@{
@@ -303,9 +301,9 @@ class TaylorModel<ValidatedTag,F>
     //@{
     /*! \name Function evaluation. */
     //! \brief The domain of the quantity, always given by \f$[-1,1]^{\mathrm{as}}\f$.
-    UnitBoxType domain() const;
+    UnitBox domain() const;
     //! \brief The codomain of the quantity.
-    ExactIntervalType codomain() const;
+    IntervalDomainType codomain() const;
     //! \brief An over-approximation to the range of the quantity.
     RangeType range() const;
     //! \brief Compute the gradient of the expansion with respect to the \a jth variable over the domain.
@@ -339,13 +337,13 @@ class TaylorModel<ValidatedTag,F>
     //@{
     /*! \name Inplace modifications. */
     //! \brief Scales the model by a function mapping \a dom into the unit interval.
-    Void unscale(ExactIntervalType const& dom);
+    Void unscale(IntervalDomainType const& dom);
     //! \brief Compute the antiderivative (in place).
     Void antidifferentiate(SizeType k);
     //! \brief Compute the weak derivative (in place).
     Void differentiate(SizeType k);
 
-    friend TaylorModel<ValidatedTag,F> unscale(TaylorModel<ValidatedTag,F> tm, ExactIntervalType const& dom) {
+    friend TaylorModel<ValidatedTag,F> unscale(TaylorModel<ValidatedTag,F> tm, IntervalDomainType const& dom) {
         tm.unscale(dom); return std::move(tm); }
     friend TaylorModel<ValidatedTag,F> antiderivative(TaylorModel<ValidatedTag,F> tm, SizeType k) {
         tm.antidifferentiate(k); return std::move(tm); }
@@ -395,10 +393,12 @@ class TaylorModel<ValidatedTag,F>
 
     //! \brief Remove all terms based on the \a swp conditions.
     TaylorModel<ValidatedTag,F>& sweep(const SweeperType& swp);
+    TaylorModel<ValidatedTag,F>& simplify(const PropertiesType& prp);
 
     //! \brief Remove all terms whose coefficient has magnitude
     //! lower than the cutoff threshold of the quantity.
     TaylorModel<ValidatedTag,F>& sweep();
+    TaylorModel<ValidatedTag,F>& simplify();
     //! \brief Sorts keys.
     TaylorModel<ValidatedTag,F>& sort();
     //! \brief Remove terms with the same keys. Assumes sorted.
@@ -416,8 +416,11 @@ class TaylorModel<ValidatedTag,F>
     /*! \name Accuracy parameters. */
     //! \brief Specify a policy to use to remove low-impact terms.
     Void set_sweeper(SweeperType swp) { this->_sweeper=swp; }
+    Void set_properties(PropertiesType prp) { this->_sweeper=prp; }
     //! \brief A shared pointer to an object using for removing low-impact terms.
     SweeperType sweeper() const { return this->_sweeper; }
+    //! \brief The precision of the coefficients.
+    PropertiesType properties() const { return this->sweeper(); }
     //! \brief The precision of the coefficients.
     PrecisionType precision() const { return this->sweeper().precision(); }
     //@}
@@ -476,11 +479,11 @@ class TaylorModel<ValidatedTag,F>
     static FloatApproximation<PR> _evaluate(const TaylorModel<ValidatedTag,F>& x, Vector<FloatApproximation<PR>> const& v);
 };
 
-// FIXME: Needed to dispatch gradient of FunctionPatch
+// FIXME: Needed to dispatch gradient of ScaledFunctionPatch
 Covector<Float64Bounds> gradient(const TaylorModel<ValidatedTag,Float64>& x, const Vector<Float64Bounds>& v);
 Covector<FloatMPBounds> gradient(const TaylorModel<ValidatedTag,FloatMP>& x, const Vector<FloatMPBounds>& v);
 
-// FIXME: Needed to dispatch gradient of FunctionPatch
+// FIXME: Needed to dispatch gradient of ScaledFunctionPatch
 template<class F> template<class A> auto TaylorModel<ValidatedTag,F>::operator() (Vector<A> const& x) const -> ArithmeticType<A,FloatValue<PR>> {
     return horner_evaluate(this->expansion(),x)+FloatBounds<typename F::PrecisionType>(-this->error(),+this->error());
 }
@@ -488,7 +491,7 @@ template<class F> template<class A> auto TaylorModel<ValidatedTag,F>::operator()
 
 /*! \brief A class representing a power series expansion, scaled to the unit box, with an error term.
  *
- * See also Expansion, Polynomial, TaylorModel<ValidatedTag,F><ExactIntervalType>.
+ * See also Expansion, Polynomial, TaylorModel<ValidatedTag,F><IntervalDomainType>.
  */
 template<class F>
 class TaylorModel<ApproximateTag,F>
@@ -504,13 +507,14 @@ class TaylorModel<ApproximateTag,F>
     typedef ReverseLexicographicIndexLess ComparisonType;
     typedef SortedExpansion<CoefficientType,ComparisonType> ExpansionType;
 
-    typedef ExactIntervalType CodomainType;
-    typedef ApproximateIntervalType RangeType;
+    typedef IntervalDomainType CodomainType;
+    typedef Interval<FloatApproximation<PR>> RangeType;
     typedef FloatApproximation<PR> NormType;
 
     //! \brief The type used algebraic operations.
     typedef FloatApproximation<PR> NumericType;
     typedef ApproximateNumber GenericNumericType;
+    typedef Sweeper<F> PropertiesType;
     //! \brief The type used to index the coefficients.
     typedef MultiIndex IndexType;
     //! \brief The type used for the coefficients.
@@ -597,25 +601,25 @@ class TaylorModel<ApproximateTag,F>
     //@{
     /*! \name Function evaluation. */
     //! \brief The domain of the quantity.
-    UnitBoxType domain() const;
+    UnitBox domain() const;
     //! \brief A coarse over-approximation to the range of the quantity.
-    ExactIntervalType codomain() const;
+    IntervalDomainType codomain() const;
     //! \brief An over-approximation to the range of the quantity.
-    ApproximateIntervalType range() const;
+    RangeType range() const;
     //! \brief Compute the gradient of the expansion with respect to the \a jth variable over the domain.
-    ApproximateIntervalType gradient_range(SizeType j) const;
+    RangeType gradient_range(SizeType j) const;
     //@}
 
     //@{
     /*! \name Inplace modifications. */
     //! \brief Scale so that the old codomain maps into the unit interval.
-    Void unscale(const ExactIntervalType& dom);
+    Void unscale(const IntervalDomainType& dom);
     //! \brief Compute the antiderivative (in place).
     Void antidifferentiate(SizeType k);
     //! \brief Compute the derivative (in place).
     Void differentiate(SizeType k);
 
-    friend TaylorModel<ApproximateTag,F> unscale(TaylorModel<ApproximateTag,F> tm, const ExactIntervalType& dom) {
+    friend TaylorModel<ApproximateTag,F> unscale(TaylorModel<ApproximateTag,F> tm, const IntervalDomainType& dom) {
         tm.unscale(dom); return std::move(tm); }
 
     //@}
@@ -624,8 +628,10 @@ class TaylorModel<ApproximateTag,F>
     /*! \name Accuracy parameters. */
     //! \brief Specify a policy to use to remove low-impact terms.
     Void set_sweeper(SweeperType swp) { this->_sweeper=swp; }
+    Void set_properties(PropertiesType prp) { this->set_sweeper(prp); }
     //! \brief A shared pointer to an object using for removing low-impact terms.
     SweeperType sweeper() const { return this->_sweeper; }
+    PropertiesType properties() const { return this->_sweeper; }
     //! \brief The precision of the coefficients.
     PrecisionType precision() const { return this->sweeper().precision(); }
     //@}
@@ -635,6 +641,7 @@ class TaylorModel<ApproximateTag,F>
     //! \brief Remove all terms whose coefficient has magnitude
     //! lower than the cutoff threshold of the quantity.
     TaylorModel<ApproximateTag,F>& sweep();
+    TaylorModel<ApproximateTag,F>& simplify();
     //! \brief Combine terms with the same index; requires sorted.
     TaylorModel<ApproximateTag,F>& unique();
     //! \brief Sort the terms in index order.
@@ -733,7 +740,7 @@ template<class F> Vector<TaylorModel<ValidatedTag,F>> compose(const Vector<Taylo
     return std::move(r);
 }
 
-template<class P, class F> Vector<TaylorModel<P,F>> unscale(const Vector<TaylorModel<P,F>>& x, const Vector<ExactIntervalType>& dom) {
+template<class P, class F> Vector<TaylorModel<P,F>> unscale(const Vector<TaylorModel<P,F>>& x, const Vector<IntervalDomainType>& dom) {
     Vector<TaylorModel<P,F>> r(x.size());
     for(SizeType i=0; i!=r.size(); ++i) { r[i]=unscale(x[i],dom[i]); }
     return std::move(r);

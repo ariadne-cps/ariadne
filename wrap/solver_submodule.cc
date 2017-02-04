@@ -26,7 +26,9 @@
 
 #include <boost/python.hpp>
 
+#include "algebra/algebra.h"
 #include "function/function.h"
+#include "function/formula.h"
 #include "solvers/solver_interface.h"
 #include "solvers/solver.h"
 #include "function/taylor_function.h"
@@ -63,11 +65,11 @@ class SolverWrapper
         return this->get_override("solve")(); }
     ValidatedPointType solve(const ValidatedVectorFunction& f, const ExactBoxType& bx) const {
         return this->get_override("solve")(); }
-    ValidatedVectorFunctionModel implicit(const ValidatedVectorFunction& f, const ExactBoxType& pd, const ExactBoxType& bx) const {
+    ValidatedVectorFunctionModel64 implicit(const ValidatedVectorFunction& f, const ExactBoxType& pd, const ExactBoxType& bx) const {
         return this->get_override("implicit")(); }
-    ValidatedScalarFunctionModel implicit(const ValidatedScalarFunction& f, const ExactBoxType& pd, const ExactIntervalType& ivl) const {
+    ValidatedScalarFunctionModel64 implicit(const ValidatedScalarFunction& f, const ExactBoxType& pd, const ExactIntervalType& ivl) const {
         return this->get_override("implicit")(); }
-    ValidatedVectorFunctionModel continuation(const ValidatedVectorFunction& f, const ApproximatePointType& a, const ExactBoxType& X,  const ExactBoxType& A) const {
+    ValidatedVectorFunctionModel64 continuation(const ValidatedVectorFunction& f, const ApproximatePointType& a, const ExactBoxType& X,  const ExactBoxType& A) const {
         return this->get_override("continuation")(); }
     Set< ValidatedPointType > solve_all(const ValidatedVectorFunction& f, const ExactBoxType& bx) const {
         return this->get_override("solve_all")(); }
@@ -89,15 +91,15 @@ class IntegratorWrapper
         return this->get_override("maximum_error")(); }
     Pair<Float64Value,UpperBoxType> flow_bounds(const ValidatedVectorFunction&,const ExactBoxType&,const RawFloat64&) const {
         return this->get_override("flow_bounds")(); }
-    ValidatedVectorFunctionModel flow_step(const ValidatedVectorFunction&,const ExactBoxType&,RawFloat64&) const {
+    ValidatedVectorFunctionModel64 flow_step(const ValidatedVectorFunction&,const ExactBoxType&,RawFloat64&) const {
         return this->get_override("flow_step")(); }
-    ValidatedVectorFunctionModel flow_step(const ValidatedVectorFunction&,const ExactBoxType&,const Float64Value&,const UpperBoxType&) const {
+    ValidatedVectorFunctionModel64 flow_step(const ValidatedVectorFunction&,const ExactBoxType&,const Float64Value&,const UpperBoxType&) const {
         return this->get_override("flow_step")(); }
-    ValidatedVectorFunctionModel flow_to(const ValidatedVectorFunction& vector_field,const ExactBoxType&,const Real&) const {
+    ValidatedVectorFunctionModel64 flow_to(const ValidatedVectorFunction& vector_field,const ExactBoxType&,const Real&) const {
         return this->get_override("flow_to")(); }
-    List<ValidatedVectorFunctionModel> flow(const ValidatedVectorFunction&,const ExactBoxType&,const Real&,const Real&) const {
+    List<ValidatedVectorFunctionModel64> flow(const ValidatedVectorFunction&,const ExactBoxType&,const Real&,const Real&) const {
         return this->get_override("flow")(); }
-    List<ValidatedVectorFunctionModel> flow(const ValidatedVectorFunction&,const ExactBoxType&,const Real&) const {
+    List<ValidatedVectorFunctionModel64> flow(const ValidatedVectorFunction&,const ExactBoxType&,const Real&) const {
         return this->get_override("flow")(); }
     Void write(OutputStream&) const {
         this->get_override("write")(); }
@@ -111,8 +113,8 @@ Void export_solver()
 {
     class_<SolverWrapper, boost::noncopyable> solver_wrapper_class("SolverInterface");
     solver_wrapper_class.def("solve",pure_virtual((Vector<ValidatedNumericType>(SolverInterface::*)(const ValidatedVectorFunction&,const ExactBoxType&)const) &SolverInterface::solve));
-    solver_wrapper_class.def("implicit",pure_virtual((ValidatedVectorFunctionModel(SolverInterface::*)(const ValidatedVectorFunction&,const ExactBoxType&,const ExactBoxType&)const) &SolverInterface::implicit));
-    solver_wrapper_class.def("implicit",pure_virtual((ValidatedScalarFunctionModel(SolverInterface::*)(const ValidatedScalarFunction&,const ExactBoxType&,const ExactIntervalType&)const) &SolverInterface::implicit));
+    solver_wrapper_class.def("implicit",pure_virtual((ValidatedVectorFunctionModel64(SolverInterface::*)(const ValidatedVectorFunction&,const ExactBoxType&,const ExactBoxType&)const) &SolverInterface::implicit));
+    solver_wrapper_class.def("implicit",pure_virtual((ValidatedScalarFunctionModel64(SolverInterface::*)(const ValidatedScalarFunction&,const ExactBoxType&,const ExactIntervalType&)const) &SolverInterface::implicit));
     solver_wrapper_class.def("solve_all",pure_virtual((Set< Vector<ValidatedNumericType> >(SolverInterface::*)(const ValidatedVectorFunction&,const ExactBoxType&)const) &SolverInterface::solve_all));
     //solver_wrapper_class.def(self_ns::str(self));
 
@@ -126,18 +128,18 @@ Void export_integrator()
 {
     class_<IntegratorWrapper, boost::noncopyable> integrator_wrapper_class("IntegratorInterface");
     integrator_wrapper_class.def("flow_bounds",(Pair<Float64Value,UpperBoxType>(IntegratorInterface::*)(const ValidatedVectorFunction&, const ExactBoxType&, const RawFloat64&)const)&IntegratorInterface::flow_bounds);
-    integrator_wrapper_class.def("flow_step",(ValidatedVectorFunctionModel(IntegratorInterface::*)(const ValidatedVectorFunction&, const ExactBoxType&, RawFloat64&)const)&IntegratorInterface::flow_step);
-    integrator_wrapper_class.def("flow_step",(ValidatedVectorFunctionModel(IntegratorInterface::*)(const ValidatedVectorFunction&,const ExactBoxType&,const Float64Value&,const UpperBoxType&)const)&IntegratorInterface::flow_step);
-    integrator_wrapper_class.def("flow_to",(ValidatedVectorFunctionModel(IntegratorInterface::*)(const ValidatedVectorFunction&,const ExactBoxType&,const Real&)const)&IntegratorInterface::flow_to);
-    integrator_wrapper_class.def("flow",(List<ValidatedVectorFunctionModel>(IntegratorInterface::*)(const ValidatedVectorFunction&,const ExactBoxType&,const Real&)const)&IntegratorInterface::flow);
+    integrator_wrapper_class.def("flow_step",(ValidatedVectorFunctionModel64(IntegratorInterface::*)(const ValidatedVectorFunction&, const ExactBoxType&, RawFloat64&)const)&IntegratorInterface::flow_step);
+    integrator_wrapper_class.def("flow_step",(ValidatedVectorFunctionModel64(IntegratorInterface::*)(const ValidatedVectorFunction&,const ExactBoxType&,const Float64Value&,const UpperBoxType&)const)&IntegratorInterface::flow_step);
+    integrator_wrapper_class.def("flow_to",(ValidatedVectorFunctionModel64(IntegratorInterface::*)(const ValidatedVectorFunction&,const ExactBoxType&,const Real&)const)&IntegratorInterface::flow_to);
+    integrator_wrapper_class.def("flow",(List<ValidatedVectorFunctionModel64>(IntegratorInterface::*)(const ValidatedVectorFunction&,const ExactBoxType&,const Real&)const)&IntegratorInterface::flow);
 
 
     class_<TaylorPicardIntegrator > taylor_picard_integrator_class("TaylorPicardIntegrator",init<double>());
     taylor_picard_integrator_class.def("flow_bounds",(Pair<Float64,UpperBoxType>(IntegratorInterface::*)(const ValidatedVectorFunction&,const ExactBoxType&,const Float64&)const)&TaylorPicardIntegrator::flow_bounds);
-    taylor_picard_integrator_class.def("flow_step", (ValidatedVectorFunctionModel(TaylorPicardIntegrator::*)(const ValidatedVectorFunction&,const ExactBoxType&,RawFloat64&)const)&TaylorPicardIntegrator::flow_step);
-    taylor_picard_integrator_class.def("flow_step", (ValidatedVectorFunctionModel(TaylorPicardIntegrator::*)(const ValidatedVectorFunction&,const ExactBoxType&,const Float64Value&,const UpperBoxType&)const)&TaylorPicardIntegrator::flow_step);
-    taylor_picard_integrator_class.def("flow_to",(ValidatedVectorFunctionModel(TaylorPicardIntegrator::*)(const ValidatedVectorFunction&,const ExactBoxType&,const Real&)const)&TaylorPicardIntegrator::flow_to);
-    taylor_picard_integrator_class.def("flow",(List<ValidatedVectorFunctionModel>(TaylorPicardIntegrator::*)(const ValidatedVectorFunction&,const ExactBoxType&,const Real&)const)&TaylorPicardIntegrator::flow);
+    taylor_picard_integrator_class.def("flow_step", (ValidatedVectorFunctionModel64(TaylorPicardIntegrator::*)(const ValidatedVectorFunction&,const ExactBoxType&,RawFloat64&)const)&TaylorPicardIntegrator::flow_step);
+    taylor_picard_integrator_class.def("flow_step", (ValidatedVectorFunctionModel64(TaylorPicardIntegrator::*)(const ValidatedVectorFunction&,const ExactBoxType&,const Float64Value&,const UpperBoxType&)const)&TaylorPicardIntegrator::flow_step);
+    taylor_picard_integrator_class.def("flow_to",(ValidatedVectorFunctionModel64(TaylorPicardIntegrator::*)(const ValidatedVectorFunction&,const ExactBoxType&,const Real&)const)&TaylorPicardIntegrator::flow_to);
+    taylor_picard_integrator_class.def("flow",(List<ValidatedVectorFunctionModel64>(TaylorPicardIntegrator::*)(const ValidatedVectorFunction&,const ExactBoxType&,const Real&)const)&TaylorPicardIntegrator::flow);
 
     class_<TaylorSeriesIntegrator > taylor_series_integrator_class("TaylorSeriesIntegrator",init<double>());
     taylor_series_integrator_class.def("maximum_spacial_order",&TaylorSeriesIntegrator::maximum_spacial_order);
@@ -149,10 +151,10 @@ Void export_integrator()
     taylor_series_integrator_class.def("set_maximum_error",&TaylorSeriesIntegrator::set_maximum_error);
     taylor_series_integrator_class.def("set_maximum_step_size",&TaylorSeriesIntegrator::set_maximum_step_size);
     taylor_series_integrator_class.def("flow_bounds",(Pair<Float64Value,UpperBoxType>(IntegratorInterface::*)(const ValidatedVectorFunction&,const ExactBoxType&,const RawFloat64&)const)&TaylorSeriesIntegrator::flow_bounds);
-    taylor_series_integrator_class.def("flow_step", (ValidatedVectorFunctionModel(TaylorSeriesIntegrator::*)(const ValidatedVectorFunction&,const ExactBoxType&,RawFloat64&)const)&TaylorSeriesIntegrator::flow_step);
-    taylor_series_integrator_class.def("flow_step", (ValidatedVectorFunctionModel(TaylorSeriesIntegrator::*)(const ValidatedVectorFunction&,const ExactBoxType&,const Float64Value&,const UpperBoxType&)const)&TaylorSeriesIntegrator::flow_step);
-    taylor_series_integrator_class.def("flow_to",(ValidatedVectorFunctionModel(TaylorSeriesIntegrator::*)(const ValidatedVectorFunction&,const ExactBoxType&,const Real&)const)&TaylorSeriesIntegrator::flow_to);
-    taylor_series_integrator_class.def("flow",(List<ValidatedVectorFunctionModel>(TaylorSeriesIntegrator::*)(const ValidatedVectorFunction&,const ExactBoxType&,const Real&)const)&TaylorSeriesIntegrator::flow);
+    taylor_series_integrator_class.def("flow_step", (ValidatedVectorFunctionModel64(TaylorSeriesIntegrator::*)(const ValidatedVectorFunction&,const ExactBoxType&,RawFloat64&)const)&TaylorSeriesIntegrator::flow_step);
+    taylor_series_integrator_class.def("flow_step", (ValidatedVectorFunctionModel64(TaylorSeriesIntegrator::*)(const ValidatedVectorFunction&,const ExactBoxType&,const Float64Value&,const UpperBoxType&)const)&TaylorSeriesIntegrator::flow_step);
+    taylor_series_integrator_class.def("flow_to",(ValidatedVectorFunctionModel64(TaylorSeriesIntegrator::*)(const ValidatedVectorFunction&,const ExactBoxType&,const Real&)const)&TaylorSeriesIntegrator::flow_to);
+    taylor_series_integrator_class.def("flow",(List<ValidatedVectorFunctionModel64>(TaylorSeriesIntegrator::*)(const ValidatedVectorFunction&,const ExactBoxType&,const Real&)const)&TaylorSeriesIntegrator::flow);
 
     class_<RungeKutta4Integrator > runge_kutta_4_integrator_class("RungeKutta4Integrator",init<double>());
     runge_kutta_4_integrator_class.def("step", &RungeKutta4Integrator::step);

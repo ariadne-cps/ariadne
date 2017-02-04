@@ -67,7 +67,7 @@ class Rational
     ~Rational();
     Rational();
     Rational(const Integer&, const Integer&);
-    template<class N, EnableIf<IsIntegral<N>> = dummy> Rational(N n);
+    template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> Rational(N n);
     Rational(Int64);
     explicit Rational(Float64 const&);
     Rational(const ExactDouble&);
@@ -103,7 +103,7 @@ class Rational
 template<> struct IsNumericType<Rational> : True { };
 Rational operator"" _q(long double x);
 
-template<class N, EnableIf<IsIntegral<N>>> inline Rational::Rational(N n) : Rational(Int64(n)) { }
+template<class N, EnableIf<IsBuiltinIntegral<N>>> inline Rational::Rational(N n) : Rational(Int64(n)) { }
 
 
 

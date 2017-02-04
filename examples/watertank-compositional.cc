@@ -76,7 +76,7 @@ Int main(Int argc, const char* argv[])
     // Since aperture is a known constant when the valve is open or closed,
     // specify aperture by an algebraic equation.
     valve_automaton.new_mode(valve|open,{let(aperture)=+1.0_decimal});
-    valve_automaton.new_mode(valve|closed,{let(aperture)=-1.0_decimal});
+    valve_automaton.new_mode(valve|closed,{let(aperture)=0.0_decimal});
     // Specify the differential equation for how the valve opens/closes.
     valve_automaton.new_mode(valve|opening,{dot(aperture)=+1/T});
     valve_automaton.new_mode(valve|closing,{dot(aperture)=-1/T});

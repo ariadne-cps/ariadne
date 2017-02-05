@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_hybrid_automaton.cc
+ *            test_hybrid_automaton.cpp
  *
  *  Copyright  2009  Pieter Collins
  *
@@ -25,11 +25,11 @@
 #include <fstream>
 
 #include "config.h"
-#include "test.h"
+#include "test.hpp"
 
-#include "expression/expression.h"
-#include "expression/valuation.h"
-#include "hybrid/hybrid_automata.h"
+#include "expression/expression.hpp"
+#include "expression/valuation.hpp"
+#include "hybrid/hybrid_automata.hpp"
 #include <boost/concept_check.hpp>
 
 using namespace Ariadne;

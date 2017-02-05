@@ -1,5 +1,5 @@
 /***************************************************************************
- *            function.decl.h
+ *            function.decl.hpp
  *
  *  Copyright 2016-17  Pieter Collins
  *
@@ -21,15 +21,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file function.decl.h
+/*! \file function.decl.hpp
  *  \brief Declarations of function types.
  */
 
-#ifndef ARIADNE_FUNCTION_DECL_H
-#define ARIADNE_FUNCTION_DECL_H
+#ifndef ARIADNE_FUNCTION_DECL_HPP
+#define ARIADNE_FUNCTION_DECL_HPP
 
-#include "geometry/interval.decl.h"
-#include "geometry/box.decl.h"
+#include "geometry/interval.decl.hpp"
+#include "geometry/box.decl.hpp"
 
 namespace Ariadne {
 

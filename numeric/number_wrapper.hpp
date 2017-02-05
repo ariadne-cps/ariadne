@@ -1,5 +1,5 @@
 /***************************************************************************
- *            numeric/number_wrapper.h
+ *            numeric/number_wrapper.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,28 +21,28 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file numeric/number_wrapper.h
+/*! \file numeric/number_wrapper.hpp
  *  \brief
  */
 
 
 
-#ifndef ARIADNE_NUMBER_WRAPPER_H
-#define ARIADNE_NUMBER_WRAPPER_H
+#ifndef ARIADNE_NUMBER_WRAPPER_HPP
+#define ARIADNE_NUMBER_WRAPPER_HPP
 
-#include "utility/module.h"
-#include "numeric/paradigm.h"
+#include "utility/module.hpp"
+#include "numeric/paradigm.hpp"
 
-#include "number_interface.h"
+#include "number_interface.hpp"
 
-#include "number.h"
-#include "logical.h"
-#include "float64.h"
-#include "floatmp.h"
-#include "float-user.h"
+#include "number.hpp"
+#include "logical.hpp"
+#include "float64.hpp"
+#include "floatmp.hpp"
+#include "float-user.hpp"
 
-#include "expression/templates.h"
-#include "numeric/operators.h"
+#include "expression/templates.hpp"
+#include "numeric/operators.hpp"
 
 namespace Ariadne {
 
@@ -300,4 +300,4 @@ template<class X> class NumberWrapper
 
 } // namespace Ariadne
 
-#endif /* ARIADNE_NUMBER_WRAPPER_H */
+#endif /* ARIADNE_NUMBER_WRAPPER_HPP */

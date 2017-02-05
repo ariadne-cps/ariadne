@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_series.cc
+ *            test_series.cpp
  *
  *  Copyright 20-15  Pieter Collins
  *
@@ -21,11 +21,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/numeric.h"
-#include "algebra/series.h"
-#include "function/taylor_series.h"
+#include "numeric/numeric.hpp"
+#include "algebra/series.hpp"
+#include "function/taylor_series.hpp"
 
-#include "test.h"
+#include "test.hpp"
 
 namespace Ariadne {
 template<class T> Bool same(List<T> const& lst1, List<T> const& lst2) {

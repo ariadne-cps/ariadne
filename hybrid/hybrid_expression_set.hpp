@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_set.h
+ *            hybrid_set.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file hybrid_set.h
+/*! \file hybrid_set.hpp
  *  \brief Sets in hybrid spaces.
  */
 
-#ifndef ARIADNE_HYBRID_EXPRESSION_SET_H
-#define ARIADNE_HYBRID_EXPRESSION_SET_H
+#ifndef ARIADNE_HYBRID_EXPRESSION_SET_HPP
+#define ARIADNE_HYBRID_EXPRESSION_SET_HPP
 
 #include <map>
 
@@ -35,29 +35,29 @@
 
 #include <memory>
 
-#include "utility/macros.h"
-#include "utility/stlio.h"
-#include "utility/declarations.h"
-#include "utility/container.h"
-#include "geometry/function_set.h"
-#include "geometry/list_set.h"
-#include "geometry/grid_set.h"
-#include "geometry/curve.h"
+#include "utility/macros.hpp"
+#include "utility/stlio.hpp"
+#include "utility/declarations.hpp"
+#include "utility/container.hpp"
+#include "geometry/function_set.hpp"
+#include "geometry/list_set.hpp"
+#include "geometry/grid_set.hpp"
+#include "geometry/curve.hpp"
 
-#include "expression/expression_set.h"
+#include "expression/expression_set.hpp"
 
-#include "hybrid/hybrid_set.decl.h"
-#include "hybrid/hybrid_set_interface.h"
-#include "hybrid/hybrid_space.h"
-#include "hybrid/hybrid_grid.h"
-#include "geometry/point.h"
-#include "geometry/box.h"
+#include "hybrid/hybrid_set.decl.hpp"
+#include "hybrid/hybrid_set_interface.hpp"
+#include "hybrid/hybrid_space.hpp"
+#include "hybrid/hybrid_grid.hpp"
+#include "geometry/point.hpp"
+#include "geometry/box.hpp"
 
 #ifdef ARIADNE_ENABLE_SERIALIZATION
-#include "output/serialization.h"
+#include "output/serialization.hpp"
 #endif /* ARIADNE_ENABLE_SERIALIZATION */
 
-#include "hybrid/hybrid_graphics_interface.h"
+#include "hybrid/hybrid_graphics_interface.hpp"
 
 namespace Ariadne {
 
@@ -192,4 +192,4 @@ class HybridBoundedConstraintSet
 
 } // namespace Ariadne
 
-#endif // ARIADNE_HYBRID_EXPRESSION_SET_H
+#endif // ARIADNE_HYBRID_EXPRESSION_SET_HPP

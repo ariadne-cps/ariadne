@@ -1,5 +1,5 @@
 /***************************************************************************
- *            expansion.tpl.h
+ *            expansion.tpl.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,9 +21,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "algebra/vector.h"
-#include "algebra/multi_index.h"
-#include "algebra/expansion.h"
+#include "algebra/vector.hpp"
+#include "algebra/multi_index.hpp"
+#include "algebra/expansion.hpp"
 
 namespace Ariadne {
 

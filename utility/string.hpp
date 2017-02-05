@@ -1,5 +1,5 @@
 /***************************************************************************
- *            string.h
+ *            string.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file string.h
+/*! \file string.hpp
  *  \brief Wrapper for string class
  */
 
-#ifndef ARIADNE_STRING_H
-#define ARIADNE_STRING_H
+#ifndef ARIADNE_STRING_HPP
+#define ARIADNE_STRING_HPP
 
 #include <string>
 #include <sstream>
@@ -52,4 +52,4 @@ template<class T> String class_name();
 
 } // namespace Ariadne
 
-#endif /* ARIADNE_STRING_H */
+#endif /* ARIADNE_STRING_HPP */

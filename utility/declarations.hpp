@@ -1,5 +1,5 @@
 /***************************************************************************
- *            declarations.h
+ *            declarations.hpp
  *
  *  Copyright 2011-17  Pieter Collins
  *
@@ -21,27 +21,27 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file declarations.h
+/*! \file declarations.hpp
  *  \brief Forward declarations of types and classes.
  */
 
-#ifndef ARIADNE_DECLARATIONS_H
-#define ARIADNE_DECLARATIONS_H
+#ifndef ARIADNE_DECLARATIONS_HPP
+#define ARIADNE_DECLARATIONS_HPP
 
 #include <iosfwd>
 
-#include "utility/metaprogramming.h"
-#include "utility/typedefs.h"
+#include "utility/metaprogramming.hpp"
+#include "utility/typedefs.hpp"
 
-#include "numeric/paradigm.h"
-#include "numeric/logical.decl.h"
-#include "numeric/number.decl.h"
-#include "numeric/float.decl.h"
+#include "numeric/paradigm.hpp"
+#include "numeric/logical.decl.hpp"
+#include "numeric/number.decl.hpp"
+#include "numeric/float.decl.hpp"
 
-#include "function/function.decl.h"
+#include "function/function.decl.hpp"
 
-#include "geometry/interval.decl.h"
-#include "geometry/box.decl.h"
+#include "geometry/interval.decl.hpp"
+#include "geometry/box.decl.hpp"
 
 namespace Ariadne {
 

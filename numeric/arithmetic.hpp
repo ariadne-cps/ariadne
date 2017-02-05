@@ -1,5 +1,5 @@
 /***************************************************************************
- *            arithmetic.h
+ *            arithmetic.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,17 +21,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file arithmetic.h
+/*! \file arithmetic.hpp
  *  \brief Arithmetic declarations
  */
 
-#ifndef ARIADNE_ARITHMETIC_H
-#define ARIADNE_ARITHMETIC_H
+#ifndef ARIADNE_ARITHMETIC_HPP
+#define ARIADNE_ARITHMETIC_HPP
 
-#include "utility/metaprogramming.h"
-#include "logical.decl.h"
-#include "sign.h"
-#include "logical.h" // TODO: Try to remove; needed for specialisation of Boolean DefineMixedComparisonOperators
+#include "utility/metaprogramming.hpp"
+#include "logical.decl.hpp"
+#include "sign.hpp"
+#include "logical.hpp" // TODO: Try to remove; needed for specialisation of Boolean DefineMixedComparisonOperators
 
 namespace Ariadne {
 

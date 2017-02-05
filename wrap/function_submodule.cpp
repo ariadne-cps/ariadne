@@ -1,5 +1,5 @@
 /***************************************************************************
- *            function_submodule.cc
+ *            function_submodule.cpp
  *
  *  Copyright 2008--17  Pieter Collins
  *
@@ -21,37 +21,37 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "boost_python.h"
-#include "utilities.h"
+#include "boost_python.hpp"
+#include "utilities.hpp"
 
 #include <boost/python.hpp>
 
 #include <iostream>
 #include <iomanip>
 
-#include "utility/array.h"
-#include "utility/container.h"
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "algebra/expansion.h"
-#include "algebra/multi_index.h"
-#include "function/taylor_model.h"
-#include "algebra/differential.h"
-#include "function/formula.h"
-#include "function/polynomial.h"
-#include "function/affine.h"
-#include "function/taylor_function.h"
-#include "function/constraint.h"
-#include "function/procedure.h"
-#include "function/function.h"
-#include "function/function_mixin.h"
-#include "expression/expression.h"
-#include "expression/space.h"
-#include "expression/assignment.h"
-#include "expression/function_expression.h"
-#include "solvers/constraint_solver.h"
+#include "utility/array.hpp"
+#include "utility/container.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/expansion.hpp"
+#include "algebra/multi_index.hpp"
+#include "function/taylor_model.hpp"
+#include "algebra/differential.hpp"
+#include "function/formula.hpp"
+#include "function/polynomial.hpp"
+#include "function/affine.hpp"
+#include "function/taylor_function.hpp"
+#include "function/constraint.hpp"
+#include "function/procedure.hpp"
+#include "function/function.hpp"
+#include "function/function_mixin.hpp"
+#include "expression/expression.hpp"
+#include "expression/space.hpp"
+#include "expression/assignment.hpp"
+#include "expression/function_expression.hpp"
+#include "solvers/constraint_solver.hpp"
 
-#include "function/function_mixin.tpl.h"
+#include "function/function_mixin.tpl.hpp"
 
 using namespace boost::python;
 

@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "include/c1_taylor_function.h"
+#include "include/c1_taylor_function.hpp"
 
 using namespace Ariadne;
 

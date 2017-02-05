@@ -1,5 +1,5 @@
 /***************************************************************************
- *            grid.h
+ *            grid.hpp
  *
  *  Copyright  2008-9  Ivan S. Zapreev, Pieter Collins
  *            ivan.zapreev@gmail.com, pieter.collins@cwi.nl
@@ -22,19 +22,19 @@
  *  Foundation, Inc., 59 Templece Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file grid.h
+/*! \file grid.hpp
  *  \brief Coordinate-aligned grids.
  */
 
-#ifndef ARIADNE_GRID_H
-#define ARIADNE_GRID_H
+#ifndef ARIADNE_GRID_HPP
+#define ARIADNE_GRID_HPP
 
-#include "utility/array.h"
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
+#include "utility/array.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
 
-#include "geometry/point.h"
-#include "geometry/box.h"
+#include "geometry/point.hpp"
+#include "geometry/box.hpp"
 
 namespace Ariadne {
 
@@ -122,5 +122,5 @@ class Grid {
 
 } // namespace Ariadne
 
-#endif /* ARIADNE_GRID_H */
+#endif /* ARIADNE_GRID_HPP */
 

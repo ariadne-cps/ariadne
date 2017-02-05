@@ -1,5 +1,5 @@
 /***************************************************************************
- *            algebra/matrix.h
+ *            algebra/matrix.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,19 +21,19 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file algebra/matrix.h
+/*! \file algebra/matrix.hpp
  *  \brief
  */
 
 
 
-#ifndef ARIADNE_MATRIX_H
-#define ARIADNE_MATRIX_H
+#ifndef ARIADNE_MATRIX_HPP
+#define ARIADNE_MATRIX_HPP
 
 #include <initializer_list>
 
-#include "vector.h"
-#include "covector.h"
+#include "vector.hpp"
+#include "covector.hpp"
 
 namespace Ariadne {
 

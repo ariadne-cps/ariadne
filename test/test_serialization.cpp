@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_serialization.cc
+ *            test_serialization.cpp
  *
  *  Copyright  2008  Pieter Collins
  *
@@ -33,15 +33,15 @@
 #include <boost/serialization/string.hpp>
 
 #include "config.h"
-#include "utility/macros.h"
-#include "output/serialization.h"
-#include "utility/array.h"
-#include "numeric/numeric.h"
-#include "numeric/float.h"
-#include "geometry/interval.h"
-#include "utility/stlio.h"
+#include "utility/macros.hpp"
+#include "output/serialization.hpp"
+#include "utility/array.hpp"
+#include "numeric/numeric.hpp"
+#include "numeric/float.hpp"
+#include "geometry/interval.hpp"
+#include "utility/stlio.hpp"
 
-#include "test.h"
+#include "test.hpp"
 
 using namespace Ariadne;
 using namespace std;

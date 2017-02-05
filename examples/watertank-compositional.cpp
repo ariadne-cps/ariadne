@@ -1,5 +1,5 @@
 /***************************************************************************
- *            watertank-compositional.cc
+ *            watertank-compositional.cpp
  *
  *  Copyright  2008-16  Davide Bresolin, Pieter Collins
  *
@@ -22,7 +22,7 @@
  */
 
 #include <cstdarg>
-#include "ariadne.h"
+#include "ariadne.hpp"
 
 
 using namespace Ariadne;

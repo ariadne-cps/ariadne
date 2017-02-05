@@ -1,5 +1,5 @@
 /***************************************************************************
- *            numeric_submodule.cc
+ *            numeric_submodule.cpp
  *
  *  Copyright 2008--17  Pieter Collins
  *
@@ -22,16 +22,16 @@
  */
 
 
-#include "boost_python.h"
-#include "utilities.h"
+#include "boost_python.hpp"
+#include "utilities.hpp"
 
-#include "numeric/logical.h"
-#include "numeric/integer.h"
-#include "numeric/rational.h"
-#include "numeric/real.h"
-#include "numeric/float64.h"
-#include "numeric/floatmp.h"
-#include "numeric/float-user.h"
+#include "numeric/logical.hpp"
+#include "numeric/integer.hpp"
+#include "numeric/rational.hpp"
+#include "numeric/real.hpp"
+#include "numeric/float64.hpp"
+#include "numeric/floatmp.hpp"
+#include "numeric/float-user.hpp"
 
 #define DECLARE_NUMERIC_OPERATIONS(Xcr,X,PX) \
     X add(Xcr,Xcr); X sub(Xcr,Xcr); X mul(Xcr,Xcr); X div(Xcr,Xcr); \

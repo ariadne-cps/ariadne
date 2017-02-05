@@ -1,5 +1,5 @@
 /***************************************************************************
- *            algebra/matrix-crtp.h
+ *            algebra/matrix-crtp.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,18 +21,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file algebra/matrix-crtp.h
+/*! \file algebra/matrix-crtp.hpp
  *  \brief
  */
 
 
 
-#ifndef ARIADNE_MATRIX_H
-#define ARIADNE_MATRIX_H
+#ifndef ARIADNE_MATRIX_HPP
+#define ARIADNE_MATRIX_HPP
 
 #include <initializer_list>
 
-#include "vector.h"
+#include "vector.hpp"
 
 namespace Ariadne {
 

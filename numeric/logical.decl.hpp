@@ -1,5 +1,5 @@
 /***************************************************************************
- *            numeric/logical.decl.h
+ *            numeric/logical.decl.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,16 +21,16 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file numeric/logical.decl.h
+/*! \file numeric/logical.decl.hpp
  *  \brief
  */
 
 
 
-#ifndef ARIADNE_LOGICAL_DECL_H
-#define ARIADNE_LOGICAL_DECL_H
+#ifndef ARIADNE_LOGICAL_DECL_HPP
+#define ARIADNE_LOGICAL_DECL_HPP
 
-#include "numeric/paradigm.h"
+#include "numeric/paradigm.hpp"
 
 namespace Ariadne {
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_textplot.cc
+ *            test_textplot.cpp
  *
  *  Copyright 2009--17  Davide Bresolin
  *
@@ -22,18 +22,18 @@
  */
 #include "config.h"
 
-#include "function/function.h"
-#include "output/textplot.h"
-#include "geometry/point.h"
-#include "geometry/box.h"
-#include "geometry/zonotope.h"
-#include "geometry/polytope.h"
-#include "geometry/curve.h"
-#include "taylor_set.h"
-#include "geometry/function_set.h"
-#include "geometry/grid_set.h"
+#include "function/function.hpp"
+#include "output/textplot.hpp"
+#include "geometry/point.hpp"
+#include "geometry/box.hpp"
+#include "geometry/zonotope.hpp"
+#include "geometry/polytope.hpp"
+#include "geometry/curve.hpp"
+#include "taylor_set.hpp"
+#include "geometry/function_set.hpp"
+#include "geometry/grid_set.hpp"
 
-#include "function/user_function.h"
+#include "function/user_function.hpp"
 
 using namespace Ariadne;
 

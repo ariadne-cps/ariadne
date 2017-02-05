@@ -1,5 +1,5 @@
 /***************************************************************************
- *            expression.cc
+ *            expression.cpp
  *
  *  Copyright 2009--17  Pieter Collins
  *
@@ -21,22 +21,22 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "utility/standard.h"
+#include "utility/standard.hpp"
 #include "config.h"
 
-#include "numeric/operators.tpl.h"
+#include "numeric/operators.tpl.hpp"
 
-#include "algebra/algebra.h"
-#include "algebra/algebra_wrapper.h"
+#include "algebra/algebra.hpp"
+#include "algebra/algebra_wrapper.hpp"
 
-#include "expression/constant.h"
-#include "expression/variables.h"
-#include "expression/expression.h"
-#include "expression/assignment.h"
-#include "expression/space.h"
-#include "expression/valuation.h"
+#include "expression/constant.hpp"
+#include "expression/variables.hpp"
+#include "expression/expression.hpp"
+#include "expression/assignment.hpp"
+#include "expression/space.hpp"
+#include "expression/valuation.hpp"
 
-#include "function/formula.h"
+#include "function/formula.hpp"
 
 namespace Ariadne {
 

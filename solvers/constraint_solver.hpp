@@ -1,5 +1,5 @@
 /***************************************************************************
- *            constraint_solver.h
+ *            constraint_solver.hpp
  *
  *  Copyright 2009-17  Pieter Collins
  *
@@ -21,20 +21,20 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file constraint_solver.h
+/*! \file constraint_solver.hpp
  *  \brief Class for solving systems of constraints over a box.
  */
 
-#ifndef ARIADNE_CONSTRAINT_SOLVER_H
-#define ARIADNE_CONSTRAINT_SOLVER_H
+#ifndef ARIADNE_CONSTRAINT_SOLVER_HPP
+#define ARIADNE_CONSTRAINT_SOLVER_HPP
 
-#include "utility/logging.h"
-#include "utility/container.h"
+#include "utility/logging.hpp"
+#include "utility/container.hpp"
 
-#include "utility/declarations.h"
-#include "utility/tribool.h"
-#include "numeric/numeric.h"
-#include "function/constraint.h"
+#include "utility/declarations.hpp"
+#include "utility/tribool.hpp"
+#include "numeric/numeric.hpp"
+#include "function/constraint.hpp"
 
 namespace Ariadne {
 

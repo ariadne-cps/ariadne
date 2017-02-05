@@ -35,139 +35,139 @@ VPATH = utility numeric expression algebra function geometry solvers dynamics hy
 	examples/experimental
 
 HDR = \
-	standard.h numeric.h functional.h
+	standard.hpp numeric.hpp functional.hpp
 
-# ariadne.h
+# ariadne.hpp
 
 LIB_NUMERIC_SRC = \
-	logging.cc operators.cc logical.cc integer.cc dyadic.cc rational.cc decimal.cc real.cc \
-	float64.cc floatmp.cc \
-	float-user.cc number.cc
+	logging.cpp operators.cpp logical.cpp integer.cpp dyadic.cpp rational.cpp decimal.cpp real.cpp \
+	float64.cpp floatmp.cpp \
+	float-user.cpp number.cpp
 
-#	float-approximate.cc float-lower.cc float-upper.cc float-validated.cc float-exact.cc \
+#	float-approximate.cpp float-lower.cpp float-upper.cpp float-validated.cpp float-exact.cpp \
 
 TEST_NUMERIC_SRC = \
-	check_numeric.cc \
-	test_logical.cc test_integer.cc test_rational.cc test_real.cc test_number.cc \
-	test_float.cc test_validated_float.cc \
+	check_numeric.cpp \
+	test_logical.cpp test_integer.cpp test_rational.cpp test_real.cpp test_number.cpp \
+	test_float.cpp test_validated_float.cpp \
 
-#	test_numeric.cc \
+#	test_numeric.cpp \
 
 LIB_ALGEBRA_SRC = \
-	vector.cc matrix.cc series.cc multi_index.cc expansion.cc differential.cc algebra.cc \
+	vector.cpp matrix.cpp series.cpp multi_index.cpp expansion.cpp differential.cpp algebra.cpp \
 
 TEST_ALGEBRA_SRC = \
-	test_vector.cc test_matrix.cc test_series.cc test_multi_index.cc test_expansion.cc test_differential.cc \
+	test_vector.cpp test_matrix.cpp test_series.cpp test_multi_index.cpp test_expansion.cpp test_differential.cpp \
 
 LIB_FUNCTION_SRC = \
-	affine.cc polynomial.cc affine_model.cc taylor_model.cc  \
-	formula.cc procedure.cc \
-	function.cc function_model.cc symbolic_function.cc taylor_function.cc  \
+	affine.cpp polynomial.cpp affine_model.cpp taylor_model.cpp  \
+	formula.cpp procedure.cpp \
+	function.cpp function_model.cpp symbolic_function.cpp taylor_function.cpp  \
 
 TEST_FUNCTION_SRC = \
-	check_function.cc \
-	test_polynomial.cc test_procedure.cc test_function.cc test_taylor_model.cc test_taylor_function.cc \
+	check_function.cpp \
+	test_polynomial.cpp test_procedure.cpp test_function.cpp test_taylor_model.cpp test_taylor_function.cpp \
 
 LIB_SOLVER_SRC = \
-	solver.cc \
-	integrator.cc \
-	constraint_solver.cc \
-	simplex_algorithm.cc \
-	linear_programming.cc \
-	nonlinear_programming.cc
+	solver.cpp \
+	integrator.cpp \
+	constraint_solver.cpp \
+	simplex_algorithm.cpp \
+	linear_programming.cpp \
+	nonlinear_programming.cpp
 
 TEST_SOLVER_SRC = \
-	test_linear_programming.cc test_nonlinear_programming.cc test_integrator.cc test_constraint_solver.cc test_solvers.cc \
+	test_linear_programming.cpp test_nonlinear_programming.cpp test_integrator.cpp test_constraint_solver.cpp test_solvers.cpp \
 
 LIB_GEOMETRY_SRC = \
-	paver.cc \
-	point.cc \
-	interval.cc \
-	box.cc \
-	curve.cc \
-	function_set.cc \
-	grid_set.cc \
-	affine_set.cc \
-	enclosure.cc \
-	drawer.cc \
-	graphics.cc
+	paver.cpp \
+	point.cpp \
+	interval.cpp \
+	box.cpp \
+	curve.cpp \
+	function_set.cpp \
+	grid_set.cpp \
+	affine_set.cpp \
+	enclosure.cpp \
+	drawer.cpp \
+	graphics.cpp
 
 TEST_GEOMETRY_SRC = \
-	test_interval.cc test_box.cc test_function_sets.cc test_affine_sets.cc test_paving.cc test_grid_set.cc \
-	test_graphics.cc \
+	test_interval.cpp test_box.cpp test_function_sets.cpp test_affine_sets.cpp test_paving.cpp test_grid_set.cpp \
+	test_graphics.cpp \
 
 LIB_DYNAMICS_SRC = \
-	orbit.cc \
-	map_evolver.cc \
-	vector_field_evolver.cc
+	orbit.cpp \
+	map_evolver.cpp \
+	vector_field_evolver.cpp
 
 TEST_DYNAMICS_SRC = \
-	test_discrete_evolution.cc \
-	test_continuous_evolution.cc
+	test_discrete_evolution.cpp \
+	test_continuous_evolution.cpp
 
 LIB_EXPRESSION_SRC = \
-	expression.cc \
-	expression_set.cc \
+	expression.cpp \
+	expression_set.cpp \
 
 TEST_EXPRESSION_SRC = \
-	test_expression.cc \
+	test_expression.cpp \
 
 LIB_HYBRID_SRC = \
-	discrete_location.cc \
-	hybrid_set.cc \
-	hybrid_enclosure.cc \
-	hybrid_automaton.cc \
-	hybrid_automaton-composite.cc \
-	hybrid_automaton-restrictive.cc \
-	hybrid_simulator.cc \
-	hybrid_evolver.cc \
-	hybrid_reachability_analyser.cc \
-	hybrid_graphics.cc \
+	discrete_location.cpp \
+	hybrid_set.cpp \
+	hybrid_enclosure.cpp \
+	hybrid_automaton.cpp \
+	hybrid_automaton-composite.cpp \
+	hybrid_automaton-restrictive.cpp \
+	hybrid_simulator.cpp \
+	hybrid_evolver.cpp \
+	hybrid_reachability_analyser.cpp \
+	hybrid_graphics.cpp \
 
 TEST_HYBRID_SRC = \
-	test_hybrid_set.cc test_hybrid_graphics.cc \
-	test_hybrid_automaton.cc test_hybrid_simulator.cc \
-	test_hybrid_evolver.cc test_hybrid_evolution.cc test_hybrid_reachability_analyser.cc
+	test_hybrid_set.cpp test_hybrid_graphics.cpp \
+	test_hybrid_automaton.cpp test_hybrid_simulator.cpp \
+	test_hybrid_evolver.cpp test_hybrid_evolution.cpp test_hybrid_reachability_analyser.cpp
 
 LIB_EXTRAS_SRC = \
-	c1_taylor_function.cc \
-	runge_kutta_integrator.cc \
-	geometry.cc \
-	textplot.cc
+	c1_taylor_function.cpp \
+	runge_kutta_integrator.cpp \
+	geometry.cpp \
+	textplot.cpp
 
 LIB_SRC = $(LIB_NUMERIC_SRC) $(LIB_ALGEBRA_SRC) $(LIB_FUNCTION_SRC) $(LIB_SOLVER_SRC) $(LIB_GEOMETRY_SRC) $(LIB_DYNAMICS_SRC) $(LIB_EXPRESSION_SRC) $(LIB_HYBRID_SRC)
 
 TESTS_SRC = $(TEST_NUMERIC_SRC) $(TEST_ALGEBRA_SRC) $(TEST_FUNCTION_SRC) $(TEST_SOLVER_SRC) $(TEST_GEOMETRY_SRC) $(TEST_DYNAMICS_SRC) $(TEST_EXPRESSION_SRC) $(TEST_HYBRID_SRC)
 
 WRAP_PYTHON_SRC = \
-	ariadne_module.cc numeric_module.cc utilities.cc \
-	numeric_submodule.cc linear_algebra_submodule.cc optimization_submodule.cc \
-	differentiation_submodule.cc function_submodule.cc calculus_submodule.cc \
-	geometry_submodule.cc solver_submodule.cc storage_submodule.cc \
-	system_submodule.cc evolution_submodule.cc graphics_submodule.cc
+	ariadne_module.cpp numeric_module.cpp utilities.cpp \
+	numeric_submodule.cpp linear_algebra_submodule.cpp optimization_submodule.cpp \
+	differentiation_submodule.cpp function_submodule.cpp calculus_submodule.cpp \
+	geometry_submodule.cpp solver_submodule.cpp storage_submodule.cpp \
+	system_submodule.cpp evolution_submodule.cpp graphics_submodule.cpp
 
 WRAP_SRC = $(WRAP_PYTHON_SRC)
 
-WRAP_HDR = utility.h
+WRAP_HDR = utility.hpp
 
 UNUSED_TESTS_SRC = \
 
 
 EXAMPLES_SRC = \
-	tutorial.cc \
-	bouncingball.cc \
-	watertank.cc \
-	heating.cc \
-	ballinabox.cc \
-	watertank-compositional.cc \
-	rectifier.cc \
+	tutorial.cpp \
+	bouncingball.cpp \
+	watertank.cpp \
+	heating.cpp \
+	ballinabox.cpp \
+	watertank-compositional.cpp \
+	rectifier.cpp \
 
 EXAMPLES_EXPERIMENTAL_SRC = \
-	exponential.cc \
-	laser.cc \
-	circle.cc \
-	bouncing-walls.cc \
-	compute_crossings_issue.cc
+	exponential.cpp \
+	laser.cpp \
+	circle.cpp \
+	bouncing-walls.cpp \
+	compute_crossings_issue.cpp
 
 DEP_DIR = dep
 OBJ_DIR = obj
@@ -189,25 +189,25 @@ ARIADNE_NUMERIC_LIB = libariadne-numeric.so
 ARIADNE_ALGEBRA_LIB = libariadne-algebra.so
 ARIADNE_FUNCTION_LIB = libariadne-function.so
 
-DEPS = $(patsubst %.cc,$(DEP_DIR)/%.o.d,$(LIB_SRC) $(LIB_EXTRAS_SRC) $(TESTS_SRC) $(EXAMPLES_SRC)) \
-	$(patsubst %.h.gch,dep/%.h.gch.d,$(PCH))
+DEPS = $(patsubst %.cpp,$(DEP_DIR)/%.o.d,$(LIB_SRC) $(LIB_EXTRAS_SRC) $(TESTS_SRC) $(EXAMPLES_SRC)) \
+	$(patsubst %.hpp.gch,dep/%.hpp.gch.d,$(PCH))
 
-PCH = $(patsubst %.h,%.h.gch,$(HDR))
-LIB_OBJ = $(patsubst %.cc,$(LIB_OBJ_DIR)/%.o,$(LIB_SRC))
-LIB_NUMERIC_OBJ = $(patsubst %.cc,$(LIB_OBJ_DIR)/%.o,$(LIB_NUMERIC_SRC))
-LIB_ALGEBRA_OBJ = $(patsubst %.cc,$(LIB_OBJ_DIR)/%.o,$(LIB_ALGEBRA_SRC))
-LIB_FUNCTION_OBJ = $(patsubst %.cc,$(LIB_OBJ_DIR)/%.o,$(LIB_FUNCTION_SRC))
-LIB_EXTRAS_OBJ = $(patsubst %.cc,$(LIB_OBJ_DIR)/%.o,$(LIB_EXTRAS_SRC))
-TESTS_OBJ = $(patsubst %.cc,$(TESTS_OBJ_DIR)/%.o,$(TESTS_SRC))
-TESTS_BIN = $(patsubst %.cc,$(TESTS_BIN_DIR)/%,$(TESTS_SRC))
-TEST_NUMERIC_BIN = $(patsubst %.cc.o,$(TESTS_BIN_DIR)/%,$(TEST_NUMERIC_SRC))
-TEST_ALGEBRA_BIN = $(patsubst %.cc.o,$(TESTS_BIN_DIR)/%,$(TEST_ALGEBRA_SRC))
-TEST_FUNCTION_BIN = $(patsubst %.cc,$(TESTS_BIN_DIR)/%,$(TEST_FUNCTION_SRC))
-WRAP_OBJ = $(patsubst %.cc,$(WRAP_OBJ_DIR)/%.o,$(WRAP_SRC))
-EXAMPLES_OBJ = $(patsubst %.cc,$(EXAMPLES_OBJ_DIR)/%.o,$(EXAMPLES_SRC))
-EXAMPLES_BIN = $(patsubst %.cc,$(EXAMPLES_BIN_DIR)/%,$(EXAMPLES_SRC))
-EXAMPLES_EXPERIMENTAL_OBJ = $(patsubst %.cc,$(EXAMPLES_OBJ_DIR)/%.o,$(EXAMPLES_EXPERIMENTAL_SRC))
-EXAMPLES_EXPERIMENTAL_BIN = $(patsubst %.cc,$(EXAMPLES_BIN_DIR)/%,$(EXAMPLES_EXPERIMENTAL_SRC))
+PCH = $(patsubst %.hpp,%.hpp.gch,$(HDR))
+LIB_OBJ = $(patsubst %.cpp,$(LIB_OBJ_DIR)/%.o,$(LIB_SRC))
+LIB_NUMERIC_OBJ = $(patsubst %.cpp,$(LIB_OBJ_DIR)/%.o,$(LIB_NUMERIC_SRC))
+LIB_ALGEBRA_OBJ = $(patsubst %.cpp,$(LIB_OBJ_DIR)/%.o,$(LIB_ALGEBRA_SRC))
+LIB_FUNCTION_OBJ = $(patsubst %.cpp,$(LIB_OBJ_DIR)/%.o,$(LIB_FUNCTION_SRC))
+LIB_EXTRAS_OBJ = $(patsubst %.cpp,$(LIB_OBJ_DIR)/%.o,$(LIB_EXTRAS_SRC))
+TESTS_OBJ = $(patsubst %.cpp,$(TESTS_OBJ_DIR)/%.o,$(TESTS_SRC))
+TESTS_BIN = $(patsubst %.cpp,$(TESTS_BIN_DIR)/%,$(TESTS_SRC))
+TEST_NUMERIC_BIN = $(patsubst %.cpp.o,$(TESTS_BIN_DIR)/%,$(TEST_NUMERIC_SRC))
+TEST_ALGEBRA_BIN = $(patsubst %.cpp.o,$(TESTS_BIN_DIR)/%,$(TEST_ALGEBRA_SRC))
+TEST_FUNCTION_BIN = $(patsubst %.cpp,$(TESTS_BIN_DIR)/%,$(TEST_FUNCTION_SRC))
+WRAP_OBJ = $(patsubst %.cpp,$(WRAP_OBJ_DIR)/%.o,$(WRAP_SRC))
+EXAMPLES_OBJ = $(patsubst %.cpp,$(EXAMPLES_OBJ_DIR)/%.o,$(EXAMPLES_SRC))
+EXAMPLES_BIN = $(patsubst %.cpp,$(EXAMPLES_BIN_DIR)/%,$(EXAMPLES_SRC))
+EXAMPLES_EXPERIMENTAL_OBJ = $(patsubst %.cpp,$(EXAMPLES_OBJ_DIR)/%.o,$(EXAMPLES_EXPERIMENTAL_SRC))
+EXAMPLES_EXPERIMENTAL_BIN = $(patsubst %.cpp,$(EXAMPLES_BIN_DIR)/%,$(EXAMPLES_EXPERIMENTAL_SRC))
 
 INCLUDE_PATHS =  -iquote.
 LINK_LIBS=-lgmpxx -lgmp -lmpfr -lcairo -lboost_system -lboost_serialization
@@ -275,30 +275,30 @@ shiny: clean
 	@rm -rf $(DEP_DIR) $(OBJ_DIR) $(BIN_DIR) $(CHECK_DIR)
 	@rm -f *.png *.d
 
-$(DEP_DIR)/standard.h.gch.d: utility/standard.h | dirs
+$(DEP_DIR)/standard.hpp.gch.d: utility/standard.hpp | dirs
 	@echo "Making dependencies for "$<
-	@$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -MM $< 2>/dev/null | sed 's|standard\.o:|utility\/standard\.h\.gch:|' > $@
+	@$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -MM $< 2>/dev/null | sed 's|standard\.o:|utility\/standard\.hpp\.gch:|' > $@
 
-$(DEP_DIR)/numeric.h.gch.d: numeric/numeric.h | dirs
+$(DEP_DIR)/numeric.hpp.gch.d: numeric/numeric.hpp | dirs
 	@echo "Making dependencies for "$<" with star "$*
-	@$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -MM $< 2>/dev/null | sed 's|\(.*\)\.o:|numeric\/\1\.h\.gch:|' > $@
+	@$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -MM $< 2>/dev/null | sed 's|\(.*\)\.o:|numeric\/\1\.hpp\.gch:|' > $@
 
-$(DEP_DIR)/functional.h.gch.d: function/functional.h | dirs
+$(DEP_DIR)/functional.hpp.gch.d: function/functional.hpp | dirs
 	@echo "Making dependencies for "$<
-	@$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -MM $< 2>/dev/null | sed 's|functional\.o:|function/functional\.h\.gch:|' > $@
+	@$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -MM $< 2>/dev/null | sed 's|functional\.o:|function/functional\.hpp\.gch:|' > $@
 
-$(DEP_DIR)/boost_python.h.gch.d: wrap/boost_python.h | dirs
+$(DEP_DIR)/boost_python.hpp.gch.d: wrap/boost_python.hpp | dirs
 	@echo "Making dependencies for "$<
-	@$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -MM $< 2>/dev/null | sed 's|boost_python\.o:|boost_python\.h\.gch:|' > $@
+	@$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -MM $< 2>/dev/null | sed 's|boost_python\.o:|boost_python\.hpp\.gch:|' > $@
 
 
-$(DEP_DIR)/%.o.d: %.cc | dirs
+$(DEP_DIR)/%.o.d: %.cpp | dirs
 	@echo "Making dependencies for "$<
 	@$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -I$(PYTHON_INCLUDE_PATH) -MM $< > $(DEP_DIR)/$*.o.d
 	@sed -i  's|$*.o:|$(OBJ_DIR)/$*.o:|' $(DEP_DIR)/$*.o.d
-	@sed -i 's|utility\/standard\.h|utility\/standard\.h\.gch|g' $(DEP_DIR)/$*.o.d
-	@sed -i 's|numeric\/numeric\.h|numeric\/numeric\.h\.gch|g' $(DEP_DIR)/$*.o.d
-	@sed -i 's|function\/functional\.h|function\/function\.h\.gch|g' $(DEP_DIR)/$*.o.d
+	@sed -i 's|utility\/standard\.hpp|utility\/standard\.hpp\.gch|g' $(DEP_DIR)/$*.o.d
+	@sed -i 's|numeric\/numeric\.hpp|numeric\/numeric\.hpp\.gch|g' $(DEP_DIR)/$*.o.d
+	@sed -i 's|function\/functional\.hpp|function\/function\.hpp\.gch|g' $(DEP_DIR)/$*.o.d
 
 
 libariadne.so: $(LIB_OBJ)
@@ -322,26 +322,26 @@ numeric.so: $(WRAP_OBJ_DIR)/numeric_module.o $(WRAP_OBJ_DIR)/numeric_submodule.o
 algebra.so: $(WRAP_OBJ_DIR)/algebra_module.o $(WRAP_OBJ_DIR)/numeric_submodule.o $(WRAP_OBJ_DIR)/linear_algebra_submodule.o $(WRAP_OBJ_DIR)/differentiation_submodule.o $(WRAP_OBJ_DIR)/calculus_submodule.o libariadne.so
 	$(CXX) $(WRAP_OBJ_DIR)/algebra_module.o $(WRAP_OBJ_DIR)/numeric_submodule.o $(WRAP_OBJ_DIR)/linear_algebra_submodule.o $(WRAP_OBJ_DIR)/differentiation_submodule.o $(WRAP_OBJ_DIR)/calculus_submodule.o $(PYTHON_LINK_LIBS) libariadne.so -shared -o linalg.so
 
-%.h.gch: %.h
+%.hpp.gch: %.hpp
 	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) $<
 
-wrap/boost_python.h.gch: wrap/boost_python.h
+wrap/boost_python.hpp.gch: wrap/boost_python.hpp
 	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -I$(PYTHON_INCLUDE_PATH) $<
 
-numeric/float.o: numeric/float.cc
+numeric/float.o: numeric/float.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -c -o $@ $<
 
-obj/%.o: %.cc
+obj/%.o: %.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS)  -I$(PYTHON_INCLUDE_PATH) -c -o $@ $<
 
-obj/test_%.o: test/test_%.cc
+obj/test_%.o: test/test_%.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -c -o $@ $<
 
 #FIXME: Make Python wrapper use its own compile rule
-obj/%module.o: wrap/%module.cc wrap/boost_python.h.gch
+obj/%module.o: wrap/%module.cpp wrap/boost_python.hpp.gch
 	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -I$(PYTHON_INCLUDE_PATH) -c -o $@ $<
 
-obj/%.o: examples/%.cc
+obj/%.o: examples/%.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -c -o $@ $<
 
 bin/test_%: $(TESTS_OBJ_DIR)/test_%.o  libariadne.so
@@ -420,8 +420,8 @@ bin/test_%: $(TESTS_OBJ_DIR)/test_%.o  libariadne.so
 bin/%: $(EXAMPLES_OBJ_DIR)/%.o libariadne.so
 	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_LIB) $(LINK_LIBS) -o $@
 
-#wrap/boost_python.h.gch: boost_python.h
+#wrap/boost_python.hpp.gch: boost_python.hpp
 #	$(CXX) $(CXXFLAGS) $< -I$(PYTHON_INCLUDE_PATH)
 
-#.libs/numeric_submodule.o: numeric_submodule.cc boost_python.h.gch integer.h rational.h float64.h
+#.libs/numeric_submodule.o: numeric_submodule.cpp boost_python.hpp.gch integer.hpp rational.hpp float64.hpp
 #	$(CXX) $(CXXFLAGS) -c -o $@ $< -I$(PYTHON_INCLUDE_PATH)

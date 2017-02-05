@@ -1,5 +1,5 @@
 /***************************************************************************
- *            utility/writable.h
+ *            utility/writable.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,17 +21,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file utility/writable.h
+/*! \file utility/writable.hpp
  *  \brief
  */
 
 
 
-#ifndef ARIADNE_WRITABLE_H
-#define ARIADNE_WRITABLE_H
+#ifndef ARIADNE_WRITABLE_HPP
+#define ARIADNE_WRITABLE_HPP
 
-#include "typedefs.h"
-#include "metaprogramming.h"
+#include "typedefs.hpp"
+#include "metaprogramming.hpp"
 
 namespace Ariadne {
 

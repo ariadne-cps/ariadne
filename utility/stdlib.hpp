@@ -1,5 +1,5 @@
 /***************************************************************************
- *            utility/stdlib.h
+ *            utility/stdlib.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file utility/stdlib.h
+/*! \file utility/stdlib.hpp
  *  \brief
  */
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            real.cc
+ *            real.cpp
  *
  *  Copyright 2013--17  Pieter Collins
  *
@@ -21,26 +21,26 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file real.cc
+/*! \file real.cpp
  *  \brief
  */
 
-#include "utility/module.h"
-#include "numeric/operators.h"
-#include "expression/templates.h"
+#include "utility/module.hpp"
+#include "numeric/operators.hpp"
+#include "expression/templates.hpp"
 
-#include "logical.h"
-#include "real.h"
-#include "integer.h"
-#include "rational.h"
+#include "logical.hpp"
+#include "real.hpp"
+#include "integer.hpp"
+#include "rational.hpp"
 
-#include "dyadic.h"
-#include "decimal.h"
+#include "dyadic.hpp"
+#include "decimal.hpp"
 
-#include "float.h"
-#include "float-user.h"
+#include "float.hpp"
+#include "float-user.hpp"
 
-#include "number_wrapper.h"
+#include "number_wrapper.hpp"
 
 namespace Ariadne {
 

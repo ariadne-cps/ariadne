@@ -1,5 +1,5 @@
 /***************************************************************************
- *            bouncingball.cc
+ *            bouncingball.cpp
  *
  *  Copyright  2008  Davide Bresolin
  *
@@ -22,7 +22,7 @@
  */
 
 #include <cstdarg>
-#include "ariadne.h"
+#include "ariadne.hpp"
 
 using namespace Ariadne;
 

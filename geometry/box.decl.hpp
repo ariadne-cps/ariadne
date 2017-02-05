@@ -1,5 +1,5 @@
 /***************************************************************************
- *            box.decl.h
+ *            box.decl.hpp
  *
  *  Copyright 2008-17  Alberto Casagrande, Pieter Collins
  *
@@ -21,10 +21,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef ARIADNE_BOX_DECL_H
-#define ARIADNE_BOX_DECL_H
+#ifndef ARIADNE_BOX_DECL_HPP
+#define ARIADNE_BOX_DECL_HPP
 
-#include "geometry/interval.decl.h"
+#include "geometry/interval.decl.hpp"
 
 namespace Ariadne {
 
@@ -59,4 +59,4 @@ typedef Vector<ApproximateIntervalType> ApproximateIntervalVectorType;
 } // namespace Ariadne
 
 
-#endif /* ARIADNE_BOX_H */
+#endif /* ARIADNE_BOX_HPP */

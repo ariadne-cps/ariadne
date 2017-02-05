@@ -1,5 +1,5 @@
 /***************************************************************************
- *            point.cc
+ *            point.cpp
  *
  *  Copyright 2008--17  Alberto Casagrande, Pieter Collins
  *
@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "utility/standard.h"
+#include "utility/standard.hpp"
 #include "config.h"
 
 #include <cstdarg>
@@ -29,9 +29,9 @@
 #include <string>
 #include <vector>
 
-#include "geometry/point.h"
-#include "geometry/box.h"
-#include "utility/stlio.h"
+#include "geometry/point.hpp"
+#include "geometry/box.hpp"
+#include "utility/stlio.hpp"
 
 namespace Ariadne {
 

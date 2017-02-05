@@ -1,5 +1,5 @@
 /***************************************************************************
- *            drawer.h
+ *            drawer.hpp
  *
  *  Copyright  2011-12  Pieter Collins
  *
@@ -21,16 +21,16 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file drawer.h
+/*! \file drawer.hpp
  *  \brief Class for drawing affine and nonlinear sets.
  */
 
-#ifndef ARIADNE_DRAWER_H
-#define ARIADNE_DRAWER_H
+#ifndef ARIADNE_DRAWER_HPP
+#define ARIADNE_DRAWER_HPP
 
 #include <iosfwd>
-#include "utility/declarations.h"
-#include "output/drawer_interface.h"
+#include "utility/declarations.hpp"
+#include "output/drawer_interface.hpp"
 
 namespace Ariadne {
 
@@ -71,4 +71,4 @@ class GridDrawer : public DrawerInterface
 
 } //namespace Ariadne
 
-#endif /* ARIADNE_DRAWER_H */
+#endif /* ARIADNE_DRAWER_HPP */

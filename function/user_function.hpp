@@ -1,5 +1,5 @@
 /***************************************************************************
- *            user_function.h
+ *            user_function.hpp
  *
  *  Copyright 2008-17 Pieter Collins
  *
@@ -21,31 +21,31 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file user_function.h
+/*! \file user_function.hpp
  *  \brief Wrappers for user functions
  */
 
-#ifndef ARIADNE_USER_FUNCTION_H
-#define ARIADNE_USER_FUNCTION_H
+#ifndef ARIADNE_USER_FUNCTION_HPP
+#define ARIADNE_USER_FUNCTION_HPP
 
 #include <cstdarg>
 #include <iosfwd>
 
-#include "function/function_interface.h"
-#include "function/function_mixin.h"
+#include "function/function_interface.hpp"
+#include "function/function_mixin.hpp"
 
-#include "utility/macros.h"
-#include "utility/pointer.h"
-#include "utility/container.h"
+#include "utility/macros.hpp"
+#include "utility/pointer.hpp"
+#include "utility/container.hpp"
 
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "algebra/matrix.h"
-#include "function/taylor_model.h"
-#include "algebra/differential.h"
-#include "function/formula.h"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "function/taylor_model.hpp"
+#include "algebra/differential.hpp"
+#include "function/formula.hpp"
 
-#include "function_mixin.h"
+#include "function_mixin.hpp"
 
 namespace Ariadne {
 
@@ -189,4 +189,4 @@ template<class F> class VectorUserFunction
 
 } // namespace Ariadne
 
-#endif /* ARIADNE_USER_FUNCTION_H */
+#endif /* ARIADNE_USER_FUNCTION_HPP */

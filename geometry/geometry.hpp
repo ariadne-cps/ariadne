@@ -1,5 +1,5 @@
 /***************************************************************************
- *            geometry.h
+ *            geometry.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,16 +21,16 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file geometry.h
+/*! \file geometry.hpp
  *  \brief Geometric operations on abstract sets.
  */
-#ifndef ARIADNE_GEOMETRY_H
-#define ARIADNE_GEOMETRY_H
+#ifndef ARIADNE_GEOMETRY_HPP
+#define ARIADNE_GEOMETRY_HPP
 
 #include <vector>
 
-#include "geometry/box.h"
-#include "function/function_interface.h"
+#include "geometry/box.hpp"
+#include "function/function_interface.hpp"
 
 namespace Ariadne {
 
@@ -218,4 +218,4 @@ ValidatedSierpinskian intersection_separated(const ClosedSetInterface& ls, const
 
 } // namespace Ariadne
 
-#endif // ARIADNE_GEOMETRY_H
+#endif // ARIADNE_GEOMETRY_HPP

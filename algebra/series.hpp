@@ -1,5 +1,5 @@
 /***************************************************************************
- *            series.h
+ *            series.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,16 +21,16 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file series.h
+/*! \file series.hpp
  *  \brief Taylor series in a single variable.
  */
 
-#ifndef ARIADNE_SERIES_H
-#define ARIADNE_SERIES_H
+#ifndef ARIADNE_SERIES_HPP
+#define ARIADNE_SERIES_HPP
 
-#include "utility/array.h"
-#include "utility/container.h"
-#include "numeric/operators.h"
+#include "utility/array.hpp"
+#include "utility/container.hpp"
+#include "numeric/operators.hpp"
 
 namespace Ariadne {
 
@@ -191,5 +191,5 @@ template<class X> Series<X> antiderivative(const Series<X>& x, const X& c) {
 } // namespace Ariadne
 
 
-#endif // ARIADNE_SERIES_H
+#endif // ARIADNE_SERIES_HPP
 

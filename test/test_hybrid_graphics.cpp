@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_hybrid_graphics.cc
+ *            test_hybrid_graphics.cpp
  *
  *  Copyright 2011--17  Pieter Collins
  *
@@ -22,15 +22,15 @@
  */
 
 #include "config.h"
-#include "test.h"
+#include "test.hpp"
 
-#include "numeric/logical.h"
-#include "numeric/real.h"
-#include "expression/variables.h"
-#include "expression/assignment.h"
+#include "numeric/logical.hpp"
+#include "numeric/real.hpp"
+#include "expression/variables.hpp"
+#include "expression/assignment.hpp"
 
-#include "hybrid/hybrid_graphics.h"
-#include "hybrid/hybrid_set.h"
+#include "hybrid/hybrid_graphics.hpp"
+#include "hybrid/hybrid_set.hpp"
 
 using namespace Ariadne;
 

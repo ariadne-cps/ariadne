@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_matrix.cc
+ *            test_matrix.cpp
  *
  *  Copyright  2006  Pieter Collins, Alberto Casagrande
  *  Email Pieter.Collins@cwi.nl, casagrande@dimi.uniud.it
@@ -28,12 +28,12 @@
 
 #include "config.h"
 
-#include "test.h"
+#include "test.hpp"
 
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "algebra/matrix.h"
-#include "algebra/covector.h"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/covector.hpp"
 
 namespace Ariadne {
 typedef Matrix<Float64Approximation> FloatApproximationMatrix;

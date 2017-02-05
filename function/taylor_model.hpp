@@ -1,5 +1,5 @@
 /***************************************************************************
- *            taylor_model.h
+ *            taylor_model.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,28 +21,28 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file taylor_model.h
+/*! \file taylor_model.hpp
  *  \brief ApproximateTag functions on a is_bounded domain with a sparse representation.
  */
 
-#ifndef ARIADNE_TAYLOR_MODEL_H
-#define ARIADNE_TAYLOR_MODEL_H
+#ifndef ARIADNE_TAYLOR_MODEL_HPP
+#define ARIADNE_TAYLOR_MODEL_HPP
 
 #include <map>
 
-#include "utility/macros.h"
-#include "utility/declarations.h"
-#include "utility/array.h"
-#include "utility/pointer.h"
-#include "algebra/vector.h"
-#include "algebra/covector.h"
-#include "algebra/multi_index.h"
-#include "algebra/expansion.h"
-#include "algebra/sweeper.h"
-#include "algebra/operations.h"
-#include "algebra/evaluate.h"
-#include "function/domain.h"
-#include "function/scaling.h"
+#include "utility/macros.hpp"
+#include "utility/declarations.hpp"
+#include "utility/array.hpp"
+#include "utility/pointer.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/covector.hpp"
+#include "algebra/multi_index.hpp"
+#include "algebra/expansion.hpp"
+#include "algebra/sweeper.hpp"
+#include "algebra/operations.hpp"
+#include "algebra/evaluate.hpp"
+#include "function/domain.hpp"
+#include "function/scaling.hpp"
 
 namespace Ariadne {
 
@@ -813,4 +813,4 @@ template<class F> Matrix<UpperIntervalType> jacobian_range(const Vector<TaylorMo
 
 } // namespace Ariadne
 
-#endif // ARIADNE_TAYLOR_MODEL_H
+#endif // ARIADNE_TAYLOR_MODEL_HPP

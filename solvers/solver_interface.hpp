@@ -1,5 +1,5 @@
 /***************************************************************************
- *            solver_interface.h
+ *            solver_interface.hpp
  *
  *  Copyright  2006-8  Alberto Casagrande, Pieter Collins
  *
@@ -21,19 +21,19 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file solver_interface.h
+/*! \file solver_interface.hpp
  *  \brief Interface class for solving equations.
  */
 
-#ifndef ARIADNE_SOLVER_INTERFACE_H
-#define ARIADNE_SOLVER_INTERFACE_H
+#ifndef ARIADNE_SOLVER_INTERFACE_HPP
+#define ARIADNE_SOLVER_INTERFACE_HPP
 
 #include <exception>
 #include <stdexcept>
 #include <string>
 
-#include "utility/declarations.h"
-#include "utility/logging.h"
+#include "utility/declarations.hpp"
+#include "utility/logging.hpp"
 
 namespace Ariadne {
 template<class T> class Set;
@@ -133,4 +133,4 @@ inline OutputStream& operator<<(OutputStream& os, const SolverInterface& solver)
 
 } // namespace Ariadne
 
-#endif /* ARIADNE_SOLVER_INTERFACE_H */
+#endif /* ARIADNE_SOLVER_INTERFACE_HPP */

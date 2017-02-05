@@ -1,5 +1,5 @@
 /***************************************************************************
- *            numeric/number.h
+ *            numeric/number.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,36 +21,36 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file numeric/number.h
+/*! \file numeric/number.hpp
  *  \brief Generic numbers
  */
 
 
 
-#ifndef ARIADNE_NUMBER_H
-#define ARIADNE_NUMBER_H
+#ifndef ARIADNE_NUMBER_HPP
+#define ARIADNE_NUMBER_HPP
 
 // Use friend declarations to provide number operators
 #define ARIADNE_FRIEND_NUMBER
 // Use template functions to provide number operators
 // #define ARIADNE_TEMPLATE_NUMBER
 
-#include "utility/handle.h"
-#include "numeric/paradigm.h"
-#include "utility/prototype.h"
+#include "utility/handle.hpp"
+#include "numeric/paradigm.hpp"
+#include "utility/prototype.hpp"
 
-#include "logical.decl.h"
-#include "number.decl.h"
-#include "float.decl.h"
+#include "logical.decl.hpp"
+#include "number.decl.hpp"
+#include "float.decl.hpp"
 
-#include "number_interface.h"
+#include "number_interface.hpp"
 
-#include "arithmetic.h"
-#include "integer.h"
-#include "rational.h"
-#include "real.h"
+#include "arithmetic.hpp"
+#include "integer.hpp"
+#include "rational.hpp"
+#include "real.hpp"
 
-#include "number_interface.h"
+#include "number_interface.hpp"
 
 namespace Ariadne {
 

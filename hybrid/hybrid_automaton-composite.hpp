@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_automaton-composite.h
+ *            hybrid_automaton-composite.hpp
  *
  *  Copyright  2004-11  Alberto Casagrande, Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file hybrid_automaton-composite.h
+/*! \file hybrid_automaton-composite.hpp
  *  \brief Main composite hybrid system class.
  */
 
-#ifndef ARIADNE_COMPOSITE_HYBRID_AUTOMATON_H
-#define ARIADNE_COMPOSITE_HYBRID_AUTOMATON_H
+#ifndef ARIADNE_COMPOSITE_HYBRID_AUTOMATON_HPP
+#define ARIADNE_COMPOSITE_HYBRID_AUTOMATON_HPP
 
 #include <string>
 #include <iostream>
@@ -34,15 +34,15 @@
 #include <set>
 #include <map>
 
-#include "function/function.h"
-#include "hybrid/discrete_location.h"
-#include "hybrid/discrete_event.h"
-#include "expression/assignment.h"
-#include "expression/expression.h"
-#include "utility/logging.h"
+#include "function/function.hpp"
+#include "hybrid/discrete_location.hpp"
+#include "hybrid/discrete_event.hpp"
+#include "expression/assignment.hpp"
+#include "expression/expression.hpp"
+#include "utility/logging.hpp"
 
-#include "hybrid/hybrid_automaton.h"
-#include "hybrid/hybrid_automaton_interface.h"
+#include "hybrid/hybrid_automaton.hpp"
+#include "hybrid/hybrid_automaton_interface.hpp"
 
 namespace Ariadne {
 
@@ -233,4 +233,4 @@ inline OutputStream& operator<<(OutputStream& os, const CompositeHybridAutomaton
 
 } // namespace Ariadne
 
-#endif // ARIADNE_HYBRID_AUTOMATON_H
+#endif // ARIADNE_HYBRID_AUTOMATON_HPP

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            taylor_model.cc
+ *            taylor_model.cpp
  *
  *  Copyright 2008--17  Pieter Collins
  *
@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/numeric.h"
-#include "function/taylor_model.tpl.h"
+#include "numeric/numeric.hpp"
+#include "function/taylor_model.tpl.hpp"
 
 namespace Ariadne {
 

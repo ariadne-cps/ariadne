@@ -1,5 +1,5 @@
 /***************************************************************************
- *            differential.tpl.h
+ *            differential.tpl.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -23,15 +23,15 @@
 
 #include <map>
 
-#include "utility/macros.h"
-#include "utility/array.h"
-#include "numeric/float.decl.h"
-#include "algebra/vector.h"
-#include "algebra/covector.h"
-#include "algebra/matrix.h"
-#include "algebra/multi_index.h"
-#include "algebra/series.h"
-#include "algebra/expansion.h"
+#include "utility/macros.hpp"
+#include "utility/array.hpp"
+#include "numeric/float.decl.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/covector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/multi_index.hpp"
+#include "algebra/series.hpp"
+#include "algebra/expansion.hpp"
 #include <boost/concept_check.hpp>
 
 namespace Ariadne {

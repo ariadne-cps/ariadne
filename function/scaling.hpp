@@ -1,5 +1,5 @@
 /***************************************************************************
- *            scaling.h
+ *            scaling.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,15 +21,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file scaling.h
+/*! \file scaling.hpp
  *  \brief Scaling functions.
  */
 
-#ifndef ARIADNE_SCALING_H
-#define ARIADNE_SCALING_H
+#ifndef ARIADNE_SCALING_HPP
+#define ARIADNE_SCALING_HPP
 
-#include "numeric/dyadic.h"
-#include "function/domain.h"
+#include "numeric/dyadic.hpp"
+#include "function/domain.hpp"
 
 namespace Ariadne {
 
@@ -127,4 +127,4 @@ template<class X> X Unscaling::operator() (X x) const {
 
 } // namespace Ariadne
 
-#endif // ARIADNE_SCALING_H
+#endif // ARIADNE_SCALING_HPP

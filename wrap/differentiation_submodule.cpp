@@ -1,5 +1,5 @@
 /***************************************************************************
- *            differentiation_submodule.cc
+ *            differentiation_submodule.cpp
  *
  *  Copyright 2008--17  Pieter Collins
  *
@@ -21,17 +21,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "boost_python.h"
-#include "utilities.h"
+#include "boost_python.hpp"
+#include "utilities.hpp"
 
 #include <boost/python.hpp>
 
-#include "utility/typedefs.h"
-#include "utility/array.h"
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "algebra/covector.h"
-#include "algebra/differential.h"
+#include "utility/typedefs.hpp"
+#include "utility/array.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/covector.hpp"
+#include "algebra/differential.hpp"
 
 using namespace boost::python;
 using namespace Ariadne;

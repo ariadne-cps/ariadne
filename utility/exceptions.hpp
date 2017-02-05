@@ -1,5 +1,5 @@
 /***************************************************************************
- *            exceptions.h
+ *            exceptions.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,14 +21,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file exceptions.h
+/*! \file exceptions.hpp
  *  \brief Exception classes
  */
 
-#ifndef ARIADNE_EXCEPTIONS_H
-#define ARIADNE_EXCEPTIONS_H
+#ifndef ARIADNE_EXCEPTIONS_HPP
+#define ARIADNE_EXCEPTIONS_HPP
 
-#include "utility/string.h"
+#include "utility/string.hpp"
 
 #include <exception>
 #include <stdexcept>

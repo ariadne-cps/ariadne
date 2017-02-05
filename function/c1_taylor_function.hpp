@@ -1,5 +1,5 @@
 /***************************************************************************
- *            c1_taylor_function.h
+ *            c1_taylor_function.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,20 +21,20 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file c1_taylor_function.h
+/*! \file c1_taylor_function.hpp
  *  \brief Over-approximations of continuously-differentiable functions based on Taylor expansions.
  */
 
-#ifndef ARIADNE_C1_TAYLOR_FUNCTION_H
-#define ARIADNE_C1_TAYLOR_FUNCTION_H
+#ifndef ARIADNE_C1_TAYLOR_FUNCTION_HPP
+#define ARIADNE_C1_TAYLOR_FUNCTION_HPP
 
 #include <iosfwd>
-#include "utility/declarations.h"
-#include "utility/container.h"
-#include "numeric/numeric.h"
-#include "numeric/float.h"
-#include "algebra/expansion.h"
-#include "function/domain.h"
+#include "utility/declarations.hpp"
+#include "utility/container.hpp"
+#include "numeric/numeric.hpp"
+#include "numeric/float.hpp"
+#include "algebra/expansion.hpp"
+#include "function/domain.hpp"
 
 namespace Ariadne {
 
@@ -109,4 +109,4 @@ class C1TaylorFunction
 
 } // namespace Ariadne
 
-#endif // ARIADNE_TAYLOR_FUNCTION_H
+#endif // ARIADNE_TAYLOR_FUNCTION_HPP

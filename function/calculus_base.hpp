@@ -1,5 +1,5 @@
 /***************************************************************************
- *            calculus_base.h
+ *            calculus_base.hpp
  *
  *  Copyright  2008  Pieter Collins
  *
@@ -21,20 +21,20 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file calculus_base.h
+/*! \file calculus_base.hpp
  *  \brief Base class for dynamical calculus routines containing implementations of routings which can be naturally composed from other routines.
  */
 
-#ifndef ARIADNE_CALCULUS_BASE_H
-#define ARIADNE_CALCULUS_BASE_H
+#ifndef ARIADNE_CALCULUS_BASE_HPP
+#define ARIADNE_CALCULUS_BASE_HPP
 
-#include "utility/tribool.h"
-#include "utility/logging.h"
-#include "function/function_interface.h"
-#include "calculus_interface.h"
+#include "utility/tribool.hpp"
+#include "utility/logging.hpp"
+#include "function/function_interface.hpp"
+#include "calculus_interface.hpp"
 
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
 
 /* \brief Top-level namespace. */
 namespace Ariadne {
@@ -324,4 +324,4 @@ class CalculusBase
 
 
 
-#endif /* ARIADNE_DYNAMICAL_CALCULUS_H */
+#endif /* ARIADNE_DYNAMICAL_CALCULUS_HPP */

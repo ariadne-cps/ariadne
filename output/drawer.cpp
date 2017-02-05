@@ -1,5 +1,5 @@
 /***************************************************************************
- *            drawer.cc
+ *            drawer.cpp
  *
  *  Copyright 2011--17  Pieter Collins
  *
@@ -21,18 +21,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.h"
+#include "function/functional.hpp"
 #include "config.h"
 
-#include "output/drawer.h"
+#include "output/drawer.hpp"
 
-#include "utility/macros.h"
-#include "utility/logging.h"
-#include "geometry/function_set.h"
-#include "geometry/affine_set.h"
-#include "geometry/grid_set.h"
+#include "utility/macros.hpp"
+#include "utility/logging.hpp"
+#include "geometry/function_set.hpp"
+#include "geometry/affine_set.hpp"
+#include "geometry/grid_set.hpp"
 
-#include "output/graphics_interface.h"
+#include "output/graphics_interface.hpp"
 
 namespace Ariadne {
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_multi_index.cc
+ *            test_multi_index.cpp
  *
  *  Copyright  2007-9  Pieter Collins
  *
@@ -26,9 +26,9 @@
 #include <fstream>
 
 #include "config.h"
-#include "algebra/multi_index.h"
+#include "algebra/multi_index.hpp"
 
-#include "test.h"
+#include "test.hpp"
 
 using namespace std;
 using namespace Ariadne;

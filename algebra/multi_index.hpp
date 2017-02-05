@@ -1,5 +1,5 @@
 /***************************************************************************
- *            multi_index.h
+ *            multi_index.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,20 +21,20 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \brief \file multi_index.h
+/*! \brief \file multi_index.hpp
  *  \brief An index specifying the degree of differentiation.
  */
 
-#ifndef ARIADNE_MULTI_INDEX_H
-#define ARIADNE_MULTI_INDEX_H
+#ifndef ARIADNE_MULTI_INDEX_HPP
+#define ARIADNE_MULTI_INDEX_HPP
 
 #include <cassert>
 #include <initializer_list>
 #include <iostream>
 
-#include "utility/macros.h"
-#include "utility/array.h"
-#include "numeric/numeric.h"
+#include "utility/macros.hpp"
+#include "utility/array.hpp"
+#include "numeric/numeric.hpp"
 
 namespace Ariadne {
 
@@ -249,6 +249,6 @@ class MultiIndexBound {
 
 } // namespace Ariadne
 
-#include "multi_index.inl.h"
+#include "multi_index.inl.hpp"
 
-#endif /* ARIADNE_MULTI_INDEX_H */
+#endif /* ARIADNE_MULTI_INDEX_HPP */

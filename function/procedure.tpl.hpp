@@ -24,14 +24,14 @@
 
 #include <iostream>
 
-#include "utility/container.h"
-#include "algebra/vector.h"
+#include "utility/container.hpp"
+#include "algebra/vector.hpp"
 
-#include "numeric/operators.h"
-#include "function/formula.h"
-#include "algebra/evaluate.h"
-#include "algebra/expansion.h"
-#include "geometry/box.h"
+#include "numeric/operators.hpp"
+#include "function/formula.hpp"
+#include "algebra/evaluate.hpp"
+#include "algebra/expansion.hpp"
+#include "geometry/box.hpp"
 
 namespace Ariadne {
 

@@ -1,6 +1,6 @@
 add_library(ariadne-expression OBJECT
-    expression.cc
-    expression_set.cc
+    expression.cpp
+    expression_set.cpp
 )
 
 cotire(ariadne-expression)

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_evolver.cc
+ *            hybrid_evolver.cpp
  *
  *  Copyright  2009  Pieter Collins
  *
@@ -24,21 +24,21 @@
 #include <typeinfo>
 #include "config.h"
 
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "function/polynomial.h"
-#include "function/function.h"
-#include "function/function_model.h"
-#include "geometry/grid_set.h"
-#include "hybrid/hybrid_time.h"
-#include "hybrid/hybrid_automaton_interface.h"
-#include "hybrid/hybrid_evolver.h"
-#include "dynamics/orbit.h"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "function/polynomial.hpp"
+#include "function/function.hpp"
+#include "function/function_model.hpp"
+#include "geometry/grid_set.hpp"
+#include "hybrid/hybrid_time.hpp"
+#include "hybrid/hybrid_automaton_interface.hpp"
+#include "hybrid/hybrid_evolver.hpp"
+#include "dynamics/orbit.hpp"
 
-#include "solvers/integrator.h"
-#include "solvers/solver.h"
+#include "solvers/integrator.hpp"
+#include "solvers/solver.hpp"
 
-#include "hybrid/hybrid_evolver.h"
+#include "hybrid/hybrid_evolver.hpp"
 
 namespace {
 

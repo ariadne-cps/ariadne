@@ -1,5 +1,5 @@
 /***************************************************************************
- *            function_model.h
+ *            function_model.hpp
  *
  *  Copyright 2011-17  Pieter Collins
  *
@@ -21,30 +21,30 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file function_model.h
+/*! \file function_model.hpp
  *  \brief Built-in and user functions and expressions
  */
 
-#ifndef ARIADNE_FUNCTION_MODEL_H
-#define ARIADNE_FUNCTION_MODEL_H
+#ifndef ARIADNE_FUNCTION_MODEL_HPP
+#define ARIADNE_FUNCTION_MODEL_HPP
 
 #include <cstdarg>
 #include <iosfwd>
 #include <iostream>
 
-#include "function/function.decl.h"
-#include "function/function_model_interface.h"
+#include "function/function.decl.hpp"
+#include "function/function_model_interface.hpp"
 
-#include "numeric/operators.h"
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "algebra/matrix.h"
-#include "algebra/operations.h"
-#include "function/domain.h"
+#include "numeric/operators.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/operations.hpp"
+#include "function/domain.hpp"
 
-#include "function/function_interface.h"
-#include "function/function_mixin.h"
-#include "function/function.h"
+#include "function/function_interface.hpp"
+#include "function/function_mixin.hpp"
+#include "function/function.hpp"
 
 namespace Ariadne {
 
@@ -491,7 +491,7 @@ template<class PR, class PRE> VectorFunctionModel<ValidatedTag,PR,PRE> restrict(
     return f._ptr->_restriction(dom); }
 
 
-// Not in function_model_interface.h since DomainType (ExactFloat64Box) is undefined.
+// Not in function_model_interface.hpp since DomainType (ExactFloat64Box) is undefined.
 template<class P, class PR, class PRE> ScalarFunctionModel<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create_identity(const IntervalDomainType& domain) const {
     return _create_coordinate(DomainType(1u,domain),0u); };
 

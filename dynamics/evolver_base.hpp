@@ -1,5 +1,5 @@
 /***************************************************************************
- *            evolver_base.h
+ *            evolver_base.hpp
  *
  *  Copyright  2008  Pieter Collins
  *
@@ -21,15 +21,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file evolver_base.h
+/*! \file evolver_base.hpp
  *  \brief Interface for computing a single time step of the evolution of a system.
  */
 
-#ifndef ARIADNE_EVOLVER_BASE_H
-#define ARIADNE_EVOLVER_BASE_H
+#ifndef ARIADNE_EVOLVER_BASE_HPP
+#define ARIADNE_EVOLVER_BASE_HPP
 
-#include "dynamics/evolver_interface.h"
-#include "geometry/list_set.h"
+#include "dynamics/evolver_interface.hpp"
+#include "geometry/list_set.hpp"
 
 namespace Ariadne {
 
@@ -83,4 +83,4 @@ template<class SYS, class ES, class TRM> class EvolverBase
 
 
 
-#endif // ARIADNE_EVOLVER_BASE_H
+#endif // ARIADNE_EVOLVER_BASE_HPP

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            expression.h
+ *            expression.hpp
  *
  *  Copyright 2008-17 Pieter Collins
  *
@@ -22,12 +22,12 @@
  */
 
 
-/*! \file expression.h
+/*! \file expression.hpp
  *  \brief Internal expressions
  */
 
-#ifndef ARIADNE_EXPRESSION_OPERATIONS_H
-#define ARIADNE_EXPRESSION_OPERATIONS_H
+#ifndef ARIADNE_EXPRESSION_OPERATIONS_HPP
+#define ARIADNE_EXPRESSION_OPERATIONS_HPP
 
 #include <cstdarg>
 #include <iosfwd>
@@ -208,4 +208,4 @@ template<> struct DeclareExpressionOperations<Real> {
 
 } // namespace Ariadne
 
-#endif /* ARIADNE_EXPRESSION_OPERATIONS_H */
+#endif /* ARIADNE_EXPRESSION_OPERATIONS_HPP */

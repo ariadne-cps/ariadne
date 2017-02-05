@@ -1,5 +1,5 @@
 /*****************************************************************************************************
- *            laser.cc
+ *            laser.cpp
  *
  *  Testing the laser cutting system.
  *
@@ -7,12 +7,12 @@
  *
  *****************************************************************************************************/
 
-#include "ariadne.h"
+#include "ariadne.hpp"
 
-#include "laser/skin-exposure.h"
-#include "laser/laser-trajectory.h"
-#include "laser/cutting-depth.h"
-#include "laser/skin-temperature.h"
+#include "laser/skin-exposure.hpp"
+#include "laser/laser-trajectory.hpp"
+#include "laser/cutting-depth.hpp"
+#include "laser/skin-temperature.hpp"
 
 using namespace Ariadne;
 

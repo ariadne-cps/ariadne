@@ -1,5 +1,5 @@
 /***************************************************************************
- *            linear_programming.h
+ *            linear_programming.hpp
  *
  *  Copyright 2005-17 Alberto Casagrande, Pieter Collins
  *
@@ -21,18 +21,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file linear_programming.h
+/*! \file linear_programming.hpp
  *  \brief Linear programming.
  */
 
-#ifndef ARIADNE_LINEAR_PROGRAMMING_H
-#define ARIADNE_LINEAR_PROGRAMMING_H
+#ifndef ARIADNE_LINEAR_PROGRAMMING_HPP
+#define ARIADNE_LINEAR_PROGRAMMING_HPP
 
-#include "utility/logging.h"
-#include "algebra/vector.h"
-#include "algebra/matrix.h"
-#include "numeric/numeric.h"
-#include "utility/tuple.h"
+#include "utility/logging.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "numeric/numeric.hpp"
+#include "utility/tuple.hpp"
 
 namespace Ariadne {
 

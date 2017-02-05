@@ -1,5 +1,5 @@
 /***************************************************************************
- *            integer.cc
+ *            integer.cpp
  *
  *  Copyright 2013--17  Pieter Collins
  *
@@ -21,19 +21,19 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file integer.cc
+/*! \file integer.cpp
  *  \brief
  */
 
 
 
-#include "utility/stdlib.h"
+#include "utility/stdlib.hpp"
 
-#include "integer.h"
+#include "integer.hpp"
 
-#include "utility/macros.h"
-#include "utility/string.h"
-#include "numeric/logical.h"
+#include "utility/macros.hpp"
+#include "utility/string.hpp"
+#include "numeric/logical.hpp"
 
 #include <limits>
 

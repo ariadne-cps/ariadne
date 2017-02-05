@@ -1,5 +1,5 @@
 /***************************************************************************
- *            functional.h
+ *            functional.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,20 +21,20 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file functional.h
+/*! \file functional.hpp
  *  \brief Function classes. File suitable for use as a pre-compiled header.
  */
 
-#ifndef ARIADNE_FUNCTIONAL_H
-#define ARIADNE_FUNCTIONAL_H
+#ifndef ARIADNE_FUNCTIONAL_HPP
+#define ARIADNE_FUNCTIONAL_HPP
 
-#include "numeric/numeric.h"
+#include "numeric/numeric.hpp"
 
-#include "algebra/differential.h"
+#include "algebra/differential.hpp"
 
-#include "function/affine.h"
-#include "function/polynomial.h"
-#include "function/function.h"
-#include "function/function_model.h"
+#include "function/affine.hpp"
+#include "function/polynomial.hpp"
+#include "function/function.hpp"
+#include "function/function_model.hpp"
 
 #endif

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            binary_word.h
+ *            binary_word.hpp
  *
  *  Copyright  2004-8  Alberto Casagrande, Pieter Collins, Ivan S. Zapreev
  *
@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file binary_word.h
+/*! \file binary_word.hpp
  *  \brief Binary words and sets of binary words.
  *
  * Binary words are generally useful objects.
@@ -47,7 +47,7 @@
  * using a binary tree representation.
  *
  * The main intended use of these classes in Ariadne is to represent
- * sets as unions of rectangles on a grid. See the file grid_box.h
+ * sets as unions of rectangles on a grid. See the file grid_box.hpp
  * for the implementation of this representation.
  * The basic idea is that a inside of Euclidean space contained in some
  * cuboid R can be represented by a union of sets obtained by repeatedly
@@ -66,16 +66,16 @@
  * for big grids or fine subdivisions, memory may well be a limiting factor.
  */
 
-#ifndef ARIADNE_BINARY_WORD_H
-#define ARIADNE_BINARY_WORD_H
+#ifndef ARIADNE_BINARY_WORD_HPP
+#define ARIADNE_BINARY_WORD_HPP
 
 #include <limits>
 #include <vector>
 #include <iosfwd>
 #include <stdexcept>
 
-#include "utility/macros.h"
-#include "utility/stlio.h"
+#include "utility/macros.hpp"
+#include "utility/stlio.hpp"
 
 namespace Ariadne {
 
@@ -231,4 +231,4 @@ inline OutputStream& operator<<(OutputStream& os, const BinaryWord& bw) {
 
 } // namespace Ariadne
 
-#endif /* ARIADNE_BINARY_WORD_H */
+#endif /* ARIADNE_BINARY_WORD_HPP */

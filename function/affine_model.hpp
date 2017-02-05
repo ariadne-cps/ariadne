@@ -1,5 +1,5 @@
 /***************************************************************************
- *            affine_model.h
+ *            affine_model.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,26 +21,26 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file affine_model.h
+/*! \file affine_model.hpp
  *  \brief Affine models defined on the unit box
  */
 
-#ifndef ARIADNE_AFFINE_MODEL_H
-#define ARIADNE_AFFINE_MODEL_H
+#ifndef ARIADNE_AFFINE_MODEL_HPP
+#define ARIADNE_AFFINE_MODEL_HPP
 
 #include <cstdarg>
 #include <iosfwd>
 #include <iostream>
 
-#include "utility/macros.h"
-#include "utility/pointer.h"
-#include "utility/declarations.h"
+#include "utility/macros.hpp"
+#include "utility/pointer.hpp"
+#include "utility/declarations.hpp"
 
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "algebra/covector.h"
-#include "algebra/matrix.h"
-#include "algebra/operations.h"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/covector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/operations.hpp"
 
 namespace Ariadne {
 
@@ -261,4 +261,4 @@ template<class P, class PR> Vector<AffineModel<P,RawFloat<PR>>> affine_models(co
 
 } // namespace Ariadne
 
-#endif /* ARIADNE_AFFINE_MODEL_H */
+#endif /* ARIADNE_AFFINE_MODEL_HPP */

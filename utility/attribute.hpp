@@ -1,5 +1,5 @@
 /***************************************************************************
- *            attribute.h
+ *            attribute.hpp
  *
  *  Copyright 2011-17  Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file attribute.h
+/*! \file attribute.hpp
  *  \brief Generic attributes for named parameters.
  */
 
-#ifndef ARIADNE_ATTRIBUTE_H
-#define ARIADNE_ATTRIBUTE_H
+#ifndef ARIADNE_ATTRIBUTE_HPP
+#define ARIADNE_ATTRIBUTE_HPP
 
 namespace Ariadne {
 
@@ -74,4 +74,4 @@ static const Generator<Degree> degree = Generator<Degree>();
 
 } // namespace Ariadne
 
-#endif /* ARIADNE_ATTRIBUTE_H */
+#endif /* ARIADNE_ATTRIBUTE_HPP */

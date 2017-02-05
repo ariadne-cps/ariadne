@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_evolver_interface.h
+ *            hybrid_evolver_interface.hpp
  *
  *  Copyright  2011  Luca Geretti
  *
@@ -21,22 +21,22 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file hybrid_evolver_interface.h
+/*! \file hybrid_evolver_interface.hpp
  *  \brief Interface for evolver classes in the hybrid space.
  */
 
-#ifndef ARIADNE_HYBRID_EVOLVER_INTERFACE_H
-#define ARIADNE_HYBRID_EVOLVER_INTERFACE_H
+#ifndef ARIADNE_HYBRID_EVOLVER_INTERFACE_HPP
+#define ARIADNE_HYBRID_EVOLVER_INTERFACE_HPP
 
-#include "dynamics/evolver_interface.h"
+#include "dynamics/evolver_interface.hpp"
 
-#include "hybrid/hybrid_time.h"
-#include "hybrid/hybrid_set.decl.h"
-#include "hybrid/hybrid_orbit.h"
+#include "hybrid/hybrid_time.hpp"
+#include "hybrid/hybrid_set.decl.hpp"
+#include "hybrid/hybrid_orbit.hpp"
 
-#include "hybrid/discrete_event.h"
+#include "hybrid/discrete_event.hpp"
 
-#include "utility/logging.h"
+#include "utility/logging.hpp"
 
 namespace Ariadne {
 
@@ -123,4 +123,4 @@ class HybridEvolverFactoryInterface
 
 } // namespace Ariadne
 
-#endif // ARIADNE_HYBRID_EVOLVER_INTERFACE_H
+#endif // ARIADNE_HYBRID_EVOLVER_INTERFACE_HPP

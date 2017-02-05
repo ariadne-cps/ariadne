@@ -1,5 +1,5 @@
 /***************************************************************************
- *            matrix.cc
+ *            matrix.cpp
  *
  *  Copyright 2008--17  Alberto Casagrande, Pieter Collins
  *
@@ -21,19 +21,19 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/module.h"
+#include "numeric/module.hpp"
 
 #include "config.h"
 
-#include "algebra/matrix.h"
+#include "algebra/matrix.hpp"
 
-#include "utility/exceptions.h"
-#include "numeric/float.h"
-#include "numeric/rational.h"
-#include "algebra/vector.h"
-#include "algebra/covector.h"
+#include "utility/exceptions.hpp"
+#include "numeric/float.hpp"
+#include "numeric/rational.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/covector.hpp"
 
-#include "matrix.tpl.h"
+#include "matrix.tpl.hpp"
 
 namespace Ariadne {
 
@@ -914,7 +914,7 @@ template<> Matrix<Rational> midpoint(Matrix<Rational> const& A) { return A; }
 
 } // namespace Ariadne
 
-#include "geometry/interval.h"
+#include "geometry/interval.hpp"
 
 namespace Ariadne {
 template class Matrix<Float64UpperInterval>;

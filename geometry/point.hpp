@@ -1,5 +1,5 @@
 /***************************************************************************
- *            point.h
+ *            point.hpp
  *
  *  Copyright 2008-17  Alberto Casagrande, Pieter Collins
  *
@@ -21,17 +21,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file point.h
+/*! \file point.hpp
  *  \brief Points in Euclidean space.
  */
 
-#ifndef ARIADNE_POINT_H
-#define ARIADNE_POINT_H
+#ifndef ARIADNE_POINT_HPP
+#define ARIADNE_POINT_HPP
 
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
 
-#include "output/graphics_interface.h"
+#include "output/graphics_interface.hpp"
 
 namespace Ariadne {
 
@@ -82,4 +82,4 @@ ExactPoint make_point(const StringType&);
 
 } // namespace Ariadne
 
-#endif // ARIADNE_POINT_H
+#endif // ARIADNE_POINT_HPP

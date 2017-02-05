@@ -1,5 +1,5 @@
 /***************************************************************************
- *            decimal.h
+ *            decimal.hpp
  *
  *  Copyright 2014-17  Pieter Collins
  *
@@ -21,18 +21,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file decimal.h
+/*! \file decimal.hpp
  *  \brief ExactTag decimal numbers, useful for user input.
  */
 
-#ifndef ARIADNE_DECIMAL_H
-#define ARIADNE_DECIMAL_H
+#ifndef ARIADNE_DECIMAL_HPP
+#define ARIADNE_DECIMAL_HPP
 
 #include <string>
 #include <iostream>
-#include "utility/typedefs.h"
-#include "numeric/number.decl.h"
-#include "numeric/integer.h"
+#include "utility/typedefs.hpp"
+#include "numeric/number.decl.hpp"
+#include "numeric/integer.hpp"
 
 namespace Ariadne {
 

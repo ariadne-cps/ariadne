@@ -1,5 +1,5 @@
 /***************************************************************************
- *            algebra_interface.h
+ *            algebra_interface.hpp
  *
  *  Copyright 2010-17  Pieter Collins
  *
@@ -21,20 +21,20 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file algebra_interface.h
+/*! \file algebra_interface.hpp
  *  \brief Interface for function algebras.
  */
 
-#ifndef ARIADNE_ALGEBRA_INTERFACE_H
-#define ARIADNE_ALGEBRA_INTERFACE_H
+#ifndef ARIADNE_ALGEBRA_INTERFACE_HPP
+#define ARIADNE_ALGEBRA_INTERFACE_HPP
 
 #include <iosfwd>
 #include <iostream>
 
-#include "utility/writable.h"
-#include "numeric/numeric.h"
-#include "utility/pointer.h"
-#include "numeric/operators.h"
+#include "utility/writable.hpp"
+#include "numeric/numeric.hpp"
+#include "utility/pointer.hpp"
+#include "numeric/operators.hpp"
 
 namespace Ariadne {
 
@@ -243,4 +243,4 @@ template<class X> class VectorAlgebraInterface
 
 } // namespace Ariadne
 
-#endif /* ARIADNE_ALGEBRA_INTERFACE_H */
+#endif /* ARIADNE_ALGEBRA_INTERFACE_HPP */

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            numeric/integer.h
+ *            numeric/integer.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,25 +21,25 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file numeric/integer.h
+/*! \file numeric/integer.hpp
  *  \brief
  */
 
 
 
-#ifndef ARIADNE_INTEGER_H
-#define ARIADNE_INTEGER_H
+#ifndef ARIADNE_INTEGER_HPP
+#define ARIADNE_INTEGER_HPP
 
-#include "external/gmp.h"
+#include "external/gmp.hpp"
 
 #include <cassert>
 
-#include "utility/typedefs.h"
-#include "utility/metaprogramming.h"
-#include "numeric/sign.h"
-#include "numeric/logical.h"
-#include "numeric/arithmetic.h"
-#include "numeric/number.decl.h"
+#include "utility/typedefs.hpp"
+#include "utility/metaprogramming.hpp"
+#include "numeric/sign.hpp"
+#include "numeric/logical.hpp"
+#include "numeric/arithmetic.hpp"
+#include "numeric/number.decl.hpp"
 
 namespace Ariadne {
 

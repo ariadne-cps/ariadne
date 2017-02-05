@@ -1,5 +1,5 @@
 /***************************************************************************
- *            logging.cc
+ *            logging.cpp
  *
  *  Copyright  2007-8   Pieter Collins
  *
@@ -27,7 +27,7 @@
 
 
 #include "config.h"
-#include "utility/logging.h"
+#include "utility/logging.hpp"
 
 namespace Ariadne {
 

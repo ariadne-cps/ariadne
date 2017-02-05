@@ -1,5 +1,5 @@
 /***************************************************************************
- *            algebra.cc
+ *            algebra.cpp
  *
  *  Copyright 2011--17  Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/numeric.h"
+#include "numeric/numeric.hpp"
 #include "config.h"
 
-#include "algebra.h"
-#include "algebra_mixin.h"
-#include "algebra_operations.tpl.h"
+#include "algebra.hpp"
+#include "algebra_mixin.hpp"
+#include "algebra_operations.tpl.hpp"
 
 namespace Ariadne {
 

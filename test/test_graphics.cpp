@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_graphics.cc
+ *            test_graphics.cpp
  *
  *  Copyright 2008--17  Pieter Collins
  *
@@ -22,15 +22,15 @@
  */
 
 #include "config.h"
-#include "test.h"
+#include "test.hpp"
 
-#include "function/function.h"
-#include "output/graphics.h"
-#include "geometry/point.h"
-#include "geometry/box.h"
-#include "geometry/curve.h"
-#include "geometry/function_set.h"
-#include "geometry/grid_set.h"
+#include "function/function.hpp"
+#include "output/graphics.hpp"
+#include "geometry/point.hpp"
+#include "geometry/box.hpp"
+#include "geometry/curve.hpp"
+#include "geometry/function_set.hpp"
+#include "geometry/grid_set.hpp"
 
 using namespace Ariadne;
 

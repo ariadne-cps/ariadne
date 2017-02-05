@@ -1,5 +1,5 @@
 /***************************************************************************
- *            fixed_differential.h
+ *            fixed_differential.hpp
  *
  *  Copyright 2011-17  Pieter Collins
  *
@@ -21,21 +21,21 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file fixed_differential.h
+/*! \file fixed_differential.hpp
  *  \brief First- and second-order multivariate differentials.
  */
 
-#ifndef ARIADNE_FIXED_DIFFERENTIAL_H
-#define ARIADNE_FIXED_DIFFERENTIAL_H
+#ifndef ARIADNE_FIXED_DIFFERENTIAL_HPP
+#define ARIADNE_FIXED_DIFFERENTIAL_HPP
 
 #include <map>
 
-#include "utility/macros.h"
-#include "utility/array.h"
-#include "algebra/vector.h"
-#include "algebra/matrix.h"
-#include "algebra/series.h"
-#include "algebra/expansion.h"
+#include "utility/macros.hpp"
+#include "utility/array.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/series.hpp"
+#include "algebra/expansion.hpp"
 #include <boost/concept_check.hpp>
 
 namespace Ariadne {
@@ -1079,4 +1079,4 @@ class Vector< SecondDifferential<X> >
 
 } //namespace Ariadne
 
-#endif // ARIADNE_FIXED_DIFFERENTIAL_H
+#endif // ARIADNE_FIXED_DIFFERENTIAL_HPP

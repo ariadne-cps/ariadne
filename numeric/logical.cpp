@@ -1,5 +1,5 @@
 /***************************************************************************
- *            logical.cc
+ *            logical.cpp
  *
  *  Copyright 2013--17  Pieter Collins
  *
@@ -21,15 +21,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file logical.cc
+/*! \file logical.cpp
  *  \brief
  */
 
-#include "utility/stdlib.h"
-#include "utility/string.h"
-#include "expression/templates.h"
+#include "utility/stdlib.hpp"
+#include "utility/string.hpp"
+#include "expression/templates.hpp"
 
-#include "logical.h"
+#include "logical.hpp"
 
 namespace Ariadne {
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            check_numeric.cc
+ *            check_numeric.cpp
  *
  *  Copyright 2006--17  Alberto Casagrande, Pieter Collins
  *
@@ -23,7 +23,7 @@
 
 #include <tuple>
 
-#include "utility/module.h"
+#include "utility/module.hpp"
 
 namespace Ariadne {
 using Nat=unsigned int; using Int=int; using Dbl=double; class Rational;
@@ -33,18 +33,18 @@ Rational rec(Nat); Rational rec(Int); Dbl rec(Dbl);
 } // namespace Ariadne
 
 #include "config.h"
-#include "numeric/logical.h"
-#include "numeric/number.h"
-#include "numeric/float.h"
-#include "numeric/integer.h"
-#include "numeric/rational.h"
-#include "numeric/real.h"
-#include "numeric/float64.h"
-#include "numeric/floatmp.h"
+#include "numeric/logical.hpp"
+#include "numeric/number.hpp"
+#include "numeric/float.hpp"
+#include "numeric/integer.hpp"
+#include "numeric/rational.hpp"
+#include "numeric/real.hpp"
+#include "numeric/float64.hpp"
+#include "numeric/floatmp.hpp"
 
-#include "test.h"
-#include "utility.h"
-#include "check_number.h"
+#include "test.hpp"
+#include "utility.hpp"
+#include "check_number.hpp"
 
 using namespace std;
 using namespace Ariadne;

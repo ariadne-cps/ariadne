@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_rational.cc
+ *            test_rational.cpp
  *
  *  Copyright 2013--17  Pieter Collins
  *
@@ -23,16 +23,16 @@
 
 #include "config.h"
 
-#include "numeric/rational.h"
-#include "numeric/builtin.h"
-#include "numeric/integer.h"
-#include "numeric/dyadic.h"
-#include "numeric/decimal.h"
-#include "numeric/logical.h"
+#include "numeric/rational.hpp"
+#include "numeric/builtin.hpp"
+#include "numeric/integer.hpp"
+#include "numeric/dyadic.hpp"
+#include "numeric/decimal.hpp"
+#include "numeric/logical.hpp"
 
 #include <iomanip>
 
-#include "test.h"
+#include "test.hpp"
 
 using namespace std;
 using namespace Ariadne;

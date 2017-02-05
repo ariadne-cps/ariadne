@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_validated_float.cc
+ *            test_validated_float.cpp
  *
  *  Copyright  2006-14  Alberto Casagrande, Pieter Collins
  *
@@ -29,11 +29,11 @@
 #include <string>
 
 #include "config.h"
-#include "numeric/rational.h"
-#include "numeric/float.decl.h"
-#include "numeric/float-user.h"
+#include "numeric/rational.hpp"
+#include "numeric/float.decl.hpp"
+#include "numeric/float-user.hpp"
 
-#include "test.h"
+#include "test.hpp"
 
 using namespace Ariadne;
 using namespace std;

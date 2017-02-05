@@ -1,5 +1,5 @@
 /***************************************************************************
- *            numeric/module.h
+ *            numeric/module.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,30 +21,30 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file numeric/module.h
+/*! \file numeric/module.hpp
  *  \brief
  */
 
 
 
-#ifndef ARIADNE_NUMERIC_MODULE_H
-#define ARIADNE_NUMERIC_MODULE_H
+#ifndef ARIADNE_NUMERIC_MODULE_HPP
+#define ARIADNE_NUMERIC_MODULE_HPP
 
-#include "utility/module.h"
+#include "utility/module.hpp"
 
-#include "logical.decl.h"
-#include "number.decl.h"
-#include "float.decl.h"
+#include "logical.decl.hpp"
+#include "number.decl.hpp"
+#include "float.decl.hpp"
 
-#include "paradigm.h"
-#include "logical.h"
-#include "integer.h"
-#include "rational.h"
-#include "real.h"
-#include "float64.h"
-#include "floatmp.h"
-#include "number.h"
+#include "paradigm.hpp"
+#include "logical.hpp"
+#include "integer.hpp"
+#include "rational.hpp"
+#include "real.hpp"
+#include "float64.hpp"
+#include "floatmp.hpp"
+#include "number.hpp"
 
-#include "float.h"
+#include "float.hpp"
 
 #endif

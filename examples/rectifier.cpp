@@ -1,9 +1,9 @@
 /***************************************************************************
- *            rectifier_automaton.cc
+ *            rectifier_automaton.cpp
  ****************************************************************************/
 
 #include <cstdarg>
-#include "ariadne.h"
+#include "ariadne.hpp"
 
 using namespace Ariadne;
 

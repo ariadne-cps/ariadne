@@ -1,4 +1,4 @@
-#include "simple_algebras.h"
+#include "simple_algebras.hpp"
 using SizeType = std::size_t;
 
 template<class X> SizeType instantiate_template_algebra_operations();

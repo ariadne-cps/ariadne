@@ -1,5 +1,5 @@
 /***************************************************************************
- *            expression_set.cc
+ *            expression_set.cpp
  *
  *  Copyright 2011--17  Pieter Collins
  *
@@ -21,14 +21,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "utility/standard.h"
+#include "utility/standard.hpp"
 #include "config.h"
 
-#include "expression/expression_set.h"
-#include "expression/expression.h"
-#include "expression/space.h"
-#include "geometry/box.h"
-#include "geometry/function_set.h"
+#include "expression/expression_set.hpp"
+#include "expression/expression.hpp"
+#include "expression/space.hpp"
+#include "geometry/box.hpp"
+#include "geometry/function_set.hpp"
 
 
 

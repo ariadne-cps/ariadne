@@ -1,5 +1,5 @@
 /***************************************************************************
- *            dyadic.h
+ *            dyadic.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,14 +21,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file dyadic.h
+/*! \file dyadic.hpp
  *  \brief Dyadic numbers.
  */
 
-#ifndef ARIADNE_DYADIC_H
-#define ARIADNE_DYADIC_H
+#ifndef ARIADNE_DYADIC_HPP
+#define ARIADNE_DYADIC_HPP
 
-#include "external/gmp.h"
+#include "external/gmp.hpp"
 
 #include <iostream> // For std::floor std::ceil etc
 #include <iomanip> // For std::setprecision
@@ -36,9 +36,9 @@
 #include <algorithm> // For std::max, std::min
 #include <limits> // For std::numeric_limits<double>
 
-#include "numeric/logical.h"
-#include "numeric/integer.h"
-#include "numeric/arithmetic.h"
+#include "numeric/logical.hpp"
+#include "numeric/integer.hpp"
+#include "numeric/arithmetic.hpp"
 
 namespace Ariadne {
 

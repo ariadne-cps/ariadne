@@ -1,5 +1,5 @@
 /***************************************************************************
- *            grid_set.cc
+ *            grid_set.cpp
  *
  *  Copyright  2008-12  Ivan S. Zapreev, Pieter Collins
  *
@@ -22,20 +22,20 @@
  *  Foundation, Inc., 59 Templece Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.h"
+#include "function/functional.hpp"
 #include "config.h"
 
 #include <iostream>
 #include <iomanip>
 
-#include "utility/macros.h"
-#include "utility/exceptions.h"
-#include "utility/stlio.h"
-#include "geometry/function_set.h"
-#include "geometry/list_set.h"
-#include "geometry/grid_set.h"
+#include "utility/macros.hpp"
+#include "utility/exceptions.hpp"
+#include "utility/stlio.hpp"
+#include "geometry/function_set.hpp"
+#include "geometry/list_set.hpp"
+#include "geometry/grid_set.hpp"
 
-#include "geometry/set_interface.h"
+#include "geometry/set_interface.hpp"
 
 
 namespace Ariadne {

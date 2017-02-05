@@ -1,5 +1,5 @@
 /***************************************************************************
- *            numeric/flt64.h
+ *            numeric/flt64.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,28 +21,28 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file numeric/flt64.h
+/*! \file numeric/flt64.hpp
  *  \brief
  */
 
-#ifndef ARIADNE_FLT64_H
-#define ARIADNE_FLT64_H
+#ifndef ARIADNE_FLT64_HPP
+#define ARIADNE_FLT64_HPP
 
 #include <cmath>
 #include <iostream>
 
-#include "utility/metaprogramming.h"
-#include "utility/typedefs.h"
-#include "numeric/paradigm.h"
+#include "utility/metaprogramming.hpp"
+#include "utility/typedefs.hpp"
+#include "numeric/paradigm.hpp"
 
-#include "numeric/sign.h"
-#include "numeric/is_number.h"
+#include "numeric/sign.hpp"
+#include "numeric/is_number.hpp"
 
-#include "numeric/logical.decl.h"
-#include "numeric/float.decl.h"
-#include "numeric/number.h"
-#include "numeric/real.h"
-#include "numeric/logical.h"
+#include "numeric/logical.decl.hpp"
+#include "numeric/float.decl.hpp"
+#include "numeric/number.hpp"
+#include "numeric/real.hpp"
+#include "numeric/logical.hpp"
 
 namespace Ariadne {
 

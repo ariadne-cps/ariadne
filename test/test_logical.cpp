@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_logical.cc
+ *            test_logical.cpp
  *
  *  Copyright  2015  Pieter Collins
  *
@@ -21,11 +21,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "utility/metaprogramming.h"
-#include "numeric/paradigm.h"
-#include "numeric/logical.h"
+#include "utility/metaprogramming.hpp"
+#include "numeric/paradigm.hpp"
+#include "numeric/logical.hpp"
 
-#include "test.h"
+#include "test.hpp"
 
 using namespace std;
 using namespace Ariadne;

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_expression.cc
+ *            test_expression.cpp
  *
  *  Copyright 2009--17  Pieter Collins
  *
@@ -24,19 +24,19 @@
 #include <iostream>
 
 #include "config.h"
-#include "utility/container.h"
-#include "utility/stlio.h"
-#include "numeric/numeric.h"
-#include "expression/expression.h"
-#include "expression/assignment.h"
-#include "expression/valuation.h"
-#include "expression/space.h"
-#include "function/formula.h"
-#include "algebra/algebra.h"
-#include "function/function.h"
-#include "function/taylor_model.h"
+#include "utility/container.hpp"
+#include "utility/stlio.hpp"
+#include "numeric/numeric.hpp"
+#include "expression/expression.hpp"
+#include "expression/assignment.hpp"
+#include "expression/valuation.hpp"
+#include "expression/space.hpp"
+#include "function/formula.hpp"
+#include "algebra/algebra.hpp"
+#include "function/function.hpp"
+#include "function/taylor_model.hpp"
 
-#include "test.h"
+#include "test.hpp"
 
 using namespace Ariadne;
 

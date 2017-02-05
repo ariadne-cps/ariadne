@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_interval.cc
+ *            test_interval.cpp
  *
  *  Copyright  2006-8  Alberto Casagrande, Pieter Collins
  *
@@ -29,10 +29,10 @@
 #include <string>
 
 #include "config.h"
-#include "numeric/rational.h"
-#include "geometry/interval.h"
+#include "numeric/rational.hpp"
+#include "geometry/interval.hpp"
 
-#include "test.h"
+#include "test.hpp"
 
 using namespace Ariadne;
 using namespace std;

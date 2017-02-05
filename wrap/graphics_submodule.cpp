@@ -1,5 +1,5 @@
 /***************************************************************************
- *            graphics_submodule.cc
+ *            graphics_submodule.cpp
  *
  *  Copyright 2008--17  Pieter Collins
  *
@@ -21,19 +21,19 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "boost_python.h"
-#include "utilities.h"
+#include "boost_python.hpp"
+#include "utilities.hpp"
 
 #include "config.h"
 
 #include <boost/python.hpp>
 
-#include "output/graphics_interface.h"
-#include "output/graphics.h"
-#include "output/geometry2d.h"
-#include "geometry/point.h"
-#include "geometry/box.h"
-#include "function/function.h"
+#include "output/graphics_interface.hpp"
+#include "output/graphics.hpp"
+#include "output/geometry2d.hpp"
+#include "geometry/point.hpp"
+#include "geometry/box.hpp"
+#include "function/function.hpp"
 
 using namespace boost::python;
 

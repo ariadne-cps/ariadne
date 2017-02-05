@@ -1,4 +1,4 @@
-#include "clang_friend_mixin.h"
+#include "clang_friend_mixin.hpp"
 
 template<class PR> struct Operations<FloatApproximation<PR>> {
     static FloatApproximation<PR> _neg(FloatApproximation<PR> x) {

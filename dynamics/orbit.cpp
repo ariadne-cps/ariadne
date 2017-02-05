@@ -1,5 +1,5 @@
 /***************************************************************************
- *            orbit.cc
+ *            orbit.cpp
  *
  *  Copyright 2007--17 Pieter Collins
  *
@@ -21,20 +21,20 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.h"
+#include "function/functional.hpp"
 
 #include "config.h"
 
 #include <utility>
 
-#include "dynamics/orbit.h"
+#include "dynamics/orbit.hpp"
 
-#include "geometry/box.h"
-#include "geometry/point.h"
-#include "geometry/curve.h"
-#include "geometry/function_set.h"
-#include "geometry/list_set.h"
-#include "geometry/grid_set.h"
+#include "geometry/box.hpp"
+#include "geometry/point.hpp"
+#include "geometry/curve.hpp"
+#include "geometry/function_set.hpp"
+#include "geometry/list_set.hpp"
+#include "geometry/grid_set.hpp"
 
 namespace Ariadne {
 

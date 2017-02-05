@@ -1,5 +1,5 @@
 /***************************************************************************
- *            numeric.h
+ *            numeric.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,27 +21,27 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file numeric.h
+/*! \file numeric.hpp
  *  \brief Number classes. File suitable for use as a pre-compiled header.
  */
 
-#ifndef ARIADNE_NUMERIC_H
-#define ARIADNE_NUMERIC_H
+#ifndef ARIADNE_NUMERIC_HPP
+#define ARIADNE_NUMERIC_HPP
 
-#include "utility/standard.h"
+#include "utility/standard.hpp"
 
 #include "config.h"
 
-#include "utility/declarations.h"
+#include "utility/declarations.hpp"
 
-#include "numeric/logical.h"
-#include "numeric/integer.h"
-#include "numeric/rational.h"
-#include "numeric/decimal.h"
-#include "numeric/dyadic.h"
-#include "numeric/float.h"
-#include "numeric/real.h"
-#include "numeric/number.h"
+#include "numeric/logical.hpp"
+#include "numeric/integer.hpp"
+#include "numeric/rational.hpp"
+#include "numeric/decimal.hpp"
+#include "numeric/dyadic.hpp"
+#include "numeric/float.hpp"
+#include "numeric/real.hpp"
+#include "numeric/number.hpp"
 
 namespace Ariadne {
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            algebra/vector-sfinae.h
+ *            algebra/vector-sfinae.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,17 +21,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file algebra/vector-sfinae.h
+/*! \file algebra/vector-sfinae.hpp
  *  \brief 
  */
 
 
 
-#ifndef ARIADNE_VECTOR_H
-#define ARIADNE_VECTOR_H
+#ifndef ARIADNE_VECTOR_HPP
+#define ARIADNE_VECTOR_HPP
 
-#include "utility/module.h"
-#include "utility/container.h"
+#include "utility/module.hpp"
+#include "utility/container.hpp"
 
 namespace Ariadne {
 

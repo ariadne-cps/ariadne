@@ -1,5 +1,5 @@
 /***************************************************************************
- *            function.h
+ *            function.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,30 +21,30 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file function.h
+/*! \file function.hpp
  *  \brief Built-in and user functions and expressions
  */
 
-#ifndef ARIADNE_FUNCTION_H
-#define ARIADNE_FUNCTION_H
+#ifndef ARIADNE_FUNCTION_HPP
+#define ARIADNE_FUNCTION_HPP
 
 #include <cstdarg>
 #include <iosfwd>
 #include <iostream>
 
-#include "utility/declarations.h"
-#include "utility/macros.h"
-#include "utility/pointer.h"
-#include "utility/container.h"
-#include "utility/metaprogramming.h"
+#include "utility/declarations.hpp"
+#include "utility/macros.hpp"
+#include "utility/pointer.hpp"
+#include "utility/container.hpp"
+#include "utility/metaprogramming.hpp"
 
-#include "function/function_interface.h"
+#include "function/function_interface.hpp"
 
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "algebra/covector.h"
-#include "algebra/differential.h"
-#include "function/domain.h"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/covector.hpp"
+#include "algebra/differential.hpp"
+#include "function/domain.hpp"
 
 namespace Ariadne {
 

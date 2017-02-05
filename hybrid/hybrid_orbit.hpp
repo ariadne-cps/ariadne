@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_orbit.h
+ *            hybrid_orbit.hpp
  *
  *  Copyright 2007-17  Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file hybrid_orbit.h
+/*! \file hybrid_orbit.hpp
  *  \brief Orbits of hybrid dynamical systems
  */
 
-#ifndef ARIADNE_HYBRID_ORBIT_H
-#define ARIADNE_HYBRID_ORBIT_H
+#ifndef ARIADNE_HYBRID_ORBIT_HPP
+#define ARIADNE_HYBRID_ORBIT_HPP
 
 #include <utility>
 #include <iostream>
@@ -35,13 +35,13 @@
 #include <memory>
 #include <boost/scoped_ptr.hpp>
 
-#include "numeric/numeric.h"
-#include "output/graphics_interface.h"
-#include "geometry/function_set.h"
-#include "hybrid/hybrid_set.h"
-#include "hybrid/hybrid_enclosure.h"
+#include "numeric/numeric.hpp"
+#include "output/graphics_interface.hpp"
+#include "geometry/function_set.hpp"
+#include "hybrid/hybrid_set.hpp"
+#include "hybrid/hybrid_enclosure.hpp"
 
-#include "dynamics/orbit.h"
+#include "dynamics/orbit.hpp"
 
 namespace Ariadne {
 
@@ -144,4 +144,4 @@ operator<<(OutputStream& os, const Orbit< HybridEnclosure >& orb);
 
 } // namespace Ariadne
 
-#endif // ARIADNE_HYBRID_ORBIT_H
+#endif // ARIADNE_HYBRID_ORBIT_HPP

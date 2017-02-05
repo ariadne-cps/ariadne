@@ -1,5 +1,5 @@
 /***************************************************************************
- *            control_validator.cc
+ *            control_validator.cpp
  *
  *  Copyright  2015 Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.h"
+#include "function/functional.hpp"
 
 #include <type_traits>
 
-#include "utility/declarations.h"
-#include "expression/variables.h"
+#include "utility/declarations.hpp"
+#include "expression/variables.hpp"
 
 namespace Ariadne {
 template<class X> class Vector;
@@ -36,15 +36,15 @@ template<> struct Vector<RealVariable> : List<RealVariable> {
 };
 } // namespace Ariadne
 
-#include "expression/expression.h"
-#include "expression/assignment.h"
-#include "expression/expression_set.h"
-#include "expression/function_expression.h"
+#include "expression/expression.hpp"
+#include "expression/assignment.hpp"
+#include "expression/expression_set.hpp"
+#include "expression/function_expression.hpp"
 
 
-#include "function/function.h"
-#include "function/scaled_function_patch.h"
-#include "function/taylor_function.h"
+#include "function/function.hpp"
+#include "function/scaled_function_patch.hpp"
+#include "function/taylor_function.hpp"
 
 
 #define ARIADNE_PRINT(expression) std::cout << #expression << "=" << (expression) << "\n"

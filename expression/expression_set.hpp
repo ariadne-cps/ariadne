@@ -1,5 +1,5 @@
 /***************************************************************************
- *            expression_set.h
+ *            expression_set.hpp
  *
  *  Copyright 2011-17  Pieter Collins
  *
@@ -21,25 +21,25 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file expression_set.h
+/*! \file expression_set.hpp
  *  \brief Sets defined using expressions over real variables.
  */
 
-#ifndef ARIADNE_EXPRESSION_SET_H
-#define ARIADNE_EXPRESSION_SET_H
+#ifndef ARIADNE_EXPRESSION_SET_HPP
+#define ARIADNE_EXPRESSION_SET_HPP
 
 #include <iostream>
 
-#include "utility/container.h"
-#include "utility/declarations.h"
-#include "expression/variables.h"
-#include "expression/expression.h"
-#include "expression/assignment.h"
-#include "expression/space.h"
-#include "numeric/float.h"
-#include "numeric/real.h"
-#include "function/projection.h"
-#include "geometry/box.h"
+#include "utility/container.hpp"
+#include "utility/declarations.hpp"
+#include "expression/variables.hpp"
+#include "expression/expression.hpp"
+#include "expression/assignment.hpp"
+#include "expression/space.hpp"
+#include "numeric/float.hpp"
+#include "numeric/real.hpp"
+#include "function/projection.hpp"
+#include "geometry/box.hpp"
 
 namespace Ariadne {
 

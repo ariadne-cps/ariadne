@@ -1,5 +1,5 @@
 /***************************************************************************
- *            nonlinear_programming.h
+ *            nonlinear_programming.hpp
  *
  *  Copyright 2009-17  Pieter Collins
  *
@@ -21,18 +21,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file nonlinear_programming.h
+/*! \file nonlinear_programming.hpp
  *  \brief Nonlinear programming.
  */
 
-#ifndef ARIADNE_NONLINEAR_PROGRAMMING_H
-#define ARIADNE_NONLINEAR_PROGRAMMING_H
+#ifndef ARIADNE_NONLINEAR_PROGRAMMING_HPP
+#define ARIADNE_NONLINEAR_PROGRAMMING_HPP
 
-#include "utility/declarations.h"
+#include "utility/declarations.hpp"
 
-#include "utility/logging.h"
-#include "numeric/numeric.h"
-#include "utility/tuple.h"
+#include "utility/logging.hpp"
+#include "numeric/numeric.hpp"
+#include "utility/tuple.hpp"
 
 
 namespace Ariadne {

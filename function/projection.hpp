@@ -1,5 +1,5 @@
 /***************************************************************************
- *            projection.h
+ *            projection.hpp
  *
  *  Copyright 2008-17 Pieter Collins
  *
@@ -22,14 +22,14 @@
  */
 
 
-/*! \file projection.h
+/*! \file projection.hpp
  *  \brief Projections onto coordinates
  */
 
-#ifndef ARIADNE_PROJECTION_H
-#define ARIADNE_PROJECTION_H
+#ifndef ARIADNE_PROJECTION_HPP
+#define ARIADNE_PROJECTION_HPP
 
-#include "utility/typedefs.h"
+#include "utility/typedefs.hpp"
 
 namespace Ariadne {
 
@@ -57,4 +57,4 @@ class Projection
 } // namespace Ariadne
 
 
-#endif // ARIADNE_FORMULA_H
+#endif // ARIADNE_FORMULA_HPP

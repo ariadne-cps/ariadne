@@ -1,5 +1,5 @@
 /***************************************************************************
- *            algebra/expansion.tpl.h
+ *            algebra/expansion.tpl.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file algebra/expansion.tpl.h
+/*! \file algebra/expansion.tpl.hpp
  *  \brief
  */
 
@@ -29,8 +29,8 @@
 #include <exception>
 #include <stdexcept>
 
-#include "expansion.h"
-#include "numeric/logical.h"
+#include "expansion.hpp"
+#include "numeric/logical.hpp"
 
 namespace Ariadne {
 

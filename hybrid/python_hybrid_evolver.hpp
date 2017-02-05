@@ -1,5 +1,5 @@
 /***************************************************************************
- *            python_hybrid_evolver.h
+ *            python_hybrid_evolver.hpp
  *
  *  Copyright  2009  Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file python_hybrid_evolver.h
+/*! \file python_hybrid_evolver.hpp
  *  \brief Wrapper for an evolver for hybrid systems written in Python
  */
 
-#ifndef ARIADNE_PYTHON_HYBRID_EVOLVER_H
-#define ARIADNE_PYTHON_HYBRID_EVOLVER_H
+#ifndef ARIADNE_PYTHON_HYBRID_EVOLVER_HPP
+#define ARIADNE_PYTHON_HYBRID_EVOLVER_HPP
 
 #ifdef HAVE_BOOST_PYTHON_HPP
 
@@ -38,21 +38,21 @@
 #include <boost/smart_ptr.hpp>
 #include <boost/python.hpp>
 
-#include "utility/tuple.h"
+#include "utility/tuple.hpp"
 
-#include "function/taylor_function.h"
-#include "taylor_set.h"
-#include "hybrid/hybrid_set.h"
-#include "hybrid/hybrid_time.h"
+#include "function/taylor_function.hpp"
+#include "taylor_set.hpp"
+#include "hybrid/hybrid_set.hpp"
+#include "hybrid/hybrid_time.hpp"
 
-#include "dynamics/orbit.h"
+#include "dynamics/orbit.hpp"
 
-#include "hybrid/hybrid_automata.h"
-#include "dynamics/evolver_interface.h"
-#include "dynamics/evolver_base.h"
-#include "evolution_parameters.h"
+#include "hybrid/hybrid_automata.hpp"
+#include "dynamics/evolver_interface.hpp"
+#include "dynamics/evolver_base.hpp"
+#include "evolution_parameters.hpp"
 
-#include "utility/logging.h"
+#include "utility/logging.hpp"
 
 namespace Ariadne {
 
@@ -258,4 +258,4 @@ PythonHybridEvolver::_evolution(EnclosureListType& final, EnclosureListType& rea
 
 #endif // HAVE_BOOST_PYTHON_HPP
 
-#endif // ARIADNE_PYTHON_HYBRID_EVOLVER_H
+#endif // ARIADNE_PYTHON_HYBRID_EVOLVER_HPP

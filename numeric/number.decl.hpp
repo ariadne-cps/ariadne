@@ -1,5 +1,5 @@
 /***************************************************************************
- *            numeric/number.decl.h
+ *            numeric/number.decl.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,18 +21,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file numeric/number.decl.h
+/*! \file numeric/number.decl.hpp
  *  \brief
  */
 
-#ifndef ARIADNE_NUMBER_DECL_H
-#define ARIADNE_NUMBER_DECL_H
+#ifndef ARIADNE_NUMBER_DECL_HPP
+#define ARIADNE_NUMBER_DECL_HPP
 
 #include <stdexcept>
 
-#include "utility/metaprogramming.h"
-#include "utility/typedefs.h"
-#include "numeric/paradigm.h"
+#include "utility/metaprogramming.hpp"
+#include "utility/typedefs.hpp"
+#include "numeric/paradigm.hpp"
 
 namespace Ariadne {
 
@@ -112,7 +112,7 @@ using ApproximateNumber=Number<ApproximateTag>;
 
 } // namespace Ariadne
 
-#include "float.decl.h"
+#include "float.decl.hpp"
 
 namespace Ariadne {
 

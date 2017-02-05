@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_float.cc
+ *            test_float.cpp
  *
  *  Copyright  2006-8  Alberto Casagrande, Pieter Collins
  *
@@ -30,11 +30,11 @@
 #include <fenv.h>
 
 #include "config.h"
-#include "numeric/rounding.h"
-#include "numeric/float.h"
-#include "numeric/numeric.h"
+#include "numeric/rounding.hpp"
+#include "numeric/float.hpp"
+#include "numeric/numeric.hpp"
 
-#include "test.h"
+#include "test.hpp"
 
 namespace Ariadne {
 template<> String class_name<Precision64>() { return "Precision64"; }

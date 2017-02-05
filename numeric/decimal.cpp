@@ -1,5 +1,5 @@
 /***************************************************************************
- *            decimal.cc
+ *            decimal.cpp
  *
  *  Copyright 2014--17  Pieter Collins
  *
@@ -21,15 +21,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "utility/standard.h"
+#include "utility/standard.hpp"
 #include "config.h"
 
-#include "utility/macros.h"
-#include "numeric/integer.h"
-#include "numeric/dyadic.h"
-#include "numeric/decimal.h"
-#include "numeric/rational.h"
-#include "numeric/float.h"
+#include "utility/macros.hpp"
+#include "numeric/integer.hpp"
+#include "numeric/dyadic.hpp"
+#include "numeric/decimal.hpp"
+#include "numeric/rational.hpp"
+#include "numeric/float.hpp"
 
 namespace Ariadne {
 

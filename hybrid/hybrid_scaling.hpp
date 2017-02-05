@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_scaling.h
+ *            hybrid_scaling.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,20 +21,20 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file hybrid_scaling.h
+/*! \file hybrid_scaling.hpp
  *  \brief Scalings for variables in hybrid spaces.
  */
 
-#ifndef ARIADNE_HYBRID_SCALING_H
-#define ARIADNE_HYBRID_SCALING_H
+#ifndef ARIADNE_HYBRID_SCALING_HPP
+#define ARIADNE_HYBRID_SCALING_HPP
 
 #include <iostream>
 #include <map>
 
-#include "utility/container.h"
-#include "utility/stlio.h"
+#include "utility/container.hpp"
+#include "utility/stlio.hpp"
 
-#include "expression/variables.h"
+#include "expression/variables.hpp"
 
 namespace Ariadne {
 
@@ -102,5 +102,5 @@ inline SimpleHybridScaling::SimpleHybridScaling(const InitializerList<Pair<RealV
 
 }
 
-#endif // ARIADNE_HYBRID_SCALING_H
+#endif // ARIADNE_HYBRID_SCALING_HPP
 

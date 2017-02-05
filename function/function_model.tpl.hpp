@@ -1,5 +1,5 @@
 /***************************************************************************
- *            function_model.tpl.h
+ *            function_model.tpl.hpp
  *
  *  Copyright 2011-17  Pieter Collins
  *
@@ -25,18 +25,18 @@
 #include <iosfwd>
 #include <iostream>
 
-#include "function/function_model.h"
+#include "function/function_model.hpp"
 
-#include "function/function_interface.h"
-#include "function/function_mixin.h"
-#include "function/function.h"
+#include "function/function_interface.hpp"
+#include "function/function_mixin.hpp"
+#include "function/function.hpp"
 
-#include "numeric/operators.h"
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "algebra/matrix.h"
-#include "algebra/operations.h"
-#include "function/domain.h"
+#include "numeric/operators.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/operations.hpp"
+#include "function/domain.hpp"
 
 namespace Ariadne {
 

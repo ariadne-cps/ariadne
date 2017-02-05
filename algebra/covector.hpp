@@ -1,5 +1,5 @@
 /***************************************************************************
- *            algebra/covector.h
+ *            algebra/covector.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,18 +21,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file algebra/covector.h
+/*! \file algebra/covector.hpp
  *  \brief
  */
 
 
 
-#ifndef ARIADNE_COVECTOR_H
-#define ARIADNE_COVECTOR_H
+#ifndef ARIADNE_COVECTOR_HPP
+#define ARIADNE_COVECTOR_HPP
 
-#include "utility/metaprogramming.h"
-#include "utility/container.h"
-#include "algebra/vector.h"
+#include "utility/metaprogramming.hpp"
+#include "utility/container.hpp"
+#include "algebra/vector.hpp"
 
 namespace Ariadne {
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_solvers.cc
+ *            test_solvers.cpp
  *
  *  Copyright  2008-10  Pieter Collins
  *
@@ -28,16 +28,16 @@
 
 #include "config.h"
 
-#include "solvers/solver.h"
-#include "function/function.h"
-#include "function/taylor_function.h"
-#include "algebra/vector.h"
-#include "algebra/algebra.h"
-#include "expression/expression.h"
-#include "expression/space.h"
-#include "function/formula.h"
+#include "solvers/solver.hpp"
+#include "function/function.hpp"
+#include "function/taylor_function.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/algebra.hpp"
+#include "expression/expression.hpp"
+#include "expression/space.hpp"
+#include "function/formula.hpp"
 
-#include "test.h"
+#include "test.hpp"
 
 using namespace Ariadne;
 using namespace std;
@@ -186,7 +186,7 @@ class TestSolver
 
 };
 
-#include "algebra/differential.h"
+#include "algebra/differential.hpp"
 
 Int main(Int argc, const char **argv) {
 /*

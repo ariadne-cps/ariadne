@@ -1,5 +1,5 @@
 /***************************************************************************
- *            taylor_function.cc
+ *            taylor_function.cpp
  *
  *  Copyright 2008--17  Pieter Collins
  *
@@ -21,33 +21,33 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.h"
+#include "function/functional.hpp"
 #include "config.h"
 
 #include <iostream>
 #include <iomanip>
 
-#include "utility/macros.h"
-#include "utility/exceptions.h"
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "algebra/matrix.h"
-#include "algebra/algebra.h"
-#include "algebra/multi_index.h"
-#include "function/polynomial.h"
-#include "algebra/differential.h"
-#include "algebra/evaluate.h"
-#include "function/taylor_model.h"
+#include "utility/macros.hpp"
+#include "utility/exceptions.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/algebra.hpp"
+#include "algebra/multi_index.hpp"
+#include "function/polynomial.hpp"
+#include "algebra/differential.hpp"
+#include "algebra/evaluate.hpp"
+#include "function/taylor_model.hpp"
 
-#include "function/function.h"
-#include "function/function_mixin.h"
-#include "function/scaled_function_patch.h"
+#include "function/function.hpp"
+#include "function/function_mixin.hpp"
+#include "function/scaled_function_patch.hpp"
 
-#include "function/taylor_function.h"
+#include "function/taylor_function.hpp"
 
-#include "taylor_model.tpl.h"
-#include "scaled_function_patch.tpl.h"
-#include "function_mixin.tpl.h"
+#include "taylor_model.tpl.hpp"
+#include "scaled_function_patch.tpl.hpp"
+#include "function_mixin.tpl.hpp"
 
 #define VOLATILE ;
 

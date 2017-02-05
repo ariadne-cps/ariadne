@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_hybrid_set.cc
+ *            test_hybrid_set.cpp
  *
  *  Copyright  2008  Pieter Collins
  *
@@ -25,15 +25,15 @@
 #include <fstream>
 
 #include "config.h"
-#include "test.h"
+#include "test.hpp"
 
-#include "algebra/vector.h"
-#include "algebra/matrix.h"
-#include "function/function.h"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "function/function.hpp"
 
-#include "geometry/function_set.h"
-#include "hybrid/hybrid_set.h"
-#include "output/graphics.h"
+#include "geometry/function_set.hpp"
+#include "hybrid/hybrid_set.hpp"
+#include "output/graphics.hpp"
 
 using namespace std;
 using namespace Ariadne;

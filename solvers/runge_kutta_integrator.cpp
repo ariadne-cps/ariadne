@@ -1,5 +1,5 @@
 /***************************************************************************
- *            runge_kutta_integrator.cc
+ *            runge_kutta_integrator.cpp
  *
  *  Copyright  2010  Pieter Collins
  *
@@ -21,20 +21,20 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "utility/standard.h"
+#include "utility/standard.hpp"
 #include "config.h"
 
 #include <iostream>
 
-#include "solvers/runge_kutta_integrator.h"
+#include "solvers/runge_kutta_integrator.hpp"
 
-#include "utility/container.h"
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "algebra/algebra.h"
-#include "function/function.h"
-#include "function/taylor_model.h"
-#include "function/formula.h"
+#include "utility/container.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/algebra.hpp"
+#include "function/function.hpp"
+#include "function/taylor_model.hpp"
+#include "function/formula.hpp"
 
 namespace Ariadne {
 

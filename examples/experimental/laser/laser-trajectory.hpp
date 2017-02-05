@@ -1,5 +1,5 @@
 /*****************************************************************************************************
- *            laser-trajectory.h
+ *            laser-trajectory.hpp
  *
  *  Copyright  2016  Luca Geretti
  *
@@ -7,7 +7,7 @@
  *
  *****************************************************************************************************/
 
-#include "ariadne.h"
+#include "ariadne.hpp"
 
 #ifndef LASER_TRAJECTORY_H_
 #define LASER_TRAJECTORY_H_

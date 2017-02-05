@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_paving.cc
+ *            test_paving.cpp
  *
  *  Copyright  2012  Pieter Collins
  *
@@ -25,14 +25,14 @@
 #include <fstream>
 
 #include "config.h"
-#include "geometry/paving_interface.h"
-#include "geometry/grid_set.h"
-#include "function/function.h"
-#include "geometry/function_set.h"
-#include "output/graphics.h"
-#include "utility/logging.h"
+#include "geometry/paving_interface.hpp"
+#include "geometry/grid_set.hpp"
+#include "function/function.hpp"
+#include "geometry/function_set.hpp"
+#include "output/graphics.hpp"
+#include "utility/logging.hpp"
 
-#include "test.h"
+#include "test.hpp"
 
 using namespace Ariadne;
 using namespace std;

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            utility/container.h
+ *            utility/container.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,20 +21,20 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file utility/container.h
+/*! \file utility/container.hpp
  *  \brief
  */
 
 
 
-#ifndef ARIADNE_CONTAINER_H
-#define ARIADNE_CONTAINER_H
+#ifndef ARIADNE_CONTAINER_HPP
+#define ARIADNE_CONTAINER_HPP
 
-#include "stdlib.h"
+#include "stdlib.hpp"
 
-#include "metaprogramming.h"
-#include "stlio.h"
-#include "array.h"
+#include "metaprogramming.hpp"
+#include "stlio.hpp"
+#include "array.hpp"
 
 namespace Ariadne {
 

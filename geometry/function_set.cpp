@@ -1,5 +1,5 @@
 /***************************************************************************
- *            function_set.cc
+ *            function_set.cpp
  *
  *  Copyright 2008--17  Pieter Collins
  *
@@ -21,26 +21,26 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.h"
+#include "function/functional.hpp"
 #include "config.h"
 
-#include "utility/macros.h"
-#include "utility/logging.h"
-#include "function/polynomial.h"
-#include "function/function.h"
-#include "function/taylor_function.h"
-#include "function/formula.h"
-#include "function/procedure.h"
-#include "solvers/nonlinear_programming.h"
-#include "solvers/constraint_solver.h"
-#include "geometry/function_set.h"
-#include "geometry/affine_set.h"
-#include "geometry/grid_set.h"
-#include "geometry/paver.h"
-#include "algebra/algebra.h"
+#include "utility/macros.hpp"
+#include "utility/logging.hpp"
+#include "function/polynomial.hpp"
+#include "function/function.hpp"
+#include "function/taylor_function.hpp"
+#include "function/formula.hpp"
+#include "function/procedure.hpp"
+#include "solvers/nonlinear_programming.hpp"
+#include "solvers/constraint_solver.hpp"
+#include "geometry/function_set.hpp"
+#include "geometry/affine_set.hpp"
+#include "geometry/grid_set.hpp"
+#include "geometry/paver.hpp"
+#include "algebra/algebra.hpp"
 
-#include "output/graphics_interface.h"
-#include "output/drawer.h"
+#include "output/graphics_interface.hpp"
+#include "output/drawer.hpp"
 
 namespace Ariadne {
 

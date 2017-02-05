@@ -1,5 +1,5 @@
 /***************************************************************************
- *            logging.h
+ *            logging.hpp
  *
  *  Copyright 2007-17  Alberto Casagrande, Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file logging.h
+/*! \file logging.hpp
  *  \brief Support for writing debugging output to a logging stream.
  */
 
-#ifndef ARIADNE_LOGGING_H
-#define ARIADNE_LOGGING_H
+#ifndef ARIADNE_LOGGING_HPP
+#define ARIADNE_LOGGING_HPP
 
 #include <iostream>
 #include <fstream>
@@ -61,4 +61,4 @@ void redirect_log(const char* filename);
 
 } // namespace Ariadne
 
-#endif // ARIADNE_LOGGING_H
+#endif // ARIADNE_LOGGING_HPP

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            float-user.cc
+ *            float-user.cpp
  *
  *  Copyright 2008--17  Pieter Collins
  *
@@ -22,18 +22,18 @@
  */
 
 #include "config.h"
-#include "utility/macros.h"
-#include "utility/exceptions.h"
+#include "utility/macros.hpp"
+#include "utility/exceptions.hpp"
 
-#include "numeric/float-user.h"
+#include "numeric/float-user.hpp"
 
-#include "numeric/integer.h"
-#include "numeric/dyadic.h"
-#include "numeric/decimal.h"
-#include "numeric/rational.h"
-#include "numeric/real.h"
+#include "numeric/integer.hpp"
+#include "numeric/dyadic.hpp"
+#include "numeric/decimal.hpp"
+#include "numeric/rational.hpp"
+#include "numeric/real.hpp"
 
-#include "numeric/number_wrapper.h"
+#include "numeric/number_wrapper.hpp"
 
 namespace Ariadne {
 

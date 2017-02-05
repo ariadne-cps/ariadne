@@ -1,5 +1,5 @@
 /***************************************************************************
- *            procedure.h
+ *            procedure.hpp
  *
  *  Copyright 2010-17  Pieter Collins
  *
@@ -22,23 +22,23 @@
  */
 
 
-/*! \file procedure.h
+/*! \file procedure.hpp
  *  \brief Procedure to compute a real function
  */
 
-#ifndef ARIADNE_PROCEDURE_H
-#define ARIADNE_PROCEDURE_H
+#ifndef ARIADNE_PROCEDURE_HPP
+#define ARIADNE_PROCEDURE_HPP
 
 #include <iostream>
 
-#include "utility/container.h"
-#include "algebra/vector.h"
+#include "utility/container.hpp"
+#include "algebra/vector.hpp"
 
-#include "function/domain.h"
+#include "function/domain.hpp"
 
-#include "numeric/operators.h"
-#include "function/formula.h"
-#include "algebra/expansion.h"
+#include "numeric/operators.hpp"
+#include "function/formula.hpp"
+#include "algebra/expansion.hpp"
 
 namespace Ariadne {
 
@@ -164,4 +164,4 @@ template<class X, class Y> Void backpropagate(List<X>& t, const Vector<Procedure
 
 } // namespace Ariadne
 
-#endif // ARIADNE_PROCEDURE_H
+#endif // ARIADNE_PROCEDURE_HPP

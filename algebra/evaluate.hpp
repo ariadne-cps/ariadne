@@ -1,5 +1,5 @@
 /***************************************************************************
- *            evaluate.h
+ *            evaluate.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file evaluate.h
+/*! \file evaluate.hpp
  *  \brief Functions for evaluating polynomial expansions.
  */
 
-#ifndef ARIADNE_EVALUATE_H
-#define ARIADNE_EVALUATE_H
+#ifndef ARIADNE_EVALUATE_HPP
+#define ARIADNE_EVALUATE_HPP
 
 namespace Ariadne {
 
@@ -52,6 +52,6 @@ template<class X, class A> Vector<A> evaluate(const Vector< Expansion<X> >& e, c
 
 } // namespace Ariadne
 
-#include "evaluate.tpl.h"
+#include "evaluate.tpl.hpp"
 
-#endif /* ARIADNE_EVALUATE_H */
+#endif /* ARIADNE_EVALUATE_HPP */

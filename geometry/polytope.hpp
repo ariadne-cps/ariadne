@@ -1,5 +1,5 @@
 /****************************************************************************
- *            polytope.h
+ *            polytope.hpp
  *
  *  Copyright  2005-8  Alberto Casagrande, Pieter Collins
  *
@@ -21,10 +21,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef ARIADNE_POLYTOPE_H
-#define ARIADNE_POLYTOPE_H
+#ifndef ARIADNE_POLYTOPE_HPP
+#define ARIADNE_POLYTOPE_HPP
 
-/*! \file polytope.h
+/*! \file polytope.hpp
  *  \brief Polytope class for geometry output.
  */
 
@@ -36,11 +36,11 @@
 #include <cassert>
 #include <cstring>
 
-#include "utility/macros.h"
-#include "geometry/point.h"
+#include "utility/macros.hpp"
+#include "geometry/point.hpp"
 
-#include "geometry/set_interface.h"
-#include "output/graphics_interface.h"
+#include "geometry/set_interface.hpp"
+#include "output/graphics_interface.hpp"
 
 namespace Ariadne {
 
@@ -114,4 +114,4 @@ inline OutputStream& operator<<(OutputStream& os, const Polytope& p) { return p.
 } // namespace Ariadne
 
 
-#endif /* ARIADNE_POLYTOPE_H */
+#endif /* ARIADNE_POLYTOPE_HPP */

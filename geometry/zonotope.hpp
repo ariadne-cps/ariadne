@@ -1,5 +1,5 @@
 /***************************************************************************
- *            zonotope.h
+ *            zonotope.hpp
  *
  *  Copyright 2008-17  Alberto Casagrande, Pieter Collins
  *
@@ -21,24 +21,24 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file zonotope.h
+/*! \file zonotope.hpp
  *  \brief Zonotopes in Euclidean space.
  */
 
-#ifndef ARIADNE_ZONOTOPE_H
-#define ARIADNE_ZONOTOPE_H
+#ifndef ARIADNE_ZONOTOPE_HPP
+#define ARIADNE_ZONOTOPE_HPP
 
 #include <iosfwd>
 
-#include "utility/declarations.h"
-#include "utility/tribool.h"
+#include "utility/declarations.hpp"
+#include "utility/tribool.hpp"
 
-#include "algebra/vector.h"
-#include "algebra/matrix.h"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
 
-#include "geometry/set_interface.h"
+#include "geometry/set_interface.hpp"
 
-#include "output/graphics_interface.h"
+#include "output/graphics_interface.hpp"
 
 namespace Ariadne {
 
@@ -255,4 +255,4 @@ Zonotope::Zonotope(Nat d, Nat m, const X* ptr)
 
 } // namespace Ariadne
 
-#endif // ARIADNE_ZONOTOPE_H
+#endif // ARIADNE_ZONOTOPE_HPP

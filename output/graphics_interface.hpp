@@ -1,5 +1,5 @@
 /***************************************************************************
- *            graphics_interface.h
+ *            graphics_interface.hpp
  *
  *  Copyright 2009-17  Davide Bresolin, Pieter Collins
  *
@@ -21,14 +21,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file graphics_interface.h
+/*! \file graphics_interface.hpp
  *  \brief Base graphics interface from which all plotting and drawing classes are inherited.
  */
 
-#ifndef ARIADNE_GRAPHICS_INTERFACE_H
-#define ARIADNE_GRAPHICS_INTERFACE_H
+#ifndef ARIADNE_GRAPHICS_INTERFACE_HPP
+#define ARIADNE_GRAPHICS_INTERFACE_HPP
 
-#include "utility/declarations.h"
+#include "utility/declarations.hpp"
 
 namespace Ariadne {
 
@@ -147,4 +147,4 @@ class DrawableInterface {
 } // namespace Ariadne
 
 
-#endif // ARIADNE_GRAPHICS_INTERFACE_H
+#endif // ARIADNE_GRAPHICS_INTERFACE_HPP

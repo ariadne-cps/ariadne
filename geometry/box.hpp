@@ -1,5 +1,5 @@
 /***************************************************************************
- *            box.h
+ *            box.hpp
  *
  *  Copyright 2008-17  Alberto Casagrande, Pieter Collins
  *
@@ -21,22 +21,22 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file box.h
+/*! \file box.hpp
  *  \brief Coordinate-aligned boxes in Euclidean space.
  */
 
-#ifndef ARIADNE_BOX_H
-#define ARIADNE_BOX_H
+#ifndef ARIADNE_BOX_HPP
+#define ARIADNE_BOX_HPP
 
-#include "utility/container.h"
+#include "utility/container.hpp"
 
-#include "numeric/logical.h"
-#include "numeric/float64.h"
-#include "geometry/interval.h"
-#include "geometry/point.h"
-#include "geometry/set_interface.h"
+#include "numeric/logical.hpp"
+#include "numeric/float64.hpp"
+#include "geometry/interval.hpp"
+#include "geometry/point.hpp"
+#include "geometry/set_interface.hpp"
 
-#include "box.decl.h"
+#include "box.decl.hpp"
 
 namespace Ariadne {
 
@@ -522,4 +522,4 @@ class ApproximateBoxSet
 } // namespace Ariadne
 
 
-#endif /* ARIADNE_BOX_H */
+#endif /* ARIADNE_BOX_HPP */

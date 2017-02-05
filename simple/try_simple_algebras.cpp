@@ -1,5 +1,5 @@
 #include <type_traits>
-#include "simple_algebras.h"
+#include "simple_algebras.hpp"
 
 template<template<typename>class ALG> void test_algebra() {
     Real r; Float x;

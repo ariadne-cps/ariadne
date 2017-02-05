@@ -1,5 +1,5 @@
 /***************************************************************************
- *            numeric/sign.h
+ *            numeric/sign.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,13 +21,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file numeric/sign.h
+/*! \file numeric/sign.hpp
  *  \brief
  */
 
 
-#ifndef ARIADNE_SIGN_H
-#define ARIADNE_SIGN_H
+#ifndef ARIADNE_SIGN_HPP
+#define ARIADNE_SIGN_HPP
 
 #include <iosfwd>
 
@@ -51,4 +51,4 @@ static const Comparison GREATER = Comparison::GREATER;
 
 }
 
-#endif /* ARIADNE_SIGN_H */
+#endif /* ARIADNE_SIGN_HPP */

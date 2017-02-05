@@ -1,5 +1,5 @@
 /***************************************************************************
- *            solver_submodule.cc
+ *            solver_submodule.cpp
  *
  *  Copyright 2009--17  Pieter Collins
  *
@@ -21,21 +21,21 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "boost_python.h"
-#include "utilities.h"
+#include "boost_python.hpp"
+#include "utilities.hpp"
 
 #include <boost/python.hpp>
 
-#include "algebra/algebra.h"
-#include "function/function.h"
-#include "function/formula.h"
-#include "solvers/solver_interface.h"
-#include "solvers/solver.h"
-#include "function/taylor_function.h"
+#include "algebra/algebra.hpp"
+#include "function/function.hpp"
+#include "function/formula.hpp"
+#include "solvers/solver_interface.hpp"
+#include "solvers/solver.hpp"
+#include "function/taylor_function.hpp"
 
-#include "solvers/integrator_interface.h"
-#include "solvers/integrator.h"
-#include "solvers/runge_kutta_integrator.h"
+#include "solvers/integrator_interface.hpp"
+#include "solvers/integrator.hpp"
+#include "solvers/runge_kutta_integrator.hpp"
 
 using namespace boost::python;
 using namespace Ariadne;

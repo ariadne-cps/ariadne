@@ -1,5 +1,5 @@
 /***************************************************************************
- *            watertank.cc
+ *            watertank.cpp
  *
  *  Copyright  2008  Davide Bresolin
  *
@@ -22,10 +22,10 @@
  */
 
 #include <cstdarg>
-#include "ariadne.h"
+#include "ariadne.hpp"
 #include <boost/concept_check.hpp>
 
-#include "expression/expression_set.h"
+#include "expression/expression_set.hpp"
 
 using namespace Ariadne;
 

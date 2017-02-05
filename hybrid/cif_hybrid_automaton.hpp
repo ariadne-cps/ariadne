@@ -1,5 +1,5 @@
 /***************************************************************************
- *            cif_hybrid_automaton.h
+ *            cif_hybrid_automaton.hpp
  *
  *  Copyright  2009  Pieter Collins
  *
@@ -21,14 +21,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file cif_hybrid_automaton.h
+/*! \file cif_hybrid_automaton.hpp
  *  \brief Hybrid system classes for interface with the Compositional Interchange Format.
  */
 
-#ifndef ARIADNE_CIF_HYBRID_AUTOMATON_H
-#define ARIADNE_CIF_HYBRID_AUTOMATON_H
+#ifndef ARIADNE_CIF_HYBRID_AUTOMATON_HPP
+#define ARIADNE_CIF_HYBRID_AUTOMATON_HPP
 
-#include "hybrid/hybrid_automata.h"
+#include "hybrid/hybrid_automata.hpp"
 
 
 namespace Ariadne {
@@ -130,4 +130,4 @@ CIFAtomicInterchangeAutomaton::new_transition(
 
 } // namespace Ariadne
 
-#endif // ARIADNE_CIF_HYBRID_AUTOMATON_H
+#endif // ARIADNE_CIF_HYBRID_AUTOMATON_HPP

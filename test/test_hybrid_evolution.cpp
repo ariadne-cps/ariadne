@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_hybrid_evolution.cc
+ *            test_hybrid_evolution.cpp
  *
  *  Copyright  2006-9  Pieter Collins
  *
@@ -25,24 +25,24 @@
 #include <iostream>
 
 #include "config.h"
-#include "utility/tuple.h"
-#include "algebra/vector.h"
-#include "algebra/matrix.h"
-#include "function/function.h"
-#include "geometry/box.h"
-#include "geometry/list_set.h"
-#include "solvers/integrator.h"
-#include "dynamics/orbit.h"
-#include "hybrid/hybrid_automata.h"
-#include "hybrid/hybrid_time.h"
-#include "hybrid/hybrid_set.h"
-#include "hybrid/hybrid_evolver.h"
-#include "output/graphics_interface.h"
-#include "output/graphics.h"
-#include "hybrid/hybrid_graphics.h"
-#include "utility/logging.h"
+#include "utility/tuple.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "function/function.hpp"
+#include "geometry/box.hpp"
+#include "geometry/list_set.hpp"
+#include "solvers/integrator.hpp"
+#include "dynamics/orbit.hpp"
+#include "hybrid/hybrid_automata.hpp"
+#include "hybrid/hybrid_time.hpp"
+#include "hybrid/hybrid_set.hpp"
+#include "hybrid/hybrid_evolver.hpp"
+#include "output/graphics_interface.hpp"
+#include "output/graphics.hpp"
+#include "hybrid/hybrid_graphics.hpp"
+#include "utility/logging.hpp"
 
-#include "test.h"
+#include "test.hpp"
 
 using namespace Ariadne;
 using namespace std;

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            algebra/expansion.h
+ *            algebra/expansion.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,20 +21,20 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file algebra/expansion.h
+/*! \file algebra/expansion.hpp
  *  \brief
  */
 
 
 
-#ifndef ARIADNE_EXPANSION_H
-#define ARIADNE_EXPANSION_H
+#ifndef ARIADNE_EXPANSION_HPP
+#define ARIADNE_EXPANSION_HPP
 
-#include "multi_index.h"
+#include "multi_index.hpp"
 
-#include "utility/typedefs.h"
-#include "utility/iterator.h"
-#include "utility/macros.h"
+#include "utility/typedefs.hpp"
+#include "utility/iterator.hpp"
+#include "utility/macros.hpp"
 
 namespace Ariadne {
 

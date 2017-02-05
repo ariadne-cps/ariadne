@@ -1,5 +1,5 @@
 /***************************************************************************
- *            function.cc
+ *            function.cpp
  *
  *  Copyright 2008--17  Pieter Collins
  *
@@ -21,24 +21,24 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/numeric.h"
+#include "numeric/numeric.hpp"
 
-#include "numeric/operators.h"
-#include "algebra/differential.h"
-#include "algebra/algebra.h"
-#include "function/formula.h"
-#include "function/taylor_model.h"
+#include "numeric/operators.hpp"
+#include "algebra/differential.hpp"
+#include "algebra/algebra.hpp"
+#include "function/formula.hpp"
+#include "function/taylor_model.hpp"
 
-#include "function/function.h"
+#include "function/function.hpp"
 
-#include "function/function_mixin.h"
-#include "function/function_mixin.tpl.h"
+#include "function/function_mixin.hpp"
+#include "function/function_mixin.tpl.hpp"
 
-#include "function/function_model.h"
+#include "function/function_model.hpp"
 
-#include "function/symbolic_function.h"
+#include "function/symbolic_function.hpp"
 
-#include "expression/expression.h"
+#include "expression/expression.hpp"
 
 
 namespace Ariadne {

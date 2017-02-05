@@ -1,5 +1,5 @@
 /***************************************************************************
- *            external/gmp.h
+ *            external/gmp.h>
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file external/gmp.h
+/*! \file external/gmp.h>
  *  \brief
  */
 

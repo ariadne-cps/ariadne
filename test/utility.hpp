@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test/utility.h
+ *            test/utility.hpp
  *
  *  Copyright 2007-17  Pieter Collins
  *
@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef ARIADNE_TEST_UTILITY_H
-#define ARIADNE_TEST_UTILITY_H
+#ifndef ARIADNE_TEST_UTILITY_HPP
+#define ARIADNE_TEST_UTILITY_HPP
 
 namespace Ariadne {
 //namespace Test {
@@ -104,5 +104,5 @@ template<class T> struct Expect { template<class U, EnableIf<IsSame<T,U>> =dummy
 //using namespace Test;
 } // namespace Ariadne
 
-#endif // ARIADNE_TEST_UTILITY_H
+#endif // ARIADNE_TEST_UTILITY_HPP
 

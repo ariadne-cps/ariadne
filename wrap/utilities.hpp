@@ -1,5 +1,5 @@
 /***************************************************************************
- *            utilities.h
+ *            utilities.hpp
  *
  *  Copyright  2005-8  Alberto Casagrande, Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file utilities.h
+/*! \file utilities.hpp
  *  Commonly used inline methods for the Python interface.
  */
 
-#ifndef ARIADNE_PYTHON_UTILITIES_H
-#define ARIADNE_PYTHON_UTILITIES_H
+#ifndef ARIADNE_PYTHON_UTILITIES_HPP
+#define ARIADNE_PYTHON_UTILITIES_HPP
 
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
@@ -40,11 +40,11 @@
 
 #include "config.h"
 
-#include "utility/array.h"
-#include "utility/tuple.h"
-#include "utility/container.h"
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
+#include "utility/array.hpp"
+#include "utility/tuple.hpp"
+#include "utility/container.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
 
 namespace Ariadne {
 
@@ -439,4 +439,4 @@ Void export_array(const char* name)
 
 } // namespace Ariadne
 
-#endif /* ARIADNE_PYTHON_UTILITIES_H */
+#endif /* ARIADNE_PYTHON_UTILITIES_HPP */

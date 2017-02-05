@@ -1,5 +1,5 @@
 /***************************************************************************
- *            float64.h
+ *            float64.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,23 +21,23 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file float64.h
+/*! \file float64.hpp
  *  \brief RawTag floating-point number class based on double-precision floats.
  */
 
-#ifndef ARIADNE_FLOAT64_H
-#define ARIADNE_FLOAT64_H
+#ifndef ARIADNE_FLOAT64_HPP
+#define ARIADNE_FLOAT64_HPP
 
 #include <iosfwd> // For std::floor std::ceil etc
 #include <cmath> // For std::floor std::ceil etc
 #include <algorithm> // For std::max, std::min
 #include <limits> // For std::numeric_limits<double>
 
-#include "utility/declarations.h"
-#include "numeric/operators.h"
-#include "numeric/rounding.h"
-#include "numeric/number.decl.h"
-#include "numeric/float.decl.h"
+#include "utility/declarations.hpp"
+#include "numeric/operators.hpp"
+#include "numeric/rounding.hpp"
+#include "numeric/number.decl.hpp"
+#include "numeric/float.decl.hpp"
 
 namespace Ariadne {
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            fixed_univariate_differential.h
+ *            fixed_univariate_differential.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,14 +21,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file fixed_univariate_differential.h
+/*! \file fixed_univariate_differential.hpp
  *  \brief First- and second-order univariate differentials.
  */
 
-#ifndef ARIADNE_FIXED_UNIVARIATE_DIFFERENTIAL_H
-#define ARIADNE_FIXED_UNIVARIATE_DIFFERENTIAL_H
+#ifndef ARIADNE_FIXED_UNIVARIATE_DIFFERENTIAL_HPP
+#define ARIADNE_FIXED_UNIVARIATE_DIFFERENTIAL_HPP
 
-#include "utility/macros.h"
+#include "utility/macros.hpp"
 
 namespace Ariadne {
 
@@ -952,4 +952,4 @@ OutputStream& operator<<(OutputStream& os, const UnivariateSecondDifferential<X>
 
 } //namespace Ariadne
 
-#endif // ARIADNE_FIXED_UNIVARIATE_DIFFERENTIAL_H
+#endif // ARIADNE_FIXED_UNIVARIATE_DIFFERENTIAL_HPP

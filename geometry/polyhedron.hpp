@@ -1,5 +1,5 @@
 /***************************************************************************
- *            polyhedron.h
+ *            polyhedron.hpp
  *
  *  Copyright  2005-8  Alberto Casagrande, Pieter Collins
  *
@@ -21,23 +21,23 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file polyhedron.h
+/*! \file polyhedron.hpp
  *  \brief Polyhedra.
  */
 
-#ifndef ARIADNE_POLYHEDRON_H
-#define ARIADNE_POLYHEDRON_H
+#ifndef ARIADNE_POLYHEDRON_HPP
+#define ARIADNE_POLYHEDRON_HPP
 
 #include <iosfwd>
 #include <vector>
 
-#include "utility/tribool.h"
+#include "utility/tribool.hpp"
 
-#include "algebra/vector.h"
-#include "algebra/matrix.h"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
 
-#include "geometry/set_interface.h"
-#include "geometry/function_set.h"
+#include "geometry/set_interface.hpp"
+#include "geometry/function_set.hpp"
 
 namespace Ariadne {
 
@@ -158,4 +158,4 @@ inline OutputStream& operator<<(OutputStream& os, const Polyhedron& p) {
 
 } // namespace Ariadne
 
-#endif // ARIADNE_POLYHEDRON_H
+#endif // ARIADNE_POLYHEDRON_HPP

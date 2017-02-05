@@ -1,5 +1,5 @@
 /***************************************************************************
- *            enclosure.h
+ *            enclosure.hpp
  *
  *  Copyright  2011  Pieter Collins
  *
@@ -21,26 +21,26 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file enclosure.h
+/*! \file enclosure.hpp
  *  \brief Enclosure sets for continuous systems
  */
 
-#ifndef ARIADNE_ENCLOSURE_H
-#define ARIADNE_ENCLOSURE_H
+#ifndef ARIADNE_ENCLOSURE_HPP
+#define ARIADNE_ENCLOSURE_HPP
 
 #include <iosfwd>
-#include "utility/container.h"
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "geometry/set_interface.h"
-#include "output/graphics_interface.h"
+#include "utility/container.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "geometry/set_interface.hpp"
+#include "output/graphics_interface.hpp"
 
-#include "function/function_model.h"
+#include "function/function_model.hpp"
 
-#include "geometry/box.h"
+#include "geometry/box.hpp"
 #include <boost/concept_check.hpp>
 
-#ifndef ARIADNE_TAYLOR_SET_H
+#ifndef ARIADNE_TAYLOR_SET_HPP
 
 namespace Ariadne {
 
@@ -359,4 +359,4 @@ Enclosure unchecked_apply(const ValidatedVectorFunctionModel64& function, const 
 
 } //namespace Ariadne
 
-#endif /* ARIADNE_TAYLOR_SET_H */
+#endif /* ARIADNE_TAYLOR_SET_HPP */

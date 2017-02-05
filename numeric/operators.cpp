@@ -1,5 +1,5 @@
 /***************************************************************************
- *            operators.cc
+ *            operators.cpp
  *
  *  Copyright 2008--17 Pieter Collins
  *
@@ -21,13 +21,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "utility/standard.h"
+#include "utility/standard.hpp"
 
-#include "utility/string.h"
-#include "numeric/logical.h"
-#include "numeric/integer.h"
-#include "numeric/real.h"
-#include "numeric/operators.h"
+#include "utility/string.hpp"
+#include "numeric/logical.hpp"
+#include "numeric/integer.hpp"
+#include "numeric/real.hpp"
+#include "numeric/operators.hpp"
 
 namespace Ariadne {
 

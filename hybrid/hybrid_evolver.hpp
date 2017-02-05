@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_evolver.h
+ *            hybrid_evolver.hpp
  *
  *  Copyright  2009  Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file hybrid_evolver.h
+/*! \file hybrid_evolver.hpp
  *  \brief Hybrid evolver classes.
  */
 
-#ifndef ARIADNE_HYBRID_EVOLVER_H
-#define ARIADNE_HYBRID_EVOLVER_H
+#ifndef ARIADNE_HYBRID_EVOLVER_HPP
+#define ARIADNE_HYBRID_EVOLVER_HPP
 
 #include <string>
 #include <vector>
@@ -35,18 +35,18 @@
 
 #include <boost/smart_ptr.hpp>
 
-#include "utility/tuple.h"
+#include "utility/tuple.hpp"
 
-#include "hybrid/hybrid_time.h"
-#include "hybrid/hybrid_set.h"
+#include "hybrid/hybrid_time.hpp"
+#include "hybrid/hybrid_set.hpp"
 
-#include "solvers/configuration_interface.h"
-#include "hybrid/hybrid_enclosure.h"
-#include "hybrid/hybrid_orbit.h"
-#include "hybrid/hybrid_automaton_interface.h"
-#include "hybrid/hybrid_evolver_interface.h"
+#include "solvers/configuration_interface.hpp"
+#include "hybrid/hybrid_enclosure.hpp"
+#include "hybrid/hybrid_orbit.hpp"
+#include "hybrid/hybrid_automaton_interface.hpp"
+#include "hybrid/hybrid_evolver_interface.hpp"
 
-#include "utility/logging.h"
+#include "utility/logging.hpp"
 
 namespace Ariadne {
 
@@ -808,4 +808,4 @@ class GeneralHybridEvolverFactory
 
 } // namespace Ariadne
 
-#endif // ARIADNE_HYBRID_EVOLVER_H
+#endif // ARIADNE_HYBRID_EVOLVER_HPP

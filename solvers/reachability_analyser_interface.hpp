@@ -1,5 +1,5 @@
 /***************************************************************************
- *            reachability_analyser_interface.h
+ *            reachability_analyser_interface.hpp
  *
  *  Copyright  2006-8  Pieter Collins
  *
@@ -21,16 +21,16 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file reachability_analyser_interface.h
+/*! \file reachability_analyser_interface.hpp
  *  \brief Interface for performing reachability analysis.
  */
 
-#ifndef ARIADNE_REACHABILITY_ANALYSER_INTERFACE_H
-#define ARIADNE_REACHABILITY_ANALYSER_INTERFACE_H
+#ifndef ARIADNE_REACHABILITY_ANALYSER_INTERFACE_HPP
+#define ARIADNE_REACHABILITY_ANALYSER_INTERFACE_HPP
 
 #include <boost/smart_ptr.hpp>
 
-#include "geometry/set_interface.h"
+#include "geometry/set_interface.hpp"
 
 namespace Ariadne {
 
@@ -129,4 +129,4 @@ class ReachabilityAnalyserFactoryInterface
 } // namespace Ariadne
 
 
-#endif // ARIADNE_ANALYSER_INTERFACE_H
+#endif // ARIADNE_ANALYSER_INTERFACE_HPP

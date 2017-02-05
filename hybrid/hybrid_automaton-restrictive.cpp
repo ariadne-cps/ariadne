@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_automaton-restrictive.cc
+ *            hybrid_automaton-restrictive.cpp
  *
  *  Copyright  2010-11  Alberto Casagrande, Pieter Collins
  *
@@ -21,23 +21,23 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.h"
+#include "function/functional.hpp"
 #include "config.h"
 
 #include <map>
 #include <boost/weak_ptr.hpp>
 
-#include "utility/macros.h"
-#include "utility/stlio.h"
-#include "utility/tuple.h"
-#include "expression/expression.h"
-#include "expression/assignment.h"
-#include "expression/space.h"
-#include "function/function.h"
-#include "hybrid/hybrid_time.h"
-#include "hybrid/hybrid_space.h"
+#include "utility/macros.hpp"
+#include "utility/stlio.hpp"
+#include "utility/tuple.hpp"
+#include "expression/expression.hpp"
+#include "expression/assignment.hpp"
+#include "expression/space.hpp"
+#include "function/function.hpp"
+#include "hybrid/hybrid_time.hpp"
+#include "hybrid/hybrid_space.hpp"
 
-#include "hybrid/hybrid_automaton-restrictive.h"
+#include "hybrid/hybrid_automaton-restrictive.hpp"
 
 namespace Ariadne {
 

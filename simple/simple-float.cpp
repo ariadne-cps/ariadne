@@ -1,4 +1,4 @@
-#include "simple.h"
+#include "simple.hpp"
 
 #include <limits>
 #include <cmath>

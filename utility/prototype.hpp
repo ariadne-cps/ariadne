@@ -1,5 +1,5 @@
 /***************************************************************************
- *            utility/prototype.h
+ *            utility/prototype.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file utility/prototype.h
+/*! \file utility/prototype.hpp
  *  \brief
  */
 
-#ifndef ARIADNE_PROTOTYPE_H
-#define ARIADNE_PROTOTYPE_H
+#ifndef ARIADNE_PROTOTYPE_HPP
+#define ARIADNE_PROTOTYPE_HPP
 
 #include <utility>
 

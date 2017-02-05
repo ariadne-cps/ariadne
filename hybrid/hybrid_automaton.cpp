@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_automaton-composite.cc
+ *            hybrid_automaton-composite.cpp
  *
  *  Copyright  2004-11  Alberto Casagrande, Pieter Collins
  *
@@ -21,22 +21,22 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.h"
+#include "function/functional.hpp"
 #include "config.h"
 
 #include <map>
 #include <boost/weak_ptr.hpp>
 
-#include "utility/macros.h"
-#include "utility/container.h"
-#include "utility/stlio.h"
-#include "expression/expression.h"
-#include "expression/space.h"
-#include "function/function.h"
-#include "hybrid/hybrid_time.h"
-#include "hybrid/hybrid_space.h"
+#include "utility/macros.hpp"
+#include "utility/container.hpp"
+#include "utility/stlio.hpp"
+#include "expression/expression.hpp"
+#include "expression/space.hpp"
+#include "function/function.hpp"
+#include "hybrid/hybrid_time.hpp"
+#include "hybrid/hybrid_space.hpp"
 
-#include "hybrid/hybrid_automaton.h"
+#include "hybrid/hybrid_automaton.hpp"
 
 namespace Ariadne {
 

@@ -1,13 +1,13 @@
 add_library(ariadne-function OBJECT
-    affine.cc
-    polynomial.cc
-    formula.cc
-    procedure.cc
-    function.cc
-    function_model.cc
-    affine_model.cc
-    taylor_model.cc
-    taylor_function.cc
+    affine.cpp
+    polynomial.cpp
+    formula.cpp
+    procedure.cpp
+    function.cpp
+    function_model.cpp
+    affine_model.cpp
+    taylor_model.cpp
+    taylor_function.cpp
 )
 
 cotire(ariadne-function)

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            configuration_interface.h
+ *            configuration_interface.hpp
  *
  *  Copyright  2011  Luca Geretti
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file configuration_interface.h
+/*! \file configuration_interface.hpp
  *  \brief A simple interface for configuration classes, mainly provided to specify the involved semantics.
  */
 
-#ifndef ARIADNE_CONFIGURATION_INTERFACE_H
-#define ARIADNE_CONFIGURATION_INTERFACE_H
+#ifndef ARIADNE_CONFIGURATION_INTERFACE_HPP
+#define ARIADNE_CONFIGURATION_INTERFACE_HPP
 
 #include <ostream>
 
@@ -117,4 +117,4 @@ class ConfigurationInterface {
 
 } // namespace Ariadne
 
-#endif // ARIADNE_CONFIGURATION_INTERFACE_H
+#endif // ARIADNE_CONFIGURATION_INTERFACE_HPP

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_formula.cc
+ *            test_formula.cpp
  *
  *  Copyright  2010-4  Pieter Collins
  *
@@ -30,10 +30,10 @@
 
 #include "config.h"
 
-#include "function/formula.h"
-#include "numeric/numeric.h"
+#include "function/formula.hpp"
+#include "numeric/numeric.hpp"
 
-#include "test.h"
+#include "test.hpp"
 
 using namespace std;
 using namespace Ariadne;

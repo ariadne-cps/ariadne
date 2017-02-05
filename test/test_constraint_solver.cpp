@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_constraint_solver.cc
+ *            test_constraint_solver.cpp
  *
  *  Copyright  2010  Pieter Collins
  *
@@ -25,15 +25,15 @@
 #include <fstream>
 
 #include "config.h"
-#include "test.h"
+#include "test.hpp"
 
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "function/function.h"
-#include "function/constraint.h"
-#include "function/procedure.h"
-#include "solvers/constraint_solver.h"
-#include "geometry/box.h"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "function/function.hpp"
+#include "function/constraint.hpp"
+#include "function/procedure.hpp"
+#include "solvers/constraint_solver.hpp"
+#include "geometry/box.hpp"
 
 
 using namespace std;

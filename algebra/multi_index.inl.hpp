@@ -1,5 +1,5 @@
 /***************************************************************************
- *            multi_index.inl.h
+ *            multi_index.inl.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *

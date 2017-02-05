@@ -1,5 +1,5 @@
 /***************************************************************************
- *            boost_python.h
+ *            boost_python.hpp
  *
  *  Copyright  2014  Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file boost_python.h
+/*! \file boost_python.hpp
  *  Boost python headers for precompiling.
  */
 
-#ifndef ARIADNE_BOOST_PYTHON_H
-#define ARIADNE_BOOST_PYTHON_H
+#ifndef ARIADNE_BOOST_PYTHON_HPP
+#define ARIADNE_BOOST_PYTHON_HPP
 
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
@@ -40,4 +40,4 @@
 
 #include "config.h"
 
-#endif /* ARIADNE_BOOST_PYTHON_H */
+#endif /* ARIADNE_BOOST_PYTHON_HPP */

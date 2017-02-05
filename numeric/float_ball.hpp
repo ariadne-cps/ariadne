@@ -1,5 +1,5 @@
 /***************************************************************************
- *            float_ball.h
+ *            float_ball.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,17 +21,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file float_ball.h
+/*! \file float_ball.hpp
  *  \brief Floating-point approximations to real numbers.
  */
 
-#ifndef ARIADNE_FLOAT_BALL_H
-#define ARIADNE_FLOAT_BALL_H
+#ifndef ARIADNE_FLOAT_BALL_HPP
+#define ARIADNE_FLOAT_BALL_HPP
 
-#include "utility/macros.h"
+#include "utility/macros.hpp"
 
-#include "number.decl.h"
-#include "float.decl.h"
+#include "number.decl.hpp"
+#include "float.decl.hpp"
 
 namespace Ariadne {
 

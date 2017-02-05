@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_set_interface.h
+ *            hybrid_set_interface.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,25 +21,25 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file hybrid_set_interface.h
+/*! \file hybrid_set_interface.hpp
  *  \brief Interfaces for open, closed, overt and compact subsets of hybrid spaces.
  */
 
-#ifndef ARIADNE_HYBRID_SET_INTERFACE_H
-#define ARIADNE_HYBRID_SET_INTERFACE_H
+#ifndef ARIADNE_HYBRID_SET_INTERFACE_HPP
+#define ARIADNE_HYBRID_SET_INTERFACE_HPP
 
 #include <iosfwd>
 #include <utility>
 #include <map>
 
 
-#include "utility/tribool.h"
-#include "geometry/set_interface.h"
-#include "hybrid/discrete_location.h"
-#include "expression/space.h"
-#include "geometry/set.h"
-#include "expression/expression_set.h"
-#include "hybrid/hybrid_set.decl.h"
+#include "utility/tribool.hpp"
+#include "geometry/set_interface.hpp"
+#include "hybrid/discrete_location.hpp"
+#include "expression/space.hpp"
+#include "geometry/set.hpp"
+#include "expression/expression_set.hpp"
+#include "hybrid/hybrid_set.decl.hpp"
 
 namespace Ariadne {
 

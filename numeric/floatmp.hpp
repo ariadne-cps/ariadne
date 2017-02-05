@@ -1,5 +1,5 @@
 /***************************************************************************
- *            numeric/floatmp.h
+ *            numeric/floatmp.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,17 +21,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file numeric/floatmp.h
+/*! \file numeric/floatmp.hpp
  *  \brief RawTag floating-point numbers based on MPFT floats.
  */
 
 
 
-#ifndef ARIADNE_FLOATMP_H
-#define ARIADNE_FLOATMP_H
+#ifndef ARIADNE_FLOATMP_HPP
+#define ARIADNE_FLOATMP_HPP
 
-#include "paradigm.h"
-#include "number.h"
+#include "paradigm.hpp"
+#include "number.hpp"
 #include <mpfr.h>
 
 namespace Ariadne {

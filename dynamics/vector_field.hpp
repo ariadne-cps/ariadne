@@ -1,5 +1,5 @@
 /***************************************************************************
- *            vector_field.h
+ *            vector_field.hpp
  *
  *  Copyright  2004-8  Alberto Casagrande, Pieter Collins
  *
@@ -21,18 +21,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file vector_field.h
+/*! \file vector_field.hpp
  *  \brief Main continuous dynamics system class.
  */
 
-#ifndef ARIADNE_VECTOR_FIELD_H
-#define ARIADNE_VECTOR_FIELD_H
+#ifndef ARIADNE_VECTOR_FIELD_HPP
+#define ARIADNE_VECTOR_FIELD_HPP
 
 #include <memory>
 
-#include "function/function.h"
-#include "geometry/set_interface.h"
-#include "geometry/grid.h"
+#include "function/function.hpp"
+#include "geometry/set_interface.hpp"
+#include "geometry/grid.hpp"
 
 namespace Ariadne {
 
@@ -64,4 +64,4 @@ inline OutputStream& operator<<(OutputStream& os, const VectorField& vf) {
 
 } // namespace Ariadne
 
-#endif // ARIADNE_VECTOR_FIELD_H
+#endif // ARIADNE_VECTOR_FIELD_HPP

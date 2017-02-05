@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_integrator.cc
+ *            test_integrator.cpp
  *
  *  Copyright  2008-10  Pieter Collins
  *
@@ -28,15 +28,15 @@
 
 #include "config.h"
 
-#include "function/polynomial.h"
-#include "solvers/integrator.h"
-#include "function/function.h"
-#include "function/taylor_function.h"
-#include "algebra/vector.h"
-#include "algebra/algebra.h"
-#include "function/formula.h"
+#include "function/polynomial.hpp"
+#include "solvers/integrator.hpp"
+#include "function/function.hpp"
+#include "function/taylor_function.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/algebra.hpp"
+#include "function/formula.hpp"
 
-#include "test.h"
+#include "test.hpp"
 
 using namespace Ariadne;
 using namespace std;

@@ -1,5 +1,5 @@
 /****************************************************************************
- *            polytope.cc
+ *            polytope.cpp
  *
  *  Copyright  2007-8  Alberto Casagrande, Pieter Collins
  *
@@ -21,19 +21,19 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.h"
+#include "function/functional.hpp"
 #include "config.h"
 
-#include "utility/stlio.h"
-#include "algebra/vector.h"
-#include "algebra/matrix.h"
-#include "geometry/point.h"
-#include "geometry/box.h"
-#include "geometry/zonotope.h"
-#include "geometry/curve.h"
-#include "function/function.h"
+#include "utility/stlio.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "geometry/point.hpp"
+#include "geometry/box.hpp"
+#include "geometry/zonotope.hpp"
+#include "geometry/curve.hpp"
+#include "function/function.hpp"
 
-#include "geometry/polytope.h"
+#include "geometry/polytope.hpp"
 
 namespace Ariadne {
 

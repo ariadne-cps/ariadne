@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_set.cc
+ *            hybrid_set.cpp
  *
  *  Copyright 2008--17  Pieter Collins
  *
@@ -21,28 +21,28 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.h"
+#include "function/functional.hpp"
 #include "config.h"
 
-#include "hybrid/hybrid_expression_set.h"
-#include "hybrid/hybrid_set.h"
+#include "hybrid/hybrid_expression_set.hpp"
+#include "hybrid/hybrid_set.hpp"
 
-#include "numeric/real.h"
+#include "numeric/real.hpp"
 
-#include "expression/expression_set.h"
-#include "geometry/function_set.h"
+#include "expression/expression_set.hpp"
+#include "geometry/function_set.hpp"
 
-#include "hybrid/hybrid_space.h"
-#include "hybrid/hybrid_time.h"
-#include "hybrid/hybrid_orbit.h"
-#include "hybrid/hybrid_automaton_interface.h"
-#include "output/graphics.h"
-#include "hybrid/hybrid_graphics.h"
+#include "hybrid/hybrid_space.hpp"
+#include "hybrid/hybrid_time.hpp"
+#include "hybrid/hybrid_orbit.hpp"
+#include "hybrid/hybrid_automaton_interface.hpp"
+#include "output/graphics.hpp"
+#include "hybrid/hybrid_graphics.hpp"
 #include <boost/concept_check.hpp>
-#include "numeric/rounding.h"
-#include "expression/assignment.h"
-#include "output/graphics_interface.h"
-#include "geometry/function_set.h"
+#include "numeric/rounding.hpp"
+#include "expression/assignment.hpp"
+#include "output/graphics_interface.hpp"
+#include "geometry/function_set.hpp"
 
 namespace Ariadne {
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            discrete_event.h
+ *            discrete_event.hpp
  *
  *  Copyright  2004-9  Alberto Casagrande, Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file discrete_event.h
+/*! \file discrete_event.hpp
  *  \brief Class representing a discrete event.
  */
 
-#ifndef ARIADNE_DISCRETE_EVENT_H
-#define ARIADNE_DISCRETE_EVENT_H
+#ifndef ARIADNE_DISCRETE_EVENT_HPP
+#define ARIADNE_DISCRETE_EVENT_HPP
 
 namespace Ariadne {
 
@@ -60,4 +60,4 @@ class DiscreteEvent {
 } //namespace Ariadne
 
 
-#endif /* ARIADNE_DISCRETE_EVENT_H */
+#endif /* ARIADNE_DISCRETE_EVENT_HPP */

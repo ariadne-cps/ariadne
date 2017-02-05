@@ -1,5 +1,5 @@
 /***************************************************************************
- *            geometry/box.tpl.h
+ *            geometry/box.tpl.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,13 +21,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file geometry/box.tpl.h
+/*! \file geometry/box.tpl.hpp
  *  \brief
  */
 
 
 
-#include "box.h"
+#include "box.hpp"
 
 namespace Ariadne {
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            geometry/interval.h
+ *            geometry/interval.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,23 +21,23 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file geometry/interval.h
+/*! \file geometry/interval.hpp
  *  \brief
  */
 
 
 
-#ifndef ARIADNE_INTERVAL_H
-#define ARIADNE_INTERVAL_H
+#ifndef ARIADNE_INTERVAL_HPP
+#define ARIADNE_INTERVAL_HPP
 
-#include "utility/module.h"
+#include "utility/module.hpp"
 
-#include "numeric/logical.h"
-#include "numeric/number.h"
-#include "numeric/float.h"
-#include "numeric/arithmetic.h"
+#include "numeric/logical.hpp"
+#include "numeric/number.hpp"
+#include "numeric/float.hpp"
+#include "numeric/arithmetic.hpp"
 
-#include "interval.decl.h"
+#include "interval.decl.hpp"
 
 namespace Ariadne {
 
@@ -319,7 +319,7 @@ class EmptyInterval { };
 
 } // namespace Ariadne
 
-#include "interval.inl.h"
+#include "interval.inl.hpp"
 
 #endif
 

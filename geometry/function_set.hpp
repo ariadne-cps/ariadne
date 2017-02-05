@@ -1,5 +1,5 @@
 /***************************************************************************
- *            function_set.h
+ *            function_set.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,28 +21,28 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file function_set.h
+/*! \file function_set.hpp
  *  \brief Images and preimages of boxes in Euclidean space.
  */
 
-#ifndef ARIADNE_FUNCTION_SET_H
-#define ARIADNE_FUNCTION_SET_H
+#ifndef ARIADNE_FUNCTION_SET_HPP
+#define ARIADNE_FUNCTION_SET_HPP
 
 #include <iosfwd>
 
 #include <memory>
 
-#include "utility/macros.h"
-#include "utility/container.h"
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "geometry/set_interface.h"
-#include "function/function.h"
-#include "function/function_model.h"
-#include "function/constraint.h"
-#include "output/graphics_interface.h"
+#include "utility/macros.hpp"
+#include "utility/container.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "geometry/set_interface.hpp"
+#include "function/function.hpp"
+#include "function/function_model.hpp"
+#include "function/constraint.hpp"
+#include "output/graphics_interface.hpp"
 
-#include "geometry/box.h"
+#include "geometry/box.hpp"
 
 namespace Ariadne {
 

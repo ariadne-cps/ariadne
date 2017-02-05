@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_vector.cc
+ *            test_vector.cpp
  *
  *  Copyright  2006  Pieter Collins, Alberto Casagrande
  *  Email Pieter.Collins@cwi.nl, casagrande@dimi.uniud.it
@@ -26,12 +26,12 @@
 #include <cassert>
 
 #include "config.h"
-#include "numeric/numeric.h"
-#include "numeric/float.h"
-#include "numeric/float-user.h"
-#include "algebra/vector.h"
+#include "numeric/numeric.hpp"
+#include "numeric/float.hpp"
+#include "numeric/float-user.hpp"
+#include "algebra/vector.hpp"
 
-#include "test.h"
+#include "test.hpp"
 
 using namespace std;
 using namespace Ariadne;

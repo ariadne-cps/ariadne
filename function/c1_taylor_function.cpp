@@ -1,5 +1,5 @@
 /***************************************************************************
- *            c1_taylor_function.cc
+ *            c1_taylor_function.cpp
  *
  *  Copyright 2008--17  Pieter Collins
  *
@@ -21,23 +21,23 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.h"
+#include "function/functional.hpp"
 #include "config.h"
 
 #include <iostream>
 #include <iomanip>
 
-#include "numeric/float.h"
-#include "numeric/rational.h"
+#include "numeric/float.hpp"
+#include "numeric/rational.hpp"
 
-#include "utility/macros.h"
-#include "utility/exceptions.h"
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "algebra/multi_index.h"
-#include "algebra/expansion.h"
+#include "utility/macros.hpp"
+#include "utility/exceptions.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/multi_index.hpp"
+#include "algebra/expansion.hpp"
 
-#include "function/c1_taylor_function.h"
+#include "function/c1_taylor_function.hpp"
 
 #define VOLATILE ;
 

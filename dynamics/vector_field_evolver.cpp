@@ -1,5 +1,5 @@
 /***************************************************************************
- *            vector_field_evolver.cc
+ *            vector_field_evolver.cpp
  *
  *  Copyright  2008  Alberto Casagrande, Pieter Collins
  *
@@ -21,25 +21,25 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.h"
+#include "function/functional.hpp"
 #include "config.h"
 
-#include "utility/macros.h"
-#include "utility/array.h"
-#include "utility/tuple.h"
-#include "utility/stlio.h"
-#include "algebra/vector.h"
-#include "function/function.h"
-#include "function/constraint.h"
-#include "geometry/enclosure.h"
-#include "dynamics/orbit.h"
+#include "utility/macros.hpp"
+#include "utility/array.hpp"
+#include "utility/tuple.hpp"
+#include "utility/stlio.hpp"
+#include "algebra/vector.hpp"
+#include "function/function.hpp"
+#include "function/constraint.hpp"
+#include "geometry/enclosure.hpp"
+#include "dynamics/orbit.hpp"
 
-#include "solvers/integrator.h"
+#include "solvers/integrator.hpp"
 
-#include "utility/logging.h"
+#include "utility/logging.hpp"
 
-#include "dynamics/vector_field.h"
-#include "dynamics/vector_field_evolver.h"
+#include "dynamics/vector_field.hpp"
+#include "dynamics/vector_field_evolver.hpp"
 
 namespace {
 

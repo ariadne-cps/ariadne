@@ -1,5 +1,5 @@
 /***************************************************************************
- *            textplot.cc
+ *            textplot.cpp
  *
  *  Copyright 2009--17  Davide Bresolin
  *
@@ -21,22 +21,22 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.h"
+#include "function/functional.hpp"
 #include "config.h"
 
-#include "utility/macros.h"
-#include "utility/stlio.h"
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "algebra/matrix.h"
-#include "function/function.h"
-#include "geometry/point.h"
-#include "geometry/box.h"
-#include "geometry/curve.h"
-//#include "geometry/polytope.h"
-//#include "geometry/zonotope.h"
-#include "output/textplot.h"
-#include "geometry/grid_set.h"
+#include "utility/macros.hpp"
+#include "utility/stlio.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "function/function.hpp"
+#include "geometry/point.hpp"
+#include "geometry/box.hpp"
+#include "geometry/curve.hpp"
+//#include "geometry/polytope.hpp"
+//#include "geometry/zonotope.hpp"
+#include "output/textplot.hpp"
+#include "geometry/grid_set.hpp"
 
 namespace Ariadne {
 

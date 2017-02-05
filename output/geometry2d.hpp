@@ -1,5 +1,5 @@
 /***************************************************************************
- *            geometry2d.h
+ *            geometry2d.hpp
  *
  *  Copyright 2009-17  Davide Bresolin, Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file graphics_interface.h
+/*! \file graphics_interface.hpp
  *  \brief Base graphics interface from which all plotting and drawing classes are inherited.
  */
 
-#ifndef ARIADNE_GEOMETRY2D_H
-#define ARIADNE_GEOMETRY2D_H
+#ifndef ARIADNE_GEOMETRY2D_HPP
+#define ARIADNE_GEOMETRY2D_HPP
 
 typedef unsigned int Nat;
 
@@ -66,4 +66,4 @@ inline OutputStream& operator<<(OutputStream& os, const Box2d& bx) {
 } // namespace Ariadne
 
 
-#endif // ARIADNE_GEOMETRY2D_H
+#endif // ARIADNE_GEOMETRY2D_HPP

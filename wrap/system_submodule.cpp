@@ -1,5 +1,5 @@
 /***************************************************************************
- *            system_submodule.cc
+ *            system_submodule.cpp
  *
  *  Copyright 2009--17  Pieter Collins
  *
@@ -27,18 +27,18 @@
 
 #include <boost/python.hpp>
 
-#include "utility/tribool.h"
-#include "numeric/numeric.h"
-#include "function/function.h"
-#include "expression/expression.h"
-#include "expression/space.h"
-#include "hybrid/discrete_event.h"
-#include "hybrid/hybrid_automata.h"
-#include "hybrid/hybrid_time.h"
-#include "hybrid/hybrid_set.h"
+#include "utility/tribool.hpp"
+#include "numeric/numeric.hpp"
+#include "function/function.hpp"
+#include "expression/expression.hpp"
+#include "expression/space.hpp"
+#include "hybrid/discrete_event.hpp"
+#include "hybrid/hybrid_automata.hpp"
+#include "hybrid/hybrid_time.hpp"
+#include "hybrid/hybrid_set.hpp"
 
-#include "boost_python.h"
-#include "utilities.h"
+#include "boost_python.hpp"
+#include "utilities.hpp"
 
 using namespace boost::python;
 using namespace Ariadne;

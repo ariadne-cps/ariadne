@@ -1,5 +1,5 @@
 /***************************************************************************
- *            numeric/float64-crtp.h
+ *            numeric/float64-crtp.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,18 +21,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file numeric/float64-crtp.h
+/*! \file numeric/float64-crtp.hpp
  *  \brief 
  */
 
 
 
-#ifndef ARIADNE_FLOAT64_H
-#define ARIADNE_FLOAT64_H
+#ifndef ARIADNE_FLOAT64_HPP
+#define ARIADNE_FLOAT64_HPP
 
-#include "utility/module.h"
-#include "utility/metaprogramming.h"
-#include "numeric/paradigm.h"
+#include "utility/module.hpp"
+#include "utility/metaprogramming.hpp"
+#include "numeric/paradigm.hpp"
 
 namespace Ariadne {
 

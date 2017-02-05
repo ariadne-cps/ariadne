@@ -1,11 +1,11 @@
 add_library(ariadne-algebra OBJECT
-    vector.cc
-    matrix.cc
-    series.cc
-    multi_index.cc
-    expansion.cc
-    differential.cc
-    algebra.cc
+    vector.cpp
+    matrix.cpp
+    series.cpp
+    multi_index.cpp
+    expansion.cpp
+    differential.cpp
+    algebra.cpp
 )
 
 cotire(ariadne-algebra)

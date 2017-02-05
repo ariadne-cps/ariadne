@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_automata.h
+ *            hybrid_automata.hpp
  *
  *  Copyright  2004-16  Alberto Casagrande, Pieter Collins
  *
@@ -21,21 +21,21 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file hybrid_automata.h
+/*! \file hybrid_automata.hpp
  *  \brief Main hybrid system classes.
  */
 
-#ifndef ARIADNE_HYBRID_AUTOMATA_H
-#define ARIADNE_HYBRID_AUTOMATA_H
+#ifndef ARIADNE_HYBRID_AUTOMATA_HPP
+#define ARIADNE_HYBRID_AUTOMATA_HPP
 
 namespace Ariadne {
 
 }
 
-#include "hybrid/hybrid_automaton_interface.h"
-#include "hybrid/hybrid_automaton.h"
-#include "hybrid/hybrid_automaton-atomic.h"
-#include "hybrid/hybrid_automaton-composite.h"
-#include "hybrid/hybrid_automaton-restrictive.h"
+#include "hybrid/hybrid_automaton_interface.hpp"
+#include "hybrid/hybrid_automaton.hpp"
+#include "hybrid/hybrid_automaton-atomic.hpp"
+#include "hybrid/hybrid_automaton-composite.hpp"
+#include "hybrid/hybrid_automaton-restrictive.hpp"
 
-#endif // ARIADNE_HYBRID_AUTOMATA_H
+#endif // ARIADNE_HYBRID_AUTOMATA_HPP

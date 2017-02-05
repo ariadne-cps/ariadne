@@ -1,5 +1,5 @@
 /***************************************************************************
- *            numeric/twoexp.h
+ *            numeric/twoexp.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,15 +21,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file numeric/twoexp.h
+/*! \file numeric/twoexp.hpp
  *  \brief
  */
 
-#ifndef ARIADNE_TWOEXP_H
-#define ARIADNE_TWOEXP_H
+#ifndef ARIADNE_TWOEXP_HPP
+#define ARIADNE_TWOEXP_HPP
 
 #include <cmath>
-#include "float.decl.h"
+#include "float.decl.hpp"
 
 namespace Ariadne {
 

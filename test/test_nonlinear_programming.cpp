@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_nonlinear_programming.cc
+ *            test_nonlinear_programming.cpp
  *
  *  Copyright  2010  Pieter Collins
  *
@@ -26,16 +26,16 @@
 
 #include "config.h"
 
-#include "test.h"
+#include "test.hpp"
 
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "algebra/algebra.h"
-#include "function/function.h"
-#include "function/taylor_model.h"
-#include "function/formula.h"
-#include "solvers/nonlinear_programming.h"
-#include "geometry/box.h"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/algebra.hpp"
+#include "function/function.hpp"
+#include "function/taylor_model.hpp"
+#include "function/formula.hpp"
+#include "solvers/nonlinear_programming.hpp"
+#include "geometry/box.hpp"
 
 
 using namespace std;

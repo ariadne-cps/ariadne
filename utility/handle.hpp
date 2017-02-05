@@ -1,5 +1,5 @@
 /***************************************************************************
- *            utility/handle.h
+ *            utility/handle.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,23 +21,23 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file utility/handle.h
+/*! \file utility/handle.hpp
  *  \brief
  */
 
 
 
-#ifndef ARIADNE_HANDLE_H
-#define ARIADNE_HANDLE_H
+#ifndef ARIADNE_HANDLE_HPP
+#define ARIADNE_HANDLE_HPP
 
-#include "stdlib.h"
+#include "stdlib.hpp"
 
 #include <memory>
 
-#include "typedefs.h"
-#include "metaprogramming.h"
+#include "typedefs.hpp"
+#include "metaprogramming.hpp"
 
-#include "writable.h"
+#include "writable.hpp"
 
 namespace Ariadne {
 

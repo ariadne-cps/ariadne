@@ -1,5 +1,5 @@
 /***************************************************************************
- *            series.cc
+ *            series.cpp
  *
  *  Copyright 2015--17  Pieter Collins
  *
@@ -21,9 +21,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/numeric.h"
+#include "numeric/numeric.hpp"
 
-#include "series.h"
+#include "series.hpp"
 
 namespace Ariadne {
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            solver.h
+ *            solver.hpp
  *
  *  Copyright  2006-9  Pieter Collins
  *
@@ -21,25 +21,25 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file solver.h
+/*! \file solver.hpp
  *  \brief Solver classes for algebraic equations.
  */
 
-#ifndef ARIADNE_SOLVER_H
-#define ARIADNE_SOLVER_H
+#ifndef ARIADNE_SOLVER_HPP
+#define ARIADNE_SOLVER_HPP
 
 #include <exception>
 #include <stdexcept>
 #include <string>
 
-#include "solvers/solver_interface.h"
-#include "function/function_interface.h"
+#include "solvers/solver_interface.hpp"
+#include "function/function_interface.hpp"
 
-#include "utility/logging.h"
-#include "utility/attribute.h"
-#include "utility/pointer.h"
-#include "utility/container.h"
-#include "numeric/numeric.h"
+#include "utility/logging.hpp"
+#include "utility/attribute.hpp"
+#include "utility/pointer.hpp"
+#include "utility/container.hpp"
+#include "numeric/numeric.hpp"
 
 namespace Ariadne {
 
@@ -176,4 +176,4 @@ class FactoredKrawczykSolver
 
 } // namespace Ariadne
 
-#endif /* ARIADNE_SOLVER_H */
+#endif /* ARIADNE_SOLVER_HPP */

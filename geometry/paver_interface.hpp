@@ -1,5 +1,5 @@
 /***************************************************************************
- *            paver_interface.h
+ *            paver_interface.hpp
  *
  *  Copyright  2011-12  Pieter Collins
  *
@@ -21,14 +21,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file paver_interface.h
+/*! \file paver_interface.hpp
  *  \brief Interface for class to compute approximations to function sets.
  */
 
-#ifndef ARIADNE_PAVER_INTERFACE_H
-#define ARIADNE_PAVER_INTERFACE_H
+#ifndef ARIADNE_PAVER_INTERFACE_HPP
+#define ARIADNE_PAVER_INTERFACE_HPP
 
-#include "utility/declarations.h"
+#include "utility/declarations.hpp"
 
 namespace Ariadne {
 
@@ -48,4 +48,4 @@ class PaverInterface
 
 } //namespace Ariadne
 
-#endif /* ARIADNE_PAVER_INTERFACE_H */
+#endif /* ARIADNE_PAVER_INTERFACE_HPP */

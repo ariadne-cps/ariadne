@@ -1,5 +1,5 @@
 /***************************************************************************
- *            expansion.h
+ *            expansion.hpp
  *
  *  Copyright 2008-17 Pieter Collins
  *
@@ -21,14 +21,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file expansion.h
+/*! \file expansion.hpp
  *  \brief Base class for power series expansions.
  */
 
 // Use vector-based expansion and casting of iterators to get a reference
 
-#ifndef ARIADNE_EXPANSION_H
-#define ARIADNE_EXPANSION_H
+#ifndef ARIADNE_EXPANSION_HPP
+#define ARIADNE_EXPANSION_HPP
 
 #include <cassert>
 #include <cstring>
@@ -40,8 +40,8 @@
 #include <boost/Iterator/zip_iterator.hpp>
 #include <boost/iterator_adaptors.hpp>
 
-#include "algebra/vector.h"
-#include "algebra/multi_index.h"
+#include "algebra/vector.hpp"
+#include "algebra/multi_index.hpp"
 
 
 
@@ -619,4 +619,4 @@ inline Vector< Expansion<Float64> > midpoint(const Vector< Expansion<ExactInterv
 
 }
 
-#endif /* ARIADNE_EXPANSION_H */
+#endif /* ARIADNE_EXPANSION_HPP */

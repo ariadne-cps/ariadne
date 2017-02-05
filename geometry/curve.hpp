@@ -1,5 +1,5 @@
 /***************************************************************************
- *            curve.h
+ *            curve.hpp
  *
  *  Copyright  2007-8  Pieter Collins
  *
@@ -21,19 +21,19 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file curve.h
+/*! \file curve.hpp
  *  \brief A arbitraty curve in Euclidean space.
  */
 
-#ifndef ARIADNE_CURVE_H
-#define ARIADNE_CURVE_H
+#ifndef ARIADNE_CURVE_HPP
+#define ARIADNE_CURVE_HPP
 
 #include <memory>
 
-#include "utility/macros.h"
-#include "utility/stlio.h"
-#include "function/function.h"
-#include "output/graphics_interface.h"
+#include "utility/macros.hpp"
+#include "utility/stlio.hpp"
+#include "function/function.hpp"
+#include "output/graphics_interface.hpp"
 
 namespace Ariadne {
 
@@ -187,4 +187,4 @@ OutputStream& operator<<(OutputStream& os, const InterpolatedCurve& curve) {
 
 } // namespace Ariadne
 
-#endif /* ARIADNE_CURVE_H */
+#endif /* ARIADNE_CURVE_HPP */

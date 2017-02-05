@@ -1,5 +1,5 @@
 /***************************************************************************
- *            sweeper.h
+ *            sweeper.hpp
  *
  *  Copyright 2010-17  Pieter Collins
  *
@@ -21,18 +21,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file sweeper.h
+/*! \file sweeper.hpp
  *  \brief Classes for simplifying the representation of a polynomial expansion.
  */
 
-#ifndef ARIADNE_SWEEPER_H
-#define ARIADNE_SWEEPER_H
+#ifndef ARIADNE_SWEEPER_HPP
+#define ARIADNE_SWEEPER_HPP
 
-#include "utility/macros.h"
-#include "utility/attribute.h"
-#include "numeric/float.decl.h"
-#include "algebra/multi_index.h"
-#include "algebra/expansion.h"
+#include "utility/macros.hpp"
+#include "utility/attribute.hpp"
+#include "numeric/float.decl.hpp"
+#include "algebra/multi_index.hpp"
+#include "algebra/expansion.hpp"
 
 namespace Ariadne {
 
@@ -234,4 +234,4 @@ template<> inline Sweeper<FloatMP>::Sweeper() : _ptr(new ThresholdSweeper<FloatM
 
 } // namespace Ariadne
 
-#endif // ARIADNE_SWEEPER_H
+#endif // ARIADNE_SWEEPER_HPP

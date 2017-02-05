@@ -1,5 +1,5 @@
 /***************************************************************************
- *            utilities.cc
+ *            utilities.cpp
  *
  *  Copyright  2005-8  Alberto Casagrande, Pieter Collins
  *
@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "boost_python.h"
-#include "utilities.h"
+#include "boost_python.hpp"
+#include "utilities.hpp"
 
 namespace Ariadne {
 

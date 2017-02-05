@@ -1,5 +1,5 @@
 /***************************************************************************
- *            numeric/float.decl.h
+ *            numeric/float.decl.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,15 +21,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file numeric/float.decl.h
+/*! \file numeric/float.decl.hpp
  *  \brief
  */
 
-#include "utility/typedefs.h"
-#include "numeric/paradigm.h"
+#include "utility/typedefs.hpp"
+#include "numeric/paradigm.hpp"
 
-#ifndef ARIADNE_FLOAT_DECL_H
-#define ARIADNE_FLOAT_DECL_H
+#ifndef ARIADNE_FLOAT_DECL_HPP
+#define ARIADNE_FLOAT_DECL_HPP
 
 namespace Ariadne {
 

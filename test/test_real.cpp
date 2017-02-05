@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_real.cc
+ *            test_real.cpp
  *
  *  Copyright 2013--17  Pieter Collins
  *
@@ -21,19 +21,19 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "utility/module.h"
+#include "utility/module.hpp"
 #include "config.h"
 
-#include "numeric/logical.h"
-#include "numeric/real.h"
+#include "numeric/logical.hpp"
+#include "numeric/real.hpp"
 
-#include "numeric/integer.h"
-#include "numeric/dyadic.h"
-#include "numeric/rational.h"
+#include "numeric/integer.hpp"
+#include "numeric/dyadic.hpp"
+#include "numeric/rational.hpp"
 
-#include "numeric/float.h"
+#include "numeric/float.hpp"
 
-#include "test.h"
+#include "test.hpp"
 
 using namespace std;
 using namespace Ariadne;

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            expansion.cc
+ *            expansion.cpp
  *
  *  Copyright 2008--17  Pieter Collins
  *
@@ -21,11 +21,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "expansion.h"
-#include "expansion.tpl.h"
+#include "expansion.hpp"
+#include "expansion.tpl.hpp"
 
-#include "numeric/float.h"
-#include "geometry/interval.h"
+#include "numeric/float.hpp"
+#include "geometry/interval.hpp"
 
 
 namespace Ariadne {

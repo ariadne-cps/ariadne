@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_number.cc
+ *            test_number.cpp
  *
  *  Copyright  2016  Alberto Casagrande, Pieter Collins
  *
@@ -21,11 +21,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/builtin.h"
-#include "numeric/rational.h"
-#include "numeric/number.h"
+#include "numeric/builtin.hpp"
+#include "numeric/rational.hpp"
+#include "numeric/number.hpp"
 
-#include "test.h"
+#include "test.hpp"
 
 using namespace std;
 using namespace Ariadne;

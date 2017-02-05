@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_hybrid_reachability_analysis.cc
+ *            test_hybrid_reachability_analysis.cpp
  *
  *  Copyright  2006-8  Pieter Collins
  *
@@ -26,20 +26,20 @@
 #include <string>
 
 #include "config.h"
-#include "function/taylor_function.h"
-#include "function/formula.h"
-#include "algebra/algebra.h"
-#include "geometry/function_set.h"
-#include "geometry/grid_set.h"
-#include "hybrid/hybrid_time.h"
-#include "hybrid/hybrid_set.h"
-#include "hybrid/hybrid_automata.h"
-#include "hybrid/hybrid_evolver.h"
-#include "hybrid/hybrid_reachability_analyser.h"
-#include "hybrid/hybrid_graphics.h"
-#include "utility/logging.h"
+#include "function/taylor_function.hpp"
+#include "function/formula.hpp"
+#include "algebra/algebra.hpp"
+#include "geometry/function_set.hpp"
+#include "geometry/grid_set.hpp"
+#include "hybrid/hybrid_time.hpp"
+#include "hybrid/hybrid_set.hpp"
+#include "hybrid/hybrid_automata.hpp"
+#include "hybrid/hybrid_evolver.hpp"
+#include "hybrid/hybrid_reachability_analyser.hpp"
+#include "hybrid/hybrid_graphics.hpp"
+#include "utility/logging.hpp"
 
-#include "test.h"
+#include "test.hpp"
 
 using namespace std;
 using namespace Ariadne;

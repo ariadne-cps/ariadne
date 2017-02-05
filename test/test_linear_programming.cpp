@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_linear_programming.cc
+ *            test_linear_programming.cpp
  *
  *  Copyright  2009  Pieter Collins
  *
@@ -25,12 +25,12 @@
 #include <fstream>
 
 #include "config.h"
-#include "test.h"
+#include "test.hpp"
 
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "algebra/matrix.h"
-#include "solvers/linear_programming.h"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "solvers/linear_programming.hpp"
 
 
 using namespace std;

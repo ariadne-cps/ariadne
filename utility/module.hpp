@@ -1,5 +1,5 @@
 /***************************************************************************
- *            utility/module.h
+ *            utility/module.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,27 +21,27 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file utility/module.h
+/*! \file utility/module.hpp
  *  \brief
  */
 
 
 
-#ifndef ARIADNE_UTILITY_MODULE_H
-#define ARIADNE_UTILITY_MODULE_H
+#ifndef ARIADNE_UTILITY_MODULE_HPP
+#define ARIADNE_UTILITY_MODULE_HPP
 
-#include "stdlib.h"
-#include "macros.h"
-#include "logging.h"
+#include "stdlib.hpp"
+#include "macros.hpp"
+#include "logging.hpp"
 
-#include "typedefs.h"
-#include "string.h"
-#include "metaprogramming.h"
+#include "typedefs.hpp"
+#include "string.hpp"
+#include "metaprogramming.hpp"
 
-#include "writable.h"
-#include "clonable.h"
+#include "writable.hpp"
+#include "clonable.hpp"
 
-#include "handle.h"
-#include "container.h"
+#include "handle.hpp"
+#include "container.hpp"
 
 #endif

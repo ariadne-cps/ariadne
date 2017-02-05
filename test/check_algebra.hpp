@@ -1,5 +1,5 @@
 /***************************************************************************
- *            check_algebra.h
+ *            check_algebra.hpp
  *
  *  Copyright 2009-17  Pieter Collins
  *
@@ -21,10 +21,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "test.h"
-#include "test/utility.h"
-#include "utility/metaprogramming.h"
-#include "numeric/operators.h"
+#include "test.hpp"
+#include "test/utility.hpp"
+#include "utility/metaprogramming.hpp"
+#include "numeric/operators.hpp"
 
 namespace Ariadne {
 template<class X> String vector_class_name() { return String("Vector<") + class_name<X>() + ">"; }

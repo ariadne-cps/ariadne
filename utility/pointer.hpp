@@ -1,5 +1,5 @@
 /***************************************************************************
- *            pointer.h
+ *            pointer.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file pointer.h
+/*! \file pointer.hpp
  *  \brief Smart pointers in Euclidean space.
  */
 
-#ifndef ARIADNE_POINTER_H
-#define ARIADNE_POINTER_H
+#ifndef ARIADNE_POINTER_HPP
+#define ARIADNE_POINTER_HPP
 
 #include <memory>
 #include <iostream>
@@ -203,4 +203,4 @@ class counted_pointer<const T>
 
 } // namespace Ariadne
 
-#endif // ARIADNE_POINTER_H
+#endif // ARIADNE_POINTER_HPP

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            calculus_submodule.cc
+ *            calculus_submodule.cpp
  *
  *  Copyright 2008--17  Pieter Collins
  *
@@ -23,19 +23,19 @@
 
 #include<type_traits>
 
-#include "boost_python.h"
-#include "utilities.h"
+#include "boost_python.hpp"
+#include "utilities.hpp"
 
-#include "algebra/expansion.tpl.h"
-#include "algebra/algebra.h"
-#include "function/function_interface.h"
-#include "function/polynomial.h"
-#include "function/function.h"
-#include "function/procedure.h"
+#include "algebra/expansion.tpl.hpp"
+#include "algebra/algebra.hpp"
+#include "function/function_interface.hpp"
+#include "function/polynomial.hpp"
+#include "function/function.hpp"
+#include "function/procedure.hpp"
 
-#include "function/function_model.h"
-#include "function/taylor_model.h"
-#include "function/taylor_function.h"
+#include "function/function_model.hpp"
+#include "function/taylor_model.hpp"
+#include "function/taylor_function.hpp"
 
 using namespace boost::python;
 using namespace Ariadne;

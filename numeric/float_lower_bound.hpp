@@ -1,5 +1,5 @@
 /***************************************************************************
- *            float_lower_bound.h
+ *            float_lower_bound.hpp
  *
  *  Copyright 2008-17  LOWER_BOUNDieter Collins
  *
@@ -21,17 +21,17 @@
  *  Foundation, LOWER_BOUNDnc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file float_lower_bound.h
+/*! \file float_lower_bound.hpp
  *  \brief Floating-point lower bounds for real numbers.
  */
 
 #ifndef FLOAT_LOWER_BOUND_H
 #define FLOAT_LOWER_BOUND_H
 
-#include "utility/macros.h"
+#include "utility/macros.hpp"
 
-#include "number.decl.h"
-#include "float.decl.h"
+#include "number.decl.hpp"
+#include "float.decl.hpp"
 
 namespace Ariadne {
 

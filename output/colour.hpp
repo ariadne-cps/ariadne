@@ -1,5 +1,5 @@
 /***************************************************************************
- *            colour.h
+ *            colour.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file colour.h
+/*! \file colour.hpp
  *  \brief Colours for graphics objects.
  */
 
-#ifndef ARIADNE_COLOUR_H
-#define ARIADNE_COLOUR_H
+#ifndef ARIADNE_COLOUR_HPP
+#define ARIADNE_COLOUR_HPP
 
 #include <iosfwd>
 #include <string>
@@ -63,4 +63,4 @@ extern const Colour magenta;
 
 } // namespace Ariadne
 
-#endif // ARIADNE_COLOUR_H
+#endif // ARIADNE_COLOUR_HPP

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            ariadne.h
+ *            ariadne.hpp
  *
  *  Copyright 2008  Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file ariadne.h
+/*! \file ariadne.hpp
  *  \brief Top-level header file includes all user headers.
  */
 
-#ifndef ARIADNE_ARIADNE_H
-#define ARIADNE_ARIADNE_H
+#ifndef ARIADNE_ARIADNE_HPP
+#define ARIADNE_ARIADNE_HPP
 
 //! \brief Top-level %Ariadne namespace
 namespace Ariadne {
@@ -44,41 +44,41 @@ using std::ofstream; using std::ifstream;
 
 #include "config.h"
 
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "algebra/matrix.h"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
 
-#include "function/function.h"
-#include "function/taylor_model.h"
+#include "function/function.hpp"
+#include "function/taylor_model.hpp"
 
-#include "geometry/function_set.h"
-#include "geometry/affine_set.h"
-#include "geometry/grid_set.h"
+#include "geometry/function_set.hpp"
+#include "geometry/affine_set.hpp"
+#include "geometry/grid_set.hpp"
 
-#include "geometry/point.h"
-#include "geometry/box.h"
-#include "geometry/curve.h"
-#include "dynamics/orbit.h"
+#include "geometry/point.hpp"
+#include "geometry/box.hpp"
+#include "geometry/curve.hpp"
+#include "dynamics/orbit.hpp"
 
-#include "solvers/integrator.h"
-#include "solvers/solver.h"
+#include "solvers/integrator.hpp"
+#include "solvers/solver.hpp"
 
-#include "hybrid/discrete_location.h"
-#include "hybrid/discrete_event.h"
-#include "hybrid/hybrid_set.h"
-#include "hybrid/hybrid_orbit.h"
-#include "hybrid/hybrid_time.h"
-#include "hybrid/hybrid_automata.h"
+#include "hybrid/discrete_location.hpp"
+#include "hybrid/discrete_event.hpp"
+#include "hybrid/hybrid_set.hpp"
+#include "hybrid/hybrid_orbit.hpp"
+#include "hybrid/hybrid_time.hpp"
+#include "hybrid/hybrid_automata.hpp"
 
-#include "dynamics/vector_field_evolver.h"
-#include "hybrid/hybrid_evolver.h"
-#include "hybrid/hybrid_reachability_analyser.h"
+#include "dynamics/vector_field_evolver.hpp"
+#include "hybrid/hybrid_evolver.hpp"
+#include "hybrid/hybrid_reachability_analyser.hpp"
 
 #ifdef ARIADNE_ENABLE_SERIALIZATION
-#include "output/serialization.h"
+#include "output/serialization.hpp"
 #endif /* ARIADNE_ENABLE_SERIALIZATION */
 
-#include "output/graphics.h"
-#include "hybrid/hybrid_graphics.h"
+#include "output/graphics.hpp"
+#include "hybrid/hybrid_graphics.hpp"
 
 #endif

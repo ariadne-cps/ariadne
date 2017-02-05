@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_automaton-restrictive.h
+ *            hybrid_automaton-restrictive.hpp
  *
  *  Copyright  2004-8  Alberto Casagrande, Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file hybrid_automaton-restrictive.h
+/*! \file hybrid_automaton-restrictive.hpp
  *  \brief Class for hybrid systems defined by a list of constraints on the dynamics.
  */
 
-#ifndef ARIADNE_RESTRICTIVE_HYBRID_AUTOMATON_H
-#define ARIADNE_RESTRICTIVE_HYBRID_AUTOMATON_H
+#ifndef ARIADNE_RESTRICTIVE_HYBRID_AUTOMATON_HPP
+#define ARIADNE_RESTRICTIVE_HYBRID_AUTOMATON_HPP
 
 #include <string>
 #include <iostream>
@@ -34,16 +34,16 @@
 #include <set>
 #include <map>
 
-#include "utility/tuple.h"
-#include "function/function.h"
-#include "hybrid/discrete_location.h"
-#include "hybrid/discrete_event.h"
-#include "expression/assignment.h"
-#include "expression/expression.h"
-#include "expression/valuation.h"
-#include "utility/logging.h"
+#include "utility/tuple.hpp"
+#include "function/function.hpp"
+#include "hybrid/discrete_location.hpp"
+#include "hybrid/discrete_event.hpp"
+#include "expression/assignment.hpp"
+#include "expression/expression.hpp"
+#include "expression/valuation.hpp"
+#include "utility/logging.hpp"
 
-#include "hybrid/hybrid_automaton_interface.h"
+#include "hybrid/hybrid_automaton_interface.hpp"
 
 namespace Ariadne {
 
@@ -365,4 +365,4 @@ HybridSystem compose(const List<HybridSystem>& components);
 
 } // namespace Ariadne
 
-#endif // ARIADNE_RESTRICTIVE_HYBRID_AUTOMATON_H
+#endif // ARIADNE_RESTRICTIVE_HYBRID_AUTOMATON_HPP

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            integrator.h
+ *            integrator.hpp
  *
  *  Copyright  2006-10  Pieter Collins
  *
@@ -21,25 +21,25 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file integrator.h
+/*! \file integrator.hpp
  *  \brief Solver classes for differential equations.
  */
 
-#ifndef ARIADNE_INTEGRATOR_H
-#define ARIADNE_INTEGRATOR_H
+#ifndef ARIADNE_INTEGRATOR_HPP
+#define ARIADNE_INTEGRATOR_HPP
 
 #include <exception>
 #include <stdexcept>
 #include <string>
 
-#include "solvers/integrator_interface.h"
-#include "function/function_interface.h"
+#include "solvers/integrator_interface.hpp"
+#include "function/function_interface.hpp"
 
-#include "utility/declarations.h"
-#include "utility/attribute.h"
-#include "utility/logging.h"
-#include "utility/pointer.h"
-#include "function/affine.h"
+#include "utility/declarations.hpp"
+#include "utility/attribute.hpp"
+#include "utility/logging.hpp"
+#include "utility/pointer.hpp"
+#include "function/affine.hpp"
 
 namespace Ariadne {
 
@@ -281,4 +281,4 @@ class AffineIntegrator
 
 } // namespace Ariadne
 
-#endif /* ARIADNE_INTEGRATOR_H */
+#endif /* ARIADNE_INTEGRATOR_HPP */

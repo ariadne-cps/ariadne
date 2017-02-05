@@ -1,5 +1,5 @@
 /***************************************************************************
- *            identifier.h
+ *            identifier.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -22,14 +22,14 @@
  */
 
 
-/*! \file identifier.h
+/*! \file identifier.hpp
  *  \brief Strings used as names for constants and variables.
  */
 
-#ifndef ARIADNE_IDENTIFIER_H
-#define ARIADNE_IDENTIFIER_H
+#ifndef ARIADNE_IDENTIFIER_HPP
+#define ARIADNE_IDENTIFIER_HPP
 
-#include "utility/string.h"
+#include "utility/string.hpp"
 
 namespace Ariadne {
 
@@ -48,4 +48,4 @@ class Identifier : public String
 
 } // namespace Ariadne
 
-#endif /* ARIADNE_IDENTIFIER_H */
+#endif /* ARIADNE_IDENTIFIER_HPP */

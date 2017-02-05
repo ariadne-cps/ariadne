@@ -1,5 +1,5 @@
 /***************************************************************************
- *            optimization_submodule.cc
+ *            optimization_submodule.cpp
  *
  *  Copyright 2008--17  Pieter Collins
  *
@@ -21,24 +21,24 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "boost_python.h"
-#include "utilities.h"
+#include "boost_python.hpp"
+#include "utilities.hpp"
 
 #include "config.h"
 
 #include <boost/python.hpp>
 
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "algebra/matrix.h"
-#include "geometry/box.h"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "geometry/box.hpp"
 
-#include "function/function.h"
-#include "function/constraint.h"
-#include "function/procedure.h"
-#include "solvers/linear_programming.h"
-#include "solvers/nonlinear_programming.h"
-#include "solvers/constraint_solver.h"
+#include "function/function.hpp"
+#include "function/constraint.hpp"
+#include "function/procedure.hpp"
+#include "solvers/linear_programming.hpp"
+#include "solvers/nonlinear_programming.hpp"
+#include "solvers/constraint_solver.hpp"
 
 using namespace boost::python;
 using namespace Ariadne;

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            set.h
+ *            set.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,19 +21,19 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file set.h
+/*! \file set.hpp
  *  \brief Handles for open, closed, overt and compact subsets of Euclidean space.
  */
 
-#ifndef ARIADNE_SET_H
-#define ARIADNE_SET_H
+#ifndef ARIADNE_SET_HPP
+#define ARIADNE_SET_HPP
 
 #include <iosfwd>
 
-#include "utility/tribool.h"
-#include "geometry/box.h"
-#include "utility/handle.h"
-#include "geometry/set_interface.h"
+#include "utility/tribool.hpp"
+#include "geometry/box.hpp"
+#include "utility/handle.hpp"
+#include "geometry/set_interface.hpp"
 
 namespace Ariadne {
 

@@ -1,5 +1,5 @@
 /*****************************************************************************************************
- *            skin-exposure.h
+ *            skin-exposure.hpp
  *
  *  Copyright  2016  Luca Geretti
  *
@@ -7,7 +7,7 @@
  *
  *****************************************************************************************************/
 
-#include "ariadne.h"
+#include "ariadne.hpp"
 
 #ifndef SKIN_EXPOSURE_H_
 #define SKIN_EXPOSURE_H_

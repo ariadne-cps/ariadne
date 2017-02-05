@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_enclosure.cc
+ *            hybrid_enclosure.cpp
  *
  *  Copyright  2009-10  Pieter Collins
  *
@@ -21,34 +21,34 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.h"
+#include "function/functional.hpp"
 #include "config.h"
 
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "algebra/algebra.h"
-#include "numeric/operators.h"
-#include "function/function.h"
-#include "function/procedure.h"
-#include "function/constraint.h"
-#include "function/polynomial.h"
-#include "function/taylor_function.h"
-#include "geometry/box.h"
-#include "geometry/grid_set.h"
-#include "hybrid/hybrid_set.h"
-#include "hybrid/hybrid_time.h"
-#include "hybrid/discrete_event.h"
-#include "hybrid/discrete_location.h"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/algebra.hpp"
+#include "numeric/operators.hpp"
+#include "function/function.hpp"
+#include "function/procedure.hpp"
+#include "function/constraint.hpp"
+#include "function/polynomial.hpp"
+#include "function/taylor_function.hpp"
+#include "geometry/box.hpp"
+#include "geometry/grid_set.hpp"
+#include "hybrid/hybrid_set.hpp"
+#include "hybrid/hybrid_time.hpp"
+#include "hybrid/discrete_event.hpp"
+#include "hybrid/discrete_location.hpp"
 
-#include "solvers/linear_programming.h"
-#include "solvers/nonlinear_programming.h"
-#include "solvers/constraint_solver.h"
-#include "geometry/affine_set.h"
+#include "solvers/linear_programming.hpp"
+#include "solvers/nonlinear_programming.hpp"
+#include "solvers/constraint_solver.hpp"
+#include "geometry/affine_set.hpp"
 
-#include "output/graphics_interface.h"
-#include "hybrid/hybrid_enclosure.h"
-#include "hybrid/hybrid_set.h"
-#include "hybrid/hybrid_expression_set.h"
+#include "output/graphics_interface.hpp"
+#include "hybrid/hybrid_enclosure.hpp"
+#include "hybrid/hybrid_set.hpp"
+#include "hybrid/hybrid_expression_set.hpp"
 
 
 namespace Ariadne {

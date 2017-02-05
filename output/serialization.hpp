@@ -1,5 +1,5 @@
 /****************************************************************************
- *            serialization.h
+ *            serialization.hpp
  *
  *  Copyright  2008  Pieter Collins
  *
@@ -21,10 +21,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef ARIADNE_SERIALIZATION_H
-#define ARIADNE_SERIALIZATION_H
+#ifndef ARIADNE_SERIALIZATION_HPP
+#define ARIADNE_SERIALIZATION_HPP
 
-/*! \file serialization.h
+/*! \file serialization.hpp
  *  \brief Reading and writing to a boost archive.
  */
  
@@ -58,4 +58,4 @@ class OutputArchive : public text_oarchive { };
 
 #endif /* ARIADNE_ENABLE_SERIALIZATION */
 
-#endif /* ARIADNE_SERIALIZATION_H */
+#endif /* ARIADNE_SERIALIZATION_HPP */

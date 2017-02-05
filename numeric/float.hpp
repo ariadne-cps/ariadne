@@ -1,5 +1,5 @@
 /***************************************************************************
- *            float.h
+ *            float.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,19 +21,19 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file float.h
+/*! \file float.hpp
  *  \brief Inclusion header for floating-point numbers.
  */
 
-#ifndef ARIADNE_FLOAT_H
-#define ARIADNE_FLOAT_H
+#ifndef ARIADNE_FLOAT_HPP
+#define ARIADNE_FLOAT_HPP
 
-#include "number.decl.h"
-#include "float.decl.h"
-#include "float64.h"
-#include "floatmp.h"
+#include "number.decl.hpp"
+#include "float.decl.hpp"
+#include "float64.hpp"
+#include "floatmp.hpp"
 
-#include "float-raw.h"
-#include "float-user.h"
+#include "float-raw.hpp"
+#include "float-user.hpp"
 
 #endif

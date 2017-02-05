@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_polynomial.cc
+ *            test_polynomial.cpp
  *
  *  Copyright 2009--17  Pieter Collins
  *
@@ -23,14 +23,14 @@
 
 #include <iostream>
 #include "config.h"
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "algebra/matrix.h"
-#include "algebra/multi_index.h"
-#include "algebra/algebra.h"
-#include "function/polynomial.h"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/multi_index.hpp"
+#include "algebra/algebra.hpp"
+#include "function/polynomial.hpp"
 
-#include "test.h"
+#include "test.hpp"
 using namespace std;
 using namespace Ariadne;
 

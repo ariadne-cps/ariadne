@@ -1,5 +1,5 @@
 /***************************************************************************
- *            profile_taylor_variable.cc
+ *            profile_taylor_variable.cpp
  *
  *  Copyright 2008--17  Pieter Collins
  *
@@ -33,7 +33,7 @@ using StringType;
 #include <boost/progress.hpp>
 
 #include "config.h"
-#include "function/taylor_model.h"
+#include "function/taylor_model.hpp"
 using namespace Ariadne;
 
 template<class A1>

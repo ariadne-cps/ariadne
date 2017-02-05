@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_graphics.h
+ *            hybrid_graphics.hpp
  *
  *  Copyright 2011-17  Pieter Collins
  *
@@ -21,25 +21,25 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file hybrid_graphics.h
+/*! \file hybrid_graphics.hpp
  *  \brief Graphics class for drawing objects in hybrid spaces.
  */
 
-#ifndef ARIADNE_HYBRID_GRAPHICS_H
-#define ARIADNE_HYBRID_GRAPHICS_H
+#ifndef ARIADNE_HYBRID_GRAPHICS_HPP
+#define ARIADNE_HYBRID_GRAPHICS_HPP
 
 #include <iosfwd>
 #include <string>
 #include <vector>
 
-#include "output/colour.h"
-#include "expression/variables.h"
-#include "output/graphics_interface.h"
-#include "output/graphics.h"
+#include "output/colour.hpp"
+#include "expression/variables.hpp"
+#include "output/graphics_interface.hpp"
+#include "output/graphics.hpp"
 
-#include "expression/expression_set.h"
-#include "hybrid/discrete_location.h"
-#include "hybrid/hybrid_graphics_interface.h"
+#include "expression/expression_set.hpp"
+#include "hybrid/discrete_location.hpp"
+#include "hybrid/hybrid_graphics_interface.hpp"
 
 namespace Ariadne {
 
@@ -192,4 +192,4 @@ Void plot(const char* filename, const Axes2d& axes, const Colour& fc1, const SET
 
 } // namespace Ariadne
 
-#endif // ARIADNE_GRAPHICS_H
+#endif // ARIADNE_GRAPHICS_HPP

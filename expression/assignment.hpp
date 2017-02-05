@@ -1,5 +1,5 @@
 /***************************************************************************
- *            assignment.h
+ *            assignment.hpp
  *
  *  Copyright 2008-17 Pieter Collins
  *
@@ -22,28 +22,28 @@
  */
 
 
-/*! \file assignment.h
+/*! \file assignment.hpp
  *  \brief Assignment expressions
  */
 
-#ifndef ARIADNE_ASSIGNMENT_H
-#define ARIADNE_ASSIGNMENT_H
+#ifndef ARIADNE_ASSIGNMENT_HPP
+#define ARIADNE_ASSIGNMENT_HPP
 
 #include <cstdarg>
 #include <iostream>
 #include <string>
 
 
-#include "utility/macros.h"
-#include "utility/pointer.h"
-#include "utility/container.h"
-#include "utility/stlio.h"
-#include "utility/string.h"
+#include "utility/macros.hpp"
+#include "utility/pointer.hpp"
+#include "utility/container.hpp"
+#include "utility/stlio.hpp"
+#include "utility/string.hpp"
 
-#include "numeric/numeric.h"
+#include "numeric/numeric.hpp"
 
-#include "expression/variables.h"
-#include "expression/expression.h"
+#include "expression/variables.hpp"
+#include "expression/expression.hpp"
 
 namespace Ariadne {
 
@@ -195,10 +195,10 @@ template<class T> inline List<Assignment<DottedVariable<T>,Expression<T>>> Dotte
 
 } // namespace Ariadne
 
-#include "expression/valuation.h"
+#include "expression/valuation.hpp"
 namespace Ariadne {
 template<class T> inline Assignment<Variable<T>,T>::operator Valuation<T> () const { Valuation<T> r; r.insert(this->lhs,this->rhs); return r; }
 } // namespace Ariadne
 
 
-#endif // ARIADNE_ASSIGNMENT_H
+#endif // ARIADNE_ASSIGNMENT_HPP

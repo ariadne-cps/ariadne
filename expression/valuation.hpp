@@ -1,5 +1,5 @@
 /***************************************************************************
- *            valuation.h
+ *            valuation.hpp
  *
  *  Copyright 2008-17 Pieter Collins
  *
@@ -22,12 +22,12 @@
  */
 
 
-/*! \file valuation.h
+/*! \file valuation.hpp
  *  \brief Valuations over named variables.
  */
 
-#ifndef ARIADNE_VALUATION_H
-#define ARIADNE_VALUATION_H
+#ifndef ARIADNE_VALUATION_HPP
+#define ARIADNE_VALUATION_HPP
 
 namespace Ariadne {
 template<class T, class X=T> class Valuation;
@@ -37,13 +37,13 @@ template<class T, class X=T> class Valuation;
 #include <iostream>
 #include <string>
 
-#include "utility/macros.h"
-#include "utility/container.h"
-#include "utility/tribool.h"
+#include "utility/macros.hpp"
+#include "utility/container.hpp"
+#include "utility/tribool.hpp"
 
-#include "numeric/integer.h"
-#include "expression/variables.h"
-#include "expression/expression.h"
+#include "numeric/integer.hpp"
+#include "expression/variables.hpp"
+#include "expression/expression.hpp"
 
 namespace Ariadne {
 
@@ -223,4 +223,4 @@ template<class X> Kleenean evaluate(const Expression<Kleenean>&, const Continuou
 
 } // namespace Ariadne
 
-#endif // ARIADNE_VALUATION_H
+#endif // ARIADNE_VALUATION_HPP

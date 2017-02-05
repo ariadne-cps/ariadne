@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_box.cc
+ *            test_box.cpp
  *
  *  Copyright  2005-14  Alberto Casagrande, Pieter Collins
  *
@@ -21,10 +21,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/module.h"
-#include "geometry/box.h"
+#include "numeric/module.hpp"
+#include "geometry/box.hpp"
 
-#include "test.h"
+#include "test.hpp"
 
 using namespace Ariadne;
 using std::cout; using std::endl;

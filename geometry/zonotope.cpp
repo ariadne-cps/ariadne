@@ -1,5 +1,5 @@
 /***************************************************************************
- *            zonotope.cc
+ *            zonotope.cpp
  *
  *  Copyright 2008--17  Alberto Casagrande, Pieter Collins
  *
@@ -21,26 +21,26 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.h"
+#include "function/functional.hpp"
 #include "config.h"
 
-#include "geometry/zonotope.h"
+#include "geometry/zonotope.hpp"
 
 #include <iostream>
 #include <vector>
 #include <algorithm>
 
-#include "utility/macros.h"
-#include "utility/array.h"
-#include "algebra/vector.h"
-#include "algebra/matrix.h"
-#include "solvers/linear_programming.h"
-#include "geometry/point.h"
-#include "geometry/box.h"
-#include "geometry/list_set.h"
-#include "function/function.h"
-#include "geometry/polytope.h"
-#include "output/geometry2d.h"
+#include "utility/macros.hpp"
+#include "utility/array.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "solvers/linear_programming.hpp"
+#include "geometry/point.hpp"
+#include "geometry/box.hpp"
+#include "geometry/list_set.hpp"
+#include "function/function.hpp"
+#include "geometry/polytope.hpp"
+#include "output/geometry2d.hpp"
 
 
 namespace Ariadne {

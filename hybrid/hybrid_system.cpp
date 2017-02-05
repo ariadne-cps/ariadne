@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_system.cc
+ *            hybrid_system.cpp
  *
  *  Copyright  2009  Pieter Collins
  *
@@ -23,19 +23,19 @@
 
 #include <map>
 
-#include "function/functional.h"
+#include "function/functional.hpp"
 
 #include "config.h"
 
-#include "utility/macros.h"
-#include "utility/logging.h"
+#include "utility/macros.hpp"
+#include "utility/logging.hpp"
 
-#include "utility/stlio.h"
-#include "expression/expression.h"
-#include "function/function.h"
-#include "hybrid/hybrid_time.h"
-#include "hybrid/hybrid_system.h"
-#include "geometry/grid.h"
+#include "utility/stlio.hpp"
+#include "expression/expression.hpp"
+#include "function/function.hpp"
+#include "hybrid/hybrid_time.hpp"
+#include "hybrid/hybrid_system.hpp"
+#include "geometry/grid.hpp"
 
 namespace Ariadne {
 

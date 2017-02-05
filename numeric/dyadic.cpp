@@ -1,5 +1,5 @@
 /***************************************************************************
- *            dyadic.cc
+ *            dyadic.cpp
  *
  *  Copyright 2013--17  Pieter Collins
  *
@@ -21,22 +21,22 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file dyadic.cc
+/*! \file dyadic.cpp
  *  \brief
  */
 
 
 
-#include "utility/stdlib.h"
+#include "utility/stdlib.hpp"
 
-#include "dyadic.h"
+#include "dyadic.hpp"
 
-#include "utility/macros.h"
-#include "utility/string.h"
-#include "numeric/logical.h"
-#include "numeric/twoexp.h"
-#include "numeric/builtin.h"
-#include "numeric/rational.h"
+#include "utility/macros.hpp"
+#include "utility/string.hpp"
+#include "numeric/logical.hpp"
+#include "numeric/twoexp.hpp"
+#include "numeric/builtin.hpp"
+#include "numeric/rational.hpp"
 
 #include <limits>
 

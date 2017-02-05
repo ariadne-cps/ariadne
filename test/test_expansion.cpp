@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_expansion.cc
+ *            test_expansion.cpp
  *
  *  Copyright 2009--17  Pieter Collins
  *
@@ -24,10 +24,10 @@
 #include <iostream>
 #include <vector>
 #include "config.h"
-#include "numeric/numeric.h"
-#include "algebra/expansion.h"
+#include "numeric/numeric.hpp"
+#include "algebra/expansion.hpp"
 
-#include "test.h"
+#include "test.hpp"
 using namespace std;
 using namespace Ariadne;
 

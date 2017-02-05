@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_affine_sets.cc
+ *            test_affine_sets.cpp
  *
  *  Copyright  2009  Pieter Collins
  *
@@ -24,15 +24,15 @@
 #include <iostream>
 
 #include "config.h"
-#include "function/function.h"
-#include "geometry/box.h"
-#include "geometry/grid_set.h"
-#include "geometry/affine_set.h"
-#include "geometry/function_set.h"
-#include "output/graphics.h"
-#include "output/geometry2d.h"
+#include "function/function.hpp"
+#include "geometry/box.hpp"
+#include "geometry/grid_set.hpp"
+#include "geometry/affine_set.hpp"
+#include "geometry/function_set.hpp"
+#include "output/graphics.hpp"
+#include "output/geometry2d.hpp"
 
-#include "test.h"
+#include "test.hpp"
 
 using namespace Ariadne;
 using namespace std;

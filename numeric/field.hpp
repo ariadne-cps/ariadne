@@ -1,5 +1,5 @@
 /***************************************************************************
- *            numeric/field.h
+ *            numeric/field.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file numeric/field.h
+/*! \file numeric/field.hpp
  *  \brief Abstractions for ring and field (numeric) types.
  */
 
-#ifndef ARIADNE_FIELD_H
-#define ARIADNE_FIELD_H
+#ifndef ARIADNE_FIELD_HPP
+#define ARIADNE_FIELD_HPP
 
 namespace Ariadne {
 

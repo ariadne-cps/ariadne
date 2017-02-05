@@ -1,5 +1,5 @@
 /***************************************************************************
- *            dense_differential.cc
+ *            dense_differential.cpp
  *
  *  Copyright 2008--17  Pieter Collins
  *
@@ -20,11 +20,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#include "function/functional.h"
+#include "function/functional.hpp"
 
 #include "config.h"
 
-#include "algebra/dense_differential.h"
+#include "algebra/dense_differential.hpp"
 
 namespace Ariadne {
 template class DenseDifferential<Float64>;

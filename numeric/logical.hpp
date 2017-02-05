@@ -1,5 +1,5 @@
 /***************************************************************************
- *            numeric/logical.h
+ *            numeric/logical.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,17 +21,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-//! \file logical.h
+//! \file logical.hpp
 //! \brief %Logical classes
 
-#ifndef ARIADNE_LOGICAL_H
-#define ARIADNE_LOGICAL_H
+#ifndef ARIADNE_LOGICAL_HPP
+#define ARIADNE_LOGICAL_HPP
 
-#include "utility/stdlib.h"
-#include "utility/typedefs.h"
-#include "numeric/paradigm.h"
+#include "utility/stdlib.hpp"
+#include "utility/typedefs.hpp"
+#include "numeric/paradigm.hpp"
 
-#include "logical.decl.h"
+#include "logical.decl.hpp"
 
 namespace Ariadne {
 

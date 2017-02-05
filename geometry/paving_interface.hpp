@@ -1,5 +1,5 @@
 /***************************************************************************
- *            paving_interface.h
+ *            paving_interface.hpp
  *
  *  Copyright 2011-17  Pieter Collins
  *
@@ -21,18 +21,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file paving_interface.h
+/*! \file paving_interface.hpp
  *  \brief Storage sets based on pavings and covers
  */
 
-#ifndef ARIADNE_PAVING_INTERFACE_H
-#define ARIADNE_PAVING_INTERFACE_H
+#ifndef ARIADNE_PAVING_INTERFACE_HPP
+#define ARIADNE_PAVING_INTERFACE_HPP
 
 #include <iosfwd>
-#include "utility/declarations.h"
-#include "geometry/grid_cell.h"
-#include "geometry/set_interface.h"
-#include "output/graphics_interface.h"
+#include "utility/declarations.hpp"
+#include "geometry/grid_cell.hpp"
+#include "geometry/set_interface.hpp"
+#include "output/graphics_interface.hpp"
 
 namespace Ariadne {
 
@@ -305,4 +305,4 @@ inline PavingHandle difference(const SubPavingInterface& p1, const SubPavingInte
 } // namespace Ariadne
 
 
-#endif // ARIADNE_PAVING_INTERFACE_H
+#endif // ARIADNE_PAVING_INTERFACE_HPP

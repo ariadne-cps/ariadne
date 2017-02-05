@@ -1,5 +1,5 @@
 /***************************************************************************
- *            utility/typedefs.h
+ *            utility/typedefs.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,14 +21,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file utility/typedefs.h
+/*! \file utility/typedefs.hpp
  *  \brief
  */
 
 
 
-#ifndef ARIADNE_TYPEDEFS_H
-#define ARIADNE_TYPEDEFS_H
+#ifndef ARIADNE_TYPEDEFS_HPP
+#define ARIADNE_TYPEDEFS_HPP
 
 #include <cstdint>
 #include <iosfwd>

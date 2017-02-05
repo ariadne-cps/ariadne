@@ -1,5 +1,5 @@
 /***************************************************************************
- *            heating.cc
+ *            heating.cpp
  *
  *  Copyright  2008  Pieter Collins
  *
@@ -22,16 +22,16 @@
  */
 
 
-//! \file heating.cc
+//! \file heating.cpp
 
-#include "ariadne.h"
+#include "ariadne.hpp"
 
-#include "hybrid/hybrid_automaton-composite.h"
-#include "hybrid/hybrid_set.h"
-#include "hybrid/hybrid_evolver.h"
-#include "hybrid/hybrid_simulator.h"
-#include "hybrid/hybrid_graphics.h"
-#include "hybrid/hybrid_enclosure.h"
+#include "hybrid/hybrid_automaton-composite.hpp"
+#include "hybrid/hybrid_set.hpp"
+#include "hybrid/hybrid_evolver.hpp"
+#include "hybrid/hybrid_simulator.hpp"
+#include "hybrid/hybrid_graphics.hpp"
+#include "hybrid/hybrid_enclosure.hpp"
 
 using namespace Ariadne;
 

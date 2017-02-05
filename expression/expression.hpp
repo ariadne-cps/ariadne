@@ -1,5 +1,5 @@
 /***************************************************************************
- *            expression.h
+ *            expression.hpp
  *
  *  Copyright 2008-17 Pieter Collins
  *
@@ -22,30 +22,30 @@
  */
 
 
-/*! \file expression.h
+/*! \file expression.hpp
  *  \brief Internal expressions
  */
 
-#ifndef ARIADNE_EXPRESSION_H
-#define ARIADNE_EXPRESSION_H
+#ifndef ARIADNE_EXPRESSION_HPP
+#define ARIADNE_EXPRESSION_HPP
 
 #include <cstdarg>
 #include <iosfwd>
 #include <iostream>
 
-#include "utility/macros.h"
-#include "utility/declarations.h"
-#include "utility/pointer.h"
-#include "utility/container.h"
+#include "utility/macros.hpp"
+#include "utility/declarations.hpp"
+#include "utility/pointer.hpp"
+#include "utility/container.hpp"
 
-#include "numeric/logical.decl.h"
-#include "numeric/number.decl.h"
+#include "numeric/logical.decl.hpp"
+#include "numeric/number.decl.hpp"
 
-#include "numeric/operators.h"
-#include "expression/constant.h"
-#include "expression/variables.h"
-#include "expression/valuation.h"
-#include "expression/operations.h"
+#include "numeric/operators.hpp"
+#include "expression/constant.hpp"
+#include "expression/variables.hpp"
+#include "expression/valuation.hpp"
+#include "expression/operations.hpp"
 
 namespace Ariadne {
 
@@ -234,4 +234,4 @@ Expression<Real> make_expression(const ScalarFunction<EffectiveTag>& f, const Sp
 
 } // namespace Ariadne
 
-#endif /* ARIADNE_EXPRESSION_H */
+#endif /* ARIADNE_EXPRESSION_HPP */

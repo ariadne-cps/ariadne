@@ -1,5 +1,5 @@
 /***************************************************************************
- *            float_value.h
+ *            float_value.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,21 +21,21 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file float_value.h
+/*! \file float_value.hpp
  *  \brief Exact Floating-point representations of real numbers.
  */
 
-#ifndef ARIADNE_FLOAT_VALUE_H
-#define ARIADNE_FLOAT_VALUE_H
+#ifndef ARIADNE_FLOAT_VALUE_HPP
+#define ARIADNE_FLOAT_VALUE_HPP
 
-#include "utility/macros.h"
+#include "utility/macros.hpp"
 
-#include "number.decl.h"
-#include "float.decl.h"
+#include "number.decl.hpp"
+#include "float.decl.hpp"
 
-#include "logical.h"
-#include "builtin.h"
-#include "twoexp.h"
+#include "logical.hpp"
+#include "builtin.hpp"
+#include "twoexp.hpp"
 
 namespace Ariadne {
 

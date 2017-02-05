@@ -1,5 +1,5 @@
 /***************************************************************************
- *            float_bounds.h
+ *            float_bounds.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,17 +21,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file float_bounds.h
+/*! \file float_bounds.hpp
  *  \brief Floating-point bounds for real numbers.
  */
 
-#ifndef ARIADNE_FLOAT_BOUNDS_H
-#define ARIADNE_FLOAT_BOUNDS_H
+#ifndef ARIADNE_FLOAT_BOUNDS_HPP
+#define ARIADNE_FLOAT_BOUNDS_HPP
 
-#include "utility/macros.h"
+#include "utility/macros.hpp"
 
-#include "number.decl.h"
-#include "float.decl.h"
+#include "number.decl.hpp"
+#include "float.decl.hpp"
 
 namespace Ariadne {
 

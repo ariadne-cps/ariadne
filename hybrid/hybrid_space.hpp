@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_space.h
+ *            hybrid_space.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,20 +21,20 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file hybrid_space.h
+/*! \file hybrid_space.hpp
  *  \brief Sets in hybrid spaces.
  */
 
-#ifndef ARIADNE_HYBRID_SPACE_H
-#define ARIADNE_HYBRID_SPACE_H
+#ifndef ARIADNE_HYBRID_SPACE_HPP
+#define ARIADNE_HYBRID_SPACE_HPP
 
 #include <map>
 
-#include "utility/container.h"
-#include "utility/stlio.h"
-#include "expression/space.h"
-#include "hybrid/discrete_location.h"
-#include "hybrid/hybrid_set_interface.h"
+#include "utility/container.hpp"
+#include "utility/stlio.hpp"
+#include "expression/space.hpp"
+#include "hybrid/discrete_location.hpp"
+#include "hybrid/hybrid_set_interface.hpp"
 
 
 namespace Ariadne {
@@ -142,5 +142,5 @@ class MonolithicHybridSpace
 
 }
 
-#endif // ARIADNE_HYBRID_SPACE_H
+#endif // ARIADNE_HYBRID_SPACE_HPP
 

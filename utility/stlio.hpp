@@ -1,5 +1,5 @@
 /***************************************************************************
- *            stlio.h
+ *            stlio.hpp
  *
  *  Copyright  2005-8  Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file stlio.h
+/*! \file stlio.hpp
  *  \brief Input-output utilities
  */
 
-#ifndef ARIADNE_STLIO_H
-#define ARIADNE_STLIO_H
+#ifndef ARIADNE_STLIO_HPP
+#define ARIADNE_STLIO_HPP
 
 #include <iostream>
 #include <stdexcept>
@@ -39,8 +39,8 @@
 #include <valarray>
 #include <set>
 #include <map>
-#include "utility/array.h"
-#include "utility/tuple.h"
+#include "utility/array.hpp"
+#include "utility/tuple.hpp"
 
 #include <memory>
 
@@ -287,4 +287,4 @@ operator>> (std::istream &is, std::vector<T>& v) {
 } // namespace std
 
 
-#endif /* ARIADNE_STLIO_H */
+#endif /* ARIADNE_STLIO_HPP */

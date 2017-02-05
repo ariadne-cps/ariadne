@@ -1,5 +1,5 @@
 /***************************************************************************
- *            function_mixin.tpl.h
+ *            function_mixin.tpl.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -24,14 +24,14 @@
 #ifndef ARIADNE_FUNCTION_MIXIN_TCC
 #define ARIADNE_FUNCTION_MIXIN_TCC
 
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "algebra/differential.h"
-#include "function/taylor_model.h"
-#include "function/formula.h"
-#include "algebra/algebra.h"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/differential.hpp"
+#include "function/taylor_model.hpp"
+#include "function/formula.hpp"
+#include "algebra/algebra.hpp"
 
-#include "function/function_mixin.h"
+#include "function/function_mixin.hpp"
 
 namespace Ariadne {
 

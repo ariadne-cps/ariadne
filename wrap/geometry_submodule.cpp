@@ -1,5 +1,5 @@
 /***************************************************************************
- *            geometry_submodule.cc
+ *            geometry_submodule.cpp
  *
  *  Copyright 2008--17  Pieter Collins
  *
@@ -21,25 +21,25 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "boost_python.h"
-#include "utilities.h"
+#include "boost_python.hpp"
+#include "utilities.hpp"
 
 #include "config.h"
 
 #include <boost/python.hpp>
 
-#include "geometry/geometry.h"
-#include "output/geometry2d.h"
-#include "geometry/point.h"
-#include "geometry/curve.h"
-#include "geometry/interval.h"
-#include "geometry/box.h"
-#include "geometry/grid_set.h"
-#include "geometry/function_set.h"
-#include "geometry/affine_set.h"
+#include "geometry/geometry.hpp"
+#include "output/geometry2d.hpp"
+#include "geometry/point.hpp"
+#include "geometry/curve.hpp"
+#include "geometry/interval.hpp"
+#include "geometry/box.hpp"
+#include "geometry/grid_set.hpp"
+#include "geometry/function_set.hpp"
+#include "geometry/affine_set.hpp"
 
-#include "hybrid/discrete_location.h"
-#include "hybrid/hybrid_set.h"
+#include "hybrid/discrete_location.hpp"
+#include "hybrid/hybrid_set.hpp"
 
 
 

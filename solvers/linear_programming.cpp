@@ -1,5 +1,5 @@
 /***************************************************************************
- *            linear_programming.cc
+ *            linear_programming.cpp
  *
  *  Copyright 2008--17  Pieter Collins
  *
@@ -21,19 +21,19 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.h"
+#include "function/functional.hpp"
 #include "config.h"
 
-#include "utility/tuple.h"
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "algebra/matrix.h"
-#include "algebra/diagonal_matrix.h"
-#include "function/affine.h"
-#include "solvers/linear_programming.h"
+#include "utility/tuple.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/diagonal_matrix.hpp"
+#include "function/affine.hpp"
+#include "solvers/linear_programming.hpp"
 
-#include "utility/macros.h"
-#include "utility/logging.h"
+#include "utility/macros.hpp"
+#include "utility/logging.hpp"
 
 static const int verbosity=0;
 

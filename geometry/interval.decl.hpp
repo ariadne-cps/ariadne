@@ -1,5 +1,5 @@
 /***************************************************************************
- *            interval.decl.h
+ *            interval.decl.hpp
  *
  *  Copyright 2008-17  Alberto Casagrande, Pieter Collins
  *
@@ -21,11 +21,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef ARIADNE_INTERVAL_DECL_H
-#define ARIADNE_INTERVAL_DECL_H
+#ifndef ARIADNE_INTERVAL_DECL_HPP
+#define ARIADNE_INTERVAL_DECL_HPP
 
-#include "numeric/float.decl.h"
-#include "numeric/number.decl.h"
+#include "numeric/float.decl.hpp"
+#include "numeric/number.decl.hpp"
 
 namespace Ariadne {
 

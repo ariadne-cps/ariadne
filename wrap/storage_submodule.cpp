@@ -1,5 +1,5 @@
 /***************************************************************************
- *            grid_submodule.cc
+ *            grid_submodule.cpp
  *
  *  Copyright 2008--17  Pieter Collins
  *
@@ -22,15 +22,15 @@
  */
 
 
-#include "boost_python.h"
-#include "utilities.h"
+#include "boost_python.hpp"
+#include "utilities.hpp"
 
 #include <boost/python.hpp>
 
-#include "numeric/numeric.h"
-#include "geometry/function_set.h"
-#include "geometry/grid_set.h"
-#include "geometry/list_set.h"
+#include "numeric/numeric.hpp"
+#include "geometry/function_set.hpp"
+#include "geometry/grid_set.hpp"
+#include "geometry/list_set.hpp"
 
 using namespace boost::python;
 using namespace Ariadne;

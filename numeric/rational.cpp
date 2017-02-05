@@ -1,5 +1,5 @@
 /***************************************************************************
- *            rational.cc
+ *            rational.cpp
  *
  *  Copyright 2013--17  Pieter Collins
  *
@@ -21,23 +21,23 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file rational.cc
+/*! \file rational.cpp
  *  \brief
  */
 
 
 
-#include "utility/stdlib.h"
-#include "utility/macros.h"
-#include "utility/typedefs.h"
+#include "utility/stdlib.hpp"
+#include "utility/macros.hpp"
+#include "utility/typedefs.hpp"
 
-#include "rational.h"
-#include "logical.h"
-#include "number.h"
-#include "builtin.h"
-#include "integer.h"
-#include "dyadic.h"
-#include "sign.h"
+#include "rational.hpp"
+#include "logical.hpp"
+#include "number.hpp"
+#include "builtin.hpp"
+#include "integer.hpp"
+#include "dyadic.hpp"
+#include "sign.hpp"
 #include <limits>
 
 #include <limits>

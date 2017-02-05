@@ -1,5 +1,5 @@
 /***************************************************************************
- *            float-user.h
+ *            float-user.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,20 +21,20 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file float.h
+/*! \file float.hpp
  *  \brief Inclusion header for floating-point numbers.
  */
 
-#ifndef ARIADNE_FLOAT_USER_H
-#define ARIADNE_FLOAT_USER_H
+#ifndef ARIADNE_FLOAT_USER_HPP
+#define ARIADNE_FLOAT_USER_HPP
 
-#include "utility/macros.h"
+#include "utility/macros.hpp"
 
-#include "number.decl.h"
-#include "float.decl.h"
-#include "float64.h"
-#include "floatmp.h"
-#include "float-raw.h"
+#include "number.decl.hpp"
+#include "float.decl.hpp"
+#include "float64.hpp"
+#include "floatmp.hpp"
+#include "float-raw.hpp"
 
 namespace Ariadne {
 
@@ -128,15 +128,15 @@ template<class PR, class P1, class P2> using FloatLessType = Logical<Generic<Wea
 
 } // namespace Ariadne
 
-#include "float_approximation.h"
-#include "float_lower_bound.h"
-#include "float_upper_bound.h"
-#include "float_bounds.h"
-#include "float_ball.h"
-#include "float_value.h"
-#include "float_error.h"
+#include "float_approximation.hpp"
+#include "float_lower_bound.hpp"
+#include "float_upper_bound.hpp"
+#include "float_bounds.hpp"
+#include "float_ball.hpp"
+#include "float_value.hpp"
+#include "float_error.hpp"
 
-#include "float_factory.h"
+#include "float_factory.hpp"
 
 namespace Ariadne {
 

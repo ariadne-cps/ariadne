@@ -1,5 +1,5 @@
 /***************************************************************************
- *            check_function.h
+ *            check_function.hpp
  *
  *  Copyright 2009-17  Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "test.h"
-#include "test/utility.h"
-#include "test/check_algebra.h"
+#include "test.hpp"
+#include "test/utility.hpp"
+#include "test/check_algebra.hpp"
 
-#include "numeric/operators.h"
-#include "function/function.h"
+#include "numeric/operators.hpp"
+#include "function/function.hpp"
 
 namespace Ariadne {
 template<class X> String class_name();

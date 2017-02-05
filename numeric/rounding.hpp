@@ -1,5 +1,5 @@
 /***************************************************************************
- *            rounding.h
+ *            rounding.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,13 +21,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file rounding.h
+/*! \file rounding.hpp
  *  \brief Functions to set and retrieve the processor rounding mode.
  *  May be platform-dependent.
  */
 
-#ifndef ARIADNE_ROUNDING_H
-#define ARIADNE_ROUNDING_H
+#ifndef ARIADNE_ROUNDING_HPP
+#define ARIADNE_ROUNDING_HPP
 
 
 #if defined __GNUC__ && ( defined __i386__ || defined __x86_64 || defined _M_IX86 || defined _M_X86 )
@@ -266,5 +266,5 @@ RoundingModeType get_rounding_mode();
 
 
 
-#endif // ARIADNE_ROUNDING_H
+#endif // ARIADNE_ROUNDING_HPP
 

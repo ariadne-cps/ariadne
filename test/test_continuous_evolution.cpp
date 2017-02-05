@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_continuous_evolution.cc
+ *            test_continuous_evolution.cpp
  *
  *  Copyright  2006-8  Pieter Collins
  *
@@ -25,26 +25,26 @@
 #include <iostream>
 
 #include "config.h"
-#include "utility/tuple.h"
-#include "algebra/vector.h"
-#include "algebra/matrix.h"
-#include "algebra/algebra.h"
-#include "function/function.h"
-#include "function/taylor_function.h"
-#include "function/constraint.h"
-#include "geometry/enclosure.h"
-#include "geometry/box.h"
-#include "geometry/list_set.h"
-#include "solvers/integrator.h"
-#include "dynamics/vector_field_evolver.h"
-#include "dynamics/orbit.h"
-#include "output/graphics.h"
-#include "output/textplot.h"
-#include "utility/logging.h"
+#include "utility/tuple.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/algebra.hpp"
+#include "function/function.hpp"
+#include "function/taylor_function.hpp"
+#include "function/constraint.hpp"
+#include "geometry/enclosure.hpp"
+#include "geometry/box.hpp"
+#include "geometry/list_set.hpp"
+#include "solvers/integrator.hpp"
+#include "dynamics/vector_field_evolver.hpp"
+#include "dynamics/orbit.hpp"
+#include "output/graphics.hpp"
+#include "output/textplot.hpp"
+#include "utility/logging.hpp"
 
-#include "function/user_function.h"
+#include "function/user_function.hpp"
 
-#include "test.h"
+#include "test.hpp"
 
 using namespace Ariadne;
 using namespace std;

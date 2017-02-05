@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_automaton.h
+ *            hybrid_automaton.hpp
  *
  *  Copyright  2004-16  Alberto Casagrande, Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file hybrid_automaton.h
+/*! \file hybrid_automaton.hpp
  *  \brief Main hybrid automaton class.
  */
 
-#ifndef ARIADNE_HYBRID_AUTOMATON_H
-#define ARIADNE_HYBRID_AUTOMATON_H
+#ifndef ARIADNE_HYBRID_AUTOMATON_HPP
+#define ARIADNE_HYBRID_AUTOMATON_HPP
 
 #include <string>
 #include <iostream>
@@ -34,14 +34,14 @@
 #include <set>
 #include <map>
 
-#include "function/function.h"
-#include "hybrid/discrete_location.h"
-#include "hybrid/discrete_event.h"
-#include "expression/assignment.h"
-#include "expression/expression.h"
-#include "utility/logging.h"
+#include "function/function.hpp"
+#include "hybrid/discrete_location.hpp"
+#include "hybrid/discrete_event.hpp"
+#include "expression/assignment.hpp"
+#include "expression/expression.hpp"
+#include "utility/logging.hpp"
 
-#include "hybrid/hybrid_automaton_interface.h"
+#include "hybrid/hybrid_automaton_interface.hpp"
 
 namespace Ariadne {
 
@@ -588,4 +588,4 @@ inline OutputStream& operator<<(OutputStream& os, const HybridAutomaton& ha) {
 
 } // namespace Ariadne
 
-#endif // ARIADNE_HYBRID_AUTOMATON_H
+#endif // ARIADNE_HYBRID_AUTOMATON_HPP

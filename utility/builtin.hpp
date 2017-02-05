@@ -1,5 +1,5 @@
 /***************************************************************************
- *            utility/builtin.h
+ *            utility/builtin.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,16 +21,16 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file utility/builtin.h
+/*! \file utility/builtin.hpp
  *  \brief 
  */
 
 
 
-#ifndef ARIADNE_BUILTIN_H
-#define ARIADNE_BUILTIN_H
+#ifndef ARIADNE_BUILTIN_HPP
+#define ARIADNE_BUILTIN_HPP
 
-#include "metaprogramming.h"
+#include "metaprogramming.hpp"
 
 namespace Ariadne {
 

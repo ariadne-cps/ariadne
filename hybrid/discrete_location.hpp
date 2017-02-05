@@ -1,5 +1,5 @@
 /***************************************************************************
- *            discrete_location.h
+ *            discrete_location.hpp
  *
  *  Copyright  2004-9  Alberto Casagrande, Pieter Collins
  *
@@ -21,16 +21,16 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file discrete_location.h
+/*! \file discrete_location.hpp
  *  \brief Class representing a discrete location of a hybrid automaton.
  */
 
-#ifndef ARIADNE_DISCRETE_LOCATION_H
-#define ARIADNE_DISCRETE_LOCATION_H
+#ifndef ARIADNE_DISCRETE_LOCATION_HPP
+#define ARIADNE_DISCRETE_LOCATION_HPP
 
 #include <string>
-#include "utility/container.h"
-#include "expression/valuation.h"
+#include "utility/container.hpp"
+#include "expression/valuation.hpp"
 
 namespace Ariadne {
 
@@ -78,4 +78,4 @@ DiscreteLocation restrict(const DiscreteLocation& location, const Set<Identifier
 
 } //namespace Ariadne
 
-#endif /* ARIADNE_DISCRETE_LOCATION_H */
+#endif /* ARIADNE_DISCRETE_LOCATION_HPP */

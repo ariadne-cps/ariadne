@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_grid_set.cc
+ *            test_grid_set.cpp
  *
  *
  *  Copyright  2008  Ivan S. Zapreev, Pieter Collins
@@ -29,17 +29,17 @@
 #include <string>
 
 #include "config.h"
-#include "utility/stlio.h"
+#include "utility/stlio.hpp"
 
-#include "utility/macros.h"
-#include "utility/tribool.h"
-#include "numeric/numeric.h"
+#include "utility/macros.hpp"
+#include "utility/tribool.hpp"
+#include "numeric/numeric.hpp"
 
-#include "geometry/function_set.h"
-#include "geometry/grid_set.h"
-#include "geometry/set_interface.h"
+#include "geometry/function_set.hpp"
+#include "geometry/grid_set.hpp"
+#include "geometry/set_interface.hpp"
 
-#include "test.h"
+#include "test.hpp"
 
 using namespace Ariadne;
 using namespace std;

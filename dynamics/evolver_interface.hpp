@@ -1,5 +1,5 @@
 /***************************************************************************
- *            evolver_interface.h
+ *            evolver_interface.hpp
  *
  *  Copyright  2008  Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file evolver_interface.h
+/*! \file evolver_interface.hpp
  *  \brief Interface for computing a single time step of the evolution of a system.
  */
 
-#ifndef ARIADNE_EVOLVER_INTERFACE_H
-#define ARIADNE_EVOLVER_INTERFACE_H
+#ifndef ARIADNE_EVOLVER_INTERFACE_HPP
+#define ARIADNE_EVOLVER_INTERFACE_HPP
 
 
 namespace Ariadne {
@@ -135,4 +135,4 @@ class EvolverFactoryInterface
 
 
 
-#endif // ARIADNE_EVOLVER_INTERFACE_H
+#endif // ARIADNE_EVOLVER_INTERFACE_HPP

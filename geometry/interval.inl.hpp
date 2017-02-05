@@ -1,5 +1,5 @@
 /***************************************************************************
- *            geometry/interval.inl.h
+ *            geometry/interval.inl.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *

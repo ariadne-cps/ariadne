@@ -1,5 +1,5 @@
 /***************************************************************************
- *            polyhedron.cc
+ *            polyhedron.cpp
  *
  *  Copyright  2006-8  Alberto Casagrande, Pieter Collins
  *
@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.h"
+#include "function/functional.hpp"
 #include "config.h"
 
 #include <iostream>
@@ -33,20 +33,20 @@
 #include <vector>
 #include <valarray>
 
-#include "geometry/polyhedron.h"
+#include "geometry/polyhedron.hpp"
 
-#include "utility/macros.h"
-#include "utility/exceptions.h"
+#include "utility/macros.hpp"
+#include "utility/exceptions.hpp"
 
-#include "numeric/numeric.h"
+#include "numeric/numeric.hpp"
 
-#include "algebra/vector.h"
-#include "algebra/matrix.h"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
 
-#include "function/function.h"
+#include "function/function.hpp"
 
-#include "geometry/box.h"
-#include "geometry/polytope.h"
+#include "geometry/box.hpp"
+#include "geometry/polytope.hpp"
 
 
 

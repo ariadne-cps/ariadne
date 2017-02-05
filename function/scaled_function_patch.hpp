@@ -1,5 +1,5 @@
 /***************************************************************************
- *            scaled_function_patch.h
+ *            scaled_function_patch.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,26 +21,26 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file scaled_function_patch.h
+/*! \file scaled_function_patch.hpp
  *  \brief Over-approximations of functions on box domains.
  */
 
-#ifndef ARIADNE_SCALED_FUNCTION_PATCH_H
-#define ARIADNE_SCALED_FUNCTION_PATCH_H
+#ifndef ARIADNE_SCALED_FUNCTION_PATCH_HPP
+#define ARIADNE_SCALED_FUNCTION_PATCH_HPP
 
 #include <iosfwd>
-#include "utility/container.h"
-#include "utility/exceptions.h"
-#include "utility/declarations.h"
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "function/taylor_model.h"
+#include "utility/container.hpp"
+#include "utility/exceptions.hpp"
+#include "utility/declarations.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "function/taylor_model.hpp"
 
-#include "algebra/operations.h"
-#include "function/function_interface.h"
-#include "function/function_mixin.h"
-#include "function/function_model.h"
-#include "function/function_model_mixin.h"
+#include "algebra/operations.hpp"
+#include "function/function_interface.hpp"
+#include "function/function_mixin.hpp"
+#include "function/function_model.hpp"
+#include "function/function_model_mixin.hpp"
 
 namespace Ariadne {
 
@@ -1252,4 +1252,4 @@ template<class M> class ScaledFunctionPatchCreator
 
 } // namespace Ariadne
 
-#endif // ARIADNE_FUNCTION_PATCH_H
+#endif // ARIADNE_FUNCTION_PATCH_HPP

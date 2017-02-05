@@ -21,7 +21,7 @@ along with the MPFR Library; see the file COPYING.LIB.  If not, write to
 the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
-#include "mpfr_array.h"
+#include "mpfr_array.hpp"
 
 mpfr_ptr
 mpfr_array_alloc_init (size_t n)

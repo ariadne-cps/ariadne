@@ -1,5 +1,5 @@
 /***************************************************************************
- *            Iterator.h
+ *            Iterator.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file Iterator.h
+/*! \file Iterator.hpp
  *  \brief Iterator support, similar to boost::Iterator package.
  */
 
-#ifndef ARIADNE_ITERATOR_H
-#define ARIADNE_ITERATOR_H
+#ifndef ARIADNE_ITERATOR_HPP
+#define ARIADNE_ITERATOR_HPP
 
 #include <iterator>
 
@@ -127,4 +127,4 @@ template<class I1, class I2> OutputStream& operator<<(OutputStream& os, const Pa
 
 } // namespace Ariadne
 
-#endif /* ARIADNE_ITERATOR_H */
+#endif /* ARIADNE_ITERATOR_HPP */

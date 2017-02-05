@@ -1,5 +1,5 @@
 /***************************************************************************
- *            simulation_toolbox_interface.h
+ *            simulation_toolbox_interface.hpp
  *
  *  Copyright  2008  Pieter Collins
  *
@@ -21,15 +21,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file simulation_toolbox_interface.h
+/*! \file simulation_toolbox_interface.hpp
  *  \brief Interfaces for calculus tools useful for working with dynamical systems.
  */
 
 
-#ifndef ARIADNE_SIMULATION_TOOLBOX_INTERFACE_H
-#define ARIADNE_SIMULATION_TOOLBOX_INTERFACE_H
+#ifndef ARIADNE_SIMULATION_TOOLBOX_INTERFACE_HPP
+#define ARIADNE_SIMULATION_TOOLBOX_INTERFACE_HPP
 
-#include "utility/tribool.h"
+#include "utility/tribool.hpp"
 
 namespace Ariadne {
 
@@ -84,4 +84,4 @@ class SimulationToolboxInterface
 } //  namespace Ariadne
 
 
-#endif // ARIADNE_SIMULATION_TOOLBOX_INTERFACE_H */
+#endif // ARIADNE_SIMULATION_TOOLBOX_INTERFACE_HPP */

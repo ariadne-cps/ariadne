@@ -1,5 +1,5 @@
 /***************************************************************************
- *            algebra.h
+ *            algebra.hpp
  *
  *  Copyright 2010-17  Pieter Collins
  *
@@ -21,18 +21,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file algebra.h
+/*! \file algebra.hpp
  *  \brief Algebras and normed algebras.
  */
-#ifndef ARIADNE_ALGEBRA_H
-#define ARIADNE_ALGEBRA_H
+#ifndef ARIADNE_ALGEBRA_HPP
+#define ARIADNE_ALGEBRA_HPP
 
 #include <iosfwd>
 #include <iostream>
-#include "numeric/numeric.h"
-#include "utility/pointer.h"
-#include "numeric/operators.h"
-#include "algebra/algebra_interface.h"
+#include "numeric/numeric.hpp"
+#include "utility/pointer.hpp"
+#include "numeric/operators.hpp"
+#include "algebra/algebra_interface.hpp"
 
 namespace Ariadne {
 
@@ -253,4 +253,4 @@ template<class X> OutputStream& operator<<(OutputStream& os, const Algebra<X>& x
 template<class X> OutputStream& operator<<(OutputStream& os, const NormedAlgebra<X>& x) { return x.write(os); }
 } // namespace Ariadne
 
-#endif /* ARIADNE_ALGEBRA_H */
+#endif /* ARIADNE_ALGEBRA_HPP */

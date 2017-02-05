@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_function.cc
+ *            test_function.cpp
  *
  *  Copyright  2009  Pieter Collins
  *
@@ -30,15 +30,15 @@
 #include <fenv.h>
 
 #include "config.h"
-#include "function/function.h"
-#include "function/formula.h"
-#include "function/symbolic_function.h"
-#include "function/taylor_model.h"
-#include "algebra/algebra.h"
+#include "function/function.hpp"
+#include "function/formula.hpp"
+#include "function/symbolic_function.hpp"
+#include "function/taylor_model.hpp"
+#include "algebra/algebra.hpp"
 
-#include "numeric/numeric.h"
+#include "numeric/numeric.hpp"
 
-#include "test.h"
+#include "test.hpp"
 
 using namespace std;
 using namespace Ariadne;

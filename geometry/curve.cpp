@@ -1,5 +1,5 @@
 /***************************************************************************
- *            curve.cc
+ *            curve.cpp
  *
  *  Copyright  2007  Pieter Collins
  *
@@ -21,22 +21,22 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.h"
-#include "function/taylor_model.h"
-#include "function/formula.h"
+#include "function/functional.hpp"
+#include "function/taylor_model.hpp"
+#include "function/formula.hpp"
 
 #include "config.h"
 
 #include <cassert>
 
-#include "algebra/vector.h"
-#include "algebra/matrix.h"
-#include "algebra/differential.h"
-#include "algebra/algebra.h"
-#include "geometry/point.h"
-#include "geometry/box.h"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/differential.hpp"
+#include "algebra/algebra.hpp"
+#include "geometry/point.hpp"
+#include "geometry/box.hpp"
 
-#include "geometry/curve.h"
+#include "geometry/curve.hpp"
 
 
 namespace Ariadne {

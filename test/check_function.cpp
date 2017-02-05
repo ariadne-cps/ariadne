@@ -1,5 +1,5 @@
 /***************************************************************************
- *            check_function.cc
+ *            check_function.cpp
  *
  *  Copyright 2009--17  Pieter Collins
  *
@@ -21,17 +21,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.h"
+#include "function/functional.hpp"
 
-#include "function/function.h"
-#include "function/taylor_model.h"
-#include "geometry/box.h"
-#include "algebra/algebra.h"
+#include "function/function.hpp"
+#include "function/taylor_model.hpp"
+#include "geometry/box.hpp"
+#include "algebra/algebra.hpp"
 
-#include "numeric/float.decl.h"
+#include "numeric/float.decl.hpp"
 
-#include "test.h"
-#include "check_function.h"
+#include "test.hpp"
+#include "check_function.hpp"
 
 using namespace Ariadne;
 

@@ -1,15 +1,15 @@
 add_library(ariadne-numeric OBJECT
-    dyadic.cc
-    logical.cc
-    operators.cc
-    integer.cc
-    rational.cc
-    decimal.cc
-    number.cc
-    real.cc
-    float64.cc
-    floatmp.cc
-    float-user.cc
+    dyadic.cpp
+    logical.cpp
+    operators.cpp
+    integer.cpp
+    rational.cpp
+    decimal.cpp
+    number.cpp
+    real.cpp
+    float64.cpp
+    floatmp.cpp
+    float-user.cpp
 )
 
 cotire(ariadne-numeric)

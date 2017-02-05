@@ -1,5 +1,5 @@
 /***************************************************************************
- *            univariate_differential.h
+ *            univariate_differential.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,17 +21,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file univariate_differential.h
+/*! \file univariate_differential.hpp
  *  \brief Differentials with respect to a single variable.
  */
 
-#ifndef ARIADNE_UNIVARIATE_DIFFERENTIAL_H
-#define ARIADNE_UNIVARIATE_DIFFERENTIAL_H
+#ifndef ARIADNE_UNIVARIATE_DIFFERENTIAL_HPP
+#define ARIADNE_UNIVARIATE_DIFFERENTIAL_HPP
 
-#include "utility/macros.h"
-#include "utility/array.h"
-#include "algebra/series.h"
-#include "numeric/numeric.h"
+#include "utility/macros.hpp"
+#include "utility/array.hpp"
+#include "algebra/series.hpp"
+#include "numeric/numeric.hpp"
 
 namespace Ariadne {
 
@@ -209,5 +209,5 @@ OutputStream& operator<<(OutputStream& os, const UnivariateDifferential<X>& x)
 } // namespace Ariadne
 
 
-#endif // ARIADNE_UNIVARIATE_DIFFERENTIAL_H
+#endif // ARIADNE_UNIVARIATE_DIFFERENTIAL_HPP
 

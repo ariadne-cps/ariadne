@@ -1,5 +1,5 @@
 /***************************************************************************
- *            integrator_interface.h
+ *            integrator_interface.hpp
  *
  *  Copyright  2006-10  Pieter Collins
  *
@@ -21,17 +21,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file integrator_interface.h
+/*! \file integrator_interface.hpp
  *  \brief Interface for solver classes for differential equations.
  */
 
-#ifndef ARIADNE_INTEGRATOR_INTERFACE_H
-#define ARIADNE_INTEGRATOR_INTERFACE_H
+#ifndef ARIADNE_INTEGRATOR_INTERFACE_HPP
+#define ARIADNE_INTEGRATOR_INTERFACE_HPP
 
 #include <string>
 #include <iosfwd>
 
-#include "utility/declarations.h"
+#include "utility/declarations.hpp"
 
 namespace Ariadne {
 
@@ -139,4 +139,4 @@ class IntegratorInterface
 
 } // namespace Ariadne
 
-#endif /* ARIADNE_INTEGRATOR_INTERFACE_H */
+#endif /* ARIADNE_INTEGRATOR_INTERFACE_HPP */

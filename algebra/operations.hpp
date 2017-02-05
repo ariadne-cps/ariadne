@@ -1,5 +1,5 @@
 /***************************************************************************
- *            algebra/operations.h
+ *            algebra/operations.hpp
  *
  *  Copyright 2010-17  Pieter Collins
  *
@@ -21,15 +21,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file operations.h
+/*! \file operations.hpp
  *  \brief Provide common algebra operations automatically.
  */
 
-#ifndef ARIADNE_ALGEBRA_OPERATIONS_H
-#define ARIADNE_ALGEBRA_OPERATIONS_H
+#ifndef ARIADNE_ALGEBRA_OPERATIONS_HPP
+#define ARIADNE_ALGEBRA_OPERATIONS_HPP
 
-#include "numeric/operators.h"
-#include "numeric/arithmetic.h"
+#include "numeric/operators.hpp"
+#include "numeric/arithmetic.hpp"
 
 namespace Ariadne {
 
@@ -346,4 +346,4 @@ template<class A, class X> struct DispatchOrderedAlgebraOperations : DispatchAlg
 
 } // namespace Ariadne
 
-#endif /* ARIADNE_ALGEBRA_OPERATIONS_H */
+#endif /* ARIADNE_ALGEBRA_OPERATIONS_HPP */

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_hybrid_system.cc
+ *            test_hybrid_system.cpp
  *
  *  Copyright  2008  Pieter Collins
  *
@@ -25,13 +25,13 @@
 #include <fstream>
 
 #include "config.h"
-#include "test.h"
+#include "test.hpp"
 
-#include "algebra/vector.h"
-#include "algebra/matrix.h"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
 
-#include "function/function.h"
-#include "hybrid/hybrid_system.h"
+#include "function/function.hpp"
+#include "hybrid/hybrid_system.hpp"
 
 using namespace std;
 using namespace Ariadne;

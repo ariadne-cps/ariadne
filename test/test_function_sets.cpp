@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_function_sets.cc
+ *            test_function_sets.cpp
  *
  *  Copyright  2009  Pieter Collins
  *
@@ -24,17 +24,17 @@
 #include <iostream>
 
 #include "config.h"
-#include "function/function.h"
-#include "function/taylor_model.h"
-#include "algebra/algebra.h"
-#include "geometry/box.h"
-#include "geometry/grid_set.h"
-#include "geometry/affine_set.h"
-#include "geometry/function_set.h"
-#include "function/formula.h"
-#include "output/graphics.h"
+#include "function/function.hpp"
+#include "function/taylor_model.hpp"
+#include "algebra/algebra.hpp"
+#include "geometry/box.hpp"
+#include "geometry/grid_set.hpp"
+#include "geometry/affine_set.hpp"
+#include "geometry/function_set.hpp"
+#include "function/formula.hpp"
+#include "output/graphics.hpp"
 
-#include "test.h"
+#include "test.hpp"
 
 using namespace Ariadne;
 using namespace std;

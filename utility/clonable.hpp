@@ -1,5 +1,5 @@
 /***************************************************************************
- *            utility/clonable.h
+ *            utility/clonable.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,14 +21,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file utility/clonable.h
+/*! \file utility/clonable.hpp
  *  \brief 
  */
 
 
 
-#ifndef ARIADNE_CLONABLE_H
-#define ARIADNE_CLONABLE_H
+#ifndef ARIADNE_CLONABLE_HPP
+#define ARIADNE_CLONABLE_HPP
 
 namespace Ariadne {
 

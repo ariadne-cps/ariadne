@@ -1,5 +1,5 @@
 /***************************************************************************
- *            function_mixin.h
+ *            function_mixin.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,10 +21,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef ARIADNE_FUNCTION_MIXIN_H
-#define ARIADNE_FUNCTION_MIXIN_H
+#ifndef ARIADNE_FUNCTION_MIXIN_HPP
+#define ARIADNE_FUNCTION_MIXIN_HPP
 
-#include "function/function_interface.h"
+#include "function/function_interface.hpp"
 
 // Adaptors for classes to conform to the Function interface.
 
@@ -168,4 +168,4 @@ template<class F, class P, class D> class VectorFunctionMixin
 
 } // namespace Ariadne
 
-#endif // ARIADNE_FUNCTION_TEMPLATE_H
+#endif // ARIADNE_FUNCTION_TEMPLATE_HPP

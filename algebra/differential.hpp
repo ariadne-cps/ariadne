@@ -1,5 +1,5 @@
 /***************************************************************************
- *            differential.h
+ *            differential.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,25 +21,25 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file differential.h
+/*! \file differential.hpp
  *  \brief Differential algebra variables with a sparse representation.
  */
 
-#ifndef ARIADNE_DIFFERENTIAL_H
-#define ARIADNE_DIFFERENTIAL_H
+#ifndef ARIADNE_DIFFERENTIAL_HPP
+#define ARIADNE_DIFFERENTIAL_HPP
 
 #include <map>
 
-#include "utility/macros.h"
-#include "utility/array.h"
-#include "numeric/number.decl.h"
-#include "numeric/float.decl.h"
-#include "algebra/vector.h"
-#include "algebra/matrix.h"
-#include "algebra/multi_index.h"
-#include "algebra/series.h"
-#include "algebra/expansion.h"
-#include "algebra/operations.h"
+#include "utility/macros.hpp"
+#include "utility/array.hpp"
+#include "numeric/number.decl.hpp"
+#include "numeric/float.decl.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/multi_index.hpp"
+#include "algebra/series.hpp"
+#include "algebra/expansion.hpp"
+#include "algebra/operations.hpp"
 #include <boost/concept_check.hpp>
 
 namespace Ariadne {
@@ -532,4 +532,4 @@ Differential<X>::Differential(SizeType as, DegreeType deg, InitializerList< Pair
 
 } //namespace Ariadne
 
-#endif // ARIADNE_DIFFERENTIAL_H
+#endif // ARIADNE_DIFFERENTIAL_HPP

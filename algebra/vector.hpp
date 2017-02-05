@@ -1,5 +1,5 @@
 /***************************************************************************
- *            algebra/vector.h
+ *            algebra/vector.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,20 +21,20 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file algebra/vector.h
+/*! \file algebra/vector.hpp
  *  \brief Vectors over a scalar (number or algebra).
  */
 
-#ifndef ARIADNE_VECTOR_H
-#define ARIADNE_VECTOR_H
+#ifndef ARIADNE_VECTOR_HPP
+#define ARIADNE_VECTOR_HPP
 
 #define SIMPLE_VECTOR_OPERATORS
 
-#include "utility/macros.h"
-#include "utility/metaprogramming.h"
-#include "utility/container.h"
-#include "utility/declarations.h"
-#include "numeric/builtin.h"
+#include "utility/macros.hpp"
+#include "utility/metaprogramming.hpp"
+#include "utility/container.hpp"
+#include "utility/declarations.hpp"
+#include "numeric/builtin.hpp"
 
 namespace Ariadne {
 

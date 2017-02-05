@@ -1,5 +1,5 @@
 /***************************************************************************
- *            enclosure.cc
+ *            enclosure.cpp
  *
  *  Copyright 2008--17  Pieter Collins
  *
@@ -21,58 +21,58 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.h"
+#include "function/functional.hpp"
 #include "config.h"
 
 #include <iomanip>
 
-#include "function/constraint.h"
-#include "function/formula.h"
-#include "function/procedure.h"
-#include "geometry/enclosure.h"
+#include "function/constraint.hpp"
+#include "function/formula.hpp"
+#include "function/procedure.hpp"
+#include "geometry/enclosure.hpp"
 
-#include "utility/macros.h"
-#include "utility/exceptions.h"
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "algebra/matrix.h"
-#include "algebra/multi_index.h"
-#include "algebra/differential.h"
-#include "algebra/algebra.h"
-#include "function/polynomial.h"
-#include "function/function.h"
+#include "utility/macros.hpp"
+#include "utility/exceptions.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/multi_index.hpp"
+#include "algebra/differential.hpp"
+#include "algebra/algebra.hpp"
+#include "function/polynomial.hpp"
+#include "function/function.hpp"
 
-#include "function/function_model.h"
-#include "function/taylor_function.h"
+#include "function/function_model.hpp"
+#include "function/taylor_function.hpp"
 
-#include "geometry/box.h"
-#include "geometry/grid.h"
+#include "geometry/box.hpp"
+#include "geometry/grid.hpp"
 
-#include "geometry/function_set.h"
-#include "geometry/affine_set.h"
+#include "geometry/function_set.hpp"
+#include "geometry/affine_set.hpp"
 
-#include "geometry/paving_interface.h"
-#include "geometry/paver.h"
-#include "geometry/grid_set.h"
+#include "geometry/paving_interface.hpp"
+#include "geometry/paver.hpp"
+#include "geometry/grid_set.hpp"
 
-#include "solvers/constraint_solver.h"
-#include "solvers/nonlinear_programming.h"
+#include "solvers/constraint_solver.hpp"
+#include "solvers/nonlinear_programming.hpp"
 
-#include "output/graphics_interface.h"
+#include "output/graphics_interface.hpp"
 
-#include "hybrid/discrete_event.h"
+#include "hybrid/discrete_event.hpp"
 
-#include "utility/logging.h"
+#include "utility/logging.hpp"
 
-#include "function/functional.h"
+#include "function/functional.hpp"
 
 #include "config.h"
 #ifdef HAVE_CAIRO_H
 #include <cairo/cairo.h>
 #endif // HAVE_CAIRO_H
 #include <boost/concept_check.hpp>
-#include "numeric/operators.h"
-#include "expression/space.h"
+#include "numeric/operators.hpp"
+#include "expression/space.hpp"
 
 
 namespace Ariadne {

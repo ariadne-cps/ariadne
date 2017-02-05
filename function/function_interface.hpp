@@ -1,5 +1,5 @@
 /***************************************************************************
- *            function_interface.h
+ *            function_interface.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,17 +21,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file function_interface.h
+/*! \file function_interface.hpp
  *  \brief Interface for functions for which derivatives can be computed.
  */
 
-#ifndef ARIADNE_FUNCTION_INTERFACE_H
-#define ARIADNE_FUNCTION_INTERFACE_H
+#ifndef ARIADNE_FUNCTION_INTERFACE_HPP
+#define ARIADNE_FUNCTION_INTERFACE_HPP
 
 #include <iosfwd>
 
-#include "utility/declarations.h"
-#include "function/function.decl.h"
+#include "utility/declarations.hpp"
+#include "function/function.decl.hpp"
 
 namespace Ariadne {
 

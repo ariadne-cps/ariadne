@@ -1,7 +1,7 @@
 add_library(ariadne-dynamics OBJECT
-    orbit.cc
-    map_evolver.cc
-    vector_field_evolver.cc
+    orbit.cpp
+    map_evolver.cpp
+    vector_field_evolver.cpp
 )
 
 cotire(ariadne-dynamics)

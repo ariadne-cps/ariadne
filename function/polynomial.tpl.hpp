@@ -1,5 +1,5 @@
 /***************************************************************************
- *            polynomial.tpl.h
+ *            polynomial.tpl.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "algebra/evaluate.h"
+#include "algebra/evaluate.hpp"
 
 namespace Ariadne {
 

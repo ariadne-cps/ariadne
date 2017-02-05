@@ -1,5 +1,5 @@
 /***************************************************************************
- *            numeric/real.h
+ *            numeric/real.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,23 +21,23 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file numeric/real.h
+/*! \file numeric/real.hpp
  *  \brief
  */
 
 
 
-#ifndef ARIADNE_REAL_H
-#define ARIADNE_REAL_H
+#ifndef ARIADNE_REAL_HPP
+#define ARIADNE_REAL_HPP
 
-#include "utility/typedefs.h"
-#include "utility/pointer.h"
+#include "utility/typedefs.hpp"
+#include "utility/pointer.hpp"
 
-#include "numeric/logical.decl.h"
-#include "numeric/number.decl.h"
-#include "numeric/float.decl.h"
+#include "numeric/logical.decl.hpp"
+#include "numeric/number.decl.hpp"
+#include "numeric/float.decl.hpp"
 
-#include "numeric/arithmetic.h"
+#include "numeric/arithmetic.hpp"
 
 namespace Ariadne {
 
@@ -286,7 +286,7 @@ PositiveReal cast_positive(Real const& x);
 
 } // namespace Ariadne
 
-#include "numeric/logical.h"
+#include "numeric/logical.hpp"
 
 namespace Ariadne {
 

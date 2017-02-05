@@ -1,5 +1,5 @@
 /*****************************************************************************************************
- *            skin_temperature.h
+ *            skin_temperature.hpp
  *
  *  Copyright  2016  Luca Geretti
  *
@@ -7,7 +7,7 @@
  *
  *****************************************************************************************************/
 
-#include "ariadne.h"
+#include "ariadne.hpp"
 
 #ifndef SKIN_TEMPERATURE_H_
 #define SKIN_TEMPERATURE_H_

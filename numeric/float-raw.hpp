@@ -1,5 +1,5 @@
 /***************************************************************************
- *            float-raw.h
+ *            float-raw.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,17 +21,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file float-raw.h
+/*! \file float-raw.hpp
  *  \brief Temporary header for raw floating-point type.
  */
 
-#ifndef ARIADNE_FLOAT_RAW_H
-#define ARIADNE_FLOAT_RAW_H
+#ifndef ARIADNE_FLOAT_RAW_HPP
+#define ARIADNE_FLOAT_RAW_HPP
 
-#include "float.decl.h"
-#include "float64.h"
-#include "floatmp.h"
-#include "numeric/operators.h"
+#include "float.decl.hpp"
+#include "float64.hpp"
+#include "floatmp.hpp"
+#include "numeric/operators.hpp"
 
 namespace Ariadne {
 
@@ -245,4 +245,4 @@ inline FloatMP atan_approx(FloatMP const& x) { return atan(x,FloatMP::to_nearest
 
 } // namespace Ariadne
 
-#endif /* ARIADNE_FLOAT_RAW_H */
+#endif /* ARIADNE_FLOAT_RAW_HPP */

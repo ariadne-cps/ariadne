@@ -1,5 +1,5 @@
 /***************************************************************************
- *            float64.cc
+ *            float64.cpp
  *
  *  Copyright 2008--17  Pieter Collins
  *
@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "utility/standard.h"
+#include "utility/standard.hpp"
 
 #include <iostream>
 #include <iomanip>
@@ -32,17 +32,17 @@
 
 #include "config.h"
 
-#include "utility/macros.h"
-#include "numeric/dyadic.h"
-#include "numeric/decimal.h"
-#include "numeric/rational.h"
-#include "numeric/rounding.h"
+#include "utility/macros.hpp"
+#include "numeric/dyadic.hpp"
+#include "numeric/decimal.hpp"
+#include "numeric/rational.hpp"
+#include "numeric/rounding.hpp"
 
 #if defined ARIADNE_C99_ROUNDING
-    #warning "Using standard fenv.h C header file for setting the rounding mode."
+    #warning "Using standard fenv.hpp C header file for setting the rounding mode."
 #elif defined ARIADNE_BOOST_ROUNDING
     #if defined BOOST_NUMERIC_INTERVAL_DETAIL_C99_ROUNDING_CONTROL_HPP
-        #warning "Using Boost interval library standard fenv.h C header for setting the rounding mode."
+        #warning "Using Boost interval library standard fenv.hpp C header for setting the rounding mode."
     #else
         #warning "Using Boost interval library hardware rounding for setting the rounding mode."
     #endif
@@ -58,8 +58,8 @@
     #warning "No rounding mode defined."
 #endif
 
-#include "numeric/float64.h"
-#include "numeric/floatmp.h"
+#include "numeric/float64.hpp"
+#include "numeric/floatmp.hpp"
 
 
 namespace Ariadne {
@@ -832,7 +832,7 @@ template<> inline String class_name<Float64>() { return "Float64"; }
 
 #ifdef ARIADNE_ENABLE_SERIALIZATION
 
-#include "output/serialization.h"
+#include "output/serialization.hpp"
 
 namespace Ariadne {
 

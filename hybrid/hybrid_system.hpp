@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_system.h
+ *            hybrid_system.hpp
  *
  *  Copyright  2009  Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file hybrid_system.h
+/*! \file hybrid_system.hpp
  *  \brief Main compositional hybrid system class.
  */
 
-#ifndef ARIADNE_HYBRID_SYSTEM_H
-#define ARIADNE_HYBRID_SYSTEM_H
+#ifndef ARIADNE_HYBRID_SYSTEM_HPP
+#define ARIADNE_HYBRID_SYSTEM_HPP
 
 #include <string>
 #include <iostream>
@@ -37,16 +37,16 @@
 #include <memory>
 #include <boost/shared_array.hpp>
 
-#include "utility/declarations.h"
+#include "utility/declarations.hpp"
 
-#include "utility/logging.h"
+#include "utility/logging.hpp"
 
-#include "utility/container.h"
-#include "expression/valuation.h"
-#include "expression/assignment.h"
-#include "expression/expression.h"
+#include "utility/container.hpp"
+#include "expression/valuation.hpp"
+#include "expression/assignment.hpp"
+#include "expression/expression.hpp"
 
-#include "hybrid/discrete_location.h"
+#include "hybrid/discrete_location.hpp"
 
 namespace Ariadne {
 
@@ -311,4 +311,4 @@ OutputStream& operator<<(OutputStream& os, const HybridSystem::InvariantPredicat
 
 } // namespace Ariadne
 
-#endif // ARIADNE_HYBRID_SYSTEM_H
+#endif // ARIADNE_HYBRID_SYSTEM_HPP

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            formula.h
+ *            formula.hpp
  *
  *  Copyright 2008-17 Pieter Collins
  *
@@ -22,12 +22,12 @@
  */
 
 
-/*! \file formula.h
+/*! \file formula.hpp
  *  \brief Formulae over variables
  */
 
-#ifndef ARIADNE_FORMULA_H
-#define ARIADNE_FORMULA_H
+#ifndef ARIADNE_FORMULA_HPP
+#define ARIADNE_FORMULA_HPP
 
 #include <cstdarg>
 #include <iostream>
@@ -35,15 +35,15 @@
 #include <string>
 
 
-#include "utility/macros.h"
-#include "utility/pointer.h"
-#include "utility/container.h"
-#include "utility/stlio.h"
+#include "utility/macros.hpp"
+#include "utility/pointer.hpp"
+#include "utility/container.hpp"
+#include "utility/stlio.hpp"
 
-#include "numeric/operators.h"
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "algebra/expansion.h"
+#include "numeric/operators.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/expansion.hpp"
 #include <boost/concept_check.hpp>
 
 namespace Ariadne {
@@ -397,4 +397,4 @@ template<class X> Formula<X> formula(const Expansion<X>& e)
 } // namespace Ariadne
 
 
-#endif // ARIADNE_FORMULA_H
+#endif // ARIADNE_FORMULA_HPP

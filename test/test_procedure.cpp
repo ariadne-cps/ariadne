@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_procedure.cc
+ *            test_procedure.cpp
  *
  *  Copyright  2010  Pieter Collins
  *
@@ -30,16 +30,16 @@
 
 #include "config.h"
 
-#include "function/procedure.h"
-#include "function/procedure.tpl.h"
+#include "function/procedure.hpp"
+#include "function/procedure.tpl.hpp"
 
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "algebra/expansion.h"
-#include "algebra/evaluate.h"
-#include "function/formula.h"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/expansion.hpp"
+#include "algebra/evaluate.hpp"
+#include "function/formula.hpp"
 
-#include "test.h"
+#include "test.hpp"
 
 using namespace std;
 using namespace Ariadne;

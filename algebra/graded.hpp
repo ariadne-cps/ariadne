@@ -1,5 +1,5 @@
 /***************************************************************************
- *            graded.h
+ *            graded.hpp
  *
  *  Copyright  2011  Pieter Collins
  *
@@ -21,14 +21,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file graded.h
+/*! \file graded.hpp
  *  \brief Graded algebras.
  */
 
-#ifndef ARIADNE_GRADED_H
-#define ARIADNE_GRADED_H
+#ifndef ARIADNE_GRADED_HPP
+#define ARIADNE_GRADED_HPP
 
-#include "function/procedure.h"
+#include "function/procedure.hpp"
 
 namespace Ariadne {
 
@@ -413,4 +413,4 @@ template<class X, class A> Void compute(const Vector<Procedure<X>>& p, Vector<Gr
 
 } // namespace Ariadne
 
-#endif /* ARIADNE_GRADED_H */
+#endif /* ARIADNE_GRADED_HPP */

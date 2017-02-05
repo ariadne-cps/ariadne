@@ -1,5 +1,5 @@
 /*****************************************************************************************************
- *            cutting_depth.h
+ *            cutting_depth.hpp
  *
  *  Copyright  2016  Luca Geretti
  *
@@ -7,7 +7,7 @@
  *
  *****************************************************************************************************/
 
-#include "ariadne.h"
+#include "ariadne.hpp"
 
 #ifndef CUTTING_DEPTH_H
 #define CUTTING_DEPTH_H

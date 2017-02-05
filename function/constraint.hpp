@@ -1,5 +1,5 @@
 /***************************************************************************
- *            constraint.h
+ *            constraint.hpp
  *
  *  Copyright 2009-17  Pieter Collins
  *
@@ -21,16 +21,16 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file constraint.h
+/*! \file constraint.hpp
  *  \brief Linear and nonlinear constraints.
  */
 
-#ifndef ARIADNE_CONSTRAINT_H
-#define ARIADNE_CONSTRAINT_H
+#ifndef ARIADNE_CONSTRAINT_HPP
+#define ARIADNE_CONSTRAINT_HPP
 
-#include "numeric/numeric.h"
-#include "function/function.h"
-#include "utility/metaprogramming.h"
+#include "numeric/numeric.hpp"
+#include "function/function.hpp"
+#include "utility/metaprogramming.hpp"
 
 namespace Ariadne {
 

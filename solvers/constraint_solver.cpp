@@ -1,5 +1,5 @@
 /***************************************************************************
- *            constraint_solver.cc
+ *            constraint_solver.cpp
  *
  *  Copyright 2000--17  Pieter Collins
  *
@@ -21,28 +21,28 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.h"
+#include "function/functional.hpp"
 #include "config.h"
 
-#include "utility/macros.h"
-#include "utility/tuple.h"
-#include "utility/tribool.h"
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "algebra/algebra.h"
-#include "geometry/box.h"
-#include "geometry/grid_set.h"
-#include "function/polynomial.h"
-#include "function/function.h"
-#include "function/formula.h"
-#include "function/procedure.h"
-#include "function/constraint.h"
-#include "solvers/nonlinear_programming.h"
-#include "function/function_mixin.h"
-#include "function/taylor_function.h"
+#include "utility/macros.hpp"
+#include "utility/tuple.hpp"
+#include "utility/tribool.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/algebra.hpp"
+#include "geometry/box.hpp"
+#include "geometry/grid_set.hpp"
+#include "function/polynomial.hpp"
+#include "function/function.hpp"
+#include "function/formula.hpp"
+#include "function/procedure.hpp"
+#include "function/constraint.hpp"
+#include "solvers/nonlinear_programming.hpp"
+#include "function/function_mixin.hpp"
+#include "function/taylor_function.hpp"
 
-#include "solvers/constraint_solver.h"
-#include "solvers/solver.h"
+#include "solvers/constraint_solver.hpp"
+#include "solvers/solver.hpp"
 
 namespace Ariadne {
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            affine.cc
+ *            affine.cpp
  *
  *  Copyright 2009--17  Pieter Collins
  *
@@ -21,13 +21,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/numeric.h"
+#include "numeric/numeric.hpp"
 #include "config.h"
 
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "function/function.h"
-#include "function/affine.h"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "function/function.hpp"
+#include "function/affine.hpp"
 
 namespace Ariadne {
 

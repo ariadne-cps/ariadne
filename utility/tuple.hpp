@@ -1,5 +1,5 @@
 /***************************************************************************
- *            tuple.h
+ *            tuple.hpp
  *
  *  Copyright  2007  Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file tuple.h
+/*! \file tuple.hpp
  *  \brief Pair and Tuple types, and types to be used as lvalues in assignments.
  */
 
-#ifndef ARIADNE_TUPLE_H
-#define ARIADNE_TUPLE_H
+#ifndef ARIADNE_TUPLE_HPP
+#define ARIADNE_TUPLE_HPP
 
 #include <utility>
 #include <tuple>
@@ -51,4 +51,4 @@ template<class T> inline decltype(auto) get_fifth(T&& t) { return std::get<4>(st
 
 } // namespace Ariadne
 
-#endif /* ARIADNE_TUPLE_H */
+#endif /* ARIADNE_TUPLE_HPP */

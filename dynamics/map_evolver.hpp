@@ -1,5 +1,5 @@
 /***************************************************************************
- *            map_evolver.h
+ *            map_evolver.hpp
  *
  *  Copyright  2007-8  Alberto Casagrande, Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file map_evolver.h
+/*! \file map_evolver.hpp
  *  \brief Evolver for map systems.
  */
 
-#ifndef ARIADNE_MAP_EVOLVER_H
-#define ARIADNE_MAP_EVOLVER_H
+#ifndef ARIADNE_MAP_EVOLVER_HPP
+#define ARIADNE_MAP_EVOLVER_HPP
 
 #include <string>
 #include <vector>
@@ -35,14 +35,14 @@
 
 #include <boost/smart_ptr.hpp>
 
-#include "utility/tuple.h"
+#include "utility/tuple.hpp"
 
-#include "dynamics/map.h"
-#include "function/function_interface.h"
-#include "solvers/configuration_interface.h"
-#include "dynamics/evolver_base.h"
+#include "dynamics/map.hpp"
+#include "function/function_interface.hpp"
+#include "solvers/configuration_interface.hpp"
+#include "dynamics/evolver_base.hpp"
 
-#include "utility/logging.h"
+#include "utility/logging.hpp"
 
 namespace Ariadne {
 
@@ -158,4 +158,4 @@ class MapEvolverConfiguration : public ConfigurationInterface
 
 } // namespace Ariadne
 
-#endif // ARIADNE_MAP_EVOLVER_H
+#endif // ARIADNE_MAP_EVOLVER_HPP

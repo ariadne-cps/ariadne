@@ -1,5 +1,5 @@
 /***************************************************************************
- *            affine.h
+ *            affine.hpp
  *
  *  Copyright 2008-17 Pieter Collins
  *
@@ -21,24 +21,24 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file affine.h
+/*! \file affine.hpp
  *  \brief Affine scalar and vector functions
  */
 
-#ifndef ARIADNE_AFFINE_H
-#define ARIADNE_AFFINE_H
+#ifndef ARIADNE_AFFINE_HPP
+#define ARIADNE_AFFINE_HPP
 
 #include <cstdarg>
 #include <iosfwd>
 #include <iostream>
 
-#include "utility/declarations.h"
+#include "utility/declarations.hpp"
 
-#include "utility/macros.h"
-#include "utility/pointer.h"
+#include "utility/macros.hpp"
+#include "utility/pointer.hpp"
 
-#include "algebra/covector.h"
-#include "algebra/matrix.h"
+#include "algebra/covector.hpp"
+#include "algebra/matrix.hpp"
 
 namespace Ariadne {
 
@@ -215,4 +215,4 @@ template<class X> OutputStream& operator<<(OutputStream& os, const Affine<X>& f)
 
 } // namespace Ariadne
 
-#endif /* ARIADNE_AFFINE_H */
+#endif /* ARIADNE_AFFINE_HPP */

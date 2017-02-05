@@ -1,5 +1,5 @@
 /***************************************************************************
- *            algebra_operations.tpl.h
+ *            algebra_operations.tpl.hpp
  *
  *  Copyright 2011-17  Pieter Collins
  *
@@ -21,11 +21,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "utility/exceptions.h"
-#include "algebra/operations.h"
+#include "utility/exceptions.hpp"
+#include "algebra/operations.hpp"
 
-#include "algebra/series.h"
-#include "function/taylor_series.h"
+#include "algebra/series.hpp"
+#include "function/taylor_series.hpp"
 
 namespace Ariadne {
 

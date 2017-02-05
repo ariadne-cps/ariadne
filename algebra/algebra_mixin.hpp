@@ -1,5 +1,5 @@
 /***************************************************************************
- *            algebra_mixin.h
+ *            algebra_mixin.hpp
  *
  *  Copyright 2010-17  Pieter Collins
  *
@@ -21,15 +21,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file algebra_mixin.h
+/*! \file algebra_mixin.hpp
  *  \brief Mixin class providing operations for (Banach) algebras.
  */
 
-#ifndef ARIADNE_ALGEBRA_MIXIN_H
-#define ARIADNE_ALGEBRA_MIXIN_H
+#ifndef ARIADNE_ALGEBRA_MIXIN_HPP
+#define ARIADNE_ALGEBRA_MIXIN_HPP
 
-#include "algebra/algebra_interface.h"
-#include "numeric/operators.h"
+#include "algebra/algebra_interface.hpp"
+#include "numeric/operators.hpp"
 
 namespace Ariadne {
 
@@ -108,4 +108,4 @@ template<class A, class X> class SymbolicAlgebraMixin
 
 } // namespace Ariadne
 
-#endif /* ARIADNE_ALGEBRA_MIXIN_H */
+#endif /* ARIADNE_ALGEBRA_MIXIN_HPP */

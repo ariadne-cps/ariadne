@@ -1,5 +1,5 @@
 /***************************************************************************
- *            symbolic_function.cc
+ *            symbolic_function.cpp
  *
  *  Copyright 2008--17  Pieter Collins
  *
@@ -21,18 +21,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.h"
+#include "function/functional.hpp"
 
 #include "config.h"
 
-#include "numeric/numeric.h"
-#include "algebra/differential.h"
-#include "numeric/operators.h"
-#include "algebra/algebra.h"
-#include "function/formula.h"
-#include "function/function.h"
+#include "numeric/numeric.hpp"
+#include "algebra/differential.hpp"
+#include "numeric/operators.hpp"
+#include "algebra/algebra.hpp"
+#include "function/formula.hpp"
+#include "function/function.hpp"
 
-#include "function/symbolic_function.h"
+#include "function/symbolic_function.hpp"
 
 
 namespace Ariadne {

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_reachability_analyser.h
+ *            hybrid_reachability_analyser.hpp
  *
  *  Copyright  2006-11  Alberto Casagrande, Pieter Collins
  *
@@ -21,26 +21,26 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file hybrid_reachability_analyser.h
+/*! \file hybrid_reachability_analyser.hpp
  *  \brief Methods for computing reachable sets of hybrid systems.
  */
 
-#ifndef ARIADNE_HYBRID_REACHABILITY_ANALYSER_H
-#define ARIADNE_HYBRID_REACHABILITY_ANALYSER_H
+#ifndef ARIADNE_HYBRID_REACHABILITY_ANALYSER_HPP
+#define ARIADNE_HYBRID_REACHABILITY_ANALYSER_HPP
 
 #include <boost/smart_ptr.hpp>
 
-#include "solvers/configuration_interface.h"
-#include "hybrid/hybrid_set.decl.h"
-#include "hybrid/hybrid_set_interface.h"
-#include "hybrid/hybrid_evolver_interface.h"
-#include "hybrid/hybrid_reachability_analyser_interface.h"
+#include "solvers/configuration_interface.hpp"
+#include "hybrid/hybrid_set.decl.hpp"
+#include "hybrid/hybrid_set_interface.hpp"
+#include "hybrid/hybrid_evolver_interface.hpp"
+#include "hybrid/hybrid_reachability_analyser_interface.hpp"
 
-#include "hybrid/hybrid_orbit.h"
-#include "hybrid/hybrid_grid.h"
-#include "hybrid/hybrid_set.h"
+#include "hybrid/hybrid_orbit.hpp"
+#include "hybrid/hybrid_grid.hpp"
+#include "hybrid/hybrid_set.hpp"
 
-#include "utility/logging.h"
+#include "utility/logging.hpp"
 
 
 namespace Ariadne {
@@ -340,4 +340,4 @@ class HybridReachabilityAnalyserConfiguration : public ConfigurationInterface {
 } // namespace Ariadne
 
 
-#endif // ARIADNE_HYBRID_REACHABILITY_ANALYSER_H
+#endif // ARIADNE_HYBRID_REACHABILITY_ANALYSER_HPP

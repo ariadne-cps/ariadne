@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_graphics_interface.h
+ *            hybrid_graphics_interface.hpp
  *
  *  Copyright 2009-17  Davide Bresolin, Pieter Collins
  *
@@ -21,14 +21,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file hybrid_graphics_interface.h
+/*! \file hybrid_graphics_interface.hpp
  *  \brief Base graphics interface from which all drawable classes in hybrid spaces are inherited.
  */
 
-#ifndef ARIADNE_HYBRID_GRAPHICS_INTERFACE_H
-#define ARIADNE_HYBRID_GRAPHICS_INTERFACE_H
+#ifndef ARIADNE_HYBRID_GRAPHICS_INTERFACE_HPP
+#define ARIADNE_HYBRID_GRAPHICS_INTERFACE_HPP
 
-#include "output/graphics_interface.h"
+#include "output/graphics_interface.hpp"
 
 namespace Ariadne {
 
@@ -58,4 +58,4 @@ class HybridDrawableInterface {
 } // namespace Ariadne
 
 
-#endif // ARIADNE_HYBRID_GRAPHICS_INTERFACE_H
+#endif // ARIADNE_HYBRID_GRAPHICS_INTERFACE_HPP

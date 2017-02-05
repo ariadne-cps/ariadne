@@ -1,5 +1,5 @@
 /***************************************************************************
- *            function_expression.h
+ *            function_expression.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,21 +21,21 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file function_expression.h
+/*! \file function_expression.hpp
  *  \brief Expressions created as wrappers around functions
  */
 
-#ifndef ARIADNE_FUNCTION_EXPRESSION_H
-#define ARIADNE_FUNCTION_EXPRESSION_H
+#ifndef ARIADNE_FUNCTION_EXPRESSION_HPP
+#define ARIADNE_FUNCTION_EXPRESSION_HPP
 
-#include "expression/expression.h"
-#include "expression/expression_set.h"
-#include "expression/space.h"
+#include "expression/expression.hpp"
+#include "expression/expression_set.hpp"
+#include "expression/space.hpp"
 
-#include "function/function.h"
-#include "function/formula.h"
-#include "function/function_model.h"
-#include "function/taylor_function.h"
+#include "function/function.hpp"
+#include "function/formula.hpp"
+#include "function/function_model.hpp"
+#include "function/taylor_function.hpp"
 
 namespace Ariadne {
 
@@ -194,4 +194,4 @@ template<class P> ScalarFunction<P> make_function(RealSpace args, ScalarFunction
 
 } // namespace Ariadne
 
-#endif /* ARIADNE_FUNCTION_EXPRESSION_H */
+#endif /* ARIADNE_FUNCTION_EXPRESSION_HPP */

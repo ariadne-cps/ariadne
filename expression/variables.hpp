@@ -1,5 +1,5 @@
 /***************************************************************************
- *            variables.h
+ *            variables.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -22,27 +22,27 @@
  */
 
 
-/*! \file variables.h
+/*! \file variables.hpp
  *  \brief Internal variables
  */
 
-#ifndef ARIADNE_VARIABLES_H
-#define ARIADNE_VARIABLES_H
+#ifndef ARIADNE_VARIABLES_HPP
+#define ARIADNE_VARIABLES_HPP
 
 #include <cstdarg>
 #include <iosfwd>
 #include <iostream>
 
-#include "utility/macros.h"
-#include "utility/pointer.h"
-#include "utility/container.h"
-#include "utility/tribool.h"
-#include "utility/string.h"
+#include "utility/macros.hpp"
+#include "utility/pointer.hpp"
+#include "utility/container.hpp"
+#include "utility/tribool.hpp"
+#include "utility/string.hpp"
 
-#include "numeric/logical.decl.h"
-#include "numeric/number.decl.h"
-#include "expression/identifier.h"
-#include "expression/operations.h"
+#include "numeric/logical.decl.hpp"
+#include "numeric/number.decl.hpp"
+#include "expression/identifier.hpp"
+#include "expression/operations.hpp"
 
 namespace Ariadne {
 
@@ -288,4 +288,4 @@ inline DottedVariables<Real> dot(const InitializerList<Variable<Real>>& lhs) { r
 
 } // namespace Ariadne
 
-#endif /* ARIADNE_VARIABLES_H */
+#endif /* ARIADNE_VARIABLES_HPP */

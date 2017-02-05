@@ -1,5 +1,5 @@
 /***************************************************************************
- *            set_interface.h
+ *            set_interface.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,18 +21,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file set_interface.h
+/*! \file set_interface.hpp
  *  \brief Interfaces for open, closed, overt and compact subsets of Euclidean space.
  */
 
-#ifndef ARIADNE_SET_INTERFACE_H
-#define ARIADNE_SET_INTERFACE_H
+#ifndef ARIADNE_SET_INTERFACE_HPP
+#define ARIADNE_SET_INTERFACE_HPP
 
 #include <iosfwd>
 
-#include "utility/declarations.h"
-#include "utility/tribool.h"
-#include "numeric/numeric.h"
+#include "utility/declarations.hpp"
+#include "utility/tribool.hpp"
+#include "numeric/numeric.hpp"
 
 namespace Ariadne {
 

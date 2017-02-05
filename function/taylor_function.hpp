@@ -1,5 +1,5 @@
 /***************************************************************************
- *            taylor_function.h
+ *            taylor_function.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,24 +21,24 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file taylor_function.h
+/*! \file taylor_function.hpp
  *  \brief Over-approximations of functions based on Taylor expansions.
  */
 
-#ifndef ARIADNE_TAYLOR_FUNCTION_H
-#define ARIADNE_TAYLOR_FUNCTION_H
+#ifndef ARIADNE_TAYLOR_FUNCTION_HPP
+#define ARIADNE_TAYLOR_FUNCTION_HPP
 
 #include <iosfwd>
-#include "utility/container.h"
-#include "utility/exceptions.h"
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "function/taylor_model.h"
+#include "utility/container.hpp"
+#include "utility/exceptions.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "function/taylor_model.hpp"
 
-#include "function/function_interface.h"
-#include "function/function_mixin.h"
-#include "function/function_model.h"
-#include "function/scaled_function_patch.h"
+#include "function/function_interface.hpp"
+#include "function/function_mixin.hpp"
+#include "function/function_model.hpp"
+#include "function/scaled_function_patch.hpp"
 
 namespace Ariadne {
 
@@ -80,4 +80,4 @@ class TaylorFunctionFactory
 
 } // namespace Ariadne
 
-#endif // ARIADNE_TAYLOR_FUNCTION_H
+#endif // ARIADNE_TAYLOR_FUNCTION_HPP

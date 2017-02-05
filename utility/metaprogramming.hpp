@@ -1,5 +1,5 @@
 /***************************************************************************
- *            metaprogramming.h
+ *            metaprogramming.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file metaprogramming.h
+/*! \file metaprogramming.hpp
  *  \brief Classes for template metaprogramming.
  */
 
-#ifndef ARIADNE_METAPROGRAMMING_H
-#define ARIADNE_METAPROGRAMMING_H
+#ifndef ARIADNE_METAPROGRAMMING_HPP
+#define ARIADNE_METAPROGRAMMING_HPP
 
 #include <type_traits>
 

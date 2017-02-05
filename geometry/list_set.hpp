@@ -1,5 +1,5 @@
 /***************************************************************************
- *            list_set.h
+ *            list_set.hpp
  *
  *  Copyright 2008-17  Alberto Casagrande, Pieter Collins
  *
@@ -21,22 +21,22 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file list_set.h
+/*! \file list_set.hpp
  *  \brief Sets which are lists of simple shapes.
  */
 
-#ifndef ARIADNE_LIST_SET_H
-#define ARIADNE_LIST_SET_H
+#ifndef ARIADNE_LIST_SET_HPP
+#define ARIADNE_LIST_SET_HPP
 
 
 #include <vector>
-#include "utility/stlio.h"
-#include "utility/macros.h"
+#include "utility/stlio.hpp"
+#include "utility/macros.hpp"
 
-#include "output/graphics_interface.h"
-#include "hybrid/discrete_location.h"
+#include "output/graphics_interface.hpp"
+#include "hybrid/discrete_location.hpp"
 
-#include "geometry/box.h"
+#include "geometry/box.hpp"
 
 namespace Ariadne {
 
@@ -145,7 +145,7 @@ class ListSet
 
     /*! \brief Draw on a canvas.
      *
-     *  The ListSet template does not implement the DrawableInterface to avoid a dependency on the box.h header file.
+     *  The ListSet template does not implement the DrawableInterface to avoid a dependency on the box.hpp header file.
      */
     Void draw(CanvasInterface& c, const Projection2d& p) const {
         for(Nat i=0; i!=this->size(); ++i) {
@@ -179,4 +179,4 @@ operator<<(OutputStream& os, const ListSet<BS>& ls)
 
 } // namespace Ariadne
 
-#endif /* ARIADNE_LIST_SET_H */
+#endif /* ARIADNE_LIST_SET_HPP */

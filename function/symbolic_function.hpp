@@ -1,5 +1,5 @@
 /***************************************************************************
- *            symbolic_function.h
+ *            symbolic_function.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,31 +21,31 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file symbolic_function.h
+/*! \file symbolic_function.hpp
  *  \brief Symbolic functions
  */
 
-#ifndef ARIADNE_SYMBOLIC_FUNCTION_H
-#define ARIADNE_SYMBOLIC_FUNCTION_H
+#ifndef ARIADNE_SYMBOLIC_FUNCTION_HPP
+#define ARIADNE_SYMBOLIC_FUNCTION_HPP
 
 #include <cstdarg>
 #include <iosfwd>
 #include <iostream>
 
-#include "function/function_interface.h"
+#include "function/function_interface.hpp"
 
-#include "utility/macros.h"
-#include "utility/pointer.h"
-#include "utility/container.h"
-#include "utility/metaprogramming.h"
+#include "utility/macros.hpp"
+#include "utility/pointer.hpp"
+#include "utility/container.hpp"
+#include "utility/metaprogramming.hpp"
 
-#include "numeric/numeric.h"
-#include "numeric/operators.tpl.h"
-#include "algebra/vector.h"
+#include "numeric/numeric.hpp"
+#include "numeric/operators.tpl.hpp"
+#include "algebra/vector.hpp"
 
-#include "function/function_mixin.h"
-#include "function/projection.h"
-#include "function/formula.h"
+#include "function/function_mixin.hpp"
+#include "function/projection.hpp"
+#include "function/formula.hpp"
 
 namespace Ariadne {
 

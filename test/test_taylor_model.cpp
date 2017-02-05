@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_taylor_model.cc
+ *            test_taylor_model.cpp
  *
  *  Copyright 2008--17  Pieter Collins
  *
@@ -24,16 +24,16 @@
 #include <iostream>
 #include <iomanip>
 #include "config.h"
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "algebra/matrix.h"
-#include "algebra/multi_index.h"
-#include "function/taylor_model.h"
-#include "algebra/differential.h"
-#include "function/function.h"
-#include "function/polynomial.h"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/multi_index.hpp"
+#include "function/taylor_model.hpp"
+#include "algebra/differential.hpp"
+#include "function/function.hpp"
+#include "function/polynomial.hpp"
 
-#include "test.h"
+#include "test.hpp"
 using std::cout; using std::cerr; using std::endl;
 using namespace Ariadne;
 

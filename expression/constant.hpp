@@ -1,5 +1,5 @@
 /***************************************************************************
- *            constant.h
+ *            constant.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -22,15 +22,15 @@
  */
 
 
-/*! \file constant.h
+/*! \file constant.hpp
  *  \brief Named constants
  */
 
-#ifndef ARIADNE_CONSTANT_H
-#define ARIADNE_CONSTANT_H
+#ifndef ARIADNE_CONSTANT_HPP
+#define ARIADNE_CONSTANT_HPP
 
-#include "utility/string.h"
-#include "expression/identifier.h"
+#include "utility/string.hpp"
+#include "expression/identifier.hpp"
 
 namespace Ariadne {
 
@@ -63,4 +63,4 @@ template<> class Constant<String>
 
 } // namespace Ariadne
 
-#endif /* ARIADNE_CONSTANT_H */
+#endif /* ARIADNE_CONSTANT_HPP */

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            predicate.h
+ *            predicate.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,25 +21,25 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file predicate.h
+/*! \file predicate.hpp
  *  \brief Predicates.
  */
 
-#ifndef ARIADNE_PREDICATE_H
-#define ARIADNE_PREDICATE_H
+#ifndef ARIADNE_PREDICATE_HPP
+#define ARIADNE_PREDICATE_HPP
 
 #include <cstdarg>
 #include <iosfwd>
 #include <iostream>
-#include "function/function_interface.h"
+#include "function/function_interface.hpp"
 
-#include "utility/macros.h"
-#include "utility/pointer.h"
+#include "utility/macros.hpp"
+#include "utility/pointer.hpp"
 
-#include "algebra/vector.h"
-#include "algebra/matrix.h"
-#include "algebra/differential.h"
-#include "function/taylor_model.h"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/differential.hpp"
+#include "function/taylor_model.hpp"
 
 namespace Ariadne {
 

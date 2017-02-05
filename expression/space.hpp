@@ -1,5 +1,5 @@
 /***************************************************************************
- *            space.h
+ *            space.hpp
  *
  *  Copyright 2008-17 Pieter Collins
  *
@@ -22,22 +22,22 @@
  */
 
 
-/*! \file space.h
+/*! \file space.hpp
  *  \brief Spaces formed by variables.
  */
 
-#ifndef ARIADNE_SPACE_H
-#define ARIADNE_SPACE_H
+#ifndef ARIADNE_SPACE_HPP
+#define ARIADNE_SPACE_HPP
 
 #include <cstdarg>
 #include <iosfwd>
 #include <iostream>
 
-#include "utility/macros.h"
-#include "utility/pointer.h"
-#include "utility/container.h"
+#include "utility/macros.hpp"
+#include "utility/pointer.hpp"
+#include "utility/container.hpp"
 
-#include "expression/variables.h"
+#include "expression/variables.hpp"
 
 namespace Ariadne {
 
@@ -147,4 +147,4 @@ template<class T> Space<T> variables(const List<String>& s) { return Space<T>(s)
 
 } // namespace Ariadne
 
-#endif /* ARIADNE_SPACE_H */
+#endif /* ARIADNE_SPACE_HPP */

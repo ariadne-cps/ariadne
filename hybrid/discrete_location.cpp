@@ -1,5 +1,5 @@
 /***************************************************************************
- *            discrete_location.cc
+ *            discrete_location.cpp
  *
  *  Copyright  2004-16  Alberto Casagrande, Pieter Collins
  *
@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "discrete_location.h"
-#include "hybrid_automaton_interface.h"
+#include "discrete_location.hpp"
+#include "hybrid_automaton_interface.hpp"
 
 namespace Ariadne {
 

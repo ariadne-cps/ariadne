@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_enclosure.h
+ *            hybrid_enclosure.hpp
  *
  *  Copyright  2009-10  Pieter Collins
  *
@@ -21,31 +21,31 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file hybrid_enclosure.h
+/*! \file hybrid_enclosure.hpp
  *  \brief Enclosure sets for hybrid systems
  */
 
-#ifndef ARIADNE_HYBRID_ENCLOSURE_H
-#define ARIADNE_HYBRID_ENCLOSURE_H
+#ifndef ARIADNE_HYBRID_ENCLOSURE_HPP
+#define ARIADNE_HYBRID_ENCLOSURE_HPP
 
 #include <string>
 #include <vector>
 #include <list>
 #include <iostream>
 
-#include "utility/logging.h"
-#include "utility/declarations.h"
-#include "utility/pointer.h"
-#include "utility/container.h"
+#include "utility/logging.hpp"
+#include "utility/declarations.hpp"
+#include "utility/pointer.hpp"
+#include "utility/container.hpp"
 
-#include "hybrid/hybrid_set.decl.h"
-#include "hybrid/discrete_location.h"
-#include "hybrid/discrete_event.h"
-#include "hybrid/hybrid_graphics_interface.h"
-#include "hybrid/hybrid_set.decl.h"
+#include "hybrid/hybrid_set.decl.hpp"
+#include "hybrid/discrete_location.hpp"
+#include "hybrid/discrete_event.hpp"
+#include "hybrid/hybrid_graphics_interface.hpp"
+#include "hybrid/hybrid_set.decl.hpp"
 
-#include "geometry/box.h"
-#include "geometry/enclosure.h"
+#include "geometry/box.hpp"
+#include "geometry/enclosure.hpp"
 
 namespace Ariadne {
 
@@ -386,4 +386,4 @@ HybridGridTreeSet outer_approximation(const ListSet<HybridEnclosure>& hls, const
 
 } // namespace Ariadne
 
-#endif // ARIADNE_HYBRID_ENCLOSURE_H
+#endif // ARIADNE_HYBRID_ENCLOSURE_HPP

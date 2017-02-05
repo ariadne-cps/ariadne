@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test.h
+ *            test.hpp
  *
  *  Copyright  2007  Alberto Casagrande, Pieter Collins, Ivan S. Zapreev
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl, ivan.zapreev@gmail.com
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*!\file test.h
+/*!\file test.hpp
  * \brief Macros for test suite.
  */
 
-#ifndef ARIADNE_TEST_H
-#define ARIADNE_TEST_H
+#ifndef ARIADNE_TEST_HPP
+#define ARIADNE_TEST_HPP
 
 #include <cstdlib>
 #include <cstring>
@@ -557,5 +557,5 @@ int test_case_counter = 0;
     } \
 
 
-#endif // ARIADNE_TEST_H
+#endif // ARIADNE_TEST_HPP
 

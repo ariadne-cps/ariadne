@@ -1,5 +1,5 @@
 /***************************************************************************
- *            grid_cell.h
+ *            grid_cell.hpp
  *
  *  Copyright  2008-12  Ivan S. Zapreev, Pieter Collins
  *
@@ -22,12 +22,12 @@
  *  Foundation, Inc., 59 Templece Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file grid_cell.h
+/*! \file grid_cell.hpp
  *  \brief Cells on a grid defined by a binary word.
  */
 
-#ifndef ARIADNE_GRID_CELL_H
-#define ARIADNE_GRID_CELL_H
+#ifndef ARIADNE_GRID_CELL_HPP
+#define ARIADNE_GRID_CELL_HPP
 
 #include <iostream>
 #include <iomanip>
@@ -36,22 +36,22 @@
 #include <boost/iterator/iterator_facade.hpp>
 #include <memory>
 
-#include "utility/tribool.h"
-#include "utility/array.h"
+#include "utility/tribool.hpp"
+#include "utility/array.hpp"
 
-#include "utility/binary_word.h"
+#include "utility/binary_word.hpp"
 
-#include "utility/exceptions.h"
-#include "geometry/box.h"
-#include "geometry/point.h"
-#include "geometry/list_set.h"
+#include "utility/exceptions.hpp"
+#include "geometry/box.hpp"
+#include "geometry/point.hpp"
+#include "geometry/list_set.hpp"
 
-#include "numeric/numeric.h"
+#include "numeric/numeric.hpp"
 
-#include "geometry/set_interface.h"
-#include "geometry/paving_interface.h"
-#include "algebra/vector.h"
-#include "geometry/grid.h"
+#include "geometry/set_interface.hpp"
+#include "geometry/paving_interface.hpp"
+#include "algebra/vector.hpp"
+#include "geometry/grid.hpp"
 
 
 namespace Ariadne {
@@ -559,5 +559,5 @@ inline Bool GridOpenCell::intersect( const GridOpenCell & theLeftOpenCell, const
 
 } // namespace Ariadne
 
-#endif /* ARIADNE_GRID_CELL_H */
+#endif /* ARIADNE_GRID_CELL_HPP */
 

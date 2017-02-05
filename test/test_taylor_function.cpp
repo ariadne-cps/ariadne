@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_taylor_function.cc
+ *            test_taylor_function.cpp
  *
  *  Copyright 2009--17  Pieter Collins
  *
@@ -24,23 +24,23 @@
 #include <iostream>
 #include <iomanip>
 #include "config.h"
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "algebra/covector.h"
-#include "algebra/matrix.h"
-#include "algebra/multi_index.h"
-#include "algebra/expansion.h"
-#include "algebra/algebra.h"
-#include "function/taylor_model.h"
-#include "function/taylor_function.h"
-#include "algebra/differential.h"
-#include "function/polynomial.h"
-#include "function/function.h"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/covector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/multi_index.hpp"
+#include "algebra/expansion.hpp"
+#include "algebra/algebra.hpp"
+#include "function/taylor_model.hpp"
+#include "function/taylor_function.hpp"
+#include "algebra/differential.hpp"
+#include "function/polynomial.hpp"
+#include "function/function.hpp"
 
-#include "function/formula.h"
-#include "function/symbolic_function.h"
+#include "function/formula.hpp"
+#include "function/symbolic_function.hpp"
 
-#include "test.h"
+#include "test.hpp"
 
 using namespace std;
 using namespace Ariadne;

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            operators.h
+ *            operators.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -22,17 +22,17 @@
  */
 
 
-/*! \file operators.h
+/*! \file operators.hpp
  *  \brief Numerical operator classes
  */
 
-#ifndef ARIADNE_OPERATORS_H
-#define ARIADNE_OPERATORS_H
+#ifndef ARIADNE_OPERATORS_HPP
+#define ARIADNE_OPERATORS_HPP
 
 #include <iostream>
 
-#include "logical.decl.h"
-#include "number.decl.h"
+#include "logical.decl.hpp"
+#include "number.decl.hpp"
 
 namespace Ariadne {
 
@@ -378,4 +378,4 @@ inline OutputStream& operator<<(OutputStream& os, const Divides& v) { return os 
 
 } // namespace Ariadne
 
-#endif // ARIADNE_OPERATORS_H
+#endif // ARIADNE_OPERATORS_HPP

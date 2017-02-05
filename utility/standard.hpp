@@ -1,5 +1,5 @@
 /***************************************************************************
- *            standard.h
+ *            standard.hpp
  *
  *  Copyright 2014-17  Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file standard.h
+/*! \file standard.hpp
  *  \brief Standard library and utility classes. File suitable for use as a pre-compiled header.
  */
 
-#ifndef ARIADNE_STANDARD_H
-#define ARIADNE_STANDARD_H
+#ifndef ARIADNE_STANDARD_HPP
+#define ARIADNE_STANDARD_HPP
 
 #include <iostream>
 #include <iomanip>
@@ -39,7 +39,7 @@
 
 #include <stdint.h>
 
-#include "utility/macros.h"
-#include "utility/metaprogramming.h"
+#include "utility/macros.hpp"
+#include "utility/metaprogramming.hpp"
 
 #endif

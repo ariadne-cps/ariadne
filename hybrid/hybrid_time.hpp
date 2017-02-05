@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_time.h
+ *            hybrid_time.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,14 +21,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file hybrid_time.h
+/*! \file hybrid_time.hpp
  *  \brief Hybrid times
  */
 
-#ifndef ARIADNE_HYBRID_TIME_H
-#define ARIADNE_HYBRID_TIME_H
+#ifndef ARIADNE_HYBRID_TIME_HPP
+#define ARIADNE_HYBRID_TIME_HPP
 
-#include "numeric/numeric.h"
+#include "numeric/numeric.hpp"
 
 namespace Ariadne {
 
@@ -104,4 +104,4 @@ inline OutputStream& operator<<(OutputStream& os, const HybridTime& ht) {
 
 } // namespace Ariadne
 
-#endif // ARIADNE_HYBRID_TIME_H
+#endif // ARIADNE_HYBRID_TIME_HPP

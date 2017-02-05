@@ -1,5 +1,5 @@
 /***************************************************************************
- *            scaled_function_patch.tpl.h
+ *            scaled_function_patch.tpl.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -24,25 +24,25 @@
 #ifndef FUNCTION_PATCH_TCC
 #define FUNCTION_PATCH_TCC
 
-#include "function/functional.h"
+#include "function/functional.hpp"
 #include "config.h"
 
 #include <iostream>
 #include <iomanip>
 
-#include "utility/macros.h"
-#include "utility/exceptions.h"
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "algebra/matrix.h"
-#include "algebra/multi_index.h"
-#include "function/polynomial.h"
-#include "algebra/differential.h"
+#include "utility/macros.hpp"
+#include "utility/exceptions.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/multi_index.hpp"
+#include "function/polynomial.hpp"
+#include "algebra/differential.hpp"
 
-#include "function/function.h"
-#include "function/function_mixin.h"
+#include "function/function.hpp"
+#include "function/function_mixin.hpp"
 
-#include "algebra/evaluate.h"
+#include "algebra/evaluate.hpp"
 
 #define VOLATILE ;
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_simulator.h
+ *            hybrid_simulator.hpp
  *
  *  Copyright  2009  Pieter Collins
  *
@@ -21,15 +21,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file hybrid_simulator.h
+/*! \file hybrid_simulator.hpp
  *  \brief Simulator for hybrid systems.
  */
 
-#ifndef ARIADNE_HYBRID_SIMULATOR_H
-#define ARIADNE_HYBRID_SIMULATOR_H
+#ifndef ARIADNE_HYBRID_SIMULATOR_HPP
+#define ARIADNE_HYBRID_SIMULATOR_HPP
 
-#include "utility/logging.h"
-#include "hybrid/hybrid_set.decl.h"
+#include "utility/logging.hpp"
+#include "hybrid/hybrid_set.decl.hpp"
 
 namespace Ariadne {
 
@@ -63,4 +63,4 @@ class HybridSimulator
 
 } // namespace Ariadne
 
-#endif // ARIADNE_HYBRID_SIMULATOR_H
+#endif // ARIADNE_HYBRID_SIMULATOR_HPP

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            profile_arithmetic.cc
+ *            profile_arithmetic.cpp
  *
  *  Copyright 2008--17  Pieter Collins
  *

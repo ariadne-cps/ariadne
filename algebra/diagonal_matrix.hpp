@@ -1,5 +1,5 @@
 /***************************************************************************
- *            algebra/diagonal_matrix.h
+ *            algebra/diagonal_matrix.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,19 +21,19 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file algebra/diagonal_matrix.h
+/*! \file algebra/diagonal_matrix.hpp
  *  \brief
  */
 
 
 
-#ifndef ARIADNE_DIAGONAL_MATRIX_H
-#define ARIADNE_DIAGONAL_MATRIX_H
+#ifndef ARIADNE_DIAGONAL_MATRIX_HPP
+#define ARIADNE_DIAGONAL_MATRIX_HPP
 
 #include <initializer_list>
 
-#include "vector.h"
-#include "matrix.h"
+#include "vector.hpp"
+#include "matrix.hpp"
 
 namespace Ariadne {
 

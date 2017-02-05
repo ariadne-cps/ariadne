@@ -1,5 +1,5 @@
 /***************************************************************************
- *            vector_field_evolver.h
+ *            vector_field_evolver.hpp
  *
  *  Copyright  2007-8  Alberto Casagrande, Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file vector_field_evolver.h
+/*! \file vector_field_evolver.hpp
  *  \brief Evolver for vector_field systems.
  */
 
-#ifndef ARIADNE_VECTOR_FIELD_EVOLVER_H
-#define ARIADNE_VECTOR_FIELD_EVOLVER_H
+#ifndef ARIADNE_VECTOR_FIELD_EVOLVER_HPP
+#define ARIADNE_VECTOR_FIELD_EVOLVER_HPP
 
 #include <string>
 #include <vector>
@@ -35,15 +35,15 @@
 
 #include <boost/smart_ptr.hpp>
 
-#include "utility/tuple.h"
+#include "utility/tuple.hpp"
 
-#include "dynamics/vector_field.h"
-#include "function/function_interface.h"
-#include "solvers/configuration_interface.h"
-#include "solvers/integrator_interface.h"
-#include "dynamics/evolver_base.h"
+#include "dynamics/vector_field.hpp"
+#include "function/function_interface.hpp"
+#include "solvers/configuration_interface.hpp"
+#include "solvers/integrator_interface.hpp"
+#include "dynamics/evolver_base.hpp"
 
-#include "utility/logging.h"
+#include "utility/logging.hpp"
 
 namespace Ariadne {
 
@@ -169,4 +169,4 @@ class VectorFieldEvolverConfiguration : public ConfigurationInterface
 
 } // namespace Ariadne
 
-#endif // ARIADNE_VECTOR_FIELD_EVOLVER_H
+#endif // ARIADNE_VECTOR_FIELD_EVOLVER_HPP

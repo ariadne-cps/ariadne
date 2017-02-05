@@ -1,5 +1,5 @@
 /***************************************************************************
- *            numeric/number_interface.h
+ *            numeric/number_interface.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file numeric/number_interface.h
+/*! \file numeric/number_interface.hpp
  *  \brief
  */
 
@@ -30,12 +30,12 @@
 #ifndef ARIADNE_NUMBER_INTERFACE
 #define ARIADNE_NUMBER_INTERFACE
 
-#include "utility/clonable.h"
-#include "utility/writable.h"
+#include "utility/clonable.hpp"
+#include "utility/writable.hpp"
 
-#include "number.decl.h"
-#include "float.decl.h"
-#include "operators.h"
+#include "number.decl.hpp"
+#include "float.decl.hpp"
+#include "operators.hpp"
 
 namespace Ariadne {
 

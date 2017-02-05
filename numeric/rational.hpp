@@ -1,5 +1,5 @@
 /***************************************************************************
- *            numeric/rational.h
+ *            numeric/rational.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,23 +21,23 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file numeric/rational.h
+/*! \file numeric/rational.hpp
  *  \brief
  */
 
 
 
-#ifndef ARIADNE_RATIONAL_H
-#define ARIADNE_RATIONAL_H
+#ifndef ARIADNE_RATIONAL_HPP
+#define ARIADNE_RATIONAL_HPP
 
-#include "external/gmp.h"
-#include "utility/typedefs.h"
-#include "utility/metaprogramming.h"
-#include "utility/string.h"
-#include "numeric/integer.h"
-#include "numeric/arithmetic.h"
-#include "numeric/number.decl.h"
-#include "numeric/float.decl.h"
+#include "external/gmp.hpp"
+#include "utility/typedefs.hpp"
+#include "utility/metaprogramming.hpp"
+#include "utility/string.hpp"
+#include "numeric/integer.hpp"
+#include "numeric/arithmetic.hpp"
+#include "numeric/number.decl.hpp"
+#include "numeric/float.decl.hpp"
 
 namespace Ariadne {
 

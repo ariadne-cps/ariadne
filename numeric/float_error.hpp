@@ -1,5 +1,5 @@
 /***************************************************************************
- *            float_error.h
+ *            float_error.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,17 +21,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file float_error.h
+/*! \file float_error.hpp
  *  \brief Floating-point error bounds for metric spaces.
  */
 
-#ifndef ARIADNE_FLOAT_ERROR_H
-#define ARIADNE_FLOAT_ERROR_H
+#ifndef ARIADNE_FLOAT_ERROR_HPP
+#define ARIADNE_FLOAT_ERROR_HPP
 
-#include "utility/macros.h"
+#include "utility/macros.hpp"
 
-#include "number.decl.h"
-#include "float.decl.h"
+#include "number.decl.hpp"
+#include "float.decl.hpp"
 
 namespace Ariadne {
 

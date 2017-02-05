@@ -1,5 +1,5 @@
 /***************************************************************************
- *            taylor_model.tpl.h
+ *            taylor_model.tpl.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,31 +21,31 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/numeric.h"
+#include "numeric/numeric.hpp"
 #include "config.h"
 
 #include <iomanip>
 #include <limits>
 
-#include "numeric/rounding.h"
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "algebra/covector.h"
-#include "algebra/matrix.h"
-#include "algebra/expansion.h"
-#include "algebra/series.h"
-#include "algebra/differential.h"
-#include "function/taylor_model.h"
-#include "function/taylor_series.h"
-#include "function/function.h"
-#include "utility/exceptions.h"
+#include "numeric/rounding.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/covector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/expansion.hpp"
+#include "algebra/series.hpp"
+#include "algebra/differential.hpp"
+#include "function/taylor_model.hpp"
+#include "function/taylor_series.hpp"
+#include "function/function.hpp"
+#include "utility/exceptions.hpp"
 
-#include "algebra/algebra_operations.tpl.h"
+#include "algebra/algebra_operations.tpl.hpp"
 
 #define VOLATILE ;
-#include "algebra/multi_index-noaliasing.h"
-#include "function/function_mixin.h"
-#include "algebra/vector.h"
+#include "algebra/multi_index-noaliasing.hpp"
+#include "function/function_mixin.hpp"
+#include "algebra/vector.hpp"
 
 namespace Ariadne {
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_grid.h
+ *            hybrid_grid.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,20 +21,20 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file hybrid_grid.h
+/*! \file hybrid_grid.hpp
  *  \brief Grids in hybrid spaces.
  */
 
-#ifndef ARIADNE_HYBRID_GRID_H
-#define ARIADNE_HYBRID_GRID_H
+#ifndef ARIADNE_HYBRID_GRID_HPP
+#define ARIADNE_HYBRID_GRID_HPP
 
 #include <iostream>
 
-#include "expression/space.h"
-#include "hybrid/hybrid_space.h"
-#include "hybrid/hybrid_scaling.h"
+#include "expression/space.hpp"
+#include "hybrid/hybrid_space.hpp"
+#include "hybrid/hybrid_scaling.hpp"
 
-#include "geometry/grid.h"
+#include "geometry/grid.hpp"
 
 namespace Ariadne {
 
@@ -93,5 +93,5 @@ inline OutputStream& operator<<(OutputStream& os, const HybridGrid& hgrid) {
 
 }
 
-#endif // ARIADNE_HYBRID_GRID_H
+#endif // ARIADNE_HYBRID_GRID_HPP
 

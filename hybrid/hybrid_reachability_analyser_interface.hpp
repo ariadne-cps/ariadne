@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_reachability_analyser_interface.h
+ *            hybrid_reachability_analyser_interface.hpp
  *
  *  Copyright  2011  Luca Geretti
  *
@@ -21,19 +21,19 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file hybrid_reachability_analyser_interface.h
+/*! \file hybrid_reachability_analyser_interface.hpp
  *  \brief Interface for analysis in the hybrid case.
  */
 
-#ifndef ARIADNE_HYBRID_REACHABILITY_ANALYSER_INTERFACE_H
-#define ARIADNE_HYBRID_REACHABILITY_ANALYSER_INTERFACE_H
+#ifndef ARIADNE_HYBRID_REACHABILITY_ANALYSER_INTERFACE_HPP
+#define ARIADNE_HYBRID_REACHABILITY_ANALYSER_INTERFACE_HPP
 
-#include "solvers/reachability_analyser_interface.h"
+#include "solvers/reachability_analyser_interface.hpp"
 
-#include "hybrid/hybrid_set_interface.h"
-#include "dynamics/evolver_interface.h"
+#include "hybrid/hybrid_set_interface.hpp"
+#include "dynamics/evolver_interface.hpp"
 
-#include "utility/logging.h"
+#include "utility/logging.hpp"
 
 namespace Ariadne {
 
@@ -90,4 +90,4 @@ class HybridReachabilityAnalyserFactoryInterface
 } // namespace Ariadne
 
 
-#endif // ARIADNE_HYBRID_REACHABILITY_ANALYSER_INTERFACE_H
+#endif // ARIADNE_HYBRID_REACHABILITY_ANALYSER_INTERFACE_HPP

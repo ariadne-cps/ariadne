@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_set.decl.h
+ *            hybrid_set.decl.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file hybrid_set.decl.h
+/*! \file hybrid_set.decl.hpp
  *  \brief Forward declarations of sets in hybrid spaces.
  */
 
-#ifndef ARIADNE_HYBRID_SET_DECL_H
-#define ARIADNE_HYBRID_SET_DECL_H
+#ifndef ARIADNE_HYBRID_SET_DECL_HPP
+#define ARIADNE_HYBRID_SET_DECL_HPP
 
 
 namespace Ariadne {
@@ -75,4 +75,4 @@ class HybridGridTreeSet;
 
 } // namespace Ariadne
 
-#endif // ARIADNE_HYBRID_SET_DECL_H
+#endif // ARIADNE_HYBRID_SET_DECL_HPP

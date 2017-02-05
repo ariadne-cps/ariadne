@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_hybrid_simulator.cc
+ *            test_hybrid_simulator.cpp
  *
  *  Copyright  2006-11  Pieter Collins
  *
@@ -25,17 +25,17 @@
 #include <iostream>
 
 #include "config.h"
-#include "expression/expression.h"
-#include "expression/space.h"
-#include "hybrid/hybrid_set.h"
-#include "hybrid/hybrid_orbit.h"
-#include "hybrid/hybrid_time.h"
-#include "hybrid/hybrid_automata.h"
-#include "hybrid/hybrid_simulator.h"
-#include "output/graphics.h"
-#include "utility/logging.h"
+#include "expression/expression.hpp"
+#include "expression/space.hpp"
+#include "hybrid/hybrid_set.hpp"
+#include "hybrid/hybrid_orbit.hpp"
+#include "hybrid/hybrid_time.hpp"
+#include "hybrid/hybrid_automata.hpp"
+#include "hybrid/hybrid_simulator.hpp"
+#include "output/graphics.hpp"
+#include "utility/logging.hpp"
 
-#include "test.h"
+#include "test.hpp"
 
 using namespace Ariadne;
 using namespace std;

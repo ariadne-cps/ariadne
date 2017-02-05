@@ -1,5 +1,5 @@
 /***************************************************************************
- *            paver.h
+ *            paver.hpp
  *
  *  Copyright  2011-12  Pieter Collins
  *
@@ -21,14 +21,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file paver.h
+/*! \file paver.hpp
  *  \brief Class for computing outer approximations to nonlinear sets.
  */
 
-#ifndef ARIADNE_PAVER_H
-#define ARIADNE_PAVER_H
+#ifndef ARIADNE_PAVER_HPP
+#define ARIADNE_PAVER_HPP
 
-#include "geometry/paver_interface.h"
+#include "geometry/paver_interface.hpp"
 
 namespace Ariadne {
 
@@ -70,4 +70,4 @@ class OptimalConstraintPaver : public PaverInterface
 
 } //namespace Ariadne
 
-#endif /* ARIADNE_PAVER_H */
+#endif /* ARIADNE_PAVER_HPP */

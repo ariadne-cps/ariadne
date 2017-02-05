@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_integer.cc
+ *            test_integer.cpp
  *
  *  Copyright 2013--17  Pieter Collins
  *
@@ -22,13 +22,13 @@
  */
 
 #include "config.h"
-#include "numeric/integer.h"
-#include "numeric/logical.h"
+#include "numeric/integer.hpp"
+#include "numeric/logical.hpp"
 
 #include <iostream>
 #include <iomanip>
 
-#include "test.h"
+#include "test.hpp"
 
 using namespace std;
 using namespace Ariadne;

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            taylor_series.h
+ *            taylor_series.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,18 +21,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file taylor_series.h
+/*! \file taylor_series.hpp
  *  \brief ApproximateTag power series in one variable on a is_bounded domain with a dense
  *  representation as a floating-point polynomial plus an error bound.
  */
 
-#ifndef ARIADNE_TAYLOR_SERIES_H
-#define ARIADNE_TAYLOR_SERIES_H
+#ifndef ARIADNE_TAYLOR_SERIES_HPP
+#define ARIADNE_TAYLOR_SERIES_HPP
 
-#include "numeric/numeric.h"
-#include "algebra/series.h"
-#include "function/domain.h"
-#include "utility/container.h"
+#include "numeric/numeric.hpp"
+#include "algebra/series.hpp"
+#include "function/domain.hpp"
+#include "utility/container.hpp"
 
 namespace Ariadne {
 
@@ -103,4 +103,4 @@ OutputStream& operator<<(OutputStream& os, const TaylorSeries<Float64Bounds>& ts
 
 } // namespace Ariadne
 
-#endif // ARIADNE_TAYLOR_SERIES_H
+#endif // ARIADNE_TAYLOR_SERIES_HPP

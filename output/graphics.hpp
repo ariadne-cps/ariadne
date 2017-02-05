@@ -1,5 +1,5 @@
 /***************************************************************************
- *            graphics.h
+ *            graphics.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,21 +21,21 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file graphics.h
+/*! \file graphics.hpp
  *  \brief Graphics class for drawing and outputting shapes in Euclidean space.
  */
 
-#ifndef ARIADNE_GRAPHICS_H
-#define ARIADNE_GRAPHICS_H
+#ifndef ARIADNE_GRAPHICS_HPP
+#define ARIADNE_GRAPHICS_HPP
 
 #include <iosfwd>
 #include <string>
 #include <vector>
 
-#include "utility/typedefs.h"
-#include "utility/declarations.h"
-#include "output/colour.h"
-#include "output/graphics_interface.h"
+#include "utility/typedefs.hpp"
+#include "utility/declarations.hpp"
+#include "output/colour.hpp"
+#include "output/graphics_interface.hpp"
 
 typedef unsigned int Nat;
 
@@ -278,4 +278,4 @@ Void plot(const char* filename, const PlanarProjectionMap& pr, const Approximate
 
 } // namespace Ariadne
 
-#endif // ARIADNE_GRAPHICS_H
+#endif // ARIADNE_GRAPHICS_HPP

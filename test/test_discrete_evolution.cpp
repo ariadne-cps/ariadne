@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_discrete_evolution.cc
+ *            test_discrete_evolution.cpp
  *
  *  Copyright  2006-8  Pieter Collins
  *
@@ -25,25 +25,25 @@
 #include <iostream>
 
 #include "config.h"
-#include "utility/tuple.h"
-#include "algebra/vector.h"
-#include "algebra/matrix.h"
-#include "algebra/algebra.h"
-#include "function/taylor_model.h"
-#include "algebra/differential.h"
-#include "function/constraint.h"
-#include "function/function.h"
-#include "function/taylor_function.h"
-#include "function/formula.h"
-#include "geometry/enclosure.h"
-#include "geometry/box.h"
-#include "geometry/list_set.h"
-#include "dynamics/map.h"
-#include "dynamics/map_evolver.h"
-#include "output/graphics.h"
-#include "utility/logging.h"
+#include "utility/tuple.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/algebra.hpp"
+#include "function/taylor_model.hpp"
+#include "algebra/differential.hpp"
+#include "function/constraint.hpp"
+#include "function/function.hpp"
+#include "function/taylor_function.hpp"
+#include "function/formula.hpp"
+#include "geometry/enclosure.hpp"
+#include "geometry/box.hpp"
+#include "geometry/list_set.hpp"
+#include "dynamics/map.hpp"
+#include "dynamics/map_evolver.hpp"
+#include "output/graphics.hpp"
+#include "utility/logging.hpp"
 
-#include "test.h"
+#include "test.hpp"
 
 using namespace Ariadne;
 using namespace std;

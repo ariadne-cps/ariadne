@@ -1,5 +1,5 @@
 /***************************************************************************
- *            function_model_mixin.h
+ *            function_model_mixin.hpp
  *
  *  Copyright 2011-17  Pieter Collins
  *
@@ -21,30 +21,30 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file function_model_mixin.h
+/*! \file function_model_mixin.hpp
  *  \brief Mixin for concrete functions on bounded domains.
  */
 
-#ifndef ARIADNE_FUNCTION_MODEL_MIXIN_H
-#define ARIADNE_FUNCTION_MODEL_MIXIN_H
+#ifndef ARIADNE_FUNCTION_MODEL_MIXIN_HPP
+#define ARIADNE_FUNCTION_MODEL_MIXIN_HPP
 
 #include <cstdarg>
 #include <iosfwd>
 #include <iostream>
 
-#include "function/function_model_interface.h"
-#include "function/function_model.h"
+#include "function/function_model_interface.hpp"
+#include "function/function_model.hpp"
 
-#include "numeric/operators.h"
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "algebra/matrix.h"
-#include "algebra/operations.h"
-#include "function/domain.h"
+#include "numeric/operators.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/operations.hpp"
+#include "function/domain.hpp"
 
-#include "function/function_interface.h"
-#include "function/function_mixin.h"
-#include "function/function.h"
+#include "function/function_interface.hpp"
+#include "function/function_mixin.hpp"
+#include "function/function.hpp"
 
 namespace Ariadne {
 

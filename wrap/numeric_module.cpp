@@ -1,5 +1,5 @@
 /***************************************************************************
- *            numeric_module.cc
+ *            numeric_module.cpp
  *
  *  Copyright  2007-15  Pieter Collins
  *
@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "boost_python.h"
+#include "boost_python.hpp"
 
 void numeric_submodule();
 

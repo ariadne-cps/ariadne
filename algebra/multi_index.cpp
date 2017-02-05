@@ -1,5 +1,5 @@
 /***************************************************************************
- *            multi_index.cc
+ *            multi_index.cpp
  *
  *  Copyright 2008--17  Pieter Collins
  *
@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "multi_index.h"
+#include "multi_index.hpp"
 
 namespace Ariadne {
 

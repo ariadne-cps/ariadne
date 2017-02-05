@@ -1,5 +1,5 @@
 /***************************************************************************
- *            utility/path.h
+ *            utility/path.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,19 +21,19 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file utility/path.h
+/*! \file utility/path.hpp
  *  \brief
  */
 
 
 
-#ifndef ARIADNE_PATH_H
-#define ARIADNE_PATH_H
+#ifndef ARIADNE_PATH_HPP
+#define ARIADNE_PATH_HPP
 
-#include "macros.h"
-#include "typedefs.h"
+#include "macros.hpp"
+#include "typedefs.hpp"
 
-#include "container.h"
+#include "container.hpp"
 
 namespace Ariadne {
 
@@ -231,4 +231,4 @@ template<class T> OutputStream& operator<<(OutputStream& os, const Path<T>& pth)
 
 } // namespace Ariadne
 
-#endif /* ARIADNE_PATH_H */
+#endif /* ARIADNE_PATH_HPP */

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            evolution_submodule.cc
+ *            evolution_submodule.cpp
  *
  *  Copyright 2008--17  Pieter Collins
  *
@@ -21,18 +21,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "boost_python.h"
-#include "utilities.h"
+#include "boost_python.hpp"
+#include "utilities.hpp"
 
 #include <boost/python.hpp>
 
-#include "dynamics/orbit.h"
-#include "dynamics/vector_field_evolver.h"
+#include "dynamics/orbit.hpp"
+#include "dynamics/vector_field_evolver.hpp"
 
-#include "hybrid/hybrid_evolver.h"
-#include "hybrid/hybrid_automata.h"
-#include "hybrid/hybrid_enclosure.h"
-#include "hybrid/hybrid_time.h"
+#include "hybrid/hybrid_evolver.hpp"
+#include "hybrid/hybrid_automata.hpp"
+#include "hybrid/hybrid_enclosure.hpp"
+#include "hybrid/hybrid_time.hpp"
 
 using namespace boost::python;
 using namespace Ariadne;

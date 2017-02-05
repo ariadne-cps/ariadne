@@ -1,5 +1,5 @@
 /***************************************************************************
- *            orbit.h
+ *            orbit.hpp
  *
  *  Copyright 2007-17  Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file orbit.h
+/*! \file orbit.hpp
  *  \brief Orbits of dynamic systems
  */
 
-#ifndef ARIADNE_ORBIT_H
-#define ARIADNE_ORBIT_H
+#ifndef ARIADNE_ORBIT_HPP
+#define ARIADNE_ORBIT_HPP
 
 #include <utility>
 #include <iostream>
@@ -35,9 +35,9 @@
 #include <memory>
 #include <boost/scoped_ptr.hpp>
 
-#include "numeric/numeric.h"
-#include "output/graphics_interface.h"
-#include "geometry/function_set.h"
+#include "numeric/numeric.hpp"
+#include "output/graphics_interface.hpp"
+#include "geometry/function_set.hpp"
 
 
 
@@ -163,4 +163,4 @@ template<class ES> FigureInterface& operator<<(FigureInterface& figure, const Or
 
 } // namespace Ariadne
 
-#endif // ARIADNE_ORBIT_H
+#endif // ARIADNE_ORBIT_HPP

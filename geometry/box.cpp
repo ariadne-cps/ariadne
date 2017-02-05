@@ -1,5 +1,5 @@
 /***************************************************************************
- *            box.cc
+ *            box.cpp
  *
  *  Copyright 2013--17  Pieter Collins
  *
@@ -21,22 +21,22 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file box.cc
+/*! \file box.cpp
  *  \brief
  */
 
 
 
-#include "numeric/module.h"
-#include "function/function.h"
-#include "function/taylor_model.h"
+#include "numeric/module.hpp"
+#include "function/function.hpp"
+#include "function/taylor_model.hpp"
 
-#include "box.h"
-#include "box.tpl.h"
+#include "box.hpp"
+#include "box.tpl.hpp"
 
-#include "function/formula.h"
+#include "function/formula.hpp"
 
-#include "algebra/algebra.h"
+#include "algebra/algebra.hpp"
 
 namespace Ariadne {
 

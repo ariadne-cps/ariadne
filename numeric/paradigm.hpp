@@ -1,5 +1,5 @@
 /***************************************************************************
- *            numeric/paradigm.h
+ *            numeric/paradigm.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,14 +21,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file numeric/paradigm.h
+/*! \file numeric/paradigm.hpp
  *  \brief
  */
 
-#ifndef ARIADNE_PARADIGM_H
-#define ARIADNE_PARADIGM_H
+#ifndef ARIADNE_PARADIGM_HPP
+#define ARIADNE_PARADIGM_HPP
 
-#include "utility/metaprogramming.h"
+#include "utility/metaprogramming.hpp"
 
 namespace Ariadne {
 
@@ -327,4 +327,4 @@ template<class P1, class P2=Negated<P1>> using Equality = Null<Weaker<P1,Negated
 
 } // namespace Ariadne
 
-#endif /* ARIADNE_PARADIGM_H */
+#endif /* ARIADNE_PARADIGM_HPP */

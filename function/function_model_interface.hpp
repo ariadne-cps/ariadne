@@ -1,5 +1,5 @@
 /***************************************************************************
- *            function_model_interface.h
+ *            function_model_interface.hpp
  *
  *  Copyright 2011-17  Pieter Collins
  *
@@ -21,17 +21,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file function_model_interface.h
+/*! \file function_model_interface.hpp
  *  \brief Interface for functions on bounded sets.
  */
 
-#ifndef ARIADNE_FUNCTION_MODEL_INTERFACE_H
-#define ARIADNE_FUNCTION_MODEL_INTERFACE_H
+#ifndef ARIADNE_FUNCTION_MODEL_INTERFACE_HPP
+#define ARIADNE_FUNCTION_MODEL_INTERFACE_HPP
 
-#include "function/function.decl.h"
-#include "function/function_interface.h"
+#include "function/function.decl.hpp"
+#include "function/function_interface.hpp"
 
-#include "numeric/operators.h"
+#include "numeric/operators.hpp"
 
 namespace Ariadne {
 

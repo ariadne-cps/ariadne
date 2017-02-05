@@ -1,5 +1,5 @@
 /***************************************************************************
- *            runge_kutta_integrator.h
+ *            runge_kutta_integrator.hpp
  *
  *  Copyright  2010  Pieter Collins
  *
@@ -21,17 +21,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef ARIADNE_RUNGE_KUTTA_INTEGRATOR_H
-#define ARIADNE_RUNGE_KUTTA_INTEGRATOR_H
+#ifndef ARIADNE_RUNGE_KUTTA_INTEGRATOR_HPP
+#define ARIADNE_RUNGE_KUTTA_INTEGRATOR_HPP
 
 #include <iostream>
 
-#include "utility/container.h"
-#include "utility/declarations.h"
-#include "solvers/integrator.h"
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "function/function.h"
+#include "utility/container.hpp"
+#include "utility/declarations.hpp"
+#include "solvers/integrator.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "function/function.hpp"
 
 namespace Ariadne {
 
@@ -55,4 +55,4 @@ class RungeKutta4Integrator
 
 } // namespace Ariadne
 
-#endif /* ARIADNE_RUNGE_KUTTA_INTEGRATOR_H */
+#endif /* ARIADNE_RUNGE_KUTTA_INTEGRATOR_HPP */

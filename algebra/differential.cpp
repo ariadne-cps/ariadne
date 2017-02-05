@@ -1,5 +1,5 @@
 /***************************************************************************
- *            differential.cc
+ *            differential.cpp
  *
  *  Copyright 2008--17  Pieter Collins
  *
@@ -21,14 +21,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/numeric.h"
-#include "geometry/interval.h"
+#include "numeric/numeric.hpp"
+#include "geometry/interval.hpp"
 
-#include "algebra/differential.h"
+#include "algebra/differential.hpp"
 
-#include "operations.h"
+#include "operations.hpp"
 
-#include "differential.tpl.h"
+#include "differential.tpl.hpp"
 
 namespace Ariadne {
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            drawer_interface.h
+ *            drawer_interface.hpp
  *
  *  Copyright  2011-12  Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file drawer_interface.h
+/*! \file drawer_interface.hpp
  *  \brief Interface for drawing affine and nonlinear sets.
  */
 
-#ifndef ARIADNE_DRAWER_INTERFACE_H
-#define ARIADNE_DRAWER_INTERFACE_H
+#ifndef ARIADNE_DRAWER_INTERFACE_HPP
+#define ARIADNE_DRAWER_INTERFACE_HPP
 
 #include <iosfwd>
 
@@ -48,4 +48,4 @@ class DrawerInterface
 
 } //namespace Ariadne
 
-#endif /* ARIADNE_DRAWER_INTERFACE_H */
+#endif /* ARIADNE_DRAWER_INTERFACE_HPP */

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            textplot.h
+ *            textplot.hpp
  *
  *  Copyright 2009-17  Davide Bresolin
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file textplot.h
+/*! \file textplot.hpp
  *  \brief TextPlot class for outputting sets as a list of point (that can be imported in GnuPlot, Matlab, etc.).
  */
 
-#ifndef ARIADNE_TEXTPLOT_H
-#define ARIADNE_TEXTPLOT_H
+#ifndef ARIADNE_TEXTPLOT_HPP
+#define ARIADNE_TEXTPLOT_HPP
 
 #include <iosfwd>
 #include <string>
@@ -34,8 +34,8 @@
 #include <fstream>
 #include <iostream>
 
-#include "output/graphics_interface.h"
-#include "output/colour.h"
+#include "output/graphics_interface.hpp"
+#include "output/colour.hpp"
 
 namespace Ariadne {
 
@@ -106,4 +106,4 @@ template<class SET> Void textplot(const char* filename, const SET& set) {
 
 } // namespace Ariadne
 
-#endif // ARIADNE_TEXTPLOT_H
+#endif // ARIADNE_TEXTPLOT_HPP

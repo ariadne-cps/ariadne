@@ -1,5 +1,5 @@
 /***************************************************************************
- *            number.cc
+ *            number.cpp
  *
  *  Copyright 2013--17  Pieter Collins
  *
@@ -21,26 +21,26 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file number.cc
+/*! \file number.cpp
  *  \brief
  */
 
 
 
-#include "utility/module.h"
-#include "numeric/paradigm.h"
+#include "utility/module.hpp"
+#include "numeric/paradigm.hpp"
 
-#include "number.h"
-#include "logical.h"
-#include "integer.h"
-#include "dyadic.h"
-#include "rational.h"
-#include "real.h"
-#include "float64.h"
-#include "floatmp.h"
+#include "number.hpp"
+#include "logical.hpp"
+#include "integer.hpp"
+#include "dyadic.hpp"
+#include "rational.hpp"
+#include "real.hpp"
+#include "float64.hpp"
+#include "floatmp.hpp"
 
-#include "number_interface.h"
-#include "number_wrapper.h"
+#include "number_interface.hpp"
+#include "number_wrapper.hpp"
 
 /************ Number *********************************************************/
 

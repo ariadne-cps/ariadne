@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_simulator.cc
+ *            hybrid_simulator.cpp
  *
  *  Copyright  2008-11  Pieter Collins
  *
@@ -21,32 +21,32 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.h"
+#include "function/functional.hpp"
 
-#include "algebra/algebra.h"
+#include "algebra/algebra.hpp"
 
 #include "config.h"
 
-#include "hybrid/hybrid_simulator.h"
+#include "hybrid/hybrid_simulator.hpp"
 
-#include "utility/array.h"
-#include "utility/container.h"
-#include "utility/tuple.h"
-#include "utility/stlio.h"
-#include "expression/valuation.h"
-#include "expression/assignment.h"
-#include "expression/space.h"
+#include "utility/array.hpp"
+#include "utility/container.hpp"
+#include "utility/tuple.hpp"
+#include "utility/stlio.hpp"
+#include "expression/valuation.hpp"
+#include "expression/assignment.hpp"
+#include "expression/space.hpp"
 
-#include "function/function.h"
-#include "function/formula.h"
-#include "function/taylor_model.h"
+#include "function/function.hpp"
+#include "function/formula.hpp"
+#include "function/taylor_model.hpp"
 
-#include "utility/logging.h"
+#include "utility/logging.hpp"
 
-#include "hybrid/hybrid_set.h"
-#include "hybrid/hybrid_orbit.h"
-#include "hybrid/hybrid_time.h"
-#include "hybrid/hybrid_automaton_interface.h"
+#include "hybrid/hybrid_set.hpp"
+#include "hybrid/hybrid_orbit.hpp"
+#include "hybrid/hybrid_time.hpp"
+#include "hybrid/hybrid_automaton_interface.hpp"
 
 
 namespace Ariadne {

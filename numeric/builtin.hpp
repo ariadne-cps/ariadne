@@ -1,5 +1,5 @@
 /***************************************************************************
- *            builtin.h
+ *            builtin.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,20 +21,20 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file builtin.h
+/*! \file builtin.hpp
  *  \brief Inclusion header for wrapper for builtin numbers.
  */
 
-#ifndef ARIADNE_BUILTIN_H
-#define ARIADNE_BUILTIN_H
+#ifndef ARIADNE_BUILTIN_HPP
+#define ARIADNE_BUILTIN_HPP
 
 #include <cassert>
 #include <iostream>
 #include <iomanip>
 #include <limits>
 
-#include "utility/metaprogramming.h"
-#include "numeric/number.decl.h"
+#include "utility/metaprogramming.hpp"
+#include "numeric/number.decl.hpp"
 
 
 namespace Ariadne {

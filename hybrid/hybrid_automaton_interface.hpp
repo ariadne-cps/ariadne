@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_automaton_interface.h
+ *            hybrid_automaton_interface.hpp
  *
  *  Copyright  2010  Pieter Collins
  *
@@ -21,17 +21,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file hybrid_automaton_interface.h
+/*! \file hybrid_automaton_interface.hpp
  *  \brief Interface for hybrid automata to be used by evolver classes.
  */
 
-#ifndef ARIADNE_HYBRID_AUTOMATON_INTERFACE_H
-#define ARIADNE_HYBRID_AUTOMATON_INTERFACE_H
+#ifndef ARIADNE_HYBRID_AUTOMATON_INTERFACE_HPP
+#define ARIADNE_HYBRID_AUTOMATON_INTERFACE_HPP
 
 #include <cassert>
-#include "function/function.h"
-#include "hybrid/discrete_event.h"
-#include "hybrid/discrete_location.h"
+#include "function/function.hpp"
+#include "hybrid/discrete_event.hpp"
+#include "hybrid/discrete_location.hpp"
 
 namespace Ariadne {
 
@@ -255,4 +255,4 @@ inline OutputStream& operator<<(OutputStream& os, const EventKind& evk) {
 
 } //namespace Ariadne
 
-#endif // ARIADNE_HYBRID_AUTOMATON_INTERFACE_H
+#endif // ARIADNE_HYBRID_AUTOMATON_INTERFACE_HPP

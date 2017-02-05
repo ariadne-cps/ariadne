@@ -1,5 +1,5 @@
 /***************************************************************************
- *            affine_set.h
+ *            affine_set.hpp
  *
  *  Copyright  2009  Pieter Collins
  *
@@ -21,25 +21,25 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file affine_set.h
+/*! \file affine_set.hpp
  *  \brief Affine sets described by equality, inequality and interval constraints over a is_bounded box.
  */
 
-#ifndef ARIADNE_AFFINE_SET_H
-#define ARIADNE_AFFINE_SET_H
+#ifndef ARIADNE_AFFINE_SET_HPP
+#define ARIADNE_AFFINE_SET_HPP
 
 #include <string>
 #include <vector>
 #include <list>
 #include <iostream>
 
-#include "utility/declarations.h"
-#include "utility/logging.h"
-#include "utility/container.h"
-#include "output/graphics_interface.h"
-#include "function/affine.h"
-#include "function/affine_model.h"
-#include "function/constraint.h"
+#include "utility/declarations.hpp"
+#include "utility/logging.hpp"
+#include "utility/container.hpp"
+#include "output/graphics_interface.hpp"
+#include "function/affine.hpp"
+#include "function/affine_model.hpp"
+#include "function/constraint.hpp"
 
 namespace Ariadne {
 
@@ -142,4 +142,4 @@ inline OutputStream& operator<<(OutputStream& os, const ValidatedAffineConstrain
 
 } // namespace Ariadne
 
-#endif // ARIADNE_AFFINE_SET_H
+#endif // ARIADNE_AFFINE_SET_HPP

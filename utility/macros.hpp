@@ -1,5 +1,5 @@
 /***************************************************************************
- *            utility/macros.h
+ *            utility/macros.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,14 +21,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file utility/macros.h
+/*! \file utility/macros.hpp
  *  \brief
  */
 
 
 
-#ifndef ARIADNE_MACROS_H
-#define ARIADNE_MACROS_H
+#ifndef ARIADNE_MACROS_HPP
+#define ARIADNE_MACROS_HPP
 
 #include <sstream>
 #include <stdexcept>
@@ -169,4 +169,4 @@
 #endif
 
 
-#endif // ARIADNE_MACROS_H
+#endif // ARIADNE_MACROS_HPP

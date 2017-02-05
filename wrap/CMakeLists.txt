@@ -12,35 +12,35 @@ ENDIF()
 
 
 add_library(pynumeric-src OBJECT
-    numeric_module.cc
-    numeric_submodule.cc
+    numeric_module.cpp
+    numeric_submodule.cpp
 )
 
 add_library(pyalgebra-src OBJECT
-    utilities.cc
-    algebra_module.cc
-    numeric_submodule.cc
-    linear_algebra_submodule.cc
-    differentiation_submodule.cc
-    calculus_submodule.cc
+    utilities.cpp
+    algebra_module.cpp
+    numeric_submodule.cpp
+    linear_algebra_submodule.cpp
+    differentiation_submodule.cpp
+    calculus_submodule.cpp
 )
 
 
 add_library(pyariadne-src OBJECT
-    utilities.cc
-    ariadne_module.cc
-    numeric_submodule.cc
-    linear_algebra_submodule.cc
-    optimization_submodule.cc
-    differentiation_submodule.cc
-    function_submodule.cc
-    calculus_submodule.cc
-    geometry_submodule.cc
-    solver_submodule.cc
-    storage_submodule.cc
-    system_submodule.cc
-    evolution_submodule.cc
-    graphics_submodule.cc
+    utilities.cpp
+    ariadne_module.cpp
+    numeric_submodule.cpp
+    linear_algebra_submodule.cpp
+    optimization_submodule.cpp
+    differentiation_submodule.cpp
+    function_submodule.cpp
+    calculus_submodule.cpp
+    geometry_submodule.cpp
+    solver_submodule.cpp
+    storage_submodule.cpp
+    system_submodule.cpp
+    evolution_submodule.cpp
+    graphics_submodule.cpp
 )
 
 cotire(pynumeric-src)

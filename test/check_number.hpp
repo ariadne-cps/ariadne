@@ -1,5 +1,5 @@
 /***************************************************************************
- *            check_number.h
+ *            check_number.hpp
  *
  *  Copyright 2009-17  Pieter Collins
  *
@@ -21,9 +21,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "test.h"
-#include "test/utility.h"
-#include "numeric/operators.h"
+#include "test.hpp"
+#include "test/utility.hpp"
+#include "numeric/operators.hpp"
 
 using namespace Ariadne;
 

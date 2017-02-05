@@ -1,5 +1,5 @@
 /***************************************************************************
- *            floatmp.cc
+ *            floatmp.cpp
  *
  *  Copyright 2013--17  Pieter Collins
  *
@@ -21,18 +21,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file floatmp.cc
+/*! \file floatmp.cpp
  *  \brief
  */
 
 
 
-#include "utility/module.h"
-#include "logical.h"
-#include "floatmp.h"
-#include "float64.h"
-#include "dyadic.h"
-#include "rational.h"
+#include "utility/module.hpp"
+#include "logical.hpp"
+#include "floatmp.hpp"
+#include "float64.hpp"
+#include "dyadic.hpp"
+#include "rational.hpp"
 
 namespace Ariadne {
 

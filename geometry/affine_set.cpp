@@ -1,5 +1,5 @@
 /***************************************************************************
- *            affine_set.cc
+ *            affine_set.cpp
  *
  *  Copyright  2009  Pieter Collins
  *
@@ -21,23 +21,23 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.h"
+#include "function/functional.hpp"
 #include "config.h"
 
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "algebra/matrix.h"
-#include "solvers/linear_programming.h"
-#include "function/function.h"
-#include "function/affine.h"
-#include "function/affine_model.h"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "solvers/linear_programming.hpp"
+#include "function/function.hpp"
+#include "function/affine.hpp"
+#include "function/affine_model.hpp"
 
-#include "geometry/box.h"
-#include "geometry/grid_set.h"
-#include "geometry/affine_set.h"
+#include "geometry/box.hpp"
+#include "geometry/grid_set.hpp"
+#include "geometry/affine_set.hpp"
 
-#include "output/graphics_interface.h"
-#include "output/geometry2d.h"
+#include "output/graphics_interface.hpp"
+#include "output/geometry2d.hpp"
 
 
 namespace Ariadne {

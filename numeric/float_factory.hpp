@@ -1,5 +1,5 @@
 /***************************************************************************
- *            float_factory.h
+ *            float_factory.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,14 +21,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file float_factory.h
+/*! \file float_factory.hpp
  *  \brief Factories for creating floating-point numbers.
  */
 
-#ifndef ARIADNE_FLOAT_FACTORY_H
-#define ARIADNE_FLOAT_FACTORY_H
+#ifndef ARIADNE_FLOAT_FACTORY_HPP
+#define ARIADNE_FLOAT_FACTORY_HPP
 
-#include "float-user.h"
+#include "float-user.hpp"
 
 namespace Ariadne {
 

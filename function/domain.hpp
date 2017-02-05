@@ -1,5 +1,5 @@
 /***************************************************************************
- *            domain.h
+ *            domain.hpp
  *
  *  Copyright 2008-17  Alberto Casagrande, Pieter Collins
  *
@@ -21,15 +21,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file domain.h
+/*! \file domain.hpp
  *  \brief Interval and box domains for functions.
  */
 
-#ifndef ARIADNE_DOMAIN_H
-#define ARIADNE_DOMAIN_H
+#ifndef ARIADNE_DOMAIN_HPP
+#define ARIADNE_DOMAIN_HPP
 
-#include "geometry/interval.h"
-#include "geometry/box.h"
+#include "geometry/interval.hpp"
+#include "geometry/box.hpp"
 
 namespace Ariadne {
 
@@ -96,4 +96,4 @@ template<> struct ElementTraits<UnitBox> { template<class X> using Type=Vector<X
 } // namespace Ariadne
 
 
-#endif /* ARIADNE_DOMAIN_H */
+#endif /* ARIADNE_DOMAIN_HPP */

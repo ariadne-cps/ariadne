@@ -1,5 +1,5 @@
 /***************************************************************************
- *            solver.cc
+ *            solver.cpp
  *
  *  Copyright  2006-9  Pieter Collins
  *
@@ -21,23 +21,23 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.h"
+#include "function/functional.hpp"
 #include "config.h"
 
-#include "geometry/interval.h"
-#include "function/function_model.h"
+#include "geometry/interval.hpp"
+#include "function/function_model.hpp"
 
-#include "solvers/solver.h"
+#include "solvers/solver.hpp"
 
-#include "utility/logging.h"
-#include "algebra/vector.h"
-#include "algebra/matrix.h"
-#include "algebra/differential.h"
-#include "algebra/algebra.h"
-#include "function/taylor_model.h"
-#include "function/formula.h"
-#include "function/function.h"
-#include "function/function_model.h"
+#include "utility/logging.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/differential.hpp"
+#include "algebra/algebra.hpp"
+#include "function/taylor_model.hpp"
+#include "function/formula.hpp"
+#include "function/function.hpp"
+#include "function/function_model.hpp"
 
 namespace Ariadne {
 

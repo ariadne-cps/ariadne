@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_automaton-atomic.h
+ *            hybrid_automaton-atomic.hpp
  *
  *  Copyright  2004-11  Alberto Casagrande, Pieter Collins
  *
@@ -21,15 +21,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file hybrid_automaton-atomic.h
+/*! \file hybrid_automaton-atomic.hpp
  *  \brief Atomic hybrid system class, where each location is defined by a single string variable.
  */
 
-#ifndef ARIADNE_ATOMIC_HYBRID_AUTOMATON_H
-#define ARIADNE_ATOMIC_HYBRID_AUTOMATON_H
+#ifndef ARIADNE_ATOMIC_HYBRID_AUTOMATON_HPP
+#define ARIADNE_ATOMIC_HYBRID_AUTOMATON_HPP
 
-#include "hybrid/hybrid_automaton_interface.h"
-#include "hybrid/hybrid_automaton-composite.h"
+#include "hybrid/hybrid_automaton_interface.hpp"
+#include "hybrid/hybrid_automaton-composite.hpp"
 
 namespace Ariadne {
 
@@ -269,4 +269,4 @@ inline OutputStream& operator<<(OutputStream& os, const AtomicHybridAutomaton& h
 
 } // namespace Ariadne
 
-#endif // ARIADNE_ATOMIC_HYBRID_AUTOMATON_H
+#endif // ARIADNE_ATOMIC_HYBRID_AUTOMATON_HPP

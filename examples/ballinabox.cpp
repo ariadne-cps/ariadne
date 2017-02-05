@@ -1,5 +1,5 @@
 /***************************************************************************
- *            ballinabox.cc
+ *            ballinabox.cpp
  *
  *  An example for checking the behavior when more than
  *  one guard is active.
@@ -25,8 +25,8 @@
  */
 
 #include <cstdarg>
-#include "ariadne.h"
-#include "hybrid/hybrid_graphics.h"
+#include "ariadne.hpp"
+#include "hybrid/hybrid_graphics.hpp"
 
 using namespace Ariadne;
 

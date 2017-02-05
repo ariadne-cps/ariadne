@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_differential.cc
+ *            test_differential.cpp
  *
  *  Copyright  2007-8  Pieter Collins
  *
@@ -30,12 +30,12 @@
 
 #include "config.h"
 
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "algebra/covector.h"
-#include "algebra/differential.h"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/covector.hpp"
+#include "algebra/differential.hpp"
 
-#include "test.h"
+#include "test.hpp"
 
 
 using namespace Ariadne;

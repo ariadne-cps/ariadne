@@ -1,5 +1,5 @@
 /***************************************************************************
- *            ValidatedKleenean.h
+ *            ValidatedKleenean.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,11 +21,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file ValidatedKleenean.h
+/*! \file ValidatedKleenean.hpp
  *  \brief Three-valued logic variable.
  */
 
-#include "numeric/logical.h"
+#include "numeric/logical.hpp"
 
 /*
 #ifdef DOXYGEN

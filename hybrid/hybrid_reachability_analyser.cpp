@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_reachability_analyser.cc
+ *            hybrid_reachability_analyser.cpp
  *
  *  Copyright  2006-11  Alberto Casagrande, Pieter Collins, Davide Bresolin
  *
@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.h"
+#include "function/functional.hpp"
 #include "config.h"
 
 #include <string>
@@ -34,32 +34,32 @@
 #include <valarray>
 
 
-#include "utility/exceptions.h"
+#include "utility/exceptions.hpp"
 
-#include "numeric/numeric.h"
+#include "numeric/numeric.hpp"
 
-#include "algebra/vector.h"
-#include "algebra/matrix.h"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
 
-#include "geometry/box.h"
-#include "geometry/list_set.h"
-#include "geometry/grid_set.h"
+#include "geometry/box.hpp"
+#include "geometry/list_set.hpp"
+#include "geometry/grid_set.hpp"
 
-#include "solvers/integrator.h"
-#include "solvers/solver.h"
+#include "solvers/integrator.hpp"
+#include "solvers/solver.hpp"
 
-#include "hybrid/hybrid_automaton_interface.h"
+#include "hybrid/hybrid_automaton_interface.hpp"
 
-#include "hybrid/hybrid_time.h"
-#include "hybrid/hybrid_space.h"
-#include "hybrid/hybrid_orbit.h"
-#include "hybrid/hybrid_set.h"
-#include "hybrid/hybrid_evolver.h"
-#include "hybrid/hybrid_reachability_analyser.h"
+#include "hybrid/hybrid_time.hpp"
+#include "hybrid/hybrid_space.hpp"
+#include "hybrid/hybrid_orbit.hpp"
+#include "hybrid/hybrid_set.hpp"
+#include "hybrid/hybrid_evolver.hpp"
+#include "hybrid/hybrid_reachability_analyser.hpp"
 
-#include "utility/logging.h"
-#include "output/graphics.h"
-#include "solvers/linear_programming.h"
+#include "utility/logging.hpp"
+#include "output/graphics.hpp"
+#include "solvers/linear_programming.hpp"
 
 
 namespace Ariadne {

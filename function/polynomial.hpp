@@ -1,5 +1,5 @@
 /***************************************************************************
- *            polynomial.h
+ *            polynomial.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file polynomial.h
+/*! \file polynomial.hpp
  *  \brief Base class for polynomial rings.
  */
 
-#ifndef ARIADNE_POLYNOMIAL_H
-#define ARIADNE_POLYNOMIAL_H
+#ifndef ARIADNE_POLYNOMIAL_HPP
+#define ARIADNE_POLYNOMIAL_HPP
 
 #include <cassert>
 #include <string>
@@ -35,11 +35,11 @@
 #include <map>
 #include <algorithm>
 
-#include "algebra/multi_index.h"
-#include "algebra/expansion.h"
-#include "algebra/operations.h"
-#include "algebra/differential.h"
-#include "algebra/evaluate.h"
+#include "algebra/multi_index.hpp"
+#include "algebra/expansion.hpp"
+#include "algebra/operations.hpp"
+#include "algebra/differential.hpp"
+#include "algebra/evaluate.hpp"
 
 
 namespace Ariadne {
@@ -335,4 +335,4 @@ template<class X> Vector<Polynomial<MidpointType<X>>> midpoint(const Vector<Poly
 
 } // namespace Ariadne
 
-#endif /* ARIADNE_POLYNOMIAL_H */
+#endif /* ARIADNE_POLYNOMIAL_HPP */

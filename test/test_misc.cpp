@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_misc.cc
+ *            test_misc.cpp
  *
  *  Copyright 2008--17 Pieter Collins
  *
@@ -23,7 +23,7 @@
 
 #include <iostream>
 #include "config.h"
-#include "test.h"
+#include "test.hpp"
 
 namespace Ariadne { }
 

@@ -1,13 +1,13 @@
 add_library(ariadne-geometry OBJECT
-    point.cc
-    interval.cc
-    box.cc
-    curve.cc
-    function_set.cc
-    grid_set.cc
-    affine_set.cc
-    enclosure.cc
-    paver.cc
+    point.cpp
+    interval.cpp
+    box.cpp
+    curve.cpp
+    function_set.cpp
+    grid_set.cpp
+    affine_set.cpp
+    enclosure.cpp
+    paver.cpp
 )
 
 cotire(ariadne-geometry)

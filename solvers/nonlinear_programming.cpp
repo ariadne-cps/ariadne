@@ -1,5 +1,5 @@
 /***************************************************************************
- *            nonlinear_programming.cc
+ *            nonlinear_programming.cpp
  *
  *  Copyright 2010--17  Pieter Collins
  *
@@ -25,31 +25,31 @@
 // "Interior-point methods for nonconvex nonlinear programming: Jamming and comparative numerical testing"
 // For some of the terminology used
 
-#include "function/functional.h"
+#include "function/functional.hpp"
 #include "config.h"
 
 #include <limits>
 
-#include "utility/macros.h"
-#include "utility/logging.h"
-#include "utility/tuple.h"
-#include "utility/tribool.h"
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "algebra/matrix.h"
-#include "algebra/diagonal_matrix.h"
-#include "algebra/differential.h"
-#include "algebra/algebra.h"
-#include "function/function.h"
-#include "function/function_mixin.h"
-#include "function/taylor_function.h"
-#include "function/formula.h"
-#include "function/procedure.h"
+#include "utility/macros.hpp"
+#include "utility/logging.hpp"
+#include "utility/tuple.hpp"
+#include "utility/tribool.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/diagonal_matrix.hpp"
+#include "algebra/differential.hpp"
+#include "algebra/algebra.hpp"
+#include "function/function.hpp"
+#include "function/function_mixin.hpp"
+#include "function/taylor_function.hpp"
+#include "function/formula.hpp"
+#include "function/procedure.hpp"
 
-#include "solvers/nonlinear_programming.h"
-#include "solvers/solver.h"
-#include "algebra/multi_index-noaliasing.h"
-#include "solvers/constraint_solver.h"
+#include "solvers/nonlinear_programming.hpp"
+#include "solvers/solver.hpp"
+#include "algebra/multi_index-noaliasing.hpp"
+#include "solvers/constraint_solver.hpp"
 
 namespace Ariadne {
 

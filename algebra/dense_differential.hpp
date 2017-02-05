@@ -1,5 +1,5 @@
 /***************************************************************************
- *            dense_differential.h
+ *            dense_differential.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  * 
@@ -21,22 +21,22 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file dense_differential.h
+/*! \file dense_differential.hpp
  *  \brief Differential algebra variables with a dense representation.
  */
-#ifndef ARIADNE_DENSE_DIFFERENTIAL_H
-#define ARIADNE_DENSE_DIFFERENTIAL_H
+#ifndef ARIADNE_DENSE_DIFFERENTIAL_HPP
+#define ARIADNE_DENSE_DIFFERENTIAL_HPP
 
 #include <cmath>
 #include <limits>
 
-#include "utility/macros.h"
-#include "utility/array.h"
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
-#include "algebra/matrix.h"
-#include "algebra/series.h"
-#include "algebra/multi_index.h"
+#include "utility/macros.hpp"
+#include "utility/array.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/series.hpp"
+#include "algebra/multi_index.hpp"
 
 namespace Ariadne {
 
@@ -956,5 +956,5 @@ operator<<(OutputStream& os, const DenseDifferential<X>& x) {
 
 
 
-#endif // ARIADNE_DENSE_DIFFERENTIAL_H
+#endif // ARIADNE_DENSE_DIFFERENTIAL_HPP
 

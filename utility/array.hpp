@@ -1,5 +1,5 @@
 /***************************************************************************
- *            utility/array.h
+ *            utility/array.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,19 +21,19 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file utility/array.h
+/*! \file utility/array.hpp
  *  \brief
  */
 
 
 
-#ifndef ARIADNE_ARRAY_H
-#define ARIADNE_ARRAY_H
+#ifndef ARIADNE_ARRAY_HPP
+#define ARIADNE_ARRAY_HPP
 
 #include <initializer_list>
 #include <iterator>
 #include <stdexcept>
-#include "metaprogramming.h"
+#include "metaprogramming.hpp"
 
 namespace Ariadne {
 

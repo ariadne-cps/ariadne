@@ -1,5 +1,5 @@
 /***************************************************************************
- *            algebra_mixin.h
+ *            algebra_mixin.hpp
  *
  *  Copyright 2010-17  Pieter Collins
  *
@@ -21,16 +21,16 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file algebra_wrapper.h
+/*! \file algebra_wrapper.hpp
  *  \brief Mixin class providing operations for (Banach) algebras.
  */
 
-#ifndef ARIADNE_ALGEBRA_WRAPPER_H
-#define ARIADNE_ALGEBRA_WRAPPER_H
+#ifndef ARIADNE_ALGEBRA_WRAPPER_HPP
+#define ARIADNE_ALGEBRA_WRAPPER_HPP
 
-#include "algebra/algebra_interface.h"
-#include "algebra/algebra_mixin.h"
-#include "numeric/operators.h"
+#include "algebra/algebra_interface.hpp"
+#include "algebra/algebra_mixin.hpp"
+#include "numeric/operators.hpp"
 
 namespace Ariadne {
 
@@ -100,4 +100,4 @@ template<class A, class X=NumericType<A>> class SymbolicAlgebraWrapper
 
 } // namespace Ariadne
 
-#endif /* ARIADNE_ALGEBRA_WRAPPER_H */
+#endif /* ARIADNE_ALGEBRA_WRAPPER_HPP */

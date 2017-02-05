@@ -1,7 +1,7 @@
 /***************************************************************************
  *            zonotope.h
  *
- *  Copyright 2008  Alberto Casagrande, Pieter Collins
+ *  Copyright 2008-17  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *            check_numeric.cc
  *
- *  Copyright 2006-14  Alberto Casagrande, Pieter Collins
+ *  Copyright 2006--17  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 

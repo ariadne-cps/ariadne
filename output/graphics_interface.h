@@ -1,7 +1,7 @@
 /***************************************************************************
  *            graphics_interface.h
  *
- *  Copyright 2009-10  Davide Bresolin, Pieter Collins
+ *  Copyright 2009-17  Davide Bresolin, Pieter Collins
  *
  ****************************************************************************/
 

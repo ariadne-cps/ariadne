@@ -1,7 +1,7 @@
 /***************************************************************************
  *            logging.h
  *
- *  Copyright 2007-14  Alberto Casagrande, Pieter Collins
+ *  Copyright 2007-17  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 

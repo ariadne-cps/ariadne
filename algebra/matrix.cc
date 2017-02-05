@@ -1,7 +1,7 @@
 /***************************************************************************
  *            matrix.cc
  *
- *  Copyright 2008-14  Alberto Casagrande, Pieter Collins
+ *  Copyright 2008--17  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 

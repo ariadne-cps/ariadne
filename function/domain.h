@@ -1,7 +1,7 @@
 /***************************************************************************
  *            domain.h
  *
- *  Copyright 2008-13  Alberto Casagrande, Pieter Collins
+ *  Copyright 2008-17  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 

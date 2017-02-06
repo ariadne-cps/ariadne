@@ -828,29 +828,3 @@ template<> inline String class_name<double>() { return "double"; }
 template<> inline String class_name<Float64>() { return "Float64"; }
 
 } // namespace Ariadne
-
-
-#ifdef ARIADNE_ENABLE_SERIALIZATION
-
-#include "output/serialization.hpp"
-
-namespace Ariadne {
-
-Void serialize(boost::archive::text_oarchive& a, Float64& flt, const unsigned int v) {
-    const double x=flt.get_d();
-    a << x;
-};
-
-Void serialize(boost::archive::text_iarchive& a, Float64& flt, const unsigned int v) {
-    flt=std::numeric_limits<double>::quiet_NaN();
-    double x;
-    a >> x;
-    flt=x;
-}
-
-} // namespace Ariadne
-
-#endif /* ARIADNE_ENABLE_SERIALIZATION */
-
-
-

@@ -52,10 +52,6 @@
 #include "geometry/point.hpp"
 #include "geometry/box.hpp"
 
-#ifdef ARIADNE_ENABLE_SERIALIZATION
-#include "output/serialization.hpp"
-#endif /* ARIADNE_ENABLE_SERIALIZATION */
-
 #include "hybrid/hybrid_graphics_interface.hpp"
 
 namespace Ariadne {
@@ -645,12 +641,5 @@ template<class S> Void HybridGridTreeSet::adjoin_outer_approximation(DiscreteLoc
 
 
 } // namespace Ariadne
-
-#ifdef ARIADNE_ENABLE_SERIALIZATION
-  namespace boost { namespace serialization {
-  template<class A> void serialize(A& archive, const Ariadne::HybridGridTreeSet& set, const unsigned int version);
-  template<class A> void serialize(A& archive, const Ariadne::DiscreteLocation& state, const unsigned int version);
-  }}
-#endif /* ARIADNE_ENABLE_SERIALIZATION */
 
 #endif // ARIADNE_HYBRID_SET_HPP

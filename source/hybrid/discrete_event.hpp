@@ -50,13 +50,6 @@ class DiscreteEvent {
     StringType _id;
 };
 
-#ifdef ARIADNE_ENABLE_SERIALIZATION
-  template<class A> inline Void serialize(A& archive, DiscreteEvent& event, const Nat version) {
-      StringType& id=reinterpret_cast<StringType&>(event);
-      archive & id;
-  }
-#endif /* ARIADNE_ENABLE_SERIALIZATION */
-
 } //namespace Ariadne
 
 

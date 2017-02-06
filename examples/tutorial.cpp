@@ -290,9 +290,9 @@ Void compute_reachable_sets(const GeneralHybridEvolver& evolver)
 
 
 
+/*
 Void compute_reachable_sets_with_serialisation(const CompositeHybridAutomaton& heating_system, const HybridReachabilityAnalyser& analyser)
 {
-/*
     // Define the initial set
     HybridImageSet initial_set;
     StringVariable heating("heating");
@@ -326,8 +326,8 @@ Void compute_reachable_sets_with_serialisation(const CompositeHybridAutomaton& h
 
     HybridGridTreeSet upper_recurrent_set = analyser.upper_reach(heating_system,initial_set,recurrent_time);
     plot("tutorial-upper_recurrent.png",Axis2d(0.0,C,1.0, 14.0,T,18.0), Colour(0.0,0.5,1.0), upper_recurrent_set);
-*/
 }
+*/
 
 
 

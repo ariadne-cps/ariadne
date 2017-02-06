@@ -29,8 +29,6 @@
 #define ARIADNE_HYBRID_EXPRESSION_SET_HPP
 
 #include <map>
-
-
 #include <memory>
 
 #include "utility/macros.hpp"
@@ -50,10 +48,6 @@
 #include "hybrid/hybrid_grid.hpp"
 #include "geometry/point.hpp"
 #include "geometry/box.hpp"
-
-#ifdef ARIADNE_ENABLE_SERIALIZATION
-#include "output/serialization.hpp"
-#endif /* ARIADNE_ENABLE_SERIALIZATION */
 
 #include "hybrid/hybrid_graphics_interface.hpp"
 

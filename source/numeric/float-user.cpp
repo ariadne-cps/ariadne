@@ -1879,12 +1879,6 @@ template<class PR> struct Operations<FloatError<PR>> {
 
 
 
-#ifdef ARIADNE_ENABLE_SERIALIZATION
-template<class PR, class A> Void serialize(A& _a, FloatBounds<PR>& x, const Nat version) {
-    _a & x.lower_raw() & x.upper_raw(); }
-#endif
-
-
 
 template<> Nat integer_cast<Nat,Float64Approximation>(Float64Approximation const& x) {
     return std::round(x.get_d()); }

@@ -74,8 +74,8 @@ class TestHybridEvolver
   private:
     string evolver_name;
     Int evolver_verbosity;
-    boost::shared_ptr<TaylorSeriesIntegrator> evolver_integrator;
-    mutable boost::shared_ptr<HybridEvolverBase> evolver_ptr;
+    std::shared_ptr<TaylorSeriesIntegrator> evolver_integrator;
+    mutable std::shared_ptr<HybridEvolverBase> evolver_ptr;
   private:
     Void _set_evolver(const HybridAutomatonInterface& system) const;
   public:

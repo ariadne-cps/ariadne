@@ -468,7 +468,7 @@ Void compute_monotonicity(UpperBoxType& domain, const EffectiveConstraint& const
     static const Nat n = domain.size();
 
     // Compute monotone formulae
-    boost::Array<Sign,0> monotonicity(n);
+    Array<Sign> monotonicity(n);
     Covector<ExactIntervalType> grad=constraint.function().gradient(domain);
     for(Nat j=0; j!=n; ++j) {
         monotonicity[j]=sign(grad[j]);

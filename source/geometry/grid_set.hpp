@@ -102,10 +102,6 @@ GridTreeSet outer_approximation(const CompactSetInterface& theSet, const Nat num
 template<class BS> GridTreeSet outer_approximation(const ListSet<BS>& theSet, const Nat numSubdivInDim);
 GridTreeSet inner_approximation(const OpenSetInterface& theSet, const Grid& theGrid, const Nat height, const Nat numSubdivInDim);
 
-#ifdef ARIADNE_ENABLE_SERIALIZATION
-  template<class A> Void serialize(A& archive, const GridTreeSet& set, const unsigned int version);
-#endif /* ARIADNE_ENABLE_SERIALIZATION */
-
 
 /*! \brief The binary-tree node operation is not allowed on a non-leaf node. */
 class NotALeafNodeException : public std::logic_error {
@@ -1912,12 +1908,6 @@ GridTreeSet outer_approximation(const ListSet<BS>& theSet, const Grid& theGrid, 
     result.recombine();
     return result;
 }
-
-#ifdef ARIADNE_ENABLE_SERIALIZATION
-  template<class A> Void serialize(A& archive, Ariadne::GridTreeSet& set, const unsigned int version) {
-      ARIADNE_NOT_IMPLEMENTED;
-  }
-#endif /* ARIADNE_ENABLE_SERIALIZATION */
 
 } // namespace Ariadne
 

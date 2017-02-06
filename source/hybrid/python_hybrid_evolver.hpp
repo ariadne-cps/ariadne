@@ -35,7 +35,6 @@
 #include <list>
 #include <iostream>
 
-#include <boost/smart_ptr.hpp>
 #include <boost/python.hpp>
 
 #include "utility/tuple.hpp"

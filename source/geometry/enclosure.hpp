@@ -38,7 +38,6 @@
 #include "function/function_model.hpp"
 
 #include "geometry/box.hpp"
-#include <boost/concept_check.hpp>
 
 #ifndef ARIADNE_TAYLOR_SET_HPP
 

@@ -44,7 +44,6 @@
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/expansion.hpp"
-#include <boost/concept_check.hpp>
 
 namespace Ariadne {
 

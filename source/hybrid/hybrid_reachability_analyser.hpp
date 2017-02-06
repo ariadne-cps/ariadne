@@ -28,7 +28,6 @@
 #ifndef ARIADNE_HYBRID_REACHABILITY_ANALYSER_HPP
 #define ARIADNE_HYBRID_REACHABILITY_ANALYSER_HPP
 
-#include <boost/smart_ptr.hpp>
 
 #include "solvers/configuration_interface.hpp"
 #include "hybrid/hybrid_set.decl.hpp"

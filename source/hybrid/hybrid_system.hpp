@@ -35,7 +35,6 @@
 #include <map>
 
 #include <memory>
-#include <boost/shared_array.hpp>
 
 #include "utility/declarations.hpp"
 

@@ -38,7 +38,6 @@
 #include "hybrid/hybrid_automaton_interface.hpp"
 #include "output/graphics.hpp"
 #include "hybrid/hybrid_graphics.hpp"
-#include <boost/concept_check.hpp>
 #include "numeric/rounding.hpp"
 #include "expression/assignment.hpp"
 #include "output/graphics_interface.hpp"

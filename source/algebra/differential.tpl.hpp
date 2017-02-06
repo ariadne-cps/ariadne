@@ -32,7 +32,6 @@
 #include "algebra/multi_index.hpp"
 #include "algebra/series.hpp"
 #include "algebra/expansion.hpp"
-#include <boost/concept_check.hpp>
 
 namespace Ariadne {
 

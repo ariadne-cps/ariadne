@@ -23,7 +23,6 @@
 
 #include <cstdarg>
 #include "ariadne.hpp"
-#include <boost/concept_check.hpp>
 
 #include "expression/expression_set.hpp"
 

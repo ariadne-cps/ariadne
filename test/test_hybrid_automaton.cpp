@@ -30,7 +30,6 @@
 #include "expression/expression.hpp"
 #include "expression/valuation.hpp"
 #include "hybrid/hybrid_automata.hpp"
-#include <boost/concept_check.hpp>
 
 using namespace Ariadne;
 

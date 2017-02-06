@@ -25,7 +25,6 @@
 #include "config.h"
 
 #include <map>
-#include <boost/weak_ptr.hpp>
 
 #include "utility/macros.hpp"
 #include "utility/container.hpp"

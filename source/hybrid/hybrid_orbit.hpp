@@ -33,7 +33,6 @@
 #include <vector>
 #include <map>
 #include <memory>
-#include <boost/scoped_ptr.hpp>
 
 #include "numeric/numeric.hpp"
 #include "output/graphics_interface.hpp"

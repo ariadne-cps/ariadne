@@ -28,7 +28,6 @@
 #ifndef ARIADNE_REACHABILITY_ANALYSER_INTERFACE_HPP
 #define ARIADNE_REACHABILITY_ANALYSER_INTERFACE_HPP
 
-#include <boost/smart_ptr.hpp>
 
 #include "geometry/set_interface.hpp"
 

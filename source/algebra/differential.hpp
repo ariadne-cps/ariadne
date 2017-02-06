@@ -40,7 +40,6 @@
 #include "algebra/series.hpp"
 #include "algebra/expansion.hpp"
 #include "algebra/operations.hpp"
-#include <boost/concept_check.hpp>
 
 namespace Ariadne {
 

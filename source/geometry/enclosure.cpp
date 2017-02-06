@@ -70,7 +70,6 @@
 #ifdef HAVE_CAIRO_H
 #include <cairo/cairo.h>
 #endif // HAVE_CAIRO_H
-#include <boost/concept_check.hpp>
 #include "numeric/operators.hpp"
 #include "expression/space.hpp"
 

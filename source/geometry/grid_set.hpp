@@ -33,11 +33,11 @@
 #include <iomanip>
 #include <string>
 
-#include <boost/iterator/iterator_facade.hpp>
 #include <memory>
 
 #include "utility/tribool.hpp"
 #include "utility/array.hpp"
+#include "utility/iterator.hpp"
 
 #include "utility/binary_word.hpp"
 
@@ -1113,7 +1113,7 @@ class GridTreeCursor {
  * The return objects for this Iterator are constant GridCells.
  */
 class GridTreeConstIterator
-    : public boost::iterator_facade< GridTreeConstIterator, GridCell const, boost::forward_traversal_tag >
+    : public IteratorFacade< GridTreeConstIterator, GridCell const, ForwardTraversalTag >
     , public virtual ForwardConstantIteratorInterface<GridCell>
 {
   private:
@@ -1123,7 +1123,7 @@ class GridTreeConstIterator
     /*! \brief the cursor object that is created based on the given sub paving*/
     GridTreeCursor _pGridTreeCursor;
 
-    friend class boost::iterator_core_access;
+    friend class IteratorCoreAccess;
 
     //@{
     //! \name Iterator Specific

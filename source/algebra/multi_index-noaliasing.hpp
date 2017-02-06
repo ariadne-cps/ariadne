@@ -35,8 +35,7 @@
 #include <iostream>
 #include <vector>
 
-#include <boost/Iterator/iterator_facade.hpp>
-
+#include "utility/iterator.hpp"
 #include "utility/macros.hpp"
 #include "utility/array.hpp"
 #include "numeric/numeric.hpp"
@@ -643,7 +642,7 @@ inline Bool operator<=(const MultiIndexReference& a, const MultiIndexBound& b) {
 
 
 class MultiIndexListIterator
-    : public boost::iterator_facade<MultiIndexListIterator,MultiIndex,boost::random_access_traversal_tag,MultiIndexReference>
+    : public IteratorFacade<MultiIndexListIterator,MultiIndex,RandomAccessTraversalTag,MultiIndexReference>
 {
     MultiIndexReference _ref;
   public:
@@ -667,7 +666,7 @@ class MultiIndexListIterator
 };
 
 class MultiIndexListConstIterator
-    : public boost::iterator_facade<MultiIndexListConstIterator,MultiIndex,boost::random_access_traversal_tag,const MultiIndexReference>
+    : public IteratorFacade<MultiIndexListConstIterator,MultiIndex,RandomAccessTraversalTag,const MultiIndexReference>
 {
     MultiIndexReference _ref;
   public:

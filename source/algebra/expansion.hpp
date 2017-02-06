@@ -315,8 +315,8 @@ template<class X> class ExpansionIterator
     template<class XX> Bool equal(const ExpansionConstIterator<XX>& other) const { return this->_cp==other._cp; }
     Void advance(PointerDifferenceType k) { this->_ip+=k*(_as+1u); _cp+=k; }
     template<class XX> PointerDifferenceType distance_to(const ExpansionIterator<XX>& other) const { return other._cp - this->_cp; }
-    ExpansionReference<X>& dereference() { return reinterpret_cast<ExpansionReference<X>&>(*this); }
-    ExpansionReference<X>* operator->() { return reinterpret_cast<ExpansionReference<X>*>(this); }
+    ExpansionReference<X>& dereference() const { return reinterpret_cast<ExpansionReference<X>&>(const_cast<ExpansionIterator<X>&>(*this)); }
+    ExpansionReference<X>* operator->() const { return reinterpret_cast<ExpansionReference<X>*>(const_cast<ExpansionIterator<X>*>(this)); }
     Void write(OutputStream& os) const { os << "{" << (void*)_ip << ":" << MultiIndex(_as,_ip) << ", " << _cp << ":" << *_cp << "}"; }
 };
 template<class X> OutputStream& operator<<(OutputStream& os, const ExpansionIterator<X>& e) {
@@ -336,8 +336,8 @@ template<class X> class ExpansionConstIterator
     template<class XX> Bool equal(const ExpansionConstIterator<XX>& other) const { return this->_cp==other._cp; }
     Void advance(PointerDifferenceType k) { this->_ip+=k*(_as+1u); _cp+=k; }
     template<class XX> PointerDifferenceType distance_to(const ExpansionConstIterator<XX>& other) const { return other._cp - this->_cp; }
-    ExpansionConstReference<X> dereference() { return ExpansionConstReference<X>(_as,_ip,_cp); }
-    ExpansionConstReference<X>* operator->() { return reinterpret_cast<ExpansionConstReference<X>*>(this); }
+    ExpansionConstReference<X> dereference() const { return ExpansionConstReference<X>(_as,_ip,_cp); }
+    ExpansionConstReference<X>* operator->() const { return reinterpret_cast<ExpansionConstReference<X>*>(const_cast<ExpansionConstIterator<X>*>(this)); }
     Void write(OutputStream& os) const { os << "{" << (void*)_ip << "," << _cp << "}"; }
 };
 template<class X> OutputStream& operator<<(OutputStream& os, const ExpansionConstIterator<X>& e) {

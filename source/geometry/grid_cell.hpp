@@ -32,8 +32,6 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
-
-#include <boost/iterator/iterator_facade.hpp>
 #include <memory>
 
 #include "utility/tribool.hpp"

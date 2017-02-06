@@ -30,8 +30,6 @@
 
 #include <map>
 
-#include <boost/iterator.hpp>
-#include <boost/iterator_adaptors.hpp>
 
 #include <memory>
 

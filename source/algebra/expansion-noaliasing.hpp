@@ -36,10 +36,8 @@
 #include <vector>
 #include <map>
 #include <algorithm>
-#include <boost/Iterator.hpp>
-#include <boost/Iterator/zip_iterator.hpp>
-#include <boost/iterator_adaptors.hpp>
 
+#include "utility/iterator.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/multi_index.hpp"
 
@@ -132,9 +130,9 @@ template<class KeyPtr, class DataPtr> class KeyDataReference {
 
 template<class KeyIter, class DataIter>
 class KeyDataIterator
-    : public boost::iterator_facade<
+    : public IteratorFacade<
         KeyDataIterator<KeyIter,DataIter>,KeyDataValue<typename KeyIter::value_type,typename DataIter::value_type>,
-        boost::random_access_traversal_tag,KeyDataReference<KeyIter,DataIter> >
+        RandomAccessTraversalTag,KeyDataReference<KeyIter,DataIter> >
 {
   public:
     typedef typename KeyIter::reference key_reference;
@@ -185,21 +183,9 @@ inline Bool operator<(const KeyDataValue<K,D>& dv1, const KeyDataReference<KP,DP
 }
 
 template<class K, class D>
-OutputStream& operator<<(OutputStream& os, const boost::Tuple<K,D>& tup) {
+OutputStream& operator<<(OutputStream& os, const Tuple<K,D>& tup) {
     //return os << "(" << v.get<0>() << ":" << v.get<1>() << ")";
     return os << "(" << "??" << ")";
-}
-
-template<class K, class D>
-OutputStream& operator<<(OutputStream& os, const boost::tuples::cons<K,D>& tup) {
-    //return os << "(" << v.get<0>() << ":" << v.get<1>() << ")";
-    return os << "(" << "??" << ")";
-}
-
-template<class T>
-OutputStream& operator<<(OutputStream& os, boost::zip_iterator< T > iter) {
-    //return os << "(" << v.get<0>() << ":" << v.get<1>() << ")";
-    return os << "<iter_traversal>";
 }
 
 template<class K, class D>

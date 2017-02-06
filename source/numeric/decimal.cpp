@@ -72,6 +72,16 @@ Decimal operator"" _dec(long double x)
     return operator"" _decimal(x);
 }
 
+Decimal operator"" _decimal(unsigned long long int n)
+{
+    return Decimal(Integer(n));
+}
+
+Decimal operator"" _dec(unsigned long long int n)
+{
+    return operator"" _decimal(n);
+}
+
 Decimal operator+(Decimal const& d)
 {
     return Decimal(d._p,d._q);

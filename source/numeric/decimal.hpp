@@ -90,7 +90,9 @@ class Decimal
 
     void canonicalize();
 };
+Decimal operator"" _dec (unsigned long long int n);
 Decimal operator"" _dec (long double dbl);
+Decimal operator"" _decimal (unsigned long long int n);
 Decimal operator"" _decimal (long double dbl);
 
 

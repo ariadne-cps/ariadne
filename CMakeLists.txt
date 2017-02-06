@@ -74,23 +74,13 @@ configure_file (${PROJECT_SOURCE_DIR}/config.h.cmake ${PROJECT_SOURCE_DIR}/confi
 #Non-portable fix to avoid user header directories being searched for by system headers
 #add_definitions(-iquote${PROJECT_SOURCE_DIR})
 #Should ideally be able to use line below
-include_directories(${PROJECT_SOURCE_DIR} ${CAIRO_INCLUDE_DIRS})
+include_directories(${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/source ${CAIRO_INCLUDE_DIRS})
 
 IF(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   add_definitions(-Wno-non-template-friend)
 ENDIF()
 
-add_subdirectory(utility)
-add_subdirectory(numeric)
-add_subdirectory(algebra)
-add_subdirectory(function)
-add_subdirectory(solvers)
-add_subdirectory(geometry)
-add_subdirectory(dynamics)
-add_subdirectory(expression)
-add_subdirectory(output)
-add_subdirectory(hybrid)
-
+add_subdirectory(source)
 add_subdirectory(test)
 add_subdirectory(wrap)
 add_subdirectory(python)

@@ -12,8 +12,8 @@ else ifeq ($(COMPILER),gcc)
 	CXXFLAGS = $(GCC_CXXFLAGS) $(CXXWARNINGS)
 else
 	CXX = $(COMPILER)
-    CXXWARNINGS = $(OTHER_CXXWARNINGS)
-    CXXFLAGS = $(OTHER_CXXWARNINGS) $(CXXWARNINGS)
+	CXXWARNINGS = $(OTHER_CXXWARNINGS)
+	CXXFLAGS = $(OTHER_CXXWARNINGS) $(CXXWARNINGS)
 endif
 
 
@@ -30,8 +30,8 @@ OTHER_CXXWARNINGS=-Wall
 
 #   -Wno-unused-local-typedef -Wno-unused-const-variable -Wno-unused-variable  -Wno-unused-function -Wno-unused-comparison
 
-VPATH = utility numeric expression algebra function geometry solvers dynamics hybrid output \
-	test wrap examples \
+VPATH = source test wrap examples \
+	source/utility source/numeric source/expression source/algebra source/function source/geometry source/solvers source/dynamics source/hybrid source/output \
 	examples/experimental
 
 HDR = \
@@ -209,7 +209,7 @@ EXAMPLES_BIN = $(patsubst %.cpp,$(EXAMPLES_BIN_DIR)/%,$(EXAMPLES_SRC))
 EXAMPLES_EXPERIMENTAL_OBJ = $(patsubst %.cpp,$(EXAMPLES_OBJ_DIR)/%.o,$(EXAMPLES_EXPERIMENTAL_SRC))
 EXAMPLES_EXPERIMENTAL_BIN = $(patsubst %.cpp,$(EXAMPLES_BIN_DIR)/%,$(EXAMPLES_EXPERIMENTAL_SRC))
 
-INCLUDE_PATHS =  -iquote.
+INCLUDE_PATHS =  -iquote. -iquote./source
 LINK_LIBS=-lgmpxx -lgmp -lmpfr -lcairo -lboost_system -lboost_serialization
 
 PYTHON_VERSION=2.7

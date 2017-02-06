@@ -47,42 +47,11 @@
 
 namespace Ariadne {
 
-class Integer;
-class Real;
-class String;
-
 class StateSpace;
-
-template<class T> class Constant;
-template<class T> class Variable;
-template<class T> class Expression;
-template<class T> class Space;
-
-typedef Space<Real> RealSpace;
-
-typedef Expression<String> StringExpression;
-typedef Expression<Integer> IntegerExpression;
-typedef Expression<Real> RealExpression;
 
 class Identifier;
 typedef Set<UntypedVariable> VariableSet;
 typedef Set<Variable<Real>> RealVariableSet;
-
-// Simplifying typedefs
-typedef Assignment<StringVariable,StringExpression> StringAssignment;
-typedef Assignment<PrimedStringVariable,StringExpression> PrimedStringAssignment;
-typedef Assignment<IntegerVariable,IntegerExpression> IntegerAssignment;
-typedef Assignment<PrimedIntegerVariable,IntegerExpression> PrimedIntegerAssignment;
-typedef Assignment<RealVariable,RealExpression> RealAssignment;
-typedef Assignment<PrimedRealVariable,RealExpression> PrimedRealAssignment;
-typedef Assignment<DottedRealVariable,RealExpression> DottedRealAssignment;
-
-typedef List<PrimedStringAssignment> PrimedStringAssignments;
-typedef List<RealAssignment> RealAssignments;
-typedef List<PrimedRealAssignment> PrimedRealAssignments;
-typedef List<DottedRealAssignment> DottedRealAssignments;
-
-typedef Assignment<RealVariable,Real> RealConstantAssignment;
 
 
 template<class F, class T> List<ResultOf<F(T)>> zip(F const& f, List<T> const& l) {
@@ -132,6 +101,9 @@ template<class LHS, class RHS> typename LHS::BaseType left_hand_side(const Assig
 }
 template<class LHS, class RHS> List<typename LHS::BaseType> left_hand_sides(const List<Assignment<LHS,RHS>>& assignments) {
     return zip([](Assignment<LHS,RHS>const&a){return a.lhs.base();},assignments);
+}
+template<class LHS, class RHS> List<RHS> right_hand_sides(const List<Assignment<LHS,RHS>>& assignments) {
+    return zip([](Assignment<LHS,RHS>const&a){return a.rhs;},assignments);
 }
 
 

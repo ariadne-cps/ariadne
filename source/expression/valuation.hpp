@@ -29,10 +29,6 @@
 #ifndef ARIADNE_VALUATION_HPP
 #define ARIADNE_VALUATION_HPP
 
-namespace Ariadne {
-template<class T, class X=T> class Valuation;
-}
-
 #include <cstdarg>
 #include <iostream>
 #include <string>

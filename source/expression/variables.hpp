@@ -41,6 +41,7 @@
 
 #include "numeric/logical.decl.hpp"
 #include "numeric/number.decl.hpp"
+#include "expression/expression.decl.hpp"
 #include "expression/identifier.hpp"
 #include "expression/operations.hpp"
 
@@ -48,40 +49,6 @@ namespace Ariadne {
 
 class UntypedVariable;
 class ExtendedUntypedVariable;
-
-template<class T> class Variable;
-template<class T> class LetVariable;
-template<class T> class DottedVariable;
-template<class T> class PrimedVariable;
-
-template<class T> class Variables;
-
-
-template<class T> class Constant;
-template<class T> class Expression;
-template<class LHS,class RHS> class Assignment;
-
-// Simplifying typedefs
-typedef Variable<Boolean> BooleanVariable;
-typedef Variable<Kleenean> KleeneanVariable;
-typedef Variable<String> StringVariable;
-typedef Variable<Integer> IntegerVariable;
-typedef Variable<Real> RealVariable;
-typedef Variables<Real> RealVariables;
-
-typedef PrimedVariable<String> PrimedStringVariable;
-typedef LetVariable<Integer> LetIntegerVariable;
-typedef PrimedVariable<Integer> PrimedIntegerVariable;
-typedef LetVariable<Real> LetRealVariable;
-typedef PrimedVariable<Real> PrimedRealVariable;
-typedef DottedVariable<Real> DottedRealVariable;
-
-template<class UB> class Interval;
-template<class UB> class VariableInterval;
-template<class IVL> class VariablesBox;
-typedef Interval<Real> RealInterval;
-typedef VariableInterval<Real> RealVariableInterval;
-typedef VariablesBox<RealInterval> RealVariablesBox;
 
 
 enum class VariableType : char { BOOLEAN, KLEENEAN, ENUMERATED, STRING, INTEGER, REAL };

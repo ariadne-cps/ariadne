@@ -49,41 +49,8 @@
 
 namespace Ariadne {
 
-class String;
-
 template<class T> class Set;
-
-class Identifier;
-
-template<class T> class Constant;
-template<class T> class Variable;
-template<class T> class Space;
-template<class T> class Expression;
-template<class LHS,class RHS> class Assignment;
-
-template<class T, class X> class Valuation;
-typedef Valuation<String,String> StringValuation;
-typedef Valuation<Integer,Integer> IntegerValuation;
-class DiscreteValuation;
-template<class X> class ContinuousValuation;
-
-template<class X> class Vector;
-template<class X> class Formula;
-template<class X> class Algebra;
-
-
-typedef Expression<Boolean> DiscretePredicate;
-typedef Expression<Kleenean> ContinuousPredicate;
-typedef Expression<Boolean> BooleanExpression;
-typedef Expression<Kleenean> KleeneanExpression;
-typedef Expression<String> StringExpression;
-typedef Expression<Integer> IntegerExpression;
-typedef Expression<Real> RealExpression;
-typedef List<Expression<Real>> RealExpressions;
-
 template<class T> struct DeclareExpressionOperations;
-
-
 template<class X> struct ExpressionNode;
 
 //! \ingroup ExpressionModule

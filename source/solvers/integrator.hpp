@@ -102,7 +102,7 @@ class IntegratorBase
     virtual Pair<Float64Value,UpperBoxType>
     flow_bounds(const ValidatedVectorFunction& vector_field,
                 const ExactBoxType& state_domain,
-                const RawFloat64& suggested_time_step) const;
+                const RawFloat64& maximum_time_step) const;
 
     virtual ValidatedVectorFunctionModel64
     flow_step(const ValidatedVectorFunction& vector_field,

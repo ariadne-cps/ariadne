@@ -91,12 +91,13 @@ IntegratorBase::function_factory() const
 }
 
 Pair<Float64Value,UpperBoxType>
-IntegratorBase::flow_bounds(const ValidatedVectorFunction& vf, const ExactBoxType& domx, const RawFloat64& hmax) const
+IntegratorBase::flow_bounds(const ValidatedVectorFunction& vf, const ExactBoxType& domx, const RawFloat64& hsug) const
 {
     ARIADNE_LOG(3,"IntegratorBase::flow_bounds(ValidatedVectorFunction vf, ExactBoxType domx, Float64 hmax)\n");
     ARIADNE_ASSERT_MSG(vf.result_size()==domx.size(),"vector_field="<<vf<<", states="<<domx);
     ARIADNE_ASSERT_MSG(vf.argument_size()==domx.size(),"vector_field="<<vf<<", states="<<domx);
-    ARIADNE_ASSERT(hmax>0);
+    ARIADNE_ASSERT(hsug>0);
+
 
     // Set up constants of the method.
     // TODO: Better estimates of constants
@@ -104,37 +105,42 @@ IntegratorBase::flow_bounds(const ValidatedVectorFunction& vf, const ExactBoxTyp
     const Float64Value MULTIPLIER=1.125_exact;
     const Float64Value BOX_RADIUS_MULTIPLIER=1.25_exact;
     const Float64Value BOX_RADIUS_WIDENING=0.25_exact;
-    const Nat EXPANSION_STEPS=8;
+    const Nat EXPANSION_STEPS=4;
     const Nat REDUCTION_STEPS=8;
     const Nat REFINEMENT_STEPS=4;
 
     Vector<Float64Bounds> const& dx=cast_singleton(domx);
 
-    Vector<ValidatedNumericType> delta=(dx-static_cast<Vector<ValidatedNumericType>>(midpoint(domx)))*BOX_RADIUS_WIDENING;
+    //Vector<ValidatedNumericType> delta=(dx-midpoint(domx))*BOX_RADIUS_WIDENING;
+    Vector<UpperIntervalType> delta=(domx-midpoint(domx))*BOX_RADIUS_WIDENING;
 
     // Compute the Lipschitz constant over the initial box
-    RawFloat64 lip = norm(vf.jacobian(dx)).upper().raw();
-    RawFloat64 hlip = this->_lipschitz_tolerance/lip;
+    Float64UpperBound lip = norm(vf.jacobian(dx)).upper();
+    Float64Value hlip = cast_exact(this->_lipschitz_tolerance/lip);
 
-    RawFloat64 hmin=RawFloat64(hmax)/(1<<REDUCTION_STEPS);
-    RawFloat64 h=RawFloat64(max(hmin,min(hmax,hlip)));
-    h=min(h,this->maximum_step_size());
+    Float64Value hmax(Float64(this->maximum_step_size()));
+    Float64Value h=cast_exact(hsug);
+    Float64Value hmin=h*two_exp(-REDUCTION_STEPS);
+    h=max(hmin,min(hmax,min(hlip,h)));
     ARIADNE_LOG(4,"L="<<lip<<", hL="<<hlip<<", hmax="<<hmax<<"\n");
 
-    Bool success=false;
     UpperBoxType bx,nbx;
     Vector<UpperIntervalType> df;
     UpperIntervalType ih(0,h);
-    Float64Bounds vh(0,h);
 
+    Bool success=false;
     while(!success) {
         ARIADNE_ASSERT_MSG(h>=hmin," h="<<h<<", hmin="<<hmin);
         //bx=domx+INITIAL_MULTIPLIER*ih*evaluate(vf,domx)+delta;
-        bx=domx+INITIAL_MULTIPLIER*vh*vf.evaluate(dx)+delta;
+        bx=domx+INITIAL_MULTIPLIER*ih*vf.evaluate(dx)+delta;
         for(Nat i=0; i!=EXPANSION_STEPS; ++i) {
             df=apply(vf,bx);
             nbx=domx+delta+ih*df;
-            if(refines(nbx,bx)) {
+            ARIADNE_LOG(7,"h="<<h<<" nbx="<<nbx<<" bx="<<bx<<"\n");
+            if(not definitely(is_bounded(nbx))) {
+                success=false;
+                break;
+            } else if(refines(nbx,bx)) {
                 success=true;
                 break;
             } else {
@@ -142,8 +148,8 @@ IntegratorBase::flow_bounds(const ValidatedVectorFunction& vf, const ExactBoxTyp
             }
         }
         if(!success) {
-            h/=2;
-            ih=ExactIntervalType(0,h);
+            h=hlf(h);
+            ih=UpperIntervalType(0,h);
         }
     }
 
@@ -754,82 +760,9 @@ TaylorSeriesIntegrator::flow_step(const ValidatedVectorFunction& f, const ExactB
 }
 
 Pair<Float64Value,UpperBoxType>
-TaylorSeriesIntegrator::flow_bounds(const ValidatedVectorFunction& vf, const ExactBoxType& dx, const Float64& hmax) const
+TaylorSeriesIntegrator::flow_bounds(const ValidatedVectorFunction& vf, const ExactBoxType& dx, const RawFloat64& hmax) const
 {
-    ARIADNE_LOG(3,"TaylorSeriesIntegrator::flow_bounds(ValidatedVectorFunction vf, ExactBoxType dx, Float64 hmax)\n");
-    ARIADNE_ASSERT_MSG(vf.result_size()==dx.size(),"vector_field="<<vf<<", states="<<dx);
-    ARIADNE_ASSERT_MSG(vf.argument_size()==dx.size(),"vector_field="<<vf<<", states="<<dx);
-    ARIADNE_ASSERT(hmax>0);
-
-    // Set up constants of the method.
-    // TODO: Better estimates of constants
-    const Float64Value INITIAL_MULTIPLIER=2.0_exact;
-    const Float64Value MULTIPLIER=1.1250_exact;
-    const Float64Value BOX_RADIUS_MULTIPLIER=1.250_exact;
-    const Float64Value BOX_RADIUS_WIDENING=0.250_exact;
-    const Nat EXPANSION_STEPS=8;
-    const Nat REDUCTION_STEPS=8;
-    const Nat REFINEMENT_STEPS=4;
-
-    Vector<ValidatedNumericType> delta=(cast_singleton(dx)-Vector<ValidatedNumericType>(midpoint(dx)))*BOX_RADIUS_WIDENING;
-
-    Float64 hmin=hmax/(1<<REDUCTION_STEPS);
-    Float64 h=hmax;
-    h=min(h,this->maximum_step_size());
-    ARIADNE_LOG(4,"vf="<<vf<<" domx="<<dx<<" hmax="<<hmax<<"\n");
-
-    UpperBoxType bx,nbx;
-    Vector<UpperIntervalType> df;
-    UpperIntervalType ih(0,h);
-
-    Bool success=false;
-    while(!success) {
-        ARIADNE_ASSERT_MSG(h>=hmin," h="<<h<<", hmin="<<hmin);
-        bx=dx+INITIAL_MULTIPLIER*ih*apply(vf,dx)+delta;
-        for(Nat i=0; i!=EXPANSION_STEPS; ++i) {
-            df=apply(vf,bx);
-            nbx=dx+delta+ih*df;
-            ARIADNE_LOG(7,"h="<<h<<" nbx="<<nbx<<" bx="<<bx<<"\n");
-            if(refines(nbx,bx)) {
-                ARIADNE_LOG(7,"success!\n");
-                success=true;
-                break;
-            } else {
-                bx=dx+delta+MULTIPLIER*ih*df;
-            }
-        }
-        if(!success) {
-            h/=2;
-            ih=UpperIntervalType(0,h);
-        }
-    }
-
-    ARIADNE_LOG(6,"h="<<h<<" nbx="<<nbx<<" bx="<<bx<<", refines(nbx,bx)="<<refines(nbx,bx)<<"\n");
-    ARIADNE_ASSERT(refines(nbx,bx));
-
-    Vector<UpperIntervalType> vfbx;
-    vfbx=apply(vf,bx);
-
-    for(Nat i=0; i!=REFINEMENT_STEPS; ++i) {
-        bx=nbx;
-        vfbx=apply(vf,bx);
-        nbx=dx+delta+ih*vfbx;
-        ARIADNE_ASSERT_MSG(refines(nbx,bx),std::setprecision(20)<<"refinement "<<i<<": "<<nbx<<" is not a inside of "<<bx);
-    }
-
-
-    // Check result of operation
-    ARIADNE_ASSERT(refines(nbx,bx));
-
-    bx=nbx;
-
-
-    ARIADNE_ASSERT(refines(dx,bx));
-
-    ARIADNE_ASSERT_MSG(refines(dx+cast_exact(h)*apply(vf,bx),bx),
-        "d="<<dx<<"\nh="<<h<<"\nf(b)="<<apply(vf,bx)<<"\nd+hf(b)="<<(dx+cast_exact(h)*apply(vf,bx))<<"\nb="<<bx<<"\n");
-
-    return std::make_pair(Float64Value(h),bx);
+    return this->IntegratorBase::flow_bounds(vf,dx,hmax);
 }
 
 Void TaylorSeriesIntegrator::write(OutputStream& os) const {

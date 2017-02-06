@@ -151,8 +151,8 @@ class HybridEvolverBase
     //! \name Main evolution functions.
 
     Orbit<EnclosureType> orbit(const HybridExactBoxType& initial_box, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const;
-    Orbit<EnclosureType> orbit(const HybridRealBoxSet& initial_box, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const;
-    Orbit<EnclosureType> orbit(const HybridRealBoundedConstraintSet& initial_set, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const;
+    Orbit<EnclosureType> orbit(const HybridBoxSet& initial_box, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const;
+    Orbit<EnclosureType> orbit(const HybridBoundedConstraintSet& initial_set, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const;
 
     //! \brief Compute an approximation to the orbit set using the given semantics, starting from an initial enclosure.
     Orbit<EnclosureType> orbit(const EnclosureType& initial_enclosure, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const;
@@ -173,7 +173,7 @@ class HybridEvolverBase
     //! \brief Set construct an enclosure from a box, such as one obtained from a grid.
     virtual EnclosureType enclosure(const HybridExactBox& initial_box) const;
     //! \brief Set construct an enclosure from a user-provided set.
-    virtual EnclosureType enclosure(const HybridRealBoundedConstraintSet& initial_set) const;
+    virtual EnclosureType enclosure(const HybridBoundedConstraintSet& initial_set) const;
 
     //@}
 

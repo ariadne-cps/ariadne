@@ -38,20 +38,14 @@ using FloatVariableInterval = VariableInterval<Float64>;
 template<class UB> class HybridVariableInterval;
 template<class IVL> class HybridVariablesBox;
 
-template<class IVL> class HybridVariablesBox;
-template<class IVL> using HybridBoxSet = HybridVariablesBox<IVL>;
-
-using HybridRealBoxSet = HybridVariablesBox<RealInterval>;
-
+class HybridBoxSet;
 class HybridConstraintSet;
 class HybridBoundedConstraintSet;
-using HybridRealBoundedConstraintSet = HybridBoundedConstraintSet;
-
 using HybridSet = HybridBoundedConstraintSet;
+
 
 template<class X> class HybridPoint;
 using HybridExactPoint = HybridPoint<Float64Value>;
-
 
 template<class IVL> class HybridBox;
 using HybridRealBox = HybridBox<RealInterval>;

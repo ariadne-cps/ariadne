@@ -127,9 +127,9 @@ class HybridEnclosure
     //! \brief An empty enclosure.
     HybridEnclosure();
     //! \brief An enclosure corresponding to a hybrid box \a hbx with variables canonically ordered by \a spc.
-    HybridEnclosure(const HybridRealBoxSet& hbx, const RealSpace& spc, const ValidatedFunctionModel64FactoryInterface& fac);
+    HybridEnclosure(const HybridBoxSet& hbx, const RealSpace& spc, const ValidatedFunctionModel64FactoryInterface& fac);
     //! \brief An enclosure corresponding to the hybrid set \a set using \a space to order the continuous variables.
-    HybridEnclosure(const HybridRealBoundedConstraintSet& set, const RealSpace& space, const ValidatedFunctionModel64FactoryInterface& factory);
+    HybridEnclosure(const HybridBoundedConstraintSet& set, const RealSpace& space, const ValidatedFunctionModel64FactoryInterface& factory);
 
     //! \brief An enclosure corresponding to a Euclidean box \a bx in location \a q with variables ordered by \a spc.
     HybridEnclosure(const DiscreteLocation& q, const RealSpace& spc, const RealBox& bx, const ValidatedFunctionModel64FactoryInterface& fac);

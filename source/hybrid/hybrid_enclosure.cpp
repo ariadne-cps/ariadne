@@ -101,7 +101,7 @@ HybridEnclosure::HybridEnclosure()
 {
 }
 
-HybridEnclosure::HybridEnclosure(const HybridRealBoxSet& hbox,
+HybridEnclosure::HybridEnclosure(const HybridBoxSet& hbox,
                                  const RealSpace& state_space,
                                  const ValidatedFunctionModel64FactoryInterface& factory)
     : HybridEnclosure(hbox.location(),state_space,hbox.euclidean_set(state_space),factory)

@@ -245,13 +245,72 @@ template<class X> Map<RealVariable,X> HybridPoint<X>::values() const {
 
 
 
-Void RealHybridVariablesBox::draw(CanvasInterface& c, const Set<DiscreteLocation>& qs, const Variables2d& vs) const {
+HybridBoxSet* HybridBoxSet::clone() const {
+    return new HybridBoxSet(*this);
+}
+Set<DiscreteLocation> HybridBoxSet::locations() const {
+    return { this->HybridVariablesBox<RealInterval>::location() };
+}
+Set<RealVariable> HybridBoxSet::variables(DiscreteLocation) const {
+    return this->HybridVariablesBox<RealInterval>::variables();
+}
+RealSpace HybridBoxSet::space() const {
+    return RealSpace( make_list(this->HybridVariablesBox<RealInterval>::variables()) );
+}
+RealSpace HybridBoxSet::space(DiscreteLocation loc) const {
+    ARIADNE_ASSERT(this->location()==loc);
+    return RealSpace( make_list(this->HybridVariablesBox<RealInterval>::variables()) );
+}
+SetInterface* HybridBoxSet::_euclidean_set(DiscreteLocation loc, RealSpace spc) const {
+    ARIADNE_NOT_IMPLEMENTED; // FIXME: Box does not inherit from SetInterface...
+}
+
+ValidatedSierpinskian HybridBoxSet::is_empty() const {
+    return this->euclidean_set(this->space()).is_empty();
+}
+ValidatedSierpinskian HybridBoxSet::inside(const HybridExactBoxes& hbxs) const {
+    const DiscreteLocation& loc=this->location();
+    if(hbxs.has_location(loc)) {
+        const RealSpace& spc=hbxs.space(loc);
+        return this->euclidean_set(spc).inside(hbxs.euclidean_set(loc));
+    } else {
+        return this->is_empty();
+    }
+}
+ValidatedSierpinskian HybridBoxSet::inside(const HybridExactBox& hbx) const {
+    return (hbx.location()==this->location() and this->euclidean_set(hbx.space()).inside(hbx.euclidean_set())) or this->is_empty();
+}
+ValidatedSierpinskian HybridBoxSet::overlaps(const HybridExactBox& hbx) const {
+    return this->location()==hbx.location() and this->euclidean_set(hbx.space()).overlaps(hbx.euclidean_set());
+}
+ValidatedSierpinskian HybridBoxSet::separated(const HybridExactBox& hbx) const {
+    return this->location()!=hbx.location() or this->euclidean_set(hbx.space()).separated(hbx.euclidean_set());
+}
+ValidatedSierpinskian HybridBoxSet::covers(const HybridExactBox& hbx) const {
+    return (this->location()==hbx.location() and this->euclidean_set(hbx.space()).covers(hbx.euclidean_set())) or hbx.euclidean_set().is_empty();
+}
+
+HybridUpperBoxes HybridBoxSet::bounding_box() const {
+    DiscreteLocation const& loc=this->location(); RealSpace spc(this->space()); RealBox bx=this->euclidean_set(spc);
+    UpperBoxType bbx(bx,Precision64());
+    HybridUpperBoxes res;
+    res.insert(loc,spc,cast_exact(bbx));  // FIXME: Should not need cast here
+    return res;
+};
+
+OutputStream& HybridBoxSet::write(OutputStream& os) const {
+    return os << static_cast<HybridVariablesBox<RealInterval>const&>(*this);
+}
+Void HybridBoxSet::draw(CanvasInterface& c, const Set<DiscreteLocation>& qs, const Variables2d& vs) const {
     if(qs.empty() || qs.contains(this->location())) {
         RealSpace spc(List<RealVariable>(this->variables()));
         Projection2d prj(spc.dimension(),spc.index(vs.x_variable()),spc.index(vs.y_variable()));
         this->euclidean_set(spc).draw(c,prj);
     }
 }
+
+
+
 
 HybridConstraintSet::HybridConstraintSet()
     : _sets()

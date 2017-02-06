@@ -267,7 +267,7 @@ orbit(const HybridExactBoxType& initial_box,
 
 Orbit<HybridEnclosure>
 HybridEvolverBase::
-orbit(const HybridRealBoxSet& initial_box,
+orbit(const HybridBoxSet& initial_box,
       const HybridTerminationCriterion& termination,
       Semantics semantics) const
 {
@@ -281,7 +281,7 @@ orbit(const HybridRealBoxSet& initial_box,
 
 Orbit<HybridEnclosure>
 HybridEvolverBase::
-orbit(const HybridRealBoundedConstraintSet& initial_set,
+orbit(const HybridBoundedConstraintSet& initial_set,
       const HybridTerminationCriterion& termination,
       Semantics semantics) const
 {
@@ -399,7 +399,7 @@ HybridEvolverBase::enclosure(const HybridExactBox& initial_box) const
 }
 
 HybridEvolverBase::EnclosureType
-HybridEvolverBase::enclosure(const HybridRealBoundedConstraintSet& initial_set) const
+HybridEvolverBase::enclosure(const HybridBoundedConstraintSet& initial_set) const
 {
     return HybridEnclosure(initial_set,this->system().continuous_state_space(initial_set.location()),this->function_factory());
 }

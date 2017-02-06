@@ -162,7 +162,7 @@ Void TestHybridEvolver::test_flow() const {
     automaton.new_mode(q,{dot(x0)=one,dot(x1)=one/2});
     RealSpace space=automaton.continuous_state_space(q);
 
-    HybridRealBoxSet initial(q,{-eighth<=x0<=eighth,-eighth<=x1<=eighth});
+    HybridBoxSet initial(q,{-eighth<=x0<=eighth,-eighth<=x1<=eighth});
     HybridTime time(2.5,3);
 
     _set_evolver(automaton);
@@ -188,7 +188,7 @@ Void TestHybridEvolver::test_exact_final_time() const {
     automaton.new_mode(q,{dot(x0)=one,dot(x1)=one/2});
     RealSpace space=automaton.continuous_state_space(q);
 
-    HybridRealBoxSet initial(q,{-eighth<=x0<=eighth,-eighth<=x1<=eighth});
+    HybridBoxSet initial(q,{-eighth<=x0<=eighth,-eighth<=x1<=eighth});
     HybridTime time(2.0,1);
 
     _set_evolver(automaton);
@@ -217,7 +217,7 @@ Void TestHybridEvolver::test_maximum_steps() const {
     // FIXME: Change so that hitting coordinate guard is not an error.
 
     RealSpace space=automaton.continuous_state_space(q);
-    HybridRealBoxSet initial(q,{-eighth<=x0<=eighth,-eighth<=x1<=eighth});
+    HybridBoxSet initial(q,{-eighth<=x0<=eighth,-eighth<=x1<=eighth});
     HybridTime time(1.0,1);
 
     _set_evolver(automaton);
@@ -248,7 +248,7 @@ Void TestHybridEvolver::test_urgent_event() const {
     // FIXME: Change so that hitting coordinate guard is not an error.
 
     RealSpace space=automaton.continuous_state_space(q);
-    HybridRealBoxSet initial(q,{-eighth<=x0<=eighth,-eighth<=x1<=eighth});
+    HybridBoxSet initial(q,{-eighth<=x0<=eighth,-eighth<=x1<=eighth});
     HybridTime time(1.0,2);
 
     _set_evolver(automaton);
@@ -277,7 +277,7 @@ Void TestHybridEvolver::test_empty_interior() const {
     automaton.new_transition(q,e,q,{next(x0)=x0-2,next(x1)=x1},x0-1>=0,urgent);
 
     RealSpace space=automaton.continuous_state_space(q);
-    HybridRealBoxSet initial(q,{-eighth<=x0<=quarter,-eighth<=x1<=eighth});
+    HybridBoxSet initial(q,{-eighth<=x0<=quarter,-eighth<=x1<=eighth});
     HybridTime time(2.0,3);
 
     _set_evolver(automaton);
@@ -305,7 +305,7 @@ Void TestHybridEvolver::test_partial_event() const {
     //FIXME: Need to allow domain of TaylorFunction to have empty interior
 
     RealSpace space=automaton.continuous_state_space(q);
-    HybridRealBoxSet initial(q,{-eighth<=x0<=quarter,-eighth<=x1<=eighth});
+    HybridBoxSet initial(q,{-eighth<=x0<=quarter,-eighth<=x1<=eighth});
     HybridTime time(2.0,3);
 
     _set_evolver(automaton);
@@ -335,7 +335,7 @@ Void TestHybridEvolver::test_step_size_event() const {
     automaton.new_transition(q,e,q,{next(x0)=x0-2,next(x1)=x1},x0-2>=0,urgent);
 
     RealSpace space=automaton.continuous_state_space(q);
-    HybridRealBoxSet initial(q,{-eighth<=x0<=eighth,-eighth<=x1<=eighth});
+    HybridBoxSet initial(q,{-eighth<=x0<=eighth,-eighth<=x1<=eighth});
     HybridTime time(1.0,3);
 
     _set_evolver(automaton);
@@ -361,7 +361,7 @@ Void TestHybridEvolver::test_initially_active_event() const {
     automaton.new_transition(q,e,q,{next(x0)=x0+1,next(x1)=x1},-x0>=0,urgent);
 
     RealSpace space=automaton.continuous_state_space(q);
-    HybridRealBoxSet initial(q,{-1.625_dy<=x0<=-1.375_dy,-0.125_dy<=x1<=0.125_dy});
+    HybridBoxSet initial(q,{-1.625_dy<=x0<=-1.375_dy,-0.125_dy<=x1<=0.125_dy});
     HybridTime time(1.0,4);
 
     _set_evolver(automaton);
@@ -389,7 +389,7 @@ Void TestHybridEvolver::test_initially_active_attracting_event() const {
     automaton.new_transition(q,e,q,{next(x0)=x0+1,next(x1)=x1},-x0-x1/256>=0,urgent);
 
     RealSpace space=automaton.continuous_state_space(q);
-    HybridRealBoxSet initial(q,{-eighth<=x0<=quarter,-eighth<=x1<=eighth});
+    HybridBoxSet initial(q,{-eighth<=x0<=quarter,-eighth<=x1<=eighth});
     HybridTime time(1.0,4);
 
     _set_evolver(automaton);
@@ -413,7 +413,7 @@ Void TestHybridEvolver::test_initially_active_repelling_event() const {
     automaton.new_transition(q,e,q,{next(x0)=x0+1,next(x1)=x1},-x0>=0,urgent);
 
     RealSpace space=automaton.continuous_state_space(q);
-    HybridRealBoxSet initial(q,{-eighth<=x0<=quarter,-eighth<=x1<=eighth});
+    HybridBoxSet initial(q,{-eighth<=x0<=quarter,-eighth<=x1<=eighth});
     HybridTime time(1.0,2);
 
     _set_evolver(automaton);
@@ -437,7 +437,7 @@ Void TestHybridEvolver::test_impact() const {
     //automaton.new_transition(q,e,q,(x0+0.001*x1-0.0004,x1-2),x0-1>=0,urgent);
 
     RealSpace space=automaton.continuous_state_space(q);
-    HybridRealBoxSet initial(q,{0.4375_dy<=x0<=0.5625_dy,0.9375_dy<=x1<=1.0625_dy});
+    HybridBoxSet initial(q,{0.4375_dy<=x0<=0.5625_dy,0.9375_dy<=x1<=1.0625_dy});
     HybridTime time(2.0,3);
 
     _set_evolver(automaton);
@@ -460,7 +460,7 @@ Void TestHybridEvolver::test_tangency() const {
     automaton.new_transition(q,e,q,{next(x0)=x0,next(x1)=x1-1},x1-sqr(x0)>=0,urgent);
 
     RealSpace space=automaton.continuous_state_space(q);
-    HybridRealBoxSet initial(q,{-1-eighth<=x0<=-1+eighth,-quarter<=x1<=quarter});
+    HybridBoxSet initial(q,{-1-eighth<=x0<=-1+eighth,-quarter<=x1<=quarter});
     HybridTime time(2.0,3);
 
     _set_evolver(automaton);
@@ -492,7 +492,7 @@ Void TestHybridEvolver::test_simultaneous_events() const {
     automaton.new_transition(q,e2,q,{next(x0)=x0-2,next(x1)=x1-1},x1-1>=0,urgent);
 
     RealSpace space=automaton.continuous_state_space(q);
-    HybridRealBoxSet initial(q,{-quarter<=x0<=eighth,-eighth<=x1<=quarter});
+    HybridBoxSet initial(q,{-quarter<=x0<=eighth,-eighth<=x1<=quarter});
     HybridTime time(2.5,4);
 
     _set_evolver(automaton);
@@ -518,7 +518,7 @@ Void TestHybridEvolver::test_creep() const {
     automaton.new_transition(q,e,q,{next(x0)=x0-1,next(x1)=x1},x0-1>=0,urgent);
 
     RealSpace space=automaton.continuous_state_space(q);
-    HybridRealBoxSet initial(q,{-quarter<=x0<=eighth,-eighth<=x1<=quarter});
+    HybridBoxSet initial(q,{-quarter<=x0<=eighth,-eighth<=x1<=quarter});
     HybridTime time(1.5,4);
 
     _set_evolver(automaton);
@@ -547,7 +547,7 @@ Void TestHybridEvolver::test_unwind() const {
     automaton.new_transition(q,e,q,{next(x0)=x0-3,next(x1)=x1-1},x0-x1/16-1>=0,urgent);
 
     RealSpace space=automaton.continuous_state_space(q);
-    HybridRealBoxSet initial(q,{-quarter<=x0<=eighth,-eighth<=x1<=quarter});
+    HybridBoxSet initial(q,{-quarter<=x0<=eighth,-eighth<=x1<=quarter});
     HybridTime time(3.0,4);
 
     _set_evolver(automaton);
@@ -576,7 +576,7 @@ Void TestHybridEvolver::test_permissive() const {
     ARIADNE_TEST_PRINT(automaton);
 
     RealSpace space=automaton.continuous_state_space(q);
-    HybridRealBoxSet initial(q,{-eighth<=x0<=eighth,-eighth<=x1<=eighth});
+    HybridBoxSet initial(q,{-eighth<=x0<=eighth,-eighth<=x1<=eighth});
     HybridTime time(3.0,4);
 
     _set_evolver(automaton);

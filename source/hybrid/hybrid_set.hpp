@@ -102,7 +102,10 @@ class HybridBasicSet
         return (this->location()==hbx.location()) and this->euclidean_set().overlaps(hbx.euclidean_set(this->space())); }
     //! \brief Test if interior of the set is a superset of a hybrid box. Returns true if the box is empty.
     template<class IVL> decltype(auto) covers(HybridBox<IVL> const& hbx) const {
-        return (this->location()==hbx.location()) ? this->euclidean_set().covers(hbx.euclidean_set(this->space())) : hbx.continuous_set().is_empty();; }
+        return (this->location()==hbx.location()) ? this->euclidean_set().covers(hbx.euclidean_set(this->space())) : hbx.continuous_set().is_empty(); }
+    //! \brief Test if the set is empty.
+    template<class IVL> decltype(auto) is_empty() const {
+        return this->euclidean_set().is_empty(); }
 
     //! \brief A bounding box for the continuous set in the given location.
     HybridUpperBox bounding_box() const;

@@ -78,19 +78,22 @@ template<class IVL> class HybridVariablesBox
     Box<IVL> euclidean_set(const RealSpace& spc) const { return this->second.euclidean_set(spc); }
 };
 
-class RealHybridVariablesBox
+class HybridBoxSet
     : public virtual HybridSetInterface
     , public virtual HybridDrawableInterface
     , public HybridVariablesBox<RealInterval>
 {
+  public:
+    using HybridVariablesBox<RealInterval>::HybridVariablesBox;
     using HybridVariablesBox<RealInterval>::variables;
     using HybridVariablesBox<RealInterval>::euclidean_set;
 
-    virtual RealHybridVariablesBox* clone() const override;
-    virtual SetInterface* _euclidean_set(DiscreteLocation, RealSpace) const override;
+    inline RealBox euclidean_set(DiscreteLocation, RealSpace) const;
     virtual Set<DiscreteLocation> locations() const override;
     virtual Set<RealVariable> variables(DiscreteLocation) const override;
+    inline RealSpace space() const;
     virtual RealSpace space(DiscreteLocation) const;
+    virtual ValidatedSierpinskian is_empty() const;
 
     virtual ValidatedSierpinskian overlaps(const HybridExactBox& bx) const override;
     virtual ValidatedSierpinskian separated(const HybridExactBox& bx) const override;
@@ -103,6 +106,9 @@ class RealHybridVariablesBox
 
     virtual OutputStream& write(OutputStream& os) const override;
     virtual Void draw(CanvasInterface&, const Set<DiscreteLocation>&, const Variables2d&) const override;
+  private:
+    virtual HybridBoxSet* clone() const override;
+    virtual SetInterface* _euclidean_set(DiscreteLocation, RealSpace) const override;
 };
 
 

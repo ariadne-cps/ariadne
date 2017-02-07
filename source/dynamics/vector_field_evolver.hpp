@@ -56,22 +56,21 @@ class Enclosure;
 
 class EvolutionProfiler;
 
-
-/*! \brief A class for computing the evolution of a vector_field system.
- *
- * The actual evolution steps are performed by the VectorFieldEvolver class.
- */
+//! \brief A class for computing the evolution of a vector_field system.
+//!
+//! The actual evolution steps are performed by the Integrator class.
 class VectorFieldEvolver
-    : public EvolverBase< VectorField, Enclosure, Float64 >
+    : public EvolverBase< VectorField, Enclosure, typename VectorField::TimeType >
     , public Loggable
 {
   public:
     typedef VectorFieldEvolverConfiguration ConfigurationType;
     typedef VectorField SystemType;
-    typedef Float64 TimeType;
-    typedef Float64 TerminationType;
+    typedef typename VectorField::TimeType TimeType;
+    typedef Dyadic TimeStepType;
+    typedef TimeType TerminationType;
     typedef Enclosure EnclosureType;
-    typedef Pair<TimeType, EnclosureType> TimedEnclosureType;
+    typedef Pair<TimeStepType, EnclosureType> TimedEnclosureType;
     typedef Orbit<EnclosureType> OrbitType;
     typedef ListSet<EnclosureType> EnclosureListType;
   public:
@@ -81,11 +80,17 @@ class VectorFieldEvolver
     		const SystemType& system,
             const IntegratorInterface& integrator);
 
-    /*! \brief Make a dynamically-allocated copy. */
+    //! \brief Make a dynamically-allocated copy.
     VectorFieldEvolver* clone() const { return new VectorFieldEvolver(*this); }
 
-    /* \brief Get the internal system. */
+    //! \brief Get the internal system.
     virtual const SystemType& system() const { return *_sys_ptr; }
+
+    //! \brief Make an enclosure from a user set.
+    EnclosureType enclosure(RealBox const&) const;
+
+    //! \brief Make an enclosure from a computed box set.
+    EnclosureType enclosure(ExactBoxType const&) const;
 
     //@{
     //! \name Configuration for the class.
@@ -94,7 +99,6 @@ class VectorFieldEvolver
     const ConfigurationType& configuration() const { return *this->_configuration; }
 
     //@}
-
 
     //@{
     //! \name Evolution using abstract sets.
@@ -115,6 +119,7 @@ class VectorFieldEvolver
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
         this->_evolution(final,reachable,intermediate,initial_set,time,UPPER_SEMANTICS,true);
         return reachable; }
+    //@}
 
   protected:
     virtual Void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,

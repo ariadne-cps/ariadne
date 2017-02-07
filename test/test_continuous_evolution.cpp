@@ -93,7 +93,7 @@ Void TestContinuousEvolution::test() const
     typedef Enclosure EnclosureType;
 
     // Set up the evolution parameters and grid
-    Float64 time(3.0);
+    Real time(3.0_dec);
     double step_size(0.5);
     double enclosure_radius(0.25);
 
@@ -163,7 +163,7 @@ Void TestContinuousEvolution::failure_test() const
     typedef Enclosure EnclosureType;
 
     // Set up the evolution parameters and grid
-    Float64 time(0.5);
+    Real time(0.5_dec);
     double step_size(0.01);
     double enclosure_radius(0.25);
 
@@ -231,7 +231,7 @@ Void TestContinuousEvolution::failure_test() const
     ExactBoxType initial_box2 = ExactBoxType{{0.0,0.0},{1.0,1.0},{1.0,1.0}};
     initial_set = EnclosureType(initial_box2,function_factory);
 
-    time = 1.5;
+    time = 1.5_dec;
 
     // Compute the reachable sets
     orbit = evolvertwo.orbit(initial_set,time,semantics);

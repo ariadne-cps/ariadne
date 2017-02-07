@@ -37,7 +37,8 @@
 #include "numeric/numeric.hpp"
 #include "output/graphics_interface.hpp"
 #include "geometry/function_set.hpp"
-
+#include "geometry/list_set.hpp"
+#include "geometry/enclosure.hpp"
 
 
 namespace Ariadne {
@@ -108,9 +109,10 @@ class Orbit<GridCell>
 };
 
 
-template<class ES>
-class Orbit
+template<>
+class Orbit<Enclosure>
 {
+    typedef Enclosure ES;
     typedef ListSet<ES> ESL;
   public:
     typedef ES EnclosureType;

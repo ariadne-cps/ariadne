@@ -28,10 +28,10 @@
 #ifndef ARIADNE_HYBRID_REACHABILITY_ANALYSER_INTERFACE_HPP
 #define ARIADNE_HYBRID_REACHABILITY_ANALYSER_INTERFACE_HPP
 
-#include "solvers/reachability_analyser_interface.hpp"
 
 #include "hybrid/hybrid_set_interface.hpp"
 #include "dynamics/evolver_interface.hpp"
+#include "dynamics/reachability_analyser_interface.hpp"
 
 #include "utility/logging.hpp"
 
@@ -41,7 +41,7 @@ class HybridAutomatonInterface;
 class HybridGridTreeSet;
 
 //! \brief Policy to handle overspill in respect to restrictions provided for chain reach computation.
-enum ChainOverspillPolicy { OVERSPILL_IGNORE, OVERSPILL_WARNING, OVERSPILL_ERROR };
+enum class ChainOverspillPolicy : char { OVERSPILL_IGNORE, OVERSPILL_WARNING, OVERSPILL_ERROR };
 
 OutputStream& operator<<(OutputStream& os, const ChainOverspillPolicy& policy);
 

@@ -35,7 +35,7 @@
 
 #include "dynamics/orbit.hpp"
 #include "dynamics/vector_field_evolver.hpp"
-#include "solvers/reachability_analyser_interface.hpp"
+#include "dynamics/reachability_analyser_interface.hpp"
 
 #include "utility/logging.hpp"
 

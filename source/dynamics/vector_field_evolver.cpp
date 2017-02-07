@@ -28,6 +28,7 @@
 #include "utility/array.hpp"
 #include "utility/tuple.hpp"
 #include "utility/stlio.hpp"
+#include "utility/container.hpp"
 #include "algebra/vector.hpp"
 #include "function/function.hpp"
 #include "function/constraint.hpp"
@@ -40,6 +41,9 @@
 
 #include "dynamics/vector_field.hpp"
 #include "dynamics/vector_field_evolver.hpp"
+
+#include "expression/space.hpp"
+#include "expression/assignment.hpp"
 
 namespace {
 
@@ -60,6 +64,14 @@ template<class ES> List<ES> subdivide(const ES& enclosure) {
 
 namespace Ariadne {
 
+EffectiveVectorFunction make_function(RealSpace const&, Vector<RealExpression> const&);
+
+VectorField::VectorField(List<DottedRealAssignment> const& dynamics)
+    : _variable_names()
+    , _function(make_function(left_hand_sides(dynamics),Vector<RealExpression>(right_hand_sides(dynamics))))
+{
+}
+
 // Allow subdivisions in upper evolution
 const Bool ENABLE_SUBDIVISIONS = false;
 // Allow premature termination of lower evolution
@@ -78,6 +90,14 @@ VectorFieldEvolver::VectorFieldEvolver(const SystemType& system, const Integrato
     , _configuration(new ConfigurationType())
 {
     //ARIADNE_ASSERT_MSG(dynamic_cast<const TaylorPicardIntegrator*>(&i),"Only TaylorPicardIntegrator supported by VectorFieldEvolver\n");
+}
+
+typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const ExactBoxType& box) const {
+    return Enclosure(box,std::dynamic_pointer_cast<const IntegratorBase>(this->_integrator)->function_factory());
+}
+
+typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const RealBox& box) const {
+    return Enclosure(box,std::dynamic_pointer_cast<const IntegratorBase>(this->_integrator)->function_factory());
 }
 
 
@@ -129,7 +149,7 @@ _evolution(EnclosureListType& final_sets,
     {
         // Set up initial timed set models
         ARIADNE_LOG(6,"initial_set = "<<initial_set<<"\n");
-        TimeType initial_time = 0.0;
+        TimeStepType initial_time = 0u;
         ARIADNE_LOG(6,"initial_time = "<<initial_time<<"\n");
         EnclosureType initial_set_model(initial_set);
         ARIADNE_LOG(6,"initial_set_model = "<<initial_set_model<<"\n");
@@ -140,10 +160,10 @@ _evolution(EnclosureListType& final_sets,
     while(!working_sets.empty()) {
         TimedEnclosureType current_timed_set=working_sets.back();
         working_sets.pop_back();
-        TimeType current_time=current_timed_set.first;
+        TimeStepType current_time=current_timed_set.first;
         EnclosureType current_set_model=current_timed_set.second;
         Float64UpperBound current_set_radius=current_set_model.bounding_box().radius();
-        if(current_time>=maximum_time) {
+        if(definitely(current_time>=maximum_time)) {
             final_sets.adjoin(current_set_model);
         } else if(UPPER_SEMANTICS && ENABLE_SUBDIVISIONS
                   && decide(current_set_radius>this->_configuration->maximum_enclosure_radius())) {
@@ -168,7 +188,7 @@ _evolution(EnclosureListType& final_sets,
             ARIADNE_LOG(1,"\r"
                         <<"#w="<<std::setw(4)<<working_sets.size()
                         <<"#r="<<std::setw(4)<<std::left<<reach_sets.size()
-                        <<" t="<<std::setw(7)<<std::fixed<<current_time
+                        <<" t="<<std::setw(7)<<std::fixed<<current_time.get_d()
                         <<" r="<<std::setw(7)<<current_set_model.radius()
                         <<" c="<<current_set_model.centre()
                         <<"                      ");
@@ -200,7 +220,7 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     typedef Enclosure EnclosureType;
 
     EnclosureType current_set_model;
-    TimeType current_time;
+    TimeStepType current_time;
     ARIADNE_LOG(9,"working_timed_set_model = "<<working_timed_set_model<<"\n");
     make_lpair(current_time,current_set_model)=working_timed_set_model;
 
@@ -238,7 +258,7 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     ARIADNE_LOG(6,"flow_step_model = "<<flow_step_model<<"\n");
 
     // Compute the integration time model
-    TimeType next_time=current_time+step_size;
+    TimeStepType next_time=current_time+TimeStepType(step_size);
     ARIADNE_LOG(6,"next_time = "<<next_time<<"\n");
     // Compute the flow tube (reachable set) model and the final set
     ARIADNE_LOG(6,"product = "<<product(current_set_model,ExactIntervalType(0.0,step_size))<<"\n");

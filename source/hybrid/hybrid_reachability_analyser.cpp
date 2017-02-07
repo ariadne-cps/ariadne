@@ -643,19 +643,19 @@ Void HybridReachabilityAnalyser::_checked_restriction(HybridGridTreeSet& set, co
     ChainOverspillPolicy policy = this->_configuration->outer_overspill_policy();
     HybridGridTreeSet set_copy(set.grid());
 
-    if (policy != OVERSPILL_IGNORE) {
+    if (policy != ChainOverspillPolicy::OVERSPILL_IGNORE) {
         set_copy = set;
     }
     set.restrict_to_height(this->_configuration->maximum_grid_height());
     if (!bounding.is_empty()) set.restrict(bounding);
 
-    if (policy != OVERSPILL_IGNORE) {
+    if (policy != ChainOverspillPolicy::OVERSPILL_IGNORE) {
         set_copy.remove(set);
         if (!set_copy.is_empty()) {
-            if (policy == OVERSPILL_WARNING) {
+            if (policy == ChainOverspillPolicy::OVERSPILL_WARNING) {
                 ARIADNE_WARN("The computed chain reach has been restricted, an outer approximation is .");
             }
-            if (policy == OVERSPILL_ERROR) {
+            if (policy == ChainOverspillPolicy::OVERSPILL_ERROR) {
                 ARIADNE_THROW(OuterChainOverspill,"outer_chain_reach","The computed chain reach has been restricted.");
             }
         }
@@ -674,7 +674,7 @@ HybridReachabilityAnalyserConfiguration::HybridReachabilityAnalyserConfiguration
     set_maximum_grid_depth(3);
     set_maximum_grid_height(16);
     set_grid(std::shared_ptr<HybridGrid>(new HybridGrid(_analyser.system().state_space(),SimpleHybridScaling())));
-    set_outer_overspill_policy(OVERSPILL_ERROR);
+    set_outer_overspill_policy(ChainOverspillPolicy::OVERSPILL_ERROR);
 }
 
 
@@ -718,10 +718,10 @@ HybridReachabilityAnalyserConfiguration::set_grid(const std::shared_ptr<HybridGr
 OutputStream& operator<<(OutputStream& os, const ChainOverspillPolicy& policy)
 {
     switch(policy) {
-        case OVERSPILL_IGNORE: os<<"ignore"; break;
-        case OVERSPILL_WARNING: os<<"warning"; break;
-        case OVERSPILL_ERROR: os<<"error"; break;
-        default: os << "unknown"; break;
+        case ChainOverspillPolicy::OVERSPILL_IGNORE: os<<"ignore"; break;
+        case ChainOverspillPolicy::OVERSPILL_WARNING: os<<"warning"; break;
+        case ChainOverspillPolicy::OVERSPILL_ERROR: os<<"error"; break;
+        default: abort();
     } return os;
 }
 

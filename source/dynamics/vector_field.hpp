@@ -33,34 +33,34 @@
 #include "function/function.hpp"
 #include "geometry/set_interface.hpp"
 #include "geometry/grid.hpp"
+#include "expression/expression.decl.hpp"
 
 namespace Ariadne {
 
-/*! \brief A vector field in Euclidean space.
- */
+//! \brief A vector field in Euclidean space.
 class VectorField
 {
   public:
     //! \brief The type used to represent time.
-    typedef Float64 TimeType;
+    typedef Real TimeType;
     //! \brief The type used to represent real numbers.
     typedef Real RealType ;
     //! \brief The type used to describe the state space.
     typedef EuclideanSpace StateSpaceType;
   public:
-    VectorField(const EffectiveVectorFunction& f) : _function(f) { }
+    VectorField(List<DottedRealAssignment> const& dynamics);
+    VectorField(EffectiveVectorFunction const& function) : _function(function) { }
     virtual ~VectorField() { }
     virtual VectorField* clone() const { return new VectorField(*this); }
+    SizeType dimension() const { return _function.result_size(); }
     const EffectiveVectorFunction& function() const { return _function; }
     Grid grid() const { return Grid(_function.argument_size()); }
+    friend OutputStream& operator<<(OutputStream& os, const VectorField& vf) {
+        return os << "VectorField( " << vf.function() << " )"; }
   private:
+    List<std::string> _variable_names;
     EffectiveVectorFunction _function;
 };
-
-inline OutputStream& operator<<(OutputStream& os, const VectorField& vf) {
-    return os << "VectorField( " << vf.function() << " )";
-}
-
 
 } // namespace Ariadne
 

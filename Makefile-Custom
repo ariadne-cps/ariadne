@@ -99,7 +99,8 @@ TEST_GEOMETRY_SRC = \
 LIB_DYNAMICS_SRC = \
 	orbit.cpp \
 	map_evolver.cpp \
-	vector_field_evolver.cpp
+	vector_field_evolver.cpp \
+	reachability_analyser.cpp
 
 TEST_DYNAMICS_SRC = \
 	test_discrete_evolution.cpp \

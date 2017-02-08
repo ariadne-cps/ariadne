@@ -223,14 +223,27 @@ Nat get_argument_size(const List<EffectiveConstraint>& c) {
     return as;
 }
 
-EffectiveVectorFunction constraint_function(Nat as, const List<EffectiveConstraint>& c) {
-    EffectiveVectorFunction f(c.size(),EuclideanDomain(as));
+template<class P, class D, class C> VectorFunction<P> make_constraint_function(D dom, const List<C>& c) {
+    VectorFunction<P> f(c.size(),dom);
     for(Nat i=0; i!=c.size(); ++i) {
         //f[i]=c[i].function();
         f.set(i,c[i].function());
     }
     return f;
 }
+
+EffectiveVectorFunction constraint_function(EuclideanDomain dom, const List<EffectiveConstraint>& c) {
+    return make_constraint_function<EffectiveTag>(dom,c);
+}
+
+EffectiveVectorFunction constraint_function(BoxDomainType dom, const List<EffectiveConstraint>& c) {
+    return make_constraint_function<EffectiveTag>(dom,c);
+}
+
+ValidatedVectorFunction constraint_function(BoxDomainType dom, const List<ValidatedConstraint>& c) {
+    return make_constraint_function<ValidatedTag>(dom,c);
+}
+
 
 EffectiveBoxType constraint_bounds(const List<EffectiveConstraint>& c) {
     EffectiveBoxType b(c.size());
@@ -265,7 +278,7 @@ ConstraintSet::ConstraintSet(const List<EffectiveConstraint>& c)
 
 EffectiveVectorFunction const ConstraintSet::constraint_function() const
 {
-    return Ariadne::constraint_function(this->dimension(),this->constraints());
+    return Ariadne::constraint_function(EuclideanDomain(this->dimension()),this->constraints());
 }
 
 EffectiveBoxType const ConstraintSet::constraint_bounds() const
@@ -337,7 +350,7 @@ BoundedConstraintSet::BoundedConstraintSet(const EffectiveBoxType& d, const List
 
 EffectiveVectorFunction const BoundedConstraintSet::constraint_function() const
 {
-    return Ariadne::constraint_function(this->dimension(),this->constraints());
+    return Ariadne::constraint_function(EuclideanDomain(this->dimension()),this->constraints());
 }
 
 EffectiveBoxType const BoundedConstraintSet::constraint_bounds() const
@@ -439,11 +452,7 @@ ConstrainedImageSet::ConstrainedImageSet(const BoundedConstraintSet& set)
 
 const EffectiveVectorFunction ConstrainedImageSet::constraint_function() const
 {
-    EffectiveVectorFunction result(this->number_of_constraints(),EuclideanDomain(this->number_of_parameters()));
-    for(Nat i=0; i!=this->number_of_constraints(); ++i) {
-        result[i]=this->constraint(i).function();
-    }
-    return result;
+    return Ariadne::constraint_function(this->function().domain(),this->constraints());
 }
 
 const EffectiveBoxType ConstrainedImageSet::constraint_bounds() const
@@ -798,11 +807,7 @@ template<class SF> class TemplatedConstrainedImageSet;
 
 ValidatedVectorFunction ValidatedConstrainedImageSet::constraint_function() const
 {
-    ValidatedVectorFunction result(this->number_of_constraints(),EuclideanDomain(this->number_of_parameters()));
-    for(Nat i=0; i!=this->number_of_constraints(); ++i) {
-        result[i]=this->constraint(i).function();
-    }
-    return result;
+    return Ariadne::constraint_function(this->function().domain(),this->constraints());
 }
 
 ExactBoxType ValidatedConstrainedImageSet::constraint_bounds() const

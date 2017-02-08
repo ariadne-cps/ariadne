@@ -62,6 +62,8 @@ class ValidatedAffineConstrainedImageSet;
 class Grid;
 class PavingInterface;
 
+class Drawer;
+
 
 //! \ingroup GeometryModule ExactSetSubModule
 //! \brief A set defined as the intersection of an exact box with preimage of an exact box (the \em codomain) under a continuous function.
@@ -256,6 +258,7 @@ class ValidatedConstrainedImageSet
 
     //! \brief The domain of the set.
     const ExactBoxType& domain() const { return this->_domain; }
+    const ExactBoxType& reduced_domain() const { return this->_reduced_domain; }
     //! \brief The function used to define the set.
     const ValidatedVectorFunction& function() const { return this->_function; }
     //! \brief The constraints used to define the set.
@@ -302,6 +305,8 @@ class ValidatedConstrainedImageSet
     Pair<ValidatedConstrainedImageSet,ValidatedConstrainedImageSet> split() const;
     //! \brief Split into two pieces by subdividing along the \a j<sup>th</sup> coordinate direction.
     Pair<ValidatedConstrainedImageSet,ValidatedConstrainedImageSet> split(Nat j) const;
+    //! \brief Restrict the parameter domain to \a parameter_subdomain.
+    ValidatedConstrainedImageSet restriction(ExactBoxType const& new_domain) const;
 
     //! \brief Test if the set is empty.
     ValidatedKleenean is_empty() const;
@@ -313,15 +318,18 @@ class ValidatedConstrainedImageSet
     ValidatedSierpinskian overlaps(const ExactBoxType&) const;
     //! \brief Adjoin an outer approximation to a paving.
     Void adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
+    //! \brief Compute an outer approximation on the \a grid to the given \a depth.
+    GridTreeSet outer_approximation(const Grid& grid, Int depth) const;
 
     //! \brief Test if the set satisfies the state constraint at all points.
     ValidatedKleenean satisfies(const ValidatedConstraint& c) const;
 
     //! \brief Draw to a canvas.
+    Void draw(Drawer const& drawer, CanvasInterface&, const Projection2d&) const;
     Void draw(CanvasInterface&, const Projection2d&) const;
     Void box_draw(CanvasInterface&, const Projection2d&) const;
-    Void affine_draw(CanvasInterface&, const Projection2d&, Int) const;
-    Void grid_draw(CanvasInterface&, const Projection2d&) const;
+    Void affine_draw(CanvasInterface&, const Projection2d&, Nat splittings) const;
+    Void grid_draw(CanvasInterface&, const Projection2d&, Nat depth) const;
     //! \brief Write to an output stream.
     OutputStream& write(OutputStream&) const;
 };

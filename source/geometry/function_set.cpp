@@ -555,32 +555,8 @@ ValidatedSierpinskian ConstrainedImageSet::overlaps(const ExactBoxType& bx) cons
 Void
 ConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const
 {
-    ARIADNE_ASSERT(paving.dimension()==this->dimension());
-    const ExactBoxType domain=over_approximation(this->domain());
-    const EffectiveVectorFunction& space_function=this->function();
-    EffectiveVectorFunction constraint_function(this->number_of_constraints(),domain);
-    EffectiveBoxType codomain(this->number_of_constraints());
-
-    for(Nat i=0; i!=this->number_of_constraints(); ++i) {
-        constraint_function.set(i,this->_constraints[i].function());
-        codomain[i]=EffectiveIntervalType(this->_constraints[i].lower_bound(),this->_constraints[i].upper_bound());
-    }
-    ExactBoxType constraint_bounds=over_approximation(codomain);
-
-    switch(DISCRETISATION_METHOD) {
-        case SUBDIVISION_DISCRETISE:
-            SubdivisionPaver().adjoin_outer_approximation(paving,domain,space_function,constraint_function,constraint_bounds,depth);
-            break;
-        case AFFINE_DISCRETISE:
-            AffinePaver().adjoin_outer_approximation(paving,domain,space_function,constraint_function,constraint_bounds,depth);
-            break;
-        case CONSTRAINT_DISCRETISE:
-            ConstraintPaver().adjoin_outer_approximation(paving,domain,space_function,constraint_function,constraint_bounds,depth);
-            break;
-        default:
-            ARIADNE_FAIL_MSG("Unknown discretisation method\n");
-    }
-
+    ValidatedConstrainedImageSet set(over_approximation(this->domain()),this->function(),this->constraints());
+    return set.adjoin_outer_approximation_to(paving,depth);
 }
 
 
@@ -828,6 +804,46 @@ ValidatedConstrainedImageSet::bounding_box() const
 }
 
 
+/*
+// Version from Enclosure
+ValidatedAffineConstrainedImageSet
+ValidatedConstrainedImageSet::affine_over_approximation() const
+{
+    this->_check();
+    typedef List<ValidatedScalarTaylorFunctionModel64>::ConstIterator ConstIterator;
+
+    const Nat nx=this->state_dimension();
+    const Nat nc=this->number_of_constraints();
+    const Nat np=this->number_of_parameters();
+
+    AffineSweeper<Float64> affine_sweeper((Precision64()));
+    ValidatedVectorTaylorFunctionModel64 state_function=dynamic_cast<const ValidatedVectorTaylorFunctionModel64&>(this->_state_function.reference());
+    ValidatedScalarTaylorFunctionModel64 time_function=dynamic_cast<const ValidatedScalarTaylorFunctionModel64&>(this->_time_function.reference());
+    List<ValidatedScalarTaylorFunctionModel64> constraint_functions;
+    for(Nat i=0; i!=nc; ++i) { constraint_functions.append(dynamic_cast<const ValidatedScalarTaylorFunctionModel64&>(this->_constraints[i].function().reference())); }
+
+    //std::cerr<<"\n"<<state_function<<"\n"<<time_function<<"\n"<<constraint_functions<<"\n\n";
+
+    Vector< ValidatedAffineModel > affine_function_models(state_function.result_size());
+    for(Nat i=0; i!=state_function.result_size(); ++i) { affine_function_models[i]=affine_model(state_function.models()[i]); }
+    //affine_function_models[state_function.result_size()]=affine_model(time_function.model());
+
+    ValidatedAffineConstrainedImageSet result(affine_function_models);
+    //std::cerr<<"\n"<<*this<<"\n"<<result<<"\n\n";
+
+    for(Nat i=0; i!=this->number_of_constraints(); ++i) {
+        ValidatedTaylorModel64 const& constraint_model=constraint_functions[i].model();
+        ValidatedAffineModel affine_constraint_model=affine_model(constraint_model);
+        ExactIntervalType constraint_bound=this->constraint(i).bounds();
+        result.new_constraint(constraint_bound.lower()<=affine_constraint_model<=constraint_bound.upper());
+    }
+
+    ARIADNE_LOG(2,"set="<<*this<<"\nset.affine_over_approximation()="<<result<<"\n");
+    return result;
+
+}
+*/
+
 ValidatedAffineConstrainedImageSet
 ValidatedConstrainedImageSet::affine_over_approximation() const
 {
@@ -949,6 +965,24 @@ ValidatedConstrainedImageSet::split() const
 }
 
 
+inline ValidatedScalarFunction const& _restriction(ValidatedScalarFunction const& f, ExactBoxType dom) { return f; }
+inline ValidatedVectorFunction const& _restriction(ValidatedVectorFunction const& f, ExactBoxType dom) { return f; }
+
+
+ValidatedConstrainedImageSet
+ValidatedConstrainedImageSet::restriction(ExactBoxType const& new_domain) const
+{
+    ARIADNE_ASSERT(subset(new_domain,this->domain()));
+    ExactBoxType new_reduced_domain = intersection(new_domain,this->reduced_domain());
+    ValidatedConstrainedImageSet result(new_domain,_restriction(this->function(),new_domain));
+    for(Nat i=0; i!=this->_constraints.size(); ++i) {
+        ValidatedConstraint const& constraint=this->_constraints[i];
+        ValidatedConstraint new_constraint(constraint.lower_bound(),_restriction(constraint.function(),new_reduced_domain),constraint.upper_bound());
+        result.new_parameter_constraint(new_constraint);
+    }
+    return result;
+}
+
 Void
 ValidatedConstrainedImageSet::reduce()
 {
@@ -1022,22 +1056,27 @@ ValidatedSierpinskian ValidatedConstrainedImageSet::overlaps(const ExactBoxType&
 
 }
 
+
+GridTreeSet ValidatedConstrainedImageSet::outer_approximation(const Grid& grid, Int depth) const
+{
+    GridTreeSet paving(grid);
+    this->adjoin_outer_approximation_to(paving,depth);
+    return paving;
+}
+
 Void ValidatedConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const
 {
-    const ExactBoxType subdomain=this->_reduced_domain;
-    const ValidatedVectorFunction function = this->function();
-    const ValidatedVectorFunction constraint_function = this->constraint_function();
-    const ExactBoxType constraint_bounds = this->constraint_bounds();
+    ValidatedConstrainedImageSet const& set=*this;
 
     switch(DISCRETISATION_METHOD) {
         case SUBDIVISION_DISCRETISE:
-            SubdivisionPaver().adjoin_outer_approximation(paving,subdomain,function,constraint_function,constraint_bounds,depth);
+            SubdivisionPaver().adjoin_outer_approximation(paving,set,depth);
             break;
         case AFFINE_DISCRETISE:
-            AffinePaver().adjoin_outer_approximation(paving,subdomain,function,constraint_function,constraint_bounds,depth);
+            AffinePaver().adjoin_outer_approximation(paving,set,depth);
             break;
         case CONSTRAINT_DISCRETISE:
-            ConstraintPaver().adjoin_outer_approximation(paving,subdomain,function,constraint_function,constraint_bounds,depth);
+            ConstraintPaver().adjoin_outer_approximation(paving,set,depth);
             break;
         default:
             ARIADNE_FAIL_MSG("Unknown discretisation method\n");
@@ -1088,15 +1127,15 @@ ValidatedConstrainedImageSet::box_draw(CanvasInterface& cnvs, const Projection2d
 }
 
 Void
-ValidatedConstrainedImageSet::affine_draw(CanvasInterface& cnvs, const Projection2d& proj, Int depth) const
+ValidatedConstrainedImageSet::affine_draw(CanvasInterface& cnvs, const Projection2d& proj, Nat splittings) const
 {
-    AffineDrawer(depth).draw(cnvs,proj,*this);
+    AffineDrawer(splittings).draw(cnvs,proj,*this);
 }
 
 Void
-ValidatedConstrainedImageSet::grid_draw(CanvasInterface& cnvs, const Projection2d& proj) const
+ValidatedConstrainedImageSet::grid_draw(CanvasInterface& cnvs, const Projection2d& proj, Nat depth) const
 {
-    GridDrawer().draw(cnvs,proj,*this);
+    GridDrawer(depth).draw(cnvs,proj,*this);
 }
 
 ValidatedConstrainedImageSet

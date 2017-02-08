@@ -43,28 +43,11 @@
 
 namespace Ariadne {
 
+Pair<Nat,double> nonlinearity_index_and_error(const ValidatedVectorFunction& function, const ExactBoxType& domain);
 Pair<Nat,double> lipschitz_index_and_error(const ValidatedVectorFunction& function, const ExactBoxType& domain);
 Pair<Nat,double> lipschitz_index_and_error(const ValidatedVectorFunction& function, const UpperBoxType& domain) {
     return lipschitz_index_and_error(function,cast_exact_box(domain));
 }
-
-namespace {
-
-static const Nat verbosity = 0u;
-
-Void subdivision_adjoin_outer_approximation(PavingInterface& paving, const ExactBoxType& domain, const ValidatedVectorFunction& function,
-                                            const ValidatedVectorFunction& constraint_function, const ExactBoxType& constraint_bounds, Int depth);
-
-Void affine_adjoin_outer_approximation(PavingInterface& paving, const ExactBoxType& domain, const ValidatedVectorFunction& function,
-                                       const ValidatedVectorFunction& constraint_function, const ExactBoxType& constraint_bounds, Int depth);
-
-Void constraint_adjoin_outer_approximation(PavingInterface& paving, const ExactBoxType& domain, const ValidatedVectorFunction& function,
-                                           const ValidatedVectorFunction& constraint_function, const ExactBoxType& constraint_bounds, Int depth);
-
-Void optimal_constraint_adjoin_outer_approximation(PavingInterface& paving, const ExactBoxType& domain, const ValidatedVectorFunction& function,
-                                                   const ValidatedVectorFunction& constraint_function, const ExactBoxType& constraint_bounds, Int depth);
-
-} // namespace
 
 namespace {
 
@@ -126,44 +109,26 @@ Float64 average_scaled_width(const UpperBoxType& bx, const Vector<Float64>& sf) 
 
 } // namespace
 
-Void SubdivisionPaver::
-adjoin_outer_approximation(PavingInterface& paving, const DomainType& domain, const ValidatedVectorFunction& space_function,
-                           const ValidatedVectorFunction& constraint_function, const ExactBoxType& constraint_bounds, Int depth) const
+
+
+Void SubdivisionPaver::adjoin_outer_approximation(PavingInterface& paving, const ValidatedConstrainedImageSet& set, Int depth) const
 {
-    return Ariadne::subdivision_adjoin_outer_approximation(paving,domain,space_function,constraint_function,constraint_bounds,depth);
+    RawFloatVector errors(paving.dimension());
+    for(Nat i=0; i!=errors.size(); ++i) {
+        errors[i]=paving.grid().lengths()[i]/(1<<depth);
+    }
+
+    this->adjoin_outer_approximation_recursion(paving,set,depth,errors);
 }
 
-Void AffinePaver::
-adjoin_outer_approximation(PavingInterface& paving, const DomainType& domain, const ValidatedVectorFunction& space_function,
-                           const ValidatedVectorFunction& constraint_function, const ExactBoxType& constraint_bounds, Int depth) const
-{
-    return Ariadne::affine_adjoin_outer_approximation(paving,domain,space_function,constraint_function,constraint_bounds,depth);
-}
-
-Void ConstraintPaver::
-adjoin_outer_approximation(PavingInterface& paving, const DomainType& domain, const ValidatedVectorFunction& space_function,
-                           const ValidatedVectorFunction& constraint_function, const ExactBoxType& constraint_bounds, Int depth) const
-{
-    return Ariadne::constraint_adjoin_outer_approximation(paving,domain,space_function,constraint_function,constraint_bounds,depth);
-}
-
-Void OptimalConstraintPaver::
-adjoin_outer_approximation(PavingInterface& paving, const DomainType& domain, const ValidatedVectorFunction& space_function,
-                           const ValidatedVectorFunction& constraint_function, const ExactBoxType& constraint_bounds, Int depth) const
-{
-    return Ariadne::optimal_constraint_adjoin_outer_approximation(paving,domain,space_function,constraint_function,constraint_bounds,depth);
-}
-
-
-namespace {
-
-using Ariadne::verbosity;
-
-Void subdivision_adjoin_outer_approximation_recursion(PavingInterface& paving, const ExactBoxType& subdomain, const ValidatedVectorFunction& function,
-                                                      const List<ValidatedConstraint>& constraints, const Int depth, const RawFloatVector& errors)
+Void SubdivisionPaver::adjoin_outer_approximation_recursion(PavingInterface& paving, ValidatedConstrainedImageSet const& set, Int depth, const RawFloatVector& errors) const
 {
     // How small an over-approximating box needs to be relative to the cell size
     static const double RELATIVE_SMALLNESS=0.5;
+
+    const ExactBoxType& subdomain = set.reduced_domain();
+    const ValidatedVectorFunction& function = set.function();
+    const List<ValidatedConstraint>& constraints = set.constraints();
 
     for(List<ValidatedConstraint>::ConstIterator iter=constraints.begin();
         iter!=constraints.end(); ++iter)
@@ -184,16 +149,75 @@ Void subdivision_adjoin_outer_approximation_recursion(PavingInterface& paving, c
     if(small) {
         paving.adjoin_outer_approximation(cast_exact_box(range),depth);
     } else {
-        ExactBoxType subdomain1,subdomain2;
-        make_lpair(subdomain1,subdomain2)=Ariadne::split(subdomain);
-        subdivision_adjoin_outer_approximation_recursion(paving,subdomain1,function,constraints,depth,errors);
-        subdivision_adjoin_outer_approximation_recursion(paving,subdomain2,function,constraints,depth,errors);
+        Pair<ValidatedConstrainedImageSet,ValidatedConstrainedImageSet> subsets=set.split();
+        this->adjoin_outer_approximation_recursion(paving,subsets.first,depth,errors);
+        this->adjoin_outer_approximation_recursion(paving,subsets.second,depth,errors);
     }
 }
 
 
 
-static Nat COUNT_TESTS=0u;
+Void AffinePaver::adjoin_outer_approximation(PavingInterface& paving,
+                                             const ValidatedConstrainedImageSet& set,
+                                             Int depth) const
+{
+    const ExactBoxType& subdomain = set.reduced_domain();
+    const ValidatedVectorFunction& function = set.function();
+    const List<ValidatedConstraint>& constraints = set.constraints();
+
+    // Bound the maximum number of splittings allowed to draw a particular set.
+    // Note that this gives rise to possibly 2^MAX_DEPTH split sets!!
+    static const Int MAXIMUM_DEPTH = 16;
+
+    // The basic approximation error when plotting with accuracy=0
+    static const double BASIC_ERROR = 0.0625;
+
+    const double max_error=BASIC_ERROR/(1<<depth);
+
+    ARIADNE_DEBUG_ASSERT(function.domain()==set.constraint_function().domain());
+    ValidatedVectorFunction fg=join(function,set.constraint_function());
+
+    List<ExactBoxType> subdomains;
+    List<ExactBoxType> unsplitdomains;
+    List<ExactBoxType> splitdomains;
+    unsplitdomains.append(subdomain);
+    ExactBoxType splitdomain1,splitdomain2;
+    for(Int i=0; i!=MAXIMUM_DEPTH; ++i) {
+        //std::cerr<<"i="<<i<<"\nsubdomains="<<subdomains<<"\nunsplitdomains="<<unsplitdomains<<"\n\n";
+        for(Nat n=0; n!=unsplitdomains.size(); ++n) {
+            Nat k; double err;
+            make_lpair(k,err)=nonlinearity_index_and_error(fg,unsplitdomains[n]);
+            //std::cerr<<"  domain="<<unsplitdomains[n]<<" k="<<k<<" err="<<err<<" max_err="<<max_error<<"\n";
+            if(k==subdomain.size() || err < max_error) {
+                subdomains.append(unsplitdomains[n]);
+            } else {
+                make_lpair(splitdomain1,splitdomain2)=unsplitdomains[n].split(k);
+                splitdomains.append(splitdomain1);
+                splitdomains.append(splitdomain2);
+            }
+        }
+        unsplitdomains.swap(splitdomains);
+        splitdomains.clear();
+        if(unsplitdomains.empty()) { break; }
+    }
+    subdomains.concatenate(unsplitdomains);
+    if(!unsplitdomains.empty()) {
+        ARIADNE_WARN("Cannot obtain desired accuracy in outer approximation without excessive splitting.");
+    }
+
+    for(Nat n=0; n!=subdomains.size(); ++n) {
+        ValidatedConstrainedImageSet set(subdomains[n],function,constraints);
+        set.affine_over_approximation().adjoin_outer_approximation_to(paving,depth);
+    }
+}
+
+int verbosity;
+
+namespace {
+
+using Ariadne::verbosity;
+
+
 
 // Adjoin an over-approximation to the solution of $f(dom)$ such that $g(D) in C$ to the paving p, looking only at solutions in b.
 Void procedure_constraint_adjoin_outer_approximation_recursion(
@@ -223,8 +247,6 @@ Void procedure_constraint_adjoin_outer_approximation_recursion(
         ARIADNE_LOG(4,"  Cell is already a subset of paving\n");
         return;
     }
-
-    ++COUNT_TESTS;
 
     // Try to prove disjointness
     const ExactBoxType& old_domain=domain;
@@ -579,37 +601,7 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
 
 
 
-Void subdivision_adjoin_outer_approximation(PavingInterface& paving,
-                                            const ExactBoxType& subdomain,
-                                            const ValidatedVectorFunction& function,
-                                            const ValidatedVectorFunction& constraint_functions,
-                                            const ExactBoxType& constraint_bounds,
-                                            Int depth)
-{
-    List<ValidatedConstraint> constraints;
-    for(Nat i=0; i!=constraint_functions.result_size(); ++i) {
-        // FIXME: Conversion from Float64Value to ValidatedNumber should be automatic
-        ExactNumber lower_bound=constraint_bounds[i].lower(); ExactNumber upper_bound=constraint_bounds[i].upper();
-        constraints.append(ValidatedConstraint(lower_bound,constraint_functions[i],upper_bound));
-    }
 
-    RawFloatVector errors(paving.dimension());
-    for(Nat i=0; i!=errors.size(); ++i) {
-        errors[i]=paving.grid().lengths()[i]/(1<<depth);
-    }
-
-    Ariadne::subdivision_adjoin_outer_approximation_recursion(paving,subdomain,function,constraints,depth,errors);
-}
-
-Void affine_adjoin_outer_approximation(PavingInterface& paving,
-                                       const ExactBoxType& subdomain,
-                                       const ValidatedVectorFunction& function,
-                                       const ValidatedVectorFunction& constraints,
-                                       const ExactBoxType& bounds,
-                                       Int depth)
-{
-    ARIADNE_NOT_IMPLEMENTED;
-}
 
 Void
 constraint_adjoin_outer_approximation(PavingInterface& p, const ExactBoxType& d, const ValidatedVectorFunction& f,
@@ -677,6 +669,19 @@ Void optimal_constraint_adjoin_outer_approximation(PavingInterface& p, const Exa
 }
 
 } // namespace
+
+
+Void ReducePaver::adjoin_outer_approximation(PavingInterface& paving, const ValidatedConstrainedImageSet& set, Int depth) const {
+    return procedure_constraint_adjoin_outer_approximation(paving,set.domain(),set.function(),set.constraint_function(),set.constraint_bounds(),depth);
+}
+
+Void ConstraintPaver::adjoin_outer_approximation(PavingInterface& paving, const ValidatedConstrainedImageSet& set, Int depth) const {
+    return constraint_adjoin_outer_approximation(paving,set.domain(),set.function(),set.constraint_function(),set.constraint_bounds(),depth);
+}
+
+Void OptimalConstraintPaver::adjoin_outer_approximation(PavingInterface& paving, const ValidatedConstrainedImageSet& set, Int depth) const {
+    return optimal_constraint_adjoin_outer_approximation(paving,set.reduced_domain(),set.function(),set.constraint_function(),set.constraint_bounds(),depth);
+}
 
 } // namespace Ariadne
 

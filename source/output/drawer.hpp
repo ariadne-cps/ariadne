@@ -42,30 +42,42 @@ struct Depth { Int _d; explicit Depth(Int d) : _d(d) { } operator Int() const { 
 class BoxDrawer : public DrawerInterface
 {
   public:
-    Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set);
+    Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const;
+};
+
+//! \brief Draw an affine over-approximation to the set.
+class EnclosureAffineDrawer : public DrawerInterface
+{
+    Nat _accuracy;
+  public:
+    EnclosureAffineDrawer(Nat accuracy) : _accuracy(accuracy) { }
+    Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const;
+    Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set, Nat accuracy) const;
 };
 
 //! \brief Draw an affine over-approximation to the set.
 class AffineDrawer : public DrawerInterface
 {
-    Int _depth;
+    Nat _splittings;
   public:
-    AffineDrawer(Int depth) : _depth(depth) { }
-    Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set);
+    AffineDrawer(Nat splittings) : _splittings(splittings) { }
+    Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const;
 };
 
 //! \brief Subdivide the set and draw affine approximations to small pieces.
 class SubdivisionDrawer : public DrawerInterface
 {
   public:
-    Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set);
+    Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const;
 };
 
 //! \brief Pave the set and draw the computed cells.
 class GridDrawer : public DrawerInterface
 {
+    Nat _depth;
   public:
-    Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set);
+    GridDrawer(Nat depth) : _depth(depth) { }
+    Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const;
 };
 
 

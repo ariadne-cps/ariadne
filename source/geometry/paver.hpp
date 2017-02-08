@@ -32,40 +32,50 @@
 
 namespace Ariadne {
 
+class Paver {
+    SharedPointer<const PaverInterface> _ptr;
+  public:
+    using SetType = PaverInterface::SetType;
+    Paver(SharedPointer<const PaverInterface> ptr) : _ptr(ptr) { }
+    Paver(const PaverInterface* ptr) : _ptr(ptr) { }
+    Void adjoin_outer_approximation(PavingInterface& paving, const SetType& set, Int depth) const {
+        this->_ptr->adjoin_outer_approximation(paving,set,depth); }
+};
+
 //! \brief A class for computing outer approximations to sets defined by functions.
 class AffinePaver : public PaverInterface
 {
   public:
-    virtual Void
-    adjoin_outer_approximation(PavingInterface& paving, const DomainType& domain, const ValidatedVectorFunction& space_function,
-                               const ValidatedVectorFunction& constraint_function, const ExactBoxType& constraint_bounds, Int depth) const;
+    Void adjoin_outer_approximation(PavingInterface& paving, const SetType& set, Int depth) const;
 };
 
 //! \brief A class for computing outer approximations to sets defined by functions.
 class SubdivisionPaver : public PaverInterface
 {
   public:
-    virtual Void
-    adjoin_outer_approximation(PavingInterface& paving, const DomainType& domain, const ValidatedVectorFunction& space_function,
-                               const ValidatedVectorFunction& constraint_function, const ExactBoxType& constraint_bounds, Int depth) const;
+    Void adjoin_outer_approximation(PavingInterface& paving, const SetType& set, Int depth) const;
+    Void adjoin_outer_approximation_recursion(PavingInterface& paving, ValidatedConstrainedImageSet const& set, Int depth, const RawFloatVector& errors) const;
+};
+
+//! \brief A class for computing outer approximations to sets defined by functions.
+class ReducePaver : public PaverInterface
+{
+  public:
+    Void adjoin_outer_approximation(PavingInterface& paving, const SetType& set, Int depth) const;
 };
 
 //! \brief A class for computing outer approximations to sets defined by functions.
 class ConstraintPaver : public PaverInterface
 {
   public:
-    virtual Void
-    adjoin_outer_approximation(PavingInterface& paving, const DomainType& domain, const ValidatedVectorFunction& space_function,
-                               const ValidatedVectorFunction& constraint_function, const ExactBoxType& constraint_bounds, Int depth) const;
+    Void adjoin_outer_approximation(PavingInterface& paving, const SetType& set, Int depth) const;
 };
 
 //! \brief A class for computing outer approximations to sets defined by functions.
 class OptimalConstraintPaver : public PaverInterface
 {
   public:
-    virtual Void
-    adjoin_outer_approximation(PavingInterface& paving, const DomainType& domain, const ValidatedVectorFunction& space_function,
-                               const ValidatedVectorFunction& constraint_function, const ExactBoxType& constraint_bounds, Int depth) const;
+    Void adjoin_outer_approximation(PavingInterface& paving, const SetType& set, Int depth) const;
 };
 
 } //namespace Ariadne

@@ -137,7 +137,7 @@ HybridReachabilityAnalyser::_reach_evolve_resume(const ListSet<HybridEnclosure>&
 
         make_lpair(current_reach_enclosures,current_evolve_enclosures) = evolver.reach_evolve(*encl_iter,time,semantics);
 
-        for(ListSet<HybridEnclosure>::ConstIterator enclosure_iter=current_reach_enclosures.begin(); enclosure_iter!=current_reach_enclosures.end(); ++enclosure_iter) {
+        for(ListSet<HybridEnclosure>::ConstIterator enclosure_iter=current_reach_enclosures.begin();        enclosure_iter!=current_reach_enclosures.end(); ++enclosure_iter) {
             enclosure_iter->adjoin_outer_approximation_to(reach_cells,accuracy);
         }
         ARIADNE_LOG(3,"  final reach size = "<<reach_cells.size()<<"\n");

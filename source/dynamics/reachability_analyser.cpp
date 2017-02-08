@@ -203,16 +203,27 @@ ReachabilityAnalyser::_adjoin_upper_reach_evolve(PavingType& reach_cells,
         make_lpair(reach_enclosures,final_enclosures) = evolver.reach_evolve(initial_enclosure,time,UPPER_SEMANTICS);
         ARIADNE_LOG(5,"  computed "<<reach_enclosures.size()<<" reach enclosures and "<<final_enclosures.size()<<" final enclosures.\n");
         ARIADNE_LOG(5,"  adjoining "<<reach_enclosures.size()<<" reach enclosures to grid... ");
+        if(verbosity==1) {
+            std::clog <<"\n\r#r="<<std::setw(4)<<std::left<<reach_enclosures.size()
+                      <<"#e="<<std::setw(4)<<final_enclosures.size();
+        }
         for(auto enclosure : reach_enclosures) {
+            if(verbosity==1) { std::clog << "."; }
             ARIADNE_LOG(7,"enclosure="<<enclosure<<"\n");
             enclosure.adjoin_outer_approximation_to(reach_cells,accuracy);
         }
+        if(verbosity==1) { std::clog << " "; }
         ARIADNE_LOG(5,"done\n");
         ARIADNE_LOG(5,"  adjoining final enclosures to grid... ");
         for(auto enclosure : final_enclosures) {
+            if(verbosity==1) { std::clog << "."; }
             enclosure.adjoin_outer_approximation_to(evolve_cells,accuracy);
         }
         ARIADNE_LOG(5,"done.\n");
+    }
+    if(verbosity==1) {
+            std::clog <<" #rc="<<reach_cells.size()
+                      <<" #ec="<<evolve_cells.size() << " \n";
     }
     ARIADNE_LOG(3,"  final reach size = "<<reach_cells.size()<<"\n");
     ARIADNE_LOG(3,"  final evolve size = "<<evolve_cells.size()<<"\n");
@@ -450,6 +461,7 @@ upper_reach(const CompactSetInterfaceType& initial_set,
     ARIADNE_LOG(3,"time_steps="<<time_steps<<"  lock_to_grid_time="<<lock_to_grid_time<<"\n");
     PavingType found_cells(grid), accumulated_evolve_cells(grid);
     for(Nat i=0; i!=time_steps; ++i) {
+        if(verbosity==1) { std::clog << "i=" << i << "\n"; }
         accumulated_evolve_cells.adjoin(found_cells);
         ARIADNE_LOG(3,"computing "<<i+1<<"-th reachability step...\n");
         this->_adjoin_upper_reach_evolve(reach_cells,evolve_cells,evolve_cells,lock_to_grid_time,grid_depth,*_evolver);

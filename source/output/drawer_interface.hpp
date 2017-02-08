@@ -42,7 +42,18 @@ class ValidatedConstrainedImageSet;
 class DrawerInterface
 {
   public:
-    virtual Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) = 0;
+    virtual Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const = 0;
+};
+
+//! \brief A class for computing outer approximations to sets defined by functions.
+class Drawer
+{
+    SharedPointer<const DrawerInterface> _ptr;
+  public:
+    Drawer(SharedPointer<const DrawerInterface> ptr) : _ptr(ptr) { }
+    Drawer(const DrawerInterface* ptr) : _ptr(ptr) { }
+    inline Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const {
+        return this->_ptr->draw(cnvs,proj,set); }
 };
 
 

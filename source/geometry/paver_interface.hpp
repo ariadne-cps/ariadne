@@ -33,17 +33,15 @@
 namespace Ariadne {
 
 class PavingInterface;
+class ValidatedConstrainedImageSet;
 
 //! \brief A class for computing outer approximations to sets defined by functions.
 class PaverInterface
 {
   public:
-    typedef ExactBoxType DomainType;
+    typedef ValidatedConstrainedImageSet SetType;
   public:
-    virtual Void
-    adjoin_outer_approximation(PavingInterface& paving, const DomainType& domain, const ValidatedVectorFunction& space_function,
-                               const ValidatedVectorFunction& constraint_function, const ExactBoxType& constraint_bounds, Int depth) const = 0;
-
+    virtual Void  adjoin_outer_approximation(PavingInterface& paving, SetType const& set, Int depth) const = 0;
 };
 
 } //namespace Ariadne

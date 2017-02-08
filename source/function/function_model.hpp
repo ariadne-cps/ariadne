@@ -56,15 +56,19 @@ template<class P, class PR, class PRE> class FunctionModelFactory {
     typedef PRE ErrorPrecisionType;
     typedef BoxDomainType DomainType;
 
+    operator const FunctionModelFactoryInterface<P,PR,PRE>& () const { return *_ptr; }
+    
     explicit FunctionModelFactory(const FunctionModelFactoryInterface<P,PR,PRE>* p) : _ptr(p) { }
     explicit FunctionModelFactory(SharedPointer<const FunctionModelFactoryInterface<P,PR,PRE>> p) : _ptr(p) { }
 
     CanonicalNumericType<P,PR,PRE> create(Number<P> const& c) const { return this->_ptr->_create(c); }
-    ScalarFunctionModel<P,PR,PRE> create(DomainType const& dom, ScalarFunction<P> const& f) { return this->_ptr->_create(dom,f); }
-    VectorFunctionModel<P,PR,PRE> create(DomainType const& dom, VectorFunction<P> const& f) { return this->_ptr->_create(dom,f); }
+    ScalarFunctionModel<P,PR,PRE> create(DomainType const& dom, ScalarFunction<P> const& f) const { return this->_ptr->_create(dom,f); }
+    VectorFunctionModel<P,PR,PRE> create(DomainType const& dom, VectorFunction<P> const& f) const { return this->_ptr->_create(dom,f); }
+    CanonicalNumericType<P,PR,PRE> create_number(Number<P> const& c) const { return this->_ptr->_create(c); }
     ScalarFunctionModel<P,PR,PRE> create_zero(DomainType const& dom) const { return this->_ptr->_create_zero(dom); }
     ScalarFunctionModel<P,PR,PRE> create_constant(DomainType const& dom, Number<P> const& c) const { return this->_ptr->_create_constant(dom,c); }
-    ScalarFunctionModel<P,PR,PRE> create_coordinate(DomainType const& dom, SizeType j) const { return this->_ptr->_create_cordinate(dom,j); }
+    ScalarFunctionModel<P,PR,PRE> create_constant(DomainType const& dom, CanonicalNumericType<P,PR,PRE> const& c) const { return this->_ptr->_create_constant(dom,c); }
+    ScalarFunctionModel<P,PR,PRE> create_coordinate(DomainType const& dom, SizeType j) const { return this->_ptr->_create_coordinate(dom,j); }
     VectorFunctionModel<P,PR,PRE> create_zeros(SizeType n, DomainType const& dom) const { return this->_ptr->_create_zeros(n,dom); }
     VectorFunctionModel<P,PR,PRE> create_identity(DomainType const& dom) const { return this->_ptr->_create_identity(dom); }
     ScalarFunctionModel<P,PR,PRE> create_identity(IntervalDomainType const& dom) const { return this->_ptr->_create_coordinate(BoxDomainType(1u,dom),0u); }

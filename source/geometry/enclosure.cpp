@@ -59,6 +59,7 @@
 #include "solvers/nonlinear_programming.hpp"
 
 #include "output/graphics_interface.hpp"
+#include "output/drawer.hpp"
 
 #include "hybrid/discrete_event.hpp"
 
@@ -118,7 +119,7 @@ ExactIntervalType make_domain(const EffectiveIntervalType& ivl) {
     return ExactIntervalType(dom_lower,dom_upper);
 }
 
-ValidatedVectorFunctionModel64 make_identity(const EffectiveBoxType& bx, const ValidatedFunctionModel64FactoryInterface& fac) {
+ValidatedVectorFunctionModel64 make_identity(const EffectiveBoxType& bx, const EnclosureConfiguration& configuration) {
     ExactIntervalVectorType dom(bx.dimension());
     RawFloatVector errs(bx.dimension());
 
@@ -136,7 +137,7 @@ ValidatedVectorFunctionModel64 make_identity(const EffectiveBoxType& bx, const V
         errs[i]=err;
     }
 
-    ValidatedVectorFunctionModel64 res=fac.create_identity(dom);
+    ValidatedVectorFunctionModel64 res=configuration._function_factory.create_identity(dom);
     for(Nat i=0; i!=bx.dimension(); ++i) {
         res[i]=res[i]+ValidatedNumericType(-errs[i],+errs[i]);
     }
@@ -161,6 +162,11 @@ Pair<ValidatedVectorFunctionModel64,ValidatedVectorFunctionModel64> split(const 
 }
 
 
+
+
+EnclosureConfiguration::EnclosureConfiguration(ValidatedFunctionModel64Factory function_factory)
+    : _function_factory(function_factory), _paver(new AffinePaver()), _drawer(new AffineDrawer(3)) { }
+
 Void Enclosure::_check() const {
     ARIADNE_ASSERT_MSG(this->_state_function.argument_size()==this->domain().size(),*this);
     ARIADNE_ASSERT_MSG(this->_time_function.argument_size()==this->domain().size(),*this<<"\n\n"<<this->_domain<<"\n"<<this->_time_function<<"\n\n");
@@ -170,9 +176,29 @@ Void Enclosure::_check() const {
     }
 }
 
-ValidatedFunctionModel64FactoryInterface const&
+ValidatedFunctionModel64Factory const&
 Enclosure::function_factory() const {
-    return *this->_function_factory_ptr;
+    return this->_configuration._function_factory;
+}
+
+Paver const&
+Enclosure::paver() const {
+    return this->_configuration._paver;
+}
+
+Void
+Enclosure::set_paver(Paver const& paver) {
+    this->_configuration._paver=paver;
+}
+
+Drawer const&
+Enclosure::drawer() const {
+    return this->_configuration._drawer;
+}
+
+Void
+Enclosure::set_drawer(Drawer const& drawer) {
+    this->_configuration._drawer=drawer;
 }
 
 /*
@@ -228,6 +254,7 @@ Void Enclosure::_solve_zero_constraints() {
 
 Enclosure::Enclosure()
     : _domain(), _auxiliary_mapping(), _state_function(), _time_function(), _dwell_time_function(), _reduced_domain(), _is_fully_reduced(true)
+    , _configuration(ValidatedFunctionModel64Factory(nullptr),Paver(nullptr),Drawer(nullptr))
 {
 }
 
@@ -236,13 +263,13 @@ Enclosure* Enclosure::clone() const
     return new Enclosure(*this);
 }
 
-Enclosure::Enclosure(const RealBox& box, const ValidatedFunctionModel64FactoryInterface& factory)
-    : Enclosure(BoundedConstraintSet(box),factory)
+Enclosure::Enclosure(const RealBox& box, const EnclosureConfiguration& configuration)
+    : Enclosure(BoundedConstraintSet(box),configuration)
 {
 }
 
-Enclosure::Enclosure(const BoundedConstraintSet& set, const ValidatedFunctionModel64FactoryInterface& factory)
-    : _function_factory_ptr(factory.clone())
+Enclosure::Enclosure(const BoundedConstraintSet& set, const EnclosureConfiguration& configuration)
+    : _configuration(configuration)
 {
     this->_state_function=make_identity(set.domain(),this->function_factory());
     this->_domain=this->_state_function.domain();
@@ -257,8 +284,8 @@ Enclosure::Enclosure(const BoundedConstraintSet& set, const ValidatedFunctionMod
     this->_check();
 }
 
-Enclosure::Enclosure(const ExactBoxType& box, const ValidatedFunctionModel64FactoryInterface& factory)
-    : _function_factory_ptr(factory.clone())
+Enclosure::Enclosure(const ExactBoxType& box, const EnclosureConfiguration& configuration)
+    : _configuration(configuration)
 {
     // Ensure domain elements have nonempty radius
     const Float64Value min_float(std::numeric_limits<float>::min());
@@ -300,8 +327,8 @@ Enclosure::Enclosure(const ExactBoxType& box, const ValidatedFunctionModel64Fact
 }
 
 
-Enclosure::Enclosure(const ExactBoxType& domain, const ValidatedVectorFunction& function, const ValidatedFunctionModel64FactoryInterface& factory)
-    : _function_factory_ptr(factory.clone())
+Enclosure::Enclosure(const ExactBoxType& domain, const ValidatedVectorFunction& function, const EnclosureConfiguration& configuration)
+    : _configuration(configuration)
 {
     ARIADNE_ASSERT_MSG(domain.size()==function.argument_size(),"domain="<<domain<<", function="<<function);
     this->_domain=domain;
@@ -313,8 +340,8 @@ Enclosure::Enclosure(const ExactBoxType& domain, const ValidatedVectorFunction& 
     this->_check();
 }
 
-Enclosure::Enclosure(const ExactBoxType& domain, const ValidatedVectorFunction& function, const List<ValidatedConstraint>& constraints, const ValidatedFunctionModel64FactoryInterface& factory)
-    : _function_factory_ptr(factory.clone())
+Enclosure::Enclosure(const ExactBoxType& domain, const ValidatedVectorFunction& function, const List<ValidatedConstraint>& constraints, const EnclosureConfiguration& configuration)
+    : _configuration(configuration)
 {
     ARIADNE_ASSERT_MSG(domain.size()==function.argument_size(),"domain="<<domain<<", function="<<function);
     const double min=std::numeric_limits<double>::min();
@@ -341,8 +368,8 @@ Enclosure::Enclosure(const ExactBoxType& domain, const ValidatedVectorFunction& 
     this->_check();
 }
 
-Enclosure::Enclosure(const ExactBoxType& domain, const ValidatedVectorFunction& state_function, const ValidatedScalarFunction& time_function, const List<ValidatedConstraint>& constraints, const ValidatedFunctionModel64FactoryInterface& factory)
-    : _function_factory_ptr(factory.clone())
+Enclosure::Enclosure(const ExactBoxType& domain, const ValidatedVectorFunction& state_function, const ValidatedScalarFunction& time_function, const List<ValidatedConstraint>& constraints, const EnclosureConfiguration& configuration)
+    : _configuration(configuration)
 {
     ARIADNE_ASSERT_MSG(domain.size()==state_function.argument_size(),"domain="<<domain<<", state_function="<<state_function);
     ARIADNE_ASSERT_MSG(domain.size()==time_function.argument_size(),"domain="<<domain<<", time_function="<<time_function);
@@ -971,35 +998,34 @@ Enclosure::split(Nat d) const
 
 
 
+ValidatedConstrainedImageSet Enclosure::state_set() const
+{
+    return ValidatedConstrainedImageSet(this->domain(),this->state_function(),this->constraints());
+}
+
+ValidatedConstrainedImageSet Enclosure::state_auxiliary_set() const
+{
+    return ValidatedConstrainedImageSet(this->domain(),this->state_auxiliary_function(),this->constraints());
+}
+
+ValidatedConstrainedImageSet Enclosure::state_time_auxiliary_set() const
+{
+    return ValidatedConstrainedImageSet(this->domain(),this->state_time_auxiliary_function(),this->constraints());
+}
+
+
+ValidatedAffineConstrainedImageSet Enclosure::affine_over_approximation() const
+{
+    return this->state_set().affine_over_approximation();
+}
 
 
 
 
-Void adjoin_outer_approximation(PavingInterface&, const ExactBoxType& domain, const ValidatedVectorFunction& function, const ValidatedVectorFunction& negative_constraints, const ValidatedVectorFunction& equality_constraints, Int depth);
 
 Void Enclosure::adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const
 {
-    PavingInterface& p=paving;
-    const ExactBoxType& d=this->domain();
-    const ValidatedVectorFunction f=this->state_auxiliary_function();
-
-    ValidatedVectorFunctionModel64 g=this->constraint_function();
-    ExactIntervalVectorType c=this->constraint_bounds();
-    Int e=depth;
-
-    switch(DISCRETISATION_METHOD) {
-        case SUBDIVISION_DISCRETISE:
-            SubdivisionPaver().adjoin_outer_approximation(p,d,f,g,c,e);
-            break;
-        case AFFINE_DISCRETISE:
-            AffinePaver().adjoin_outer_approximation(p,d,f,g,c,e);
-            break;
-        case CONSTRAINT_DISCRETISE:
-            ConstraintPaver().adjoin_outer_approximation(p,d,f,g,c,e);
-            break;
-        default:
-            ARIADNE_FAIL_MSG("Unknown discretisation method\n");
-    }
+    this->paver().adjoin_outer_approximation(paving,this->state_auxiliary_set(),depth);
 }
 
 
@@ -1012,53 +1038,6 @@ GridTreeSet Enclosure::outer_approximation(const Grid& grid, Int depth) const
 
 
 
-Void Enclosure::affine_adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const
-{
-    ARIADNE_ASSERT_MSG(Ariadne::subset(this->_reduced_domain,this->_domain),*this);
-
-    // Bound the maximum number of splittings allowed to draw a particular set.
-    // Note that this gives rise to possibly 2^MAX_DEPTH split sets!!
-    static const Int MAXIMUM_DEPTH = 16;
-
-    // The basic approximation error when plotting with accuracy=0
-    static const double BASIC_ERROR = 0.0625;
-
-    const double max_error=BASIC_ERROR/(1<<depth);
-
-    ValidatedVectorFunctionModel64 fg=join(this->state_function(),this->constraint_function());
-
-    List<ExactBoxType> subdomains;
-    List<ExactBoxType> unsplitdomains;
-    List<ExactBoxType> splitdomains;
-    unsplitdomains.append(this->_reduced_domain);
-    ExactBoxType splitdomain1,splitdomain2;
-    for(Int i=0; i!=MAXIMUM_DEPTH; ++i) {
-        //std::cerr<<"i="<<i<<"\nsubdomains="<<subdomains<<"\nunsplitdomains="<<unsplitdomains<<"\n\n";
-        for(Nat n=0; n!=unsplitdomains.size(); ++n) {
-            Nat k; double err;
-            make_lpair(k,err)=nonlinearity_index_and_error(fg,unsplitdomains[n]);
-            //std::cerr<<"  domain="<<unsplitdomains[n]<<" k="<<k<<" err="<<err<<" max_err="<<max_error<<"\n";
-            if(k==this->number_of_parameters() || err < max_error) {
-                subdomains.append(unsplitdomains[n]);
-            } else {
-                make_lpair(splitdomain1,splitdomain2)=unsplitdomains[n].split(k);
-                splitdomains.append(splitdomain1);
-                splitdomains.append(splitdomain2);
-            }
-        }
-        unsplitdomains.swap(splitdomains);
-        splitdomains.clear();
-        if(unsplitdomains.empty()) { break; }
-    }
-    subdomains.concatenate(unsplitdomains);
-    if(!unsplitdomains.empty()) {
-        ARIADNE_WARN("Cannot obtain desired accuracy in outer approximation "<<*this<<" without excessive splitting.");
-    }
-
-    for(Nat n=0; n!=subdomains.size(); ++n) {
-        this->restriction(subdomains[n]).affine_over_approximation().adjoin_outer_approximation_to(paving,depth);
-    }
-}
 
 
 
@@ -1306,98 +1285,22 @@ ValidatedVectorFunctionModel64 join(const ValidatedVectorFunctionModel64& f1, co
 }
 
 Void Enclosure::draw(CanvasInterface& canvas, const Projection2d& projection) const {
-    switch(DRAWING_METHOD) {
-        case BOX_DRAW:
-            this->box_draw(canvas,projection); break;
-        case AFFINE_DRAW:
-            //if(this->number_of_zero_constraints()!=0) { this->box_draw(canvas); }
-            this->affine_draw(canvas,projection,DRAWING_ACCURACY); break;
-        case GRID_DRAW:
-            this->grid_draw(canvas,projection); break;
-        default:
-            ARIADNE_WARN("Unknown drawing method\n");
-    }
+    this->drawer().draw(canvas,projection,this->state_time_auxiliary_set());
 }
 
 Void Enclosure::box_draw(CanvasInterface& canvas, const Projection2d& projection) const {
     this->reduce();
-    ValidatedConstrainedImageSet(this->domain(),this->state_time_auxiliary_function(),this->constraints()).box_draw(canvas,projection);
+    BoxDrawer().draw(canvas,projection,this->state_time_auxiliary_set());
 }
 
 Void Enclosure::affine_draw(CanvasInterface& canvas, const Projection2d& projection, Nat accuracy) const {
-    ARIADNE_ASSERT_MSG(Ariadne::subset(this->_reduced_domain,this->_domain),*this);
+    EnclosureAffineDrawer(accuracy).draw(canvas,projection,this->state_time_auxiliary_set());
+}
 
-    ValidatedVectorFunctionModel64 cached_state_function=this->_state_function;
-    const_cast<Enclosure*>(this)->_state_function=this->state_time_auxiliary_function();
-
-    // Bound the maximum number of splittings allowed to draw a particular set.
-    // Note that this gives rise to possibly 2^MAX_DEPTH split sets!!
-    static const Int MAXIMUM_DEPTH = 16;
-
-    // The basic approximation error when plotting with accuracy=0
-    static const double BASIC_ERROR = 0.0625;
-
-    const double max_error=BASIC_ERROR/(1<<accuracy);
-
-    // If the reduced domain is empty, then the set is empty; abort
-    if(this->_reduced_domain.is_empty()) {
-        return;
-    }
-
-    ValidatedVectorFunctionModel64 fg=this->function_factory().create_zeros(2u+this->number_of_constraints(),this->domain());
-    fg[0]=this->get_function(projection.i);
-    fg[1]=this->get_function(projection.j);
-    for(Nat i=0; i!=this->_constraints.size(); ++i) { fg[i+2u]=this->_constraints[i].function(); }
-    Projection2d identity(2, 0,1);
-//    ValidatedVectorFunctionModel64 fg=join(this->state_function(),this->time_function(),this->constraint_function());
-
-    List<ExactBoxType> subdomains;
-    List<ExactBoxType> unsplitdomains;
-    List<ExactBoxType> splitdomains;
-    unsplitdomains.append(this->_reduced_domain);
-    ExactBoxType splitdomain1,splitdomain2;
-    for(Int i=0; i!=MAXIMUM_DEPTH; ++i) {
-        //std::cerr<<"i="<<i<<"\nsubdomains="<<subdomains<<"\nunsplitdomains="<<unsplitdomains<<"\n\n";
-        for(Nat n=0; n!=unsplitdomains.size(); ++n) {
-            Nat k; double err;
-            make_lpair(k,err)=nonlinearity_index_and_error(fg,unsplitdomains[n]);
-            //std::cerr<<"  domain="<<unsplitdomains[n]<<" k="<<k<<" err="<<err<<" max_err="<<max_error<<"\n";
-            if(k==this->number_of_parameters() || err < max_error) {
-                subdomains.append(unsplitdomains[n]);
-            } else {
-                make_lpair(splitdomain1,splitdomain2)=unsplitdomains[n].split(k);
-                splitdomains.append(splitdomain1);
-                splitdomains.append(splitdomain2);
-            }
-        }
-        unsplitdomains.swap(splitdomains);
-        splitdomains.clear();
-        if(unsplitdomains.empty()) { break; }
-    }
-    subdomains.concatenate(unsplitdomains);
-    if(!unsplitdomains.empty()) {
-        ARIADNE_WARN("Cannot obtain desired accuracy in drawing "<<*this<<" without excessive splitting.");
-    }
-
-    for(Nat n=0; n!=subdomains.size(); ++n) {
-        try {
-            this->restriction(subdomains[n]).affine_over_approximation().draw(canvas,projection);
-        } catch(std::runtime_error& e) {
-            ARIADNE_WARN("ErrorTag "<<e.what()<<" in Enclosure::affine_draw(...) for "<<*this<<"\n");
-            this->restriction(subdomains[n]).box_draw(canvas,projection);
-        }
-    }
-
-    const_cast<Enclosure*>(this)->_state_function=cached_state_function;
+Void Enclosure::grid_draw(CanvasInterface& canvas, const Projection2d& projection, Nat depth) const {
+    GridDrawer(depth).draw(canvas,projection,this->state_time_auxiliary_set());
 };
 
-
-Void Enclosure::grid_draw(CanvasInterface& canvas, const Projection2d& projection, Nat accuracy) const {
-    ValidatedVectorFunctionModel64 cached_state_function=this->_state_function;
-    const_cast<Enclosure*>(this)->_state_function=join(this->get_function(projection.i),this->get_function(projection.j));
-    this->outer_approximation(Grid(this->dimension()),accuracy).draw(canvas,projection);
-    const_cast<Enclosure*>(this)->_state_function=cached_state_function;
-}
 
 
 
@@ -1513,43 +1416,6 @@ ValidatedAffineModel _affine_model(const ValidatedTaylorModel64& tm) {
 }
 */
 
-
-ValidatedAffineConstrainedImageSet
-Enclosure::affine_over_approximation() const
-{
-    this->_check();
-    typedef List<ValidatedScalarTaylorFunctionModel64>::ConstIterator ConstIterator;
-
-    const Nat nx=this->state_dimension();
-    const Nat nc=this->number_of_constraints();
-    const Nat np=this->number_of_parameters();
-
-    AffineSweeper<Float64> affine_sweeper((Precision64()));
-    ValidatedVectorTaylorFunctionModel64 state_function=dynamic_cast<const ValidatedVectorTaylorFunctionModel64&>(this->_state_function.reference());
-    ValidatedScalarTaylorFunctionModel64 time_function=dynamic_cast<const ValidatedScalarTaylorFunctionModel64&>(this->_time_function.reference());
-    List<ValidatedScalarTaylorFunctionModel64> constraint_functions;
-    for(Nat i=0; i!=nc; ++i) { constraint_functions.append(dynamic_cast<const ValidatedScalarTaylorFunctionModel64&>(this->_constraints[i].function().reference())); }
-
-    //std::cerr<<"\n"<<state_function<<"\n"<<time_function<<"\n"<<constraint_functions<<"\n\n";
-
-    Vector< ValidatedAffineModel > affine_function_models(state_function.result_size());
-    for(Nat i=0; i!=state_function.result_size(); ++i) { affine_function_models[i]=affine_model(state_function.models()[i]); }
-    //affine_function_models[state_function.result_size()]=affine_model(time_function.model());
-
-    ValidatedAffineConstrainedImageSet result(affine_function_models);
-    //std::cerr<<"\n"<<*this<<"\n"<<result<<"\n\n";
-
-    for(Nat i=0; i!=this->number_of_constraints(); ++i) {
-        ValidatedTaylorModel64 const& constraint_model=constraint_functions[i].model();
-        ValidatedAffineModel affine_constraint_model=affine_model(constraint_model);
-        ExactIntervalType constraint_bound=this->constraint(i).bounds();
-        result.new_constraint(constraint_bound.lower()<=affine_constraint_model<=constraint_bound.upper());
-    }
-
-    ARIADNE_LOG(2,"set="<<*this<<"\nset.affine_over_approximation()="<<result<<"\n");
-    return result;
-
-}
 
 
 Enclosure product(const Enclosure& set, const ExactIntervalType& ivl) {

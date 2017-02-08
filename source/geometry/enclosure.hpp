@@ -34,14 +34,18 @@
 #include "algebra/vector.hpp"
 #include "geometry/set_interface.hpp"
 #include "output/graphics_interface.hpp"
+#include "output/drawer_interface.hpp"
 
 #include "function/function_model.hpp"
 
 #include "geometry/box.hpp"
+#include "geometry/paver.hpp"
 
 #ifndef ARIADNE_TAYLOR_SET_HPP
 
 namespace Ariadne {
+
+class ValidatedConstrainedImageSet;
 
 //! \related Enclosure \brief The possible types of method used to draw a nonlinear set.
 enum DrawingMethod { CURVE_DRAW, BOX_DRAW, AFFINE_DRAW, GRID_DRAW };
@@ -78,6 +82,19 @@ class PavingInterface;
 
 typedef Constraint<ValidatedScalarFunctionModel64,ValidatedNumericType> ValidatedConstraintModel;
 
+struct EnclosureConfiguration {
+    ValidatedFunctionModel64Factory _function_factory;
+    Paver _paver;
+    Drawer _drawer;
+    EnclosureConfiguration(ValidatedFunctionModel64Factory function_factory);
+    EnclosureConfiguration(ValidatedFunctionModel64FactoryInterface const& function_factory)
+        : EnclosureConfiguration(ValidatedFunctionModel64Factory(function_factory.clone())) { }
+    EnclosureConfiguration(ValidatedFunctionModel64Factory function_factory, Paver paver, Drawer drawer)
+        : _function_factory(function_factory), _paver(paver), _drawer(drawer) { }
+    EnclosureConfiguration& set_paver(Paver paver) { _paver=paver; return *this; }
+    EnclosureConfiguration& set_drawer(Drawer drawer) { _drawer=drawer; return *this; }
+};
+
 //! \brief A set of the form \f$x=f(s)\f$ for \f$s\in D\f$ satisfying \f$g(s)\leq0\f$ and \f$h(s)=0\f$.
 class Enclosure
     : public DrawableInterface
@@ -89,33 +106,39 @@ class Enclosure
     ValidatedScalarFunctionModel64 _time_function;
     ValidatedScalarFunctionModel64 _dwell_time_function;
     List<ValidatedConstraintModel> _constraints;
-    ValidatedFunctionModel64FactoryInterface* _function_factory_ptr;
     mutable ExactBoxType _reduced_domain;
     mutable Bool _is_fully_reduced;
+    EnclosureConfiguration _configuration;
   public:
     //! \brief Construct a set with \f$D=\emptyset\f$ in \f$\mathbb{R}^0\f$.
     explicit Enclosure();
     //! \brief Construct a representation of the box \a bx.
-    explicit Enclosure(const RealBox& bx, const ValidatedFunctionModel64FactoryInterface& fac);
+    explicit Enclosure(const RealBox& bx, const EnclosureConfiguration& config);
     //! \brief Construct a representation of the box \a bx.
-    explicit Enclosure(const ExactBoxType& bx, const ValidatedFunctionModel64FactoryInterface& fac);
+    explicit Enclosure(const ExactBoxType& bx, const EnclosureConfiguration& config);
     //! \brief Construct the set with parameter domain \a d and image function \a f.
-    explicit Enclosure(const ExactBoxType& d, const ValidatedVectorFunction& f, const ValidatedFunctionModel64FactoryInterface& fac);
+    explicit Enclosure(const ExactBoxType& d, const ValidatedVectorFunction& f, const EnclosureConfiguration& config);
     //! \brief Construct the set with parameter domain \a d, image function \a f and constraints \a c.
-    explicit Enclosure(const ExactBoxType& d, const ValidatedVectorFunction& f, const List<ValidatedConstraint>& c, const ValidatedFunctionModel64FactoryInterface& fac);
+    explicit Enclosure(const ExactBoxType& d, const ValidatedVectorFunction& f, const List<ValidatedConstraint>& c, const EnclosureConfiguration& config);
     //! \brief Construct the set with parameter domain \a d, image function \a sf, time function \a tf and constraints \a c.
-    explicit Enclosure(const ExactBoxType& d, const ValidatedVectorFunction& sf, const ValidatedScalarFunction& tf, const List<ValidatedConstraint>& c, const ValidatedFunctionModel64FactoryInterface& fac);
+    explicit Enclosure(const ExactBoxType& d, const ValidatedVectorFunction& sf, const ValidatedScalarFunction& tf, const List<ValidatedConstraint>& c, const EnclosureConfiguration& config);
     //! \brief Construct the set with domain \a d, space function \a sf, time function \a tf, negative constraints \a g and equality constraints \a h.
     //!   (Not currently implemented.)
-    explicit Enclosure(const ExactBoxType& d, const ValidatedVectorFunction& sf, const ValidatedScalarFunction tf, const ValidatedVectorFunction& g, const ValidatedVectorFunction& h, const ValidatedFunctionModel64FactoryInterface& fac);
+    explicit Enclosure(const ExactBoxType& d, const ValidatedVectorFunction& sf, const ValidatedScalarFunction tf, const ValidatedVectorFunction& g, const ValidatedVectorFunction& h, const EnclosureConfiguration& fac);
     //! \brief Construct from an exact singleton constraint \a set.
-    explicit Enclosure(const BoundedConstraintSet& set, const ValidatedFunctionModel64FactoryInterface& fac);
+    explicit Enclosure(const BoundedConstraintSet& set, const EnclosureConfiguration& fac);
 
     //! \brief Create a dynamically-allocated copy.
     Enclosure* clone() const;
 
     //! \brief The class used to create new function instances.
-    const ValidatedFunctionModel64FactoryInterface& function_factory() const;
+    const ValidatedFunctionModel64Factory& function_factory() const;
+    //! \brief The class used to discretise the set.
+    const Paver& paver() const;
+    Void set_paver(Paver const&);
+    //! \brief The class used to draw the set.
+    const Drawer& drawer() const;
+    Void set_drawer(Drawer const&);
     //! \brief The parameter domain \f$D\f$.
     ExactBoxType domain() const;
     ExactBoxType parameter_domain() const;
@@ -262,7 +285,6 @@ class Enclosure
 
     //! \brief Compute an outer approximation on the \a grid to the given \a depth.
     GridTreeSet outer_approximation(const Grid& grid, Int depth) const;
-
     //! \brief Adjoin an outer approximation to the given \a depth to the \a paving.
     Void adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
     //! \brief Adjoin an outer approximation to the given \a depth to the \a paving
@@ -317,16 +339,20 @@ class Enclosure
     Pair<Enclosure,Enclosure> split(Nat k) const;
 
 
+    ValidatedConstrainedImageSet state_set() const;
+    ValidatedConstrainedImageSet state_auxiliary_set() const;
+    ValidatedConstrainedImageSet state_time_auxiliary_set() const;
+
     //! \brief Draw to a canvas.
     Void draw(CanvasInterface& c, const Projection2d& p) const;
     //! \brief Draw the bounding box to a canvas. Useful to obtain a quick and rough
     //! image or when all else fails.
-    Void box_draw(CanvasInterface&, const Projection2d& p) const;
+    [[deprecated]] Void box_draw(CanvasInterface&, const Projection2d& p) const; [[deprecated]]
     //! \brief Draw the to a canvas by splitting into small enough pieces that
     //! affine over-approximations yield a good image.
-    Void affine_draw(CanvasInterface&, const Projection2d& p, Nat=1u) const;
+    [[deprecated]] Void affine_draw(CanvasInterface&, const Projection2d& p, Nat splittings) const;
     //! \brief Draw the to a canvas by over-approximating on a grid.
-    Void grid_draw(CanvasInterface&, const Projection2d& p, Nat=1u) const;
+     [[deprecated]] Void grid_draw(CanvasInterface&, const Projection2d& p, Nat depth) const;
 
     //! \brief Write to an output stream.
     OutputStream& write(OutputStream&) const;

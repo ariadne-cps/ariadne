@@ -41,14 +41,13 @@ namespace Ariadne {
 class Grid;
 class GridCell;
 
-/*! \brief An infinite, uniform grid of rectangles in Euclidean space.
- *
- *  \internal Maybe a Grid should be a type of Paving or Cover.
- *  Then rather than having GridXXX classes, we can have classes such that cells of
- *  some type are mapped into concrete sets by a Paving or Cover.
- *  This should be more general, and will unify the concepts of Paving and Cover,
- *  as well as different types of covers.
- */
+//! \brief An infinite, uniform grid of rectangles in Euclidean space.
+//!
+//! \internal Maybe a Grid should be a type of Paving or Cover.
+//! Then rather than having GridXXX classes, we can have classes such that cells of
+//! some type are mapped into concrete sets by a Paving or Cover.
+//! This should be more general, and will unify the concepts of Paving and Cover,
+//! as well as different types of covers.
 class Grid {
     typedef double DyadicType;
     typedef Int IntegerType;

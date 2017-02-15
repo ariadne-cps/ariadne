@@ -49,7 +49,7 @@ Bool subset( const GridCell& theCellOne, const GridCell& theCellTwo,
              BinaryWord * pPathPrefixOne, BinaryWord * pPathPrefixTwo, Nat * pPrimaryCellHeight);
 
 
-/****************************************BinaryTreeNode**********************************************/
+//***************************************BinaryTreeNode**********************************************/
 
 Bool BinaryTreeNode::has_enabled() const {
     if( is_leaf() ) {
@@ -479,7 +479,7 @@ Bool BinaryTreeNode::subset( const BinaryTreeNode * pRootNodeOne, const BinaryTr
     return result;
 }
 
-/****************************************Grid**********************************************/
+//***************************************Grid**********************************************/
 
 struct Grid::Data
 {
@@ -676,7 +676,7 @@ OutputStream& operator<<(OutputStream& os, const Grid& gr)
     return os;
 }
 
-/*****************************************GridAbstractCell*******************************************/
+//****************************************GridAbstractCell*******************************************/
 
 LatticeBoxType GridAbstractCell::primary_cell_lattice_box( const Nat theHeight, const dimension_type dimensions ) {
     Int leftBottomCorner = 0, rightTopCorner = 1;
@@ -718,7 +718,6 @@ Nat GridAbstractCell::smallest_enclosing_primary_cell_height( const UpperBoxType
     return smallest_enclosing_primary_cell_height( theLatticeBoxType );
 }
 
-/*! \brief Apply grid data \a theGrid to \a theLatticeBoxType in order to compute the box dimensions in the original space*/
 ExactBoxType GridAbstractCell::lattice_box_to_space(const LatticeBoxType & theLatticeBoxType, const Grid& theGrid ){
     const DimensionType dimensions = theGrid.dimension();
     ExactBoxType theTmpBoxType( dimensions );
@@ -796,7 +795,7 @@ Bool GridAbstractCell::compare_abstract_grid_cells(const GridAbstractCell * pCel
     }
 }
 
-/*********************************************GridCell***********************************************/
+//********************************************GridCell***********************************************/
 
 GridCell GridCell::split(Bool isRight) const {
     BinaryWord theWord = _theWord;
@@ -919,7 +918,7 @@ DimensionType GridCell::dimension() const {
     return this->grid().dimension();
 }
 
-/*************************************FRIENDS OF GridCell*****************************************/
+//************************************FRIENDS OF GridCell*****************************************/
 
 Bool subset(const GridCell& theCellOne, const GridCell& theCellTwo, BinaryWord * pPathPrefixOne, BinaryWord * pPathPrefixTwo, Nat *pPrimaryCellHeight ) {
     //Test that the Grids are equal
@@ -979,7 +978,6 @@ Bool subset(const GridCell& theCellOne, const GridCell& theCellTwo, BinaryWord *
     return result;
 }
 
-/*! \brief Stream insertion operator for the GridCell. */
 OutputStream& operator<<(OutputStream& os, const GridCell& gridPavingCell){
     //Write the grid data to the string stream
     return os << "GridCell( " << gridPavingCell.grid() <<
@@ -989,7 +987,7 @@ OutputStream& operator<<(OutputStream& os, const GridCell& gridPavingCell){
 }
 
 
-/*********************************************GridOpenCell******************************************/
+//********************************************GridOpenCell******************************************/
 
 //NOTE: In this method first works with the boxes on the lattice, to make
 //      computation exact, and then maps them to the original space.
@@ -1262,7 +1260,7 @@ List<GridOpenCell> GridOpenCell::intersection( const GridOpenCell & theLeftOpenC
     return result;
 }
 
-/****************************************FRIENDS OF GridOpenCell*******************************************/
+//***************************************FRIENDS OF GridOpenCell*******************************************/
 
 OutputStream& operator<<(OutputStream& os, const GridOpenCell& theGridOpenCell ) {
     //Write the grid data to the string stream
@@ -1274,7 +1272,7 @@ OutputStream& operator<<(OutputStream& os, const GridOpenCell& theGridOpenCell )
 
 
 
-/********************************************GridTreeCursor***************************************/
+//*******************************************GridTreeCursor***************************************/
 
 GridTreeCursor::GridTreeCursor( ) :
     _currentStackIndex(-1), _pSubPaving(0), _theCurrentGridCell( Grid(), 0, BinaryWord() ) {
@@ -1454,7 +1452,7 @@ const GridTreeSubset GridTreeCursor::operator*() const {
     return const_cast<GridTreeCursor&>(*this).operator*();
 }
 
-/*************************************FRIENDS OF GridTreeCursor*****************************************/
+//************************************FRIENDS OF GridTreeCursor*****************************************/
 
 OutputStream& operator<<(OutputStream& os, const GridTreeCursor& theGridTreeCursor) {
     const Int curr_stack_idx = theGridTreeCursor._currentStackIndex;
@@ -1467,7 +1465,7 @@ OutputStream& operator<<(OutputStream& os, const GridTreeCursor& theGridTreeCurs
     return os<<" ], " << theGridTreeCursor._theCurrentGridCell << " )";
 }
 
-/****************************************GridTreeConstIterator************************************/
+//***************************************GridTreeConstIterator************************************/
 
 GridTreeConstIterator::GridTreeConstIterator(  ) : _pGridTreeCursor()  {
 }
@@ -1591,7 +1589,7 @@ Void GridTreeConstIterator::write(OutputStream& os) const {
 }
 
 
-/********************************************GridTreeSubset******************************************/
+//*******************************************GridTreeSubset******************************************/
 
 SizeType GridTreeSubset::size() const {
     return BinaryTreeNode::count_enabled_leaf_nodes( this->binary_tree() );
@@ -2258,7 +2256,7 @@ GridTreeSubset::write(OutputStream& os) const
     return os << (*this);
 }
 
-/*************************************FRIENDS OF GridTreeSubset*****************************************/
+//************************************FRIENDS OF GridTreeSubset*****************************************/
 
 Bool subset( const GridCell& theCell, const GridTreeSubset& theSet ) {
     Bool result = false;
@@ -2363,12 +2361,11 @@ Bool intersect( const GridCell& theCell, const GridTreeSubset& theSet ) {
     return result;
 }
 
-/*! \brief This is a helper method, it receives two GridTreeSubset elements
- *  then it computes the primary cell that is common to them in a sence that
- *  these sets can be rooted to it. After that the method updates the paths
- *  with the information about the paths from the found primary cell to the
- *  root binary tree nodes of both sets.
- */
+// This is a helper method, it receives two GridTreeSubset elements
+// then it computes the primary cell that is common to them in a sence that
+// these sets can be rooted to it. After that the method updates the paths
+// with the information about the paths from the found primary cell to the
+// root binary tree nodes of both sets.
 static Void common_primary_cell_path(const GridTreeSubset& theSet1, const GridTreeSubset& theSet2, BinaryWord &pathCommonPCtoRC1, BinaryWord &pathCommonPCtoRC2 ) {
     //Get the root cells for the subsets
     GridCell rootCell1 = theSet1.root_cell();
@@ -2391,9 +2388,8 @@ static Void common_primary_cell_path(const GridTreeSubset& theSet1, const GridTr
     }
 }
 
-/*! \brief this method locates the node in the tree rooted to pSuperTreeRootNode that corresponds to
- *  the path pathFromSuperToSub. In case we encounter a leaf node then we stop and return the node
- */
+// This method locates the node in the tree rooted to pSuperTreeRootNode that corresponds to
+//  the path pathFromSuperToSub. In case we encounter a leaf node then we stop and return the node
 static const BinaryTreeNode * locate_node( const BinaryTreeNode * pSuperTreeRootNode, const BinaryWord& pathFromSuperToSub ){
     //Locate the node in the pSuperTreeRootNode such that it corresponds to pSubTreeRootNode
     const BinaryTreeNode * pCurrentSuperTreeNode = pSuperTreeRootNode;
@@ -2409,12 +2405,11 @@ static const BinaryTreeNode * locate_node( const BinaryTreeNode * pSuperTreeRoot
     return pCurrentSuperTreeNode;
 }
 
-/*! \brief This is a helper functiuon for Bool subset( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 )
- *  pSuperTreeRootNode is the root tree node, pathFromSuperToSub is the path from this root node to the root node
- *  pSubTreeRootNode. In general we see if the set represented by pSubTreeRootNode is a subset of pSuperTreeRootNode.
- *  If pSubTreeRootNode has no enabled leaf nodes then the result is always true, else if pSuperTreeRootNode has no
- *  enabled leaf nodes then the result is always false.
- */
+// \brief This is a helper functiuon for Bool subset( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 )
+// pSuperTreeRootNode is the root tree node, pathFromSuperToSub is the path from this root node to the root node
+// pSubTreeRootNode. In general we see if the set represented by pSubTreeRootNode is a subset of pSuperTreeRootNode.
+// If pSubTreeRootNode has no enabled leaf nodes then the result is always true, else if pSuperTreeRootNode has no
+// enabled leaf nodes then the result is always false.
 static Bool subset(const BinaryTreeNode * pSubTreeRootNode, const BinaryTreeNode * pSuperTreeRootNode, const BinaryWord & pathFromSuperToSub) {
     Bool result = false;
 
@@ -2446,12 +2441,11 @@ static Bool subset(const BinaryTreeNode * pSubTreeRootNode, const BinaryTreeNode
     return result;
 }
 
-/*! \brief This is a helper functiuon for Bool subset( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 )
- *  pSuperTreeRootNode is the root tree node, pathFromSuperToSub is the path from this root node to the root node
- *  pSubTreeRootNode. In general we see if the set represented by pSuperTreeRootNode is a subset of pSubTreeRootNode.
- *  If pSuperTreeRootNode has no enabled leaf nodes then the result is always true, else if pSubTreeRootNode has no
- *  enabled leaf nodes then the result is always false.
- */
+// This is a helper functiuon for Bool subset( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 )
+// pSuperTreeRootNode is the root tree node, pathFromSuperToSub is the path from this root node to the root node
+// pSubTreeRootNode. In general we see if the set represented by pSuperTreeRootNode is a subset of pSubTreeRootNode.
+// If pSuperTreeRootNode has no enabled leaf nodes then the result is always true, else if pSubTreeRootNode has no
+// enabled leaf nodes then the result is always false.
 static Bool subset( const BinaryTreeNode * pSuperTreeRootNode, const BinaryWord & pathFromSuperToSub, const BinaryTreeNode * pSubTreeRootNode ) {
     Bool result = false;
 
@@ -2556,11 +2550,10 @@ Bool subset( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 ) {
     return result;
 }
 
-/*! \brief This is a helper functiuon for Bool overlap( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 )
- *  pSuperTreeRootNode is the root tree node, pathFromSuperToSub is the path from this root node to the root node
- *  pSubTreeRootNode. In general we see if the sets represented by pSuperTreeRootNode and pSubTreeRootNode overlap.
- *  If at least one of pSuperTreeRootNode and pSubTreeRootNode have no enabled leaf nodes then the result is always false.
- */
+// This is a helper functiuon for Bool overlap( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 )
+// pSuperTreeRootNode is the root tree node, pathFromSuperToSub is the path from this root node to the root node
+// pSubTreeRootNode. In general we see if the sets represented by pSuperTreeRootNode and pSubTreeRootNode overlap.
+// If at least one of pSuperTreeRootNode and pSubTreeRootNode have no enabled leaf nodes then the result is always false.
 static Bool intersect(const BinaryTreeNode * pSuperTreeRootNode, const BinaryWord & pathFromSuperToSub, const BinaryTreeNode * pSubTreeRootNode) {
     Bool result = false;
 
@@ -2623,7 +2616,7 @@ OutputStream& operator<<(OutputStream& os, const GridTreeSubset& theGridTreeSubs
 }
 
 
-/*********************************************GridTreeSet*********************************************/
+//********************************************GridTreeSet*********************************************/
 
 GridCell GridTreeSet::smallest_enclosing_primary_cell( const UpperBoxType& theBoxType ) const {
     ARIADNE_ASSERT_MSG( this->dimension() == theBoxType.dimension(), "Cannot find enclosing cell for ExactBoxType  " << theBoxType << " for GridTreeSet with grid " << this->grid() );
@@ -3352,7 +3345,7 @@ Void GridTreeSet::restrict_to_height( const Nat theHeight ) {
     }
 }
 
-/*************************************FRIENDS OF GridTreeSet*****************************************/
+//************************************FRIENDS OF GridTreeSet*****************************************/
 
 GridTreeSet outer_approximation(const ExactBoxType& theBoxType, const Grid& theGrid, const Nat depth) {
     ExactBoxSet theBoxSet=theBoxType;

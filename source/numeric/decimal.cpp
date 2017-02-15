@@ -115,6 +115,11 @@ Decimal operator*(Decimal const& d1, Decimal const& d2)
     return Decimal(d1._p*d2._p,d1._q+d2._q);
 }
 
+Decimal sqr(Decimal const& d)
+{
+    return Decimal(sqr(d._p),2u*d._q);
+}
+
 Decimal abs(Decimal const& d)
 {
     return Decimal(abs(d._p),d._q);
@@ -172,9 +177,9 @@ Decimal::Decimal(double x)
     while(y<1.0) { y*=10; exp-=1; }
     while(y>=1.0) { y/=10; exp+=1; }
     // Now 0.1<=y<1.0; and |x| = y*10^exp
-    long int n=std::floor(y/acc+0.5); // An approximation of y*10^sf
+    long int n=std::round(y/acc); // An approximation of y*10^sf
     exp-=sf;
-    double re=std::fabs(y-n*acc); // The error of
+    double re=std::fabs(y-n*acc); // The error of n/10^sf
 
     if(std::fabs(re)>=tol) {
         ARIADNE_THROW(std::runtime_error,"Decimal(double)","double-precision floating-point number must have a relative error of "<<tol<<" with respect to its approximation to "<<sf<<" significant figures; number "<<std::setprecision(17)<<x<<" has a relative error of "<<re<<"");
@@ -239,7 +244,10 @@ OutputStream& operator<<(OutputStream& os, Decimal const& d) {
     Integer n = quot(p,q);
     Integer r = p-n*q;
     if(d._p<0) { os << '-'; }
-    return os << n << "." << r;
+    os << n << ".";
+    // Pad zeros after point
+    while(r*ten<q) { q=quot(q,ten); os << "0"; }
+    return os << r;
 }
 
 Decimal::operator Rational() const {

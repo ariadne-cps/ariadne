@@ -795,6 +795,21 @@ EffectiveScalarFunction lie_derivative(const EffectiveScalarFunction& g, const E
     }
 }
 
+EffectiveVectorFunction lie_derivative(const EffectiveVectorFunction& g, const EffectiveVectorFunction& f) {
+    ARIADNE_ASSERT_MSG(g.argument_size()==f.result_size(),"f="<<f<<", g="<<g<<"\n");
+    ARIADNE_ASSERT_MSG(f.result_size()==f.argument_size(),"f="<<f<<", g="<<g<<"\n");
+    ARIADNE_ASSERT_MSG(f.result_size()>0,"f="<<f<<", g="<<g<<"\n");
+
+    try {
+        EffectiveVectorFunction r(g.result_size(),g.domain());
+        for(SizeType i=0; i!=g.result_size(); ++i) { r[i]=lie_derivative(g[i],f); }
+        return r;
+    }
+    catch(...) {
+        ARIADNE_FAIL_MSG("Failed to compute Lie derivative of vector function "<<g<<" under vector field "<<f<<"\n");
+    }
+}
+
 
 
 //------------------------ Validated function operators -------------------------------//

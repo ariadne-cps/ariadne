@@ -70,12 +70,9 @@ class GridOpenCell;
 
 typedef Box<ExactIntervalType> LatticeBoxType;
 
-OutputStream& operator<<(OutputStream& os, const GridCell& theGridCell);
-OutputStream& operator<<(OutputStream& os, const GridOpenCell& theGridOpenCell );
-
-Bool subset( const GridCell& theCellOne, const GridCell& theCellTwo, BinaryWord * pPathPrefixOne = NULL,
-             BinaryWord * pPathPrefixTwo = NULL, Nat * pPrimaryCellHeight = NULL );
-
+enum class BinaryTreeDirection : char { LEFT=-1, UP=0, RIGHT=+1 };
+enum class BinaryChild : char { LEFT=-1, RIGHT=+1 };
+enum class TernaryChild : char { LEFT=-1, MIDDLE=0, RIGHT=+1 };
 
 /*! \brief An abstract cell of a grid paving. This class is the base of the GridCell - a regular cell on the Grid
  *  and the GridOpenCell - an open cell on a Grid. Here we only store common data and operations
@@ -233,7 +230,7 @@ class GridCell : public GridAbstractCell {
      *  \a pPrimaryCellHeight, are returned as \a pathPrefixOne and \a pathPrefixTwo
      */
     friend Bool subset( const GridCell& theCellOne, const GridCell& theCellTwo, BinaryWord * pPathPrefixOne,
-                            BinaryWord * pPathPrefixTwo, Nat * pPrimaryCellHeight );
+                            BinaryWord * pPathPrefixTwo, Nat * pPrimaryCellHeight);
 
   public:
     /*! \brief Default constructor. Needed for some containers and iterators. */
@@ -261,6 +258,9 @@ class GridCell : public GridAbstractCell {
 
     /*! \brief A total order on cells on the same grid, by height and word prefix. */
     Bool operator<(const GridCell& otherCell) const;
+
+    /*! \brief Stream insertion operator. */
+    friend OutputStream& operator<<(OutputStream& os, const GridCell& theCell);
 
     /*! \brief The dimension of the cell. */
     DimensionType dimension() const;
@@ -342,7 +342,7 @@ class GridOpenCell: public GridAbstractCell {
      *  The search is started from \a theOpenCell that is an open cell covering \a theBoxType.
      *  Note: This method is recursive and it assumes that \a theOpenCell
      *  and \a theBoxType are on the same Grid! The latter is not checked, but only assumed.
-     *  In the open cell based on \a theOpenCell does not cover \a theBoxType this method returns NULL.
+     *  In the open cell based on \a theOpenCell does not cover \a theBoxType this method returns nullptr.
      */
     static GridOpenCell * smallest_open_subcell( const GridOpenCell &theOpenCell, const ExactBoxType & theBoxType );
 
@@ -368,10 +368,13 @@ class GridOpenCell: public GridAbstractCell {
 
     /*! \brief Allows to split the given cell into two sub-cells. When isRight == true
      * then we return the right sub-cell, if false then the left one, otherwise the middle one */
-    GridOpenCell split(ValidatedKleenean isRight) const;
+    GridOpenCell split(TernaryChild isRight) const;
 
     /*! \brief The equality operator. */
     Bool operator==(const GridOpenCell& otherCell) const;
+
+    /*! \brief Stream insertion operator. */
+    friend OutputStream& operator<<(OutputStream& os, const GridOpenCell& theOpenCell);
 
     /*! \brief Allows to assign one GridCell to another */
     GridOpenCell& operator=( const GridOpenCell & otherCell );
@@ -390,7 +393,7 @@ class GridOpenCell: public GridAbstractCell {
      * with the cell will result in more that one open cell. Still the operation is robust, it always
      * results in a set of open cells whoes union is the exact intersection of the given open cells.
      */
-    static std::vector<GridOpenCell> intersection( const GridOpenCell & theLeftOpenCell, const GridOpenCell & theRightOpenCell );
+    static List<GridOpenCell> intersection( const GridOpenCell & theLeftOpenCell, const GridOpenCell & theRightOpenCell );
 
     /*! \brief Tests if the two open cells intersect */
     static Bool intersect( const GridOpenCell & theLeftOpenCell, const GridOpenCell & theRightOpenCell );

@@ -63,8 +63,6 @@ typedef std::vector<Bool> BooleanArray;
 typedef Array<Int> IndexArray;
 typedef Array<SizeType> SizeArray;
 
-typedef unsigned short dimension_type;
-
 /*Some pre-declarations*/
 class BinaryTreeNode;
 class Grid;
@@ -79,29 +77,6 @@ class GridTreeConstIterator;
 
 /*Declarations of classes in other files*/
 template<class BS> class ListSet;
-
-OutputStream& operator<<(OutputStream& output_stream, const BinaryTreeNode & binary_tree );
-OutputStream& operator<<(OutputStream& os, const GridCell& theGridCell);
-OutputStream& operator<<(OutputStream& os, const GridOpenCell& theGridOpenCell );
-OutputStream& operator<<(OutputStream& os, const GridTreeCursor& theGridTreeCursor);
-OutputStream& operator<<(OutputStream& os, const GridTreeSubset& theGridTreeSubset);
-OutputStream& operator<<(OutputStream& os, const GridTreeSet& theGridTreeSet);
-
-Bool subset(const GridCell& theCell, const GridTreeSubset& theSet);
-Bool intersect(const GridCell& theCell, const GridTreeSubset& theSet);
-Bool subset(const GridTreeSubset& theSet1, const GridTreeSubset& theSet2);
-Bool intersect(const GridTreeSubset& theSet1, const GridTreeSubset& theSet2);
-
-GridTreeSet join(const GridTreeSubset& theSet1, const GridTreeSubset& theSet2);
-GridTreeSet intersection(const GridTreeSubset& theSet1, const GridTreeSubset& theSet2);
-GridTreeSet difference(const GridTreeSubset& theSet1, const GridTreeSubset& theSet2);
-
-GridTreeSet outer_approximation(const ExactBoxType& theBoxType, const Grid& theGrid, const Nat numSubdivInDim);
-GridTreeSet outer_approximation(const CompactSetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim);
-GridTreeSet outer_approximation(const CompactSetInterface& theSet, const Nat numSubdivInDim);
-template<class BS> GridTreeSet outer_approximation(const ListSet<BS>& theSet, const Nat numSubdivInDim);
-GridTreeSet inner_approximation(const OpenSetInterface& theSet, const Grid& theGrid, const Nat height, const Nat numSubdivInDim);
-
 
 /*! \brief The binary-tree node operation is not allowed on a non-leaf node. */
 class NotALeafNodeException : public std::logic_error {
@@ -122,260 +97,15 @@ class NotAllowedMoveException : public std::logic_error {
 };
 
 
-/*! \brief The binary tree node.
- *
- * This node is to be used in a binary tree designed for subdividing the state
- * space into enabled and disabled cells. This is required for representing
- * subsets of the state space.
- *
- * \b Storage: We only store pointers to the left and right subtrees and the ValidatedKleenean
- * value indicating whether this cell is enabled/disabled or we do not know.
- */
-class BinaryTreeNode {
-  protected:
-    /*! \brief Defines whether the given node of the tree is on/off or we do not know*/
-    ValidatedKleenean _isEnabled;
+class BinaryTreeNode;
 
-    /*! \brief The left and right subnodes of the tree. Note that,
-     * \a pLeftNode == \a NULL iff \a pRightNode == \a NULL. The latter
-     * is allowed iff \a _isEnabled == \a TRUE or \a _isEnabled == \a FALSE,
-     * i.e. the node can be a leaf.
-     */
-    BinaryTreeNode* _pLeftNode;
-    BinaryTreeNode* _pRightNode;
-
-    /*! \brief This method splits the enabled subtrees of the tree rooted to
-     * \a pCurrentNode in such a way that the tree depth becomes \a depth.
-     * If the initial tree depth is greater than \a depth then nothing is done.
-     */
-    Void mince_node(BinaryTreeNode* pCurrentNode, const Nat depth);
-
-    /*! \brief This method recombined the sub tree nodes rooted to \a pCurrentNode.
-     * Note that, the two leaf nodes with the same parent are removed if they have
-     * the same value of isEnabled fields.
-     */
-    Void recombine_node(BinaryTreeNode * pCurrentNode);
-
-    /*! \brief This method is used for recursive restoration of the binary tree from
-     *  the used data, i.e. \a theTree and \a theEnabledCells. It is used in the
-     *  constructor \a BinaryTreeNode( const BooleanArray& , const BooleanArray& )
-     */
-    Void restore_node( BinaryTreeNode * pCurrentNode, Nat & arr_index, Nat & leaf_counter,
-                       const BooleanArray& theTree, const BooleanArray& theEnabledCells);
-
-    /*! \brief This method is used in constructors for the node initialization */
-    Void init( ValidatedKleenean isEnabled, BinaryTreeNode* pLeftNode, BinaryTreeNode* pRightNode );
-
-  public:
-    //@{
-    //! \name Constructors
-
-    /*! \brief Construct a tree node. */
-    explicit BinaryTreeNode(const ValidatedKleenean _isEnabled = false );
-
-    /*! \brief The copy constructor.
-     * The the node and all it's sub nodes are copied.
-     */
-    explicit BinaryTreeNode(const BinaryTreeNode& theTreeNode);
-
-    /*! \brief Constructs a binary tree from the boolean arrays. \a theTree defines
-     * the tree structure, \a theEnabledCells defines the tree nodes.
-     * IVAN S. ZAPREEV:
-     * WARNING: We assume that every node has either no children or both of them!
-     * NOTE: The dinary data of the tree is organized in the following way:
-     *          1      The \a theTree contains Depth first search lay out of the tree,
-     *         / \     where 1 stands for the non-leaf node and 0 for a leaf node, we
-     *        /   \    always visit the left su-node first, e.g. the tree on the left
-     *       2     5   is encodes the Array:     [1, 1, 0, 0, 0]
-     *      / \        where the corresponding    ^  ^  ^  ^  ^
-     *     /   \       tree nodes are:            1  2  3  4  5
-     *    3     4      \a theEnabledCells contains true/false values for the leaf nodes
-     * of the tree. Their order is the same as in \a theTree, e.g. here it is: 3,4,5
-     */
-    explicit BinaryTreeNode( const BooleanArray& theTree, const BooleanArray& theEnabledCells );
-
-    //@}
-
-    ~BinaryTreeNode();
-
-    //@{
-    //! \name Properties
-
-    /*! \brief Returns true if the node is marked as enabled, otherwise false */
-    Bool is_enabled() const;
-
-    /*! \brief Returns true if some of the leaf nodes in the tree rooted to this node are enabled, otherwise false */
-    Bool has_enabled() const;
-
-    /*! \brief Returns true if all leaf nodes in the tree rooted to this node are enabled, otherwise false */
-    Bool all_enabled() const;
-
-    /*! \brief This method returns true if the given path defines a node in the tree that is either enabled
-     *  or is in a "virtual" subtree of some enabled node (note that enabled nodes can only be leafs).
-     * Note that: \a path is treated as if it is rooted to this node, we assume that the path starts
-     * from position \a position of \a path. The parameter \a position is used for recursive calls only.
-     */
-    Bool is_enabled( const BinaryWord & path, const Nat position = 0) const;
-
-    /*! \brief Returns true if the node is marked as disabled, otherwise false */
-    Bool is_disabled() const;
-
-    /*! \brief Returns true if the node is a leaf (pLeftNode == NULL && pRightNode == NULL) otherwise false */
-    Bool is_leaf() const;
-
-    /*! \brief Return the left or right sub-node */
-    BinaryTreeNode * child_node(Bool left_or_right) const;
-
-    /*! \brief Return the left sub-node */
-    BinaryTreeNode * left_node() const;
-
-    /*! \brief Return the right sub-node */
-    BinaryTreeNode * right_node() const;
-
-    /*! \brief Returns the depth of the sub-tree rooted to the given node, i.e. the depth of it's deepest node */
-    Nat depth() const;
-
-    /*! \brief Allows to compare to binaty tree nodes */
-    Bool operator==(const BinaryTreeNode & otherNode ) const;
-
-    /*! \brief Marks the node as enabled or disabled. */
-    Void set(Bool all_enabled_or_all_disabled);
-
-    static Bool is_equal_nodes( const BinaryTreeNode * pFirstNode, const BinaryTreeNode * pSecondNode );
-
-    //@}
-
-    //@{
-    //! \name Leaf Operations
-
-    /*! \brief This method makes the node to become a leaf node with the enabled value : \a is_enabled
-     * NOTE: the leat and the right sub-trees (are deallocated.
-     * WARNING: this method MUST NOT be called on a non-leaf node!!!
-     */
-    Void make_leaf( ValidatedKleenean is_enabled );
-
-    /*! \brief Marks the leaf node as enabled, otherwise they through \a NotALeafNodeEsception */
-    Void set_enabled();
-
-    /*! \brief Marks the leaf node as disabled, otherwise they through \a NotALeafNodeEsception */
-    Void set_disabled();
-
-    /*! \brief Marks the node as neither enabled nor disabled, is only applicable to non-leaf nodes.
-     * When applied to a leaf node, throws IsALeafNodeException.
-     */
-    Void set_unknown();
-
-    /*! \brief Splits the leaf node, i.e. adds two subnodes with the _isEnabled field value inherited from the parent node.
-     * The parent's _isEnabled is set to intermediate, because the subsequent operation on the subtree might enable/disable
-     * subnodes and we do not want to keep track of these changes. If the node is not a leaf then nothing is done.
-     */
-    Void split();
-
-    /*! \brief This method splits the enabled subtrees of the tree rooted to
-     * this node in such a way that the tree depth becomes \a depth.
-     * If the initial tree depth is greater than \a depth then nothing is done.
-     */
-    Void mince(const Nat depth);
-
-    //@}
-
-    //@{
-    //! \name
-
-    /*! \brief Allows to assign one binary tree node to the other, this is done by copying
-     * the nodes value and the sub-trees. The sub-trees of this node are deallocated.
-     */
-    BinaryTreeNode& operator=(const BinaryTreeNode & otherNode );
-
-    /*! \brief Copy all the data (including the sub-nodes) from the node pointed by \a pOtherNode into the given node.
-     * Note that here we will create copies of the sub nodes, and NOT just copy pointers to them!
-     */
-    Void copy_from( const BinaryTreeNode * pOtherNode );
-
-    /*! \brief This method recombined the sub tree nodes. Note that, the two leaf nodes with
-     * the same parent are removed if they have the same value of isEnabled fields.
-     */
-    Void recombine();
-
-    /*! \brief Stores the binary tree in a form of two arrays, their structure is the same as needed for
-     *   the BinaryTreeNode( const BooleanArray& , const BooleanArray&  ) constructor
-     */
-    Void tree_to_binary_words( BinaryWord & tree, BinaryWord & leaves ) const;
-
-    /*! \brief Stores the binary tree node as a string*/
-    String node_to_string() const;
-
-    /*! \brief Finds(creates) the leaf node defined by the \a path and marks it as enabled.
-     * If some prefix of the \a path references an enabled node then nothing is done.
-     */
-    Void add_enabled( const BinaryWord & path );
-
-    /*! \brief This method adjoins the enabled nodes of \a subTree to this tree.
-     * Note that, the position of the root node of \a subTree within this
-     * tree is defined by path.
-     */
-    Void add_enabled( const BinaryTreeNode * pOtherSubTree, const BinaryWord & path );
-
-    /*! \brief This method merges \a pFromTreeRoot into \a pToTreeRoot.
-     *  The enabled nodes of the former tree are added to the latter tree.
-     *  If in the latter tree there is an enabled leaf node and in the former
-     *  tree the corresponding node is not a leaf, then this node of the latter
-     *  tree stays intact. If on the other hand we have a non-leaf node in
-     *  \a pToTreeRoot and we are adding to it an enabled node of \a pFromTreeRoot
-     *  then we just "substitute" the former one with the latter.
-     *  NOTE: 1. This function is recursive. 2. No pointers are copied between
-     *  \a pToTreeRoot and \a pFromTreeRoot.
-     */
-    Void add_enabled( BinaryTreeNode* pToTreeRoot, const BinaryTreeNode* pFromTreeRoot );
-
-    /*! \brief Starting in the \a pNode node as at the root, this method counts
-     *  the number of enabled leaf nodes in the subtree
-     *  rooted at pNode.
-     */
-    static SizeType count_enabled_leaf_nodes( const BinaryTreeNode* pNode );
-
-    /*! \brief Starting in the \a pRootTreeNode node as at the root, this method finds(creates)
-     *  the leaf node defined by the \a path and marks it as enabled. If some prefix of the \a path
-     *  references an enabled node then nothing is done.
-     *  NOTE: This is a recursive method on the position (\a position) in the binary path (\a path).
-     *  Therefore, the initial evaluate of this method should be done with \a position == 0;
-     */
-    static Void add_enabled( BinaryTreeNode* pRootTreeNode, const BinaryWord& path, const Nat position = 0 );
-
-    /*! \brief Creates a binary tree of the height rootNodePath.size(), puts the subtree oldRootNode
-     * into the node defined by the path \a rootNodePath, returns the root node of the extended tree.
-     */
-    static BinaryTreeNode * prepend_tree( const BinaryWord & rootNodePath, BinaryTreeNode * oldRootNode);
-
-    /*! \brief This method restricts \a pThisNode to \a pOtherNode.
-     * In essance we do the inplace AND on the tree node pThisNode.
-     * Note that, this method is recursive.
-     */
-    static Void restrict( BinaryTreeNode * pThisNode, const BinaryTreeNode * pOtherNode );
-
-    /*! \brief This method removed enabled nodes of \a pOtherNode from \a pThisNode.
-     * Note that, this method is recursive.
-     */
-    static Void remove( BinaryTreeNode * pThisNode, const BinaryTreeNode * pOtherNode );
-
-    /*! \brief checks if two trees intersect in a set-theory sence.
-     * I.e. we assume that pRootNodeOne and pRootNodeTwo correspond to the same (virtual) root
-     * and then we see if the enabled leaf node of one tree contain enabled leaf nodes of
-     * another tree as their (virtual) children.
-     */
-    static Bool intersect( const BinaryTreeNode * pRootNodeOne, const BinaryTreeNode * pRootNodeTwo );
-
-    /*! \brief checks if the tree pRootNodeOne is a subset of the tree pRootNodeTwo, in a set-theory sence.
-     * I.e. we assume that pRootNodeOne and pRootNodeTwo correspond to the same (virtual) root
-     * and then we see if every enabled leaf node of pRootNodeOne is contained in the enabled leaf nodes of
-     * pRootNodeTwo, or it is covered by the enabled leaf nodes of pRootNodeTwo. When we write, contained and
-     * covered then we mean: is a subnode in the (virtual) tree and all it's subnodes in the (virtual) tree.
-     */
-    static Bool subset( const BinaryTreeNode * pRootNodeOne, const BinaryTreeNode * pRootNodeTwo );
-
-    //@}
-};
-
+Bool subset( const GridCell& theCell, const GridTreeSubset& theSet );
+Bool intersect( const GridCell& theCell, const GridTreeSubset& theSet );
+Bool subset( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 );
+GridTreeSet join( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 );
+GridTreeSet intersection( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 );
+GridTreeSet difference( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 );
+Bool intersect( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 );
 
 /*! \brief This class represents a subpaving of a paving. Note that, the subtree enclosed into
  * this class is just a pointer to the node in the tree of some paving. This class is not
@@ -412,8 +142,8 @@ class GridTreeSubset
      *  This is a recursive procedure and it returns true only if there are no disabled
      *  cells in \a pCurrentNode that intersect with theBoxType.
      */
-    static ValidatedKleenean superset( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
-                             const Nat theHeight, BinaryWord &theWord, const ExactBoxType& theBoxType );
+    static ValidatedKleenean _superset( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
+                                        const Nat theHeight, BinaryWord &theWord, const ExactBoxType& theBoxType );
 
     /*! \brief This method checks whether the set defined by \a pCurrentNode is a subset
      *  of \a theBoxType. The set of \a pCurrentNode is defined by \a theGrid, the primary
@@ -421,8 +151,8 @@ class GridTreeSubset
      *  This is a recursive procedure and it returns true only if all enabled sub-cells of
      *  \a pCurrentNode are sub-sets of \a theBoxType.
      */
-    static ValidatedKleenean subset( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
-                           const Nat theHeight, BinaryWord &theWord, const ExactBoxType& theBoxType );
+    static ValidatedKleenean _subset( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
+                                      const Nat theHeight, BinaryWord &theWord, const ExactBoxType& theBoxType );
 
     /*! \brief This method checks whether \a theBoxType is disjoint from the set defined by
      *  \a pCurrentNode, \a theGrid, the primary cell (\a theHeight) to which this
@@ -432,8 +162,8 @@ class GridTreeSubset
      *  have an intersection. If there are no such nodes then there is no intersection,
      *  and the sets are disjoint.
      */
-    static ValidatedKleenean disjoint( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
-                             const Nat theHeight, BinaryWord &theWord, const ExactBoxType& theBoxType );
+    static ValidatedKleenean _disjoint( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
+                                        const Nat theHeight, BinaryWord &theWord, const ExactBoxType& theBoxType );
 
     /*! \brief This method checks whether \a theBoxType overlaps the set defined by
      *  \a pCurrentNode, \a theGrid, the primary cell (\a theHeight) to which this
@@ -444,8 +174,8 @@ class GridTreeSubset
      *  method cannot be implemented using disjoint since disjoint tests if the closures
      *  are disjoint, and overlaps tests if the interiors are not disjoint.
      */
-    static ValidatedKleenean intersects( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
-                               const Nat theHeight, BinaryWord &theWord, const ExactBoxType& theBoxType );
+    static ValidatedKleenean _intersects( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
+                                          const Nat theHeight, BinaryWord &theWord, const ExactBoxType& theBoxType );
 
     /*! Allow to convert the number of subdivisions in each dimension, i.e. \a numSubdivInDim,
      *  starting from the zero cell into the number of subdivisions that have to be done in a
@@ -520,10 +250,6 @@ class GridTreeSubset
      */
     GridCell root_cell() const;
 
-    /*! \brief Returns the \a GridCell corresponding to the ROOT NODE of \em this \a GridTreeSubset
-     */
-    GridCell cell() const { return this->root_cell(); };
-
     /*! \brief Computes a bounding box for a grid set. */
     UpperBoxType bounding_box() const;
 
@@ -578,9 +304,6 @@ class GridTreeSubset
     //@{
     //! \name Geometric Predicates
 
-    /*! \brief Tests if a cell is a subset of the set. */
-    Bool superset( const GridCell& theCell) const { return Ariadne::subset(theCell,*this); }
-
     /*! \brief Tests if a cell is a subset of a set. */
     friend Bool subset( const GridCell& theCell, const GridTreeSubset& theSet );
 
@@ -589,6 +312,17 @@ class GridTreeSubset
 
     /*! \brief Tests if a grid set \a theSet1 is a subset of \a theSet2. */
     friend Bool subset( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 );
+
+    /*! \brief Join (make union of) two grid paving sets. */
+    friend GridTreeSet join( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 );
+
+    /*! \brief The intersection of two grid paving sets. Points only lying on the
+     *  intersection of the boundaries of the two sets are not included in the result.
+     */
+    friend GridTreeSet intersection( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 );
+
+    /*! \brief The difference of two grid paving sets. (Results in theSet1 minus theSet2) */
+    friend GridTreeSet difference( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 );
 
     /*! \brief Tests if two grid paving sets intersect (as open sets)
      *  If at least one of the GridTreeSubsets represents an empty set, then the result is false.
@@ -603,6 +337,9 @@ class GridTreeSubset
 
     /*! \brief Tests if a grid set intersects another paving. */
     virtual Bool intersects(const SubPavingInterface&) const;
+
+    /*! \brief Tests if a cell is a subset of the set. */
+    Bool superset( const GridCell& theCell) const;
 
     /*! \brief Tests if a grid set is a subset of a box. */
     Bool subset( const ExactBoxType& theBoxType ) const;
@@ -660,6 +397,8 @@ class GridTreeSubset
 
     /*! \brief Write to an output stream. */
     OutputStream& write(OutputStream& os) const;
+
+    friend OutputStream& operator<<(OutputStream& os, const GridTreeSubset& theGridTreeSubset);
     //@}
 
   private:
@@ -875,18 +614,19 @@ class GridTreeSet
 
     /*! \brief Adjoin (make inplace union with) another grid paving set. */
     Void adjoin( const GridTreeSubset& theOtherSubPaving );
-    Void adjoin( const SubPavingInterface& theOtherSubPaving ) {
-        this->adjoin(dynamic_cast<const GridTreeSubset&>(theOtherSubPaving)); }
 
     /*! \brief Restrict to (make inplace intersection with) another grid paving set. */
     Void restrict( const GridTreeSubset& theOtherSubPaving );
-    Void restrict( const SubPavingInterface& theOtherSubPaving ) {
-        this->restrict(dynamic_cast<const GridTreeSubset&>(theOtherSubPaving)); }
 
     /*! \brief Remove cells in another grid paving set. */
     Void remove( const GridTreeSubset& theOtherSubPaving );
-    Void remove( const SubPavingInterface& theOtherSubPaving ) {
-        this->remove(dynamic_cast<const GridTreeSubset&>(theOtherSubPaving)); }
+
+    /*! \brief Adjoin (make inplace union with) an abstract paving set. */
+    Void adjoin( const SubPavingInterface& theOtherSubPaving );
+    /*! \brief Restrict to (make inplace intersection with) an abstract paving set. */
+    Void restrict( const SubPavingInterface& theOtherSubPaving );
+    /*! \brief Remove cells from  an abstract paving set. */
+    Void remove( const SubPavingInterface& theOtherSubPaving );
 
     /*! \brief Restrict to cells rooted to the primary cell with the height (at most) \a theHeight. */
     Void restrict_to_height( const Nat theHeight );
@@ -979,9 +719,21 @@ class GridTreeSet
 
     //@{
     //! \name Input/output routines.
+
+    friend OutputStream& operator<<(OutputStream& os, const GridTreeSet& theGridTreeSet);
     //@}
 
 };
+
+GridTreeSet outer_approximation(const ExactBoxType& theBoxType, const Grid& theGrid, const Nat depth);
+GridTreeSet outer_approximation(const ExactBoxType& theBoxType, const Nat depth);
+GridTreeSet outer_approximation( const CompactSetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim );
+GridTreeSet outer_approximation( const CompactSetInterface& theSet, const Nat numSubdivInDim );
+GridTreeSet inner_approximation( const OpenSetInterface& theSet, const Grid& theGrid, const Nat height, const Nat numSubdivInDim );
+GridTreeSet inner_approximation( const OpenSetInterface& theSet, const Grid& theGrid, const ExactBoxType& bounding_box, const Nat numSubdivInDim );
+
+template<class BS> GridTreeSet outer_approximation(const ListSet<BS>& theSet, const Grid& theGrid, const Nat numSubdivInDim);
+
 
 /*! \brief This class represents a cursor/Iterator that can be used to traverse a subtree. */
 class GridTreeCursor {
@@ -1005,7 +757,7 @@ class GridTreeCursor {
     /*! \brief Push the node into the atack */
     Void push( BinaryTreeNode* pLatestNode );
 
-    /*! \brief Pop the node from the atack, return NULL is the stack is empty */
+    /*! \brief Pop the node from the atack, return nullptr is the stack is empty */
     BinaryTreeNode* pop( );
 
     /*! \brief Check is the stack contains just one element, i.e. we are at the root */
@@ -1015,7 +767,7 @@ class GridTreeCursor {
      * if left_or_right == false then we go left, if left_or_right == true then right
      * if left_or_right == indeterminate then we are going one level up.
      */
-    Void updateTheCurrentGridCell( ValidatedKleenean left_or_right );
+    Void updateTheCurrentGridCell( BinaryTreeDirection up_or_left_or_right );
 
     friend OutputStream& operator<<(OutputStream& os, const GridTreeCursor& theGridTreeCursor);
 
@@ -1079,10 +831,10 @@ class GridTreeCursor {
     /*! \brief Move to the right child node. Throws an NotAllowedMoveException if the current node is a leaf. */
     GridTreeCursor& move_right();
 
-    /*! \brief Move to a child node. Throws an NotAllowedMoveException if the current node is a leaf.
-     * if left_or_right == false then we go left, if left_or_right == true then right
+    /*! \brief Move to a neighbouring node. Throws an NotAllowedMoveException if the current node is a leaf
+     * and we try to move to a child, or if the current node is the root and we try to move up.
      */
-    GridTreeCursor& move(Bool left_or_right);
+    GridTreeCursor& move(BinaryTreeDirection up_or_left_or_right);
 
     /*! \brief Convert to a GridCell. */
     const GridCell& cell() const;
@@ -1124,7 +876,7 @@ class GridTreeConstIterator
     //@{
     //! \name Iterator Specific
 
-    Void increment();
+    virtual Void increment();
 
     /*! \brief Returns true if:
      * both iterators are in the "end Iterator" state
@@ -1133,7 +885,7 @@ class GridTreeConstIterator
      */
     Bool equal( GridTreeConstIterator const & theOtherIterator) const;
 
-    GridCell const& dereference() const;
+    virtual GridCell const& dereference() const;
 
     //@}
 
@@ -1173,443 +925,47 @@ class GridTreeConstIterator
     /*! \brief The copy constructor that copies the current state by copying the
      *   underlying GridTreeCursor. The latter is copied by it's copy constructor.
      */
-    GridTreeConstIterator( const GridTreeConstIterator& theGridPavingIter );
+    GridTreeConstIterator( const GridTreeConstIterator& theGridPavingIter ) = default;
 
     //@}
 
     /*! \brief An assignment operator that copies the current state by copying the
      *  underlying GridTreeCursor. The latter is copied by it's assignment operator.
      */
-    GridTreeConstIterator & operator=( const GridTreeConstIterator& theGridPavingIter );
+    GridTreeConstIterator & operator=( const GridTreeConstIterator& theGridPavingIter ) = default;
 
 
     /*! This destructor only deallocates the GridTreeCursor, note that the
      * latter one does not deallocate the enclosed sub paving.
      */
-    ~GridTreeConstIterator();
+    ~GridTreeConstIterator() = default;
 
     //@{
     //! \name Get the cursor of the Iterator
 
-    //This cursor is only needed to get access to enable/disable node functionality
+    // This cursor is only needed to get access to enable/disable node functionality
     GridTreeCursor const& cursor() const;
 
     //@}
   private:
-    virtual GridTreeConstIterator* clone() const { return new GridTreeConstIterator(*this); }
-    virtual Bool equals( ForwardConstantIteratorInterface<GridCell> const & theOtherIterator) const {
-        GridTreeConstIterator const* theOtherIteratorPointer = dynamic_cast<GridTreeConstIterator const*>(&theOtherIterator);
-        return theOtherIteratorPointer && (this->equal(*theOtherIteratorPointer)); }
-    virtual Void write(OutputStream& os) const { os << "GridTreeConstIterator(" << this->cursor() << ")"; }
+    // Return a dynamically-allocated copy.
+    virtual GridTreeConstIterator* clone() const;
+    // Test equality with another abstract iterator.
+    virtual Bool equals( ForwardConstantIteratorInterface<GridCell> const & theOtherIterator) const;
+    // Write to an output stream.
+    virtual Void write(OutputStream& os) const;
 
 };
 
-/****************************************************************************************************/
 /***************************************Inline functions*********************************************/
-/****************************************************************************************************/
 
-/****************************************BinaryTreeNode**********************************************/
-
-inline Void BinaryTreeNode::init( ValidatedKleenean isEnabled, BinaryTreeNode* pLeftNode, BinaryTreeNode* pRightNode ){
-    _isEnabled = isEnabled;
-    _pLeftNode = pLeftNode;
-    _pRightNode = pRightNode;
-}
-
-inline BinaryTreeNode::BinaryTreeNode(const ValidatedKleenean isEnabled){
-    init( isEnabled, NULL, NULL );
-}
-
-inline BinaryTreeNode::BinaryTreeNode(const BinaryTreeNode& theTreeNode){
-    if( (theTreeNode._pLeftNode) != NULL && ( theTreeNode._pRightNode != NULL ) ){
-        init( theTreeNode._isEnabled, new BinaryTreeNode( *theTreeNode._pLeftNode ), new BinaryTreeNode( *theTreeNode._pRightNode ) );
-    }else{
-        //NOTE: We do not allow for nodes where one leaf is NULL and another is not
-        init( theTreeNode._isEnabled, NULL, NULL );
-    }
-}
-
-inline BinaryTreeNode::BinaryTreeNode( const BooleanArray& theTree, const BooleanArray& theEnabledCells ) {
-    //Make default initialization
-    init( false, NULL, NULL ) ;
-
-    //If the tree is not empry and there are enabled leafs then do the thing
-    if( ( theTree.size() ) > 0 && ( theEnabledCells.size() > 0 ) ) {
-        Nat arr_index = 0, leaf_counter = 0;
-        restore_node( this, arr_index, leaf_counter, theTree, theEnabledCells );
-    } else {
-        //Otherwise settle with one disabled node
-        this->set_disabled();
-    }
-}
-
-inline BinaryTreeNode::~BinaryTreeNode(){
-    if( _pLeftNode != NULL ) {
-        delete _pLeftNode;
-    }
-    if( _pRightNode != NULL ) {
-        delete _pRightNode;
-    }
-}
-
-inline Bool BinaryTreeNode::is_enabled() const{
-    return definitely(_isEnabled);
-}
-
-inline Bool BinaryTreeNode::is_disabled() const{
-    return ! possibly(_isEnabled) ;
-}
-
-inline Bool BinaryTreeNode::is_leaf() const{
-    return (_pLeftNode == NULL) && (_pRightNode == NULL);
-}
-
-inline BinaryTreeNode * BinaryTreeNode::child_node(Bool left_or_right) const {
-    return left_or_right ? _pRightNode : _pLeftNode;
-}
-
-inline BinaryTreeNode * BinaryTreeNode::left_node() const {
-    return _pLeftNode;
-}
-
-inline BinaryTreeNode * BinaryTreeNode::right_node() const {
-    return _pRightNode;
-}
-
-inline Void BinaryTreeNode::set(Bool enabled_or_disabled) {
-    _isEnabled = enabled_or_disabled;
-    if( _pLeftNode != NULL ) {
-        delete _pLeftNode;
-    }
-    if( _pRightNode != NULL ) {
-        delete _pRightNode;
-    }
-}
-
-inline Void BinaryTreeNode::set_enabled() {
-    if ( is_leaf() ) {
-        _isEnabled = true;
-    } else {
-        throw NotALeafNodeException(ARIADNE_PRETTY_FUNCTION);
-    }
-}
-
-inline Void BinaryTreeNode::copy_from( const BinaryTreeNode * pOtherNode ){
-    if( pOtherNode != NULL ){
-        _isEnabled = pOtherNode->_isEnabled;
-        if( _pLeftNode != NULL){ delete _pLeftNode; _pLeftNode = NULL; }
-        if( _pRightNode != NULL){ delete _pRightNode; _pRightNode = NULL; }
-        if( pOtherNode->_pLeftNode != NULL ){ _pLeftNode = new BinaryTreeNode( * (pOtherNode->_pLeftNode) ); }
-        if( pOtherNode->_pRightNode != NULL ){ _pRightNode = new BinaryTreeNode( * (pOtherNode->_pRightNode) ); }
-    }
-}
-
-inline Void BinaryTreeNode::set_disabled() {
-    if ( is_leaf() ) {
-        _isEnabled = false;
-    } else {
-        throw NotALeafNodeException(ARIADNE_PRETTY_FUNCTION);
-    }
-}
-
-inline Void BinaryTreeNode::set_unknown() {
-    if ( ! is_leaf() ) {
-        _isEnabled = indeterminate;
-    } else {
-        throw IsALeafNodeException(ARIADNE_PRETTY_FUNCTION);
-    }
-}
-
-inline Void BinaryTreeNode::make_leaf(ValidatedKleenean is_enabled ){
-    _isEnabled = is_enabled;
-    if( _pLeftNode != NULL ) { delete _pLeftNode; _pLeftNode= NULL; }
-    if( _pRightNode != NULL ) { delete _pRightNode; _pRightNode= NULL; }
-}
-
-inline Void BinaryTreeNode::split() {
-    if ( is_leaf() ) {
-        _pLeftNode  = new BinaryTreeNode(_isEnabled);
-        _pRightNode = new BinaryTreeNode(_isEnabled);
-        set_unknown();
-    }
-}
-
-inline Void BinaryTreeNode::add_enabled( const BinaryWord& path ){
-    add_enabled( this, path, 0 );
-}
-
-inline Void BinaryTreeNode::mince(const Nat depth) {
-    mince_node(this, depth);
-}
-
-inline Void BinaryTreeNode::recombine() {
-    recombine_node(this);
-}
-
-inline String BinaryTreeNode::node_to_string() const {
-    std::stringstream tmp_stream;
-    tmp_stream << "BinaryTreeNode( isLeaf = " << is_leaf() << ", isEnabled = " << is_enabled() << ", isDisabled = " << is_disabled() << " )";
-    return tmp_stream.str();
-}
-
-inline BinaryTreeNode& BinaryTreeNode::operator=( const BinaryTreeNode & otherNode ) {
-    //Copy the node value
-    _isEnabled = otherNode._isEnabled;
-
-    //Deallocate memory for the children, if any
-    if( _pLeftNode != NULL ){ delete _pLeftNode; _pLeftNode = NULL; }
-    if( _pRightNode != NULL ){ delete _pRightNode; _pRightNode = NULL; }
-
-    //Copy the children trees from the otherNode
-    if( otherNode._pLeftNode != NULL ) { _pLeftNode = new BinaryTreeNode( * ( otherNode._pLeftNode ) ); }
-    if( otherNode._pRightNode != NULL ) { _pRightNode = new BinaryTreeNode( * ( otherNode._pRightNode ) ); }
-
-    return *this;
-}
-
-/********************************************GridTreeCursor***************************************/
-
-inline GridTreeCursor::GridTreeCursor(  ) :
-    _currentStackIndex(-1), _pSubPaving(0), _theCurrentGridCell( Grid(), 0, BinaryWord() ) {
-}
-
-inline GridTreeCursor::GridTreeCursor(const GridTreeCursor & otherCursor) :
-    _currentStackIndex(otherCursor._currentStackIndex), _theStack(otherCursor._theStack),
-    _pSubPaving(otherCursor._pSubPaving), _theCurrentGridCell(otherCursor._theCurrentGridCell){
-}
-
-inline GridTreeCursor& GridTreeCursor::operator=(const GridTreeCursor & otherCursor) {
-    _currentStackIndex = otherCursor._currentStackIndex;
-    _theStack = otherCursor._theStack;
-    _pSubPaving = otherCursor._pSubPaving;
-    _theCurrentGridCell = otherCursor._theCurrentGridCell;
-
-    return *this;
-}
-
-inline GridTreeCursor::GridTreeCursor(const GridTreeSubset * pSubPaving) :
-    _currentStackIndex(-1), _pSubPaving(pSubPaving), _theCurrentGridCell( pSubPaving->cell() ) {
-    //Remember that GridTreeSubset contains GridCell
-
-    //Add the current node to the stack, since we are in it
-
-    //IVAN S ZAPREEV:
-    //NOTE: There is no need in allocating _theStack elements,
-    //it is all done in the push method
-    push(pSubPaving->_pRootTreeNode);
-}
-
-inline GridTreeCursor::~GridTreeCursor() {
-    //IVAN S ZAPREEV:
-    //WARNING: The subpaving should not be deallocated here!
-    //There are no other data feels that we need to deallocate
-    _pSubPaving = NULL;
-}
-
-inline Void GridTreeCursor::push( BinaryTreeNode* pLatestNode ){
-    //If we are out of free space, increase the Array's capacity
-    if( static_cast<Nat>(_currentStackIndex +1) == ( _theStack.size()  ) ){
-        _theStack.resize( _theStack.size() + STACK_SIZE_INCREMENT );
-    }
-
-    //The index for the tree node to be added
-    _currentStackIndex += 1;
-
-    //Put the tree node pointer into the stack
-    _theStack[_currentStackIndex] = pLatestNode;
-
-}
-
-inline BinaryTreeNode* GridTreeCursor::pop( ){
-    BinaryTreeNode* pLastNode = NULL;
-
-    //If there are non-root nodes in the stack
-    if( _currentStackIndex > 0 ){
-        //Return the stack element at _currentStackIndex,
-        //then decrement the current element's index.
-        return _theStack[ _currentStackIndex-- ];
-    }
-
-    return pLastNode;
-}
-
-inline Bool GridTreeCursor::is_at_the_root() const {
-    //If we are pointing at the zero cell of the Array then it
-    //means that we are in the root of the tree
-    return (_currentStackIndex == 0);
-}
-
-inline Bool GridTreeCursor::is_enabled() const {
-    return _theStack[ _currentStackIndex ]->is_enabled();
-}
-
-inline Bool GridTreeCursor::is_disabled() const {
-    return _theStack[ _currentStackIndex ]->is_disabled();
-}
-
-inline Bool GridTreeCursor::is_leaf() const {
-    return _theStack[ _currentStackIndex ]->is_leaf();
-}
-
-inline Bool GridTreeCursor::is_root() const {
-    return  is_at_the_root();
-}
-
-inline Void GridTreeCursor::set_enabled() const {
-    return _theStack[ _currentStackIndex ]->set_enabled();
-}
-
-inline Void GridTreeCursor::set_disabled() const {
-    return _theStack[ _currentStackIndex ]->set_disabled();
-}
-
-inline Bool GridTreeCursor::is_left_child() const{
-    //If there is a parent node and the given node is it's left child
-    return ( _currentStackIndex > 0 ) && ( _theStack[ _currentStackIndex - 1 ]->left_node() == _theStack[ _currentStackIndex ] );
-}
-
-inline Bool GridTreeCursor::is_right_child() const{
-    //If there is a parent node and the given node is it's right child
-    return ( _currentStackIndex > 0 ) && ( _theStack[ _currentStackIndex - 1 ]->right_node() == _theStack[ _currentStackIndex ] );
-}
-
-inline GridTreeCursor& GridTreeCursor::move_up() {
-    if( ! is_root() ){
-        //Remove the current node from the stack
-        pop();
-        //Recompute the PavingGridCell
-        updateTheCurrentGridCell( indeterminate );
-        //Return the object back
-        return ( * this);
-    } else {
-        throw NotAllowedMoveException(ARIADNE_PRETTY_FUNCTION);
-    }
-}
-
-inline GridTreeCursor& GridTreeCursor::move_left() {
-    return move(false);
-}
-
-inline GridTreeCursor& GridTreeCursor::move_right() {
-    return move(true);
-}
-
-inline Void GridTreeCursor::updateTheCurrentGridCell( ValidatedKleenean left_or_right ){
-    if( is_determinate(left_or_right) ){
-        //Here left_or_right is either true or false, also true defines moving to the right branch
-        _theCurrentGridCell._theWord.push_back( definitely( left_or_right ) );
-    } else {
-        //If left_or_right is indeterminate, this means that we go "up"
-        //in the tree, so we remove the last bit of the path.
-        _theCurrentGridCell._theWord.pop_back();
-    }
-    _theCurrentGridCell = GridCell( _theCurrentGridCell._theGrid, _theCurrentGridCell._theHeight, _theCurrentGridCell._theWord );
-}
-
-inline GridTreeCursor& GridTreeCursor::move(Bool left_or_right) {
-    BinaryTreeNode* pNextNode;
-    if( ! is_leaf() ){
-        //If we are not in the leaf node then we can go down
-        if( left_or_right ){ //true moves us to the right
-            pNextNode = _theStack[ _currentStackIndex ]->right_node();
-        } else { //false moves us to the left
-            pNextNode = _theStack[ _currentStackIndex ]->left_node();
-        }
-        //Put the node into the stack
-        push(pNextNode);
-        //Recompute the PavingGridCell
-        updateTheCurrentGridCell( left_or_right );
-        //Return the object back
-        return ( * this);
-    } else {
-        throw NotAllowedMoveException(ARIADNE_PRETTY_FUNCTION);
-    }
-}
+/****************************************GridTreeCursor**********************************************/
 
 inline const GridCell& GridTreeCursor::cell() const {
     return _theCurrentGridCell;
 }
 
-inline Bool GridTreeCursor::operator==(const GridTreeCursor& anotherGridTreeCursor) const {
-    Bool areEqual = false;
-    if( (this->_currentStackIndex >=0) && (anotherGridTreeCursor._currentStackIndex >=0 ) ){
-        areEqual = (this->_theStack[this->_currentStackIndex] == anotherGridTreeCursor._theStack[anotherGridTreeCursor._currentStackIndex]);
-    }
-    return areEqual;
-}
-
-inline GridTreeSubset GridTreeCursor::operator*() {
-    //IVAN S ZAPREEV:
-    //NOTE: The first three parameters define the location of the _theStack[ _currentStackIndex ]
-    //node with respect to the primary cell of the GridTreeSet.
-    return GridTreeSubset( _theCurrentGridCell._theGrid,
-                           _theCurrentGridCell._theHeight,
-                           _theCurrentGridCell._theWord,
-                           _theStack[ _currentStackIndex ] );
-}
-
-inline const GridTreeSubset GridTreeCursor::operator*() const {
-    return const_cast<GridTreeCursor&>(*this).operator*();
-}
-
 /****************************************GridTreeConstIterator************************************/
-
-inline GridTreeConstIterator::GridTreeConstIterator( const GridTreeConstIterator& theGridPavingIter ) :
-    _is_in_end_state(theGridPavingIter._is_in_end_state), _pGridTreeCursor(theGridPavingIter._pGridTreeCursor) {
-    //Copy everything
-}
-
-inline GridTreeConstIterator& GridTreeConstIterator::operator=( const GridTreeConstIterator& theGridPavingIter ){
-    _is_in_end_state = theGridPavingIter._is_in_end_state;
-    _pGridTreeCursor = theGridPavingIter._pGridTreeCursor;
-
-    return *this;
-}
-
-inline GridTreeConstIterator::GridTreeConstIterator( const GridTreeSubset * pSubPaving, const ValidatedKleenean firstLastNone ):
-    _pGridTreeCursor(pSubPaving) {
-    if( is_determinate( firstLastNone ) ){
-        //If the first/last enabled node is not found, it means that there are no elements
-        //to iterate on, then we switch to the "end Iterator" state
-        _is_in_end_state = ! navigate_to( definitely( firstLastNone ) );
-    } else {
-        //In this case if we do nothing, the cursor in the Iterator will point to the root node
-        //Since this can be the only node in the tre we should add a marker that indicates that
-        //the Iterator is at the end state.
-        _is_in_end_state = true;
-    }
-}
-
-inline Void GridTreeConstIterator::increment() {
-    //If we are not done iterating
-    if( ! _is_in_end_state){
-        //We are at some enabled-leaf node and we want to find the next one.
-        //The next node is somewhere on the right in the tree.
-        find_next_enabled_leaf();
-    }
-}
-
-inline GridTreeConstIterator::~GridTreeConstIterator() {
-    //IVAN S ZAPREEV:
-    //WARNING: There are no memory allocations in this class that have to be cleaned
-}
-
-inline Bool GridTreeConstIterator::equal( GridTreeConstIterator const & theOtherIterator) const {
-    //Check if both iterators are in the "end Iterator" state
-    Bool result = theOtherIterator._is_in_end_state && this->_is_in_end_state;
-
-    //If not then check if the cursors are equal (i.e. if they point to the same binary-tree node of the same (subpaving)
-    if( ! result ){
-        if( theOtherIterator._is_in_end_state || this->_is_in_end_state ){
-            //If at one is in the end state and the other is not then the answer is FALSE
-            result = false;
-        } else {
-            result = theOtherIterator._pGridTreeCursor == this->_pGridTreeCursor;
-        }
-    }
-
-    return result;
-}
 
 inline GridCell const& GridTreeConstIterator::dereference() const {
     return _pGridTreeCursor.cell();
@@ -1619,297 +975,14 @@ inline GridTreeCursor const& GridTreeConstIterator::cursor() const {
     return _pGridTreeCursor;
 }
 
-/********************************************GridTreeSubset******************************************/
-
-inline GridTreeSubset::GridTreeSubset( const Grid& theGrid, const Nat theHeight,
-                                       const BinaryWord& theWord, BinaryTreeNode * pRootTreeNode ) :
-                                       _pRootTreeNode(pRootTreeNode), _theGridCell(theGrid, theHeight, theWord) {
-}
-
-inline GridTreeSubset::GridTreeSubset( const GridTreeSubset &otherSubset ) : _pRootTreeNode(otherSubset._pRootTreeNode),
-                                                                             _theGridCell(otherSubset._theGridCell) {
-}
-
-inline GridTreeSubset::~GridTreeSubset() {
-    //IVAN S ZAPREEV:
-    //WARNING: This method should have no implementation what so ever
-    //All the synamically allocatged data should be destroyed from the
-    //corresponding Paving object
-}
-
-inline Nat GridTreeSubset::compute_number_subdiv( Float64 theWidth, const Float64 theMaxWidth) const{
-    //Compute the minimum number of subdivisions N as:
-    //   minimum N : ( theWidth / 2^{N} ) <= theMaxWidth
-    //This is equivalent to (because all values are positive)
-    //   minimum N : theWidth / theMaxWidth <= 2^{N}
-    //log is a continuous-increasing dunction, thus the latter is
-    //equivalent to (since 0 < theMaxWidth, theWidth < infinite )
-    //   minimum N : log( theWidth / theMaxWidth ) <= N
-    //In computations then we need to take
-    //   N = ceil( log( theWidth / theMaxWidth ) )
-
-    //IVAN S ZAPREEV:
-    //NOTE: We take log_approx, log_approx because if we use _up and _down versions to maximize the answer,
-    //then it might become very inaccurate, and in case require more subdivisions than needed.
-    //NOTE: We need base 2 logarithm, we get it by the rule: log_a(b)/log_a(c) = log_c(a)
-    //PIETER COLLINS:
-    //NOTE: Float64 now uses approximate operators by default
-    Nat result = 0;
-    if ( theWidth > theMaxWidth ){
-        //result = (Nat) ceil( div_approx( log_approx( div_approx( theWidth, theMaxWidth ) ) , log_approx( R(2.0) ) ) );
-        result = integer_cast<Nat>(ceil( div( log( div( theWidth, theMaxWidth ) ) , log( Float64(2.0) ) ) ) );
-    }
-    return result;
-}
-
-inline Bool GridTreeSubset::is_empty() const {
-    return BinaryTreeNode::count_enabled_leaf_nodes( this->binary_tree() ) == 0;
-}
-
-inline SizeType GridTreeSubset::size() const {
-    return BinaryTreeNode::count_enabled_leaf_nodes( this->binary_tree() );
-}
-
-inline DimensionType GridTreeSubset::dimension( ) const {
-    return grid().dimension();
-}
-
-
-inline const Grid& GridTreeSubset::grid() const {
-    return this->_theGridCell.grid();
-}
-
-inline GridCell GridTreeSubset::root_cell() const {
-    return _theGridCell;
-}
-
-inline Void GridTreeSubset::set_root_cell(Bool enabled_or_disabled)  {
-    this->_pRootTreeNode->set(enabled_or_disabled);
-}
-
-inline UpperBoxType GridTreeSubset::bounding_box() const {
-    if(this->is_empty()) return ExactBoxType(this->dimension());
-
-    GridTreeSet::ConstIterator iter=this->begin();
-    UpperBoxType bbox = iter->box();
-
-    for( ; iter!=this->end(); ++iter) {
-        UpperBoxType cell = iter->box();
-        for(Nat i = 0; i < cell.dimension(); ++i) {
-            if(cell[i].lower().raw() < bbox[i].lower().raw()) bbox[i].set_lower(cell[i].lower());
-            if(cell[i].upper().raw() > bbox[i].upper().raw()) bbox[i].set_upper(cell[i].upper());
-        }
-    }
-
-    return bbox;
-
-}
-
-inline Int GridTreeSubset::zero_cell_subdivisions_to_tree_subdivisions( const Nat numSubdivInDim, const Nat primaryCellHeight,
-                                                                        const Nat primaryToRootCellPathLength ) const {
-    //Here we take the height of the primary cell that the subpaving's root cell is rooted to
-    //This height times the number of dimensions is the number of subdivisions to make in
-    //the primary cell to reach the level of the zero cell. This plus the numSubdivInDim
-    //times the number of dimensions gives us the total number of the primary cell we have
-    //to make. But, the given paving is has the root node different from the primary cell,
-    //thus we have to subtract the length of the path from the primary cell to the root cell
-    //of this subpaving, to get the proper number of subdivisions to make in the binary tree
-    Int theNewDepth = ( primaryCellHeight + numSubdivInDim ) * _theGridCell.grid().dimension() - primaryToRootCellPathLength;
-    //If the new depth is not positive then we already have the required number
-    //of subdivisions so then nothing has to be done, so we return zero!
-    return (theNewDepth > 0) ? theNewDepth : 0;
-}
-
-inline Void GridTreeSubset::mince( Nat numSubdivInDim ) {
-    mince_to_tree_depth( zero_cell_subdivisions_to_tree_subdivisions( numSubdivInDim, _theGridCell.height(), _theGridCell.word().size() ) );
-}
-
-inline Void GridTreeSubset::mince_to_tree_depth( const Nat theNewDepth ) {
-    _pRootTreeNode->mince( theNewDepth );
-}
-
-inline Void GridTreeSubset::recombine() {
-    _pRootTreeNode->recombine();
-}
-
-inline Nat GridTreeSubset::depth() const {
-    return _pRootTreeNode->depth();
-}
-
-inline Bool GridTreeSubset::operator==(const GridTreeSubset& anotherGridTreeSubset) const {
-    return ( this->_theGridCell == anotherGridTreeSubset._theGridCell ) &&
-        ( ( * this->_pRootTreeNode ) == ( * anotherGridTreeSubset._pRootTreeNode ) );
-}
-
-inline GridTreeSubset::ConstIterator GridTreeSubset::begin() const {
-    return GridTreeSubset::ConstIterator(this, true);
-}
-
-inline GridTreeSubset::ConstIterator GridTreeSubset::end() const {
-    return GridTreeSubset::ConstIterator(this, indeterminate);
-}
-
-inline const BinaryTreeNode * GridTreeSubset::binary_tree() const {
-    return _pRootTreeNode;
-}
-
-inline GridTreeSubset& GridTreeSubset::operator=( const GridTreeSubset &otherSubset) {
-    _pRootTreeNode = otherSubset._pRootTreeNode;
-    _theGridCell = otherSubset._theGridCell;
-
-    return *this;
-}
-
-inline GridTreeSubset* GridTreeSubset::_branch(Bool left_or_right) const {
-    return new GridTreeSubset(this->branch(left_or_right));
-}
-
-inline ForwardConstantIteratorInterface<GridCell>* GridTreeSubset::_begin() const {
-    return new GridTreeConstIterator(this->begin());
-}
-
-inline ForwardConstantIteratorInterface<GridCell>* GridTreeSubset::_end() const {
-    return new GridTreeConstIterator(this->end());
-}
-
-inline Bool GridTreeSubset::equals(const SubPavingInterface& paving) const {
-    return (*this) == dynamic_cast<const GridTreeSubset&>(paving);
-}
-
-inline Bool GridTreeSubset::subset(const SubPavingInterface& paving) const {
-    return Ariadne::subset(*this, dynamic_cast<const GridTreeSubset&>(paving));
-}
-
-inline Bool GridTreeSubset::intersects(const SubPavingInterface& paving) const {
-    return Ariadne::intersect(*this, dynamic_cast<const GridTreeSubset&>(paving));
-}
-
-/*********************************************GridTreeSet*********************************************/
-
-inline GridCell GridTreeSet::smallest_enclosing_primary_cell( const UpperBoxType& theBoxType ) const {
-    ARIADNE_ASSERT_MSG( this->dimension() == theBoxType.dimension(), "Cannot find enclosing cell for ExactBoxType  " << theBoxType << " for GridTreeSet with grid " << this->grid() );
-
-    return GridCell::smallest_enclosing_primary_cell( theBoxType, this->grid() );
-}
-
-inline Void GridTreeSet::adjoin( const GridCell& theCell ) {
-    ARIADNE_ASSERT_MSG( this->grid() == theCell.grid(), "Cannot adjoin GridCell with grid "<<theCell.grid()<<" to GridTreeSet with grid "<<this->grid() );
-    Bool has_stopped = false;
-    //Align the paving and the cell
-    BinaryTreeNode* pBinaryTreeNode = align_with_cell( theCell.height(), true, false, has_stopped );
-
-    //If we are not trying to adjoin something into an enabled sub cell of the paving
-    if( ! has_stopped ){
-        //Add the enabled cell to the binary tree.
-        pBinaryTreeNode->add_enabled( theCell.word() );
-    }
-}
-
-inline Void GridTreeSet::adjoin( const GridTreeSubset& theOtherSubPaving ) {
-    ARIADNE_ASSERT_MSG( this->grid() == theOtherSubPaving.cell().grid(), "Cannot adjoin GridTreeSubset with grid "<<theOtherSubPaving.cell().grid()<<" to GridTreeSet with grid "<<this->grid() );
-
-    Bool has_stopped = false;
-    //Align the paving and the cell
-    BinaryTreeNode* pBinaryTreeNode = align_with_cell( theOtherSubPaving.cell().height(), true, false, has_stopped );
-
-    //If we are not trying to adjoin something into an enabled sub cell of the paving
-    if( ! has_stopped ){
-        //Now, the pBinaryTreeNode of this paving corresponds to the primary cell common with theOtherSubPaving.
-        //The theOtherSubPaving's root node is defined the path theOtherSubPaving.word() which starts in the
-        //node corresponding to the common primary cell.
-        pBinaryTreeNode->add_enabled( theOtherSubPaving.binary_tree(), theOtherSubPaving.cell().word() );
-    }
-}
-
-/**************************************FRIENDS OF BinaryTreeNode***************************************/
-
-/*! \brief Stream insertion operator, prints out two binary arrays, one is the tree structure
- *  and the other is the true/false (enabled/disabled) values for the leaf nodes
- */
-inline OutputStream& operator<<(OutputStream& output_stream, const BinaryTreeNode & binary_tree ) {
-    BinaryWord tree, leaves;
-    binary_tree.tree_to_binary_words( tree, leaves );
-    return output_stream << "BinaryTreeNode( Tree: " << tree << ", Leaves: " << leaves << ")";
-}
-
-/****************************************FRIENDS OF GridOpenCell*******************************************/
-
-inline OutputStream& operator<<(OutputStream& os, const GridOpenCell& theGridOpenCell ) {
-    //Write the grid data to the string stream
-    return os << "GridOpenCell( " << theGridOpenCell.grid() <<
-        ", Primary cell height: " << theGridOpenCell.height() <<
-        ", Base cell path: " << theGridOpenCell.word() <<
-        ", ExactBoxType (closure): " << theGridOpenCell.box() << " )";
-}
-
-/****************************************FRIENDS OF GridCell*******************************************/
-
-/*! \brief Stream insertion operator for the GridCell. */
-inline OutputStream& operator<<(OutputStream& os, const GridCell& gridPavingCell){
-    //Write the grid data to the string stream
-    return os << "GridCell( " << gridPavingCell.grid() <<
-        ", Primary cell height: " << gridPavingCell.height() <<
-        ", Path to the root: " << gridPavingCell.word() <<
-        ", ExactBoxType: " << gridPavingCell.box() << " )";
-}
-
-
-/*************************************FRIENDS OF GridTreeCursor*****************************************/
-
-inline OutputStream& operator<<(OutputStream& os, const GridTreeCursor& theGridTreeCursor){
-    const Int curr_stack_idx = theGridTreeCursor._currentStackIndex;
-    os << "GridTreeCursor( " << theGridTreeCursor._pSubPaving <<
-        ", Curr. stack index: " << curr_stack_idx  <<
-        ", Stack data: [ ";
-    for(Int i = 0; i <= curr_stack_idx; i++){
-        os << theGridTreeCursor._theStack[i]->node_to_string() << ( ( i < curr_stack_idx ) ? "" : ", ");
-    }
-    return os<<" ], " << theGridTreeCursor._theCurrentGridCell << " )";
-}
-
-/*************************************FRIENDS OF GridTreeSubset*****************************************/
-
-inline OutputStream& operator<<(OutputStream& os, const GridTreeSubset& theGridTreeSubset) {
-    return os << "GridTreeSubset( Primary cell: " << theGridTreeSubset.cell() << ", " << (*theGridTreeSubset.binary_tree()) <<" )";
-}
-
 /***************************************FRIENDS OF GridTreeSet******************************************/
-
-inline OutputStream& operator<<(OutputStream& os, const GridTreeSet& theGridTreeSet) {
-    const GridTreeSubset& theGridTreeSubset = theGridTreeSet;
-    return os << "GridTreeSet( " << theGridTreeSubset << " )";
-}
-
-inline GridTreeSet outer_approximation( const CompactSetInterface& theSet, const Nat numSubdivInDim ) {
-    Grid theGrid( theSet.dimension() );
-    return outer_approximation( theSet, theGrid, numSubdivInDim );
-}
-
-inline GridTreeSet outer_approximation( const CompactSetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim ) {
-    GridTreeSet result( theGrid );
-    result.adjoin_outer_approximation( theSet, numSubdivInDim );
-    return result;
-}
-
-inline GridTreeSet inner_approximation( const OpenSetInterface& theSet, const Grid& theGrid, const Nat height, const Nat numSubdivInDim ) {
-    GridTreeSet result( theGrid );
-    result.adjoin_inner_approximation( theSet, height, numSubdivInDim );
-    return result;
-}
-
-inline GridTreeSet inner_approximation( const OpenSetInterface& theSet, const Grid& theGrid, const ExactBoxType& bounding_box, const Nat numSubdivInDim ) {
-    GridTreeSet result( theGrid );
-    result.adjoin_inner_approximation( theSet, bounding_box, numSubdivInDim );
-    return result;
-}
-
 
 template<class BS>
 GridTreeSet outer_approximation(const ListSet<BS>& theSet, const Grid& theGrid, const Nat numSubdivInDim) {
     ARIADNE_ASSERT_MSG( theSet.dimension()==theGrid.dimension(),"theSet="<<theSet<<", theGrid="<<theGrid );
     GridTreeSet result( theGrid );
-    for(typename ListSet<BS>::ConstIterator iter=theSet.begin(); iter!=theSet.end(); ++iter) {
-        result.adjoin_outer_approximation( *iter, numSubdivInDim );
+    for(auto basicSet : theSet) {
+        result.adjoin_outer_approximation( basicSet, numSubdivInDim );
     }
     result.recombine();
     return result;

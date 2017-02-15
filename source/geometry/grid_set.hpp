@@ -1897,6 +1897,12 @@ inline GridTreeSet inner_approximation( const OpenSetInterface& theSet, const Gr
     return result;
 }
 
+inline GridTreeSet inner_approximation( const OpenSetInterface& theSet, const Grid& theGrid, const ExactBoxType& bounding_box, const Nat numSubdivInDim ) {
+    GridTreeSet result( theGrid );
+    result.adjoin_inner_approximation( theSet, bounding_box, numSubdivInDim );
+    return result;
+}
+
 
 template<class BS>
 GridTreeSet outer_approximation(const ListSet<BS>& theSet, const Grid& theGrid, const Nat numSubdivInDim) {

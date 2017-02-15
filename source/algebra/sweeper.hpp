@@ -220,12 +220,12 @@ template<class F> class GradedSweeper : public SweeperBase<GradedSweeper<F>,F> {
   public:
     GradedSweeper(PR precision, DegreeType degree) : _coefficient_precision(precision), _degree(degree) { }
     DegreeType degree() const { return this->_degree; }
-    inline Bool discard(const MultiIndex& a, const Float64& x) const { return a.degree()>this->_degree; }
-    inline Bool discard(const MultiIndex& a, const FloatMP& x) const { return a.degree()>this->_degree; }
+    inline PR precision() const { return _coefficient_precision; }
+    inline Bool discard(const MultiIndex& a, const F& x) const { return a.degree()>this->_degree; }
   private:
     virtual Void _write(OutputStream& os) const { os << "GradedSweeper( degree="<<this->_degree<<" )"; }
   private:
-    Nat _degree;
+    DegreeType _degree;
 };
 
 template<> inline Sweeper<Float64>::Sweeper() : _ptr(new ThresholdSweeper<Float64>(Precision64(),std::numeric_limits<float>::epsilon())) { }

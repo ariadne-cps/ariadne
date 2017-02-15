@@ -787,7 +787,7 @@ template<class P, class F> Vector<TaylorModel<P,F>> split(const Vector<TaylorMod
     return std::move(r);
 }
 
-template<class P, class F> typename TaylorModel<P,F>::RangeType ranges(const Vector<TaylorModel<P,F>>& f) {
+template<class P, class F> Vector<typename TaylorModel<P,F>::RangeType> ranges(const Vector<TaylorModel<P,F>>& f) {
     Vector<typename TaylorModel<P,F>::RangeType> r(f.size()); for(SizeType i=0; i!=f.size(); ++i) { r[i]=f[i].range(); } return std::move(r);
 }
 

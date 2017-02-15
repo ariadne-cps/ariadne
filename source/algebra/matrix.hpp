@@ -165,6 +165,8 @@ template<class X> class Matrix
     static Matrix<X> zero(SizeType m, SizeType n);
     //! \brief The itentity matrix with \a n rows and \a n columns.
     static Matrix<X> identity(SizeType n);
+    //! Construct the identity matrix from parameters of \a X.
+    template<class... PRS, EnableIf<IsConstructible<X,PRS...>> =dummy> static Matrix<X> identity(SizeType n, PRS... prs);
     //@}
 
     template<class M, EnableIf<And<IsMatrixExpression<M>,IsConvertible<typename M::ScalarType,X>>> =dummy>
@@ -678,7 +680,7 @@ struct ProvideMatrixOperations {
     template<class X1, class X2> friend Matrix<ArithmeticType<X1,X2>> operator*(Matrix<X1> const& A1, Matrix<X2> const& A2) {
         typedef ArithmeticType<X1,X2> X0;
         ARIADNE_PRECONDITION(A1.column_size()==A2.row_size());
-        Matrix<X0> A0(A1.row_size(), A2.column_size());
+        Matrix<X0> A0(A1.row_size(), A2.column_size(),A1.zero_element()*A2.zero_element());
         for(SizeType i=0; i!=A0.row_size(); ++i) {
             for(SizeType j=0; j!=A0.column_size(); ++j) {
                 for(SizeType k=0; k!=A1.column_size(); ++k) {
@@ -692,7 +694,7 @@ struct ProvideMatrixOperations {
     template<class X1, class X2> friend Vector<ArithmeticType<X1,X2>> operator*(Matrix<X1> const& A1, Vector<X2> const& v2) {
         typedef ArithmeticType<X1,X2> X0;
         ARIADNE_PRECONDITION(A1.column_size()==v2.size());
-        Vector<X0> v0(A1.row_size());
+        Vector<X0> v0(A1.row_size(),A1.zero_element()*v2.zero_element());
         for(SizeType i=0; i!=v0.size(); ++i) {
             for(SizeType j=0; j!=v2.size(); ++j) {
                 v0.at(i)+=A1.at(i,j)*v2.at(j);
@@ -704,7 +706,7 @@ struct ProvideMatrixOperations {
     template<class X1, class X2> friend Covector<ArithmeticType<X1,X2>> operator*(Covector<X1> const& u1, Matrix<X2> const& A2) {
         typedef ArithmeticType<X1,X2> X0;
         ARIADNE_PRECONDITION(u1.size()==A2.row_size());
-        Covector<X0> u0(A2.column_size());
+        Covector<X0> u0(A2.column_size(),u1.zero_element()*A2.zero_element());
         for(SizeType j=0; j!=u0.size(); ++j) {
             for(SizeType i=0; i!=u1.size(); ++i) {
                 u0.at(j)+=u1.at(i)*A2.at(i,j);
@@ -716,7 +718,7 @@ struct ProvideMatrixOperations {
     template<class X1, class X2> friend Matrix<ArithmeticType<X1,X2>> operator*(Matrix<X1> const& A1, Transpose<Matrix<X2>> const& A2) {
         typedef ArithmeticType<X1,X2> X0;
         ARIADNE_PRECONDITION(A1.column_size()==A2.row_size());
-        Matrix<X0> A0(A1.row_size(), A2.column_size());
+        Matrix<X0> A0(A1.row_size(), A2.column_size(),A1.zero_element()*A2.zero_element());
         for(SizeType i=0; i!=A0.row_size(); ++i) {
             for(SizeType j=0; j!=A0.column_size(); ++j) {
                 for(SizeType k=0; k!=A1.column_size(); ++k) {
@@ -799,6 +801,15 @@ Matrix<X>::Matrix(InitializerList<InitializerList<double>> lst, PRS... prs) : _r
             this->at(i,j)=X(ExactDouble(*col_iter),prs...);
         }
     }
+}
+
+template<class X> template<class... PRS, EnableIf<IsConstructible<X,PRS...>>> auto
+Matrix<X>::identity(SizeType n, PRS... prs) -> Matrix<X> {
+    Matrix<X> I(n,n,X(prs...));
+    for(SizeType i=0; i!=n; ++i) {
+        I.at(i,i)=1u;
+    }
+    return I;
 }
 
 template<class X> template<class Y, EnableIf<IsAssignable<X,Y>>>

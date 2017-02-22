@@ -600,6 +600,14 @@ Void HybridGridTreeSet::restrict_to_height(Nat h) {
     }
 }
 
+Void HybridGridTreeSet::adjoin_inner_approximation(const HybridSetInterface& hset, const Int depth) {
+    Set<DiscreteLocation> locations=hset.locations();
+    for(auto location : locations) {
+        RealSpace space = this->space(location);
+        this->_provide_location(location).adjoin_inner_approximation(hset.euclidean_set(location,space),depth);
+    }
+}
+
 Void HybridGridTreeSet::adjoin_inner_approximation(const HybridExactBoxes& hbxs, const Int depth) {
     for(HybridExactBoxes::ConstIterator _loc_iter=hbxs.begin();
             _loc_iter!=hbxs.end(); ++_loc_iter) {
@@ -724,6 +732,19 @@ HybridUpperBoxes HybridGridTreeSet::bounding_box() const {
         }
     }
     return result;
+}
+
+Bool subset(const HybridGridTreeSet& hgts1, const HybridGridTreeSet& hgts2) {
+    for( typename HybridGridTreeSet::LocationsConstIterator _loc_iter = hgts1.locations_begin(); _loc_iter != hgts1.locations_end(); ++_loc_iter ) {
+        if( !_loc_iter->second.is_empty() ) {
+            DiscreteLocation const& loc = _loc_iter->first;
+            RealSpace spc=hgts1.space(loc);
+            if(not subset(hgts1.euclidean_set(loc),hgts2.euclidean_set(loc,spc))) {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 OutputStream& HybridGridTreeSet::write(OutputStream& os) const {

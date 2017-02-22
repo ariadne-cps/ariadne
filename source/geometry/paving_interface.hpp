@@ -240,6 +240,7 @@ class PavingInterface
     virtual Void adjoin_outer_approximation(const CompactSetInterface& set, const Nat depth) = 0;
     virtual Void adjoin_outer_approximation(const UpperBoxType& set, const Nat depth) = 0;
     virtual Void adjoin_inner_approximation(const OpenSetInterface& set, const Nat height, const Nat depth) = 0;
+    virtual Void adjoin_inner_approximation(const SetInterface& set, const Nat depth) = 0;
     virtual Void adjoin(const SubPavingInterface& paving) = 0;
     virtual Void restrict(const SubPavingInterface& paving) = 0;
     virtual Void remove(const SubPavingInterface& paving) = 0;
@@ -282,6 +283,7 @@ class PavingHandle
     Void adjoin_cells(const PredicateInterface<ExactBoxType>& predicate, const Nat depth) { return this->_ptr->adjoin_cells(predicate,depth); }
     Void adjoin_outer_approximation(const CompactSetInterface& set, const Nat depth) { return this->_ptr->adjoin_outer_approximation(set,depth); }
     Void adjoin_inner_approximation(const OpenSetInterface& set, const Nat height, const Nat depth) { return this->_ptr->adjoin_inner_approximation(set,height,depth); }
+    Void adjoin_inner_approximation(const SetInterface& set, const Nat depth) { return this->_ptr->adjoin_inner_approximation(set,depth); }
     Void adjoin(const SubPavingInterface& paving) { return this->_ptr->adjoin(paving); }
     Void restrict(const SubPavingInterface& paving) { return this->_ptr->restrict(paving); }
     Void remove(const SubPavingInterface& paving) { return this->_ptr->remove(paving); }

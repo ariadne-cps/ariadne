@@ -126,6 +126,7 @@ class HybridRegularSetInterface
     : public virtual HybridOpenSetInterface,
       public virtual HybridClosedSetInterface
 {
+  public:
     virtual HybridRegularSetInterface* clone() const = 0;
     inline RegularSet euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
   protected:
@@ -137,6 +138,7 @@ class HybridLocatedSetInterface
     : public virtual HybridOvertSetInterface,
       public virtual HybridCompactSetInterface
 {
+  public:
     virtual HybridLocatedSetInterface* clone() const = 0;
     inline LocatedSet euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
   protected:
@@ -148,6 +150,7 @@ class HybridSetInterface
     : public virtual HybridRegularSetInterface,
       public virtual HybridLocatedSetInterface
 {
+  public:
     virtual HybridSetInterface* clone() const = 0;
     inline RegularLocatedSet euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
   protected:

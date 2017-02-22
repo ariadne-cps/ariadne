@@ -3099,6 +3099,12 @@ Void GridTreeSet::adjoin_inner_approximation( const OpenSetInterface& theSet, co
     adjoin_inner_approximation( theSet, height, numSubdivInDim );
 }
 
+Void GridTreeSet::adjoin_inner_approximation( const SetInterface& theSet, const Nat numSubdivInDim ) {
+    OpenSetInterface const& theOpenSet = theSet;
+    ExactBoxType theBoundingBox = cast_exact_box(theSet.bounding_box());
+    this -> adjoin_inner_approximation(theOpenSet, theBoundingBox, numSubdivInDim);
+}
+
 Void GridTreeSet::adjoin_inner_approximation( const LowerBoxType& theBoxType, const Nat numSubdivInDim ) {
     ExactBoxSet theBoxSet=cast_exact_box(theBoxType);
     this->adjoin_inner_approximation(theBoxSet,theBoxSet,numSubdivInDim);
@@ -3371,6 +3377,12 @@ GridTreeSet outer_approximation( const CompactSetInterface& theSet, const Nat nu
 GridTreeSet inner_approximation( const OpenSetInterface& theSet, const Grid& theGrid, const Nat height, const Nat numSubdivInDim ) {
     GridTreeSet result( theGrid );
     result.adjoin_inner_approximation( theSet, height, numSubdivInDim );
+    return result;
+}
+
+GridTreeSet inner_approximation( const SetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim ) {
+    GridTreeSet result( theGrid );
+    result.adjoin_inner_approximation( theSet, numSubdivInDim );
     return result;
 }
 

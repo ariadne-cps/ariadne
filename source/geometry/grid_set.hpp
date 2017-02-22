@@ -667,6 +667,13 @@ class GridTreeSet
     //! the given set.
     Void adjoin_inner_approximation( const OpenSetInterface& theSet, const ExactBoxType& bounding_box, const Nat numSubdivInDim );
 
+    //! \brief Adjoin an inner approximation to the given set, computing to the given depth:
+    //! \a numSubdivInDim -- defines, how many subdivisions in each
+    //! dimension from the level of the zero cell we should make to get the proper cells for outer
+    //! approximating \a theSet. An inner approximation comprises all cells that are sub-cells of
+    //! the given set.
+    Void adjoin_inner_approximation( const SetInterface& theSet, const Nat numSubdivInDim );
+
     Void adjoin_inner_approximation( const LowerBoxType& theBoxType, const Nat numSubdivInDim );
     //@}
 
@@ -684,6 +691,7 @@ GridTreeSet outer_approximation( const CompactSetInterface& theSet, const Grid& 
 GridTreeSet outer_approximation( const CompactSetInterface& theSet, const Nat numSubdivInDim );
 GridTreeSet inner_approximation( const OpenSetInterface& theSet, const Grid& theGrid, const Nat height, const Nat numSubdivInDim );
 GridTreeSet inner_approximation( const OpenSetInterface& theSet, const Grid& theGrid, const ExactBoxType& bounding_box, const Nat numSubdivInDim );
+GridTreeSet inner_approximation( const SetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim );
 
 template<class BS> GridTreeSet outer_approximation(const ListSet<BS>& theSet, const Grid& theGrid, const Nat numSubdivInDim);
 

@@ -276,7 +276,7 @@ Void export_formula()
     class_<RealSpace> real_space_class("RealSpace", init<RealSpace>());
     real_space_class.def("dimension", &RealSpace::dimension);
     real_space_class.def("variable", &RealSpace::variable);
-    real_space_class.def("index", (SizeType(RealSpace::*)(const String&)const) &RealSpace::index);
+    real_space_class.def("index", (SizeType(RealSpace::*)(const Identifier&)const) &RealSpace::index);
     real_space_class.def("index", (SizeType(RealSpace::*)(const RealVariable&)const) &RealSpace::index);
     real_space_class.def(self_ns::str(self));
 

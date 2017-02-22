@@ -310,8 +310,6 @@ Void export_covector(class_<Covector<X> >& covector_class)
 template<class X>
 Void export_matrix_class(class_<Matrix<X> >& matrix_class)
 {
-    typedef Nat SizeType;
-
     matrix_class.def(init<Int,Int>());
     matrix_class.def("rows", &Matrix<X>::row_size);
     matrix_class.def("columns", &Matrix<X>::column_size);

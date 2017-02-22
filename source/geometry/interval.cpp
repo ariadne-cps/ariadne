@@ -93,11 +93,14 @@ Float64UpperInterval pow(Float64UpperInterval const& ivl, Int n) {
     return make_interval(pow(cast_singleton(ivl),n)); }
 
 Float64UpperInterval sqrt(Float64UpperInterval const& ivl) {
-    return make_interval(sqrt(cast_singleton(ivl))); }
+    if(ivl.upper().raw()<0) { return Float64UpperInterval::empty_interval(); }
+    else { Float64UpperBound u=sqrt(ivl.upper()); return Float64UpperInterval(-u,+u); } }
 Float64UpperInterval exp(Float64UpperInterval const& ivl) {
     return make_interval(exp(cast_singleton(ivl))); }
 Float64UpperInterval log(Float64UpperInterval const& ivl) {
-    return make_interval(log(cast_singleton(ivl))); }
+    if(ivl.upper().raw()<=0) { return Float64UpperInterval::empty_interval(); }
+    else if(ivl.lower().raw()<=0) { return Float64UpperInterval(-inf,log_up(ivl.upper().raw())); }
+    else { return make_interval(log(cast_singleton(ivl))); } }
 Float64UpperInterval sin(Float64UpperInterval const& ivl) {
     return make_interval(sin(cast_singleton(ivl))); }
 Float64UpperInterval cos(Float64UpperInterval const& ivl) {

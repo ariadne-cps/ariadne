@@ -214,6 +214,7 @@ template<class X, class Y> Void _backpropagate(Vector<X>& x, List<X>& v, const L
             case OperatorCode::SQRT: restrict(v[a],sqr(v[r])); break;
             case OperatorCode::EXP:  restrict(v[a],log(v[r])); break;
             case OperatorCode::LOG:  restrict(v[a],exp(v[r])); break;
+            // FIXME: restricting asin/acos of interval should not be dependent on any branch of asin/acos
             case OperatorCode::SIN:  restrict(v[a],asin(v[r])); break;
             case OperatorCode::COS:  restrict(v[a],acos(v[r])); break;
             case OperatorCode::TAN:  restrict(v[a],atan(v[r])); break;

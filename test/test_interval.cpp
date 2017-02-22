@@ -50,6 +50,7 @@ class TestIntervalType
     Void test_class();
     Void test_comparison();
     Void test_geometric_predicates();
+    Void test_arithmetic();
     Void regression_tests();
 };
 
@@ -63,6 +64,7 @@ TestIntervalType::test()
     ARIADNE_TEST_CALL(test_class());
     ARIADNE_TEST_CALL(test_comparison());
     ARIADNE_TEST_CALL(test_geometric_predicates());
+    ARIADNE_TEST_CALL(test_arithmetic());
     ARIADNE_TEST_CALL(regression_tests());
 }
 
@@ -238,6 +240,17 @@ Void TestIntervalType::test_geometric_predicates()
     ARIADNE_TEST_BINARY_PREDICATE(subset,empty_interval,ExactIntervalType(0.25,0.75));
     ARIADNE_TEST_BINARY_PREDICATE(covers,ExactIntervalType(0.25,0.75),empty_interval);
     ARIADNE_TEST_BINARY_PREDICATE(inside,empty_interval,ExactIntervalType(0.25,0.75));
+}
+
+Void TestIntervalType::test_arithmetic() {
+    UpperIntervalType e=EmptyInterval();
+    ARIADNE_TEST_SAME(sqrt(UpperIntervalType(-4,-1)),e);
+    ARIADNE_TEST_SAME(sqrt(UpperIntervalType(-4,0)),UpperIntervalType(0,0));
+    ARIADNE_TEST_BINARY_PREDICATE(refines,UpperIntervalType(-3,3),sqrt(UpperIntervalType(-4,9)));
+    ARIADNE_TEST_SAME(log(UpperIntervalType(-4,-1)),e);
+    ARIADNE_TEST_SAME(log(UpperIntervalType(-4,0)),e);
+    ARIADNE_TEST_SAME(log(UpperIntervalType(-4,1)),UpperIntervalType(-inf,0));
+    ARIADNE_TEST_SAME(log(UpperIntervalType( 0,1)),UpperIntervalType(-inf,0));
 }
 
 Void TestIntervalType::regression_tests() {

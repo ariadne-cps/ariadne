@@ -563,6 +563,10 @@ outer_chain_reach(
     _checked_restriction(initial_cells,bounding);
     ARIADNE_LOG(5,"initial_size="<<initial_cells.size()<<"\n");
 
+    Nat stage=0;
+    if(verbosity==1) {
+        std::clog <<"\n\ri="<<std::setw(3)<<std::left<<stage<<" #s="<<std::setw(4)<<std::left<<initial_cells.size()<<std::endl;
+    }
 
     PavingType reach_cells(grid);
     PavingType evolve_cells(grid);
@@ -585,6 +589,11 @@ outer_chain_reach(
 
 
     while(!starting_cells.is_empty()) {
+        ++stage;
+        if(verbosity==1) {
+            std::clog <<"\n\ri="<<std::setw(3)<<stage<<" #s="<<std::setw(4)<<std::left<<starting_cells.size()<<std::flush;
+        }
+
         current_evolve_cells = evolve_cells;
         this->_adjoin_upper_reach_evolve(reach_cells,evolve_cells,starting_cells,
                                          lock_to_grid_time,maximum_grid_depth,*_evolver);
@@ -600,6 +609,76 @@ outer_chain_reach(
     }
     _checked_restriction(reach_cells,bounding);
     return reach_cells;
+}
+
+
+auto ReachabilityAnalyser::
+verify_safety(
+    const CompactSetInterfaceType& initial_set,
+    const OpenSetInterfaceType& safe_set) const
+        -> SafetyCertificateType
+{
+    const BoundedSetInterfaceType* bounded_safe_set_ptr=dynamic_cast<BoundedSetInterfaceType const*>(&safe_set);
+    assert(bounded_safe_set_ptr != nullptr);
+
+    ExactBoxType safe_set_bounding_box=cast_exact_box(bounded_safe_set_ptr->bounding_box());
+    const GridType& grid=this->_configuration->grid();
+    PavingType safe_cells=inner_approximation(safe_set, grid, safe_set_bounding_box, this->_configuration->maximum_grid_depth());
+
+    ARIADNE_LOG(2,"ReachabilityAnalyser::outer_chain_reach(...)\n");
+    TimeType transient_time = this->_configuration->transient_time();
+    TimeType lock_to_grid_time=this->_configuration->lock_to_grid_time();
+    Int maximum_grid_depth = this->_configuration->maximum_grid_depth();
+    Int maximum_grid_height = this->_configuration->maximum_grid_height();
+    ARIADNE_LOG(3,"transient_time=("<<transient_time<<")\n");
+    ARIADNE_LOG(3,"lock_to_grid_time=("<<lock_to_grid_time<<")\n");
+    ARIADNE_LOG(5,"initial_set="<<initial_set<<"\n");
+
+    PavingType initial_cells(grid);
+    initial_cells.adjoin_outer_approximation(initial_set,maximum_grid_depth);
+    ARIADNE_LOG(5,"initial_size="<<initial_cells.size()<<"\n");
+
+    if(not subset(initial_cells,safe_cells)) {
+        return SafetyCertificateType { indeterminate,initial_cells,safe_cells };
+    }
+
+    Nat stage=0;
+    if(verbosity==1) {
+        std::clog <<"\n\ri="<<std::setw(3)<<std::left<<stage<<" #s="<<std::setw(4)<<std::left<<initial_cells.size()<<std::endl;
+    }
+
+    PavingType reach_cells(grid);
+    PavingType evolve_cells(grid);
+    if(definitely(transient_time > 0)) {
+        ARIADNE_LOG(3,"Computing transient evolution...\n");
+        this->_adjoin_upper_reach_evolve(reach_cells,evolve_cells,initial_cells,transient_time,maximum_grid_depth,*_evolver);
+        evolve_cells.mince(maximum_grid_depth);
+        ARIADNE_LOG(5,"transient_reach_size="<<reach_cells.size()<<"\n");
+        ARIADNE_LOG(5,"transient evolve_size="<<evolve_cells.size()<<"\n");
+        ARIADNE_LOG(3,"  found "<<reach_cells.size()<<" cells.\n");
+    }
+
+    ARIADNE_LOG(3,"Computing recurrent evolution...\n");
+    PavingType starting_cells = evolve_cells;
+    PavingType current_evolve_cells(grid);
+
+    while(!starting_cells.is_empty()) {
+        if(verbosity==1) { std::clog <<"\n\ri="<<std::setw(3)<<++stage<<" #s="<<std::setw(4)<<std::left<<starting_cells.size()<<std::flush; }
+        if(not subset(reach_cells,safe_cells)) { return SafetyCertificateType { indeterminate,initial_cells,safe_cells }; }
+
+        current_evolve_cells = evolve_cells;
+        this->_adjoin_upper_reach_evolve(reach_cells,evolve_cells,starting_cells,
+                                         lock_to_grid_time,maximum_grid_depth,*_evolver);
+        evolve_cells.mince(maximum_grid_depth);
+        ARIADNE_LOG(5,"reach.size()="<<reach_cells.size()<<"\n");
+        ARIADNE_LOG(5,"evolve.size()="<<evolve_cells.size()<<"\n");
+        starting_cells = evolve_cells;
+        starting_cells.remove(current_evolve_cells);
+        starting_cells.mince(maximum_grid_depth);
+        ARIADNE_LOG(3,"  evolved to "<<evolve_cells.size()<<" cells, of which "<<starting_cells.size()<<" are new.\n");
+    }
+
+    return SafetyCertificateType { true,reach_cells,safe_cells };
 }
 
 

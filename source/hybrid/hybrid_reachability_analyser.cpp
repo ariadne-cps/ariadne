@@ -61,6 +61,7 @@
 #include "output/graphics.hpp"
 #include "solvers/linear_programming.hpp"
 
+#include "hybrid/hybrid_graphics.hpp"
 
 namespace Ariadne {
 
@@ -211,33 +212,33 @@ HybridReachabilityAnalyser::_adjoin_upper_reach_evolve(HybridGridTreeSet& reach_
                                                        const Int accuracy,
                                                        const HybridEvolverInterface& evolver) const
 {
-    ARIADNE_LOG(4,"HybridReachabilityAnalyser::_adjoin_upper_reach_evolve(...)\n");
+    ARIADNE_LOG(6,"HybridReachabilityAnalyser::_adjoin_upper_reach_evolve(...)\n");
     HybridGrid grid=set.grid();
     HybridGridTreeSet cells=set;
     cells.mince(accuracy);
 
-    ARIADNE_LOG(3,"Evolving "<<cells.size()<<" cells\n");
+    ARIADNE_LOG(6,"Evolving "<<cells.size()<<" cells\n");
     for(HybridGridCell const& cell : cells) {
-        ARIADNE_LOG(5,"Evolving cell = "<<cell<<"\n");
+        ARIADNE_LOG(7,"Evolving cell = "<<cell<<"\n");
         HybridEnclosure initial_enclosure = evolver.enclosure(cell.box());
         ListSet<HybridEnclosure> reach_enclosures;
         ListSet<HybridEnclosure> final_enclosures;
         make_lpair(reach_enclosures,final_enclosures) = evolver.reach_evolve(initial_enclosure,termination,UPPER_SEMANTICS);
-        ARIADNE_LOG(5,"  computed "<<reach_enclosures.size()<<" reach enclosures and "<<final_enclosures.size()<<" final enclosures.\n");
-        ARIADNE_LOG(5,"  adjoining reach enclosures to grid... ");
+        ARIADNE_LOG(7,"  computed "<<reach_enclosures.size()<<" reach enclosures and "<<final_enclosures.size()<<" final enclosures.\n");
+        ARIADNE_LOG(7,"  adjoining reach enclosures to grid... ");
         for(HybridEnclosure const& enclosure : reach_enclosures) {
             enclosure.adjoin_outer_approximation_to(reach_cells,accuracy);
         }
-        ARIADNE_LOG(5,"done\n");
-        ARIADNE_LOG(5,"  adjoining final enclosures to grid... ");
+        ARIADNE_LOG(7,"done\n");
+        ARIADNE_LOG(7,"  adjoining final enclosures to grid... ");
         for(HybridEnclosure const& enclosure : final_enclosures) {
             enclosure.adjoin_outer_approximation_to(evolve_cells,accuracy);
         }
-        ARIADNE_LOG(5,"done.\n");
+        ARIADNE_LOG(7,"done.\n");
     }
-    ARIADNE_LOG(3,"  final reach size = "<<reach_cells.size()<<"\n");
-    ARIADNE_LOG(3,"  final evolve size = "<<evolve_cells.size()<<"\n");
-    ARIADNE_LOG(2,"Done.\n");
+    ARIADNE_LOG(6,"  final reach size = "<<reach_cells.size()<<"\n");
+    ARIADNE_LOG(6,"  final evolve size = "<<evolve_cells.size()<<"\n");
+    ARIADNE_LOG(6,"Done.\n");
 }
 
 
@@ -637,6 +638,87 @@ outer_chain_reach(
     return reach_cells;
 }
 
+String itoa(Nat m) { std::stringstream ss; if(m<10) { ss<<"0"; } ss<<m; return ss.str(); }
+
+auto HybridReachabilityAnalyser::
+verify_safety(
+    const CompactSetInterfaceType& initial_set,
+    const OpenSetInterfaceType& safe_set) const
+        -> SafetyCertificateType
+{
+    ARIADNE_LOG(2,"HybridReachabilityAnalyser::verify_safety(...)\n");
+    Set<DiscreteEvent> lock_to_grid_events=this->_configuration->lock_to_grid_events();
+    ExactNumericType transient_time = this->_configuration->transient_time();
+    DiscreteTimeType transient_steps = this->_configuration->transient_steps();
+    HybridTerminationCriterion transient_termination(EffectiveNumericType(transient_time), transient_steps, lock_to_grid_events);
+    ExactNumericType lock_to_grid_time=this->_configuration->lock_to_grid_time();
+    DiscreteTimeType lock_to_grid_steps=this->_configuration->lock_to_grid_steps();
+    HybridTerminationCriterion recurrent_termination(EffectiveNumericType(lock_to_grid_time),lock_to_grid_steps,lock_to_grid_events);
+    Int maximum_grid_depth = this->_configuration->maximum_grid_depth();
+    Int maximum_grid_height = this->_configuration->maximum_grid_height();
+    ARIADNE_LOG(3,"transient_time=("<<transient_time<<","<<transient_steps<<")\n");
+    ARIADNE_LOG(3,"lock_to_grid_time=("<<lock_to_grid_time<<","<<lock_to_grid_steps<<")\n");
+    ARIADNE_LOG(5,"initial_set="<<initial_set<<"\n");
+
+    const HybridSetInterface* bounded_safe_set_ptr=dynamic_cast<HybridSetInterface const*>(&safe_set);
+    assert(bounded_safe_set_ptr != nullptr);
+
+    HybridExactBoxes safe_set_bounding_boxes=(bounded_safe_set_ptr->bounding_box());
+    const GridType& grid=this->_configuration->grid();
+    PavingType safe_cells=inner_approximation(*bounded_safe_set_ptr, grid, this->_configuration->maximum_grid_depth());
+
+    HybridGridTreeSet initial_cells(grid);
+    initial_cells.adjoin_outer_approximation(initial_set,maximum_grid_depth);
+
+    if(not subset(initial_cells,safe_cells)) {
+        return SafetyCertificateType { indeterminate,initial_cells,safe_cells };
+    }
+
+    HybridGridTreeSet reach_cells(grid);
+    HybridGridTreeSet evolve_cells(grid);
+    if(transient_time > 0.0_exact || transient_steps > 0) {
+        ARIADNE_LOG(3,"Computing transient evolution...\n");
+        this->_adjoin_upper_reach_evolve(reach_cells,evolve_cells,initial_cells,transient_termination,maximum_grid_depth,*_evolver);
+        evolve_cells.recombine();
+        evolve_cells.mince(maximum_grid_depth);
+        ARIADNE_LOG(4,"reach_size="<<reach_cells.size()<<"\n");
+        ARIADNE_LOG(4,"transient evolve_size="<<evolve_cells.size()<<"\n");
+        ARIADNE_LOG(3,"  found "<<reach_cells.size()<<" cells.\n");
+    } else {
+        evolve_cells=initial_cells;
+        reach_cells=initial_cells;
+    }
+
+
+
+    ARIADNE_LOG(3,"Computing recurrent evolution...\n");
+    HybridGridTreeSet starting_cells = evolve_cells;
+    HybridGridTreeSet current_evolve_cells(grid);
+    HybridGridTreeSet new_evolve_cells(grid);
+    Nat step=0;
+    while(!starting_cells.is_empty()) {
+        if(not subset(reach_cells,safe_cells)) {
+            return SafetyCertificateType { indeterminate,reach_cells,safe_cells };
+        }
+
+        current_evolve_cells=evolve_cells;
+        this->_adjoin_upper_reach_evolve(reach_cells,evolve_cells,starting_cells,
+                                         recurrent_termination,maximum_grid_depth,*_evolver);
+        ARIADNE_LOG(4,"reach.size()="<<reach_cells.size()<<"\n");
+        ARIADNE_LOG(4,"evolve.size()="<<evolve_cells.size()<<"\n");
+//        evolve_cells.recombine();
+        evolve_cells.mince(maximum_grid_depth);
+        new_evolve_cells = evolve_cells;
+        new_evolve_cells.remove(current_evolve_cells);
+//        new_evolve_cells.recombine();
+        new_evolve_cells.mince(maximum_grid_depth);
+        starting_cells = new_evolve_cells;
+        ARIADNE_LOG(3,"  evolved to total of "<<evolve_cells.size()<<" cells, of which "<<starting_cells.size()<<" are new.\n");
+        // ARIADNE_LOG(4,"bounded_new_size="<<found_cells.size()<<"\n");
+    }
+
+    return SafetyCertificateType { true,reach_cells,safe_cells };
+}
 
 Void HybridReachabilityAnalyser::_checked_restriction(HybridGridTreeSet& set, const HybridGridTreeSet& bounding) const
 {

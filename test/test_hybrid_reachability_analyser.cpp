@@ -51,6 +51,7 @@ Colour evolve_set_colour(0.75,0.75,1.00);
 Colour initial_set_colour(0.75,0.75,1.00);
 Colour guard_set_colour(0.75,0.75,0.75);
 Colour bounding_box_colour(0.75,0.75,0.875);
+Colour safe_set_colour(0.50,1.00,0.50);
 
 
 namespace Ariadne {
@@ -85,6 +86,7 @@ class TestHybridReachabilityAnalyser
     Grid grid;
     ExactIntervalType bound;
     HybridSet initial_set;
+    HybridSet safe_set;
     HybridTime reach_time;
     Axes2d axes;
   public:
@@ -97,11 +99,10 @@ class TestHybridReachabilityAnalyser
         std::cerr<<std::setprecision(20);
         std::clog<<std::setprecision(20);
         DiscreteLocation location(1);
-
         RealVariable x("x");
         RealVariable y("y");
-        Real a(-0.5); Real b(1.0);
-        sys.new_mode(location,{dot(x)=-a*x-b*y,dot(y)=b*x+a*y} );
+        Real a(-0.25); Real b(1.0);
+        sys.new_mode(location,{dot(x)=-a*x-b*y,dot(y)=b*x+2*a*y} );
         cout << "Done building system\n";
         return sys;
     }
@@ -124,7 +125,7 @@ class TestHybridReachabilityAnalyser
           grid(2),
           bound(-4,4),
           reach_time(3.0,4),
-          axes({-1<=RealVariable("x")<=3,-2<=RealVariable("y")<=2})
+          axes({-3<=RealVariable("x")<=3,-3<=RealVariable("y")<=3})
     {
         analyser.verbosity=analyser_verbosity;
         DiscreteLocation location(1);
@@ -135,10 +136,12 @@ class TestHybridReachabilityAnalyser
         //ImageSet initial_box(make_box("[1.99,2.01]x[-0.01,0.01]"));
         Decimal x0l(2.01), x0u(2.02), y0l(0.01), y0u(0.02);
         initial_set=HybridSet(location,{x.in(x0l,(Real)x0u),y.in(y0l,(Real)y0u)});
-        cout << "Done creating initial set\n" << endl;
+        safe_set=HybridSet(location,{x.in(-2,(Real)3),y.in(-2,(Real)3)},{sqr(x)+sqr(y)<=sqr((Real)3)});
+        cout << "Done creating initial and safe sets\n" << endl;
 
         cout << "system=" << system << endl;
         cout << "initial_set=" << initial_set << endl;
+        cout << "safe_set=" << safe_set << endl;
 
         //ARIADNE_ASSERT(inside(initial_set[loc],bounding_set[loc]));
 
@@ -241,7 +244,10 @@ class TestHybridReachabilityAnalyser
         HybridExactBoxes bounding_boxes
             =Ariadne::bounding_boxes(system.state_space(),bound);
 
-        analyser.configuration().set_transient_time(4.0);
+        analyser.configuration().set_transient_steps(1);
+        analyser.configuration().set_transient_time(12.0);
+        analyser.configuration().set_lock_to_grid_time(6.0);
+        analyser.configuration().set_maximum_grid_depth(3);
         analyser.configuration().set_bounding_domain_ptr(shared_ptr<HybridExactBoxes>(new HybridExactBoxes(bounding_boxes)));
         cout << analyser.configuration();
 
@@ -256,7 +262,22 @@ class TestHybridReachabilityAnalyser
 
         analyser.configuration().set_maximum_grid_height(1);
         ARIADNE_TEST_THROWS(analyser.outer_chain_reach(initial_set),OuterChainOverspill);
+    }
 
+    Void test_verify_safety() {
+        cout << "Verifying safety" << endl;
+        DiscreteLocation loc(1);
+
+        cout << analyser.configuration();
+
+        auto safety_certificate=analyser.verify_safety(initial_set,safe_set);
+
+        ARIADNE_TEST_ASSERT(definitely(safety_certificate.is_safe));
+
+        plot("test_reachability_analyser-verify_safety.png",axes,
+             safe_set_colour,safe_set,
+             reach_set_colour,safety_certificate.chain_reach_set,
+             initial_set_colour,initial_set);
 
     }
 
@@ -270,7 +291,8 @@ class TestHybridReachabilityAnalyser
         ARIADNE_TEST_CALL(test_upper_reach_evolve());
         ARIADNE_TEST_CALL(test_infinite_time_lower_reach());
 
-        ARIADNE_TEST_SKIP(test_outer_chain_reach());
+        ARIADNE_TEST_CALL(test_outer_chain_reach());
+        ARIADNE_TEST_CALL(test_verify_safety());
     }
 
 };

@@ -59,6 +59,12 @@ template<class ES> class HybridListSet;
 class HybridEvolverInterface;
 class HybridReachabilityAnalyserConfiguration;
 
+struct HybridSafetyCertificate {
+    ValidatedSierpinskian is_safe;
+    HybridGridTreeSet chain_reach_set;
+    HybridGridTreeSet safe_set;
+};
+
 //! \ingroup AnalysisModule
 //! \brief A class for performing reachability analysis on a hybrid system.
 class HybridReachabilityAnalyser
@@ -69,11 +75,16 @@ class HybridReachabilityAnalyser
     typedef HybridAutomatonInterface SystemType;
     typedef SystemType::StateSpaceType StateSpaceType;
     typedef SystemType::TimeType TimeType;
+    typedef HybridOpenSetInterface OpenSetInterfaceType;
+    typedef HybridBoundedSetInterface BoundedSetInterfaceType;
     typedef HybridOvertSetInterface OvertSetInterfaceType;
     typedef HybridCompactSetInterface CompactSetInterfaceType;
     typedef HybridLocatedSetInterface LocatedSetInterfaceType;
     typedef HybridRegularSetInterface RegularSetInterfaceType;
+    typedef HybridGrid GridType;
+    typedef HybridGridTreeSet PavingType;
     typedef HybridGridTreeSet SetApproximationType;
+    typedef HybridSafetyCertificate SafetyCertificateType;
   private:
     std::shared_ptr< SystemType > _system;
     std::shared_ptr< HybridEvolverInterface > _evolver;
@@ -147,6 +158,8 @@ class HybridReachabilityAnalyser
     virtual SetApproximationType
     outer_chain_reach(const CompactSetInterfaceType& initial_set) const;
 
+    //! \brief Test if the system is safe.
+    SafetyCertificateType verify_safety(const CompactSetInterfaceType& initial_set, const OpenSetInterfaceType& safe_set) const;
     //@}
 
   public:

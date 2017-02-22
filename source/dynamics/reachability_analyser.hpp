@@ -59,6 +59,12 @@ class ReachabilityAnalyserConfiguration;
 
 enum class ChainOverspillPolicy : char;
 
+struct SafetyCertificate {
+    ValidatedSierpinskian is_safe;
+    GridTreeSet chain_reach_set;
+    GridTreeSet safe_set;
+};
+
 //! \ingroup AnalysisModule
 //! \brief A class for performing reachability analysis on a hybrid system.
 class ReachabilityAnalyser
@@ -71,11 +77,14 @@ class ReachabilityAnalyser
     typedef SystemType::TimeType TimeType;
     typedef VectorFieldEvolver EvolverType;
     typedef Enclosure EnclosureType;
+    typedef Grid GridType;
     typedef GridTreeSet PavingType;
     typedef OvertSetInterface OvertSetInterfaceType;
+    typedef OpenSetInterface OpenSetInterfaceType;
     typedef CompactSetInterface CompactSetInterfaceType;
     typedef LocatedSetInterface LocatedSetInterfaceType;
     typedef RegularSetInterface RegularSetInterfaceType;
+    typedef SafetyCertificate SafetyCertificateType;
   private:
     std::shared_ptr< VectorField > _system;
     std::shared_ptr< VectorFieldEvolver > _evolver;
@@ -148,6 +157,10 @@ class ReachabilityAnalyser
     //! \brief Compute a (possibly-restricted) approximation to the outer chain-reachable set of the system starting in \a initial_set.
     virtual PavingType
     outer_chain_reach(const CompactSetInterfaceType& initial_set) const;
+
+    //! \brief Test if the system is safe.
+    virtual SafetyCertificate
+    verify_safety(const CompactSetInterfaceType& initial_set, const OpenSetInterfaceType& safe_set) const;
 
     //@}
 

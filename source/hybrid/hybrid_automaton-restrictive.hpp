@@ -307,7 +307,7 @@ class HybridSystem
     virtual DimensionType dimension(DiscreteLocation location) const;
     //! \brief The output function on Euclidean state space. Used for outputting auxiliary variables.
     virtual EffectiveVectorFunction output_function(DiscreteLocation location) const;
-    //! \brief The function defining the differential equation \f$\dot{x}=f(x)\f$ valid in the \a location.
+    //! \brief The function defining the differential equation \f$\der{x}=f(x)\f$ valid in the \a location.
     virtual EffectiveVectorFunction dynamic_function(DiscreteLocation location) const;
     //! \brief The function defining the reset \f$x'=r(x)\f$ when the \a event occurs in the \a source location.
     virtual EffectiveVectorFunction reset_function(DiscreteLocation source, DiscreteEvent event) const;

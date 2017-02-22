@@ -61,7 +61,7 @@ class CIFAtomicInterchangeAutomaton
     //!
     //!    \param location is the mode's location label.
     //!    \param algebraic_equations are the algebraic equations \f$y=f(x_1,\ldots,x_k)\f$ valid in the mode.
-    //!    \param differential_equations are the differential equations \f$\dot{y}=f(x_1,\ldots,x_k)\f$ valid in the mode.
+    //!    \param differential_equations are the differential equations \f$\der{y}=f(x_1,\ldots,x_k)\f$ valid in the mode.
     //!    \param progress_predicates are the time-can-progress (tcp) predicates e.g. \f$g(x_1,\ldots,x_n)\leq c\f$ valid in the mode.
     //!
     //! Currently no invariant predicates are supported.

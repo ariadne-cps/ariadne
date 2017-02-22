@@ -114,14 +114,14 @@ class IntegratorBase
          const ExactBoxType& state_domain,
          const Real& time) const;
 
-    //! \brief Solve \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$ for \f$t\in[0,T_{\max}]\f$.
+    //! \brief Solve \f$\der{\phi}(x,t)=f(\phi(x,t))\f$ for \f$t\in[0,T_{\max}]\f$.
     virtual List<ValidatedVectorFunctionModel64>
     flow(const ValidatedVectorFunction& vector_field,
          const ExactBoxType& state_domain,
          const Real& minimum_time,
          const Real& maximum_time) const;
 
-    //! \brief Solve \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$ for \f$t\in[0,T_{\max}]\f$.
+    //! \brief Solve \f$\der{\phi}(x,t)=f(\phi(x,t))\f$ for \f$t\in[0,T_{\max}]\f$.
     virtual List<ValidatedVectorFunctionModel64>
     flow(const ValidatedVectorFunction& vector_field,
          const ExactBoxType& state_domain,

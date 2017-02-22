@@ -60,6 +60,7 @@ template<class T> class Space
     //! \brief The trivial space \f$\R^0\f$.
     Space() : _variables() { }
     Space(const List<VariableType>& vl) { for(Nat i=0; i!=vl.size(); ++i) { this->append(vl[i]); } }
+    Space(const List<Identifier>& vl) { for(Nat i=0; i!=vl.size(); ++i) { this->append(VariableType(vl[i])); } }
     Space(const InitializerList<VariableType>& vl) { for(Nat i=0; i!=vl.size(); ++i) { this->append(vl.begin()[i]); } }
 
     Bool operator==(const Space<T>& other) const { return this->_variables==other._variables; }
@@ -104,7 +105,7 @@ template<class T> class Space
             if(v.name()==_variables[i]) { return i; } }
         ARIADNE_ASSERT_MSG(false,"Variable "<<v<<" is not in the Space "<<*this);
         return _variables.size(); }
-    SizeType index(const String& n) const {
+    SizeType index(const Identifier& n) const {
         for(Nat i=0; i!=_variables.size(); ++i) {
             if(n==_variables[i]) { return i; } }
         ARIADNE_ASSERT_MSG(false,"Variable named "<<n<<" is not in the Space "<<*this);
@@ -138,10 +139,13 @@ template<class T> inline Space<T> join(const Space<T>& spc1, const Variable<T>& 
 
 // Compiled conversion operators to allow conversion between expression and function.
 SizeType dimension(const Space<Real>& spc);
-Space<Real> space(const List< Variable<Real> >& vars);
+List<Identifier> variable_names(const Space<Real>& spc);
+List<Identifier> variable_names(const List<Variable<Real>>& spc);
+Space<Real> space(const List<Variable<Real>>& vars);
+Space<Real> real_space(const List<Identifier>& vars);
 
-template<class T> Variable<T> variable(const String& s) { return Variable<T>(s); }
-template<class T> Space<T> variables(const List<String>& s) { return Space<T>(s); }
+template<class T> Variable<T> variable(const Identifier& s) { return Variable<T>(s); }
+template<class T> Space<T> variables(const List<Identifier>& s) { return Space<T>(s); }
 
 
 

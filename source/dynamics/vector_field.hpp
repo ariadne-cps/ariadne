@@ -53,12 +53,13 @@ class VectorField
     virtual ~VectorField() { }
     virtual VectorField* clone() const { return new VectorField(*this); }
     SizeType dimension() const { return _function.result_size(); }
+    RealSpace state_space() const;
     const EffectiveVectorFunction& function() const { return _function; }
     Grid grid() const { return Grid(_function.argument_size()); }
     friend OutputStream& operator<<(OutputStream& os, const VectorField& vf) {
         return os << "VectorField( " << vf.function() << " )"; }
   private:
-    List<std::string> _variable_names;
+    List<Identifier> _variable_names;
     EffectiveVectorFunction _function;
 };
 

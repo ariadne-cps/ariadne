@@ -37,6 +37,9 @@
 
 namespace Ariadne {
 
+class Enclosure;
+class VectorFieldEvolver;
+
 //! \brief A vector field in Euclidean space.
 class VectorField
 {
@@ -47,6 +50,9 @@ class VectorField
     typedef Real RealType ;
     //! \brief The type used to describe the state space.
     typedef EuclideanSpace StateSpaceType;
+    //! \brief The generic type used to compute the system evolution.
+    typedef VectorFieldEvolver EvolverType;
+    typedef Enclosure EnclosureType;
   public:
     VectorField(List<DottedRealAssignment> const& dynamics);
     VectorField(EffectiveVectorFunction const& function) : _function(function) { }

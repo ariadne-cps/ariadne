@@ -54,12 +54,14 @@ class PavingType;
 
 template<class ES> class ListSet;
 
-class VectorFieldEvolverType;
-class ReachabilityAnalyserConfiguration;
+template<class SYS> class ReachabilityAnalyserConfiguration;
+template<class SYS> class ReachabilityAnalyser;
 
 enum class ChainOverspillPolicy : char;
 
-struct SafetyCertificate {
+using ContinuousReachabilityAnalyser = ReachabilityAnalyser<VectorField>;
+
+template<> struct SafetyCertificate<EuclideanSpace> {
     ValidatedSierpinskian is_safe;
     GridTreeSet chain_reach_set;
     GridTreeSet safe_set;
@@ -67,28 +69,35 @@ struct SafetyCertificate {
 
 //! \ingroup AnalysisModule
 //! \brief A class for performing reachability analysis on a hybrid system.
-class ReachabilityAnalyser
-    : public ReachabilityAnalyserInterface<VectorField>
+template<class SYS> class ReachabilityAnalyser
+    : public ReachabilityAnalyserInterface<SYS>
     , public Loggable
 {
+    typedef ReachabilityAnalyserInterface<SYS> Interface;
   public:
-    typedef ReachabilityAnalyserConfiguration ConfigurationType;
-    typedef VectorField SystemType;
-    typedef SystemType::TimeType TimeType;
-    typedef VectorFieldEvolver EvolverType;
-    typedef Enclosure EnclosureType;
-    typedef Grid GridType;
-    typedef GridTreeSet PavingType;
-    typedef OvertSetInterface OvertSetInterfaceType;
-    typedef OpenSetInterface OpenSetInterfaceType;
-    typedef CompactSetInterface CompactSetInterfaceType;
-    typedef LocatedSetInterface LocatedSetInterfaceType;
-    typedef RegularSetInterface RegularSetInterfaceType;
-    typedef SafetyCertificate SafetyCertificateType;
+    typedef ReachabilityAnalyserConfiguration<SYS> ConfigurationType;
+    using typename Interface::SystemType;
+    using typename Interface::TimeType;
+    using typename Interface::EvolverType;
+    using typename Interface::BoundingDomainType;
+    using typename Interface::BoundedSetInterfaceType;
+    using typename Interface::OvertSetInterfaceType;
+    using typename Interface::OpenSetInterfaceType;
+    using typename Interface::CompactSetInterfaceType;
+    using typename Interface::LocatedSetInterfaceType;
+    using typename Interface::RegularSetInterfaceType;
+    using typename Interface::SetInterfaceType;
+    using typename Interface::SetApproximationType;
+    using typename Interface::SafetyCertificateType;
+
+    typedef typename SystemType::EnclosureType EnclosureType;
+    using GridType = typename SetApproximationType::GridType;
+    using PavingType = SetApproximationType;
   private:
-    std::shared_ptr< VectorField > _system;
-    std::shared_ptr< VectorFieldEvolver > _evolver;
-    std::shared_ptr< ConfigurationType > _configuration;
+  protected:
+    SharedPointer<SystemType> _system;
+    SharedPointer<EvolverType> _evolver;
+    SharedPointer<ConfigurationType> _configuration;
   public:
     //@{
     //! \name Constructors and destructors
@@ -99,7 +108,7 @@ class ReachabilityAnalyser
     //! \brief Construct from an evolver.
     ReachabilityAnalyser(
             const SystemType& system,
-            const VectorFieldEvolver& evolver);
+            const EvolverType& evolver);
 
     //! \brief Make a dynamically-allocated copy.
     virtual ReachabilityAnalyser* clone() const;
@@ -113,7 +122,7 @@ class ReachabilityAnalyser
     const ConfigurationType& configuration() const { return *this->_configuration; }
 
     //! \brief Get the system associated with the analyser.
-    virtual const SystemType& system() const { return *this->_system; }
+    virtual const SystemType& system() const override { return *this->_system; }
     //@}
 
 
@@ -121,50 +130,50 @@ class ReachabilityAnalyser
     //@{
     //! \name Evaluation of systems on abstract sets
     //! \brief Compute a lower-approximation to the set obtained by evolving the system starting in \a initial_set until \a time.
-    virtual PavingType
+    virtual SetApproximationType
     lower_evolve(const OvertSetInterfaceType& initial_set,
-                 const TimeType& time) const;
+                 const TimeType& steps) const override;
 
     //! \brief Compute a lower-approximation to the reachable and evolved sets of the system starting in \a initial_set up to \a time.
-    virtual Pair<PavingType,PavingType>
+    virtual Pair<SetApproximationType,SetApproximationType>
     lower_reach_evolve(const OvertSetInterfaceType& initial_set,
-                       const TimeType& time) const;
+                       const TimeType& time) const override;
 
     //! \brief Compute a lower-approximation to the reachable set of the system starting in \a initial_set up to \a time.
-    virtual PavingType
+    virtual SetApproximationType
     lower_reach(const OvertSetInterfaceType& initial_set,
-                const TimeType& time) const;
+                const TimeType& time) const override;
 
     //! \brief Compute an infinite-time lower-approximation to the reachable set of the system starting in \a initial_set.
-    virtual PavingType
-    lower_reach(const OvertSetInterfaceType& initial_set) const;
+    virtual SetApproximationType
+    lower_reach(const OvertSetInterfaceType& initial_set) const override;
 
     //! \brief Compute an upper-approximation to the set obtained by evolving the system starting in \a initial_set up to \a time.
-    virtual PavingType
+    virtual SetApproximationType
     upper_evolve(const CompactSetInterfaceType& initial_set,
-                 const TimeType& time) const;
+                 const TimeType& time) const override;
 
     //! \brief Compute upper-approximations to the reachable and evolved sets of the system starting in \a initial_set up to \a time.
-    virtual Pair<PavingType,PavingType>
+    virtual Pair<SetApproximationType,SetApproximationType>
     upper_reach_evolve(const CompactSetInterfaceType& initial_set,
-                       const TimeType& time) const;
+                       const TimeType& time) const override;
 
     //! \brief Compute an upper-approximation to the reachable set of the system starting in \a initial_set up to \a time.
-    virtual PavingType
+    virtual SetApproximationType
     upper_reach(const CompactSetInterfaceType& initial_set,
-                const TimeType& time) const;
+                const TimeType& time) const override;
 
     //! \brief Compute a (possibly-restricted) approximation to the outer chain-reachable set of the system starting in \a initial_set.
-    virtual PavingType
-    outer_chain_reach(const CompactSetInterfaceType& initial_set) const;
+    virtual SetApproximationType
+    outer_chain_reach(const CompactSetInterfaceType& initial_set) const override;
 
     //! \brief Test if the system is safe.
-    virtual SafetyCertificate
-    verify_safety(const CompactSetInterfaceType& initial_set, const OpenSetInterfaceType& safe_set) const;
+    virtual SafetyCertificateType
+    verify_safety(const CompactSetInterfaceType& initial_set, const OpenSetInterfaceType& safe_set) const override;
 
     //@}
 
-  private:
+  protected:
     // Helper functions for operators on lists of sets.
     Pair<PavingType,PavingType> _reach_evolve_resume(const ListSet<EnclosureType>& initial_enclosures,
             const TimeType& time, const Int accuracy, ListSet<EnclosureType>& evolve_enclosures,
@@ -180,26 +189,30 @@ class ReachabilityAnalyser
     Void _checked_restriction(PavingType& set, const PavingType& bounding) const;
 };
 
-
 //! \brief Configuration for a ReachabilityAnalyser, essentially for controlling the
 //!    accuracy of discretised evolution methods and reachability analysis.
-class ReachabilityAnalyserConfiguration : public ConfigurationInterface {
-
+template<class SYS> class ReachabilityAnalyserConfiguration : public ConfigurationInterface {
   public:
     //! \brief The integer type.
     typedef Int IntType;
     //! \brief The unsigned integer type.
     typedef Nat UnsignedIntType;
+
+    typedef ReachabilityAnalyser<SYS> ReachabilityAnalyserType;
+
     //! \brief The type representing time.
-    typedef typename VectorField::TimeType TimeType;
+    typedef typename ReachabilityAnalyserType::TimeType TimeType;
+
+    typedef typename ReachabilityAnalyserType::GridType GridType;
+    typedef typename ReachabilityAnalyserType::BoundingDomainType BoundingDomainType;
 
     //! \brief Default constructor gives reasonable values.
-    ReachabilityAnalyserConfiguration(ReachabilityAnalyser& analyser);
+    ReachabilityAnalyserConfiguration(ReachabilityAnalyser<SYS>& analyser);
 
   private:
 
     //! \brief Reference back to the main class, for consistency checking.
-    ReachabilityAnalyser& _analyser;
+    ReachabilityAnalyser<SYS>& _analyser;
 
     //! \brief The time after which infinite-time evolution routines
     //! may approximate computed sets on a grid.
@@ -248,11 +261,11 @@ class ReachabilityAnalyserConfiguration : public ConfigurationInterface {
     //! If defined, this property combines with _maximum_grid_height to define the actual bounding domain.
     //!  <br>
     //! This property is only used in the chain_reach() routines.
-    std::shared_ptr<ExactBoxType> _bounding_domain_ptr;
+    SharedPointer<BoundingDomainType> _bounding_domain_ptr;
 
     //! \brief The grid used for approximation.
     //! \details Provided as a pointer in order to avoid double construction. It must always be defined.
-    std::shared_ptr<Grid> _grid_ptr;
+    SharedPointer<GridType> _grid_ptr;
 
     //! \brief The policy for overspill in outer chain reach computation.
     //! \details A OVERSPILL_IGNORE simply bypasses checks, OVERSPILL_WARNING issues a warning and OVERSPILL_ERROR
@@ -273,11 +286,14 @@ class ReachabilityAnalyserConfiguration : public ConfigurationInterface {
     const IntType& maximum_grid_height() const { return _maximum_grid_height; }
     Void set_maximum_grid_height(const IntType value) { _maximum_grid_height = value; }
 
-    const std::shared_ptr<ExactBoxType>& bounding_domain_ptr() const { return _bounding_domain_ptr; }
-    Void set_bounding_domain_ptr(const std::shared_ptr<ExactBoxSet> value);
+    const SharedPointer<BoundingDomainType>& bounding_domain_ptr() const { return _bounding_domain_ptr; }
+    Void set_bounding_domain_ptr(SharedPointer<BoundingDomainType> bounding_domain_ptr) { _bounding_domain_ptr = bounding_domain_ptr; }
 
-    const Grid& grid() const { return *_grid_ptr; }
-    Void set_grid(const std::shared_ptr<Grid> grid_ptr);
+    const BoundingDomainType& bounding_domain() const { return *_bounding_domain_ptr; }
+    Void set_bounding_domain(const BoundingDomainType& bounding_domain);
+
+    const GridType& grid() const { return *_grid_ptr; }
+    Void set_grid(const GridType& grid);
 
     const ChainOverspillPolicy& outer_overspill_policy() const { return _outer_overspill_policy; }
     Void set_outer_overspill_policy(const ChainOverspillPolicy value) { _outer_overspill_policy = value; }

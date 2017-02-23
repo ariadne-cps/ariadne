@@ -49,6 +49,9 @@ typedef Space<Real> RealSpace;
 enum EventKind { INVARIANT, PROGRESS, PERMISSIVE, URGENT, IMPACT };
 inline OutputStream& operator<<(OutputStream&, const EventKind& evk);
 
+class HybridEvolverInterface;
+class HybridEnclosure;
+
 static const EventKind invariant = INVARIANT;
 static const EventKind progress = PROGRESS;
 static const EventKind permissive = PERMISSIVE;
@@ -150,6 +153,9 @@ class HybridAutomatonInterface {
     typedef HybridTime TimeType;
     //! \brief The type used to describe the state space.
     typedef HybridSpace StateSpaceType;
+    //! \brief The type used to describe the state space.
+    typedef HybridEvolverInterface EvolverType;
+    typedef HybridEnclosure EnclosureType;
 
   public:
     //! \brief Virtual destructor.

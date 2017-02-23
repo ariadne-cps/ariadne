@@ -205,6 +205,8 @@ inline OutputStream& operator<<(OutputStream& os, const SetInterfaceBase& s) {
 class EuclideanSpace
 {
   public:
+    //! \brief The canonical type used for bounding sets in the space.
+    typedef ExactBoxType BoundingDomainType;
     //! \brief The interface satisified by singleton sets in the space.
     typedef BoundedSetInterface BoundedSetInterfaceType;
     //! \brief The interface satisified by overt sets in the space.
@@ -219,6 +221,8 @@ class EuclideanSpace
     typedef RegularSetInterface RegularSetInterfaceType;
     //! \brief The interface satisified by located sets in the space.
     typedef LocatedSetInterface LocatedSetInterfaceType;
+    //! \brief The interface satisified by bounded regular sets.
+    typedef SetInterface SetInterfaceType;
     //! \brief The type of approximations to sets in the space.
     typedef GridTreeSet SetApproximationType;
   public:

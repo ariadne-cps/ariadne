@@ -30,6 +30,7 @@
 
 
 #include "solvers/configuration_interface.hpp"
+#include "dynamics/reachability_analyser.hpp"
 #include "hybrid/hybrid_set.decl.hpp"
 #include "hybrid/hybrid_set_interface.hpp"
 #include "hybrid/hybrid_evolver_interface.hpp"
@@ -57,44 +58,30 @@ class HybridGridTreeSet;
 template<class ES> class HybridListSet;
 
 class HybridEvolverInterface;
-class HybridReachabilityAnalyserConfiguration;
 
-struct HybridSafetyCertificate {
+class HybridAutomaton;
+
+template<> struct SafetyCertificate<HybridSpace> {
     ValidatedSierpinskian is_safe;
     HybridGridTreeSet chain_reach_set;
     HybridGridTreeSet safe_set;
 };
 
+using HybridSafetyCertificate = SafetyCertificate<HybridSpace>;
+using HybridReachabilityAnalyserConfiguration = ReachabilityAnalyserConfiguration<HybridAutomatonInterface>;
+
+template<> class ReachabilityAnalyserConfiguration<HybridAutomatonInterface>;
+
 //! \ingroup AnalysisModule
 //! \brief A class for performing reachability analysis on a hybrid system.
 class HybridReachabilityAnalyser
-    : public HybridReachabilityAnalyserInterface
+    : public ReachabilityAnalyser<HybridAutomatonInterface>
 {
   public:
     typedef HybridReachabilityAnalyserConfiguration ConfigurationType;
-    typedef HybridAutomatonInterface SystemType;
-    typedef SystemType::StateSpaceType StateSpaceType;
-    typedef SystemType::TimeType TimeType;
-    typedef HybridOpenSetInterface OpenSetInterfaceType;
-    typedef HybridBoundedSetInterface BoundedSetInterfaceType;
-    typedef HybridOvertSetInterface OvertSetInterfaceType;
-    typedef HybridCompactSetInterface CompactSetInterfaceType;
-    typedef HybridLocatedSetInterface LocatedSetInterfaceType;
-    typedef HybridRegularSetInterface RegularSetInterfaceType;
-    typedef HybridGrid GridType;
-    typedef HybridGridTreeSet PavingType;
-    typedef HybridGridTreeSet SetApproximationType;
-    typedef HybridSafetyCertificate SafetyCertificateType;
-  private:
-    std::shared_ptr< SystemType > _system;
-    std::shared_ptr< HybridEvolverInterface > _evolver;
-    std::shared_ptr< ConfigurationType > _configuration;
   public:
     //@{
     //! \name Constructors and destructors
-
-    //! \brief Virtual destructor
-    virtual ~HybridReachabilityAnalyser();
 
     //! \brief Construct from an evolver.
     HybridReachabilityAnalyser(
@@ -105,94 +92,20 @@ class HybridReachabilityAnalyser
     virtual HybridReachabilityAnalyser* clone() const;
     //@}
 
-    //@{
-    //! \name Methods to set and get the configuration properties of the class.
+  protected:
+    Void _adjoin_upper_reach_evolve(HybridGridTreeSet& reach_cells,
+                                    HybridGridTreeSet& evolve_cells,
+                                    const HybridGridTreeSet& set,
+                                    const HybridTerminationCriterion& termination,
+                                    const Int accuracy,
+                                    const HybridEvolverInterface& evolver) const;
 
-    //! \brief A reference to the analyser's configuration parameters.
-    ConfigurationType& configuration() { return *this->_configuration; }
-    const ConfigurationType& configuration() const { return *this->_configuration; }
-
-    //! \brief Get the system associated with the analyser.
-    virtual const SystemType& system() const { return *this->_system; }
-    //@}
-
-
-
-    //@{
-    //! \name Evaluation of systems on abstract sets
-    //! \brief Compute a lower-approximation to the set obtained by evolving the system for \a time starting in \a initial_set.
-    virtual SetApproximationType
-    lower_evolve(const OvertSetInterfaceType& initial_set,
-                 const TimeType& time) const;
-
-    //! \brief Compute a lower-approximation to the reachable and evolved sets of the system starting in \a initial_set up to \a time.
-    virtual Pair<SetApproximationType,SetApproximationType>
-    lower_reach_evolve(const OvertSetInterfaceType& initial_set,
-                       const TimeType& time) const;
-
-    //! \brief Compute a lower-approximation to the reachable set of the system starting in \a initial_set up to \a time.
-    virtual SetApproximationType
-    lower_reach(const OvertSetInterfaceType& initial_set,
-                const TimeType& time) const;
-
-    //! \brief Compute an infinite-time lower-approximation to the reachable set of the system starting in \a initial_set.
-    virtual SetApproximationType
-    lower_reach(const OvertSetInterfaceType& initial_set) const;
-
-    //! \brief Compute an upper-approximation to the set obtained by iterating \a time times the system starting in \a initial_set.
-    virtual SetApproximationType
-    upper_evolve(const CompactSetInterfaceType& initial_set,
-                 const TimeType& time) const;
-
-    //! \brief Compute an upper-approximation to the reachable and evolved sets of the system starting in \a initial_set iterating at most \a time times.
-    virtual Pair<SetApproximationType,SetApproximationType>
-    upper_reach_evolve(const CompactSetInterfaceType& initial_set,
-                       const TimeType& time) const;
-
-    //! \brief Compute an upper-approximation to the reachable set of the system starting in \a initial_set iterating at most \a time times.
-    virtual SetApproximationType
-    upper_reach(const CompactSetInterfaceType& initial_set,
-                const TimeType& timeType) const;
-
-    //! \brief Compute a (possibly-restricted) approximation to the outer chain-reachable set of the system starting in \a initial_set.
-    virtual SetApproximationType
-    outer_chain_reach(const CompactSetInterfaceType& initial_set) const;
-
-    //! \brief Test if the system is safe.
-    SafetyCertificateType verify_safety(const CompactSetInterfaceType& initial_set, const OpenSetInterfaceType& safe_set) const;
-    //@}
-
-  public:
-    typedef HybridTime T;
-    typedef HybridAutomatonInterface Sys;
-    typedef HybridListSet<ExactBoxType> BxLS;
-    typedef HybridGrid Gr;
-    typedef HybridGridCell GC;
-    typedef HybridGridTreeSet GCLS;
-    typedef HybridGridTreeSet GTS;
-    typedef HybridOpenSetInterface OpSI;
-    typedef HybridOvertSetInterface OvSI;
-    typedef HybridCompactSetInterface CoSI;
-  private:
-    // Helper functions for operators on lists of sets.
-    Pair<HybridGridTreeSet,HybridGridTreeSet> _reach_evolve_resume(const ListSet<HybridEnclosure>& initial_enclosures,
-            const HybridTime& time, const Int accuracy, ListSet<HybridEnclosure>& evolve_enclosures,
-            Semantics semantics, const HybridEvolverInterface& evolver) const;
-    HybridGridTreeSet _upper_reach(const HybridGridTreeSet& set, const HybridTime& time,
-            const Int accuracy, const HybridEvolverInterface& evolver) const;
-    HybridGridTreeSet _upper_evolve(const HybridGridTreeSet& set, const HybridTime& time,
-            const Int accuracy, const HybridEvolverInterface& evolver) const;
-    Void _adjoin_upper_reach_evolve(HybridGridTreeSet& reach_set, HybridGridTreeSet& final_set,
-                                    const HybridGridTreeSet& set, const HybridTerminationCriterion& termination,
-                                    const Int accuracy, const HybridEvolverInterface& evolver) const;
-    //! \brief Perform restriction on \a set, using the overspill policy
-    Void _checked_restriction(HybridGridTreeSet& set, const HybridGridTreeSet& bounding) const;
 };
 
 
 //! \brief Configuration for a HybridReachabilityAnalyser, essentially for controlling the
 //!    accuracy of discretised evolution methods and reachability analysis.
-class HybridReachabilityAnalyserConfiguration : public ConfigurationInterface {
+template<> class ReachabilityAnalyserConfiguration<HybridAutomatonInterface> : public ConfigurationInterface {
 
   public:
     //! \brief The integer type.
@@ -202,13 +115,16 @@ class HybridReachabilityAnalyserConfiguration : public ConfigurationInterface {
     //! \brief The real type.
     typedef ExactNumericType RealType;
 
+    //! \brief The real type.
+    typedef HybridAutomatonInterface::TimeType TimeType;
+
     //! \brief Default constructor gives reasonable values.
-    HybridReachabilityAnalyserConfiguration(HybridReachabilityAnalyser& analyser);
+    ReachabilityAnalyserConfiguration(ReachabilityAnalyser<HybridAutomatonInterface>& analyser);
 
   private:
 
     //! \brief Reference back to the main class, for consistency checking.
-    HybridReachabilityAnalyser& _analyser;
+    ReachabilityAnalyser<HybridAutomatonInterface>& _analyser;
 
     //! \brief The time after which infinite-time evolution routines
     //! may approximate computed sets on a grid.
@@ -294,11 +210,11 @@ class HybridReachabilityAnalyserConfiguration : public ConfigurationInterface {
     //! If defined, this property combines with _maximum_grid_height to define the actual bounding domain.
     //!  <br>
     //! This property is only used in the chain_reach() routines.
-    std::shared_ptr<HybridExactBoxes> _bounding_domain_ptr;
+    SharedPointer<HybridExactBoxes> _bounding_domain_ptr;
 
     //! \brief The grid used for approximation.
     //! \details Provided as a pointer in order to avoid double construction. It must always be defined.
-    std::shared_ptr<HybridGrid> _grid_ptr;
+    SharedPointer<HybridGrid> _grid_ptr;
 
     //! \brief The policy for overspill in outer chain reach computation.
     //! \details A OVERSPILL_IGNORE simply bypasses checks, OVERSPILL_WARNING issues a warning and OVERSPILL_ERROR
@@ -306,14 +222,18 @@ class HybridReachabilityAnalyserConfiguration : public ConfigurationInterface {
     ChainOverspillPolicy _outer_overspill_policy;
 
   public:
+    //FIXME: Be consistent in use of time and steps
 
-    const RealType& transient_time() const { return _transient_time; }
+    const TimeType transient_time() const { return HybridTime(Dyadic(_transient_time),_transient_steps); }
+    const TimeType lock_to_grid_time() const { return HybridTime(Dyadic(_lock_to_grid_time),_lock_to_grid_steps); }
+
+    //    const RealType& transient_time() const { return _transient_time; }
     Void set_transient_time(const RawFloat64 value) { _transient_time = RealType(value); }
 
     const UnsignedIntType& transient_steps() const { return _transient_steps; }
     Void set_transient_steps(const UnsignedIntType value) { _transient_steps = value; }
 
-    const RealType& lock_to_grid_time() const { return _lock_to_grid_time; }
+//    const RealType& lock_to_grid_time() const { return _lock_to_grid_time; }
     Void set_lock_to_grid_time(const RawFloat64 value) { _lock_to_grid_time = RealType(value); }
 
     const UnsignedIntType& lock_to_grid_steps() const { return _lock_to_grid_steps; }
@@ -331,6 +251,9 @@ class HybridReachabilityAnalyserConfiguration : public ConfigurationInterface {
     const std::shared_ptr<HybridExactBoxes>& bounding_domain_ptr() const { return _bounding_domain_ptr; }
     //! \brief Check the consistency in respect to the system space, then set the bounding domain.
     Void set_bounding_domain_ptr(const std::shared_ptr<HybridExactBoxes> value);
+
+    const HybridExactBoxes& bounding_domain() const { return *_bounding_domain_ptr; }
+    Void set_bounding_domain(const HybridExactBoxes& bounding_domain);
 
     const HybridGrid& grid() const { return *_grid_ptr; }
     HybridGrid& grid() { return *_grid_ptr; }

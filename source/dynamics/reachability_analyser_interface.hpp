@@ -33,6 +33,8 @@
 
 namespace Ariadne {
 
+template<class SPC> struct SafetyCertificate;
+
 //! \ingroup EvaluationModule
 //! \brief Interface for computing (chain) reachable sets of a dynamic system.
 //!
@@ -42,21 +44,31 @@ template<class SYS> class ReachabilityAnalyserInterface {
     //! \brief The type of the internal system.
     typedef SYS SystemType;
     //! \brief The type used to define the elapsed evolution time for the system type.
+    typedef typename SystemType::EvolverType EvolverType;
+    //! \brief The type used to define the elapsed evolution time for the system type.
     typedef typename SystemType::TimeType TimeType;
     //! \brief The type used to describe the state space of the system evolution.
     typedef typename SystemType::StateSpaceType StateSpaceType;
+    //! \brief The type used to describe the interface for singleton sets in the state space.
+    typedef typename StateSpaceType::BoundingDomainType BoundingDomainType;
     //! \brief The type used to describe the interface for overt sets in the state space, which are used as initial sets for lower reachability analysis.
     typedef typename StateSpaceType::OvertSetInterfaceType OvertSetInterfaceType;
+    //! \brief The type used to describe the interface for open sets in the state space, which are used as safe sets for lower reachability analysis.
+    typedef typename StateSpaceType::OpenSetInterfaceType OpenSetInterfaceType;
     //! \brief The type used to describe the interface for compact sets in the state space, which are used as initial sets for upper reachability analysis.
     typedef typename StateSpaceType::CompactSetInterfaceType CompactSetInterfaceType;
     //! \brief The type used to describe the interface for located sets in the state space, which are used as initial sets for verification.
     typedef typename StateSpaceType::LocatedSetInterfaceType LocatedSetInterfaceType;
     //! \brief The type used to describe the interface for regular sets in the state space, which are used as safe sets for verification.
     typedef typename StateSpaceType::RegularSetInterfaceType RegularSetInterfaceType;
-    //! \brief The type used to describe the interface for singleton sets in the state space.
+    //! \brief The type used to describe the interface for bounded sets in the state space.
     typedef typename StateSpaceType::BoundedSetInterfaceType BoundedSetInterfaceType;
-    //! \brief The type used to describe the type used for concrete approximations to sets.
+    //! \brief The type used to describe the interface for bounded regular sets in the state space.
+    typedef typename StateSpaceType::SetInterfaceType SetInterfaceType;
+    //! \brief The type used to describe the type used for upper approximations to sets.
     typedef typename StateSpaceType::SetApproximationType SetApproximationType;
+    //! \brief The type used to represent a certificate of safety.
+    typedef SafetyCertificate<StateSpaceType> SafetyCertificateType;
   public:
     //! \brief Virtual destructor.
     virtual ~ReachabilityAnalyserInterface() { }
@@ -106,6 +118,10 @@ template<class SYS> class ReachabilityAnalyserInterface {
     //! \brief Compute an outer-approximation to the chain-reachable set of the system starting in \a initial_set.
     virtual SetApproximationType
     outer_chain_reach(const CompactSetInterfaceType& initial_set) const = 0;
+
+    //! \brief Test if the system is safe.
+    virtual SafetyCertificateType
+    verify_safety(const CompactSetInterfaceType& initial_set, const OpenSetInterfaceType& safe_set) const = 0;
 
     //@}
 

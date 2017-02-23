@@ -414,6 +414,8 @@ class GridTreeSet
 
   public:
 
+    typedef Grid GridType;
+
     typedef GridCell CellType;
 
   protected:

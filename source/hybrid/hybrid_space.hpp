@@ -64,6 +64,8 @@ class HybridSpaceInterface
 class HybridSpace
 {
   public:
+    //! \brief The canonical type used for bounding sets in the space.
+    typedef HybridExactBoxes BoundingDomainType;
     //! \brief The interface satisified by singleton sets in the space.
     typedef HybridBoundedSetInterface BoundedSetInterfaceType;
     //! \brief The interface satisified by overt sets in the space.
@@ -78,6 +80,8 @@ class HybridSpace
     typedef HybridRegularSetInterface RegularSetInterfaceType;
     //! \brief The interface satisified by located sets in the space.
     typedef HybridLocatedSetInterface LocatedSetInterfaceType;
+    //! \brief The interface satisified by located sets in the space.
+    typedef HybridSetInterface SetInterfaceType;
     //! \brief The type of approximations to sets in the space.
     typedef HybridGridTreeSet SetApproximationType;
   public:

@@ -60,6 +60,8 @@ class HybridTime
     //! \brief The number of discrete steps taken.
     DiscreteTimeType _discrete_time;
   public:
+    explicit HybridTime(Real t)
+      : _continuous_time(t), _discrete_time(0) { }
     HybridTime(Real t, Integer n)
       : _continuous_time(t), _discrete_time(n) { }
     HybridTime(RawFloat64 t, Integer n)
@@ -71,36 +73,54 @@ class HybridTime
     HybridTime(Int n, double t)
       : _continuous_time(t), _discrete_time(n) {
           ARIADNE_FAIL_MSG("HybridTime(Int,double) is incorrect; use HybridTime(Real,Integer) instead."); }
+
+    friend HybridTime operator*(const Integer& c, const HybridTime& ht) {
+        return HybridTime(c*ht._continuous_time,c*ht._discrete_time);
+    }
+
+    friend HybridTime operator-(const HybridTime& ht1, const HybridTime& ht2) {
+        return HybridTime(ht1._continuous_time-ht2._continuous_time,max(ht1._discrete_time-ht2._discrete_time,Integer(0)));
+    }
+
+    friend Bool same(const HybridTime& ht1, const HybridTime& ht2) {
+        return same(ht1._continuous_time,ht2._continuous_time) &&
+            ht1._discrete_time==ht2._discrete_time;
+    }
+
+    friend ValidatedNegatedSierpinskian operator==(const HybridTime& ht1, const HybridTime& ht2) {
+        return ht1._continuous_time==ht2._continuous_time &&
+            ht1._discrete_time==ht2._discrete_time;
+    }
+
+    friend ValidatedSierpinskian operator!=(const HybridTime& ht1, const HybridTime& ht2) {
+        return ht1._continuous_time!=ht2._continuous_time ||
+            ht1._discrete_time!=ht2._discrete_time;
+    }
+
+    friend ValidatedKleenean operator<=(const HybridTime& ht1, const HybridTime& ht2) {
+        return ValidatedKleenean(ht1._continuous_time<=ht2._continuous_time) &&
+            Boolean(ht1._discrete_time<=ht2._discrete_time);
+    }
+
+    friend ValidatedKleenean operator<(const HybridTime& ht1, const HybridTime& ht2) {
+        return ValidatedKleenean(ht1._continuous_time< ht2._continuous_time) &&
+            Boolean(ht1._discrete_time<=ht2._discrete_time);
+    }
+
+    friend ValidatedKleenean operator>(const HybridTime& ht1, const HybridTime& ht2) {
+        return ValidatedKleenean(ht1._continuous_time> ht2._continuous_time) &&
+            Boolean(ht1._discrete_time>=ht2._discrete_time);
+    }
+
+    friend ValidatedKleenean operator>(const HybridTime& ht1, const ContinuousTimeType& ct2) {
+        return ValidatedKleenean(ht1._continuous_time> ct2);
+    }
+
+    friend OutputStream& operator<<(OutputStream& os, const HybridTime& ht) {
+        return os << "("<<ht._continuous_time<<","<<ht._discrete_time<<")";
+    }
 };
 
-inline Bool same(const HybridTime& ht1, const HybridTime& ht2) {
-    return same(ht1._continuous_time,ht2._continuous_time) &&
-        ht1._discrete_time==ht2._discrete_time;
-}
-
-inline ValidatedNegatedSierpinskian operator==(const HybridTime& ht1, const HybridTime& ht2) {
-    return ht1._continuous_time==ht2._continuous_time &&
-        ht1._discrete_time==ht2._discrete_time;
-}
-
-inline ValidatedSierpinskian operator!=(const HybridTime& ht1, const HybridTime& ht2) {
-    return ht1._continuous_time!=ht2._continuous_time ||
-        ht1._discrete_time!=ht2._discrete_time;
-}
-
-inline ValidatedKleenean operator<=(const HybridTime& ht1, const HybridTime& ht2) {
-    return ValidatedKleenean(ht1._continuous_time<=ht2._continuous_time) &&
-        Boolean(ht1._discrete_time<=ht2._discrete_time);
-}
-
-inline ValidatedKleenean operator<(const HybridTime& ht1, const HybridTime& ht2) {
-    return ValidatedKleenean(ht1._continuous_time< ht2._continuous_time) &&
-        Boolean(ht1._discrete_time<=ht2._discrete_time);
-}
-
-inline OutputStream& operator<<(OutputStream& os, const HybridTime& ht) {
-    return os << "("<<ht._continuous_time<<","<<ht._discrete_time<<")";
-}
 
 } // namespace Ariadne
 

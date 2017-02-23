@@ -255,6 +255,10 @@ Kleenean operator> (Real const& x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
 Kleenean operator<=(Real const& x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
 Kleenean operator>=(Real const& x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
 
+template<> Int integer_cast<Int,Real>(Real const& r) { return std::round(r.get(Precision64()).get_d()); }
+template<> Nat integer_cast<Nat,Real>(Real const& r) { return std::round(r.get(Precision64()).get_d()); }
+
+
 template<> String class_name<Real>() { return "Real"; }
 template<> String class_name<PositiveReal>() { return "PositiveReal"; }
 

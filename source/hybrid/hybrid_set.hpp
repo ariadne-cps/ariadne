@@ -554,6 +554,7 @@ class HybridGridTreeSet
     HybridGrid _hgrid;
     Map<DiscreteLocation,GridTreeSet> _map;
   public:
+    typedef HybridGrid GridType;
     typedef Map<DiscreteLocation,GridTreeSet>::Iterator LocationsIterator;
     typedef Map<DiscreteLocation,GridTreeSet>::ConstIterator LocationsConstIterator;
     typedef HybridSpaceSetConstIterator<GridTreeSet,HybridGridCell> ConstIterator;

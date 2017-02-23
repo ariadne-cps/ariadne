@@ -40,15 +40,10 @@ namespace Ariadne {
 class HybridAutomatonInterface;
 class HybridGridTreeSet;
 
-//! \brief Policy to handle overspill in respect to restrictions provided for chain reach computation.
-enum class ChainOverspillPolicy : char { OVERSPILL_IGNORE, OVERSPILL_WARNING, OVERSPILL_ERROR };
-
-OutputStream& operator<<(OutputStream& os, const ChainOverspillPolicy& policy);
-
 /*! \brief A class for performing reachability analysis on a hybrid system.
  */
 class HybridReachabilityAnalyserInterface
-    : public ReachabilityAnalyserInterface<HybridAutomatonInterface>
+    : public virtual ReachabilityAnalyserInterface<HybridAutomatonInterface>
     , public Loggable
 {
   public:

@@ -101,7 +101,7 @@ class TestHybridReachabilityAnalyser
         DiscreteLocation location(1);
         RealVariable x("x");
         RealVariable y("y");
-        Real a(-0.25); Real b(1.0);
+        Real a(-0.5); Real b(1.0);
         sys.new_mode(location,{dot(x)=-a*x-b*y,dot(y)=b*x+2*a*y} );
         cout << "Done building system\n";
         return sys;
@@ -134,7 +134,7 @@ class TestHybridReachabilityAnalyser
         RealVariable y("y");
 
         //ImageSet initial_box(make_box("[1.99,2.01]x[-0.01,0.01]"));
-        Decimal x0l(2.01), x0u(2.02), y0l(0.01), y0u(0.02);
+        Decimal x0l(1.98), x0u(1.99), y0l(0.01), y0u(0.02);
         initial_set=HybridSet(location,{x.in(x0l,(Real)x0u),y.in(y0l,(Real)y0u)});
         safe_set=HybridSet(location,{x.in(-2,(Real)3),y.in(-2,(Real)3)},{sqr(x)+sqr(y)<=sqr((Real)3)});
         cout << "Done creating initial and safe sets\n" << endl;
@@ -274,8 +274,10 @@ class TestHybridReachabilityAnalyser
 
         ARIADNE_TEST_ASSERT(definitely(safety_certificate.is_safe));
 
+        auto grid=analyser.configuration().grid();
+        auto safe_cells=inner_approximation(safe_set, grid, analyser.configuration().maximum_grid_depth());
         plot("test_reachability_analyser-verify_safety.png",axes,
-             safe_set_colour,safe_set,
+             safe_set_colour,safety_certificate.safe_set,
              reach_set_colour,safety_certificate.chain_reach_set,
              initial_set_colour,initial_set);
 

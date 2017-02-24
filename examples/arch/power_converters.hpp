@@ -2,6 +2,12 @@
 
 namespace Ariadne {
 
+template<class IS, class SYS, class SS> struct Problem {
+    IS initial_set; SYS system; SS safe_set; };
+template<class IS, class SYS, class SS> Problem<IS,SYS,SS> make_problem(IS initial_set, SYS system, SS safe_set) {
+    return Problem<IS,SYS,SS>{initial_set,system,safe_set}; }
+
+TimeVariable t;
 RealVariable V("V"), I("I");
 RealVariable tau("tau");
 
@@ -19,6 +25,7 @@ RealConstant C("C",25.0_dec);      // Capacitor C [23.75, 26.25] uF
 RealConstant L("L",50.0_dec);      // Inductor L [47.5, 52.5] uH
 RealConstant T("T",25.0_dec);      // Switching Period T [24.5, 25.5] us
 RealConstant D("D",0.6_dec);     // Switch-closed duty cycle D 0.6
+RealConstant Verr("Verr",0.1_dec); // Desired Output Voltage Vref 5V
 
 StringVariable swtch("switch");
 StringConstant open("open");
@@ -27,19 +34,24 @@ StringConstant closed("closed");
 DiscreteEvent close_switch("close_switch");
 DiscreteEvent open_switch("open_switch");
 
-HybridAutomaton make_buck_system() {
+decltype(auto) make_buck_problem() {
 
     HybridAutomaton buck("buck");
 
+    HybridBoundedConstraintSet initial_set(swtch|open,{V==0,I==0,tau==0});
+//    HybridBoundedConstraintSet initial_set(swtch|open,{0.11_dec<=V<=0.12_dec,1.11_dec<=I<=1.12_dec,0.01<=tau<=0.001});
+
+    HybridConstraintSet safe_set;
+    safe_set.adjoin(swtch|open,{V<=Vref+Verr});
+    safe_set.adjoin(swtch|closed,{V<=Vref+Verr});
 
     buck.new_mode(swtch|open, {dot(I)=-V/L, dot(V)=I/C-V/(R*C), dot(tau)=1});
     buck.new_mode(swtch|closed, {dot(I)=(1-V)/L, dot(V)=I/C-V/(R*C), dot(tau)=1});
 
-
     buck.new_transition(swtch|closed,open_switch,swtch|open, next({I,V,tau})={I,V,Real(0)}, tau>=(1-D)*T, urgent);
     buck.new_transition(swtch|open,close_switch,swtch|closed, {next(I)=I,next(V)=V,next(tau)=0}, tau>=D*T, urgent);
 
-    return buck;
+    return make_problem(initial_set,buck,safe_set);
 }
 
 } // namespace Ariadne

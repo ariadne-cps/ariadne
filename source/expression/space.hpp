@@ -99,6 +99,11 @@ template<class T> class Space
         for(Nat i=0; i!=_variables.size(); ++i) {
             if(v.name()==_variables[i]) { return true; } }
         return false; }
+    //! \brief Tests if all the variables \a vs is in the space.
+    Bool contains(const Set<VariableType>& vs) const {
+        for(auto v : vs) {
+            if(!this->contains(v)) { return false; } }
+        return true; }
     //! \brief The index of the named variable \a v.
     SizeType index(const VariableType& v) const {
         for(Nat i=0; i!=_variables.size(); ++i) {

@@ -66,24 +66,28 @@ make_key_value_map(const List<T>& lst) {
     return map;
 }
 
-template<class K, class V> List<V> order(const Map<K,V>& map, const List<K>& ordering) {
+template<class K, class V> List<V> order(const Map<K,V>& map, const List<K>& key_ordering) {
     List<V> result;
-    result.reserve(ordering.size());
-    for(Nat i=0; i!=ordering.size(); ++i) {
-        result.append(map[ordering[i]]);
-    }
+    result.reserve(key_ordering.size());
+    for(auto key : key_ordering) { result.append(map[key]); }
     return result;
 }
 
-Set<Identifier> variables(const List<RealVariableInterval>& b) {
+Set<Identifier> variables(const Map<RealVariable,RealInterval>& bnds) {
     Set<Identifier> r;
-    for(Nat i=0; i!=b.size(); ++i) { r.insert(b[i].variable().name()); }
+    for(auto bnd : bnds) { r.insert(bnd.first.name()); }
     return r;
 }
 
-Set<Identifier> arguments(const List<ContinuousPredicate>& c) {
+Set<Identifier> variables(const List<RealVariableInterval>& bnds) {
     Set<Identifier> r;
-    for(Nat i=0; i!=c.size(); ++i) { r.adjoin(arguments(c[i])); }
+    for(auto bnd : bnds) { r.insert(bnd.variable().name()); }
+    return r;
+}
+
+Set<Identifier> arguments(const List<ContinuousPredicate>& cs) {
+    Set<Identifier> r;
+    for(auto c : cs) { r.adjoin(arguments(c)); }
     return r;
 }
 
@@ -144,6 +148,7 @@ RealExpressionConstraintSet::RealExpressionConstraintSet(const List<ContinuousPr
 }
 
 ConstraintSet RealExpressionConstraintSet::euclidean_set(const RealSpace& space) const {
+    ARIADNE_ASSERT( subset(this->variables(), Set<RealVariable>(space.variables())) );
     const RealExpressionConstraintSet& set = *this;
     List<EffectiveConstraint> constraints;
     for(Nat i=0; i!=set.constraints().size(); ++i) {
@@ -175,13 +180,20 @@ RealExpressionBoundedConstraintSet::RealExpressionBoundedConstraintSet(const Lis
 }
 
 RealExpressionBoundedConstraintSet::RealExpressionBoundedConstraintSet(const List<RealVariableInterval>& bounds, const List<ContinuousPredicate>& constraints)
-    : _bounds(make_key_value_map(bounds)), _constraints(constraints)
+    : RealExpressionBoundedConstraintSet(make_key_value_map(bounds),constraints)
 {
     ARIADNE_ASSERT(unique_keys(bounds));
-    ARIADNE_ASSERT( subset(arguments(constraints),Ariadne::variables(bounds)) );
+}
+
+
+RealExpressionBoundedConstraintSet::RealExpressionBoundedConstraintSet(const Map<RealVariable,RealInterval>& bounds, const List<ContinuousPredicate>& constraints)
+    : _bounds(bounds), _constraints(constraints)
+{
+    ARIADNE_ASSERT( subset(arguments(constraints),Ariadne::variables(_bounds)) );
 }
 
 BoundedConstraintSet RealExpressionBoundedConstraintSet::euclidean_set(const RealSpace& space) const {
+    ARIADNE_ASSERT( this->variables() == make_set(space.variables()) );
     const RealExpressionBoundedConstraintSet& set = *this;
     RealBox domain=RealVariablesBox(set.bounds()).euclidean_set(space);
     List<EffectiveConstraint> constraints;
@@ -201,6 +213,10 @@ OutputStream& operator<<(OutputStream& os, const RealExpressionBoundedConstraint
         os << (iter==eset._constraints.begin()?"":",") << *iter; }
     return os << "]";
     return os << eset._bounds << eset._constraints;
+}
+
+RealExpressionBoundedConstraintSet intersection(RealVariablesBox const& bx, RealExpressionConstraintSet const& cs) {
+    return RealExpressionBoundedConstraintSet(bx.bounds(),cs.constraints());
 }
 
 ValidatedConstrainedImageSet approximate_euclidean_set(const RealExpressionBoundedConstraintSet& set, const RealSpace& space) {

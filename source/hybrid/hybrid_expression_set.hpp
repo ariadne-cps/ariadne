@@ -111,10 +111,47 @@ class HybridBoxSet
     virtual SetInterface* _euclidean_set(DiscreteLocation, RealSpace) const override;
 };
 
+//! \ingroup ExpressionSetSubModule
+//! \ingroup HybridSetSubModule
+//! \brief A hybrid set defined by a box in each of a set of locations.
+//! \details Does not assume a canonical order of the real variables.
+template<class IVL> class HybridVariablesBoxes
+    : public Map<DiscreteLocation,VariablesBox<IVL>>
+{
+    typedef Map<DiscreteLocation,VariablesBox<IVL>> Base;
+  public:
+    HybridVariablesBoxes() : Base() { }
+    HybridVariablesBoxes(Set<DiscreteLocation> locs, VariablesBox<IVL> const& box) {
+        for(auto loc : locs) { this->Base::insert(loc,box); } }
+    HybridVariablesBoxes(List<HybridVariablesBox<IVL>> const& hboxes) {
+        for(auto hbox : hboxes) { this->adjoin(hbox); } }
+
+    HybridVariablesBoxes<IVL>& adjoin(HybridVariablesBox<IVL> const& hbox){
+        this->Base::insert(hbox.location(),hbox.continuous_set()); }
+
+    //! \brief The location in which the box is defined.
+    Set<DiscreteLocation> locations() const { return this->Base::keys(); }
+    //! \brief The location in which the box is defined.
+    VariablesBox<IVL> const& continuous_set(DiscreteLocation loc) const { return (*this)[loc]; }
+    //! \brief The active variables in the location \a loc.
+    Set<RealVariable> variables(DiscreteLocation loc) const { return this->continuous_set(loc).variables(); }
+    //! \brief The subset of \f$\mathbb{R}^n\f$ obtained by ordering the variables as defined by \a spc.
+    Box<IVL> euclidean_set(DiscreteLocation loc, const RealSpace& spc) const { return this->continuous_set(loc).euclidean_set(spc); }
+};
+
+class HybridBoxesSet
+    // TODO: Support
+    : public HybridVariablesBoxes<RealInterval>
+{
+  public:
+    using HybridVariablesBoxes<RealInterval>::HybridVariablesBoxes;
+};
+
 
 //! \ingroup ExpressionSetSubModule
 //! \ingroup HybridSetSubModule
 //! \brief A hybrid set defined by a constraint system in each location.
+//! NOTE: If a location is not specified, the set is considered empty. This may be changed in future to the set being considered unconstrained (entire).
 class HybridConstraintSet
     : public virtual HybridRegularSetInterface
 {
@@ -124,9 +161,22 @@ class HybridConstraintSet
     //! \brief Construct a set in a single \a location with a list of \a bounds on the variables and nonlinear \a constraints.
     HybridConstraintSet(const DiscreteLocation& location,
                         const List<ContinuousPredicate>& constraints);
+    HybridConstraintSet(const DiscreteLocation& location,
+                        const RealExpressionConstraintSet& constraint_set);
+
+    //! \brief Adjoin the set defined by \a constraints in \a location.
+    HybridConstraintSet& adjoin(const DiscreteLocation& location, const List<ContinuousPredicate>& set);
+    HybridConstraintSet& adjoin(const DiscreteLocation& location, const RealExpressionConstraintSet& set);
+
+    //! \brief Intersect with a set of boxes, one in each location, to form a bounded set.
+    friend HybridBoundedConstraintSet intersection(const HybridBoxesSet& bounds, HybridConstraintSet const& constraints);
 
     virtual HybridConstraintSet* clone() const override;
 
+
+    //! \brief The set of locations in which the set is nonempty.
+    Set<DiscreteLocation> locations() const;
+    Bool has_location(DiscreteLocation loc) const;
     //! \brief The active variables in the location \a loc.
     virtual Set<RealVariable> variables(DiscreteLocation loc) const override;
     //! \brief The subset of \f$\mathbb{R}^V\f$ obtained by restricting to location \a loc.
@@ -156,15 +206,20 @@ class HybridBoundedConstraintSet
     HybridBoundedConstraintSet(const DiscreteLocation& loc,
                                const RealVariablesBox& bx);
     HybridBoundedConstraintSet(const DiscreteLocation& loc,
+                               const RealExpressionBoundedConstraintSet& set);
+    HybridBoundedConstraintSet(const DiscreteLocation& loc,
                                const InitializerList<RealVariableInterval>& bnd);
     //! \brief Construct a set in a single \a location with a list of \a bounds on the variables and nonlinear \a constraints.
     HybridBoundedConstraintSet(const DiscreteLocation& location,
                                const InitializerList<RealVariableInterval>& bounds,
                                const InitializerList<ContinuousPredicate>& constraints);
 
-    DiscreteLocation location() const;
+    HybridBoundedConstraintSet& adjoin(const DiscreteLocation& loc, const RealExpressionBoundedConstraintSet& set);
 
     virtual HybridBoundedConstraintSet* clone() const override;
+
+    //! \brief If the set only has a single location, returns this, otherwise fails. DEPRECATED
+    DiscreteLocation location() const;
 
     //! \brief The set of discrete locations in which the set is nontrivial.
     virtual Set<DiscreteLocation> locations() const override;

@@ -63,7 +63,8 @@ typedef VariableInterval<Real> RealVariableInterval;
 typedef VariablesBox<RealInterval> RealVariablesBox;
 typedef VariablesBox<ExactIntervalType> ExactVariablesBoxType;
 
-class ExpressionConstraintSet;
+class RealExpressionConstraintSet;
+class RealExpressionBoundedConstraintSet;
 
 Set<Identifier> arguments(const List<ContinuousPredicate>& c);
 
@@ -233,6 +234,9 @@ class RealExpressionConstraintSet
     List<ContinuousPredicate> const& constraints() const { return this->_constraints; }
     ConstraintSet euclidean_set(const RealSpace& space) const;
     friend OutputStream& operator<<(OutputStream& os, const RealExpressionConstraintSet& eset);
+
+    friend RealExpressionBoundedConstraintSet intersection(RealVariablesBox const&, RealExpressionConstraintSet const&);
+
 };
 
 //! \ingroup ExpressionSetSubModule
@@ -246,6 +250,7 @@ class RealExpressionBoundedConstraintSet
     RealExpressionBoundedConstraintSet(const InitializerList<RealVariableInterval>& domain);
     RealExpressionBoundedConstraintSet(const List<RealVariableInterval>& domain);
     RealExpressionBoundedConstraintSet(const List<RealVariableInterval>& domain, const List<ContinuousPredicate>& constraints);
+    RealExpressionBoundedConstraintSet(const Map<RealVariable,RealInterval>& domain, const List<ContinuousPredicate>& constraints);
     RealExpressionBoundedConstraintSet(const RealVariablesBox& box) : _bounds(box.bounds()) { }
     Set<RealVariable> variables() const { return this->_bounds.keys(); }
     Map<RealVariable,RealInterval> bounds() const { return this->_bounds; }

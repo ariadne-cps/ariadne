@@ -71,6 +71,13 @@ static const double DEFAULT_GRID_LENGTH=0.125;
 template class ReachabilityAnalyser<HybridAutomatonInterface>;
 template class ReachabilityAnalyserConfiguration<HybridAutomatonInterface>;
 
+// Resolves possible linking bug in macOS
+template<>
+ReachabilityAnalyser<HybridAutomatonInterface>::
+~ReachabilityAnalyser()
+{
+}
+
 inline Real operator-(Real const& r1, Rational const& q2) {
     return r1-Real(q2);
 }

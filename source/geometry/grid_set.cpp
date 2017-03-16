@@ -1616,7 +1616,7 @@ Bool GridTreeSubset::operator==(const GridTreeSubset& anotherGridTreeSubset) con
         ( ( * this->_pRootTreeNode ) == ( * anotherGridTreeSubset._pRootTreeNode ) );
 }
 
-inline GridTreeSubset::GridTreeSubset( const Grid& theGrid, const Nat theHeight,
+GridTreeSubset::GridTreeSubset( const Grid& theGrid, const Nat theHeight,
                                        const BinaryWord& theWord, BinaryTreeNode * pRootTreeNode )
     : _pRootTreeNode(pRootTreeNode), _theGridCell(theGrid, theHeight, theWord) {
 }
@@ -1720,7 +1720,7 @@ GridTreeSubset::ConstIterator GridTreeSubset::end() const {
     return GridTreeSubset::ConstIterator(this, indeterminate);
 }
 
-inline const BinaryTreeNode * GridTreeSubset::binary_tree() const {
+const BinaryTreeNode * GridTreeSubset::binary_tree() const {
     return _pRootTreeNode;
 }
 

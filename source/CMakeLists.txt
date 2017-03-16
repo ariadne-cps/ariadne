@@ -1,0 +1,11 @@
+add_subdirectory(utility)
+add_subdirectory(numeric)
+add_subdirectory(algebra)
+add_subdirectory(function)
+add_subdirectory(solvers)
+add_subdirectory(geometry)
+add_subdirectory(dynamics)
+add_subdirectory(expression)
+add_subdirectory(output)
+add_subdirectory(hybrid)
+

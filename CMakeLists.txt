@@ -38,10 +38,6 @@ include (CheckLibraryExists)
 check_type_size("int" SIZEOF_INT)
 
 check_include_file(gmp.h HAVE_GMP_H)
-check_include_file_cxx(gmpxx.h HAVE_GMPXX_H)
-if(NOT HAVE_GMPXX_H)
-    message(WARNING "Unable to find gmpxx.h.")
-endif()
 
 check_include_file(mpfr.h HAVE_MPFR_H)
 
@@ -78,23 +74,13 @@ configure_file (${PROJECT_SOURCE_DIR}/config.h.cmake ${PROJECT_SOURCE_DIR}/confi
 #Non-portable fix to avoid user header directories being searched for by system headers
 #add_definitions(-iquote${PROJECT_SOURCE_DIR})
 #Should ideally be able to use line below
-include_directories(${PROJECT_SOURCE_DIR} ${CAIRO_INCLUDE_DIRS})
+include_directories(${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/source ${CAIRO_INCLUDE_DIRS})
 
 IF(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   add_definitions(-Wno-non-template-friend)
 ENDIF()
 
-add_subdirectory(utility)
-add_subdirectory(numeric)
-add_subdirectory(algebra)
-add_subdirectory(function)
-add_subdirectory(solvers)
-add_subdirectory(geometry)
-add_subdirectory(dynamics)
-add_subdirectory(expression)
-add_subdirectory(output)
-add_subdirectory(hybrid)
-
+add_subdirectory(source)
 add_subdirectory(test)
 add_subdirectory(wrap)
 add_subdirectory(python)
@@ -125,9 +111,9 @@ target_link_libraries (ariadne boost_serialization)
 #set_target_properties(pyariadne PROPERTIES PREFIX "" OUTPUT_NAME "ariadne")
 #target_link_libraries (pyariadne ariadne boost_python)
 
-#add_library(pynumeric $<TARGET_OBJECTS:pynumeric-src>)
+#add_library(pynumeric SHARED $<TARGET_OBJECTS:pynumeric-src>)
 #set_target_properties(pynumeric PROPERTIES PREFIX "" OUTPUT_NAME "numeric")
-#target_link_libraries (pynumeric ariadne boost_python)
+#target_link_libraries (pynumeric ariadne ${PYTHON_LIBRARIES} boost_python )
 
 #add_library(pyalgebra $<TARGET_OBJECTS:pyalgebra-src>)
 #set_target_properties(pyalgebra PROPERTIES PREFIX "" OUTPUT_NAME "algebra")

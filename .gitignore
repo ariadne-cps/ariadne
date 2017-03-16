@@ -7,3 +7,5 @@ config.h
 dep/
 obj/
 *.gch
+.DS_Store
+.settings

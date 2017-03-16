@@ -10,7 +10,7 @@ set(EXAMPLES
 
 
 foreach(example ${EXAMPLES})
-    add_executable(${example} ${example}.cc)
+    add_executable(${example} ${example}.cpp)
     target_link_libraries(${example} ariadne)
 endforeach()
 

@@ -1,0 +1,86 @@
+/***************************************************************************
+ *            drawer.hpp
+ *
+ *  Copyright  2011-12  Pieter Collins
+ *
+ ****************************************************************************/
+
+/*
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
+
+/*! \file drawer.hpp
+ *  \brief Class for drawing affine and nonlinear sets.
+ */
+
+#ifndef ARIADNE_DRAWER_HPP
+#define ARIADNE_DRAWER_HPP
+
+#include <iosfwd>
+#include "utility/declarations.hpp"
+#include "output/drawer_interface.hpp"
+
+namespace Ariadne {
+
+typedef Int Int;
+
+struct Depth { Int _d; explicit Depth(Int d) : _d(d) { } operator Int() const { return _d; } };
+
+//! \brief Draw a box over-approximation to the set.
+class BoxDrawer : public DrawerInterface
+{
+  public:
+    Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const;
+};
+
+//! \brief Draw an affine over-approximation to the set.
+class EnclosureAffineDrawer : public DrawerInterface
+{
+    Nat _accuracy;
+  public:
+    EnclosureAffineDrawer(Nat accuracy) : _accuracy(accuracy) { }
+    Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const;
+    Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set, Nat accuracy) const;
+};
+
+//! \brief Draw an affine over-approximation to the set.
+class AffineDrawer : public DrawerInterface
+{
+    Nat _splittings;
+  public:
+    AffineDrawer(Nat splittings) : _splittings(splittings) { }
+    Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const;
+};
+
+//! \brief Subdivide the set and draw affine approximations to small pieces.
+class SubdivisionDrawer : public DrawerInterface
+{
+  public:
+    Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const;
+};
+
+//! \brief Pave the set and draw the computed cells.
+class GridDrawer : public DrawerInterface
+{
+    Nat _depth;
+  public:
+    GridDrawer(Nat depth) : _depth(depth) { }
+    Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const;
+};
+
+
+} //namespace Ariadne
+
+#endif /* ARIADNE_DRAWER_HPP */

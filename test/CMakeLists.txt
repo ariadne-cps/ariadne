@@ -36,7 +36,7 @@ set(UNIT_TESTS
 )
 
 foreach(test ${UNIT_TESTS})
-    add_executable(${test} ${test}.cc)
+    add_executable(${test} ${test}.cpp)
     target_link_libraries(${test} ariadne)
     add_test(${test} ${test})
 endforeach()

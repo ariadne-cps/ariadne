@@ -275,6 +275,10 @@ Bool is_inf(FloatMP const& x) {
     return mpfr_inf_p(x._mpfr);
 }
 
+Bool is_finite(FloatMP const& x) {
+    return mpfr_number_p(x._mpfr);
+}
+
 
 FloatMP nul(FloatMP const& x) { return nul(x,FloatMP::get_rounding_mode()); }
 FloatMP hlf(FloatMP const& x) { return hlf(x,FloatMP::get_rounding_mode()); }

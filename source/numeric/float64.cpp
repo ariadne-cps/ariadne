@@ -789,6 +789,8 @@ Bool operator< (Float64 x1, Float64 x2) { return x1.dbl< x2.dbl; }
 Bool operator> (Float64 x1, Float64 x2) { return x1.dbl> x2.dbl; }
 
 Bool is_nan(Float64 x) { return std::isnan(x.dbl); }
+Bool is_inf(Float64 x) { return std::isinf(x.dbl); }
+Bool is_finite(Float64 x) { return std::isfinite(x.dbl); }
 
 Comparison cmp(Float64 x1, Rational const& q2) {
     if(std::isfinite(x1.get_d())) { return cmp(Rational(x1),q2); }

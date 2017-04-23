@@ -147,6 +147,7 @@ class Float64 {
   public:
     friend Bool is_nan(Float64 x);
     friend Bool is_inf(Float64 x);
+    friend Bool is_finite(Float64 x);
 
     friend Float64 next_up(Float64 x);
     friend Float64 next_down(Float64 x);

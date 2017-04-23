@@ -162,6 +162,10 @@ class Vector
     Vector(VectorExpression<VE> const& ve) : _ary(ve().size(),ve().zero_element()) {
             for(SizeType i=0; i!=this->size(); ++i) { this->_ary[i]=ve()[i]; } }
 
+    /*! \brief Generate from a function (object) \a g of type \a G mapping an index to a value. */
+    template<class G, EnableIf<IsInvocableReturning<X,G,SizeType>> =dummy>
+    Vector(SizeType n, G const& g) : _ary(n,g) { }
+
     //! \brief Construct from an %VectorExpression of a different type.
     template<class VE, EnableIf<IsConstructible<X,typename VE::ScalarType>> =dummy, DisableIf<IsConvertible<typename VE::ScalarType,X>> =dummy>
     explicit Vector(VectorExpression<VE> const& ve) : _ary(ve().size(),X(ve().zero_element())) {

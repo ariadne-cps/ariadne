@@ -4,6 +4,7 @@ set(EXPERIMENTAL_EXAMPLES
 	laser
 	bouncing-walls
 	vanderpol
+	harmonic_inclusion
 )
 
 foreach(example ${EXPERIMENTAL_EXAMPLES})

@@ -183,11 +183,15 @@ template<class M> class ScaledFunctionPatch
     static ScaledFunctionPatch<M> zero(const DomainType& d, PropertiesType prp);
     //! \brief Construct a constant quantity in \a as independent variables.
     static ScaledFunctionPatch<M> constant(const DomainType& d, const NumericType& c, PropertiesType prp);
-    //! \brief Construct the quantity \f$x_j\f$ over the domain \a d.
+    //! \brief Construct the coordinate \f$x_{j}\f$ over the domain \a d.
     static ScaledFunctionPatch<M> coordinate(const DomainType& d, SizeType j, PropertiesType prp);
     //! \brief Construct a constant quantity in \a as independent variables with value zero and uniform error \a 1
     static ScaledFunctionPatch<M> unit_ball(const DomainType& d, PropertiesType prp);
-    //! \brief Construct the quantity \f$x_j\f$ over the domain \a d.
+    //! \brief Construct the coordinate \f$x_{j}\f$ over the domain \a d.
+    static ScaledFunctionPatch<M> projection(const BoxDomainType& d, SizeType j, PropertiesType prp);
+    //! \brief Return the vector function of coordinates in the range \a js over domain \a d.
+    static VectorScaledFunctionPatch<M> projection(const BoxDomainType& d, Range js, PropertiesType prp);
+    //! \brief Construct the identity function over the domain \a d.
     static VectorScaledFunctionPatch<M> identity(const DomainType& d, PropertiesType prp);
 
     //! \brief Construct the quantity \f$c+\sum g_jx_j\f$ over the domain \a d. // DEPRECATED
@@ -688,7 +692,7 @@ template<class M> class VectorScaledFunctionPatch
     //! \brief The identity Taylor model on domain \a d.
     static VectorScaledFunctionPatch<M> identity(const BoxDomainType& d, PropertiesType prp);
     //! \brief Return the vector of variables in the range with values \a x over domain \a d.
-    static VectorScaledFunctionPatch<M> projection(const BoxDomainType& d, SizeType imin, SizeType imax, PropertiesType prp);
+    static VectorScaledFunctionPatch<M> projection(const BoxDomainType& d, Range js, PropertiesType prp);
 
     //! \brief Convert to an interval polynomial.
     Vector<Polynomial<FloatBounds<PR>>> polynomials() const;
@@ -936,6 +940,9 @@ template<class M> class VectorScaledFunctionPatch
 
 
     friend VectorScaledFunctionPatch<M> compose(const VectorFunction<P>& g, const VectorScaledFunctionPatch<M>& f) {
+        return VectorScaledFunctionPatch<M>(f.domain(),g.evaluate(f.models()));
+    }
+    friend VectorScaledFunctionPatch<M> compose(const VectorFunctionModel<P,PR,PRE>& g, const VectorScaledFunctionPatch<M>& f) {
         return VectorScaledFunctionPatch<M>(f.domain(),g.evaluate(f.models()));
     }
     friend VectorScaledFunctionPatch<M> compose(const VectorScaledFunctionPatch<M>& g, const VectorScaledFunctionPatch<M>& f) {

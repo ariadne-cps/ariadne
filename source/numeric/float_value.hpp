@@ -145,6 +145,10 @@ template<class PR> class Positive<FloatValue<PR>> : public FloatValue<PR> {
     explicit Positive<FloatValue<PR>>(FloatValue<PR> const& x) : FloatValue<PR>(x) { }
   public:
     friend Positive<FloatValue<PR>> hlf(Positive<FloatValue<PR>> const&);
+    friend Positive<FloatBounds<PR>> pow(Positive<FloatValue<PR>> const& x, Nat m) {
+        return pow(Positive<FloatBounds<PR>>(x),m); }
+    friend Positive<FloatBounds<PR>> pow(Positive<FloatBounds<PR>> const& x, Int n) {
+        return pow(Positive<FloatBounds<PR>>(x),n); }
 };
 
 template<class PR> inline PositiveFloatValue<PR> cast_positive(FloatValue<PR> const& x) {

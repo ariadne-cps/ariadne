@@ -336,6 +336,10 @@ Comparison cmp(ExactDouble const& x1, Rational const& q2) {
     return Comparison(-(int)cmp(q2,x1));
 }
 
+Rational operator"" _q(unsigned long long int n) {
+    return Rational(operator""_z(n));
+}
+
 Rational operator"" _q(long double x) {
     static const uint32_t max_cf_coef = std::numeric_limits<uint32_t>::max();
     static const std::size_t N=11;

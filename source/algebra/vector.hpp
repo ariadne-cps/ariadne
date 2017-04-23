@@ -281,6 +281,19 @@ class Range {
     SizeType stride() const { return 1u; }
     SizeType stop() const { return this->_stop; }
 };
+inline Range range(SizeType stop) { return Range(0u,stop); }
+inline Range range(SizeType start, SizeType stop) { return Range(start,stop); }
+
+struct RangeIterator {
+    explicit inline RangeIterator(SizeType i) : _i(i) { }
+    inline RangeIterator& operator++() { ++this->_i; return *this; }
+    inline SizeType operator*() const { return this->_i; }
+    friend inline bool operator!=(RangeIterator iter1, RangeIterator iter2) { return iter1._i != iter2._i; }
+  private:
+    SizeType _i;
+};
+inline RangeIterator begin(Range rng) { return RangeIterator(rng.start()); }
+inline RangeIterator end(Range rng) { return RangeIterator(rng.stop()); }
 
 class Slice {
     SizeType _size; SizeType _start; SizeType _stride;
@@ -292,8 +305,6 @@ class Slice {
     SizeType stride() const { return this->_stride; }
     SizeType stop() const { return this->_start+this->_size*this->_stride; }
 };
-
-inline Range range(SizeType start, SizeType stop) { return Range(start,stop); }
 inline Slice slice(SizeType size, SizeType start, SizeType stride) { return Slice(size,start,stride); }
 
 

@@ -735,4 +735,6 @@ FloatMP pi_near(PrecisionMP pr) { return FloatMP::pi(pr,MPFR_RNDN); }
 FloatMP pi_down(PrecisionMP pr) { return FloatMP::pi(pr,MPFR_RNDD); }
 FloatMP pi_up(PrecisionMP pr) { return FloatMP::pi(pr,MPFR_RNDU); }
 
+template<> String class_name<FloatMP>() { return "FloatMP"; }
+
 } // namespace Ariadne

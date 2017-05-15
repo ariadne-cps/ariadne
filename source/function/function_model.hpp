@@ -57,7 +57,7 @@ template<class P, class PR, class PRE> class FunctionModelFactory {
     typedef BoxDomainType DomainType;
 
     operator const FunctionModelFactoryInterface<P,PR,PRE>& () const { return *_ptr; }
-    
+
     explicit FunctionModelFactory(const FunctionModelFactoryInterface<P,PR,PRE>* p) : _ptr(p) { }
     explicit FunctionModelFactory(SharedPointer<const FunctionModelFactoryInterface<P,PR,PRE>> p) : _ptr(p) { }
 
@@ -289,6 +289,8 @@ template<class P, class PR, class PRE> class VectorFunctionModelElement
     VectorFunctionModelElement<P,PR,PRE>& operator=(const VectorFunctionModelElement<P,PR,PRE>& sf) {
         return this->operator=(static_cast<ScalarFunctionModel<P,PR,PRE>const>(sf)); }
     Void clobber() { ScalarFunctionModel<P,PR,PRE> sf=_p->get(_i); sf.clobber(); _p->set(_i,sf); }
+    const ScalarFunctionModel<P,PR,PRE> model() const { ScalarFunctionModel<P,PR,PRE> sf=_p->get(_i); return sf.model(); }
+    const CanonicalErrorType<P,PRE> error() const { ScalarFunctionModel<P,PR,PRE> sf=_p->get(_i); return sf.error(); }
     Void set_error(CanonicalErrorType<P,PRE> e) const { ScalarFunctionModel<P,PR,PRE> sf=_p->get(_i); sf.set_error(e); _p->set(_i,sf); }
     Void set_error(Nat e) const { ScalarFunctionModel<P,PR,PRE> sf=_p->get(_i); sf.set_error(e); _p->set(_i,sf); }
     friend ScalarFunctionModel<P,PR,PRE> antiderivative(VectorFunctionModelElement<P,PR,PRE> const& f, SizeType k) {
@@ -404,6 +406,8 @@ template<class P, class PR, class PRE> class VectorFunctionModel
         return f._ptr->_norm(); }
     friend VectorFunctionModel<P,PR,PRE> embed(const DomainType& d1, const VectorFunctionModel<P,PR,PRE>& f, const DomainType& d2) {
         return f._ptr->_embed(d1,d2); }
+    friend VectorFunctionModel<P,PR,PRE> embed(const DomainType& d, const VectorFunctionModel<P,PR,PRE>& f) {
+        return embed(d,f,DomainType()); }
     friend VectorFunctionModel<P,PR,PRE> embed(const VectorFunctionModel<P,PR,PRE>& f, const DomainType& d) {
         return embed(DomainType(),f,d); }
     friend VectorFunctionModel<P,PR,PRE> embed(const VectorFunctionModel<P,PR,PRE>& f, const IntervalDomainType& d) {

@@ -55,7 +55,8 @@ template<class X> Expansion<X>::Expansion(SizeType as)
 template<class X> Expansion<X>::Expansion(SizeType as, X const& z, SizeType cap)
     : _zero_coefficient(z), _capacity(cap), _size(0u), _argument_size(as)
     , _indices(new DegreeType[_capacity*(_argument_size+1)]), _coefficients(new CoefficientType[_capacity])
-{ }
+{
+}
 
 
 template<class X> Expansion<X>::Expansion(InitializerList<Pair<InitializerList<DegreeType>,X>> lst)
@@ -85,7 +86,7 @@ namespace std {
 */
 
 template<class X> Expansion<X>::Expansion(const Expansion<X>& e)
-    : _capacity(e.capacity()), _size(e.size()), _argument_size(e.argument_size())
+    : _zero_coefficient(e._zero_coefficient), _capacity(e._capacity), _size(e._size), _argument_size(e._argument_size)
     , _indices(new DegreeType[_capacity*(_argument_size+1)]), _coefficients(new CoefficientType[_capacity])
 {
     std::copy(e._indices,e._indices+_size*(_argument_size+1),_indices);
@@ -111,6 +112,7 @@ template<class X> Expansion<X>& Expansion<X>::operator=(const Expansion<X>& e)
             delete[] _indices;
             _indices=new_indices;
         }
+        _zero_coefficient=e._zero_coefficient;
         _size=e._size;
         _argument_size=e._argument_size;
         std::copy(e._indices,e._indices+_size*(_argument_size+1),_indices);
@@ -120,7 +122,7 @@ template<class X> Expansion<X>& Expansion<X>::operator=(const Expansion<X>& e)
 }
 
 template<class X> Expansion<X>::Expansion(Expansion<X>&& e)
-    : _capacity(e.capacity()), _size(e.size()), _argument_size(e.argument_size())
+    : _zero_coefficient(e._zero_coefficient), _capacity(e._capacity), _size(e._size), _argument_size(e._argument_size)
     , _indices(e._indices), _coefficients(e._coefficients)
 {
     e._indices=nullptr;
@@ -130,25 +132,32 @@ template<class X> Expansion<X>::Expansion(Expansion<X>&& e)
 template<class X> Expansion<X>& Expansion<X>::operator=(Expansion<X>&& e)
 {
     if(this!=&e) {
-        delete[] _indices;
-        delete[] _coefficients;
+        assert(this->_indices!=e._indices);
+        assert(this->_coefficients!=e._coefficients);
+
+        _zero_coefficient=e._zero_coefficient;
         _capacity=e._capacity;
         _size=e._size;
         _argument_size=e._argument_size;
+
+        delete[] _indices;
         _indices=e._indices;
-        _coefficients=e._coefficients;
         e._indices=nullptr;
+
+        delete[] _coefficients;
+        _coefficients=e._coefficients;
         e._coefficients=nullptr;
     }
     return *this;
 }
 
 template<class X> Void Expansion<X>::swap(Expansion<X>& other) {
-    std::swap(this->_coefficients,other._coefficients);
-    std::swap(this->_indices,other._indices);
-    std::swap(this->_size,other._size);
+    std::swap(this->_zero_coefficient,other._zero_coefficient);
     std::swap(this->_capacity,other._capacity);
+    std::swap(this->_size,other._size);
     std::swap(this->_argument_size,other._argument_size);
+    std::swap(this->_indices,other._indices);
+    std::swap(this->_coefficients,other._coefficients);
 }
 
 template<class X> SizeType Expansion<X>::number_of_terms() const {
@@ -436,7 +445,7 @@ Expansion<X> Expansion<X>::_embed(SizeType before_size, SizeType after_size) con
     const Expansion<X>& x=*this;
     SizeType old_size=x.argument_size();
     SizeType new_size=before_size+old_size+after_size;
-    Expansion<X> r(new_size, this->_zero_coefficient);
+    Expansion<X> r(new_size, x._zero_coefficient, x._capacity);
     MultiIndex old_index(old_size);
     MultiIndex new_index(new_size);
     for(typename Expansion<X>::ConstIterator iter=x.begin(); iter!=x.end(); ++iter) {
@@ -451,7 +460,8 @@ Expansion<X> Expansion<X>::_embed(SizeType before_size, SizeType after_size) con
 }
 
 template<class X> OutputStream& Expansion<X>::write(OutputStream& os) const {
-    os << "\nExpansion<X>{"<<this->number_of_terms()<<"/"<<this->capacity()<<","<<this->argument_size()<<"\n";
+    os << "Expansion<" << class_name<X>() <<">";
+    os << "{"<<this->number_of_terms()<<"/"<<this->capacity()<<","<<this->argument_size()<<"\n";
     for(auto iter=this->begin(); iter!=this->end(); ++iter) {
         os << "  "<<iter->index()<<":"<<iter->coefficient()<<",\n";
     }

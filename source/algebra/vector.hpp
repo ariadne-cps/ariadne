@@ -162,6 +162,10 @@ class Vector
     Vector(VectorExpression<VE> const& ve) : _ary(ve().size(),ve().zero_element()) {
             for(SizeType i=0; i!=this->size(); ++i) { this->_ary[i]=ve()[i]; } }
 
+    /*! \brief Generate from a function (object) \a g of type \a G mapping an index to a value. */
+    template<class G, EnableIf<IsInvocableReturning<X,G,SizeType>> =dummy>
+    Vector(SizeType n, G const& g) : _ary(n,g) { }
+
     //! \brief Construct from an %VectorExpression of a different type.
     template<class VE, EnableIf<IsConstructible<X,typename VE::ScalarType>> =dummy, DisableIf<IsConvertible<typename VE::ScalarType,X>> =dummy>
     explicit Vector(VectorExpression<VE> const& ve) : _ary(ve().size(),X(ve().zero_element())) {
@@ -277,6 +281,19 @@ class Range {
     SizeType stride() const { return 1u; }
     SizeType stop() const { return this->_stop; }
 };
+inline Range range(SizeType stop) { return Range(0u,stop); }
+inline Range range(SizeType start, SizeType stop) { return Range(start,stop); }
+
+struct RangeIterator {
+    explicit inline RangeIterator(SizeType i) : _i(i) { }
+    inline RangeIterator& operator++() { ++this->_i; return *this; }
+    inline SizeType operator*() const { return this->_i; }
+    friend inline bool operator!=(RangeIterator iter1, RangeIterator iter2) { return iter1._i != iter2._i; }
+  private:
+    SizeType _i;
+};
+inline RangeIterator begin(Range rng) { return RangeIterator(rng.start()); }
+inline RangeIterator end(Range rng) { return RangeIterator(rng.stop()); }
 
 class Slice {
     SizeType _size; SizeType _start; SizeType _stride;
@@ -288,8 +305,6 @@ class Slice {
     SizeType stride() const { return this->_stride; }
     SizeType stop() const { return this->_start+this->_size*this->_stride; }
 };
-
-inline Range range(SizeType start, SizeType stop) { return Range(start,stop); }
 inline Slice slice(SizeType size, SizeType start, SizeType stride) { return Slice(size,start,stride); }
 
 

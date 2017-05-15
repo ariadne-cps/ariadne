@@ -518,6 +518,21 @@ class ApproximateBoxSet
     virtual OutputStream& write(OutputStream& os) const final { return os << static_cast<const ApproximateBoxType&>(*this); }
 };
 
+class RealBoxSet
+    : public virtual DrawableInterface,
+      public Box<RealInterval>
+{
+
+  public:
+    using Box<RealInterval>::Box;
+    RealBoxSet(Box<RealInterval>const& bx) : Box<RealInterval>(bx) { }
+
+    virtual RealBoxSet* clone() const { return new RealBoxSet(*this); }
+    virtual DimensionType dimension() const final { return this->Box<RealInterval>::size(); }
+    virtual Void draw(CanvasInterface& c, const Projection2d& p) const final { return this->Box<RealInterval>::draw(c,p); }
+    virtual OutputStream& write(OutputStream& os) const final { return os << static_cast<const Box<RealInterval>&>(*this); }
+};
+
 
 } // namespace Ariadne
 

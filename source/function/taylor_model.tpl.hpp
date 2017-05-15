@@ -363,6 +363,7 @@ template<class F> Void _scal(TaylorModel<ValidatedTag,F>& r, const Bounds<F>& c)
 {
     typedef typename F::PrecisionType PR;
     //std::cerr<<"TaylorModel<ValidatedTag,F>::scal(Float64Bounds c) c="<<c<<std::endl;
+    ARIADNE_ASSERT(is_finite(c.lower().raw()) && is_finite(c.upper().raw()));
     ARIADNE_DEBUG_ASSERT(r.error().raw()>=0);
 
     const F inf = F::inf(r.precision());

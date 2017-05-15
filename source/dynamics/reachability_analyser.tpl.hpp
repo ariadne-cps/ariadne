@@ -151,7 +151,7 @@ _upper_reach(const PavingType& set,
     cells.mince(accuracy);
     for(auto cell : cells) {
         EnclosureType initial_enclosure = evolver.enclosure(cell.box());
-        ListSet<EnclosureType> reach = evolver.reach(initial_enclosure,time,UPPER_SEMANTICS);
+        ListSet<EnclosureType> reach = evolver.reach(initial_enclosure,time);
         for(auto enclosure : reach) {
             enclosure.adjoin_outer_approximation_to(result,accuracy);
         }

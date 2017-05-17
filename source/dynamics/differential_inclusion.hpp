@@ -31,8 +31,10 @@
 #include "utility/typedefs.hpp"
 #include "utility/attribute.hpp"
 #include "algebra/sweeper.hpp"
+#include "algebra/algebra.hpp"
 #include "function/domain.hpp"
 #include "function/function_model.hpp"
+#include "function/formula.hpp"
 
 namespace Ariadne {
 

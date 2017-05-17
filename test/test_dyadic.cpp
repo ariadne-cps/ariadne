@@ -23,6 +23,7 @@
 
 #include "config.h"
 
+#include "numeric/twoexp.hpp"
 #include "numeric/dyadic.hpp"
 #include "numeric/builtin.hpp"
 #include "numeric/integer.hpp"
@@ -93,7 +94,18 @@ void TestDyadic::test_literal() {
     ARIADNE_TEST_EQUALS(3.25_q2,Dyadic(13,2u));
     ARIADNE_TEST_EQUALS(-11.375_q2,Dyadic(-91,3u));
     ARIADNE_TEST_EQUALS(0.375_q2,Dyadic(3,3u));
-//    ARIADNE_TEST_EQUALS(-91/_2^3,Dyadic(-91,3u));
+
+    ARIADNE_TEST_EQUALS(_2^3,Dyadic(8));
+    ARIADNE_TEST_EQUALS(_2^-3,Dyadic(1,3u));
+    ARIADNE_TEST_EQUALS(+(_2^-4),Dyadic(1,4u));
+    ARIADNE_TEST_EQUALS(-(_2^-4),Dyadic(-1,4u));
+    ARIADNE_TEST_EQUALS(5*(_2^-3),Dyadic(5,3u));
+    ARIADNE_TEST_EQUALS(5/(_2^3),Dyadic(5,3u));
+    ARIADNE_TEST_EQUALS(5/(_2^-3),Dyadic(40));
+// The following should not compile, since ^ binds less tightly than -,*,/
+//    ARIADNE_TEST_EQUALS(-_2^-4,Dyadic(-1,4u));
+//    ARIADNE_TEST_EQUALS(5*_2^-4,Dyadic(5,4u));
+//    ARIADNE_TEST_EQUALS(5/_2^4,Dyadic(5,4u));
 }
 
 void TestDyadic::test_conversions() {

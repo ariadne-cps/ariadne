@@ -589,7 +589,7 @@ ValidatedAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingI
 class PerturbationGenerator {
   public:
     PerturbationGenerator() : _n(0) { }
-    double operator()() { _n=_n+3; if(_n>19) { _n=_n-37; } return _n*1e-14; }
+    double operator()() { _n=_n+3; if(_n>19) { _n=_n-37; } return _n*1e-13; }
   private:
     Int _n;
 };

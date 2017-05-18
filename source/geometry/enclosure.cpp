@@ -165,7 +165,13 @@ Pair<ValidatedVectorFunctionModel64,ValidatedVectorFunctionModel64> split(const 
 
 
 EnclosureConfiguration::EnclosureConfiguration(ValidatedFunctionModel64Factory function_factory)
-    : _function_factory(function_factory), _paver(new AffinePaver()), _drawer(new AffineDrawer(3)) { }
+    : _function_factory(function_factory), _paver(new AffinePaver()), _drawer(new AffineDrawer(0)) { }
+
+OutputStream& operator<<(OutputStream& os, EnclosureConfiguration const& ec) {
+    return os << "EnclosureConfiguration( function_factory=" << ec._function_factory
+              << ", paver=" << ec._paver
+              <<", drawer=" << ec._drawer<<")";
+}
 
 Void Enclosure::_check() const {
     ARIADNE_ASSERT_MSG(this->_state_function.argument_size()==this->domain().size(),*this);
@@ -174,6 +180,11 @@ Void Enclosure::_check() const {
     for(List<ValidatedConstraintModel>::ConstIterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
         ARIADNE_ASSERT_MSG(iter->function().argument_size()==this->domain().size(),*this);
     }
+}
+
+EnclosureConfiguration const&
+Enclosure::configuration() const {
+    return this->_configuration;
 }
 
 ValidatedFunctionModel64Factory const&

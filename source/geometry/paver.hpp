@@ -40,6 +40,7 @@ class Paver {
     Paver(const PaverInterface* ptr) : _ptr(ptr) { }
     Void adjoin_outer_approximation(PavingInterface& paving, const SetType& set, Int depth) const {
         this->_ptr->adjoin_outer_approximation(paving,set,depth); }
+    friend OutputStream& operator<<(OutputStream& os, Paver const& pv) { return pv._ptr->_write(os); }
 };
 
 //! \brief A class for computing outer approximations to sets defined by functions.
@@ -47,6 +48,7 @@ class AffinePaver : public PaverInterface
 {
   public:
     Void adjoin_outer_approximation(PavingInterface& paving, const SetType& set, Int depth) const;
+    OutputStream& _write(OutputStream& os) const;
 };
 
 //! \brief A class for computing outer approximations to sets defined by functions.
@@ -55,6 +57,7 @@ class SubdivisionPaver : public PaverInterface
   public:
     Void adjoin_outer_approximation(PavingInterface& paving, const SetType& set, Int depth) const;
     Void adjoin_outer_approximation_recursion(PavingInterface& paving, ValidatedConstrainedImageSet const& set, Int depth, const RawFloatVector& errors) const;
+    OutputStream& _write(OutputStream& os) const;
 };
 
 //! \brief A class for computing outer approximations to sets defined by functions.
@@ -62,6 +65,7 @@ class ReducePaver : public PaverInterface
 {
   public:
     Void adjoin_outer_approximation(PavingInterface& paving, const SetType& set, Int depth) const;
+    OutputStream& _write(OutputStream& os) const;
 };
 
 //! \brief A class for computing outer approximations to sets defined by functions.
@@ -69,6 +73,7 @@ class ConstraintPaver : public PaverInterface
 {
   public:
     Void adjoin_outer_approximation(PavingInterface& paving, const SetType& set, Int depth) const;
+    OutputStream& _write(OutputStream& os) const;
 };
 
 //! \brief A class for computing outer approximations to sets defined by functions.
@@ -76,6 +81,7 @@ class OptimalConstraintPaver : public PaverInterface
 {
   public:
     Void adjoin_outer_approximation(PavingInterface& paving, const SetType& set, Int depth) const;
+    OutputStream& _write(OutputStream& os) const;
 };
 
 } //namespace Ariadne

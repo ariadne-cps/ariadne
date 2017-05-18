@@ -43,7 +43,9 @@ class BoxDrawer : public DrawerInterface
 {
   public:
     Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const;
+    OutputStream& _write(OutputStream& os) const;
 };
+
 
 //! \brief Draw an affine over-approximation to the set.
 class EnclosureAffineDrawer : public DrawerInterface
@@ -53,6 +55,7 @@ class EnclosureAffineDrawer : public DrawerInterface
     EnclosureAffineDrawer(Nat accuracy) : _accuracy(accuracy) { }
     Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const;
     Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set, Nat accuracy) const;
+    OutputStream& _write(OutputStream& os) const;
 };
 
 //! \brief Draw an affine over-approximation to the set.
@@ -62,6 +65,7 @@ class AffineDrawer : public DrawerInterface
   public:
     AffineDrawer(Nat splittings) : _splittings(splittings) { }
     Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const;
+    OutputStream& _write(OutputStream& os) const;
 };
 
 //! \brief Subdivide the set and draw affine approximations to small pieces.
@@ -69,6 +73,7 @@ class SubdivisionDrawer : public DrawerInterface
 {
   public:
     Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const;
+    OutputStream& _write(OutputStream& os) const;
 };
 
 //! \brief Pave the set and draw the computed cells.
@@ -78,6 +83,7 @@ class GridDrawer : public DrawerInterface
   public:
     GridDrawer(Nat depth) : _depth(depth) { }
     Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const;
+    OutputStream& _write(OutputStream& os) const;
 };
 
 

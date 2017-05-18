@@ -148,6 +148,8 @@ class HybridEnclosure
     //! \brief Create a dynamically-allocated copy.
     HybridEnclosure* clone() const;
 
+    //! \brief The algorithms used to compute with the set.
+    const EnclosureConfiguration& configuration() const;
     //! \brief The current location.
     const DiscreteLocation& location() const;
     //! \brief The Euclidean space of the location, including state, time and auxiliary functions.

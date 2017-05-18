@@ -29,6 +29,7 @@
 #define ARIADNE_PAVER_INTERFACE_HPP
 
 #include "utility/declarations.hpp"
+#include "utility/writable.hpp"
 
 namespace Ariadne {
 
@@ -36,7 +37,7 @@ class PavingInterface;
 class ValidatedConstrainedImageSet;
 
 //! \brief A class for computing outer approximations to sets defined by functions.
-class PaverInterface
+class PaverInterface : public WritableInterface
 {
   public:
     typedef ValidatedConstrainedImageSet SetType;

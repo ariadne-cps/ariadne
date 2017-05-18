@@ -93,7 +93,9 @@ struct EnclosureConfiguration {
         : _function_factory(function_factory), _paver(paver), _drawer(drawer) { }
     EnclosureConfiguration& set_paver(Paver paver) { _paver=paver; return *this; }
     EnclosureConfiguration& set_drawer(Drawer drawer) { _drawer=drawer; return *this; }
+    friend OutputStream& operator<<(OutputStream& os, EnclosureConfiguration const& ec);
 };
+
 
 //! \brief A set of the form \f$x=f(s)\f$ for \f$s\in D\f$ satisfying \f$g(s)\leq0\f$ and \f$h(s)=0\f$.
 class Enclosure
@@ -131,6 +133,8 @@ class Enclosure
     //! \brief Create a dynamically-allocated copy.
     Enclosure* clone() const;
 
+    //! \brief The classes used to work with the set.
+    const EnclosureConfiguration& configuration() const;
     //! \brief The class used to create new function instances.
     const ValidatedFunctionModel64Factory& function_factory() const;
     //! \brief The class used to discretise the set.
@@ -139,6 +143,7 @@ class Enclosure
     //! \brief The class used to draw the set.
     const Drawer& drawer() const;
     Void set_drawer(Drawer const&);
+
     //! \brief The parameter domain \f$D\f$.
     ExactBoxType domain() const;
     ExactBoxType parameter_domain() const;

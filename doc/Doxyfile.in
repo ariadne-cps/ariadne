@@ -552,7 +552,16 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories 
 # with spaces.
 
-INPUT                  = @CMAKE_CURRENT_SOURCE_DIR@/include/ \
+INPUT                  = @CMAKE_CURRENT_SOURCE_DIR@/source/algebra/ \
+			 @CMAKE_CURRENT_SOURCE_DIR@/source/dynamics/ \
+			 @CMAKE_CURRENT_SOURCE_DIR@/source/expression/ \
+			 @CMAKE_CURRENT_SOURCE_DIR@/source/function/ \
+			 @CMAKE_CURRENT_SOURCE_DIR@/source/geometry/ \
+			 @CMAKE_CURRENT_SOURCE_DIR@/source/hybrid/ \
+			 @CMAKE_CURRENT_SOURCE_DIR@/source/numeric/ \
+			 @CMAKE_CURRENT_SOURCE_DIR@/source/output/ \
+			 @CMAKE_CURRENT_SOURCE_DIR@/source/solvers/ \
+			 @CMAKE_CURRENT_SOURCE_DIR@/source/utility/ \
                          @CMAKE_CURRENT_SOURCE_DIR@/doc/
 
 # This tag can be used to specify the character encoding of the source files 
@@ -610,7 +619,7 @@ EXCLUDE_SYMBOLS        =
 # directories that contain example code fragments that are included (see 
 # the \include command).
 
-EXAMPLE_PATH           = @CMAKE_CURRENT_SOURCE_DIR@/tutorial/
+EXAMPLE_PATH           = @CMAKE_CURRENT_SOURCE_DIR@/examples/tutorial.cpp
 
 # If the value of the EXAMPLE_PATH tag contains directories, you can use the 
 # EXAMPLE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 

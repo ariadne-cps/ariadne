@@ -2,10 +2,8 @@ set(EXAMPLES
     tutorial
     ballinabox
     bouncingball
-    watertank
     heating
     rectifier
-    watertank-compositional
 )
 
 
@@ -14,4 +12,5 @@ foreach(example ${EXAMPLES})
     target_link_libraries(${example} ariadne)
 endforeach()
 
+add_subdirectory(watertank)
 add_subdirectory(experimental)

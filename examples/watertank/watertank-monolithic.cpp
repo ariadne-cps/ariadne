@@ -1,5 +1,5 @@
 /***************************************************************************
- *            watertank.cpp
+ *            watertank-monolithic.cpp
  *
  *  Copyright  2008  Davide Bresolin
  *

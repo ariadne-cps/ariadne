@@ -54,17 +54,37 @@ int main()
 
     /// Set the evolution parameters
     evolver.configuration().set_maximum_enclosure_radius(1.0);
-    evolver.configuration().set_maximum_step_size(1e-2);
+    evolver.configuration().set_maximum_step_size(0.01);
     evolver.verbosity = 1;
     std::cout <<  evolver.configuration() << std::endl;
 
-    HybridSet initial_set(vanderpol|loc,{x==2,y==0});
+    Real x0(2.01);
+    Real eps(0.0);
 
-    HybridTime evolution_time(10.0,4);
+    HybridSet initial_set(vanderpol|loc,{x0-eps<=x<=x0 +eps,-eps<=y<=eps});
+
+    std::cout << "Initial set: " << initial_set << std::endl;
+    HybridTime evolution_time(6.68,4);
 
     std::cout << "Computing orbit... " << std::flush;
     OrbitType orbit = evolver.orbit(initial_set,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
 
     plot("vanderpol",Axes2d(-2.1,x,2.1, -3.0,y,3.0), Colour(0.0,0.5,1.0), orbit);
+    plot("vanderpol-tx",Axes2d(0,TimeVariable(),evolution_time.continuous_time(), -2.1,x,2.1), Colour(0.0,0.5,1.0), orbit);
+    plot("vanderpol-ty",Axes2d(0,TimeVariable(),evolution_time.continuous_time(), -3.0,y,3.0), Colour(0.0,0.5,1.0), orbit);
+
+    std::cout << "Discretising orbit" << std::flush;
+    HybridGrid grid(vanderpol.state_auxiliary_space());
+    HybridGridTreeSet hgts(grid);
+
+    for (ListSet<HybridEnclosure>::ConstIterator it = orbit.reach().begin(); it != orbit.reach().end(); it++)
+    {
+        std::cout<<"."<<std::flush;
+        it->state_auxiliary_set().adjoin_outer_approximation_to(hgts,4);
+    }
+    std::cout << "done." << std::endl;
+
+    // The following currently fails since auxiliary variables are not tracked
+    plot("vanderpol-reach", Axes2d(-2.1,x,2.1, -3.0,y,3.0), Colour(0.0,0.5,1.0), hgts);
 }

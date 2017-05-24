@@ -26,7 +26,7 @@
 
 using namespace Ariadne;
 
-HybridAutomaton getValve()
+AtomicHybridAutomaton getValve()
 {
 
     // Declare some constants. Note that system parameters should be given as variables.
@@ -47,33 +47,32 @@ HybridAutomaton getValve()
     DiscreteEvent must_start_opening("must_start_opening");
     DiscreteEvent must_start_closing("must_start_closing");
 
-    HybridAutomaton valve_automaton("valve_automaton");
-    StringVariable valve("valve");
+    AtomicHybridAutomaton valve("valve");
 
     // Declare the values the valve can variable can have
-    StringConstant open("open");
-    StringConstant opening("opening");
-    StringConstant closed("closed");
-    StringConstant closing("closing");
+    AtomicDiscreteLocation open("open");
+    AtomicDiscreteLocation opening("opening");
+    AtomicDiscreteLocation closed("closed");
+    AtomicDiscreteLocation closing("closing");
 
     // Since aperture is a known constant when the valve is open or closed,
     // specify aperture by an algebraic equation.
-    valve_automaton.new_mode(valve|open,{let(aperture)=+1.0_decimal});
-    valve_automaton.new_mode(valve|closed,{let(aperture)=0.0_decimal});
+    valve.new_mode(open,{let(aperture)=+1.0_decimal});
+    valve.new_mode(closed,{let(aperture)=0.0_decimal});
     // Specify the differential equation for how the valve opens/closes.
-    valve_automaton.new_mode(valve|opening,{dot(aperture)=+1/T});
-    valve_automaton.new_mode(valve|closing,{dot(aperture)=-1/T});
+    valve.new_mode(opening,{dot(aperture)=+1/T});
+    valve.new_mode(closing,{dot(aperture)=-1/T});
 
     // Specify the invariants valid in each mode. Note that every invariant
     // must have an action label. This is used internally, for example, to
     // check non-blockingness of urgent actions.
-    valve_automaton.new_invariant(valve|open,height<=hmax+delta,must_start_closing);
-    valve_automaton.new_invariant(valve|closed,height>=hmin-delta,must_start_opening);
+    valve.new_invariant(open,height<=hmax+delta,must_start_closing);
+    valve.new_invariant(closed,height>=hmin-delta,must_start_opening);
 
-    valve_automaton.new_transition(valve|closed,start_opening,valve|opening,{next(aperture)=aperture},height<=hmin+delta,permissive);
-    valve_automaton.new_transition(valve|opening,finished_opening,valve|open,aperture>=1,urgent);
-    valve_automaton.new_transition(valve|open,start_closing,valve|closing,{next(aperture)=aperture},height>=hmax-delta,permissive);
-    valve_automaton.new_transition(valve|closing,finished_closing,valve|closed,aperture<=0,urgent);
+    valve.new_transition(closed,start_opening,opening,{next(aperture)=aperture},height<=hmin+delta,permissive);
+    valve.new_transition(opening,finished_opening,open,aperture>=1,urgent);
+    valve.new_transition(open,start_closing,closing,{next(aperture)=aperture},height>=hmax-delta,permissive);
+    valve.new_transition(closing,finished_closing,closed,aperture<=0,urgent);
 
-    return valve_automaton;
+    return valve;
 }

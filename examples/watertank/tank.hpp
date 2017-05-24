@@ -36,7 +36,7 @@ HybridAutomaton getTank()
     RealVariable height("height");
 
     // Create the tank object
-    HybridAutomaton tank("tank_automaton");
+    HybridAutomaton tank("tank");
 
     // Declare a trivial discrete location.
     DiscreteLocation draining;

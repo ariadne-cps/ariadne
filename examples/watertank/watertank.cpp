@@ -24,7 +24,7 @@
 #include <cstdarg>
 #include "ariadne.hpp"
 #include "tank.hpp"
-#include "valve-permissive.hpp"
+#include "valve-urgent.hpp"
 
 using namespace Ariadne;
 using std::cout; using std::endl;
@@ -45,6 +45,7 @@ Int main(Int argc, const char* argv[])
     HybridAutomaton valve_automaton = getValve();
     CompositeHybridAutomaton watertank_system({tank_automaton,valve_automaton});
 
+    cout << watertank_system << endl;
     // Compute the system evolution
 
     // Create a GeneralHybridEvolver object
@@ -61,7 +62,6 @@ Int main(Int argc, const char* argv[])
     typedef GeneralHybridEvolver::EnclosureListType EnclosureListType;
 
     std::cout << "Computing evolution... " << std::flush;
-    DiscreteLocation initial_location={valve|opening};
     HybridSet initial_set({valve|opening},{height==0,aperture==0});
     HybridTime evolution_time(80.0,5);
     OrbitType orbit = evolver.orbit(initial_set,evolution_time,UPPER_SEMANTICS);

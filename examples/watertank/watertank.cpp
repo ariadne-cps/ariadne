@@ -24,7 +24,7 @@
 #include <cstdarg>
 #include "ariadne.hpp"
 #include "tank.hpp"
-#include "valve-urgent.hpp"
+#include "valve-permissive.hpp"
 
 using namespace Ariadne;
 using std::cout; using std::endl;
@@ -43,9 +43,7 @@ Int main(Int argc, const char* argv[])
 
     HybridAutomaton tank_automaton = getTank();
     HybridAutomaton valve_automaton = getValve();
-
     CompositeHybridAutomaton watertank_system({tank_automaton,valve_automaton});
-    std::cout << "watertank_system:\n" << watertank_system << "\n";
 
     // Compute the system evolution
 
@@ -55,36 +53,28 @@ Int main(Int argc, const char* argv[])
 
     // Set the evolution parameters
     evolver.configuration().set_maximum_enclosure_radius(0.25);
-    evolver.configuration().set_maximum_step_size(0.125);
-    std::cout << evolver.configuration() << std::endl;
+    evolver.configuration().set_maximum_step_size(0.26);
 
     // Declare the type to be used for the system evolution
     typedef GeneralHybridEvolver::EnclosureType HybridEnclosureType;
     typedef GeneralHybridEvolver::OrbitType OrbitType;
     typedef GeneralHybridEvolver::EnclosureListType EnclosureListType;
 
-    std::cout << "Computing evolution starting from location l2, x = 0.0, y = 0.0" << std::endl;
+    std::cout << "Computing evolution... " << std::flush;
     DiscreteLocation initial_location={valve|opening};
     HybridSet initial_set({valve|opening},{height==0,aperture==0});
-
     HybridTime evolution_time(80.0,5);
-
-    std::cout << "Computing orbit... " << std::flush;
     OrbitType orbit = evolver.orbit(initial_set,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
-
-    std::cout << "Orbit.final size="<<orbit.final().size()<<std::endl;
 
     std::cout << "Plotting trajectory... "<<std::flush;
     Axes2d time_height_axes(0<=TimeVariable()<=80,-0.1<=height<=9.1);
     plot("watertank-orbit",time_height_axes, Colour(0.0,0.5,1.0), orbit);
-    std::cout << "done." << std::endl;
-
-    std::cout << "Plotting orbit... "<<std::flush;
     Axes2d height_aperture_axes(-0.1,height,9.1, -0.1,aperture,1.3);
     plot("watertank-height_aperture",height_aperture_axes, Colour(0.0,0.5,1.0), orbit);
     std::cout << "done." << std::endl;
 
+    /*
     std::cout << "Discretising orbit" << std::flush;
     HybridGrid grid(watertank_system.state_auxiliary_space());
     HybridGridTreeSet hgts(grid);
@@ -97,4 +87,5 @@ Int main(Int argc, const char* argv[])
     std::cout << "done." << std::endl;
 
     plot("watertank-reach", height_aperture_axes, Colour(0.0,0.5,1.0), hgts);
+    */
 }

@@ -110,6 +110,11 @@ Float64 average_scaled_width(const UpperBoxType& bx, const Vector<Float64>& sf) 
 } // namespace
 
 
+OutputStream& AffinePaver::_write(OutputStream& os) const { return os << "AffinePaver()"; }
+OutputStream& SubdivisionPaver::_write(OutputStream& os) const { return os << "SubdivisionPaver()"; }
+OutputStream& ReducePaver::_write(OutputStream& os) const { return os << "ReducePaver()"; }
+OutputStream& ConstraintPaver::_write(OutputStream& os) const { return os << "ConstraintPaver()"; }
+OutputStream& OptimalConstraintPaver::_write(OutputStream& os) const { return os << "OptimalConstraintPaver()"; }
 
 Void SubdivisionPaver::adjoin_outer_approximation(PavingInterface& paving, const ValidatedConstrainedImageSet& set, Int depth) const
 {

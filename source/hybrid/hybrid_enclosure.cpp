@@ -184,6 +184,12 @@ HybridEnclosure::previous_events() const
     return this->_events;
 }
 
+EnclosureConfiguration const&
+HybridEnclosure::configuration() const
+{
+    return this->_set.configuration();
+}
+
 ValidatedFunctionModel64FactoryInterface const&
 HybridEnclosure::function_factory() const
 {

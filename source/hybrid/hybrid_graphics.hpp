@@ -155,40 +155,15 @@ inline HybridFigure& operator<<(HybridFigure& g, const FillColour& fc) { g.set_f
 inline Void draw(HybridFigure& fig, const HybridDrawableInterface& shape) { fig.draw(shape); }
 inline HybridFigure& operator<<(HybridFigure& fig, const HybridDrawableInterface& shape) { fig.draw(shape); return fig; }
 
-template<class SET1>
-Void plot(const char* filename, const Axes2d& axes, const Colour& fc1, const SET1& set1) {
-    HybridFigure g; g.set_axes(axes); g.set_fill_colour(fc1); draw(g,set1); g.write(filename); }
+inline Void draw(HybridFigure& g) { }
 
-template<class SET1,class SET2>
-Void plot(const char* filename, const Axes2d& axes, const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2) {
-    HybridFigure g; g.set_axes(axes); g.set_fill_colour(fc1); draw(g,set1); g.set_fill_colour(fc2); draw(g,set2); g.write(filename); }
+template<class SET, class... CSETS>
+inline Void draw(HybridFigure& g, const Colour& fc1, const SET& set1, CSETS const&... csets) {
+    g.set_fill_colour(fc1); draw(g,set1); draw(g,csets...); }
 
-template<class SET1,class SET2,class SET3>
-Void plot(const char* filename, const Axes2d& axes, const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2,
-          const Colour& fc3, const SET3& set3) {
-    HybridFigure g; g.set_axes(axes); g.set_fill_colour(fc1); draw(g,set1); g.set_fill_colour(fc2); draw(g,set2);
-    g.set_fill_colour(fc3); draw(g,set3); g.write(filename); }
-
-template<class SET1,class SET2,class SET3,class SET4>
-Void plot(const char* filename, const Axes2d& axes, const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2,
-          const Colour& fc3, const SET3& set3, const Colour& fc4, const SET4& set4) {
-    HybridFigure g;  g.set_axes(axes); g.set_fill_colour(fc1); draw(g,set1); g.set_fill_colour(fc2); draw(g,set2);
-    g.set_fill_colour(fc3); draw(g,set3); g.set_fill_colour(fc4); draw(g,set4); g.write(filename); }
-
-template<class SET1,class SET2,class SET3,class SET4,class SET5>
-Void plot(const char* filename, const Axes2d& axes, const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2,
-          const Colour& fc3, const SET3& set3, const Colour& fc4, const SET4& set4, const Colour& fc5, const SET5& set5) {
-    HybridFigure g;  g.set_axes(axes); g.set_fill_colour(fc1); draw(g,set1); g.set_fill_colour(fc2); draw(g,set2);
-    g.set_fill_colour(fc3); draw(g,set3); g.set_fill_colour(fc4); draw(g,set4);
-    g.set_fill_colour(fc5); draw(g,set5); g.write(filename); }
-
-template<class SET1,class SET2,class SET3,class SET4,class SET5,class SET6>
-Void plot(const char* filename, const Axes2d& axes, const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2,
-          const Colour& fc3, const SET3& set3, const Colour& fc4, const SET4& set4,
-          const Colour& fc5, const SET5& set5, const Colour& fc6, const SET6& set6) {
-    HybridFigure g;  g.set_axes(axes); g.set_fill_colour(fc1); draw(g,set1); g.set_fill_colour(fc2); draw(g,set2);
-    g.set_fill_colour(fc3); draw(g,set3); g.set_fill_colour(fc4); draw(g,set4);
-    g.set_fill_colour(fc5); draw(g,set5); g.set_fill_colour(fc6); draw(g,set6); g.write(filename); }
+template<class... CSETS>
+Void plot(const char* filename, const Axes2d& axes, CSETS const&... csets) {
+    HybridFigure g;  g.set_axes(axes); draw(g,csets...); g.write(filename); }
 
 } // namespace Ariadne
 

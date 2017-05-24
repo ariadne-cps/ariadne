@@ -30,6 +30,7 @@
 
 #include "utility/exceptions.hpp"
 #include "numeric/float.hpp"
+#include "numeric/dyadic.hpp"
 #include "numeric/rational.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/covector.hpp"
@@ -884,6 +885,8 @@ template PositiveFloatDPUpperBound sup_norm(const Matrix<FloatDPBounds>& A);
 template FloatDPUpperBound log_norm(const Matrix<FloatDPBounds>& A);
 
 template Matrix<FloatDPValue>const& cast_exact(const Matrix<FloatDPApproximation>& mx);
+
+template class Matrix<Dyadic>;
 
 template class Matrix<Rational>;
 template Matrix<Rational> inverse(const Matrix<Rational>&);

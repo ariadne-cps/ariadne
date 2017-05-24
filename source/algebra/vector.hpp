@@ -92,6 +92,7 @@ struct DeclareVectorOperations {
     template<class X1, class X2> friend Vector<InplaceQuotientType<X1,X2>>& operator/=(Vector<X1>& v1, X2 const& x2);
     template<class X> friend decltype(abs(declval<X>())) norm(Vector<X> const& v);
     template<class X> friend decltype(mag(declval<X>())) sup_norm(Vector<X> const& v);
+    template<class X> friend decltype(sqrt(sqr(declval<X>()))) two_norm(Vector<X> const& v);
     template<class X1, class X2> friend ArithmeticType<X1,X2> dot(Vector<X1> const& v1, Vector<X2> const& v2);
     template<class X1, class X2> friend EqualsType<X1,X2> operator==(Vector<X1> const& v1, Vector<X2> const& v2);
     template<class X1, class X2> friend decltype(declval<X1>()!=declval<X2>()) operator!=(Vector<X1> const& v1, Vector<X2> const& v2);
@@ -430,6 +431,14 @@ struct ProvideVectorOperations {
             r=max(r,mag(v[i]));
         }
         return r;
+    }
+
+    template<class X> friend decltype(sqrt(sqr(declval<X>()))) two_norm(const Vector<X>& v) {
+        decltype(sqr(declval<X>())) s=sqr(v.zero_element());
+        for(SizeType i=0; i!=v.size(); ++i) {
+            s=add(s,sqr(v[i]));
+        }
+        return sqrt(s);
     }
 
     template<class X1, class X2> friend EqualsType<X1,X2> operator==(const Vector<X1>& v1, const Vector<X2>& v2) {

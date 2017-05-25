@@ -13,4 +13,5 @@ foreach(example ${EXAMPLES})
 endforeach()
 
 add_subdirectory(watertank)
+add_subdirectory(twowatertanks)
 add_subdirectory(experimental)

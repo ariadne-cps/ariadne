@@ -69,7 +69,7 @@ Int main(Int argc, const char* argv[])
     evolver.verbosity=evolver_verbosity;
 
     /// Set the evolution parameters
-    evolver.configuration().set_maximum_enclosure_radius(0.05);
+    evolver.configuration().set_maximum_enclosure_radius(2.0);
     evolver.configuration().set_maximum_step_size(1.0/32);
     std::cout <<  evolver.configuration() << std::endl;
 
@@ -78,64 +78,14 @@ Int main(Int argc, const char* argv[])
     typedef GeneralHybridEvolverType::EnclosureListType EnclosureListType;
     typedef GeneralHybridEvolverType::OrbitType OrbitType;
 
-    std::cout << "Computing evolution starting from location l1, x = 2.0, v = 0.0" << std::endl;
-
-    // FIXME: Currently fails with singleton initial set
-    // HybridSet initial_set(freefall,{2<=x<=2,v.in(0,0)});
-    std::cout << "WARNING: Cannot compute on initial set with empty interior.";
-    Real e(1.0/1024/1024);
-    HybridSet initial_set(freefall,{2-e<=x<=2+e,v.in(0-e,0+e)});
+    Real e(1.0/16);
+    HybridSet initial_set(freefall,{2-e<=x<=2+e,-e<=v<=e});
     HybridTime evolution_time(1.5,4);
 
-    std::cout << "Computing orbit... " << std::flush;
-    OrbitType orbit = evolver.orbit(initial_set,evolution_time,UPPER_SEMANTICS);
+    std::cout << "Computing evolution... " << std::flush;
+    OrbitType orbit = evolver.orbit(initial_set,evolution_time,LOWER_SEMANTICS);
     std::cout << "done." << std::endl;
 
-    //std::cout << "Orbit="<<orbit<<std::endl;
-    std::cout << "Orbit.final()="<<orbit.final()<<std::endl;
-    plot("bouncingball-orbit",Axes2d(-0.1,x,2.1, -10.1,v,10.1), Colour(0.0,0.5,1.0), orbit);
-    plot("bouncingball-x",Axes2d(0.0,TimeVariable(),1.5,- 0.1,x,2.1), Colour(0.0,0.5,1.0), orbit);
-
-    std::cout << "\norbit: 1 initial set, "<<orbit.reach().size()<<" reach sets, "<<orbit.intermediate().size()<<" intermediate sets, "<<orbit.final().size()<<" final sets\n\n";
-
-/*
-    std::cout << "Computing reach set using GeneralHybridEvolver... " << std::flush;
-    EnclosureListType reach = evolver.reach(initial_enclosure,evolution_time);
-    std::cout << "done." << std::endl;
-
-    std::cout << "Reach="<<reach<<std::endl;
-    //plot("tutorial-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit.initial());
-    plot("ball-reach-evolver",bounding_box, Colour(0.0,0.5,1.0), reach);
-
-    /// Create a ReachabilityAnalyser object
-    HybridReachabilityAnalyser analyser(evolver);
-    analyser.verbosity = 6;
-    analyser.parameters().lock_to_grid_time = 32.0;
-    analyser.parameters().maximum_grid_depth= 5;
-    std::cout <<  analyser.parameters() << std::endl;
-
-    HybridImageSet initial_set;
-    initial_set[l1]=initial_box;
-
-    HybridTime reach_time(4.0,2);
-
-    plot("ball-initial_set1",bounding_box, Colour(0.0,0.5,1.0), initial_set);
-
-    // Compute evolved sets (i.e. at the evolution time) and reach sets (i.e. up to the evolution time) using lower semantics.
-    // These functions run a bunch of simulations with singleton approximation errors and combines the results.
-    // If the desired evolution time can not be attained without exceeding the error bounds, then the run discarded (without warning)
-    std::cout << "Computing lower reach set... " << std::flush;
-    HybridGridTreeSet* lower_reach_set_ptr = analyser.lower_reach(ball,initial_set,reach_time);
-    std::cout << "done." << std::endl;
-    plot("ball-lower_reach",bounding_box, Colour(0.0,0.5,1.0), *lower_reach_set_ptr);
-
-    // Compute evolved sets and reach sets using upper semantics.
-    // These functions compute over-approximations to the evolved and reachabe sets. Subdivision is used
-    // as necessary to keep the local errors reasonable. The accumulated global error may be very large.
-    std::cout << "Computing upper reach set... " << std::flush;
-    HybridGridTreeSet* upper_reach_set_ptr = analyser.upper_reach(ball,initial_set,reach_time);
-    std::cout << "done." << std::endl;
-    plot("ball-upper_reach",bounding_box, Colour(0.0,0.5,1.0), *upper_reach_set_ptr);
-*/
-
+    plot("bouncingball-xv",Axes2d(-0.1,x,2.1, -10.1,v,10.1), Colour(0.0,0.5,1.0), orbit);
+    plot("bouncingball-tx",Axes2d(0.0,TimeVariable(),1.5,- 0.1,x,2.1), Colour(0.0,0.5,1.0), orbit);
 }

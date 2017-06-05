@@ -57,7 +57,7 @@ Int main(Int argc, const char* argv[])
 
     // Set the evolution parameters
     evolver.configuration().set_maximum_enclosure_radius(3.05);
-    evolver.configuration().set_maximum_step_size(1.0);
+    evolver.configuration().set_maximum_step_size(0.25);
 
     // Declare the type to be used for the system evolution
     typedef GeneralHybridEvolver::EnclosureType HybridEnclosureType;
@@ -65,8 +65,10 @@ Int main(Int argc, const char* argv[])
     typedef GeneralHybridEvolver::EnclosureListType EnclosureListType;
 
     std::cout << "Computing evolution... " << std::flush;
-    HybridSet initial_set({valve|opening},{height==0,aperture==0});
-    HybridTime evolution_time(80.0,5);
+    Real a_max(1.0/32);
+    
+    HybridSet initial_set({valve|opening},{0<=height<=2.0_decimal,0<=aperture<=a_max});
+    HybridTime evolution_time(80.0,4);
     OrbitType orbit = evolver.orbit(initial_set,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
 
@@ -93,12 +95,12 @@ Int main(Int argc, const char* argv[])
     analyser.configuration().set_lock_to_grid_steps(2);
     analyser.configuration().set_lock_to_grid_time(80.0);
 
-
+/*
     std::cout << "Computing upper reach... " << std::flush;
     HybridGridTreeSet upper_reach = analyser.upper_reach(initial_set,evolution_time);
     std::cout << "Plotting reachable sets... " << std::flush;
     plot("watertank-upper-reach", height_aperture_axes, Colour(0.0,0.5,1.0), upper_reach);
-
+*/
     /*
     std::cout << "Discretising orbit" << std::flush;
     HybridGrid grid(watertank_system.state_auxiliary_space());

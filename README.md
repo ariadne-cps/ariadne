@@ -23,7 +23,7 @@ $ cd build
 The library dependencies of ARIADNE are the following:
 
 ##### Ubuntu
-Aptitude packages required: `git cmake libgmp-dev libmpfr-dev libboost-serialization-dev libboost-python-dev libgtk2.0-dev libcairo2-dev`
+Aptitude packages required: `git cmake libgmp-dev libmpfr-dev libboost-system-dev libboost-serialization-dev libboost-python-dev libgtk2.0-dev libcairo2-dev`
 
 ##### OSX
 1. Install the Command Line Developer Tools (will also be asked when installing Homebrew) from the Apple Store

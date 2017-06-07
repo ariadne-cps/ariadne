@@ -1,7 +1,7 @@
 /***************************************************************************
- *            watertank.cpp
+ *            watertank-hysteresis.cpp
  *
- *  Copyright  2008-16  Davide Bresolin, Pieter Collins
+ *  Copyright  2017  Luca Geretti
  *
  ****************************************************************************/
 
@@ -24,7 +24,7 @@
 #include <cstdarg>
 #include "ariadne.hpp"
 #include "tank.hpp"
-#include "valve-urgent.hpp"
+#include "valve-hysteresis-urgent.hpp"
 
 using namespace Ariadne;
 using std::cout; using std::endl;
@@ -67,7 +67,7 @@ Int main(Int argc, const char* argv[])
     std::cout << "Computing evolution... " << std::flush;
     Real a_max(1.0/32);
     
-    HybridSet initial_set({valve|opening},{0<=height<=2.0_decimal,0<=aperture<=a_max});
+    HybridSet initial_set({valve|opening},{0<=height<=0.5_decimal,0<=aperture<=a_max});
     HybridTime evolution_time(80.0,4);
     OrbitType orbit = evolver.orbit(initial_set,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
@@ -79,8 +79,10 @@ Int main(Int argc, const char* argv[])
     plot("watertank-height_aperture",height_aperture_axes, Colour(0.0,0.5,1.0), orbit);
     std::cout << "done." << std::endl;
 
+    /*
     HybridReachabilityAnalyser analyser(watertank_system,evolver);
-   /* HybridBoxes bounding_domain;
+
+    HybridBoxes bounding_domain;
     Box continuous_domain_2d(2,-1.0,10,0,-1.0,2.0);
     Box continuous_domain_1d(1,-1.0,10.0);
     bounding_domain.insert(valve|opening,watertank_system.state_space()[valve|opening],continuous_domain_2d);
@@ -89,12 +91,13 @@ Int main(Int argc, const char* argv[])
     bounding_domain.insert(valve|closed,watertank_system.state_space()[valve|closed],continuous_domain_1d);
     analyser.configuration().set_bounding_domain(bounding_domain);
     */
+    /*
     std::shared_ptr<HybridGrid> grid(new HybridGrid(watertank_system.state_auxiliary_space()));
     analyser.configuration().set_grid(grid);
     analyser.configuration().set_maximum_grid_depth(3);
     analyser.configuration().set_lock_to_grid_steps(2);
     analyser.configuration().set_lock_to_grid_time(80.0);
-
+	*/
 /*
     std::cout << "Computing upper reach... " << std::flush;
     HybridGridTreeSet upper_reach = analyser.upper_reach(initial_set,evolution_time);

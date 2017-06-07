@@ -1,5 +1,5 @@
 /***************************************************************************
- *            valve-permissive.hpp
+ *            valve-hysteresis-permissive.hpp
  *
  *  Copyright  2017 Luca Geretti
  *

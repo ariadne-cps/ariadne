@@ -1,6 +1,6 @@
 set(WATERTANK_EXAMPLES 
-    watertank
-    watertank-monolithic
+    watertank-hysteresis
+    watertank-proportional
 )
 
 foreach(example ${WATERTANK_EXAMPLES})

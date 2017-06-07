@@ -1,5 +1,5 @@
 /***************************************************************************
- *            valve-urgent.hpp
+ *            valve-proportional-urgent.hpp
  *
  *  Copyright  2017 Luca Geretti
  *
@@ -29,18 +29,16 @@ using namespace Ariadne;
 AtomicHybridAutomaton getValve()
 {
 
-    // Declare some constants. Note that system parameters should be given as variables.
-    RealConstant T("T",4.0_decimal);
-    RealConstant hmin("hmin",5.5_decimal);
-    RealConstant hmax("hmax",8.0_decimal);
+    // Declare some constants.
+    RealConstant K("K",2.0_decimal); // Gain of the proportional controller
+    RealConstant Ref("Ref",7.0_decimal); // Reference height
 
     // Declare the shared system variables
     RealVariable aperture("aperture");
     RealVariable height("height");
 
     // Declare the events we use
-    DiscreteEvent start_opening("start_opening");
-    DiscreteEvent start_closing("start_closing");
+    DiscreteEvent start_modulating("start_modulating");
     DiscreteEvent finished_opening("finished_opening");
     DiscreteEvent finished_closing("finished_closing");
 
@@ -48,22 +46,20 @@ AtomicHybridAutomaton getValve()
 
     // Declare the values the valve variable can have
     AtomicDiscreteLocation opened("opened");
-    AtomicDiscreteLocation opening("opening");
+    AtomicDiscreteLocation modulated("modulated");
     AtomicDiscreteLocation closed("closed");
-    AtomicDiscreteLocation closing("closing");
 
     // Since aperture is a known constant when the valve is open or closed,
     // specify aperture by an algebraic equation.
     valve_automaton.new_mode(opened,{let(aperture)=+1.0_decimal});
     valve_automaton.new_mode(closed,{let(aperture)=0.0_decimal});
-    // Specify the differential equation for how the valve opens/closes.
-    valve_automaton.new_mode(opening,{dot(aperture)=+1/T});
-    valve_automaton.new_mode(closing,{dot(aperture)=-1/T});
+    // Specify the differential equation for when the proportional control is in effect
+    valve_automaton.new_mode(modulated,{let(aperture)=K*(Ref-height)});
 
-    valve_automaton.new_transition(closed,start_opening,opening,{next(aperture)=aperture},height<=hmin,urgent);
-    valve_automaton.new_transition(opening,finished_opening,opened,aperture>=1,urgent);
-    valve_automaton.new_transition(opened,start_closing,closing,{next(aperture)=aperture},height>=hmax,urgent);
-    valve_automaton.new_transition(closing,finished_closing,closed,aperture<=0,urgent);
+    valve_automaton.new_transition(modulated,finished_opening,closed,K*(Ref-height)<=0,urgent);
+    valve_automaton.new_transition(modulated,finished_closing,opened,K*(Ref-height)>=1,urgent);
+    valve_automaton.new_transition(opened,start_modulating,modulated,K*(Ref-height)<=1,urgent);
+    valve_automaton.new_transition(closed,start_modulating,modulated,K*(Ref-height)>=0,urgent);
 
     return valve_automaton;
 }

@@ -71,6 +71,8 @@ template<class T, class U> using IsStrictlyConstructible = And<IsConstructible<T
 template<class T> using IsDefaultConstructible = std::is_default_constructible<T>;
 template<class T, class U> using IsAssignable = std::is_assignable<T,U>;
 template<class T, class U> using IsBaseOf = std::is_base_of<T,U>;
+//template<class F, class... AS> using IsInvocable = std::is_invokable<F,AS...>;
+//template<class R, class F, class... AS> using IsInvocableReturning = std::is_invokable_r<R,F,AS...>;
 template<class T> using IsBuiltinArithmetic = std::is_arithmetic<T>;
 template<class T> using IsBuiltinIntegral = std::is_integral<T>;
 template<class T> using IsBuiltinFloatingPoint = std::is_floating_point<T>;
@@ -119,6 +121,27 @@ template<class X1, class X2=X1> using ArithmeticType = SumType<ProductType<X1,X2
 template<class X1, class X2=X1> using EqualsType = decltype(declval<X1>()==declval<X2>());
 template<class X1, class X2=X1> using LessType = decltype(declval<X1>()< declval<X2>());
 template<class X1, class X2=X1> using ComparisonType = LessType<X1,X2>;
+
+//template<class R, class F, class... AS> using IsInvocableReturning = std::is_invokable_r<R,F,AS...>;
+template<class F, class... AS> struct IsInvocable;
+template<class R, class F, class... AS> struct IsInvocableReturning;
+
+template<class F, class A> struct IsInvocable<F,A> {
+    template<class FF, class AA, class=decltype(std::declval<FF>()(std::declval<AA>()))>
+        static std::true_type test(int);
+    template<class FF, class AA>
+        static std::false_type test(...);
+    static const bool value = decltype(test<F,A>(1))::value;
+};
+
+template<class R, class F, class A> struct IsInvocableReturning<R,F,A> {
+    template<class RR, class FF, class AA, class=decltype(std::declval<RR>()=std::declval<FF>()(std::declval<AA>()))>
+        static std::true_type test(int);
+    template<class RR, class FF, class AA>
+        static std::false_type test(...);
+    static const bool value = decltype(test<R,F,A>(1))::value;
+};
+
 
 // The following class only accepts an exact match as an argument
 template<class T> class SuppressConversions {

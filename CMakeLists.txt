@@ -30,6 +30,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -O1")
 # add support for precompiled headers and single compilation unit
 include(cotire)
 
+include(UseDoxygen OPTIONAL)
+
 include (CheckTypeSize)
 include (CheckIncludeFile)
 include (CheckIncludeFileCXX)

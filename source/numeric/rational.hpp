@@ -101,6 +101,7 @@ class Rational
     friend class Dyadic;
 };
 template<> struct IsNumericType<Rational> : True { };
+Rational operator"" _q(unsigned long long int n);
 Rational operator"" _q(long double x);
 
 template<class N, EnableIf<IsBuiltinIntegral<N>>> inline Rational::Rational(N n) : Rational(Int64(n)) { }

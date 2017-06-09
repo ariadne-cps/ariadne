@@ -32,7 +32,7 @@ OTHER_CXXWARNINGS=-Wall
 
 VPATH = source test wrap examples \
 	source/utility source/numeric source/expression source/algebra source/function source/geometry source/solvers source/dynamics source/hybrid source/output \
-	examples/experimental
+	source/experimental examples/experimental
 
 HDR = \
 	standard.hpp numeric.hpp functional.hpp
@@ -98,12 +98,13 @@ TEST_GEOMETRY_SRC = \
 
 LIB_DYNAMICS_SRC = \
 	orbit.cpp \
+    differential_inclusion.cpp \
 	map_evolver.cpp \
 	vector_field_evolver.cpp \
 	reachability_analyser.cpp
 
 TEST_DYNAMICS_SRC = \
-	test_discrete_evolution.cpp \
+    test_discrete_evolution.cpp \
 	test_continuous_evolution.cpp
 
 LIB_EXPRESSION_SRC = \
@@ -136,6 +137,10 @@ LIB_EXTRAS_SRC = \
 	geometry.cpp \
 	textplot.cpp
 
+LIB_EXPERIMENTAL_SRC = \
+	control_validator.cc \
+	dynamic_game.cc
+
 LIB_SRC = $(LIB_NUMERIC_SRC) $(LIB_ALGEBRA_SRC) $(LIB_FUNCTION_SRC) $(LIB_SOLVER_SRC) $(LIB_GEOMETRY_SRC) $(LIB_DYNAMICS_SRC) $(LIB_EXPRESSION_SRC) $(LIB_HYBRID_SRC)
 
 TESTS_SRC = $(TEST_NUMERIC_SRC) $(TEST_ALGEBRA_SRC) $(TEST_FUNCTION_SRC) $(TEST_SOLVER_SRC) $(TEST_GEOMETRY_SRC) $(TEST_DYNAMICS_SRC) $(TEST_EXPRESSION_SRC) $(TEST_HYBRID_SRC)
@@ -164,6 +169,7 @@ EXAMPLES_SRC = \
 	rectifier.cpp \
 
 EXAMPLES_EXPERIMENTAL_SRC = \
+    harmonic_inclusion.cpp \
 	exponential.cpp \
 	laser.cpp \
 	circle.cpp \
@@ -221,7 +227,7 @@ PYTHON_LINK_LIBS=-lboost_python -l$(PYTHON_LIBRARY)
 # Pull in dependency information
 include $(DEPS)
 
-phony: all help dirs deps hdr lib tests wrap examples check clean shiny
+phony: all help dirs deps hdr lib tests wrap examples experimental check clean shiny
 
 help:
 	@echo "\nDEPS"=$(DEPS)
@@ -257,6 +263,8 @@ helpdep:
 hdr: dirs deps $(PCH)
 
 lib: dirs deps hdr libariadne.so libariadne-function.so
+
+experimental: dirs $(LIB_EXPERIMENTAL_OBJ)
 
 wrap: lib $(WRAP_OBJ) ariadne.so numeric.so
 

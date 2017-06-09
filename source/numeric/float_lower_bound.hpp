@@ -93,6 +93,9 @@ template<class PR> class FloatLowerBound
     friend Bool same(FloatLowerBound<PR> const&, FloatLowerBound<PR> const&);
     friend Bool refines(FloatLowerBound<PR> const&, FloatLowerBound<PR> const&);
     friend FloatLowerBound<PR> refinement(FloatLowerBound<PR> const&, FloatLowerBound<PR> const&);
+  public:
+    friend FloatLowerBound<PR> operator*(FloatLowerBound<PR> const& x1, Positive<FloatValue<PR>> const& x2) {
+        return FloatLowerBound<PR>(mul_down(x1.raw(),x2.raw())); }
   private: public:
     static Nat output_places;
     RawFloatType _l;
@@ -109,7 +112,10 @@ template<class PR> class Positive<FloatLowerBound<PR>> : public FloatLowerBound<
     explicit Positive<FloatLowerBound<PR>>(FloatLowerBound<PR> const& x) : FloatLowerBound<PR>(x) { }
     explicit Positive<FloatLowerBound<PR>>(ValidatedLowerNumber const& y, PR pr) : FloatLowerBound<PR>(y,pr) { }
     Positive<FloatLowerBound<PR>>(PositiveFloatValue<PR> const& x) : FloatLowerBound<PR>(x) { }
+    Positive<FloatLowerBound<PR>>(PositiveFloatBounds<PR> const& x) : FloatLowerBound<PR>(x) { }
   public:
+    friend Positive<FloatLowerBound<PR>> operator*(Positive<FloatLowerBound<PR>> const& x1, Positive<FloatValue<PR>> const& x2) {
+        return Positive<FloatLowerBound<PR>>(mul_down(x1.raw(),x2.raw())); }
 };
 
 template<class PR> inline PositiveFloatLowerBound<PR> cast_positive(FloatLowerBound<PR> const& x) {

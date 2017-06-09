@@ -589,7 +589,7 @@ ValidatedAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingI
 class PerturbationGenerator {
   public:
     PerturbationGenerator() : _n(0) { }
-    double operator()() { _n=_n+3; if(_n>19) { _n=_n-37; } return _n*1e-14; }
+    double operator()() { _n=_n+3; if(_n>19) { _n=_n-37; } return _n*1e-13; }
   private:
     Int _n;
 };
@@ -615,16 +615,22 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
     ValidatedAffineModel const& xa=this->_space_models[xind];
     ValidatedAffineModel const& ya=this->_space_models[yind];
 
-    // The set is given by (x,y)=Gs+h, where As=b and l<=s<=u
-    Matrix<Float64> G=Matrix<Float64>::zero(2,np);
-    for(Nat j=0; j!=nx; ++j) { G[0][j]=numeric_cast<RawFloat64>(xa.gradient(j))+eps(); G[1][j]=numeric_cast<RawFloat64>(ya.gradient(j))+eps(); }
-    G[0][nx+0]=xa.error().raw()+std::abs(eps()); G[1][nx+1]=ya.error().raw()+std::abs(eps());
-    Vector<Float64> h(2);
-    h[0]=numeric_cast<RawFloat64>(xa.value()); h[1]=numeric_cast<RawFloat64>(ya.value());
-    ARIADNE_LOG(5,"G="<<G<<" h="<<h<<"\n");
+    // The set is given by pt=Gx+h, where Ax=b and l<=x<=u
+    Matrix<Float64> G=Matrix<Float64>::zero(ne,np);
+    for(Nat j=0; j!=nx; ++j) {
+        G[0][j]=numeric_cast<Float64>(xa.gradient(j))+eps();
+        G[1][j]=numeric_cast<Float64>(ya.gradient(j))+eps();
+    }
+    G[0][nx+nc+0]=numeric_cast<Float64>(1.0);
+    G[1][nx+nc+1]=numeric_cast<Float64>(1.0);
+    Vector<Float64> h(ne);
+    h[0]=numeric_cast<Float64>(xa.value());
+    h[1]=numeric_cast<Float64>(ya.value());
+    ARIADNE_LOG(3," G="<<G<<"\n h="<<h<<"\n");
 
     // Set up linear programming problem Ax=b; l<=x<=u
     // Since the parameter domain is given by cl<=Ay+b+/-e<=cu, -1<=y<=+1, introduce slack variables z such that z-Ay=b, with cl-e<=z<=cu+e
+    // Need to keep point error variables, introduce extra variables
 
     Matrix<Float64> A(nc,np);
     Vector<Float64> b(nc);
@@ -632,36 +638,31 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
     Vector<Float64> u(np);
 
     for(Nat j=0; j!=nx; ++j) {
-        l[j]=-1.0+eps();
-        u[j]=+1.0+eps();
+        l[j]=numeric_cast<Float64>(-1.0);
+        u[j]=numeric_cast<Float64>(+1.0);
     }
+
     for(Nat i=0; i!=nc; ++i) {
         for(Nat j=0; j!=nx; ++j) {
-            A[i][j] = neg( this->_constraint_models[i].function().gradient(j).raw() );
+            A[i][j] = neg( numeric_cast<Float64>(this->_constraint_models[i].function().gradient(j)) );
         }
-        for(Nat j=nx; j!=nx+nc; ++j) {
-            A[i][j] = 0.0;
+        for(Nat j=nx; j!=nx+nc+ne; ++j) {
+            A[i][j] = numeric_cast<Float64>(0.0);
         }
-        A[i][nx+i]=1.0;
-        Float64 fb=this->_constraint_models[i].function().value().raw();
-        Float64 fe=this->_constraint_models[i].function().error().raw();
-        Float64 cl=this->_constraint_models[i].lower_bound().value().raw();
-        Float64 cu=this->_constraint_models[i].upper_bound().value().raw();
-        b[i]=fb;
+        A[i][nx+i]=numeric_cast<Float64>(1.0);
+        Float64 fb=numeric_cast<Float64>(this->_constraint_models[i].function().value());
+        Float64 fe=numeric_cast<Float64>(this->_constraint_models[i].function().error().raw());
+        Float64 cl=numeric_cast<Float64>(this->_constraint_models[i].lower_bound().value());
+        Float64 cu=numeric_cast<Float64>(this->_constraint_models[i].upper_bound().value());
+        b[i]=fb+eps();
         l[nx+i]=cl-fe;
         u[nx+i]=cu+fe;
     }
 
-    if(xa.error().raw()==0.0) {
-        l[nx+nc]=0.0; u[nx+nc]=0.0;
-    } else {
-        l[nx+nc]=-1.0; u[nx+nc]=+1.0;
-    }
-    if(ya.error().raw()==0.0) {
-        l[nx+nc+1]=0.0; u[nx+nc+1]=0.0;
-    } else {
-        l[nx+nc+1]=-1.0; u[nx+nc+1]=+1.0;
-    }
+    l[nx+nc]=static_cast<Float64>(-xa.error().raw());
+    u[nx+nc]=static_cast<Float64>(+xa.error().raw());
+    l[nx+nc+1]=static_cast<Float64>(-ya.error().raw());
+    u[nx+nc+1]=static_cast<Float64>(+ya.error().raw());
     ARIADNE_LOG(3," A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<"\n");
 
     List<Point2d> vertices;

@@ -94,6 +94,9 @@ template<class PR> class FloatUpperBound
     friend Bool same(FloatUpperBound<PR> const&, FloatUpperBound<PR> const&);
     friend Bool refines(FloatUpperBound<PR> const&, FloatUpperBound<PR> const&);
     friend FloatUpperBound<PR> refinement(FloatUpperBound<PR> const&, FloatUpperBound<PR> const&);
+  public:
+    friend FloatUpperBound<PR> operator*(FloatUpperBound<PR> const& x1, Positive<FloatValue<PR>> const& x2) {
+        return FloatUpperBound<PR>(mul_up(x1.raw(),x2.raw())); }
   private: public:
     static Nat output_places;
     RawFloatType _u;
@@ -111,7 +114,10 @@ template<class PR> class Positive<FloatUpperBound<PR>> : public FloatUpperBound<
     explicit Positive<FloatUpperBound<PR>>(FloatUpperBound<PR> const& x) : FloatUpperBound<PR>(x) { ARIADNE_PRECONDITION_MSG(!(this->_u<0),"x="<<x); }
     explicit Positive<FloatUpperBound<PR>>(ValidatedUpperNumber const& y, PR pr) : FloatUpperBound<PR>(y,pr) { ARIADNE_PRECONDITION_MSG(!(this->_u<0),"y="<<y); }
     Positive<FloatUpperBound<PR>>(PositiveFloatValue<PR> const& x) : FloatUpperBound<PR>(x) { }
+    Positive<FloatUpperBound<PR>>(PositiveFloatBounds<PR> const& x) : FloatUpperBound<PR>(x) { }
   public:
+    friend Positive<FloatUpperBound<PR>> operator*(Positive<FloatUpperBound<PR>> const& x1, Positive<FloatValue<PR>> const& x2) {
+        return Positive<FloatUpperBound<PR>>(mul_up(x1.raw(),x2.raw())); }
 };
 
 template<class PR> inline PositiveFloatUpperBound<PR> cast_positive(FloatUpperBound<PR> const& x) {

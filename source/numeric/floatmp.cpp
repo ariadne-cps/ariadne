@@ -275,6 +275,10 @@ Bool is_inf(FloatMP const& x) {
     return mpfr_inf_p(x._mpfr);
 }
 
+Bool is_finite(FloatMP const& x) {
+    return mpfr_number_p(x._mpfr);
+}
+
 
 FloatMP nul(FloatMP const& x) { return nul(x,FloatMP::get_rounding_mode()); }
 FloatMP hlf(FloatMP const& x) { return hlf(x,FloatMP::get_rounding_mode()); }
@@ -734,5 +738,7 @@ FloatMP atan_down(FloatMP const& x) { return atan(x,MPFR_RNDD); }
 FloatMP pi_near(PrecisionMP pr) { return FloatMP::pi(pr,MPFR_RNDN); }
 FloatMP pi_down(PrecisionMP pr) { return FloatMP::pi(pr,MPFR_RNDD); }
 FloatMP pi_up(PrecisionMP pr) { return FloatMP::pi(pr,MPFR_RNDU); }
+
+template<> String class_name<FloatMP>() { return "FloatMP"; }
 
 } // namespace Ariadne

@@ -46,6 +46,17 @@ Void box_draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedCo
     cast_exact_box(apply(set.function(),set.domain())).draw(cnvs,proj);
 }
 
+OutputStream& BoxDrawer::_write(OutputStream& os) const {
+    return os << "BoxDrawer()"; }
+OutputStream& AffineDrawer::_write(OutputStream& os) const {
+    return os << "AffineDrawer(splittings=" << this->_splittings << ")"; }
+OutputStream& EnclosureAffineDrawer::_write(OutputStream& os) const {
+    return os << "EnclosureAffineDrawer(accuracy=" << this->_accuracy << ")"; }
+OutputStream& SubdivisionDrawer::_write(OutputStream& os) const {
+    return os << "SubdivisionDrawer()"; }
+OutputStream& GridDrawer::_write(OutputStream& os) const {
+    return os << "GridDrawer(depth=" << this->_depth << ")"; }
+
 Void BoxDrawer::draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const { box_draw(cnvs,proj,set); }
 
 

@@ -1,7 +1,7 @@
 /***************************************************************************
- *            paver_interface.hpp
+ *            tank.hpp
  *
- *  Copyright  2011-12  Pieter Collins
+ *  Copyright  2017 Luca Geretti
  *
  ****************************************************************************/
 
@@ -21,30 +21,30 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file paver_interface.hpp
- *  \brief Interface for class to compute approximations to function sets.
- */
+#include <cstdarg>
+#include "ariadne.hpp"
 
-#ifndef ARIADNE_PAVER_INTERFACE_HPP
-#define ARIADNE_PAVER_INTERFACE_HPP
 
-#include "utility/declarations.hpp"
-#include "utility/writable.hpp"
+using namespace Ariadne;
 
-namespace Ariadne {
-
-class PavingInterface;
-class ValidatedConstrainedImageSet;
-
-//! \brief A class for computing outer approximations to sets defined by functions.
-class PaverInterface : public WritableInterface
+HybridAutomaton getTank()
 {
-  public:
-    typedef ValidatedConstrainedImageSet SetType;
-  public:
-    virtual Void  adjoin_outer_approximation(PavingInterface& paving, SetType const& set, Int depth) const = 0;
-};
+    RealConstant lambda("lambda",0.02_decimal);
+    RealConstant rate("rate",0.3_decimal);
 
-} //namespace Ariadne
+    RealVariable aperture("aperture");
+    RealVariable height("height");
 
-#endif /* ARIADNE_PAVER_INTERFACE_HPP */
+    // Create the tank object
+    HybridAutomaton tank("tank");
+
+    // Declare a trivial discrete location.
+    DiscreteLocation draining;
+
+    // The water level is always given by the same dynamic
+    // The inflow is controlled by the valve aperture, the outflow depends on the
+    // pressure, which is proportional to the water height.
+    tank.new_mode(draining,{dot(height)=-lambda*height+rate*aperture});
+
+    return tank;
+}

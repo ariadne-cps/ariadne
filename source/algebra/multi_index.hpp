@@ -183,7 +183,7 @@ class MultiIndex
     const DegreeType* end() const { return reinterpret_cast<const DegreeType*>(_p)+_n; }
   public:
     static Void _deallocate(DegreeType* p) { delete[] p; }
-    static DegreeType* _allocate(SizeType n) { DegreeType* p=new DegreeType[n]; return p; }
+    static DegreeType* _allocate(SizeType n) { DegreeType* p=new DegreeType[n+1]; return p; }
 };
 
 class MultiIndexReference

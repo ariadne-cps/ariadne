@@ -133,4 +133,7 @@ FloatMPError mag(FloatMPUpperInterval const& ivl) {
 FloatMPLowerBound mig(FloatMPUpperInterval const& ivl) {
     return mig(cast_singleton(ivl)); }
 
+template<> String class_name<Float64UpperInterval>() { return "Float64UpperInterval"; }
+template<> String class_name<FloatMPUpperInterval>() { return "FloatMPUpperInterval"; }
+
 } // namespace Ariadne

@@ -262,6 +262,20 @@ template<class M> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::coordinate(cons
     return ScaledFunctionPatch<M>(d,ModelType::scaling(d.size(),j,d[j],prp));
 }
 
+template<class M> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::projection(const BoxDomainType& d, SizeType j, PropertiesType prp)
+{
+    return ScaledFunctionPatch<M>::coordinate(d,j,prp);
+}
+
+template<class M> VectorScaledFunctionPatch<M> ScaledFunctionPatch<M>::projection(const BoxDomainType& d, Range js, PropertiesType prp)
+{
+    VectorScaledFunctionPatch<M> x(js.size(),d,prp);
+    for(SizeType i=0; i!=x.size(); ++i) {
+        x[i]=ScaledFunctionPatch<M>::coordinate(d,js.start()+i,prp);
+    }
+    return x;
+}
+
 template<class M> VectorScaledFunctionPatch<M> ScaledFunctionPatch<M>::identity(const BoxDomainType& d, PropertiesType prp)
 {
     return VectorScaledFunctionPatch<M>(d,ModelType::scalings(d,prp));
@@ -281,7 +295,7 @@ template<class M> Vector<ScaledFunctionPatch<M>> ScaledFunctionPatch<M>::constan
 template<class M> Vector<ScaledFunctionPatch<M>> ScaledFunctionPatch<M>::coordinates(const BoxDomainType& d, PropertiesType prp)
 {
     ARIADNE_DEPRECATED("ScaledFunctionPatch<M>::coordinates","Use VectorScaledFunctionPatch<M>::identity instead");
-    Vector<ScaledFunctionPatch<M>> x(d.dimension(),ScaledFunctionPatch<M>(d,prp));
+    Vector<ScaledFunctionPatch<M>> x(d.dimension());
     for(SizeType i=0; i!=x.size(); ++i) {
         x[i]=ScaledFunctionPatch<M>::coordinate(d,i,prp);
     }
@@ -293,6 +307,7 @@ template<class M> Vector<ScaledFunctionPatch<M>> ScaledFunctionPatch<M>::coordin
     ARIADNE_DEPRECATED("ScaledFunctionPatch<M>::coordinates","Use VectorScaledFunctionPatch<M>::projection instead");
     ARIADNE_ASSERT(imin<=imax);
     ARIADNE_ASSERT(imax<=d.size());
+    ARIADNE_ASSERT(imin<imax);
 
     Vector<ScaledFunctionPatch<M>> x(imax-imin);
     for(SizeType i=imin; i!=imax; ++i) {
@@ -618,7 +633,6 @@ template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const 
 template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const Vector<ScaledFunctionPatch<M>>& v)
     : _domain(), _models(v.size())
 {
-    ARIADNE_ASSERT(v.size()>0);
     for(SizeType i=0; i!=v.size(); ++i) { ARIADNE_ASSERT(v[i].domain()==v.zero_element().domain()); }
     this->_domain=v.zero_element().domain();
     for(SizeType i=0; i!=v.size(); ++i) {
@@ -666,14 +680,14 @@ template<class M> VectorScaledFunctionPatch<M> VectorScaledFunctionPatch<M>::con
     return VectorScaledFunctionPatch<M>(d,ModelType::constants(d.size(),c,prp));
 }
 
+template<class M> VectorScaledFunctionPatch<M> VectorScaledFunctionPatch<M>::projection(const BoxDomainType& d, Range js, PropertiesType prp)
+{
+    return ScaledFunctionPatch<M>::projection(d,js,prp);
+}
+
 template<class M> VectorScaledFunctionPatch<M> VectorScaledFunctionPatch<M>::identity(const BoxDomainType& d, PropertiesType prp)
 {
     return VectorScaledFunctionPatch<M>(d,ModelType::scalings(d,prp));
-}
-
-template<class M> VectorScaledFunctionPatch<M> VectorScaledFunctionPatch<M>::projection(const BoxDomainType& d, SizeType imin, SizeType imax, PropertiesType prp)
-{
-    return VectorScaledFunctionPatch<M>(ScaledFunctionPatch<M>::coordinates(d,imin,imax,prp));
 }
 
 
@@ -741,7 +755,7 @@ template<class M> Bool VectorScaledFunctionPatch<M>::operator!=(const VectorScal
 
 template<class M> auto VectorScaledFunctionPatch<M>::properties() const -> PropertiesType
 {
-    ARIADNE_ASSERT(this->size()>0); return this->_models[0].properties();
+    return this->_models.zero_element().properties();
 }
 
 
@@ -957,11 +971,15 @@ template<class M> Void VectorScaledFunctionPatch<M>::restrict(const BoxDomainTyp
 
 template<class M> OutputStream& VectorScaledFunctionPatch<M>::write(OutputStream& os) const
 {
+    os << "FP" << this->domain();
     os << "[";
     for(SizeType i=0; i!=this->result_size(); ++i) {
         if(i!=0) { os << ", "; }
-        ScaledFunctionPatch<M> tfi=(*this)[i];
-        os << tfi;
+        ScaledFunctionPatch<M> fi=(*this)[i];
+        Polynomial<FloatBounds<PR>> pi=fi.polynomial();
+        Polynomial<FloatApproximation<PR>> api=pi;
+        os << api;
+        if(fi.error().raw()>0.0) { os << "+/-" << fi.error(); }
     }
     os << "]";
     return os;

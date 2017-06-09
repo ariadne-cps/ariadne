@@ -89,6 +89,10 @@ class Array {
     template<class PR, EnableIf<IsConstructible<T,ExactDouble,PR>> = dummy>
     Array(InitializerList<ExactDouble> lst, PR pr) : _size(lst.size()), _ptr(uninitialized_new(_size)) {
         this->_uninitialized_fill(lst.begin(),pr); }
+    /*! \brief Generate from a function (object) \a g of type \a G mapping an index to a value. */
+    template<class G, EnableIf<IsInvocableReturning<ValueType,G,SizeType>> = dummy>
+    Array(SizeType n, G const& g) : _size(n), _ptr(uninitialized_new(_size)) {
+        this->_uninitialized_generate(g); }
 
     /*! \brief Constructs an Array from the range \a first to \a last. */
     template<class ForwardIterator>
@@ -204,6 +208,8 @@ class Array {
     template<class InputIterator, class Parameters> void _uninitialized_fill(InputIterator first, Parameters parameters) {
         pointer curr=_ptr; pointer end=_ptr+_size;
         while(curr!=end) { new (curr) T(*first,parameters); ++curr; ++first; } }
+    template<class G> void _uninitialized_generate(G g) {
+        for(SizeType i=0u; i!=this->size(); ++i) { new (_ptr+i) T(g(i)); } }
   private:
     SizeType _size;
     pointer _ptr;

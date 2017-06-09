@@ -789,6 +789,8 @@ Bool operator< (Float64 x1, Float64 x2) { return x1.dbl< x2.dbl; }
 Bool operator> (Float64 x1, Float64 x2) { return x1.dbl> x2.dbl; }
 
 Bool is_nan(Float64 x) { return std::isnan(x.dbl); }
+Bool is_inf(Float64 x) { return std::isinf(x.dbl); }
+Bool is_finite(Float64 x) { return std::isfinite(x.dbl); }
 
 Comparison cmp(Float64 x1, Rational const& q2) {
     if(std::isfinite(x1.get_d())) { return cmp(Rational(x1),q2); }
@@ -823,8 +825,8 @@ InputStream& operator>>(InputStream& is, Float64& x) {
     double r; is >> r; x.dbl=r; return is;
 }
 
-template<> inline String class_name<double>() { return "double"; }
+template<> String class_name<double>() { return "double"; }
 
-template<> inline String class_name<Float64>() { return "Float64"; }
+template<> String class_name<Float64>() { return "Float64"; }
 
 } // namespace Ariadne

@@ -1,5 +1,5 @@
-#include "ariadne.h"
-#include "test.h"
+#include "ariadne.hpp"
+#include "test.hpp"
 
 using namespace std;
 using namespace Ariadne;

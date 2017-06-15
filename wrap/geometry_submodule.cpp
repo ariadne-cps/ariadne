@@ -279,7 +279,7 @@ template<class IVL> Void export_interval(std::string name) {
 
     class_< IntervalType > interval_class(name.c_str(),init<IntervalType>());
     //interval_class.def(init<MidpointType>());
-    //interval_class.def(init<LowerBoundType,UpperBoundType>());
+    interval_class.def(init<LowerBoundType,UpperBoundType>());
 
     interval_class.def(self == self);
     interval_class.def(self != self);

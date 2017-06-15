@@ -400,6 +400,21 @@ template<class R, class A1, class A2>
 R __le__(const A1& a1, const A2& a2) { return static_cast<R>(a1<=a2); }
 
 
+template<class A> decltype(auto) _neg_(const A& a) { return neg(a); }
+template<class A> decltype(auto) _rec_(const A& a) { return rec(a); }
+template<class A> decltype(auto) _sqr_(const A& a) { return sqr(a); }
+template<class A, class N> decltype(auto) _pow_(const A& a, N n) { return pow(a,n); }
+template<class A> decltype(auto) _sqrt_(const A& a) { return sqrt(a); }
+template<class A> decltype(auto) _exp_(const A& a) { return exp(a); }
+template<class A> decltype(auto) _log_(const A& a) { return log(a); }
+template<class A> decltype(auto) _sin_(const A& a) { return sin(a); }
+template<class A> decltype(auto) _cos_(const A& a) { return cos(a); }
+template<class A> decltype(auto) _tan_(const A& a) { return tan(a); }
+template<class A> decltype(auto) _atan_(const A& a) { return atan(a); }
+template<class A1, class A2> decltype(auto) _max_(const A1& a1, const A2& a2) { return max(a1,a2); }
+template<class A1, class A2> decltype(auto) _min_(const A1& a1, const A2& a2) { return min(a1,a2); }
+template<class A> decltype(auto) _abs_(const A& a) { return abs(a); }
+
 template<class T> StringType __cstr__(const T& t) {
     StringStream ss; ss << t; return ss.str(); }
 

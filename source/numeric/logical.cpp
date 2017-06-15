@@ -137,13 +137,13 @@ OutputStream& operator<<(OutputStream& os, LogicalValue l) {
 
 const Logical<EffectiveTag> indeterminate = Logical<EffectiveTag>(LogicalValue::INDETERMINATE);
 
-template<> String class_name<ExactTag>() { return "ExactTag"; }
-template<> String class_name<EffectiveTag>() { return "EffectiveTag"; }
-template<> String class_name<ValidatedTag>() { return "ValidatedTag"; }
-template<> String class_name<BoundedTag>() { return "BoundedTag"; }
-template<> String class_name<UpperTag>() { return "UpperTag"; }
-template<> String class_name<LowerTag>() { return "LowerTag"; }
-template<> String class_name<ApproximateTag>() { return "ApproximateTag"; }
+template<> String class_name<ExactTag>() { return "Exact"; }
+template<> String class_name<EffectiveTag>() { return "Effective"; }
+template<> String class_name<ValidatedTag>() { return "Validated"; }
+template<> String class_name<BoundedTag>() { return "Bounded"; }
+template<> String class_name<UpperTag>() { return "Upper"; }
+template<> String class_name<LowerTag>() { return "Lower"; }
+template<> String class_name<ApproximateTag>() { return "Approximate"; }
 
 template<> String class_name<Bool>() { return "Bool"; }
 template<> String class_name<Boolean>() { return "Boolean"; }

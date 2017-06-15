@@ -356,6 +356,8 @@ class TaylorModel<ValidatedTag,F>
     //!\brief Split the Taylor model \a tm, subdividing along the independent variable \a k, taking the lower/middle/upper \a part.
     friend TaylorModel<ValidatedTag,F> split(const TaylorModel<ValidatedTag,F>& tm, SizeType k, SplitPart part) {
         return TaylorModel<ValidatedTag,F>::_split(tm,k,part); }
+    friend Pair<TaylorModel<ValidatedTag,F>,TaylorModel<ValidatedTag,F>> split(const TaylorModel<ValidatedTag,F>& tm, SizeType k) {
+        return make_pair(split(tm,k,SplitPart::LOWER),split(tm,k,SplitPart::UPPER)); }
     //! \relates TaylorModel<ValidatedTag,F> \brief Embed the model in a space of higher dimension
     friend TaylorModel<ValidatedTag,F> embed(SizeType as1, const TaylorModel<ValidatedTag,F>& tm2, SizeType as3) {
         return TaylorModel<ValidatedTag,F>::_embed(as1,tm2,as3); }

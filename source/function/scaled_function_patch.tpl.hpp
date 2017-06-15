@@ -411,7 +411,6 @@ template<class M> ScaledFunctionPatch<M>* ScaledFunctionPatch<M>::_derivative(Si
     return new ScaledFunctionPatch<M>(derivative(*this,j));
 }
 
-
 template<class M> auto ScaledFunctionPatch<M>::operator() (const Vector<FloatApproximation<PR>>& x) const -> FloatApproximation<PR>
 {
     const ScaledFunctionPatch<M>& f=*this;
@@ -871,14 +870,6 @@ template<class M> Void VectorScaledFunctionPatch<M>::set(SizeType i, const Scale
     }
     this->_models[i]=e.model();
 }
-
-
-
-
-
-
-
-
 
 
 

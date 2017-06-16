@@ -38,42 +38,6 @@
 using namespace Ariadne;
 using namespace std;
 
-struct ExactFloatVector2d : ExactFloatVector, Vector2d {
-    ExactFloatVector2d(double x_, double y_) : ExactFloatVector{FloatDPValue(x_),FloatDPValue(y_)}, Vector2d(x_,y_) { }
-};
-
-struct Polytope2d
-    : public DrawableInterface
-{
-    List<Point2d> points;
-  public:
-    Polytope2d(Nat n, ...) {
-        assert(n>=1); va_list args; va_start(args,n);
-        for(Nat i=0; i!=n; ++i) {
-            // NOTE: Need to store values first since order of evaluating function arguments is undefined
-            double x=va_arg(args,double); double y=va_arg(args,double);
-            this->points.push_back(Point2d(x,y));
-        } va_end(args);
-    }
-
-    virtual Polytope2d* clone() const { return new Polytope2d(*this); }
-    virtual DimensionType dimension() const { return 2u; }
-
-    virtual Void draw(CanvasInterface& canvas, const Projection2d& p) const {
-        if(points.size()==1) { canvas.dot(points[0].x,points[0].y); return; }
-        canvas.move_to(points[0].x,points[0].y);
-        for(Nat i=1; i!=points.size(); ++i) {
-            canvas.line_to(points[i].x,points[i].y);
-        }
-        canvas.line_to(points[0].x,points[0].y);
-        canvas.fill();
-    }
-
-    Polytope2d operator+(const Vector2d& v) {
-        Polytope2d r(*this); for(Nat i=0; i!=r.points.size(); ++i) { r.points[i]+=v; } return r;
-    }
-};
-
 static const Colour colour(0.5,1.0,1.0);
 static const Colour expected_colour(1.0,0.25,0.25);
 
@@ -82,6 +46,10 @@ inline decltype(auto) operator<=(Affine<FloatDPBounds>const& af, Dyadic w) { ret
 inline FloatDPValue operator"" _ex (long double x) { return FloatDPValue((double)x); }
 inline FloatDPBounds operator/(Int n1, FloatDPValue x2) { return FloatDPValue(n1)/x2; }
 }
+
+struct ExactFloatVector2d : ExactFloatVector, Vector2d {
+    ExactFloatVector2d(double x, double y) : ExactFloatVector{FloatDPValue(x),FloatDPValue(y)}, Vector2d(x,y) { }
+};
 
 class TestAffineSet
 {
@@ -124,8 +92,8 @@ class TestAffineSet
         set.new_parameter_constraint(-2.0_ex*x[0]-3.0_ex*x[1]-1.0_ex*x[2]<=3.00_ex);
 
         ARIADNE_TEST_PRINT(set);
-        Polytope2d expected_set(8, -3.0,-3.0, -3.0,-3.66667, 2.0,-2.0, 4.0,-1.0,
-                                    3.0,-0.5, 1.0,-1.0, -2.0,-2.0, -3.0,-2.5);
+        Polytope2d expected_set({{-3.0,-3.0}, {-3.0,-3.66667}, {2.0,-2.0}, {4.0,-1.0},
+                                     {3.0,-0.5}, {1.0,-1.0}, {-2.0,-2.0}, {-3.0,-2.5}});
 
         figure.clear(); figure.set_bounding_box(ExactBoxType{{-7.,+7.},{-5.,+1.}}); figure.set_fill_opacity(0.5);
         figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
@@ -327,7 +295,7 @@ class TestAffineSet
     Void test_draw() {
         ExactFloatVector2d offsets{0.0,0.0}; // Offsets
         ExactFloatVector& o=offsets;
-        Polytope2d expected_set(1,0.0,0.0);
+        Polytope2d expected_set({{0.0,0.0}});
         Vector< Affine<ValidatedNumericType> > a;
         Vector<ExactIntervalType> dom;
         figure.clear();
@@ -337,8 +305,8 @@ class TestAffineSet
 
         {
             // Draw overlapping sets to check colours
-            figure << fill_colour(expected_colour) << Polytope2d(4,0.,-0.5,2.,-0.5,2.,0.,0.,0.)
-                   << fill_colour(colour) << Polytope2d(4,1.,-0.5,3.,-0.5,3.,0.,1.,0.);
+            figure << fill_colour(expected_colour) << Polytope2d({{0.,-0.5},{2.,-0.5},{2.,0.},{0.,0.}})
+                   << fill_colour(colour) << Polytope2d({{1.,-0.5},{3.,-0.5},{3.,0.},{1.,0.}});
         }
 
         {
@@ -347,7 +315,7 @@ class TestAffineSet
             dom=ExactBoxType::unit_box(2);
             offsets=ExactFloatVector2d{1.0,13.0};
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+0.5_ex*a[0],o[1]+0.25_ex*a[1]});
-            expected_set=Polytope2d(4, -0.5,-0.25, +0.5,-0.25, +0.5,+0.25,-0.5,+0.25) + offsets;
+            expected_set=Polytope2d({{-0.5,-0.25}, {+0.5,-0.25}, {+0.5,+0.25},{-0.5,+0.25}}) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
 
@@ -357,7 +325,7 @@ class TestAffineSet
             dom=ExactBoxType::unit_box(2);
             offsets=ExactFloatVector2d(4.0,13.0);
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+0.5_ex*a[0],o[1]+0.25_ex*a[1]},{a[0]+a[1]<=0.5_ex});
-            expected_set=Polytope2d(5, -0.5,-0.25, +0.5,-0.25, +0.5,-0.125, -0.25,+0.25,-0.5,+0.25) + offsets;
+            expected_set=Polytope2d({{-0.5,-0.25}, {+0.5,-0.25}, {+0.5,-0.125}, {-0.25,+0.25},{-0.5,+0.25}}) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
 
@@ -369,7 +337,7 @@ class TestAffineSet
             ValidatedNumericType e=ValidatedNumericType(-1.0,+1.0);
 
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+0.25_ex*a[0]+0.25_ex*a[1]+0.5_ex*e,o[1]+0.5_ex*a[0]-0.5_ex*a[1]});
-            expected_set=Polytope2d(6, -1.0,0.0, -0.5,-1.0, +0.5,-1.0, +1.0,0.0, +0.5,+1.0, -0.5,+1.0) + offsets;
+            expected_set=Polytope2d({{-1.0,0.0}, {-0.5,-1.0}, {+0.5,-1.0}, {+1.0,0.0}, {+0.5,+1.0}, {-0.5,+1.0}}) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
 
@@ -379,7 +347,7 @@ class TestAffineSet
             dom=ExactBoxType::unit_box(1);
             offsets=ExactFloatVector2d{1.0,1.0};
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+0.5_ex*a[0],o[1]+0.25_ex*a[0]},{0.0_ex*a[0]<=1.0_ex,a[0]==0.75_ex});
-            expected_set=Polytope2d(1, 0.375, 0.1875) + offsets;
+            expected_set=Polytope2d({{0.375, 0.1875}}) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
 
@@ -389,7 +357,7 @@ class TestAffineSet
             dom=ExactBoxType::unit_box(1);
             offsets=ExactFloatVector2d{4.0,1.0};
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+0.5_ex*a[0],o[1]+0.25_ex*a[0]});
-            expected_set=Polytope2d(2, -0.5,-0.25, 0.5,0.25) + offsets;
+            expected_set=Polytope2d({{-0.5,-0.25}, {0.5,0.25}}) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
 
@@ -399,7 +367,7 @@ class TestAffineSet
             dom=ExactBoxType::unit_box(2);
             offsets=ExactFloatVector2d{7.0,1.0};
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{0.0_ex*a[0]<=1.0_ex,a[0]+a[1]==0.5_ex});
-            expected_set=Polytope2d(2, -0.5,+1.0, +1.0,-0.5) + offsets;
+            expected_set=Polytope2d({{-0.5,+1.0}, {+1.0,-0.5}}) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
 
@@ -409,7 +377,7 @@ class TestAffineSet
             dom=ExactBoxType::unit_box(2);
             offsets=ExactFloatVector2d{10.0,1.0};
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{1.0_ex<=a[0], a[1]<=0.5_ex});
-            expected_set=Polytope2d(2, +1.0,-1.0, +1.0,+0.5) + offsets;
+            expected_set=Polytope2d({{+1.0,-1.0}, {+1.0,+0.5}}) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
 
@@ -419,7 +387,7 @@ class TestAffineSet
             dom=ExactBoxType::unit_box(2);
             offsets=ExactFloatVector2d{13.0,1.0};
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{a[0]+0.5_ex*a[1]<=0.75_ex,0.75_ex<=a[0]+0.5_ex*a[1]});
-            expected_set=Polytope2d(2, +0.25,+1.0, +1.0,-0.5) + offsets;
+            expected_set=Polytope2d({{+0.25,+1.0}, {+1.0,-0.5}}) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
 
@@ -429,7 +397,7 @@ class TestAffineSet
             dom=ExactBoxType::unit_box(2);
             offsets=ExactFloatVector2d{13.0,1.0};
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{0.75_ex<=a[0]+0.5_ex*a[1]<=0.75_ex});
-            expected_set=Polytope2d(2, +0.25,+1.0, +1.0,-0.5) + offsets;
+            expected_set=Polytope2d({{+0.25,+1.0}, {+1.0,-0.5}}) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
 
@@ -439,7 +407,7 @@ class TestAffineSet
             dom=ExactBoxType::unit_box(2);
             offsets=ExactFloatVector2d{1.0,4.0};
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{a[0]+2*a[1]<=3,1.5_ex*(a[0]+a[1])<=3,2*a[0]+a[1]<=3});
-            expected_set=Polytope2d(4, -1.0,-1.0, +1.0,-1.0, +1.0,+1.0, -1.0,+1.0) + offsets;
+            expected_set=Polytope2d({{-1.0,-1.0}, {+1.0,-1.0}, {+1.0,+1.0}, {-1.0,+1.0}}) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
 
@@ -449,7 +417,7 @@ class TestAffineSet
             dom=ExactBoxType::unit_box(2);
             offsets=ExactFloatVector2d{4.0,4.0};
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{a[0]+2*a[1]<=2,1.5_ex*(a[0]+a[1])<=2,2*a[0]+a[1]<=2});
-            expected_set=Polytope2d(6, -1.0,-1.0, +1.0,-1.0, +1.0,0.0, +0.667,+0.667, 0.0,+1.0, -1.0,+1.0) + offsets;
+            expected_set=Polytope2d({{-1.0,-1.0}, {+1.0,-1.0}, {+1.0,0.0}, {+0.667,+0.667}, {0.0,+1.0}, {-1.0,+1.0}}) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
 
@@ -459,7 +427,7 @@ class TestAffineSet
             dom=ExactBoxType::unit_box(2);
             offsets=ExactFloatVector2d{7.0,4.0};
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{a[0]+2.0_ex*a[1]<=2.0_ex,a[0]*(1/3.0_ex)+a[1]*(2/3.0_ex)<=(2/3.0_ex)});
-            expected_set=Polytope2d(5, -1.0,-1.0, +1.0,-1.0, +1.0,0.5, 0.0,+1.0, -1.0,+1.0) + offsets;
+            expected_set=Polytope2d({{-1.0,-1.0}, {+1.0,-1.0}, {+1.0,0.5}, {0.0,+1.0}, {-1.0,+1.0}}) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
 
@@ -469,7 +437,7 @@ class TestAffineSet
             dom=ExactBoxType::unit_box(3);
             offsets=ExactFloatVector2d{10.0,4.0};
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{a[0]+2.0_ex*a[1]+a[2]==1.5_ex});
-            expected_set=Polytope2d(5, +1.0,-0.25, +1.0,+0.75, +0.5,+1.0, -1.0,+1.0, -1.0,+0.75) + offsets;
+            expected_set=Polytope2d({{+1.0,-0.25}, {+1.0,+0.75}, {+0.5,+1.0}, {-1.0,+1.0}, {-1.0,+0.75}}) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
 
@@ -479,7 +447,7 @@ class TestAffineSet
             dom=ExactBoxType::unit_box(3);
             offsets=ExactFloatVector2d{1.0,7.0};
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+0.3_ex*a[0]+0.20_ex*a[1]+0.05_ex*a[2],o[1]-0.10_ex*a[0]+0.1_ex*a[1]+0.05_ex*a[2]},{a[1]-a[2]<=-0.25_ex,a[0]+a[1]+a[2]==0.5_ex});
-            expected_set=Polytope2d(1, +0.0,0.0) + offsets; // Unknown
+            expected_set=Polytope2d({{+0.0,0.0}}) + offsets; // Unknown
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
 

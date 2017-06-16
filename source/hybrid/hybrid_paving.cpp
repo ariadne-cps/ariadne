@@ -103,7 +103,7 @@ Void HybridGridTreePaving::adjoin_inner_approximation(const HybridExactBoxes& hb
     for(HybridExactBoxes::ConstIterator _loc_iter=hbxs.begin();
             _loc_iter!=hbxs.end(); ++_loc_iter) {
         DiscreteLocation const& loc=_loc_iter->first;
-        ExpressionSet<ExactBoxType> const& vbx=_loc_iter->second;
+        LabelledSet<ExactBoxType> const& vbx=_loc_iter->second;
         ARIADNE_ASSERT(vbx.space() == this->space(loc));
         this->_provide_location(loc).adjoin_inner_approximation(vbx.euclidean_set(),depth);
     }
@@ -133,7 +133,7 @@ Void HybridGridTreePaving::adjoin_outer_approximation(const HybridExactBoxes& hb
     for(HybridExactBoxes::ConstIterator _loc_iter=hbxs.begin();
             _loc_iter!=hbxs.end(); ++_loc_iter) {
         DiscreteLocation const& loc=_loc_iter->first;
-        ExpressionSet<ExactBoxType> const& vbx=_loc_iter->second;
+        LabelledSet<ExactBoxType> const& vbx=_loc_iter->second;
         ARIADNE_ASSERT(vbx.space() == this->space(loc));
         this->_provide_location(_loc_iter->first).adjoin_outer_approximation(vbx.euclidean_set(),depth);
     }

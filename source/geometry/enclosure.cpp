@@ -491,6 +491,7 @@ Void Enclosure::clear_time()
 {
     this->_time_function=ValidatedNumericType(0);
     this->_dwell_time_function=ValidatedNumericType(0);
+    this->_check();
 }
 
 Void Enclosure::apply_map(ValidatedVectorFunction map)
@@ -536,10 +537,11 @@ Void Enclosure::apply_space_evolve_step(ValidatedVectorFunction flow, ValidatedS
     this->_dwell_time_function=this->_dwell_time_function + evolve_time_function;
     this->_check();
 }
+
 Void Enclosure::apply_spacetime_evolve_step(ValidatedVectorFunction flow, ValidatedScalarFunction time)
 {
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->state_dimension()+1u,"state_dimension="<<this->state_dimension()<<", flow="<<flow);
-    ARIADNE_ASSERT_MSG(time.argument_size()==this->state_dimension(),"state_dimension="<<this->state_dimension()<<", time="<<time);
+    ARIADNE_ASSERT_MSG(time.argument_size()==this->state_dimension()+1u,"state_dimension="<<this->state_dimension()<<", time="<<time);
     ValidatedScalarFunctionModel64 evolve_time_function=compose(time,join(this->_state_function,this->_time_function));
     this->_state_function=compose(flow,join(this->_state_function,evolve_time_function));
     this->_time_function=this->_time_function + evolve_time_function;
@@ -550,7 +552,8 @@ Void Enclosure::apply_spacetime_evolve_step(ValidatedVectorFunction flow, Valida
 Void Enclosure::apply_parameter_evolve_step(ValidatedVectorFunction flow, ValidatedScalarFunction time)
 {
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->state_dimension()+1u,"state_dimension="<<this->state_dimension()<<", flow="<<flow);
-    ARIADNE_ASSERT_MSG(time.argument_size()==this->number_of_parameters(),"number_of_parameters="<<this->number_of_parameters()<<", time="<<time);
+    ARIADNE_ASSERT_MSG(time.argument_size()==this->number_of_parameters(),"number_of_parameters="<<this->number_of_parameters()<<", time="<<time<<", enclosure="<<*this);
+    ARIADNE_ASSERT_MSG(time.domain()==this->parameter_domain(),"parameter_domain="<<this->parameter_domain()<<", time="<<time);
     this->_state_function=compose(flow,join(this->_state_function,this->function_factory().create(this->_state_function.domain(),time)));
     this->_time_function=this->_time_function + time;
     this->_dwell_time_function=this->_dwell_time_function + time;
@@ -561,6 +564,7 @@ Void Enclosure::apply_finishing_parameter_evolve_step(ValidatedVectorFunction fl
 {
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->state_dimension()+1u,"state_dimension="<<this->state_dimension()<<", flow="<<flow);
     ARIADNE_ASSERT_MSG(finishing_time.argument_size()==this->number_of_parameters(),"number_of_parameters="<<this->number_of_parameters()<<", finishing_time="<<finishing_time);
+    ARIADNE_ASSERT_MSG(finishing_time.domain()==this->parameter_domain(),"parameter_domain="<<this->parameter_domain()<<", finishing_time="<<finishing_time);
     ValidatedScalarFunctionModel64 omega=this->function_factory().create(this->domain(),finishing_time);
     this->_state_function=compose(flow,join(this->_state_function,omega-this->_time_function));
     this->_dwell_time_function=this->_dwell_time_function + (omega-this->_time_function);
@@ -577,6 +581,7 @@ Void Enclosure::apply_full_reach_step(ValidatedVectorFunctionModel64 phi)
     Float64 h=phi.domain()[phi.result_size()].upper().raw();
     ValidatedScalarFunctionModel64 elps=this->function_factory().create_constant(this->domain(),Float64Value(h));
     this->apply_parameter_reach_step(phi,elps);
+    this->_check();
 }
 
 Void Enclosure::apply_spacetime_reach_step(ValidatedVectorFunctionModel64 phi, ValidatedScalarFunction elps)
@@ -585,6 +590,7 @@ Void Enclosure::apply_spacetime_reach_step(ValidatedVectorFunctionModel64 phi, V
     ARIADNE_ASSERT(phi.argument_size()==this->state_dimension()+1);
     ARIADNE_ASSERT(elps.argument_size()==this->state_dimension()+1);
     this->apply_parameter_reach_step(phi,compose(elps,join(this->state_function(),this->time_function())));
+    this->_check();
 }
 
 Void Enclosure::apply_parameter_reach_step(ValidatedVectorFunctionModel64 phi, ValidatedScalarFunction elps)
@@ -618,6 +624,7 @@ Void Enclosure::new_state_constraint(ValidatedConstraint constraint) {
     ValidatedScalarFunctionModel64 composed_function_model=compose(constraint.function(),this->_state_function);
     ValidatedNumericType upper_bound=this->function_factory().create_number(constraint.upper_bound());
     this->_constraints.append(ValidatedConstraintModel(lower_bound,composed_function_model,upper_bound));
+    this->_check();
 }
 
 Void Enclosure::new_state_time_constraint(ValidatedConstraint constraint) {
@@ -627,6 +634,7 @@ Void Enclosure::new_state_time_constraint(ValidatedConstraint constraint) {
     ValidatedScalarFunctionModel64 composed_function_model=compose(constraint.function(),join(this->_state_function,this->_time_function));
     ValidatedNumericType upper_bound=this->function_factory().create_number(constraint.upper_bound());
     this->_constraints.append(ValidatedConstraintModel(lower_bound,composed_function_model,upper_bound));
+    this->_check();
 }
 
 Void Enclosure::new_parameter_constraint(ValidatedConstraint constraint) {
@@ -636,6 +644,7 @@ Void Enclosure::new_parameter_constraint(ValidatedConstraint constraint) {
     ValidatedScalarFunctionModel64 function_model=this->function_factory().create(this->domain(),constraint.function());
     ValidatedNumericType upper_bound=this->function_factory().create_number(constraint.upper_bound());
     this->_constraints.append(ValidatedConstraintModel(lower_bound,function_model,upper_bound));
+    this->_check();
 }
 
 
@@ -644,6 +653,7 @@ Void Enclosure::new_positive_state_constraint(ValidatedScalarFunction constraint
     this->_is_fully_reduced=false;
     ValidatedNumericType zero=this->function_factory().create_number(0);
     this->_constraints.append(compose(constraint_function,this->state_function())>=zero);
+    this->_check();
 }
 
 Void Enclosure::new_negative_state_constraint(ValidatedScalarFunction constraint_function) {
@@ -651,6 +661,7 @@ Void Enclosure::new_negative_state_constraint(ValidatedScalarFunction constraint
     this->_is_fully_reduced=false;
     ValidatedNumericType zero=this->function_factory().create_number(0);
     this->_constraints.append(compose(constraint_function,this->state_function())<=zero);
+    this->_check();
 }
 
 Void Enclosure::new_zero_state_constraint(ValidatedScalarFunction constraint_function) {
@@ -658,6 +669,7 @@ Void Enclosure::new_zero_state_constraint(ValidatedScalarFunction constraint_fun
     this->_is_fully_reduced=false;
     ValidatedNumericType zero=this->function_factory().create_number(0);
     this->_constraints.append(compose(constraint_function,this->state_function())==zero);
+    this->_check();
 }
 
 Void Enclosure::new_negative_parameter_constraint(ValidatedScalarFunction constraint_function) {
@@ -665,6 +677,7 @@ Void Enclosure::new_negative_parameter_constraint(ValidatedScalarFunction constr
     this->_is_fully_reduced=false;
     ValidatedNumericType zero=this->function_factory().create_number(0);
     this->_constraints.append(this->function_factory().create(this->domain(),constraint_function)<=zero);
+    this->_check();
 }
 
 Void Enclosure::new_zero_parameter_constraint(ValidatedScalarFunction constraint_function) {
@@ -672,6 +685,7 @@ Void Enclosure::new_zero_parameter_constraint(ValidatedScalarFunction constraint
     this->_is_fully_reduced=false;
     ValidatedNumericType zero=this->function_factory().create_number(0);
     this->_constraints.append(this->function_factory().create(this->domain(),constraint_function)==zero);
+    this->_check();
 }
 
 

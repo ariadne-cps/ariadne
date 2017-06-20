@@ -85,6 +85,9 @@ class ListSet
     /*! \brief Returns the number of basic sets forming this object. */
     SizeType size() const { return this->_data.size(); }
 
+    /*! \brief Returns the number of basic sets which can be stored without reallocating memory. */
+    SizeType capacity() const { return this->_data.capacity(); }
+
     /*! \brief Accesses the i-th BasicSet. */
     const BS& operator[](SizeType i) const { return this->_data[i]; };
 

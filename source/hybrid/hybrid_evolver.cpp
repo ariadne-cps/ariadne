@@ -788,7 +788,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                         ARIADNE_LOG(2,event<<": critical_time: error="<<critical_time.error()<<", range="<<critical_time.range()<<"\n"); }
 
                     HybridEnclosure evolve_set_at_critical_time=initial_set;
-                    evolve_set_at_critical_time.apply_evolve_step(flow,critical_time);
+                    evolve_set_at_critical_time.apply_space_evolve_step(flow,critical_time);
                     UpperIntervalType guard_range_at_critical_time=evolve_set_at_critical_time.range_of(guard);
                     ARIADNE_LOG(8,"guard_range_at_critical_time="<<guard_range_at_critical_time<<"\n");
                     if(definitely(guard_range_at_critical_time.upper()<0)) {
@@ -861,7 +861,7 @@ _apply_reach_step(HybridEnclosure& set,
                   ValidatedVectorFunctionModel64 const& flow,
                   TimingData const& timing_data) const
 {
-    set.apply_reach_step(flow,timing_data.parameter_dependent_evolution_time);
+    set.apply_parameter_reach_step(flow,timing_data.parameter_dependent_evolution_time);
 }
 
 Void
@@ -877,12 +877,12 @@ _apply_evolve_step(HybridEnclosure& set,
         case StepKind::TIME_DEPENDENT_EVOLUTION_TIME:
         case StepKind::SPACETIME_DEPENDENT_EVOLUTION_TIME:
         case StepKind::PARAMETER_DEPENDENT_EVOLUTION_TIME:
-            set.apply_evolve_step(flow,timing_data.parameter_dependent_evolution_time);
+            set.apply_parameter_evolve_step(flow,timing_data.parameter_dependent_evolution_time);
             break;
         case StepKind::PARAMETER_DEPENDENT_FINISHING_TIME:
         case StepKind::SPACETIME_DEPENDENT_FINISHING_TIME:
         case StepKind::CONSTANT_FINISHING_TIME:
-            set.apply_finishing_evolve_step(flow,timing_data.parameter_dependent_finishing_time);
+            set.apply_finishing_parameter_evolve_step(flow,timing_data.parameter_dependent_finishing_time);
             break;
         default:
             ARIADNE_FAIL_MSG("Unhandled step kind "<<timing_data.step_kind);
@@ -913,7 +913,7 @@ _apply_guard_step(HybridEnclosure& set,
         case PERMISSIVE:
             // The continuous evolution is just the same as a reachability step,
             // so we need to embed the starting state and the step time function into one higher dimension.
-            jump_set.apply_reach_step(flow,timing_data.parameter_dependent_evolution_time);
+            jump_set.apply_parameter_reach_step(flow,timing_data.parameter_dependent_evolution_time);
             jump_set.new_activation(event,transition_data.guard_function);
             break;
         case IMPACT: {
@@ -936,20 +936,20 @@ _apply_guard_step(HybridEnclosure& set,
                         jump_set.new_parameter_constraint(step_event,step_time<=timing_data.parameter_dependent_evolution_time);
                     }
 
-                    jump_set.apply_evolve_step(flow,unchecked_compose(crossing_data.crossing_time,starting_state));
+                    jump_set.apply_parameter_evolve_step(flow,unchecked_compose(crossing_data.crossing_time,starting_state));
                     break;
                 case CrossingKind::INCREASING: case CrossingKind::CONVEX:
-                    jump_set.apply_reach_step(flow,timing_data.parameter_dependent_evolution_time);
+                    jump_set.apply_parameter_reach_step(flow,timing_data.parameter_dependent_evolution_time);
                     jump_set.new_guard(event,transition_data.guard_function);
                     break;
                 case CrossingKind::CONCAVE: case CrossingKind::GRAZING:
-                    jump_set.apply_reach_step(flow,timing_data.parameter_dependent_evolution_time);
+                    jump_set.apply_parameter_reach_step(flow,timing_data.parameter_dependent_evolution_time);
                     jump_set.new_guard(event,transition_data.guard_function);
                     jump_set.new_invariant(event,-lie_derivative(transition_data.guard_function,dynamic));
                     break;
                 case CrossingKind::DEGENERATE: // Just check positive derivative in this case; NOT EXACT
                     if(semantics==UPPER_SEMANTICS) {
-                        jump_set.apply_reach_step(flow,timing_data.parameter_dependent_evolution_time);
+                        jump_set.apply_parameter_reach_step(flow,timing_data.parameter_dependent_evolution_time);
                         jump_set.new_guard(event,transition_data.guard_function);
                         jump_set.new_invariant(event,-lie_derivative(transition_data.guard_function,dynamic));
                     } else {
@@ -1475,7 +1475,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
         _apply_guard_step(jump_set,dynamic,flow,timing_data,transitions[event],crossings[event],semantics);
         ValidatedScalarFunctionModel64 jump_step_time=reach_step_time;
         if(reach_step_time.argument_size()!=jump_set.number_of_parameters()) {
-            assert(starting_set.number_of_parameters()==jump_set.number_of_parameters());
+            ARIADNE_ASSERT(starting_set.number_of_parameters()==jump_set.number_of_parameters());
             switch(crossings[event].crossing_kind) {
                 case CrossingKind::TRANSVERSE:
                     jump_step_time=unchecked_compose(crossings[event].crossing_time,starting_set.state_function());
@@ -1880,7 +1880,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
                 //Float64Value alpha=numeric_cast<Float64Value>(1+flow.step_size()*guard_derivative_range.lower()/guard_range.lower());
                 Float64Bounds alpha_val=(1+flow.step_size()*cast_exact(guard_derivative_range.lower())/cast_exact(guard_range.lower()));
                 Float64Value alpha=cast_exact(alpha_val);
-                assert(alpha_val.value()==alpha);
+                ARIADNE_ASSERT(alpha_val.value()==alpha);
                 ARIADNE_LOG(6,"  step_size: "<<flow.step_size()<<", guard_range: "<<guard_range<<", guard_derivative_range: "<<guard_derivative_range<<", alpha: "<<alpha<<"\n");
                 if(alpha>0 && alpha<=1) {
                     ValidatedScalarFunctionModel64 guard_creep_time;

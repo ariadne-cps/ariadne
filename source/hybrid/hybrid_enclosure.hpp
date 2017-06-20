@@ -212,16 +212,18 @@ class HybridEnclosure
     Void apply_reset(DiscreteEvent e, DiscreteLocation q, RealSpace s, const ValidatedVectorFunction& r);
     //! \brief Apply the evolve step \xi'(s) = phi(xi(s),eps) and tau'(s)=tau(s)+eps
     Void apply_fixed_evolve_step(const ValidatedVectorFunctionModel64& phi, const Float64Value& eps);
+    //! \brief Apply the evolve step \xi'(s) = phi(xi(s),eps(xi(s))) and tau'(s)=tau(s)+eps(xi(s))
+    Void apply_space_evolve_step(const ValidatedVectorFunctionModel64& phi, const ValidatedScalarFunctionModel64& eps);
     //! \brief Apply the evolve step \xi'(s) = phi(xi(s),eps(xi(s),tau(s))) and tau'(s)=tau(s)+eps(xi(s),tau(s))
     Void apply_spacetime_evolve_step(const ValidatedVectorFunctionModel64& phi, const ValidatedScalarFunctionModel64& eps);
     //! \brief Apply the reach step \xi'(s) = phi(xi(s),t-tau(s)) and tau'(s)=tau(s)+t for 0<=t<=eps(xi(s),tau(s))
     Void apply_spacetime_reach_step(const ValidatedVectorFunctionModel64& phi, const ValidatedScalarFunctionModel64& eps);
     // Compute the evolve step \xi'(s) = phi(xi(s),eps(s)) and tau'(s)=tau(s)+eps(s)
-    Void apply_evolve_step(const ValidatedVectorFunctionModel64& phi, const ValidatedScalarFunctionModel64& eps);
+    Void apply_parameter_evolve_step(const ValidatedVectorFunctionModel64& phi, const ValidatedScalarFunctionModel64& eps);
     // Compute the evolve step \xi'(s) = phi(xi(s),\omega(s)-tau(s)) and tau'(s)=omega(s)
-    Void apply_finishing_evolve_step(const ValidatedVectorFunctionModel64& phi, const ValidatedScalarFunctionModel64& omega);
+    Void apply_finishing_parameter_evolve_step(const ValidatedVectorFunctionModel64& phi, const ValidatedScalarFunctionModel64& omega);
     //! \brief Compute the reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h] and t <= eps(s) , assuming eps(s)<= h throughout.
-    Void apply_reach_step(const ValidatedVectorFunctionModel64& phi, const ValidatedScalarFunctionModel64& eps);
+    Void apply_parameter_reach_step(const ValidatedVectorFunctionModel64& phi, const ValidatedScalarFunctionModel64& eps);
     //! \brief Compute the reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h].
     Void apply_full_reach_step(const ValidatedVectorFunctionModel64& phi);
 

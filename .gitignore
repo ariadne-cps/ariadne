@@ -1,11 +1,8 @@
-build/
+*build*
 *~
 config.h
-.project
-.cproject
-.pydevproject
 dep/
 obj/
 *.gch
 .DS_Store
-.settings
+.idea

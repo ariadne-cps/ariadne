@@ -106,7 +106,6 @@ class DeclareNumberOperators {
 
 //! \ingroup NumericModule
 //! \brief Generic numbers with computational paradigm \a P, which may be %EffectiveTag, %ValidatedTag, %UpperTag, %LowerTag or %ApproximateTag.
-// Number
 template<class P> class Number
 {
     static_assert(IsParadigm<P>::value,"P must be a paradigm");
@@ -264,7 +263,6 @@ template<class R, class P, EnableIf<IsConcreteNumericType<R>> =dummy> auto opera
 
 //! \ingroup NumericModule
 //! \brief Generic numbers with computational paradigm \a P, which may be %EffectiveTag, %ValidatedTag, %UpperTag, %LowerTag or %ApproximateTag.
-// Number
 template<class P> class Number
     : public Handle<NumberInterface>
 {

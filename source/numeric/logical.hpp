@@ -35,6 +35,11 @@
 
 namespace Ariadne {
 
+/*! \defgroup LogicModule Logic Module
+ *  \ingroup CoreModules
+ *  \brief %Logical classes and functions.
+ */
+
 class Effort {
     Nat _m;
   public:
@@ -47,7 +52,7 @@ class Effort {
 
 template<class P> class Logical;
 
-//!  \ingroup LogicalTypes
+//!  \ingroup LogicModule
 //! \brief An enumeration containing the possible values of a logical variable.
 enum class LogicalValue : char {
     FALSE=-2, //!< Definitely not true.
@@ -118,7 +123,7 @@ template<> class LogicalFacade<ExactTag> {
 
 template<> class Logical<EffectiveTag>;
 
-//!  \ingroup LogicalTypes
+//!  \ingroup LogicModule
 //!  \brief A logical variable for the paradigm \a P, which must be %ExactTag, %ValidatedTag, %UpperTag, %LowerTag or %ApproximateTag.
 //!  Used as a base of exact, validated and approximate logical types. Implemented in terms of LogicalValue.
 template<class P> class Logical
@@ -272,15 +277,15 @@ inline Logical<EffectiveLowerTag> operator&&(Logical<EffectiveLowerTag> l1, Logi
 inline Logical<EffectiveUpperTag> operator||(Logical<EffectiveUpperTag> l1, Logical<ExactTag> l2) {
     if(decide(l2)) { return Logical<EffectiveTag>(true); } else { return l1; } }
 
-//! \ingroup LogicalTypes
+//! \ingroup LogicModule
 //! \brief The logical constant representing an unknown value.
 extern const Logical<EffectiveTag> indeterminate;
 
-//! \ingroup LogicalTypes
+//! \ingroup LogicModule
 //! \brief The logical constant representing an value which is deemed likely to be true, but for which truth has not been confirmed.
 static const Logical<ApproximateTag> likely = Logical<ApproximateTag>(LogicalValue::LIKELY);
 
-//! \ingroup LogicalTypes
+//! \ingroup LogicModule
 //! \brief The logical constant representing an value which is deemed unlikely to be true, but for which truth has not been ruled out.
 static const Logical<ApproximateTag> unlikely = Logical<ApproximateTag>(LogicalValue::UNLIKELY);
 

@@ -26,7 +26,10 @@ MA 02110-1301, USA.
 #include <cstdlib>
 #include <mpfr.h>
 
-/*! \defgroup mpfr_array Arrays of mpfr objects of the same precision. */
+/*! \defgroup mpfr_array MPFR Array
+ *  \ingroup ExternalModules
+ *  \brief Arrays of mpfr objects of the same precision.
+ */
 
 /*@{*/
 

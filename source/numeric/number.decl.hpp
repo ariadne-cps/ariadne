@@ -79,6 +79,8 @@ class Real;
 
 template<class R, class A> R integer_cast(const A& _a);
 
+//! \ingroup NumericModule
+//! \brief A modifier declaring that a number is positive.
 template<class X> class Positive;
 
 template<class P=Void> class Number;
@@ -101,14 +103,14 @@ template<> struct IsGenericNumericType<Dbl> : True { };
 template<class P> struct IsGenericNumericType<Number<P>> : True { };
 
 
-using ExactNumber=Number<ExactTag>;
-using EffectiveNumber=Number<EffectiveTag>;
-using EffectiveUpperNumber=Number<EffectiveUpperTag>;
-using EffectiveLowerNumber=Number<EffectiveLowerTag>;
-using ValidatedNumber=Number<ValidatedTag>;
-using ValidatedUpperNumber=Number<ValidatedUpperTag>;
-using ValidatedLowerNumber=Number<ValidatedLowerTag>;
-using ApproximateNumber=Number<ApproximateTag>;
+using ExactNumber=Number<ExactTag>; //!< Alias for generic exact numbers. \ingroup NumericModule
+using EffectiveNumber=Number<EffectiveTag>; //!< Alias for generic effective numbers. \ingroup NumericModule
+using EffectiveUpperNumber=Number<EffectiveUpperTag>; //!< Alias for generic effective upper numbers. \ingroup NumericModule
+using EffectiveLowerNumber=Number<EffectiveLowerTag>; //!< Alias for generic effective lower numbers. \ingroup NumericModule
+using ValidatedNumber=Number<ValidatedTag>; //!< Alias for generic validated numbers. \ingroup NumericModule
+using ValidatedUpperNumber=Number<ValidatedUpperTag>; //!< Alias for generic validated upper numbers. \ingroup NumericModule
+using ValidatedLowerNumber=Number<ValidatedLowerTag>; //!< Alias for generic validated lower numbers. \ingroup NumericModule
+using ApproximateNumber=Number<ApproximateTag>; //!< Alias for generic approximate numbers. \ingroup NumericModule
 
 } // namespace Ariadne
 

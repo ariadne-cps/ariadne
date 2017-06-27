@@ -38,10 +38,6 @@
 
 namespace Ariadne {
 
-//! \defgroup LinearAlgebraSubModule Linear Algebra Sub-Module
-//! \ingroup AlgebraModule
-//! \brief %Vector and matrix classes for linear algebra.
-
 /************ Vector *********************************************************/
 
 template<class X> class Vector;
@@ -107,7 +103,7 @@ struct DeclareVectorOperations { };
 template<class V> struct VectorExpression : public DeclareVectorOperations { const V& operator()() const { return static_cast<const V&>(*this); } };
 template<class V> struct VectorContainer : public VectorExpression<V> { };
 
-//! \ingroup LinearAlgebraSubModule
+//! \ingroup LinearAlgebraModule
 //! \brief Vectors over some type \a X.
 //! Corresponds to elements of a \em module over a mathematical \em ring, or a <em>vector space</em> over a field.
 //! May also be used if \a X is an \em algebra \a A over another field.

@@ -58,7 +58,7 @@ template<class PR> struct NumericTraits<FloatBounds<PR>> {
 //! If \f$v\f$ and \f$e\f$ are the returned value and error for the bounds \f$[l,u]\f$, then it is guaranteed that \f$v-e\leq l\f$ and \f$v+e\geq u\f$ in exact arithmetic.
 //!
 //! To test if the bounds contain a number , use \c models(FloatBounds,FloatValue), and to test if bounds are inconsistent use \c inconsistent(x,y), and to test if \c x provides a better approximation, use \c refines(x,y).
-//! \sa Float64, FloatMP
+//! \sa Real, Float64, FloatMP, FloatValue, FloatBall, FloatUpperBound, FloatLowerBound, FloatApproximation.
 //!
 //! \par Python interface
 //!

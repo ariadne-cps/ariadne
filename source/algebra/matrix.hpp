@@ -111,7 +111,7 @@ class DispatchMatrixOperations {
 };
 */
 
-//! \ingroup LinearAlgebraSubModule
+//! \ingroup LinearAlgebraModule
 //! \brief Matrices over some type \a X.
 template<class X> class Matrix
     : public MatrixContainer<Matrix<X>>

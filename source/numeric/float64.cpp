@@ -68,9 +68,7 @@ namespace Ariadne {
 
 typedef unsigned short rounding_mode_t;
 
-//! \ingroup NumericModule \brief Set the active rounding mode.
 Void set_rounding_mode(RoundingModeType rnd) { _set_rounding_mode(rnd); }
-//! \ingroup NumericModule \brief Get the active rounding mode.
 RoundingModeType get_rounding_mode() { return _get_rounding_mode(); }
 
 Void set_rounding_to_nearest() { _set_rounding_to_nearest(); }

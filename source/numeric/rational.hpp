@@ -49,7 +49,7 @@ enum class Comparison : char;
 
 /************ Rational *******************************************************/
 
-//! \ingroup UserNumericTypeSubModule
+//! \ingroup NumericModule
 //! \brief %Rational numbers.
 class Rational
     : DeclareFieldOperations<Rational>

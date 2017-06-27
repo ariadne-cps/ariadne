@@ -60,7 +60,7 @@ struct Accuracy {
 extern const Real pi;
 extern const Real infinity;
 
-//! \ingroup UserNumericTypeSubModule
+//! \ingroup NumericModule
 //! \brief Computable real numbers definable in terms of elementary functions.
 class Real
     : public DeclareRealOperations<Real,PositiveReal>
@@ -145,7 +145,7 @@ template<class M, EnableIf<And<IsBuiltinIntegral<M>,IsBuiltinUnsigned<M>>>> inli
 template<class N, EnableIf<And<IsBuiltinIntegral<N>,IsBuiltinSigned<N>>>> inline Real::Real(N n) : Real(std::int64_t(n),nullptr) { };
 
 
-//! \ingroup UserNumericTypeSubModule
+//! \ingroup NumericModule
 //! \brief Computable lower real numbers defined by conversion to concrete floats.
 class LowerReal
     : public DirectedRing<LowerReal,UpperReal,PositiveLowerReal>
@@ -184,7 +184,7 @@ class LowerReal
     friend PositiveLowerReal mul(PositiveLowerReal const&, PositiveLowerReal const&);
 };
 
-//! \ingroup UserNumericTypeSubModule
+//! \ingroup NumericModule
 //! \brief Computable lower real numbers defined by conversion to concrete floats.
 class UpperReal
     : public DirectedRing<UpperReal,LowerReal,PositiveUpperReal>

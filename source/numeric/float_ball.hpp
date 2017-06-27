@@ -44,6 +44,7 @@ template<class PR> struct NumericTraits<FloatBall<PR>> {
 
 //! \ingroup NumericModule
 //! \brief Floating point approximations to a real number with guaranteed error bounds.
+//! \sa Real, Float64 , FloatMP, FloatValue, FloatBounds, FloatApproximation.
 template<class PR> class FloatBall
     : public DispatchFloatOperations<FloatBall<PR>>
     , public ProvideConvertedFieldOperations<FloatBounds<PR>,FloatBall<PR>>

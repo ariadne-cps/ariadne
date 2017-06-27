@@ -230,6 +230,7 @@ inline rounding_mode_t Float64::get_rounding_mode() { return 0 }
 
 namespace Ariadne {
 
+//! \ingroup NumericModule
 //! \brief The integral type used to represent the rounding mode.
 typedef unsigned short RoundingModeType;
 
@@ -246,25 +247,26 @@ extern const RoundingModeType ROUND_UP;
 extern const RoundingModeType toward_zero;
 extern const RoundingModeType ROUND_ZERO;
 
-//! \brief Set the rounding mode to nearest.
+//! \brief Set the builtin rounding mode. \ingroup NumericModule
+void set_rounding_mode(RoundingModeType rnd);
+//! \brief Get the current rounding mode \ingroup NumericModule
+RoundingModeType get_rounding_mode();
+
+//! \brief Set the rounding mode to nearest. \ingroup NumericModule
 void set_rounding_to_nearest();
-//! \brief Set the rounding mode to downwards rounding.
+//! \brief Set the rounding mode to downwards rounding. \ingroup NumericModule
 void set_rounding_downward();
-//! \brief Set the rounding mode to upwards rounding.
+//! \brief Set the rounding mode to upwards rounding. \ingroup NumericModule
 void set_rounding_upward();
-//! \brief Set the rounding mode to towards-zero rounding.
+//! \brief Set the rounding mode to towards-zero rounding. \ingroup NumericModule
 void set_rounding_toward_zero();
 
 //! \brief Set the rounding mode to the expected default rounding mode.
 void set_default_rounding();
 
-//! \brief Set the rounding mode.
-void set_rounding_mode(RoundingModeType rnd);
-//! \brief Get the current rounding mode.
-RoundingModeType get_rounding_mode();
-}
 
 
+} // namespace Ariadne
 
 #endif // ARIADNE_ROUNDING_HPP
 

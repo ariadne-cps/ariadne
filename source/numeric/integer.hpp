@@ -97,7 +97,7 @@ template<> struct IsNumericType<Nat> : True { };
 template<> struct IsNumericType<Int> : True { };
 template<> struct IsNumericType<Integer> : True { };
 
-//! \ingroup UserNumericTypeSubModule
+//! \ingroup NumericModule
 //! \brief Arbitrarily-sized integers.
 class Integer
     : DeclareRingOperations<Integer,Integer,Natural>
@@ -171,6 +171,7 @@ template<> class Positive<Integer> : public Integer {
     Positive<Integer>(Integer const& z) : Integer(z) { assert(z>=0); }
 };
 
+//! \brief A positive integer.
 class Natural : public Positive<Integer> {
   public:
     Natural() : Positive<Integer>() { }

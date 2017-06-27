@@ -50,8 +50,8 @@ static_assert(not IsGenericNumericType<FloatValue<Precision64>>::value,"");
 static_assert(not IsGenericNumericType<FloatValue<PrecisionMP>>::value,"");
 
 //! \ingroup NumericModule
-//! \related Float64, Float64Bounds
 //! \brief A floating-point number, which is taken to represent the \em exact value of a real quantity.
+//! \sa Float64 , FloatMP, FloatBall, FloatBounds, FloatApproximation.
 template<class PR> class FloatValue
     : DispatchNumericOperations<FloatValue<PR>,FloatBounds<PR>>
     , DispatchComparisonOperations<FloatValue<PR>,Boolean>

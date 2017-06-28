@@ -73,8 +73,8 @@ template<class PR, class PRE> class FloatBall
     explicit FloatBall<PR,PRE>(RawFloat<PR> const& v) : _v(v), _e(0.0,_error_precision<PRE>(v.precision())) { }
     explicit FloatBall<PR,PRE>(RawFloat<PR> const& v, PRE pre) : _v(v), _e(0.0,pre) { }
     explicit FloatBall<PR,PRE>(RawFloat<PR> const& v, RawFloat<PRE> const& e) : _v(v), _e(e) { }
-    FloatBall<PR>(FloatValue<PR> const& value, FloatError<PRE> const& error);
-    FloatBall<PR>(FloatLowerBound<PR> const& lower, FloatUpperBound<PR> const& upper) = delete;
+    FloatBall<PR,PRE>(FloatValue<PR> const& value, FloatError<PRE> const& error);
+    FloatBall<PR,PRE>(FloatLowerBound<PR> const& lower, FloatUpperBound<PR> const& upper) = delete;
 
     FloatBall<PR>(ExactDouble d, PR pr);
         FloatBall<PR>(const Integer& z, PR pr);
@@ -124,20 +124,20 @@ template<class PR, class PRE> class FloatBall
     RawFloat<PR> _v; RawFloat<PRE> _e;
 };
 
-template<class PR> inline FloatFactory<PR> factory(FloatBall<PR> const& flt) {
+template<class PR, class PRE> inline FloatFactory<PR> factory(FloatBall<PR,PRE> const& flt) {
     return FloatFactory<PR>(flt.precision());
 }
 
-template<class PR> class Positive<FloatBall<PR>> : public FloatBall<PR> {
+template<class PR, class PRE> class Positive<FloatBall<PR,PRE>> : public FloatBall<PR,PRE> {
   public:
-    Positive<FloatBall<PR>>() : FloatBounds<PR>() { }
+    Positive<FloatBall<PR,PRE>>() : FloatBounds<PR>() { }
     template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>> =dummy>
-        Positive<FloatBall<PR>>(M m, PR pr) : FloatBall<PR>(m,pr) { }
-    explicit Positive<FloatBall<PR>>(FloatBall<PR> const& x) : FloatBall<PR>(x) { }
+        Positive<FloatBall<PR,PRE>>(M m, PR pr) : FloatBall<PR,PRE>(m,pr) { }
+    explicit Positive<FloatBall<PR,PRE>>(FloatBall<PR,PRE> const& x) : FloatBall<PR,PRE>(x) { }
 };
 
-template<class PR> inline PositiveFloatBall<PR> cast_positive(FloatBall<PR> const& x) {
-    return PositiveFloatBall<PR>(x); }
+template<class PR, class PRE> inline PositiveFloatBall<PR,PRE> cast_positive(FloatBall<PR,PRE> const& x) {
+    return PositiveFloatBall<PR,PRE>(x); }
 
 
 }

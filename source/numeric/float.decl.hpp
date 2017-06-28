@@ -60,7 +60,7 @@ template<class PR> class FloatApproximation;
 template<class PR> class FloatLowerBound;
 template<class PR> class FloatUpperBound;
 template<class PR> class FloatBounds;
-template<class PR> class FloatBall;
+template<class PR, class PRE=PR> class FloatBall;
 template<class PR> class FloatValue;
 template<class PR> class FloatError;
 
@@ -68,22 +68,22 @@ template<class PR> using PositiveFloatApproximation = Positive<FloatApproximatio
 template<class PR> using PositiveFloatLowerBound = Positive<FloatLowerBound<PR>>;
 template<class PR> using PositiveFloatUpperBound = Positive<FloatUpperBound<PR>>;
 template<class PR> using PositiveFloatBounds = Positive<FloatBounds<PR>>;
-template<class PR> using PositiveFloatBall = Positive<FloatBall<PR>>;
+template<class PR, class PRE=PR> using PositiveFloatBall = Positive<FloatBall<PR,PRE>>;
 template<class PR> using PositiveFloatValue = Positive<FloatValue<PR>>;
 
-template<class P, class PR> struct FloatTypedef;
+template<class P, class PR, class PRE=PR> struct FloatTypedef;
 template<class PR> struct FloatTypedef<ApproximateTag,PR> { typedef FloatApproximation<PR> Type; };
 template<class PR> struct FloatTypedef<LowerTag,PR> { typedef FloatLowerBound<PR> Type; };
 template<class PR> struct FloatTypedef<UpperTag,PR> { typedef FloatUpperBound<PR> Type; };
 template<class PR> struct FloatTypedef<BoundedTag,PR> { typedef FloatBounds<PR> Type; };
-template<class PR> struct FloatTypedef<MetricTag,PR> { typedef FloatBall<PR> Type; };
+template<class PR, class PRE> struct FloatTypedef<MetricTag,PR,PRE> { typedef FloatBall<PR,PRE> Type; };
 template<class PR> struct FloatTypedef<ExactTag,PR> { typedef FloatValue<PR> Type; };
 template<class PR> struct FloatTypedef<ErrorTag,PR> { typedef FloatError<PR> Type; };
 
 template<class PR> struct FloatTypedef<ValidatedTag,PR> { typedef FloatBounds<PR> Type; };
-template<class PR> struct FloatTypedef<EffectiveTag,PR> { typedef FloatBall<PR> Type; };
+template<class PR, class PRE> struct FloatTypedef<EffectiveTag,PR,PRE> { typedef FloatBall<PR,PRE> Type; };
 
-template<class P, class PR> using Float = typename FloatTypedef<P,PR>::Type;
+template<class P, class PR, class PRE=PR> using Float = typename FloatTypedef<P,PR,PRE>::Type;
 //template<class P> using Float64=Float<P,Precision64>;
 //template<class P> using FloatMP=Float<P,PrecisionMP>;
 
@@ -115,11 +115,13 @@ using PositiveFloatMPBounds = PositiveFloatBounds<PrecisionMP>;
 using PositiveFloatMPBall = PositiveFloatBall<PrecisionMP>;
 using PositiveFloatMPValue = PositiveFloatValue<PrecisionMP>;
 
+using FloatMP64Ball = Float<MetricTag,PrecisionMP,Precision64>;
+
 template<class F> using Approximation = FloatApproximation<typename F::PrecisionType>;
 template<class F> using LowerBound = FloatLowerBound<typename F::PrecisionType>;
 template<class F> using UpperBound = FloatUpperBound<typename F::PrecisionType>;
 template<class F> using Bounds = FloatBounds<typename F::PrecisionType>;
-template<class F> using Ball = FloatBall<typename F::PrecisionType>;
+template<class F, class FE=F> using Ball = FloatBall<typename F::PrecisionType, typename FE::PrecisionType>;
 template<class F> using Value = FloatValue<typename F::PrecisionType>;
 template<class F> using Error = FloatError<typename F::PrecisionType>;
 
@@ -129,7 +131,7 @@ template<class PR> struct IsFloat<FloatApproximation<PR>> : True { };
 template<class PR> struct IsFloat<FloatLowerBound<PR>> : True { };
 template<class PR> struct IsFloat<FloatUpperBound<PR>> : True { };
 template<class PR> struct IsFloat<FloatBounds<PR>> : True { };
-template<class PR> struct IsFloat<FloatBall<PR>> : True { };
+template<class PR, class PRE> struct IsFloat<FloatBall<PR,PRE>> : True { };
 template<class PR> struct IsFloat<FloatValue<PR>> : True { };
 template<class PR> struct IsFloat<FloatError<PR>> : True { };
 template<> struct IsFloat<Dbl> : False { };
@@ -139,7 +141,7 @@ template<class T> struct IsNumericType;
 template<> struct IsNumericType<Dbl> : True { };
 template<class PR> struct IsNumericType<FloatApproximation<PR>> : True { };
 template<class PR> struct IsNumericType<FloatBounds<PR>> : True { };
-template<class PR> struct IsNumericType<FloatBall<PR>> : True { };
+template<class PR, class PRE> struct IsNumericType<FloatBall<PR,PRE>> : True { };
 template<class PR> struct IsNumericType<FloatValue<PR>> : True { };
 
 } // namespace Ariadne

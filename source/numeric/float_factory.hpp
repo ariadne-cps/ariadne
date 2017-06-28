@@ -74,7 +74,7 @@ template<class PR> inline FloatFactory<PR> factory(FloatApproximation<PR> const&
 template<class PR> inline FloatFactory<PR> factory(FloatLowerBound<PR> const& flt) { return FloatFactory<PR>(flt.precision()); }
 template<class PR> inline FloatFactory<PR> factory(FloatUpperBound<PR> const& flt) { return FloatFactory<PR>(flt.precision()); }
 template<class PR> inline FloatFactory<PR> factory(FloatBounds<PR> const& flt) { return FloatFactory<PR>(flt.precision()); }
-template<class PR> inline FloatFactory<PR> factory(FloatBall<PR> const& flt) { return FloatFactory<PR>(flt.precision()); }
+template<class PR, class PRE> inline FloatFactory<PR> factory(FloatBall<PR,PRE> const& flt) { return FloatFactory<PR>(flt.precision()); }
 template<class PR> inline FloatFactory<PR> factory(FloatValue<PR> const& flt) { return FloatFactory<PR>(flt.precision()); }
 
 template<class PR> inline FloatApproximation<PR> FloatFactory<PR>::(Number<ApproximateTag> const& y) { return FloatApproximation<PR>(y,_pr); }

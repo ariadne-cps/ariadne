@@ -112,7 +112,7 @@ template<class PR> class FloatBounds
         FloatBounds<PR>(const FloatBounds<PR>& x, PR pr);
     FloatBounds<PR>(const ValidatedNumber& y, PR pr);
 
-    FloatBounds<PR>(FloatBall<PR> const& x);
+    template<class PRE> FloatBounds<PR>(FloatBall<PR,PRE> const& x);
     FloatBounds<PR>(FloatValue<PR> const& x);
 
         FloatBounds<PR>& operator=(const FloatValue<PR>& x) { return *this=FloatBounds<PR>(x); }

@@ -106,7 +106,7 @@ template<class PR> class FloatValue
     RawFloatType& raw() { return _v; }
     double get_d() const { return _v.get_d(); }
 
-    FloatBall<PR> pm(FloatError<PR> _e) const;
+    template<class PRE> FloatBall<PR,PRE> pm(FloatError<PRE> e) const;
   public:
     friend FloatValue<PR> operator*(FloatValue<PR> const&, TwoExp const&);
     friend FloatValue<PR> operator/(FloatValue<PR> const&, TwoExp const&);

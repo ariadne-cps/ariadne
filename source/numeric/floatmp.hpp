@@ -261,6 +261,14 @@ class FloatMP {
     friend Bool operator< (FloatMP const& x1, Dbl x2);
     friend Bool operator> (FloatMP const& x1, Dbl x2);
 
+    friend Comparison cmp(FloatMP const& x1, Float64 const& x2);
+    friend Bool operator==(FloatMP const& x1, Float64 const&  x2);
+    friend Bool operator!=(FloatMP const& x1, Float64 const&  x2);
+    friend Bool operator<=(FloatMP const& x1, Float64 const&  x2);
+    friend Bool operator>=(FloatMP const& x1, Float64 const&  x2);
+    friend Bool operator< (FloatMP const& x1, Float64 const&  x2);
+    friend Bool operator> (FloatMP const& x1, Float64 const&  x2);
+
     friend Comparison cmp(FloatMP const& x, Rational const& q);
   private:
     friend OutputStream& write(OutputStream& os, FloatMP const& x, DecimalPlaces dgts, RoundingModeMP rnd);

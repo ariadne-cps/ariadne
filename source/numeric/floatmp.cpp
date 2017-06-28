@@ -573,6 +573,10 @@ Comparison cmp(FloatMP const& x1, Dbl x2) {
     return c==0 ? Comparison::EQUAL : (c>0?Comparison::GREATER:Comparison::LESS);
 }
 
+Comparison cmp(FloatMP const& x1, Float64 const& x2) {
+    return cmp(x1,x2.get_d());
+}
+
 Comparison cmp(FloatMP const& x1, Rational const& q2) {
     auto c=mpfr_cmp_q(x1._mpfr,q2.get_mpq());
     return c==0 ? Comparison::EQUAL : (c>0?Comparison::GREATER:Comparison::LESS);
@@ -639,6 +643,25 @@ Bool operator< (FloatMP const& x1, Dbl x2) {
     return cmp(x1,x2)< Comparison::EQUAL;
 }
 Bool operator> (FloatMP const& x1, Dbl x2) {
+    return cmp(x1,x2)> Comparison::EQUAL;
+}
+
+Bool operator==(FloatMP const& x1, Float64 const& x2) {
+    return cmp(x1,x2)==Comparison::EQUAL;
+}
+Bool operator!=(FloatMP const& x1, Float64 const& x2) {
+    return cmp(x1,x2)!=Comparison::EQUAL;
+}
+Bool operator<=(FloatMP const& x1, Float64 const& x2) {
+    return cmp(x1,x2)<=Comparison::EQUAL;
+}
+Bool operator>=(FloatMP const& x1, Float64 const& x2) {
+    return cmp(x1,x2)>=Comparison::EQUAL;
+}
+Bool operator< (FloatMP const& x1, Float64 const& x2) {
+    return cmp(x1,x2)< Comparison::EQUAL;
+}
+Bool operator> (FloatMP const& x1, Float64 const& x2) {
     return cmp(x1,x2)> Comparison::EQUAL;
 }
 

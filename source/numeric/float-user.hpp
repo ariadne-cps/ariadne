@@ -75,20 +75,32 @@ template<class PR> inline FloatBounds<PR> make_bounds(FloatError<PR> const& e) {
     return FloatBounds<PR>(-e.raw(),+e.raw()); }
 
 
-template<class PR> inline FloatBall<PR>::FloatBall(FloatValue<PR> const& value, FloatError<PR> const& error)
+template<class PR, class PRE> inline FloatBall<PR,PRE>::FloatBall(FloatValue<PR> const& value, FloatError<PRE> const& error)
     : _v(value.raw()), _e(error.raw()) { }
 
-template<class PR> inline FloatLowerBound<PR> const FloatBall<PR>::lower() const {
+template<class PR, class PRE> inline FloatLowerBound<PR> const FloatBall<PR,PRE>::lower() const {
     return FloatLowerBound<PR>(lower_raw()); }
 
-template<class PR> inline FloatUpperBound<PR> const FloatBall<PR>::upper() const {
+template<class PR, class PRE> inline FloatUpperBound<PR> const FloatBall<PR,PRE>::upper() const {
     return FloatUpperBound<PR>(upper_raw()); }
 
-template<class PR> inline const FloatValue<PR> FloatBall<PR>::value() const {
+template<class PR, class PRE> inline const FloatValue<PR> FloatBall<PR,PRE>::value() const {
     return FloatValue<PR>(this->_v); }
 
-template<class PR> inline const FloatError<PR> FloatBall<PR>::error() const {
-    return FloatError<PR>(this->_e); }
+template<class PR, class PRE> inline const FloatError<PRE> FloatBall<PR,PRE>::error() const {
+    return FloatError<PRE>(this->_e); }
+
+
+template<class PR> template<class PRE> inline FloatBall<PR,PRE> FloatValue<PR>::pm(FloatError<PRE> e) const {
+    return FloatBall<PR,PRE>(*this,e);
+}
+
+template<class PR> template<class PRE> FloatApproximation<PR>::FloatApproximation(FloatBall<PR,PRE> const& x) : _a(x.value_raw()) {
+}
+
+template<class PR> template<class PRE> FloatBounds<PR>::FloatBounds(FloatBall<PR,PRE> const& x) : _l(x.lower_raw()), _u(x.upper_raw()) {
+}
+
 
 extern const Float64Value infty;
 

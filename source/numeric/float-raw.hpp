@@ -169,6 +169,8 @@ inline FloatMP pi_down(PrecisionMP const& pr) { return FloatMP::pi(pr,FloatMP::d
 inline FloatMP med_near(FloatMP x1, FloatMP x2) { return hlf(add_near(x1,x2)); }
 inline FloatMP rad_up(FloatMP x1, FloatMP x2) { return hlf(sub_up(x2,x1)); }
 
+FloatMP add_up(FloatMP x1, Float64 x2);
+FloatMP sub_down(FloatMP x1, Float64 x2);
 /*
 inline Float64 max_exact(Float64 const& x1, Float64 const& x2) { return max(x1,x2); }
 inline Float64 min_exact(Float64 const& x1, Float64 const& x2) { return min(x1,x2); }

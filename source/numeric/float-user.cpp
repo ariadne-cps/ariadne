@@ -37,6 +37,20 @@
 
 namespace Ariadne {
 
+template<class PRE, class FLT, DisableIf<IsSame<PRE,PrecisionType<FLT>>> =dummy> inline RawFloat<PRE> _make_error(FLT const& x) {
+    return RawFloat<PRE>(Dyadic(x),RawFloat<PRE>::upward,PRE()); }
+template<class PRE, class FLT, EnableIf<IsSame<PRE,PrecisionType<FLT>>> =dummy> inline RawFloat<PRE> _make_error(FLT const& x) {
+    return x; }
+
+Float64 set_up(FloatMP const& x, Precision64 pr) { return Float64(Dyadic(x),Float64::upward,pr); }
+Float64 set_down(FloatMP const& x, Precision64 pr) { return Float64(Dyadic(x),Float64::downward,pr); }
+FloatMP add_up(FloatMP x1, Float64 x2) { return add_up(x1,FloatMP(x2.get_d(),FloatMP::upward,x1.precision())); }
+FloatMP sub_down(FloatMP x1, Float64 x2) { return sub_down(x1,FloatMP(x2.get_d(),FloatMP::upward,x1.precision())); }
+Bool operator>(Float64 x1, FloatMP x2) { return x2<x1; }
+Bool operator<(Float64 x1, FloatMP x2) { return x2>x1; }
+Bool operator>(Float64 x1, Dbl x2) { return x2<x1; }
+Bool operator<(Float64 x1, Dbl x2) { return x2>x1; }
+
 
 template<class PR> Nat FloatError<PR>::output_places = 3;
 template<class PR> Nat FloatApproximation<PR>::output_places = 4;
@@ -154,46 +168,46 @@ template<class PR> FloatValue<PR>::operator ExactNumber() const {
     return ExactNumber(new NumberWrapper<FloatValue<PR>>(*this));
 }
 
-template<class PR> FloatBall<PR>::FloatBall(ExactDouble d, PR pr)
-    : _v(d.get_d(),RawFloat<PR>::to_nearest,pr), _e(0,pr) {
+template<class PR, class PRE> FloatBall<PR,PRE>::FloatBall(ExactDouble d, PR pr)
+    : _v(d.get_d(),RawFloat<PR>::to_nearest,pr), _e(0,_error_precision<PRE>(pr)) {
 }
 
-template<class PR> FloatBall<PR>::FloatBall(Integer const& z, PR pr) : FloatBall<PR>(Rational(z),pr) {
+template<class PR, class PRE> FloatBall<PR,PRE>::FloatBall(Integer const& z, PR pr) : FloatBall<PR,PRE>(Rational(z),pr) {
 }
 
-template<class PR> FloatBall<PR>::FloatBall(Dyadic const& w, PR pr)
-    : _v(RawFloat<PR>(w,RawFloat<PR>::to_nearest,pr)), _e(abs(Dyadic(_v)-w),RawFloat<PR>::upward,pr) {
+template<class PR, class PRE> FloatBall<PR,PRE>::FloatBall(Dyadic const& w, PR pr)
+    : _v(RawFloat<PR>(w,RawFloat<PR>::to_nearest,pr)), _e(abs(Dyadic(_v)-w),RawFloat<PRE>::upward,_error_precision<PRE>(pr)) {
 }
 
-template<class PR> FloatBall<PR>::FloatBall(Decimal const& d, PR pr)
+template<class PR, class PRE> FloatBall<PR,PRE>::FloatBall(Decimal const& d, PR pr)
     : FloatBall(Rational(d),pr) {
 }
 
-template<class PR> FloatBall<PR>::FloatBall(Rational const& q, PR pr)
-    : _v(RawFloat<PR>(q,RawFloat<PR>::to_nearest,pr)), _e(abs(Rational(_v)-q),RawFloat<PR>::upward,pr) {
+template<class PR, class PRE> FloatBall<PR,PRE>::FloatBall(Rational const& q, PR pr)
+    : _v(RawFloat<PR>(q,RawFloat<PR>::to_nearest,pr)), _e(abs(Rational(_v)-q),RawFloat<PRE>::upward,_error_precision<PRE>(pr)) {
 }
 
-template<class PR> FloatBall<PR>::FloatBall(Real const& r, PR pr)
+template<class PR, class PRE> FloatBall<PR,PRE>::FloatBall(Real const& r, PR pr)
     : FloatBall(r.get(pr)) {
 }
 
-template<class PR> FloatBall<PR>::FloatBall(FloatBall<PR> const& x, PR pr)
-    : _v(x._v,RawFloat<PR>::to_nearest,pr),_e(x._e,RawFloat<PR>::to_nearest,pr)
+template<class PR, class PRE> FloatBall<PR,PRE>::FloatBall(FloatBall<PR,PRE> const& x, PR pr)
+    : _v(x._v,RawFloat<PR>::to_nearest,pr), _e(x._e,RawFloat<PRE>::to_nearest,_error_precision<PRE>(pr))
 {
     RawFloat<PR> d = (this->_v>=x._v) ? sub_up(this->_v,x._v) : sub_up(x._v,this->_v);
-    _e=add_up(_e,d);
+    _e=add_up(_e,_make_error<PRE>(d));
 }
 
-template<class PR> FloatBall<PR>::FloatBall(ValidatedNumber const& y, PR pr)
+template<class PR, class PRE> FloatBall<PR,PRE>::FloatBall(ValidatedNumber const& y, PR pr)
     : FloatBall(y.get(MetricTag(),pr)) {
 }
 
-template<class PR> FloatBall<PR> FloatBall<PR>::create(ValidatedNumber const& y) const {
-    return FloatBall<PR>(y,this->precision());
+template<class PR, class PRE> FloatBall<PR,PRE> FloatBall<PR,PRE>::create(ValidatedNumber const& y) const {
+    return FloatBall<PR,PRE>(y,this->precision());
 }
 
-template<class PR> FloatBall<PR>::operator ValidatedNumber() const {
-    return ValidatedNumber(new NumberWrapper<FloatBall<PR>>(*this));
+template<class PR, class PRE> FloatBall<PR,PRE>::operator ValidatedNumber() const {
+    return ValidatedNumber(new NumberWrapper<FloatBall<PR,PRE>>(*this));
 }
 
 
@@ -419,9 +433,6 @@ template<class PR> FloatApproximation<PR>::FloatApproximation(FloatUpperBound<PR
 template<class PR> FloatApproximation<PR>::FloatApproximation(FloatBounds<PR> const& x) : _a(x.value_raw()) {
 }
 
-template<class PR> FloatApproximation<PR>::FloatApproximation(FloatBall<PR> const& x) : _a(x.value_raw()) {
-}
-
 template<class PR> FloatApproximation<PR>::FloatApproximation(FloatValue<PR> const& x) : _a(x.raw()) {
 }
 
@@ -449,24 +460,18 @@ template<class PR> FloatUpperBound<PR>::FloatUpperBound(FloatValue<PR> const& x)
 template<class PR> FloatUpperBound<PR>::FloatUpperBound(FloatError<PR> const& x) : _u(x.raw()) {
 }
 
-template<class PR> FloatBounds<PR>::FloatBounds(FloatBall<PR> const& x) : _l(x.lower_raw()), _u(x.upper_raw()) {
-}
-
 template<class PR> FloatBounds<PR>::FloatBounds(FloatValue<PR> const& x) : _l(x.raw()), _u(x.raw()) {
 }
 
-template<class PR> FloatBall<PR>::FloatBall(FloatBounds<PR> const& x) : _v(x.value_raw()), _e(x.error_raw()) {
+template<class PR, class PRE> FloatBall<PR,PRE>::FloatBall(FloatBounds<PR> const& x)
+    : _v(x.value_raw()) , _e(_make_error<PRE>(x.error_raw())) {
 }
 
-template<class PR> FloatBall<PR>::FloatBall(FloatValue<PR> const& x) : _v(x.raw()), _e(nul(x.raw())) {
+template<class PR, class PRE> FloatBall<PR,PRE>::FloatBall(FloatValue<PR> const& x) : _v(x.raw()), _e(_error_precision<PRE>(x.precision())) {
 }
 
 
-template<class PR> FloatBall<PR> FloatValue<PR>::pm(FloatError<PR> e) const {
-    FloatValue<PR> const& v=*this; return FloatBall<PR>(v,e);
-}
-
-template<class PR> FloatBall<PR> FloatBall<PR>::pm(FloatError<PR> e) const {
+template<class PR, class PRE> FloatBall<PR,PRE> FloatBall<PR,PRE>::pm(FloatError<PRE> e) const {
     return FloatBall(this->_v,add_up(this->_e,e._e));
 }
 
@@ -1184,197 +1189,200 @@ template<> OutputStream& Operations<FloatBounds<Precision64>>::_write(OutputStre
     return os << FloatBounds<PrecisionMP>(FloatMP(x.lower_raw(),prec),FloatMP(x.upper_raw(),prec));
 }
 
+template<class PR, class PRE> struct Operations<FloatBall<PR,PRE>> {
 
-
-template<class PR> struct Operations<FloatBall<PR>> {
-
-    static FloatBall<PR> _nul(FloatBall<PR> const& x) {
-        return FloatBall<PR>(nul(x._v),nul(x._e));
+    static FloatBall<PR,PRE> _nul(FloatBall<PR,PRE> const& x) {
+        return FloatBall<PR,PRE>(nul(x._v),nul(x._e));
     }
 
-    static FloatBall<PR> _pos(FloatBall<PR> const& x) {
-        return FloatBall<PR>(pos(x._v),x._e);
+    static FloatBall<PR,PRE> _pos(FloatBall<PR,PRE> const& x) {
+        return FloatBall<PR,PRE>(pos(x._v),x._e);
     }
 
-    static FloatBall<PR> _neg(FloatBall<PR> const& x) {
-        return FloatBall<PR>(neg(x._v),x._e);
+    static FloatBall<PR,PRE> _neg(FloatBall<PR,PRE> const& x) {
+        return FloatBall<PR,PRE>(neg(x._v),x._e);
     }
 
-    static FloatBall<PR> _hlf(FloatBall<PR> const& x) {
-        return FloatBall<PR>(hlf(x._v),hlf(x._e));
+    static FloatBall<PR,PRE> _hlf(FloatBall<PR,PRE> const& x) {
+        return FloatBall<PR,PRE>(hlf(x._v),hlf(x._e));
     }
 
-    static FloatBall<PR> _sqr(FloatBall<PR> const& x) {
-        FloatBall<PR> r=x*x;
+    static FloatBall<PR,PRE> _sqr(FloatBall<PR,PRE> const& x) {
+        FloatBall<PR,PRE> r=x*x;
         if(r._e>r._v) {
-            r._e=hlf(add_up(r._e,r._v));
-            r._v=r._e;
+            r._e=hlf(add_up(r._e,_make_error<PRE>(r._v)));
+            r._v=RawFloat<PR>(Dyadic(r._e),RawFloat<PR>::upward,x.precision());
         }
         return r;
     }
 
-    static FloatBall<PR> _rec(FloatBall<PR> const& x) {
+    static FloatBall<PR,PRE> _rec(FloatBall<PR,PRE> const& x) {
         // Use this code to find value same as reciprocal value
         auto rv=rec_approx(x._v);
         auto ru=rec_up(sub_down(x._v,x._e));
         auto rl=rec_down(add_up(x._v,x._e));
         auto re=max(sub_up(ru,rv),sub_up(rv,rl));
-        return FloatBall<PR>(rv,re);
+        return FloatBall<PR,PRE>(rv,_make_error<PRE>(re));
     #ifdef ARIADNE_UNDEFINED
         // Use this code to get same result as interval computation
         auto ru=rec_up(sub_down(x._v,x._e));
         auto rl=rec_down(add_up(x._v,x._e));
         auto re=hlf(sub_up(ru,rl));
         auto rv=hlf(add_near(rl,ru));
-        return FloatBall<PR>(rv,re);
+        return FloatBall<PR,PRE>(rv,re);
     #endif
     }
 
-    static FloatBall<PR> _add(FloatBall<PR> const& x, FloatBall<PR> const& y) {
+    static FloatBall<PR,PRE> _add(FloatBall<PR,PRE> const& x, FloatBall<PR,PRE> const& y) {
         auto rv=add_near(x._v,y._v);
         auto ru=add_up(x._v,y._v);
         auto rl=add_down(x._v,y._v);
-        auto re=add_up(hlf(sub_up(ru,rl)),add_up(x._e,y._e));
-        return FloatBall<PR>(rv,re);
+        auto ae=_make_error<PRE>(hlf(sub_up(ru,rl)));
+        auto re=add_up(ae,add_up(x._e,y._e));
+        return FloatBall<PR,PRE>(rv,re);
     }
 
-    static FloatBall<PR> _sub(FloatBall<PR> const& x, FloatBall<PR> const& y) {
+    static FloatBall<PR,PRE> _sub(FloatBall<PR,PRE> const& x, FloatBall<PR,PRE> const& y) {
         auto rv=sub_near(x._v,y._v);
         auto ru=sub_up(x._v,y._v);
         auto rl=sub_down(x._v,y._v);
-        auto re=add_up(hlf(sub_up(ru,rl)),add_up(x._e,y._e));
-        return FloatBall<PR>(rv,re);
+        auto ae=_make_error<PRE>(hlf(sub_up(ru,rl)));
+        auto re=add_up(ae,add_up(x._e,y._e));
+        return FloatBall<PR,PRE>(rv,re);
     }
 
-    static FloatBall<PR> _mul(FloatBall<PR> const& x, FloatBall<PR> const& y) {
+    static FloatBall<PR,PRE> _mul(FloatBall<PR,PRE> const& x, FloatBall<PR,PRE> const& y) {
         auto rv=mul_near(x._v,y._v);
         auto ru=mul_up(x._v,y._v);
         auto rl=mul_down(x._v,y._v);
-        auto re1=add_up(hlf(sub_up(ru,rl)),mul_up(x._e,y._e));
-        auto re2=add_up(mul_up(abs(x._v),y._e),mul_up(x._e,abs(y._v)));
+        auto re0=_make_error<PRE>(hlf(sub_up(ru,rl)));
+        auto re1=add_up(re0,mul_up(x._e,y._e));
+        auto re2=add_up(mul_up(_make_error<PRE>(abs(x._v)),y._e),mul_up(x._e,_make_error<PRE>(abs(y._v))));
         auto re=add_up(re1,re2);
-        return FloatBall<PR>(rv,re);
+        return FloatBall<PR,PRE>(rv,re);
     }
 
-    static FloatBall<PR> _div(FloatBall<PR> const& x, FloatBall<PR> const& y) {
+    static FloatBall<PR,PRE> _div(FloatBall<PR,PRE> const& x, FloatBall<PR,PRE> const& y) {
         return x*rec(y);
     }
 
-    static FloatBall<PR> _pow(FloatBall<PR> const& x, Nat m) {
-        return FloatBall<PR>(pow(FloatBounds<PR>(x),m));
+    static FloatBall<PR,PRE> _pow(FloatBall<PR,PRE> const& x, Nat m) {
+        return FloatBall<PR,PRE>(pow(FloatBounds<PR>(x),m));
     }
 
-    static FloatBall<PR> _pow(FloatBall<PR> const& x, Int n) {
-        return FloatBall<PR>(pow(FloatBounds<PR>(x),n));
+    static FloatBall<PR,PRE> _pow(FloatBall<PR,PRE> const& x, Int n) {
+        return FloatBall<PR,PRE>(pow(FloatBounds<PR>(x),n));
     }
 
-    static FloatBall<PR> _sqrt(FloatBall<PR> const& x) {
-        return FloatBall<PR>(sqrt(FloatBounds<PR>(x)));
+    static FloatBall<PR,PRE> _sqrt(FloatBall<PR,PRE> const& x) {
+        return FloatBall<PR,PRE>(sqrt(FloatBounds<PR>(x)));
     }
 
-    static FloatBall<PR> _exp(FloatBall<PR> const& x) {
-        return FloatBall<PR>(exp(FloatBounds<PR>(x)));
+    static FloatBall<PR,PRE> _exp(FloatBall<PR,PRE> const& x) {
+        return FloatBall<PR,PRE>(exp(FloatBounds<PR>(x)));
     }
 
-    static FloatBall<PR> _log(FloatBall<PR> const& x) {
-        return FloatBall<PR>(log(FloatBounds<PR>(x)));
+    static FloatBall<PR,PRE> _log(FloatBall<PR,PRE> const& x) {
+        return FloatBall<PR,PRE>(log(FloatBounds<PR>(x)));
     }
 
-    static FloatBall<PR> _sin(FloatBall<PR> const& x) {
-        return FloatBall<PR>(sin(FloatBounds<PR>(x)));
+    static FloatBall<PR,PRE> _sin(FloatBall<PR,PRE> const& x) {
+        return FloatBall<PR,PRE>(sin(FloatBounds<PR>(x)));
     }
 
-    static FloatBall<PR> _cos(FloatBall<PR> const& x) {
-        return FloatBall<PR>(cos(FloatBounds<PR>(x)));
+    static FloatBall<PR,PRE> _cos(FloatBall<PR,PRE> const& x) {
+        return FloatBall<PR,PRE>(cos(FloatBounds<PR>(x)));
     }
 
-    static FloatBall<PR> _tan(FloatBall<PR> const& x) {
-        return FloatBall<PR>(tan(FloatBounds<PR>(x)));
+    static FloatBall<PR,PRE> _tan(FloatBall<PR,PRE> const& x) {
+        return FloatBall<PR,PRE>(tan(FloatBounds<PR>(x)));
     }
 
-    static FloatBall<PR> _asin(FloatBall<PR> const& x) {
-        return FloatBall<PR>(asin(FloatBounds<PR>(x)));
+    static FloatBall<PR,PRE> _asin(FloatBall<PR,PRE> const& x) {
+        return FloatBall<PR,PRE>(asin(FloatBounds<PR>(x)));
     }
 
-    static FloatBall<PR> _acos(FloatBall<PR> const& x) {
-        return FloatBall<PR>(acos(FloatBounds<PR>(x)));
+    static FloatBall<PR,PRE> _acos(FloatBall<PR,PRE> const& x) {
+        return FloatBall<PR,PRE>(acos(FloatBounds<PR>(x)));
     }
 
-    static FloatBall<PR> _atan(FloatBall<PR> const& x) {
-        return FloatBall<PR>(atan(FloatBounds<PR>(x)));
+    static FloatBall<PR,PRE> _atan(FloatBall<PR,PRE> const& x) {
+        return FloatBall<PR,PRE>(atan(FloatBounds<PR>(x)));
     }
 
 
-    static FloatBall<PR> _abs(FloatBall<PR> const& x) {
+    static FloatBall<PR,PRE> _abs(FloatBall<PR,PRE> const& x) {
         if(x._e<abs(x._v)) { return x; }
-        else { auto rv=hlf(abs(x._v)+x._e); return FloatBall<PR>(rv,rv); }
+        else { auto rv=hlf(add_up(abs(x._v),x._e)); return FloatBall<PR,PRE>(rv,_make_error<PRE>(rv)); }
     }
 
-    static FloatBall<PR> _max(FloatBall<PR> const& x1, FloatBall<PR> const& x2) {
+    static FloatBall<PR,PRE> _max(FloatBall<PR,PRE> const& x1, FloatBall<PR,PRE> const& x2) {
         return hlf((x1+x2)+abs(x1-x2));
     }
 
-    static FloatBall<PR> _min(FloatBall<PR> const& x1, FloatBall<PR> const& x2) {
+    static FloatBall<PR,PRE> _min(FloatBall<PR,PRE> const& x1, FloatBall<PR,PRE> const& x2) {
         return hlf((x1+x2)-abs(x1-x2));
     }
 
-    static FloatError<PR> _mag(FloatBall<PR> const& x) {
-        return PositiveFloatUpperBound<PR>(max(x._e+x._v,x._e-x._v));
+    static FloatError<PR> _mag(FloatBall<PR,PRE> const& x) {
+        return PositiveFloatUpperBound<PR>(add_up(abs(x._v),x._e));
     }
 
-    static PositiveFloatLowerBound<PR> _mig(FloatBall<PR> const& x) {
-        return PositiveFloatLowerBound<PR>(max(0,max(x._v-x._e,-x._v-x._e)));
+    static PositiveFloatLowerBound<PR> _mig(FloatBall<PR,PRE> const& x) {
+        return PositiveFloatLowerBound<PR>(max(0,sub_down(abs(x._v),x._e)));
     }
 
     //! \related FloatBounds<PR> \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
-    static ValidatedKleenean _eq(FloatBall<PR> const& x1, FloatBall<PR> const& x2) {
+    static ValidatedKleenean _eq(FloatBall<PR,PRE> const& x1, FloatBall<PR,PRE> const& x2) {
         return FloatBounds<PR>(x1) == FloatBounds<PR>(x2);
     }
 
     //! \related FloatBounds<PR> \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
-    static ValidatedKleenean _lt(FloatBall<PR> const& x1, FloatBall<PR> const& x2) {
+    static ValidatedKleenean _lt(FloatBall<PR,PRE> const& x1, FloatBall<PR,PRE> const& x2) {
         return FloatBounds<PR>(x1) <  FloatBounds<PR>(x2);
     }
 
-    static Bool _same(FloatBall<PR> const& x1, FloatBall<PR> const& x2) {
+    static Bool _same(FloatBall<PR,PRE> const& x1, FloatBall<PR,PRE> const& x2) {
         return x1._v==x2._v && x1._e==x2._e;
     }
 
-    static Bool _models(FloatBall<PR> const& x1, FloatValue<PR> const& x2) {
+    static Bool _models(FloatBall<PR,PRE> const& x1, FloatValue<PR> const& x2) {
         return (x1._v>=x2._v ? sub_up(x1._v,x2._v) : sub_up(x2._v,x1._v)) <= x1._e;
     }
 
-    static Bool _consistent(FloatBall<PR> const& x1, FloatBall<PR> const& x2) {
+    static Bool _consistent(FloatBall<PR,PRE> const& x1, FloatBall<PR,PRE> const& x2) {
         return consistent(FloatBounds<PR>(x1),FloatBounds<PR>(x2));
     }
 
-    static Bool _inconsistent(FloatBall<PR> const& x1, FloatBall<PR> const& x2) {
+    static Bool _inconsistent(FloatBall<PR,PRE> const& x1, FloatBall<PR,PRE> const& x2) {
         return inconsistent(FloatBounds<PR>(x1),FloatBounds<PR>(x2));
     }
 
-    static Bool _refines(FloatBall<PR> const& x1, FloatBall<PR> const& x2) {
+    static Bool _refines(FloatBall<PR,PRE> const& x1, FloatBall<PR,PRE> const& x2) {
         return (x1._v>=x2._v ? sub_up(x1._v,x2._v) : sub_up(x2._v,x1._v)) <= sub_down(x2._e, x1._e);
     }
 
-    static FloatBall<PR> _refinement(FloatBall<PR> const& x1, FloatBall<PR> const& x2) {
-        return FloatBall<PR>(refinement(FloatBounds<PR>(x1),FloatBounds<PR>(x2)));
+    static FloatBall<PR,PRE> _refinement(FloatBall<PR,PRE> const& x1, FloatBall<PR,PRE> const& x2) {
+        return FloatBall<PR,PRE>(refinement(FloatBounds<PR>(x1),FloatBounds<PR>(x2)));
     }
 
-    static OutputStream& _write(OutputStream& os, FloatBall<PR> const& x) {
+    static OutputStream& _write(OutputStream& os, FloatBall<PR,PRE> const& x) {
         return os << x.value() << "\u00b1" << x.error();
     }
 
-    static InputStream& _read(InputStream& is, FloatBall<PR>& x) {
+    static InputStream& _read(InputStream& is, FloatBall<PR,PRE>& x) {
         static const char pmstr[] = "\u00b1";
         char cpm[3];
-        RawFloat<PR> _v,_e;
+        RawFloat<PR> _v; RawFloat<PRE> _e;
         auto rnd=RawFloat<PR>::get_rounding_mode();
         RawFloat<PR>::set_rounding_to_nearest();
         is >> _v;
         is >> cpm[0] >> cpm[1];
-        RawFloat<PR>::set_rounding_upward();
-        is >> _e;
         RawFloat<PR>::set_rounding_mode(rnd);
+        auto rnde=RawFloat<PRE>::get_rounding_mode();
+        RawFloat<PRE>::set_rounding_upward();
+        is >> _e;
+        RawFloat<PRE>::set_rounding_mode(rnde);
         ARIADNE_ASSERT(not is.fail());
         ARIADNE_ASSERT(std::strcmp(cpm,pmstr));
         x._v=_v; x._e=_e;
@@ -1431,6 +1439,11 @@ template<> OutputStream& Operations<FloatBall<PrecisionMP>>::_write(OutputStream
     return os << ocstr;
 
     return os << x.value() << "\u00b1" << x.error();
+}
+
+template<> OutputStream& Operations<FloatBall<PrecisionMP,Precision64>>::_write(OutputStream& os, FloatBall<PrecisionMP,Precision64> const& x) {
+    PrecisionMP prec(64);
+    return os << FloatBall<PrecisionMP,PrecisionMP>(x.value_raw(),FloatMP(x.error_raw(),prec));
 }
 
 template<> OutputStream& Operations<FloatBall<Precision64>>::_write(OutputStream& os, FloatBall<Precision64> const& x) {
@@ -1928,6 +1941,8 @@ template class FloatBounds<PrecisionMP>;
 template class FloatBall<PrecisionMP>;
 template class FloatValue<PrecisionMP>;
 
+template class FloatBall<PrecisionMP, Precision64>;
+
 template class Operations<Float64Approximation>;
 template class Operations<Float64LowerBound>;
 template class Operations<Float64UpperBound>;
@@ -1952,8 +1967,7 @@ template class Operations<PositiveFloatMPUpperBound>;
 template class Operations<PositiveFloatMPBounds>;
 template class Operations<FloatMPError>;
 
-
-
+template class Operations<FloatMP64Ball>;
 
 PositiveFloat64Approximation mag(Float64Approximation const& x) { return Operations<Float64Approximation>::_mag(x); }
 PositiveFloat64Approximation mig(Float64Approximation const& x) { return Operations<Float64Approximation>::_mig(x); }
@@ -2079,5 +2093,8 @@ template<> String class_name<FloatMPUpperBound>() { return "FloatMPUpperBound"; 
 template<> String class_name<FloatMPBounds>() { return "FloatMPBounds"; }
 template<> String class_name<FloatMPBall>() { return "FloatMPBall"; }
 template<> String class_name<FloatMPValue>() { return "FloatMPValue"; }
+
+template<> String class_name<FloatMP64Ball>() { return "FloatMP64Ball"; }
+
 
 } // namespace Ariadne

@@ -78,7 +78,7 @@ template<class PR> class FloatApproximation
 
     FloatApproximation<PR>(FloatError<PR> const& x); // FIXME: Remove
     FloatApproximation<PR>(FloatValue<PR> const& x);
-    FloatApproximation<PR>(FloatBall<PR> const& x);
+    template<class PRE> FloatApproximation<PR>(FloatBall<PR,PRE> const& x);
     FloatApproximation<PR>(FloatBounds<PR> const& x);
     FloatApproximation<PR>(FloatUpperBound<PR> const& x);
     FloatApproximation<PR>(FloatLowerBound<PR> const& x);

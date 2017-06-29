@@ -189,7 +189,7 @@ void TestReal::test_accuracy() {
     Real pi=4*atan(one);
 
     PrecisionMP mp_high(320);
-    RawFloatMP pi_near = FloatMP::pi(mp_high,FloatMP::to_nearest);
+    RawFloatMP pi_near = FloatMP::pi(near,mp_high);
 
     Precision64 dp;
     ARIADNE_TEST_CONSTRUCT(Float64Bounds,pi_dp,(pi.get(dp)));

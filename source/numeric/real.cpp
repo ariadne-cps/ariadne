@@ -289,7 +289,7 @@ FloatMPBall Real::evaluate(Accuracy accuracy) const {
     Nat effort=1;
     Nat acc=accuracy.bits();
     PrecisionMP precision(effort*64);
-    FloatMPError error_bound(FloatMP(Rational(two_exp(-acc).get_d()),FloatMP::upward,precision));
+    FloatMPError error_bound(FloatMP(Rational(two_exp(-acc).get_d()),upward,precision));
     FloatMPError error=2u*error_bound;
     FloatMPBounds res;
     while (!(error.raw()<error_bound.raw())) {

@@ -58,15 +58,10 @@ namespace Ariadne {
 
 typedef unsigned short rounding_mode_t;
 
-const rounding_mode_t to_nearest = _MM_ROUND_NEAREST;
-const rounding_mode_t downward = _MM_ROUND_DOWN;
-const rounding_mode_t upward = _MM_ROUND_UP;
-const rounding_mode_t toward_zero = _MM_ROUND_TOWARD_ZERO;
-
-const rounding_mode_t ROUND_NEAR = to_nearest;
-const rounding_mode_t ROUND_DOWN = downward;
-const rounding_mode_t ROUND_UP   = upward;
-const rounding_mode_t ROUND_ZERO = toward_zero;
+const rounding_mode_t ROUND_TO_NEAREST  = _MM_ROUND_NEAREST;
+const rounding_mode_t ROUND_DOWNWARD    = _MM_ROUND_DOWN;
+const rounding_mode_t ROUND_UPWARD      = _MM_ROUND_UP;
+const rounding_mode_t ROUND_TOWARD_ZERO = _MM_ROUND_TOWARD_ZERO;
 
 inline void _set_rounding_to_nearest() { _MM_SET_ROUNDING_MODE(_MM_ROUND_NEAREST);  }
 inline void _set_rounding_downward() { _MM_SET_ROUNDING_MODE(_MM_ROUND_DOWN);  }
@@ -77,7 +72,7 @@ inline void _set_rounding_mode(rounding_mode_t rnd) { _MM_SET_ROUNDING_MODE(rnd)
 inline rounding_mode_t _get_rounding_mode() { return _MM_GET_ROUNDING_MODE(); }
 
 enum class RoundingMode : rounding_mode_t {
-    ROUND_NEAR = to_nearest, ROUND_DOWN = downward, ROUND_UP   = upward
+    ROUND_TO_NEAREST = ROUND_TO_NEAREST, ROUND_DOWNWARD = ROUND_DOWNWARD, ROUND_UPWARD = ROUND_UPWARD, ROUND_TOWARD_ZERO = ROUND_TOWARD_ZERO
 };
 
 } // namespace Ariadne
@@ -92,15 +87,10 @@ namespace Ariadne {
 
 typedef unsigned short rounding_mode_t;
 
-const rounding_mode_t ROUND_NEAR = FE_TONEAREST;
-const rounding_mode_t ROUND_DOWN = FE_DOWNWARD;
-const rounding_mode_t ROUND_UP = FE_UPWARD;
-const rounding_mode_t ROUND_ZERO = FE_TOWARDZERO;
-
-const rounding_mode_t to_nearest = FE_TONEAREST;
-const rounding_mode_t downward = FE_DOWNWARD;
-const rounding_mode_t upward = FE_UPWARD;
-const rounding_mode_t toward_zero = FE_TOWARDZERO;
+const rounding_mode_t ROUND_TO_NEAREST  = FE_TONEAREST;
+const rounding_mode_t ROUND_DOWNWARD    = FE_DOWNWARD;
+const rounding_mode_t ROUND_UPWARD      = FE_UPWARD;
+const rounding_mode_t ROUND_TOWARD_ZERO = FE_TOWARDZERO;
 
 inline void _set_rounding_to_nearest() { fesetround(FE_TONEAREST);  }
 inline void _set_rounding_downward() { fesetround(FE_DOWNWARD);  }
@@ -122,10 +112,10 @@ namespace Ariadne {
 
 typedef boost::numeric::interval_lib::rounding_control<double>::rounding_mode rounding_mode_t;
 
-class RoundToNearest { };
-class RoundDownward { };
-class RoundUpward { };
-class RoundTowardZero { };
+class RoundDownward;
+class RoundToNearest;
+class RoundUpward;
+class RoundTowardZero;
 
 const RoundToNearest  to_nearest=RoundToNearest();
 const RoundDownward   downward=RoundDownward();
@@ -137,10 +127,10 @@ inline void Float64::set_rounding_downward() { boost::numeric::interval_lib::rou
 inline void Float64::set_rounding_upward() { boost::numeric::interval_lib::rounding_control<double>::upward(); }
 inline void Float64::set_rounding_toward_zero() { boost::numeric::interval_lib::rounding_control<double>::toward_zero(); }
 
-inline void Float64::set_rounding_mode(RoundToNearest) { boost::numeric::interval_lib::rounding_control<double>::to_nearest(); }
-inline void Float64::set_rounding_mode(RoundDownward) { boost::numeric::interval_lib::rounding_control<double>::downward(); }
-inline void Float64::set_rounding_mode(RoundUpward) { boost::numeric::interval_lib::rounding_control<double>::upward(); }
-inline void Float64::set_rounding_mode(RoundTowardZero) { boost::numeric::interval_lib::rounding_control<double>::toward_zero(); }
+inline void Float64::set_rounding_mode(RoundToNearest const&) { boost::numeric::interval_lib::rounding_control<double>::to_nearest(); }
+inline void Float64::set_rounding_mode(RoundDownward const&) { boost::numeric::interval_lib::rounding_control<double>::downward(); }
+inline void Float64::set_rounding_mode(RoundUpward const&) { boost::numeric::interval_lib::rounding_control<double>::upward(); }
+inline void Float64::set_rounding_mode(RoundTowardZero const&) { boost::numeric::interval_lib::rounding_control<double>::toward_zero(); }
 
 inline void Float64::set_rounding_mode(rounding_mode_t rnd) { boost::numeric::interval_lib::rounding_control<double>::Float64::set_rounding_mode(rnd); }
 inline rounding_mode_t Float64::get_rounding_mode() { rounding_mode_t rnd; boost::numeric::interval_lib::rounding_control<double>::Float64::get_rounding_mode(rnd); return rnd; }
@@ -155,23 +145,18 @@ namespace Ariadne {
 
 typedef unsigned short rounding_mode_t;
 
-const rounding_mode_t ROUND_NEAR = 895;
-const rounding_mode_t ROUND_DOWN = 895+1024;
-const rounding_mode_t ROUND_UP = 895+2048;
-const rounding_mode_t ROUND_ZERO = 895+3072;
-
-const rounding_mode_t to_nearest   = ROUND_NEAR;
-const rounding_mode_t downward     = ROUND_DOWN;
-const rounding_mode_t upward       = ROUND_UP;
-const rounding_mode_t toward_zero  = ROUND_ZERO;
+const rounding_mode_t ROUND_TO_NEAREST  = 895;
+const rounding_mode_t ROUND_DOWNWARD    = 895+1024;
+const rounding_mode_t ROUND_UPWARD      = 895+2048;
+const rounding_mode_t ROUND_TOWARD_ZERO = 895+3072;
 
 inline rounding_mode_t _get_rounding_mode() { rounding_mode_t rnd; asm volatile ("fstcw %0" : "=m" (rnd) ); return rnd; }
 inline void _get_rounding_mode(rounding_mode_t& rnd) { asm volatile ("fstcw %0" : "=m" (rnd) ); }
 inline void _set_rounding_mode(rounding_mode_t rnd) { asm volatile ("fldcw %0" : : "m" (rnd) ); }
-inline void _set_rounding_to_nearest() { asm volatile ("fldcw %0" : : "m" (ROUND_NEAR) ); }
-inline void _set_rounding_downward() { asm volatile ("fldcw %0" : : "m" (ROUND_DOWN) ); }
-inline void _set_rounding_upward() { asm volatile ("fldcw %0" : : "m" (ROUND_UP) ); }
-inline void _set_rounding_toward_zero() { asm volatile ("fldcw %0" : : "m" (ROUND_ZERO) ); }
+inline void _set_rounding_to_nearest() { asm volatile ("fldcw %0" : : "m" (ROUND_TO_NEAREST) ); }
+inline void _set_rounding_downward() { asm volatile ("fldcw %0" : : "m" (ROUND_DOWNWARD) ); }
+inline void _set_rounding_upward() { asm volatile ("fldcw %0" : : "m" (ROUND_UPWARD) ); }
+inline void _set_rounding_toward_zero() { asm volatile ("fldcw %0" : : "m" (ROUND_TOWARD_ZERO) ); }
 
 } // namespace Ariadne
 
@@ -186,10 +171,10 @@ namespace Ariadne {
 
 typedef unsigned short rounding_mode_t;
 
-const rounding_mode_t to_nearest   = ARIADNE_FENV_BASE;
-const rounding_mode_t downward     = ARIADNE_FENV_BASE + 1024;
-const rounding_mode_t upward       = ARIADNE_FENV_BASE + 2048;
-const rounding_mode_t toward_zero  = ARIADNE_FENV_BASE + 3072;
+const rounding_mode_t ROUND_TO_NEAREST   = ARIADNE_FENV_BASE;
+const rounding_mode_t ROUND_DOWNWARD     = ARIADNE_FENV_BASE + 1024;
+const rounding_mode_t ROUND_UPWARD       = ARIADNE_FENV_BASE + 2048;
+const rounding_mode_t ROUND_TOWARD_ZERO  = ARIADNE_FENV_BASE + 3072;
 
 inline void Float64::set_rounding_to_nearest() { __asm fldcw to_nearest; }
 inline void Float64::set_rounding_downward() { __asm fldcw downward; }
@@ -209,10 +194,10 @@ namespace Ariadne {
 
 typedef unsigned short rounding_mode_t;
 
-const rounding_mode_t to_nearest   = 0000;
-const rounding_mode_t downward     = 1024;
-const rounding_mode_t upward       = 2048;
-const rounding_mode_t toward_zero  = 3072;
+const rounding_mode_t ROUND_TO_NEAREST   = 0000;
+const rounding_mode_t ROUND_DOWNWARD     = 1024;
+const rounding_mode_t ROUND_UPWARD       = 2048;
+const rounding_mode_t ROUND_TOWARD_ZERO  = 3072;
 
 inline void Float64::set_rounding_to_nearest() { }
 inline void Float64::set_rounding_downward() { }
@@ -235,17 +220,13 @@ namespace Ariadne {
 typedef unsigned short RoundingModeType;
 
 //! \brief The floating-point environment value for rounding arithmetic to the nearest exactly-representable value.
-extern const RoundingModeType to_nearest;
-extern const RoundingModeType ROUND_NEAR;
+extern const RoundingModeType ROUND_TO_NEAREST;
 //! \brief The floating-point environment value for upwards-rounded arithmetic.
-extern const RoundingModeType downward;
-extern const RoundingModeType ROUND_DOWN;
+extern const RoundingModeType ROUND_DOWNWARD;
 //! \brief The floating-point environment value for downwards-rounded arithmetic.
-extern const RoundingModeType downward;
-extern const RoundingModeType ROUND_UP;
+extern const RoundingModeType ROUND_UPWARD;
 //! \brief The floating-point environment value for rounding arithmetic to zero.
-extern const RoundingModeType toward_zero;
-extern const RoundingModeType ROUND_ZERO;
+extern const RoundingModeType ROUND_TOWARD_ZERO;
 
 //! \brief Set the builtin rounding mode. \ingroup NumericModule
 void set_rounding_mode(RoundingModeType rnd);
@@ -264,7 +245,47 @@ void set_rounding_toward_zero();
 //! \brief Set the rounding mode to the expected default rounding mode.
 void set_default_rounding();
 
+//! \brief Set the rounding mode.
+void set_rounding_mode(RoundingModeType rnd);
+//! \brief Get the current rounding mode.
+RoundingModeType get_rounding_mode();
 
+} // namespace Ariadne;
+
+#include <mpfr.h>
+
+namespace Ariadne {
+
+typedef mpfr_rnd_t RoundingModeMP;
+
+typedef RoundingModeType BuiltinRoundingModeType;
+typedef RoundingModeMP MPFRRoundingModeType;
+
+struct RoundDownward {
+    constexpr operator BuiltinRoundingModeType() const { return ROUND_DOWNWARD; }
+    constexpr operator MPFRRoundingModeType() const { return MPFR_RNDD; }
+};
+struct RoundToNearest {
+    constexpr operator BuiltinRoundingModeType() const { return ROUND_TO_NEAREST; }
+    constexpr operator MPFRRoundingModeType() const { return MPFR_RNDN; }
+};
+struct RoundUpward {
+    constexpr operator BuiltinRoundingModeType() const { return ROUND_UPWARD; }
+    constexpr operator MPFRRoundingModeType() const { return MPFR_RNDU; }
+};
+struct RoundTowardZero {
+    constexpr operator BuiltinRoundingModeType() const { return ROUND_TOWARD_ZERO; }
+    constexpr operator MPFRRoundingModeType() const { return MPFR_RNDZ; }
+};
+
+const RoundDownward downward = RoundDownward();
+const RoundToNearest to_nearest = RoundToNearest();
+const RoundUpward upward = RoundUpward();
+const RoundTowardZero toward_zero = RoundTowardZero();
+
+const RoundDownward down = downward;
+const RoundToNearest near = to_nearest;
+const RoundUpward up = upward;
 
 } // namespace Ariadne
 

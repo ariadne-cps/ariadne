@@ -287,18 +287,18 @@ double log_rnd(double x) {
 
 double pi_rnd() {
     switch(get_rounding_mode()) {
-        case to_nearest: return _pi_approx;
-        case downward: return _pi_down;
-        case upward: return _pi_up;
+        case ROUND_TO_NEAREST: return _pi_approx;
+        case ROUND_DOWNWARD: return _pi_down;
+        case ROUND_UPWARD: return _pi_up;
         default: return _pi_approx;
     }
 }
 
 double pi_opp() {
     switch(get_rounding_mode()) {
-        case to_nearest: return _pi_approx;
-        case downward: return _pi_up;
-        case upward: return _pi_down;
+        case ROUND_TO_NEAREST: return _pi_approx;
+        case ROUND_DOWNWARD: return _pi_up;
+        case ROUND_UPWARD: return _pi_down;
         default: return _pi_approx;
     }
 }
@@ -652,14 +652,6 @@ double atan_rnd(double x) {
 
 
 
-const Float64::RoundingModeType Float64::upward = Ariadne::upward;
-
-const Float64::RoundingModeType Float64::downward = Ariadne::downward;
-
-const Float64::RoundingModeType Float64::to_nearest = Ariadne::to_nearest;
-
-const Float64::RoundingModeType Float64::toward_zero = Ariadne::toward_zero;
-
 Float64::Float64(Dyadic const& w, PrecisionType)
     : Float64(w.get_d())
 {
@@ -675,12 +667,12 @@ Float64::Float64(Rational const& q, RoundingModeType rnd, PrecisionType)
     : Float64(q.get_d())
 {
     RoundingModeType old_rnd=get_rounding_mode();
-    if(rnd==upward) {
+    if(rnd==ROUND_UPWARD) {
         set_rounding_upward();
         while (Rational(dbl)<q) { dbl+=std::numeric_limits<double>::min(); }
         set_rounding_mode(old_rnd);
     }
-    if(rnd==downward) {
+    if(rnd==ROUND_DOWNWARD) {
         set_rounding_downward();
         while (Rational(dbl)>q) { dbl-=std::numeric_limits<double>::min(); }
         set_rounding_mode(old_rnd);
@@ -740,17 +732,17 @@ Float64 atan_rnd(Float64 x)
     return atan_rnd(x.dbl);
 }
 
-Float64 Float64::pi(Precision64 pr, RoundingModeType rnd) {
+Float64 Float64::pi(RoundingModeType rnd, Precision64 pr) {
     switch(rnd) {
-        case upward: return _pi_up;
-        case downward: return _pi_down;
-        case to_nearest: return _pi_near;
+        case Float64::ROUND_UPWARD: return _pi_up;
+        case Float64::ROUND_DOWNWARD: return _pi_down;
+        case Float64::ROUND_TO_NEAREST: return _pi_near;
         default: assert(false);
     }
 }
 
 Float64 Float64::pi(Precision64 pr) {
-    return pi(pr,Float64::get_rounding_mode());
+    return pi(Float64::get_rounding_mode(),pr);
 }
 
 Float64::RoundingModeType Float64::get_rounding_mode() { return Ariadne::get_rounding_mode(); }
@@ -808,9 +800,9 @@ OutputStream& write(OutputStream& os, Float64 const& x, Nat bits, RoundingMode64
 OutputStream& write(OutputStream& os, FloatMP const& x, DecimalPlaces dgts, RoundingModeMP rnd);
 
 OutputStream& write(OutputStream& os, Float64 const& x, DecimalPlaces dgts, RoundingMode64 rnd) {
-    assert(rnd==Float64::to_nearest || rnd==Float64::upward || rnd==Float64::downward);
+    assert(rnd==ROUND_TO_NEAREST || rnd==ROUND_UPWARD || rnd==ROUND_DOWNWARD);
     PrecisionMP pr_mp(53);
-    RoundingModeMP rnd_mp = (rnd==Float64::to_nearest) ? FloatMP::to_nearest : (rnd==Float64::downward) ? FloatMP::downward : FloatMP::upward;
+    RoundingModeMP rnd_mp = (rnd==Float64::ROUND_TO_NEAREST) ? FloatMP::ROUND_TO_NEAREST : (rnd==Float64::ROUND_DOWNWARD) ? FloatMP::ROUND_DOWNWARD : FloatMP::ROUND_UPWARD;
     return write(os,FloatMP(x,pr_mp),dgts,rnd_mp);
 }
 

@@ -38,14 +38,14 @@
 namespace Ariadne {
 
 template<class PRE, class FLT, DisableIf<IsSame<PRE,PrecisionType<FLT>>> =dummy> inline RawFloat<PRE> _make_error(FLT const& x) {
-    return RawFloat<PRE>(Dyadic(x),RawFloat<PRE>::upward,PRE()); }
+    return RawFloat<PRE>(Dyadic(x),upward,PRE()); }
 template<class PRE, class FLT, EnableIf<IsSame<PRE,PrecisionType<FLT>>> =dummy> inline RawFloat<PRE> _make_error(FLT const& x) {
     return x; }
 
-Float64 set_up(FloatMP const& x, Precision64 pr) { return Float64(Dyadic(x),Float64::upward,pr); }
-Float64 set_down(FloatMP const& x, Precision64 pr) { return Float64(Dyadic(x),Float64::downward,pr); }
-FloatMP add_up(FloatMP x1, Float64 x2) { return add_up(x1,FloatMP(x2.get_d(),FloatMP::upward,x1.precision())); }
-FloatMP sub_down(FloatMP x1, Float64 x2) { return sub_down(x1,FloatMP(x2.get_d(),FloatMP::upward,x1.precision())); }
+Float64 set_up(FloatMP const& x, Precision64 pr) { return Float64(Dyadic(x),upward,pr); }
+Float64 set_down(FloatMP const& x, Precision64 pr) { return Float64(Dyadic(x),downward,pr); }
+FloatMP add_up(FloatMP x1, Float64 x2) { return add_up(x1,FloatMP(x2.get_d(),upward,x1.precision())); }
+FloatMP sub_down(FloatMP x1, Float64 x2) { return sub_down(x1,FloatMP(x2.get_d(),downward,x1.precision())); }
 Bool operator>(Float64 x1, FloatMP x2) { return x2<x1; }
 Bool operator<(Float64 x1, FloatMP x2) { return x2>x1; }
 Bool operator>(Float64 x1, Dbl x2) { return x2<x1; }
@@ -108,13 +108,13 @@ TwoExp::operator FloatValue<Precision64> () const {
 }
 
 template<class PR> FloatValue<PR>::FloatValue(Dyadic const& w, PR pr)
-    : _v(w,RawFloat<PR>::to_nearest,pr)
+    : _v(w,to_nearest,pr)
 {
     ARIADNE_ASSERT_MSG(Dyadic(this->_v)==w,"Dyadic number "<<w<<" cannot be converted exactly to a floating-point number with precision "<<pr<<"; nearest is "<<(*this));
 };
 
 template<class PR> FloatValue<PR>::FloatValue(FloatValue<PR> const& x, PR pr)
-    : _v(x._v,RawFloat<PR>::to_nearest,pr)
+    : _v(x._v,to_nearest,pr)
 {
     ARIADNE_ASSERT_MSG(*this==x,"Exact FloatValue "<<x<<" cannot be converted exactly to a floating-point number with precision "<<pr<<"; nearest is "<<(*this));
 };
@@ -148,7 +148,7 @@ template<class PR> FloatValue<PR>::FloatValue(TwoExp const& t, PR pr)
 }
 
 template<class PR> FloatValue<PR>::FloatValue(Integer const& z, PR pr)
-    : _v(Rational(z),RawFloat<PR>::to_nearest,pr)
+    : _v(Rational(z),to_nearest,pr)
 {
     Rational q(_v);
     ARIADNE_PRECONDITION(z==q);
@@ -169,14 +169,14 @@ template<class PR> FloatValue<PR>::operator ExactNumber() const {
 }
 
 template<class PR, class PRE> FloatBall<PR,PRE>::FloatBall(ExactDouble d, PR pr)
-    : _v(d.get_d(),RawFloat<PR>::to_nearest,pr), _e(0,_error_precision<PRE>(pr)) {
+    : _v(d.get_d(),to_nearest,pr), _e(0,_error_precision<PRE>(pr)) {
 }
 
 template<class PR, class PRE> FloatBall<PR,PRE>::FloatBall(Integer const& z, PR pr) : FloatBall<PR,PRE>(Rational(z),pr) {
 }
 
 template<class PR, class PRE> FloatBall<PR,PRE>::FloatBall(Dyadic const& w, PR pr)
-    : _v(RawFloat<PR>(w,RawFloat<PR>::to_nearest,pr)), _e(abs(Dyadic(_v)-w),RawFloat<PRE>::upward,_error_precision<PRE>(pr)) {
+    : _v(RawFloat<PR>(w,to_nearest,pr)), _e(abs(Dyadic(_v)-w),upward,_error_precision<PRE>(pr)) {
 }
 
 template<class PR, class PRE> FloatBall<PR,PRE>::FloatBall(Decimal const& d, PR pr)
@@ -184,7 +184,7 @@ template<class PR, class PRE> FloatBall<PR,PRE>::FloatBall(Decimal const& d, PR 
 }
 
 template<class PR, class PRE> FloatBall<PR,PRE>::FloatBall(Rational const& q, PR pr)
-    : _v(RawFloat<PR>(q,RawFloat<PR>::to_nearest,pr)), _e(abs(Rational(_v)-q),RawFloat<PRE>::upward,_error_precision<PRE>(pr)) {
+    : _v(RawFloat<PR>(q,to_nearest,pr)), _e(abs(Rational(_v)-q),upward,_error_precision<PRE>(pr)) {
 }
 
 template<class PR, class PRE> FloatBall<PR,PRE>::FloatBall(Real const& r, PR pr)
@@ -192,7 +192,7 @@ template<class PR, class PRE> FloatBall<PR,PRE>::FloatBall(Real const& r, PR pr)
 }
 
 template<class PR, class PRE> FloatBall<PR,PRE>::FloatBall(FloatBall<PR,PRE> const& x, PR pr)
-    : _v(x._v,RawFloat<PR>::to_nearest,pr), _e(x._e,RawFloat<PRE>::to_nearest,_error_precision<PRE>(pr))
+    : _v(x._v,to_nearest,pr), _e(x._e,upward,_error_precision<PRE>(pr))
 {
     RawFloat<PR> d = (this->_v>=x._v) ? sub_up(this->_v,x._v) : sub_up(x._v,this->_v);
     _e=add_up(_e,_make_error<PRE>(d));
@@ -212,15 +212,15 @@ template<class PR, class PRE> FloatBall<PR,PRE>::operator ValidatedNumber() cons
 
 
 template<class PR> FloatBounds<PR>::FloatBounds(ExactDouble d, PR pr)
-    : _l(d.get_d(),RawFloat<PR>::downward,pr),_u(d.get_d(),RawFloat<PR>::upward,pr) {
+    : _l(d.get_d(),downward,pr),_u(d.get_d(),upward,pr) {
 }
 
 template<class PR> FloatBounds<PR>::FloatBounds(Integer const& z, PR pr)
-    : _l(z,RawFloat<PR>::downward,pr),_u(z,RawFloat<PR>::upward,pr) {
+    : _l(z,downward,pr),_u(z,upward,pr) {
 }
 
 template<class PR> FloatBounds<PR>::FloatBounds(Dyadic const& w, PR pr)
-    : _l(w,RawFloat<PR>::downward,pr),_u(w,RawFloat<PR>::upward,pr) {
+    : _l(w,downward,pr),_u(w,upward,pr) {
 }
 
 template<class PR> FloatBounds<PR>::FloatBounds(Decimal const& d, PR pr)
@@ -228,23 +228,23 @@ template<class PR> FloatBounds<PR>::FloatBounds(Decimal const& d, PR pr)
 }
 
 template<class PR> FloatBounds<PR>::FloatBounds(Rational const& q, PR pr)
-    : _l(q,RawFloat<PR>::downward,pr),_u(q,RawFloat<PR>::upward,pr) {
+    : _l(q,downward,pr),_u(q,upward,pr) {
 }
 
 template<class PR> FloatBounds<PR>::FloatBounds(ExactDouble const& dl, ExactDouble const& du, PR pr)
-    : _l(dl.get_d(),RawFloat<PR>::downward,pr),_u(du.get_d(),RawFloat<PR>::upward,pr) {
+    : _l(dl.get_d(),downward,pr),_u(du.get_d(),upward,pr) {
 }
 
 template<class PR> FloatBounds<PR>::FloatBounds(Dyadic const& wl, Dyadic const& wu, PR pr)
-    : _l(wl,RawFloat<PR>::downward,pr),_u(wu,RawFloat<PR>::upward,pr) {
+    : _l(wl,downward,pr),_u(wu,upward,pr) {
 }
 
 template<class PR> FloatBounds<PR>::FloatBounds(FloatBounds<PR> const& x, PR pr)
-    : _l(x._l,RawFloat<PR>::downward,pr), _u(x._u,RawFloat<PR>::upward,pr) {
+    : _l(x._l,downward,pr), _u(x._u,upward,pr) {
 }
 
 template<class PR> FloatBounds<PR>::FloatBounds(Rational const& ql, Rational const& qu, PR pr)
-    : _l(ql,RawFloat<PR>::downward,pr),_u(qu,RawFloat<PR>::upward,pr) {
+    : _l(ql,downward,pr),_u(qu,upward,pr) {
 }
 
 template<class PR> FloatBounds<PR>::FloatBounds(Real const& x, PR pr)
@@ -274,15 +274,15 @@ template<class PR> FloatBounds<PR>::operator ValidatedNumber() const {
 }
 
 template<class PR> FloatUpperBound<PR>::FloatUpperBound(ExactDouble d, PR pr)
-    : _u(d.get_d(),RawFloat<PR>::upward,pr) {
+    : _u(d.get_d(),upward,pr) {
 }
 
 template<class PR> FloatUpperBound<PR>::FloatUpperBound(Integer const& z, PR pr)
-    : _u(z,RawFloat<PR>::upward,pr) {
+    : _u(z,upward,pr) {
 }
 
 template<class PR> FloatUpperBound<PR>::FloatUpperBound(Dyadic const& w, PR pr)
-    : _u(w,RawFloat<PR>::upward,pr) {
+    : _u(w,upward,pr) {
 }
 
 template<class PR> FloatUpperBound<PR>::FloatUpperBound(Decimal const& d, PR pr)
@@ -290,7 +290,7 @@ template<class PR> FloatUpperBound<PR>::FloatUpperBound(Decimal const& d, PR pr)
 }
 
 template<class PR> FloatUpperBound<PR>::FloatUpperBound(Rational const& q, PR pr)
-    : _u(q,RawFloat<PR>::upward,pr) {
+    : _u(q,upward,pr) {
 }
 
 template<class PR> FloatUpperBound<PR>::FloatUpperBound(Real const& r, PR pr)
@@ -298,7 +298,7 @@ template<class PR> FloatUpperBound<PR>::FloatUpperBound(Real const& r, PR pr)
 }
 
 template<class PR> FloatUpperBound<PR>::FloatUpperBound(FloatUpperBound<PR> const& x, PR pr)
-    : _u(x._u,RawFloat<PR>::upward,pr) {
+    : _u(x._u,upward,pr) {
 }
 
 template<class PR> FloatUpperBound<PR>::FloatUpperBound(ValidatedUpperNumber const& y, PR pr)
@@ -323,15 +323,15 @@ template<class PR> FloatUpperBound<PR> FloatUpperBound<PR>::create(ValidatedUppe
 }
 
 template<class PR> FloatLowerBound<PR>::FloatLowerBound(ExactDouble d, PR pr)
-    : _l(d.get_d(),RawFloat<PR>::downward,pr) {
+    : _l(d.get_d(),downward,pr) {
 }
 
 template<class PR> FloatLowerBound<PR>::FloatLowerBound(Integer const& z, PR pr)
-    : _l(z,RawFloat<PR>::downward,pr) {
+    : _l(z,downward,pr) {
 }
 
 template<class PR> FloatLowerBound<PR>::FloatLowerBound(Dyadic const& w, PR pr)
-    : _l(w,RawFloat<PR>::downward,pr) {
+    : _l(w,downward,pr) {
 }
 
 template<class PR> FloatLowerBound<PR>::FloatLowerBound(Decimal const& d, PR pr)
@@ -339,7 +339,7 @@ template<class PR> FloatLowerBound<PR>::FloatLowerBound(Decimal const& d, PR pr)
 }
 
 template<class PR> FloatLowerBound<PR>::FloatLowerBound(Rational const& q, PR pr)
-    : _l(q,RawFloat<PR>::downward,pr) {
+    : _l(q,downward,pr) {
 }
 
 template<class PR> FloatLowerBound<PR>::FloatLowerBound(Real const& r, PR pr)
@@ -347,7 +347,7 @@ template<class PR> FloatLowerBound<PR>::FloatLowerBound(Real const& r, PR pr)
 }
 
 template<class PR> FloatLowerBound<PR>::FloatLowerBound(FloatLowerBound<PR> const& x, PR pr)
-    : _l(x._l,RawFloat<PR>::downward,pr) {
+    : _l(x._l,downward,pr) {
 }
 
 template<class PR> FloatLowerBound<PR>::FloatLowerBound(ValidatedLowerNumber const& y, PR pr)
@@ -372,20 +372,20 @@ template<class PR> FloatUpperBound<PR> FloatLowerBound<PR>::create(ValidatedUppe
 }
 
 template<class PR> FloatApproximation<PR>::FloatApproximation(double d, PR pr)
-    : _a(d,RawFloat<PR>::to_nearest,pr)
+    : _a(d,to_nearest,pr)
 {
 }
 
 template<class PR> FloatApproximation<PR>::FloatApproximation(ExactDouble d, PR pr)
-    : _a(d.get_d(),RawFloat<PR>::to_nearest,pr) {
+    : _a(d.get_d(),to_nearest,pr) {
 }
 
 template<class PR> FloatApproximation<PR>::FloatApproximation(Integer const& z, PR pr)
-    : _a(z,RawFloat<PR>::to_nearest,pr) {
+    : _a(z,to_nearest,pr) {
 }
 
 template<class PR> FloatApproximation<PR>::FloatApproximation(Dyadic const& w, PR pr)
-    : _a(w,RawFloat<PR>::to_nearest,pr) {
+    : _a(w,to_nearest,pr) {
 }
 
 template<class PR> FloatApproximation<PR>::FloatApproximation(Decimal const& d, PR pr)
@@ -393,11 +393,11 @@ template<class PR> FloatApproximation<PR>::FloatApproximation(Decimal const& d, 
 }
 
 template<class PR> FloatApproximation<PR>::FloatApproximation(Rational const& q, PR pr)
-    : _a(q,RawFloat<PR>::to_nearest,pr) {
+    : _a(q,to_nearest,pr) {
 }
 
 template<class PR> FloatApproximation<PR>::FloatApproximation(FloatApproximation<PR> const& x, PR pr)
-    : _a(x._a,RawFloat<PR>::to_nearest,pr) {
+    : _a(x._a,to_nearest,pr) {
 }
 
 template<class PR> FloatApproximation<PR>::FloatApproximation(Real const& r, PR pr)
@@ -555,7 +555,7 @@ template<class PR> struct Operations<FloatApproximation<PR>> {
         return x1._a==x2._a; }
 
     static OutputStream& _write(OutputStream& os, FloatApproximation<PR> const& x) {
-        return write(os,x.raw(),FloatApproximation<PR>::output_places,RawFloat<PR>::to_nearest);
+        return write(os,x.raw(),FloatApproximation<PR>::output_places,to_nearest);
     }
 
     static InputStream& _read(InputStream& is, FloatApproximation<PR>& x) {
@@ -645,7 +645,7 @@ template<class PR> struct Operations<FloatLowerBound<PR>> {
 
 
     static OutputStream& _write(OutputStream& os, FloatLowerBound<PR> const& x) {
-        return write(os,x.raw(),FloatBounds<PR>::output_places,RawFloat<PR>::downward);
+        return write(os,x.raw(),FloatBounds<PR>::output_places,downward);
     }
 
     static InputStream& _read(InputStream& is, FloatLowerBound<PR>& x) {
@@ -747,7 +747,7 @@ template<class PR> struct Operations<FloatUpperBound<PR>> {
     static Integer integer_cast(FloatUpperBound<PR> const& x) { return Integer(static_cast<int>(x._u.get_d())); }
 
     static OutputStream& _write(OutputStream& os, FloatUpperBound<PR> const& x) {
-        return write(os,x.raw(),FloatBounds<PR>::output_places,RawFloat<PR>::upward);
+        return write(os,x.raw(),FloatBounds<PR>::output_places,upward);
     }
 
     static InputStream& _read(InputStream& is, FloatUpperBound<PR>& x) {
@@ -1109,9 +1109,9 @@ template<class PR> struct Operations<FloatBounds<PR>> {
     static OutputStream& _write(OutputStream& os, const FloatBounds<PR>& x) {
         typename RawFloat<PR>::RoundingModeType rnd=RawFloat<PR>::get_rounding_mode();
         os << '{';
-        write(os,x.lower().raw(),FloatBounds<PR>::output_places,RawFloat<PR>::downward);
+        write(os,x.lower().raw(),FloatBounds<PR>::output_places,downward);
         os << ':';
-        write(os,x.upper().raw(),FloatBounds<PR>::output_places,RawFloat<PR>::upward);
+        write(os,x.upper().raw(),FloatBounds<PR>::output_places,upward);
         os << '}';
         return os;
 
@@ -1211,7 +1211,7 @@ template<class PR, class PRE> struct Operations<FloatBall<PR,PRE>> {
         FloatBall<PR,PRE> r=x*x;
         if(r._e>r._v) {
             r._e=hlf(add_up(r._e,_make_error<PRE>(r._v)));
-            r._v=RawFloat<PR>(Dyadic(r._e),RawFloat<PR>::upward,x.precision());
+            r._v=RawFloat<PR>(Dyadic(r._e),upward,x.precision());
         }
         return r;
     }
@@ -1641,7 +1641,7 @@ template<class PR> struct Operations<FloatValue<PR>> {
         return x1._v==x2._v; }
 
     static OutputStream& _write(OutputStream& os, FloatValue<PR> const& x) {
-        return write(os,x.raw(),FloatValue<PR>::output_places,RawFloat<PR>::to_nearest);
+        return write(os,x.raw(),FloatValue<PR>::output_places,to_nearest);
     }
 
     static InputStream& _read(InputStream& is, FloatValue<PR>& x) {
@@ -1693,7 +1693,7 @@ template<class PR> struct Operations<PositiveFloatApproximation<PR>> {
     static Bool _same(PositiveFloatApproximation<PR> const& x1, PositiveFloatApproximation<PR> const& x2) {
         return x1._a == x2._a; }
     static OutputStream& _write(OutputStream& os, PositiveFloatApproximation<PR> const& x) {
-        return write(os,x.raw(),FloatApproximation<PR>::output_places,RawFloat<PR>::upward); }
+        return write(os,x.raw(),FloatApproximation<PR>::output_places,upward); }
     static InputStream& _read(InputStream& is, PositiveFloatApproximation<PR>& x) {
         FloatApproximation<PR> xa; is >> xa; x=PositiveFloatApproximation<PR>(xa); return is; }
 };
@@ -1764,7 +1764,7 @@ template<class PR> struct Operations<PositiveFloatUpperBound<PR>> {
     }
 
     static OutputStream& _write(OutputStream& os, PositiveFloatUpperBound<PR> const& x) {
-        return write(os,x.raw(),FloatBounds<PR>::output_places,RawFloat<PR>::upward);
+        return write(os,x.raw(),FloatBounds<PR>::output_places,upward);
     }
 
     static InputStream& _read(InputStream& is, PositiveFloatUpperBound<PR>& x) {
@@ -1837,7 +1837,7 @@ template<class PR> struct Operations<PositiveFloatLowerBound<PR>> {
     }
 
     static OutputStream& _write(OutputStream& os, PositiveFloatLowerBound<PR> const& x) {
-        return write(os,x.raw(),FloatBounds<PR>::output_places,RawFloat<PR>::upward);
+        return write(os,x.raw(),FloatBounds<PR>::output_places,upward);
     }
 
     static InputStream& _read(InputStream& is, PositiveFloatLowerBound<PR>& x) {
@@ -1881,7 +1881,7 @@ template<class PR> struct Operations<PositiveFloatBounds<PR>> {
 
 template<class PR> struct Operations<FloatError<PR>> {
     static OutputStream& _write(OutputStream& os, FloatError<PR> const& x) {
-        return write(os,x.raw(),FloatError<PR>::output_places,RawFloat<PR>::upward);
+        return write(os,x.raw(),FloatError<PR>::output_places,upward);
     }
 
     static InputStream& _read(InputStream& is, FloatError<PR>& x) {

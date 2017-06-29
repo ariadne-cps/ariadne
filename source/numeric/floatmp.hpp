@@ -72,10 +72,10 @@ class FloatMP {
     typedef PrecisionMP PrecisionType;
     typedef RoundingModeMP RoundingModeType;
   public:
-    static const RoundingModeType downward;
-    static const RoundingModeType upward;
-    static const RoundingModeType to_nearest;
-    static const RoundingModeType toward_zero;
+    static const RoundingModeType ROUND_TO_NEAREST;
+    static const RoundingModeType ROUND_DOWNWARD;
+    static const RoundingModeType ROUND_UPWARD;
+    static const RoundingModeType ROUND_TOWARD_ZERO;
 
     static RoundingModeType get_rounding_mode();
     static Void set_rounding_mode(RoundingModeType);
@@ -142,43 +142,44 @@ class FloatMP {
     friend FloatMP round(FloatMP const& x);
   public:
     // Explcitly rounded operations
-    friend FloatMP nul(FloatMP const& x, RoundingModeType rnd);
-    friend FloatMP hlf(FloatMP const& x, RoundingModeType rnd);
-    friend FloatMP pos(FloatMP const& x, RoundingModeType rnd);
-    friend FloatMP neg(FloatMP const& x, RoundingModeType rnd);
-    friend FloatMP sqr(FloatMP const& x, RoundingModeType rnd);
-    friend FloatMP rec(FloatMP const& x, RoundingModeType rnd);
-    friend FloatMP add(FloatMP const& x1, FloatMP const& x2, RoundingModeType rnd);
-    friend FloatMP sub(FloatMP const& x1, FloatMP const& x2, RoundingModeType rnd);
-    friend FloatMP mul(FloatMP const& x1, FloatMP const& x2, RoundingModeType rnd);
-    friend FloatMP div(FloatMP const& x1, FloatMP const& x2, RoundingModeType rnd);
-    friend FloatMP fma(FloatMP const& x1, FloatMP const& x2, FloatMP const& x3, RoundingModeType rnd);
-    friend FloatMP pow(FloatMP const& x, Int n, RoundingModeType rnd);
-    friend FloatMP sqrt(FloatMP const& x, RoundingModeType rnd);
-    friend FloatMP exp(FloatMP const& x, RoundingModeType rnd);
-    friend FloatMP log(FloatMP const& x, RoundingModeType rnd);
-    friend FloatMP sin(FloatMP const& x, RoundingModeType rnd);
-    friend FloatMP cos(FloatMP const& x, RoundingModeType rnd);
-    friend FloatMP tan(FloatMP const& x, RoundingModeType rnd);
-    friend FloatMP asin(FloatMP const& x, RoundingModeType rnd);
-    friend FloatMP acos(FloatMP const& x, RoundingModeType rnd);
-    friend FloatMP atan(FloatMP const& x, RoundingModeType rnd);
-    static FloatMP pi(PrecisionMP pr, RoundingModeType rnd);
+    friend FloatMP nul(RoundingModeType rnd, FloatMP const& x);
+    friend FloatMP hlf(RoundingModeType rnd, FloatMP const& x);
+    friend FloatMP pos(RoundingModeType rnd, FloatMP const& x);
+    friend FloatMP neg(RoundingModeType rnd, FloatMP const& x);
+    friend FloatMP sqr(RoundingModeType rnd, FloatMP const& x);
+    friend FloatMP rec(RoundingModeType rnd, FloatMP const& x);
+    friend FloatMP add(RoundingModeType rnd, FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP add(RoundingModeType rnd, FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP sub(RoundingModeType rnd, FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP mul(RoundingModeType rnd, FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP div(RoundingModeType rnd, FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP fma(RoundingModeType rnd, FloatMP const& x1, FloatMP const& x2, FloatMP const& x3);
+    friend FloatMP pow(RoundingModeType rnd, FloatMP const& x, Int n);
+    friend FloatMP sqrt(RoundingModeType rnd, FloatMP const& x);
+    friend FloatMP exp(RoundingModeType rnd, FloatMP const& x);
+    friend FloatMP log(RoundingModeType rnd, FloatMP const& x);
+    friend FloatMP sin(RoundingModeType rnd, FloatMP const& x);
+    friend FloatMP cos(RoundingModeType rnd, FloatMP const& x);
+    friend FloatMP tan(RoundingModeType rnd, FloatMP const& x);
+    friend FloatMP asin(RoundingModeType rnd, FloatMP const& x);
+    friend FloatMP acos(RoundingModeType rnd, FloatMP const& x);
+    friend FloatMP atan(RoundingModeType rnd, FloatMP const& x);
+    static FloatMP pi(RoundingModeType rnd, PrecisionMP pr);
 
-    friend FloatMP max(FloatMP const& x1, FloatMP const& x2, RoundingModeType rnd);
-    friend FloatMP min(FloatMP const& x1, FloatMP const& x2, RoundingModeType rnd);
-    friend FloatMP abs(FloatMP const& x, RoundingModeType rnd);
-    friend FloatMP mag(FloatMP const& x, RoundingModeType rnd);
+    friend FloatMP max(RoundingModeType rnd, FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP min(RoundingModeType rnd, FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP abs(RoundingModeType rnd, FloatMP const& x);
+    friend FloatMP mag(RoundingModeType rnd, FloatMP const& x);
 
     // Mixed operations
-    friend FloatMP add(FloatMP const& x1, Dbl x2, RoundingModeType rnd);
-    friend FloatMP sub(FloatMP const& x1, Dbl x2, RoundingModeType rnd);
-    friend FloatMP mul(FloatMP const& x1, Dbl x2, RoundingModeType rnd);
-    friend FloatMP div(FloatMP const& x1, Dbl x2, RoundingModeType rnd);
-    friend FloatMP add(Dbl x1, FloatMP const& x2, RoundingModeType rnd);
-    friend FloatMP sub(Dbl x1, FloatMP const& x2, RoundingModeType rnd);
-    friend FloatMP mul(Dbl x1, FloatMP const& x2, RoundingModeType rnd);
-    friend FloatMP div(Dbl x1, FloatMP const& x2, RoundingModeType rnd);
+    friend FloatMP add(RoundingModeType rnd, FloatMP const& x1, Dbl x2);
+    friend FloatMP sub(RoundingModeType rnd, FloatMP const& x1, Dbl x2);
+    friend FloatMP mul(RoundingModeType rnd, FloatMP const& x1, Dbl x2);
+    friend FloatMP div(RoundingModeType rnd, FloatMP const& x1, Dbl x2);
+    friend FloatMP add(RoundingModeType rnd, Dbl x1, FloatMP const& x2);
+    friend FloatMP sub(RoundingModeType rnd, Dbl x1, FloatMP const& x2);
+    friend FloatMP mul(RoundingModeType rnd, Dbl x1, FloatMP const& x2);
+    friend FloatMP div(RoundingModeType rnd, Dbl x1, FloatMP const& x2);
 
     // Operations in current rounding mode
     friend FloatMP nul(FloatMP const& x);

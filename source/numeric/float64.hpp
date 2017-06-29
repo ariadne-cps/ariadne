@@ -98,10 +98,10 @@ class Float64 {
     typedef Precision64 PrecisionType;
     typedef RoundingMode64 RoundingModeType;
   public:
-    static const RoundingModeType downward;
-    static const RoundingModeType upward;
-    static const RoundingModeType to_nearest;
-    static const RoundingModeType toward_zero;
+    static const RoundingModeType ROUND_TO_NEAREST = Ariadne::ROUND_TO_NEAREST;
+    static const RoundingModeType ROUND_DOWNWARD = Ariadne::ROUND_DOWNWARD;
+    static const RoundingModeType ROUND_UPWARD = Ariadne::ROUND_UPWARD;
+    static const RoundingModeType ROUND_TOWARD_ZERO = Ariadne::ROUND_TOWARD_ZERO;
 
     static RoundingModeType get_rounding_mode();
     static Void set_rounding_mode(RoundingModeType);
@@ -245,36 +245,36 @@ class Float64 {
     friend Float64 div_opp(Float64 x, Float64 y) { volatile double t=x.dbl; t=t/y.dbl; return -t; }
     friend Float64 pow_opp(Float64 x, int n);
 
-    template<class OP> friend Float64 apply(OP op, Float64 const& x1, Float64 const& x2, RoundingMode64 rnd) {
+    template<class OP> friend Float64 apply(OP op, RoundingMode64 rnd, Float64 const& x1, Float64 const& x2) {
         auto old_rnd=Float64::get_rounding_mode(); Float64::set_rounding_mode(rnd);
         Float64 r=op(x1,x2); Float64::set_rounding_mode(old_rnd); return r;
     }
 
-    template<class OP> friend Float64 apply(OP op, Float64 const& x, RoundingMode64 rnd) {
+    template<class OP> friend Float64 apply(OP op, RoundingMode64 rnd, Float64 const& x) {
         auto old_rnd=Float64::get_rounding_mode(); Float64::set_rounding_mode(rnd);
         Float64 r=op(x); Float64::set_rounding_mode(old_rnd); return r;
     }
 
-    template<class OP> friend Float64 apply(OP op, Float64 const& x, Int n, RoundingMode64 rnd) {
+    template<class OP> friend Float64 apply(OP op, RoundingMode64 rnd, Float64 const& x, Int n) {
         auto old_rnd=Float64::get_rounding_mode(); Float64::set_rounding_mode(rnd);
         Float64 r=op(x,n); Float64::set_rounding_mode(old_rnd); return r;
     }
 
-    friend Float64 add(Float64 const& x1, Float64 const& x2, RoundingModeType rnd) { return apply(Add(),x1,x2,rnd); }
-    friend Float64 sub(Float64 const& x1, Float64 const& x2, RoundingModeType rnd) { return apply(Sub(),x1,x2,rnd); }
-    friend Float64 mul(Float64 const& x1, Float64 const& x2, RoundingModeType rnd) { return apply(Mul(),x1,x2,rnd); }
-    friend Float64 div(Float64 const& x1, Float64 const& x2, RoundingModeType rnd) { return apply(Div(),x1,x2,rnd); }
-    friend Float64 pow(Float64 const& x, Int n, RoundingModeType rnd) { return apply(Pow(),x,n,rnd); }
-    friend Float64 sqr(Float64 const& x, RoundingModeType rnd) { return apply(Sqr(),x,rnd); }
-    friend Float64 rec(Float64 const& x, RoundingModeType rnd) { return apply(Rec(),x,rnd); }
-    friend Float64 sqrt(Float64 const& x, RoundingModeType rnd) { return apply(Sqrt(),x,rnd); }
-    friend Float64 exp(Float64 const& x, RoundingModeType rnd) { return apply(Exp(),x,rnd); }
-    friend Float64 log(Float64 const& x, RoundingModeType rnd) { return apply(Log(),x,rnd); }
-    friend Float64 sin(Float64 const& x, RoundingModeType rnd) { return apply(Sin(),x,rnd); }
-    friend Float64 cos(Float64 const& x, RoundingModeType rnd) { return apply(Cos(),x,rnd); }
-    friend Float64 tan(Float64 const& x, RoundingModeType rnd) { return apply(Tan(),x,rnd); }
-    friend Float64 atan(Float64 const& x, RoundingModeType rnd) { return apply(Atan(),x,rnd); }
-    static Float64 pi(PrecisionType pr, RoundingModeType rnd);
+    friend Float64 add(RoundingModeType rnd, Float64 const& x1, Float64 const& x2) { return apply(Add(),rnd,x1,x2); }
+    friend Float64 sub(RoundingModeType rnd, Float64 const& x1, Float64 const& x2) { return apply(Sub(),rnd,x1,x2); }
+    friend Float64 mul(RoundingModeType rnd, Float64 const& x1, Float64 const& x2) { return apply(Mul(),rnd,x1,x2); }
+    friend Float64 div(RoundingModeType rnd, Float64 const& x1, Float64 const& x2) { return apply(Div(),rnd,x1,x2); }
+    friend Float64 pow(RoundingModeType rnd, Float64 const& x, Int n) { return apply(Pow(),rnd,x,n); }
+    friend Float64 sqr(RoundingModeType rnd, Float64 const& x) { return apply(Sqr(),rnd,x); }
+    friend Float64 rec(RoundingModeType rnd, Float64 const& x) { return apply(Rec(),rnd,x); }
+    friend Float64 sqrt(RoundingModeType rnd, Float64 const& x) { return apply(Sqrt(),rnd,x); }
+    friend Float64 exp(RoundingModeType rnd, Float64 const& x) { return apply(Exp(),rnd,x); }
+    friend Float64 log(RoundingModeType rnd, Float64 const& x) { return apply(Log(),rnd,x); }
+    friend Float64 sin(RoundingModeType rnd, Float64 const& x) { return apply(Sin(),rnd,x); }
+    friend Float64 cos(RoundingModeType rnd, Float64 const& x) { return apply(Cos(),rnd,x); }
+    friend Float64 tan(RoundingModeType rnd, Float64 const& x) { return apply(Tan(),rnd,x); }
+    friend Float64 atan(RoundingModeType rnd, Float64 const& x) { return apply(Atan(),rnd,x); }
+    static Float64 pi(RoundingModeType rnd, PrecisionType pr);
 
     //! \related Float64 \brief The nearest floating-point approximation to the constant \a pi.
     friend const Float64 pi_approx() { return Float64(3.1415926535897931); }

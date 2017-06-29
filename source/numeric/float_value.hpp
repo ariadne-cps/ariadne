@@ -33,6 +33,8 @@
 #include "number.decl.hpp"
 #include "float.decl.hpp"
 
+#include "float_operations.hpp"
+
 #include "logical.hpp"
 #include "builtin.hpp"
 #include "twoexp.hpp"
@@ -133,6 +135,15 @@ template<class PR> class FloatValue
     friend OutputStream& operator<<(OutputStream& os, FloatValue<PR> const& x) {
         return Operations<FloatValue<PR>>::_write(os,x); }
 };
+
+template<class PR> inline FloatFactory<PR> factory(FloatValue<PR> const& flt) { return FloatFactory<PR>(flt.precision()); }
+template<class PR> inline FloatValue<PR> FloatFactory<PR>::create(Dyadic const& y, ExactTag) { return FloatValue<PR>(y,_pr); }
+template<class PR> inline FloatValue<PR> FloatFactory<PR>::create(Integer const& y, ExactTag) { return FloatValue<PR>(y,_pr); }
+
+template<class PR> template<class N, EnableIf<IsBuiltinSignedIntegral<N>>> inline
+FloatValue<PR> FloatFactory<PR>::create(N const& y) { return FloatValue<PR>(y,_pr); }
+template<class PR> template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>>> inline
+PositiveFloatValue<PR> FloatFactory<PR>::create(M const& y) { return PositiveFloatValue<PR>(y,_pr); }
 
 template<class PR> class Positive<FloatValue<PR>> : public FloatValue<PR> {
   public:

@@ -27,6 +27,8 @@
 
 #include "numeric/logical.hpp"
 #include "numeric/integer.hpp"
+#include "numeric/dyadic.hpp"
+#include "numeric/decimal.hpp"
 #include "numeric/rational.hpp"
 #include "numeric/real.hpp"
 #include "numeric/float64.hpp"
@@ -46,6 +48,9 @@ namespace Ariadne {
 Rational operator/(Integer const&, Integer const&);
 Integer pow(Integer const& z, Nat m);
 //Integer abs(Integer const& z);
+
+Rational operator/(Dyadic const& w1, Dyadic const& w2) { return Rational(w1) / Rational(w2); }
+Dyadic hlf(Dyadic const& w);
 
 DECLARE_NUMERIC_OPERATIONS(Real const&,Real,PositiveReal);
 //DECLARE_NUMERIC_OPERATIONS(Float64Approximation const&,Float64Approximation,PositiveFloat64Approximation);
@@ -90,6 +95,7 @@ template<class OP> struct PythonOperator { };
 PythonOperator<Pos> pos(boost::python::self_ns::self_t) { return PythonOperator<Pos>(); }
 PythonOperator<Neg> neg(boost::python::self_ns::self_t) { return PythonOperator<Neg>(); }
 PythonOperator<Sqr> sqr(boost::python::self_ns::self_t) { return PythonOperator<Sqr>(); }
+PythonOperator<Hlf> hlf(boost::python::self_ns::self_t) { return PythonOperator<Hlf>(); }
 PythonOperator<Rec> rec(boost::python::self_ns::self_t) { return PythonOperator<Rec>(); }
 PythonOperator<Sqrt> sqrt(boost::python::self_ns::self_t) { return PythonOperator<Sqrt>(); }
 PythonOperator<Exp> exp(boost::python::self_ns::self_t) { return PythonOperator<Exp>(); }
@@ -238,6 +244,29 @@ void export_integer()
 
 }
 
+void export_dyadic()
+{
+    class_<Dyadic> dyadic_class("Dyadic");
+//    dyadic_class.def(init<Int,Nat>());
+//    dyadic_class.def(init<Integer,Natural>());
+//    dyadic_class.def(init<Int>());
+    dyadic_class.def(init<Integer>());
+    dyadic_class.def(init<Dyadic>());
+    dyadic_class.def(init<Float64Value>());
+    dyadic_class.def(init<FloatMPValue>());
+
+    dyadic_class.define_self_arithmetic();
+    dyadic_class.define_self_comparisons();
+    def("hlf", (Dyadic(*)(Dyadic const&)) &hlf);
+
+    dyadic_class.def(self_ns::str(self));
+    dyadic_class.def(self_ns::repr(self));
+
+    dyadic_class.def("get_d", &Dyadic::get_d);
+
+    implicitly_convertible<Integer,Dyadic>();
+}
+
 void export_rational()
 {
     class_<Rational> rational_class("Rational");
@@ -246,12 +275,12 @@ void export_rational()
     rational_class.def(init<int>());
     //rational_class.def(init<double>());
     rational_class.def(init<Integer>());
+    rational_class.def(init<Dyadic>());
+    rational_class.def(init<Decimal>());
     rational_class.def(init<Rational>());
 
     rational_class.define_self_arithmetic();
     rational_class.define_self_comparisons();
-    rational_class.define_mixed_arithmetic<double>();
-    rational_class.define_mixed_arithmetic<Rational>();
 
     rational_class.def(self_ns::str(self));
     rational_class.def(self_ns::repr(self));
@@ -259,7 +288,16 @@ void export_rational()
     rational_class.def("get_d", &Rational::get_d);
 
     implicitly_convertible<Integer,Rational>();
+    implicitly_convertible<Dyadic,Rational>();
 
+}
+
+void export_decimal()
+{
+    class_<Decimal> decimal_class("Decimal", init<Decimal>());
+    decimal_class.def(self_ns::str(self));
+    decimal_class.def(self_ns::repr(self));
+    implicitly_convertible<Decimal,Rational>();
 }
 
 void export_real()
@@ -267,6 +305,7 @@ void export_real()
     class_<Real> real_class("Real");
     real_class.def(init<int>());
     real_class.def(init<Integer>());
+    real_class.def(init<Dyadic>());
     real_class.def(init<Rational>());
     real_class.def(init<Real>());
 
@@ -399,268 +438,266 @@ void export_numbers()
     implicitly_convertible<Real,EffectiveNumber>();
 }
 
-template<class PR> void export_exact_float()
+template<class PR> void export_float_value()
 {
-    class_<FloatValue<PR>> exact_float_class("Float"+class_tag<PR>()+"Value");
-    exact_float_class.def(init<int>());
-    exact_float_class.def(init<double>());
-    exact_float_class.def(init<Integer,PR>());
-    exact_float_class.def(init<FloatValue<PR>>());
+    class_<FloatValue<PR>> float_value_class("Float"+class_tag<PR>()+"Value");
+    float_value_class.def(init<int>());
+    float_value_class.def(init<double>());
+    float_value_class.def(init<Integer,PR>());
+    float_value_class.def(init<FloatValue<PR>>());
 
-    exact_float_class.template define_mixed_arithmetic<Int>();
-    exact_float_class.template define_mixed_arithmetic<FloatValue<PR>>();
-    exact_float_class.define_self_arithmetic();
-    //exact_float_class.define_mixed_arithmetic<ApproximateNumericType>();
-    //exact_float_class.define_mixed_arithmetic<LowerNumericType>();
-    //exact_float_class.define_mixed_arithmetic<UpperNumericType>();
-    //exact_float_class.define_mixed_arithmetic<ValidatedNumericType>();
-    exact_float_class.define_self_comparisons();
+    float_value_class.template define_mixed_arithmetic<Int>();
+    float_value_class.template define_mixed_arithmetic<FloatValue<PR>>();
+    float_value_class.define_self_arithmetic();
+    //float_value_class.define_mixed_arithmetic<ApproximateNumericType>();
+    //float_value_class.define_mixed_arithmetic<LowerNumericType>();
+    //float_value_class.define_mixed_arithmetic<UpperNumericType>();
+    //float_value_class.define_mixed_arithmetic<ValidatedNumericType>();
+    float_value_class.define_self_comparisons();
 
-    exact_float_class.def(pos(self));
-    exact_float_class.def(neg(self));
+    float_value_class.def(pos(self));
+    float_value_class.def(neg(self));
 
-    exact_float_class.def("precision", &FloatValue<PR>::precision);
-    exact_float_class.def("get_d",&FloatValue<PR>::get_d);
+    float_value_class.def("precision", &FloatValue<PR>::precision);
+    float_value_class.def("get_d",&FloatValue<PR>::get_d);
 
-    exact_float_class.def(self_ns::str(self));
-    exact_float_class.def(self_ns::repr(self));
+    float_value_class.def(self_ns::str(self));
+    float_value_class.def(self_ns::repr(self));
 
-    implicitly_convertible<int,FloatValue<PR>>();
-
-    exact_float_class.def("set_output_places",&FloatValue<PR>::set_output_places).staticmethod("set_output_places");
+    float_value_class.def("set_output_places",&FloatValue<PR>::set_output_places).staticmethod("set_output_places");
 }
 
-template<class PR> void export_error_float()
+template<class PR> void export_float_error()
 {
-    class_<FloatError<PR>> error_float_class("Float"+class_tag<PR>()+"Error");
-    error_float_class.def(init<uint>());
-    error_float_class.def(init<double>());
-    error_float_class.def(init<FloatError<PR>>());
+    class_<FloatError<PR>> float_error_class("Float"+class_tag<PR>()+"Error");
+    float_error_class.def(init<uint>());
+    float_error_class.def(init<double>());
+    float_error_class.def(init<FloatError<PR>>());
 
-    error_float_class.def(+self);
-    error_float_class.def(self+self);
-    error_float_class.def(self*self);
-//    error_float_class.def("raw",(RawFloat<PR>&(FloatError<PR>::*)())&FloatError<PR>::raw,reference_existing_object());
-    error_float_class.def(self_ns::str(self));
-    error_float_class.def(self_ns::repr(self));
+    float_error_class.def(+self);
+    float_error_class.def(self+self);
+    float_error_class.def(self*self);
+//    float_error_class.def("raw",(RawFloat<PR>&(FloatError<PR>::*)())&FloatError<PR>::raw,reference_existing_object());
+    float_error_class.def(self_ns::str(self));
+    float_error_class.def(self_ns::repr(self));
 
-    error_float_class.def("precision", &FloatError<PR>::precision);
+    float_error_class.def("precision", &FloatError<PR>::precision);
 
-    //    error_float_class.def("set_output_places",&FloatError<PR>::set_output_places).staticmethod("set_output_places");
+    //    float_error_class.def("set_output_places",&FloatError<PR>::set_output_places).staticmethod("set_output_places");
 }
 
-template<class PR> void export_metric_float()
+template<class PR> void export_float_ball()
 {
-    class_<FloatBall<PR>> metric_float_class("Float"+class_tag<PR>()+"Ball");
-//    metric_float_class.def(init<double,double,PR>());
-    metric_float_class.def(init<FloatValue<PR>,FloatError<PR>>());
-    metric_float_class.def(init<Real,PR>());
+    class_<FloatBall<PR>> float_ball_class("Float"+class_tag<PR>()+"Ball");
+//    float_ball_class.def(init<double,double,PR>());
+    float_ball_class.def(init<FloatValue<PR>,FloatError<PR>>());
+    float_ball_class.def(init<Real,PR>());
 
-    metric_float_class.def(init<ExactDouble,PR>());
-    metric_float_class.def(init<ValidatedNumber,PR>());
-    metric_float_class.def(init<FloatValue<PR>>());
-    metric_float_class.def(init<FloatBall<PR>>());
-    metric_float_class.def(init<FloatBounds<PR>>());
+    float_ball_class.def(init<ExactDouble,PR>());
+    float_ball_class.def(init<ValidatedNumber,PR>());
+    float_ball_class.def(init<FloatValue<PR>>());
+    float_ball_class.def(init<FloatBall<PR>>());
+    float_ball_class.def(init<FloatBounds<PR>>());
 
-    metric_float_class.def("value", &FloatBall<PR>::value);
-    metric_float_class.def("error", &FloatBall<PR>::error);
-    metric_float_class.def("lower", &FloatBall<PR>::lower);
-    metric_float_class.def("upper", &FloatBall<PR>::upper);
+    float_ball_class.def("value", &FloatBall<PR>::value);
+    float_ball_class.def("error", &FloatBall<PR>::error);
+    float_ball_class.def("lower", &FloatBall<PR>::lower);
+    float_ball_class.def("upper", &FloatBall<PR>::upper);
 
-    metric_float_class.def("precision", &FloatBall<PR>::precision);
+    float_ball_class.def("precision", &FloatBall<PR>::precision);
 
-    metric_float_class.template define_mixed_arithmetic<Int>();
-    metric_float_class.template define_mixed_arithmetic<FloatBall<PR>>();
-    metric_float_class.template define_mixed_arithmetic<ValidatedNumber>();
-    metric_float_class.define_self_arithmetic();
-//    metric_float_class.define_mixed_arithmetic<FloatBall<PR>>();
-//    metric_float_class.define_mixed_arithmetic<ApproximateNumericType>();
-//    metric_float_class.define_mixed_arithmetic<LowerNumericType>();
-//    metric_float_class.define_mixed_arithmetic<UpperNumericType>();
-//    metric_float_class.define_mixed_arithmetic<ValidatedNumericType>();
-    metric_float_class.define_self_comparisons();
+    float_ball_class.template define_mixed_arithmetic<ValidatedNumber>();
+    float_ball_class.template define_mixed_arithmetic<Int>();
+    float_ball_class.define_self_arithmetic();
+//    float_ball_class.define_mixed_arithmetic<FloatBall<PR>>();
+//    float_ball_class.define_mixed_arithmetic<ApproximateNumericType>();
+//    float_ball_class.define_mixed_arithmetic<LowerNumericType>();
+//    float_ball_class.define_mixed_arithmetic<UpperNumericType>();
+//    float_ball_class.define_mixed_arithmetic<ValidatedNumericType>();
+    float_ball_class.define_self_comparisons();
 
-    metric_float_class.define_unary_arithmetic();
-    metric_float_class.define_transcendental_functions();
+    float_ball_class.define_unary_arithmetic();
+    float_ball_class.define_transcendental_functions();
 
-    metric_float_class.def(self_ns::str(self));
-    metric_float_class.def(self_ns::repr(self));
+    float_ball_class.def(self_ns::str(self));
+    float_ball_class.def(self_ns::repr(self));
 
     implicitly_convertible<FloatValue<PR>,FloatBall<PR>>();
 
 }
 
 
-template<class PR> void export_bounded_float()
+template<class PR> void export_float_bounds()
 {
-    class_<FloatBounds<PR>> bounded_float_class("Float"+class_tag<PR>()+"Bounds");
-    bounded_float_class.def(init<double,double>());
-    bounded_float_class.def(init<FloatLowerBound<PR>,FloatUpperBound<PR>>());
-    bounded_float_class.def(init<Real,PR>());
+    class_<FloatBounds<PR>> float_bounds_class("Float"+class_tag<PR>()+"Bounds");
+    float_bounds_class.def(init<double,double>());
+    float_bounds_class.def(init<FloatLowerBound<PR>,FloatUpperBound<PR>>());
+    float_bounds_class.def(init<Real,PR>());
 
-    bounded_float_class.def(init<ExactDouble,PR>());
-    bounded_float_class.def(init<ValidatedNumber,PR>());
-    bounded_float_class.def(init<FloatValue<PR>>());
-    bounded_float_class.def(init<FloatBall<PR>>());
-    bounded_float_class.def(init<FloatBounds<PR>>());
+    float_bounds_class.def(init<ExactDouble,PR>());
+    float_bounds_class.def(init<ValidatedNumber,PR>());
+    float_bounds_class.def(init<FloatValue<PR>>());
+    float_bounds_class.def(init<FloatBall<PR>>());
+    float_bounds_class.def(init<FloatBounds<PR>>());
 
-    bounded_float_class.def("lower", &FloatBounds<PR>::lower);
-    bounded_float_class.def("upper", &FloatBounds<PR>::upper);
-    bounded_float_class.def("value", &FloatBounds<PR>::value);
-    bounded_float_class.def("error", &FloatBounds<PR>::error);
+    float_bounds_class.def("lower", &FloatBounds<PR>::lower);
+    float_bounds_class.def("upper", &FloatBounds<PR>::upper);
+    float_bounds_class.def("value", &FloatBounds<PR>::value);
+    float_bounds_class.def("error", &FloatBounds<PR>::error);
 
-    bounded_float_class.def("precision", &FloatBounds<PR>::precision);
+    float_bounds_class.def("precision", &FloatBounds<PR>::precision);
 
-    bounded_float_class.template define_mixed_arithmetic<Int>();
-    bounded_float_class.template define_mixed_arithmetic<FloatBall<PR>>();
-    bounded_float_class.template define_mixed_arithmetic<FloatBounds<PR>>();
-    bounded_float_class.template define_mixed_arithmetic<ValidatedNumber>();
-    bounded_float_class.define_self_arithmetic();
-//    bounded_float_class.define_mixed_arithmetic<ApproximateNumericType>();
-//    bounded_float_class.define_mixed_arithmetic<LowerNumericType>();
-//    bounded_float_class.define_mixed_arithmetic<UpperNumericType>();
-//    bounded_float_class.define_mixed_arithmetic<ValidatedNumericType>();
-    bounded_float_class.define_self_comparisons();
+    float_bounds_class.template define_mixed_arithmetic<ValidatedNumber>();
+    float_bounds_class.template define_mixed_arithmetic<Int>();
+    float_bounds_class.template define_mixed_arithmetic<FloatBall<PR>>();
+    float_bounds_class.define_self_arithmetic();
+//    float_bounds_class.define_mixed_arithmetic<ApproximateNumericType>();
+//    float_bounds_class.define_mixed_arithmetic<LowerNumericType>();
+//    float_bounds_class.define_mixed_arithmetic<UpperNumericType>();
+//    float_bounds_class.define_mixed_arithmetic<ValidatedNumericType>();
+    float_bounds_class.define_self_comparisons();
 
-    bounded_float_class.define_unary_arithmetic();
-    bounded_float_class.define_transcendental_functions();
+    float_bounds_class.define_transcendental_functions();
 
-    bounded_float_class.def(self_ns::str(self));
-    bounded_float_class.def(self_ns::repr(self));
+    float_bounds_class.def(self_ns::str(self));
+    float_bounds_class.def(self_ns::repr(self));
 
     implicitly_convertible<FloatBall<PR>,FloatBounds<PR>>();
 
-    bounded_float_class.def("set_output_places",&FloatBounds<PR>::set_output_places).staticmethod("set_output_places");
+    float_bounds_class.def("set_output_places",&FloatBounds<PR>::set_output_places).staticmethod("set_output_places");
 
 }
 
-template<class PR> void export_upper_float()
+template<class PR> void export_float_upper_bound()
 {
-    class_<FloatUpperBound<PR>> upper_float_class("Float"+class_tag<PR>()+"UpperBound");
-    upper_float_class.def(init<int>());
-    upper_float_class.def(init<double>());
-    upper_float_class.def(init<Real,PR>());
+    class_<FloatUpperBound<PR>> float_upper_bound_class("Float"+class_tag<PR>()+"UpperBound");
+    float_upper_bound_class.def(init<int>());
+    float_upper_bound_class.def(init<double>());
+    float_upper_bound_class.def(init<Real,PR>());
 
-    upper_float_class.def(init<FloatValue<PR>>());
-    upper_float_class.def(init<FloatBall<PR>>());
-    upper_float_class.def(init<FloatBounds<PR>>());
-    upper_float_class.def(init<FloatUpperBound<PR>>());
-    upper_float_class.def(init<ValidatedUpperNumber,PR>());
-    upper_float_class.def(self_ns::str(self));
-    upper_float_class.def(self_ns::repr(self));
+    float_upper_bound_class.def(init<FloatValue<PR>>());
+    float_upper_bound_class.def(init<FloatBall<PR>>());
+    float_upper_bound_class.def(init<FloatBounds<PR>>());
+    float_upper_bound_class.def(init<FloatUpperBound<PR>>());
+    float_upper_bound_class.def(init<ValidatedUpperNumber,PR>());
+    float_upper_bound_class.def(self_ns::str(self));
+    float_upper_bound_class.def(self_ns::repr(self));
 
-    upper_float_class.def("precision", &FloatUpperBound<PR>::precision);
+    float_upper_bound_class.def("precision", &FloatUpperBound<PR>::precision);
 
-    upper_float_class.def(+self);
-    upper_float_class.def(-self);
-    upper_float_class.def(self + self);
-    upper_float_class.def(self + FloatUpperBound<PR>());
-    upper_float_class.def(FloatUpperBound<PR>() + self);
-    upper_float_class.def(self - self);
-    upper_float_class.def(self - FloatLowerBound<PR>());
-    upper_float_class.def(FloatLowerBound<PR>() - self);
+    float_upper_bound_class.def(+self);
+    float_upper_bound_class.def(-self);
+    float_upper_bound_class.def(self + self);
+    float_upper_bound_class.def(self + FloatUpperBound<PR>());
+    float_upper_bound_class.def(FloatUpperBound<PR>() + self);
+    float_upper_bound_class.def(self - self);
+    float_upper_bound_class.def(self - FloatLowerBound<PR>());
+    float_upper_bound_class.def(FloatLowerBound<PR>() - self);
 
-    upper_float_class.def(self + Int());
-    upper_float_class.def(Int() + self);
-    upper_float_class.def(self - Int());
-    upper_float_class.def(Int() - self);
+    float_upper_bound_class.def(self + Int());
+    float_upper_bound_class.def(Int() + self);
+    float_upper_bound_class.def(self - Int());
+    float_upper_bound_class.def(Int() - self);
 
-    upper_float_class.def(self > FloatBounds<PR>());
-    upper_float_class.def(self > FloatApproximation<PR>());
-    upper_float_class.def(self < FloatLowerBound<PR>());
-    upper_float_class.def(self >= FloatBounds<PR>());
-    upper_float_class.def(self >= FloatApproximation<PR>());
-    upper_float_class.def(self <= FloatLowerBound<PR>());
+    float_upper_bound_class.def(self > FloatBounds<PR>());
+    float_upper_bound_class.def(self > FloatApproximation<PR>());
+    float_upper_bound_class.def(self < FloatLowerBound<PR>());
+    float_upper_bound_class.def(self >= FloatBounds<PR>());
+    float_upper_bound_class.def(self >= FloatApproximation<PR>());
+    float_upper_bound_class.def(self <= FloatLowerBound<PR>());
 
-//    upper_float_class.define_mixed_arithmetic<ApproximateNumericType>();
-//    upper_float_class.def(UpperNumericType() + self);
-//    upper_float_class.def(LowerNumericType() - self);
-//    upper_float_class.def(self + UpperNumericType());
-//    upper_float_class.def(self - LowerNumericType());
+//    float_upper_bound_class.define_mixed_arithmetic<ApproximateNumericType>();
+//    float_upper_bound_class.def(UpperNumericType() + self);
+//    float_upper_bound_class.def(LowerNumericType() - self);
+//    float_upper_bound_class.def(self + UpperNumericType());
+//    float_upper_bound_class.def(self - LowerNumericType());
 
-    upper_float_class.define_monotonic_functions();
+    float_upper_bound_class.define_monotonic_functions();
 
     implicitly_convertible<FloatBounds<PR>,FloatUpperBound<PR>>();
 }
 
-template<class PR> void export_lower_float()
+template<class PR> void export_float_lower_bound()
 {
-    class_<FloatLowerBound<PR>> lower_float_class("Float"+class_tag<PR>()+"LowerBound");
-    lower_float_class.def(init<int>());
-    lower_float_class.def(init<double>());
-    lower_float_class.def(init<Real,PR>());
+    class_<FloatLowerBound<PR>> float_lower_bound_class("Float"+class_tag<PR>()+"LowerBound");
+    float_lower_bound_class.def(init<int>());
+    float_lower_bound_class.def(init<double>());
+    float_lower_bound_class.def(init<Real,PR>());
 
-    lower_float_class.def(init<FloatValue<PR>>());
-    lower_float_class.def(init<FloatBall<PR>>());
-    lower_float_class.def(init<FloatBounds<PR>>());
-    lower_float_class.def(init<FloatLowerBound<PR>>());
-    lower_float_class.def(init<ValidatedLowerNumber,PR>());
-    lower_float_class.def(self_ns::str(self));
-    lower_float_class.def(self_ns::repr(self));
+    float_lower_bound_class.def(init<FloatValue<PR>>());
+    float_lower_bound_class.def(init<FloatBall<PR>>());
+    float_lower_bound_class.def(init<FloatBounds<PR>>());
+    float_lower_bound_class.def(init<FloatLowerBound<PR>>());
+    float_lower_bound_class.def(init<ValidatedLowerNumber,PR>());
+    float_lower_bound_class.def(self_ns::str(self));
+    float_lower_bound_class.def(self_ns::repr(self));
 
-    lower_float_class.def("precision", &FloatLowerBound<PR>::precision);
+    float_lower_bound_class.def("precision", &FloatLowerBound<PR>::precision);
 
-    lower_float_class.def(+self);
-    lower_float_class.def(-self);
-    lower_float_class.def(self + self);
-    lower_float_class.def(self + FloatLowerBound<PR>());
-    lower_float_class.def(FloatLowerBound<PR>() + self);
-    lower_float_class.def(self - self);
-    lower_float_class.def(self - FloatUpperBound<PR>());
-    lower_float_class.def(FloatUpperBound<PR>() - self);
+    float_lower_bound_class.def(+self);
+    float_lower_bound_class.def(-self);
+    float_lower_bound_class.def(self + self);
+    float_lower_bound_class.def(self + FloatLowerBound<PR>());
+    float_lower_bound_class.def(FloatLowerBound<PR>() + self);
+    float_lower_bound_class.def(self - self);
+    float_lower_bound_class.def(self - FloatUpperBound<PR>());
+    float_lower_bound_class.def(FloatUpperBound<PR>() - self);
 
-    lower_float_class.def(self + Int());
-    lower_float_class.def(Int() + self);
-    lower_float_class.def(self - Int());
-    lower_float_class.def(Int() - self);
+    float_lower_bound_class.def(self + Int());
+    float_lower_bound_class.def(Int() + self);
+    float_lower_bound_class.def(self - Int());
+    float_lower_bound_class.def(Int() - self);
 
-    lower_float_class.def(self < FloatBounds<PR>());
-    lower_float_class.def(self < FloatApproximation<PR>());
-    lower_float_class.def(self > FloatUpperBound<PR>());
-    lower_float_class.def(self <= FloatBounds<PR>());
-    lower_float_class.def(self <= FloatApproximation<PR>());
-    lower_float_class.def(self >= FloatUpperBound<PR>());
+    float_lower_bound_class.def(self < FloatBounds<PR>());
+    float_lower_bound_class.def(self < FloatApproximation<PR>());
+    float_lower_bound_class.def(self > FloatUpperBound<PR>());
+    float_lower_bound_class.def(self <= FloatBounds<PR>());
+    float_lower_bound_class.def(self <= FloatApproximation<PR>());
+    float_lower_bound_class.def(self >= FloatUpperBound<PR>());
 
-    //    lower_float_class.define_mixed_arithmetic<ApproximateNumericType>();
+    //    float_lower_bound_class.define_mixed_arithmetic<ApproximateNumericType>();
 
-//    lower_float_class.def(LowerNumericType() + self);
-//    lower_float_class.def(UpperNumericType() - self);
-//    lower_float_class.def(self + LowerNumericType());
-//    lower_float_class.def(self - UpperNumericType());
+//    float_lower_bound_class.def(LowerNumericType() + self);
+//    float_lower_bound_class.def(UpperNumericType() - self);
+//    float_lower_bound_class.def(self + LowerNumericType());
+//    float_lower_bound_class.def(self - UpperNumericType());
 
-    lower_float_class.define_monotonic_functions();
+    float_lower_bound_class.define_monotonic_functions();
 
     implicitly_convertible<FloatBounds<PR>,FloatLowerBound<PR>>();
 }
 
 
 
-template<class PR> void export_approximate_float()
+template<class PR> void export_float_approximation()
 {
-    class_<FloatApproximation<PR>> approximate_float_class("Float"+class_tag<PR>()+"Approximation");
-    approximate_float_class.def(init<double>());
-    approximate_float_class.def(init<Real,PR>());
+    class_<FloatApproximation<PR>> float_approximation_class("Float"+class_tag<PR>()+"Approximation");
 
-    approximate_float_class.def(init<FloatValue<PR>>());
-    approximate_float_class.def(init<FloatBall<PR>>());
-    approximate_float_class.def(init<FloatBounds<PR>>());
-    approximate_float_class.def(init<FloatLowerBound<PR>>());
-    approximate_float_class.def(init<FloatUpperBound<PR>>());
-    approximate_float_class.def(init<FloatApproximation<PR>>());
-    approximate_float_class.def(init<ApproximateNumber,PR>());
+    if(IsSame<PR,Precision64>::value) {
+        float_approximation_class.def(init<double>());
+    }
+    float_approximation_class.def(init<double,PR>());
+    float_approximation_class.def(init<Real,PR>());
 
-    approximate_float_class.define_self_arithmetic();
-    approximate_float_class.template define_mixed_arithmetic<FloatApproximation<PR>>();
-    approximate_float_class.template define_mixed_arithmetic<ApproximateNumber>();
-    approximate_float_class.template define_mixed_arithmetic<double>();
-    approximate_float_class.define_self_comparisons();
+    float_approximation_class.def(init<FloatValue<PR>>());
+    float_approximation_class.def(init<FloatBall<PR>>());
+    float_approximation_class.def(init<FloatBounds<PR>>());
+    float_approximation_class.def(init<FloatLowerBound<PR>>());
+    float_approximation_class.def(init<FloatUpperBound<PR>>());
+    float_approximation_class.def(init<FloatApproximation<PR>>());
+    float_approximation_class.def(init<ApproximateNumber,PR>());
 
-    approximate_float_class.def("precision", &FloatApproximation<PR>::precision);
-    approximate_float_class.def("get_d", &FloatApproximation<PR>::get_d);
+    float_approximation_class.template define_mixed_arithmetic<double>();
+    float_approximation_class.template define_mixed_arithmetic<ApproximateNumber>();
+    float_approximation_class.define_self_arithmetic();
+    float_approximation_class.define_self_comparisons();
+
+    float_approximation_class.def("precision", &FloatApproximation<PR>::precision);
+    float_approximation_class.def("get_d", &FloatApproximation<PR>::get_d);
 
 
-    approximate_float_class.def(self_ns::str(self));
-    approximate_float_class.def(self_ns::repr(self));
+    float_approximation_class.def(self_ns::str(self));
+    float_approximation_class.def(self_ns::repr(self));
 
     implicitly_convertible<double,FloatApproximation<PR>>();
     //implicitly_convertible<Integer,FloatBounds<PR>>();
@@ -670,10 +707,10 @@ template<class PR> void export_approximate_float()
     implicitly_convertible<FloatUpperBound<PR>,FloatApproximation<PR>>();
     implicitly_convertible<FloatLowerBound<PR>,FloatApproximation<PR>>();
 
-    approximate_float_class.def(abs(self));
+    float_approximation_class.def(abs(self));
 
-    approximate_float_class.define_unary_arithmetic();
-    approximate_float_class.define_transcendental_functions();
+    float_approximation_class.define_unary_arithmetic();
+    float_approximation_class.define_transcendental_functions();
 }
 
 Void export_effort() {
@@ -685,25 +722,28 @@ Void export_effort() {
 Void export_precision() {
     class_<Precision64> precision64_class("Precision64",init<>());
     precision64_class.def(self_ns::str(self));
+    precision64_class.def(self_ns::repr(self));
     class_<PrecisionMP> precisionmp_class("PrecisionMP",init<Nat>());
     precisionmp_class.def("bits",&PrecisionMP::bits);
     precisionmp_class.def(self_ns::str(self));
+    precisionmp_class.def(self_ns::repr(self));
     class_<Accuracy> accuracy_class("Accuracy",init<Nat>());
     accuracy_class.def("bits",&Accuracy::bits);
     accuracy_class.def(self_ns::str(self));
+    accuracy_class.def(self_ns::repr(self));
 }
 
 template<class PR> Void export_user_floats() {
     class_<RawFloat<PR>> raw_float_class("RawFloat"+class_tag<PR>(),init<double>());
     raw_float_class.def(self_ns::str(self));
 
-    export_approximate_float<PR>();
-    export_upper_float<PR>();
-    export_lower_float<PR>();
-    export_bounded_float<PR>();
-    export_metric_float<PR>();
-    export_exact_float<PR>();
-    export_error_float<PR>();
+    export_float_approximation<PR>();
+    export_float_upper_bound<PR>();
+    export_float_lower_bound<PR>();
+    export_float_bounds<PR>();
+    export_float_ball<PR>();
+    export_float_value<PR>();
+    export_float_error<PR>();
 }
 
 
@@ -732,5 +772,7 @@ numeric_submodule()
     export_numbers();
     export_real();
     export_rational();
+    export_decimal();
+    export_dyadic();
     export_integer();
 }

@@ -102,6 +102,9 @@ template<class PR> class FloatLowerBound
     RawFloatType _l;
 };
 
+template<class PR> inline FloatFactory<PR> factory(FloatLowerBound<PR> const& flt) { return FloatFactory<PR>(flt.precision()); }
+template<class PR> inline FloatLowerBound<PR> FloatFactory<PR>::create(Number<LowerTag> const& y) { return FloatLowerBound<PR>(y,_pr); }
+
 template<class PR> class Positive<FloatLowerBound<PR>> : public FloatLowerBound<PR>
     , public DispatchPositiveDirectedFloatOperations<PositiveFloatLowerBound<PR>,PositiveFloatUpperBound<PR>>
 {

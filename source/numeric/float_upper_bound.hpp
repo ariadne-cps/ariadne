@@ -103,6 +103,9 @@ template<class PR> class FloatUpperBound
     RawFloatType _u;
 };
 
+template<class PR> inline FloatFactory<PR> factory(FloatUpperBound<PR> const& flt) { return FloatFactory<PR>(flt.precision()); }
+template<class PR> inline FloatUpperBound<PR> FloatFactory<PR>::create(Number<UpperTag> const& y) { return FloatUpperBound<PR>(y,_pr); }
+
 template<class PR> class Positive<FloatUpperBound<PR>> : public FloatUpperBound<PR>
     , public DispatchPositiveDirectedFloatOperations<PositiveFloatUpperBound<PR>,PositiveFloatLowerBound<PR>>
 {

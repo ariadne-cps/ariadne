@@ -477,10 +477,12 @@ template Void export_matrix<Rational>();
 Void linear_algebra_submodule() {
     export_vector<Float64Approximation>();
     export_vector<Float64Bounds>();
+    export_vector<Float64Ball>();
     export_vector<Float64Value>();
 
     export_vector<FloatMPApproximation>();
     export_vector<FloatMPBounds>();
+    export_vector<FloatMPBall>();
     export_vector<FloatMPValue>();
 
     export_matrix<Float64Approximation>();

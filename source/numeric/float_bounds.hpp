@@ -33,6 +33,9 @@
 #include "number.decl.hpp"
 #include "float.decl.hpp"
 
+#include "float_operations.hpp"
+#include "float_factory.hpp"
+
 namespace Ariadne {
 
 template<class PR> struct NumericTraits<FloatBounds<PR>> {
@@ -97,7 +100,7 @@ template<class PR> class FloatBounds
     FloatBounds<PR>(ExactDouble const& dl, ExactDouble const& du, PrecisionType pr);
     FloatBounds<PR>(Dyadic const& wl, Dyadic const& wu, PrecisionType pr);
     FloatBounds<PR>(Rational const& ql, Rational const& qu, PrecisionType pr);
-    FloatBounds<PR>(Pair<ExactDouble,ExactDouble> const& dlu, PrecisionType pr);
+//    FloatBounds<PR>(Pair<ExactDouble,ExactDouble> const& dlu, PrecisionType pr);
 
     template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> FloatBounds<PR>(N n, PR pr) : FloatBounds<PR>(ExactDouble(n),pr) { }
     FloatBounds<PR>(ExactDouble d, PR pr);
@@ -156,6 +159,16 @@ template<class PR> class FloatBounds
   private: public:
     RawFloatType _l, _u;
 };
+
+template<class PR> inline FloatFactory<PR> factory(FloatBounds<PR> const& flt) { return FloatFactory<PR>(flt.precision()); }
+template<class PR> inline FloatBounds<PR> FloatFactory<PR>::create(Number<ValidatedTag> const& y) { return FloatBounds<PR>(y,_pr); }
+template<class PR> inline FloatBounds<PR> FloatFactory<PR>::create(Number<EffectiveTag> const& y) { return FloatBounds<PR>(y,_pr); }
+template<class PR> inline FloatBounds<PR> FloatFactory<PR>::create(Number<ExactTag> const& y) { return FloatBounds<PR>(y,_pr); }
+template<class PR> inline FloatBounds<PR> FloatFactory<PR>::create(Real const& y) { return FloatBounds<PR>(y,_pr); }
+template<class PR> inline FloatBounds<PR> FloatFactory<PR>::create(Rational const& y) { return FloatBounds<PR>(y,_pr); }
+template<class PR> inline FloatBounds<PR> FloatFactory<PR>::create(Dyadic const& y) { return FloatBounds<PR>(y,_pr); }
+template<class PR> inline FloatBounds<PR> FloatFactory<PR>::create(Integer const& y) { return FloatBounds<PR>(y,_pr); }
+
 
 template<class PR> class Positive<FloatBounds<PR>> : public FloatBounds<PR>
     , public DispatchPositiveFloatOperations<PositiveFloatBounds<PR>>

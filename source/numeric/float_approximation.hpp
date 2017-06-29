@@ -33,6 +33,8 @@
 #include "number.decl.hpp"
 #include "float.decl.hpp"
 
+#include "float_operations.hpp"
+
 namespace Ariadne {
 
 template<class PR> struct NumericTraits<FloatApproximation<PR>> {
@@ -111,6 +113,11 @@ template<class PR> class FloatApproximation
     static Nat output_places;
     RawFloatType _a;
 };
+
+template<class PR> inline FloatFactory<PR> factory(FloatApproximation<PR> const& flt) { return FloatFactory<PR>(flt.precision()); }
+template<class PR> inline FloatApproximation<PR> FloatFactory<PR>::create(Number<ApproximateTag> const& y) { return FloatApproximation<PR>(y,_pr); }
+template<class PR> template<class D, EnableIf<IsBuiltinFloatingPoint<D>>> inline
+    FloatApproximation<PR> FloatFactory<PR>::create(D const& y) { return FloatApproximation<PR>(y,_pr); }
 
 template<class PR> class Positive<FloatApproximation<PR>> : public FloatApproximation<PR>
     , public DispatchPositiveFloatOperations<PositiveFloatApproximation<PR>>

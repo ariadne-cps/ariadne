@@ -33,6 +33,8 @@
 #include "number.decl.hpp"
 #include "float.decl.hpp"
 
+#include "float_operations.hpp"
+
 namespace Ariadne {
 
 template<class PR> struct NumericTraits<FloatBall<PR>> {
@@ -112,6 +114,10 @@ template<class PR> class FloatBall
   private: public:
     RawFloatType _v, _e;
 };
+
+template<class PR> inline FloatFactory<PR> factory(FloatBall<PR> const& flt) {
+    return FloatFactory<PR>(flt.precision());
+}
 
 template<class PR> class Positive<FloatBall<PR>> : public FloatBall<PR> {
   public:

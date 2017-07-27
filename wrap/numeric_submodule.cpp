@@ -289,7 +289,6 @@ void export_rational()
 
     implicitly_convertible<Integer,Rational>();
     implicitly_convertible<Dyadic,Rational>();
-
 }
 
 void export_decimal()
@@ -472,8 +471,6 @@ FloatUpperBound<PrecisionMP> log2(FloatError<PrecisionMP> const& x);
 
 template<class PR> void export_float_error()
 {
-    RawFloat<PR>const&(FloatError<PR>::*raw_ptr)()const  = &FloatError<PR>::raw;
-
     class_<FloatError<PR>> float_error_class("Float"+class_tag<PR>()+"Error");
     float_error_class.def(init<uint>());
     float_error_class.def(init<double>());

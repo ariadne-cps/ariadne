@@ -72,6 +72,8 @@ template<class PR> class FloatError
     friend FloatLowerBound<PR> operator-(FloatError<PR> const& x) { return FloatLowerBound<PR>(-x._e); }
     friend FloatUpperBound<PR> operator+(FloatValue<PR> const& x1, FloatError<PR> const& x2) { return FloatUpperBound<PR>(add_up(x1._v,x2._e)); }
     friend FloatLowerBound<PR> operator-(FloatValue<PR> const& x1, FloatError<PR> const& x2) { return FloatLowerBound<PR>(sub_down(x1._v,x2._e)); }
+    friend FloatUpperBound<PR> log2(FloatError<PR> const& x) {
+        return log(x)/cast_positive(log(FloatBounds<PR>(2u,x.precision()))); }
 
     friend Bool same(FloatError<PR> const& x1, FloatError<PR> const& x2) { return x1._e==x2._e; }
     friend Bool refines(FloatError<PR> const& x1, FloatError<PR> const& x2) { return x1._e<=x2._e; }

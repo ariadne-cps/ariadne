@@ -96,8 +96,14 @@ template<class PR> class FloatUpperBound
     friend Bool refines(FloatUpperBound<PR> const&, FloatUpperBound<PR> const&);
     friend FloatUpperBound<PR> refinement(FloatUpperBound<PR> const&, FloatUpperBound<PR> const&);
   public:
-    friend FloatUpperBound<PR> operator*(FloatUpperBound<PR> const& x1, Positive<FloatValue<PR>> const& x2) {
+    friend FloatUpperBound<PR> operator*(FloatUpperBound<PR> const& x1, PositiveFloatValue<PR> const& x2) {
         return FloatUpperBound<PR>(mul_up(x1.raw(),x2.raw())); }
+    friend FloatUpperBound<PR> operator*(FloatUpperBound<PR> const& x1, PositiveFloatBounds<PR> const& x2) {
+        return FloatUpperBound<PR>(mul_up(x1.raw(),x1.raw()>=0?x2.upper().raw():x2.lower().raw())); }
+    friend FloatUpperBound<PR> operator/(FloatUpperBound<PR> const& x1, PositiveFloatValue<PR> const& x2) {
+        return FloatUpperBound<PR>(div_up(x1.raw(),x2.raw())); }
+    friend FloatUpperBound<PR> operator/(FloatUpperBound<PR> const& x1, PositiveFloatBounds<PR> const& x2) {
+        return FloatUpperBound<PR>(div_up(x1.raw(),x1.raw()>=0?x2.lower().raw():x2.upper().raw())); }
   private: public:
     static Nat output_places;
     RawFloatType _u;
@@ -120,8 +126,14 @@ template<class PR> class Positive<FloatUpperBound<PR>> : public FloatUpperBound<
     Positive<FloatUpperBound<PR>>(PositiveFloatValue<PR> const& x) : FloatUpperBound<PR>(x) { }
     Positive<FloatUpperBound<PR>>(PositiveFloatBounds<PR> const& x) : FloatUpperBound<PR>(x) { }
   public:
-    friend Positive<FloatUpperBound<PR>> operator*(Positive<FloatUpperBound<PR>> const& x1, Positive<FloatValue<PR>> const& x2) {
-        return Positive<FloatUpperBound<PR>>(mul_up(x1.raw(),x2.raw())); }
+    friend PositiveFloatUpperBound<PR> operator*(PositiveFloatUpperBound<PR> const& x1, PositiveFloatValue<PR> const& x2) {
+        return PositiveFloatUpperBound<PR>(mul_up(x1.raw(),x2.raw())); }
+    friend PositiveFloatUpperBound<PR> operator*(PositiveFloatUpperBound<PR> const& x1, PositiveFloatBounds<PR> const& x2) {
+        return PositiveFloatUpperBound<PR>(mul_up(x1.raw(),x2.upper().raw())); }
+    friend PositiveFloatUpperBound<PR> operator/(PositiveFloatUpperBound<PR> const& x1, PositiveFloatValue<PR> const& x2) {
+        return PositiveFloatUpperBound<PR>(div_up(x1.raw(),x2.raw())); }
+    friend PositiveFloatUpperBound<PR> operator/(PositiveFloatUpperBound<PR> const& x1, PositiveFloatBounds<PR> const& x2) {
+        return PositiveFloatUpperBound<PR>(div_up(x1.raw(),x2.lower().raw())); }
 };
 
 template<class PR> inline PositiveFloatUpperBound<PR> cast_positive(FloatUpperBound<PR> const& x) {

@@ -467,8 +467,13 @@ template<class PR> void export_float_value()
     float_value_class.def("set_output_places",&FloatValue<PR>::set_output_places).staticmethod("set_output_places");
 }
 
+FloatUpperBound<Precision64> log2(FloatError<Precision64> const& x);
+FloatUpperBound<PrecisionMP> log2(FloatError<PrecisionMP> const& x);
+
 template<class PR> void export_float_error()
 {
+    RawFloat<PR>const&(FloatError<PR>::*raw_ptr)()const  = &FloatError<PR>::raw;
+
     class_<FloatError<PR>> float_error_class("Float"+class_tag<PR>()+"Error");
     float_error_class.def(init<uint>());
     float_error_class.def(init<double>());
@@ -477,12 +482,14 @@ template<class PR> void export_float_error()
     float_error_class.def(+self);
     float_error_class.def(self+self);
     float_error_class.def(self*self);
-//    float_error_class.def("raw",(RawFloat<PR>&(FloatError<PR>::*)())&FloatError<PR>::raw,reference_existing_object());
+    //float_error_class.def("raw",(RawFloat<PR>&(FloatError<PR>::*)())&FloatError<PR>::raw,return_value_policy<reference_existing_object>());
+    float_error_class.def("raw",(RawFloat<PR>const&(FloatError<PR>::*)()const)&FloatError<PR>::raw,return_value_policy<copy_const_reference>());
     float_error_class.def(self_ns::str(self));
     float_error_class.def(self_ns::repr(self));
 
     float_error_class.def("precision", &FloatError<PR>::precision);
 
+    def("log2", (FloatUpperBound<PR>(*)(FloatError<PR>const&)) &log2);
     //    float_error_class.def("set_output_places",&FloatError<PR>::set_output_places).staticmethod("set_output_places");
 }
 

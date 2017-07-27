@@ -109,7 +109,8 @@ class Real
     FloatMPBounds operator() (PrecisionMP pr) const;
     Float64Bounds get(Precision64 pr) const;
     FloatMPBounds get(PrecisionMP pr) const;
-    FloatMPBounds evaluate(Accuracy acc) const;
+    FloatMPBall get(Accuracy acc) const;
+    FloatMPBall evaluate(Accuracy acc) const;
 
 
     friend PositiveReal abs(Real const&);

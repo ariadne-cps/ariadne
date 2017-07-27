@@ -281,7 +281,11 @@ FloatMPBounds Real::get(PrecisionMP pr) const {
     return this->_ptr->_evaluate(pr);
 }
 
-FloatMPBounds Real::evaluate(Accuracy accuracy) const {
+FloatMPBall Real::get(Accuracy accuracy) const {
+    return this->evaluate(accuracy);
+}
+
+FloatMPBall Real::evaluate(Accuracy accuracy) const {
     Nat effort=1;
     Nat acc=accuracy.bits();
     PrecisionMP precision(effort*64);
@@ -289,12 +293,12 @@ FloatMPBounds Real::evaluate(Accuracy accuracy) const {
     FloatMPError error=2u*error_bound;
     FloatMPBounds res;
     while (!(error.raw()<error_bound.raw())) {
-        res=(*this)(precision);
+        res=this->get(precision);
         error=res.error();
         effort+=1;
         precision=PrecisionMP(effort*64);
     }
-    return res;
+    return FloatMPBall(res);
 }
 
 

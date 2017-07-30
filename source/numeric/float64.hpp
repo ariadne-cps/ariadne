@@ -149,8 +149,8 @@ class Float64 {
     friend Bool is_inf(Float64 x);
     friend Bool is_finite(Float64 x);
 
-    friend Float64 next_up(Float64 x);
-    friend Float64 next_down(Float64 x);
+    friend Float64 next(RoundUpward rnd, Float64 x) { return add(rnd,x,Float64::min(x.precision())); }
+    friend Float64 next(RoundDownward rnd, Float64 x) { return sub(rnd,x,Float64::min(x.precision())); }
 
     friend Float64 floor(Float64 x);
     friend Float64 ceil(Float64 x);
@@ -264,6 +264,7 @@ class Float64 {
     friend Float64 sub(RoundingModeType rnd, Float64 const& x1, Float64 const& x2) { return apply(Sub(),rnd,x1,x2); }
     friend Float64 mul(RoundingModeType rnd, Float64 const& x1, Float64 const& x2) { return apply(Mul(),rnd,x1,x2); }
     friend Float64 div(RoundingModeType rnd, Float64 const& x1, Float64 const& x2) { return apply(Div(),rnd,x1,x2); }
+    friend Float64 fma(RoundingModeType rnd, Float64 x1, Float64 x2, Float64 x3); // x1*x2+x3
     friend Float64 pow(RoundingModeType rnd, Float64 const& x, Int n) { return apply(Pow(),rnd,x,n); }
     friend Float64 sqr(RoundingModeType rnd, Float64 const& x) { return apply(Sqr(),rnd,x); }
     friend Float64 rec(RoundingModeType rnd, Float64 const& x) { return apply(Rec(),rnd,x); }
@@ -276,45 +277,28 @@ class Float64 {
     friend Float64 atan(RoundingModeType rnd, Float64 const& x) { return apply(Atan(),rnd,x); }
     static Float64 pi(RoundingModeType rnd, PrecisionType pr);
 
-    //! \related Float64 \brief The nearest floating-point approximation to the constant \a pi.
-    friend const Float64 pi_approx() { return Float64(3.1415926535897931); }
-    friend const Float64 pi_near()   { return Float64(3.1415926535897931); }
-    friend const Float64 pi_down()   { return Float64(3.1415926535897931); }
-    friend const Float64 pi_up()     { return Float64(3.1415926535897936); }
-
-    friend Float64 fma_approx(Float64 x, Float64 y, Float64 z) {
-        rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest);
-        Float64 t=mul(x,y); Float64 r=add(t,z); set_rounding_mode(rounding_mode); return r; }
-
-    friend Float64 fma_up(Float64 x, Float64 y, Float64 z) {
-        rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward);
-        Float64 t=mul(x,y); Float64 r=add(t,z); set_rounding_mode(rounding_mode); return r; }
-
-    friend Float64 fma_down(Float64 x, Float64 y, Float64 z) {
-        rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(downward);
+    friend Float64 fma(RoundingModeType rnd, Float64 x, Float64 y, Float64 z) {
+        rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(rnd);
         Float64 t=mul(x,y); Float64 r=add(t,z); set_rounding_mode(rounding_mode); return r; }
 
     //! \related Float64 \brief The average of two values, computed with nearest rounding. Also available with \c _ivl suffix.
-    friend Float64 med_approx(Float64 x, Float64 y) {
-        rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest);
-        Float64 r=hlf(add(x,y)); set_rounding_mode(rounding_mode); return r; }
-    friend Float64 med_near(Float64 x, Float64 y) {
-        rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest);
+    friend Float64 med(RoundingModeType rnd, Float64 x, Float64 y) {
+        rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(rnd);
         Float64 r=hlf(add(x,y)); set_rounding_mode(rounding_mode); return r; }
     //! \related Float64 \brief Half of the difference of two values, computed with upward rounding. Also available with \c _ivl suffix.
-    friend Float64 rad_up(Float64 x, Float64 y) {
-        rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward);
+    friend Float64 rad(RoundingModeType rnd, Float64 x, Float64 y) {
+        rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(rnd);
         Float64 r=hlf(sub(y,x)); set_rounding_mode(rounding_mode); return r; }
 
-    friend Float64 sqrt_approx(Float64 x) { return std::sqrt(x.dbl); }
-    friend Float64 exp_approx(Float64 x) { return std::exp(x.dbl); }
-    friend Float64 log_approx(Float64 x) { return std::log(x.dbl); }
-    friend Float64 sin_approx(Float64 x) { return std::sin(x.dbl); }
-    friend Float64 cos_approx(Float64 x) { return std::cos(x.dbl); }
-    friend Float64 tan_approx(Float64 x) { return std::tan(x.dbl); }
-    friend Float64 asin_approx(Float64 x) { return std::asin(x.dbl); }
-    friend Float64 acos_approx(Float64 x) { return std::acos(x.dbl); }
-    friend Float64 atan_approx(Float64 x) { return std::atan(x.dbl); }
+    friend Float64 sqrt(RoundApprox,Float64 x) { return std::sqrt(x.dbl); }
+    friend Float64 exp(RoundApprox,Float64 x) { return std::exp(x.dbl); }
+    friend Float64 log(RoundApprox,Float64 x) { return std::log(x.dbl); }
+    friend Float64 sin(RoundApprox,Float64 x) { return std::sin(x.dbl); }
+    friend Float64 cos(RoundApprox,Float64 x) { return std::cos(x.dbl); }
+    friend Float64 tan(RoundApprox,Float64 x) { return std::tan(x.dbl); }
+    friend Float64 asin(RoundApprox,Float64 x) { return std::asin(x.dbl); }
+    friend Float64 acos(RoundApprox,Float64 x) { return std::acos(x.dbl); }
+    friend Float64 atan(RoundApprox,Float64 x) { return std::atan(x.dbl); }
 
 
 
@@ -335,6 +319,8 @@ class Float64 {
 
     friend Comparison cmp(Float64 x, Rational const& q);
 };
+
+static const Float64 inf = std::numeric_limits<double>::infinity();
 
 
 

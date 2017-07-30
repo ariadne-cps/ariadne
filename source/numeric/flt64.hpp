@@ -190,55 +190,55 @@ inline Flt64 Flt64::inf() { return Flt64{1.0/0.0}; }
 
 /************ Rounded arithmetic of Flt64 ***************************************************/
 
-Flt64 hlf_exact(Flt64);
+Flt64 hlf(exact,Flt64);
 
-Flt64 next_down(Flt64);
-Flt64 next_up(Flt64);
+Flt64 next(down,Flt64);
+Flt64 next(up,Flt64);
 
-Flt64 add_near(Flt64, Flt64);
-Flt64 add_down(Flt64, Flt64);
-Flt64 add_up(Flt64, Flt64);
+Flt64 add(near,Flt64, Flt64);
+Flt64 add(down,Flt64, Flt64);
+Flt64 add(up,Flt64, Flt64);
 
-Flt64 sub_near(Flt64, Flt64);
-Flt64 sub_down(Flt64, Flt64);
-Flt64 sub_up(Flt64, Flt64);
+Flt64 sub(near,Flt64, Flt64);
+Flt64 sub(down,Flt64, Flt64);
+Flt64 sub(up,Flt64, Flt64);
 
-Flt64 mul_near(Flt64, Flt64);
-Flt64 mul_down(Flt64, Flt64);
-Flt64 mul_up(Flt64, Flt64);
+Flt64 mul(near,Flt64, Flt64);
+Flt64 mul(down,Flt64, Flt64);
+Flt64 mul(up,Flt64, Flt64);
 
-Flt64 div_near(Flt64, Flt64);
-Flt64 div_down(Flt64, Flt64);
-Flt64 div_up(Flt64, Flt64);
+Flt64 div(near,Flt64, Flt64);
+Flt64 div(down,Flt64, Flt64);
+Flt64 div(up,Flt64, Flt64);
 
-Flt64 rad_up(Flt64, Flt64);
-Flt64 med_near(Flt64, Flt64);
+Flt64 rad(up,Flt64, Flt64);
+Flt64 med(near,Flt64, Flt64);
 
-Flt64 pow_approx(Flt64, Int);
-Flt64 pow_down(Flt64, Int);
-Flt64 pow_up(Flt64, Int);
+Flt64 pow(approx,Flt64, Int);
+Flt64 pow(down,Flt64, Int);
+Flt64 pow(up,Flt64, Int);
 
-Flt64 sqrt_approx(Flt64);
-Flt64 sqrt_down(Flt64);
-Flt64 sqrt_up(Flt64);
-Flt64 exp_approx(Flt64);
-Flt64 exp_down(Flt64);
-Flt64 exp_up(Flt64);
-Flt64 log_approx(Flt64);
-Flt64 log_down(Flt64);
-Flt64 log_up(Flt64);
-Flt64 sin_approx(Flt64);
-Flt64 sin_down(Flt64);
-Flt64 sin_up(Flt64);
-Flt64 cos_approx(Flt64);
-Flt64 cos_down(Flt64);
-Flt64 cos_up(Flt64);
-Flt64 tan_approx(Flt64);
-Flt64 tan_down(Flt64);
-Flt64 tan_up(Flt64);
-Flt64 atan_approx(Flt64);
-Flt64 atan_down(Flt64);
-Flt64 atan_up(Flt64);
+Flt64 sqrt(approx,Flt64);
+Flt64 sqrt(down,Flt64);
+Flt64 sqrt(up,Flt64);
+Flt64 exp(approx,Flt64);
+Flt64 exp(down,Flt64);
+Flt64 exp(up,Flt64);
+Flt64 log(approx,Flt64);
+Flt64 log(down,Flt64);
+Flt64 log(up,Flt64);
+Flt64 sin(approx,Flt64);
+Flt64 sin(down,Flt64);
+Flt64 sin(up,Flt64);
+Flt64 cos(approx,Flt64);
+Flt64 cos(down,Flt64);
+Flt64 cos(up,Flt64);
+Flt64 tan(approx,Flt64);
+Flt64 tan(down,Flt64);
+Flt64 tan(up,Flt64);
+Flt64 atan(approx,Flt64);
+Flt64 atan(down,Flt64);
+Flt64 atan(up,Flt64);
 
 // Arithmetic respecting the rounding mode
 Flt64 add_rnd(Flt64 x, Flt64 y);

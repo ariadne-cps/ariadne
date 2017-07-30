@@ -466,7 +466,7 @@ template<class F> Void TestTaylorModel<F>::test_refinement()
 
     // Code below computes expected values for second test
     // Float64 xv=2./3; Float64 xe=1./2; Float64 yv=6./5; Float64 ye=1./4;
-    // Float64 rl=sub_down(yv,ye); Float64 ru=add_up(xv,xe); Float64 rv=add_near(rl,ru)/2; Float64 re=sub_up(ru,rl)/2;
+    // Float64 rl=sub(down,yv,ye); Float64 ru=add(up,xv,xe); Float64 rv=add(near,rl,ru)/2; Float64 re=sub(up,ru,rl)/2;
     // std::cerr << std::setprecision(18) << "xv="<<xv<<" yv="<<yv<<" rl="<<rl<<" ru="<<ru<<" rv="<<rv<<" re="<<re<<"\n";
 
 

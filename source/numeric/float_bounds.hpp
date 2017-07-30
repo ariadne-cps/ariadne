@@ -129,8 +129,8 @@ template<class PR> class FloatBounds
 
     RawFloatType const& lower_raw() const { return _l; }
     RawFloatType const& upper_raw() const { return _u; }
-    RawFloatType const value_raw() const { return hlf(add_near(_l,_u)); }
-    RawFloatType const error_raw() const { RawFloatType v=value_raw(); return max(sub_up(_u,v),sub_up(v,_l)); }
+    RawFloatType const value_raw() const { return hlf(add(near,_l,_u)); }
+    RawFloatType const error_raw() const { RawFloatType v=value_raw(); return max(sub(up,_u,v),sub(up,v,_l)); }
     double get_d() const { return value_raw().get_d(); }
 
     PrecisionType precision() const { ARIADNE_DEBUG_ASSERT(_l.precision()==_u.precision()); return _u.precision(); }

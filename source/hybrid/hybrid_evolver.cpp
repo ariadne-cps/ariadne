@@ -53,9 +53,9 @@ inline auto operator-(Int n, Float64Bounds x) -> decltype(Float64Value(n)-x) { r
 inline auto operator/(Float64Value x, Nat n) -> decltype(x/Float64Value(n)) { return x/Float64Value(n); }
 
 template<class PR> inline auto operator*(FloatUpperBound<PR> x1, PositiveFloatValue<PR> x2) -> FloatUpperBound<PR> {
-    return FloatUpperBound<PR>(mul_up(x1._u,x2._v)); }
+    return FloatUpperBound<PR>(mul(up,x1._u,x2._v)); }
 template<class PR> inline auto operator*(PositiveFloatUpperBound<PR> x1, PositiveFloatValue<PR> x2) -> PositiveFloatUpperBound<PR> {
-    return PositiveFloatUpperBound<PR>(mul_up(x1._u,x2._v)); }
+    return PositiveFloatUpperBound<PR>(mul(up,x1._u,x2._v)); }
 
 inline auto operator> (Float64LowerBound x, Real r) -> decltype(x> declval<Float64Bounds>()) { return x> Float64Bounds(r,Precision64()); }
 inline auto operator>=(Float64LowerBound x, Real r) -> decltype(x>=declval<Float64Bounds>()) { return x>=Float64Bounds(r,Precision64()); }

@@ -630,10 +630,10 @@ template<class PR> Void TestFloatBounds<PR>::test_class()
     ARIADNE_TEST_EQUAL(FloatBoundsType(-1./3,2./3).error().raw(),0.5)
 
     // Tests for inexact operations
-    ARIADNE_TEST_EQUAL(FloatBoundsType(div_down(-one,3),div_up(two,3)).lower().raw(),-0.33333333333333337034);
-    ARIADNE_TEST_EQUAL(FloatBoundsType(div_down(-one,3),div_up(two,3)).upper().raw(),0.66666666666666674068);
-    ARIADNE_TEST_EQUAL(FloatBoundsType(div_down(-one,3),div_up(two,3)).value().raw(),0.16666666666666668517);
-    ARIADNE_TEST_EQUAL(FloatBoundsType(div_down(-one,3),div_up(two,3)).error().raw(),0.50000000000000011102);
+    ARIADNE_TEST_EQUAL(FloatBoundsType(div(down,-one,3),div(up,two,3)).lower().raw(),-0.33333333333333337034);
+    ARIADNE_TEST_EQUAL(FloatBoundsType(div(down,-one,3),div(up,two,3)).upper().raw(),0.66666666666666674068);
+    ARIADNE_TEST_EQUAL(FloatBoundsType(div(down,-one,3),div(up,two,3)).value().raw(),0.16666666666666668517);
+    ARIADNE_TEST_EQUAL(FloatBoundsType(div(down,-one,3),div(up,two,3)).error().raw(),0.50000000000000011102);
 }
 
 template<class PR> Void TestFloatBounds<PR>::test_input()

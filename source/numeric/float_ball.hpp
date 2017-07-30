@@ -99,8 +99,8 @@ template<class PR, class PRE> class FloatBall
     FloatValue<PR> const value() const;
     FloatError<PRE> const error() const;
 
-    RawFloatType const lower_raw() const { return sub_down(_v,_e); }
-    RawFloatType const upper_raw() const { return add_up(_v,_e); }
+    RawFloatType const lower_raw() const { return sub(down,_v,_e); }
+    RawFloatType const upper_raw() const { return add(up,_v,_e); }
     RawFloatType const& value_raw() const { return _v; }
     RawErrorFloatType const& error_raw() const { return _e; }
     double get_d() const { return _v.get_d(); }

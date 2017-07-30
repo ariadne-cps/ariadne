@@ -114,8 +114,8 @@ inline rounding_mode_t get_control_word() { rounding_mode_t grnd; asm volatile (
 
 #if defined ARIADNE_C99_ROUNDING
 
-inline Void set_round_up() { fesetround(FE_UPWARD);  }
-inline Void set_round_down() { fesetround(FE_DOWNWARD);  }
+inline Void set_round(up,) { fesetround(FE_UPWARD);  }
+inline Void set_round(down,) { fesetround(FE_DOWNWARD);  }
 inline Void set_round_nearest() { fesetround(FE_TONEAREST);  }
 
 inline Void Float64::set_rounding_mode(rounding_mode_t rnd) { fesetround(rnd); }
@@ -125,8 +125,8 @@ inline Void c_set_round_nearest() { fesetround(FE_TONEAREST); }
 
 #elif defined ARIADNE_GCC_ROUNDING
 
-inline Void set_round_up() { asm volatile ("fldcw ROUND_UP"); }
-inline Void set_round_down() { asm volatile ("fldcw ROUND_DOWN"); }
+inline Void set_round(up,) { asm volatile ("fldcw ROUND_UP"); }
+inline Void set_round(down,) { asm volatile ("fldcw ROUND_DOWN"); }
 inline Void set_round_nearest() { asm volatile ("fldcw ROUND_NEAREST"); }
 
 inline Void c_set_round_nearest() { fesetround(FE_TONEAREST); }
@@ -139,8 +139,8 @@ inline Void Float64::set_rounding_mode(rounding_mode_t rnd) { asm volatile ("fld
 
 #elif defined ARIADNE_GCC_MACRO_ROUNDING
 
-#define set_round_up()           asm("fldcw ROUND_UP")
-#define set_round_down()         asm("fldcw ROUND_DOWN")
+#define set_round(up,)           asm("fldcw ROUND_UP")
+#define set_round(down,)         asm("fldcw ROUND_DOWN")
 #define set_round_nearest()      asm("fldcw ROUND_NEAREST")
 
 inline Void Float64::set_rounding_mode(rounding_mode_t rnd) { fesetround(rnd); }
@@ -391,12 +391,12 @@ Void test_rounding(volatile double p, volatile double q)
     rounding_mode_t rnd=Float64::get_rounding_mode();
     std::cout<<"Initial rounding mode="<<rnd<<"\n";
 
-    set_round_up();
+    set_round(up,);
     std::cout<<"Up rounding mode="<<Float64::get_rounding_mode()<<"\n";
     volatile double xu=p/q;
     std::cout<<"  Computed "<<p<<"/"<<q<<"="<<xu<<std::endl;
 
-    set_round_down();
+    set_round(down,);
     std::cout<<"Down rounding mode="<<Float64::get_rounding_mode()<<"\n";
     volatile double xl=p/q;
     std::cout<<"  Computed "<<p<<"/"<<q<<"="<<xl<<std::endl;
@@ -529,21 +529,21 @@ Void dot_md_rat(mpq_class& m, SizeType n, const double* x, const double* y) {
 
 Void dot_lu_ivl(double& l, double& u, SizeType n, const double* x, const double* y) {
     for(SizeType i=0; i!=n; ++i) {
-        set_round_up();
+        set_round(up,);
         u+=x[i]*y[i];
-        set_round_down();
+        set_round(down,);
         l+=x[i]*y[i];
     }
     set_round_nearest();
 }
 
 Void dot_lu_std(double& l, double& u, SizeType n, const double* x, const double* y) {
-    set_round_up();
+    set_round(up,);
     for(SizeType i=0; i!=n; ++i) {
         u+=x[i]*y[i];
         //std::cerr<<" i="<<i<<" u="<<u<<"\n";
     }
-    set_round_down();
+    set_round(down,);
     for(SizeType i=0; i!=n; ++i) {
         l+=x[i]*y[i];
         //std::cerr<<" i="<<i<<" l="<<l<<"\n";
@@ -552,7 +552,7 @@ Void dot_lu_std(double& l, double& u, SizeType n, const double* x, const double*
 }
 
 Void dot_lu_opp(double& l, double& u, SizeType n, const double* x, const double* y) {
-    set_round_up();
+    set_round(up,);
     register volatile double uu=u;
     register volatile double ll=-l;
     register volatile double t;
@@ -570,7 +570,7 @@ Void dot_lu_opp(double& l, double& u, SizeType n, const double* x, const double*
 }
 
 Void dot_lu_opp2(double& l, double& u, SizeType n, const double* x, const double* y) {
-    set_round_up();
+    set_round(up,);
     register volatile double t;
     for(SizeType i=0; i!=n; ++i) {
         u+=x[i]*y[i];
@@ -588,19 +588,19 @@ Void dot_lu_ord(double& l, double& u, SizeType n, const double* x, const double*
 }
 
 Void dot_mr_std(double& m, double& r, SizeType n, const double* x, const double* y) {
-    set_round_down();
+    set_round(down,);
     volatile double l=m-r;
     for(SizeType i=0; i!=n; ++i) {
         l+=x[i]*y[i];
     }
-    set_round_up();
+    set_round(up,);
     volatile double u=m+r;
     for(SizeType i=0; i!=n; ++i) {
         u+=x[i]*y[i];
     }
     set_round_nearest();
     m=(u+l)/2;
-    set_round_up();
+    set_round(up,);
     r=max(u-m,m-l);
     set_round_nearest();
 }
@@ -610,12 +610,12 @@ Void dot_mr_mid(double& m, double& r, SizeType n, const double* x, const double*
     for(SizeType i=0; i!=n; ++i) {
         a+=x[i]*y[i];
     }
-    set_round_down();
+    set_round(down,);
     volatile double l=m-r;
     for(SizeType i=0; i!=n; ++i) {
         l+=x[i]*y[i];
     }
-    set_round_up();
+    set_round(up,);
     volatile double u=m+r;
     for(SizeType i=0; i!=n; ++i) {
         u+=x[i]*y[i];
@@ -643,9 +643,9 @@ Void add_mr_std(double& e, SizeType n, double* r, const double* x, const double*
 {
     for(SizeType i=0; i!=n; ++i) {
         volatile double a=x[i]+y[i];
-        set_round_down();
+        set_round(down,);
         volatile double l=x[i]+y[i];
-        set_round_up();
+        set_round(up,);
         volatile double u=x[i]+y[i];
         r[i]=a;
         e+=(u-l)/2;
@@ -659,7 +659,7 @@ Void add_mr_buf(double& e, SizeType n, double* r, const double* x, const double*
     for(SizeType i=0; i!=n; ++i) {
         z[i]=x[i]+y[i];
     }
-    set_round_up();
+    set_round(up,);
     for(SizeType i=0; i!=n; ++i) {
         volatile double u=x[i]+y[i];
         volatile double t=-x[i];
@@ -687,9 +687,9 @@ Void scal_mr_std(double& e, SizeType n, double* r, const double* x, const double
 {
     for(SizeType i=0; i!=n; ++i) {
         volatile double a=x[i]*c;
-        set_round_down();
+        set_round(down,);
         volatile double l=x[i]*c;
-        set_round_up();
+        set_round(up,);
         volatile double u=x[i]*c;
         r[i]=a;
         e+=(u-l)/2;

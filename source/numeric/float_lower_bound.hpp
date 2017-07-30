@@ -96,13 +96,13 @@ template<class PR> class FloatLowerBound
     friend FloatLowerBound<PR> refinement(FloatLowerBound<PR> const&, FloatLowerBound<PR> const&);
   public:
     friend FloatLowerBound<PR> operator*(FloatLowerBound<PR> const& x1, PositiveFloatValue<PR> const& x2) {
-        return FloatLowerBound<PR>(mul_down(x1.raw(),x2.raw())); }
+        return FloatLowerBound<PR>(mul(down,x1.raw(),x2.raw())); }
     friend FloatLowerBound<PR> operator*(FloatLowerBound<PR> const& x1, PositiveFloatBounds<PR> const& x2) {
-        return FloatLowerBound<PR>(mul_down(x1.raw(),x1.raw()>=0?x2.lower().raw():x2.upper().raw())); }
+        return FloatLowerBound<PR>(mul(down,x1.raw(),x1.raw()>=0?x2.lower().raw():x2.upper().raw())); }
     friend FloatLowerBound<PR> operator/(FloatLowerBound<PR> const& x1, PositiveFloatValue<PR> const& x2) {
-        return FloatLowerBound<PR>(div_down(x1.raw(),x2.raw())); }
+        return FloatLowerBound<PR>(div(down,x1.raw(),x2.raw())); }
     friend FloatLowerBound<PR> operator/(FloatLowerBound<PR> const& x1, PositiveFloatBounds<PR> const& x2) {
-        return FloatLowerBound<PR>(div_down(x1.raw(),x1.raw()>=0?x2.upper().raw():x2.lower().raw())); }
+        return FloatLowerBound<PR>(div(down,x1.raw(),x1.raw()>=0?x2.upper().raw():x2.lower().raw())); }
   private: public:
     static Nat output_places;
     RawFloatType _l;
@@ -125,13 +125,13 @@ template<class PR> class Positive<FloatLowerBound<PR>> : public FloatLowerBound<
     Positive<FloatLowerBound<PR>>(PositiveFloatBounds<PR> const& x) : FloatLowerBound<PR>(x) { }
   public:
     friend PositiveFloatLowerBound<PR> operator*(PositiveFloatLowerBound<PR> const& x1, PositiveFloatValue<PR> const& x2) {
-        return PositiveFloatLowerBound<PR>(mul_down(x1.raw(),x2.raw())); }
+        return PositiveFloatLowerBound<PR>(mul(down,x1.raw(),x2.raw())); }
     friend PositiveFloatLowerBound<PR> operator*(PositiveFloatLowerBound<PR> const& x1, PositiveFloatBounds<PR> const& x2) {
-        return PositiveFloatLowerBound<PR>(mul_down(x1.raw(),x2.lower().raw())); }
+        return PositiveFloatLowerBound<PR>(mul(down,x1.raw(),x2.lower().raw())); }
     friend PositiveFloatLowerBound<PR> operator/(PositiveFloatLowerBound<PR> const& x1, PositiveFloatValue<PR> const& x2) {
-        return PositiveFloatLowerBound<PR>(div_down(x1.raw(),x2.raw())); }
+        return PositiveFloatLowerBound<PR>(div(down,x1.raw(),x2.raw())); }
     friend PositiveFloatLowerBound<PR> operator/(PositiveFloatLowerBound<PR> const& x1, PositiveFloatBounds<PR> const& x2) {
-        return PositiveFloatLowerBound<PR>(div_down(x1.raw(),x2.upper().raw())); }
+        return PositiveFloatLowerBound<PR>(div(down,x1.raw(),x2.upper().raw())); }
 };
 
 template<class PR> inline PositiveFloatLowerBound<PR> cast_positive(FloatLowerBound<PR> const& x) {

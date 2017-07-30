@@ -896,7 +896,7 @@ ValidatedConstrainedImageSet::affine_over_approximation() const
 
     for(ConstIterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
         ValidatedScalarTaylorFunctionModel64 constraint_function(this->_reduced_domain,iter->function(),affine_sweeper);
-        b=sub_up(constraint_function.model().error(),constraint_function.model().value());
+        b=sub(up,constraint_function.model().error(),constraint_function.model().value());
         for(Nat j=0; j!=np; ++j) { a[j]=constraint_function.model().gradient(j); }
         result.new_parameter_constraint(-inf,a,b);
     }

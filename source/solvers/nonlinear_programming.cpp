@@ -2637,16 +2637,16 @@ Void KrawczykOptimiser::compute_tz(const ExactBoxType& d, const ValidatedVectorF
     Float64 tmin=+inf;
     Float64 tmax=+inf;
     for(Nat j=0; j!=n; ++j) {
-        tmax=min(tmax,sub_up(c[j].upper(),gy[j].lower()));
-        tmax=min(tmax,sub_up(gy[j].upper(),c[j].lower()));
-        tmin=min(tmin,sub_down(c[j].upper(),mgy[j].upper()));
-        tmin=min(tmin,sub_down(mgy[j].lower(),c[j].lower()));
+        tmax=min(tmax,sub(up,c[j].upper(),gy[j].lower()));
+        tmax=min(tmax,sub(up,gy[j].upper(),c[j].lower()));
+        tmin=min(tmin,sub(down,c[j].upper(),mgy[j].upper()));
+        tmin=min(tmin,sub(down,mgy[j].lower(),c[j].lower()));
     }
     for(Nat i=0; i!=m; ++i) {
-        tmin=min(tmin,sub_up(d[i].upper(),y[i].lower()));
-        tmax=min(tmax,sub_up(y[i].upper(),d[i].lower()));
-        tmin=min(tmin,sub_down(d[i].upper(),my[i].upper()));
-        tmax=min(tmax,sub_down(my[i].lower(),d[i].lower()));
+        tmin=min(tmin,sub(up,d[i].upper(),y[i].lower()));
+        tmax=min(tmax,sub(up,y[i].upper(),d[i].lower()));
+        tmin=min(tmin,sub(down,d[i].upper(),my[i].upper()));
+        tmax=min(tmax,sub(down,my[i].lower(),d[i].lower()));
     }
     tmin-=0.0625;
     t=ExactIntervalType(tmin,tmax);

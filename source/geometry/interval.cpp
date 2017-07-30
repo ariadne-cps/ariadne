@@ -99,7 +99,7 @@ Float64UpperInterval exp(Float64UpperInterval const& ivl) {
     return make_interval(exp(cast_singleton(ivl))); }
 Float64UpperInterval log(Float64UpperInterval const& ivl) {
     if(ivl.upper().raw()<=0) { return Float64UpperInterval::empty_interval(); }
-    else if(ivl.lower().raw()<=0) { return Float64UpperInterval(-inf,log_up(ivl.upper().raw())); }
+    else if(ivl.lower().raw()<=0) { return Float64UpperInterval(-inf,log(up,ivl.upper().raw())); }
     else { return make_interval(log(cast_singleton(ivl))); } }
 Float64UpperInterval sin(Float64UpperInterval const& ivl) {
     return make_interval(sin(cast_singleton(ivl))); }

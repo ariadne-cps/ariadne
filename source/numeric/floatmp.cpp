@@ -66,7 +66,7 @@ FloatMP::FloatMP(double d, PrecisionMP pr) : FloatMP(d,MPFR_RNDN,pr) {
     ARIADNE_ASSERT(d==this->get_d());
 }
 
-FloatMP::FloatMP(Float64 x, PrecisionMP pr) : FloatMP(x.get_d(),pr) {
+FloatMP::FloatMP(Float64 const& x, PrecisionMP pr) : FloatMP(x.get_d(),pr) {
 }
 
 FloatMP::FloatMP(PrecisionMP pr) {
@@ -94,7 +94,7 @@ FloatMP::FloatMP(double d, RoundingModeType rnd, PrecisionMP pr) {
     mpfr_set_d(_mpfr,d,rnd);
 }
 
-FloatMP::FloatMP(Float64 x, RoundingModeType rnd, PrecisionMP pr) {
+FloatMP::FloatMP(Float64 const& x, RoundingModeType rnd, PrecisionMP pr) {
     mpfr_init2(_mpfr,pr);
     mpfr_set_d(_mpfr,x.get_d(),rnd);
 }
@@ -278,6 +278,9 @@ Bool is_inf(FloatMP const& x) {
 Bool is_finite(FloatMP const& x) {
     return mpfr_number_p(x._mpfr);
 }
+
+FloatMP next(RoundUpward rnd, FloatMP const& x) { return add(rnd,x,FloatMP::min(x.precision())); }
+FloatMP next(RoundDownward rnd, FloatMP const& x) { return sub(rnd,x,FloatMP::min(x.precision())); }
 
 
 FloatMP nul(FloatMP const& x) { return nul(FloatMP::get_rounding_mode(),x); }
@@ -665,55 +668,6 @@ Bool operator> (FloatMP const& x1, Float64 const& x2) {
     return cmp(x1,x2)> Comparison::EQUAL;
 }
 
-FloatMP pos_exact(FloatMP const& x) { return pos(near,x); }
-FloatMP neg_exact(FloatMP const& x) { return neg(near,x); }
-FloatMP abs_exact(FloatMP const& x) { return abs(near,x); }
-FloatMP half_exact(FloatMP const& x) { return hlf(near,x); }
-
-FloatMP next_down(FloatMP const& x) { FloatMP r(x); mpfr_nextbelow(r._mpfr); return r; }
-FloatMP next_up(FloatMP const& x) { FloatMP r(x); mpfr_nextabove(r._mpfr); return r; }
-
-FloatMP neg_up(FloatMP const& x) { return neg(up,x); }
-FloatMP rec_up(FloatMP const& x) { return rec(up,x); }
-FloatMP add_up(FloatMP const& x1, FloatMP const& x2) { return add(up,x1,x2); }
-FloatMP sub_up(FloatMP const& x1, FloatMP const& x2) { return sub(up,x1,x2); }
-FloatMP mul_up(FloatMP const& x1, FloatMP const& x2) { return mul(up,x1,x2); }
-FloatMP div_up(FloatMP const& x1, FloatMP const& x2) { return div(up,x1,x2); }
-FloatMP pow_up(FloatMP const& x, Int n) { return pow(up,x,n); }
-
-FloatMP neg_down(FloatMP const& x) { return neg(down,x); }
-FloatMP rec_down(FloatMP const& x) { return rec(down,x); }
-FloatMP add_down(FloatMP const& x1, FloatMP const& x2) { return add(down,x1,x2); }
-FloatMP sub_down(FloatMP const& x1, FloatMP const& x2) { return sub(down,x1,x2); }
-FloatMP mul_down(FloatMP const& x1, FloatMP const& x2) { return mul(down,x1,x2); }
-FloatMP div_down(FloatMP const& x1, FloatMP const& x2) { return div(down,x1,x2); }
-FloatMP pow_down(FloatMP const& x, Int n) { return pow(down,x,n); }
-
-FloatMP neg_near(FloatMP const& x) { return neg(near,x); }
-// FloatMP rec_near(FloatMP const& x) { return rec(near,x); }
-FloatMP add_near(FloatMP const& x1, FloatMP const& x2) { return add(near,x1,x2); }
-FloatMP sub_near(FloatMP const& x1, FloatMP const& x2) { return sub(near,x1,x2); }
-FloatMP mul_near(FloatMP const& x1, FloatMP const& x2) { return mul(near,x1,x2); }
-FloatMP div_near(FloatMP const& x1, FloatMP const& x2) { return div(near,x1,x2); }
-FloatMP pow_near(FloatMP const& x, Int n) { return pow(near,x,n); }
-
-FloatMP neg_approx(FloatMP const& x) { return neg(near,x); }
-FloatMP rec_approx(FloatMP const& x) { return rec(near,x); }
-FloatMP add_approx(FloatMP const& x1, FloatMP const& x2) { return add(near,x1,x2); }
-FloatMP sub_approx(FloatMP const& x1, FloatMP const& x2) { return sub(near,x1,x2); }
-FloatMP mul_approx(FloatMP const& x1, FloatMP const& x2) { return mul(near,x1,x2); }
-FloatMP div_approx(FloatMP const& x1, FloatMP const& x2) { return div(near,x1,x2); }
-FloatMP pow_approx(FloatMP const& x, Int n) { return pow(near,x,n); }
-FloatMP sqrt_approx(FloatMP const& x) { return sqrt(near,x); }
-FloatMP exp_approx(FloatMP const& x) { return exp(near,x); }
-FloatMP log_approx(FloatMP const& x) { return log(near,x); }
-FloatMP sin_approx(FloatMP const& x) { return sin(near,x); }
-FloatMP cos_approx(FloatMP const& x) { return cos(near,x); }
-FloatMP tan_approx(FloatMP const& x) { return tan(near,x); }
-FloatMP atan_approx(FloatMP const& x) { return atan(near,x); }
-
-FloatMP med_approx(FloatMP const& x1, FloatMP const& x2) { return hlf(add(near,x1,x2)); }
-FloatMP rad_up(FloatMP const& x1, FloatMP const& x2) { return hlf(abs(sub(up,x2,x1))); }
 
 FloatMP sqr_rnd(FloatMP const& x) { return sqr(FloatMP::get_rounding_mode(),x); }
 FloatMP add_rnd(FloatMP const& x1, FloatMP const& x2) { return add(FloatMP::get_rounding_mode(),x1,x2); }
@@ -733,34 +687,6 @@ FloatMP add_opp(FloatMP const& x, FloatMP const& y);
 FloatMP sub_opp(FloatMP const& x, FloatMP const& y);
 FloatMP mul_opp(FloatMP const& x, FloatMP const& y);
 FloatMP div_opp(FloatMP const& x, FloatMP const& y);
-
-FloatMP sqrt_near(FloatMP const& x) { return sqrt(near,x); }
-FloatMP exp_near(FloatMP const& x) { return exp(near,x); }
-FloatMP log_near(FloatMP const& x) { return log(near,x); }
-FloatMP sin_near(FloatMP const& x) { return sin(near,x); }
-FloatMP cos_near(FloatMP const& x) { return cos(near,x); }
-FloatMP tan_near(FloatMP const& x) { return tan(near,x); }
-FloatMP atan_near(FloatMP const& x) { return atan(near,x); }
-
-FloatMP sqrt_up(FloatMP const& x) { return sqrt(up,x); }
-FloatMP exp_up(FloatMP const& x) { return exp(up,x); }
-FloatMP log_up(FloatMP const& x) { return log(up,x); }
-FloatMP sin_up(FloatMP const& x) { return sin(up,x); }
-FloatMP cos_up(FloatMP const& x) { return cos(up,x); }
-FloatMP tan_up(FloatMP const& x) { return tan(up,x); }
-FloatMP atan_up(FloatMP const& x) { return atan(up,x); }
-
-FloatMP sqrt_down(FloatMP const& x) { return sqrt(down,x); }
-FloatMP exp_down(FloatMP const& x) { return exp(down,x); }
-FloatMP log_down(FloatMP const& x) { return log(down,x); }
-FloatMP sin_down(FloatMP const& x) { return sin(down,x); }
-FloatMP cos_down(FloatMP const& x) { return cos(down,x); }
-FloatMP tan_down(FloatMP const& x) { return tan(down,x); }
-FloatMP atan_down(FloatMP const& x) { return atan(down,x); }
-
-FloatMP pi_near(PrecisionMP pr) { return FloatMP::pi(near,pr); }
-FloatMP pi_down(PrecisionMP pr) { return FloatMP::pi(down,pr); }
-FloatMP pi_up(PrecisionMP pr) { return FloatMP::pi(up,pr); }
 
 template<> String class_name<FloatMP>() { return "FloatMP"; }
 

@@ -207,9 +207,9 @@ void TestReal::test_accuracy() {
     FloatMPValue error(accuracy.error(),PrecisionMP(320));
     ARIADNE_TEST_CONSTRUCT(FloatMPBounds,pi_met,(pi.evaluate(accuracy)));
     ARIADNE_TEST_PRINT(pi_met.error());
-    ARIADNE_TEST_PRINT(abs(sub_up(pi_met.value_raw(),pi_near)));
+    ARIADNE_TEST_PRINT(abs(sub(up,pi_met.value_raw(),pi_near)));
     ARIADNE_TEST_ASSERT(pi_met.error() <= error);
-    ARIADNE_TEST_ASSERT(rad_up(pi_met.value().raw(),pi_near) <= error.raw());
+    ARIADNE_TEST_ASSERT(rad(up,pi_met.value().raw(),pi_near) <= error.raw());
 }
 
 

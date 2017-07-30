@@ -229,8 +229,8 @@ ValidatedSierpinskian ValidatedAffineConstrainedImageSet::separated(const ExactB
     LinearProgram<Float64> lp;
     this->construct_linear_program(lp);
     for(Nat i=0; i!=bx.size(); ++i) {
-        lp.l[i]=sub_down(wbx[i].lower().raw(),this->_space_models[i].error().raw());
-        lp.u[i]=add_up(wbx[i].upper().raw(),this->_space_models[i].error().raw());
+        lp.l[i]=sub(down,wbx[i].lower().raw(),this->_space_models[i].error().raw());
+        lp.u[i]=add(up,wbx[i].upper().raw(),this->_space_models[i].error().raw());
     }
     //std::cerr<<"\ns="<<*this<<"\nbx="<<bx<<"\n\nA="<<lp.A<<"\nb="<<lp.b<<"\nl="<<lp.l<<"\nu="<<lp.u<<"\n\n";
     ValidatedKleenean feasible=indeterminate;
@@ -278,8 +278,8 @@ Void ValidatedAffineConstrainedImageSet::_adjoin_outer_approximation_to(PavingIn
     for(Nat i=0; i!=cell.dimension(); ++i) {
         //lp.l[i]=bx[i].lower();
         //lp.u[i]=bx[i].upper();
-        lp.l[i]=sub_down(bx[i].lower().raw(),errors[i].raw());
-        lp.u[i]=add_up(bx[i].upper().raw(),errors[i].raw());
+        lp.l[i]=sub(down,bx[i].lower().raw(),errors[i].raw());
+        lp.u[i]=add(up,bx[i].upper().raw(),errors[i].raw());
     }
 
     Int cell_tree_depth=(cell.depth()-cell.height());

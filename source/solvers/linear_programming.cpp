@@ -149,7 +149,7 @@ Float64 compute_mu(const Vector<Float64>& xl, const Vector<Float64>& xu,
 
 
 
-inline Float64Bounds mul_val(Float64 x1, Float64 x2) { return Float64Bounds(mul_down(x1,x2),mul_up(x1,x2)); }
+inline Float64Bounds mul_val(Float64 x1, Float64 x2) { return Float64Bounds(mul(down,x1,x2),mul(up,x1,x2)); }
 inline Vector<Float64Value> const& cast_exact(Vector<Float64> const& v) { return reinterpret_cast<Vector<Float64Value>const&>(v); }
 inline Matrix<Float64Value> const& cast_exact(Matrix<Float64> const& A) { return reinterpret_cast<Matrix<Float64Value>const&>(A); }
 

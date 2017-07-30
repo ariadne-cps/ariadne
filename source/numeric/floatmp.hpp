@@ -32,6 +32,7 @@
 
 #include "paradigm.hpp"
 #include "number.hpp"
+#include "rounding.hpp"
 #include <mpfr.h>
 
 namespace Ariadne {
@@ -40,6 +41,8 @@ namespace Ariadne {
 
 struct NoInit { };
 struct RawPtr { };
+
+struct RoundUpward; struct RoundDownward;
 
 //enum RoundingModeMP { NEAREST=MPFR_RNDN, UPWARD=MPFR_RNDU, DOWNWARD=MPFR_RNDD };
 typedef mpfr_rnd_t RoundingModeMP;
@@ -102,7 +105,7 @@ class FloatMP {
 
     explicit FloatMP(PrecisionType);
     explicit FloatMP(double, PrecisionType);
-    explicit FloatMP(Float64, PrecisionType);
+    explicit FloatMP(Float64 const&, PrecisionType);
     explicit FloatMP(Dyadic const&, PrecisionType);
 
     FloatMP(const FloatMP&);
@@ -113,7 +116,7 @@ class FloatMP {
 
     FloatMP(Int32 n, PrecisionMP pr);
     FloatMP(double, RoundingModeType, PrecisionType);
-    FloatMP(Float64, RoundingModeType, PrecisionType);
+    FloatMP(Float64 const&, RoundingModeType, PrecisionType);
     FloatMP(Integer const&, RoundingModeType, PrecisionType);
     FloatMP(Dyadic const&, RoundingModeType, PrecisionType);
     FloatMP(Rational const&, RoundingModeType, PrecisionType);
@@ -134,8 +137,8 @@ class FloatMP {
     friend Bool is_inf(FloatMP const& x);
     friend Bool is_finite(FloatMP const& x);
 
-    friend FloatMP next_up(FloatMP const& x);
-    friend FloatMP next_down(FloatMP const& x);
+    friend FloatMP next(RoundUpward rnd, FloatMP const& x);
+    friend FloatMP next(RoundDownward rnd, FloatMP const& x);
 
     friend FloatMP floor(FloatMP const& x);
     friend FloatMP ceil(FloatMP const& x);
@@ -241,6 +244,9 @@ class FloatMP {
     friend Bool operator< (FloatMP const& x1, FloatMP const& x2);
     friend Bool operator> (FloatMP const& x1, FloatMP const& x2);
 
+    friend FloatMP med(RoundingModeType rnd, FloatMP x1, FloatMP x2) { return hlf(add(rnd,x1,x2)); }
+    friend FloatMP rad(RoundingModeType rnd, FloatMP x1, FloatMP x2) { return hlf(sub(rnd,x2,x1)); }
+
     friend OutputStream& operator<<(OutputStream& os, FloatMP const& x);
     friend InputStream& operator>>(InputStream& is, FloatMP& x);
 
@@ -253,6 +259,9 @@ class FloatMP {
     friend FloatMP operator-(Dbl x1, FloatMP const& x2);
     friend FloatMP operator*(Dbl x1, FloatMP const& x2);
     friend FloatMP operator/(Dbl x1, FloatMP const& x2);
+
+    friend FloatMP add(RoundUpward rnd, FloatMP const& x1, Float64 const& x2) { return add(up,x1,FloatMP(x2,rnd,x1.precision())); }
+    friend FloatMP sub(RoundDownward rnd, FloatMP const& x1, Float64 const& x2) { return sub(down,x1,FloatMP(x2,rnd,x1.precision())); }
 
     friend Comparison cmp(FloatMP const& x1, Dbl x2);
     friend Bool operator==(FloatMP const& x1, Dbl x2);

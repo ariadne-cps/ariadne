@@ -42,10 +42,9 @@ template<class PRE, class FLT, DisableIf<IsSame<PRE,PrecisionType<FLT>>> =dummy>
 template<class PRE, class FLT, EnableIf<IsSame<PRE,PrecisionType<FLT>>> =dummy> inline RawFloat<PRE> _make_error(FLT const& x) {
     return x; }
 
-Float64 set_up(FloatMP const& x, Precision64 pr) { return Float64(Dyadic(x),upward,pr); }
-Float64 set_down(FloatMP const& x, Precision64 pr) { return Float64(Dyadic(x),downward,pr); }
-FloatMP add_up(FloatMP x1, Float64 x2) { return add_up(x1,FloatMP(x2.get_d(),upward,x1.precision())); }
-FloatMP sub_down(FloatMP x1, Float64 x2) { return sub_down(x1,FloatMP(x2.get_d(),downward,x1.precision())); }
+Float64 set(RoundUpward rnd, FloatMP const& x, Precision64 pr) { return Float64(Dyadic(x),rnd,pr); }
+Float64 set(RoundDownward rnd, FloatMP const& x, Precision64 pr) { return Float64(Dyadic(x),rnd,pr); }
+
 Bool operator>(Float64 x1, FloatMP x2) { return x2<x1; }
 Bool operator<(Float64 x1, FloatMP x2) { return x2>x1; }
 Bool operator>(Float64 x1, Dbl x2) { return x2<x1; }
@@ -194,8 +193,8 @@ template<class PR, class PRE> FloatBall<PR,PRE>::FloatBall(Real const& r, PR pr)
 template<class PR, class PRE> FloatBall<PR,PRE>::FloatBall(FloatBall<PR,PRE> const& x, PR pr)
     : _v(x._v,to_nearest,pr), _e(x._e,upward,_error_precision<PRE>(pr))
 {
-    RawFloat<PR> d = (this->_v>=x._v) ? sub_up(this->_v,x._v) : sub_up(x._v,this->_v);
-    _e=add_up(_e,_make_error<PRE>(d));
+    RawFloat<PR> d = (this->_v>=x._v) ? sub(up,this->_v,x._v) : sub(up,x._v,this->_v);
+    _e=add(up,_e,_make_error<PRE>(d));
 }
 
 template<class PR, class PRE> FloatBall<PR,PRE>::FloatBall(ValidatedNumber const& y, PR pr)
@@ -472,11 +471,11 @@ template<class PR, class PRE> FloatBall<PR,PRE>::FloatBall(FloatValue<PR> const&
 
 
 template<class PR, class PRE> FloatBall<PR,PRE> FloatBall<PR,PRE>::pm(FloatError<PRE> e) const {
-    return FloatBall(this->_v,add_up(this->_e,e._e));
+    return FloatBall(this->_v,add(up,this->_e,e._e));
 }
 
 template<class PR> FloatBounds<PR> FloatBounds<PR>::pm(FloatError<PR> e) const {
-    return FloatBounds(sub_down(this->_l,e._e),add_up(this->_u,e._e));
+    return FloatBounds(sub(down,this->_l,e._e),add(up,this->_u,e._e));
 }
 
 
@@ -490,61 +489,61 @@ template<class PR> struct Operations<FloatApproximation<PR>> {
         return FloatApproximation<PR>(round(x._a)); }
 
     static FloatApproximation<PR> _abs(FloatApproximation<PR> const& x) {
-        return FloatApproximation<PR>(abs_exact(x._a)); }
+        return FloatApproximation<PR>(abs(x._a)); }
     static FloatApproximation<PR> _max(FloatApproximation<PR> const& x, FloatApproximation<PR> const& y) {
-        return FloatApproximation<PR>(max_exact(x._a,y._a)); }
+        return FloatApproximation<PR>(max(x._a,y._a)); }
     static FloatApproximation<PR> _min(FloatApproximation<PR> const& x, FloatApproximation<PR> const& y) {
-        return FloatApproximation<PR>(min_exact(x._a,y._a)); }
+        return FloatApproximation<PR>(min(x._a,y._a)); }
     static PositiveFloatApproximation<PR> _mag(FloatApproximation<PR> const& x) {
         return PositiveFloatApproximation<PR>(abs(x._a)); }
     static PositiveFloatApproximation<PR> _mig(FloatApproximation<PR> const& x) {
         return PositiveFloatApproximation<PR>(abs(x._a)); }
 
     static FloatApproximation<PR> _nul(FloatApproximation<PR> const& x) {
-        return FloatApproximation<PR>(nul_exact(x._a)); }
+        return FloatApproximation<PR>(nul(x._a)); }
     static FloatApproximation<PR> _pos(FloatApproximation<PR> const& x) {
-        return FloatApproximation<PR>(pos_exact(x._a)); }
+        return FloatApproximation<PR>(pos(x._a)); }
     static FloatApproximation<PR> _neg(FloatApproximation<PR> const& x) {
-        return FloatApproximation<PR>(neg_exact(x._a)); }
+        return FloatApproximation<PR>(neg(x._a)); }
     static FloatApproximation<PR> _hlf(FloatApproximation<PR> const& x) {
-        return FloatApproximation<PR>(hlf_exact(x._a)); }
+        return FloatApproximation<PR>(hlf(x._a)); }
     static FloatApproximation<PR> _sqr(FloatApproximation<PR> const& x) {
-        return FloatApproximation<PR>(mul_near(x._a,x._a)); }
+        return FloatApproximation<PR>(mul(near,x._a,x._a)); }
     static FloatApproximation<PR> _rec(FloatApproximation<PR> const& x) {
-        return FloatApproximation<PR>(div_near(1.0,x._a)); }
+        return FloatApproximation<PR>(div(near,1.0,x._a)); }
 
     static FloatApproximation<PR> _add(FloatApproximation<PR> const& x1, FloatApproximation<PR> const& x2) {
-        return FloatApproximation<PR>(add_near(x1._a,x2._a)); }
+        return FloatApproximation<PR>(add(near,x1._a,x2._a)); }
     static FloatApproximation<PR> _sub(FloatApproximation<PR> const& x1, FloatApproximation<PR> const& x2) {
-        return FloatApproximation<PR>(sub_near(x1._a,x2._a)); }
+        return FloatApproximation<PR>(sub(near,x1._a,x2._a)); }
     static FloatApproximation<PR> _mul(FloatApproximation<PR> const& x1, FloatApproximation<PR> const& x2) {
-        return FloatApproximation<PR>(mul_near(x1._a,x2._a)); }
+        return FloatApproximation<PR>(mul(near,x1._a,x2._a)); }
     static FloatApproximation<PR> _div(FloatApproximation<PR> const& x1, FloatApproximation<PR> const& x2) {
-        return FloatApproximation<PR>(div_near(x1._a,x2._a)); }
+        return FloatApproximation<PR>(div(near,x1._a,x2._a)); }
 
     static FloatApproximation<PR> _pow(FloatApproximation<PR> const& x, Nat m) {
-        return FloatApproximation<PR>(pow_approx(x._a,m)); }
+        return FloatApproximation<PR>(pow(approx,x._a,m)); }
     static FloatApproximation<PR> _pow(FloatApproximation<PR> const& x, Int n) {
-        return FloatApproximation<PR>(pow_approx(x._a,n)); }
+        return FloatApproximation<PR>(pow(approx,x._a,n)); }
 
     static FloatApproximation<PR> _sqrt(FloatApproximation<PR> const& x) {
-        return FloatApproximation<PR>(sqrt_approx(x._a)); }
+        return FloatApproximation<PR>(sqrt(approx,x._a)); }
     static FloatApproximation<PR> _exp(FloatApproximation<PR> const& x) {
-        return FloatApproximation<PR>(exp_approx(x._a)); }
+        return FloatApproximation<PR>(exp(approx,x._a)); }
     static FloatApproximation<PR> _log(FloatApproximation<PR> const& x) {
-        return FloatApproximation<PR>(log_approx(x._a)); }
+        return FloatApproximation<PR>(log(approx,x._a)); }
     static FloatApproximation<PR> _sin(FloatApproximation<PR> const& x) {
-        return FloatApproximation<PR>(sin_approx(x._a)); }
+        return FloatApproximation<PR>(sin(approx,x._a)); }
     static FloatApproximation<PR> _cos(FloatApproximation<PR> const& x) {
-        return FloatApproximation<PR>(cos_approx(x._a)); }
+        return FloatApproximation<PR>(cos(approx,x._a)); }
     static FloatApproximation<PR> _tan(FloatApproximation<PR> const& x) {
-        return FloatApproximation<PR>(tan_approx(x._a)); }
+        return FloatApproximation<PR>(tan(approx,x._a)); }
     static FloatApproximation<PR> _asin(FloatApproximation<PR> const& x) {
-        return FloatApproximation<PR>(asin_approx(x._a)); }
+        return FloatApproximation<PR>(asin(approx,x._a)); }
     static FloatApproximation<PR> _acos(FloatApproximation<PR> const& x) {
-        return FloatApproximation<PR>(acos_approx(x._a)); }
+        return FloatApproximation<PR>(acos(approx,x._a)); }
     static FloatApproximation<PR> _atan(FloatApproximation<PR> const& x) {
-        return FloatApproximation<PR>(atan_approx(x._a)); }
+        return FloatApproximation<PR>(atan(approx,x._a)); }
 
     static ApproximateKleenean _eq(FloatApproximation<PR> const& x1, FloatApproximation<PR> const& x2) {
         return x1._a==x2._a; }
@@ -568,58 +567,58 @@ template<class PR> struct Operations<FloatApproximation<PR>> {
 template<class PR> struct Operations<FloatLowerBound<PR>> {
 
     static FloatLowerBound<PR> _max(FloatLowerBound<PR> const& x1, FloatLowerBound<PR> const& x2) {
-        return FloatLowerBound<PR>(max_exact(x1._l,x2._l)); }
+        return FloatLowerBound<PR>(max(x1._l,x2._l)); }
     static FloatLowerBound<PR> _min(FloatLowerBound<PR> const& x1, FloatLowerBound<PR> const& x2) {
-        return FloatLowerBound<PR>(min_exact(x1._l,x2._l)); }
+        return FloatLowerBound<PR>(min(x1._l,x2._l)); }
     static FloatApproximation<PR> _abs(FloatLowerBound<PR> const& x) {
         return abs(FloatApproximation<PR>(x)); }
 
     static FloatLowerBound<PR> _nul(FloatLowerBound<PR> const& x) {
-        return FloatLowerBound<PR>(pos_exact(x._l)); }
+        return FloatLowerBound<PR>(pos(x._l)); }
     static FloatLowerBound<PR> _pos(FloatLowerBound<PR> const& x) {
-        return FloatLowerBound<PR>(pos_exact(x._l)); }
+        return FloatLowerBound<PR>(pos(x._l)); }
     static FloatUpperBound<PR> _neg(FloatLowerBound<PR> const& x) {
-        return FloatUpperBound<PR>(neg_exact(x._l)); }
+        return FloatUpperBound<PR>(neg(x._l)); }
     static FloatLowerBound<PR> _hlf(FloatLowerBound<PR> const& x) {
-        return FloatLowerBound<PR>(hlf_exact(x._l)); }
+        return FloatLowerBound<PR>(hlf(x._l)); }
 
     static FloatLowerBound<PR> _rec(FloatUpperBound<PR> const& x) {
-        return FloatLowerBound<PR>(rec_down(x.raw())); }
+        return FloatLowerBound<PR>(rec(down,x.raw())); }
 
     static FloatLowerBound<PR> _add(FloatLowerBound<PR> const& x1, FloatLowerBound<PR> const& x2) {
-        return FloatLowerBound<PR>(add_down(x1._l,x2._l)); }
+        return FloatLowerBound<PR>(add(down,x1._l,x2._l)); }
 
     static FloatApproximation<PR> _sub(FloatLowerBound<PR> const& x1, FloatLowerBound<PR> const& x2) {
-        return FloatUpperBound<PR>(sub_near(x1._l,x2._l)); }
+        return FloatUpperBound<PR>(sub(near,x1._l,x2._l)); }
 
     static FloatLowerBound<PR> _sub(FloatLowerBound<PR> const& x1, FloatUpperBound<PR> const& x2) {
-        return FloatLowerBound<PR>(sub_down(x1._l,x2._u)); }
+        return FloatLowerBound<PR>(sub(down,x1._l,x2._u)); }
 
     static FloatLowerBound<PR> _mul(FloatLowerBound<PR> const& x1, FloatLowerBound<PR> const& x2) {
         ARIADNE_PRECONDITION(x1.raw()>=0 && x2.raw()>=0);
-        return FloatLowerBound<PR>(mul_down(x1.raw(),x2.raw())); }
+        return FloatLowerBound<PR>(mul(down,x1.raw(),x2.raw())); }
 
     static FloatLowerBound<PR> _div(FloatLowerBound<PR> const& x1, FloatUpperBound<PR> const& x2) {
-        return FloatLowerBound<PR>(div_down(x1.raw(),x2.raw())); }
+        return FloatLowerBound<PR>(div(down,x1.raw(),x2.raw())); }
 
     static FloatLowerBound<PR> _pow(FloatLowerBound<PR> const& x, Nat m) {
         ARIADNE_PRECONDITION(x.raw()>=0);
-        return FloatLowerBound<PR>(pow_down(x.raw(),m)); }
+        return FloatLowerBound<PR>(pow(down,x.raw(),m)); }
 
     static FloatApproximation<PR> _pow(FloatLowerBound<PR> const& x, Int n) {
         return pow(FloatApproximation<PR>(x),n); }
 
     static FloatLowerBound<PR> _sqrt(FloatLowerBound<PR> const& x) {
-        return FloatLowerBound<PR>(sqrt_down(x.raw())); }
+        return FloatLowerBound<PR>(sqrt(down,x.raw())); }
 
     static FloatLowerBound<PR> _exp(FloatLowerBound<PR> const& x) {
-        return FloatLowerBound<PR>(exp_down(x.raw())); }
+        return FloatLowerBound<PR>(exp(down,x.raw())); }
 
     static FloatLowerBound<PR> _log(FloatLowerBound<PR> const& x) {
-        return FloatLowerBound<PR>(log_down(x.raw())); }
+        return FloatLowerBound<PR>(log(down,x.raw())); }
 
     static FloatLowerBound<PR> _atan(FloatLowerBound<PR> const& x) {
-        return FloatLowerBound<PR>(atan_down(x.raw())); }
+        return FloatLowerBound<PR>(atan(down,x.raw())); }
 
     static ValidatedNegatedSierpinskian _eq(FloatLowerBound<PR> const& x1, FloatUpperBound<PR> const& x2) {
         if(x1._l>x2._u) { return false; }
@@ -655,71 +654,71 @@ template<class PR> struct Operations<FloatLowerBound<PR>> {
 
 template<class PR> struct Operations<FloatUpperBound<PR>> {
     static FloatUpperBound<PR> _max(FloatUpperBound<PR> const& x1, FloatUpperBound<PR> const& x2) {
-        return FloatUpperBound<PR>(max_exact(x1._u,x2._u)); }
+        return FloatUpperBound<PR>(max(x1._u,x2._u)); }
 
     static FloatUpperBound<PR> _min(FloatUpperBound<PR> const& x1, FloatUpperBound<PR> const& x2) {
-        return FloatUpperBound<PR>(min_exact(x1._u,x2._u)); }
+        return FloatUpperBound<PR>(min(x1._u,x2._u)); }
 
     static FloatApproximation<PR> _abs(FloatUpperBound<PR> const& x) {
         return abs(FloatApproximation<PR>(x)); }
 
     static FloatUpperBound<PR> _nul(FloatUpperBound<PR> const& x) {
-        return FloatUpperBound<PR>(pos_exact(x._u)); }
+        return FloatUpperBound<PR>(pos(x._u)); }
 
     static FloatUpperBound<PR> _pos(FloatUpperBound<PR> const& x) {
-        return FloatUpperBound<PR>(pos_exact(x._u)); }
+        return FloatUpperBound<PR>(pos(x._u)); }
 
     static FloatLowerBound<PR> _neg(FloatUpperBound<PR> const& x) {
-        return FloatLowerBound<PR>(neg_exact(x._u)); }
+        return FloatLowerBound<PR>(neg(x._u)); }
 
     static FloatUpperBound<PR> _hlf(FloatUpperBound<PR> const& x) {
-        return FloatUpperBound<PR>(hlf_exact(x._u)); }
+        return FloatUpperBound<PR>(hlf(x._u)); }
 
     static FloatUpperBound<PR> _sqr(FloatUpperBound<PR> const& x) {
-        ARIADNE_ASSERT(false); return FloatUpperBound<PR>(mul_up(x._u,x._u)); }
+        ARIADNE_ASSERT(false); return FloatUpperBound<PR>(mul(up,x._u,x._u)); }
 
     static FloatUpperBound<PR> _rec(FloatLowerBound<PR> const& x) {
-        return FloatUpperBound<PR>(rec_up(x.raw())); }
+        return FloatUpperBound<PR>(rec(up,x.raw())); }
 
     static FloatUpperBound<PR> _add(FloatUpperBound<PR> const& x1, FloatUpperBound<PR> const& x2) {
-        return FloatUpperBound<PR>(add_up(x1._u,x2._u)); }
+        return FloatUpperBound<PR>(add(up,x1._u,x2._u)); }
 
     static FloatApproximation<PR> _sub(FloatUpperBound<PR> const& x1, FloatUpperBound<PR> const& x2) {
-        return FloatUpperBound<PR>(sub_near(x1._u,x2._u)); }
+        return FloatUpperBound<PR>(sub(near,x1._u,x2._u)); }
 
     static FloatUpperBound<PR> _sub(FloatUpperBound<PR> const& x1, FloatLowerBound<PR> const& x2) {
-        return FloatUpperBound<PR>(sub_up(x1._u,x2._l)); }
+        return FloatUpperBound<PR>(sub(up,x1._u,x2._l)); }
 
     static FloatUpperBound<PR> _mul(FloatUpperBound<PR> const& x1, FloatUpperBound<PR> const& x2) {
     //    ARIADNE_WARN("Multiplying FloatUpperBound "<<x1<<" with FloatUpperBound "<<x2<<" is unsafe");
         ARIADNE_PRECONDITION(x1.raw()>=0);
         ARIADNE_PRECONDITION(x2.raw()>=0);
-        return FloatUpperBound<PR>(mul_up(x1._u,x2._u)); }
+        return FloatUpperBound<PR>(mul(up,x1._u,x2._u)); }
 
     static FloatUpperBound<PR> _div(FloatUpperBound<PR> const& x1, FloatLowerBound<PR> const& x2) {
     //    ARIADNE_WARN("Dividing FloatUpperBound "<<x1<<" by FloatLowerBound "<<x2<<" is unsafe");
         ARIADNE_PRECONDITION(x1.raw()>=0);
         ARIADNE_PRECONDITION(x2.raw()>=0);
-        return FloatUpperBound<PR>(div_up(x1._u,x2._l)); }
+        return FloatUpperBound<PR>(div(up,x1._u,x2._l)); }
 
     static FloatUpperBound<PR> _pow(FloatUpperBound<PR> const& x, Nat m) {
         ARIADNE_PRECONDITION(x.raw()>=0);
-        return FloatUpperBound<PR>(pow_up(x._u,m)); }
+        return FloatUpperBound<PR>(pow(up,x._u,m)); }
 
     static FloatApproximation<PR> _pow(FloatUpperBound<PR> const& x, Int n) {
         return pow(FloatApproximation<PR>(x),n); }
 
     static FloatUpperBound<PR> _sqrt(FloatUpperBound<PR> const& x) {
-        return FloatUpperBound<PR>(sqrt_up(x.raw())); }
+        return FloatUpperBound<PR>(sqrt(up,x.raw())); }
 
     static FloatUpperBound<PR> _exp(FloatUpperBound<PR> const& x) {
-        return FloatUpperBound<PR>(exp_up(x.raw())); }
+        return FloatUpperBound<PR>(exp(up,x.raw())); }
 
     static FloatUpperBound<PR> _log(FloatUpperBound<PR> const& x) {
-        return FloatUpperBound<PR>(log_up(x.raw())); }
+        return FloatUpperBound<PR>(log(up,x.raw())); }
 
     static FloatUpperBound<PR> _atan(FloatUpperBound<PR> const& x) {
-        return FloatUpperBound<PR>(atan_up(x.raw())); }
+        return FloatUpperBound<PR>(atan(up,x.raw())); }
 
     static ValidatedNegatedSierpinskian _eq(FloatUpperBound<PR> const& x1, FloatLowerBound<PR> const& x2) {
         if(x1._u<x2._l) { return false; }
@@ -813,11 +812,11 @@ template<class PR> struct Operations<FloatBounds<PR>> {
         const RawFloat<PR>& xl=x.lower_raw(); const RawFloat<PR>& xu=x.upper_raw();
         RawFloat<PR> rl,ru;
         if(xl>0.0) {
-            rl=mul_down(xl,xl); ru=mul_up(xu,xu);
+            rl=mul(down,xl,xl); ru=mul(up,xu,xu);
         } else if(xu<0.0) {
-            rl=mul_down(xu,xu); ru=mul_up(xl,xl);
+            rl=mul(down,xu,xu); ru=mul(up,xl,xl);
         } else {
-            rl=nul(xl); ru=max(mul_up(xl,xl),mul_up(xu,xu));
+            rl=nul(xl); ru=max(mul(up,xl,xl),mul(up,xu,xu));
         }
         return FloatBounds<PR>(rl,ru);
     }
@@ -825,7 +824,7 @@ template<class PR> struct Operations<FloatBounds<PR>> {
     static FloatBounds<PR> _rec(FloatBounds<PR> const& x) {
         // IMPORTANT: Need to be careful when one of the bounds is 0, since if xl=-0.0 and xu>0, then 1/xl=-inf
         if(x._l>0 || x._u<0) {
-            return FloatBounds<PR>(rec_down(x._u),rec_up(x._l));
+            return FloatBounds<PR>(rec(down,x._u),rec(up,x._l));
         } else {
             RawFloat<PR> inf=RawFloat<PR>::inf(x.precision());
             RawFloat<PR> rl=-inf; RawFloat<PR> ru=+inf;
@@ -835,11 +834,11 @@ template<class PR> struct Operations<FloatBounds<PR>> {
     }
 
     static FloatBounds<PR> _add(FloatBounds<PR> const& x1, FloatBounds<PR> const& x2) {
-        return FloatBounds<PR>(add_down(x1._l,x2._l),add_up(x1._u,x2._u));
+        return FloatBounds<PR>(add(down,x1._l,x2._l),add(up,x1._u,x2._u));
     }
 
     static FloatBounds<PR> _sub(FloatBounds<PR> const& x1, FloatBounds<PR> const& x2) {
-        return FloatBounds<PR>(sub_down(x1._l,x2._u),sub_up(x1._u,x2._l));
+        return FloatBounds<PR>(sub(down,x1._l,x2._u),sub(up,x1._u,x2._l));
     }
 
     static FloatBounds<PR> _mul(FloatBounds<PR> const& x1, FloatBounds<PR> const& x2) {
@@ -849,29 +848,29 @@ template<class PR> struct Operations<FloatBounds<PR>> {
         typename RawFloat<PR>::RoundingModeType rnd=RawFloat<PR>::get_rounding_mode();
         if(x1l>=0) {
             if(x2l>=0) {
-                rl=mul_down(x1l,x2l); ru=mul_up(x1u,x2u);
+                rl=mul(down,x1l,x2l); ru=mul(up,x1u,x2u);
             } else if(x2u<=0) {
-                rl=mul_down(x1u,x2l); ru=mul_up(x1l,x2u);
+                rl=mul(down,x1u,x2l); ru=mul(up,x1l,x2u);
             } else {
-                rl=mul_down(x1u,x2l); ru=mul_up(x1u,x2u);
+                rl=mul(down,x1u,x2l); ru=mul(up,x1u,x2u);
             }
         }
         else if(x1u<=0) {
             if(x2l>=0) {
-                rl=mul_down(x1l,x2u); ru=mul_up(x1u,x2l);
+                rl=mul(down,x1l,x2u); ru=mul(up,x1u,x2l);
             } else if(x2u<=0) {
-                rl=mul_down(x1u,x2u); ru=mul_up(x1l,x2l);
+                rl=mul(down,x1u,x2u); ru=mul(up,x1l,x2l);
             } else {
-                rl=mul_down(x1l,x2u); ru=mul_up(x1l,x2l);
+                rl=mul(down,x1l,x2u); ru=mul(up,x1l,x2l);
             }
         } else {
             if(x2l>=0) {
-                rl=mul_down(x1l,x2u); ru=mul_up(x1u,x2u);
+                rl=mul(down,x1l,x2u); ru=mul(up,x1u,x2u);
             } else if(x2u<=0) {
-                rl=mul_down(x1u,x2l); ru=mul_up(x1l,x2l);
+                rl=mul(down,x1u,x2l); ru=mul(up,x1l,x2l);
             } else {
-                rl=min(mul_down(x1u,x2l),mul_down(x1l,x2u));
-                ru=max(mul_up(x1l,x2l),mul_up(x1u,x2u));
+                rl=min(mul(down,x1u,x2l),mul(down,x1l,x2u));
+                ru=max(mul(up,x1l,x2l),mul(up,x1u,x2u));
             }
         }
         return FloatBounds<PR>(rl,ru);
@@ -885,20 +884,20 @@ template<class PR> struct Operations<FloatBounds<PR>> {
         // IMPORTANT: Need to be careful when one of the bounds is 0, since if x2l=-0.0 and x1u>0, then x2l>=0 but x1u/x2l=-inf
         if(x2l>0) {
             if(x1l>=0) {
-                rl=div_down(x1l,x2u); ru=div_up(x1u,x2l);
+                rl=div(down,x1l,x2u); ru=div(up,x1u,x2l);
             } else if(x1u<=0) {
-                rl=div_down(x1l,x2l); ru=div_up(x1u,x2u);
+                rl=div(down,x1l,x2l); ru=div(up,x1u,x2u);
             } else {
-                rl=div_down(x1l,x2l); ru=div_up(x1u,x2l);
+                rl=div(down,x1l,x2l); ru=div(up,x1u,x2l);
             }
         }
         else if(x2u<0) {
             if(x1l>=0) {
-                rl=div_down(x1u,x2u); ru=div_up(x1l,x2l);
+                rl=div(down,x1u,x2u); ru=div(up,x1l,x2l);
             } else if(x1u<=0) {
-                rl=div_down(x1u,x2l); ru=div_up(x1l,x2u);
+                rl=div(down,x1u,x2l); ru=div(up,x1l,x2u);
             } else {
-                rl=div_down(x1u,x2u); ru=div_up(x1l,x2u);
+                rl=div(down,x1u,x2u); ru=div(up,x1l,x2u);
             }
         }
         else {
@@ -923,26 +922,26 @@ template<class PR> struct Operations<FloatBounds<PR>> {
     static FloatBounds<PR> _pow(FloatBounds<PR> const& x, Nat m) {
         FloatBounds<PR> y = x;
         if(m%2==0) { y=abs(x); }
-        RawFloat<PR> rl=pow_down(y.lower_raw(),m);
-        RawFloat<PR> ru=pow_up(y.upper_raw(),m);
+        RawFloat<PR> rl=pow(down,y.lower_raw(),m);
+        RawFloat<PR> ru=pow(up,y.upper_raw(),m);
         return FloatBounds<PR>(rl,ru);
     }
 
 
     static FloatBounds<PR> _sqrt(FloatBounds<PR> const& x) {
-        return FloatBounds<PR>(sqrt_down(x.lower_raw()),sqrt_up(x.upper_raw()));
+        return FloatBounds<PR>(sqrt(down,x.lower_raw()),sqrt(up,x.upper_raw()));
     }
 
     static FloatBounds<PR> _exp(FloatBounds<PR> const& x) {
-        return FloatBounds<PR>(exp_down(x.lower_raw()),exp_up(x.upper_raw()));
+        return FloatBounds<PR>(exp(down,x.lower_raw()),exp(up,x.upper_raw()));
     }
 
     static FloatBounds<PR> _log(FloatBounds<PR> const& x) {
-        return FloatBounds<PR>(log_down(x.lower_raw()),log_up(x.upper_raw()));
+        return FloatBounds<PR>(log(down,x.lower_raw()),log(up,x.upper_raw()));
     }
 
 
-    static FloatBounds<PR> _pi_val(PR pr) { return FloatBounds<PR>(pi_down(pr),pi_up(pr)); }
+    static FloatBounds<PR> _pi_val(PR pr) { return FloatBounds<PR>(RawFloat<PR>::pi(down,pr),RawFloat<PR>::pi(up,pr)); }
 
     static FloatBounds<PR> _sin(FloatBounds<PR> const& x)
     {
@@ -968,15 +967,15 @@ template<class PR> struct Operations<FloatBounds<PR>> {
 
         RawFloat<PR> rl,ru;
         if(y.lower_raw()<=-pi.lower_raw()) {
-            if(y.upper_raw()<=0.0) { rl=-one; ru=cos_up(y.upper_raw()); }
+            if(y.upper_raw()<=0.0) { rl=-one; ru=cos(up,y.upper_raw()); }
             else { rl=-one; ru=+one; }
         } else if(y.lower_raw()<=0.0) {
-            if(y.upper_raw()<=0.0) { rl=cos_down(y.lower_raw()); ru=cos_up(y.upper_raw()); }
-            else if(y.upper_raw()<=pi.lower_raw()) { rl=cos_down(max(-y.lower_raw(),y.upper_raw())); ru=+one; }
+            if(y.upper_raw()<=0.0) { rl=cos(down,y.lower_raw()); ru=cos(up,y.upper_raw()); }
+            else if(y.upper_raw()<=pi.lower_raw()) { rl=cos(down,max(-y.lower_raw(),y.upper_raw())); ru=+one; }
             else { rl=-one; ru=+one; }
         } else if(y.lower_raw()<=pi.upper_raw()) {
-            if(y.upper_raw()<=pi.lower_raw()) { rl=cos_down(y.upper_raw()); ru=cos_up(y.lower_raw()); }
-            else if(y.upper_raw()<=2*pi.lower_raw()) { rl=-one; ru=cos_up(min(y.lower_raw(),sub_down(2*pi_down(prec),y.upper_raw()))); }
+            if(y.upper_raw()<=pi.lower_raw()) { rl=cos(down,y.upper_raw()); ru=cos(up,y.lower_raw()); }
+            else if(y.upper_raw()<=2*pi.lower_raw()) { rl=-one; ru=cos(up,min(y.lower_raw(),sub(down,2*pi.lower_raw(),y.upper_raw()))); }
             else { rl=-one; ru=+one; }
         } else {
             assert(false);
@@ -999,7 +998,7 @@ template<class PR> struct Operations<FloatBounds<PR>> {
     }
 
     static FloatBounds<PR> _atan(FloatBounds<PR> const& x) {
-        return FloatBounds<PR>(atan_down(x._l),atan_up(x._u));
+        return FloatBounds<PR>(atan(down,x._l),atan(up,x._u));
     }
 
     //! \related FloatBounds<PR> \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
@@ -1210,7 +1209,7 @@ template<class PR, class PRE> struct Operations<FloatBall<PR,PRE>> {
     static FloatBall<PR,PRE> _sqr(FloatBall<PR,PRE> const& x) {
         FloatBall<PR,PRE> r=x*x;
         if(r._e>r._v) {
-            r._e=hlf(add_up(r._e,_make_error<PRE>(r._v)));
+            r._e=hlf(add(up,r._e,_make_error<PRE>(r._v)));
             r._v=RawFloat<PR>(Dyadic(r._e),upward,x.precision());
         }
         return r;
@@ -1218,47 +1217,47 @@ template<class PR, class PRE> struct Operations<FloatBall<PR,PRE>> {
 
     static FloatBall<PR,PRE> _rec(FloatBall<PR,PRE> const& x) {
         // Use this code to find value same as reciprocal value
-        auto rv=rec_approx(x._v);
-        auto ru=rec_up(sub_down(x._v,x._e));
-        auto rl=rec_down(add_up(x._v,x._e));
-        auto re=max(sub_up(ru,rv),sub_up(rv,rl));
+        auto rv=rec(approx,x._v);
+        auto ru=rec(up,sub(down,x._v,x._e));
+        auto rl=rec(down,add(up,x._v,x._e));
+        auto re=max(sub(up,ru,rv),sub(up,rv,rl));
         return FloatBall<PR,PRE>(rv,_make_error<PRE>(re));
     #ifdef ARIADNE_UNDEFINED
         // Use this code to get same result as interval computation
-        auto ru=rec_up(sub_down(x._v,x._e));
-        auto rl=rec_down(add_up(x._v,x._e));
-        auto re=hlf(sub_up(ru,rl));
-        auto rv=hlf(add_near(rl,ru));
+        auto ru=rec(up,sub(down,x._v,x._e));
+        auto rl=rec(down,add(up,x._v,x._e));
+        auto re=hlf(sub(up,ru,rl));
+        auto rv=hlf(add(near,rl,ru));
         return FloatBall<PR,PRE>(rv,re);
     #endif
     }
 
     static FloatBall<PR,PRE> _add(FloatBall<PR,PRE> const& x, FloatBall<PR,PRE> const& y) {
-        auto rv=add_near(x._v,y._v);
-        auto ru=add_up(x._v,y._v);
-        auto rl=add_down(x._v,y._v);
-        auto ae=_make_error<PRE>(hlf(sub_up(ru,rl)));
-        auto re=add_up(ae,add_up(x._e,y._e));
+        auto rv=add(near,x._v,y._v);
+        auto ru=add(up,x._v,y._v);
+        auto rl=add(down,x._v,y._v);
+        auto ae=_make_error<PRE>(hlf(sub(up,ru,rl)));
+        auto re=add(up,ae,add(up,x._e,y._e));
         return FloatBall<PR,PRE>(rv,re);
     }
 
     static FloatBall<PR,PRE> _sub(FloatBall<PR,PRE> const& x, FloatBall<PR,PRE> const& y) {
-        auto rv=sub_near(x._v,y._v);
-        auto ru=sub_up(x._v,y._v);
-        auto rl=sub_down(x._v,y._v);
-        auto ae=_make_error<PRE>(hlf(sub_up(ru,rl)));
-        auto re=add_up(ae,add_up(x._e,y._e));
+        auto rv=sub(near,x._v,y._v);
+        auto ru=sub(up,x._v,y._v);
+        auto rl=sub(down,x._v,y._v);
+        auto ae=_make_error<PRE>(hlf(sub(up,ru,rl)));
+        auto re=add(up,ae,add(up,x._e,y._e));
         return FloatBall<PR,PRE>(rv,re);
     }
 
     static FloatBall<PR,PRE> _mul(FloatBall<PR,PRE> const& x, FloatBall<PR,PRE> const& y) {
-        auto rv=mul_near(x._v,y._v);
-        auto ru=mul_up(x._v,y._v);
-        auto rl=mul_down(x._v,y._v);
-        auto re0=_make_error<PRE>(hlf(sub_up(ru,rl)));
-        auto re1=add_up(re0,mul_up(x._e,y._e));
-        auto re2=add_up(mul_up(_make_error<PRE>(abs(x._v)),y._e),mul_up(x._e,_make_error<PRE>(abs(y._v))));
-        auto re=add_up(re1,re2);
+        auto rv=mul(near,x._v,y._v);
+        auto ru=mul(up,x._v,y._v);
+        auto rl=mul(down,x._v,y._v);
+        auto re0=_make_error<PRE>(hlf(sub(up,ru,rl)));
+        auto re1=add(up,re0,mul(up,x._e,y._e));
+        auto re2=add(up,mul(up,_make_error<PRE>(abs(x._v)),y._e),mul(up,x._e,_make_error<PRE>(abs(y._v))));
+        auto re=add(up,re1,re2);
         return FloatBall<PR,PRE>(rv,re);
     }
 
@@ -1313,7 +1312,7 @@ template<class PR, class PRE> struct Operations<FloatBall<PR,PRE>> {
 
     static FloatBall<PR,PRE> _abs(FloatBall<PR,PRE> const& x) {
         if(x._e<abs(x._v)) { return x; }
-        else { auto rv=hlf(add_up(abs(x._v),x._e)); return FloatBall<PR,PRE>(rv,_make_error<PRE>(rv)); }
+        else { auto rv=hlf(add(up,abs(x._v),x._e)); return FloatBall<PR,PRE>(rv,_make_error<PRE>(rv)); }
     }
 
     static FloatBall<PR,PRE> _max(FloatBall<PR,PRE> const& x1, FloatBall<PR,PRE> const& x2) {
@@ -1325,11 +1324,11 @@ template<class PR, class PRE> struct Operations<FloatBall<PR,PRE>> {
     }
 
     static FloatError<PR> _mag(FloatBall<PR,PRE> const& x) {
-        return PositiveFloatUpperBound<PR>(add_up(abs(x._v),x._e));
+        return PositiveFloatUpperBound<PR>(add(up,abs(x._v),x._e));
     }
 
     static PositiveFloatLowerBound<PR> _mig(FloatBall<PR,PRE> const& x) {
-        return PositiveFloatLowerBound<PR>(max(0,sub_down(abs(x._v),x._e)));
+        return PositiveFloatLowerBound<PR>(max(0,sub(down,abs(x._v),x._e)));
     }
 
     //! \related FloatBounds<PR> \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
@@ -1347,7 +1346,7 @@ template<class PR, class PRE> struct Operations<FloatBall<PR,PRE>> {
     }
 
     static Bool _models(FloatBall<PR,PRE> const& x1, FloatValue<PR> const& x2) {
-        return (x1._v>=x2._v ? sub_up(x1._v,x2._v) : sub_up(x2._v,x1._v)) <= x1._e;
+        return (x1._v>=x2._v ? sub(up,x1._v,x2._v) : sub(up,x2._v,x1._v)) <= x1._e;
     }
 
     static Bool _consistent(FloatBall<PR,PRE> const& x1, FloatBall<PR,PRE> const& x2) {
@@ -1359,7 +1358,7 @@ template<class PR, class PRE> struct Operations<FloatBall<PR,PRE>> {
     }
 
     static Bool _refines(FloatBall<PR,PRE> const& x1, FloatBall<PR,PRE> const& x2) {
-        return (x1._v>=x2._v ? sub_up(x1._v,x2._v) : sub_up(x2._v,x1._v)) <= sub_down(x2._e, x1._e);
+        return (x1._v>=x2._v ? sub(up,x1._v,x2._v) : sub(up,x2._v,x1._v)) <= sub(down,x2._e, x1._e);
     }
 
     static FloatBall<PR,PRE> _refinement(FloatBall<PR,PRE> const& x1, FloatBall<PR,PRE> const& x2) {
@@ -1457,19 +1456,19 @@ template<> OutputStream& Operations<FloatBall<Precision64>>::_write(OutputStream
 
 // Mixed BoundedTag - ExactTag operations
 template<class PR> FloatBounds<PR> _add(FloatBounds<PR> const& x1, FloatValue<PR> const& x2) {
-    return FloatBounds<PR>(add_down(x1._l,x2._v),add_up(x1._u,x2._v));
+    return FloatBounds<PR>(add(down,x1._l,x2._v),add(up,x1._u,x2._v));
 }
 
 template<class PR> FloatBounds<PR> _add(FloatValue<PR> const& x1, FloatBounds<PR> const& x2) {
-    return FloatBounds<PR>(add_down(x1._v,x2._l),add_down(x1._v,x2._u));
+    return FloatBounds<PR>(add(down,x1._v,x2._l),add(down,x1._v,x2._u));
 }
 
 template<class PR> FloatBounds<PR> _sub(FloatBounds<PR> const& x1, FloatValue<PR> const& x2) {
-    return FloatBounds<PR>(sub_down(x1._l,x2._v),sub_up(x1._u,x2._v));
+    return FloatBounds<PR>(sub(down,x1._l,x2._v),sub(up,x1._u,x2._v));
 }
 
 template<class PR> FloatBounds<PR> _sub(FloatValue<PR> const& x1, FloatBounds<PR> const& x2) {
-    return FloatBounds<PR>(sub_down(x1._v,x2._u),sub_up(x1._v,x2._l));
+    return FloatBounds<PR>(sub(down,x1._v,x2._u),sub(up,x1._v,x2._l));
 }
 
 template<class PR> FloatBounds<PR> _mul(FloatBounds<PR> const& x1, FloatValue<PR> const& x2) {
@@ -1477,9 +1476,9 @@ template<class PR> FloatBounds<PR> _mul(FloatBounds<PR> const& x1, FloatValue<PR
     const RawFloat<PR>& x2v=x2.raw();
     RawFloat<PR> rl,ru;
     if(x2v>=0.0) {
-        rl=mul_down(x1l,x2v); ru=mul_up(x1u,x2v);
+        rl=mul(down,x1l,x2v); ru=mul(up,x1u,x2v);
     } else {
-        rl=mul_down(x1u,x2v); ru=mul_up(x1l,x2v);
+        rl=mul(down,x1u,x2v); ru=mul(up,x1l,x2v);
     }
     return FloatBounds<PR>(rl,ru);
 }
@@ -1490,9 +1489,9 @@ template<class PR> FloatBounds<PR> _mul(FloatValue<PR> const& x1, FloatBounds<PR
     const RawFloat<PR>& x2l=x2.lower_raw(); const RawFloat<PR>& x2u=x2.upper_raw();
     RawFloat<PR> rl,ru;
     if(x1v>=0.0) {
-        rl=mul_down(x1v,x2l); ru=mul_up(x1v,x2u);
+        rl=mul(down,x1v,x2l); ru=mul(up,x1v,x2u);
     } else {
-        rl=mul_down(x1v,x2u); ru=mul_up(x1v,x2l);
+        rl=mul(down,x1v,x2u); ru=mul(up,x1v,x2l);
     }
     return FloatBounds<PR>(rl,ru);
 }
@@ -1504,9 +1503,9 @@ template<class PR> FloatBounds<PR> _div(FloatBounds<PR> const& x1, FloatValue<PR
     const RawFloat<PR>& x2v=x2.raw();
     RawFloat<PR> rl,ru;
     if(x2v>0) {
-        rl=div_down(x1l,x2v); ru=div_up(x1u,x2v);
+        rl=div(down,x1l,x2v); ru=div(up,x1u,x2v);
     } else if(x2v<0) {
-        rl=div_down(x1u,x2v); ru=div_up(x1l,x2v);
+        rl=div(down,x1u,x2v); ru=div(up,x1l,x2v);
     } else {
         //ARIADNE_THROW(DivideByZeroException,"FloatBounds div(FloatBounds const& x1, FloatValue x2)","x1="<<x1<<", x2="<<x2);
         PR pr=min(x1.precision(),x2.precision());
@@ -1529,9 +1528,9 @@ template<class PR> FloatBounds<PR> _div(FloatValue<PR> const& x1, FloatBounds<PR
         rl=-RawFloat<PR>::inf(pr);
         ru=+RawFloat<PR>::inf(pr);
     } else if(x1v>=0) {
-        rl=div_down(x1v,i2u); ru=div_up(x1v,i2l);
+        rl=div(down,x1v,i2u); ru=div(up,x1v,i2l);
     } else {
-        rl=div_down(x1v,i2l); ru=div_up(x1v,i2u);
+        rl=div(down,x1v,i2l); ru=div(up,x1v,i2u);
     }
     return FloatBounds<PR>(rl,ru);
 }
@@ -1569,22 +1568,22 @@ template<class PR> struct Operations<FloatValue<PR>> {
         return FloatValue<PR>(hlf(x._v)); }
 
     static FloatBounds<PR> _sqr(FloatValue<PR> const& x) {
-        return FloatBounds<PR>(mul_down(x._v,x._v),mul_up(x._v,x._v)); }
+        return FloatBounds<PR>(mul(down,x._v,x._v),mul(up,x._v,x._v)); }
 
     static FloatBounds<PR> _rec(FloatValue<PR> const& x) {
-        return FloatBounds<PR>(rec_down(x._v),rec_up(x._v)); }
+        return FloatBounds<PR>(rec(down,x._v),rec(up,x._v)); }
 
     static FloatBounds<PR> _add(FloatValue<PR> const& x1, FloatValue<PR> const& x2) {
-        return FloatBounds<PR>(add_down(x1._v,x2._v),add_up(x1._v,x2._v)); }
+        return FloatBounds<PR>(add(down,x1._v,x2._v),add(up,x1._v,x2._v)); }
 
     static FloatBounds<PR> _sub(FloatValue<PR> const& x1, FloatValue<PR> const& x2) {
-        return FloatBounds<PR>(sub_down(x1._v,x2._v),sub_up(x1._v,x2._v)); }
+        return FloatBounds<PR>(sub(down,x1._v,x2._v),sub(up,x1._v,x2._v)); }
 
     static FloatBounds<PR> _mul(FloatValue<PR> const& x1, FloatValue<PR> const& x2) {
-        return FloatBounds<PR>(mul_down(x1._v,x2._v),mul_up(x1._v,x2._v)); }
+        return FloatBounds<PR>(mul(down,x1._v,x2._v),mul(up,x1._v,x2._v)); }
 
     static FloatBounds<PR> _div(FloatValue<PR> const& x1, FloatValue<PR> const& x2) {
-        return FloatBounds<PR>(div_down(x1._v,x2._v),div_up(x1._v,x2._v)); }
+        return FloatBounds<PR>(div(down,x1._v,x2._v),div(up,x1._v,x2._v)); }
 
     static FloatValue<PR> _mul(FloatValue<PR> const& x, TwoExp y) {
         FloatValue<PR> yv(y,x.precision()); return FloatValue<PR>(x.raw()*yv.raw()); }
@@ -1671,19 +1670,19 @@ template<class PR> struct Operations<PositiveFloatApproximation<PR>> {
     static PositiveFloatApproximation<PR> _nul(PositiveFloatApproximation<PR> const& x) {
         return PositiveFloatApproximation<PR>(nul(x._a)); }
     static PositiveFloatApproximation<PR> _sqr(PositiveFloatApproximation<PR> const& x) {
-        return PositiveFloatApproximation<PR>(mul_near(x._a,x._a)); }
+        return PositiveFloatApproximation<PR>(mul(near,x._a,x._a)); }
     static PositiveFloatApproximation<PR> _rec(PositiveFloatApproximation<PR> const& x) {
-        return PositiveFloatApproximation<PR>(rec_near(x._a)); }
+        return PositiveFloatApproximation<PR>(rec(near,x._a)); }
     static PositiveFloatApproximation<PR> _add(PositiveFloatApproximation<PR> const& x1, PositiveFloatApproximation<PR> const& x2) {
-        return PositiveFloatApproximation<PR>(add_near(x1._a,x2._a)); }
+        return PositiveFloatApproximation<PR>(add(near,x1._a,x2._a)); }
     static PositiveFloatApproximation<PR> _mul(PositiveFloatApproximation<PR> const& x1, PositiveFloatApproximation<PR> const& x2) {
-        return PositiveFloatApproximation<PR>(mul_near(x1._a,x2._a)); }
+        return PositiveFloatApproximation<PR>(mul(near,x1._a,x2._a)); }
     static PositiveFloatApproximation<PR> _div(PositiveFloatApproximation<PR> const& x1, PositiveFloatApproximation<PR> const& x2) {
-        return PositiveFloatApproximation<PR>(div_near(x1._a,x2._a)); }
+        return PositiveFloatApproximation<PR>(div(near,x1._a,x2._a)); }
     static PositiveFloatApproximation<PR> _pow(PositiveFloatApproximation<PR> const& x1, Int n2) {
-        return PositiveFloatApproximation<PR>(pow_approx(x1._a,n2)); }
+        return PositiveFloatApproximation<PR>(pow(approx,x1._a,n2)); }
     static FloatApproximation<PR> _log(PositiveFloatApproximation<PR> const& x) {
-        return FloatApproximation<PR>(log_approx(x._a)); }
+        return FloatApproximation<PR>(log(approx,x._a)); }
     static PositiveFloatApproximation<PR> _max(PositiveFloatApproximation<PR> const& x1, PositiveFloatApproximation<PR> const& x2) {
         return PositiveFloatApproximation<PR>(max(x1._a,x2._a)); }
     static PositiveFloatApproximation<PR> _min(PositiveFloatApproximation<PR> const& x1, PositiveFloatApproximation<PR> const& x2) {
@@ -1704,39 +1703,39 @@ template<class PR> struct Operations<PositiveFloatUpperBound<PR>> {
     }
 
     static PositiveFloatUpperBound<PR> _sqr(PositiveFloatUpperBound<PR> const& x) {
-        return PositiveFloatUpperBound<PR>(mul_up(x._u,x._u));
+        return PositiveFloatUpperBound<PR>(mul(up,x._u,x._u));
     }
 
     static PositiveFloatLowerBound<PR> _rec(PositiveFloatUpperBound<PR> const& x) {
-        return PositiveFloatLowerBound<PR>(rec_down(x._u));
+        return PositiveFloatLowerBound<PR>(rec(down,x._u));
     }
 
     static PositiveFloatUpperBound<PR> _rec(PositiveFloatLowerBound<PR> const& x) {
-        ARIADNE_ASSERT_MSG(x._l>=0.0,x); return PositiveFloatUpperBound<PR>(rec_up(x._l));
+        ARIADNE_ASSERT_MSG(x._l>=0.0,x); return PositiveFloatUpperBound<PR>(rec(up,x._l));
     }
 
     static PositiveFloatUpperBound<PR> _add(PositiveFloatUpperBound<PR> const& x1, PositiveFloatUpperBound<PR> const& x2) {
-        return PositiveFloatUpperBound<PR>(add_up(x1._u,x2._u));
+        return PositiveFloatUpperBound<PR>(add(up,x1._u,x2._u));
     }
 
     static PositiveFloatUpperBound<PR> _mul(PositiveFloatUpperBound<PR> const& x1, PositiveFloatUpperBound<PR> const& x2) {
-        return PositiveFloatUpperBound<PR>(mul_up(x1._u,x2._u));
+        return PositiveFloatUpperBound<PR>(mul(up,x1._u,x2._u));
     }
 
     static PositiveFloatUpperBound<PR> _div(PositiveFloatUpperBound<PR> const& x1, PositiveFloatLowerBound<PR> const& x2) {
-        return PositiveFloatUpperBound<PR>(div_up(x1._u,x2._l));
+        return PositiveFloatUpperBound<PR>(div(up,x1._u,x2._l));
     }
 
     static PositiveFloatUpperBound<PR> _div(PositiveFloatUpperBound<PR> const& x1, FloatLowerBound<PR> const& x2) {
-        ARIADNE_ASSERT_MSG(x2._l>=0.0,x2); return PositiveFloatUpperBound<PR>(div_up(x1._u,x2._l));
+        ARIADNE_ASSERT_MSG(x2._l>=0.0,x2); return PositiveFloatUpperBound<PR>(div(up,x1._u,x2._l));
     }
 
     static PositiveFloatUpperBound<PR> _pow(PositiveFloatUpperBound<PR> const& x1, Nat m2) {
-        return PositiveFloatUpperBound<PR>(pow_up(x1._u,m2));
+        return PositiveFloatUpperBound<PR>(pow(up,x1._u,m2));
     }
 
     static FloatUpperBound<PR> _log(PositiveFloatUpperBound<PR> const& x) {
-        return FloatUpperBound<PR>(log_up(x._u));
+        return FloatUpperBound<PR>(log(up,x._u));
     }
 
     static PositiveFloatUpperBound<PR> _max(PositiveFloatUpperBound<PR> const& x1, PositiveFloatUpperBound<PR> const& x2) {
@@ -1781,35 +1780,35 @@ template<class PR> struct Operations<PositiveFloatLowerBound<PR>> {
     }
 
     static PositiveFloatLowerBound<PR> _sqr(PositiveFloatLowerBound<PR> const& x) {
-        return PositiveFloatLowerBound<PR>(mul_down(x._l,x._l));
+        return PositiveFloatLowerBound<PR>(mul(down,x._l,x._l));
     }
 
     static PositiveFloatUpperBound<PR> _rec(PositiveFloatLowerBound<PR> const& x) {
-        return PositiveFloatUpperBound<PR>(rec_up(x._l));
+        return PositiveFloatUpperBound<PR>(rec(up,x._l));
     }
 
     static PositiveFloatLowerBound<PR> _rec(PositiveFloatUpperBound<PR> const& x) {
-        return PositiveFloatLowerBound<PR>(rec_down(x._u));
+        return PositiveFloatLowerBound<PR>(rec(down,x._u));
     }
 
     static PositiveFloatLowerBound<PR> _add(PositiveFloatLowerBound<PR> const& x1, PositiveFloatLowerBound<PR> const& x2) {
-        return PositiveFloatLowerBound<PR>(add_down(x1._l,x2._l));
+        return PositiveFloatLowerBound<PR>(add(down,x1._l,x2._l));
     }
 
     static PositiveFloatLowerBound<PR> _mul(PositiveFloatLowerBound<PR> const& x1, PositiveFloatLowerBound<PR> const& x2) {
-        return PositiveFloatLowerBound<PR>(mul_down(x1._l,x2._l));
+        return PositiveFloatLowerBound<PR>(mul(down,x1._l,x2._l));
     }
 
     static PositiveFloatLowerBound<PR> _div(PositiveFloatLowerBound<PR> const& x1, PositiveFloatUpperBound<PR> const& x2) {
-        return PositiveFloatLowerBound<PR>(div_down(x1._l,x2._u));
+        return PositiveFloatLowerBound<PR>(div(down,x1._l,x2._u));
     }
 
     static PositiveFloatLowerBound<PR> _pow(PositiveFloatLowerBound<PR> const& x1, Nat m2) {
-        return PositiveFloatLowerBound<PR>(pow_down(x1._l,m2));
+        return PositiveFloatLowerBound<PR>(pow(down,x1._l,m2));
     }
 
     static FloatLowerBound<PR> _log(PositiveFloatLowerBound<PR> const& x) {
-        return FloatLowerBound<PR>(log_down(x._l));
+        return FloatLowerBound<PR>(log(down,x._l));
     }
 
     static PositiveFloatLowerBound<PR> _max(PositiveFloatLowerBound<PR> const& x1, PositiveFloatLowerBound<PR> const& x2) {
@@ -1850,21 +1849,21 @@ template<class PR> struct Operations<PositiveFloatBounds<PR>> {
     static PositiveFloatBounds<PR> _nul(PositiveFloatBounds<PR> const& x) {
         return PositiveFloatBounds<PR>(nul(x._l),nul(x._u)); }
     static PositiveFloatBounds<PR> _sqr(PositiveFloatBounds<PR> const& x) {
-        return PositiveFloatBounds<PR>(mul_down(x._l,x._l),mul_up(x._u,x._u)); }
+        return PositiveFloatBounds<PR>(mul(down,x._l,x._l),mul(up,x._u,x._u)); }
     static PositiveFloatBounds<PR> _rec(PositiveFloatBounds<PR> const& x) {
-        return PositiveFloatBounds<PR>(rec_down(x._u),rec_up(x._l)); }
+        return PositiveFloatBounds<PR>(rec(down,x._u),rec(up,x._l)); }
     static PositiveFloatBounds<PR> _add(PositiveFloatBounds<PR> const& x1, PositiveFloatBounds<PR> const& x2) {
-        return PositiveFloatBounds<PR>(add_down(x1._l,x2._l),add_up(x1._u,x2._u)); }
+        return PositiveFloatBounds<PR>(add(down,x1._l,x2._l),add(up,x1._u,x2._u)); }
     static PositiveFloatBounds<PR> _mul(PositiveFloatBounds<PR> const& x1, PositiveFloatBounds<PR> const& x2) {
-        return PositiveFloatBounds<PR>(mul_down(x1._l,x2._l),mul_up(x1._u,x2._u)); }
+        return PositiveFloatBounds<PR>(mul(down,x1._l,x2._l),mul(up,x1._u,x2._u)); }
     static PositiveFloatBounds<PR> _div(PositiveFloatBounds<PR> const& x1, PositiveFloatBounds<PR> const& x2) {
-        return PositiveFloatBounds<PR>(div_down(x1._l,x2._u),div_up(x1._u,x2._l)); }
+        return PositiveFloatBounds<PR>(div(down,x1._l,x2._u),div(up,x1._u,x2._l)); }
     static PositiveFloatBounds<PR> _pow(PositiveFloatBounds<PR> const& x1, Nat m2) {
-        return PositiveFloatBounds<PR>(pow_down(x1._l,m2),pow_up(x1._u,m2)); }
+        return PositiveFloatBounds<PR>(pow(down,x1._l,m2),pow(up,x1._u,m2)); }
     static PositiveFloatBounds<PR> _pow(PositiveFloatBounds<PR> const& x1, Int n2) {
         if(n2>=0) { return _pow(x1,Nat(n2)); } else { return _rec(_pow(x1,Nat(-n2))); } }
     static FloatBounds<PR> _log(PositiveFloatBounds<PR> const& x) {
-        return FloatBounds<PR>(log_down(x._l),log_up(x._u)); }
+        return FloatBounds<PR>(log(down,x._l),log(up,x._u)); }
     static PositiveFloatBounds<PR> _max(PositiveFloatBounds<PR> const& x1, PositiveFloatBounds<PR> const& x2) {
         return PositiveFloatBounds<PR>(max(x1._l,x2._l),max(x1._u,x2._u)); }
     static PositiveFloatBounds<PR> _min(PositiveFloatBounds<PR> const& x1, PositiveFloatBounds<PR> const& x2) {
@@ -2072,10 +2071,10 @@ PositiveFloat64Value hlf(PositiveFloat64Value const& x) { return PositiveFloat64
 PositiveFloatMPValue hlf(PositiveFloatMPValue const& x) { return PositiveFloatMPValue(hlf(x._v)); }
 
 Float64Error operator/(Float64Error const& x1, PositiveFloat64LowerBound const& x2) {
-    return Float64Error(div_up(x1._e,x2._l)); }
+    return Float64Error(div(up,x1._e,x2._l)); }
 
 Float64UpperBound operator*(Float64UpperBound const& x1, Real const& y2) {
-    Float64UpperBound x2(y2,x1.precision()); return Float64UpperBound(mul_up(x1._u,x2._u)); }
+    Float64UpperBound x2(y2,x1.precision()); return Float64UpperBound(mul(up,x1._u,x2._u)); }
 
 
 Float64Value midpoint(Float64Bounds const& x) { return x.value(); }

@@ -287,6 +287,9 @@ const RoundDownward down = downward;
 const RoundToNearest near = to_nearest;
 const RoundUpward up = upward;
 
+using RoundApprox = RoundToNearest;
+const RoundApprox approx = to_nearest;
+
 } // namespace Ariadne
 
 #endif // ARIADNE_ROUNDING_HPP

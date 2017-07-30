@@ -556,24 +556,24 @@ const Vector<Float64>& Grid::lengths() const
 
 ExactNumericType Grid::coordinate(Nat d, DyadicType x) const
 {
-    return ExactNumericType(add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],x)));
+    return ExactNumericType(add(approx,this->_data->_origin[d],mul(approx,this->_data->_lengths[d],x)));
 }
 
 ExactNumericType Grid::subdivision_coordinate(Nat d, DyadicType x) const
 {
-    return ExactNumericType(add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],x)));
+    return ExactNumericType(add(approx,this->_data->_origin[d],mul(approx,this->_data->_lengths[d],x)));
 }
 
 ExactNumericType Grid::subdivision_coordinate(Nat d, IntegerType n) const
 {
-    return ExactNumericType(add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],n)));
+    return ExactNumericType(add(approx,this->_data->_origin[d],mul(approx,this->_data->_lengths[d],n)));
 }
 
 Int Grid::subdivision_index(Nat d, const ExactNumericType& x) const
 {
     Float64 half=0.5;
-    Int n=integer_cast<Int>(floor(add_approx(div_approx(sub_approx(x.raw(),this->_data->_origin[d]),this->_data->_lengths[d]),half)));
-    Float64 sc=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],n));
+    Int n=integer_cast<Int>(floor(add(approx,div(approx,sub(approx,x.raw(),this->_data->_origin[d]),this->_data->_lengths[d]),half)));
+    Float64 sc=add(approx,this->_data->_origin[d],mul(approx,this->_data->_lengths[d],n));
     if(sc == x.raw()) {
         return n;
     } else {
@@ -583,8 +583,8 @@ Int Grid::subdivision_index(Nat d, const ExactNumericType& x) const
 
 Int Grid::subdivision_lower_index(Nat d, const LowerNumericType& x) const
 {
-    Int n=integer_cast<Int>(floor(div_down(sub_down(x.raw(),this->_data->_origin[d]),this->_data->_lengths[d])));
-    if(x.raw()>=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],(n+1)))) {
+    Int n=integer_cast<Int>(floor(div(down,sub(down,x.raw(),this->_data->_origin[d]),this->_data->_lengths[d])));
+    if(x.raw()>=add(approx,this->_data->_origin[d],mul(approx,this->_data->_lengths[d],(n+1)))) {
         return n+1;
     } else {
         return n;
@@ -593,8 +593,8 @@ Int Grid::subdivision_lower_index(Nat d, const LowerNumericType& x) const
 
 Int Grid::subdivision_upper_index(Nat d, const UpperNumericType& x) const
 {
-    Int n=integer_cast<Int>(ceil(div_up(sub_up(x.raw(),this->_data->_origin[d]),this->_data->_lengths[d])));
-    if(x.raw()<=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],(n-1)))) {
+    Int n=integer_cast<Int>(ceil(div(up,sub(up,x.raw(),this->_data->_origin[d]),this->_data->_lengths[d])));
+    if(x.raw()<=add(approx,this->_data->_origin[d],mul(approx,this->_data->_lengths[d],(n-1)))) {
         return n-1;
     } else {
         return n;
@@ -731,8 +731,8 @@ ExactBoxType GridAbstractCell::lattice_box_to_space(const LatticeBoxType & theLa
         //Recompute the new dimension coordinates, detaching them from the grid
         //Compute lower and upper bounds separately, and then set the box lower
         //and upper values simultaneously to prevent lower temporarily higher than upper.
-        Float64 lower = add_approx( theDimOrigin, mul_approx( theDimLength, theLatticeBoxType[current_dimension].lower().raw() ) );
-        Float64 upper = add_approx( theDimOrigin, mul_approx( theDimLength, theLatticeBoxType[current_dimension].upper().raw() ) );
+        Float64 lower = add(approx, theDimOrigin, mul(approx, theDimLength, theLatticeBoxType[current_dimension].lower().raw() ) );
+        Float64 upper = add(approx, theDimOrigin, mul(approx, theDimLength, theLatticeBoxType[current_dimension].upper().raw() ) );
         theTmpBoxType[current_dimension].set(cast_exact(lower),cast_exact(upper));
     }
 
@@ -863,7 +863,7 @@ GridCell GridCell::neighboringCell( const Grid& theGrid, const Nat theHeight, co
     //   we are sure that we get a box that overlaps with the required neighboring cell.
     //NOTE: This box is in the original space, but not on the lattice
     Vector<ExactIntervalType> baseCellBoxInLattice =  GridCell::compute_lattice_box( dimensions, theHeight, theWord );
-    const Float64 upperBorderOverlapping = add_approx( baseCellBoxInLattice[dim].upper().raw(), baseCellBoxInLattice[dim].width().value_raw() / 2 );
+    const Float64 upperBorderOverlapping = add(approx, baseCellBoxInLattice[dim].upper().raw(), baseCellBoxInLattice[dim].width().value_raw() / 2 );
 
     //2. Now check if the neighboring cell can be rooted to the given primary cell. For that
     //   we simply use the box computed in 1. and get the primary cell that encloses it.
@@ -1652,7 +1652,7 @@ inline Nat GridTreeSubset::compute_number_subdiv( Float64 theWidth, const Float6
     //NOTE: Float64 now uses approximate operators by default
     Nat result = 0;
     if ( theWidth > theMaxWidth ){
-        //result = (Nat) ceil( div_approx( log_approx( div_approx( theWidth, theMaxWidth ) ) , log_approx( R(2.0) ) ) );
+        //result = (Nat) ceil( div(approx, log(approx, div(approx, theWidth, theMaxWidth ) ) , log(approx, R(2.0) ) ) );
         result = integer_cast<Nat>(ceil( div( log( div( theWidth, theMaxWidth ) ) , log( Float64(2.0) ) ) ) );
     }
     return result;
@@ -1789,7 +1789,7 @@ Void GridTreeSubset::subdivide( Float64 theMaxCellWidth ) {
         //Get the number of required subdivisions in this dimension
         //IVAN S ZAPREEV:
         //NOTE: We compute sub_up because we do not want to have insufficient number of subdivisions
-        num_subdiv = compute_number_subdiv( sub_up( theRootCellBoxType[i].upper().raw(), theRootCellBoxType[i].lower().raw() ) , theMaxCellWidth );
+        num_subdiv = compute_number_subdiv( sub(up, theRootCellBoxType[i].upper().raw(), theRootCellBoxType[i].lower().raw() ) , theMaxCellWidth );
 
         //Compute the max number of subdivisions and the dimension where to do them
         if( num_subdiv >= max_num_subdiv_dim ){

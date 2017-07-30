@@ -60,10 +60,10 @@ template<class PR> inline FloatUpperBound<PR> const FloatBounds<PR>::upper() con
     return FloatUpperBound<PR>(upper_raw()); }
 
 template<class PR> inline const FloatValue<PR> FloatBounds<PR>::value() const {
-    return FloatValue<PR>(med_near(this->_l,this->_u)); }
+    return FloatValue<PR>(med(near,this->_l,this->_u)); }
 
 template<class PR> inline const FloatError<PR> FloatBounds<PR>::error() const {
-    RawFloat<PR> _v=med_near(this->_l,this->_u); return FloatError<PR>(max(sub_up(this->_u,_v),sub_up(_v,this->_l))); }
+    RawFloat<PR> _v=med(near,this->_l,this->_u); return FloatError<PR>(max(sub(up,this->_u,_v),sub(up,_v,this->_l))); }
 
 template<class PR> inline FloatValue<PR> value(FloatBounds<PR> const& x) {
     return x.value(); }

@@ -52,7 +52,7 @@ SizeType irmax(const ExactBoxType& bx) {
 }
 
 inline Float64Value mid(Float64Value l, Float64Value u) {
-    return Float64Value(med_approx(l.raw(),u.raw()));
+    return Float64Value(med(approx,l.raw(),u.raw()));
 }
 
 inline

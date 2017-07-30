@@ -323,6 +323,14 @@ class Float64 {
 static const Float64 inf = std::numeric_limits<double>::infinity();
 
 
+struct Float32 {
+    float flt;
+  public:
+    explicit Float32(Float64 x, BuiltinRoundingModeType rnd) { set_rounding_mode(rnd); (volatile float&)flt = (volatile double&)x.dbl; }
+    explicit operator Float64() const { return Float64((double)this->flt); }
+};
+
+
 
 } // namespace Ariadne
 

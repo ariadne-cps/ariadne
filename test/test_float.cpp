@@ -681,12 +681,12 @@ TestFloat<PR>::test_arithmetic()
 
     // Conversion to integer types
     Int i3,i4;
-    i3=numeric_cast<Int>(floor(f1));
-    i4=numeric_cast<Int>(ceil(f1));
+    i3=integer_cast<Int>(floor(f1));
+    i4=integer_cast<Int>(ceil(f1));
     cout << i3 << " < " << f1 << " < " << i4 << endl;
     ARIADNE_TEST_ASSERT(i3==1); ARIADNE_TEST_ASSERT(i4==2);
-    i3=numeric_cast<Int>(floor(f2));
-    i4=numeric_cast<Int>(ceil(f2));
+    i3=integer_cast<Int>(floor(f2));
+    i4=integer_cast<Int>(ceil(f2));
     cout << i3 << " < " << f2 << " < " << i4 << endl;
     ARIADNE_TEST_ASSERT(i3==-4); ARIADNE_TEST_ASSERT(i4==-3);
 

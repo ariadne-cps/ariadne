@@ -45,10 +45,6 @@
 
 namespace Ariadne {
 
-template<> inline Float64Value numeric_cast<Float64Value>(Real const& r) {
-    return cast_exact(r.get(Precision64()));
-}
-
 ExactBoxType over_approximation(RealBox const&);
 ExactBoxType under_approximation(RealBox const&);
 ExactBoxType approximation(RealBox const&);

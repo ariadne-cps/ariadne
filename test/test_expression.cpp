@@ -97,16 +97,16 @@ class TestExpression {
         RealExpression expr = x;//+u;
 
         Map<Identifier,Real> valuation;
-        Real uncertain_value = numeric_cast<Real>(ValidatedNumericType(-1.0,1.0));
-        valuation[x.name()] = uncertain_value;
+        Real value = Real(ExactNumericType(-0.0626));
+        valuation[x.name()] = value;
 
         ARIADNE_TEST_EQUALS(expr.kind(),OperatorKind::VARIABLE);
         ARIADNE_TEST_EQUALS(expr.var(),"x");
-        ARIADNE_TEST_EQUALS(valuation[x.name()],uncertain_value);
+        ARIADNE_TEST_EQUALS(valuation[x.name()],value);
 
         Real result1 = evaluate(expr,valuation);
 
-        ARIADNE_TEST_EQUALS(result1,uncertain_value);
+        ARIADNE_TEST_EQUALS(result1,value);
     }
 
     Void test_function()

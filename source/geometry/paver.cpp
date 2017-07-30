@@ -43,9 +43,9 @@
 
 namespace Ariadne {
 
-Pair<Nat,double> nonlinearity_index_and_error(const ValidatedVectorFunction& function, const ExactBoxType& domain);
-Pair<Nat,double> lipschitz_index_and_error(const ValidatedVectorFunction& function, const ExactBoxType& domain);
-Pair<Nat,double> lipschitz_index_and_error(const ValidatedVectorFunction& function, const UpperBoxType& domain) {
+Pair<Nat,Float64> nonlinearity_index_and_error(const ValidatedVectorFunction& function, const ExactBoxType& domain);
+Pair<Nat,Float64> lipschitz_index_and_error(const ValidatedVectorFunction& function, const ExactBoxType& domain);
+Pair<Nat,Float64> lipschitz_index_and_error(const ValidatedVectorFunction& function, const UpperBoxType& domain) {
     return lipschitz_index_and_error(function,cast_exact_box(domain));
 }
 
@@ -190,7 +190,7 @@ Void AffinePaver::adjoin_outer_approximation(PavingInterface& paving,
     for(Int i=0; i!=MAXIMUM_DEPTH; ++i) {
         //std::cerr<<"i="<<i<<"\nsubdomains="<<subdomains<<"\nunsplitdomains="<<unsplitdomains<<"\n\n";
         for(Nat n=0; n!=unsplitdomains.size(); ++n) {
-            Nat k; double err;
+            Nat k; Float64 err;
             make_lpair(k,err)=nonlinearity_index_and_error(fg,unsplitdomains[n]);
             //std::cerr<<"  domain="<<unsplitdomains[n]<<" k="<<k<<" err="<<err<<" max_err="<<max_error<<"\n";
             if(k==subdomain.size() || err < max_error) {
@@ -318,7 +318,7 @@ Void procedure_constraint_adjoin_outer_approximation_recursion(
     Float64 clmaxwdth = maximum_scaled_width(cell_box,scalings).raw();
 
     if( (bbxmaxwdth > 4.0*clmaxwdth) || (cell.tree_depth()>=max_dpth && (bbxmaxwdth > clmaxwdth)) ) {
-        Pair<Nat,double> lipsch = lipschitz_index_and_error(f,new_domain);
+        Pair<Nat,Float64> lipsch = lipschitz_index_and_error(f,new_domain);
         ARIADNE_LOG(4,"  Splitting domain on coordinate "<<lipsch.first<<"\n");
         Pair<ExactBoxType,ExactBoxType> sd=exact_new_domain.split(lipsch.first);
         procedure_constraint_adjoin_outer_approximation_recursion(paving, sd.first, f, g, codomain, cell, max_dpth, splt+1, procedures);

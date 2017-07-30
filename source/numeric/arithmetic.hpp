@@ -531,6 +531,7 @@ template<class X, class PX=X> struct DeclareRealOperations
     : DeclareFieldOperators<X>
 {
     friend X neg(X const&);
+    friend X hlf(X const&);
     friend X add(X const&, X const&);
     friend X sub(X const&, X const&);
     friend X mul(X const&, X const&);

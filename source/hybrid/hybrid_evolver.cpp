@@ -1877,7 +1877,6 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
                 ARIADNE_ASSERT(decide(guard_range.lower()<zero));
                 UpperIntervalType guard_derivative_range = compose(lie_derivative(guard_function,dynamic),flow).range();
 
-                //Float64Value alpha=numeric_cast<Float64Value>(1+flow.step_size()*guard_derivative_range.lower()/guard_range.lower());
                 Float64Bounds alpha_val=(1+flow.step_size()*cast_exact(guard_derivative_range.lower())/cast_exact(guard_range.lower()));
                 Float64Value alpha=cast_exact(alpha_val);
                 assert(alpha_val.value()==alpha);

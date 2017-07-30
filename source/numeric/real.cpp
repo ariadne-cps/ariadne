@@ -192,6 +192,7 @@ Real pow(Real const& x1, Int n2) { return make_real(Pow(),x1,n2); }
 Real nul(Real const& x) { return Real(0); }
 Real pos(Real const& x) { return make_real(Pos(),x); }
 Real neg(Real const& x) { return make_real(Neg(),x); }
+Real hlf(Real const& x) { return make_real(Hlf(),x); }
 Real sqr(Real const& x) { return make_real(Sqr(),x); }
 Real rec(Real const& x) { return make_real(Rec(),x); }
 Real sqrt(Real const& x) { return make_real(Sqrt(),x); }

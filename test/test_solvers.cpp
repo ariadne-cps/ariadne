@@ -42,6 +42,8 @@
 using namespace Ariadne;
 using namespace std;
 
+typedef Interval<Dyadic> DyadicInterval;
+typedef Vector<DyadicInterval> DyadicIntervalVector;
 typedef Vector<Float64Bounds> FloatBoundsVector;
 
 class TestSolver
@@ -72,6 +74,7 @@ class TestSolver
     Void test_implicit() {
         //TaylorModelAccuracy::set_default_sweep_threshold(1e-12);
 
+        // FIXME: Should be able to use numbers yielding exact results for p,r
         EffectiveScalarFunction aa=EffectiveScalarFunction::coordinate(1,0);
         EffectiveScalarFunction a=EffectiveScalarFunction::coordinate(2,0);
         EffectiveScalarFunction x=EffectiveScalarFunction::coordinate(2,1);
@@ -100,7 +103,7 @@ class TestSolver
         ARIADNE_TEST_PRINT(f);
         h=solver->implicit(f,p,r);
         ARIADNE_TEST_PRINT(h);
-        bb=EffectiveScalarFunction(aa-numeric_cast<Real>(p[0].midpoint()))/numeric_cast<Real>(p[0].radius().upper_raw());
+        bb=EffectiveScalarFunction(aa-DyadicInterval(p[0]).midpoint())/DyadicInterval(p[0]).radius();
         Decimal a0(0.682328), a1(0.0521547), a2(-0.0023232), a3(0.000147778);
         e=EffectiveVectorFunction( { a0+bb*(a1+bb*(a2+bb*a3)) } );
         ARIADNE_TEST_PRINT(e);
@@ -113,7 +116,7 @@ class TestSolver
         ARIADNE_TEST_PRINT(f);
         h=solver->implicit(f,p,r);
         ARIADNE_TEST_PRINT(h);
-        bb=EffectiveScalarFunction(aa-numeric_cast<Real>(p[0].midpoint()))/numeric_cast<Real>(p[0].radius().upper_raw());
+        bb=EffectiveScalarFunction(aa-DyadicInterval(p[0]).midpoint())/DyadicInterval(p[0]).radius();
         Decimal c0(0.828427), c1(0.0441942), c2(-0.000345267), c3(0.00000539468);
         e=EffectiveVectorFunction( { c0+bb*(c1+bb*(c2+bb*c3)) } );
         ARIADNE_TEST_PRINT(e);
@@ -158,7 +161,7 @@ class TestSolver
         ARIADNE_TEST_PRINT(f);
         h=solver->implicit(f,p,r);
         ARIADNE_TEST_PRINT(h);
-        s=EffectiveScalarFunction(aa-numeric_cast<Real>(p[0].midpoint()))/numeric_cast<Real>(p[0].radius().upper_raw());
+        s=EffectiveScalarFunction(aa-DyadicInterval(p[0]).midpoint())/DyadicInterval(p[0]).radius();
         Decimal a0(0.682328), a1(0.0521547), a2(-0.0023232), a3(0.000147778);
         e=EffectiveScalarFunction( a0+s*(a1+s*(a2+s*a3)) );
         ARIADNE_TEST_PRINT(e);

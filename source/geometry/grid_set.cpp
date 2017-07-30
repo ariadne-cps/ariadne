@@ -1832,12 +1832,12 @@ Void GridTreeSubset::subdivide( Float64 theMaxCellWidth ) {
     mince_to_tree_depth(needed_num_tree_subdiv);
 }
 
-double GridTreeSubset::measure() const {
-    Float64 result=0.0;
+Float64Approximation GridTreeSubset::measure() const {
+    Float64Approximation result={0.0, Precision64()};
     for(ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
-        result+=iter->box().measure().value_raw();
+        result+=iter->box().measure().value();
     }
-    return numeric_cast<double>(result);
+    return result;
 }
 
 

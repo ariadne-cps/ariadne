@@ -231,7 +231,7 @@ class GridTreeSubset
     Nat depth() const;
 
     //! The measure (area, volume) of the set in Euclidean space.
-    double measure() const;
+    Float64Approximation measure() const;
 
     //! The a branch along the binary tree.
     GridTreeSubset branch(Bool left_or_right) const;

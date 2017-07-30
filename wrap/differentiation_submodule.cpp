@@ -151,7 +151,7 @@ make_differential_variables(const Nat& d, const Vector<typename DIFF::NumericTyp
 {
     boost::python::list result;
     for(Nat i=0; i!=x.size(); ++i) {
-        result.append(DIFF::variable(x.size(),d,numeric_cast<typename DIFF::NumericType>(x[i]),i));
+        result.append(DIFF::variable(x.size(),d,x[i],i));
     }
     return result;
 }

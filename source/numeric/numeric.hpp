@@ -64,6 +64,10 @@ template<> inline Real numeric_cast(const Float64& a) { return Real(ExactDouble(
 template<> inline Real numeric_cast(const Float64Value& a) { return numeric_cast<Real>(a.raw()); }
 template<> inline Real numeric_cast(const Float64Bounds& a) { return numeric_cast<Real>(Float64Approximation(a).raw()); }
 
+template<> inline Float64Ball numeric_cast(const Real& a) { return Float64Ball(a,Precision64()); }
+template<> inline Float64Bounds numeric_cast(const Real& a) { return Float64Bounds(a,Precision64()); }
+template<> inline Float64Approximation numeric_cast(const Real& a) { return Float64Approximation(a,Precision64()); }
+
 } // namespace Ariadne
 
 #endif

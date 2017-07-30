@@ -129,6 +129,7 @@ void TestReal::test_arithmetic() {
     ARIADNE_TEST_EQUALS(pow(x,3),15.625);
     ARIADNE_TEST_EQUALS(pos(x),+2.5);
     ARIADNE_TEST_EQUALS(neg(x),-2.5);
+    ARIADNE_TEST_EQUALS(hlf(x),1.25);
     ARIADNE_TEST_EQUALS(sqr(x),6.25);
     ARIADNE_TEST_EQUALS(rec(y),0.25);
 }

@@ -315,7 +315,7 @@ template<class A> A NormedAlgebraOperations<A>::_log(const A& x)
     z=z*y;
 
     z+=z.create_ball(trunc_err);
-    z+=log(numeric_cast<X>(avg));
+    z+=log(static_cast<X>(avg));
     return z;
 }
 

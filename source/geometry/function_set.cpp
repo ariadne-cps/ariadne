@@ -68,8 +68,8 @@ uint DRAWING_ACCURACY=1u;
 template<class T> StringType str(const T& t) { StringStream ss; ss<<t; return ss.str(); }
 
 Matrix<Float64> nonlinearities_zeroth_order(const ValidatedVectorFunction& f, const ExactBoxType& dom);
-Pair<Nat,double> nonlinearity_index_and_error(const ValidatedVectorFunction& function, const ExactBoxType domain);
-Pair<Nat,double> lipschitz_index_and_error(const ValidatedVectorFunction& function, const ExactBoxType& domain);
+Pair<Nat,Float64> nonlinearity_index_and_error(const ValidatedVectorFunction& function, const ExactBoxType domain);
+Pair<Nat,Float64> lipschitz_index_and_error(const ValidatedVectorFunction& function, const ExactBoxType& domain);
 
 Matrix<Float64> nonlinearities_zeroth_order(const ValidatedVectorTaylorFunctionModel64& f, const ExactBoxType& dom)
 {
@@ -164,7 +164,7 @@ Matrix<Float64> nonlinearities_second_order(const ValidatedVectorFunction& f, co
     return nonlinearities;
 }
 
-Pair<Nat,double> nonlinearity_index_and_error(const ValidatedVectorTaylorFunctionModel64& function, const ExactBoxType domain) {
+Pair<Nat,Float64> nonlinearity_index_and_error(const ValidatedVectorTaylorFunctionModel64& function, const ExactBoxType domain) {
     Matrix<Float64> nonlinearities=Ariadne::nonlinearities_zeroth_order(function,domain);
 
     // Compute the row of the nonlinearities Array which has the highest norm
@@ -188,7 +188,7 @@ Pair<Nat,double> nonlinearity_index_and_error(const ValidatedVectorTaylorFunctio
         }
     }
 
-    return make_pair(jmax_in_row_imax,numeric_cast<double>(max_row_sum));
+    return make_pair(jmax_in_row_imax,max_row_sum);
 }
 
 
@@ -697,7 +697,7 @@ Matrix<Float64> nonlinearities_second_order(const ValidatedVectorFunction& f, co
 }
 */
 
-Pair<Nat,double> lipschitz_index_and_error(const ValidatedVectorFunction& function, const ExactBoxType& domain)
+Pair<Nat,Float64> lipschitz_index_and_error(const ValidatedVectorFunction& function, const ExactBoxType& domain)
 {
     Matrix<UpperIntervalType> jacobian=Ariadne::jacobian_range(function,domain);
 
@@ -716,10 +716,10 @@ Pair<Nat,double> lipschitz_index_and_error(const ValidatedVectorFunction& functi
             jmax=j;
         }
     }
-    return make_pair(jmax,numeric_cast<double>(max_column_norm));
+    return make_pair(jmax,max_column_norm);
 }
 
-Pair<Nat,double> nonlinearity_index_and_error(const ValidatedVectorFunction& function, const ExactBoxType& domain)
+Pair<Nat,Float64> nonlinearity_index_and_error(const ValidatedVectorFunction& function, const ExactBoxType& domain)
 {
     Matrix<Float64> nonlinearities=Ariadne::nonlinearities_zeroth_order(function,domain);
 
@@ -744,7 +744,7 @@ Pair<Nat,double> nonlinearity_index_and_error(const ValidatedVectorFunction& fun
         }
     }
 
-    return make_pair(jmax_in_row_imax,numeric_cast<double>(max_row_sum));
+    return make_pair(jmax_in_row_imax,max_row_sum);
 }
 
 

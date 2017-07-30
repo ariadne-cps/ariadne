@@ -66,12 +66,12 @@ typedef HybridBasicSet<InterpolatedCurve> HybridInterpolatedCurve;
 template<class ES> OutputStream& operator<<(OutputStream&, const Orbit<ES>&);
 
 template<>
-class Orbit<HybridExactPoint>
+class Orbit<HybridApproximatePoint>
     : public HybridDrawableInterface
 {
   public:
-    Orbit(const HybridExactPoint& hpt);
-    Void insert(HybridTime ht, const HybridExactPoint& hpt);
+    Orbit(const HybridApproximatePoint& hpt);
+    Void insert(HybridTime ht, const HybridApproximatePoint& hpt);
     Nat size() const;
     const InterpolatedCurve& curve(Nat m) const;
     const std::vector<HybridInterpolatedCurve>& curves() const { return *this->_curves_ptr; }
@@ -82,7 +82,7 @@ class Orbit<HybridExactPoint>
 
 template<>
 OutputStream&
-operator<<(OutputStream& os, const Orbit< HybridExactPoint >& orb);
+operator<<(OutputStream& os, const Orbit< HybridApproximatePoint >& orb);
 
 template<>
 class Orbit<HybridGridCell>

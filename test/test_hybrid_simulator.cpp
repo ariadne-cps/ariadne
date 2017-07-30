@@ -107,15 +107,16 @@ Void TestHybridSimulator::test() const
 
     // Define the initial box
     RealSpace space={x,y};
-    ExactPoint initial_point = ExactPoint{-0.00, 0.50};
+    RealPoint initial_point = Point<Real>{-0.00, 0.50};
     cout << "initial_point=" << initial_point << endl;
-    HybridExactPoint initial_hybrid_point(location1,space,initial_point);
+    ApproximatePoint approximate_initial_point = ApproximatePoint(initial_point,pr64);
+    HybridApproximatePoint initial_hybrid_point(location1,space,approximate_initial_point);
     HybridTime simulation_time(2.25,3);
 
 
     // Compute the reachable sets
     cout << "Computing orbit... "<<std::flush;
-    Orbit<HybridExactPoint> hybrid_orbit=simulator.orbit(automaton,initial_hybrid_point,simulation_time);
+    Orbit<HybridApproximatePoint> hybrid_orbit=simulator.orbit(automaton,initial_hybrid_point,simulation_time);
     cout << "done"<<std::endl;
 
     ARIADNE_TEST_PRINT(hybrid_orbit);

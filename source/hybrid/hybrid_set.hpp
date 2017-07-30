@@ -178,11 +178,15 @@ template<class X> class HybridPoint
   public:
     HybridPoint<X>() : HybridBasicSet<Point<X>>() { }
     HybridPoint<X>(const DiscreteLocation& q, const RealSpace& spc, const Point<X>& pt) : HybridBasicSet<Point<X>>(q,spc,pt) { }
-    HybridPoint<X>(const DiscreteLocation& q, const Map<RealVariable,X>& val);
 
-    HybridPoint<X>(const DiscreteLocation& q, const Map<RealVariable,Real>& val);
-    HybridPoint<X>(const DiscreteLocation& q, const List<Assignment<RealVariable,Real>>& val);
-    HybridPoint<X>(const DiscreteLocation& q, const InitializerList<Assignment<RealVariable,Real>>& val);
+    HybridPoint<X>(const DiscreteLocation& q, const Map<RealVariable,X>& val);
+    HybridPoint<X>(const DiscreteLocation& q, const List<Assignment<RealVariable,X>>& val);
+    HybridPoint<X>(const DiscreteLocation& q, const InitializerList<Assignment<RealVariable,X>>& val);
+
+    template<class XX, EnableIf<IsConvertible<XX,X>> =dummy> HybridPoint<X>(HybridPoint<XX> hpt)
+        : HybridPoint<X>(hpt.location(),hpt.space(),Point<X>(hpt.euclidean_set())) { }
+    template<class Y, class PR, EnableIf<IsConstructible<X,Y,PR>> =dummy> HybridPoint<X>(HybridPoint<Y> hpt, PR pr)
+        : HybridPoint<X>(hpt.location(),hpt.space(),Point<X>(hpt.euclidean_set(),pr)) { }
 
     Point<X>& point() { return this->euclidean_set(); }
     const Point<X>& point() const { return this->euclidean_set(); }

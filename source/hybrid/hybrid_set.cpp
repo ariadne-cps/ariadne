@@ -62,24 +62,24 @@ HybridExactBox over_approximation(HybridRealBox const& hbx) {
 }
 
 
-Orbit<HybridExactPoint>::Orbit(const HybridExactPoint& hpt)
+Orbit<HybridApproximatePoint>::Orbit(const HybridApproximatePoint& hpt)
     : _curves_ptr(new std::vector<HybridInterpolatedCurve>(1u,HybridInterpolatedCurve(hpt.location(),hpt.space(),InterpolatedCurve(0,hpt.point()))))
 { }
 
 Nat
-Orbit<HybridExactPoint>::size() const
+Orbit<HybridApproximatePoint>::size() const
 {
     return this->_curves_ptr->size();
 }
 
 const InterpolatedCurve&
-Orbit<HybridExactPoint>::curve(Nat m) const
+Orbit<HybridApproximatePoint>::curve(Nat m) const
 {
     return (*this->_curves_ptr)[m].euclidean_set();
 }
 
 Void
-Orbit<HybridExactPoint>::insert(HybridTime ht, const HybridExactPoint& hpt)
+Orbit<HybridApproximatePoint>::insert(HybridTime ht, const HybridApproximatePoint& hpt)
 {
     ARIADNE_ASSERT(ht.discrete_time()<=this->size());
     // FIXME: Should allow non-exact times
@@ -93,8 +93,8 @@ Orbit<HybridExactPoint>::insert(HybridTime ht, const HybridExactPoint& hpt)
     }
 }
 
-Void Orbit<HybridExactPoint>::draw(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& axes) const {
-    const Orbit<HybridExactPoint>& orbit=*this;
+Void Orbit<HybridApproximatePoint>::draw(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& axes) const {
+    const Orbit<HybridApproximatePoint>& orbit=*this;
     for(Nat i=0; i!=orbit._curves_ptr->size(); ++i) {
         HybridInterpolatedCurve const& hcurve=this->_curves_ptr->at(i);
         if(locations.empty() || locations.contains(hcurve.location())) {
@@ -108,7 +108,7 @@ Void Orbit<HybridExactPoint>::draw(CanvasInterface& canvas, const Set<DiscreteLo
 
 template<>
 OutputStream&
-operator<<(OutputStream& os, const Orbit< HybridExactPoint >& orb)
+operator<<(OutputStream& os, const Orbit< HybridApproximatePoint >& orb)
 {
     return os << orb.curves();
 }
@@ -212,16 +212,7 @@ template<class X> HybridPoint<X>::HybridPoint(const DiscreteLocation& q, const M
     }
 }
 
-template<class X> HybridPoint<X>::HybridPoint(const DiscreteLocation& q, const Map<RealVariable,Real>& x)
-    : HybridBasicSet<Point<X>>(q,make_list(x.keys()),Point<X>(x.size()))
-{
-    SizeType i=0;
-    for(auto iter=x.begin(); iter!=x.end(); ++iter, ++i) {
-        this->point()[i]=numeric_cast<X>(iter->second);
-    }
-}
-
-template<class X> HybridPoint<X>::HybridPoint(const DiscreteLocation& q, const List<Assignment<RealVariable,Real>>& x)
+template<class X> HybridPoint<X>::HybridPoint(const DiscreteLocation& q, const List<Assignment<RealVariable,X>>& x)
     : HybridBasicSet<Point<X>>(q,left_hand_sides(x),Point<X>(x.size()))
 {
     SizeType i=0;
@@ -230,8 +221,8 @@ template<class X> HybridPoint<X>::HybridPoint(const DiscreteLocation& q, const L
     }
 }
 
-template<class X> HybridPoint<X>::HybridPoint(const DiscreteLocation& q, const InitializerList<Assignment<RealVariable,Real>>& x)
-    : HybridPoint<X>(q,List<Assignment<RealVariable,Real>>(x))
+template<class X> HybridPoint<X>::HybridPoint(const DiscreteLocation& q, const InitializerList<Assignment<RealVariable,X>>& x)
+    : HybridPoint<X>(q,List<Assignment<RealVariable,X>>(x))
 {
 }
 
@@ -824,9 +815,10 @@ template<> String class_name<GridCell>() { return "GridCell"; }
 
 
 // Instantiations
-template class HybridBasicSet<ExactBoxType>;
+template class HybridPoint<ApproximateNumericType>;
+template class HybridPoint<Real>;
 
-template class HybridPoint<ExactNumericType>;
+template class HybridBasicSet<ExactBoxType>;
 template class HybridBox<ExactIntervalType>;
 template class HybridBoxes<ExactIntervalType>;
 

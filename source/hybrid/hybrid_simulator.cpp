@@ -66,10 +66,10 @@ Void HybridSimulator::set_step_size(double h)
 }
 
 
-ExactPoint make_point(const HybridExactPoint& hpt, const RealSpace& spc) {
+ApproximatePoint make_point(const HybridApproximatePoint& hpt, const RealSpace& spc) {
     if(hpt.space()==spc) { return hpt.point(); }
-    Map<RealVariable,Float64Value> values=hpt.values();
-    ExactPoint pt(spc.dimension());
+    Map<RealVariable,Float64Approximation> values=hpt.values();
+    ApproximatePoint pt(spc.dimension());
     for(Nat i=0; i!=pt.size(); ++i) {
         pt[i]=values[spc.variable(i)];
     }
@@ -88,8 +88,14 @@ Map<DiscreteEvent,EffectiveScalarFunction> guard_functions(const HybridAutomaton
     return guards;
 }
 
-Orbit<HybridExactPoint>
-HybridSimulator::orbit(const HybridAutomatonInterface& system, const HybridExactPoint& init_pt, const HybridTime& tmax) const
+Orbit<HybridApproximatePoint>
+HybridSimulator::orbit(const HybridAutomatonInterface& system, const HybridRealPoint& init_pt, const HybridTime& tmax) const
+{
+    return orbit(system,HybridApproximatePoint(init_pt,Precision64()),tmax);
+}
+
+Orbit<HybridApproximatePoint>
+HybridSimulator::orbit(const HybridAutomatonInterface& system, const HybridApproximatePoint& init_pt, const HybridTime& tmax) const
 {
     Precision64 pr;
     HybridTime t(0.0,0);
@@ -100,7 +106,7 @@ HybridSimulator::orbit(const HybridAutomatonInterface& system, const HybridExact
     ApproximatePoint point=make_point(init_pt,space);
     ApproximatePoint next_point;
 
-    Orbit<HybridExactPoint> orbit(HybridExactPoint(location,space,cast_exact(point)));
+    Orbit<HybridApproximatePoint> orbit(HybridApproximatePoint(location,space,cast_exact(point)));
 
     EffectiveVectorFunction dynamic=system.dynamic_function(location);
     Map<DiscreteEvent,EffectiveScalarFunction> guards=guard_functions(system,location);
@@ -147,7 +153,7 @@ HybridSimulator::orbit(const HybridAutomatonInterface& system, const HybridExact
             t._continuous_time += Real(Float64Value(h.raw()));
         }
         point=next_point;
-        orbit.insert(t,HybridExactPoint(location,space,cast_exact(point)));
+        orbit.insert(t,HybridApproximatePoint(location,space,cast_exact(point)));
     }
 
     return orbit;

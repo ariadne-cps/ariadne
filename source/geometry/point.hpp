@@ -40,6 +40,7 @@ typedef Point<ExactNumericType> ExactPoint;
 typedef Point<EffectiveNumericType> EffectivePoint;
 typedef Point<ValidatedNumericType> ValidatedPoint;
 typedef Point<ApproximateNumericType> ApproximatePoint;
+typedef Point<Real> RealPoint;
 
 //! A point in Euclidean space.
 template<class X>
@@ -55,6 +56,7 @@ class Point
     explicit Point(Nat n) : Vector<RealType>(n) { }
     Point(const Vector<RealType>& v) : Vector<RealType>(v) { }
     template<class T, EnableIf<IsConvertible<T,X>> =dummy> Point(const Point<T>& pt) : Vector<RealType>(pt.vector()) { }
+    template<class Y, class PR, EnableIf<IsConstructible<X,Y,PR>> =dummy> Point(const Point<Y>& pt, PR pr) : Vector<RealType>(pt.vector(),pr) { }
     //! Construct from an initializer list of floating-point values.
     template<class T, EnableIf<IsConvertible<T,X>> =dummy> Point(SizeType n, const T& t) : Vector<RealType>(n,RealType(t)) { }
     //! Construct from an initializer list of floating-point values.

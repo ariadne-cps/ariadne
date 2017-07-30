@@ -45,7 +45,9 @@ using HybridSet = HybridBoundedConstraintSet;
 
 
 template<class X> class HybridPoint;
+using HybridRealPoint = HybridPoint<Real>;
 using HybridExactPoint = HybridPoint<Float64Value>;
+using HybridApproximatePoint = HybridPoint<Float64Approximation>;
 
 template<class IVL> class HybridBox;
 using HybridRealBox = HybridBox<RealInterval>;

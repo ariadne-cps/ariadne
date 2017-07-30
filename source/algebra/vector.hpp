@@ -148,7 +148,7 @@ class Vector
     //! \brief Convert from an initializer list of generic type and a precision parameter.
     template<class PR, EnableIf<IsConstructible<X,ExactDouble,PR>> =dummy> Vector(InitializerList<double> const& lst, PR pr);
     template<class PR, EnableIf<IsConstructible<X,Real,PR>> =dummy> Vector(InitializerList<Real> const& lst, PR pr);
-    template<class PR, EnableIf<IsConstructible<X,Pair<ExactDouble,ExactDouble>,PR>> =dummy> Vector(InitializerList<Pair<double,double>> const& lst, PR pr);
+    template<class PR, EnableIf<IsConstructible<X,ExactDouble,ExactDouble,PR>> =dummy> Vector(InitializerList<Pair<double,double>> const& lst, PR pr);
     //! \brief Convert from an array of generic type and a precision parameter.
     template<class Y, class PR, EnableIf<IsConstructible<X,Y,PR>> =dummy> Vector(Array<Y> const& ary, PR pr) : _ary(ary,pr) { }
     //! \brief Convert from an vector of generic type and a precision parameter.
@@ -739,7 +739,7 @@ Vector<X>::Vector(InitializerList<Real> const& lst, PR pr)
 {
 }
 
-template<class X> template<class PR, EnableIf<IsConstructible<X,Pair<ExactDouble,ExactDouble>,PR>>> Vector<X>::Vector(InitializerList<Pair<double,double>> const& lst, PR pr)
+template<class X> template<class PR, EnableIf<IsConstructible<X,ExactDouble,ExactDouble,PR>>> Vector<X>::Vector(InitializerList<Pair<double,double>> const& lst, PR pr)
     : _ary(lst.size(),X(pr))
 {
     SizeType i=0;

@@ -29,6 +29,9 @@ namespace Ariadne {
 template class Series<Float64Bounds>;
 template class Series<FloatMPBounds>;
 
+template class SweeperBase<Float64>;
+template class SweeperBase<FloatMP>;
+
 template class TaylorModel<ValidatedTag,Float64>;
 template class AlgebraOperations<TaylorModel<ValidatedTag,Float64>>;
 template class NormedAlgebraOperations<TaylorModel<ValidatedTag,Float64>>;

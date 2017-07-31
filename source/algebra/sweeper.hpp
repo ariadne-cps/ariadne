@@ -37,22 +37,25 @@
 namespace Ariadne {
 
 template<class F> class Sweeper;
+template<class F> class SweeperBase;
 template<class X> class Expansion;
 
 template<class F> class SweeperInterface {
     friend class Sweeper<F>;
+    friend class SweeperBase<F>;
   protected:
     typedef typename F::PrecisionType PR;
   public:
-    inline Bool discard(const MultiIndex& a, const F& x) const { return this->_discard(a,x); }
-    inline Void sweep(Expansion<F>& p, F& e) const { this->_sweep(p,e); }
-    inline Void sweep(Expansion<F>& p) const { this->_sweep(p); }
+    inline Bool discard(const MultiIndex& a, const FloatValue<PR>& x) const { return this->_discard(a,x.raw()); }
+    inline Bool discard(const MultiIndex& a, const FloatApproximation<PR>& x) const { return this->_discard(a,x.raw()); }
+    inline Void sweep(Expansion<FloatValue<PR>>& p, FloatError<PR>& e) const { this->_sweep(p,e); }
+    inline Void sweep(Expansion<FloatApproximation<PR>>& p) const { this->_sweep(p); }
     inline PR precision() const { return this->_precision(); }
   private:
     virtual SweeperInterface* _clone() const = 0;
     virtual PR _precision() const = 0;
-    virtual Void _sweep(Expansion<F>& p, F& e) const = 0;
-    virtual Void _sweep(Expansion<F>& p) const = 0;
+    virtual Void _sweep(Expansion<FloatValue<PR>>& p, FloatError<PR>& e) const = 0;
+    virtual Void _sweep(Expansion<FloatApproximation<PR>>& p) const = 0;
     virtual Bool _discard(const MultiIndex& a, const F& x) const = 0;
     virtual Void _write(OutputStream& os) const = 0;
     friend OutputStream& operator<<(OutputStream& os, const SweeperInterface& swp) { swp._write(os); return os; }
@@ -67,7 +70,7 @@ template<class F> class SweeperInterface {
 template<class F> class Sweeper {
     typedef typename F::PrecisionType PR;
   public:
-    typedef F FloatType;
+    typedef F RawFloatType;
     typedef PR PrecisionType;
     typedef MultiIndex IndexType;
   public:
@@ -81,87 +84,56 @@ template<class F> class Sweeper {
     //! \brief The precision to which terms should be built.
     inline PrecisionType precision() const { return this->_ptr->_precision(); }
     //! \brief Returns \a true if the term with index \a a and coefficient \a x should be discarded.
-    inline Bool discard(const IndexType& a, const FloatType& x) const { return this->_ptr->_discard(a,x); }
+    inline Bool discard(const MultiIndex& a, const FloatValue<PR>& x) const { return this->_ptr->_discard(a,x.raw()); }
+    inline Bool discard(const MultiIndex& a, const FloatApproximation<PR>& x) const { return this->_ptr->_discard(a,x.raw()); }
     //! \brief Discard terms in the expansion, adding the absolute value of the coefficient to the uniform error.
-    inline Void sweep(Expansion<FloatType>& p, FloatType& e) const { this->_ptr->_sweep(p,e); }
+    inline Void sweep(Expansion<FloatValue<PR>>& p, FloatError<PR>& e) const { this->_ptr->_sweep(p,e); }
     //! \brief Discard terms in the expansion, without keeping track of discarded terms.
-    inline Void sweep(Expansion<FloatType>& p) const { this->_ptr->_sweep(p); }
+    inline Void sweep(Expansion<FloatApproximation<PR>>& p) const { this->_ptr->_sweep(p); }
     friend OutputStream& operator<<(OutputStream& os, const Sweeper<F>& swp) { return os << *swp._ptr; }
   private:
     std::shared_ptr<const SweeperInterface<F>> _ptr;
 };
 
-template<class SWP, class F> class SweeperBase
+template<class F> class SweeperBase
     : public virtual SweeperInterface<F>
+{
+    using typename SweeperInterface<F>::PR;
+    virtual Void _sweep(Expansion<FloatValue<PR>>& p, FloatError<PR>& e) const override;
+    virtual Void _sweep(Expansion<FloatApproximation<PR>>& p) const override;
+};
+
+
+template<class SWP, class F> class SweeperMixin
+    : public virtual SweeperBase<F>
 {
     using typename SweeperInterface<F>::PR;
     virtual SweeperInterface<F>* _clone() const override final;
     virtual PR _precision() const override final;
     virtual Bool _discard(const MultiIndex& a, const F& x) const override final;
-    virtual Void _sweep(Expansion<F>& p, F& e) const override;
-    virtual Void _sweep(Expansion<F>& p) const override;
 };
 
-
 template<class SWP, class F>
-SweeperInterface<F>* SweeperBase<SWP,F>::_clone() const
+auto SweeperMixin<SWP,F>::_clone() const -> SweeperInterface<F>*
 {
     return new SWP(static_cast<const SWP&>(*this));
 }
 
 template<class SWP, class F>
-auto SweeperBase<SWP,F>::_precision() const -> PR
+auto SweeperMixin<SWP,F>::_precision() const -> PR
 {
     return static_cast<const SWP*>(this)->SWP::precision();
 }
 
 template<class SWP, class F>
-Bool SweeperBase<SWP,F>::_discard(const MultiIndex& a, const F& x) const
+auto SweeperMixin<SWP,F>::_discard(const MultiIndex& a, const F& x) const -> Bool
 {
     return static_cast<const SWP*>(this)->SWP::discard(a,x);
 }
 
-template<class SWP, class F>
-Void SweeperBase<SWP,F>::_sweep(Expansion<F>& p, F& e) const
-{
-    typename Expansion<F>::ConstIterator end=p.end();
-    typename Expansion<F>::ConstIterator adv=p.begin();
-    typename Expansion<F>::Iterator curr=p.begin();
-    F::set_rounding_upward();
-    F te=0.0;
-    while(adv!=end) {
-        if(this->_discard(adv->key(),adv->data())) {
-            te+=abs(adv->data());
-        } else {
-            *curr=*adv;
-            ++curr;
-        }
-        ++adv;
-    }
-    e+=te;
-    p.resize(curr-p.begin());
-    F::set_rounding_to_nearest();
-}
-
-template<class SWP, class F>
-Void SweeperBase<SWP,F>::_sweep(Expansion<F>& p) const
-{
-    typename Expansion<F>::ConstIterator end=p.end();
-    typename Expansion<F>::ConstIterator adv=p.begin();
-    typename Expansion<F>::Iterator curr=p.begin();
-    while(adv!=end) {
-        if(this->_discard(adv->key(),adv->data())) {
-        } else {
-            *curr=*adv;
-            ++curr;
-        }
-        ++adv;
-    }
-    p.resize(curr-p.begin());
-}
 
 //! \brief A sweeper class which discards terms whose absolute value is smaller than a threshold.
-template<class F> class ThresholdSweeper : public SweeperBase<ThresholdSweeper<F>,F> {
+template<class F> class ThresholdSweeper : public SweeperMixin<ThresholdSweeper<F>,F> {
     typedef PrecisionType<F> PR;
     PR _coefficient_precision;
     F _sweep_threshold;
@@ -176,7 +148,7 @@ template<class F> class ThresholdSweeper : public SweeperBase<ThresholdSweeper<F
 };
 
 //! \brief A sweeper class which does not discard any terms at all.
-template<class F> class TrivialSweeper : public SweeperBase<TrivialSweeper<F>,F> {
+template<class F> class TrivialSweeper : public SweeperMixin<TrivialSweeper<F>,F> {
     typedef PrecisionType<F> PR;
     PR _coefficient_precision;
   public:
@@ -184,13 +156,13 @@ template<class F> class TrivialSweeper : public SweeperBase<TrivialSweeper<F>,F>
     inline PR precision() const { return _coefficient_precision; }
     inline Bool discard(const MultiIndex& a, const F& x) const { return false; }
   private:
-    virtual Void _sweep(Expansion<F>& p, F& e) const final { }
-    virtual Void _sweep(Expansion<F>& p) const final { }
+    virtual Void _sweep(Expansion<FloatValue<PR>>& p, FloatError<PR>& e) const final { }
+    virtual Void _sweep(Expansion<FloatApproximation<PR>>& p) const final { }
     virtual Void _write(OutputStream& os) const { os << "TrivialSweeper"; }
 };
 
 //! \brief A sweeper class which only discards the zero term.
-template<class F> class NullSweeper : public SweeperBase<NullSweeper<F>,F> {
+template<class F> class NullSweeper : public SweeperMixin<NullSweeper<F>,F> {
     typedef PrecisionType<F> PR;
     PR _coefficient_precision;
   public:
@@ -202,7 +174,7 @@ template<class F> class NullSweeper : public SweeperBase<NullSweeper<F>,F> {
 };
 
 //! \brief A sweeper class which discards non-affine terms.
-template<class F> class AffineSweeper : public SweeperBase<AffineSweeper<F>,F> {
+template<class F> class AffineSweeper : public SweeperMixin<AffineSweeper<F>,F> {
     typedef PrecisionType<F> PR;
     PR _coefficient_precision;
   public:
@@ -214,7 +186,7 @@ template<class F> class AffineSweeper : public SweeperBase<AffineSweeper<F>,F> {
 };
 
 //! \brief A sweeper class which discards terms whose total degree is above some threshold.
-template<class F> class GradedSweeper : public SweeperBase<GradedSweeper<F>,F> {
+template<class F> class GradedSweeper : public SweeperMixin<GradedSweeper<F>,F> {
     typedef PrecisionType<F> PR;
     PR _coefficient_precision;
   public:

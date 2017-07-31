@@ -85,6 +85,53 @@ Box<Interval<FloatMPValue>> convert_box(BoxDomainType const& bx, PrecisionMP pr)
 } // namespace
 
 
+
+template<class F>
+Void SweeperBase<F>::_sweep(Expansion<FloatValue<PR>>& p, FloatError<PR>& e) const
+{
+    typename Expansion<FloatValue<PR>>::ConstIterator end=p.end();
+    typename Expansion<FloatValue<PR>>::ConstIterator adv=p.begin();
+    typename Expansion<FloatValue<PR>>::Iterator curr=p.begin();
+
+    // FIXME: Not needed, but added to pair with rounding mode change below
+    F::set_rounding_upward();
+    FloatError<PR> te(e.precision());
+    while(adv!=end) {
+        if(this->discard(adv->key(),adv->data())) {
+            //te+=abs(adv->data());
+            te+=cast_positive(abs(adv->data()));
+        } else {
+            *curr=*adv;
+            ++curr;
+        }
+        ++adv;
+    }
+    e+=te;
+
+    // FIXME: Removing reset of rounding mode causes error in TestNonlinear programming
+    // ERROR: test/test_nonlinear_programming.cpp:57: calling test_equality_constrained_optimisation(): std::runtime_error in
+    // source/solvers/nonlinear_programming.cpp:1063: step: Assertion `norm(YH*dx+E*dx+transpose(A)*dy-rx)/max(1.0,norm(rx))<1e-2' failed.
+    F::set_rounding_to_nearest();
+    p.resize(curr-p.begin());
+}
+
+template<class F>
+Void SweeperBase<F>::_sweep(Expansion<FloatApproximation<PR>>& p) const
+{
+    typename Expansion<FloatApproximation<PR>>::ConstIterator end=p.end();
+    typename Expansion<FloatApproximation<PR>>::ConstIterator adv=p.begin();
+    typename Expansion<FloatApproximation<PR>>::Iterator curr=p.begin();
+    while(adv!=end) {
+        if(this->discard(adv->key(),adv->data())) {
+        } else {
+            *curr=*adv;
+            ++curr;
+        }
+        ++adv;
+    }
+    p.resize(curr-p.begin());
+}
+
 template<class F> TaylorModel<ValidatedTag,F>::TaylorModel()
     : _expansion(0), _error(0u), _sweeper()
 {
@@ -611,7 +658,7 @@ template<class F> inline Void _mul(TaylorModel<ValidatedTag,F>& r, const TaylorM
             const FloatValue<PR>& yv=yiter->data();
             ta=xa+ya;
             FloatValue<PR> tv=mul_no_err(xv,yv);
-            if(r.sweeper().discard(ta,tv.raw())) {
+            if(r.sweeper().discard(ta,tv)) {
                 te+=mag_xv*mag(yv);
             } else {
                 t._append(ta,tv);
@@ -750,12 +797,13 @@ template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::uniq
 }
 
 template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::sweep() {
-    this->_sweeper.sweep(reinterpret_cast<Expansion<F>&>(this->_expansion),reinterpret_cast<F&>(this->_error));
+//    this->_sweeper.sweep(reinterpret_cast<Expansion<F>&>(this->_expansion),reinterpret_cast<F&>(this->_error));
+    this->_sweeper.sweep(this->_expansion,this->_error);
     return *this;
 }
 
 template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::sweep(const SweeperType& sweeper) {
-    sweeper.sweep(reinterpret_cast<Expansion<F>&>(this->_expansion),reinterpret_cast<F&>(this->_error));
+    sweeper.sweep(this->_expansion,this->_error);
     return *this;
 }
 
@@ -1890,7 +1938,7 @@ template<class F> auto TaylorModel<ApproximateTag,F>::range() const -> RangeType
 }
 
 template<class F> TaylorModel<ApproximateTag,F>& TaylorModel<ApproximateTag,F>::sweep() {
-    this->_sweeper.sweep(reinterpret_cast<Expansion<F>&>(this->_expansion));
+    this->_sweeper.sweep(this->_expansion);
     return *this;
 }
 

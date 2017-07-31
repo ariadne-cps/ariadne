@@ -766,25 +766,14 @@ template<class R, class A> R integer_cast(A const&);
 template<> Nat integer_cast<Nat,Float64>(Float64 const& x) { return x.dbl; }
 template<> Int integer_cast<Int,Float64>(Float64 const& x) { return x.dbl; }
 
-Float64 mag(Float64 x) { return std::fabs(x.dbl); }
-
-
-Float64 operator+(Float64 x) { return +x.dbl; }
-Float64 operator-(Float64 x) { return -x.dbl; }
-Bool operator==(Float64 x1, Float64 x2) { return x1.dbl==x2.dbl; }
-Bool operator!=(Float64 x1, Float64 x2) { return x1.dbl!=x2.dbl; }
-Bool operator<=(Float64 x1, Float64 x2) { return x1.dbl<=x2.dbl; }
-Bool operator>=(Float64 x1, Float64 x2) { return x1.dbl>=x2.dbl; }
-Bool operator< (Float64 x1, Float64 x2) { return x1.dbl< x2.dbl; }
-Bool operator> (Float64 x1, Float64 x2) { return x1.dbl> x2.dbl; }
-
-Bool is_nan(Float64 x) { return std::isnan(x.dbl); }
-Bool is_inf(Float64 x) { return std::isinf(x.dbl); }
-Bool is_finite(Float64 x) { return std::isfinite(x.dbl); }
 
 Comparison cmp(Float64 x1, Rational const& q2) {
     if(std::isfinite(x1.get_d())) { return cmp(Rational(x1),q2); }
     else { return x1.get_d()>0.0 ? Comparison::GREATER : Comparison::LESS; }
+}
+Comparison cmp(Rational const& q1, Float64 x2) {
+    if(std::isfinite(x2.get_d())) { return cmp(q1,Rational(x2)); }
+    else { return x2.get_d()>0.0 ? Comparison::LESS : Comparison::GREATER; }
 }
 
 /*

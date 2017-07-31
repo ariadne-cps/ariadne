@@ -576,13 +576,27 @@ Comparison cmp(FloatMP const& x1, Dbl x2) {
     return c==0 ? Comparison::EQUAL : (c>0?Comparison::GREATER:Comparison::LESS);
 }
 
+Comparison cmp(Dbl x1, FloatMP const& x2) {
+    auto c=mpfr_cmp_d(x2._mpfr,x1);
+    return c==0 ? Comparison::EQUAL : (c>0?Comparison::LESS:Comparison::GREATER);
+}
+
 Comparison cmp(FloatMP const& x1, Float64 const& x2) {
     return cmp(x1,x2.get_d());
+}
+
+Comparison cmp(Float64 const& x1, FloatMP const& x2) {
+    return cmp(x1.get_d(),x2);
 }
 
 Comparison cmp(FloatMP const& x1, Rational const& q2) {
     auto c=mpfr_cmp_q(x1._mpfr,q2.get_mpq());
     return c==0 ? Comparison::EQUAL : (c>0?Comparison::GREATER:Comparison::LESS);
+}
+
+Comparison cmp(Rational const& q1, FloatMP const& x2) {
+    auto c=mpfr_cmp_q(x2._mpfr,q1.get_mpq());
+    return c==0 ? Comparison::EQUAL : (c>0?Comparison::LESS:Comparison::GREATER);
 }
 
 FloatMP add(FloatMP::RoundingModeType rnd, FloatMP const& x1, Dbl x2) {
@@ -610,6 +624,13 @@ FloatMP div(FloatMP::RoundingModeType rnd, Dbl x1, FloatMP const& x2) {
     FloatMP r(x2.precision(),NoInit()); mpfr_d_div(r._mpfr,x1,x2._mpfr,rnd); return r;
 }
 
+FloatMP add(RoundUpward rnd, FloatMP const& x1, Float64 const& x2) {
+    FloatMP r(x1.precision(),NoInit()); mpfr_add_d(r._mpfr,x1._mpfr,x2.get_d(),rnd); return r;
+}
+FloatMP sub(RoundDownward rnd, FloatMP const& x1, Float64 const& x2) {
+    FloatMP r(x1.precision(),NoInit()); mpfr_sub_d(r._mpfr,x1._mpfr,x2.get_d(),rnd); return r;
+}
+
 Bool operator==(FloatMP const& x1, FloatMP const& x2) {
     return mpfr_equal_p(x1._mpfr,x2._mpfr);
 }
@@ -630,43 +651,6 @@ Bool operator> (FloatMP const& x1, FloatMP const& x2) {
 }
 
 
-Bool operator==(FloatMP const& x1, Dbl x2) {
-    return cmp(x1,x2)==Comparison::EQUAL;
-}
-Bool operator!=(FloatMP const& x1, Dbl x2) {
-    return cmp(x1,x2)!=Comparison::EQUAL;
-}
-Bool operator<=(FloatMP const& x1, Dbl x2) {
-    return cmp(x1,x2)<=Comparison::EQUAL;
-}
-Bool operator>=(FloatMP const& x1, Dbl x2) {
-    return cmp(x1,x2)>=Comparison::EQUAL;
-}
-Bool operator< (FloatMP const& x1, Dbl x2) {
-    return cmp(x1,x2)< Comparison::EQUAL;
-}
-Bool operator> (FloatMP const& x1, Dbl x2) {
-    return cmp(x1,x2)> Comparison::EQUAL;
-}
-
-Bool operator==(FloatMP const& x1, Float64 const& x2) {
-    return cmp(x1,x2)==Comparison::EQUAL;
-}
-Bool operator!=(FloatMP const& x1, Float64 const& x2) {
-    return cmp(x1,x2)!=Comparison::EQUAL;
-}
-Bool operator<=(FloatMP const& x1, Float64 const& x2) {
-    return cmp(x1,x2)<=Comparison::EQUAL;
-}
-Bool operator>=(FloatMP const& x1, Float64 const& x2) {
-    return cmp(x1,x2)>=Comparison::EQUAL;
-}
-Bool operator< (FloatMP const& x1, Float64 const& x2) {
-    return cmp(x1,x2)< Comparison::EQUAL;
-}
-Bool operator> (FloatMP const& x1, Float64 const& x2) {
-    return cmp(x1,x2)> Comparison::EQUAL;
-}
 
 
 FloatMP sqr_rnd(FloatMP const& x) { return sqr(FloatMP::get_rounding_mode(),x); }

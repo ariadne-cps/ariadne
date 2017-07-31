@@ -45,11 +45,6 @@ template<class PRE, class FLT, EnableIf<IsSame<PRE,PrecisionType<FLT>>> =dummy> 
 Float64 set(RoundUpward rnd, FloatMP const& x, Precision64 pr) { return Float64(Dyadic(x),rnd,pr); }
 Float64 set(RoundDownward rnd, FloatMP const& x, Precision64 pr) { return Float64(Dyadic(x),rnd,pr); }
 
-Bool operator>(Float64 x1, FloatMP x2) { return x2<x1; }
-Bool operator<(Float64 x1, FloatMP x2) { return x2>x1; }
-Bool operator>(Float64 x1, Dbl x2) { return x2<x1; }
-Bool operator<(Float64 x1, Dbl x2) { return x2>x1; }
-
 
 template<class PR> Nat FloatError<PR>::output_places = 3;
 template<class PR> Nat FloatApproximation<PR>::output_places = 4;

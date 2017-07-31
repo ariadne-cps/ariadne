@@ -155,40 +155,36 @@ inline Matrix<Float64Value> const& cast_exact(Matrix<Float64> const& A) { return
 
 
 ValidatedKleenean InteriorPointSolver::
-validate_feasibility(const Vector<Float64>& xl, const Vector<Float64>& xu,
-                     const Matrix<Float64>& A, const Vector<Float64>& b,
-                     const Vector<Float64>& x, const Vector<Float64>& y) const
+validate_feasibility(const Vector<Float64>& axl, const Vector<Float64>& axu,
+                     const Matrix<Float64>& aA, const Vector<Float64>& ab,
+                     const Vector<Float64>& ax, const Vector<Float64>& ay) const
 {
+    Vector<Float64Value> const& xl = cast_exact(axl);
+    Vector<Float64Value> const& xu = cast_exact(axu);
+    Matrix<Float64Value> const& A = cast_exact(aA);
+    Vector<Float64Value> const& b = cast_exact(ab);
+
+    Vector<Float64Bounds> x = cast_exact(ax);
+    Vector<Float64Bounds> y = cast_exact(ay);
+
+    Float64Value zero;
+
     const Nat m=A.row_size();
     const Nat n=A.column_size();
 
     // x should be an approximate solution to Ax=b
     // Use the fact that for any x, x'=(x + A^T (AA^T)^{-1}(b-Ax)) satisfies Ax'=0
-    Vector<ValidatedNumericType> ivlx = cast_exact(x);
-    Vector<ValidatedNumericType> ivle = cast_exact(b)-cast_exact(A)*ivlx;
+    Vector<Float64Bounds> e = b-A*x;
 
-    Matrix<ValidatedNumericType> ivlS(m,m);
-    for(Nat i1=0; i1!=m; ++i1) {
-        for(Nat i2=i1; i2!=m; ++i2) {
-            for(Nat j=0; j!=n; ++j) {
-                ivlS[i1][i2] += mul_val(A[i1][j],A[i2][j]);
-            }
-        }
-    }
-    for(Nat i1=0; i1!=m; ++i1) {
-        for(Nat i2=0; i2!=i1; ++i2) {
-            ivlS[i1][i2]=ivlS[i2][i1];
-        }
-    }
+    Matrix<Float64Bounds> S=A*transpose(A);
+    Vector<Float64Bounds> d =  transpose(A) * solve(S,e);
 
-    Vector<ValidatedNumericType> ivld =  transpose(cast_exact(A)) * solve(ivlS,ivle);
+    x += d;
 
-    ivlx += ivld;
-
-    ARIADNE_LOG(2,"[x] = "<<ivlx);
+    ARIADNE_LOG(2,"[x] = "<<x);
     ValidatedKleenean result=true;
     for(Nat i=0; i!=n; ++i) {
-        if(ivlx[i].lower().raw()<=xl[i] || ivlx[i].upper().raw()>=xu[i]) {
+        if(x[i].lower().raw()<=xl[i].raw() || x[i].upper().raw()>=xu[i].raw()) {
             result = indeterminate; break;
         }
     }
@@ -197,19 +193,18 @@ validate_feasibility(const Vector<Float64>& xl, const Vector<Float64>& xu,
 
     // If yb - max(yA,0) xu + min(yA,0) xl > 0, then problem is infeasible
     // Evaluate lower bound for yb - max(z,0) xu + min(z,0) xl
-    Vector<ValidatedNumericType> z=transpose(cast_exact(A)) * cast_exact(y);
-    Float64 mx = 0.0;
-    Float64::set_rounding_downward();
+    Vector<Float64Bounds> z=transpose(A) * y;
+    Float64LowerBound mx = zero;
     for(Nat i=0; i!=y.size(); ++i) {
-        mx += (b[i]*y[i]).raw();
+        mx += (b[i]*y[i]);
     }
     for(Nat i=0; i!=x.size(); ++i) {
-        Float64 neg_xui = -xu[i];
-        if(z[i].upper().raw()>0.0) { mx += z[i].upper().raw() * neg_xui; }
-        if(z[i].lower().raw()<0.0) { mx += z[i].lower().raw() * xl[i]; }
+        Float64Value zil=cast_exact(z[i].lower());
+        Float64Value ziu=cast_exact(z[i].upper());
+        if(ziu>0) { mx -= ziu * xu[i]; }
+        if(zil<0) { mx += zil * xl[i]; }
     }
-    Float64::set_rounding_to_nearest();
-    if(mx>0.0) { return false; }
+    if(definitely(mx>0)) { return false; }
 
     return indeterminate;
 }

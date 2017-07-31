@@ -418,10 +418,6 @@ template<> Void export_matrix<Float64Approximation>()
     def("triangular_decomposition",&triangular_decomposition<X>);
     def("orthogonal_decomposition", &orthogonal_decomposition<X>);
     def("row_norms",(Vector<X>(*)(const Matrix<X>&)) &row_norms<X>);
-    def("normalise_rows",(Matrix<X>(*)(const Matrix<X>&)) &normalise_rows<X>);
-
-    def("triangular_factor",&triangular_factor);
-    def("triangular_multiplier", &triangular_multiplier);
 
 //    to_python< Tuple<FloatMatrix,FloatMatrix,PivotMatrix> >();
 }

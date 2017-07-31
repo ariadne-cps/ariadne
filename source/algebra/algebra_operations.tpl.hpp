@@ -218,7 +218,6 @@ template<class A> EnableIfNormedAlgebra<A> _compose(const AnalyticFunction& fn, 
 namespace {
 inline Int pow2(Nat k) { return 1<<k; }
 inline Int powm1(Nat k) { return (k%2) ? -1 : +1; }
-double rec_fac_up(Nat n) { Float64::set_rounding_upward(); double r=1; for(Nat i=1; i<=n; ++i) { r/=i; } return r; }
 }
 
 

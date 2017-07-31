@@ -26,16 +26,35 @@
 namespace Ariadne {
 
 Interval<Float64Value> widen_domain(Interval<Float64UpperBound> const& ivl) {
+    auto rnd=Float64::get_rounding_mode();
+    Float64::set_rounding_mode(upward);
     volatile float min=std::numeric_limits<float>::min();
-    volatile double l=-ivl.lower().get_d();
+    volatile double neg_l=(-ivl.lower()).get_d();
+    volatile double l=-neg_l;
     volatile double u=ivl.upper().get_d();
-    volatile double neg_l=-l;
     volatile float neg_rl=neg_l;
     volatile float ru=u;
     if(l==u) { neg_rl+=min; ru+=min; }
     if(neg_rl<neg_l) { neg_rl+=min; }
     if(ru<u) { ru+=min; }
-    return Interval<Float64Value>(-neg_rl,ru);
+    volatile float rl=-neg_l;
+    Interval<Float64Value> res(rl,ru);
+    Float64::set_rounding_mode(rnd);
+    return res;
+}
+
+Interval<Float64Value> approximate_domain(Interval<Float64UpperBound> const& ivl) {
+    auto rnd=Float64::get_rounding_mode();
+    Float64::set_rounding_mode(to_nearest);
+    volatile float eps=std::numeric_limits<float>::epsilon();
+    volatile double l=ivl.lower().get_d();
+    volatile double u=ivl.upper().get_d();
+    volatile float rl=l;
+    volatile float ru=u;
+    if(rl==ru) { rl-=(rl*eps); ru+=(ru*eps); }
+    Interval<Float64Value> res(rl,ru);
+    Float64::set_rounding_mode(rnd);
+    return res;
 }
 
 InputStream&

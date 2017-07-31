@@ -57,6 +57,9 @@ const double CUTOFF_THRESHOLD=std::numeric_limits<double>::epsilon() * 16;
 // Threshold for primal variables to exceed their bounds
 const double BOUNDS_TOLERANCE=std::numeric_limits<double>::epsilon() * 4098;
 
+// Threshold for accumulation of numerical errors
+const double ERROR_TOLERANCE=std::numeric_limits<double>::epsilon() * 1048576;
+
 OutputStream& operator<<(OutputStream& os, Slackness t) {
     return os << (t==BASIS ? 'B' : t==LOWER ? 'L' : t==UPPER ? 'U' : t==FIXED ? 'E' : '?');
 }
@@ -152,7 +155,7 @@ template<class X>
 Void
 SimplexSolver<X>::consistency_check(const Matrix<X>& A, const Array<SizeType>& p, const Matrix<XX>& B) const
 {
-    static const X MAXIMUM_ERROR=X(1e-8);
+    static const X MAXIMUM_ERROR=X(ERROR_TOLERANCE);
     const SizeType m=A.row_size();
     Matrix<X> A_B(m,m);
     for(SizeType k=0; k!=m; ++k) {
@@ -167,7 +170,7 @@ SimplexSolver<X>::consistency_check(const Matrix<X>& A, const Array<SizeType>& p
     Matrix<XX> Z=B*A_B;
     ARIADNE_LOG(9,"        p_B="<<p_B<<" B="<<B<<" A_B="<<A_B<<" B*A_B-I="<<Z<<"\n");
     for(SizeType i=0; i!=m; ++i) { Z[i][i]-=1; }
-    ARIADNE_ASSERT_MSG(decide(norm(Z)<MAXIMUM_ERROR), "A="<<A<<"\np="<<p<<"\nB="<<B<<"\nZ=B*A_B-I="<<Z<<"\nnorm(Z)="<<norm(Z));
+    ARIADNE_ASSERT_MSG(decide(norm(Z)<ERROR_TOLERANCE), "A="<<A<<"\np="<<p<<"\nB="<<B<<"\nZ=B*A_B-I="<<Z<<"\nnorm(Z)="<<norm(Z));
 }
 
 
@@ -176,7 +179,7 @@ template<class X>
 Void
 SimplexSolver<X>::consistency_check(const Matrix<X>& A, const Vector<X>& b,const Vector<XX>& x) const
 {
-    static const X MAXIMUM_ERROR=X(1e-8);
+    static const X MAXIMUM_ERROR=X(ERROR_TOLERANCE);
     Vector<XX> z=A*b-x;
     ARIADNE_ASSERT(decide(norm(z)<MAXIMUM_ERROR));
 }
@@ -552,7 +555,7 @@ template<class X,class XX,class XXX>
 Vector<XX>
 compute_z(const Matrix<X>& A, const Vector<XXX>& c, const Array<SizeType>& p, const Vector<XX>& y)
 {
-    const Float64Value CUTOFF_THRESHOLD(1e-10);
+    const Float64Value CUTOFF_THRESHOLD(Ariadne::CUTOFF_THRESHOLD);
     const SizeType m=A.row_size();
     const SizeType n=A.column_size();
     Vector<XX> z(n);
@@ -984,6 +987,8 @@ SizeType
 SimplexSolver<X>::lpstep(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
                          Array<Slackness>& vt, Array<SizeType>& p, Matrix<XX>& B, Vector<XX>& x, SizeType s) const
 {
+    const X BOUNDS_TOLERANCE = X(Ariadne::BOUNDS_TOLERANCE);
+
     const SizeType m=A.row_size();
     const SizeType n=A.column_size();
 
@@ -1044,8 +1049,6 @@ SimplexSolver<X>::lpstep(const Vector<X>& xl, const Vector<X>& xu, const Matrix<
         std::swap(p[r],p[s]);
     }
 
-    const double ERROR_TOLERANCE = std::numeric_limits<float>::epsilon();
-
     // Recompute B and x if it appears that there are problems with numerical degeneracy
     Bool possible_degeneracy=false;
     for(Nat i=0; i!=m; ++i) {
@@ -1058,10 +1061,10 @@ SimplexSolver<X>::lpstep(const Vector<X>& xl, const Vector<X>& xu, const Matrix<
     x=Ariadne::compute_x<X>(xl,xu,A,b, vt,p,B);
     for(Nat i=0; i!=m; ++i) {
         if(decide(x[p[i]]<xl[p[i]])) {
-            ARIADNE_ASSERT(decide(x[p[i]]>xl[p[i]]-X(ERROR_TOLERANCE)));
+            ARIADNE_ASSERT(decide(x[p[i]]>xl[p[i]]-BOUNDS_TOLERANCE));
             x[p[i]]=xl[p[i]];
         } else if(decide(x[p[i]]>xu[p[i]])) {
-            ARIADNE_ASSERT(decide(x[p[i]]<xu[p[i]]+X(ERROR_TOLERANCE)));
+            ARIADNE_ASSERT(decide(x[p[i]]<xu[p[i]]+BOUNDS_TOLERANCE));
             x[p[i]]=xu[p[i]];
         }
     }

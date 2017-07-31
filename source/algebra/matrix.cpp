@@ -361,34 +361,32 @@ row_norms(const Matrix<X>& A)
 }
 
 
-// Scale the rows of A to each have some of absolute values less than or equal to one
+// Scale the rows of A to each have sum of absolute values less than or equal to one
+// FIXME: This code is inherantly approximate and relies on changing the rounding mode
 template<class X>
-Matrix<X>
-normalise_rows(const Matrix<X>& A)
+Void
+normalise_rows(Matrix<X>& A)
 {
+
     const SizeType m=A.row_size();
     const SizeType n=A.column_size();
 
-    Matrix<X> R=A;
-
+    auto prev_rounding_mode=X::get_rounding_mode();
+    X::set_rounding_upward();
     Array<X> row_asums(m);
-    auto prev_rounding_mode=Float64::get_rounding_mode();
-    Float64::set_rounding_upward();
     for(SizeType i=0; i!=m; ++i) {
         row_asums[i]=0.0;
         for(SizeType j=0; j!=n; ++j) {
             row_asums[i]+=abs(A[i][j]);
         }
     }
-    Float64::set_rounding_toward_zero();
+    X::set_rounding_toward_zero();
     for(SizeType i=0; i!=m; ++i) {
         for(SizeType j=0; j!=n; ++j) {
-            R[i][j]/=row_asums[i];
+            A[i][j]/=row_asums[i];
         }
     }
-    Float64::set_rounding_mode(prev_rounding_mode);
-
-    return R;
+    X::set_rounding_mode(prev_rounding_mode);
 }
 
 
@@ -461,10 +459,9 @@ triangular_decomposition(const Matrix<X>& A)
 // Use Householder transformation H=I-vv' where v=u/|u|
 // and u=a +/- |a|e with a and e the working column of A
 // and corresponding unit vector.
-Tuple< Matrix<Float64Approximation>, PivotMatrix>
-triangular_factor(const Matrix<Float64Approximation>& A)
+template<class X> Tuple< Matrix<X>, PivotMatrix>
+triangular_factor(const Matrix<X>& A)
 {
-    typedef Float64Approximation X;
     X zero = A.zero_element();
 
     const SizeType m=A.row_size();
@@ -494,7 +491,7 @@ triangular_factor(const Matrix<Float64Approximation>& A)
             // Find largest column norm
             SizeType l=k; X cnsmax=cns[k];
             for(SizeType j=k+1; j!=n; ++j) {
-                if(decide(cns[j]>cnsmax)) {
+                if(cns[j]>cnsmax) {
                     l=j; cnsmax=cns[j];
                 }
             }
@@ -521,7 +518,7 @@ triangular_factor(const Matrix<Float64Approximation>& A)
         for(SizeType i=k; i!=m; ++i) {
             u[i]=R[i][k];
         }
-        if(decide(u[k]>=0)) { u[k]+=nrma; }
+        if(u[k]>=0) { u[k]+=nrma; }
         else { u[k]-=nrma; }
 
         // Compute -2/u.u
@@ -552,20 +549,7 @@ triangular_factor(const Matrix<Float64Approximation>& A)
     } // end of loop on working column k
 
     // Scale the rows of R to have sum of absolute values equal to 1
-
-    Float64::RoundingModeType prev_rounding_mode=Float64::get_rounding_mode();
-    for(SizeType i=0; i!=m; ++i) {
-        Float64::set_rounding_upward();
-        X rsum=zero;
-        for(SizeType j=i; j!=n; ++j) {
-            rsum+=abs(R[i][j]);
-        }
-        Float64::set_rounding_toward_zero();
-        for(SizeType j=i; j!=n; ++j) {
-            R[i][j]/=rsum;
-        }
-    }
-    Float64::set_rounding_mode(prev_rounding_mode);
+    normalise_rows(R);
 
     return Tuple<Matrix<X>,PivotMatrix>{R,P};
 
@@ -575,11 +559,9 @@ triangular_factor(const Matrix<Float64Approximation>& A)
 // orthogonal rows, and such that the row absolute value sums of the inverse of
 // T are at most 1. Then the image of the unit box under the matrix T is
 // an over-approximation of the unit box.
-Matrix<Float64Approximation>
-triangular_multiplier(const Matrix<Float64Approximation>& A)
+template<class X> Matrix<X>
+triangular_multiplier(const Matrix<X>& A)
 {
-    typedef Float64Approximation X;
-
     ARIADNE_ASSERT(A.row_size()<=A.column_size());
     const SizeType m=A.row_size();
     const SizeType n=A.column_size();
@@ -589,7 +571,7 @@ triangular_multiplier(const Matrix<Float64Approximation>& A)
 
     Matrix<X> T(n,m); for(SizeType i=0; i!=m; ++i) { T[i][i]=1.0; }
 
-    for(SizeType i=0; i!=m; ++i) { assert(R[i][i].raw()!=0.0); }
+    for(SizeType i=0; i!=m; ++i) { assert(R[i][i]!=0.0); }
 
     for(SizeType k=m-1; k!=SizeType(-1); --k) {
         X r=1/R[k][k];
@@ -856,6 +838,7 @@ template<class AX> Matrix<decltype(cast_exact(declval<AX>()))> cast_exact(Matrix
 template class Matrix<Float64>;
 template Matrix<Float64> inverse(const Matrix<Float64>&);
 template Vector<Float64> solve(const Matrix<Float64>&, const Vector<Float64>&);
+template Void normalise_rows(Matrix<Float64>&);
 
 template class Matrix<Float64Approximation>;
 template Matrix<Float64Approximation> inverse(const Matrix<Float64Approximation>&);
@@ -868,7 +851,6 @@ template Tuple<Matrix<Float64Approximation>,Matrix<Float64Approximation>,PivotMa
 template Tuple<Matrix<Float64Approximation>,Matrix<Float64Approximation>> orthogonal_decomposition(Matrix<Float64Approximation> const&);
 
 template Vector<Float64Approximation> row_norms(Matrix<Float64Approximation> const&);
-template Matrix<Float64Approximation> normalise_rows(Matrix<Float64Approximation> const&);
 
 template class Matrix<Float64Bounds>;
 template Matrix<Float64Bounds> inverse(const Matrix<Float64Bounds>&);

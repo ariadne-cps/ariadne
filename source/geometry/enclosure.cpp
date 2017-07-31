@@ -98,42 +98,26 @@ ExactIntervalType cast_exact_interval(const Real& r) {
 }
 
 ExactIntervalType make_domain(const EffectiveIntervalType& ivl) {
-    Ariadne::RoundingModeType rnd=Ariadne::get_rounding_mode();
-    ExactIntervalType dom_lower_ivl=cast_exact_interval(ivl.lower());
-    ExactIntervalType dom_upper_ivl=cast_exact_interval(ivl.upper());
-    Float64 dom_lower=dom_lower_ivl.lower().raw();
-    Float64 dom_upper=dom_upper_ivl.upper().raw();
-    Ariadne::set_rounding_downward();
-    float flt_dom_lower=numeric_cast<double>(dom_lower);
-    while(double(flt_dom_lower)>dom_lower) {
-        flt_dom_lower-=std::numeric_limits<float>::min();
-    }
-    dom_lower=flt_dom_lower;
-    Ariadne::set_rounding_upward();
-    float flt_dom_upper=numeric_cast<double>(dom_upper);
-    while(double(flt_dom_upper)<dom_upper) {
-        flt_dom_upper+=std::numeric_limits<float>::min();
-    }
-    dom_upper=flt_dom_upper;
-    Ariadne::set_rounding_mode(rnd);
-    return ExactIntervalType(dom_lower,dom_upper);
+    return widen_domain(UpperIntervalType(ivl,Precision64()));
 }
 
 ValidatedVectorFunctionModel64 make_identity(const EffectiveBoxType& bx, const EnclosureConfiguration& configuration) {
     ExactIntervalVectorType dom(bx.dimension());
-    RawFloatVector errs(bx.dimension());
+    Vector<ErrorNumericType> errs(bx.dimension());
+    Precision64 pr64;
 
     for(Nat i=0; i!=bx.dimension(); ++i) {
-        ExactIntervalType dom_lower_ivl=cast_exact_interval(bx[i].lower());
-        ExactIntervalType dom_upper_ivl=cast_exact_interval(bx[i].upper());
+        Float64Bounds dom_lower_bnds(bx[i].lower(),pr64);
+        Float64Bounds dom_upper_bnds(bx[i].upper(),pr64);
         // Convert to single-precision values
-        Float64 dom_lower_flt=numeric_cast<float>(bx[i].lower());
-        Float64 dom_upper_flt=numeric_cast<float>(bx[i].upper());
-        Float64::set_rounding_upward();
-        Float64 err=max( max(dom_upper_ivl.upper().raw()-dom_upper_flt,dom_upper_flt-dom_upper_ivl.lower().raw()),
-                       max(dom_lower_ivl.upper().raw()-dom_lower_flt,dom_lower_flt-dom_lower_ivl.lower().raw()) );
-        Float64::set_rounding_to_nearest();
-        dom[i]=ExactIntervalType(dom_lower_flt,dom_upper_flt);
+        Float64Approximation dom_lower_apprx(bx[i].lower(),pr64);
+        Float64Approximation dom_upper_apprx(bx[i].upper(),pr64);
+        Float64Value dom_lower_flt=cast_exact(Float64(Float32(dom_lower_apprx.raw(),to_nearest)));
+        Float64Value dom_upper_flt=cast_exact(Float64(Float32(dom_upper_apprx.raw(),to_nearest)));
+        ExactIntervalType dom_ivl(dom_lower_flt,dom_upper_flt);
+        Float64Error err=cast_positive( max( max(dom_upper_bnds.upper()-dom_upper_flt,dom_upper_flt-dom_upper_bnds.lower()),
+                                        max(dom_lower_bnds.upper()-dom_lower_flt,dom_lower_flt-dom_lower_bnds.lower()) ) );
+        dom[i]=dom_ivl;
         errs[i]=err;
     }
 
@@ -1164,8 +1148,6 @@ TaylorModel<ValidatedTag,Float64> recondition(const TaylorModel<ValidatedTag,Flo
             r.expansion().append(ra,xv);
         }
     }
-    Float64::set_rounding_to_nearest();
-
     return r;
 }
 
@@ -1411,8 +1393,7 @@ struct ValidatedAffineModel {
 };
 
 ValidatedAffineModel _affine_model(const ValidatedTaylorModel64& tm) {
-    ValidatedAffineModel result(0.0,Vector<Float64>(tm.argument_size(),0.0),tm.error());
-    Float64::set_rounding_upward();
+    ValidatedAffineModel result(0.0,Vector<Float64Value>(tm.argument_size(),0.0),tm.error());
     for(ValidatedTaylorModel64::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
         if(iter->key().degree()>=2) { result._e+=abs(iter->data()); }
         else if(iter->key().degree()==0) {result. _c=iter->data(); }
@@ -1422,7 +1403,6 @@ ValidatedAffineModel _affine_model(const ValidatedTaylorModel64& tm) {
             }
         }
     }
-    Float64::set_rounding_to_nearest();
     return result;
 }
 */

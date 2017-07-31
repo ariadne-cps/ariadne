@@ -835,7 +835,6 @@ AffineIntegrator::flow_step(const ValidatedVectorFunction& f, const ExactBoxType
 
     Vector<Float64Error> err(n,zero_err);
 
-    Float64::set_rounding_upward();
     Vector<Float64Error> rad(n+1,zero_err);
     for(Nat i=0; i!=n; ++i) {
         rad[i] = cast_positive(max(dom[i].upper()-mid[i].lower(),mid[i].upper()-dom[i].lower()));
@@ -855,7 +854,6 @@ AffineIntegrator::flow_step(const ValidatedVectorFunction& f, const ExactBoxType
             }
         }
     }
-    Float64::set_rounding_to_nearest();
 
     ExactBoxType flow_domain = join(dom,ExactIntervalType(0,h));
 

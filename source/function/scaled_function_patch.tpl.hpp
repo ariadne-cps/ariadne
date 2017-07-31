@@ -66,21 +66,17 @@ inline decltype(auto) contains(BoxDomainType const& bx, Vector<FloatMPApproximat
 
 template<class M> Void _set_scaling(ScaledFunctionPatch<M>& x, const IntervalDomainType& ivl, SizeType j)
 {
-    Float64::RoundingModeType rounding_mode=Float64::get_rounding_mode();
-    Float64::set_rounding_upward();
-    const Float64& l=ivl.lower().raw();
-    const Float64& u=ivl.upper().raw();
-    VOLATILE Float64 pc=u; pc+=l;
-    VOLATILE Float64 nc=-u; nc-=l;
-    VOLATILE Float64 pg=u; pg-=l;
-    VOLATILE Float64 ng=l; ng-=u;
-    x.error()=ErrorType((pc+nc+pg+ng)/4);
-    Float64::set_rounding_to_nearest();
+    // A scaling of [-1,+1] into [a,b] has the form s->rx+c where c is centre and r radius of ivl
+    const Float64Value& l=ivl.lower();
+    const Float64Value& u=ivl.upper();
+    Float64Ball c{hlf(l+u)};
+    Float64Ball r{hlf(u-l)};
+    Float64Error e=c.error()+r.error();
     MultiIndex a(x.argument_size());
-    x.expansion().raw().append(a,(l+u)/2);
+    x.expansion().append(a,c.value());
     ++a[j];
-    x.expansion().raw().append(a,(l+u)/2);
-    Float64::set_rounding_mode(rounding_mode);
+    x.expansion().append(a,r.value());
+    x.set_error(e);
 }
 
 

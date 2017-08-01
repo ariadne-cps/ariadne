@@ -60,6 +60,30 @@ struct Accuracy {
 extern const Real pi;
 extern const Real infinity;
 
+template<class X> class Sequence {
+    std::function<X(Natural)> _fn;
+  public:
+    Sequence<X>(std::function<X(Natural)> fn) : _fn(fn) { }
+    X operator[](Natural const& n) const { return _fn(n); }
+};
+
+template<class Y> struct CompletionTypedef;
+template<> struct CompletionTypedef<Dyadic> { typedef Real Type; };
+template<> struct CompletionTypedef<Rational> { typedef Real Type; };
+template<> struct CompletionTypedef<Real> { typedef Real Type; };
+template<class Y> using CompletionType = typename CompletionTypedef<Y>::Type;
+
+template<class X> class ConvergentSequence : public Sequence<X> {
+  public:
+    ConvergentSequence(Sequence<X> const& seq) : Sequence<X>(seq) { }
+};
+template<class X> class StrongCauchySequence : public Sequence<X> {
+  public:
+    StrongCauchySequence(Sequence<X> const& seq) : Sequence<X>(seq) { }
+    friend CompletionType<X> limit(StrongCauchySequence<X> const&);
+};
+
+
 //! \ingroup NumericModule
 //! \brief Computable real numbers definable in terms of elementary functions.
 class Real
@@ -82,7 +106,7 @@ class Real
   public:
     Real();
 
-    explicit Real(double);
+    explicit Real(double); //!< DEPRECATED
 
     template<class M, EnableIf<And<IsBuiltinIntegral<M>,IsBuiltinUnsigned<M>>> = dummy> Real(M m);
     template<class N, EnableIf<And<IsBuiltinIntegral<N>,IsBuiltinSigned<N>>> = dummy> Real(N n);
@@ -114,6 +138,10 @@ class Real
 
 
     friend PositiveReal abs(Real const&);
+
+    friend Real limit(ConvergentSequence<DyadicBounds> const&);
+    friend Real limit(StrongCauchySequence<Dyadic> const&);
+    friend Real limit(StrongCauchySequence<Real> const&);
 
     friend PositiveUpperReal mag(Real const&);
     friend FloatDPError mag(Real const&, DoublePrecision);

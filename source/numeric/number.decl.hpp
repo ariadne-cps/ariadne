@@ -77,6 +77,8 @@ class Integer;
 class Rational;
 class Real;
 
+class DyadicBounds;
+
 template<class R, class A> R integer_cast(const A& _a);
 
 //! \ingroup NumericModule

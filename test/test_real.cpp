@@ -200,6 +200,15 @@ void TestReal::test_accuracy() {
     ARIADNE_TEST_PRINT(abs(sub(up,pi_met.value_raw(),pi_near)));
     ARIADNE_TEST_ASSERT(pi_met.error() <= error);
     ARIADNE_TEST_ASSERT(rad(up,pi_met.value().raw(),pi_near) <= error.raw());
+
+    std::function<Dyadic(Natural)> wfn([&](Natural n){int nint=n.get_si();return Dyadic(two_exp(-nint));});
+    StrongCauchySequence<Dyadic> wseq(wfn);
+    Real wlim=limit(wseq);
+
+    std::function<Real(Natural)> rfn([&](Natural n){return exp(Real(-(n+1u)));});
+    StrongCauchySequence<Real> rseq(rfn);
+    Real rlim=limit(rseq);
+
 }
 
 

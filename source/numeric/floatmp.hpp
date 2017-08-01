@@ -50,9 +50,11 @@ typedef mpfr_rnd_t RoundingModeMP;
 
 class MultiplePrecision {
     mpfr_prec_t prec;
+    typedef std::make_unsigned<mpfr_prec_t>::type unsigned_mpfr_prec_t;
   public:
+    typedef unsigned_mpfr_prec_t Type;
     explicit MultiplePrecision(mpfr_prec_t pr) : prec(pr) { }
-    mpfr_prec_t bits() const { return prec; }
+    unsigned_mpfr_prec_t bits() const { return prec; }
     operator mpfr_prec_t () const { return prec; }
     friend MultiplePrecision max(MultiplePrecision mp1, MultiplePrecision mp2) { return MultiplePrecision(std::max(mp1.bits(),mp2.bits())); }
     friend MultiplePrecision min(MultiplePrecision mp1, MultiplePrecision mp2) { return MultiplePrecision(std::min(mp1.bits(),mp2.bits())); }

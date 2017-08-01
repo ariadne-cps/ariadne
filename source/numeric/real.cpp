@@ -59,6 +59,12 @@ class Real::Interface {
     virtual OutputStream& _write(OutputStream& os) const = 0;
 };
 
+template<> Ball<FloatDP>::Ball(Real const& r, DoublePrecision pr) : Ball(r.get(pr)) { }
+template<> Bounds<FloatDP>::Bounds(Real const& r, DoublePrecision pr) : Bounds<FloatDP>(r.get(pr)) { }
+template<> UpperBound<FloatDP>::UpperBound(Real const& r, DoublePrecision pr) : UpperBound<FloatDP>(r.upper().get(pr)) { }
+template<> LowerBound<FloatDP>::LowerBound(Real const& r, DoublePrecision pr) : LowerBound<FloatDP>(r.lower().get(pr)) { }
+template<> Approximation<FloatDP>::Approximation(Real const& r, DoublePrecision pr) : Approximation<FloatDP>(r.get(pr)) { }
+
 template<class O, class... AS> struct RealWrapper;
 
 template<class O, class A> struct RealWrapper<O,A> : virtual RealInterface, ExpressionTemplate<O,A>, FloatDPBounds {
@@ -89,15 +95,6 @@ template<class A, class N> struct RealWrapper<Pow,A,N> : virtual RealInterface, 
 template<class X> struct RealConstant : RealInterface, FloatDPBounds {
     X _c;
   public:
-    virtual FloatDPBounds _evaluate(DoublePrecision pr) const { return static_cast<FloatDPBounds const&>(*this); }
-    virtual FloatMPBounds _evaluate(MultiplePrecision pr) const { return FloatMPBounds(Number<Ariadne::Paradigm<X>>(this->_c),pr); }
-    virtual OutputStream& _write(OutputStream& os) const { return os << this->_c; }
-};
-
-template<> struct RealConstant<Integer> : RealInterface, FloatDPBounds {
-    typedef Integer X;
-    X _c;
-  public:
     RealConstant(X const& x) : FloatDPBounds(x,dp), _c(x) { }
     virtual FloatDPBounds _evaluate(DoublePrecision pr) const { return static_cast<FloatDPBounds const&>(*this); }
     virtual FloatMPBounds _evaluate(MultiplePrecision pr) const { return FloatMPBounds(this->_c,pr); }
@@ -119,8 +116,53 @@ template<> struct RealConstant<EffectiveNumber> : RealInterface, FloatDPBounds {
   public:
     RealConstant(X const& x) : FloatDPBounds(x,dp) { }
     virtual FloatDPBounds _evaluate(DoublePrecision pr) const { return static_cast<FloatDPBounds const&>(*this); }
-    virtual FloatMPBounds _evaluate(MultiplePrecision pr) const { return this->_c.get(BoundedTag(),pr); }
+    virtual FloatMPBounds _evaluate(MultiplePrecision pr) const { return FloatMPBounds(this->_c,pr); }
     virtual OutputStream& _write(OutputStream& os) const { return os << this->_c; }
+};
+
+template<class Y> struct RealLimit;
+
+template<> struct RealLimit<Real> : RealInterface {
+    Sequence<Real> _seq;
+  public:
+    RealLimit(Sequence<Real> const& seq) : _seq(seq) { }
+    virtual FloatDPBounds _evaluate(DoublePrecision pr) const {
+        return FloatDPBounds(_seq[53u],pr).pm(FloatDPError(two^(-53),DoublePrecision())); }
+    virtual FloatMPBounds _evaluate(MultiplePrecision pr) const {
+        Nat n = pr.bits()+1u; Accuracy acc(n+1u); return _seq[n].get(Accuracy(n)).pm(FloatMPError(two_exp(-n),pr)); }
+    virtual OutputStream& _write(OutputStream& os) const {
+        return os << "{" << _seq[0u] << ", " << _seq[1u] << ", " <<_seq[2u] << ", ... }"; }
+};
+
+template<> struct RealLimit<Dyadic> : RealInterface {
+    Sequence<Dyadic> _seq;
+  public:
+    RealLimit(Sequence<Dyadic> const& seq) : _seq(seq) { }
+    virtual FloatDPBounds _evaluate(DoublePrecision pr) const {
+        Dyadic w=_seq[53u]; return FloatDPBounds(w,pr).pm(FloatDPError(two^(-53),DoublePrecision())); }
+    virtual FloatMPBounds _evaluate(MultiplePrecision pr) const {
+        Nat n = pr.bits()+1u; Accuracy acc(n+1u); return FloatMPBounds(_seq[n],pr).pm(FloatMPError(two_exp(-n),pr)); }
+    virtual OutputStream& _write(OutputStream& os) const {
+        return os << "{" << _seq[0u] << ", " << _seq[1u] << ", " <<_seq[2u] << ", ... }"; }
+};
+
+class DyadicBounds {
+  public:
+    FloatDPBounds get(DoublePrecision) const;
+    FloatMPBounds get(MultiplePrecision) const;
+    friend OutputStream& operator<<(OutputStream&, DyadicBounds);
+};
+
+template<> struct RealLimit<DyadicBounds> : RealInterface {
+    Sequence<DyadicBounds> _seq;
+  public:
+    RealLimit(ConvergentSequence<DyadicBounds> const& seq) : _seq(seq) { }
+    virtual FloatDPBounds _evaluate(DoublePrecision pr) const {
+        return _seq[0u].get(pr); }
+    virtual FloatMPBounds _evaluate(MultiplePrecision pr) const {
+        return _seq[pr.bits()].get(pr); }
+    virtual OutputStream& _write(OutputStream& os) const {
+        return os << "{" << _seq[0u] << ", " << _seq[1u] << ", " <<_seq[2u] << ", ... }"; }
 };
 
 template<class O, class... A> inline Real make_real(O o, A... a) {
@@ -155,12 +197,6 @@ template<class PR> FloatUpperBound<PR>::Float(Real const& x) : FloatUpperBound<P
 template<class PR> FloatLowerBound<PR>::Float(Real const& x) : FloatLowerBound<PR>(x.lower()) { }
 template<class PR> FloatApproximation<PR>::Float(Real const& x) : FloatApproximation<PR>(x.approx()) { }
 */
-
-template<> FloatBall<DoublePrecision>::Ball(Real const& r, DoublePrecision pr) : FloatBall<DoublePrecision>(r.get(pr)) { }
-template<> FloatBounds<DoublePrecision>::Bounds(Real const& r, DoublePrecision pr) : FloatBounds<DoublePrecision>(r.get(pr)) { }
-template<> FloatUpperBound<DoublePrecision>::UpperBound(Real const& r, DoublePrecision pr) : FloatUpperBound<DoublePrecision>(r.upper().get(pr)) { }
-template<> FloatLowerBound<DoublePrecision>::LowerBound(Real const& r, DoublePrecision pr) : FloatLowerBound<DoublePrecision>(r.lower().get(pr)) { }
-template<> FloatApproximation<DoublePrecision>::Approximation(Real const& r, DoublePrecision pr) : FloatApproximation<DoublePrecision>(r.get(pr)) { }
 
 Real::Real(std::uint64_t m, Void*) : Real(std::make_shared<RealConstant<Integer>>(m)) { }
 Real::Real(std::int64_t n, Void*) : Real(std::make_shared<RealConstant<Integer>>(n)) { }
@@ -198,6 +234,9 @@ Real atan(Real const& x) { return make_real(Atan(),x); }
 PositiveReal abs(Real const& x) { return PositiveReal(make_real(Abs(),x)); }
 Real max(Real const& x1, Real const& x2) { return make_real(Max(),x1,x2); }
 Real min(Real const& x1, Real const& x2) { return make_real(Min(),x1,x2); }
+
+Real limit(StrongCauchySequence<Real> const& seq) { return Real(std::make_shared<RealLimit<Real>>(seq)); }
+Real limit(StrongCauchySequence<Dyadic> const& seq) { return Real(std::make_shared<RealLimit<Dyadic>>(seq)); }
 
 PositiveUpperReal mag(Real const& r) { return abs(r); }
 FloatDPError mag(Real const& r, DoublePrecision pr) { return mag(r.get(pr)); }

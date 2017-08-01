@@ -65,6 +65,7 @@ template<class PR> class FloatLowerBound
 
     template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> FloatLowerBound<PR>(N n, PR pr) : FloatLowerBound<PR>(ExactDouble(n),pr) { }
     FloatLowerBound<PR>(ExactDouble d, PR pr);
+        FloatLowerBound<PR>(TwoExp t, PR pr);
         FloatLowerBound<PR>(const Integer& z, PR pr);
         FloatLowerBound<PR>(const Dyadic& w, PR pr);
         FloatLowerBound<PR>(const Decimal& d, PR pr);

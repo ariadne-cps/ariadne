@@ -59,6 +59,7 @@ template<class PR> class FloatError
     template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>> =dummy> FloatError<PR>(M m, PR pr) : _e(m,pr) { }
     explicit FloatError<PR>(FloatUpperBound<PR> const& x) : FloatError<PR>(x._u) { }
     explicit FloatError<PR>(ValidatedUpperNumber const& y, PR pr) : FloatError(FloatUpperBound<PR>(y,pr)) { }
+    explicit FloatError<PR>(const TwoExp& t, PR pr) : FloatError(FloatUpperBound<PR>(t,pr)) { }
     FloatError<PR>(PositiveFloatValue<PR> const& x) : _e(x._v) { }
     FloatError<PR>& operator=(Nat m) { reinterpret_cast<FloatUpperBound<PR>&>(*this)=m; return *this; }
   public:

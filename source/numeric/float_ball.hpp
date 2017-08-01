@@ -77,6 +77,7 @@ template<class PR, class PRE> class FloatBall
     FloatBall<PR,PRE>(FloatLowerBound<PR> const& lower, FloatUpperBound<PR> const& upper) = delete;
 
     FloatBall<PR,PRE>(ExactDouble d, PR pr);
+        FloatBall<PR,PRE>(TwoExp t, PR pr);
         FloatBall<PR,PRE>(const Integer& z, PR pr);
         FloatBall<PR,PRE>(const Dyadic& w, PR pr);
         FloatBall<PR,PRE>(const Decimal& d, PR pr);

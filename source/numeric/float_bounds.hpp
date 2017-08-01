@@ -103,6 +103,7 @@ template<class PR> class FloatBounds
 
     template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> FloatBounds<PR>(N n, PR pr) : FloatBounds<PR>(ExactDouble(n),pr) { }
     FloatBounds<PR>(ExactDouble d, PR pr);
+        FloatBounds<PR>(TwoExp t, PR pr);
         FloatBounds<PR>(const Integer& z, PR pr);
         FloatBounds<PR>(const Dyadic& w, PR pr);
         FloatBounds<PR>(const Decimal& d, PR pr);

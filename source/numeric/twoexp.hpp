@@ -47,14 +47,15 @@ class TwoExp {
     Float64 get_raw(Precision64 pr) const;
     FloatMP get_raw(PrecisionMP pr) const;
     double get_d() const { return std::pow(2.0,this->_n); }
-    operator Float64Value () const;
-    operator Float64Error () const;
-    operator Float64Ball () const;
-    operator Float64Bounds () const;
-    friend Float64Value operator+(TwoExp);
-    friend Float64Value operator-(TwoExp);
+    friend Dyadic operator+(TwoExp);
+    friend Dyadic operator-(TwoExp);
 };
 inline TwoExp two_exp(Int n) { return TwoExp(n); }
+
+struct Two : public std::integral_constant<uint,2u> {
+    friend TwoExp operator^(Two, Int n) { return TwoExp(n); }
+};
+static const Two two = Two();
 
 /*
 inline Float64 TwoExp::get_raw(Precision64 pr) const {

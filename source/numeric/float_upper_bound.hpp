@@ -65,6 +65,7 @@ template<class PR> class FloatUpperBound
 
     template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> FloatUpperBound<PR>(N n, PR pr) : FloatUpperBound<PR>(ExactDouble(n),pr) { }
     FloatUpperBound<PR>(ExactDouble d, PR pr);
+        FloatUpperBound<PR>(TwoExp t, PR pr);
         FloatUpperBound<PR>(const Integer& z, PR pr);
         FloatUpperBound<PR>(const Dyadic& w, PR pr);
         FloatUpperBound<PR>(const Decimal& d, PR pr);

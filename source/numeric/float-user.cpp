@@ -97,12 +97,27 @@ FloatApproximation<Precision64> operator"" _approx(long double lx) {
 }
 
 
-TwoExp::operator FloatValue<Precision64> () const {
-    return FloatValue<Precision64>(this->get_d());
+
+template<class PR> FloatValue<PR>::FloatValue(ExactDouble d, PR pr)
+    : _v(d.get_d(),pr)
+{
+}
+
+template<class PR> FloatValue<PR>::FloatValue(TwoExp const& t, PR pr)
+    : _v(t,pr)
+{
+    ARIADNE_ASSERT_MSG(Dyadic(this->_v)==Dyadic(t),"Number 2^"<<t.exponent()<<" cannot be converted exactly to a floating-point number with precision "<<pr<<"; nearest is "<<(*this));
+};
+
+template<class PR> FloatValue<PR>::FloatValue(Integer const& z, PR pr)
+    : _v(z,to_nearest,pr)
+{
+    Rational q(_v);
+    ARIADNE_ASSERT_MSG(Dyadic(this->_v)==z,"Integer "<<z<<" cannot be converted exactly to a floating-point number with precision "<<pr<<"; nearest is "<<(*this));
 }
 
 template<class PR> FloatValue<PR>::FloatValue(Dyadic const& w, PR pr)
-    : _v(w,to_nearest,pr)
+    : _v(w,pr)
 {
     ARIADNE_ASSERT_MSG(Dyadic(this->_v)==w,"Dyadic number "<<w<<" cannot be converted exactly to a floating-point number with precision "<<pr<<"; nearest is "<<(*this));
 };
@@ -131,23 +146,6 @@ template<class PR> FloatValue<PR>::operator Rational() const {
     return Rational(this->operator Dyadic());
 }
 
-template<class PR> FloatValue<PR>::FloatValue(ExactDouble d, PR pr)
-    : _v(d.get_d(),pr)
-{
-}
-
-template<class PR> FloatValue<PR>::FloatValue(TwoExp const& t, PR pr)
-    : _v(pow(to_nearest,RawFloat<PR>(2,pr),t.exponent()))
-{
-}
-
-template<class PR> FloatValue<PR>::FloatValue(Integer const& z, PR pr)
-    : _v(Rational(z),to_nearest,pr)
-{
-    Rational q(_v);
-    ARIADNE_PRECONDITION(z==q);
-}
-
 template<class PR> FloatValue<PR>& FloatValue<PR>::operator=(Dyadic const& w) {
     _v=RawFloat<PR>(w,this->precision());
     ARIADNE_ASSERT_MSG(Dyadic(_v)==w,"Dyadic number "<<w<<" cannot be assigned exactly to a floating-point number with precision "<<this->precision()<<"; nearest is "<<(*this));
@@ -164,6 +162,10 @@ template<class PR> FloatValue<PR>::operator ExactNumber() const {
 
 template<class PR, class PRE> FloatBall<PR,PRE>::FloatBall(ExactDouble d, PR pr)
     : _v(d.get_d(),to_nearest,pr), _e(0,_error_precision<PRE>(pr)) {
+}
+
+template<class PR, class PRE> FloatBall<PR,PRE>::FloatBall(TwoExp t, PR pr)
+    : _v(t,pr), _e(0u,_error_precision<PRE>(pr)) {
 }
 
 template<class PR, class PRE> FloatBall<PR,PRE>::FloatBall(Integer const& z, PR pr) : FloatBall<PR,PRE>(Rational(z),pr) {
@@ -207,6 +209,10 @@ template<class PR, class PRE> FloatBall<PR,PRE>::operator ValidatedNumber() cons
 
 template<class PR> FloatBounds<PR>::FloatBounds(ExactDouble d, PR pr)
     : _l(d.get_d(),downward,pr),_u(d.get_d(),upward,pr) {
+}
+
+template<class PR> FloatBounds<PR>::FloatBounds(TwoExp t, PR pr)
+    : _l(t,pr),_u(t,pr) {
 }
 
 template<class PR> FloatBounds<PR>::FloatBounds(Integer const& z, PR pr)
@@ -271,6 +277,10 @@ template<class PR> FloatUpperBound<PR>::FloatUpperBound(ExactDouble d, PR pr)
     : _u(d.get_d(),upward,pr) {
 }
 
+template<class PR> FloatUpperBound<PR>::FloatUpperBound(TwoExp t, PR pr)
+    : _u(t,pr) {
+}
+
 template<class PR> FloatUpperBound<PR>::FloatUpperBound(Integer const& z, PR pr)
     : _u(z,upward,pr) {
 }
@@ -317,7 +327,7 @@ template<class PR> FloatUpperBound<PR> FloatUpperBound<PR>::create(ValidatedUppe
 }
 
 template<class PR> FloatLowerBound<PR>::FloatLowerBound(ExactDouble d, PR pr)
-    : _l(d.get_d(),downward,pr) {
+    : _l(d.get_d(),pr) {
 }
 
 template<class PR> FloatLowerBound<PR>::FloatLowerBound(Integer const& z, PR pr)
@@ -372,6 +382,10 @@ template<class PR> FloatApproximation<PR>::FloatApproximation(double d, PR pr)
 
 template<class PR> FloatApproximation<PR>::FloatApproximation(ExactDouble d, PR pr)
     : _a(d.get_d(),to_nearest,pr) {
+}
+
+template<class PR> FloatApproximation<PR>::FloatApproximation(TwoExp t, PR pr)
+    : _a(t,pr) {
 }
 
 template<class PR> FloatApproximation<PR>::FloatApproximation(Integer const& z, PR pr)
@@ -2048,11 +2062,6 @@ Float64Error mag(Float64Value const& x) { return Operations<Float64Value>::_mag(
 FloatMPError mag(FloatMPValue const& x) { return Operations<FloatMPValue>::_mag(x); }
 Bool same(Float64Value const& x1, Float64Value const& x2) { return Operations<Float64Value>::_same(x1,x2); }
 Bool same(FloatMPValue const& x1, FloatMPValue const& x2) { return Operations<FloatMPValue>::_same(x1,x2); }
-
-
-
-Float64Value operator+(TwoExp y) { return Float64Value(y); }
-Float64Value operator-(TwoExp y) { return neg(Float64Value(y)); }
 
 
 

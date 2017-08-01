@@ -53,7 +53,6 @@ typedef Real::Interface RealInterface;
 class Real::Interface {
   public:
     virtual ~Interface() = default;
-    virtual FloatDPBounds _value() const = 0;
     virtual FloatDPBounds _evaluate(DoublePrecision) const = 0;
     virtual FloatMPBounds _evaluate(MultiplePrecision) const = 0;
   public:
@@ -65,7 +64,6 @@ template<class O, class... AS> struct RealWrapper;
 template<class O, class A> struct RealWrapper<O,A> : virtual RealInterface, ExpressionTemplate<O,A>, FloatDPBounds {
     RealWrapper(O o, A a) : ExpressionTemplate<O,A>(o,a)
         , FloatDPBounds(this->_op(this->_arg.get(dp))) { }
-    virtual FloatDPBounds _value() const { return static_cast<FloatDPBounds const&>(*this); }
     virtual FloatDPBounds _evaluate(DoublePrecision pr) const {  return static_cast<FloatDPBounds>(*this); }
     virtual FloatMPBounds _evaluate(MultiplePrecision pr) const {  return this->_op(this->_arg.get(pr)); }
     virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<ExpressionTemplate<O,A> const&>(*this); }
@@ -83,7 +81,6 @@ template<class O, class A1, class A2> struct RealWrapper<O,A1,A2> : virtual Real
 template<class A, class N> struct RealWrapper<Pow,A,N> : virtual RealInterface, ExpressionTemplate<Pow,A,N>, FloatDPBounds {
     RealWrapper(Pow o, A a, N n) : ExpressionTemplate<Pow,A,N>(o,a,n)
         , FloatDPBounds(this->_op(this->_arg.get(dp),n)) { }
-    virtual FloatDPBounds _value() const { return static_cast<FloatDPBounds const&>(*this); }
     virtual FloatDPBounds _evaluate(DoublePrecision pr) const {  return static_cast<FloatDPBounds>(*this); }
     virtual FloatMPBounds _evaluate(MultiplePrecision pr) const {  return this->_op(this->_arg.get(pr),this->_n); }
     virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<ExpressionTemplate<Pow,A,N> const&>(*this); }
@@ -92,8 +89,6 @@ template<class A, class N> struct RealWrapper<Pow,A,N> : virtual RealInterface, 
 template<class X> struct RealConstant : RealInterface, FloatDPBounds {
     X _c;
   public:
-    RealConstant(X const& x) : FloatDPBounds(x,dp), _c(x) { }
-    virtual FloatDPBounds _value() const { return static_cast<FloatDPBounds const&>(*this); }
     virtual FloatDPBounds _evaluate(DoublePrecision pr) const { return static_cast<FloatDPBounds const&>(*this); }
     virtual FloatMPBounds _evaluate(MultiplePrecision pr) const { return FloatMPBounds(Number<Ariadne::Paradigm<X>>(this->_c),pr); }
     virtual OutputStream& _write(OutputStream& os) const { return os << this->_c; }
@@ -104,7 +99,6 @@ template<> struct RealConstant<Integer> : RealInterface, FloatDPBounds {
     X _c;
   public:
     RealConstant(X const& x) : FloatDPBounds(x,dp), _c(x) { }
-    virtual FloatDPBounds _value() const { return static_cast<FloatDPBounds const&>(*this); }
     virtual FloatDPBounds _evaluate(DoublePrecision pr) const { return static_cast<FloatDPBounds const&>(*this); }
     virtual FloatMPBounds _evaluate(MultiplePrecision pr) const { return FloatMPBounds(this->_c,pr); }
     virtual OutputStream& _write(OutputStream& os) const { return os << this->_c; }
@@ -114,7 +108,6 @@ template<> struct RealConstant<FloatDPBounds> : RealInterface, FloatDPBounds {
     typedef FloatDPBounds X;
   public:
     RealConstant(X const& x) : FloatDPBounds(x,dp) { }
-    virtual FloatDPBounds _value() const { return static_cast<FloatDPBounds const&>(*this); }
     virtual FloatDPBounds _evaluate(DoublePrecision pr) const { return static_cast<FloatDPBounds const&>(*this); }
     virtual FloatMPBounds _evaluate(MultiplePrecision pr) const { ARIADNE_NOT_IMPLEMENTED; }
     virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<FloatDPBounds const&>(*this); }
@@ -125,7 +118,6 @@ template<> struct RealConstant<EffectiveNumber> : RealInterface, FloatDPBounds {
     X _c;
   public:
     RealConstant(X const& x) : FloatDPBounds(x,dp) { }
-    virtual FloatDPBounds _value() const { return static_cast<FloatDPBounds const&>(*this); }
     virtual FloatDPBounds _evaluate(DoublePrecision pr) const { return static_cast<FloatDPBounds const&>(*this); }
     virtual FloatMPBounds _evaluate(MultiplePrecision pr) const { return this->_c.get(BoundedTag(),pr); }
     virtual OutputStream& _write(OutputStream& os) const { return os << this->_c; }

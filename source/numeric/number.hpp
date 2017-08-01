@@ -63,11 +63,6 @@ class NumberInterface;
 template<class P> class Number;
 template<class P> struct IsNumericType<Number<P>> : True { };
 
-template<class N1, class N2, EnableIf<And<IsNumericType<N1>,IsNumericType<N2>>> =dummy> inline N1& operator+=(N1& n1, const N2& n2) { n1=n1+n2; return n1; }
-template<class N1, class N2, EnableIf<And<IsNumericType<N1>,IsNumericType<N2>>> =dummy> inline N1& operator-=(N1& n1, const N2& n2) { n1=n1-n2; return n1; }
-template<class N1, class N2, EnableIf<And<IsNumericType<N1>,IsNumericType<N2>>> =dummy> inline N1& operator*=(N1& n1, const N2& n2) { n1=n1*n2; return n1; }
-template<class N1, class N2, EnableIf<And<IsNumericType<N1>,IsNumericType<N2>>> =dummy> inline N1& operator/=(N1& n1, const N2& n2) { n1=n1/n2; return n1; }
-
 
 /*
 struct DefineBuiltinFloatOperators {

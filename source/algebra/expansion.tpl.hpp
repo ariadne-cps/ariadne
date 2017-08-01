@@ -225,7 +225,13 @@ template<class X> Void Expansion<X>::remove_zeros() {
     this->resize(std::remove_if(this->begin(),this->end(),CoefficientIsZero())-this->begin());
 }
 
-template<class X, EnableIf<IsSame<SumType<X>,X>> =dummy> Void combine_terms(Expansion<X>& e) {
+template<class X, class Y> struct CanInplaceAdd {
+    template<class XX, class YY, class = decltype(declval<XX&>()+=declval<YY>())> static True test(int);
+    template<class XX, class YY> static False test(...);
+    static const bool value = decltype(test<X,Y>(1))::value;
+};
+
+template<class X, EnableIf<CanInplaceAdd<X,X>> =dummy> Void combine_terms(Expansion<X>& e) {
     auto begin=e.begin();
     auto end=e.end();
     auto curr=begin;
@@ -243,7 +249,7 @@ template<class X, EnableIf<IsSame<SumType<X>,X>> =dummy> Void combine_terms(Expa
     e.resize(curr-begin);
 }
 
-template<class X, DisableIf<IsSame<SumType<X>,X>> =dummy> Void combine_terms(Expansion<X>& e) {
+template<class X, DisableIf<CanInplaceAdd<X,X>> =dummy> Void combine_terms(Expansion<X>& e) {
     ARIADNE_ASSERT_MSG(false, "Cannot combine terms of an expansion if the coefficients do not support inplace addition.");
 }
 

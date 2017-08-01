@@ -417,7 +417,6 @@ template<class A> A NormedAlgebraOperations<A>::_cos(const A& x)
     auto rad=x.radius();
 
     // Range reduce; use cos(x)=cos(x-2*n*pi)=-cos(x-pi)
-    Float64 two_pi_approx=2*Float64::pi(Precision64());
     Int n=integer_cast<Int>( round(avg/pi) );
     A y=x-n*pi;
     int c=(n%2)?-1:+1; // If n is odd, take minus the usual series

@@ -344,15 +344,17 @@ double sin_rnd(double x) {
 
 inline double max(double x1, double x2) { return std::max(x1,x2); }
 
-inline double add_rnd(double x1, double x2) { return (volatile double&)x1+(volatile double&)x2; }
-inline double sub_rnd(double x1, double x2) { return (volatile double&)x1-(volatile double&)x2; }
-inline double mul_rnd(double x1, double x2) { return (volatile double&)x1*(volatile double&)x2; }
-inline double div_rnd(double x1, double x2) { return (volatile double&)x1/(volatile double&)x2; }
+double sqr_rnd(double x) { return (volatile double&)x*(volatile double&)x; }
+double rec_rnd(double x) { return 1.0/(volatile double&)x; }
+double add_rnd(double x1, double x2) { return (volatile double&)x1+(volatile double&)x2; }
+double sub_rnd(double x1, double x2) { return (volatile double&)x1-(volatile double&)x2; }
+double mul_rnd(double x1, double x2) { return (volatile double&)x1*(volatile double&)x2; }
+double div_rnd(double x1, double x2) { return (volatile double&)x1/(volatile double&)x2; }
 
-inline double add_opp(double x, double y) { volatile double t=(-x)-y; return -t; }
-inline double sub_opp(double x, double y) { volatile double t=(-x)+y; return -t; }
-inline double mul_opp(double x, double y) { volatile double t=(-x)*y; return -t; }
-inline double div_opp(double x, double y) { volatile double t=(-x)/y; return -t; }
+double add_opp(double x, double y) { volatile double t=(-x)-y; return -t; }
+double sub_opp(double x, double y) { volatile double t=(-x)+y; return -t; }
+double mul_opp(double x, double y) { volatile double t=(-x)*y; return -t; }
+double div_opp(double x, double y) { volatile double t=(-x)/y; return -t; }
 
 double neg_rec_rnd(double x) { return (-1.0)/(volatile double&)x; }
 double neg_rec_opp(double x) { volatile double t=1.0/x; return -t; }
@@ -739,10 +741,6 @@ Float64 Float64::pi(RoundingModeType rnd, Precision64 pr) {
         case Float64::ROUND_TO_NEAREST: return _pi_near;
         default: assert(false);
     }
-}
-
-Float64 Float64::pi(Precision64 pr) {
-    return pi(Float64::get_rounding_mode(),pr);
 }
 
 Float64::RoundingModeType Float64::get_rounding_mode() { return Ariadne::get_rounding_mode(); }

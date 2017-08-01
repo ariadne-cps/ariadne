@@ -380,7 +380,7 @@ Void LohnerReconditioner::simplify(ValidatedVectorFunctionModel& phi) const {
     auto m=phi.argument_size();
     auto n=phi.result_size();
     // Compute effect of error terms, but not of original variables;
-    Matrix<Float64Approximation> C(m,n);
+    Matrix<Float64> C(m,n);
     for (auto i : range(n)) {
         auto p=tphi[i].model().expansion();
 
@@ -389,19 +389,18 @@ Void LohnerReconditioner::simplify(ValidatedVectorFunctionModel& phi) const {
             Float64Value& c=ac.coefficient();
             for (auto j : range(m)) {
                 if (a[j]!=0) {
-                    C[j][i] = C[j][i]+abs(c);
+                    C[j][i] = C[j][i]+abs(c).raw();
                 }
             }
         }
     }
 
-    Vector<Float64Error> e(n,[&phi](SizeType i){return phi[i].error();});
-    ARIADNE_LOG(3,"C"<<C<<", e"<<e<<"\n");
+    ARIADNE_LOG(3,"C"<<C<<"\n");
 
-    List<Float64> Ce(m,Float64(Precision64()));
+    Array<Float64> Ce(m);
     for (auto j : range(m)) {
         for (auto i : range(n)) {
-            Ce[j] += C[j][i].raw();
+            Ce[j] += C[j][i];
         }
     }
     ARIADNE_LOG(3,"Ce:"<<Ce<<"\n");
@@ -429,7 +428,7 @@ Void LohnerReconditioner::simplify(ValidatedVectorFunctionModel& phi) const {
     auto projection=ValidatedVectorTaylorFunctionModel(m,new_domain,this->_sweeper);
     for (auto i : range(new_domain.size())) { projection[keep_indices[i]]=ValidatedScalarTaylorFunctionModel::coordinate(new_domain,i,this->_sweeper); }
     for (auto i : range(remove_indices.size())) {
-        auto j=remove_indices[i]; auto cj=cast_singleton(old_domain[j]);
+        auto j=remove_indices[i]; auto cj=old_domain[j].midpoint();
         projection[j]=ValidatedScalarTaylorFunctionModel::constant(new_domain,cj,this->_sweeper); }
     phi=compose(phi,projection);
 

@@ -644,7 +644,7 @@ ExactPoint Grid::point(const Array<IntegerType>& a) const
 {
     Vector<Float64Value> res(a.size());
     for(SizeType i=0; i!=res.size(); ++i) {
-        res[i]=Float64Value(this->_data->_origin[i]+this->_data->_lengths[i]*a[i]);
+        res[i]=cast_exact(add(near,this->_data->_origin[i],mul(near,this->_data->_lengths[i],a[i])));
     }
     return res;
 }
@@ -653,7 +653,7 @@ ExactPoint Grid::point(const Array<DyadicType>& a) const
 {
     Vector<Float64Value> res(a.size());
     for(SizeType i=0; i!=res.size(); ++i) {
-        res[i]=Float64Value(this->_data->_origin[i]+this->_data->_lengths[i]*a[i]);
+        res[i]=cast_exact(add(near,this->_data->_origin[i],mul(near,this->_data->_lengths[i],a[i])));
     }
     return res;
 }
@@ -863,7 +863,7 @@ GridCell GridCell::neighboringCell( const Grid& theGrid, const Nat theHeight, co
     //   we are sure that we get a box that overlaps with the required neighboring cell.
     //NOTE: This box is in the original space, but not on the lattice
     Vector<ExactIntervalType> baseCellBoxInLattice =  GridCell::compute_lattice_box( dimensions, theHeight, theWord );
-    const Float64 upperBorderOverlapping = add(approx, baseCellBoxInLattice[dim].upper().raw(), baseCellBoxInLattice[dim].width().value_raw() / 2 );
+    const Float64 upperBorderOverlapping = add(approx, baseCellBoxInLattice[dim].upper().raw(), hlf( baseCellBoxInLattice[dim].width().value_raw() ) );
 
     //2. Now check if the neighboring cell can be rooted to the given primary cell. For that
     //   we simply use the box computed in 1. and get the primary cell that encloses it.
@@ -1000,9 +1000,9 @@ ExactBoxType GridOpenCell::compute_box(const Grid& theGrid, const Nat theHeight,
         ExactIntervalType openCellBoxInLatticeDimIntervalType;
         ExactIntervalType baseCellBoxInLatticeDimIntervalType = baseCellBoxInLattice[dim];
         Float64 lower = baseCellBoxInLatticeDimIntervalType.lower().raw();
-        Float64 upper = baseCellBoxInLatticeDimIntervalType.upper().raw() +
-                        ( baseCellBoxInLatticeDimIntervalType.upper().raw() -
-                          baseCellBoxInLatticeDimIntervalType.lower().raw() );
+        Float64 upper = add( near, baseCellBoxInLatticeDimIntervalType.upper().raw(),
+                             sub( near, baseCellBoxInLatticeDimIntervalType.upper().raw(),
+                                        baseCellBoxInLatticeDimIntervalType.lower().raw() ) );
         openCellBoxInLatticeDimIntervalType.set(cast_exact(lower),cast_exact(upper));
 
         openCellBoxInLattice[dim] = openCellBoxInLatticeDimIntervalType;
@@ -1653,7 +1653,7 @@ inline Nat GridTreeSubset::compute_number_subdiv( Float64 theWidth, const Float6
     Nat result = 0;
     if ( theWidth > theMaxWidth ){
         //result = (Nat) ceil( div(approx, log(approx, div(approx, theWidth, theMaxWidth ) ) , log(approx, R(2.0) ) ) );
-        result = integer_cast<Nat>(ceil( div( log( div( theWidth, theMaxWidth ) ) , log( Float64(2.0) ) ) ) );
+        result = integer_cast<Nat>(ceil( div( near, log( near, div( near, theWidth, theMaxWidth ) ) , log( near, Float64(2.0) ) ) ) );
     }
     return result;
 }

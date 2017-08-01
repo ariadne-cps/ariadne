@@ -39,6 +39,56 @@
 namespace Ariadne {
 template<> String class_name<Precision64>() { return "Precision64"; }
 template<> String class_name<PrecisionMP>() { return "PrecisionMP"; }
+Float64 operator+(Float64 x1, Float64 x2);
+Float64 operator-(Float64 x1, Float64 x2);
+Float64 operator*(Float64 x1, Float64 x2);
+Float64 operator/(Float64 x1, Float64 x2);
+Float64& operator+=(Float64& x1, Float64 x2);
+Float64& operator-=(Float64& x1, Float64 x2);
+Float64& operator*=(Float64& x1, Float64 x2);
+Float64& operator/=(Float64& x1, Float64 x2);
+Float64 sqr(Float64 x);
+Float64 rec(Float64 x);
+Float64 add(Float64 x1, Float64 x2);
+Float64 sub(Float64 x1, Float64 x2);
+Float64 mul(Float64 x1, Float64 x2);
+Float64 div(Float64 x1, Float64 x2);
+Float64 fma(Float64 x1, Float64 x2, Float64 x3);
+Float64 pow(Float64 x, Int n);
+Float64 sqrt(Float64 x);
+Float64 exp(Float64 x);
+Float64 log(Float64 x);
+Float64 sin(Float64 x);
+Float64 cos(Float64 x);
+Float64 tan(Float64 x);
+Float64 asin(Float64 x);
+Float64 acos(Float64 x);
+Float64 atan(Float64 x);
+FloatMP operator+(FloatMP const& x1, FloatMP const& x2);
+FloatMP operator-(FloatMP const& x1, FloatMP const& x2);
+FloatMP operator*(FloatMP const& x1, FloatMP const& x2);
+FloatMP operator/(FloatMP const& x1, FloatMP const& x2);
+FloatMP& operator+=(FloatMP& x1, FloatMP const& x2);
+FloatMP& operator-=(FloatMP& x1, FloatMP const& x2);
+FloatMP& operator*=(FloatMP& x1, FloatMP const& x2);
+FloatMP& operator/=(FloatMP& x1, FloatMP const& x2);
+FloatMP sqr(FloatMP const& x);
+FloatMP rec(FloatMP const& x);
+FloatMP add(FloatMP const& x1, FloatMP const& x2);
+FloatMP sub(FloatMP const& x1, FloatMP const& x2);
+FloatMP mul(FloatMP const& x1, FloatMP const& x2);
+FloatMP div(FloatMP const& x1, FloatMP const& x2);
+FloatMP fma(FloatMP const& x1, FloatMP const& x2, FloatMP const& x3);
+FloatMP pow(FloatMP const& x, Int n);
+FloatMP sqrt(FloatMP const& x);
+FloatMP exp(FloatMP const& x);
+FloatMP log(FloatMP const& x);
+FloatMP sin(FloatMP const& x);
+FloatMP cos(FloatMP const& x);
+FloatMP tan(FloatMP const& x);
+FloatMP asin(FloatMP const& x);
+FloatMP acos(FloatMP const& x);
+FloatMP atan(FloatMP const& x);
 } // namespace Ariadne
 
 using namespace std;
@@ -754,7 +804,7 @@ TestFloat<PR>::test_cosine()
     static const RawFloat<PR> third_pi_down=div(down,pi_down,three);
     static const RawFloat<PR> third_pi_up  =div(up  ,pi_up  ,three);
 
-    RawFloat<PR>::set_rounding_mode(up);
+    RawFloat<PR>::set_rounding_mode(upward);
     ARIADNE_TEST_EQUAL(cos(RawFloat<PR>(0.0)),1.0);
     ARIADNE_TEST_COMPARE(cos(third_pi_down),>,0.5);
     ARIADNE_TEST_COMPARE(sqr(cos(pi_down/4)),>,0.5);

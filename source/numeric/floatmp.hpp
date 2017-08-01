@@ -145,20 +145,49 @@ class FloatMP {
     friend FloatMP ceil(FloatMP const& x);
     friend FloatMP round(FloatMP const& x);
   public:
+    // Exact lattice operations
+    friend FloatMP max(FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP min(FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP abs(FloatMP const& x);
+    friend FloatMP mag(FloatMP const& x);
+
+    // Exact arithmetic
+    friend FloatMP nul(FloatMP const& x);
+    friend FloatMP pos(FloatMP const& x);
+    friend FloatMP neg(FloatMP const& x);
+    friend FloatMP hlf(FloatMP const& x);
+    friend FloatMP shft(FloatMP const& x, Int n);
+
+    // Exact arithmetic operators
+    friend FloatMP operator+(FloatMP const& x);
+    friend FloatMP operator-(FloatMP const& x);
+
+    // Explcitly rounded lattice operations
+    friend FloatMP max(RoundingModeType rnd, FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP min(RoundingModeType rnd, FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP abs(RoundingModeType rnd, FloatMP const& x);
+    friend FloatMP mag(RoundingModeType rnd, FloatMP const& x);
+
+    // Explcitly rounded inplace operations
+    friend FloatMP& iadd(RoundingModeType rnd, FloatMP& x1, FloatMP const& x2);
+    friend FloatMP& isub(RoundingModeType rnd, FloatMP& x1, FloatMP const& x2);
+    friend FloatMP& imul(RoundingModeType rnd, FloatMP& x1, FloatMP const& x2);
+    friend FloatMP& idiv(RoundingModeType rnd, FloatMP& x1, FloatMP const& x2);
+
     // Explcitly rounded operations
     friend FloatMP nul(RoundingModeType rnd, FloatMP const& x);
-    friend FloatMP hlf(RoundingModeType rnd, FloatMP const& x);
     friend FloatMP pos(RoundingModeType rnd, FloatMP const& x);
     friend FloatMP neg(RoundingModeType rnd, FloatMP const& x);
-    friend FloatMP sqr(RoundingModeType rnd, FloatMP const& x);
-    friend FloatMP rec(RoundingModeType rnd, FloatMP const& x);
-    friend FloatMP add(RoundingModeType rnd, FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP hlf(RoundingModeType rnd, FloatMP const& x);
+    friend FloatMP shft(RoundingModeType rnd, FloatMP const& x, Int n);
     friend FloatMP add(RoundingModeType rnd, FloatMP const& x1, FloatMP const& x2);
     friend FloatMP sub(RoundingModeType rnd, FloatMP const& x1, FloatMP const& x2);
     friend FloatMP mul(RoundingModeType rnd, FloatMP const& x1, FloatMP const& x2);
     friend FloatMP div(RoundingModeType rnd, FloatMP const& x1, FloatMP const& x2);
-    friend FloatMP fma(RoundingModeType rnd, FloatMP const& x1, FloatMP const& x2, FloatMP const& x3);
+    friend FloatMP fma(RoundingModeType rnd, FloatMP const& x1, FloatMP const& x2, FloatMP const& x3); // x1*x2+x3
     friend FloatMP pow(RoundingModeType rnd, FloatMP const& x, Int n);
+    friend FloatMP sqr(RoundingModeType rnd, FloatMP const& x);
+    friend FloatMP rec(RoundingModeType rnd, FloatMP const& x);
     friend FloatMP sqrt(RoundingModeType rnd, FloatMP const& x);
     friend FloatMP exp(RoundingModeType rnd, FloatMP const& x);
     friend FloatMP log(RoundingModeType rnd, FloatMP const& x);
@@ -169,11 +198,6 @@ class FloatMP {
     friend FloatMP acos(RoundingModeType rnd, FloatMP const& x);
     friend FloatMP atan(RoundingModeType rnd, FloatMP const& x);
     static FloatMP pi(RoundingModeType rnd, PrecisionMP pr);
-
-    friend FloatMP max(RoundingModeType rnd, FloatMP const& x1, FloatMP const& x2);
-    friend FloatMP min(RoundingModeType rnd, FloatMP const& x1, FloatMP const& x2);
-    friend FloatMP abs(RoundingModeType rnd, FloatMP const& x);
-    friend FloatMP mag(RoundingModeType rnd, FloatMP const& x);
 
     friend FloatMP med(RoundingModeType rnd, FloatMP x1, FloatMP x2) { return hlf(add(rnd,x1,x2)); }
     friend FloatMP rad(RoundingModeType rnd, FloatMP x1, FloatMP x2) { return hlf(sub(rnd,x2,x1)); }
@@ -200,12 +224,7 @@ class FloatMP {
     friend FloatMP add(RoundUpward rnd, FloatMP const& x1, Float64 const& x2);
     friend FloatMP sub(RoundDownward rnd, FloatMP const& x1, Float64 const& x2);
 
-
-    // Operations in current rounding mode
-    friend FloatMP nul(FloatMP const& x);
-    friend FloatMP hlf(FloatMP const& x);
-    friend FloatMP pos(FloatMP const& x);
-    friend FloatMP neg(FloatMP const& x);
+    // Correctly rounded arithmetic
     friend FloatMP sqr(FloatMP const& x);
     friend FloatMP rec(FloatMP const& x);
     friend FloatMP add(FloatMP const& x1, FloatMP const& x2);
@@ -225,24 +244,7 @@ class FloatMP {
     friend FloatMP atan(FloatMP const& x);
     static FloatMP pi(PrecisionMP pr);
 
-    friend FloatMP max(FloatMP const& x1, FloatMP const& x2);
-    friend FloatMP min(FloatMP const& x1, FloatMP const& x2);
-    friend FloatMP abs(FloatMP const& x);
-    friend FloatMP mag(FloatMP const& x);
-
-    // Mixed operations
-    friend FloatMP add(FloatMP const& x1, Dbl x2);
-    friend FloatMP sub(FloatMP const& x1, Dbl x2);
-    friend FloatMP mul(FloatMP const& x1, Dbl x2);
-    friend FloatMP div(FloatMP const& x1, Dbl x2);
-    friend FloatMP add(Dbl x1, FloatMP const& x2);
-    friend FloatMP sub(Dbl x1, FloatMP const& x2);
-    friend FloatMP mul(Dbl x1, FloatMP const& x2);
-    friend FloatMP div(Dbl x1, FloatMP const& x2);
-
-    // Operators
-    friend FloatMP operator+(FloatMP const& x);
-    friend FloatMP operator-(FloatMP const& x);
+    // Correctly rounded operators
     friend FloatMP operator+(FloatMP const& x1, FloatMP const& x2);
     friend FloatMP operator-(FloatMP const& x1, FloatMP const& x2);
     friend FloatMP operator*(FloatMP const& x1, FloatMP const& x2);
@@ -252,7 +254,7 @@ class FloatMP {
     friend FloatMP& operator*=(FloatMP& x1, FloatMP const& x2);
     friend FloatMP& operator/=(FloatMP& x1, FloatMP const& x2);
 
-    // Mixed operators
+    // Correctly rounded  mixed operators
     friend FloatMP operator+(FloatMP const& x1, Dbl x2);
     friend FloatMP operator-(FloatMP const& x1, Dbl x2);
     friend FloatMP operator*(FloatMP const& x1, Dbl x2);
@@ -262,7 +264,6 @@ class FloatMP {
     friend FloatMP operator*(Dbl x1, FloatMP const& x2);
     friend FloatMP operator/(Dbl x1, FloatMP const& x2);
 
-    // Mixed operators
     friend FloatMP operator+(FloatMP const& x1, Float64 const& x2);
     friend FloatMP operator-(FloatMP const& x1, Float64 const& x2);
     friend FloatMP operator*(FloatMP const& x1, Float64 const& x2);
@@ -271,7 +272,6 @@ class FloatMP {
     friend FloatMP operator-(Float64 const& x1, FloatMP const& x2);
     friend FloatMP operator*(Float64 const& x1, FloatMP const& x2);
     friend FloatMP operator/(Float64 const& x1, FloatMP const& x2);
-
 
     friend Comparison cmp(FloatMP const& x1, FloatMP const& x2);
     friend Bool operator==(FloatMP const& x1, FloatMP const& x2);

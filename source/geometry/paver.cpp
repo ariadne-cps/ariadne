@@ -66,7 +66,7 @@ UpperIntervalType emulrng(const RawFloatVector& x, const RawFloatVector& z) {
     return emulrng(reinterpret_cast<ExactFloatVector const&>(x),reinterpret_cast<ExactFloatVector const&>(z));
 }
 
-Float64UpperBound total_widths(const UpperBoxType& bx) {
+PositiveFloat64UpperBound total_widths(const UpperBoxType& bx) {
     PositiveFloat64UpperBound res=bx.zero_element().width();
     for(Nat i=0; i!=bx.size(); ++i) {
         res+=(bx[i].width());
@@ -74,16 +74,16 @@ Float64UpperBound total_widths(const UpperBoxType& bx) {
     return res;
 }
 
-Float64UpperBound average_width(const UpperBoxType& bx) {
+PositiveFloat64UpperBound average_width(const UpperBoxType& bx) {
     PositiveFloat64UpperBound res=bx.zero_element().width();
     for(Nat i=0; i!=bx.size(); ++i) {
-        if(definitely(bx[i].lower()>bx[i].upper())) { return -infty; }
+        if(definitely(bx[i].lower()>bx[i].upper())) { return cast_positive(-infty); }
         res+=bx[i].width();
     }
     return res/bx.size();
 }
 
-Float64UpperBound maximum_scaled_width(const UpperBoxType& bx, const Vector<PositiveFloat64Value>& sf) {
+PositiveFloat64UpperBound maximum_scaled_width(const UpperBoxType& bx, const Vector<PositiveFloat64Value>& sf) {
     PositiveFloat64UpperBound res=bx.zero_element().width();
     for(Nat i=0; i!=bx.size(); ++i) {
         res=max(bx[i].width()/sf[i],res);
@@ -91,7 +91,7 @@ Float64UpperBound maximum_scaled_width(const UpperBoxType& bx, const Vector<Posi
     return res;
 }
 
-Float64UpperBound average_scaled_width(const UpperBoxType& bx, const Vector<PositiveFloat64Value>& sf) {
+PositiveFloat64UpperBound average_scaled_width(const UpperBoxType& bx, const Vector<PositiveFloat64Value>& sf) {
     PositiveFloat64UpperBound res=bx.zero_element().width();
     for(Nat i=0; i!=bx.size(); ++i) {
         res+=(bx[i].width()/sf[i]);
@@ -118,18 +118,18 @@ OutputStream& OptimalConstraintPaver::_write(OutputStream& os) const { return os
 
 Void SubdivisionPaver::adjoin_outer_approximation(PavingInterface& paving, const ValidatedConstrainedImageSet& set, Int depth) const
 {
-    RawFloatVector errors(paving.dimension());
-    for(Nat i=0; i!=errors.size(); ++i) {
-        errors[i]=paving.grid().lengths()[i]/(1<<depth);
+    Vector<Float64Value> max_errors(paving.dimension());
+    for(Nat i=0; i!=max_errors.size(); ++i) {
+        max_errors[i]=shft(static_cast<Float64Value>(paving.grid().lengths()[i]),-depth);
     }
 
-    this->adjoin_outer_approximation_recursion(paving,set,depth,errors);
+    this->adjoin_outer_approximation_recursion(paving,set,depth,max_errors);
 }
 
-Void SubdivisionPaver::adjoin_outer_approximation_recursion(PavingInterface& paving, ValidatedConstrainedImageSet const& set, Int depth, const RawFloatVector& errors) const
+Void SubdivisionPaver::adjoin_outer_approximation_recursion(PavingInterface& paving, ValidatedConstrainedImageSet const& set, Int depth, const Vector<Float64Value>& max_errors) const
 {
     // How small an over-approximating box needs to be relative to the cell size
-    static const double RELATIVE_SMALLNESS=0.5;
+    static const ExactDouble RELATIVE_SMALLNESS=0.5_x;
 
     const ExactBoxType& subdomain = set.reduced_domain();
     const ValidatedVectorFunction& function = set.function();
@@ -145,7 +145,7 @@ Void SubdivisionPaver::adjoin_outer_approximation_recursion(PavingInterface& pav
     UpperBoxType range=apply(function,subdomain);
     Bool small=true;
     for(Nat i=0; i!=range.size(); ++i) {
-        if(range[i].width().raw()>errors[i]*RELATIVE_SMALLNESS*2) {
+        if(possibly(hlf(range[i].width())>max_errors[i]*RELATIVE_SMALLNESS)) {
             small=false;
             break;
         }
@@ -155,8 +155,8 @@ Void SubdivisionPaver::adjoin_outer_approximation_recursion(PavingInterface& pav
         paving.adjoin_outer_approximation(cast_exact_box(range),depth);
     } else {
         Pair<ValidatedConstrainedImageSet,ValidatedConstrainedImageSet> subsets=set.split();
-        this->adjoin_outer_approximation_recursion(paving,subsets.first,depth,errors);
-        this->adjoin_outer_approximation_recursion(paving,subsets.second,depth,errors);
+        this->adjoin_outer_approximation_recursion(paving,subsets.first,depth,max_errors);
+        this->adjoin_outer_approximation_recursion(paving,subsets.second,depth,max_errors);
     }
 }
 
@@ -222,6 +222,12 @@ namespace {
 
 using Ariadne::verbosity;
 
+template<class Y, class PR> decltype(auto) make_raw_float(Y const& y, PR pr) { return RawFloat<PR>(y,pr); }
+
+inline Bool strictly_smaller_by_factor(PositiveFloat64UpperBound x1, PositiveFloat64UpperBound x2, ExactDouble sf) {
+    return x1.raw() < mul(down,x2.raw(),make_raw_float(sf,pr64)); }
+inline Bool strictly_smaller(PositiveFloat64UpperBound x1, PositiveFloat64UpperBound x2) {
+    return x1.raw() < x2.raw(); }
 
 
 // Adjoin an over-approximation to the solution of $f(dom)$ such that $g(D) in C$ to the paving p, looking only at solutions in b.
@@ -234,7 +240,7 @@ Void procedure_constraint_adjoin_outer_approximation_recursion(
     const Nat ng=g.result_size();
 
     const ExactBoxType& cell_box=cell.box();
-    const RawFloatVector scalings=paving.grid().lengths();
+    const Vector<PositiveFloat64Value> scalings=Vector<PositiveFloat64Value>(paving.grid().lengths());
 
     UpperBoxType bbox = apply(f,domain);
 
@@ -257,10 +263,10 @@ Void procedure_constraint_adjoin_outer_approximation_recursion(
     const ExactBoxType& old_domain=domain;
     ExactBoxType exact_new_domain=old_domain;
     UpperBoxType& new_domain = reinterpret_cast<UpperBoxType&>(exact_new_domain);
-    Float64 olddomwdth = average_width(domain).raw();
-    Float64 newdomwdth = olddomwdth;
+    PositiveFloat64UpperBound olddomwdth = average_width(domain);
+    PositiveFloat64UpperBound newdomwdth = olddomwdth;
 
-    static const double ACCEPTABLE_REDUCTION_FACTOR = 0.75;
+    static const ExactDouble ACCEPTABLE_REDUCTION_FACTOR = 0.75_x;
 
 
     // ExactBoxType reduction steps
@@ -276,7 +282,7 @@ Void procedure_constraint_adjoin_outer_approximation_recursion(
             if(definitely(new_domain.is_empty())) { ARIADNE_LOG(4,"  Proved disjointness using box reduce\n"); return; }
         }
     }
-    newdomwdth=average_width(new_domain).raw();
+    newdomwdth=average_width(new_domain);
     ARIADNE_LOG(6,"     domwdth="<<newdomwdth<<" olddomwdth="<<olddomwdth<<" dom="<<new_domain<<" box reduce\n");
 
     // Hull reduction steps
@@ -292,16 +298,16 @@ Void procedure_constraint_adjoin_outer_approximation_recursion(
             if(definitely(new_domain.is_empty())) { ARIADNE_LOG(4,"  Proved disjointness using hull reduce\n"); return; }
             //constraint_solver.hull_reduce(new_domain,g[i],codomain[i]);
         }
-        newdomwdth=average_width(new_domain).raw();
+        newdomwdth=average_width(new_domain);
         ARIADNE_LOG(6,"     domwdth="<<newdomwdth<<" dom="<<new_domain<<"\n");
-    } while( !definitely(new_domain.is_empty()) && (newdomwdth < ACCEPTABLE_REDUCTION_FACTOR * olddomwdth) );
+    } while( !definitely(new_domain.is_empty()) && strictly_smaller_by_factor(newdomwdth , olddomwdth, ACCEPTABLE_REDUCTION_FACTOR) );
 
     ARIADNE_LOG(6,"new_domain="<<new_domain);
 
 
-    domwdth = average_scaled_width(new_domain,RawFloatVector(new_domain.size(),1.0)).raw();
+    domwdth = average_scaled_width(new_domain,RawFloatVector(new_domain.size(),1.0));
     bbox=apply(f,new_domain);
-    bbxwdth=average_scaled_width(bbox,paving.grid().lengths()).raw();
+    bbxwdth=average_scaled_width(bbox,paving.grid().lengths());
     if(definitely(bbox.disjoint(cell_box)) || definitely(codomain.disjoint(apply(g,new_domain)))) {
         ARIADNE_LOG(4,"  Proved disjointness using image of new domain\n");
         return;
@@ -314,10 +320,11 @@ Void procedure_constraint_adjoin_outer_approximation_recursion(
     // It seems that a more efficient algorithm results if the domain
     // is only split if the bounding box is much larger, so we preferentiably
     // split the cell unless the bounding box is 4 times as large
-    Float64 bbxmaxwdth = maximum_scaled_width(bbox,scalings).raw();
-    Float64 clmaxwdth = maximum_scaled_width(cell_box,scalings).raw();
+    PositiveFloat64UpperBound bbxmaxwdth = maximum_scaled_width(bbox,scalings);
+    PositiveFloat64UpperBound clmaxwdth = maximum_scaled_width(cell_box,scalings);
+    ExactDouble RELATIVE_SPLITTING_SIZE = 4.0_x;
 
-    if( (bbxmaxwdth > 4.0*clmaxwdth) || (cell.tree_depth()>=max_dpth && (bbxmaxwdth > clmaxwdth)) ) {
+    if( !strictly_smaller_by_factor(bbxmaxwdth, clmaxwdth, RELATIVE_SPLITTING_SIZE) || (cell.tree_depth()>=max_dpth && strictly_smaller(clmaxwdth, bbxmaxwdth)) ) {
         Pair<Nat,Float64> lipsch = lipschitz_index_and_error(f,new_domain);
         ARIADNE_LOG(4,"  Splitting domain on coordinate "<<lipsch.first<<"\n");
         Pair<ExactBoxType,ExactBoxType> sd=exact_new_domain.split(lipsch.first);

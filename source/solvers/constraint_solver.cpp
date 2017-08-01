@@ -201,17 +201,17 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
 
 Bool ConstraintSolver::reduce(UpperBoxType& domain, const ValidatedVectorFunction& function, const ExactBoxType& codomain) const
 {
-    const double MINIMUM_REDUCTION = 0.75;
+    const Float64 MINIMUM_REDUCTION = 0.75;
     ARIADNE_ASSERT(function.argument_size()==domain.size());
     ARIADNE_ASSERT(function.result_size()==codomain.size());
 
     if(definitely(domain.is_empty())) { return true; }
 
-    Float64 domain_magnitude=0.0;
+    Float64UpperBound domain_magnitude={0u,pr64};
     for(Nat j=0; j!=domain.size(); ++j) {
-        domain_magnitude+=domain[j].width().raw();
+        domain_magnitude+=domain[j].width();
     }
-    Float64 old_domain_magnitude=domain_magnitude;
+    Float64UpperBound old_domain_magnitude=domain_magnitude;
 
     do {
         this->hull_reduce(domain,function,codomain);
@@ -226,11 +226,11 @@ Bool ConstraintSolver::reduce(UpperBoxType& domain, const ValidatedVectorFunctio
         if(definitely(domain.is_empty())) { return true; }
 
         old_domain_magnitude=domain_magnitude;
-        domain_magnitude=0.0;
+        domain_magnitude=0u;
         for(Nat j=0; j!=domain.size(); ++j) {
-            domain_magnitude+=domain[j].width().raw();
+            domain_magnitude+=domain[j].width();
         }
-    } while(domain_magnitude/old_domain_magnitude <= MINIMUM_REDUCTION);
+    } while(domain_magnitude.raw() < old_domain_magnitude.raw() * MINIMUM_REDUCTION);
 
     return false;
 }
@@ -250,11 +250,11 @@ Bool ConstraintSolver::reduce(UpperBoxType& domain, const List<ValidatedConstrai
 
     if(definitely(domain.is_empty())) { return true; }
 
-    Float64 domain_magnitude=0.0;
+    Float64UpperBound domain_magnitude={0u,pr64};
     for(Nat j=0; j!=domain.size(); ++j) {
-        domain_magnitude+=domain[j].width().raw();
+        domain_magnitude+=domain[j].width();
     }
-    Float64 old_domain_magnitude=domain_magnitude;
+    Float64UpperBound old_domain_magnitude=domain_magnitude;
 
     do {
         for(Nat i=0; i!=constraints.size(); ++i) {
@@ -272,11 +272,11 @@ Bool ConstraintSolver::reduce(UpperBoxType& domain, const List<ValidatedConstrai
         }
 
         old_domain_magnitude=domain_magnitude;
-        domain_magnitude=0.0;
+        domain_magnitude=0u;
         for(Nat j=0; j!=domain.size(); ++j) {
-            domain_magnitude+=domain[j].width().raw();
+            domain_magnitude+=domain[j].width();
         }
-    } while(domain_magnitude/old_domain_magnitude <= MINIMUM_REDUCTION);
+    } while(domain_magnitude.raw() < old_domain_magnitude.raw() * MINIMUM_REDUCTION);
 
     return false;
 }

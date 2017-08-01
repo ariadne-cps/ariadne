@@ -126,10 +126,12 @@ template<class PR> class FloatValue
   private: public:
     RawFloatType _v;
   private:
+    friend FloatValue<PR> shft(FloatValue<PR> const& x, Int n) {
+        return FloatValue<PR>(shft(x.raw(),n)); }
     friend FloatValue<PR> operator*(FloatValue<PR> const& x, TwoExp const& y) {
-        return FloatValue<PR>(x.raw()*RawFloat<PR>(y,x.precision())); }
+        return FloatValue<PR>(mul(near,x.raw(),RawFloat<PR>(y,x.precision()))); }
     friend FloatValue<PR> operator/(FloatValue<PR> const& x, TwoExp const& y) {
-        return FloatValue<PR>(x.raw()/RawFloat<PR>(y,x.precision())); }
+        return FloatValue<PR>(div(near,x.raw(),RawFloat<PR>(y,x.precision()))); }
     friend FloatValue<PR>& operator*=(FloatValue<PR>& x, TwoExp const& y) { return x=x*y; }
     friend FloatValue<PR>& operator/=(FloatValue<PR>& x, TwoExp const& y) { return x=x/y; }
     friend OutputStream& operator<<(OutputStream& os, FloatValue<PR> const& x) {
@@ -139,9 +141,11 @@ template<class PR> class FloatValue
 template<class PR> inline FloatFactory<PR> factory(FloatValue<PR> const& flt) { return FloatFactory<PR>(flt.precision()); }
 template<class PR> inline FloatValue<PR> FloatFactory<PR>::create(Dyadic const& y, ExactTag) { return FloatValue<PR>(y,_pr); }
 template<class PR> inline FloatValue<PR> FloatFactory<PR>::create(Integer const& y, ExactTag) { return FloatValue<PR>(y,_pr); }
+template<class PR> inline FloatValue<PR> FloatFactory<PR>::create(ExactDouble const& y) { return FloatValue<PR>(y,_pr); }
 
 template<class PR> template<class N, EnableIf<IsBuiltinSignedIntegral<N>>> inline
 FloatValue<PR> FloatFactory<PR>::create(N const& y) { return FloatValue<PR>(y,_pr); }
+
 template<class PR> template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>>> inline
 PositiveFloatValue<PR> FloatFactory<PR>::create(M const& y) { return PositiveFloatValue<PR>(y,_pr); }
 

@@ -51,6 +51,7 @@ template<class PR> class FloatFactory {
     FloatBounds<PR> create(Rational const& y);
     FloatBounds<PR> create(Dyadic const& y);
     FloatBounds<PR> create(Integer const& y);
+    FloatValue<PR> create(ExactDouble const& y);
     FloatValue<PR> create(Dyadic const& y, ExactTag);
     FloatValue<PR> create(Integer const& y, ExactTag);
     template<class N, EnableIf<IsBuiltinSignedIntegral<N>> =dummy> FloatValue<PR> create(N const& y);

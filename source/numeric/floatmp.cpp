@@ -264,7 +264,7 @@ FloatMP FloatMP::max(PrecisionMP pr) {
     assert(x<2);
     FloatMP e(pr);
     mpfr_set_ui_2exp(e._mpfr,1u,(emax-1),to_nearest);
-    return x*e;
+    return mul(to_nearest,e,x);
 }
 
 Bool is_nan(FloatMP const& x) {
@@ -304,7 +304,7 @@ FloatMP tan(FloatMP const& x) { return tan(FloatMP::get_rounding_mode(),x); }
 FloatMP asin(FloatMP const& x) { return asin(FloatMP::get_rounding_mode(),x); }
 FloatMP acos(FloatMP const& x) { return acos(FloatMP::get_rounding_mode(),x); }
 FloatMP atan(FloatMP const& x) { return atan(FloatMP::get_rounding_mode(),x); }
-FloatMP FloatMP::pi(PrecisionMP pr) { return pi(FloatMP::get_rounding_mode(),pr); }
+// FIXME FloatMP FloatMP::pi(PrecisionMP pr) { return pi(FloatMP::get_rounding_mode(),pr); }
 
 FloatMP max(FloatMP const& x1, FloatMP const& x2) { return max(FloatMP::get_rounding_mode(),x1,x2); }
 FloatMP min(FloatMP const& x1, FloatMP const& x2) { return min(FloatMP::get_rounding_mode(),x1,x2); }
@@ -362,8 +362,6 @@ FloatMP& operator/=(FloatMP& x1, FloatMP const& x2) {
     mpfr_div(x1._mpfr,x1._mpfr,x2._mpfr,FloatMP::get_rounding_mode()); return x1;
 }
 
-
-
 FloatMP operator+(FloatMP const& x1, Dbl x2) {
     FloatMP r(x1.precision(),NoInit()); mpfr_add_d(r._mpfr,x1._mpfr,x2,FloatMP::get_rounding_mode()); return r;
 }
@@ -389,6 +387,7 @@ FloatMP operator*(Dbl x1, FloatMP const& x2) {
 FloatMP operator/(Dbl x1, FloatMP const& x2) {
     FloatMP r(x2.precision(),NoInit()); mpfr_d_div(r._mpfr,x1,x2._mpfr,FloatMP::get_rounding_mode()); return r;
 }
+
 
 inline int log10floor(double const& x) { return std::max(std::floor(std::log10(x)),-65280.); }
 inline int log10floor(FloatMP const& x) { return log10floor(x.get_d()); }
@@ -499,7 +498,13 @@ FloatMP sqr(FloatMP::RoundingModeType rnd, FloatMP const& x) {
 }
 
 FloatMP hlf(FloatMP::RoundingModeType rnd, FloatMP const& x) {
-    FloatMP r(x.precision(),NoInit()); mpfr_div_si(r._mpfr,x._mpfr,2,rnd); return r;
+    FloatMP r(x.precision(),NoInit()); mpfr_div_2ui(r._mpfr,x._mpfr,1u,rnd); return r;
+}
+
+FloatMP shft(FloatMP::RoundingModeType rnd, FloatMP const& x, Int n) {
+    FloatMP r(x.precision(),NoInit());
+    mpfr_mul_2si(r._mpfr,x._mpfr,n,rnd);
+    return r;
 }
 
 FloatMP rec(FloatMP::RoundingModeType rnd, FloatMP const& x) {

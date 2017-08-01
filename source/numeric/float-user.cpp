@@ -137,7 +137,7 @@ template<class PR> FloatValue<PR>::FloatValue(ExactDouble d, PR pr)
 }
 
 template<class PR> FloatValue<PR>::FloatValue(TwoExp const& t, PR pr)
-    : _v(pow(RawFloat<PR>(2.0,pr),t.exponent()))
+    : _v(pow(to_nearest,RawFloat<PR>(2,pr),t.exponent()))
 {
 }
 
@@ -952,9 +952,10 @@ template<class PR> struct Operations<FloatBounds<PR>> {
         const RawFloat<PR> one(1,prec);
         const FloatValue<PR> two(2,prec);
         const FloatBounds<PR> pi=_pi_val(prec);
-        if(x.error().raw()>2*pi.lower().raw()) { return FloatBounds<PR>(-one,+one); }
+        const FloatBounds<PR> two_pi=2*_pi_val(prec);
+        if(x.error().raw()>two_pi.lower().raw()) { return FloatBounds<PR>(-one,+one); }
 
-        FloatValue<PR> n(round(x.value_raw()/(2*pi.value_raw())));
+        FloatValue<PR> n(round(div(near,x.value_raw(),(two_pi.value_raw()))));
         FloatBounds<PR> y=x-two*(n*pi);
 
         ARIADNE_ASSERT(y.lower_raw()<=pi.upper_raw());
@@ -970,7 +971,7 @@ template<class PR> struct Operations<FloatBounds<PR>> {
             else { rl=-one; ru=+one; }
         } else if(y.lower_raw()<=pi.upper_raw()) {
             if(y.upper_raw()<=pi.lower_raw()) { rl=cos(down,y.upper_raw()); ru=cos(up,y.lower_raw()); }
-            else if(y.upper_raw()<=2*pi.lower_raw()) { rl=-one; ru=cos(up,min(y.lower_raw(),sub(down,2*pi.lower_raw(),y.upper_raw()))); }
+            else if(y.upper_raw()<=two_pi.lower_raw()) { rl=-one; ru=cos(up,min(y.lower_raw(),sub(down,two_pi.lower_raw(),y.upper_raw()))); }
             else { rl=-one; ru=+one; }
         } else {
             assert(false);
@@ -1013,30 +1014,22 @@ template<class PR> struct Operations<FloatBounds<PR>> {
 
     static FloatBounds<PR> _widen(FloatBounds<PR> const& x)
     {
-        typename RawFloat<PR>::RoundingModeType rm=RawFloat<PR>::get_rounding_mode();
         const RawFloat<PR>& xl=x.lower_raw();
         const RawFloat<PR>& xu=x.upper_raw();
         const RawFloat<PR> m=std::numeric_limits<float>::min();
-        RawFloat<PR>::set_rounding_upward();
-        RawFloat<PR> wu=add(xu,m);
-        RawFloat<PR> mwl=add(neg(xl),m);
-        RawFloat<PR> wl=neg(mwl);
-        RawFloat<PR>::set_rounding_mode(rm);
+        RawFloat<PR> wl=sub(down,xl,m);
+        RawFloat<PR> wu=add(up,xu,m);
         assert(wl<xl); assert(wu>xu);
         return FloatBounds<PR>(wl,wu);
     }
 
     static FloatBounds<PR> _narrow(FloatBounds<PR> const& x)
     {
-        typename RawFloat<PR>::RoundingModeType rm=RawFloat<PR>::get_rounding_mode();
         const RawFloat<PR>& xl=x.lower_raw();
         const RawFloat<PR>& xu=x.upper_raw();
         const RawFloat<PR> m=std::numeric_limits<float>::min();
-        RawFloat<PR>::set_rounding_upward();
-        RawFloat<PR> mnu=add(neg(xu),m);
-        RawFloat<PR> nu=neg(mnu);
-        RawFloat<PR> nl=add(xl,m);
-        RawFloat<PR>::set_rounding_mode(rm);
+        RawFloat<PR> nu=add(down,xu,m);
+        RawFloat<PR> nl=add(up,xl,m);
         assert(xl<nl); assert(nu<xu);
         return FloatBounds<PR>(nl,nu);
     }
@@ -1151,7 +1144,7 @@ template<> OutputStream& Operations<FloatBounds<PrecisionMP>>::_write(OutputStre
     int errplc=FloatError<PrecisionMP>::output_places;
     int bndplc=FloatBounds<PrecisionMP>::output_places;
     int precplc=x.precision()/log2ten;
-    int log10wdth=log10floor(u-l);
+    int log10wdth=log10floor(sub(to_nearest,u,l));
     int log10mag=log10floor(max(-ldbl,udbl));
     int dgtswdth=errplc-(log10wdth+1); // Digits appropriate given width of interval
     int dgtsbnd=bndplc-(log10mag+1); // Digits appropriate given asked-for precision of bounded objects
@@ -1581,10 +1574,10 @@ template<class PR> struct Operations<FloatValue<PR>> {
         return FloatBounds<PR>(div(down,x1._v,x2._v),div(up,x1._v,x2._v)); }
 
     static FloatValue<PR> _mul(FloatValue<PR> const& x, TwoExp y) {
-        FloatValue<PR> yv(y,x.precision()); return FloatValue<PR>(x.raw()*yv.raw()); }
+        FloatValue<PR> yv(y,x.precision()); return FloatValue<PR>(mul(near,x.raw(),yv.raw())); }
 
     static FloatValue<PR> _div(FloatValue<PR> const& x, TwoExp y) {
-        FloatValue<PR> yv(y,x.precision()); return FloatValue<PR>(x.raw()/yv.raw()); }
+        FloatValue<PR> yv(y,x.precision()); return FloatValue<PR>(div(near,x.raw(),yv.raw())); }
 
     static FloatBounds<PR> _pow(FloatValue<PR> const& x, Nat m) {
         return pow(FloatBounds<PR>(x),m); }
@@ -1695,6 +1688,10 @@ template<class PR> struct Operations<PositiveFloatApproximation<PR>> {
 template<class PR> struct Operations<PositiveFloatUpperBound<PR>> {
     static PositiveFloatUpperBound<PR> _nul(PositiveFloatUpperBound<PR> const& x) {
         return PositiveFloatUpperBound<PR>(nul(x._u));
+    }
+
+    static PositiveFloatUpperBound<PR> _hlf(PositiveFloatUpperBound<PR> const& x) {
+        return PositiveFloatUpperBound<PR>(hlf(x._u));
     }
 
     static PositiveFloatUpperBound<PR> _sqr(PositiveFloatUpperBound<PR> const& x) {

@@ -49,6 +49,23 @@
 
 namespace Ariadne {
 
+Float64 operator+(Float64 x1, Float64 x2);
+Float64 operator-(Float64 x1, Float64 x2);
+Float64 operator*(Float64 x1, Float64 x2);
+Float64 operator/(Float64 x1, Float64 x2);
+Float64& operator+=(Float64& x1, Float64 x2);
+Float64& operator-=(Float64& x1, Float64 x2);
+Float64& operator*=(Float64& x1, Float64 x2);
+Float64& operator/=(Float64& x1, Float64 x2);
+FloatMP operator+(FloatMP const& x1, FloatMP const& x2);
+FloatMP operator-(FloatMP const& x1, FloatMP const& x2);
+FloatMP operator*(FloatMP const& x1, FloatMP const& x2);
+FloatMP operator/(FloatMP const& x1, FloatMP const& x2);
+FloatMP& operator+=(FloatMP& x1, FloatMP const& x2);
+FloatMP& operator-=(FloatMP& x1, FloatMP const& x2);
+FloatMP& operator*=(FloatMP& x1, FloatMP const& x2);
+FloatMP& operator/=(FloatMP& x1, FloatMP const& x2);
+
 namespace {
 
 static const double MACHINE_EPSILON = 2.2204460492503131e-16;

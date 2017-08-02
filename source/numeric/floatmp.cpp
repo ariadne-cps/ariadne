@@ -30,7 +30,7 @@
 #include "utility/module.hpp"
 #include "logical.hpp"
 #include "floatmp.hpp"
-#include "float64.hpp"
+#include "floatdp.hpp"
 #include "dyadic.hpp"
 #include "rational.hpp"
 

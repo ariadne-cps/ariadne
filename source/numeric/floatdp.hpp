@@ -1,5 +1,5 @@
 /***************************************************************************
- *            float64.hpp
+ *            floatdp.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file float64.hpp
+/*! \file floatdp.hpp
  *  \brief RawTag floating-point number class based on double-precision floats.
  */
 

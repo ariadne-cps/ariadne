@@ -37,7 +37,7 @@
 
 #include "number.hpp"
 #include "logical.hpp"
-#include "float64.hpp"
+#include "floatdp.hpp"
 #include "floatmp.hpp"
 #include "float-user.hpp"
 

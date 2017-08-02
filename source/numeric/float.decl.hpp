@@ -39,8 +39,6 @@ class TwoExp;
 class DoublePrecision;
 class MultiplePrecision;
 
-using DoublePrecision = DoublePrecision;
-using MultiplePrecision = MultiplePrecision;
 using DP = DoublePrecision;
 using MP = MultiplePrecision;
 

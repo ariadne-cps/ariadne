@@ -33,7 +33,7 @@
 
 #include "numeric/rational.hpp"
 #include "numeric/real.hpp"
-#include "numeric/float64.hpp"
+#include "numeric/floatdp.hpp"
 #include "expression/variables.hpp"
 #include "expression/expression.hpp"
 #include "expression/assignment.hpp"

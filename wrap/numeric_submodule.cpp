@@ -31,7 +31,7 @@
 #include "numeric/decimal.hpp"
 #include "numeric/rational.hpp"
 #include "numeric/real.hpp"
-#include "numeric/float64.hpp"
+#include "numeric/floatdp.hpp"
 #include "numeric/floatmp.hpp"
 #include "numeric/float-user.hpp"
 

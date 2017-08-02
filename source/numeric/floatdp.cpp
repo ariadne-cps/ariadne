@@ -58,7 +58,7 @@
     #warning "No rounding mode defined."
 #endif
 
-#include "numeric/float64.hpp"
+#include "numeric/floatdp.hpp"
 #include "numeric/floatmp.hpp"
 
 

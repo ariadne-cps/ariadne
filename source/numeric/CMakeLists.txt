@@ -7,7 +7,7 @@ add_library(ariadne-numeric OBJECT
     decimal.cpp
     number.cpp
     real.cpp
-    float64.cpp
+    floatdp.cpp
     floatmp.cpp
     float-user.cpp
 )

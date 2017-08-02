@@ -32,7 +32,7 @@
 
 #include "number.decl.hpp"
 #include "float.decl.hpp"
-#include "float64.hpp"
+#include "floatdp.hpp"
 #include "floatmp.hpp"
 #include "float-raw.hpp"
 

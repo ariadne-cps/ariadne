@@ -29,7 +29,7 @@
 #define ARIADNE_FLOAT_RAW_HPP
 
 #include "float.decl.hpp"
-#include "float64.hpp"
+#include "floatdp.hpp"
 #include "floatmp.hpp"
 #include "numeric/operators.hpp"
 

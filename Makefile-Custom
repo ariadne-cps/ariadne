@@ -42,7 +42,7 @@ HDR = \
 
 LIB_NUMERIC_SRC = \
 	logging.cpp operators.cpp logical.cpp integer.cpp dyadic.cpp rational.cpp decimal.cpp real.cpp \
-	float64.cpp floatmp.cpp \
+	floatdp.cpp floatmp.cpp \
 	float-user.cpp number.cpp
 
 #	float-approximate.cpp float-lower.cpp float-upper.cpp float-validated.cpp float-exact.cpp \
@@ -433,5 +433,5 @@ bin/%: $(EXAMPLES_OBJ_DIR)/%.o libariadne.so
 #wrap/boost_python.hpp.gch: boost_python.hpp
 #	$(CXX) $(CXXFLAGS) $< -I$(PYTHON_INCLUDE_PATH)
 
-#.libs/numeric_submodule.o: numeric_submodule.cpp boost_python.hpp.gch integer.hpp rational.hpp float64.hpp
+#.libs/numeric_submodule.o: numeric_submodule.cpp boost_python.hpp.gch integer.hpp rational.hpp floatdp.hpp
 #	$(CXX) $(CXXFLAGS) -c -o $@ $< -I$(PYTHON_INCLUDE_PATH)

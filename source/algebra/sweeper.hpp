@@ -98,7 +98,7 @@ template<class F> class Sweeper {
 template<class F> class SweeperBase
     : public virtual SweeperInterface<F>
 {
-    using typename SweeperInterface<F>::PR;
+    typedef typename F::PrecisionType PR;
     virtual Void _sweep(Expansion<FloatValue<PR>>& p, FloatError<PR>& e) const override;
     virtual Void _sweep(Expansion<FloatApproximation<PR>>& p) const override;
 };
@@ -107,7 +107,7 @@ template<class F> class SweeperBase
 template<class SWP, class F> class SweeperMixin
     : public virtual SweeperBase<F>
 {
-    using typename SweeperInterface<F>::PR;
+    typedef typename F::PrecisionType PR;
     virtual SweeperInterface<F>* _clone() const override final;
     virtual PR _precision() const override final;
     virtual Bool _discard(const MultiIndex& a, const F& x) const override final;

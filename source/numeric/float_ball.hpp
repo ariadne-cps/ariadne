@@ -76,19 +76,19 @@ template<class PR, class PRE> class FloatBall
     FloatBall<PR,PRE>(FloatValue<PR> const& value, FloatError<PRE> const& error);
     FloatBall<PR,PRE>(FloatLowerBound<PR> const& lower, FloatUpperBound<PR> const& upper) = delete;
 
-    FloatBall<PR>(ExactDouble d, PR pr);
-        FloatBall<PR>(const Integer& z, PR pr);
-        FloatBall<PR>(const Dyadic& w, PR pr);
-        FloatBall<PR>(const Decimal& d, PR pr);
-        FloatBall<PR>(const Rational& q, PR pr);
-        FloatBall<PR>(const Real& r, PR pr);
-        FloatBall<PR>(const FloatBall<PR,PRE>& x, PR pr);
-    FloatBall<PR>(const ValidatedNumber& y, PR pr);
+    FloatBall<PR,PRE>(ExactDouble d, PR pr);
+        FloatBall<PR,PRE>(const Integer& z, PR pr);
+        FloatBall<PR,PRE>(const Dyadic& w, PR pr);
+        FloatBall<PR,PRE>(const Decimal& d, PR pr);
+        FloatBall<PR,PRE>(const Rational& q, PR pr);
+        FloatBall<PR,PRE>(const Real& r, PR pr);
+        FloatBall<PR,PRE>(const FloatBall<PR,PRE>& x, PR pr);
+    FloatBall<PR,PRE>(const ValidatedNumber& y, PR pr);
 
-    explicit FloatBall<PR>(FloatBounds<PR> const& x);
-    FloatBall<PR>(FloatValue<PR> const& x);
+    explicit FloatBall<PR,PRE>(FloatBounds<PR> const& x);
+    FloatBall<PR,PRE>(FloatValue<PR> const& x);
 
-    FloatBall<PR>& operator=(const ValidatedNumber& y);
+    FloatBall<PR,PRE>& operator=(const ValidatedNumber& y);
 
     operator ValidatedNumber () const;
 
@@ -112,14 +112,13 @@ template<class PR, class PRE> class FloatBall
     FloatBall<PR,PRE> pm(FloatError<PRE> e) const;
     friend FloatApproximation<PR> round(FloatApproximation<PR> const& x);
   public:
-    friend PositiveFloatUpperBound<PR> mag(FloatBall<PR> const&);
-    friend PositiveFloatLowerBound<PR> mig(FloatBall<PR> const&);
-    friend Bool same(FloatBall<PR> const&, FloatBall<PR> const&);
-    friend Bool same(FloatBall<PR> const&, FloatBall<PR> const&);
-    friend Bool models(FloatBall<PR> const&, FloatValue<PR> const&);
-    friend Bool consistent(FloatBall<PR> const&, FloatBall<PR> const&);
-    friend Bool refines(FloatBall<PR> const&, FloatBall<PR> const&);
-    friend FloatBall<PR> refinement(FloatBall<PR> const&, FloatBall<PR> const&);
+    friend PositiveFloatUpperBound<PR> mag(FloatBall<PR,PRE> const&);
+    friend PositiveFloatLowerBound<PR> mig(FloatBall<PR,PRE> const&);
+    friend Bool same(FloatBall<PR,PRE> const&, FloatBall<PR,PRE> const&);
+    friend Bool models(FloatBall<PR,PRE> const&, FloatValue<PR> const&);
+    friend Bool consistent(FloatBall<PR,PRE> const&, FloatBall<PR,PRE> const&);
+    friend Bool refines(FloatBall<PR,PRE> const&, FloatBall<PR,PRE> const&);
+    friend FloatBall<PR,PRE> refinement(FloatBall<PR,PRE> const&, FloatBall<PR,PRE> const&);
   private: public:
     RawFloat<PR> _v; RawFloat<PRE> _e;
 };

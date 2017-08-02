@@ -50,7 +50,7 @@ template<class T1, class T2> using Pair = std::pair<T1,T2>;
 template<class T> using SharedPointer=std::shared_ptr<T>;
 using std::make_pair;
 
-using Float = Ariadne::Float64;
+using Float = Ariadne::FloatDP;
 using Real = Ariadne::Real;
 using Expression = Ariadne::RealExpression;
 

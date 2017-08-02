@@ -93,7 +93,7 @@ class Real
     Real(Decimal const& d);
     Real(Rational const& q);
 
-    explicit Real(Float64Value x); //!< DEPRECATED
+    explicit Real(FloatDPValue x); //!< DEPRECATED
     explicit Real(EffectiveNumber r); //!< DEPRECATED
 
     operator Number<EffectiveTag>() const;
@@ -101,14 +101,14 @@ class Real
     // Extract bounds
     UpperReal upper() const;
     LowerReal lower() const;
-    Float64Approximation approx() const;
+    FloatDPApproximation approx() const;
     double get_d() const;
 
     // Extract arbitrarily accurate approximations
-    Float64Bounds operator() (Precision64 pr) const;
-    FloatMPBounds operator() (PrecisionMP pr) const;
-    Float64Bounds get(Precision64 pr) const;
-    FloatMPBounds get(PrecisionMP pr) const;
+    FloatDPBounds operator() (DoublePrecision pr) const;
+    FloatMPBounds operator() (MultiplePrecision pr) const;
+    FloatDPBounds get(DoublePrecision pr) const;
+    FloatMPBounds get(MultiplePrecision pr) const;
     FloatMPBall get(Accuracy acc) const;
     FloatMPBall evaluate(Accuracy acc) const;
 
@@ -116,7 +116,7 @@ class Real
     friend PositiveReal abs(Real const&);
 
     friend PositiveUpperReal mag(Real const&);
-    friend Float64Error mag(Real const&, Precision64);
+    friend FloatDPError mag(Real const&, DoublePrecision);
 
     friend PositiveReal dist(Real const&, Real const&);
 
@@ -162,10 +162,10 @@ class LowerReal
   public:
     LowerReal(Real);
   public:
-    Float64LowerBound operator() (Precision64 pr) const;
-    FloatMPLowerBound operator() (PrecisionMP pr) const;
-    Float64LowerBound get(Precision64 pr) const;
-    FloatMPLowerBound get(PrecisionMP pr) const;
+    FloatDPLowerBound operator() (DoublePrecision pr) const;
+    FloatMPLowerBound operator() (MultiplePrecision pr) const;
+    FloatDPLowerBound get(DoublePrecision pr) const;
+    FloatMPLowerBound get(MultiplePrecision pr) const;
   public:
     friend LowerReal max(LowerReal const&, LowerReal const&);
     friend LowerReal min(LowerReal const&, LowerReal const&);
@@ -201,10 +201,10 @@ class UpperReal
   public:
     UpperReal(Real);
   public:
-    Float64UpperBound operator() (Precision64 pr) const;
-    FloatMPUpperBound operator() (PrecisionMP pr) const;
-    Float64UpperBound get(Precision64 pr) const;
-    FloatMPUpperBound get(PrecisionMP pr) const;
+    FloatDPUpperBound operator() (DoublePrecision pr) const;
+    FloatMPUpperBound operator() (MultiplePrecision pr) const;
+    FloatDPUpperBound get(DoublePrecision pr) const;
+    FloatMPUpperBound get(MultiplePrecision pr) const;
   public:
     friend UpperReal max(UpperReal const&, UpperReal const&);
     friend UpperReal min(UpperReal const&, UpperReal const&);
@@ -232,8 +232,8 @@ class PositiveReal : public Real
     using Real::Real;
     PositiveReal() : Real() { }
     PositiveReal(Real r) : Real(r) { }
-    PositiveFloat64Bounds get(Precision64 pr) const;
-    PositiveFloatMPBounds get(PrecisionMP pr) const;
+    PositiveFloatDPBounds get(DoublePrecision pr) const;
+    PositiveFloatMPBounds get(MultiplePrecision pr) const;
   public:
     PositiveReal max(PositiveReal const&, PositiveReal const&);
     PositiveReal max(Real const&, PositiveReal const&);
@@ -254,8 +254,8 @@ class PositiveLowerReal : public LowerReal
   public:
     using LowerReal::LowerReal;
     PositiveLowerReal(LowerReal r) : LowerReal(r) { }
-    PositiveFloat64LowerBound get(Precision64 pr) const;
-    PositiveFloatMPLowerBound get(PrecisionMP pr) const;
+    PositiveFloatDPLowerBound get(DoublePrecision pr) const;
+    PositiveFloatMPLowerBound get(MultiplePrecision pr) const;
   public:
     PositiveLowerReal rec(PositiveUpperReal const&);
     PositiveUpperReal rec(PositiveLowerReal const&);
@@ -272,8 +272,8 @@ class PositiveUpperReal : public UpperReal
   public:
     using UpperReal::UpperReal;
     PositiveUpperReal(UpperReal r) : UpperReal(r) { }
-    PositiveFloat64UpperBound get(Precision64 pr) const;
-    PositiveFloatMPUpperBound get(PrecisionMP pr) const;
+    PositiveFloatDPUpperBound get(DoublePrecision pr) const;
+    PositiveFloatMPUpperBound get(MultiplePrecision pr) const;
   public:
     PositiveUpperReal rec(PositiveLowerReal const&);
     PositiveLowerReal rec(PositiveUpperReal const&);
@@ -293,17 +293,17 @@ namespace Ariadne {
 
 /*
 template<class D, EnableIf<IsBuiltinFloatingPoint<D>> =dummy> inline auto
-    operator==(Real r, D d) -> decltype(r==Float64Approximation(d)) { return r==Float64Approximation(d); }
+    operator==(Real r, D d) -> decltype(r==FloatDPApproximation(d)) { return r==FloatDPApproximation(d); }
 template<class D, EnableIf<IsBuiltinFloatingPoint<D>> =dummy> inline auto
-    operator!=(Real r, D d) -> decltype(r!=Float64Approximation(d)) { return r!=Float64Approximation(d); }
+    operator!=(Real r, D d) -> decltype(r!=FloatDPApproximation(d)) { return r!=FloatDPApproximation(d); }
 template<class D, EnableIf<IsBuiltinFloatingPoint<D>> =dummy> inline auto
-    operator< (Real r, D d) -> decltype(r< Float64Approximation(d)) { return r< Float64Approximation(d); }
+    operator< (Real r, D d) -> decltype(r< FloatDPApproximation(d)) { return r< FloatDPApproximation(d); }
 template<class D, EnableIf<IsBuiltinFloatingPoint<D>> =dummy> inline auto
-    operator> (Real r, D d) -> decltype(r> Float64Approximation(d)) { return r> Float64Approximation(d); }
+    operator> (Real r, D d) -> decltype(r> FloatDPApproximation(d)) { return r> FloatDPApproximation(d); }
 template<class D, EnableIf<IsBuiltinFloatingPoint<D>> =dummy> inline auto
-    operator<=(Real r, D d) -> decltype(r<=Float64Approximation(d)) { return r<=Float64Approximation(d); }
+    operator<=(Real r, D d) -> decltype(r<=FloatDPApproximation(d)) { return r<=FloatDPApproximation(d); }
 template<class D, EnableIf<IsBuiltinFloatingPoint<D>> =dummy> inline auto
-    operator>=(Real r, D d) -> decltype(r>=Float64Approximation(d)) { return r>=Float64Approximation(d); }
+    operator>=(Real r, D d) -> decltype(r>=FloatDPApproximation(d)) { return r>=FloatDPApproximation(d); }
 */
 /*
 template<class T> auto operator+(T const& t) -> decltype(pos(t)) { return pos(t); }

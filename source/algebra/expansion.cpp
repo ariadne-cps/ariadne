@@ -32,24 +32,24 @@ namespace Ariadne {
     template class Expansion<double>;
     template class Expansion<Dyadic>;
 
-    template class Expansion<Float64>;
-    template class Expansion<Float64Value>;
-    template class Expansion<Float64Bounds>;
-    template class Expansion<Float64Approximation>;
+    template class Expansion<FloatDP>;
+    template class Expansion<FloatDPValue>;
+    template class Expansion<FloatDPBounds>;
+    template class Expansion<FloatDPApproximation>;
 
-    template class SortedExpansion<Float64,GradedIndexLess>;
-    template class SortedExpansion<Float64Approximation,GradedIndexLess>;
-    template class SortedExpansion<Float64Bounds,GradedIndexLess>;
+    template class SortedExpansion<FloatDP,GradedIndexLess>;
+    template class SortedExpansion<FloatDPApproximation,GradedIndexLess>;
+    template class SortedExpansion<FloatDPBounds,GradedIndexLess>;
 
-    template class SortedExpansion<Float64,ReverseLexicographicIndexLess>;
-    template class SortedExpansion<Float64Value,ReverseLexicographicIndexLess>;
-    template class SortedExpansion<Float64Bounds,ReverseLexicographicIndexLess>;
-    template class SortedExpansion<Float64Approximation,ReverseLexicographicIndexLess>;
+    template class SortedExpansion<FloatDP,ReverseLexicographicIndexLess>;
+    template class SortedExpansion<FloatDPValue,ReverseLexicographicIndexLess>;
+    template class SortedExpansion<FloatDPBounds,ReverseLexicographicIndexLess>;
+    template class SortedExpansion<FloatDPApproximation,ReverseLexicographicIndexLess>;
 
 
-    template class Expansion<Float64UpperInterval>;
-    template class SortedExpansion<Float64UpperInterval,GradedIndexLess>;
-    template class SortedExpansion<Float64UpperInterval,ReverseLexicographicIndexLess>;
+    template class Expansion<FloatDPUpperInterval>;
+    template class SortedExpansion<FloatDPUpperInterval,GradedIndexLess>;
+    template class SortedExpansion<FloatDPUpperInterval,ReverseLexicographicIndexLess>;
 
 
     template class Expansion<FloatMP>;

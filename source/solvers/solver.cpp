@@ -43,16 +43,16 @@ namespace Ariadne {
 
 namespace {
 
-Vector<UpperIntervalType> ranges(const Vector<ValidatedTaylorModel64>& f) {
+Vector<UpperIntervalType> ranges(const Vector<ValidatedTaylorModelDP>& f) {
     Vector<UpperIntervalType> r(f.size()); for(Nat i=0; i!=f.size(); ++i) { r[i]=f[i].range(); } return r;
 }
 
-Vector<ValidatedTaylorModel64>& clobber(Vector<ValidatedTaylorModel64>& h) {
+Vector<ValidatedTaylorModelDP>& clobber(Vector<ValidatedTaylorModelDP>& h) {
     for(Nat i=0; i!=h.size(); ++i) { h[i].set_error(0u); } return h; }
 
 // Compute the Jacobian over an arbitrary domain
 Matrix<ValidatedNumericType>
-jacobian2(const Vector<ValidatedTaylorModel64>& f, const Vector<ValidatedNumericType>& x)
+jacobian2(const Vector<ValidatedTaylorModelDP>& f, const Vector<ValidatedNumericType>& x)
 {
     Vector< Differential<ValidatedNumericType> > dx(x.size(), f.size(), 1u);
     for(Nat i=0; i!=x.size()-f.size(); ++i) {
@@ -69,17 +69,17 @@ jacobian2(const Vector<ValidatedTaylorModel64>& f, const Vector<ValidatedNumeric
 }
 
 // Compute the Jacobian over the unit domain
-Matrix<Float64Value>
-jacobian2_value(const Vector<ValidatedTaylorModel64>& f)
+Matrix<FloatDPValue>
+jacobian2_value(const Vector<ValidatedTaylorModelDP>& f)
 {
     const Nat rs=f.size();
     const Nat fas=f.zero_element().argument_size();
     const Nat has=fas-rs;
-    Matrix<Float64Value> J(rs,rs);
+    Matrix<FloatDPValue> J(rs,rs);
     MultiIndex a(fas);
     for(Nat i=0; i!=rs; ++i) {
         for(Nat j=0; j!=rs; ++j) {
-            a[has+j]=1; const Float64Value x=f[i][a]; J[i][j]=x; a[has+j]=0;
+            a[has+j]=1; const FloatDPValue x=f[i][a]; J[i][j]=x; a[has+j]=0;
         }
     }
     return J;
@@ -87,18 +87,18 @@ jacobian2_value(const Vector<ValidatedTaylorModel64>& f)
 
 // Compute the Jacobian over the unit domain
 Matrix<ValidatedNumericType>
-jacobian2_range(const Vector<ValidatedTaylorModel64>& f)
+jacobian2_range(const Vector<ValidatedTaylorModelDP>& f)
 {
     Nat rs=f.size();
     Nat fas=f.zero_element().argument_size();
     Nat has=fas-rs;
     Matrix<ValidatedNumericType> J(rs,rs);
     for(Nat i=0; i!=rs; ++i) {
-        for(ValidatedTaylorModel64::ConstIterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
+        for(ValidatedTaylorModelDP::ConstIterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
             for(Nat k=0; k!=rs; ++k) {
                 const Nat c=iter->key()[has+k];
                 if(c>0) {
-                    const Float64Value& x=iter->data();
+                    const FloatDPValue& x=iter->data();
                     if(iter->key().degree()==1) { J[i][k]+=x; }
                     else { J[i][k]+=ValidatedNumericType(-1,1)*x*c; }
                     //std::cerr<<"  J="<<J<<" i="<<i<<" a="<<iter->key()<<" k="<<k<<" c="<<c<<" x="<<x<<std::endl;
@@ -118,24 +118,24 @@ static const Bool ALLOW_PARTIAL_FUNCTION = true;
 
 FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory();
 
-ValidatedVectorFunctionModel64 operator*(const Matrix<Float64Value>& A,const ValidatedVectorFunctionModel64& v) {
+ValidatedVectorFunctionModelDP operator*(const Matrix<FloatDPValue>& A,const ValidatedVectorFunctionModelDP& v) {
     ARIADNE_ASSERT(v.size()!=0);
-    ValidatedVectorFunctionModel64 r(A.row_size(),factory(v).create_zero());
+    ValidatedVectorFunctionModelDP r(A.row_size(),factory(v).create_zero());
     for(Nat i=0; i!=r.size(); ++i) {
-        ValidatedScalarFunctionModel64 t=r[i];
+        ValidatedScalarFunctionModelDP t=r[i];
         for(Nat j=0; j!=v.size(); ++j) {
-            t+=Float64Value(A[i][j])*v[j];
+            t+=FloatDPValue(A[i][j])*v[j];
         }
         r[i]=t;
     }
     return r;
 }
 
-ValidatedVectorFunctionModel64 operator*(const Matrix<ValidatedNumericType>& A,const ValidatedVectorFunctionModel64& v) {
+ValidatedVectorFunctionModelDP operator*(const Matrix<ValidatedNumericType>& A,const ValidatedVectorFunctionModelDP& v) {
     ARIADNE_ASSERT(v.size()!=0);
-    ValidatedVectorFunctionModel64 r(A.row_size(),factory(v).create_zero());
+    ValidatedVectorFunctionModelDP r(A.row_size(),factory(v).create_zero());
     for(Nat i=0; i!=r.size(); ++i) {
-        ValidatedScalarFunctionModel64 t=r[i];
+        ValidatedScalarFunctionModelDP t=r[i];
         for(Nat j=0; j!=v.size(); ++j) {
             t+=A[i][j]*v[j];
         }
@@ -144,8 +144,8 @@ ValidatedVectorFunctionModel64 operator*(const Matrix<ValidatedNumericType>& A,c
     return r;
 }
 
-Float64Error sup_error(const ValidatedVectorFunctionModel64& x) {
-    Float64Error r; r=0u;
+FloatDPError sup_error(const ValidatedVectorFunctionModelDP& x) {
+    FloatDPError r; r=0u;
     for(Nat i=0; i!=x.size(); ++i) { r=max(r,x[i].error()); }
     return r;
 }
@@ -220,7 +220,7 @@ SolverBase::solve_all(const ValidatedVectorFunction& f,
     // Create result set
     Set< Vector<ValidatedNumericType> > r;
 
-    Vector<Float64Bounds> x=cast_singleton(bx);
+    Vector<FloatDPBounds> x=cast_singleton(bx);
 
     // Test for no solution
     const Vector<ValidatedNumericType> z(bx.size());
@@ -299,7 +299,7 @@ Vector<ValidatedNumericType>
 SolverBase::zero(const ValidatedVectorFunction& f,
                  const ExactBoxType& bx) const
 {
-    const Float64Value e=this->maximum_error();
+    const FloatDPValue e=this->maximum_error();
     Nat n=this->maximum_number_of_steps();
     ARIADNE_LOG(1,"verbosity="<<verbosity<<"\n");
     Vector<ValidatedNumericType> r=cast_singleton(bx);
@@ -326,7 +326,7 @@ SolverBase::zero(const ValidatedVectorFunction& f,
     if(!consistent(f.evaluate(r),Vector<ValidatedNumericType>(f.result_size()))) {
         ARIADNE_THROW(NoSolutionException,"SolverBase::zero","No result found in "<<bx<<"; f("<<r<<") is inconsistent with zero");
     } else {
-        Float64Error widen=Float64Error(Float64::eps(Precision64()))*sup_error(r);
+        FloatDPError widen=FloatDPError(FloatDP::eps(dp))*sup_error(r);
         r+=Vector<ValidatedNumericType>(r.size(),ValidatedNumericType(-widen,+widen));
         nr=this->step(f,r);
         if(refines(nr,r)) {
@@ -346,7 +346,7 @@ SolverBase::fixed_point(const ValidatedVectorFunction& f, const ExactBoxType& bx
 }
 
 
-ValidatedVectorFunctionModel64
+ValidatedVectorFunctionModelDP
 SolverBase::implicit(const ValidatedVectorFunction& f,
                       const ExactBoxType& ip,
                       const ExactBoxType& ix) const
@@ -357,12 +357,12 @@ SolverBase::implicit(const ValidatedVectorFunction& f,
     ARIADNE_ASSERT(f.argument_size()==ip.size()+ix.size());
 
     const Nat n=ix.size();
-    const Float64Value err=this->maximum_error();
+    const FloatDPValue err=this->maximum_error();
 
-    ValidatedVectorFunctionModel64 id(this->function_factory().create_identity(ip));
-    ValidatedVectorFunctionModel64 h(this->function_factory().create_constants(ip,cast_singleton(ix)));
-    ValidatedVectorFunctionModel64 nh(this->function_factory().create_zeros(n,ip));
-    ValidatedVectorFunctionModel64 fnh(this->function_factory().create_zeros(n,ip));
+    ValidatedVectorFunctionModelDP id(this->function_factory().create_identity(ip));
+    ValidatedVectorFunctionModelDP h(this->function_factory().create_constants(ip,cast_singleton(ix)));
+    ValidatedVectorFunctionModelDP nh(this->function_factory().create_zeros(n,ip));
+    ValidatedVectorFunctionModelDP fnh(this->function_factory().create_zeros(n,ip));
 
     Nat steps_remaining=this->maximum_number_of_steps();
     Nat number_unrefined=n;
@@ -383,7 +383,7 @@ SolverBase::implicit(const ValidatedVectorFunction& f,
                     if(refines(nh[i],h[i])) {
                         is_refinement[i]=true;
                         --number_unrefined;
-                    } else if(definitely(disjoint(ValidatedScalarFunctionModel64(nh[i]).range(),ix[i]))) {
+                    } else if(definitely(disjoint(ValidatedScalarFunctionModelDP(nh[i]).range(),ix[i]))) {
                         ARIADNE_THROW(NoSolutionException,"SolverBase::implicit","No result found in "<<ix<<"; function "<<nh<<" is disjoint from "<<h<<" for at least one point.");
                     }
                 }
@@ -422,18 +422,18 @@ SolverBase::implicit(const ValidatedVectorFunction& f,
 
 }
 
-ValidatedScalarFunctionModel64
+ValidatedScalarFunctionModelDP
 SolverBase::implicit(const ValidatedScalarFunction& f,
                      const ExactBoxType& ip,
                      const ExactIntervalType& ix) const
 {
     ARIADNE_LOG(4,"SolverBase::implicit(ValidatedScalarFunction f, ExactIntervalVectorType ip, ExactIntervalType ix)\n");
     ARIADNE_LOG(5,"f="<<f<<"\n");
-    ValidatedVectorFunctionModel64 res=this->implicit(ValidatedVectorFunction(List<ValidatedScalarFunction>(1u,f)),ip,ExactBoxType(1u,ix));
+    ValidatedVectorFunctionModelDP res=this->implicit(ValidatedVectorFunction(List<ValidatedScalarFunction>(1u,f)),ip,ExactBoxType(1u,ix));
     return res[0];
 }
 
-ValidatedVectorFunctionModel64
+ValidatedVectorFunctionModelDP
 SolverBase::continuation(const ValidatedVectorFunction& f,
                          const Vector<ApproximateNumericType>& p,
                          const ExactBoxType& ix,
@@ -451,7 +451,7 @@ IntervalNewtonSolver::step(const ValidatedVectorFunction& f,
 {
     ARIADNE_LOG(4,"Testing for root in "<<x<<"\n");
     ARIADNE_LOG(5,"  e="<<sup_error(x)<<"  x="<<x<<"\n");
-    Vector<Float64Value> m(cast_exact(x));
+    Vector<FloatDPValue> m(cast_exact(x));
     ARIADNE_LOG(5,"  m="<<m<<"\n");
     Vector<ValidatedNumericType> im(m);
     Vector<ValidatedNumericType> w=f.evaluate(im);
@@ -474,7 +474,7 @@ KrawczykSolver::step(const ValidatedVectorFunction& f,
     Matrix<ValidatedNumericType> I=Matrix<ValidatedNumericType>::identity(x.size());
     ARIADNE_LOG(4,"Testing for root in "<<x<<"\n");
     ARIADNE_LOG(5,"  e="<<sup_error(x)<<"  x="<<x<<"\n");
-    Vector<Float64Value> m(cast_exact(x));
+    Vector<FloatDPValue> m(cast_exact(x));
     ARIADNE_LOG(5,"  m="<<m<<"\n");
     Vector<ValidatedNumericType> im(m);
     Vector<ValidatedNumericType> fm=f.evaluate(im);
@@ -500,7 +500,7 @@ FactoredKrawczykSolver::step(const ValidatedVectorFunction& f,
     Matrix<ValidatedNumericType> I=Matrix<ValidatedNumericType>::identity(x.size());
     ARIADNE_LOG(4,"Testing for root in "<<x<<"\n");
     ARIADNE_LOG(5,"  e="<<sup_error(x)<<"  x="<<x<<"\n");
-    Vector<Float64Value> m(cast_exact(x));
+    Vector<FloatDPValue> m(cast_exact(x));
     ARIADNE_LOG(5,"  m="<<m<<"\n");
     Vector<ValidatedNumericType> im(m);
     Vector<ValidatedNumericType> fm=f.evaluate(im);
@@ -520,19 +520,19 @@ FactoredKrawczykSolver::step(const ValidatedVectorFunction& f,
 }
 
 
-ValidatedVectorFunctionModel64
+ValidatedVectorFunctionModelDP
 IntervalNewtonSolver::implicit_step(const ValidatedVectorFunction& f,
-                                    const ValidatedVectorFunctionModel64& id,
-                                    const ValidatedVectorFunctionModel64& h) const
+                                    const ValidatedVectorFunctionModelDP& id,
+                                    const ValidatedVectorFunctionModelDP& h) const
 {
     const Nat m=id.size();
     const Nat n=h.size();
 
-    ARIADNE_LOG(6,"IntervalNewtonSolver::implicit_step(ValidatedVectorFunction f, ValidatedVectorFunctionModel64 id, ValidatedVectorFunctionModel64 h)\n");
+    ARIADNE_LOG(6,"IntervalNewtonSolver::implicit_step(ValidatedVectorFunction f, ValidatedVectorFunctionModelDP id, ValidatedVectorFunctionModelDP h)\n");
     ARIADNE_LOG(7,"f="<<f<<"\n");
     ARIADNE_LOG(7,"h="<<h<<"\n");
 
-    ValidatedVectorFunctionModel64 mh=h; mh.clobber();
+    ValidatedVectorFunctionModelDP mh=h; mh.clobber();
     ARIADNE_LOG(7,"midpoint(h)="<<mh<<"\n");
 
     ValidatedScalarFunction zero_function(f.domain());
@@ -545,10 +545,10 @@ IntervalNewtonSolver::implicit_step(const ValidatedVectorFunction& f,
     ARIADNE_LOG(7,"D2f="<<D2f<<"\n");
 
     ValidatedNumericType zero(0);
-    ValidatedScalarFunctionModel64 z=h[0]*zero;
-    ValidatedVectorFunctionModel64 idh=join(id,h);
+    ValidatedScalarFunctionModelDP z=h[0]*zero;
+    ValidatedVectorFunctionModelDP idh=join(id,h);
 
-    Matrix<ValidatedScalarFunctionModel64> J(n,n,z);
+    Matrix<ValidatedScalarFunctionModelDP> J(n,n,z);
     for(Nat i=0; i!=n; ++i) {
         for(Nat j=0; j!=n; ++j) {
             J[i][j]=compose(D2f[i][j],idh);
@@ -565,15 +565,15 @@ IntervalNewtonSolver::implicit_step(const ValidatedVectorFunction& f,
     }
     ARIADNE_LOG(7,"rngJ="<<rngJ<<"\n");
 
-    ValidatedVectorFunctionModel64 fidmh=compose(f,join(id,mh));
+    ValidatedVectorFunctionModelDP fidmh=compose(f,join(id,mh));
     ARIADNE_LOG(7,"compose(f,join(id,midpoint(h)))="<<fidmh<<"\n");
 
-    ValidatedVectorFunctionModel64 dh(n,z);
+    ValidatedVectorFunctionModelDP dh(n,z);
     if(n==1) {
-        if(possibly(contains(rngJ[0][0],Float64Value(0.0)))) {
+        if(possibly(contains(rngJ[0][0],FloatDPValue(0.0)))) {
             ARIADNE_THROW(SingularJacobianException,"IntervalNewtonSolver","D2f(P,X)="<<rngJ[0][0]<<" which contains zero.");
         }
-        if(possibly(contains(J[0][0].range(),Float64Value(0.0)))) {
+        if(possibly(contains(J[0][0].range(),FloatDPValue(0.0)))) {
             dh[0]=fidmh[0]/cast_singleton(rngJ[0][0]);
         } else {
             dh[0]=fidmh[0]/J[0][0];
@@ -583,16 +583,16 @@ IntervalNewtonSolver::implicit_step(const ValidatedVectorFunction& f,
     }
     ARIADNE_LOG(7,"dh="<<dh<<"\n");
 
-    ValidatedVectorFunctionModel64 nh=mh-dh;
+    ValidatedVectorFunctionModelDP nh=mh-dh;
     ARIADNE_LOG(7,"nh="<<nh<<"\n");
     return nh;
 }
 
 
-ValidatedVectorFunctionModel64
+ValidatedVectorFunctionModelDP
 KrawczykSolver::implicit_step(const ValidatedVectorFunction& f,
-                              const ValidatedVectorFunctionModel64& p,
-                              const ValidatedVectorFunctionModel64& x) const
+                              const ValidatedVectorFunctionModelDP& p,
+                              const ValidatedVectorFunctionModelDP& x) const
 {
     const Nat np=p.size();
     const Nat nx=x.size();
@@ -601,14 +601,14 @@ KrawczykSolver::implicit_step(const ValidatedVectorFunction& f,
     ARIADNE_LOG(4,"    p="<<p<<"\n");
     ARIADNE_LOG(4,"    f="<<f<<"\n");
     //ARIADNE_LOG(5,"  e="<<sup_error(x)<<"  x="<<x<<"\n");
-    ValidatedVectorFunctionModel64 mx(x);
+    ValidatedVectorFunctionModelDP mx(x);
     for(Nat i=0; i!=mx.size(); ++i) { mx[i].set_error(0u); }
     ARIADNE_LOG(5,"    mx="<<mx<<"\n");
-    Vector<Float64Error> ex(nx);
+    Vector<FloatDPError> ex(nx);
     for(Nat i=0; i!=nx; ++i) { ex[i]=x[i].error(); }
     Vector<ValidatedNumericType> eix=make_bounds(ex);
     ARIADNE_LOG(5,"    ex="<<ex<<"\n");
-    ValidatedVectorFunctionModel64 fm=compose(f,join(p,mx));
+    ValidatedVectorFunctionModelDP fm=compose(f,join(p,mx));
     ARIADNE_LOG(5,"    f(p,mx)="<<fm<<"\n");
     Vector<ValidatedNumericType> rp(np);
     for(Nat i=0; i!=np; ++i) { rp[i]=cast_singleton(p[i].range()); }
@@ -621,16 +621,16 @@ KrawczykSolver::implicit_step(const ValidatedVectorFunction& f,
     ARIADNE_LOG(5,"    M*f(p,mx)="<<M*fm<<"\n");
     ARIADNE_LOG(5,"    (I-M*J)="<<(I-M*J)<<"\n");
     ARIADNE_LOG(5,"    (I-M*J) * (ex*ValidatedNumericType(-1,+1))="<<(I-M*J)<<"*"<<eix<<"="<<(I-M*J) * eix<<"\n");
-    ValidatedVectorFunctionModel64 dx= M*fm - (I-M*J) * eix;
+    ValidatedVectorFunctionModelDP dx= M*fm - (I-M*J) * eix;
     ARIADNE_LOG(5,"    dx="<<dx<<"\n");
-    ValidatedVectorFunctionModel64 nwx= mx - dx;
+    ValidatedVectorFunctionModelDP nwx= mx - dx;
     ARIADNE_LOG(5,"    nwx="<<nwx<<"\n");
     return nwx;
 }
 
 
 /*
-ValidatedScalarFunctionModel64
+ValidatedScalarFunctionModelDP
 IntervalNewtonSolver::implicit(const ValidatedScalarFunction& f,
                                const ExactBoxType& ip,
                                const ExactIntervalType& ix) const
@@ -662,13 +662,13 @@ IntervalNewtonSolver::implicit(const ValidatedScalarFunction& f,
 
 
     // Set up auxiliary functions
-    ValidatedScalarFunctionModel64 h=this->function_factory().create_constant(ip,ix);
-    ValidatedVectorFunctionModel64 id=this->function_factory().create_identity(ip);
-    ValidatedScalarFunctionModel64 dh=this->function_factory().create_zero(ip);
-    ValidatedScalarFunctionModel64 mh=this->function_factory().create_zero(ip);
-    ValidatedScalarFunctionModel64 nh=this->function_factory().create_zero(ip);
-    ValidatedScalarFunctionModel64 dfidh=this->function_factory().create_zero(ip);
-    ValidatedScalarFunctionModel64 fidmh=this->function_factory().create_zero(ip);
+    ValidatedScalarFunctionModelDP h=this->function_factory().create_constant(ip,ix);
+    ValidatedVectorFunctionModelDP id=this->function_factory().create_identity(ip);
+    ValidatedScalarFunctionModelDP dh=this->function_factory().create_zero(ip);
+    ValidatedScalarFunctionModelDP mh=this->function_factory().create_zero(ip);
+    ValidatedScalarFunctionModelDP nh=this->function_factory().create_zero(ip);
+    ValidatedScalarFunctionModelDP dfidh=this->function_factory().create_zero(ip);
+    ValidatedScalarFunctionModelDP fidmh=this->function_factory().create_zero(ip);
 
     ARIADNE_LOG(5,"f="<<f<<"\n");
     ARIADNE_LOG(5,"df="<<df<<"\n");
@@ -697,8 +697,8 @@ IntervalNewtonSolver::implicit(const ValidatedScalarFunction& f,
         ARIADNE_LOG(6,"dh="<<dh<<"\n");
         ARIADNE_LOG(6,"dh.range()="<<dh.range()<<"\n");
         ARIADNE_LOG(8,"norm(dh)="<<norm(dh)<<", h.error()="<<h.error()<<"\n");
-        Float64Error herr=h.error();
-        Float64Error dhnrm=norm(dh);
+        FloatDPError herr=h.error();
+        FloatDPError dhnrm=norm(dh);
         // Prefer to check refinement using norm of dh, since this is faster
         // if(refines(nh,h)) { refinement=true; }
         if(dhnrm<=herr) { refinement=true; }

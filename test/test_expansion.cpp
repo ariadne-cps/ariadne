@@ -354,9 +354,9 @@ template<class F> Void TestExpansion<F>::test_embed()
 }
 
 Int main() {
-    Float64 zero_64{Precision64()};
-    FloatMP zero_mp{PrecisionMP(128)};
-    TestExpansion<Float64>(zero_64).test();
+    FloatDP zero_64{dp};
+    FloatMP zero_mp{MultiplePrecision(128)};
+    TestExpansion<FloatDP>(zero_64).test();
     TestExpansion<FloatMP>(zero_mp).test();
     return ARIADNE_TEST_FAILURES;
 }

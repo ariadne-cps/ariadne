@@ -48,18 +48,21 @@ struct RoundUpward; struct RoundDownward;
 //enum RoundingModeMP { NEAREST=MPFR_RNDN, UPWARD=MPFR_RNDU, DOWNWARD=MPFR_RNDD };
 typedef mpfr_rnd_t RoundingModeMP;
 
-class PrecisionMP {
+class MultiplePrecision {
     mpfr_prec_t prec;
   public:
-    explicit PrecisionMP(mpfr_prec_t pr) : prec(pr) { }
+    explicit MultiplePrecision(mpfr_prec_t pr) : prec(pr) { }
     mpfr_prec_t bits() const { return prec; }
     operator mpfr_prec_t () const { return prec; }
-    friend PrecisionMP max(PrecisionMP mp1, PrecisionMP mp2) { return PrecisionMP(std::max(mp1.bits(),mp2.bits())); }
-    friend PrecisionMP min(PrecisionMP mp1, PrecisionMP mp2) { return PrecisionMP(std::min(mp1.bits(),mp2.bits())); }
-    friend bool operator==(PrecisionMP mp1, PrecisionMP mp2) { return mp1.bits()==mp2.bits(); }
-    friend bool operator<=(PrecisionMP mp1, PrecisionMP mp2) { return mp1.bits()<=mp2.bits(); }
-    friend OutputStream& operator<<(OutputStream& os, PrecisionMP mp) { return os << "PrecisionMP("<<mp.bits()<<")"; }
+    friend MultiplePrecision max(MultiplePrecision mp1, MultiplePrecision mp2) { return MultiplePrecision(std::max(mp1.bits(),mp2.bits())); }
+    friend MultiplePrecision min(MultiplePrecision mp1, MultiplePrecision mp2) { return MultiplePrecision(std::min(mp1.bits(),mp2.bits())); }
+    friend bool operator==(MultiplePrecision mp1, MultiplePrecision mp2) { return mp1.bits()==mp2.bits(); }
+    friend bool operator<=(MultiplePrecision mp1, MultiplePrecision mp2) { return mp1.bits()<=mp2.bits(); }
+    friend OutputStream& operator<<(OutputStream& os, MultiplePrecision mp) { return os << "MultiplePrecision("<<mp.bits()<<")"; }
 };
+using MP = MultiplePrecision;
+inline MultiplePrecision multiple_precision(mpfr_prec_t pr) { return MultiplePrecision(pr); }
+inline MP mp(mpfr_prec_t pr) { return MP(pr); }
 
 //! \ingroup FltMPSubModule
 //! \brief Multiple-precision floating-point numbers.
@@ -73,7 +76,7 @@ class FloatMP {
     typedef RawTag Paradigm;
     typedef FloatMP NumericType;
     typedef mpfr_exp_t ExponentType;
-    typedef PrecisionMP PrecisionType;
+    typedef MultiplePrecision PrecisionType;
     typedef RoundingModeMP RoundingModeType;
   public:
     static const RoundingModeType ROUND_TO_NEAREST;
@@ -106,7 +109,7 @@ class FloatMP {
 
     explicit FloatMP(PrecisionType);
     explicit FloatMP(double, PrecisionType);
-    explicit FloatMP(Float64 const&, PrecisionType);
+    explicit FloatMP(FloatDP const&, PrecisionType);
     explicit FloatMP(Dyadic const&, PrecisionType);
 
     FloatMP(const FloatMP&);
@@ -115,9 +118,9 @@ class FloatMP {
     FloatMP& operator=(const FloatMP&);
     FloatMP& operator=(FloatMP&&);
 
-    FloatMP(Int32 n, PrecisionMP pr);
+    FloatMP(Int32 n, MultiplePrecision pr);
     FloatMP(double, RoundingModeType, PrecisionType);
-    FloatMP(Float64 const&, RoundingModeType, PrecisionType);
+    FloatMP(FloatDP const&, RoundingModeType, PrecisionType);
     FloatMP(Integer const&, RoundingModeType, PrecisionType);
     FloatMP(Dyadic const&, RoundingModeType, PrecisionType);
     FloatMP(Rational const&, RoundingModeType, PrecisionType);
@@ -126,8 +129,8 @@ class FloatMP {
     explicit operator Rational() const;
 
     ExponentType exponent() const;
-    PrecisionMP precision() const;
-    Void set_precision(PrecisionMP);
+    MultiplePrecision precision() const;
+    Void set_precision(MultiplePrecision);
   public:
     FloatMP const& raw() const;
     MpfrReference get_mpfr();
@@ -197,7 +200,7 @@ class FloatMP {
     friend FloatMP asin(RoundingModeType rnd, FloatMP const& x);
     friend FloatMP acos(RoundingModeType rnd, FloatMP const& x);
     friend FloatMP atan(RoundingModeType rnd, FloatMP const& x);
-    static FloatMP pi(RoundingModeType rnd, PrecisionMP pr);
+    static FloatMP pi(RoundingModeType rnd, MultiplePrecision pr);
 
     friend FloatMP med(RoundingModeType rnd, FloatMP x1, FloatMP x2) { return hlf(add(rnd,x1,x2)); }
     friend FloatMP rad(RoundingModeType rnd, FloatMP x1, FloatMP x2) { return hlf(sub(rnd,x2,x1)); }
@@ -212,17 +215,17 @@ class FloatMP {
     friend FloatMP mul(RoundingModeType rnd, Dbl x1, FloatMP const& x2);
     friend FloatMP div(RoundingModeType rnd, Dbl x1, FloatMP const& x2);
 
-    friend FloatMP add(RoundingModeType rnd, FloatMP const& x1, Float64 const& x2);
-    friend FloatMP sub(RoundingModeType rnd, FloatMP const& x1, Float64 const& x2);
-    friend FloatMP mul(RoundingModeType rnd, FloatMP const& x1, Float64 const& x2);
-    friend FloatMP div(RoundingModeType rnd, FloatMP const& x1, Float64 const& x2);
-    friend FloatMP add(RoundingModeType rnd, Float64 const& x1, FloatMP const& x2);
-    friend FloatMP sub(RoundingModeType rnd, Float64 const& x1, FloatMP const& x2);
-    friend FloatMP mul(RoundingModeType rnd, Float64 const& x1, FloatMP const& x2);
-    friend FloatMP div(RoundingModeType rnd, Float64 const& x1, FloatMP const& x2);
+    friend FloatMP add(RoundingModeType rnd, FloatMP const& x1, FloatDP const& x2);
+    friend FloatMP sub(RoundingModeType rnd, FloatMP const& x1, FloatDP const& x2);
+    friend FloatMP mul(RoundingModeType rnd, FloatMP const& x1, FloatDP const& x2);
+    friend FloatMP div(RoundingModeType rnd, FloatMP const& x1, FloatDP const& x2);
+    friend FloatMP add(RoundingModeType rnd, FloatDP const& x1, FloatMP const& x2);
+    friend FloatMP sub(RoundingModeType rnd, FloatDP const& x1, FloatMP const& x2);
+    friend FloatMP mul(RoundingModeType rnd, FloatDP const& x1, FloatMP const& x2);
+    friend FloatMP div(RoundingModeType rnd, FloatDP const& x1, FloatMP const& x2);
 
-    friend FloatMP add(RoundUpward rnd, FloatMP const& x1, Float64 const& x2);
-    friend FloatMP sub(RoundDownward rnd, FloatMP const& x1, Float64 const& x2);
+    friend FloatMP add(RoundUpward rnd, FloatMP const& x1, FloatDP const& x2);
+    friend FloatMP sub(RoundDownward rnd, FloatMP const& x1, FloatDP const& x2);
 
     // Correctly rounded arithmetic
     friend FloatMP sqr(FloatMP const& x);
@@ -242,7 +245,7 @@ class FloatMP {
     friend FloatMP asin(FloatMP const& x);
     friend FloatMP acos(FloatMP const& x);
     friend FloatMP atan(FloatMP const& x);
-    static FloatMP pi(PrecisionMP pr);
+    static FloatMP pi(MultiplePrecision pr);
 
     // Correctly rounded operators
     friend FloatMP operator+(FloatMP const& x1, FloatMP const& x2);
@@ -264,14 +267,14 @@ class FloatMP {
     friend FloatMP operator*(Dbl x1, FloatMP const& x2);
     friend FloatMP operator/(Dbl x1, FloatMP const& x2);
 
-    friend FloatMP operator+(FloatMP const& x1, Float64 const& x2);
-    friend FloatMP operator-(FloatMP const& x1, Float64 const& x2);
-    friend FloatMP operator*(FloatMP const& x1, Float64 const& x2);
-    friend FloatMP operator/(FloatMP const& x1, Float64 const& x2);
-    friend FloatMP operator+(Float64 const& x1, FloatMP const& x2);
-    friend FloatMP operator-(Float64 const& x1, FloatMP const& x2);
-    friend FloatMP operator*(Float64 const& x1, FloatMP const& x2);
-    friend FloatMP operator/(Float64 const& x1, FloatMP const& x2);
+    friend FloatMP operator+(FloatMP const& x1, FloatDP const& x2);
+    friend FloatMP operator-(FloatMP const& x1, FloatDP const& x2);
+    friend FloatMP operator*(FloatMP const& x1, FloatDP const& x2);
+    friend FloatMP operator/(FloatMP const& x1, FloatDP const& x2);
+    friend FloatMP operator+(FloatDP const& x1, FloatMP const& x2);
+    friend FloatMP operator-(FloatDP const& x1, FloatMP const& x2);
+    friend FloatMP operator*(FloatDP const& x1, FloatMP const& x2);
+    friend FloatMP operator/(FloatDP const& x1, FloatMP const& x2);
 
     friend Comparison cmp(FloatMP const& x1, FloatMP const& x2);
     friend Bool operator==(FloatMP const& x1, FloatMP const& x2);
@@ -312,20 +315,20 @@ class FloatMP {
     friend Bool operator< (Rational const& x1, FloatMP const& x2) { return cmp(x1,x2)< Comparison::EQUAL; }
     friend Bool operator> (Rational const& x1, FloatMP const& x2) { return cmp(x1,x2)> Comparison::EQUAL; }
 
-    friend Comparison cmp(FloatMP const& x1, Float64 const& x2);
-    friend Bool operator==(FloatMP const& x1, Float64 const&  x2) { return cmp(x1,x2)==Comparison::EQUAL; }
-    friend Bool operator!=(FloatMP const& x1, Float64 const&  x2) { return cmp(x1,x2)!=Comparison::EQUAL; }
-    friend Bool operator<=(FloatMP const& x1, Float64 const&  x2) { return cmp(x1,x2)<=Comparison::EQUAL; }
-    friend Bool operator>=(FloatMP const& x1, Float64 const&  x2) { return cmp(x1,x2)>=Comparison::EQUAL; }
-    friend Bool operator< (FloatMP const& x1, Float64 const&  x2) { return cmp(x1,x2)< Comparison::EQUAL; }
-    friend Bool operator> (FloatMP const& x1, Float64 const&  x2) { return cmp(x1,x2)> Comparison::EQUAL; }
-    friend Comparison cmp(Float64 const& x1, FloatMP const& x2);
-    friend Bool operator==(Float64 const& x1, FloatMP const& x2) { return cmp(x1,x2)==Comparison::EQUAL; }
-    friend Bool operator!=(Float64 const& x1, FloatMP const& x2) { return cmp(x1,x2)!=Comparison::EQUAL; }
-    friend Bool operator<=(Float64 const& x1, FloatMP const& x2) { return cmp(x1,x2)<=Comparison::EQUAL; }
-    friend Bool operator>=(Float64 const& x1, FloatMP const& x2) { return cmp(x1,x2)>=Comparison::EQUAL; }
-    friend Bool operator< (Float64 const& x1, FloatMP const& x2) { return cmp(x1,x2)< Comparison::EQUAL; }
-    friend Bool operator> (Float64 const& x1, FloatMP const& x2) { return cmp(x1,x2)> Comparison::EQUAL; }
+    friend Comparison cmp(FloatMP const& x1, FloatDP const& x2);
+    friend Bool operator==(FloatMP const& x1, FloatDP const&  x2) { return cmp(x1,x2)==Comparison::EQUAL; }
+    friend Bool operator!=(FloatMP const& x1, FloatDP const&  x2) { return cmp(x1,x2)!=Comparison::EQUAL; }
+    friend Bool operator<=(FloatMP const& x1, FloatDP const&  x2) { return cmp(x1,x2)<=Comparison::EQUAL; }
+    friend Bool operator>=(FloatMP const& x1, FloatDP const&  x2) { return cmp(x1,x2)>=Comparison::EQUAL; }
+    friend Bool operator< (FloatMP const& x1, FloatDP const&  x2) { return cmp(x1,x2)< Comparison::EQUAL; }
+    friend Bool operator> (FloatMP const& x1, FloatDP const&  x2) { return cmp(x1,x2)> Comparison::EQUAL; }
+    friend Comparison cmp(FloatDP const& x1, FloatMP const& x2);
+    friend Bool operator==(FloatDP const& x1, FloatMP const& x2) { return cmp(x1,x2)==Comparison::EQUAL; }
+    friend Bool operator!=(FloatDP const& x1, FloatMP const& x2) { return cmp(x1,x2)!=Comparison::EQUAL; }
+    friend Bool operator<=(FloatDP const& x1, FloatMP const& x2) { return cmp(x1,x2)<=Comparison::EQUAL; }
+    friend Bool operator>=(FloatDP const& x1, FloatMP const& x2) { return cmp(x1,x2)>=Comparison::EQUAL; }
+    friend Bool operator< (FloatDP const& x1, FloatMP const& x2) { return cmp(x1,x2)< Comparison::EQUAL; }
+    friend Bool operator> (FloatDP const& x1, FloatMP const& x2) { return cmp(x1,x2)> Comparison::EQUAL; }
 
     friend OutputStream& operator<<(OutputStream& os, FloatMP const& x);
     friend InputStream& operator>>(InputStream& is, FloatMP& x);

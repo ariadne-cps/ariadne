@@ -51,9 +51,9 @@ template<class T1, class T2> struct Product;
 template<class P, class F> class TaylorModel;
 template<class F> using ValidatedTaylorModel = TaylorModel<ValidatedTag,F>;
 template<class F> using ApproximateTaylorModel = TaylorModel<ApproximateTag,F>;
-using ValidatedTaylorModel64 = TaylorModel<ValidatedTag,Float64>;
+using ValidatedTaylorModelDP = TaylorModel<ValidatedTag,FloatDP>;
 using ValidatedTaylorModelMP = TaylorModel<ValidatedTag,FloatMP>;
-using ApproximateTaylorModel64 = TaylorModel<ApproximateTag,Float64>;
+using ApproximateTaylorModelDP = TaylorModel<ApproximateTag,FloatDP>;
 using ApproximateTaylorModelMP = TaylorModel<ApproximateTag,FloatMP>;
 
 template<class P, class F> struct IsScalar< TaylorModel<P,F> > { static const Bool value = true; };
@@ -84,7 +84,7 @@ template<class P, class F> struct AlgebraOperations<TaylorModel<P,F>> : NormedAl
 
 /*! \brief A class representing a power series expansion, scaled to the unit box, with an error term.
  *
- * See also Expansion, ValidatedScalarTaylorFunctionModel64, ValidatedVectorTaylorFunctionModel64, TaylorConstrainedImageSet.
+ * See also Expansion, ValidatedScalarTaylorFunctionModelDP, ValidatedVectorTaylorFunctionModelDP, TaylorConstrainedImageSet.
  */
 template<class F>
 class TaylorModel<ValidatedTag,F>
@@ -482,7 +482,7 @@ class TaylorModel<ValidatedTag,F>
 };
 
 // FIXME: Needed to dispatch gradient of ScaledFunctionPatch
-Covector<Float64Bounds> gradient(const TaylorModel<ValidatedTag,Float64>& x, const Vector<Float64Bounds>& v);
+Covector<FloatDPBounds> gradient(const TaylorModel<ValidatedTag,FloatDP>& x, const Vector<FloatDPBounds>& v);
 Covector<FloatMPBounds> gradient(const TaylorModel<ValidatedTag,FloatMP>& x, const Vector<FloatMPBounds>& v);
 
 // FIXME: Needed to dispatch gradient of ScaledFunctionPatch
@@ -805,8 +805,8 @@ template<class P, class F> typename TaylorModel<P,F>::NormType norm(const Vector
 
 template<class F> Matrix<ValidatedNumericType> jacobian(const Vector<TaylorModel<ValidatedTag,F>>& x, const Vector<ValidatedNumericType>& y);
 template<class F> Matrix<ValidatedNumericType> jacobian(const Vector<TaylorModel<ValidatedTag,F>>& x, const Vector<ValidatedNumericType>& y, Array<SizeType>& p);
-template<class F> Matrix<Float64Value> jacobian_value(const Vector<TaylorModel<ValidatedTag,F>>& x);
-template<class F> Matrix<Float64Value> jacobian_value(const Vector<TaylorModel<ValidatedTag,F>>& x, const Array<SizeType>& p);
+template<class F> Matrix<FloatDPValue> jacobian_value(const Vector<TaylorModel<ValidatedTag,F>>& x);
+template<class F> Matrix<FloatDPValue> jacobian_value(const Vector<TaylorModel<ValidatedTag,F>>& x, const Array<SizeType>& p);
 template<class F> Matrix<UpperIntervalType> jacobian_range(const Vector<TaylorModel<ValidatedTag,F>>& x);
 template<class F> Matrix<UpperIntervalType> jacobian_range(const Vector<TaylorModel<ValidatedTag,F>>& x, const Array<SizeType>& p);
 

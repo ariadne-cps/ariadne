@@ -130,7 +130,7 @@ class GridTreeSubset
 
     //! \brief this function takes the interval width and computes how many binary subdivisions
     //! one has to make in order to have sub-intervals of the width <= \a theMaxWidth
-    Nat compute_number_subdiv( Float64 theWidth, const Float64 theMaxWidth) const;
+    Nat compute_number_subdiv( FloatDP theWidth, const FloatDP theMaxWidth) const;
 
     //! \brief This method checks whether the set defined by \a pCurrentNode is a superset
     //! of \a theBoxType, in case when it is known that the cell corresponding to the root of
@@ -231,7 +231,7 @@ class GridTreeSubset
     Nat depth() const;
 
     //! The measure (area, volume) of the set in Euclidean space.
-    Float64Approximation measure() const;
+    FloatDPApproximation measure() const;
 
     //! The a branch along the binary tree.
     GridTreeSubset branch(Bool left_or_right) const;
@@ -277,7 +277,7 @@ class GridTreeSubset
     //! \brief Subdivide the paving until the smallest depth such that the leaf
     //! cells size is <= \a theMaxCellWidth. Note that, the disabled cells are
     //! not subdivided.
-    Void subdivide( Float64 theMaxCellWidth );
+    Void subdivide( FloatDP theMaxCellWidth );
 
     //! \brief Recombines the subdivisions, for instance if all subcells of a cell are
     //! enabled/disabled then they are put together.

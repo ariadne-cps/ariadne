@@ -49,14 +49,14 @@
 
 namespace Ariadne {
 
-Float64 operator+(Float64 x1, Float64 x2);
-Float64 operator-(Float64 x1, Float64 x2);
-Float64 operator*(Float64 x1, Float64 x2);
-Float64 operator/(Float64 x1, Float64 x2);
-Float64& operator+=(Float64& x1, Float64 x2);
-Float64& operator-=(Float64& x1, Float64 x2);
-Float64& operator*=(Float64& x1, Float64 x2);
-Float64& operator/=(Float64& x1, Float64 x2);
+FloatDP operator+(FloatDP x1, FloatDP x2);
+FloatDP operator-(FloatDP x1, FloatDP x2);
+FloatDP operator*(FloatDP x1, FloatDP x2);
+FloatDP operator/(FloatDP x1, FloatDP x2);
+FloatDP& operator+=(FloatDP& x1, FloatDP x2);
+FloatDP& operator-=(FloatDP& x1, FloatDP x2);
+FloatDP& operator*=(FloatDP& x1, FloatDP x2);
+FloatDP& operator/=(FloatDP& x1, FloatDP x2);
 FloatMP operator+(FloatMP const& x1, FloatMP const& x2);
 FloatMP operator-(FloatMP const& x1, FloatMP const& x2);
 FloatMP operator*(FloatMP const& x1, FloatMP const& x2);
@@ -74,26 +74,26 @@ Bool operator<(const MultiIndex& a1, const MultiIndex& a2) {
     return reverse_lexicographic_less(a1,a2); }
 
 
-Interval<Float64Value> const& convert_interval(IntervalDomainType const& ivl, Precision64) { return ivl; }
-Interval<FloatMPValue> convert_interval(IntervalDomainType const& ivl, PrecisionMP pr) {
+Interval<FloatDPValue> const& convert_interval(IntervalDomainType const& ivl, DoublePrecision) { return ivl; }
+Interval<FloatMPValue> convert_interval(IntervalDomainType const& ivl, MultiplePrecision pr) {
     return Interval<FloatMPValue>(FloatMP(ivl.lower().get_d(),pr),FloatMP(ivl.upper().get_d(),pr)); }
 
-Interval<Float64UpperBound> const& convert_interval(Interval<Float64UpperBound> const& ivl, Precision64) { return ivl; }
-Interval<Float64UpperBound> convert_interval(Interval<FloatMPUpperBound> const& ivl, Precision64 pr) {
+Interval<FloatDPUpperBound> const& convert_interval(Interval<FloatDPUpperBound> const& ivl, DoublePrecision) { return ivl; }
+Interval<FloatDPUpperBound> convert_interval(Interval<FloatMPUpperBound> const& ivl, DoublePrecision pr) {
     Dyadic l(ivl.lower().raw()); Dyadic u(ivl.upper().raw());
-    return Interval<Float64UpperBound>(Float64LowerBound(l,pr),Float64UpperBound(u,pr)); }
+    return Interval<FloatDPUpperBound>(FloatDPLowerBound(l,pr),FloatDPUpperBound(u,pr)); }
 
-Float64 const& convert_float(Float64 const& flt, Precision64) { return flt; }
-FloatMP convert_float(Float64 const& flt, PrecisionMP pr) { return FloatMP(flt.get_d(),pr); }
+FloatDP const& convert_float(FloatDP const& flt, DoublePrecision) { return flt; }
+FloatMP convert_float(FloatDP const& flt, MultiplePrecision pr) { return FloatMP(flt.get_d(),pr); }
 
-Interval<Float64Value> convert_exact_interval(Interval<Float64UpperBound> const& ivl, Precision64 pr) {
+Interval<FloatDPValue> convert_exact_interval(Interval<FloatDPUpperBound> const& ivl, DoublePrecision pr) {
     return cast_exact(ivl); }
-Interval<Float64Value> convert_exact_interval(Interval<FloatMPUpperBound> const& ivl, Precision64 pr) {
-    Float64 l(Dyadic(ivl.lower().raw()),downward,pr); Float64 u(Dyadic(ivl.lower().raw()),upward,pr);
-    return Interval<Float64Value>(Float64Value(l),Float64Value(u)); }
+Interval<FloatDPValue> convert_exact_interval(Interval<FloatMPUpperBound> const& ivl, DoublePrecision pr) {
+    FloatDP l(Dyadic(ivl.lower().raw()),downward,pr); FloatDP u(Dyadic(ivl.lower().raw()),upward,pr);
+    return Interval<FloatDPValue>(FloatDPValue(l),FloatDPValue(u)); }
 
-inline Box<Interval<Float64Value>> const& convert_box(BoxDomainType const& bx, Precision64) { return bx; }
-Box<Interval<FloatMPValue>> convert_box(BoxDomainType const& bx, PrecisionMP pr) {
+inline Box<Interval<FloatDPValue>> const& convert_box(BoxDomainType const& bx, DoublePrecision) { return bx; }
+Box<Interval<FloatMPValue>> convert_box(BoxDomainType const& bx, MultiplePrecision pr) {
     Box<Interval<FloatMPValue>> r(bx.dimension(),Interval<FloatMPValue>(FloatMPValue(pr),FloatMPValue(pr)));
     for(SizeType i=0; i!=r.dimension(); ++i) { r[i]=convert_interval(bx[i],pr); }
     return r;
@@ -426,7 +426,7 @@ template<class F> Void _scal(TaylorModel<ValidatedTag,F>& r, const Value<F>& c) 
 template<class F> Void _scal(TaylorModel<ValidatedTag,F>& r, const Bounds<F>& c)
 {
     typedef typename F::PrecisionType PR;
-    //std::cerr<<"TaylorModel<ValidatedTag,F>::scal(Float64Bounds c) c="<<c<<std::endl;
+    //std::cerr<<"TaylorModel<ValidatedTag,F>::scal(FloatDPBounds c) c="<<c<<std::endl;
     ARIADNE_ASSERT(is_finite(c.lower().raw()) && is_finite(c.upper().raw()));
     ARIADNE_DEBUG_ASSERT(r.error().raw()>=0);
 
@@ -550,9 +550,9 @@ template<class F> inline Void _add(TaylorModel<ValidatedTag,F>& r, const TaylorM
         ++yiter;
     }
 
-    Float64::set_rounding_upward();
+    FloatDP::set_rounding_upward();
     r.error()=(x.error()+y.error())+e;
-    Float64::set_rounding_to_nearest();
+    FloatDP::set_rounding_to_nearest();
 
     ARIADNE_DEBUG_ASSERT(r.error().raw()>=0);
 }
@@ -594,9 +594,9 @@ template<class F> inline Void _sub(TaylorModel<ValidatedTag,F>& r, const TaylorM
         ++yiter;
     }
 
-    Float64::set_rounding_upward();
+    FloatDP::set_rounding_upward();
     r.error()=(x.error()+y.error())+e;
-    Float64::set_rounding_to_nearest();
+    FloatDP::set_rounding_to_nearest();
 
     ARIADNE_DEBUG_ASSERT(r.error().raw()>=0);
 }
@@ -609,7 +609,7 @@ template<class F> inline Void _sma(TaylorModel<ValidatedTag,F>& r, const TaylorM
     ARIADNE_ASSERT_MSG(x.error().raw()>=0,"x="<<x);
     ARIADNE_ASSERT_MSG(y.error().raw()>=0,"y="<<y);
 
-    VOLATILE Float64 u,ml,myv;
+    VOLATILE FloatDP u,ml,myv;
     FloatError<PR> te=nul(r.error()); // Twice the maximum accumulated error
     FloatError<PR> err=nul(r.error()); // Twice the maximum accumulated error
     ValidatedFloatApproximation<PR> clmu=c;
@@ -869,7 +869,7 @@ template<class F> UnitBox TaylorModel<ValidatedTag,F>::domain() const
 template<class F> auto TaylorModel<ValidatedTag,F>::codomain() const -> CodomainType
 {
     RangeType rng=this->range();
-    return convert_exact_interval(rng,Precision64());
+    return convert_exact_interval(rng,dp);
 }
 
 
@@ -1074,7 +1074,7 @@ compose(const AnalyticFunction& fn, const TaylorModel<ValidatedTag,F>& tm) {
     typedef typename F::PrecisionType PR;
 
     static const DegreeType MAX_DEGREE=20;
-    static const Float64 MAX_TRUNCATION_ERROR=MACHINE_EPSILON;
+    static const FloatDP MAX_TRUNCATION_ERROR=MACHINE_EPSILON;
     SweeperInterface<F> const& sweeper=tm.sweeper();
 
     F max_truncation_error=MAX_TRUNCATION_ERROR;
@@ -1089,9 +1089,9 @@ compose(const AnalyticFunction& fn, const TaylorModel<ValidatedTag,F>& tm) {
 
     Nat d=max_degree;
     FloatValue<PR> c=tm.value();
-    Float64Bounds r=cast_singleton(tm.range());
-    Series<Float64Bounds> centre_series=fn.series(c);
-    Series<Float64Bounds> range_series=fn.series(r);
+    FloatDPBounds r=cast_singleton(tm.range());
+    Series<FloatDPBounds> centre_series=fn.series(c);
+    Series<FloatDPBounds> range_series=fn.series(r);
     //std::cerr<<"c="<<c<<"\nr="<<r<<"\n";
     //std::cerr<<"cs="<<centre_series<<"\nrs="<<range_series<<"\n";
 
@@ -1115,7 +1115,7 @@ compose(const AnalyticFunction& fn, const TaylorModel<ValidatedTag,F>& tm) {
         res=centre_series[d-i-1]+x*res;
         // Don't sweep here...
     }
-    res+=Float64Bounds(-truncation_error,+truncation_error);
+    res+=FloatDPBounds(-truncation_error,+truncation_error);
     return res;
 }
 
@@ -1511,7 +1511,7 @@ template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::_refi
     const FloatError<PR>& xe=x.error();
     const FloatError<PR>& ye=y.error();
     FloatValue<PR> rv,xv,yv;
-    Float64 xu,yu,mxl,myl,u,ml;
+    FloatDP xu,yu,mxl,myl,u,ml;
     MultiIndex a;
 
     typename TaylorModel<ValidatedTag,F>::ConstIterator xiter=x.begin();

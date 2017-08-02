@@ -116,7 +116,7 @@ template class Formula<ApproximateNumber>;
 template class Formula<ValidatedNumber>;
 template class Formula<EffectiveNumber>;
 
-template class Formula<Float64Approximation>;
+template class Formula<FloatDPApproximation>;
 template class Formula<Real>;
 
 } // namespace Ariadne

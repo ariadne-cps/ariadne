@@ -77,14 +77,14 @@ template<class PR> struct AlgebraTraits<FloatApproximation<PR>> {
 template<class PR> struct AlgebraTraits<FloatBounds<PR>> {
     typedef FloatValue<PR> ValueType;
     typedef Interval<FloatUpperBound<PR>> RangeType;
-    typedef Float64Error NormType;
+    typedef FloatDPError NormType;
     typedef FloatBounds<PR> NumericType;
 };
 
 template<> struct AlgebraTraits<Real> {
-    typedef Float64Value ValueType;
-    typedef Interval<Float64UpperBound> RangeType;
-    typedef Float64Error NormType;
+    typedef FloatDPValue ValueType;
+    typedef Interval<FloatDPUpperBound> RangeType;
+    typedef FloatDPError NormType;
     typedef Real NumericType;
 };
 
@@ -186,7 +186,7 @@ template<class X> class NormedAlgebraInterface
     virtual NormedAlgebraInterface<X>* _create_ball(ErrorType const& r) const = 0;
 
     //! \brief A value \c e such that analytic functions are evaluated to a tolerance of \c e.
-    virtual RawFloat64 tolerance() const = 0;
+    virtual RawFloatDP tolerance() const = 0;
     //! \brief A value \c c such that \c |a-c1| is approximately minimised.
     virtual ValueType average() const = 0;
     //! \brief A value \c c such that \c |a-c1| is approximately minimised.

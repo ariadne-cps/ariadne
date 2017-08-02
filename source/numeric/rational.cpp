@@ -53,8 +53,8 @@ class InvalidRationalLiteralException {
 };
 
 // Shortened version of raw float classes sufficient for comparison operator
-class Float64 { volatile double _dbl; public: double get_d() const { return _dbl; } };
-template<> class FloatValue<Precision64> { Float64 _v; public: Float64 raw() const { return _v; } };
+class FloatDP { volatile double _dbl; public: double get_d() const { return _dbl; } };
+template<> class FloatValue<DoublePrecision> { FloatDP _v; public: FloatDP raw() const { return _v; } };
 
 Rational rec(Integer const& z) {
     return Rational(1,z);
@@ -122,10 +122,10 @@ Rational::Rational(ExactDouble const& x) {
     mpq_canonicalize(_mpq);
 }
 
-Rational::Rational(Float64 const& x) : Rational(ExactDouble(x.get_d())) {
+Rational::Rational(FloatDP const& x) : Rational(ExactDouble(x.get_d())) {
 }
 
-Rational::Rational(Float64Value const& x) : Rational(reinterpret_cast<Float64 const&>(x)) {
+Rational::Rational(FloatDPValue const& x) : Rational(reinterpret_cast<FloatDP const&>(x)) {
 }
 
 Rational::Rational(const String& s) {
@@ -414,7 +414,7 @@ OutputStream& operator<<(OutputStream& os, Rational const& q1) {
     return os;
 }
 
-Comparison cmp(Rational const& q1, Float64 const& x2) {
+Comparison cmp(Rational const& q1, FloatDP const& x2) {
     return cmp(q1,Rational(x2));
 }
 

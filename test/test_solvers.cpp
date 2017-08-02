@@ -44,7 +44,7 @@ using namespace std;
 
 typedef Interval<Dyadic> DyadicInterval;
 typedef Vector<DyadicInterval> DyadicIntervalVector;
-typedef Vector<Float64Bounds> FloatBoundsVector;
+typedef Vector<FloatDPBounds> FloatBoundsVector;
 
 class TestSolver
 {
@@ -81,9 +81,9 @@ class TestSolver
         EffectiveScalarFunction bb;
         ExactIntervalVectorType p,r;
         EffectiveVectorFunction f;
-        ValidatedVectorFunctionModel64 h;
+        ValidatedVectorFunctionModelDP h;
         EffectiveVectorFunction e;
-        Float64Value tol;
+        FloatDPValue tol;
 
         // Test solution of x-a=0. This should be very easy to solve.
         p=ExactIntervalVectorType({ExactIntervalType(-0.25,0.25)});
@@ -150,7 +150,7 @@ class TestSolver
         // Uses scalar implicit
         ExactIntervalVectorType p; ExactIntervalType r;
         EffectiveScalarFunction e,f,s; // s is unscaling functions
-        ValidatedScalarFunctionModel64 h;
+        ValidatedScalarFunctionModelDP h;
 
         ARIADNE_TEST_PRINT(*solver);
 
@@ -174,7 +174,7 @@ class TestSolver
         r=ExactIntervalType(-1,1);
         f=EffectiveScalarFunction(x-2*a);
         ARIADNE_TEST_PRINT(f);
-        ValidatedScalarFunctionModel64 g=ValidatedScalarTaylorFunctionModel64(join(p,r),f,ThresholdSweeper<Float64>(Precision64(),1e-12));
+        ValidatedScalarFunctionModelDP g=ValidatedScalarTaylorFunctionModelDP(join(p,r),f,ThresholdSweeper<FloatDP>(dp,1e-12));
         ARIADNE_TEST_PRINT(g);
         try {
             h=solver->implicit(g,p,r);
@@ -194,8 +194,8 @@ class TestSolver
 Int main(Int argc, const char **argv) {
 /*
     ExactIntervalVectorType D={{-1,+1},{-1,+1}};
-    ValidatedVectorTaylorFunctionModel64 x=ValidatedVectorTaylorFunctionModel64::identity(D,ThresholdSweeper(1e-10));
-    ValidatedScalarTaylorFunctionModel64 f=2*x[0]-x[1];
+    ValidatedVectorTaylorFunctionModelDP x=ValidatedVectorTaylorFunctionModelDP::identity(D,ThresholdSweeper(1e-10));
+    ValidatedScalarTaylorFunctionModelDP f=2*x[0]-x[1];
     std::cerr<<"D="<<D<<"\n";
     ExactIntervalType D0=D[0];
     std::cerr<<"f="<<representation(f)<<"\n";

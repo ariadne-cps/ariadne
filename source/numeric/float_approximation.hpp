@@ -49,7 +49,7 @@ template<class PR> struct NumericTraits<FloatApproximation<PR>> {
 //! \details
 //! The \c %FloatApproximation<PR> class represents approximate floating-point numbers.
 //! Operations are performed approximately, with no guarantees on the output.
-//! \sa Real, Float64 , FloatMP, FloatValue, FloatBall, FloatBounds.
+//! \sa Real, FloatDP , FloatMP, FloatValue, FloatBall, FloatBounds.
 template<class PR> class FloatApproximation
     : public DispatchFloatOperations<FloatApproximation<PR>>
 {

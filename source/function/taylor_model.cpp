@@ -26,19 +26,19 @@
 
 namespace Ariadne {
 
-template class Series<Float64Bounds>;
+template class Series<FloatDPBounds>;
 template class Series<FloatMPBounds>;
 
-template class SweeperBase<Float64>;
+template class SweeperBase<FloatDP>;
 template class SweeperBase<FloatMP>;
 
-template class TaylorModel<ValidatedTag,Float64>;
-template class AlgebraOperations<TaylorModel<ValidatedTag,Float64>>;
-template class NormedAlgebraOperations<TaylorModel<ValidatedTag,Float64>>;
+template class TaylorModel<ValidatedTag,FloatDP>;
+template class AlgebraOperations<TaylorModel<ValidatedTag,FloatDP>>;
+template class NormedAlgebraOperations<TaylorModel<ValidatedTag,FloatDP>>;
 
-template class TaylorModel<ApproximateTag,Float64>;
-template class AlgebraOperations<TaylorModel<ApproximateTag,Float64>>;
-template class NormedAlgebraOperations<TaylorModel<ApproximateTag,Float64>>;
+template class TaylorModel<ApproximateTag,FloatDP>;
+template class AlgebraOperations<TaylorModel<ApproximateTag,FloatDP>>;
+template class NormedAlgebraOperations<TaylorModel<ApproximateTag,FloatDP>>;
 
 
 template class TaylorModel<ValidatedTag,FloatMP>;

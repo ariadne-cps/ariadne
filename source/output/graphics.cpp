@@ -49,7 +49,7 @@ static const Int TOP_MARGIN = 10;
 static const Int RIGHT_MARGIN = 10;
 
 
-StringType str(Float64 x) {
+StringType str(FloatDP x) {
     StringStream ss;
     ss << x;
     return ss.str();
@@ -59,7 +59,7 @@ Void draw(Figure& fig, const DrawableInterface& shape) {
     fig.draw(shape);
 }
 
-Void draw(Figure& fig, Float64ApproximateBox const& box) {
+Void draw(Figure& fig, FloatDPApproximateBox const& box) {
     fig.draw(box);
 }
 

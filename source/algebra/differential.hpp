@@ -52,9 +52,9 @@ template<class X> class Differential;
 template<class X> class UnivariateDifferential;
 template<class X> class NonAssignableDifferential;
 
-typedef Differential<Float64> FloatDifferential;
-typedef Differential<Float64Approximation> FloatApproximationDifferential;
-typedef Differential<Float64Bounds> FloatBoundsDifferential;
+typedef Differential<FloatDP> FloatDifferential;
+typedef Differential<FloatDPApproximation> FloatApproximationDifferential;
+typedef Differential<FloatDPBounds> FloatBoundsDifferential;
 typedef Differential<UpperIntervalType> UpperIntervalDifferentialType;
 
 
@@ -159,7 +159,7 @@ class Differential
     : public DispatchTranscendentalAlgebraOperations<Differential<X>,X>
     , public ProvideConcreteGenericArithmeticOperators<Differential<X>>
 {
-    static_assert(!IsSame<X,Float64Value>::value,"");
+    static_assert(!IsSame<X,FloatDPValue>::value,"");
     typedef Differential<X> SelfType;
 
     static const DegreeType MAX_DEGREE=65535;

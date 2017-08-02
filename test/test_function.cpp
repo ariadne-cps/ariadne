@@ -45,7 +45,7 @@ using namespace Ariadne;
 
 class TestFunction
 {
-    Precision64 pr;
+    DoublePrecision pr;
   public:
     Void test();
   private:
@@ -83,7 +83,7 @@ Void TestFunction::test_concept()
     //Polynomial<Real> p;
     //EffectiveScalarFunction pf(p);
 
-    //Vector<Float64Approximation> b; Matrix<Float64Approximation> A;
+    //Vector<FloatDPApproximation> b; Matrix<FloatDPApproximation> A;
     //VectorAffineFunction aff(A,b);
 
 }
@@ -96,7 +96,7 @@ Void TestFunction::test_scalar_function()
 
 
     ARIADNE_TEST_CONSTRUCT(EffectiveScalarFunction,f,(o+x*y));
-    ARIADNE_TEST_CONSTRUCT(Vector<Float64Approximation>,p,({2.0_approx,3.0_approx,5.0_approx}));
+    ARIADNE_TEST_CONSTRUCT(Vector<FloatDPApproximation>,p,({2.0_approx,3.0_approx,5.0_approx}));
     ARIADNE_TEST_EQUAL(f(p),7.0_approx);
 
     ARIADNE_TEST_PRINT(cos(f));
@@ -117,7 +117,7 @@ Void TestFunction::test_vector_function()
     EffectiveVectorFunction& id_ref=id;
     ARIADNE_TEST_PRINT(id_ref[0]);
 
-    Vector<Float64Approximation> v={2.0_approx,3.0_approx,5.0_approx};
+    Vector<FloatDPApproximation> v={2.0_approx,3.0_approx,5.0_approx};
 
     ARIADNE_TEST_CONSTRUCT(EffectiveVectorFunction,f,(id));
     ARIADNE_TEST_EQUAL(f(v),v);
@@ -157,8 +157,8 @@ Void TestFunction::test_differentiation()
     ARIADNE_TEST_NAMED_CONSTRUCT(EffectiveScalarFunction,df0,constant(dom,3));
     ARIADNE_TEST_NAMED_CONSTRUCT(EffectiveScalarFunction,df1,constant(dom,-2));
 
-    ARIADNE_TEST_CONSTRUCT(Vector<Float64Bounds>,v,({2.25_exact,1.375_exact}));
-    ARIADNE_TEST_CONSTRUCT(Vector<Float64Approximation>,va,(v));
+    ARIADNE_TEST_CONSTRUCT(Vector<FloatDPBounds>,v,({2.25_exact,1.375_exact}));
+    ARIADNE_TEST_CONSTRUCT(Vector<FloatDPApproximation>,va,(v));
 
     ARIADNE_TEST_EVALUATE(f.differential(v,deg));
     ARIADNE_TEST_EVALUATE(f.differential(va,deg));

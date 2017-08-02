@@ -54,8 +54,8 @@ class CalculusBase
     : public CalculusInterface<Var>
     , public Loggable
 {
-    typedef Float64 R;
-    typedef Float64 A;
+    typedef FloatDP R;
+    typedef FloatDP A;
     typedef IntervalDomainType I;
   public:
     //!
@@ -73,11 +73,11 @@ class CalculusBase
     typedef FunctionModelType FlowModelType;
     typedef SetModelType FlowSetModelType;
 
-    typedef Float64 RealType;
+    typedef FloatDP RealType;
     typedef IntervalDomainType IntervalType;
     typedef BoxDomainType BoxType;
 
-    typedef Float64 TimeType;
+    typedef FloatDP TimeType;
     typedef VectorFunction VectorFunctionType;
     typedef ScalarFunction ScalarFunctionType;
     typedef SetModelType EnclosureType;
@@ -225,7 +225,7 @@ class CalculusBase
     virtual PredicateModelType predicate_model(const ScalarFunctionType& g, const BoxType& d) const = 0;
 
     //! \brief A model for the constant time \a t over the box \a d.
-    virtual TimeModelType time_model(const Float64& t, const BoxType& d) const = 0;
+    virtual TimeModelType time_model(const FloatDP& t, const BoxType& d) const = 0;
     //@}
 
     //@{ \name Set-based operations

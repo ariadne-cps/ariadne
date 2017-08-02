@@ -41,19 +41,19 @@ template<class PR> using FloatUpperInterval = Interval<FloatUpperBound<PR>>;
 template<class PR> using FloatLowerInterval = Interval<FloatLowerBound<PR>>;
 template<class PR> using FloatApproximateInterval = Interval<FloatApproximation<PR>>;
 
-using Float64ExactInterval = FloatExactInterval<Precision64>;
-using Float64BallInterval = FloatBallInterval<Precision64> ;
-using Float64BoundsInterval = FloatBoundsInterval<Precision64>;
-using Float64UpperInterval = FloatUpperInterval<Precision64>;
-using Float64LowerInterval = FloatLowerInterval<Precision64>;
-using Float64ApproximateInterval = FloatApproximateInterval<Precision64>;
+using FloatDPExactInterval = FloatExactInterval<DoublePrecision>;
+using FloatDPBallInterval = FloatBallInterval<DoublePrecision> ;
+using FloatDPBoundsInterval = FloatBoundsInterval<DoublePrecision>;
+using FloatDPUpperInterval = FloatUpperInterval<DoublePrecision>;
+using FloatDPLowerInterval = FloatLowerInterval<DoublePrecision>;
+using FloatDPApproximateInterval = FloatApproximateInterval<DoublePrecision>;
 
-using FloatMPExactInterval = FloatExactInterval<PrecisionMP>;
-using FloatMPBallInterval = FloatBallInterval<PrecisionMP> ;
-using FloatMPBoundsInterval = FloatBoundsInterval<PrecisionMP>;
-using FloatMPUpperInterval = FloatUpperInterval<PrecisionMP>;
-using FloatMPLowerInterval = FloatLowerInterval<PrecisionMP>;
-using FloatMPApproximateInterval = FloatApproximateInterval<PrecisionMP>;
+using FloatMPExactInterval = FloatExactInterval<MultiplePrecision>;
+using FloatMPBallInterval = FloatBallInterval<MultiplePrecision> ;
+using FloatMPBoundsInterval = FloatBoundsInterval<MultiplePrecision>;
+using FloatMPUpperInterval = FloatUpperInterval<MultiplePrecision>;
+using FloatMPLowerInterval = FloatLowerInterval<MultiplePrecision>;
+using FloatMPApproximateInterval = FloatApproximateInterval<MultiplePrecision>;
 
 
 typedef Interval<ExactNumericType> ExactIntervalType;

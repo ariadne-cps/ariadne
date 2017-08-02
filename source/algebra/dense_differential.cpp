@@ -27,6 +27,6 @@
 #include "algebra/dense_differential.hpp"
 
 namespace Ariadne {
-template class DenseDifferential<Float64>;
-//template class Vector< DenseDifferential<Float64> >;
+template class DenseDifferential<FloatDP>;
+//template class Vector< DenseDifferential<FloatDP> >;
 }

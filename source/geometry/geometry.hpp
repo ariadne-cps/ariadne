@@ -39,10 +39,10 @@ enum class SplitPart : char;
 
 inline
 SizeType irmax(const ExactBoxType& bx) {
-    Float64 dmax=0.0;
+    FloatDP dmax=0.0;
     Nat imax=0;
     for(Nat i=0; i!=bx.size(); ++i) {
-        Float64 d=bx[i].width().upper().raw();
+        FloatDP d=bx[i].width().upper().raw();
         if(d>dmax) {
             imax=i;
             dmax=d;
@@ -51,17 +51,17 @@ SizeType irmax(const ExactBoxType& bx) {
     return imax;
 }
 
-inline Float64Value mid(Float64Value l, Float64Value u) {
-    return Float64Value(med(approx,l.raw(),u.raw()));
+inline FloatDPValue mid(FloatDPValue l, FloatDPValue u) {
+    return FloatDPValue(med(approx,l.raw(),u.raw()));
 }
 
 inline
 ExactBoxType split(const ExactBoxType& bx, SizeType i, SplitPart lr) {
     ExactBoxType result(bx);
     ExactIntervalType& ivl=result[i];
-    const Float64Value& l=ivl.lower();
-    const Float64Value& u=ivl.upper();
-    Float64Value c=mid(l,u);
+    const FloatDPValue& l=ivl.lower();
+    const FloatDPValue& u=ivl.upper();
+    FloatDPValue c=mid(l,u);
     if(lr==SplitPart::MIDDLE) {
         ivl.set(mid(l,c),mid(c,u));
     } else {
@@ -75,7 +75,7 @@ inline
 Pair<ExactBoxType,ExactBoxType> split(const ExactBoxType& bx, SizeType i)
 {
     Pair<ExactBoxType,ExactBoxType> result(bx,bx);
-    Float64Value c=mid(bx[i].lower(),bx[i].upper());
+    FloatDPValue c=mid(bx[i].lower(),bx[i].upper());
     result.first[i].set_upper(c);
     result.second[i].set_lower(c);
     return result;
@@ -96,7 +96,7 @@ Pair<ExactBoxType,ExactBoxType> split(const ExactBoxType& bx) {
 
 template<class F>
 ValidatedKleenean
-image_separated(const ExactBoxType& d, const F& f, const ExactBoxType& b, const RawFloat64& eps)
+image_separated(const ExactBoxType& d, const F& f, const ExactBoxType& b, const RawFloatDP& eps)
 {
 
     ExactBoxType fd=f.evaluate(d);
@@ -122,7 +122,7 @@ image_separated(const ExactBoxType& d, const F& f, const ExactBoxType& b, const 
 
 template<class F>
 ValidatedKleenean
-image_inside(const ExactBoxType& d, const F& f, const ExactBoxType& b, const RawFloat64& eps)
+image_inside(const ExactBoxType& d, const F& f, const ExactBoxType& b, const RawFloatDP& eps)
 {
 
     ExactBoxType fd=f.evaluate(d);
@@ -175,45 +175,45 @@ DS remove_supersets(const DS& ls)
 
 
 //! \brief Tests if \a ls overlaps \a rs, to a tolerance of \a eps.
-ValidatedKleenean overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float64& eps);
+ValidatedKleenean overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const FloatDP& eps);
 
 //! \brief Tests if \a ls is a inside of \a rs, to a tolerance of \a eps.
-ValidatedKleenean inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float64& eps);
+ValidatedKleenean inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const FloatDP& eps);
 
 //! \brief Tests if \a ls is disjoint from \a rs, to a tolerance of \a eps.
-ValidatedKleenean separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float64& eps);
+ValidatedKleenean separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const FloatDP& eps);
 
 
 //! \brief Tests if \a ovs overlaps \a ops, to a tolerance of \a eps.
-ValidatedSierpinskian overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const Float64& eps);
+ValidatedSierpinskian overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const FloatDP& eps);
 
 //! \brief Tests if \a cps is a inside of \a ops, to a tolerance of \a eps.
-ValidatedSierpinskian inside(const CompactSetInterface& cps, const OpenSetInterface& ops, const Float64& eps);
+ValidatedSierpinskian inside(const CompactSetInterface& cps, const OpenSetInterface& ops, const FloatDP& eps);
 
 //! \brief Tests if \a cps is disjoint from \a cls, to a tolerance of \a eps.
-ValidatedSierpinskian separated(const CompactSetInterface& cps, const ClosedSetInterface& cls, const Float64& eps);
+ValidatedSierpinskian separated(const CompactSetInterface& cps, const ClosedSetInterface& cls, const FloatDP& eps);
 
 
 
 
 //! \brief Tests if the intersection of \a ls and \a bx overlaps \a rs, to a tolerance of \a eps.
-ValidatedKleenean overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBoxType& bx, const Float64& eps);
+ValidatedKleenean overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBoxType& bx, const FloatDP& eps);
 
 //! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
-ValidatedKleenean inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBoxType& bx, const Float64& eps);
+ValidatedKleenean inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBoxType& bx, const FloatDP& eps);
 
 //! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
-ValidatedKleenean separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBoxType& bx, const Float64& eps);
+ValidatedKleenean separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBoxType& bx, const FloatDP& eps);
 
 
 //! \brief Tests if the intersection of \a ls and \a bx overlaps \a rs, to a tolerance of \a eps.
-ValidatedSierpinskian intersection_overlap(const OvertSetInterface& ls, const OpenSetInterface& rs, const ExactBoxType& bx, const Float64& eps);
+ValidatedSierpinskian intersection_overlap(const OvertSetInterface& ls, const OpenSetInterface& rs, const ExactBoxType& bx, const FloatDP& eps);
 
 //! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
-ValidatedSierpinskian intersection_inside(const ClosedSetInterface& ls, const OpenSetInterface& rs, const ExactBoxType& bx, const Float64& eps);
+ValidatedSierpinskian intersection_inside(const ClosedSetInterface& ls, const OpenSetInterface& rs, const ExactBoxType& bx, const FloatDP& eps);
 
 //! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
-ValidatedSierpinskian intersection_separated(const ClosedSetInterface& ls, const ClosedSetInterface& rs, const ExactBoxType& bx, const Float64& eps);
+ValidatedSierpinskian intersection_separated(const ClosedSetInterface& ls, const ClosedSetInterface& rs, const ExactBoxType& bx, const FloatDP& eps);
 
 
 } // namespace Ariadne

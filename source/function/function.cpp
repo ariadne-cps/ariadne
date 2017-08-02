@@ -818,55 +818,55 @@ EffectiveVectorFunction lie_derivative(const EffectiveVectorFunction& g, const E
 namespace {
 
 template<class OP> ValidatedScalarFunction apply(OP op, ValidatedScalarFunction const& f) {
-    std::shared_ptr<ValidatedScalarFunctionModel64Interface const>
-        fp=std::dynamic_pointer_cast<ValidatedScalarFunctionModel64Interface const>(f.managed_pointer());
+    std::shared_ptr<ValidatedScalarFunctionModelDPInterface const>
+        fp=std::dynamic_pointer_cast<ValidatedScalarFunctionModelDPInterface const>(f.managed_pointer());
     if(fp) {
-        ValidatedScalarFunctionModel64 fm(fp); return op(fm);
+        ValidatedScalarFunctionModelDP fm(fp); return op(fm);
     }
     return ValidatedScalarFunction(new UnaryFunction<ValidatedTag>(op.code(),f));
 }
 
 template<class OP> ValidatedScalarFunction apply(OP op, ValidatedScalarFunction const& f1, ValidatedScalarFunction const& f2) {
-    std::shared_ptr<ValidatedScalarFunctionModel64Interface const>
-        f1p=std::dynamic_pointer_cast<ValidatedScalarFunctionModel64Interface const>(f1.managed_pointer());
-    std::shared_ptr<ValidatedScalarFunctionModel64Interface const>
-        f2p=std::dynamic_pointer_cast<ValidatedScalarFunctionModel64Interface const>(f2.managed_pointer());
+    std::shared_ptr<ValidatedScalarFunctionModelDPInterface const>
+        f1p=std::dynamic_pointer_cast<ValidatedScalarFunctionModelDPInterface const>(f1.managed_pointer());
+    std::shared_ptr<ValidatedScalarFunctionModelDPInterface const>
+        f2p=std::dynamic_pointer_cast<ValidatedScalarFunctionModelDPInterface const>(f2.managed_pointer());
     if(f1p && f2p) {
-        ValidatedScalarFunctionModel64 f1m(f1p); ValidatedScalarFunctionModel64 f2m(f2p); return op(f1m,f2m);
+        ValidatedScalarFunctionModelDP f1m(f1p); ValidatedScalarFunctionModelDP f2m(f2p); return op(f1m,f2m);
     } else if(f1p) {
-        ValidatedScalarFunctionModel64 f1m(f1p); return op(f1m,factory(f1m).create(f2));
+        ValidatedScalarFunctionModelDP f1m(f1p); return op(f1m,factory(f1m).create(f2));
     } else if(f2p) {
-        ValidatedScalarFunctionModel64 f2m(f2p); return op(factory(f2m).create(f1),f2m);
+        ValidatedScalarFunctionModelDP f2m(f2p); return op(factory(f2m).create(f1),f2m);
     } else {
         return ValidatedScalarFunction(new BinaryFunction<ValidatedTag>(op.code(),f1,f2));
     }
 }
 
 template<class OP> ValidatedScalarFunction apply(OP op, ValidatedScalarFunction const& f1, ValidatedNumber const& c2) {
-    std::shared_ptr<ValidatedScalarFunctionModel64Interface const>
-        f1p=std::dynamic_pointer_cast<ValidatedScalarFunctionModel64Interface const>(f1.managed_pointer());
+    std::shared_ptr<ValidatedScalarFunctionModelDPInterface const>
+        f1p=std::dynamic_pointer_cast<ValidatedScalarFunctionModelDPInterface const>(f1.managed_pointer());
     if(f1p) {
-        ValidatedScalarFunctionModel64 f1m=f1p; return op(f1,c2);
+        ValidatedScalarFunctionModelDP f1m=f1p; return op(f1,c2);
     } else {
         return ValidatedScalarFunction(new BinaryFunction<ValidatedTag>(op.code(),f1,f1.create_constant(c2)));
     }
 }
 
 template<class OP> ValidatedScalarFunction apply(OP op, ValidatedNumber const& c1, ValidatedScalarFunction const& f2) {
-    std::shared_ptr<ValidatedScalarFunctionModel64Interface const>
-        f2p=std::dynamic_pointer_cast<ValidatedScalarFunctionModel64Interface const>(f2.managed_pointer());
+    std::shared_ptr<ValidatedScalarFunctionModelDPInterface const>
+        f2p=std::dynamic_pointer_cast<ValidatedScalarFunctionModelDPInterface const>(f2.managed_pointer());
     if(f2p) {
-        ValidatedScalarFunctionModel64 f2m=f2p; return op(c1,f2m);
+        ValidatedScalarFunctionModelDP f2m=f2p; return op(c1,f2m);
     } else {
         return ValidatedScalarFunction(new BinaryFunction<ValidatedTag>(op.code(),f2.create_constant(c1),f2));
     }
 }
 
 ValidatedScalarFunction apply(Pow op, ValidatedScalarFunction const& f, Int n) {
-    std::shared_ptr<ValidatedScalarFunctionModel64Interface const>
-        fp=std::dynamic_pointer_cast<ValidatedScalarFunctionModel64Interface const>(f.managed_pointer());
+    std::shared_ptr<ValidatedScalarFunctionModelDPInterface const>
+        fp=std::dynamic_pointer_cast<ValidatedScalarFunctionModelDPInterface const>(f.managed_pointer());
     if(fp) {
-        ValidatedScalarFunctionModel64 fm=fp; return op(fm,n);
+        ValidatedScalarFunctionModelDP fm=fp; return op(fm,n);
     } else {
         return ValidatedScalarFunction(new GradedFunction<ValidatedTag>(op.code(),f,n));
     }
@@ -1025,14 +1025,14 @@ ValidatedScalarFunction atan(ValidatedScalarFunction const& f) {
 
 /*
 ValidatedVectorFunction operator-(ValidatedVectorFunction const& f1, ValidatedVectorFunction const& f2) {
-    std::shared_ptr<ValidatedVectorFunctionModel64Interface const> f1p=std::dynamic_pointer_cast<ValidatedVectorFunctionModel64Interface const>(f1.managed_pointer());
-    std::shared_ptr<ValidatedVectorFunctionModel64Interface const> f2p=std::dynamic_pointer_cast<ValidatedVectorFunctionModel64Interface const>(f2.managed_pointer());
+    std::shared_ptr<ValidatedVectorFunctionModelDPInterface const> f1p=std::dynamic_pointer_cast<ValidatedVectorFunctionModelDPInterface const>(f1.managed_pointer());
+    std::shared_ptr<ValidatedVectorFunctionModelDPInterface const> f2p=std::dynamic_pointer_cast<ValidatedVectorFunctionModelDPInterface const>(f2.managed_pointer());
     if(f1p && f2p) {
-        return ValidatedVectorFunctionModel64(*f1p) - ValidatedVectorFunctionModel64(*f2p);
+        return ValidatedVectorFunctionModelDP(*f1p) - ValidatedVectorFunctionModelDP(*f2p);
     } else if(f1p) {
-        return ValidatedVectorFunctionModel64(*f1p) - f2.reference();
+        return ValidatedVectorFunctionModelDP(*f1p) - f2.reference();
     } else if(f2p) {
-        return f1.reference() - ValidatedVectorFunctionModel64(*f2p);
+        return f1.reference() - ValidatedVectorFunctionModelDP(*f2p);
     } else {
         VectorOfScalarFunction<ValidatedTag> r(f1.result_size(),ValidatedScalarFunction(f1.argument_size()));
         for(SizeType i=0; i!=r.result_size(); ++i) {
@@ -1045,10 +1045,10 @@ ValidatedVectorFunction operator-(ValidatedVectorFunction const& f1, ValidatedVe
 
 ValidatedScalarFunction compose(const ValidatedScalarFunction& f, const ValidatedVectorFunction& g) {
     ARIADNE_ASSERT(f.argument_size()==g.result_size());
-    std::shared_ptr<ValidatedVectorFunctionModel64Interface const>
-        gp=std::dynamic_pointer_cast<ValidatedVectorFunctionModel64Interface const>(g.managed_pointer());
+    std::shared_ptr<ValidatedVectorFunctionModelDPInterface const>
+        gp=std::dynamic_pointer_cast<ValidatedVectorFunctionModelDPInterface const>(g.managed_pointer());
     if(gp) {
-        return compose(f,ValidatedVectorFunctionModel64(gp->_clone()));
+        return compose(f,ValidatedVectorFunctionModelDP(gp->_clone()));
     } else {
         return ValidatedScalarFunction(new ScalarComposedFunction<ValidatedTag>(f,g));
     }
@@ -1056,42 +1056,42 @@ ValidatedScalarFunction compose(const ValidatedScalarFunction& f, const Validate
 
 ValidatedVectorFunction compose(const ValidatedVectorFunction& f, const ValidatedVectorFunction& g) {
     ARIADNE_ASSERT(f.argument_size()==g.result_size());
-    std::shared_ptr<ValidatedVectorFunctionModel64Interface const>
-        gp=std::dynamic_pointer_cast<ValidatedVectorFunctionModel64Interface const>(g.managed_pointer());
+    std::shared_ptr<ValidatedVectorFunctionModelDPInterface const>
+        gp=std::dynamic_pointer_cast<ValidatedVectorFunctionModelDPInterface const>(g.managed_pointer());
     if(gp) {
-        return compose(f,ValidatedVectorFunctionModel64(gp->_clone()));
+        return compose(f,ValidatedVectorFunctionModelDP(gp->_clone()));
     } else {
         return ValidatedVectorFunction(new VectorComposedFunction<ValidatedTag>(f,g));
     }
 }
 
 ValidatedVectorFunction join(ValidatedVectorFunction const& f1, const ValidatedVectorFunction& f2) {
-    std::shared_ptr<ValidatedVectorFunctionModel64Interface const>
-        f1p=std::dynamic_pointer_cast<ValidatedVectorFunctionModel64Interface const>(f1.managed_pointer());
-    std::shared_ptr<ValidatedVectorFunctionModel64Interface const>
-        f2p=std::dynamic_pointer_cast<ValidatedVectorFunctionModel64Interface const>(f2.managed_pointer());
+    std::shared_ptr<ValidatedVectorFunctionModelDPInterface const>
+        f1p=std::dynamic_pointer_cast<ValidatedVectorFunctionModelDPInterface const>(f1.managed_pointer());
+    std::shared_ptr<ValidatedVectorFunctionModelDPInterface const>
+        f2p=std::dynamic_pointer_cast<ValidatedVectorFunctionModelDPInterface const>(f2.managed_pointer());
     if(f1p && f2p) {
-        ValidatedVectorFunctionModel64 f1m(f1p); ValidatedVectorFunctionModel64 f2m(f2p); return join(f1m,f2m);
+        ValidatedVectorFunctionModelDP f1m(f1p); ValidatedVectorFunctionModelDP f2m(f2p); return join(f1m,f2m);
     } else if(f1p) {
-        ValidatedVectorFunctionModel64 f1m(f1p); ValidatedVectorFunctionModel64 f2m=factory(f1m).create(f2); return join(f1m,f2m);
+        ValidatedVectorFunctionModelDP f1m(f1p); ValidatedVectorFunctionModelDP f2m=factory(f1m).create(f2); return join(f1m,f2m);
     } else if(f2p) {
-        ValidatedVectorFunctionModel64 f2m(f2p); ValidatedVectorFunctionModel64 f1m=factory(f2m).create(f1); return join(f1m,f2m);
+        ValidatedVectorFunctionModelDP f2m(f2p); ValidatedVectorFunctionModelDP f1m=factory(f2m).create(f1); return join(f1m,f2m);
     } else {
         return ValidatedVectorFunction(new JoinedFunction<ValidatedTag>(f1,f2));
     }
 }
 
 ValidatedVectorFunction join(ValidatedVectorFunction const& f1, const ValidatedScalarFunction& f2) {
-    std::shared_ptr<ValidatedVectorFunctionModel64Interface const>
-        f1p=std::dynamic_pointer_cast<ValidatedVectorFunctionModel64Interface const>(f1.managed_pointer());
-    std::shared_ptr<ValidatedScalarFunctionModel64Interface const>
-        f2p=std::dynamic_pointer_cast<ValidatedScalarFunctionModel64Interface const>(f2.managed_pointer());
+    std::shared_ptr<ValidatedVectorFunctionModelDPInterface const>
+        f1p=std::dynamic_pointer_cast<ValidatedVectorFunctionModelDPInterface const>(f1.managed_pointer());
+    std::shared_ptr<ValidatedScalarFunctionModelDPInterface const>
+        f2p=std::dynamic_pointer_cast<ValidatedScalarFunctionModelDPInterface const>(f2.managed_pointer());
     if(f1p && f2p) {
-        ValidatedVectorFunctionModel64 f1m(f1p); ValidatedScalarFunctionModel64 f2m(f2p); return join(f1m,f2m);
+        ValidatedVectorFunctionModelDP f1m(f1p); ValidatedScalarFunctionModelDP f2m(f2p); return join(f1m,f2m);
     } else if(f1p) {
-        ValidatedVectorFunctionModel64 f1m(f1p); ValidatedScalarFunctionModel64 f2m=factory(f1m).create(f2); return join(f1m,f2m);
+        ValidatedVectorFunctionModelDP f1m(f1p); ValidatedScalarFunctionModelDP f2m=factory(f1m).create(f2); return join(f1m,f2m);
     } else if(f2p) {
-        ValidatedScalarFunctionModel64 f2m(f2p); ValidatedVectorFunctionModel64 f1m=factory(f2m).create(f1); return join(f1m,f2m);
+        ValidatedScalarFunctionModelDP f2m(f2p); ValidatedVectorFunctionModelDP f1m=factory(f2m).create(f1); return join(f1m,f2m);
     } else {
         VectorOfScalarFunction<ValidatedTag> r(f1.result_size()+1u,f1.domain());
         for(SizeType i=0; i!=f1.result_size(); ++i) { r[i]=f1[i]; }
@@ -1101,16 +1101,16 @@ ValidatedVectorFunction join(ValidatedVectorFunction const& f1, const ValidatedS
 }
 
 ValidatedVectorFunction join(ValidatedScalarFunction const& f1, const ValidatedVectorFunction& f2) {
-    std::shared_ptr<ValidatedScalarFunctionModel64Interface const>
-        f1p=std::dynamic_pointer_cast<ValidatedScalarFunctionModel64Interface const>(f1.managed_pointer());
-    std::shared_ptr<ValidatedVectorFunctionModel64Interface const>
-        f2p=std::dynamic_pointer_cast<ValidatedVectorFunctionModel64Interface const>(f2.managed_pointer());
+    std::shared_ptr<ValidatedScalarFunctionModelDPInterface const>
+        f1p=std::dynamic_pointer_cast<ValidatedScalarFunctionModelDPInterface const>(f1.managed_pointer());
+    std::shared_ptr<ValidatedVectorFunctionModelDPInterface const>
+        f2p=std::dynamic_pointer_cast<ValidatedVectorFunctionModelDPInterface const>(f2.managed_pointer());
     if(f1p && f2p) {
-        ValidatedScalarFunctionModel64 f1m(f1p); ValidatedVectorFunctionModel64 f2m(f2p); return join(f1m,f2m);
+        ValidatedScalarFunctionModelDP f1m(f1p); ValidatedVectorFunctionModelDP f2m(f2p); return join(f1m,f2m);
     } else if(f1p) {
-        ValidatedScalarFunctionModel64 f1m(f1p); ValidatedVectorFunctionModel64 f2m=factory(f1m).create(f2); return join(f1m,f2m);
+        ValidatedScalarFunctionModelDP f1m(f1p); ValidatedVectorFunctionModelDP f2m=factory(f1m).create(f2); return join(f1m,f2m);
     } else if(f2p) {
-        ValidatedVectorFunctionModel64 f2m(f2p); ValidatedScalarFunctionModel64 f1m=factory(f2m).create(f1); return join(f1m,f2m);
+        ValidatedVectorFunctionModelDP f2m(f2p); ValidatedScalarFunctionModelDP f1m=factory(f2m).create(f1); return join(f1m,f2m);
     } else {
         VectorOfScalarFunction<ValidatedTag> r(f1.result_size()+1u,f1.domain());
         r[0u]=f1;
@@ -1120,16 +1120,16 @@ ValidatedVectorFunction join(ValidatedScalarFunction const& f1, const ValidatedV
 }
 
 ValidatedVectorFunction join(ValidatedScalarFunction const& f1, const ValidatedScalarFunction& f2) {
-    std::shared_ptr<ValidatedScalarFunctionModel64Interface const>
-        f1p=std::dynamic_pointer_cast<ValidatedScalarFunctionModel64Interface const>(f1.managed_pointer());
-    std::shared_ptr<ValidatedScalarFunctionModel64Interface const>
-        f2p=std::dynamic_pointer_cast<ValidatedScalarFunctionModel64Interface const>(f2.managed_pointer());
+    std::shared_ptr<ValidatedScalarFunctionModelDPInterface const>
+        f1p=std::dynamic_pointer_cast<ValidatedScalarFunctionModelDPInterface const>(f1.managed_pointer());
+    std::shared_ptr<ValidatedScalarFunctionModelDPInterface const>
+        f2p=std::dynamic_pointer_cast<ValidatedScalarFunctionModelDPInterface const>(f2.managed_pointer());
     if(f1p && f2p) {
-        ValidatedScalarFunctionModel64 f1m(f1p); ValidatedScalarFunctionModel64 f2m(f2p); return join(f1m,f2m);
+        ValidatedScalarFunctionModelDP f1m(f1p); ValidatedScalarFunctionModelDP f2m(f2p); return join(f1m,f2m);
     } else if(f1p) {
-        ValidatedScalarFunctionModel64 f1m(f1p); ValidatedScalarFunctionModel64 f2m=factory(f1m).create(f2); return join(f1m,f2m);
+        ValidatedScalarFunctionModelDP f1m(f1p); ValidatedScalarFunctionModelDP f2m=factory(f1m).create(f2); return join(f1m,f2m);
     } else if(f2p) {
-        ValidatedScalarFunctionModel64 f2m(f2p); ValidatedScalarFunctionModel64 f1m=factory(f2m).create(f1); return join(f1m,f2m);
+        ValidatedScalarFunctionModelDP f2m(f2p); ValidatedScalarFunctionModelDP f1m=factory(f2m).create(f1); return join(f1m,f2m);
     } else {
         VectorOfScalarFunction<ValidatedTag> r(2u,f1.domain());
         r[0u]=f1;

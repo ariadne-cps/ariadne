@@ -45,18 +45,18 @@
 namespace Ariadne {
 
 template<class X> class Affine;
-typedef Affine<Float64> FloatAffine;
+typedef Affine<FloatDP> FloatAffine;
 typedef Affine<IntervalDomainType> IntervalAffine;
 typedef Affine<ApproximateNumericType> ApproximateAffine;
 typedef Affine<ValidatedNumericType> ValidatedAffine;
 
 template<class P, class F> class AffineModel;
-typedef AffineModel<ApproximateTag,Float64> ApproximateAffineModel;
-typedef AffineModel<ValidatedTag,Float64> ValidatedAffineModel;
+typedef AffineModel<ApproximateTag,FloatDP> ApproximateAffineModel;
+typedef AffineModel<ValidatedTag,FloatDP> ValidatedAffineModel;
 
 template<class P, class F> class TaylorModel;
-typedef TaylorModel<ApproximateTag,Float64> ApproximateTaylorModel64;
-typedef TaylorModel<ValidatedTag,Float64> ValidatedTaylorModel64;
+typedef TaylorModel<ApproximateTag,FloatDP> ApproximateTaylorModelDP;
+typedef TaylorModel<ValidatedTag,FloatDP> ValidatedTaylorModelDP;
 
 
 

@@ -122,18 +122,18 @@ const RoundDownward   downward=RoundDownward();
 const RoundUpward     upward=RoundUpward();
 const RoundTowardZero toward_zero=RoundTowardZero();
 
-inline void Float64::set_rounding_to_nearest() { boost::numeric::interval_lib::rounding_control<double>::to_nearest(); }
-inline void Float64::set_rounding_downward() { boost::numeric::interval_lib::rounding_control<double>::downward(); }
-inline void Float64::set_rounding_upward() { boost::numeric::interval_lib::rounding_control<double>::upward(); }
-inline void Float64::set_rounding_toward_zero() { boost::numeric::interval_lib::rounding_control<double>::toward_zero(); }
+inline void FloatDP::set_rounding_to_nearest() { boost::numeric::interval_lib::rounding_control<double>::to_nearest(); }
+inline void FloatDP::set_rounding_downward() { boost::numeric::interval_lib::rounding_control<double>::downward(); }
+inline void FloatDP::set_rounding_upward() { boost::numeric::interval_lib::rounding_control<double>::upward(); }
+inline void FloatDP::set_rounding_toward_zero() { boost::numeric::interval_lib::rounding_control<double>::toward_zero(); }
 
-inline void Float64::set_rounding_mode(RoundToNearest const&) { boost::numeric::interval_lib::rounding_control<double>::to_nearest(); }
-inline void Float64::set_rounding_mode(RoundDownward const&) { boost::numeric::interval_lib::rounding_control<double>::downward(); }
-inline void Float64::set_rounding_mode(RoundUpward const&) { boost::numeric::interval_lib::rounding_control<double>::upward(); }
-inline void Float64::set_rounding_mode(RoundTowardZero const&) { boost::numeric::interval_lib::rounding_control<double>::toward_zero(); }
+inline void FloatDP::set_rounding_mode(RoundToNearest const&) { boost::numeric::interval_lib::rounding_control<double>::to_nearest(); }
+inline void FloatDP::set_rounding_mode(RoundDownward const&) { boost::numeric::interval_lib::rounding_control<double>::downward(); }
+inline void FloatDP::set_rounding_mode(RoundUpward const&) { boost::numeric::interval_lib::rounding_control<double>::upward(); }
+inline void FloatDP::set_rounding_mode(RoundTowardZero const&) { boost::numeric::interval_lib::rounding_control<double>::toward_zero(); }
 
-inline void Float64::set_rounding_mode(rounding_mode_t rnd) { boost::numeric::interval_lib::rounding_control<double>::Float64::set_rounding_mode(rnd); }
-inline rounding_mode_t Float64::get_rounding_mode() { rounding_mode_t rnd; boost::numeric::interval_lib::rounding_control<double>::Float64::get_rounding_mode(rnd); return rnd; }
+inline void FloatDP::set_rounding_mode(rounding_mode_t rnd) { boost::numeric::interval_lib::rounding_control<double>::FloatDP::set_rounding_mode(rnd); }
+inline rounding_mode_t FloatDP::get_rounding_mode() { rounding_mode_t rnd; boost::numeric::interval_lib::rounding_control<double>::FloatDP::get_rounding_mode(rnd); return rnd; }
 
 } // namespace Ariadne
 
@@ -176,13 +176,13 @@ const rounding_mode_t ROUND_DOWNWARD     = ARIADNE_FENV_BASE + 1024;
 const rounding_mode_t ROUND_UPWARD       = ARIADNE_FENV_BASE + 2048;
 const rounding_mode_t ROUND_TOWARD_ZERO  = ARIADNE_FENV_BASE + 3072;
 
-inline void Float64::set_rounding_to_nearest() { __asm fldcw to_nearest; }
-inline void Float64::set_rounding_downward() { __asm fldcw downward; }
-inline void Float64::set_rounding_upward() { __asm fldcw upward; }
-inline void Float64::set_rounding_toward_zero() { __asm fldcw toward_zero; }
+inline void FloatDP::set_rounding_to_nearest() { __asm fldcw to_nearest; }
+inline void FloatDP::set_rounding_downward() { __asm fldcw downward; }
+inline void FloatDP::set_rounding_upward() { __asm fldcw upward; }
+inline void FloatDP::set_rounding_toward_zero() { __asm fldcw toward_zero; }
 
-inline void Float64::set_rounding_mode(rounding_mode_t rnd) { ARIADNE_RND_TMP=rnd; __asm fldcw ARIADNE_ROUND_TMP; }
-inline rounding_mode_t Float64::get_rounding_mode() { __asm fstcw ARIADNE_ROUND_TMP; ARIADNE_RND_TMP; }
+inline void FloatDP::set_rounding_mode(rounding_mode_t rnd) { ARIADNE_RND_TMP=rnd; __asm fldcw ARIADNE_ROUND_TMP; }
+inline rounding_mode_t FloatDP::get_rounding_mode() { __asm fstcw ARIADNE_ROUND_TMP; ARIADNE_RND_TMP; }
 
 } // namespace Ariadne
 
@@ -199,13 +199,13 @@ const rounding_mode_t ROUND_DOWNWARD     = 1024;
 const rounding_mode_t ROUND_UPWARD       = 2048;
 const rounding_mode_t ROUND_TOWARD_ZERO  = 3072;
 
-inline void Float64::set_rounding_to_nearest() { }
-inline void Float64::set_rounding_downward() { }
-inline void Float64::set_rounding_upward() { }
-inline void Float64::set_rounding_toward_zero() { }
+inline void FloatDP::set_rounding_to_nearest() { }
+inline void FloatDP::set_rounding_downward() { }
+inline void FloatDP::set_rounding_upward() { }
+inline void FloatDP::set_rounding_toward_zero() { }
 
-inline void Float64::set_rounding_mode(rounding_mode_t rnd) { }
-inline rounding_mode_t Float64::get_rounding_mode() { return 0 }
+inline void FloatDP::set_rounding_mode(rounding_mode_t rnd) { }
+inline rounding_mode_t FloatDP::get_rounding_mode() { return 0 }
 
 } // namespace Ariadne
 

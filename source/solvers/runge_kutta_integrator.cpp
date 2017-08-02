@@ -38,7 +38,7 @@
 
 namespace Ariadne {
 
-inline auto operator*(double s, FloatApproximationVector v) -> decltype(Float64Approximation(s)*v) { return Float64Approximation(s)*v; }
+inline auto operator*(double s, FloatApproximationVector v) -> decltype(FloatDPApproximation(s)*v) { return FloatDPApproximation(s)*v; }
 
 RungeKutta4Integrator::RungeKutta4Integrator(double step_size)
     : _step_size(step_size)
@@ -46,7 +46,7 @@ RungeKutta4Integrator::RungeKutta4Integrator(double step_size)
 }
 
 FloatApproximationVector
-RungeKutta4Integrator::step(const ApproximateVectorFunction& f, const FloatApproximationVector& x, const Float64Approximation& h) const
+RungeKutta4Integrator::step(const ApproximateVectorFunction& f, const FloatApproximationVector& x, const FloatDPApproximation& h) const
 {
     FloatApproximationVector k1=f(x);
     FloatApproximationVector k2=f(FloatApproximationVector(x+(h/2)*k1));
@@ -56,13 +56,13 @@ RungeKutta4Integrator::step(const ApproximateVectorFunction& f, const FloatAppro
     return x+(h/6)*(k1+2.0*k3+2.0*k4+k2);
 }
 
-List< Pair<Float64Approximation,FloatApproximationVector> >
-RungeKutta4Integrator::evolve(const ApproximateVectorFunction& f, const FloatApproximationVector& x0, const Float64Approximation& tmax) const
+List< Pair<FloatDPApproximation,FloatApproximationVector> >
+RungeKutta4Integrator::evolve(const ApproximateVectorFunction& f, const FloatApproximationVector& x0, const FloatDPApproximation& tmax) const
 {
-    static const Float64Approximation h(this->_step_size,Precision64());
+    static const FloatDPApproximation h(this->_step_size,dp);
 
-    List< Pair<Float64Approximation,FloatApproximationVector> > res;
-    Float64Approximation t(0.0,Precision64());
+    List< Pair<FloatDPApproximation,FloatApproximationVector> > res;
+    FloatDPApproximation t(0.0,dp);
     FloatApproximationVector x=x0;
 
     res.push_back(make_pair(t,x));

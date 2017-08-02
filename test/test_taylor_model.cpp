@@ -465,8 +465,8 @@ template<class F> Void TestTaylorModel<F>::test_refinement()
         FloatValue<PR>(1.05833333333333335)*x+FloatValue<PR>(0.108333333333333393)*e);
 
     // Code below computes expected values for second test
-    // Float64 xv=2./3; Float64 xe=1./2; Float64 yv=6./5; Float64 ye=1./4;
-    // Float64 rl=sub(down,yv,ye); Float64 ru=add(up,xv,xe); Float64 rv=add(near,rl,ru)/2; Float64 re=sub(up,ru,rl)/2;
+    // FloatDP xv=2./3; FloatDP xe=1./2; FloatDP yv=6./5; FloatDP ye=1./4;
+    // FloatDP rl=sub(down,yv,ye); FloatDP ru=add(up,xv,xe); FloatDP rv=add(near,rl,ru)/2; FloatDP re=sub(up,ru,rl)/2;
     // std::cerr << std::setprecision(18) << "xv="<<xv<<" yv="<<yv<<" rl="<<rl<<" ru="<<ru<<" rv="<<rv<<" re="<<re<<"\n";
 
 
@@ -535,10 +535,10 @@ template<class F> Void TestTaylorModel<F>::test_recondition()
 
 
 Int main() {
-    Precision64 dp;
-    ThresholdSweeper<Float64> sweeper_dp(dp,1e-8);
-//    TestTaylorModel<Float64>(sweeper_dp).test();
-    PrecisionMP mp(128);
+    DoublePrecision dp;
+    ThresholdSweeper<FloatDP> sweeper_dp(dp,1e-8);
+//    TestTaylorModel<FloatDP>(sweeper_dp).test();
+    MultiplePrecision mp(128);
     ThresholdSweeper<FloatMP> sweeper_mp(mp,std::pow(2.0,-64));
     ARIADNE_TEST_PRINT(sweeper_mp.precision());
     ARIADNE_TEST_PRINT(sweeper_mp);

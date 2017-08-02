@@ -36,11 +36,11 @@ namespace Ariadne {
 class Real;
 class TwoExp;
 
-class Precision64;
-class PrecisionMP;
+class DoublePrecision;
+class MultiplePrecision;
 
-using DoublePrecision = Precision64;
-using MultiplePrecision = PrecisionMP;
+using DoublePrecision = DoublePrecision;
+using MultiplePrecision = MultiplePrecision;
 using DP = DoublePrecision;
 using MP = MultiplePrecision;
 
@@ -51,14 +51,14 @@ struct DecimalPrecision { uint _figures; operator uint() const { return _figures
 
 template<class X> class Positive;
 
-class Float64;
+class FloatDP;
 class FloatMP;
 
-using RawFloat64 = Float64;
+using RawFloatDP = FloatDP;
 using RawFloatMP = FloatMP;
 
-RawFloat64 cast_raw_float(Precision64);
-RawFloatMP cast_raw_float(PrecisionMP);
+RawFloatDP cast_raw_float(DoublePrecision);
+RawFloatMP cast_raw_float(MultiplePrecision);
 template<class PR> using RawFloat = decltype(cast_raw_float(declval<PR>()));
 
 template<class PR> class FloatApproximation;
@@ -89,38 +89,38 @@ template<class PR> struct FloatTypedef<ValidatedTag,PR> { typedef FloatBounds<PR
 template<class PR, class PRE> struct FloatTypedef<EffectiveTag,PR,PRE> { typedef FloatBall<PR,PRE> Type; };
 
 template<class P, class PR, class PRE=PR> using Float = typename FloatTypedef<P,PR,PRE>::Type;
-//template<class P> using Float64=Float<P,Precision64>;
-//template<class P> using FloatMP=Float<P,PrecisionMP>;
+//template<class P> using FloatDP=Float<P,DoublePrecision>;
+//template<class P> using FloatMP=Float<P,MultiplePrecision>;
 
-using Float64Approximation = Float<ApproximateTag,Precision64>;
-using Float64LowerBound = Float<LowerTag,Precision64>;
-using Float64UpperBound = Float<UpperTag,Precision64>;
-using Float64Bounds = Float<BoundedTag,Precision64>;
-using Float64Ball = Float<MetricTag,Precision64>;
-using Float64Value = Float<ExactTag,Precision64>;
-using Float64Error = FloatError<Precision64>;
-using PositiveFloat64Approximation = PositiveFloatApproximation<Precision64>;
-using PositiveFloat64LowerBound = PositiveFloatLowerBound<Precision64>;
-using PositiveFloat64UpperBound = PositiveFloatUpperBound<Precision64>;
-using PositiveFloat64Bounds = PositiveFloatBounds<Precision64>;
-using PositiveFloat64Ball = PositiveFloatBall<Precision64>;
-using PositiveFloat64Value = PositiveFloatValue<Precision64>;
+using FloatDPApproximation = Float<ApproximateTag,DoublePrecision>;
+using FloatDPLowerBound = Float<LowerTag,DoublePrecision>;
+using FloatDPUpperBound = Float<UpperTag,DoublePrecision>;
+using FloatDPBounds = Float<BoundedTag,DoublePrecision>;
+using FloatDPBall = Float<MetricTag,DoublePrecision>;
+using FloatDPValue = Float<ExactTag,DoublePrecision>;
+using FloatDPError = FloatError<DoublePrecision>;
+using PositiveFloatDPApproximation = PositiveFloatApproximation<DoublePrecision>;
+using PositiveFloatDPLowerBound = PositiveFloatLowerBound<DoublePrecision>;
+using PositiveFloatDPUpperBound = PositiveFloatUpperBound<DoublePrecision>;
+using PositiveFloatDPBounds = PositiveFloatBounds<DoublePrecision>;
+using PositiveFloatDPBall = PositiveFloatBall<DoublePrecision>;
+using PositiveFloatDPValue = PositiveFloatValue<DoublePrecision>;
 
-using FloatMPApproximation = Float<ApproximateTag,PrecisionMP>;
-using FloatMPLowerBound = Float<LowerTag,PrecisionMP>;
-using FloatMPUpperBound = Float<UpperTag,PrecisionMP>;
-using FloatMPBounds= Float<BoundedTag,PrecisionMP>;
-using FloatMPBall = Float<MetricTag,PrecisionMP>;
-using FloatMPValue = Float<ExactTag,PrecisionMP>;
-using FloatMPError = FloatError<PrecisionMP>;
-using PositiveFloatMPApproximation = PositiveFloatApproximation<PrecisionMP>;
-using PositiveFloatMPLowerBound = PositiveFloatLowerBound<PrecisionMP>;
-using PositiveFloatMPUpperBound = PositiveFloatUpperBound<PrecisionMP>;
-using PositiveFloatMPBounds = PositiveFloatBounds<PrecisionMP>;
-using PositiveFloatMPBall = PositiveFloatBall<PrecisionMP>;
-using PositiveFloatMPValue = PositiveFloatValue<PrecisionMP>;
+using FloatMPApproximation = Float<ApproximateTag,MultiplePrecision>;
+using FloatMPLowerBound = Float<LowerTag,MultiplePrecision>;
+using FloatMPUpperBound = Float<UpperTag,MultiplePrecision>;
+using FloatMPBounds= Float<BoundedTag,MultiplePrecision>;
+using FloatMPBall = Float<MetricTag,MultiplePrecision>;
+using FloatMPValue = Float<ExactTag,MultiplePrecision>;
+using FloatMPError = FloatError<MultiplePrecision>;
+using PositiveFloatMPApproximation = PositiveFloatApproximation<MultiplePrecision>;
+using PositiveFloatMPLowerBound = PositiveFloatLowerBound<MultiplePrecision>;
+using PositiveFloatMPUpperBound = PositiveFloatUpperBound<MultiplePrecision>;
+using PositiveFloatMPBounds = PositiveFloatBounds<MultiplePrecision>;
+using PositiveFloatMPBall = PositiveFloatBall<MultiplePrecision>;
+using PositiveFloatMPValue = PositiveFloatValue<MultiplePrecision>;
 
-using FloatMP64Ball = Float<MetricTag,PrecisionMP,Precision64>;
+using FloatMDPBall = Float<MetricTag,MultiplePrecision,DoublePrecision>;
 
 template<class F> using Approximation = FloatApproximation<typename F::PrecisionType>;
 template<class F> using LowerBound = FloatLowerBound<typename F::PrecisionType>;

@@ -182,12 +182,12 @@ template<class PR> inline Interval<FloatLowerBound<PR>> narrow(Interval<FloatLow
 template<class PR> inline Interval<FloatLowerBound<PR>> narrow(Interval<FloatValue<PR>> const& ivl) {
     return narrow(Interval<FloatLowerBound<PR>>(ivl),FloatUpperBound<PR>(RawFloat<PR>::min(ivl.upper().precision()))); }
 
-inline Interval<Float64Value> cast_exact(Interval<Float64Approximation> const& ivl) {
-    return reinterpret_cast<Interval<Float64Value> const&>(ivl); }
+inline Interval<FloatDPValue> cast_exact(Interval<FloatDPApproximation> const& ivl) {
+    return reinterpret_cast<Interval<FloatDPValue> const&>(ivl); }
 inline Interval<FloatMPValue> cast_exact(Interval<FloatMPApproximation> const& ivl) {
     return reinterpret_cast<Interval<FloatMPValue> const&>(ivl); }
-inline Interval<Float64Value> cast_exact_interval(Interval<Float64Approximation> const& ivl) {
-    return reinterpret_cast<Interval<Float64Value> const&>(ivl); }
+inline Interval<FloatDPValue> cast_exact_interval(Interval<FloatDPApproximation> const& ivl) {
+    return reinterpret_cast<Interval<FloatDPValue> const&>(ivl); }
 inline Interval<FloatMPValue> cast_exact_interval(Interval<FloatMPApproximation> const& ivl) {
     return reinterpret_cast<Interval<FloatMPValue> const&>(ivl); }
 

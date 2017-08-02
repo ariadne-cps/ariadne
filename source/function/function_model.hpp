@@ -136,7 +136,7 @@ template<class P, class PR, class PRE> class ScalarFunctionModel
     ScalarFunctionModel<P,PR,PRE>& operator=(const CanonicalNumericType<P,PR,PRE>& c);
     ScalarFunctionModel<P,PR,PRE>& operator=(const ScalarFunction<P>& f);
     ScalarFunctionModel<P,PR,PRE>& operator=(const ScalarFunctionModelInterface<P,PR,PRE>& f);
-//    ScalarFunctionModel<P,PR,PRE>& operator=(const ValidatedScalarTaylorFunctionModel64& f);
+//    ScalarFunctionModel<P,PR,PRE>& operator=(const ValidatedScalarTaylorFunctionModelDP& f);
     inline SizeType argument_size() const { return this->_ptr->argument_size(); }
     template<class X> X operator() (const Vector<X>& x) const {
         return this->_ptr->_evaluate(x); }
@@ -245,16 +245,16 @@ template<class P, class PR, class PRE> class ScalarFunctionModel
         return os <<  f.operator ScalarFunction<P>(); }
 };
 
-inline ScalarFunctionModel64<ValidatedTag> refinement(const ScalarFunctionModel64<ValidatedTag>& f1, const ScalarFunctionModel64<ValidatedTag>& f2) {
+inline ScalarFunctionModelDP<ValidatedTag> refinement(const ScalarFunctionModelDP<ValidatedTag>& f1, const ScalarFunctionModelDP<ValidatedTag>& f2) {
     return f1._ptr->_refinement(f2); }
-inline Boolean inconsistent(const ScalarFunctionModel64<ValidatedTag>& f1, const ScalarFunctionModel64<ValidatedTag>& f2) {
+inline Boolean inconsistent(const ScalarFunctionModelDP<ValidatedTag>& f1, const ScalarFunctionModelDP<ValidatedTag>& f2) {
     return f1._ptr->_inconsistent(f2); }
-inline Boolean refines(const ScalarFunctionModel64<ValidatedTag>& f1, const ScalarFunctionModel64<ValidatedTag>& f2) {
+inline Boolean refines(const ScalarFunctionModelDP<ValidatedTag>& f1, const ScalarFunctionModelDP<ValidatedTag>& f2) {
     return f1._ptr->_refines(f2); }
 
 // FIXME: Should not be needed since ScalarFunctionModel has a representation
-template<class P> inline ScalarFunctionModel64<P> embed(const ScalarFunction<P>& f, const IntervalDomainType& d) {
-    return embed(ScalarFunctionModel64<P>(f),d); }
+template<class P> inline ScalarFunctionModelDP<P> embed(const ScalarFunction<P>& f, const IntervalDomainType& d) {
+    return embed(ScalarFunctionModelDP<P>(f),d); }
 
 template<class P, class PR, class PRE> inline ScalarFunctionModel<P,PR,PRE>& ScalarFunctionModel<P,PR,PRE>::operator=(const CanonicalNumericType<P,PR,PRE>& c) {
         (*this)*=CanonicalNumericType<P,PR,PRE>(0); (*this)+=c; return *this; }
@@ -273,7 +273,7 @@ template<class M> class ScaledFunctionPatch;
 template<class M> class VectorScaledFunctionPatch;
 template<class M> struct Element<VectorScaledFunctionPatch<M>> { typedef ScaledFunctionPatch<M> Type; };
 
-typedef ScaledFunctionPatch<ValidatedTaylorModel64> ValidatedScalarTaylorFunctionModel64;
+typedef ScaledFunctionPatch<ValidatedTaylorModelDP> ValidatedScalarTaylorFunctionModelDP;
 
 template<class P, class PR, class PRE> class VectorFunctionModelElement
     : public DispatchAlgebraOperators<ScalarFunctionModel<P,PR,PRE>, CanonicalNumericType<P,PR,PRE>>
@@ -474,12 +474,12 @@ template<class P, class PR, class PRE> inline CanonicalNumericType<P,PR,PRE> unc
     return f._ptr->_unchecked_evaluate(x); }
 
 template<class P> inline CanonicalNumeric64Type<P> unchecked_evaluate(const ScalarFunction<P>& f, const Vector<CanonicalNumeric64Type<P>>& x) {
-    ScalarFunctionModel64Interface<P> const* fptr = dynamic_cast<ScalarFunctionModel64Interface<P> const*>(f.raw_pointer());
-    if(fptr) { return unchecked_evaluate(ScalarFunctionModel64<P>(*fptr),x); } else { return evaluate(f,x); } }
+    ScalarFunctionModelDPInterface<P> const* fptr = dynamic_cast<ScalarFunctionModelDPInterface<P> const*>(f.raw_pointer());
+    if(fptr) { return unchecked_evaluate(ScalarFunctionModelDP<P>(*fptr),x); } else { return evaluate(f,x); } }
 
 template<class P> inline Vector<CanonicalNumeric64Type<P>> unchecked_evaluate(const VectorFunction<P>& f, const Vector<CanonicalNumeric64Type<P>>& x) {
-    VectorFunctionModel64Interface<P> const* fptr = dynamic_cast<VectorFunctionModel64Interface<P> const*>(f.raw_pointer());
-    if(fptr) { return unchecked_evaluate(VectorFunctionModel64<P>(*fptr),x); } else { return evaluate(f,x); } }
+    VectorFunctionModelDPInterface<P> const* fptr = dynamic_cast<VectorFunctionModelDPInterface<P> const*>(f.raw_pointer());
+    if(fptr) { return unchecked_evaluate(VectorFunctionModelDP<P>(*fptr),x); } else { return evaluate(f,x); } }
 
 template<class P, class PR, class PRE> inline ScalarFunctionModel<P,PR,PRE> unchecked_compose(const ScalarFunction<P>& f, const VectorFunctionModel<P,PR,PRE>& g) {
     ScalarFunctionModelInterface<P,PR,PRE> const* fptr = dynamic_cast<ScalarFunctionModelInterface<P,PR,PRE> const*>(f.raw_pointer());
@@ -499,7 +499,7 @@ template<class PR, class PRE> VectorFunctionModel<ValidatedTag,PR,PRE> restrict(
     return f._ptr->_restriction(dom); }
 
 
-// Not in function_model_interface.hpp since DomainType (ExactFloat64Box) is undefined.
+// Not in function_model_interface.hpp since DomainType (ExactFloatDPBox) is undefined.
 template<class P, class PR, class PRE> ScalarFunctionModel<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create_identity(const IntervalDomainType& domain) const {
     return _create_coordinate(DomainType(1u,domain),0u); };
 

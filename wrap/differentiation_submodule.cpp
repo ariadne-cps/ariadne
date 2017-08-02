@@ -42,10 +42,10 @@ inline Nat compute_polynomial_data_size(Nat rs, Nat as, Nat d) { return rs*Ariad
 namespace Ariadne {
 
 // FIXME: Ensure all valid arithmetic and comparisons are defined!
-inline auto operator==(Float64Bounds x, Int n) -> decltype(x==Float64Value(n)) { return x==Float64Value(n); }
-inline auto operator!=(Float64Bounds x, Int n) -> decltype(x!=Float64Value(n)) { return x!=Float64Value(n); }
-inline auto operator> (Float64Bounds x, Int n) -> decltype(x> Float64Value(n)) { return x> Float64Value(n); }
-inline auto operator*=(Float64Approximation x, Int n) -> decltype(x*=Float64Approximation(n)) { return x*=Float64Approximation(n); }
+inline auto operator==(FloatDPBounds x, Int n) -> decltype(x==FloatDPValue(n)) { return x==FloatDPValue(n); }
+inline auto operator!=(FloatDPBounds x, Int n) -> decltype(x!=FloatDPValue(n)) { return x!=FloatDPValue(n); }
+inline auto operator> (FloatDPBounds x, Int n) -> decltype(x> FloatDPValue(n)) { return x> FloatDPValue(n); }
+inline auto operator*=(FloatDPApproximation x, Int n) -> decltype(x*=FloatDPApproximation(n)) { return x*=FloatDPApproximation(n); }
 
 template<class X>
 struct to_python_dict< Ariadne::Expansion<X>  > {
@@ -306,21 +306,21 @@ export_differential_vector(const char* name)
     //def("lie_derivative", (DV(*)(const DV&,const DV&))&lie_derivative);
 }
 
-template Void export_differential< Differential<Float64Approximation> >(const char*);
-template Void export_differential< Differential<Float64Bounds> >(const char*);
+template Void export_differential< Differential<FloatDPApproximation> >(const char*);
+template Void export_differential< Differential<FloatDPBounds> >(const char*);
 
-template Void export_differential_vector< Differential<Float64Approximation> >(const char*);
-template Void export_differential_vector< Differential<Float64Bounds> >(const char*);
+template Void export_differential_vector< Differential<FloatDPApproximation> >(const char*);
+template Void export_differential_vector< Differential<FloatDPBounds> >(const char*);
 
 Void differentiation_submodule()
 {
-    to_python_dict < Expansion<Float64Approximation> >();
-    to_python_dict < Expansion<Float64Bounds> >();
+    to_python_dict < Expansion<FloatDPApproximation> >();
+    to_python_dict < Expansion<FloatDPBounds> >();
 
-    export_differential< Differential<Float64Approximation> >(python_name<Float64Approximation>("Differential"));
-    export_differential< Differential<Float64Bounds> >(python_name<Float64Bounds>("Differential"));
+    export_differential< Differential<FloatDPApproximation> >(python_name<FloatDPApproximation>("Differential"));
+    export_differential< Differential<FloatDPBounds> >(python_name<FloatDPBounds>("Differential"));
 
-    export_differential_vector< Differential<Float64Approximation> >(python_name<Float64Approximation>("DifferentialVector"));
-    export_differential_vector< Differential<Float64Bounds> >(python_name<Float64Bounds>("DifferentialVector"));
+    export_differential_vector< Differential<FloatDPApproximation> >(python_name<FloatDPApproximation>("DifferentialVector"));
+    export_differential_vector< Differential<FloatDPBounds> >(python_name<FloatDPBounds>("DifferentialVector"));
 }
 

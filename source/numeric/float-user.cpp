@@ -42,8 +42,8 @@ template<class PRE, class FLT, DisableIf<IsSame<PRE,PrecisionType<FLT>>> =dummy>
 template<class PRE, class FLT, EnableIf<IsSame<PRE,PrecisionType<FLT>>> =dummy> inline RawFloat<PRE> _make_error(FLT const& x) {
     return x; }
 
-Float64 set(RoundUpward rnd, FloatMP const& x, Precision64 pr) { return Float64(Dyadic(x),rnd,pr); }
-Float64 set(RoundDownward rnd, FloatMP const& x, Precision64 pr) { return Float64(Dyadic(x),rnd,pr); }
+FloatDP set(RoundUpward rnd, FloatMP const& x, DoublePrecision pr) { return FloatDP(Dyadic(x),rnd,pr); }
+FloatDP set(RoundDownward rnd, FloatMP const& x, DoublePrecision pr) { return FloatDP(Dyadic(x),rnd,pr); }
 
 
 template<class PR> Nat FloatError<PR>::output_places = 3;
@@ -51,49 +51,49 @@ template<class PR> Nat FloatApproximation<PR>::output_places = 4;
 template<class PR> Nat FloatBounds<PR>::output_places=8;
 template<class PR> Nat FloatValue<PR>::output_places = 16;
 
-const Float64Value infty = Float64Value(Float64::inf(Precision64()));
+const FloatDPValue infty = FloatDPValue(FloatDP::inf(dp));
 
-FloatError<Precision64> operator"" _error(long double lx) {
+FloatError<DoublePrecision> operator"" _error(long double lx) {
     double x=lx;
     assert(x==lx);
-    return FloatError<Precision64>(Float64(x));
+    return FloatError<DoublePrecision>(FloatDP(x));
 }
 
-FloatValue<Precision64> operator"" _exact(long double lx) {
+FloatValue<DoublePrecision> operator"" _exact(long double lx) {
     double x=lx;
     assert(x==lx);
-    return FloatValue<Precision64>(x);
+    return FloatValue<DoublePrecision>(x);
 }
 
-FloatBall<Precision64> operator"" _near(long double lx) {
+FloatBall<DoublePrecision> operator"" _near(long double lx) {
     volatile double x=lx;
     volatile long double le=std::abs((long double)x-lx);
     volatile double e=le;
     while(e<le) { e*=(1+std::numeric_limits<double>::epsilon()); }
-    return FloatBall<Precision64>(x,e);
+    return FloatBall<DoublePrecision>(x,e);
 }
 
-FloatUpperBound<Precision64> operator"" _upper(long double lx) {
+FloatUpperBound<DoublePrecision> operator"" _upper(long double lx) {
     static const double eps = std::numeric_limits<double>::epsilon();
     static const double min = std::numeric_limits<double>::min();
     double x=lx;
     if(x<lx) { x+=min; }
     while (x<lx) { x+=std::abs(x)*eps; }
-    return FloatUpperBound<Precision64>(x);
+    return FloatUpperBound<DoublePrecision>(x);
 }
 
-FloatLowerBound<Precision64> operator"" _lower(long double lx) {
+FloatLowerBound<DoublePrecision> operator"" _lower(long double lx) {
     static const double eps = std::numeric_limits<double>::epsilon();
     static const double min = std::numeric_limits<double>::min();
     double x=lx;
     if(x>lx) { x-=min; }
     while (x>lx) { x-=std::abs(x)*eps; }
-    return FloatLowerBound<Precision64>(x);
+    return FloatLowerBound<DoublePrecision>(x);
 }
 
-FloatApproximation<Precision64> operator"" _approx(long double lx) {
+FloatApproximation<DoublePrecision> operator"" _approx(long double lx) {
     double x=lx;
-    return FloatApproximation<Precision64>(x);
+    return FloatApproximation<DoublePrecision>(x);
 }
 
 
@@ -1146,7 +1146,7 @@ inline int log10floor(FloatMP const& x) { return log10floor(x.get_d()); }
 inline int abslog10floor(double const& x) { return log10floor(std::abs(x)); }
 
 
-template<> OutputStream& Operations<FloatBounds<PrecisionMP>>::_write(OutputStream& os, const FloatBounds<PrecisionMP>& x)
+template<> OutputStream& Operations<FloatBounds<MultiplePrecision>>::_write(OutputStream& os, const FloatBounds<MultiplePrecision>& x)
 {
     static const double log2ten = 3.3219280948873621817;
     using std::max; using std::min;
@@ -1155,8 +1155,8 @@ template<> OutputStream& Operations<FloatBounds<PrecisionMP>>::_write(OutputStre
     double ldbl=l.get_d();
     double udbl=u.get_d();
     if(ldbl==0.0 && udbl==0.0) { return os << "0.0[:]"; }
-    int errplc=FloatError<PrecisionMP>::output_places;
-    int bndplc=FloatBounds<PrecisionMP>::output_places;
+    int errplc=FloatError<MultiplePrecision>::output_places;
+    int bndplc=FloatBounds<MultiplePrecision>::output_places;
     int precplc=x.precision()/log2ten;
     int log10wdth=log10floor(sub(to_nearest,u,l));
     int log10mag=log10floor(max(-ldbl,udbl));
@@ -1184,10 +1184,10 @@ template<> OutputStream& Operations<FloatBounds<PrecisionMP>>::_write(OutputStre
     return os << ocstr;
 }
 
-template<> OutputStream& Operations<FloatBounds<Precision64>>::_write(OutputStream& os, const FloatBounds<Precision64>& x)
+template<> OutputStream& Operations<FloatBounds<DoublePrecision>>::_write(OutputStream& os, const FloatBounds<DoublePrecision>& x)
 {
-    PrecisionMP prec(64);
-    return os << FloatBounds<PrecisionMP>(FloatMP(x.lower_raw(),prec),FloatMP(x.upper_raw(),prec));
+    MultiplePrecision prec(64);
+    return os << FloatBounds<MultiplePrecision>(FloatMP(x.lower_raw(),prec),FloatMP(x.upper_raw(),prec));
 }
 
 template<class PR, class PRE> struct Operations<FloatBall<PR,PRE>> {
@@ -1392,7 +1392,7 @@ template<class PR, class PRE> struct Operations<FloatBall<PR,PRE>> {
 
 };
 
-template<> OutputStream& Operations<FloatBall<PrecisionMP>>::_write(OutputStream& os, FloatBall<PrecisionMP> const& x) {
+template<> OutputStream& Operations<FloatBall<MultiplePrecision>>::_write(OutputStream& os, FloatBall<MultiplePrecision> const& x) {
     // Write based on number of correct digits
     static const double log2ten = 3.3219280948873621817;
     static const char pmstr[] = "\u00b1";
@@ -1401,7 +1401,7 @@ template<> OutputStream& Operations<FloatBall<PrecisionMP>>::_write(OutputStream
     FloatMP const& e=x.error_raw();
     double edbl=e.get_d();
     // Compute the number of decimal places to be displayed
-    int errplc = FloatError<PrecisionMP>::output_places;
+    int errplc = FloatError<MultiplePrecision>::output_places;
     int log10err = log10floor(edbl);
     int dgtserr = errplc-(log10err+1);
     int dgtsval = std::floor((x.value().precision()-x.value().raw().exponent())/log2ten);
@@ -1442,14 +1442,14 @@ template<> OutputStream& Operations<FloatBall<PrecisionMP>>::_write(OutputStream
     return os << x.value() << "\u00b1" << x.error();
 }
 
-template<> OutputStream& Operations<FloatBall<PrecisionMP,Precision64>>::_write(OutputStream& os, FloatBall<PrecisionMP,Precision64> const& x) {
-    PrecisionMP prec(64);
-    return os << FloatBall<PrecisionMP,PrecisionMP>(x.value_raw(),FloatMP(x.error_raw(),prec));
+template<> OutputStream& Operations<FloatBall<MultiplePrecision,DoublePrecision>>::_write(OutputStream& os, FloatBall<MultiplePrecision,DoublePrecision> const& x) {
+    MultiplePrecision prec(64);
+    return os << FloatBall<MultiplePrecision,MultiplePrecision>(x.value_raw(),FloatMP(x.error_raw(),prec));
 }
 
-template<> OutputStream& Operations<FloatBall<Precision64>>::_write(OutputStream& os, FloatBall<Precision64> const& x) {
-    PrecisionMP prec(64);
-    return os << FloatBall<PrecisionMP>(FloatMP(x.value_raw(),prec),FloatMP(x.error_raw(),prec));
+template<> OutputStream& Operations<FloatBall<DoublePrecision>>::_write(OutputStream& os, FloatBall<DoublePrecision> const& x) {
+    MultiplePrecision prec(64);
+    return os << FloatBall<MultiplePrecision>(FloatMP(x.value_raw(),prec),FloatMP(x.error_raw(),prec));
 }
 
 
@@ -1664,7 +1664,7 @@ template<class PR> struct Operations<FloatValue<PR>> {
 };
 
 Rational cast_exact(Real const& x) {
-    return Rational(cast_exact(FloatApproximation<Precision64>(x,Precision64())));
+    return Rational(cast_exact(FloatApproximation<DoublePrecision>(x,dp)));
 }
 
 
@@ -1898,19 +1898,19 @@ template<class PR> struct Operations<FloatError<PR>> {
 
 
 
-template<> Nat integer_cast<Nat,Float64Approximation>(Float64Approximation const& x) {
+template<> Nat integer_cast<Nat,FloatDPApproximation>(FloatDPApproximation const& x) {
     return std::round(x.get_d()); }
 
-template<> Int integer_cast<Int,Float64Approximation>(Float64Approximation const& x) {
+template<> Int integer_cast<Int,FloatDPApproximation>(FloatDPApproximation const& x) {
     return std::round(x.get_d()); }
 
-template<> Nat integer_cast<Nat,Float64LowerBound>(Float64LowerBound const& x) {
+template<> Nat integer_cast<Nat,FloatDPLowerBound>(FloatDPLowerBound const& x) {
     return std::round(x.get_d()); }
 
-template<> Int integer_cast<Int,Float64LowerBound>(Float64LowerBound const& x) {
+template<> Int integer_cast<Int,FloatDPLowerBound>(FloatDPLowerBound const& x) {
     return std::round(x.get_d()); }
 
-template<> Int integer_cast<Int,Float64Bounds>(Float64Bounds const& x) {
+template<> Int integer_cast<Int,FloatDPBounds>(FloatDPBounds const& x) {
     return std::round((x.lower().get_d()+x.upper().get_d())/2); }
 
 template<> Nat integer_cast<Nat,FloatMPApproximation>(FloatMPApproximation const& x) {
@@ -1932,33 +1932,33 @@ template<class PR> FloatBounds<PR> _make_float(Rational q) { return FloatBounds<
 template<class PR> FloatValue<PR> _make_float(Integer z) { return FloatValue<PR>(z); }
 
 
-template class FloatApproximation<Precision64>;
-template class FloatLowerBound<Precision64>;
-template class FloatUpperBound<Precision64>;
-template class FloatBounds<Precision64>;
-template class FloatBall<Precision64>;
-template class FloatValue<Precision64>;
+template class FloatApproximation<DoublePrecision>;
+template class FloatLowerBound<DoublePrecision>;
+template class FloatUpperBound<DoublePrecision>;
+template class FloatBounds<DoublePrecision>;
+template class FloatBall<DoublePrecision>;
+template class FloatValue<DoublePrecision>;
 
-template class FloatApproximation<PrecisionMP>;
-template class FloatLowerBound<PrecisionMP>;
-template class FloatUpperBound<PrecisionMP>;
-template class FloatBounds<PrecisionMP>;
-template class FloatBall<PrecisionMP>;
-template class FloatValue<PrecisionMP>;
+template class FloatApproximation<MultiplePrecision>;
+template class FloatLowerBound<MultiplePrecision>;
+template class FloatUpperBound<MultiplePrecision>;
+template class FloatBounds<MultiplePrecision>;
+template class FloatBall<MultiplePrecision>;
+template class FloatValue<MultiplePrecision>;
 
-template class FloatBall<PrecisionMP, Precision64>;
+template class FloatBall<MultiplePrecision, DoublePrecision>;
 
-template class Operations<Float64Approximation>;
-template class Operations<Float64LowerBound>;
-template class Operations<Float64UpperBound>;
-template class Operations<Float64Bounds>;
-template class Operations<Float64Ball>;
-template class Operations<Float64Value>;
-template class Operations<PositiveFloat64Approximation>;
-template class Operations<PositiveFloat64LowerBound>;
-template class Operations<PositiveFloat64UpperBound>;
-template class Operations<PositiveFloat64Bounds>;
-template class Operations<Float64Error>;
+template class Operations<FloatDPApproximation>;
+template class Operations<FloatDPLowerBound>;
+template class Operations<FloatDPUpperBound>;
+template class Operations<FloatDPBounds>;
+template class Operations<FloatDPBall>;
+template class Operations<FloatDPValue>;
+template class Operations<PositiveFloatDPApproximation>;
+template class Operations<PositiveFloatDPLowerBound>;
+template class Operations<PositiveFloatDPUpperBound>;
+template class Operations<PositiveFloatDPBounds>;
+template class Operations<FloatDPError>;
 
 template class Operations<FloatMPApproximation>;
 template class Operations<FloatMPLowerBound>;
@@ -1972,12 +1972,12 @@ template class Operations<PositiveFloatMPUpperBound>;
 template class Operations<PositiveFloatMPBounds>;
 template class Operations<FloatMPError>;
 
-template class Operations<FloatMP64Ball>;
+template class Operations<FloatMDPBall>;
 
-PositiveFloat64Approximation mag(Float64Approximation const& x) { return Operations<Float64Approximation>::_mag(x); }
-PositiveFloat64Approximation mig(Float64Approximation const& x) { return Operations<Float64Approximation>::_mig(x); }
-Float64Approximation round(Float64Approximation const& x) { return Operations<Float64Approximation>::_round(x); }
-Bool same(Float64Approximation const& x1, Float64Approximation const& x2) { return Operations<Float64Approximation>::_same(x1,x2); }
+PositiveFloatDPApproximation mag(FloatDPApproximation const& x) { return Operations<FloatDPApproximation>::_mag(x); }
+PositiveFloatDPApproximation mig(FloatDPApproximation const& x) { return Operations<FloatDPApproximation>::_mig(x); }
+FloatDPApproximation round(FloatDPApproximation const& x) { return Operations<FloatDPApproximation>::_round(x); }
+Bool same(FloatDPApproximation const& x1, FloatDPApproximation const& x2) { return Operations<FloatDPApproximation>::_same(x1,x2); }
 
 
 PositiveFloatMPApproximation mag(FloatMPApproximation const& x) { return Operations<FloatMPApproximation>::_mag(x); }
@@ -1987,9 +1987,9 @@ Bool same(FloatMPApproximation const& x1, FloatMPApproximation const& x2) { retu
 
 
 
-Bool same(Float64LowerBound const& x1, Float64LowerBound const& x2) { return Operations<Float64LowerBound>::_same(x1,x2); }
-Bool refines(Float64LowerBound const& x1, Float64LowerBound const& x2) { return Operations<Float64LowerBound>::_refines(x1,x2); }
-Float64LowerBound refinement(Float64LowerBound const& x1, Float64LowerBound const& x2) { return Operations<Float64LowerBound>::_refinement(x1,x2); }
+Bool same(FloatDPLowerBound const& x1, FloatDPLowerBound const& x2) { return Operations<FloatDPLowerBound>::_same(x1,x2); }
+Bool refines(FloatDPLowerBound const& x1, FloatDPLowerBound const& x2) { return Operations<FloatDPLowerBound>::_refines(x1,x2); }
+FloatDPLowerBound refinement(FloatDPLowerBound const& x1, FloatDPLowerBound const& x2) { return Operations<FloatDPLowerBound>::_refinement(x1,x2); }
 
 
 Bool same(FloatMPLowerBound const& x1, FloatMPLowerBound const& x2) { return Operations<FloatMPLowerBound>::_same(x1,x2); }
@@ -1999,9 +1999,9 @@ FloatMPLowerBound refinement(FloatMPLowerBound const& x1, FloatMPLowerBound cons
 
 
 
-Bool same(Float64UpperBound const& x1, Float64UpperBound const& x2) { return Operations<Float64UpperBound>::_same(x1,x2); }
-Bool refines(Float64UpperBound const& x1, Float64UpperBound const& x2) { return Operations<Float64UpperBound>::_refines(x1,x2); }
-Float64UpperBound refinement(Float64UpperBound const& x1, Float64UpperBound const& x2) { return Operations<Float64UpperBound>::_refinement(x1,x2); }
+Bool same(FloatDPUpperBound const& x1, FloatDPUpperBound const& x2) { return Operations<FloatDPUpperBound>::_same(x1,x2); }
+Bool refines(FloatDPUpperBound const& x1, FloatDPUpperBound const& x2) { return Operations<FloatDPUpperBound>::_refines(x1,x2); }
+FloatDPUpperBound refinement(FloatDPUpperBound const& x1, FloatDPUpperBound const& x2) { return Operations<FloatDPUpperBound>::_refinement(x1,x2); }
 
 
 Bool same(FloatMPUpperBound const& x1, FloatMPUpperBound const& x2) { return Operations<FloatMPUpperBound>::_same(x1,x2); }
@@ -2010,16 +2010,16 @@ FloatMPUpperBound refinement(FloatMPUpperBound const& x1, FloatMPUpperBound cons
 
 
 
-PositiveFloat64UpperBound mag(Float64Bounds const& x) { return Operations<Float64Bounds>::_mag(x); }
-PositiveFloat64LowerBound mig(Float64Bounds const& x) { return Operations<Float64Bounds>::_mig(x); }
-Float64Bounds round(Float64Bounds const& x) { return Operations<Float64Bounds   >::_round(x); }
+PositiveFloatDPUpperBound mag(FloatDPBounds const& x) { return Operations<FloatDPBounds>::_mag(x); }
+PositiveFloatDPLowerBound mig(FloatDPBounds const& x) { return Operations<FloatDPBounds>::_mig(x); }
+FloatDPBounds round(FloatDPBounds const& x) { return Operations<FloatDPBounds   >::_round(x); }
 
-Bool same(Float64Bounds const& x1, Float64Bounds const& x2) { return Operations<Float64Bounds>::_same(x1,x2); }
-Bool models(Float64Bounds const& x1, Float64Value const& x2) { return Operations<Float64Bounds>::_models(x1,x2); }
-Bool refines(Float64Bounds const& x1, Float64Bounds const& x2) { return Operations<Float64Bounds>::_refines(x1,x2); }
-Bool consistent(Float64Bounds const& x1, Float64Bounds const& x2) { return Operations<Float64Bounds>::_consistent(x1,x2); }
-Bool inconsistent(Float64Bounds const& x1, Float64Bounds const& x2) { return Operations<Float64Bounds>::_inconsistent(x1,x2); }
-Float64Bounds refinement(Float64Bounds const& x1, Float64Bounds const& x2) { return Operations<Float64Bounds>::_refinement(x1,x2); }
+Bool same(FloatDPBounds const& x1, FloatDPBounds const& x2) { return Operations<FloatDPBounds>::_same(x1,x2); }
+Bool models(FloatDPBounds const& x1, FloatDPValue const& x2) { return Operations<FloatDPBounds>::_models(x1,x2); }
+Bool refines(FloatDPBounds const& x1, FloatDPBounds const& x2) { return Operations<FloatDPBounds>::_refines(x1,x2); }
+Bool consistent(FloatDPBounds const& x1, FloatDPBounds const& x2) { return Operations<FloatDPBounds>::_consistent(x1,x2); }
+Bool inconsistent(FloatDPBounds const& x1, FloatDPBounds const& x2) { return Operations<FloatDPBounds>::_inconsistent(x1,x2); }
+FloatDPBounds refinement(FloatDPBounds const& x1, FloatDPBounds const& x2) { return Operations<FloatDPBounds>::_refinement(x1,x2); }
 
 
 PositiveFloatMPUpperBound mag(FloatMPBounds const& x) { return Operations<FloatMPBounds>::_mag(x); }
@@ -2035,15 +2035,15 @@ FloatMPBounds refinement(FloatMPBounds const& x1, FloatMPBounds const& x2) { ret
 
 
 
-PositiveFloat64UpperBound mag(Float64Ball const& x) { return Operations<Float64Ball>::_mag(x); }
-PositiveFloat64LowerBound mig(Float64Ball const& x) { return Operations<Float64Ball>::_mig(x); }
+PositiveFloatDPUpperBound mag(FloatDPBall const& x) { return Operations<FloatDPBall>::_mag(x); }
+PositiveFloatDPLowerBound mig(FloatDPBall const& x) { return Operations<FloatDPBall>::_mig(x); }
 
-Bool same(Float64Ball const& x1, Float64Ball const& x2) { return Operations<Float64Ball>::_same(x1,x2); }
-Bool models(Float64Ball const& x1, Float64Value const& x2) { return Operations<Float64Ball>::_models(x1,x2); }
-Bool refines(Float64Ball const& x1, Float64Ball const& x2) { return Operations<Float64Ball>::_refines(x1,x2); }
-Bool consistent(Float64Ball const& x1, Float64Ball const& x2) { return Operations<Float64Ball>::_consistent(x1,x2); }
-Bool inconsistent(Float64Ball const& x1, Float64Ball const& x2) { return Operations<Float64Ball>::_inconsistent(x1,x2); }
-Float64Ball refinement(Float64Ball const& x1, Float64Ball const& x2) { return Operations<Float64Ball>::_refinement(x1,x2); }
+Bool same(FloatDPBall const& x1, FloatDPBall const& x2) { return Operations<FloatDPBall>::_same(x1,x2); }
+Bool models(FloatDPBall const& x1, FloatDPValue const& x2) { return Operations<FloatDPBall>::_models(x1,x2); }
+Bool refines(FloatDPBall const& x1, FloatDPBall const& x2) { return Operations<FloatDPBall>::_refines(x1,x2); }
+Bool consistent(FloatDPBall const& x1, FloatDPBall const& x2) { return Operations<FloatDPBall>::_consistent(x1,x2); }
+Bool inconsistent(FloatDPBall const& x1, FloatDPBall const& x2) { return Operations<FloatDPBall>::_inconsistent(x1,x2); }
+FloatDPBall refinement(FloatDPBall const& x1, FloatDPBall const& x2) { return Operations<FloatDPBall>::_refinement(x1,x2); }
 
 
 PositiveFloatMPUpperBound mag(FloatMPBall const& x) { return Operations<FloatMPBall>::_mag(x); }
@@ -2058,9 +2058,9 @@ FloatMPBall refinement(FloatMPBall const& x1, FloatMPBall const& x2) { return Op
 
 
 
-Float64Error mag(Float64Value const& x) { return Operations<Float64Value>::_mag(x); }
+FloatDPError mag(FloatDPValue const& x) { return Operations<FloatDPValue>::_mag(x); }
 FloatMPError mag(FloatMPValue const& x) { return Operations<FloatMPValue>::_mag(x); }
-Bool same(Float64Value const& x1, Float64Value const& x2) { return Operations<Float64Value>::_same(x1,x2); }
+Bool same(FloatDPValue const& x1, FloatDPValue const& x2) { return Operations<FloatDPValue>::_same(x1,x2); }
 Bool same(FloatMPValue const& x1, FloatMPValue const& x2) { return Operations<FloatMPValue>::_same(x1,x2); }
 
 
@@ -2068,25 +2068,25 @@ Bool same(FloatMPValue const& x1, FloatMPValue const& x2) { return Operations<Fl
 
 
 
-PositiveFloat64Value hlf(PositiveFloat64Value const& x) { return PositiveFloat64Value(hlf(x._v)); }
+PositiveFloatDPValue hlf(PositiveFloatDPValue const& x) { return PositiveFloatDPValue(hlf(x._v)); }
 PositiveFloatMPValue hlf(PositiveFloatMPValue const& x) { return PositiveFloatMPValue(hlf(x._v)); }
 
-Float64Error operator/(Float64Error const& x1, PositiveFloat64LowerBound const& x2) {
-    return Float64Error(div(up,x1._e,x2._l)); }
+FloatDPError operator/(FloatDPError const& x1, PositiveFloatDPLowerBound const& x2) {
+    return FloatDPError(div(up,x1._e,x2._l)); }
 
-Float64UpperBound operator*(Float64UpperBound const& x1, Real const& y2) {
-    Float64UpperBound x2(y2,x1.precision()); return Float64UpperBound(mul(up,x1._u,x2._u)); }
-
-
-Float64Value midpoint(Float64Bounds const& x) { return x.value(); }
+FloatDPUpperBound operator*(FloatDPUpperBound const& x1, Real const& y2) {
+    FloatDPUpperBound x2(y2,x1.precision()); return FloatDPUpperBound(mul(up,x1._u,x2._u)); }
 
 
-template<> String class_name<Float64Approximation>() { return "Float64Approximation"; }
-template<> String class_name<Float64LowerBound>() { return "Float64LowerBound"; }
-template<> String class_name<Float64UpperBound>() { return "Float64UpperBound"; }
-template<> String class_name<Float64Bounds>() { return "Float64Bounds"; }
-template<> String class_name<Float64Ball>() { return "Float64Ball"; }
-template<> String class_name<Float64Value>() { return "Float64Value"; }
+FloatDPValue midpoint(FloatDPBounds const& x) { return x.value(); }
+
+
+template<> String class_name<FloatDPApproximation>() { return "FloatDPApproximation"; }
+template<> String class_name<FloatDPLowerBound>() { return "FloatDPLowerBound"; }
+template<> String class_name<FloatDPUpperBound>() { return "FloatDPUpperBound"; }
+template<> String class_name<FloatDPBounds>() { return "FloatDPBounds"; }
+template<> String class_name<FloatDPBall>() { return "FloatDPBall"; }
+template<> String class_name<FloatDPValue>() { return "FloatDPValue"; }
 template<> String class_name<FloatMPApproximation>() { return "FloatMPApproximation"; }
 template<> String class_name<FloatMPLowerBound>() { return "FloatMPLowerBound"; }
 template<> String class_name<FloatMPUpperBound>() { return "FloatMPUpperBound"; }
@@ -2094,7 +2094,7 @@ template<> String class_name<FloatMPBounds>() { return "FloatMPBounds"; }
 template<> String class_name<FloatMPBall>() { return "FloatMPBall"; }
 template<> String class_name<FloatMPValue>() { return "FloatMPValue"; }
 
-template<> String class_name<FloatMP64Ball>() { return "FloatMP64Ball"; }
+template<> String class_name<FloatMDPBall>() { return "FloatMDPBall"; }
 
 
 } // namespace Ariadne

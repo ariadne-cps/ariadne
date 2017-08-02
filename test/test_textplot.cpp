@@ -56,15 +56,15 @@ Int main(Int argc, char **argv)
     ExactBoxType bx4(2); bx4[0]=ExactIntervalType(0.25,0.5); bx4[1]=ExactIntervalType(0.20,0.50);
     ExactBoxType bx5(2); bx5[0]=ExactIntervalType(0.4,0.8); bx5[1]=ExactIntervalType(0.40,1.1);
     double z1cdata[]={0.15,0.6}; double z1gdata[]={0.05,0.0,0.05, 0.0,0.05,0.05};
-    Vector<Float64> z1c(2,z1cdata);
-    Matrix<Float64> z1g(2,3,z1gdata);
+    Vector<FloatDP> z1c(2,z1cdata);
+    Matrix<FloatDP> z1g(2,3,z1gdata);
     Zonotope z1(z1c,z1g);
-    Vector<Float64> ts1c=z1c-Vector<Float64>(2,Float64(0.25));
-    Matrix<Float64> ts1g=z1g;
+    Vector<FloatDP> ts1c=z1c-Vector<FloatDP>(2,FloatDP(0.25));
+    Matrix<FloatDP> ts1g=z1g;
     VectorAffineFunction afn1(ts1g,ts1c);
     TaylorConstrainedImageSet ts1(afn1,ExactBoxType::unit_box(3));
 
-    VectorUserFunction<RadiusSquare> radius(Vector<Float64>(1u,0.5));
+    VectorUserFunction<RadiusSquare> radius(Vector<FloatDP>(1u,0.5));
     ConstraintSet cs1(ExactBoxType(1u,ExactIntervalType(-1,0)),radius);
 
     std::cout << "Testing boxes.." << std::endl;

@@ -37,33 +37,33 @@
 #include "test.hpp"
 
 namespace Ariadne {
-template<> String class_name<Precision64>() { return "Precision64"; }
-template<> String class_name<PrecisionMP>() { return "PrecisionMP"; }
-Float64 operator+(Float64 x1, Float64 x2);
-Float64 operator-(Float64 x1, Float64 x2);
-Float64 operator*(Float64 x1, Float64 x2);
-Float64 operator/(Float64 x1, Float64 x2);
-Float64& operator+=(Float64& x1, Float64 x2);
-Float64& operator-=(Float64& x1, Float64 x2);
-Float64& operator*=(Float64& x1, Float64 x2);
-Float64& operator/=(Float64& x1, Float64 x2);
-Float64 sqr(Float64 x);
-Float64 rec(Float64 x);
-Float64 add(Float64 x1, Float64 x2);
-Float64 sub(Float64 x1, Float64 x2);
-Float64 mul(Float64 x1, Float64 x2);
-Float64 div(Float64 x1, Float64 x2);
-Float64 fma(Float64 x1, Float64 x2, Float64 x3);
-Float64 pow(Float64 x, Int n);
-Float64 sqrt(Float64 x);
-Float64 exp(Float64 x);
-Float64 log(Float64 x);
-Float64 sin(Float64 x);
-Float64 cos(Float64 x);
-Float64 tan(Float64 x);
-Float64 asin(Float64 x);
-Float64 acos(Float64 x);
-Float64 atan(Float64 x);
+template<> String class_name<DoublePrecision>() { return "DoublePrecision"; }
+template<> String class_name<MultiplePrecision>() { return "MultiplePrecision"; }
+FloatDP operator+(FloatDP x1, FloatDP x2);
+FloatDP operator-(FloatDP x1, FloatDP x2);
+FloatDP operator*(FloatDP x1, FloatDP x2);
+FloatDP operator/(FloatDP x1, FloatDP x2);
+FloatDP& operator+=(FloatDP& x1, FloatDP x2);
+FloatDP& operator-=(FloatDP& x1, FloatDP x2);
+FloatDP& operator*=(FloatDP& x1, FloatDP x2);
+FloatDP& operator/=(FloatDP& x1, FloatDP x2);
+FloatDP sqr(FloatDP x);
+FloatDP rec(FloatDP x);
+FloatDP add(FloatDP x1, FloatDP x2);
+FloatDP sub(FloatDP x1, FloatDP x2);
+FloatDP mul(FloatDP x1, FloatDP x2);
+FloatDP div(FloatDP x1, FloatDP x2);
+FloatDP fma(FloatDP x1, FloatDP x2, FloatDP x3);
+FloatDP pow(FloatDP x, Int n);
+FloatDP sqrt(FloatDP x);
+FloatDP exp(FloatDP x);
+FloatDP log(FloatDP x);
+FloatDP sin(FloatDP x);
+FloatDP cos(FloatDP x);
+FloatDP tan(FloatDP x);
+FloatDP asin(FloatDP x);
+FloatDP acos(FloatDP x);
+FloatDP atan(FloatDP x);
 FloatMP operator+(FloatMP const& x1, FloatMP const& x2);
 FloatMP operator-(FloatMP const& x1, FloatMP const& x2);
 FloatMP operator*(FloatMP const& x1, FloatMP const& x2);
@@ -122,9 +122,9 @@ Int main() {
     std::cout<<std::setprecision(20);
     std::cerr<<std::setprecision(20);
 
-    ARIADNE_TEST_CLASS(Float64,TestFloat<Precision64>(Precision64()));
-    ARIADNE_TEST_CLASS(FloatMP,TestFloat<PrecisionMP>(PrecisionMP(64)));
-    ARIADNE_TEST_CLASS(FloatMP,TestFloat<PrecisionMP>(PrecisionMP(192)));
+    ARIADNE_TEST_CLASS(FloatDP,TestFloat<DoublePrecision>(dp));
+    ARIADNE_TEST_CLASS(FloatMP,TestFloat<MultiplePrecision>(MultiplePrecision(64)));
+    ARIADNE_TEST_CLASS(FloatMP,TestFloat<MultiplePrecision>(MultiplePrecision(192)));
 
 
     return ARIADNE_TEST_FAILURES;
@@ -254,7 +254,7 @@ TestFloat<PR>::test_concept()
     typename RawFloat<PR>::RoundingModeType rnd=RawFloat<PR>::get_rounding_mode();
     RawFloat<PR>::set_rounding_mode(rnd);
 
-    // Precision64
+    // DoublePrecision
     typename RawFloat<PR>::PrecisionType pr=RawFloat<PR>::get_default_precision();
     pr=x.precision();
     x.set_precision(pr);
@@ -504,7 +504,7 @@ TestFloat<PR>::test_comparison()
 }
 
 template<> Void
-TestFloat<Precision64>::test_rounding()
+TestFloat<DoublePrecision>::test_rounding()
 {
     volatile double one   = 1;
     volatile double two   = 2;
@@ -843,27 +843,27 @@ TestFloat<PR>::test_cosine()
 }
 
 template<> Void
-TestFloat<Precision64>::test_arctan()
+TestFloat<DoublePrecision>::test_arctan()
 {
-    Precision64 pr;
+    DoublePrecision pr;
 
-    static const Float64 pi_down=3.1415926535897931;
-    //static const Float64 pi_near=3.1415926535897931;
-    static const Float64 pi_up  =3.1415926535897936;
+    static const FloatDP pi_down=3.1415926535897931;
+    //static const FloatDP pi_near=3.1415926535897931;
+    static const FloatDP pi_up  =3.1415926535897936;
 
-    static const Float64 atan_quarter_down=0.244978663126864143;
-    //static const Float64 atan_quarter_near=0.244978663126864154;
-    static const Float64 atan_quarter_up  =0.244978663126864171;
+    static const FloatDP atan_quarter_down=0.244978663126864143;
+    //static const FloatDP atan_quarter_near=0.244978663126864154;
+    static const FloatDP atan_quarter_up  =0.244978663126864171;
 
-    static const Float64 sqrt_three_down=1.732050807568877193;
-    //static const Float64 sqrt_three_near=1.732050807568877294;
-    static const Float64 sqrt_three_up  =1.732050807568877415;
+    static const FloatDP sqrt_three_down=1.732050807568877193;
+    //static const FloatDP sqrt_three_near=1.732050807568877294;
+    static const FloatDP sqrt_three_up  =1.732050807568877415;
 
-    static const Float64 zero=0.0;
-    static const Float64 one=1.0;
-    static const Float64 eps=Float64::eps(pr);
+    static const FloatDP zero=0.0;
+    static const FloatDP one=1.0;
+    static const FloatDP eps=FloatDP::eps(pr);
 
-    Float64::set_rounding_mode(upward);
+    FloatDP::set_rounding_mode(upward);
     ARIADNE_TEST_EQUAL(atan(zero),zero);
     ARIADNE_TEST_COMPARE(atan(one)*4,>=,pi_up);
     ARIADNE_TEST_COMPARE(atan(-one)*4,>=,-pi_down);
@@ -874,7 +874,7 @@ TestFloat<Precision64>::test_arctan()
     ARIADNE_TEST_COMPARE(atan(one/4),>=,atan_quarter_up);
     ARIADNE_TEST_COMPARE(atan(-one/4),>=,-atan_quarter_down);
 
-    Float64::set_rounding_mode(downward);
+    FloatDP::set_rounding_mode(downward);
     ARIADNE_TEST_EQUAL(atan(zero),zero);
     ARIADNE_TEST_COMPARE(atan(+one)*4,<=,pi_down);
     ARIADNE_TEST_COMPARE(atan(-one)*4,<=,-pi_up);

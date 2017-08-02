@@ -48,8 +48,8 @@
 
 namespace Ariadne {
 
-template<class FM, class P, class PR=Precision64, class PRE=PR> class ScalarFunctionModelMixin;
-template<class FM, class P, class PR=Precision64, class PRE=PR> class VectorFunctionModelMixin;
+template<class FM, class P, class PR=DoublePrecision, class PRE=PR> class ScalarFunctionModelMixin;
+template<class FM, class P, class PR=DoublePrecision, class PRE=PR> class VectorFunctionModelMixin;
 
 template<class FM, class P, class PR, class PRE> class ScalarFunctionModelMixin
     : public virtual ScalarFunctionModelInterface<P,PR,PRE>

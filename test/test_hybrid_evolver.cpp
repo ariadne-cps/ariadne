@@ -682,7 +682,7 @@ TestHybridEvolver::test_affine_hysteresis() const
     // with an affine flow in each, and affine guards and resets.
     // This should be very easy to analyse numerically, and is there to test
     // switching logic
-    Float64Value::set_output_places(2);
+    FloatDPValue::set_output_places(2);
 
     RealVariable x("x");
     RealVariable y("y");
@@ -824,7 +824,7 @@ Void TestHybridEvolver::test_transverse_linear_crossing() const
     DiscreteLocation q1(1), q2(2);
     RealVariable x("x"), y("y");
     Real r(1.0/8);
-    Float64 tol=1e-5;
+    FloatDP tol=1e-5;
     RealExpression guard=x+y/2-1;
 
     HybridAutomaton system;
@@ -846,7 +846,7 @@ Void TestHybridEvolver::test_transverse_linear_crossing() const
     Enclosure expected_final_enclosure(initial_set.euclidean_set(q1,final_space),evolver_ptr->function_factory());
     expected_final_enclosure.apply_map(function);
 
-    Vector<Float64Bounds> tolerance(2,Float64Bounds(-tol,+tol));
+    Vector<FloatDPBounds> tolerance(2,FloatDPBounds(-tol,+tol));
     ARIADNE_TEST_BINARY_PREDICATE(refines,expected_final_enclosure.state_function()[0],final_enclosure.state_function()[0]);
     ARIADNE_TEST_BINARY_PREDICATE(refines,final_enclosure.state_function()[0],expected_final_enclosure.state_function()[0]+tolerance[0]);
 

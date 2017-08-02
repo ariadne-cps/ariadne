@@ -58,19 +58,19 @@ template<class F,class D, class C> FunctionInterface<EffectiveTag,D,C>* Function
     return new F(static_cast<const F&>(*this)); }
 
 template<class F,class D, class C> auto
-FunctionMixin<F,ApproximateTag,D,C>::_evaluate(const Argument<Float64Approximation>& x) const -> Result<Float64Approximation> {
+FunctionMixin<F,ApproximateTag,D,C>::_evaluate(const Argument<FloatDPApproximation>& x) const -> Result<FloatDPApproximation> {
     return this->_base_evaluate(x); }
 template<class F,class D, class C> auto
 FunctionMixin<F,ApproximateTag,D,C>::_evaluate(const Argument<FloatMPApproximation>& x) const -> Result<FloatMPApproximation> {
     return this->_base_evaluate(x); }
 template<class F,class D, class C> auto
-FunctionMixin<F,ApproximateTag,D,C>::_evaluate(const Argument<Differential<Float64Approximation>>& x) const -> Result<Differential<Float64Approximation>> {
+FunctionMixin<F,ApproximateTag,D,C>::_evaluate(const Argument<Differential<FloatDPApproximation>>& x) const -> Result<Differential<FloatDPApproximation>> {
     return this->_base_evaluate(x); }
 template<class F,class D, class C> auto
 FunctionMixin<F,ApproximateTag,D,C>::_evaluate(const Argument<Differential<FloatMPApproximation>>& x) const -> Result<Differential<FloatMPApproximation>> {
     return this->_base_evaluate(x); }
 template<class F,class D, class C> auto
-FunctionMixin<F,ApproximateTag,D,C>::_evaluate(const Argument<TaylorModel<ApproximateTag,Float64>>& x) const -> Result<TaylorModel<ApproximateTag,Float64>> {
+FunctionMixin<F,ApproximateTag,D,C>::_evaluate(const Argument<TaylorModel<ApproximateTag,FloatDP>>& x) const -> Result<TaylorModel<ApproximateTag,FloatDP>> {
     return this->_base_evaluate(x); }
 template<class F,class D, class C> auto
 FunctionMixin<F,ApproximateTag,D,C>::_evaluate(const Argument<TaylorModel<ApproximateTag,FloatMP>>& x) const -> Result<TaylorModel<ApproximateTag,FloatMP>> {
@@ -83,19 +83,19 @@ FunctionMixin<F,ApproximateTag,D,C>::_evaluate(const Argument<Formula<Approximat
     return this->_base_evaluate(x); }
 
 template<class F,class D, class C> auto
-FunctionMixin<F,ValidatedTag,D,C>::_evaluate(const Argument<Float64Bounds>& x) const -> Result<Float64Bounds> {
+FunctionMixin<F,ValidatedTag,D,C>::_evaluate(const Argument<FloatDPBounds>& x) const -> Result<FloatDPBounds> {
     return this->_base_evaluate(x); }
 template<class F,class D, class C> auto
 FunctionMixin<F,ValidatedTag,D,C>::_evaluate(const Argument<FloatMPBounds>& x) const -> Result<FloatMPBounds> {
     return this->_base_evaluate(x); }
 template<class F,class D, class C> auto
-FunctionMixin<F,ValidatedTag,D,C>::_evaluate(const Argument<Differential<Float64Bounds>>& x) const -> Result<Differential<Float64Bounds>> {
+FunctionMixin<F,ValidatedTag,D,C>::_evaluate(const Argument<Differential<FloatDPBounds>>& x) const -> Result<Differential<FloatDPBounds>> {
     return this->_base_evaluate(x); }
 template<class F,class D, class C> auto
 FunctionMixin<F,ValidatedTag,D,C>::_evaluate(const Argument<Differential<FloatMPBounds>>& x) const -> Result<Differential<FloatMPBounds>> {
     return this->_base_evaluate(x); }
 template<class F,class D, class C> auto
-FunctionMixin<F,ValidatedTag,D,C>::_evaluate(const Argument<TaylorModel<ValidatedTag,Float64>>& x) const -> Result<TaylorModel<ValidatedTag,Float64>> {
+FunctionMixin<F,ValidatedTag,D,C>::_evaluate(const Argument<TaylorModel<ValidatedTag,FloatDP>>& x) const -> Result<TaylorModel<ValidatedTag,FloatDP>> {
     return this->_base_evaluate(x); }
 template<class F,class D, class C> auto
 FunctionMixin<F,ValidatedTag,D,C>::_evaluate(const Argument<TaylorModel<ValidatedTag,FloatMP>>& x) const -> Result<TaylorModel<ValidatedTag,FloatMP>> {

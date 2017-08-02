@@ -192,7 +192,7 @@ template<class I> inline Box<I> split(const Vector<I>& bx, SplitPart lmu) { retu
 template<class I> inline Pair<Box<I>,Box<I>> split(const Vector<I>& bx) { return static_cast<Box<I>const&>(bx).split(); }
 template<class I> inline Pair<Box<I>,Box<I>> split(const Vector<I>& bx, SizeType k) { return static_cast<Box<I>const&>(bx).split(k); }
 
-//! \relates Float64ExactBox \brief The cartesian product of two boxes.
+//! \relates FloatDPExactBox \brief The cartesian product of two boxes.
 template<class I> inline Box<I> product(const Box<I>& bx1, const Box<I>& bx2) { return Box<I>::_product(bx1,bx2); }
 template<class I> inline Box<I> product(const Box<I>& bx1, const I& ivl2) { return Box<I>::_product(bx1,ivl2); }
 template<class I> inline Box<I> product(const Box<I>& bx1, const Box<I>& bx2, const Box<I>& bx3) { return Box<I>::_product(bx1,bx2,bx3); }
@@ -414,68 +414,68 @@ template<class I> inline Void Box<I>::draw(CanvasInterface& c, const Projection2
     Ariadne::draw(c,p,ApproximateBoxType(*this)); }
 
 template<> inline Void Box<Interval<Real>>::draw(CanvasInterface& c, const Projection2d& p) const {
-    Ariadne::draw(c,p,ApproximateBoxType(*this,Precision64())); }
+    Ariadne::draw(c,p,ApproximateBoxType(*this,dp)); }
 
-inline Float64ExactBox cast_exact_box(Float64ApproximateBox const& abx) {
-    return Float64ExactBox(reinterpret_cast<Float64ExactBox const&>(abx));
+inline FloatDPExactBox cast_exact_box(FloatDPApproximateBox const& abx) {
+    return FloatDPExactBox(reinterpret_cast<FloatDPExactBox const&>(abx));
 }
 
-inline Box<Float64ExactInterval> cast_exact_box(Vector<Float64Bounds> const& bv) {
-    return Box<Float64ExactInterval>(reinterpret_cast<Vector<Float64ExactInterval>const&>(bv));
+inline Box<FloatDPExactInterval> cast_exact_box(Vector<FloatDPBounds> const& bv) {
+    return Box<FloatDPExactInterval>(reinterpret_cast<Vector<FloatDPExactInterval>const&>(bv));
 }
 
 
-inline Float64ApproximateBox widen(const Float64ApproximateBox& bx, Float64Approximation e) {
-    Float64Approximation eps(e);
-    Float64ApproximateBox r(bx.dimension());
+inline FloatDPApproximateBox widen(const FloatDPApproximateBox& bx, FloatDPApproximation e) {
+    FloatDPApproximation eps(e);
+    FloatDPApproximateBox r(bx.dimension());
     for(Nat i=0; i!=bx.size(); ++i) {
         r[i]=ApproximateIntervalType(bx[i].lower()-eps,bx[i].upper()+eps);
     }
     return r;
 }
 
-inline Float64UpperBox widen(const Float64UpperBox& bx, Float64UpperBound eps) {
-    Float64UpperBox r(bx.dimension());
+inline FloatDPUpperBox widen(const FloatDPUpperBox& bx, FloatDPUpperBound eps) {
+    FloatDPUpperBox r(bx.dimension());
     for(Nat i=0; i!=bx.size(); ++i) {
         r[i]=widen(bx[i],eps);
     }
     return r;
 }
 // TODO: Add widen for other generic values
-inline Float64UpperBox widen(const Float64UpperBox& bx, ValidatedUpperNumber eps) {
-    return widen(bx,eps.get(UpperTag(),Precision64()));
+inline FloatDPUpperBox widen(const FloatDPUpperBox& bx, ValidatedUpperNumber eps) {
+    return widen(bx,eps.get(UpperTag(),dp));
 }
 
-inline Float64UpperBox widen(const Float64ExactBox& bx, Float64Value eps) {
-    return widen(reinterpret_cast<const Float64UpperBox&>(bx),Float64UpperBound(eps));
+inline FloatDPUpperBox widen(const FloatDPExactBox& bx, FloatDPValue eps) {
+    return widen(reinterpret_cast<const FloatDPUpperBox&>(bx),FloatDPUpperBound(eps));
 }
 
-inline Float64UpperBox widen(const Float64UpperBox& bx) {
-    Float64UpperBox r(bx.dimension());
+inline FloatDPUpperBox widen(const FloatDPUpperBox& bx) {
+    FloatDPUpperBox r(bx.dimension());
     for(Nat i=0; i!=bx.size(); ++i) {
         r[i]=widen(bx[i]);
     }
     return r;
 }
 
-inline Float64ExactBox widen_domain(const Float64UpperBox& bx) {
-    Float64ExactBox r(bx.dimension());
+inline FloatDPExactBox widen_domain(const FloatDPUpperBox& bx) {
+    FloatDPExactBox r(bx.dimension());
     for(Nat i=0; i!=bx.size(); ++i) {
         r[i]=widen_domain(bx[i]);
     }
     return r;
 }
 
-inline Float64LowerBox narrow(const Float64LowerBox& bx, Float64UpperBound eps) {
-    Float64LowerBox r(bx.dimension());
+inline FloatDPLowerBox narrow(const FloatDPLowerBox& bx, FloatDPUpperBound eps) {
+    FloatDPLowerBox r(bx.dimension());
     for(Nat i=0; i!=bx.size(); ++i) {
         r[i]=narrow(bx[i],eps);
     }
     return r;
 }
 
-inline Float64LowerBox narrow(const Float64LowerBox& bx) {
-    Float64LowerBox r(bx.dimension());
+inline FloatDPLowerBox narrow(const FloatDPLowerBox& bx) {
+    FloatDPLowerBox r(bx.dimension());
     for(Nat i=0; i!=bx.size(); ++i) {
         r[i]=narrow(bx[i]);
     }

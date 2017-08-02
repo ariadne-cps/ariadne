@@ -11,11 +11,11 @@ inline int get_verbosity(int argc, const char* argv[]) {
     return 0;
 }
 
-Interval<Float64Value> over_approximation(Interval<Real> const& ivl) {
-    return cast_exact(Interval<Float64UpperBound>(ivl,Precision64()));
+Interval<FloatDPValue> over_approximation(Interval<Real> const& ivl) {
+    return cast_exact(Interval<FloatDPUpperBound>(ivl,dp));
 }
-Box<Interval<Float64Value>> over_approximation(Box<Interval<Real>> const& bx) {
-    Box<Interval<Float64Value>> ebx(bx.dimension(),Interval<Float64Value>(0,0,Precision64()));
+Box<Interval<FloatDPValue>> over_approximation(Box<Interval<Real>> const& bx) {
+    Box<Interval<FloatDPValue>> ebx(bx.dimension(),Interval<FloatDPValue>(0,0,dp));
     for(SizeType i=0; i!=ebx.dimension(); ++i) { ebx[i]=over_approximation(bx[i]); }
     return ebx;
 }
@@ -144,7 +144,7 @@ void test() {
 
 
 
-        Precision64 pr;
+        DoublePrecision pr;
 
         Box<ExactIntervalType> initial_box=over_approximation(initial_box_set);
         auto flow_bounds=integrator.flow_bounds(system.function(),initial_box,1);
@@ -170,10 +170,10 @@ void test() {
         return;
         /*
         for(Dyadic rad(1,8u); rad<=4; rad=2*rad) {
-            Box<Interval<Float64Value>> init(Box<Interval<Dyadic>>({{-1-rad,-1+rad},{-2-rad,-2+rad}}),pr);
-            Float64 step(8.0);
+            Box<Interval<FloatDPValue>> init(Box<Interval<Dyadic>>({{-1-rad,-1+rad},{-2-rad,-2+rad}}),pr);
+            FloatDP step(8.0);
             auto phi=integrator.flow_step(system.function(),init,step);
-            FloatError<Precision64>::set_output_places(9);
+            FloatError<DoublePrecision>::set_output_places(9);
             std::cerr<<"rad="<<rad.get_d()<<", step="<<step<<"\nphi.errors()="<<phi.errors()<<"\n\n";
             //std::cerr<<"phi="<<phi<<"\n";
         }

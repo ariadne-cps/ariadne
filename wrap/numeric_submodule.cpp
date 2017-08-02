@@ -53,17 +53,17 @@ Rational operator/(Dyadic const& w1, Dyadic const& w2) { return Rational(w1) / R
 Dyadic hlf(Dyadic const& w);
 
 DECLARE_NUMERIC_OPERATIONS(Real const&,Real,PositiveReal);
-//DECLARE_NUMERIC_OPERATIONS(Float64Approximation const&,Float64Approximation,PositiveFloat64Approximation);
+//DECLARE_NUMERIC_OPERATIONS(FloatDPApproximation const&,FloatDPApproximation,PositiveFloatDPApproximation);
 //DECLARE_NUMERIC_OPERATIONS(FloatBall<PR>);
 //DECLARE_NUMERIC_OPERATIONS(FloatBounds<PR>);
-//DECLARE_NUMERIC_OPERATIONS(FloatApproximation<PR>64);
+//DECLARE_NUMERIC_OPERATIONS(FloatApproximation<PR>);
 
-template<> String class_name<Precision64>() { return "Precision64"; }
-template<> String class_name<PrecisionMP>() { return "PrecisionMP"; }
+template<> String class_name<DoublePrecision>() { return "DoublePrecision"; }
+template<> String class_name<MultiplePrecision>() { return "MultiplePrecision"; }
 
 template<class T> String class_tag();
-template<> String class_tag<Precision64>() { return "64"; }
-template<> String class_tag<PrecisionMP>() { return "MP"; }
+template<> String class_tag<DoublePrecision>() { return "DP"; }
+template<> String class_tag<MultiplePrecision>() { return "MP"; }
 
 template<class T> struct PythonName { const char* get() const { return class_name<T>().c_str(); } };
 template<class T> inline const char* python_name() { return PythonName<T>().get(); }
@@ -78,18 +78,18 @@ namespace Ariadne {
 
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Rational>& repr) {
     return os << "Rational("<<repr.reference().numerator()<<","<<repr.reference().denominator()<<")"; }
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<RawFloat64>& repr) {
-    return os << "Float64("<<repr.reference()<<")"; }
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Float64Approximation>& repr) {
-    return os << "Float64Approximation("<<repr.reference().raw()<<")"; }
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Float64Bounds>& repr) {
-    return os << "Float64Bounds("<<repr.reference().lower().raw()<<","<<repr.reference().upper().raw()<<")"; }
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Float64Value>& repr) {
-    return os << "Float64Value("<<repr.reference().raw()<<")"; }
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Float64UpperBound>& repr) {
-    return os << "Float64UpperBound("<<repr.reference().raw()<<")"; }
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<PositiveFloat64UpperBound>& repr) {
-    return os << "Float64Error("<<repr.reference().raw()<<")"; }
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<RawFloatDP>& repr) {
+    return os << "FloatDP("<<repr.reference()<<")"; }
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<FloatDPApproximation>& repr) {
+    return os << "FloatDPApproximation("<<repr.reference().raw()<<")"; }
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<FloatDPBounds>& repr) {
+    return os << "FloatDPBounds("<<repr.reference().lower().raw()<<","<<repr.reference().upper().raw()<<")"; }
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<FloatDPValue>& repr) {
+    return os << "FloatDPValue("<<repr.reference().raw()<<")"; }
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<FloatDPUpperBound>& repr) {
+    return os << "FloatDPUpperBound("<<repr.reference().raw()<<")"; }
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<PositiveFloatDPUpperBound>& repr) {
+    return os << "FloatDPError("<<repr.reference().raw()<<")"; }
 
 template<class OP> struct PythonOperator { };
 PythonOperator<Pos> pos(boost::python::self_ns::self_t) { return PythonOperator<Pos>(); }
@@ -252,7 +252,7 @@ void export_dyadic()
 //    dyadic_class.def(init<Int>());
     dyadic_class.def(init<Integer>());
     dyadic_class.def(init<Dyadic>());
-    dyadic_class.def(init<Float64Value>());
+    dyadic_class.def(init<FloatDPValue>());
     dyadic_class.def(init<FloatMPValue>());
 
     dyadic_class.define_self_arithmetic();
@@ -324,8 +324,8 @@ void export_real()
     real_class.def(self_ns::str(self));
     real_class.def(self_ns::repr(self));
 
-    real_class.def("get", (Float64Bounds(Real::*)(Precision64)const) &Real::get);
-    real_class.def("get", (FloatMPBounds(Real::*)(PrecisionMP)const) &Real::get);
+    real_class.def("get", (FloatDPBounds(Real::*)(DoublePrecision)const) &Real::get);
+    real_class.def("get", (FloatMPBounds(Real::*)(MultiplePrecision)const) &Real::get);
     real_class.def("get", (FloatMPBall(Real::*)(Accuracy)const) &Real::get);
     real_class.def("evaluate", (FloatMPBall(Real::*)(Accuracy)const) &Real::evaluate);
     real_class.def("get_d", &Real::get_d);
@@ -339,24 +339,24 @@ template<class P> void export_number()
     class_<Number<P>> number_class(class_name<P>()+"Number");
     number_class.def(init<Rational>());
     number_class.define_self_arithmetic();
-//    number_class.def("get", (Float64Bounds(Number<P>::*)(ValidatedTag,Precision64)const) &Number<P>::get);
-//    number_class.def("get", (Float64Approximation(Number<P>::*)(ApproximateTag,Precision64)const) &Number<P>::get);
-//    number_class.def("get", (FloatMPBounds(Number<P>::*)(ValidatedTag,PrecisionMP)const) &Number<P>::get);
-//    number_class.def("get", (FloatMPApproximation(Number<P>::*)(ApproximateTag,PrecisionMP)const) &Number<P>::get);
+//    number_class.def("get", (FloatDPBounds(Number<P>::*)(ValidatedTag,DoublePrecision)const) &Number<P>::get);
+//    number_class.def("get", (FloatDPApproximation(Number<P>::*)(ApproximateTag,DoublePrecision)const) &Number<P>::get);
+//    number_class.def("get", (FloatMPBounds(Number<P>::*)(ValidatedTag,MultiplePrecision)const) &Number<P>::get);
+//    number_class.def("get", (FloatMPApproximation(Number<P>::*)(ApproximateTag,MultiplePrecision)const) &Number<P>::get);
 }
 
-Float64Bounds get(ExactNumber const& n, Precision64 const& pr) { return n.get(BoundedTag(),pr); }
-FloatMPBounds get(ExactNumber const& n, PrecisionMP const& pr) { return n.get(BoundedTag(),pr); }
-Float64Bounds get(EffectiveNumber const& n, Precision64 const& pr) { return n.get(BoundedTag(),pr); }
-FloatMPBounds get(EffectiveNumber const& n, PrecisionMP const& pr) { return n.get(BoundedTag(),pr); }
-Float64Bounds get(ValidatedNumber const& n, Precision64 const& pr) { return n.get(BoundedTag(),pr); }
-FloatMPBounds get(ValidatedNumber const& n, PrecisionMP const& pr) { return n.get(BoundedTag(),pr); }
-Float64UpperBound get(ValidatedUpperNumber const& n, Precision64 const& pr) { return n.get(UpperTag(),pr); }
-FloatMPUpperBound get(ValidatedUpperNumber const& n, PrecisionMP const& pr) { return n.get(UpperTag(),pr); }
-Float64LowerBound get(ValidatedLowerNumber const& n, Precision64 const& pr) { return n.get(LowerTag(),pr); }
-FloatMPLowerBound get(ValidatedLowerNumber const& n, PrecisionMP const& pr) { return n.get(LowerTag(),pr); }
-Float64Approximation get(ApproximateNumber const& n, Precision64 const& pr) { return n.get(ApproximateTag(),pr); }
-FloatMPApproximation get(ApproximateNumber const& n, PrecisionMP const& pr) { std::cerr<<"get(AN,MP)\n";return n.get(ApproximateTag(),pr); }
+FloatDPBounds get(ExactNumber const& n, DoublePrecision const& pr) { return n.get(BoundedTag(),pr); }
+FloatMPBounds get(ExactNumber const& n, MultiplePrecision const& pr) { return n.get(BoundedTag(),pr); }
+FloatDPBounds get(EffectiveNumber const& n, DoublePrecision const& pr) { return n.get(BoundedTag(),pr); }
+FloatMPBounds get(EffectiveNumber const& n, MultiplePrecision const& pr) { return n.get(BoundedTag(),pr); }
+FloatDPBounds get(ValidatedNumber const& n, DoublePrecision const& pr) { return n.get(BoundedTag(),pr); }
+FloatMPBounds get(ValidatedNumber const& n, MultiplePrecision const& pr) { return n.get(BoundedTag(),pr); }
+FloatDPUpperBound get(ValidatedUpperNumber const& n, DoublePrecision const& pr) { return n.get(UpperTag(),pr); }
+FloatMPUpperBound get(ValidatedUpperNumber const& n, MultiplePrecision const& pr) { return n.get(UpperTag(),pr); }
+FloatDPLowerBound get(ValidatedLowerNumber const& n, DoublePrecision const& pr) { return n.get(LowerTag(),pr); }
+FloatMPLowerBound get(ValidatedLowerNumber const& n, MultiplePrecision const& pr) { return n.get(LowerTag(),pr); }
+FloatDPApproximation get(ApproximateNumber const& n, DoublePrecision const& pr) { return n.get(ApproximateTag(),pr); }
+FloatMPApproximation get(ApproximateNumber const& n, MultiplePrecision const& pr) { std::cerr<<"get(AN,MP)\n";return n.get(ApproximateTag(),pr); }
 
 void export_numbers()
 {
@@ -367,8 +367,8 @@ void export_numbers()
     approximate_number_class.def(init<EffectiveNumber>());
     approximate_number_class.def(init<ValidatedNumber>());
     approximate_number_class.def(init<ApproximateNumber>());
-    approximate_number_class.def("get", (Float64Approximation(*)(ApproximateNumber const&, Precision64 const&)) &get);
-    approximate_number_class.def("get", (FloatMPApproximation(*)(ApproximateNumber const&, PrecisionMP const&)) &get);
+    approximate_number_class.def("get", (FloatDPApproximation(*)(ApproximateNumber const&, DoublePrecision const&)) &get);
+    approximate_number_class.def("get", (FloatMPApproximation(*)(ApproximateNumber const&, MultiplePrecision const&)) &get);
     approximate_number_class.define_self_arithmetic();
     approximate_number_class.define_mixed_arithmetic<ApproximateNumber>();
     approximate_number_class.define_transcendental_functions();
@@ -377,16 +377,16 @@ void export_numbers()
 
     class_<ValidatedLowerNumber> lower_number_class(class_name<LowerTag>()+"Number");
     lower_number_class.def(init<ValidatedNumber>());
-    lower_number_class.def("get", (Float64LowerBound(*)(ValidatedLowerNumber const&, Precision64 const&)) &get);
-    lower_number_class.def("get", (FloatMPLowerBound(*)(ValidatedLowerNumber const&, PrecisionMP const&)) &get);
+    lower_number_class.def("get", (FloatDPLowerBound(*)(ValidatedLowerNumber const&, DoublePrecision const&)) &get);
+    lower_number_class.def("get", (FloatMPLowerBound(*)(ValidatedLowerNumber const&, MultiplePrecision const&)) &get);
     lower_number_class.define_monotonic_functions();
     lower_number_class.def(self_ns::str(self));
     lower_number_class.def(self_ns::repr(self));
 
     class_<ValidatedUpperNumber> upper_number_class(class_name<UpperTag>()+"Number");
     upper_number_class.def(init<ValidatedNumber>());
-    upper_number_class.def("get", (Float64UpperBound(*)(ValidatedUpperNumber const&, Precision64 const&)) &get);
-    upper_number_class.def("get", (FloatMPUpperBound(*)(ValidatedUpperNumber const&, PrecisionMP const&)) &get);
+    upper_number_class.def("get", (FloatDPUpperBound(*)(ValidatedUpperNumber const&, DoublePrecision const&)) &get);
+    upper_number_class.def("get", (FloatMPUpperBound(*)(ValidatedUpperNumber const&, MultiplePrecision const&)) &get);
     upper_number_class.define_monotonic_functions();
     upper_number_class.def(self_ns::str(self));
     upper_number_class.def(self_ns::repr(self));
@@ -397,8 +397,8 @@ void export_numbers()
     validated_number_class.def(init<ExactNumber>());
     validated_number_class.def(init<EffectiveNumber>());
     validated_number_class.def(init<ValidatedNumber>());
-    validated_number_class.def("get", (Float64Bounds(*)(ValidatedNumber const&, Precision64 const&)) &get);
-    validated_number_class.def("get", (FloatMPBounds(*)(ValidatedNumber const&, PrecisionMP const&)) &get);
+    validated_number_class.def("get", (FloatDPBounds(*)(ValidatedNumber const&, DoublePrecision const&)) &get);
+    validated_number_class.def("get", (FloatMPBounds(*)(ValidatedNumber const&, MultiplePrecision const&)) &get);
     validated_number_class.define_self_arithmetic();
     validated_number_class.define_mixed_arithmetic<ValidatedNumber>();
     validated_number_class.define_transcendental_functions();
@@ -410,8 +410,8 @@ void export_numbers()
     effective_number_class.def(init<Real>());
     effective_number_class.def(init<ExactNumber>());
     effective_number_class.def(init<EffectiveNumber>());
-    effective_number_class.def("get", (Float64Bounds(*)(EffectiveNumber const&, Precision64 const&)) &get);
-    effective_number_class.def("get", (FloatMPBounds(*)(EffectiveNumber const&, PrecisionMP const&)) &get);
+    effective_number_class.def("get", (FloatDPBounds(*)(EffectiveNumber const&, DoublePrecision const&)) &get);
+    effective_number_class.def("get", (FloatMPBounds(*)(EffectiveNumber const&, MultiplePrecision const&)) &get);
     effective_number_class.define_self_arithmetic();
     effective_number_class.define_mixed_arithmetic<EffectiveNumber>();
     effective_number_class.define_transcendental_functions();
@@ -421,8 +421,8 @@ void export_numbers()
     class_<ExactNumber> exact_number_class(class_name<ExactTag>()+"Number");
     exact_number_class.def(init<Rational>());
     exact_number_class.def(init<ExactNumber>());
-    exact_number_class.def("get", (Float64Bounds(*)(ExactNumber const&, Precision64 const&)) &get);
-    exact_number_class.def("get", (FloatMPBounds(*)(ExactNumber const&, PrecisionMP const&)) &get);
+    exact_number_class.def("get", (FloatDPBounds(*)(ExactNumber const&, DoublePrecision const&)) &get);
+    exact_number_class.def("get", (FloatMPBounds(*)(ExactNumber const&, MultiplePrecision const&)) &get);
     exact_number_class.def(self_ns::str(self));
     exact_number_class.def(self_ns::repr(self));
 
@@ -481,8 +481,8 @@ template<class PR> void export_float_value()
     float_value_class.def("set_output_places",&FloatValue<PR>::set_output_places).staticmethod("set_output_places");
 }
 
-FloatUpperBound<Precision64> log2(FloatError<Precision64> const& x);
-FloatUpperBound<PrecisionMP> log2(FloatError<PrecisionMP> const& x);
+FloatUpperBound<DoublePrecision> log2(FloatError<DoublePrecision> const& x);
+FloatUpperBound<MultiplePrecision> log2(FloatError<MultiplePrecision> const& x);
 
 template<class PRE> void export_float_error()
 {
@@ -699,7 +699,7 @@ template<class PR> void export_float_approximation()
 {
     class_<FloatApproximation<PR>> float_approximation_class("Float"+class_tag<PR>()+"Approximation");
 
-    if(IsSame<PR,Precision64>::value) {
+    if(IsSame<PR,DoublePrecision>::value) {
         float_approximation_class.def(init<double>());
     }
     float_approximation_class.def(init<double,PR>());
@@ -755,14 +755,14 @@ Void export_accuracy() {
 
 template<class PR> Void export_precision();
 
-template<> Void export_precision<Precision64>() {
-    class_<Precision64> precision_class("Precision64",init<>());
+template<> Void export_precision<DoublePrecision>() {
+    class_<DoublePrecision> precision_class("DoublePrecision",init<>());
     precision_class.def(self_ns::str(self));
 }
 
-template<> Void export_precision<PrecisionMP>() {
-    class_<PrecisionMP> precision_class("PrecisionMP",init<Nat>());
-    precision_class.def("bits",&PrecisionMP::bits);
+template<> Void export_precision<MultiplePrecision>() {
+    class_<MultiplePrecision> precision_class("MultiplePrecision",init<Nat>());
+    precision_class.def("bits",&MultiplePrecision::bits);
     precision_class.def(self_ns::str(self));
 }
 
@@ -795,14 +795,14 @@ numeric_submodule()
     export_logical<LowerTag>("Falsified");
     export_logical<ApproximateTag>("Fuzzy");
 
-    export_precision<Precision64>();
-    export_precision<PrecisionMP>();
-    export_raw_float<Precision64>();
-    export_raw_float<PrecisionMP>();
-    export_user_floats<Precision64>();
-    export_user_floats<PrecisionMP>();
+    export_precision<DoublePrecision>();
+    export_precision<MultiplePrecision>();
+    export_raw_float<DoublePrecision>();
+    export_raw_float<MultiplePrecision>();
+    export_user_floats<DoublePrecision>();
+    export_user_floats<MultiplePrecision>();
 
-    export_float_ball<PrecisionMP,Precision64>();
+    export_float_ball<MultiplePrecision,DoublePrecision>();
 
     export_numbers();
     export_real();

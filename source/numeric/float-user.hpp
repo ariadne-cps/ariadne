@@ -102,53 +102,53 @@ template<class PR> template<class PRE> FloatBounds<PR>::FloatBounds(FloatBall<PR
 }
 
 
-extern const Float64Value infty;
+extern const FloatDPValue infty;
 
 // Literals operation
-Float64Value operator"" _exact(long double lx);
-Float64Error operator"" _error(long double lx);
-Float64Ball operator"" _near(long double lx);
-Float64UpperBound operator"" _upper(long double lx);
-Float64LowerBound operator"" _lower(long double lx);
-Float64Approximation operator"" _approx(long double lx);
+FloatDPValue operator"" _exact(long double lx);
+FloatDPError operator"" _error(long double lx);
+FloatDPBall operator"" _near(long double lx);
+FloatDPUpperBound operator"" _upper(long double lx);
+FloatDPLowerBound operator"" _lower(long double lx);
+FloatDPApproximation operator"" _approx(long double lx);
 
 
 
-inline Float64Value const& cast_exact(RawFloat64 const& x) { return reinterpret_cast<Float64Value const&>(x); }
-inline Float64Value const& cast_exact(Float64Approximation const& x) { return reinterpret_cast<Float64Value const&>(x); }
-inline Float64Value const& cast_exact(Float64Value const& x) { return reinterpret_cast<Float64Value const&>(x); }
-inline Float64Value const& cast_exact(Float64Error const& x) { return reinterpret_cast<Float64Value const&>(x); }
+inline FloatDPValue const& cast_exact(RawFloatDP const& x) { return reinterpret_cast<FloatDPValue const&>(x); }
+inline FloatDPValue const& cast_exact(FloatDPApproximation const& x) { return reinterpret_cast<FloatDPValue const&>(x); }
+inline FloatDPValue const& cast_exact(FloatDPValue const& x) { return reinterpret_cast<FloatDPValue const&>(x); }
+inline FloatDPValue const& cast_exact(FloatDPError const& x) { return reinterpret_cast<FloatDPValue const&>(x); }
 
-template<template<class>class T> inline const T<Float64Value>& cast_exact(const T<RawFloat64>& t) {
-    return reinterpret_cast<const T<Float64Value>&>(t); }
-template<template<class>class T> inline const T<Float64Value>& cast_exact(const T<Float64Approximation>& t) {
-    return reinterpret_cast<const T<Float64Value>&>(t); }
-template<template<class>class T> inline const T<Float64Value>& cast_exact(const T<Float64Value>& t) {
-    return reinterpret_cast<const T<Float64Value>&>(t); }
-template<template<class>class T> inline const T<Float64Value>& cast_exact(const T<Float64Error>& t) {
-    return reinterpret_cast<const T<Float64Value>&>(t); }
+template<template<class>class T> inline const T<FloatDPValue>& cast_exact(const T<RawFloatDP>& t) {
+    return reinterpret_cast<const T<FloatDPValue>&>(t); }
+template<template<class>class T> inline const T<FloatDPValue>& cast_exact(const T<FloatDPApproximation>& t) {
+    return reinterpret_cast<const T<FloatDPValue>&>(t); }
+template<template<class>class T> inline const T<FloatDPValue>& cast_exact(const T<FloatDPValue>& t) {
+    return reinterpret_cast<const T<FloatDPValue>&>(t); }
+template<template<class>class T> inline const T<FloatDPValue>& cast_exact(const T<FloatDPError>& t) {
+    return reinterpret_cast<const T<FloatDPValue>&>(t); }
 
-inline RawFloat64 const& cast_raw(RawFloat64 const& x) { return reinterpret_cast<RawFloat64 const&>(x); }
-inline RawFloat64 const& cast_raw(Float64Approximation const& x) { return reinterpret_cast<RawFloat64 const&>(x); }
-inline RawFloat64 const& cast_raw(Float64Value const& x) { return reinterpret_cast<RawFloat64 const&>(x); }
+inline RawFloatDP const& cast_raw(RawFloatDP const& x) { return reinterpret_cast<RawFloatDP const&>(x); }
+inline RawFloatDP const& cast_raw(FloatDPApproximation const& x) { return reinterpret_cast<RawFloatDP const&>(x); }
+inline RawFloatDP const& cast_raw(FloatDPValue const& x) { return reinterpret_cast<RawFloatDP const&>(x); }
 
-template<template<class>class T> inline const T<RawFloat64>& cast_raw(const T<RawFloat64>& t) {
-    return reinterpret_cast<const T<RawFloat64>&>(t); }
-template<template<class>class T> inline const T<RawFloat64>& cast_raw(const T<Float64Approximation>& t) {
-    return reinterpret_cast<const T<RawFloat64>&>(t); }
-template<template<class>class T> inline const T<RawFloat64>& cast_raw(const T<Float64Value>& t) {
-    return reinterpret_cast<const T<RawFloat64>&>(t); }
+template<template<class>class T> inline const T<RawFloatDP>& cast_raw(const T<RawFloatDP>& t) {
+    return reinterpret_cast<const T<RawFloatDP>&>(t); }
+template<template<class>class T> inline const T<RawFloatDP>& cast_raw(const T<FloatDPApproximation>& t) {
+    return reinterpret_cast<const T<RawFloatDP>&>(t); }
+template<template<class>class T> inline const T<RawFloatDP>& cast_raw(const T<FloatDPValue>& t) {
+    return reinterpret_cast<const T<RawFloatDP>&>(t); }
 
-inline Float64Approximation const& cast_approximate(RawFloat64 const& x) { return reinterpret_cast<Float64Approximation const&>(x); }
-inline Float64Approximation const& cast_approximate(Float64Approximation const& x) { return reinterpret_cast<Float64Approximation const&>(x); }
-inline Float64Approximation const& cast_approximate(Float64Value const& x) { return reinterpret_cast<Float64Approximation const&>(x); }
+inline FloatDPApproximation const& cast_approximate(RawFloatDP const& x) { return reinterpret_cast<FloatDPApproximation const&>(x); }
+inline FloatDPApproximation const& cast_approximate(FloatDPApproximation const& x) { return reinterpret_cast<FloatDPApproximation const&>(x); }
+inline FloatDPApproximation const& cast_approximate(FloatDPValue const& x) { return reinterpret_cast<FloatDPApproximation const&>(x); }
 
-template<template<class>class T> inline const T<Float64Approximation>& cast_approximate(const T<RawFloat64>& t) {
-    return reinterpret_cast<const T<Float64Approximation>&>(t); }
-template<template<class>class T> inline const T<Float64Approximation>& cast_approximate(const T<Float64Approximation>& t) {
-    return reinterpret_cast<const T<Float64Approximation>&>(t); }
-template<template<class>class T> inline const T<Float64Approximation>& cast_approximate(const T<Float64Value>& t) {
-    return reinterpret_cast<const T<Float64Approximation>&>(t); }
+template<template<class>class T> inline const T<FloatDPApproximation>& cast_approximate(const T<RawFloatDP>& t) {
+    return reinterpret_cast<const T<FloatDPApproximation>&>(t); }
+template<template<class>class T> inline const T<FloatDPApproximation>& cast_approximate(const T<FloatDPApproximation>& t) {
+    return reinterpret_cast<const T<FloatDPApproximation>&>(t); }
+template<template<class>class T> inline const T<FloatDPApproximation>& cast_approximate(const T<FloatDPValue>& t) {
+    return reinterpret_cast<const T<FloatDPApproximation>&>(t); }
 
 inline FloatMPValue const& cast_exact(RawFloatMP const& x) { return reinterpret_cast<FloatMPValue const&>(x); }
 inline FloatMPValue const& cast_exact(FloatMPApproximation const& x) { return reinterpret_cast<FloatMPValue const&>(x); }

@@ -60,9 +60,9 @@ template<class M> using ScalarScaledFunctionPatch = ScaledFunctionPatch<M>;
 template<class M> class VectorScaledFunctionPatch;
 template<class M> class VectorScaledFunctionPatchElementReference;
 
-inline Float64Approximation convert_error_to_bounds(const PositiveFloat64Approximation& e) { return Float64Approximation(0.0); }
-inline Float64Bounds convert_error_to_bounds(const PositiveFloat64UpperBound& e) { return Float64Bounds(-e.raw(),+e.raw()); }
-inline Float64Bounds convert_error_to_bounds(const Float64Error& e) { return Float64Bounds(-e.raw(),+e.raw()); }
+inline FloatDPApproximation convert_error_to_bounds(const PositiveFloatDPApproximation& e) { return FloatDPApproximation(0.0); }
+inline FloatDPBounds convert_error_to_bounds(const PositiveFloatDPUpperBound& e) { return FloatDPBounds(-e.raw(),+e.raw()); }
+inline FloatDPBounds convert_error_to_bounds(const FloatDPError& e) { return FloatDPBounds(-e.raw(),+e.raw()); }
 
 inline FloatMPApproximation convert_error_to_bounds(const PositiveFloatMPApproximation& e) { return FloatMPApproximation(0.0,e.precision()); }
 inline FloatMPBounds convert_error_to_bounds(const PositiveFloatMPUpperBound& e) { return FloatMPBounds(-e.raw(),+e.raw()); }
@@ -98,9 +98,9 @@ template<class M> class ScaledFunctionPatchCreator;
 
 
 /*! \ingroup FunctionModelSubModule
- *  \brief A ValidatedScalarTaylorFunctionModel64 is a type of FunctionModel in which a the restriction of a scalar function \f$f:\R^n\rightarrow\R\f$ on a domain \f$D\f$ is approximated by polynomial \f$p\f$ with uniform error \f$e\f$.
+ *  \brief A ValidatedScalarTaylorFunctionModelDP is a type of FunctionModel in which a the restriction of a scalar function \f$f:\R^n\rightarrow\R\f$ on a domain \f$D\f$ is approximated by polynomial \f$p\f$ with uniform error \f$e\f$.
  *
- * Formally, a ValidatedScalarTaylorFunctionModel64 is a triple \f$(D,p,e)\f$ representing a set of continuous functions \f$\mathrm{T}(D,p,e)\f$ by
+ * Formally, a ValidatedScalarTaylorFunctionModelDP is a triple \f$(D,p,e)\f$ representing a set of continuous functions \f$\mathrm{T}(D,p,e)\f$ by
  * \f[ \mathrm{T}(D,p,e) = \{ f:\R^n\rightarrow \R \mid \sup_{x\in D}|f(x)-p(x)| \leq e \} . \f]
  * Note that there is no need for the functions \f$f\f$ to be themselves polynomial, and that no information is given
  * about the values of \f$f\f$ outside of \f$D\f$. Information about the derivatives of \f$f\f$ is also unavailable.
@@ -116,7 +116,7 @@ template<class M> class ScaledFunctionPatchCreator;
  * Finding exact bounds for the range of \f$p\f$ over \f$D\f$ is an NP-complete problem,
  * for but there are a number of techniques available.
  *
- * \sa Expansion, TaylorModel, ValidatedVectorTaylorFunctionModel64, TaylorConstrainedImageSet.
+ * \sa Expansion, TaylorModel, ValidatedVectorTaylorFunctionModelDP, TaylorConstrainedImageSet.
  */
 template<class M> class ScaledFunctionPatch
     : public ScalarFunctionModelMixin<ScaledFunctionPatch<M>, typename M::Paradigm, typename M::PrecisionType, typename M::ErrorPrecisionType>
@@ -500,7 +500,7 @@ template<class M> ScaledFunctionPatch<M> midpoint(const ScaledFunctionPatch<M>& 
 /*! \ingroup FunctionModelSubModule
  *  \brief A Taylor function model with multivalued codomain built from the TaylorModel class.
  *
- *  See also TaylorModel, ScaledFunctionPatch<M>, ValidatedVectorTaylorFunctionModel64.
+ *  See also TaylorModel, ScaledFunctionPatch<M>, ValidatedVectorTaylorFunctionModelDP.
  */
 template<class M> class VectorScaledFunctionPatch
     : public VectorFunctionModelMixin<VectorScaledFunctionPatch<M>,typename M::Paradigm,typename M::PrecisionType,typename M::ErrorPrecisionType>

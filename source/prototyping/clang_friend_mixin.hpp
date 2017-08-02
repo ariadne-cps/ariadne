@@ -86,7 +86,7 @@ template<class P> class Number {
 using ApproximateNumber = Number<ApproximateTag>;
 using ValidatedNumber = Number<ValidatedTag>;
 
-class DoublePrecision { friend DoublePrecision max(DoublePrecision,DoublePrecision) { return DoublePrecision(); } };
+class DoublePrecision { friend DoublePrecision max(DoublePrecision,DoublePrecision) { return dp; } };
 using DP=DoublePrecision;
 
 class RoundingMode {

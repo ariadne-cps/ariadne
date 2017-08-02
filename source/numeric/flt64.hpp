@@ -50,48 +50,48 @@ namespace Ariadne {
 
 Void set_default_rounding();
 
-Void Float64::set_rounding_to_nearest();
-Void Float64::set_rounding_downward();
-Void Float64::set_rounding_upward();
-Void Float64::set_rounding_toward_zero();
+Void FloatDP::set_rounding_to_nearest();
+Void FloatDP::set_rounding_downward();
+Void FloatDP::set_rounding_upward();
+Void FloatDP::set_rounding_toward_zero();
 
 typedef unsigned short RoundingModeType;
-RoundingModeType Float64::get_rounding_mode();
-Void Float64::set_rounding_mode(RoundingModeType);
+RoundingModeType FloatDP::get_rounding_mode();
+Void FloatDP::set_rounding_mode(RoundingModeType);
 
 extern const RoundingModeType ROUND_NEAR;
 extern const RoundingModeType ROUND_DOWN;
 extern const RoundingModeType ROUND_UP;
 extern const RoundingModeType ROUND_ZERO;
 
-// ----------------- RawTag Float64 class ---------------------------------------------------------
+// ----------------- RawTag FloatDP class ---------------------------------------------------------
 
 template<class Z, EnableIf<IsBuiltinIntegral<Z>> =dummy> Z integer_cast(Flt64);
 
-// ----------------- RawTag Float64 class ---------------------------------------------------------
+// ----------------- RawTag FloatDP class ---------------------------------------------------------
 
-//! \ingroup Float64SubModule
+//! \ingroup FloatDPSubModule
 //! \brief Wrapper class for double-precision floating-point numbers.
 //! \details
 //! The main purpose of this class is as a base implementation for the \em safe floating-point number types
-//! Float64Approximation, Float64LowerBound, Float64UpperBound,Float64Bounds, Float64Ball, Float64Error and Float64Value.
+//! FloatDPApproximation, FloatDPLowerBound, FloatDPUpperBound,FloatDPBounds, FloatDPBall, FloatDPError and FloatDPValue.
 //! These classes
 //!
 //! Default arithmetic operations are approximate, and comparisons are exact, so this class is \em unsafe.
-//! %Rounded operations on \b Float64 classes are provided using the \c _down
+//! %Rounded operations on \b FloatDP classes are provided using the \c _down
 //! and \c _up suffixes. %ApproximateTag arithmetic without control of the
 //! rounding mode can be specified by the \c _approx rounding suffix, or \c _near if round-to-nearest is available.
 //! %ExactTag arithmetic can be specified explicitly using the \c _exact rounding suffix.
 //!
-//! Since the raw \b Float64 classes represent unsafe values, they cannot be converted to other numbers.
-//! The exception is conversion to \b Float64Approximation classes, since these represent approximate values with no control of the error.
-//! Since the raw \b Float64 classes are used as the implementation of the safe \c Float64 classes,
+//! Since the raw \b FloatDP classes represent unsafe values, they cannot be converted to other numbers.
+//! The exception is conversion to \b FloatDPApproximation classes, since these represent approximate values with no control of the error.
+//! Since the raw \b FloatDP classes are used as the implementation of the safe \c FloatDP classes,
 //! they are valid arguments to constructors, but these constructors are all declared \c explicit.
-//! Comparison of raw \b %Float64 data and other numbers is performed as if the %Float64 object were an \b %Float64Approximation.
+//! Comparison of raw \b %FloatDP data and other numbers is performed as if the %FloatDP object were an \b %FloatDPApproximation.
 //!
 //! When testing, it is often useful to perform comparisons with \c %Flt64 or \c double values.
 //! Although care must be taken, since compiler rounding may change the truth of certain comparisons.
-//! comparisons with \c double are performed as if the value were \c Float64Value.
+//! comparisons with \c double are performed as if the value were \c FloatDPValue.
 
 
 class Flt64 {
@@ -110,13 +110,13 @@ class Flt64 {
     static Flt64 eps();
     static Flt64 inf();
 
-    static Void Float64::set_rounding_mode(RoundingModeType);
-    static RoundingModeType Float64::get_rounding_mode();
+    static Void FloatDP::set_rounding_mode(RoundingModeType);
+    static RoundingModeType FloatDP::get_rounding_mode();
 
-    static Void Float64::set_rounding_to_nearest();
-    static Void Float64::set_rounding_downward();
-    static Void Float64::set_rounding_upward();
-    static Void Float64::set_rounding_toward_zero();
+    static Void FloatDP::set_rounding_to_nearest();
+    static Void FloatDP::set_rounding_downward();
+    static Void FloatDP::set_rounding_upward();
+    static Void FloatDP::set_rounding_toward_zero();
 
     friend inline Flt64 operator+(Flt64 x) { return Flt64{+x.d}; }
     friend inline Flt64 operator-(Flt64 x) { return Flt64{-x.d}; }

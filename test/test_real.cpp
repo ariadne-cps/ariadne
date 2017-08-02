@@ -54,7 +54,7 @@ class TestReal
 
 void TestReal::test()
 {
-    Float64Approximation::set_output_places(18);
+    FloatDPApproximation::set_output_places(18);
 //    ARIADNE_TEST_CALL(test_concept());
     ARIADNE_TEST_CALL(test_constructors());
     ARIADNE_TEST_CALL(test_conversions());
@@ -79,15 +79,15 @@ void TestReal::test_concept() {
 void TestReal::test_conversions() {
     Real one=1;
     Real pi=4*atan(one);
-    auto pi_dp=pi(Precision64());
-//    auto pi_mp=pi(PrecisionMP(2));
+    auto pi_dp=pi(dp);
+//    auto pi_mp=pi(MultiplePrecision(2));
     ARIADNE_TEST_PRINT(pi_dp);
 //    ARIADNE_TEST_PRINT(pi_mp);
 
 }
 
 void TestReal::test_constructors() {
-    Precision64 pr;
+    DoublePrecision pr;
     ARIADNE_TEST_CONSTRUCT(Real,xv, );
     ARIADNE_TEST_EQUALS(xv.get(pr),0);
     ARIADNE_TEST_EQUALS(xv.lower().get(pr).raw(),0);
@@ -106,7 +106,7 @@ void TestReal::test_constructors() {
 }
 
 void TestReal::test_arithmetic() {
-    Float64Approximation::set_output_places(18);
+    FloatDPApproximation::set_output_places(18);
     Real x(2.5_dyadic);
     Real y(4.0_dyadic);
     ARIADNE_TEST_EQUALS(x, 2.5_dy);
@@ -131,9 +131,9 @@ void TestReal::test_arithmetic() {
 }
 
 void TestReal::test_transcendental() {
-    Dyadic eps{Float64::eps(Precision64())};
+    Dyadic eps{FloatDP::eps(dp)};
     Real x(2.5_dyadic);
-    Float64Approximation ax=x.get(Precision64());
+    FloatDPApproximation ax=x.get(dp);
     ARIADNE_TEST_EQUALS(sqrt(Real(4)),2.0_dy);
     ARIADNE_TEST_EQUALS(exp(Real(0)),1.0_dy);
     ARIADNE_TEST_EQUALS(log(Real(1)),0.0_dy);
@@ -157,8 +157,8 @@ void TestReal::test_comparison() {
     ARIADNE_TEST_ASSERT(possibly(check(log(e)==one,effort)));
     ARIADNE_TEST_ASSERT(possibly((log(e)==one).check(effort)));
 
-    ARIADNE_TEST_PRINT(pi.get(Precision64()));
-    ARIADNE_TEST_PRINT(e*log(pi).get(Precision64()));
+    ARIADNE_TEST_PRINT(pi.get(dp));
+    ARIADNE_TEST_PRINT(e*log(pi).get(dp));
 
     ARIADNE_TEST_ASSERT(not check(pi==elogpi,effort));
     ARIADNE_TEST_ASSERT(check(pi!=elogpi,effort));
@@ -174,17 +174,17 @@ void TestReal::test_comparison() {
 
 
 void TestReal::test_accuracy() {
-    Float64Bounds::set_output_places(18);
+    FloatDPBounds::set_output_places(18);
     Real one=1;
     Real pi=4*atan(one);
 
-    PrecisionMP mp_high(320);
+    MultiplePrecision mp_high(320);
     RawFloatMP pi_near = FloatMP::pi(near,mp_high);
 
-    Precision64 dp;
-    ARIADNE_TEST_CONSTRUCT(Float64Bounds,pi_dp,(pi.get(dp)));
+    DoublePrecision dp;
+    ARIADNE_TEST_CONSTRUCT(FloatDPBounds,pi_dp,(pi.get(dp)));
 
-    PrecisionMP mp(128);
+    MultiplePrecision mp(128);
     ARIADNE_TEST_CONSTRUCT(FloatMPBounds,pi_mp,(pi.get(mp)));
 
     ARIADNE_TEST_ASSERT(pi_dp.lower_raw()<=pi_near);
@@ -194,7 +194,7 @@ void TestReal::test_accuracy() {
     ARIADNE_TEST_ASSERT(pi_mp.upper_raw()>=pi_near);
 
     Accuracy accuracy{256};
-    FloatMPValue error(accuracy.error(),PrecisionMP(320));
+    FloatMPValue error(accuracy.error(),MultiplePrecision(320));
     ARIADNE_TEST_CONSTRUCT(FloatMPBounds,pi_met,(pi.evaluate(accuracy)));
     ARIADNE_TEST_PRINT(pi_met.error());
     ARIADNE_TEST_PRINT(abs(sub(up,pi_met.value_raw(),pi_near)));

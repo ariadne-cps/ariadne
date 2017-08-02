@@ -36,7 +36,7 @@
 
 namespace Ariadne {
 
-Pair<Nat,Float64> nonlinearity_index_and_error(const ValidatedVectorFunction& function, const ExactBoxType& domain);
+Pair<Nat,FloatDP> nonlinearity_index_and_error(const ValidatedVectorFunction& function, const ExactBoxType& domain);
 
 
 Void SubdivisionDrawer::draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const { ARIADNE_NOT_IMPLEMENTED; }
@@ -100,7 +100,7 @@ Void EnclosureAffineDrawer::draw(CanvasInterface& canvas, const Projection2d& pr
     fg[1]=set.function()[projection.i];
     for(Nat i=0; i!=set.constraints().size(); ++i) { fg[i+2u]=set.constraints()[i].function(); }
     Projection2d identity(2, 0,1);
-//    ValidatedVectorFunctionModel64 fg=join(set.state_function(),set.time_function(),set.constraint_function());
+//    ValidatedVectorFunctionModelDP fg=join(set.state_function(),set.time_function(),set.constraint_function());
 
     List<ExactBoxType> subdomains;
     List<ExactBoxType> unsplitdomains;
@@ -110,7 +110,7 @@ Void EnclosureAffineDrawer::draw(CanvasInterface& canvas, const Projection2d& pr
     for(Int i=0; i!=MAXIMUM_DEPTH; ++i) {
         //std::cerr<<"i="<<i<<"\nsubdomains="<<subdomains<<"\nunsplitdomains="<<unsplitdomains<<"\n\n";
         for(Nat n=0; n!=unsplitdomains.size(); ++n) {
-            Nat k; Float64 err;
+            Nat k; FloatDP err;
             make_lpair(k,err)=nonlinearity_index_and_error(fg,unsplitdomains[n]);
             //std::cerr<<"  domain="<<unsplitdomains[n]<<" k="<<k<<" err="<<err<<" max_err="<<max_error<<"\n";
             if(k==set.number_of_parameters() || err < max_error) {

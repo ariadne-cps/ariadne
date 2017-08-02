@@ -69,12 +69,12 @@ class String;
 
 typedef SizeType DimensionType;
 
-typedef Float64Error ValidatedNormType; // FIXME: Remove this typedef
-typedef Float64Approximation ApproximateNormType; // FIXME: Remove this typedef
+typedef FloatDPError ValidatedNormType; // FIXME: Remove this typedef
+typedef FloatDPApproximation ApproximateNormType; // FIXME: Remove this typedef
 
-typedef Float64Error NormType; // FIXME: Remove this typedef
-typedef Float64Error ErrorType; // FIXME: Remove this typedef
-typedef Float64Approximation ApproximateErrorType; // FIXME: Remove this typedef
+typedef FloatDPError NormType; // FIXME: Remove this typedef
+typedef FloatDPError ErrorType; // FIXME: Remove this typedef
+typedef FloatDPApproximation ApproximateErrorType; // FIXME: Remove this typedef
 
 template<class X> struct InformationTypedef;
 template<> struct InformationTypedef<Real> { typedef EffectiveTag Type; };
@@ -102,11 +102,11 @@ template<class X> class Point;
 
 typedef Vector<Rational> RationalVector;
 typedef Vector<Real> RealVector;
-typedef Vector<Float64> FloatVector;
-typedef Vector<RawFloat64> RawFloatVector;
-typedef Vector<Float64Approximation> FloatApproximationVector;
-typedef Vector<Float64Bounds> FloatBoundsVector;
-typedef Vector<Float64Value> ExactFloatVector;
+typedef Vector<FloatDP> FloatVector;
+typedef Vector<RawFloatDP> RawFloatVector;
+typedef Vector<FloatDPApproximation> FloatApproximationVector;
+typedef Vector<FloatDPBounds> FloatBoundsVector;
+typedef Vector<FloatDPValue> ExactFloatVector;
 
 typedef Vector<ApproximateNumericType> ApproximateVector;
 typedef Vector<ValidatedNumericType> ValidatedVector;
@@ -115,11 +115,11 @@ typedef Vector<ExactNumericType> ExactVector;
 
 typedef Matrix<Rational> RationalMatrix;
 typedef Matrix<Real> RealMatrix;
-typedef Matrix<RawFloat64> RawFloatMatrix;
-typedef Matrix<Float64> FloatMatrix;
-typedef Matrix<Float64Approximation> FloatApproximationMatrix;
-typedef Matrix<Float64Bounds> FloatBoundsMatrix;
-typedef Matrix<Float64Value> ExactFloatMatrix;
+typedef Matrix<RawFloatDP> RawFloatMatrix;
+typedef Matrix<FloatDP> FloatMatrix;
+typedef Matrix<FloatDPApproximation> FloatApproximationMatrix;
+typedef Matrix<FloatDPBounds> FloatBoundsMatrix;
+typedef Matrix<FloatDPValue> ExactFloatMatrix;
 
 typedef Point<ApproximateNumericType> ApproximatePoint;
 typedef Point<ValidatedNumericType> ValidatedPoint;

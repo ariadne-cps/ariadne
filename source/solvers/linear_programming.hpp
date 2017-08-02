@@ -74,40 +74,40 @@ class InteriorPointSolver
   public:
     //! \brief Find approximate optimal solution of \f$\min c^T x \text{ s.t. } Ax=b; x\geq0\f$.
     //! Returns the pair (x,y) where x is the optimal point, and y the corresponding dual feasible point.
-    Tuple< Float64, Vector<Float64>, Vector<Float64> >
-    minimise(const RawFloatVector& c, const RawFloatVector& xl, const RawFloatVector& xu, const Matrix<Float64>& A, const Vector<Float64>& b) const;
+    Tuple< FloatDP, Vector<FloatDP>, Vector<FloatDP> >
+    minimise(const RawFloatVector& c, const RawFloatVector& xl, const RawFloatVector& xu, const Matrix<FloatDP>& A, const Vector<FloatDP>& b) const;
 
     //! \brief Find approximate optimal solution of \f$\min c^T x \text{ s.t. } Ax=b; x\geq0\f$.
     //! Returns the triple (x,y,z) where x is the optimal point, and y the corresponding dual feasible point.
-    Tuple< Float64, Vector<Float64>, Vector<Float64> >
-    hotstarted_minimise(const RawFloatVector& c, const RawFloatVector& xl, const RawFloatVector& xu, const Matrix<Float64>& A, const Vector<Float64>& b,
-                        Vector<Float64>& x, Vector<Float64>& y, Vector<Float64>& zl, Vector<Float64>& zu) const;
+    Tuple< FloatDP, Vector<FloatDP>, Vector<FloatDP> >
+    hotstarted_minimise(const RawFloatVector& c, const RawFloatVector& xl, const RawFloatVector& xu, const Matrix<FloatDP>& A, const Vector<FloatDP>& b,
+                        Vector<FloatDP>& x, Vector<FloatDP>& y, Vector<FloatDP>& zl, Vector<FloatDP>& zu) const;
 
     //! \brief Test feasibility of the problem \f$Ax=b; x_l\leq x\leq x_u\f$.
     //! Returns the pair (r,x) where r is the result, and x the (potential) feasible point.
     ValidatedKleenean
-    feasible(const Vector<Float64>& xl, const Vector<Float64>& xu, const Matrix<Float64>& A, const Vector<Float64>& b) const;
+    feasible(const Vector<FloatDP>& xl, const Vector<FloatDP>& xu, const Matrix<FloatDP>& A, const Vector<FloatDP>& b) const;
 
 
     //! \brief Validate that \a x is primal feasible and \a y is dual feasible.
     //! Returns the interval of possible optimal values.
-    ValidatedKleenean validate_feasibility(const Vector<Float64>& xl, const Vector<Float64>& xu,
-                                 const Matrix<Float64>& A, const Vector<Float64>& b,
-                                 const Vector<Float64>& x, const Vector<Float64>& y) const;
+    ValidatedKleenean validate_feasibility(const Vector<FloatDP>& xl, const Vector<FloatDP>& xu,
+                                 const Matrix<FloatDP>& A, const Vector<FloatDP>& b,
+                                 const Vector<FloatDP>& x, const Vector<FloatDP>& y) const;
   public:
     //! \brief Perform a step of the optimization of \f$\min c^T x \text{ s.t. } Ax=b; x_l \leq x\leq x_u\f$.
     //! Returns true if a full Newton step (alpha=1) is taken. In this case, the problem is feasible (up to roundoff error).
     LinearProgramStatus
-    _minimisation_step(const Vector<Float64>& c,
-                       const Vector<Float64>& xl, const Vector<Float64>& xu,
-                       const Matrix<Float64>& A, const Vector<Float64>& b,
-                       Vector<Float64>& x, Vector<Float64>& y, Vector<Float64>& zl, Vector<Float64>& zu) const;
+    _minimisation_step(const Vector<FloatDP>& c,
+                       const Vector<FloatDP>& xl, const Vector<FloatDP>& xu,
+                       const Matrix<FloatDP>& A, const Vector<FloatDP>& b,
+                       Vector<FloatDP>& x, Vector<FloatDP>& y, Vector<FloatDP>& zl, Vector<FloatDP>& zu) const;
 
     //! \brief Perform a step of the feasibility problem \f$Ax=b,\ x_l \leq x \leq x_u\f$.
     LinearProgramStatus
-    _feasibility_step(const Vector<Float64>& xl, const Vector<Float64>& xu,
-                      const Matrix<Float64>& A, const Vector<Float64>& b,
-                      Vector<Float64>& x, Vector<Float64>& y, Vector<Float64>& zl, Vector<Float64>& zu) const;
+    _feasibility_step(const Vector<FloatDP>& xl, const Vector<FloatDP>& xu,
+                      const Matrix<FloatDP>& A, const Vector<FloatDP>& b,
+                      Vector<FloatDP>& x, Vector<FloatDP>& y, Vector<FloatDP>& zl, Vector<FloatDP>& zu) const;
 
 
 };
@@ -115,7 +115,7 @@ class InteriorPointSolver
 
 
 template<class X> struct RigorousNumericsTraits { typedef X Type; };
-template<> struct RigorousNumericsTraits<Float64Value> { typedef Float64Bounds Type; };
+template<> struct RigorousNumericsTraits<FloatDPValue> { typedef FloatDPBounds Type; };
 template<class X> using RigorousNumericType = typename RigorousNumericsTraits<X>::Type;
 
 //! \relates SimplexSolver \brief The type of variable; lower is_bounded, upper is_bounded, basic, or fixed (upper and lower singleton).

@@ -55,15 +55,15 @@ namespace Ariadne {
 
 static double TAYLOR_FUNCTION_WRITING_ACCURACY = 1e-8;
 
-template class ScaledFunctionPatchFactory<ValidatedTaylorModel64>;
-template class FunctionModelCreator<ScaledFunctionPatchFactory<ValidatedTaylorModel64>>;
+template class ScaledFunctionPatchFactory<ValidatedTaylorModelDP>;
+template class FunctionModelCreator<ScaledFunctionPatchFactory<ValidatedTaylorModelDP>>;
 
-template class ScaledFunctionPatch<ValidatedTaylorModel64>;
-template class FunctionMixin<ScaledFunctionPatch<ValidatedTaylorModel64>,ApproximateTag,BoxDomainType,IntervalDomainType>;
-template class FunctionMixin<ScaledFunctionPatch<ValidatedTaylorModel64>,ValidatedTag,BoxDomainType,IntervalDomainType>;
-template class VectorScaledFunctionPatch<ValidatedTaylorModel64>;
-template class FunctionMixin<VectorScaledFunctionPatch<ValidatedTaylorModel64>,ApproximateTag,BoxDomainType,BoxDomainType>;
-template class FunctionMixin<VectorScaledFunctionPatch<ValidatedTaylorModel64>,ValidatedTag,BoxDomainType,BoxDomainType>;
+template class ScaledFunctionPatch<ValidatedTaylorModelDP>;
+template class FunctionMixin<ScaledFunctionPatch<ValidatedTaylorModelDP>,ApproximateTag,BoxDomainType,IntervalDomainType>;
+template class FunctionMixin<ScaledFunctionPatch<ValidatedTaylorModelDP>,ValidatedTag,BoxDomainType,IntervalDomainType>;
+template class VectorScaledFunctionPatch<ValidatedTaylorModelDP>;
+template class FunctionMixin<VectorScaledFunctionPatch<ValidatedTaylorModelDP>,ApproximateTag,BoxDomainType,BoxDomainType>;
+template class FunctionMixin<VectorScaledFunctionPatch<ValidatedTaylorModelDP>,ValidatedTag,BoxDomainType,BoxDomainType>;
 
 template class ScaledFunctionPatchFactory<ValidatedTaylorModelMP>;
 template class FunctionModelCreator<ScaledFunctionPatchFactory<ValidatedTaylorModelMP>>;
@@ -71,11 +71,11 @@ template class ScaledFunctionPatch<ValidatedTaylorModelMP>;
 template class VectorScaledFunctionPatch<ValidatedTaylorModelMP>;
 
 FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory() {
-    return new TaylorFunctionFactory(Sweeper<Float64>());
+    return new TaylorFunctionFactory(Sweeper<FloatDP>());
 }
 
 FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory(double sweep_threshold) {
-    return new TaylorFunctionFactory(ThresholdSweeper<Float64>(Precision64(),sweep_threshold));
+    return new TaylorFunctionFactory(ThresholdSweeper<FloatDP>(dp,sweep_threshold));
 }
 
 

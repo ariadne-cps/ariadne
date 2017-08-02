@@ -46,17 +46,17 @@
 
 namespace Ariadne {
 
-static const Float64Value zero=Float64Value(0,Precision64());
+static const FloatDPValue zero=FloatDPValue(0,dp);
 
 inline UpperBoxType operator+(Vector<ExactIntervalType> bx, Vector<UpperIntervalType> const& ex) {
     return Vector<UpperIntervalType>(bx) + ex;
 }
 
-inline UpperBoxType operator+(Vector<UpperIntervalType> bx, Vector<Float64Bounds> const& v) {
+inline UpperBoxType operator+(Vector<UpperIntervalType> bx, Vector<FloatDPBounds> const& v) {
     return bx + Vector<UpperIntervalType>(v);
 }
 
-inline UpperBoxType operator+(Vector<ExactIntervalType> bx, Vector<Float64Bounds> const& v) {
+inline UpperBoxType operator+(Vector<ExactIntervalType> bx, Vector<FloatDPBounds> const& v) {
     return Vector<UpperIntervalType>(bx) + Vector<UpperIntervalType>(v);
 }
 
@@ -79,21 +79,21 @@ IntegratorBase::IntegratorBase(MaximumError e, SweepThreshold s, LipschitzConsta
 }
 
 Void
-IntegratorBase::set_function_factory(const ValidatedFunctionModel64FactoryInterface& factory)
+IntegratorBase::set_function_factory(const ValidatedFunctionModelDPFactoryInterface& factory)
 {
     this->_function_factory_ptr=FunctionFactoryPointer(factory.clone());
 }
 
-const ValidatedFunctionModel64FactoryInterface&
+const ValidatedFunctionModelDPFactoryInterface&
 IntegratorBase::function_factory() const
 {
     return *this->_function_factory_ptr;
 }
 
-Pair<Float64Value,UpperBoxType>
-IntegratorBase::flow_bounds(const ValidatedVectorFunction& vf, const ExactBoxType& domx, const RawFloat64& hsug) const
+Pair<FloatDPValue,UpperBoxType>
+IntegratorBase::flow_bounds(const ValidatedVectorFunction& vf, const ExactBoxType& domx, const RawFloatDP& hsug) const
 {
-    ARIADNE_LOG(3,"IntegratorBase::flow_bounds(ValidatedVectorFunction vf, ExactBoxType domx, Float64 hmax)\n");
+    ARIADNE_LOG(3,"IntegratorBase::flow_bounds(ValidatedVectorFunction vf, ExactBoxType domx, FloatDP hmax)\n");
     ARIADNE_ASSERT_MSG(vf.result_size()==domx.size(),"vector_field="<<vf<<", states="<<domx);
     ARIADNE_ASSERT_MSG(vf.argument_size()==domx.size(),"vector_field="<<vf<<", states="<<domx);
     ARIADNE_ASSERT(hsug>0);
@@ -101,26 +101,26 @@ IntegratorBase::flow_bounds(const ValidatedVectorFunction& vf, const ExactBoxTyp
 
     // Set up constants of the method.
     // TODO: Better estimates of constants
-    const Float64Value INITIAL_MULTIPLIER=2.0_exact;
-    const Float64Value MULTIPLIER=1.125_exact;
-    const Float64Value BOX_RADIUS_MULTIPLIER=1.25_exact;
-    const Float64Value BOX_RADIUS_WIDENING=0.25_exact;
+    const FloatDPValue INITIAL_MULTIPLIER=2.0_exact;
+    const FloatDPValue MULTIPLIER=1.125_exact;
+    const FloatDPValue BOX_RADIUS_MULTIPLIER=1.25_exact;
+    const FloatDPValue BOX_RADIUS_WIDENING=0.25_exact;
     const Nat EXPANSION_STEPS=4;
     const Nat REDUCTION_STEPS=8;
     const Nat REFINEMENT_STEPS=4;
 
-    Vector<Float64Bounds> const& dx=cast_singleton(domx);
+    Vector<FloatDPBounds> const& dx=cast_singleton(domx);
 
     //Vector<ValidatedNumericType> delta=(dx-midpoint(domx))*BOX_RADIUS_WIDENING;
     Vector<UpperIntervalType> delta=(domx-midpoint(domx))*BOX_RADIUS_WIDENING;
 
     // Compute the Lipschitz constant over the initial box
-    Float64UpperBound lip = norm(vf.jacobian(dx)).upper();
-    Float64Value hlip = cast_exact(this->_lipschitz_tolerance/lip);
+    FloatDPUpperBound lip = norm(vf.jacobian(dx)).upper();
+    FloatDPValue hlip = cast_exact(this->_lipschitz_tolerance/lip);
 
-    Float64Value hmax(Float64(this->maximum_step_size()));
-    Float64Value h=cast_exact(hsug);
-    Float64Value hmin=h*two_exp(-REDUCTION_STEPS);
+    FloatDPValue hmax(FloatDP(this->maximum_step_size()));
+    FloatDPValue h=cast_exact(hsug);
+    FloatDPValue hmin=h*two_exp(-REDUCTION_STEPS);
     h=max(hmin,min(hmax,min(hlip,h)));
     ARIADNE_LOG(4,"L="<<lip<<", hL="<<hlip<<", hmax="<<hmax<<"\n");
 
@@ -178,27 +178,27 @@ IntegratorBase::flow_bounds(const ValidatedVectorFunction& vf, const ExactBoxTyp
     ARIADNE_ASSERT_MSG(refines(domx+ih*apply(vf,bx),bx),
         "d="<<dx<<"\nh="<<h<<"\nf(b)="<<apply(vf,bx)<<"\nd+hf(b)="<<(domx+ih*apply(vf,bx))<<"\nb="<<bx<<"\n");
 
-    return std::make_pair(Float64Value(h),bx);
+    return std::make_pair(FloatDPValue(h),bx);
 }
 
 
 
 
 
-ValidatedVectorFunctionModel64
+ValidatedVectorFunctionModelDP
 IntegratorBase::flow_to(const ValidatedVectorFunction& vf, const ExactBoxType& dx0, const Real& tmax) const
 {
     ARIADNE_LOG(1,"IntegratorBase::flow_to(ValidatedVectorFunction vf, ExactBoxType dx0, Real tmax)\n");
     ARIADNE_LOG(2,"vf="<<vf<<"\n");
     ARIADNE_LOG(2,"dom(x0)="<<dx0<<" tmax="<<tmax<<"\n");
     const Nat n=dx0.size(); // Dimension of the state space
-    ValidatedVectorFunctionModel64 flow_function=this->function_factory().create_identity(dx0);
+    ValidatedVectorFunctionModelDP flow_function=this->function_factory().create_identity(dx0);
     Rational t=0;
-    ValidatedVectorFunctionModel64 step_function;
+    ValidatedVectorFunctionModelDP step_function;
     while(possibly(t<tmax)) {
         ExactBoxType dx=flow_function.codomain();
-        Float64Bounds h_max=Float64Bounds(tmax,Precision64())-t;
-        Float64Value h;
+        FloatDPBounds h_max=FloatDPBounds(tmax,dp)-t;
+        FloatDPValue h;
         UpperBoxType bx;
         make_lpair(h,bx) = this->flow_bounds(vf,dx,h_max.upper().raw());
         Bool flow_successfully_computed=false;
@@ -218,36 +218,36 @@ IntegratorBase::flow_to(const ValidatedVectorFunction& vf, const ExactBoxType& d
 }
 
 
-List<ValidatedVectorFunctionModel64>
+List<ValidatedVectorFunctionModelDP>
 IntegratorBase::flow(const ValidatedVectorFunction& vf, const ExactBoxType& dx0, const Real& tmin, const Real& tmax) const
 {
     ARIADNE_LOG(1,"IntegratorBase::flow(ValidatedVectorFunction vf, ExactBoxType dx0, Real tmin, Real tmax)\n");
-    Precision64 precision;
-    Float64LowerBound tminl=Float64Bounds(tmin,precision).lower();
-    Float64UpperBound tmaxu=Float64Bounds(tmax,precision).upper();
-    ValidatedVectorFunctionModel64 evolve_function=this->flow_to(vf,dx0,tmin);
-    Float64Value t=cast_exact(tminl);
-    List<ValidatedVectorFunctionModel64> result;
+    DoublePrecision precision;
+    FloatDPLowerBound tminl=FloatDPBounds(tmin,precision).lower();
+    FloatDPUpperBound tmaxu=FloatDPBounds(tmax,precision).upper();
+    ValidatedVectorFunctionModelDP evolve_function=this->flow_to(vf,dx0,tmin);
+    FloatDPValue t=cast_exact(tminl);
+    List<ValidatedVectorFunctionModelDP> result;
 
     while(possibly(t<tmax)) {
         ExactBoxType dx=evolve_function.codomain();
-        Float64Value h=cast_exact(tmaxu-t);
+        FloatDPValue h=cast_exact(tmaxu-t);
         UpperBoxType bx;
         make_lpair(h,bx) = this->flow_bounds(vf,dx,h.raw());
-        ValidatedVectorFunctionModel64 flow_step_function=this->flow_step(vf,dx,h,bx);
-        Float64Value new_t=cast_exact((t+h).lower());
+        ValidatedVectorFunctionModelDP flow_step_function=this->flow_step(vf,dx,h,bx);
+        FloatDPValue new_t=cast_exact((t+h).lower());
         ExactIntervalType dt(t,new_t);
-        ValidatedScalarFunctionModel64 step_time_function=this->function_factory().create_identity(dt)-Float64Value(t);
-        ValidatedVectorFunctionModel64 flow_function=compose(flow_step_function,combine(evolve_function,step_time_function));
+        ValidatedScalarFunctionModelDP step_time_function=this->function_factory().create_identity(dt)-FloatDPValue(t);
+        ValidatedVectorFunctionModelDP flow_function=compose(flow_step_function,combine(evolve_function,step_time_function));
         ARIADNE_ASSERT(flow_function.domain()[dx0.size()].upper()==new_t);
         result.append(flow_function);
-        evolve_function=partial_evaluate(flow_function,dx0.size(),Float64Value(new_t));
+        evolve_function=partial_evaluate(flow_function,dx0.size(),FloatDPValue(new_t));
         t=new_t;
     }
     return result;
 }
 
-List<ValidatedVectorFunctionModel64>
+List<ValidatedVectorFunctionModelDP>
 IntegratorBase::flow(const ValidatedVectorFunction& vf, const ExactBoxType& dx0, const Real& tmax) const
 {
     return flow(vf,dx0,Real(0),tmax);
@@ -255,11 +255,11 @@ IntegratorBase::flow(const ValidatedVectorFunction& vf, const ExactBoxType& dx0,
 
 
 
-ValidatedVectorFunctionModel64
-IntegratorBase::flow_step(const ValidatedVectorFunction& vf, const ExactBoxType& dx, Float64& hmax) const
+ValidatedVectorFunctionModelDP
+IntegratorBase::flow_step(const ValidatedVectorFunction& vf, const ExactBoxType& dx, FloatDP& hmax) const
 {
-    ARIADNE_LOG(3,"IntegratorBase::flow_step(ValidatedVectorFunction vf, ExactBoxType dx, Float64 hmax)\n");
-    Float64Value& h=reinterpret_cast<Float64Value&>(hmax);
+    ARIADNE_LOG(3,"IntegratorBase::flow_step(ValidatedVectorFunction vf, ExactBoxType dx, FloatDP hmax)\n");
+    FloatDPValue& h=reinterpret_cast<FloatDPValue&>(hmax);
     UpperBoxType bx;
     make_lpair(h,bx)=this->flow_bounds(vf,dx,hmax);
     while(true) {
@@ -271,28 +271,28 @@ IntegratorBase::flow_step(const ValidatedVectorFunction& vf, const ExactBoxType&
     }
 }
 
-ValidatedVectorFunctionModel64
-TaylorPicardIntegrator::flow_step(const ValidatedVectorFunction& f, const ExactBoxType& dx, const Float64Value& h, const UpperBoxType& bx) const
+ValidatedVectorFunctionModelDP
+TaylorPicardIntegrator::flow_step(const ValidatedVectorFunction& f, const ExactBoxType& dx, const FloatDPValue& h, const UpperBoxType& bx) const
 {
-    ARIADNE_LOG(3,"TaylorPicardIntegrator::flow_step(ValidatedVectorFunction vf, ExactBoxType dx, Float64Value h, UpperBoxType bx)\n");
+    ARIADNE_LOG(3,"TaylorPicardIntegrator::flow_step(ValidatedVectorFunction vf, ExactBoxType dx, FloatDPValue h, UpperBoxType bx)\n");
     ARIADNE_LOG(3," dx="<<dx<<" h="<<h<<" bx="<<bx<<"\n");
     const Nat nx=dx.size();
-    Sweeper<Float64> sweeper(new ThresholdSweeper<Float64>(Precision64(),this->_step_sweep_threshold));
+    Sweeper<FloatDP> sweeper(new ThresholdSweeper<FloatDP>(dp,this->_step_sweep_threshold));
 
     ExactBoxType dom=join(dx,ExactIntervalType(-h,h));
     ARIADNE_LOG(7,"dom="<<dom<<"\n");
 
-    ValidatedVectorFunctionModel64 phi0=this->function_factory().create_zeros(nx,dom);
+    ValidatedVectorFunctionModelDP phi0=this->function_factory().create_zeros(nx,dom);
     for(Nat i=0; i!=nx; ++i) { phi0[i]=this->function_factory().create_coordinate(dom,i); }
     ARIADNE_LOG(5,"phi0="<<phi0<<"\n");
 
-    ValidatedVectorFunctionModel64 phi=this->function_factory().create_zeros(nx,dom);
+    ValidatedVectorFunctionModelDP phi=this->function_factory().create_zeros(nx,dom);
     for(Nat i=0; i!=nx; ++i) { phi[i]=this->function_factory().create_constant(dom,cast_singleton(bx[i])); }
 
     ARIADNE_LOG(5,"phi="<<phi<<"\n");
     for(Nat k=0; k!=this->_maximum_temporal_order; ++k) {
         Bool last_step=(phi.error().raw()<this->maximum_error());
-        ValidatedVectorFunctionModel64 fphi=compose(f,phi);
+        ValidatedVectorFunctionModelDP fphi=compose(f,phi);
         ARIADNE_LOG(5,"fphi="<<fphi<<"\n");
         for(Nat i=0; i!=nx; ++i) {
             phi[i]=antiderivative(fphi[i],nx)+phi0[i];
@@ -305,7 +305,7 @@ TaylorPicardIntegrator::flow_step(const ValidatedVectorFunction& f, const ExactB
         ARIADNE_THROW(FlowTimeStepException,"TaylorPicardIntegrator::flow_step","Integration of "<<f<<" starting in "<<dx<<" for time "<<h<<" has error "<<phi.error()<<" after "<<this->_maximum_temporal_order<<" iterations, which exceeds maximum error "<<this->maximum_error()<<"\n");
     }
 
-    ValidatedVectorFunctionModel64 res=this->function_factory().create_zeros(nx,dom);
+    ValidatedVectorFunctionModelDP res=this->function_factory().create_zeros(nx,dom);
     ARIADNE_LOG(4,"res_init="<<res<<"\n");
     for(Nat i=0; i!=nx; ++i) { res[i]=phi[i]; }
     //res.sweep();
@@ -335,8 +335,8 @@ namespace Ariadne {
 
 class FormulaFunction;
 typedef Procedure<ValidatedNumber> ValidatedProcedure;
-typedef Differential<Float64Bounds> ValidatedDifferential;
-typedef Polynomial<Float64Bounds> ValidatedPolynomial;
+typedef Differential<FloatDPBounds> ValidatedDifferential;
+typedef Polynomial<FloatDPBounds> ValidatedPolynomial;
 typedef Graded<ValidatedDifferential> GradedValidatedDifferential;
 Bool operator<(const MultiIndex& a1, const MultiIndex& a2);
 
@@ -435,7 +435,7 @@ Void flow_init(const Vector<ValidatedProcedure>& p,
     }
 }
 
-Void flow_iterate(const Vector<ValidatedProcedure>& p, Float64Value h,
+Void flow_iterate(const Vector<ValidatedProcedure>& p, FloatDPValue h,
                   Vector<GradedValidatedDifferential>& fy, List<GradedValidatedDifferential>& t, Vector<GradedValidatedDifferential>& y)
 {
     Ariadne::compute(p,fy,t,y);
@@ -473,10 +473,10 @@ Vector<ValidatedDifferential> flow_differential(Vector<GradedValidatedDifferenti
 
     Vector<ValidatedDifferential> dphi(nx,ValidatedDifferential(nx+1u,so+to));
     for(Nat i=0; i!=nx; ++i) {
-        Expansion<Float64Bounds>& component=dphi[i].expansion();
+        Expansion<FloatDPBounds>& component=dphi[i].expansion();
         for(Nat j=0; j<=to; ++j) {
-            const Expansion<Float64Bounds>& expansion=gdphi[i][j].expansion();
-            for(Expansion<Float64Bounds>::ConstIterator iter=expansion.begin(); iter!=expansion.end(); ++iter) {
+            const Expansion<FloatDPBounds>& expansion=gdphi[i][j].expansion();
+            for(Expansion<FloatDPBounds>::ConstIterator iter=expansion.begin(); iter!=expansion.end(); ++iter) {
                 append_join(component,iter->key(),j,iter->data());
             }
         }
@@ -486,23 +486,23 @@ Vector<ValidatedDifferential> flow_differential(Vector<GradedValidatedDifferenti
     return dphi;
 }
 
-ValidatedVectorTaylorFunctionModel64 flow_function(const Vector<ValidatedDifferential>& dphi, const ExactBoxType& dx, const Float64Value& h, double swpt, Int verbosity=0) {
+ValidatedVectorTaylorFunctionModelDP flow_function(const Vector<ValidatedDifferential>& dphi, const ExactBoxType& dx, const FloatDPValue& h, double swpt, Int verbosity=0) {
     const Nat n=dphi.size();
-    Sweeper<Float64> sweeper(new ThresholdSweeper<Float64>(Precision64(),swpt));
-    ValidatedVectorTaylorFunctionModel64 tphi(n,join(dx,ExactIntervalType(-h,+h)),sweeper);
+    Sweeper<FloatDP> sweeper(new ThresholdSweeper<FloatDP>(dp,swpt));
+    ValidatedVectorTaylorFunctionModelDP tphi(n,join(dx,ExactIntervalType(-h,+h)),sweeper);
 
     for(Nat i=0; i!=n; ++i) {
-        ValidatedTaylorModel64& model=tphi.model(i);
-        Expansion<Float64Value>& expansion=model.expansion();
-        Float64Error& error=model.error();
+        ValidatedTaylorModelDP& model=tphi.model(i);
+        Expansion<FloatDPValue>& expansion=model.expansion();
+        FloatDPError& error=model.error();
         error=0u;
         expansion.reserve(dphi[i].expansion().number_of_nonzeros());
 
-        Differential<Float64Bounds>::ConstIterator iter=dphi[i].begin();
+        Differential<FloatDPBounds>::ConstIterator iter=dphi[i].begin();
         while(iter!=dphi[i].end()) {
             MultiIndex const a=iter->key();
-            Float64Bounds coef=iter->data();
-            Float64Value x=coef.value();
+            FloatDPBounds coef=iter->data();
+            FloatDPValue x=coef.value();
             error+=coef.error();
             expansion.append(a,x);
             ++iter;
@@ -512,8 +512,8 @@ ValidatedVectorTaylorFunctionModel64 flow_function(const Vector<ValidatedDiffere
     return tphi;
 }
 
-ValidatedVectorFunctionModel64
-differential_flow_step(const ValidatedVectorFunction& f, const ExactBoxType& dx, const Float64Value& flth, const UpperBoxType& bx,
+ValidatedVectorFunctionModelDP
+differential_flow_step(const ValidatedVectorFunction& f, const ExactBoxType& dx, const FloatDPValue& flth, const UpperBoxType& bx,
                        double swpt, Nat so, Nat to, Nat verbosity=0)
 {
     Nat n=f.result_size();
@@ -521,7 +521,7 @@ differential_flow_step(const ValidatedVectorFunction& f, const ExactBoxType& dx,
     Vector<ValidatedDifferential> idb(n,n+1,so+to);
     Vector<ValidatedDifferential> dphic(n,n+1,so+to);
     Vector<ValidatedDifferential> dphib(n,n+1,so+to);
-    Float64Value h(flth);
+    FloatDPValue h(flth);
     for(Nat i=0; i!=n; ++i) {
         idc[i]=ValidatedDifferential::variable(n+1,so+to,zero,i)*dx[i].radius()+dx[i].midpoint();
         idb[i]=ValidatedDifferential::variable(n+1,so+to,zero,i)*dx[i].radius()+cast_singleton(bx[i]);
@@ -533,11 +533,11 @@ differential_flow_step(const ValidatedVectorFunction& f, const ExactBoxType& dx,
         dphib=antiderivative(f(dphib),n)*h+idb;
     }
 
-    ValidatedVectorTaylorFunctionModel64 tphi(n,join(dx,ExactIntervalType(-h,+h)),ThresholdSweeper<Float64>(Precision64(),swpt));
+    ValidatedVectorTaylorFunctionModelDP tphi(n,join(dx,ExactIntervalType(-h,+h)),ThresholdSweeper<FloatDP>(dp,swpt));
     for(Nat i=0; i!=n; ++i) {
-        ValidatedTaylorModel64& model=tphi.model(i);
-        Expansion<Float64Value>& expansion=model.expansion();
-        Float64Error& error=model.error();
+        ValidatedTaylorModelDP& model=tphi.model(i);
+        Expansion<FloatDPValue>& expansion=model.expansion();
+        FloatDPError& error=model.error();
         error=0u;
         expansion.reserve(dphic[i].expansion().number_of_nonzeros());
 
@@ -552,8 +552,8 @@ differential_flow_step(const ValidatedVectorFunction& f, const ExactBoxType& dx,
             } else {
                 coef=citer->data();
             }
-            Float64Value x=coef.value();
-            Float64Error e=coef.error();
+            FloatDPValue x=coef.value();
+            FloatDPError e=coef.error();
             error+=e;
             expansion.append(a,x);
             ++citer;
@@ -564,8 +564,8 @@ differential_flow_step(const ValidatedVectorFunction& f, const ExactBoxType& dx,
     return tphi;
 }
 
-ValidatedVectorFunctionModel64
-differential_space_time_flow_step(const ValidatedVectorFunction& f, const ExactBoxType& dx, const Float64& h, const UpperBoxType& bx,
+ValidatedVectorFunctionModelDP
+differential_space_time_flow_step(const ValidatedVectorFunction& f, const ExactBoxType& dx, const FloatDP& h, const UpperBoxType& bx,
                                   double swpt, Nat so, Nat to, Nat verbosity=0)
 {
     Nat n=f.result_size();
@@ -584,11 +584,11 @@ differential_space_time_flow_step(const ValidatedVectorFunction& f, const ExactB
         dphib=antiderivative(f(dphib),n)*cast_exact(h)+idb;
     }
 
-    ValidatedVectorTaylorFunctionModel64 tphi(n,join(dx,ExactIntervalType(-h,+h)),ThresholdSweeper<Float64>(Precision64(),swpt));
+    ValidatedVectorTaylorFunctionModelDP tphi(n,join(dx,ExactIntervalType(-h,+h)),ThresholdSweeper<FloatDP>(dp,swpt));
     for(Nat i=0; i!=n; ++i) {
-        ValidatedTaylorModel64& model=tphi.model(i);
-        Expansion<Float64Value>& expansion=model.expansion();
-        Float64Error& error=model.error();
+        ValidatedTaylorModelDP& model=tphi.model(i);
+        Expansion<FloatDPValue>& expansion=model.expansion();
+        FloatDPError& error=model.error();
         error=0u;
         expansion.reserve(dphic[i].expansion().number_of_nonzeros());
 
@@ -604,8 +604,8 @@ differential_space_time_flow_step(const ValidatedVectorFunction& f, const ExactB
                 } else {
                     coef=biter->data();
                 }
-                Float64Value x=coef.value();
-                Float64Error e=coef.error();
+                FloatDPValue x=coef.value();
+                FloatDPError e=coef.error();
                 error+=e;
                 expansion.append(a,x);
             }
@@ -617,8 +617,8 @@ differential_space_time_flow_step(const ValidatedVectorFunction& f, const ExactB
     return tphi;
 }
 
-ValidatedVectorFunctionModel64
-series_flow_step(const ValidatedVectorFunction& f, const ExactBoxType& bdx, const Float64Value& h, const UpperBoxType& bbx,
+ValidatedVectorFunctionModelDP
+series_flow_step(const ValidatedVectorFunction& f, const ExactBoxType& bdx, const FloatDPValue& h, const UpperBoxType& bbx,
                  double max_err, double swpt, Nat init_so, Nat init_to, Nat max_so, Nat max_to, Nat verbosity)
 {
     static const double TRY_SPACIAL_ORDER_INCREASE_FACTOR=4;
@@ -667,16 +667,16 @@ series_flow_step(const ValidatedVectorFunction& f, const ExactBoxType& bdx, cons
     Vector<ValidatedDifferential> dphi=flow_differential(dphia,dphib,dphic,dphid,so,to,verbosity);
     ARIADNE_LOG(5,"dphi="<<dphi<<"\n");
 
-    ValidatedVectorTaylorFunctionModel64 tphi=flow_function(dphi,bdx,h,swpt,verbosity);
+    ValidatedVectorTaylorFunctionModelDP tphi=flow_function(dphi,bdx,h,swpt,verbosity);
     ARIADNE_LOG(5,"phi="<<tphi<<"\n");
 
-    Float64Error old_error=tphi.error()*Float64Error(TRY_SPACIAL_ORDER_INCREASE_FACTOR*2);
+    FloatDPError old_error=tphi.error()*FloatDPError(TRY_SPACIAL_ORDER_INCREASE_FACTOR*2);
 
     while(tphi.error().raw()>max_err && (so<max_so || to<max_to) ) {
         Nat nnz=0; for(Nat i=0; i!=tphi.size(); ++i) { nnz+=tphi.model(i).number_of_nonzeros(); }
         ARIADNE_LOG(3,"so="<<so<<" to="<<to<<" nnz="<<nnz<<" err="<<tphi.error()<<"\n");
 
-        if( (so<max_so) && ((tphi.error()*Float64Error(TRY_SPACIAL_ORDER_INCREASE_FACTOR)).raw() > old_error.raw()) ) {
+        if( (so<max_so) && ((tphi.error()*FloatDPError(TRY_SPACIAL_ORDER_INCREASE_FACTOR)).raw() > old_error.raw()) ) {
             // try increasing spacial degree
             if(nto==0) {
                 // Initialise higher spacial order
@@ -703,7 +703,7 @@ series_flow_step(const ValidatedVectorFunction& f, const ExactBoxType& bdx, cons
                 Ariadne::flow_iterate(p,h,nfdphid,ntdphid,ndphid);
             }
             Vector<ValidatedDifferential> ndphi=flow_differential(ndphia,ndphib,ndphic,ndphid,nso,nto,verbosity);
-            ValidatedVectorTaylorFunctionModel64 ntphi=flow_function(ndphi,bdx,h,swpt,verbosity);
+            ValidatedVectorTaylorFunctionModelDP ntphi=flow_function(ndphi,bdx,h,swpt,verbosity);
 
             Nat nnnz=0; for(Nat i=0; i!=tphi.size(); ++i) { nnnz+=tphi.model(i).number_of_nonzeros(); }
             ARIADNE_LOG(3,"nso="<<nso<<" nto="<<nto<<" nnnz="<<nnnz<<" nerr="<<ntphi.error()<<"\n");
@@ -737,16 +737,16 @@ series_flow_step(const ValidatedVectorFunction& f, const ExactBoxType& bdx, cons
     return tphi;
 }
 
-ValidatedVectorFunctionModel64
-TaylorSeriesIntegrator::flow_step(const ValidatedVectorFunction& f, const ExactBoxType& dx, const Float64Value& h, const UpperBoxType& bx) const
+ValidatedVectorFunctionModelDP
+TaylorSeriesIntegrator::flow_step(const ValidatedVectorFunction& f, const ExactBoxType& dx, const FloatDPValue& h, const UpperBoxType& bx) const
 {
-    ARIADNE_LOG(3,"TaylorSeriesIntegrator::flow_step(ValidatedVectorFunction f, ExactBoxType dx, Float64Value h, const UpperBoxType& bx)\n");
-    ValidatedVectorFunctionModel64 tphi=Ariadne::series_flow_step(f,dx,h,bx,
+    ARIADNE_LOG(3,"TaylorSeriesIntegrator::flow_step(ValidatedVectorFunction f, ExactBoxType dx, FloatDPValue h, const UpperBoxType& bx)\n");
+    ValidatedVectorFunctionModelDP tphi=Ariadne::series_flow_step(f,dx,h,bx,
         this->step_maximum_error(),this->step_sweep_threshold(),
         this->minimum_spacial_order(),this->minimum_temporal_order(),
         this->maximum_spacial_order(),this->maximum_temporal_order(),this->verbosity);
 
-//    ValidatedVectorFunctionModel64 tphi=Ariadne::differential_space_time_flow_step(f,dx,h,bx,
+//    ValidatedVectorFunctionModelDP tphi=Ariadne::differential_space_time_flow_step(f,dx,h,bx,
 //        this->step_sweep_threshold(),6,4,this->verbosity);
 
     if(tphi.error().raw()>this->step_maximum_error()) {
@@ -759,8 +759,8 @@ TaylorSeriesIntegrator::flow_step(const ValidatedVectorFunction& f, const ExactB
     return tphi;
 }
 
-Pair<Float64Value,UpperBoxType>
-TaylorSeriesIntegrator::flow_bounds(const ValidatedVectorFunction& vf, const ExactBoxType& dx, const RawFloat64& hmax) const
+Pair<FloatDPValue,UpperBoxType>
+TaylorSeriesIntegrator::flow_bounds(const ValidatedVectorFunction& vf, const ExactBoxType& dx, const RawFloatDP& hmax) const
 {
     return this->IntegratorBase::flow_bounds(vf,dx,hmax);
 }
@@ -818,10 +818,10 @@ AffineIntegrator::flow_derivative(const ValidatedVectorFunction& f, const Vector
     return dphi;
 }
 
-ValidatedVectorFunctionModel64
-AffineIntegrator::flow_step(const ValidatedVectorFunction& f, const ExactBoxType& dom, const Float64Value& h, const UpperBoxType& bbox) const
+ValidatedVectorFunctionModelDP
+AffineIntegrator::flow_step(const ValidatedVectorFunction& f, const ExactBoxType& dom, const FloatDPValue& h, const UpperBoxType& bbox) const
 {
-    ARIADNE_LOG(3,"AffineIntegrator::flow_step(ValidatedVectorFunction f, ExactBoxType dom, Float64 h, UpperBoxType bbox)\n");
+    ARIADNE_LOG(3,"AffineIntegrator::flow_step(ValidatedVectorFunction f, ExactBoxType dom, FloatDP h, UpperBoxType bbox)\n");
     Vector<ValidatedNumericType> mid = Vector<ValidatedNumericType>(midpoint(dom));
 
     Vector<ValidatedDifferential> mdphi = this->flow_derivative(f,mid);
@@ -830,12 +830,12 @@ AffineIntegrator::flow_step(const ValidatedVectorFunction& f, const ExactBoxType
     ARIADNE_WARN("AffineIntegrator may compute overly optimistic error bounds.");
 
     const Nat n=dom.size();
-    Precision64 prec;
-    Float64Error zero_err(prec);
+    DoublePrecision prec;
+    FloatDPError zero_err(prec);
 
-    Vector<Float64Error> err(n,zero_err);
+    Vector<FloatDPError> err(n,zero_err);
 
-    Vector<Float64Error> rad(n+1,zero_err);
+    Vector<FloatDPError> rad(n+1,zero_err);
     for(Nat i=0; i!=n; ++i) {
         rad[i] = cast_positive(max(dom[i].upper()-mid[i].lower(),mid[i].upper()-dom[i].lower()));
     }
@@ -848,7 +848,7 @@ AffineIntegrator::flow_step(const ValidatedVectorFunction& f, const ExactBoxType
                 const ValidatedNumericType& rng = iter->data();
                 const ValidatedNumericType& mid = mdphi[i][a];
                 ARIADNE_ASSERT(rng.lower().raw()<=mid.lower().raw() && mid.upper().raw()<=rng.upper().raw());
-                Float64Error mag = Float64Error(max(rng.upper()-mid.lower(),mid.upper()-rng.lower()));
+                FloatDPError mag = FloatDPError(max(rng.upper()-mid.lower(),mid.upper()-rng.lower()));
                 for(Nat j=0; j!=n+1; ++j) { mag *= pow(rad[j],Nat(a[j])); }
                 err[i] += mag;
             }
@@ -857,13 +857,13 @@ AffineIntegrator::flow_step(const ValidatedVectorFunction& f, const ExactBoxType
 
     ExactBoxType flow_domain = join(dom,ExactIntervalType(0,h));
 
-    ValidatedVectorFunctionModel64 id = this->function_factory().create_identity(flow_domain);
-    ValidatedVectorFunctionModel64 res = this->function_factory().create_zeros(n,flow_domain);
+    ValidatedVectorFunctionModelDP id = this->function_factory().create_identity(flow_domain);
+    ValidatedVectorFunctionModelDP res = this->function_factory().create_zeros(n,flow_domain);
     for(Nat i=0; i!=n; ++i) {
-        ValidatedScalarFunctionModel64 res_model = res[i] + mdphi[i].expansion()[MultiIndex::zero(n+1)];
+        ValidatedScalarFunctionModelDP res_model = res[i] + mdphi[i].expansion()[MultiIndex::zero(n+1)];
         for(Nat j=0; j!=mdphi[i].argument_size()-1; ++j) { res_model+=mdphi[i].expansion()[MultiIndex::unit(n+1,j)]*(id[j]-ValidatedNumericType(midpoint(flow_domain[j]))); }
         Nat j=mdphi[i].argument_size()-1; { res_model+=mdphi[i].expansion()[MultiIndex::unit(n+1,j)]*id[j]; }
-        res_model += Float64Bounds(-err[i],+err[i]);
+        res_model += FloatDPBounds(-err[i],+err[i]);
         res[i]=res_model;
     }
     return res;

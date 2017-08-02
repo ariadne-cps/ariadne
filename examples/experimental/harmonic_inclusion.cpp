@@ -79,7 +79,7 @@ void damped_harmonic(InclusionIntegratorBase const& integrator, Real evolution_t
 
     List<ValidatedConstrainedImageSet> reach_sets = map([](ValidatedVectorFunctionModelType const& fm){return range(fm);},flow_functions);
 
-    ValidatedVectorFunctionModelType evolve_function = partial_evaluate(flow_functions.back(),X0.size(),Float64Bounds(T,Precision64()));
+    ValidatedVectorFunctionModelType evolve_function = partial_evaluate(flow_functions.back(),X0.size(),FloatDPBounds(T,dp));
     ValidatedConstrainedImageSet evolve_set = range(evolve_function);
 
     std::cerr<<"Plotting... ";
@@ -98,7 +98,7 @@ void damped_harmonic(InclusionIntegratorBase const& integrator, Real evolution_t
 void test() {
     // damped_harmonic( evolution_time=2*pi, damping=1.0/4, noise=(0.0,0.1), step_size=8.0/32 );
     // damped_harmonic( evolution_time=2*pi, damping=0.0, noise=(0.0,0.1), delta=0.01, step_size=2*pi/50 );
-    ThresholdSweeper64 sweeper(Precision64(),1e-8);
+    ThresholdSweeperDP sweeper(dp,1e-8);
     auto integrator = InclusionIntegrator2ndOrder(sweeper, step_size=1.0/4, number_of_steps_between_simplifications=64, number_of_variables_to_keep=32);
 
     Real evolution_time=3/4_q;

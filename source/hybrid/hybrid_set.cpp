@@ -80,7 +80,7 @@ Orbit<HybridApproximatePoint>::insert(HybridTime ht, const HybridApproximatePoin
     ARIADNE_ASSERT(ht.discrete_time()<=this->size());
     // FIXME: Should allow non-exact times
     Real time=ht.continuous_time();
-    Float64Value flt_time=cast_exact(time.get(Precision64()));
+    FloatDPValue flt_time=cast_exact(time.get(dp));
     ARIADNE_ASSERT(decide(Real(flt_time)==time));
     if(this->size()==ht.discrete_time()) {
         this->_curves_ptr->push_back(HybridInterpolatedCurve(hpt.location(),hpt.space(),InterpolatedCurve(flt_time,hpt.point())));
@@ -279,7 +279,7 @@ ValidatedSierpinskian HybridBoxSet::covers(const HybridExactBox& hbx) const {
 
 HybridUpperBoxes HybridBoxSet::bounding_box() const {
     DiscreteLocation const& loc=this->location(); RealSpace spc(this->space()); RealBox bx=this->euclidean_set(spc);
-    UpperBoxType bbx(bx,Precision64());
+    UpperBoxType bbx(bx,dp);
     HybridUpperBoxes res;
     res.insert(loc,spc,cast_exact(bbx));  // FIXME: Should not need cast here
     return res;
@@ -805,7 +805,7 @@ GridTreeSet& HybridGridTreeSet::_provide_location(const DiscreteLocation& q) {
 template<> String class_name<RealInterval>() { return "RealInterval"; }
 template<> String class_name<InterpolatedCurve>() { return "InterpolatedCurve"; }
 template<> String class_name<Box<RealInterval>>() { return "RealBox"; }
-template<> String class_name<ExactBoxType>() { return "ExactFloat64Box"; }
+template<> String class_name<ExactBoxType>() { return "ExactFloatDPBox"; }
 
 template<> String class_name<GridCell>() { return "GridCell"; }
 

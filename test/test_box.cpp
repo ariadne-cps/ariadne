@@ -29,7 +29,7 @@
 using namespace Ariadne;
 using std::cout; using std::endl;
 
-template<class I> Box<I> make_box(InitializerList<Interval<RawFloat64>> lst) {
+template<class I> Box<I> make_box(InitializerList<Interval<RawFloatDP>> lst) {
     return Box<I>(Vector<I>(lst));
 }
 
@@ -116,7 +116,7 @@ template<class BX> class TestBoxType {
 
 
 int main() {
-    TestBoxType<Float64ExactBox>().test();
+    TestBoxType<FloatDPExactBox>().test();
 
     return ARIADNE_TEST_FAILURES;
 }

@@ -48,7 +48,7 @@ template<class PR> struct NumericTraits<FloatBounds<PR>> {
 //! \ingroup NumericModule
 //! \brief Validated bounds on a number with floating-point endpoints supporting outwardly-rounded arithmetic.
 //! \details
-//! Note that direct construction from a floating-point number is prohibited, since <c>%Float64Bounds(3.3)</c> would the singleton interval \f$[3.2999999999999998224,3.2999999999999998224]\f$ (the constant is first interpreted by the C++ compiler to give a C++ \c double, whereas <c>%Float64Bounds(3.3_decimal)</c> yields the interval \f$[3.2999999999999998224,3.3000000000000002665]\f$ enclosing \f$3.3\f$.
+//! Note that direct construction from a floating-point number is prohibited, since <c>%FloatDPBounds(3.3)</c> would the singleton interval \f$[3.2999999999999998224,3.2999999999999998224]\f$ (the constant is first interpreted by the C++ compiler to give a C++ \c double, whereas <c>%FloatDPBounds(3.3_decimal)</c> yields the interval \f$[3.2999999999999998224,3.3000000000000002665]\f$ enclosing \f$3.3\f$.
 //!
 //! Comparison tests on \c FloatBounds use the idea that an interval represents a single number with an unknown value.
 //! Hence the result is of type \c ValidatedKleenean, which can take values { \c True, \c False, \c Indeterminate }.
@@ -61,7 +61,7 @@ template<class PR> struct NumericTraits<FloatBounds<PR>> {
 //! If \f$v\f$ and \f$e\f$ are the returned value and error for the bounds \f$[l,u]\f$, then it is guaranteed that \f$v-e\leq l\f$ and \f$v+e\geq u\f$ in exact arithmetic.
 //!
 //! To test if the bounds contain a number , use \c models(FloatBounds,FloatValue), and to test if bounds are inconsistent use \c inconsistent(x,y), and to test if \c x provides a better approximation, use \c refines(x,y).
-//! \sa Real, Float64, FloatMP, FloatValue, FloatBall, FloatUpperBound, FloatLowerBound, FloatApproximation.
+//! \sa Real, FloatDP, FloatMP, FloatValue, FloatBall, FloatUpperBound, FloatLowerBound, FloatApproximation.
 //!
 //! \par Python interface
 //!
@@ -72,9 +72,9 @@ template<class PR> struct NumericTraits<FloatBounds<PR>> {
 //! Care must be taken when defining intervals using floating-point coefficients, since values are first converted to the nearest
 //! representable value by the Python interpreter. <br><br>
 //! \code
-//!   Float64Bounds({1.1:2.3}) # Create the interval [1.1000000000000001, 2.2999999999999998]
-//!   Float64Bounds({2.5:4.25}) # Create the interval [2.5, 4.25], which can be represented exactly
-//!   Float64Bounds([2.5,4.25]) # Alternative syntax for creating the interval [2.5, 4.25]
+//!   FloatDPBounds({1.1:2.3}) # Create the interval [1.1000000000000001, 2.2999999999999998]
+//!   FloatDPBounds({2.5:4.25}) # Create the interval [2.5, 4.25], which can be represented exactly
+//!   FloatDPBounds([2.5,4.25]) # Alternative syntax for creating the interval [2.5, 4.25]
 //! \endcode
 template<class PR> class FloatBounds
     : public DispatchFloatOperations<FloatBounds<PR>>

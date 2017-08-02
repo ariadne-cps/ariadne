@@ -50,11 +50,11 @@ namespace Ariadne {
 
 namespace {
 
-Interval<Float64Value> const& convert_interval(IntervalDomainType const& ivl, Precision64);
-Interval<FloatMPValue> convert_interval(IntervalDomainType const& ivl, PrecisionMP pr);
+Interval<FloatDPValue> const& convert_interval(IntervalDomainType const& ivl, DoublePrecision);
+Interval<FloatMPValue> convert_interval(IntervalDomainType const& ivl, MultiplePrecision pr);
 
-Box<Interval<Float64Value>> const& convert_box(BoxDomainType const& bx, Precision64);
-Box<Interval<FloatMPValue>> convert_box(BoxDomainType const& bx, PrecisionMP pr);
+Box<Interval<FloatDPValue>> const& convert_box(BoxDomainType const& bx, DoublePrecision);
+Box<Interval<FloatMPValue>> convert_box(BoxDomainType const& bx, MultiplePrecision pr);
 
 } // namespace
 
@@ -67,11 +67,11 @@ inline decltype(auto) contains(BoxDomainType const& bx, Vector<FloatMPApproximat
 template<class M> Void _set_scaling(ScaledFunctionPatch<M>& x, const IntervalDomainType& ivl, SizeType j)
 {
     // A scaling of [-1,+1] into [a,b] has the form s->rx+c where c is centre and r radius of ivl
-    const Float64Value& l=ivl.lower();
-    const Float64Value& u=ivl.upper();
-    Float64Ball c{hlf(l+u)};
-    Float64Ball r{hlf(u-l)};
-    Float64Error e=c.error()+r.error();
+    const FloatDPValue& l=ivl.lower();
+    const FloatDPValue& u=ivl.upper();
+    FloatDPBall c{hlf(l+u)};
+    FloatDPBall r{hlf(u-l)};
+    FloatDPError e=c.error()+r.error();
     MultiIndex a(x.argument_size());
     x.expansion().append(a,c.value());
     ++a[j];
@@ -81,12 +81,12 @@ template<class M> Void _set_scaling(ScaledFunctionPatch<M>& x, const IntervalDom
 
 
 
-inline OutputStream& operator<<(OutputStream& os, const Representation<Float64>& flt_repr)
+inline OutputStream& operator<<(OutputStream& os, const Representation<FloatDP>& flt_repr)
 {
-    const Float64& flt=*flt_repr.pointer;
+    const FloatDP& flt=*flt_repr.pointer;
     Int precision=os.precision(); std::ios_base::fmtflags flags = os.flags();
     os.precision(17); os.setf(std::ios_base::showpoint);
-    os << "Float64(" << flt << ")";
+    os << "FloatDP(" << flt << ")";
     os.precision(precision); os.flags(flags);
     return os;
 }
@@ -346,17 +346,17 @@ template<class M> Void ScaledFunctionPatch<M>::restrict(const BoxDomainType& dom
 
 
 
-inline Bool operator==(Float64Value x1, Int n2) { return x1.raw()==Float64(n2); }
-inline Bool operator==(Float64Bounds x1, Int n2) { return x1.upper_raw()==Float64(n2) && x1.lower_raw()==Float64(n2); }
-inline Bool operator==(Float64Approximation x1, Int n2) { return x1.raw()==Float64(n2); }
+inline Bool operator==(FloatDPValue x1, Int n2) { return x1.raw()==FloatDP(n2); }
+inline Bool operator==(FloatDPBounds x1, Int n2) { return x1.upper_raw()==FloatDP(n2) && x1.lower_raw()==FloatDP(n2); }
+inline Bool operator==(FloatDPApproximation x1, Int n2) { return x1.raw()==FloatDP(n2); }
 
-inline Bool operator!=(Float64Value x1, Int n2) { return x1.raw()!=Float64(n2); }
-inline Bool operator!=(Float64Bounds x1, Int n2) { return x1.upper_raw()!=Float64(n2) || x1.lower_raw()!=Float64(n2); }
-inline Bool operator!=(Float64Approximation x1, Int n2) { return x1.raw()!=Float64(n2); }
+inline Bool operator!=(FloatDPValue x1, Int n2) { return x1.raw()!=FloatDP(n2); }
+inline Bool operator!=(FloatDPBounds x1, Int n2) { return x1.upper_raw()!=FloatDP(n2) || x1.lower_raw()!=FloatDP(n2); }
+inline Bool operator!=(FloatDPApproximation x1, Int n2) { return x1.raw()!=FloatDP(n2); }
 
-inline Bool operator> (Float64Value x1, Int n2) { return x1.raw()> Float64(n2); }
-inline Bool operator> (Float64Bounds x1, Int n2) { return x1.lower_raw()> Float64(n2); }
-inline Bool operator> (Float64Approximation x1, Int n2) { return x1.raw()> Float64(n2); }
+inline Bool operator> (FloatDPValue x1, Int n2) { return x1.raw()> FloatDP(n2); }
+inline Bool operator> (FloatDPBounds x1, Int n2) { return x1.lower_raw()> FloatDP(n2); }
+inline Bool operator> (FloatDPApproximation x1, Int n2) { return x1.raw()> FloatDP(n2); }
 
 template<class M> auto ScaledFunctionPatch<M>::polynomial() const -> Polynomial<FloatBounds<PR>>
 {
@@ -479,7 +479,7 @@ template<class M> OutputStream& operator<<(OutputStream& os, const Representatio
 template<class M> OutputStream& operator<<(OutputStream& os, const ModelRepresentation<ScaledFunctionPatch<M>>& frepr)
 {
     ScaledFunctionPatch<M> const& f=*frepr.pointer;
-    Float64 truncatation_error = 0.0;
+    FloatDP truncatation_error = 0.0;
     os << "<"<<f.domain()<<"\n";
     for(ModelType::ConstIterator iter=f.begin(); iter!=f.end(); ++iter) {
         if(abs(iter->data())>frepr.threshold) { truncatation_error+=abs(iter->data()); }

@@ -35,14 +35,14 @@
 
 namespace Ariadne {
 
-Float64 operator+(Float64 x1, Float64 x2);
-Float64 operator-(Float64 x1, Float64 x2);
-Float64 operator*(Float64 x1, Float64 x2);
-Float64 operator/(Float64 x1, Float64 x2);
-Float64& operator+=(Float64& x1, Float64 x2);
-Float64& operator-=(Float64& x1, Float64 x2);
-Float64& operator*=(Float64& x1, Float64 x2);
-Float64& operator/=(Float64& x1, Float64 x2);
+FloatDP operator+(FloatDP x1, FloatDP x2);
+FloatDP operator-(FloatDP x1, FloatDP x2);
+FloatDP operator*(FloatDP x1, FloatDP x2);
+FloatDP operator/(FloatDP x1, FloatDP x2);
+FloatDP& operator+=(FloatDP& x1, FloatDP x2);
+FloatDP& operator-=(FloatDP& x1, FloatDP x2);
+FloatDP& operator*=(FloatDP& x1, FloatDP x2);
+FloatDP& operator/=(FloatDP& x1, FloatDP x2);
 FloatMP operator+(FloatMP const& x1, FloatMP const& x2);
 FloatMP operator-(FloatMP const& x1, FloatMP const& x2);
 FloatMP operator*(FloatMP const& x1, FloatMP const& x2);
@@ -329,12 +329,12 @@ template<class F> AffineModel<ValidatedTag,F>::AffineModel(const TaylorModel<Val
 
 template<class P, class PR> AffineModel<P,RawFloat<PR>> affine_model(const BoxDomainType& domain, const ScalarFunction<P>& function, PR precision)
 {
-    ValidatedScalarTaylorFunctionModel64 tf(domain,function,AffineSweeper<RawFloat<PR>>(precision));
+    ValidatedScalarTaylorFunctionModelDP tf(domain,function,AffineSweeper<RawFloat<PR>>(precision));
     return affine_model(tf.model());
 }
 
-inline decltype(auto) operator<(FloatMPApproximation x,const Float64Value y) { return x<FloatMPApproximation(y.get_d(),x.precision()); }
-inline decltype(auto) operator<(FloatMPValue x,const Float64Value y) { return x<FloatMPValue(Dyadic(y.get_d()),x.precision()); }
+inline decltype(auto) operator<(FloatMPApproximation x,const FloatDPValue y) { return x<FloatMPApproximation(y.get_d(),x.precision()); }
+inline decltype(auto) operator<(FloatMPValue x,const FloatDPValue y) { return x<FloatMPValue(Dyadic(y.get_d()),x.precision()); }
 
 // FIXME: Clean up construction of interval with precision PrecisionType<F>
 template<class F> AffineModel<ApproximateTag,F> AffineModel<ApproximateTag,F>::scaling(SizeType n, SizeType j, const IntervalDomainType& codom, PrecisionType pr)

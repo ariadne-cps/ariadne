@@ -67,21 +67,21 @@ uint DRAWING_ACCURACY=1u;
 
 template<class T> StringType str(const T& t) { StringStream ss; ss<<t; return ss.str(); }
 
-Matrix<Float64> nonlinearities_zeroth_order(const ValidatedVectorFunction& f, const ExactBoxType& dom);
-Pair<Nat,Float64> nonlinearity_index_and_error(const ValidatedVectorFunction& function, const ExactBoxType domain);
-Pair<Nat,Float64> lipschitz_index_and_error(const ValidatedVectorFunction& function, const ExactBoxType& domain);
+Matrix<FloatDP> nonlinearities_zeroth_order(const ValidatedVectorFunction& f, const ExactBoxType& dom);
+Pair<Nat,FloatDP> nonlinearity_index_and_error(const ValidatedVectorFunction& function, const ExactBoxType domain);
+Pair<Nat,FloatDP> lipschitz_index_and_error(const ValidatedVectorFunction& function, const ExactBoxType& domain);
 
-Matrix<Float64> nonlinearities_zeroth_order(const ValidatedVectorTaylorFunctionModel64& f, const ExactBoxType& dom)
+Matrix<FloatDP> nonlinearities_zeroth_order(const ValidatedVectorTaylorFunctionModelDP& f, const ExactBoxType& dom)
 {
     const Nat m=f.result_size();
     const Nat n=f.argument_size();
-    ValidatedVectorTaylorFunctionModel64 g=restriction(f,dom);
+    ValidatedVectorTaylorFunctionModelDP g=restriction(f,dom);
 
-    Matrix<Float64> nonlinearities=Matrix<Float64>::zero(m,n);
+    Matrix<FloatDP> nonlinearities=Matrix<FloatDP>::zero(m,n);
     MultiIndex a;
     for(Nat i=0; i!=m; ++i) {
-        const ValidatedTaylorModel64& tm=g.model(i);
-        for(ValidatedTaylorModel64::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
+        const ValidatedTaylorModelDP& tm=g.model(i);
+        for(ValidatedTaylorModelDP::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
             a=iter->key();
             if(a.degree()>1) {
                 for(Nat j=0; j!=n; ++j) {
@@ -94,7 +94,7 @@ Matrix<Float64> nonlinearities_zeroth_order(const ValidatedVectorTaylorFunctionM
     return nonlinearities;
 }
 
-Matrix<Float64> nonlinearities_first_order(const ValidatedVectorFunction& f, const ExactBoxType& dom)
+Matrix<FloatDP> nonlinearities_first_order(const ValidatedVectorFunction& f, const ExactBoxType& dom)
 {
     //std::cerr<<"\n\nf="<<f<<"\n";
     //std::cerr<<"dom="<<dom<<"\n";
@@ -103,7 +103,7 @@ Matrix<Float64> nonlinearities_first_order(const ValidatedVectorFunction& f, con
     Vector<UpperIntervalDifferentialType> ivl_dx=UpperIntervalDifferentialType::constants(m,n, 1, dom);
     MultiIndex a(n);
     for(Nat i=0; i!=n; ++i) {
-        Float64 sf=dom[i].radius().upper().raw();
+        FloatDP sf=dom[i].radius().upper().raw();
         ++a[i];
         ivl_dx[i].expansion().append(a,ExactIntervalType(sf,sf));
         --a[i];
@@ -112,7 +112,7 @@ Matrix<Float64> nonlinearities_first_order(const ValidatedVectorFunction& f, con
     Vector<UpperIntervalDifferentialType> df=derivative_range(f,ivl_dx);
     //std::cerr<<"df="<<df<<"\n";
 
-    Matrix<Float64> nonlinearities=Matrix<Float64>::zero(m,n);
+    Matrix<FloatDP> nonlinearities=Matrix<FloatDP>::zero(m,n);
     for(Nat i=0; i!=m; ++i) {
         const UpperIntervalDifferentialType& d=df[i];
         for(UpperIntervalDifferentialType::ConstIterator iter=d.begin(); iter!=d.end(); ++iter) {
@@ -129,7 +129,7 @@ Matrix<Float64> nonlinearities_first_order(const ValidatedVectorFunction& f, con
     return nonlinearities;
 }
 
-Matrix<Float64> nonlinearities_second_order(const ValidatedVectorFunction& f, const ExactBoxType& dom)
+Matrix<FloatDP> nonlinearities_second_order(const ValidatedVectorFunction& f, const ExactBoxType& dom)
 {
     //std::cerr<<"\n\nf="<<f<<"\n";
     //std::cerr<<"dom="<<dom<<"\n";
@@ -138,7 +138,7 @@ Matrix<Float64> nonlinearities_second_order(const ValidatedVectorFunction& f, co
     Vector<UpperIntervalDifferentialType> ivl_dx=UpperIntervalDifferentialType::constants(m,n, 2, dom);
     MultiIndex a(n);
     for(Nat i=0; i!=n; ++i) {
-        Float64 sf=dom[i].radius().upper().raw();
+        FloatDP sf=dom[i].radius().upper().raw();
         ++a[i];
         ivl_dx[i].expansion().append(a,ExactIntervalType(sf,sf));
         --a[i];
@@ -147,7 +147,7 @@ Matrix<Float64> nonlinearities_second_order(const ValidatedVectorFunction& f, co
     Vector<UpperIntervalDifferentialType> df=derivative_range(f,ivl_dx);
     //std::cerr<<"df="<<df<<"\n";
 
-    Matrix<Float64> nonlinearities=Matrix<Float64>::zero(m,n);
+    Matrix<FloatDP> nonlinearities=Matrix<FloatDP>::zero(m,n);
     for(Nat i=0; i!=m; ++i) {
         const UpperIntervalDifferentialType& d=df[i];
         for(UpperIntervalDifferentialType::ConstIterator iter=d.begin(); iter!=d.end(); ++iter) {
@@ -164,17 +164,17 @@ Matrix<Float64> nonlinearities_second_order(const ValidatedVectorFunction& f, co
     return nonlinearities;
 }
 
-Pair<Nat,Float64> nonlinearity_index_and_error(const ValidatedVectorTaylorFunctionModel64& function, const ExactBoxType domain) {
-    Matrix<Float64> nonlinearities=Ariadne::nonlinearities_zeroth_order(function,domain);
+Pair<Nat,FloatDP> nonlinearity_index_and_error(const ValidatedVectorTaylorFunctionModelDP& function, const ExactBoxType domain) {
+    Matrix<FloatDP> nonlinearities=Ariadne::nonlinearities_zeroth_order(function,domain);
 
     // Compute the row of the nonlinearities Array which has the highest norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
     Nat jmax_in_row_imax=nonlinearities.column_size();
-    Float64 max_row_sum=0.0;
+    FloatDP max_row_sum=0.0;
     for(Nat i=0; i!=nonlinearities.row_size(); ++i) {
         Nat jmax=nonlinearities.column_size();
-        Float64 row_sum=0.0;
-        Float64 max_mag_j_in_i=0.0;
+        FloatDP row_sum=0.0;
+        FloatDP max_mag_j_in_i=0.0;
         for(Nat j=0; j!=nonlinearities.column_size(); ++j) {
             row_sum+=mag(nonlinearities[i][j]);
             if(mag(nonlinearities[i][j])>max_mag_j_in_i) {
@@ -193,22 +193,22 @@ Pair<Nat,Float64> nonlinearity_index_and_error(const ValidatedVectorTaylorFuncti
 
 
 ExactIntervalType over_approximating_interval(ValidatedLowerNumber const& lb, ValidatedUpperNumber const& ub) {
-    Precision64 prec;
+    DoublePrecision prec;
     return cast_exact_interval(UpperIntervalType(lb,ub,prec));
 }
 
 ExactBoxType under_approximation(const EffectiveBoxType& rbx) {
-    Precision64 prec;
+    DoublePrecision prec;
     return cast_exact_box(LowerBoxType(rbx,prec));
 }
 
 ExactBoxType over_approximation(const EffectiveBoxType& rbx) {
-    Precision64 prec;
+    DoublePrecision prec;
     return cast_exact_box(UpperBoxType(rbx,prec));
 }
 
 ExactBoxType approximation(const EffectiveBoxType& rbx) {
-    Precision64 prec;
+    DoublePrecision prec;
     return cast_exact_box(ApproximateBoxType(rbx,prec));
 }
 
@@ -470,28 +470,28 @@ UpperBoxType ConstrainedImageSet::bounding_box() const
     return Ariadne::apply(this->_function,over_approximation(this->_domain));
 }
 
-Matrix<Float64Value> cast_exact(Matrix<Float64Bounds> vA) {
-    Matrix<Float64Approximation> aA=vA;
-    return reinterpret_cast<Matrix<Float64Value>&>(aA);
+Matrix<FloatDPValue> cast_exact(Matrix<FloatDPBounds> vA) {
+    Matrix<FloatDPApproximation> aA=vA;
+    return reinterpret_cast<Matrix<FloatDPValue>&>(aA);
 }
 
 ValidatedAffineConstrainedImageSet
 ConstrainedImageSet::affine_approximation() const
 {
-    Precision64 prec;
+    DoublePrecision prec;
     const Vector<ExactIntervalType> D=approximation(this->domain());
-    Vector<Float64Value> m=midpoint(D);
-    Matrix<Float64Value> G=cast_exact(jacobian(this->_function,m));
-    Vector<Float64Value> h=cast_exact(this->_function.evaluate(m)-G*m);
+    Vector<FloatDPValue> m=midpoint(D);
+    Matrix<FloatDPValue> G=cast_exact(jacobian(this->_function,m));
+    Vector<FloatDPValue> h=cast_exact(this->_function.evaluate(m)-G*m);
     ValidatedAffineConstrainedImageSet result(D,G,h);
 
 
-    Vector<Float64Approximation> a(this->number_of_parameters());
-    Float64Approximation b,l,u;
+    Vector<FloatDPApproximation> a(this->number_of_parameters());
+    FloatDPApproximation b,l,u;
     for(List<EffectiveConstraint>::ConstIterator iter=this->_constraints.begin();
         iter!=this->_constraints.end(); ++iter)
     {
-        AffineModel<ValidatedTag,Float64> a=affine_model(D,iter->function(),prec);
+        AffineModel<ValidatedTag,FloatDP> a=affine_model(D,iter->function(),prec);
         ExactIntervalType b=iter->bounds();
         result.new_constraint(b.lower()<=a<=b.upper());
     }
@@ -616,17 +616,17 @@ ConstrainedImageSet image(const BoundedConstraintSet& set, const EffectiveVector
 
 
 
-Matrix<Float64> nonlinearities_zeroth_order(const ValidatedVectorTaylorFunctionModel64& f, const ExactBoxType& dom);
+Matrix<FloatDP> nonlinearities_zeroth_order(const ValidatedVectorTaylorFunctionModelDP& f, const ExactBoxType& dom);
 
 
-Matrix<Float64> nonlinearities_zeroth_order(const ValidatedVectorFunction& f, const ExactBoxType& dom)
+Matrix<FloatDP> nonlinearities_zeroth_order(const ValidatedVectorFunction& f, const ExactBoxType& dom)
 {
-    ARIADNE_ASSERT(dynamic_cast<const ValidatedVectorTaylorFunctionModel64*>(f.raw_pointer()));
-    return nonlinearities_zeroth_order(dynamic_cast<const ValidatedVectorTaylorFunctionModel64&>(*f.raw_pointer()),dom);
+    ARIADNE_ASSERT(dynamic_cast<const ValidatedVectorTaylorFunctionModelDP*>(f.raw_pointer()));
+    return nonlinearities_zeroth_order(dynamic_cast<const ValidatedVectorTaylorFunctionModelDP&>(*f.raw_pointer()),dom);
 }
 
 /*
-Matrix<Float64> nonlinearities_first_order(const ValidatedVectorFunction& f, const ExactBoxType& dom)
+Matrix<FloatDP> nonlinearities_first_order(const ValidatedVectorFunction& f, const ExactBoxType& dom)
 {
     //std::cerr<<"\n\nf="<<f<<"\n";
     //std::cerr<<"dom="<<dom<<"\n";
@@ -635,7 +635,7 @@ Matrix<Float64> nonlinearities_first_order(const ValidatedVectorFunction& f, con
     Vector<UpperIntervalDifferentialType> ivl_dx=UpperIntervalDifferentialType::constants(m,n, 1, dom);
     MultiIndex a(n);
     for(Nat i=0; i!=n; ++i) {
-        Float64 sf=dom[i].radius();
+        FloatDP sf=dom[i].radius();
         ++a[i];
         ivl_dx[i].expansion().append(a,ExactIntervalType(sf));
         --a[i];
@@ -644,7 +644,7 @@ Matrix<Float64> nonlinearities_first_order(const ValidatedVectorFunction& f, con
     Vector<UpperIntervalDifferentialType> df=f.evaluate(ivl_dx);
     //std::cerr<<"df="<<df<<"\n";
 
-    Matrix<Float64> nonlinearities=Matrix<Float64>::zero(m,n);
+    Matrix<FloatDP> nonlinearities=Matrix<FloatDP>::zero(m,n);
     for(Nat i=0; i!=m; ++i) {
         const UpperIntervalDifferentialType& d=df[i];
         for(UpperIntervalDifferentialType::ConstIterator iter=d.begin(); iter!=d.end(); ++iter) {
@@ -661,7 +661,7 @@ Matrix<Float64> nonlinearities_first_order(const ValidatedVectorFunction& f, con
     return nonlinearities;
 }
 
-Matrix<Float64> nonlinearities_second_order(const ValidatedVectorFunction& f, const ExactBoxType& dom)
+Matrix<FloatDP> nonlinearities_second_order(const ValidatedVectorFunction& f, const ExactBoxType& dom)
 {
     //std::cerr<<"\n\nf="<<f<<"\n";
     //std::cerr<<"dom="<<dom<<"\n";
@@ -670,7 +670,7 @@ Matrix<Float64> nonlinearities_second_order(const ValidatedVectorFunction& f, co
     Vector<UpperIntervalDifferentialType> ivl_dx=UpperIntervalDifferentialType::constants(m,n, 2, dom);
     MultiIndex a(n);
     for(Nat i=0; i!=n; ++i) {
-        Float64 sf=dom[i].radius();
+        FloatDP sf=dom[i].radius();
         ++a[i];
         ivl_dx[i].expansion().append(a,ExactIntervalType(sf));
         --a[i];
@@ -679,7 +679,7 @@ Matrix<Float64> nonlinearities_second_order(const ValidatedVectorFunction& f, co
     Vector<UpperIntervalDifferentialType> df=f.evaluate(ivl_dx);
     //std::cerr<<"df="<<df<<"\n";
 
-    Matrix<Float64> nonlinearities=Matrix<Float64>::zero(m,n);
+    Matrix<FloatDP> nonlinearities=Matrix<FloatDP>::zero(m,n);
     for(Nat i=0; i!=m; ++i) {
         const UpperIntervalDifferentialType& d=df[i];
         for(UpperIntervalDifferentialType::ConstIterator iter=d.begin(); iter!=d.end(); ++iter) {
@@ -697,16 +697,16 @@ Matrix<Float64> nonlinearities_second_order(const ValidatedVectorFunction& f, co
 }
 */
 
-Pair<Nat,Float64> lipschitz_index_and_error(const ValidatedVectorFunction& function, const ExactBoxType& domain)
+Pair<Nat,FloatDP> lipschitz_index_and_error(const ValidatedVectorFunction& function, const ExactBoxType& domain)
 {
     Matrix<UpperIntervalType> jacobian=Ariadne::jacobian_range(function,domain);
 
     // Compute the column of the matrix which has the norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
     Nat jmax=domain.size();
-    Float64 max_column_norm=0.0;
+    FloatDP max_column_norm=0.0;
     for(Nat j=0; j!=domain.size(); ++j) {
-        Float64 column_norm=0.0;
+        FloatDP column_norm=0.0;
         for(Nat i=0; i!=function.result_size(); ++i) {
             column_norm+=mag(jacobian[i][j]).raw();
         }
@@ -719,18 +719,18 @@ Pair<Nat,Float64> lipschitz_index_and_error(const ValidatedVectorFunction& funct
     return make_pair(jmax,max_column_norm);
 }
 
-Pair<Nat,Float64> nonlinearity_index_and_error(const ValidatedVectorFunction& function, const ExactBoxType& domain)
+Pair<Nat,FloatDP> nonlinearity_index_and_error(const ValidatedVectorFunction& function, const ExactBoxType& domain)
 {
-    Matrix<Float64> nonlinearities=Ariadne::nonlinearities_zeroth_order(function,domain);
+    Matrix<FloatDP> nonlinearities=Ariadne::nonlinearities_zeroth_order(function,domain);
 
     // Compute the row of the nonlinearities Array which has the highest norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
     Nat jmax_in_row_imax=nonlinearities.column_size();
-    Float64 max_row_sum=0.0;
+    FloatDP max_row_sum=0.0;
     for(Nat i=0; i!=nonlinearities.row_size(); ++i) {
         Nat jmax=nonlinearities.column_size();
-        Float64 row_sum=0.0;
-        Float64 max_mag_j_in_i=0.0;
+        FloatDP row_sum=0.0;
+        FloatDP max_mag_j_in_i=0.0;
         for(Nat j=0; j!=nonlinearities.column_size(); ++j) {
             row_sum+=mag(nonlinearities[i][j]);
             if(mag(nonlinearities[i][j])>max_mag_j_in_i) {
@@ -774,7 +774,7 @@ ConstrainedImageSet::write(OutputStream& os) const
 
 template<class SF> struct FunctionTraits;
 template<class X> struct FunctionTraits< ScalarFunction<X> > { typedef VectorFunction<X> VectorFunctionType; };
-template<> struct FunctionTraits< ValidatedScalarTaylorFunctionModel64 > { typedef ValidatedVectorTaylorFunctionModel64 VectorFunctionType; };
+template<> struct FunctionTraits< ValidatedScalarTaylorFunctionModelDP > { typedef ValidatedVectorTaylorFunctionModelDP VectorFunctionType; };
 
 template<class SF> class TemplatedConstraintSet;
 template<class SF> class TemplatedConstrainedImageSet;
@@ -788,7 +788,7 @@ ValidatedVectorFunction ValidatedConstrainedImageSet::constraint_function() cons
 
 ExactBoxType ValidatedConstrainedImageSet::constraint_bounds() const
 {
-    Precision64 prec;
+    DoublePrecision prec;
     ExactBoxType result(this->number_of_constraints());
     for(Nat i=0; i!=this->number_of_constraints(); ++i) {
         result[i]=over_approximating_interval(this->constraint(i).lower_bound(),this->constraint(i).upper_bound());
@@ -810,17 +810,17 @@ ValidatedAffineConstrainedImageSet
 ValidatedConstrainedImageSet::affine_over_approximation() const
 {
     this->_check();
-    typedef List<ValidatedScalarTaylorFunctionModel64>::ConstIterator ConstIterator;
+    typedef List<ValidatedScalarTaylorFunctionModelDP>::ConstIterator ConstIterator;
 
     const Nat nx=this->state_dimension();
     const Nat nc=this->number_of_constraints();
     const Nat np=this->number_of_parameters();
 
-    AffineSweeper<Float64> affine_sweeper((Precision64()));
-    ValidatedVectorTaylorFunctionModel64 state_function=dynamic_cast<const ValidatedVectorTaylorFunctionModel64&>(this->_state_function.reference());
-    ValidatedScalarTaylorFunctionModel64 time_function=dynamic_cast<const ValidatedScalarTaylorFunctionModel64&>(this->_time_function.reference());
-    List<ValidatedScalarTaylorFunctionModel64> constraint_functions;
-    for(Nat i=0; i!=nc; ++i) { constraint_functions.append(dynamic_cast<const ValidatedScalarTaylorFunctionModel64&>(this->_constraints[i].function().reference())); }
+    AffineSweeper<FloatDP> affine_sweeper((dp));
+    ValidatedVectorTaylorFunctionModelDP state_function=dynamic_cast<const ValidatedVectorTaylorFunctionModelDP&>(this->_state_function.reference());
+    ValidatedScalarTaylorFunctionModelDP time_function=dynamic_cast<const ValidatedScalarTaylorFunctionModelDP&>(this->_time_function.reference());
+    List<ValidatedScalarTaylorFunctionModelDP> constraint_functions;
+    for(Nat i=0; i!=nc; ++i) { constraint_functions.append(dynamic_cast<const ValidatedScalarTaylorFunctionModelDP&>(this->_constraints[i].function().reference())); }
 
     //std::cerr<<"\n"<<state_function<<"\n"<<time_function<<"\n"<<constraint_functions<<"\n\n";
 
@@ -832,7 +832,7 @@ ValidatedConstrainedImageSet::affine_over_approximation() const
     //std::cerr<<"\n"<<*this<<"\n"<<result<<"\n\n";
 
     for(Nat i=0; i!=this->number_of_constraints(); ++i) {
-        ValidatedTaylorModel64 const& constraint_model=constraint_functions[i].model();
+        ValidatedTaylorModelDP const& constraint_model=constraint_functions[i].model();
         ValidatedAffineModel affine_constraint_model=affine_model(constraint_model);
         ExactIntervalType constraint_bound=this->constraint(i).bounds();
         result.new_constraint(constraint_bound.lower()<=affine_constraint_model<=constraint_bound.upper());
@@ -848,7 +848,7 @@ ValidatedAffineConstrainedImageSet
 ValidatedConstrainedImageSet::affine_over_approximation() const
 {
     typedef List<ValidatedConstraint>::ConstIterator ConstIterator;
-    Precision64 prec;
+    DoublePrecision prec;
 
     Vector<ExactIntervalType> domain = this->domain();
     Vector<ValidatedAffineModel> space_models=affine_models(domain,this->function(),prec);
@@ -874,11 +874,11 @@ ValidatedConstrainedImageSet::affine_over_approximation() const
         if(function[i].error()>0.0) { ++nerr; }
     }
 
-    Vector<Float64> h(nx);
-    Matrix<Float64> G(nx,np+nerr);
+    Vector<FloatDP> h(nx);
+    Matrix<FloatDP> G(nx,np+nerr);
     Nat ierr=0; // The index where the error bound should go
     for(Nat i=0; i!=nx; ++i) {
-        ValidatedScalarTaylorFunctionModel64 component_function=function[i];
+        ValidatedScalarTaylorFunctionModelDP component_function=function[i];
         h[i]=component_function.model().value();
         for(Nat j=0; j!=np; ++j) {
             G[i][j]=component_function.model().gradient(j);
@@ -891,11 +891,11 @@ ValidatedConstrainedImageSet::affine_over_approximation() const
 
     ValidatedAffineConstrainedImageSet result(G,h);
 
-    Vector<Float64> a(np+nerr, 0.0);
-    Float64 b;
+    Vector<FloatDP> a(np+nerr, 0.0);
+    FloatDP b;
 
     for(ConstIterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
-        ValidatedScalarTaylorFunctionModel64 constraint_function(this->_reduced_domain,iter->function(),affine_sweeper);
+        ValidatedScalarTaylorFunctionModelDP constraint_function(this->_reduced_domain,iter->function(),affine_sweeper);
         b=sub(up,constraint_function.model().error(),constraint_function.model().value());
         for(Nat j=0; j!=np; ++j) { a[j]=constraint_function.model().gradient(j); }
         result.new_parameter_constraint(-inf,a,b);
@@ -910,7 +910,7 @@ ValidatedConstrainedImageSet::affine_over_approximation() const
 
 ValidatedAffineConstrainedImageSet ValidatedConstrainedImageSet::affine_approximation() const
 {
-    Precision64 prec;
+    DoublePrecision prec;
 
     Vector<ExactIntervalType> domain = this->domain();
 
@@ -953,9 +953,9 @@ Pair<ValidatedConstrainedImageSet,ValidatedConstrainedImageSet>
 ValidatedConstrainedImageSet::split() const
 {
     Nat k=this->number_of_parameters();
-    Float64 rmax=0.0;
+    FloatDP rmax=0.0;
     for(Nat j=0; j!=this->number_of_parameters(); ++j) {
-        Float64UpperBound rj=this->domain()[j].radius();
+        FloatDPUpperBound rj=this->domain()[j].radius();
         if(rj.raw()>rmax) {
             k=j;
             rmax=rj.raw();
@@ -1169,25 +1169,25 @@ join(const ValidatedConstrainedImageSet& set1, const ValidatedConstrainedImageSe
 
     ExactBoxType new_domain = hull(domain1,domain2);
 
-    ValidatedVectorFunctionModel64 function1
-        = ValidatedVectorFunctionModel64( dynamic_cast<VectorFunctionModel64Interface<ValidatedTag> const&>(set1.function().reference()));
-    Vector<Float64Error> function_error1=function1.errors();
+    ValidatedVectorFunctionModelDP function1
+        = ValidatedVectorFunctionModelDP( dynamic_cast<VectorFunctionModelDPInterface<ValidatedTag> const&>(set1.function().reference()));
+    Vector<FloatDPError> function_error1=function1.errors();
     function1.clobber();
     function1.restrict(new_domain);
 
-    ValidatedVectorFunctionModel64 function2
-        = ValidatedVectorFunctionModel64( dynamic_cast<VectorFunctionModel64Interface<ValidatedTag> const&>(set2.function().reference()));
-    Vector<Float64Error> function_error2=function2.errors();
+    ValidatedVectorFunctionModelDP function2
+        = ValidatedVectorFunctionModelDP( dynamic_cast<VectorFunctionModelDPInterface<ValidatedTag> const&>(set2.function().reference()));
+    Vector<FloatDPError> function_error2=function2.errors();
     function2.clobber();
     function2.restrict(new_domain);
 
-    ValidatedVectorFunctionModel64 new_function=(function1+function2)*Float64Value(0.5);
+    ValidatedVectorFunctionModelDP new_function=(function1+function2)*FloatDPValue(0.5);
     new_function.clobber();
     for(Nat i=0; i!=new_function.result_size(); ++i) {
         function_error1[i]=norm(new_function[i]-function1[i])+function_error1[i];
         function_error2[i]=norm(new_function[i]-function2[i])+function_error2[i];
-        Float64Error new_function_error = max(function_error1[i],function_error2[i]);
-        new_function[i] = new_function[i] + Float64Bounds(-new_function_error,+new_function_error);
+        FloatDPError new_function_error = max(function_error1[i],function_error2[i]);
+        new_function[i] = new_function[i] + FloatDPBounds(-new_function_error,+new_function_error);
     }
 
     ARIADNE_ASSERT(set1.number_of_constraints()==0);

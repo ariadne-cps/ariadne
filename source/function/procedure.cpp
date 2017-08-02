@@ -35,8 +35,8 @@ template class Procedure<ValidatedNumber>;
 template class Vector<Procedure<ApproximateNumber>>;
 template class Vector<Procedure<ValidatedNumber>>;
 
-template Void _execute(List<Float64Bounds>& v, const List<ProcedureInstruction>& p, const List<ValidatedNumber>& c, const Vector<Float64Bounds>& x);
-template Void _execute(List<Graded<Differential<Float64Bounds>>>& v, const List<ProcedureInstruction>& p, const List<ValidatedNumber>& c, const Vector<Graded<Differential<Float64Bounds>>>& x);
+template Void _execute(List<FloatDPBounds>& v, const List<ProcedureInstruction>& p, const List<ValidatedNumber>& c, const Vector<FloatDPBounds>& x);
+template Void _execute(List<Graded<Differential<FloatDPBounds>>>& v, const List<ProcedureInstruction>& p, const List<ValidatedNumber>& c, const Vector<Graded<Differential<FloatDPBounds>>>& x);
 
 inline
 Void restrict(UpperIntervalType& r, const UpperIntervalType& x) {

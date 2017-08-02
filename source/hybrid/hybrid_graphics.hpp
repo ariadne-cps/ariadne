@@ -43,13 +43,13 @@
 
 namespace Ariadne {
 
-template<> class Interval<Float64> {
-    Float64 _l, _u;
+template<> class Interval<FloatDP> {
+    FloatDP _l, _u;
   public:
-    Interval(Float64 l, Float64 u) : _l(l), _u(u) { }
+    Interval(FloatDP l, FloatDP u) : _l(l), _u(u) { }
     template<class UB> Interval(Interval<UB> const& ivl) : _l(ivl.lower()), _u(ivl.upper()) { }
-    Float64 lower() const { return _l; }
-    Float64 upper() const { return _u; }
+    FloatDP lower() const { return _l; }
+    FloatDP upper() const { return _u; }
 };
 
 template<> class Interval<ApproximateDouble> {

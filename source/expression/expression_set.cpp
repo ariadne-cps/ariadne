@@ -95,17 +95,17 @@ Set<Identifier> arguments(const List<ContinuousPredicate>& cs) {
 
 
 ExactIntervalType over_approximation(RealInterval ivl) {
-    Precision64 prec;
+    DoublePrecision prec;
     return cast_exact_interval(UpperIntervalType(ivl,prec));
 }
 
 ExactIntervalType under_approximation(RealInterval ivl) {
-    Precision64 prec;
+    DoublePrecision prec;
     return cast_exact_interval(LowerIntervalType(ivl,prec));
 }
 
 ExactIntervalType approximation(RealInterval ivl) {
-    Precision64 prec;
+    DoublePrecision prec;
     return cast_exact_interval(ApproximateIntervalType(ivl,prec));
 }
 
@@ -221,7 +221,7 @@ RealExpressionBoundedConstraintSet intersection(RealVariablesBox const& bx, Real
 
 ValidatedConstrainedImageSet approximate_euclidean_set(const RealExpressionBoundedConstraintSet& set, const RealSpace& space) {
     RealBox real_domain = RealVariablesBox(set.bounds()).euclidean_set(space);
-    ExactBoxType domain=cast_exact_box(ApproximateBoxType(real_domain,Precision64()));
+    ExactBoxType domain=cast_exact_box(ApproximateBoxType(real_domain,dp));
     ValidatedVectorFunction identity=ValidatedVectorFunction::identity(domain.size());
 
     ValidatedConstrainedImageSet result(domain,identity);

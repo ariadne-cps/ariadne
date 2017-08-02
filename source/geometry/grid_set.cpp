@@ -483,8 +483,8 @@ Bool BinaryTreeNode::subset( const BinaryTreeNode * pRootNodeOne, const BinaryTr
 
 struct Grid::Data
 {
-    Vector<Float64> _origin;
-    Vector<Float64> _lengths;
+    Vector<FloatDP> _origin;
+    Vector<FloatDP> _lengths;
 };
 
 Grid::~Grid()
@@ -504,27 +504,27 @@ Grid::Grid(const Grid& gr)
 Grid::Grid(Nat d)
     : _data(new Data())
 {
-    Vector<Float64> origin(d,Float64(0));
-    Vector<Float64> lengths(d,Float64(1));
+    Vector<FloatDP> origin(d,FloatDP(0));
+    Vector<FloatDP> lengths(d,FloatDP(1));
     this->_create(origin,lengths);
 }
 
-Grid::Grid(Nat d, Float64 l)
+Grid::Grid(Nat d, FloatDP l)
     : _data(new Data())
 {
-    Vector<Float64> origin(d,Float64(0));
-    Vector<Float64> lengths(d,l);
+    Vector<FloatDP> origin(d,FloatDP(0));
+    Vector<FloatDP> lengths(d,l);
     this->_create(origin,lengths);
 }
 
-Grid::Grid(const Vector<Float64>& lengths)
+Grid::Grid(const Vector<FloatDP>& lengths)
     : _data(new Data())
 {
-    Vector<Float64> origin(lengths.size(),Float64(0));
+    Vector<FloatDP> origin(lengths.size(),FloatDP(0));
     this->_create(origin,lengths);
 }
 
-Grid::Grid(const Vector<Float64>& origin, const Vector<Float64>& lengths)
+Grid::Grid(const Vector<FloatDP>& origin, const Vector<FloatDP>& lengths)
     : _data(new Data())
 {
     if(origin.size() != lengths.size()) {
@@ -533,7 +533,7 @@ Grid::Grid(const Vector<Float64>& origin, const Vector<Float64>& lengths)
     this->_create(origin,lengths);
 }
 
-Void Grid::_create(const Vector<Float64>& origin, const Vector<Float64>& lengths)
+Void Grid::_create(const Vector<FloatDP>& origin, const Vector<FloatDP>& lengths)
 {
     this->_data->_origin=origin;
     this->_data->_lengths=lengths;
@@ -544,12 +544,12 @@ DimensionType Grid::dimension() const
     return this->_data->_lengths.size();
 }
 
-const Vector<Float64>& Grid::origin() const
+const Vector<FloatDP>& Grid::origin() const
 {
     return this->_data->_origin;
 }
 
-const Vector<Float64>& Grid::lengths() const
+const Vector<FloatDP>& Grid::lengths() const
 {
     return this->_data->_lengths;
 }
@@ -571,9 +571,9 @@ ExactNumericType Grid::subdivision_coordinate(Nat d, IntegerType n) const
 
 Int Grid::subdivision_index(Nat d, const ExactNumericType& x) const
 {
-    Float64 half=0.5;
+    FloatDP half=0.5;
     Int n=integer_cast<Int>(floor(add(approx,div(approx,sub(approx,x.raw(),this->_data->_origin[d]),this->_data->_lengths[d]),half)));
-    Float64 sc=add(approx,this->_data->_origin[d],mul(approx,this->_data->_lengths[d],n));
+    FloatDP sc=add(approx,this->_data->_origin[d],mul(approx,this->_data->_lengths[d],n));
     if(sc == x.raw()) {
         return n;
     } else {
@@ -642,7 +642,7 @@ Array<double> Grid::upper_index(const ExactBoxType& bx) const {
 
 ExactPoint Grid::point(const Array<IntegerType>& a) const
 {
-    Vector<Float64Value> res(a.size());
+    Vector<FloatDPValue> res(a.size());
     for(SizeType i=0; i!=res.size(); ++i) {
         res[i]=cast_exact(add(near,this->_data->_origin[i],mul(near,this->_data->_lengths[i],a[i])));
     }
@@ -651,7 +651,7 @@ ExactPoint Grid::point(const Array<IntegerType>& a) const
 
 ExactPoint Grid::point(const Array<DyadicType>& a) const
 {
-    Vector<Float64Value> res(a.size());
+    Vector<FloatDPValue> res(a.size());
     for(SizeType i=0; i!=res.size(); ++i) {
         res[i]=cast_exact(add(near,this->_data->_origin[i],mul(near,this->_data->_lengths[i],a[i])));
     }
@@ -722,17 +722,17 @@ ExactBoxType GridAbstractCell::lattice_box_to_space(const LatticeBoxType & theLa
     const DimensionType dimensions = theGrid.dimension();
     ExactBoxType theTmpBoxType( dimensions );
 
-    Vector<Float64> theGridOrigin( theGrid.origin() );
-    Vector<Float64> theGridLengths( theGrid.lengths() );
+    Vector<FloatDP> theGridOrigin( theGrid.origin() );
+    Vector<FloatDP> theGridLengths( theGrid.lengths() );
 
     for(Nat current_dimension = 0; current_dimension < dimensions; current_dimension ++){
-        const Float64 theDimLength = theGridLengths[current_dimension];
-        const Float64 theDimOrigin = theGridOrigin[current_dimension];
+        const FloatDP theDimLength = theGridLengths[current_dimension];
+        const FloatDP theDimOrigin = theGridOrigin[current_dimension];
         //Recompute the new dimension coordinates, detaching them from the grid
         //Compute lower and upper bounds separately, and then set the box lower
         //and upper values simultaneously to prevent lower temporarily higher than upper.
-        Float64 lower = add(approx, theDimOrigin, mul(approx, theDimLength, theLatticeBoxType[current_dimension].lower().raw() ) );
-        Float64 upper = add(approx, theDimOrigin, mul(approx, theDimLength, theLatticeBoxType[current_dimension].upper().raw() ) );
+        FloatDP lower = add(approx, theDimOrigin, mul(approx, theDimLength, theLatticeBoxType[current_dimension].lower().raw() ) );
+        FloatDP upper = add(approx, theDimOrigin, mul(approx, theDimLength, theLatticeBoxType[current_dimension].upper().raw() ) );
         theTmpBoxType[current_dimension].set(cast_exact(lower),cast_exact(upper));
     }
 
@@ -830,7 +830,7 @@ LatticeBoxType GridCell::compute_lattice_box( const DimensionType dimensions, co
         current_dimension = i % dimensions;
         //Compute the middle point of the box's projection onto
         //the dimension \a current_dimension (relative to the grid)
-        Float64 middlePointInCurrDim = theResultLatticeBoxType[current_dimension].midpoint().raw();
+        FloatDP middlePointInCurrDim = theResultLatticeBoxType[current_dimension].midpoint().raw();
         if( theWord[i] ){
             //Choose the right half
             theResultLatticeBoxType[current_dimension].set_lower( cast_exact(middlePointInCurrDim) );
@@ -863,7 +863,7 @@ GridCell GridCell::neighboringCell( const Grid& theGrid, const Nat theHeight, co
     //   we are sure that we get a box that overlaps with the required neighboring cell.
     //NOTE: This box is in the original space, but not on the lattice
     Vector<ExactIntervalType> baseCellBoxInLattice =  GridCell::compute_lattice_box( dimensions, theHeight, theWord );
-    const Float64 upperBorderOverlapping = add(approx, baseCellBoxInLattice[dim].upper().raw(), hlf( baseCellBoxInLattice[dim].width().value_raw() ) );
+    const FloatDP upperBorderOverlapping = add(approx, baseCellBoxInLattice[dim].upper().raw(), hlf( baseCellBoxInLattice[dim].width().value_raw() ) );
 
     //2. Now check if the neighboring cell can be rooted to the given primary cell. For that
     //   we simply use the box computed in 1. and get the primary cell that encloses it.
@@ -999,8 +999,8 @@ ExactBoxType GridOpenCell::compute_box(const Grid& theGrid, const Nat theHeight,
     for( DimensionType dim = 0; dim < theGrid.dimension(); dim++){
         ExactIntervalType openCellBoxInLatticeDimIntervalType;
         ExactIntervalType baseCellBoxInLatticeDimIntervalType = baseCellBoxInLattice[dim];
-        Float64 lower = baseCellBoxInLatticeDimIntervalType.lower().raw();
-        Float64 upper = add( near, baseCellBoxInLatticeDimIntervalType.upper().raw(),
+        FloatDP lower = baseCellBoxInLatticeDimIntervalType.lower().raw();
+        FloatDP upper = add( near, baseCellBoxInLatticeDimIntervalType.upper().raw(),
                              sub( near, baseCellBoxInLatticeDimIntervalType.upper().raw(),
                                         baseCellBoxInLatticeDimIntervalType.lower().raw() ) );
         openCellBoxInLatticeDimIntervalType.set(cast_exact(lower),cast_exact(upper));
@@ -1633,7 +1633,7 @@ GridTreeSubset::~GridTreeSubset() {
     //corresponding Paving object
 }
 
-inline Nat GridTreeSubset::compute_number_subdiv( Float64 theWidth, const Float64 theMaxWidth) const{
+inline Nat GridTreeSubset::compute_number_subdiv( FloatDP theWidth, const FloatDP theMaxWidth) const{
     //Compute the minimum number of subdivisions N as:
     //   minimum N : ( theWidth / 2^{N} ) <= theMaxWidth
     //This is equivalent to (because all values are positive)
@@ -1649,11 +1649,11 @@ inline Nat GridTreeSubset::compute_number_subdiv( Float64 theWidth, const Float6
     //then it might become very inaccurate, and in case require more subdivisions than needed.
     //NOTE: We need base 2 logarithm, we get it by the rule: log_a(b)/log_a(c) = log_c(a)
     //PIETER COLLINS:
-    //NOTE: Float64 now uses approximate operators by default
+    //NOTE: FloatDP now uses approximate operators by default
     Nat result = 0;
     if ( theWidth > theMaxWidth ){
         //result = (Nat) ceil( div(approx, log(approx, div(approx, theWidth, theMaxWidth ) ) , log(approx, R(2.0) ) ) );
-        result = integer_cast<Nat>(ceil( div( near, log( near, div( near, theWidth, theMaxWidth ) ) , log( near, Float64(2.0) ) ) ) );
+        result = integer_cast<Nat>(ceil( div( near, log( near, div( near, theWidth, theMaxWidth ) ) , log( near, FloatDP(2.0) ) ) ) );
     }
     return result;
 }
@@ -1773,7 +1773,7 @@ GridTreeSubset GridTreeSubset::branch(Bool left_or_right) const {
 }
 
 
-Void GridTreeSubset::subdivide( Float64 theMaxCellWidth ) {
+Void GridTreeSubset::subdivide( FloatDP theMaxCellWidth ) {
     //1. Take the ExactBoxType of this GridTreeSubset's GridCell
     //   I.e. the box that corresponds to the root cell of
     //   the GridTreeSubset in the original space.
@@ -1832,8 +1832,8 @@ Void GridTreeSubset::subdivide( Float64 theMaxCellWidth ) {
     mince_to_tree_depth(needed_num_tree_subdiv);
 }
 
-Float64Approximation GridTreeSubset::measure() const {
-    Float64Approximation result={0.0, Precision64()};
+FloatDPApproximation GridTreeSubset::measure() const {
+    FloatDPApproximation result={0.0, dp};
     for(ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
         result+=iter->box().measure().value();
     }
@@ -2683,7 +2683,7 @@ GridTreeSet::GridTreeSet( const GridCell& theGridCell  ) :
 }
 
 GridTreeSet::GridTreeSet( const Nat theDimension, const Bool enable ) :
-    GridTreeSubset( Grid( theDimension, Float64(1.0) ), 0, BinaryWord(), new BinaryTreeNode( enable )) {
+    GridTreeSubset( Grid( theDimension, FloatDP(1.0) ), 0, BinaryWord(), new BinaryTreeNode( enable )) {
     //We want a [0,1]x...[0,1] cell in N dimensional space with no sxaling or shift of coordinates:
     //1. Create a new non scaling grid with no shift of the coordinates
     //2. The height of the primary cell is zero, since is is [0,1]x...[0,1] itself

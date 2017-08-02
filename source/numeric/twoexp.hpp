@@ -44,8 +44,8 @@ class TwoExp {
     explicit TwoExp(Int n) : _n(n) { }
     Int exponent() const { return this->_n; }
     // NOTE: Use std::pow(2.0,_n) not (1<<_n) since latter does not handle very large exponents
-    Float64 get_raw(Precision64 pr) const;
-    FloatMP get_raw(PrecisionMP pr) const;
+    FloatDP get_raw(DoublePrecision pr) const;
+    FloatMP get_raw(MultiplePrecision pr) const;
     double get_d() const { return std::pow(2.0,this->_n); }
     friend Dyadic operator+(TwoExp);
     friend Dyadic operator-(TwoExp);
@@ -58,10 +58,10 @@ struct Two : public std::integral_constant<uint,2u> {
 static const Two two = Two();
 
 /*
-inline Float64 TwoExp::get_raw(Precision64 pr) const {
-    return Float64(this->get_d());
+inline FloatDP TwoExp::get_raw(DoublePrecision pr) const {
+    return FloatDP(this->get_d());
 }
-inline FloatMP TwoExp::get_raw(PrecisionMP pr) const {
+inline FloatMP TwoExp::get_raw(MultiplePrecision pr) const {
     return FloatMP(this->get_d(),pr);
 }
 */

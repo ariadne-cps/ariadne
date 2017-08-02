@@ -39,12 +39,12 @@ using namespace Ariadne;
 using namespace std;
 
 namespace Ariadne {
-template<class Q, EnableIf<IsSame<Q,Rational>> =dummy> Bool operator==(Float64 const& x, Q const& q) { return Rational(x)==q; }
-template<class Q, EnableIf<IsSame<Q,Rational>> =dummy> Bool operator!=(Float64 const& x, Q const& q) { return Rational(x)!=q; }
-template<class Q, EnableIf<IsSame<Q,Rational>> =dummy> Bool operator<=(Float64 const& x, Q const& q) { return Rational(x)<=q; }
-template<class Q, EnableIf<IsSame<Q,Rational>> =dummy> Bool operator>=(Float64 const& x, Q const& q) { return Rational(x)>=q; }
-template<class Q, EnableIf<IsSame<Q,Rational>> =dummy> Bool operator< (Float64 const& x, Q const& q) { return Rational(x)< q; }
-template<class Q, EnableIf<IsSame<Q,Rational>> =dummy> Bool operator> (Float64 const& x, Q const& q) { return Rational(x)> q; }
+template<class Q, EnableIf<IsSame<Q,Rational>> =dummy> Bool operator==(FloatDP const& x, Q const& q) { return Rational(x)==q; }
+template<class Q, EnableIf<IsSame<Q,Rational>> =dummy> Bool operator!=(FloatDP const& x, Q const& q) { return Rational(x)!=q; }
+template<class Q, EnableIf<IsSame<Q,Rational>> =dummy> Bool operator<=(FloatDP const& x, Q const& q) { return Rational(x)<=q; }
+template<class Q, EnableIf<IsSame<Q,Rational>> =dummy> Bool operator>=(FloatDP const& x, Q const& q) { return Rational(x)>=q; }
+template<class Q, EnableIf<IsSame<Q,Rational>> =dummy> Bool operator< (FloatDP const& x, Q const& q) { return Rational(x)< q; }
+template<class Q, EnableIf<IsSame<Q,Rational>> =dummy> Bool operator> (FloatDP const& x, Q const& q) { return Rational(x)> q; }
 template<class Q, EnableIf<IsSame<Q,Rational>> =dummy> Bool operator==(FloatMP const& x, Q const& q) { return Rational(x)==q; }
 template<class Q, EnableIf<IsSame<Q,Rational>> =dummy> Bool operator!=(FloatMP const& x, Q const& q) { return Rational(x)!=q; }
 template<class Q, EnableIf<IsSame<Q,Rational>> =dummy> Bool operator<=(FloatMP const& x, Q const& q) { return Rational(x)<=q; }
@@ -57,8 +57,8 @@ template<class PR> Bool models(FloatUpperBound<PR> x, Rational q) { return x.raw
 template<class PR> Bool models(FloatBounds<PR> x, Rational q) { return x.lower_raw() <= q and x.upper_raw() >= q; }
 template<class PR> Bool models(FloatBall<PR> x, Rational q) { return x.error_raw() >= abs(Rational(x.value_raw())-q); }
 
-template<> String class_name<Precision64>() { return "Precision64"; }
-template<> String class_name<PrecisionMP>() { return "PrecisionMP"; }
+template<> String class_name<DoublePrecision>() { return "DoublePrecision"; }
+template<> String class_name<MultiplePrecision>() { return "MultiplePrecision"; }
 } // namespace Ariadne
 
 template<class PR>
@@ -535,13 +535,13 @@ TestFloatBounds<PR>::test_exact_rounded_arithmetic()
 
 
 template<> Void
-TestFloatBounds<Precision64>::test_constructors()
+TestFloatBounds<DoublePrecision>::test_constructors()
 {
-    Precision64 pr;
-    Float64 zero=0;
+    DoublePrecision pr;
+    FloatDP zero=0;
 
     // Construct from pair
-    FloatBoundsType xd1(Float64(1.125),Float64(2.25));
+    FloatBoundsType xd1(FloatDP(1.125),FloatDP(2.25));
     ARIADNE_TEST_ASSERT(xd1.lower_raw()==1.125); ARIADNE_TEST_ASSERT(xd1.upper_raw()==2.25);
 
     // Default constructor
@@ -568,9 +568,9 @@ TestFloatBounds<Precision64>::test_constructors()
     ARIADNE_TEST_COMPARE(Rational(xd5.upper_raw()),>,Rational(1,3));
 
     // ExactTag constructor from a single value
-    FloatBoundsType xd6(Float64(1.25));
-    ARIADNE_TEST_EQUAL(xd6.lower_raw(),Float64(1.25));
-    ARIADNE_TEST_EQUAL(xd6.upper_raw(),Float64(1.25));
+    FloatBoundsType xd6(FloatDP(1.25));
+    ARIADNE_TEST_EQUAL(xd6.lower_raw(),FloatDP(1.25));
+    ARIADNE_TEST_EQUAL(xd6.upper_raw(),FloatDP(1.25));
 }
 
 template<class PR> Void
@@ -773,14 +773,14 @@ Int main() {
     std::cout<<std::setprecision(20);
     std::cerr<<std::setprecision(20);
 
-    TestDirectedFloats<Precision64>(Precision64()).test();
-    TestDirectedFloats<PrecisionMP>(PrecisionMP(128)).test();
+    TestDirectedFloats<DoublePrecision>(dp).test();
+    TestDirectedFloats<MultiplePrecision>(MultiplePrecision(128)).test();
 
-    TestFloatBall<Precision64>(Precision64()).test();
-    TestFloatBall<PrecisionMP>(PrecisionMP(128)).test();
+    TestFloatBall<DoublePrecision>(dp).test();
+    TestFloatBall<MultiplePrecision>(MultiplePrecision(128)).test();
 
-    TestFloatBounds<Precision64>(Precision64()).test();
-    TestFloatBounds<PrecisionMP>(PrecisionMP(128)).test();
+    TestFloatBounds<DoublePrecision>(dp).test();
+    TestFloatBounds<MultiplePrecision>(MultiplePrecision(128)).test();
 
     return ARIADNE_TEST_FAILURES;
 }

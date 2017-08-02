@@ -134,7 +134,7 @@ _evolution(EnclosureListType& final_sets,
         working_sets.pop_back();
         EnclosureType initial_enclosure=current_set.second;
         TimeType initial_time=current_set.first;
-        Float64UpperBound initial_set_radius=initial_enclosure.bounding_box().radius();
+        FloatDPUpperBound initial_set_radius=initial_enclosure.bounding_box().radius();
         if(initial_time>=maximum_time) {
             final_sets.adjoin(EnclosureType(initial_enclosure));
         } else if(UPPER_SEMANTICS && ENABLE_SUBDIVISIONS

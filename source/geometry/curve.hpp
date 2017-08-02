@@ -56,9 +56,9 @@ class CurveInterface
 {
   public:
     typedef Dyadic GenericParameterType;
-    typedef Float64Value ParameterType;
-    typedef Point<Float64Approximation> PointType;
-    typedef Vector<Float64Approximation> TangentVectorType;
+    typedef FloatDPValue ParameterType;
+    typedef Point<FloatDPApproximation> PointType;
+    typedef Vector<FloatDPApproximation> TangentVectorType;
   public:
     /*! \brief Destructor. */
     virtual ~CurveInterface() { };
@@ -125,7 +125,7 @@ class InterpolatedCurve
     : public DrawableInterface
 {
   public:
-    typedef Precision64 PrecisionType;
+    typedef DoublePrecision PrecisionType;
     typedef CurveInterface::GenericParameterType GenericParameterType;
     typedef CurveInterface::ParameterType ParameterType;
     typedef CurveInterface::PointType PointType;
@@ -143,7 +143,7 @@ class InterpolatedCurve
         : _points() { this->insert(s,pt); }
     InterpolatedCurve(GenericParameterType s, const PointType& pt)
         : _points() { PrecisionType pr; this->insert(ParameterType(s,pr),pt); }
-    InterpolatedCurve(const RawFloat64& s, const Vector<RawFloat64>& pt)
+    InterpolatedCurve(const RawFloatDP& s, const Vector<RawFloatDP>& pt)
         : _points() { this->insert(s,pt); }
     /*! \brief Create a segment from \a pt0 at parameter value 0 to \a pt1 at parameter value 1. */
     InterpolatedCurve(const PointType& pt0, const PointType& pt1)
@@ -151,7 +151,7 @@ class InterpolatedCurve
     /*! \brief Insert a point with parameter value \a s and spacial value \a pt. */
     Void insert(const GenericParameterType& s, const PointType& pt);
     Void insert(const ParameterType& s, const PointType& pt);
-    Void insert(const RawFloat64& s, const Vector<RawFloat64>& pt);
+    Void insert(const RawFloatDP& s, const Vector<RawFloatDP>& pt);
 
     /*! \brief The number of segments in the curve. */
     SizeType size() const { return this->_points.size(); }

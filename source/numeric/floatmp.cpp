@@ -37,8 +37,8 @@
 namespace Ariadne {
 
 // Rule for combining mixed precision
-inline PrecisionMP cmb(PrecisionMP pr1, PrecisionMP pr2) { return min(pr1,pr2); }
-inline PrecisionMP cmb(PrecisionMP pr1, PrecisionMP pr2, PrecisionMP pr3) { return cmb(cmb(pr1,pr2),pr3); }
+inline MultiplePrecision cmb(MultiplePrecision pr1, MultiplePrecision pr2) { return min(pr1,pr2); }
+inline MultiplePrecision cmb(MultiplePrecision pr1, MultiplePrecision pr2, MultiplePrecision pr3) { return cmb(cmb(pr1,pr2),pr3); }
 
 FloatMP::~FloatMP() {
     mpfr_clear(_mpfr);
@@ -62,59 +62,59 @@ FloatMP::FloatMP(const mpfr_t x) : FloatMP(NoInit()) {
 FloatMP::FloatMP(double d) : FloatMP(d,get_default_precision()) {
 }
 
-FloatMP::FloatMP(double d, PrecisionMP pr) : FloatMP(d,MPFR_RNDN,pr) {
+FloatMP::FloatMP(double d, MultiplePrecision pr) : FloatMP(d,MPFR_RNDN,pr) {
     ARIADNE_ASSERT(d==this->get_d());
 }
 
-FloatMP::FloatMP(Float64 const& x, PrecisionMP pr) : FloatMP(x.get_d(),pr) {
+FloatMP::FloatMP(FloatDP const& x, MultiplePrecision pr) : FloatMP(x.get_d(),pr) {
 }
 
-FloatMP::FloatMP(PrecisionMP pr) {
+FloatMP::FloatMP(MultiplePrecision pr) {
     mpfr_init2(_mpfr,pr);
     mpfr_set_si(_mpfr,0l,get_rounding_mode());
 }
 
-FloatMP::FloatMP(PrecisionMP pr, NoInit) {
+FloatMP::FloatMP(MultiplePrecision pr, NoInit) {
     mpfr_init2(_mpfr,pr);
 }
 
-FloatMP::FloatMP(Int32 n, PrecisionMP pr) {
+FloatMP::FloatMP(Int32 n, MultiplePrecision pr) {
     mpfr_init2(_mpfr,pr);
     mpfr_set_si(_mpfr,n.get_si(),get_rounding_mode());
 }
 
-FloatMP::FloatMP(Dyadic const& w, PrecisionMP pr) {
+FloatMP::FloatMP(Dyadic const& w, MultiplePrecision pr) {
     mpfr_init2(_mpfr,pr);
     mpfr_set_f(_mpfr,w.get_mpf(),get_rounding_mode());
     ARIADNE_ASSERT(Dyadic(*this)==w);
 }
 
-FloatMP::FloatMP(double d, RoundingModeType rnd, PrecisionMP pr) {
+FloatMP::FloatMP(double d, RoundingModeType rnd, MultiplePrecision pr) {
     mpfr_init2(_mpfr,pr);
     mpfr_set_d(_mpfr,d,rnd);
 }
 
-FloatMP::FloatMP(Float64 const& x, RoundingModeType rnd, PrecisionMP pr) {
+FloatMP::FloatMP(FloatDP const& x, RoundingModeType rnd, MultiplePrecision pr) {
     mpfr_init2(_mpfr,pr);
     mpfr_set_d(_mpfr,x.get_d(),rnd);
 }
 
-FloatMP::FloatMP(Integer const& z, RoundingModeType rnd, PrecisionMP pr) {
+FloatMP::FloatMP(Integer const& z, RoundingModeType rnd, MultiplePrecision pr) {
     mpfr_init2(_mpfr,pr);
     mpfr_set_z(_mpfr,z.get_mpz(),rnd);
 }
 
-FloatMP::FloatMP(Dyadic const& w, RoundingModeType rnd, PrecisionMP pr) {
+FloatMP::FloatMP(Dyadic const& w, RoundingModeType rnd, MultiplePrecision pr) {
     mpfr_init2(_mpfr,pr);
     mpfr_set_f(_mpfr,w.get_mpf(),rnd);
 }
 
-FloatMP::FloatMP(Rational const& q, RoundingModeType rnd, PrecisionMP pr) {
+FloatMP::FloatMP(Rational const& q, RoundingModeType rnd, MultiplePrecision pr) {
     mpfr_init2(_mpfr,pr);
     mpfr_set_q(_mpfr,q.get_mpq(),rnd);
 }
 
-FloatMP::FloatMP(FloatMP const& x, RoundingModeType rnd, PrecisionMP pr) {
+FloatMP::FloatMP(FloatMP const& x, RoundingModeType rnd, MultiplePrecision pr) {
     mpfr_init2(_mpfr,pr);
     mpfr_set(_mpfr,x._mpfr,rnd);
 }
@@ -213,7 +213,7 @@ FloatMP::PrecisionType FloatMP::get_default_precision() {
     return PrecisionType(mpfr_get_default_prec());
 }
 
-Void FloatMP::set_precision(PrecisionMP pr) {
+Void FloatMP::set_precision(MultiplePrecision pr) {
     mpfr_t tmp;
     mpfr_init2(tmp,pr);
     mpfr_set(tmp,_mpfr,get_rounding_mode());
@@ -232,32 +232,32 @@ double FloatMP::get_d() const {
     return mpfr_get_d(this->_mpfr,get_rounding_mode());
 }
 
-FloatMP FloatMP::nan(PrecisionMP pr) {
+FloatMP FloatMP::nan(MultiplePrecision pr) {
     FloatMP x(pr);
     mpfr_set_nan(x._mpfr);
     return x;
 }
 
-FloatMP FloatMP::inf(PrecisionMP pr) {
+FloatMP FloatMP::inf(MultiplePrecision pr) {
     FloatMP x(pr);
     mpfr_set_inf(x._mpfr,+1);
     return x;
 }
 
-FloatMP FloatMP::eps(PrecisionMP pr) {
+FloatMP FloatMP::eps(MultiplePrecision pr) {
     FloatMP x(pr);
     mpfr_set_ui_2exp(x._mpfr,1u,1-pr.bits(),to_nearest);
     return x;
 }
 
-FloatMP FloatMP::min(PrecisionMP pr) {
+FloatMP FloatMP::min(MultiplePrecision pr) {
     mpfr_exp_t emin=mpfr_get_emin();
     FloatMP x(pr);
     mpfr_set_ui_2exp(x._mpfr,1u,emin-1,to_nearest);
     return x;
 }
 
-FloatMP FloatMP::max(PrecisionMP pr) {
+FloatMP FloatMP::max(MultiplePrecision pr) {
     mpfr_exp_t emax=mpfr_get_emax();
     FloatMP x(2,pr);
     x=sub(down,x,FloatMP::min(pr));
@@ -304,7 +304,7 @@ FloatMP tan(FloatMP const& x) { return tan(FloatMP::get_rounding_mode(),x); }
 FloatMP asin(FloatMP const& x) { return asin(FloatMP::get_rounding_mode(),x); }
 FloatMP acos(FloatMP const& x) { return acos(FloatMP::get_rounding_mode(),x); }
 FloatMP atan(FloatMP const& x) { return atan(FloatMP::get_rounding_mode(),x); }
-// FIXME FloatMP FloatMP::pi(PrecisionMP pr) { return pi(FloatMP::get_rounding_mode(),pr); }
+// FIXME FloatMP FloatMP::pi(MultiplePrecision pr) { return pi(FloatMP::get_rounding_mode(),pr); }
 
 FloatMP max(FloatMP const& x1, FloatMP const& x2) { return max(FloatMP::get_rounding_mode(),x1,x2); }
 FloatMP min(FloatMP const& x1, FloatMP const& x2) { return min(FloatMP::get_rounding_mode(),x1,x2); }
@@ -548,7 +548,7 @@ FloatMP atan(FloatMP::RoundingModeType rnd, FloatMP const& x) {
 }
 
 
-FloatMP FloatMP::pi(FloatMP::RoundingModeType rnd, PrecisionMP pr) {
+FloatMP FloatMP::pi(FloatMP::RoundingModeType rnd, MultiplePrecision pr) {
     FloatMP r(pr); mpfr_const_pi(r._mpfr,rnd); return r;
 }
 
@@ -586,11 +586,11 @@ Comparison cmp(Dbl x1, FloatMP const& x2) {
     return c==0 ? Comparison::EQUAL : (c>0?Comparison::LESS:Comparison::GREATER);
 }
 
-Comparison cmp(FloatMP const& x1, Float64 const& x2) {
+Comparison cmp(FloatMP const& x1, FloatDP const& x2) {
     return cmp(x1,x2.get_d());
 }
 
-Comparison cmp(Float64 const& x1, FloatMP const& x2) {
+Comparison cmp(FloatDP const& x1, FloatMP const& x2) {
     return cmp(x1.get_d(),x2);
 }
 
@@ -629,10 +629,10 @@ FloatMP div(FloatMP::RoundingModeType rnd, Dbl x1, FloatMP const& x2) {
     FloatMP r(x2.precision(),NoInit()); mpfr_d_div(r._mpfr,x1,x2._mpfr,rnd); return r;
 }
 
-FloatMP add(RoundUpward rnd, FloatMP const& x1, Float64 const& x2) {
+FloatMP add(RoundUpward rnd, FloatMP const& x1, FloatDP const& x2) {
     FloatMP r(x1.precision(),NoInit()); mpfr_add_d(r._mpfr,x1._mpfr,x2.get_d(),rnd); return r;
 }
-FloatMP sub(RoundDownward rnd, FloatMP const& x1, Float64 const& x2) {
+FloatMP sub(RoundDownward rnd, FloatMP const& x1, FloatDP const& x2) {
     FloatMP r(x1.precision(),NoInit()); mpfr_sub_d(r._mpfr,x1._mpfr,x2.get_d(),rnd); return r;
 }
 

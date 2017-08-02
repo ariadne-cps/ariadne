@@ -48,12 +48,12 @@ template<class PR> struct NumericTraits<FloatValue<PR>> {
     typedef Boolean EqualsType;
 };
 
-static_assert(not IsGenericNumericType<FloatValue<Precision64>>::value,"");
-static_assert(not IsGenericNumericType<FloatValue<PrecisionMP>>::value,"");
+static_assert(not IsGenericNumericType<FloatValue<DoublePrecision>>::value,"");
+static_assert(not IsGenericNumericType<FloatValue<MultiplePrecision>>::value,"");
 
 //! \ingroup NumericModule
 //! \brief A floating-point number, which is taken to represent the \em exact value of a real quantity.
-//! \sa Float64 , FloatMP, FloatBall, FloatBounds, FloatApproximation.
+//! \sa FloatDP , FloatMP, FloatBall, FloatBounds, FloatApproximation.
 template<class PR> class FloatValue
     : DispatchNumericOperations<FloatValue<PR>,FloatBounds<PR>>
     , DispatchComparisonOperations<FloatValue<PR>,Boolean>
@@ -169,7 +169,7 @@ template<class PR> class Positive<FloatValue<PR>> : public FloatValue<PR> {
 template<class PR> inline PositiveFloatValue<PR> cast_positive(FloatValue<PR> const& x) {
     return PositiveFloatValue<PR>(x); }
 
-static_assert(IsSame<decltype(declval<Float64Value>() < declval<Rational>()),Boolean>::value,"");
+static_assert(IsSame<decltype(declval<FloatDPValue>() < declval<Rational>()),Boolean>::value,"");
 
 }
 

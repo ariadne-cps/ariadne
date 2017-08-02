@@ -54,13 +54,13 @@ class Constraint {
     Constraint(const Constraint<FF,RR>& c)
         : _function(static_cast<F>(c.function())), _lower_bound(c.lower_bound()), _upper_bound(c.upper_bound()) { }
 
-    template< class FF, class RR, EnableIf<IsConvertible<FF,F>> =dummy, EnableIf<IsConstructible<R,RR,Precision64>> =dummy>
+    template< class FF, class RR, EnableIf<IsConvertible<FF,F>> =dummy, EnableIf<IsConstructible<R,RR,DoublePrecision>> =dummy>
     Constraint(const RR& l, const FF& f, const RR& u)
-        : _function(static_cast<F>(f)), _lower_bound(l,Precision64()), _upper_bound(u,Precision64()) { }
+        : _function(static_cast<F>(f)), _lower_bound(l,dp), _upper_bound(u,dp) { }
 
-    template< class FF, class RR, EnableIf<IsConvertible<FF,F>> =dummy, EnableIf<IsConstructible<R,RR,Precision64>> =dummy>
+    template< class FF, class RR, EnableIf<IsConvertible<FF,F>> =dummy, EnableIf<IsConstructible<R,RR,DoublePrecision>> =dummy>
     Constraint(const Constraint<FF,RR>& c)
-        : _function(static_cast<F>(c.function())), _lower_bound(c.lower_bound(),Precision64()), _upper_bound(c.upper_bound(),Precision64()) { }
+        : _function(static_cast<F>(c.function())), _lower_bound(c.lower_bound(),dp), _upper_bound(c.upper_bound(),dp) { }
 
     Void set_function(const FunctionType& f) { this->_function = f; }
     FunctionType& function() { return this->_function; }
@@ -70,7 +70,7 @@ class Constraint {
     UpperBoundType const& upper_bound() const { return this->_upper_bound; }
 
     // FIXME: This function should not be used as it breaks type safety
-    const Interval<Float64Value> bounds() const { Precision64 pr; return cast_exact(Interval<Float64UpperBound>({_lower_bound,pr},{_upper_bound,pr})); }
+    const Interval<FloatDPValue> bounds() const { DoublePrecision pr; return cast_exact(Interval<FloatDPUpperBound>({_lower_bound,pr},{_upper_bound,pr})); }
   private:
     F _function;
     R _lower_bound;

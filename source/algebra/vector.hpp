@@ -751,10 +751,10 @@ template<class X> template<class PR, EnableIf<IsConstructible<X,ExactDouble,Exac
 
 template<class PR> class FloatApproximation;
 template<class PR> class FloatValue;
-typedef FloatValue<Precision64> Float64Value;
-typedef FloatApproximation<Precision64> Float64Approximation;
-inline Vector<Float64Value>const& cast_exact(Vector<Float64Approximation>const& v) {
-    return reinterpret_cast<Vector<Float64Value>const&>(v);
+typedef FloatValue<DoublePrecision> FloatDPValue;
+typedef FloatApproximation<DoublePrecision> FloatDPApproximation;
+inline Vector<FloatDPValue>const& cast_exact(Vector<FloatDPApproximation>const& v) {
+    return reinterpret_cast<Vector<FloatDPValue>const&>(v);
 }
 
 

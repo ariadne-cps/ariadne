@@ -36,7 +36,7 @@
 #include "algebra/covector.hpp"
 
 namespace Ariadne {
-typedef Matrix<Float64Approximation> FloatApproximationMatrix;
+typedef Matrix<FloatDPApproximation> FloatApproximationMatrix;
 }
 
 using namespace std;
@@ -44,7 +44,7 @@ using namespace Ariadne;
 
 
 class TestMatrix {
-    Precision64 pr;
+    DoublePrecision pr;
   public:
     Void test();
   private:
@@ -64,15 +64,15 @@ TestMatrix::test()
 Void
 TestMatrix::test_concept()
 {
-    Float64Approximation fx(1);
-    Float64Bounds ix(1);
-    Float64Value ex(1);
-    Vector<Float64Approximation> fv;
-    Vector<Float64Bounds> iv;
-    Vector<Float64Value> ev;
-    Matrix<Float64Approximation> fA;
-    Matrix<Float64Bounds> iA;
-    Matrix<Float64Value> eA;
+    FloatDPApproximation fx(1);
+    FloatDPBounds ix(1);
+    FloatDPValue ex(1);
+    Vector<FloatDPApproximation> fv;
+    Vector<FloatDPBounds> iv;
+    Vector<FloatDPValue> ev;
+    Matrix<FloatDPApproximation> fA;
+    Matrix<FloatDPBounds> iA;
+    Matrix<FloatDPValue> eA;
 
     fv=fv+fv; iv=ev+ev; iv=ev+iv; iv=iv+ev; iv=iv+iv;
     fv=fv-fv; iv=ev-ev; iv=ev-iv; iv=iv-ev; iv=iv-iv;
@@ -95,7 +95,7 @@ TestMatrix::test_concept()
 Void
 TestMatrix::test_project()
 {
-    typedef Float64 X;
+    typedef FloatDP X;
     ARIADNE_TEST_CONSTRUCT(Matrix<X>,A,({{11,12,13,14,15},{21,22,23,24,25},{31,32,33,34,35}},pr));
     ARIADNE_TEST_CONSTRUCT(Matrix<X>,B,({{120,130,140},{220,230,240}},pr));
 
@@ -123,20 +123,20 @@ TestMatrix::test_project()
 Void
 TestMatrix::test_misc()
 {
-    Float64Approximation x={2.25,pr};
-    Float64Bounds ix={1.5_exact,2.25_exact};
-    Array<Float64Approximation> Aary={{-1.0,3.0,1.0, -1.0,1.0,2.0, 2.0,1.0,1.0},pr};
-    Array<Float64Bounds> iAary={{-1.0_x,3.0_x, -1.0_x,1.0_x},pr};
-    Float64Approximation* Aptr=Aary.begin();
-    Float64Bounds* iAptr=iAary.begin();
+    FloatDPApproximation x={2.25,pr};
+    FloatDPBounds ix={1.5_exact,2.25_exact};
+    Array<FloatDPApproximation> Aary={{-1.0,3.0,1.0, -1.0,1.0,2.0, 2.0,1.0,1.0},pr};
+    Array<FloatDPBounds> iAary={{-1.0_x,3.0_x, -1.0_x,1.0_x},pr};
+    FloatDPApproximation* Aptr=Aary.begin();
+    FloatDPBounds* iAptr=iAary.begin();
 
-    Matrix<Float64Approximation> A0;
+    Matrix<FloatDPApproximation> A0;
     ARIADNE_TEST_PRINT(A0);
-    Matrix<Float64Approximation> A1(3,2,pr);
+    Matrix<FloatDPApproximation> A1(3,2,pr);
     ARIADNE_TEST_PRINT(A1);
-    Matrix<Float64Approximation> A2(3,3,Aary.begin());
+    Matrix<FloatDPApproximation> A2(3,3,Aary.begin());
     ARIADNE_TEST_PRINT(A2);
-    Matrix<Float64Approximation> A3({{-1.0,3.0,1.0}, {-1.0,1.0,2.0}, {2.0,1.0,1.0}},pr);
+    Matrix<FloatDPApproximation> A3({{-1.0,3.0,1.0}, {-1.0,1.0,2.0}, {2.0,1.0,1.0}},pr);
     ARIADNE_TEST_PRINT(A3);
 
     for(SizeType i=0; i!=A2.row_size(); ++i) {
@@ -156,9 +156,9 @@ TestMatrix::test_misc()
     A1.at(1,0)=2.0;
     ARIADNE_TEST_EQUALS(A1[1][0],2.0);
 
-    A0=Matrix<Float64Approximation>::zero(2,3);
+    A0=Matrix<FloatDPApproximation>::zero(2,3);
     ARIADNE_TEST_PRINT(A0);
-    A1=Matrix<Float64Approximation>::identity(4);
+    A1=Matrix<FloatDPApproximation>::identity(4);
     ARIADNE_TEST_PRINT(A1);
 
     typedef FloatApproximationMatrix MatrixType;

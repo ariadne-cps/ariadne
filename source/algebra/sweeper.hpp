@@ -200,10 +200,10 @@ template<class F> class GradedSweeper : public SweeperMixin<GradedSweeper<F>,F> 
     DegreeType _degree;
 };
 
-template<> inline Sweeper<Float64>::Sweeper() : _ptr(new ThresholdSweeper<Float64>(Precision64(),std::numeric_limits<float>::epsilon())) { }
-template<> inline Sweeper<FloatMP>::Sweeper() : _ptr(new ThresholdSweeper<FloatMP>(PrecisionMP(64),std::numeric_limits<double>::epsilon())) { }
+template<> inline Sweeper<FloatDP>::Sweeper() : _ptr(new ThresholdSweeper<FloatDP>(dp,std::numeric_limits<float>::epsilon())) { }
+template<> inline Sweeper<FloatMP>::Sweeper() : _ptr(new ThresholdSweeper<FloatMP>(MultiplePrecision(64),std::numeric_limits<double>::epsilon())) { }
 
-using Sweeper64=Sweeper<Float64>;
+using SweeperDP=Sweeper<FloatDP>;
 using SweeperMP=Sweeper<FloatMP>;
 
 } // namespace Ariadne

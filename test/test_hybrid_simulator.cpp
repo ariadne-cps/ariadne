@@ -92,8 +92,8 @@ Void TestHybridSimulator::test() const
     const RealVariable y("y");
 
     // Set up the simulator parameters and grid
-    Float64 step_size(0.125);
-    Float64 enclosure_radius(0.25);
+    FloatDP step_size(0.125);
+    FloatDP enclosure_radius(0.25);
 
     // Set up the evaluators
     HybridSimulator simulator;
@@ -109,7 +109,7 @@ Void TestHybridSimulator::test() const
     RealSpace space={x,y};
     RealPoint initial_point = Point<Real>{-0.00, 0.50};
     cout << "initial_point=" << initial_point << endl;
-    ApproximatePoint approximate_initial_point = ApproximatePoint(initial_point,pr64);
+    ApproximatePoint approximate_initial_point = ApproximatePoint(initial_point,dp);
     HybridApproximatePoint initial_hybrid_point(location1,space,approximate_initial_point);
     HybridTime simulation_time(2.25,3);
 

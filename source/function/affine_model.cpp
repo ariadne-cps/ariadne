@@ -40,19 +40,19 @@
 
 namespace Ariadne {
 
-template class AffineModel<ApproximateTag,Float64>;
+template class AffineModel<ApproximateTag,FloatDP>;
 template class AffineModel<ApproximateTag,FloatMP>;
 
-template class AffineModel<ValidatedTag,Float64>;
+template class AffineModel<ValidatedTag,FloatDP>;
 template class AffineModel<ValidatedTag,FloatMP>;
 
-template class AlgebraOperations<AffineModel<ApproximateTag,Float64>,FloatBounds<Precision64>>;
-template class AlgebraOperations<AffineModel<ApproximateTag,FloatMP>,FloatBounds<PrecisionMP>>;
+template class AlgebraOperations<AffineModel<ApproximateTag,FloatDP>,FloatBounds<DoublePrecision>>;
+template class AlgebraOperations<AffineModel<ApproximateTag,FloatMP>,FloatBounds<MultiplePrecision>>;
 
-template class AlgebraOperations<AffineModel<ValidatedTag,Float64>,FloatBounds<Precision64>>;
-template class AlgebraOperations<AffineModel<ValidatedTag,FloatMP>,FloatBounds<PrecisionMP>>;
+template class AlgebraOperations<AffineModel<ValidatedTag,FloatDP>,FloatBounds<DoublePrecision>>;
+template class AlgebraOperations<AffineModel<ValidatedTag,FloatMP>,FloatBounds<MultiplePrecision>>;
 
-template AffineModel<ValidatedTag,Float64> affine_model(const ExactBoxType&, const ScalarFunction<ValidatedTag>&, Precision64);
+template AffineModel<ValidatedTag,FloatDP> affine_model(const ExactBoxType&, const ScalarFunction<ValidatedTag>&, DoublePrecision);
 
 } //namespace Ariadne
 

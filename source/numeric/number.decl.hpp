@@ -118,13 +118,13 @@ using ApproximateNumber=Number<ApproximateTag>; //!< Alias for generic approxima
 
 namespace Ariadne {
 
-using ExactNumericType=Float64Value;
+using ExactNumericType=FloatDPValue;
 using EffectiveNumericType=Real;
-using ValidatedNumericType=Float64Bounds;
-using UpperNumericType=Float64UpperBound;
-using LowerNumericType=Float64LowerBound;
-using ApproximateNumericType=Float64Approximation;
-using ErrorNumericType=Float64Error;
+using ValidatedNumericType=FloatDPBounds;
+using UpperNumericType=FloatDPUpperBound;
+using LowerNumericType=FloatDPLowerBound;
+using ApproximateNumericType=FloatDPApproximation;
+using ErrorNumericType=FloatDPError;
 
 } // namespace Ariadne
 

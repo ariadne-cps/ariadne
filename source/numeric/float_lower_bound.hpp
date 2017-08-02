@@ -45,7 +45,7 @@ template<class PR> struct NumericTraits<FloatLowerBound<PR>> {
 
 //! \ingroup NumericModule
 //! \brief Floating-point lower bounds for real numbers.
-//! \sa UpperReal, Float64, FloatMP, FloatBounds, FloatUpperBound.
+//! \sa UpperReal, FloatDP, FloatMP, FloatBounds, FloatUpperBound.
 template<class PR> class FloatLowerBound
     : public DispatchDirectedFloatOperations<FloatLowerBound<PR>>
     , public DispatchFloatOperations<FloatApproximation<PR>>

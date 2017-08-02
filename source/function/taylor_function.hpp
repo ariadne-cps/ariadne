@@ -45,29 +45,29 @@ namespace Ariadne {
 template<class P, class F> class TaylorModel;
 class TaylorFunctionFactory;
 
-typedef ScalarScaledFunctionPatch<ValidatedTaylorModel64> ValidatedScalarTaylorFunctionModel64;
-typedef VectorScaledFunctionPatch<ValidatedTaylorModel64> ValidatedVectorTaylorFunctionModel64;
+typedef ScalarScaledFunctionPatch<ValidatedTaylorModelDP> ValidatedScalarTaylorFunctionModelDP;
+typedef VectorScaledFunctionPatch<ValidatedTaylorModelDP> ValidatedVectorTaylorFunctionModelDP;
 
 /*
-class ValidatedScalarTaylorFunctionModel64 : public ScaledFunctionPatch<ValidatedTaylorModel64> {
+class ValidatedScalarTaylorFunctionModelDP : public ScaledFunctionPatch<ValidatedTaylorModelDP> {
   public:
-    using ScaledFunctionPatch<ValidatedTaylorModel64>::ScaledFunctionPatch;
-    ValidatedScalarTaylorFunctionModel64() : ScaledFunctionPatch<ValidatedTaylorModel64>() { }
-    ValidatedScalarTaylorFunctionModel64(ScaledFunctionPatch<ValidatedTaylorModel64> const& f) : ScaledFunctionPatch<ValidatedTaylorModel64>(f) { }
+    using ScaledFunctionPatch<ValidatedTaylorModelDP>::ScaledFunctionPatch;
+    ValidatedScalarTaylorFunctionModelDP() : ScaledFunctionPatch<ValidatedTaylorModelDP>() { }
+    ValidatedScalarTaylorFunctionModelDP(ScaledFunctionPatch<ValidatedTaylorModelDP> const& f) : ScaledFunctionPatch<ValidatedTaylorModelDP>(f) { }
 };
 
-class ValidatedVectorTaylorFunctionModel64 : public VectorScaledFunctionPatch<Vali_datedTaylorModel64> {
+class ValidatedVectorTaylorFunctionModelDP : public VectorScaledFunctionPatch<Vali_datedTaylorModelDP> {
   public:
-    using VectorScaledFunctionPatch<ValidatedTaylorModel64>::VectorScaledFunctionPatch;
-    ValidatedVectorTaylorFunctionModel64() : VectorScaledFunctionPatch<ValidatedTaylorModel64>() { }
-    ValidatedVectorTaylorFunctionModel64(VectorScaledFunctionPatch<ValidatedTaylorModel64> const& f) : VectorScaledFunctionPatch<ValidatedTaylorModel64>(f) { }
+    using VectorScaledFunctionPatch<ValidatedTaylorModelDP>::VectorScaledFunctionPatch;
+    ValidatedVectorTaylorFunctionModelDP() : VectorScaledFunctionPatch<ValidatedTaylorModelDP>() { }
+    ValidatedVectorTaylorFunctionModelDP(VectorScaledFunctionPatch<ValidatedTaylorModelDP> const& f) : VectorScaledFunctionPatch<ValidatedTaylorModelDP>(f) { }
 };
 */
 
 class TaylorFunctionFactory
-    : public ScaledFunctionPatchFactory<TaylorModel<ValidatedTag,Float64>>
+    : public ScaledFunctionPatchFactory<TaylorModel<ValidatedTag,FloatDP>>
 {
-    typedef TaylorModel<ValidatedTag,Float64> M;
+    typedef TaylorModel<ValidatedTag,FloatDP> M;
   public:
     typedef typename M::SweeperType SweeperType;
     using ScaledFunctionPatchFactory<M>::ScaledFunctionPatchFactory;

@@ -127,19 +127,19 @@ class HybridEnclosure
     //! \brief An empty enclosure.
     HybridEnclosure();
     //! \brief An enclosure corresponding to a hybrid box \a hbx with variables canonically ordered by \a spc.
-    HybridEnclosure(const HybridBoxSet& hbx, const RealSpace& spc, const ValidatedFunctionModel64FactoryInterface& fac);
+    HybridEnclosure(const HybridBoxSet& hbx, const RealSpace& spc, const ValidatedFunctionModelDPFactoryInterface& fac);
     //! \brief An enclosure corresponding to the hybrid set \a set using \a space to order the continuous variables.
-    HybridEnclosure(const HybridBoundedConstraintSet& set, const RealSpace& space, const ValidatedFunctionModel64FactoryInterface& factory);
+    HybridEnclosure(const HybridBoundedConstraintSet& set, const RealSpace& space, const ValidatedFunctionModelDPFactoryInterface& factory);
 
     //! \brief An enclosure corresponding to a Euclidean box \a bx in location \a q with variables ordered by \a spc.
-    HybridEnclosure(const DiscreteLocation& q, const RealSpace& spc, const RealBox& bx, const ValidatedFunctionModel64FactoryInterface& fac);
+    HybridEnclosure(const DiscreteLocation& q, const RealSpace& spc, const RealBox& bx, const ValidatedFunctionModelDPFactoryInterface& fac);
     //! \brief An enclosure corresponding to a hybrid box \a hbx.
-    explicit HybridEnclosure(const HybridRealBox& hbx, const ValidatedFunctionModel64FactoryInterface& fac);
+    explicit HybridEnclosure(const HybridRealBox& hbx, const ValidatedFunctionModelDPFactoryInterface& fac);
 
     //! \brief An enclosure corresponding to a hybrid box \a hbx.
-    explicit HybridEnclosure(const HybridExactBoxType& hbx, const ValidatedFunctionModel64FactoryInterface& fac);
+    explicit HybridEnclosure(const HybridExactBoxType& hbx, const ValidatedFunctionModelDPFactoryInterface& fac);
     //! \brief An enclosure corresponding to a hybrid box \a hbx.
-    explicit HybridEnclosure(const HybridExactBoxType& hbx, List<RealAssignment> aux, const ValidatedFunctionModel64FactoryInterface& fac);
+    explicit HybridEnclosure(const HybridExactBoxType& hbx, List<RealAssignment> aux, const ValidatedFunctionModelDPFactoryInterface& fac);
     //! \brief An enclosure constructed from a location \a q, a real space \a spc, and a (timed) enclosure \a es.
     explicit HybridEnclosure(const DiscreteLocation& q, const RealSpace& spc, const Enclosure& es);
 
@@ -161,7 +161,7 @@ class HybridEnclosure
     //! \brief The Euclidean state space of the location.
     const RealSpace auxiliary_space() const;
     //! \brief The factory used to create functions.
-    const ValidatedFunctionModel64FactoryInterface& function_factory() const;
+    const ValidatedFunctionModelDPFactoryInterface& function_factory() const;
     //! \brief The list of previous events.
     const List<DiscreteEvent>& previous_events() const;
     //! \brief The number of independent parameters.
@@ -171,20 +171,20 @@ class HybridEnclosure
     //! \brief The continuous state set.
     const ExactBoxType parameter_domain() const;
     //! \brief The function related to the state space.
-    const ValidatedVectorFunctionModel64& state_function() const;
+    const ValidatedVectorFunctionModelDP& state_function() const;
     //! \brief The function related to time.
-    const ValidatedScalarFunctionModel64& time_function() const;
+    const ValidatedScalarFunctionModelDP& time_function() const;
     //! \brief The function giving the time since the last event.
-    const ValidatedScalarFunctionModel64& dwell_time_function() const;
+    const ValidatedScalarFunctionModelDP& dwell_time_function() const;
     //! \brief The function related to the auxiliary space.
-    const ValidatedVectorFunctionModel64 auxiliary_function() const;
+    const ValidatedVectorFunctionModelDP auxiliary_function() const;
     //! \brief The function related to the auxiliary space.
-    const ValidatedVectorFunctionModel64 state_time_auxiliary_function() const;
+    const ValidatedVectorFunctionModelDP state_time_auxiliary_function() const;
     //! \brief The function related to the variable \a var.
-    const ValidatedScalarFunctionModel64 function(RealVariable var) const;
+    const ValidatedScalarFunctionModelDP function(RealVariable var) const;
 
     //! \brief Set the evolution time function to \a omega.
-    Void set_time_function(const ValidatedScalarFunctionModel64& omega);
+    Void set_time_function(const ValidatedScalarFunctionModelDP& omega);
 
     //! \brief A bounding box for the space.
     UpperBoxType state_bounding_box() const;
@@ -211,19 +211,19 @@ class HybridEnclosure
     //! Corresponds to replacing \f$\xi\f$ by \f$r\circ \xi\f$.
     Void apply_reset(DiscreteEvent e, DiscreteLocation q, RealSpace s, const ValidatedVectorFunction& r);
     //! \brief Apply the evolve step \xi'(s) = phi(xi(s),eps) and tau'(s)=tau(s)+eps
-    Void apply_fixed_evolve_step(const ValidatedVectorFunctionModel64& phi, const Float64Value& eps);
+    Void apply_fixed_evolve_step(const ValidatedVectorFunctionModelDP& phi, const FloatDPValue& eps);
     //! \brief Apply the evolve step \xi'(s) = phi(xi(s),eps(xi(s),tau(s))) and tau'(s)=tau(s)+eps(xi(s),tau(s))
-    Void apply_spacetime_evolve_step(const ValidatedVectorFunctionModel64& phi, const ValidatedScalarFunctionModel64& eps);
+    Void apply_spacetime_evolve_step(const ValidatedVectorFunctionModelDP& phi, const ValidatedScalarFunctionModelDP& eps);
     //! \brief Apply the reach step \xi'(s) = phi(xi(s),t-tau(s)) and tau'(s)=tau(s)+t for 0<=t<=eps(xi(s),tau(s))
-    Void apply_spacetime_reach_step(const ValidatedVectorFunctionModel64& phi, const ValidatedScalarFunctionModel64& eps);
+    Void apply_spacetime_reach_step(const ValidatedVectorFunctionModelDP& phi, const ValidatedScalarFunctionModelDP& eps);
     // Compute the evolve step \xi'(s) = phi(xi(s),eps(s)) and tau'(s)=tau(s)+eps(s)
-    Void apply_evolve_step(const ValidatedVectorFunctionModel64& phi, const ValidatedScalarFunctionModel64& eps);
+    Void apply_evolve_step(const ValidatedVectorFunctionModelDP& phi, const ValidatedScalarFunctionModelDP& eps);
     // Compute the evolve step \xi'(s) = phi(xi(s),\omega(s)-tau(s)) and tau'(s)=omega(s)
-    Void apply_finishing_evolve_step(const ValidatedVectorFunctionModel64& phi, const ValidatedScalarFunctionModel64& omega);
+    Void apply_finishing_evolve_step(const ValidatedVectorFunctionModelDP& phi, const ValidatedScalarFunctionModelDP& omega);
     //! \brief Compute the reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h] and t <= eps(s) , assuming eps(s)<= h throughout.
-    Void apply_reach_step(const ValidatedVectorFunctionModel64& phi, const ValidatedScalarFunctionModel64& eps);
+    Void apply_reach_step(const ValidatedVectorFunctionModelDP& phi, const ValidatedScalarFunctionModelDP& eps);
     //! \brief Compute the reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h].
-    Void apply_full_reach_step(const ValidatedVectorFunctionModel64& phi);
+    Void apply_full_reach_step(const ValidatedVectorFunctionModelDP& phi);
 
 
     //! \brief Set the time of evolution to \a \f$t_{\max}\f$.
@@ -239,9 +239,9 @@ class HybridEnclosure
 
     //! \brief Set the maximum time of evolution to \a \f$t_{\max}\f$. \deprecated
     //! Corresponds to introducting the constraint \f$\tau(s)\leq t_{\max}\f$.
-    Void set_maximum_time(DiscreteEvent event, RawFloat64 tmax);
+    Void set_maximum_time(DiscreteEvent event, RawFloatDP tmax);
     //! \brief Set the current time-step to \f$h\f$. \deprecated
-    Void set_step_time(Float64Value h);
+    Void set_step_time(FloatDPValue h);
     //! \brief \deprecated
     Void new_time_step_bound(DiscreteEvent e, ValidatedScalarFunction tau);
 
@@ -317,9 +317,9 @@ class HybridEnclosure
   private:
   public:
     // Compute the flow reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h] .
-    Void _apply_flow(ValidatedVectorFunction phi, Float64Value step);
+    Void _apply_flow(ValidatedVectorFunction phi, FloatDPValue step);
     // Compute the flow reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h] and t <= eps(xi(s)) .
-    Void _apply_flow(ValidatedVectorFunction phi, Float64Value step, ValidatedScalarFunction elps);
+    Void _apply_flow(ValidatedVectorFunction phi, FloatDPValue step, ValidatedScalarFunction elps);
     // Compute the flow evolve step \xi'(s) = phi(xi(s),eps(s)) and tau'(s)=tau(s)+eps(s)
     Void _apply_flow_step(ValidatedVectorFunction phi, ValidatedScalarFunction elps);
     Void _check() const; // Check that set is well-formed.

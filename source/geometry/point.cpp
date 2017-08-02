@@ -41,8 +41,8 @@ inline ExactIntervalType make_interval(ExactNumericType x) { return ExactInterva
 template<class X, EnableIf<IsConstructible<X,ExactDouble>> =dummy> Vector<X> make_vector(InitializerList<double> lst) {
     return Vector<X>(Array<ExactDouble>(Array<double>(lst))); }
 
-template<class X, EnableIf<IsConstructible<X,ExactDouble,Precision64>> =dummy> Vector<X> make_vector(InitializerList<double> lst) {
-    return Vector<X>(lst,Precision64()); }
+template<class X, EnableIf<IsConstructible<X,ExactDouble,DoublePrecision>> =dummy> Vector<X> make_vector(InitializerList<double> lst) {
+    return Vector<X>(lst,dp); }
 
 template<class X> Point<X>::Point(InitializerList<double> lst)
     : Vector<X>(make_vector<X>(lst))
@@ -54,8 +54,8 @@ template<class X> Point<X>* Point<X>::clone() const {
 }
 
 template<class X> ExactBoxType Point<X>::bounding_box() const {
-    typedef decltype(declval<X>()+declval<Float64Error>()) U;
-    Float64Error eps(Float64::eps(Precision64()));
+    typedef decltype(declval<X>()+declval<FloatDPError>()) U;
+    FloatDPError eps(FloatDP::eps(dp));
     ExactBoxType r(this->dimension());
     UpperIntervalType v;
     for(Nat i=0; i!=this->dimension(); ++i) {
@@ -69,9 +69,9 @@ template<class X> Void Point<X>::draw(CanvasInterface& canv, const Projection2d&
     canv.stroke();
 }
 
-template<> String class_name<Point<Float64Approximation>>() { return "Point<Float64Approximation>"; }
-template<> String class_name<Point<Float64Bounds>>() { return "Point<Float64Bounds>"; }
-template<> String class_name<Point<Float64Value>>() { return "Point<Float64Value>"; }
+template<> String class_name<Point<FloatDPApproximation>>() { return "Point<FloatDPApproximation>"; }
+template<> String class_name<Point<FloatDPBounds>>() { return "Point<FloatDPBounds>"; }
+template<> String class_name<Point<FloatDPValue>>() { return "Point<FloatDPValue>"; }
 template<> String class_name<Point<Real>>() { return "Point<Real>"; }
 
 template class Point<ExactNumericType>;
@@ -82,12 +82,12 @@ template class Point<ApproximateNumericType>;
 
 ExactPoint make_point(const StringType& str)
 {
-    std::vector<Float64> lst;
+    std::vector<FloatDP> lst;
     StringStream ss(str);
     read_sequence(ss,lst,'(',')',',');
-    Vector<Float64> vec(lst);
+    Vector<FloatDP> vec(lst);
 
-    return ExactPoint(Vector<Float64Value>(vec));
+    return ExactPoint(Vector<FloatDPValue>(vec));
 }
 
 } //namespace Ariadne

@@ -44,7 +44,7 @@ Orbit<ExactPoint>::Orbit(const ExactPoint& pt)
 { }
 
 Void
-Orbit<ExactPoint>::insert(Float64Value t, const ExactPoint& pt)
+Orbit<ExactPoint>::insert(FloatDPValue t, const ExactPoint& pt)
 {
     this->_curve->insert(t,pt);
 }

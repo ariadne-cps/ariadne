@@ -30,22 +30,22 @@
 
 namespace Ariadne {
 
-template class Polynomial<Float64>;
-template class Polynomial<Float64Approximation>;
-template class Polynomial<Float64Bounds>;
+template class Polynomial<FloatDP>;
+template class Polynomial<FloatDPApproximation>;
+template class Polynomial<FloatDPBounds>;
 template class Polynomial<UpperIntervalType>;
 
-template class AlgebraOperations<Polynomial<Float64>>;
-template class AlgebraOperations<Polynomial<Float64Approximation>>;
-template class AlgebraOperations<Polynomial<Float64Bounds>>;
+template class AlgebraOperations<Polynomial<FloatDP>>;
+template class AlgebraOperations<Polynomial<FloatDPApproximation>>;
+template class AlgebraOperations<Polynomial<FloatDPBounds>>;
 // template class AlgebraOperations<Polynomial<UpperIntervalType>>;
 
-template<> Void Polynomial<Float64Value>::cleanup() { }
+template<> Void Polynomial<FloatDPValue>::cleanup() { }
 
-template Polynomial<Float64Value>::Polynomial(SizeType);
-template Expansion<Float64Value>& Polynomial<Float64Value>::expansion();
-template OutputStream& Polynomial<Float64Value>::_write(OutputStream&) const;
-template OutputStream& Polynomial<Float64Value>::_write(OutputStream&, List<String> const&) const;
+template Polynomial<FloatDPValue>::Polynomial(SizeType);
+template Expansion<FloatDPValue>& Polynomial<FloatDPValue>::expansion();
+template OutputStream& Polynomial<FloatDPValue>::_write(OutputStream&) const;
+template OutputStream& Polynomial<FloatDPValue>::_write(OutputStream&, List<String> const&) const;
 
 
 template class Polynomial<FloatMPApproximation>;

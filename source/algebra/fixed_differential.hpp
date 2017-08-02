@@ -39,7 +39,7 @@
 
 namespace Ariadne {
 
-class Float64;
+class FloatDP;
 class ExactIntervalType;
 
 template<class X> class Vector;

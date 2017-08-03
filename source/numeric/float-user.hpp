@@ -50,55 +50,55 @@
 
 namespace Ariadne {
 
-template<class PR> inline FloatBounds<PR>::FloatBounds(FloatLowerBound<PR> const& lower, FloatUpperBound<PR> const& upper)
+template<class F> inline Bounds<F>::Bounds(LowerBound<F> const& lower, UpperBound<F> const& upper)
     : _l(lower.raw()), _u(upper.raw()) { }
 
-template<class PR> inline FloatLowerBound<PR> const FloatBounds<PR>::lower() const {
-    return FloatLowerBound<PR>(lower_raw()); }
+template<class F> inline LowerBound<F> const Bounds<F>::lower() const {
+    return LowerBound<F>(lower_raw()); }
 
-template<class PR> inline FloatUpperBound<PR> const FloatBounds<PR>::upper() const {
-    return FloatUpperBound<PR>(upper_raw()); }
+template<class F> inline UpperBound<F> const Bounds<F>::upper() const {
+    return UpperBound<F>(upper_raw()); }
 
-template<class PR> inline const FloatValue<PR> FloatBounds<PR>::value() const {
-    return FloatValue<PR>(med(near,this->_l,this->_u)); }
+template<class F> inline const Value<F> Bounds<F>::value() const {
+    return Value<F>(med(near,this->_l,this->_u)); }
 
-template<class PR> inline const FloatError<PR> FloatBounds<PR>::error() const {
-    RawFloat<PR> _v=med(near,this->_l,this->_u); return FloatError<PR>(max(sub(up,this->_u,_v),sub(up,_v,this->_l))); }
+template<class F> inline const Error<F> Bounds<F>::error() const {
+    RawFloat<PR> _v=med(near,this->_l,this->_u); return Error<F>(max(sub(up,this->_u,_v),sub(up,_v,this->_l))); }
 
-template<class PR> inline FloatValue<PR> value(FloatBounds<PR> const& x) {
+template<class F> inline Value<F> value(Bounds<F> const& x) {
     return x.value(); }
 
-template<class PR> inline FloatError<PR> error(FloatBounds<PR> const& x) {
+template<class F> inline Error<F> error(Bounds<F> const& x) {
     return x.error(); }
 
-template<class PR> inline FloatBounds<PR> make_bounds(FloatError<PR> const& e) {
-    return FloatBounds<PR>(-e.raw(),+e.raw()); }
+template<class F> inline Bounds<F> make_bounds(Error<F> const& e) {
+    return Bounds<F>(-e.raw(),+e.raw()); }
 
 
-template<class PR, class PRE> inline FloatBall<PR,PRE>::FloatBall(FloatValue<PR> const& value, FloatError<PRE> const& error)
+template<class F, class FE> inline Ball<F,FE>::Ball(Value<F> const& value, Error<FE> const& error)
     : _v(value.raw()), _e(error.raw()) { }
 
-template<class PR, class PRE> inline FloatLowerBound<PR> const FloatBall<PR,PRE>::lower() const {
-    return FloatLowerBound<PR>(lower_raw()); }
+template<class F, class FE> inline LowerBound<F> const Ball<F,FE>::lower() const {
+    return LowerBound<F>(lower_raw()); }
 
-template<class PR, class PRE> inline FloatUpperBound<PR> const FloatBall<PR,PRE>::upper() const {
-    return FloatUpperBound<PR>(upper_raw()); }
+template<class F, class FE> inline UpperBound<F> const Ball<F,FE>::upper() const {
+    return UpperBound<F>(upper_raw()); }
 
-template<class PR, class PRE> inline const FloatValue<PR> FloatBall<PR,PRE>::value() const {
-    return FloatValue<PR>(this->_v); }
+template<class F, class FE> inline const Value<F> Ball<F,FE>::value() const {
+    return Value<F>(this->_v); }
 
-template<class PR, class PRE> inline const FloatError<PRE> FloatBall<PR,PRE>::error() const {
-    return FloatError<PRE>(this->_e); }
+template<class F, class FE> inline const Error<FE> Ball<F,FE>::error() const {
+    return Error<FE>(this->_e); }
 
 
-template<class PR> template<class PRE> inline FloatBall<PR,PRE> FloatValue<PR>::pm(FloatError<PRE> e) const {
-    return FloatBall<PR,PRE>(*this,e);
+template<class F> template<class FE> inline FloatBall<PrecisionType<F>,Ariadne::PrecisionType<FE>> Value<F>::pm(Error<FE> e) const {
+    return FloatBall<Ariadne::PrecisionType<F>,Ariadne::PrecisionType<FE>>(*this,e);
 }
 
-template<class PR> template<class PRE> FloatApproximation<PR>::FloatApproximation(FloatBall<PR,PRE> const& x) : _a(x.value_raw()) {
+template<class F> template<class FE> Approximation<F>::Approximation(Ball<F,FE> const& x) : _a(x.value_raw()) {
 }
 
-template<class PR> template<class PRE> FloatBounds<PR>::FloatBounds(FloatBall<PR,PRE> const& x) : _l(x.lower_raw()), _u(x.upper_raw()) {
+template<class F> template<class FE> Bounds<F>::Bounds(Ball<F,FE> const& x) : _l(x.lower_raw()), _u(x.upper_raw()) {
 }
 
 
@@ -114,19 +114,29 @@ FloatDPApproximation operator"" _approx(long double lx);
 
 
 
-inline FloatDPValue const& cast_exact(RawFloatDP const& x) { return reinterpret_cast<FloatDPValue const&>(x); }
-inline FloatDPValue const& cast_exact(FloatDPApproximation const& x) { return reinterpret_cast<FloatDPValue const&>(x); }
-inline FloatDPValue const& cast_exact(FloatDPValue const& x) { return reinterpret_cast<FloatDPValue const&>(x); }
-inline FloatDPValue const& cast_exact(FloatDPError const& x) { return reinterpret_cast<FloatDPValue const&>(x); }
+template<class F> inline Value<F> const& cast_exact(F const& x) { return reinterpret_cast<Value<F> const&>(x); }
+template<class F> inline Value<F> const& cast_exact(Approximation<F> const& x) { return reinterpret_cast<Value<F> const&>(x); }
+template<class F> inline Value<F> const& cast_exact(LowerBound<F> const& x) { return reinterpret_cast<Value<F> const&>(x); }
+template<class F> inline Value<F> const& cast_exact(UpperBound<F> const& x) { return reinterpret_cast<Value<F> const&>(x); }
+template<class F> inline Value<F> const cast_exact(Bounds<F> const& x) { return cast_exact(Approximation<F>(x)); }
+template<class F, class FE> inline Value<F> const& cast_exact(Ball<F,FE> const& x) { return reinterpret_cast<Value<F> const&>(x); }
+template<class F> inline Value<F> const& cast_exact(Value<F> const& x) { return reinterpret_cast<Value<F> const&>(x); }
+template<class F> inline Value<F> const& cast_exact(Error<F> const& x) { return reinterpret_cast<Value<F> const&>(x); }
 
-template<template<class>class T> inline const T<FloatDPValue>& cast_exact(const T<RawFloatDP>& t) {
-    return reinterpret_cast<const T<FloatDPValue>&>(t); }
-template<template<class>class T> inline const T<FloatDPValue>& cast_exact(const T<FloatDPApproximation>& t) {
-    return reinterpret_cast<const T<FloatDPValue>&>(t); }
-template<template<class>class T> inline const T<FloatDPValue>& cast_exact(const T<FloatDPValue>& t) {
-    return reinterpret_cast<const T<FloatDPValue>&>(t); }
-template<template<class>class T> inline const T<FloatDPValue>& cast_exact(const T<FloatDPError>& t) {
-    return reinterpret_cast<const T<FloatDPValue>&>(t); }
+
+template<template<class>class T, class F> inline const T<Value<F>>& cast_exact(const T<F>& t) {
+    return reinterpret_cast<const T<Value<F>>&>(t); }
+template<template<class>class T, class F> inline const T<Value<F>>& cast_exact(const T<Approximation<F>>& t) {
+    return reinterpret_cast<const T<Value<F>>&>(t); }
+template<template<class>class T, class F> inline const T<Value<F>>& cast_exact(const T<LowerBound<F>>& t) {
+    return reinterpret_cast<const T<Value<F>>&>(t); }
+template<template<class>class T, class F> inline const T<Value<F>>& cast_exact(const T<UpperBound<F>>& t) {
+    return reinterpret_cast<const T<Value<F>>&>(t); }
+template<template<class>class T, class F> inline const T<Value<F>>& cast_exact(const T<Value<F>>& t) {
+    return reinterpret_cast<const T<Value<F>>&>(t); }
+template<template<class>class T, class F> inline const T<Value<F>>& cast_exact(const T<Error<F>>& t) {
+    return reinterpret_cast<const T<Value<F>>&>(t); }
+
 
 inline RawFloatDP const& cast_raw(RawFloatDP const& x) { return reinterpret_cast<RawFloatDP const&>(x); }
 inline RawFloatDP const& cast_raw(FloatDPApproximation const& x) { return reinterpret_cast<RawFloatDP const&>(x); }

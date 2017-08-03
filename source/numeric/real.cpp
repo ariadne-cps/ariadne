@@ -164,11 +164,11 @@ template<class PR> FloatLowerBound<PR>::Float(Real const& x) : FloatLowerBound<P
 template<class PR> FloatApproximation<PR>::Float(Real const& x) : FloatApproximation<PR>(x.approx()) { }
 */
 
-template<> FloatBall<DoublePrecision>::FloatBall(Real const& r, DoublePrecision pr) : FloatBall<DoublePrecision>(r.get(pr)) { }
-template<> FloatBounds<DoublePrecision>::FloatBounds(Real const& r, DoublePrecision pr) : FloatBounds<DoublePrecision>(r.get(pr)) { }
-template<> FloatUpperBound<DoublePrecision>::FloatUpperBound(Real const& r, DoublePrecision pr) : FloatUpperBound<DoublePrecision>(r.upper().get(pr)) { }
-template<> FloatLowerBound<DoublePrecision>::FloatLowerBound(Real const& r, DoublePrecision pr) : FloatLowerBound<DoublePrecision>(r.lower().get(pr)) { }
-template<> FloatApproximation<DoublePrecision>::FloatApproximation(Real const& r, DoublePrecision pr) : FloatApproximation<DoublePrecision>(r.get(pr)) { }
+template<> FloatBall<DoublePrecision>::Ball(Real const& r, DoublePrecision pr) : FloatBall<DoublePrecision>(r.get(pr)) { }
+template<> FloatBounds<DoublePrecision>::Bounds(Real const& r, DoublePrecision pr) : FloatBounds<DoublePrecision>(r.get(pr)) { }
+template<> FloatUpperBound<DoublePrecision>::UpperBound(Real const& r, DoublePrecision pr) : FloatUpperBound<DoublePrecision>(r.upper().get(pr)) { }
+template<> FloatLowerBound<DoublePrecision>::LowerBound(Real const& r, DoublePrecision pr) : FloatLowerBound<DoublePrecision>(r.lower().get(pr)) { }
+template<> FloatApproximation<DoublePrecision>::Approximation(Real const& r, DoublePrecision pr) : FloatApproximation<DoublePrecision>(r.get(pr)) { }
 
 Real::Real(std::uint64_t m, Void*) : Real(std::make_shared<RealConstant<Integer>>(m)) { }
 Real::Real(std::int64_t n, Void*) : Real(std::make_shared<RealConstant<Integer>>(n)) { }

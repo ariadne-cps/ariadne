@@ -25,9 +25,9 @@
 namespace Ariadne {
 
 template<class M> inline M make_split_point(M const& m) { return m; }
-template<class PR> inline FloatValue<PR> make_split_point(FloatApproximation<PR> const& am) { return cast_exact(am); }
-template<class PR> inline FloatValue<PR> make_split_point(FloatBounds<PR> const& vm) { return vm.value(); }
-template<class PR> inline FloatValue<PR> make_split_point(FloatBall<PR> const& bm) { return bm.value(); }
+template<class F> inline Value<F> make_split_point(Approximation<F> const& am) { return cast_exact(am); }
+template<class F> inline Value<F> make_split_point(Bounds<F> const& vm) { return vm.value(); }
+template<class F> inline Value<F> make_split_point(Ball<F> const& bm) { return bm.value(); }
 
 
 template<class U> Interval<U>::Interval() : Interval(EmptyInterval()) { }
@@ -161,35 +161,39 @@ template<class U1, class U2> inline bool refines(Interval<U1> const& ivl1, Inter
 template<class U1, class U2> inline bool same(Interval<U1> const& ivl1, Interval<U2> const& ivl2) {
     return same(ivl1.lower(),ivl2.lower()) and same(ivl1.upper(),ivl2.upper()); }
 
-template<class PR> inline Interval<FloatUpperBound<PR>> refinement(Interval<FloatUpperBound<PR>> const& ivl1, Interval<FloatUpperBound<SelfType<PR>>> const& ivl2) {
-    return Interval<FloatUpperBound<PR>>(max(ivl1.lower().raw(),ivl2.lower().raw()),min(ivl1.upper().raw(),ivl2.upper().raw())); }
-template<class PR> inline Bool refines(Interval<FloatUpperBound<PR>> const& ivl1, Interval<FloatUpperBound<SelfType<PR>>> const& ivl2) {
+template<class F> inline Interval<UpperBound<F>> refinement(Interval<UpperBound<F>> const& ivl1, Interval<UpperBound<SelfType<F>>> const& ivl2) {
+    return Interval<UpperBound<F>>(max(ivl1.lower().raw(),ivl2.lower().raw()),min(ivl1.upper().raw(),ivl2.upper().raw())); }
+template<class F> inline Bool refines(Interval<UpperBound<F>> const& ivl1, Interval<UpperBound<SelfType<F>>> const& ivl2) {
     return ivl1.lower().raw()>=ivl2.lower().raw() && ivl1.upper().raw()<=ivl2.upper().raw(); }
-template<class PR> inline Bool same(Interval<FloatUpperBound<PR>> const& ivl1, Interval<FloatUpperBound<SelfType<PR>>> const& ivl2) {
+template<class F> inline Bool same(Interval<UpperBound<F>> const& ivl1, Interval<UpperBound<SelfType<F>>> const& ivl2) {
     return ivl1.lower().raw()==ivl2.lower().raw() && ivl1.upper().raw()==ivl2.upper().raw(); }
 
-template<class PR> inline Interval<FloatUpperBound<PR>> widen(Interval<FloatUpperBound<PR>> const& ivl, FloatUpperBound<PR> e) {
-    return Interval<FloatUpperBound<PR>>(ivl.lower()-e,ivl.upper()+e); }
-template<class PR> inline Interval<FloatUpperBound<PR>> widen(Interval<FloatUpperBound<PR>> const& ivl) {
-    return widen(ivl,FloatUpperBound<PR>(RawFloat<PR>::min(ivl.upper().precision()))); }
-template<class PR> inline Interval<FloatUpperBound<PR>> widen(Interval<FloatValue<PR>> const& ivl) {
-    return widen(Interval<FloatUpperBound<PR>>(ivl),FloatUpperBound<PR>(RawFloat<PR>::min(ivl.upper().precision()))); }
+template<class F> inline Interval<UpperBound<F>> widen(Interval<UpperBound<F>> const& ivl, UpperBound<F> e) {
+    return Interval<UpperBound<F>>(ivl.lower()-e,ivl.upper()+e); }
+template<class F> inline Interval<UpperBound<F>> widen(Interval<UpperBound<F>> const& ivl) {
+    return widen(ivl,UpperBound<F>(F::min(ivl.upper().precision()))); }
+template<class F> inline Interval<UpperBound<F>> widen(Interval<Value<F>> const& ivl) {
+    return widen(Interval<UpperBound<F>>(ivl),UpperBound<F>(F::min(ivl.upper().precision()))); }
 
-template<class PR> inline Interval<FloatLowerBound<PR>> narrow(Interval<FloatLowerBound<PR>> const& ivl, FloatUpperBound<PR> e) {
-    return Interval<FloatLowerBound<PR>>(ivl.lower()+e,ivl.upper()-e); }
-template<class PR> inline Interval<FloatLowerBound<PR>> narrow(Interval<FloatLowerBound<PR>> const& ivl) {
-    return narrow(ivl,FloatUpperBound<PR>(RawFloat<PR>::min(ivl.upper().precision()))); }
-template<class PR> inline Interval<FloatLowerBound<PR>> narrow(Interval<FloatValue<PR>> const& ivl) {
-    return narrow(Interval<FloatLowerBound<PR>>(ivl),FloatUpperBound<PR>(RawFloat<PR>::min(ivl.upper().precision()))); }
+template<class F> inline Interval<LowerBound<F>> narrow(Interval<LowerBound<F>> const& ivl, UpperBound<F> e) {
+    return Interval<LowerBound<F>>(ivl.lower()+e,ivl.upper()-e); }
+template<class F> inline Interval<LowerBound<F>> narrow(Interval<LowerBound<F>> const& ivl) {
+    return narrow(ivl,UpperBound<F>(F::min(ivl.upper().precision()))); }
+template<class F> inline Interval<LowerBound<F>> narrow(Interval<Value<F>> const& ivl) {
+    return narrow(Interval<LowerBound<F>>(ivl),UpperBound<F>(F::min(ivl.upper().precision()))); }
 
-inline Interval<FloatDPValue> cast_exact(Interval<FloatDPApproximation> const& ivl) {
-    return reinterpret_cast<Interval<FloatDPValue> const&>(ivl); }
-inline Interval<FloatMPValue> cast_exact(Interval<FloatMPApproximation> const& ivl) {
-    return reinterpret_cast<Interval<FloatMPValue> const&>(ivl); }
-inline Interval<FloatDPValue> cast_exact_interval(Interval<FloatDPApproximation> const& ivl) {
-    return reinterpret_cast<Interval<FloatDPValue> const&>(ivl); }
-inline Interval<FloatMPValue> cast_exact_interval(Interval<FloatMPApproximation> const& ivl) {
-    return reinterpret_cast<Interval<FloatMPValue> const&>(ivl); }
+inline Interval<FloatValue<DP>> cast_exact(Interval<FloatApproximation<DP>> const& ivl) {
+    return reinterpret_cast<Interval<FloatValue<DP>> const&>(ivl); }
+inline Interval<FloatValue<MP>> cast_exact(Interval<FloatApproximation<MP>> const& ivl) {
+    return reinterpret_cast<Interval<FloatValue<MP>> const&>(ivl); }
+inline Interval<FloatValue<DP>> cast_exact(Interval<FloatUpperBound<DP>> const& ivl) {
+    return reinterpret_cast<Interval<FloatValue<DP>> const&>(ivl); }
+inline Interval<FloatValue<MP>> cast_exact(Interval<FloatUpperBound<MP>> const& ivl) {
+    return reinterpret_cast<Interval<FloatValue<MP>> const&>(ivl); }
+inline Interval<FloatValue<DP>> cast_exact_interval(Interval<FloatApproximation<DP>> const& ivl) {
+    return reinterpret_cast<Interval<FloatValue<DP>> const&>(ivl); }
+inline Interval<FloatValue<MP>> cast_exact_interval(Interval<FloatApproximation<MP>> const& ivl) {
+    return reinterpret_cast<Interval<FloatValue<MP>> const&>(ivl); }
 
 
 } // namespace Ariadne

@@ -253,144 +253,144 @@ template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::oper
 
 namespace { // Internal code for arithmetic
 
-template<class PR> struct ValidatedFloatApproximation {
-    FloatBounds<PR> _v; FloatApproximation<PR> _a;
-    ValidatedFloatApproximation(FloatBounds<PR>const& x) : _v(x), _a(x) { }
-    FloatLowerBound<PR> lower() const { return _v.lower(); }
-    FloatApproximation<PR> middle() const { return _a; }
-    FloatUpperBound<PR> upper() const { return _v.upper(); }
-    RawFloat<PR> const& lower_raw() const { return _v.lower_raw(); }
-    RawFloat<PR> const& middle_raw() const { return _a.raw(); }
-    RawFloat<PR> const& upper_raw() const { return _v.upper_raw(); }
+template<class F> struct ValidatedApproximation {
+    Bounds<F> _v; Approximation<F> _a;
+    ValidatedApproximation(Bounds<F>const& x) : _v(x), _a(x) { }
+    LowerBound<F> lower() const { return _v.lower(); }
+    Approximation<F> middle() const { return _a; }
+    UpperBound<F> upper() const { return _v.upper(); }
+    F const& lower_raw() const { return _v.lower_raw(); }
+    F const& middle_raw() const { return _a.raw(); }
+    F const& upper_raw() const { return _v.upper_raw(); }
 };
 
-template<class PR> FloatValue<PR> add_err(FloatValue<PR> const& x1, FloatValue<PR> const& x2, FloatError<PR>& e) {
-    FloatValue<PR> mx1=-x1;
-    RawFloat<PR>::set_rounding_to_nearest();
-    FloatValue<PR> r(x1.raw() + x2.raw());
-    RawFloat<PR>::set_rounding_upward();
-    RawFloat<PR> u=x1.raw()+x2.raw();
-    RawFloat<PR> ml=mx1.raw()-x2.raw();
+template<class F> Value<F> add_err(Value<F> const& x1, Value<F> const& x2, Error<F>& e) {
+    Value<F> mx1=-x1;
+    F::set_rounding_to_nearest();
+    Value<F> r(x1.raw() + x2.raw());
+    F::set_rounding_upward();
+    F u=x1.raw()+x2.raw();
+    F ml=mx1.raw()-x2.raw();
     e.raw() += (u+ml)/2;
     return r;
 }
 
-template<class PR> FloatValue<PR> add_err(FloatValue<PR> const& x, ValidatedFloatApproximation<PR> const& c, FloatError<PR>& e) {
-    RawFloat<PR> const& xv=x.raw();
-    RawFloat<PR> const& cl=c.lower_raw();
-    RawFloat<PR> const& cm=c.middle_raw();
-    RawFloat<PR> const& cu=c.upper_raw();
-    RawFloat<PR>& re=e.raw();
-    RawFloat<PR>::set_rounding_to_nearest();
-    RawFloat<PR> rv=xv+cm;
-    RawFloat<PR>::set_rounding_upward();
-    RawFloat<PR> u=xv+cu;
-    RawFloat<PR> ml=(-xv)-cl;
+template<class F> Value<F> add_err(Value<F> const& x, ValidatedApproximation<F> const& c, Error<F>& e) {
+    F const& xv=x.raw();
+    F const& cl=c.lower_raw();
+    F const& cm=c.middle_raw();
+    F const& cu=c.upper_raw();
+    F& re=e.raw();
+    F::set_rounding_to_nearest();
+    F rv=xv+cm;
+    F::set_rounding_upward();
+    F u=xv+cu;
+    F ml=(-xv)-cl;
     re += (u+ml)/2;
-    return FloatValue<PR>(rv);
+    return Value<F>(rv);
 }
 
-template<class PR> FloatValue<PR> add_err(FloatValue<PR> const& x, FloatBounds<PR> const& c, FloatError<PR>& e) {
-    return add_err(x,ValidatedFloatApproximation<PR>(c),e);
+template<class F> Value<F> add_err(Value<F> const& x, Bounds<F> const& c, Error<F>& e) {
+    return add_err(x,ValidatedApproximation<F>(c),e);
 }
 
-template<class PR> FloatValue<PR> sub_err(FloatValue<PR> const& x1, FloatValue<PR> const& x2, FloatError<PR>& e) {
-    FloatValue<PR> mx1=-x1;
-    RawFloat<PR>::set_rounding_to_nearest();
-    FloatValue<PR> r(x1.raw() - x2.raw());
-    RawFloat<PR>::set_rounding_upward();
-    RawFloat<PR> u=x1.raw()-x2.raw();
-    RawFloat<PR> ml=mx1.raw()+x2.raw();
+template<class F> Value<F> sub_err(Value<F> const& x1, Value<F> const& x2, Error<F>& e) {
+    Value<F> mx1=-x1;
+    F::set_rounding_to_nearest();
+    Value<F> r(x1.raw() - x2.raw());
+    F::set_rounding_upward();
+    F u=x1.raw()-x2.raw();
+    F ml=mx1.raw()+x2.raw();
     e.raw() += (u+ml)/2;
     return r;
 }
 
-template<class PR> FloatValue<PR> mul_no_err(FloatValue<PR> const& x1, FloatValue<PR> const& x2) {
-    RawFloat<PR>::set_rounding_to_nearest();
-    FloatValue<PR> r(x1.raw() * x2.raw());
-    RawFloat<PR>::set_rounding_upward();
+template<class F> Value<F> mul_no_err(Value<F> const& x1, Value<F> const& x2) {
+    F::set_rounding_to_nearest();
+    Value<F> r(x1.raw() * x2.raw());
+    F::set_rounding_upward();
     return r;
 }
 
-template<class PR> FloatValue<PR> mul_err(FloatValue<PR> const& x1, FloatValue<PR> const& x2, FloatError<PR>& e) {
-    FloatValue<PR> mx1=-x1;
-    RawFloat<PR>::set_rounding_to_nearest();
-    FloatValue<PR> r(x1.raw() * x2.raw());
-    RawFloat<PR>::set_rounding_upward();
-    RawFloat<PR> u=x1.raw()*x2.raw();
-    RawFloat<PR> ml=mx1.raw()*x2.raw();
+template<class F> Value<F> mul_err(Value<F> const& x1, Value<F> const& x2, Error<F>& e) {
+    Value<F> mx1=-x1;
+    F::set_rounding_to_nearest();
+    Value<F> r(x1.raw() * x2.raw());
+    F::set_rounding_upward();
+    F u=x1.raw()*x2.raw();
+    F ml=mx1.raw()*x2.raw();
     e.raw() += (u+ml)/2;
     return r;
 }
 
-template<class PR> FloatValue<PR> mul_err(FloatValue<PR> const& x, ValidatedFloatApproximation<PR> const& c, FloatError<PR>& e) {
-    RawFloat<PR> const& xv=x.raw();
-    RawFloat<PR> const& cu=c.upper_raw();
-    RawFloat<PR> const& cm=c.middle_raw();
-    RawFloat<PR> const& cl=c.lower_raw();
-    RawFloat<PR>& re=e.raw();
-    RawFloat<PR>::set_rounding_to_nearest();
-    RawFloat<PR> rv=xv*cm;
-    RawFloat<PR>::set_rounding_upward();
-    RawFloat<PR> u,ml;
+template<class F> Value<F> mul_err(Value<F> const& x, ValidatedApproximation<F> const& c, Error<F>& e) {
+    F const& xv=x.raw();
+    F const& cu=c.upper_raw();
+    F const& cm=c.middle_raw();
+    F const& cl=c.lower_raw();
+    F& re=e.raw();
+    F::set_rounding_to_nearest();
+    F rv=xv*cm;
+    F::set_rounding_upward();
+    F u,ml;
     if(xv>=0) {
-        RawFloat<PR> mcl=-cl;
+        F mcl=-cl;
         u=xv*cu;
         ml=xv*mcl;
     } else {
-        RawFloat<PR> mcu=-cu;
+        F mcu=-cu;
         u=xv*cl;
         ml=xv*mcu;
     }
     re+=(u+ml)/2;
-    return FloatValue<PR>(rv);
+    return Value<F>(rv);
 }
 
-template<class PR> FloatValue<PR> mul_err(FloatValue<PR> const& x, FloatBounds<PR> const& c, FloatError<PR>& e) {
-    return mul_err(x,ValidatedFloatApproximation<PR>(c),e);
+template<class F> Value<F> mul_err(Value<F> const& x, Bounds<F> const& c, Error<F>& e) {
+    return mul_err(x,ValidatedApproximation<F>(c),e);
 }
 
-template<class PR> FloatValue<PR> fma_err(FloatValue<PR> const& x, ValidatedFloatApproximation<PR> const& c, FloatValue<PR> y, FloatError<PR>& e) {
-    RawFloat<PR> const& xv=x.raw();
-    RawFloat<PR> const& cu=c.upper_raw();
-    RawFloat<PR> const& cm=c.middle_raw();
-    RawFloat<PR> const& cl=c.lower_raw();
-    RawFloat<PR> const& yv=y.raw();
-    RawFloat<PR>& re=e.raw();
-    RawFloat<PR>::set_rounding_to_nearest();
-    RawFloat<PR> rv=xv+cm*yv;
-    RawFloat<PR>::set_rounding_upward();
-    RawFloat<PR> u,ml;
+template<class F> Value<F> fma_err(Value<F> const& x, ValidatedApproximation<F> const& c, Value<F> y, Error<F>& e) {
+    F const& xv=x.raw();
+    F const& cu=c.upper_raw();
+    F const& cm=c.middle_raw();
+    F const& cl=c.lower_raw();
+    F const& yv=y.raw();
+    F& re=e.raw();
+    F::set_rounding_to_nearest();
+    F rv=xv+cm*yv;
+    F::set_rounding_upward();
+    F u,ml;
     if(yv>=0) {
-        RawFloat<PR> mcl=-cl;
+        F mcl=-cl;
         u=cu*yv+xv;
         ml=mcl*yv-xv;
     } else {
-        RawFloat<PR> mcu=-cu;
+        F mcu=-cu;
         u=cl*yv+xv;
         ml=mcu*yv-xv;
     }
     re+=(u+ml)/2;
-    return FloatValue<PR>(rv);
+    return Value<F>(rv);
 }
 
-template<class PR> FloatValue<PR> mul_err(FloatValue<PR> const& x1, Nat n2, FloatError<PR>& e) {
-    return mul_err(x1,FloatValue<PR>(n2,x1.precision()),e);
+template<class F> Value<F> mul_err(Value<F> const& x1, Nat n2, Error<F>& e) {
+    return mul_err(x1,Value<F>(n2,x1.precision()),e);
 }
 
-template<class PR> FloatValue<PR> div_err(FloatValue<PR> const& x1, FloatValue<PR> const& x2, FloatError<PR>& e) {
-    FloatValue<PR> mx1=-x1;
-    RawFloat<PR>::set_rounding_to_nearest();
-    FloatValue<PR> r(x1.raw() / x2.raw());
-    RawFloat<PR>::set_rounding_upward();
-    RawFloat<PR> u=x1.raw()/x2.raw();
-    RawFloat<PR> ml=mx1.raw()/x2.raw();
+template<class F> Value<F> div_err(Value<F> const& x1, Value<F> const& x2, Error<F>& e) {
+    Value<F> mx1=-x1;
+    F::set_rounding_to_nearest();
+    Value<F> r(x1.raw() / x2.raw());
+    F::set_rounding_upward();
+    F u=x1.raw()/x2.raw();
+    F ml=mx1.raw()/x2.raw();
     e.raw() += (u+ml)/2;
     return r;
 }
 
-template<class PR> FloatValue<PR> div_err(FloatValue<PR> const& x1, Nat n2, FloatError<PR>& e) {
-    return div_err(x1,FloatValue<PR>(n2,x1.precision()),e);
+template<class F> Value<F> div_err(Value<F> const& x1, Nat n2, Error<F>& e) {
+    return div_err(x1,Value<F>(n2,x1.precision()),e);
 }
 
 // Inplace negation
@@ -436,7 +436,7 @@ template<class F> Void _scal(TaylorModel<ValidatedTag,F>& r, const Bounds<F>& c)
     }
 
     FloatError<PR> e=nul(r.error());
-    ValidatedFloatApproximation<PR> clmu=c;
+    ValidatedApproximation<F> clmu=c;
     for(typename TaylorModel<ValidatedTag,F>::Iterator riter=r.begin(); riter!=r.end(); ++riter) {
         FloatValue<PR>& rv=riter->data();
         rv=mul_err(rv,clmu,e);
@@ -612,7 +612,7 @@ template<class F> inline Void _sma(TaylorModel<ValidatedTag,F>& r, const TaylorM
     VOLATILE FloatDP u,ml,myv;
     FloatError<PR> te=nul(r.error()); // Twice the maximum accumulated error
     FloatError<PR> err=nul(r.error()); // Twice the maximum accumulated error
-    ValidatedFloatApproximation<PR> clmu=c;
+    ValidatedApproximation<F> clmu=c;
 
     // Compute r=x+y, assuming r is empty
     RawFloat<PR>::set_rounding_upward();

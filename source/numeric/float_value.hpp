@@ -41,9 +41,9 @@
 
 namespace Ariadne {
 
-template<class PR> struct NumericTraits<FloatValue<PR>> {
+template<class F> struct NumericTraits<Value<F>> {
     typedef ExactNumber GenericType;
-    typedef PositiveFloatValue<PR> PositiveType;
+    typedef PositiveValue<F> PositiveType;
     typedef Boolean LessType;
     typedef Boolean EqualsType;
 };
@@ -54,91 +54,100 @@ static_assert(not IsGenericNumericType<FloatValue<MultiplePrecision>>::value,"")
 //! \ingroup NumericModule
 //! \brief A floating-point number, which is taken to represent the \em exact value of a real quantity.
 //! \sa FloatDP , FloatMP, FloatBall, FloatBounds, FloatApproximation.
-template<class PR> class FloatValue
-    : DispatchNumericOperations<FloatValue<PR>,FloatBounds<PR>>
-    , DispatchComparisonOperations<FloatValue<PR>,Boolean>
-    , DefineMixedComparisonOperators<FloatValue<PR>,ExactNumber,Boolean>
-    , DefineMixedComparisonOperators<FloatValue<PR>,Rational,Boolean>
-//    , DefineMixedComparisonOperators<FloatValue<PR>,Dyadic,Boolean>
-//    , DefineMixedComparisonOperators<FloatValue<PR>,Integer,Boolean>
-//    , DefineMixedComparisonOperators<FloatValue<PR>,Int,Boolean>
-//        , public DispatchFloatOperations<FloatBall<PR>>
-        , public DispatchFloatOperations<FloatBounds<PR>>
-    , DefineConcreteGenericArithmeticOperators<FloatValue<PR>>
-    , DefineConcreteGenericComparisonOperators<FloatValue<PR>>
+template<class F> class Value
+    : DispatchNumericOperations<Value<F>,Bounds<F>>
+    , DispatchComparisonOperations<Value<F>,Boolean>
+    , DefineMixedComparisonOperators<Value<F>,ExactNumber,Boolean>
+    , DefineMixedComparisonOperators<Value<F>,Rational,Boolean>
+//    , DefineMixedComparisonOperators<Value<F>,Dyadic,Boolean>
+//    , DefineMixedComparisonOperators<Value<F>,Integer,Boolean>
+//    , DefineMixedComparisonOperators<Value<F>,Int,Boolean>
+//        , public DispatchFloatOperations<Ball<F>>
+        , public DispatchFloatOperations<Bounds<F>>
+    , DefineConcreteGenericArithmeticOperators<Value<F>>
+    , DefineConcreteGenericComparisonOperators<Value<F>>
 {
-    typedef ExactTag P; typedef RawFloat<PR> FLT;
+  protected:
+    typedef ExactTag P; typedef typename F::PrecisionType PR;
   public:
     typedef ExactTag Paradigm;
-    typedef FloatValue<PR> NumericType;
+    typedef Value<F> NumericType;
     typedef ExactNumber GenericType;
-    typedef FLT RawFloatType;
+    typedef F RawType;
     typedef PR PrecisionType;
     typedef PR PropertiesType;
   public:
-    FloatValue<PR>() : _v(0.0) { }
-    explicit FloatValue<PR>(PrecisionType pr) : _v(0.0,pr) { }
-    explicit FloatValue<PR>(RawFloatType const& v) : _v(v) { }
+    Value<F>() : _v(0.0) { }
+    explicit Value<F>(PrecisionType pr) : _v(0.0,pr) { }
+    explicit Value<F>(RawType const& v) : _v(v) { }
 
-    template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> FloatValue<PR>(N n, PR pr) : FloatValue<PR>(ExactDouble(n),pr) { }
-    FloatValue<PR>(ExactDouble d, PR pr);
-    FloatValue<PR>(const Integer& z, PR pr);
-    FloatValue<PR>(const TwoExp& t, PR pr);
-    FloatValue<PR>(const Dyadic& w, PR pr);
-    FloatValue<PR>(const FloatValue<PR>& x, PR pr);
+    template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> Value<F>(N n, PR pr) : Value<F>(ExactDouble(n),pr) { }
+    Value<F>(ExactDouble d, PR pr);
+    Value<F>(const Integer& z, PR pr);
+    Value<F>(const TwoExp& t, PR pr);
+    Value<F>(const Dyadic& w, PR pr);
+    Value<F>(const Value<F>& x, PR pr);
 
-    template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> FloatValue<PR>& operator=(N n) { _v=n; return *this; }
-    FloatValue<PR>& operator=(const Integer& z);
-    FloatValue<PR>& operator=(const TwoExp& t);
-    FloatValue<PR>& operator=(const Dyadic& w);
+    template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> Value<F>& operator=(N n) { _v=n; return *this; }
+    Value<F>& operator=(const Integer& z);
+    Value<F>& operator=(const TwoExp& t);
+    Value<F>& operator=(const Dyadic& w);
 
     operator ExactNumber () const;
     explicit operator Dyadic () const;
     explicit operator Rational () const;
 
-    FloatBall<PR> create(ValidatedNumber const&) const;
-//    explicit operator RawFloatType () const { return _v; }
+    Ball<F> create(ValidatedNumber const&) const;
+//    explicit operator RawType () const { return _v; }
 
     PrecisionType precision() const { return _v.precision(); }
     PropertiesType properties() const { return _v.precision(); }
     GenericType generic() const { return this->operator GenericType(); }
-    RawFloatType const& raw() const { return _v; }
-    RawFloatType& raw() { return _v; }
+    RawType const& raw() const { return _v; }
+    RawType& raw() { return _v; }
     double get_d() const { return _v.get_d(); }
 
-    template<class PRE> FloatBall<PR,PRE> pm(FloatError<PRE> e) const;
+    template<class FE> FloatBall<PR,Ariadne::PrecisionType<FE>> pm(Error<FE> e) const;
   public:
-    friend FloatValue<PR> operator*(FloatValue<PR> const&, TwoExp const&);
-    friend FloatValue<PR> operator/(FloatValue<PR> const&, TwoExp const&);
-    friend FloatValue<PR>& operator*=(FloatValue<PR>&, TwoExp const&);
-    friend FloatValue<PR>& operator/=(FloatValue<PR>&, TwoExp const&);
-    friend FloatError<PR> mag(FloatValue<PR> const&);
-    friend FloatLowerBound<PR> mig(FloatValue<PR> const&);
-    friend Bool same(FloatValue<PR> const&, FloatValue<PR> const&);
-    friend OutputStream& operator<<(OutputStream&, FloatValue<PR> const&);
+    friend Value<F> operator*(Value<F> const&, TwoExp const&);
+    friend Value<F> operator/(Value<F> const&, TwoExp const&);
+    friend Value<F>& operator*=(Value<F>&, TwoExp const&);
+    friend Value<F>& operator/=(Value<F>&, TwoExp const&);
+    friend Error<F> mag(Value<F> const&);
+    friend LowerBound<F> mig(Value<F> const&);
+    friend Bool same(Value<F> const&, Value<F> const&);
+    friend OutputStream& operator<<(OutputStream&, Value<F> const&);
   public:
-    friend Comparison cmp(FloatValue<PR> const& x1, Rational const& q2) { return cmp(x1.raw(),q2); }
-    friend Comparison cmp(FloatValue<PR> const& x1, Dyadic const& w2) { return cmp(x1.raw(),w2); }
-    friend Comparison cmp(FloatValue<PR> const& x1, Integer const& z2) { return cmp(x1.raw(),z2); }
+    friend Comparison cmp(Value<F> const& x1, Rational const& q2) { return cmp(x1.raw(),q2); }
+    friend Comparison cmp(Value<F> const& x1, Dyadic const& w2) { return cmp(x1.raw(),w2); }
+    friend Comparison cmp(Value<F> const& x1, Integer const& z2) { return cmp(x1.raw(),z2); }
   public:
     static Nat output_places;
     static Void set_output_places(Nat p) { output_places=p; }
   private: public:
-    RawFloatType _v;
+    RawType _v;
   private:
-    friend FloatValue<PR> shft(FloatValue<PR> const& x, Int n) {
-        return FloatValue<PR>(shft(x.raw(),n)); }
-    friend FloatValue<PR> operator*(FloatValue<PR> const& x, TwoExp const& y) {
-        return FloatValue<PR>(mul(near,x.raw(),RawFloat<PR>(y,x.precision()))); }
-    friend FloatValue<PR> operator/(FloatValue<PR> const& x, TwoExp const& y) {
-        return FloatValue<PR>(div(near,x.raw(),RawFloat<PR>(y,x.precision()))); }
-    friend FloatValue<PR>& operator*=(FloatValue<PR>& x, TwoExp const& y) { return x=x*y; }
-    friend FloatValue<PR>& operator/=(FloatValue<PR>& x, TwoExp const& y) { return x=x/y; }
-    friend OutputStream& operator<<(OutputStream& os, FloatValue<PR> const& x) {
-        return Operations<FloatValue<PR>>::_write(os,x); }
+    friend Value<F> shft(Value<F> const& x, Int n) {
+        return Value<F>(shft(x.raw(),n)); }
+    friend Value<F> operator*(Value<F> const& x, TwoExp const& y) {
+        return Value<F>(mul(near,x.raw(),F(y,x.precision()))); }
+    friend Value<F> operator/(Value<F> const& x, TwoExp const& y) {
+        return Value<F>(div(near,x.raw(),F(y,x.precision()))); }
+    friend Value<F>& operator*=(Value<F>& x, TwoExp const& y) { return x=x*y; }
+    friend Value<F>& operator/=(Value<F>& x, TwoExp const& y) { return x=x/y; }
+    friend OutputStream& operator<<(OutputStream& os, Value<F> const& x) {
+        return Operations<Value<F>>::_write(os,x); }
 };
 
-template<class PR> inline FloatFactory<PR> factory(FloatValue<PR> const& flt) { return FloatFactory<PR>(flt.precision()); }
+/*
+template<class PR> class FloatValue : public Value<RawFloatType<PR>> {
+    typedef RawFloatType<PR> F;
+    static Nat output_places;
+    using Value<F>::Value;
+};
+*/
+
+template<class F> inline FloatFactory<PrecisionType<F>> factory(Value<F> const& flt) { return FloatFactory<PrecisionType<F>>(flt.precision()); }
 template<class PR> inline FloatValue<PR> FloatFactory<PR>::create(Dyadic const& y, ExactTag) { return FloatValue<PR>(y,_pr); }
 template<class PR> inline FloatValue<PR> FloatFactory<PR>::create(Integer const& y, ExactTag) { return FloatValue<PR>(y,_pr); }
 template<class PR> inline FloatValue<PR> FloatFactory<PR>::create(ExactDouble const& y) { return FloatValue<PR>(y,_pr); }
@@ -149,25 +158,26 @@ FloatValue<PR> FloatFactory<PR>::create(N const& y) { return FloatValue<PR>(y,_p
 template<class PR> template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>>> inline
 PositiveFloatValue<PR> FloatFactory<PR>::create(M const& y) { return PositiveFloatValue<PR>(y,_pr); }
 
-template<class PR> class Positive<FloatValue<PR>> : public FloatValue<PR> {
+template<class F> class Positive<Value<F>> : public Value<F> {
+    using typename Value<F>::PR;
   public:
-    Positive<FloatValue<PR>>() : FloatValue<PR>() { }
-    explicit Positive<FloatValue<PR>>(PR const& pr) : FloatValue<PR>(pr) { }
-    template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>> =dummy> Positive<FloatValue<PR>>(M m, PR pr) : FloatValue<PR>(m,pr) { }
-    Positive<FloatValue<PR>>(TwoExp const& ex, PR pr) : FloatValue<PR>(ex,pr) { }
-    explicit Positive<FloatValue<PR>>(Dyadic const& w, PR pr) : FloatValue<PR>(w,pr) { }
-    explicit Positive<FloatValue<PR>>(RawFloat<PR> const& x) : FloatValue<PR>(x) { }
-    explicit Positive<FloatValue<PR>>(FloatValue<PR> const& x) : FloatValue<PR>(x) { }
+    Positive<Value<F>>() : Value<F>() { }
+    explicit Positive<Value<F>>(PR const& pr) : Value<F>(pr) { }
+    template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>> =dummy> Positive<Value<F>>(M m, PR pr) : Value<F>(m,pr) { }
+    Positive<Value<F>>(TwoExp const& ex, PR pr) : Value<F>(ex,pr) { }
+    explicit Positive<Value<F>>(Dyadic const& w, PR pr) : Value<F>(w,pr) { }
+    explicit Positive<Value<F>>(F const& x) : Value<F>(x) { }
+    explicit Positive<Value<F>>(Value<F> const& x) : Value<F>(x) { }
   public:
-    friend Positive<FloatValue<PR>> hlf(Positive<FloatValue<PR>> const&);
-    friend Positive<FloatBounds<PR>> pow(Positive<FloatValue<PR>> const& x, Nat m) {
-        return pow(Positive<FloatBounds<PR>>(x),m); }
-    friend Positive<FloatBounds<PR>> pow(Positive<FloatBounds<PR>> const& x, Int n) {
-        return pow(Positive<FloatBounds<PR>>(x),n); }
+    friend Positive<Value<F>> hlf(Positive<Value<F>> const&);
+    friend Positive<Bounds<F>> pow(Positive<Value<F>> const& x, Nat m) {
+        return pow(Positive<Bounds<F>>(x),m); }
+    friend Positive<Bounds<F>> pow(Positive<Bounds<F>> const& x, Int n) {
+        return pow(Positive<Bounds<F>>(x),n); }
 };
 
-template<class PR> inline PositiveFloatValue<PR> cast_positive(FloatValue<PR> const& x) {
-    return PositiveFloatValue<PR>(x); }
+template<class F> inline PositiveValue<F> cast_positive(Value<F> const& x) {
+    return PositiveValue<F>(x); }
 
 static_assert(IsSame<decltype(declval<FloatDPValue>() < declval<Rational>()),Boolean>::value,"");
 

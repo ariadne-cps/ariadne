@@ -244,10 +244,11 @@ template<class M> class ScaledFunctionPatch
     //! \brief The gradient at the centre of the domain.
     const CoefficientType gradient_value(SizeType i) const {
         // FIXME: Cannot be guaranteed to be exact
-        FloatBounds<PR> radius(this->_domain[i].radius(),this->model().precision()); return cast_exact(this->_model.gradient_value(i)/radius); }
+        Bounds<F> radius(this->_domain[i].radius(),this->model().precision()); Value<F> gradient=this->_model.gradient_value(i);
+        return cast_exact(gradient/radius); }
 
     //! \brief A polynomial representation.
-    Polynomial<FloatBounds<PR>> polynomial() const;
+    Polynomial<Bounds<F>> polynomial() const;
     //! \brief A multivalued function equal to the model on the domain.
     ScalarFunctionType<M> function() const;
     //! \brief Cast to a generic function.

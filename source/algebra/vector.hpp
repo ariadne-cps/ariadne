@@ -748,16 +748,12 @@ template<class X> template<class PR, EnableIf<IsConstructible<X,ExactDouble,Exac
     }
 }
 
+} // namespace Ariadne
 
-template<class PR> class FloatApproximation;
-template<class PR> class FloatValue;
-typedef FloatValue<DoublePrecision> FloatDPValue;
-typedef FloatApproximation<DoublePrecision> FloatDPApproximation;
+#include "numeric/float.decl.hpp"
+namespace Ariadne {
 inline Vector<FloatDPValue>const& cast_exact(Vector<FloatDPApproximation>const& v) {
-    return reinterpret_cast<Vector<FloatDPValue>const&>(v);
-}
-
-
+    return reinterpret_cast<Vector<FloatDPValue>const&>(v); }
 } // namespace Ariadne
 
 #endif

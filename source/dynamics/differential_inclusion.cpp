@@ -68,7 +68,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegratorBase::flow(EffectiveVect
             hsug=cast_positive(cast_exact((tmax-t).upper()));
         }
 
-        auto D = cast_exact(evolve_function.range());
+        auto D = cast_exact_box(evolve_function.range());
         UpperBoxType B;
         PositiveFloatDPValue h;
         std::tie(h,B)=this->flow_bounds(f,V,D,hsug);

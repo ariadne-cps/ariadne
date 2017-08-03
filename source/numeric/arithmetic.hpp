@@ -1122,6 +1122,10 @@ template<class X, class R=X> struct DispatchNumericOperations
     friend X hlf(X const& x) { return OperationsType::_hlf(x); }
     friend R sqr(X const& x) { return OperationsType::_sqr(x); }
     friend R rec(X const& x) { return OperationsType::_rec(x); }
+//    friend R add(X const& x1, X const& x2);
+//    friend R sub(X const& x1, X const& x2);
+//    friend R mul(X const& x1, X const& x2);
+//    friend R div(X const& x1, X const& x2);
     friend R add(X const& x1, X const& x2) { return OperationsType::_add(x1,x2); }
     friend R sub(X const& x1, X const& x2) { return OperationsType::_sub(x1,x2); }
     friend R mul(X const& x1, X const& x2) { return OperationsType::_mul(x1,x2); }

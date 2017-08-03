@@ -55,10 +55,18 @@ class FloatMP;
 using RawFloatDP = FloatDP;
 using RawFloatMP = FloatMP;
 
+template<class PR> struct RawFloatTypedef;
+template<> struct RawFloatTypedef<DoublePrecision> { typedef FloatDP Type; };
+template<> struct RawFloatTypedef<MultiplePrecision> { typedef FloatMP Type; };
+template<class PR> using RawFloat = decltype(cast_raw_float(declval<PR>()));
+template<class PR> using RawFloatType = typename RawFloatTypedef<PR>::Type;
+
 RawFloatDP cast_raw_float(DoublePrecision);
 RawFloatMP cast_raw_float(MultiplePrecision);
 template<class PR> using RawFloat = decltype(cast_raw_float(declval<PR>()));
 
+
+/*
 template<class PR> class FloatApproximation;
 template<class PR> class FloatLowerBound;
 template<class PR> class FloatUpperBound;
@@ -66,6 +74,31 @@ template<class PR> class FloatBounds;
 template<class PR, class PRE=PR> class FloatBall;
 template<class PR> class FloatValue;
 template<class PR> class FloatError;
+*/
+
+template<class F> class Approximation;
+template<class F> class LowerBound;
+template<class F> class UpperBound;
+template<class F> class Bounds;
+template<class F, class FE=F> class Ball;
+template<class F> class Value;
+
+template<class F> class Error;
+
+template<class F> using PositiveApproximation = Positive<Approximation<F>>;
+template<class F> using PositiveLowerBound = Positive<LowerBound<F>>;
+template<class F> using PositiveUpperBound = Positive<UpperBound<F>>;
+template<class F> using PositiveBounds = Positive<Bounds<F>>;
+template<class F, class FE=F> using PositiveBall = Positive<Ball<F>>;
+template<class F> using PositiveValue = Positive<Value<F>>;
+
+
+template<class PR> using FloatApproximation = Approximation<RawFloatType<PR>>;
+template<class PR> using FloatLowerBound = LowerBound<RawFloatType<PR>>;
+template<class PR> using FloatUpperBound = UpperBound<RawFloatType<PR>>;
+template<class PR> using FloatBounds = Bounds<RawFloatType<PR>>;
+template<class PR, class PRE=PR> using FloatBall = Ball<RawFloatType<PR>,RawFloatType<PRE>>;
+template<class PR> using FloatValue = Value<RawFloatType<PR>>;
 
 template<class PR> using PositiveFloatApproximation = Positive<FloatApproximation<PR>>;
 template<class PR> using PositiveFloatLowerBound = Positive<FloatLowerBound<PR>>;
@@ -73,6 +106,9 @@ template<class PR> using PositiveFloatUpperBound = Positive<FloatUpperBound<PR>>
 template<class PR> using PositiveFloatBounds = Positive<FloatBounds<PR>>;
 template<class PR, class PRE=PR> using PositiveFloatBall = Positive<FloatBall<PR,PRE>>;
 template<class PR> using PositiveFloatValue = Positive<FloatValue<PR>>;
+
+template<class PR> using FloatError = Error<RawFloatType<PR>>;
+
 
 template<class P, class PR, class PRE=PR> struct FloatTypedef;
 template<class PR> struct FloatTypedef<ApproximateTag,PR> { typedef FloatApproximation<PR> Type; };
@@ -86,16 +122,18 @@ template<class PR> struct FloatTypedef<ErrorTag,PR> { typedef FloatError<PR> Typ
 template<class PR> struct FloatTypedef<ValidatedTag,PR> { typedef FloatBounds<PR> Type; };
 template<class PR, class PRE> struct FloatTypedef<EffectiveTag,PR,PRE> { typedef FloatBall<PR,PRE> Type; };
 
-template<class P, class PR, class PRE=PR> using Float = typename FloatTypedef<P,PR,PRE>::Type;
+//template<class P, class PR, class PRE=PR> using Float = typename FloatTypedef<P,PR,PRE>::Type;
 //template<class P> using FloatDP=Float<P,DoublePrecision>;
 //template<class P> using FloatMP=Float<P,MultiplePrecision>;
 
-using FloatDPApproximation = Float<ApproximateTag,DoublePrecision>;
-using FloatDPLowerBound = Float<LowerTag,DoublePrecision>;
-using FloatDPUpperBound = Float<UpperTag,DoublePrecision>;
-using FloatDPBounds = Float<BoundedTag,DoublePrecision>;
-using FloatDPBall = Float<MetricTag,DoublePrecision>;
-using FloatDPValue = Float<ExactTag,DoublePrecision>;
+template<class F> using PositiveApproximation = Positive<Approximation<F>>;
+
+using FloatDPApproximation = FloatApproximation<DoublePrecision>;
+using FloatDPLowerBound = FloatLowerBound<DoublePrecision>;
+using FloatDPUpperBound = FloatUpperBound<DoublePrecision>;
+using FloatDPBounds = FloatBounds<DoublePrecision>;
+using FloatDPBall = FloatBall<DoublePrecision>;
+using FloatDPValue = FloatValue<DoublePrecision>;
 using FloatDPError = FloatError<DoublePrecision>;
 using PositiveFloatDPApproximation = PositiveFloatApproximation<DoublePrecision>;
 using PositiveFloatDPLowerBound = PositiveFloatLowerBound<DoublePrecision>;
@@ -104,12 +142,12 @@ using PositiveFloatDPBounds = PositiveFloatBounds<DoublePrecision>;
 using PositiveFloatDPBall = PositiveFloatBall<DoublePrecision>;
 using PositiveFloatDPValue = PositiveFloatValue<DoublePrecision>;
 
-using FloatMPApproximation = Float<ApproximateTag,MultiplePrecision>;
-using FloatMPLowerBound = Float<LowerTag,MultiplePrecision>;
-using FloatMPUpperBound = Float<UpperTag,MultiplePrecision>;
-using FloatMPBounds= Float<BoundedTag,MultiplePrecision>;
-using FloatMPBall = Float<MetricTag,MultiplePrecision>;
-using FloatMPValue = Float<ExactTag,MultiplePrecision>;
+using FloatMPApproximation = FloatApproximation<MultiplePrecision>;
+using FloatMPLowerBound = FloatLowerBound<MultiplePrecision>;
+using FloatMPUpperBound = FloatUpperBound<MultiplePrecision>;
+using FloatMPBounds = FloatBounds<MultiplePrecision>;
+using FloatMPBall = FloatBall<MultiplePrecision>;
+using FloatMPValue = FloatValue<MultiplePrecision>;
 using FloatMPError = FloatError<MultiplePrecision>;
 using PositiveFloatMPApproximation = PositiveFloatApproximation<MultiplePrecision>;
 using PositiveFloatMPLowerBound = PositiveFloatLowerBound<MultiplePrecision>;
@@ -118,34 +156,40 @@ using PositiveFloatMPBounds = PositiveFloatBounds<MultiplePrecision>;
 using PositiveFloatMPBall = PositiveFloatBall<MultiplePrecision>;
 using PositiveFloatMPValue = PositiveFloatValue<MultiplePrecision>;
 
-using FloatMDPBall = Float<MetricTag,MultiplePrecision,DoublePrecision>;
+using FloatMDPBall = FloatBall<MultiplePrecision,DoublePrecision>;
 
-template<class F> using Approximation = FloatApproximation<typename F::PrecisionType>;
-template<class F> using LowerBound = FloatLowerBound<typename F::PrecisionType>;
-template<class F> using UpperBound = FloatUpperBound<typename F::PrecisionType>;
-template<class F> using Bounds = FloatBounds<typename F::PrecisionType>;
-template<class F, class FE=F> using Ball = FloatBall<typename F::PrecisionType, typename FE::PrecisionType>;
-template<class F> using Value = FloatValue<typename F::PrecisionType>;
-template<class F> using Error = FloatError<typename F::PrecisionType>;
-
+template<class P, class PR, class PRE=PR> struct UserFloatTypedef;
+template<class PR> struct UserFloatTypedef<ApproximateTag,PR> { typedef FloatApproximation<PR> Type; };
+template<class PR> struct UserFloatTypedef<LowerTag,PR> { typedef FloatLowerBound<PR> Type; };
+template<class PR> struct UserFloatTypedef<UpperTag,PR> { typedef FloatUpperBound<PR> Type; };
+template<class PR> struct UserFloatTypedef<BoundedTag,PR> { typedef FloatBounds<PR> Type; };
+template<class PR, class PRE> struct UserFloatTypedef<MetricTag,PR,PRE> { typedef FloatBall<PR,PRE> Type; };
+template<class PR> struct UserFloatTypedef<ExactTag,PR> { typedef FloatValue<PR> Type; };
+template<class PR> struct UserFloatTypedef<ValidatedTag,PR> { typedef FloatBounds<PR> Type; };
+template<class PR> struct UserFloatTypedef<EffectiveTag,PR> { typedef FloatBall<PR> Type; };
+template<class P, class PR, class PRE=PR> using Float = typename UserFloatTypedef<P,PR,PRE>::Type;
 
 template<class X> struct IsFloat : False { };
-template<class PR> struct IsFloat<FloatApproximation<PR>> : True { };
-template<class PR> struct IsFloat<FloatLowerBound<PR>> : True { };
-template<class PR> struct IsFloat<FloatUpperBound<PR>> : True { };
-template<class PR> struct IsFloat<FloatBounds<PR>> : True { };
-template<class PR, class PRE> struct IsFloat<FloatBall<PR,PRE>> : True { };
-template<class PR> struct IsFloat<FloatValue<PR>> : True { };
-template<class PR> struct IsFloat<FloatError<PR>> : True { };
+template<> struct IsFloat<FloatDP> : True { };
+template<> struct IsFloat<FloatMP> : True { };
+template<class F> struct IsFloat<Approximation<F>> : IsFloat<F> { };
+template<class F> struct IsFloat<LowerBound<F>> : IsFloat<F> { };
+template<class F> struct IsFloat<UpperBound<F>> : IsFloat<F> { };
+template<class F> struct IsFloat<Bounds<F>> : IsFloat<F> { };
+template<class F, class FE> struct IsFloat<Ball<F,FE>> : IsFloat<F> { };
+template<class F> struct IsFloat<Value<F>> : IsFloat<F> { };
+template<class F> struct IsFloat<Error<F>> : IsFloat<F> { };
 template<> struct IsFloat<Dbl> : False { };
 
 
 template<class T> struct IsNumericType;
 template<> struct IsNumericType<Dbl> : True { };
-template<class PR> struct IsNumericType<FloatApproximation<PR>> : True { };
-template<class PR> struct IsNumericType<FloatBounds<PR>> : True { };
-template<class PR, class PRE> struct IsNumericType<FloatBall<PR,PRE>> : True { };
-template<class PR> struct IsNumericType<FloatValue<PR>> : True { };
+template<> struct IsNumericType<FloatDP> : True { };
+template<> struct IsNumericType<FloatMP> : True { };
+template<class F> struct IsNumericType<Approximation<F>> : IsNumericType<F> { };
+template<class F> struct IsNumericType<Bounds<F>> : IsNumericType<F> { };
+template<class F, class FE> struct IsNumericType<Ball<F,FE>> : IsNumericType<F> { };
+template<class F> struct IsNumericType<Value<F>> : IsNumericType<F> { };
 
 } // namespace Ariadne
 

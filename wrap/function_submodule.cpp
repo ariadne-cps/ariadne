@@ -436,7 +436,6 @@ template<class P> Void export_scalar_function()
 template<class P> Void export_vector_function()
 {
     typedef VectorFunction<P> VF;
-
     class_<VectorFunction<P>>
         vector_function_class((class_name<P>()+"VectorFunction").c_str(), init<VectorFunction<P>>());
     vector_function_class.def(init<Nat,Nat>());
@@ -459,8 +458,8 @@ template<class P> Void export_vector_function()
     vector_function_class.def("identity", (VectorFunction<P>(*)(SizeType)) &VectorFunction<P>::identity);
     vector_function_class.staticmethod("identity");
 
-    def("evaluate", (Vector<FloatDPApproximation>(*)(const VectorFunction<P>&,const Vector<FloatDPApproximation>&)) &evaluate<P,BoxDomainType,FloatDPApproximation>);
-    def("evaluate", (Vector<FloatDPBounds>(*)(const VectorFunction<P>&,const Vector<FloatDPBounds>&)) &evaluate<P,BoxDomainType,FloatDPBounds>);
+    def("evaluate", (Vector<FloatDPApproximation>(*)(const VectorFunction<P>&,const Vector<FloatDPApproximation>&)) &evaluate);
+    def("evaluate", (Vector<FloatDPBounds>(*)(const VectorFunction<P>&,const Vector<FloatDPBounds>&)) &evaluate);
 
     def("join", (VectorFunction<P>(*)(const ScalarFunction<P>&, const ScalarFunction<P>&)) &join);
     def("join", (VectorFunction<P>(*)(const VectorFunction<P>&, const ScalarFunction<P>&)) &join);

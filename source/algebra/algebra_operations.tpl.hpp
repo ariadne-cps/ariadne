@@ -153,12 +153,12 @@ template<class A> EnableIfNormedAlgebra<A> _compose2(const AnalyticFunction& fn,
     return res;
 }
 
-template<class PR> FloatError<PR> error_bound(FloatBounds<PR> const& b, FloatValue<PR> const& c) {
-    return FloatError<PR>(max(b.upper()-c,c-b.lower()));
+template<class F> Error<F> error_bound(Bounds<F> const& b, Value<F> const& c) {
+    return Error<F>(max(b.upper()-c,c-b.lower()));
 }
 
-template<class PR> FloatError<PR> error_bound(FloatBounds<PR> const& b, FloatBounds<PR> const& c) {
-    return FloatError<PR>(max(b.upper()-c.lower(),c.upper()-b.lower()));
+template<class F> Error<F> error_bound(Bounds<F> const& b, Bounds<F> const& c) {
+    return Error<F>(max(b.upper()-c.lower(),c.upper()-b.lower()));
 }
 
 // Compose using the Taylor formula with a constant truncation error. This method

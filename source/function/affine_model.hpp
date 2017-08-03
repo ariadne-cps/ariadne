@@ -72,8 +72,8 @@ class AffineModel<ApproximateTag,F>
     typedef P Paradigm;
     typedef PR PrecisionType;
     typedef PR PropertiesType;
-    typedef FloatApproximation<PR> NumericType;
-    typedef FloatApproximation<PR> CoefficientType;
+    typedef Approximation<F> NumericType;
+    typedef Approximation<F> CoefficientType;
 
     explicit AffineModel() : _c(), _g() { }
     explicit AffineModel(SizeType n, PrecisionType prec) : _c(0,prec), _g(n,CoefficientType(0,prec)) { }
@@ -81,7 +81,7 @@ class AffineModel<ApproximateTag,F>
     explicit AffineModel(const CoefficientType& c, const Covector<CoefficientType>& g) : _c(c), _g(g) { }
     explicit AffineModel(CoefficientType c, InitializerList<CoefficientType> g) : _c(c), _g(g) { }
 
-    explicit AffineModel(const Affine<FloatApproximation<PR>>& affine);
+    explicit AffineModel(const Affine<Approximation<F>>& affine);
     explicit AffineModel(const Affine<ApproximateNumber>& affine, PrecisionType precision);
 
     AffineModel(const BoxDomainType& domain, const ApproximateScalarFunction& function, PrecisionType precision);
@@ -210,24 +210,24 @@ template<class F> template<class X> X AffineModel<ApproximateTag,F>::evaluate(co
     return r;
 }
 
-template<class P, class PR> inline AffineModel<P,RawFloat<PR>> affine_model(const Affine<Number<P>>& affine, PR precision) {
-    return AffineModel<P,RawFloat<PR>>(affine,precision); }
-template<class PR> inline AffineModel<ApproximateTag,RawFloat<PR>> affine_model(const Affine<FloatApproximation<PR>>& affine) {
-    return AffineModel<ApproximateTag,RawFloat<PR>>(affine); }
-template<class PR> inline AffineModel<ValidatedTag,RawFloat<PR>> affine_model(const Affine<FloatBounds<PR>>& affine) {
-    return AffineModel<ValidatedTag,RawFloat<PR>>(affine); }
+template<class P, class PR> inline AffineModel<P,RawFloatType<PR>> affine_model(const Affine<Number<P>>& affine, PR precision) {
+    return AffineModel<P,RawFloatType<PR>>(affine,precision); }
+template<class F> inline AffineModel<ApproximateTag,F> affine_model(const Affine<Approximation<F>>& affine) {
+    return AffineModel<ApproximateTag,F>(affine); }
+template<class F> inline AffineModel<ValidatedTag,F> affine_model(const Affine<Bounds<F>>& affine) {
+    return AffineModel<ValidatedTag,F>(affine); }
 
 template<class P, class F> inline AffineModel<P,F> affine_model(const TaylorModel<P,F>& taylor_model);
 template<class P, class F> inline Vector<AffineModel<P,F>> affine_models(const Vector<TaylorModel<P,F>>& taylor_models);
 
 
 // DEPRECATED
-template<class P, class PR> AffineModel<P,RawFloat<PR>> affine_model(const BoxDomainType& domain, const ScalarFunction<P>& function, PR precision);
-template<class P, class PR> inline Vector<AffineModel<P,RawFloat<PR>>> affine_models(const BoxDomainType& domain, const VectorFunction<P>& function, PR precision);
+template<class P, class PR> AffineModel<P,RawFloatType<PR>> affine_model(const BoxDomainType& domain, const ScalarFunction<P>& function, PR precision);
+template<class P, class PR> inline Vector<AffineModel<P,RawFloatType<PR>>> affine_models(const BoxDomainType& domain, const VectorFunction<P>& function, PR precision);
 
-template<class PR> inline AffineModel<ValidatedTag,RawFloat<PR>> affine_model(const BoxDomainType& domain, const ScalarFunction<EffectiveTag>& function, PR precision) {
+template<class PR> inline AffineModel<ValidatedTag,RawFloatType<PR>> affine_model(const BoxDomainType& domain, const ScalarFunction<EffectiveTag>& function, PR precision) {
     return affine_model(domain,ScalarFunction<ValidatedTag>(function),precision); }
-template<class PR> inline Vector<AffineModel<ValidatedTag,RawFloat<PR>>> affine_models(const BoxDomainType& domain, const VectorFunction<EffectiveTag>& function, PR precision) {
+template<class PR> inline Vector<AffineModel<ValidatedTag,RawFloatType<PR>>> affine_models(const BoxDomainType& domain, const VectorFunction<EffectiveTag>& function, PR precision) {
     return affine_models(domain,VectorFunction<ValidatedTag>(function),precision); }
 
 
@@ -247,7 +247,7 @@ template<class P, class F> Vector<AffineModel<P,F>> affine_models(const Vector<T
     return result;
 }
 
-template<class P, class PR> Vector<AffineModel<P,RawFloat<PR>>> affine_models(const BoxDomainType& domain, const VectorFunction<P>& function, PR precision)
+template<class P, class PR> Vector<AffineModel<P,RawFloatType<PR>>> affine_models(const BoxDomainType& domain, const VectorFunction<P>& function, PR precision)
 {
     typedef RawFloat<PR> F;
     SizeType rs=function.result_size();

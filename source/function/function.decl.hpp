@@ -96,12 +96,14 @@ template<class P> using ScalarFunctionModelDP = ScalarFunctionModel<P,DoublePrec
 template<class P> using VectorFunctionModelDP = VectorFunctionModel<P,DoublePrecision>;
 
 template<class PR> struct FunctionModelTraits<ApproximateTag,PR> {
+    static_assert(IsSame<PR,DP>::value or IsSame<PR,MP>::value,"");
     typedef FloatApproximation<PR> CoefficientType;
     typedef Void ErrorType;
     typedef FloatApproximation<PR> NumericType;
 };
 
 template<class PR, class PRE> struct FunctionModelTraits<ValidatedTag,PR,PRE> {
+    static_assert(IsSame<PR,DP>::value or IsSame<PR,MP>::value,"");
     typedef FloatValue<PR> CoefficientType;
     typedef FloatError<PRE> ErrorType;
     typedef FloatBounds<PR> NumericType;

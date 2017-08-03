@@ -35,10 +35,10 @@
 
 namespace Ariadne {
 
-template<class PR> struct NumericTraits<FloatLowerBound<PR>> {
+template<class F> struct NumericTraits<LowerBound<F>> {
     typedef ValidatedLowerNumber GenericType;
-    typedef FloatUpperBound<PR> OppositeType;
-    typedef PositiveFloatLowerBound<PR> PositiveType;
+    typedef UpperBound<F> OppositeType;
+    typedef PositiveLowerBound<F> PositiveType;
     typedef ValidatedLowerKleenean LessType;
     typedef ValidatedNegatedSierpinskian EqualsType;
 };
@@ -46,97 +46,99 @@ template<class PR> struct NumericTraits<FloatLowerBound<PR>> {
 //! \ingroup NumericModule
 //! \brief Floating-point lower bounds for real numbers.
 //! \sa UpperReal, FloatDP, FloatMP, FloatBounds, FloatUpperBound.
-template<class PR> class FloatLowerBound
-    : public DispatchDirectedFloatOperations<FloatLowerBound<PR>>
-    , public DispatchFloatOperations<FloatApproximation<PR>>
+template<class F> class LowerBound
+    : public DispatchDirectedFloatOperations<LowerBound<F>>
+    , public DispatchFloatOperations<Approximation<F>>
 {
-    typedef LowerTag P; typedef RawFloat<PR> FLT;
+  protected:
+    typedef LowerTag P; typedef typename F::PrecisionType PR;
   public:
     typedef LowerTag Paradigm;
-    typedef FloatLowerBound<PR> NumericType;
+    typedef LowerBound<F> NumericType;
     typedef ValidatedLowerNumber GenericType;
-    typedef FLT RawFloatType;
+    typedef F RawType;
     typedef PR PrecisionType;
     typedef PR PropertiesType;
   public:
-    FloatLowerBound<PR>() : _l(0.0) { }
-    explicit FloatLowerBound<PR>(PrecisionType pr) : _l(0.0,pr) { }
-    explicit FloatLowerBound<PR>(RawFloatType const& l) : _l(l) { }
+    LowerBound<F>() : _l(0.0) { }
+    explicit LowerBound<F>(PrecisionType pr) : _l(0.0,pr) { }
+    explicit LowerBound<F>(RawType const& l) : _l(l) { }
 
-    template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> FloatLowerBound<PR>(N n, PR pr) : FloatLowerBound<PR>(ExactDouble(n),pr) { }
-    FloatLowerBound<PR>(ExactDouble d, PR pr);
-        FloatLowerBound<PR>(TwoExp t, PR pr);
-        FloatLowerBound<PR>(const Integer& z, PR pr);
-        FloatLowerBound<PR>(const Dyadic& w, PR pr);
-        FloatLowerBound<PR>(const Decimal& d, PR pr);
-        FloatLowerBound<PR>(const Rational& q, PR pr);
-        FloatLowerBound<PR>(const Real& r, PR pr);
-    FloatLowerBound<PR>(const FloatLowerBound<PR>& x, PR pr);
-    FloatLowerBound<PR>(const ValidatedLowerNumber& y, PR pr);
+    template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> LowerBound<F>(N n, PR pr) : LowerBound<F>(ExactDouble(n),pr) { }
+    LowerBound<F>(ExactDouble d, PR pr);
+        LowerBound<F>(TwoExp t, PR pr);
+        LowerBound<F>(const Integer& z, PR pr);
+        LowerBound<F>(const Dyadic& w, PR pr);
+        LowerBound<F>(const Decimal& d, PR pr);
+        LowerBound<F>(const Rational& q, PR pr);
+        LowerBound<F>(const Real& r, PR pr);
+    LowerBound<F>(const LowerBound<F>& x, PR pr);
+    LowerBound<F>(const ValidatedLowerNumber& y, PR pr);
 
-    FloatLowerBound<PR>(FloatBounds<PR> const& x);
-    FloatLowerBound<PR>(FloatBall<PR> const& x);
-    FloatLowerBound<PR>(FloatValue<PR> const& x);
+    LowerBound<F>(Bounds<F> const& x);
+    LowerBound<F>(Ball<F> const& x);
+    LowerBound<F>(Value<F> const& x);
 
-        FloatLowerBound<PR>& operator=(const FloatValue<PR>& x) { return *this=FloatLowerBound<PR>(x); }
-    FloatLowerBound<PR>& operator=(const ValidatedLowerNumber&);
-    FloatLowerBound<PR> create(const ValidatedLowerNumber& y) const;
-    FloatUpperBound<PR> create(const ValidatedUpperNumber& y) const;
+        LowerBound<F>& operator=(const Value<F>& x) { return *this=LowerBound<F>(x); }
+    LowerBound<F>& operator=(const ValidatedLowerNumber&);
+    LowerBound<F> create(const ValidatedLowerNumber& y) const;
+    UpperBound<F> create(const ValidatedUpperNumber& y) const;
 
     operator ValidatedLowerNumber () const;
 
     PrecisionType precision() const { return _l.precision(); }
     PropertiesType properties() const { return _l.precision(); }
     GenericType generic() const { return this->operator GenericType(); }
-    RawFloatType const& raw() const { return _l; }
-    RawFloatType& raw() { return _l; }
+    RawType const& raw() const { return _l; }
+    RawType& raw() { return _l; }
     double get_d() const { return _l.get_d(); }
   public: // To be removed
-    friend Bool same(FloatLowerBound<PR> const&, FloatLowerBound<PR> const&);
-    friend Bool refines(FloatLowerBound<PR> const&, FloatLowerBound<PR> const&);
-    friend FloatLowerBound<PR> refinement(FloatLowerBound<PR> const&, FloatLowerBound<PR> const&);
+    friend Bool same(LowerBound<F> const&, LowerBound<F> const&);
+    friend Bool refines(LowerBound<F> const&, LowerBound<F> const&);
+    friend LowerBound<F> refinement(LowerBound<F> const&, LowerBound<F> const&);
   public:
-    friend FloatLowerBound<PR> operator*(FloatLowerBound<PR> const& x1, PositiveFloatValue<PR> const& x2) {
-        return FloatLowerBound<PR>(mul(down,x1.raw(),x2.raw())); }
-    friend FloatLowerBound<PR> operator*(FloatLowerBound<PR> const& x1, PositiveFloatBounds<PR> const& x2) {
-        return FloatLowerBound<PR>(mul(down,x1.raw(),x1.raw()>=0?x2.lower().raw():x2.upper().raw())); }
-    friend FloatLowerBound<PR> operator/(FloatLowerBound<PR> const& x1, PositiveFloatValue<PR> const& x2) {
-        return FloatLowerBound<PR>(div(down,x1.raw(),x2.raw())); }
-    friend FloatLowerBound<PR> operator/(FloatLowerBound<PR> const& x1, PositiveFloatBounds<PR> const& x2) {
-        return FloatLowerBound<PR>(div(down,x1.raw(),x1.raw()>=0?x2.upper().raw():x2.lower().raw())); }
+    friend LowerBound<F> operator*(LowerBound<F> const& x1, PositiveValue<F> const& x2) {
+        return LowerBound<F>(mul(down,x1.raw(),x2.raw())); }
+    friend LowerBound<F> operator*(LowerBound<F> const& x1, PositiveBounds<F> const& x2) {
+        return LowerBound<F>(mul(down,x1.raw(),x1.raw()>=0?x2.lower().raw():x2.upper().raw())); }
+    friend LowerBound<F> operator/(LowerBound<F> const& x1, PositiveValue<F> const& x2) {
+        return LowerBound<F>(div(down,x1.raw(),x2.raw())); }
+    friend LowerBound<F> operator/(LowerBound<F> const& x1, PositiveBounds<F> const& x2) {
+        return LowerBound<F>(div(down,x1.raw(),x1.raw()>=0?x2.upper().raw():x2.lower().raw())); }
   private: public:
     static Nat output_places;
-    RawFloatType _l;
+    RawType _l;
 };
 
-template<class PR> inline FloatFactory<PR> factory(FloatLowerBound<PR> const& flt) { return FloatFactory<PR>(flt.precision()); }
+template<class F> inline FloatFactory<PrecisionType<F>> factory(LowerBound<F> const& flt) { return FloatFactory<PrecisionType<F>>(flt.precision()); }
 template<class PR> inline FloatLowerBound<PR> FloatFactory<PR>::create(Number<LowerTag> const& y) { return FloatLowerBound<PR>(y,_pr); }
 
-template<class PR> class Positive<FloatLowerBound<PR>> : public FloatLowerBound<PR>
-    , public DispatchPositiveDirectedFloatOperations<PositiveFloatLowerBound<PR>,PositiveFloatUpperBound<PR>>
+template<class F> class Positive<LowerBound<F>> : public LowerBound<F>
+    , public DispatchPositiveDirectedFloatOperations<PositiveLowerBound<F>,PositiveUpperBound<F>>
 {
+    using typename LowerBound<F>::PR;
   public:
-    Positive<FloatLowerBound<PR>>() : FloatLowerBound<PR>() { }
+    Positive<LowerBound<F>>() : LowerBound<F>() { }
     template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>> =dummy>
-        Positive<FloatLowerBound<PR>>(M m) : FloatLowerBound<PR>(m) { }
-    explicit Positive<FloatLowerBound<PR>>(RawFloat<PR> const& x) : FloatLowerBound<PR>(x) { }
-    explicit Positive<FloatLowerBound<PR>>(FloatLowerBound<PR> const& x) : FloatLowerBound<PR>(x) { }
-    explicit Positive<FloatLowerBound<PR>>(ValidatedLowerNumber const& y, PR pr) : FloatLowerBound<PR>(y,pr) { }
-    Positive<FloatLowerBound<PR>>(PositiveFloatValue<PR> const& x) : FloatLowerBound<PR>(x) { }
-    Positive<FloatLowerBound<PR>>(PositiveFloatBounds<PR> const& x) : FloatLowerBound<PR>(x) { }
+        Positive<LowerBound<F>>(M m) : LowerBound<F>(m) { }
+    explicit Positive<LowerBound<F>>(F const& x) : LowerBound<F>(x) { }
+    explicit Positive<LowerBound<F>>(LowerBound<F> const& x) : LowerBound<F>(x) { }
+    explicit Positive<LowerBound<F>>(ValidatedLowerNumber const& y, PR pr) : LowerBound<F>(y,pr) { }
+    Positive<LowerBound<F>>(PositiveValue<F> const& x) : LowerBound<F>(x) { }
+    Positive<LowerBound<F>>(PositiveBounds<F> const& x) : LowerBound<F>(x) { }
   public:
-    friend PositiveFloatLowerBound<PR> operator*(PositiveFloatLowerBound<PR> const& x1, PositiveFloatValue<PR> const& x2) {
-        return PositiveFloatLowerBound<PR>(mul(down,x1.raw(),x2.raw())); }
-    friend PositiveFloatLowerBound<PR> operator*(PositiveFloatLowerBound<PR> const& x1, PositiveFloatBounds<PR> const& x2) {
-        return PositiveFloatLowerBound<PR>(mul(down,x1.raw(),x2.lower().raw())); }
-    friend PositiveFloatLowerBound<PR> operator/(PositiveFloatLowerBound<PR> const& x1, PositiveFloatValue<PR> const& x2) {
-        return PositiveFloatLowerBound<PR>(div(down,x1.raw(),x2.raw())); }
-    friend PositiveFloatLowerBound<PR> operator/(PositiveFloatLowerBound<PR> const& x1, PositiveFloatBounds<PR> const& x2) {
-        return PositiveFloatLowerBound<PR>(div(down,x1.raw(),x2.upper().raw())); }
+    friend PositiveLowerBound<F> operator*(PositiveLowerBound<F> const& x1, PositiveValue<F> const& x2) {
+        return PositiveLowerBound<F>(mul(down,x1.raw(),x2.raw())); }
+    friend PositiveLowerBound<F> operator*(PositiveLowerBound<F> const& x1, PositiveBounds<F> const& x2) {
+        return PositiveLowerBound<F>(mul(down,x1.raw(),x2.lower().raw())); }
+    friend PositiveLowerBound<F> operator/(PositiveLowerBound<F> const& x1, PositiveValue<F> const& x2) {
+        return PositiveLowerBound<F>(div(down,x1.raw(),x2.raw())); }
+    friend PositiveLowerBound<F> operator/(PositiveLowerBound<F> const& x1, PositiveBounds<F> const& x2) {
+        return PositiveLowerBound<F>(div(down,x1.raw(),x2.upper().raw())); }
 };
 
-template<class PR> inline PositiveFloatLowerBound<PR> cast_positive(FloatLowerBound<PR> const& x) {
-    return PositiveFloatLowerBound<PR>(x); }
+template<class F> inline PositiveLowerBound<F> cast_positive(LowerBound<F> const& x) {
+    return PositiveLowerBound<F>(x); }
 
 }
 

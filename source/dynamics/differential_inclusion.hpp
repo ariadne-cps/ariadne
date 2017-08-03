@@ -77,7 +77,7 @@ BoxDomainType error_domain(SizeType n, FloatDPError e) {
 
 //! \brief The function dexp(x)=(exp(x)-1)/x.
 //! Note that the function is positive and monotone increasing.
-template<class PR> PositiveFloatUpperBound<PR> dexp(FloatUpperBound<PR> const& x) {
+template<class F> PositiveUpperBound<F> dexp(UpperBound<F> const& x) {
     if(x.raw()>=0) { return cast_positive(exp(x)-1)/cast_positive(cast_exact(x)); }
     else { return cast_positive(cast_exact(1-exp(x)))/cast_positive(-x); }
 }

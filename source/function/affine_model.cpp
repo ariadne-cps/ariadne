@@ -46,11 +46,11 @@ template class AffineModel<ApproximateTag,FloatMP>;
 template class AffineModel<ValidatedTag,FloatDP>;
 template class AffineModel<ValidatedTag,FloatMP>;
 
-template class AlgebraOperations<AffineModel<ApproximateTag,FloatDP>,FloatBounds<DoublePrecision>>;
-template class AlgebraOperations<AffineModel<ApproximateTag,FloatMP>,FloatBounds<MultiplePrecision>>;
+template class AlgebraOperations<AffineModel<ApproximateTag,FloatDP>,FloatDPBounds>;
+template class AlgebraOperations<AffineModel<ApproximateTag,FloatMP>,FloatMPBounds>;
 
-template class AlgebraOperations<AffineModel<ValidatedTag,FloatDP>,FloatBounds<DoublePrecision>>;
-template class AlgebraOperations<AffineModel<ValidatedTag,FloatMP>,FloatBounds<MultiplePrecision>>;
+template class AlgebraOperations<AffineModel<ValidatedTag,FloatDP>,FloatDPBounds>;
+template class AlgebraOperations<AffineModel<ValidatedTag,FloatMP>,FloatMPBounds>;
 
 template AffineModel<ValidatedTag,FloatDP> affine_model(const ExactBoxType&, const ScalarFunction<ValidatedTag>&, DoublePrecision);
 

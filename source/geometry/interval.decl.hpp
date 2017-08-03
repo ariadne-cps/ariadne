@@ -34,6 +34,13 @@ template<class U> class VariableInterval;
 typedef Interval<Rational> RationalInterval;
 typedef Interval<Real> RealInterval;
 
+template<class F> using ExactInterval = Interval<Value<F>>;
+template<class F> using BallInterval = Interval<Ball<F>> ;
+template<class F> using BoundsInterval = Interval<Bounds<F>>;
+template<class F> using UpperInterval = Interval<UpperBound<F>>;
+template<class F> using LowerInterval = Interval<LowerBound<F>>;
+template<class F> using ApproximateInterval = Interval<Approximation<F>>;
+
 template<class PR> using FloatExactInterval = Interval<FloatValue<PR>>;
 template<class PR> using FloatBallInterval = Interval<FloatBall<PR>> ;
 template<class PR> using FloatBoundsInterval = Interval<FloatBounds<PR>>;

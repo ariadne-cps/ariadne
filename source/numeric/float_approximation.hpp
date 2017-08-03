@@ -37,9 +37,9 @@
 
 namespace Ariadne {
 
-template<class PR> struct NumericTraits<FloatApproximation<PR>> {
+template<class F> struct NumericTraits<Approximation<F>> {
     typedef ApproximateNumber GenericType;
-    typedef PositiveFloatApproximation<PR> PositiveType;
+    typedef PositiveApproximation<F> PositiveType;
     typedef Fuzzy LessType;
     typedef Fuzzy EqualsType;
 };
@@ -47,98 +47,100 @@ template<class PR> struct NumericTraits<FloatApproximation<PR>> {
 //! \ingroup NumericModule
 //! \brief Floating point number approximations to real numbers supporting approxiamate arithmetic.
 //! \details
-//! The \c %FloatApproximation<PR> class represents approximate floating-point numbers.
+//! The \c %Approximation<F> class represents approximate floating-point numbers.
 //! Operations are performed approximately, with no guarantees on the output.
 //! \sa Real, FloatDP , FloatMP, FloatValue, FloatBall, FloatBounds.
-template<class PR> class FloatApproximation
-    : public DispatchFloatOperations<FloatApproximation<PR>>
+template<class F> class Approximation
+    : public DispatchFloatOperations<Approximation<F>>
 {
-    typedef ApproximateTag P; typedef RawFloat<PR> FLT;
+  protected:
+    typedef ApproximateTag P; typedef typename F::PrecisionType PR;
   public:
     typedef ApproximateTag Paradigm;
-    typedef FloatApproximation<PR> NumericType;
+    typedef Approximation<F> NumericType;
     typedef ApproximateNumber GenericType;
-    typedef FLT RawFloatType;
+    typedef F RawType;
     typedef PR PrecisionType;
     typedef PR PropertiesType;
   public:
-    FloatApproximation<PR>() : _a(0.0) { }
-    explicit FloatApproximation<PR>(PrecisionType pr) : _a(0.0,pr) { }
-    explicit FloatApproximation<PR>(RawFloatType const& a) : _a(a) { }
+    Approximation<F>() : _a(0.0) { }
+    explicit Approximation<F>(PrecisionType pr) : _a(0.0,pr) { }
+    explicit Approximation<F>(RawType const& a) : _a(a) { }
 
-        FloatApproximation<PR>(double d, PR pr);
-        FloatApproximation<PR>(ExactDouble d, PR pr);
-        FloatApproximation<PR>(TwoExp t, PR pr);
-        FloatApproximation<PR>(const Integer& z, PR pr);
-        FloatApproximation<PR>(const Dyadic& w, PR pr);
-        FloatApproximation<PR>(const Decimal& d, PR pr);
-        FloatApproximation<PR>(const Rational& q, PR pr);
-        FloatApproximation<PR>(const Real& r, PR pr);
-        FloatApproximation<PR>(const FloatApproximation<PR>& r, PR pr);
-    FloatApproximation<PR>(const ApproximateNumber& y, PR pr);
+        Approximation<F>(double d, PR pr);
+        Approximation<F>(ExactDouble d, PR pr);
+        Approximation<F>(TwoExp t, PR pr);
+        Approximation<F>(const Integer& z, PR pr);
+        Approximation<F>(const Dyadic& w, PR pr);
+        Approximation<F>(const Decimal& d, PR pr);
+        Approximation<F>(const Rational& q, PR pr);
+        Approximation<F>(const Real& r, PR pr);
+        Approximation<F>(const Approximation<F>& r, PR pr);
+    Approximation<F>(const ApproximateNumber& y, PR pr);
 
-    FloatApproximation<PR>(FloatError<PR> const& x); // FIXME: Remove
-    FloatApproximation<PR>(FloatValue<PR> const& x);
-    template<class PRE> FloatApproximation<PR>(FloatBall<PR,PRE> const& x);
-    FloatApproximation<PR>(FloatBounds<PR> const& x);
-    FloatApproximation<PR>(FloatUpperBound<PR> const& x);
-    FloatApproximation<PR>(FloatLowerBound<PR> const& x);
+    Approximation<F>(Error<F> const& x); // FIXME: Remove
+    Approximation<F>(Value<F> const& x);
+    template<class FE> Approximation<F>(Ball<F,FE> const& x);
+    Approximation<F>(Bounds<F> const& x);
+    Approximation<F>(UpperBound<F> const& x);
+    Approximation<F>(LowerBound<F> const& x);
 
-    template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> FloatApproximation<PR>& operator=(N n) { this->_a=n; return *this; }
-    template<class D, EnableIf<IsBuiltinFloatingPoint<D>> =dummy> FloatApproximation<PR>& operator=(D x) { this->_a=x; return *this; }
-        FloatApproximation<PR>& operator=(const FloatLowerBound<PR>& x) { return *this=FloatApproximation<PR>(x); }
-        FloatApproximation<PR>& operator=(const FloatUpperBound<PR>& x) { return *this=FloatApproximation<PR>(x); }
-        FloatApproximation<PR>& operator=(const FloatBounds<PR>& x) { return *this=FloatApproximation<PR>(x); }
-        FloatApproximation<PR>& operator=(const FloatValue<PR>& x) { return *this=FloatApproximation<PR>(x); }
-    FloatApproximation<PR>& operator=(const ApproximateNumber& y);
-    FloatApproximation<PR> create(const ApproximateNumber& y) const;
+    template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> Approximation<F>& operator=(N n) { this->_a=n; return *this; }
+    template<class D, EnableIf<IsBuiltinFloatingPoint<D>> =dummy> Approximation<F>& operator=(D x) { this->_a=x; return *this; }
+        Approximation<F>& operator=(const LowerBound<F>& x) { return *this=Approximation<F>(x); }
+        Approximation<F>& operator=(const UpperBound<F>& x) { return *this=Approximation<F>(x); }
+        Approximation<F>& operator=(const Bounds<F>& x) { return *this=Approximation<F>(x); }
+        Approximation<F>& operator=(const Value<F>& x) { return *this=Approximation<F>(x); }
+    Approximation<F>& operator=(const ApproximateNumber& y);
+    Approximation<F> create(const ApproximateNumber& y) const;
 
     operator ApproximateNumber () const;
 
-    friend FloatApproximation<PR> round(FloatApproximation<PR> const& x);
+    friend Approximation<F> round(Approximation<F> const& x);
 
     PrecisionType precision() const { return _a.precision(); }
     PropertiesType properties() const { return _a.precision(); }
     GenericType generic() const { return this->operator GenericType(); }
-    explicit operator RawFloatType () const { return this->_a; }
-    RawFloatType const& raw() const { return this->_a; }
-    RawFloatType& raw() { return this->_a; }
+    explicit operator RawType () const { return this->_a; }
+    RawType const& raw() const { return this->_a; }
+    RawType& raw() { return this->_a; }
     double get_d() const { return this->_a.get_d(); }
   public:
-    friend Bool same(FloatApproximation<PR> const&, FloatApproximation<PR> const&);
-    friend PositiveFloatApproximation<PR> mag(FloatApproximation<PR> const&);
+    friend Bool same(Approximation<F> const&, Approximation<F> const&);
+    friend PositiveApproximation<F> mag(Approximation<F> const&);
   public:
     static Void set_output_places(Nat p) { output_places=p; }
-    FloatApproximation<PR> pm(FloatApproximation<PR> _e) { return *this; }
+    Approximation<F> pm(Approximation<F> _e) { return *this; }
   private: public:
     static Nat output_places;
-    RawFloatType _a;
+    RawType _a;
 };
 
-template<class PR> inline FloatFactory<PR> factory(FloatApproximation<PR> const& flt) { return FloatFactory<PR>(flt.precision()); }
+template<class F> inline FloatFactory<PrecisionType<F>> factory(Approximation<F> const& flt) { return FloatFactory<PrecisionType<F>>(flt.precision()); }
 template<class PR> inline FloatApproximation<PR> FloatFactory<PR>::create(Number<ApproximateTag> const& y) { return FloatApproximation<PR>(y,_pr); }
 template<class PR> template<class D, EnableIf<IsBuiltinFloatingPoint<D>>> inline
     FloatApproximation<PR> FloatFactory<PR>::create(D const& y) { return FloatApproximation<PR>(y,_pr); }
 
-template<class PR> class Positive<FloatApproximation<PR>> : public FloatApproximation<PR>
-    , public DispatchPositiveFloatOperations<PositiveFloatApproximation<PR>>
+template<class F> class Positive<Approximation<F>> : public Approximation<F>
+    , public DispatchPositiveFloatOperations<PositiveApproximation<F>>
 {
+    using typename Approximation<F>::PR;
   public:
-    Positive<FloatApproximation<PR>>() : FloatApproximation<PR>() { }
+    Positive<Approximation<F>>() : Approximation<F>() { }
     template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>> =dummy>
-        Positive<FloatApproximation<PR>>(M m) : FloatApproximation<PR>(m) { }
-    explicit Positive<FloatApproximation<PR>>(RawFloat<PR> const& x) : FloatApproximation<PR>(x) { }
-    explicit Positive<FloatApproximation<PR>>(FloatApproximation<PR> const& x) : FloatApproximation<PR>(x) { }
-    explicit Positive<FloatApproximation<PR>>(ApproximateNumber const& y, PR pr) : FloatApproximation<PR>(y,pr) { }
-    Positive<FloatApproximation<PR>>(PositiveFloatLowerBound<PR> const& x) : FloatApproximation<PR>(x) { }
-    Positive<FloatApproximation<PR>>(PositiveFloatUpperBound<PR> const& x) : FloatApproximation<PR>(x) { }
-    Positive<FloatApproximation<PR>>(PositiveFloatValue<PR> const& x) : FloatApproximation<PR>(x) { }
-    Positive<FloatApproximation<PR>>(FloatError<PR> const& x) : FloatApproximation<PR>(x) { }
+        Positive<Approximation<F>>(M m) : Approximation<F>(m) { }
+    explicit Positive<Approximation<F>>(F const& x) : Approximation<F>(x) { }
+    explicit Positive<Approximation<F>>(Approximation<F> const& x) : Approximation<F>(x) { }
+    explicit Positive<Approximation<F>>(ApproximateNumber const& y, PR pr) : Approximation<F>(y,pr) { }
+    Positive<Approximation<F>>(PositiveLowerBound<F> const& x) : Approximation<F>(x) { }
+    Positive<Approximation<F>>(PositiveUpperBound<F> const& x) : Approximation<F>(x) { }
+    Positive<Approximation<F>>(PositiveValue<F> const& x) : Approximation<F>(x) { }
+    Positive<Approximation<F>>(Error<F> const& x) : Approximation<F>(x) { }
   public:
 };
 
-template<class PR> inline PositiveFloatApproximation<PR> cast_positive(FloatApproximation<PR> const& x) {
-    return PositiveFloatApproximation<PR>(x); }
+template<class F> inline PositiveApproximation<F> cast_positive(Approximation<F> const& x) {
+    return PositiveApproximation<F>(x); }
 
 
 }

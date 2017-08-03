@@ -37,49 +37,50 @@ namespace Ariadne {
 
 //! \ingroup NumericModule
 //! \brief Floating-point upper bounds for positive real numbers, suitable for use as an upper bound for an error in a metric space.
-template<class PR> class FloatError
-    : public DispatchDirectedFloatOperations<FloatUpperBound<PR>>
-    , public DispatchPositiveDirectedNumericOperations<PositiveFloatUpperBound<PR>,PositiveFloatLowerBound<PR>>
-    , public ProvideConcreteGenericDirectedSemiFieldOperations<PositiveFloatUpperBound<PR>,PositiveFloatLowerBound<PR>,Nat,Nat>
+template<class F> class Error
+    : public DispatchDirectedFloatOperations<UpperBound<F>>
+    , public DispatchPositiveDirectedNumericOperations<PositiveUpperBound<F>,PositiveLowerBound<F>>
+    , public ProvideConcreteGenericDirectedSemiFieldOperations<PositiveUpperBound<F>,PositiveLowerBound<F>,Nat,Nat>
 {
+    using PR=typename F::PrecisionType;
   private: public:
-    RawFloat<PR> _e;
+    F _e;
   public:
     typedef PR PrecisionType;
     typedef PR PropertiesType;
   public:
-    FloatError<PR>(PositiveFloatBounds<PR> const& x) : _e(x._u) { }
-    FloatError<PR>(PositiveFloatUpperBound<PR> const& x) : _e(x._u) { }
-    operator PositiveFloatUpperBound<PR> const& () const { return reinterpret_cast<PositiveFloatUpperBound<PR>const&>(*this); }
-    operator PositiveFloatUpperBound<PR>& () { return reinterpret_cast<PositiveFloatUpperBound<PR>&>(*this); }
+    Error<F>(PositiveBounds<F> const& x) : _e(x._u) { }
+    Error<F>(PositiveUpperBound<F> const& x) : _e(x._u) { }
+    operator PositiveUpperBound<F> const& () const { return reinterpret_cast<PositiveUpperBound<F>const&>(*this); }
+    operator PositiveUpperBound<F>& () { return reinterpret_cast<PositiveUpperBound<F>&>(*this); }
   public:
-    FloatError<PR>() : _e() { }
-    explicit FloatError<PR>(PR const& pr) : _e(pr) { }
-    explicit FloatError<PR>(RawFloat<PR> const& x) : _e(x) { ARIADNE_PRECONDITION_MSG((this->_e>=0),"e="<<*this); }
-    template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>> =dummy> FloatError<PR>(M m, PR pr) : _e(m,pr) { }
-    explicit FloatError<PR>(FloatUpperBound<PR> const& x) : FloatError<PR>(x._u) { }
-    explicit FloatError<PR>(ValidatedUpperNumber const& y, PR pr) : FloatError(FloatUpperBound<PR>(y,pr)) { }
-    explicit FloatError<PR>(const TwoExp& t, PR pr) : FloatError(FloatUpperBound<PR>(t,pr)) { }
-    FloatError<PR>(PositiveFloatValue<PR> const& x) : _e(x._v) { }
-    FloatError<PR>& operator=(Nat m) { reinterpret_cast<FloatUpperBound<PR>&>(*this)=m; return *this; }
+    Error<F>() : _e() { }
+    explicit Error<F>(PR const& pr) : _e(pr) { }
+    explicit Error<F>(F const& x) : _e(x) { ARIADNE_PRECONDITION_MSG((this->_e>=0),"e="<<*this); }
+    template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>> =dummy> Error<F>(M m, PR pr) : _e(m,pr) { }
+    explicit Error<F>(UpperBound<F> const& x) : Error<F>(x._u) { }
+    explicit Error<F>(ValidatedUpperNumber const& y, PR pr) : Error<F>(UpperBound<F>(y,pr)) { }
+    explicit Error<F>(const TwoExp& t, PR pr) : Error<F>(UpperBound<F>(t,pr)) { }
+    Error<F>(PositiveValue<F> const& x) : _e(x._v) { }
+    Error<F>& operator=(Nat m) { reinterpret_cast<UpperBound<F>&>(*this)=m; return *this; }
   public:
     PrecisionType precision() const { return _e.precision(); }
     PropertiesType properties() const { return _e.precision(); }
-    RawFloat<PR> const& raw() const { return _e; }
-    RawFloat<PR>& raw() { return _e; }
+    F const& raw() const { return _e; }
+    F& raw() { return _e; }
   public:
-    friend FloatError<PR> mag(FloatError<PR> const& x) { return x; }
-    friend FloatUpperBound<PR> operator+(FloatError<PR> const& x) { return FloatUpperBound<PR>(+x._e); }
-    friend FloatLowerBound<PR> operator-(FloatError<PR> const& x) { return FloatLowerBound<PR>(-x._e); }
-    friend FloatUpperBound<PR> operator+(FloatValue<PR> const& x1, FloatError<PR> const& x2) { return FloatUpperBound<PR>(add(up,x1._v,x2._e)); }
-    friend FloatLowerBound<PR> operator-(FloatValue<PR> const& x1, FloatError<PR> const& x2) { return FloatLowerBound<PR>(sub(down,x1._v,x2._e)); }
-    friend FloatUpperBound<PR> log2(FloatError<PR> const& x) {
-        return log(x)/cast_positive(log(FloatBounds<PR>(2u,x.precision()))); }
+    friend Error<F> mag(Error<F> const& x) { return x; }
+    friend UpperBound<F> operator+(Error<F> const& x) { return UpperBound<F>(+x._e); }
+    friend LowerBound<F> operator-(Error<F> const& x) { return LowerBound<F>(-x._e); }
+    friend UpperBound<F> operator+(Value<F> const& x1, Error<F> const& x2) { return UpperBound<F>(add(up,x1._v,x2._e)); }
+    friend LowerBound<F> operator-(Value<F> const& x1, Error<F> const& x2) { return LowerBound<F>(sub(down,x1._v,x2._e)); }
+    friend UpperBound<F> log2(Error<F> const& x) {
+        return log(x)/cast_positive(log(Bounds<F>(2u,x.precision()))); }
 
-    friend Bool same(FloatError<PR> const& x1, FloatError<PR> const& x2) { return x1._e==x2._e; }
-    friend Bool refines(FloatError<PR> const& x1, FloatError<PR> const& x2) { return x1._e<=x2._e; }
-    friend FloatError<PR> refinement(FloatError<PR> const& x1, FloatError<PR> const& x2) { return FloatError<PR>(min(x1._e,x2._e)); }
-    friend OutputStream& operator<<(OutputStream& os, FloatError<PR> const& x) { return Operations<FloatError<PR>>::_write(os,x); }
+    friend Bool same(Error<F> const& x1, Error<F> const& x2) { return x1._e==x2._e; }
+    friend Bool refines(Error<F> const& x1, Error<F> const& x2) { return x1._e<=x2._e; }
+    friend Error<F> refinement(Error<F> const& x1, Error<F> const& x2) { return Error<F>(min(x1._e,x2._e)); }
+    friend OutputStream& operator<<(OutputStream& os, Error<F> const& x) { return Operations<Error<F>>::_write(os,x); }
   public:
     static Nat output_places;
     static Void set_output_places(Nat p) { output_places=p; }

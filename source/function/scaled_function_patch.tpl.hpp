@@ -358,25 +358,25 @@ inline Bool operator> (FloatDPValue x1, Int n2) { return x1.raw()> FloatDP(n2); 
 inline Bool operator> (FloatDPBounds x1, Int n2) { return x1.lower_raw()> FloatDP(n2); }
 inline Bool operator> (FloatDPApproximation x1, Int n2) { return x1.raw()> FloatDP(n2); }
 
-template<class M> auto ScaledFunctionPatch<M>::polynomial() const -> Polynomial<FloatBounds<PR>>
+template<class M> auto ScaledFunctionPatch<M>::polynomial() const -> Polynomial<Bounds<F>>
 {
-    FloatBounds<PR> zero(0,this->model().precision());
+    Bounds<F> zero(0,this->model().precision());
 
-    Vector<Polynomial<FloatBounds<PR>> > pid=Polynomial<NumericType>::coordinates(this->argument_size());
-    return horner_evaluate(this->expansion(),unscale(pid,this->domain()))+FloatBounds<PR>(-this->error(),+this->error());
+    Vector<Polynomial<Bounds<F>> > pid=Polynomial<NumericType>::coordinates(this->argument_size());
+    return horner_evaluate(this->expansion(),unscale(pid,this->domain()))+Bounds<F>(-this->error(),+this->error());
 
-    Polynomial<FloatBounds<PR>> z(this->argument_size());
-    Polynomial<FloatBounds<PR>> p;//=Ariadne::polynomial(this->model());
+    Polynomial<Bounds<F>> z(this->argument_size());
+    Polynomial<Bounds<F>> p;//=Ariadne::polynomial(this->model());
 
-    Vector<Polynomial<FloatBounds<PR>> > s(this->argument_size(),z);
+    Vector<Polynomial<Bounds<F>> > s(this->argument_size(),z);
     for(SizeType j=0; j!=this->argument_size(); ++j) {
         auto domj=convert_interval(this->domain()[j],this->precision());
         if(domj.lower()>=domj.upper()) {
             ARIADNE_ASSERT(this->domain()[j].is_singleton());
-            s[j]=Polynomial<FloatBounds<PR>>::constant(this->argument_size(),zero);
+            s[j]=Polynomial<Bounds<F>>::constant(this->argument_size(),zero);
         } else {
             //s[j]=Ariadne::polynomial(ModelType::unscaling(this->argument_size(),j,this->domain()[j],this->properties()));
-            s[j]=(Polynomial<FloatBounds<PR>>::coordinate(this->argument_size(),j)-domj.midpoint())/domj.radius();
+            s[j]=(Polynomial<Bounds<F>>::coordinate(this->argument_size(),j)-domj.midpoint())/domj.radius();
         }
     }
 

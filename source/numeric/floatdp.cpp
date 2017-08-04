@@ -793,6 +793,13 @@ OutputStream& write(OutputStream& os, FloatDP const& x, DecimalPlaces dgts, Roun
     return write(os,FloatMP(x,pr_mp),dgts,rnd_mp);
 }
 
+OutputStream& write(OutputStream& os, FloatDP const& x, DecimalPrecision dgts, RoundingMode64 rnd) {
+    assert(rnd==ROUND_TO_NEAREST || rnd==ROUND_UPWARD || rnd==ROUND_DOWNWARD);
+    MultiplePrecision pr_mp(53);
+    RoundingModeMP rnd_mp = (rnd==FloatDP::ROUND_TO_NEAREST) ? FloatMP::ROUND_TO_NEAREST : (rnd==FloatDP::ROUND_DOWNWARD) ? FloatMP::ROUND_DOWNWARD : FloatMP::ROUND_UPWARD;
+    return write(os,FloatMP(x,pr_mp),dgts,rnd_mp);
+}
+
 
 OutputStream& operator<<(OutputStream& os, FloatDP const& x) {
     return os << x.dbl;

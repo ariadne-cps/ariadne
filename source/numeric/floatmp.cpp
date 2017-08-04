@@ -426,6 +426,10 @@ OutputStream& write(OutputStream& os, FloatMP const& x, DecimalPlaces plcs, Roun
     return os << print(x,plcs,rnd);
 }
 
+OutputStream& write(OutputStream& os, FloatMP const& x, DecimalPrecision plcs, RoundingModeMP rnd) {
+    return os << print(x,plcs,rnd);
+}
+
 
 OutputStream& operator<<(OutputStream& os, FloatMP const& x) {
     static const double log2ten = 3.3219280948873621817;

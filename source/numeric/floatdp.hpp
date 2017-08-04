@@ -349,6 +349,7 @@ class FloatDP {
     friend OutputStream& operator<<(OutputStream& os, FloatDP const&);
     friend InputStream& operator>>(InputStream& is, FloatDP&);
     friend OutputStream& write(OutputStream& os, FloatDP const& x, DecimalPlaces dgts, RoundingModeType rnd);
+    friend OutputStream& write(OutputStream& os, FloatDP const& x, DecimalPrecision dgts, RoundingModeType rnd);
   private:
     // Opposite rounded arithmetic
     friend FloatDP pos_opp(FloatDP x) { volatile double t=-x.dbl; return -t; }

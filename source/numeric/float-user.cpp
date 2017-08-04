@@ -1405,11 +1405,10 @@ template<> OutputStream& Operations<FloatBall<MultiplePrecision>>::_write(Output
     int errplc = FloatError<MultiplePrecision>::output_places;
     int log10err = log10floor(edbl);
     int dgtserr = errplc-(log10err+1);
-    int dgtsval = std::floor((x.value().precision()-x.value().raw().exponent())/log2ten);
-    int dgts = std::max(std::min(dgtsval,dgtserr),1);
+    int dgtsval = (x.value().raw()==0) ? dgtserr : std::floor((x.value().precision()+1-x.value().raw().exponent())/log2ten);
+    int dgts = std::max(std::min(dgtsval,dgtserr),errplc);
     if(edbl==0.0) { dgts = dgtsval; }
     DecimalPlaces plcs{dgts};
-
     // Get string version of mpfr values
     String vstr=print(v,plcs,MPFR_RNDN);
     String estr=print(e,plcs,MPFR_RNDU);
@@ -1887,7 +1886,7 @@ template<class F> struct Operations<PositiveBounds<F>> {
 
 template<class F> struct Operations<Error<F>> {
     static OutputStream& _write(OutputStream& os, Error<F> const& x) {
-        return write(os,x.raw(),Error<F>::output_places,upward);
+        return write(os,x.raw(),DecimalPrecision{Error<F>::output_places},upward);
     }
 
     static InputStream& _read(InputStream& is, Error<F>& x) {

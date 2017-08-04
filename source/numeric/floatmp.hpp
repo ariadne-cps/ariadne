@@ -337,6 +337,7 @@ class FloatMP {
     friend InputStream& operator>>(InputStream& is, FloatMP& x);
   private:
     friend OutputStream& write(OutputStream& os, FloatMP const& x, DecimalPlaces dgts, RoundingModeMP rnd);
+    friend OutputStream& write(OutputStream& os, FloatMP const& x, DecimalPrecision dgts, RoundingModeMP rnd);
     friend String print(FloatMP const& x, DecimalPlaces dgts, RoundingModeMP rnd);
     friend String print(FloatMP const& x, DecimalPrecision dgts, RoundingModeMP rnd);
 };

@@ -40,6 +40,7 @@
 #include "float.hpp"
 #include "float-user.hpp"
 
+#include "real_interface.hpp"
 #include "number_wrapper.hpp"
 
 namespace Ariadne {
@@ -47,17 +48,6 @@ namespace Ariadne {
 TwoExp Accuracy::error() const {
     return TwoExp(-(Int)this->bits());
 }
-
-typedef Real::Interface RealInterface;
-
-class Real::Interface {
-  public:
-    virtual ~Interface() = default;
-    virtual FloatDPBounds _evaluate(DoublePrecision) const = 0;
-    virtual FloatMPBounds _evaluate(MultiplePrecision) const = 0;
-  public:
-    virtual OutputStream& _write(OutputStream& os) const = 0;
-};
 
 template<> Ball<FloatDP>::Ball(Real const& r, DoublePrecision pr) : Ball(r.get(pr)) { }
 template<> Bounds<FloatDP>::Bounds(Real const& r, DoublePrecision pr) : Bounds<FloatDP>(r.get(pr)) { }

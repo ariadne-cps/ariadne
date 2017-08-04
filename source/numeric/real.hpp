@@ -83,6 +83,7 @@ template<class X> class StrongCauchySequence : public Sequence<X> {
     friend CompletionType<X> limit(StrongCauchySequence<X> const&);
 };
 
+class RealInterface;
 
 //! \ingroup NumericModule
 //! \brief Computable real numbers definable in terms of elementary functions.
@@ -94,7 +95,7 @@ class Real
     , public DefineFieldOperators<Real>
 {
   private: public:
-    class Interface;
+    using Interface = RealInterface;
   private: public:
     SharedPointer<Interface> _ptr;
   private: public:

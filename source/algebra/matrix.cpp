@@ -235,9 +235,9 @@ template<> Matrix<FloatDPBounds> gs_solve(const Matrix<FloatDPBounds>& A, const 
 }
 
 template<class X> Vector<X> gs_solve(const Matrix<X>& A, const Vector<X>& b) {
-    Matrix<X> B(b.size(),1u); for(SizeType i=0; i!=b.size(); ++i) { B[i][1]=b[i]; }
+    Matrix<X> B(b.size(),1u); for(SizeType i=0; i!=b.size(); ++i) { B[i][0]=b[i]; }
     Matrix<X> R=gs_solve(A,B);
-    Vector<X> r(R.row_size()); for(SizeType i=0; i!=r.size(); ++i) { r[i]=R[i][1]; }
+    Vector<X> r(R.row_size()); for(SizeType i=0; i!=r.size(); ++i) { r[i]=R[i][0]; }
     return r;
 }
 

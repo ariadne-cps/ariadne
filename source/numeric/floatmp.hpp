@@ -54,6 +54,7 @@ class MultiplePrecision {
   public:
     typedef unsigned_mpfr_prec_t Type;
     explicit MultiplePrecision(mpfr_prec_t pr) : prec(pr) { }
+    explicit MultiplePrecision(DoublePrecision const& pr) : prec(53u) { }
     unsigned_mpfr_prec_t bits() const { return prec; }
     operator mpfr_prec_t () const { return prec; }
     friend MultiplePrecision max(MultiplePrecision mp1, MultiplePrecision mp2) { return MultiplePrecision(std::max(mp1.bits(),mp2.bits())); }
@@ -106,6 +107,7 @@ class FloatMP {
     ~FloatMP();
     explicit FloatMP(NoInit);
     explicit FloatMP(PrecisionType, NoInit);
+    explicit FloatMP(const mpfr_t, RawPtr);
 
     FloatMP();
     FloatMP(double);

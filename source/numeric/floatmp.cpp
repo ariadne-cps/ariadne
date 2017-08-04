@@ -52,12 +52,11 @@ FloatMP::FloatMP(NoInit) {
     mpfr_init(_mpfr);
 }
 
-/*
-FloatMP::FloatMP(const mpfr_t x) : FloatMP(NoInit()) {
+FloatMP::FloatMP(const mpfr_t x, RawPtr) : FloatMP(NoInit()) {
     mpfr_set_prec(this->_mpfr,mpfr_get_prec(x));
     mpfr_set(this->_mpfr,x,MPFR_RNDN);
 }
-*/
+
 
 FloatMP::FloatMP(double d) : FloatMP(d,get_default_precision()) {
 }

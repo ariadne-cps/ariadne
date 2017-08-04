@@ -64,6 +64,7 @@ class MultiplePrecision {
 };
 using MP = MultiplePrecision;
 inline MultiplePrecision multiple_precision(mpfr_prec_t pr) { return MultiplePrecision(pr); }
+inline MultiplePrecision precision(mpfr_prec_t pr) { return MultiplePrecision(pr); }
 inline MP mp(mpfr_prec_t pr) { return MP(pr); }
 
 //! \ingroup FltMPSubModule

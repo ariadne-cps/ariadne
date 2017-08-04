@@ -758,12 +758,16 @@ template<class PR> Void export_precision();
 template<> Void export_precision<DoublePrecision>() {
     class_<DoublePrecision> precision_class("DoublePrecision",init<>());
     precision_class.def(self_ns::str(self));
+    boost::python::scope().attr("double_precision") = double_precision;
 }
 
 template<> Void export_precision<MultiplePrecision>() {
     class_<MultiplePrecision> precision_class("MultiplePrecision",init<Nat>());
     precision_class.def("bits",&MultiplePrecision::bits);
     precision_class.def(self_ns::str(self));
+    def("multiple_precision", &multiple_precision);
+    def("precision", &precision);
+
 }
 
 template<class PR> Void export_user_floats() {

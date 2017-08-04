@@ -225,6 +225,21 @@ class LocatedSetWrapper
     OutputStream& write(OutputStream&) const { return this->get_override("write")(); }
 };
 
+
+// Declare Geometry friend operations
+ConstraintSet intersection(const ConstraintSet& cs1, const ConstraintSet& cs2);
+BoundedConstraintSet intersection(const ConstraintSet& cs, const RealBox& bx);
+BoundedConstraintSet intersection(const RealBox& bx, const ConstraintSet& cs);
+
+BoundedConstraintSet intersection(const BoundedConstraintSet& bcs1, const ConstraintSet& cs2);
+BoundedConstraintSet intersection(const ConstraintSet& cs1, const BoundedConstraintSet& bcs2);
+BoundedConstraintSet intersection(const BoundedConstraintSet& bcs1, const RealBox& bx2);
+BoundedConstraintSet intersection(const RealBox& bx1, const BoundedConstraintSet& bcs2);
+ConstrainedImageSet image(const BoundedConstraintSet& set, const EffectiveVectorFunction& function);
+
+ValidatedConstrainedImageSet image(ValidatedConstrainedImageSet set, ValidatedVectorFunction const& h);
+ValidatedConstrainedImageSet join(const ValidatedConstrainedImageSet& set1, const ValidatedConstrainedImageSet& set2);
+
 }
 
 
@@ -453,7 +468,7 @@ Void export_constraint_set()
     class_<BoxSet>
         box_set_class("BoxSet");
 
-    def("intersection", (BoundedConstraintSet(*)(const ConstraintSet&,const BoxSet&)) &intersection);
+    def("intersection", (BoundedConstraintSet(*)(const ConstraintSet&,const RealBox&)) &intersection);
 
 }
 

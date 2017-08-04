@@ -97,6 +97,10 @@ class ConstraintSet
     ValidatedSierpinskian overlaps(const ExactBoxType&) const;
     ValidatedSierpinskian covers(const ExactBoxType&) const;
     OutputStream& write(OutputStream&) const;
+
+    friend ConstraintSet intersection(const ConstraintSet& cs1, const ConstraintSet& cs2);
+    friend BoundedConstraintSet intersection(const ConstraintSet& cs, const RealBox& bx);
+    friend BoundedConstraintSet intersection(const RealBox& bx, const ConstraintSet& cs);
 };
 
 
@@ -140,9 +144,13 @@ class BoundedConstraintSet
     UpperBoxType bounding_box() const;
     OutputStream& write(OutputStream&) const;
     Void draw(CanvasInterface&,const Projection2d&) const;
-};
 
-BoundedConstraintSet intersection(const ConstraintSet& cs, const RealBox& bx);
+    friend BoundedConstraintSet intersection(const BoundedConstraintSet& bcs1, const ConstraintSet& cs2);
+    friend BoundedConstraintSet intersection(const ConstraintSet& cs1, const BoundedConstraintSet& bcs2);
+    friend BoundedConstraintSet intersection(const BoundedConstraintSet& bcs1, const RealBox& bx2);
+    friend BoundedConstraintSet intersection(const RealBox& bx1, const BoundedConstraintSet& bcs2);
+    friend ConstrainedImageSet image(const BoundedConstraintSet& set, const EffectiveVectorFunction& function);
+};
 
 
 class ConstrainedImageSet
@@ -226,6 +234,9 @@ class ConstrainedImageSet
     Void draw(CanvasInterface&,const Projection2d&) const;
     //! \brief Write to an output stream.
     OutputStream& write(OutputStream&) const;
+
+    //! \brief Compute the image of \f$S\f$ under the function \f$h\f$.
+    friend ConstrainedImageSet image(ConstrainedImageSet set, EffectiveVectorFunction const& h);
 };
 
 
@@ -332,10 +343,12 @@ class ValidatedConstrainedImageSet
     Void grid_draw(CanvasInterface&, const Projection2d&, Nat depth) const;
     //! \brief Write to an output stream.
     OutputStream& write(OutputStream&) const;
+
+    friend ValidatedConstrainedImageSet image(ValidatedConstrainedImageSet set, ValidatedVectorFunction const& h);
+    friend ValidatedConstrainedImageSet join(const ValidatedConstrainedImageSet& set1, const ValidatedConstrainedImageSet& set2);
+    friend OutputStream& operator<<(OutputStream&, const ValidatedConstrainedImageSet&);
 };
 
-ValidatedConstrainedImageSet join(const ValidatedConstrainedImageSet& set1, const ValidatedConstrainedImageSet& set2);
-OutputStream& operator<<(OutputStream&, const ValidatedConstrainedImageSet&);
 
 
 

@@ -328,6 +328,12 @@ ConstraintSet::write(OutputStream& os) const
     return os << "ConstraintSet( constraints=" << this->constraints() << " )";
 }
 
+ConstraintSet
+intersection(const ConstraintSet& cs1,const ConstraintSet& cs2)
+{
+    return ConstraintSet(catenate(cs1.constraints(),cs2.constraints()));
+}
+
 
 
 
@@ -432,6 +438,36 @@ BoundedConstraintSet
 intersection(const ConstraintSet& cs,const EffectiveBoxType& bx)
 {
     return BoundedConstraintSet(bx,cs.constraints());
+}
+
+BoundedConstraintSet
+intersection(const EffectiveBoxType& bx,const ConstraintSet& cs)
+{
+    return intersection(cs,bx);
+}
+
+BoundedConstraintSet
+intersection(const BoundedConstraintSet& bcs,const EffectiveBoxType& bx)
+{
+    return BoundedConstraintSet(intersection(bcs.constraint_bounds(),bx),bcs.constraints());
+}
+
+BoundedConstraintSet
+intersection(const EffectiveBoxType& bx,const BoundedConstraintSet& bcs)
+{
+    return intersection(bcs,bx);
+}
+
+BoundedConstraintSet
+intersection(const BoundedConstraintSet& bcs,const ConstraintSet& cs)
+{
+    return BoundedConstraintSet(bcs.constraint_bounds(),catenate(bcs.constraints(),cs.constraints()));
+}
+
+BoundedConstraintSet
+intersection(const ConstraintSet& cs,const BoundedConstraintSet& bcs)
+{
+    return intersection(bcs,cs);
 }
 
 
@@ -596,6 +632,10 @@ ConstrainedImageSet image(const BoundedConstraintSet& set, const EffectiveVector
         result.new_parameter_constraint(set.constraint(i));
     }
     return result;
+}
+
+ConstrainedImageSet image(ConstrainedImageSet set, const EffectiveVectorFunction& function) {
+    set.apply(function); return set;
 }
 
 

@@ -22,8 +22,19 @@
  */
 
 #include "interval.hpp"
+#include "numeric/dyadic.hpp"
 
 namespace Ariadne {
+
+static const uint GEOMETRY_OUTPUT_PLACES = 4;
+
+template<> OutputStream& operator<<(OutputStream& os, Interval<FloatDPValue> const& ivl) {
+    auto places = FloatDPValue::output_places;
+    FloatDPValue::output_places=GEOMETRY_OUTPUT_PLACES;
+    os << "{" << ivl.lower() << ":" << ivl.upper() << "}";
+    FloatDPValue::output_places=places;
+    return os;
+}
 
 Interval<FloatDPValue> widen_domain(Interval<FloatDPUpperBound> const& ivl) {
     auto rnd=FloatDP::get_rounding_mode();

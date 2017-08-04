@@ -60,6 +60,7 @@ template<class U> inline OutputStream& operator<<(OutputStream& os, Interval<U> 
     return os << "{" << ivl.lower() << ":" << ivl.upper() << "}";
 }
 
+template<> OutputStream& operator<<(OutputStream& os, Interval<FloatDPValue> const& ivl);
 
 template<class U> inline auto lower_bound(Interval<U> const& ivl) -> decltype(ivl.lower()) { return ivl.lower(); }
 template<class U> inline auto upper_bound(Interval<U> const& ivl) -> decltype(ivl.upper()) { return ivl.upper(); }

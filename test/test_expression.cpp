@@ -118,7 +118,7 @@ class TestExpression {
         Real tz=Dyadic(3.750);
 
         Vector<Real> tv={tx,ty,tz};
-        ContinuousValuation<Real> tw({{x.name(),tx},{y.name(),ty},{z.name(),tz}});
+        Valuation<Real> tw({{x.name(),tx},{y.name(),ty},{z.name(),tz}});
 
         RealConstant c("5",tc);
         RealVariable x("x");

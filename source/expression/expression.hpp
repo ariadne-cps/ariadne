@@ -126,10 +126,11 @@ class Expression
 //! \related Expression
 
 Boolean evaluate(const Expression<Boolean>& e, const DiscreteValuation& q);
+Boolean evaluate(const Expression<Boolean>& e, const StringValuation& q);
 String evaluate(const Expression<String>& e, const StringValuation& q);
 Integer evaluate(const Expression<Integer>& e, const IntegerValuation& q);
-Real evaluate(const Expression<Real>& e, const ContinuousValuation<Real>& q);
-Kleenean evaluate(const Expression<Kleenean>& e, const ContinuousValuation<Real>& q);
+Real evaluate(const Expression<Real>& e, const Valuation<Real>& q);
+Kleenean evaluate(const Expression<Kleenean>& e, const Valuation<Real>& q);
 
 //! \brief Evaluate expression \a e on argument \a x which is a map of variable identifiers to values of type \c A.
 template<class A> typename Logic<A>::Type evaluate(const Expression<typename Logic<A>::Type>& e, const Map<Identifier,A>& x);

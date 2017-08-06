@@ -81,7 +81,7 @@ template<class F> class Bounds
 //    , public ProvideConvertedFieldOperations<Bounds<F>,Value<F>>
 {
   protected:
-    typedef ValidatedTag P; typedef typename F::PrecisionType PR;
+    typedef ValidatedTag P; typedef typename F::RoundingModeType RND; typedef typename F::PrecisionType PR;
   public:
     typedef P Paradigm;
     typedef Bounds<F> NumericType;
@@ -101,6 +101,9 @@ template<class F> class Bounds
     Bounds<F>(ExactDouble const& dl, ExactDouble const& du, PrecisionType pr);
     Bounds<F>(Dyadic const& wl, Dyadic const& wu, PrecisionType pr);
     Bounds<F>(Rational const& ql, Rational const& qu, PrecisionType pr);
+
+    template<class FF, EnableIf<IsConstructible<F,FF,RND,PR>> =dummy>
+        Bounds<F>(Bounds<FF> const& x, PR pr) : Bounds<F>(F(x.lower_raw(),downward,pr),F(x.upper_raw(),upward,pr)) { }
 
     template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> Bounds<F>(N n, PR pr) : Bounds<F>(ExactDouble(n),pr) { }
     Bounds<F>(ExactDouble d, PR pr);

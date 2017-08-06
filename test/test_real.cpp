@@ -79,7 +79,7 @@ void TestReal::test_concept() {
 void TestReal::test_conversions() {
     Real one=1;
     Real pi=4*atan(one);
-    auto pi_dp=pi(dp);
+    auto pi_dp=pi.get(dp);
 //    auto pi_mp=pi(MultiplePrecision(2));
     ARIADNE_TEST_PRINT(pi_dp);
 //    ARIADNE_TEST_PRINT(pi_mp);
@@ -193,13 +193,17 @@ void TestReal::test_accuracy() {
     ARIADNE_TEST_ASSERT(pi_mp.lower_raw()<=pi_near);
     ARIADNE_TEST_ASSERT(pi_mp.upper_raw()>=pi_near);
 
+    mp=precision(320);
+    Effort effort{256};
+    ARIADNE_TEST_CONSTRUCT(ValidatedReal,pi_ord,(pi.compute(effort)));
     Accuracy accuracy{256};
-    FloatMPValue error(accuracy.error(),MultiplePrecision(320));
-    ARIADNE_TEST_CONSTRUCT(FloatMPBounds,pi_met,(pi.evaluate(accuracy)));
-    ARIADNE_TEST_PRINT(pi_met.error());
-    ARIADNE_TEST_PRINT(abs(sub(up,pi_met.value_raw(),pi_near)));
-    ARIADNE_TEST_ASSERT(pi_met.error() <= error);
-    ARIADNE_TEST_ASSERT(rad(up,pi_met.value().raw(),pi_near) <= error.raw());
+    FloatMPValue error(accuracy.error(),mp);
+    ARIADNE_TEST_CONSTRUCT(ValidatedReal,pi_met,(pi.compute(accuracy)));
+    ARIADNE_TEST_CONSTRUCT(FloatMPBounds,pi_met_mp,(pi_met.get(mp)));
+    ARIADNE_TEST_PRINT(pi_met_mp.error());
+    ARIADNE_TEST_PRINT(abs(sub(up,pi_met_mp.value_raw(),pi_near)));
+    ARIADNE_TEST_ASSERT(pi_met_mp.error() <= error);
+    ARIADNE_TEST_ASSERT(rad(up,pi_met_mp.value().raw(),pi_near) <= error.raw());
 
     std::function<Dyadic(Natural)> wfn([&](Natural n){int nint=n.get_si();return Dyadic(two_exp(-nint));});
     StrongCauchySequence<Dyadic> wseq(wfn);

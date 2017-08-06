@@ -326,8 +326,8 @@ void export_real()
 
     real_class.def("get", (FloatDPBounds(Real::*)(DoublePrecision)const) &Real::get);
     real_class.def("get", (FloatMPBounds(Real::*)(MultiplePrecision)const) &Real::get);
-    real_class.def("get", (FloatMPBall(Real::*)(Accuracy)const) &Real::get);
-    real_class.def("evaluate", (FloatMPBall(Real::*)(Accuracy)const) &Real::evaluate);
+    real_class.def("compute", (ValidatedReal(Real::*)(Effort)const) &Real::compute);
+    real_class.def("compute", (ValidatedReal(Real::*)(Accuracy)const) &Real::compute);
     real_class.def("get_d", &Real::get_d);
 
     implicitly_convertible<Rational,Real>();

@@ -77,7 +77,9 @@ class Integer;
 class Rational;
 class Real;
 
-class DyadicBounds;
+template<class F> class Bounds;
+template<> class Bounds<Dyadic>;
+using DyadicBounds = Bounds<Dyadic>;
 
 template<class R, class A> R integer_cast(const A& _a);
 

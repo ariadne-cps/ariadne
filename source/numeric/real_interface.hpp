@@ -31,6 +31,7 @@ class FloatMP;
 class FloatDP;
 
 template<class F> class Bounds;
+using DyadicBounds = Bounds<Dyadic>;
 using FloatDPBounds = Bounds<FloatDP>;
 using FloatMPBounds = Bounds<FloatMP>;
 
@@ -41,8 +42,19 @@ class Real;
 class RealInterface {
   public:
     virtual ~RealInterface() = default;
-    virtual FloatDPBounds _evaluate(DoublePrecision) const = 0;
-    virtual FloatMPBounds _evaluate(MultiplePrecision) const = 0;
+    virtual ValidatedReal _compute(Effort) const = 0;
+    virtual FloatDPBounds _compute_get(DoublePrecision) const = 0;
+    virtual FloatMPBounds _compute_get(MultiplePrecision) const = 0;
+  public:
+    virtual OutputStream& _write(OutputStream& os) const = 0;
+};
+
+class ValidatedRealInterface {
+  public:
+    virtual ~ValidatedRealInterface() = default;
+    virtual DyadicBounds _get() const = 0;
+    virtual FloatDPBounds _get(DoublePrecision) const = 0;
+    virtual FloatMPBounds _get(MultiplePrecision) const = 0;
   public:
     virtual OutputStream& _write(OutputStream& os) const = 0;
 };

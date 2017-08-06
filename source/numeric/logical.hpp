@@ -47,6 +47,7 @@ class Effort {
     explicit Effort() : _m(0u) { }
     explicit Effort(Nat m) : _m(m) { }
     operator Nat() const { return _m; }
+    Nat work() const { return _m; }
     friend OutputStream& operator<<(OutputStream& os, Effort eff) { return os << "Effort(" << eff._m << ")"; }
 };
 

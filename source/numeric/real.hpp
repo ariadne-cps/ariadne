@@ -49,6 +49,8 @@ class PositiveLowerReal;
 class PositiveUpperReal;
 template<> struct IsNumericType<Real> : True { };
 
+class ValidatedReal;
+
 struct Accuracy {
     Nat _bits;
     Accuracy(Nat bits) : _bits(bits) { }
@@ -130,12 +132,10 @@ class Real
     double get_d() const;
 
     // Extract arbitrarily accurate approximations
-    FloatDPBounds operator() (DoublePrecision pr) const;
-    FloatMPBounds operator() (MultiplePrecision pr) const;
+    ValidatedReal compute(Accuracy acc) const;
+    ValidatedReal compute(Effort eff) const;
     FloatDPBounds get(DoublePrecision pr) const;
     FloatMPBounds get(MultiplePrecision pr) const;
-    FloatMPBall get(Accuracy acc) const;
-    FloatMPBall evaluate(Accuracy acc) const;
 
 
     friend PositiveReal abs(Real const&);
@@ -313,6 +313,23 @@ class PositiveUpperReal : public UpperReal
 };
 
 PositiveReal cast_positive(Real const& x);
+
+
+class ValidatedRealInterface;
+
+class ValidatedReal {
+    SharedPointer<ValidatedRealInterface> _ptr;
+  public:
+    ValidatedReal(DyadicBounds const&);
+    Dyadic value();
+    Dyadic error();
+    Dyadic lower();
+    Dyadic upper();
+    DyadicBounds get() const;
+    FloatDPBounds get(DoublePrecision) const;
+    FloatMPBounds get(MultiplePrecision) const;
+    friend OutputStream& operator<<(OutputStream&, ValidatedReal const&);
+};
 
 } // namespace Ariadne
 

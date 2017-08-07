@@ -62,22 +62,22 @@ typedef PlanarProjectionMap Projection2d;
 class FigureInterface {
   public:
     virtual ~FigureInterface() { };
-    virtual Void set_projection_map(const PlanarProjectionMap& prj) = 0;
-    virtual Void set_bounding_box(const ApproximateBoxType& bx) = 0;
-    virtual Void set_projection(Nat as, Nat ix, Nat iy) = 0;
-    virtual Void set_line_style(Bool) = 0;
-    virtual Void set_line_width(double) = 0;
-    virtual Void set_dot_radius(double) = 0;
-    virtual Void set_line_colour(Colour) = 0;
-    virtual Void set_fill_opacity(double) = 0;
-    virtual Void set_fill_colour(Colour) = 0;
+    virtual FigureInterface& set_projection_map(const PlanarProjectionMap& prj) = 0;
+    virtual FigureInterface& set_bounding_box(const ApproximateBoxType& bx) = 0;
+    virtual FigureInterface& set_projection(Nat as, Nat ix, Nat iy) = 0;
+    virtual FigureInterface& set_line_style(Bool) = 0;
+    virtual FigureInterface& set_line_width(double) = 0;
+    virtual FigureInterface& set_dot_radius(double) = 0;
+    virtual FigureInterface& set_line_colour(Colour) = 0;
+    virtual FigureInterface& set_fill_opacity(double) = 0;
+    virtual FigureInterface& set_fill_colour(Colour) = 0;
     virtual Bool get_line_style() const = 0;
     virtual double get_line_width() const = 0;
     virtual Colour get_line_colour() const = 0;
     virtual Bool get_fill_style() const = 0;
     virtual double get_fill_opacity() const = 0;
     virtual Colour get_fill_colour() const = 0;
-    virtual Void draw(const DrawableInterface&) = 0;
+    virtual FigureInterface& draw(const DrawableInterface&) = 0;
 };
 inline Void draw(FigureInterface& fig, const DrawableInterface& shape) { fig.draw(shape); }
 inline FigureInterface& operator<<(FigureInterface& fig, const DrawableInterface& shape) { fig.draw(shape); return fig; }

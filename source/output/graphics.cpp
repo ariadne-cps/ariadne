@@ -82,6 +82,7 @@ struct GraphicsObject {
 struct Figure::Data
 {
     Data() : bounding_box(0), projection(2,0,1), properties() { }
+    Data(ApproximateBoxType bbx, PlanarProjectionMap prj) : bounding_box(bbx), projection(prj), properties() { }
     ApproximateBoxType bounding_box;
     PlanarProjectionMap projection;
     GraphicsProperties properties;
@@ -95,31 +96,40 @@ Figure::~Figure()
 
 
 Figure::Figure()
-    : _data(new Data())
+    : Figure(ApproximateBoxType({{-1,+1},{-1,+1}}),PlanarProjectionMap(2,0,1))
 {
-    this->_data->bounding_box=ApproximateBoxType(0);
-    this->_data->projection=PlanarProjectionMap(2,0,1);
 }
 
-Void Figure::draw(const DrawableInterface& shape)
+Figure::Figure(const GraphicsBoundingBoxType& bbx, const PlanarProjectionMap& proj)
+    : _data(new Data(bbx,proj))
 {
-    this->_data->objects.push_back(GraphicsObject(this->_data->properties,shape));
+    ARIADNE_ASSERT_MSG(proj.argument_size() == bbx.dimension(), "Coordinate projection "<<proj<<" must take same number of arguments as the dimension of the bounding box "<<bbx);
+}
+
+Figure::Figure(const GraphicsBoundingBoxType& bbx, Nat ix, Nat iy)
+    : Figure(bbx,PlanarProjectionMap(bbx.dimension(),ix,iy))
+{
+}
+
+Figure& Figure::draw(const DrawableInterface& shape)
+{
+    this->_data->objects.push_back(GraphicsObject(this->_data->properties,shape)); return *this;
 }
 
 
-Void Figure::set_projection(Nat as, Nat ix, Nat iy)
+Figure& Figure::set_projection(Nat as, Nat ix, Nat iy)
 {
-    this->_data->projection=PlanarProjectionMap(as,ix,iy);
+    this->_data->projection=PlanarProjectionMap(as,ix,iy); return *this;
 }
 
-Void Figure::set_projection_map(const PlanarProjectionMap& p)
+Figure& Figure::set_projection_map(const PlanarProjectionMap& p)
 {
-    this->_data->projection=p;
+    this->_data->projection=p; return *this;
 }
 
-Void Figure::set_bounding_box(const ApproximateBoxType& bx)
+Figure& Figure::set_bounding_box(const ApproximateBoxType& bx)
 {
-    this->_data->bounding_box=bx;
+    this->_data->bounding_box=bx; return *this;
 }
 
 PlanarProjectionMap Figure::get_projection_map() const
@@ -132,49 +142,49 @@ ApproximateBoxType Figure::get_bounding_box() const
     return this->_data->bounding_box;
 }
 
-Void Figure::set_dot_radius(double dr)
+Figure& Figure::set_dot_radius(double dr)
 {
-    this->_data->properties.dot_radius=dr;
+    this->_data->properties.dot_radius=dr; return *this;
 }
 
-Void Figure::set_line_style(Bool ls)
+Figure& Figure::set_line_style(Bool ls)
 {
-    this->_data->properties.line_style=ls;
+    this->_data->properties.line_style=ls; return *this;
 }
 
-Void Figure::set_line_width(double lw)
+Figure& Figure::set_line_width(double lw)
 {
-    this->_data->properties.line_width=lw;
+    this->_data->properties.line_width=lw; return *this;
 }
 
-Void Figure::set_line_colour(Colour lc)
+Figure& Figure::set_line_colour(Colour lc)
 {
-    this->_data->properties.line_colour=lc;
+    this->_data->properties.line_colour=lc; return *this;
 }
 
-Void Figure::set_line_colour(double r, double g, double b)
+Figure& Figure::set_line_colour(double r, double g, double b)
 {
-    this->set_line_colour(Colour(r,g,b));
+    this->set_line_colour(Colour(r,g,b)); return *this;
 }
 
-Void Figure::set_fill_style(Bool fs)
+Figure& Figure::set_fill_style(Bool fs)
 {
-    this->_data->properties.fill_style=fs;
+    this->_data->properties.fill_style=fs; return *this;
 }
 
-Void Figure::set_fill_opacity(double fo)
+Figure& Figure::set_fill_opacity(double fo)
 {
-    this->_data->properties.fill_colour.opacity=fo;
+    this->_data->properties.fill_colour.opacity=fo; return *this;
 }
 
-Void Figure::set_fill_colour(Colour fc)
+Figure& Figure::set_fill_colour(Colour fc)
 {
-    this->_data->properties.fill_colour=fc;
+    this->_data->properties.fill_colour=fc; return *this;
 }
 
-Void Figure::set_fill_colour(double r, double g, double b)
+Figure& Figure::set_fill_colour(double r, double g, double b)
 {
-    this->set_fill_colour(Colour(r,g,b,this->_data->properties.fill_colour.opacity));
+    this->set_fill_colour(Colour(r,g,b,this->_data->properties.fill_colour.opacity)); return *this;
 }
 
 Bool Figure::get_line_style() const
@@ -208,17 +218,17 @@ Colour Figure::get_fill_colour() const
     return this->_data->properties.fill_colour;
 }
 
-Void Figure::draw(ApproximateBoxType const& box)
+Figure& Figure::draw(ApproximateBoxType const& box)
 {
     ApproximateBoxSet box_set(box);
     DrawableInterface const& shape=box_set;
-    this->draw(shape);
+    this->draw(shape); return *this;
 }
 
 
 
-Void Figure::clear() {
-    this->_data->objects.clear();
+Figure& Figure::clear() {
+    this->_data->objects.clear(); return *this;
 }
 
 
@@ -282,15 +292,15 @@ Void CairoCanvas::stroke()
     cairo_restore(cr);
 }
 
-Void CairoCanvas::fill() { 
-    cairo_set_source_rgba(cr,fc.red,fc.green,fc.blue,fc.opacity); 
-    cairo_fill_preserve (cr); 
-    this->stroke(); 
+Void CairoCanvas::fill() {
+    cairo_set_source_rgba(cr,fc.red,fc.green,fc.blue,fc.opacity);
+    cairo_fill_preserve (cr);
+    this->stroke();
 }
 
 ImageSize2d CairoCanvas::size_in_pixels() const {
     return ImageSize2d(cairo_image_surface_get_width(cairo_get_target(cr))-(LEFT_MARGIN+RIGHT_MARGIN),
-                       cairo_image_surface_get_height(cairo_get_target(cr))-(BOTTOM_MARGIN+TOP_MARGIN)); 
+                       cairo_image_surface_get_height(cairo_get_target(cr))-(BOTTOM_MARGIN+TOP_MARGIN));
 }
 
 Void CairoCanvas::move_to(double x, double y) { cairo_move_to (cr, x, y); }
@@ -506,7 +516,7 @@ Figure::write(const char* cfilename, Nat drawing_width, Nat drawing_height) cons
     } else {
         filename=filename+".png";
     }
-    
+
     canvas.write(filename.c_str());
 }
 

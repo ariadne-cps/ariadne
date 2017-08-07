@@ -81,25 +81,36 @@ class Figure
 {
   public:
     ~Figure();
-    Figure();
-    Void set_projection_map(const PlanarProjectionMap&);
-    Void set_bounding_box(const GraphicsBoundingBoxType&);
+    Figure(); //< Deprecated
+    Figure(const GraphicsBoundingBoxType& bbx, const PlanarProjectionMap& proj);
+    //! Construct a figure projecting \a bbx onto the (\a i, \i j) coordinates
+    Figure(const GraphicsBoundingBoxType& bbx, Nat ix, Nat iy);
+    Figure& set_projection_map(const PlanarProjectionMap&);
+    //! Set the restricted region to display coordinates to (\a i, \a j)
+    Figure& set_bounding_box(const GraphicsBoundingBoxType&);
 
     PlanarProjectionMap get_projection_map() const;
     GraphicsBoundingBoxType get_bounding_box() const;
 
-    Void set_projection(Nat as, Nat ix, Nat iy);
+    //! Set the displayed coordinates to (\a i, \a j)
+    Figure& set_projection(Nat i, Nat j);
+    Figure& set_projection(Nat as, Nat ix, Nat iy);
 
-    Void set_dot_radius(double);
-    Void set_line_style(Bool);
-    Void set_line_width(double);
-    Void set_line_colour(Colour);
-    Void set_fill_style(Bool);
-    Void set_fill_colour(Colour);
+    //! Set the radiues to draw points (dots).
+    Figure& set_dot_radius(double);
+    Figure& set_line_style(Bool);
+    //! Set the width to draw lines. A width of 0 means no lines are drawn.
+    Figure& set_line_width(double);
+    //! Set the colour draw lines
+    Figure& set_line_colour(Colour);
+    Figure& set_fill_style(Bool);
+    //! Set the colour to fill shapes.
+    Figure& set_fill_colour(Colour);
 
-    Void set_line_colour(double, double, double);
-    Void set_fill_colour(double, double, double);
-    Void set_fill_opacity(double);
+    Figure& set_line_colour(double, double, double);
+    Figure& set_fill_colour(double, double, double);
+    //! Set the opacity of shapes. An opacity of 0 means no fill.
+    Figure& set_fill_opacity(double);
 
     Bool get_line_style() const;
     double get_line_width() const;
@@ -108,12 +119,16 @@ class Figure
     double get_fill_opacity() const;
     Colour get_fill_colour() const;
 
-    Void draw(const DrawableInterface& shape);
-    Void draw(const ApproximateBoxType& box);
+    //! Add a set to draw onto the figure.
+    Figure& draw(const DrawableInterface& shape);
+    Figure& draw(const ApproximateBoxType& box);
 
-    Void clear();
+    //! Clear the figure.
+    Figure& clear();
+    //! Clear the figure.
     Void display() const;
     Void write(const char* filename, Nat nx, Nat ny) const;
+    //! Write to \a filename.
     Void write(const char* filename) const;
   public:
     struct Data;

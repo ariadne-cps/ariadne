@@ -62,20 +62,20 @@ class TextPlot
     TextPlot(const char* filename);
     TextPlot(const char* filename, std::ios::openmode mode);
 
-    virtual Void set_projection_map(const PlanarProjectionMap& prj) override { };
-    virtual Void set_bounding_box(const GraphicsBoundingBoxType& bx) override { };
-    virtual Void set_dot_radius(double) override { };
+    virtual TextPlot& set_projection_map(const PlanarProjectionMap& prj) override { };
+    virtual TextPlot& set_bounding_box(const GraphicsBoundingBoxType& bx) override { };
+    virtual TextPlot& set_dot_radius(double) override { };
 
-    Void set_projection(Nat, Nat, Nat) override { };
+    TextPlot& set_projection(Nat, Nat, Nat) override { };
 
-    Void set_line_style(Bool) override { };
-    Void set_line_width(double) override { };
-    Void set_line_colour(Colour) override { };
-    Void set_fill_opacity(double) override { };
-    Void set_fill_colour(Colour) override { };
+    TextPlot& set_line_style(Bool) override { };
+    TextPlot& set_line_width(double) override { };
+    TextPlot& set_line_colour(Colour) override { };
+    TextPlot& set_fill_opacity(double) override { };
+    TextPlot& set_fill_colour(Colour) override { };
 
-    Void set_line_colour(double, double, double) { };
-    Void set_fill_colour(double, double, double) { };
+    TextPlot& set_line_colour(double, double, double) { };
+    TextPlot& set_fill_colour(double, double, double) { };
 
     Bool get_line_style() const override { return true; }
     double get_line_width() const override { return 1.0; }
@@ -86,15 +86,15 @@ class TextPlot
 
     Void open(const char* filename);
     Void open(const char* filename, std::ios::openmode mode);
-    Void draw(const ExactPoint&);
-    Void draw(const ExactBoxType&);
-//    Void draw(const Polytope&);
-    Void draw(const InterpolatedCurve&);
-    Void draw(const GridTreeSubset&);
-    Void draw(const DrawableInterface&) override;
+    TextPlot& draw(const ExactPoint&);
+    TextPlot& draw(const ExactBoxType&);
+//    TextPlot& draw(const Polytope&);
+    TextPlot& draw(const InterpolatedCurve&);
+    TextPlot& draw(const GridTreeSubset&);
+    TextPlot& draw(const DrawableInterface&) override;
     Void close();
   private:
-    Void _draw(const std::vector<ExactPoint>&);
+    TextPlot& _draw(const std::vector<ExactPoint>&);
   private:
     std::ofstream _fstream;
 };

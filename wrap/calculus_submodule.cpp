@@ -42,27 +42,6 @@ using namespace Ariadne;
 
 namespace Ariadne {
 
-template<class... AS> inline decltype(auto) _evaluate_(AS... as) { return evaluate(as...); }
-template<class... AS> inline decltype(auto) _partial_evaluate_(AS... as) { return partial_evaluate(as...); }
-template<class... AS> inline decltype(auto) _unchecked_evaluate_(AS... as) { return unchecked_evaluate(as...); }
-template<class... AS> inline decltype(auto) _compose_(AS... as) { return compose(as...); }
-template<class... AS> inline decltype(auto) _unchecked_compose_(AS... as) { return unchecked_compose(as...); }
-
-template<class... AS> inline decltype(auto) _join_(AS... as) { return join(as...); }
-template<class... AS> inline decltype(auto) _combine_(AS... as) { return combine(as...); }
-
-template<class... AS> inline decltype(auto) _midpoint_(AS... as) { return midpoint(as...); }
-template<class... AS> inline decltype(auto) _embed_(AS... as) { return embed(as...); }
-template<class... AS> inline decltype(auto) _extension_(AS... as) { return extension(as...); }
-template<class... AS> inline decltype(auto) _restriction_(AS... as) { return restriction(as...); }
-template<class... AS> inline decltype(auto) _split_(AS... as) { return split(as...); }
-template<class... AS> inline decltype(auto) _derivative_(AS... as) { return derivative(as...); }
-template<class... AS> inline decltype(auto) _antiderivative_(AS... as) { return antiderivative(as...); }
-
-template<class... AS> inline decltype(auto) _refinement_(AS... as) { return refinement(as...); }
-template<class... AS> inline decltype(auto) _refines_(AS... as) { return refines(as...); }
-template<class... AS> inline decltype(auto) _inconsistent_(AS... as) { return inconsistent(as...); }
-
 
 
 //ValidatedNumericType evaluate(const ValidatedScalarFunctionModelDP& f, const Vector<ValidatedNumericType>& x) { return f(x); }
@@ -651,6 +630,7 @@ Void export_scalar_taylor_function()
 
 Void export_vector_taylor_function()
 {
+/*
     typedef SizeType I;
     typedef ValidatedScalarFunction SFN;
     typedef ValidatedVectorFunction VFN;
@@ -741,6 +721,8 @@ Void export_vector_taylor_function()
 //    def("evaluate",(Vector<FloatDPApproximation>(ValidatedVectorTaylorFunctionModelDP::*)(const Vector<FloatDPApproximation>&)const) &ValidatedVectorTaylorFunctionModelDP::evaluate);
 
     from_python<ValidatedVectorTaylorFunctionModelDP>();
+*/
+
 }
 
 Void calculus_submodule()

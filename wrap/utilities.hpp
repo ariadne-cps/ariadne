@@ -400,20 +400,41 @@ template<class R, class A1, class A2>
 R __le__(const A1& a1, const A2& a2) { return static_cast<R>(a1<=a2); }
 
 
-template<class A> decltype(auto) _neg_(const A& a) { return neg(a); }
-template<class A> decltype(auto) _rec_(const A& a) { return rec(a); }
-template<class A> decltype(auto) _sqr_(const A& a) { return sqr(a); }
-template<class A, class N> decltype(auto) _pow_(const A& a, N n) { return pow(a,n); }
-template<class A> decltype(auto) _sqrt_(const A& a) { return sqrt(a); }
-template<class A> decltype(auto) _exp_(const A& a) { return exp(a); }
-template<class A> decltype(auto) _log_(const A& a) { return log(a); }
-template<class A> decltype(auto) _sin_(const A& a) { return sin(a); }
-template<class A> decltype(auto) _cos_(const A& a) { return cos(a); }
-template<class A> decltype(auto) _tan_(const A& a) { return tan(a); }
-template<class A> decltype(auto) _atan_(const A& a) { return atan(a); }
-template<class A1, class A2> decltype(auto) _max_(const A1& a1, const A2& a2) { return max(a1,a2); }
-template<class A1, class A2> decltype(auto) _min_(const A1& a1, const A2& a2) { return min(a1,a2); }
-template<class A> decltype(auto) _abs_(const A& a) { return abs(a); }
+template<class A> auto _neg_(const A& a) -> decltype(neg(a)) { return neg(a); }
+template<class A> auto _rec_(const A& a) -> decltype(rec(a)) { return rec(a); }
+template<class A> auto _sqr_(const A& a) -> decltype(sqr(a)) { return sqr(a); }
+template<class A, class N> auto _pow_(const A& a, N n) -> decltype(pow(a,n)) { return pow(a,n); }
+template<class A> auto _sqrt_(const A& a) -> decltype(sqrt(a)) { return sqrt(a); }
+template<class A> auto _exp_(const A& a) -> decltype(exp(a)) { return exp(a); }
+template<class A> auto _log_(const A& a) -> decltype(log(a)) { return log(a); }
+template<class A> auto _sin_(const A& a) -> decltype(sin(a)) { return sin(a); }
+template<class A> auto _cos_(const A& a) -> decltype(cos(a)) { return cos(a); }
+template<class A> auto _tan_(const A& a) -> decltype(tan(a)) { return tan(a); }
+template<class A> auto _atan_(const A& a) -> decltype(atan(a)) { return atan(a); }
+template<class A1, class A2> auto _max_(const A1& a1, const A2& a2) -> decltype(max(a1,a2)) { return max(a1,a2); }
+template<class A1, class A2> auto _min_(const A1& a1, const A2& a2) -> decltype(min(a1,a2)) { return min(a1,a2); }
+template<class A> auto _abs_(const A& a) -> decltype(abs(a)) { return abs(a); }
+
+template<class... AS> inline auto _evaluate_(AS... as) -> decltype(evaluate(as...)) { return evaluate(as...); }
+template<class... AS> inline auto _partial_evaluate_(AS... as) -> decltype(partial_evaluate(as...)) { return partial_evaluate(as...); }
+template<class... AS> inline auto _unchecked_evaluate_(AS... as) -> decltype(unchecked_evaluate(as...)) { return unchecked_evaluate(as...); }
+template<class... AS> inline auto _compose_(AS... as) -> decltype(compose(as...)) { return compose(as...); }
+template<class... AS> inline auto _unchecked_compose_(AS... as) -> decltype(unchecked_compose(as...)) { return unchecked_compose(as...); }
+
+template<class... AS> inline auto _join_(AS... as) -> decltype(join(as...)) { return join(as...); }
+template<class... AS> inline auto _combine_(AS... as) -> decltype(combine(as...)) { return combine(as...); }
+
+template<class... AS> inline auto _midpoint_(AS... as) -> decltype(midpoint(as...)) { return midpoint(as...); }
+template<class... AS> inline auto _embed_(AS... as) -> decltype(embed(as...)) { return embed(as...); }
+template<class... AS> inline auto _extension_(AS... as) -> decltype(extension(as...)) { return extension(as...); }
+template<class... AS> inline auto _restriction_(AS... as) -> decltype(restriction(as...)) { return restriction(as...); }
+    template<class... AS> inline auto _split_(AS... as) -> decltype(split(as...)) { return split(as...); }
+template<class... AS> inline auto _derivative_(AS... as) -> decltype(derivative(as...)) { return derivative(as...); }
+template<class... AS> inline auto _antiderivative_(AS... as) -> decltype(antiderivative(as...)) { return antiderivative(as...); }
+
+template<class... AS> inline auto _refinement_(AS... as) -> decltype(refinement(as...)) { return refinement(as...); }
+template<class... AS> inline auto _refines_(AS... as) -> decltype(refines(as...)) { return refines(as...); }
+template<class... AS> inline auto _inconsistent_(AS... as) -> decltype(inconsistent(as...)) { return inconsistent(as...); }
 
 template<class T> StringType __cstr__(const T& t) {
     StringStream ss; ss << t; return ss.str(); }

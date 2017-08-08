@@ -154,7 +154,8 @@ Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegratorBase::flow_bounds(Val
     apply(f,D); //f(D); //image(f,D);
 
     PositiveFloatDPValue h=cast_exact(hsug);
-    UpperBoxType B = D + 2*IntervalDomainType(0,h)*(apply(f,D)+V);
+    UpperBoxType wD = D + (D-D.midpoint());
+    UpperBoxType B = wD + 2*IntervalDomainType(0,h)*(apply(f,D)+V);
 
     while(not refines(D+h*(apply(f,B)+V),B)) {
         h=hlf(h);

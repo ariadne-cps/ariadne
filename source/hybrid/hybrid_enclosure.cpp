@@ -383,6 +383,11 @@ Void HybridEnclosure::apply_fixed_evolve_step(const ValidatedVectorFunctionModel
     this->_set.apply_fixed_evolve_step(phi,elps);
 }
 
+Void HybridEnclosure::apply_space_evolve_step(const ValidatedVectorFunctionModelDP& phi, const ValidatedScalarFunctionModelDP& elps)
+{
+    this->_set.apply_space_evolve_step(phi,elps);
+}
+
 Void HybridEnclosure::apply_spacetime_evolve_step(const ValidatedVectorFunctionModelDP& phi, const ValidatedScalarFunctionModelDP& elps)
 {
     this->_set.apply_spacetime_evolve_step(phi,elps);
@@ -394,18 +399,18 @@ Void HybridEnclosure::apply_spacetime_reach_step(const ValidatedVectorFunctionMo
 }
 
 
-Void HybridEnclosure::apply_evolve_step(const ValidatedVectorFunctionModelDP& phi, const ValidatedScalarFunctionModelDP& elps)
+Void HybridEnclosure::apply_parameter_evolve_step(const ValidatedVectorFunctionModelDP& phi, const ValidatedScalarFunctionModelDP& elps)
 {
     this->_set.apply_parameter_evolve_step(phi,elps);
 }
 
-Void HybridEnclosure::apply_finishing_evolve_step(const ValidatedVectorFunctionModelDP& phi, const ValidatedScalarFunctionModelDP& omega)
+Void HybridEnclosure::apply_finishing_parameter_evolve_step(const ValidatedVectorFunctionModelDP& phi, const ValidatedScalarFunctionModelDP& omega)
 {
     this->_set.apply_finishing_parameter_evolve_step(phi,omega);
 }
 
 
-Void HybridEnclosure::apply_reach_step(const ValidatedVectorFunctionModelDP& phi, const ValidatedScalarFunctionModelDP& elps)
+Void HybridEnclosure::apply_parameter_reach_step(const ValidatedVectorFunctionModelDP& phi, const ValidatedScalarFunctionModelDP& elps)
 {
     this->_set.apply_parameter_reach_step(phi,elps);
 }

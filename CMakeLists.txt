@@ -89,6 +89,7 @@ add_subdirectory(python)
 add_subdirectory(examples)
 
 add_library(ariadne SHARED
+    $<TARGET_OBJECTS:ariadne-utility>
     $<TARGET_OBJECTS:ariadne-numeric>
     $<TARGET_OBJECTS:ariadne-expression>
     $<TARGET_OBJECTS:ariadne-algebra>

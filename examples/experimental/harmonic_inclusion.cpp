@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_differential_inclusions.cpp
+ *            harmonic_inclusion.cpp
  *
  *  Copyright  2008-17  Pieter Collins, Sanja Zivanovic
  *
@@ -59,8 +59,7 @@ void damped_harmonic(InclusionIntegratorBase const& integrator, Real evolution_t
     auto I=IntervalDomainType(-1,+1);
     auto c=EffectiveVectorFunction::constant(2,1);
     auto x=EffectiveVectorFunction::identity(2);
-    //auto f=EffectiveVectorFunction({-x[0]*d-x[1],x[0]-x[1]*d});
-    auto f=EffectiveVectorFunction({x[0]/2-c,c});
+    auto f=EffectiveVectorFunction({-x[0]*d-x[1],x[0]-x[1]*d});
     RealBox Vr({RealInterval(-v[0],+v[0]),RealInterval(-v[1],+v[1])});
     Box<Interval<ValidatedNumber>> Vb(Vr);
     BoxDomainType V=over_approximation(Vr);
@@ -98,10 +97,10 @@ void damped_harmonic(InclusionIntegratorBase const& integrator, Real evolution_t
 void test() {
     // damped_harmonic( evolution_time=2*pi, damping=1.0/4, noise=(0.0,0.1), step_size=8.0/32 );
     // damped_harmonic( evolution_time=2*pi, damping=0.0, noise=(0.0,0.1), delta=0.01, step_size=2*pi/50 );
-    ThresholdSweeperDP sweeper(dp,1e-8);
+    ThresholdSweeperDP sweeper(DoublePrecision(),1e-8);
     auto integrator = InclusionIntegrator2ndOrder(sweeper, step_size=1.0/4, number_of_steps_between_simplifications=64, number_of_variables_to_keep=32);
 
-    Real evolution_time=3/4_q;
+    Real evolution_time=pi;
     Real damping=1/100_q;
     Vector<Real> noise={1/16_q,1/32_q};
     Real box_radius=1/128_q;

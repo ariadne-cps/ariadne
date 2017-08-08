@@ -33,6 +33,11 @@
 
 namespace Ariadne {
 
+struct UnscalingException : std::runtime_error {
+    IntervalDomainType domain;
+    inline UnscalingException(String msg, IntervalDomainType dom) : std::runtime_error(msg+to_str(dom)), domain(dom) { }
+};
+
 inline ApproximateNumericType med_apprx(IntervalDomainType const& ivl) {
     return ApproximateNumericType(hlf(add(approx,ivl.lower().raw(),ivl.upper().raw())));
 }
@@ -57,15 +62,14 @@ inline Dyadic rad(IntervalDomainType const& ivl) {
     return hlf(sub( Dyadic(ivl.upper().raw()), Dyadic(ivl.lower().raw()) ));
 }
 
-template<class T, EnableIf<IsSame<Paradigm<T>,ApproximateTag>> =dummy>
-inline T unscale(T x, const IntervalDomainType& d) {
-    return (std::move(x)-med(d))/rad(d);
-}
-
-template<class T, EnableIf<IsStronger<Paradigm<T>,ValidatedTag>> =dummy>
-inline T unscale(T x, const IntervalDomainType& d) {
-    if(d.lower()==d.upper()) { return std::move(x)*Dyadic(0); }
-    return (std::move(x)-med(d))/rad(d);
+template<class T> inline
+T unscale(T x, const IntervalDomainType& d) {
+    if(d.lower()==d.upper()) {
+        return std::move(x)*0;
+        // throw UnscalingException{"Cannot unscale "+to_str(x)+" over empty interval ",d};
+    } else {
+        return (std::move(x)-med(d))/rad(d);
+    }
 }
 
 template<class X> Vector<X> unscale(const Vector<X>& x, const BoxDomainType& d) {

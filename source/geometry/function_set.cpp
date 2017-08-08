@@ -993,7 +993,7 @@ Pair<ValidatedConstrainedImageSet,ValidatedConstrainedImageSet>
 ValidatedConstrainedImageSet::split() const
 {
     Nat k=this->number_of_parameters();
-    FloatDP rmax=0.0;
+    FloatDP rmax=-inf;
     for(Nat j=0; j!=this->number_of_parameters(); ++j) {
         FloatDPUpperBound rj=this->domain()[j].radius();
         if(rj.raw()>rmax) {

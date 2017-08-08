@@ -400,6 +400,7 @@ template<class M> class ScaledFunctionPatch
         return g-compose(g,h); }
 
     friend ScaledFunctionPatch<M> partial_evaluate(const ScaledFunctionPatch<M>& f, SizeType k, const NumericType& c) {
+        ARIADNE_ASSERT(decide(contains(f.domain()[k],c)));
         return ScaledFunctionPatch<M>(remove(f.domain(),k),partial_evaluate(f.model(),k,unscale(c,f.domain()[k]))); }
     friend NumericType evaluate(const ScaledFunctionPatch<M>& f, const Vector<NumericType>& x) {
         if(!definitely(contains(f.domain(),x))) { ARIADNE_THROW(DomainException,"evaluate(f,x) with f="<<f<<", x="<<x,"x is not an element of f.domain()="<<f.domain()); }
@@ -865,23 +866,9 @@ template<class M> class VectorScaledFunctionPatch
     friend VectorScaledFunctionPatch<M> operator/(const VectorScaledFunctionPatch<M>& tf1, const ScalarFunction<P>& f2) {
         return tf1/ScaledFunctionPatch<M>(tf1.domain(),f2,tf1.properties()); }
 
-
-
     friend VectorScaledFunctionPatch<M> partial_evaluate(const VectorScaledFunctionPatch<M>& tf, SizeType k, const NumericType& c) {
-        // Scale c to domain
-        const SizeType as=tf.argument_size();
-        ARIADNE_ASSERT(k<as);
-        const Vector<IntervalDomainType>& domain=tf.domain();
-        const IntervalDomainType& dk=domain[k];
-        NumericType sc=(c-med(dk))/rad(dk);
-
-        Vector<IntervalDomainType> new_domain(as-1);
-        for(SizeType i=0; i!=k; ++i) { new_domain[i]=domain[i]; }
-        for(SizeType i=k; i!=as-1; ++i) { new_domain[i]=domain[i+1]; }
-
-        Vector<M> new_models=partial_evaluate(tf.models(),k,sc);
-
-        return VectorScaledFunctionPatch<M>(new_domain,new_models);
+        ARIADNE_ASSERT(decide(contains(tf.domain()[k],c)));
+        return VectorScaledFunctionPatch<M>(remove(tf.domain(),k),partial_evaluate(tf.models(),k,unscale(c,tf.domain()[k])));
     }
     friend Vector<NumericType> evaluate(const VectorScaledFunctionPatch<M>& f, const Vector<NumericType>& x) {
         if(!definitely(contains(f.domain(),x))) {

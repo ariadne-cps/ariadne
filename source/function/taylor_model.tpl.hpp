@@ -426,8 +426,8 @@ template<class F> Void _scal(TaylorModel<ValidatedTag,F>& r, const Value<F>& c) 
 template<class F> Void _scal(TaylorModel<ValidatedTag,F>& r, const Bounds<F>& c)
 {
     typedef typename F::PrecisionType PR;
-    //std::cerr<<"TaylorModel<ValidatedTag,F>::scal(FloatDPBounds c) c="<<c<<std::endl;
-    ARIADNE_ASSERT(is_finite(c.lower().raw()) && is_finite(c.upper().raw()));
+    //std::cerr<<"TaylorModel<ValidatedTag,F>::scal(Float64Bounds c) c="<<c<<std::endl;
+    ARIADNE_ASSERT_MSG(is_finite(c.lower().raw()) && is_finite(c.upper().raw()),"scal(tm,c): tm="<<r<<", c="<<c);
     ARIADNE_DEBUG_ASSERT(r.error().raw()>=0);
 
     const F inf = F::inf(r.precision());
@@ -1333,7 +1333,7 @@ template<class F> Void TaylorModel<ValidatedTag,F>::unscale(IntervalDomainType c
     ARIADNE_ASSERT_MSG(ivl.lower()<=ivl.upper(),"Cannot unscale TaylorModel<ValidatedTag,F> "<<tm<<" from empty interval "<<ivl);
 
     if(ivl.lower()==ivl.upper()) {
-        tm=ivl.midpoint();
+        tm=0;
         // Uncomment out line below to make unscaling to a singleton interval undefined
         //tm.clear(); tm.set_error(+inf);
     } else {

@@ -48,7 +48,9 @@ A more detailed explanation of the hybrid automaton class can be found on the \r
 
 A more detailed explanation of how to analyse a hybrid system can be found on the \ref system_analysis_page documentation page.
 
-An example of the use of %Ariadne for reachability analysis of a simple hybrid system is given on the \ref tutorial_page  page. The example is contained in the file  \link examples/tutorial.cc tutorial.cc \endlink.
+An example of the use of %Ariadne for reachability analysis of a simple hybrid system is given on the \ref hybrid_system_tutorial_page  page. The example is contained in the file  \link examples/hybrid_system_tutorial.cpp examples/hybrid_system_tutorial.cpp \endlink.
+
+An example of the use of %Ariadne for general-purpose rigorous numerical computation is given ony the \ref rigorous_numerics_tutorial_page  page. The example is contained in the file  \link examples/rigorous_numerics_tutorial.cpp rigorous_numerics_tutorial.cpp \endlink.
 
 The internal structure of %Ariadne can be best explored via the <A HREF="modules.html">Modules</A> page (also linked to at the top of this page).
 
@@ -84,7 +86,8 @@ More information on the mathematical foundations of %Ariadne can be found on the
 \latexonly A more detailed description of Ariadne's capabilities can be found in the documentation for the individual Modules and Classes. \endlatexonly
 Coding guideline are given on the \ref coding_guidelines_page documentation page.
 
-\example examples/tutorial.cc A simple nonlinear model of a heating system.
+\example examples/rigorous_numerics_tutorial.cpp An introduction to Ariadne's facilities for rigorous numerics.
+\example examples/hybrid_system_tutorial.cpp A simple nonlinear model of a heating system.
 \example examples/tutorial.py A tutorial on using the Python interface.
 
 

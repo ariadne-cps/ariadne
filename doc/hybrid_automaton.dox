@@ -34,7 +34,7 @@ namespace Ariadne {
 
 \todo This page has not been written yet.
 See the \ref hybrid_automaton_page_0_4 page for a description of how to build a hybrid automaton in %Ariadne 0.4.
-See the \ref tutorial_page for a tutorial.
+See the \ref hybrid_system_tutorial_page for a tutorial.
 See the documentation on the \ref MonolithicHybridAutomaton and \ref CompositeHybridAutomaton classes for an up-to-date description of the API.
 
 */

@@ -1,7 +1,7 @@
 /***************************************************************************
- *            tutorial.cpp
+ *            hybrid_system_tutorial.cpp
  *
- *  Copyright  2008  Pieter Collins
+ *  Copyright  2008-17  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  */
 
 
-//! \file tutorial.cpp
+//! \file hybrid_system_tutorial.cpp
 
 #include "ariadne.hpp"
 
@@ -32,11 +32,13 @@
 #include "hybrid/hybrid_simulator.hpp"
 #include "hybrid/hybrid_graphics.hpp"
 
+namespace Ariadne::HeatingSystemTutorial {
+
+using namespace Ariadne;
+
 template<class T> void write(const char* filename, const T& t) {
     std::ofstream ofs(filename); ofs << t; ofs.close();
 }
-
-using namespace Ariadne;
 
 typedef GeneralHybridEvolver HybridEvolverType;
 
@@ -76,6 +78,16 @@ typedef GeneralHybridEvolver HybridEvolverType;
 //   Temperature below which the heater must be turned on Toninv
 
 
+//! [create_heating_system]
+// Create the discrete system variables.
+StringVariable clock("clock");
+StringVariable heating("heating");
+// Create the values of the discrete variables.
+StringConstant on("on");
+StringConstant off("off");
+// Declare the continuous system variables.
+RealVariable T("T");
+RealVariable C("C");
 
 CompositeHybridAutomaton create_heating_system()
 {
@@ -102,9 +114,6 @@ CompositeHybridAutomaton create_heating_system()
     DiscreteEvent switch_off("switch_off");
     DiscreteEvent midnight("midnight");
 
-    // Declare the system variables.
-    RealVariable T("T");
-    RealVariable C("C");
 
     // Create the heater subsystem
     HybridAutomaton heater;
@@ -124,7 +133,9 @@ CompositeHybridAutomaton create_heating_system()
 
     return heating_system;
 }
+//! [create_heating_system]
 
+//! [create_evolver]
 HybridEvolverType create_evolver(const CompositeHybridAutomaton& heating_system)
 {
     // Create a GeneralHybridEvolver object
@@ -132,24 +143,22 @@ HybridEvolverType create_evolver(const CompositeHybridAutomaton& heating_system)
 
     // Set the evolution parameters
     evolver.configuration().set_maximum_enclosure_radius(0.25);
-    //evolver.parameters().maximum_step_size(0.125);
     evolver.configuration().set_maximum_step_size(0.5);
     evolver.verbosity=1;
     cout <<  evolver.configuration() << endl << endl;
 
     return evolver;
 }
+//! [create_evolver]
 
-Void compute_evolution(const CompositeHybridAutomaton& heating_system,const GeneralHybridEvolver& evolver)
+//! [simulate_evolution]
+Void simulate_evolution(const CompositeHybridAutomaton& heating_system,const GeneralHybridEvolver& evolver)
 {
-
     // Redefine the two discrete states
     StringVariable clock("clock");
     StringVariable heating("heating");
     StringConstant on("on");
     StringConstant off("off");
-    DiscreteLocation heating_off(heating|off);
-    DiscreteLocation heating_on(heating|on);
     RealVariable T("T");
     RealVariable C("C");
     TimeVariable time;
@@ -159,16 +168,18 @@ Void compute_evolution(const CompositeHybridAutomaton& heating_system,const Gene
     simulator.set_step_size(0.03125);
 
     // Set an initial point for the simulation
-    HybridRealPoint initial_point(heating_off, {C=0.0_dec,T=18.0_dec} );
+    HybridRealPoint initial_point(heating|off, {C=0.0_decimal,T=18.0_decimal} );
     cout << "initial_point=" << initial_point << endl;
+
     // Set the maximum simulation time
-    HybridTime simulation_time(8.0,9);
+    HybridTime simulation_time(8.0_decimal,9);
     cout << "simulation_time=" << simulation_time << endl;
 
     // Compute a simulation trajectory
     cout << "Computing simulation trajectory... \n" << flush;
     Orbit<HybridApproximatePoint> trajectory = simulator.orbit(heating_system,initial_point,simulation_time);
     cout << "    done." << endl;
+
     // Write the simulation trajectory to standard output and plot.
     cout << "Writing simulation trajectory... " << flush;
     write("tutorial-trajectory.txt",trajectory);
@@ -176,24 +187,39 @@ Void compute_evolution(const CompositeHybridAutomaton& heating_system,const Gene
     cout << "Plotting simulation trajectory... " << flush;
     plot("tutorial-trajectory.png",Axes2d(0.0<=time<=8.0,14.0<=T<=23.0), Colour(0.0,0.5,1.0), trajectory);
     cout << "done." << endl << endl;
+}
+//! [simulate_evolution]
 
+
+//! [compute_evolution]
+Void compute_evolution(const CompositeHybridAutomaton& heating_system,const GeneralHybridEvolver& evolver)
+{
+    StringVariable clock("clock");
+    StringVariable heating("heating");
+    StringConstant on("on");
+    StringConstant off("off");
+    RealVariable T("T");
+    RealVariable C("C");
+    TimeVariable time;
 
     // Set the initial set.
-    Dyadic Tinit=17; Dyadic Cinit_max(1.0/1024);
-    HybridSet initial_set(heating_off, {T==Tinit,0<=C<=Cinit_max} );
+    Dyadic Tinit=17; Dyadic Cinit_max(1/two^10);
+    HybridSet initial_set(heating|off, {T==Tinit,0<=C<=Cinit_max} );
     cout << "initial_set=" << initial_set << endl;
+
     // Compute the initial set as a validated enclosure.
     HybridEnclosure initial_enclosure = evolver.enclosure(initial_set);
     cout << "initial_enclosure="<<initial_enclosure << endl << endl;
 
     // Set the maximum evolution time
-    HybridTime evolution_time(3.0,4);
+    HybridTime evolution_time(3.0_decimal,4);
     cout << "evolution_time=" << evolution_time << endl;
 
     // Compute a validated orbit.
     cout << "Computing orbit... \n" << flush;
     Orbit<HybridEnclosure> orbit = evolver.orbit(initial_set,evolution_time,UPPER_SEMANTICS);
     cout << "    done." << endl;
+
     // Write the validated orbit to standard output and plot.
     cout << "Writing orbit... " << flush;
     write("tutorial-orbit.txt",orbit);
@@ -209,22 +235,20 @@ Void compute_evolution(const CompositeHybridAutomaton& heating_system,const Gene
     ListSet<HybridEnclosure> reach,evolve;
     make_lpair(reach,evolve) = evolver.reach_evolve(initial_enclosure,evolution_time,UPPER_SEMANTICS);
     cout << "    done." << endl;
+
     // Write the orbit to standard output and plot.
     cout << "Plotting reach and evolve sets... " << flush;
     plot("tutorial-reach_evolve.png",Axes2d(0.0<=C<=1.0,14.0<=T<=23.0),
          Colour(0.0,0.5,1.0), reach, Colour(0.0,0.25,0.5), initial_enclosure, Colour(0.25,0.0,0.5), evolve);
 
 /*
-    plot("tutorial-reach_evolve-off.png",ExactBoxType(2, 0.0,1.0, 14.0,23.0),
-         Colour(0.0,0.5,1.0), reach[heating_off], Colour(0.25,0.0,0.5), evolve[heating_on]);
-    plot("tutorial-reach_evolve-on.png",ExactBoxType(2, 0.0,1.0, 14.0,23.0),
-         Colour(0.0,0.5,1.0), reach[heating_on], Colour(0.0,0.25,0.5), initial_enclosure, Colour(0.25,0.0,0.5), evolve[heating_on]);
+    plot("tutorial-reach_evolve-off.png",Axes2d(0.0<=C<=1.0,14.0<=T<=23.0),
+         Colour(0.0,0.5,1.0), reach[heating|off], Colour(0.25,0.0,0.5), evolve[heating|off]);
+    plot("tutorial-reach_evolve-on.png",Axes2d(0.0<=C<=1.0,14.0<=T<=23.0),
+         Colour(0.0,0.5,1.0), reach[heating|on], Colour(0.0,0.25,0.5), initial_enclosure, Colour(0.25,0.0,0.5), evolve[heating|on]);
 */
-    cout << "done." << endl;
-
-
 }
-
+//! [compute_evolution]
 
 Void compute_reachable_sets(const GeneralHybridEvolver& evolver)
 {
@@ -329,20 +353,26 @@ Void compute_reachable_sets_with_serialisation(const CompositeHybridAutomaton& h
 }
 */
 
+} // namespace Ariadne::HeatingSystemTutorial
+
+using namespace Ariadne::HeatingSystemTutorial;
 
 
-
+//! [main]
 Int main(Int argc, const char* argv[])
 {
     // Create the system
     CompositeHybridAutomaton heating_system=create_heating_system();
-    std::cerr<<heating_system<<"\n";
+    cout << heating_system << "\n";
 
     // Create the analyser classes
     HybridEvolverType evolver=create_evolver(heating_system);
-    std::cerr<<evolver<<"\n";
+    cout << evolver << "\n";
 
-    // Compute the system evolution
+    // Compute an approximate simulation of the system evolution
+    simulate_evolution(heating_system,evolver);
+
+    // Compute rigorous bounds on the system evolution
     compute_evolution(heating_system,evolver);
-    //compute_reachable_sets(evolver);
 }
+//! [main]

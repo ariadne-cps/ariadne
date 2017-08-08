@@ -1,5 +1,6 @@
 set(EXAMPLES
-    tutorial
+    rigorous_numerics_tutorial
+    hybrid_system_tutorial
     ballinabox
     bouncingball
     heating

@@ -52,6 +52,9 @@ template<class X> class Positive;
 class FloatDP;
 class FloatMP;
 
+using DoublePrecisionFloat = FloatDP;
+using MultiplePrecisionFloat = FloatMP;
+
 using RawFloatDP = FloatDP;
 using RawFloatMP = FloatMP;
 
@@ -128,13 +131,13 @@ template<class PR, class PRE> struct FloatTypedef<EffectiveTag,PR,PRE> { typedef
 
 template<class F> using PositiveApproximation = Positive<Approximation<F>>;
 
-using FloatDPApproximation = FloatApproximation<DoublePrecision>;
-using FloatDPLowerBound = FloatLowerBound<DoublePrecision>;
-using FloatDPUpperBound = FloatUpperBound<DoublePrecision>;
-using FloatDPBounds = FloatBounds<DoublePrecision>;
-using FloatDPBall = FloatBall<DoublePrecision>;
-using FloatDPValue = FloatValue<DoublePrecision>;
-using FloatDPError = FloatError<DoublePrecision>;
+using FloatDPApproximation = Approximation<DoublePrecisionFloat>; //!< An approximation to a number, represented in double precision.
+using FloatDPLowerBound = FloatLowerBound<DoublePrecision>; //!< A lower bound for a number, represented in double precision.
+using FloatDPUpperBound = FloatUpperBound<DoublePrecision>; //!< An upper bound for a number, represented in double precision.
+using FloatDPBounds = FloatBounds<DoublePrecision>; //!< Lower and upper bounds for a number, represented in double precision.
+using FloatDPBall = FloatBall<DoublePrecision>; //!< A ball around a number, with the approximating value and error bound represented in double precision.
+using FloatDPValue = FloatValue<DoublePrecision>; //!< A double-precision floating-point object representin a number exactly.
+using FloatDPError = FloatError<DoublePrecision>; //!< An over-approximation to the error of a computation.
 using PositiveFloatDPApproximation = PositiveFloatApproximation<DoublePrecision>;
 using PositiveFloatDPLowerBound = PositiveFloatLowerBound<DoublePrecision>;
 using PositiveFloatDPUpperBound = PositiveFloatUpperBound<DoublePrecision>;
@@ -142,13 +145,13 @@ using PositiveFloatDPBounds = PositiveFloatBounds<DoublePrecision>;
 using PositiveFloatDPBall = PositiveFloatBall<DoublePrecision>;
 using PositiveFloatDPValue = PositiveFloatValue<DoublePrecision>;
 
-using FloatMPApproximation = FloatApproximation<MultiplePrecision>;
-using FloatMPLowerBound = FloatLowerBound<MultiplePrecision>;
-using FloatMPUpperBound = FloatUpperBound<MultiplePrecision>;
-using FloatMPBounds = FloatBounds<MultiplePrecision>;
-using FloatMPBall = FloatBall<MultiplePrecision>;
-using FloatMPValue = FloatValue<MultiplePrecision>;
-using FloatMPError = FloatError<MultiplePrecision>;
+using FloatMPApproximation = FloatApproximation<MultiplePrecision>; //!<
+using FloatMPLowerBound = FloatLowerBound<MultiplePrecision>; //!<
+using FloatMPUpperBound = FloatUpperBound<MultiplePrecision>; //!<
+using FloatMPBounds = FloatBounds<MultiplePrecision>; //!<
+using FloatMPBall = FloatBall<MultiplePrecision>; //!<
+using FloatMPValue = FloatValue<MultiplePrecision>; //!<
+using FloatMPError = FloatError<MultiplePrecision>; //!<
 using PositiveFloatMPApproximation = PositiveFloatApproximation<MultiplePrecision>;
 using PositiveFloatMPLowerBound = PositiveFloatLowerBound<MultiplePrecision>;
 using PositiveFloatMPUpperBound = PositiveFloatUpperBound<MultiplePrecision>;

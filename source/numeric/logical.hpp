@@ -40,6 +40,8 @@ namespace Ariadne {
  *  \brief %Logical classes and functions.
  */
 
+//! \ingroup LogicModule
+//! A class wrapping a positive integer roughly representing the amount of effort that should be used in a calculation.
 class Effort {
     Nat _m;
   public:
@@ -293,6 +295,9 @@ static const Logical<ApproximateTag> unlikely = Logical<ApproximateTag>(LogicalV
 inline Bool definitely(Bool b) { return b; }
 inline Bool possibly(Bool b) { return b; }
 inline Bool decide(Bool b) { return b; }
+
+//! A three-valued logical type, representing the result of a predicate which may be undecidable due to non-robustness.
+typedef Logical<EffectiveTag> Kleenean;
 
 }
 

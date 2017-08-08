@@ -210,7 +210,7 @@ template<class X, class NX, class R=X, class NR=NX> struct DeclareDirectedGroupO
 
 
     //@{
-    //! \name  Standard overloadable operators. */
+    //! \name  Standard overloadable operators.
 
     //! \brief Positive \a +x. Usually dispatches to <code>pos(x)</code>
     friend X operator+(X const& x);
@@ -225,6 +225,8 @@ template<class X, class NX, class R=X, class NR=NX> struct DeclareDirectedGroupO
     //@}
 };
 
+//! \ingroup NumericAlgebraSubModule
+//! \brief Declare operators corresponding to \a X being a (mathematical) group.
 template<class X, class R=X> struct DeclareGroupOperations
     : DeclareDirectedGroupOperations<X,X,R> { };
 
@@ -237,6 +239,7 @@ template<class X, class R=X, class PR=R> struct DeclareRingOperations
 {
     //@{
     //! \name Named operations.
+
     //! \brief Square \a x^2.
     friend PR sqr(X const& x);
     //! \brief Product \a x1*x2.
@@ -247,7 +250,8 @@ template<class X, class R=X, class PR=R> struct DeclareRingOperations
 
 
     //@{
-    //! \name  Standard overloadable operators. */
+    //! \name  Standard overloadable operators.
+
     //! \brief Product \a x1*x2. Usually dispatches to <code>mul(x1,x2)</code>
     friend R operator*(X const& x1, X const& x2);
 
@@ -305,6 +309,8 @@ template<class X, class R=X> class DeclareTranscendentalOperations
     friend X tan(X const& x);
 };
 
+//! \ingroup NumericAlgebraSubModule
+//! \brief Declare elementary arithmetic, algebraic and transcendental operations.
 template<class X, class R=X> class DeclareAnalyticFieldOperations
     : DeclareFieldOperations<X,R>, DeclareTranscendentalOperations<X,R>
 {

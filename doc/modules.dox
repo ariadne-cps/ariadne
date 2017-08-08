@@ -82,7 +82,8 @@ namespace Ariadne {
 
 /*!\defgroup NumericModule Numeric Module
  * \ingroup CoreModules
- * \brief Numerical types and intervals.
+ * \brief Numerical types, including \ref Integer, \ref Dyadic, \ref Rational and \ref Real types,
+ * and double/multiple precision floating-point types \ref FloatDP and \ref FloatMP.
  * \details In this module, we define %Ariadne's base numerical types,
  * including support for interval arithmetic via balls and bounds.
  * The main concrete algebraic number types are \ref Integer,
@@ -93,25 +94,26 @@ namespace Ariadne {
  * Generic numbers are defined using the \ref Number "Number<P>" templates,
  * with typedefs e.g. \ref EffectiveNumber for \ref Number<\ref EffectiveTag>.
  * [Forthcoming] Validated and approximate versions of real numbers are given by
- * \ref ValidatedReal and \ref ApproximateReal.
+ * \ref ValidatedReal and \ref ApproximateReal, and convergent sequences without
+ * error bounds by \ref NaiveReal.
  *
- * Rounded operations on \ref Float64 and \ref FloatMP are provided using the \c _down
- * and \c _up suffixes. Approximate arithmetic without control of the
- * rounding mode can be specified by the approx rounding type, and exact
- * arithmetic (the default) can be specified explicitly using the exact
- * rounding type.
+ * Rounded operations on \ref FloatDP and \ref FloatMP are provided using the \c down
+ * and \c up tags (equivalantly, \c downward and \c upward).
+ * Rounding to nearest is specified by the \c near (equivalently, \c nearest) tag.
+ * Approximate arithmetic without control of the
+ * rounding mode can be specified by the \c approx rounding type.
  *
  * Types supporting exact or rounded arithmetic may be used to define (validated)
- * approximations to numbers via the classes \ref FloatValue "FloatValue<PR>",
- * \ref FloatBall "FloatBall<PR,PRE>", \ref FloatBounds "FloatBounds<PR>"
- * \ref FloatUpperBound "FloatUpperBound<PR>", \ref FloatLowerBound "FloatLowerBound<PR>"
- * and \ref FloatApproximation "FloatApproximation<PR>".
+ * approximations to numbers via the classes \ref Value "Value<F>",
+ * \ref Ball "Ball<F,FE>", \ref Bounds "Bounds<F>"
+ * \ref UpperBound "UpperBound<F>", \ref LowerBound "LowerBound<F>"
+ * and \ref Approximation "Approximation<F>".
  *
  * %Positive numbers can be defined using the \ref Positive "Positive<X>" template.
  * A \ref Natural is a \ref Positive<\ref Integer>.
  *
  * Note that to prevent accidental calls to approximate functions, all
- * non-exact operations must yield a \ref FloatApproximation value.
+ * non-exact operations must yield an \ref Approximation value.
  *
  * We use the following abbreviations for template parameters
  * for classes and concepts in this module:

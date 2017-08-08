@@ -38,6 +38,7 @@
 #include "numeric/float.decl.hpp"
 
 #include "numeric/arithmetic.hpp"
+#include "paradigm.hpp"
 
 namespace Ariadne {
 
@@ -51,6 +52,8 @@ template<> struct IsNumericType<Real> : True { };
 
 class ValidatedReal;
 
+//! \ingroup NumericModule
+//! \brief The accuracy of a computation of a value in a metric space. The result must be correct to within 2<sup>-acc</sup> bits.
 struct Accuracy {
     Nat _bits;
     Accuracy(Nat bits) : _bits(bits) { }
@@ -88,7 +91,7 @@ template<class X> class StrongCauchySequence : public Sequence<X> {
 class RealInterface;
 
 //! \ingroup NumericModule
-//! \brief Computable real numbers definable in terms of elementary functions.
+//! \brief %Real numbers supporting elementary functions, comparisons and limits.
 class Real
     : public DeclareRealOperations<Real,PositiveReal>
     , public DeclareAnalyticFieldOperations<Real>
@@ -98,61 +101,157 @@ class Real
 {
   private: public:
     using Interface = RealInterface;
+    using InterfaceType = RealInterface;
   private: public:
     SharedPointer<Interface> _ptr;
-  private: public:
-    explicit Real(SharedPointer<Interface>);
+  private:
     explicit Real(double,double,double);
   public:
     typedef EffectiveTag Paradigm;
     typedef Real NumericType;
   public:
-    Real();
+    //@{
+    //! \name Constructors
+    Real(); //!< Default constructor yields the integer \c 0 as a real number.
+    explicit Real(SharedPointer<Real::InterfaceType>); //!< Construct from any class implementing the real number interface.
+    explicit Real(ConvergentSequence<DyadicBounds> const&); //!< Construct from a sequence of dyadic bounds converging to a singleton intersection.
+    explicit Real(StrongCauchySequence<Dyadic> const&); //!< Construct from a strongly convergent sequence of dyadic numbers.
+    //@}
 
-    explicit Real(double); //!< DEPRECATED
+    //@{
+    //! \name Conversion operators
+    explicit Real(double); //!< Unsafe construction from a double is DEPRECATED
 
+#ifdef DOXYGEN
+    template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> Real(N n); //!< Convert from a builtin integer (but not a float).
+#else
     template<class M, EnableIf<And<IsBuiltinIntegral<M>,IsBuiltinUnsigned<M>>> = dummy> Real(M m);
     template<class N, EnableIf<And<IsBuiltinIntegral<N>,IsBuiltinSigned<N>>> = dummy> Real(N n);
-
-    Real(ExactDouble d);
-    Real(Integer const& n);
-    Real(Dyadic const& d);
-    Real(Decimal const& d);
-    Real(Rational const& q);
+#endif
+    Real(ExactDouble d); //!< Construct from a double-precision value representing a number exactly.
+    Real(Integer const& n); //!< Construct from an integer.
+    Real(Dyadic const& d); //!< Construct from a dyadic number \a d=p/2<sup>q</sup> for integers \a p, \a q.
+    Real(Decimal const& d); //!< Construct from a decimal number, given by its decimal expansion.
+    Real(Rational const& q); //!< Construct from a rational number.
 
     explicit Real(FloatDPValue x); //!< DEPRECATED
     explicit Real(EffectiveNumber r); //!< DEPRECATED
 
-    operator Number<EffectiveTag>() const;
+    operator Number<EffectiveTag>() const; //!< Convert to an effective number for computations.
+    //@}
 
-    // Extract bounds
-    UpperReal upper() const;
-    LowerReal lower() const;
-    FloatDPApproximation approx() const;
-    double get_d() const;
+    //@{
+    //! \name Convert to real number types describing less information.
+    UpperReal upper() const; //!< A real number allowing only computation of upper bounds.
+    LowerReal lower() const; //!< A real number allowing only computation of lower bounds.
+    //FloatDPApproximation approx() const; //!< A real number allowing only computation of approximations with no guarantees on the accuracy.
+    //@}
 
-    // Extract arbitrarily accurate approximations
+    //@{
+    //! \name Computation of rigorous validated bounds on the number.
+
+    //! Compute a concrete approximation with an error of at most \a 2<sup>-acc</sup> i.e. \a acc binary digits.
     ValidatedReal compute(Accuracy acc) const;
+    //! Compute a concrete approximation with a bound on the error. The error bound converges to \a 0 as \a eff approaches infinity.
+    //! The time taken should be roughly polynomial in \a eff.
     ValidatedReal compute(Effort eff) const;
+    //! Compute a concrete approximation using double-precision.
     FloatDPBounds get(DoublePrecision pr) const;
+    //! Compute a concrete approximation using the given precision.
     FloatMPBounds get(MultiplePrecision pr) const;
+    //@}
 
+    //@{
+    //! \name Named arithmetical functions
+    friend Real pos(Real const& r); //!< Identity \a +r.
+    friend Real neg(Real const& r); //!< Negative \a -r.
+    friend Real hlf(Real const& r); //!< Half \a r÷2.
+    friend Real sqr(Real const& r); //!< Square \a r<sup>2</sup>.
+    friend Real rec(Real const& r); //!< Reciprocal \a 1/r.
+    friend Real add(Real const& r1, Real const& r2); //!< \brief Sum \a r1+r2.
+    friend Real sub(Real const& r1, Real const& r2); //!< \brief Difference \a r1-r2.
+    friend Real mul(Real const& r1, Real const& r2); //!< \brief Product \a r1×r2.
+    friend Real div(Real const& r1, Real const& r2); //!< \brief Quotient \a r1÷r2.
+    friend Real fma(Real const& r1, Real const& r2, Real const& r3); //!< \brief Fused multiply-and-add \a r1×r2+r3.
+    friend Real pow(Real const& r, Int n); //!< \brief Power \a r<sup>n</sup>.
+    //@}
 
-    friend PositiveReal abs(Real const&);
+    //@{
+    //! \name Algebraic and transcendental functions
+    friend Real sqrt(Real const& r); //!< The square root of \a r, √\a r. Requires \a r ≥ 0.
+    friend Real exp(Real const& r); //!< The natural exponent of \a r, \em e<sup>r</sup>.
+    friend Real log(Real const& r); //!< The natural logarithm of \a r. Requires \a r ≥ 0.
+    friend Real atan(Real const& r); //!< The arc-tangent of \a r.
+    friend Real sin(Real const& r); //!< The sine of \a r.
+    friend Real cos(Real const& r); //!< The cosine of \a r.
+    friend Real tan(Real const& r); //!< The tangent of \a r, sin(\a r)/cos(\a r) \f$.
+    friend Real stan(Real const& r); //!< The arc-tangent of \a r.
+    //@}
 
-    friend Real limit(ConvergentSequence<DyadicBounds> const&);
-    friend Real limit(StrongCauchySequence<Dyadic> const&);
-    friend Real limit(StrongCauchySequence<Real> const&);
+    //@{
+    //! \name Standard arithmetic operators
+    friend Real operator+(Real const& r); //!< Unary plus.
+    friend Real operator-(Real const& r); //!< Unary minus.
+    friend Real operator+(Real const& r1, Real const& r2); //!< Plus.
+    friend Real operator-(Real const& r1, Real const& r2); //!< Minus.
+    friend Real operator*(Real const& r1, Real const& r2); //!< Times.
+    friend Real operator/(Real const& r1, Real const& r2); //!< Divides.
+    friend Real& operator+=(Real& r1, Real const& r2); //!< Inplace plus.
+    friend Real& operator-=(Real& r1, Real const& r2); //!< Inplace minus.
+    friend Real& operator*=(Real& r1, Real const& r2); //!< Inplace times.
+    friend Real& operator/=(Real& r1, Real const& r2); //!< Inplace divides.
+    //@}
 
-    friend PositiveUpperReal mag(Real const&);
+    //@{
+    //! \name Lattice operations
+    friend PositiveReal abs(Real const&); //!< Absolute value \a |r|.
+    friend Real min(Real const& r1, Real const& r2); //!< The mimimum of \a r1 and \a r2.
+    friend Real max(Real const& r1, Real const& r2); //!< The maximum of \a r1 and \a r2.
+    //@}
+
+    //@{
+    //! Operations based on the metric structure.
+    friend PositiveReal dist(Real const& r1, Real const& r2);
+        //< The distance |\a r <sub>1</sub>-\a r <sub>2</sub>| between \a r<sub>1</sub> and \a r<sub>2</sub>.
+    friend PositiveUpperReal mag(Real const& r);
+        //!< An over-approximation to the absolute value of \a r.
     friend FloatDPError mag(Real const&, DoublePrecision);
+    //@}
 
-    friend PositiveReal dist(Real const&, Real const&);
+    //@{
+    //! \name Comparison operations and operators.
+    friend Kleenean leq(Real const& r1, Real const& r2); //!< Returns \c true if \a r1<r2, \c false if \a r1\>r2, and \c indetermiate if \a r1==r2.
+    friend NegatedSierpinskian operator==(Real const& r1, Real const& r2); //!< Equality is undecidable and may only robustly be falsified.
+    friend Sierpinskian operator!=(Real const& r1, Real const& r2); //!< Inequality is undecidable and may only robustly be verified.
+    friend Kleenean operator<=(Real const& r1, Real const& r2); //!< Comparison \c leq.
+    friend Kleenean operator>=(Real const& r1, Real const& r2); //!< Comparison .
+    friend Boolean operator>(Real const& r1, Pair<Real,Real> lu); //!< Given \a l<u, returns \a true if r>l and \a false if r<u.
+    //@}
 
-    friend Bool same(Real const&, Real const&);
+    //@{
+    //! \name Limit operations.
+    friend Real limit(ConvergentSequence<DyadicBounds> const& qbs);
+        //!< Create a real number from a sequence of dyadic bounds whose width converges to 0.
+    friend Real limit(StrongCauchySequence<Dyadic> const& qs);
+        //!< Create a real number from a sequence of dyadic numbers \em q<sub>n</sub> for which
+        //!< <em>|q<sub>n<sub>1</sub></sub>-q<sub>n<sub>2</sub></sub>|≤<em>2<sup>-min</sup><sup>(n<sub>1</sub>,n<sub>2</sub>)</sup></em>
+    friend Real limit(StrongCauchySequence<Real> const& rs);
+        //!< The limit of a sequence of real numbers \em r<sub>n</sub> for which
+        //!< <em>|r<sub>n<sub>1</sub></sub>-r<sub>n<sub>2</sub></sub>|≤<em>2<sup>-min</sup><sup>(n<sub>1</sub>,n<sub>2</sub>)</sup></em>
+    //@}
 
-    friend OutputStream& operator<<(OutputStream&, Real const&);
 
+    //@{
+    //! \name Operations on the representation.
+    friend Bool same(Real const&, Real const&); //!< Test equivalence of representation.
+    //@}
+
+    //@{
+    //! \name Input/output operations
+    friend OutputStream& operator<<(OutputStream& os, Real const& r); //< Write to an output stream.
+    //@}
+    double get_d() const;
+/*
     friend Number<EffectiveTag> operator+(Number<EffectiveTag>, Number<EffectiveTag>);
     friend Number<EffectiveTag> operator-(Number<EffectiveTag>, Number<EffectiveTag>);
     friend Number<EffectiveTag> operator*(Number<EffectiveTag>, Number<EffectiveTag>);
@@ -164,7 +263,7 @@ class Real
     template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> friend inline decltype(auto) operator>=(const Real& x1, N n2) { return x1>=Real(n2); }
     template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> friend inline decltype(auto) operator< (const Real& x1, N n2) { return x1< Real(n2); }
     template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> friend inline decltype(auto) operator> (const Real& x1, N n2) { return x1> Real(n2); }
-
+*/
 
   private:
     Real(std::int64_t n, Void*);

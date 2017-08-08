@@ -315,7 +315,7 @@ template<> Nat integer_cast<Nat,Real>(Real const& r) { return std::round(r.get(d
 template<> String class_name<Real>() { return "Real"; }
 template<> String class_name<PositiveReal>() { return "PositiveReal"; }
 
-const Real pi = Real(3.1415926535897930, 3.141592653589793238, 3.1415926535897936);
+const Real pi = 4*atan(1); //Real(3.1415926535897930, 3.141592653589793238, 3.1415926535897936);
 const Real infinity = Real(std::numeric_limits<double>::infinity());
 
 FloatDPBounds Real::get(DoublePrecision pr) const {

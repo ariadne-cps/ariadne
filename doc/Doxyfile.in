@@ -610,7 +610,9 @@ EXCLUDE_SYMBOLS        =
 # directories that contain example code fragments that are included (see
 # the \include command).
 
-EXAMPLE_PATH           = @CMAKE_CURRENT_SOURCE_DIR@/examples/tutorial.cpp
+EXAMPLE_PATH           = @CMAKE_CURRENT_SOURCE_DIR@/examples/ \
+                         @CMAKE_CURRENT_SOURCE_DIR@/examples/rigorous_numerics_tutorial.cpp \
+                         @CMAKE_CURRENT_SOURCE_DIR@/examples/hybrid_system_tutorial.cpp 
 
 # If the value of the EXAMPLE_PATH tag contains directories, you can use the
 # EXAMPLE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp

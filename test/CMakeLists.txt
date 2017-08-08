@@ -23,6 +23,7 @@ set(UNIT_TESTS
     test_integrator
     test_constraint_solver
     test_solvers
+    test_differential_inclusion
     test_discrete_evolution
     test_continuous_evolution
     test_graphics

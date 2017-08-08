@@ -38,10 +38,6 @@
 
 namespace Ariadne {
 
-//! \defgroup LinearAlgebraSubModule Linear Algebra Sub-Module
-//! \ingroup AlgebraModule
-//! \brief %Vector and matrix classes for linear algebra.
-
 /************ Vector *********************************************************/
 
 template<class X> class Vector;
@@ -107,7 +103,7 @@ struct DeclareVectorOperations { };
 template<class V> struct VectorExpression : public DeclareVectorOperations { const V& operator()() const { return static_cast<const V&>(*this); } };
 template<class V> struct VectorContainer : public VectorExpression<V> { };
 
-//! \ingroup LinearAlgebraSubModule
+//! \ingroup LinearAlgebraModule
 //! \brief Vectors over some type \a X.
 //! Corresponds to elements of a \em module over a mathematical \em ring, or a <em>vector space</em> over a field.
 //! May also be used if \a X is an \em algebra \a A over another field.
@@ -152,7 +148,7 @@ class Vector
     //! \brief Convert from an initializer list of generic type and a precision parameter.
     template<class PR, EnableIf<IsConstructible<X,ExactDouble,PR>> =dummy> Vector(InitializerList<double> const& lst, PR pr);
     template<class PR, EnableIf<IsConstructible<X,Real,PR>> =dummy> Vector(InitializerList<Real> const& lst, PR pr);
-    template<class PR, EnableIf<IsConstructible<X,Pair<ExactDouble,ExactDouble>,PR>> =dummy> Vector(InitializerList<Pair<double,double>> const& lst, PR pr);
+    template<class PR, EnableIf<IsConstructible<X,ExactDouble,ExactDouble,PR>> =dummy> Vector(InitializerList<Pair<double,double>> const& lst, PR pr);
     //! \brief Convert from an array of generic type and a precision parameter.
     template<class Y, class PR, EnableIf<IsConstructible<X,Y,PR>> =dummy> Vector(Array<Y> const& ary, PR pr) : _ary(ary,pr) { }
     //! \brief Convert from an vector of generic type and a precision parameter.
@@ -743,7 +739,7 @@ Vector<X>::Vector(InitializerList<Real> const& lst, PR pr)
 {
 }
 
-template<class X> template<class PR, EnableIf<IsConstructible<X,Pair<ExactDouble,ExactDouble>,PR>>> Vector<X>::Vector(InitializerList<Pair<double,double>> const& lst, PR pr)
+template<class X> template<class PR, EnableIf<IsConstructible<X,ExactDouble,ExactDouble,PR>>> Vector<X>::Vector(InitializerList<Pair<double,double>> const& lst, PR pr)
     : _ary(lst.size(),X(pr))
 {
     SizeType i=0;
@@ -752,16 +748,12 @@ template<class X> template<class PR, EnableIf<IsConstructible<X,Pair<ExactDouble
     }
 }
 
+} // namespace Ariadne
 
-template<class PR> class FloatApproximation;
-template<class PR> class FloatValue;
-typedef FloatValue<Precision64> Float64Value;
-typedef FloatApproximation<Precision64> Float64Approximation;
-inline Vector<Float64Value>const& cast_exact(Vector<Float64Approximation>const& v) {
-    return reinterpret_cast<Vector<Float64Value>const&>(v);
-}
-
-
+#include "numeric/float.decl.hpp"
+namespace Ariadne {
+inline Vector<FloatDPValue>const& cast_exact(Vector<FloatDPApproximation>const& v) {
+    return reinterpret_cast<Vector<FloatDPValue>const&>(v); }
 } // namespace Ariadne
 
 #endif

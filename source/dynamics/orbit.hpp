@@ -81,7 +81,7 @@ class Orbit<ExactPoint>
 {
   public:
     Orbit(const ExactPoint& pt);
-    Void insert(Float64Value t, const ExactPoint& hpt);
+    Void insert(FloatDPValue t, const ExactPoint& hpt);
     const InterpolatedCurve& curve() const { return *this->_curve; }
   private:
     std::shared_ptr< InterpolatedCurve > _curve;

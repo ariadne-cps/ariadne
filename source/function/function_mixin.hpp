@@ -34,8 +34,8 @@ typedef Differential<ApproximateNumericType> ApproximateDifferential;
 typedef Differential<ValidatedNumericType> ValidatedDifferential;
 typedef UnivariateDifferential<ApproximateNumericType> ApproximateUnivariateDifferential;
 typedef UnivariateDifferential<ValidatedNumericType> ValidatedUnivariateDifferential;
-typedef TaylorModel<ApproximateTag,Float64> ApproximateTaylorModel64;
-typedef TaylorModel<ValidatedTag,Float64> ValidatedTaylorModel64;
+typedef TaylorModel<ApproximateTag,FloatDP> ApproximateTaylorModelDP;
+typedef TaylorModel<ValidatedTag,FloatDP> ValidatedTaylorModelDP;
 
 typedef Formula<ApproximateNumber> ApproximateFormula;
 typedef Formula<ValidatedNumber> ValidatedFormula;
@@ -103,11 +103,11 @@ class FunctionMixin<F,ApproximateTag,D,C>
     template<class X> using Result = typename ElementTraits<C>::template Type<X>;
   public:
     virtual FunctionInterface<ApproximateTag,D,C>* _clone() const override;
-    virtual Result<Float64Approximation> _evaluate(const Argument<Float64Approximation>& x) const override;
+    virtual Result<FloatDPApproximation> _evaluate(const Argument<FloatDPApproximation>& x) const override;
     virtual Result<FloatMPApproximation> _evaluate(const Argument<FloatMPApproximation>& x) const override;
-    virtual Result<Differential<Float64Approximation>> _evaluate(const Argument<Differential<Float64Approximation>>& x) const override;
+    virtual Result<Differential<FloatDPApproximation>> _evaluate(const Argument<Differential<FloatDPApproximation>>& x) const override;
     virtual Result<Differential<FloatMPApproximation>> _evaluate(const Argument<Differential<FloatMPApproximation>>& x) const override;
-    virtual Result<TaylorModel<ApproximateTag,Float64>> _evaluate(const Argument<TaylorModel<ApproximateTag,Float64>>& x) const override;
+    virtual Result<TaylorModel<ApproximateTag,FloatDP>> _evaluate(const Argument<TaylorModel<ApproximateTag,FloatDP>>& x) const override;
     virtual Result<TaylorModel<ApproximateTag,FloatMP>> _evaluate(const Argument<TaylorModel<ApproximateTag,FloatMP>>& x) const override;
     virtual Result<Formula<ApproximateNumber>> _evaluate(const Argument<Formula<ApproximateNumber>>& x) const override;
     virtual Result<Algebra<ApproximateNumber>> _evaluate(const Argument<Algebra<ApproximateNumber>>& x) const override;
@@ -124,11 +124,11 @@ class FunctionMixin<F,ValidatedTag,D,C>
   public:
     using FunctionMixin<F,ApproximateTag,D,C>::_evaluate;
     virtual FunctionInterface<ValidatedTag,D,C>* _clone() const override;
-    virtual Result<Float64Bounds> _evaluate(const Argument<Float64Bounds>& x) const override;
+    virtual Result<FloatDPBounds> _evaluate(const Argument<FloatDPBounds>& x) const override;
     virtual Result<FloatMPBounds> _evaluate(const Argument<FloatMPBounds>& x) const override;
-    virtual Result<Differential<Float64Bounds>> _evaluate(const Argument<Differential<Float64Bounds>>& x) const override;
+    virtual Result<Differential<FloatDPBounds>> _evaluate(const Argument<Differential<FloatDPBounds>>& x) const override;
     virtual Result<Differential<FloatMPBounds>> _evaluate(const Argument<Differential<FloatMPBounds>>& x) const override;
-    virtual Result<TaylorModel<ValidatedTag,Float64>> _evaluate(const Argument<TaylorModel<ValidatedTag,Float64>>& x) const override;
+    virtual Result<TaylorModel<ValidatedTag,FloatDP>> _evaluate(const Argument<TaylorModel<ValidatedTag,FloatDP>>& x) const override;
     virtual Result<TaylorModel<ValidatedTag,FloatMP>> _evaluate(const Argument<TaylorModel<ValidatedTag,FloatMP>>& x) const override;
     virtual Result<Formula<ValidatedNumber>> _evaluate(const Argument<Formula<ValidatedNumber>>& x) const override;
     virtual Result<Algebra<ValidatedNumber>> _evaluate(const Argument<Algebra<ValidatedNumber>>& x) const override;

@@ -167,12 +167,12 @@ inline VariableInterval<Real> operator==(const Real& x, const RealVariable& v) {
 inline VariableInterval<Real> operator<=(const VariableLowerInterval<Real>& lv, const Real& u) {
     return VariableInterval<Real>(lv.lower(),lv.variable(),u); }
 
-inline VariableLowerInterval<Float64Value> operator<=(const Float64Value& l, const RealVariable& v) { return VariableLowerInterval<Float64Value>(l,v); }
+inline VariableLowerInterval<FloatDPValue> operator<=(const FloatDPValue& l, const RealVariable& v) { return VariableLowerInterval<FloatDPValue>(l,v); }
 inline VariableLowerInterval<Dyadic> operator<=(const Dyadic& l, const RealVariable& v) { return VariableLowerInterval<Dyadic>(l,v); }
 inline VariableLowerInterval<Dyadic> operator<=(const int& l, const RealVariable& v) { return Dyadic(l)<=v; }
 
-inline VariableLowerInterval<Float64> operator<=(const Float64& l, const RealVariable& v) { return VariableLowerInterval<Float64>(l,v); }
-inline VariableLowerInterval<Float64> operator<=(const double& l, const RealVariable& v) { return VariableLowerInterval<Float64>(l,v); }
+inline VariableLowerInterval<FloatDP> operator<=(const FloatDP& l, const RealVariable& v) { return VariableLowerInterval<FloatDP>(l,v); }
+inline VariableLowerInterval<FloatDP> operator<=(const double& l, const RealVariable& v) { return VariableLowerInterval<FloatDP>(l,v); }
 
 //! \brief An box defining ranges for a collection of real variables.
 template<class IVL> class VariablesBox {

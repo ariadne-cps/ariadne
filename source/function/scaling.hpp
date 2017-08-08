@@ -34,11 +34,11 @@
 namespace Ariadne {
 
 inline ApproximateNumericType med_apprx(IntervalDomainType const& ivl) {
-    return ApproximateNumericType(hlf_exact(add_approx(ivl.lower().raw(),ivl.upper().raw())));
+    return ApproximateNumericType(hlf(add(approx,ivl.lower().raw(),ivl.upper().raw())));
 }
 
 inline ApproximateNumericType rad_apprx(IntervalDomainType const& ivl) {
-    return ApproximateNumericType(hlf_exact(sub_approx(ivl.upper().raw(),ivl.lower().raw())));
+    return ApproximateNumericType(hlf(sub(approx,ivl.upper().raw(),ivl.lower().raw())));
 }
 
 inline ValidatedNumericType med_val(IntervalDomainType const& ivl) {

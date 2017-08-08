@@ -284,7 +284,7 @@ template<class Y> inline Formula<Y> Formula<Y>::create_zero() const { return For
 template<class Y> inline Formula<Y> Formula<Y>::create_constant(const Y& c) const { return Formula<Y>::constant(c); }
 
 template<class Y> inline Formula<Y> Formula<Y>::zero() {
-    return Formula<Y>(new ConstantFormulaNode<Y>(numeric_cast<Y>(0)),PointerTag()); }
+    return Formula<Y>(new ConstantFormulaNode<Y>(static_cast<Y>(0)),PointerTag()); }
 template<class Y> inline Formula<Y> Formula<Y>::constant(const Y& c) {
     return Formula<Y>(new ConstantFormulaNode<Y>(c),PointerTag()); }
 template<class Y> inline Formula<Y> Formula<Y>::coordinate(Nat j) {

@@ -32,7 +32,8 @@ OTHER_CXXWARNINGS=-Wall
 
 VPATH = source test wrap examples \
 	source/utility source/numeric source/expression source/algebra source/function source/geometry source/solvers source/dynamics source/hybrid source/output \
-	source/experimental examples/experimental
+	source/experimental examples/experimental \
+	examples/watertank
 
 HDR = \
 	standard.hpp numeric.hpp functional.hpp
@@ -41,7 +42,7 @@ HDR = \
 
 LIB_NUMERIC_SRC = \
 	logging.cpp operators.cpp logical.cpp integer.cpp dyadic.cpp rational.cpp decimal.cpp real.cpp \
-	float64.cpp floatmp.cpp \
+	floatdp.cpp floatmp.cpp \
 	float-user.cpp number.cpp
 
 #	float-approximate.cpp float-lower.cpp float-upper.cpp float-validated.cpp float-exact.cpp \
@@ -98,13 +99,13 @@ TEST_GEOMETRY_SRC = \
 
 LIB_DYNAMICS_SRC = \
 	orbit.cpp \
-    differential_inclusion.cpp \
+	differential_inclusion.cpp \
 	map_evolver.cpp \
 	vector_field_evolver.cpp \
 	reachability_analyser.cpp
 
 TEST_DYNAMICS_SRC = \
-    test_discrete_evolution.cpp \
+	test_discrete_evolution.cpp \
 	test_continuous_evolution.cpp
 
 LIB_EXPRESSION_SRC = \
@@ -162,14 +163,14 @@ UNUSED_TESTS_SRC = \
 EXAMPLES_SRC = \
 	tutorial.cpp \
 	bouncingball.cpp \
-	watertank.cpp \
 	heating.cpp \
 	ballinabox.cpp \
-	watertank-compositional.cpp \
 	rectifier.cpp \
+	watertank-hysteresis.cpp \
+	watertank-proportional.cpp \
 
 EXAMPLES_EXPERIMENTAL_SRC = \
-    harmonic_inclusion.cpp \
+	harmonic_inclusion.cpp \
 	exponential.cpp \
 	laser.cpp \
 	circle.cpp \
@@ -432,5 +433,5 @@ bin/%: $(EXAMPLES_OBJ_DIR)/%.o libariadne.so
 #wrap/boost_python.hpp.gch: boost_python.hpp
 #	$(CXX) $(CXXFLAGS) $< -I$(PYTHON_INCLUDE_PATH)
 
-#.libs/numeric_submodule.o: numeric_submodule.cpp boost_python.hpp.gch integer.hpp rational.hpp float64.hpp
+#.libs/numeric_submodule.o: numeric_submodule.cpp boost_python.hpp.gch integer.hpp rational.hpp floatdp.hpp
 #	$(CXX) $(CXXFLAGS) -c -o $@ $< -I$(PYTHON_INCLUDE_PATH)

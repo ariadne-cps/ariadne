@@ -61,7 +61,7 @@ VariableIntervalDomainType _make_domain(RealVariable const& arg, IntervalDomainT
 }
 
 VariablesBoxDomainType _make_domain(Vector<RealVariable> const& args, BoxDomainType const& dom) {
-    Map<RealVariable,Float64ExactInterval> domain;
+    Map<RealVariable,FloatDPExactInterval> domain;
     for(SizeType i=0; i!=args.size(); ++i) { domain[args[i]]=dom[i]; }
     return domain;
 }
@@ -133,9 +133,9 @@ template<class M> ScaledFunctionPatch<M> compose(ScaledFunctionPatch<M> const& f
 }
 
 template<class P, class PR, class PRE> ScalarFunctionModel<P,PR,PRE> compose(ScalarFunctionModel<P,PR,PRE> const& f, Projection const& prj) {
-    auto fpp = std::dynamic_pointer_cast<const ValidatedScalarTaylorFunctionModel64>(f.managed_pointer());
+    auto fpp = std::dynamic_pointer_cast<const ValidatedScalarTaylorFunctionModelDP>(f.managed_pointer());
     if(fpp) {
-        return compose(ValidatedScalarTaylorFunctionModel64(fpp),prj);
+        return compose(ValidatedScalarTaylorFunctionModelDP(fpp),prj);
     }
     SizeType as=prj.argument_size();
     auto f_dom=f.domain();
@@ -147,9 +147,9 @@ template<class P, class PR, class PRE> ScalarFunctionModel<P,PR,PRE> compose(Sca
 }
 
 template<class P> ScalarFunction<P,BoxDomainType> compose(ScalarFunction<P,BoxDomainType> const& f, Projection const& prj) {
-    auto fmp = std::dynamic_pointer_cast<const ScalarFunctionModel64Interface<P>>(f.managed_pointer());
+    auto fmp = std::dynamic_pointer_cast<const ScalarFunctionModelDPInterface<P>>(f.managed_pointer());
     if(fmp) {
-        return compose(ScalarFunctionModel64<P>(fmp),prj);
+        return compose(ScalarFunctionModelDP<P>(fmp),prj);
     }
     SizeType as=prj.argument_size();
     auto f_dom=f.domain();

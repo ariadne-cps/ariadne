@@ -50,11 +50,11 @@ namespace Ariadne {
 
 namespace {
 
-Interval<Float64Value> const& convert_interval(IntervalDomainType const& ivl, Precision64);
-Interval<FloatMPValue> convert_interval(IntervalDomainType const& ivl, PrecisionMP pr);
+Interval<FloatDPValue> const& convert_interval(IntervalDomainType const& ivl, DoublePrecision);
+Interval<FloatMPValue> convert_interval(IntervalDomainType const& ivl, MultiplePrecision pr);
 
-Box<Interval<Float64Value>> const& convert_box(BoxDomainType const& bx, Precision64);
-Box<Interval<FloatMPValue>> convert_box(BoxDomainType const& bx, PrecisionMP pr);
+Box<Interval<FloatDPValue>> const& convert_box(BoxDomainType const& bx, DoublePrecision);
+Box<Interval<FloatMPValue>> convert_box(BoxDomainType const& bx, MultiplePrecision pr);
 
 } // namespace
 
@@ -66,31 +66,27 @@ inline decltype(auto) contains(BoxDomainType const& bx, Vector<FloatMPApproximat
 
 template<class M> Void _set_scaling(ScaledFunctionPatch<M>& x, const IntervalDomainType& ivl, SizeType j)
 {
-    Float64::RoundingModeType rounding_mode=Float64::get_rounding_mode();
-    Float64::set_rounding_upward();
-    const Float64& l=ivl.lower().raw();
-    const Float64& u=ivl.upper().raw();
-    VOLATILE Float64 pc=u; pc+=l;
-    VOLATILE Float64 nc=-u; nc-=l;
-    VOLATILE Float64 pg=u; pg-=l;
-    VOLATILE Float64 ng=l; ng-=u;
-    x.error()=ErrorType((pc+nc+pg+ng)/4);
-    Float64::set_rounding_to_nearest();
+    // A scaling of [-1,+1] into [a,b] has the form s->rx+c where c is centre and r radius of ivl
+    const FloatDPValue& l=ivl.lower();
+    const FloatDPValue& u=ivl.upper();
+    FloatDPBall c{hlf(l+u)};
+    FloatDPBall r{hlf(u-l)};
+    FloatDPError e=c.error()+r.error();
     MultiIndex a(x.argument_size());
-    x.expansion().raw().append(a,(l+u)/2);
+    x.expansion().append(a,c.value());
     ++a[j];
-    x.expansion().raw().append(a,(l+u)/2);
-    Float64::set_rounding_mode(rounding_mode);
+    x.expansion().append(a,r.value());
+    x.set_error(e);
 }
 
 
 
-inline OutputStream& operator<<(OutputStream& os, const Representation<Float64>& flt_repr)
+inline OutputStream& operator<<(OutputStream& os, const Representation<FloatDP>& flt_repr)
 {
-    const Float64& flt=*flt_repr.pointer;
+    const FloatDP& flt=*flt_repr.pointer;
     Int precision=os.precision(); std::ios_base::fmtflags flags = os.flags();
     os.precision(17); os.setf(std::ios_base::showpoint);
-    os << "Float64(" << flt << ")";
+    os << "FloatDP(" << flt << ")";
     os.precision(precision); os.flags(flags);
     return os;
 }
@@ -350,37 +346,37 @@ template<class M> Void ScaledFunctionPatch<M>::restrict(const BoxDomainType& dom
 
 
 
-inline Bool operator==(Float64Value x1, Int n2) { return x1.raw()==Float64(n2); }
-inline Bool operator==(Float64Bounds x1, Int n2) { return x1.upper_raw()==Float64(n2) && x1.lower_raw()==Float64(n2); }
-inline Bool operator==(Float64Approximation x1, Int n2) { return x1.raw()==Float64(n2); }
+inline Bool operator==(FloatDPValue x1, Int n2) { return x1.raw()==FloatDP(n2); }
+inline Bool operator==(FloatDPBounds x1, Int n2) { return x1.upper_raw()==FloatDP(n2) && x1.lower_raw()==FloatDP(n2); }
+inline Bool operator==(FloatDPApproximation x1, Int n2) { return x1.raw()==FloatDP(n2); }
 
-inline Bool operator!=(Float64Value x1, Int n2) { return x1.raw()!=Float64(n2); }
-inline Bool operator!=(Float64Bounds x1, Int n2) { return x1.upper_raw()!=Float64(n2) || x1.lower_raw()!=Float64(n2); }
-inline Bool operator!=(Float64Approximation x1, Int n2) { return x1.raw()!=Float64(n2); }
+inline Bool operator!=(FloatDPValue x1, Int n2) { return x1.raw()!=FloatDP(n2); }
+inline Bool operator!=(FloatDPBounds x1, Int n2) { return x1.upper_raw()!=FloatDP(n2) || x1.lower_raw()!=FloatDP(n2); }
+inline Bool operator!=(FloatDPApproximation x1, Int n2) { return x1.raw()!=FloatDP(n2); }
 
-inline Bool operator> (Float64Value x1, Int n2) { return x1.raw()> Float64(n2); }
-inline Bool operator> (Float64Bounds x1, Int n2) { return x1.lower_raw()> Float64(n2); }
-inline Bool operator> (Float64Approximation x1, Int n2) { return x1.raw()> Float64(n2); }
+inline Bool operator> (FloatDPValue x1, Int n2) { return x1.raw()> FloatDP(n2); }
+inline Bool operator> (FloatDPBounds x1, Int n2) { return x1.lower_raw()> FloatDP(n2); }
+inline Bool operator> (FloatDPApproximation x1, Int n2) { return x1.raw()> FloatDP(n2); }
 
-template<class M> auto ScaledFunctionPatch<M>::polynomial() const -> Polynomial<FloatBounds<PR>>
+template<class M> auto ScaledFunctionPatch<M>::polynomial() const -> Polynomial<Bounds<F>>
 {
-    FloatBounds<PR> zero(0,this->model().precision());
+    Bounds<F> zero(0,this->model().precision());
 
-    Vector<Polynomial<FloatBounds<PR>> > pid=Polynomial<NumericType>::coordinates(this->argument_size());
-    return horner_evaluate(this->expansion(),unscale(pid,this->domain()))+FloatBounds<PR>(-this->error(),+this->error());
+    Vector<Polynomial<Bounds<F>> > pid=Polynomial<NumericType>::coordinates(this->argument_size());
+    return horner_evaluate(this->expansion(),unscale(pid,this->domain()))+Bounds<F>(-this->error(),+this->error());
 
-    Polynomial<FloatBounds<PR>> z(this->argument_size());
-    Polynomial<FloatBounds<PR>> p;//=Ariadne::polynomial(this->model());
+    Polynomial<Bounds<F>> z(this->argument_size());
+    Polynomial<Bounds<F>> p;//=Ariadne::polynomial(this->model());
 
-    Vector<Polynomial<FloatBounds<PR>> > s(this->argument_size(),z);
+    Vector<Polynomial<Bounds<F>> > s(this->argument_size(),z);
     for(SizeType j=0; j!=this->argument_size(); ++j) {
         auto domj=convert_interval(this->domain()[j],this->precision());
         if(domj.lower()>=domj.upper()) {
             ARIADNE_ASSERT(this->domain()[j].is_singleton());
-            s[j]=Polynomial<FloatBounds<PR>>::constant(this->argument_size(),zero);
+            s[j]=Polynomial<Bounds<F>>::constant(this->argument_size(),zero);
         } else {
             //s[j]=Ariadne::polynomial(ModelType::unscaling(this->argument_size(),j,this->domain()[j],this->properties()));
-            s[j]=(Polynomial<FloatBounds<PR>>::coordinate(this->argument_size(),j)-domj.midpoint())/domj.radius();
+            s[j]=(Polynomial<Bounds<F>>::coordinate(this->argument_size(),j)-domj.midpoint())/domj.radius();
         }
     }
 
@@ -410,7 +406,6 @@ template<class M> ScaledFunctionPatch<M>* ScaledFunctionPatch<M>::_derivative(Si
 {
     return new ScaledFunctionPatch<M>(derivative(*this,j));
 }
-
 
 template<class M> auto ScaledFunctionPatch<M>::operator() (const Vector<FloatApproximation<PR>>& x) const -> FloatApproximation<PR>
 {
@@ -484,7 +479,7 @@ template<class M> OutputStream& operator<<(OutputStream& os, const Representatio
 template<class M> OutputStream& operator<<(OutputStream& os, const ModelRepresentation<ScaledFunctionPatch<M>>& frepr)
 {
     ScaledFunctionPatch<M> const& f=*frepr.pointer;
-    Float64 truncatation_error = 0.0;
+    FloatDP truncatation_error = 0.0;
     os << "<"<<f.domain()<<"\n";
     for(ModelType::ConstIterator iter=f.begin(); iter!=f.end(); ++iter) {
         if(abs(iter->data())>frepr.threshold) { truncatation_error+=abs(iter->data()); }
@@ -871,14 +866,6 @@ template<class M> Void VectorScaledFunctionPatch<M>::set(SizeType i, const Scale
     }
     this->_models[i]=e.model();
 }
-
-
-
-
-
-
-
-
 
 
 

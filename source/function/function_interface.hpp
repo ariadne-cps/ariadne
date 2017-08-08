@@ -107,11 +107,11 @@ class FunctionInterface<ApproximateTag,D,C>
     template<class X> using Argument = typename ElementTraits<D>::template Type<X>;
     template<class X> using Result = typename ElementTraits<C>::template Type<X>;
   public:
-    virtual Result<Float64Approximation> _evaluate(const Argument<Float64Approximation>& x) const = 0;
+    virtual Result<FloatDPApproximation> _evaluate(const Argument<FloatDPApproximation>& x) const = 0;
     virtual Result<FloatMPApproximation> _evaluate(const Argument<FloatMPApproximation>& x) const = 0;
-    virtual Result<Differential<Float64Approximation>> _evaluate(const Argument< Differential<Float64Approximation> >& x) const = 0;
+    virtual Result<Differential<FloatDPApproximation>> _evaluate(const Argument< Differential<FloatDPApproximation> >& x) const = 0;
     virtual Result<Differential<FloatMPApproximation>> _evaluate(const Argument< Differential<FloatMPApproximation> >& x) const = 0;
-    virtual Result<TaylorModel<ApproximateTag,Float64>> _evaluate(const Argument< TaylorModel<ApproximateTag,Float64> >& x) const = 0;
+    virtual Result<TaylorModel<ApproximateTag,FloatDP>> _evaluate(const Argument< TaylorModel<ApproximateTag,FloatDP> >& x) const = 0;
     virtual Result<TaylorModel<ApproximateTag,FloatMP>> _evaluate(const Argument< TaylorModel<ApproximateTag,FloatMP> >& x) const = 0;
     virtual Result<Formula<ApproximateNumber>> _evaluate(const Argument< Formula<ApproximateNumber> >& x) const = 0;
     virtual Result<Algebra<ApproximateNumber>> _evaluate(const Argument< Algebra<ApproximateNumber> >& x) const = 0;
@@ -136,19 +136,19 @@ class FunctionInterface<ValidatedTag,D,C>
     template<class X> using Result = typename ElementTraits<C>::template Type<X>;
   public:
     using FunctionInterface<AP,D,C>::_evaluate;
-    virtual Result<Float64Bounds> _evaluate(const Argument<Float64Bounds>& x) const = 0;
+    virtual Result<FloatDPBounds> _evaluate(const Argument<FloatDPBounds>& x) const = 0;
     virtual Result<FloatMPBounds> _evaluate(const Argument<FloatMPBounds>& x) const = 0;
-    virtual Result<Differential<Float64Bounds>> _evaluate(const Argument< Differential<Float64Bounds> >& x) const = 0;
+    virtual Result<Differential<FloatDPBounds>> _evaluate(const Argument< Differential<FloatDPBounds> >& x) const = 0;
     virtual Result<Differential<FloatMPBounds>> _evaluate(const Argument< Differential<FloatMPBounds> >& x) const = 0;
-    virtual Result<TaylorModel<ValidatedTag,Float64>> _evaluate(const Argument< TaylorModel<ValidatedTag,Float64> >& x) const = 0;
+    virtual Result<TaylorModel<ValidatedTag,FloatDP>> _evaluate(const Argument< TaylorModel<ValidatedTag,FloatDP> >& x) const = 0;
     virtual Result<TaylorModel<ValidatedTag,FloatMP>> _evaluate(const Argument< TaylorModel<ValidatedTag,FloatMP> >& x) const = 0;
     virtual Result<Formula<ValidatedNumber>> _evaluate(const Argument< Formula<ValidatedNumber> >& x) const = 0;
     virtual Result<Algebra<ValidatedNumber>> _evaluate(const Argument< Algebra<ValidatedNumber> >& x) const = 0;
 
     virtual Result<ScalarFunction<ValidatedTag>> _evaluate(const Argument< ScalarFunction<ValidatedTag> >& x) const = 0;
 
-    inline Result<Float64Bounds> _evaluate(const Argument<Float64Value>& x) const {
-        return this->_evaluate(Argument<Float64Bounds>(x)); }
+    inline Result<FloatDPBounds> _evaluate(const Argument<FloatDPValue>& x) const {
+        return this->_evaluate(Argument<FloatDPBounds>(x)); }
     inline Result<FloatMPBounds> _evaluate(const Argument<FloatMPValue>& x) const {
         return this->_evaluate(Argument<FloatMPBounds>(x)); }
 

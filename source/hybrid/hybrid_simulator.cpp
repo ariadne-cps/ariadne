@@ -66,18 +66,18 @@ Void HybridSimulator::set_step_size(double h)
 }
 
 
-ExactPoint make_point(const HybridExactPoint& hpt, const RealSpace& spc) {
+ApproximatePoint make_point(const HybridApproximatePoint& hpt, const RealSpace& spc) {
     if(hpt.space()==spc) { return hpt.point(); }
-    Map<RealVariable,Float64Value> values=hpt.values();
-    ExactPoint pt(spc.dimension());
+    Map<RealVariable,FloatDPApproximation> values=hpt.values();
+    ApproximatePoint pt(spc.dimension());
     for(Nat i=0; i!=pt.size(); ++i) {
         pt[i]=values[spc.variable(i)];
     }
     return pt;
 }
 
-inline Float64Approximation evaluate(const EffectiveScalarFunction& f, const Vector<Float64Approximation>& x) { return f(x); }
-inline Vector<Float64Approximation> evaluate(const EffectiveVectorFunction& f, const Vector<Float64Approximation>& x) { return f(x); }
+inline FloatDPApproximation evaluate(const EffectiveScalarFunction& f, const Vector<FloatDPApproximation>& x) { return f(x); }
+inline Vector<FloatDPApproximation> evaluate(const EffectiveVectorFunction& f, const Vector<FloatDPApproximation>& x) { return f(x); }
 
 Map<DiscreteEvent,EffectiveScalarFunction> guard_functions(const HybridAutomatonInterface& system, const DiscreteLocation& location) {
     Set<DiscreteEvent> events=system.events(location);
@@ -88,19 +88,25 @@ Map<DiscreteEvent,EffectiveScalarFunction> guard_functions(const HybridAutomaton
     return guards;
 }
 
-Orbit<HybridExactPoint>
-HybridSimulator::orbit(const HybridAutomatonInterface& system, const HybridExactPoint& init_pt, const HybridTime& tmax) const
+Orbit<HybridApproximatePoint>
+HybridSimulator::orbit(const HybridAutomatonInterface& system, const HybridRealPoint& init_pt, const HybridTime& tmax) const
 {
-    Precision64 pr;
+    return orbit(system,HybridApproximatePoint(init_pt,dp),tmax);
+}
+
+Orbit<HybridApproximatePoint>
+HybridSimulator::orbit(const HybridAutomatonInterface& system, const HybridApproximatePoint& init_pt, const HybridTime& tmax) const
+{
+    DoublePrecision pr;
     HybridTime t(0.0,0);
-    Float64Approximation h={this->_step_size,pr};
+    FloatDPApproximation h={this->_step_size,pr};
 
     DiscreteLocation location=init_pt.location();
     RealSpace space=system.continuous_state_space(location);
     ApproximatePoint point=make_point(init_pt,space);
     ApproximatePoint next_point;
 
-    Orbit<HybridExactPoint> orbit(HybridExactPoint(location,space,cast_exact(point)));
+    Orbit<HybridApproximatePoint> orbit(HybridApproximatePoint(location,space,cast_exact(point)));
 
     EffectiveVectorFunction dynamic=system.dynamic_function(location);
     Map<DiscreteEvent,EffectiveScalarFunction> guards=guard_functions(system,location);
@@ -143,11 +149,11 @@ HybridSimulator::orbit(const HybridAutomatonInterface& system, const HybridExact
 
             k4=evaluate(dynamic,pt3);
 
-            next_point=pt+(h/6)*(k1+Float64Approximation(2.0)*(k2+k3)+k4);
-            t._continuous_time += Real(Float64Value(h.raw()));
+            next_point=pt+(h/6)*(k1+FloatDPApproximation(2.0)*(k2+k3)+k4);
+            t._continuous_time += Real(FloatDPValue(h.raw()));
         }
         point=next_point;
-        orbit.insert(t,HybridExactPoint(location,space,cast_exact(point)));
+        orbit.insert(t,HybridApproximatePoint(location,space,cast_exact(point)));
     }
 
     return orbit;

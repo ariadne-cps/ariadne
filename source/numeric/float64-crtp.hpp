@@ -36,7 +36,7 @@
 
 namespace Ariadne {
 
-/************ Float64 ********************************************************/
+/************ FloatDP ********************************************************/
 
 struct ExactTag { };
 
@@ -45,26 +45,26 @@ class ValidatedKleenean;
 class ValidatedSierpinskian;
 class Fuzzy;
 
-class Float64Approximation;
-class Float64LowerBound;
-class Float64UpperBound;
-class ValidFloat64;
-class Float64Bounds;
-class Float64Error;
-class Float64Value;
+class FloatDPApproximation;
+class FloatDPLowerBound;
+class FloatDPUpperBound;
+class ValidFloatDP;
+class FloatDPBounds;
+class FloatDPError;
+class FloatDPValue;
 
 class Rational;
 
-Float64Value operator"" _x(long double);
-Float64Error operator"" _e(long double);
-Float64LowerBound operator"" _l(long double);
-Float64UpperBound operator"" _u(long double);
-Float64Approximation operator"" _a(long double);
+FloatDPValue operator"" _x(long double);
+FloatDPError operator"" _e(long double);
+FloatDPLowerBound operator"" _l(long double);
+FloatDPUpperBound operator"" _u(long double);
+FloatDPApproximation operator"" _a(long double);
 
-Void Float64::set_rounding_to_nearest();
-Void Float64::set_rounding_downward();
-Void Float64::set_rounding_upward();
-Void Float64::set_rounding_toward_zero();
+Void FloatDP::set_rounding_to_nearest();
+Void FloatDP::set_rounding_downward();
+Void FloatDP::set_rounding_upward();
+Void FloatDP::set_rounding_toward_zero();
 
 template<class N> inline N& operator+=(NumberObject<N>& n1, const NumberObject<N>& n2) {
     n1.upcast()=n1.upcast()+n2.upcast(); return n1.upcast(); }
@@ -74,313 +74,313 @@ template<class N> inline N& operator*=(NumberObject<N>& n1, const NumberObject<N
 enum class Sign { NEGATIVE=-1, ZERO=0, POSITIVE=+1 };
 enum class Comparison { LESS=-1, EQUAL=0, GREATER=+1 };
 
-class Float64 : public ScalarObject<Float64> {
+class FloatDP : public ScalarObject<FloatDP> {
     volatile double d;
   public:
     typedef Void Paradigm;
-    Float64() : d(0.0) { }
-    Float64(double dbl) : d(dbl) { }
+    FloatDP() : d(0.0) { }
+    FloatDP(double dbl) : d(dbl) { }
     explicit operator double() const { return d; }
-    Float64 get_flt() const { return *this; }
+    FloatDP get_flt() const { return *this; }
     double get_d() const { return d; }
-    friend Float64 operator+(Float64 x);
-    friend Float64 operator-(Float64 x);
-    friend Float64 operator+(Float64 x1, Float64 x2);
-    friend Float64 operator-(Float64 x1, Float64 x2);
-    friend Float64 operator*(Float64 x1, Float64 x2);
-    friend Float64 operator/(Float64 x1, Float64 x2);
-    friend Float64 operator/(Float64 x1, Int n2);
-    friend Float64& operator+=(Float64& x1, Float64 x2);
-    friend Float64& operator-=(Float64& x1, Float64 x2);
-    friend Float64& operator*=(Float64& x1, Float64 x2);
-    friend Float64& operator/=(Float64& x1, Float64 x2);
-    friend Float64 max(Float64 x1, Float64 x2);
-    friend Float64 neg(Float64 x);
-    friend Float64 abs(Float64 x);
-    friend Int32 floor(Float64 x);
-    friend Int32 ceil(Float64 x);
-    friend Sign sng(Float64 x);
-    friend Comparison cmp(Float64 x1, Float64 x2);
-    friend Bool operator==(Float64 x1, Float64 x2);
-    friend Bool operator<=(Float64 x1, Float64 x2);
-    friend OutputStream& operator<<(OutputStream& os, Float64 x);
+    friend FloatDP operator+(FloatDP x);
+    friend FloatDP operator-(FloatDP x);
+    friend FloatDP operator+(FloatDP x1, FloatDP x2);
+    friend FloatDP operator-(FloatDP x1, FloatDP x2);
+    friend FloatDP operator*(FloatDP x1, FloatDP x2);
+    friend FloatDP operator/(FloatDP x1, FloatDP x2);
+    friend FloatDP operator/(FloatDP x1, Int n2);
+    friend FloatDP& operator+=(FloatDP& x1, FloatDP x2);
+    friend FloatDP& operator-=(FloatDP& x1, FloatDP x2);
+    friend FloatDP& operator*=(FloatDP& x1, FloatDP x2);
+    friend FloatDP& operator/=(FloatDP& x1, FloatDP x2);
+    friend FloatDP max(FloatDP x1, FloatDP x2);
+    friend FloatDP neg(FloatDP x);
+    friend FloatDP abs(FloatDP x);
+    friend Int32 floor(FloatDP x);
+    friend Int32 ceil(FloatDP x);
+    friend Sign sng(FloatDP x);
+    friend Comparison cmp(FloatDP x1, FloatDP x2);
+    friend Bool operator==(FloatDP x1, FloatDP x2);
+    friend Bool operator<=(FloatDP x1, FloatDP x2);
+    friend OutputStream& operator<<(OutputStream& os, FloatDP x);
 };
-inline Float64 operator+(Float64 x) { return Float64{+x.d}; }
-inline Float64 operator-(Float64 x) { return Float64{-x.d}; }
-inline Float64 operator+(Float64 x1, Float64 x2) { return Float64{x1.d+x2.d}; }
-inline Float64 operator-(Float64 x1, Float64 x2) { return Float64{x1.d-x2.d}; }
-inline Float64 operator*(Float64 x1, Float64 x2) { return Float64{x1.d*x2.d}; }
-inline Float64 operator/(Float64 x1, Float64 x2) { return Float64{x1.d/x2.d}; }
-inline Float64 operator/(Float64 x1, Int n2) { return Float64{x1.d/n2}; }
-inline Float64& operator+=(Float64& x1, Float64 x2) { x1.d+=x2.d; return x1; }
-inline Float64& operator-=(Float64& x1, Float64 x2) { x1.d-=x2.d; return x1; }
-inline Float64& operator*=(Float64& x1, Float64 x2) { x1.d*=x2.d; return x1; }
-inline Float64& operator/=(Float64& x1, Float64 x2) { x1.d/=x2.d; return x1; }
-inline Comparison cmp(Float64 x1, Float64 x2) { return (x1.d==x2.d)?Comparison::EQUAL:(x1.d>x2.d)?Comparison::GREATER:Comparison::LESS; }
-Bool isnan(Float64 x);
+inline FloatDP operator+(FloatDP x) { return FloatDP{+x.d}; }
+inline FloatDP operator-(FloatDP x) { return FloatDP{-x.d}; }
+inline FloatDP operator+(FloatDP x1, FloatDP x2) { return FloatDP{x1.d+x2.d}; }
+inline FloatDP operator-(FloatDP x1, FloatDP x2) { return FloatDP{x1.d-x2.d}; }
+inline FloatDP operator*(FloatDP x1, FloatDP x2) { return FloatDP{x1.d*x2.d}; }
+inline FloatDP operator/(FloatDP x1, FloatDP x2) { return FloatDP{x1.d/x2.d}; }
+inline FloatDP operator/(FloatDP x1, Int n2) { return FloatDP{x1.d/n2}; }
+inline FloatDP& operator+=(FloatDP& x1, FloatDP x2) { x1.d+=x2.d; return x1; }
+inline FloatDP& operator-=(FloatDP& x1, FloatDP x2) { x1.d-=x2.d; return x1; }
+inline FloatDP& operator*=(FloatDP& x1, FloatDP x2) { x1.d*=x2.d; return x1; }
+inline FloatDP& operator/=(FloatDP& x1, FloatDP x2) { x1.d/=x2.d; return x1; }
+inline Comparison cmp(FloatDP x1, FloatDP x2) { return (x1.d==x2.d)?Comparison::EQUAL:(x1.d>x2.d)?Comparison::GREATER:Comparison::LESS; }
+Bool isnan(FloatDP x);
 
-Float64 abs(Float64 x);
-inline Float64 mig(Float64 x) { return abs(x); }
-inline Float64 mag(Float64 x) { return abs(x); }
+FloatDP abs(FloatDP x);
+inline FloatDP mig(FloatDP x) { return abs(x); }
+inline FloatDP mag(FloatDP x) { return abs(x); }
 
-inline Float64 neg(Float64 x) { return Float64{-x.d}; }
+inline FloatDP neg(FloatDP x) { return FloatDP{-x.d}; }
 
-inline Bool operator==(Float64 x1, Float64 x2) { return x1.d==x2.d; }
-inline Bool operator!=(Float64 x1, Float64 x2) { return !(x1==x2); }
-inline Bool operator<=(Float64 x1, Float64 x2) { return x1.d<=x2.d; }
-inline Bool operator>=(Float64 x1, Float64 x2) { return (x2<=x1); }
-inline Bool operator< (Float64 x1, Float64 x2) { return !(x2<=x1); }
-inline Bool operator> (Float64 x1, Float64 x2) { return !(x1<=x2); }
+inline Bool operator==(FloatDP x1, FloatDP x2) { return x1.d==x2.d; }
+inline Bool operator!=(FloatDP x1, FloatDP x2) { return !(x1==x2); }
+inline Bool operator<=(FloatDP x1, FloatDP x2) { return x1.d<=x2.d; }
+inline Bool operator>=(FloatDP x1, FloatDP x2) { return (x2<=x1); }
+inline Bool operator< (FloatDP x1, FloatDP x2) { return !(x2<=x1); }
+inline Bool operator> (FloatDP x1, FloatDP x2) { return !(x1<=x2); }
 
-/************ Float64Value ***************************************************/
+/************ FloatDPValue ***************************************************/
 
-extern const Float64Value inf;
+extern const FloatDPValue inf;
 
-class Float64Value
-    : public NumberObject<Float64Value>
+class FloatDPValue
+    : public NumberObject<FloatDPValue>
 {
-    friend class Float64Bounds;
-    friend class Float64Approximation;
+    friend class FloatDPBounds;
+    friend class FloatDPApproximation;
     volatile double v;
     static Int output_places;
   public:
     static Void set_output_places(Int);
   public:
     typedef ExactTag Paradigm;
-    Float64Value();
-    template<class N, typename std::enable_if<std::is_integral<N>::value>::type> Float64Value(N);
-    Float64Value(Nat);
-    Float64Value(Int);
-    explicit Float64Value(double);
-    explicit Float64Value(Float64);
-    operator Float64Bounds () const;
-    operator ValidFloat64 () const;
-    operator Float64LowerBound () const;
-    operator Float64UpperBound () const;
-    operator Float64Approximation () const;
-    Float64 get_flt() const;
+    FloatDPValue();
+    template<class N, typename std::enable_if<std::is_integral<N>::value>::type> FloatDPValue(N);
+    FloatDPValue(Nat);
+    FloatDPValue(Int);
+    explicit FloatDPValue(double);
+    explicit FloatDPValue(FloatDP);
+    operator FloatDPBounds () const;
+    operator ValidFloatDP () const;
+    operator FloatDPLowerBound () const;
+    operator FloatDPUpperBound () const;
+    operator FloatDPApproximation () const;
+    FloatDP get_flt() const;
     double get_d() const;
-    friend Float64Value operator+(Float64Value);
-    friend Float64Value operator-(Float64Value);
-    friend Float64Bounds operator+(Float64Value x1, Float64Value x2);
-    friend Float64Bounds operator-(Float64Value x1, Float64Value x2);
-    friend Float64Bounds operator*(Float64Value x1, Float64Value x2);
-    friend Float64Bounds operator/(Float64Value x1, Float64Value x2);
-    friend OutputStream& operator<<(OutputStream& os, Float64Value const&);
+    friend FloatDPValue operator+(FloatDPValue);
+    friend FloatDPValue operator-(FloatDPValue);
+    friend FloatDPBounds operator+(FloatDPValue x1, FloatDPValue x2);
+    friend FloatDPBounds operator-(FloatDPValue x1, FloatDPValue x2);
+    friend FloatDPBounds operator*(FloatDPValue x1, FloatDPValue x2);
+    friend FloatDPBounds operator/(FloatDPValue x1, FloatDPValue x2);
+    friend OutputStream& operator<<(OutputStream& os, FloatDPValue const&);
   private:
-    Float64Value(long long int n, std::nullptr_t);
+    FloatDPValue(long long int n, std::nullptr_t);
 };
-Boolean operator==(Float64Value x1, Float64Value x2);
-Boolean operator!=(Float64Value x1, Float64Value x2);
-Boolean operator<=(Float64Value x1, Float64Value x2);
-Boolean operator>=(Float64Value x1, Float64Value x2);
-Boolean operator< (Float64Value x1, Float64Value x2);
-Boolean operator> (Float64Value x1, Float64Value x2);
-Float64Value min(Float64Value x1, Float64Value x2);
-Float64Value max(Float64Value x1, Float64Value x2);
+Boolean operator==(FloatDPValue x1, FloatDPValue x2);
+Boolean operator!=(FloatDPValue x1, FloatDPValue x2);
+Boolean operator<=(FloatDPValue x1, FloatDPValue x2);
+Boolean operator>=(FloatDPValue x1, FloatDPValue x2);
+Boolean operator< (FloatDPValue x1, FloatDPValue x2);
+Boolean operator> (FloatDPValue x1, FloatDPValue x2);
+FloatDPValue min(FloatDPValue x1, FloatDPValue x2);
+FloatDPValue max(FloatDPValue x1, FloatDPValue x2);
 
-class Float64Error : public NumberObject<Float64UpperBound> {
+class FloatDPError : public NumberObject<FloatDPUpperBound> {
     volatile double e;
     static Int output_places;
   public:
     static Void set_output_places(Int);
   public:
-    Float64Error();
-    template<class M, EnableIf<IsSame<M,Nat>> = dummy> Float64Error(M m);
-    template<class X, EnableIf<IsSame<X,double>> = dummy> explicit Float64Error(X x);
-    explicit Float64Error(double);
-    explicit Float64Error(Float64);
-    explicit operator Float64UpperBound () const;
-    Float64 get_flt() const;
-    Float64& get_flt();
+    FloatDPError();
+    template<class M, EnableIf<IsSame<M,Nat>> = dummy> FloatDPError(M m);
+    template<class X, EnableIf<IsSame<X,double>> = dummy> explicit FloatDPError(X x);
+    explicit FloatDPError(double);
+    explicit FloatDPError(FloatDP);
+    explicit operator FloatDPUpperBound () const;
+    FloatDP get_flt() const;
+    FloatDP& get_flt();
     double get_d() const;
     explicit operator double() const;
-    friend Float64Error operator+(Float64Error);
-    friend Float64Error operator+(Float64Error,Float64Error);
-    friend Float64Error operator*(Float64Error,Float64Error);
-    friend Float64Error pow(Float64Error,Nat);
-    friend Float64UpperBound operator/(Float64Error x1, Float64Value x2);
-    friend OutputStream& operator<<(OutputStream& os, Float64Error const&);
-    friend Fuzzy operator==(Float64Error, Float64);
+    friend FloatDPError operator+(FloatDPError);
+    friend FloatDPError operator+(FloatDPError,FloatDPError);
+    friend FloatDPError operator*(FloatDPError,FloatDPError);
+    friend FloatDPError pow(FloatDPError,Nat);
+    friend FloatDPUpperBound operator/(FloatDPError x1, FloatDPValue x2);
+    friend OutputStream& operator<<(OutputStream& os, FloatDPError const&);
+    friend Fuzzy operator==(FloatDPError, FloatDP);
 };
 
-Float64Error max(Float64Error x1, Float64Error x2);
+FloatDPError max(FloatDPError x1, FloatDPError x2);
 
-template<class M, typename std::enable_if<std::is_unsigned<M>::value,Int>::type=0> inline Float64Error operator/(Float64Error x1, M m2) {
-    return Float64Error(x1.get_d()/m2); }
+template<class M, typename std::enable_if<std::is_unsigned<M>::value,Int>::type=0> inline FloatDPError operator/(FloatDPError x1, M m2) {
+    return FloatDPError(x1.get_d()/m2); }
 
-class ValidFloat64 : public NumberObject<ValidFloat64> {
+class ValidFloatDP : public NumberObject<ValidFloatDP> {
     volatile double v; volatile double e;
   private:
-    ValidFloat64(double d, ExactTag);
+    ValidFloatDP(double d, ExactTag);
   public:
     typedef ValidatedTag Paradigm;
-    ValidFloat64();
+    ValidFloatDP();
     template<class N, typename std::enable_if<std::is_integral<N>::value,Int>::type = 0>
-        ValidFloat64(N n);
-    explicit ValidFloat64(double);
-    explicit ValidFloat64(double,double);
-    ValidFloat64(Float64Value, Float64Error);
-    operator Float64Approximation () const;
-    Float64Value value() const;
-    Float64Error error() const;
-    Float64UpperBound upper() const;
-    Float64LowerBound lower() const;
-    friend ValidFloat64 operator+(ValidFloat64);
-    friend ValidFloat64 operator-(ValidFloat64);
-    friend ValidFloat64 operator+(ValidFloat64,ValidFloat64);
-    friend ValidFloat64 operator-(ValidFloat64,ValidFloat64);
-    friend ValidFloat64 operator*(ValidFloat64,ValidFloat64);
-    friend ValidFloat64 operator/(ValidFloat64,ValidFloat64);
-    friend ValidFloat64 sqr(ValidFloat64);
-    friend ValidFloat64 rec(ValidFloat64 x);
-    friend Bool operator==(ValidFloat64,Int);
-    friend OutputStream& operator<<(OutputStream& os, ValidFloat64 const&);
+        ValidFloatDP(N n);
+    explicit ValidFloatDP(double);
+    explicit ValidFloatDP(double,double);
+    ValidFloatDP(FloatDPValue, FloatDPError);
+    operator FloatDPApproximation () const;
+    FloatDPValue value() const;
+    FloatDPError error() const;
+    FloatDPUpperBound upper() const;
+    FloatDPLowerBound lower() const;
+    friend ValidFloatDP operator+(ValidFloatDP);
+    friend ValidFloatDP operator-(ValidFloatDP);
+    friend ValidFloatDP operator+(ValidFloatDP,ValidFloatDP);
+    friend ValidFloatDP operator-(ValidFloatDP,ValidFloatDP);
+    friend ValidFloatDP operator*(ValidFloatDP,ValidFloatDP);
+    friend ValidFloatDP operator/(ValidFloatDP,ValidFloatDP);
+    friend ValidFloatDP sqr(ValidFloatDP);
+    friend ValidFloatDP rec(ValidFloatDP x);
+    friend Bool operator==(ValidFloatDP,Int);
+    friend OutputStream& operator<<(OutputStream& os, ValidFloatDP const&);
 };
-ValidFloat64 min(ValidFloat64 x1, ValidFloat64 x2);
-ValidFloat64 max(ValidFloat64 x1, ValidFloat64 x2);
+ValidFloatDP min(ValidFloatDP x1, ValidFloatDP x2);
+ValidFloatDP max(ValidFloatDP x1, ValidFloatDP x2);
 
 
-Bool same(ValidFloat64 x1, ValidFloat64 x2);
+Bool same(ValidFloatDP x1, ValidFloatDP x2);
 
 template<class N, typename std::enable_if<std::is_integral<N>::value,Int>::type> inline
-ValidFloat64::ValidFloat64(N n) : ValidFloat64(double(n),ExactTag())
+ValidFloatDP::ValidFloatDP(N n) : ValidFloatDP(double(n),ExactTag())
 { }
 
-class Float64Bounds : public NumberObject<Float64Bounds> {
-    friend class Float64Approximation; friend class ValidFloat64;
+class FloatDPBounds : public NumberObject<FloatDPBounds> {
+    friend class FloatDPApproximation; friend class ValidFloatDP;
     volatile double l; volatile double u;
     static Int output_places;
   public:
     static Void set_output_places(Int);
   public:
     typedef ValidatedTag Paradigm;
-    Float64Bounds();
-    Float64Bounds(Int);
-    Float64Bounds(const Rational&);
-    explicit Float64Bounds(double);
-    explicit Float64Bounds(double,double);
-    Float64Bounds(Float64LowerBound, Float64UpperBound);
-    operator Float64Approximation () const;
-    operator Float64UpperBound () const;
-    operator Float64LowerBound () const;
-    operator ValidFloat64 () const;
-    friend Float64Bounds operator+(Float64Bounds);
-    friend Float64Bounds operator-(Float64Bounds);
-    friend Float64Bounds operator+(Float64Bounds,Float64Bounds);
-    friend Float64Bounds operator-(Float64Bounds,Float64Bounds);
-    friend Float64Bounds operator*(Float64Bounds,Float64Bounds);
-    friend Float64Bounds operator/(Float64Bounds,Float64Bounds);
-    friend Float64Bounds sqr(Float64Bounds);
-    friend Float64Bounds max(Float64Bounds,Float64Bounds);
-    friend Float64Bounds min(Float64Bounds,Float64Bounds);
-    friend Bool operator==(Float64Bounds,Int);
-    friend ValidatedKleenean operator> (Float64Bounds,Float64Bounds);
-    friend OutputStream& operator<<(OutputStream& os, Float64Bounds const&);
+    FloatDPBounds();
+    FloatDPBounds(Int);
+    FloatDPBounds(const Rational&);
+    explicit FloatDPBounds(double);
+    explicit FloatDPBounds(double,double);
+    FloatDPBounds(FloatDPLowerBound, FloatDPUpperBound);
+    operator FloatDPApproximation () const;
+    operator FloatDPUpperBound () const;
+    operator FloatDPLowerBound () const;
+    operator ValidFloatDP () const;
+    friend FloatDPBounds operator+(FloatDPBounds);
+    friend FloatDPBounds operator-(FloatDPBounds);
+    friend FloatDPBounds operator+(FloatDPBounds,FloatDPBounds);
+    friend FloatDPBounds operator-(FloatDPBounds,FloatDPBounds);
+    friend FloatDPBounds operator*(FloatDPBounds,FloatDPBounds);
+    friend FloatDPBounds operator/(FloatDPBounds,FloatDPBounds);
+    friend FloatDPBounds sqr(FloatDPBounds);
+    friend FloatDPBounds max(FloatDPBounds,FloatDPBounds);
+    friend FloatDPBounds min(FloatDPBounds,FloatDPBounds);
+    friend Bool operator==(FloatDPBounds,Int);
+    friend ValidatedKleenean operator> (FloatDPBounds,FloatDPBounds);
+    friend OutputStream& operator<<(OutputStream& os, FloatDPBounds const&);
 
-    Float64LowerBound lower() const;
-    Float64UpperBound upper() const;
-    Float64Error error() const;
-    Float64Error width() const;
-    Float64Error radius() const;
+    FloatDPLowerBound lower() const;
+    FloatDPUpperBound upper() const;
+    FloatDPError error() const;
+    FloatDPError width() const;
+    FloatDPError radius() const;
 
 };
-Float64Bounds min(Float64Bounds x1, Float64Bounds x2);
-Float64Bounds max(Float64Bounds x1, Float64Bounds x2);
-Float64Error mag(Float64Bounds x);
-Float64Bounds sqr(Float64Bounds);
+FloatDPBounds min(FloatDPBounds x1, FloatDPBounds x2);
+FloatDPBounds max(FloatDPBounds x1, FloatDPBounds x2);
+FloatDPError mag(FloatDPBounds x);
+FloatDPBounds sqr(FloatDPBounds);
 
-Bool same(Float64Bounds x1, Float64Bounds x2);
+Bool same(FloatDPBounds x1, FloatDPBounds x2);
 
-ValidatedKleenean operator==(Float64Bounds x1, Float64Bounds x2);
-ValidatedKleenean operator!=(Float64Bounds x1, Float64Bounds x2);
-ValidatedKleenean operator<=(Float64Bounds x1, Float64Bounds x2);
-ValidatedKleenean operator>=(Float64Bounds x1, Float64Bounds x2);
-ValidatedKleenean operator< (Float64Bounds x1, Float64Bounds x2);
-ValidatedKleenean operator> (Float64Bounds x1, Float64Bounds x2);
+ValidatedKleenean operator==(FloatDPBounds x1, FloatDPBounds x2);
+ValidatedKleenean operator!=(FloatDPBounds x1, FloatDPBounds x2);
+ValidatedKleenean operator<=(FloatDPBounds x1, FloatDPBounds x2);
+ValidatedKleenean operator>=(FloatDPBounds x1, FloatDPBounds x2);
+ValidatedKleenean operator< (FloatDPBounds x1, FloatDPBounds x2);
+ValidatedKleenean operator> (FloatDPBounds x1, FloatDPBounds x2);
 
-class Float64LowerBound : public NumberObject<Float64LowerBound> {
+class FloatDPLowerBound : public NumberObject<FloatDPLowerBound> {
     volatile double l;
   public:
-    Float64LowerBound();
-    Float64LowerBound(Int);
-    explicit Float64LowerBound(double);
-    operator Float64Approximation () const;
-    Float64 get_flt() const;
-    friend Float64LowerBound operator+(Float64LowerBound);
-    friend Float64UpperBound operator-(Float64LowerBound);
-    friend Float64LowerBound operator-(Float64UpperBound);
-    friend Float64LowerBound operator+(Float64LowerBound,Float64LowerBound);
-    friend Float64LowerBound operator-(Float64LowerBound,Float64UpperBound);
-    friend Float64UpperBound operator-(Float64UpperBound,Float64LowerBound);
-    friend Float64UpperBound min(Float64UpperBound,Float64UpperBound);
-    friend Float64UpperBound max(Float64UpperBound,Float64UpperBound);
-    friend OutputStream& operator<<(OutputStream& os, Float64LowerBound const&);
+    FloatDPLowerBound();
+    FloatDPLowerBound(Int);
+    explicit FloatDPLowerBound(double);
+    operator FloatDPApproximation () const;
+    FloatDP get_flt() const;
+    friend FloatDPLowerBound operator+(FloatDPLowerBound);
+    friend FloatDPUpperBound operator-(FloatDPLowerBound);
+    friend FloatDPLowerBound operator-(FloatDPUpperBound);
+    friend FloatDPLowerBound operator+(FloatDPLowerBound,FloatDPLowerBound);
+    friend FloatDPLowerBound operator-(FloatDPLowerBound,FloatDPUpperBound);
+    friend FloatDPUpperBound operator-(FloatDPUpperBound,FloatDPLowerBound);
+    friend FloatDPUpperBound min(FloatDPUpperBound,FloatDPUpperBound);
+    friend FloatDPUpperBound max(FloatDPUpperBound,FloatDPUpperBound);
+    friend OutputStream& operator<<(OutputStream& os, FloatDPLowerBound const&);
 };
-Float64LowerBound min(Float64LowerBound,Float64LowerBound);
-Float64LowerBound max(Float64LowerBound,Float64LowerBound);
+FloatDPLowerBound min(FloatDPLowerBound,FloatDPLowerBound);
+FloatDPLowerBound max(FloatDPLowerBound,FloatDPLowerBound);
 
-Float64UpperBound rec(Float64LowerBound);
+FloatDPUpperBound rec(FloatDPLowerBound);
 
-class Float64UpperBound : public NumberObject<Float64UpperBound> {
+class FloatDPUpperBound : public NumberObject<FloatDPUpperBound> {
     volatile double u;
   public:
-    Float64UpperBound();
-    Float64UpperBound(Int);
-    explicit Float64UpperBound(double);
-    operator Float64Approximation () const;
-    Float64 get_flt() const;
-    friend Float64UpperBound operator+(Float64UpperBound);
-    friend Float64UpperBound operator-(Float64LowerBound);
-    friend Float64LowerBound operator-(Float64UpperBound);
-    friend Float64UpperBound operator+(Float64UpperBound,Float64UpperBound);
-    friend Float64UpperBound operator-(Float64UpperBound,Float64LowerBound);
-    friend Float64LowerBound operator-(Float64LowerBound,Float64UpperBound);
-    friend Float64UpperBound operator*(Float64UpperBound,Float64UpperBound);
-    friend Float64LowerBound min(Float64LowerBound,Float64LowerBound);
-    friend Float64LowerBound max(Float64LowerBound,Float64LowerBound);
-    friend OutputStream& operator<<(OutputStream& os, Float64UpperBound const&);
+    FloatDPUpperBound();
+    FloatDPUpperBound(Int);
+    explicit FloatDPUpperBound(double);
+    operator FloatDPApproximation () const;
+    FloatDP get_flt() const;
+    friend FloatDPUpperBound operator+(FloatDPUpperBound);
+    friend FloatDPUpperBound operator-(FloatDPLowerBound);
+    friend FloatDPLowerBound operator-(FloatDPUpperBound);
+    friend FloatDPUpperBound operator+(FloatDPUpperBound,FloatDPUpperBound);
+    friend FloatDPUpperBound operator-(FloatDPUpperBound,FloatDPLowerBound);
+    friend FloatDPLowerBound operator-(FloatDPLowerBound,FloatDPUpperBound);
+    friend FloatDPUpperBound operator*(FloatDPUpperBound,FloatDPUpperBound);
+    friend FloatDPLowerBound min(FloatDPLowerBound,FloatDPLowerBound);
+    friend FloatDPLowerBound max(FloatDPLowerBound,FloatDPLowerBound);
+    friend OutputStream& operator<<(OutputStream& os, FloatDPUpperBound const&);
 };
-Float64UpperBound min(Float64UpperBound,Float64UpperBound);
-Float64UpperBound max(Float64UpperBound,Float64UpperBound);
-Float64LowerBound rec(Float64UpperBound);
+FloatDPUpperBound min(FloatDPUpperBound,FloatDPUpperBound);
+FloatDPUpperBound max(FloatDPUpperBound,FloatDPUpperBound);
+FloatDPLowerBound rec(FloatDPUpperBound);
 
-Float64UpperBound operator+(Float64UpperBound,Float64Error);
-Float64LowerBound operator-(Float64LowerBound,Float64Error);
+FloatDPUpperBound operator+(FloatDPUpperBound,FloatDPError);
+FloatDPLowerBound operator-(FloatDPLowerBound,FloatDPError);
 
-class Float64Approximation : public NumberObject<Float64Approximation> {
+class FloatDPApproximation : public NumberObject<FloatDPApproximation> {
     volatile double a;
   public:
     typedef ApproximateTag Paradigm;
-    Float64Approximation();
-    Float64Approximation(double);
-    Float64Approximation(const Rational&);
-    Float64 get_flt() const;
+    FloatDPApproximation();
+    FloatDPApproximation(double);
+    FloatDPApproximation(const Rational&);
+    FloatDP get_flt() const;
     double get_d() const;
-    friend Float64Approximation operator+(Float64Approximation);
-    friend Float64Approximation operator-(Float64Approximation);
-    friend Float64Approximation operator+(Float64Approximation,Float64Approximation);
-    friend Float64Approximation operator-(Float64Approximation,Float64Approximation);
-    friend Float64Approximation operator*(Float64Approximation,Float64Approximation);
-    friend Float64Approximation operator/(Float64Approximation,Float64Approximation);
-    friend Float64Approximation& operator+=(Float64Approximation&,Float64Approximation);
-    friend Float64Approximation neg(Float64Approximation);
-    friend Float64Approximation sqr(Float64Approximation);
-    friend Float64Approximation min(Float64Approximation,Float64Approximation);
-    friend Float64Approximation max(Float64Approximation,Float64Approximation);
-    friend Fuzzy operator==(Float64Approximation,Float64Approximation);
-    friend OutputStream& operator<<(OutputStream& os, Float64Approximation const&);
+    friend FloatDPApproximation operator+(FloatDPApproximation);
+    friend FloatDPApproximation operator-(FloatDPApproximation);
+    friend FloatDPApproximation operator+(FloatDPApproximation,FloatDPApproximation);
+    friend FloatDPApproximation operator-(FloatDPApproximation,FloatDPApproximation);
+    friend FloatDPApproximation operator*(FloatDPApproximation,FloatDPApproximation);
+    friend FloatDPApproximation operator/(FloatDPApproximation,FloatDPApproximation);
+    friend FloatDPApproximation& operator+=(FloatDPApproximation&,FloatDPApproximation);
+    friend FloatDPApproximation neg(FloatDPApproximation);
+    friend FloatDPApproximation sqr(FloatDPApproximation);
+    friend FloatDPApproximation min(FloatDPApproximation,FloatDPApproximation);
+    friend FloatDPApproximation max(FloatDPApproximation,FloatDPApproximation);
+    friend Fuzzy operator==(FloatDPApproximation,FloatDPApproximation);
+    friend OutputStream& operator<<(OutputStream& os, FloatDPApproximation const&);
 };
 
-Fuzzy operator==(Float64Approximation,Float64Approximation);
-Fuzzy operator!=(Float64Approximation,Float64Approximation);
-Fuzzy operator<=(Float64Approximation,Float64Approximation);
-Fuzzy operator>=(Float64Approximation,Float64Approximation);
-Fuzzy operator< (Float64Approximation,Float64Approximation);
-Fuzzy operator> (Float64Approximation,Float64Approximation);
-Float64Approximation neg(Float64Approximation);
-Float64Approximation abs(Float64Approximation);
-Float64Approximation sqr(Float64Approximation);
+Fuzzy operator==(FloatDPApproximation,FloatDPApproximation);
+Fuzzy operator!=(FloatDPApproximation,FloatDPApproximation);
+Fuzzy operator<=(FloatDPApproximation,FloatDPApproximation);
+Fuzzy operator>=(FloatDPApproximation,FloatDPApproximation);
+Fuzzy operator< (FloatDPApproximation,FloatDPApproximation);
+Fuzzy operator> (FloatDPApproximation,FloatDPApproximation);
+FloatDPApproximation neg(FloatDPApproximation);
+FloatDPApproximation abs(FloatDPApproximation);
+FloatDPApproximation sqr(FloatDPApproximation);
 
 
 class TwoExp {
@@ -388,18 +388,18 @@ class TwoExp {
   public:
     TwoExp(Int n) : _n(n) { }
     double get_d() const { if(_n>=0) { return 1<<_n; } else { return 1.0/(1<<(-_n)); } }
-    operator Float64Value () const { return Float64Value(this->get_d()); }
-    operator Float64Error () const { return Float64Error(this->get_d()); }
-    operator ValidFloat64 () const { return ValidFloat64(this->get_d()); }
-    operator Float64Bounds () const { return Float64Bounds(this->get_d()); }
+    operator FloatDPValue () const { return FloatDPValue(this->get_d()); }
+    operator FloatDPError () const { return FloatDPError(this->get_d()); }
+    operator ValidFloatDP () const { return ValidFloatDP(this->get_d()); }
+    operator FloatDPBounds () const { return FloatDPBounds(this->get_d()); }
 };
 inline TwoExp two_exp(Int n) { return TwoExp(n); }
 
 
-Float64Value cast_exact(const Float64&);
-Float64Error make_error(const Float64&);
-ValidFloat64 make_valid(const Float64&);
-Float64 cast_raw(const Float64Approximation&);
+FloatDPValue cast_exact(const FloatDP&);
+FloatDPError make_error(const FloatDP&);
+ValidFloatDP make_valid(const FloatDP&);
+FloatDP cast_raw(const FloatDPApproximation&);
 
 } // namespace Ariadne
 

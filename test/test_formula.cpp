@@ -70,15 +70,15 @@ void TestFormula::test_constructors()
     ApproximateFormula x(ApproximateFormula::coordinate(0));
     ApproximateFormula y(ApproximateFormula::coordinate(1));
 
-    Precision64 pr;
+    DoublePrecision pr;
     ARIADNE_TEST_CONSTRUCT( ApproximateFormula, r, (sqrt(pow(x,2)+pow(y,2))) );
-    ARIADNE_TEST_EQUALS(evaluate(r,Vector<Float64Approximation>({6.0,8.0},pr)),10);
+    ARIADNE_TEST_EQUALS(evaluate(r,Vector<FloatDPApproximation>({6.0,8.0},pr)),10);
 }
 
 void TestFormula::test_pointer_constructor()
 {
     //unsigned int zero=0u;
-    ApproximateNumericType zero(0u,Precision64());
+    ApproximateNumericType zero(0u,dp);
 
     ARIADNE_TEST_CONSTRUCT(ApproximateFormula, ncz, (zero));
     ARIADNE_TEST_ASSERT(ncz.node_ptr()!=nullptr);

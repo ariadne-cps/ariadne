@@ -70,6 +70,7 @@ enum class OperatorCode : char {
     POW,   // Integer power
     POS,   // Unary plus
     NEG,   // Unary negation
+    HLF,   // Halve
     REC,   // Reciprocal
     SQR,   // Square
     SQRT,  // Square root
@@ -278,6 +279,11 @@ struct Neg : OperatorObject<Neg> {
     OperatorCode code() const { return OperatorCode::NEG; } OperatorKind kind() const { return OperatorKind::UNARY; }
     template<class A> auto operator()(A&& a) const -> decltype(neg(a)) { return neg(a); }
     template<class X,class D> D derivative(const X& a, const D& d) const { return -d; }
+};
+struct Hlf : OperatorObject<Neg> {
+    OperatorCode code() const { return OperatorCode::HLF; } OperatorKind kind() const { return OperatorKind::UNARY; }
+    template<class A> auto operator()(A&& a) const -> decltype(hlf(a)) { return hlf(a); }
+    template<class X,class D> D derivative(const X& a, const D& d) const { return hlf(d); }
 };
 struct Rec : OperatorObject<Rec> {
     OperatorCode code() const { return OperatorCode::REC; } OperatorKind kind() const { return OperatorKind::UNARY; }

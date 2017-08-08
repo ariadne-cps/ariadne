@@ -82,28 +82,20 @@ inline Real operator-(Real const& r1, Rational const& q2) {
     return r1-Real(q2);
 }
 
-inline Float64Bounds operator*(Integer n1,  const Float64Value& x2) {
+inline FloatDPBounds operator*(Integer n1,  const FloatDPValue& x2) {
     ARIADNE_ASSERT(n1==n1.get_si());
-    Float64Value x1((Int)n1.get_si());
+    FloatDPValue x1((Int)n1.get_si());
     return x1*x2;
 }
 
-template<> inline Float64Approximation numeric_cast<Float64Approximation>(Real const& x) {
-    return Float64Approximation(x,Precision64());
-}
-
-template<> inline Float64Value numeric_cast<Float64Value>(Real const& x) {
-    return Float64Value(numeric_cast<Float64Approximation>(x).raw());
-}
-
 inline DiscreteTimeType div_floor(Real const& t, ExactNumericType h) {
-    return integer_cast<Nat>(numeric_cast<Float64Approximation>(t)/h);
+    return integer_cast<Nat>(FloatDPApproximation(t,dp)/h);
 }
 
 template<> Nat integer_cast<Nat,Real>(Real const& r);
 
-template<> inline Nat integer_cast<Nat>(Float64Bounds const& x) {
-    return integer_cast<Nat>(Float64Approximation(x).raw());
+template<> inline Nat integer_cast<Nat>(FloatDPBounds const& x) {
+    return integer_cast<Nat>(FloatDPApproximation(x).raw());
 }
 
 inline Nat compute_time_steps(HybridTime time, HybridTime lock_to_grid_time) {

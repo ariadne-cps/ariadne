@@ -60,9 +60,9 @@ template<class M> using ScalarScaledFunctionPatch = ScaledFunctionPatch<M>;
 template<class M> class VectorScaledFunctionPatch;
 template<class M> class VectorScaledFunctionPatchElementReference;
 
-inline Float64Approximation convert_error_to_bounds(const PositiveFloat64Approximation& e) { return Float64Approximation(0.0); }
-inline Float64Bounds convert_error_to_bounds(const PositiveFloat64UpperBound& e) { return Float64Bounds(-e.raw(),+e.raw()); }
-inline Float64Bounds convert_error_to_bounds(const Float64Error& e) { return Float64Bounds(-e.raw(),+e.raw()); }
+inline FloatDPApproximation convert_error_to_bounds(const PositiveFloatDPApproximation& e) { return FloatDPApproximation(0.0); }
+inline FloatDPBounds convert_error_to_bounds(const PositiveFloatDPUpperBound& e) { return FloatDPBounds(-e.raw(),+e.raw()); }
+inline FloatDPBounds convert_error_to_bounds(const FloatDPError& e) { return FloatDPBounds(-e.raw(),+e.raw()); }
 
 inline FloatMPApproximation convert_error_to_bounds(const PositiveFloatMPApproximation& e) { return FloatMPApproximation(0.0,e.precision()); }
 inline FloatMPBounds convert_error_to_bounds(const PositiveFloatMPUpperBound& e) { return FloatMPBounds(-e.raw(),+e.raw()); }
@@ -98,9 +98,9 @@ template<class M> class ScaledFunctionPatchCreator;
 
 
 /*! \ingroup FunctionModelSubModule
- *  \brief A ValidatedScalarTaylorFunctionModel64 is a type of FunctionModel in which a the restriction of a scalar function \f$f:\R^n\rightarrow\R\f$ on a domain \f$D\f$ is approximated by polynomial \f$p\f$ with uniform error \f$e\f$.
+ *  \brief A ValidatedScalarTaylorFunctionModelDP is a type of FunctionModel in which a the restriction of a scalar function \f$f:\R^n\rightarrow\R\f$ on a domain \f$D\f$ is approximated by polynomial \f$p\f$ with uniform error \f$e\f$.
  *
- * Formally, a ValidatedScalarTaylorFunctionModel64 is a triple \f$(D,p,e)\f$ representing a set of continuous functions \f$\mathrm{T}(D,p,e)\f$ by
+ * Formally, a ValidatedScalarTaylorFunctionModelDP is a triple \f$(D,p,e)\f$ representing a set of continuous functions \f$\mathrm{T}(D,p,e)\f$ by
  * \f[ \mathrm{T}(D,p,e) = \{ f:\R^n\rightarrow \R \mid \sup_{x\in D}|f(x)-p(x)| \leq e \} . \f]
  * Note that there is no need for the functions \f$f\f$ to be themselves polynomial, and that no information is given
  * about the values of \f$f\f$ outside of \f$D\f$. Information about the derivatives of \f$f\f$ is also unavailable.
@@ -116,7 +116,7 @@ template<class M> class ScaledFunctionPatchCreator;
  * Finding exact bounds for the range of \f$p\f$ over \f$D\f$ is an NP-complete problem,
  * for but there are a number of techniques available.
  *
- * \sa Expansion, TaylorModel, ValidatedVectorTaylorFunctionModel64, TaylorConstrainedImageSet.
+ * \sa Expansion, TaylorModel, ValidatedVectorTaylorFunctionModelDP, TaylorConstrainedImageSet.
  */
 template<class M> class ScaledFunctionPatch
     : public ScalarFunctionModelMixin<ScaledFunctionPatch<M>, typename M::Paradigm, typename M::PrecisionType, typename M::ErrorPrecisionType>
@@ -244,10 +244,11 @@ template<class M> class ScaledFunctionPatch
     //! \brief The gradient at the centre of the domain.
     const CoefficientType gradient_value(SizeType i) const {
         // FIXME: Cannot be guaranteed to be exact
-        FloatBounds<PR> radius(this->_domain[i].radius(),this->model().precision()); return cast_exact(this->_model.gradient_value(i)/radius); }
+        Bounds<F> radius(this->_domain[i].radius(),this->model().precision()); Value<F> gradient=this->_model.gradient_value(i);
+        return cast_exact(gradient/radius); }
 
     //! \brief A polynomial representation.
-    Polynomial<FloatBounds<PR>> polynomial() const;
+    Polynomial<Bounds<F>> polynomial() const;
     //! \brief A multivalued function equal to the model on the domain.
     ScalarFunctionType<M> function() const;
     //! \brief Cast to a generic function.
@@ -334,51 +335,49 @@ template<class M> class ScaledFunctionPatch
     template<class X, EnableIf<CanCall<X,M,Vector<X>>> =dummy> Void _compute(X& r, const Vector<X>& a) const;
     template<class X, DisableIf<CanCall<X,M,Vector<X>>> =dummy> Void _compute(X& r, const Vector<X>& a) const;
   public:
-    template<class OP> static ScaledFunctionPatch<M> _create(OP op, ScaledFunctionPatch<M> const& fp);
-    template<class OP> static ScaledFunctionPatch<M> _create(OP op, ScaledFunctionPatch<M> const& fp1, ScaledFunctionPatch<M> const& fp2);
-    template<class OP> static ScaledFunctionPatch<M> _create(OP op, ScaledFunctionPatch<M> const& fp1, NumericType const& c2);
-    template<class OP> static ScaledFunctionPatch<M> _create(OP op, NumericType const& c1, ScaledFunctionPatch<M> const& fp2);
-    static ScaledFunctionPatch<M> _create(Pow op, ScaledFunctionPatch<M> const& fp, Int n);
+    template<class OP> static ScaledFunctionPatch<M> _create(OP op, ScaledFunctionPatch<M> const& f);
+    template<class OP> static ScaledFunctionPatch<M> _create(OP op, ScaledFunctionPatch<M> const& f1, ScaledFunctionPatch<M> const& f2);
+    template<class OP> static ScaledFunctionPatch<M> _create(OP op, ScaledFunctionPatch<M> const& f1, NumericType const& c2);
+    template<class OP> static ScaledFunctionPatch<M> _create(OP op, NumericType const& c1, ScaledFunctionPatch<M> const& f2);
+    static ScaledFunctionPatch<M> _create(Pow op, ScaledFunctionPatch<M> const& f, Int n);
   private:
     ScaledFunctionPatch<M>* _derivative(SizeType j) const;
     ScaledFunctionPatch<M>* _clone() const;
     ScaledFunctionPatch<M>* _create() const;
     virtual ScaledFunctionPatchFactory<M>* _factory() const;
   public:
-    VectorScaledFunctionPatch<M> join(const ScaledFunctionPatch<M>& f1, const ScaledFunctionPatch<M>& f2);
-    VectorScaledFunctionPatch<M> combine(const ScaledFunctionPatch<M>& f1, const ScaledFunctionPatch<M>& f2);
+    template<class OP> static ScaledFunctionPatch<M> _apply(OP op, ScaledFunctionPatch<M> const& f);
+    template<class OP> static ScaledFunctionPatch<M> _apply(OP op, ScaledFunctionPatch<M> const& f1, ScaledFunctionPatch<M> const& f2);
+
+    friend ScaledFunctionPatch<M> max(const ScaledFunctionPatch<M>& f1, const ScaledFunctionPatch<M>& f2) { return _apply(Max(),f1,f2); }
+    friend ScaledFunctionPatch<M> min(const ScaledFunctionPatch<M>& f1, const ScaledFunctionPatch<M>& f2) { return _apply(Min(),f1,f2); }
+    friend ScaledFunctionPatch<M> abs(const ScaledFunctionPatch<M>& f) { return _apply(Abs(),f); }
+
+    friend VectorScaledFunctionPatch<M> join(const ScaledFunctionPatch<M>& f1, const ScaledFunctionPatch<M>& f2);
+    friend VectorScaledFunctionPatch<M> combine(const ScaledFunctionPatch<M>& f1, const ScaledFunctionPatch<M>& f2);
 
     //! \brief Restrict to a subdomain.
-    friend ScaledFunctionPatch<M> restriction(const ScaledFunctionPatch<M>& fp, const BoxDomainType& dom) {
-        if(not(subset(dom,fp.domain()))) { ARIADNE_THROW(DomainException,"restiction(ScaledFunctionPatch<M>,BoxDomainType)","fp="<<fp<<", dom="<<dom); }
-        return unchecked_compose(fp,ScaledFunctionPatch<M>::identity(dom,fp.properties()));
-    }
+    friend ScaledFunctionPatch<M> restriction(const ScaledFunctionPatch<M>& f, const BoxDomainType& dom) {
+        if(not(subset(dom,f.domain()))) { ARIADNE_THROW(DomainException,"restiction(ScaledFunctionPatch<M>,BoxDomainType)","f="<<f<<", dom="<<dom); }
+        return unchecked_compose(f,ScaledFunctionPatch<M>::identity(dom,f.properties())); }
+
+
     //! \brief Restrict a component to a subdomain
     // To scale from a model on [a,b] to a model on [c,d], use scale factor s=(d-c)/(b-a)
     // and translation t=((c+d)-(a+b))/(b-a)
     // Because we are scaling the model on [-1,+1], this is not the same as
     // the mapping taking [a,b] to [c,d]
-    friend ScaledFunctionPatch<M> partial_restriction(const ScaledFunctionPatch<M>& fp, SizeType k, const IntervalDomainType& ivl) {
-        BoxDomainType dom=fp.domain(); dom[k]=ivl; return restriction(fp,dom);
-    }
-    //! \brief Extend over a larger domain. Only possible if the larger domain is only larger where the smaller domain is a singleton.
-    //! The extension is performed keeping \a x constant over the new coordinates. // DEPRECATED
-    friend ScaledFunctionPatch<M> extension(const ScaledFunctionPatch<M>& fp, const BoxDomainType& dom) {
-        return unchecked_compose(fp,ScaledFunctionPatch<M>::identity(dom,fp.properties()));
-    }
-    //! \brief Pre-compose with a projection from the Cartesian product of the given domains.
-    friend ScaledFunctionPatch<M> embed(const BoxDomainType& dom1, const ScaledFunctionPatch<M>& tv2,const BoxDomainType& dom3) {
-        return ScaledFunctionPatch<M>(product(dom1,tv2.domain(),dom3),embed(dom1.size(),tv2.model(),dom3.size())); }
-    //! \brief Split the domain into two.
-    friend Pair<ScaledFunctionPatch<M>,ScaledFunctionPatch<M>> split(const ScaledFunctionPatch<M>& tv, SizeType j) {
-        Pair<ModelType,ModelType> models={split(tv.model(),j,SplitPart::LOWER),split(tv.model(),j,SplitPart::LOWER)};
-        Pair<BoxDomainType,BoxDomainType> subdomains=split(tv.domain(),j);
-        return make_pair(ScaledFunctionPatch<M>(subdomains.first,models.first),
-                                ScaledFunctionPatch<M>(subdomains.second,models.second));
-    }
+    friend ScaledFunctionPatch<M> partial_restriction(const ScaledFunctionPatch<M>& f, SizeType k, const IntervalDomainType& ivl) {
+        BoxDomainType dom=f.domain(); dom[k]=ivl; return restriction(f,dom); }
 
-    template<class OP> static ScaledFunctionPatch<M> _apply(OP op, ScaledFunctionPatch<M> const& f);
-    template<class OP> static ScaledFunctionPatch<M> _apply(OP op, ScaledFunctionPatch<M> const& f1, ScaledFunctionPatch<M> const& f2);
+    //! \brief Pre-compose with a projection from the Cartesian product of the given domains.
+    friend ScaledFunctionPatch<M> embed(const BoxDomainType& dom1, const ScaledFunctionPatch<M>& f2,const BoxDomainType& dom3) {
+        return ScaledFunctionPatch<M>(product(dom1,f2.domain(),dom3),embed(dom1.size(),f2.model(),dom3.size())); }
+
+    //! \brief Split the domain into two.
+    friend Pair<ScaledFunctionPatch<M>,ScaledFunctionPatch<M>> split(const ScaledFunctionPatch<M>& f, SizeType j) {
+        Pair<ModelType,ModelType> models=split(f.model(),j); Pair<BoxDomainType,BoxDomainType> subdomains=split(f.domain(),j);
+        return make_pair(ScaledFunctionPatch<M>(subdomains.first,models.first), ScaledFunctionPatch<M>(subdomains.second,models.second)); }
 
 /*
     friend ScaledFunctionPatch<M>& operator+=(ScaledFunctionPatch<M>& f, const NumericType& c) { f.model()+=c; return f; }
@@ -389,65 +388,33 @@ template<class M> class ScaledFunctionPatch
     friend ScaledFunctionPatch<M> operator*(const ScaledFunctionPatch<M>& f1, const ScaledFunctionPatch<M>& f2) { return apply(Mul(),f1,f2); }
     friend ScaledFunctionPatch<M> operator/(const ScaledFunctionPatch<M>& f1, const ScaledFunctionPatch<M>& f2) { return apply(Div(),f1,f2); }
 */
-    friend ScaledFunctionPatch<M> max(const ScaledFunctionPatch<M>& f1, const ScaledFunctionPatch<M>& f2) { return _apply(Max(),f1,f2); }
-    friend ScaledFunctionPatch<M> min(const ScaledFunctionPatch<M>& f1, const ScaledFunctionPatch<M>& f2) { return _apply(Min(),f1,f2); }
-    friend ScaledFunctionPatch<M> abs(const ScaledFunctionPatch<M>& f) { return _apply(Abs(),f); }
-
+    friend ScaledFunctionPatch<M> derivative(const ScaledFunctionPatch<M>& f, SizeType k) {
+        return ScaledFunctionPatch<M>(f.domain(),derivative(f.model(),k)/rad(f.domain()[k])); }
     friend ScaledFunctionPatch<M> antiderivative(const ScaledFunctionPatch<M>& f, SizeType k) {
         return ScaledFunctionPatch<M>(f.domain(),antiderivative(f.model(),k)*rad(f.domain()[k])); }
     friend ScaledFunctionPatch<M> antiderivative(const ScaledFunctionPatch<M>& f, SizeType k, const NumericType& c) {
-        ARIADNE_ASSERT(k<f.argument_size());
-        ARIADNE_ASSERT(decide(contains(f.domain()[k],c)));
+        ARIADNE_ASSERT(k<f.argument_size()); ARIADNE_ASSERT(decide(contains(f.domain()[k],c)));
         ScaledFunctionPatch<M> g = antiderivative(f,k);
         VectorScaledFunctionPatch<M> h ( VectorScaledFunctionPatch<M>::identity(f.domain(),f.properties()) );
         h[k] = ScaledFunctionPatch<M>::constant(f.domain(),c,f.properties());
-        return g-compose(g,h);
-    }
-    friend ScaledFunctionPatch<M> derivative(const ScaledFunctionPatch<M>& f, SizeType k) {
-        return ScaledFunctionPatch<M>(f.domain(),derivative(f.model(),k)*rec(rad(f.domain()[k]))); }
+        return g-compose(g,h); }
 
-
-    friend ScaledFunctionPatch<M> partial_evaluate(const ScaledFunctionPatch<M>& te, SizeType k, const NumericType& c) {
-        // Scale c to domain
-        const SizeType as=te.argument_size();
-        ARIADNE_ASSERT(k<as);
-        const BoxDomainType& domain=te.domain();
-        const IntervalDomainType& dk=domain[k];
-        NumericType sc=(c-med(dk))/rad(dk);
-
-        BoxDomainType new_domain(as-1);
-        for(SizeType i=0; i!=k; ++i) { new_domain[i]=domain[i]; }
-        for(SizeType i=k; i!=as-1; ++i) { new_domain[i]=domain[i+1]; }
-
-        M new_model=partial_evaluate(te.model(),k,sc);
-
-        return ScaledFunctionPatch<M>(new_domain,new_model);
-    }
+    friend ScaledFunctionPatch<M> partial_evaluate(const ScaledFunctionPatch<M>& f, SizeType k, const NumericType& c) {
+        return ScaledFunctionPatch<M>(remove(f.domain(),k),partial_evaluate(f.model(),k,unscale(c,f.domain()[k]))); }
     friend NumericType evaluate(const ScaledFunctionPatch<M>& f, const Vector<NumericType>& x) {
-        if(!definitely(contains(f.domain(),x))) {
-            ARIADNE_THROW(DomainException,"evaluate(f,x) with f="<<f<<", x="<<x,"x is not an element of f.domain()="<<f.domain());
-        }
-        return unchecked_evaluate(f,x);
-    }
+        if(!definitely(contains(f.domain(),x))) { ARIADNE_THROW(DomainException,"evaluate(f,x) with f="<<f<<", x="<<x,"x is not an element of f.domain()="<<f.domain()); }
+        return unchecked_evaluate(f,x); }
     friend NumericType unchecked_evaluate(const ScaledFunctionPatch<M>& f, const Vector<NumericType>& x) {
-        return evaluate(f.model(),unscale(x,f.domain()));
-    }
-
+        return evaluate(f.model(),unscale(x,f.domain())); }
 
     friend NormType norm(const ScaledFunctionPatch<M>& f) {
-        return norm(f.model());
-    }
+        return norm(f.model()); }
     friend NormType distance(const ScaledFunctionPatch<M>& f1, const ScaledFunctionPatch<M>& f2) {
-        return norm(f1-f2);
-    }
+        return norm(f1-f2); }
     friend NormType distance(const ScaledFunctionPatch<M>& f1, const ScalarFunction<P>& f2) {
-        return distance(f1,ScaledFunctionPatch<M>(f1.domain(),f2,f1.properties()));
-    }
+        return distance(f1,f1.create(f2)); }
 
-
-    friend Polynomial<NumericType> polynomial(const ScaledFunctionPatch<M>& tfn) {
-        return tfn.polynomial();
-    }
+    friend Polynomial<NumericType> polynomial(const ScaledFunctionPatch<M>& tfn) { return tfn.polynomial(); }
 
 };
 
@@ -458,9 +425,9 @@ template<class M> template<class X, DisableIf<CanCall<X,M,Vector<X>>>> Void Scal
     assert(false);
 }
 
-template<class FP1, class FP2> Void check_function_patch_domain(String const& op_str, const FP1& fp1, const FP2& fp2) {
-    ARIADNE_ASSERT_MSG(!is_empty(intersection(fp1.domain(),fp2.domain())),
-                    op_str<<"((Vector)ScaledFunctionPatch<M> fp1, (Vector)ScaledFunctionPatch<M> fp2) with fp1="<<fp1<<" fp2="<<fp2<<
+template<class FP1, class FP2> Void check_function_patch_domain(String const& op_str, const FP1& f1, const FP2& f2) {
+    ARIADNE_ASSERT_MSG(!is_empty(intersection(f1.domain(),f2.domain())),
+                    op_str<<"((Vector)ScaledFunctionPatch<M> f1, (Vector)ScaledFunctionPatch<M> f2) with f1="<<f1<<" f2="<<f2<<
                     ": domains are disjoint");
 }
 template<class M> template<class OP> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::_apply(OP op, ScaledFunctionPatch<M> const& f) {
@@ -477,20 +444,20 @@ template<class M> template<class OP> ScaledFunctionPatch<M> ScaledFunctionPatch<
 }
 
 
-template<class M> template<class OP> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::_create(OP op, ScaledFunctionPatch<M> const& fp1, ScaledFunctionPatch<M> const& fp2) {
-    assert(fp1.domain()==fp2.domain()); return ScaledFunctionPatch<M>(fp1.domain(),op(fp1.model(),fp2.model()));
+template<class M> template<class OP> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::_create(OP op, ScaledFunctionPatch<M> const& f1, ScaledFunctionPatch<M> const& f2) {
+    assert(f1.domain()==f2.domain()); return ScaledFunctionPatch<M>(f1.domain(),op(f1.model(),f2.model()));
 }
-template<class M> template<class OP> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::_create(OP op, ScaledFunctionPatch<M> const& fp) {
-    return ScaledFunctionPatch<M>(fp.domain(),op(fp.model()));
+template<class M> template<class OP> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::_create(OP op, ScaledFunctionPatch<M> const& f) {
+    return ScaledFunctionPatch<M>(f.domain(),op(f.model()));
 }
-template<class M> template<class OP> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::_create(OP op, ScaledFunctionPatch<M> const& fp1, typename M::NumericType const& c2) {
-    return ScaledFunctionPatch<M>(fp1.domain(),op(fp1.model(),c2));
+template<class M> template<class OP> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::_create(OP op, ScaledFunctionPatch<M> const& f1, typename M::NumericType const& c2) {
+    return ScaledFunctionPatch<M>(f1.domain(),op(f1.model(),c2));
 }
-template<class M> template<class OP> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::_create(OP op, typename M::NumericType const& c1, ScaledFunctionPatch<M> const& fp2) {
-    return ScaledFunctionPatch<M>(fp2.domain(),op(c1,fp2.model()));
+template<class M> template<class OP> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::_create(OP op, typename M::NumericType const& c1, ScaledFunctionPatch<M> const& f2) {
+    return ScaledFunctionPatch<M>(f2.domain(),op(c1,f2.model()));
 }
-template<class M> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::_create(Pow op, ScaledFunctionPatch<M> const& fp, Int n) {
-    return ScaledFunctionPatch<M>(fp.domain(),op(fp.model(),n));
+template<class M> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::_create(Pow op, ScaledFunctionPatch<M> const& f, Int n) {
+    return ScaledFunctionPatch<M>(f.domain(),op(f.model(),n));
 }
 
 //! \brief Test if the function models have the same representation.
@@ -534,7 +501,7 @@ template<class M> ScaledFunctionPatch<M> midpoint(const ScaledFunctionPatch<M>& 
 /*! \ingroup FunctionModelSubModule
  *  \brief A Taylor function model with multivalued codomain built from the TaylorModel class.
  *
- *  See also TaylorModel, ScaledFunctionPatch<M>, ValidatedVectorTaylorFunctionModel64.
+ *  See also TaylorModel, ScaledFunctionPatch<M>, ValidatedVectorTaylorFunctionModelDP.
  */
 template<class M> class VectorScaledFunctionPatch
     : public VectorFunctionModelMixin<VectorScaledFunctionPatch<M>,typename M::Paradigm,typename M::PrecisionType,typename M::ErrorPrecisionType>
@@ -847,6 +814,7 @@ template<class M> class VectorScaledFunctionPatch
 
     template<class OP> static VectorScaledFunctionPatch<M> _apply(OP op, const VectorScaledFunctionPatch<M>& f1, const VectorScaledFunctionPatch<M>& f2);
     template<class OP> static VectorScaledFunctionPatch<M> _apply(OP op, const ScaledFunctionPatch<M>& f1, const VectorScaledFunctionPatch<M>& f2);
+    template<class OP> static VectorScaledFunctionPatch<M> _apply(OP op, const VectorScaledFunctionPatch<M>& f1, const ScaledFunctionPatch<M>& f2);
     friend VectorScaledFunctionPatch<M> operator+(const VectorScaledFunctionPatch<M>& f1, const VectorScaledFunctionPatch<M>& f2) {
         return _apply(Plus(),f1,f2); }
     friend VectorScaledFunctionPatch<M> operator-(const VectorScaledFunctionPatch<M>& f1, const VectorScaledFunctionPatch<M>& f2) {

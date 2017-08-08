@@ -90,18 +90,20 @@ template<class P, class PR, class PRE=PR> class VectorFunctionModel;
 
 template<class P, class PR, class PRE=PR> struct FunctionModelTraits;
 
-template<class P> using ScalarFunctionModel64Interface = ScalarFunctionModelInterface<P,Precision64>;
-template<class P> using VectorFunctionModel64Interface = VectorFunctionModelInterface<P,Precision64>;
-template<class P> using ScalarFunctionModel64 = ScalarFunctionModel<P,Precision64>;
-template<class P> using VectorFunctionModel64 = VectorFunctionModel<P,Precision64>;
+template<class P> using ScalarFunctionModelDPInterface = ScalarFunctionModelInterface<P,DoublePrecision>;
+template<class P> using VectorFunctionModelDPInterface = VectorFunctionModelInterface<P,DoublePrecision>;
+template<class P> using ScalarFunctionModelDP = ScalarFunctionModel<P,DoublePrecision>;
+template<class P> using VectorFunctionModelDP = VectorFunctionModel<P,DoublePrecision>;
 
 template<class PR> struct FunctionModelTraits<ApproximateTag,PR> {
+    static_assert(IsSame<PR,DP>::value or IsSame<PR,MP>::value,"");
     typedef FloatApproximation<PR> CoefficientType;
     typedef Void ErrorType;
     typedef FloatApproximation<PR> NumericType;
 };
 
 template<class PR, class PRE> struct FunctionModelTraits<ValidatedTag,PR,PRE> {
+    static_assert(IsSame<PR,DP>::value or IsSame<PR,MP>::value,"");
     typedef FloatValue<PR> CoefficientType;
     typedef FloatError<PRE> ErrorType;
     typedef FloatBounds<PR> NumericType;
@@ -111,23 +113,23 @@ template<class P, class PR, class PRE=PR> using CanonicalNumericType = typename 
 template<class P, class PR> using CanonicalCoefficientType = typename FunctionModelTraits<P,PR>::CoefficientType;
 template<class P, class PRE> using CanonicalErrorType = typename FunctionModelTraits<P,PRE,PRE>::ErrorType;
 
-template<class P> using CanonicalNumeric64Type = typename FunctionModelTraits<P,Precision64>::NumericType;
-template<class P> using CanonicalCoefficient64Type = typename FunctionModelTraits<P,Precision64>::CoefficientType;
-template<class P> using CanonicalError64Type = typename FunctionModelTraits<P,Precision64,Precision64>::ErrorType;
+template<class P> using CanonicalNumeric64Type = typename FunctionModelTraits<P,DoublePrecision>::NumericType;
+template<class P> using CanonicalCoefficient64Type = typename FunctionModelTraits<P,DoublePrecision>::CoefficientType;
+template<class P> using CanonicalError64Type = typename FunctionModelTraits<P,DoublePrecision,DoublePrecision>::ErrorType;
 
 template<class X> using PrecisionType = typename X::PrecisionType;
 template<class X> using ErrorPrecisionType = typename X::ErrorPrecisionType;
 
-using ValidatedScalarFunctionModel64Interface = ScalarFunctionModelInterface<ValidatedTag,Precision64>;
-using ValidatedVectorFunctionModel64Interface = VectorFunctionModelInterface<ValidatedTag,Precision64>;
+using ValidatedScalarFunctionModelDPInterface = ScalarFunctionModelInterface<ValidatedTag,DoublePrecision>;
+using ValidatedVectorFunctionModelDPInterface = VectorFunctionModelInterface<ValidatedTag,DoublePrecision>;
 
-using ValidatedScalarFunctionModel64 = ScalarFunctionModel<ValidatedTag,Precision64>;
-using ValidatedVectorFunctionModel64 = VectorFunctionModel<ValidatedTag,Precision64>;
+using ValidatedScalarFunctionModelDP = ScalarFunctionModel<ValidatedTag,DoublePrecision>;
+using ValidatedVectorFunctionModelDP = VectorFunctionModel<ValidatedTag,DoublePrecision>;
 
-template<class P, class PR=Precision64, class PRE=PR> class FunctionModelFactoryInterface;
-typedef FunctionModelFactoryInterface<ValidatedTag,Precision64> ValidatedFunctionModel64FactoryInterface;
-template<class P, class PR=Precision64, class PRE=PR> class FunctionModelFactory;
-typedef FunctionModelFactory<ValidatedTag,Precision64> ValidatedFunctionModel64Factory;
+template<class P, class PR=DoublePrecision, class PRE=PR> class FunctionModelFactoryInterface;
+typedef FunctionModelFactoryInterface<ValidatedTag,DoublePrecision> ValidatedFunctionModelDPFactoryInterface;
+template<class P, class PR=DoublePrecision, class PRE=PR> class FunctionModelFactory;
+typedef FunctionModelFactory<ValidatedTag,DoublePrecision> ValidatedFunctionModelDPFactory;
 template<class FMF> class FunctionModelCreator;
 
 

@@ -39,7 +39,7 @@ Rational rec(Nat); Rational rec(Int); Dbl rec(Dbl);
 #include "numeric/integer.hpp"
 #include "numeric/rational.hpp"
 #include "numeric/real.hpp"
-#include "numeric/float64.hpp"
+#include "numeric/floatdp.hpp"
 #include "numeric/floatmp.hpp"
 
 #include "test.hpp"
@@ -309,13 +309,13 @@ ARIADNE_CLASS_NAME(Number<EffectiveUpperTag>)
 ARIADNE_CLASS_NAME(Number<EffectiveTag>)
 ARIADNE_CLASS_NAME(Number<ExactTag>)
 
-ARIADNE_CLASS_NAME(Float64Approximation);
-ARIADNE_CLASS_NAME(Float64LowerBound);
-ARIADNE_CLASS_NAME(Float64UpperBound);
-ARIADNE_CLASS_NAME(Float64Bounds);
-ARIADNE_CLASS_NAME(Float64Ball);
-ARIADNE_CLASS_NAME(Float64Error);
-ARIADNE_CLASS_NAME(Float64Value);
+ARIADNE_CLASS_NAME(FloatDPApproximation);
+ARIADNE_CLASS_NAME(FloatDPLowerBound);
+ARIADNE_CLASS_NAME(FloatDPUpperBound);
+ARIADNE_CLASS_NAME(FloatDPBounds);
+ARIADNE_CLASS_NAME(FloatDPBall);
+ARIADNE_CLASS_NAME(FloatDPError);
+ARIADNE_CLASS_NAME(FloatDPValue);
 
 ARIADNE_CLASS_NAME(FloatMPApproximation);
 ARIADNE_CLASS_NAME(FloatMPLowerBound);
@@ -331,8 +331,8 @@ typedef bool B; typedef uint Nat; typedef int Int; typedef double Dbl;
 typedef Integer  Z ; typedef Rational  Q ; typedef Real  R ;
 typedef Number<ExactTag> ExN; typedef Number<EffectiveTag> EfN; typedef Number<ValidatedTag> VaN;
 typedef Number<ValidatedUpperTag> UpN; typedef Number<ValidatedLowerTag> LoN; typedef Number<ApproximateTag> ApN;
-typedef Float64Value ExF; typedef Float64Ball MeF; typedef Float64Bounds BoF;
-typedef Float64UpperBound UpF; typedef Float64LowerBound LoF; typedef Float64Approximation ApF;
+typedef FloatDPValue ExF; typedef FloatDPBall MeF; typedef FloatDPBounds BoF;
+typedef FloatDPUpperBound UpF; typedef FloatDPLowerBound LoF; typedef FloatDPApproximation ApF;
 typedef Logical<ExactTag> ExL; typedef Logical<EffectiveTag> EfL; typedef Logical<ValidatedTag> VaL;
 typedef Logical<UpperTag> UpL; typedef Logical<LowerTag> LoL; typedef Logical<ApproximateTag> ApL;
 
@@ -341,7 +341,7 @@ typedef decltype(declval<ExN>() + declval<ExF>()) EfF;
 typedef decltype(declval<MeF>() + declval<BoF>()) VaF;
 typedef decltype(declval<UpF>() * declval<UpF>()) PrF;
 typedef decltype(declval<double>() + declval<Number<ApproximateTag>>()) ApD;
-//typedef Float64BoundsType VaF;
+//typedef FloatDPBoundsType VaF;
 
 } // namespace Ariadne
 
@@ -350,7 +350,7 @@ class CheckNumeric
   public:
     void check();
   private:
-    typedef UnsafeType<Plus,Float64Value,Float64Value> ExactFloatArithmeticType;
+    typedef UnsafeType<Plus,FloatDPValue,FloatDPValue> ExactFloatArithmeticType;
 
     void notifications();
     void check_conversions();
@@ -367,9 +367,9 @@ class CheckNumeric
     typedef Tags<Nat,Int,Dbl> BuiltinTypes;
     typedef Tags<Integer,Rational,Real> UserTypes;
     typedef Tags<Number<ExactTag>,Number<EffectiveTag>,Number<ValidatedTag>,Number<ValidatedUpperTag>,Number<ValidatedLowerTag>,Number<ApproximateTag>> GenericTypes;
-    typedef Tags<Float64Value,Float64Ball,Float64Bounds,Float64UpperBound,Float64LowerBound,Float64Approximation> Float64Types;
+    typedef Tags<FloatDPValue,FloatDPBall,FloatDPBounds,FloatDPUpperBound,FloatDPLowerBound,FloatDPApproximation> FloatDPTypes;
 
-    typedef decltype(cat(declval<BuiltinTypes>(),declval<UserTypes>(),declval<GenericTypes>(),declval<Float64Types>())) NumericTypes;
+    typedef decltype(cat(declval<BuiltinTypes>(),declval<UserTypes>(),declval<GenericTypes>(),declval<FloatDPTypes>())) NumericTypes;
 
     using ExpectedNegatives =
     Tags<Nat,Int,Dbl,  Z , Q , R , ExN,EfN,VaN,LoN,UpN,ApN, ExF,MeF,BoF,LoF,UpF,ApF>;
@@ -437,26 +437,26 @@ String to_str(bool b) { return b?"true":"false"; }
 
 void CheckNumeric::notifications()
 {
-    // Operations on Float64Value: display what is being used.
+    // Operations on FloatDPValue: display what is being used.
     ARIADNE_TEST_NOTIFY(String("Conversion double -> ApproximateNumericType: ")+to_str(IsConvertible<double,ApproximateNumericType>::value));
-    ARIADNE_TEST_NOTIFY(String("Conversion double -> Float64Approximation: ")+to_str(IsConvertible<double,Float64Approximation>::value));
-    ARIADNE_TEST_NOTIFY(String("Conversion double -> Float64Value: ")+to_str(IsConvertible<double,Float64Value>::value));
+    ARIADNE_TEST_NOTIFY(String("Conversion double -> FloatDPApproximation: ")+to_str(IsConvertible<double,FloatDPApproximation>::value));
+    ARIADNE_TEST_NOTIFY(String("Conversion double -> FloatDPValue: ")+to_str(IsConvertible<double,FloatDPValue>::value));
     ARIADNE_TEST_NOTIFY(String("Construction double -> ExactNumericType: ")+to_str(IsConstructible<ExactNumericType,double>::value));
-    ARIADNE_TEST_NOTIFY(String("Construction double -> Float64Value: ")+to_str(IsConstructible<Float64Value,double>::value));
-    ARIADNE_TEST_NOTIFY(String("Conversion int -> Float64Value: ")+to_str(IsConvertible<int,Float64Value>::value));
-    ARIADNE_TEST_NOTIFY(String("Construction Integer -> Float64Value: ")+to_str(IsConstructible<Float64Value,Integer>::value)+"\n");
+    ARIADNE_TEST_NOTIFY(String("Construction double -> FloatDPValue: ")+to_str(IsConstructible<FloatDPValue,double>::value));
+    ARIADNE_TEST_NOTIFY(String("Conversion int -> FloatDPValue: ")+to_str(IsConvertible<int,FloatDPValue>::value));
+    ARIADNE_TEST_NOTIFY(String("Construction Integer -> FloatDPValue: ")+to_str(IsConstructible<FloatDPValue,Integer>::value)+"\n");
 
     ARIADNE_TEST_NOTIFY((String("UpperNumericType * UpperNumericType -> ")+class_name<SafeType<Times,UpperNumericType,UpperNumericType>>()+"\n"));
 
-    ARIADNE_TEST_NOTIFY((String("Float64Value + Float64Value -> ")+class_name<UnsafeType<Plus,Float64Value,Float64Value>>()));
-    ARIADNE_TEST_NOTIFY((String("Float64Ball + Float64Bounds -> ")+class_name<UnsafeType<Plus,Float64Ball,Float64Bounds>>()));
-    ARIADNE_TEST_NOTIFY((String("Float64Value + ValidatedNumericType -> ")+class_name<UnsafeType<Plus,Float64Value,ValidatedNumericType>>()));
-    ARIADNE_TEST_NOTIFY((String("Float64UpperBound * Float64UpperBound -> ")+class_name<UnsafeType<Times,Float64UpperBound,Float64UpperBound>>()+"\n"));
+    ARIADNE_TEST_NOTIFY((String("FloatDPValue + FloatDPValue -> ")+class_name<UnsafeType<Plus,FloatDPValue,FloatDPValue>>()));
+    ARIADNE_TEST_NOTIFY((String("FloatDPBall + FloatDPBounds -> ")+class_name<UnsafeType<Plus,FloatDPBall,FloatDPBounds>>()));
+    ARIADNE_TEST_NOTIFY((String("FloatDPValue + ValidatedNumericType -> ")+class_name<UnsafeType<Plus,FloatDPValue,ValidatedNumericType>>()));
+    ARIADNE_TEST_NOTIFY((String("FloatDPUpperBound * FloatDPUpperBound -> ")+class_name<UnsafeType<Times,FloatDPUpperBound,FloatDPUpperBound>>()+"\n"));
 
     ARIADNE_TEST_NOTIFY((String("Integer + double -> ")+class_name<UnsafeType<Plus,Integer,double>>()));
     ARIADNE_TEST_NOTIFY((String("ExactNumericType + double -> ")+class_name<UnsafeType<Plus,ExactNumericType,double>>()));
     ARIADNE_TEST_NOTIFY((String("ApproximateNumericType + double -> ")+class_name<UnsafeType<Plus,ApproximateNumericType,double>>()));
-    ARIADNE_TEST_NOTIFY((String("Float64Value + double -> ")+class_name<UnsafeType<Plus,Float64Value,double>>()+"\n"));
+    ARIADNE_TEST_NOTIFY((String("FloatDPValue + double -> ")+class_name<UnsafeType<Plus,FloatDPValue,double>>()+"\n"));
 
     ARIADNE_TEST_NOTIFY((String("Rational == double -> ")+class_name<UnsafeType<Equal,Rational,double>>()));
     ARIADNE_TEST_NOTIFY((String("Rational < double -> ")+class_name<UnsafeType<Less,Rational,double>>()+"\n"));
@@ -468,7 +468,7 @@ void CheckNumeric::check_conversions() {
     // Cid is conversion, Eid is explicit construction, Nid is no construction
 
     // Conversions involving int
-    chk<Float64Error,Cid,Nat>(); chk<Float64Error,Nid,Int>(); chk<Float64Error,Eid,Dbl>();
+    chk<FloatDPError,Cid,Nat>(); chk<FloatDPError,Nid,Int>(); chk<FloatDPError,Eid,Dbl>();
 
     // Concrete numbers
     chk<Nat,Cid,Nat>(); chk<Nat,Cid,Int>(); chk<Nat,Cid,Dbl>(); chk<Nat,Nid, Z >(); chk<Int,Nid, Q >(); chk<Int,Nid, R >();
@@ -502,7 +502,7 @@ void CheckNumeric::check_conversions() {
     chk< Q ,Nid,ExN>(); chk< Q ,Nid,EfN>(); chk< Q ,Nid,VaN>(); chk< Q ,Nid,UpN>(); chk< Q ,Nid,LoN>(); chk< Q ,Nid,ApN>();
     chk< R ,Nid,ExN>(); chk< R ,Nid,EfN>(); chk< R ,Nid,VaN>(); chk< R ,Nid,UpN>(); chk< R ,Nid,LoN>(); chk< R ,Nid,ApN>();
 
-    // Float64 numbers
+    // FloatDP numbers
     chk<ExF,Cid,ExF>(); chk<ExF,Nid,MeF>(); chk<ExF,Nid,BoF>(); chk<ExF,Nid,UpF>(); chk<ExF,Nid,LoF>(); chk<ExF,Nid,ApF>();
     chk<MeF,Cid,ExF>(); chk<MeF,Cid,MeF>(); chk<MeF,Cid,BoF>(); chk<MeF,Nid,UpF>(); chk<MeF,Nid,LoF>(); chk<MeF,Nid,ApF>();
     chk<BoF,Cid,ExF>(); chk<BoF,Cid,MeF>(); chk<BoF,Cid,BoF>(); chk<BoF,Nid,UpF>(); chk<BoF,Nid,LoF>(); chk<BoF,Nid,ApF>();
@@ -510,7 +510,7 @@ void CheckNumeric::check_conversions() {
     chk<LoF,Cid,ExF>(); chk<LoF,Cid,MeF>(); chk<LoF,Cid,BoF>(); chk<LoF,Nid,UpF>(); chk<LoF,Cid,LoF>(); chk<LoF,Nid,ApF>();
     chk<ApF,Cid,ExF>(); chk<ApF,Cid,MeF>(); chk<ApF,Cid,BoF>(); chk<ApF,Cid,UpF>(); chk<ApF,Cid,LoF>(); chk<ApF,Cid,ApF>();
 
-    // Mixed Float64 # Generic and Generic # Float64
+    // Mixed FloatDP # Generic and Generic # FloatDP
     chk<ExF,Nid,ExN>(); chk<ExF,Nid,EfN>(); chk<ExF,Nid,VaN>(); chk<ExF,Nid,UpN>(); chk<ExF,Nid,LoN>(); chk<ExF,Nid,ApN>();
     chk<MeF,Eid,ExN>(); chk<MeF,Eid,EfN>(); chk<MeF,Eid,VaN>(); chk<MeF,Nid,UpN>(); chk<MeF,Nid,LoN>(); chk<MeF,Nid,ApN>();
     chk<BoF,Eid,ExN>(); chk<BoF,Eid,EfN>(); chk<BoF,Eid,VaN>(); chk<BoF,Nid,UpN>(); chk<BoF,Nid,LoN>(); chk<BoF,Nid,ApN>();
@@ -525,7 +525,7 @@ void CheckNumeric::check_conversions() {
     chk<LoN,Cid,ExF>(); chk<LoN,Cid,MeF>(); chk<LoN,Cid,BoF>(); chk<LoN,Nid,UpF>(); chk<LoN,Cid,LoF>(); chk<LoN,Nid,ApF>();
     chk<ApN,Cid,ExF>(); chk<ApN,Cid,MeF>(); chk<ApN,Cid,BoF>(); chk<ApN,Cid,UpF>(); chk<ApN,Cid,LoF>(); chk<ApN,Cid,ApF>();
 
-    // Mixed Float64 # Concrete and Concrete # Float64
+    // Mixed FloatDP # Concrete and Concrete # FloatDP
     chk<ExF,Eid,Dbl>(); chk<ExF,Cid,Int>(); chk<ExF,Eid, Z >(); chk<ExF,Nid, Q >(); chk<ExF,Nid, R >();
     chk<MeF,Eid,Dbl>(); chk<MeF,Cid,Int>(); chk<MeF,Eid, Z >(); chk<MeF,Eid, Q >(); chk<MeF,Eid, R >();
     chk<BoF,Eid,Dbl>(); chk<BoF,Cid,Int>(); chk<BoF,Eid, Z >(); chk<BoF,Eid, Q >(); chk<BoF,Eid, R >();

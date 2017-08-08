@@ -81,63 +81,47 @@ static const Nat verbosity = 0u;
 
 template<class T> StringType str(const T& t) { StringStream ss; ss<<t; return ss.str(); }
 
-typedef Vector<Float64> RawFloatVector;
+typedef Vector<FloatDP> RawFloatVector;
 typedef Vector<ExactIntervalType> ExactIntervalVectorType;
 
-inline ValidatedConstraintModel operator>=(ValidatedScalarFunctionModel64 const& f, ValidatedNumericType const& l) {
+inline ValidatedConstraintModel operator>=(ValidatedScalarFunctionModelDP const& f, ValidatedNumericType const& l) {
     return ValidatedConstraintModel(l,f,infty); }
-inline ValidatedConstraintModel operator<=(ValidatedScalarFunctionModel64 const& f, ValidatedNumericType const& u) {
+inline ValidatedConstraintModel operator<=(ValidatedScalarFunctionModelDP const& f, ValidatedNumericType const& u) {
     return ValidatedConstraintModel(-infty,f,u); }
-inline ValidatedConstraintModel operator==(ValidatedScalarFunctionModel64 const& f, ValidatedNumericType const& c) {
+inline ValidatedConstraintModel operator==(ValidatedScalarFunctionModelDP const& f, ValidatedNumericType const& c) {
     return ValidatedConstraintModel(c,f,c); }
 
 namespace {
 
 ExactIntervalType cast_exact_interval(const Real& r) {
-    Precision64 pr; auto x=r.get(pr); return ExactIntervalType(x.lower().raw(),x.upper().raw());
+    DoublePrecision pr; auto x=r.get(pr); return ExactIntervalType(x.lower().raw(),x.upper().raw());
 }
 
 ExactIntervalType make_domain(const EffectiveIntervalType& ivl) {
-    Ariadne::RoundingModeType rnd=Ariadne::get_rounding_mode();
-    ExactIntervalType dom_lower_ivl=cast_exact_interval(ivl.lower());
-    ExactIntervalType dom_upper_ivl=cast_exact_interval(ivl.upper());
-    Float64 dom_lower=dom_lower_ivl.lower().raw();
-    Float64 dom_upper=dom_upper_ivl.upper().raw();
-    Ariadne::set_rounding_downward();
-    float flt_dom_lower=numeric_cast<double>(dom_lower);
-    while(double(flt_dom_lower)>dom_lower) {
-        flt_dom_lower-=std::numeric_limits<float>::min();
-    }
-    dom_lower=flt_dom_lower;
-    Ariadne::set_rounding_upward();
-    float flt_dom_upper=numeric_cast<double>(dom_upper);
-    while(double(flt_dom_upper)<dom_upper) {
-        flt_dom_upper+=std::numeric_limits<float>::min();
-    }
-    dom_upper=flt_dom_upper;
-    Ariadne::set_rounding_mode(rnd);
-    return ExactIntervalType(dom_lower,dom_upper);
+    return widen_domain(UpperIntervalType(ivl,dp));
 }
 
-ValidatedVectorFunctionModel64 make_identity(const EffectiveBoxType& bx, const EnclosureConfiguration& configuration) {
+ValidatedVectorFunctionModelDP make_identity(const EffectiveBoxType& bx, const EnclosureConfiguration& configuration) {
     ExactIntervalVectorType dom(bx.dimension());
-    RawFloatVector errs(bx.dimension());
+    Vector<ErrorNumericType> errs(bx.dimension());
+    DoublePrecision dp;
 
     for(Nat i=0; i!=bx.dimension(); ++i) {
-        ExactIntervalType dom_lower_ivl=cast_exact_interval(bx[i].lower());
-        ExactIntervalType dom_upper_ivl=cast_exact_interval(bx[i].upper());
+        FloatDPBounds dom_lower_bnds(bx[i].lower(),dp);
+        FloatDPBounds dom_upper_bnds(bx[i].upper(),dp);
         // Convert to single-precision values
-        Float64 dom_lower_flt=numeric_cast<float>(bx[i].lower());
-        Float64 dom_upper_flt=numeric_cast<float>(bx[i].upper());
-        Float64::set_rounding_upward();
-        Float64 err=max( max(dom_upper_ivl.upper().raw()-dom_upper_flt,dom_upper_flt-dom_upper_ivl.lower().raw()),
-                       max(dom_lower_ivl.upper().raw()-dom_lower_flt,dom_lower_flt-dom_lower_ivl.lower().raw()) );
-        Float64::set_rounding_to_nearest();
-        dom[i]=ExactIntervalType(dom_lower_flt,dom_upper_flt);
+        FloatDPApproximation dom_lower_apprx(bx[i].lower(),dp);
+        FloatDPApproximation dom_upper_apprx(bx[i].upper(),dp);
+        FloatDPValue dom_lower_flt=cast_exact(FloatDP(Float32(dom_lower_apprx.raw(),to_nearest)));
+        FloatDPValue dom_upper_flt=cast_exact(FloatDP(Float32(dom_upper_apprx.raw(),to_nearest)));
+        ExactIntervalType dom_ivl(dom_lower_flt,dom_upper_flt);
+        FloatDPError err=cast_positive( max( max(dom_upper_bnds.upper()-dom_upper_flt,dom_upper_flt-dom_upper_bnds.lower()),
+                                        max(dom_lower_bnds.upper()-dom_lower_flt,dom_lower_flt-dom_lower_bnds.lower()) ) );
+        dom[i]=dom_ivl;
         errs[i]=err;
     }
 
-    ValidatedVectorFunctionModel64 res=configuration._function_factory.create_identity(dom);
+    ValidatedVectorFunctionModelDP res=configuration._function_factory.create_identity(dom);
     for(Nat i=0; i!=bx.dimension(); ++i) {
         res[i]=res[i]+ValidatedNumericType(-errs[i],+errs[i]);
     }
@@ -151,12 +135,12 @@ inline Void assign_all_but_last(MultiIndex& r, const MultiIndex& a) {
 }
 } // namespace
 
-Pair<ValidatedScalarFunctionModel64,ValidatedScalarFunctionModel64> split(const ValidatedScalarFunctionModel64& f, Nat k) {
+Pair<ValidatedScalarFunctionModelDP,ValidatedScalarFunctionModelDP> split(const ValidatedScalarFunctionModelDP& f, Nat k) {
     Pair<ExactBoxType,ExactBoxType> domains=split(f.domain(),k);
     return make_pair(restrict(f,domains.first),restrict(f,domains.second));
 }
 
-Pair<ValidatedVectorFunctionModel64,ValidatedVectorFunctionModel64> split(const ValidatedVectorFunctionModel64& f, Nat k) {
+Pair<ValidatedVectorFunctionModelDP,ValidatedVectorFunctionModelDP> split(const ValidatedVectorFunctionModelDP& f, Nat k) {
     Pair<ExactBoxType,ExactBoxType> domains=split(f.domain(),k);
     return make_pair(restrict(f,domains.first),restrict(f,domains.second));
 }
@@ -164,7 +148,7 @@ Pair<ValidatedVectorFunctionModel64,ValidatedVectorFunctionModel64> split(const 
 
 
 
-EnclosureConfiguration::EnclosureConfiguration(ValidatedFunctionModel64Factory function_factory)
+EnclosureConfiguration::EnclosureConfiguration(ValidatedFunctionModelDPFactory function_factory)
     : _function_factory(function_factory), _paver(new AffinePaver()), _drawer(new AffineDrawer(0)) { }
 
 OutputStream& operator<<(OutputStream& os, EnclosureConfiguration const& ec) {
@@ -187,7 +171,7 @@ Enclosure::configuration() const {
     return this->_configuration;
 }
 
-ValidatedFunctionModel64Factory const&
+ValidatedFunctionModelDPFactory const&
 Enclosure::function_factory() const {
     return this->_configuration._function_factory;
 }
@@ -216,17 +200,17 @@ Enclosure::set_drawer(Drawer const& drawer) {
 // FIXME: What if solving for constraint leaves domain?
 Void Enclosure::_solve_zero_constraints() {
     this->_check();
-    for(List<ValidatedScalarFunctionModel64>::Iterator iter=this->_zero_constraints.begin(); iter!=this->_zero_constraints.end(); ) {
+    for(List<ValidatedScalarFunctionModelDP>::Iterator iter=this->_zero_constraints.begin(); iter!=this->_zero_constraints.end(); ) {
         const ExactBoxType& domain=this->domain();
-        const ValidatedTaylorModel64& model=iter->model();
+        const ValidatedTaylorModelDP& model=iter->model();
         const Nat k=model.argument_size()-1u;
-        ValidatedTaylorModel64 zeroth_order(k,this->sweeper());
-        ValidatedTaylorModel64 first_order(k,this->sweeper());
+        ValidatedTaylorModelDP zeroth_order(k,this->sweeper());
+        ValidatedTaylorModelDP first_order(k,this->sweeper());
         Bool is_zeroth_order=true;
         Bool is_first_order=true;
         MultiIndex r(k);
         // Try linear approach in last coefficient
-        for(ValidatedTaylorModel64::ConstIterator tmiter=model.begin(); tmiter!=model.end(); ++tmiter) {
+        for(ValidatedTaylorModelDP::ConstIterator tmiter=model.begin(); tmiter!=model.end(); ++tmiter) {
             if(tmiter->key()[k]==0) {
                 assign_all_but_last(r,tmiter->key());
                 zeroth_order.expansion().append(r,tmiter->data());
@@ -240,16 +224,16 @@ Void Enclosure::_solve_zero_constraints() {
         }
         if(is_first_order && !is_zeroth_order) {
             const ExactBoxType new_domain=project(domain,range(0,k));
-            ValidatedTaylorModel64 substitution_model=-zeroth_order/first_order;
+            ValidatedTaylorModelDP substitution_model=-zeroth_order/first_order;
             this->_state_function=this->function_factory().create(new_domain,Ariadne::substitute(this->_state_function.models(),k,substitution_model));
-            for(List<ValidatedScalarFunctionModel64>::Iterator constraint_iter=this->_negative_constraints.begin();
+            for(List<ValidatedScalarFunctionModelDP>::Iterator constraint_iter=this->_negative_constraints.begin();
                     constraint_iter!=this->_negative_constraints.end(); ++constraint_iter) {
-                ValidatedScalarFunctionModel64& constraint=*constraint_iter;
+                ValidatedScalarFunctionModelDP& constraint=*constraint_iter;
                 constraint=this->function_factory().create(new_domain,Ariadne::substitute(constraint.model(),k,substitution_model));
             }
-            for(List<ValidatedScalarFunctionModel64>::Iterator constraint_iter=this->_zero_constraints.begin();
+            for(List<ValidatedScalarFunctionModelDP>::Iterator constraint_iter=this->_zero_constraints.begin();
                     constraint_iter!=this->_zero_constraints.end(); ++constraint_iter) {
-                ValidatedScalarFunctionModel64& constraint=*constraint_iter;
+                ValidatedScalarFunctionModelDP& constraint=*constraint_iter;
                 constraint=this->function_factory().create(new_domain,Ariadne::substitute(constraint.model(),k,substitution_model));
             }
             // Since we are using an std::vector, assign Iterator to next element
@@ -265,7 +249,7 @@ Void Enclosure::_solve_zero_constraints() {
 
 Enclosure::Enclosure()
     : _domain(), _auxiliary_mapping(), _state_function(), _time_function(), _dwell_time_function(), _reduced_domain(), _is_fully_reduced(true)
-    , _configuration(ValidatedFunctionModel64Factory(nullptr),Paver(nullptr),Drawer(nullptr))
+    , _configuration(ValidatedFunctionModelDPFactory(nullptr),Paver(nullptr),Drawer(nullptr))
 {
 }
 
@@ -299,7 +283,7 @@ Enclosure::Enclosure(const ExactBoxType& box, const EnclosureConfiguration& conf
     : _configuration(configuration)
 {
     // Ensure domain elements have nonempty radius
-    const Float64Value min_float(std::numeric_limits<float>::min());
+    const FloatDPValue min_float(std::numeric_limits<float>::min());
     List<Nat> proper_coordinates;
     proper_coordinates.reserve(box.dimension());
     for(Nat i=0; i!=box.dimension(); ++i) {
@@ -423,28 +407,28 @@ ValidatedKleenean Enclosure::satisfies(ValidatedScalarFunction constraint) const
 
 
 /*
-Void Enclosure::substitute(SizeType j, ValidatedScalarFunctionModel64 v)
+Void Enclosure::substitute(SizeType j, ValidatedScalarFunctionModelDP v)
 {
     ARIADNE_ASSERT_MSG(v.argument_size()+1u==this->number_of_parameters(),
                        "number_of_parameters="<<this->number_of_parameters()<<", variable="<<v);
                        this->_state_function = Ariadne::substitute(this->_state_function,j,v);
-                       for(List<ValidatedScalarFunctionModel64>::Iterator iter=this->_negative_constraints.begin(); iter!=this->_negative_constraints.end(); ++iter) {
+                       for(List<ValidatedScalarFunctionModelDP>::Iterator iter=this->_negative_constraints.begin(); iter!=this->_negative_constraints.end(); ++iter) {
                            *iter = Ariadne::substitute(*iter,j,v);
                        }
-                       for(List<ValidatedScalarFunctionModel64>::Iterator iter=this->_zero_constraints.begin(); iter!=this->_zero_constraints.end(); ++iter) {
+                       for(List<ValidatedScalarFunctionModelDP>::Iterator iter=this->_zero_constraints.begin(); iter!=this->_zero_constraints.end(); ++iter) {
                            *iter = Ariadne::substitute(*iter,j,v);
                        }
 
                        this->_check();
 }
 
-Void Enclosure::substitute(SizeType j, Float64 c)
+Void Enclosure::substitute(SizeType j, FloatDP c)
 {
     this->_state_function = Ariadne::partial_evaluate(this->_state_function,j,c);
-    for(List<ValidatedScalarFunctionModel64>::Iterator iter=this->_negative_constraints.begin(); iter!=this->_negative_constraints.end(); ++iter) {
+    for(List<ValidatedScalarFunctionModelDP>::Iterator iter=this->_negative_constraints.begin(); iter!=this->_negative_constraints.end(); ++iter) {
         *iter = Ariadne::partial_evaluate(*iter,j,c);
     }
-    for(List<ValidatedScalarFunctionModel64>::Iterator iter=this->_zero_constraints.begin(); iter!=this->_zero_constraints.end(); ++iter) {
+    for(List<ValidatedScalarFunctionModelDP>::Iterator iter=this->_zero_constraints.begin(); iter!=this->_zero_constraints.end(); ++iter) {
         *iter = Ariadne::partial_evaluate(*iter,j,c);
     }
     this->_check();
@@ -474,7 +458,7 @@ Void Enclosure::new_parameter(ExactIntervalType ivl)
 
 Void Enclosure::new_variable(ExactIntervalType ivl)
 {
-    ValidatedScalarFunctionModel64 variable_function = this->function_factory().create_identity(ivl);
+    ValidatedScalarFunctionModelDP variable_function = this->function_factory().create_identity(ivl);
     this->_domain=product(this->_domain,ivl);
     this->_reduced_domain=product(this->_reduced_domain,ivl);
     this->_state_function=combine(this->_state_function,variable_function);
@@ -507,20 +491,20 @@ Void Enclosure::apply_flow(ValidatedVectorFunction flow, ExactIntervalType time)
 {
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->state_dimension()+1u,"state_dimension="<<this->state_dimension()<<", flow="<<flow);
     this->_state_function=compose(flow,combine(this->_state_function,this->function_factory().create_identity(ExactBoxType(1u,time))));
-    for(List<ValidatedScalarFunctionModel64>::Iterator iter=this->_negative_constraints.begin(); iter!=this->_negative_constraints.end(); ++iter) {
+    for(List<ValidatedScalarFunctionModelDP>::Iterator iter=this->_negative_constraints.begin(); iter!=this->_negative_constraints.end(); ++iter) {
         *iter=embed(*iter,time);
     }
-    for(List<ValidatedScalarFunctionModel64>::Iterator iter=this->_zero_constraints.begin(); iter!=this->_zero_constraints.end(); ++iter) {
+    for(List<ValidatedScalarFunctionModelDP>::Iterator iter=this->_zero_constraints.begin(); iter!=this->_zero_constraints.end(); ++iter) {
         *iter=embed(*iter,time);
     }
     this->_check();
 }
 */
 
-Void Enclosure::apply_fixed_evolve_step(ValidatedVectorFunction flow, Float64Value time)
+Void Enclosure::apply_fixed_evolve_step(ValidatedVectorFunction flow, FloatDPValue time)
 {
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->state_dimension()+1u,"state_dimension="<<this->state_dimension()<<", flow="<<flow);
-    ValidatedScalarFunctionModel64 evolve_time_function=this->function_factory().create_constant(this->domain(),Float64Value(time));
+    ValidatedScalarFunctionModelDP evolve_time_function=this->function_factory().create_constant(this->domain(),FloatDPValue(time));
     this->_state_function=compose(flow,join(this->_state_function,evolve_time_function));
     this->_time_function=this->_time_function + evolve_time_function;
     this->_dwell_time_function=this->_dwell_time_function + evolve_time_function;
@@ -531,7 +515,7 @@ Void Enclosure::apply_space_evolve_step(ValidatedVectorFunction flow, ValidatedS
 {
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->state_dimension()+1u,"state_dimension="<<this->state_dimension()<<", flow="<<flow);
     ARIADNE_ASSERT_MSG(time.argument_size()==this->state_dimension(),"state_dimension="<<this->state_dimension()<<", time="<<time);
-    ValidatedScalarFunctionModel64 evolve_time_function=compose(time,this->_state_function);
+    ValidatedScalarFunctionModelDP evolve_time_function=compose(time,this->_state_function);
     this->_state_function=compose(flow,join(this->_state_function,evolve_time_function));
     this->_time_function=this->_time_function + evolve_time_function;
     this->_dwell_time_function=this->_dwell_time_function + evolve_time_function;
@@ -542,7 +526,7 @@ Void Enclosure::apply_spacetime_evolve_step(ValidatedVectorFunction flow, Valida
 {
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->state_dimension()+1u,"state_dimension="<<this->state_dimension()<<", flow="<<flow);
     ARIADNE_ASSERT_MSG(time.argument_size()==this->state_dimension()+1u,"state_dimension="<<this->state_dimension()<<", time="<<time);
-    ValidatedScalarFunctionModel64 evolve_time_function=compose(time,join(this->_state_function,this->_time_function));
+    ValidatedScalarFunctionModelDP evolve_time_function=compose(time,join(this->_state_function,this->_time_function));
     this->_state_function=compose(flow,join(this->_state_function,evolve_time_function));
     this->_time_function=this->_time_function + evolve_time_function;
     this->_dwell_time_function=this->_dwell_time_function + evolve_time_function;
@@ -565,26 +549,26 @@ Void Enclosure::apply_finishing_parameter_evolve_step(ValidatedVectorFunction fl
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->state_dimension()+1u,"state_dimension="<<this->state_dimension()<<", flow="<<flow);
     ARIADNE_ASSERT_MSG(finishing_time.argument_size()==this->number_of_parameters(),"number_of_parameters="<<this->number_of_parameters()<<", finishing_time="<<finishing_time);
     ARIADNE_ASSERT_MSG(finishing_time.domain()==this->parameter_domain(),"parameter_domain="<<this->parameter_domain()<<", finishing_time="<<finishing_time);
-    ValidatedScalarFunctionModel64 omega=this->function_factory().create(this->domain(),finishing_time);
+    ValidatedScalarFunctionModelDP omega=this->function_factory().create(this->domain(),finishing_time);
     this->_state_function=compose(flow,join(this->_state_function,omega-this->_time_function));
     this->_dwell_time_function=this->_dwell_time_function + (omega-this->_time_function);
     this->_time_function=omega;
     this->_check();
 }
 
-Void Enclosure::apply_full_reach_step(ValidatedVectorFunctionModel64 phi)
+Void Enclosure::apply_full_reach_step(ValidatedVectorFunctionModelDP phi)
 {
     // xi'(s,t) = phi(xi(s),t) for t in [0,h] with constraint t<=eps(s) where range(eps) in [0,h]
     // tau'(s) = tau(s)+t
     ARIADNE_ASSERT(phi.result_size()==this->state_dimension());
     ARIADNE_ASSERT(phi.argument_size()==this->state_dimension()+1);
-    Float64 h=phi.domain()[phi.result_size()].upper().raw();
-    ValidatedScalarFunctionModel64 elps=this->function_factory().create_constant(this->domain(),Float64Value(h));
+    FloatDP h=phi.domain()[phi.result_size()].upper().raw();
+    ValidatedScalarFunctionModelDP elps=this->function_factory().create_constant(this->domain(),FloatDPValue(h));
     this->apply_parameter_reach_step(phi,elps);
     this->_check();
 }
 
-Void Enclosure::apply_spacetime_reach_step(ValidatedVectorFunctionModel64 phi, ValidatedScalarFunction elps)
+Void Enclosure::apply_spacetime_reach_step(ValidatedVectorFunctionModelDP phi, ValidatedScalarFunction elps)
 {
     ARIADNE_ASSERT(phi.result_size()==this->state_dimension());
     ARIADNE_ASSERT(phi.argument_size()==this->state_dimension()+1);
@@ -593,22 +577,22 @@ Void Enclosure::apply_spacetime_reach_step(ValidatedVectorFunctionModel64 phi, V
     this->_check();
 }
 
-Void Enclosure::apply_parameter_reach_step(ValidatedVectorFunctionModel64 phi, ValidatedScalarFunction elps)
+Void Enclosure::apply_parameter_reach_step(ValidatedVectorFunctionModelDP phi, ValidatedScalarFunction elps)
 {
     // xi'(s,t) = phi(xi(s),t) for t in [0,h] with constraint t<=eps(s) where range(eps) in [0,h]
     // tau'(s) = tau(s)+t
     ARIADNE_ASSERT(phi.result_size()==this->state_dimension());
     ARIADNE_ASSERT(phi.argument_size()==this->state_dimension()+1);
     ARIADNE_ASSERT(elps.argument_size()==this->number_of_parameters());
-    Float64 h=phi.domain()[phi.result_size()].upper().raw();
+    FloatDP h=phi.domain()[phi.result_size()].upper().raw();
     ExactBoxType parameter_domain=this->parameter_domain();
     ExactIntervalType time_domain=ExactIntervalType(0,h);
-    ValidatedScalarFunctionModel64 time_function=this->function_factory().create_identity(time_domain);
+    ValidatedScalarFunctionModelDP time_function=this->function_factory().create_identity(time_domain);
     this->new_variable(time_domain);
     ARIADNE_ASSERT(phi.argument_size()==this->state_dimension());
     this->apply_map(phi);
     ExactBoxType new_domain=this->parameter_domain();
-    ValidatedScalarFunctionModel64 time_step_function=this->function_factory().create_coordinate(new_domain,new_domain.size()-1u);
+    ValidatedScalarFunctionModelDP time_step_function=this->function_factory().create_coordinate(new_domain,new_domain.size()-1u);
     this->_time_function=this->_time_function+time_step_function;
     this->_dwell_time_function=this->_dwell_time_function+time_step_function;
     if(phi.domain()[phi.result_size()].lower()<time_domain.upper()) {
@@ -621,7 +605,7 @@ Void Enclosure::new_state_constraint(ValidatedConstraint constraint) {
     ARIADNE_ASSERT(constraint.function().argument_size()==this->state_dimension());
     this->_is_fully_reduced=false;
     ValidatedNumericType lower_bound=this->function_factory().create_number(constraint.lower_bound());
-    ValidatedScalarFunctionModel64 composed_function_model=compose(constraint.function(),this->_state_function);
+    ValidatedScalarFunctionModelDP composed_function_model=compose(constraint.function(),this->_state_function);
     ValidatedNumericType upper_bound=this->function_factory().create_number(constraint.upper_bound());
     this->_constraints.append(ValidatedConstraintModel(lower_bound,composed_function_model,upper_bound));
     this->_check();
@@ -631,7 +615,7 @@ Void Enclosure::new_state_time_constraint(ValidatedConstraint constraint) {
     ARIADNE_ASSERT(constraint.function().argument_size()==this->state_dimension()+1u);
     this->_is_fully_reduced=false;
     ValidatedNumericType lower_bound=this->function_factory().create_number(constraint.lower_bound());
-    ValidatedScalarFunctionModel64 composed_function_model=compose(constraint.function(),join(this->_state_function,this->_time_function));
+    ValidatedScalarFunctionModelDP composed_function_model=compose(constraint.function(),join(this->_state_function,this->_time_function));
     ValidatedNumericType upper_bound=this->function_factory().create_number(constraint.upper_bound());
     this->_constraints.append(ValidatedConstraintModel(lower_bound,composed_function_model,upper_bound));
     this->_check();
@@ -641,7 +625,7 @@ Void Enclosure::new_parameter_constraint(ValidatedConstraint constraint) {
     ARIADNE_ASSERT(constraint.function().argument_size()==this->number_of_parameters());
     this->_is_fully_reduced=false;
     ValidatedNumericType lower_bound=this->function_factory().create_number(constraint.lower_bound());
-    ValidatedScalarFunctionModel64 function_model=this->function_factory().create(this->domain(),constraint.function());
+    ValidatedScalarFunctionModelDP function_model=this->function_factory().create(this->domain(),constraint.function());
     ValidatedNumericType upper_bound=this->function_factory().create_number(constraint.upper_bound());
     this->_constraints.append(ValidatedConstraintModel(lower_bound,function_model,upper_bound));
     this->_check();
@@ -707,27 +691,27 @@ ExactBoxType Enclosure::codomain() const {
     return cast_exact_box(widen(this->_state_function.range()));
 }
 
-ValidatedVectorFunctionModel64 const Enclosure::state_time_auxiliary_function() const {
+ValidatedVectorFunctionModelDP const Enclosure::state_time_auxiliary_function() const {
     return join(join(this->state_function(),this->time_function()),this->auxiliary_function());
 }
 
-ValidatedVectorFunctionModel64 const Enclosure::state_auxiliary_function() const {
+ValidatedVectorFunctionModelDP const Enclosure::state_auxiliary_function() const {
     return join(this->state_function(),this->auxiliary_function());
 }
 
-ValidatedVectorFunctionModel64 const& Enclosure::state_function() const {
+ValidatedVectorFunctionModelDP const& Enclosure::state_function() const {
     return this->_state_function;
 }
 
-ValidatedScalarFunctionModel64 const& Enclosure::time_function() const {
+ValidatedScalarFunctionModelDP const& Enclosure::time_function() const {
     return this->_time_function;
 }
 
-ValidatedScalarFunctionModel64 const& Enclosure::dwell_time_function() const {
+ValidatedScalarFunctionModelDP const& Enclosure::dwell_time_function() const {
     return this->_dwell_time_function;
 }
 
-ValidatedVectorFunctionModel64 const Enclosure::auxiliary_function() const {
+ValidatedVectorFunctionModelDP const Enclosure::auxiliary_function() const {
     return compose(this->_auxiliary_mapping,this->_state_function);
 }
 
@@ -751,8 +735,8 @@ ValidatedConstraintModel const& Enclosure::constraint(SizeType i) const {
     return this->_constraints[i];
 }
 
-ValidatedVectorFunctionModel64 const Enclosure::constraint_function() const {
-    ValidatedVectorFunctionModel64 g=this->function_factory().create_zeros(this->number_of_constraints(),this->domain());
+ValidatedVectorFunctionModelDP const Enclosure::constraint_function() const {
+    ValidatedVectorFunctionModelDP g=this->function_factory().create_zeros(this->number_of_constraints(),this->domain());
     for(Nat i=0; i!=this->number_of_constraints(); ++i) {
         g.set(i,this->constraint(i).function());
     }
@@ -783,7 +767,7 @@ UpperBoxType Enclosure::bounding_box() const {
     return this->_state_function.codomain().bounding_box();
 }
 
-Float64Error Enclosure::radius() const {
+FloatDPError Enclosure::radius() const {
     return cast_positive(this->bounding_box().radius());
 }
 
@@ -862,8 +846,8 @@ Void Enclosure::reduce() const
     contractor.reduce(reinterpret_cast<UpperBoxType&>(this->_reduced_domain),constraints);
 
     for(Nat i=0; i!=this->number_of_parameters(); ++i) {
-        Float64 l=this->_reduced_domain[i].lower().raw();
-        Float64 u=this->_reduced_domain[i].upper().raw();
+        FloatDP l=this->_reduced_domain[i].lower().raw();
+        FloatDP u=this->_reduced_domain[i].upper().raw();
         if(is_nan(l) || is_nan(u)) {
             ARIADNE_WARN("Reducing domain "<<_domain<<" yields "<<this->_reduced_domain);
             _reduced_domain[i]=_domain[i];
@@ -873,7 +857,7 @@ Void Enclosure::reduce() const
 /*
     // Remove redundant constraints
     Nat j=0;
-    List<ValidatedScalarFunctionModel64>& mutable_constraints=const_cast<List<ValidatedScalarFunctionModel64>&>(this->_negative_constraints);
+    List<ValidatedScalarFunctionModelDP>& mutable_constraints=const_cast<List<ValidatedScalarFunctionModelDP>&>(this->_negative_constraints);
     for(Nat i=0; i!=mutable_constraints.size(); ++i) {
         if(mutable_constraints[i](this->_reduced_domain).upper()<0.0) { redundant_constraints.append(i); }
         else { if(i>j) { mutable_constraints[j]=mutable_constraints[j]; } ++j; }
@@ -886,9 +870,9 @@ Void Enclosure::reduce() const
 
 
 
-Matrix<Float64> nonlinearities_zeroth_order(const ValidatedVectorFunction& f, const ExactBoxType& dom);
-Pair<Nat,double> nonlinearity_index_and_error(const ValidatedVectorFunction& function, const ExactBoxType& domain);
-Pair<Nat,double> lipschitz_index_and_error(const ValidatedVectorFunction& function, const ExactBoxType& domain);
+Matrix<FloatDP> nonlinearities_zeroth_order(const ValidatedVectorFunction& f, const ExactBoxType& dom);
+Pair<Nat,FloatDP> nonlinearity_index_and_error(const ValidatedVectorFunction& function, const ExactBoxType& domain);
+Pair<Nat,FloatDP> lipschitz_index_and_error(const ValidatedVectorFunction& function, const ExactBoxType& domain);
 
 Pair<Enclosure,Enclosure>
 Enclosure::split_zeroth_order() const
@@ -921,9 +905,9 @@ Enclosure::splitting_index_zeroth_order() const
     // Compute the column of the matrix which has the norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
     Nat jmax=this->number_of_parameters();
-    Float64 max_column_norm=0.0;
+    FloatDP max_column_norm=0.0;
     for(Nat j=0; j!=this->number_of_parameters(); ++j) {
-        Float64 column_norm=0.0;
+        FloatDP column_norm=0.0;
         for(Nat i=0; i!=this->state_dimension(); ++i) {
             column_norm+=mag(jacobian[i][j]).raw();
         }
@@ -941,17 +925,17 @@ Enclosure::splitting_index_zeroth_order() const
 Pair<Enclosure,Enclosure>
 Enclosure::split_first_order() const
 {
-    Matrix<Float64> nonlinearities=Ariadne::nonlinearities_zeroth_order(this->_state_function,this->_reduced_domain);
+    Matrix<FloatDP> nonlinearities=Ariadne::nonlinearities_zeroth_order(this->_state_function,this->_reduced_domain);
 
     // Compute the row of the nonlinearities Array which has the highest norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
     Nat imax=nonlinearities.row_size();
     Nat jmax_in_row_imax=nonlinearities.column_size();
-    Float64 max_row_sum=0.0;
+    FloatDP max_row_sum=0.0;
     for(Nat i=0; i!=nonlinearities.row_size(); ++i) {
         Nat jmax=nonlinearities.column_size();
-        Float64 row_sum=0.0;
-        Float64 max_mag_j_in_i=0.0;
+        FloatDP row_sum=0.0;
+        FloatDP max_mag_j_in_i=0.0;
         for(Nat j=0; j!=nonlinearities.column_size(); ++j) {
             row_sum+=mag(nonlinearities[i][j]);
             if(mag(nonlinearities[i][j])>max_mag_j_in_i) {
@@ -985,7 +969,7 @@ Enclosure::split(Nat d) const
     ExactBoxType subdomain1,subdomain2;
     make_lpair(subdomain1,subdomain2)=Ariadne::split(this->_state_function.domain(),d);
 
-    ValidatedVectorFunctionModel64 function1,function2;
+    ValidatedVectorFunctionModelDP function1,function2;
     make_lpair(function1,function2)=Ariadne::split(this->_state_function,d);
 
     Pair<Enclosure,Enclosure>
@@ -994,7 +978,7 @@ Enclosure::split(Nat d) const
     Enclosure& result1=result.first;
     Enclosure& result2=result.second;
 
-    ValidatedScalarFunctionModel64 constraint_function1,constraint_function2;
+    ValidatedScalarFunctionModelDP constraint_function1,constraint_function2;
     for(List<ValidatedConstraintModel>::ConstIterator iter=this->_constraints.begin();
         iter!=this->_constraints.end(); ++iter)
     {
@@ -1004,11 +988,11 @@ Enclosure::split(Nat d) const
         result2._constraints.append(ValidatedConstraintModel(constraint.lower_bound(),constraint_function2,constraint.upper_bound()));
     }
 
-    ValidatedScalarFunctionModel64 time_function1,time_function2;
+    ValidatedScalarFunctionModelDP time_function1,time_function2;
     make_lpair(time_function1,time_function2)=Ariadne::split(this->_time_function,d);
     result1._time_function=time_function1;
     result2._time_function=time_function2;
-    ValidatedScalarFunctionModel64 dwell_time_function1,dwell_time_function2;
+    ValidatedScalarFunctionModelDP dwell_time_function1,dwell_time_function2;
     make_lpair(dwell_time_function1,dwell_time_function2)=Ariadne::split(this->_dwell_time_function,d);
     result1._dwell_time_function=dwell_time_function1;
     result2._dwell_time_function=dwell_time_function2;
@@ -1085,7 +1069,7 @@ uniform_error_recondition()
     List<Nat> large_error_indices;
 
     for(Nat i=0; i!=this->_state_function.result_size(); ++i) {
-        Float64Error error=this->_state_function.get(i).error();
+        FloatDPError error=this->_state_function.get(i).error();
         if(error.raw() > MAXIMUM_ERROR) {
             large_error_indices.append(i);
         }
@@ -1095,7 +1079,7 @@ uniform_error_recondition()
 
         ExactBoxType error_domains(large_error_indices.size());
         for(Nat i=0; i!=large_error_indices.size(); ++i) {
-            Float64 error=this->_state_function.get(large_error_indices[i]).error().raw();
+            FloatDP error=this->_state_function.get(large_error_indices[i]).error().raw();
             error_domains[i]=ExactIntervalType(-error,+error);
         }
         error_domains=ExactBoxType(large_error_indices.size(),ExactIntervalType(-1,+1));
@@ -1109,10 +1093,10 @@ uniform_error_recondition()
         }
 
         for(Nat i=0; i!=large_error_indices.size(); ++i) {
-            Float64 error=this->_state_function.get(large_error_indices[i]).error().raw();
+            FloatDP error=this->_state_function.get(large_error_indices[i]).error().raw();
             if(error > MAXIMUM_ERROR) {
                 this->_state_function[large_error_indices[i]].set_error(0u);
-                this->_state_function[large_error_indices[i]] = this->_state_function.get(large_error_indices[i]) + this->function_factory().create_coordinate(this->_domain,k)*Float64Bounds(+error);
+                this->_state_function[large_error_indices[i]] = this->_state_function.get(large_error_indices[i]) + this->function_factory().create_coordinate(this->_domain,k)*FloatDPBounds(+error);
                 ++k;
             }
         }
@@ -1127,7 +1111,7 @@ uniform_error_recondition()
 // In MultiIndex code file
 Array<SizeType> complement(SizeType nmax, Array<SizeType> vars);
 
-TaylorModel<ValidatedTag,Float64> recondition(const TaylorModel<ValidatedTag,Float64>& tm, Array<SizeType>& discarded_variables, SizeType number_of_error_variables, SizeType index_of_error)
+TaylorModel<ValidatedTag,FloatDP> recondition(const TaylorModel<ValidatedTag,FloatDP>& tm, Array<SizeType>& discarded_variables, SizeType number_of_error_variables, SizeType index_of_error)
 {
     for(SizeType i=0; i!=discarded_variables.size()-1; ++i) {
         ARIADNE_PRECONDITION(discarded_variables[i]<discarded_variables[i+1]);
@@ -1143,26 +1127,26 @@ TaylorModel<ValidatedTag,Float64> recondition(const TaylorModel<ValidatedTag,Flo
     Array<SizeType> kept_variables=complement(number_of_variables,discarded_variables);
 
     // Construct result and reserve memory
-    TaylorModel<ValidatedTag,Float64> r(number_of_kept_variables+number_of_error_variables,tm.sweeper());
+    TaylorModel<ValidatedTag,FloatDP> r(number_of_kept_variables+number_of_error_variables,tm.sweeper());
     r.expansion().reserve(tm.number_of_nonzeros()+1u);
     MultiIndex ra(number_of_kept_variables+number_of_error_variables);
 
     // Set the uniform error of the original model
     // If index_of_error == number_of_error_variables, then the error is kept as a uniform error bound
-    Float64Error* error_ptr;
+    FloatDPError* error_ptr;
     if(number_of_error_variables==index_of_error) {
         error_ptr = &r.error();
     } else {
         ra[number_of_kept_variables+index_of_error]=1;
         r.expansion().append(ra,cast_exact(tm.error()));
         ra[number_of_kept_variables+index_of_error]=0;
-        error_ptr = reinterpret_cast<Float64Error*>(&r.begin()->data());
+        error_ptr = reinterpret_cast<FloatDPError*>(&r.begin()->data());
     }
-    Float64Error& error=*error_ptr;
+    FloatDPError& error=*error_ptr;
 
-    for(TaylorModel<ValidatedTag,Float64>::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
+    for(TaylorModel<ValidatedTag,FloatDP>::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
         MultiIndex const& xa=iter->key();
-        Float64Value const& xv=iter->data();
+        FloatDPValue const& xv=iter->data();
         Bool keep=true;
         for(SizeType k=0; k!=number_of_discarded_variables; ++k) {
             if(xa[discarded_variables[k]]!=0) {
@@ -1178,12 +1162,10 @@ TaylorModel<ValidatedTag,Float64> recondition(const TaylorModel<ValidatedTag,Flo
             r.expansion().append(ra,xv);
         }
     }
-    Float64::set_rounding_to_nearest();
-
     return r;
 }
 
-TaylorModel<ValidatedTag,Float64> recondition(const TaylorModel<ValidatedTag,Float64>& tm, Array<SizeType>& discarded_variables, SizeType number_of_error_variables) {
+TaylorModel<ValidatedTag,FloatDP> recondition(const TaylorModel<ValidatedTag,FloatDP>& tm, Array<SizeType>& discarded_variables, SizeType number_of_error_variables) {
     return recondition(tm,discarded_variables,number_of_error_variables,number_of_error_variables);
 }
 
@@ -1191,7 +1173,7 @@ TaylorModel<ValidatedTag,Float64> recondition(const TaylorModel<ValidatedTag,Flo
 Void
 Enclosure::kuhn_recondition()
 {
-    if(!dynamic_cast<const ValidatedVectorTaylorFunctionModel64*>(&this->state_function().reference())) {
+    if(!dynamic_cast<const ValidatedVectorTaylorFunctionModelDP*>(&this->state_function().reference())) {
         ARIADNE_WARN("Cannot Kuhn reduce an Enclosure which is not given by TaylorFunctions.");
     }
 
@@ -1206,11 +1188,11 @@ Enclosure::kuhn_recondition()
         return;
     }
 
-    const ValidatedVectorTaylorFunctionModel64& function=dynamic_cast<const ValidatedVectorTaylorFunctionModel64&>(this->state_function().reference());
-    const Vector<ValidatedTaylorModel64>& models = function.models();
-    Matrix<Float64> dependencies(this->state_dimension(),this->number_of_parameters());
+    const ValidatedVectorTaylorFunctionModelDP& function=dynamic_cast<const ValidatedVectorTaylorFunctionModelDP&>(this->state_function().reference());
+    const Vector<ValidatedTaylorModelDP>& models = function.models();
+    Matrix<FloatDP> dependencies(this->state_dimension(),this->number_of_parameters());
     for(SizeType i=0; i!=dependencies.row_size(); ++i) {
-        for(ValidatedTaylorModel64::ConstIterator iter=models[i].begin(); iter!=models[i].end(); ++iter) {
+        for(ValidatedTaylorModelDP::ConstIterator iter=models[i].begin(); iter!=models[i].end(); ++iter) {
             for(SizeType j=0; j!=dependencies.column_size(); ++j) {
                 if(iter->key()[j]!=0) {
                     dependencies[i][j]+=abs(iter->data()).raw();
@@ -1218,14 +1200,14 @@ Enclosure::kuhn_recondition()
             }
         }
     }
-    Array< Pair<Float64,SizeType> > column_max_dependencies(this->number_of_parameters());
+    Array< Pair<FloatDP,SizeType> > column_max_dependencies(this->number_of_parameters());
     for(SizeType j=0; j!=dependencies.column_size(); ++j) {
-        column_max_dependencies[j] = make_pair(Float64(0.0),SizeType(j));
+        column_max_dependencies[j] = make_pair(FloatDP(0.0),SizeType(j));
         for(SizeType i=0; i!=dependencies.row_size(); ++i) {
             column_max_dependencies[j].first=std::max(column_max_dependencies[j].first,dependencies[i][j]);
         }
     }
-    std::sort(column_max_dependencies.begin(),column_max_dependencies.end(),std::greater< Pair<Float64,SizeType> >());
+    std::sort(column_max_dependencies.begin(),column_max_dependencies.end(),std::greater< Pair<FloatDP,SizeType> >());
 
     Array<SizeType> kept_parameters(number_of_kept_parameters);
     Array<SizeType> discarded_parameters(number_of_discarded_parameters);
@@ -1234,7 +1216,7 @@ Enclosure::kuhn_recondition()
     std::sort(kept_parameters.begin(),kept_parameters.end());
     std::sort(discarded_parameters.begin(),discarded_parameters.end());
 
-    Vector<ValidatedTaylorModel64> new_models(models.size(),ValidatedTaylorModel64(number_of_kept_parameters+number_of_error_parameters,function.properties()));
+    Vector<ValidatedTaylorModelDP> new_models(models.size(),ValidatedTaylorModelDP(number_of_kept_parameters+number_of_error_parameters,function.properties()));
     for(SizeType i=0; i!=this->state_dimension(); ++i) {
         new_models[i] = Ariadne::recondition(models[i],discarded_parameters,number_of_error_parameters,i);
     }
@@ -1252,17 +1234,17 @@ Enclosure::kuhn_recondition()
     this->_domain = new_domain;
     this->_reduced_domain = new_reduced_domain;
 
-    Enclosure new_set(new_domain,ValidatedVectorTaylorFunctionModel64(new_domain,new_models),this->function_factory());
+    Enclosure new_set(new_domain,ValidatedVectorTaylorFunctionModelDP(new_domain,new_models),this->function_factory());
     for(SizeType i=0; i!=this->_constraints.size(); ++i) {
         const ValidatedConstraintModel& constraint=this->_constraints[i];
-        ValidatedScalarTaylorFunctionModel64 const& constraint_function=dynamic_cast<const ValidatedScalarTaylorFunctionModel64&>(constraint.function().reference());
-        ValidatedScalarFunctionModel64 new_constraint_function=ValidatedScalarTaylorFunctionModel64(new_domain,Ariadne::recondition(constraint_function.model(),discarded_parameters,number_of_error_parameters));
+        ValidatedScalarTaylorFunctionModelDP const& constraint_function=dynamic_cast<const ValidatedScalarTaylorFunctionModelDP&>(constraint.function().reference());
+        ValidatedScalarFunctionModelDP new_constraint_function=ValidatedScalarTaylorFunctionModelDP(new_domain,Ariadne::recondition(constraint_function.model(),discarded_parameters,number_of_error_parameters));
         new_set._constraints.append(ValidatedConstraintModel(constraint.lower_bound(),new_constraint_function,constraint.upper_bound()));
     }
-    ValidatedScalarTaylorFunctionModel64 const& time=dynamic_cast<const ValidatedScalarTaylorFunctionModel64&>(this->_time_function.reference());
-    new_set._time_function=ValidatedScalarTaylorFunctionModel64(new_domain,Ariadne::recondition(time.model(),discarded_parameters,number_of_error_parameters));
-    ValidatedScalarTaylorFunctionModel64 const& dwell_time=dynamic_cast<const ValidatedScalarTaylorFunctionModel64&>(this->_dwell_time_function.reference());
-    new_set._dwell_time_function=ValidatedScalarTaylorFunctionModel64(new_domain,Ariadne::recondition(dwell_time.model(),discarded_parameters,number_of_error_parameters));
+    ValidatedScalarTaylorFunctionModelDP const& time=dynamic_cast<const ValidatedScalarTaylorFunctionModelDP&>(this->_time_function.reference());
+    new_set._time_function=ValidatedScalarTaylorFunctionModelDP(new_domain,Ariadne::recondition(time.model(),discarded_parameters,number_of_error_parameters));
+    ValidatedScalarTaylorFunctionModelDP const& dwell_time=dynamic_cast<const ValidatedScalarTaylorFunctionModelDP&>(this->_dwell_time_function.reference());
+    new_set._dwell_time_function=ValidatedScalarTaylorFunctionModelDP(new_domain,Ariadne::recondition(dwell_time.model(),discarded_parameters,number_of_error_parameters));
 
     (*this)=new_set;
 
@@ -1281,11 +1263,11 @@ Void Enclosure::restrict(const ExactBoxType& subdomain)
     result._state_function=Ariadne::restrict(result._state_function,subdomain);
     result._time_function=Ariadne::restrict(result._time_function,subdomain);
     result._dwell_time_function=Ariadne::restrict(result._dwell_time_function,subdomain);
-    ValidatedScalarFunctionModel64 new_constraint;
+    ValidatedScalarFunctionModelDP new_constraint;
     for(List<ValidatedConstraintModel>::Iterator iter=result._constraints.begin();
         iter!=result._constraints.end(); ++iter)
     {
-        ValidatedScalarFunctionModel64& constraint_function=iter->function();
+        ValidatedScalarFunctionModelDP& constraint_function=iter->function();
         constraint_function=Ariadne::restrict(constraint_function,subdomain);
     }
     this->reduce();
@@ -1299,13 +1281,13 @@ Enclosure Enclosure::restriction(const ExactBoxType& subdomain) const
 }
 
 
-ValidatedScalarFunctionModel64 const Enclosure::get_function(SizeType i) const {
+ValidatedScalarFunctionModelDP const Enclosure::get_function(SizeType i) const {
     if(i<this->state_dimension()) { return this->_state_function[i]; }
     else if (i==this->state_dimension()) { return this->_time_function; }
     else { return compose(this->_auxiliary_mapping[i-this->state_dimension()-1u],this->_state_function); }
 }
 
-ValidatedVectorFunctionModel64 join(const ValidatedVectorFunctionModel64& f1, const ValidatedScalarFunctionModel64& f2, const ValidatedVectorFunctionModel64& f3) {
+ValidatedVectorFunctionModelDP join(const ValidatedVectorFunctionModelDP& f1, const ValidatedScalarFunctionModelDP& f2, const ValidatedVectorFunctionModelDP& f3) {
     return join(join(f1,f2),f3);
 }
 
@@ -1339,9 +1321,9 @@ template<class K, class V> Map<K,V> filter(const Map<K,V>& m, const Set<K>& s) {
 }
 
 
-const ValidatedScalarFunctionModel64& repr(const ValidatedScalarFunctionModel64& f) { return f; }
-const ValidatedVectorFunctionModel64& repr(const ValidatedVectorFunctionModel64& f) { return f; }
-const List<ValidatedScalarFunctionModel64>& repr(const List<ValidatedScalarFunctionModel64>& f) { return f; }
+const ValidatedScalarFunctionModelDP& repr(const ValidatedScalarFunctionModelDP& f) { return f; }
+const ValidatedVectorFunctionModelDP& repr(const ValidatedVectorFunctionModelDP& f) { return f; }
+const List<ValidatedScalarFunctionModelDP>& repr(const List<ValidatedScalarFunctionModelDP>& f) { return f; }
 
 OutputStream& Enclosure::write(OutputStream& os) const {
     const Bool LONG_FORMAT=false;
@@ -1375,7 +1357,7 @@ ValidatedAffineConstrainedImageSet
 Enclosure::affine_approximation() const
 {
     this->_check();
-    typedef List<ValidatedScalarFunctionModel64>::ConstIterator ConstIterator;
+    typedef List<ValidatedScalarFunctionModelDP>::ConstIterator ConstIterator;
 
     const Nat nx=this->state_dimension();
     const Nat np=this->number_of_parameters();
@@ -1385,10 +1367,10 @@ Enclosure::affine_approximation() const
     //if(set._zero_constraints.size()>0) { set._solve_zero_constraints(); }
     this->_check();
 
-    Vector<Float64> h(nx);
-    Matrix<Float64> G(nx,np);
+    Vector<FloatDP> h(nx);
+    Matrix<FloatDP> G(nx,np);
     for(Nat i=0; i!=nx; ++i) {
-        ValidatedScalarFunctionModel64 component=set._state_function[i];
+        ValidatedScalarFunctionModelDP component=set._state_function[i];
         h[i]=component.model().value();
         for(Nat j=0; j!=np; ++j) {
             G[i][j]=component.model().gradient(j);
@@ -1396,12 +1378,12 @@ Enclosure::affine_approximation() const
     }
     ValidatedAffineConstrainedImageSet result(G,h);
 
-    Vector<Float64> a(np);
-    Float64 b;
+    Vector<FloatDP> a(np);
+    FloatDP b;
 
     for(ConstIterator iter=set._negative_constraints.begin();
             iter!=set._negative_constraints.end(); ++iter) {
-        const ValidatedScalarFunctionModel64& constraint=*iter;
+        const ValidatedScalarFunctionModelDP& constraint=*iter;
         b=-constraint.model().value();
         for(Nat j=0; j!=np; ++j) { a[j]=constraint.model().gradient(j); }
         result.new_inequality_constraint(a,b);
@@ -1409,7 +1391,7 @@ Enclosure::affine_approximation() const
 
     for(ConstIterator iter=set._zero_constraints.begin();
             iter!=set._zero_constraints.end(); ++iter) {
-        const ValidatedScalarFunctionModel64& constraint=*iter;
+        const ValidatedScalarFunctionModelDP& constraint=*iter;
         b=-constraint.model().value();
         for(Nat j=0; j!=np; ++j) { a[j]=constraint.model().gradient(j); }
         result.new_equality_constraint(a,b);
@@ -1420,14 +1402,13 @@ Enclosure::affine_approximation() const
 
 /*
 struct ValidatedAffineModel {
-    Float64 _c; Vector<Float64> _g; Float64 _e;
-    ValidatedAffineModel(Float64 c, const Vector<Float64>& g, Float64 e) : _c(c), _g(g), _e(e) { }
+    FloatDP _c; Vector<FloatDP> _g; FloatDP _e;
+    ValidatedAffineModel(FloatDP c, const Vector<FloatDP>& g, FloatDP e) : _c(c), _g(g), _e(e) { }
 };
 
-ValidatedAffineModel _affine_model(const ValidatedTaylorModel64& tm) {
-    ValidatedAffineModel result(0.0,Vector<Float64>(tm.argument_size(),0.0),tm.error());
-    Float64::set_rounding_upward();
-    for(ValidatedTaylorModel64::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
+ValidatedAffineModel _affine_model(const ValidatedTaylorModelDP& tm) {
+    ValidatedAffineModel result(0.0,Vector<FloatDPValue>(tm.argument_size(),0.0),tm.error());
+    for(ValidatedTaylorModelDP::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
         if(iter->key().degree()>=2) { result._e+=abs(iter->data()); }
         else if(iter->key().degree()==0) {result. _c=iter->data(); }
         else {
@@ -1436,7 +1417,6 @@ ValidatedAffineModel _affine_model(const ValidatedTaylorModel64& tm) {
             }
         }
     }
-    Float64::set_rounding_to_nearest();
     return result;
 }
 */
@@ -1446,7 +1426,7 @@ ValidatedAffineModel _affine_model(const ValidatedTaylorModel64& tm) {
 Enclosure product(const Enclosure& set, const ExactIntervalType& ivl) {
     typedef List<ValidatedConstraintModel>::ConstIterator ConstIterator;
 
-    ValidatedVectorFunctionModel64 new_function=combine(set.state_function(),set.function_factory().create_identity(ivl));
+    ValidatedVectorFunctionModelDP new_function=combine(set.state_function(),set.function_factory().create_identity(ivl));
 
     Enclosure result(new_function.domain(),new_function,set.function_factory());
     for(ConstIterator iter=set._constraints.begin(); iter!=set._constraints.end(); ++iter) {
@@ -1461,7 +1441,7 @@ Enclosure product(const Enclosure& set, const ExactIntervalType& ivl) {
 Enclosure product(const Enclosure& set, const ExactBoxType& bx) {
     typedef List<ValidatedConstraintModel>::ConstIterator ConstIterator;
 
-    ValidatedVectorFunctionModel64 new_function=combine(set.state_function(),set.function_factory().create_identity(bx));
+    ValidatedVectorFunctionModelDP new_function=combine(set.state_function(),set.function_factory().create_identity(bx));
 
     Enclosure result(new_function.domain(),new_function,set.function_factory());
     for(ConstIterator iter=set._constraints.begin(); iter!=set._constraints.end(); ++iter) {
@@ -1479,7 +1459,7 @@ Enclosure product(const Enclosure& set1, const Enclosure& set2) {
 
     typedef List<ValidatedConstraintModel>::ConstIterator ConstIterator;
 
-    ValidatedVectorFunctionModel64 new_state_function=combine(set1.state_function(),set2.state_function());
+    ValidatedVectorFunctionModelDP new_state_function=combine(set1.state_function(),set2.state_function());
 
     Enclosure result(new_state_function.domain(),new_state_function,set1.function_factory());
     for(ConstIterator iter=set1._constraints.begin(); iter!=set1._constraints.end(); ++iter) {
@@ -1500,10 +1480,10 @@ Enclosure apply(const ValidatedVectorFunction& function, const Enclosure& set) {
     return result;
 }
 
-Enclosure unchecked_apply(const ValidatedVectorFunctionModel64& function, const Enclosure& set) {
+Enclosure unchecked_apply(const ValidatedVectorFunctionModelDP& function, const Enclosure& set) {
     Enclosure result(set);
-    const ValidatedVectorFunctionModel64& state_function=result.state_function();
-    const_cast<ValidatedVectorFunctionModel64&>(state_function)=Ariadne::unchecked_compose(function,set.state_function());
+    const ValidatedVectorFunctionModelDP& state_function=result.state_function();
+    const_cast<ValidatedVectorFunctionModelDP&>(state_function)=Ariadne::unchecked_compose(function,set.state_function());
     return result;
 }
 

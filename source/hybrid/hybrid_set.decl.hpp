@@ -32,7 +32,7 @@
 namespace Ariadne {
 
 template<class UB> class VariableInterval;
-using FloatVariableInterval = VariableInterval<Float64>;
+using FloatVariableInterval = VariableInterval<FloatDP>;
 
 
 template<class UB> class HybridVariableInterval;
@@ -45,7 +45,9 @@ using HybridSet = HybridBoundedConstraintSet;
 
 
 template<class X> class HybridPoint;
-using HybridExactPoint = HybridPoint<Float64Value>;
+using HybridRealPoint = HybridPoint<Real>;
+using HybridExactPoint = HybridPoint<FloatDPValue>;
+using HybridApproximatePoint = HybridPoint<FloatDPApproximation>;
 
 template<class IVL> class HybridBox;
 using HybridRealBox = HybridBox<RealInterval>;

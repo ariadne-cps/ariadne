@@ -32,101 +32,11 @@
 
 #include "number.decl.hpp"
 #include "float.decl.hpp"
-#include "float64.hpp"
+#include "floatdp.hpp"
 #include "floatmp.hpp"
 #include "float-raw.hpp"
 
-namespace Ariadne {
-
-
-
-template<class X, class R=X> struct DeclareFloatOperations
-    : public DeclareRealOperations<X,R>
-    , public DeclareComparisonOperations<X,LessTrait<X>,EqualsTrait<X>>
-    , public DeclareMixedFieldOperators<X,GenericTrait<X>,R>
-{
-    friend OutputStream& operator<<(OutputStream&, X const&);
-    friend InputStream& operator>>(InputStream&, X&);
-};
-
-template<class X, class NX=OppositeTrait<X>> struct DeclareDirectedFloatOperations
-    : DeclareDirectedNumericOperations<X,NX>
-    , DeclareMixedDirectedGroupOperators<X,NX,GenericTrait<X>,GenericTrait<NX>>
-{
-    friend OutputStream& operator<<(OutputStream&, X const&);
-    friend InputStream& operator>>(InputStream&, X&);
-};
-
-template<class PX, class QPX=OppositeTrait<PX>> struct DeclarePositiveDirectedFloatOperations
-    : DeclarePositiveDirectedNumericOperations<PX,QPX>
-    , DeclareMixedDirectedSemifieldOperators<PX,QPX,GenericTrait<PX>,GenericTrait<QPX>>
-{
-    friend OutputStream& operator<<(OutputStream&, PX const&);
-    friend InputStream& operator>>(InputStream&, PX&);
-};
-
-template<class PX> struct DeclarePositiveFloatOperations
-    : DeclarePositiveDirectedFloatOperations<PX,PX>
-{
-};
-
-template<class X, class R=X> struct DispatchFloatOperations
-    : DispatchNumericOperations<X,R>
-    , DispatchComparisonOperations<X,LessTrait<X>,EqualsTrait<X>>
-    , DefineConcreteGenericOperators<X>
-//    , ProvideConcreteGenericFieldOperations<X,GenericTrait<X>,R>
-//    , ProvideConcreteGenericComparisonOperations<X,GenericTrait<X>,LessTrait<X>,EqualsTrait<X>>
-{
-    friend OutputStream& operator<<(OutputStream& os, X const& x) { return Operations<X>::_write(os,x); }
-    friend InputStream& operator>>(InputStream& is, X& x) { return Operations<X>::_read(is,x); }
-};
-
-template<class X> struct DispatchDirectedFloatOperations
-    : DispatchDirectedNumericOperations<X,OppositeTrait<X>>
-    , DispatchDirectedNumericOperations<OppositeTrait<X>,X>
-    , DispatchDirectedComparisonOperations<X,OppositeTrait<X>,LessTrait<X>,EqualsTrait<X>>
-    , DispatchDirectedComparisonOperations<OppositeTrait<X>,X,LessTrait<OppositeTrait<X>>,EqualsTrait<OppositeTrait<X>>>
-    , DefineConcreteGenericOperators<X>
-//    , ProvideConcreteGenericDirectedGroupOperations<X,OppositeTrait<X>,GenericTrait<X>,GenericTrait<OppositeTrait<X>>>
-//    , ProvideConcreteGenericDirectedGroupOperations<OppositeTrait<X>,X,GenericTrait<OppositeTrait<X>>,GenericTrait<X>>
-//    , ProvideConcreteGenericDirectedComparisonOperations<X,GenericTrait<OppositeTrait<X>>,LessTrait<X>,EqualsTrait<X>>
-//    , ProvideConcreteGenericDirectedComparisonOperations<OppositeTrait<X>,GenericTrait<X>,LessTrait<OppositeTrait<X>>,EqualsTrait<OppositeTrait<X>>>
-{
-    friend OutputStream& operator<<(OutputStream& os, X const& x) { return Operations<X>::_write(os,x); }
-    friend InputStream& operator>>(InputStream& is, X& x) { return Operations<X>::_read(is,x); }
-};
-
-template<class PX, class QPX=OppositeTrait<PX>> struct DispatchPositiveDirectedFloatOperations
-    : public DispatchPositiveDirectedNumericOperations<PX,QPX>
-    , public DispatchPositiveDirectedNumericOperations<QPX,PX>
-    , DefineConcreteGenericOperators<PX>
-//    , public ProvideConcreteGenericDirectedSemiFieldOperations<PX,QPX,Nat,Nat>
-//    , public ProvideConcreteGenericDirectedSemiFieldOperations<QPX,PX,Nat,Nat>
-{
-};
-
-template<class PX> struct DispatchPositiveFloatOperations
-    : public DispatchPositiveDirectedNumericOperations<PX,PX>
-    , DefineConcreteGenericOperators<PX>
-//    , public ProvideConcreteGenericDirectedSemiFieldOperations<PX,PX,Nat,Nat>
-{
-};
-
-
-template<class PR, class P1, class P2> using FloatWeakerType = Float<Weaker<P1,P2>,PR>;
-
-template<class PR, class P> using NegatedFloatType = Float<Negated<P>,PR>;
-template<class PR, class P> using FloatNegateType = Float<Negated<P>,PR>;
-
-template<class PR, class P1, class P2> using FloatSumType = Float<Widen<Weaker<P1,P2>>,PR>;
-template<class PR, class P1, class P2> using FloatDifferenceType = Float<Widen<Weaker<P1,Negated<P2>>>,PR>;
-template<class PR, class P1, class P2> using FloatProductType = Float<Widen<Weaker<P1,P2>>,PR>;
-template<class PR, class P1, class P2> using FloatQuotientType = Float<Widen<Weaker<P1,Inverted<P2>>>,PR>;
-
-template<class PR, class P1, class P2> using FloatEqualsType = Logical<Equality<Weaker<P1,Negated<P2>>>>;
-template<class PR, class P1, class P2> using FloatLessType = Logical<Generic<Weaker<P1,Negated<P2>>>>;
-
-} // namespace Ariadne
+#include "float_operations.hpp"
 
 #include "float_approximation.hpp"
 #include "float_lower_bound.hpp"
@@ -140,93 +50,115 @@ template<class PR, class P1, class P2> using FloatLessType = Logical<Generic<Wea
 
 namespace Ariadne {
 
-template<class PR> inline FloatBounds<PR>::FloatBounds(FloatLowerBound<PR> const& lower, FloatUpperBound<PR> const& upper)
+template<class F> inline Bounds<F>::Bounds(LowerBound<F> const& lower, UpperBound<F> const& upper)
     : _l(lower.raw()), _u(upper.raw()) { }
 
-template<class PR> inline FloatLowerBound<PR> const FloatBounds<PR>::lower() const {
-    return FloatLowerBound<PR>(lower_raw()); }
+template<class F> inline LowerBound<F> const Bounds<F>::lower() const {
+    return LowerBound<F>(lower_raw()); }
 
-template<class PR> inline FloatUpperBound<PR> const FloatBounds<PR>::upper() const {
-    return FloatUpperBound<PR>(upper_raw()); }
+template<class F> inline UpperBound<F> const Bounds<F>::upper() const {
+    return UpperBound<F>(upper_raw()); }
 
-template<class PR> inline const FloatValue<PR> FloatBounds<PR>::value() const {
-    return FloatValue<PR>(med_near(this->_l,this->_u)); }
+template<class F> inline const Value<F> Bounds<F>::value() const {
+    return Value<F>(med(near,this->_l,this->_u)); }
 
-template<class PR> inline const FloatError<PR> FloatBounds<PR>::error() const {
-    RawFloat<PR> _v=med_near(this->_l,this->_u); return FloatError<PR>(max(sub_up(this->_u,_v),sub_up(_v,this->_l))); }
+template<class F> inline const Error<F> Bounds<F>::error() const {
+    RawFloat<PR> _v=med(near,this->_l,this->_u); return Error<F>(max(sub(up,this->_u,_v),sub(up,_v,this->_l))); }
 
-template<class PR> inline FloatValue<PR> value(FloatBounds<PR> const& x) {
+template<class F> inline Value<F> value(Bounds<F> const& x) {
     return x.value(); }
 
-template<class PR> inline FloatError<PR> error(FloatBounds<PR> const& x) {
+template<class F> inline Error<F> error(Bounds<F> const& x) {
     return x.error(); }
 
-template<class PR> inline FloatBounds<PR> make_bounds(FloatError<PR> const& e) {
-    return FloatBounds<PR>(-e.raw(),+e.raw()); }
+template<class F> inline Bounds<F> make_bounds(Error<F> const& e) {
+    return Bounds<F>(-e.raw(),+e.raw()); }
 
 
-template<class PR> inline FloatBall<PR>::FloatBall(FloatValue<PR> const& value, FloatError<PR> const& error)
+template<class F, class FE> inline Ball<F,FE>::Ball(Value<F> const& value, Error<FE> const& error)
     : _v(value.raw()), _e(error.raw()) { }
 
-template<class PR> inline FloatLowerBound<PR> const FloatBall<PR>::lower() const {
-    return FloatLowerBound<PR>(lower_raw()); }
+template<class F, class FE> inline LowerBound<F> const Ball<F,FE>::lower() const {
+    return LowerBound<F>(lower_raw()); }
 
-template<class PR> inline FloatUpperBound<PR> const FloatBall<PR>::upper() const {
-    return FloatUpperBound<PR>(upper_raw()); }
+template<class F, class FE> inline UpperBound<F> const Ball<F,FE>::upper() const {
+    return UpperBound<F>(upper_raw()); }
 
-template<class PR> inline const FloatValue<PR> FloatBall<PR>::value() const {
-    return FloatValue<PR>(this->_v); }
+template<class F, class FE> inline const Value<F> Ball<F,FE>::value() const {
+    return Value<F>(this->_v); }
 
-template<class PR> inline const FloatError<PR> FloatBall<PR>::error() const {
-    return FloatError<PR>(this->_e); }
+template<class F, class FE> inline const Error<FE> Ball<F,FE>::error() const {
+    return Error<FE>(this->_e); }
 
-extern const Float64Value infty;
+
+template<class F> template<class FE> inline FloatBall<PrecisionType<F>,Ariadne::PrecisionType<FE>> Value<F>::pm(Error<FE> e) const {
+    return FloatBall<Ariadne::PrecisionType<F>,Ariadne::PrecisionType<FE>>(*this,e);
+}
+
+template<class F> template<class FE> Approximation<F>::Approximation(Ball<F,FE> const& x) : _a(x.value_raw()) {
+}
+
+template<class F> template<class FE> Bounds<F>::Bounds(Ball<F,FE> const& x) : _l(x.lower_raw()), _u(x.upper_raw()) {
+}
+
+
+extern const FloatDPValue infty;
 
 // Literals operation
-Float64Value operator"" _exact(long double lx);
-Float64Error operator"" _error(long double lx);
-Float64Ball operator"" _near(long double lx);
-Float64UpperBound operator"" _upper(long double lx);
-Float64LowerBound operator"" _lower(long double lx);
-Float64Approximation operator"" _approx(long double lx);
+FloatDPValue operator"" _exact(long double lx);
+FloatDPError operator"" _error(long double lx);
+FloatDPBall operator"" _near(long double lx);
+FloatDPUpperBound operator"" _upper(long double lx);
+FloatDPLowerBound operator"" _lower(long double lx);
+FloatDPApproximation operator"" _approx(long double lx);
 
 
 
-inline Float64Value const& cast_exact(RawFloat64 const& x) { return reinterpret_cast<Float64Value const&>(x); }
-inline Float64Value const& cast_exact(Float64Approximation const& x) { return reinterpret_cast<Float64Value const&>(x); }
-inline Float64Value const& cast_exact(Float64Value const& x) { return reinterpret_cast<Float64Value const&>(x); }
-inline Float64Value const& cast_exact(Float64Error const& x) { return reinterpret_cast<Float64Value const&>(x); }
+template<class F> inline Value<F> const& cast_exact(F const& x) { return reinterpret_cast<Value<F> const&>(x); }
+template<class F> inline Value<F> const& cast_exact(Approximation<F> const& x) { return reinterpret_cast<Value<F> const&>(x); }
+template<class F> inline Value<F> const& cast_exact(LowerBound<F> const& x) { return reinterpret_cast<Value<F> const&>(x); }
+template<class F> inline Value<F> const& cast_exact(UpperBound<F> const& x) { return reinterpret_cast<Value<F> const&>(x); }
+template<class F> inline Value<F> const cast_exact(Bounds<F> const& x) { return cast_exact(Approximation<F>(x)); }
+template<class F, class FE> inline Value<F> const& cast_exact(Ball<F,FE> const& x) { return reinterpret_cast<Value<F> const&>(x); }
+template<class F> inline Value<F> const& cast_exact(Value<F> const& x) { return reinterpret_cast<Value<F> const&>(x); }
+template<class F> inline Value<F> const& cast_exact(Error<F> const& x) { return reinterpret_cast<Value<F> const&>(x); }
 
-template<template<class>class T> inline const T<Float64Value>& cast_exact(const T<RawFloat64>& t) {
-    return reinterpret_cast<const T<Float64Value>&>(t); }
-template<template<class>class T> inline const T<Float64Value>& cast_exact(const T<Float64Approximation>& t) {
-    return reinterpret_cast<const T<Float64Value>&>(t); }
-template<template<class>class T> inline const T<Float64Value>& cast_exact(const T<Float64Value>& t) {
-    return reinterpret_cast<const T<Float64Value>&>(t); }
-template<template<class>class T> inline const T<Float64Value>& cast_exact(const T<Float64Error>& t) {
-    return reinterpret_cast<const T<Float64Value>&>(t); }
 
-inline RawFloat64 const& cast_raw(RawFloat64 const& x) { return reinterpret_cast<RawFloat64 const&>(x); }
-inline RawFloat64 const& cast_raw(Float64Approximation const& x) { return reinterpret_cast<RawFloat64 const&>(x); }
-inline RawFloat64 const& cast_raw(Float64Value const& x) { return reinterpret_cast<RawFloat64 const&>(x); }
+template<template<class>class T, class F> inline const T<Value<F>>& cast_exact(const T<F>& t) {
+    return reinterpret_cast<const T<Value<F>>&>(t); }
+template<template<class>class T, class F> inline const T<Value<F>>& cast_exact(const T<Approximation<F>>& t) {
+    return reinterpret_cast<const T<Value<F>>&>(t); }
+template<template<class>class T, class F> inline const T<Value<F>>& cast_exact(const T<LowerBound<F>>& t) {
+    return reinterpret_cast<const T<Value<F>>&>(t); }
+template<template<class>class T, class F> inline const T<Value<F>>& cast_exact(const T<UpperBound<F>>& t) {
+    return reinterpret_cast<const T<Value<F>>&>(t); }
+template<template<class>class T, class F> inline const T<Value<F>>& cast_exact(const T<Value<F>>& t) {
+    return reinterpret_cast<const T<Value<F>>&>(t); }
+template<template<class>class T, class F> inline const T<Value<F>>& cast_exact(const T<Error<F>>& t) {
+    return reinterpret_cast<const T<Value<F>>&>(t); }
 
-template<template<class>class T> inline const T<RawFloat64>& cast_raw(const T<RawFloat64>& t) {
-    return reinterpret_cast<const T<RawFloat64>&>(t); }
-template<template<class>class T> inline const T<RawFloat64>& cast_raw(const T<Float64Approximation>& t) {
-    return reinterpret_cast<const T<RawFloat64>&>(t); }
-template<template<class>class T> inline const T<RawFloat64>& cast_raw(const T<Float64Value>& t) {
-    return reinterpret_cast<const T<RawFloat64>&>(t); }
 
-inline Float64Approximation const& cast_approximate(RawFloat64 const& x) { return reinterpret_cast<Float64Approximation const&>(x); }
-inline Float64Approximation const& cast_approximate(Float64Approximation const& x) { return reinterpret_cast<Float64Approximation const&>(x); }
-inline Float64Approximation const& cast_approximate(Float64Value const& x) { return reinterpret_cast<Float64Approximation const&>(x); }
+inline RawFloatDP const& cast_raw(RawFloatDP const& x) { return reinterpret_cast<RawFloatDP const&>(x); }
+inline RawFloatDP const& cast_raw(FloatDPApproximation const& x) { return reinterpret_cast<RawFloatDP const&>(x); }
+inline RawFloatDP const& cast_raw(FloatDPValue const& x) { return reinterpret_cast<RawFloatDP const&>(x); }
 
-template<template<class>class T> inline const T<Float64Approximation>& cast_approximate(const T<RawFloat64>& t) {
-    return reinterpret_cast<const T<Float64Approximation>&>(t); }
-template<template<class>class T> inline const T<Float64Approximation>& cast_approximate(const T<Float64Approximation>& t) {
-    return reinterpret_cast<const T<Float64Approximation>&>(t); }
-template<template<class>class T> inline const T<Float64Approximation>& cast_approximate(const T<Float64Value>& t) {
-    return reinterpret_cast<const T<Float64Approximation>&>(t); }
+template<template<class>class T> inline const T<RawFloatDP>& cast_raw(const T<RawFloatDP>& t) {
+    return reinterpret_cast<const T<RawFloatDP>&>(t); }
+template<template<class>class T> inline const T<RawFloatDP>& cast_raw(const T<FloatDPApproximation>& t) {
+    return reinterpret_cast<const T<RawFloatDP>&>(t); }
+template<template<class>class T> inline const T<RawFloatDP>& cast_raw(const T<FloatDPValue>& t) {
+    return reinterpret_cast<const T<RawFloatDP>&>(t); }
+
+inline FloatDPApproximation const& cast_approximate(RawFloatDP const& x) { return reinterpret_cast<FloatDPApproximation const&>(x); }
+inline FloatDPApproximation const& cast_approximate(FloatDPApproximation const& x) { return reinterpret_cast<FloatDPApproximation const&>(x); }
+inline FloatDPApproximation const& cast_approximate(FloatDPValue const& x) { return reinterpret_cast<FloatDPApproximation const&>(x); }
+
+template<template<class>class T> inline const T<FloatDPApproximation>& cast_approximate(const T<RawFloatDP>& t) {
+    return reinterpret_cast<const T<FloatDPApproximation>&>(t); }
+template<template<class>class T> inline const T<FloatDPApproximation>& cast_approximate(const T<FloatDPApproximation>& t) {
+    return reinterpret_cast<const T<FloatDPApproximation>&>(t); }
+template<template<class>class T> inline const T<FloatDPApproximation>& cast_approximate(const T<FloatDPValue>& t) {
+    return reinterpret_cast<const T<FloatDPApproximation>&>(t); }
 
 inline FloatMPValue const& cast_exact(RawFloatMP const& x) { return reinterpret_cast<FloatMPValue const&>(x); }
 inline FloatMPValue const& cast_exact(FloatMPApproximation const& x) { return reinterpret_cast<FloatMPValue const&>(x); }

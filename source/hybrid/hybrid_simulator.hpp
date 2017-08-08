@@ -45,7 +45,7 @@ template<class T> class Orbit;
 class HybridSimulator
     : public Loggable
 {
-    typedef HybridExactPoint EnclosureType;
+    typedef HybridApproximatePoint EnclosureType;
     double _step_size;
   public:
 
@@ -56,7 +56,8 @@ class HybridSimulator
     //@{
     //! \name Evolution using abstract sets.
     //! \brief Compute an approximation to the orbit set using upper semantics.
-    Orbit<HybridExactPoint> orbit(const HybridAutomatonInterface& system, const HybridExactPoint& initial_point, const HybridTime& time) const;
+    Orbit<HybridApproximatePoint> orbit(const HybridAutomatonInterface& system, const HybridApproximatePoint& initial_point, const HybridTime& time) const;
+    Orbit<HybridApproximatePoint> orbit(const HybridAutomatonInterface& system, const HybridRealPoint& initial_point, const HybridTime& time) const;
 };
 
 

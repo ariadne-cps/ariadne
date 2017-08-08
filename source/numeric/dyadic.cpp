@@ -130,6 +130,14 @@ double Dyadic::get_d() const {
     return mpf_get_d(this->_mpf);
 }
 
+Dyadic operator+(TwoExp y) {
+    return +Dyadic(y); 
+}
+
+Dyadic operator-(TwoExp y) {
+    return -Dyadic(y);
+}
+
 
 /*
 Dyadic& operator+=(Dyadic& x1, Dyadic const& x2) {

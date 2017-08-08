@@ -40,7 +40,7 @@ using namespace std;
 class TestIntervalType
 {
     typedef ExactIntervalType I;
-    typedef Float64 R;
+    typedef FloatDP R;
   public:
     Void test();
   private:
@@ -71,12 +71,12 @@ TestIntervalType::test()
 Void
 TestIntervalType::test_concept()
 {
-    Precision64 pr;
+    DoublePrecision pr;
     Int n=1;
     Nat m=1;
     double d=1;
-    Float64Value x={1,pr};
-    Float64 a,b;
+    FloatDPValue x={1,pr};
+    FloatDP a,b;
     ExactIntervalType xivl;
     UpperIntervalType uivl;
 
@@ -94,10 +94,10 @@ Void
 TestIntervalType::test_constructors()
 {
 
-    Float64 zero=0;
+    FloatDP zero=0;
 
     // Construct from pair
-    ExactIntervalType ivld1(Float64(1.125),Float64(2.25));
+    ExactIntervalType ivld1(FloatDP(1.125),FloatDP(2.25));
     ARIADNE_TEST_ASSERT(ivld1.lower().raw()==1.125); ARIADNE_TEST_ASSERT(ivld1.upper().raw()==2.25);
 
     // Default constructor
@@ -120,15 +120,15 @@ TestIntervalType::test_constructors()
     ARIADNE_TEST_COMPARE(ivld4.upper(),>=,3.2);
 
     // ApproximateTag constructor from a single value
-    ARIADNE_TEST_WARN("Cannot construct Interval<UpperFloat64> from Rational.");
+    ARIADNE_TEST_WARN("Cannot construct Interval<UpperFloatDP> from Rational.");
 //    UpperIntervalType ivld5(Rational(1,3));
 //    ARIADNE_TEST_COMPARE(cast_exact(ivld5.lower()),<,Rational(1,3));
 //    ARIADNE_TEST_COMPARE(cast_exact(ivld5.upper()),>,Rational(1,3));
 
     // ExactTag constructor from a single value
-    ExactIntervalType ivld6(Float64(1.25));
-    ARIADNE_TEST_EQUAL(ivld6.lower().raw(),Float64(1.25));
-    ARIADNE_TEST_EQUAL(ivld6.upper().raw(),Float64(1.25));
+    ExactIntervalType ivld6(FloatDP(1.25));
+    ARIADNE_TEST_EQUAL(ivld6.lower().raw(),FloatDP(1.25));
+    ARIADNE_TEST_EQUAL(ivld6.upper().raw(),FloatDP(1.25));
 
     // Empty interval
     EmptyInterval empty_interval;
@@ -182,7 +182,7 @@ Void TestIntervalType::test_comparison() {
     ExactIntervalType& ivl1ref=ivl1;
     ivl1ref=ExactIntervalType(5.25,7.375);
     cout << "ivl1ref=" << ivl1ref << endl;
-    ARIADNE_TEST_ASSERT(ivl1ref.lower().raw()==Float64(5.25));
+    ARIADNE_TEST_ASSERT(ivl1ref.lower().raw()==FloatDP(5.25));
 }
 
 Void TestIntervalType::test_geometric_predicates()

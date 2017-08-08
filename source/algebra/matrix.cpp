@@ -136,31 +136,31 @@ template<class X> Vector<X> lu_solve(const Matrix<X>& A, const Vector<X>& b) {
 }
 
 // Find a starting solution for a diagonally dominant system
-template<> Matrix<Float64Bounds> dd_solve(const Matrix<Float64Bounds>& A, const Matrix<Float64Bounds>& B)
+template<> Matrix<FloatDPBounds> dd_solve(const Matrix<FloatDPBounds>& A, const Matrix<FloatDPBounds>& B)
 {
     const SizeType n=B.row_size();
     const SizeType m=B.column_size();
 
     //Compute an upper bound for 1/(|aii|-sum|aij|) using outward rounding
-    Vector<Float64UpperBound> c(n,Float64UpperBound(0u));
+    Vector<FloatDPUpperBound> c(n,FloatDPUpperBound(0u));
     for(SizeType i=0; i!=n; ++i) {
-        Float64LowerBound rci=mig(A[i][i]);
+        FloatDPLowerBound rci=mig(A[i][i]);
         for(SizeType j=0; j!=n; ++j) {
             if(j!=i) {
                 rci=rci-mag(A[i][j] );
             }
         }
         if(possibly(rci<=0)) {
-            ARIADNE_THROW(std::runtime_error,"dd_solve(Matrix<Float64Bounds> A, Matrix<Float64Bounds> B)",
+            ARIADNE_THROW(std::runtime_error,"dd_solve(Matrix<FloatDPBounds> A, Matrix<FloatDPBounds> B)",
                           "Matrix A="<<A<<" is not diagonally-dominant.");
         }
         c[i]=rec(cast_positive(rci));
     }
 
     // Compute initial solution
-    Matrix<Float64Bounds> R(n,m);
+    Matrix<FloatDPBounds> R(n,m);
     for(SizeType i=0; i!=n; ++i) {
-        Float64Bounds ci(-c[i],+c[i]);
+        FloatDPBounds ci(-c[i],+c[i]);
         for(SizeType j=0; j!=m; ++j) {
             R[i][j]=B[i][j]*ci;
         }
@@ -170,13 +170,13 @@ template<> Matrix<Float64Bounds> dd_solve(const Matrix<Float64Bounds>& A, const 
 }
 
 
-template<> Void gs_step(const Matrix<Float64Bounds>& A, const Vector<Float64Bounds>& b, Vector<Float64Bounds>& x)
+template<> Void gs_step(const Matrix<FloatDPBounds>& A, const Vector<FloatDPBounds>& b, Vector<FloatDPBounds>& x)
 {
     // Perform Gauss-Seidel iteration
     const SizeType n=x.size();
     for(SizeType i=0; i!=n; ++i) {
         // compute R'[i][j] := (JB[i][j] - Sum{k!=j}JA[i][k]*R[k][j]) / JA[i][i]
-        Float64Bounds ri=b[i];
+        FloatDPBounds ri=b[i];
         for(SizeType k=0; k!=n; ++k) {
             if(k!=i) {
                 ri-=A[i][k]*x[k];
@@ -189,7 +189,7 @@ template<> Void gs_step(const Matrix<Float64Bounds>& A, const Vector<Float64Boun
     }
 }
 
-template<> Matrix<Float64Bounds> gs_solve(const Matrix<Float64Bounds>& A, const Matrix<Float64Bounds>& B)
+template<> Matrix<FloatDPBounds> gs_solve(const Matrix<FloatDPBounds>& A, const Matrix<FloatDPBounds>& B)
 {
     ARIADNE_ASSERT(A.row_size()==A.column_size());
     ARIADNE_ASSERT(B.row_size()==A.column_size());
@@ -197,14 +197,14 @@ template<> Matrix<Float64Bounds> gs_solve(const Matrix<Float64Bounds>& A, const 
     const SizeType m=B.column_size();
 
     // Precondition A and B
-    Matrix<Float64Approximation> mA(A);
+    Matrix<FloatDPApproximation> mA(A);
 
-    Matrix<Float64Value> J=cast_exact(inverse(mA));
-    Matrix<Float64Bounds> JA=J*A;
-    Matrix<Float64Bounds> JB=J*B;
+    Matrix<FloatDPValue> J=cast_exact(inverse(mA));
+    Matrix<FloatDPBounds> JA=J*A;
+    Matrix<FloatDPBounds> JB=J*B;
 
-    //Matrix<Float64Bounds> R=dd_solve(JA,JB);
-    Matrix<Float64Bounds> R=lu_solve(A,B);
+    //Matrix<FloatDPBounds> R=dd_solve(JA,JB);
+    Matrix<FloatDPBounds> R=lu_solve(A,B);
     //std::cerr<<"R="<<R<<"\n";
 
     // Perform Gauss-Seidel iteration
@@ -213,7 +213,7 @@ template<> Matrix<Float64Bounds> gs_solve(const Matrix<Float64Bounds>& A, const 
         for(SizeType i=0; i!=n; ++i) {
             for(SizeType j=0; j!=m; ++j) {
                 // compute R'[i][j] := (JB[i][j] - Sum{k!=j}JA[i][k]*R[k][j]) / JA[i][i]
-                Float64Bounds Rij=JB[i][j];
+                FloatDPBounds Rij=JB[i][j];
                 for(SizeType k=0; k!=n; ++k) {
                     if(k!=i) {
                         Rij-=JA[i][k]*R[k][j];
@@ -223,8 +223,8 @@ template<> Matrix<Float64Bounds> gs_solve(const Matrix<Float64Bounds>& A, const 
                     Rij/=JA[i][i];
                     R[i][j]=refinement(R[i][j],Rij);
                 }
-                // FIXME: Use Float64Interval or Float64 here?
-                //R[i][j]=Float64Interval(max(R[i][j].lower(),Rij.lower()),min(R[i][j].upper(),Rij.upper()));
+                // FIXME: Use FloatDPInterval or FloatDP here?
+                //R[i][j]=FloatDPInterval(max(R[i][j].lower(),Rij.lower()),min(R[i][j].upper(),Rij.upper()));
             }
         }
         ++step;
@@ -235,9 +235,9 @@ template<> Matrix<Float64Bounds> gs_solve(const Matrix<Float64Bounds>& A, const 
 }
 
 template<class X> Vector<X> gs_solve(const Matrix<X>& A, const Vector<X>& b) {
-    Matrix<X> B(b.size(),1u); for(SizeType i=0; i!=b.size(); ++i) { B[i][1]=b[i]; }
+    Matrix<X> B(b.size(),1u); for(SizeType i=0; i!=b.size(); ++i) { B[i][0]=b[i]; }
     Matrix<X> R=gs_solve(A,B);
-    Vector<X> r(R.row_size()); for(SizeType i=0; i!=r.size(); ++i) { r[i]=R[i][1]; }
+    Vector<X> r(R.row_size()); for(SizeType i=0; i!=r.size(); ++i) { r[i]=R[i][0]; }
     return r;
 }
 
@@ -251,11 +251,11 @@ template<class X> Matrix<ArithmeticType<X>> inverse(const Matrix<X>& A) {
     return lu_inverse(A);
 }
 
-template<> Matrix<Float64Bounds> inverse<>(const Matrix<Float64Value>& A) {
-    return lu_inverse(Matrix<Float64Bounds>(A));
+template<> Matrix<FloatDPBounds> inverse<>(const Matrix<FloatDPValue>& A) {
+    return lu_inverse(Matrix<FloatDPBounds>(A));
 }
 
-template<> Matrix<Float64Bounds> inverse<Float64Bounds>(const Matrix<Float64Bounds>& A) {
+template<> Matrix<FloatDPBounds> inverse<FloatDPBounds>(const Matrix<FloatDPBounds>& A) {
     try {
         return lu_inverse(A);
     } catch(const DivideByZeroException& e) {
@@ -269,7 +269,7 @@ template<class X1, class X2> Matrix<ArithmeticType<X1,X2>> solve(const Matrix<X1
     auto Ainv=inverse(A); return Ainv*B;
 }
 
-template<> Matrix<Float64Bounds> solve(const Matrix<Float64Bounds>& A, const Matrix<Float64Bounds>& B) {
+template<> Matrix<FloatDPBounds> solve(const Matrix<FloatDPBounds>& A, const Matrix<FloatDPBounds>& B) {
     return gs_solve(A,B);
 }
 
@@ -361,34 +361,32 @@ row_norms(const Matrix<X>& A)
 }
 
 
-// Scale the rows of A to each have some of absolute values less than or equal to one
+// Scale the rows of A to each have sum of absolute values less than or equal to one
+// FIXME: This code is inherantly approximate and relies on changing the rounding mode
 template<class X>
-Matrix<X>
-normalise_rows(const Matrix<X>& A)
+Void
+normalise_rows(Matrix<X>& A)
 {
+
     const SizeType m=A.row_size();
     const SizeType n=A.column_size();
 
-    Matrix<X> R=A;
-
+    auto prev_rounding_mode=X::get_rounding_mode();
+    X::set_rounding_upward();
     Array<X> row_asums(m);
-    auto prev_rounding_mode=Float64::get_rounding_mode();
-    Float64::set_rounding_upward();
     for(SizeType i=0; i!=m; ++i) {
         row_asums[i]=0.0;
         for(SizeType j=0; j!=n; ++j) {
             row_asums[i]+=abs(A[i][j]);
         }
     }
-    Float64::set_rounding_toward_zero();
+    X::set_rounding_toward_zero();
     for(SizeType i=0; i!=m; ++i) {
         for(SizeType j=0; j!=n; ++j) {
-            R[i][j]/=row_asums[i];
+            A[i][j]/=row_asums[i];
         }
     }
-    Float64::set_rounding_mode(prev_rounding_mode);
-
-    return R;
+    X::set_rounding_mode(prev_rounding_mode);
 }
 
 
@@ -461,10 +459,9 @@ triangular_decomposition(const Matrix<X>& A)
 // Use Householder transformation H=I-vv' where v=u/|u|
 // and u=a +/- |a|e with a and e the working column of A
 // and corresponding unit vector.
-Tuple< Matrix<Float64Approximation>, PivotMatrix>
-triangular_factor(const Matrix<Float64Approximation>& A)
+template<class X> Tuple< Matrix<X>, PivotMatrix>
+triangular_factor(const Matrix<X>& A)
 {
-    typedef Float64Approximation X;
     X zero = A.zero_element();
 
     const SizeType m=A.row_size();
@@ -494,7 +491,7 @@ triangular_factor(const Matrix<Float64Approximation>& A)
             // Find largest column norm
             SizeType l=k; X cnsmax=cns[k];
             for(SizeType j=k+1; j!=n; ++j) {
-                if(decide(cns[j]>cnsmax)) {
+                if(cns[j]>cnsmax) {
                     l=j; cnsmax=cns[j];
                 }
             }
@@ -521,7 +518,7 @@ triangular_factor(const Matrix<Float64Approximation>& A)
         for(SizeType i=k; i!=m; ++i) {
             u[i]=R[i][k];
         }
-        if(decide(u[k]>=0)) { u[k]+=nrma; }
+        if(u[k]>=0) { u[k]+=nrma; }
         else { u[k]-=nrma; }
 
         // Compute -2/u.u
@@ -552,20 +549,7 @@ triangular_factor(const Matrix<Float64Approximation>& A)
     } // end of loop on working column k
 
     // Scale the rows of R to have sum of absolute values equal to 1
-
-    Float64::RoundingModeType prev_rounding_mode=Float64::get_rounding_mode();
-    for(SizeType i=0; i!=m; ++i) {
-        Float64::set_rounding_upward();
-        X rsum=zero;
-        for(SizeType j=i; j!=n; ++j) {
-            rsum+=abs(R[i][j]);
-        }
-        Float64::set_rounding_toward_zero();
-        for(SizeType j=i; j!=n; ++j) {
-            R[i][j]/=rsum;
-        }
-    }
-    Float64::set_rounding_mode(prev_rounding_mode);
+    normalise_rows(R);
 
     return Tuple<Matrix<X>,PivotMatrix>{R,P};
 
@@ -575,11 +559,9 @@ triangular_factor(const Matrix<Float64Approximation>& A)
 // orthogonal rows, and such that the row absolute value sums of the inverse of
 // T are at most 1. Then the image of the unit box under the matrix T is
 // an over-approximation of the unit box.
-Matrix<Float64Approximation>
-triangular_multiplier(const Matrix<Float64Approximation>& A)
+template<class X> Matrix<X>
+triangular_multiplier(const Matrix<X>& A)
 {
-    typedef Float64Approximation X;
-
     ARIADNE_ASSERT(A.row_size()<=A.column_size());
     const SizeType m=A.row_size();
     const SizeType n=A.column_size();
@@ -589,7 +571,7 @@ triangular_multiplier(const Matrix<Float64Approximation>& A)
 
     Matrix<X> T(n,m); for(SizeType i=0; i!=m; ++i) { T[i][i]=1.0; }
 
-    for(SizeType i=0; i!=m; ++i) { assert(R[i][i].raw()!=0.0); }
+    for(SizeType i=0; i!=m; ++i) { assert(R[i][i]!=0.0); }
 
     for(SizeType k=m-1; k!=SizeType(-1); --k) {
         X r=1/R[k][k];
@@ -634,7 +616,7 @@ template<class X> PivotMatrix::operator Matrix<X> () const {
 }
 
 OutputStream& operator<<(OutputStream& os, const PivotMatrix& pv) {
-    return os << static_cast< Matrix<Float64Value> >(pv);
+    return os << static_cast< Matrix<FloatDPValue> >(pv);
 }
 
 // Compute the orthogonal decomposition A=QR with or without column pivoting. The
@@ -853,38 +835,38 @@ template<class AX> Matrix<decltype(cast_exact(declval<AX>()))> cast_exact(Matrix
 }
 
 
-template class Matrix<Float64>;
-template Matrix<Float64> inverse(const Matrix<Float64>&);
-template Vector<Float64> solve(const Matrix<Float64>&, const Vector<Float64>&);
+template class Matrix<FloatDP>;
+template Matrix<FloatDP> inverse(const Matrix<FloatDP>&);
+template Vector<FloatDP> solve(const Matrix<FloatDP>&, const Vector<FloatDP>&);
+template Void normalise_rows(Matrix<FloatDP>&);
 
-template class Matrix<Float64Approximation>;
-template Matrix<Float64Approximation> inverse(const Matrix<Float64Approximation>&);
-template Matrix<Float64Approximation> solve(const Matrix<Float64Approximation>&, const Matrix<Float64Approximation>&);
-template Vector<Float64Approximation> solve(const Matrix<Float64Approximation>&, const Vector<Float64Approximation>&);
-//template Matrix<Float64Approximation> lu_solve(const Matrix<Float64Approximation>&, const Matrix<Float64Approximation>&);
-//template Matrix<Float64Approximation> lu_inverse(const Matrix<Float64Approximation>&, const Matrix<Float64Approximation>&);
-template Tuple<PivotMatrix,Matrix<Float64Approximation>,Matrix<Float64Approximation>> triangular_decomposition(Matrix<Float64Approximation> const&);
-template Tuple<Matrix<Float64Approximation>,Matrix<Float64Approximation>,PivotMatrix> orthogonal_decomposition(Matrix<Float64Approximation> const&, Bool);
-template Tuple<Matrix<Float64Approximation>,Matrix<Float64Approximation>> orthogonal_decomposition(Matrix<Float64Approximation> const&);
+template class Matrix<FloatDPApproximation>;
+template Matrix<FloatDPApproximation> inverse(const Matrix<FloatDPApproximation>&);
+template Matrix<FloatDPApproximation> solve(const Matrix<FloatDPApproximation>&, const Matrix<FloatDPApproximation>&);
+template Vector<FloatDPApproximation> solve(const Matrix<FloatDPApproximation>&, const Vector<FloatDPApproximation>&);
+//template Matrix<FloatDPApproximation> lu_solve(const Matrix<FloatDPApproximation>&, const Matrix<FloatDPApproximation>&);
+//template Matrix<FloatDPApproximation> lu_inverse(const Matrix<FloatDPApproximation>&, const Matrix<FloatDPApproximation>&);
+template Tuple<PivotMatrix,Matrix<FloatDPApproximation>,Matrix<FloatDPApproximation>> triangular_decomposition(Matrix<FloatDPApproximation> const&);
+template Tuple<Matrix<FloatDPApproximation>,Matrix<FloatDPApproximation>,PivotMatrix> orthogonal_decomposition(Matrix<FloatDPApproximation> const&, Bool);
+template Tuple<Matrix<FloatDPApproximation>,Matrix<FloatDPApproximation>> orthogonal_decomposition(Matrix<FloatDPApproximation> const&);
 
-template Vector<Float64Approximation> row_norms(Matrix<Float64Approximation> const&);
-template Matrix<Float64Approximation> normalise_rows(Matrix<Float64Approximation> const&);
+template Vector<FloatDPApproximation> row_norms(Matrix<FloatDPApproximation> const&);
 
-template class Matrix<Float64Bounds>;
-template Matrix<Float64Bounds> inverse(const Matrix<Float64Bounds>&);
-template Matrix<Float64Bounds> lu_inverse(const Matrix<Float64Bounds>&);
-template Matrix<Float64Bounds> gs_inverse(const Matrix<Float64Bounds>&);
-template Matrix<Float64Bounds> solve(const Matrix<Float64Bounds>&, const Matrix<Float64Bounds>&);
-template Matrix<Float64Bounds> lu_solve(const Matrix<Float64Bounds>&, const Matrix<Float64Bounds>&);
-template Matrix<Float64Bounds> gs_solve(const Matrix<Float64Bounds>&, const Matrix<Float64Bounds>&);
-template Vector<Float64Bounds> solve(const Matrix<Float64Bounds>&, const Vector<Float64Bounds>&);
-template Vector<Float64Bounds> lu_solve(const Matrix<Float64Bounds>&, const Vector<Float64Bounds>&);
-template Vector<Float64Bounds> gs_solve(const Matrix<Float64Bounds>&, const Vector<Float64Bounds>&);
-template Matrix<MidpointType<Float64Bounds>> midpoint(Matrix<Float64Bounds> const&);
-template Tuple<PivotMatrix,Matrix<Float64Bounds>,Matrix<Float64Bounds>> triangular_decomposition(Matrix<Float64Bounds> const&);
-template Tuple<Matrix<Float64Bounds>,Matrix<Float64Bounds>> orthogonal_decomposition(Matrix<Float64Bounds> const&);
+template class Matrix<FloatDPBounds>;
+template Matrix<FloatDPBounds> inverse(const Matrix<FloatDPBounds>&);
+template Matrix<FloatDPBounds> lu_inverse(const Matrix<FloatDPBounds>&);
+template Matrix<FloatDPBounds> gs_inverse(const Matrix<FloatDPBounds>&);
+template Matrix<FloatDPBounds> solve(const Matrix<FloatDPBounds>&, const Matrix<FloatDPBounds>&);
+template Matrix<FloatDPBounds> lu_solve(const Matrix<FloatDPBounds>&, const Matrix<FloatDPBounds>&);
+template Matrix<FloatDPBounds> gs_solve(const Matrix<FloatDPBounds>&, const Matrix<FloatDPBounds>&);
+template Vector<FloatDPBounds> solve(const Matrix<FloatDPBounds>&, const Vector<FloatDPBounds>&);
+template Vector<FloatDPBounds> lu_solve(const Matrix<FloatDPBounds>&, const Vector<FloatDPBounds>&);
+template Vector<FloatDPBounds> gs_solve(const Matrix<FloatDPBounds>&, const Vector<FloatDPBounds>&);
+template Matrix<MidpointType<FloatDPBounds>> midpoint(Matrix<FloatDPBounds> const&);
+template Tuple<PivotMatrix,Matrix<FloatDPBounds>,Matrix<FloatDPBounds>> triangular_decomposition(Matrix<FloatDPBounds> const&);
+template Tuple<Matrix<FloatDPBounds>,Matrix<FloatDPBounds>> orthogonal_decomposition(Matrix<FloatDPBounds> const&);
 
-template class Matrix<Float64Value>;
+template class Matrix<FloatDPValue>;
 
 template class Matrix<FloatMPApproximation>;
 template class Matrix<FloatMPBounds>;
@@ -900,10 +882,10 @@ template Matrix<FloatMPBounds> solve(const Matrix<FloatMPBounds>&, const Matrix<
 
 template class Matrix<Real>;
 
-template PositiveFloat64UpperBound sup_norm(const Matrix<Float64Bounds>& A);
-template Float64UpperBound log_norm(const Matrix<Float64Bounds>& A);
+template PositiveFloatDPUpperBound sup_norm(const Matrix<FloatDPBounds>& A);
+template FloatDPUpperBound log_norm(const Matrix<FloatDPBounds>& A);
 
-template Matrix<Float64Value>const& cast_exact(const Matrix<Float64Approximation>& mx);
+template Matrix<FloatDPValue>const& cast_exact(const Matrix<FloatDPApproximation>& mx);
 
 template class Matrix<Rational>;
 template Matrix<Rational> inverse(const Matrix<Rational>&);
@@ -917,10 +899,10 @@ template<> Matrix<Rational> midpoint(Matrix<Rational> const& A) { return A; }
 #include "geometry/interval.hpp"
 
 namespace Ariadne {
-template class Matrix<Float64UpperInterval>;
-template Matrix<SingletonType<Float64UpperInterval>> cast_singleton(Matrix<Float64UpperInterval> const&);
-template Matrix<MidpointType<Float64UpperInterval>> midpoint(Matrix<Float64UpperInterval> const&);
-template Matrix<Float64UpperInterval> inverse(const Matrix<Float64UpperInterval>&);
-template Vector<Float64UpperInterval> solve(const Matrix<Float64UpperInterval>&, const Vector<Float64UpperInterval>&);
+template class Matrix<FloatDPUpperInterval>;
+template Matrix<SingletonType<FloatDPUpperInterval>> cast_singleton(Matrix<FloatDPUpperInterval> const&);
+template Matrix<MidpointType<FloatDPUpperInterval>> midpoint(Matrix<FloatDPUpperInterval> const&);
+template Matrix<FloatDPUpperInterval> inverse(const Matrix<FloatDPUpperInterval>&);
+template Vector<FloatDPUpperInterval> solve(const Matrix<FloatDPUpperInterval>&, const Vector<FloatDPUpperInterval>&);
 } // namespace Ariadne
 

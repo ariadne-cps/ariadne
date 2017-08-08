@@ -38,10 +38,6 @@
 using namespace std;
 using namespace Ariadne;
 
-auto operator==(const Real& x1, double x2) -> decltype(x1==Float64Value(x2)) {
-    return Float64Bounds(x1,Precision64())==Float64Bounds(x2);
-}
-
 class TestReal
 {
   public:
@@ -58,7 +54,7 @@ class TestReal
 
 void TestReal::test()
 {
-    Float64Approximation::set_output_places(18);
+    FloatDPApproximation::set_output_places(18);
 //    ARIADNE_TEST_CALL(test_concept());
     ARIADNE_TEST_CALL(test_constructors());
     ARIADNE_TEST_CALL(test_conversions());
@@ -83,15 +79,15 @@ void TestReal::test_concept() {
 void TestReal::test_conversions() {
     Real one=1;
     Real pi=4*atan(one);
-    auto pi_dp=pi(Precision64());
-//    auto pi_mp=pi(PrecisionMP(2));
+    auto pi_dp=pi.get(dp);
+//    auto pi_mp=pi(MultiplePrecision(2));
     ARIADNE_TEST_PRINT(pi_dp);
 //    ARIADNE_TEST_PRINT(pi_mp);
 
 }
 
 void TestReal::test_constructors() {
-    Precision64 pr;
+    DoublePrecision pr;
     ARIADNE_TEST_CONSTRUCT(Real,xv, );
     ARIADNE_TEST_EQUALS(xv.get(pr),0);
     ARIADNE_TEST_EQUALS(xv.lower().get(pr).raw(),0);
@@ -110,36 +106,37 @@ void TestReal::test_constructors() {
 }
 
 void TestReal::test_arithmetic() {
-    Float64Approximation::set_output_places(18);
+    FloatDPApproximation::set_output_places(18);
     Real x(2.5_dyadic);
     Real y(4.0_dyadic);
-    ARIADNE_TEST_EQUALS(x, 2.5);
-    ARIADNE_TEST_EQUALS(y, 4.0);
-    ARIADNE_TEST_EQUALS(+x, 2.5);
-    ARIADNE_TEST_EQUALS(-x,-2.5);
-    ARIADNE_TEST_EQUALS(x+y, 6.5);
-    ARIADNE_TEST_EQUALS(x-y,-1.5);
-    ARIADNE_TEST_EQUALS(x*y,10.0);
-    ARIADNE_TEST_EQUALS(x/y,0.625);
-    ARIADNE_TEST_EQUALS(add(x,y), 6.5);
-    ARIADNE_TEST_EQUALS(sub(x,y),-1.5);
-    ARIADNE_TEST_EQUALS(mul(x,y),10.0);
-    ARIADNE_TEST_EQUALS(div(x,y),0.625);
-    ARIADNE_TEST_EQUALS(pow(x,3u),15.625);
-    ARIADNE_TEST_EQUALS(pow(x,3),15.625);
-    ARIADNE_TEST_EQUALS(pos(x),+2.5);
-    ARIADNE_TEST_EQUALS(neg(x),-2.5);
-    ARIADNE_TEST_EQUALS(sqr(x),6.25);
-    ARIADNE_TEST_EQUALS(rec(y),0.25);
+    ARIADNE_TEST_EQUALS(x, 2.5_dy);
+    ARIADNE_TEST_EQUALS(y, 4.0_x);
+    ARIADNE_TEST_EQUALS(+x, 2.5_x);
+    ARIADNE_TEST_EQUALS(-x,-2.5_x);
+    ARIADNE_TEST_EQUALS(x+y, 6.5_x);
+    ARIADNE_TEST_EQUALS(x-y,-1.5_x);
+    ARIADNE_TEST_EQUALS(x*y,10.0_x);
+    ARIADNE_TEST_EQUALS(x/y,0.625_dy);
+    ARIADNE_TEST_EQUALS(add(x,y), 6.5_dy);
+    ARIADNE_TEST_EQUALS(sub(x,y),-1.5_dy);
+    ARIADNE_TEST_EQUALS(mul(x,y),10.0_dy);
+    ARIADNE_TEST_EQUALS(div(x,y),0.625_dy);
+    ARIADNE_TEST_EQUALS(pow(x,3u),15.625_dy);
+    ARIADNE_TEST_EQUALS(pow(x,3),15.625_dy);
+    ARIADNE_TEST_EQUALS(pos(x),+2.5_dy);
+    ARIADNE_TEST_EQUALS(neg(x),-2.5_dy);
+    ARIADNE_TEST_EQUALS(hlf(x),1.25_dy);
+    ARIADNE_TEST_EQUALS(sqr(x),6.25_dy);
+    ARIADNE_TEST_EQUALS(rec(y),0.25_dy);
 }
 
 void TestReal::test_transcendental() {
-    Float64Approximation eps{Float64::eps(Precision64())};
+    Dyadic eps{FloatDP::eps(dp)};
     Real x(2.5_dyadic);
-    Float64Approximation ax=x.get(Precision64());
-    ARIADNE_TEST_EQUALS(sqrt(Real(4)),2.0);
-    ARIADNE_TEST_EQUALS(exp(Real(0)),1.0);
-    ARIADNE_TEST_EQUALS(log(Real(1)),0.0);
+    FloatDPApproximation ax=x.get(dp);
+    ARIADNE_TEST_EQUALS(sqrt(Real(4)),2.0_dy);
+    ARIADNE_TEST_EQUALS(exp(Real(0)),1.0_dy);
+    ARIADNE_TEST_EQUALS(log(Real(1)),0.0_dy);
     ARIADNE_TEST_WITHIN(sqrt(x),sqrt(ax),eps);
     ARIADNE_TEST_WITHIN(exp(x),exp(ax),8*eps);
     ARIADNE_TEST_WITHIN(log(x),log(ax),eps);
@@ -160,8 +157,8 @@ void TestReal::test_comparison() {
     ARIADNE_TEST_ASSERT(possibly(check(log(e)==one,effort)));
     ARIADNE_TEST_ASSERT(possibly((log(e)==one).check(effort)));
 
-    ARIADNE_TEST_PRINT(pi.get(Precision64()));
-    ARIADNE_TEST_PRINT(e*log(pi).get(Precision64()));
+    ARIADNE_TEST_PRINT(pi.get(dp));
+    ARIADNE_TEST_PRINT(e*log(pi).get(dp));
 
     ARIADNE_TEST_ASSERT(not check(pi==elogpi,effort));
     ARIADNE_TEST_ASSERT(check(pi!=elogpi,effort));
@@ -176,25 +173,18 @@ void TestReal::test_comparison() {
 }
 
 
-namespace Ariadne {
-Bool operator>=(FloatMP const& x1, Float64 x2) { return x1>=x2.get_d(); }
-Bool operator<=(FloatMP const& x1, Float64 x2) { return x1<=x2.get_d(); }
-Bool operator<=(Float64 x1, FloatMP const& x2) { return x2>=x1.get_d(); }
-Bool operator>=(Float64 x1, FloatMP const& x2) { return x2<=x1.get_d(); }
-}
-
 void TestReal::test_accuracy() {
-    Float64Bounds::set_output_places(18);
+    FloatDPBounds::set_output_places(18);
     Real one=1;
     Real pi=4*atan(one);
 
-    PrecisionMP mp_high(320);
-    RawFloatMP pi_near = FloatMP::pi(mp_high,FloatMP::to_nearest);
+    MultiplePrecision mp_high(320);
+    RawFloatMP pi_near = FloatMP::pi(near,mp_high);
 
-    Precision64 dp;
-    ARIADNE_TEST_CONSTRUCT(Float64Bounds,pi_dp,(pi.get(dp)));
+    DoublePrecision dp;
+    ARIADNE_TEST_CONSTRUCT(FloatDPBounds,pi_dp,(pi.get(dp)));
 
-    PrecisionMP mp(128);
+    MultiplePrecision mp(128);
     ARIADNE_TEST_CONSTRUCT(FloatMPBounds,pi_mp,(pi.get(mp)));
 
     ARIADNE_TEST_ASSERT(pi_dp.lower_raw()<=pi_near);
@@ -203,13 +193,26 @@ void TestReal::test_accuracy() {
     ARIADNE_TEST_ASSERT(pi_mp.lower_raw()<=pi_near);
     ARIADNE_TEST_ASSERT(pi_mp.upper_raw()>=pi_near);
 
+    mp=precision(320);
+    Effort effort{256};
+    ARIADNE_TEST_CONSTRUCT(ValidatedReal,pi_ord,(pi.compute(effort)));
     Accuracy accuracy{256};
-    FloatMPValue error(accuracy.error(),PrecisionMP(320));
-    ARIADNE_TEST_CONSTRUCT(FloatMPBounds,pi_met,(pi.evaluate(accuracy)));
-    ARIADNE_TEST_PRINT(pi_met.error());
-    ARIADNE_TEST_PRINT(abs(sub_up(pi_met.value_raw(),pi_near)));
-    ARIADNE_TEST_ASSERT(pi_met.error() <= error);
-    ARIADNE_TEST_ASSERT(rad_up(pi_met.value().raw(),pi_near) <= error.raw());
+    FloatMPValue error(accuracy.error(),mp);
+    ARIADNE_TEST_CONSTRUCT(ValidatedReal,pi_met,(pi.compute(accuracy)));
+    ARIADNE_TEST_CONSTRUCT(FloatMPBounds,pi_met_mp,(pi_met.get(mp)));
+    ARIADNE_TEST_PRINT(pi_met_mp.error());
+    ARIADNE_TEST_PRINT(abs(sub(up,pi_met_mp.value_raw(),pi_near)));
+    ARIADNE_TEST_ASSERT(pi_met_mp.error() <= error);
+    ARIADNE_TEST_ASSERT(rad(up,pi_met_mp.value().raw(),pi_near) <= error.raw());
+
+    std::function<Dyadic(Natural)> wfn([&](Natural n){int nint=n.get_si();return Dyadic(two_exp(-nint));});
+    StrongCauchySequence<Dyadic> wseq(wfn);
+    Real wlim=limit(wseq);
+
+    std::function<Real(Natural)> rfn([&](Natural n){return exp(Real(-(n+1u)));});
+    StrongCauchySequence<Real> rseq(rfn);
+    Real rlim=limit(rseq);
+
 }
 
 

@@ -91,17 +91,17 @@ class NumberInterface
 
     virtual Rational _get_q() const = 0;
 
-    virtual Float64Ball _get(MetricTag, Precision64) const = 0;
-    virtual Float64Bounds _get(BoundedTag, Precision64) const = 0;
-    virtual Float64UpperBound _get(UpperTag, Precision64) const = 0;
-    virtual Float64LowerBound _get(LowerTag, Precision64) const = 0;
-    virtual Float64Approximation _get(ApproximateTag, Precision64) const = 0;
+    virtual FloatDPBall _get(MetricTag, DoublePrecision) const = 0;
+    virtual FloatDPBounds _get(BoundedTag, DoublePrecision) const = 0;
+    virtual FloatDPUpperBound _get(UpperTag, DoublePrecision) const = 0;
+    virtual FloatDPLowerBound _get(LowerTag, DoublePrecision) const = 0;
+    virtual FloatDPApproximation _get(ApproximateTag, DoublePrecision) const = 0;
 
-    virtual FloatMPBall _get(MetricTag, PrecisionMP) const = 0;
-    virtual FloatMPBounds _get(BoundedTag, PrecisionMP) const = 0;
-    virtual FloatMPUpperBound _get(UpperTag, PrecisionMP) const = 0;
-    virtual FloatMPLowerBound _get(LowerTag, PrecisionMP) const = 0;
-    virtual FloatMPApproximation _get(ApproximateTag, PrecisionMP) const = 0;
+    virtual FloatMPBall _get(MetricTag, MultiplePrecision) const = 0;
+    virtual FloatMPBounds _get(BoundedTag, MultiplePrecision) const = 0;
+    virtual FloatMPUpperBound _get(UpperTag, MultiplePrecision) const = 0;
+    virtual FloatMPLowerBound _get(LowerTag, MultiplePrecision) const = 0;
+    virtual FloatMPApproximation _get(ApproximateTag, MultiplePrecision) const = 0;
 
     virtual ParadigmCode _paradigm() const = 0;
     virtual String _class_name() const = 0;

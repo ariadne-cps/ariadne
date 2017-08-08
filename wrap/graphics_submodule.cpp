@@ -49,22 +49,24 @@ using namespace Ariadne;
 
 Void export_figure()
 {
+    return_value_policy<reference_existing_object> ref_existing;
+
     class_<FigureInterface,boost::noncopyable>("FigureInterface",no_init);
     class_<Figure, bases<FigureInterface> > figure_class("Figure",init<>());
 
     //class_<Figure, bases<FigureInterface> > figure_class("Figure",init<>());
-    figure_class.def("set_projection_map",(Void(Figure::*)(const PlanarProjectionMap&)) &Figure::set_projection_map);
-    figure_class.def("set_projection",(Void(Figure::*)(Nat,Nat,Nat)) &Figure::set_projection);
-    figure_class.def("set_bounding_box",&Figure::set_bounding_box);
-    figure_class.def("set_dot_radius", (Void(Figure::*)(double)) &Figure::set_dot_radius);
-    figure_class.def("set_line_style", (Void(Figure::*)(Bool)) &Figure::set_line_style);
-    figure_class.def("set_line_width", (Void(Figure::*)(double)) &Figure::set_line_width);
-    figure_class.def("set_line_colour", (Void(Figure::*)(double,double,double)) &Figure::set_line_colour);
-    figure_class.def("set_fill_style", (Void(Figure::*)(Bool)) &Figure::set_fill_style);
-    figure_class.def("set_fill_colour", (Void(Figure::*)(double,double,double)) &Figure::set_fill_colour);
-    figure_class.def("set_fill_opacity", (Void(Figure::*)(double)) &Figure::set_fill_opacity);
-    figure_class.def("draw",(Void(FigureInterface::*)(const DrawableInterface&))&FigureInterface::draw);
-    figure_class.def("clear",&Figure::clear);
+    figure_class.def("set_projection_map",(Figure&(Figure::*)(const PlanarProjectionMap&)) &Figure::set_projection_map, ref_existing);
+    figure_class.def("set_projection",(Figure&(Figure::*)(Nat,Nat,Nat)) &Figure::set_projection, ref_existing);
+    figure_class.def("set_bounding_box",&Figure::set_bounding_box, ref_existing);
+    figure_class.def("set_dot_radius", (Figure&(Figure::*)(double)) &Figure::set_dot_radius, ref_existing);
+    figure_class.def("set_line_style", (Figure&(Figure::*)(Bool)) &Figure::set_line_style, ref_existing);
+    figure_class.def("set_line_width", (Figure&(Figure::*)(double)) &Figure::set_line_width, ref_existing);
+    figure_class.def("set_line_colour", (Figure&(Figure::*)(double,double,double)) &Figure::set_line_colour, ref_existing);
+    figure_class.def("set_fill_style", (Figure&(Figure::*)(Bool)) &Figure::set_fill_style, ref_existing);
+    figure_class.def("set_fill_colour", (Figure&(Figure::*)(double,double,double)) &Figure::set_fill_colour, ref_existing);
+    figure_class.def("set_fill_opacity", (Figure&(Figure::*)(double)) &Figure::set_fill_opacity, ref_existing);
+    figure_class.def("draw",(Figure&(FigureInterface::*)(const DrawableInterface&))&FigureInterface::draw, ref_existing);
+    figure_class.def("clear",&Figure::clear, ref_existing);
     figure_class.def("display",&Figure::display);
     figure_class.def("write",(Void(Figure::*)(const char*)const)&Figure::write);
     figure_class.def("write",(Void(Figure::*)(const char*,Nat,Nat)const)&Figure::write);

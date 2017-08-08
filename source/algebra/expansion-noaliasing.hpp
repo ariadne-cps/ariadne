@@ -389,7 +389,7 @@ OutputStream& operator<<(OutputStream& os, const typename Expansion<X>::referenc
     return os << "<reference>";
 }
 
-OutputStream& operator<<(OutputStream& os, const Expansion<Float64>::const_reference& cref) {
+OutputStream& operator<<(OutputStream& os, const Expansion<FloatDP>::const_reference& cref) {
     //return os << "(" << v.get<0>() << ":" << v.get<1>() << ")";
     return os << "<const_reference>";
 }
@@ -514,8 +514,8 @@ Expansion<X> embed(unsigned int before_size, const Expansion<X>& x, unsigned int
 }
 
 
-inline Expansion<Float64> midpoint(const Expansion<ExactIntervalType>& pse) {
-    Expansion<Float64> r(pse.argument_size());
+inline Expansion<FloatDP> midpoint(const Expansion<ExactIntervalType>& pse) {
+    Expansion<FloatDP> r(pse.argument_size());
     for(Expansion<ExactIntervalType>::ConstIterator iter=pse.begin(); iter!=pse.end(); ++iter) {
         //r.append(iter->key(),midpoint(iter->data())); }
         r.append(iter->key(),midpoint(iter->data())); }
@@ -579,7 +579,7 @@ Vector<Y> evaluate(const Vector< Expansion<X> >& x, const Vector<Y>& y)
 }
 
 
-template<class X> Vector< Expansion<X> > operator*(const Expansion<X>& e, const Vector<Float64> v) {
+template<class X> Vector< Expansion<X> > operator*(const Expansion<X>& e, const Vector<FloatDP> v) {
     Vector< Expansion<X> > r(v.size(),Expansion<X>(e.argument_size()));
     for(Nat i=0; i!=r.size(); ++i) {
         ARIADNE_ASSERT(v[i]==0.0 || v[i]==1.0);
@@ -589,8 +589,8 @@ template<class X> Vector< Expansion<X> > operator*(const Expansion<X>& e, const 
 }
 
 
-inline Vector< Expansion<Float64> > midpoint(const Vector< Expansion<ExactIntervalType> >& pse) {
-    Vector< Expansion<Float64> > r(pse.size());
+inline Vector< Expansion<FloatDP> > midpoint(const Vector< Expansion<ExactIntervalType> >& pse) {
+    Vector< Expansion<FloatDP> > r(pse.size());
     for(Nat i=0; i!=pse.size(); ++i) {
         r[i]=midpoint(pse[i]); }
     return r;

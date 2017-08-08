@@ -111,7 +111,7 @@ class DispatchMatrixOperations {
 };
 */
 
-//! \ingroup LinearAlgebraSubModule
+//! \ingroup LinearAlgebraModule
 //! \brief Matrices over some type \a X.
 template<class X> class Matrix
     : public MatrixContainer<Matrix<X>>
@@ -852,8 +852,8 @@ template<class X> using RowNormType = decltype(abs(declval<X>())+abs(declval<X>(
 template<class X> Vector<RowNormType<X>> row_norms(const Matrix<X>& A);
 template<class X> Matrix<X> normalise_rows(const Matrix<X>& A);
 
-Tuple< Matrix<Float64Approximation>, PivotMatrix> triangular_factor(const Matrix<Float64Approximation>& A);
-Matrix<Float64Approximation> triangular_multiplier(const Matrix<Float64Approximation>& A);
+Tuple< Matrix<FloatDPApproximation>, PivotMatrix> triangular_factor(const Matrix<FloatDPApproximation>& A);
+Matrix<FloatDPApproximation> triangular_multiplier(const Matrix<FloatDPApproximation>& A);
 
 
 } // namespace Ariadne

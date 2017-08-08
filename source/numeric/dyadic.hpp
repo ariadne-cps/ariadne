@@ -50,7 +50,7 @@ class InfinityException : public std::runtime_error {
 };
 
 //! \ingroup NumericModule
-//! \related Float64, ExactIntervalType
+//! \related FloatDP, ExactIntervalType
 //! \brief A floating-point number, which is taken to represent the \em exact value of a real quantity.
 class Dyadic
     : DeclareRingOperations<Dyadic>

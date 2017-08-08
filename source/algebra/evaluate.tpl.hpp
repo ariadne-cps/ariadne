@@ -93,7 +93,7 @@ template<class X, class Y> Y horner_evaluate(const Expansion<X>& e, const Vector
         ++iter;
     }
     // Set r=(((c+r[0])*x[0]^a[0]+r[1])*x[1]^a[1]+...+r[n-1])*x[n-1]^(a[n-1])
-    t=numeric_cast<typename Y::NumericType>(c);
+    t=static_cast<typename Y::NumericType>(c);
     for(SizeType i=0; i!=j; ++i) {
         for(SizeType ii=0; ii!=a[i]; ++ii) {
             t=t*x[i];

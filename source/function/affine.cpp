@@ -31,10 +31,10 @@
 
 namespace Ariadne {
 
-template class Affine<Float64Approximation>;
-template class Affine<Float64Bounds>;
-template struct ProvideAlgebraOperations<Affine<Float64Approximation>,Float64Approximation>;
-template struct ProvideAlgebraOperations<Affine<Float64Bounds>,Float64Bounds>;
+template class Affine<FloatDPApproximation>;
+template class Affine<FloatDPBounds>;
+template struct ProvideAlgebraOperations<Affine<FloatDPApproximation>,FloatDPApproximation>;
+template struct ProvideAlgebraOperations<Affine<FloatDPBounds>,FloatDPBounds>;
 
 template class Affine<FloatMPApproximation>;
 template class Affine<FloatMPBounds>;

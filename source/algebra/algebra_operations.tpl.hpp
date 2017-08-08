@@ -37,8 +37,8 @@ template<class A> using EnableIfGradedAlgebra = EnableIf<IsGradedAlgebra<A>,A>;
 struct Factorial {
     Nat _n;
     Factorial(Nat n) : _n(n) { }
-    operator Float64Bounds() { Float64Bounds r(1,Precision64()); for(Nat i=1; i<=_n; ++i) { r*=i; } return r; }
-    friend Float64Bounds rec(Factorial x) { return rec(Float64Bounds(x)); }
+    operator FloatDPBounds() { FloatDPBounds r(1,dp); for(Nat i=1; i<=_n; ++i) { r*=i; } return r; }
+    friend FloatDPBounds rec(Factorial x) { return rec(FloatDPBounds(x)); }
 };
 
 template<class A> EnableIfGradedAlgebra<A>
@@ -59,12 +59,12 @@ compose(const Series<typename A::NumericType>& x, const A& y)
 
 template<class X> class TaylorSeries;
 
-template<class A> EnableIfNormedAlgebra<A> compose(const TaylorSeries<Float64Bounds>& ts, const A& tv, double eps)
+template<class A> EnableIfNormedAlgebra<A> compose(const TaylorSeries<FloatDPBounds>& ts, const A& tv, double eps)
 {
     //std::cerr<<"_compose(TaylorSeries,A,ErrorTag)\n";
     //std::cerr<<"\n  ts="<<ts<<"\n  tv="<<tv<<"\n";
-    Float64Value& vref=const_cast<Float64Value&>(tv.value());
-    Float64Value vtmp=vref;
+    FloatDPValue& vref=const_cast<FloatDPValue&>(tv.value());
+    FloatDPValue vtmp=vref;
     vref=0;
     A r(tv.argument_size());
     r+=ts[ts.degree()];
@@ -81,7 +81,7 @@ template<class A> EnableIfNormedAlgebra<A> compose(const TaylorSeries<Float64Bou
     return r;
 }
 
-template<class A> EnableIfNormedAlgebra<A> compose(const TaylorSeries<Float64Bounds>& ts, const A& tm)
+template<class A> EnableIfNormedAlgebra<A> compose(const TaylorSeries<FloatDPBounds>& ts, const A& tm)
 {
     return _compose(ts,tm,tm.tolerance());
 }
@@ -95,12 +95,12 @@ template<class A> EnableIfNormedAlgebra<A> _compose1(const AnalyticFunction& fn,
     static const Nat DEGREE=18;
     static const double TRUNCATION_ERROR=1e-8;
     Nat d=DEGREE;
-    Float64Value c=tm.value();
-    Float64Bounds r=tm.range();
-    Series<Float64Bounds> centre_series=fn.series(Float64Bounds(c));
-    Series<Float64Bounds> range_series=fn.series(r);
+    FloatDPValue c=tm.value();
+    FloatDPBounds r=tm.range();
+    Series<FloatDPBounds> centre_series=fn.series(FloatDPBounds(c));
+    Series<FloatDPBounds> range_series=fn.series(r);
 
-    Float64UpperBound truncation_error_estimate=mag(range_series[d])*pow(mag(r-c),d);
+    FloatDPUpperBound truncation_error_estimate=mag(range_series[d])*pow(mag(r-c),d);
     if(truncation_error_estimate.raw()>TRUNCATION_ERROR) {
         ARIADNE_WARN("Truncation error estimate "<<truncation_error_estimate
                      <<" is greater than maximum allowable truncation error "<<TRUNCATION_ERROR<<"\n");
@@ -125,17 +125,17 @@ template<class A> EnableIfNormedAlgebra<A> _compose1(const AnalyticFunction& fn,
 template<class A> EnableIfNormedAlgebra<A> _compose2(const AnalyticFunction& fn, const A& tm, double eps)
 {
     static const Nat DEGREE=20;
-    static const Float64 TRUNCATION_ERROR=1e-8;
+    static const FloatDP TRUNCATION_ERROR=1e-8;
     Nat d=DEGREE;
-    Float64Value c=tm.value();
-    Float64Bounds r=tm.range();
-    Series<Float64Bounds> centre_series=fn.series(Float64Bounds(c));
-    Series<Float64Bounds> range_series=fn.series(r);
+    FloatDPValue c=tm.value();
+    FloatDPBounds r=tm.range();
+    Series<FloatDPBounds> centre_series=fn.series(FloatDPBounds(c));
+    Series<FloatDPBounds> range_series=fn.series(r);
 
     //std::cerr<<"c="<<c<<" r="<<r<<" r-c="<<r-c<<" e="<<mag(r-c)<<"\n";
     //std::cerr<<"cs[d]="<<centre_series[d]<<" rs[d]="<<range_series[d]<<"\n";
     //std::cerr<<"cs="<<centre_series<<"\nrs="<<range_series<<"\n";
-    Float64Error truncation_error=mag(range_series[d]-centre_series[d])*pow(mag(r-c),d);
+    FloatDPError truncation_error=mag(range_series[d]-centre_series[d])*pow(mag(r-c),d);
     //std::cerr<<"te="<<truncation_error<<"\n";
     if(truncation_error.raw()>TRUNCATION_ERROR) {
         ARIADNE_WARN("Truncation error estimate "<<truncation_error
@@ -149,41 +149,41 @@ template<class A> EnableIfNormedAlgebra<A> _compose2(const AnalyticFunction& fn,
         res=centre_series[d-i-1]+x*res;
         res.sweep(eps);
     }
-    res+=Float64Bounds(-truncation_error,+truncation_error);
+    res+=FloatDPBounds(-truncation_error,+truncation_error);
     return res;
 }
 
-template<class PR> FloatError<PR> error_bound(FloatBounds<PR> const& b, FloatValue<PR> const& c) {
-    return FloatError<PR>(max(b.upper()-c,c-b.lower()));
+template<class F> Error<F> error_bound(Bounds<F> const& b, Value<F> const& c) {
+    return Error<F>(max(b.upper()-c,c-b.lower()));
 }
 
-template<class PR> FloatError<PR> error_bound(FloatBounds<PR> const& b, FloatBounds<PR> const& c) {
-    return FloatError<PR>(max(b.upper()-c.lower(),c.upper()-b.lower()));
+template<class F> Error<F> error_bound(Bounds<F> const& b, Bounds<F> const& c) {
+    return Error<F>(max(b.upper()-c.lower(),c.upper()-b.lower()));
 }
 
 // Compose using the Taylor formula with a constant truncation error. This method
 // is usually better than _compose1 since there is no blow-up of the trunction
 // error. This method is better than _compose2 since the truncation error is
 // assumed at the ends of the intervals
-template<class A> EnableIfNormedAlgebra<A> _compose3(const AnalyticFunction& fn, const A& tm, Float64 eps)
+template<class A> EnableIfNormedAlgebra<A> _compose3(const AnalyticFunction& fn, const A& tm, FloatDP eps)
 {
     static const Nat DEGREE=20;
-    static const Float64 TRUNCATION_ERROR=1e-8;
+    static const FloatDP TRUNCATION_ERROR=1e-8;
     Nat d=DEGREE;
-    Float64Value c=tm.value();
-    Float64Bounds r=tm.range();
-    Series<Float64Bounds> centre_series=fn.series(Float64Bounds(c));
-    Series<Float64Bounds> range_series=fn.series(r);
+    FloatDPValue c=tm.value();
+    FloatDPBounds r=tm.range();
+    Series<FloatDPBounds> centre_series=fn.series(FloatDPBounds(c));
+    Series<FloatDPBounds> range_series=fn.series(r);
 
     //std::cerr<<"c="<<c<<" r="<<r<<" r-c="<<r-c<<" e="<<mag(r-c)<<"\n";
     //std::cerr<<"cs[d]="<<centre_series[d]<<" rs[d]="<<range_series[d]<<"\n";
     //std::cerr<<"cs="<<centre_series<<"\nrs="<<range_series<<"\n";
-    Float64Error se=error_bound(range_series[d],centre_series[d]);
-    Float64Error e=error_bound(r,c);
-    Float64Error p=pow(e,d);
+    FloatDPError se=error_bound(range_series[d],centre_series[d]);
+    FloatDPError e=error_bound(r,c);
+    FloatDPError p=pow(e,d);
     //std::cerr<<"se="<<se<<" e="<<e<<" p="<<p<<std::endl;
     // FIXME: Here we assume the dth derivative of f is monotone increasing
-    Float64 truncation_error=(se*p).raw();
+    FloatDP truncation_error=(se*p).raw();
     //std::cerr<<"te="<<truncation_error<<"\n";
     if(truncation_error>TRUNCATION_ERROR) {
         ARIADNE_WARN("Truncation error estimate "<<truncation_error
@@ -197,12 +197,12 @@ template<class A> EnableIfNormedAlgebra<A> _compose3(const AnalyticFunction& fn,
         res=centre_series[d-i-1]+x*res;
         //res.sweep(eps);
     }
-    res+=Float64Bounds(-truncation_error,+truncation_error);
+    res+=FloatDPBounds(-truncation_error,+truncation_error);
     return res;
 }
 
 
-template<class A> EnableIfNormedAlgebra<A> _compose(const AnalyticFunction& fn, const A& tm, Float64 eps)
+template<class A> EnableIfNormedAlgebra<A> _compose(const AnalyticFunction& fn, const A& tm, FloatDP eps)
 {
     return _compose3(fn,tm,eps);
 }
@@ -218,7 +218,6 @@ template<class A> EnableIfNormedAlgebra<A> _compose(const AnalyticFunction& fn, 
 namespace {
 inline Int pow2(Nat k) { return 1<<k; }
 inline Int powm1(Nat k) { return (k%2) ? -1 : +1; }
-double rec_fac_up(Nat n) { Float64::set_rounding_upward(); double r=1; for(Nat i=1; i<=n; ++i) { r/=i; } return r; }
 }
 
 
@@ -316,7 +315,7 @@ template<class A> A NormedAlgebraOperations<A>::_log(const A& x)
     z=z*y;
 
     z+=z.create_ball(trunc_err);
-    z+=log(numeric_cast<X>(avg));
+    z+=log(static_cast<X>(avg));
     return z;
 }
 
@@ -418,7 +417,6 @@ template<class A> A NormedAlgebraOperations<A>::_cos(const A& x)
     auto rad=x.radius();
 
     // Range reduce; use cos(x)=cos(x-2*n*pi)=-cos(x-pi)
-    Float64 two_pi_approx=2*Float64::pi(Precision64());
     Int n=integer_cast<Int>( round(avg/pi) );
     A y=x-n*pi;
     int c=(n%2)?-1:+1; // If n is odd, take minus the usual series
@@ -459,9 +457,9 @@ template<class A> A NormedAlgebraOperations<A>::_asin(const A& x)
 /*
     static const Nat DEG=18;
     typedef typename A::NumericType X;
-    Float64 xavg = x.average();
-    Float64 xrad = x.radius();
-    Float64Bounds xrng = xavg + Float64Bounds(-xrad,+xrad);
+    FloatDP xavg = x.average();
+    FloatDP xrad = x.radius();
+    FloatDPBounds xrng = xavg + FloatDPBounds(-xrad,+xrad);
     return compose(TaylorSeries(DEG,&Series<X>::asin,xavg,xrng),x);
 */
 }
@@ -472,9 +470,9 @@ template<class A> A NormedAlgebraOperations<A>::_acos(const A& x)
 /*
     static const Nat DEG=18;
     typedef typename A::NumericType X;
-    Float64 xavg = x.average();
-    Float64 xrad = x.radius();
-    Float64Bounds xrng = xavg + Float64Bounds(-xrad,+xrad);
+    FloatDP xavg = x.average();
+    FloatDP xrad = x.radius();
+    FloatDPBounds xrng = xavg + FloatDPBounds(-xrad,+xrad);
     return compose(TaylorSeries(DEG,&Series<X>::acos,xavg,xrng),x);
 */
 }
@@ -485,9 +483,9 @@ template<class A> A NormedAlgebraOperations<A>::_atan(const A& x)
 /*
     static const Nat DEG=18;
     typedef typename A::NumericType X;
-    Float64 xavg = x.average();
-    Float64 xrad = x.radius();
-    Float64Bounds xrng = xavg + Float64Bounds(-xrad,+xrad);
+    FloatDP xavg = x.average();
+    FloatDP xrad = x.radius();
+    FloatDPBounds xrng = xavg + FloatDPBounds(-xrad,+xrad);
     return compose(TaylorSeries(DEG,&Series<X>::atan,xavg,xrng),x);
 */
 }

@@ -58,7 +58,7 @@
     #warning "No rounding mode defined."
 #endif
 
-#include "numeric/float64.hpp"
+#include "numeric/floatdp.hpp"
 #include "numeric/floatmp.hpp"
 
 
@@ -68,9 +68,7 @@ namespace Ariadne {
 
 typedef unsigned short rounding_mode_t;
 
-//! \ingroup NumericModule \brief Set the active rounding mode.
 Void set_rounding_mode(RoundingModeType rnd) { _set_rounding_mode(rnd); }
-//! \ingroup NumericModule \brief Get the active rounding mode.
 RoundingModeType get_rounding_mode() { return _get_rounding_mode(); }
 
 Void set_rounding_to_nearest() { _set_rounding_to_nearest(); }
@@ -289,18 +287,18 @@ double log_rnd(double x) {
 
 double pi_rnd() {
     switch(get_rounding_mode()) {
-        case to_nearest: return _pi_approx;
-        case downward: return _pi_down;
-        case upward: return _pi_up;
+        case ROUND_TO_NEAREST: return _pi_approx;
+        case ROUND_DOWNWARD: return _pi_down;
+        case ROUND_UPWARD: return _pi_up;
         default: return _pi_approx;
     }
 }
 
 double pi_opp() {
     switch(get_rounding_mode()) {
-        case to_nearest: return _pi_approx;
-        case downward: return _pi_up;
-        case upward: return _pi_down;
+        case ROUND_TO_NEAREST: return _pi_approx;
+        case ROUND_DOWNWARD: return _pi_up;
+        case ROUND_UPWARD: return _pi_down;
         default: return _pi_approx;
     }
 }
@@ -346,15 +344,17 @@ double sin_rnd(double x) {
 
 inline double max(double x1, double x2) { return std::max(x1,x2); }
 
-inline double add_rnd(double x1, double x2) { return (volatile double&)x1+(volatile double&)x2; }
-inline double sub_rnd(double x1, double x2) { return (volatile double&)x1-(volatile double&)x2; }
-inline double mul_rnd(double x1, double x2) { return (volatile double&)x1*(volatile double&)x2; }
-inline double div_rnd(double x1, double x2) { return (volatile double&)x1/(volatile double&)x2; }
+double sqr_rnd(double x) { return (volatile double&)x*(volatile double&)x; }
+double rec_rnd(double x) { return 1.0/(volatile double&)x; }
+double add_rnd(double x1, double x2) { return (volatile double&)x1+(volatile double&)x2; }
+double sub_rnd(double x1, double x2) { return (volatile double&)x1-(volatile double&)x2; }
+double mul_rnd(double x1, double x2) { return (volatile double&)x1*(volatile double&)x2; }
+double div_rnd(double x1, double x2) { return (volatile double&)x1/(volatile double&)x2; }
 
-inline double add_opp(double x, double y) { volatile double t=(-x)-y; return -t; }
-inline double sub_opp(double x, double y) { volatile double t=(-x)+y; return -t; }
-inline double mul_opp(double x, double y) { volatile double t=(-x)*y; return -t; }
-inline double div_opp(double x, double y) { volatile double t=(-x)/y; return -t; }
+double add_opp(double x, double y) { volatile double t=(-x)-y; return -t; }
+double sub_opp(double x, double y) { volatile double t=(-x)+y; return -t; }
+double mul_opp(double x, double y) { volatile double t=(-x)*y; return -t; }
+double div_opp(double x, double y) { volatile double t=(-x)/y; return -t; }
 
 double neg_rec_rnd(double x) { return (-1.0)/(volatile double&)x; }
 double neg_rec_opp(double x) { volatile double t=1.0/x; return -t; }
@@ -654,179 +654,163 @@ double atan_rnd(double x) {
 
 
 
-const Float64::RoundingModeType Float64::upward = Ariadne::upward;
-
-const Float64::RoundingModeType Float64::downward = Ariadne::downward;
-
-const Float64::RoundingModeType Float64::to_nearest = Ariadne::to_nearest;
-
-const Float64::RoundingModeType Float64::toward_zero = Ariadne::toward_zero;
-
-Float64::Float64(Dyadic const& w, PrecisionType)
-    : Float64(w.get_d())
+FloatDP::FloatDP(Dyadic const& w, PrecisionType)
+    : FloatDP(w.get_d())
 {
     ARIADNE_ASSERT(Dyadic(*this)==w);
 }
 
-Float64::Float64(double d, RoundingModeType rnd, PrecisionType)
-    : Float64(d)
+FloatDP::FloatDP(double d, RoundingModeType rnd, PrecisionType)
+    : FloatDP(d)
 {
 }
 
-Float64::Float64(Rational const& q, RoundingModeType rnd, PrecisionType)
-    : Float64(q.get_d())
+FloatDP::FloatDP(Rational const& q, RoundingModeType rnd, PrecisionType)
+    : FloatDP(q.get_d())
 {
     RoundingModeType old_rnd=get_rounding_mode();
-    if(rnd==upward) {
+    if(rnd==ROUND_UPWARD) {
         set_rounding_upward();
         while (Rational(dbl)<q) { dbl+=std::numeric_limits<double>::min(); }
         set_rounding_mode(old_rnd);
     }
-    if(rnd==downward) {
+    if(rnd==ROUND_DOWNWARD) {
         set_rounding_downward();
         while (Rational(dbl)>q) { dbl-=std::numeric_limits<double>::min(); }
         set_rounding_mode(old_rnd);
     }
 }
 
-Float64::Float64(Float64 x, RoundingModeType rnd, PrecisionType)
-    : Float64(x)
+FloatDP::FloatDP(FloatDP x, RoundingModeType rnd, PrecisionType)
+    : FloatDP(x)
 {
 }
 
-Float64::operator Dyadic () const {
+FloatDP::operator Dyadic () const {
     return Dyadic(this->dbl);
 }
 
-Float64::operator Rational () const {
+FloatDP::operator Rational () const {
     return Rational(this->dbl);
 }
 
-Float64 pow_rnd(Float64 x, Int n)
+FloatDP pow_rnd(FloatDP x, Int n)
 {
     return pow_rnd(x.dbl,n);
 }
 
-Float64 sqrt_rnd(Float64 x)
+FloatDP sqrt_rnd(FloatDP x)
 {
     return sqrt_rnd(x.dbl);
 }
 
-Float64 exp_rnd(Float64 x)
+FloatDP exp_rnd(FloatDP x)
 {
     return exp_rnd(x.dbl);
 }
 
-Float64 log_rnd(Float64 x)
+FloatDP log_rnd(FloatDP x)
 {
     return log_rnd(x.dbl);
 }
 
-Float64 sin_rnd(Float64 x)
+FloatDP sin_rnd(FloatDP x)
 {
     return sin_rnd(x.dbl);
 }
 
-Float64 cos_rnd(Float64 x)
+FloatDP cos_rnd(FloatDP x)
 {
     return cos_rnd(x.dbl);
 }
 
-Float64 tan_rnd(Float64 x)
+FloatDP tan_rnd(FloatDP x)
 {
     return tan_rnd(x.dbl);
 }
 
-Float64 atan_rnd(Float64 x)
+FloatDP atan_rnd(FloatDP x)
 {
     return atan_rnd(x.dbl);
 }
 
-Float64 Float64::pi(Precision64 pr, RoundingModeType rnd) {
+FloatDP FloatDP::pi(RoundingModeType rnd, DoublePrecision pr) {
     switch(rnd) {
-        case upward: return _pi_up;
-        case downward: return _pi_down;
-        case to_nearest: return _pi_near;
+        case FloatDP::ROUND_UPWARD: return _pi_up;
+        case FloatDP::ROUND_DOWNWARD: return _pi_down;
+        case FloatDP::ROUND_TO_NEAREST: return _pi_near;
         default: assert(false);
     }
 }
 
-Float64 Float64::pi(Precision64 pr) {
-    return pi(pr,Float64::get_rounding_mode());
-}
+FloatDP::RoundingModeType FloatDP::get_rounding_mode() { return Ariadne::get_rounding_mode(); }
+Void FloatDP::set_rounding_mode(RoundingModeType rnd) { Ariadne::set_rounding_mode(rnd); }
+Void FloatDP::set_rounding_downward() { Ariadne::set_rounding_downward(); }
+Void FloatDP::set_rounding_upward() { Ariadne::set_rounding_upward(); }
+Void FloatDP::set_rounding_to_nearest() { Ariadne::set_rounding_to_nearest(); }
+Void FloatDP::set_rounding_toward_zero() { Ariadne::set_rounding_toward_zero(); }
 
-Float64::RoundingModeType Float64::get_rounding_mode() { return Ariadne::get_rounding_mode(); }
-Void Float64::set_rounding_mode(RoundingModeType rnd) { Ariadne::set_rounding_mode(rnd); }
-Void Float64::set_rounding_downward() { Ariadne::set_rounding_downward(); }
-Void Float64::set_rounding_upward() { Ariadne::set_rounding_upward(); }
-Void Float64::set_rounding_to_nearest() { Ariadne::set_rounding_to_nearest(); }
-Void Float64::set_rounding_toward_zero() { Ariadne::set_rounding_toward_zero(); }
+FloatDP::PrecisionType FloatDP::get_default_precision() { return FloatDP::PrecisionType(); }
+FloatDP::PrecisionType FloatDP::precision() const { return FloatDP::PrecisionType(); }
+Void FloatDP::set_precision(FloatDP::PrecisionType) { }
 
-Float64::PrecisionType Float64::get_default_precision() { return Float64::PrecisionType(); }
-Float64::PrecisionType Float64::precision() const { return Float64::PrecisionType(); }
-Void Float64::set_precision(Float64::PrecisionType) { }
-
-Float64 Float64::min(PrecisionType) { return std::numeric_limits<double>::min(); }
-Float64 Float64::max(PrecisionType) { return std::numeric_limits<double>::max(); }
-Float64 Float64::eps(PrecisionType) { return std::numeric_limits<double>::epsilon(); }
-Float64 Float64::inf(PrecisionType) { return std::numeric_limits<double>::infinity(); }
-Float64 Float64::nan(PrecisionType) { return std::numeric_limits<double>::quiet_NaN(); }
+FloatDP FloatDP::min(PrecisionType) { return std::numeric_limits<double>::min(); }
+FloatDP FloatDP::max(PrecisionType) { return std::numeric_limits<double>::max(); }
+FloatDP FloatDP::eps(PrecisionType) { return std::numeric_limits<double>::epsilon(); }
+FloatDP FloatDP::inf(PrecisionType) { return std::numeric_limits<double>::infinity(); }
+FloatDP FloatDP::nan(PrecisionType) { return std::numeric_limits<double>::quiet_NaN(); }
 
 template<class R, class A> R integer_cast(A const&);
-template<> Nat integer_cast<Nat,Float64>(Float64 const& x) { return x.dbl; }
-template<> Int integer_cast<Int,Float64>(Float64 const& x) { return x.dbl; }
-
-Float64 mag(Float64 x) { return std::fabs(x.dbl); }
+template<> Nat integer_cast<Nat,FloatDP>(FloatDP const& x) { return x.dbl; }
+template<> Int integer_cast<Int,FloatDP>(FloatDP const& x) { return x.dbl; }
 
 
-Float64 operator+(Float64 x) { return +x.dbl; }
-Float64 operator-(Float64 x) { return -x.dbl; }
-Bool operator==(Float64 x1, Float64 x2) { return x1.dbl==x2.dbl; }
-Bool operator!=(Float64 x1, Float64 x2) { return x1.dbl!=x2.dbl; }
-Bool operator<=(Float64 x1, Float64 x2) { return x1.dbl<=x2.dbl; }
-Bool operator>=(Float64 x1, Float64 x2) { return x1.dbl>=x2.dbl; }
-Bool operator< (Float64 x1, Float64 x2) { return x1.dbl< x2.dbl; }
-Bool operator> (Float64 x1, Float64 x2) { return x1.dbl> x2.dbl; }
-
-Bool is_nan(Float64 x) { return std::isnan(x.dbl); }
-Bool is_inf(Float64 x) { return std::isinf(x.dbl); }
-Bool is_finite(Float64 x) { return std::isfinite(x.dbl); }
-
-Comparison cmp(Float64 x1, Rational const& q2) {
+Comparison cmp(FloatDP x1, Rational const& q2) {
     if(std::isfinite(x1.get_d())) { return cmp(Rational(x1),q2); }
     else { return x1.get_d()>0.0 ? Comparison::GREATER : Comparison::LESS; }
 }
+Comparison cmp(Rational const& q1, FloatDP x2) {
+    if(std::isfinite(x2.get_d())) { return cmp(q1,Rational(x2)); }
+    else { return x2.get_d()>0.0 ? Comparison::LESS : Comparison::GREATER; }
+}
 
 /*
-OutputStream& write(OutputStream& os, Float64 const& x, Nat bits, RoundingMode64 rnd) {
+OutputStream& write(OutputStream& os, FloatDP const& x, Nat bits, RoundingMode64 rnd) {
     Nat dgts = std::ceil(bits*std::log(2))/std::log(10);
-    Float64::RoundingModeType old_rnd=Float64::get_rounding_mode();
-    Float64::set_rounding_mode(rnd);
+    FloatDP::RoundingModeType old_rnd=FloatDP::get_rounding_mode();
+    FloatDP::set_rounding_mode(rnd);
     os << std::setprecision(dgts) << x.get_d();
-    Float64::set_rounding_mode(old_rnd);
+    FloatDP::set_rounding_mode(old_rnd);
     return os;
 }
 */
 OutputStream& write(OutputStream& os, FloatMP const& x, DecimalPlaces dgts, RoundingModeMP rnd);
 
-OutputStream& write(OutputStream& os, Float64 const& x, DecimalPlaces dgts, RoundingMode64 rnd) {
-    assert(rnd==Float64::to_nearest || rnd==Float64::upward || rnd==Float64::downward);
-    PrecisionMP pr_mp(53);
-    RoundingModeMP rnd_mp = (rnd==Float64::to_nearest) ? FloatMP::to_nearest : (rnd==Float64::downward) ? FloatMP::downward : FloatMP::upward;
+OutputStream& write(OutputStream& os, FloatDP const& x, DecimalPlaces dgts, RoundingMode64 rnd) {
+    assert(rnd==ROUND_TO_NEAREST || rnd==ROUND_UPWARD || rnd==ROUND_DOWNWARD);
+    MultiplePrecision pr_mp(53);
+    RoundingModeMP rnd_mp = (rnd==FloatDP::ROUND_TO_NEAREST) ? FloatMP::ROUND_TO_NEAREST : (rnd==FloatDP::ROUND_DOWNWARD) ? FloatMP::ROUND_DOWNWARD : FloatMP::ROUND_UPWARD;
+    return write(os,FloatMP(x,pr_mp),dgts,rnd_mp);
+}
+
+OutputStream& write(OutputStream& os, FloatDP const& x, DecimalPrecision dgts, RoundingMode64 rnd) {
+    assert(rnd==ROUND_TO_NEAREST || rnd==ROUND_UPWARD || rnd==ROUND_DOWNWARD);
+    MultiplePrecision pr_mp(53);
+    RoundingModeMP rnd_mp = (rnd==FloatDP::ROUND_TO_NEAREST) ? FloatMP::ROUND_TO_NEAREST : (rnd==FloatDP::ROUND_DOWNWARD) ? FloatMP::ROUND_DOWNWARD : FloatMP::ROUND_UPWARD;
     return write(os,FloatMP(x,pr_mp),dgts,rnd_mp);
 }
 
 
-OutputStream& operator<<(OutputStream& os, Float64 const& x) {
+OutputStream& operator<<(OutputStream& os, FloatDP const& x) {
     return os << x.dbl;
 }
 
-InputStream& operator>>(InputStream& is, Float64& x) {
+InputStream& operator>>(InputStream& is, FloatDP& x) {
     double r; is >> r; x.dbl=r; return is;
 }
 
 template<> String class_name<double>() { return "double"; }
 
-template<> String class_name<Float64>() { return "Float64"; }
+template<> String class_name<FloatDP>() { return "FloatDP"; }
 
 } // namespace Ariadne

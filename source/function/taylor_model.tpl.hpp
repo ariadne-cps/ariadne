@@ -49,6 +49,23 @@
 
 namespace Ariadne {
 
+FloatDP operator+(FloatDP x1, FloatDP x2);
+FloatDP operator-(FloatDP x1, FloatDP x2);
+FloatDP operator*(FloatDP x1, FloatDP x2);
+FloatDP operator/(FloatDP x1, FloatDP x2);
+FloatDP& operator+=(FloatDP& x1, FloatDP x2);
+FloatDP& operator-=(FloatDP& x1, FloatDP x2);
+FloatDP& operator*=(FloatDP& x1, FloatDP x2);
+FloatDP& operator/=(FloatDP& x1, FloatDP x2);
+FloatMP operator+(FloatMP const& x1, FloatMP const& x2);
+FloatMP operator-(FloatMP const& x1, FloatMP const& x2);
+FloatMP operator*(FloatMP const& x1, FloatMP const& x2);
+FloatMP operator/(FloatMP const& x1, FloatMP const& x2);
+FloatMP& operator+=(FloatMP& x1, FloatMP const& x2);
+FloatMP& operator-=(FloatMP& x1, FloatMP const& x2);
+FloatMP& operator*=(FloatMP& x1, FloatMP const& x2);
+FloatMP& operator/=(FloatMP& x1, FloatMP const& x2);
+
 namespace {
 
 static const double MACHINE_EPSILON = 2.2204460492503131e-16;
@@ -57,26 +74,26 @@ Bool operator<(const MultiIndex& a1, const MultiIndex& a2) {
     return reverse_lexicographic_less(a1,a2); }
 
 
-Interval<Float64Value> const& convert_interval(IntervalDomainType const& ivl, Precision64) { return ivl; }
-Interval<FloatMPValue> convert_interval(IntervalDomainType const& ivl, PrecisionMP pr) {
+Interval<FloatDPValue> const& convert_interval(IntervalDomainType const& ivl, DoublePrecision) { return ivl; }
+Interval<FloatMPValue> convert_interval(IntervalDomainType const& ivl, MultiplePrecision pr) {
     return Interval<FloatMPValue>(FloatMP(ivl.lower().get_d(),pr),FloatMP(ivl.upper().get_d(),pr)); }
 
-Interval<Float64UpperBound> const& convert_interval(Interval<Float64UpperBound> const& ivl, Precision64) { return ivl; }
-Interval<Float64UpperBound> convert_interval(Interval<FloatMPUpperBound> const& ivl, Precision64 pr) {
+Interval<FloatDPUpperBound> const& convert_interval(Interval<FloatDPUpperBound> const& ivl, DoublePrecision) { return ivl; }
+Interval<FloatDPUpperBound> convert_interval(Interval<FloatMPUpperBound> const& ivl, DoublePrecision pr) {
     Dyadic l(ivl.lower().raw()); Dyadic u(ivl.upper().raw());
-    return Interval<Float64UpperBound>(Float64LowerBound(l,pr),Float64UpperBound(u,pr)); }
+    return Interval<FloatDPUpperBound>(FloatDPLowerBound(l,pr),FloatDPUpperBound(u,pr)); }
 
-Float64 const& convert_float(Float64 const& flt, Precision64) { return flt; }
-FloatMP convert_float(Float64 const& flt, PrecisionMP pr) { return FloatMP(flt.get_d(),pr); }
+FloatDP const& convert_float(FloatDP const& flt, DoublePrecision) { return flt; }
+FloatMP convert_float(FloatDP const& flt, MultiplePrecision pr) { return FloatMP(flt.get_d(),pr); }
 
-Interval<Float64Value> convert_exact_interval(Interval<Float64UpperBound> const& ivl, Precision64 pr) {
+Interval<FloatDPValue> convert_exact_interval(Interval<FloatDPUpperBound> const& ivl, DoublePrecision pr) {
     return cast_exact(ivl); }
-Interval<Float64Value> convert_exact_interval(Interval<FloatMPUpperBound> const& ivl, Precision64 pr) {
-    Float64 l(Dyadic(ivl.lower().raw()),downward,pr); Float64 u(Dyadic(ivl.lower().raw()),upward,pr);
-    return Interval<Float64Value>(Float64Value(l),Float64Value(u)); }
+Interval<FloatDPValue> convert_exact_interval(Interval<FloatMPUpperBound> const& ivl, DoublePrecision pr) {
+    FloatDP l(Dyadic(ivl.lower().raw()),downward,pr); FloatDP u(Dyadic(ivl.lower().raw()),upward,pr);
+    return Interval<FloatDPValue>(FloatDPValue(l),FloatDPValue(u)); }
 
-inline Box<Interval<Float64Value>> const& convert_box(BoxDomainType const& bx, Precision64) { return bx; }
-Box<Interval<FloatMPValue>> convert_box(BoxDomainType const& bx, PrecisionMP pr) {
+inline Box<Interval<FloatDPValue>> const& convert_box(BoxDomainType const& bx, DoublePrecision) { return bx; }
+Box<Interval<FloatMPValue>> convert_box(BoxDomainType const& bx, MultiplePrecision pr) {
     Box<Interval<FloatMPValue>> r(bx.dimension(),Interval<FloatMPValue>(FloatMPValue(pr),FloatMPValue(pr)));
     for(SizeType i=0; i!=r.dimension(); ++i) { r[i]=convert_interval(bx[i],pr); }
     return r;
@@ -84,6 +101,53 @@ Box<Interval<FloatMPValue>> convert_box(BoxDomainType const& bx, PrecisionMP pr)
 
 } // namespace
 
+
+
+template<class F>
+Void SweeperBase<F>::_sweep(Expansion<FloatValue<PR>>& p, FloatError<PR>& e) const
+{
+    typename Expansion<FloatValue<PR>>::ConstIterator end=p.end();
+    typename Expansion<FloatValue<PR>>::ConstIterator adv=p.begin();
+    typename Expansion<FloatValue<PR>>::Iterator curr=p.begin();
+
+    // FIXME: Not needed, but added to pair with rounding mode change below
+    F::set_rounding_upward();
+    FloatError<PR> te(e.precision());
+    while(adv!=end) {
+        if(this->discard(adv->key(),adv->data())) {
+            //te+=abs(adv->data());
+            te+=cast_positive(abs(adv->data()));
+        } else {
+            *curr=*adv;
+            ++curr;
+        }
+        ++adv;
+    }
+    e+=te;
+
+    // FIXME: Removing reset of rounding mode causes error in TestNonlinear programming
+    // ERROR: test/test_nonlinear_programming.cpp:57: calling test_equality_constrained_optimisation(): std::runtime_error in
+    // source/solvers/nonlinear_programming.cpp:1063: step: Assertion `norm(YH*dx+E*dx+transpose(A)*dy-rx)/max(1.0,norm(rx))<1e-2' failed.
+    F::set_rounding_to_nearest();
+    p.resize(curr-p.begin());
+}
+
+template<class F>
+Void SweeperBase<F>::_sweep(Expansion<FloatApproximation<PR>>& p) const
+{
+    typename Expansion<FloatApproximation<PR>>::ConstIterator end=p.end();
+    typename Expansion<FloatApproximation<PR>>::ConstIterator adv=p.begin();
+    typename Expansion<FloatApproximation<PR>>::Iterator curr=p.begin();
+    while(adv!=end) {
+        if(this->discard(adv->key(),adv->data())) {
+        } else {
+            *curr=*adv;
+            ++curr;
+        }
+        ++adv;
+    }
+    p.resize(curr-p.begin());
+}
 
 template<class F> TaylorModel<ValidatedTag,F>::TaylorModel()
     : _expansion(0), _error(0u), _sweeper()
@@ -189,144 +253,144 @@ template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::oper
 
 namespace { // Internal code for arithmetic
 
-template<class PR> struct ValidatedFloatApproximation {
-    FloatBounds<PR> _v; FloatApproximation<PR> _a;
-    ValidatedFloatApproximation(FloatBounds<PR>const& x) : _v(x), _a(x) { }
-    FloatLowerBound<PR> lower() const { return _v.lower(); }
-    FloatApproximation<PR> middle() const { return _a; }
-    FloatUpperBound<PR> upper() const { return _v.upper(); }
-    RawFloat<PR> const& lower_raw() const { return _v.lower_raw(); }
-    RawFloat<PR> const& middle_raw() const { return _a.raw(); }
-    RawFloat<PR> const& upper_raw() const { return _v.upper_raw(); }
+template<class F> struct ValidatedApproximation {
+    Bounds<F> _v; Approximation<F> _a;
+    ValidatedApproximation(Bounds<F>const& x) : _v(x), _a(x) { }
+    LowerBound<F> lower() const { return _v.lower(); }
+    Approximation<F> middle() const { return _a; }
+    UpperBound<F> upper() const { return _v.upper(); }
+    F const& lower_raw() const { return _v.lower_raw(); }
+    F const& middle_raw() const { return _a.raw(); }
+    F const& upper_raw() const { return _v.upper_raw(); }
 };
 
-template<class PR> FloatValue<PR> add_err(FloatValue<PR> const& x1, FloatValue<PR> const& x2, FloatError<PR>& e) {
-    FloatValue<PR> mx1=-x1;
-    RawFloat<PR>::set_rounding_to_nearest();
-    FloatValue<PR> r(x1.raw() + x2.raw());
-    RawFloat<PR>::set_rounding_upward();
-    RawFloat<PR> u=x1.raw()+x2.raw();
-    RawFloat<PR> ml=mx1.raw()-x2.raw();
+template<class F> Value<F> add_err(Value<F> const& x1, Value<F> const& x2, Error<F>& e) {
+    Value<F> mx1=-x1;
+    F::set_rounding_to_nearest();
+    Value<F> r(x1.raw() + x2.raw());
+    F::set_rounding_upward();
+    F u=x1.raw()+x2.raw();
+    F ml=mx1.raw()-x2.raw();
     e.raw() += (u+ml)/2;
     return r;
 }
 
-template<class PR> FloatValue<PR> add_err(FloatValue<PR> const& x, ValidatedFloatApproximation<PR> const& c, FloatError<PR>& e) {
-    RawFloat<PR> const& xv=x.raw();
-    RawFloat<PR> const& cl=c.lower_raw();
-    RawFloat<PR> const& cm=c.middle_raw();
-    RawFloat<PR> const& cu=c.upper_raw();
-    RawFloat<PR>& re=e.raw();
-    RawFloat<PR>::set_rounding_to_nearest();
-    RawFloat<PR> rv=xv+cm;
-    RawFloat<PR>::set_rounding_upward();
-    RawFloat<PR> u=xv+cu;
-    RawFloat<PR> ml=(-xv)-cl;
+template<class F> Value<F> add_err(Value<F> const& x, ValidatedApproximation<F> const& c, Error<F>& e) {
+    F const& xv=x.raw();
+    F const& cl=c.lower_raw();
+    F const& cm=c.middle_raw();
+    F const& cu=c.upper_raw();
+    F& re=e.raw();
+    F::set_rounding_to_nearest();
+    F rv=xv+cm;
+    F::set_rounding_upward();
+    F u=xv+cu;
+    F ml=(-xv)-cl;
     re += (u+ml)/2;
-    return FloatValue<PR>(rv);
+    return Value<F>(rv);
 }
 
-template<class PR> FloatValue<PR> add_err(FloatValue<PR> const& x, FloatBounds<PR> const& c, FloatError<PR>& e) {
-    return add_err(x,ValidatedFloatApproximation<PR>(c),e);
+template<class F> Value<F> add_err(Value<F> const& x, Bounds<F> const& c, Error<F>& e) {
+    return add_err(x,ValidatedApproximation<F>(c),e);
 }
 
-template<class PR> FloatValue<PR> sub_err(FloatValue<PR> const& x1, FloatValue<PR> const& x2, FloatError<PR>& e) {
-    FloatValue<PR> mx1=-x1;
-    RawFloat<PR>::set_rounding_to_nearest();
-    FloatValue<PR> r(x1.raw() - x2.raw());
-    RawFloat<PR>::set_rounding_upward();
-    RawFloat<PR> u=x1.raw()-x2.raw();
-    RawFloat<PR> ml=mx1.raw()+x2.raw();
+template<class F> Value<F> sub_err(Value<F> const& x1, Value<F> const& x2, Error<F>& e) {
+    Value<F> mx1=-x1;
+    F::set_rounding_to_nearest();
+    Value<F> r(x1.raw() - x2.raw());
+    F::set_rounding_upward();
+    F u=x1.raw()-x2.raw();
+    F ml=mx1.raw()+x2.raw();
     e.raw() += (u+ml)/2;
     return r;
 }
 
-template<class PR> FloatValue<PR> mul_no_err(FloatValue<PR> const& x1, FloatValue<PR> const& x2) {
-    RawFloat<PR>::set_rounding_to_nearest();
-    FloatValue<PR> r(x1.raw() * x2.raw());
-    RawFloat<PR>::set_rounding_upward();
+template<class F> Value<F> mul_no_err(Value<F> const& x1, Value<F> const& x2) {
+    F::set_rounding_to_nearest();
+    Value<F> r(x1.raw() * x2.raw());
+    F::set_rounding_upward();
     return r;
 }
 
-template<class PR> FloatValue<PR> mul_err(FloatValue<PR> const& x1, FloatValue<PR> const& x2, FloatError<PR>& e) {
-    FloatValue<PR> mx1=-x1;
-    RawFloat<PR>::set_rounding_to_nearest();
-    FloatValue<PR> r(x1.raw() * x2.raw());
-    RawFloat<PR>::set_rounding_upward();
-    RawFloat<PR> u=x1.raw()*x2.raw();
-    RawFloat<PR> ml=mx1.raw()*x2.raw();
+template<class F> Value<F> mul_err(Value<F> const& x1, Value<F> const& x2, Error<F>& e) {
+    Value<F> mx1=-x1;
+    F::set_rounding_to_nearest();
+    Value<F> r(x1.raw() * x2.raw());
+    F::set_rounding_upward();
+    F u=x1.raw()*x2.raw();
+    F ml=mx1.raw()*x2.raw();
     e.raw() += (u+ml)/2;
     return r;
 }
 
-template<class PR> FloatValue<PR> mul_err(FloatValue<PR> const& x, ValidatedFloatApproximation<PR> const& c, FloatError<PR>& e) {
-    RawFloat<PR> const& xv=x.raw();
-    RawFloat<PR> const& cu=c.upper_raw();
-    RawFloat<PR> const& cm=c.middle_raw();
-    RawFloat<PR> const& cl=c.lower_raw();
-    RawFloat<PR>& re=e.raw();
-    RawFloat<PR>::set_rounding_to_nearest();
-    RawFloat<PR> rv=xv*cm;
-    RawFloat<PR>::set_rounding_upward();
-    RawFloat<PR> u,ml;
+template<class F> Value<F> mul_err(Value<F> const& x, ValidatedApproximation<F> const& c, Error<F>& e) {
+    F const& xv=x.raw();
+    F const& cu=c.upper_raw();
+    F const& cm=c.middle_raw();
+    F const& cl=c.lower_raw();
+    F& re=e.raw();
+    F::set_rounding_to_nearest();
+    F rv=xv*cm;
+    F::set_rounding_upward();
+    F u,ml;
     if(xv>=0) {
-        RawFloat<PR> mcl=-cl;
+        F mcl=-cl;
         u=xv*cu;
         ml=xv*mcl;
     } else {
-        RawFloat<PR> mcu=-cu;
+        F mcu=-cu;
         u=xv*cl;
         ml=xv*mcu;
     }
     re+=(u+ml)/2;
-    return FloatValue<PR>(rv);
+    return Value<F>(rv);
 }
 
-template<class PR> FloatValue<PR> mul_err(FloatValue<PR> const& x, FloatBounds<PR> const& c, FloatError<PR>& e) {
-    return mul_err(x,ValidatedFloatApproximation<PR>(c),e);
+template<class F> Value<F> mul_err(Value<F> const& x, Bounds<F> const& c, Error<F>& e) {
+    return mul_err(x,ValidatedApproximation<F>(c),e);
 }
 
-template<class PR> FloatValue<PR> fma_err(FloatValue<PR> const& x, ValidatedFloatApproximation<PR> const& c, FloatValue<PR> y, FloatError<PR>& e) {
-    RawFloat<PR> const& xv=x.raw();
-    RawFloat<PR> const& cu=c.upper_raw();
-    RawFloat<PR> const& cm=c.middle_raw();
-    RawFloat<PR> const& cl=c.lower_raw();
-    RawFloat<PR> const& yv=y.raw();
-    RawFloat<PR>& re=e.raw();
-    RawFloat<PR>::set_rounding_to_nearest();
-    RawFloat<PR> rv=xv+cm*yv;
-    RawFloat<PR>::set_rounding_upward();
-    RawFloat<PR> u,ml;
+template<class F> Value<F> fma_err(Value<F> const& x, ValidatedApproximation<F> const& c, Value<F> y, Error<F>& e) {
+    F const& xv=x.raw();
+    F const& cu=c.upper_raw();
+    F const& cm=c.middle_raw();
+    F const& cl=c.lower_raw();
+    F const& yv=y.raw();
+    F& re=e.raw();
+    F::set_rounding_to_nearest();
+    F rv=xv+cm*yv;
+    F::set_rounding_upward();
+    F u,ml;
     if(yv>=0) {
-        RawFloat<PR> mcl=-cl;
+        F mcl=-cl;
         u=cu*yv+xv;
         ml=mcl*yv-xv;
     } else {
-        RawFloat<PR> mcu=-cu;
+        F mcu=-cu;
         u=cl*yv+xv;
         ml=mcu*yv-xv;
     }
     re+=(u+ml)/2;
-    return FloatValue<PR>(rv);
+    return Value<F>(rv);
 }
 
-template<class PR> FloatValue<PR> mul_err(FloatValue<PR> const& x1, Nat n2, FloatError<PR>& e) {
-    return mul_err(x1,FloatValue<PR>(n2,x1.precision()),e);
+template<class F> Value<F> mul_err(Value<F> const& x1, Nat n2, Error<F>& e) {
+    return mul_err(x1,Value<F>(n2,x1.precision()),e);
 }
 
-template<class PR> FloatValue<PR> div_err(FloatValue<PR> const& x1, FloatValue<PR> const& x2, FloatError<PR>& e) {
-    FloatValue<PR> mx1=-x1;
-    RawFloat<PR>::set_rounding_to_nearest();
-    FloatValue<PR> r(x1.raw() / x2.raw());
-    RawFloat<PR>::set_rounding_upward();
-    RawFloat<PR> u=x1.raw()/x2.raw();
-    RawFloat<PR> ml=mx1.raw()/x2.raw();
+template<class F> Value<F> div_err(Value<F> const& x1, Value<F> const& x2, Error<F>& e) {
+    Value<F> mx1=-x1;
+    F::set_rounding_to_nearest();
+    Value<F> r(x1.raw() / x2.raw());
+    F::set_rounding_upward();
+    F u=x1.raw()/x2.raw();
+    F ml=mx1.raw()/x2.raw();
     e.raw() += (u+ml)/2;
     return r;
 }
 
-template<class PR> FloatValue<PR> div_err(FloatValue<PR> const& x1, Nat n2, FloatError<PR>& e) {
-    return div_err(x1,FloatValue<PR>(n2,x1.precision()),e);
+template<class F> Value<F> div_err(Value<F> const& x1, Nat n2, Error<F>& e) {
+    return div_err(x1,Value<F>(n2,x1.precision()),e);
 }
 
 // Inplace negation
@@ -362,7 +426,7 @@ template<class F> Void _scal(TaylorModel<ValidatedTag,F>& r, const Value<F>& c) 
 template<class F> Void _scal(TaylorModel<ValidatedTag,F>& r, const Bounds<F>& c)
 {
     typedef typename F::PrecisionType PR;
-    //std::cerr<<"TaylorModel<ValidatedTag,F>::scal(Float64Bounds c) c="<<c<<std::endl;
+    //std::cerr<<"TaylorModel<ValidatedTag,F>::scal(FloatDPBounds c) c="<<c<<std::endl;
     ARIADNE_ASSERT(is_finite(c.lower().raw()) && is_finite(c.upper().raw()));
     ARIADNE_DEBUG_ASSERT(r.error().raw()>=0);
 
@@ -372,7 +436,7 @@ template<class F> Void _scal(TaylorModel<ValidatedTag,F>& r, const Bounds<F>& c)
     }
 
     FloatError<PR> e=nul(r.error());
-    ValidatedFloatApproximation<PR> clmu=c;
+    ValidatedApproximation<F> clmu=c;
     for(typename TaylorModel<ValidatedTag,F>::Iterator riter=r.begin(); riter!=r.end(); ++riter) {
         FloatValue<PR>& rv=riter->data();
         rv=mul_err(rv,clmu,e);
@@ -486,9 +550,9 @@ template<class F> inline Void _add(TaylorModel<ValidatedTag,F>& r, const TaylorM
         ++yiter;
     }
 
-    Float64::set_rounding_upward();
+    FloatDP::set_rounding_upward();
     r.error()=(x.error()+y.error())+e;
-    Float64::set_rounding_to_nearest();
+    FloatDP::set_rounding_to_nearest();
 
     ARIADNE_DEBUG_ASSERT(r.error().raw()>=0);
 }
@@ -530,9 +594,9 @@ template<class F> inline Void _sub(TaylorModel<ValidatedTag,F>& r, const TaylorM
         ++yiter;
     }
 
-    Float64::set_rounding_upward();
+    FloatDP::set_rounding_upward();
     r.error()=(x.error()+y.error())+e;
-    Float64::set_rounding_to_nearest();
+    FloatDP::set_rounding_to_nearest();
 
     ARIADNE_DEBUG_ASSERT(r.error().raw()>=0);
 }
@@ -545,10 +609,10 @@ template<class F> inline Void _sma(TaylorModel<ValidatedTag,F>& r, const TaylorM
     ARIADNE_ASSERT_MSG(x.error().raw()>=0,"x="<<x);
     ARIADNE_ASSERT_MSG(y.error().raw()>=0,"y="<<y);
 
-    VOLATILE Float64 u,ml,myv;
+    VOLATILE FloatDP u,ml,myv;
     FloatError<PR> te=nul(r.error()); // Twice the maximum accumulated error
     FloatError<PR> err=nul(r.error()); // Twice the maximum accumulated error
-    ValidatedFloatApproximation<PR> clmu=c;
+    ValidatedApproximation<F> clmu=c;
 
     // Compute r=x+y, assuming r is empty
     RawFloat<PR>::set_rounding_upward();
@@ -611,7 +675,7 @@ template<class F> inline Void _mul(TaylorModel<ValidatedTag,F>& r, const TaylorM
             const FloatValue<PR>& yv=yiter->data();
             ta=xa+ya;
             FloatValue<PR> tv=mul_no_err(xv,yv);
-            if(r.sweeper().discard(ta,tv.raw())) {
+            if(r.sweeper().discard(ta,tv)) {
                 te+=mag_xv*mag(yv);
             } else {
                 t._append(ta,tv);
@@ -750,12 +814,13 @@ template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::uniq
 }
 
 template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::sweep() {
-    this->_sweeper.sweep(reinterpret_cast<Expansion<F>&>(this->_expansion),reinterpret_cast<F&>(this->_error));
+//    this->_sweeper.sweep(reinterpret_cast<Expansion<F>&>(this->_expansion),reinterpret_cast<F&>(this->_error));
+    this->_sweeper.sweep(this->_expansion,this->_error);
     return *this;
 }
 
 template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::sweep(const SweeperType& sweeper) {
-    sweeper.sweep(reinterpret_cast<Expansion<F>&>(this->_expansion),reinterpret_cast<F&>(this->_error));
+    sweeper.sweep(this->_expansion,this->_error);
     return *this;
 }
 
@@ -804,7 +869,7 @@ template<class F> UnitBox TaylorModel<ValidatedTag,F>::domain() const
 template<class F> auto TaylorModel<ValidatedTag,F>::codomain() const -> CodomainType
 {
     RangeType rng=this->range();
-    return convert_exact_interval(rng,Precision64());
+    return convert_exact_interval(rng,dp);
 }
 
 
@@ -1009,7 +1074,7 @@ compose(const AnalyticFunction& fn, const TaylorModel<ValidatedTag,F>& tm) {
     typedef typename F::PrecisionType PR;
 
     static const DegreeType MAX_DEGREE=20;
-    static const Float64 MAX_TRUNCATION_ERROR=MACHINE_EPSILON;
+    static const FloatDP MAX_TRUNCATION_ERROR=MACHINE_EPSILON;
     SweeperInterface<F> const& sweeper=tm.sweeper();
 
     F max_truncation_error=MAX_TRUNCATION_ERROR;
@@ -1024,9 +1089,9 @@ compose(const AnalyticFunction& fn, const TaylorModel<ValidatedTag,F>& tm) {
 
     Nat d=max_degree;
     FloatValue<PR> c=tm.value();
-    Float64Bounds r=cast_singleton(tm.range());
-    Series<Float64Bounds> centre_series=fn.series(c);
-    Series<Float64Bounds> range_series=fn.series(r);
+    FloatDPBounds r=cast_singleton(tm.range());
+    Series<FloatDPBounds> centre_series=fn.series(c);
+    Series<FloatDPBounds> range_series=fn.series(r);
     //std::cerr<<"c="<<c<<"\nr="<<r<<"\n";
     //std::cerr<<"cs="<<centre_series<<"\nrs="<<range_series<<"\n";
 
@@ -1050,7 +1115,7 @@ compose(const AnalyticFunction& fn, const TaylorModel<ValidatedTag,F>& tm) {
         res=centre_series[d-i-1]+x*res;
         // Don't sweep here...
     }
-    res+=Float64Bounds(-truncation_error,+truncation_error);
+    res+=FloatDPBounds(-truncation_error,+truncation_error);
     return res;
 }
 
@@ -1446,7 +1511,7 @@ template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::_refi
     const FloatError<PR>& xe=x.error();
     const FloatError<PR>& ye=y.error();
     FloatValue<PR> rv,xv,yv;
-    Float64 xu,yu,mxl,myl,u,ml;
+    FloatDP xu,yu,mxl,myl,u,ml;
     MultiIndex a;
 
     typename TaylorModel<ValidatedTag,F>::ConstIterator xiter=x.begin();
@@ -1890,7 +1955,7 @@ template<class F> auto TaylorModel<ApproximateTag,F>::range() const -> RangeType
 }
 
 template<class F> TaylorModel<ApproximateTag,F>& TaylorModel<ApproximateTag,F>::sweep() {
-    this->_sweeper.sweep(reinterpret_cast<Expansion<F>&>(this->_expansion));
+    this->_sweeper.sweep(this->_expansion);
     return *this;
 }
 

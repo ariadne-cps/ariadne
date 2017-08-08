@@ -80,16 +80,16 @@ template<class BS> class ListSet;
 class Grid;
 class PavingInterface;
 
-typedef Constraint<ValidatedScalarFunctionModel64,ValidatedNumericType> ValidatedConstraintModel;
+typedef Constraint<ValidatedScalarFunctionModelDP,ValidatedNumericType> ValidatedConstraintModel;
 
 struct EnclosureConfiguration {
-    ValidatedFunctionModel64Factory _function_factory;
+    ValidatedFunctionModelDPFactory _function_factory;
     Paver _paver;
     Drawer _drawer;
-    EnclosureConfiguration(ValidatedFunctionModel64Factory function_factory);
-    EnclosureConfiguration(ValidatedFunctionModel64FactoryInterface const& function_factory)
-        : EnclosureConfiguration(ValidatedFunctionModel64Factory(function_factory.clone())) { }
-    EnclosureConfiguration(ValidatedFunctionModel64Factory function_factory, Paver paver, Drawer drawer)
+    EnclosureConfiguration(ValidatedFunctionModelDPFactory function_factory);
+    EnclosureConfiguration(ValidatedFunctionModelDPFactoryInterface const& function_factory)
+        : EnclosureConfiguration(ValidatedFunctionModelDPFactory(function_factory.clone())) { }
+    EnclosureConfiguration(ValidatedFunctionModelDPFactory function_factory, Paver paver, Drawer drawer)
         : _function_factory(function_factory), _paver(paver), _drawer(drawer) { }
     EnclosureConfiguration& set_paver(Paver paver) { _paver=paver; return *this; }
     EnclosureConfiguration& set_drawer(Drawer drawer) { _drawer=drawer; return *this; }
@@ -104,9 +104,9 @@ class Enclosure
 {
     ExactBoxType _domain;
     EffectiveVectorFunction _auxiliary_mapping;
-    ValidatedVectorFunctionModel64 _state_function;
-    ValidatedScalarFunctionModel64 _time_function;
-    ValidatedScalarFunctionModel64 _dwell_time_function;
+    ValidatedVectorFunctionModelDP _state_function;
+    ValidatedScalarFunctionModelDP _time_function;
+    ValidatedScalarFunctionModelDP _dwell_time_function;
     List<ValidatedConstraintModel> _constraints;
     mutable ExactBoxType _reduced_domain;
     mutable Bool _is_fully_reduced;
@@ -136,7 +136,7 @@ class Enclosure
     //! \brief The classes used to work with the set.
     const EnclosureConfiguration& configuration() const;
     //! \brief The class used to create new function instances.
-    const ValidatedFunctionModel64Factory& function_factory() const;
+    const ValidatedFunctionModelDPFactory& function_factory() const;
     //! \brief The class used to discretise the set.
     const Paver& paver() const;
     Void set_paver(Paver const&);
@@ -152,23 +152,23 @@ class Enclosure
     //! \brief An over-approximation to the image of \f$D\f$ under \f$f\f$.
     ExactBoxType codomain() const;
     //! \brief The function giving the state \c x in terms of parameters \c s, \f$x=\xi(s)\f$.
-    ValidatedVectorFunctionModel64 const& state_function() const;
+    ValidatedVectorFunctionModelDP const& state_function() const;
     //! \brief The function giving the time \c t in terms of parameters \c s, \f$t=\tau(s)\f$.
-    ValidatedScalarFunctionModel64 const& time_function() const;
+    ValidatedScalarFunctionModelDP const& time_function() const;
     //! \brief The function giving the auxiliary variables in terms of parameters \c s.
-    ValidatedVectorFunctionModel64 const  auxiliary_function() const;
+    ValidatedVectorFunctionModelDP const  auxiliary_function() const;
     //! \brief The function giving the state and auxiliary variables in terms of parameters \c s.
-    ValidatedVectorFunctionModel64 const  state_auxiliary_function() const;
+    ValidatedVectorFunctionModelDP const  state_auxiliary_function() const;
     //! \brief The function giving the state, time and auxiliary variables in terms of parameters \c s.
-    ValidatedVectorFunctionModel64 const  state_time_auxiliary_function() const;
+    ValidatedVectorFunctionModelDP const  state_time_auxiliary_function() const;
     //! \brief The function giving the time since the last discrete jump in terms of the parameters \c s.
-    ValidatedScalarFunctionModel64 const& dwell_time_function() const;
+    ValidatedScalarFunctionModelDP const& dwell_time_function() const;
     //! \brief The function \c g of the constrants \f$g(s)\in C\f$.
-    ValidatedVectorFunctionModel64 const  constraint_function() const;
+    ValidatedVectorFunctionModelDP const  constraint_function() const;
     //! \brief The bounds \c C of the constrants \f$g(s)\in C\f$.
     ExactBoxType const constraint_bounds() const;
     //! \brief The function of parameters \a s giving the \a i<sup>th</sup> state variable.
-    ValidatedScalarFunctionModel64 const  get_function(SizeType i) const;
+    ValidatedScalarFunctionModelDP const  get_function(SizeType i) const;
 
     //! \brief Set the auxiliary function.
     Void set_auxiliary(EffectiveVectorFunction const& aux);
@@ -180,9 +180,9 @@ class Enclosure
     Void new_variable(ExactIntervalType ivl);
     //! \brief Substitutes the expression \f$x_j=v(x_1,\ldots,x_{j-1},x_{j+1}\ldots,x_n)\f$ into the function and constraints.
     //! Requires that \f$v(D_1,\ldots,D_{j-1},D_{j+1}\ldots,D_n) \subset D_j\f$ where \f$D\f$ is the domain.
-    Void substitute(SizeType j, ValidatedScalarFunctionModel64 v);
+    Void substitute(SizeType j, ValidatedScalarFunctionModelDP v);
     //! \brief Substitutes the expression \f$x_j=c\f$ into the function and constraints.
-    Void substitute(SizeType j, Float64 c);
+    Void substitute(SizeType j, FloatDP c);
 
     //! \brief Set the time function to zero.
     Void clear_time();
@@ -190,7 +190,7 @@ class Enclosure
     //! \brief Apply the map \f$r\f$ to the enclosure, obtaining \f$\phi'(s)=r(\phi(s))(x,h)\f$ and \f$\tau'(s)=\tau(s)\f$. \f$f\f$.
     Void apply_map(ValidatedVectorFunction r);
     //! \brief Apply the flow \f$\xi'(s)=\phi(\xi(s),h)\f$ and \f$\tau'(s)=\tau(s)+h\f$.
-    Void apply_fixed_evolve_step(ValidatedVectorFunction phi, Float64Value h);
+    Void apply_fixed_evolve_step(ValidatedVectorFunction phi, FloatDPValue h);
     //! \brief Apply the flow \f$xi'(s)=\phi(\xi(s),\epsilon(\xi(s)))\f$, \f$\tau'(s)=\tau(s)+\epsilon(\xi(s))\f$.
     Void apply_space_evolve_step(ValidatedVectorFunction phi, ValidatedScalarFunction elps);
     //! \brief Apply the flow \f$xi'(s)=\phi(\xi(s),\epsilon(\xi(s),\tau(s)))\f$, \f$\tau'(s)=\tau(s)+\epsilon(\xi(s),\tau(s))\f$.
@@ -201,14 +201,14 @@ class Enclosure
     Void apply_finishing_parameter_evolve_step(ValidatedVectorFunction phi, ValidatedScalarFunction omega);
 
     //! \brief Set \f$\xi'(s,r)=\phi(\xi(s),r)\f$ and \f$\tau'(s,r)=\tau(s)+r\f$ for $0\leq r\leq h.
-    Void apply_full_reach_step(ValidatedVectorFunctionModel64 phi);
+    Void apply_full_reach_step(ValidatedVectorFunctionModelDP phi);
     //! \brief Apply the flow \f$xi'(s,r)=\phi(\xi(s),r)\f$, \f$\tau'(s,r)=\tau(s)+r\f$, \f$0\leq r\leq\epsilon(\xi(s),\tau(s))\f$
-    Void apply_spacetime_reach_step(ValidatedVectorFunctionModel64 phi, ValidatedScalarFunction elps);
+    Void apply_spacetime_reach_step(ValidatedVectorFunctionModelDP phi, ValidatedScalarFunction elps);
     //! \brief Set \f$\xi'(s,r)=\phi(\xi(s),r)\f$ and \f$\tau'(s,r)=\tau(s)+r\f$ for $0\leq r\leq\epsilon(s)$.
-    Void apply_parameter_reach_step(ValidatedVectorFunctionModel64 phi, ValidatedScalarFunction elps);
+    Void apply_parameter_reach_step(ValidatedVectorFunctionModelDP phi, ValidatedScalarFunction elps);
 /*
     //! \brief Apply the flow \f$\phi(x,t)\f$ for \f$t\in[0,h]\f$
-    Void apply_reach_step(ValidatedVectorFunction phi, Float64 h);
+    Void apply_reach_step(ValidatedVectorFunction phi, FloatDP h);
     //! \brief Apply the flow \f$\phi(x,t)\f$ for \f$t\in[0,\max(h,\epsilon(x))]\f$
     Void apply_reach_step(ValidatedVectorFunction phi, ValidatedScalarFunction elps);
 */
@@ -259,7 +259,7 @@ class Enclosure
     //! \brief A point in the image of the <em>unconstrained</em> parameter domain.
     ExactPoint centre() const;
     //! \brief An over-approximation to the radius of the set.
-    Float64Error radius() const;
+    FloatDPError radius() const;
     //! \brief Returns \c true if the set is definitely singleton.
     ValidatedSierpinskian is_bounded() const;
     //! \brief Returns \c true if the set is provably empty.
@@ -385,7 +385,7 @@ Enclosure product(const Enclosure& set1, const Enclosure& set2);
 //! \related Enclosure \brief The image of the \a set under the \a function.
 Enclosure apply(const ValidatedVectorFunction& function, const Enclosure& set);
 //! \related Enclosure \brief The image of the \a set under the \a function. Does not perform domain-checking.
-Enclosure unchecked_apply(const ValidatedVectorFunctionModel64& function, const Enclosure& set);
+Enclosure unchecked_apply(const ValidatedVectorFunctionModelDP& function, const Enclosure& set);
 
 } //namespace Ariadne
 

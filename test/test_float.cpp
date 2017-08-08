@@ -37,8 +37,58 @@
 #include "test.hpp"
 
 namespace Ariadne {
-template<> String class_name<Precision64>() { return "Precision64"; }
-template<> String class_name<PrecisionMP>() { return "PrecisionMP"; }
+template<> String class_name<DoublePrecision>() { return "DoublePrecision"; }
+template<> String class_name<MultiplePrecision>() { return "MultiplePrecision"; }
+FloatDP operator+(FloatDP x1, FloatDP x2);
+FloatDP operator-(FloatDP x1, FloatDP x2);
+FloatDP operator*(FloatDP x1, FloatDP x2);
+FloatDP operator/(FloatDP x1, FloatDP x2);
+FloatDP& operator+=(FloatDP& x1, FloatDP x2);
+FloatDP& operator-=(FloatDP& x1, FloatDP x2);
+FloatDP& operator*=(FloatDP& x1, FloatDP x2);
+FloatDP& operator/=(FloatDP& x1, FloatDP x2);
+FloatDP sqr(FloatDP x);
+FloatDP rec(FloatDP x);
+FloatDP add(FloatDP x1, FloatDP x2);
+FloatDP sub(FloatDP x1, FloatDP x2);
+FloatDP mul(FloatDP x1, FloatDP x2);
+FloatDP div(FloatDP x1, FloatDP x2);
+FloatDP fma(FloatDP x1, FloatDP x2, FloatDP x3);
+FloatDP pow(FloatDP x, Int n);
+FloatDP sqrt(FloatDP x);
+FloatDP exp(FloatDP x);
+FloatDP log(FloatDP x);
+FloatDP sin(FloatDP x);
+FloatDP cos(FloatDP x);
+FloatDP tan(FloatDP x);
+FloatDP asin(FloatDP x);
+FloatDP acos(FloatDP x);
+FloatDP atan(FloatDP x);
+FloatMP operator+(FloatMP const& x1, FloatMP const& x2);
+FloatMP operator-(FloatMP const& x1, FloatMP const& x2);
+FloatMP operator*(FloatMP const& x1, FloatMP const& x2);
+FloatMP operator/(FloatMP const& x1, FloatMP const& x2);
+FloatMP& operator+=(FloatMP& x1, FloatMP const& x2);
+FloatMP& operator-=(FloatMP& x1, FloatMP const& x2);
+FloatMP& operator*=(FloatMP& x1, FloatMP const& x2);
+FloatMP& operator/=(FloatMP& x1, FloatMP const& x2);
+FloatMP sqr(FloatMP const& x);
+FloatMP rec(FloatMP const& x);
+FloatMP add(FloatMP const& x1, FloatMP const& x2);
+FloatMP sub(FloatMP const& x1, FloatMP const& x2);
+FloatMP mul(FloatMP const& x1, FloatMP const& x2);
+FloatMP div(FloatMP const& x1, FloatMP const& x2);
+FloatMP fma(FloatMP const& x1, FloatMP const& x2, FloatMP const& x3);
+FloatMP pow(FloatMP const& x, Int n);
+FloatMP sqrt(FloatMP const& x);
+FloatMP exp(FloatMP const& x);
+FloatMP log(FloatMP const& x);
+FloatMP sin(FloatMP const& x);
+FloatMP cos(FloatMP const& x);
+FloatMP tan(FloatMP const& x);
+FloatMP asin(FloatMP const& x);
+FloatMP acos(FloatMP const& x);
+FloatMP atan(FloatMP const& x);
 } // namespace Ariadne
 
 using namespace std;
@@ -72,9 +122,9 @@ Int main() {
     std::cout<<std::setprecision(20);
     std::cerr<<std::setprecision(20);
 
-    ARIADNE_TEST_CLASS(Float64,TestFloat<Precision64>(Precision64()));
-    ARIADNE_TEST_CLASS(FloatMP,TestFloat<PrecisionMP>(PrecisionMP(64)));
-    ARIADNE_TEST_CLASS(FloatMP,TestFloat<PrecisionMP>(PrecisionMP(192)));
+    ARIADNE_TEST_CLASS(FloatDP,TestFloat<DoublePrecision>(dp));
+    ARIADNE_TEST_CLASS(FloatMP,TestFloat<MultiplePrecision>(MultiplePrecision(64)));
+    ARIADNE_TEST_CLASS(FloatMP,TestFloat<MultiplePrecision>(MultiplePrecision(192)));
 
 
     return ARIADNE_TEST_FAILURES;
@@ -132,39 +182,39 @@ TestFloat<PR>::test_concept()
     x=nul(x); x=pos(x); x=neg(x); x=hlf(x);
 
     // Rounded arithmetic operations
-    x=add_near(x,x); x=add_approx(x,x); x=add_down(x,x); x=add_up(x,x); // x=add_chop(x,x);
-    x=sub_near(x,x); x=add_approx(x,x); x=sub_down(x,x); x=sub_up(x,x); // x=sub_chop(x,x);
-    x=mul_near(x,x); x=add_approx(x,x); x=mul_down(x,x); x=mul_up(x,x); // x=mul_chop(x,x);
-    x=div_near(x,x); x=add_approx(x,x); x=div_down(x,x); x=div_up(x,x); // x=div_chop(x,x);
-    x=fma_approx(x,x,x); x=fma_down(x,x,x); x=fma_up(x,x,x);
-    x=pow_approx(x,n); x=pow_down(x,n); x=pow_up(x,n); // x=pow_chop(x,n);
-    x=pow_approx(x,m); x=pow_down(x,m); x=pow_up(x,m); // x=pow_chop(x,m);
+    x=add(near,x,x); x=add(approx,x,x); x=add(down,x,x); x=add(up,x,x); // x=add_chop(x,x);
+    x=sub(near,x,x); x=add(approx,x,x); x=sub(down,x,x); x=sub(up,x,x); // x=sub_chop(x,x);
+    x=mul(near,x,x); x=add(approx,x,x); x=mul(down,x,x); x=mul(up,x,x); // x=mul_chop(x,x);
+    x=div(near,x,x); x=add(approx,x,x); x=div(down,x,x); x=div(up,x,x); // x=div_chop(x,x);
+    x=fma(approx,x,x,x); x=fma(down,x,x,x); x=fma(up,x,x,x);
+    x=pow(approx,x,n); x=pow(down,x,n); x=pow(up,x,n); // x=pow_chop(x,n);
+    x=pow(approx,x,m); x=pow(down,x,m); x=pow(up,x,m); // x=pow_chop(x,m);
 
     // Non-exact operations
-    x=sqr_approx(x); x=sqr_down(x); x=sqr_up(x); // x=sqr_chop(x);
-    x=rec_approx(x); x=rec_down(x); x=rec_up(x); // x=rec_chop(x);
-    x=sqrt_approx(x); x=sqrt_down(x); x=sqrt_up(x); // x=sqrt_chop(x);
-    x=exp_approx(x); x=exp_down(x); x=exp_up(x); // x=exp_chop(x);
-    x=log_approx(x); x=log_down(x); x=log_up(x); // x=log_chop(x);
-    x=sin_approx(x); x=sin_down(x); x=sin_up(x); // x=sin_chop(x);
-    x=cos_approx(x); x=cos_down(x); x=cos_up(x); // x=cos_chop(x);
-    x=tan_approx(x); x=tan_down(x); x=tan_up(x); // x=tan_chop(x);
-    x=asin_approx(x); x=asin_down(x); x=asin_up(x); // x=asin_chop(x);
-    x=acos_approx(x); x=acos_down(x); x=acos_up(x); // x=acos_chop(x);
-    x=atan_approx(x); x=atan_down(x); x=atan_up(x); // x=atan_chop(x);
+    x=sqr(approx,x); x=sqr(down,x); x=sqr(up,x); // x=sqr_chop(x);
+    x=rec(approx,x); x=rec(down,x); x=rec(up,x); // x=rec_chop(x);
+    x=sqrt(approx,x); x=sqrt(down,x); x=sqrt(up,x); // x=sqrt_chop(x);
+    x=exp(approx,x); x=exp(down,x); x=exp(up,x); // x=exp_chop(x);
+    x=log(approx,x); x=log(down,x); x=log(up,x); // x=log_chop(x);
+    x=sin(approx,x); x=sin(down,x); x=sin(up,x); // x=sin_chop(x);
+    x=cos(approx,x); x=cos(down,x); x=cos(up,x); // x=cos_chop(x);
+    x=tan(approx,x); x=tan(down,x); x=tan(up,x); // x=tan_chop(x);
+    x=asin(approx,x); x=asin(down,x); x=asin(up,x); // x=asin_chop(x);
+    x=acos(approx,x); x=acos(down,x); x=acos(up,x); // x=acos_chop(x);
+    x=atan(approx,x); x=atan(down,x); x=atan(up,x); // x=atan_chop(x);
 
-    x=med_near(x,x); x=rad_up(x,x);
+    x=med(near,x,x); x=rad(up,x,x);
 
     // Mixed RawFloat<PR>/Int arithmetic
-    x=mul_approx(n,x); x=mul_down(n,x); x=mul_up(n,x); // x=mul_chop(n,x);
-    x=mul_approx(m,x); x=mul_down(m,x); x=mul_up(m,x); // x=mul_chop(m,x);
-    x=mul_approx(x,n); x=mul_down(x,n); x=mul_up(x,n); // x=mul_chop(x,n);
-    x=mul_approx(x,m); x=mul_down(x,m); x=mul_up(x,m); // x=mul_chop(x,m);
-    x=div_approx(x,n); x=div_down(x,n); x=div_up(x,n); // x=div_chop(x,n);
-    x=div_approx(x,m); x=div_down(x,m); x=div_up(x,m); // x=div_chop(x,m);
+    x=mul(approx,n,x); x=mul(down,n,x); x=mul(up,n,x); // x=mul_chop(n,x);
+    x=mul(approx,m,x); x=mul(down,m,x); x=mul(up,m,x); // x=mul_chop(m,x);
+    x=mul(approx,x,n); x=mul(down,x,n); x=mul(up,x,n); // x=mul_chop(x,n);
+    x=mul(approx,x,m); x=mul(down,x,m); x=mul(up,x,m); // x=mul_chop(x,m);
+    x=div(approx,x,n); x=div(down,x,n); x=div(up,x,n); // x=div_chop(x,n);
+    x=div(approx,x,m); x=div(down,x,m); x=div(up,x,m); // x=div_chop(x,m);
 
     // Mixed RawFloat<PR>/double arithmetic
-    x=mul_approx(d,x); x=mul_approx(x,d); x=div_approx(x,d);
+    x=mul(approx,d,x); x=mul(approx,x,d); x=div(approx,x,d);
 
     // Reset x to zero
     x=0; x=0.0;
@@ -192,15 +242,19 @@ TestFloat<PR>::test_concept()
     RawFloat<PR>::set_rounding_upward();
     RawFloat<PR>::set_rounding_toward_zero();
 
-    RawFloat<PR>::set_rounding_mode(RawFloat<PR>::to_nearest);
-    RawFloat<PR>::set_rounding_mode(RawFloat<PR>::downward);
-    RawFloat<PR>::set_rounding_mode(RawFloat<PR>::upward);
-    RawFloat<PR>::set_rounding_mode(RawFloat<PR>::toward_zero);
+    RawFloat<PR>::set_rounding_mode(to_nearest);
+    RawFloat<PR>::set_rounding_mode(downward);
+    RawFloat<PR>::set_rounding_mode(upward);
+    RawFloat<PR>::set_rounding_mode(toward_zero);
+
+    RawFloat<PR>::set_rounding_mode(near);
+    RawFloat<PR>::set_rounding_mode(down);
+    RawFloat<PR>::set_rounding_mode(up);
 
     typename RawFloat<PR>::RoundingModeType rnd=RawFloat<PR>::get_rounding_mode();
     RawFloat<PR>::set_rounding_mode(rnd);
 
-    // Precision64
+    // DoublePrecision
     typename RawFloat<PR>::PrecisionType pr=RawFloat<PR>::get_default_precision();
     pr=x.precision();
     x.set_precision(pr);
@@ -269,14 +323,14 @@ TestFloat<PR>::test_limits()
     Float nan=Float::nan(precision);
 
     ARIADNE_TEST_PRINT(eps);
-    ARIADNE_TEST_COMPARE(add_down(one,eps),>,one);
-    ARIADNE_TEST_COMPARE(add_down(one,div_up(eps,two)),==,one);
+    ARIADNE_TEST_COMPARE(add(down,one,eps),>,one);
+    ARIADNE_TEST_COMPARE(add(down,one,div(up,eps,two)),==,one);
 
     ARIADNE_TEST_ASSERT(min>zero);
     ARIADNE_TEST_ASSERT(max<inf);
 
-    ARIADNE_TEST_ASSERT(add_down(inf,min)==inf);
-    ARIADNE_TEST_ASSERT(add_up(max,min)==inf);
+    ARIADNE_TEST_ASSERT(add(down,inf,min)==inf);
+    ARIADNE_TEST_ASSERT(add(up,max,min)==inf);
 
     ARIADNE_TEST_ASSERT(is_nan(nan));
     ARIADNE_TEST_ASSERT(not(nan==nan));
@@ -304,10 +358,6 @@ TestFloat<PR>::test_limits()
 template<class PR> Void
 TestFloat<PR>::test_conversion()
 {
-    static const auto downward = RawFloat<PR>::downward;
-    static const auto to_nearest = RawFloat<PR>::to_nearest;
-    static const auto upward = RawFloat<PR>::upward;
-
     // Convert from integers
     Int n;
     n=std::numeric_limits<Int>::min();
@@ -330,9 +380,9 @@ TestFloat<PR>::test_conversion()
 
     // Convert from a negative rational
     num=-2; den=5;
-    ARIADNE_TEST_COMPARE(Rational(RawFloat<PR>(q,RawFloat<PR>::downward,precision)),<,q);
-    ARIADNE_TEST_COMPARE(Rational(RawFloat<PR>(q,RawFloat<PR>::upward,precision)),>,q);
-    ARIADNE_TEST_COMPARE(RawFloat<PR>(q,RawFloat<PR>::downward,precision),<,RawFloat<PR>(q,RawFloat<PR>::upward,precision));
+    ARIADNE_TEST_COMPARE(Rational(RawFloat<PR>(q,downward,precision)),<,q);
+    ARIADNE_TEST_COMPARE(Rational(RawFloat<PR>(q,upward,precision)),>,q);
+    ARIADNE_TEST_COMPARE(RawFloat<PR>(q,downward,precision),<,RawFloat<PR>(q,upward,precision));
 
 };
 
@@ -454,7 +504,7 @@ TestFloat<PR>::test_comparison()
 }
 
 template<> Void
-TestFloat<Precision64>::test_rounding()
+TestFloat<DoublePrecision>::test_rounding()
 {
     volatile double one   = 1;
     volatile double two   = 2;
@@ -469,16 +519,16 @@ TestFloat<Precision64>::test_rounding()
     const double twofifthschop   = 0.39999999999999996669;
     const double twofifthsnearest= 0.40000000000000002220;
 
-    Ariadne::set_rounding_mode(Ariadne::downward);
+    Ariadne::set_rounding_mode(downward);
     double onethirdrounddown=one/three;
     ARIADNE_TEST_EQUAL(onethirdrounddown, onethirddown);
-    Ariadne::set_rounding_mode(Ariadne::upward);
+    Ariadne::set_rounding_mode(upward);
     double onethirdroundup=one/three;
     ARIADNE_TEST_EQUAL(onethirdroundup, onethirdup);
-    Ariadne::set_rounding_mode(Ariadne::toward_zero);
+    Ariadne::set_rounding_mode(toward_zero);
     double onethirdroundchop=one/three;
     ARIADNE_TEST_EQUAL(onethirdroundchop, onethirdchop);
-    Ariadne::set_rounding_mode(Ariadne::to_nearest);
+    Ariadne::set_rounding_mode(to_nearest);
     double onethirdroundnearest=one/three;
     ARIADNE_TEST_EQUAL(onethirdroundnearest, onethirdnearest);
 
@@ -545,9 +595,9 @@ TestFloat<PR>::test_arithmetic()
     cout << __PRETTY_FUNCTION__ << endl;
 
     static bool full_precision_warning = false;
-    const RawFloat<PR> pi_near=RawFloat<PR>::pi(precision,RawFloat<PR>::to_nearest);
+    const RawFloat<PR> pi_near=RawFloat<PR>::pi(near,precision);
     const RawFloat<PR> four   =RawFloat<PR>(4,precision);
-    if( mul_up(pi_near,4.0) != mul_up(pi_near,four) ) {
+    if( mul(up,pi_near,4.0) != mul(up,pi_near,four) ) {
         if(not full_precision_warning) {
             full_precision_warning=true;
             ARIADNE_TEST_WARN("Mixed Float/BuiltinTag operations may not use full precision.");
@@ -584,7 +634,7 @@ TestFloat<PR>::test_arithmetic()
     ARIADNE_TEST_ASSERT(f5==3.25);
 
     // Median (this should remain exact here)
-    f3=med_near(f1,f2);
+    f3=med(near,f1,f2);
     cout << f1 << " <= med(" << f1 << "," << f2 << ")=" << f3 << " <= " << f2 << endl;
     ARIADNE_TEST_ASSERT(f1<=f3); ARIADNE_TEST_ASSERT(f3<=f2);
     ARIADNE_TEST_ASSERT(f3==1.75);
@@ -597,46 +647,46 @@ TestFloat<PR>::test_arithmetic()
     ARIADNE_TEST_ASSERT(f3==-1.25);
 
     // Rounding
-    f3=next_down(f1);
-    f4=next_up(f1);
+    f3=next(down,f1);
+    f4=next(up,f1);
     cout << f3 << " < " << f1 << " < " << f4 << endl;
     ARIADNE_TEST_COMPARE(f3,<,f1); ARIADNE_TEST_COMPARE(f4,>,f1);
 
     // Addition (this should remain exact here)
-    f3=add_down(f1,f2);
-    f4=add_up(f1,f2);
+    f3=add(down,f1,f2);
+    f4=add(up,f1,f2);
     cout << f3 << " <= " << f1 << " + " << f2 << " <= " << f4 << endl;
     ARIADNE_TEST_ASSERT(f3<=3.5); ARIADNE_TEST_ASSERT(f4>=3.5);
     // Addition
-    ARIADNE_TEST_COMPARE(add_up(RawFloat<PR>(1.0),RawFloat<PR>(eps/2)),>,1.0);
-    ARIADNE_TEST_COMPARE(add_down(RawFloat<PR>(1.0),RawFloat<PR>(eps)),>,1.0);
-    if(add_down(RawFloat<PR>(1.0),RawFloat<PR>(eps/2)) != RawFloat<PR>(1.0)) {
+    ARIADNE_TEST_COMPARE(add(up,RawFloat<PR>(1.0),RawFloat<PR>(eps/2)),>,1.0);
+    ARIADNE_TEST_COMPARE(add(down,RawFloat<PR>(1.0),RawFloat<PR>(eps)),>,1.0);
+    if(add(down,RawFloat<PR>(1.0),RawFloat<PR>(eps/2)) != RawFloat<PR>(1.0)) {
         ARIADNE_TEST_WARN("Results of floating-point operations stored to higher-precision in registers than memory.");
-        ARIADNE_TEST_COMPARE(add_down(RawFloat<PR>(1.0),RawFloat<PR>(eps/(1<<11))),>,RawFloat<PR>(1.0));
+        ARIADNE_TEST_COMPARE(add(down,RawFloat<PR>(1.0),RawFloat<PR>(eps/(1<<11))),>,RawFloat<PR>(1.0));
     }
-    ARIADNE_TEST_COMPARE(add_down(RawFloat<PR>(1.0),RawFloat<PR>(eps/(1<<12))),==,RawFloat<PR>(1.0));
-    RawFloat<PR> one_add_down_half_epsilon=add_down(RawFloat<PR>(1.0),RawFloat<PR>(eps/2));
+    ARIADNE_TEST_COMPARE(add(down,RawFloat<PR>(1.0),RawFloat<PR>(eps/(1<<12))),==,RawFloat<PR>(1.0));
+    RawFloat<PR> one_add_down_half_epsilon=add(down,RawFloat<PR>(1.0),RawFloat<PR>(eps/2));
     ARIADNE_TEST_COMPARE(one_add_down_half_epsilon,==,RawFloat<PR>(1.0));
     ARIADNE_TEST_EQUAL(RawFloat<PR>(1.0),1.0);
     ARIADNE_TEST_COMPARE(RawFloat<PR>(1.0),==,1.0);
 
 
     // Subtraction (this should remain exact here)
-    f3=sub_down(f1,f2);
-    f4=sub_up(f1,f2);
+    f3=sub(down,f1,f2);
+    f4=sub(up,f1,f2);
     cout << f3 << " <= " << f1 << " - " << f2 << " <= " << f4 << endl;
     ARIADNE_TEST_ASSERT(f3<=-1); ARIADNE_TEST_ASSERT(f4>=-1);
 
     // Multiplication (this should remain exact here)
-    f3=mul_down(f1,f2);
-    f4=mul_up(f1,f2);
+    f3=mul(down,f1,f2);
+    f4=mul(up,f1,f2);
     cout << f3 << " <= " << f1 << " * " << f2 << " <= " << f4 << endl;
     ARIADNE_TEST_ASSERT(f3<=2.8125); ARIADNE_TEST_ASSERT(f4>=2.8125);
 
     // Division (not exact; should catch errors here)
-    f3=div_down(f1,f2);
-    f4=div_up(f1,f2);
-    f5=div_approx(f1,f2);
+    f3=div(down,f1,f2);
+    f4=div(up,f1,f2);
+    f5=div(approx,f1,f2);
     cout << f3 << " <= " << f1 << " / " << f2 << " <= " << f4 << endl;
     RawFloat<PR> five = 5;
     RawFloat<PR> nine = 9;
@@ -650,24 +700,24 @@ TestFloat<PR>::test_arithmetic()
     ARIADNE_TEST_COMPARE(five_divby_nine_down,<,expected_five_ninths_up);
 
     RawFloat<PR>::set_rounding_to_nearest();
-    ARIADNE_TEST_COMPARE(div_down(RawFloat<PR>(5.0),RawFloat<PR>(9.0)),<,div_up(RawFloat<PR>(5.0),RawFloat<PR>(9.0)));
-    ARIADNE_TEST_COMPARE(div_down(RawFloat<PR>(5),RawFloat<PR>(9)),<,div_up(RawFloat<PR>(5),RawFloat<PR>(9)));
-    ARIADNE_TEST_COMPARE(div_down(five,nine),<,div_up(five,nine));
-    RawFloat<PR> five_ninths_down = div_down(five,nine);
-    RawFloat<PR> five_ninths_up = div_up(five,nine);
+    ARIADNE_TEST_COMPARE(div(down,RawFloat<PR>(5.0),RawFloat<PR>(9.0)),<,div(up,RawFloat<PR>(5.0),RawFloat<PR>(9.0)));
+    ARIADNE_TEST_COMPARE(div(down,RawFloat<PR>(5),RawFloat<PR>(9)),<,div(up,RawFloat<PR>(5),RawFloat<PR>(9)));
+    ARIADNE_TEST_COMPARE(div(down,five,nine),<,div(up,five,nine));
+    RawFloat<PR> five_ninths_down = div(down,five,nine);
+    RawFloat<PR> five_ninths_up = div(up,five,nine);
     ARIADNE_TEST_COMPARE(five_ninths_down, < , five_ninths_up);
-    ARIADNE_TEST_COMPARE(mul_down(five_ninths_down,nine), < , five);
-    ARIADNE_TEST_COMPARE(mul_up(five_ninths_up,nine), > , five);
+    ARIADNE_TEST_COMPARE(mul(down,five_ninths_down,nine), < , five);
+    ARIADNE_TEST_COMPARE(mul(up,five_ninths_up,nine), > , five);
 
 
     // Power (not exact; should catch errors here)
-    f3=pow_down(f1,3);
-    f4=pow_up(f1,3);
+    f3=pow(down,f1,3);
+    f4=pow(up,f1,3);
     cout << f3 << " <= pow(" << f1 << ",3) <= " << f4 << endl;
     ARIADNE_TEST_ASSERT(f3<=1.953125); ARIADNE_TEST_ASSERT(f4>=1.953125);
 
-    f3=pow_down(f1,-2);
-    f4=pow_up(f1,-2);
+    f3=pow(down,f1,-2);
+    f4=pow(up,f1,-2);
     cout << f3 << " <= pow(" << f1 << ",-2) <= " << f4 << endl;
     //ARIADNE_TEST_ASSERT(Rational(f3)<Rational(16,25));
     //ARIADNE_TEST_ASSERT(Rational(f4)>Rational(16,25));
@@ -681,29 +731,29 @@ TestFloat<PR>::test_arithmetic()
 
     // Conversion to integer types
     Int i3,i4;
-    i3=numeric_cast<Int>(floor(f1));
-    i4=numeric_cast<Int>(ceil(f1));
+    i3=integer_cast<Int>(floor(f1));
+    i4=integer_cast<Int>(ceil(f1));
     cout << i3 << " < " << f1 << " < " << i4 << endl;
     ARIADNE_TEST_ASSERT(i3==1); ARIADNE_TEST_ASSERT(i4==2);
-    i3=numeric_cast<Int>(floor(f2));
-    i4=numeric_cast<Int>(ceil(f2));
+    i3=integer_cast<Int>(floor(f2));
+    i4=integer_cast<Int>(ceil(f2));
     cout << i3 << " < " << f2 << " < " << i4 << endl;
     ARIADNE_TEST_ASSERT(i3==-4); ARIADNE_TEST_ASSERT(i4==-3);
 
     // Check interval conversions
     RawFloat<PR> z(0); RawFloat<PR> o(1); RawFloat<PR> t(3);
 
-    RawFloat<PR> odtd=div_down(o,t);
-    RawFloat<PR> odtu=div_up(o,t);
+    RawFloat<PR> odtd=div(down,o,t);
+    RawFloat<PR> odtu=div(up,o,t);
     cout << odtd << " <= 1/3 <= " << odtu << endl;
     ARIADNE_TEST_COMPARE(odtd,<,odtu);
     // Regression test to catch errors when RawFloat<PR> result is not assigned to a variable
-    cout << div_down(o,t) << " <= 1/3 <= " << div_up(o,t) << endl;
-    ARIADNE_TEST_COMPARE(div_down(o,t),<,div_up(o,t));
+    cout << div(down,o,t) << " <= 1/3 <= " << div(up,o,t) << endl;
+    ARIADNE_TEST_COMPARE(div(down,o,t),<,div(up,o,t));
 
-    ARIADNE_TEST_COMPARE(med_near(RawFloat<PR>(2),RawFloat<PR>(3)),==,2.5);
-    ARIADNE_TEST_COMPARE(rad_up(RawFloat<PR>(2),RawFloat<PR>(3)),>=,0.5);
-    ARIADNE_TEST_COMPARE(rad_up(RawFloat<PR>(2),RawFloat<PR>(3)),<=,0.5000000000000002);
+    ARIADNE_TEST_COMPARE(med(near,RawFloat<PR>(2),RawFloat<PR>(3)),==,2.5);
+    ARIADNE_TEST_COMPARE(rad(up,RawFloat<PR>(2),RawFloat<PR>(3)),>=,0.5);
+    ARIADNE_TEST_COMPARE(rad(up,RawFloat<PR>(2),RawFloat<PR>(3)),<=,0.5000000000000002);
 
     // The following line should not compile
     // f5=f1+f2;
@@ -723,8 +773,8 @@ TestFloat<PR>::test_function()
 
     x=1;
     ra=exp(x);
-    rl=next_down(ra);
-    ru=next_up(ra);
+    rl=next(down,ra);
+    ru=next(up,ra);
     ARIADNE_TEST_PRINT(rl);
     ARIADNE_TEST_PRINT(ru);
     ARIADNE_TEST_ASSERT(rl<ru);
@@ -747,14 +797,14 @@ template<class PR> Void
 TestFloat<PR>::test_cosine()
 {
     //3.14159265358979323846264338327950288419716939937510
-    const RawFloat<PR> pi_down=RawFloat<PR>::pi(precision,RawFloat<PR>::downward);
-    const RawFloat<PR> pi_up  =RawFloat<PR>::pi(precision,RawFloat<PR>::upward);
+    const RawFloat<PR> pi_down=RawFloat<PR>::pi(down,precision);
+    const RawFloat<PR> pi_up  =RawFloat<PR>::pi(up,precision);
     const RawFloat<PR> three  =RawFloat<PR>(3,precision);
 
-    static const RawFloat<PR> third_pi_down=div_down(pi_down,three);
-    static const RawFloat<PR> third_pi_up  =div_up  (pi_up  ,three);
+    static const RawFloat<PR> third_pi_down=div(down,pi_down,three);
+    static const RawFloat<PR> third_pi_up  =div(up  ,pi_up  ,three);
 
-    RawFloat<PR>::set_rounding_mode(RawFloat<PR>::upward);
+    RawFloat<PR>::set_rounding_mode(upward);
     ARIADNE_TEST_EQUAL(cos(RawFloat<PR>(0.0)),1.0);
     ARIADNE_TEST_COMPARE(cos(third_pi_down),>,0.5);
     ARIADNE_TEST_COMPARE(sqr(cos(pi_down/4)),>,0.5);
@@ -767,7 +817,7 @@ TestFloat<PR>::test_cosine()
     ARIADNE_TEST_COMPARE(cos(3*pi_down),>,-1.0);
     ARIADNE_TEST_COMPARE(cos(3*pi_up),>,-1.0);
 
-    RawFloat<PR>::set_rounding_mode(RawFloat<PR>::downward);
+    RawFloat<PR>::set_rounding_mode(downward);
     ARIADNE_TEST_EQUAL(cos(RawFloat<PR>(0.0)),1.0);
     ARIADNE_TEST_COMPARE(cos(third_pi_up),<,0.5);
     ARIADNE_TEST_COMPARE(sqr(cos(pi_up/4)),<,0.5);
@@ -781,11 +831,11 @@ TestFloat<PR>::test_cosine()
     ARIADNE_TEST_COMPARE(cos(3*pi_up),==,-1.0);
 
     static const RawFloat<PR> one=1.0;
-    RawFloat<PR>::set_rounding_mode(RawFloat<PR>::upward);
+    RawFloat<PR>::set_rounding_mode(upward);
     RawFloat<PR> sin_rnd_up_one=sin(one);
-    RawFloat<PR>::set_rounding_mode(RawFloat<PR>::downward);
+    RawFloat<PR>::set_rounding_mode(downward);
     RawFloat<PR> sin_rnd_down_one=sin(one);
-    RawFloat<PR>::set_rounding_mode(RawFloat<PR>::to_nearest);
+    RawFloat<PR>::set_rounding_mode(to_nearest);
     RawFloat<PR> sin_rnd_approx_one=sin(one);
     ARIADNE_TEST_COMPARE(sin_rnd_down_one,<=,sin_rnd_approx_one);
     ARIADNE_TEST_COMPARE(sin_rnd_approx_one,<=,sin_rnd_up_one);
@@ -793,27 +843,27 @@ TestFloat<PR>::test_cosine()
 }
 
 template<> Void
-TestFloat<Precision64>::test_arctan()
+TestFloat<DoublePrecision>::test_arctan()
 {
-    Precision64 pr;
+    DoublePrecision pr;
 
-    static const Float64 pi_down=3.1415926535897931;
-    //static const Float64 pi_near=3.1415926535897931;
-    static const Float64 pi_up  =3.1415926535897936;
+    static const FloatDP pi_down=3.1415926535897931;
+    //static const FloatDP pi_near=3.1415926535897931;
+    static const FloatDP pi_up  =3.1415926535897936;
 
-    static const Float64 atan_quarter_down=0.244978663126864143;
-    //static const Float64 atan_quarter_near=0.244978663126864154;
-    static const Float64 atan_quarter_up  =0.244978663126864171;
+    static const FloatDP atan_quarter_down=0.244978663126864143;
+    //static const FloatDP atan_quarter_near=0.244978663126864154;
+    static const FloatDP atan_quarter_up  =0.244978663126864171;
 
-    static const Float64 sqrt_three_down=1.732050807568877193;
-    //static const Float64 sqrt_three_near=1.732050807568877294;
-    static const Float64 sqrt_three_up  =1.732050807568877415;
+    static const FloatDP sqrt_three_down=1.732050807568877193;
+    //static const FloatDP sqrt_three_near=1.732050807568877294;
+    static const FloatDP sqrt_three_up  =1.732050807568877415;
 
-    static const Float64 zero=0.0;
-    static const Float64 one=1.0;
-    static const Float64 eps=Float64::eps(pr);
+    static const FloatDP zero=0.0;
+    static const FloatDP one=1.0;
+    static const FloatDP eps=FloatDP::eps(pr);
 
-    Float64::set_rounding_mode(Float64::upward);
+    FloatDP::set_rounding_mode(upward);
     ARIADNE_TEST_EQUAL(atan(zero),zero);
     ARIADNE_TEST_COMPARE(atan(one)*4,>=,pi_up);
     ARIADNE_TEST_COMPARE(atan(-one)*4,>=,-pi_down);
@@ -824,7 +874,7 @@ TestFloat<Precision64>::test_arctan()
     ARIADNE_TEST_COMPARE(atan(one/4),>=,atan_quarter_up);
     ARIADNE_TEST_COMPARE(atan(-one/4),>=,-atan_quarter_down);
 
-    Float64::set_rounding_mode(Float64::downward);
+    FloatDP::set_rounding_mode(downward);
     ARIADNE_TEST_EQUAL(atan(zero),zero);
     ARIADNE_TEST_COMPARE(atan(+one)*4,<=,pi_down);
     ARIADNE_TEST_COMPARE(atan(-one)*4,<=,-pi_up);
@@ -847,13 +897,13 @@ template<class PR> Void
 TestFloat<PR>::test_arctan()
 {
     //pi~=3.14159265358979323846264338327950288419716939937510
-    const RawFloat<PR> pi_down=RawFloat<PR>::pi(precision,RawFloat<PR>::downward);
-    const RawFloat<PR> pi_near=RawFloat<PR>::pi(precision,RawFloat<PR>::to_nearest);
-    const RawFloat<PR> pi_up  =RawFloat<PR>::pi(precision,RawFloat<PR>::upward);
+    const RawFloat<PR> pi_down=RawFloat<PR>::pi(down,precision);
+    const RawFloat<PR> pi_near=RawFloat<PR>::pi(near,precision);
+    const RawFloat<PR> pi_up  =RawFloat<PR>::pi(up,precision);
 
     RawFloat<PR> three=RawFloat<PR>(3,precision);
-    const RawFloat<PR> sqrt_three_down=sqrt_down(three);
-    const RawFloat<PR> sqrt_three_up  =sqrt_up(three);
+    const RawFloat<PR> sqrt_three_down=sqrt(down,three);
+    const RawFloat<PR> sqrt_three_up  =sqrt(up,three);
 
     const RawFloat<PR> zero(0,precision);
     const RawFloat<PR> one(1,precision);
@@ -862,7 +912,7 @@ TestFloat<PR>::test_arctan()
     const RawFloat<PR> six(6,precision);
     const RawFloat<PR> eps=RawFloat<PR>::eps(precision);
 
-    RawFloat<PR>::set_rounding_mode(RawFloat<PR>::upward);
+    RawFloat<PR>::set_rounding_mode(upward);
     ARIADNE_TEST_EQUAL(atan(zero),zero);
     ARIADNE_TEST_COMPARE(mul(atan(+one),four),>=,pi_up);
     ARIADNE_TEST_COMPARE(mul(atan(-one),four),>=,-pi_down);
@@ -871,7 +921,7 @@ TestFloat<PR>::test_arctan()
     ARIADNE_TEST_COMPARE(mul(atan(+1/sqrt_three_down),six),>=,pi_up);
     ARIADNE_TEST_COMPARE(mul(atan(-1/sqrt_three_up),six),>=,-pi_down);
 
-    RawFloat<PR>::set_rounding_mode(RawFloat<PR>::downward);
+    RawFloat<PR>::set_rounding_mode(downward);
     ARIADNE_TEST_EQUAL(atan(zero),zero);
     ARIADNE_TEST_COMPARE(mul(atan(+one),four),<=,pi_down);
     ARIADNE_TEST_COMPARE(mul(atan(-one),four),<=,-pi_up);

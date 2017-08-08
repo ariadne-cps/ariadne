@@ -159,7 +159,7 @@ Void compute_evolution(const CompositeHybridAutomaton& heating_system,const Gene
     simulator.set_step_size(0.03125);
 
     // Set an initial point for the simulation
-    HybridExactPoint initial_point(heating_off, {C=0.0_dec,T=18.0_dec} );
+    HybridRealPoint initial_point(heating_off, {C=0.0_dec,T=18.0_dec} );
     cout << "initial_point=" << initial_point << endl;
     // Set the maximum simulation time
     HybridTime simulation_time(8.0,9);
@@ -167,7 +167,7 @@ Void compute_evolution(const CompositeHybridAutomaton& heating_system,const Gene
 
     // Compute a simulation trajectory
     cout << "Computing simulation trajectory... \n" << flush;
-    Orbit<HybridExactPoint> trajectory = simulator.orbit(heating_system,initial_point,simulation_time);
+    Orbit<HybridApproximatePoint> trajectory = simulator.orbit(heating_system,initial_point,simulation_time);
     cout << "    done." << endl;
     // Write the simulation trajectory to standard output and plot.
     cout << "Writing simulation trajectory... " << flush;
@@ -305,7 +305,7 @@ Void compute_reachable_sets_with_serialisation(const CompositeHybridAutomaton& h
     // The intermediate set is stored to an archive file and used to build the initial set for the reach step
     // Note that because of peculiarities in the Boost serialization library,
     // the object to be serialized must be declared const.
-    Float64 tlower=0.25; Float64 tupper=0.75;
+    FloatDP tlower=0.25; FloatDP tupper=0.75;
     HybridTime transient_time(tlower,4);
     HybridTime recurrent_time(tupper-tlower,16);
 

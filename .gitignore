@@ -9,3 +9,10 @@ obj/
 *.gch
 .DS_Store
 .settings
+
+source/*/Makefile
+test/Makefile
+wrap/Makefile
+examples/Makefile
+examples/*/Makefile
+

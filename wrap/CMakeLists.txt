@@ -11,12 +11,12 @@ ELSE()
 ENDIF()
 
 
-add_library(pynumeric-src OBJECT
+add_library(pyariadne-numeric-src OBJECT
     numeric_module.cpp
     numeric_submodule.cpp
 )
 
-add_library(pyalgebra-src OBJECT
+add_library(pyariadne-algebra-src OBJECT
     utilities.cpp
     algebra_module.cpp
     numeric_submodule.cpp

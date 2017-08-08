@@ -51,7 +51,7 @@ template<class X> Pair<Variable<X>,X> operator|(const Variable<X>& v, const Cons
 template<class T, class X> class Valuation;
 typedef Valuation<Integer> IntegerValuation;
 typedef Valuation<String> StringValuation;
-
+typedef Valuation<Real> RealValuation;
 
 //! \ingroup ExpressionModule
 //! \brief A valuation of named variables of mathematical type \a T, with values represented by values of concrete type \a X,
@@ -71,7 +71,7 @@ class Valuation
     Valuation() { }
     //! \brief Construct from a mapping from \em names of variables to values.
     Valuation(const Map<Identifier,ValueType>& m) : _values(m) { }
-    Valuation(const Map<Variable<Type>,ValueType>& m);
+    Valuation(const Map<Variable<Type>,ValueType>& m) { for(auto val : m) { this->_values.insert(val.first.name(),val.second); } }
     Valuation(const Assignment<Variable<T>,X>& a);
     Valuation(const List<Assignment<Variable<T>,X> >& la);
     Valuation(const InitializerList<Pair<Variable<T>,X> >& lst);
@@ -154,7 +154,9 @@ class ContinuousValuation
     : public Valuation<Real,X>
 {
   public:
-    ContinuousValuation(const Map<Identifier,X>& rm) : Valuation<Real,X>(rm) { }
+    ContinuousValuation() : Valuation<Real,X>() { }
+//    ContinuousValuation(const Map<Identifier,X>& rm) : Valuation<Real,X>(rm) { }
+    ContinuousValuation(const Map<Variable<Real>,X>& rm) : Valuation<Real,X>(rm) { }
     typedef X RealType;
 };
 
@@ -191,7 +193,7 @@ inline OutputStream& operator<<(OutputStream& os, const DiscreteValuation& val) 
 }
 
 template<class X> inline OutputStream& operator<<(OutputStream& os, const ContinuousValuation<X>& val) {
-    return os << val.real_values();
+    return os << val.values();
 }
 
 template<class X> inline OutputStream& operator<<(OutputStream& os, const Valuation<X>& val) {
@@ -210,10 +212,14 @@ template<class V, class X> Valuation<V,X>::Valuation(const List<Assignment<Varia
     for(Nat i=0; i!=la.size(); ++i) { this->insert(la[i].lhs,la[i].rhs); } }
 template<class V, class X> Valuation<V,X>::Valuation(const InitializerList<Pair<Variable<V>,X> >& la) {
     for(auto iter=la.begin(); iter!=la.end(); ++iter) { this->insert(iter->first,iter->second); } }
-Boolean evaluate(const Expression<Boolean>&, const StringValuation&);
-String evaluate(const Expression<String>&, const StringValuation&);
-Integer evaluate(const Expression<Integer>&, const IntegerValuation&);
-Boolean evaluate(const Expression<Boolean>&, const DiscreteValuation&);
+
+Boolean evaluate(const Expression<Boolean>& e, const DiscreteValuation& q);
+Boolean evaluate(const Expression<Boolean>& e, const StringValuation& q);
+String evaluate(const Expression<String>& e, const StringValuation& q);
+Integer evaluate(const Expression<Integer>& e, const IntegerValuation& q);
+Real evaluate(const Expression<Real>& e, const Valuation<Real>& q);
+Kleenean evaluate(const Expression<Kleenean>& e, const Valuation<Real>& q);
+
 template<class X> X evaluate(const Expression<Real>& e, const ContinuousValuation<X>&);
 template<class X> Kleenean evaluate(const Expression<Kleenean>&, const ContinuousValuation<X>&);
 

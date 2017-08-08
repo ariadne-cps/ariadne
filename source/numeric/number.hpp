@@ -63,11 +63,6 @@ class NumberInterface;
 template<class P> class Number;
 template<class P> struct IsNumericType<Number<P>> : True { };
 
-template<class N1, class N2, EnableIf<And<IsNumericType<N1>,IsNumericType<N2>>> =dummy> inline N1& operator+=(N1& n1, const N2& n2) { n1=n1+n2; return n1; }
-template<class N1, class N2, EnableIf<And<IsNumericType<N1>,IsNumericType<N2>>> =dummy> inline N1& operator-=(N1& n1, const N2& n2) { n1=n1-n2; return n1; }
-template<class N1, class N2, EnableIf<And<IsNumericType<N1>,IsNumericType<N2>>> =dummy> inline N1& operator*=(N1& n1, const N2& n2) { n1=n1*n2; return n1; }
-template<class N1, class N2, EnableIf<And<IsNumericType<N1>,IsNumericType<N2>>> =dummy> inline N1& operator/=(N1& n1, const N2& n2) { n1=n1/n2; return n1; }
-
 
 /*
 struct DefineBuiltinFloatOperators {
@@ -106,7 +101,6 @@ class DeclareNumberOperators {
 
 //! \ingroup NumericModule
 //! \brief Generic numbers with computational paradigm \a P, which may be %EffectiveTag, %ValidatedTag, %UpperTag, %LowerTag or %ApproximateTag.
-// Number
 template<class P> class Number
 {
     static_assert(IsParadigm<P>::value,"P must be a paradigm");
@@ -141,7 +135,7 @@ template<class P> class Number
     // Construct from a builtin integer
     template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> Number(const N& n) : Number<P>(Integer(n)) { }
     // Construct from a builtin floating-point number
-    template<class X, EnableIf<And<IsSame<P,ApproximateTag>,IsBuiltinFloatingPoint<X>>> =dummy> Number(const X& x) : Number<P>(Float<P,Precision64>(x)) { }
+    template<class X, EnableIf<And<IsSame<P,ApproximateTag>,IsBuiltinFloatingPoint<X>>> =dummy> Number(const X& x) : Number<P>(Float<P,DoublePrecision>(x)) { }
 
     // Construct from a type which is convertible to Real.
     template<class X, EnableIf<IsWeaker<P,ParadigmTag<X>>> =dummy,
@@ -152,7 +146,7 @@ template<class P> class Number
     template<class X, EnableIf<IsWeaker<P,ParadigmTag<X>>> =dummy,
                       DisableIf<IsConvertible<X,Real>> =dummy,
                       EnableIf<IsConvertible<X,Number<ParadigmTag<X>>>> =dummy,
-                      DisableIf<IsConvertible<X,Float64Approximation>> =dummy,
+                      DisableIf<IsConvertible<X,FloatDPApproximation>> =dummy,
                       DisableIf<IsConvertible<X,FloatMPApproximation>> =dummy>
         Number<P>(X const & x) : Number<P>(x.operator Number<ParadigmTag<X>>()) { }
 
@@ -160,28 +154,28 @@ template<class P> class Number
     template<class X, EnableIf<IsWeaker<P,ParadigmTag<X>>> =dummy,
                       DisableIf<IsConvertible<X,Real>> =dummy,
                       EnableIf<IsConvertible<X,Number<ParadigmTag<X>>>> =dummy,
-                      EnableIf<Or<IsConvertible<X,Float64Approximation>,IsConvertible<X,FloatMPApproximation>>> =dummy>
+                      EnableIf<Or<IsConvertible<X,FloatDPApproximation>,IsConvertible<X,FloatMPApproximation>>> =dummy>
         explicit Number<P>(X const & x) : Number<P>(x.operator Number<ParadigmTag<X>>()) { }
 
     //! \brief Get the value of the number as a double-precision floating-point type
     template<class WP, EnableIf<IsWeaker<WP,P>> =dummy>
-    Float<WP,Precision64> get(WP par) const { return pointer()->_get(WP()); }
+    Float<WP,DoublePrecision> get(WP par) const { return pointer()->_get(WP()); }
     //! \brief Get the value of the number as a double-precision floating-point type
     template<class WP, EnableIf<IsWeaker<WP,P>> =dummy>
-    Float<WP,Precision64> get(WP par, Precision64 const& prec) const { return pointer()->_get(WP(),prec); }
+    Float<WP,DoublePrecision> get(WP par, DoublePrecision const& prec) const { return pointer()->_get(WP(),prec); }
     //! \brief Get the value of the number as a multiple-precision floating-point type
     template<class WP, EnableIf<IsWeaker<WP,P>> =dummy>
-    Float<WP,PrecisionMP> get(WP par, PrecisionMP const& prec) const { return pointer()->_get(WP(),prec); }
+    Float<WP,MultiplePrecision> get(WP par, MultiplePrecision const& prec) const { return pointer()->_get(WP(),prec); }
     //! \brief Get the value of the number as a double-precision floating-point type
-    template<class PR, EnableIf<IsSame<PR,Precision64>> =dummy>
+    template<class PR, EnableIf<IsSame<PR,DoublePrecision>> =dummy>
     Float<P,PR> get(PR pr) const { return pointer()->_get(P(),pr); }
 
     //! \brief Get the value of the number as a double-precision floating-point type
-    Float<P,Precision64> get() const { return pointer()->_get(WP()); }
+    Float<P,DoublePrecision> get() const { return pointer()->_get(WP()); }
     //! \brief Get the value of the number as a double-precision floating-point type
-    Float<P,Precision64> get(Precision64 const& prec) const { return pointer()->_get(WP()); }
+    Float<P,DoublePrecision> get(DoublePrecision const& prec) const { return pointer()->_get(WP()); }
     //! \brief Get the value of the number as a multiple-precision floating-point type
-    Float<P,PrecisionMP> get(PrecisionMP const& prec) const { return pointer()->_get(WP(),prec); }
+    Float<P,MultiplePrecision> get(MultiplePrecision const& prec) const { return pointer()->_get(WP(),prec); }
 
     template<class X> X extract() const;
 
@@ -264,7 +258,6 @@ template<class R, class P, EnableIf<IsConcreteNumericType<R>> =dummy> auto opera
 
 //! \ingroup NumericModule
 //! \brief Generic numbers with computational paradigm \a P, which may be %EffectiveTag, %ValidatedTag, %UpperTag, %LowerTag or %ApproximateTag.
-// Number
 template<class P> class Number
     : public Handle<NumberInterface>
 {

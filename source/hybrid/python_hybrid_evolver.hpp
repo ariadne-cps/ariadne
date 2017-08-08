@@ -57,8 +57,8 @@ namespace Ariadne {
 
 template<class Sys, class BS> class Evolver;
 
-class ValidatedScalarTaylorFunctionModel64;
-class ValidatedVectorTaylorFunctionModel64;
+class ValidatedScalarTaylorFunctionModelDP;
+class ValidatedVectorTaylorFunctionModelDP;
 class TaylorConstrainedImageSet;
 typedef Pair<DiscreteLocation,TaylorConstrainedImageSet> HybridTaylorConstrainedImageSet;
 template<class ES> class Orbit;
@@ -83,10 +83,10 @@ class PythonHybridEvolver
 {
     typedef VectorFunction FunctionType;
     typedef Vector<ExactIntervalType> BoxType;
-    typedef ValidatedVectorTaylorFunctionModel64 FunctionModelType;
-    typedef ValidatedVectorTaylorFunctionModel64 MapModelType;
-    typedef ValidatedVectorTaylorFunctionModel64 FlowModelType;
-    typedef ValidatedScalarTaylorFunctionModel64 ConstraintModelType;
+    typedef ValidatedVectorTaylorFunctionModelDP FunctionModelType;
+    typedef ValidatedVectorTaylorFunctionModelDP MapModelType;
+    typedef ValidatedVectorTaylorFunctionModelDP FlowModelType;
+    typedef ValidatedScalarTaylorFunctionModelDP ConstraintModelType;
     typedef TaylorModel TimeModelType;
     typedef TaylorConstrainedImageSet SetModelType;
     typedef TaylorConstrainedImageSet TimedSetModelType;
@@ -94,7 +94,7 @@ class PythonHybridEvolver
     typedef ContinuousEvolutionParameters EvolutionParametersType;
     typedef HybridAutomaton::TimeType TimeType;
     typedef Int IntegerType;
-    typedef Float64 RealType;
+    typedef FloatDP RealType;
     typedef List<DiscreteEvent> EventListType;
     typedef HybridAutomaton SystemType;
     typedef TaylorConstrainedImageSet ContinuousEnclosureType;
@@ -102,7 +102,7 @@ class PythonHybridEvolver
     typedef HybridEnclosureType EnclosureType;
     typedef Orbit<EnclosureType> OrbitType;
     typedef ListSet<EnclosureType> EnclosureListType;
-    typedef Float64 ContinuousTimeType;
+    typedef FloatDP ContinuousTimeType;
   public:
 
     //! \brief Default constructor.

@@ -181,11 +181,11 @@ class TestDifferential {
 
     Void test_gradient() {
         // Regression test based on errors in Henon evaluation.
-        Vector<Float64Approximation> x={{0.875,-0.125},pr};
-        Vector< Differential<Float64Approximation> > dx=Differential<Float64Approximation>::variables(1u,x);
-        Differential<Float64Approximation> dfx=1.5-dx[0]*dx[0]-0.25*dx[1];
+        Vector<FloatDPApproximation> x={{0.875,-0.125},pr};
+        Vector< Differential<FloatDPApproximation> > dx=Differential<FloatDPApproximation>::variables(1u,x);
+        Differential<FloatDPApproximation> dfx=1.5-dx[0]*dx[0]-0.25*dx[1];
         ARIADNE_TEST_PRINT(dfx);
-        Covector<Float64Approximation> g = dfx.gradient();
+        Covector<FloatDPApproximation> g = dfx.gradient();
         ARIADNE_TEST_PRINT(g);
         ARIADNE_TEST_EQUALS(g[0],-1.75);
         ARIADNE_TEST_EQUALS(g[1],-0.25);
@@ -193,13 +193,13 @@ class TestDifferential {
 
     Void test_hessian() {
         // Test Hessian matrix of
-        Float64Approximation a00={1.5,pr}; Float64Approximation a01={2.5,pr}; Float64Approximation a11={3.5,pr};
+        FloatDPApproximation a00={1.5,pr}; FloatDPApproximation a01={2.5,pr}; FloatDPApproximation a11={3.5,pr};
         double x0=0.875; double x1=-1.25;
-        Vector<Float64Approximation> x={{x0,x1},pr};
-        Vector< Differential<Float64Approximation> > dx=Differential<Float64Approximation>::variables(2u,x);
-        Differential<Float64Approximation> dfx=a00*dx[0]*dx[0]+a01*dx[0]*dx[1]+a11*dx[1]*dx[1];
+        Vector<FloatDPApproximation> x={{x0,x1},pr};
+        Vector< Differential<FloatDPApproximation> > dx=Differential<FloatDPApproximation>::variables(2u,x);
+        Differential<FloatDPApproximation> dfx=a00*dx[0]*dx[0]+a01*dx[0]*dx[1]+a11*dx[1]*dx[1];
         ARIADNE_TEST_PRINT(dfx);
-        Matrix<Float64Approximation> H = dfx.hessian();
+        Matrix<FloatDPApproximation> H = dfx.hessian();
         ARIADNE_TEST_PRINT(H);
         ARIADNE_TEST_EQUAL(H[0][1],H[1][0]);
         ARIADNE_TEST_EQUALS(H[0][0],a00*2);
@@ -285,7 +285,7 @@ class TestDifferentialVector {
 
     Void test_jacobian() {
         DifferentialVectorType dv(0u,2u,3u);
-        Matrix<Float64Approximation> J=dv.jacobian();
+        Matrix<FloatDPApproximation> J=dv.jacobian();
         ARIADNE_TEST_EQUALS(J.row_size(),dv.result_size());
         ARIADNE_TEST_EQUALS(J.column_size(),dv.argument_size());
     }
@@ -327,7 +327,7 @@ class TestDifferentialVector {
         DifferentialVectorType x(2,2,2);
         x[0][MultiIndex::unit(2,0)]=1; x[1][MultiIndex::unit(2,1)]=1;
         cout << "x=" << x << endl;
-        Vector<Float64Approximation> p(2); p[0]=1.5; p[1]=0.375;
+        Vector<FloatDPApproximation> p(2); p[0]=1.5; p[1]=0.375;
         double ahxp[12]={ 1.5, 0.0, -0.375, -1.0, 0.0, 0.0,   0.0, 1.0, 0.0, 0.0, 0.0, 0.0 };
         DifferentialVectorType hxp(2,2,2,ahxp);
         ARIADNE_TEST_EQUAL(henon(x,p),hxp);
@@ -335,7 +335,7 @@ class TestDifferentialVector {
 };
 
 Int main() {
-    TestDifferential< Differential<Float64Approximation> > tf;
-    TestDifferentialVector< Differential<Float64Approximation> > tfv;
+    TestDifferential< Differential<FloatDPApproximation> > tf;
+    TestDifferentialVector< Differential<FloatDPApproximation> > tfv;
     return ARIADNE_TEST_FAILURES;
 }

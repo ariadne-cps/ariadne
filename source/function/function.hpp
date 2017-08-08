@@ -214,7 +214,7 @@ class Function
     Function<P,D,C> derivative(SizeType k) const {
         return Function<P,D,C>(this->reference()._derivative(k)); }
     friend Function<P,D,C> derivative(Function<P,D,C> const& f, SizeType k) {
-        return Function<P,D,C>(f.reference()._derivative(k)); }
+        return f.derivative(k); }
 
     template<class X> decltype(auto) differential(const Argument<X>& x, DegreeType d) const {
         return this->_ptr->_evaluate(Differential<EvaluateType<P,X>>::identity(d,x)); }

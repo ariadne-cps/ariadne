@@ -97,7 +97,7 @@ template<> struct IsNumericType<Nat> : True { };
 template<> struct IsNumericType<Int> : True { };
 template<> struct IsNumericType<Integer> : True { };
 
-//! \ingroup UserNumericTypeSubModule
+//! \ingroup NumericModule
 //! \brief Arbitrarily-sized integers.
 class Integer
     : DeclareRingOperations<Integer,Integer,Natural>
@@ -166,15 +166,16 @@ Integer operator"" _z(unsigned long long int n);
 template<> class Positive<Integer> : public Integer {
   public:
     Positive<Integer>() : Integer() { }
-    Positive<Integer>(uint m) : Integer(m) { }
+    template<class M, EnableIf<IsBuiltinUnsigned<M>> = dummy> Positive<Integer>(M m) : Integer(m) { }
     Positive<Integer>(int n) = delete;
     Positive<Integer>(Integer const& z) : Integer(z) { assert(z>=0); }
 };
 
+//! \brief A positive integer.
 class Natural : public Positive<Integer> {
   public:
     Natural() : Positive<Integer>() { }
-    Natural(uint m) : Positive<Integer>(m) { }
+    template<class M, EnableIf<IsBuiltinUnsigned<M>> = dummy> Natural(M m) : Positive<Integer>(m) { }
     Natural(int n) = delete;
     explicit Natural(Integer const& z) : Positive<Integer>(z) { assert(z>=Integer(0)); }
     friend Natural& operator++(Natural& n) { ++static_cast<Integer&>(n); return n; }

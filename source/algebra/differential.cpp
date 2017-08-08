@@ -32,30 +32,30 @@
 
 namespace Ariadne {
 
-template class UnivariateDifferential<Float64>;
-template class UnivariateDifferential<Float64Approximation>;
-template class UnivariateDifferential<Float64Bounds>;
+template class UnivariateDifferential<FloatDP>;
+template class UnivariateDifferential<FloatDPApproximation>;
+template class UnivariateDifferential<FloatDPBounds>;
 template class UnivariateDifferential<UpperIntervalType>;
 
 template class UnivariateDifferential<FloatMPApproximation>;
 template class UnivariateDifferential<FloatMPBounds>;
 
 
-template class Differential<Float64>;
-template class Differential<Float64Bounds>;
-template class Differential<Float64Approximation>;
+template class Differential<FloatDP>;
+template class Differential<FloatDPBounds>;
+template class Differential<FloatDPApproximation>;
 template class Differential<UpperIntervalType>;
 
-template class AlgebraOperations<Differential<Float64>>;
-template class AlgebraOperations<Differential<Float64Approximation>>;
-template class AlgebraOperations<Differential<Float64Bounds>>;
-template class GradedAlgebraOperations<Differential<Float64>>;
-template class GradedAlgebraOperations<Differential<Float64Approximation>>;
-template class GradedAlgebraOperations<Differential<Float64Bounds>>;
+template class AlgebraOperations<Differential<FloatDP>>;
+template class AlgebraOperations<Differential<FloatDPApproximation>>;
+template class AlgebraOperations<Differential<FloatDPBounds>>;
+template class GradedAlgebraOperations<Differential<FloatDP>>;
+template class GradedAlgebraOperations<Differential<FloatDPApproximation>>;
+template class GradedAlgebraOperations<Differential<FloatDPBounds>>;
 
-template class Vector<Differential<Float64>>;
-template class Vector<Differential<Float64Bounds>>;
-template class Vector<Differential<Float64Approximation>>;
+template class Vector<Differential<FloatDP>>;
+template class Vector<Differential<FloatDPBounds>>;
+template class Vector<Differential<FloatDPApproximation>>;
 //template class Vector<Differential<UpperIntervalType>>;
 
 template class Differential<FloatMPBounds>;

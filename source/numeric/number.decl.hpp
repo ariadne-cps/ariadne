@@ -77,8 +77,14 @@ class Integer;
 class Rational;
 class Real;
 
+template<class F> class Bounds;
+template<> class Bounds<Dyadic>;
+using DyadicBounds = Bounds<Dyadic>;
+
 template<class R, class A> R integer_cast(const A& _a);
 
+//! \ingroup NumericModule
+//! \brief A modifier declaring that a number is positive.
 template<class X> class Positive;
 
 template<class P=Void> class Number;
@@ -101,14 +107,14 @@ template<> struct IsGenericNumericType<Dbl> : True { };
 template<class P> struct IsGenericNumericType<Number<P>> : True { };
 
 
-using ExactNumber=Number<ExactTag>;
-using EffectiveNumber=Number<EffectiveTag>;
-using EffectiveUpperNumber=Number<EffectiveUpperTag>;
-using EffectiveLowerNumber=Number<EffectiveLowerTag>;
-using ValidatedNumber=Number<ValidatedTag>;
-using ValidatedUpperNumber=Number<ValidatedUpperTag>;
-using ValidatedLowerNumber=Number<ValidatedLowerTag>;
-using ApproximateNumber=Number<ApproximateTag>;
+using ExactNumber=Number<ExactTag>; //!< Alias for generic exact numbers. \ingroup NumericModule
+using EffectiveNumber=Number<EffectiveTag>; //!< Alias for generic effective numbers. \ingroup NumericModule
+using EffectiveUpperNumber=Number<EffectiveUpperTag>; //!< Alias for generic effective upper numbers. \ingroup NumericModule
+using EffectiveLowerNumber=Number<EffectiveLowerTag>; //!< Alias for generic effective lower numbers. \ingroup NumericModule
+using ValidatedNumber=Number<ValidatedTag>; //!< Alias for generic validated numbers. \ingroup NumericModule
+using ValidatedUpperNumber=Number<ValidatedUpperTag>; //!< Alias for generic validated upper numbers. \ingroup NumericModule
+using ValidatedLowerNumber=Number<ValidatedLowerTag>; //!< Alias for generic validated lower numbers. \ingroup NumericModule
+using ApproximateNumber=Number<ApproximateTag>; //!< Alias for generic approximate numbers. \ingroup NumericModule
 
 } // namespace Ariadne
 
@@ -116,13 +122,13 @@ using ApproximateNumber=Number<ApproximateTag>;
 
 namespace Ariadne {
 
-using ExactNumericType=Float64Value;
+using ExactNumericType=FloatDPValue;
 using EffectiveNumericType=Real;
-using ValidatedNumericType=Float64Bounds;
-using UpperNumericType=Float64UpperBound;
-using LowerNumericType=Float64LowerBound;
-using ApproximateNumericType=Float64Approximation;
-using ErrorNumericType=Float64Error;
+using ValidatedNumericType=FloatDPBounds;
+using UpperNumericType=FloatDPUpperBound;
+using LowerNumericType=FloatDPLowerBound;
+using ApproximateNumericType=FloatDPApproximation;
+using ErrorNumericType=FloatDPError;
 
 } // namespace Ariadne
 

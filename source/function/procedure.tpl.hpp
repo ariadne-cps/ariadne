@@ -186,7 +186,7 @@ template<class X, class Y> Void _execute(List<X>& v, const List<ProcedureInstruc
 
 template<class X, class Y> Void _backpropagate(Vector<X>& x, List<X>& v, const List<ProcedureInstruction>& p, const List<Y>& c)
 {
-    Float64Value infty(inf);
+    FloatDPValue infty(inf);
 
     ARIADNE_ASSERT(v.size()==p.size());
     SizeType r=p.size();

@@ -93,8 +93,10 @@ template<class O, class A1, class A2, class A3> struct ExpressionTemplate<O,A1,A
         return os << expr._op.code() << "(" << expr._arg1 << "," << expr._arg2 << "," << expr._arg3 << ")"; }
 };
 
+template<class O, class... Args> ExpressionTemplate<O,Args...> make_expression_template(O o, Args... as) {
+    return ExpressionTemplate<O,Args...>(o, as...); }
 
-template<class Op, class... Args> struct TemporaryExpression;
+template<class O, class... Args> struct TemporaryExpression;
 
 template<class O, class A> struct TemporaryExpression<O,A> {
     O _op; A const& _arg;

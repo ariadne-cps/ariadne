@@ -60,14 +60,14 @@ TestVector::test()
 Void
 TestVector::test_concept()
 {
-    Float64Approximation ax(1);
-    Float64Bounds ix(1);
-    Float64Value ex(1);
-    Vector<Float64Approximation> av;
-    Vector<Float64Bounds> iv;
-    Vector<Float64Value> ev;
+    FloatDPApproximation ax(1);
+    FloatDPBounds ix(1);
+    FloatDPValue ex(1);
+    Vector<FloatDPApproximation> av;
+    Vector<FloatDPBounds> iv;
+    Vector<FloatDPValue> ev;
 
-    iv=Vector<Float64Bounds>(ev);
+    iv=Vector<FloatDPBounds>(ev);
 
     av=av+av;
     iv=ev+ev;
@@ -117,75 +117,75 @@ TestVector::test_arithmetic()
     ARIADNE_TEST_EQUAL( - RawFloatVector({2.0,-3.0,5.0}) , RawFloatVector({-2.0,+3.0,-5.0}) );
     ARIADNE_TEST_EQUAL( RawFloatVector({2.0,-3.0,5.0}) + RawFloatVector({1.25,2.75,-3.5}), RawFloatVector({3.25,-0.25,1.5}) );
     ARIADNE_TEST_EQUAL( RawFloatVector({2.0,-3.0,5.0}) - RawFloatVector({1.25,2.75,-3.5}), RawFloatVector({0.75,-5.75,8.5}) );
-    ARIADNE_TEST_EQUAL( Float64(4.0) * RawFloatVector({2.0,-3.0,5.0}), RawFloatVector({8.0,-12.0,20.0}) );
-    ARIADNE_TEST_EQUAL( RawFloatVector({2.0,-3.0,5.0}) * Float64(4.0), RawFloatVector({8.0,-12.0,20.0}) );
-    ARIADNE_TEST_EQUAL( RawFloatVector({2.0,-3.0,5.0}) / Float64(4.0), RawFloatVector({0.5,-0.75,1.25}) );
+    ARIADNE_TEST_EQUAL( FloatDP(4.0) * RawFloatVector({2.0,-3.0,5.0}), RawFloatVector({8.0,-12.0,20.0}) );
+    ARIADNE_TEST_EQUAL( RawFloatVector({2.0,-3.0,5.0}) * FloatDP(4.0), RawFloatVector({8.0,-12.0,20.0}) );
+    ARIADNE_TEST_EQUAL( RawFloatVector({2.0,-3.0,5.0}) / FloatDP(4.0), RawFloatVector({0.5,-0.75,1.25}) );
 
-    ARIADNE_TEST_EQUAL( sup_norm(RawFloatVector({2.0,-3.0,1.0})), Float64(3.0) )
+    ARIADNE_TEST_EQUAL( sup_norm(RawFloatVector({2.0,-3.0,1.0})), FloatDP(3.0) )
 }
 
 
 Void
 TestVector::test_misc()
 {
-    Precision64 pr;
+    DoublePrecision pr;
     Int n=3;
-    Array<Float64Approximation> vary={{-4.0,3.0,1.0},pr64};
-    Float64Approximation x={1.5,pr64};
+    Array<FloatDPApproximation> vary={{-4.0,3.0,1.0},dp};
+    FloatDPApproximation x={1.5,dp};
 
-    Vector<Float64Approximation> v0;
+    Vector<FloatDPApproximation> v0;
     cout << "v0.size()=" << v0.size() << endl;
     cout << "v0=" << flush; cout << v0 << endl;
     ARIADNE_TEST_NOTIFY("Constructor Vector<X>(SizeType, const X*) is unsafe and has been removed.");
-    Array<Float64Approximation> a1(vary.begin(),vary.end());
-    Vector<Float64Approximation> v1(a1);
+    Array<FloatDPApproximation> a1(vary.begin(),vary.end());
+    Vector<FloatDPApproximation> v1(a1);
     cout << "v1=" << v1 << endl;
-    Vector<Float64Approximation> v2=Vector<Float64Approximation>({2.375,4.25,-1.25},pr64);
+    Vector<FloatDPApproximation> v2=Vector<FloatDPApproximation>({2.375,4.25,-1.25},dp);
     cout << "v2=" << v2 << endl;
     cout << "norm(v1)=" << norm(v1) << "  norm(v2)=" << norm(v2) << endl;
     ARIADNE_TEST_EQUAL(norm(v1).raw(),4);
     ARIADNE_TEST_EQUAL(norm(v2).raw(),4.25);
 
-    Vector<Float64Approximation> v3(1);
+    Vector<FloatDPApproximation> v3(1);
     cout << "v3=" << v3 << endl;
-    Vector<Float64Approximation> v4=v2;
+    Vector<FloatDPApproximation> v4=v2;
     cout << "v4=" << v4 << endl;
-    Vector<Float64Approximation> v5={{-4.0,3.0,1.0},pr64};
+    Vector<FloatDPApproximation> v5={{-4.0,3.0,1.0},dp};
     cout << "v5=" << v5 << endl;
     ARIADNE_TEST_EQUAL(v1,v5);
     cout << endl;
 
-    Vector<Float64Approximation> vf0;
-    v1=Vector<Float64Approximation>({0.25,-1.5},pr64);
-    v2=Vector<Float64Approximation>({-0.5,2.25},pr64);
+    Vector<FloatDPApproximation> vf0;
+    v1=Vector<FloatDPApproximation>({0.25,-1.5},dp);
+    v2=Vector<FloatDPApproximation>({-0.5,2.25},dp);
     vf0=-v1;
     cout << vf0 << " = -" << v1 << endl;
-    vf0=Vector<Float64Approximation>(v1)+v2;
+    vf0=Vector<FloatDPApproximation>(v1)+v2;
     cout << vf0 << " = " << v1 << " + " << v2 << endl;
-    vf0=Vector<Float64Approximation>(v1)-v2;
+    vf0=Vector<FloatDPApproximation>(v1)-v2;
     cout << vf0 << " = " << v1 << " - " << v2 << endl;
-    vf0=x*Vector<Float64Approximation>(v2);
+    vf0=x*Vector<FloatDPApproximation>(v2);
     cout << vf0 << " = " << x << " * " << v2 << endl;
-    vf0=Vector<Float64Approximation>(v1)*x;
+    vf0=Vector<FloatDPApproximation>(v1)*x;
     cout << vf0 << " = " << v1 << " * " << x << endl;
-    vf0=Vector<Float64Approximation>(v1)/x;
+    vf0=Vector<FloatDPApproximation>(v1)/x;
     cout << vf0 << " = " << v1 << " / " << x << endl;
     cout << endl;
 
-    Vector< Float64Bounds > iv1=Vector<Float64Bounds>({Float64Bounds{0.984375_x,1.015625_x,pr},{2.25_x,2.375_x,pr},{4.0_x,4.375_x,pr},{-0.03125_x,0.015625_x,pr}});
+    Vector< FloatDPBounds > iv1=Vector<FloatDPBounds>({FloatDPBounds{0.984375_x,1.015625_x,pr},{2.25_x,2.375_x,pr},{4.0_x,4.375_x,pr},{-0.03125_x,0.015625_x,pr}});
     cout << "iv1=" << iv1 << endl;
     cout << "norm(iv1)=" << norm(iv1) << endl;
     cout << "norm(iv1).upper()=" << norm(iv1).upper() << endl;
 
-    Vector< Float64Bounds > iv2=Vector<Float64Bounds>({{-1.0_x,1.0_x,pr},{-1.0_x,1.0_x,pr}});
+    Vector< FloatDPBounds > iv2=Vector<FloatDPBounds>({{-1.0_x,1.0_x,pr},{-1.0_x,1.0_x,pr}});
     cout << "iv2=" << iv2 << endl;
-    Vector< Float64Bounds > iv3(3);
+    Vector< FloatDPBounds > iv3(3);
     cout << "iv3=" << iv3 << endl;
-    iv3=Vector<Float64Bounds>({{4.25_x,4.25_x,pr},{2.375_x,2.375_x,pr}});
+    iv3=Vector<FloatDPBounds>({{4.25_x,4.25_x,pr},{2.375_x,2.375_x,pr}});
     cout << "iv3=" << iv3 << endl;
-    Float64Bounds ix=Float64Bounds(-2,1,pr);
+    FloatDPBounds ix=FloatDPBounds(-2,1,pr);
 
-    Vector< Float64Bounds > iv0;
+    Vector< FloatDPBounds > iv0;
     cout << "iv0=" << iv0 << endl;
     iv1=iv0;
     cout << "iv1=" << iv1 << endl;
@@ -193,9 +193,9 @@ TestVector::test_misc()
     cout << "iv1=" << iv1 << endl;
     cout << endl;
 
-    Float64Bounds ix2=iv2[0];
-    Float64Bounds ix3=iv3[0];
-    Float64Bounds ix1=ix2+ix3;
+    FloatDPBounds ix2=iv2[0];
+    FloatDPBounds ix3=iv3[0];
+    FloatDPBounds ix1=ix2+ix3;
     ix1=ix2+ix3;
 
     cout << "iv2=" << iv2 << ", iv3=" << iv3 << endl;
@@ -207,13 +207,13 @@ TestVector::test_misc()
     cout << iv1 << " = " << ix << " * " << iv3 << endl;
     iv1=iv2*ix;
     cout << iv1 << " = " << iv2 << " * " << ix << endl;
-    ix=Float64Bounds(1,2);
+    ix=FloatDPBounds(1,2);
     iv1=iv2/ix;
     cout << iv1 << " = " << iv2 << " / " << ix << endl;
     cout << endl;
 
-    Vector<Float64Value> ev1(reinterpret_cast<Vector<Float64Value>const&>(v1));
-    Float64Value ex(reinterpret_cast<Float64Value const&>(x));
+    Vector<FloatDPValue> ev1(reinterpret_cast<Vector<FloatDPValue>const&>(v1));
+    FloatDPValue ex(reinterpret_cast<FloatDPValue const&>(x));
     iv0=iv1+ev1;
     cout << iv0 << " = " << iv1 << " + " << ev1 << endl;
     iv0=ev1+iv1;
@@ -237,22 +237,22 @@ TestVector::test_misc()
 
     iv0=ev1;
     iv0/=ix;
-    iv0=Vector<Float64Bounds>({2,1},pr64);
-    iv1=Vector<Float64Bounds>({0,1},pr64);
+    iv0=Vector<FloatDPBounds>({2,1},dp);
+    iv1=Vector<FloatDPBounds>({0,1},dp);
     /*
-      ARIADNE_TEST_ASSERT( (iv0+=Vector<Float64Bounds>("[0,1]")) == Vector<Float64Bounds>("[2,2]") );
-      ARIADNE_TEST_ASSERT( (iv0-=Vector<Float64Bounds>("[0,1]")) == Vector<Float64Bounds>("[2,1]") );
-      ARIADNE_TEST_ASSERT( (iv0*=2) == Vector<Float64Bounds>("[4,2]") );
-      ARIADNE_TEST_ASSERT( (iv0/=4) == Vector<Float64Bounds>("[1,0.5]") );
+      ARIADNE_TEST_ASSERT( (iv0+=Vector<FloatDPBounds>("[0,1]")) == Vector<FloatDPBounds>("[2,2]") );
+      ARIADNE_TEST_ASSERT( (iv0-=Vector<FloatDPBounds>("[0,1]")) == Vector<FloatDPBounds>("[2,1]") );
+      ARIADNE_TEST_ASSERT( (iv0*=2) == Vector<FloatDPBounds>("[4,2]") );
+      ARIADNE_TEST_ASSERT( (iv0/=4) == Vector<FloatDPBounds>("[1,0.5]") );
     */
 
     /*
       cout << "test_vector_slice" << endl;
-      v1=Vector<Float64Approximation>("[-1.25,0.75,-0.5,-4.25,2.375]");
+      v1=Vector<FloatDPApproximation>("[-1.25,0.75,-0.5,-4.25,2.375]");
       cout << v1 << endl;
-      VectorSlice<Float64Approximation> vs1(2,v1.begin()+2,2);
+      VectorSlice<FloatDPApproximation> vs1(2,v1.begin()+2,2);
       cout << vs1 << endl;
-      VectorSlice<Float64Approximation> vs2(2,v1.begin(),3);
+      VectorSlice<FloatDPApproximation> vs2(2,v1.begin(),3);
       cout << vs2 << endl;
 
       iv1=vs1+vs2;

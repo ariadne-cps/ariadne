@@ -67,24 +67,24 @@ template<> struct AlgebraTraits<EffectiveNumber> {
     typedef EffectiveNumber NumericType;
 };
 
-template<class PR> struct AlgebraTraits<FloatApproximation<PR>> {
-    typedef FloatApproximation<PR> ValueType;
-    typedef Interval<FloatApproximation<PR>> RangeType;
-    typedef PositiveFloatApproximation<PR> NormType;
-    typedef FloatApproximation<PR> NumericType;
+template<class F> struct AlgebraTraits<Approximation<F>> {
+    typedef Approximation<F> ValueType;
+    typedef Interval<Approximation<F>> RangeType;
+    typedef PositiveApproximation<F> NormType;
+    typedef Approximation<F> NumericType;
 };
 
-template<class PR> struct AlgebraTraits<FloatBounds<PR>> {
-    typedef FloatValue<PR> ValueType;
-    typedef Interval<FloatUpperBound<PR>> RangeType;
-    typedef Float64Error NormType;
-    typedef FloatBounds<PR> NumericType;
+template<class F> struct AlgebraTraits<Bounds<F>> {
+    typedef Value<F> ValueType;
+    typedef Interval<UpperBound<F>> RangeType;
+    typedef FloatDPError NormType;
+    typedef Bounds<F> NumericType;
 };
 
 template<> struct AlgebraTraits<Real> {
-    typedef Float64Value ValueType;
-    typedef Interval<Float64UpperBound> RangeType;
-    typedef Float64Error NormType;
+    typedef FloatDPValue ValueType;
+    typedef Interval<FloatDPUpperBound> RangeType;
+    typedef FloatDPError NormType;
     typedef Real NumericType;
 };
 
@@ -186,7 +186,7 @@ template<class X> class NormedAlgebraInterface
     virtual NormedAlgebraInterface<X>* _create_ball(ErrorType const& r) const = 0;
 
     //! \brief A value \c e such that analytic functions are evaluated to a tolerance of \c e.
-    virtual RawFloat64 tolerance() const = 0;
+    virtual RawFloatDP tolerance() const = 0;
     //! \brief A value \c c such that \c |a-c1| is approximately minimised.
     virtual ValueType average() const = 0;
     //! \brief A value \c c such that \c |a-c1| is approximately minimised.

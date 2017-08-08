@@ -81,9 +81,9 @@ class Zonotope
     , public DrawableInterface
 {
   private:
-    Vector<Float64> _centre;
-    Matrix<Float64> _generators;
-    Vector<Float64> _error;
+    Vector<FloatDP> _centre;
+    Matrix<FloatDP> _generators;
+    Vector<FloatDP> _error;
   public:
     //@{
     //! \name Constructors and destructors
@@ -97,13 +97,13 @@ class Zonotope
     explicit Zonotope(Nat d, Nat m);
 
     /*! \brief Construct from centre, generators, and a uniform error term. */
-    explicit Zonotope(const Vector<Float64>& c, const Matrix<Float64>& G, const Vector<Float64>& e);
+    explicit Zonotope(const Vector<FloatDP>& c, const Matrix<FloatDP>& G, const Vector<FloatDP>& e);
     /*! \brief Construct from centre and generators. */
-    explicit Zonotope(const Vector<Float64>& c, const Matrix<Float64>& G);
+    explicit Zonotope(const Vector<FloatDP>& c, const Matrix<FloatDP>& G);
     /*! \brief Construct from interval centre and a generator matrix. */
-    explicit Zonotope(const Vector<ExactIntervalType>& c, const Matrix<Float64>& G);
+    explicit Zonotope(const Vector<ExactIntervalType>& c, const Matrix<FloatDP>& G);
     /*! \brief Construct from centre and an interval generator matrix. */
-    explicit Zonotope(const Vector<Float64>& c, const Matrix<ExactIntervalType>& G);
+    explicit Zonotope(const Vector<FloatDP>& c, const Matrix<ExactIntervalType>& G);
     /*! \brief Construct from an interval centre and an interval generator matrix. */
     explicit Zonotope(const Vector<ExactIntervalType>& c, const Matrix<ExactIntervalType>& G);
 
@@ -114,7 +114,7 @@ class Zonotope
     /*! \brief Construct a zonotope of dimension \a d with \a m generators from raw data.
      *  The data format is (c0,G00,G01,...,G0m,e0,c1,G10,...,G1m,e1,...).
      */
-    explicit Zonotope(InitializerList< std::tuple<Float64,InitializerList<Float64>,Float64> > lst);
+    explicit Zonotope(InitializerList< std::tuple<FloatDP,InitializerList<FloatDP>,FloatDP> > lst);
 
 
     /*! \brief Convert from a box. */
@@ -146,19 +146,19 @@ class Zonotope
     Vector<ExactIntervalType> domain() const;
 
     /*! \brief The centre. */
-    const Vector<Float64>& centre() const;
+    const Vector<FloatDP>& centre() const;
 
     /*! \brief The matrix of principle directions. */
-    const Matrix<Float64>& generators() const;
+    const Matrix<FloatDP>& generators() const;
 
     /*! \brief The uniform error bound. */
-    const Vector<Float64>& error() const;
+    const Vector<FloatDP>& error() const;
 
     /*! \brief A bounding box for the set. */
     UpperBoxType bounding_box() const;
 
     /*! \brief The radius of the set in the supremum norm. */
-    Float64 radius() const;
+    FloatDP radius() const;
 
     /*! \brief Test if the set contains a point. */
     ValidatedKleenean contains(const ExactPoint& pt) const;
@@ -218,7 +218,7 @@ class Zonotope
 
 ValidatedKleenean empty(const Zonotope& z);
 ValidatedKleenean is_bounded(const Zonotope& z);
-Float64 radius(const Zonotope& z);
+FloatDP radius(const Zonotope& z);
 ExactBoxType bounding_box(const Zonotope& z);
 
 

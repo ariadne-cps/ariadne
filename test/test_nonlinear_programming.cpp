@@ -45,7 +45,7 @@ class TestOptimiser
 {
   private:
     std::unique_ptr<OptimiserInterface> optimiser;
-    Precision64 pr;
+    DoublePrecision pr;
   public:
     TestOptimiser(const OptimiserInterface& opt)
         : optimiser(opt.clone()) { }
@@ -75,7 +75,7 @@ class TestOptimiser
         FloatBoundsVector x_optimal=optimiser->minimise(f,D,g,C);
         ARIADNE_TEST_BINARY_PREDICATE(element,x_optimal,D);
         ARIADNE_TEST_BINARY_PREDICATE(element,g(x_optimal),C);
-        Float64Value required_accuracy(1e-8);
+        FloatDPValue required_accuracy(1e-8);
         //ARIADNE_TEST_LESS(norm(x_optimal),required_accuracy);
     }
 
@@ -90,7 +90,7 @@ class TestOptimiser
         ExactBoxType D=ExactBoxType{{-1.0,2.0},{-3.0,5.0}};
         ARIADNE_TEST_PRINT(Ariadne::make_tuple(f,D,g,C));
 
-        Float64Value required_accuracy(1e-7);
+        FloatDPValue required_accuracy(1e-7);
         FloatBoundsVector x_optimal=optimiser->minimise(f,D,g,C);
         ARIADNE_TEST_BINARY_PREDICATE(element,x_optimal,D);
         ARIADNE_TEST_LESS(norm(g(x_optimal)),required_accuracy);
@@ -112,7 +112,7 @@ class TestOptimiser
         FloatBoundsVector x_optimal=optimiser->minimise(f,D,g,C);
         ARIADNE_TEST_BINARY_PREDICATE(element,x_optimal,D);
         ARIADNE_TEST_BINARY_PREDICATE(element,g(x_optimal),C);
-        Float64Value required_accuracy(1e-6);
+        FloatDPValue required_accuracy(1e-6);
         //ARIADNE_TEST_LESS(norm(x_optimal),required_accuracy);
     }
 
@@ -130,7 +130,7 @@ class TestOptimiser
         ARIADNE_TEST_PRINT(C);
 
         FloatBoundsVector x_optimal=optimiser->minimise(f,D,gh,C);
-        Float64Value required_accuracy(1e-8);
+        FloatDPValue required_accuracy(1e-8);
         ARIADNE_TEST_LESS(norm(h(x_optimal)),required_accuracy);
     }
 

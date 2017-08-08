@@ -69,7 +69,7 @@ TestParadigm::test()
 }
 
 // Test that the type implements all operations of
-// the Float64 concept without testing correctness
+// the FloatDP concept without testing correctness
 Void
 TestParadigm::test_concept()
 {

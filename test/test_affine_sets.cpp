@@ -38,7 +38,7 @@ using namespace Ariadne;
 using namespace std;
 
 struct ExactFloatVector2d : ExactFloatVector, Vector2d {
-    ExactFloatVector2d(double x, double y) : ExactFloatVector{Float64Value(x),Float64Value(y)}, Vector2d(x,y) { }
+    ExactFloatVector2d(double x, double y) : ExactFloatVector{FloatDPValue(x),FloatDPValue(y)}, Vector2d(x,y) { }
 };
 
 struct Polytope2d
@@ -77,9 +77,9 @@ static const Colour colour(0.5,1.0,1.0);
 static const Colour expected_colour(1.0,0.25,0.25);
 
 namespace Ariadne {
-decltype(auto) operator<=(Affine<Float64Bounds>const& af, Dyadic w) { return af <= Float64Value(w,Precision64()); }
-Float64Value operator"" _ex (long double x) { return Float64Value((double)x); }
-Float64Bounds operator/(Int n1, Float64Value x2) { return Float64Value(n1)/x2; }
+decltype(auto) operator<=(Affine<FloatDPBounds>const& af, Dyadic w) { return af <= FloatDPValue(w,dp); }
+FloatDPValue operator"" _ex (long double x) { return FloatDPValue((double)x); }
+FloatDPBounds operator/(Int n1, FloatDPValue x2) { return FloatDPValue(n1)/x2; }
 }
 
 class TestAffineSet
@@ -90,7 +90,7 @@ class TestAffineSet
     Vector< ValidatedAffineFunction > x;
     ValidatedAffineConstrainedImageSet set;
   public:
-    TestAffineSet() : set(Matrix<Float64Value>(2,2),Vector<Float64Value>(2)) { }
+    TestAffineSet() : set(Matrix<FloatDPValue>(2,2),Vector<FloatDPValue>(2)) { }
 
     Void test_pure_constraint() {
         figure.clear();
@@ -276,7 +276,7 @@ class TestAffineSet
     }
 
     Void test_uniform_error() {
-        Float64Value e=0.25_ex;
+        FloatDPValue e=0.25_ex;
         ExactIntervalType I = ExactIntervalType(-1,+1);
         ValidatedNumericType E = ValidatedNumericType(-e,+e);
         D = ExactBoxType::unit_box(2);

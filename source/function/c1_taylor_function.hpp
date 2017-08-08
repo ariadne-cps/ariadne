@@ -50,20 +50,20 @@ class C1TaylorFunction;
 class C1TaylorSeries
 {
   public:
-    std::vector<Float64> _coefficients;
-    Float64 _zero_error;
-    Float64 _uniform_error;
-    Float64 _derivative_error;
+    std::vector<FloatDP> _coefficients;
+    FloatDP _zero_error;
+    FloatDP _uniform_error;
+    FloatDP _derivative_error;
   private:
     C1TaylorSeries(Nat d);
   public:
     C1TaylorSeries();
-    static C1TaylorSeries constant(Float64);
+    static C1TaylorSeries constant(FloatDP);
     static C1TaylorSeries coordinate();
   public:
     IntervalDomainType domain() const;
     Nat degree() const;
-    Void sweep(Float64 threshold);
+    Void sweep(FloatDP threshold);
   public:
     friend C1TaylorSeries& operator+=(C1TaylorSeries&, ValidatedNumericType);
     friend C1TaylorSeries& operator*=(C1TaylorSeries&, ValidatedNumericType);
@@ -77,28 +77,28 @@ class C1TaylorSeries
 class C1TaylorFunction
 {
   public:
-    typedef Float64Bounds NumericType;
+    typedef FloatDPBounds NumericType;
   public:
-    Expansion<Float64> _expansion;
-    Float64 _zero_error;
-    Float64 _uniform_error;
-    Array<Float64> _derivative_errors;
+    Expansion<FloatDP> _expansion;
+    FloatDP _zero_error;
+    FloatDP _uniform_error;
+    Array<FloatDP> _derivative_errors;
   private:
   public:
     C1TaylorFunction();
     C1TaylorFunction(SizeType as);
   public:
-    static C1TaylorFunction constant(SizeType as, Float64 c);
+    static C1TaylorFunction constant(SizeType as, FloatDP c);
     static C1TaylorFunction coordinate(SizeType as, SizeType ind);
   public:
     BoxDomainType domain() const;
     Nat argument_size() const;
-    Void sweep(Float64 threshold);
+    Void sweep(FloatDP threshold);
     C1TaylorFunction& operator=(NumericType c);
     Void clear();
   public:
-    friend C1TaylorFunction& operator+=(C1TaylorFunction& f, Float64 c);
-    friend C1TaylorFunction& operator*=(C1TaylorFunction& f, Float64 c);
+    friend C1TaylorFunction& operator+=(C1TaylorFunction& f, FloatDP c);
+    friend C1TaylorFunction& operator*=(C1TaylorFunction& f, FloatDP c);
     friend C1TaylorFunction operator+(C1TaylorFunction f1, C1TaylorFunction f2);
     friend C1TaylorFunction operator*(C1TaylorFunction f1, C1TaylorFunction f2);
     friend NumericType evaluate(C1TaylorFunction f, Vector<NumericType> x);

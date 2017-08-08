@@ -464,19 +464,19 @@ String evaluate(const Expression<String>& e, const StringValuation& x) {
     }
 }
 
-Integer evaluate(const Expression<Integer>& e, const IntegerValuation& x) {
+Integer evaluate(const Expression<Integer>& e, const Valuation<Integer>& x) {
     return evaluate(e,x.values());
 }
 
-Boolean evaluate(const Expression<Boolean>& e, const StringValuation& x) {
+Boolean evaluate(const Expression<Boolean>& e, const Valuation<String>& x) {
     return evaluate(e,x.values());
 }
 
-Kleenean evaluate(const Expression<Kleenean>& e, const ContinuousValuation<Real>& x) {
+Kleenean evaluate(const Expression<Kleenean>& e, const Valuation<Real>& x) {
     return evaluate(e,x.values());
 }
 
-Real evaluate(const Expression<Real>& e, const ContinuousValuation<Real>& x) {
+Real evaluate(const Expression<Real>& e, const Valuation<Real>& x) {
     return evaluate(e,x.values());
 }
 

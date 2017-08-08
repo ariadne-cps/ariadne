@@ -33,95 +33,112 @@
 #include "number.decl.hpp"
 #include "float.decl.hpp"
 
+#include "float_operations.hpp"
+
 namespace Ariadne {
 
-template<class PR> struct NumericTraits<FloatBall<PR>> {
+template<class F, class FE> struct NumericTraits<Ball<F,FE>> {
     typedef ValidatedNumber GenericType;
-    typedef PositiveFloatBall<PR> PositiveType;
+    typedef PositiveBall<F,FE> PositiveType;
     typedef ValidatedKleenean LessType;
     typedef ValidatedKleenean EqualsType;
 };
 
+template<class PRE, class PR, EnableIf<IsDefaultConstructible<PRE>> = dummy> PRE _error_precision(PR const&) { return PRE(); }
+template<class PRE, class PR, DisableIf<IsDefaultConstructible<PRE>> = dummy, EnableIf<IsConstructible<PRE,PR>> = dummy> PRE _error_precision(PR const& pr) { return PRE(pr); }
+
 //! \ingroup NumericModule
 //! \brief Floating point approximations to a real number with guaranteed error bounds.
-template<class PR> class FloatBall
-    : public DispatchFloatOperations<FloatBall<PR>>
-    , public ProvideConvertedFieldOperations<FloatBounds<PR>,FloatBall<PR>>
-    , public ProvideConvertedFieldOperations<FloatBall<PR>,FloatValue<PR>>
+template<class F, class FE> class Ball
+    : public DispatchFloatOperations<Ball<F,FE>>
+    , public ProvideConvertedFieldOperations<Bounds<F>,Ball<F,FE>>
+    , public ProvideConvertedFieldOperations<Ball<F,FE>,Value<F>>
 {
-    typedef ValidatedTag P; typedef RawFloat<PR> FLT;
+    typedef ValidatedTag P; typedef typename F::PrecisionType PR; typedef typename FE::PrecisionType PRE;
+    static_assert(IsConstructible<PR,PRE>::value or IsDefaultConstructible<PRE>::value,"");
   public:
     typedef P Paradigm;
-    typedef FloatBall<PR> NumericType;
+    typedef Ball<F,FE> NumericType;
     typedef Number<P> GenericType;
-    typedef FLT RawFloatType;
+    typedef F RawType;
+    typedef FE RawErrorType;
     typedef PR PrecisionType;
+    typedef PRE ErrorPrecisionType;
     typedef PR PropertiesType;
   public:
-    FloatBall<PR>() : _v(0.0), _e(0.0) { }
-    explicit FloatBall<PR>(PrecisionType pr) : _v(0.0,pr), _e(0.0,pr) { }
-    explicit FloatBall<PR>(RawFloatType const& v) : _v(v), _e(0.0) { }
-    explicit FloatBall<PR>(RawFloatType const& v, RawFloatType const& e) : _v(v), _e(e) { }
-    FloatBall<PR>(FloatValue<PR> const& value, FloatError<PR> const& error);
-    FloatBall<PR>(FloatLowerBound<PR> const& lower, FloatUpperBound<PR> const& upper) =  delete;
+    Ball<F,FE>() : _v(0.0), _e(0.0) { }
+    explicit Ball<F,FE>(PrecisionType pr) : _v(0.0,pr), _e(0.0,_error_precision<PRE>(pr)) { }
+    explicit Ball<F,FE>(PrecisionType pr, ErrorPrecisionType pre) : _v(0.0,pr), _e(0.0,pre) { }
+    explicit Ball<F,FE>(F const& v) : _v(v), _e(0.0,_error_precision<PRE>(v.precision())) { }
+    explicit Ball<F,FE>(F const& v, PRE pre) : _v(v), _e(0.0,pre) { }
+    explicit Ball<F,FE>(F const& v, FE const& e) : _v(v), _e(e) { }
+    Ball<F,FE>(Value<F> const& value, Error<FE> const& error);
+    Ball<F,FE>(LowerBound<F> const& lower, UpperBound<F> const& upper) = delete;
 
-    FloatBall<PR>(ExactDouble d, PR pr);
-        FloatBall<PR>(const Integer& z, PR pr);
-        FloatBall<PR>(const Dyadic& w, PR pr);
-        FloatBall<PR>(const Decimal& d, PR pr);
-        FloatBall<PR>(const Rational& q, PR pr);
-        FloatBall<PR>(const Real& r, PR pr);
-        FloatBall<PR>(const FloatBall<PR>& x, PR pr);
-    FloatBall<PR>(const ValidatedNumber& y, PR pr);
+    Ball<F,FE>(ExactDouble d, PR pr);
+        Ball<F,FE>(TwoExp t, PR pr);
+        Ball<F,FE>(const Integer& z, PR pr);
+        Ball<F,FE>(const Dyadic& w, PR pr);
+        Ball<F,FE>(const Decimal& d, PR pr);
+        Ball<F,FE>(const Rational& q, PR pr);
+        Ball<F,FE>(const Real& r, PR pr);
+        Ball<F,FE>(const Ball<F,FE>& x, PR pr);
+    Ball<F,FE>(const ValidatedNumber& y, PR pr);
 
-    explicit FloatBall<PR>(FloatBounds<PR> const& x);
-    FloatBall<PR>(FloatValue<PR> const& x);
+    explicit Ball<F,FE>(Bounds<F> const& x);
+    Ball<F,FE>(Value<F> const& x);
 
-    FloatBall<PR>& operator=(const ValidatedNumber& y);
+    Ball<F,FE>& operator=(const ValidatedNumber& y);
 
     operator ValidatedNumber () const;
 
-    FloatBall<PR> create(const ValidatedNumber& y) const;
+    Ball<F,FE> create(const ValidatedNumber& y) const;
 
-    FloatLowerBound<PR> const lower() const;
-    FloatUpperBound<PR> const upper() const;
-    FloatValue<PR> const value() const;
-    FloatError<PR> const error() const;
+    LowerBound<F> const lower() const;
+    UpperBound<F> const upper() const;
+    Value<F> const value() const;
+    Error<FE> const error() const;
 
-    RawFloatType const lower_raw() const { return sub_down(_v,_e); }
-    RawFloatType const upper_raw() const { return add_up(_v,_e); }
-    RawFloatType const& value_raw() const { return _v; }
-    RawFloatType const& error_raw() const { return _e; }
+    RawType const lower_raw() const { return sub(down,_v,_e); }
+    RawType const upper_raw() const { return add(up,_v,_e); }
+    RawType const& value_raw() const { return _v; }
+    RawErrorType const& error_raw() const { return _e; }
     double get_d() const { return _v.get_d(); }
 
     PrecisionType precision() const { return _v.precision(); }
+    ErrorPrecisionType error_precision() const { return _e.precision(); }
     PropertiesType properties() const { return _v.precision(); }
     GenericType generic() const { return this->operator GenericType(); }
-    FloatBall<PR> pm(FloatError<PR> e) const;
-    friend FloatApproximation<PR> round(FloatApproximation<PR> const& x);
+    Ball<F,FE> pm(Error<FE> const& e) const;
+    friend Approximation<F> round(Approximation<F> const& x);
   public:
-    friend PositiveFloatUpperBound<PR> mag(FloatBall<PR> const&);
-    friend PositiveFloatLowerBound<PR> mig(FloatBall<PR> const&);
-    friend Bool same(FloatBall<PR> const&, FloatBall<PR> const&);
-    friend Bool same(FloatBall<PR> const&, FloatBall<PR> const&);
-    friend Bool models(FloatBall<PR> const&, FloatValue<PR> const&);
-    friend Bool consistent(FloatBall<PR> const&, FloatBall<PR> const&);
-    friend Bool refines(FloatBall<PR> const&, FloatBall<PR> const&);
-    friend FloatBall<PR> refinement(FloatBall<PR> const&, FloatBall<PR> const&);
+    friend PositiveUpperBound<F> mag(Ball<F,FE> const&);
+    friend PositiveLowerBound<F> mig(Ball<F,FE> const&);
+    friend Bool same(Ball<F,FE> const&, Ball<F,FE> const&);
+    friend Bool models(Ball<F,FE> const&, Value<F> const&);
+    friend Bool consistent(Ball<F,FE> const&, Ball<F,FE> const&);
+    friend Bool refines(Ball<F,FE> const&, Ball<F,FE> const&);
+    friend Ball<F,FE> refinement(Ball<F,FE> const&, Ball<F,FE> const&);
   private: public:
-    RawFloatType _v, _e;
+    F _v; FE _e;
 };
 
-template<class PR> class Positive<FloatBall<PR>> : public FloatBall<PR> {
+template<class F, class FE> inline FloatFactory<PrecisionType<F>> factory(Ball<F,FE> const& flt) {
+    return FloatFactory<PrecisionType<F>>(flt.precision());
+}
+
+template<class F, class FE> class Positive<Ball<F,FE>> : public Ball<F,FE> {
+    using typename Ball<F,FE>::PRE;
   public:
-    Positive<FloatBall<PR>>() : FloatBounds<PR>() { }
+    Positive<Ball<F,FE>>() : Bounds<F>() { }
     template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>> =dummy>
-        Positive<FloatBall<PR>>(M m, PR pr) : FloatBall<PR>(m,pr) { }
-    explicit Positive<FloatBall<PR>>(FloatBall<PR> const& x) : FloatBall<PR>(x) { }
+        Positive<Ball<F,FE>>(M m, PRE pre) : Ball<F,FE>(m,pre) { }
+    explicit Positive<Ball<F,FE>>(Ball<F,FE> const& x) : Ball<F,FE>(x) { }
 };
 
-template<class PR> inline PositiveFloatBall<PR> cast_positive(FloatBall<PR> const& x) {
-    return PositiveFloatBall<PR>(x); }
+template<class F, class FE> inline PositiveBall<F,FE> cast_positive(Ball<F,FE> const& x) {
+    return PositiveBall<F,FE>(x); }
+
 
 }
 

@@ -22,106 +22,136 @@
  */
 
 #include "interval.hpp"
+#include "numeric/dyadic.hpp"
 
 namespace Ariadne {
 
-Interval<Float64Value> widen_domain(Interval<Float64UpperBound> const& ivl) {
+static const uint GEOMETRY_OUTPUT_PLACES = 4;
+
+template<> OutputStream& operator<<(OutputStream& os, Interval<FloatDPValue> const& ivl) {
+    auto places = FloatDPValue::output_places;
+    FloatDPValue::output_places=GEOMETRY_OUTPUT_PLACES;
+    os << "{" << ivl.lower() << ":" << ivl.upper() << "}";
+    FloatDPValue::output_places=places;
+    return os;
+}
+
+Interval<FloatDPValue> widen_domain(Interval<FloatDPUpperBound> const& ivl) {
+    auto rnd=FloatDP::get_rounding_mode();
+    FloatDP::set_rounding_mode(upward);
     volatile float min=std::numeric_limits<float>::min();
-    volatile double l=-ivl.lower().get_d();
+    volatile double neg_l=(-ivl.lower()).get_d();
+    volatile double l=-neg_l;
     volatile double u=ivl.upper().get_d();
-    volatile double neg_l=-l;
     volatile float neg_rl=neg_l;
     volatile float ru=u;
     if(l==u) { neg_rl+=min; ru+=min; }
     if(neg_rl<neg_l) { neg_rl+=min; }
     if(ru<u) { ru+=min; }
-    return Interval<Float64Value>(-neg_rl,ru);
+    volatile float rl=-neg_l;
+    Interval<FloatDPValue> res(rl,ru);
+    FloatDP::set_rounding_mode(rnd);
+    return res;
+}
+
+Interval<FloatDPValue> approximate_domain(Interval<FloatDPUpperBound> const& ivl) {
+    auto rnd=FloatDP::get_rounding_mode();
+    FloatDP::set_rounding_mode(to_nearest);
+    volatile float eps=std::numeric_limits<float>::epsilon();
+    volatile double l=ivl.lower().get_d();
+    volatile double u=ivl.upper().get_d();
+    volatile float rl=l;
+    volatile float ru=u;
+    if(rl==ru) { rl-=(rl*eps); ru+=(ru*eps); }
+    Interval<FloatDPValue> res(rl,ru);
+    FloatDP::set_rounding_mode(rnd);
+    return res;
 }
 
 InputStream&
-operator>>(InputStream& is, Interval<Float64Value>& ivl)
+operator>>(InputStream& is, Interval<FloatDPValue>& ivl)
 {
-    Float64 l,u;
+    FloatDP l,u;
     char cl,cm,cr;
     is >> cl >> l >> cm >> u >> cr;
     ARIADNE_ASSERT(not is.fail());
     ARIADNE_ASSERT(cl=='[' || cl=='(');
     ARIADNE_ASSERT(cm==':' || cm==',' || cm==';');
     ARIADNE_ASSERT(cr==']' || cr==')');
-    ivl.set(Float64Value(l),Float64Value(u));
+    ivl.set(FloatDPValue(l),FloatDPValue(u));
     return is;
 }
 
 
-template<> Float64UpperInterval FloatUpperIntervalFactory<Precision64>::create(ValidatedNumber const& y) const {
-    return Float64UpperInterval(Float64Bounds(y,this->_precision)); }
+template<> FloatDPUpperInterval FloatUpperIntervalFactory<DoublePrecision>::create(ValidatedNumber const& y) const {
+    return FloatDPUpperInterval(FloatDPBounds(y,this->_precision)); }
 
-Float64Bounds cast_singleton(Float64UpperInterval const& ivl) {
-    return Float64Bounds(ivl.lower(),ivl.upper()); }
-Float64UpperInterval make_interval(Float64Bounds const& x) {
-    return Float64UpperInterval(x.lower(),x.upper()); }
+FloatDPBounds cast_singleton(FloatDPUpperInterval const& ivl) {
+    return FloatDPBounds(ivl.lower(),ivl.upper()); }
+FloatDPUpperInterval make_interval(FloatDPBounds const& x) {
+    return FloatDPUpperInterval(x.lower(),x.upper()); }
 
-Float64UpperInterval max(Float64UpperInterval const& ivl1, Float64UpperInterval const& ivl2) {
+FloatDPUpperInterval max(FloatDPUpperInterval const& ivl1, FloatDPUpperInterval const& ivl2) {
     return make_interval(max(cast_singleton(ivl1),cast_singleton(ivl2))); }
-Float64UpperInterval min(Float64UpperInterval const& ivl1, Float64UpperInterval const& ivl2) {
+FloatDPUpperInterval min(FloatDPUpperInterval const& ivl1, FloatDPUpperInterval const& ivl2) {
     return make_interval(min(cast_singleton(ivl1),cast_singleton(ivl2))); }
-Float64UpperInterval abs(Float64UpperInterval const& ivl) {
+FloatDPUpperInterval abs(FloatDPUpperInterval const& ivl) {
     return make_interval(abs(cast_singleton(ivl))); }
-Float64UpperInterval nul(Float64UpperInterval const& ivl) {
+FloatDPUpperInterval nul(FloatDPUpperInterval const& ivl) {
     return make_interval(nul(cast_singleton(ivl))); }
-Float64UpperInterval pos(Float64UpperInterval const& ivl) {
+FloatDPUpperInterval pos(FloatDPUpperInterval const& ivl) {
     return make_interval(pos(cast_singleton(ivl))); }
-Float64UpperInterval neg(Float64UpperInterval const& ivl) {
+FloatDPUpperInterval neg(FloatDPUpperInterval const& ivl) {
     return make_interval(neg(cast_singleton(ivl))); }
-Float64UpperInterval sqr(Float64UpperInterval const& ivl) {
+FloatDPUpperInterval sqr(FloatDPUpperInterval const& ivl) {
     return make_interval(sqr(cast_singleton(ivl))); }
-Float64UpperInterval rec(Float64UpperInterval const& ivl) {
+FloatDPUpperInterval rec(FloatDPUpperInterval const& ivl) {
     return make_interval(rec(cast_singleton(ivl))); }
 
-Float64UpperInterval add(Float64UpperInterval const& ivl1, Float64UpperInterval const& ivl2) {
+FloatDPUpperInterval add(FloatDPUpperInterval const& ivl1, FloatDPUpperInterval const& ivl2) {
     return make_interval(add(cast_singleton(ivl1),cast_singleton(ivl2))); }
-Float64UpperInterval sub(Float64UpperInterval const& ivl1, Float64UpperInterval const& ivl2) {
+FloatDPUpperInterval sub(FloatDPUpperInterval const& ivl1, FloatDPUpperInterval const& ivl2) {
     return make_interval(sub(cast_singleton(ivl1),cast_singleton(ivl2))); }
-Float64UpperInterval mul(Float64UpperInterval const& ivl1, Float64UpperInterval const& ivl2) {
+FloatDPUpperInterval mul(FloatDPUpperInterval const& ivl1, FloatDPUpperInterval const& ivl2) {
     return make_interval(mul(cast_singleton(ivl1),cast_singleton(ivl2))); }
-Float64UpperInterval div(Float64UpperInterval const& ivl1, Float64UpperInterval const& ivl2) {
+FloatDPUpperInterval div(FloatDPUpperInterval const& ivl1, FloatDPUpperInterval const& ivl2) {
     return make_interval(div(cast_singleton(ivl1),cast_singleton(ivl2))); }
 
-Float64UpperInterval pow(Float64UpperInterval const& ivl, Nat m) {
+FloatDPUpperInterval pow(FloatDPUpperInterval const& ivl, Nat m) {
     return make_interval(pow(cast_singleton(ivl),m)); }
-Float64UpperInterval pow(Float64UpperInterval const& ivl, Int n) {
+FloatDPUpperInterval pow(FloatDPUpperInterval const& ivl, Int n) {
     return make_interval(pow(cast_singleton(ivl),n)); }
 
-Float64UpperInterval sqrt(Float64UpperInterval const& ivl) {
-    if(ivl.upper().raw()<0) { return Float64UpperInterval::empty_interval(); }
-    else { Float64UpperBound u=sqrt(ivl.upper()); return Float64UpperInterval(-u,+u); } }
-Float64UpperInterval exp(Float64UpperInterval const& ivl) {
+FloatDPUpperInterval sqrt(FloatDPUpperInterval const& ivl) {
+    if(ivl.upper().raw()<0) { return FloatDPUpperInterval::empty_interval(); }
+    else { FloatDPUpperBound u=sqrt(ivl.upper()); return FloatDPUpperInterval(-u,+u); } }
+FloatDPUpperInterval exp(FloatDPUpperInterval const& ivl) {
     return make_interval(exp(cast_singleton(ivl))); }
-Float64UpperInterval log(Float64UpperInterval const& ivl) {
-    if(ivl.upper().raw()<=0) { return Float64UpperInterval::empty_interval(); }
-    else if(ivl.lower().raw()<=0) { return Float64UpperInterval(-inf,log_up(ivl.upper().raw())); }
+FloatDPUpperInterval log(FloatDPUpperInterval const& ivl) {
+    if(ivl.upper().raw()<=0) { return FloatDPUpperInterval::empty_interval(); }
+    else if(ivl.lower().raw()<=0) { return FloatDPUpperInterval(-inf,log(up,ivl.upper().raw())); }
     else { return make_interval(log(cast_singleton(ivl))); } }
-Float64UpperInterval sin(Float64UpperInterval const& ivl) {
+FloatDPUpperInterval sin(FloatDPUpperInterval const& ivl) {
     return make_interval(sin(cast_singleton(ivl))); }
-Float64UpperInterval cos(Float64UpperInterval const& ivl) {
+FloatDPUpperInterval cos(FloatDPUpperInterval const& ivl) {
     return make_interval(cos(cast_singleton(ivl))); }
-Float64UpperInterval tan(Float64UpperInterval const& ivl) {
+FloatDPUpperInterval tan(FloatDPUpperInterval const& ivl) {
     return make_interval(tan(cast_singleton(ivl))); }
-Float64UpperInterval asin(Float64UpperInterval const& ivl) {
+FloatDPUpperInterval asin(FloatDPUpperInterval const& ivl) {
     return make_interval(asin(cast_singleton(ivl))); }
-Float64UpperInterval acos(Float64UpperInterval const& ivl) {
+FloatDPUpperInterval acos(FloatDPUpperInterval const& ivl) {
     return make_interval(acos(cast_singleton(ivl))); }
-Float64UpperInterval atan(Float64UpperInterval const& ivl) {
+FloatDPUpperInterval atan(FloatDPUpperInterval const& ivl) {
     return make_interval(atan(cast_singleton(ivl))); }
 
-Float64Error mag(Float64UpperInterval const& ivl) {
+FloatDPError mag(FloatDPUpperInterval const& ivl) {
     return mag(cast_singleton(ivl)); }
-Float64LowerBound mig(Float64UpperInterval const& ivl) {
+FloatDPLowerBound mig(FloatDPUpperInterval const& ivl) {
     return mig(cast_singleton(ivl)); }
 
-ValidatedKleenean eq(Float64UpperInterval const& ivl1, Float64UpperInterval const& ivl2) {
+ValidatedKleenean eq(FloatDPUpperInterval const& ivl1, FloatDPUpperInterval const& ivl2) {
     return eq(cast_singleton(ivl1),cast_singleton(ivl2)); }
-ValidatedKleenean lt(Float64UpperInterval const& ivl1, Float64UpperInterval const& ivl2) {
+ValidatedKleenean lt(FloatDPUpperInterval const& ivl1, FloatDPUpperInterval const& ivl2) {
     return lt(cast_singleton(ivl1),cast_singleton(ivl2)); }
 
 FloatMPBounds cast_singleton(FloatMPUpperInterval const& ivl) {
@@ -133,7 +163,7 @@ FloatMPError mag(FloatMPUpperInterval const& ivl) {
 FloatMPLowerBound mig(FloatMPUpperInterval const& ivl) {
     return mig(cast_singleton(ivl)); }
 
-template<> String class_name<Float64UpperInterval>() { return "Float64UpperInterval"; }
+template<> String class_name<FloatDPUpperInterval>() { return "FloatDPUpperInterval"; }
 template<> String class_name<FloatMPUpperInterval>() { return "FloatMPUpperInterval"; }
 
 } // namespace Ariadne

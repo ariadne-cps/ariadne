@@ -42,14 +42,14 @@
 namespace Ariadne {
 
 class Int64;
-class Float64;
+class FloatDP;
 
 enum class Comparison : char;
 
 
 /************ Rational *******************************************************/
 
-//! \ingroup UserNumericTypeSubModule
+//! \ingroup NumericModule
 //! \brief %Rational numbers.
 class Rational
     : DeclareFieldOperations<Rational>
@@ -69,12 +69,12 @@ class Rational
     Rational(const Integer&, const Integer&);
     template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> Rational(N n);
     Rational(Int64);
-    explicit Rational(Float64 const&);
+    explicit Rational(FloatDP const&);
     Rational(const ExactDouble&);
     Rational(const Integer&);
     Rational(const Dyadic&);
     explicit Rational(const String&);
-    explicit Rational(const Float64Value&);
+    explicit Rational(const FloatDPValue&);
     explicit Rational(const mpq_t);
     Rational(const Rational&);
     Rational(Rational&&);

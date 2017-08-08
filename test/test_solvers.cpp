@@ -42,7 +42,9 @@
 using namespace Ariadne;
 using namespace std;
 
-typedef Vector<Float64Bounds> FloatBoundsVector;
+typedef Interval<Dyadic> DyadicInterval;
+typedef Vector<DyadicInterval> DyadicIntervalVector;
+typedef Vector<FloatDPBounds> FloatBoundsVector;
 
 class TestSolver
 {
@@ -72,15 +74,16 @@ class TestSolver
     Void test_implicit() {
         //TaylorModelAccuracy::set_default_sweep_threshold(1e-12);
 
+        // FIXME: Should be able to use numbers yielding exact results for p,r
         EffectiveScalarFunction aa=EffectiveScalarFunction::coordinate(1,0);
         EffectiveScalarFunction a=EffectiveScalarFunction::coordinate(2,0);
         EffectiveScalarFunction x=EffectiveScalarFunction::coordinate(2,1);
         EffectiveScalarFunction bb;
         ExactIntervalVectorType p,r;
         EffectiveVectorFunction f;
-        ValidatedVectorFunctionModel64 h;
+        ValidatedVectorFunctionModelDP h;
         EffectiveVectorFunction e;
-        Float64Value tol;
+        FloatDPValue tol;
 
         // Test solution of x-a=0. This should be very easy to solve.
         p=ExactIntervalVectorType({ExactIntervalType(-0.25,0.25)});
@@ -100,7 +103,7 @@ class TestSolver
         ARIADNE_TEST_PRINT(f);
         h=solver->implicit(f,p,r);
         ARIADNE_TEST_PRINT(h);
-        bb=EffectiveScalarFunction(aa-numeric_cast<Real>(p[0].midpoint()))/numeric_cast<Real>(p[0].radius().upper_raw());
+        bb=EffectiveScalarFunction(aa-DyadicInterval(p[0]).midpoint())/DyadicInterval(p[0]).radius();
         Decimal a0(0.682328), a1(0.0521547), a2(-0.0023232), a3(0.000147778);
         e=EffectiveVectorFunction( { a0+bb*(a1+bb*(a2+bb*a3)) } );
         ARIADNE_TEST_PRINT(e);
@@ -113,7 +116,7 @@ class TestSolver
         ARIADNE_TEST_PRINT(f);
         h=solver->implicit(f,p,r);
         ARIADNE_TEST_PRINT(h);
-        bb=EffectiveScalarFunction(aa-numeric_cast<Real>(p[0].midpoint()))/numeric_cast<Real>(p[0].radius().upper_raw());
+        bb=EffectiveScalarFunction(aa-DyadicInterval(p[0]).midpoint())/DyadicInterval(p[0]).radius();
         Decimal c0(0.828427), c1(0.0441942), c2(-0.000345267), c3(0.00000539468);
         e=EffectiveVectorFunction( { c0+bb*(c1+bb*(c2+bb*c3)) } );
         ARIADNE_TEST_PRINT(e);
@@ -147,7 +150,7 @@ class TestSolver
         // Uses scalar implicit
         ExactIntervalVectorType p; ExactIntervalType r;
         EffectiveScalarFunction e,f,s; // s is unscaling functions
-        ValidatedScalarFunctionModel64 h;
+        ValidatedScalarFunctionModelDP h;
 
         ARIADNE_TEST_PRINT(*solver);
 
@@ -158,7 +161,7 @@ class TestSolver
         ARIADNE_TEST_PRINT(f);
         h=solver->implicit(f,p,r);
         ARIADNE_TEST_PRINT(h);
-        s=EffectiveScalarFunction(aa-numeric_cast<Real>(p[0].midpoint()))/numeric_cast<Real>(p[0].radius().upper_raw());
+        s=EffectiveScalarFunction(aa-DyadicInterval(p[0]).midpoint())/DyadicInterval(p[0]).radius();
         Decimal a0(0.682328), a1(0.0521547), a2(-0.0023232), a3(0.000147778);
         e=EffectiveScalarFunction( a0+s*(a1+s*(a2+s*a3)) );
         ARIADNE_TEST_PRINT(e);
@@ -171,7 +174,7 @@ class TestSolver
         r=ExactIntervalType(-1,1);
         f=EffectiveScalarFunction(x-2*a);
         ARIADNE_TEST_PRINT(f);
-        ValidatedScalarFunctionModel64 g=ValidatedScalarTaylorFunctionModel64(join(p,r),f,ThresholdSweeper<Float64>(Precision64(),1e-12));
+        ValidatedScalarFunctionModelDP g=ValidatedScalarTaylorFunctionModelDP(join(p,r),f,ThresholdSweeper<FloatDP>(dp,1e-12));
         ARIADNE_TEST_PRINT(g);
         try {
             h=solver->implicit(g,p,r);
@@ -191,8 +194,8 @@ class TestSolver
 Int main(Int argc, const char **argv) {
 /*
     ExactIntervalVectorType D={{-1,+1},{-1,+1}};
-    ValidatedVectorTaylorFunctionModel64 x=ValidatedVectorTaylorFunctionModel64::identity(D,ThresholdSweeper(1e-10));
-    ValidatedScalarTaylorFunctionModel64 f=2*x[0]-x[1];
+    ValidatedVectorTaylorFunctionModelDP x=ValidatedVectorTaylorFunctionModelDP::identity(D,ThresholdSweeper(1e-10));
+    ValidatedScalarTaylorFunctionModelDP f=2*x[0]-x[1];
     std::cerr<<"D="<<D<<"\n";
     ExactIntervalType D0=D[0];
     std::cerr<<"f="<<representation(f)<<"\n";

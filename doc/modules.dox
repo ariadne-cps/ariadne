@@ -32,9 +32,8 @@
 /*! \brief The main %Ariadne namespace.
  */
 namespace Ariadne {
-}
 
-/*!\defgroup UserModules UserModules
+/*!\defgroup UserModules User Modules
  */
 
 /*! \defgroup ExpressionModule Expression Module
@@ -76,42 +75,53 @@ namespace Ariadne {
  *  \brief Classes for computing the evolution and analysing the behaviour of a system.
  */
 
-
-
-
 /*! \defgroup CoreModules Core Modules
  *
  *  \brief Core classes and functions used for both system specification and internal computation.
  */
 
-
-
-
 /*!\defgroup NumericModule Numeric Module
  * \ingroup CoreModules
  * \brief Numerical types and intervals.
- * \details In this module, we define %Ariadne's base numerical types, and interval
- * arithmetic. The main classes are \ref Ariadne::Integer "Integer",
- * \ref Ariadne::Rational "Rational", \ref Ariadne::Float "Float",
- * \ref Ariadne::Interval "Interval" and \ref Ariadne::Real "Real" classes.
+ * \details In this module, we define %Ariadne's base numerical types,
+ * including support for interval arithmetic via balls and bounds.
+ * The main concrete algebraic number types are \ref Integer,
+ * \ref Dyadic, and \ref Rational.
+ * A \ref Decimal number class is provided for user input.
+ * The main real number type is \ref Real,
+ * with directed versions \ref LowerReal and \ref UpperReal.
+ * Generic numbers are defined using the \ref Number "Number<P>" templates,
+ * with typedefs e.g. \ref EffectiveNumber for \ref Number<\ref EffectiveTag>.
+ * [Forthcoming] Validated and approximate versions of real numbers are given by
+ * \ref ValidatedReal and \ref ApproximateReal.
  *
- * Rounded operations on \ref Ariadne::Float "Float" are provided using the \c _down
+ * Rounded operations on \ref Float64 and \ref FloatMP are provided using the \c _down
  * and \c _up suffixes. Approximate arithmetic without control of the
  * rounding mode can be specified by the approx rounding type, and exact
  * arithmetic (the default) can be specified explicitly using the exact
  * rounding type.
  *
+ * Types supporting exact or rounded arithmetic may be used to define (validated)
+ * approximations to numbers via the classes \ref FloatValue "FloatValue<PR>",
+ * \ref FloatBall "FloatBall<PR,PRE>", \ref FloatBounds "FloatBounds<PR>"
+ * \ref FloatUpperBound "FloatUpperBound<PR>", \ref FloatLowerBound "FloatLowerBound<PR>"
+ * and \ref FloatApproximation "FloatApproximation<PR>".
+ *
+ * %Positive numbers can be defined using the \ref Positive "Positive<X>" template.
+ * A \ref Natural is a \ref Positive<\ref Integer>.
+ *
  * Note that to prevent accidental calls to approximate functions, all
- * non-exact operations must yield a \a Float value.
+ * non-exact operations must yield a \ref FloatApproximation value.
  *
  * We use the following abbreviations for template parameters
  * for classes and concepts in this module:
- *  - \b Q: Rational
- *  - \b F: Float
- *  - \b I: Interval
- *  - \b A: Rational, Interval
- *  - \b R: Rational, Float
- *  - \b X: Rational, Float, Interval
+ *  - \b Z: %Integer
+ *  - \b W: %Dyadic
+ *  - \b Q: %Rational
+ *  - \b R: %Real
+ *  - \b F: %Float
+ *  - \b Y: %Generic %Number
+ *  - \b X: %Concrete %Number
  *
  * \internal The above template names are currently not used consistently
  *
@@ -128,7 +138,7 @@ namespace Ariadne {
  * and \ref Ariadne::Matrix "Matrix".
  * Specialist types include PermutationMatrix and DiagonalMatrix.
  * Operations such as vector sums and matrix-vector products are
- * accessed using operator overloading. Expression templates and slices are
+ * accessed using operator overloading. %Expression templates and slices are
  * used to improve efficiency.
  *
  * More complicated matrix operations, such as factorisation, are represented
@@ -301,5 +311,10 @@ namespace Ariadne {
 
 /*! \defgroup HybridModules Hybrid System Modules
  */
+
+/*!\defgroup ExternalModules External Modules
+ */
+
+} // namespace Ariadne
 
 #endif /* _ARIADNE_MODULES_H */

@@ -36,7 +36,7 @@
 #include "dyadic.hpp"
 #include "rational.hpp"
 #include "real.hpp"
-#include "float64.hpp"
+#include "floatdp.hpp"
 #include "floatmp.hpp"
 
 #include "number_interface.hpp"
@@ -74,19 +74,19 @@ Dyadic::operator ExactNumber() const { return ExactNumber(new NumberWrapper<Dyad
 Rational::operator ExactNumber() const { return ExactNumber(new NumberWrapper<Rational>(*this)); }
 Real::operator EffectiveNumber() const { return EffectiveNumber(new NumberWrapper<Real>(*this)); }
 
-template class NumberWrapper<Float64Approximation>;
-//template class NumberWrapper<Float64LowerBound>;
-//template class NumberWrapper<Float64UpperBound>;
-template class NumberWrapper<Float64Bounds>;
-template class NumberWrapper<Float64Ball>;
-template class NumberWrapper<Float64Value>;
+template class NumberWrapper<FloatDPApproximation>;
+//template class NumberWrapper<FloatDPLowerBound>;
+//template class NumberWrapper<FloatDPUpperBound>;
+template class NumberWrapper<FloatDPBounds>;
+template class NumberWrapper<FloatDPBall>;
+template class NumberWrapper<FloatDPValue>;
 
-template<> Float64Approximation::operator ApproximateNumber() const { return ApproximateNumber(new NumberWrapper<Float64Approximation>(*this)); }
-//template<> Float64LowerBound::operator ValidatedLowerNumber() const { return ValidatedLowerNumber(new NumberWrapper<Float64LowerBound>(*this)); }
-//template<> Float64UpperBound::operator ValidatedUpperNumber() const { return ValidatedUpperNumber(new NumberWrapper<Float64UpperBound>(*this)); }
-template<> Float64Bounds::operator ValidatedNumber() const { return ValidatedNumber(new NumberWrapper<Float64Bounds>(*this)); }
-template<> Float64Ball::operator ValidatedNumber() const { return ValidatedNumber(new NumberWrapper<Float64Ball>(*this)); }
-template<> Float64Value::operator ExactNumber() const { return ExactNumber(new NumberWrapper<Float64Value>(*this)); }
+template<> FloatDPApproximation::operator ApproximateNumber() const { return ApproximateNumber(new NumberWrapper<FloatDPApproximation>(*this)); }
+//template<> FloatDPLowerBound::operator ValidatedLowerNumber() const { return ValidatedLowerNumber(new NumberWrapper<FloatDPLowerBound>(*this)); }
+//template<> FloatDPUpperBound::operator ValidatedUpperNumber() const { return ValidatedUpperNumber(new NumberWrapper<FloatDPUpperBound>(*this)); }
+template<> FloatDPBounds::operator ValidatedNumber() const { return ValidatedNumber(new NumberWrapper<FloatDPBounds>(*this)); }
+template<> FloatDPBall::operator ValidatedNumber() const { return ValidatedNumber(new NumberWrapper<FloatDPBall>(*this)); }
+template<> FloatDPValue::operator ExactNumber() const { return ExactNumber(new NumberWrapper<FloatDPValue>(*this)); }
 
 template class NumberWrapper<FloatMPApproximation>;
 //template class NumberWrapper<FloatMPLowerBound>;

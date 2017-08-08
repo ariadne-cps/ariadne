@@ -64,7 +64,7 @@ Void TestMapEvolver::test() const
 {
     cout << __PRETTY_FUNCTION__ << endl;
 
-    Precision64 pr;
+    DoublePrecision pr;
 
     typedef Enclosure EnclosureType;
 
@@ -102,7 +102,7 @@ Void TestMapEvolver::test() const
 
 
     // Over-approximate the initial set by a grid cell
-    EnclosureType initial_set(initial_box,TaylorFunctionFactory(ThresholdSweeper<Float64>(Precision64(),1e-10)));
+    EnclosureType initial_set(initial_box,TaylorFunctionFactory(ThresholdSweeper<FloatDP>(dp,1e-10)));
     cout << "initial_set=" << initial_set << endl << endl << endl;
 
     // Set up the evolution parameters and grid

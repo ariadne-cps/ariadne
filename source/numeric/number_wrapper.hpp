@@ -37,7 +37,7 @@
 
 #include "number.hpp"
 #include "logical.hpp"
-#include "float64.hpp"
+#include "floatdp.hpp"
 #include "floatmp.hpp"
 #include "float-user.hpp"
 
@@ -68,8 +68,8 @@ inline OutputStream& operator<<(OutputStream& os, Sign s) {
 // FIXME: Should test for other potential infiniteis
 inline Comparison cmp(NumberInterface const& y1, NumberInterface const& y2) {
     Comparison res;
-    Float64Value const* x1=extract<Float64Value>(&y1);
-    Float64Value const* x2=extract<Float64Value>(&y2);
+    FloatDPValue const* x1=extract<FloatDPValue>(&y1);
+    FloatDPValue const* x2=extract<FloatDPValue>(&y2);
     if(x1) {
         if(x2) { res= cmp(ExactDouble(x1->raw().get_d()),ExactDouble(x2->raw().get_d())); }
         else { res= cmp(ExactDouble(x1->raw().get_d()),y2._get_q()); }
@@ -216,42 +216,42 @@ template<class X> class NumberGetterMixin : public virtual NumberInterface {
         if (this->_paradigm() == ParadigmCode::EXACT && y._paradigm() == ParadigmCode::EXACT) {
             return LogicalValue( cmp(*this,y)==Comparison::EQUAL ? LogicalValue::TRUE : LogicalValue::FALSE ); }
         if (this->_paradigm() == ParadigmCode::VALIDATED && y._paradigm() == ParadigmCode::VALIDATED) {
-            return LogicalValue(this->_get(BoundedTag(),Precision64()) == y._get(BoundedTag(),Precision64())); }
+            return LogicalValue(this->_get(BoundedTag(),dp) == y._get(BoundedTag(),dp)); }
         else {
-            return LogicalValue(this->_get(ApproximateTag(),Precision64()) == y._get(ApproximateTag(),Precision64())); }
+            return LogicalValue(this->_get(ApproximateTag(),dp) == y._get(ApproximateTag(),dp)); }
     }
     virtual LogicalValue _less(NumberInterface const& y) const override {
         if (this->_paradigm() == ParadigmCode::EXACT && y._paradigm() == ParadigmCode::EXACT) {
             return LogicalValue( cmp(*this,y)==Comparison::LESS ? LogicalValue::TRUE : LogicalValue::FALSE ); }
         else if (this->_paradigm() == ParadigmCode::VALIDATED && y._paradigm() == ParadigmCode::VALIDATED) {
-            return LogicalValue(this->_get(BoundedTag(),Precision64()) < y._get(BoundedTag(),Precision64())); }
+            return LogicalValue(this->_get(BoundedTag(),dp) < y._get(BoundedTag(),dp)); }
         else {
-            return LogicalValue(this->_get(ApproximateTag(),Precision64()) < y._get(ApproximateTag(),Precision64()));
+            return LogicalValue(this->_get(ApproximateTag(),dp) < y._get(ApproximateTag(),dp));
         }
     }
 
     virtual Rational _get_q() const override {
         return this->_get_as<Rational>(); }
 
-    virtual Float64Ball _get(MetricTag,Precision64 pr) const override {
-        return this->_get_as<Float64Ball>(pr); }
-    virtual Float64Bounds _get(BoundedTag,Precision64 pr) const override {
-        return this->_get_as<Float64Bounds>(pr); }
-    virtual Float64UpperBound _get(UpperTag,Precision64 pr) const override {
-        return this->_get_as<Float64UpperBound>(pr); }
-    virtual Float64LowerBound _get(LowerTag,Precision64 pr) const override {
-        return this->_get_as<Float64LowerBound>(pr); }
-    virtual Float64Approximation _get(ApproximateTag,Precision64 pr) const override {
-        return this->_get_as<Float64Approximation>(pr); }
-    virtual FloatMPBall _get(MetricTag, PrecisionMP pr) const override {
+    virtual FloatDPBall _get(MetricTag,DoublePrecision pr) const override {
+        return this->_get_as<FloatDPBall>(pr); }
+    virtual FloatDPBounds _get(BoundedTag,DoublePrecision pr) const override {
+        return this->_get_as<FloatDPBounds>(pr); }
+    virtual FloatDPUpperBound _get(UpperTag,DoublePrecision pr) const override {
+        return this->_get_as<FloatDPUpperBound>(pr); }
+    virtual FloatDPLowerBound _get(LowerTag,DoublePrecision pr) const override {
+        return this->_get_as<FloatDPLowerBound>(pr); }
+    virtual FloatDPApproximation _get(ApproximateTag,DoublePrecision pr) const override {
+        return this->_get_as<FloatDPApproximation>(pr); }
+    virtual FloatMPBall _get(MetricTag, MultiplePrecision pr) const override {
         return this->_get_as<FloatMPBall>(pr); }
-    virtual FloatMPBounds _get(BoundedTag, PrecisionMP pr) const override {
+    virtual FloatMPBounds _get(BoundedTag, MultiplePrecision pr) const override {
         return this->_get_as<FloatMPBounds>(pr); }
-    virtual FloatMPUpperBound _get(UpperTag, PrecisionMP pr) const override {
+    virtual FloatMPUpperBound _get(UpperTag, MultiplePrecision pr) const override {
         return this->_get_as<FloatMPUpperBound>(pr); }
-    virtual FloatMPLowerBound _get(LowerTag, PrecisionMP pr) const override {
+    virtual FloatMPLowerBound _get(LowerTag, MultiplePrecision pr) const override {
         return this->_get_as<FloatMPLowerBound>(pr); }
-    virtual FloatMPApproximation _get(ApproximateTag, PrecisionMP pr) const override {
+    virtual FloatMPApproximation _get(ApproximateTag, MultiplePrecision pr) const override {
         return this->_get_as<FloatMPApproximation>(pr); }
 
     virtual ParadigmCode _paradigm() const override { return P::code(); }

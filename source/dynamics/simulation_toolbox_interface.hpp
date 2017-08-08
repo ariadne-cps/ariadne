@@ -41,8 +41,8 @@ class VectorFunction;
 class SimulationToolboxInterface
 {
   public:
-    typedef Float64 RealType;
-    typedef Float64 TimeType;
+    typedef FloatDP RealType;
+    typedef FloatDP TimeType;
     typedef ExactPoint StateType;
     typedef ScalarFunction PredicateType;
     typedef VectorFunction MapType;

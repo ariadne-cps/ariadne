@@ -56,9 +56,9 @@ class SolverBase
     SolverBase(double max_error, Nat max_steps);
 
     /*! \brief The maximum permissible error of the solution. */
-    Float64Value maximum_error() const { return this->_max_error; }
+    FloatDPValue maximum_error() const { return this->_max_error; }
     /*! \brief Set the maximum error. */
-    Void set_maximum_error(RawFloat64 max_error) { this->_max_error=cast_exact(max_error); };
+    Void set_maximum_error(RawFloatDP max_error) { this->_max_error=cast_exact(max_error); };
 
     /*! \brief The maximum number of steps allowed before the method must quit. */
     Nat maximum_number_of_steps() const { return this->_max_steps; }
@@ -79,11 +79,11 @@ class SolverBase
     virtual Vector<ValidatedNumericType> solve(const ValidatedVectorFunction& f,const ExactBoxType& bx) const;
     virtual Vector<ValidatedNumericType> solve(const ValidatedVectorFunction& f,const Vector<ValidatedNumericType>& ipt) const;
     /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for a solution with x in \a ix. */
-    virtual ValidatedVectorFunctionModel64 implicit(const ValidatedVectorFunction& f, const ExactBoxType& par, const ExactBoxType& ix) const;
+    virtual ValidatedVectorFunctionModelDP implicit(const ValidatedVectorFunction& f, const ExactBoxType& par, const ExactBoxType& ix) const;
     /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for a solution with x in \a ix. */
-    virtual ValidatedScalarFunctionModel64 implicit(const ValidatedScalarFunction& f, const ExactBoxType& par, const ExactIntervalType& ix) const;
+    virtual ValidatedScalarFunctionModelDP implicit(const ValidatedScalarFunction& f, const ExactBoxType& par, const ExactIntervalType& ix) const;
     //! \brief Solve \f$f(a,x)=0\f$ yielding a function \f$x=h(a)\f$ for a in \a A, looking for a solution with \f$h(A) \subset X\f$ and $h(a)\in x\f$.
-    virtual ValidatedVectorFunctionModel64 continuation(const ValidatedVectorFunction& f, const Vector<ApproximateNumericType>& a, const ExactBoxType& X, const ExactBoxType& A) const;
+    virtual ValidatedVectorFunctionModelDP continuation(const ValidatedVectorFunction& f, const Vector<ApproximateNumericType>& a, const ExactBoxType& X, const ExactBoxType& A) const;
 
 
     /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
@@ -92,9 +92,9 @@ class SolverBase
     /*! \brief Perform one iterative step of the contractor. */
     virtual Vector<ValidatedNumericType> step(const ValidatedVectorFunction& f,const Vector<ValidatedNumericType>& pt) const = 0;
     /*! \brief Perform one iterative step of the contractor. */
-    virtual ValidatedVectorFunctionModel64 implicit_step(const ValidatedVectorFunction& f,const ValidatedVectorFunctionModel64& p,const ValidatedVectorFunctionModel64& x) const = 0;
+    virtual ValidatedVectorFunctionModelDP implicit_step(const ValidatedVectorFunction& f,const ValidatedVectorFunctionModelDP& p,const ValidatedVectorFunctionModelDP& x) const = 0;
   private:
-    Float64Value _max_error;
+    FloatDPValue _max_error;
     Nat _max_steps;
     std::shared_ptr< FunctionModelFactoryInterface<ValidatedTag> > _function_factory_ptr;
 };
@@ -117,7 +117,7 @@ class IntervalNewtonSolver
 
     using SolverBase::implicit;
   public:
-    virtual ValidatedVectorFunctionModel64 implicit_step(const ValidatedVectorFunction& f, const ValidatedVectorFunctionModel64& p, const ValidatedVectorFunctionModel64& x) const;
+    virtual ValidatedVectorFunctionModelDP implicit_step(const ValidatedVectorFunction& f, const ValidatedVectorFunctionModelDP& p, const ValidatedVectorFunctionModelDP& x) const;
 
     virtual Vector<ValidatedNumericType> step(const ValidatedVectorFunction& f, const Vector<ValidatedNumericType>& pt) const;
 };
@@ -140,7 +140,7 @@ class KrawczykSolver
     virtual Void write(OutputStream& os) const;
 
     /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for solutions with x in \a ix. */
-    virtual ValidatedVectorFunctionModel64 implicit_step(const ValidatedVectorFunction& f, const ValidatedVectorFunctionModel64& p, const ValidatedVectorFunctionModel64& x) const;
+    virtual ValidatedVectorFunctionModelDP implicit_step(const ValidatedVectorFunction& f, const ValidatedVectorFunctionModelDP& p, const ValidatedVectorFunctionModelDP& x) const;
 
   public:
     /*! \brief A single step of the Krawczyk contractor. */

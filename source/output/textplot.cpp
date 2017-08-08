@@ -98,7 +98,7 @@ Void TextPlot::open(const char* cfilename, std::ios_base::openmode mode)
 
 inline OutputStream& operator<<(OutputStream& os, const DrawableInterface& sh) { return sh.write(os); }
 
-Void TextPlot::draw(const DrawableInterface& shape) {
+TextPlot& TextPlot::draw(const DrawableInterface& shape) {
     if(dynamic_cast<const ExactPoint*>(&shape)) {
         this->draw(dynamic_cast<const ExactPoint&>(shape));
     } else if(dynamic_cast<const ExactBoxType*>(&shape)) {
@@ -112,43 +112,49 @@ Void TextPlot::draw(const DrawableInterface& shape) {
     } else {
         ARIADNE_THROW(std::runtime_error,"TextPlot::draw(const DrawableInterface&)","Unrecognised shape "<<shape<<" "<<typeid(shape).name());
     }
+    return *this;
 }
 
-Void TextPlot::_draw(const std::vector<ExactPoint>& pts) {
+TextPlot& TextPlot::_draw(const std::vector<ExactPoint>& pts) {
     for(std::vector<ExactPoint>::const_iterator iter = pts.begin() ; iter != pts.end() ; iter++) {
         this->draw(*iter);
     }
     this->_fstream << std::endl;
+    return *this;
 }
 
-Void TextPlot::draw(const ExactPoint& pt) {
+TextPlot& TextPlot::draw(const ExactPoint& pt) {
     for(Nat i = 0; i < pt.dimension(); i++) {
         this->_fstream << numeric_cast<double>(pt[i]) << " ";
     }
     this->_fstream << std::endl;
+    return *this;
 }
 
 
-Void TextPlot::draw(const ExactBoxType& bx) {
+TextPlot& TextPlot::draw(const ExactBoxType& bx) {
     this->_draw(bx.vertices());
+    return *this;
 }
 
-//Void TextPlot::draw(const Polytope& p) {
+//TextPlot& TextPlot::draw(const Polytope& p) {
 //    this->_draw(p.vertices());
 //}
 
-Void TextPlot::draw(const InterpolatedCurve& c) {
+TextPlot& TextPlot::draw(const InterpolatedCurve& c) {
     for(InterpolatedCurve::ConstIterator iter = c.begin() ; iter != c.end() ; ++iter) {
         this->draw(ApproximatePoint(iter->second));
     }
     this->_fstream << std::endl;
+    return *this;
 }
 
-Void TextPlot::draw(const GridTreeSubset& gts) {
+TextPlot& TextPlot::draw(const GridTreeSubset& gts) {
     for(GridTreeSubset::ConstIterator iter = gts.begin() ; iter != gts.end() ; ++iter) {
         this->draw(iter->box());
     }
     this->_fstream << std::endl;
+    return *this;
 }
 
 Void TextPlot::close() {

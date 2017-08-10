@@ -118,10 +118,9 @@ The main operations which %Ariadne can perform are
    - Output classes \ref Figure for plotting sets and orbits and \ref InputArchive and \ref OutputArchive classes for data persistence.
    .
 - Auxiliary user classes, used to define systems and store output.
-   - Numeric classes, including \ref Real, \ref Float and \ref Interval types and the optional \ref Integer and \ref Rational types.
+   - Numeric classes, including \ref Real, \link Bounds \c Bounds<F> \endlink and \link Approximation \c Approximation<F> \endlink based on floating-point types \ref FloatDP and \ref FloatMP, and concrete \ref Integer, \ref Dyadic, \ref Decimal and \ref Rational classes.
    - Linear algebra classes, \link Vector \c Vector<X> \endlink and \link Matrix \c Matrix<X> \endlink, templated on the numerical type.
-   - Function classes, including the \ref ScalarFunctionInterface and \ref VectorFunctionInterface interfaces, general \ref ScalarFunction and \ref VectorFunction classes, specific \ref ScalarConstantFunction, \ref ScalarAffineFunction, \ref ScalarPolynomialFunction and \ref IdentityFunction types,
-and \link ScalarUserFunction \c ScalarUserFunction<F> \endlink and \link VectorUserFunction \c VectorUserFunction<F> \endlink templates for user-defined nonlinear functions.
+   - Function classes, including the general \ref ScalarFunction and \ref VectorFunction classes, with \ref ScalarUnivariateFunction and \ref VectorUnivariantFunction, specific \ref ScalarConstantFunction, \ref ScalarAffineFunction, \ref ScalarPolynomialFunction and \ref IdentityFunction types.
    - Geometric classes, including affine geometric types such as \ref Point, \ref Box and \ref Polyhedron, and general \ref ImageSet, \ref ConstraintSet and \ref ConstrainedImageSet objects, and abstract interfaces such as \ref OpenSetInterface, \ref OvertSetInterface and \ref CompactSetInterface.
    - Storage class \link Orbit Orbit<S> \endlink for storing evolution traces and \ref GridTreeSet for storing reached sets.
    .

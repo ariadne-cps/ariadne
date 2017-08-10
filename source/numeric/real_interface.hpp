@@ -70,4 +70,4 @@ class ValidatedRealInterface {
 
 } // namespace Ariadne
 
-#endif
+#endif /* ARIADNE_REAL_INTERFACE_HPP */

@@ -42,13 +42,22 @@ Then you can prepare the build environment:
 $ cmake ..
 ```
 
-At this point, if no error arises, you can build the library itself:
+At this point, if no error arises, you can build the library itself, along with the test suite, examples, and python interface:
 
 ```
 $ make
 ```
+To build the library only, use 
+```
+$ make ariadne
+```
+and to make the Python interface, use
+```
+$ make pyariadne
+```
 
-Optionally, you can also run the test suite for the library:
+
+After building, you can also run the test suite for the library:
 
 ```
 $ make test

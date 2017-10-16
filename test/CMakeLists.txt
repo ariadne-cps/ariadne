@@ -1,4 +1,4 @@
-set(UNIT_TESTS
+set(UNIT_TESTS_KERNEL
     test_logical
     test_float
     test_validated_float
@@ -28,6 +28,9 @@ set(UNIT_TESTS
     test_continuous_evolution
     test_graphics
 #    test_serialization
+)
+
+set(UNIT_TESTS_HYBRID
     test_hybrid_set
     test_hybrid_automaton
     test_hybrid_evolver
@@ -36,9 +39,15 @@ set(UNIT_TESTS
     test_crossings_issue
 )
 
-foreach(test ${UNIT_TESTS})
-    add_executable(${test} ${test}.cpp)
-    target_link_libraries(${test} ariadne)
-    add_test(${test} ${test})
+set(UNIT_TESTS ${UNIT_TESTS_KERNEL} ${UNIT_TESTS_HYBRID})
+
+foreach(TEST ${UNIT_TESTS})
+    add_executable(${TEST} ${TEST}.cpp)
+    target_link_libraries(${TEST} ariadne)
+    add_test(${TEST} ${TEST})
 endforeach()
 
+add_custom_target(tests)
+add_dependencies(tests ${UNIT_TESTS})
+add_custom_target(tests-kernel)
+add_dependencies(tests-kernel ${UNIT_TESTS_KERNEL})

@@ -13,6 +13,11 @@ foreach(example ${EXAMPLES})
     target_link_libraries(${example} ariadne)
 endforeach()
 
+add_custom_target(examples)
+add_dependencies(examples ${EXAMPLES})
+
+add_custom_target(examples-experimental)
+
 add_subdirectory(watertank)
 add_subdirectory(twowatertanks)
 add_subdirectory(experimental)

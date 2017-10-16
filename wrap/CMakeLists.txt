@@ -1,14 +1,16 @@
 find_package(Boost ${Boost_REQUIRED_VERSION} COMPONENTS python)
 
 find_package(PythonLibs 2.4)
-message("  PYTHON_INCLUDE_DIRS: ${PYTHON_INCLUDE_DIRS}")
-message("  PYTHON_LIBRARIES: ${PYTHON_LIBRARIES}")
 
-IF(PYTHONLIBS_FOUND)
+if(PYTHONLIBS_FOUND)
+  message("Found Python headers")
+  message("  PYTHON_INCLUDE_DIRS: ${PYTHON_INCLUDE_DIRS}")
+  message("  PYTHON_LIBRARY_DIRS: ${PYTHON_LIBRARY_DIRS}")
+  message("  PYTHON_LIBRARIES: ${PYTHON_LIBRARIES}")
   include_directories(${PYTHON_INCLUDE_DIRS})
-ELSE()
-  message(FATAL_ERROR "Unable to find Python headers")
-ENDIF()
+else()
+  message(WARNING "Unable to find Python headers. You will not be able to use the Python interface.")
+endif()
 
 
 add_library(pyariadne-numeric-src OBJECT
@@ -43,6 +45,5 @@ add_library(pyariadne-src OBJECT
     graphics_submodule.cpp
 )
 
-cotire(pynumeric-src)
-cotire(pyalgebra-src)
+cotire(pyariadne-numeric-src)
 cotire(pyariadne-src)

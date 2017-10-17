@@ -25,7 +25,6 @@
 #define FUNCTION_PATCH_TCC
 
 #include "function/functional.hpp"
-#include "config.h"
 
 #include <iostream>
 #include <iomanip>

@@ -22,7 +22,6 @@
  */
 
 #include "function/functional.hpp"
-#include "config.h"
 
 #include <string>
 #include <sstream>

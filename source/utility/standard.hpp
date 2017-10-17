@@ -28,6 +28,8 @@
 #ifndef ARIADNE_STANDARD_HPP
 #define ARIADNE_STANDARD_HPP
 
+#include "config.h"
+
 #include <iostream>
 #include <iomanip>
 #include <cassert>

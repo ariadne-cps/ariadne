@@ -1,4 +1,4 @@
-/***************************************************************************
+    /***************************************************************************
  *            affine_model.tcc
  *
  *  Copyright 2009-17  Pieter Collins
@@ -22,7 +22,6 @@
  */
 
 #include "numeric/numeric.hpp"
-#include "config.h"
 
 #include "algebra/vector.hpp"
 #include "function/function.hpp"

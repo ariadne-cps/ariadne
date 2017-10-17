@@ -22,7 +22,6 @@
  */
 
 #include "numeric/numeric.hpp"
-#include "config.h"
 
 #include <iomanip>
 #include <limits>

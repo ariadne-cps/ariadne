@@ -28,6 +28,8 @@
 #ifndef ARIADNE_FUNCTION_HPP
 #define ARIADNE_FUNCTION_HPP
 
+#include "config.h"
+
 #include <cstdarg>
 #include <iosfwd>
 #include <iostream>

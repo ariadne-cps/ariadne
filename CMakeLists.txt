@@ -34,6 +34,7 @@ include(UseDoxygen OPTIONAL)
 
 include (CheckTypeSize)
 include (CheckIncludeFile)
+include (CheckIncludeFiles)
 include (CheckIncludeFileCXX)
 include (CheckLibraryExists)
 
@@ -49,6 +50,13 @@ check_type_size("long double" SIZEOF_LONG_DOUBLE)
 check_include_file(gmp.h HAVE_GMP_H)
 check_include_file(mpfr.h HAVE_MPFR_H)
 check_include_file_cxx(gmpxx.h HAVE_GMPXX_H)
+
+check_include_file("dlfcn.h" HAVE_DLFCN_H)
+check_include_file("execinfo.h" HAVE_EXECINFO_H)
+check_include_file_cxx("cxxabi.h" HAVE_CXXABI_H)
+if((${HAVE_DLFCN_H}) AND (${HAVE_EXECINFO_H}) AND (${HAVE_CXXABI_H}))
+    set(ARIADNE_ENABLE_STACK_TRACE TRUE)
+endif()
 
 if(NOT HAVE_GMP_H)
     message(FATAL_ERROR "Unable to find required header gmp.h")

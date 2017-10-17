@@ -10,6 +10,8 @@
 #cmakedefine SIZEOF_DOUBLE @SIZEOF_DOUBLE@
 #cmakedefine SIZEOF_LONG_DOUBLE @SIZEOF_LONG_DOUBLE@
 
+#cmakedefine ARIADNE_ENABLE_STACK_TRACE
+
 #cmakedefine HAVE_GMPXX_H
 #cmakedefine HAVE_CAIRO_H
 #cmakedefine HAVE_GTK2_H

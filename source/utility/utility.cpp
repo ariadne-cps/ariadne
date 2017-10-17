@@ -21,10 +21,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "config.h"
 #include "stack_trace.hpp"
+
+#ifdef ARIADNE_ENABLE_STACK_TRACE
 
 #include <cassert>
 #include <iostream>
+
 #include <execinfo.h>
 #include <dlfcn.h>
 #include <cxxabi.h>
@@ -41,7 +45,6 @@ void stack_trace() {
     int nFrames = backtrace(callstack, nMaxFrames);
     char **symbols = backtrace_symbols(callstack, nFrames);
     assert (symbols != nullptr);
-//    std::cerr << "\nnFrames=" << nFrames << "\n";
     for (int i = skip; i < nFrames; i++) {
         Dl_info info;
         if (dladdr(callstack[i], &info)) {
@@ -50,7 +53,6 @@ void stack_trace() {
             size_t length;
             int status;
             char* demangled = abi::__cxa_demangle(symbols[i], no_output_buffer, &length, &status);
-//            std::cerr << i << " " << status << " ";
             std::cerr << (status == 0 ? demangled : info.dli_sname) << "\n";
             free(demangled);
         } else {
@@ -61,3 +63,14 @@ void stack_trace() {
 }
 
 } // namespace Ariadne
+
+#else /* ARIADNE_ENABLE_STACK_TRACE */
+
+namespace Ariadne {
+
+void stack_trace() { }
+
+}
+
+#endif /* ARIADNE_ENABLE_STACK_TRACE */
+

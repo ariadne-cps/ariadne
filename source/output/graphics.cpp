@@ -49,6 +49,33 @@ static const Int TOP_MARGIN = 10;
 static const Int RIGHT_MARGIN = 10;
 
 
+Colour::Colour()
+    : Colour("transparant", 1.0, 1.0, 1.0, 0.0) { }
+Colour::Colour(double rd, double gr, double bl, Bool tr)
+    : Colour("",rd,gr,bl,tr?0.0:1.0) { }
+Colour::Colour(double rd, double gr, double bl, double op)
+    : Colour("",rd,gr,bl,op) { }
+Colour::Colour(const char* nm, double rd, double gr, double bl, Bool tr)
+    : Colour("",rd,gr,bl,tr?0.0:1.0) { }
+Colour::Colour(const char* nm, double rd, double gr, double bl, double op)
+    : name(nm), red(rd), green(gr), blue(bl), opacity(op) { }
+OutputStream& operator<<(OutputStream& os, const Colour& c) {
+    return os << "Colour( name=" << c.name << ", r=" << c.red << ", g=" << c.green << ", b=" << c.blue << ", op=" << c.opacity << " )"; }
+
+
+const Colour transparant=Colour();
+
+const Colour white=Colour("white",1.0,1.0,1.0);
+const Colour black=Colour("black",0.0,0.0,0.0);
+const Colour red=Colour("red",1.0,0.0,0.0);
+const Colour green=Colour("green",0.0,1.0,0.0);
+const Colour blue=Colour("blue",0.0,0.0,1.0);
+const Colour yellow=Colour("yellow",1.0,1.0,0.0);
+const Colour cyan=Colour("cyan",0.0,1.0,1.0);
+const Colour magenta=Colour("magenta",1.0,0.0,1.0);
+
+
+
 StringType str(FloatDP x) {
     StringStream ss;
     ss << x;
@@ -66,9 +93,6 @@ Void draw(Figure& fig, FloatDPApproximateBox const& box) {
 OutputStream& operator<<(OutputStream& os, const DrawableInterface& drawable) {
     return drawable.write(os);
 }
-
-
-
 
 struct GraphicsObject {
     GraphicsObject(const GraphicsProperties& gp, const DrawableInterface& sh)
@@ -225,11 +249,157 @@ Figure& Figure::draw(ApproximateBoxType const& box)
     this->draw(shape); return *this;
 }
 
-
-
 Figure& Figure::clear() {
     this->_data->objects.clear(); return *this;
 }
+
+Void set_properties(CanvasInterface& canvas, const GraphicsProperties& properties) {
+    const Colour& line_colour=properties.line_colour;
+    const Colour& fill_colour=properties.fill_colour;
+    canvas.set_fill_opacity(properties.fill_colour.opacity);
+    canvas.set_fill_colour(fill_colour.red, fill_colour.green, fill_colour.blue);
+    canvas.set_line_colour(line_colour.red, line_colour.green, line_colour.blue);
+}
+
+inline OutputStream& operator<<(OutputStream& os, const ExactBoxType& bx) { return os << static_cast<const ExactIntervalVectorType&>(bx); }
+
+Void Figure::_paint_all(CanvasInterface& canvas) const
+{
+    ApproximateBoxType bounding_box=this->_data->bounding_box;
+    const PlanarProjectionMap projection=this->_data->projection;
+    const std::vector<GraphicsObject>& objects=this->_data->objects;
+
+    Nat dimension=projection.argument_size();
+
+    // Don't attempt to compute a bounding box, as this relies on
+    // a drawable object having one. Instead, the bounding box must be
+    // specified explicitly
+    if(bounding_box.dimension()==0) {
+        bounding_box=ExactBoxType(dimension,ExactIntervalType(-1,1));
+    }
+
+    // Check projection and bounding box have same values.
+    ARIADNE_ASSERT_MSG(bounding_box.dimension()==projection.argument_size(),"bounding_box="<<bounding_box<<", projection="<<projection);
+    ARIADNE_ASSERT(bounding_box.dimension()>projection.x_coordinate());
+    ARIADNE_ASSERT(bounding_box.dimension()>projection.y_coordinate());
+
+    // Project the bounding box onto the canvas
+    double xl=numeric_cast<double>(bounding_box[projection.x_coordinate()].lower());
+    double xu=numeric_cast<double>(bounding_box[projection.x_coordinate()].upper());
+    double yl=numeric_cast<double>(bounding_box[projection.y_coordinate()].lower());
+    double yu=numeric_cast<double>(bounding_box[projection.y_coordinate()].upper());
+
+    StringType tx=StringType("x")+str(projection.x_coordinate());
+    StringType ty=StringType("x")+str(projection.y_coordinate());
+    canvas.initialise(tx,ty,xl,xu,yl,yu);
+
+    // Draw shapes
+    for(Nat i=0; i!=objects.size(); ++i) {
+        const DrawableInterface& shape=objects[i].shape_ptr.operator*();
+        if(shape.dimension()==0) { break; } // The dimension may be equal to two for certain empty sets.
+        ARIADNE_ASSERT_MSG(dimension==shape.dimension(),
+                           "Shape "<<shape<<", dimension="<<shape.dimension()<<", bounding_box="<<bounding_box);
+        set_properties(canvas, objects[i].properties);
+        shape.draw(canvas,this->_data->projection);
+    }
+
+    canvas.finalise();
+}
+
+
+Void
+Figure::write(const char* cfilename) const
+{
+    this->write(cfilename, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+}
+
+
+Void
+Figure::write(const char* cfilename, Nat drawing_width, Nat drawing_height) const
+{
+    SharedPointer<CanvasInterface> canvas=make_canvas(drawing_width,drawing_height);
+
+    this->_paint_all(*canvas);
+
+    StringType filename(cfilename);
+    if(filename.rfind(".") != StringType::npos) {
+    } else {
+        filename=filename+".png";
+    }
+
+    canvas->write(filename.c_str());
+}
+
+
+
+#ifdef HAVE_CAIRO_H
+
+SharedPointer<CanvasInterface> make_canvas(Nat drawing_width, Nat drawing_height) {
+    return std::make_shared<CairoCanvas>(ImageSize2d(drawing_width,drawing_height));
+}
+
+#else
+
+SharedPointer<CanvasInterface> make_canvas(Nat drawing_width, Nat drawing_height) {
+    throw std::runtime_error("No facilities for displaying graphics are available.");
+}
+
+#endif
+
+
+
+#ifdef HAVE_GTK_H
+
+Void Figure::display() const
+{
+
+    GtkWidget *window;
+    GtkWidget *canvas;
+
+    Int argc=0;
+    char **argv;
+
+    // initialize gtk
+    gtk_init (&argc,&argv);
+
+    // create a new top level window
+    window   = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+    // make the gtk terminate the process the close button is pressed
+    g_signal_connect (G_OBJECT (window), "delete-event",
+                      G_CALLBACK (gtk_main_quit), NULL);
+
+    // create a new drawing area widget
+    canvas = gtk_drawing_area_new ();
+
+    // set a requested (minimum size) for the canvas
+    gtk_widget_set_size_request (canvas, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+
+    // connect our drawing method to the "expose" signal
+    g_signal_connect (G_OBJECT (canvas), "expose-event",
+                      G_CALLBACK (paint),
+                      const_cast<Figure*>(this));  //  here we can pass a pointer to a custom data structure
+
+    // pack canvas widget into window
+    gtk_container_add (GTK_CONTAINER (window), canvas);
+
+    // show window and all it's children (just the canvas widget)
+    gtk_widget_show_all (window);
+
+    // enter main loop
+    gtk_main ();
+
+}
+
+#else // NO GTK_H
+
+Void Figure::display() const
+{
+    throw std::runtime_error("No facilities for displaying graphics are available.");
+}
+
+#endif // HAVE_GTK_H
+
+
 
 
 #ifdef HAVE_CAIRO_H
@@ -312,10 +482,6 @@ Void CairoCanvas::set_line_width(double lw) { this->lw=lw; }
 Void CairoCanvas::set_line_colour(double r, double g, double b) { lc.red=r; lc.green=g; lc.blue=b; }
 Void CairoCanvas::set_fill_opacity(double o) { fc.opacity=o; }
 Void CairoCanvas::set_fill_colour(double r, double g, double b) { fc.red=r; fc.green=g; fc.blue=b; }
-
-
-
-
 
 
 // TODO: Use generic canvas routines; move cairo-specific functionality
@@ -442,197 +608,12 @@ Void CairoCanvas::finalise()
     cairo_stroke (cr);
 }
 
-
-Void set_properties(CanvasInterface& canvas, const GraphicsProperties& properties) {
-    const Colour& line_colour=properties.line_colour;
-    const Colour& fill_colour=properties.fill_colour;
-    canvas.set_fill_opacity(properties.fill_colour.opacity);
-    canvas.set_fill_colour(fill_colour.red, fill_colour.green, fill_colour.blue);
-    canvas.set_line_colour(line_colour.red, line_colour.green, line_colour.blue);
-}
-
-inline OutputStream& operator<<(OutputStream& os, const ExactBoxType& bx) { return os << static_cast<const ExactIntervalVectorType&>(bx); }
-
-Void Figure::_paint_all(CanvasInterface& canvas) const
-{
-    ApproximateBoxType bounding_box=this->_data->bounding_box;
-    const PlanarProjectionMap projection=this->_data->projection;
-    const std::vector<GraphicsObject>& objects=this->_data->objects;
-
-    Nat dimension=projection.argument_size();
-
-    // Don't attempt to compute a bounding box, as this relies on
-    // a drawable object having one. Instead, the bounding box must be
-    // specified explicitly
-    if(bounding_box.dimension()==0) {
-        bounding_box=ExactBoxType(dimension,ExactIntervalType(-1,1));
-    }
-
-    // Check projection and bounding box have same values.
-    ARIADNE_ASSERT_MSG(bounding_box.dimension()==projection.argument_size(),"bounding_box="<<bounding_box<<", projection="<<projection);
-    ARIADNE_ASSERT(bounding_box.dimension()>projection.x_coordinate());
-    ARIADNE_ASSERT(bounding_box.dimension()>projection.y_coordinate());
-
-    // Project the bounding box onto the canvas
-    double xl=numeric_cast<double>(bounding_box[projection.x_coordinate()].lower());
-    double xu=numeric_cast<double>(bounding_box[projection.x_coordinate()].upper());
-    double yl=numeric_cast<double>(bounding_box[projection.y_coordinate()].lower());
-    double yu=numeric_cast<double>(bounding_box[projection.y_coordinate()].upper());
-
-    StringType tx=StringType("x")+str(projection.x_coordinate());
-    StringType ty=StringType("x")+str(projection.y_coordinate());
-    canvas.initialise(tx,ty,xl,xu,yl,yu);
-
-    // Draw shapes
-    for(Nat i=0; i!=objects.size(); ++i) {
-        const DrawableInterface& shape=objects[i].shape_ptr.operator*();
-        if(shape.dimension()==0) { break; } // The dimension may be equal to two for certain empty sets.
-        ARIADNE_ASSERT_MSG(dimension==shape.dimension(),
-                           "Shape "<<shape<<", dimension="<<shape.dimension()<<", bounding_box="<<bounding_box);
-        set_properties(canvas, objects[i].properties);
-        shape.draw(canvas,this->_data->projection);
-    }
-
-    canvas.finalise();
-}
-
-
-Void
-Figure::write(const char* cfilename) const
-{
-    this->write(cfilename, DEFAULT_WIDTH, DEFAULT_HEIGHT);
-}
-
-
-Void
-Figure::write(const char* cfilename, Nat drawing_width, Nat drawing_height) const
-{
-    CairoCanvas canvas(ImageSize2d(drawing_width,drawing_height));
-
-    this->_paint_all(canvas);
-
-    StringType filename(cfilename);
-    if(filename.rfind(".") != StringType::npos) {
-    } else {
-        filename=filename+".png";
-    }
-
-    canvas.write(filename.c_str());
-}
-
-
-#ifdef HAVE_GTK_H
-
-Void
-paint (GtkWidget      *widget,
-       GdkEventExpose *eev,
-       gpointer        gdata)
-{
-    cairo_t *cr;
-
-    Figure* figure=static_cast<Figure*>(gdata);
-
-    //gint canvas_width  = widget->allocation.width;
-    //gint canvas_height = widget->allocation.height;
-
-    // Get Cairo drawing context
-    cr = gdk_cairo_create (widget->window);
-
-    // Draw Cairo objects
-    CairoCanvas canvas(cr);
-    figure->_paint_all(canvas);
-}
-
-Void Figure::display() const
-{
-
-    GtkWidget *window;
-    GtkWidget *canvas;
-
-    Int argc=0;
-    char **argv;
-
-    // initialize gtk
-    gtk_init (&argc,&argv);
-
-    // create a new top level window
-    window   = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-    // make the gtk terminate the process the close button is pressed
-    g_signal_connect (G_OBJECT (window), "delete-event",
-                      G_CALLBACK (gtk_main_quit), NULL);
-
-    // create a new drawing area widget
-    canvas = gtk_drawing_area_new ();
-
-    // set a requested (minimum size) for the canvas
-    gtk_widget_set_size_request (canvas, DEFAULT_WIDTH, DEFAULT_HEIGHT);
-
-    // connect our drawing method to the "expose" signal
-    g_signal_connect (G_OBJECT (canvas), "expose-event",
-                      G_CALLBACK (paint),
-                      const_cast<Figure*>(this));  //  here we can pass a pointer to a custom data structure
-
-    // pack canvas widget into window
-    gtk_container_add (GTK_CONTAINER (window), canvas);
-
-    // show window and all it's children (just the canvas widget)
-    gtk_widget_show_all (window);
-
-    // enter main loop
-    gtk_main ();
-
-}
-
-#else // NO GTK_H
-
-Void Figure::display() const
-{
-    throw std::runtime_error("No facilities for displaying graphics are available.");
-}
-
-#endif // HAVE_GTK_H
-
-#else // NO CAIRO_H
-
-Void
-Figure::write(const char* filename) const
-{
-    throw std::runtime_error("No facilities for drawing graphics are available.");
-}
-
-Void Figure::display() const
-{
-    throw std::runtime_error("No facilities for displaying graphics are available.");
-}
-
-#endif // HAVE_CAIRO_H
+#endif
 
 
 
-Colour::Colour()
-    : Colour("transparant", 1.0, 1.0, 1.0, 0.0) { }
-Colour::Colour(double rd, double gr, double bl, Bool tr)
-    : Colour("",rd,gr,bl,tr?0.0:1.0) { }
-Colour::Colour(double rd, double gr, double bl, double op)
-    : Colour("",rd,gr,bl,op) { }
-Colour::Colour(const char* nm, double rd, double gr, double bl, Bool tr)
-    : Colour("",rd,gr,bl,tr?0.0:1.0) { }
-Colour::Colour(const char* nm, double rd, double gr, double bl, double op)
-    : name(nm), red(rd), green(gr), blue(bl), opacity(op) { }
-OutputStream& operator<<(OutputStream& os, const Colour& c) {
-    return os << "Colour( name=" << c.name << ", r=" << c.red << ", g=" << c.green << ", b=" << c.blue << ", op=" << c.opacity << " )"; }
 
 
-const Colour transparant=Colour();
-
-const Colour white=Colour("white",1.0,1.0,1.0);
-const Colour black=Colour("black",0.0,0.0,0.0);
-const Colour red=Colour("red",1.0,0.0,0.0);
-const Colour green=Colour("green",0.0,1.0,0.0);
-const Colour blue=Colour("blue",0.0,0.0,1.0);
-const Colour yellow=Colour("yellow",1.0,1.0,0.0);
-const Colour cyan=Colour("cyan",0.0,1.0,1.0);
-const Colour magenta=Colour("magenta",1.0,0.0,1.0);
 
 } // namespace Ariadne
 

@@ -31,7 +31,7 @@
 #include "geometry/point.hpp"
 #include "geometry/box.hpp"
 #include "output/geometry2d.hpp"
-#include "output/cairo.hpp"
+#include "output/graphics.hpp"
 #include "hybrid/discrete_location.hpp"
 #include "geometry/function_set.hpp"
 #include "expression/expression_set.hpp"
@@ -100,17 +100,12 @@ HybridFigure::write(const char* cfilename) const
 Void
 HybridFigure::write(const char* cfilename, Nat drawing_width, Nat drawing_height) const
 {
-    cairo_surface_t *surface;
-    cairo_t *cr;
-
     const Int canvas_width = drawing_width+LEFT_MARGIN+RIGHT_MARGIN;
     const Int canvas_height = drawing_height+BOTTOM_MARGIN+TOP_MARGIN;;
 
-    surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, canvas_width, canvas_height);
-    cr = cairo_create (surface);
-    CairoCanvas canvas(cr);
+    SharedPointer<CanvasInterface> canvas=make_canvas(canvas_width, canvas_height);
 
-    this->_paint_all(canvas);
+    this->_paint_all(*canvas);
 
     StringType filename(cfilename);
     if(filename.rfind(".") != StringType::npos) {
@@ -118,8 +113,9 @@ HybridFigure::write(const char* cfilename, Nat drawing_width, Nat drawing_height
         filename=filename+".png";
     }
 
-    canvas.write(filename.c_str());
+    canvas->write(filename.c_str());
 }
+
 
 Void HybridFigure::_paint_all(CanvasInterface& canvas) const
 {

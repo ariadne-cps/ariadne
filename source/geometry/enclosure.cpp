@@ -67,10 +67,6 @@
 
 #include "function/functional.hpp"
 
-#include "config.h"
-#ifdef HAVE_CAIRO_H
-#include <cairo/cairo.h>
-#endif // HAVE_CAIRO_H
 #include "numeric/operators.hpp"
 #include "expression/space.hpp"
 

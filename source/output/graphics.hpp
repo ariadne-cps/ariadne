@@ -28,6 +28,8 @@
 #ifndef ARIADNE_GRAPHICS_HPP
 #define ARIADNE_GRAPHICS_HPP
 
+#include "config.h"
+
 #include <iosfwd>
 #include <string>
 #include <vector>

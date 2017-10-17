@@ -57,6 +57,8 @@ inline OutputStream& operator<<(OutputStream& os, const PlanarProjectionMap& p) 
     return os << "P<R"<<p.n<<";R2>[x"<<p.i<<",x"<<p.j<<"]"; }
 typedef PlanarProjectionMap Projection2d;
 
+SharedPointer<CanvasInterface> make_canvas(Nat drawing_width, Nat drawing_height);
+
 //! \ingroup GraphicsModule
 //! \brief Base interface for plotting and drawing classes.
 class FigureInterface {
@@ -95,6 +97,8 @@ class CanvasInterface {
 
     virtual Void initialise(StringType x, StringType y, double lx, double ux, double ly, double uy) = 0;
     virtual Void finalise() = 0;
+
+    virtual Void write(const char* filename) const = 0;
 
     //! \brief Move the current initial point for a line to the point \a (x,y).
     virtual Void move_to(double x, double y) = 0;

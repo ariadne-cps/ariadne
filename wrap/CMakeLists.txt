@@ -32,6 +32,7 @@ add_library(pyariadne-src OBJECT
     utilities.cpp
     ariadne_module.cpp
     numeric_submodule.cpp
+    expression_submodule.cpp
     linear_algebra_submodule.cpp
     optimization_submodule.cpp
     differentiation_submodule.cpp

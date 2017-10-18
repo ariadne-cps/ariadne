@@ -95,7 +95,8 @@ template<class UB> class VariableInterval {
     const LowerBoundType lower() const { return this->_ivl.lower(); }
     const UpperBoundType upper() const { return this->_ivl.upper(); }
     friend OutputStream& operator<<(OutputStream& os, const VariableInterval<UB>& eivl) {
-        return os << eivl._variable << ".in(" << eivl._ivl << "\n"; }
+        //return os << eivl._variable << ".in(" << eivl._ivl << "\n"; }
+        return os << eivl._ivl.lower() << "<=" << eivl._variable << "<=" << eivl._ivl.upper(); }
   private:
     RealVariable _variable;
     IntervalType _ivl;
@@ -124,6 +125,8 @@ template<class UB> struct VariableLowerInterval {
     const RealVariable& variable() const { return _variable; }
     operator Expression<Kleenean>() const {
         static_assert(IsSame<UB,Real>::value,""); return ( Real(this->_lower) <= RealExpression(this->_variable) ); };
+    friend OutputStream& operator<<(OutputStream& os, const VariableLowerInterval<UB>& elivl) {
+        return os << elivl._lower << "<=" << elivl._variable; }
 };
 
 template<class UB> struct VariableUpperInterval {
@@ -135,6 +138,8 @@ template<class UB> struct VariableUpperInterval {
     UB upper() const { return _upper; }
     operator Expression<Kleenean>() const {
         static_assert(IsSame<UB,Real>::value,""); return ( RealExpression(this->_variable) <= Real(this->_upper) ); }
+    friend OutputStream& operator<<(OutputStream& os, const VariableUpperInterval<UB>& euivl) {
+        return os << euivl._variable << "<=" << euivl._upper; }
 };
 
 typedef VariableLowerInterval<Real> RealVariableLowerInterval;
@@ -291,6 +296,10 @@ template<class IVL> VariablesBox<IVL>::operator ExpressionSet<Box<IVL>>() const 
     return ExpressionSet<Box<IVL>>(spc,this->euclidean_set(spc));
 }
 
+
+RealBox make_box(RealSpace const&, RealVariablesBox const&);
+ConstraintSet make_set(RealSpace const&, RealExpressionConstraintSet const&);
+BoundedConstraintSet make_set(RealSpace const&, RealExpressionBoundedConstraintSet const&);
 } // namespace Ariadne
 
 

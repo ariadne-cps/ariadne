@@ -50,68 +50,70 @@ namespace Ariadne {
 
 typedef RealBox BoxSet;
 
-template<>
-struct from_python_dict<ExactIntervalType> {
-    from_python_dict() { converter::registry::push_back(&convertible,&construct,type_id<ExactIntervalType>()); }
+template<class UB>
+struct from_python_dict<Interval<UB>> {
+    from_python_dict() { converter::registry::push_back(&convertible,&construct,type_id<Interval<UB>>()); }
     static Void* convertible(PyObject* obj_ptr) {
         if (!PyDict_Check(obj_ptr) || len(boost::python::extract<boost::python::dict>(obj_ptr))!=1) { return 0; } return obj_ptr; }
     static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
+        typedef typename Interval<UB>::LowerBoundType LB;
         boost::python::dict dct = boost::python::extract<boost::python::dict>(obj_ptr);
         boost::python::list lst=dct.items();
         assert(boost::python::len(lst)==1);
-        Void* storage = ((converter::rvalue_from_python_storage<ExactIntervalType>*)data)->storage.bytes;
-        double lb=boost::python::extract<double>(lst[0][0]); double ub=boost::python::extract<double>(lst[0][1]);
-        new (storage) ExactIntervalType(lb,ub);
+        Void* storage = ((converter::rvalue_from_python_storage<Interval<UB>>*)data)->storage.bytes;
+        LB lb=boost::python::extract<LB>(lst[0][0]); UB ub=boost::python::extract<UB>(lst[0][1]);
+        new (storage) Interval<UB>(lb,ub);
         data->convertible = storage;
     }
 };
 
 
-template<>
-struct from_python_list<ExactIntervalType> {
+template<class UB>
+struct from_python_list<Interval<UB>> {
     from_python_list() { converter::registry::push_back(&convertible,&construct,type_id<ExactIntervalType>()); }
     static Void* convertible(PyObject* obj_ptr) {
         if (!PyList_Check(obj_ptr) || len(boost::python::extract<boost::python::list>(obj_ptr))!=2) { return 0; } return obj_ptr; }
     static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
+        typedef typename Interval<UB>::LowerBoundType LB;
         boost::python::list lst = boost::python::extract<boost::python::list>(obj_ptr);
         assert(boost::python::len(lst)==2);
         Void* storage = ((converter::rvalue_from_python_storage<ExactIntervalType>*)data)->storage.bytes;
-        double lb=boost::python::extract<double>(lst[0]); double ub=boost::python::extract<double>(lst[1]);
-        new (storage) ExactIntervalType(lb,ub);
+        LB lb=boost::python::extract<LB>(lst[0]); UB ub=boost::python::extract<UB>(lst[1]);
+        new (storage) Interval<UB>(lb,ub);
         data->convertible = storage;
     }
 };
 
-template<>
-struct from_python<ExactPoint> {
-    from_python() { converter::registry::push_back(&convertible,&construct,type_id<ExactPoint>()); }
+template<class X>
+struct from_python<Point<X>> {
+    from_python() { converter::registry::push_back(&convertible,&construct,type_id<Point<X>>()); }
     static Void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr) && !PyTuple_Check(obj_ptr)) { return 0; } return obj_ptr; }
     static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
         boost::python::extract<boost::python::tuple> xtup(obj_ptr);
         boost::python::extract<boost::python::list> xlst(obj_ptr);
-        ExactPoint pt;
+        Point<X> pt;
         if(xtup.check()) {
-            boost::python::tuple tup=xtup(); pt=ExactPoint(len(tup));
-            for(Int i=0; i!=len(tup); ++i) { pt[i]=FloatDPValue(boost::python::extract<FloatDP>(tup[i])); }
+            boost::python::tuple tup=xtup(); pt=Point<X>(len(tup));
+            for(Int i=0; i!=len(tup); ++i) { pt[i]=boost::python::extract<X>(tup[i]); }
         } else if(xlst.check()) {
-            boost::python::list lst=xlst(); pt=ExactPoint(len(lst));
-            for(Int i=0; i!=len(lst); ++i) { pt[i]=FloatDPValue(boost::python::extract<FloatDP>(lst[i])); }
+            boost::python::list lst=xlst(); pt=Point<X>(len(lst));
+            for(Int i=0; i!=len(lst); ++i) { pt[i]=boost::python::extract<X>(lst[i]); }
         }
-        Void* storage = ((converter::rvalue_from_python_storage<ExactIntervalType>*)data)->storage.bytes;
-        new (storage) ExactPoint(pt);
+        Void* storage = ((converter::rvalue_from_python_storage<X>*)data)->storage.bytes;
+        new (storage) Point<X>(pt);
         data->convertible = storage;
     }
 };
 
-template<>
-struct from_python<ExactBoxType> {
-    from_python() { converter::registry::push_back(&convertible,&construct,type_id<ExactBoxType>()); }
+template<class IVL>
+struct from_python<Box<IVL>> {
+    from_python() { converter::registry::push_back(&convertible,&construct,type_id<Box<IVL>>()); }
     static Void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
     static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
-        Void* storage = ((converter::rvalue_from_python_storage<ExactIntervalType>*)data)->storage.bytes;
+        Void* storage = ((converter::rvalue_from_python_storage<IVL>*)data)->storage.bytes;
         boost::python::list lst=boost::python::extract<boost::python::list>(obj_ptr);
-        ExactBoxType* bx_ptr = new (storage) ExactBoxType(len(lst));
-        for(Int i=0; i!=len(lst); ++i) { (*bx_ptr)[i]=boost::python::extract<ExactIntervalType>(lst[i]); }
+        Box<IVL>* bx_ptr = new (storage) Box<IVL>(len(lst));
+        for(Int i=0; i!=len(lst); ++i) { (*bx_ptr)[i]=boost::python::extract<IVL>(lst[i]); }
         data->convertible = storage;
     }
 };
@@ -240,6 +242,7 @@ ConstrainedImageSet image(const BoundedConstraintSet& set, const EffectiveVector
 ValidatedConstrainedImageSet image(ValidatedConstrainedImageSet set, ValidatedVectorFunction const& h);
 ValidatedConstrainedImageSet join(const ValidatedConstrainedImageSet& set1, const ValidatedConstrainedImageSet& set2);
 
+ValidatedAffineConstrainedImageSet image(ValidatedAffineConstrainedImageSet set, ValidatedVectorFunction const& h);
 }
 
 
@@ -292,6 +295,8 @@ template<class IVL> Void export_interval(std::string name) {
     typedef decltype(disjoint(declval<IntervalType>(),declval<IntervalType>())) DisjointType;
     typedef decltype(subset(declval<IntervalType>(),declval<IntervalType>())) SubsetType;
 
+    from_python_dict<IVL>();
+
     class_< IntervalType > interval_class(name.c_str(),init<IntervalType>());
     //interval_class.def(init<MidpointType>());
     interval_class.def(init<LowerBoundType,UpperBoundType>());
@@ -325,7 +330,7 @@ template<class IVL> Void export_interval(std::string name) {
 Void export_intervals() {
     export_interval<ExactIntervalType>("ExactInterval");
     export_interval<UpperIntervalType>("UpperInterval");
-    from_python_dict<ExactIntervalType>();
+    export_interval<RealInterval>("RealInterval");
 }
 
 template<class BX> Void export_box()
@@ -434,7 +439,6 @@ Void export_curve()
 
 Void export_affine_set()
 {
-
     class_<ValidatedAffineConstrainedImageSet,bases<CompactSetInterface,DrawableInterface> >
         affine_set_class("ValidatedAffineConstrainedImageSet",init<ValidatedAffineConstrainedImageSet>());
     affine_set_class.def(init<Vector<ExactIntervalType>, Matrix<FloatDPValue>, Vector<FloatDPValue> >());
@@ -450,6 +454,7 @@ Void export_affine_set()
     affine_set_class.def("outer_approximation", &ValidatedAffineConstrainedImageSet::outer_approximation);
     affine_set_class.def("boundary", &ValidatedAffineConstrainedImageSet::boundary);
     affine_set_class.def(self_ns::str(self));
+
 }
 
 
@@ -465,8 +470,8 @@ Void export_constraint_set()
         bounded_constraint_set_class("BoundedConstraintSet",init<BoundedConstraintSet>());
     bounded_constraint_set_class.def(init< BoxSet, List<EffectiveConstraint> >());
 
-    class_<BoxSet>
-        box_set_class("BoxSet");
+    class_<BoxSet> box_set_class("BoxSet");
+    box_set_class.def(self_ns::str(self));
 
     def("intersection", (BoundedConstraintSet(*)(const ConstraintSet&,const RealBox&)) &intersection);
 

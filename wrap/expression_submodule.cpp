@@ -35,6 +35,7 @@
 #include "expression/expression.hpp"
 #include "expression/assignment.hpp"
 #include "expression/space.hpp"
+#include "expression/expression_set.hpp"
 
 using namespace boost::python;
 using namespace Ariadne;
@@ -87,6 +88,10 @@ RealExpression operator+(const RealExpression& e, const RealVariable& v) { retur
 RealExpression operator-(const RealExpression& e, const RealVariable& v) { return e-RealExpression(v); }
 RealExpression operator*(const RealExpression& e, const RealVariable& v) { return e*RealExpression(v); }
 RealExpression operator/(const RealExpression& e, const RealVariable& v) { return e/RealExpression(v); }
+RealExpression operator+(const RealVariable& v1, const RealVariable& v2) { return RealExpression(v1)+RealExpression(v2); }
+RealExpression operator-(const RealVariable& v1, const RealVariable& v2) { return RealExpression(v1)-RealExpression(v2); }
+RealExpression operator*(const RealVariable& v1, const RealVariable& v2) { return RealExpression(v1)*RealExpression(v2); }
+RealExpression operator/(const RealVariable& v1, const RealVariable& v2) { return RealExpression(v1)/RealExpression(v2); }
 RealExpression operator+(const RealVariable& v, const Real& x) { return RealExpression(v)+RealExpression(x); }
 RealExpression operator-(const RealVariable& v, const Real& x) { return RealExpression(v)-RealExpression(x); }
 RealExpression operator*(const RealVariable& v, const Real& x) { return RealExpression(v)*RealExpression(x); }
@@ -109,6 +114,25 @@ KleeneanExpression sgn(const RealExpression&);
 
 Int length(const Array<StringType>& a) { return a.size(); }
 
+//RealVariableInterval operator&&(RealVariableLowerInterval elivl, RealVariableUpperInterval euivl) {
+//    assert(elivl.variable()==euivl.variable());
+//    return RealVariableInterval(elivl.lower(),elivl.variable(),euivl.upper());
+//}
+
+RealVariableInterval operator|(RealVariable v, RealInterval ivl) {
+    return RealVariableInterval(ivl.lower(),v,ivl.upper());
+}
+
+void foo() {
+    Real a(1);
+    RealVariable x("x");
+//    decltype(x*x) re1=nullptr;
+//    decltype(x*x<=a) re2=nullptr;
+//    decltype(a<=x*x) re3=nullptr;
+//    decltype(x*x==a) re4=nullptr;
+//    decltype(a<=x*x<=a) re5=nullptr;
+}
+
 } // namespace Ariadne
 
 
@@ -125,6 +149,8 @@ Void export_formula()
     implicitly_convertible<RealVariable,RealExpression>();
 
     to_python< List<RealExpression> >();
+
+    from_python< List<RealVariableInterval> >();
 
     // TODO: These interval conversions are dangerous since they are applied when they sometimes should not be.
     //implicitly_convertible<double,RealExpression>();
@@ -206,6 +232,7 @@ Void export_formula()
     real_variable_class.def("__rsub__", &__rsub__<RealExpression,RealVariable,Real>);
     real_variable_class.def("__rmul__", &__rmul__<RealExpression,RealVariable,Real>);
     real_variable_class.def("__rdiv__", &__rdiv__<RealExpression,RealVariable,Real>);
+    real_variable_class.def("__pow__", &__pow__<RealExpression,RealVariable,Int>);
 
     real_variable_class.def("__le__", &__le__<ContinuousPredicate,RealVariable,RealExpression>);
     real_variable_class.def("__ge__", &__ge__<ContinuousPredicate,RealVariable,RealExpression>);
@@ -266,6 +293,10 @@ Void export_formula()
     real_expression_class.def("__rsub__", &__rsub__<RealExpression,RealExpression,Real>);
     real_expression_class.def("__rmul__", &__rmul__<RealExpression,RealExpression,Real>);
     real_expression_class.def("__rdiv__", &__rdiv__<RealExpression,RealExpression,Real>);
+    real_expression_class.def("__le__", &__le__<ContinuousPredicate,RealExpression,Real>);
+    real_expression_class.def("__ge__", &__ge__<ContinuousPredicate,RealExpression,Real>);
+    real_expression_class.def("__le__", &__le__<ContinuousPredicate,Real,RealExpression>);
+    real_expression_class.def("__ge__", &__ge__<ContinuousPredicate,Real,RealExpression>);
 
     def("neg", (RealExpression(*)(RealExpression const&)) &neg);
     def("rec", (RealExpression(*)(RealExpression const&)) &rec);
@@ -336,6 +367,42 @@ Void export_formula()
 
     //class_<RealVariable> real_variable_class("RealVariable", init<StringType>());
 
+    class_<RealVariableLowerInterval> real_variable_lower_interval_class("RealVariableLowerInterval", init<Real,RealVariable>());
+    real_variable_lower_interval_class.def(self_ns::str(self));
+    class_<RealVariableUpperInterval> real_variable_upper_interval_class("RealVariableUpperInterval", init<RealVariable,Real>());
+    real_variable_upper_interval_class.def(self_ns::str(self));
+    real_variable_class.def("__le__", &__le__<RealVariableLowerInterval,Real,RealVariable>);
+    real_variable_class.def("__ge__", &__ge__<RealVariableLowerInterval,RealVariable,Real>);
+    real_variable_class.def("__le__", &__le__<RealVariableUpperInterval,RealVariable,Real>);
+    real_variable_lower_interval_class.def("__le__", &__le__<RealVariableInterval,RealVariableLowerInterval,Real>);
+    real_variable_upper_interval_class.def("__le__", &__le__<RealVariableInterval,Real,RealVariableUpperInterval>);
+    real_variable_upper_interval_class.def("__ge__", &__ge__<RealVariableInterval,RealVariableUpperInterval,Real>);
+
+//    real_variable_lower_interval_class.def("__and__", &__and__<RealVariableInterval,RealVariableLowerInterval,RealVariableUpperInterval>);
+
+    real_variable_class.def("__or__", &__bitor__<RealVariableInterval,RealVariable,RealInterval>);
+
+    class_<RealVariableInterval> real_variable_interval_class("RealVariableInterval", init<Real,RealVariable,Real>());
+    real_variable_interval_class.def("variable", &RealVariableInterval::variable, return_value_policy<copy_const_reference>());
+    real_variable_interval_class.def("interval", &RealVariableInterval::interval);
+    real_variable_interval_class.def("lower", &RealVariableInterval::lower);
+    real_variable_interval_class.def("upper", &RealVariableInterval::upper);
+    real_variable_interval_class.def(self_ns::str(self));
+
+    class_<RealVariablesBox> real_variables_box_class("RealVariablesBox", init<List<RealVariableInterval>>());
+    real_variables_box_class.def("__getitem__", &RealVariablesBox::operator[],return_value_policy<copy_const_reference>());
+    real_variables_box_class.def(self_ns::str(self));
+
+    class_<RealExpressionConstraintSet> real_expression_constraint_set_class("RealExpressionConstraintSet", init<List<ContinuousPredicate>>());
+    real_expression_constraint_set_class.def(self_ns::str(self));
+
+    class_<RealExpressionBoundedConstraintSet> real_expression_bounded_constraint_set_class("RealExpressionConstraintSet", init<List<RealVariableInterval>,List<ContinuousPredicate>>());
+    real_expression_bounded_constraint_set_class.def(self_ns::str(self));
+
+    def("make_box", (RealBox(*)(RealSpace const&, RealVariablesBox const&)) &make_box);
+    def("make_set", (RealBox(*)(RealSpace const&, RealVariablesBox const&)) &make_box);
+    def("make_set", (ConstraintSet(*)(RealSpace const&, RealExpressionConstraintSet const&)) &make_set);
+    def("make_set", (BoundedConstraintSet(*)(RealSpace const&, RealExpressionBoundedConstraintSet const&)) &make_set);
 }
 
 

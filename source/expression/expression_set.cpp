@@ -237,6 +237,17 @@ ValidatedConstrainedImageSet approximate_euclidean_set(const RealExpressionBound
 }
 
 
+RealBox make_box(RealSpace const& spc, RealVariablesBox const& bx) {
+    return bx.euclidean_set(spc);
+}
+
+ConstraintSet make_set(RealSpace const& spc, RealExpressionConstraintSet const& set) {
+    return set.euclidean_set(spc);
+}
+
+BoundedConstraintSet make_set(RealSpace const& spc, RealExpressionBoundedConstraintSet const& set) {
+    return set.euclidean_set(spc);
+}
 
 
 

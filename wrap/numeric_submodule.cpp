@@ -121,8 +121,10 @@ template<class T, class B = boost::python::bases<> > class class_ : public boost
     template<class OP> void def(PythonOperator<OP>) { boost::python::def(to_str(OP()).c_str(),&py_apply<OP,T>); }
     void define_self_arithmetic() {
         using boost::python::self;
+        T const* other_ptr=nullptr; T const& other=*other_ptr;
         this->def(+self); this->def(-self);
-        this->def(self+self); this->def(self-self); this->def(self*self); this->def(self/self);
+        this->def(self+other); this->def(self-other); this->def(self*other); this->def(self/other);
+        this->def(other+self); this->def(other-self); this->def(other*self); this->def(other/self);
     }
     template<class X> void define_mixed_arithmetic() {
         using boost::python::self_ns::self;
@@ -230,10 +232,8 @@ void export_integer()
     integer_class.def(self_ns::str(self));
     integer_class.def(self_ns::repr(self));
 
-//    integer_class.define_self_arithmetic();
-
-    // Required for mixed operations with integral types
-    integer_class.define_mixed_arithmetic<Integer>();
+    // Allows mixed operations with integral types
+    integer_class.define_self_arithmetic();
     integer_class.define_self_comparisons();
 
     def("pow", (Integer(*)(const Integer&,Nat)) &pow) ;
@@ -247,7 +247,7 @@ void export_integer()
 void export_dyadic()
 {
     class_<Dyadic> dyadic_class("Dyadic");
-//    dyadic_class.def(init<Int,Nat>());
+    dyadic_class.def(init<Int,Nat>());
 //    dyadic_class.def(init<Integer,Natural>());
 //    dyadic_class.def(init<Int>());
     dyadic_class.def(init<Integer>());
@@ -264,6 +264,7 @@ void export_dyadic()
 
     dyadic_class.def("get_d", &Dyadic::get_d);
 
+    implicitly_convertible<int,Dyadic>();
     implicitly_convertible<Integer,Dyadic>();
 }
 
@@ -287,6 +288,7 @@ void export_rational()
 
     rational_class.def("get_d", &Rational::get_d);
 
+    implicitly_convertible<int,Rational>();
     implicitly_convertible<Integer,Rational>();
     implicitly_convertible<Dyadic,Rational>();
 }
@@ -294,6 +296,7 @@ void export_rational()
 void export_decimal()
 {
     class_<Decimal> decimal_class("Decimal", init<Decimal>());
+    decimal_class.def(init<String>());
     decimal_class.def(self_ns::str(self));
     decimal_class.def(self_ns::repr(self));
     implicitly_convertible<Decimal,Rational>();
@@ -309,8 +312,6 @@ void export_real()
     real_class.def(init<Real>());
 
     real_class.define_self_arithmetic();
-    real_class.template define_mixed_arithmetic<Int>();
-    real_class.template define_mixed_arithmetic<Rational>();
     real_class.define_transcendental_functions();
     real_class.define_self_comparisons();
 

@@ -1,18 +1,16 @@
-build/
+*build*
 *~
 config.h
-.project
-.cproject
-.pydevproject
 dep/
 obj/
 *.gch
 .DS_Store
+
 .settings
+.idea
 
 source/*/Makefile
 test/Makefile
 wrap/Makefile
 examples/Makefile
 examples/*/Makefile
-

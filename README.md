@@ -69,7 +69,7 @@ $ make tutorial
 Optionally, you can also build and run the test suite for the library:
 
 ```
-$ make; make test
+$ make tests; make test
 ```
 
 where no error should appear.

@@ -249,6 +249,11 @@ Figure& Figure::draw(ApproximateBoxType const& box)
     this->draw(shape); return *this;
 }
 
+Figure& Figure::draw(RealBox const& box)
+{
+    return this->draw(ApproximateBoxType(box,DoublePrecision()));
+}
+
 Figure& Figure::clear() {
     this->_data->objects.clear(); return *this;
 }

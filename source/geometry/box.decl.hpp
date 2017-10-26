@@ -48,6 +48,11 @@ typedef Box<UpperIntervalType> UpperBoxType;
 typedef Box<LowerIntervalType> LowerBoxType;
 typedef Box<ApproximateIntervalType> ApproximateBoxType;
 
+template<class IVL> class BoxSet;
+typedef BoxSet<ExactIntervalType> ExactBoxSet;
+typedef BoxSet<ApproximateIntervalType> ApproximateBoxSet;
+typedef BoxSet<RealInterval> RealBoxSet;
+
 using BoxDomainType = FloatDPExactBox;
 
 template<class X> class Vector;

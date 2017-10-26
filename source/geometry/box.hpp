@@ -483,8 +483,9 @@ inline FloatDPLowerBox narrow(const FloatDPLowerBox& bx) {
 }
 
 
+template<class IVL> class BoxSet;
 
-class ExactBoxSet
+template<> class BoxSet<ExactIntervalType>
     : public virtual SetInterface,
       public virtual DrawableInterface,
       public Box<ExactIntervalType>
@@ -492,7 +493,7 @@ class ExactBoxSet
 
   public:
     using Box<ExactIntervalType>::Box;
-    ExactBoxSet(Box<ExactIntervalType>const& bx) : Box<ExactIntervalType>(bx) { }
+    BoxSet<ExactIntervalType>(Box<ExactIntervalType>const& bx) : Box<ExactIntervalType>(bx) { }
 
     virtual ExactBoxSet* clone() const { return new ExactBoxSet(*this); }
     virtual DimensionType dimension() const final { return this->ExactBoxType::size(); }
@@ -505,14 +506,14 @@ class ExactBoxSet
     virtual OutputStream& write(OutputStream& os) const final { return os << static_cast<const ExactBoxType&>(*this); }
 };
 
-class ApproximateBoxSet
+template<> class BoxSet<ApproximateIntervalType>
     : public virtual DrawableInterface,
       public Box<ApproximateIntervalType>
 {
 
   public:
     using Box<ApproximateIntervalType>::Box;
-    ApproximateBoxSet(Box<ApproximateIntervalType>const& bx) : Box<ApproximateIntervalType>(bx) { }
+    BoxSet<ApproximateIntervalType>(Box<ApproximateIntervalType>const& bx) : Box<ApproximateIntervalType>(bx) { }
 
     virtual ApproximateBoxSet* clone() const { return new ApproximateBoxSet(*this); }
     virtual DimensionType dimension() const final { return this->ApproximateBoxType::size(); }
@@ -520,14 +521,14 @@ class ApproximateBoxSet
     virtual OutputStream& write(OutputStream& os) const final { return os << static_cast<const ApproximateBoxType&>(*this); }
 };
 
-class RealBoxSet
+template<> class BoxSet<RealInterval>
     : public virtual DrawableInterface,
       public Box<RealInterval>
 {
 
   public:
     using Box<RealInterval>::Box;
-    RealBoxSet(Box<RealInterval>const& bx) : Box<RealInterval>(bx) { }
+    BoxSet<RealInterval>(Box<RealInterval>const& bx) : Box<RealInterval>(bx) { }
 
     virtual RealBoxSet* clone() const { return new RealBoxSet(*this); }
     virtual DimensionType dimension() const final { return this->Box<RealInterval>::size(); }

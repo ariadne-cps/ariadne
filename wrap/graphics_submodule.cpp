@@ -37,14 +37,7 @@
 
 using namespace boost::python;
 
-
-namespace Ariadne {
-    template<class S> Void draw(FigureInterface& fig, const S& sh) { fig.draw(sh); }
-}
-
-
 using namespace Ariadne;
-
 
 
 Void export_figure()
@@ -65,7 +58,9 @@ Void export_figure()
     figure_class.def("set_fill_style", (Figure&(Figure::*)(Bool)) &Figure::set_fill_style, ref_existing);
     figure_class.def("set_fill_colour", (Figure&(Figure::*)(double,double,double)) &Figure::set_fill_colour, ref_existing);
     figure_class.def("set_fill_opacity", (Figure&(Figure::*)(double)) &Figure::set_fill_opacity, ref_existing);
-    figure_class.def("draw",(Figure&(FigureInterface::*)(const DrawableInterface&))&FigureInterface::draw, ref_existing);
+    figure_class.def("draw",(Figure&(Figure::*)(const DrawableInterface&))&Figure::draw, ref_existing);
+    figure_class.def("draw",(Figure&(Figure::*)(const RealBox&))&Figure::draw, ref_existing);
+    figure_class.def("draw",(Figure&(Figure::*)(const ApproximateBoxType&))&Figure::draw, ref_existing);
     figure_class.def("clear",&Figure::clear, ref_existing);
     figure_class.def("display",&Figure::display);
     figure_class.def("write",(Void(Figure::*)(const char*)const)&Figure::write);

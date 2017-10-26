@@ -88,7 +88,7 @@ void damped_harmonic(InclusionIntegratorBase const& integrator, Real evolution_t
     fig.set_fill_colour(1.0,0.0,0.8);
     for (auto set : reach_sets) { fig.draw(set); }
     fig.set_fill_colour(0.75,0.0,0.6);
-    fig.draw(RealBoxSet(starting_set));
+    fig.draw(starting_set);
     fig.draw(evolve_set);
     fig.write("damped_harmonic-test");
     std::cerr<<"done!\n";

@@ -80,7 +80,7 @@ class TestInclusionIntegrator {
         fig.set_line_colour(0.0,0.0,0.0);
         fig.set_line_style(false);
         fig.set_fill_colour(0.75,0.0,0.6);
-        fig.draw(RealBoxSet(starting_set));
+        fig.draw(starting_set);
         fig.set_fill_colour(1.0,0.0,0.8);
         fig.set_fill_colour(0.0,0.0,blue);
         for (auto set : reverse(reach_sets)) { fig.draw(set); blue=std::max(blue+0.1,1.0); fig.set_fill_colour(0.0,0.0,blue);}

@@ -124,6 +124,7 @@ class Figure
     //! Add a set to draw onto the figure.
     Figure& draw(const DrawableInterface& shape);
     Figure& draw(const ApproximateBoxType& box);
+    Figure& draw(const RealBox& box);
 
     //! Clear the figure.
     Figure& clear();

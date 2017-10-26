@@ -48,8 +48,6 @@ using namespace Ariadne;
 
 namespace Ariadne {
 
-typedef RealBox BoxSet;
-
 template<class UB>
 struct from_python_dict<Interval<UB>> {
     from_python_dict() { converter::registry::push_back(&convertible,&construct,type_id<Interval<UB>>()); }
@@ -330,49 +328,67 @@ template<class IVL> Void export_interval(std::string name) {
 Void export_intervals() {
     export_interval<ExactIntervalType>("ExactInterval");
     export_interval<UpperIntervalType>("UpperInterval");
+    export_interval<ApproximateIntervalType>("ApproximateInterval");
     export_interval<RealInterval>("RealInterval");
 }
 
-template<class BX> Void export_box()
+template<class BX> Void export_box(std::string name)
 {
-    typedef Vector<ExactIntervalType> ExactIntervalVectorType;
-    class_<Vector<ExactIntervalType>> interval_vector_class("ExactIntervalVectorType");
+    typedef typename BX::IntervalType IVL;
+    typedef  IVL IntervalType;
+    typedef Vector<IVL> IntervalVectorType;
+    //class_<Vector<ExactIntervalType>> interval_vector_class("ExactIntervalVectorType");
+
+    typedef typename IVL::UpperBoundType UB;
+
+    typedef decltype(disjoint(declval<BX>(),declval<BX>())) DisjointType;
+    typedef decltype(subset(declval<BX>(),declval<BX>())) SubsetType;
+    typedef decltype(separated(declval<BX>(),declval<BX>())) SeparatedType;
+    typedef decltype(overlap(declval<BX>(),declval<BX>())) OverlapType;
+    typedef decltype(covers(declval<BX>(),declval<BX>())) CoversType;
+    typedef decltype(inside(declval<BX>(),declval<BX>())) InsideType;
 
 //    class_<ExactBoxType,bases<CompactSetInterface,OpenSetInterface,Vector<ExactIntervalType>,DrawableInterface > >
-    class_<ExactBoxType,bases< > > box_class("ExactBox",init<ExactBoxType>());
+    class_<BX,bases< > > box_class(name.c_str(),init<BX>());
     box_class.def(init<DimensionType>());
-    box_class.def(init< Vector<ExactIntervalType> >());
-    box_class.def("__eq__", (ExactLogicalType(*)(const Vector<ExactIntervalType>&,const Vector<ExactIntervalType>&)) &operator==);
-    box_class.def("dimension", (DimensionType(ExactBoxType::*)()const) &ExactBoxType::dimension);
-    box_class.def("centre", (ExactBoxType::CentreType(ExactBoxType::*)()const) &ExactBoxType::centre);
-    box_class.def("radius", (ExactBoxType::RadiusType(ExactBoxType::*)()const) &ExactBoxType::radius);
-    box_class.def("separated", (ExactLogicalType(ExactBoxType::*)(const ExactBoxType&)const) &ExactBoxType::separated);
-    box_class.def("overlaps", (ExactLogicalType(ExactBoxType::*)(const ExactBoxType&)const) &ExactBoxType::overlaps);
-    box_class.def("covers", (ExactLogicalType(ExactBoxType::*)(const ExactBoxType&)const) &ExactBoxType::covers);
-    box_class.def("inside", (ExactLogicalType(ExactBoxType::*)(const ExactBoxType&)const) &ExactBoxType::inside);
-    box_class.def("is_empty", (Bool(ExactBoxType::*)()const) &ExactBoxType::is_empty);
-    box_class.def("split", (Pair<ExactBoxType,ExactBoxType>(ExactBoxType::*)()const) &ExactBoxType::split);
-    box_class.def("split", (Pair<ExactBoxType,ExactBoxType>(ExactBoxType::*)(SizeType)const) &ExactBoxType::split);
-    box_class.def("split", (Pair<ExactBoxType,ExactBoxType>(ExactBoxType::*)()const) &ExactBoxType::split);
+    box_class.def(init< Vector<IVL> >());
+    //box_class.def("__eq__", (ExactLogicalType(*)(const Vector<ExactIntervalType>&,const Vector<ExactIntervalType>&)) &operator==);
+    box_class.def("dimension", (DimensionType(BX::*)()const) &BX::dimension);
+    box_class.def("centre", (typename BX::CentreType(BX::*)()const) &BX::centre);
+    box_class.def("radius", (typename BX::RadiusType(BX::*)()const) &BX::radius);
+    box_class.def("separated", (SeparatedType(BX::*)(const BX&)const) &BX::separated);
+    box_class.def("overlaps", (OverlapType(BX::*)(const BX&)const) &BX::overlaps);
+    box_class.def("covers", (CoversType(BX::*)(const BX&)const) &BX::covers);
+    box_class.def("inside", (InsideType(BX::*)(const BX&)const) &BX::inside);
+    box_class.def("is_empty", (SeparatedType(BX::*)()const) &BX::is_empty);
+    box_class.def("split", (Pair<BX,BX>(BX::*)()const) &BX::split);
+    box_class.def("split", (Pair<BX,BX>(BX::*)(SizeType)const) &BX::split);
+    box_class.def("split", (Pair<BX,BX>(BX::*)()const) &BX::split);
     box_class.def(self_ns::str(self));
 
-    def("disjoint", (ExactLogicalType(*)(const ExactBoxType&,const ExactBoxType&)) &disjoint);
-    def("subset", (ExactLogicalType(*)(const ExactBoxType&,const ExactBoxType&)) &subset);
+    def("disjoint", (DisjointType(*)(const BX&,const BX&)) &disjoint);
+    def("subset", (SubsetType(*)(const BX&,const BX&)) &subset);
 
-    def("product", (ExactBoxType(*)(const ExactBoxType&,const ExactIntervalType&)) &product);
-    def("product", (ExactBoxType(*)(const ExactBoxType&,const ExactBoxType&)) &product);
-    def("hull", (ExactBoxType(*)(const ExactBoxType&,const ExactBoxType&)) &hull);
-    def("intersection", (ExactBoxType(*)(const ExactBoxType&,const ExactBoxType&)) &intersection);
+    def("product", (BX(*)(const BX&,const IVL&)) &product);
+    def("product", (BX(*)(const BX&,const BX&)) &product);
+    def("hull", (BX(*)(const BX&,const BX&)) &hull);
+    def("intersection", (BX(*)(const BX&,const BX&)) &intersection);
 
-    def("widen", (UpperBoxType(*)(ExactBoxType const&, FloatDPValue eps)) &widen);
-
-    from_python<ExactBoxType>();
-    to_python< Pair<ExactBoxType,ExactBoxType> >();
-    implicitly_convertible<Vector<ExactIntervalType>,ExactBoxType>();
+    from_python<BX>();
+    to_python< Pair<BX,BX> >();
 }
 
 Void export_boxes() {
-    export_box<ExactBoxType>();
+    export_box<RealBox>("RealBox");
+    export_box<ExactBoxType>("ExactBox");
+    export_box<UpperBoxType>("UpperBox");
+    export_box<ApproximateBoxType>("ApproximateBox");
+
+    implicitly_convertible<ExactBoxType,UpperBoxType>();
+    implicitly_convertible<ExactBoxType,ApproximateBoxType>();
+    implicitly_convertible<UpperBoxType,ApproximateBoxType>();
+
+    def("widen", (UpperBoxType(*)(ExactBoxType const&, FloatDPValue eps)) &widen);
 }
 
 /*
@@ -465,16 +481,15 @@ Void export_constraint_set()
 {
     from_python< List<EffectiveConstraint> >();
 
-    class_<ConstraintSet,bases<RegularSetInterface> >
+    class_<ConstraintSet,bases<RegularSetInterface,OpenSetInterface> >
         constraint_set_class("ConstraintSet",init<ConstraintSet>());
     constraint_set_class.def(init< List<EffectiveConstraint> >());
+    constraint_set_class.def(self_ns::str(self));
 
     class_<BoundedConstraintSet,bases<DrawableInterface> >
         bounded_constraint_set_class("BoundedConstraintSet",init<BoundedConstraintSet>());
-    bounded_constraint_set_class.def(init< BoxSet, List<EffectiveConstraint> >());
-
-    class_<BoxSet> box_set_class("BoxSet");
-    box_set_class.def(self_ns::str(self));
+    bounded_constraint_set_class.def(init< RealBox, List<EffectiveConstraint> >());
+    bounded_constraint_set_class.def(self_ns::str(self));
 
     def("intersection", (BoundedConstraintSet(*)(const ConstraintSet&,const RealBox&)) &intersection);
 

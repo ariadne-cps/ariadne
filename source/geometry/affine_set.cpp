@@ -82,6 +82,54 @@ ValidatedAffineModelConstraint operator<=(const ValidatedAffineModelConstraint& 
     return ValidatedAffineModelConstraint(c.lower_bound(),c.function(),u);
 }
 
+ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const RealBox& bx)
+    : ValidatedAffineConstrainedImageSet(Box<Interval<FloatDPBall>>(bx,dp))
+{
+    FloatDPBall(0_z,dp);
+}
+
+
+Pair<Interval<FloatDPValue>,FloatDPError> make_domain(Interval<Real> const& ivl) {
+    FloatDPBounds dlb(ivl.lower(),dp);
+    FloatDPBounds dub(ivl.upper(),dp);
+    FloatDPApproximation dla(ivl.lower(),dp);
+    FloatDPApproximation dua(ivl.upper(),dp);
+    FloatDPValue dl(FloatDP(Float32(dla.raw(),near)));
+    FloatDPValue du(FloatDP(Float32(dua.raw(),near)));
+    FloatDPError e=cast_positive(max(max(dub.upper()-du,du-dub.lower()),max(dlb.upper()-dl,dl-dlb.lower())));
+    return make_pair(make_interval(dl,du),e);
+}
+
+Pair<Interval<FloatDPValue>,FloatDPError> make_domain(Interval<FloatDPBall> const& ivl) {
+    FloatDPBall const& dlb=ivl.lower();
+    FloatDPBall const& dub=ivl.upper();
+    FloatDPValue dl(FloatDP(Float32(dlb.value().raw(),near)));
+    FloatDPValue du(FloatDP(Float32(dub.value().raw(),near)));
+    FloatDPError e=cast_positive(max(mag(dlb.value()-dl)+dlb.error(),mag(dlb.value()-dl)+dlb.error()));
+    return make_pair(make_interval(dl,du),e);
+}
+
+ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Box<Interval<FloatDPBall>>& bx)
+    : _domain(bx.dimension(),Interval<FloatDPValue>(0_z,dp)), _space_models(bx.dimension(),ValidatedAffineModel(bx.dimension(),dp))
+{
+    Vector<ErrorNumericType> errs(bx.dimension());
+
+    for(Nat i=0; i!=bx.dimension(); ++i) {
+        make_lpair(_domain[i],errs[i])=make_domain(bx[i]);
+    }
+
+    for(Nat i=0; i!=bx.dimension(); ++i) {
+        _space_models[i]=ValidatedAffineModel::scaling(bx.dimension(),i,_domain[i],dp);
+        _space_models[i].error()+=errs[i];
+    }
+}
+
+ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const ExactBoxType& d)
+    : _domain(d), _space_models(ValidatedAffineModel::scalings(d,dp))
+{
+}
+
+
 ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const ExactBoxType& d,
                      const Vector<ValidatedAffine>& f)
     : _domain(d), _space_models(f.size(),ValidatedAffineModel(d.size(),dp))
@@ -213,8 +261,7 @@ UpperBoxType ValidatedAffineConstrainedImageSet::bounding_box() const {
     UpperBoxType result(this->dimension());
     ExactBoxType domain=this->domain();
     for(Nat i=0; i!=this->dimension(); ++i) {
-        //result[i]=evaluate(this->_space_models[i],domain);
-        result[i]=this->_space_models[i].evaluate(static_cast<Vector<UpperIntervalType>>(domain));
+        result[i]=this->_space_models[i].range();
     }
     return result;
 }
@@ -252,6 +299,12 @@ ValidatedSierpinskian ValidatedAffineConstrainedImageSet::is_empty() const {
 ValidatedSierpinskian ValidatedAffineConstrainedImageSet::inside(const ExactBoxType& bx) const {
     ARIADNE_PRECONDITION_MSG(this->dimension()==bx.dimension(),"set="<<*this<<", box="<<bx);
     return widen(this->bounding_box()).inside(bx);
+}
+
+
+ValidatedAffineConstrainedImageSet image(ValidatedAffineConstrainedImageSet set, ValidatedVectorFunction const& h) {
+    set._space_models=compose(h,set._space_models);
+    return set;
 }
 
 

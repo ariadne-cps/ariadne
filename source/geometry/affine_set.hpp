@@ -89,6 +89,8 @@ class ValidatedAffineConstrainedImageSet
     Vector<ValidatedAffineModel> _space_models;
     List<ValidatedAffineModelConstraint> _constraint_models;
   public:
+    //!\brief The set \f$\{ y \mid y\in D\}\f$.
+    ValidatedAffineConstrainedImageSet(const ExactBoxType& D);
     //!\brief The set \f$\{ Gy+c \mid y\in D\}\f$.
     ValidatedAffineConstrainedImageSet(const ExactBoxType& D, const Matrix<FloatDPValue>& G, const Vector<FloatDPValue>& c);
     //!\brief The set \f$\{ Gy+c \mid ||y||_\infty\leq 1\}\f$. \deprecated
@@ -102,6 +104,11 @@ class ValidatedAffineConstrainedImageSet
     explicit ValidatedAffineConstrainedImageSet(const Vector<ValidatedAffineModel>& f);
 
     ValidatedAffineConstrainedImageSet(const ExactBoxType& D, const Vector<ValidatedAffineModel>& f, const List<ValidatedAffineModelConstraint>& c);
+
+    //!\brief The set \f$\{ x \mid x\in B\}\f$.
+    ValidatedAffineConstrainedImageSet(const RealBox& B);
+    //!\brief The set \f$\{ x \mid x\in B\}\f$.
+    ValidatedAffineConstrainedImageSet(const Box<Interval<FloatDPBall>>& B);
 
     ValidatedAffineConstrainedImageSet* clone() const;
     Void new_parameter_constraint(const EffectiveAffineConstraint& c);
@@ -118,6 +125,9 @@ class ValidatedAffineConstrainedImageSet
     ValidatedSierpinskian separated(const ExactBoxType& bx) const;
     ValidatedSierpinskian inside(const ExactBoxType& bx) const;
     ValidatedSierpinskian is_empty() const;
+
+    //! \brief Compute the image of \f$S\f$ under the function \f$h\f$.
+    friend ValidatedAffineConstrainedImageSet image(ValidatedAffineConstrainedImageSet set, ValidatedVectorFunction const& h);
 
     Void adjoin_outer_approximation_to(PavingInterface& g, Int depth) const;
     GridTreeSet outer_approximation(const Grid& g, Int depth) const;

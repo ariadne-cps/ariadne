@@ -441,6 +441,8 @@ Void export_affine_set()
 {
     class_<ValidatedAffineConstrainedImageSet,bases<CompactSetInterface,DrawableInterface> >
         affine_set_class("ValidatedAffineConstrainedImageSet",init<ValidatedAffineConstrainedImageSet>());
+    affine_set_class.def(init<RealBox>());
+    affine_set_class.def(init<ExactBoxType>());
     affine_set_class.def(init<Vector<ExactIntervalType>, Matrix<FloatDPValue>, Vector<FloatDPValue> >());
     affine_set_class.def(init<Matrix<FloatDPValue>, Vector<FloatDPValue> >());
     affine_set_class.def("new_parameter_constraint", (Void(ValidatedAffineConstrainedImageSet::*)(const Constraint<Affine<FloatDPBounds>,FloatDPBounds>&)) &ValidatedAffineConstrainedImageSet::new_parameter_constraint);
@@ -455,6 +457,7 @@ Void export_affine_set()
     affine_set_class.def("boundary", &ValidatedAffineConstrainedImageSet::boundary);
     affine_set_class.def(self_ns::str(self));
 
+    def("image", (ValidatedAffineConstrainedImageSet(*)(ValidatedAffineConstrainedImageSet,ValidatedVectorFunction const&)) &image);
 }
 
 

@@ -87,14 +87,12 @@ inline ValidatedConstraintModel operator<=(ValidatedScalarFunctionModelDP const&
 inline ValidatedConstraintModel operator==(ValidatedScalarFunctionModelDP const& f, ValidatedNumericType const& c) {
     return ValidatedConstraintModel(c,f,c); }
 
+Pair<Interval<FloatDPValue>,FloatDPError> make_domain(Interval<Real> const& ivl);
+
 namespace {
 
 ExactIntervalType cast_exact_interval(const Real& r) {
     DoublePrecision pr; auto x=r.get(pr); return ExactIntervalType(x.lower().raw(),x.upper().raw());
-}
-
-ExactIntervalType make_domain(const EffectiveIntervalType& ivl) {
-    return widen_domain(UpperIntervalType(ivl,dp));
 }
 
 ValidatedVectorFunctionModelDP make_identity(const EffectiveBoxType& bx, const EnclosureConfiguration& configuration) {
@@ -103,18 +101,7 @@ ValidatedVectorFunctionModelDP make_identity(const EffectiveBoxType& bx, const E
     DoublePrecision dp;
 
     for(Nat i=0; i!=bx.dimension(); ++i) {
-        FloatDPBounds dom_lower_bnds(bx[i].lower(),dp);
-        FloatDPBounds dom_upper_bnds(bx[i].upper(),dp);
-        // Convert to single-precision values
-        FloatDPApproximation dom_lower_apprx(bx[i].lower(),dp);
-        FloatDPApproximation dom_upper_apprx(bx[i].upper(),dp);
-        FloatDPValue dom_lower_flt=cast_exact(FloatDP(Float32(dom_lower_apprx.raw(),to_nearest)));
-        FloatDPValue dom_upper_flt=cast_exact(FloatDP(Float32(dom_upper_apprx.raw(),to_nearest)));
-        ExactIntervalType dom_ivl(dom_lower_flt,dom_upper_flt);
-        FloatDPError err=cast_positive( max( max(dom_upper_bnds.upper()-dom_upper_flt,dom_upper_flt-dom_upper_bnds.lower()),
-                                        max(dom_lower_bnds.upper()-dom_lower_flt,dom_lower_flt-dom_lower_bnds.lower()) ) );
-        dom[i]=dom_ivl;
-        errs[i]=err;
+        make_lpair(dom[i],errs[i])=make_domain(bx[i]);
     }
 
     ValidatedVectorFunctionModelDP res=configuration._function_factory.create_identity(dom);

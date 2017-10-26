@@ -67,13 +67,14 @@ class AffineModel<ApproximateTag,F>
 {
     typedef ApproximateTag P;
     typedef typename F::PrecisionType PR;
-    friend class AlgebraOperations<AffineModel<ApproximateTag,F>,FloatBounds<PR>>;
+    friend class AlgebraOperations<AffineModel<ApproximateTag,F>,FloatApproximation<PR>>;
   public:
     typedef P Paradigm;
     typedef PR PrecisionType;
     typedef PR PropertiesType;
     typedef Approximation<F> NumericType;
     typedef Approximation<F> CoefficientType;
+    typedef Interval<FloatApproximation<PR>> RangeType;
 
     explicit AffineModel() : _c(), _g() { }
     explicit AffineModel(SizeType n, PrecisionType prec) : _c(0,prec), _g(n,CoefficientType(0,prec)) { }
@@ -90,6 +91,8 @@ class AffineModel<ApproximateTag,F>
     AffineModel<ApproximateTag,F>& operator=(const CoefficientType& c) {
         this->_c=c; for(SizeType i=0; i!=this->_g.size(); ++i) { this->_g[i]=0.0; } return *this; }
 
+    AffineModel<ApproximateTag,F> create_zero() const {
+        return AffineModel<ApproximateTag,F>(this->argument_size(),this->precision()); }
     static AffineModel<ApproximateTag,F> constant(SizeType n, const CoefficientType& c) {
         AffineModel<ApproximateTag,F> res(n, c.precision()); res._c=c; return res; }
     static AffineModel<ApproximateTag,F> coordinate(SizeType n, SizeType j, PrecisionType pr) {
@@ -110,6 +113,8 @@ class AffineModel<ApproximateTag,F>
     CoefficientType& operator[](SizeType i) { return this->_g[i]; }
     const CoefficientType& operator[](SizeType i) const { return this->_g[i]; }
 
+    RangeType range() const;
+
     Void resize(SizeType n) { this->_g.resize(n); }
     Void set_value(const CoefficientType& c) { _c=c; }
     Void set_gradient(SizeType j, const CoefficientType& g) { _g[j]=g; }
@@ -118,6 +123,9 @@ class AffineModel<ApproximateTag,F>
     friend OutputStream& operator<<(OutputStream& os, const AffineModel<ApproximateTag,F>& f) { return f._write(os); }
   private:
     OutputStream& _write(OutputStream&) const;
+  private: public:
+    static AffineModel<P,F> _compose(const ScalarFunction<P>& f, Vector<AffineModel<P,F>> const& g);
+    static Vector<AffineModel<P,F>> _compose(const VectorFunction<P>& f, Vector<AffineModel<P,F>> const& g);
   private:
     CoefficientType _c;
     Covector<CoefficientType> _g;
@@ -139,6 +147,7 @@ class AffineModel<ValidatedTag,F>
     typedef FloatError<PR> ErrorType;
     typedef FloatBounds<PR> NumericType;
     typedef AffineModel<ValidatedTag,F> AffineModelType;
+    typedef Interval<FloatUpperBound<PR>> RangeType;
 
     explicit AffineModel() : _c(), _g() { }
     explicit AffineModel(SizeType n, PrecisionType prec) : _c(0,prec), _g(n,CoefficientType(0,prec)), _e(0u,prec) { }
@@ -154,9 +163,11 @@ class AffineModel<ValidatedTag,F>
     AffineModelType& operator=(const CoefficientType& c) {
         this->_c=c; for(SizeType i=0; i!=this->_g.size(); ++i) { this->_g[i]=0; } this->_e=0u; return *this; }
 
-    static AffineModelType constant(SizeType n, const CoefficientType& c) {
+    AffineModel<ValidatedTag,F> create_zero() const {
+        return AffineModel<ValidatedTag,F>(this->argument_size(),this->precision()); }
+    static AffineModel<ValidatedTag,F> constant(SizeType n, const CoefficientType& c) {
         AffineModel<ValidatedTag,F> res(n,c.precision()); res._c=c;  return res; }
-    static AffineModelType coordinate(SizeType n, SizeType j, PrecisionType prec) {
+    static AffineModel<ValidatedTag,F> coordinate(SizeType n, SizeType j, PrecisionType prec) {
         AffineModel<ValidatedTag,F> res(n,prec); res._g[j]=1;  return res; }
 
     static AffineModel<ValidatedTag,F> scaling(SizeType n, SizeType j, const IntervalDomainType& codom, PrecisionType precision);
@@ -172,8 +183,11 @@ class AffineModel<ValidatedTag,F>
     const Covector<CoefficientType>& gradient() const { return this->_g; }
     const CoefficientType& gradient(SizeType i) const { return this->_g[i]; }
     const ErrorType& error() const { return this->_e; }
+    ErrorType& error() { return this->_e; }
     CoefficientType& operator[](SizeType i) { return this->_g[i]; }
     const CoefficientType& operator[](SizeType i) const { return this->_g[i]; }
+
+    RangeType range() const;
 
     Void set_value(const CoefficientType& c) { _c=c; }
     Void set_gradient(SizeType j, const CoefficientType& g) { _g[j]=g; }
@@ -187,6 +201,9 @@ class AffineModel<ValidatedTag,F>
     friend OutputStream& operator<<(OutputStream& os, const AffineModel<ValidatedTag,F>& f) { return f._write(os); }
   private:
     OutputStream& _write(OutputStream&) const;
+  private: public:
+    static AffineModel<P,F> _compose(const ScalarFunction<P>& f, Vector<AffineModel<P,F>> const& g);
+    static Vector<AffineModel<P,F>> _compose(const VectorFunction<P>& f, Vector<AffineModel<P,F>> const& g);
   private:
     CoefficientType _c;
     Covector<CoefficientType> _g;
@@ -256,6 +273,19 @@ template<class P, class PR> Vector<AffineModel<P,RawFloatType<PR>>> affine_model
     Vector<AffineModel<P,F>> result(rs,AffineModel<P,F>(as,precision));
     for(SizeType i=0; i!=rs; ++i) { result[i]=affine_model(domain,function[i],precision); }
     return result;
+}
+
+template<class P, class F> Vector<typename AffineModel<P,F>::RangeType> ranges(const Vector<AffineModel<P,F>>& f) {
+    return Vector<typename AffineModel<P,F>::RangeType>(f.size(), [&](SizeType i){return f[i].range();});
+    //Vector<typename AffineModel<P,F>::RangeType> r(f.size(),f.zero_element().range()); for(SizeType i=0; i!=f.size(); ++i) { r[i]=f[i].range(); } return r;
+}
+
+template<class P, class F> Vector<AffineModel<P,F>> compose(const VectorFunction<P>& f, Vector<AffineModel<P,F>> const& g) {
+    return AffineModel<P,F>::_compose(f,g);
+}
+
+template<class P, class F> AffineModel<P,F> compose(const ScalarFunction<P>& f, Vector<AffineModel<P,F>> const& g) {
+    return AffineModel<P,F>::_compose(f,g);
 }
 
 

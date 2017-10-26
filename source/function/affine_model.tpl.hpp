@@ -1,4 +1,4 @@
-    /***************************************************************************
+/***************************************************************************
  *            affine_model.tcc
  *
  *  Copyright 2009-17  Pieter Collins
@@ -340,9 +340,19 @@ template<class F> AffineModel<ApproximateTag,F> AffineModel<ApproximateTag,F>::s
 {
     AffineModel<ApproximateTag,F> r(n,pr);
     FloatApproximation<PR> l(codom.lower().get_d(),pr);
-    FloatApproximation<PR> u(codom.lower().get_d(),pr);
+    FloatApproximation<PR> u(codom.upper().get_d(),pr);
     r.set_gradient(j,hlf(u-l));
     r.set_value(hlf(l+u));
+    return r;
+}
+
+template<class F> Vector<AffineModel<ApproximateTag,F>> AffineModel<ApproximateTag,F>::scalings(const BoxDomainType& codom, PrecisionType pr)
+{
+    SizeType n=codom.dimension();
+    Vector<AffineModel<ApproximateTag,F>> r(n,AffineModel<ApproximateTag,F>(n,pr));
+    for(SizeType i=0; i!=n; ++i) {
+        r[i] = AffineModel<ApproximateTag,F>::scaling(n,i,codom[i],pr);
+    }
     return r;
 }
 
@@ -350,12 +360,42 @@ template<class F> AffineModel<ValidatedTag,F> AffineModel<ValidatedTag,F>::scali
 {
     AffineModel<ValidatedTag,F> r(n,pr);
     FloatValue<PR> l(Dyadic(codom.lower()),pr);
-    FloatValue<PR> u(Dyadic(codom.lower()),pr);
+    FloatValue<PR> u(Dyadic(codom.upper()),pr);
     Interval<FloatValue<PR>> ivl(l,u);
     r.set_gradient(j,1);
     r*=ivl.radius();
     r+=ivl.midpoint();
     return r;
+}
+
+template<class F> Vector<AffineModel<ValidatedTag,F>> AffineModel<ValidatedTag,F>::scalings(const Vector<IntervalDomainType>& codom, PrecisionType pr)
+{
+    SizeType n=codom.size();
+    Vector<AffineModel<ValidatedTag,F>> r(n,AffineModel<ValidatedTag,F>(n,pr));
+    for(SizeType i=0; i!=n; ++i) {
+        r[i] = AffineModel<ValidatedTag,F>::scaling(n,i,codom[i],pr);
+    }
+    return r;
+}
+
+template<class F> auto AffineModel<ApproximateTag,F>::range() const -> RangeType
+{
+    auto v=this->value();
+    auto e=this->gradient().zero_element();
+    for(SizeType i=0; i!=this->argument_size(); ++i) {
+        e+=abs(this->gradient(i));
+    }
+    return RangeType(v-e,v+e);
+}
+
+template<class F> auto AffineModel<ValidatedTag,F>::range() const -> RangeType
+{
+    auto v=this->value();
+    ErrorType e=this->error();
+    for(SizeType i=0; i!=this->argument_size(); ++i) {
+        e+=abs(this->gradient(i));
+    }
+    return RangeType(v-e,v+e);
 }
 
 template<class F> OutputStream& AffineModel<ApproximateTag,F>::_write(OutputStream& os) const
@@ -377,6 +417,74 @@ template<class F> OutputStream& AffineModel<ValidatedTag,F>::_write(OutputStream
     }
     return os << "+/-" << this->error();
 
+}
+
+template<class F> auto
+AffineModel<ApproximateTag,F>::_compose(const ScalarFunction<P>& f, Vector<AffineModel<P,F>> const& g) -> AffineModel<P,F> {
+    auto pr = g.zero_element().precision();
+    auto c=values(g);
+    auto b=f(c);
+    auto A=f.gradient(c);
+    return b+A*(g-c);
+}
+
+template<class F> auto
+AffineModel<ApproximateTag,F>::_compose(const VectorFunction<P>& f, Vector<AffineModel<P,F>> const& g) -> Vector<AffineModel<P,F>> {
+    auto pr = g.zero_element().precision();
+    auto c=values(g);
+    auto b=f(c);
+    auto A=f.jacobian(c);
+    return b+A*(g-c);
+}
+
+template<class X> decltype(auto) values(Vector<X> const& v) {
+    //typedef typename std::remove_reference<decltype(a.zero_element().value())>::type C;
+    return transform_vector(v,[&](X const& x){return x.value();});
+}
+
+/*
+FloatDPBounds const& make_singleton(IntervalRangeType const& ivl, DoublePrecision) {
+    return reinterpret_cast<FloatDPBounds const&>(ivl);
+}
+
+FloatMPBounds const& make_singleton(IntervalRangeType const& ivl, MultiplePrecision pr) {
+    return FloatMPBounds(ivl.lower(),ivl.upper());
+}
+*/
+
+/*
+Bounds<FloatMP> cast_singleton(Interval<UpperBound<FloatMP>> const& ivl) {
+    return Bounds<FloatMP>(ivl.lower(),ivl.upper());
+}
+
+Vector<Bounds<FloatMP>> cast_singleton(Vector<Interval<UpperBound<FloatMP>>> const& bx) {
+    return transform_vector(bx,[&](Interval<UpperBound<FloatMP>> const& ivl){return cast_singleton(ivl);});
+}
+*/
+
+FloatDPBounds cast_singleton(Interval<FloatDPUpperBound> const& ivl);
+FloatMPBounds cast_singleton(Interval<FloatMPUpperBound> const& ivl);
+
+template<class F> auto
+AffineModel<ValidatedTag,F>::_compose(const ScalarFunction<P>& f, Vector<AffineModel<P,F>> const& g) -> AffineModel<P,F> {
+    auto pr = g.zero_element().precision();
+    auto d = ranges(g);
+    auto r = cast_singleton(d);
+    auto c=values(g);
+    auto b=f(c);
+    auto A=f.gradient(r);
+    return b+A*(g-c);
+}
+
+template<class F> auto
+AffineModel<ValidatedTag,F>::_compose(const VectorFunction<P>& f, Vector<AffineModel<P,F>> const& g) -> Vector<AffineModel<P,F>> {
+    auto pr = g.zero_element().precision();
+    auto d = ranges(g);
+    auto r = cast_singleton(d);
+    auto c=values(g);
+    auto b=f(c);
+    auto A=f.jacobian(r);
+    return b+A*(g-c);
 }
 
 

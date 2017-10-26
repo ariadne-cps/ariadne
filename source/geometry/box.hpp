@@ -202,6 +202,7 @@ template<class I> inline Box<I> remove(const Box<I>& bx, SizeType k) {
 
 UpperIntervalType apply(ScalarFunction<ValidatedTag>const& f, const Box<UpperIntervalType>& x);
 Box<UpperIntervalType> apply(VectorFunction<ValidatedTag>const& f, const Box<UpperIntervalType>& x);
+UpperBoxType image(UpperBoxType bx, ValidatedVectorFunction const& f);
 
 //! \relates Box \brief Project onto the variables \a rng.
 template<class I> inline Box<I> project(const Box<I> & bx, Array<SizeType> const& rng) { return Box<I>::_project(bx,rng); }

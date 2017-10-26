@@ -151,6 +151,7 @@ Void export_formula()
     to_python< List<RealExpression> >();
 
     from_python< List<RealVariableInterval> >();
+    from_python< List<ContinuousPredicate> >();
 
     // TODO: These interval conversions are dangerous since they are applied when they sometimes should not be.
     //implicitly_convertible<double,RealExpression>();
@@ -393,16 +394,22 @@ Void export_formula()
     real_variables_box_class.def("__getitem__", &RealVariablesBox::operator[],return_value_policy<copy_const_reference>());
     real_variables_box_class.def(self_ns::str(self));
 
+    implicitly_convertible<List<RealVariableInterval>,RealVariablesBox>();
+
     class_<RealExpressionConstraintSet> real_expression_constraint_set_class("RealExpressionConstraintSet", init<List<ContinuousPredicate>>());
     real_expression_constraint_set_class.def(self_ns::str(self));
 
+    implicitly_convertible<List<ContinuousPredicate>,RealExpressionConstraintSet>();
+
     class_<RealExpressionBoundedConstraintSet> real_expression_bounded_constraint_set_class("RealExpressionConstraintSet", init<List<RealVariableInterval>,List<ContinuousPredicate>>());
+    real_expression_bounded_constraint_set_class.def(init<RealVariablesBox,RealExpressionConstraintSet>());
     real_expression_bounded_constraint_set_class.def(self_ns::str(self));
 
     def("make_box", (RealBox(*)(RealSpace const&, RealVariablesBox const&)) &make_box);
     def("make_set", (RealBox(*)(RealSpace const&, RealVariablesBox const&)) &make_box);
     def("make_set", (ConstraintSet(*)(RealSpace const&, RealExpressionConstraintSet const&)) &make_set);
     def("make_set", (BoundedConstraintSet(*)(RealSpace const&, RealExpressionBoundedConstraintSet const&)) &make_set);
+    def("make_set", (BoundedConstraintSet(*)(RealSpace const&, RealVariablesBox const&, RealExpressionConstraintSet const&)) &make_set);
 }
 
 

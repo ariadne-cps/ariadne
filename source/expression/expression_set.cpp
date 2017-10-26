@@ -241,12 +241,20 @@ RealBox make_box(RealSpace const& spc, RealVariablesBox const& bx) {
     return bx.euclidean_set(spc);
 }
 
+RealBox make_set(RealSpace const& spc, RealVariablesBox const& bx) {
+    return bx.euclidean_set(spc);
+}
+
 ConstraintSet make_set(RealSpace const& spc, RealExpressionConstraintSet const& set) {
     return set.euclidean_set(spc);
 }
 
 BoundedConstraintSet make_set(RealSpace const& spc, RealExpressionBoundedConstraintSet const& set) {
     return set.euclidean_set(spc);
+}
+
+BoundedConstraintSet make_set(RealSpace const& spc, RealVariablesBox const& bx, RealExpressionConstraintSet const& set) {
+    return intersection(bx,set).euclidean_set(spc);
 }
 
 

@@ -257,6 +257,8 @@ class RealExpressionBoundedConstraintSet
     RealExpressionBoundedConstraintSet(const List<RealVariableInterval>& domain, const List<ContinuousPredicate>& constraints);
     RealExpressionBoundedConstraintSet(const Map<RealVariable,RealInterval>& domain, const List<ContinuousPredicate>& constraints);
     RealExpressionBoundedConstraintSet(const RealVariablesBox& box) : _bounds(box.bounds()) { }
+    RealExpressionBoundedConstraintSet(const RealVariablesBox& box, const RealExpressionConstraintSet& set)
+        : _bounds(box.bounds()), _constraints(set.constraints()) { }
     Set<RealVariable> variables() const { return this->_bounds.keys(); }
     Map<RealVariable,RealInterval> bounds() const { return this->_bounds; }
     List<ContinuousPredicate> const& constraints() const { return this->_constraints; }
@@ -298,8 +300,10 @@ template<class IVL> VariablesBox<IVL>::operator ExpressionSet<Box<IVL>>() const 
 
 
 RealBox make_box(RealSpace const&, RealVariablesBox const&);
+RealBox make_set(RealSpace const&, RealVariablesBox const&);
 ConstraintSet make_set(RealSpace const&, RealExpressionConstraintSet const&);
 BoundedConstraintSet make_set(RealSpace const&, RealExpressionBoundedConstraintSet const&);
+BoundedConstraintSet make_set(RealSpace const&, RealVariablesBox const&, RealExpressionConstraintSet const&);
 } // namespace Ariadne
 
 

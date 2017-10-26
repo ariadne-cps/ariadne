@@ -389,6 +389,7 @@ Void export_boxes() {
     implicitly_convertible<UpperBoxType,ApproximateBoxType>();
 
     def("widen", (UpperBoxType(*)(ExactBoxType const&, FloatDPValue eps)) &widen);
+    def("image", (UpperBoxType(*)(UpperBoxType, ValidatedVectorFunction const&)) &image);
 }
 
 /*

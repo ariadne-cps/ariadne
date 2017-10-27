@@ -51,6 +51,36 @@ FloatMP& operator-=(FloatMP& x1, FloatMP const& x2);
 FloatMP& operator*=(FloatMP& x1, FloatMP const& x2);
 FloatMP& operator/=(FloatMP& x1, FloatMP const& x2);
 
+template<class X> decltype(auto) values(Vector<X> const& v) {
+    //typedef typename std::remove_reference<decltype(a.zero_element().value())>::type C;
+    return transform_vector(v,[&](X const& x){return x.value();});
+}
+
+/*
+FloatDPBounds const& make_singleton(IntervalRangeType const& ivl, DoublePrecision) {
+    return reinterpret_cast<FloatDPBounds const&>(ivl);
+}
+
+FloatMPBounds const& make_singleton(IntervalRangeType const& ivl, MultiplePrecision pr) {
+    return FloatMPBounds(ivl.lower(),ivl.upper());
+}
+*/
+
+/*
+Bounds<FloatMP> cast_singleton(Interval<UpperBound<FloatMP>> const& ivl) {
+    return Bounds<FloatMP>(ivl.lower(),ivl.upper());
+}
+
+Vector<Bounds<FloatMP>> cast_singleton(Vector<Interval<UpperBound<FloatMP>>> const& bx) {
+    return transform_vector(bx,[&](Interval<UpperBound<FloatMP>> const& ivl){return cast_singleton(ivl);});
+}
+*/
+
+FloatDPBounds cast_singleton(Interval<FloatDPUpperBound> const& ivl);
+FloatMPBounds cast_singleton(Interval<FloatMPUpperBound> const& ivl);
+
+
+
 template<class F> struct AlgebraOperations<AffineModel<ApproximateTag,F>> {
     typedef typename F::PrecisionType PrecisionType;
     typedef AffineModel<ApproximateTag,F> AffineModelType;
@@ -436,34 +466,6 @@ AffineModel<ApproximateTag,F>::_compose(const VectorFunction<P>& f, Vector<Affin
     auto A=f.jacobian(c);
     return b+A*(g-c);
 }
-
-template<class X> decltype(auto) values(Vector<X> const& v) {
-    //typedef typename std::remove_reference<decltype(a.zero_element().value())>::type C;
-    return transform_vector(v,[&](X const& x){return x.value();});
-}
-
-/*
-FloatDPBounds const& make_singleton(IntervalRangeType const& ivl, DoublePrecision) {
-    return reinterpret_cast<FloatDPBounds const&>(ivl);
-}
-
-FloatMPBounds const& make_singleton(IntervalRangeType const& ivl, MultiplePrecision pr) {
-    return FloatMPBounds(ivl.lower(),ivl.upper());
-}
-*/
-
-/*
-Bounds<FloatMP> cast_singleton(Interval<UpperBound<FloatMP>> const& ivl) {
-    return Bounds<FloatMP>(ivl.lower(),ivl.upper());
-}
-
-Vector<Bounds<FloatMP>> cast_singleton(Vector<Interval<UpperBound<FloatMP>>> const& bx) {
-    return transform_vector(bx,[&](Interval<UpperBound<FloatMP>> const& ivl){return cast_singleton(ivl);});
-}
-*/
-
-FloatDPBounds cast_singleton(Interval<FloatDPUpperBound> const& ivl);
-FloatMPBounds cast_singleton(Interval<FloatMPUpperBound> const& ivl);
 
 template<class F> auto
 AffineModel<ValidatedTag,F>::_compose(const ScalarFunction<P>& f, Vector<AffineModel<P,F>> const& g) -> AffineModel<P,F> {

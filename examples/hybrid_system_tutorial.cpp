@@ -32,7 +32,8 @@
 #include "hybrid/hybrid_simulator.hpp"
 #include "hybrid/hybrid_graphics.hpp"
 
-namespace Ariadne::HeatingSystemTutorial {
+namespace Ariadne {
+namespace HeatingSystemTutorial {
 
 using namespace Ariadne;
 
@@ -353,7 +354,8 @@ Void compute_reachable_sets_with_serialisation(const CompositeHybridAutomaton& h
 }
 */
 
-} // namespace Ariadne::HeatingSystemTutorial
+} // namespace HeatingSystemTutorial
+} // namespace Ariadne
 
 using namespace Ariadne::HeatingSystemTutorial;
 

@@ -37,8 +37,9 @@
 #include "numeric/number.decl.hpp"
 #include "numeric/float.decl.hpp"
 
-#include "numeric/arithmetic.hpp"
 #include "paradigm.hpp"
+#include "numeric/arithmetic.hpp"
+#include "numeric/sequence.hpp"
 
 namespace Ariadne {
 
@@ -64,29 +65,6 @@ struct Accuracy {
 
 extern const Real pi;
 extern const Real infinity;
-
-template<class X> class Sequence {
-    std::function<X(Natural)> _fn;
-  public:
-    Sequence<X>(std::function<X(Natural)> fn) : _fn(fn) { }
-    X operator[](Natural const& n) const { return _fn(n); }
-};
-
-template<class Y> struct CompletionTypedef;
-template<> struct CompletionTypedef<Dyadic> { typedef Real Type; };
-template<> struct CompletionTypedef<Rational> { typedef Real Type; };
-template<> struct CompletionTypedef<Real> { typedef Real Type; };
-template<class Y> using CompletionType = typename CompletionTypedef<Y>::Type;
-
-template<class X> class ConvergentSequence : public Sequence<X> {
-  public:
-    ConvergentSequence(Sequence<X> const& seq) : Sequence<X>(seq) { }
-};
-template<class X> class StrongCauchySequence : public Sequence<X> {
-  public:
-    StrongCauchySequence(Sequence<X> const& seq) : Sequence<X>(seq) { }
-    friend CompletionType<X> limit(StrongCauchySequence<X> const&);
-};
 
 class RealInterface;
 

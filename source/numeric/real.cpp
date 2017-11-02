@@ -287,19 +287,22 @@ template<class O> LogicalValue LogicalWrapper<O,Real,Real>::_check(Effort e) con
     else { MultiplePrecision p(e*64); return static_cast<LogicalValue>(this->_op(this->_arg1.get(p),this->_arg2.get(p))); }
 }
 
-template<class P, class O, class... ARGS> Logical<P> make_logical(O op, ARGS ...args) {
-    return Logical<P>(std::make_shared<LogicalWrapper<O,ARGS...>>(op,args...));
+template<class R, class O, class... ARGS> R make_logical(O op, ARGS ...args) {
+    return R(std::make_shared<LogicalWrapper<O,ARGS...>>(op,args...));
+}
+template<class P, class O, class... ARGS> LogicalType<P> make_logical_type(O op, ARGS ...args) {
+    return LogicalType<P>(std::make_shared<LogicalWrapper<O,ARGS...>>(op,args...));
 }
 
-NegatedSierpinskian eq(Real const& x1, Real const& x2) { return make_logical<EffectiveLowerTag>(Equal(),x1,x2); }
-Kleenean lt(Real const& x1, Real const& x2) { return make_logical<EffectiveTag>(Less(),x1,x2); }
+NegatedSierpinskian eq(Real const& x1, Real const& x2) { return make_logical<NegatedSierpinskian>(Equal(),x1,x2); }
+Kleenean lt(Real const& x1, Real const& x2) { return make_logical<Kleenean>(Less(),x1,x2); }
 
-Falsifyable operator==(Real const& x1, Real const& x2) { return make_logical<EffectiveLowerTag>(Equal(),x1,x2); }
-Verifyable operator!=(Real const& x1, Real const& x2) { return make_logical<EffectiveUpperTag>(Unequal(),x1,x2); }
-Quasidecidable operator< (Real const& x1, Real const& x2) { return make_logical<EffectiveTag>(Less(),x1,x2); }
-Quasidecidable operator> (Real const& x1, Real const& x2) { return make_logical<EffectiveTag>(Gtr(),x1,x2); }
-Quasidecidable operator<=(Real const& x1, Real const& x2) { return make_logical<EffectiveTag>(Leq(),x1,x2); }
-Quasidecidable operator>=(Real const& x1, Real const& x2) { return make_logical<EffectiveTag>(Geq(),x1,x2); }
+Falsifyable operator==(Real const& x1, Real const& x2) { return make_logical<NegatedSierpinskian>(Equal(),x1,x2); }
+Verifyable operator!=(Real const& x1, Real const& x2) { return make_logical<Sierpinskian>(Unequal(),x1,x2); }
+Quasidecidable operator< (Real const& x1, Real const& x2) { return make_logical<Kleenean>(Less(),x1,x2); }
+Quasidecidable operator> (Real const& x1, Real const& x2) { return make_logical<Kleenean>(Gtr(),x1,x2); }
+Quasidecidable operator<=(Real const& x1, Real const& x2) { return make_logical<Kleenean>(Leq(),x1,x2); }
+Quasidecidable operator>=(Real const& x1, Real const& x2) { return make_logical<Kleenean>(Geq(),x1,x2); }
 
 ValidatedNegatedSierpinskian operator==(Real const& x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
 ValidatedSierpinskian operator!=(Real const& x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
@@ -346,6 +349,12 @@ ValidatedReal Real::compute(Accuracy accuracy) const {
     return ValidatedReal(DyadicBounds(res));
 }
 
+ValidatedKleenean check_sgn(Real r, Effort eff) {
+    auto x = r.get(MultiplePrecision(eff));
+    if(definitely(x>0)) { return true; }
+    else if(definitely(x<0)) { return false; }
+    else { return indeterminate; }
+}
 
 
 

@@ -34,49 +34,58 @@
 
 namespace Ariadne {
 
-typedef Void Void;
+typedef void Void;
+typedef bool Bool;
 
-enum class LogicalValue : char;
-template<class P=Void> class Logical;
+class Indeterminate;
+extern const Indeterminate indeterminate;
 
-typedef Logical<ExactTag> Boolean;
-typedef Logical<EffectiveTag> Kleenean;
-typedef Logical<EffectiveUpperTag> Sierpinskian;
-typedef Logical<EffectiveLowerTag> NegatedSierpinskian;
-typedef Logical<ValidatedTag> ValidatedKleenean;
-typedef Logical<ValidatedUpperTag> ValidatedUpperKleenean;
-typedef Logical<ValidatedLowerTag> ValidatedLowerKleenean;
-typedef Logical<ValidatedUpperTag> ValidatedSierpinskian;
-typedef Logical<ValidatedLowerTag> ValidatedNegatedSierpinskian;
-typedef Logical<ApproximateTag> ApproximateKleenean;
-typedef Logical<ApproximateTag> Fuzzy;
-
-/*
 class Boolean;
-class ValidatedKleenean;
+class Sierpinskian;
+class Kleenean;
+
+template<class L> class Negate;
+template<class L> class Lower;
+template<class L> class Upper;
+template<class L> class Validated;
+template<class L> class Approximate;
+
+class NegatedSierpinskian;
+class LowerKleenean;
+class UpperKleenean;
 class ValidatedSierpinskian;
 class ValidatedNegatedSierpinskian;
-class Fuzzy;
-*/
+class ValidatedKleenean;
+class ValidatedLowerKleenean;
+class ValidatedUpperKleenean;
+class ApproximateKleenean;
 
-template<class P> using LogicalType = Logical<P>;
-using ExactLogic = Logical<ExactTag>;
-using EffectiveLogic = Logical<EffectiveTag>;
-using EffectiveUpperLogic = Logical<EffectiveUpperTag>;
-using EffectiveLowerLogic = Logical<EffectiveLowerTag>;
-using ValidatedLogic = Logical<ValidatedTag>;
-using ValidatedUpperLogic = Logical<ValidatedUpperTag>;
-using ValidatedLowerLogic = Logical<ValidatedLowerTag>;
-using ApproximateLogic = Logical<ApproximateTag>;
+using Fuzzy = ApproximateKleenean;
 
-using Decidable = Logical<ExactTag>;
-using Quasidecidable = Logical<EffectiveTag>;
-using Verifyable = Logical<EffectiveUpperTag>;
-using Falsifyable = Logical<EffectiveLowerTag>;
+template<class P> struct LogicalTypedef;
+template<class P> using LogicalType = typename LogicalTypedef<P>::Type;
+template<> struct LogicalTypedef<ExactTag> { typedef Boolean Type; };
+template<> struct LogicalTypedef<EffectiveTag> { typedef Kleenean Type; };
+template<> struct LogicalTypedef<EffectiveLowerTag> { typedef LowerKleenean Type; };
+template<> struct LogicalTypedef<EffectiveUpperTag> { typedef UpperKleenean Type; };
+template<> struct LogicalTypedef<ValidatedTag> { typedef ValidatedKleenean Type; };
+template<> struct LogicalTypedef<ValidatedLowerTag> { typedef ValidatedLowerKleenean Type; };
+template<> struct LogicalTypedef<ValidatedUpperTag> { typedef ValidatedUpperKleenean Type; };
+template<> struct LogicalTypedef<ApproximateTag> { typedef ApproximateKleenean Type; };
+
+using Decidable = Boolean;
+using Quasidecidable = Kleenean;
+using Verifyable = Sierpinskian;
+using Falsifyable = NegatedSierpinskian;
 
 Boolean operator!(Boolean const&);
 NegatedSierpinskian operator!(Sierpinskian const&);
 Kleenean operator!(Kleenean const&);
+
+namespace Detail {
+enum class LogicalValue : char;
+}
+using Detail::LogicalValue;
 
 }
 

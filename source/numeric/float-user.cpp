@@ -1013,14 +1013,14 @@ template<class F> struct Operations<Bounds<F>> {
     }
 
     //! \related Bounds<F> \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
-    static Logical<ValidatedTag> _eq(Bounds<F> const& x1, Bounds<F> const& x2) {
+    static LogicalType<ValidatedTag> _eq(Bounds<F> const& x1, Bounds<F> const& x2) {
         if(x1.upper_raw()<x2.lower_raw() || x1.lower_raw()>x2.upper_raw()) { return false; }
         else if(x1.lower_raw()==x2.upper_raw() && x1.upper_raw() == x2.lower_raw()) { return true; }
         else { return indeterminate; }
     }
 
     //! \related Bounds<F> \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
-    static Logical<ValidatedTag> _lt(Bounds<F> const& x1, Bounds<F> const& x2) {
+    static LogicalType<ValidatedTag> _lt(Bounds<F> const& x1, Bounds<F> const& x2) {
         if(x1.upper_raw()< x2.lower_raw()) { return true; }
         else if(x1.lower_raw()>=x2.upper_raw()) { return false; }
         else { return indeterminate; }
@@ -1076,13 +1076,13 @@ template<class F> struct Operations<Bounds<F>> {
         return Integer(static_cast<int>(x.value_raw().get_d()));
     }
 
-    static auto is_zero(Bounds<F> const& x) -> Logical<ValidatedTag> {
+    static auto is_zero(Bounds<F> const& x) -> LogicalType<ValidatedTag> {
         if(x.lower_raw()>0.0 || x.upper_raw()<0.0) { return false; }
         else if(x.lower_raw()==0.0 && x.upper_raw()==0.0) { return true; }
         else { return indeterminate; }
     }
 
-    static auto is_positive(Bounds<F> const& x) -> Logical<ValidatedTag> {
+    static auto is_positive(Bounds<F> const& x) -> LogicalType<ValidatedTag> {
         if(x.lower_raw()>=0.0) { return true; }
         else if(x.upper_raw()<0.0) { return false; }
         else { return indeterminate; }
@@ -1140,7 +1140,7 @@ template<class F> struct Operations<Bounds<F>> {
     }
 };
 
-template<class F> auto is_positive(Bounds<F> const&) -> Logical<ValidatedTag>;
+template<class F> auto is_positive(Bounds<F> const&) -> LogicalType<ValidatedTag>;
 
 inline int log10floor(double const& x) { return std::max(std::floor(std::log10(x)),-65280.); }
 inline int log10floor(FloatMP const& x) { return log10floor(x.get_d()); }
@@ -2095,6 +2095,5 @@ template<> String class_name<FloatMPBall>() { return "FloatMPBall"; }
 template<> String class_name<FloatMPValue>() { return "FloatMPValue"; }
 
 template<> String class_name<FloatMDPBall>() { return "FloatMDPBall"; }
-
 
 } // namespace Ariadne

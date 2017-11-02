@@ -31,10 +31,28 @@
 
 namespace Ariadne {
 
+ValidatedKleenean check_sgn(Real r, Effort eff);
+template<class OP, class... AS> class Expression;
+
+template<class Y> class Expression<Sgn,Y> : public LogicalInterface {
+    Y _y;
+  public:
+    Expression(Sgn, Y y) : _y(y) { }
+    virtual OutputStream& _write(OutputStream& os) const override;
+    virtual LogicalValue _check(Effort eff) const override;
+};
+
+template<class Y> OutputStream& Expression<Sgn,Y>::_write(OutputStream& os) const {
+    return os << "sgn(" << _y << ")";
+}
+template<class Y> LogicalValue Expression<Sgn,Y>::_check(Effort eff) const {
+    return static_cast<LogicalValue>(check_sgn(_y,eff));
+}
+template class Expression<Sgn,Real>;
+
+
 Kleenean Sgn::operator()(const Real& a) const {
-    if(definitely(a>0)) { return true; }
-    else if(definitely(a<0)) { return false; }
-    else { return indeterminate; }
+    return Kleenean(LogicalHandle(std::make_shared<Expression<Sgn,Real>>(Sgn(),a)));
 }
 
 OutputStream& operator<<(OutputStream& os, const OperatorKind& knd) {

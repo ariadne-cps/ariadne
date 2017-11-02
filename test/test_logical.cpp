@@ -121,16 +121,16 @@ Void
 TestLogical::test_concept()
 {
     // Check to see if we can perform operations on computational and specification logical types
-    Logical<ExactTag> xl(true);
-    Logical<EffectiveTag> el(true);
-    Logical<ValidatedTag> vl(true);
+    LogicalType<ExactTag> xl(true);
+    LogicalType<EffectiveTag> el(true);
+    LogicalType<ValidatedTag> vl(true);
     Effort eff(0);
 
     vl=el.check(eff);
     vl=check(el,eff);
 
     vl=indeterminate;
-    vl=Logical<ValidatedTag>(LogicalValue::LIKELY);
+    vl=LogicalType<ValidatedTag>(LogicalValue::LIKELY);
 
     xl = xl && xl;
     el = xl && el;
@@ -142,14 +142,14 @@ TestLogical::test_concept()
 Void
 TestLogical::test_conversion_to_bool()
 {
-    ARIADNE_TEST_STATIC_ASSERT(IsConvertible<Logical<ExactTag>,Bool>);
-    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<Logical<EffectiveTag>,Bool>>);
-    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<Logical<EffectiveUpperTag>,Bool>>);
-    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<Logical<EffectiveLowerTag>,Bool>>);
-    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<Logical<ValidatedTag>,Bool>>);
-    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<Logical<UpperTag>,Bool>>);
-    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<Logical<LowerTag>,Bool>>);
-    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<Logical<ApproximateTag>,Bool>>);
+    ARIADNE_TEST_STATIC_ASSERT(IsConvertible<LogicalType<ExactTag>,Bool>);
+    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<LogicalType<EffectiveTag>,Bool>>);
+    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<LogicalType<EffectiveUpperTag>,Bool>>);
+    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<LogicalType<EffectiveLowerTag>,Bool>>);
+    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<LogicalType<ValidatedTag>,Bool>>);
+    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<LogicalType<UpperTag>,Bool>>);
+    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<LogicalType<LowerTag>,Bool>>);
+    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<LogicalType<ApproximateTag>,Bool>>);
 
     ARIADNE_TEST_STATIC_ASSERT(IsConvertible<Boolean,Bool>);
     ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<ValidatedKleenean,Bool>>);
@@ -161,9 +161,9 @@ TestLogical::test_conversion_to_bool()
 Void
 TestLogical::test_conversion()
 {
-    if(IsConvertible<Logical<EffectiveTag>,Logical<ValidatedTag>>::value) {
+    if(IsConvertible<LogicalType<EffectiveTag>,LogicalType<ValidatedTag>>::value) {
         ARIADNE_TEST_NOTIFY("EffectiveTag logical types may be converted to values using default Effort.");
-    } else if(IsConvertible<Logical<EffectiveTag>,Logical<ValidatedTag>>::value) {
+    } else if(IsConvertible<LogicalType<EffectiveTag>,LogicalType<ValidatedTag>>::value) {
         ARIADNE_TEST_NOTIFY("EffectiveTag logical types may be explicitly converted to values using default Effort.");
     } else {
         ARIADNE_TEST_NOTIFY("EffectiveTag logical types cannot be converted to values; the Effort used must be specified.");
@@ -179,12 +179,12 @@ TestLogical::test_conversion()
         ARIADNE_TEST_NOTIFY("decide(...) is throws error on INDETERMINATE value.");
     }
 
-    ARIADNE_TEST_CONSTRUCT(Logical<ValidatedTag>,vl,(LogicalValue::LIKELY))
+    ARIADNE_TEST_CONSTRUCT(LogicalType<ValidatedTag>,vl,(LogicalValue::LIKELY))
     ARIADNE_TEST_EQUAL(definitely(vl),false);
     ARIADNE_TEST_EQUAL(possibly(vl),true);
     ARIADNE_TEST_EQUAL(decide(vl),true);
 
-    ARIADNE_TEST_CONSTRUCT(Logical<ValidatedTag>,vi,(LogicalValue::INDETERMINATE))
+    ARIADNE_TEST_CONSTRUCT(LogicalType<ValidatedTag>,vi,(LogicalValue::INDETERMINATE))
     ARIADNE_TEST_EQUAL(definitely(vl),false);
     ARIADNE_TEST_EQUAL(possibly(vl),true);
 }

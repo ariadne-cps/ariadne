@@ -33,15 +33,7 @@
 
 namespace Ariadne {
 
-inline LogicalValue operator!(LogicalValue lv) { return negation(lv); }
-inline LogicalValue operator&&(LogicalValue lv1, LogicalValue lv2) { return conjunction(lv1,lv2); }
-inline LogicalValue operator||(LogicalValue lv1, LogicalValue lv2) { return disjunction(lv1,lv2); }
-inline LogicalValue operator^(LogicalValue lv1, LogicalValue lv2) { return exclusive(lv1,lv2); }
-
-Logical<ExactTag> operator||(Bool b1, Logical<ExactTag> l2) { return Logical<ExactTag>(b1) || l2; }
-Logical<ExactTag> operator||(Logical<ExactTag> l1, Bool b2) { return l1 || Logical<ExactTag>(b2); }
-Logical<ExactTag> operator&&(Bool b1, Logical<ExactTag> l2) { return Logical<ExactTag>(b1) && l2; }
-Logical<ExactTag> operator&&(Logical<ExactTag> l1, Bool b2) { return l1 && Logical<ExactTag>(b2); }
+namespace Detail {
 
 class LogicalConstant : public LogicalInterface {
     LogicalValue _v;
@@ -65,26 +57,35 @@ template<class OP, class ARG> struct LogicalExpression<OP,ARG>
 template<class OP, class ARG1, class ARG2> struct LogicalExpression<OP,ARG1,ARG2>
     : virtual LogicalInterface, ExpressionTemplate<OP,ARG1,ARG2>
 {
-
     using ExpressionTemplate<OP,ARG1,ARG2>::ExpressionTemplate;
     virtual LogicalValue _check(Effort e) const { return this->_op(check(this->_arg1,e),check(this->_arg2,e)); }
     virtual OutputStream& _write(OutputStream& os) const {
         return os << static_cast<ExpressionTemplate<OP,ARG1,ARG2>const&>(*this); }
 };
 
-//FIXME: Should not need special treatment
-template<class ARG1, class ARG2> struct LogicalExpression<Equal,ARG1,ARG2>
-    : virtual LogicalInterface, ExpressionTemplate<Equal,ARG1,ARG2>
-{
-    using ExpressionTemplate<Equal,ARG1,ARG2>::ExpressionTemplate;
-    virtual LogicalValue _check(Effort e) const { return equality(check(this->_arg1,e),check(this->_arg2,e)); }
-    virtual OutputStream& _write(OutputStream& os) const {
-        return os << static_cast<ExpressionTemplate<Equal,ARG1,ARG2>const&>(*this); }
-};
-
 LogicalHandle::LogicalHandle(LogicalValue l)
     : _ptr(std::make_shared<LogicalConstant>(l)) {
 }
+
+LogicalHandle operator&&(LogicalHandle l1, LogicalHandle l2) {
+    return LogicalHandle(std::make_shared<LogicalExpression<AndOp,LogicalHandle,LogicalHandle>>(AndOp(),l1,l2));
+};
+
+LogicalHandle operator||(LogicalHandle l1, LogicalHandle l2) {
+    return LogicalHandle(std::make_shared<LogicalExpression<OrOp,LogicalHandle,LogicalHandle>>(OrOp(),l1,l2));
+};
+
+LogicalHandle operator==(LogicalHandle l1, LogicalHandle l2) {
+    return LogicalHandle(std::make_shared<LogicalExpression<Equal,LogicalHandle,LogicalHandle>>(Equal(),l1,l2));
+};
+
+LogicalHandle operator^(LogicalHandle l1, LogicalHandle l2) {
+    return LogicalHandle(std::make_shared<LogicalExpression<XOrOp,LogicalHandle,LogicalHandle>>(XOrOp(),l1,l2));
+};
+
+LogicalHandle operator!(LogicalHandle l) {
+    return LogicalHandle(std::make_shared<LogicalExpression<NotOp,LogicalHandle>>(NotOp(),l));
+};
 
 LogicalHandle conjunction(LogicalHandle l1, LogicalHandle l2) {
     return LogicalHandle(std::make_shared<LogicalExpression<AndOp,LogicalHandle,LogicalHandle>>(AndOp(),l1,l2));
@@ -102,11 +103,13 @@ LogicalHandle equality(LogicalHandle l1, LogicalHandle l2) {
     return LogicalHandle(std::make_shared<LogicalExpression<Equal,LogicalHandle,LogicalHandle>>(Equal(),l1,l2));
 };
 
+
 LogicalHandle exclusive(LogicalHandle l1, LogicalHandle l2) {
     return LogicalHandle(std::make_shared<LogicalExpression<XOrOp,LogicalHandle,LogicalHandle>>(XOrOp(),l1,l2));
 };
 
-LogicalValue equality(LogicalValue l1, LogicalValue l2) {
+
+LogicalValue operator==(LogicalValue l1, LogicalValue l2) {
     switch (l1) {
         case LogicalValue::TRUE:
             return l2;
@@ -115,14 +118,13 @@ LogicalValue equality(LogicalValue l1, LogicalValue l2) {
         case LogicalValue::INDETERMINATE:
             return LogicalValue::INDETERMINATE;
         case LogicalValue::UNLIKELY:
-            switch (l2) { case LogicalValue::TRUE: return LogicalValue::UNLIKELY; case LogicalValue::FALSE: return LogicalValue::LIKELY; default: return negation(l2); }
+            switch (l2) { case LogicalValue::TRUE: return LogicalValue::UNLIKELY; case LogicalValue::FALSE: return LogicalValue::LIKELY; default: return not l2; }
         case LogicalValue::FALSE:
-            return negation(l2);
+            return not l2;
         default:
             return LogicalValue::INDETERMINATE;
     }
 }
-
 
 OutputStream& operator<<(OutputStream& os, LogicalValue l) {
     switch(l) {
@@ -135,7 +137,11 @@ OutputStream& operator<<(OutputStream& os, LogicalValue l) {
     return os;
 }
 
-const Logical<EffectiveTag> indeterminate = Logical<EffectiveTag>(LogicalValue::INDETERMINATE);
+} // namespace Detail
+
+Nat Effort::_default = 0u;
+
+const Indeterminate indeterminate = Indeterminate();
 
 template<> String class_name<ExactTag>() { return "Exact"; }
 template<> String class_name<EffectiveTag>() { return "Effective"; }
@@ -147,12 +153,32 @@ template<> String class_name<ApproximateTag>() { return "Approximate"; }
 
 template<> String class_name<Bool>() { return "Bool"; }
 template<> String class_name<Boolean>() { return "Boolean"; }
-template<> String class_name<Kleenean>() { return "Kleenean"; }
 template<> String class_name<Sierpinskian>() { return "Sierpinskian"; }
 template<> String class_name<NegatedSierpinskian>() { return "NegatedSierpinskian"; }
-template<> String class_name<ValidatedKleenean>() { return "ValidatedKleenean"; }
+template<> String class_name<Kleenean>() { return "Kleenean"; }
+template<> String class_name<LowerKleenean>() { return "LowerKleenean"; }
+template<> String class_name<UpperKleenean>() { return "UpperKleenean"; }
 template<> String class_name<ValidatedSierpinskian>() { return "ValidatedSierpinskian"; }
 template<> String class_name<ValidatedNegatedSierpinskian>() { return "ValidatedNegatedSierpinskian"; }
-template<> String class_name<Fuzzy>() { return "Fuzzy"; }
+template<> String class_name<ValidatedKleenean>() { return "ValidatedKleenean"; }
+template<> String class_name<ValidatedLowerKleenean>() { return "ValidatedLowerKleenean"; }
+template<> String class_name<ValidatedUpperKleenean>() { return "ValidatedUpperKleenean"; }
+template<> String class_name<ApproximateKleenean>() { return "ApproximateKleenean"; }
+
+void try_logical() {
+    Kleenean k(true);
+    Effort e(3);
+    Sierpinskian s(true);
+    Boolean b(true);
+    k=b and s;
+    k=k and b;
+    k=k and s;
+    k=s and not s;
+    ValidatedKleenean vk=k.check(e);
+    vk && vk;
+    ValidatedLowerKleenean vlk = vk;
+    vlk || vk;
+    ValidatedUpperKleenean vuk = !vlk;
+}
 
 } // namespace Ariadne

@@ -61,10 +61,10 @@ Decidable signum(Rational q);
 Quasidecidable signum(Real r);
 Decidable signum(Number<ExactTag> n);
 Quasidecidable signum(Number<EffectiveTag> n);
-Logical<ValidatedTag> signum(Number<ValidatedTag> n);
-Logical<LowerTag> signum(Number<ValidatedUpperTag> n);
-Logical<UpperTag> signum(Number<ValidatedLowerTag> n);
-Logical<ApproximateTag> signum(Number<ApproximateTag> n);
+LogicalType<ValidatedTag> signum(Number<ValidatedTag> n);
+LogicalType<LowerTag> signum(Number<ValidatedUpperTag> n);
+LogicalType<UpperTag> signum(Number<ValidatedLowerTag> n);
+LogicalType<ApproximateTag> signum(Number<ApproximateTag> n);
 template<class P, class PR> decltype(signum(declval<Number<P>>())) signum(Float<P,PR>);
 struct Sig { template<class A> auto operator() (A&& a) const -> decltype(signum(a)) { return signum(std::move(a)); } };
 
@@ -276,14 +276,14 @@ ARIADNE_CLASS_NAME(BoundedTag);
 ARIADNE_CLASS_NAME(ValidatedTag);
 ARIADNE_CLASS_NAME(ExactTag);
 
-ARIADNE_CLASS_NAME(Logical<ApproximateTag>);
-ARIADNE_CLASS_NAME(Logical<ValidatedLowerTag>);
-ARIADNE_CLASS_NAME(Logical<ValidatedUpperTag>);
-ARIADNE_CLASS_NAME(Logical<ValidatedTag>);
-ARIADNE_CLASS_NAME(Logical<EffectiveLowerTag>);
-ARIADNE_CLASS_NAME(Logical<EffectiveUpperTag>);
-ARIADNE_CLASS_NAME(Logical<EffectiveTag>);
-ARIADNE_CLASS_NAME(Logical<ExactTag>);
+ARIADNE_CLASS_NAME(LogicalType<ApproximateTag>);
+ARIADNE_CLASS_NAME(LogicalType<ValidatedLowerTag>);
+ARIADNE_CLASS_NAME(LogicalType<ValidatedUpperTag>);
+ARIADNE_CLASS_NAME(LogicalType<ValidatedTag>);
+ARIADNE_CLASS_NAME(LogicalType<EffectiveLowerTag>);
+ARIADNE_CLASS_NAME(LogicalType<EffectiveUpperTag>);
+ARIADNE_CLASS_NAME(LogicalType<EffectiveTag>);
+ARIADNE_CLASS_NAME(LogicalType<ExactTag>);
 
 ARIADNE_CLASS_NAME(bool);
 ARIADNE_CLASS_NAME(uint);
@@ -325,8 +325,8 @@ typedef Number<ExactTag> ExN; typedef Number<EffectiveTag> EfN; typedef Number<V
 typedef Number<ValidatedUpperTag> UpN; typedef Number<ValidatedLowerTag> LoN; typedef Number<ApproximateTag> ApN;
 typedef FloatDPValue ExF; typedef FloatDPBall MeF; typedef FloatDPBounds BoF;
 typedef FloatDPUpperBound UpF; typedef FloatDPLowerBound LoF; typedef FloatDPApproximation ApF;
-typedef Logical<ExactTag> ExL; typedef Logical<EffectiveTag> EfL; typedef Logical<ValidatedTag> VaL;
-typedef Logical<UpperTag> UpL; typedef Logical<LowerTag> LoL; typedef Logical<ApproximateTag> ApL;
+typedef LogicalType<ExactTag> ExL; typedef LogicalType<EffectiveTag> EfL; typedef LogicalType<ValidatedTag> VaL;
+typedef LogicalType<UpperTag> UpL; typedef LogicalType<LowerTag> LoL; typedef LogicalType<ApproximateTag> ApL;
 
 //typedef decltype(declval<ExF>() + declval<ExF>()) EfF;
 typedef decltype(declval<ExN>() + declval<ExF>()) EfF;

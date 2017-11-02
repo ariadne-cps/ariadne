@@ -105,6 +105,15 @@ PythonOperator<Cos> cos(boost::python::self_ns::self_t) { return PythonOperator<
 PythonOperator<Tan> tan(boost::python::self_ns::self_t) { return PythonOperator<Tan>(); }
 PythonOperator<Atan> atan(boost::python::self_ns::self_t) { return PythonOperator<Atan>(); }
 
+template<class L> Bool decide(L l) { return Ariadne::decide(l); }
+template<class L> Bool definitely(L l) { return Ariadne::definitely(l); }
+template<class L> Bool possibly(L l) { return Ariadne::possibly(l); }
+
+template<class L> decltype(auto) check(L const& l, Effort const& e) { return l.check(e); }
+template<class L> decltype(auto) operator&(L const& l1, L const& l2) { return l1 and l2; }
+template<class L> decltype(auto) operator|(L const& l1, L const& l2) { return l1 or l2; }
+template<class L> decltype(auto) operator~(L const& l) { return not l; }
+
 
 template<class OP, class T> auto py_apply(T const& t) -> decltype(OP()(t)){ OP op; return op(t); }
 
@@ -156,8 +165,10 @@ template<class T, class B = boost::python::bases<> > class class_ : public boost
         this->def(self<=self); this->def(self>=self); this->def(self<self); this->def(self>self);
     }
     void define_self_logical() {
-        using boost::python::self_ns::self;
-        this->def(self & self); this->def(self | self); this->def(~self);
+        T const* self_ptr=nullptr; T const& self=*self_ptr;
+        //using boost::python::self_ns::self;
+        this->def("__and__", (T(*)(T const&, T const&)) &operator&);
+        //self & self); this->def(self | self); this->def(~self);
     }
     void convert_from() { }
     template<class A, class... AS> void convert_from() {
@@ -170,56 +181,47 @@ template<class T, class B = boost::python::bases<> > class class_ : public boost
 };
 
 
-template<class P> Bool decide(Logical<P> l) { return Ariadne::decide(l); }
-template<class P> Bool definitely(Logical<P> l) { return Ariadne::definitely(l); }
-template<class P> Bool possibly(Logical<P> l) { return Ariadne::possibly(l); }
-
-template<class P> auto check(Logical<P> l, Effort e) -> decltype(l.check(e)) { return l.check(e); }
-template<class P1, class P2> Logical<Weaker<P1,P2>> operator&(Logical<P1> l1, Logical<P2> l2) { return l1 and l2; }
-template<class P1, class P2> Logical<Weaker<P1,P2>> operator|(Logical<P1> l1, Logical<P2> l2) { return l1 or l2; }
-template<class P> Logical<Opposite<P>> operator~(Logical<P> l) { return not l; }
-
 template<class P> void export_effective_logical(std::string name)
 {
-    typedef decltype(declval<Logical<P>>().check(declval<Effort>())) CheckType;
-    OutputStream& operator<<(OutputStream& os, Logical<P> l);
+    typedef decltype(declval<LogicalType<P>>().check(declval<Effort>())) CheckType;
+    OutputStream& operator<<(OutputStream& os, LogicalType<P> l);
 
-    class_<Logical<P>> logical_class(name,init<bool>());
-    logical_class.def(init<Logical<P>>());
-    logical_class.def("check", (CheckType(Logical<P>::*)(Effort)) &Logical<P>::check);
+    class_<LogicalType<P>> logical_class(name,init<bool>());
+    logical_class.def(init<LogicalType<P>>());
+    logical_class.def("check", (CheckType(LogicalType<P>::*)(Effort)) &LogicalType<P>::check);
     logical_class.define_self_logical();
     logical_class.def(self_ns::str(self));
     logical_class.def(self_ns::repr(self));
-    def("check", (CheckType(*)(Logical<P> const&,Effort)) &Ariadne::check<P>);
+    def("check", (CheckType(*)(LogicalType<P> const&,Effort)) &Ariadne::check<LogicalType<P>>);
 };
 
 template<class P> void export_logical(std::string name)
 {
-    typedef decltype(~declval<Logical<P>>()) NotType;
-    OutputStream& operator<<(OutputStream& os, Logical<P> l);
-    class_<Logical<P>> logical_class(name,init<bool>());
-    logical_class.def(init<Logical<P>>());
+    typedef decltype(~declval<LogicalType<P>>()) NotType;
+    OutputStream& operator<<(OutputStream& os, LogicalType<P> l);
+    class_<LogicalType<P>> logical_class(name,init<bool>());
+    logical_class.def(init<LogicalType<P>>());
     logical_class.define_self_logical();
     logical_class.def(self_ns::str(self));
     logical_class.def(self_ns::repr(self));
 
-    def("decide", (bool(*)(Logical<P>)) &decide);
-    def("possibly", (bool(*)(Logical<P>)) &possibly);
-    def("definitely", (bool(*)(Logical<P>)) &definitely);
+    def("decide", (bool(*)(LogicalType<P>)) &decide);
+    def("possibly", (bool(*)(LogicalType<P>)) &possibly);
+    def("definitely", (bool(*)(LogicalType<P>)) &definitely);
 
 };
 
 template<> void export_logical<ExactTag>(std::string name)
 {
     typedef ExactTag P;
-    OutputStream& operator<<(OutputStream& os, Logical<P> l);
-    class_<Logical<P>> logical_class(name,init<bool>());
-    logical_class.def(init<Logical<P>>());
+    OutputStream& operator<<(OutputStream& os, LogicalType<P> l);
+    class_<LogicalType<P>> logical_class(name,init<bool>());
+    logical_class.def(init<LogicalType<P>>());
     logical_class.define_self_logical();
     logical_class.def(self_ns::str(self));
     logical_class.def(self_ns::repr(self));
 
-    implicitly_convertible<Logical<ExactTag>,bool>();
+    implicitly_convertible<LogicalType<ExactTag>,bool>();
 
 }
 
@@ -743,7 +745,7 @@ template<class PR> void export_float_approximation()
 
 Void export_effort() {
     class_<Effort> effort_class("Effort",init<Nat>());
-    effort_class.def(init<>());
+    effort_class.def("work",&Effort::work);
     effort_class.def(self_ns::str(self));
 }
 

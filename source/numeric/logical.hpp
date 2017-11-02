@@ -22,7 +22,7 @@
  */
 
 //! \file logical.hpp
-//! \brief %Logical classes
+//! \brief Logical classes
 
 #ifndef ARIADNE_LOGICAL_HPP
 #define ARIADNE_LOGICAL_HPP
@@ -41,263 +41,496 @@ namespace Ariadne {
  */
 
 //! \ingroup LogicModule
-//! A class wrapping a positive integer roughly representing the amount of effort that should be used in a calculation.
+//! \brief The amount of work used in performing a calculation or checking a quasidecidable predicate.
+//! \details The Effort should roughly reflect the time needed to perform a computation.
+//! \sa LogicalModule
 class Effort {
+    static Nat _default;
     Nat _m;
   public:
-    static Effort get_default() { return Effort(0u); }
-    explicit Effort() : _m(0u) { }
+    //! \brief Get the default effort. Initially set to the minimum possible effort 0.
+    static Effort get_default() { return Effort(_default); }
+    //! \brief Set the default effort.
+    static Void set_default(Nat m) { _default=m; }
+  public:
+    //! \brief Construct from a raw positive integer.
     explicit Effort(Nat m) : _m(m) { }
+    //! \brief Convert to a raw positive integer.
     operator Nat() const { return _m; }
     Nat work() const { return _m; }
     friend OutputStream& operator<<(OutputStream& os, Effort eff) { return os << "Effort(" << eff._m << ")"; }
 };
 
-template<class P> class Logical;
+//! \brief Explicitly declare that a type is %Effective.
+template<class T> using Effective = T;
 
-//!  \ingroup LogicModule
-//! \brief An enumeration containing the possible values of a logical variable.
-enum class LogicalValue : char {
-    FALSE=-2, //!< Definitely not true.
-    UNLIKELY=-1, //!< Considered unlikely to be true.
-    INDETERMINATE= 0, //!< Truth is unknown, possibly undecidable.
-    LIKELY=+1, //!< Considered likely to be true.
-    TRUE=+2 //!< Definitely true.
+namespace Detail {
+
+    //! \ingroup LogicalTypes
+    //! \brief An enumeration containing the possible values of a logical variable.
+    enum class LogicalValue : char {
+        FALSE=-2, //!< Definitely not true.
+        UNLIKELY=-1, //!< Considered unlikely to be true.
+        INDETERMINATE= 0, //!< Truth is unknown, possibly undecidable.
+        LIKELY=+1, //!< Considered likely to be true.
+        TRUE=+2 //!< Definitely true.
+    };
+    inline LogicalValue make_logical_value(bool b) { return b ? LogicalValue::TRUE : LogicalValue::FALSE; }
+    inline Bool definitely(LogicalValue lv) { return lv==LogicalValue::TRUE; }
+    inline Bool probably(const LogicalValue& lv) { return lv>=LogicalValue::LIKELY; };
+    inline Bool decide(LogicalValue lv) { return lv>=LogicalValue::LIKELY; }
+    inline Bool possibly(LogicalValue lv) { return lv!=LogicalValue::FALSE; }
+    inline Bool is_determinate(LogicalValue lv) { return lv==LogicalValue::TRUE or lv==LogicalValue::FALSE; }
+    inline Bool is_indeterminate(LogicalValue lv) { return lv==LogicalValue::INDETERMINATE or lv==LogicalValue::UNLIKELY or lv==LogicalValue::LIKELY; }
+    LogicalValue operator==(LogicalValue lv1, LogicalValue lv2);
+    inline LogicalValue operator!(LogicalValue lv) { return static_cast<LogicalValue>(-static_cast<char>(lv)); }
+    inline LogicalValue operator&&(LogicalValue lv1, LogicalValue lv2) { return std::min(lv1,lv2); }
+    inline LogicalValue operator||(LogicalValue lv1, LogicalValue lv2) { return std::max(lv1,lv2); }
+    inline LogicalValue operator^(LogicalValue lv1, LogicalValue lv2) { return not (lv1==lv2); }
+    OutputStream& operator<<(OutputStream& os, LogicalValue l);
+
+    class LogicalInterface {
+      public:
+        virtual ~LogicalInterface() = default;
+        virtual LogicalValue _check(Effort) const = 0;
+        virtual OutputStream& _write(OutputStream&) const = 0;
+    };
+
+    typedef SharedPointer<LogicalInterface> LogicalPointer;
+
+    class LogicalHandle {
+        LogicalPointer _ptr;
+       public:
+        LogicalHandle(LogicalPointer const& ptr) : _ptr(ptr) { }
+        operator LogicalPointer const& () const { return _ptr; }
+        explicit LogicalHandle(LogicalValue);
+        LogicalValue check(Effort eff) const { return _ptr->_check(eff); }
+        friend OutputStream& operator<<(OutputStream& os, LogicalHandle l) {
+            return l._ptr->_write(os); }
+    };
+
+    inline LogicalValue check(LogicalHandle l, Effort e) { return l.check(e); }
+    inline Bool definitely(LogicalHandle l, Effort e) { return definitely(check(l,e)); }
+    inline Bool probably(LogicalHandle l, Effort e) { return probably(check(l,e)); }
+    inline Bool decide(LogicalHandle l, Effort e) { return decide(check(l,e)); }
+    inline Bool possibly(LogicalHandle l, Effort e) { return possibly(check(l,e)); }
+    LogicalHandle operator&&(LogicalHandle v1, LogicalHandle v2);
+    LogicalHandle operator||(LogicalHandle v1, LogicalHandle v2);
+    LogicalHandle operator==(LogicalHandle v1, LogicalHandle v2);
+    LogicalHandle operator^(LogicalHandle v1, LogicalHandle v2);
+    LogicalHandle operator!(LogicalHandle v);
+}
+
+using Detail::LogicalValue;
+using Detail::LogicalHandle;
+using Detail::LogicalInterface;
+using Detail::LogicalPointer;
+
+
+
+template<class L, class R> class LogicalBase;
+
+template<class L> class LogicalBase<L,LogicalValue> {
+    typedef LogicalValue R;
+  protected:
+    R _v;
+    explicit LogicalBase(R v) : _v(v) { }
+    explicit LogicalBase(bool b) = delete;
+  public:
+    friend bool definitely(L const& l) { return Detail::definitely(l._v); }
+    friend bool probably(L const& l) { return Detail::probably(l._v); }
+    friend bool decide(L const& l) { return Detail::decide(l._v); }
+    friend bool possibly(L const& l) { return Detail::possibly(l._v); }
+    friend bool is_determinate(L const& l) { return Detail::is_determinate(l._v); }
+    friend bool is_indeterminate(L const& l) { return Detail::is_indeterminate(l._v); }
 };
 
-inline Bool definitely(const LogicalValue& l) { return l==LogicalValue::TRUE; }
-inline Bool possibly(const LogicalValue& l) { return l!=LogicalValue::FALSE; }
-inline Bool probably(const LogicalValue& l) { return l==LogicalValue::TRUE || l==LogicalValue::LIKELY; };
-inline Bool decide(const LogicalValue& l) { return l==LogicalValue::TRUE || l==LogicalValue::LIKELY; };
-
-LogicalValue equality(LogicalValue l1, LogicalValue l2);
-inline LogicalValue negation(LogicalValue l) { return static_cast<LogicalValue>(-static_cast<char>(l)); }
-inline LogicalValue conjunction(LogicalValue l1, LogicalValue l2) { return (l1<l2 ? l1 : l2); }
-inline LogicalValue disjunction(LogicalValue l1, LogicalValue l2) { return (l1>l2 ? l1 : l2); }
-inline LogicalValue exclusive(LogicalValue l1, LogicalValue l2) { return negation(equality(l1,l2)); }
-inline LogicalValue check(LogicalValue l) { return l; }
-
-OutputStream& operator<<(OutputStream& os, LogicalValue b);
-
-class LogicalHandle;
-LogicalValue check(LogicalHandle const& l, Effort e);
-LogicalValue check(LogicalHandle const& l); //!< DEPRECATED
-
-class LogicalInterface {
-    friend LogicalValue check(LogicalHandle const& l, Effort e);
-    friend OutputStream& operator<<(OutputStream& os, LogicalHandle const& l);
+template<class L> class LogicalBase<L,LogicalHandle> {
+    typedef LogicalHandle R;
+  protected:
+    R _v;
+    explicit LogicalBase(R v) : _v(v) { }
+    explicit LogicalBase(bool b) = delete;
   public:
-    virtual ~LogicalInterface() = default;
-  private:
-    virtual LogicalValue _check(Effort) const = 0;
-    virtual OutputStream& _write(OutputStream&) const = 0;
-};
-
-class LogicalHandle {
-    SharedPointer<const LogicalInterface> _ptr;
-  public:
-    explicit LogicalHandle(SharedPointer<const LogicalInterface> p) : _ptr(p) { }
-    explicit LogicalHandle(LogicalValue v);
-    friend LogicalHandle equality(LogicalHandle l1, LogicalHandle l2);
-    friend LogicalHandle conjunction(LogicalHandle l1, LogicalHandle l2);
-    friend LogicalHandle disjunction(LogicalHandle l1, LogicalHandle l2);
-    friend LogicalHandle exclusive(LogicalHandle l1, LogicalHandle l2);
-    friend LogicalHandle negation(LogicalHandle l);
-    friend LogicalValue check(LogicalHandle const& l, Effort e) { return l._ptr->_check(e); }
-    friend LogicalValue check(LogicalHandle const& l) { return check(l, Effort::get_default()); } //!< DEPRECATED
-    friend OutputStream& operator<<(OutputStream& os, LogicalHandle const& l) { return l._ptr->_write(os); }
+    friend bool definitely(L const& l, Effort e) { return definitely(l.check(e)); }
+    friend bool probably(L const& l, Effort e) { return probably(l.check(e)); }
+    friend bool decide(L const& l, Effort e) { return decide(l.check(e)); }
+    friend bool possibly(L const& l, Effort e) { return possibly(l.check(e)); }
+    friend bool definitely(L const& l) { return definitely(l,Effort::get_default()); }
+    friend bool probably(L const& l) { return probably(l,Effort::get_default()); }
+    friend bool decide(L const& l) { return decide(l,Effort::get_default()); }
+    friend bool possibly(L const& l) { return possibly(l,Effort::get_default()); }
 };
 
 
-template<class P> class LogicalFacade {
+template<class L, class R, class NL=L, class XL=L> class Logical : public LogicalBase<L,R> { // FIXME: Use protected inheritence
+    template<class LL, class RR, class NNLL, class XXLL> friend class Logical;
+  protected:
+    explicit Logical(R v) : LogicalBase<L,R>(v) { }
+    explicit Logical(bool b) = delete;
+  public:
+    explicit operator R const&() const { return this->_v; }
+    R const& repr() const { return this->_v; }
+  public:
+    friend NL operator!(L const& l) { return NL(! l._v); }
+    friend L operator&&(L const& l1, L const& l2) { return L(l1._v && l2._v); }
+    friend L operator||(L const& l1, L const& l2) { return L(l1._v || l2._v); }
+
+    friend XL operator^(L const& l1, L const& l2) { return XL(l1._v ^ l2._v); }
+    friend XL operator==(L const& l1, L const& l2) { return XL(l1._v == l2._v); }
+    friend XL operator!=(L const& l1, L const& l2) { return XL(l1._v ^ l2._v); }
+
+    friend OutputStream& operator<<(OutputStream& os, L const& l) { return os << l._v; }
 };
 
-template<> class LogicalFacade<ExactTag> {
-    typedef ExactTag P;
+#ifdef DOXYGEN
+//! \relatesalso ValidatedKleenean \ingroup LogicalTypes
+//! \brief Returns \c true if a finite (non-effective) logical type is definitely true, otherwise \c false.
+//! In particular, always returns \c false for a ValidatedUpperKleenean or ApproximateKleenean.
+template<class L> bool definitely(L const&);
+//! \relatesalso ValidatedKleenean \ingroup LogicalTypes
+//! \brief Returns \c false if a finite (non-effective) logical type is definitely false, otherwise \c true.
+//! In particular, always returns \c false for a ValidatedLowerKleenean or ApproximateKleenean.
+template<class L> bool possibly(L const&);
+//! \relatesalso ApproximateKleenean \ingroup LogicalTypes
+//! \brief Returns an 'educated guess' to the value of a finite (non-effective) logical type.
+//! Returns \c true for logical values of \c TRUE and \c LIKELY, and \c false for \c INDETERMINATE, \c UNLIKELY and \c FALSE.
+template<class L> bool probably(L const& l);
+//! \relatesalso Kleenean \ingroup LogicalTypes
+//! \brief Force a decision of a logical type.
+//! Returns \c true for logical values of \c TRUE, and \c LIKELY for a non-effective type, and \c decide(check(l,e)) for the default effort \c e.
+template<class L> bool decide(L const&);
+#endif
+
+inline bool definitely(bool b) { return b; }
+inline bool probably(bool b) { return b; }
+inline bool decide(bool b) { return b; }
+inline bool possibly(bool b) { return b; }
+
+class Boolean; class Sierpinskian; class Kleenean;
+class LowerKleenean; class UpperKleenean;
+class ValidatedSierpinskian; class ValidatedNegatedSierpinskian;
+class ValidatedKleenean; class ValidatedLowerKleenean; class ValidatedUpperKleenean;
+class ApproximateKleenean;
+
+class Indeterminate {
   public:
-    operator Bool () const;
+    operator Sierpinskian() const;
+    operator Kleenean() const;
+    operator ValidatedSierpinskian() const;
+    operator ValidatedKleenean() const;
+    friend Bool decide(Indeterminate const& l, Effort e);
+    friend Bool decide(Indeterminate const& l);
+};
+
+//! \brief A logical class representing the result of a decidable predicate.
+//! \sa LogicalModule
+class Boolean : public Logical<Boolean,LogicalValue> {
+    typedef Logical<Boolean,LogicalValue> Base;
   public:
-    friend Logical<ExactTag> operator||(Bool b1, Logical<ExactTag> l2);
-    friend Logical<ExactTag> operator||(Logical<ExactTag> l1, Bool b2);
-    friend Logical<ExactTag> operator&&(Bool b1, Logical<ExactTag> l2);
-    friend Logical<ExactTag> operator&&(Logical<ExactTag> l1, Bool b2);
+    explicit Boolean(LogicalValue l) : Base(l) { }
+  public:
+    //! \brief Convert from a built-in boolean value, defaulting to \c true.
+    Boolean(bool b=true) : Boolean(Detail::make_logical_value(b)) { }
+    //! \brief Convert to a built-in boolean value.
+    operator bool() const { return definitely(*this); }
+
+    //! \brief Logical negation.
+    friend Boolean operator!(Boolean const& b);
+    //! \brief Logical conjunction.
+    friend Boolean operator&&(Boolean const& b1, Boolean const& b2);
+    //! \brief Logical disjunction. <code>b1 or b2</code> is equivalent to <code>not ( (not b1) and (not b2) )</code>
+    friend Boolean operator||(Boolean const& b1, Boolean const& b2);
+    //! \brief Logical exclusive or.
+    //! <code>b1 xor b2</code> is equivalent to <code>(b1 or b2) and ((not b1) or (not b2))</code> and to <code>(b1 or b2) and not (b1 and b2)</code>
+    friend Boolean operator^(Boolean const& b1, Boolean const& b2);
+    //! \brief Logical equality.
+    friend Boolean operator==(Boolean const& b1, Boolean const& b2);
+
+    friend Boolean operator&&(Boolean const& l1, Bool const& l2) { return l1 && Boolean(l2); }
+    friend Boolean operator&&(Bool const& l1, Boolean const& l2) { return Boolean(l1) && l2; }
+    friend Boolean operator||(Boolean const& l1, Bool const& l2) { return l1 || Boolean(l2); }
+    friend Boolean operator||(Bool const& l1, Boolean const& l2) { return Boolean(l1) || l2; }
 };
 
 
-template<> class Logical<EffectiveTag>;
-
-//!  \ingroup LogicModule
-//!  \brief A logical variable for the paradigm \a P, which must be %ExactTag, %ValidatedTag, %UpperTag, %LowerTag or %ApproximateTag.
-//!  Used as a base of exact, validated and approximate logical types. Implemented in terms of LogicalValue.
-template<class P> class Logical
-    : public LogicalFacade<P>
-{
-    template<class PP> friend class Logical;
-    LogicalValue _v;
+//! \brief A logical class representing the result of a verifyable predicate
+//! over a continuous (uncountable) data type which has no robustly \c false instances,
+//! such as inequality on a Hausdoff space.
+//! \sa LogicalModule
+class Sierpinskian : public Logical<Sierpinskian,LogicalHandle,NegatedSierpinskian,Kleenean> {
+    typedef Logical<Sierpinskian,LogicalHandle,NegatedSierpinskian,Kleenean> Base;
   public:
-    explicit Logical(LogicalValue v);
-    explicit operator LogicalValue () const { return _v; }
-  public:
-    constexpr Logical() : Logical(LogicalValue::FALSE) { }
-    template<class PP, EnableIf<IsWeaker<P,PP>> =dummy> constexpr Logical(Logical<PP> l) : Logical(check(l._v)) { }
-    //! \brief Convert from a builtin boolean value.
-    constexpr Logical(Bool b) : Logical(b?LogicalValue::TRUE:LogicalValue::FALSE) { }
+    explicit Sierpinskian(LogicalPointer l) : Base(l) { }
+    explicit Sierpinskian(bool b=true) : Sierpinskian(LogicalHandle(Detail::make_logical_value(b))) { }
+    //! \brief Check the value using effort \a e.
+    ValidatedSierpinskian check(Effort e) const;
+    //! \brief Check the value of \a s using effort \a e.
+    friend ValidatedSierpinskian check(Sierpinskian const& s, Effort e);
 
-    //! \brief Convert to a builtin boolean value. Calls the decide() function.
-    // TODO: This should be explicit (except for Boolean)
+    //! \brief Logical negation.
+    friend NegatedSierpinskian operator!(Sierpinskian const& l);
+    //! \brief Logical conjunction.
+    friend Sierpinskian operator&&(Sierpinskian const& l1, Sierpinskian const& l2);
+    //! \brief Logical disjunction.
+    friend Sierpinskian operator||(Sierpinskian const& l1, Sierpinskian const& l2);
 
-    //! \brief Equality of two logical values.
-    friend inline Logical<P> operator==(Logical<P> l1, Logical<P> l2) { return Logical<P>(equality(l1._v,l2._v)); }
-    friend inline Logical<P> operator!=(Logical<P> l1, Logical<P> l2) { return Logical<P>(negation(equality(l1._v,l2._v))); }
-    //! \brief %Logical conjunction [and].
-    friend inline Logical<P> operator&&(Logical<P> l1, Logical<P> l2) { return Logical<P>(conjunction(l1._v,l2._v)); }
-    //! \brief %Logical disjunction [or].
-    friend inline Logical<P> operator||(Logical<P> l1, Logical<P> l2) { return Logical<P>(disjunction(l1._v,l2._v)); }
-    //! \brief %Logical exclusive or.
-    friend inline Logical<P> operator^(Logical<P> l1, Logical<P> l2) { return Logical<P>(negation(equality(l1._v,l2._v))); }
-    //! \brief %Logical negation.
-    friend inline Logical<Negated<P>> operator!(Logical<P> const& l) { return Logical<Negated<P>>(negation(l._v)); }
-    //! \brief Returns \c true only if \a l represents the result of a logical predicate which is definitely true.
-    //! Returns \c false for values other than LogicalValue::TRUE.
-    friend inline Bool definitely(Logical<P> l) { return l._v == LogicalValue::TRUE; }
-    //! \brief Returns \c true only if \a l represents the result of a logical predicate which may be true.
-    //!  Returns \c false  only for the value LogicalValue::FALSE.
-    friend inline Bool possibly(Logical<P> l) { return l._v != LogicalValue::FALSE; }
-    //! \brief Converts the logical value into a true/false boolean context.
-    //! Returns \c true for LogicalValue::TRUE or LogicalValue::LIKELY.
-    friend inline Bool probably(Logical<P> l) { return l._v >= LogicalValue::LIKELY; }
-    //! \brief Converts the logical value into a true/false boolean context.
-    //! Returns \c true for LogicalValue::TRUE or LogicalValue::LIKELY.
-    //! Note that decide(indeterminate) is false.
-    friend inline Bool decide(Logical<P> l) { return l._v >= LogicalValue::LIKELY; }
-    //! \brief Returns \c true if the value is definitely TRUE or FALSE.
-    friend inline Bool is_determinate(Logical<P> l) { return l._v == LogicalValue::TRUE || l._v == LogicalValue::FALSE; }
-    friend inline Bool is_indeterminate(Logical<P> l) { return l._v != LogicalValue::TRUE && l._v != LogicalValue::FALSE; }
-    //! \brief Returns \c true if the values have the same code; does not mean they represent equal results.
-    friend inline Bool same(Logical<P> l1, Logical<P> l2) { return l1._v == l2._v; }
-    //! \brief Write to an output stream.
-    friend inline OutputStream& operator<<(OutputStream& os, Logical<P> l) { return os << l._v; }
+    friend Sierpinskian const& operator||(Sierpinskian const& l1, Boolean const&) { return l1; }
+    friend Sierpinskian const& operator||(Boolean const&, Sierpinskian const& l2) { return l2; }
+
+    friend Kleenean operator&&(Kleenean const&, Kleenean const&);
+    friend Kleenean operator||(Kleenean const&, Kleenean const&);
 };
 
-inline LogicalFacade<ExactTag>::operator Bool () const { return decide(static_cast<Logical<ExactTag>const&>(*this)); }
-
-template<> inline Logical<ExactTag>::Logical(LogicalValue v)
-     : _v(v) { assert(v==LogicalValue::FALSE || v==LogicalValue::TRUE); }
-template<> inline Logical<ValidatedTag>::Logical(LogicalValue v)
-    : _v(v) { }
-template<> inline Logical<UpperTag>::Logical(LogicalValue v)
-    : _v(v==LogicalValue::FALSE?LogicalValue::UNLIKELY:v) { }
-template<> inline Logical<LowerTag>::Logical(LogicalValue v)
-    : _v(v==LogicalValue::TRUE?LogicalValue::LIKELY:v) { }
-template<> inline Logical<ApproximateTag>::Logical(LogicalValue v)
-    : _v(v==LogicalValue::TRUE?LogicalValue::LIKELY:v==LogicalValue::FALSE?LogicalValue::UNLIKELY:v) { }
-
-template<> class Logical<EffectiveTag>
-{
-    LogicalHandle _v;
-    template<class P> friend class Logical;
+//! \brief A logical class representing the result of a falsifyable predicate
+//! over a continuous (uncountable) data type which has no robustly \c true instances,
+//! such as equality on a Hausdoff space.
+//! \sa LogicalModule
+class NegatedSierpinskian : public Logical<NegatedSierpinskian,LogicalHandle,Sierpinskian,Kleenean> {
+    typedef Logical<NegatedSierpinskian,LogicalHandle,Sierpinskian,Kleenean> Base;
   public:
-    explicit Logical<EffectiveTag>() : _v(LogicalValue::INDETERMINATE) { }
-    explicit Logical<EffectiveTag>(SharedPointer<const LogicalInterface> p) : _v(p) { }
-    explicit Logical<EffectiveTag>(LogicalValue v) : _v(LogicalHandle(v)) { }
-    explicit Logical<EffectiveTag>(LogicalHandle h) : _v(h) { }
-    explicit operator LogicalHandle () const { return _v; }
-    template<class B, EnableIf<IsSame<B,Bool>> =dummy> Logical(B b) : Logical(Logical<ExactTag>(b)) { }
-    Logical<EffectiveTag>(Logical<ExactTag> l) : _v(static_cast<LogicalValue>(l)) { };
-    Logical<ValidatedTag> check(Effort e) const { return Logical<ValidatedTag>(Ariadne::check(_v,e)); }
-    friend Logical<ValidatedTag> check(Logical<EffectiveTag> l, Effort e) { return Logical<ValidatedTag>(Ariadne::check(l._v,e)); }
-    friend Logical<EffectiveTag> operator==(Logical<EffectiveTag> l1, Logical<EffectiveTag> l2) {
-        return Logical<EffectiveTag>(equality(l1._v,l2._v)); }
-    friend Logical<EffectiveTag> operator&&(Logical<EffectiveTag> l1, Logical<EffectiveTag> l2) {
-        return Logical<EffectiveTag>(conjunction(l1._v,l2._v)); }
-    friend Logical<EffectiveTag> operator||(Logical<EffectiveTag> l1, Logical<EffectiveTag> l2) {
-        return Logical<EffectiveTag>(disjunction(l1._v,l2._v)); }
-    friend Logical<EffectiveTag> operator^(Logical<EffectiveTag> l1, Logical<EffectiveTag> l2) {
-        return Logical<EffectiveTag>(exclusive(l1._v,l2._v)); }
-    friend Logical<EffectiveTag> operator!(Logical<EffectiveTag> const& l) {
-        return Logical<EffectiveTag>(negation(l._v)); }
-    friend Bool decide(Logical<EffectiveTag> l, Effort e) { return decide(l.check(e)); }
-    friend Bool definitely(Logical<EffectiveTag> l, Effort e) { return definitely(l.check(e)); }
-    friend Bool possibly(Logical<EffectiveTag> l, Effort e) { return possibly(l.check(e)); }
-    friend Bool decide(Logical<EffectiveTag> l) { return decide(l.check(Effort::get_default())); }  //!< DEPRECATED
-    friend Bool definitely(Logical<EffectiveTag> l) { return definitely(l.check(Effort::get_default())); }  //!< DEPRECATED
-    friend Bool possibly(Logical<EffectiveTag> l) { return possibly(l.check(Effort::get_default())); }  //!< DEPRECATED
-    friend inline OutputStream& operator<<(OutputStream& os, Logical<EffectiveTag> l) { return os << l._v; }
+    explicit NegatedSierpinskian(LogicalPointer l) : Base(l) { }
+    explicit NegatedSierpinskian(bool b) : NegatedSierpinskian(LogicalHandle(Detail::make_logical_value(b))) { }
+    ValidatedNegatedSierpinskian check(Effort e) const;
+    friend ValidatedNegatedSierpinskian check(NegatedSierpinskian const& l, Effort e);
+
+    friend Sierpinskian operator!(NegatedSierpinskian const& l);
+    friend NegatedSierpinskian operator&&(NegatedSierpinskian const& l1, NegatedSierpinskian const& l2);
+    friend NegatedSierpinskian operator||(NegatedSierpinskian const& l1, NegatedSierpinskian const& l2);
+
+    friend NegatedSierpinskian const& operator&&(NegatedSierpinskian const& l1, Boolean const&) { return l1; }
+    friend NegatedSierpinskian const& operator&&(Boolean const&, NegatedSierpinskian const& l2) { return l2; }
+    friend Kleenean operator&&(Kleenean const&, Kleenean const&);
+    friend Kleenean operator||(Kleenean const&, Kleenean const&);
 };
 
-template<> class Logical<EffectiveUpperTag>
-{
-    LogicalHandle _v;
-    template<class P> friend class Logical;
+//! \brief A logical class representing the result of a quasidecidable predicate
+//! over a continuous (uncountable) data type.
+//! \details A canonical example is (strict) positivity of a real number,
+//! which is undecidable for zero, since positivity cannot be determined from arbitrarily accurate approximations.
+//! \sa LogicalModule
+class Kleenean : public Logical<Kleenean,LogicalHandle> {
+    typedef Logical<Kleenean,LogicalHandle> Base;
   public:
-    explicit Logical<EffectiveUpperTag>(SharedPointer<const LogicalInterface> p) : _v(p) { }
-    explicit Logical<EffectiveUpperTag>(LogicalHandle h) : _v(h) { }
-    explicit operator LogicalHandle () const { return _v; }
-    Logical<EffectiveUpperTag>(Logical<EffectiveTag> l) : _v(l._v) { }
-    Logical<ValidatedUpperTag> check(Effort e) const { return Logical<ValidatedUpperTag>(Ariadne::check(_v,e)); }
-    friend Logical<EffectiveUpperTag> operator&&(Logical<EffectiveUpperTag> l1, Logical<EffectiveUpperTag> l2) {
-        return Logical<EffectiveUpperTag>(conjunction(l1._v,l2._v)); }
-    friend Logical<EffectiveUpperTag> operator||(Logical<EffectiveUpperTag> l1, Logical<EffectiveUpperTag> l2) {
-        return Logical<EffectiveUpperTag>(disjunction(l1._v,l2._v)); }
-    friend Logical<EffectiveLowerTag> operator!(Logical<EffectiveUpperTag> const& l);
-    friend Logical<EffectiveUpperTag> operator!(Logical<EffectiveLowerTag> const& l);
-    friend Logical<ValidatedUpperTag> check(Logical<EffectiveUpperTag> l, Effort e) { return Logical<ValidatedUpperTag>(Ariadne::check(l._v,e)); }
-    friend Bool decide(Logical<EffectiveUpperTag> l, Effort e) { return decide(l.check(e)); }
-    friend Bool decide(Logical<EffectiveUpperTag> l) { return decide(l.check(Effort::get_default())); } //!< DEPRECATED
-    friend inline OutputStream& operator<<(OutputStream& os, Logical<EffectiveUpperTag> l) { return os << l._v; }
+    explicit Kleenean(LogicalPointer const& l) : Base(l) { }
+    explicit Kleenean(LogicalValue l) : Base(LogicalHandle(l)) { } // FIXME: Remove
+  public:
+    //! \brief Convert from a built-in boolean value, defaulting to \c true.
+    Kleenean(bool b=true) : Kleenean(Boolean(b)) { }
+    //! \brief Convert from a %Boolean constant value. May be checked with effort 0.
+    Kleenean(Boolean b) : Kleenean(b.repr()) { }
+    //! \brief Convert from a %Sierpinskian predicate.
+    Kleenean(Sierpinskian s) : Kleenean(s.repr()) { }
+    //! \brief Convert from a negated %Sierpinskian predicate.
+    Kleenean(NegatedSierpinskian ns) : Kleenean(ns.repr()) { }
+    //! \brief Check the value using effort \a e.
+    ValidatedKleenean check(Effort e) const;
+    //! \brief Check the value of \a k using effort \a e.
+    friend ValidatedKleenean check(Kleenean const& k, Effort e);
+
+    //! \brief Logical negation.
+    friend Kleenean operator!(Kleenean const& k);
+    //! \brief Logical conjunction.
+    friend Kleenean operator&&(Kleenean const& k1, Kleenean const& k2);
+    //! \brief Logical disjunction.
+    friend Kleenean operator||(Kleenean const& k1, Kleenean const& k2);
+    //! \brief Logical exclusive or.
+    friend Kleenean operator^(Kleenean const& k1, Kleenean const& k2);
 };
 
-template<> class Logical<EffectiveLowerTag>
-{
-    LogicalHandle _v;
-    template<class P> friend class Logical;
+//! \brief A logical class representing the result of a verifyable predicate
+//! over a continuous (uncountable) data type.
+//! \details A canonical example is strict positivity of a real number given only lower bounds to its value,
+//! since sufficient accurate lower bounds for a strictly positive number are themselves strictly positive,
+//! but negativity cannot be deduced given only lower bounds to a negative number.
+//! \sa LogicalModule
+class LowerKleenean : public Logical<LowerKleenean,LogicalHandle,UpperKleenean> {
+    typedef Logical<LowerKleenean,LogicalHandle,UpperKleenean> Base;
   public:
-    Logical<EffectiveLowerTag>(SharedPointer<const LogicalInterface> p) : _v(p) { }
-    explicit Logical<EffectiveLowerTag>(LogicalHandle h) : _v(h) { }
-    explicit operator LogicalHandle () const { return _v; }
-    Logical<EffectiveLowerTag>(Logical<EffectiveTag> l) : _v(l._v) { }
-    Logical<ValidatedLowerTag> check(Effort e) const { return Logical<ValidatedLowerTag>(Ariadne::check(_v,e)); }
-    friend Logical<ValidatedLowerTag> check(Logical<EffectiveLowerTag> l, Effort e) { return Logical<ValidatedLowerTag>(Ariadne::check(l._v,e)); }
-    friend Logical<EffectiveLowerTag> operator&&(Logical<EffectiveLowerTag> l1, Logical<EffectiveLowerTag> l2) {
-        return Logical<EffectiveLowerTag>(conjunction(l1._v,l2._v)); }
-    friend Logical<EffectiveLowerTag> operator||(Logical<EffectiveLowerTag> l1, Logical<EffectiveLowerTag> l2) {
-        return Logical<EffectiveLowerTag>(disjunction(l1._v,l2._v)); }
-    friend Logical<EffectiveUpperTag> operator!(Logical<EffectiveLowerTag> const& l) {
-        return Logical<EffectiveUpperTag>(negation(l._v)); }
-    friend Logical<EffectiveLowerTag> operator!(Logical<EffectiveUpperTag> const& l) {
-        return Logical<EffectiveLowerTag>(negation(l._v)); }
-    friend Bool decide(Logical<EffectiveLowerTag> l, Effort e) { return decide(l.check(e)); }
-    friend Bool decide(Logical<EffectiveLowerTag> l) { return decide(l.check(Effort::get_default())); } //!< DEPRECATED
-    friend inline OutputStream& operator<<(OutputStream& os, Logical<EffectiveLowerTag> l) { return os << l._v; }
+    explicit LowerKleenean(LogicalPointer const& l) : Base(l) { }
+    LowerKleenean(bool b) : LowerKleenean(Boolean(b)) { }
+    LowerKleenean(Boolean b) : LowerKleenean(Kleenean(b)) { }
+    LowerKleenean(Sierpinskian s) : LowerKleenean(Kleenean(s)) { }
+    //! \brief Convert from a %Kleenean predicate.
+    LowerKleenean(Kleenean k) : LowerKleenean(k.repr()) { }
+    //! \brief Check the value using effort \a e.
+    ValidatedLowerKleenean check(Effort e) const;
+    //! \brief Check the value of \a lk using effort \a e.
+    friend ValidatedLowerKleenean check(LowerKleenean const& lk, Effort e);
+
+    //! \brief Logical negation.
+    friend UpperKleenean operator!(LowerKleenean const& l);
+    //! \brief Logical conjunction.
+    friend LowerKleenean operator&&(LowerKleenean const& l1, LowerKleenean const& l2);
+    //! \brief Logical disjunction.
+    friend LowerKleenean operator||(LowerKleenean const& l1, LowerKleenean const& l2);
 };
 
-typedef Logical<EffectiveTag> Quasidecidable;
-typedef Logical<EffectiveUpperTag> Verifyable;
-typedef Logical<EffectiveLowerTag> Falsifyable;
+//! \brief A logical class representing the result of a falsifyable predicate
+//! over a continuous (uncountable) data type.
+//! \sa LogicalModule
+class UpperKleenean : public Logical<UpperKleenean,LogicalHandle,LowerKleenean> {
+    typedef Logical<UpperKleenean,LogicalHandle,LowerKleenean> Base;
+  public:
+    explicit UpperKleenean(LogicalPointer const& l) : Base(l) { }
+    UpperKleenean(bool b) : UpperKleenean(Kleenean(b)) { }
+    UpperKleenean(Boolean b) : UpperKleenean(Kleenean(b)) { }
+    UpperKleenean(NegatedSierpinskian ns) : UpperKleenean(Kleenean(ns)) { }
+    //! \brief Convert from a %Kleenean predicate.
+    UpperKleenean(Kleenean k) : UpperKleenean(k.repr()) { }
+    //! \brief Check the value using effort \a e.
+    ValidatedUpperKleenean check(Effort e) const;
+    //! \brief Check the value of \a uk using effort \a e.
+    friend ValidatedUpperKleenean check(UpperKleenean const& uk, Effort e);
 
-inline Logical<EffectiveLowerTag> operator&&(Logical<EffectiveLowerTag> l1, Logical<ExactTag> l2) {
-    if(decide(l2)) { return l1; } else { return Logical<EffectiveTag>(false); } }
-inline Logical<EffectiveUpperTag> operator||(Logical<EffectiveUpperTag> l1, Logical<ExactTag> l2) {
-    if(decide(l2)) { return Logical<EffectiveTag>(true); } else { return l1; } }
+    //! \brief Logical negation.
+    friend LowerKleenean operator!(UpperKleenean const& l);
+    //! \brief Logical conjunction.
+    friend UpperKleenean operator&&(UpperKleenean const& l1, UpperKleenean const& l2);
+    //! \brief Logical disjunction.
+    friend UpperKleenean operator||(UpperKleenean const& l1, UpperKleenean const& l2);
+};
 
-//! \ingroup LogicModule
-//! \brief The logical constant representing an unknown value.
-extern const Logical<EffectiveTag> indeterminate;
+//! \brief A logical class representing the result of a undecidable predicate
+//! over a continuous (uncountable) data type.
+//! \details A canonical example is (strict) positivity of a real number given only a convergent sequence,
+//! since without error bounds we can never know whether a given approximation is sufficiently close to
+//! deduce any properties of the number.
+//! \sa LogicalModule
+class NaiveKleenean : public Logical<NaiveKleenean,LogicalHandle> {
+    typedef Logical<NaiveKleenean,LogicalHandle> Base;
+  public:
+    explicit NaiveKleenean(LogicalPointer const& l) : Base(l) { }
+    NaiveKleenean(bool b) : NaiveKleenean(Kleenean(b)) { }
+    NaiveKleenean(Boolean b) : NaiveKleenean(Kleenean(b)) { }
+    NaiveKleenean(Sierpinskian s) : NaiveKleenean(Kleenean(s)) { }
+    NaiveKleenean(NegatedSierpinskian ns) : NaiveKleenean(Kleenean(ns)) { }
+    //! \brief Convert from a %Kleenean predicate.
+    NaiveKleenean(Kleenean k) : NaiveKleenean(k.repr()) { }
+    //! \brief Convert from a %LowerKleenean predicate.
+    NaiveKleenean(LowerKleenean lk) : NaiveKleenean(lk.repr()) { }
+    //! \brief Convert from an %UpperKleenean predicate.
+    NaiveKleenean(UpperKleenean uk) : NaiveKleenean(uk.repr()) { }
+    //! \brief Check the value using effort \a e.
+    ApproximateKleenean check(Effort e) const;
+    //! \brief Check the value of \a ak using effort \a e.
+    friend ApproximateKleenean check(NaiveKleenean const& ak, Effort e);
 
-//! \ingroup LogicModule
-//! \brief The logical constant representing an value which is deemed likely to be true, but for which truth has not been confirmed.
-static const Logical<ApproximateTag> likely = Logical<ApproximateTag>(LogicalValue::LIKELY);
+    //! \brief Logical negation.
+    friend NaiveKleenean operator!(NaiveKleenean const& l);
+    //! \brief Logical conjunction.
+    friend NaiveKleenean operator&&(NaiveKleenean const& l1, NaiveKleenean const& l2);
+    //! \brief Logical disjunction.
+    friend NaiveKleenean operator||(NaiveKleenean const& l1, NaiveKleenean const& l2);
+};
 
-//! \ingroup LogicModule
-//! \brief The logical constant representing an value which is deemed unlikely to be true, but for which truth has not been ruled out.
-static const Logical<ApproximateTag> unlikely = Logical<ApproximateTag>(LogicalValue::UNLIKELY);
 
-inline Bool definitely(Bool b) { return b; }
-inline Bool possibly(Bool b) { return b; }
-inline Bool decide(Bool b) { return b; }
 
-//! A three-valued logical type, representing the result of a predicate which may be undecidable due to non-robustness.
-typedef Logical<EffectiveTag> Kleenean;
+//! \brief A logical class representing the result of a verifyable predicate.
+//! \sa LogicalModule, Sierpinskian
+class ValidatedSierpinskian : public Logical<ValidatedSierpinskian,LogicalValue,ValidatedNegatedSierpinskian> {
+    typedef Logical<ValidatedSierpinskian,LogicalValue,ValidatedNegatedSierpinskian> Base;
+  public:
+    explicit ValidatedSierpinskian(LogicalValue lv) : Base(lv || LogicalValue::UNLIKELY) { }
+    ValidatedSierpinskian(bool b) : ValidatedSierpinskian(b?LogicalValue::TRUE:LogicalValue::UNLIKELY) { }
+    ValidatedSierpinskian(Sierpinskian s, Effort e) : ValidatedSierpinskian(s.check(e)) { }
+    friend ValidatedSierpinskian check(Sierpinskian const& s, Effort e) { return s.check(e); }
+};
+
+class ValidatedNegatedSierpinskian : public Logical<ValidatedNegatedSierpinskian,LogicalValue,ValidatedSierpinskian> {
+    typedef Logical<ValidatedNegatedSierpinskian,LogicalValue,ValidatedSierpinskian> Base;
+  public:
+    explicit ValidatedNegatedSierpinskian(LogicalValue lv) : Base(lv && LogicalValue::LIKELY) { }
+    ValidatedNegatedSierpinskian(bool b) : ValidatedNegatedSierpinskian(b?LogicalValue::LIKELY:LogicalValue::FALSE) { }
+    ValidatedNegatedSierpinskian(NegatedSierpinskian ns, Effort e) : ValidatedNegatedSierpinskian(ns.check(e)) { }
+    friend ValidatedNegatedSierpinskian check(NegatedSierpinskian const& ns, Effort e) { return ns.check(e); }
+};
+
+//! \brief A logical class representing a value of a quasidecidable predicate,
+//! either a Kleenean value \ref Kleenean::check "check"ed using some Effort, or applied directly to a Validated object.
+//! \sa LogicalModule, Kleenean
+class ValidatedKleenean : public Logical<ValidatedKleenean,LogicalValue> {
+    typedef Logical<ValidatedKleenean,LogicalValue> Base;
+  public:
+    explicit ValidatedKleenean() : ValidatedKleenean(true) { } //FIXME: Remove
+    explicit ValidatedKleenean(LogicalValue lv) : Base(lv) { }
+    ValidatedKleenean(bool b) : ValidatedKleenean(Boolean(b)) { }
+    ValidatedKleenean(Boolean b) : ValidatedKleenean(static_cast<LogicalValue>(b)) { }
+//    ValidatedKleenean(ValidatedSierpinskian s) : ValidatedKleenean(static_cast<LogicalValue>(s)) { }
+//    ValidatedKleenean(ValidatedNegatedSierpinskian ns) : ValidatedKleenean(static_cast<LogicalValue>(ns)) { }
+    ValidatedKleenean(Kleenean k, Effort e) : ValidatedKleenean(k.check(e)) { }
+    friend ValidatedKleenean check(Kleenean const& k, Effort e) { return k.check(e); }
+};
+
+//! \brief A logical class representing the result of a verifyable predicate.
+//! \sa LogicalModule, LowerKleenean
+class ValidatedLowerKleenean : public Logical<ValidatedLowerKleenean,LogicalValue,ValidatedUpperKleenean> {
+    typedef Logical<ValidatedLowerKleenean,LogicalValue,ValidatedUpperKleenean> Base;
+  public:
+    explicit ValidatedLowerKleenean(LogicalValue lv) : Base(lv || LogicalValue::UNLIKELY) { }
+    ValidatedLowerKleenean(bool b) : ValidatedLowerKleenean(Boolean(b)) { }
+    ValidatedLowerKleenean(Boolean b) : ValidatedLowerKleenean(static_cast<LogicalValue>(b)) { }
+    ValidatedLowerKleenean(ValidatedSierpinskian s) : ValidatedLowerKleenean(static_cast<LogicalValue>(s)) { }
+    ValidatedLowerKleenean(ValidatedKleenean k) : ValidatedLowerKleenean(static_cast<LogicalValue>(k)) { }
+    ValidatedLowerKleenean(LowerKleenean lk, Effort e) : ValidatedLowerKleenean(lk.check(e)) { }
+    friend ValidatedLowerKleenean check(LowerKleenean const& lk, Effort e) { return lk.check(e); }
+};
+
+//! \brief A logical class representing the result of a falsifyable predicate.
+//! \sa LogicalModule, UpperKleenean
+class ValidatedUpperKleenean : public Logical<ValidatedUpperKleenean,LogicalValue,ValidatedLowerKleenean> {
+    typedef Logical<ValidatedUpperKleenean,LogicalValue,ValidatedLowerKleenean> Base;
+  public:
+    explicit ValidatedUpperKleenean(LogicalValue lv) : Base(lv && LogicalValue::LIKELY) { }
+    ValidatedUpperKleenean(bool b) : ValidatedUpperKleenean(Boolean(b)) { }
+    ValidatedUpperKleenean(Boolean b) : ValidatedUpperKleenean(static_cast<LogicalValue>(b)) { }
+    ValidatedUpperKleenean(ValidatedKleenean k) : ValidatedUpperKleenean(static_cast<LogicalValue>(k)) { }
+    ValidatedUpperKleenean(ValidatedNegatedSierpinskian ns) : ValidatedUpperKleenean(static_cast<LogicalValue>(ns)) { }
+    ValidatedUpperKleenean(UpperKleenean uk, Effort e) : ValidatedUpperKleenean(uk.check(e)) { }
+    friend ValidatedUpperKleenean check(UpperKleenean const& uk, Effort e) { return uk.check(e); }
+};
+
+//! \brief A logical class representing a value of an undecidable predicate,
+//! either a NaiveKleenean value \ref NaiveKleenean::check "check"ed using some Effort, or applied directly to an Approximate object.
+//! \details Note that definitely() and possibly() always return \c false and \c true, respectively.
+//! \sa LogicalModule, NaiveKleenean
+class ApproximateKleenean : public Logical<ApproximateKleenean,LogicalValue> {
+    typedef Logical<ApproximateKleenean,LogicalValue> Base;
+  public:
+    explicit ApproximateKleenean(LogicalValue lv) : Base((lv && LogicalValue::LIKELY) || LogicalValue::UNLIKELY) { }
+    ApproximateKleenean(bool b) : ApproximateKleenean(Boolean(b)) { }
+    ApproximateKleenean(Boolean b) : ApproximateKleenean(static_cast<LogicalValue>(b)) { }
+    ApproximateKleenean(ValidatedKleenean k) : ApproximateKleenean(static_cast<LogicalValue>(k)) { }
+    ApproximateKleenean(ValidatedLowerKleenean lk) : ApproximateKleenean(static_cast<LogicalValue>(lk)) { }
+    ApproximateKleenean(ValidatedUpperKleenean uk) : ApproximateKleenean(static_cast<LogicalValue>(uk)) { }
+    ApproximateKleenean(Kleenean k, Effort e) : ApproximateKleenean(k.check(e)) { }
+};
+
+inline Indeterminate::operator Sierpinskian() const {
+    return Sierpinskian(LogicalHandle(LogicalValue::INDETERMINATE)); }
+inline Indeterminate::operator Kleenean() const {
+    return Kleenean(LogicalHandle(LogicalValue::INDETERMINATE)); }
+inline Indeterminate::operator ValidatedSierpinskian() const {
+    return ValidatedSierpinskian(LogicalValue::INDETERMINATE); }
+inline Indeterminate::operator ValidatedKleenean() const {
+    return ValidatedKleenean(LogicalValue::INDETERMINATE); }
+inline Bool decide(Indeterminate const& l, Effort e) {
+    return decide(ValidatedKleenean(l)); }
+inline Bool decide(Indeterminate const& l) {
+    return decide(ValidatedKleenean(l)); }
+
+inline ValidatedSierpinskian Sierpinskian::check(Effort eff) const {
+    return ValidatedSierpinskian(this->repr().check(eff)); }
+inline ValidatedNegatedSierpinskian NegatedSierpinskian::check(Effort eff) const {
+    return ValidatedNegatedSierpinskian(this->repr().check(eff)); }
+inline ValidatedKleenean Kleenean::check(Effort e) const {
+    return ValidatedKleenean(this->repr().check(e)); }
+inline ValidatedLowerKleenean LowerKleenean::check(Effort e) const {
+    return ValidatedLowerKleenean(this->repr().check(e)); }
+inline ValidatedUpperKleenean UpperKleenean::check(Effort e) const {
+    return ValidatedUpperKleenean(this->repr().check(e)); }
+inline ApproximateKleenean NaiveKleenean::check(Effort e) const {
+    return ApproximateKleenean(this->repr().check(e)); }
 
 }
 

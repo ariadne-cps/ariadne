@@ -80,6 +80,74 @@ namespace Ariadne {
  *  \brief Core classes and functions used for both system specification and internal computation.
  */
 
+
+
+
+/*!\defgroup LogicalModule Logical Module
+ * \ingroup CoreModules
+ * \brief Logical types.
+ * \details In this module, we define %Ariadne's base logical types.
+ * The main classes are \ref Ariadne::Boolean "Boolean",
+ * \ref Ariadne::Sierpinskian "Sierpinskian", and \ref Ariadne::Kleenean "Kleenean".
+ *
+ * The Boolean class is a standard two-valued logical type with values \c true and \c false,
+ * and represents the result of a decidable predicate.
+ * The Sierpinskian class has two values, \c true and \c indeterminate,
+ * and represents the result of a verifyable predicate.
+ * The Kleenean class has three values, \c true, \c indeterminate and \c false,
+ * and represents the result of a \em quasidecidable predicate.
+ *
+ * The Sierpinskian and Kleenean classes are \ref Ariadne::Effective "Effective" types.
+ * They are used to represent the results of predicates on exactly-specified objects from continuous (i.e. uncountable) spaces.
+ * From the viewpoint of computable analysis, they can be considered as sequences of their values,
+ * which stabilise as soon as a decision  (\c true or \c false) is reached.
+ * In %Ariadne, this is realised by providing a method check(\ref Ariadne::Effort "Effort"),
+ * which returns a \ref Ariadne::Validated "Validated" version of the class containing one of its concrete values.
+ * For example, if \c k is a Kleeanen object, then \c k.check(3) is a \ref Ariadne::ValidatedKleenean "ValidatedKleenean" object
+ * which may have value \c true, \c indeterminate or \c false. Further, if \c k.check(3) is \c true or \c false, then k.check(4) has the same value.
+ * Validated logical types are also used for the result of logical predicates on approximations to objects on continuous spaces with given error bounds.
+ *
+ * The \ref Ariadne::LowerKleenean "LowerKleenean" class also has the two values \c true and \c indeterminate.
+ * The difference between LowerKleenean and Sierpinskian is that Sierpinskian is used where falsification is impossible,
+ * which occurs when there are no robustly false values, such in the case of the inequality predicate,
+ * whereas LowerKleenean is used when information which could be used to falsify the predicate has been lost,
+ * such as testing positivity of a \ref Ariadne::LowerReal "LowerReal" number, for which only lower bounds are provided.
+ * Conversions are possible Sierpinskian to Kleenean to LowerKleenean.
+ * Similarly, a \ref Ariadne::UpperKleenean "UpperKleenean" class is provided with values \c false and \c indeterminate.
+ *
+ * The \ref Ariadne::NaiveKleenean "NaiveKleenean" class has values \c likely, \c indeterminate and \c unlikely,
+ * and is used where only approximate information is available, so a rigorous assessment of truth or falseness cannot be made.
+ * The corresponding finitary class is \ref Ariadne::ApproximateKleenean "ApproximateKleenean", which may represent a
+ * the result of a predicate on a floating-point approximation to a real number without error bounds.
+ * Note that ApproximateKleenean may be considered a \"\c ValidatedNaiveKleenean\" or as an \"\c Approximate\"\c Kleenean.
+ * Although NaiveKleenean and ApproximateKleenean do not provide mathematically rigorous information, they may be useful in
+ * scratch calculuations used to hot-start or precondition a rigorous calculuation.
+ *
+ * All logical classes support the standard operations of negation, conjunction (logical "and"), disjunction (logical "or") and exclusive-or.
+ *
+ * In order to obtain a built-in \c bool value from a \c Validated logical object,
+ * the tests \ref Ariadne::definitely "definitely", \ref Ariadne::possibly "possibly", and \ref Ariadne::probably "probably" can be used.
+ * Further, \ref Ariadne::decide "decide" can be used to convert any logical type to a boolean value,
+ * returning \c probably for concrete (validated) logical types,
+ * and checking abstract (effective) logical type with the default effort.
+ *
+ * An example of the use of logical predicates is given below:
+ * \code
+ * Real x = ...;
+ * Kleeanean k = (x>0);
+ *
+ * Effort eff(5);
+ * ValidatedKleenean vk = k.check(eff);
+ *
+ * MultiplePrecision pr(128);
+ * ValidatedFloatMP vx = x.get(pr);
+ * ValidatedKleenean vpx = (vx>0);
+ *
+ * // Check that if vk is false, then vpx cannot be true.
+ * assert(possibly(vk) or not definitely(vpx));
+ * \endcode
+ */
+
 /*!\defgroup NumericModule Numeric Module
  * \ingroup CoreModules
  * \brief Numerical types, including \ref Integer, \ref Dyadic, \ref Rational and \ref Real types,

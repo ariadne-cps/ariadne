@@ -214,14 +214,14 @@ template<class P> class Number
     friend Number<P> max(Number<P> const& y1, Number<P> const& y2) { return Number<P>(y1.ref()._apply(Min(),&y2.ref())); }
     friend Number<P> min(Number<P> const& y1, Number<P> const& y2) { return Number<P>(y1.ref()._apply(Max(),&y2.ref())); }
 
-    friend Logical<Equality<P>> operator==(Number<P> const& y1, Number<NP> const& y2) {
-        return Logical<Equality<P>>(y1.ref()._equals(y2.ref())); }
-    friend Logical<LessThan<P>> operator< (Number<P> const& y1, Number<Negated<P>> const& y2) {
-        return Logical<LessThan<P>>(y1.ref()._less(y2.ref())); }
-    friend Logical<LessThan<Negated<P>>> operator> (Number<P> const& y1, Number<Negated<P>> const& y2) { return (y2<y1); }
-    friend Logical<Negated<Equality<P>>> operator!=(Number<P> const& y1, Number<Negated<P>> const& y2) { return !(y1==y2); }
-    friend Logical<LessThan<P>> operator<=(Number<P> const& y1, Number<Negated<P>> const& y2) { return !(y1>y2); }
-    friend Logical<LessThan<Negated<P>>> operator>=(Number<P> const& y1, Number<Negated<P>> const& y2) { return !(y1<y2); }
+    friend LogicalType<Equality<P>> operator==(Number<P> const& y1, Number<NP> const& y2) {
+        return LogicalType<Equality<P>>(y1.ref()._equals(y2.ref())); }
+    friend LogicalType<LessThan<P>> operator< (Number<P> const& y1, Number<Negated<P>> const& y2) {
+        return LogicalType<LessThan<P>>(y1.ref()._less(y2.ref())); }
+    friend LogicalType<LessThan<Negated<P>>> operator> (Number<P> const& y1, Number<Negated<P>> const& y2) { return (y2<y1); }
+    friend LogicalType<Negated<Equality<P>>> operator!=(Number<P> const& y1, Number<Negated<P>> const& y2) { return !(y1==y2); }
+    friend LogicalType<LessThan<P>> operator<=(Number<P> const& y1, Number<Negated<P>> const& y2) { return !(y1>y2); }
+    friend LogicalType<LessThan<Negated<P>>> operator>=(Number<P> const& y1, Number<Negated<P>> const& y2) { return !(y1<y2); }
 
     friend OutputStream& operator<<(OutputStream& os, Number<P> const& y) { return os << y.ref(); }
 };

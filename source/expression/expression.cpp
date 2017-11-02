@@ -671,13 +671,14 @@ template Expression<Kleenean> simplify(const Expression<Kleenean>& e);
 
 
 Expression<Real> indicator(Expression<Kleenean> e, Sign sign) {
-    Kleenean value(indeterminate);
     switch(e.op()) {
-        case OperatorCode::CNST:
-            value=( sign==POSITIVE ? e.val() : Kleenean(!e.val()) );
-            if(definitely(value)) { return Expression<Real>::constant(+1); }
-            else if(not possibly(value)) {  return Expression<Real>::constant(-1); }
+        case OperatorCode::CNST: {
+            Kleenean value=( sign==POSITIVE ? e.val() : !e.val() );
+            ValidatedKleenean checked_value = value.check(Effort::get_default());
+            if(definitely(checked_value)) { return Expression<Real>::constant(+1); }
+            else if(not possibly(checked_value)) {  return Expression<Real>::constant(-1); }
             else { return Expression<Real>::constant(0); }
+        }
         case OperatorCode::VAR:
             return Expression<Real>(Variable<Real>(e.var()));
         case OperatorCode::GEQ: case OperatorCode::GT:

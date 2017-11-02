@@ -39,7 +39,7 @@ template<class F> struct NumericTraits<UpperBound<F>> {
     typedef ValidatedUpperNumber GenericType;
     typedef LowerBound<F> OppositeType;
     typedef PositiveUpperBound<F> PositiveType;
-    typedef ValidatedUpperKleenean LessType;
+    typedef ValidatedLowerKleenean LessType;
     typedef ValidatedNegatedSierpinskian EqualsType;
 };
 

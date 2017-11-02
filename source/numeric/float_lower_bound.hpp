@@ -1,24 +1,24 @@
 /***************************************************************************
  *            float_lower_bound.hpp
  *
- *  Copyright 2008-17  LOWER_BOUNDieter Collins
+ *  Copyright 2008-17  Pieter Collins
  *
  ****************************************************************************/
 
 /*
- *  LOWER_BOUNDhis program is free software; you can redistribute it and/or modify
- *  it under the terms of the GLOWER_BOUNDU General Public License as published by
- *  the Free LOWER_BOUNDoftware Foundation; either version 2 of the License, or
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
  *
- *  LOWER_BOUNDhis program is distributed in the hope that it will be useful,
- *  but WLOWER_BOUNDTHOUT ANY WARRANTY; without even the implied warranty of
- *  LOWER_BOUNDERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GLOWER_BOUNDU Library General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
  *
- *  You should have received a copy of the GLOWER_BOUNDU General Public License
- *  along with this program; if not, write to the Free LOWER_BOUNDoftware
- *  Foundation, LOWER_BOUNDnc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
 /*! \file float_lower_bound.hpp
@@ -39,7 +39,7 @@ template<class F> struct NumericTraits<LowerBound<F>> {
     typedef ValidatedLowerNumber GenericType;
     typedef UpperBound<F> OppositeType;
     typedef PositiveLowerBound<F> PositiveType;
-    typedef ValidatedLowerKleenean LessType;
+    typedef ValidatedUpperKleenean LessType;
     typedef ValidatedNegatedSierpinskian EqualsType;
 };
 

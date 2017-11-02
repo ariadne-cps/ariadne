@@ -111,7 +111,7 @@ HybridSimulator::orbit(const HybridAutomatonInterface& system, const HybridAppro
     EffectiveVectorFunction dynamic=system.dynamic_function(location);
     Map<DiscreteEvent,EffectiveScalarFunction> guards=guard_functions(system,location);
 
-    while(possibly(t<tmax)) {
+    while(possibly(check(t<tmax,Effort::get_default()))) {
 
         Bool enabled=false;
         DiscreteEvent event;

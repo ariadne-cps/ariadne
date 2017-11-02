@@ -768,12 +768,12 @@ Enclosure::satisfies(ValidatedConstraint c) const
     else { return ValidatedKleenean(indeterminate); }
 }
 
-ValidatedSierpinskian Enclosure::is_bounded() const
+ValidatedLowerKleenean Enclosure::is_bounded() const
 {
     return this->domain().is_bounded() || ValidatedKleenean(indeterminate);
 }
 
-ValidatedSierpinskian Enclosure::is_empty() const
+ValidatedLowerKleenean Enclosure::is_empty() const
 {
     if(definitely(this->_reduced_domain.is_empty())) { return true; }
     if(this->_constraints.empty()) { return this->domain().is_empty(); }
@@ -790,20 +790,19 @@ ValidatedSierpinskian Enclosure::is_empty() const
     return ValidatedKleenean(indeterminate);
 }
 
-ValidatedSierpinskian Enclosure::inside(const ExactBoxType& bx) const
+ValidatedLowerKleenean Enclosure::inside(const ExactBoxType& bx) const
 {
     return Ariadne::subset(Ariadne::apply(this->_state_function,this->_reduced_domain),bx);
 }
 
-ValidatedSierpinskian Enclosure::subset(const ExactBoxType& bx) const
+ValidatedLowerKleenean Enclosure::subset(const ExactBoxType& bx) const
 {
     this->reduce();
 
-    return ValidatedSierpinskian(Ariadne::subset(Ariadne::apply(this->_state_function,this->_reduced_domain),bx)) || ValidatedKleenean(indeterminate);
-
+    return ValidatedLowerKleenean(Ariadne::subset(Ariadne::apply(this->_state_function,this->_reduced_domain),bx)) || ValidatedKleenean(indeterminate);
 }
 
-ValidatedSierpinskian Enclosure::separated(const ExactBoxType& bx) const
+ValidatedLowerKleenean Enclosure::separated(const ExactBoxType& bx) const
 {
     ARIADNE_ASSERT_MSG(this->state_dimension()==bx.dimension(),"Enclosure::subset(ExactBoxType): self="<<*this<<", box="<<bx);
     List<ValidatedConstraint> constraints = this->constraints();

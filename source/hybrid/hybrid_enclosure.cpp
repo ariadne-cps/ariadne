@@ -500,17 +500,17 @@ DimensionType HybridEnclosure::state_dimension() const {
     return this->_set.state_dimension();
 }
 
-ValidatedSierpinskian HybridEnclosure::is_empty() const {
+ValidatedLowerKleenean HybridEnclosure::is_empty() const {
     return this->_set.is_empty();
 }
 
-ValidatedSierpinskian HybridEnclosure::inside(const HybridExactBox& hbx) const {
-    if(this->_location==hbx.location()) { return this->continuous_set().inside(hbx.euclidean_set()); }
+ValidatedLowerKleenean HybridEnclosure::inside(const HybridExactBox& hbx) const {
+    if(this->_location==hbx.location()) { return this->continuous_set().inside(hbx.euclidean_set(this->state_space())); }
     else { return this->continuous_set().is_empty(); }
 }
 
-ValidatedSierpinskian HybridEnclosure::separated(const HybridExactBox& hbx) const {
-    if(this->_location==hbx.location()) { return this->continuous_set().separated(hbx.euclidean_set()); }
+ValidatedLowerKleenean HybridEnclosure::separated(const HybridExactBox& hbx) const {
+    if(this->_location==hbx.location()) { return this->continuous_set().separated(hbx.euclidean_set(this->state_space())); }
     else { return true; }
 }
 
@@ -640,7 +640,7 @@ OutputStream& HybridEnclosure::repr(OutputStream& os) const
 
 HybridExactBox under_approximation(const HybridRealBox& hbx);
 
-ValidatedSierpinskian inside(const HybridEnclosure& he, const HybridRealBox& hbx) {
+ValidatedLowerKleenean inside(const HybridEnclosure& he, const HybridRealBox& hbx) {
     return he.inside(under_approximation(hbx));
 }
 

@@ -125,7 +125,7 @@ class SubPavingInterface;
 //! NOTE: Since operations modifying a sub-paving modify the original paving, we need to be careful with constantness, in particular when making copies.
 //! This may be an issue in the branch method or when implementing Handle classes.
 class SubPavingInterface
-    : public virtual LocatedSetInterface
+    : public virtual ValidatedLocatedSetInterface
     , public virtual DrawableInterface
 {
     friend class SubPavingHandle;
@@ -168,9 +168,9 @@ class SubPavingInterface
     virtual Void set_root_cell(Bool onoff) = 0;
 
     virtual UpperBoxType bounding_box() const = 0; // Inherited from CompactSetInterface
-    virtual ValidatedSierpinskian inside(const ExactBoxType& bx) const = 0; // Inherited from CompactSetInterface
-    virtual ValidatedSierpinskian separated(const ExactBoxType& bx) const = 0; // Inherited from ClosedSetInterface
-    virtual ValidatedSierpinskian overlaps(const ExactBoxType& bx) const = 0; // Inherited from OvertSetInterface
+    virtual ValidatedLowerKleenean inside(const ExactBoxType& bx) const = 0; // Inherited from CompactSetInterface
+    virtual ValidatedLowerKleenean separated(const ExactBoxType& bx) const = 0; // Inherited from ClosedSetInterface
+    virtual ValidatedLowerKleenean overlaps(const ExactBoxType& bx) const = 0; // Inherited from OvertSetInterface
 
     virtual Void mince(Nat depth) = 0; // Deprecated?
     virtual Void recombine() = 0; // Deprecated?
@@ -215,9 +215,9 @@ class SubPavingHandle
     ForwardConstantIteratorHandle<GridCell> end() const { return this->_ptr->_end(); }
 
     UpperBoxType bounding_box() const { return this->_ptr->bounding_box(); };
-    ValidatedSierpinskian inside(const ExactBoxType& bx) const { return this->_ptr->inside(bx); }
-    ValidatedSierpinskian separated(const ExactBoxType& bx) const { return this->_ptr->separated(bx); }
-    ValidatedSierpinskian overlaps(const ExactBoxType& bx) const { return this->_ptr->overlaps(bx); }
+    ValidatedLowerKleenean inside(const ExactBoxType& bx) const { return this->_ptr->inside(bx); }
+    ValidatedLowerKleenean separated(const ExactBoxType& bx) const { return this->_ptr->separated(bx); }
+    ValidatedLowerKleenean overlaps(const ExactBoxType& bx) const { return this->_ptr->overlaps(bx); }
 
     Void mince(Nat depth) { this->_ptr->mince(depth); }
     Void recombine() { this->_ptr->recombine(); }
@@ -275,9 +275,9 @@ class PavingHandle
     ForwardConstantIteratorHandle<GridCell> begin() const { return this->_ptr->_begin(); }
     ForwardConstantIteratorHandle<GridCell> end() const { return this->_ptr->_end(); }
     UpperBoxType bounding_box() const { return this->_ptr->bounding_box(); };
-    ValidatedSierpinskian inside(const ExactBoxType& bx) const { return this->_ptr->inside(bx); }
-    ValidatedSierpinskian separated(const ExactBoxType& bx) const { return this->_ptr->separated(bx); }
-    ValidatedSierpinskian overlaps(const ExactBoxType& bx) const { return this->_ptr->overlaps(bx); }
+    ValidatedLowerKleenean inside(const ExactBoxType& bx) const { return this->_ptr->inside(bx); }
+    ValidatedLowerKleenean separated(const ExactBoxType& bx) const { return this->_ptr->separated(bx); }
+    ValidatedLowerKleenean overlaps(const ExactBoxType& bx) const { return this->_ptr->overlaps(bx); }
 
     //GridCell smallest_enclosing_primary_cell(const ExactBoxType& bx) const { return this->_ptr->smallest_enclosing_primary_cell(); }
     Void adjoin_cells(const PredicateInterface<ExactBoxType>& predicate, const Nat depth) { return this->_ptr->adjoin_cells(predicate,depth); }

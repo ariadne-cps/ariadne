@@ -1915,7 +1915,7 @@ Bool GridTreeSubset::intersects( const ExactBoxType& theBoxType ) const {
     return definitely( GridTreeSubset::_intersects( binary_tree(), grid(), root_cell().height(), pathCopy, theBoxType ) );
 }
 
-ValidatedSierpinskian GridTreeSubset::covers( const ExactBoxType& theBoxType ) const {
+ValidatedLowerKleenean GridTreeSubset::covers( const ExactBoxType& theBoxType ) const {
     //Simply check if theBoxType is covered by the set and then make sure that
     //all tree cells that are not disjoint from theBoxType are enabled
 
@@ -1933,7 +1933,7 @@ ValidatedSierpinskian GridTreeSubset::covers( const ExactBoxType& theBoxType ) c
     }
 }
 
-ValidatedSierpinskian GridTreeSubset::inside( const ExactBoxType& theBoxType ) const {
+ValidatedLowerKleenean GridTreeSubset::inside( const ExactBoxType& theBoxType ) const {
     //Check that the box corresponding to the root node of the set
     //is not disjoint from theBoxType. If it is then the set is not a
     //subset of theBoxType otherwise we need to traverse the tree and check
@@ -1946,7 +1946,7 @@ ValidatedSierpinskian GridTreeSubset::inside( const ExactBoxType& theBoxType ) c
     return GridTreeSubset::_subset( binary_tree(), grid(), root_cell().height(), pathCopy, cast_exact_box(narrow(theBoxType)) );
 }
 
-ValidatedSierpinskian GridTreeSubset::separated( const ExactBoxType& theBoxType ) const {
+ValidatedLowerKleenean GridTreeSubset::separated( const ExactBoxType& theBoxType ) const {
     //Simply check if the box does not intersect with the set
 
     ARIADNE_ASSERT( theBoxType.dimension() == root_cell().dimension() );
@@ -1956,7 +1956,7 @@ ValidatedSierpinskian GridTreeSubset::separated( const ExactBoxType& theBoxType 
     return GridTreeSubset::_disjoint( binary_tree(), grid(), root_cell().height(), pathCopy, cast_exact_box(widen(theBoxType)) );
 }
 
-ValidatedSierpinskian GridTreeSubset::overlaps( const ExactBoxType& theBoxType ) const {
+ValidatedLowerKleenean GridTreeSubset::overlaps( const ExactBoxType& theBoxType ) const {
     //Check if the box of the root cell overlaps with theBoxType,
     //if not then theBoxType does not intersect with the cell,
     //otherwise we need to find at least one enabled node
@@ -2835,6 +2835,54 @@ Void GridTreeSet::_adjoin_outer_approximation( const Grid & theGrid, BinaryTreeN
     }
 }
 
+Void GridTreeSet::_adjoin_outer_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const Nat primary_cell_height,
+                                               const Nat max_mince_depth,  const ValidatedCompactSetInterface& theSet, BinaryWord * pPath ){
+    //Compute the cell correspomding to the current node
+    GridCell theCurrentCell( theGrid, primary_cell_height, *pPath );
+
+    const OpenSetInterface* pOpenSet=dynamic_cast<const OpenSetInterface*>(static_cast<const SetInterfaceBase*>(&theSet));
+
+    if( definitely( theSet.separated( theCurrentCell.box() ) ) ) {
+        //DO NOTHING: We are in the node whoes representation in the original space is
+        //disjoint from pSet and thus there will be nothing added to this cell.
+    } else if( pOpenSet && definitely( pOpenSet->covers( theCurrentCell.box() ) ) ) {
+        pBinaryTreeNode->make_leaf(true);
+    } else {
+        //This node's cell is not disjoint from theSet, thus it is possible to adjoin elements
+        //of its outer approximation, unless this node is already and enabled leaf node.
+        if( pBinaryTreeNode->is_enabled() ){ //NOTE: A non-leaf node can not be enabled so this check suffices
+            //DO NOTHING: If it is enabled, then we can not add anything new to it.
+        } else {
+            //If the node is not enabled, so may be we can add something from the outer approximation of theSet.
+            if( pPath->size() < max_mince_depth ){
+                //Since we still do not have the finest cells for the outer approximation of theSet, we split
+                pBinaryTreeNode->split(); //NOTE: splitting a non-leaf node does not do any harm
+                //Check the left branch
+                pPath->push_back(false);
+                _adjoin_outer_approximation( theGrid, pBinaryTreeNode->left_node(), primary_cell_height, max_mince_depth, theSet, pPath );
+                //Check the right branch
+                pPath->push_back(true);
+                _adjoin_outer_approximation( theGrid, pBinaryTreeNode->right_node(), primary_cell_height, max_mince_depth, theSet, pPath );
+            } else {
+                //We should not mince any further, so since the node is a leaf and
+                //it's cell is not disjoint from theSet, we mark the node as enabled.
+                if( !pBinaryTreeNode->is_leaf() ){
+                    //If the node is not leaf, then we make it an enabled one
+                    pBinaryTreeNode->make_leaf(true);
+                } else {
+                    //Just make the node enabled
+                    pBinaryTreeNode->set_enabled();
+                }
+            }
+        }
+    }
+    //Return to the previous level, since the initial evaluate is made
+    //with the empty word, we check that it is not yet empty.
+    if( pPath->size() > 0 ) {
+        pPath->pop_back();
+    }
+}
+
 // FIXME: This method can fail if we cannot determine which of a node's children overlaps
 // the set. In principle this can be solved by checking if one of the children overlaps
 // the set, before doing recursion, and if none overlaps then we mark the present node as
@@ -2928,6 +2976,38 @@ Void GridTreeSet::adjoin_outer_approximation( const UpperBoxType& theBoxType, co
 }
 
 Void GridTreeSet::adjoin_outer_approximation( const CompactSetInterface& theSet, const Nat numSubdivInDim ) {
+    Grid theGrid( this->root_cell().grid() );
+    ARIADNE_ASSERT( theSet.dimension() == this->root_cell().dimension() );
+
+    //1. Compute the smallest GridCell (corresponding to the primary cell)
+    //   that encloses the theSet (after it is mapped onto theGrid).
+    const Nat height = GridCell::smallest_enclosing_primary_cell_height( theSet.bounding_box(), theGrid );
+    //Compute the height of the primary cell for the outer approximation stepping up by the number of dimensions
+    const Nat outer_approx_primary_cell_height = height + theGrid.dimension();
+
+    //2. Align this paving and paving enclosing the provided set
+    Bool has_stopped = false;
+    BinaryTreeNode* pBinaryTreeNode = align_with_cell( outer_approx_primary_cell_height, true, false, has_stopped );
+
+    //If the outer aproximation of the bounding box of the provided set is enclosed
+    //in an enabled cell of this paving, then there is nothing to be done. The latter
+    //is because adjoining the outer approx of the set will not change this paving.
+    if( ! has_stopped ){
+        //Compute the depth to which we must mince the outer approximation of the adjoining set.
+        //This depth is relative to the root of the constructed paving, which has been alligned
+        //with the binary tree node pBinaryTreeNode.
+        const Nat max_mince_depth = zero_cell_subdivisions_to_tree_subdivisions( numSubdivInDim, outer_approx_primary_cell_height, 0 );
+
+        //Adjoin the outer approximation, computing it on the fly.
+        BinaryWord * pEmptyPath = new BinaryWord();
+        _adjoin_outer_approximation( GridTreeSubset::_theGridCell.grid(), pBinaryTreeNode, outer_approx_primary_cell_height,
+                                     max_mince_depth, theSet, pEmptyPath );
+
+        delete pEmptyPath;
+    }
+}
+
+Void GridTreeSet::adjoin_outer_approximation( const ValidatedCompactSetInterface& theSet, const Nat numSubdivInDim ) {
     Grid theGrid( this->root_cell().grid() );
     ARIADNE_ASSERT( theSet.dimension() == this->root_cell().dimension() );
 
@@ -3370,6 +3450,17 @@ GridTreeSet outer_approximation( const CompactSetInterface& theSet, const Grid& 
 }
 
 GridTreeSet outer_approximation( const CompactSetInterface& theSet, const Nat numSubdivInDim ) {
+    Grid theGrid( theSet.dimension() );
+    return outer_approximation( theSet, theGrid, numSubdivInDim );
+}
+
+GridTreeSet outer_approximation( const ValidatedCompactSetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim ) {
+    GridTreeSet result( theGrid );
+    result.adjoin_outer_approximation( theSet, numSubdivInDim );
+    return result;
+}
+
+GridTreeSet outer_approximation( const ValidatedCompactSetInterface& theSet, const Nat numSubdivInDim ) {
     Grid theGrid( theSet.dimension() );
     return outer_approximation( theSet, theGrid, numSubdivInDim );
 }

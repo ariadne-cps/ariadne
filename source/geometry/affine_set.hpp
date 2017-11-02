@@ -81,7 +81,7 @@ ValidatedAffineModelConstraint operator==(const ValidatedAffineModel& am, const 
 //! Includes the class of zonotopes \f$Z=\{ f(x) \mid x\in D\}\f$, polyhedra \f$\{ f(x) \mid x\in\R^n \mid g(x)\leq 0\}\f$ and polytopes \f$\{ f(x) \mid x\in[0,\infty)^n \mid \sum_{i=1}^{n} x_i -1 = 0\}\f$.
 //! \sa ValidatedConstrainedImageSet
 class ValidatedAffineConstrainedImageSet
-    : public virtual CompactSetInterface
+    : public virtual ValidatedCompactSetInterface
 	, public virtual DrawableInterface
 	, public Loggable
 {
@@ -122,9 +122,9 @@ class ValidatedAffineConstrainedImageSet
 
     ValidatedKleenean is_bounded() const;
     UpperBoxType bounding_box() const;
-    ValidatedSierpinskian separated(const ExactBoxType& bx) const;
-    ValidatedSierpinskian inside(const ExactBoxType& bx) const;
-    ValidatedSierpinskian is_empty() const;
+    ValidatedLowerKleenean separated(const ExactBoxType& bx) const;
+    ValidatedLowerKleenean inside(const ExactBoxType& bx) const;
+    ValidatedLowerKleenean is_empty() const;
 
     //! \brief Compute the image of \f$S\f$ under the function \f$h\f$.
     friend ValidatedAffineConstrainedImageSet image(ValidatedAffineConstrainedImageSet set, ValidatedVectorFunction const& h);

@@ -1050,7 +1050,7 @@ _apply_guard(List<HybridEnclosure>& sets,
                 HybridEnclosure returning_set=set;
                 returning_set.new_parameter_constraint( event, elapsed_time_function >= critical_time_function );
                 returning_set.new_parameter_constraint( event, final_guard_function <= zero );
-                ValidatedUpperKleenean returning_set_empty=returning_set.is_empty();
+                ValidatedLowerKleenean returning_set_empty=returning_set.is_empty();
                 ARIADNE_LOG(9,"returning_set.is_empty()="<<returning_set.is_empty()<<"\n");
                 if(definitely(returning_set.is_empty())) {
                     set.new_parameter_constraint( event, final_guard_function <= zero );
@@ -1304,7 +1304,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
 
     EvolutionStepData _step_data;
     HybridEnclosure starting_set_copy=starting_set;
-    ValidatedSierpinskian starting_set_empty=starting_set_copy.is_empty();
+    ValidatedLowerKleenean starting_set_empty=starting_set_copy.is_empty();
 
     // Counters for number of sucessor sets
     Nat jump_sets = 0;

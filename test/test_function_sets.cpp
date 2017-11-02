@@ -74,8 +74,10 @@ class TestConstrainedImageSet
         set.new_parameter_constraint(0<=s[0]+s[1]<=1);
 
         ExactBoxType bx(cast_exact_box(set.bounding_box()));
-        ValidatedSierpinskian overlaps = set.overlaps(bx);
-//        ValidatedSierpinskian separated = set.separated(bx);
+        LowerKleenean overlaps = set.overlaps(bx);
+        ValidatedLowerKleenean check_overlaps=overlaps.check(Effort::get_default());
+        LowerKleenean separated = set.separated(bx);
+        ValidatedLowerKleenean check_separated=separated.check(Effort::get_default());
     }
 
     Void test_geometry() {
@@ -94,7 +96,7 @@ class TestConstrainedImageSet
         polytope.new_parameter_constraint(x[0]+Real(1.5)*+x[1]<=1);
         box1=ExactBoxType( {ExactIntervalType(1.0,2.0),ExactIntervalType(0.5,1.0)} );
         box2=ExactBoxType( {ExactIntervalType(0.0,1.0),ExactIntervalType(0.5,1.0)} );
-        ARIADNE_TEST_ASSERT(polytope.separated(box1));
+        ARIADNE_TEST_ASSERT(definitely(polytope.separated(box1),Effort::get_default()));
         //ARIADNE_TEST_ASSERT(polytope.overlaps(box2));
 
         plot("test_function_sets-geometry-polytope",widen(polytope.bounding_box(),0.5_exact),set_colour,polytope,box_colour,box1,box_colour,box2);
@@ -106,7 +108,7 @@ class TestConstrainedImageSet
         box2=ExactBoxType( {ExactIntervalType(1,2),ExactIntervalType(0.5,1)} );
         box3=ExactBoxType( {ExactIntervalType(0.75,2),ExactIntervalType(-1.0,-0.5)} );
         //ARIADNE_TEST_ASSERT(disc.overlaps(box1));
-        ARIADNE_TEST_ASSERT(disc.separated(box2));
+        ARIADNE_TEST_ASSERT(definitely(disc.separated(box2),Effort::get_default()));
         //ARIADNE_TEST_ASSERT(disc.overlaps(box3));
 
         plot("test_function_sets-geometry-disc",widen(disc.bounding_box(),0.5_exact),set_colour,disc,box_colour,box1,box_colour,box2,box_colour,box3);
@@ -170,11 +172,11 @@ class TestConstrainedImageSet
                 Pair<ExactBoxType,ExactBoxType> sbx=bx.split();
                 stack.append(sbx.first); stack.append(sbx.second);
             } else {
-                ValidatedSierpinskian overlaps = set.overlaps(bx);
-                ValidatedSierpinskian separated = set.separated(bx);
+                ValidatedLowerKleenean overlaps = check(set.overlaps(bx),Effort::get_default());
+                LowerKleenean separated = set.separated(bx);
             if(definitely(overlaps)) {
                     figure.set_fill_colour(0.0,0.5,0.0);
-                } else if(definitely(separated)) {
+                } else if(definitely(separated,Effort::get_default())) {
                     figure.set_fill_colour(0.75,1.0,0.75);
                 } else {
                     figure.set_fill_colour(0.55,0.75,0.5);
@@ -193,7 +195,7 @@ class TestConstrainedImageSet
         EffectiveConstrainedImageSet quadratic_set(EffectiveBoxType(ExactIntervalVectorType({{-1.0,1.0},{-1.0,1.0}})));
         quadratic_set.apply( {2*x[0]+x[1]+x[0]*x[0]/4,x[0]+x[1]} );
         ExactBoxType box{{0.750000,1.00000},{0.00000,0.250000}};
-        ARIADNE_TEST_ASSERT(not definitely(set.separated(box)));
+        ARIADNE_TEST_ASSERT(not definitely(set.separated(box).check(Effort::get_default())));
     }
 
     Void test_approximation() {

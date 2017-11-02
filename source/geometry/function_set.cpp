@@ -264,6 +264,22 @@ List<EffectiveConstraint> constraints(const EffectiveVectorFunction& f, const Ef
 
 } //namespace
 
+namespace Detail {
+
+template<class OP, class... ARGS> struct LogicalExpression;
+
+template<class OP, class ARG1, class ARG2> struct LogicalExpression<OP,ARG1,ARG2>
+    : virtual LogicalInterface, ExpressionTemplate<OP,ARG1,ARG2>
+{
+    using ExpressionTemplate<OP,ARG1,ARG2>::ExpressionTemplate;
+    virtual LogicalValue _check(Effort eff) const { return this->_op(this->_arg1,this->_arg2,eff).repr(); }
+    virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<ExpressionTemplate<OP,ARG1,ARG2>const&>(*this); }
+};
+
+} // namespace Detail
+
+template<class OP, class ARG1, class ARG2> decltype(auto) make_shared_logical_expression(OP const& op, ARG1 const& arg1, ARG2 const& arg2) {
+    return std::make_shared<Detail::LogicalExpression<OP,ARG1,ARG2>>(op,arg1,arg2); }
 
 ConstraintSet::ConstraintSet(const EffectiveVectorFunction& f, const EffectiveBoxType& b)
     : _dimension(f.argument_size()), _constraints()
@@ -300,22 +316,40 @@ ConstraintSet::dimension() const
 }
 
 
-ValidatedSierpinskian
+LowerKleenean
 ConstraintSet::separated(const ExactBoxType& bx) const
+{
+    return LowerKleenean(make_shared_logical_expression(Separated(),*this,bx));
+}
+
+LowerKleenean
+ConstraintSet::overlaps(const ExactBoxType& bx) const
+{
+    return LowerKleenean(make_shared_logical_expression(Overlap(),*this,bx));
+}
+
+LowerKleenean
+ConstraintSet::covers(const ExactBoxType& bx) const
+{
+    return LowerKleenean(make_shared_logical_expression(Covers(),*this,bx));
+}
+
+ValidatedLowerKleenean
+ConstraintSet::separated(const ExactBoxType& bx, Effort eff) const
 {
     ExactBoxType codomain=over_approximation(this->codomain());
     return ValidatedConstrainedImageSet(bx,this->constraint_function()).separated(codomain);
 }
 
-ValidatedSierpinskian
-ConstraintSet::overlaps(const ExactBoxType& bx) const
+ValidatedLowerKleenean
+ConstraintSet::overlaps(const ExactBoxType& bx, Effort eff) const
 {
     ExactBoxType codomain=under_approximation(this->codomain());
     return ValidatedConstrainedImageSet(bx,this->constraint_function()).overlaps(codomain);
 }
 
-ValidatedSierpinskian
-ConstraintSet::covers(const ExactBoxType& bx) const
+ValidatedLowerKleenean
+ConstraintSet::covers(const ExactBoxType& bx, Effort eff) const
 {
     ExactBoxType codomain=under_approximation(this->codomain());
     return UpperBoxType(apply(this->constraint_function(),bx)).inside(codomain);
@@ -378,8 +412,32 @@ BoundedConstraintSet::dimension() const
 }
 
 
-ValidatedSierpinskian
+LowerKleenean
 BoundedConstraintSet::separated(const ExactBoxType& bx) const
+{
+    return LowerKleenean(make_shared_logical_expression(Separated(),*this,bx));
+}
+
+LowerKleenean
+BoundedConstraintSet::overlaps(const ExactBoxType& bx) const
+{
+    return LowerKleenean(make_shared_logical_expression(Overlap(),*this,bx));
+}
+
+LowerKleenean
+BoundedConstraintSet::covers(const ExactBoxType& bx) const
+{
+    return LowerKleenean(make_shared_logical_expression(Covers(),*this,bx));
+}
+
+LowerKleenean
+BoundedConstraintSet::inside(const ExactBoxType& bx) const
+{
+    return LowerKleenean(make_shared_logical_expression(Inside(),*this,bx));
+}
+
+ValidatedLowerKleenean
+BoundedConstraintSet::separated(const ExactBoxType& bx, Effort eff) const
 {
     ExactBoxType domain=over_approximation(this->domain());
     if(Ariadne::disjoint(domain,bx)) { return true; }
@@ -388,8 +446,8 @@ BoundedConstraintSet::separated(const ExactBoxType& bx) const
 }
 
 
-ValidatedSierpinskian
-BoundedConstraintSet::overlaps(const ExactBoxType& bx) const
+ValidatedLowerKleenean
+BoundedConstraintSet::overlaps(const ExactBoxType& bx, Effort eff) const
 {
     if(Ariadne::disjoint(over_approximation(this->domain()),bx)) { return false; }
     ExactBoxType domain=under_approximation(this->domain());
@@ -398,8 +456,8 @@ BoundedConstraintSet::overlaps(const ExactBoxType& bx) const
 }
 
 
-ValidatedSierpinskian
-BoundedConstraintSet::covers(const ExactBoxType& bx) const
+ValidatedLowerKleenean
+BoundedConstraintSet::covers(const ExactBoxType& bx, Effort eff) const
 {
     ExactBoxType domain=under_approximation(this->domain());
     ExactBoxType codomain=under_approximation(this->codomain());
@@ -407,8 +465,8 @@ BoundedConstraintSet::covers(const ExactBoxType& bx) const
     return UpperBoxType(apply(this->constraint_function(),bx)).inside(codomain);
 }
 
-ValidatedSierpinskian
-BoundedConstraintSet::inside(const ExactBoxType& bx) const
+ValidatedLowerKleenean
+BoundedConstraintSet::inside(const ExactBoxType& bx, Effort eff) const
 {
     return Ariadne::inside(UpperBoxType(over_approximation(this->domain())),bx);
 }
@@ -536,7 +594,7 @@ ConstrainedImageSet::affine_approximation() const
 }
 
 
-ValidatedKleenean ConstrainedImageSet::satisfies(const EffectiveConstraint& nc) const
+ValidatedKleenean ConstrainedImageSet::satisfies(const EffectiveConstraint& nc, Effort eff) const
 {
     if( definitely(subset(Ariadne::apply(nc.function(),this->bounding_box()),nc.bounds())) ) {
         return true;
@@ -564,12 +622,30 @@ ValidatedKleenean ConstrainedImageSet::satisfies(const EffectiveConstraint& nc) 
 }
 
 
+LowerKleenean
+ConstrainedImageSet::inside(const ExactBoxType& bx) const
+{
+    return LowerKleenean(make_shared_logical_expression(Inside(),*this,bx));
+}
+
+LowerKleenean
+ConstrainedImageSet::separated(const ExactBoxType& bx) const
+{
+    return LowerKleenean(make_shared_logical_expression(Separated(),*this,bx));
+}
+
+LowerKleenean
+ConstrainedImageSet::overlaps(const ExactBoxType& bx) const
+{
+    return LowerKleenean(make_shared_logical_expression(Overlap(),*this,bx));
+}
+
 //! \brief Test if the set is contained in (the interior of) a box.
-ValidatedSierpinskian ConstrainedImageSet::inside(const ExactBoxType& bx) const {
+ValidatedLowerKleenean ConstrainedImageSet::inside(const ExactBoxType& bx, Effort eff) const {
     return this->bounding_box().inside(bx);
 }
 
-ValidatedSierpinskian ConstrainedImageSet::separated(const ExactBoxType& bx) const
+ValidatedLowerKleenean ConstrainedImageSet::separated(const ExactBoxType& bx, Effort eff) const
 {
     UpperBoxType subdomain = over_approximation(this->_domain);
     EffectiveVectorFunction function = join(this->function(),this->constraint_function());
@@ -577,12 +653,9 @@ ValidatedSierpinskian ConstrainedImageSet::separated(const ExactBoxType& bx) con
     ConstraintSolver solver;
     solver.reduce(subdomain,function,codomain);
     return subdomain.is_empty();
-
-
 }
 
-
-ValidatedSierpinskian ConstrainedImageSet::overlaps(const ExactBoxType& bx) const
+ValidatedLowerKleenean ConstrainedImageSet::overlaps(const ExactBoxType& bx, Effort eff) const
 {
     return ValidatedConstrainedImageSet(under_approximation(this->_domain),this->_function,this->_constraints).overlaps(bx);
 }
@@ -1037,12 +1110,12 @@ ValidatedKleenean ValidatedConstrainedImageSet::is_empty() const
     return this->_reduced_domain.is_empty();
 }
 
-ValidatedSierpinskian ValidatedConstrainedImageSet::inside(const ExactBoxType& bx) const
+ValidatedLowerKleenean ValidatedConstrainedImageSet::inside(const ExactBoxType& bx) const
 {
     return Ariadne::inside(this->bounding_box(),bx);
 }
 
-ValidatedSierpinskian ValidatedConstrainedImageSet::separated(const ExactBoxType& bx) const
+ValidatedLowerKleenean ValidatedConstrainedImageSet::separated(const ExactBoxType& bx) const
 {
     UpperBoxType subdomain = this->_reduced_domain;
     ValidatedVectorFunction function(this->dimension()+this->number_of_constraints(),EuclideanDomain(this->number_of_parameters()));
@@ -1055,7 +1128,7 @@ ValidatedSierpinskian ValidatedConstrainedImageSet::separated(const ExactBoxType
     return subdomain.is_empty();
 }
 
-ValidatedSierpinskian ValidatedConstrainedImageSet::overlaps(const ExactBoxType& bx) const
+ValidatedLowerKleenean ValidatedConstrainedImageSet::overlaps(const ExactBoxType& bx) const
 {
     //std::cerr<<"domain="<<this->_domain<<"\n";
     //std::cerr<<"subdomain="<<this->_reduced_domain<<"\n";

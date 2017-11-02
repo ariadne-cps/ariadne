@@ -41,6 +41,7 @@
 #include "numeric/rounding.hpp"
 #include "expression/assignment.hpp"
 #include "output/graphics_interface.hpp"
+#include <boost/concept_check.hpp>
 #include "geometry/function_set.hpp"
 
 namespace Ariadne {
@@ -252,29 +253,31 @@ SetInterface* HybridBoxSet::_euclidean_set(DiscreteLocation loc, RealSpace spc) 
     ARIADNE_NOT_IMPLEMENTED; // FIXME: Box does not inherit from SetInterface...
 }
 
-ValidatedSierpinskian HybridBoxSet::is_empty() const {
+using DyadicBox = Box<Interval<Dyadic>>;
+
+LowerKleenean HybridBoxSet::is_empty() const {
     return this->euclidean_set(this->space()).is_empty();
 }
-ValidatedSierpinskian HybridBoxSet::inside(const HybridExactBoxes& hbxs) const {
+LowerKleenean HybridBoxSet::inside(const HybridExactBoxes& hbxs) const {
     const DiscreteLocation& loc=this->location();
     if(hbxs.has_location(loc)) {
         const RealSpace& spc=hbxs.space(loc);
-        return this->euclidean_set(spc).inside(hbxs.euclidean_set(loc));
+        return this->euclidean_set(spc).inside(static_cast<DyadicBox>(hbxs.euclidean_set(loc)));
     } else {
         return this->is_empty();
     }
 }
-ValidatedSierpinskian HybridBoxSet::inside(const HybridExactBox& hbx) const {
-    return (hbx.location()==this->location() and this->euclidean_set(hbx.space()).inside(hbx.euclidean_set())) or this->is_empty();
+LowerKleenean HybridBoxSet::inside(const HybridExactBox& hbx) const {
+    return (hbx.location()==this->location() and this->euclidean_set(hbx.space()).inside(static_cast<DyadicBox>(hbx.euclidean_set()))) or this->is_empty();
 }
-ValidatedSierpinskian HybridBoxSet::overlaps(const HybridExactBox& hbx) const {
-    return this->location()==hbx.location() and this->euclidean_set(hbx.space()).overlaps(hbx.euclidean_set());
+LowerKleenean HybridBoxSet::overlaps(const HybridExactBox& hbx) const {
+    return this->location()==hbx.location() and this->euclidean_set(hbx.space()).overlaps(static_cast<DyadicBox>(hbx.euclidean_set()));
 }
-ValidatedSierpinskian HybridBoxSet::separated(const HybridExactBox& hbx) const {
-    return this->location()!=hbx.location() or this->euclidean_set(hbx.space()).separated(hbx.euclidean_set());
+LowerKleenean HybridBoxSet::separated(const HybridExactBox& hbx) const {
+    return this->location()!=hbx.location() or this->euclidean_set(hbx.space()).separated(static_cast<DyadicBox>(hbx.euclidean_set()));
 }
-ValidatedSierpinskian HybridBoxSet::covers(const HybridExactBox& hbx) const {
-    return (this->location()==hbx.location() and this->euclidean_set(hbx.space()).covers(hbx.euclidean_set())) or hbx.euclidean_set().is_empty();
+LowerKleenean HybridBoxSet::covers(const HybridExactBox& hbx) const {
+    return (this->location()==hbx.location() and this->euclidean_set(hbx.space()).covers(static_cast<DyadicBox>(hbx.euclidean_set()))) or hbx.euclidean_set().is_empty();
 }
 
 HybridUpperBoxes HybridBoxSet::bounding_box() const {
@@ -350,7 +353,7 @@ RegularSetInterface* HybridConstraintSet::_euclidean_set(DiscreteLocation loc, R
     return new ConstraintSet(this->euclidean_set(loc,spc));
 }
 
-ValidatedSierpinskian HybridConstraintSet::overlaps(const HybridExactBox& bx) const {
+LowerKleenean HybridConstraintSet::overlaps(const HybridExactBox& bx) const {
     if(this->_sets.has_key(bx.location())) {
         return this->_sets[bx.location()].euclidean_set(bx.space()).overlaps(bx.euclidean_set());
     } else {
@@ -358,7 +361,7 @@ ValidatedSierpinskian HybridConstraintSet::overlaps(const HybridExactBox& bx) co
     }
 }
 
-ValidatedSierpinskian HybridConstraintSet::covers(const HybridExactBox& bx) const {
+LowerKleenean HybridConstraintSet::covers(const HybridExactBox& bx) const {
     if(this->_sets.has_key(bx.location())) {
         return this->_sets[bx.location()].euclidean_set(bx.space()).covers(bx.euclidean_set());
     } else {
@@ -366,7 +369,7 @@ ValidatedSierpinskian HybridConstraintSet::covers(const HybridExactBox& bx) cons
     }
 }
 
-ValidatedSierpinskian HybridConstraintSet::separated(const HybridExactBox& bx) const {
+LowerKleenean HybridConstraintSet::separated(const HybridExactBox& bx) const {
     if(this->_sets.has_key(bx.location())) {
         return this->_sets[bx.location()].euclidean_set(bx.space()).separated(bx.euclidean_set());
     } else {
@@ -434,7 +437,7 @@ BoundedConstraintSet* HybridBoundedConstraintSet::_euclidean_set(DiscreteLocatio
     return new BoundedConstraintSet(this->euclidean_set(loc,spc));
 }
 
-ValidatedSierpinskian HybridBoundedConstraintSet::overlaps(const HybridExactBox& bx) const {
+LowerKleenean HybridBoundedConstraintSet::overlaps(const HybridExactBox& bx) const {
     if(this->_sets.has_key(bx.location())) {
         return this->_sets[bx.location()].euclidean_set(bx.space()).overlaps(bx.euclidean_set());
     } else {
@@ -442,7 +445,7 @@ ValidatedSierpinskian HybridBoundedConstraintSet::overlaps(const HybridExactBox&
     }
 }
 
-ValidatedSierpinskian HybridBoundedConstraintSet::covers(const HybridExactBox& bx) const {
+LowerKleenean HybridBoundedConstraintSet::covers(const HybridExactBox& bx) const {
     if(this->_sets.has_key(bx.location())) {
         return this->_sets[bx.location()].euclidean_set(bx.space()).covers(bx.euclidean_set());
     } else {
@@ -450,7 +453,7 @@ ValidatedSierpinskian HybridBoundedConstraintSet::covers(const HybridExactBox& b
     }
 }
 
-ValidatedSierpinskian HybridBoundedConstraintSet::separated(const HybridExactBox& bx) const {
+LowerKleenean HybridBoundedConstraintSet::separated(const HybridExactBox& bx) const {
     if(this->_sets.has_key(bx.location())) {
         return this->_sets[bx.location()].euclidean_set(bx.space()).separated(bx.euclidean_set());
     } else {
@@ -458,8 +461,8 @@ ValidatedSierpinskian HybridBoundedConstraintSet::separated(const HybridExactBox
     }
 }
 
-ValidatedSierpinskian HybridBoundedConstraintSet::inside(const HybridExactBoxes& bxs) const {
-    ValidatedSierpinskian result=true;
+LowerKleenean HybridBoundedConstraintSet::inside(const HybridExactBoxes& bxs) const {
+    LowerKleenean result=true;
     for(Map<DiscreteLocation,RealExpressionBoundedConstraintSet>::ConstIterator iter=this->_sets.begin(); iter!=this->_sets.end(); ++iter) {
         DiscreteLocation const& loc=iter->first;
         RealExpressionBoundedConstraintSet const& set = iter->second;
@@ -728,22 +731,22 @@ Void HybridGridTreeSet::recombine() {
     }
 }
 
-ValidatedSierpinskian HybridGridTreeSet::separated(const HybridExactBox& hbx) const {
+ValidatedLowerKleenean HybridGridTreeSet::separated(const HybridExactBox& hbx) const {
     LocationsConstIterator _loc_iter = this->_map.find( hbx.location() );
     return _loc_iter != this->locations_end() || _loc_iter->second.separated( hbx.euclidean_set() );
 }
 
-ValidatedSierpinskian HybridGridTreeSet::overlaps(const HybridExactBox& hbx) const {
+ValidatedLowerKleenean HybridGridTreeSet::overlaps(const HybridExactBox& hbx) const {
     LocationsConstIterator _loc_iter = this->_map.find( hbx.location() );
     return _loc_iter != this->locations_end() && _loc_iter->second.overlaps( hbx.euclidean_set() );
 }
 
-ValidatedSierpinskian HybridGridTreeSet::covers(const HybridExactBox& hbx) const {
+ValidatedLowerKleenean HybridGridTreeSet::covers(const HybridExactBox& hbx) const {
     LocationsConstIterator _loc_iter=this->_map.find(hbx.location());
     return _loc_iter!=this->locations_end() && _loc_iter->second.covers( hbx.euclidean_set() );
 }
 
-ValidatedSierpinskian HybridGridTreeSet::inside(const HybridExactBoxes& hbx) const  {
+ValidatedLowerKleenean HybridGridTreeSet::inside(const HybridExactBoxes& hbx) const  {
     for( LocationsConstIterator _loc_iter = this->locations_begin(); _loc_iter != this->locations_end(); ++_loc_iter ) {
         if( !_loc_iter->second.is_empty() ) {
             DiscreteLocation const& loc = _loc_iter->first;

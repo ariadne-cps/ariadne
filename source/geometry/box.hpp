@@ -487,7 +487,7 @@ inline FloatDPLowerBox narrow(const FloatDPLowerBox& bx) {
 template<class IVL> class BoxSet;
 
 template<> class BoxSet<ExactIntervalType>
-    : public virtual SetInterface,
+    : public virtual RegularLocatedSetInterface,
       public virtual DrawableInterface,
       public Box<ExactIntervalType>
 {
@@ -498,10 +498,14 @@ template<> class BoxSet<ExactIntervalType>
 
     virtual ExactBoxSet* clone() const { return new ExactBoxSet(*this); }
     virtual DimensionType dimension() const final { return this->ExactBoxType::size(); }
-    virtual ValidatedSierpinskian separated(const ExactBoxType& other) const final { return this->ExactBoxType::separated(other); }
-    virtual ValidatedSierpinskian overlaps(const ExactBoxType& other) const final { return this->ExactBoxType::overlaps(other); }
-    virtual ValidatedSierpinskian covers(const ExactBoxType& other) const final { return this->ExactBoxType::covers(other); }
-    virtual ValidatedSierpinskian inside(const ExactBoxType& other) const final { return this->ExactBoxType::inside(other); }
+    virtual LowerKleenean separated(const ExactBoxType& other) const final { return this->ExactBoxType::separated(other); }
+    virtual LowerKleenean overlaps(const ExactBoxType& other) const final { return this->ExactBoxType::overlaps(other); }
+    virtual LowerKleenean covers(const ExactBoxType& other) const final { return this->ExactBoxType::covers(other); }
+    virtual LowerKleenean inside(const ExactBoxType& other) const final { return this->ExactBoxType::inside(other); }
+    virtual ValidatedLowerKleenean separated(const ExactBoxType& other, Effort eff) const final { return this->ExactBoxType::separated(other); }
+    virtual ValidatedLowerKleenean overlaps(const ExactBoxType& other, Effort eff) const final { return this->ExactBoxType::overlaps(other); }
+    virtual ValidatedLowerKleenean covers(const ExactBoxType& other, Effort eff) const final { return this->ExactBoxType::covers(other); }
+    virtual ValidatedLowerKleenean inside(const ExactBoxType& other, Effort eff) const final { return this->ExactBoxType::inside(other); }
     virtual UpperBoxType bounding_box() const final { return this->ExactBoxType::bounding_box(); }
     virtual Void draw(CanvasInterface& c, const Projection2d& p) const final { return Ariadne::draw(c,p,*this); }
     virtual OutputStream& write(OutputStream& os) const final { return os << static_cast<const ExactBoxType&>(*this); }

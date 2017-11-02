@@ -275,7 +275,7 @@ template<class IVL> class HybridBoxes
 //! \ingroup HybridSetSubModule
 //! \brief A hybrid set defined by the intersection of a box and a constraint system in each location.
 class HybridValidatedConstrainedImageSet
-    : public virtual HybridLocatedSetInterface
+    : public virtual HybridValidatedLocatedSetInterface
     , public virtual HybridDrawableInterface
     , public HybridBasicSet<ValidatedConstrainedImageSet>
 {
@@ -291,11 +291,11 @@ class HybridValidatedConstrainedImageSet
     virtual Set<DiscreteLocation> locations() const override {
         return {this->Base::location()}; }
 
-    virtual ValidatedSierpinskian overlaps(const HybridExactBoxType& hbx) const override {
+    virtual ValidatedLowerKleenean overlaps(const HybridExactBoxType& hbx) const override {
         return this->Base::overlaps(hbx); }
-    inline ValidatedSierpinskian inside(const HybridExactBoxesType& hbxs) const override {
+    inline ValidatedLowerKleenean inside(const HybridExactBoxesType& hbxs) const override {
         return this->Base::inside(hbxs); }
-    virtual ValidatedSierpinskian separated(const HybridExactBoxType& hbx) const override {
+    virtual ValidatedLowerKleenean separated(const HybridExactBoxType& hbx) const override {
         return this->Base::separated(hbx); }
     virtual HybridUpperBoxes bounding_box() const override;
 
@@ -632,10 +632,10 @@ class HybridGridTreeSet
     //@{ \name HybridSetInterface methods
     HybridGridTreeSet* clone() const { return new HybridGridTreeSet(*this); }
     HybridSpace space() const { return this->grid().space(); }
-    ValidatedSierpinskian separated(const HybridExactBox& hbx) const;
-    ValidatedSierpinskian overlaps(const HybridExactBox& hbx) const;
-    ValidatedSierpinskian covers(const HybridExactBox& hbx) const;
-    ValidatedSierpinskian inside(const HybridExactBoxes& hbx) const ;
+    ValidatedLowerKleenean separated(const HybridExactBox& hbx) const;
+    ValidatedLowerKleenean overlaps(const HybridExactBox& hbx) const;
+    ValidatedLowerKleenean covers(const HybridExactBox& hbx) const;
+    ValidatedLowerKleenean inside(const HybridExactBoxes& hbx) const ;
     HybridUpperBoxes bounding_box() const;
     OutputStream& write(OutputStream& os) const;
     Void draw(CanvasInterface& c, const Set<DiscreteLocation>& l, const Variables2d&v) const;

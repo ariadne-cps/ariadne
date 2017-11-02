@@ -55,7 +55,7 @@ class BoundedSet
   public:
     template<class ...Args> BoundedSet(Args&&... args) : Handle<BoundedSetInterface>(std::forward<Args>(args)...) { }
     inline DimensionType dimension() const { return this->reference().dimension(); }
-    inline ValidatedSierpinskian inside(const ExactBoxType& bx) const { return this->reference().inside(bx); }
+    inline LowerKleenean inside(const ExactBoxType& bx) const { return this->reference().inside(bx); }
     inline UpperBoxType bounding_box() const { return this->reference().bounding_box(); }
 };
 
@@ -68,7 +68,7 @@ class OvertSet
   public:
     template<typename ...Args> OvertSet(Args&&... args) : Handle<OvertSetInterface>(std::forward<Args>(args)...) { }
     inline DimensionType dimension() const { return this->reference().dimension(); }
-    inline ValidatedSierpinskian overlaps(const ExactBoxType& bx) const { return this->reference().overlaps(bx); }
+    inline LowerKleenean overlaps(const ExactBoxType& bx) const { return this->reference().overlaps(bx); }
 };
 
 //! \ingroup GeometryModule SetSubModule
@@ -79,8 +79,8 @@ class OpenSet
   public:
     template<typename ...Args> OpenSet(Args&&... args) : Handle<OpenSetInterface>(std::forward<Args>(args)...) { }
     inline DimensionType dimension() const { return this->reference().dimension(); }
-    inline ValidatedSierpinskian overlaps(const ExactBoxType& bx) const { return this->reference().overlaps(bx); }
-    inline ValidatedSierpinskian covers(const ExactBoxType& bx) const { return this->reference().covers(bx); }
+    inline LowerKleenean overlaps(const ExactBoxType& bx) const { return this->reference().overlaps(bx); }
+    inline LowerKleenean covers(const ExactBoxType& bx) const { return this->reference().covers(bx); }
 };
 
 //! \ingroup GeometryModule SetSubModule
@@ -91,7 +91,7 @@ class ClosedSet
   public:
     template<typename ...Args> ClosedSet(Args&&... args) : Handle<ClosedSetInterface>(std::forward<Args>(args)...) { }
     inline DimensionType dimension() const { return this->reference().dimension(); }
-    inline ValidatedSierpinskian separated(const ExactBoxType& bx) const { return this->reference().separated(bx); }
+    inline LowerKleenean separated(const ExactBoxType& bx) const { return this->reference().separated(bx); }
 };
 
 //! \ingroup GeometryModule SetSubModule
@@ -102,8 +102,8 @@ class CompactSet
   public:
     template<typename ...Args> CompactSet(Args&&... args) : Handle<CompactSetInterface>(std::forward<Args>(args)...) { }
     inline DimensionType dimension() const { return this->reference().dimension(); }
-    inline ValidatedSierpinskian separated(const ExactBoxType& bx) const { return this->reference().separated(bx); }
-    inline ValidatedSierpinskian inside(const ExactBoxType& bx) const { return this->reference().inside(bx); }
+    inline LowerKleenean separated(const ExactBoxType& bx) const { return this->reference().separated(bx); }
+    inline LowerKleenean inside(const ExactBoxType& bx) const { return this->reference().inside(bx); }
     inline UpperBoxType bounding_box() const { return this->reference().bounding_box(); }
 };
 
@@ -115,9 +115,9 @@ class RegularSet
   public:
     template<typename ...Args> RegularSet(Args&&... args) : Handle<RegularSetInterface>(std::forward<Args>(args)...) { }
     inline DimensionType dimension() const { return this->reference().dimension(); }
-    inline ValidatedSierpinskian overlaps(const ExactBoxType& bx) const { return this->reference().overlaps(bx); }
-    inline ValidatedSierpinskian covers(const ExactBoxType& bx) const { return this->reference().covers(bx); }
-    inline ValidatedSierpinskian separated(const ExactBoxType& bx) const { return this->reference().separated(bx); }
+    inline LowerKleenean overlaps(const ExactBoxType& bx) const { return this->reference().overlaps(bx); }
+    inline LowerKleenean covers(const ExactBoxType& bx) const { return this->reference().covers(bx); }
+    inline LowerKleenean separated(const ExactBoxType& bx) const { return this->reference().separated(bx); }
 };
 
 
@@ -130,24 +130,24 @@ class LocatedSet
   public:
     template<typename ...Args> LocatedSet(Args&&... args) : Handle<LocatedSetInterface>(std::forward<Args>(args)...) { }
     inline DimensionType dimension() const { return this->reference().dimension(); }
-    inline ValidatedSierpinskian overlaps(const ExactBoxType& bx) const { return this->reference().overlaps(bx); }
-    inline ValidatedSierpinskian separated(const ExactBoxType& bx) const { return this->reference().separated(bx); }
-    inline ValidatedSierpinskian inside(const ExactBoxType& bx) const { return this->reference().inside(bx); }
+    inline LowerKleenean overlaps(const ExactBoxType& bx) const { return this->reference().overlaps(bx); }
+    inline LowerKleenean separated(const ExactBoxType& bx) const { return this->reference().separated(bx); }
+    inline LowerKleenean inside(const ExactBoxType& bx) const { return this->reference().inside(bx); }
     inline UpperBoxType bounding_box() const { return this->reference().bounding_box(); }
 };
 
 //! \ingroup GeometryModule SetSubModule
 //! \brief Handle class for singleton regular sets.
 class RegularLocatedSet
-    : public Handle<SetInterface>
+    : public Handle<RegularLocatedSetInterface>
 {
   public:
-    template<typename ...Args> RegularLocatedSet(Args&&... args) : Handle<SetInterface>(std::forward<Args>(args)...) { }
+    template<typename ...Args> RegularLocatedSet(Args&&... args) : Handle<RegularLocatedSetInterface>(std::forward<Args>(args)...) { }
     inline DimensionType dimension() const { return this->reference().dimension(); }
-    inline ValidatedSierpinskian overlaps(const ExactBoxType& bx) const { return this->reference().overlaps(bx); }
-    inline ValidatedSierpinskian covers(const ExactBoxType& bx) const { return this->reference().covers(bx); }
-    inline ValidatedSierpinskian separated(const ExactBoxType& bx) const { return this->reference().separated(bx); }
-    inline ValidatedSierpinskian inside(const ExactBoxType& bx) const { return this->reference().inside(bx); }
+    inline LowerKleenean overlaps(const ExactBoxType& bx) const { return this->reference().overlaps(bx); }
+    inline LowerKleenean covers(const ExactBoxType& bx) const { return this->reference().covers(bx); }
+    inline LowerKleenean separated(const ExactBoxType& bx) const { return this->reference().separated(bx); }
+    inline LowerKleenean inside(const ExactBoxType& bx) const { return this->reference().inside(bx); }
     inline UpperBoxType bounding_box() const { return this->reference().bounding_box(); }
 };
 

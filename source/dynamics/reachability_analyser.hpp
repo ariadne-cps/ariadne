@@ -86,7 +86,7 @@ template<class SYS> class ReachabilityAnalyser
     using typename Interface::CompactSetInterfaceType;
     using typename Interface::LocatedSetInterfaceType;
     using typename Interface::RegularSetInterfaceType;
-    using typename Interface::SetInterfaceType;
+    using typename Interface::RegularLocatedSetInterfaceType;
     using typename Interface::SetApproximationType;
     using typename Interface::SafetyCertificateType;
 

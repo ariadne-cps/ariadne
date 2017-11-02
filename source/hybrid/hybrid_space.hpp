@@ -81,7 +81,7 @@ class HybridSpace
     //! \brief The interface satisified by located sets in the space.
     typedef HybridLocatedSetInterface LocatedSetInterfaceType;
     //! \brief The interface satisified by located sets in the space.
-    typedef HybridSetInterface SetInterfaceType;
+    typedef HybridRegularLocatedSetInterface RegularLocatedSetInterfaceType;
     //! \brief The type of approximations to sets in the space.
     typedef HybridGridTreeSet SetApproximationType;
   public:

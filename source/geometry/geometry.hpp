@@ -185,13 +185,13 @@ ValidatedKleenean separated(const LocatedSetInterface& ls, const RegularSetInter
 
 
 //! \brief Tests if \a ovs overlaps \a ops, to a tolerance of \a eps.
-ValidatedSierpinskian overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const FloatDP& eps);
+ValidatedLowerKleenean overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const FloatDP& eps);
 
 //! \brief Tests if \a cps is a inside of \a ops, to a tolerance of \a eps.
-ValidatedSierpinskian inside(const CompactSetInterface& cps, const OpenSetInterface& ops, const FloatDP& eps);
+ValidatedLowerKleenean inside(const CompactSetInterface& cps, const OpenSetInterface& ops, const FloatDP& eps);
 
 //! \brief Tests if \a cps is disjoint from \a cls, to a tolerance of \a eps.
-ValidatedSierpinskian separated(const CompactSetInterface& cps, const ClosedSetInterface& cls, const FloatDP& eps);
+ValidatedLowerKleenean separated(const CompactSetInterface& cps, const ClosedSetInterface& cls, const FloatDP& eps);
 
 
 
@@ -207,7 +207,7 @@ ValidatedKleenean separated(const LocatedSetInterface& ls, const RegularSetInter
 
 
 //! \brief Tests if the intersection of \a ls and \a bx overlaps \a rs, to a tolerance of \a eps.
-ValidatedSierpinskian intersection_overlap(const OvertSetInterface& ls, const OpenSetInterface& rs, const ExactBoxType& bx, const FloatDP& eps);
+ValidatedLowerKleenean intersection_overlap(const OvertSetInterface& ls, const OpenSetInterface& rs, const ExactBoxType& bx, const FloatDP& eps);
 
 //! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
 ValidatedSierpinskian intersection_inside(const ClosedSetInterface& ls, const OpenSetInterface& rs, const ExactBoxType& bx, const FloatDP& eps);

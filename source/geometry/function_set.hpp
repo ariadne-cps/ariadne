@@ -34,8 +34,10 @@
 
 #include "utility/macros.hpp"
 #include "utility/container.hpp"
+#include "utility/container.hpp"
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"
+#include "expression/templates.hpp"
 #include "geometry/set_interface.hpp"
 #include "function/function.hpp"
 #include "function/function_model.hpp"
@@ -93,9 +95,12 @@ class ConstraintSet
 
     ConstraintSet* clone() const;
     DimensionType dimension() const;
-    ValidatedSierpinskian separated(const ExactBoxType&) const;
-    ValidatedSierpinskian overlaps(const ExactBoxType&) const;
-    ValidatedSierpinskian covers(const ExactBoxType&) const;
+    LowerKleenean separated(const ExactBoxType&) const;
+    LowerKleenean overlaps(const ExactBoxType&) const;
+    LowerKleenean covers(const ExactBoxType&) const;
+    ValidatedLowerKleenean separated(const ExactBoxType&, Effort) const;
+    ValidatedLowerKleenean overlaps(const ExactBoxType&, Effort) const;
+    ValidatedLowerKleenean covers(const ExactBoxType&, Effort) const;
     OutputStream& write(OutputStream&) const;
 
     friend ConstraintSet intersection(const ConstraintSet& cs1, const ConstraintSet& cs2);
@@ -108,7 +113,7 @@ class ConstraintSet
 //! \brief A set defined as the intersection of an exact box with preimage of an exact box (the \em codomain) under a continuous function.
 //! The set is described as \f$S=D\cap g^{-1}(C) = \{ x\in D \mid g(x)\in C\}\f$ where \f$D\f$ is the domain, \f$C\f$ is the codomain and \f$g\f$ the function.
 class BoundedConstraintSet
-    : public virtual SetInterface
+    : public virtual RegularLocatedSetInterface
     , public virtual DrawableInterface
 {
     RealBox _domain;
@@ -137,10 +142,14 @@ class BoundedConstraintSet
 
     BoundedConstraintSet* clone() const;
     DimensionType dimension() const;
-    ValidatedSierpinskian separated(const ExactBoxType&) const;
-    ValidatedSierpinskian overlaps(const ExactBoxType&) const;
-    ValidatedSierpinskian covers(const ExactBoxType&) const;
-    ValidatedSierpinskian inside(const ExactBoxType&) const;
+    LowerKleenean separated(const ExactBoxType&) const;
+    LowerKleenean overlaps(const ExactBoxType&) const;
+    LowerKleenean covers(const ExactBoxType&) const;
+    LowerKleenean inside(const ExactBoxType&) const;
+    ValidatedLowerKleenean separated(const ExactBoxType&, Effort) const;
+    ValidatedLowerKleenean overlaps(const ExactBoxType&, Effort) const;
+    ValidatedLowerKleenean covers(const ExactBoxType&, Effort) const;
+    ValidatedLowerKleenean inside(const ExactBoxType&, Effort) const;
     UpperBoxType bounding_box() const;
     OutputStream& write(OutputStream&) const;
     Void draw(CanvasInterface&,const Projection2d&) const;
@@ -219,16 +228,21 @@ class ConstrainedImageSet
     Pair<ConstrainedImageSet,ConstrainedImageSet> split(Nat j) const;
 
     //! \brief Test if the set is contained in (the interior of) a box.
-    ValidatedSierpinskian inside(const ExactBoxType& bx) const;
+    LowerKleenean inside(const ExactBoxType& bx) const;
     //! \brief Test if the set is disjoint from a (closed) box.
-    ValidatedSierpinskian separated(const ExactBoxType&) const;
+    LowerKleenean separated(const ExactBoxType&) const;
     //! \brief Test if the set overlaps (intersects the interior of) a box.
-    ValidatedSierpinskian overlaps(const ExactBoxType&) const;
+    LowerKleenean overlaps(const ExactBoxType&) const;
     //! \brief Adjoin an outer approximation to a paving.
     Void adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
 
+    ValidatedLowerKleenean inside(const ExactBoxType&, Effort) const;
+    ValidatedLowerKleenean separated(const ExactBoxType&, Effort) const;
+    ValidatedLowerKleenean overlaps(const ExactBoxType&, Effort) const;
+
     //! \brief Test if the set satisfies the state constraint at all points.
-    ValidatedKleenean satisfies(const EffectiveConstraint& c) const;
+    Kleenean satisfies(const EffectiveConstraint& c) const;
+    ValidatedKleenean satisfies(const EffectiveConstraint& c, Effort) const;
 
     //! \brief Draw to a canvas.
     Void draw(CanvasInterface&,const Projection2d&) const;
@@ -245,7 +259,7 @@ class ConstrainedImageSet
 //! \brief A set defined as the image of the intersection of a box \f$D\f$ and a constraint set \f$g^{-1}(C)\f$ under a function \f$f\f$.
 //! In other words, \f$S=f(D\cap g^{-1}(C))\f$.
 class ValidatedConstrainedImageSet
-    : public virtual LocatedSetInterface, public virtual DrawableInterface
+    : public virtual ValidatedLocatedSetInterface, public virtual DrawableInterface
 {
     ExactBoxType _domain;
     ExactBoxType _reduced_domain;
@@ -322,11 +336,11 @@ class ValidatedConstrainedImageSet
     //! \brief Test if the set is empty.
     ValidatedKleenean is_empty() const;
     //! \brief Test if the set is a strict subset of a box.
-    ValidatedSierpinskian inside(const ExactBoxType& bx) const;
+    ValidatedLowerKleenean inside(const ExactBoxType& bx) const;
     //! \brief Test if the set is disjoint from a box.
-    ValidatedSierpinskian separated(const ExactBoxType&) const;
+    ValidatedLowerKleenean separated(const ExactBoxType&) const;
     //! \brief Test if the set overlaps (intersects the interior of) a box.
-    ValidatedSierpinskian overlaps(const ExactBoxType&) const;
+    ValidatedLowerKleenean overlaps(const ExactBoxType&) const;
     //! \brief Adjoin an outer approximation to a paving.
     Void adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
     //! \brief Compute an outer approximation on the \a grid to the given \a depth.

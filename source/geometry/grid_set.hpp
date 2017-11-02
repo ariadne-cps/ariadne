@@ -336,16 +336,16 @@ class GridTreeSubset
     Bool disjoint( const ExactBoxType& theBoxType ) const;
 
     //! \brief Tests if the interior of a grid set is a superset of a box.
-    ValidatedSierpinskian covers( const ExactBoxType& theBoxType ) const;
+    ValidatedLowerKleenean covers( const ExactBoxType& theBoxType ) const;
 
     //! \brief Tests if (the closure of) a grid set is a subset of the interior of box.
-    ValidatedSierpinskian inside( const ExactBoxType& theBoxType  ) const;
+    ValidatedLowerKleenean inside( const ExactBoxType& theBoxType  ) const;
 
     //! \brief Tests if (the closure of) a grid set is disjoint from (the closure of) a box.
-    ValidatedSierpinskian separated( const ExactBoxType& theBoxType  ) const;
+    ValidatedLowerKleenean separated( const ExactBoxType& theBoxType  ) const;
 
     //! \brief Tests if a grid set overlaps (intersects the interior of) a box.
-    ValidatedSierpinskian overlaps( const ExactBoxType& theBoxType ) const;
+    ValidatedLowerKleenean overlaps( const ExactBoxType& theBoxType ) const;
 
     //@}
 
@@ -448,6 +448,8 @@ class GridTreeSet
     //! from the root node in recursive calls, thus the initial evaluate for this method must be done with an empty word.
     static Void _adjoin_outer_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const Nat primary_cell_height,
                                              const Nat max_mince_depth, const CompactSetInterface& theSet, BinaryWord * pPath );
+    static Void _adjoin_outer_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const Nat primary_cell_height,
+                                             const Nat max_mince_depth, const ValidatedCompactSetInterface& theSet, BinaryWord * pPath );
 
     //! \brief This method adjoins the inner approximation of \a theSet (computed on the fly) to this paving.
     //! We use the primary cell (enclosed in this paving) of height \a primary_cell_height and represented
@@ -635,6 +637,7 @@ class GridTreeSet
     //!   3. Minces the paving to the level: depth + \<the primary cell height\>
     //!   4. Iterates through the enabled leaf nodes of the paving (all the nodes are initially enabled)
     //!   5. Disables the cells that are disjoint with the \a theSet
+    Void adjoin_outer_approximation( const ValidatedCompactSetInterface& theSet, const Nat numSubdivInDim );
     Void adjoin_outer_approximation( const CompactSetInterface& theSet, const Nat numSubdivInDim );
     Void adjoin_outer_approximation( const UpperBoxType& theBoxType, const Nat numSubdivInDim );
 
@@ -691,6 +694,8 @@ GridTreeSet outer_approximation(const ExactBoxType& theBoxType, const Grid& theG
 GridTreeSet outer_approximation(const ExactBoxType& theBoxType, const Nat depth);
 GridTreeSet outer_approximation( const CompactSetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim );
 GridTreeSet outer_approximation( const CompactSetInterface& theSet, const Nat numSubdivInDim );
+GridTreeSet outer_approximation( const ValidatedCompactSetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim );
+GridTreeSet outer_approximation( const ValidatedCompactSetInterface& theSet, const Nat numSubdivInDim );
 GridTreeSet inner_approximation( const OpenSetInterface& theSet, const Grid& theGrid, const Nat height, const Nat numSubdivInDim );
 GridTreeSet inner_approximation( const OpenSetInterface& theSet, const Grid& theGrid, const ExactBoxType& bounding_box, const Nat numSubdivInDim );
 GridTreeSet inner_approximation( const SetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim );

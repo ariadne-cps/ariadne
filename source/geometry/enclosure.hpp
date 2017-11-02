@@ -100,7 +100,7 @@ struct EnclosureConfiguration {
 //! \brief A set of the form \f$x=f(s)\f$ for \f$s\in D\f$ satisfying \f$g(s)\leq0\f$ and \f$h(s)=0\f$.
 class Enclosure
     : public DrawableInterface
-    , public CompactSetInterface
+    , public ValidatedCompactSetInterface
 {
     ExactBoxType _domain;
     EffectiveVectorFunction _auxiliary_mapping;
@@ -261,16 +261,16 @@ class Enclosure
     //! \brief An over-approximation to the radius of the set.
     FloatDPError radius() const;
     //! \brief Returns \c true if the set is definitely singleton.
-    ValidatedSierpinskian is_bounded() const;
+    ValidatedLowerKleenean is_bounded() const;
     //! \brief Returns \c true if the set is provably empty.
     //! May return \c false if the set can (easily) be proved to be nonempty.
-    ValidatedSierpinskian is_empty() const;
+    ValidatedLowerKleenean is_empty() const;
     //! \brief Returns \c true if the set can be shown to be disjoint from \a bx.
-    ValidatedSierpinskian separated(const ExactBoxType& bx) const;
+    ValidatedLowerKleenean separated(const ExactBoxType& bx) const;
     //! \brief Returns \c true if the set can be shown to be a subset of \a bx..
-    ValidatedSierpinskian inside(const ExactBoxType& bx) const;
+    ValidatedLowerKleenean inside(const ExactBoxType& bx) const;
     //! \brief Returns \c true if the set can be shown to be a subset of \a bx..
-    ValidatedSierpinskian subset(const ExactBoxType& bx) const;
+    ValidatedLowerKleenean subset(const ExactBoxType& bx) const;
 
     //! \brief Reduces the size of the effective parameter domain
     //! by pruning away infeasible points. Does not affect the set as a mathematical entity.

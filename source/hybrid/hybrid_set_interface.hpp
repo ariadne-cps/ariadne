@@ -67,7 +67,7 @@ class HybridBoundedSetInterface
     virtual HybridBoundedSetInterface* clone() const = 0;
     virtual Set<DiscreteLocation> locations() const = 0;
     inline BoundedSet euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
-    virtual ValidatedSierpinskian inside(const HybridExactBoxes& bx) const = 0;
+    virtual LowerKleenean inside(const HybridExactBoxes& bx) const = 0;
     virtual HybridUpperBoxes bounding_box() const = 0;
   protected:
     virtual BoundedSetInterface* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
@@ -80,7 +80,7 @@ class HybridOvertSetInterface
   public:
     virtual HybridOvertSetInterface* clone() const = 0;
     inline OvertSet euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
-    virtual ValidatedSierpinskian overlaps(const HybridExactBox& bx) const = 0;
+    virtual LowerKleenean overlaps(const HybridExactBox& bx) const = 0;
   protected:
     virtual OvertSetInterface* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
 };
@@ -92,7 +92,7 @@ class HybridOpenSetInterface
   public:
     virtual HybridOpenSetInterface* clone() const = 0;
     inline OpenSet euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
-    virtual ValidatedSierpinskian covers(const HybridExactBox& bx) const = 0;
+    virtual LowerKleenean covers(const HybridExactBox& bx) const = 0;
   protected:
     virtual OpenSetInterface* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
 };
@@ -104,7 +104,7 @@ class HybridClosedSetInterface
   public:
     virtual HybridClosedSetInterface* clone() const = 0;
     inline ClosedSet euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
-    virtual ValidatedSierpinskian separated(const HybridExactBox& bx) const = 0;
+    virtual LowerKleenean separated(const HybridExactBox& bx) const = 0;
   protected:
     virtual ClosedSetInterface* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
 };
@@ -146,21 +146,126 @@ class HybridLocatedSetInterface
 };
 
 //! \brief Complete set interface for singleton regular sets in a hybrid space.
-class HybridSetInterface
+class HybridRegularLocatedSetInterface
     : public virtual HybridRegularSetInterface,
       public virtual HybridLocatedSetInterface
 {
   public:
-    virtual HybridSetInterface* clone() const = 0;
+    virtual HybridRegularLocatedSetInterface* clone() const = 0;
     inline RegularLocatedSet euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
   protected:
-    virtual SetInterface* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
+    virtual RegularLocatedSetInterface* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
 };
 
+using HybridSetInterface = HybridRegularLocatedSetInterface;
 
 inline OutputStream& operator<<(OutputStream& os, const HybridSetInterfaceBase& s) {
     return s.write(os);
 }
+
+
+//! \ingroup GeometryModule SetInterfaceSubModule
+//! \brief Interface for singleton sets.
+class HybridValidatedBoundedSetInterface
+    : public virtual HybridSetInterfaceBase {
+  public:
+    virtual HybridValidatedBoundedSetInterface* clone() const = 0;
+    virtual Set<DiscreteLocation> locations() const = 0;
+//    inline ValidatedBoundedSet euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
+    virtual ValidatedLowerKleenean inside(const HybridExactBoxes& bx) const = 0;
+    virtual HybridUpperBoxes bounding_box() const = 0;
+  protected:
+    virtual ValidatedBoundedSetInterface* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
+};
+
+//! \brief Interface for overt sets in a hybrid space.
+class HybridValidatedOvertSetInterface
+    : public virtual HybridSetInterfaceBase
+{
+  public:
+    virtual HybridValidatedOvertSetInterface* clone() const = 0;
+//    inline ValidatedOvertSet euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
+    virtual ValidatedLowerKleenean overlaps(const HybridExactBox& bx) const = 0;
+  protected:
+    virtual ValidatedOvertSetInterface* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
+};
+
+//! \ingroup GeometryModule SetInterfaceSubModule
+//! \brief Interface for open sets.
+class HybridValidatedOpenSetInterface
+    : public virtual HybridValidatedOvertSetInterface
+{
+  public:
+    virtual HybridValidatedOpenSetInterface* clone() const = 0;
+//    inline OpenSet euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
+    virtual ValidatedLowerKleenean covers(const ExactBoxType& bx) const = 0;
+  protected:
+    virtual ValidatedOpenSetInterface* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
+};
+
+//! \ingroup GeometryModule SetInterfaceSubModule
+//! \brief Interface for closed sets.
+class HybridValidatedClosedSetInterface
+    : public virtual HybridSetInterfaceBase
+{
+  public:
+    virtual HybridValidatedClosedSetInterface* clone() const = 0;
+//    inline ValidatedClosedSet euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
+    virtual ValidatedLowerKleenean separated(const HybridExactBox& bx) const = 0;
+  protected:
+    virtual ValidatedClosedSetInterface* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
+};
+
+//! \ingroup GeometryModule SetInterfaceSubModule
+//! \brief Interface for compact (closed and singleton) sets.
+class HybridValidatedCompactSetInterface
+    : public virtual HybridValidatedBoundedSetInterface,
+      public virtual HybridValidatedClosedSetInterface
+{
+  public:
+    virtual HybridValidatedCompactSetInterface* clone() const = 0;
+//    inline ValidatedCompactSet euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
+  protected:
+    virtual ValidatedCompactSetInterface* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
+};
+
+//! \ingroup GeometryModule SetInterfaceSubModule
+//! \brief Interface for regular sets, whose closure is the closure of the interior, and whose interior is the interior of the closure.
+class HybridValidatedRegularSetInterface
+    : public virtual HybridValidatedOpenSetInterface,
+      public virtual HybridValidatedClosedSetInterface
+{
+    virtual HybridValidatedRegularSetInterface* clone() const = 0;
+//    inline ValidatedRegularSet euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
+  protected:
+    virtual ValidatedRegularSetInterface* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
+};
+
+//! \ingroup GeometryModule SetInterfaceSubModule
+//! \brief Interface for located (overt and compact) sets.
+class HybridValidatedLocatedSetInterface
+    : public virtual HybridValidatedOvertSetInterface,
+      public virtual HybridValidatedCompactSetInterface
+{
+    virtual HybridValidatedLocatedSetInterface* clone() const = 0;
+//    inline ValidatedLocatedSet euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
+  protected:
+    virtual ValidatedLocatedSetInterface* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
+};
+
+//! \ingroup GeometryModule SetInterfaceSubModule
+//! \brief Complete set interface for singleton regular sets.
+class HybridValidatedRegularLocatedSetInterface
+    : public virtual HybridValidatedRegularSetInterface,
+      public virtual HybridValidatedLocatedSetInterface
+{
+  public:
+    virtual HybridValidatedRegularLocatedSetInterface* clone() const = 0;
+//    inline ValidatedRegularLocatedSet euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
+  protected:
+    virtual ValidatedRegularLocatedSetInterface* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
+};
+
 
 
 } // namespace Ariadne

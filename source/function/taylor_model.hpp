@@ -216,17 +216,17 @@ class TaylorModel<ValidatedTag,F>
     friend Bool same(const TaylorModel<ValidatedTag,F>& tm1, const TaylorModel<ValidatedTag,F>& tm2) {
         return same(tm1._expansion, tm2._expansion) && same(tm1._error, tm2._error); }
 
-    ValidatedSierpinskian operator<(const TaylorModel<ValidatedTag,F>& sd) const {
+    ValidatedLowerKleenean operator<(const TaylorModel<ValidatedTag,F>& sd) const {
         return (sd-*this)>0; }
     //! \brief Comparison with another Taylor model.
-    ValidatedSierpinskian operator>(const TaylorModel<ValidatedTag,F>& sd) const {
+    ValidatedLowerKleenean operator>(const TaylorModel<ValidatedTag,F>& sd) const {
         return (*this-sd)>0; }
 
     //! \brief Comparison with a scalar.
-    ValidatedSierpinskian operator<(Int c) const {
+    ValidatedLowerKleenean operator<(Int c) const {
         return this->range().upper()<c; }
     //! \brief Comparison with a scalar.
-    ValidatedSierpinskian operator>(Int c) const {
+    ValidatedLowerKleenean operator>(Int c) const {
         return this->range().lower()>c; }
     //@}
 

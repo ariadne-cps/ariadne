@@ -87,33 +87,33 @@ class HybridTime
             ht1._discrete_time==ht2._discrete_time;
     }
 
-    friend ValidatedNegatedSierpinskian operator==(const HybridTime& ht1, const HybridTime& ht2) {
+    friend NegatedSierpinskian operator==(const HybridTime& ht1, const HybridTime& ht2) {
         return ht1._continuous_time==ht2._continuous_time &&
             ht1._discrete_time==ht2._discrete_time;
     }
 
-    friend ValidatedSierpinskian operator!=(const HybridTime& ht1, const HybridTime& ht2) {
+    friend Sierpinskian operator!=(const HybridTime& ht1, const HybridTime& ht2) {
         return ht1._continuous_time!=ht2._continuous_time ||
             ht1._discrete_time!=ht2._discrete_time;
     }
 
-    friend ValidatedKleenean operator<=(const HybridTime& ht1, const HybridTime& ht2) {
-        return ValidatedKleenean(ht1._continuous_time<=ht2._continuous_time) &&
+    friend Kleenean operator<=(const HybridTime& ht1, const HybridTime& ht2) {
+        return Kleenean(ht1._continuous_time<=ht2._continuous_time) &&
             Boolean(ht1._discrete_time<=ht2._discrete_time);
     }
 
-    friend ValidatedKleenean operator<(const HybridTime& ht1, const HybridTime& ht2) {
-        return ValidatedKleenean(ht1._continuous_time< ht2._continuous_time) &&
+    friend Kleenean operator<(const HybridTime& ht1, const HybridTime& ht2) {
+        return Kleenean(ht1._continuous_time< ht2._continuous_time) &&
             Boolean(ht1._discrete_time<=ht2._discrete_time);
     }
 
-    friend ValidatedKleenean operator>(const HybridTime& ht1, const HybridTime& ht2) {
-        return ValidatedKleenean(ht1._continuous_time> ht2._continuous_time) &&
+    friend Kleenean operator>(const HybridTime& ht1, const HybridTime& ht2) {
+        return Kleenean(ht1._continuous_time> ht2._continuous_time) &&
             Boolean(ht1._discrete_time>=ht2._discrete_time);
     }
 
-    friend ValidatedKleenean operator>(const HybridTime& ht1, const ContinuousTimeType& ct2) {
-        return ValidatedKleenean(ht1._continuous_time> ct2);
+    friend Kleenean operator>(const HybridTime& ht1, const ContinuousTimeType& ct2) {
+        return Kleenean(ht1._continuous_time> ct2);
     }
 
     friend OutputStream& operator<<(OutputStream& os, const HybridTime& ht) {

@@ -270,7 +270,7 @@ UpperBoxType ValidatedAffineConstrainedImageSet::bounding_box() const {
 
 
 
-ValidatedSierpinskian ValidatedAffineConstrainedImageSet::separated(const ExactBoxType& bx) const {
+ValidatedLowerKleenean ValidatedAffineConstrainedImageSet::separated(const ExactBoxType& bx) const {
     ARIADNE_PRECONDITION_MSG(this->dimension()==bx.dimension(),"set="<<*this<<", box="<<bx);
     ExactBoxType wbx=cast_exact_box(widen(bx));
     LinearProgram<FloatDP> lp;
@@ -292,11 +292,11 @@ ValidatedSierpinskian ValidatedAffineConstrainedImageSet::separated(const ExactB
     return !feasible;
 }
 
-ValidatedSierpinskian ValidatedAffineConstrainedImageSet::is_empty() const {
-    return ValidatedSierpinskian(this->separated(cast_exact_box(this->bounding_box()))) || ValidatedKleenean(indeterminate);
+ValidatedLowerKleenean ValidatedAffineConstrainedImageSet::is_empty() const {
+    return ValidatedLowerKleenean(this->separated(cast_exact_box(this->bounding_box()))) || ValidatedKleenean(indeterminate);
 }
 
-ValidatedSierpinskian ValidatedAffineConstrainedImageSet::inside(const ExactBoxType& bx) const {
+ValidatedLowerKleenean ValidatedAffineConstrainedImageSet::inside(const ExactBoxType& bx) const {
     ARIADNE_PRECONDITION_MSG(this->dimension()==bx.dimension(),"set="<<*this<<", box="<<bx);
     return widen(this->bounding_box()).inside(bx);
 }

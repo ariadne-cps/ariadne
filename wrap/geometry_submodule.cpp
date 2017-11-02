@@ -159,8 +159,8 @@ class OpenSetWrapper
   public:
     OpenSetInterface* clone() const { return this->get_override("clone")(); }
     SizeType dimension() const { return this->get_override("dimension")(); }
-    ValidatedSierpinskian covers(const ExactBoxType& r) const { return this->get_override("covers")(); }
-    ValidatedSierpinskian overlaps(const ExactBoxType& r) const { return this->get_override("overlaps")(); }
+    LowerKleenean covers(const ExactBoxType& r) const { return this->get_override("covers")(); }
+    LowerKleenean overlaps(const ExactBoxType& r) const { return this->get_override("overlaps")(); }
     OutputStream& write(OutputStream&) const { return this->get_override("write")(); }
 };
 
@@ -170,7 +170,7 @@ class ClosedSetWrapper
   public:
     ClosedSetInterface* clone() const { return this->get_override("clone")(); }
     SizeType dimension() const { return this->get_override("dimension")(); }
-    ValidatedSierpinskian separated(const ExactBoxType& r) const { return this->get_override("separated")(); }
+    LowerKleenean separated(const ExactBoxType& r) const { return this->get_override("separated")(); }
     OutputStream& write(OutputStream&) const { return this->get_override("write")(); }
 };
 
@@ -181,7 +181,7 @@ class OvertSetWrapper
   public:
     OvertSetInterface* clone() const { return this->get_override("clone")(); }
     SizeType dimension() const { return this->get_override("dimension")(); }
-    ValidatedSierpinskian overlaps(const ExactBoxType& r) const { return this->get_override("overlaps")(); }
+    LowerKleenean overlaps(const ExactBoxType& r) const { return this->get_override("overlaps")(); }
     OutputStream& write(OutputStream&) const { return this->get_override("write")(); }
 };
 
@@ -192,9 +192,9 @@ class CompactSetWrapper
   public:
     CompactSetInterface* clone() const { return this->get_override("clone")(); }
     SizeType dimension() const { return this->get_override("dimension")(); }
-    ValidatedSierpinskian separated(const ExactBoxType& r) const { return this->get_override("separated")(); }
-    ValidatedSierpinskian inside(const ExactBoxType& r) const { return this->get_override("inside")(); }
-    ValidatedSierpinskian is_bounded() const { return this->get_override("is_bounded")(); }
+    LowerKleenean separated(const ExactBoxType& r) const { return this->get_override("separated")(); }
+    LowerKleenean inside(const ExactBoxType& r) const { return this->get_override("inside")(); }
+    LowerKleenean is_bounded() const { return this->get_override("is_bounded")(); }
     UpperBoxType bounding_box() const { return this->get_override("bounding_box")(); }
     OutputStream& write(OutputStream&) const { return this->get_override("write")(); }
 };
@@ -205,9 +205,9 @@ class RegularSetWrapper
   public:
     RegularSetWrapper* clone() const { return this->get_override("clone")(); }
     SizeType dimension() const { return this->get_override("dimension")(); }
-    ValidatedSierpinskian overlaps(const ExactBoxType& r) const { return this->get_override("overlaps")(); }
-    ValidatedSierpinskian covers(const ExactBoxType& r) const { return this->get_override("covers")(); }
-    ValidatedSierpinskian separated(const ExactBoxType& r) const { return this->get_override("separated")(); }
+    LowerKleenean overlaps(const ExactBoxType& r) const { return this->get_override("overlaps")(); }
+    LowerKleenean covers(const ExactBoxType& r) const { return this->get_override("covers")(); }
+    LowerKleenean separated(const ExactBoxType& r) const { return this->get_override("separated")(); }
     OutputStream& write(OutputStream&) const { return this->get_override("write")(); }
 };
 
@@ -217,10 +217,10 @@ class LocatedSetWrapper
   public:
     LocatedSetInterface* clone() const { return this->get_override("clone")(); }
     SizeType dimension() const { return this->get_override("dimension")(); }
-    ValidatedSierpinskian overlaps(const ExactBoxType& r) const { return this->get_override("overlaps")(); }
-    ValidatedSierpinskian separated(const ExactBoxType& r) const { return this->get_override("separated")(); }
-    ValidatedSierpinskian inside(const ExactBoxType& r) const { return this->get_override("inside")(); }
-    ValidatedSierpinskian is_bounded() const { return this->get_override("is_bounded")(); }
+    LowerKleenean overlaps(const ExactBoxType& r) const { return this->get_override("overlaps")(); }
+    LowerKleenean separated(const ExactBoxType& r) const { return this->get_override("separated")(); }
+    LowerKleenean inside(const ExactBoxType& r) const { return this->get_override("inside")(); }
+    LowerKleenean is_bounded() const { return this->get_override("is_bounded")(); }
     UpperBoxType bounding_box() const { return this->get_override("bounding_box")(); }
     OutputStream& write(OutputStream&) const { return this->get_override("write")(); }
 };
@@ -246,18 +246,18 @@ ValidatedAffineConstrainedImageSet image(ValidatedAffineConstrainedImageSet set,
 
 Void export_set_interface() {
     class_<OpenSetInterface, boost::noncopyable> open_set_wrapper_class("OpenSetInterface", no_init);
-    open_set_wrapper_class.def("covers",&OpenSetInterface::covers);
-    open_set_wrapper_class.def("overlaps",&OpenSetInterface::overlaps);
+    open_set_wrapper_class.def("covers",(LowerKleenean(OpenSetInterface::*)(const ExactBoxType& bx)const) &OpenSetInterface::covers);
+    open_set_wrapper_class.def("overlaps",(LowerKleenean(OvertSetInterface::*)(const ExactBoxType& bx)const) &OpenSetInterface::overlaps);
 
     class_<ClosedSetInterface, boost::noncopyable> closed_set_wrapper_class("ClosedSetInterface", no_init);
-    closed_set_wrapper_class.def("separated",&ClosedSetInterface::separated);
+    closed_set_wrapper_class.def("separated",(LowerKleenean(ClosedSetInterface::*)(const ExactBoxType& bx)const) &ClosedSetInterface::separated);
 
     class_<OvertSetInterface, boost::noncopyable> overt_set_wrapper_class("OvertSetInterface", no_init);
-    overt_set_wrapper_class.def("overlaps",&OvertSetInterface::overlaps);
+    overt_set_wrapper_class.def("overlaps",(LowerKleenean(OvertSetInterface::*)(const ExactBoxType& bx)const) &OvertSetInterface::overlaps);
 
     class_<CompactSetInterface, boost::noncopyable> compact_set_wrapper_class("CompactSetInterface", no_init);
-    compact_set_wrapper_class.def("separated",&CompactSetInterface::separated);
-    compact_set_wrapper_class.def("inside",&CompactSetInterface::inside);
+    compact_set_wrapper_class.def("separated",(LowerKleenean(ClosedSetInterface::*)(const ExactBoxType& bx)const) &CompactSetInterface::separated);
+    compact_set_wrapper_class.def("inside",(LowerKleenean(BoundedSetInterface::*)(const ExactBoxType& bx)const) &CompactSetInterface::inside);
     compact_set_wrapper_class.def("bounding_box",&CompactSetInterface::bounding_box);
 
     class_<LocatedSetInterface, boost::noncopyable> located_set_wrapper_class("LocatedSetInterface", no_init);
@@ -280,7 +280,7 @@ Void export_point()
 
 }
 
-typedef Logical<ExactTag> ExactLogicalType;
+typedef LogicalType<ExactTag> ExactLogicalType;
 
 
 template<class IVL> Void export_interval(std::string name) {

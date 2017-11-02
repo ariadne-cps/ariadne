@@ -278,7 +278,7 @@ class HybridEnclosure
     //! \brief The dimension of the state space of the set.
     DimensionType state_dimension() const;
     //! \brief Tests whether the set is empty.
-    ValidatedSierpinskian is_empty() const;
+    ValidatedLowerKleenean is_empty() const;
     //! \brief Tests whether the set satisfies the constraint \a c.
     ValidatedKleenean satisfies(EffectiveConstraint c) const;
 
@@ -287,9 +287,9 @@ class HybridEnclosure
     //! \brief Returns an over-approximation to the range of \a g over the set.
     UpperIntervalType range_of(EffectiveScalarFunction const& g) const;
     //! \brief Tests whether the set is disjoint from the box \a hbx.
-    ValidatedSierpinskian separated(const HybridExactBox& hbx) const;
+    ValidatedLowerKleenean separated(const HybridExactBox& hbx) const;
     //! \brief Tests whether the set is a subset of the interior of the box \a hbx.
-    ValidatedSierpinskian inside(const HybridExactBox& hbx) const;
+    ValidatedLowerKleenean inside(const HybridExactBox& hbx) const;
     //! \brief Restricts to a subdomain of the \em parameter domain.
     Void restrict(const ExactBoxType& subdomain);
     //! \brief Adjoins an outer approximation of the set to the grid-based set \a paving, with accuracy given by
@@ -330,9 +330,9 @@ class HybridEnclosure
 
 };
 
-ValidatedSierpinskian inside(const HybridEnclosure& he, const HybridRealBox& hbx);
-inline ValidatedSierpinskian inside(const HybridEnclosure& he, const HybridExactBox& hbx) { return he.inside(hbx); }
-inline ValidatedSierpinskian separated(const HybridEnclosure& he, const HybridExactBox& hbx) { return he.separated(hbx); }
+ValidatedLowerKleenean inside(const HybridEnclosure& he, const HybridRealBox& hbx);
+inline ValidatedLowerKleenean inside(const HybridEnclosure& he, const HybridExactBox& hbx) { return he.inside(hbx); }
+inline ValidatedLowerKleenean separated(const HybridEnclosure& he, const HybridExactBox& hbx) { return he.separated(hbx); }
 
 inline OutputStream& operator<<(OutputStream& os, const HybridEnclosure& s) { return s.write(os); }
 inline OutputStream& operator<<(OutputStream& os, const Representation<HybridEnclosure>& s) { return s.pointer->repr(os); }
@@ -372,8 +372,8 @@ class ListSet<HybridEnclosure>
     List<HybridEnclosure> _list;
 };
 
-inline ValidatedSierpinskian inside(ListSet<HybridEnclosure> const& set, HybridExactBox const& bx) {
-    ValidatedSierpinskian result=true;
+inline ValidatedLowerKleenean inside(ListSet<HybridEnclosure> const& set, HybridExactBox const& bx) {
+    ValidatedLowerKleenean result=true;
     for(auto iter=set.begin(); iter!=set.end(); ++iter) {
         result = result && inside(*iter,bx);
     }

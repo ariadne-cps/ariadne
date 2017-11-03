@@ -181,6 +181,10 @@ template<class F> inline PositiveValue<F> cast_positive(Value<F> const& x) {
 
 static_assert(IsSame<decltype(declval<FloatDPValue>() < declval<Rational>()),Boolean>::value,"");
 
+extern template Ariadne::Nat Ariadne::Value<Ariadne::FloatDP>::output_places;
+extern template Ariadne::Nat Ariadne::Value<Ariadne::FloatMP>::output_places;
+
+
 }
 
 #endif

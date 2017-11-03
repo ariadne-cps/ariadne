@@ -191,6 +191,10 @@ template<class F> class Positive<Bounds<F>> : public Bounds<F>
 template<class F> inline PositiveBounds<F> cast_positive(Bounds<F> const& x) {
     return PositiveBounds<F>(x); }
 
+extern template Ariadne::Nat Ariadne::Bounds<Ariadne::FloatDP>::output_places;
+extern template Ariadne::Nat Ariadne::Bounds<Ariadne::FloatMP>::output_places;
+
 }
+
 
 #endif

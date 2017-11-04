@@ -458,12 +458,6 @@ Void export_pivot_matrix()
 
 }
 
-
-template Void export_vector<FloatDPApproximation>();
-template Void export_vector<FloatDPBounds>();
-template Void export_matrix<FloatDPApproximation>();
-template Void export_matrix<FloatDPBounds>();
-
 template Void export_diagonal_matrix<FloatDPApproximation>();
 
 template Void export_vector<Rational>();

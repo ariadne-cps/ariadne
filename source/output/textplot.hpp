@@ -62,20 +62,20 @@ class TextPlot
     TextPlot(const char* filename);
     TextPlot(const char* filename, std::ios::openmode mode);
 
-    virtual TextPlot& set_projection_map(const PlanarProjectionMap& prj) override { };
-    virtual TextPlot& set_bounding_box(const GraphicsBoundingBoxType& bx) override { };
-    virtual TextPlot& set_dot_radius(double) override { };
+    virtual TextPlot& set_projection_map(const PlanarProjectionMap& prj) override { return *this; };
+    virtual TextPlot& set_bounding_box(const GraphicsBoundingBoxType& bx) override { return *this; };
+    virtual TextPlot& set_dot_radius(double) override { return *this; };
 
-    TextPlot& set_projection(Nat, Nat, Nat) override { };
+    TextPlot& set_projection(Nat, Nat, Nat) override { return *this; };
 
-    TextPlot& set_line_style(Bool) override { };
-    TextPlot& set_line_width(double) override { };
-    TextPlot& set_line_colour(Colour) override { };
-    TextPlot& set_fill_opacity(double) override { };
-    TextPlot& set_fill_colour(Colour) override { };
+    TextPlot& set_line_style(Bool) override { return *this; };
+    TextPlot& set_line_width(double) override { return *this; };
+    TextPlot& set_line_colour(Colour) override { return *this; };
+    TextPlot& set_fill_opacity(double) override { return *this; };
+    TextPlot& set_fill_colour(Colour) override { return *this; };
 
-    TextPlot& set_line_colour(double, double, double) { };
-    TextPlot& set_fill_colour(double, double, double) { };
+    TextPlot& set_line_colour(double, double, double) { return *this; };
+    TextPlot& set_fill_colour(double, double, double) { return *this; };
 
     Bool get_line_style() const override { return true; }
     double get_line_width() const override { return 1.0; }

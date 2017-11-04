@@ -37,6 +37,8 @@
 using std::cout; using std::cerr; using std::endl;
 using namespace Ariadne;
 
+extern template Ariadne::Nat Ariadne::Error<Ariadne::FloatMP>::output_places;
+
 Dyadic operator"" _exd (long double x) { return Dyadic(x); }
 
 template<class T, class = decltype(declval<T>().clobber())> True has_clobber(int);

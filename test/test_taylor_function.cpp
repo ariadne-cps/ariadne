@@ -45,6 +45,8 @@
 using namespace std;
 using namespace Ariadne;
 
+extern template Ariadne::Nat Ariadne::Error<Ariadne::FloatDP>::output_places;
+
 Vector<Real> e(Nat n, Nat i) { return Vector<Real>::unit(n,i); }
 Polynomial<FloatDP> p(Nat n, Nat j) { return Polynomial<FloatDP>::variable(n,j); }
 ValidatedScalarTaylorFunctionModelDP t(ExactBoxType d, Nat j,Sweeper<FloatDP> swp) { return ValidatedScalarTaylorFunctionModelDP::coordinate(d,j,swp); }

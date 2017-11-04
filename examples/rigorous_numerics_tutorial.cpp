@@ -37,6 +37,9 @@
 
 using namespace Ariadne;
 
+extern template Ariadne::Nat Ariadne::Error<Ariadne::FloatMP>::output_places;
+extern template Ariadne::Nat Ariadne::Approximation<Ariadne::FloatMP>::output_places;
+
 int main() {
     //! [numeric_demonstration]
     {

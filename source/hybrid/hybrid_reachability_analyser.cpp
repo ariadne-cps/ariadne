@@ -69,7 +69,6 @@ static const double DEFAULT_MAXIMUM_ENCLOSURE_RADIUS=0.25;
 static const double DEFAULT_GRID_LENGTH=0.125;
 
 template class ReachabilityAnalyser<HybridAutomatonInterface>;
-template class ReachabilityAnalyserConfiguration<HybridAutomatonInterface>;
 
 // Resolves possible linking bug in macOS
 template<>

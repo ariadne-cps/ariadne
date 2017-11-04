@@ -181,11 +181,11 @@ endif()
 
 add_library(pyariadne $<TARGET_OBJECTS:pyariadne-src>)
 set_target_properties(pyariadne PROPERTIES PREFIX "" OUTPUT_NAME "ariadne")
-target_link_libraries (pyariadne ariadne boost_python)
+target_link_libraries (pyariadne ariadne boost_python python)
 
 add_library(pyariadne-numeric SHARED $<TARGET_OBJECTS:pyariadne-numeric-src> $<TARGET_OBJECTS:ariadne-utility> $<TARGET_OBJECTS:ariadne-numeric>)
 set_target_properties(pyariadne-numeric PROPERTIES PREFIX "" OUTPUT_NAME "numeric")
-target_link_libraries (pyariadne-numeric ${PYTHON_LIBRARIES} boost_python mpfr gmp)
+target_link_libraries (pyariadne-numeric ${PYTHON_LIBRARIES} boost_python python mpfr gmp)
 
 #add_library(pyariadne-algebra $<TARGET_OBJECTS:pyariadne-algebra-src>)
 #set_target_properties(pyariadne-algebra PROPERTIES PREFIX "" OUTPUT_NAME "algebra")

@@ -264,6 +264,7 @@ struct Div : OperatorObject<Div> {
 struct Pow : OperatorObject<Pow> {
     OperatorCode code() const { return OperatorCode::POW; } OperatorKind kind() const { return OperatorKind::GRADED; }
     template<class A, class N> auto operator()(A&& a, N&& n) const -> decltype(pow(a,n)) { return pow(a,n); }
+    template<class X,class D, class N> D derivative(const X& a, const D& d, N n) const { return n*pow(a,n-1)*d; }
 };
 struct Fma : OperatorObject<Fma> {
     OperatorCode code() const { return OperatorCode::FMA; } OperatorKind kind() const { return OperatorKind::TERNARY; }

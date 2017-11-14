@@ -41,6 +41,8 @@
 #include "algebra/expansion.hpp"
 #include "algebra/operations.hpp"
 
+#include "algebra/univariate_differential.hpp"
+
 namespace Ariadne {
 
 template<class X> class Vector;
@@ -57,7 +59,6 @@ typedef Differential<FloatDPApproximation> FloatApproximationDifferential;
 typedef Differential<FloatDPBounds> FloatBoundsDifferential;
 typedef Differential<UpperIntervalType> UpperIntervalDifferentialType;
 
-
 template<class PR> class DifferentialFactory : public FloatFactory<PR> {
   public:
     DifferentialFactory<PR>(PR const& pr) : FloatFactory<PR>(pr) { }
@@ -73,71 +74,6 @@ template<class X> DifferentialFactory<PrecisionType<X>> factory(UnivariateDiffer
 template<class X> DifferentialFactory<PrecisionType<X>> factory(Differential<X> const& dx) {
     return differential_factory(dx.value().precision()); }
 
-
-
-//! \ingroup DifferentiationModule
-//! \brief Arbitrary-order derivatives with respect to a single argument.
-template<class X> class UnivariateDifferential
-    : public DispatchTranscendentalAlgebraOperations<UnivariateDifferential<X>,X>
-{
-    Array<X> _ary;
-  public:
-    typedef X NumericType;
-    typedef typename X::Paradigm Paradigm;
-    typedef UnivariateDifferential<X> SelfType;
-    typedef typename Array<X>::Iterator Iterator;
-    typedef typename Array<X>::ConstIterator ConstIterator;
-
-    UnivariateDifferential();
-    UnivariateDifferential(DegreeType d);
-    UnivariateDifferential(DegreeType d, InitializerList<X> e);
-    template<class XX> UnivariateDifferential(DegreeType d, XX const* p);
-    UnivariateDifferential(DegreeType d, Series<X> const& s); // explicit
-
-    static SelfType constant(DegreeType d, const NumericType& c);
-    static SelfType variable(DegreeType d, const NumericType& c);
-
-    SelfType create_zero() const;
-    SelfType create_constant(const NumericType& c) const;
-    SelfType create_variable(const NumericType& c) const;
-
-    SizeType argument_size() const;
-    DegreeType degree() const;
-    X zero_coefficient() const;
-    const Array<X>& array() const;
-    Expansion<X>& array();
-    const X& operator[](SizeType k) const;
-    X& operator[](SizeType k);
-
-    SelfType& operator=(const NumericType& c);
-    template<class T, EnableIf<IsAssignable<X,T>> =dummy>
-        SelfType& operator=(const T& c) { X xc=nul(this->value()); xc=c; return (*this)=xc; }
-
-    SelfType& operator+=(const SelfType& x);
-    SelfType& operator-=(const SelfType& x);
-    SelfType& operator*=(const SelfType& x);
-    SelfType& operator+=(const NumericType& c);
-    SelfType& operator*=(const NumericType& c);
-
-    SelfType apply(Rec) const;
-
-    X value() const;
-    X gradient() const;
-    X hessian() const;
-
-    Void clear();
-    OutputStream& write(OutputStream& os) const;
-
-    friend OutputStream& operator<<(OutputStream& os, UnivariateDifferential<X> const& dx) {
-        return dx.write(os); }
-    static UnivariateDifferential<X> _compose(Series<X> const& f, Differential<X> const& dx);
-};
-
-template<class X> template<class XX> UnivariateDifferential<X>::UnivariateDifferential(DegreeType d, XX const* ptr)
-    : _ary(d+1,X(0))
-{
-    std::copy(ptr,ptr+d+1,_ary.begin());
-}
 
 
 
@@ -252,6 +188,7 @@ class Differential
     //! \note Note the the components of the Hessian matrix are \em half those of the values indexed by the differential.
     //! This is because the differential stores the coefficients of the Taylor expansion, rather than the derivatives themselves.
     Matrix<X> hessian() const;
+    Matrix<X> half_hessian() const;
 
     //! \brief A reference to the coefficient of \f$x_j\f$.
     X& operator[](const SizeType& j);
@@ -305,6 +242,7 @@ class Differential
     friend X value(const Differential<X>& x) { return x.value(); }
     friend Covector<X> gradient(const Differential<X>& x) { return x.gradient(); }
     friend Matrix<X> hessian(const Differential<X>& x) { return x.hessian(); }
+    friend Matrix<X> half_hessian(const Differential<X>& x) { return x.half_hessian(); }
 
     friend OutputStream& operator<<(OutputStream& os, Differential<X> const& dx) { return dx._write(os); }
   public:
@@ -453,6 +391,7 @@ class Vector< Differential<X> >
     Vector(SizeType rs, SizeType as, DegreeType d,const Vector<X>& v, const Matrix<X>& A);
     template<class E> Vector(const VectorExpression<E>& ve);
     template<class E> Vector< Differential<X> >& operator=(const VectorExpression<E>& ve);
+    template<class G, EnableIf<IsInvocableReturning<Differential<X>,G,SizeType>> =dummy> Vector(SizeType n, G const& g);
 
 
     const Differential<X>& operator[](SizeType i) const { return this->_ary[i]; }
@@ -504,6 +443,10 @@ Vector<Differential<X>>::Vector(SizeType rs, SizeType as, DegreeType d, const Y*
     : _chars(as,d), _ary(rs,Differential<X>(as,d)) {
     for(SizeType i=0; i!=rs; ++i) { for(MultiIndex j(as); j.degree()<=d; ++j) { if(*ptr!=0) { (*this)[i][j]=X(*ptr,prs...); } ++ptr; } }
 }
+
+template<class X> template<class G, EnableIf<IsInvocableReturning<Differential<X>,G,SizeType>>>
+Vector<Differential<X>>::Vector(SizeType n, G const& g)
+    : _chars(g(0).argument_size(),g(0).degree()), _ary(n,g) { }
 
 template<class X> template<class E>
 Vector<Differential<X>>::Vector(const VectorExpression<E>& ve) : _ary(ve().size(),Uninitialised()) {

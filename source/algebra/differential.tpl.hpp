@@ -45,71 +45,6 @@ template<class X> class Differential;
 
 
 
-template<class X> UnivariateDifferential<X>::UnivariateDifferential()
-    : _ary(1u,X(0)) { }
-
-template<class X> UnivariateDifferential<X>::UnivariateDifferential(DegreeType d)
-    : _ary(d+1,X(0)) { }
-
-template<class X> UnivariateDifferential<X>::UnivariateDifferential(DegreeType d, InitializerList<X> lst)
-    : _ary(d+1,X(0))
-{
-    ARIADNE_PRECONDITION(lst.size()==d+1u);
-    std::copy(lst.begin(),lst.end(),_ary.begin());
-}
-
-template<class X> UnivariateDifferential<X>::UnivariateDifferential(DegreeType d, Series<X> const& s)
-    : _ary(d+1u) { for(SizeType i=0; i<=d; ++i) { this->_ary[i]=s[i]; }
-}
-
-template<class X> UnivariateDifferential<X> UnivariateDifferential<X>::constant(DegreeType d, X const& c) {
-    UnivariateDifferential r(d);
-    r[0]=c;
-    return std::move(r);
-}
-
-template<class X> UnivariateDifferential<X> UnivariateDifferential<X>::variable(DegreeType d, X const& c) {
-    UnivariateDifferential r(d);
-    r[0]=c;
-    if(d>=1) { r[1]=1; }
-    return std::move(r);
-}
-
-template<class X> DegreeType UnivariateDifferential<X>::degree() const {
-    return this->_ary.size()-1u;
-}
-
-template<class X> X const& UnivariateDifferential<X>::operator[](SizeType k) const {
-    return this->_ary[k];
-}
-
-template<class X> X& UnivariateDifferential<X>::operator[](SizeType k) {
-    return this->_ary[k];
-}
-
-template<class X> UnivariateDifferential<X>& UnivariateDifferential<X>::operator+=(X const& c) {
-    this->_ary[0]+=c;
-    return *this;
-}
-
-template<class X> UnivariateDifferential<X>& UnivariateDifferential<X>::operator*=(X const& c) {
-    for(DegreeType i=0; i<=this->degree(); ++i) {
-        this->_ary[i]*=c;
-    }
-    return *this;
-}
-
-template<class X> OutputStream& UnivariateDifferential<X>::write(OutputStream& os) const {
-    os << this->_ary[0];
-    for(DegreeType i=1; i<=this->degree(); ++i) {
-        os <<" ";
-        if(decide(this->_ary[i]>=X(0))) { os << "+"; }
-        os << this->_ary[i] << "*dx^" << (uint)i;
-    }
-    return os;
-}
-
-
 
 
 //template<class X> Differential<X>::Differential() : _expansion(0), _degree(0) { }
@@ -268,7 +203,7 @@ template<class X> Covector<X> Differential<X>::gradient() const {
     return g;
 }
 
-template<class X> Matrix<X> Differential<X>::hessian() const {
+template<class X> Matrix<X> Differential<X>::half_hessian() const {
     ARIADNE_PRECONDITION(this->degree()>=2);
     Matrix<X> H(this->argument_size(),this->argument_size());
     ConstIterator iter=this->begin();
@@ -277,11 +212,15 @@ template<class X> Matrix<X> Differential<X>::hessian() const {
     while(iter!=this->end() && iter->key().degree()<=2) {
         const MultiIndex& a=iter->key(); const X& c=iter->data();
         while(a[i]==0) { ++i; j=i+1; }
-        if(a[i]==2) { H[i][i]=c*2; }
-        else { while(a[j]==0) { ++j; } H[i][j]=c*2; H[j][i]=c*2; }
+        if(a[i]==2) { H[i][i]=c; }
+        else { while(a[j]==0) { ++j; } H[i][j]=c; H[j][i]=c; }
         ++iter;
     }
     return H;
+}
+
+template<class X> Matrix<X> Differential<X>::hessian() const {
+    return this->half_hessian()*2;
 }
 
 
@@ -836,8 +775,5 @@ Vector<Differential<X>>::_lie_derivative(const Vector<Differential<X> >& df, con
     }
     return r;
 }
-
-
-
 
 } //namespace Ariadne

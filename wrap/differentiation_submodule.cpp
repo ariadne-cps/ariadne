@@ -32,6 +32,9 @@
 #include "algebra/vector.hpp"
 #include "algebra/covector.hpp"
 #include "algebra/differential.hpp"
+#include "algebra/univariate_differential.hpp"
+#include "algebra/fixed_differential.hpp"
+#include "algebra/fixed_univariate_differential.hpp"
 
 using namespace boost::python;
 using namespace Ariadne;
@@ -197,6 +200,10 @@ template<class X> OutputStream& operator<<(OutputStream& os, const PythonReprese
 }
 
 
+template<class D> using ValueType = decltype(declval<D>().value());
+template<class D> using GradientType = decltype(declval<D>().gradient());
+template<class D> using HessianType = decltype(declval<D>().hessian());
+
 
 template<class DIFF>
 Void export_differential(const char* name)
@@ -207,13 +214,10 @@ Void export_differential(const char* name)
     typedef DIFF D;
     typedef Vector<D> DV;
 
-
     class_<D> differential_class(name, init<D>() );
-    //differential_class.def("__init__", make_constructor(&make_differential<D>) );
     differential_class.def("__init__", make_constructor(&make_sparse_differential<D>) );
-    //differential_class.def( init< D >());
-    differential_class.def( init< Nat, Nat >());
-    differential_class.def( init< Expansion<X>, Nat >());
+    differential_class.def( init< SizeType, DegreeType >());
+    differential_class.def( init< Expansion<X>, DegreeType >());
     differential_class.def("__getitem__", &get_item<D,MultiIndex,X>);
     differential_class.def("__setitem__",&set_item<D,MultiIndex,X>);
     differential_class.def(-self);
@@ -230,19 +234,17 @@ Void export_differential(const char* name)
     differential_class.def(X()*self);
     differential_class.def(self+=self);
     differential_class.def(self-=self);
-    //differential_class.def(self*=self);
     differential_class.def(self+=X());
     differential_class.def(self-=X());
     differential_class.def(self*=X());
     differential_class.def(self/=X());
     differential_class.def(self_ns::str(self));
-    //differential_class.def("__repr__", (StringType(*)(const D&)) &__repr__);
     differential_class.def("__repr__", &__repr__<D>);
 
-    differential_class.def("value",&D::value,return_value_policy<copy_const_reference>());
-    differential_class.def("gradient",(Covector<X>(D::*)()const)&D::gradient);
-    differential_class.def("hessian", (Matrix<X>(D::*)()const)&D::hessian);
-    differential_class.def("expansion", (Expansion<X>const&(D::*)()const)&D::expansion,return_value_policy<copy_const_reference>());
+    differential_class.def("value", (ValueType<D>(D::*)()const)&D::value, return_value_policy<copy_const_reference>());
+    differential_class.def("gradient", (GradientType<D>(D::*)()const)&D::gradient);
+    differential_class.def("hessian", (HessianType<D>(D::*)()const)&D::hessian);
+    differential_class.def("expansion", (Expansion<X>const&(D::*)()const)&D::expansion, return_value_policy<copy_const_reference>());
 
     differential_class.def("constant",(D(*)(SizeType, DegreeType, const X&))&D::constant);
     differential_class.def("variable",(D(*)(SizeType, DegreeType, const X&, SizeType))&D::variable);

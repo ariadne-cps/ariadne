@@ -310,6 +310,14 @@ ValidatedScalarFunction compose(const ValidatedScalarFunction& f, const Validate
 ValidatedVectorFunction compose(const ValidatedVectorFunction& f, const ValidatedVectorFunction& g);
 
 
+ApproximateVectorFunction join(const ApproximateScalarFunction& f1, const ApproximateScalarFunction& f2);
+ApproximateVectorFunction join(const ApproximateScalarFunction& f1, const ApproximateVectorFunction& f2);
+ApproximateVectorFunction join(const ApproximateVectorFunction& f1, const ApproximateScalarFunction& f2);
+ApproximateVectorFunction join(const ApproximateVectorFunction& f1, const ApproximateVectorFunction& f2);
+ApproximateScalarFunction compose(const ApproximateScalarFunction& f, const ApproximateVectorFunction& g);
+ApproximateVectorFunction compose(const ApproximateVectorFunction& f, const ApproximateVectorFunction& g);
+
+
 
 template<class P, class D>
 struct VectorFunctionElementReference

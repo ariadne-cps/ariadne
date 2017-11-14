@@ -1150,5 +1150,234 @@ Covector<UpperIntervalType> gradient_range(ValidatedScalarFunction const& f, con
 Matrix<UpperIntervalType> jacobian_range(ValidatedVectorFunction const& f, const Vector<UpperIntervalType>& x) {
     return static_cast<Matrix<UpperIntervalType>>(static_cast<Matrix<ValidatedNumericType>>(jacobian(f,reinterpret_cast<Vector<ValidatedNumericType>const&>(x)))); }
 
+//------------------------ Approximate function operators -------------------------------//
+
+namespace {
+
+template<class OP> ApproximateScalarFunction apply(OP op, ApproximateScalarFunction const& f) {
+    return ApproximateScalarFunction(new UnaryFunction<ApproximateTag>(op.code(),f));
+}
+
+template<class OP> ApproximateScalarFunction apply(OP op, ApproximateScalarFunction const& f1, ApproximateScalarFunction const& f2) {
+    return ApproximateScalarFunction(new BinaryFunction<ApproximateTag>(op.code(),f1,f2));
+}
+
+template<class OP> ApproximateScalarFunction apply(OP op, ApproximateScalarFunction const& f1, ApproximateNumber const& c2) {
+    return ApproximateScalarFunction(new BinaryFunction<ApproximateTag>(op.code(),f1,f1.create_constant(c2)));
+}
+
+template<class OP> ApproximateScalarFunction apply(OP op, ApproximateNumber const& c1, ApproximateScalarFunction const& f2) {
+    return ApproximateScalarFunction(new BinaryFunction<ApproximateTag>(op.code(),f2.create_constant(c1),f2));
+}
+
+ApproximateScalarFunction apply(Pow op, ApproximateScalarFunction const& f, Int n) {
+    return ApproximateScalarFunction(new GradedFunction<ApproximateTag>(op.code(),f,n));
+}
+
+} // namespace
+
+ApproximateScalarFunction operator+(ApproximateScalarFunction const& f) {
+    return apply(Pos(),f);
+}
+
+ApproximateScalarFunction operator-(ApproximateScalarFunction const& f) {
+    return apply(Neg(),f);
+}
+
+ApproximateScalarFunction operator+(ApproximateScalarFunction const& f1, ApproximateScalarFunction const& f2) {
+    return apply(Add(),f1,f2);
+}
+
+ApproximateScalarFunction operator-(ApproximateScalarFunction const& f1, ApproximateScalarFunction const& f2) {
+    return apply(Sub(),f1,f2);
+}
+
+ApproximateScalarFunction operator*(ApproximateScalarFunction const& f1, ApproximateScalarFunction const& f2) {
+    return apply(Mul(),f1,f2);
+}
+
+ApproximateScalarFunction operator/(ApproximateScalarFunction const& f1, ApproximateScalarFunction const& f2) {
+    return apply(Div(),f1,f2);
+}
+
+ApproximateScalarFunction operator+(ApproximateScalarFunction const& f1, ApproximateNumber const& c2) {
+    return apply(Add(),f1,c2);
+}
+
+ApproximateScalarFunction operator-(ApproximateScalarFunction const& f1, ApproximateNumber const& c2) {
+    return apply(Sub(),f1,c2);
+}
+
+ApproximateScalarFunction operator*(ApproximateScalarFunction const& f1, ApproximateNumber const& c2) {
+    return apply(Mul(),f1,c2);
+}
+
+ApproximateScalarFunction operator/(ApproximateScalarFunction const& f1, ApproximateNumber const& c2) {
+    return apply(Div(),f1,c2);
+}
+
+ApproximateScalarFunction operator+(ApproximateNumber const& c1, ApproximateScalarFunction const& f2) {
+    return apply(Add(),c1,f2);
+}
+
+ApproximateScalarFunction operator-(ApproximateNumber const& c1, ApproximateScalarFunction const& f2) {
+    return apply(Sub(),c1,f2);
+}
+
+ApproximateScalarFunction operator*(ApproximateNumber const& c1, ApproximateScalarFunction const& f2) {
+    return apply(Mul(),c1,f2);
+}
+
+ApproximateScalarFunction operator/(ApproximateNumber const& c1, ApproximateScalarFunction const& f2) {
+    return apply(Div(),c1,f2);
+}
+
+
+ApproximateScalarFunction& operator+=(ApproximateScalarFunction& f1, const ApproximateScalarFunction& f2) {
+    return f1=f1+f2;
+}
+
+ApproximateScalarFunction& operator-=(ApproximateScalarFunction& f1, const ApproximateScalarFunction& f2) {
+    return f1=f1-f2;
+}
+
+ApproximateScalarFunction& operator+=(ApproximateScalarFunction& f1, const ApproximateNumber& c2) {
+    return f1=f1+c2;
+}
+
+ApproximateScalarFunction& operator-=(ApproximateScalarFunction& f1, const ApproximateNumber& c2) {
+    return f1=f1-c2;
+}
+
+ApproximateScalarFunction& operator*=(ApproximateScalarFunction& f1, const ApproximateNumber& c2) {
+    return f1=f1*c2;
+}
+
+ApproximateScalarFunction& operator/=(ApproximateScalarFunction& f1, const ApproximateNumber& c2) {
+    return f1=f1/c2;
+}
+
+
+ApproximateScalarFunction add(ApproximateScalarFunction const& f1, const ApproximateNumber& c2) {
+    return apply(Add(),f1,c2);
+}
+
+ApproximateScalarFunction sub(ApproximateScalarFunction const& f1, const ApproximateNumber& c2) {
+    return apply(Sub(),f1,c2);
+}
+
+ApproximateScalarFunction mul(ApproximateScalarFunction const& f1, const ApproximateNumber& c2) {
+    return apply(Mul(),f1,c2);
+}
+
+ApproximateScalarFunction div(ApproximateScalarFunction const& f1, const ApproximateNumber& c2) {
+    return apply(Div(),f1,c2);
+}
+
+ApproximateScalarFunction pos(ApproximateScalarFunction const& f) {
+    return apply(Pos(),f);
+}
+
+ApproximateScalarFunction neg(ApproximateScalarFunction const& f) {
+    return apply(Neg(),f);
+}
+
+ApproximateScalarFunction pow(ApproximateScalarFunction const& f, Int n) {
+    return apply(Pow(),f,n);
+}
+
+ApproximateScalarFunction sqr(ApproximateScalarFunction const& f) {
+    return apply(Sqr(),f);
+}
+
+ApproximateScalarFunction rec(ApproximateScalarFunction const& f) {
+    return apply(Rec(),f);
+}
+
+ApproximateScalarFunction sqrt(ApproximateScalarFunction const& f) {
+    return apply(Sqrt(),f);
+}
+
+ApproximateScalarFunction exp(ApproximateScalarFunction const& f) {
+    return apply(Exp(),f);
+}
+
+ApproximateScalarFunction log(ApproximateScalarFunction const& f) {
+    return apply(Log(),f);
+}
+
+ApproximateScalarFunction sin(ApproximateScalarFunction const& f) {
+    return apply(Sin(),f);
+}
+
+ApproximateScalarFunction cos(ApproximateScalarFunction const& f) {
+    return apply(Cos(),f);
+}
+
+ApproximateScalarFunction tan(ApproximateScalarFunction const& f) {
+    return apply(Tan(),f);
+}
+
+ApproximateScalarFunction atan(ApproximateScalarFunction const& f) {
+    return apply(Atan(),f);
+}
+
+
+ApproximateVectorFunction join(const ApproximateScalarFunction& f1, const ApproximateScalarFunction& f2) {
+    ARIADNE_ASSERT(f1.argument_size()==f2.argument_size());
+    ApproximateVectorFunction r(2,f1.domain());
+    r.set(0,f1);
+    r.set(1,f2);
+    return r;
+}
+
+ApproximateVectorFunction join(const ApproximateVectorFunction& f1, const ApproximateScalarFunction& f2) {
+    ARIADNE_ASSERT(f1.argument_size()==f2.argument_size());
+    ApproximateVectorFunction r(f1.result_size()+1u,f1.domain());
+    for(SizeType i=0u; i!=f1.result_size(); ++i) {
+        r.set(i,f1.get(i));
+    }
+    r.set(f1.result_size(),f2);
+    return r;
+}
+
+ApproximateVectorFunction join(const ApproximateScalarFunction& f1, const ApproximateVectorFunction& f2) {
+    ARIADNE_ASSERT(f1.argument_size()==f2.argument_size());
+    ApproximateVectorFunction r(f2.result_size()+1u,f1.domain());
+    r.set(0u,f1);
+    for(SizeType i=0u; i!=f2.result_size(); ++i) {
+        r.set(i+1u,f2.get(i));
+    }
+    return r;
+}
+
+ApproximateVectorFunction join(const ApproximateVectorFunction& f1, const ApproximateVectorFunction& f2) {
+    ARIADNE_ASSERT(f1.argument_size()==f2.argument_size());
+    ApproximateVectorFunction r(f1.result_size()+f2.result_size(),f1.domain());
+    for(SizeType i=0u; i!=f1.result_size(); ++i) {
+        r.set(i,f1.get(i));
+    }
+    for(SizeType i=0u; i!=f2.result_size(); ++i) {
+        r.set(i+f1.result_size(),f2.get(i));
+    }
+    return r;
+}
+
+
+ApproximateScalarFunction compose(const ApproximateScalarFunction& f, const ApproximateVectorFunction& g) {
+    ARIADNE_ASSERT(f.argument_size()==g.result_size());
+    return ApproximateScalarFunction(new ScalarComposedFunction<ApproximateTag>(f,g));
+}
+
+ApproximateVectorFunction compose(const ApproximateVectorFunction& f, const ApproximateVectorFunction& g) {
+    ARIADNE_ASSERT(f.argument_size()==g.result_size());
+    return ApproximateVectorFunction(new VectorComposedFunction<ApproximateTag>(f,g));
+}
+
+
+ApproximateScalarFunction operator*(Int const& n1, ApproximateScalarFunction const& f2) {
+    return ApproximateNumber(n1)*f2;
+}
+
 
 } // namespace Ariadne

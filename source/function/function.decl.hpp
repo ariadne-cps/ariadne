@@ -126,6 +126,12 @@ using ValidatedVectorFunctionModelDPInterface = VectorFunctionModelInterface<Val
 using ValidatedScalarFunctionModelDP = ScalarFunctionModel<ValidatedTag,DoublePrecision>;
 using ValidatedVectorFunctionModelDP = VectorFunctionModel<ValidatedTag,DoublePrecision>;
 
+using ApproximateScalarFunctionModelDPInterface = ScalarFunctionModelInterface<ApproximateTag,DoublePrecision>;
+using ApproximateVectorFunctionModelDPInterface = VectorFunctionModelInterface<ApproximateTag,DoublePrecision>;
+
+using ApproximateScalarFunctionModelDP = ScalarFunctionModel<ApproximateTag,DoublePrecision>;
+using ApproximateVectorFunctionModelDP = VectorFunctionModel<ApproximateTag,DoublePrecision>;
+
 template<class P, class PR=DoublePrecision, class PRE=PR> class FunctionModelFactoryInterface;
 typedef FunctionModelFactoryInterface<ValidatedTag,DoublePrecision> ValidatedFunctionModelDPFactoryInterface;
 template<class P, class PR=DoublePrecision, class PRE=PR> class FunctionModelFactory;

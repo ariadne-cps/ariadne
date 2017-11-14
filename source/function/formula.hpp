@@ -98,6 +98,10 @@ class FormulaOperations {
     template<class Y> friend inline Formula<Y>& operator*=(Formula<Y>& f1, const Formula<Y>& f2) { Formula<Y> r=f1*f2; return f1=r; }
     template<class Y> friend inline Formula<Y>& operator/=(Formula<Y>& f1, const Formula<Y>& f2) { Formula<Y> r=f1/f2; return f1=r; }
 
+    template<class Y> friend inline Formula<Y> add(const Formula<Y>& f1, const Formula<Y>& f2) { return make_formula(Add(),f1,f2); }
+    template<class Y> friend inline Formula<Y> sub(const Formula<Y>& f1, const Formula<Y>& f2) { return make_formula(Sub(),f1,f2); }
+    template<class Y> friend inline Formula<Y> mul(const Formula<Y>& f1, const Formula<Y>& f2) { return make_formula(Mul(),f1,f2); }
+    template<class Y> friend inline Formula<Y> div(const Formula<Y>& f1, const Formula<Y>& f2) { return make_formula(Div(),f1,f2); }
     template<class Y> friend inline Formula<Y> pos(const Formula<Y>& f) { return make_formula(Pos(),f); }
     template<class Y> friend inline Formula<Y> neg(const Formula<Y>& f) { return make_formula(Neg(),f); }
     template<class Y> friend inline Formula<Y> rec(const Formula<Y>& f) { return make_formula(Rec(),f); }

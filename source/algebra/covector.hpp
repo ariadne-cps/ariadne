@@ -47,6 +47,10 @@ struct DeclareCovectorOperations {
     template<class X1, class X2> friend Covector<ProductType<Scalar<X1>,X2>> operator*(X1 const& x1, Covector<X2> const& v2);
     template<class X1, class X2> friend Covector<ProductType<X1,Scalar<X2>>> operator*(Covector<X1> const& v1, X2 const& x2);
     template<class X1, class X2> friend Covector<QuotientType<X1,Scalar<X2>>> operator/(Covector<X1> const& v1, X2 const& x2);
+    template<class X1, class X2> friend Covector<InplaceSumType<X1,X2>>& operator+=(Covector<X1>& u1, const Covector<X2>& u2);
+    template<class X1, class X2> friend Covector<InplaceDifferenceType<X1,X2>>& operator-=(Covector<X1>& u1, const Covector<X2>& u2);
+    template<class X1, class X2> friend Covector<InplaceProductType<X1,X2>>& operator*=(Covector<X1>& u1, const X2& s2);
+    template<class X1, class X2> friend Covector<InplaceQuotientType<X1,X2>>& operator/=(Covector<X1>& u1, const X2& s2);
     template<class X1, class X2> friend ArithmeticType<X1,X2> operator*(const Covector<X1>& u1, const Vector<X2>& v2);
     template<class X1, class X2> friend EqualsType<X1,X2> operator==(const Covector<X1>& u1, const Covector<X2>& u2);
     template<class X> friend OutputStream& operator<<(OutputStream& os, const Covector<X>& u);
@@ -127,13 +131,29 @@ class ProvideCovectorOperations {
         ARIADNE_PRECONDITION(u1.size()==u2.size()); Covector<SumType<X1,X2>> r(u1.size(),u1.zero_element()+u2.zero_element());
         for(SizeType i=0; i!=r.size(); ++i) { r[i]=u1[i]+u2[i]; } return std::move(r); }
 
-    template<class X1,class X2> friend Covector<ProductType<X1,X2>> operator*(X1 const& s1, Covector<X2> const& u2) {
+    template<class X1,class X2> friend Covector<ProductType<Scalar<X1>,X2>> operator*(X1 const& s1, Covector<X2> const& u2) {
         Covector<ProductType<X1,X2>> r(u2.size(),s1*u2.zero_element());
         for(SizeType i=0; i!=r.size(); ++i) { r[i]=s1*u2[i]; } return std::move(r); }
 
-    template<class X1,class X2> friend Covector<ProductType<X1,X2>> operator*(Covector<X1> const& u1, X2 const& s2) {
+    template<class X1,class X2> friend Covector<ProductType<X1,Scalar<X2>>> operator*(Covector<X1> const& u1, X2 const& s2) {
         Covector<ProductType<X1,X2>> r(u1.size(),u1.zero_element()*s2);
         for(SizeType i=0; i!=r.size(); ++i) { r[i]=u1[i]*s2; } return std::move(r); }
+
+    template<class X1,class X2> friend Covector<QuotientType<X1,Scalar<X2>>> operator/(Covector<X1> const& u1, X2 const& s2) {
+        Covector<QuotientType<X1,X2>> r(u1.size(),u1.zero_element()*s2);
+        for(SizeType i=0; i!=r.size(); ++i) { r[i]=u1[i]/s2; } return std::move(r); }
+
+    template<class X1,class X2> friend Covector<InplaceSumType<X1,X2>>& operator+=(Covector<X1>& u1, Covector<X2> const& u2) {
+        ARIADNE_PRECONDITION(u1.size()==u2.size()); for(SizeType i=0; i!=u1.size(); ++i) { u1[i]+=u2[i]; } return u1; }
+
+    template<class X1,class X2> friend Covector<InplaceDifferenceType<X1,X2>>& operator-=(Covector<X1>& u1, Covector<X2> const& u2) {
+        ARIADNE_PRECONDITION(u1.size()==u2.size()); for(SizeType i=0; i!=u1.size(); ++i) { u1[i]-=u2[i]; } return u1; }
+
+    template<class X1,class X2> friend Covector<InplaceProductType<X1,X2>>& operator*=(Covector<X1>& u1, X2 const& s2) {
+        for(SizeType i=0; i!=u1.size(); ++i) { u1[i]*=s2; } return u1; }
+
+    template<class X1,class X2> friend Covector<InplaceQuotientType<X1,X2>>& operator/=(Covector<X1>& u1, X2 const& s2) {
+        for(SizeType i=0; i!=u1.size(); ++i) { u1[i]/=s2; } return u1; }
 
     template<class X1, class X2> friend ArithmeticType<X1,X2> operator*(const Covector<X1>& u1, const Vector<X2>& v2) {
         ARIADNE_PRECONDITION(u1.size()==v2.size()); ArithmeticType<X1,X2> r=u1.zero_element()*v2.zero_element();

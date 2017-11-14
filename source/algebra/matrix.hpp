@@ -67,6 +67,8 @@ class DeclareMatrixOperations {
     template<class X1, class X2> friend Matrix<ProductType<Scalar<X1>,X2>> operator*(X1 const& s, Matrix<X2> const& A);
     template<class X1, class X2> friend Matrix<ProductType<X1,Scalar<X2>>> operator*(Matrix<X1> const& A, X2 const& s);
     template<class X1, class X2> friend Matrix<QuotientType<X1,Scalar<X2>>> operator/(Matrix<X1> const& A, X2 const& s);
+    template<class X1, class X2> friend Matrix<InplaceProductType<X1,X2>>& operator*=(Matrix<X1>& A, X2 const& s);
+    template<class X1, class X2> friend Matrix<InplaceQuotientType<X1,X2>>& operator/=(Matrix<X1>& A, X2 const& s);
 
     template<class X> friend Matrix<X> operator+(Matrix<X> A);
     template<class X> friend Matrix<X> operator-(Matrix<X> A);
@@ -177,6 +179,7 @@ template<class X> class Matrix
         explicit Matrix(const M& A);
 
     template<class M> Matrix<X>& operator+=(const M& A);
+    template<class M> Matrix<X>& operator-=(const M& A);
 
     //! \brief The number of rows of the matrix.
     SizeType row_size() const;
@@ -594,6 +597,15 @@ template<class X> template<class M> Matrix<X>& Matrix<X>::operator+=(const M& A)
     return *this;
 }
 
+template<class X> template<class M> Matrix<X>& Matrix<X>::operator-=(const M& A) {
+    for(SizeType i=0; i!=this->row_size(); ++i) {
+        for(SizeType j=0; j!=this->column_size(); ++j) {
+            this->at(i,j)-=A.get(i,j);
+        }
+    }
+    return *this;
+}
+
 template<class X0, class X1, class X2> Void _mul_assign(Matrix<X0>& A0, Matrix<X1> const& A1, Matrix<X2> const& A2) {
     for(SizeType i=0; i!=A0.row_size(); ++i) {
         for(SizeType j=0; j!=A0.column_size(); ++j) {
@@ -672,6 +684,24 @@ struct ProvideMatrixOperations {
             }
         }
         return std::move(R);
+    }
+
+    template<class X1, class X2> friend inline Matrix<InplaceProductType<X1,X2>>& operator*=(Matrix<X1>& A1, X2 const& s2) {
+        for(SizeType i=0; i!=A1.row_size(); ++i) {
+            for(SizeType j=0; j!=A1.column_size(); ++j) {
+                A1[i][j]*=s2;
+            }
+        }
+        return A1;
+    }
+
+    template<class X1, class X2> friend inline Matrix<InplaceQuotientType<X1,X2>>& operator/=(Matrix<X1>& A1, X2 const& s2) {
+        for(SizeType i=0; i!=A1.row_size(); ++i) {
+            for(SizeType j=0; j!=A1.column_size(); ++j) {
+                A1[i][j]/=s2;
+            }
+        }
+        return A1;
     }
 
     //template<class X1, class X2> friend inline MatrixMatrixProduct<X1,X2> operator*(Matrix<X1> const& A1, Matrix<X2> const& A2) {

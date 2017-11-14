@@ -86,6 +86,10 @@ struct DeclareVectorOperations {
     template<class X1, class X2> friend Vector<ProductType<Scalar<X1>,X2>> operator*(X1 const& x1, Vector<X2> const& v2);
     template<class X1, class X2> friend Vector<ProductType<X1,Scalar<X2>>> operator*(Vector<X1> const& v1, X2 const& x2);
     template<class X1, class X2> friend Vector<QuotientType<X1,Scalar<X2>>> operator/(Vector<X1> const& v1, X2 const& x2);
+    template<class X1, class X2> friend Vector<InplaceSumType<X1,X2>>& operator+=(Vector<X1>& v1, const Vector<X2>& v2);
+    template<class X1, class X2> friend Vector<InplaceDifferenceType<X1,X2>>& operator-=(Vector<X1>& v1, const Vector<X2>& v2);
+    template<class X1, class X2> friend Vector<InplaceProductType<X1,X2>>& operator*=(Vector<X1>& v1, X2 const& x2);
+    template<class X1, class X2> friend Vector<InplaceQuotientType<X1,X2>>& operator/=(Vector<X1>& v1, X2 const& x2);
     template<class X> friend decltype(abs(declval<X>())) norm(Vector<X> const& v);
     template<class X> friend decltype(mag(declval<X>())) sup_norm(Vector<X> const& v);
     template<class X1, class X2> friend ArithmeticType<X1,X2> dot(Vector<X1> const& v1, Vector<X2> const& v2);
@@ -338,30 +342,6 @@ template<class V, EnableIf<IsVectorExpression<V>> =dummy> OutputStream& operator
 
 
 
-template<class X, class XX, EnableIf<IsConvertible<decltype(declval<X>()+declval<XX>()),X>> =dummy> inline
-Vector<X>& operator+=(Vector<X>& v1, const Vector<XX>& v2) {
-    ARIADNE_PRECONDITION(v1.size()==v2.size());
-    for(SizeType i=0; i!=v1.size(); ++i) { v1[i]+=v2[i]; } return v1;
-}
-
-template<class X, class XX, EnableIf<IsConvertible<decltype(declval<X>()-declval<XX>()),X>> =dummy> inline
-Vector<X>& operator-=(Vector<X>& v1, const Vector<XX>& v2) {
-    ARIADNE_PRECONDITION(v1.size()==v2.size());
-    for(SizeType i=0; i!=v1.size(); ++i) { v1[i]-=v2[i]; } return v1;
-}
-
-template<class X, class XX, EnableIf<IsConvertible<decltype(declval<X>()*declval<XX>()),X>> =dummy> inline
-Vector<X>& operator*=(Vector<X>& v, const XX& s) {
-    for(SizeType i=0; i!=v.size(); ++i) { v[i]*=s; } return v;
-}
-
-template<class X, class XX, EnableIf<IsConvertible<decltype(declval<X>()/declval<XX>()),X>> =dummy> inline
-Vector<X>& operator/=(Vector<X>& v, const XX& s) {
-    for(SizeType i=0; i!=v.size(); ++i) { v[i]/=s; } return v;
-}
-
-
-
 #ifdef SIMPLE_VECTOR_OPERATORS
 
 struct ProvideVectorOperations {
@@ -407,6 +387,24 @@ struct ProvideVectorOperations {
         Vector<decltype(declval<X1>()/declval<X2>())> r(v1.size(),v1.zero_element()/x2);
         for(SizeType i=0; i!=r.size(); ++i) { r[i]=v1[i]/x2; }
         return std::move(r);
+    }
+
+    template<class X1,class X2> friend Vector<InplaceSumType<X1,X2>>& operator+=(Vector<X1>& v1, Vector<X2> const& v2) {
+        ARIADNE_PRECONDITION(v1.size()==v2.size());
+        for(SizeType i=0; i!=v1.size(); ++i) { v1[i]+=v2[i]; } return v1;
+    }
+
+    template<class X1,class X2> friend Vector<InplaceDifferenceType<X1,X2>>& operator-=(Vector<X1>& v1, Vector<X2> const& v2) {
+        ARIADNE_PRECONDITION(v1.size()==v2.size());
+        for(SizeType i=0; i!=v1.size(); ++i) { v1[i]-=v2[i]; } return v1;
+    }
+
+    template<class X1,class X2> friend Vector<InplaceProductType<X1,X2>>& operator*=(Vector<X1>& v1, X2 const& s2) {
+        for(SizeType i=0; i!=v1.size(); ++i) { v1[i]*=s2; } return v1;
+    }
+
+    template<class X1,class X2> friend Vector<InplaceQuotientType<X1,X2>>& operator/=(Vector<X1>& v1, X2 const& s2) {
+        for(SizeType i=0; i!=v1.size(); ++i) { v1[i]/=s2; } return v1;
     }
 
     template<class X1, class X2> friend ArithmeticType<X1,X2> dot(const Vector<X1>& v1, const Vector<X2>& v2) {
@@ -685,7 +683,7 @@ template<class X1, class X2> inline decltype(consistent(declval<X1>(),declval<X2
     return true;
 }
 
-template<class V, class G> decltype(auto) generate_vector(SizeType n, G const& g) {
+template<class G> decltype(auto) generate_vector(SizeType n, G const& g) {
     typedef std::remove_const_t<std::remove_reference_t<decltype(g(declval<SizeType>()))>> X;
     return Vector<X>(n,g);
 }

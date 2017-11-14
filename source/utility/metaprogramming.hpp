@@ -122,6 +122,11 @@ template<class X1, class X2=X1> using EqualsType = decltype(declval<X1>()==declv
 template<class X1, class X2=X1> using LessType = decltype(declval<X1>()< declval<X2>());
 template<class X1, class X2=X1> using ComparisonType = LessType<X1,X2>;
 
+template<class X1, class X2=X1> using InplaceSumType = RemoveReference<decltype(declval<X1&>()+=declval<X2>())>;
+template<class X1, class X2=X1> using InplaceDifferenceType = RemoveReference<decltype(declval<X1&>()-=declval<X2>())>;
+template<class X1, class X2=X1> using InplaceProductType = RemoveReference<decltype(declval<X1&>()*=declval<X2>())>;
+template<class X1, class X2=X1> using InplaceQuotientType = RemoveReference<decltype(declval<X1&>()/=declval<X2>())>;
+
 //template<class R, class F, class... AS> using IsInvocableReturning = std::is_invokable_r<R,F,AS...>;
 template<class F, class... AS> struct IsInvocable;
 template<class R, class F, class... AS> struct IsInvocableReturning;

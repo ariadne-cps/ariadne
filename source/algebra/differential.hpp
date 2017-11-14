@@ -58,10 +58,6 @@ typedef Differential<FloatDPBounds> FloatBoundsDifferential;
 typedef Differential<UpperIntervalType> UpperIntervalDifferentialType;
 
 
-template<class X> using EqualityType = decltype(declval<X>()==declval<X>());
-template<class X> using InequalityType = decltype(declval<X>()!=declval<X>());
-
-
 template<class PR> class DifferentialFactory : public FloatFactory<PR> {
   public:
     DifferentialFactory<PR>(PR const& pr) : FloatFactory<PR>(pr) { }

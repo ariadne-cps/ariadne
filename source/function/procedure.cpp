@@ -25,7 +25,9 @@
 #include "procedure.tpl.hpp"
 
 #include "algebra/differential.hpp"
+#include "algebra/fixed_univariate_differential.hpp"
 #include "algebra/graded.hpp"
+#include "function/function.hpp"
 
 namespace Ariadne {
 
@@ -35,8 +37,22 @@ template class Procedure<ValidatedNumber>;
 template class Vector<Procedure<ApproximateNumber>>;
 template class Vector<Procedure<ValidatedNumber>>;
 
+template ApproximateProcedure make_procedure(const ApproximateScalarFunction& f);
+template ValidatedProcedure make_procedure(const ValidatedScalarFunction& f);
+template EffectiveProcedure make_procedure(const EffectiveScalarFunction& f);
+
 template Void _execute(List<FloatDPBounds>& v, const List<ProcedureInstruction>& p, const List<ValidatedNumber>& c, const Vector<FloatDPBounds>& x);
 template Void _execute(List<Graded<Differential<FloatDPBounds>>>& v, const List<ProcedureInstruction>& p, const List<ValidatedNumber>& c, const Vector<Graded<Differential<FloatDPBounds>>>& x);
+
+template Void _execute<FloatDPApproximation, ApproximateNumber>(List<FloatDPApproximation>&, List<ProcedureInstruction> const&, List<ApproximateNumber> const&, Vector<FloatDPApproximation> const&);
+
+template Covector<FloatDPApproximation> gradient(Procedure<ApproximateNumber> const& f, Vector<FloatDPApproximation> const& x);
+template Covector<FloatDPBounds> gradient(Procedure<ValidatedNumber> const& f, Vector<FloatDPBounds> const& x);
+
+template FloatDPApproximation hessian(Procedure<ApproximateNumber> const& f, Vector<FloatDPApproximation> const& x, Vector<FloatDPApproximation> const& s);
+template FloatDPBounds hessian(Procedure<ValidatedNumber> const& f, Vector<FloatDPBounds> const& x, Vector<FloatDPBounds> const& s);
+
+
 
 inline
 Void restrict(UpperIntervalType& r, const UpperIntervalType& x) {

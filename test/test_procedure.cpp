@@ -41,8 +41,13 @@
 
 #include "test.hpp"
 
+#include "algebra/covector.hpp"
+#include "function/function.hpp"
+
 using namespace std;
 using namespace Ariadne;
+
+template<class X> decltype(auto) mag(Covector<X> const& u) { return norm(transpose(u)); }
 
 class TestProcedure
 {
@@ -59,6 +64,7 @@ class TestProcedure
     Void test_construct_from_expansion();
     Void test_evaluate();
     Void test_propagate();
+    Void test_derivative();
 };
 
 //ApproximateFormula TestProcedure::o(ApproximateFormula::constant(1.0));
@@ -77,7 +83,11 @@ Void TestProcedure::test()
     ARIADNE_TEST_CALL(test_construct_from_expansion());
     ARIADNE_TEST_CALL(test_evaluate());
     ARIADNE_TEST_CALL(test_propagate());
+    ARIADNE_TEST_CALL(test_derivative());
+
+
 }
+
 
 Void TestProcedure::test_formula()
 {
@@ -112,6 +122,7 @@ Void TestProcedure::test_construct_from_formula()
     Vector<ApproximateProcedure> p(f);
     ARIADNE_TEST_PRINT(p);
 }
+
 
 Void TestProcedure::test_construct_from_expansion()
 {
@@ -192,8 +203,36 @@ Void TestProcedure::test_propagate()
     ARIADNE_TEST_PRINT(evaluate(pp,xx));
     simple_hull_reduce(xx,pp,cc);
     ARIADNE_TEST_PRINT(xx);
-
 }
+
+Void TestProcedure::test_derivative()
+{
+    typedef ApproximateTag P;
+    typedef Number<P> Y;
+    typedef FloatDPApproximation X;
+
+    Y c(2);
+    Formula<Y> o(Formula<Y>::constant(1));
+    Formula<Y> x(Formula<Y>::coordinate(0));
+    Formula<Y> y(Formula<Y>::coordinate(1));
+
+    auto xs=sqr(x); auto ys=sqr(y);
+    Formula<Y> e=sqrt(xs+c*ys)+sin(y/x)*xs*c-ys;
+    ARIADNE_TEST_PRINT(e);
+    ScalarFunction<P> f(EuclideanDomain(2),e);
+    ARIADNE_TEST_PRINT(f);
+    Procedure<Y> p(e);
+    ARIADNE_TEST_PRINT(p);
+
+    X zero(0,dp);
+
+    Vector<X> q({2,1},dp);
+    Vector<X> s({-1,3},dp);
+    Vector<Differential<X>> ds=Differential<X>::variable(1,2,zero,0)*s+q;
+    ARIADNE_TEST_WITHIN(gradient(p,q),f.gradient(q),8e-16);
+    ARIADNE_TEST_EQUALS(hessian(p,q,s),f(ds).hessian().get(0,0));
+}
+
 
 
 

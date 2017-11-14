@@ -51,11 +51,6 @@ Pair<Nat,FloatDP> lipschitz_index_and_error(const ValidatedVectorFunction& funct
 
 namespace {
 
-ValidatedProcedure make_procedure(const ValidatedScalarFunction& f) {
-    Formula<ValidatedNumber> e=f(Formula<ValidatedNumber>::identity(f.argument_size()));
-    return Procedure<ValidatedNumber>(e);
-}
-
 UpperIntervalType emulrng(const ExactFloatVector& x, const ExactFloatVector& z) {
     UpperIntervalType r=make_interval(mul(x[0],z[0]));
     for(Nat i=0; i!=x.size(); ++i) { r=hull(mul(x[i],z[i]),r); }

@@ -495,6 +495,16 @@ template<class P> Void export_vector_function()
     export_vector_function_evaluation(vector_function_class);
 }
 
+template<class Y, class X> Void export_procedure() {
+    typedef Paradigm<Y> P;
+    class_<Procedure<Y>> procedure_class((class_name<P>()+"Procedure").c_str());
+    procedure_class.def("__str__", &__cstr__<Procedure<Y>>);
+    def("make_procedure", (Procedure<Y>(*)(ScalarFunction<P> const&)) &make_procedure);
+    def("evaluate", (X(*)(Procedure<Y> const&, Vector<X> const&)) &evaluate);
+    def("gradient", (Covector<X>(*)(Procedure<Y> const&, Vector<X> const&)) &gradient);
+    def("hessian", (X(*)(Procedure<Y> const&, Vector<X> const&, Vector<X> const&)) &hessian);
+}
+
 Void export_scalar_functions() {
     export_scalar_function<ApproximateTag>();
     export_scalar_function<ValidatedTag>();
@@ -538,6 +548,10 @@ Void function_submodule() {
     export_univariate_function();
     export_scalar_functions();
     export_vector_functions();
+
+    export_procedure<ApproximateNumber, FloatDPApproximation>();
+    export_procedure<ValidatedNumber, FloatDPBounds>();
+
 
     //export_scalar_python_function();
     //export_vector_python_function();

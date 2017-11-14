@@ -41,6 +41,7 @@ using namespace Ariadne;
 
 namespace Ariadne {
 
+template<class X1, class X2> ArithmeticType<X1,X2> dot(const Vector<X1>& v1, const Vector<X2>& v2);
 
 template<class X>
 X __vgetitem__(const Vector<X>& v, Int i)
@@ -221,14 +222,15 @@ Void export_vector_conversion(class_<Vector<X> >& vector_class)
     implicitly_convertible< Vector<Y>, Vector<X> >();
 }
 
-template<class X, class Y>
+template<class X, class Y=X>
 Void export_vector_arithmetic(class_<Vector<X> >& vector_class)
 {
     vector_class.def("__add__",__add__< Vector<SumType<X,Y>>, Vector<X>, Vector<Y> >);
     vector_class.def("__sub__",__sub__< Vector<DifferenceType<X,Y>>, Vector<X>, Vector<Y> >);
     vector_class.def("__rmul__",__rmul__< Vector<ProductType<X,Y>>, Vector<X>, Y >);
-    vector_class.def("__mul__",__mul__< Vector<QuotientType<X,Y>>, Vector<X>, Y >);
+    vector_class.def("__mul__",__mul__< Vector<ProductType<X,Y>>, Vector<X>, Y >);
     vector_class.def("__div__",__div__< Vector<QuotientType<X,Y>>, Vector<X>, Y >);
+    def("dot", (ArithmeticType<X,Y>(*)(Vector<X> const&, Vector<Y> const&)) &dot);
     // Don't use boost::python style operators self+other (as below) because of
     // below) because of need to convert result expressions to Vector<R>.
     // vector_class.def(self+=Vector<Y>());
@@ -262,38 +264,58 @@ template<> Void export_vector<FloatDPBounds>()
 {
     typedef FloatDPBounds X;
     class_< Vector<X> > vector_class(python_name<X>("Vector"),init< Vector<X> >());
+    export_vector_conversion<FloatDPValue,FloatDPBounds>(vector_class);
+    vector_class.def(init<Vector<ValidatedNumber>,DoublePrecision>());
     export_vector_class<X>(vector_class);
     export_vector_arithmetic<X,X>(vector_class);
     def("norm",&__norm__<Vector<X>>);
-    def("dot", &__dot__<Vector<X>>);
+}
 
-    export_vector_conversion<FloatDPValue,FloatDPBounds>(vector_class);
+template<> Void export_vector<FloatMPBounds>()
+{
+    typedef FloatMPBounds X;
+    class_< Vector<X> > vector_class(python_name<X>("Vector"),init< Vector<X> >());
+    vector_class.def(init<Vector<ValidatedNumber>,MultiplePrecision>());
+    export_vector_class<X>(vector_class);
+    export_vector_arithmetic<X,X>(vector_class);
+    def("norm",&__norm__<Vector<X>>);
+    //export_vector_conversion<FloatMPValue,FloatMPBounds>(vector_class);
 }
 
 template<> Void export_vector<FloatDPApproximation>()
 {
     typedef FloatDPApproximation X;
     class_< Vector<X> > vector_class(python_name<X>("Vector"),init< Vector<FloatDPApproximation> >());
+    vector_class.def(init<Vector<ApproximateNumber>, DoublePrecision>());
     export_vector_class<X>(vector_class);
     export_vector_arithmetic<X,X>(vector_class);
-    vector_class.def("__rmul__",__rmul__< Vector<X>, Vector<X>, X >);
-    vector_class.def("__mul__",__mul__< Vector<X>, Vector<X>, X >);
-    vector_class.def("__div__",__div__< Vector<X>, Vector<X>, X >);
+    def("norm",&__norm__<Vector<X>>);
+    //export_vector_conversion<FloatDPBounds,FloatDPApproximation>(vector_class);
+}
 
-    export_vector_conversion<FloatDPBounds,FloatDPApproximation>(vector_class);
+template<> Void export_vector<FloatMPApproximation>()
+{
+    typedef FloatMPApproximation X;
+    class_< Vector<X> > vector_class(python_name<X>("Vector"),init< Vector<FloatMPApproximation> >());
+    vector_class.def(init<Vector<ApproximateNumber>,MultiplePrecision>());
+    export_vector_class<X>(vector_class);
+    export_vector_arithmetic<X,X>(vector_class);
+    def("norm",&__norm__<Vector<X>>);
+    //export_vector_conversion<FloatMPBounds,FloatMPApproximation>(vector_class);
+
 }
 
 
 template<class X>
-Void export_covector(class_<Covector<X> >& covector_class)
+Void export_covector(class_<Covector<X>>& covector_class)
 {
     covector_class.def(init<Int>());
     covector_class.def(init<Int,X>());
     covector_class.def("size", &Covector<X>::size);
     covector_class.def("__len__", &Covector<X>::size);
-    covector_class.def("__setitem__", &__setitem__<Covector<X>>);
-    covector_class.def("__setitem__", &__setitem__<Covector<X>>);
-    covector_class.def("__getitem__", &__getitem__<Covector<X>>);
+//    covector_class.def("__setitem__", &__setitem__<Covector<X>>);
+//    covector_class.def("__setitem__", &__setitem__<Covector<X>>);
+//      covector_class.def("__getitem__", &__getitem__<Covector<X>>);
     covector_class.def("__str__",&__cstr__< Covector<X> >);
 
     covector_class.def("__add__",__add__< Covector<SumType<X,X>>, Covector<X>, Covector<X> >);
@@ -302,8 +324,15 @@ Void export_covector(class_<Covector<X> >& covector_class)
     covector_class.def("__mul__",__mul__< Covector<QuotientType<X,X>>, Covector<X>, X >);
     covector_class.def("__div__",__div__< Covector<QuotientType<X,X>>, Covector<X>, X >);
 
-    def("transpose", (Covector<X>(*)(Vector<X>const&)) &transpose);
-    def("transpose", (Vector<X>(*)(Covector<X>const&)) &transpose);
+    def("transpose", (Covector<X>const&(*)(Vector<X>const&)) &transpose, return_value_policy<copy_const_reference>());
+    def("transpose", (Vector<X>const&(*)(Covector<X>const&)) &transpose, return_value_policy<copy_const_reference>());
+}
+
+template<class X>
+Void export_covector()
+{
+    class_<Covector<X>> covector_class(python_name<X>("Covector"));
+    export_covector(covector_class);
 }
 
 
@@ -471,6 +500,9 @@ template Void export_matrix<Rational>();
 
 
 Void linear_algebra_submodule() {
+    from_python<Vector<ApproximateNumber>>();
+    from_python<Vector<ValidatedNumber>>();
+
     export_vector<FloatDPApproximation>();
     export_vector<FloatDPBounds>();
     export_vector<FloatDPBall>();
@@ -480,6 +512,11 @@ Void linear_algebra_submodule() {
     export_vector<FloatMPBounds>();
     export_vector<FloatMPBall>();
     export_vector<FloatMPValue>();
+
+    export_covector<FloatDPApproximation>();
+    export_covector<FloatDPBounds>();
+    export_covector<FloatMPApproximation>();
+    export_covector<FloatMPBounds>();
 
     export_matrix<FloatDPApproximation>();
     export_matrix<FloatDPBounds>();

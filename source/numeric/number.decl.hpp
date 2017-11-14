@@ -58,6 +58,12 @@ template<class X> using EqualsTrait = typename NumericTraits<X>::EqualsType;
 template<class X> using PropertiesType = typename X::PropertiesType;
 template<class X> using GenericType = typename X::GenericType;
 
+template<class X> struct IsConcrete : Has<GenericType,X> { };
+
+template<class X> struct IsScalar;
+template<class X> struct IsConcreteScalar : And<Has<GenericType,X>,IsScalar<X>> { };
+template<class X> struct IsGenericScalar : And<Not<Has<GenericType,X>>,IsScalar<X>> { };
+
 
 typedef uint Nat;
 typedef int Int;

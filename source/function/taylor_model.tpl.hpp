@@ -750,31 +750,32 @@ template<class F> Void TaylorModel<ValidatedTag,F>::ifma(const TaylorModel<Valid
 }
 
 template<class F> class AlgebraOperations<TaylorModel<ValidatedTag,F>>
-    : public NormedAlgebraOperations<TaylorModel<ValidatedTag,F>>
+    : NormedAlgebraOperations<TaylorModel<ValidatedTag,F>>
 {
     typedef TaylorModel<ValidatedTag,F> ModelType;
     typedef typename TaylorModel<ValidatedTag,F>::NumericType NumericType;
     typedef typename ModelType::RangeType RangeType;
   public:
-    static ModelType _nul(ModelType const& x) {
+    using NormedAlgebraOperations<TaylorModel<ValidatedTag,F>>::apply;
+    static ModelType apply(Nul, ModelType const& x) {
         return ModelType(x.argument_size(),x.sweeper()); }
-    static ModelType _pos(ModelType x) {
+    static ModelType apply(Pos, ModelType x) {
         return std::move(x); }
-    static ModelType _neg(ModelType x) {
+    static ModelType apply(Neg, ModelType x) {
         x.imul(NumericType(-1)); return std::move(x); }
-    static ModelType _add(ModelType const& x, ModelType const& y) {
+    static ModelType apply(Add, ModelType const& x, ModelType const& y) {
         auto r=x; r.isma(NumericType(+1),y); return std::move(r); }
-    static ModelType _sub(ModelType const& x, ModelType const& y) {
+    static ModelType apply(Sub, ModelType const& x, ModelType const& y) {
         auto r=x; r.isma(NumericType(-1),y); return std::move(r); }
-    static ModelType _mul(ModelType const& x, ModelType const& y) {
+    static ModelType apply(Mul, ModelType const& x, ModelType const& y) {
         auto r=nul(x); r.ifma(x,y); return std::move(r); }
-    static ModelType _add(ModelType x, NumericType const& c) {
+    static ModelType apply(Add, ModelType x, NumericType const& c) {
         auto& r=x; r.iadd(c); return std::move(r); }
-    static ModelType _mul(ModelType x, NumericType const& c) {
+    static ModelType apply(Mul, ModelType x, NumericType const& c) {
         auto& r=x; r.imul(c); return std::move(r); }
-    static ModelType _max(ModelType const& x, ModelType const& y);
-    static ModelType _min(ModelType const& x, ModelType const& y);
-    static ModelType _abs(ModelType const& x);
+    static ModelType apply(Max, ModelType const& x, ModelType const& y);
+    static ModelType apply(Min, ModelType const& x, ModelType const& y);
+    static ModelType apply(Abs, ModelType const& x);
 };
 
 
@@ -960,7 +961,7 @@ template<class F> auto TaylorModel<ValidatedTag,F>::gradient_range() const -> Co
 // ExactTag functions (max, min, abs, neg) and arithmetical functions (sqr, pow)
 
 
-template<class F> TaylorModel<ValidatedTag,F> AlgebraOperations<TaylorModel<ValidatedTag,F>>::_max(const TaylorModel<ValidatedTag,F>& x, const TaylorModel<ValidatedTag,F>& y) {
+template<class F> TaylorModel<ValidatedTag,F> AlgebraOperations<TaylorModel<ValidatedTag,F>>::apply(Max, const TaylorModel<ValidatedTag,F>& x, const TaylorModel<ValidatedTag,F>& y) {
     typedef typename F::PrecisionType PR;
     RangeType xr=x.range();
     RangeType yr=y.range();
@@ -974,7 +975,7 @@ template<class F> TaylorModel<ValidatedTag,F> AlgebraOperations<TaylorModel<Vali
 }
 
 
-template<class F> TaylorModel<ValidatedTag,F> AlgebraOperations<TaylorModel<ValidatedTag,F>>::_min(const TaylorModel<ValidatedTag,F>& x, const TaylorModel<ValidatedTag,F>& y) {
+template<class F> TaylorModel<ValidatedTag,F> AlgebraOperations<TaylorModel<ValidatedTag,F>>::apply(Min, const TaylorModel<ValidatedTag,F>& x, const TaylorModel<ValidatedTag,F>& y) {
     typedef typename F::PrecisionType PR;
     RangeType xr=x.range();
     RangeType yr=y.range();
@@ -987,7 +988,7 @@ template<class F> TaylorModel<ValidatedTag,F> AlgebraOperations<TaylorModel<Vali
     }
 }
 
-template<class F> TaylorModel<ValidatedTag,F> AlgebraOperations<TaylorModel<ValidatedTag,F>>::_abs(const TaylorModel<ValidatedTag,F>& x) {
+template<class F> TaylorModel<ValidatedTag,F> AlgebraOperations<TaylorModel<ValidatedTag,F>>::apply(Abs, const TaylorModel<ValidatedTag,F>& x) {
     typedef typename F::PrecisionType PR;
     RangeType xr=x.range();
     if(definitely(xr.lower()>=0)) {
@@ -1886,30 +1887,34 @@ template<class F> Void TaylorModel<ApproximateTag,F>::ifma(const TaylorModel<App
 
 
 template<class F> class AlgebraOperations<TaylorModel<ApproximateTag,F>>
-    : public NormedAlgebraOperations<TaylorModel<ApproximateTag,F>>
+    : NormedAlgebraOperations<TaylorModel<ApproximateTag,F>>
 {
     typedef typename F::PrecisionType PR;
     typedef CanonicalNumericType<ApproximateTag,PR> ApproximateNumericType;
   public:
-    static TaylorModel<ApproximateTag,F> _nul(TaylorModel<ApproximateTag,F> const& x) {
+    using NormedAlgebraOperations<TaylorModel<ApproximateTag,F>>::apply;
+    static TaylorModel<ApproximateTag,F> apply(Nul, TaylorModel<ApproximateTag,F> const& x) {
         return TaylorModel<ApproximateTag,F>(x.argument_size(),x.sweeper()); }
-    static TaylorModel<ApproximateTag,F> _pos(TaylorModel<ApproximateTag,F> x) {
+    static TaylorModel<ApproximateTag,F> apply(Pos, TaylorModel<ApproximateTag,F> x) {
         return std::move(x); }
-    static TaylorModel<ApproximateTag,F> _neg(TaylorModel<ApproximateTag,F> x) {
+    static TaylorModel<ApproximateTag,F> apply(Neg, TaylorModel<ApproximateTag,F> x) {
         x.imul(ApproximateNumericType(-1,x.precision())); return std::move(x); }
-    static TaylorModel<ApproximateTag,F> _add(TaylorModel<ApproximateTag,F> const& x, TaylorModel<ApproximateTag,F> const& y) {
+    static TaylorModel<ApproximateTag,F> apply(Add, TaylorModel<ApproximateTag,F> const& x, TaylorModel<ApproximateTag,F> const& y) {
         auto r=x; r.isma(ApproximateNumericType(-1,x.precision()),y); return std::move(r); }
-    static TaylorModel<ApproximateTag,F> _sub(TaylorModel<ApproximateTag,F> const& x, TaylorModel<ApproximateTag,F> const& y) {
+    static TaylorModel<ApproximateTag,F> apply(Sub, TaylorModel<ApproximateTag,F> const& x, TaylorModel<ApproximateTag,F> const& y) {
         auto r=x; r.isma(ApproximateNumericType(-1,x.precision()),y); return std::move(r); }
-    static TaylorModel<ApproximateTag,F> _mul(TaylorModel<ApproximateTag,F> const& x, TaylorModel<ApproximateTag,F> const& y) {
+    static TaylorModel<ApproximateTag,F> apply(Mul, TaylorModel<ApproximateTag,F> const& x, TaylorModel<ApproximateTag,F> const& y) {
         auto r=nul(x); r.ifma(x,y); return std::move(r); }
-    static TaylorModel<ApproximateTag,F> _add(TaylorModel<ApproximateTag,F> x, ApproximateNumericType const& c) {
+    static TaylorModel<ApproximateTag,F> apply(Add, TaylorModel<ApproximateTag,F> x, ApproximateNumericType const& c) {
         auto& r=x; r.iadd(c); return std::move(r); }
-    static TaylorModel<ApproximateTag,F> _mul(TaylorModel<ApproximateTag,F> x, ApproximateNumericType const& c) {
+    static TaylorModel<ApproximateTag,F> apply(Mul, TaylorModel<ApproximateTag,F> x, ApproximateNumericType const& c) {
         auto& r=x; r.imul(c); return std::move(r); }
-    static TaylorModel<ApproximateTag,F> _max(TaylorModel<ApproximateTag,F> const& x, TaylorModel<ApproximateTag,F> const& y) { ARIADNE_NOT_IMPLEMENTED; }
-    static TaylorModel<ApproximateTag,F> _min(TaylorModel<ApproximateTag,F> const& x, TaylorModel<ApproximateTag,F> const& y) { ARIADNE_NOT_IMPLEMENTED; }
-    static TaylorModel<ApproximateTag,F> _abs(TaylorModel<ApproximateTag,F> const& x) { ARIADNE_NOT_IMPLEMENTED; }
+    static TaylorModel<ApproximateTag,F> apply(Max, TaylorModel<ApproximateTag,F> const& x, TaylorModel<ApproximateTag,F> const& y) {
+        ARIADNE_NOT_IMPLEMENTED; }
+    static TaylorModel<ApproximateTag,F> apply(Min, TaylorModel<ApproximateTag,F> const& x, TaylorModel<ApproximateTag,F> const& y) {
+        ARIADNE_NOT_IMPLEMENTED; }
+    static TaylorModel<ApproximateTag,F> apply(Abs, TaylorModel<ApproximateTag,F> const& x) {
+        ARIADNE_NOT_IMPLEMENTED; }
 };
 
 template<class F> Void TaylorModel<ApproximateTag,F>::unscale(IntervalDomainType const& dom) {

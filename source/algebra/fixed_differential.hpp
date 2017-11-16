@@ -36,6 +36,7 @@
 #include "algebra/matrix.hpp"
 #include "algebra/series.hpp"
 #include "algebra/expansion.hpp"
+#include "algebra/operations.hpp"
 
 #include "algebra/fixed_univariate_differential.hpp"
 
@@ -132,6 +133,7 @@ Matrix<X> outer(const Covector<X>& u) {
 //! total degree of the terms is increasing, and the linear terms appear in coordinate order.
 template<class X>
 class FirstDifferential
+    : public DispatchTranscendentalAlgebraOperations<FirstDifferential<X>,X>
 {
   public:
     X _value;
@@ -172,12 +174,19 @@ class FirstDifferential
         return result; }
 
     //! \brief Equality operator.
-    EqualityType<X> operator==(const FirstDifferential<X>& other) const {
-        return this->_value==other._value && this->_gradient==other._gradient; }
+    friend EqualityType<X> operator==(const FirstDifferential<X>& dx1, const FirstDifferential<X>& dx2) {
+        return dx1._value==dx2._value && dx1._gradient==dx2._gradient; }
 
     //! \brief Inequality operator.
-    InequalityType<X> operator!=(const FirstDifferential<X>& other) const {
-        return !(*this==other); }
+    friend InequalityType<X> operator!=(const FirstDifferential<X>& dx1, const FirstDifferential<X>& dx2) {
+        return !(dx1==dx2); }
+
+    //! \brief Comparison operator.
+    friend decltype(auto) operator>=(const FirstDifferential<X>& dx1, const FirstDifferential<X>& dx2) {
+        return dx1._value>=dx2._value; }
+    //! \brief Comparison operator.
+    friend decltype(auto) operator<=(const FirstDifferential<X>& dx1, const FirstDifferential<X>& dx2) {
+        return dx1._value<=dx2._value; }
 
     //! \brief The number of independent variables.
     SizeType argument_size() const { return this->_gradient.size(); }
@@ -211,12 +220,15 @@ class FirstDifferential
     friend FirstDifferential<X> compose(UnivariateFirstDifferential<X> const& df, FirstDifferential<X> dg) {
         return _compose(df,dg); }
 
+    friend OutputStream& operator<<(OutputStream& os, FirstDifferential<X> df) {
+        return df._write(os); }
+
   private:
     static FirstDifferential<X> _compose(UnivariateFirstDifferential<X> const&, FirstDifferential<X>);
+    OutputStream& _write(OutputStream&) const;
 };
 
-template<class X>
-const X FirstDifferential<X>::_zero=X(0);
+template<class X> const X FirstDifferential<X>::_zero=X(0);
 
 template<class X> FirstDifferential<X> FirstDifferential<X>::_compose(UnivariateFirstDifferential<X> const& x, FirstDifferential<X> y) {
     //d/dxi(f(g(x)) = f'(g(x)) dg(x)/dxi
@@ -227,361 +239,8 @@ template<class X> FirstDifferential<X> FirstDifferential<X>::_compose(Univariate
     return y;
 }
 
-
-template<class X, class R>
-EnableIfNumericType<R,FirstDifferential<X>&>
-operator+=(FirstDifferential<X>& x, const R& c)
-{
-    x._value+=c;
-    return x;
-}
-
-template<class X, class R>
-EnableIfNumericType<R,FirstDifferential<X>&>
-operator-=(FirstDifferential<X>& x, const R& c)
-{
-    x._value-=c;
-    return x;
-}
-
-template<class X, class R>
-EnableIfNumericType<R,FirstDifferential<X>&>
-operator*=(FirstDifferential<X>& x, const R& c)
-{
-    x._value*=c;
-    x._gradient*=c;
-    return x;
-}
-
-
-template<class X, class R>
-EnableIfNumericType<R,FirstDifferential<X>&>
-operator/=(FirstDifferential<X>& x, const R& c)
-{
-    x._value/=c;
-    x._gradient/=c;
-    return x;
-}
-
-template<class X, class R>
-EnableIfNumericType<R,FirstDifferential<X> >
-operator+(const FirstDifferential<X>& x, const R& c)
-{
-    FirstDifferential<X> r(x); r+=X(c); return r;
-}
-
-template<class X, class R>
-EnableIfNumericType<R,FirstDifferential<X> >
-operator+(const R& c, const FirstDifferential<X>& x)
-{
-    FirstDifferential<X> r(x); r+=X(c); return r;
-}
-
-template<class X, class R>
-EnableIfNumericType<R,FirstDifferential<X> >
-operator-(const FirstDifferential<X>& x, const R& c)
-{
-    FirstDifferential<X> r(x); r-=X(c); return r;
-}
-
-template<class X, class R>
-EnableIfNumericType<R,FirstDifferential<X> >
-operator-(const R& c, const FirstDifferential<X>& x)
-{
-    FirstDifferential<X> r(-x); r+=X(c); return r;
-}
-
-template<class X, class R>
-EnableIfNumericType<R,FirstDifferential<X> >
-operator*(const FirstDifferential<X>& x, const R& c)
-{
-    FirstDifferential<X> r(x); r*=X(c); return r;
-}
-
-template<class X>
-FirstDifferential<X>
-operator*(const FirstDifferential<X>& x, const Int& c)
-{
-    FirstDifferential<X> r(x); r*=X(0); return r;
-}
-
-template<class X, class R>
-EnableIfNumericType<R,FirstDifferential<X> >
-operator*(const R& c, const FirstDifferential<X>& x)
-{
-    FirstDifferential<X> r(x); r*=X(c); return r;
-}
-
-template<class X, class R>
-EnableIfNumericType<R,FirstDifferential<X> >
-operator/(const FirstDifferential<X>& x, const R& c)
-{
-    FirstDifferential<X> r(x); r/=X(c); return r;
-}
-
-template<class X, class R>
-EnableIfNumericType<R,FirstDifferential<X> >
-operator/(const R& c, const FirstDifferential<X>& x)
-{
-    FirstDifferential<X> r(rec(x)); r*=X(c); return r;
-}
-
-
-template<class X>
-FirstDifferential<X>& operator+=(FirstDifferential<X>& x, const FirstDifferential<X>& y)
-{
-    x._value += y._value;
-    x._gradient += y._gradient;
-    return x;
-}
-
-template<class X>
-FirstDifferential<X>& operator-=(FirstDifferential<X>& x, const FirstDifferential<X>& y)
-{
-    x._value -= y._value;
-    x._gradient -= y._gradient;
-    return x;
-}
-
-template<class X>
-FirstDifferential<X>& operator*=(FirstDifferential<X>& x, const FirstDifferential<X>& y)
-{
-    x._gradient *= y._value;
-    x._gradient += x._value * y._gradient;
-    x._value *= y._value;
-    return x;
-}
-
-template<class X>
-FirstDifferential<X>& operator/=(FirstDifferential<X>& x, const FirstDifferential<X>& y)
-{
-    x._value /= y._value;
-    x._gradient -= x._value * y._gradient;
-    x._gradient /= y._value;
-    return x;
-}
-
-
-template<class X>
-FirstDifferential<X> operator+(const FirstDifferential<X>& x)
-{
-    return FirstDifferential<X>(+x._value,+x._gradient);
-}
-
-template<class X>
-FirstDifferential<X> operator-(const FirstDifferential<X>& x)
-{
-    return FirstDifferential<X>(-x._value,-x._gradient);
-}
-
-
-template<class X>
-FirstDifferential<X> operator+(const FirstDifferential<X>& x, const FirstDifferential<X>& y)
-{
-    return FirstDifferential<X>(x._value+y._value,x._gradient+y._gradient);
-}
-
-template<class X>
-FirstDifferential<X> operator-(const FirstDifferential<X>& x, const FirstDifferential<X>& y)
-{
-    return FirstDifferential<X>(x._value-y._value,x._gradient-y._gradient);
-}
-
-template<class X>
-FirstDifferential<X> operator*(const FirstDifferential<X>& x, const FirstDifferential<X>& y)
-{
-    return FirstDifferential<X>(x._value*y._value,x._value*y._gradient+y._value*x._gradient);
-}
-
-template<class X>
-FirstDifferential<X> operator/(const FirstDifferential<X>& x, const FirstDifferential<X>& y)
-{
-    return FirstDifferential<X>(x._value/y._value,((x._value/y._value)*y._gradient+x._gradient)/y._value);
-}
-
-template<class X> FirstDifferential<X> create_zero(const FirstDifferential<X>& c) {
-    return FirstDifferential<X>(c.argument_size(),create_zero(c.value())); }
-
-
-
-
-
-
-
-
-template<class X>
-FirstDifferential<X>
-min(const FirstDifferential<X>& x1, const FirstDifferential<X>& x2)
-{
-    ARIADNE_ASSERT_MSG(x1.argument_size()==x2.argument_size(),"x1="<<x1<<" x2="<<x2);
-    if(x1.value()==x2.value()) {
-        ARIADNE_THROW(std::runtime_error,"min(FirstDifferential<X> x1, FirstDifferential<X> x2)","x1[0]==x2[0]");
-    }
-    return x1.value()<x2.value() ? x1 : x2;
-}
-
-
-template<class X>
-FirstDifferential<X>
-max(const FirstDifferential<X>& x1,const FirstDifferential<X>& x2)
-{
-    ARIADNE_ASSERT_MSG(x1.argument_size()==x2.argument_size(),"x1="<<x1<<" x2="<<x2);
-    if(x1.value()==x2.value()) {
-        ARIADNE_THROW(std::runtime_error,"max(FirstDifferential<X> x1, FirstDifferential<X> x2)","x1[0]==x2[0]");
-    }
-    return x1.value()>x2.value() ? x1 : x2;
-}
-
-template<class X>
-FirstDifferential<X>
-abs(const FirstDifferential<X>& x)
-{
-    if(x.value()==0) {
-        ARIADNE_THROW(std::runtime_error,"abs(FirstDifferential<X> x)","x[0]==0");
-    }
-    return x.value()>0 ? pos(x) : neg(x);
-}
-
-
-template<class X>
-FirstDifferential<X>
-pos(const FirstDifferential<X>& x)
-{
-    return x;
-}
-
-template<class X>
-FirstDifferential<X>
-neg(const FirstDifferential<X>& x)
-{
-    return -x;
-}
-
-template<class X>
-FirstDifferential<X> rec(const FirstDifferential<X>& x)
-{
-    return FirstDifferential<X>( rec(x._value), x._gradient * (neg(sqr(rec(x._value)))) );
-}
-
-template<class X>
-FirstDifferential<X> sqr(const FirstDifferential<X>& x)
-{
-    return FirstDifferential<X>( sqr(x._value), (2*x._value)*x._gradient );
-}
-
-template<class X>
-FirstDifferential<X> pow(const FirstDifferential<X>& x, Int n)
-{
-    return FirstDifferential<X>( pow(x._value,n), (n*pow(x._value,n-1))*x._gradient );
-}
-
-template<class X>
-FirstDifferential<X> sqrt(const FirstDifferential<X>& x)
-{
-    X sqrt_val = sqrt(x._value);
-    return FirstDifferential<X>( sqrt_val, rec(2*sqrt_val)*x._gradient );
-}
-
-template<class X>
-FirstDifferential<X> exp(const FirstDifferential<X>& x)
-{
-    X exp_val = exp(x._value);
-    return FirstDifferential<X>( exp_val, exp_val*x._gradient );
-}
-
-template<class X>
-FirstDifferential<X> log(const FirstDifferential<X>& x)
-{
-    X log_val = log(x._value);
-    X rec_val = rec(x._value);
-    return FirstDifferential<X>( log_val, rec_val*x._gradient );
-}
-
-template<class X>
-FirstDifferential<X> sin(const FirstDifferential<X>& x)
-{
-    X sin_val = sin(x._value);
-    X cos_val = cos(x._value);
-    return FirstDifferential<X>( sin_val, cos_val*x._gradient );
-}
-
-template<class X>
-FirstDifferential<X> cos(const FirstDifferential<X>& x)
-{
-    X cos_val = cos(x._value);
-    X neg_sin_val = neg(sin(x._value));
-    return FirstDifferential<X>( cos_val, neg_sin_val*x._gradient );
-}
-
-template<class X>
-FirstDifferential<X> tan(const FirstDifferential<X>& x)
-{
-    X tan_val = tan(x._value);
-    X sqr_sec_val = sqr(rec(cos(x._value)));
-    return FirstDifferential<X>( tan_val, sqr_sec_val*x._gradient );
-}
-
-template<class X>
-FirstDifferential<X> asin(const FirstDifferential<X>& x)
-{
-    X asin_val = asin(x._value);
-    X d_asin_val = rec(sqrt(1.0-sqr(x._value)));
-    return FirstDifferential<X>( asin_val, d_asin_val*x._gradient );
-}
-
-template<class X>
-FirstDifferential<X> acos(const FirstDifferential<X>& x)
-{
-    X acos_val = acos(x._value);
-    X d_acos_val = neg(rec(sqrt(1.0-sqr(x._value))));
-    return FirstDifferential<X>( acos_val, d_acos_val*x._gradient );
-}
-
-template<class X>
-FirstDifferential<X> atan(const FirstDifferential<X>& x)
-{
-    X atan_val = atan(x._value);
-    X d_atan_val = rec(1+sqr(x._value));
-    return FirstDifferential<X>( atan_val, d_atan_val*x._gradient );
-}
-
-
-template<class X>
-Bool
-operator>=(const FirstDifferential<X>& x, const FirstDifferential<X>& y)
-{
-    return x._value>=y._value;
-}
-
-
-template<class X>
-Bool
-operator<=(const FirstDifferential<X>& x, const FirstDifferential<X>& y)
-{
-    return x._value<=y._value;
-}
-
-
-template<class X, class R>
-EnableIfNumericType<R,Bool>
-operator>=(const FirstDifferential<X>& x, const R& c)
-{
-    return x._value>=c;
-}
-
-
-template<class X, class R>
-EnableIfNumericType<R,Bool>
-operator<=(const FirstDifferential<X>& x, const R& c)
-{
-    return x._value<=c;
-}
-
-
-
-template<class X>
-OutputStream& operator<<(OutputStream& os, const FirstDifferential<X>& x)
-{
+template<class X> OutputStream& FirstDifferential<X>::_write(OutputStream& os) const {
+    FirstDifferential<X>const& x=*this;
     os << "D<R"<<x.argument_size()<<","<<x.degree()<<">{ ";
     os << x._value;
     for(SizeType j=0; j!=x.argument_size(); ++j) {
@@ -589,6 +248,92 @@ OutputStream& operator<<(OutputStream& os, const FirstDifferential<X>& x)
     }
     return os << " }";
 }
+
+
+template<class X> struct AlgebraOperations<FirstDifferential<X>,X> {
+
+    static FirstDifferential<X> apply(Add, FirstDifferential<X> x, const FirstDifferential<X>& y) {
+        x._value+=y._value; x._gradient+=y._gradient; return std::move(x); }
+    static FirstDifferential<X> apply(Sub, FirstDifferential<X> x, const FirstDifferential<X>& y) {
+        x._value-=y._value; x._gradient-=y._gradient; return std::move(x); }
+    static FirstDifferential<X> apply(Mul, const FirstDifferential<X>& x, const FirstDifferential<X>& y) {
+        return FirstDifferential<X>(x._value*y._value,x._value*y._gradient+y._value*x._gradient); }
+    static FirstDifferential<X> apply(Div, const FirstDifferential<X>& x, const FirstDifferential<X>& y) {
+        return FirstDifferential<X>(x._value/y._value,((x._value/y._value)*y._gradient+x._gradient)/y._value); }
+
+    static FirstDifferential<X> apply(Add, FirstDifferential<X> x, const X& c) {
+        x._value+=c; return std::move(x); }
+    static FirstDifferential<X> apply(Sub, FirstDifferential<X> x, const X& c) {
+        x._value-=c; return std::move(x); }
+    static FirstDifferential<X> apply(Mul, FirstDifferential<X> x, const X& c) {
+        x._value*=c; x._gradient*=c; return std::move(x); }
+    static FirstDifferential<X> apply(Div, FirstDifferential<X> x, const X& c) {
+        x._value/=c; x._gradient/=c; return std::move(x); }
+
+
+    static FirstDifferential<X> apply(Min, const FirstDifferential<X>& x1, const FirstDifferential<X>& x2) {
+        ARIADNE_ASSERT_MSG(x1.argument_size()==x2.argument_size(),"x1="<<x1<<" x2="<<x2); if(x1.value()==x2.value()) {
+            ARIADNE_THROW(std::runtime_error,"min(FirstDifferential<X> x1, FirstDifferential<X> x2)","x1[0]==x2[0]"); }
+        return x1.value()<x2.value() ? x1 : x2; }
+
+
+    static FirstDifferential<X> apply(Max, const FirstDifferential<X>& x1,const FirstDifferential<X>& x2) {
+        ARIADNE_ASSERT_MSG(x1.argument_size()==x2.argument_size(),"x1="<<x1<<" x2="<<x2); if(x1.value()==x2.value()) {
+            ARIADNE_THROW(std::runtime_error,"max(FirstDifferential<X> x1, FirstDifferential<X> x2)","x1[0]==x2[0]"); }
+        return x1.value()>x2.value() ? x1 : x2; }
+
+    static FirstDifferential<X> apply(Abs, const FirstDifferential<X>& x) {
+        if(x.value()==0) {
+            ARIADNE_THROW(std::runtime_error,"abs(FirstDifferential<X> x)","x[0]==0"); }
+        return x.value()>0 ? pos(x) : neg(x); }
+
+
+    static FirstDifferential<X> apply(Pos, const FirstDifferential<X>& x) {
+        return FirstDifferential<X>(+x._value,+x._gradient); }
+
+    static FirstDifferential<X> apply(Neg, const FirstDifferential<X>& x) {
+        return FirstDifferential<X>(-x._value,-x._gradient); }
+
+    static FirstDifferential<X> apply(Rec, const FirstDifferential<X>& x) {
+        return FirstDifferential<X>( rec(x._value), x._gradient * (neg(sqr(rec(x._value)))) ); }
+
+    static FirstDifferential<X> apply(Sqr, const FirstDifferential<X>& x) {
+        return FirstDifferential<X>( sqr(x._value), (2*x._value)*x._gradient ); }
+
+    static FirstDifferential<X> apply(Pow, const FirstDifferential<X>& x, Int n) {
+        return FirstDifferential<X>( pow(x._value,n), (n*pow(x._value,n-1))*x._gradient ); }
+
+    static FirstDifferential<X> apply(Sqrt, const FirstDifferential<X>& x) {
+        X sqrt_val = sqrt(x._value); return FirstDifferential<X>( sqrt_val, rec(2*sqrt_val)*x._gradient ); }
+
+    static FirstDifferential<X> apply(Exp, const FirstDifferential<X>& x) {
+        X exp_val = exp(x._value); return FirstDifferential<X>( exp_val, exp_val*x._gradient ); }
+
+    static FirstDifferential<X> apply(Log, const FirstDifferential<X>& x) {
+        X log_val = log(x._value); X rec_val = rec(x._value); return FirstDifferential<X>( log_val, rec_val*x._gradient ); }
+
+    static FirstDifferential<X> apply(Sin, const FirstDifferential<X>& x) {
+        X sin_val = sin(x._value); X cos_val = cos(x._value); return FirstDifferential<X>( sin_val, cos_val*x._gradient ); }
+
+    static FirstDifferential<X> apply(Cos, const FirstDifferential<X>& x) {
+        X cos_val = cos(x._value); X neg_sin_val = neg(sin(x._value)); return FirstDifferential<X>( cos_val, neg_sin_val*x._gradient ); }
+
+    static FirstDifferential<X> apply(Tan, const FirstDifferential<X>& x) {
+        X tan_val = tan(x._value); X sqr_sec_val = sqr(rec(cos(x._value))); return FirstDifferential<X>( tan_val, sqr_sec_val*x._gradient ); }
+
+    static FirstDifferential<X> apply(Asin, const FirstDifferential<X>& x) {
+        X asin_val = asin(x._value); X d_asin_val = rec(sqrt(1.0-sqr(x._value))); return FirstDifferential<X>( asin_val, d_asin_val*x._gradient ); }
+
+    static FirstDifferential<X> apply(Acos, const FirstDifferential<X>& x) {
+        X acos_val = acos(x._value); X d_acos_val = neg(rec(sqrt(1.0-sqr(x._value)))); return FirstDifferential<X>( acos_val, d_acos_val*x._gradient ); }
+
+    static FirstDifferential<X> apply(Atan, const FirstDifferential<X>& x) {
+        X atan_val = atan(x._value); X d_atan_val = rec(1+sqr(x._value)); return FirstDifferential<X>( atan_val, d_atan_val*x._gradient ); }
+
+};
+
+
+
 
 
 
@@ -654,6 +399,7 @@ class Vector< FirstDifferential<X> >
 //! total degree of the terms is increasing, and the linear terms appear in coordinate order.
 template<class X>
 class SecondDifferential
+    : public DispatchTranscendentalAlgebraOperations<SecondDifferential<X>,X>
 {
   public:
     X _value;
@@ -737,6 +483,8 @@ class SecondDifferential
 
     friend SecondDifferential<X> compose(UnivariateSecondDifferential<X> const& df, SecondDifferential<X> dg) {
         return _compose(df,dg); }
+    friend OutputStream& operator<<(OutputStream& os, SecondDifferential<X> df) {
+        return df._write(os); }
 
   private: public:
     explicit SecondDifferential(const X& v, const Covector<X>& g, const Matrix<X>& hh) : _value(v), _gradient(g), _half_hessian(hh) {
@@ -745,185 +493,10 @@ class SecondDifferential
         ARIADNE_ASSERT(hh.row_size()==g.size() && hh.column_size()==g.size()); }
 
     static SecondDifferential<X> _compose(UnivariateSecondDifferential<X> const&, SecondDifferential<X>);
+    OutputStream& _write(OutputStream&) const;
 };
 
-template<class X>
-const X SecondDifferential<X>::_zero=X(0);
-
-
-
-
-template<class X, class R>
-EnableIfNumericType<R,SecondDifferential<X>&>
-operator+=(SecondDifferential<X>& x, const R& c)
-{
-    x._value+=c;
-}
-
-template<class X, class R>
-EnableIfNumericType<R,SecondDifferential<X>&>
-operator-=(SecondDifferential<X>& x, const R& c)
-{
-    x._value-=c;
-}
-
-template<class X, class R>
-EnableIfNumericType<R,SecondDifferential<X>&>
-operator*=(SecondDifferential<X>& x, const R& c)
-{
-    x._value*=c;
-    x._gradient*=c;
-    x._half_hessian*=c;
-}
-
-
-template<class X, class R>
-EnableIfNumericType<R,SecondDifferential<X>&>
-operator/=(SecondDifferential<X>& x, const R& c)
-{
-    x._value/=c;
-    x._gradient/=c;
-    x._half_hessian/=c;
-}
-
-template<class X, class R>
-EnableIfNumericType<R,SecondDifferential<X> >
-operator+(const SecondDifferential<X>& x, const R& c)
-{
-    SecondDifferential<X> r(x); r+=X(c); return r;
-}
-
-template<class X, class R>
-EnableIfNumericType<R,SecondDifferential<X> >
-operator+(const R& c, const SecondDifferential<X>& x)
-{
-    SecondDifferential<X> r(x); r+=X(c); return r;
-}
-
-template<class X, class R>
-EnableIfNumericType<R,SecondDifferential<X> >
-operator-(const SecondDifferential<X>& x, const R& c)
-{
-    SecondDifferential<X> r(x); r-=X(c); return r;
-}
-
-template<class X, class R>
-EnableIfNumericType<R,SecondDifferential<X> >
-operator-(const R& c, const SecondDifferential<X>& x)
-{
-    SecondDifferential<X> r(-x); r+=X(c); return r;
-}
-
-template<class X, class R>
-
-EnableIfNumericType<R,SecondDifferential<X> >
-operator*(const SecondDifferential<X>& x, const R& c)
-{
-    SecondDifferential<X> r(x); r*=X(c); return r;
-}
-
-template<class X, class R>
-EnableIfNumericType<R,SecondDifferential<X> >
-operator*(const R& c, const SecondDifferential<X>& x)
-{
-    SecondDifferential<X> r(x); r*=X(c); return r;
-}
-
-template<class X, class R>
-EnableIfNumericType<R,SecondDifferential<X> >
-operator/(const SecondDifferential<X>& x, const R& c)
-{
-    SecondDifferential<X> r(x); r/=X(c); return r;
-}
-
-template<class X, class R>
-EnableIfNumericType<R,SecondDifferential<X> >
-operator/(const R& c, const SecondDifferential<X>& x)
-{
-    SecondDifferential<X> r(rec(x)); r*=X(c); return r;
-}
-
-
-
-template<class X>
-SecondDifferential<X>& operator+=(SecondDifferential<X>& x, const SecondDifferential<X>& y)
-{
-    x._value += y._value;
-    x._gradient += y._gradient;
-    x._half_hessian += y._half_hessian;
-    return x;
-}
-
-template<class X>
-SecondDifferential<X>& operator-=(SecondDifferential<X>& x, const SecondDifferential<X>& y)
-{
-    x._value -= y._value;
-    x._gradient -= y._gradient;
-    x._half_hessian -= y._half_hessian;
-    return x;
-}
-
-template<class X>
-SecondDifferential<X>& operator*=(SecondDifferential<X>& x, const SecondDifferential<X>& y)
-{
-    x._half_hessian *= y._value;
-    x._half_hessian += x._value * y._half_hessian;
-    for(SizeType j=0; j!=x.argument_size(); ++j) { for(SizeType k=0; k!=x.argument_size(); ++k) {
-            x._half_hessian[j][k]+=(x._gradient[j]*y._gradient[k]+x._gradient[k]*y._gradient[j])/2;
-    } }
-    x._gradient *= y._value;
-    x._gradient += x._value * y._gradient;
-    x._value *= y._value;
-    return x;
-}
-
-
-template<class X>
-SecondDifferential<X> operator+(const SecondDifferential<X>& x)
-{
-    return SecondDifferential<X>(+x._value,+x._gradient,+x._half_hessian);
-}
-
-template<class X>
-SecondDifferential<X> operator-(const SecondDifferential<X>& x)
-{
-    return SecondDifferential<X>(-x._value,-x._gradient,-x._half_hessian);
-}
-
-
-template<class X>
-SecondDifferential<X> operator+(const SecondDifferential<X>& x, const SecondDifferential<X>& y)
-{
-    return SecondDifferential<X>(x._value+y._value,x._gradient+y._gradient,x._half_hessian+y._half_hessian);
-}
-
-template<class X>
-SecondDifferential<X> operator-(const SecondDifferential<X>& x, const SecondDifferential<X>& y)
-{
-    return SecondDifferential<X>(x._value-y._value,x._gradient-y._gradient,x._half_hessian-y._half_hessian);
-}
-
-template<class X>
-SecondDifferential<X> operator*(const SecondDifferential<X>& x, const SecondDifferential<X>& y)
-{
-    Matrix<X> half_hessian(x.argument_size(),y.argument_size());
-    for(SizeType j=0; j!=x.argument_size(); ++j) { for(SizeType k=0; k!=x.argument_size(); ++k) {
-        half_hessian[j][k]=(x._gradient[j]*y._gradient[k]+x._gradient[k]*y._gradient[j])/2;
-    } }
-    half_hessian+=x._value*y._half_hessian;
-    half_hessian+=y._value*x._half_hessian;
-    return SecondDifferential<X>(x._value*y._value,x._value*y._gradient+y._value*x._gradient,half_hessian);
-}
-
-template<class X>
-SecondDifferential<X> operator/(const SecondDifferential<X>& x, const SecondDifferential<X>& y)
-{
-    return x*rec(y);
-}
-
-
-
-
+template<class X> const X SecondDifferential<X>::_zero=X(0);
 
 template<class X> SecondDifferential<X> SecondDifferential<X>::_compose(UnivariateSecondDifferential<X> const& x, SecondDifferential<X> y) {
     //d/dxi(f(g(x)) = f'(g(x)) dg(x)/dxi
@@ -936,135 +509,8 @@ template<class X> SecondDifferential<X> SecondDifferential<X>::_compose(Univaria
     return y;
 }
 
-
-template<class X>
-SecondDifferential<X>
-min(const SecondDifferential<X>& x1, const SecondDifferential<X>& x2)
-{
-    ARIADNE_ASSERT_MSG(x1.argument_size()==x2.argument_size(),"x1="<<x1<<" x2="<<x2);
-    if(x1.value()==x2.value()) {
-        ARIADNE_THROW(std::runtime_error,"min(SecondDifferential<X> x1, SecondDifferential<X> x2)","x1[0]==x2[0]");
-    }
-    return x1.value()<x2.value() ? x1 : x2;
-}
-
-
-template<class X>
-SecondDifferential<X>
-max(const SecondDifferential<X>& x1,const SecondDifferential<X>& x2)
-{
-    ARIADNE_ASSERT_MSG(x1.argument_size()==x2.argument_size(),"x1="<<x1<<" x2="<<x2);
-    if(x1.value()==x2.value()) {
-        ARIADNE_THROW(std::runtime_error,"max(SecondDifferential<X> x1, SecondDifferential<X> x2)","x1[0]==x2[0]");
-    }
-    return x1.value()>x2.value() ? x1 : x2;
-}
-
-template<class X>
-SecondDifferential<X>
-abs(const SecondDifferential<X>& x)
-{
-    if(x.value()==0) {
-        ARIADNE_THROW(std::runtime_error,"abs(SecondDifferential<X> x)","x[0]==0");
-    }
-    return x.value()>0 ? pos(x) : neg(x);
-}
-
-template<class X>
-SecondDifferential<X>
-pos(const SecondDifferential<X>& x)
-{
-    return x;
-}
-
-template<class X>
-SecondDifferential<X>
-neg(const SecondDifferential<X>& x)
-{
-    return -x;
-}
-
-template<class X>
-SecondDifferential<X> rec(const SecondDifferential<X>& x)
-{
-    X rec_val = rec(x._value);
-    X neg_sqr_rec_val = neg(sqr(rec_val));
-    X cub_rec_val = -rec_val*neg_sqr_rec_val;
-    return SecondDifferential<X>( rec_val, neg_sqr_rec_val*x._gradient, neg_sqr_rec_val*x._half_hessian + cub_rec_val * outer(x._gradient), SeriesTag() );
-}
-
-template<class X>
-SecondDifferential<X> sqr(const SecondDifferential<X>& x)
-{
-    return SecondDifferential<X>( sqr(x._value), (2*x._value)*x._gradient, (2*x._value)*x._half_hessian + outer(x._gradient)/2 );
-}
-
-template<class X>
-SecondDifferential<X> pow(const SecondDifferential<X>& x, Int n)
-{
-    return SecondDifferential<X>( pow(x._value,n), (n*pow(x._value,n-1))*x._gradient, n*(n-1)/2*pow(x._value,n-2)*x._half_hessian, SeriesTag() );
-}
-
-//ddf(y)/dxdx = d/dx ( f'(y) dy/dx) = f''(y) dy/dx dy/dx + f'(y) ddy/dxdx
-
-template<class X>
-SecondDifferential<X> sqrt(const SecondDifferential<X>& x)
-{
-    X sqrt_val = sqrt(x._value);
-    X rec_dbl_sqrt_val = rec(2*sqrt_val);
-    X neg_rec_quad_pow_val = neg(rec(4*sqrt_val*x._value));
-    return SecondDifferential<X>( sqrt_val, rec_dbl_sqrt_val*x._gradient, rec_dbl_sqrt_val*x._half_hessian + neg_rec_quad_pow_val * outer(x._gradient), SeriesTag() );
-}
-
-template<class X>
-SecondDifferential<X> exp(const SecondDifferential<X>& x)
-{
-    X exp_val = exp(x._value);
-    return SecondDifferential<X>( exp_val, exp_val*x._gradient, exp_val*x._half_hessian+exp_val*outer(x._gradient), SeriesTag() );
-}
-
-template<class X>
-SecondDifferential<X> log(const SecondDifferential<X>& x)
-{
-    X log_val = log(x._value);
-    X rec_val = rec(x._value);
-    X neg_sqr_rec_val = neg(sqr(rec_val));
-    return SecondDifferential<X>( log_val, rec_val*x._gradient, rec_val*x._half_hessian+neg_sqr_rec_val*outer(x._gradient), SeriesTag() );
-}
-
-template<class X>
-SecondDifferential<X> sin(const SecondDifferential<X>& x)
-{
-    X sin_val = sin(x._value);
-    X cos_val = cos(x._value);
-    X neg_sin_val = neg(sin_val);
-    return SecondDifferential<X>( sin_val, cos_val*x._gradient, cos_val*x._half_hessian+neg_sin_val*outer(x._gradient), SeriesTag() );
-}
-
-template<class X>
-SecondDifferential<X> cos(const SecondDifferential<X>& x)
-{
-    X cos_val = cos(x._value);
-    X neg_sin_val = neg(sin(x._value));
-    X neg_cos_val = neg(cos_val);
-    return SecondDifferential<X>( cos_val, neg_sin_val*x._gradient, neg_sin_val*x._half_hessian+neg_cos_val*outer(x._gradient), SeriesTag() );
-}
-
-template<class X>
-SecondDifferential<X> tan(const SecondDifferential<X>& x)
-{
-    X tan_val = tan(x._value);
-    X sqr_sec_val = sqr(rec(cos(x._value)));
-    X dbl_tan_sqr_sec_val = 2*tan_val*sqr_sec_val;
-    return SecondDifferential<X>( tan_val, sqr_sec_val*x._gradient, sqr_sec_val*x._half_hessian+dbl_tan_sqr_sec_val*outer(x._gradient), SeriesTag() );
-}
-
-
-
-
-template<class X>
-OutputStream& operator<<(OutputStream& os, const SecondDifferential<X>& x)
-{
+template<class X> OutputStream& SecondDifferential<X>::_write(OutputStream& os) const {
+    SecondDifferential<X> const& x = *this;
     os << "D<R"<<x.argument_size()<<","<<x.degree()<<">{";
     os << x._value;
     for(SizeType j=0; j!=x.argument_size(); ++j) {
@@ -1077,6 +523,123 @@ OutputStream& operator<<(OutputStream& os, const SecondDifferential<X>& x)
     }
     return os << " }";
 }
+
+
+template<class X> struct AlgebraOperations<SecondDifferential<X>,X> {
+
+    static SecondDifferential<X> apply(Add, SecondDifferential<X> x, const SecondDifferential<X>& y) {
+        x._value += y._value; x._gradient += y._gradient; x._half_hessian += y._half_hessian; return std::move(x); }
+    static SecondDifferential<X> apply(Sub, SecondDifferential<X> x, const SecondDifferential<X>& y) {
+        x._value -= y._value; x._gradient -= y._gradient; x._half_hessian -= y._half_hessian; return std::move(x); }
+    static SecondDifferential<X> apply(Mul, SecondDifferential<X> x, const SecondDifferential<X>& y) {
+        x._half_hessian *= y._value;
+        x._half_hessian += x._value * y._half_hessian;
+        for(SizeType j=0; j!=x.argument_size(); ++j) { for(SizeType k=0; k!=x.argument_size(); ++k) {
+            x._half_hessian[j][k]+=(x._gradient[j]*y._gradient[k]+x._gradient[k]*y._gradient[j])/2; } }
+        x._gradient *= y._value;
+        x._gradient += x._value * y._gradient;
+        x._value *= y._value;
+        return std::move(x);
+    }
+    static SecondDifferential<X> apply(Div, const SecondDifferential<X>& x, SecondDifferential<X> y) {
+        return mul(x,rec(std::move(y))); }
+
+
+    static SecondDifferential<X> apply(Add, SecondDifferential<X> x, const X& c) {
+        x._value+=c; return std::move(x); }
+    static SecondDifferential<X> apply(Sub, SecondDifferential<X> x, const X& c) {
+        x._value-=c; return std::move(x); }
+    static SecondDifferential<X> apply(Mul, SecondDifferential<X> x, const X& c) {
+        x._value*=c; x._gradient*=c; x._half_hessian*=c; return std::move(x); }
+    static SecondDifferential<X> apply(Div, SecondDifferential<X> x, const X& c) {
+        x._value/=c; x._gradient/=c; x._half_hessian/=c; return std::move(x); }
+
+    static SecondDifferential<X> apply(Min, const SecondDifferential<X>& x1, const SecondDifferential<X>& x2) {
+        ARIADNE_ASSERT_MSG(x1.argument_size()==x2.argument_size(),"x1="<<x1<<" x2="<<x2);
+        if(x1.value()==x2.value()) {
+            ARIADNE_THROW(std::runtime_error,"min(SecondDifferential<X> x1, SecondDifferential<X> x2)","x1[0]==x2[0]");
+        }
+        return x1.value()<x2.value() ? x1 : x2;
+    }
+
+    static SecondDifferential<X> apply(Max, const SecondDifferential<X>& x1,const SecondDifferential<X>& x2) {
+        ARIADNE_ASSERT_MSG(x1.argument_size()==x2.argument_size(),"x1="<<x1<<" x2="<<x2);
+        if(x1.value()==x2.value()) {
+            ARIADNE_THROW(std::runtime_error,"max(SecondDifferential<X> x1, SecondDifferential<X> x2)","x1[0]==x2[0]");
+        }
+        return x1.value()>x2.value() ? x1 : x2;
+    }
+
+    static SecondDifferential<X> apply(Abs, const SecondDifferential<X>& x) {
+        if(x.value()==0) {
+            ARIADNE_THROW(std::runtime_error,"abs(SecondDifferential<X> x)","x[0]==0");
+        }
+        return x.value()>0 ? pos(x) : neg(x);
+    }
+
+    static SecondDifferential<X> apply(Pos, const SecondDifferential<X>& x) {
+        return x; }
+
+    static SecondDifferential<X> apply(Neg, const SecondDifferential<X>& x) {
+        return SecondDifferential<X>(-x._value,-x._gradient,-x._half_hessian); }
+
+
+    static SecondDifferential<X> apply(Rec, const SecondDifferential<X>& x) {
+        X rec_val = rec(x._value);
+        X neg_sqr_rec_val = neg(sqr(rec_val));
+        X cub_rec_val = -rec_val*neg_sqr_rec_val;
+        return SecondDifferential<X>( rec_val, neg_sqr_rec_val*x._gradient, neg_sqr_rec_val*x._half_hessian + cub_rec_val * outer(x._gradient), SeriesTag() );
+    }
+
+    static SecondDifferential<X> apply(Sqr, const SecondDifferential<X>& x) {
+        return SecondDifferential<X>( sqr(x._value), (2*x._value)*x._gradient, (2*x._value)*x._half_hessian + outer(x._gradient)/2 );
+    }
+
+    static SecondDifferential<X> apply(Pow, const SecondDifferential<X>& x, Int n) {
+        return SecondDifferential<X>( pow(x._value,n), (n*pow(x._value,n-1))*x._gradient, n*(n-1)/2*pow(x._value,n-2)*x._half_hessian, SeriesTag() );
+    }
+
+    static SecondDifferential<X> apply(Sqrt, const SecondDifferential<X>& x) {
+        X sqrt_val = sqrt(x._value);
+        X rec_dbl_sqrt_val = rec(2*sqrt_val);
+        X neg_rec_quad_pow_val = neg(rec(4*sqrt_val*x._value));
+        return SecondDifferential<X>( sqrt_val, rec_dbl_sqrt_val*x._gradient, rec_dbl_sqrt_val*x._half_hessian + neg_rec_quad_pow_val * outer(x._gradient), SeriesTag() );
+    }
+
+    static SecondDifferential<X> apply(Exp, const SecondDifferential<X>& x) {
+        X exp_val = exp(x._value);
+        return SecondDifferential<X>( exp_val, exp_val*x._gradient, exp_val*x._half_hessian+exp_val*outer(x._gradient), SeriesTag() );
+    }
+
+    static SecondDifferential<X> apply(Log, const SecondDifferential<X>& x) {
+        X log_val = log(x._value);
+        X rec_val = rec(x._value);
+        X neg_sqr_rec_val = neg(sqr(rec_val));
+        return SecondDifferential<X>( log_val, rec_val*x._gradient, rec_val*x._half_hessian+neg_sqr_rec_val*outer(x._gradient), SeriesTag() );
+    }
+
+    static SecondDifferential<X> apply(Sin, const SecondDifferential<X>& x) {
+        X sin_val = sin(x._value);
+        X cos_val = cos(x._value);
+        X neg_sin_val = neg(sin_val);
+        return SecondDifferential<X>( sin_val, cos_val*x._gradient, cos_val*x._half_hessian+neg_sin_val*outer(x._gradient), SeriesTag() );
+    }
+
+    static SecondDifferential<X> apply(Cos, const SecondDifferential<X>& x) {
+        X cos_val = cos(x._value);
+        X neg_sin_val = neg(sin(x._value));
+        X neg_cos_val = neg(cos_val);
+        return SecondDifferential<X>( cos_val, neg_sin_val*x._gradient, neg_sin_val*x._half_hessian+neg_cos_val*outer(x._gradient), SeriesTag() );
+    }
+
+    static SecondDifferential<X> apply(Tan, const SecondDifferential<X>& x) {
+        X tan_val = tan(x._value);
+        X sqr_sec_val = sqr(rec(cos(x._value)));
+        X dbl_tan_sqr_sec_val = 2*tan_val*sqr_sec_val;
+        return SecondDifferential<X>( tan_val, sqr_sec_val*x._gradient, sqr_sec_val*x._half_hessian+dbl_tan_sqr_sec_val*outer(x._gradient), SeriesTag() );
+    }
+
+};
 
 
 

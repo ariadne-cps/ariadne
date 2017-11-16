@@ -227,16 +227,16 @@ class Polynomial
 
 template<class X> struct AlgebraOperations<Polynomial<X>> {
   public:
-    static Polynomial<X> _neg(const Polynomial<X>& p);
-    static Polynomial<X> _add(const Polynomial<X>& p1, const Polynomial<X>& p2);
-    static Polynomial<X> _sub(const Polynomial<X>& p1, const Polynomial<X>& p2);
-    static Polynomial<X> _mul(const Polynomial<X>& p1, const Polynomial<X>& p2);
-    static Polynomial<X> _add(Polynomial<X> p, const X& c);
-    static Polynomial<X> _mul(Polynomial<X> p, const X& c);
-    static Polynomial<X> _mul(Polynomial<X> p, const Monomial<X>& m);
-    static Polynomial<X>& _iadd(Polynomial<X>& p, const X& c);
-    static Polynomial<X>& _imul(Polynomial<X>& p, const X& c);
-    static Polynomial<X>& _imul(Polynomial<X>& p, const Monomial<X>& m);
+    static Polynomial<X> apply(Neg, const Polynomial<X>& p);
+    static Polynomial<X> apply(Add, const Polynomial<X>& p1, const Polynomial<X>& p2);
+    static Polynomial<X> apply(Sub, const Polynomial<X>& p1, const Polynomial<X>& p2);
+    static Polynomial<X> apply(Mul, const Polynomial<X>& p1, const Polynomial<X>& p2);
+    static Polynomial<X> apply(Add, Polynomial<X> p, const X& c);
+    static Polynomial<X> apply(Mul, Polynomial<X> p, const X& c);
+    static Polynomial<X> apply(Mul, Polynomial<X> p, const Monomial<X>& m);
+    static Polynomial<X>& iapply(Add, Polynomial<X>& p, const X& c);
+    static Polynomial<X>& iapply(Mul, Polynomial<X>& p, const X& c);
+    static Polynomial<X>& iapply(Mul, Polynomial<X>& p, const Monomial<X>& m);
 
 };
 

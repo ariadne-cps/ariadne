@@ -130,11 +130,15 @@ template<class P> class FunctionFacade<P,BoxDomainType,BoxDomainType> {
 
 template<class P, class D, class C> class DeclareFunctionOperations;
 template<class P, class D> class DeclareFunctionOperations<P,D,IntervalDomainType>
-    : DeclareTranscendentalAlgebraOperations<Function<P,D,IntervalDomainType>,Number<P>>
-    , DeclareMixedArithmeticOperators<Function<P,D,IntervalDomainType>,Int> { };
+    : DeclareTranscendentalAlgebraOperations<Function<P,D,IntervalDomainType>,Number<P>> { };
 template<class P, class D> class DeclareFunctionOperations<P,D,BoxDomainType>
     : DeclareVectorAlgebraOperators<Function<P,D,BoxDomainType>,Function<P,D,IntervalDomainType>,Number<P>> { };
 
+template<class P, class D, class C> class DispatchFunctionOperations;
+template<class P, class D> class DispatchFunctionOperations<P,D,IntervalDomainType>
+    : DispatchTranscendentalAlgebraOperations<Function<P,D,IntervalDomainType>,Number<P>> { };
+template<class P, class D> class DispatchFunctionOperations<P,D,BoxDomainType>
+    : DeclareVectorAlgebraOperators<Function<P,D,BoxDomainType>,Function<P,D,IntervalDomainType>,Number<P>> { };
 
 //! \ingroup FunctionModule
 //! \brief A generic scalar function which can be evaluated over the number type \a X,  \f$f:\X^n\rightarrow\X\f$.
@@ -142,7 +146,8 @@ template<class P, class D, class C>
 class Function
     : public FunctionConstructors<P>
     , public FunctionFacade<P,D,C>
-    , public DeclareFunctionOperations<P,D,C>
+//    , public DeclareFunctionOperations<P,D,C>
+    , public DispatchFunctionOperations<P,D,C>
 {
     static_assert(IsStronger<P,ApproximateTag>::value,"P must be an information level/paradigm.");
     typedef Number<P> Y;
@@ -230,6 +235,47 @@ class Function
     friend OutputStream& operator<<(OutputStream& os, Function<P,D,C> const& f) { f._ptr->write(os); return os; }
 };
 
+template<class A> struct AlgebraOperationsBase;
+
+template<class P> struct AlgebraOperationsBase<ScalarFunction<P>> {
+    template<class OP> static ScalarFunction<P> apply(OP op, ScalarFunction<P> const& f);
+    template<class OP> static ScalarFunction<P> apply(OP op, ScalarFunction<P> const& f1, ScalarFunction<P> const& f2);
+    template<class OP> static ScalarFunction<P> apply(OP op, ScalarFunction<P> const& f1, Number<P> const& c2);
+    template<class OP> static ScalarFunction<P> apply(OP op, Number<P> const& c1, ScalarFunction<P> const& f2);
+    template<class OP> static ScalarFunction<P> apply(OP op, ScalarFunction<P> const& f, Int n);
+};
+
+template<class P> struct AlgebraOperations<ScalarFunction<P>,Number<P>>
+    : public AlgebraOperationsBase<ScalarFunction<P>>
+{
+    using F=ScalarFunction<P>;
+    using C=Number<P>;
+    using Base=AlgebraOperationsBase<ScalarFunction<P>>;
+    static ScalarFunction<P> apply(Pos, ScalarFunction<P> const& f);
+    static ScalarFunction<P> apply(Neg, ScalarFunction<P> const& f);
+    static ScalarFunction<P> apply(Sqr, ScalarFunction<P> const& f);
+    static ScalarFunction<P> apply(Rec, ScalarFunction<P> const& f);
+    static ScalarFunction<P> apply(Add, ScalarFunction<P> const& f, Number<P> const& c);
+    static ScalarFunction<P> apply(Mul, ScalarFunction<P> const& f, Number<P> const& c);
+    static ScalarFunction<P> apply(Add, ScalarFunction<P> const& f1, ScalarFunction<P> const& f2);
+    static ScalarFunction<P> apply(Sub, ScalarFunction<P> const& f1, ScalarFunction<P> const& f2);
+    static ScalarFunction<P> apply(Mul, ScalarFunction<P> const& f1, ScalarFunction<P> const& f2);
+    static ScalarFunction<P> apply(Div, ScalarFunction<P> const& f1, ScalarFunction<P> const& f2);
+    static ScalarFunction<P> apply(Pow, ScalarFunction<P> const& f, Int n);
+    static ScalarFunction<P> apply(Sqrt, ScalarFunction<P> const& f);
+    static ScalarFunction<P> apply(Exp, ScalarFunction<P> const& f);
+    static ScalarFunction<P> apply(Log, ScalarFunction<P> const& f);
+    static ScalarFunction<P> apply(Sin, ScalarFunction<P> const& f);
+    static ScalarFunction<P> apply(Cos, ScalarFunction<P> const& f);
+    static ScalarFunction<P> apply(Tan, ScalarFunction<P> const& f);
+    static ScalarFunction<P> apply(Asin, ScalarFunction<P> const& f);
+    static ScalarFunction<P> apply(Acos, ScalarFunction<P> const& f);
+    static ScalarFunction<P> apply(Atan, ScalarFunction<P> const& f);
+    static ScalarFunction<P> apply(Min, ScalarFunction<P> const& f1, ScalarFunction<P> const& f2);
+    static ScalarFunction<P> apply(Max, ScalarFunction<P> const& f1, ScalarFunction<P> const& f2);
+    static ScalarFunction<P> apply(Abs, ScalarFunction<P> const& f);
+};
+
 template<class P, class D, class C> inline OutputStream&
 operator<<(OutputStream& os, const Function<P,D,C>& f) {
     return f.write(os); }
@@ -279,7 +325,7 @@ FunctionFacade<P,BoxDomainType,BoxDomainType>::jacobian(Vector<X> const& x) cons
 }
 
 
-inline ValidatedScalarFunction& operator*=(ValidatedScalarFunction& sf, const ExactNumber& c) { return sf*=ValidatedNumber(c); }
+ValidatedScalarFunction& operator*=(ValidatedScalarFunction& sf, const ExactNumber& c);
 EffectiveVectorFunction operator*(const EffectiveNumericType& c, const EffectiveVectorFunction& vf);
 
 EffectiveScalarFunction embed(SizeType as1, const EffectiveScalarFunction& f2, SizeType as3);
@@ -321,7 +367,7 @@ ApproximateVectorFunction compose(const ApproximateVectorFunction& f, const Appr
 
 template<class P, class D>
 struct VectorFunctionElementReference
-    : DeclareFunctionOperations<P,D,IntervalDomainType>
+    : DispatchFunctionOperations<P,D,IntervalDomainType>
 {
     typedef IntervalDomainType SC; typedef BoxDomainType VC;
     typedef VectorFunctionElementReference<P,D> SelfType;

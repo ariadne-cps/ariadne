@@ -65,7 +65,7 @@ template<class Y> Formula<Y> Formula<Y>::_derivative(SizeType j) const
         case OperatorCode::COS:
             return -derivative(f.arg(),j) * sin(f.arg());
         case OperatorCode::TAN:
-            return derivative(f.arg(),j) * (static_cast<Y>(1)-sqr(f.arg()));
+            return derivative(f.arg(),j) * (1-sqr(f.arg()));
         default:
             ARIADNE_THROW(std::runtime_error,"derivative(Formula<Y>)",
                           "Cannot compute derivative of "<<f<<"\n");

@@ -68,6 +68,7 @@ enum class OperatorCode : char {
     DIV,   // Division
     FMA,   // Fused multiply-and-add
     POW,   // Integer power
+    NUL,   // Zero
     POS,   // Unary plus
     NEG,   // Unary negation
     HLF,   // Halve
@@ -271,6 +272,11 @@ struct Fma : OperatorObject<Fma> {
     template<class A1, class A2, class A3> auto operator()(A1&& a1, A2&& a2, A3&& a3) const -> decltype(a1*a2+a3) { return a1*a2+a3; }
 };
 
+struct Nul : OperatorObject<Nul> {
+    OperatorCode code() const { return OperatorCode::NUL; } OperatorKind kind() const { return OperatorKind::UNARY; }
+    template<class A> auto operator()(A&& a) const -> decltype(nul(a)) { return nul(a); }
+    template<class X,class D> D derivative(const X& a, const D& d) const { return nul(d); }
+};
 struct Pos : OperatorObject<Pos> {
     OperatorCode code() const { return OperatorCode::POS; } OperatorKind kind() const { return OperatorKind::UNARY; }
     template<class A> auto operator()(A&& a) const -> decltype(pos(a)) { return pos(a); }

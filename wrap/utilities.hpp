@@ -406,6 +406,7 @@ template<class R, class A1, class A2>
 R __le__(const A1& a1, const A2& a2) { return static_cast<R>(a1<=a2); }
 
 
+template<class A> auto _pos_(const A& a) -> decltype(pos(a)) { return pos(a); }
 template<class A> auto _neg_(const A& a) -> decltype(neg(a)) { return neg(a); }
 template<class A> auto _rec_(const A& a) -> decltype(rec(a)) { return rec(a); }
 template<class A> auto _sqr_(const A& a) -> decltype(sqr(a)) { return sqr(a); }

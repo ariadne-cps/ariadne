@@ -312,7 +312,7 @@ template<class X> Void Differential<X>::check() const {
 
 
 template<class X>
-Differential<X> AlgebraOperations<Differential<X>>::_pos(Differential<X> x)
+Differential<X> AlgebraOperations<Differential<X>>::apply(Pos op, Differential<X> x)
 {
     for(auto iter=x.begin(); iter!=x.end(); ++iter) {
         X& xa=iter->data();
@@ -322,7 +322,7 @@ Differential<X> AlgebraOperations<Differential<X>>::_pos(Differential<X> x)
 }
 
 template<class X>
-Differential<X> AlgebraOperations<Differential<X>>::_neg(Differential<X> x)
+Differential<X> AlgebraOperations<Differential<X>>::apply(Neg op, Differential<X> x)
 {
     for(auto iter=x.begin(); iter!=x.end(); ++iter) {
         X& xa=iter->data();
@@ -332,7 +332,7 @@ Differential<X> AlgebraOperations<Differential<X>>::_neg(Differential<X> x)
 }
 
 template<class X>
-Differential<X> AlgebraOperations<Differential<X>>::_add(Differential<X> x, const X& c)
+Differential<X> AlgebraOperations<Differential<X>>::apply(Add op, Differential<X> x, const X& c)
 {
     MultiIndex a(x.argument_size());
     if(x.expansion().empty()) {
@@ -346,7 +346,7 @@ Differential<X> AlgebraOperations<Differential<X>>::_add(Differential<X> x, cons
 }
 
 template<class X>
-Differential<X> AlgebraOperations<Differential<X>>::_mul(Differential<X> x, const X& c)
+Differential<X> AlgebraOperations<Differential<X>>::apply(Mul op, Differential<X> x, const X& c)
 {
     if(decide(c==static_cast<X>(0))) {
         x.clear();
@@ -361,7 +361,7 @@ Differential<X> AlgebraOperations<Differential<X>>::_mul(Differential<X> x, cons
 
 
 template<class X>
-Differential<X> AlgebraOperations<Differential<X>>::_add(const Differential<X>& x, const Differential<X>& y)
+Differential<X> AlgebraOperations<Differential<X>>::apply(Add op, const Differential<X>& x, const Differential<X>& y)
 {
     ARIADNE_ASSERT_MSG(x.argument_size()==y.argument_size(),"x="<<x<<" y="<<y);
     Differential<X> r(x.argument_size(),std::min(x.degree(),y.degree()));
@@ -394,7 +394,7 @@ Differential<X> AlgebraOperations<Differential<X>>::_add(const Differential<X>& 
 }
 
 template<class X>
-Differential<X> AlgebraOperations<Differential<X>>::_sub(const Differential<X>& x, const Differential<X>& y)
+Differential<X> AlgebraOperations<Differential<X>>::apply(Sub op, const Differential<X>& x, const Differential<X>& y)
 {
     ARIADNE_ASSERT_MSG(x.argument_size()==y.argument_size(),"x="<<x<<" y="<<y);
     Differential<X> r(x.argument_size(),std::min(x.degree(),y.degree()));
@@ -427,7 +427,7 @@ Differential<X> AlgebraOperations<Differential<X>>::_sub(const Differential<X>& 
 }
 
 template<class X>
-Differential<X> AlgebraOperations<Differential<X>>::_mul(const Differential<X>& x, const Differential<X>& y)
+Differential<X> AlgebraOperations<Differential<X>>::apply(Mul op, const Differential<X>& x, const Differential<X>& y)
 {
     typedef typename Differential<X>::ConstIterator ConstIterator;
     ARIADNE_ASSERT_MSG(x.argument_size()==y.argument_size(),"x="<<x<<" y="<<y);
@@ -449,19 +449,19 @@ Differential<X> AlgebraOperations<Differential<X>>::_mul(const Differential<X>& 
 }
 
 template<class X>
-Differential<X> AlgebraOperations<Differential<X>>::_div(const Differential<X>& x, const Differential<X>& y)
+Differential<X> AlgebraOperations<Differential<X>>::apply(Div op, const Differential<X>& x, const Differential<X>& y)
 {
     return x * rec(y);
 }
 
 template<class X>
-Differential<X> AlgebraOperations<Differential<X>>::_rec(const Differential<X>& x)
+Differential<X> AlgebraOperations<Differential<X>>::apply(Pow op, const Differential<X>& x, Int n)
 {
-    return GradedAlgebraOperations<Differential<X>>::_rec(x);
+    return generic_pow(x,n);
 }
 
 
-template<class X> Differential<X> AlgebraOperations<Differential<X>>::_min(const Differential<X>& x1, const Differential<X>& x2) {
+template<class X> Differential<X> AlgebraOperations<Differential<X>>::apply(Min op, const Differential<X>& x1, const Differential<X>& x2) {
     // FIXME: Maybe need different code for validated and approximate paradigms
     ARIADNE_ASSERT_MSG(x1.argument_size()==x2.argument_size(),"x1="<<x1<<" x2="<<x2);
     if(decide(x1.value()==x2.value())) {
@@ -471,7 +471,7 @@ template<class X> Differential<X> AlgebraOperations<Differential<X>>::_min(const
 }
 
 
-template<class X> Differential<X> AlgebraOperations<Differential<X>>::_max(const Differential<X>& x1,const Differential<X>& x2) {
+template<class X> Differential<X> AlgebraOperations<Differential<X>>::apply(Max op, const Differential<X>& x1,const Differential<X>& x2) {
     ARIADNE_ASSERT_MSG(x1.argument_size()==x2.argument_size(),"x1="<<x1<<" x2="<<x2);
     if(decide(x1.value()==x2.value())) {
         ARIADNE_THROW(std::runtime_error,"max(Differential<X> x1, Differential<X> x2)","x1[0]==x2[0]");
@@ -479,7 +479,7 @@ template<class X> Differential<X> AlgebraOperations<Differential<X>>::_max(const
     return decide(x1.value()>x2.value()) ? x1 : x2;
 }
 
-template<class X> Differential<X> AlgebraOperations<Differential<X>>::_abs(const Differential<X>& x) {
+template<class X> Differential<X> AlgebraOperations<Differential<X>>::apply(Abs op, const Differential<X>& x) {
     // FIXME: Maybe need different code for validated and approximate paradigms
     if(decide(x.value()==X(0))) {
         ARIADNE_THROW(std::runtime_error,"abs(Differential<X> x)","x[0]==0");

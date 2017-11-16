@@ -44,8 +44,12 @@
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/expansion.hpp"
+#include "algebra/operations.hpp"
 
 namespace Ariadne {
+
+template<class A, class X >
+struct DispatchAlgebraOperations;
 
 template<class Y> class Formula;
 typedef Formula<ApproximateNumber> ApproximateFormula;
@@ -64,9 +68,9 @@ struct Index {
   public:
     explicit Index(Nat i) : _i(i) { }
     operator Nat () const { return _i; }
+    friend OutputStream& operator<<(OutputStream& os, const Index& ind) {
+        return os << Nat(ind); }
 };
-inline OutputStream& operator<<(OutputStream& os, const Index& ind) {
-    return os << Nat(ind); }
 
 template<class Y> class FormulaNode;
 
@@ -80,6 +84,8 @@ template<class Y> inline Formula<Y> make_formula(const Operator& op, const Formu
     return Formula<Y>::unary(op,arg); }
 template<class Y> inline Formula<Y> make_formula(const Operator& op, const Formula<Y>& arg1, const Formula<Y>& arg2) {
     return Formula<Y>::binary(op,arg1,arg2); }
+template<class Y> inline Formula<Y> make_formula(const Operator& op, const Formula<Y>& arg1, const Y& arg2) {
+    return Formula<Y>::binary(op,arg1,make_formula(arg2)); }
 template<class Y> inline Formula<Y> make_formula(const Operator& op, const Formula<Y>& arg, Int num) {
     return Formula<Y>::graded(op,arg,num); }
 template<class Y, class OP> inline Formula<Y> make_formula(const OP& op, Y const& cnst, const Formula<Y>& arg) {
@@ -87,69 +93,33 @@ template<class Y, class OP> inline Formula<Y> make_formula(const OP& op, Y const
     return Formula<Y>::scalar(Operator(op_code,OperatorKind::SCALAR),cnst,arg); }
 
 class FormulaOperations {
-    template<class Y> friend inline Formula<Y> operator+(const Formula<Y>& f) { return make_formula(Pos(),f); }
-    template<class Y> friend inline Formula<Y> operator-(const Formula<Y>& f) { return make_formula(Neg(),f); }
-    template<class Y> friend inline Formula<Y> operator+(const Formula<Y>& f1, const Formula<Y>& f2) { return make_formula(Add(),f1,f2); }
-    template<class Y> friend inline Formula<Y> operator-(const Formula<Y>& f1, const Formula<Y>& f2) { return make_formula(Sub(),f1,f2); }
-    template<class Y> friend inline Formula<Y> operator*(const Formula<Y>& f1, const Formula<Y>& f2) { return make_formula(Mul(),f1,f2); }
-    template<class Y> friend inline Formula<Y> operator/(const Formula<Y>& f1, const Formula<Y>& f2) { return make_formula(Div(),f1,f2); }
-    template<class Y> friend inline Formula<Y>& operator+=(Formula<Y>& f1, const Formula<Y>& f2) { Formula<Y> r=f1+f2; return f1=r; }
-    template<class Y> friend inline Formula<Y>& operator-=(Formula<Y>& f1, const Formula<Y>& f2) { Formula<Y> r=f1-f2; return f1=r; }
-    template<class Y> friend inline Formula<Y>& operator*=(Formula<Y>& f1, const Formula<Y>& f2) { Formula<Y> r=f1*f2; return f1=r; }
-    template<class Y> friend inline Formula<Y>& operator/=(Formula<Y>& f1, const Formula<Y>& f2) { Formula<Y> r=f1/f2; return f1=r; }
+    template<class Y, class R, EnableIf<IsConstructible<Y,R>> =dummy> friend Formula<Y> operator+(Formula<Y> f, R c) { return f + Y(c); }
+    template<class Y, class R, EnableIf<IsConstructible<Y,R>> =dummy> friend Formula<Y> operator-(Formula<Y> f, R c) { return f - Y(c); }
+    template<class Y, class R, EnableIf<IsConstructible<Y,R>> =dummy> friend Formula<Y> operator*(Formula<Y> f, R c) { return f * Y(c); }
+    template<class Y, class R, EnableIf<IsConstructible<Y,R>> =dummy> friend Formula<Y> operator/(Formula<Y> f, R c) { return f / Y(c); }
+    template<class Y, class R, EnableIf<IsConstructible<Y,R>> =dummy> friend Formula<Y> operator+(R c, Formula<Y> f) { return Y(c)+f; }
+    template<class Y, class R, EnableIf<IsConstructible<Y,R>> =dummy> friend Formula<Y> operator-(R c, Formula<Y> f) { return Y(c)-f; }
+    template<class Y, class R, EnableIf<IsConstructible<Y,R>> =dummy> friend Formula<Y> operator*(R c, Formula<Y> f) { return Y(c)*f; }
+    template<class Y, class R, EnableIf<IsConstructible<Y,R>> =dummy> friend Formula<Y> operator/(R c, Formula<Y> f) { return Y(c)/f; }
 
-    template<class Y> friend inline Formula<Y> add(const Formula<Y>& f1, const Formula<Y>& f2) { return make_formula(Add(),f1,f2); }
-    template<class Y> friend inline Formula<Y> sub(const Formula<Y>& f1, const Formula<Y>& f2) { return make_formula(Sub(),f1,f2); }
-    template<class Y> friend inline Formula<Y> mul(const Formula<Y>& f1, const Formula<Y>& f2) { return make_formula(Mul(),f1,f2); }
-    template<class Y> friend inline Formula<Y> div(const Formula<Y>& f1, const Formula<Y>& f2) { return make_formula(Div(),f1,f2); }
-    template<class Y> friend inline Formula<Y> pos(const Formula<Y>& f) { return make_formula(Pos(),f); }
-    template<class Y> friend inline Formula<Y> neg(const Formula<Y>& f) { return make_formula(Neg(),f); }
-    template<class Y> friend inline Formula<Y> rec(const Formula<Y>& f) { return make_formula(Rec(),f); }
-    template<class Y> friend inline Formula<Y> sqr(const Formula<Y>& f) { return make_formula(Sqr(),f); }
-    template<class Y> friend inline Formula<Y> pow(const Formula<Y>& f, Int n) { return make_formula(Pow(),f,n); }
-    template<class Y> friend inline Formula<Y> sqrt(const Formula<Y>& f) { return make_formula(Sqrt(),f); }
-    template<class Y> friend inline Formula<Y> exp(const Formula<Y>& f) { return make_formula(Exp(),f); }
-    template<class Y> friend inline Formula<Y> log(const Formula<Y>& f) { return make_formula(Log(),f); }
-    template<class Y> friend inline Formula<Y> sin(const Formula<Y>& f) { return make_formula(Sin(),f); }
-    template<class Y> friend inline Formula<Y> cos(const Formula<Y>& f) { return make_formula(Cos(),f); }
-    template<class Y> friend inline Formula<Y> tan(const Formula<Y>& f) { return make_formula(Tan(),f); }
-    template<class Y> friend inline Formula<Y> atan(const Formula<Y>& f) { return make_formula(Atan(),f); }
-/*
-    template<class Y> friend inline Formula<Y> operator+(Formula<Y> f, SelfType<Y> c) { return f + make_formula<Y>(c); }
-    template<class Y> friend inline Formula<Y> operator-(Formula<Y> f, SelfType<Y> c) { return f - make_formula<Y>(c); }
-    template<class Y> friend inline Formula<Y> operator*(Formula<Y> f, SelfType<Y> c) { return f * make_formula<Y>(c); }
-    template<class Y> friend inline Formula<Y> operator/(Formula<Y> f, SelfType<Y> c) { return f / make_formula<Y>(c); }
-    template<class Y> friend inline Formula<Y> operator+(SelfType<Y> c, Formula<Y> f) { return make_formula(Add(),c,f); }
-    template<class Y> friend inline Formula<Y> operator-(SelfType<Y> c, Formula<Y> f) { return make_formula(Sub(),c,f); }
-    template<class Y> friend inline Formula<Y> operator*(SelfType<Y> c, Formula<Y> f) { return make_formula(Mul(),c,f); }
-    template<class Y> friend inline Formula<Y> operator/(SelfType<Y> c, Formula<Y> f) { return make_formula(Div(),c,f); }
+    template<class Y, class R, EnableIf<IsConstructible<Y,R>> =dummy> friend Formula<Y>& operator+=(Formula<Y>& f, const R& c) { return f+=Y(c); }
+    template<class Y, class R, EnableIf<IsConstructible<Y,R>> =dummy> friend Formula<Y>& operator-=(Formula<Y>& f, const R& c) { return f-=Y(c); }
+    template<class Y, class R, EnableIf<IsConstructible<Y,R>> =dummy> friend Formula<Y>& operator*=(Formula<Y>& f, const R& c) { return f*=Y(c); }
+    template<class Y, class R, EnableIf<IsConstructible<Y,R>> =dummy> friend Formula<Y>& operator/=(Formula<Y>& f, const R& c) { return f/=Y(c); }
+};
 
-    template<class Y> friend inline Formula<Y>& operator+=(Formula<Y>& f, const SelfType<Y>& c) { return f=f+c; }
-    template<class Y> friend inline Formula<Y>& operator-=(Formula<Y>& f, const SelfType<Y>& c) { return f=f-c; }
-    template<class Y> friend inline Formula<Y>& operator*=(Formula<Y>& f, const SelfType<Y>& c) { return f=f*c; }
-    template<class Y> friend inline Formula<Y>& operator/=(Formula<Y>& f, const SelfType<Y>& c) { return f=f/c; }
-*/
-    template<class Y, class R, EnableIf<IsConstructible<Y,R>> =dummy> friend inline Formula<Y> operator+(Formula<Y> f, R c) {
-        return f + make_formula<Y>(Y(c)); }
-    template<class Y, class R, EnableIf<IsConstructible<Y,R>> =dummy> friend inline Formula<Y> operator-(Formula<Y> f, R c) {
-        return f - make_formula<Y>(Y(c)); }
-    template<class Y, class R, EnableIf<IsConstructible<Y,R>> =dummy> friend inline Formula<Y> operator*(Formula<Y> f, R c) {
-        return f * make_formula<Y>(Y(c)); }
-    template<class Y, class R, EnableIf<IsConstructible<Y,R>> =dummy> friend inline Formula<Y> operator/(Formula<Y> f, R c) {
-        return f / make_formula<Y>(Y(c)); }
-    template<class Y, class R, EnableIf<IsConstructible<Y,R>> =dummy> friend inline Formula<Y> operator+(R c, Formula<Y> f) {
-        return make_formula<Y>(Add(),Y(c),f); }
-    template<class Y, class R, EnableIf<IsConstructible<Y,R>> =dummy> friend inline Formula<Y> operator-(R c, Formula<Y> f) {
-        return make_formula<Y>(Sub(),Y(c),f); }
-    template<class Y, class R, EnableIf<IsConstructible<Y,R>> =dummy> friend inline Formula<Y> operator*(R c, Formula<Y> f) {
-        return make_formula<Y>(Mul(),Y(c),f); }
-    template<class Y, class R, EnableIf<IsConstructible<Y,R>> =dummy> friend inline Formula<Y> operator/(R c, Formula<Y> f) {
-        return make_formula<Y>(Div(),Y(c),f); }
-
-    template<class Y, class R, EnableIf<IsConstructible<Y,R>> =dummy> friend inline Formula<Y>& operator+=(Formula<Y>& f, const R& c) { return f+=Y(c); }
-    template<class Y, class R, EnableIf<IsConstructible<Y,R>> =dummy> friend inline Formula<Y>& operator-=(Formula<Y>& f, const R& c) { return f-=Y(c); }
-    template<class Y, class R, EnableIf<IsConstructible<Y,R>> =dummy> friend inline Formula<Y>& operator*=(Formula<Y>& f, const R& c) { return f*=Y(c); }
-    template<class Y, class R, EnableIf<IsConstructible<Y,R>> =dummy> friend inline Formula<Y>& operator/=(Formula<Y>& f, const R& c) { return f/=Y(c); }
+template<class Y> class AlgebraOperations<Formula<Y>,Y> {
+  public:
+    template<class OP> static Formula<Y> apply(OP op, Formula<Y> const& f) {
+        return Formula<Y>::unary(op,f); }
+    template<class OP> static Formula<Y> apply(OP op, Formula<Y> const& f1, Formula<Y> const& f2) {
+        return Formula<Y>::binary(op,f1,f2); }
+    template<class OP> static Formula<Y> apply(OP op, Formula<Y> const& f1, Y const& c2) {
+        return Formula<Y>::binary(op,f1,Formula<Y>::constant(c2)); }
+    template<class OP> static Formula<Y> apply(OP op, Y const& c1, Formula<Y> const& f2) {
+        return Formula<Y>::binary(op,Formula<Y>::constant(c1),f2); }
+    static Formula<Y> apply(Pow op, Formula<Y> const& f, Int n) {
+        return Formula<Y>::graded(op,f,n); }
 };
 
 //! \brief A formula defining a real function.
@@ -157,7 +127,10 @@ class FormulaOperations {
 //! The Formula class is implemented as a directed acyclic graph, with
 //! each node being an atomic operation.
 template<class Y>
-class Formula : public FormulaOperations {
+class Formula
+    : public DispatchTranscendentalAlgebraOperations<Formula<Y>,Y>
+    , public FormulaOperations
+{
     typedef Index I;
   public:
     typedef typename Y::Paradigm Paradigm;

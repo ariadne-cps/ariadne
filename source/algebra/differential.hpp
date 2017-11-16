@@ -59,20 +59,22 @@ typedef Differential<FloatDPApproximation> FloatApproximationDifferential;
 typedef Differential<FloatDPBounds> FloatBoundsDifferential;
 typedef Differential<UpperIntervalType> UpperIntervalDifferentialType;
 
-template<class PR> class DifferentialFactory : public FloatFactory<PR> {
+template<class X> class DifferentialFactory {
+    typedef PrecisionType<X> PR;
+    PR _pr;
   public:
-    DifferentialFactory<PR>(PR const& pr) : FloatFactory<PR>(pr) { }
-    template<class Y> using ConcreteNumberType = decltype(declval<FloatFactory<PR>>().create(declval<Y>()));
-    using FloatFactory<PR>::create;
-    template<class Y> UnivariateDifferential<ConcreteNumberType<Y>> create(UnivariateDifferential<Y> const&);
-    template<class Y> Differential<ConcreteNumberType<Y>> create(Differential<Y> const&);
-    template<class Z> Differential<Z>const& create(NonAssignableDifferential<Z> const& dx) { return dx; }
+    DifferentialFactory<X>(PR const& pr) : _pr(pr) { }
+
+    template<class Y, EnableIf<IsConstructible<X,Y,PR>> =dummy> X create(Y const& y) { return X(y,_pr); }
+    template<class Y> UnivariateDifferential<X> create(UnivariateDifferential<Y> const&);
+    template<class Y> Differential<X> create(Differential<Y> const&);
+    Differential<X>const& create(NonAssignableDifferential<X> const& dx) { return dx; }
 };
-template<class PR> inline DifferentialFactory<PR> differential_factory(PR const& pr) { return DifferentialFactory<PR>(pr); }
-template<class X> DifferentialFactory<PrecisionType<X>> factory(UnivariateDifferential<X> const& dx) {
-    return differential_factory(dx.value().precision()); }
-template<class X> DifferentialFactory<PrecisionType<X>> factory(Differential<X> const& dx) {
-    return differential_factory(dx.value().precision()); }
+template<class X> inline DifferentialFactory<X> differential_factory(X const& x) { return DifferentialFactory<X>(x.precision()); }
+template<class X> inline DifferentialFactory<X> factory(UnivariateDifferential<X> const& dx) {
+    return DifferentialFactory<X>(dx.value().precision()); }
+template<class X> inline DifferentialFactory<X> factory(Differential<X> const& dx) {
+    return DifferentialFactory<X>(dx.value().precision()); }
 
 
 
@@ -279,18 +281,20 @@ template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumeri
 decltype(auto) operator+(Differential<X> const& x, Y const& y) { return x+factory(x).create(y); }
 
 template<class X> struct AlgebraOperations<Differential<X>> : GradedAlgebraOperations<Differential<X>> {
-    static Differential<X> _pos(Differential<X> dx);
-    static Differential<X> _neg(Differential<X> dx);
-    static Differential<X> _add(Differential<X> dx, X const& c);
-    static Differential<X> _mul(Differential<X> dx, X const& c);
-    static Differential<X> _add(Differential<X> const& dx1, Differential<X> const& dx2);
-    static Differential<X> _sub(Differential<X> const& dx1, Differential<X> const& dx2);
-    static Differential<X> _mul(Differential<X> const& dx1, Differential<X> const& dx2);
-    static Differential<X> _div(Differential<X> const& dx1, Differential<X> const& dx2);
-    static Differential<X> _rec(Differential<X> const& dx);
-    static Differential<X> _min(Differential<X> const& dx1, Differential<X> const& dx2);
-    static Differential<X> _max(Differential<X> const& dx1, Differential<X> const& dx2);
-    static Differential<X> _abs(Differential<X> const& dx);
+    template<class OP> static Differential<X> apply(OP op, Differential<X> dx) {
+        return Differential<X>::_compose(Series<X>(op,dx.value()),dx); }
+    static Differential<X> apply(Pos op, Differential<X> dx);
+    static Differential<X> apply(Neg op, Differential<X> dx);
+    static Differential<X> apply(Add op, Differential<X> const& dx1, Differential<X> const& dx2);
+    static Differential<X> apply(Sub op, Differential<X> const& dx1, Differential<X> const& dx2);
+    static Differential<X> apply(Mul op, Differential<X> const& dx1, Differential<X> const& dx2);
+    static Differential<X> apply(Div op, Differential<X> const& dx1, Differential<X> const& dx2);
+    static Differential<X> apply(Pow op, Differential<X> const& dx, Int n);
+    static Differential<X> apply(Add op, Differential<X> dx, X const& c);
+    static Differential<X> apply(Mul op, Differential<X> dx, X const& c);
+    static Differential<X> apply(Min op, Differential<X> const& dx1, Differential<X> const& dx2);
+    static Differential<X> apply(Max op, Differential<X> const& dx1, Differential<X> const& dx2);
+    static Differential<X> apply(Abs op, Differential<X> const& dx);
 };
 
 template<class X> template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>>>

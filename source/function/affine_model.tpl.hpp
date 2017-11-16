@@ -87,7 +87,7 @@ template<class F> struct AlgebraOperations<AffineModel<ApproximateTag,F>> {
     typedef typename AffineModelType::NumericType NumericType;
     typedef typename AffineModelType::CoefficientType CoefficientType;
 
-    AffineModelType _neg(const AffineModelType& a) {
+    static AffineModelType apply(Neg, const AffineModelType& a) {
         SizeType n=a.argument_size();
         PrecisionType prec=a.precision();
 
@@ -99,7 +99,7 @@ template<class F> struct AlgebraOperations<AffineModel<ApproximateTag,F>> {
         return r;
     }
 
-    AffineModelType _add(const AffineModelType& a1, const AffineModelType& a2) {
+    static AffineModelType apply(Add, const AffineModelType& a1, const AffineModelType& a2) {
         ARIADNE_ASSERT_MSG(a1.argument_size()==a2.argument_size(),"a1="<<a1<<" a2="<<a2);
         SizeType n=a1.argument_size();
         PrecisionType prec=max(a1.precision(),a2.precision());
@@ -112,7 +112,7 @@ template<class F> struct AlgebraOperations<AffineModel<ApproximateTag,F>> {
         return r;
     }
 
-    AffineModelType _mul(const AffineModelType& a1, const AffineModelType& a2) {
+    static AffineModelType apply(Mul, const AffineModelType& a1, const AffineModelType& a2) {
         ARIADNE_ASSERT_MSG(a1.argument_size()==a2.argument_size(),"a1="<<a1<<" a2="<<a2);
         SizeType n=a1.argument_size();
         PrecisionType prec=max(a1.precision(),a2.precision());
@@ -125,17 +125,17 @@ template<class F> struct AlgebraOperations<AffineModel<ApproximateTag,F>> {
         return r;
     }
 
-    AffineModelType _add(const NumericType& c, const AffineModelType& a) {
+    static AffineModelType apply(Add, const NumericType& c, const AffineModelType& a) {
         AffineModelType r=a;
         r._c=CoefficientType(c.raw() + a.value().raw());
         return r;
     }
 
-    AffineModelType _add(const AffineModelType& a, const NumericType& c) {
-        return _add(c,a);
+    static AffineModelType apply(Add, const AffineModelType& a, const NumericType& c) {
+        return apply(Add(), c,a);
     }
 
-    AffineModelType _mul(const NumericType& c, const AffineModelType& a) {
+    static AffineModelType apply(Mul, const NumericType& c, const AffineModelType& a) {
         SizeType n=a.argument_size();
         PrecisionType prec=a.precision();
 
@@ -147,8 +147,8 @@ template<class F> struct AlgebraOperations<AffineModel<ApproximateTag,F>> {
         return r;
     }
 
-    AffineModelType _mul(const AffineModelType& a, const NumericType& c) {
-        return _mul(c,a);
+    static AffineModelType apply(Mul, const AffineModelType& a, const NumericType& c) {
+        return apply(Mul(), c,a);
     }
 };
 
@@ -160,7 +160,7 @@ template<class F> struct AlgebraOperations<AffineModel<ValidatedTag,F>> {
     typedef typename AffineModelType::CoefficientType CoefficientType;
     typedef typename AffineModelType::ErrorType ErrorType;
 
-    AffineModelType _neg(const AffineModelType& a) {
+    static AffineModelType apply(Neg, const AffineModelType& a) {
         SizeType n=a.argument_size();
         AffineModelType r(n,a.precision());
         r=CoefficientType( -a.value().raw() );
@@ -172,7 +172,7 @@ template<class F> struct AlgebraOperations<AffineModel<ValidatedTag,F>> {
         return r;
     }
 
-    AffineModelType _add(const AffineModelType& a1, const AffineModelType& a2) {
+    static AffineModelType apply(Add, const AffineModelType& a1, const AffineModelType& a2) {
         ARIADNE_ASSERT_MSG(a1.argument_size()==a2.argument_size(),"a1="<<a1<<" a2="<<a2);
         SizeType n=a1.argument_size();
         PrecisionType prec=max(a1.precision(),a2.precision());
@@ -203,7 +203,7 @@ template<class F> struct AlgebraOperations<AffineModel<ValidatedTag,F>> {
         return r;
     }
 
-    AffineModelType _mul(const AffineModelType& a1, const AffineModelType& a2) {
+    static AffineModelType apply(Mul, const AffineModelType& a1, const AffineModelType& a2) {
         ARIADNE_ASSERT_MSG(a1.argument_size()==a2.argument_size(),"a1="<<a1<<" a2="<<a2);
         SizeType n=a1.argument_size();
         PrecisionType prec=max(a1.precision(),a2.precision());
@@ -247,7 +247,7 @@ template<class F> struct AlgebraOperations<AffineModel<ValidatedTag,F>> {
         return r;
     }
 
-    AffineModelType _add(const NumericType& c, const AffineModelType& a) {
+    static AffineModelType apply(Add, const NumericType& c, const AffineModelType& a) {
         AffineModelType r=a;
         F cm=c.value().raw();
         r.set_value( CoefficientType( cm + a.value().raw() ) );
@@ -265,11 +265,11 @@ template<class F> struct AlgebraOperations<AffineModel<ValidatedTag,F>> {
         return r;
     }
 
-    AffineModelType _add(const AffineModelType& a, const NumericType& c) {
-        return _add(c,a);
+    static AffineModelType apply(Add, const AffineModelType& a, const NumericType& c) {
+        return apply(Add(), c,a);
     }
 
-    AffineModelType _mul(const NumericType& c, const AffineModelType& a) {
+    static AffineModelType apply(Mul, const NumericType& c, const AffineModelType& a) {
         SizeType n=a.argument_size();
         PrecisionType prec=a.precision();
 
@@ -306,8 +306,8 @@ template<class F> struct AlgebraOperations<AffineModel<ValidatedTag,F>> {
         return r;
     }
 
-    AffineModelType _mul(const AffineModelType& a, const NumericType& c) {
-        return _mul(c,a);
+    static AffineModelType apply(Mul, const AffineModelType& a, const NumericType& c) {
+        return apply(Mul(), c,a);
     }
 };
 

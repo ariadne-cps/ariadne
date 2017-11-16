@@ -221,7 +221,7 @@ inline Int powm1(Nat k) { return (k%2) ? -1 : +1; }
 }
 
 
-template<class A> A NormedAlgebraOperations<A>::_sqrt(const A& x)
+template<class A> A NormedAlgebraOperations<A>::apply(Sqrt, const A& x)
 {
     typedef typename A::NumericType X;
 
@@ -255,7 +255,7 @@ template<class A> A NormedAlgebraOperations<A>::_sqrt(const A& x)
     return z;
 }
 
-template<class A> A NormedAlgebraOperations<A>::_rec(const A& x)
+template<class A> A NormedAlgebraOperations<A>::apply(Rec, const A& x)
 {
     typedef typename A::NumericType X;
     // Use a special routine to minimise errors
@@ -287,7 +287,7 @@ template<class A> A NormedAlgebraOperations<A>::_rec(const A& x)
     return z;
 }
 
-template<class A> A NormedAlgebraOperations<A>::_log(const A& x)
+template<class A> A NormedAlgebraOperations<A>::apply(Log, const A& x)
 {
     typedef typename A::NumericType X;
     // Use a special routine to minimise errors
@@ -320,7 +320,7 @@ template<class A> A NormedAlgebraOperations<A>::_log(const A& x)
 }
 
 // Use special code to utilise exp(ax+b)=exp(x)^a*exp(b)
-template<class A> A NormedAlgebraOperations<A>::_exp(const A& x)
+template<class A> A NormedAlgebraOperations<A>::apply(Exp, const A& x)
 {
     typedef typename A::NumericType X;
 
@@ -365,7 +365,7 @@ template<class A> A NormedAlgebraOperations<A>::_exp(const A& x)
 
 // Use special code to utilise sin(x+2pi)=sin(x)
 // and that the power series is of the form x*f(x^2)
-template<class A> A NormedAlgebraOperations<A>::_sin(const A& x)
+template<class A> A NormedAlgebraOperations<A>::apply(Sin, const A& x)
 {
     typedef typename A::NumericType X;
     Real const& pi=Ariadne::pi;
@@ -408,7 +408,7 @@ template<class A> A NormedAlgebraOperations<A>::_sin(const A& x)
 
 // Use special code to utilise sin(x+2pi)=sin(x)
 // and that the power series is of the form f(x^2)
-template<class A> A NormedAlgebraOperations<A>::_cos(const A& x)
+template<class A> A NormedAlgebraOperations<A>::apply(Cos, const A& x)
 {
     typedef typename A::NumericType X;
 
@@ -446,12 +446,12 @@ template<class A> A NormedAlgebraOperations<A>::_cos(const A& x)
     return z;
 }
 
-template<class A> A NormedAlgebraOperations<A>::_tan(const A& x)
+template<class A> A NormedAlgebraOperations<A>::apply(Tan, const A& x)
 {
     return sin(x)*rec(cos(x));
 }
 
-template<class A> A NormedAlgebraOperations<A>::_asin(const A& x)
+template<class A> A NormedAlgebraOperations<A>::apply(Asin, const A& x)
 {
     ARIADNE_NOT_IMPLEMENTED;
 /*
@@ -464,7 +464,7 @@ template<class A> A NormedAlgebraOperations<A>::_asin(const A& x)
 */
 }
 
-template<class A> A NormedAlgebraOperations<A>::_acos(const A& x)
+template<class A> A NormedAlgebraOperations<A>::apply(Acos, const A& x)
 {
     ARIADNE_NOT_IMPLEMENTED;
 /*
@@ -477,7 +477,7 @@ template<class A> A NormedAlgebraOperations<A>::_acos(const A& x)
 */
 }
 
-template<class A> A NormedAlgebraOperations<A>::_atan(const A& x)
+template<class A> A NormedAlgebraOperations<A>::apply(Atan, const A& x)
 {
     ARIADNE_NOT_IMPLEMENTED;
 /*

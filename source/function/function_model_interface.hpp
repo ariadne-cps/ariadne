@@ -136,20 +136,30 @@ template<class P, class PR, class PRE> class FunctionModelFactoryInterface
     virtual VectorFunctionModelInterface<P,PR,PRE>* _create_constants(const DomainType& domain, const Vector<Number<P>>& values) const = 0;
     virtual VectorFunctionModelInterface<P,PR,PRE>* _create_identity(const DomainType& domain) const = 0;
   public:
-    CanonicalNumericType<P,PR,PRE> create(const Number<P>& number) const { return this->_create(number); };
-    ScalarFunctionModel<P,PR,PRE> create(const DomainType& domain, const ScalarFunctionInterface<P>& function) const { return this->_create(domain,function); };
-    VectorFunctionModel<P,PR,PRE> create(const DomainType& domain, const VectorFunctionInterface<P>& function) const { return this->_create(domain,function); };
+    CanonicalNumericType<P,PR,PRE> create(const Number<P>& number) const {
+        return CanonicalNumericType<P,PR,PRE>(this->_create(number)); };
+    ScalarFunctionModel<P,PR,PRE> create(const DomainType& domain, const ScalarFunctionInterface<P>& function) const {
+        return ScalarFunctionModel<P,PR,PRE>(this->_create(domain,function)); };
+    VectorFunctionModel<P,PR,PRE> create(const DomainType& domain, const VectorFunctionInterface<P>& function) const {
+        return VectorFunctionModel<P,PR,PRE>(this->_create(domain,function)); };
 
-    ScalarFunctionModel<P,PR,PRE> create_zero(const DomainType& domain) const { return _create_zero(domain); };
-    ScalarFunctionModel<P,PR,PRE> create_constant(const DomainType& domain, const Number<P>& value) const { return _create_constant(domain,value); };
+    ScalarFunctionModel<P,PR,PRE> create_zero(const DomainType& domain) const {
+        return ScalarFunctionModel<P,PR,PRE>(_create_zero(domain)); };
+    ScalarFunctionModel<P,PR,PRE> create_constant(const DomainType& domain, const Number<P>& value) const {
+        return ScalarFunctionModel<P,PR,PRE>(_create_constant(domain,value)); };
     ScalarFunctionModel<P,PR,PRE> create_constant(const DomainType& domain, const CanonicalNumericType<P,PR,PRE>& value) const {
-        return _create_constant(domain,Number<P>(value)); };
-    ScalarFunctionModel<P,PR,PRE> create_coordinate(const DomainType& domain, SizeType index) const { return _create_coordinate(domain,index); };
-    VectorFunctionModel<P,PR,PRE> create_zeros(SizeType result_size, const DomainType& domain) const { return _create_zeros(result_size,domain); };
-    VectorFunctionModel<P,PR,PRE> create_constants(const DomainType& domain, const Vector<Number<P>>& values) const { return _create_constants(domain,values); };
-    VectorFunctionModel<P,PR,PRE> create_identity(const DomainType& domain) const { return _create_identity(domain); };
+        return ScalarFunctionModel<P,PR,PRE>(_create_constant(domain,Number<P>(value))); };
+    ScalarFunctionModel<P,PR,PRE> create_coordinate(const DomainType& domain, SizeType index) const {
+        return ScalarFunctionModel<P,PR,PRE>(_create_coordinate(domain,index)); };
+    VectorFunctionModel<P,PR,PRE> create_zeros(SizeType result_size, const DomainType& domain) const {
+        return VectorFunctionModel<P,PR,PRE>(_create_zeros(result_size,domain)); };
+    VectorFunctionModel<P,PR,PRE> create_constants(const DomainType& domain, const Vector<Number<P>>& values) const {
+        return VectorFunctionModel<P,PR,PRE>(_create_constants(domain,values)); };
+    VectorFunctionModel<P,PR,PRE> create_identity(const DomainType& domain) const {
+        return VectorFunctionModel<P,PR,PRE>(_create_identity(domain)); };
     ScalarFunctionModel<P,PR,PRE> create_identity(const IntervalDomainType& domain) const;
-    CanonicalNumericType<P,PR,PRE> create_number(const Number<P>& number) const { return this->_create(number); }
+    CanonicalNumericType<P,PR,PRE> create_number(const Number<P>& number) const {
+        return CanonicalNumericType<P,PR,PRE>(this->_create(number)); }
 
 };
 

@@ -46,6 +46,11 @@ template<class X> class SeriesGeneratorInterface {
 
 template<class OP, class X> class SeriesGenerator;
 
+template<class X> class SeriesGenerator<Sqr,X> : public SeriesGeneratorInterface<X> {
+    virtual X _next(DegreeType deg, X const& c, List<X>& y) const final {
+        Int d=deg; return (d==0) ? sqr(c) : (d==1) ? 2*c : (d==2) ? nul(c)+1 : nul(c); }
+};
+
 template<class X> class SeriesGenerator<Rec,X> : public SeriesGeneratorInterface<X> {
     virtual X _next(DegreeType deg, X const& c, List<X>& y) const final { Int d=deg; return (d==0) ? (1/c) : y[d-1]*(-y[0]); }
 };

@@ -96,6 +96,15 @@ template<class R, class F, class X> class CanCall {
 template<class M> class ScaledFunctionPatchFactory;
 template<class M> class ScaledFunctionPatchCreator;
 
+template<class M> struct AlgebraOperations<ScaledFunctionPatch<M>> {
+    typedef typename M::NumericType NumericType;
+  public:
+    template<class OP> static ScaledFunctionPatch<M> apply(OP op, ScaledFunctionPatch<M> const& f);
+    template<class OP> static ScaledFunctionPatch<M> apply(OP op, ScaledFunctionPatch<M> const& f1, ScaledFunctionPatch<M> const& f2);
+    template<class OP> static ScaledFunctionPatch<M> apply(OP op, ScaledFunctionPatch<M> const& f1, NumericType const& c2);
+    template<class OP> static ScaledFunctionPatch<M> apply(OP op, NumericType const& c1, ScaledFunctionPatch<M> const& f2);
+    static ScaledFunctionPatch<M> apply(Pow op, ScaledFunctionPatch<M> const& f, Int n);
+};
 
 /*! \ingroup FunctionModelSubModule
  *  \brief A ValidatedScalarTaylorFunctionModelDP is a type of FunctionModel in which a the restriction of a scalar function \f$f:\R^n\rightarrow\R\f$ on a domain \f$D\f$ is approximated by polynomial \f$p\f$ with uniform error \f$e\f$.
@@ -120,7 +129,7 @@ template<class M> class ScaledFunctionPatchCreator;
  */
 template<class M> class ScaledFunctionPatch
     : public ScalarFunctionModelMixin<ScaledFunctionPatch<M>, typename M::Paradigm, typename M::PrecisionType, typename M::ErrorPrecisionType>
-    , public DispatchSymbolicAlgebraOperations<ScaledFunctionPatch<M>, NumericType<M>>
+    , public DispatchTranscendentalAlgebraOperations<ScaledFunctionPatch<M>, NumericType<M>>
     , public ProvideConcreteGenericArithmeticOperators<ScaledFunctionPatch<M>, ScalarFunction<typename M::Paradigm>>
     , public DispatchConcreteGenericAlgebraNumberOperations<ScaledFunctionPatch<M>,NumericType<M>,Number<typename M::Paradigm>>
 {
@@ -334,12 +343,6 @@ template<class M> class ScaledFunctionPatch
   public:
     template<class X, EnableIf<CanCall<X,M,Vector<X>>> =dummy> Void _compute(X& r, const Vector<X>& a) const;
     template<class X, DisableIf<CanCall<X,M,Vector<X>>> =dummy> Void _compute(X& r, const Vector<X>& a) const;
-  public:
-    template<class OP> static ScaledFunctionPatch<M> _create(OP op, ScaledFunctionPatch<M> const& f);
-    template<class OP> static ScaledFunctionPatch<M> _create(OP op, ScaledFunctionPatch<M> const& f1, ScaledFunctionPatch<M> const& f2);
-    template<class OP> static ScaledFunctionPatch<M> _create(OP op, ScaledFunctionPatch<M> const& f1, NumericType const& c2);
-    template<class OP> static ScaledFunctionPatch<M> _create(OP op, NumericType const& c1, ScaledFunctionPatch<M> const& f2);
-    static ScaledFunctionPatch<M> _create(Pow op, ScaledFunctionPatch<M> const& f, Int n);
   private:
     ScaledFunctionPatch<M>* _derivative(SizeType j) const;
     ScaledFunctionPatch<M>* _clone() const;
@@ -445,19 +448,19 @@ template<class M> template<class OP> ScaledFunctionPatch<M> ScaledFunctionPatch<
 }
 
 
-template<class M> template<class OP> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::_create(OP op, ScaledFunctionPatch<M> const& f1, ScaledFunctionPatch<M> const& f2) {
+template<class M> template<class OP> ScaledFunctionPatch<M> AlgebraOperations<ScaledFunctionPatch<M>>::apply(OP op, ScaledFunctionPatch<M> const& f1, ScaledFunctionPatch<M> const& f2) {
     assert(f1.domain()==f2.domain()); return ScaledFunctionPatch<M>(f1.domain(),op(f1.model(),f2.model()));
 }
-template<class M> template<class OP> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::_create(OP op, ScaledFunctionPatch<M> const& f) {
+template<class M> template<class OP> ScaledFunctionPatch<M> AlgebraOperations<ScaledFunctionPatch<M>>::apply(OP op, ScaledFunctionPatch<M> const& f) {
     return ScaledFunctionPatch<M>(f.domain(),op(f.model()));
 }
-template<class M> template<class OP> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::_create(OP op, ScaledFunctionPatch<M> const& f1, typename M::NumericType const& c2) {
+template<class M> template<class OP> ScaledFunctionPatch<M> AlgebraOperations<ScaledFunctionPatch<M>>::apply(OP op, ScaledFunctionPatch<M> const& f1, typename M::NumericType const& c2) {
     return ScaledFunctionPatch<M>(f1.domain(),op(f1.model(),c2));
 }
-template<class M> template<class OP> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::_create(OP op, typename M::NumericType const& c1, ScaledFunctionPatch<M> const& f2) {
+template<class M> template<class OP> ScaledFunctionPatch<M> AlgebraOperations<ScaledFunctionPatch<M>>::apply(OP op, typename M::NumericType const& c1, ScaledFunctionPatch<M> const& f2) {
     return ScaledFunctionPatch<M>(f2.domain(),op(c1,f2.model()));
 }
-template<class M> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::_create(Pow op, ScaledFunctionPatch<M> const& f, Int n) {
+template<class M> ScaledFunctionPatch<M> AlgebraOperations<ScaledFunctionPatch<M>>::apply(Pow op, ScaledFunctionPatch<M> const& f, Int n) {
     return ScaledFunctionPatch<M>(f.domain(),op(f.model(),n));
 }
 
@@ -1125,7 +1128,7 @@ template<class M> Vector<typename M::RangeType> ranges(const Vector<ScaledFuncti
 #endif // ARIADNE_UNDEF
 
 template<class M> class VectorScaledFunctionPatchElementReference
-    : public DispatchSymbolicAlgebraOperations<ScaledFunctionPatch<M>, NumericType<M>>
+    : public DispatchTranscendentalAlgebraOperations<ScaledFunctionPatch<M>, NumericType<M>>
     , public ProvideConcreteGenericArithmeticOperators<ScaledFunctionPatch<M>, ScalarFunction<typename M::Paradigm>>
     , public DispatchConcreteGenericAlgebraNumberOperations<ScaledFunctionPatch<M>,NumericType<M>,Number<typename M::Paradigm>>
 {

@@ -257,18 +257,16 @@ Void export_differential(const char* name)
     def("derivative", (D(*)(const D&, SizeType))&D::_derivative);
     def("antiderivative", (D(*)(const D&, SizeType))&D::_antiderivative);
 
-    typedef AlgebraOperations<D> Operations;
-    def("pos",&Operations::_pos);
-    def("neg",&Operations::_neg);
-    def("rec",&Operations::_rec);
-///    def("pow",&Operations::_pow);
-    def("sqrt",&Operations::_sqrt);
-    def("exp",&Operations::_exp);
-    def("log",&Operations::_log);
-    def("sin",&Operations::_sin);
-    def("cos",&Operations::_cos);
-    def("tan",&Operations::_tan);
-    def("atan",&Operations::_atan);
+    def("neg",&_neg_<D>);
+    def("sqr",&_sqr_<D>);
+    def("rec",&_rec_<D>);
+    def("sqrt",&_sqrt_<D>);
+    def("exp",&_exp_<D>);
+    def("log",&_log_<D>);
+    def("sin",&_sin_<D>);
+    def("cos",&_cos_<D>);
+    def("tan",&_tan_<D>);
+    def("atan",&_atan_<D>);
 }
 
 template<class DIFF>

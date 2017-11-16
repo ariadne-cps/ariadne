@@ -65,19 +65,26 @@ class IntersectionException : public std::runtime_error {
     IntersectionException(const StringType& what) : std::runtime_error(what) { }
 };
 
+template<class P, class F> struct ModelNumericTypedef;
+template<class F> struct ModelNumericTypedef<ValidatedTag,F> { typedef FloatBounds<typename F::PrecisionType> Type; };
+template<class F> struct ModelNumericTypedef<ApproximateTag,F> { typedef FloatApproximation<typename F::PrecisionType> Type; };
+template<class P, class F> using ModelNumericType = typename ModelNumericTypedef<P,F>::Type;
 
-template<class P, class F> struct AlgebraOperations<TaylorModel<P,F>> : NormedAlgebraOperations<TaylorModel<P,F>> {
-    typedef typename TaylorModel<P,F>::NumericType X;
-    static TaylorModel<P,F> _pos(TaylorModel<P,F> dx);
-    static TaylorModel<P,F> _neg(TaylorModel<P,F> dx);
-    static TaylorModel<P,F> _add(TaylorModel<P,F> dx, X const& c);
-    static TaylorModel<P,F> _mul(TaylorModel<P,F> dx, X const& c);
-    static TaylorModel<P,F> _add(TaylorModel<P,F> const& dx1, TaylorModel<P,F> const& dx2);
-    static TaylorModel<P,F> _sub(TaylorModel<P,F> const& dx1, TaylorModel<P,F> const& dx2);
-    static TaylorModel<P,F> _mul(TaylorModel<P,F> const& dx1, TaylorModel<P,F> const& dx2);
-    static TaylorModel<P,F> _min(TaylorModel<P,F> const& dx1, TaylorModel<P,F> const& dx2);
-    static TaylorModel<P,F> _max(TaylorModel<P,F> const& dx1, TaylorModel<P,F> const& dx2);
-    static TaylorModel<P,F> _abs(TaylorModel<P,F> const& dx);
+template<class P, class F> struct AlgebraOperations<TaylorModel<P,F>>
+    : NormedAlgebraOperations<TaylorModel<P,F>>
+{
+    typedef ModelNumericType<P,F> X;
+    using NormedAlgebraOperations<TaylorModel<P,F>>::apply;
+    static TaylorModel<P,F> apply(Pos,TaylorModel<P,F> tm);
+    static TaylorModel<P,F> apply(Neg,TaylorModel<P,F> tm);
+    static TaylorModel<P,F> apply(Add,TaylorModel<P,F> tm, X const& c);
+    static TaylorModel<P,F> apply(Mul,TaylorModel<P,F> tm, X const& c);
+    static TaylorModel<P,F> apply(Add,TaylorModel<P,F> const& tm1, TaylorModel<P,F> const& tm2);
+    static TaylorModel<P,F> apply(Sub,TaylorModel<P,F> const& tm1, TaylorModel<P,F> const& tm2);
+    static TaylorModel<P,F> apply(Mul,TaylorModel<P,F> const& tm1, TaylorModel<P,F> const& tm2);
+    static TaylorModel<P,F> apply(Min,TaylorModel<P,F> const& tm1, TaylorModel<P,F> const& tm2);
+    static TaylorModel<P,F> apply(Max,TaylorModel<P,F> const& tm1, TaylorModel<P,F> const& tm2);
+    static TaylorModel<P,F> apply(Abs,TaylorModel<P,F> const& tm);
 };
 
 

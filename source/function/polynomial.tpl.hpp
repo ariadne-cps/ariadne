@@ -201,7 +201,7 @@ Void Polynomial<X>::check() const
 
 
 
-template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::_neg(const Polynomial<X>& p) {
+template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::apply(Neg, const Polynomial<X>& p) {
     Polynomial<X> r(p.argument_size());
     for(auto iter=p.begin(); iter!=p.end(); ++iter) {
         r[iter->key()]-=iter->data();
@@ -210,17 +210,17 @@ template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::_neg(const Pol
 }
 
 
-template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::_add(Polynomial<X> p, const X& c) {
+template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::apply(Add, Polynomial<X> p, const X& c) {
     p[MultiIndex(p.argument_size())]+=c;
     return std::move(p);
 }
 
-template<class X> Polynomial<X>& AlgebraOperations<Polynomial<X>>::_iadd(Polynomial<X>& p, const X& c) {
+template<class X> Polynomial<X>& AlgebraOperations<Polynomial<X>>::iapply(Add, Polynomial<X>& p, const X& c) {
     p[MultiIndex(p.argument_size())]+=c;
     return p;
 }
 
-template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::_mul(Polynomial<X> p, const X& c) {
+template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::apply(Mul, Polynomial<X> p, const X& c) {
     if(is_null(c)) {
         p.expansion().clear();
     } else {
@@ -231,7 +231,7 @@ template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::_mul(Polynomia
     return std::move(p);
 }
 
-template<class X> Polynomial<X>& AlgebraOperations<Polynomial<X>>::_imul(Polynomial<X>& p, const X& c) {
+template<class X> Polynomial<X>& AlgebraOperations<Polynomial<X>>::iapply(Mul, Polynomial<X>& p, const X& c) {
     if(is_null(c)) {
         p.expansion().clear();
     } else {
@@ -242,7 +242,7 @@ template<class X> Polynomial<X>& AlgebraOperations<Polynomial<X>>::_imul(Polynom
     return p;
 }
 
-template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::_add(const Polynomial<X>& p1, const Polynomial<X>& p2) {
+template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::apply(Add, const Polynomial<X>& p1, const Polynomial<X>& p2) {
     ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
     typename Polynomial<X>::IndexComparisonType less;
     Polynomial<X> r(p1.argument_size());
@@ -270,7 +270,7 @@ template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::_add(const Pol
     return std::move(r);
 }
 
-template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::_sub(const Polynomial<X>& p1, const Polynomial<X>& p2) {
+template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::apply(Sub, const Polynomial<X>& p1, const Polynomial<X>& p2) {
     ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
     typename Polynomial<X>::IndexComparisonType less;
     Polynomial<X> r(p1.argument_size());
@@ -298,7 +298,7 @@ template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::_sub(const Pol
     return std::move(r);
 }
 
-template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::_mul(const Polynomial<X>& p1, const Polynomial<X>& p2) {
+template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::apply(Mul, const Polynomial<X>& p1, const Polynomial<X>& p2) {
     ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
     Polynomial<X> r(p1.argument_size());
     for(auto iter1=p1.begin(); iter1!=p1.end(); ++iter1) {
@@ -310,7 +310,7 @@ template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::_mul(const Pol
     return r;
 }
 
-template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::_mul(Polynomial<X> p, const Monomial<X>& m) {
+template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::apply(Mul, Polynomial<X> p, const Monomial<X>& m) {
     if(is_null(m.data())) { p.clear(); }
     for(auto iter=p.begin(); iter!=p.end(); ++iter) {
         iter->key()+=m.key();
@@ -319,7 +319,7 @@ template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::_mul(Polynomia
     return std::move(p);
 }
 
-template<class X> Polynomial<X>& AlgebraOperations<Polynomial<X>>::_imul(Polynomial<X>& p, const Monomial<X>& m) {
+template<class X> Polynomial<X>& AlgebraOperations<Polynomial<X>>::iapply(Mul, Polynomial<X>& p, const Monomial<X>& m) {
     if(is_null(m.data())) { p.clear(); }
     for(auto iter=p.begin(); iter!=p.end(); ++iter) {
         iter->key()+=m.key();

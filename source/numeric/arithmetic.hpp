@@ -910,7 +910,7 @@ template<class X, class Y, class R=X> struct ProvideConcreteGenericFieldOperator
     : DefineInplaceFieldOperators<X,Y,R>
 {
     //static R create(Y const& y, X const& x) { return X(y,x.precision()); }
-    friend R _create(Y const& y, X const& x) { return factory(x).create(y); }
+    friend decltype(auto) _create(Y const& y, X const& x) { return factory(x).create(y); }
     friend R operator+(const X& x1, const Y& y2) { return operator+(x1,_create(y2,x1)); }
     friend R operator-(const X& x1, const Y& y2) { return operator-(x1,_create(y2,x1)); }
     friend R operator*(const X& x1, const Y& y2) { return operator*(x1,_create(y2,x1)); }
@@ -1126,10 +1126,6 @@ template<class X, class R=X> struct DispatchNumericOperations
     friend X hlf(X const& x) { return OperationsType::_hlf(x); }
     friend R sqr(X const& x) { return OperationsType::_sqr(x); }
     friend R rec(X const& x) { return OperationsType::_rec(x); }
-//    friend R add(X const& x1, X const& x2);
-//    friend R sub(X const& x1, X const& x2);
-//    friend R mul(X const& x1, X const& x2);
-//    friend R div(X const& x1, X const& x2);
     friend R add(X const& x1, X const& x2) { return OperationsType::_add(x1,x2); }
     friend R sub(X const& x1, X const& x2) { return OperationsType::_sub(x1,x2); }
     friend R mul(X const& x1, X const& x2) { return OperationsType::_mul(x1,x2); }

@@ -92,8 +92,13 @@ template<class X> UnivariateDifferential<X>& UnivariateDifferential<X>::operator
 template<class X>
 UnivariateDifferential<X> UnivariateDifferential<X>::_compose(const Series<X>& x, const UnivariateDifferential<X>& y)
 {
-    DegreeType d=y.degree();
+    return compose(UnivariateDifferential(y.degree(),x),y);
+}
 
+template<class X>
+UnivariateDifferential<X> UnivariateDifferential<X>::_compose(const UnivariateDifferential<X>& x, const UnivariateDifferential<X>& y)
+{
+    DegreeType d=std::min(x.degree(),y.degree());
     X y0 = y[0];
     X z = Ariadne::create_zero(y0);
     const_cast<X&>(y[0]) = z;

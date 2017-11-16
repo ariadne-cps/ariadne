@@ -282,7 +282,7 @@ decltype(auto) operator+(Differential<X> const& x, Y const& y) { return x+factor
 
 template<class X> struct AlgebraOperations<Differential<X>> : GradedAlgebraOperations<Differential<X>> {
     template<class OP> static Differential<X> apply(OP op, Differential<X> dx) {
-        return Differential<X>::_compose(Series<X>(op,dx.value()),dx); }
+        return compose(UnivariateDifferential<X>(op,dx.degree(),dx.value()),dx); }
     static Differential<X> apply(Pos op, Differential<X> dx);
     static Differential<X> apply(Neg op, Differential<X> dx);
     static Differential<X> apply(Add op, Differential<X> const& dx1, Differential<X> const& dx2);

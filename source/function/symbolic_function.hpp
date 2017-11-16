@@ -167,18 +167,7 @@ struct UnaryFunction
     }
 
     virtual ScalarFunction<P> derivative(SizeType j) const {
-        switch(_op) {
-            case OperatorCode::POS: return _arg.derivative(j);
-            case OperatorCode::NEG: return -_arg.derivative(j);
-            case OperatorCode::REC: return -_arg.derivative(j)/sqr(_arg);
-            case OperatorCode::SQR: return 2*_arg.derivative(j)*_arg;
-            case OperatorCode::SQRT: return _arg.derivative(j)/(2*sqrt(_arg));
-            case OperatorCode::EXP: return _arg*_arg.derivative(j);
-            case OperatorCode::LOG: return _arg.derivative(j)/_arg;
-            case OperatorCode::SIN: return _arg.derivative(j)*cos(_arg);
-            case OperatorCode::COS: return -_arg.derivative(j)*sin(_arg);
-            default: ARIADNE_FAIL_MSG("Unknown unary function "<<this->_op);
-        }
+        return Ariadne::derivative(_op, _arg, _arg.derivative(j));
     }
 
     virtual OutputStream& repr(OutputStream& os) const {
@@ -218,26 +207,10 @@ struct BinaryFunction
         return this->_arg1.argument_size(); }
 
     virtual ScalarFunctionInterface<P>* _derivative(SizeType j) const {
-        return static_cast<const ScalarFunctionInterface<P>&>(this->derivative(j))._clone();
-    }
+        return static_cast<const ScalarFunctionInterface<P>&>(this->derivative(j))._clone(); }
 
     virtual ScalarFunction<P> derivative(SizeType j) const {
-        switch(_op) {
-            case OperatorCode::ADD:
-                return _arg1.derivative(j)+_arg2.derivative(j);
-            case OperatorCode::SUB:
-                return _arg1.derivative(j)-_arg2.derivative(j);
-            case OperatorCode::MUL:
-                return _arg1.derivative(j)*_arg2+_arg1*_arg2.derivative(j);
-            case OperatorCode::DIV:
-                if(dynamic_cast<const ConstantFunction<Y>*>(_arg2.raw_pointer())) {
-                    return _arg1.derivative(j)/_arg2;
-                } else {
-                    return _arg1.derivative(j)/_arg2-_arg2.derivative(j)*_arg1/sqr(_arg2);
-                }
-            default: ARIADNE_FAIL_MSG("Unknown binary function "<<this->_op);
-        }
-    }
+        return Ariadne::derivative(_op,_arg1,_arg1.derivative(j),_arg2,_arg2.derivative(j)); }
 
     virtual OutputStream& repr(OutputStream& os) const {
         return os << "BF[R" << this->argument_size() << "](" << *this << ")"; }
@@ -274,11 +247,7 @@ class GradedFunction
     }
 
     virtual ScalarFunction<P> derivative(SizeType j) const {
-        assert(_op==OperatorCode::POW);
-        if(_arg2==0) { return ScalarFunction<P>::constant(this->argument_size(),Y(0)); }
-        if(_arg2==1) { return _arg1.derivative(j); }
-        if(_arg2==2) { return 2*_arg1.derivative(j)*_arg1; }
-        return _arg2*_arg1.derivative(j)*pow(_arg1,_arg2-1);
+        return Ariadne::derivative(_op, _arg1, _arg1.derivative(j), _arg2);
     }
 
     virtual OutputStream& repr(OutputStream& os) const {

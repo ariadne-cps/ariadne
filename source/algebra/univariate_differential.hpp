@@ -60,6 +60,8 @@ template<class X> class UnivariateDifferential
     template<class XX> UnivariateDifferential(DegreeType d, XX const* p);
     UnivariateDifferential(DegreeType d, Series<X> const& s); // explicit
 
+    template<class OP> UnivariateDifferential(OP op, DegreeType d, X const& c);
+
     static SelfType constant(DegreeType d, const NumericType& c);
     static SelfType variable(DegreeType d, const NumericType& c);
 
@@ -97,6 +99,8 @@ template<class X> class UnivariateDifferential
 
     friend UnivariateDifferential<X> compose(Series<X> const& f, UnivariateDifferential<X> const& dx) {
         return UnivariateDifferential<X>::_compose(f,dx); }
+    friend UnivariateDifferential<X> compose(UnivariateDifferential<X> const& f, UnivariateDifferential<X> const& dx) {
+        return UnivariateDifferential<X>::_compose(f,dx); }
     friend UnivariateDifferential<X> derivative(UnivariateDifferential<X> const& dx) {
         return UnivariateDifferential<X>::_derivative(dx); }
     friend UnivariateDifferential<X> antiderivative(UnivariateDifferential<X> const& dx) {
@@ -110,11 +114,14 @@ template<class X> class UnivariateDifferential
     static Differential<X> _compose(Series<X> const& f, Differential<X> const& dx);
   private:
     static UnivariateDifferential<X> _compose(Series<X> const& f, UnivariateDifferential<X> const& dx);
+    static UnivariateDifferential<X> _compose(UnivariateDifferential<X> const& f, UnivariateDifferential<X> const& dx);
     static UnivariateDifferential<X> _derivative(UnivariateDifferential<X> const& dx);
     static UnivariateDifferential<X> _antiderivative(UnivariateDifferential<X> const& dx);
     static UnivariateDifferential<X> _antiderivative(UnivariateDifferential<X> const& dx, X const& c);
 };
 
+template<class X> template<class OP> UnivariateDifferential<X>::UnivariateDifferential(OP op, DegreeType d, X const& c)
+    : UnivariateDifferential(d,Series<X>(op,c)) { }
 
 template<class X> inline const X& UnivariateDifferential<X>::value() const { return _ary[0]; }
 template<class X> inline const X& UnivariateDifferential<X>::gradient() const { assert(this->degree()>=1); return _ary[1]; }
@@ -132,8 +139,7 @@ template<class X> template<class XX> UnivariateDifferential<X>::UnivariateDiffer
 template<class X> UnivariateDifferential<X> create_zero(const UnivariateDifferential<X>& c) {
     return UnivariateDifferential<X>(c.degree(),create_zero(c[0])); }
 
-template<class X> class AlgebraOperations<UnivariateDifferential<X>,X> {
-  public:
+template<class X> struct AlgebraOperations<UnivariateDifferential<X>,X> {
     static UnivariateDifferential<X> apply(Pos, UnivariateDifferential<X> x) {
         return std::move(x); }
 
@@ -171,7 +177,7 @@ template<class X> class AlgebraOperations<UnivariateDifferential<X>,X> {
         for(DegreeType i=0; i<=x.degree(); ++i) { x[i]*=c; } return std::move(x); }
 
     template<class OP> static UnivariateDifferential<X> apply(OP op, const UnivariateDifferential<X>& dx) {
-        return compose(Series<X>(op,dx[0]),dx); }
+        return compose(UnivariateDifferential<X>(op,dx.degree(),dx[0]),dx); }
 };
 
 

@@ -252,6 +252,11 @@ template<class X> OutputStream& FirstDifferential<X>::_write(OutputStream& os) c
 
 template<class X> struct AlgebraOperations<FirstDifferential<X>,X> {
 
+    static FirstDifferential<X> apply(Pos, const FirstDifferential<X>& x) {
+        return FirstDifferential<X>(+x._value,+x._gradient); }
+    static FirstDifferential<X> apply(Neg, const FirstDifferential<X>& x) {
+        return FirstDifferential<X>(-x._value,-x._gradient); }
+
     static FirstDifferential<X> apply(Add, FirstDifferential<X> x, const FirstDifferential<X>& y) {
         x._value+=y._value; x._gradient+=y._gradient; return std::move(x); }
     static FirstDifferential<X> apply(Sub, FirstDifferential<X> x, const FirstDifferential<X>& y) {
@@ -275,24 +280,18 @@ template<class X> struct AlgebraOperations<FirstDifferential<X>,X> {
         ARIADNE_ASSERT_MSG(x1.argument_size()==x2.argument_size(),"x1="<<x1<<" x2="<<x2); if(x1.value()==x2.value()) {
             ARIADNE_THROW(std::runtime_error,"min(FirstDifferential<X> x1, FirstDifferential<X> x2)","x1[0]==x2[0]"); }
         return x1.value()<x2.value() ? x1 : x2; }
-
-
     static FirstDifferential<X> apply(Max, const FirstDifferential<X>& x1,const FirstDifferential<X>& x2) {
         ARIADNE_ASSERT_MSG(x1.argument_size()==x2.argument_size(),"x1="<<x1<<" x2="<<x2); if(x1.value()==x2.value()) {
             ARIADNE_THROW(std::runtime_error,"max(FirstDifferential<X> x1, FirstDifferential<X> x2)","x1[0]==x2[0]"); }
         return x1.value()>x2.value() ? x1 : x2; }
-
     static FirstDifferential<X> apply(Abs, const FirstDifferential<X>& x) {
         if(x.value()==0) {
             ARIADNE_THROW(std::runtime_error,"abs(FirstDifferential<X> x)","x[0]==0"); }
         return x.value()>0 ? pos(x) : neg(x); }
 
+    template<class OP> static FirstDifferential<X> apply(OP op, const FirstDifferential<X>& x) {
+        return compose(UnivariateFirstDifferential<X>(op,x._value),x); }
 
-    static FirstDifferential<X> apply(Pos, const FirstDifferential<X>& x) {
-        return FirstDifferential<X>(+x._value,+x._gradient); }
-
-    static FirstDifferential<X> apply(Neg, const FirstDifferential<X>& x) {
-        return FirstDifferential<X>(-x._value,-x._gradient); }
 
     static FirstDifferential<X> apply(Rec, const FirstDifferential<X>& x) {
         return FirstDifferential<X>( rec(x._value), x._gradient * (neg(sqr(rec(x._value)))) ); }
@@ -527,6 +526,11 @@ template<class X> OutputStream& SecondDifferential<X>::_write(OutputStream& os) 
 
 template<class X> struct AlgebraOperations<SecondDifferential<X>,X> {
 
+    static SecondDifferential<X> apply(Pos, const SecondDifferential<X>& x) {
+        return SecondDifferential<X>(+x._value,+x._gradient,+x._half_hessian); }
+    static SecondDifferential<X> apply(Neg, const SecondDifferential<X>& x) {
+        return SecondDifferential<X>(-x._value,-x._gradient,-x._half_hessian); }
+
     static SecondDifferential<X> apply(Add, SecondDifferential<X> x, const SecondDifferential<X>& y) {
         x._value += y._value; x._gradient += y._gradient; x._half_hessian += y._half_hessian; return std::move(x); }
     static SecondDifferential<X> apply(Sub, SecondDifferential<X> x, const SecondDifferential<X>& y) {
@@ -544,7 +548,6 @@ template<class X> struct AlgebraOperations<SecondDifferential<X>,X> {
     static SecondDifferential<X> apply(Div, const SecondDifferential<X>& x, SecondDifferential<X> y) {
         return mul(x,rec(std::move(y))); }
 
-
     static SecondDifferential<X> apply(Add, SecondDifferential<X> x, const X& c) {
         x._value+=c; return std::move(x); }
     static SecondDifferential<X> apply(Sub, SecondDifferential<X> x, const X& c) {
@@ -561,7 +564,6 @@ template<class X> struct AlgebraOperations<SecondDifferential<X>,X> {
         }
         return x1.value()<x2.value() ? x1 : x2;
     }
-
     static SecondDifferential<X> apply(Max, const SecondDifferential<X>& x1,const SecondDifferential<X>& x2) {
         ARIADNE_ASSERT_MSG(x1.argument_size()==x2.argument_size(),"x1="<<x1<<" x2="<<x2);
         if(x1.value()==x2.value()) {
@@ -569,7 +571,6 @@ template<class X> struct AlgebraOperations<SecondDifferential<X>,X> {
         }
         return x1.value()>x2.value() ? x1 : x2;
     }
-
     static SecondDifferential<X> apply(Abs, const SecondDifferential<X>& x) {
         if(x.value()==0) {
             ARIADNE_THROW(std::runtime_error,"abs(SecondDifferential<X> x)","x[0]==0");
@@ -577,12 +578,8 @@ template<class X> struct AlgebraOperations<SecondDifferential<X>,X> {
         return x.value()>0 ? pos(x) : neg(x);
     }
 
-    static SecondDifferential<X> apply(Pos, const SecondDifferential<X>& x) {
-        return x; }
-
-    static SecondDifferential<X> apply(Neg, const SecondDifferential<X>& x) {
-        return SecondDifferential<X>(-x._value,-x._gradient,-x._half_hessian); }
-
+    template<class OP> static SecondDifferential<X> apply(OP op, const SecondDifferential<X>& x) {
+        return compose(UnivariateSecondDifferential<X>(op,x.value(),x)); }
 
     static SecondDifferential<X> apply(Rec, const SecondDifferential<X>& x) {
         X rec_val = rec(x._value);

@@ -65,6 +65,9 @@ class UnivariateFirstDifferential
     UnivariateFirstDifferential(const Series<X>& x)
         : _value(x[0]), _gradient(x[1]) { }
 
+    template<class OP> UnivariateFirstDifferential(OP op, X const& c)
+        : _value(op(c)), _gradient(next_series_coefficient(op,1u,c,&_value)) { }
+
     //! \brief Set the differential equal to a constant, without changing the degree or number of arguments.
     UnivariateFirstDifferential<X>& operator=(const X& c) { _value=c; _gradient=nul(c); return *this; }
 
@@ -132,7 +135,7 @@ class UnivariateFirstDifferential
 template<class X> UnivariateFirstDifferential<X> create_zero(const UnivariateFirstDifferential<X>& c) {
     return UnivariateFirstDifferential<X>(create_zero(c.value())); }
 
-template<class X> class AlgebraOperations<UnivariateFirstDifferential<X>,X> {
+template<class X> struct AlgebraOperations<UnivariateFirstDifferential<X>,X> {
     static UnivariateFirstDifferential<X> apply(Add, UnivariateFirstDifferential<X> x, const X& c) {
         x._value+=c; return std::move(x); }
     static UnivariateFirstDifferential<X> apply(Sub, UnivariateFirstDifferential<X> x, const X& c) {
@@ -171,6 +174,9 @@ template<class X> class AlgebraOperations<UnivariateFirstDifferential<X>,X> {
 
     static UnivariateFirstDifferential<X> apply(Pow, const UnivariateFirstDifferential<X>& x, Int n) {
         return UnivariateFirstDifferential<X>( pow(x._value,n), (n*pow(x._value,n-1))*x._gradient ); }
+
+    template<class OP> static UnivariateFirstDifferential<X> apply(OP op, const UnivariateFirstDifferential<X>& x) {
+        return compose(UnivariateFirstDifferential<X>(op,x.value()),x); }
 
     static UnivariateFirstDifferential<X> apply(Sqrt, const UnivariateFirstDifferential<X>& x) {
         X sqrt_val = sqrt(x._value); return UnivariateFirstDifferential<X>( sqrt_val, rec(2*sqrt_val)*x._gradient ); }
@@ -240,6 +246,9 @@ class UnivariateSecondDifferential
     //! \brief Construct from  a power series.
     UnivariateSecondDifferential(const Series<X>& x)
         : _value(x[0]), _gradient(x[1]), _half_hessian(x[2]) { }
+
+    template<class OP> UnivariateSecondDifferential(OP op, X const& c)
+        : _value(op(c)), _gradient(next_series_coefficient(op,1u,c,&_value)), _half_hessian(next_series_coefficient(op,2u,c,&_value)) { }
 
     //! \brief Conversion constructor from a different numerical type.
     template<class XX> UnivariateSecondDifferential(const UnivariateSecondDifferential<XX>& x)
@@ -340,7 +349,6 @@ class UnivariateSecondDifferential
 };
 
 template<class X> struct AlgebraOperations<UnivariateSecondDifferential<X>,X> {
-
     static UnivariateSecondDifferential<X> apply(Add, UnivariateSecondDifferential<X> x, const X& c) {
         x._value+=c; return std::move(x); }
     static UnivariateSecondDifferential<X> apply(Sub, UnivariateSecondDifferential<X> x, const X& c) {
@@ -384,6 +392,9 @@ template<class X> struct AlgebraOperations<UnivariateSecondDifferential<X>,X> {
     static UnivariateSecondDifferential<X> apply(Rec, const UnivariateSecondDifferential<X>& x) {
         X rec_val = rec(x._value); X neg_sqr_rec_val = neg(sqr(rec_val)); X cub_rec_val = -rec_val*neg_sqr_rec_val;
         return UnivariateSecondDifferential<X>( rec_val, neg_sqr_rec_val*x._gradient, neg_sqr_rec_val*x._half_hessian + cub_rec_val * sqr(x._gradient) ); }
+
+    template<class OP> static UnivariateSecondDifferential<X> apply(OP op, const UnivariateSecondDifferential<X>& x) {
+        return compose(UnivariateSecondDifferential<X>(op,x.value()),x); }
 
     static UnivariateSecondDifferential<X> apply(Sqr, const UnivariateSecondDifferential<X>& x) {
         return UnivariateSecondDifferential<X>( sqr(x._value), (2*x._value)*x._gradient, (x._value)*x._half_hessian + sqr(x._gradient) ); }

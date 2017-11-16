@@ -65,10 +65,10 @@ template<class PR>
 class TestFloats
 {
   public:
-    static Rational to_rational(Float<ApproximateTag,PR> x) { return Rational(x.raw()); }
-    static Rational to_rational(Float<LowerTag,PR> x) { return Rational(x.raw()); }
-    static Rational to_rational(Float<UpperTag,PR> x) { return Rational(x.raw()); }
-    static Rational to_rational(Float<ExactTag,PR> x) { return Rational(x.raw()); }
+    static Rational to_rational(FloatType<ApproximateTag,PR> x) { return Rational(x.raw()); }
+    static Rational to_rational(FloatType<LowerTag,PR> x) { return Rational(x.raw()); }
+    static Rational to_rational(FloatType<UpperTag,PR> x) { return Rational(x.raw()); }
+    static Rational to_rational(FloatType<ExactTag,PR> x) { return Rational(x.raw()); }
 };
 
 
@@ -76,12 +76,12 @@ template<class PR>
 class TestDirectedFloats
     : public TestFloats<PR>
 {
-    typedef Float<ApproximateTag,PR> FloatApproximationType;
-    typedef Float<LowerTag,PR> FloatLowerBoundType;
-    typedef Float<UpperTag,PR> FloatUpperBoundType;
-    typedef Float<BoundedTag,PR> FloatBoundsType;
-    typedef Float<MetricTag,PR> FloatBallType;
-    typedef Float<ExactTag,PR> FloatValueType;
+    typedef FloatType<ApproximateTag,PR> FloatApproximationType;
+    typedef FloatType<LowerTag,PR> FloatLowerBoundType;
+    typedef FloatType<UpperTag,PR> FloatUpperBoundType;
+    typedef FloatType<BoundedTag,PR> FloatBoundsType;
+    typedef FloatType<MetricTag,PR> FloatBallType;
+    typedef FloatType<ExactTag,PR> FloatValueType;
 
   private:
     PR precision;
@@ -182,12 +182,12 @@ class TestFloatBall
     : public TestFloats<PR>
 {
     typedef RawFloat<PR> RawFloatType;
-    typedef Float<ApproximateTag,PR> FloatApproximationType;
-    typedef Float<LowerTag,PR> FloatLowerBoundType;
-    typedef Float<UpperTag,PR> FloatUpperBoundType;
-    typedef Float<BoundedTag,PR> FloatBoundsType;
-    typedef Float<MetricTag,PR> FloatBallType;
-    typedef Float<ExactTag,PR> FloatValueType;
+    typedef FloatType<ApproximateTag,PR> FloatApproximationType;
+    typedef FloatType<LowerTag,PR> FloatLowerBoundType;
+    typedef FloatType<UpperTag,PR> FloatUpperBoundType;
+    typedef FloatType<BoundedTag,PR> FloatBoundsType;
+    typedef FloatType<MetricTag,PR> FloatBallType;
+    typedef FloatType<ExactTag,PR> FloatValueType;
   private:
     PR precision;
   public:
@@ -277,8 +277,8 @@ template<class PR>
 class TestFloatBounds
 {
     typedef RawFloat<PR> RawFloatType;
-    typedef Float<BoundedTag,PR> FloatBoundsType;
-    typedef Float<ExactTag,PR> FloatValueType;
+    typedef FloatType<BoundedTag,PR> FloatBoundsType;
+    typedef FloatType<ExactTag,PR> FloatValueType;
   private:
     PR precision;
   public:
@@ -652,7 +652,7 @@ template<class PR> Void TestFloatBounds<PR>::test_input()
     //ARIADNE_TEST_COMPARE(x.lower_raw(),<,Rational(2,5))
     // ARIADNE_TEST_COMPARE(x.upper_raw(),>,Rational(3,5))
     if(not(x.lower_raw()<=Rational(2,5) and x.upper_raw()>=Rational(3,5))) {
-        ARIADNE_TEST_WARN("Float<BoundedTag,"<<class_name<PR>()<<"> string constructor returns an approximate interval, not an outwardly rounded interval.");
+        ARIADNE_TEST_WARN("FloatType<BoundedTag,"<<class_name<PR>()<<"> string constructor returns an approximate interval, not an outwardly rounded interval.");
     }
 }
 

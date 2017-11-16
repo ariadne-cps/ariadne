@@ -410,32 +410,4 @@ class ValidatedReal {
 
 } // namespace Ariadne
 
-#include "numeric/logical.hpp"
-
-namespace Ariadne {
-
-/*
-template<class D, EnableIf<IsBuiltinFloatingPoint<D>> =dummy> inline auto
-    operator==(Real r, D d) -> decltype(r==FloatDPApproximation(d)) { return r==FloatDPApproximation(d); }
-template<class D, EnableIf<IsBuiltinFloatingPoint<D>> =dummy> inline auto
-    operator!=(Real r, D d) -> decltype(r!=FloatDPApproximation(d)) { return r!=FloatDPApproximation(d); }
-template<class D, EnableIf<IsBuiltinFloatingPoint<D>> =dummy> inline auto
-    operator< (Real r, D d) -> decltype(r< FloatDPApproximation(d)) { return r< FloatDPApproximation(d); }
-template<class D, EnableIf<IsBuiltinFloatingPoint<D>> =dummy> inline auto
-    operator> (Real r, D d) -> decltype(r> FloatDPApproximation(d)) { return r> FloatDPApproximation(d); }
-template<class D, EnableIf<IsBuiltinFloatingPoint<D>> =dummy> inline auto
-    operator<=(Real r, D d) -> decltype(r<=FloatDPApproximation(d)) { return r<=FloatDPApproximation(d); }
-template<class D, EnableIf<IsBuiltinFloatingPoint<D>> =dummy> inline auto
-    operator>=(Real r, D d) -> decltype(r>=FloatDPApproximation(d)) { return r>=FloatDPApproximation(d); }
-*/
-/*
-template<class T> auto operator+(T const& t) -> decltype(pos(t)) { return pos(t); }
-template<class T> auto operator-(T const& t) -> decltype(neg(t)) { return neg(t); }
-template<class T1, class T2> auto operator+(T1 const& t1, T2 const& t2) -> decltype(add(t1,t2)) { return add(t1,t2); }
-template<class T1, class T2> auto operator-(T1 const& t1, T2 const& t2) -> decltype(sub(t1,t2)) { return sub(t1,t2); }
-template<class T1, class T2> auto operator*(T1 const& t1, T2 const& t2) -> decltype(mul(t1,t2)) { return mul(t1,t2); }
-template<class T1, class T2> auto operator/(T1 const& t1, T2 const& t2) -> decltype(div(t1,t2)) { return div(t1,t2); }
-*/
-} // namespace Ariadne
-
 #endif

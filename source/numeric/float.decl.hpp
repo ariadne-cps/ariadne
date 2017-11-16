@@ -125,6 +125,9 @@ template<class PR> struct FloatTypedef<ErrorTag,PR> { typedef FloatError<PR> Typ
 template<class PR> struct FloatTypedef<ValidatedTag,PR> { typedef FloatBounds<PR> Type; };
 template<class PR, class PRE> struct FloatTypedef<EffectiveTag,PR,PRE> { typedef FloatBall<PR,PRE> Type; };
 
+template<class P, class PR, class PRE=PR> using FloatType = typename FloatTypedef<P,PR,PRE>::Type;
+
+
 //template<class P, class PR, class PRE=PR> using Float = typename FloatTypedef<P,PR,PRE>::Type;
 //template<class P> using FloatDP=Float<P,DoublePrecision>;
 //template<class P> using FloatMP=Float<P,MultiplePrecision>;
@@ -160,17 +163,6 @@ using PositiveFloatMPBall = PositiveFloatBall<MultiplePrecision>;
 using PositiveFloatMPValue = PositiveFloatValue<MultiplePrecision>;
 
 using FloatMDPBall = FloatBall<MultiplePrecision,DoublePrecision>;
-
-template<class P, class PR, class PRE=PR> struct UserFloatTypedef;
-template<class PR> struct UserFloatTypedef<ApproximateTag,PR> { typedef FloatApproximation<PR> Type; };
-template<class PR> struct UserFloatTypedef<LowerTag,PR> { typedef FloatLowerBound<PR> Type; };
-template<class PR> struct UserFloatTypedef<UpperTag,PR> { typedef FloatUpperBound<PR> Type; };
-template<class PR> struct UserFloatTypedef<BoundedTag,PR> { typedef FloatBounds<PR> Type; };
-template<class PR, class PRE> struct UserFloatTypedef<MetricTag,PR,PRE> { typedef FloatBall<PR,PRE> Type; };
-template<class PR> struct UserFloatTypedef<ExactTag,PR> { typedef FloatValue<PR> Type; };
-template<class PR> struct UserFloatTypedef<ValidatedTag,PR> { typedef FloatBounds<PR> Type; };
-template<class PR> struct UserFloatTypedef<EffectiveTag,PR> { typedef FloatBall<PR> Type; };
-template<class P, class PR, class PRE=PR> using Float = typename UserFloatTypedef<P,PR,PRE>::Type;
 
 template<class X> struct IsFloat : False { };
 template<> struct IsFloat<FloatDP> : True { };

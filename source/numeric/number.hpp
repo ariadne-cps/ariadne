@@ -30,11 +30,6 @@
 #ifndef ARIADNE_NUMBER_HPP
 #define ARIADNE_NUMBER_HPP
 
-// Use friend declarations to provide number operators
-#define ARIADNE_FRIEND_NUMBER
-// Use template functions to provide number operators
-// #define ARIADNE_TEMPLATE_NUMBER
-
 #include "utility/handle.hpp"
 #include "numeric/paradigm.hpp"
 #include "utility/prototype.hpp"
@@ -82,10 +77,10 @@ struct DefineBuiltinFloatOperators {
 };
 */
 
-#ifdef ARIADNE_FRIEND_NUMBER
-
 //template<class P1, class P2> struct DisableIfWeaker { typedef typename std::enable_if<not std::is_convertible<P2,P1>::value,Dummy>::type Type; };
 template<class P1, class P2> using DisableIfWeaker = DisableIf<IsWeaker<P1,P2>>;
+
+template<class R> struct IsConcreteNumericType : IsConvertible<R,Real> { };
 
 class DeclareNumberOperators {
     friend ApproximateNumber operator+(ApproximateNumber const&, ApproximateNumber const&);
@@ -97,11 +92,35 @@ class DeclareNumberOperators {
     friend ValidatedLowerNumber operator-(ValidatedLowerNumber const& y1, ValidatedUpperNumber const& y2);
     friend ValidatedUpperNumber operator+(ValidatedUpperNumber const& y1, ValidatedUpperNumber const& y2);
     friend ValidatedUpperNumber operator-(ValidatedUpperNumber const& y1, ValidatedLowerNumber const& y2);
+
+    template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> friend auto
+    operator+(N const& y1, D const& d2) -> decltype(y1+Number<ApproximateTag>(d2)) { return y1+Number<ApproximateTag>(d2); }
+    template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> friend auto
+    operator-(N const& y1, D const& d2) -> decltype(y1-Number<ApproximateTag>(d2)) { return y1-Number<ApproximateTag>(d2); }
+    template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> friend auto
+    operator*(N const& y1, D const& d2) -> decltype(y1*Number<ApproximateTag>(d2)) { return y1*Number<ApproximateTag>(d2); }
+    template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> friend auto
+    operator/(N const& y1, D const& d2) -> decltype(y1/Number<ApproximateTag>(d2)) { return y1/Number<ApproximateTag>(d2); }
+    template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> friend auto
+    operator+(D const& d1, N const& y2) -> decltype(Number<ApproximateTag>(d1)+y2) { return Number<ApproximateTag>(d1)+y2; }
+    template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> friend auto
+    operator-(D const& d1, N const& y2) -> decltype(Number<ApproximateTag>(d1)-y2) { return Number<ApproximateTag>(d1)-y2; }
+    template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> friend auto
+    operator*(D const& d1, N const& y2) -> decltype(Number<ApproximateTag>(d1)*y2) { return Number<ApproximateTag>(d1)*y2; }
+    template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> friend auto
+    operator/(D const& d1, N const& y2) -> decltype(Number<ApproximateTag>(d1)/y2) { return Number<ApproximateTag>(d1)/y2; }
+
+    template<class R, class P, EnableIf<IsConcreteNumericType<R>> =dummy> friend auto
+    operator+(R const& r1, Number<P> const& y2) -> decltype(Number<Paradigm<R>>(r1)+y2) { return Number<Paradigm<R>>(r1)+y2; }
+    template<class R, class P, EnableIf<IsConcreteNumericType<R>> =dummy> friend auto
+    operator+(Number<P> const& y1, R const& r2) -> decltype(y1+Number<Paradigm<R>>(r2)) { return y1+Number<Paradigm<R>>(r2); }
+
 };
 
 //! \ingroup NumericModule
 //! \brief Generic numbers with computational paradigm \a P, which may be %EffectiveTag, %ValidatedTag, %UpperTag, %LowerTag or %ApproximateTag.
 template<class P> class Number
+    : public DeclareNumberOperators
 {
     static_assert(IsParadigm<P>::value,"P must be a paradigm");
     template<class PP> friend class Number;
@@ -135,7 +154,7 @@ template<class P> class Number
     // Construct from a builtin integer
     template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> Number(const N& n) : Number<P>(Integer(n)) { }
     // Construct from a builtin floating-point number
-    template<class X, EnableIf<And<IsSame<P,ApproximateTag>,IsBuiltinFloatingPoint<X>>> =dummy> Number(const X& x) : Number<P>(Float<P,DoublePrecision>(x)) { }
+    template<class X, EnableIf<And<IsSame<P,ApproximateTag>,IsBuiltinFloatingPoint<X>>> =dummy> Number(const X& x) : Number<P>(FloatType<P,DoublePrecision>(x)) { }
 
     // Construct from a type which is convertible to Real.
     template<class X, EnableIf<IsWeaker<P,ParadigmTag<X>>> =dummy,
@@ -159,23 +178,23 @@ template<class P> class Number
 
     //! \brief Get the value of the number as a double-precision floating-point type
     template<class WP, EnableIf<IsWeaker<WP,P>> =dummy>
-    Float<WP,DoublePrecision> get(WP par) const { return pointer()->_get(WP()); }
+    FloatType<WP,DoublePrecision> get(WP par) const { return pointer()->_get(WP()); }
     //! \brief Get the value of the number as a double-precision floating-point type
     template<class WP, EnableIf<IsWeaker<WP,P>> =dummy>
-    Float<WP,DoublePrecision> get(WP par, DoublePrecision const& prec) const { return pointer()->_get(WP(),prec); }
+    FloatType<WP,DoublePrecision> get(WP par, DoublePrecision const& prec) const { return pointer()->_get(WP(),prec); }
     //! \brief Get the value of the number as a multiple-precision floating-point type
     template<class WP, EnableIf<IsWeaker<WP,P>> =dummy>
-    Float<WP,MultiplePrecision> get(WP par, MultiplePrecision const& prec) const { return pointer()->_get(WP(),prec); }
+    FloatType<WP,MultiplePrecision> get(WP par, MultiplePrecision const& prec) const { return pointer()->_get(WP(),prec); }
     //! \brief Get the value of the number as a double-precision floating-point type
     template<class PR, EnableIf<IsSame<PR,DoublePrecision>> =dummy>
-    Float<P,PR> get(PR pr) const { return pointer()->_get(P(),pr); }
+    FloatType<P,PR> get(PR pr) const { return pointer()->_get(P(),pr); }
 
     //! \brief Get the value of the number as a double-precision floating-point type
-    Float<P,DoublePrecision> get() const { return pointer()->_get(WP()); }
+    FloatType<P,DoublePrecision> get() const { return pointer()->_get(WP()); }
     //! \brief Get the value of the number as a double-precision floating-point type
-    Float<P,DoublePrecision> get(DoublePrecision const& prec) const { return pointer()->_get(WP()); }
+    FloatType<P,DoublePrecision> get(DoublePrecision const& prec) const { return pointer()->_get(WP()); }
     //! \brief Get the value of the number as a multiple-precision floating-point type
-    Float<P,MultiplePrecision> get(MultiplePrecision const& prec) const { return pointer()->_get(WP(),prec); }
+    FloatType<P,MultiplePrecision> get(MultiplePrecision const& prec) const { return pointer()->_get(WP(),prec); }
 
     template<class X> X extract() const;
 
@@ -226,131 +245,6 @@ template<class P> class Number
     friend OutputStream& operator<<(OutputStream& os, Number<P> const& y) { return os << y.ref(); }
 };
 
-template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
-operator+(N const& y1, D const& d2) -> decltype(y1+Number<ApproximateTag>(d2)) { return y1+Number<ApproximateTag>(d2); }
-template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
-operator-(N const& y1, D const& d2) -> decltype(y1-Number<ApproximateTag>(d2)) { return y1-Number<ApproximateTag>(d2); }
-template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
-operator*(N const& y1, D const& d2) -> decltype(y1*Number<ApproximateTag>(d2)) { return y1*Number<ApproximateTag>(d2); }
-template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
-operator/(N const& y1, D const& d2) -> decltype(y1/Number<ApproximateTag>(d2)) { return y1/Number<ApproximateTag>(d2); }
-template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
-operator+(D const& d1, N const& y2) -> decltype(Number<ApproximateTag>(d1)+y2) { return Number<ApproximateTag>(d1)+y2; }
-template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
-operator-(D const& d1, N const& y2) -> decltype(Number<ApproximateTag>(d1)-y2) { return Number<ApproximateTag>(d1)-y2; }
-template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
-operator*(D const& d1, N const& y2) -> decltype(Number<ApproximateTag>(d1)*y2) { return Number<ApproximateTag>(d1)*y2; }
-template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> auto
-operator/(D const& d1, N const& y2) -> decltype(Number<ApproximateTag>(d1)/y2) { return Number<ApproximateTag>(d1)/y2; }
-
-
-template<class R> struct IsConcreteNumericType : IsConvertible<R,Real> { };
-
-template<class R, class P, EnableIf<IsConcreteNumericType<R>> =dummy> auto operator+(R const& r1, Number<P> const& y2) -> decltype(Number<Paradigm<R>>(r1)+y2) {
-    return Number<Paradigm<R>>(r1)+y2; }
-template<class R, class P, EnableIf<IsConcreteNumericType<R>> =dummy> auto operator+(Number<P> const& y1, R const& r2) -> decltype(y1+Number<Paradigm<R>>(r2)) {
-    return y1+Number<Paradigm<R>>(r2); }
-
-
-#endif
-
-#ifdef ARIADNE_TEMPLATE_NUMBER
-
-//! \ingroup NumericModule
-//! \brief Generic numbers with computational paradigm \a P, which may be %EffectiveTag, %ValidatedTag, %UpperTag, %LowerTag or %ApproximateTag.
-template<class P> class Number
-    : public Handle<NumberInterface>
-{
-    static_assert(IsConvertible<P,ApproximateTag>::value,"P must be a paradigm");
-    template<class PP> friend class Number;
-    template<class X> using IsGettableAs = And<IsNumericType<X>,IsWeaker<typename X::Paradigm,P>,Not<IsSame<typename X::Paradigm,ExactTag>>>;
-  public:
-    explicit Number(Handle<NumberInterface> h) : Handle<NumberInterface>(h) { }
-    Handle<NumberInterface> handle() const { return *this; }
-  public:
-    typedef P Paradigm;
-
-    Number();
-
-    template<class PP, EnableIf<IsWeaker<P,PP>> = dummy> Number(const Number<PP>& n) : Number<P>(n.handle()) { }
-    template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> Number(const N& n) : Number<P>(Integer(n)) { }
-
-    // Construct from raw double
-    template<class X, EnableIf<And<IsSame<P,ApproximateTag>,IsBuiltinFloatingPoint<X>>> =dummy> explicit Number(const X& n);
-
-    template<class X> X extract() const;
-};
-
-// Unary and binary operators
-template<class P> Number<P> inline operator+(Number<P> y) {
-    return pos(y); }
-template<class P> Number<P> inline operator-(Number<P> y) {
-    return neg(y); }
-
-template<class P1, class P2> inline Number<Weaker<P1,P2>> operator+(Number<P1> y1, Number<P2> y2) {
-    typedef Weaker<P1,P2> P0; return add(Number<P0>(y1),Number<P0>(y2)); }
-template<class P1, class P2> inline Number<Weaker<P1,P2>> operator-(Number<P1> y1, Number<P2> y2) {
-    typedef Weaker<P1,P2> P0; return sub(Number<P0>(y1),Number<P0>(y2)); }
-template<class P1, class P2> inline Number<Weaker<P1,P2>> operator*(Number<P1> y1, Number<P2> y2) {
-    typedef Weaker<P1,P2> P0; return mul(Number<P0>(y1),Number<P0>(y2)); }
-template<class P1, class P2> inline Number<Weaker<P1,P2>> operator/(Number<P1> y1, Number<P2> y2) {
-    typedef Weaker<P1,P2> P0; return div(Number<P0>(y1),Number<P0>(y2)); }
-
-// Overloads
-template<class P1, class P2, EnableIf<And<IsSame<P1,UpperTag>,IsSame<P2,LowerTag>>> =dummy>
-    inline Number<ApproximateTag> operator+(Number<P1> y1, Number<P2> y2) { return Number<ApproximateTag>(y1)+Number<ApproximateTag>(y2); }
-template<class P1, class P2, EnableIf<And<IsSame<P1,LowerTag>,IsSame<P2,UpperTag>>> =dummy>
-    inline Number<ApproximateTag> operator+(Number<P1> y1, Number<P2> y2) { return Number<ApproximateTag>(y1)+Number<ApproximateTag>(y2); }
-template<class P1, class P2, EnableIf<And<IsSame<P1,UpperTag>,IsSame<P2,UpperTag>>> =dummy>
-    inline Number<ApproximateTag> operator-(Number<P1> y1, Number<P2> y2) { return Number<ApproximateTag>(y1)-Number<ApproximateTag>(y2); }
-template<class P1, class P2, EnableIf<And<IsSame<P1,LowerTag>,IsSame<P2,LowerTag>>> =dummy>
-    inline Number<ApproximateTag> operator-(Number<P1> y1, Number<P2> y2) { return Number<ApproximateTag>(y1)-Number<ApproximateTag>(y2); }
-
-// Comparison operators
-template<class P> inline Logical<Equality<P>> operator==(Number<P> y1, Number<Negated<P>> y2) {
-    return Logical<Equality<P>>(y1.ref()._eq(y2.ref())); }
-template<class P> inline Logical<LessThan<P>> operator< (Number<P> y1, Number<Negated<P>> y2) {
-    return Logical<LessThan<P>>(y1.ref()._lt(y2.ref())); }
-template<class P> inline Logical<LessThan<Negated<P>>> operator> (Number<P> y1, Number<Negated<P>> y2) { return (y2<y1); }
-template<class P> inline Logical<Negated<Equality<P>>> operator!=(Number<P> y1, Number<Negated<P>> y2) { return !(y1==y2); }
-template<class P> inline Logical<LessThan<P>> operator<=(Number<P> y1, Number<Negated<P>> y2) { return !(y1>y2); }
-template<class P> inline Logical<LessThan<Negated<P>>> operator>=(Number<P> y1, Number<Negated<P>> y2) { return !(y2<y1); }
-
-template<class P> inline OutputStream& operator<<(OutputStream& os, Number<P> y) {
-    return os << y.handle(); }
-
-template<class P> inline Number<P> abs(Number<P> y);
-template<class P1, class P2> inline Number<Weaker<P1,P2>> max(Number<P1> y1, Number<P2> y2);
-template<class P1, class P2> inline Number<Weaker<P1,P2>> min(Number<P1> y1, Number<P2> y2);
-
-template<class P> inline Number<P> add(Number<P> y1, Number<P> y2) { return Number<P>(y1.ref()._add(y2.ref())); }
-template<class P> inline Number<P> sub(Number<P> y1, Number<Negated<P>> y2) { return Number<P>(y1.ref()._sub(y2.ref())); }
-template<class P> inline Number<P> mul(Number<P> y1, Number<P> y2) { return Number<P>(y1.ref()._mul(y2.ref())); }
-template<class P> inline Number<P> div(Number<P> y1, Number<Negated<P>> y2) { return Number<P>(y1.ref()._div(y2.ref())); }
-template<class P> inline Number<P> pos(Number<P> y) { return Number<P>(y.ref()._pos()); }
-template<class P> inline Number<P> sqr(Number<P> y) { return Number<P>(y.ref()._sqr()); }
-template<class P> inline Number<P> neg(Number<P> y) { return Number<P>(y.ref()._neg()); }
-template<class P> inline Number<P> rec(Number<P> y) { return Number<P>(y.ref()._rec()); }
-template<class P> inline Number<P> sqrt(Number<P> y) { return Number<P>(y.ref()._sqrt()); }
-template<class P> inline Number<P> exp(Number<P> y) { return Number<P>(y.ref()._exp()); }
-template<class P> inline Number<P> log(Number<P> y) { return Number<P>(y.ref()._log()); }
-template<class P> inline Number<P> sin(Number<P> y) { return Number<P>(y.ref()._sin()); }
-template<class P> inline Number<P> cos(Number<P> y) { return Number<P>(y.ref()._cos()); }
-template<class P> inline Number<P> tan(Number<P> y) { return Number<P>(y.ref()._tan()); }
-template<class P> inline Number<P> atan(Number<P> y) { return Number<P>(y.ref()._atan()); }
-
-template<class P> inline Number<P> pow(Number<P> y, Integer n) { return Number<P>(y.ref()._pow(n)); }
-
-template<class P, class N, EnableIf<IsBuiltinIntegral<N>> =dummy> inline Number<P> pow(Number<P> y1, N n2) {
-    return Number<P>(y1.ref()._pow(n2)); }
-
-template<class P> inline Logical<Equality<P>> eq(Number<P> y1, Number<Negated<P>> y2) {
-    return Logical<P>(y1.ref()._eq(y2.ref())); }
-
-template<class P> OutputStream& operator<<(OutputStream& os, Number<P> y) { return y._ptr->_write(os); }
-
-
-#endif /* ARIADNE_FRIEND_NUMBER */
 
 
 template<class P> class Positive<Number<P>> : Number<P> {

@@ -192,8 +192,8 @@ template<class X> OutputStream& operator<<(OutputStream& os, const PythonReprese
 
 template<class X> OutputStream& operator<<(OutputStream& os, const PythonRepresentation< Differential<X> >& repr) {
     const Differential<X>& diff=repr.reference();
-    os << python_name<X>("Differential") << "(" << python_representation(diff.expansion()) << "," << diff.degree() << ")";
-    //os << python_name<X>("Differential") << "(" << diff.argument_size() << "," << diff.degree() << "," << python_representation(diff.expansion()) << ")";
+    os << python_name<X>("Differential").c_str() << "(" << python_representation(diff.expansion()) << "," << diff.degree() << ")";
+    //os << python_name<X>("Differential").c_str() << "(" << diff.argument_size() << "," << diff.degree() << "," << python_representation(diff.expansion()) << ")";
     return os;
 }
 
@@ -206,7 +206,7 @@ template<class D> using HessianType = decltype(declval<D>().hessian());
 
 
 template<class DIFF>
-Void export_differential(const char* name)
+Void export_differential(const String& name)
 {
     typedef typename DIFF::ValueType X;
     typedef Vector<X> V;
@@ -214,7 +214,7 @@ Void export_differential(const char* name)
     typedef DIFF D;
     typedef Vector<D> DV;
 
-    class_<D> differential_class(name, init<D>() );
+    class_<D> differential_class(name.c_str(), init<D>() );
     differential_class.def("__init__", make_constructor(&make_sparse_differential<D>) );
     differential_class.def( init< SizeType, DegreeType >());
     differential_class.def( init< Expansion<X>, DegreeType >());
@@ -271,7 +271,7 @@ Void export_differential(const char* name)
 
 template<class DIFF>
 Void
-export_differential_vector(const char* name)
+export_differential_vector(const String& name)
 {
     typedef typename DIFF::ValueType X;
     typedef Vector<X> V;
@@ -279,7 +279,7 @@ export_differential_vector(const char* name)
     typedef DIFF D;
     typedef Vector<D> DV;
 
-    class_<DV> differential_vector_class(name, init<DV>());
+    class_<DV> differential_vector_class(name.c_str(), init<DV>());
     differential_vector_class.def("__init__", make_constructor(&make_differential_vector<D>) );
     differential_vector_class.def( init< Nat, Nat, Nat >());
     differential_vector_class.def("__getitem__", &matrix_get_item<DV,Int,MultiIndex,X>);
@@ -306,11 +306,11 @@ export_differential_vector(const char* name)
     //def("lie_derivative", (DV(*)(const DV&,const DV&))&lie_derivative);
 }
 
-template Void export_differential< Differential<FloatDPApproximation> >(const char*);
-template Void export_differential< Differential<FloatDPBounds> >(const char*);
+template Void export_differential< Differential<FloatDPApproximation> >(const String&);
+template Void export_differential< Differential<FloatDPBounds> >(const String&);
 
-template Void export_differential_vector< Differential<FloatDPApproximation> >(const char*);
-template Void export_differential_vector< Differential<FloatDPBounds> >(const char*);
+template Void export_differential_vector< Differential<FloatDPApproximation> >(const String&);
+template Void export_differential_vector< Differential<FloatDPBounds> >(const String&);
 
 Void differentiation_submodule()
 {

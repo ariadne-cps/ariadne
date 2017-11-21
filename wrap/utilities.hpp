@@ -50,8 +50,8 @@ namespace Ariadne {
 
 class Real;
 
-template<class X> inline const char* python_name(const char* name) {
-    return (StringType(class_name<X>())+name).c_str(); }
+template<class X> inline std::string python_name(const std::string& name) {
+    return class_name<X>()+name; }
 
 template<class T> struct to_python;
 template<class T> struct to_python_list;

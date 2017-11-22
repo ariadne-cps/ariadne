@@ -117,13 +117,13 @@ void TestInclusionIntegrator::test_rotation() const {
     RealBox starting_set={{1-e,1+e},{-e,+e}};
     Real evolution_time=3/4_q;
 
-    this->run_test("singleton_domain",integrator,vector_field,noise_levels,starting_set,evolution_time);
+    this->run_test("rotation",integrator,vector_field,noise_levels,starting_set,evolution_time);
 }
 
 void TestInclusionIntegrator::test_singleton_domain() const {
     auto integrator = InclusionIntegrator2ndOrder(make_threshold_sweeper(1e-8), step_size=1.0/4, number_of_steps_between_simplifications=64, number_of_variables_to_keep=32);
 
-    RealVector noise_levels={1/16_q,1/32_q};
+    RealVector noise_levels={0_q,0_q};
 
     auto vector_field=EffectiveVectorFunction({-x[0],one});
 

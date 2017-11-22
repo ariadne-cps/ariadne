@@ -37,6 +37,8 @@
 using std::cout; using std::cerr; using std::endl;
 using namespace Ariadne;
 
+extern template Ariadne::Nat Ariadne::Error<Ariadne::FloatMP>::output_places;
+
 Dyadic operator"" _exd (long double x) { return Dyadic(x); }
 
 template<class T, class = decltype(declval<T>().clobber())> True has_clobber(int);
@@ -150,7 +152,6 @@ template<class F> Void TestTaylorModel<F>::test()
     FloatBounds<PR>::set_output_places(18);
 
     ARIADNE_TEST_CALL(test_constructors());
-    return;
     ARIADNE_TEST_CALL(test_predicates());
     ARIADNE_TEST_CALL(test_approximation());
     ARIADNE_TEST_CALL(test_unscale());
@@ -527,8 +528,10 @@ template<class F> Void TestTaylorModel<F>::test_recondition()
 {
     ARIADNE_TEST_CONSTRUCT( ValidatedTaylorModel<F>, tm1, ({ {{0,0},2.0}, {{1,0},3.0}, {{0,1},5.0} }, 0.5, swp) );
     ARIADNE_TEST_CONSTRUCT( ValidatedTaylorModel<F>, tm2, ({ {{0,0,1},0.5}, {{0,0,0},2.0}, {{1,0,0},3.0}, {{0,1,0},5.0} }, 0.0, swp) );
+    ARIADNE_TEST_CONSTRUCT( ValidatedTaylorModel<F>, tm3, ({ {{0},2.0}, {{1},5.0} }, 3.5, swp) );
     ARIADNE_TEST_SAME(embed_error(tm1),tm2);
     ARIADNE_TEST_SAME(discard_variables(tm2,{2}),tm1);
+    ARIADNE_TEST_SAME(discard_variables(tm1,{0}),tm3);
 }
 
 

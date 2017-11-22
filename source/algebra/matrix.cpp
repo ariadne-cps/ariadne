@@ -853,12 +853,9 @@ template Tuple<Matrix<FloatDPApproximation>,Matrix<FloatDPApproximation>> orthog
 template Vector<FloatDPApproximation> row_norms(Matrix<FloatDPApproximation> const&);
 
 template class Matrix<FloatDPBounds>;
-template Matrix<FloatDPBounds> inverse(const Matrix<FloatDPBounds>&);
 template Matrix<FloatDPBounds> lu_inverse(const Matrix<FloatDPBounds>&);
 template Matrix<FloatDPBounds> gs_inverse(const Matrix<FloatDPBounds>&);
-template Matrix<FloatDPBounds> solve(const Matrix<FloatDPBounds>&, const Matrix<FloatDPBounds>&);
 template Matrix<FloatDPBounds> lu_solve(const Matrix<FloatDPBounds>&, const Matrix<FloatDPBounds>&);
-template Matrix<FloatDPBounds> gs_solve(const Matrix<FloatDPBounds>&, const Matrix<FloatDPBounds>&);
 template Vector<FloatDPBounds> solve(const Matrix<FloatDPBounds>&, const Vector<FloatDPBounds>&);
 template Vector<FloatDPBounds> lu_solve(const Matrix<FloatDPBounds>&, const Vector<FloatDPBounds>&);
 template Vector<FloatDPBounds> gs_solve(const Matrix<FloatDPBounds>&, const Vector<FloatDPBounds>&);

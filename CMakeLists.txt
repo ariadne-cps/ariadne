@@ -178,10 +178,11 @@ if(CAIRO_FOUND)
     target_link_libraries(ariadne-kernel cairo)
 endif()
 
+find_package(PythonLibs 2.4)
 
 add_library(pyariadne $<TARGET_OBJECTS:pyariadne-src>)
 set_target_properties(pyariadne PROPERTIES PREFIX "" OUTPUT_NAME "ariadne")
-target_link_libraries (pyariadne ariadne boost_python)
+target_link_libraries (pyariadne ariadne ${PYTHON_LIBRARIES} boost_python)
 
 add_library(pyariadne-numeric SHARED $<TARGET_OBJECTS:pyariadne-numeric-src> $<TARGET_OBJECTS:ariadne-utility> $<TARGET_OBJECTS:ariadne-numeric>)
 set_target_properties(pyariadne-numeric PROPERTIES PREFIX "" OUTPUT_NAME "numeric")

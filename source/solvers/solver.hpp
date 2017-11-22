@@ -172,7 +172,16 @@ class FactoredKrawczykSolver
           const Vector<ValidatedNumericType>& pt) const;
 };
 
-
+template<class X1, class X2>
+Bool operator<(const Vector<X1>& v1, const Vector<X2>& v2)
+{
+    if(v1.size()!=v2.size()) { return v1.size()<v2.size(); }
+    for(SizeType i=0; i!=v1.size(); ++i) {
+        if(decide(v1[i]<v2[i])) { return true; }
+        else if(decide(v1[i]>v2[i])) { return false; }
+    }
+    return true;
+}
 
 } // namespace Ariadne
 

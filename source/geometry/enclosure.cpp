@@ -1120,11 +1120,12 @@ TaylorModel<ValidatedTag,FloatDP> recondition(const TaylorModel<ValidatedTag,Flo
         error_ptr = &r.error();
     } else {
         ra[number_of_kept_variables+index_of_error]=1;
-        r.expansion().append(ra,cast_exact(tm.error()));
+        r.expansion().append(ra,FloatDPValue());
         ra[number_of_kept_variables+index_of_error]=0;
         error_ptr = reinterpret_cast<FloatDPError*>(&r.begin()->data());
     }
     FloatDPError& error=*error_ptr;
+    error += tm.error();
 
     for(TaylorModel<ValidatedTag,FloatDP>::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
         MultiIndex const& xa=iter->key();

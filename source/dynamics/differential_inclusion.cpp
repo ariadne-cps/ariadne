@@ -355,12 +355,13 @@ compute_step(EffectiveVectorFunction f, BoxDomainType V, BoxDomainType D, Positi
 
 LohnerReconditioner::LohnerReconditioner(SweeperDP sweeper, NumberOfVariablesToKeep number_of_variables_to_keep)
     : _sweeper(sweeper), _number_of_variables_to_keep(number_of_variables_to_keep) {
+    this->verbosity = 6;
 }
 
 ValidatedVectorFunctionModelDP LohnerReconditioner::expand_errors(ValidatedVectorFunctionModelDP Phi) const {
     BoxDomainType domain=Phi.domain();
     BoxDomainType errors=cast_exact(cast_exact(Phi.errors())*FloatDPUpperInterval(-1,+1)); // FIXME: Avoid cast;
-    ARIADNE_LOG(6,"Uniform errors:"<<errors);
+    ARIADNE_LOG(6,"Uniform errors:"<<errors<<"\n");
     for(SizeType i=0; i!=Phi.result_size(); ++i) { Phi[i].set_error(0); }
     ValidatedVectorFunctionModelDP error_function=ValidatedVectorTaylorFunctionModelDP::identity(errors,this->_sweeper);
     return embed(Phi,errors)+embed(domain,error_function);
@@ -427,14 +428,12 @@ Void LohnerReconditioner::simplify(ValidatedVectorFunctionModelDP& phi) const {
     List<SizeType> keep_indices;
     List<SizeType> remove_indices;
     int number_of_variables_to_remove = m - this->_number_of_variables_to_keep;
-    if (number_of_variables_to_remove > 0) {
-        ARIADNE_LOG(6, "Finding indices to remove\n");
-        for (auto j : range(m)) {
-            if (j < number_of_variables_to_remove) {
-                remove_indices.append(SCe[j].index);
-            } else {
-                keep_indices.append(SCe[j].index);
-            }
+    ARIADNE_LOG(6, "Number of variables to remove:" << number_of_variables_to_remove<<"\n");
+    for (int j : range(m)) {
+        if (j < number_of_variables_to_remove) {
+            remove_indices.append(SCe[j].index);
+        } else {
+            keep_indices.append(SCe[j].index);
         }
     }
     ARIADNE_LOG(6,"keep_indices:"<<keep_indices<<"\n");

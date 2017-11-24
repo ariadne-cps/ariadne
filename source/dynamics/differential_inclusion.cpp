@@ -404,7 +404,7 @@ Void LohnerReconditioner::simplify(ValidatedVectorFunctionModelDP& phi) const {
     ARIADNE_LOG(5,"SortCe:"<<SCe<<"\n");
     List<SizeType> keep_indices;
     List<SizeType> remove_indices;
-    if (m>=this->_number_of_variables_to_keep) {
+    if (m>this->_number_of_variables_to_keep) {
         ARIADNE_LOG(5, "Finding indices to remove\n");
         auto threshold = (SCe[m - this->_number_of_variables_to_keep - 1] + SCe[m - this->_number_of_variables_to_keep]) / 2;
         ARIADNE_LOG(5, "Threshold: " << threshold << "\n");

@@ -62,8 +62,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegratorBase::flow(EffectiveVect
 
     auto step = 0;
     while (possibly(t<FloatDPBounds(tmax,pr))) {
-        ARIADNE_LOG(3,"\n");
-        ARIADNE_LOG(3,"step:"<<step<<", t:"<<t<<", hsug:"<<hsug);
+        ARIADNE_LOG(3,"step#:"<<step<<", t:"<<t<<", hsug:"<<hsug << "\n");
         if(possibly(t+hsug>FloatDPBounds(tmax,pr))) {  //FIXME: Check types for timing;
             hsug=cast_positive(cast_exact((tmax-t).upper()));
         }
@@ -72,20 +71,19 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegratorBase::flow(EffectiveVect
         UpperBoxType B;
         PositiveFloatDPValue h;
         std::tie(h,B)=this->flow_bounds(f,V,D,hsug);
-        if(verbosity>=3) { std::clog << ", h:"<<h<<", B:"<<B<<"\n"; }
+        ARIADNE_LOG(3,"h:"<<h<<", B:"<<B<<"\n");
         auto Phi = this->compute_step(f,V,D,h,B);
-        ARIADNE_LOG(7,"Phi="<<Phi<<"\n");
+        ARIADNE_LOG(5,"Phi="<<Phi<<"\n");
         assert(Phi.domain()[n].upper()==h);
         PositiveFloatDPValue new_t=cast_positive(cast_exact((t+h).lower()));
 
         // Simplify terms in Phi
-        ARIADNE_LOG(9,"Phi="<<Phi<<"\n");
         ValidatedVectorTaylorFunctionModelDP& TPhi = const_cast<ValidatedVectorTaylorFunctionModelDP&>(dynamic_cast<ValidatedVectorTaylorFunctionModelDP const&>(*Phi.raw_pointer()));
-        ARIADNE_LOG(9,"TPhi="<<TPhi<<"\n");
+        ARIADNE_LOG(6,"TPhi="<<TPhi<<"\n");
         TPhi.set_properties(ThresholdSweeper<FloatDP>(pr,4e-3));
         TPhi.simplify();
-        ARIADNE_LOG(9,"TPhi="<<TPhi<<"\n");
-        ARIADNE_LOG(9,"Phi="<<Phi<<"\n");
+        ARIADNE_LOG(6,"TPhi="<<TPhi<<"\n");
+        ARIADNE_LOG(6,"Phi="<<Phi<<"\n");
         assert(Phi.domain()[n].upper()==h);
         ARIADNE_LOG(5,"evolve_function.domain()="<<evolve_function.domain()<<"\n");
         ARIADNE_LOG(5,"evolve_function.codomain()="<<evolve_function.codomain()<<"\n");
@@ -99,48 +97,49 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegratorBase::flow(EffectiveVect
         BoxDomainType A1=Phi.domain()[range(n+1,n+1+p1)];
 
         auto Psi = partial_evaluate(Phi,n,FloatDPValue(h));
-        ARIADNE_LOG(7,"Psi="<<Psi<<"\n");
+        ARIADNE_LOG(6,"Psi="<<Psi<<"\n");
 
         // Evolve function is xi(x,a) at s; Flow is phi(x,h,b)
         // Want (x,t,a,b):->phi(xi(x,a),t-s,b))
         auto swp=TPhi.properties();
         auto Tau=IntervalDomainType(t,new_t);
-        ARIADNE_LOG(7,"Tau="<<Tau<<"\n");
+        ARIADNE_LOG(6,"Tau="<<Tau<<"\n");
         BoxDomainType DTA = join(X0,Tau,A0,A1);
-        ARIADNE_LOG(7,"DTA="<<DTA<<"\n");
+        ARIADNE_LOG(6,"DTA="<<DTA<<"\n");
         ValidatedVectorTaylorFunctionModelDP xf=ValidatedVectorTaylorFunctionModelDP::projection(DTA,range(0,n),swp);
         ValidatedScalarTaylorFunctionModelDP tf=ValidatedScalarTaylorFunctionModelDP::coordinate(DTA,n,swp);
-        ARIADNE_LOG(7,"tf="<<tf<<"\n");
+        ARIADNE_LOG(6,"tf="<<tf<<"\n");
         ValidatedScalarTaylorFunctionModelDP hf=tf-t;
-        ARIADNE_LOG(7,"hf="<<hf<<"\n");
+        ARIADNE_LOG(6,"hf="<<hf<<"\n");
         ValidatedVectorTaylorFunctionModelDP a1f=ValidatedVectorTaylorFunctionModelDP::projection(DTA,range(n+1+p0,n+1+p0+p1),swp);
-        ARIADNE_LOG(7,"a1f="<<join(xf,a1f)<<"\n");
+        ARIADNE_LOG(6,"a1f="<<join(xf,a1f)<<"\n");
         ValidatedVectorTaylorFunctionModelDP a0f=ValidatedVectorTaylorFunctionModelDP::projection(DTA,range(n+1,n+1+p0),swp);
-        ARIADNE_LOG(7,"a0f="<<join(xf,a0f)<<"\n");
-        ARIADNE_LOG(7,"join(xf,a0f)="<<join(xf,a0f)<<"\n");
+        ARIADNE_LOG(6,"a0f="<<join(xf,a0f)<<"\n");
+        ARIADNE_LOG(6,"join(xf,a0f)="<<join(xf,a0f)<<"\n");
 
         ValidatedVectorTaylorFunctionModelDP ef=compose(evolve_function,join(xf,a0f));
         ARIADNE_LOG(5,"ef.domain()"<<ef.domain()<<"\n");
         ARIADNE_LOG(5,"ef.range()"<<ef.range()<<"\n");
 
         ValidatedVectorFunctionModelDP reach_function=compose(Phi,join(ef,hf,a1f));
-        ARIADNE_LOG(7,"reach_function="<<reach_function<<"\n");
+        ARIADNE_LOG(5,"reach_function="<<reach_function<<"\n");
         //reach_function=this->_reconditioner->expand_errors(reach_function);
 
         evolve_function=partial_evaluate(reach_function,n,new_t);
-        ARIADNE_LOG(7,"evolve_function="<<evolve_function<<"\n");
+        ARIADNE_LOG(5,"evolve_function="<<evolve_function<<"\n");
+        ARIADNE_LOG(5,"evolve_function.range()="<<evolve_function.range()<<"\n");
 
         step+=1;
         if (step%this->_number_of_steps_between_simplifications==0) {
             this->_reconditioner->simplify(evolve_function);
         }
 
+        ARIADNE_LOG(5,"new_evolve_function="<<evolve_function<<"\n");
         ARIADNE_LOG(5,"new_evolve_function.range():"<<evolve_function.range()<<"\n");
         t=new_t;
         //reach_sets.append(lohner_approximation(reach_function));
         result.append(reach_function);
 
-        ARIADNE_LOG(7,evolve_function<<"\n");
         ARIADNE_LOG(5,"new_evolve_function.errors():"<<evolve_function.errors()<<"\n");
     }
     return result;
@@ -361,15 +360,15 @@ LohnerReconditioner::LohnerReconditioner(SweeperDP sweeper, NumberOfVariablesToK
 ValidatedVectorFunctionModelDP LohnerReconditioner::expand_errors(ValidatedVectorFunctionModelDP Phi) const {
     BoxDomainType domain=Phi.domain();
     BoxDomainType errors=cast_exact(cast_exact(Phi.errors())*FloatDPUpperInterval(-1,+1)); // FIXME: Avoid cast;
-    ARIADNE_LOG(3,"Uniform errors:"<<errors);
+    ARIADNE_LOG(5,"Uniform errors:"<<errors);
     for(SizeType i=0; i!=Phi.result_size(); ++i) { Phi[i].set_error(0); }
     ValidatedVectorFunctionModelDP error_function=ValidatedVectorTaylorFunctionModelDP::identity(errors,this->_sweeper);
     return embed(Phi,errors)+embed(domain,error_function);
 }
 
 Void LohnerReconditioner::simplify(ValidatedVectorFunctionModelDP& phi) const {
-    ARIADNE_LOG(4,"simplifying\n");
-    ARIADNE_LOG(6,"phi="<<phi<<"\n");
+    ARIADNE_LOG(5,"simplifying\n");
+    ARIADNE_LOG(5,"phi="<<phi<<"\n");
 
     ValidatedVectorTaylorFunctionModelDP& tphi = dynamic_cast<ValidatedVectorTaylorFunctionModelDP&>(phi.reference());
 
@@ -391,7 +390,7 @@ Void LohnerReconditioner::simplify(ValidatedVectorFunctionModelDP& phi) const {
         }
     }
 
-    ARIADNE_LOG(3,"C"<<C<<"\n");
+    ARIADNE_LOG(5,"C"<<C<<"\n");
 
     Array<FloatDP> Ce(m);
     for (auto j : range(m)) {
@@ -399,25 +398,26 @@ Void LohnerReconditioner::simplify(ValidatedVectorFunctionModelDP& phi) const {
             Ce[j] += C[j][i];
         }
     }
-    ARIADNE_LOG(3,"Ce:"<<Ce<<"\n");
+    ARIADNE_LOG(5,"Ce:"<<Ce<<"\n");
     auto SCe=Ce;
     std::sort(SCe.begin(),SCe.end());
-    ARIADNE_LOG(3,"SortCe:"<<SCe<<"\n");
+    ARIADNE_LOG(5,"SortCe:"<<SCe<<"\n");
     List<SizeType> keep_indices;
     List<SizeType> remove_indices;
-    SizeType number_of_variables_to_keep=this->_number_of_variables_to_keep;
-    if (m<this->_number_of_variables_to_keep) { number_of_variables_to_keep=m; }
-    auto threshold = (SCe[-number_of_variables_to_keep]+SCe[1-number_of_variables_to_keep])/2;
-    for (auto j : range(m)) {
-        if (Ce[j] < threshold) {
-            remove_indices.append(j);
-        }
-        else {
-            keep_indices.append(j);
+    if (m>=this->_number_of_variables_to_keep) {
+        ARIADNE_LOG(5, "Finding indices to remove\n");
+        auto threshold = (SCe[m - this->_number_of_variables_to_keep - 1] + SCe[m - this->_number_of_variables_to_keep]) / 2;
+        ARIADNE_LOG(5, "Threshold: " << threshold << "\n");
+        for (auto j : range(m)) {
+            if (Ce[j] < threshold) {
+                remove_indices.append(j);
+            } else {
+                keep_indices.append(j);
+            }
         }
     }
-    ARIADNE_LOG(3,"keep_indices:"<<keep_indices<<"\n");
-    ARIADNE_LOG(3,"remove_indices:"<<remove_indices<<"\n");
+    ARIADNE_LOG(5,"keep_indices:"<<keep_indices<<"\n");
+    ARIADNE_LOG(5,"remove_indices:"<<remove_indices<<"\n");
 
     auto old_domain=phi.domain();
     auto new_domain=BoxDomainType(Vector<IntervalDomainType>(keep_indices.size(),[&old_domain,&keep_indices](SizeType j){return old_domain[keep_indices[j]];}));

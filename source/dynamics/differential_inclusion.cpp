@@ -360,20 +360,41 @@ LohnerReconditioner::LohnerReconditioner(SweeperDP sweeper, NumberOfVariablesToK
 ValidatedVectorFunctionModelDP LohnerReconditioner::expand_errors(ValidatedVectorFunctionModelDP Phi) const {
     BoxDomainType domain=Phi.domain();
     BoxDomainType errors=cast_exact(cast_exact(Phi.errors())*FloatDPUpperInterval(-1,+1)); // FIXME: Avoid cast;
-    ARIADNE_LOG(5,"Uniform errors:"<<errors);
+    ARIADNE_LOG(6,"Uniform errors:"<<errors);
     for(SizeType i=0; i!=Phi.result_size(); ++i) { Phi[i].set_error(0); }
     ValidatedVectorFunctionModelDP error_function=ValidatedVectorTaylorFunctionModelDP::identity(errors,this->_sweeper);
     return embed(Phi,errors)+embed(domain,error_function);
 }
 
+struct IndexedFloatDP
+{
+    SizeType index;
+    FloatDP value;
+
+    IndexedFloatDP() : index(0), value(FloatDP()) {}
+};
+
+OutputStream& operator<<(OutputStream& os, IndexedFloatDP const& ifl) {
+    return os << "(" << ifl.index << ":" << ifl.value << ")"; }
+
+struct IndexedFloatDPComparator
+{
+    inline bool operator() (const IndexedFloatDP& ifl1, const IndexedFloatDP& ifl2)
+    {
+        return (ifl1.value < ifl2.value);
+    }
+};
+
 Void LohnerReconditioner::simplify(ValidatedVectorFunctionModelDP& phi) const {
-    ARIADNE_LOG(5,"simplifying\n");
-    ARIADNE_LOG(5,"phi="<<phi<<"\n");
+    ARIADNE_LOG(6,"simplifying\n");
+    ARIADNE_LOG(6,"phi="<<phi<<"\n");
 
     ValidatedVectorTaylorFunctionModelDP& tphi = dynamic_cast<ValidatedVectorTaylorFunctionModelDP&>(phi.reference());
 
     auto m=phi.argument_size();
     auto n=phi.result_size();
+
+    ARIADNE_LOG(6,"num.parameters="<<m<<", to keep="<< this->_number_of_variables_to_keep <<"\n");
     // Compute effect of error terms, but not of original variables;
     Matrix<FloatDP> C(m,n);
     for (auto i : range(n)) {
@@ -390,34 +411,34 @@ Void LohnerReconditioner::simplify(ValidatedVectorFunctionModelDP& phi) const {
         }
     }
 
-    ARIADNE_LOG(5,"C"<<C<<"\n");
+    ARIADNE_LOG(6,"C"<<C<<"\n");
 
-    Array<FloatDP> Ce(m);
+    Array<IndexedFloatDP> Ce(m);
     for (auto j : range(m)) {
+        Ce[j].index = j;
         for (auto i : range(n)) {
-            Ce[j] += C[j][i];
+            Ce[j].value += C[j][i];
         }
     }
-    ARIADNE_LOG(5,"Ce:"<<Ce<<"\n");
+    ARIADNE_LOG(6,"Ce:"<<Ce<<"\n");
     auto SCe=Ce;
-    std::sort(SCe.begin(),SCe.end());
-    ARIADNE_LOG(5,"SortCe:"<<SCe<<"\n");
+    std::sort(SCe.begin(),SCe.end(),IndexedFloatDPComparator());
+    ARIADNE_LOG(6,"SortedCe:"<<SCe<<"\n");
     List<SizeType> keep_indices;
     List<SizeType> remove_indices;
-    if (m>this->_number_of_variables_to_keep) {
-        ARIADNE_LOG(5, "Finding indices to remove\n");
-        auto threshold = (SCe[m - this->_number_of_variables_to_keep - 1] + SCe[m - this->_number_of_variables_to_keep]) / 2;
-        ARIADNE_LOG(5, "Threshold: " << threshold << "\n");
+    int number_of_variables_to_remove = m - this->_number_of_variables_to_keep;
+    if (number_of_variables_to_remove > 0) {
+        ARIADNE_LOG(6, "Finding indices to remove\n");
         for (auto j : range(m)) {
-            if (Ce[j] < threshold) {
-                remove_indices.append(j);
+            if (j < number_of_variables_to_remove) {
+                remove_indices.append(SCe[j].index);
             } else {
-                keep_indices.append(j);
+                keep_indices.append(SCe[j].index);
             }
         }
     }
-    ARIADNE_LOG(5,"keep_indices:"<<keep_indices<<"\n");
-    ARIADNE_LOG(5,"remove_indices:"<<remove_indices<<"\n");
+    ARIADNE_LOG(6,"keep_indices:"<<keep_indices<<"\n");
+    ARIADNE_LOG(6,"remove_indices:"<<remove_indices<<"\n");
 
     auto old_domain=phi.domain();
     auto new_domain=BoxDomainType(Vector<IntervalDomainType>(keep_indices.size(),[&old_domain,&keep_indices](SizeType j){return old_domain[keep_indices[j]];}));

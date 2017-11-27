@@ -80,8 +80,8 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegratorBase::flow(EffectiveVect
         // Simplify terms in Phi
         ValidatedVectorTaylorFunctionModelDP& TPhi = const_cast<ValidatedVectorTaylorFunctionModelDP&>(dynamic_cast<ValidatedVectorTaylorFunctionModelDP const&>(*Phi.raw_pointer()));
         ARIADNE_LOG(6,"TPhi="<<TPhi<<"\n");
-        TPhi.set_properties(ThresholdSweeper<FloatDP>(pr,4e-3));
-        TPhi.simplify();
+        //TPhi.set_properties(ThresholdSweeper<FloatDP>(pr,4e-3));
+        //TPhi.simplify();
         ARIADNE_LOG(6,"TPhi="<<TPhi<<"\n");
         ARIADNE_LOG(6,"Phi="<<Phi<<"\n");
         assert(Phi.domain()[n].upper()==h);

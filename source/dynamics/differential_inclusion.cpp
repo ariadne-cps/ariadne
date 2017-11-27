@@ -93,6 +93,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegratorBase::flow(EffectiveVect
         SizeType p0=evolve_function.argument_size()-n;
         SizeType p1=Phi.argument_size()-(n+1);
 
+        BoxDomainType Xi=evolve_function.domain()[range(0,n)];
         BoxDomainType A0=evolve_function.domain()[range(n,n+p0)];
         BoxDomainType A1=Phi.domain()[range(n+1,n+1+p1)];
 
@@ -101,10 +102,11 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegratorBase::flow(EffectiveVect
 
         // Evolve function is xi(x,a) at s; Flow is phi(x,h,b)
         // Want (x,t,a,b):->phi(xi(x,a),t-s,b))
+
         auto swp=TPhi.properties();
         auto Tau=IntervalDomainType(t,new_t);
         ARIADNE_LOG(6,"Tau="<<Tau<<"\n");
-        BoxDomainType DTA = join(X0,Tau,A0,A1);
+        BoxDomainType DTA = join(Xi,Tau,A0,A1);
         ARIADNE_LOG(6,"DTA="<<DTA<<"\n");
         ValidatedVectorTaylorFunctionModelDP xf=ValidatedVectorTaylorFunctionModelDP::projection(DTA,range(0,n),swp);
         ValidatedScalarTaylorFunctionModelDP tf=ValidatedScalarTaylorFunctionModelDP::coordinate(DTA,n,swp);
@@ -355,7 +357,7 @@ compute_step(EffectiveVectorFunction f, BoxDomainType V, BoxDomainType D, Positi
 
 LohnerReconditioner::LohnerReconditioner(SweeperDP sweeper, NumberOfVariablesToKeep number_of_variables_to_keep)
     : _sweeper(sweeper), _number_of_variables_to_keep(number_of_variables_to_keep) {
-    this->verbosity = 6;
+    this->verbosity = 0;
 }
 
 ValidatedVectorFunctionModelDP LohnerReconditioner::expand_errors(ValidatedVectorFunctionModelDP Phi) const {

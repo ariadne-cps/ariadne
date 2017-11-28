@@ -150,7 +150,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegratorBase::flow(EffectiveVect
 
 Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegratorBase::flow_bounds(ValidatedVectorFunction f, UpperBoxType V, BoxDomainType D, PositiveFloatDPApproximation hsug) const {
 
-    // Set up constants of the method.
+/*    // Set up constants of the method.
     // TODO: Better estimates of constants
     const FloatDPValue INITIAL_MULTIPLIER=2.0_exact;
     const FloatDPValue MULTIPLIER=1.125_exact;
@@ -228,8 +228,8 @@ Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegratorBase::flow_bounds(Val
     ARIADNE_ASSERT_MSG(refines(D+ih*apply(f,bx),bx),
                        "d="<<dx<<"\nh="<<h<<"\nf(b)="<<apply(f,bx)<<"\nd+hf(b)="<<(D+ih*apply(f,bx))<<"\nb="<<bx<<"\n");
 
-    return std::make_pair(PositiveFloatDPValue(h),bx);
-    /*
+    return std::make_pair(PositiveFloatDPValue(h),bx);*/
+
     //! Compute a bound B for the differential inclusion dot(x) in f(x)+V for x(0) in D for step size h;
     ARIADNE_LOG(3,"D:"<<D);
 
@@ -247,7 +247,6 @@ Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegratorBase::flow_bounds(Val
     }
     ARIADNE_LOG(3,"B:"<<B);
     return std::make_pair(h,B);
-     */
 }
 
 Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPUpperBound>

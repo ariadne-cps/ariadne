@@ -441,6 +441,21 @@ Void LohnerReconditioner::simplify(ValidatedVectorFunctionModelDP& phi) const {
     ARIADNE_LOG(6,"keep_indices:"<<keep_indices<<"\n");
     ARIADNE_LOG(6,"remove_indices:"<<remove_indices<<"\n");
 
+    for (int i : range(n)) {
+        ErrorType error = tphi[i].error();
+        for(TaylorModel<ValidatedTag,FloatDP>::ConstIterator iter=tphi[i].model().begin(); iter!=tphi[i].model().end(); ++iter) {
+            MultiIndex const& xa=iter->key();
+            FloatDPValue const& xv=iter->data();
+            for(SizeType k=0; k!=remove_indices.size(); ++k) {
+                if(xa[remove_indices[k]]!=0) {
+                    error += mag(xv);
+                    break;
+                }
+            }
+        }
+        tphi[i].set_error(error);
+    }
+
     auto old_domain=phi.domain();
     auto new_domain=BoxDomainType(Vector<IntervalDomainType>(keep_indices.size(),[&old_domain,&keep_indices](SizeType j){return old_domain[keep_indices[j]];}));
     auto projection=ValidatedVectorTaylorFunctionModelDP(m,new_domain,this->_sweeper);

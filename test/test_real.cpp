@@ -50,6 +50,7 @@ class TestReal
     void test_transcendental();
     void test_comparison();
     void test_accuracy();
+    void test_sequence();
 };
 
 void TestReal::test()
@@ -62,12 +63,12 @@ void TestReal::test()
     ARIADNE_TEST_CALL(test_transcendental());
     ARIADNE_TEST_CALL(test_comparison());
     ARIADNE_TEST_CALL(test_accuracy());
+    ARIADNE_TEST_CALL(test_sequence());
 }
 
 void TestReal::test_concept() {
     Real x,y;
     x=Real(); x=Real(1); x=Real(1.0_exact);
-    x=Real(3.14159,3.141593,3.14160);
     x=Real(1);
     y=+x; y=-x; y=x+x; y=x-x; y=x*x; y=x/x;
     y=pow(x,2u); y=pow(x,2);
@@ -96,7 +97,6 @@ void TestReal::test_constructors() {
     ARIADNE_TEST_EQUALS(xz.get(pr),1);
     ARIADNE_TEST_CONSTRUCT(Real,xe,(1.5_exact));
     ARIADNE_TEST_EQUALS(xe.get(pr),1.5);
-    ARIADNE_TEST_CONSTRUCT(Real,xlau,(3.14159,3.141593,3.14160));
     ARIADNE_TEST_CONSTRUCT(Real,xn,(1.1_q));
     ARIADNE_TEST_COMPARE(Rational(xn.lower().get(pr).raw()),<,Rational(11,10));
     ARIADNE_TEST_COMPARE(Rational(xn.upper().get(pr).raw()),>,Rational(11,10));
@@ -205,14 +205,24 @@ void TestReal::test_accuracy() {
     ARIADNE_TEST_ASSERT(pi_met_mp.error() <= error);
     ARIADNE_TEST_ASSERT(rad(up,pi_met_mp.value().raw(),pi_near) <= error.raw());
 
-    std::function<Dyadic(Natural)> wfn([&](Natural n){int nint=n.get_si();return Dyadic(two_exp(-nint));});
+    Dyadic eps(1,1024u);
+    ARIADNE_TEST_PRINT(nondeterministic_greater(sin(pi),-eps,eps));
+    ARIADNE_TEST_PRINT(nondeterministic_greater(sin(pi),-1,eps));
+    ARIADNE_TEST_PRINT(nondeterministic_greater(sin(pi),-eps,1));
+    ARIADNE_TEST_ASSERT(not nondeterministic_greater(sin(pi),eps,2*eps));
+    ARIADNE_TEST_ASSERT(nondeterministic_greater(sin(pi),-3*eps,-2*eps));
+}
+
+
+void TestReal::test_sequence() {
+    std::function<Dyadic(Natural)> wfn([&](Natural n){return 1-Dyadic(1,n);});
     StrongCauchySequence<Dyadic> wseq(wfn);
     Real wlim=limit(wseq);
+    std::cout<<wlim.compute(Accuracy(256))<<"\n";
 
     std::function<Real(Natural)> rfn([&](Natural n){return exp(Real(-(n+1u)));});
     StrongCauchySequence<Real> rseq(rfn);
     Real rlim=limit(rseq);
-
 }
 
 

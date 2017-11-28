@@ -69,6 +69,7 @@ class Dyadic
     //! \brief Construct the Dyadic number \a p/2<sup>q</sup>.
     Dyadic (Integer const& p, Nat q);
     Dyadic (Integer const& p, Int q) = delete;
+    Dyadic (Integer const& p, Natural q);
     //! \brief Destructor.
     ~Dyadic();
     //! \brief Default constructor creates the number 0 (zero).

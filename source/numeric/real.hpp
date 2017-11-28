@@ -216,6 +216,8 @@ class Real
     friend Real limit(StrongCauchySequence<Real> const& rs);
         //!< The limit of a sequence of real numbers \em r<sub>n</sub> for which
         //!< <em>|r<sub>n<sub>1</sub></sub>-r<sub>n<sub>2</sub></sub>|≤<em>2<sup>-min</sup><sup>(n<sub>1</sub>,n<sub>2</sub>)</sup></em>
+    friend Boolean nondeterministic_greater(Real const& rs, Rational a, Rational b);
+        //!< Requires \a a<b. May return true if \a r>a, and may return false if \a r<b.
     //@}
 
 

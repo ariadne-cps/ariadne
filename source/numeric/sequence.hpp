@@ -49,10 +49,12 @@ template<class Y> using CompletionType = typename CompletionTypedef<Y>::Type;
 
 template<class X> class ConvergentSequence : public Sequence<X> {
   public:
+    ConvergentSequence(std::function<X(Natural)> fn) : Sequence<X>(fn) { }
     ConvergentSequence(Sequence<X> const& seq) : Sequence<X>(seq) { }
 };
 template<class X> class StrongCauchySequence : public Sequence<X> {
   public:
+    StrongCauchySequence(std::function<X(Natural)> fn) : Sequence<X>(fn) { }
     StrongCauchySequence(Sequence<X> const& seq) : Sequence<X>(seq) { }
     friend CompletionType<X> limit(StrongCauchySequence<X> const&);
 };

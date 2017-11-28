@@ -259,6 +259,20 @@ Real min(Real const& x1, Real const& x2) { return make_real(Min(),x1,x2); }
 Real limit(StrongCauchySequence<Real> const& seq) { return Real(std::make_shared<RealLimit<Real>>(seq)); }
 Real limit(StrongCauchySequence<Dyadic> const& seq) { return Real(std::make_shared<RealLimit<Dyadic>>(seq)); }
 
+Boolean nondeterministic_greater(Real const& r, Rational a, Rational b) {
+    ARIADNE_PRECONDITION(a<b);
+    DoublePrecision dp;
+    FloatDPBounds x0=r.get(dp);
+    if(x0.lower_raw()>a) { return true; } else if(x0.upper_raw()<b) { return false; }
+    Nat bits=64;
+    while(true) {
+        MultiplePrecision pr(bits);
+        FloatMPBounds x=r.get(pr);
+        if(x.lower_raw()>a) { return true; } else if(x.upper_raw()<b) { return false; }
+        bits+=64;
+    }
+}
+
 PositiveUpperReal mag(Real const& r) { return abs(r); }
 FloatDPError mag(Real const& r, DoublePrecision pr) { return mag(r.get(pr)); }
 

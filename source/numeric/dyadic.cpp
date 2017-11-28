@@ -57,6 +57,14 @@ Dyadic::Dyadic(mpf_t mpf) {
     mpf_set(_mpf,_mpf);
 }
 
+Dyadic::Dyadic(Integer const& p, Natural q) {
+    ARIADNE_ASSERT(q.get_si()==q);
+    mpf_init2(_mpf,maximum_precision);
+    mpf_set_z(_mpf,p._mpz);
+    mpf_div_2exp(_mpf,_mpf,q.get_si());
+    //if(q>=0) { mpf_div_2exp(_mpf,_mpf,q); } else { mpf_mul_2exp(_mpf,_mpf,-q); }
+}
+
 Dyadic::Dyadic(Integer const& p, Nat q) {
     mpf_init2(_mpf,maximum_precision);
     mpf_set_z(_mpf,p._mpz);
@@ -131,7 +139,7 @@ double Dyadic::get_d() const {
 }
 
 Dyadic operator+(TwoExp y) {
-    return +Dyadic(y); 
+    return +Dyadic(y);
 }
 
 Dyadic operator-(TwoExp y) {

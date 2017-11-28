@@ -1,5 +1,6 @@
 set(UNIT_TESTS_KERNEL
     test_logical
+    test_real
     test_float
     test_validated_float
     test_interval

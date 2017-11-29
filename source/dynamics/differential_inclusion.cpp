@@ -34,8 +34,7 @@ Box<UpperIntervalType> apply(VectorFunction<ValidatedTag>const& f, const Box<Exa
 }
 
 InclusionIntegratorBase::InclusionIntegratorBase(SweeperDP sweeper, StepSize step_size)
-    : _reconditioner(new LohnerReconditioner(sweeper,number_of_variables_to_keep=4))
-    , _sweeper(sweeper)
+    : _sweeper(sweeper)
     , _step_size(step_size)
     , _number_of_steps_between_simplifications(8)
     , _number_of_variables_to_keep(4)
@@ -67,11 +66,16 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegratorBase::flow(EffectiveVect
             hsug=cast_positive(cast_exact((tmax-t).upper()));
         }
 
+        ARIADNE_LOG(4,"additional parameters="<<evolve_function.argument_size()-n<<"\n");
+        ARIADNE_LOG(5,"evolve_function.domain()="<<evolve_function.domain()<<"\n");
+        ARIADNE_LOG(5,"evolve_function.codomain()="<<evolve_function.codomain()<<"\n");
+
+
         auto D = cast_exact_box(evolve_function.range());
         UpperBoxType B;
         PositiveFloatDPValue h;
         std::tie(h,B)=this->flow_bounds(f,V,D,hsug);
-        ARIADNE_LOG(3,"h:"<<h<<", B:"<<B<<"\n");
+        ARIADNE_LOG(5,"h:"<<h<<", B:"<<B<<"\n");
         auto Phi = this->compute_step(f,V,D,h,B);
         ARIADNE_LOG(5,"Phi="<<Phi<<"\n");
         assert(Phi.domain()[n].upper()==h);
@@ -85,8 +89,6 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegratorBase::flow(EffectiveVect
         ARIADNE_LOG(6,"TPhi="<<TPhi<<"\n");
         ARIADNE_LOG(6,"Phi="<<Phi<<"\n");
         assert(Phi.domain()[n].upper()==h);
-        ARIADNE_LOG(5,"evolve_function.domain()="<<evolve_function.domain()<<"\n");
-        ARIADNE_LOG(5,"evolve_function.codomain()="<<evolve_function.codomain()<<"\n");
         ARIADNE_LOG(5,"Phi.domain()="<<Phi.domain()<<"\n");
 
         assert(evolve_function.result_size()==n);
@@ -231,7 +233,7 @@ Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegratorBase::flow_bounds(Val
     return std::make_pair(PositiveFloatDPValue(h),bx);*/
 
     //! Compute a bound B for the differential inclusion dot(x) in f(x)+V for x(0) in D for step size h;
-    ARIADNE_LOG(3,"D:"<<D);
+    ARIADNE_LOG(5,"D:"<<D);
 
     apply(f,D); //f(D); //image(f,D);
 
@@ -245,7 +247,7 @@ Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegratorBase::flow_bounds(Val
     for(auto i : range(0,4)) {
         B=D+IntervalDomainType(0,h)*(apply(f,B)+V);
     }
-    ARIADNE_LOG(3,"B:"<<B);
+    ARIADNE_LOG(5,"B:"<<B << "\n");
     return std::make_pair(h,B);
 }
 
@@ -436,7 +438,7 @@ compute_step(EffectiveVectorFunction f, BoxDomainType V, BoxDomainType D, Positi
 
 
 
-LohnerReconditioner::LohnerReconditioner(SweeperDP sweeper, NumberOfVariablesToKeep number_of_variables_to_keep)
+LohnerReconditioner::LohnerReconditioner(SweeperDP sweeper, Nat number_of_variables_to_keep)
     : _sweeper(sweeper), _number_of_variables_to_keep(number_of_variables_to_keep) {
     this->verbosity = 0;
 }

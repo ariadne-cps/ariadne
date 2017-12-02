@@ -53,7 +53,7 @@ FloatMP& operator/=(FloatMP& x1, FloatMP const& x2);
 
 template<class X> decltype(auto) values(Vector<X> const& v) {
     //typedef typename std::remove_reference<decltype(a.zero_element().value())>::type C;
-    return transform_vector(v,[&](X const& x){return x.value();});
+    return elementwise([&](X const& x){return x.value();},v);
 }
 
 /*
@@ -72,7 +72,7 @@ Bounds<FloatMP> cast_singleton(Interval<UpperBound<FloatMP>> const& ivl) {
 }
 
 Vector<Bounds<FloatMP>> cast_singleton(Vector<Interval<UpperBound<FloatMP>>> const& bx) {
-    return transform_vector(bx,[&](Interval<UpperBound<FloatMP>> const& ivl){return cast_singleton(ivl);});
+    return elementwise(bx,[&](Interval<UpperBound<FloatMP>> const& ivl){return cast_singleton(ivl);});
 }
 */
 

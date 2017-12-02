@@ -684,14 +684,21 @@ template<class X1, class X2> inline decltype(consistent(declval<X1>(),declval<X2
 }
 
 template<class G> decltype(auto) generate_vector(SizeType n, G const& g) {
-    typedef std::remove_const_t<std::remove_reference_t<decltype(g(declval<SizeType>()))>> X;
-    return Vector<X>(n,g);
+    typedef ResultOf<G(SizeType)> R;
+    return Vector<R>(n,g);
 }
 
-template<class X, class F> decltype(auto) transform_vector(Vector<X> const& v, F const& f) {
-    typedef std::remove_const_t<std::remove_reference_t<decltype(f(declval<X>()))>> R;
+template<class F, class X> Vector<ResultOf<F(X)>> elementwise(F const& f, Vector<X> const& v) {
+    typedef ResultOf<F(X)> R;
     return Vector<R>(v.size(),[&](SizeType i){return f(v[i]);});
 }
+
+template<class F, class X1, class X2> Vector<ResultOf<F(X1,X2)>> elementwise(F const& f, Vector<X1> const& v1, Vector<X2> const& v2) {
+    ARIADNE_PRECONDITION(v1.size()==v2.size());
+    typedef ResultOf<F(X1,X2)> R;
+    return Vector<R>(v1.size(),[&](SizeType i){return f(v1[i],v2[i]);});
+}
+
 
 
 template<class X> using MidpointType = RemoveConst<decltype(midpoint(declval<X>()))>;
@@ -709,7 +716,7 @@ template<class X> using SingletonType = decltype(cast_singleton(declval<X>()));
 template<class X, class PR> using ConcreteSingletonType = decltype(cast_singleton(declval<X>(),declval<PR>()));
 
 template<class X> inline decltype(auto) cast_singleton(const Vector<X>& v) {
-    return transform_vector(v,[&](X const& x){return cast_singleton(x);});
+    return elementwise([&](X const& x){return cast_singleton(x);},v);
 }
 
 template<class X> using BoundsType = decltype(make_bounds(declval<X>()));

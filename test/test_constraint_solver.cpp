@@ -28,6 +28,7 @@
 #include "test.hpp"
 
 #include "numeric/numeric.hpp"
+#include "numeric/logical.hpp"
 #include "algebra/vector.hpp"
 #include "function/function.hpp"
 #include "function/constraint.hpp"
@@ -54,6 +55,7 @@ class TestConstraintSolver
         ARIADNE_TEST_CALL(test_hull_reduce());
         ARIADNE_TEST_CALL(test_box_reduce());
         ARIADNE_TEST_CALL(test_monotone_reduce());
+        ARIADNE_TEST_CALL(test_feasible());
         ARIADNE_TEST_CALL(test_split());
     }
 
@@ -171,6 +173,28 @@ class TestConstraintSolver
 
     Void test_split() {
         ARIADNE_TEST_WARN("test_split: Not implemented");
+    }
+
+    Void test_feasible() {
+
+        List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(1);
+        EffectiveConstraint c = (x[0]-2.0<=0);
+
+        List<ValidatedConstraint> constraints;
+        constraints.append(c);
+
+        ConstraintSolver contractor;
+
+        ARIADNE_TEST_PRINT(constraints);
+
+        ExactBoxType domain1({{1.9,2.0}});
+        ARIADNE_TEST_ASSERT(definitely(contractor.feasible(domain1,constraints).first));
+
+        ExactBoxType domain2({{2.01,2.5}});
+        ARIADNE_TEST_ASSERT(!possibly(contractor.feasible(domain2,constraints).first));
+
+        ExactBoxType domain3({{2.0,2.01}});
+        ARIADNE_TEST_ASSERT(is_indeterminate(contractor.feasible(domain3,constraints).first));
     }
 };
 

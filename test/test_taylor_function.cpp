@@ -49,8 +49,8 @@ Vector<Real> e(Nat n, Nat i) { return Vector<Real>::unit(n,i); }
 Polynomial<FloatDP> p(Nat n, Nat j) { return Polynomial<FloatDP>::variable(n,j); }
 ValidatedScalarTaylorFunctionModelDP t(ExactBoxType d, Nat j,Sweeper<FloatDP> swp) { return ValidatedScalarTaylorFunctionModelDP::coordinate(d,j,swp); }
 
-template<class X> Vector< Expansion<X> > operator*(const Expansion<X>& e, const Vector<FloatDP> v) {
-    Vector< Expansion<X> > r(v.size(),Expansion<X>(e.argument_size()));
+template<class X> Vector< Expansion<MultiIndex,X> > operator*(const Expansion<MultiIndex,X>& e, const Vector<FloatDP> v) {
+    Vector< Expansion<MultiIndex,X> > r(v.size(),Expansion<MultiIndex,X>(e.argument_size()));
     for(Nat i=0; i!=r.size(); ++i) { ARIADNE_ASSERT(v[i]==0.0 || v[i]==1.0); if(v[i]==1.0) { r[i]=e; } }
     return r;
 }
@@ -78,7 +78,7 @@ class TestScalarTaylorFunction
     Void test_generic();
   private:
     ExactBoxType d(SizeType n) { return Vector<ExactIntervalType>(n,ExactIntervalType(-1,+1)); }
-    typedef Expansion<RawFloatDP> e;
+    typedef Expansion<MultiIndex,RawFloatDP> e;
     typedef TaylorModel<ValidatedTag,FloatDP> TM;
 };
 
@@ -398,15 +398,15 @@ TestVectorTaylorFunction::test()
     ARIADNE_TEST_CALL(test_domain());
 }
 
-Bool operator==(Expansion<FloatDPValue> const& e1, Expansion<RawFloatDP> const& e2) {
-    return reinterpret_cast<Expansion<RawFloatDP>const&>(e1)==e2;
+Bool operator==(Expansion<MultiIndex,FloatDPValue> const& e1, Expansion<MultiIndex,RawFloatDP> const& e2) {
+    return reinterpret_cast<Expansion<MultiIndex,RawFloatDP>const&>(e1)==e2;
 }
 
 Void TestVectorTaylorFunction::test_constructors()
 {
-    Vector< Expansion<RawFloatDP> > expansion(2, Expansion<RawFloatDP>(2));
-    expansion[0]=Expansion<RawFloatDP>({ {{0,0},1.125}, {{1,0},-0.75}, {{0,1},0.0625}, {{2,0},-0.25} });
-    expansion[1]=Expansion<RawFloatDP>({ {{0,0},0.750}, {{1,0},0.50} });
+    Vector< Expansion<MultiIndex,RawFloatDP> > expansion(2, Expansion<MultiIndex,RawFloatDP>(2));
+    expansion[0]=Expansion<MultiIndex,RawFloatDP>({ {{0,0},1.125}, {{1,0},-0.75}, {{0,1},0.0625}, {{2,0},-0.25} });
+    expansion[1]=Expansion<MultiIndex,RawFloatDP>({ {{0,0},0.750}, {{1,0},0.50} });
     expansion[0].reverse_lexicographic_sort(); expansion[1].reverse_lexicographic_sort();
     Vector< RawFloatDP > errors(2);
 
@@ -432,9 +432,9 @@ Void TestVectorTaylorFunction::test_restrict()
     Vector<RawFloatDP> unit0={1};
 
     ExactBoxType domain1={{-1.0,+1.0},{-1.0,+1.0}};
-    Expansion<RawFloatDP> expansion1({{{0,0},1.0}, {{1,0},2.0},{{0,1},3.0}, {{2,0},4.0},{{1,1},5.0},{{0,2},6.0}, {{3,0},7.0},{{2,1},8.0},{{1,2},9.0},{{0,3},10.0}});
+    Expansion<MultiIndex,RawFloatDP> expansion1({{{0,0},1.0}, {{1,0},2.0},{{0,1},3.0}, {{2,0},4.0},{{1,1},5.0},{{0,2},6.0}, {{3,0},7.0},{{2,1},8.0},{{1,2},9.0},{{0,3},10.0}});
     Vector<ExactIntervalType> subdomain1={{-0.25,0.75},{-0.5,0.0}};
-    Expansion<RawFloatDP> subexpansion1({{{0,0},1.031250},{{1,0},1.812500},{{0,1},0.625000}, {{2,0},1.812500},{{1,1},0.562500},{{0,2},0.0468750},
+    Expansion<MultiIndex,RawFloatDP> subexpansion1({{{0,0},1.031250},{{1,0},1.812500},{{0,1},0.625000}, {{2,0},1.812500},{{1,1},0.562500},{{0,2},0.0468750},
                                         {{3,0},0.875000},{{2,1},0.500000},{{1,2},0.281250},{{0,3},0.156250}});
     Vector<RawFloatDP> error1={0.0};
     ValidatedVectorTaylorFunctionModelDP function1(domain1,expansion1*unit0,error1,swp);
@@ -442,10 +442,10 @@ Void TestVectorTaylorFunction::test_restrict()
     ARIADNE_TEST_SAME(restriction(function1,subdomain1),restricted_function1);
 
     ExactBoxType domain2={{-1.0,+1.0}};
-    Expansion<RawFloatDP> expansion2={{{0},0.0},{{1},1.0} };
+    Expansion<MultiIndex,RawFloatDP> expansion2={{{0},0.0},{{1},1.0} };
     Vector<RawFloatDP> error2={0.125};
     Vector<ExactIntervalType> subdomain2={{3e-16,1.0}};
-    Expansion<RawFloatDP> subexpansion2={{{0},0.50000000000000022},{{1},0.49999999999999989}};
+    Expansion<MultiIndex,RawFloatDP> subexpansion2={{{0},0.50000000000000022},{{1},0.49999999999999989}};
     Vector<RawFloatDP> suberror2={0.125000000000000028};
     ValidatedVectorTaylorFunctionModelDP function2(domain2,expansion2*unit0,error2,swp);
     ValidatedVectorTaylorFunctionModelDP restricted_function2(subdomain2,subexpansion2*unit0,suberror2,swp);
@@ -508,27 +508,27 @@ Void TestVectorTaylorFunction::test_antiderivative()
 
     Vector<RawFloatDP> unit0={1};
     ExactBoxType domain1={{-1,+1},{-1,+1}};
-    Expansion<RawFloatDP> expansion1={{{0,0},3.0}};
+    Expansion<MultiIndex,RawFloatDP> expansion1={{{0,0},3.0}};
     ValidatedVectorTaylorFunctionModelDP function1(domain1,expansion1*unit0,swp);
-    Expansion<RawFloatDP> aexpansion1={{{0,1},3.0}};
+    Expansion<MultiIndex,RawFloatDP> aexpansion1={{{0,1},3.0}};
     ValidatedVectorTaylorFunctionModelDP antiderivative1(domain1,aexpansion1*unit0,swp);
     ARIADNE_TEST_SAME(antiderivative(function1,index1),antiderivative1);
 
     ExactBoxType domain2={{-0.25,0.75},{0.0,0.5}};
-    Expansion<RawFloatDP> expansion2={{{0,0},3.0}};
+    Expansion<MultiIndex,RawFloatDP> expansion2={{{0,0},3.0}};
     ValidatedVectorTaylorFunctionModelDP function2(domain2,expansion2*unit0,swp);
-    Expansion<RawFloatDP> aexpansion2={{{0,1},0.75}};
+    Expansion<MultiIndex,RawFloatDP> aexpansion2={{{0,1},0.75}};
     ValidatedVectorTaylorFunctionModelDP antiderivative2(domain2,aexpansion2*unit0,swp);
     ARIADNE_TEST_SAME(antiderivative(function2,index1),antiderivative2);
 
     ExactBoxType domain3={{-0.25,0.75},{0.0,0.5}};
-    Expansion<RawFloatDP> expansion3={{{0,0},1.0},{{1,0},2.0},{{0,1},3.0},{{2,0},4.0},{{1,1},5.0},{{0,2},6.0}};
+    Expansion<MultiIndex,RawFloatDP> expansion3={{{0,0},1.0},{{1,0},2.0},{{0,1},3.0},{{2,0},4.0},{{1,1},5.0},{{0,2},6.0}};
     ValidatedVectorTaylorFunctionModelDP function3(domain3,expansion3*unit0,swp);
-    Expansion<RawFloatDP> aexpansion30={{{1,0},0.5},{{2,0},0.5},{{1,1},1.5},{{3,0},0.66666666666666663},{{2,1},1.25},{{1,2},3.0}};
+    Expansion<MultiIndex,RawFloatDP> aexpansion30={{{1,0},0.5},{{2,0},0.5},{{1,1},1.5},{{3,0},0.66666666666666663},{{2,1},1.25},{{1,2},3.0}};
     Vector<FloatDP> aerror30={5.5511151231257827e-17};
     ValidatedVectorTaylorFunctionModelDP antiderivative30(domain3,aexpansion30*unit0,aerror30,swp);
     ARIADNE_TEST_SAME(antiderivative(function3,index0),antiderivative30);
-    Expansion<RawFloatDP> aexpansion31={{{0,1},0.25},{{1,1},0.5},{{0,2},0.375},{{2,1},1.0},{{1,2},0.625},{{0,3},0.5}};
+    Expansion<MultiIndex,RawFloatDP> aexpansion31={{{0,1},0.25},{{1,1},0.5},{{0,2},0.375},{{2,1},1.0},{{1,2},0.625},{{0,3},0.5}};
     ValidatedVectorTaylorFunctionModelDP antiderivative31(domain3,aexpansion31*unit0,swp);
     ARIADNE_TEST_SAME(antiderivative(function3,index1),antiderivative31);
 

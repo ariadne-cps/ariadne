@@ -95,9 +95,9 @@ template<class X> X& Polynomial<X>::operator[](const MultiIndex& a) { return thi
 
 template<class X> const X& Polynomial<X>::operator[](const MultiIndex& a) const { return this->_expansion.get(a); }
 
-template<class X> const Expansion<X>& Polynomial<X>::expansion() const { return this->_expansion; }
+template<class X> const Expansion<MultiIndex,X>& Polynomial<X>::expansion() const { return this->_expansion; }
 
-template<class X> Expansion<X>& Polynomial<X>::expansion() { return this->_expansion; }
+template<class X> Expansion<MultiIndex,X>& Polynomial<X>::expansion() { return this->_expansion; }
 
 
 

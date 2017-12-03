@@ -100,21 +100,21 @@ struct from_python<MultiIndex> {
 
 
 template<class T>
-struct from_python< Expansion<T> > {
+struct from_python< Expansion<MultiIndex,T> > {
     from_python() {
-        boost::python::converter::registry::push_back(&convertible,&construct,boost::python::type_id< Expansion<T> >()); }
+        boost::python::converter::registry::push_back(&convertible,&construct,boost::python::type_id< Expansion<MultiIndex,T> >()); }
     static Void* convertible(PyObject* obj_ptr) {
         if (!PyDict_Check(obj_ptr)) { return 0; } return obj_ptr; }
     static Void construct(PyObject* obj_ptr,boost::python::converter::rvalue_from_python_stage1_data* data) {
-        Void* storage = ((boost::python::converter::rvalue_from_python_storage< Expansion<T> >*)data)->storage.bytes;
-        Expansion<T> r(0);
+        Void* storage = ((boost::python::converter::rvalue_from_python_storage< Expansion<MultiIndex,T> >*)data)->storage.bytes;
+        Expansion<MultiIndex,T> r(0);
         boost::python::dict dct=boost::python::extract<boost::python::dict>(obj_ptr);
         boost::python::list lst=dct.items();
         MultiIndex a;
         if(len(lst)!=0) {
             boost::python::tuple tup=boost::python::extract<boost::python::tuple>(lst[0]);
             a=boost::python::extract<MultiIndex>(tup[0]);
-            r=Expansion<T>(a.size());
+            r=Expansion<MultiIndex,T>(a.size());
             r.reserve(len(lst));
         }
         for(Int i=0; i!=len(lst); ++i) {
@@ -123,7 +123,7 @@ struct from_python< Expansion<T> > {
             T c=boost::python::extract<T>(tup[1]);
             r.append(a,c);
         }
-        new (storage) Expansion<T>(r);
+        new (storage) Expansion<MultiIndex,T>(r);
         //r.unique_sort();
         data->convertible = storage;
     }
@@ -166,9 +166,9 @@ template<class X> OutputStream& operator<<(OutputStream& os, const PythonReprese
     return os << repr.reference();
 }
 
-template<class X> OutputStream& operator<<(OutputStream& os, const PythonRepresentation< Expansion<X> >& repr) {
-    const Expansion<X>& exp=repr.reference();
-    for(typename Expansion<X>::ConstIterator iter=exp.begin(); iter!=exp.end(); ++iter) {
+template<class X> OutputStream& operator<<(OutputStream& os, const PythonRepresentation< Expansion<MultiIndex,X> >& repr) {
+    const Expansion<MultiIndex,X>& exp=repr.reference();
+    for(typename Expansion<MultiIndex,X>::ConstIterator iter=exp.begin(); iter!=exp.end(); ++iter) {
         os << (iter==exp.begin()?'{':',') << "(";
         for(SizeType j=0; j!=iter->key().size(); ++j) {
             if(j!=0) { os << ','; } os << Int(iter->key()[j]);
@@ -179,14 +179,14 @@ template<class X> OutputStream& operator<<(OutputStream& os, const PythonReprese
     return os;
 }
 
-template<class X, class CMP> OutputStream& operator<<(OutputStream& os, const PythonRepresentation< SortedExpansion<X,CMP> >& repr) {
-    return os << python_representation(static_cast<const Expansion<X>&>(repr.reference()));
+template<class X, class CMP> OutputStream& operator<<(OutputStream& os, const PythonRepresentation< SortedExpansion<MultiIndex,X,CMP> >& repr) {
+    return os << python_representation(static_cast<const Expansion<MultiIndex,X>&>(repr.reference()));
 }
 
-template OutputStream& operator<<(OutputStream&, const PythonRepresentation< Expansion<RawFloatDP> >&);
-template OutputStream& operator<<(OutputStream&, const PythonRepresentation< Expansion<FloatDPApproximation> >&);
-template OutputStream& operator<<(OutputStream&, const PythonRepresentation< Expansion<FloatDPBounds> >&);
-template OutputStream& operator<<(OutputStream&, const PythonRepresentation< Expansion<FloatDPValue> >&);
+template OutputStream& operator<<(OutputStream&, const PythonRepresentation< Expansion<MultiIndex,RawFloatDP> >&);
+template OutputStream& operator<<(OutputStream&, const PythonRepresentation< Expansion<MultiIndex,FloatDPApproximation> >&);
+template OutputStream& operator<<(OutputStream&, const PythonRepresentation< Expansion<MultiIndex,FloatDPBounds> >&);
+template OutputStream& operator<<(OutputStream&, const PythonRepresentation< Expansion<MultiIndex,FloatDPValue> >&);
 
 template<class X> OutputStream& operator<<(OutputStream& os, const PythonRepresentation< Vector<X> >& repr) {
     const Vector<X>& vec=repr.reference();
@@ -266,15 +266,15 @@ Sweeper<FloatDP> make_graded_sweeper(DoublePrecision pr, SizeType n) { return ne
 
 Void export_expansion()
 {
-    from_python< Expansion<FloatDPApproximation> >();
-    from_python< Expansion<FloatDPBounds> >();
-    from_python< Vector< Expansion<FloatDPApproximation> > >();
+    from_python< Expansion<MultiIndex,FloatDPApproximation> >();
+    from_python< Expansion<MultiIndex,FloatDPBounds> >();
+    from_python< Vector< Expansion<MultiIndex,FloatDPApproximation> > >();
 
-    class_< ExpansionValue<FloatDPApproximation> > expansion_value_class("ExpansionValue", init<MultiIndex,FloatDPApproximation>());
+    class_< ExpansionValue<MultiIndex,FloatDPApproximation> > expansion_value_class("ExpansionValue", init<MultiIndex,FloatDPApproximation>());
     // TODO: Add get/set for data
     // TODO: Use property for key
-    //expansion_value_class.add_property("key", (MultiIndex const&(ExpansionValue<FloatDPApproximation>::*)()const)&ExpansionValue<FloatDPApproximation>::key);
-    expansion_value_class.def("key", (const MultiIndex&(ExpansionValue<FloatDPApproximation>::*)()const)&ExpansionValue<FloatDPApproximation>::key, return_value_policy<copy_const_reference>());
+    //expansion_value_class.add_property("key", (MultiIndex const&(ExpansionValue<MultiIndex,FloatDPApproximation>::*)()const)&ExpansionValue<MultiIndex,FloatDPApproximation>::key);
+    expansion_value_class.def("key", (const MultiIndex&(ExpansionValue<MultiIndex,FloatDPApproximation>::*)()const)&ExpansionValue<MultiIndex,FloatDPApproximation>::key, return_value_policy<copy_const_reference>());
     expansion_value_class.def(self_ns::str(self));
 
 }
@@ -290,7 +290,7 @@ Void export_sweeper()
 }
 
 /*
-Expansion<FloatDPValue>const& get_expansion(ValidatedTaylorModelDP const& tm) { return tm.expansion(); }
+Expansion<MultiIndex,FloatDPValue>const& get_expansion(ValidatedTaylorModelDP const& tm) { return tm.expansion(); }
 
 template<class F> Void export_validated_taylor_model()
 {
@@ -303,7 +303,7 @@ template<class F> Void export_validated_taylor_model()
     taylor_model_class.def("value", (const FloatDPValue&(ValidatedTaylorModelDP::*)()const) &ValidatedTaylorModelDP::value, return_value_policy<copy_const_reference>());
     taylor_model_class.def("gradient", (const FloatDPValue&(ValidatedTaylorModelDP::*)(SizeType)const) &ValidatedTaylorModelDP::gradient_value, return_value_policy<copy_const_reference>());
     taylor_model_class.def("error", (const FloatDPError&(ValidatedTaylorModelDP::*)()const) &ValidatedTaylorModelDP::error, return_value_policy<copy_const_reference>());
-    taylor_model_class.def("expansion", (const Expansion<FloatDPValue>&(*)(ValidatedTaylorModelDP const&)) &get_expansion, return_value_policy<copy_const_reference>());
+    taylor_model_class.def("expansion", (const Expansion<MultiIndex,FloatDPValue>&(*)(ValidatedTaylorModelDP const&)) &get_expansion, return_value_policy<copy_const_reference>());
     taylor_model_class.def("set_error", (Void(ValidatedTaylorModelDP::*)(const FloatDPError&)) &ValidatedTaylorModelDP::set_error);
     taylor_model_class.def("argument_size", &ValidatedTaylorModelDP::argument_size);
     taylor_model_class.def("domain", &ValidatedTaylorModelDP::domain);
@@ -378,7 +378,7 @@ Void export_approximate_taylor_model()
     taylor_model_class.def("keys", (List<MultiIndex>(*)(const ApproximateTaylorModelDP&))&keys);
     taylor_model_class.def("value", (const FloatDPApproximation&(ApproximateTaylorModelDP::*)()const) &ApproximateTaylorModelDP::value, return_value_policy<copy_const_reference>());
     taylor_model_class.def("gradient", (const FloatDPApproximation&(ApproximateTaylorModelDP::*)(SizeType)const) &ApproximateTaylorModelDP::gradient_value, return_value_policy<copy_const_reference>());
-    taylor_model_class.def("expansion", (const Expansion<FloatDPApproximation>&(*)(ApproximateTaylorModelDP const&)) &get_expansion, return_value_policy<copy_const_reference>());
+    taylor_model_class.def("expansion", (const Expansion<MultiIndex,FloatDPApproximation>&(*)(ApproximateTaylorModelDP const&)) &get_expansion, return_value_policy<copy_const_reference>());
     taylor_model_class.def("argument_size", &ApproximateTaylorModelDP::argument_size);
     taylor_model_class.def("domain", &ApproximateTaylorModelDP::domain);
     taylor_model_class.def("range", &ApproximateTaylorModelDP::range);
@@ -533,7 +533,7 @@ Void export_scalar_taylor_function()
     scalar_taylor_function_class.def(init<ExactBoxType,ValidatedTaylorModelDP>());
     scalar_taylor_function_class.def(init< ExactBoxType,SweeperDP >());
     scalar_taylor_function_class.def(init< ExactBoxType, const EffectiveScalarFunction&,SweeperDP >());
-    scalar_taylor_function_class.def(init< ExactBoxType, Expansion<FloatDPValue>, FloatDPError, SweeperDP >());
+    scalar_taylor_function_class.def(init< ExactBoxType, Expansion<MultiIndex,FloatDPValue>, FloatDPError, SweeperDP >());
     scalar_taylor_function_class.def("error", (const FloatDPError&(ValidatedScalarTaylorFunctionModelDP::*)()const) &ValidatedScalarTaylorFunctionModelDP::error, return_value_policy<copy_const_reference>());
     scalar_taylor_function_class.def("set_error", (Void(ValidatedScalarTaylorFunctionModelDP::*)(const FloatDPError&)) &ValidatedScalarTaylorFunctionModelDP::set_error);
     scalar_taylor_function_class.def("argument_size", &F::argument_size);
@@ -644,7 +644,7 @@ Void export_vector_taylor_function()
     class_<ValidatedVectorTaylorFunctionModelDP> vector_taylor_function_class("ValidatedVectorTaylorFunctionModelDP", init<ValidatedVectorTaylorFunctionModelDP>());
     vector_taylor_function_class.def( init< SizeType, ExactBoxType, SweeperDP >());
     vector_taylor_function_class.def( init< ExactBoxType,const EffectiveVectorFunction&,SweeperDP >());
-    vector_taylor_function_class.def(init< ExactBoxType, Vector< Expansion<FloatDPValue> >, Vector<FloatDPError>, SweeperDP >());
+    vector_taylor_function_class.def(init< ExactBoxType, Vector< Expansion<MultiIndex,FloatDPValue> >, Vector<FloatDPError>, SweeperDP >());
     vector_taylor_function_class.def( init< Vector<ValidatedScalarTaylorFunctionModelDP> >());
     vector_taylor_function_class.def("_len_", &ValidatedVectorTaylorFunctionModelDP::result_size);
     vector_taylor_function_class.def("result_size", &ValidatedVectorTaylorFunctionModelDP::result_size);

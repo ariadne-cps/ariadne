@@ -47,13 +47,15 @@ namespace Ariadne {
 template<class T> class Array;
 template<class X> class Algebra;
 
-//! \brief A monomial with coefficients of some type \a X.
+//! \brief A monomial with index \a I and coefficients of some type \a X.
 template<class X>
 class Monomial
-    : public ExpansionValue<X>
+    : public ExpansionValue<MultiIndex,X>
 {
-    Monomial(const MultiIndex& a, const X& x) : ExpansionValue<X>(a,x) { }
-    Monomial(const ExpansionValue<X>& v) : ExpansionValue<X>(v) { }
+    typedef MultiIndex I;
+  public:
+    Monomial(const MultiIndex& a, const X& x) : ExpansionValue<I,X>(a,x) { }
+    Monomial(const ExpansionValue<I,X>& v) : ExpansionValue<I,X>(v) { }
 };
 
 //! \ingroup FunctionModule
@@ -65,11 +67,11 @@ class Polynomial
     template<class XX> friend class Polynomial;
     friend class AlgebraOperations<Polynomial<X>,X>;
   public:
-    typedef typename Expansion<X>::ValueType ValueType;
-    typedef typename Expansion<X>::Reference Reference;
-    typedef typename Expansion<X>::ConstReference ConstReference;
-    typedef typename Expansion<X>::Iterator Iterator;
-    typedef typename Expansion<X>::ConstIterator ConstIterator;
+    typedef typename Expansion<MultiIndex,X>::ValueType ValueType;
+    typedef typename Expansion<MultiIndex,X>::Reference Reference;
+    typedef typename Expansion<MultiIndex,X>::ConstReference ConstReference;
+    typedef typename Expansion<MultiIndex,X>::Iterator Iterator;
+    typedef typename Expansion<MultiIndex,X>::ConstIterator ConstIterator;
 
     typedef typename X::Paradigm Paradigm;
     typedef typename X::NumericType NumericType;
@@ -85,7 +87,7 @@ class Polynomial
     //! \brief Copy/conversion constructor.
     template<class XX> Polynomial(const Polynomial<XX>& p);
     //! \brief Copy/conversion constructor.
-    template<class XX> explicit Polynomial(const Expansion<XX>& e);
+    template<class XX> explicit Polynomial(const Expansion<MultiIndex,XX>& e);
     //! \brief A sparse polynomial with coefficients given by an initializer list of indices and coefficients.
     Polynomial(InitializerList<Pair<InitializerList<DegreeType>,X>> lst);
     //@}
@@ -130,9 +132,9 @@ class Polynomial
     //! \brief A constant referent to the coefficient of the term in \f$x^{a_1}\cdots x^{a_n}\f$.
     const X& operator[](const MultiIndex& a) const;
     //! \brief A constant reference to the raw data expansion.
-    const Expansion<X>& expansion() const;
+    const Expansion<MultiIndex,X>& expansion() const;
     //! \brief A reference to the raw data expansion.
-    Expansion<X>& expansion();
+    Expansion<MultiIndex,X>& expansion();
     //@}
 
     //@{
@@ -208,7 +210,7 @@ class Polynomial
     Void _append(const MultiIndex& a, const X& c);
     Iterator _unique_key();
   private:
-    SortedExpansion<X,ReverseLexicographicIndexLess> _expansion;
+    SortedExpansion<MultiIndex,X,ReverseLexicographicIndexLess> _expansion;
   private: // FIXME: Put these concrete-generic operations in proper place
     template<class Y, EnableIf<IsAssignable<X,Y>> =dummy>
         friend Polynomial<X> operator+(Polynomial<X> p, const Y& c) {
@@ -244,7 +246,7 @@ template<class X> struct AlgebraOperations<Polynomial<X>> {
 template<class X> template<class XX> Polynomial<X>::Polynomial(const Polynomial<XX>& p)
     : _expansion(p._expansion) { }
 
-template<class X> template<class XX> Polynomial<X>::Polynomial(const Expansion<XX>& e)
+template<class X> template<class XX> Polynomial<X>::Polynomial(const Expansion<MultiIndex,XX>& e)
     : _expansion(e) { this->cleanup(); }
 
 template<class X> template<class XX> Bool Polynomial<X>::operator==(const Polynomial<XX>& p) const {

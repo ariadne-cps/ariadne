@@ -49,7 +49,7 @@ template<class X> class Vector;
 template<class X> class Matrix;
 template<class X> class Series;
 
-template<class X> class Expansion;
+template<class I, class X> class Expansion;
 template<class X> class Differential;
 template<class X> class UnivariateDifferential;
 template<class X> class NonAssignableDifferential;
@@ -98,7 +98,7 @@ class Differential
 
     static const DegreeType MAX_DEGREE=65535;
 
-    SortedExpansion<X,GradedIndexLess> _expansion;
+    SortedExpansion<MultiIndex,X,GradedIndexLess> _expansion;
     DegreeType _degree;
   public:
     //! \brief The type used for a power series.
@@ -106,7 +106,7 @@ class Differential
     //! \brief The comparison used to sort the coefficients.
     typedef GradedLess IndexComparisonType;
     //! \brief The type of used to represent numbers in the coefficient.
-    typedef SortedExpansion<X,GradedIndexLess> ExpansionType;
+    typedef SortedExpansion<MultiIndex,X,GradedIndexLess> ExpansionType;
     //! \brief The kind of information provided by the concrete values.
     typedef typename X::Paradigm Paradigm;
     //! \brief The type of used to represent numbers in the coefficient.
@@ -128,7 +128,7 @@ class Differential
     explicit Differential(const Map<MultiIndex,X>& map, DegreeType deg);
     //! \brief Construct a differential of degree \a deg from the power-series expansion \a e.
     //! Terms in \a e of degree higher than \a deg are truncated
-    explicit Differential(const Expansion<X>& e, DegreeType deg);
+    explicit Differential(const Expansion<MultiIndex,X>& e, DegreeType deg);
     //! \brief Construct a differential of degree \a deg from an initializer list list of (index,coefficient) pairs.
     explicit Differential(SizeType as, DegreeType deg, InitializerList< Pair<InitializerList<DegreeType>,X> > lst);
     //! \brief Construct a differential of degree \a deg from an initializer list list of (index,coefficient) pairs.
@@ -177,9 +177,9 @@ class Differential
     //! \brief A zero with the precision argument of the numbers.
     X zero_coefficient() const;
     //! \brief The internal representation of the polynomial expansion.
-    const Expansion<X>& expansion() const;
+    const Expansion<MultiIndex,X>& expansion() const;
     //! \brief A reference to the internal representation of the polynomial expansion.
-    Expansion<X>& expansion();
+    Expansion<MultiIndex,X>& expansion();
     //! \brief The value of the differential i.e. the coefficient of \f$1\f$.
     const X& value() const;
     //! \brief The coefficient of \f$x_j\f$.
@@ -466,7 +466,7 @@ Vector<Differential<X>>& Vector<Differential<X>>::operator=(const VectorExpressi
 
 template<class X> template<class PR, EnableIf<IsConstructible<X,Dbl,PR>>>
 Differential<X>::Differential(SizeType as, DegreeType deg, InitializerList< Pair<InitializerList<DegreeType>,Dbl> > lst, PR pr)
-    : Differential<X>(Expansion<X>(lst,pr),deg)
+    : Differential<X>(Expansion<MultiIndex,X>(lst,pr),deg)
 { }
 
 

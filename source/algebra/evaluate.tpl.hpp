@@ -40,9 +40,9 @@ namespace Ariadne {
 //! We update register \f$r_k\f$ by \f[r'_k=(((c_\alpha + r_1) x^{\alpha_1} + r_2 )x^{\alpha_2}+\cdots r_k)x^{\alpha_k-\beta_k}.\f]
 //! The result is obtained by updating a fictional register \f$r_{n+1}\f$ at the last step.
 //! See J. M. Pena and T. Sauer, "On the multivariate Horner scheme", SIAM J. Numer. Anal. 37(4) 1186-1197, 2000.
-template<class X, class Y> Y horner_evaluate(const Expansion<X>& e, const Vector<Y>& x)
+template<class X, class Y> Y horner_evaluate(const Expansion<MultiIndex,X>& e, const Vector<Y>& x)
 {
-    typedef typename Expansion<X>::ConstIterator ConstIterator;
+    typedef typename Expansion<MultiIndex,X>::ConstIterator ConstIterator;
     const SizeType n=e.argument_size();
     const Y z=x.zero_element(); // The zero element of the ring Y
     if(e.number_of_nonzeros()==0) { return z; }
@@ -111,14 +111,14 @@ template<class X, class Y> Y horner_evaluate(const Expansion<X>& e, const Vector
 }
 
 template<class X, class Y>
-Y power_evaluate(const Expansion<X>& e, const Vector<Y>& y)
+Y power_evaluate(const Expansion<MultiIndex,X>& e, const Vector<Y>& y)
 {
     Y zero = y.zero_element();
     Y one = zero + 1;
 
     Y r=zero;
     Y t=zero;
-    for(typename Expansion<X>::ConstIterator iter=e.begin();
+    for(typename Expansion<MultiIndex,X>::ConstIterator iter=e.begin();
         iter!=e.end(); ++iter)
     {
         const MultiIndex& j=iter->key();
@@ -138,19 +138,19 @@ Y power_evaluate(const Expansion<X>& e, const Vector<Y>& y)
 
 
 template<class X, class Y>
-Y evaluate(const Expansion<X>& e, const Vector<Y>& y)
+Y evaluate(const Expansion<MultiIndex,X>& e, const Vector<Y>& y)
 {
     return power_evaluate(e,y);
 }
 
 template<class X, class Y>
-Y simple_evaluate(const Expansion<X>& e, const Vector<Y>& y)
+Y simple_evaluate(const Expansion<MultiIndex,X>& e, const Vector<Y>& y)
 {
     return power_evaluate(e,y);
 }
 
 template<class X, class Y>
-Vector<Y> evaluate(const Vector< Expansion<X> >& x, const Vector<Y>& y)
+Vector<Y> evaluate(const Vector< Expansion<MultiIndex,X> >& x, const Vector<Y>& y)
 {
     Vector<Y> r(x.size(),y.zero_element());
     for(SizeType i=0; i!=x.size(); ++i) {

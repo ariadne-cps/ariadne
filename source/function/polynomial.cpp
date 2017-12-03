@@ -43,7 +43,7 @@ template class AlgebraOperations<Polynomial<FloatDPBounds>>;
 template<> Void Polynomial<FloatDPValue>::cleanup() { }
 
 template Polynomial<FloatDPValue>::Polynomial(SizeType);
-template Expansion<FloatDPValue>& Polynomial<FloatDPValue>::expansion();
+template Expansion<MultiIndex,FloatDPValue>& Polynomial<FloatDPValue>::expansion();
 template OutputStream& Polynomial<FloatDPValue>::_write(OutputStream&) const;
 template OutputStream& Polynomial<FloatDPValue>::_write(OutputStream&, List<String> const&) const;
 

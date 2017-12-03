@@ -442,7 +442,7 @@ C1TaylorFunction& operator*=(C1TaylorFunction& f, FloatDP ec) {
         fde[j]*=ac;
     }
 
-    for(Expansion<FloatDP>::Iterator iter=f._expansion.begin();
+    for(Expansion<MultiIndex,FloatDP>::Iterator iter=f._expansion.begin();
         iter!=f._expansion.end(); ++iter)
     {
         const MultiIndex& a=iter->key();
@@ -458,7 +458,7 @@ C1TaylorFunction& operator*=(C1TaylorFunction& f, FloatDP ec) {
     }
 
     FloatDP::set_rounding_to_nearest();
-    for(Expansion<FloatDP>::Iterator iter=f._expansion.begin();
+    for(Expansion<MultiIndex,FloatDP>::Iterator iter=f._expansion.begin();
         iter!=f._expansion.end(); ++iter)
     {
         FloatDP& fv=iter->data();
@@ -478,8 +478,8 @@ C1TaylorFunction operator+(C1TaylorFunction f1, C1TaylorFunction f2) {
     f0._expansion.clear();
     f0._expansion.reserve(f1._expansion.number_of_nonzeros()+f2._expansion.number_of_nonzeros());
 
-    Expansion<FloatDP>::ConstIterator i1=f1._expansion.begin();
-    Expansion<FloatDP>::ConstIterator i2=f2._expansion.begin();
+    Expansion<MultiIndex,FloatDP>::ConstIterator i1=f1._expansion.begin();
+    Expansion<MultiIndex,FloatDP>::ConstIterator i2=f2._expansion.begin();
     while(i1!=f1._expansion.end() && i2!=f2._expansion.end()) {
         if(i1->key()==i2->key()) {
             const MultiIndex& a = i1->key();
@@ -534,8 +534,8 @@ Void fma(C1TaylorFunction& f0, const C1TaylorFunction& f1, const C1TaylorFunctio
     MultiIndex a(n);
     f0.clear();
 
-    Expansion<FloatDP>::ConstIterator i1=f1._expansion.begin();
-    Expansion<FloatDP>::ConstIterator i2=f2._expansion.begin();
+    Expansion<MultiIndex,FloatDP>::ConstIterator i1=f1._expansion.begin();
+    Expansion<MultiIndex,FloatDP>::ConstIterator i2=f2._expansion.begin();
     while(i1!=f1._expansion.end() && i2!=f2._expansion.end()) {
         if(i1->key()==i2->key()+a3) {
             const MultiIndex& a = i1->key();
@@ -613,7 +613,7 @@ C1TaylorFunction operator*(C1TaylorFunction f1, C1TaylorFunction f2) {
     f0b.clear();
     C1TaylorFunction* ftp=&f0a;
     C1TaylorFunction* frp=&f0b;
-    for(Expansion<FloatDP>::ConstIterator i2=f2._expansion.begin();
+    for(Expansion<MultiIndex,FloatDP>::ConstIterator i2=f2._expansion.begin();
         i2!=f2._expansion.end(); ++i2)
     {
         fma(*frp,*ftp,f1,i2->data(),i2->key());
@@ -623,7 +623,7 @@ C1TaylorFunction operator*(C1TaylorFunction f1, C1TaylorFunction f2) {
 }
 
 UpperIntervalType evaluate(C1TaylorFunction f, Vector<UpperIntervalType> x) {
-    UpperIntervalType r=horner_evaluate(reinterpret_cast<Expansion<FloatDPValue>const&>(f._expansion),x);
+    UpperIntervalType r=horner_evaluate(reinterpret_cast<Expansion<MultiIndex,FloatDPValue>const&>(f._expansion),x);
     r += UpperIntervalType(-f._uniform_error,+f._uniform_error);
     return r;
 }
@@ -649,7 +649,7 @@ C1TaylorFunction compose(C1TaylorSeries f, C1TaylorFunction g) {
 }
 
 C1TaylorFunction compose(C1TaylorFunction f, Vector<C1TaylorFunction> g) {
-    C1TaylorFunction r=horner_evaluate(reinterpret_cast<Expansion<FloatDPValue>const&>(f._expansion),g);
+    C1TaylorFunction r=horner_evaluate(reinterpret_cast<Expansion<MultiIndex,FloatDPValue>const&>(f._expansion),g);
     std::cerr<<"intermediate="<<r<<"\n";
     r._uniform_error += f._uniform_error;
     r._zero_error += f._zero_error;
@@ -663,10 +663,10 @@ template<class T> struct ListForm {
 };
 template<class T> ListForm<T> list_form(const T& t) { return ListForm<T>(t); }
 
-OutputStream& operator<<(OutputStream& os, const ListForm<Expansion<FloatDP>>& lfe) {
-    const Expansion<FloatDP>& e=lfe.value;
+OutputStream& operator<<(OutputStream& os, const ListForm<Expansion<MultiIndex,FloatDP>>& lfe) {
+    const Expansion<MultiIndex,FloatDP>& e=lfe.value;
     os << "{ ";
-    for(Expansion<FloatDP>::ConstIterator iter=e.begin();
+    for(Expansion<MultiIndex,FloatDP>::ConstIterator iter=e.begin();
         iter!=e.end(); ++iter)
     {
         if(iter!=e.begin()) { os << ", "; }
@@ -687,7 +687,7 @@ OutputStream& operator<<(OutputStream& os, const C1TaylorFunction& f) {
        << ")";
     return os;
 
-    for(Expansion<FloatDP>::ConstIterator iter=f._expansion.begin();
+    for(Expansion<MultiIndex,FloatDP>::ConstIterator iter=f._expansion.begin();
         iter!=f._expansion.end(); ++iter)
     {
         os << *iter;

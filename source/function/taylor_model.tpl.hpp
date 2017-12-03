@@ -103,11 +103,11 @@ Box<Interval<FloatMPValue>> convert_box(BoxDomainType const& bx, MultiplePrecisi
 
 
 template<class F>
-Void SweeperBase<F>::_sweep(Expansion<FloatValue<PR>>& p, FloatError<PR>& e) const
+Void SweeperBase<F>::_sweep(Expansion<MultiIndex,FloatValue<PR>>& p, FloatError<PR>& e) const
 {
-    typename Expansion<FloatValue<PR>>::ConstIterator end=p.end();
-    typename Expansion<FloatValue<PR>>::ConstIterator adv=p.begin();
-    typename Expansion<FloatValue<PR>>::Iterator curr=p.begin();
+    typename Expansion<MultiIndex,FloatValue<PR>>::ConstIterator end=p.end();
+    typename Expansion<MultiIndex,FloatValue<PR>>::ConstIterator adv=p.begin();
+    typename Expansion<MultiIndex,FloatValue<PR>>::Iterator curr=p.begin();
 
     // FIXME: Not needed, but added to pair with rounding mode change below
     F::set_rounding_upward();
@@ -132,11 +132,11 @@ Void SweeperBase<F>::_sweep(Expansion<FloatValue<PR>>& p, FloatError<PR>& e) con
 }
 
 template<class F>
-Void SweeperBase<F>::_sweep(Expansion<FloatApproximation<PR>>& p) const
+Void SweeperBase<F>::_sweep(Expansion<MultiIndex,FloatApproximation<PR>>& p) const
 {
-    typename Expansion<FloatApproximation<PR>>::ConstIterator end=p.end();
-    typename Expansion<FloatApproximation<PR>>::ConstIterator adv=p.begin();
-    typename Expansion<FloatApproximation<PR>>::Iterator curr=p.begin();
+    typename Expansion<MultiIndex,FloatApproximation<PR>>::ConstIterator end=p.end();
+    typename Expansion<MultiIndex,FloatApproximation<PR>>::ConstIterator adv=p.begin();
+    typename Expansion<MultiIndex,FloatApproximation<PR>>::Iterator curr=p.begin();
     while(adv!=end) {
         if(this->discard(adv->key(),adv->data())) {
         } else {
@@ -159,20 +159,20 @@ template<class F> TaylorModel<ValidatedTag,F>::TaylorModel(SizeType as, SweeperT
 {
 }
 
-template<class F> TaylorModel<ValidatedTag,F>::TaylorModel(const Expansion<CoefficientType>& f, const ErrorType& e, SweeperType swp)
+template<class F> TaylorModel<ValidatedTag,F>::TaylorModel(const Expansion<MultiIndex,CoefficientType>& f, const ErrorType& e, SweeperType swp)
     : _expansion(f), _error(e), _sweeper(swp)
 {
     this->cleanup();
 }
 
-template<class F> TaylorModel<ValidatedTag,F>::TaylorModel(const Expansion<F>& f, const F& e, SweeperType swp)
-//    : TaylorModel(reinterpret_cast<Expansion<CoefficientType>const&>(f),reinterpret_cast<ErrorType const&>(e),swp)
-    : TaylorModel(static_cast<Expansion<CoefficientType>>(f),static_cast<ErrorType>(e),swp)
+template<class F> TaylorModel<ValidatedTag,F>::TaylorModel(const Expansion<MultiIndex,F>& f, const F& e, SweeperType swp)
+//    : TaylorModel(reinterpret_cast<Expansion<MultiIndex,CoefficientType>const&>(f),reinterpret_cast<ErrorType const&>(e),swp)
+    : TaylorModel(static_cast<Expansion<MultiIndex,CoefficientType>>(f),static_cast<ErrorType>(e),swp)
 {
 }
 
-template<class F> TaylorModel<ValidatedTag,F>::TaylorModel(const Expansion<double>& f, const double& e, SweeperType swp)
-    : TaylorModel(Expansion<CoefficientType>(Expansion<Dyadic>(f),swp.precision()),ErrorType(Dyadic(e),swp.precision()),swp)
+template<class F> TaylorModel<ValidatedTag,F>::TaylorModel(const Expansion<MultiIndex,double>& f, const double& e, SweeperType swp)
+    : TaylorModel(Expansion<MultiIndex,CoefficientType>(Expansion<MultiIndex,Dyadic>(f),swp.precision()),ErrorType(Dyadic(e),swp.precision()),swp)
 {
 }
 
@@ -814,7 +814,7 @@ template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::uniq
 }
 
 template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::sweep() {
-//    this->_sweeper.sweep(reinterpret_cast<Expansion<F>&>(this->_expansion),reinterpret_cast<F&>(this->_error));
+//    this->_sweeper.sweep(reinterpret_cast<Expansion<MultiIndex,F>&>(this->_expansion),reinterpret_cast<F&>(this->_error));
     this->_sweeper.sweep(this->_expansion,this->_error);
     return *this;
 }
@@ -1581,7 +1581,7 @@ template<class F> OutputStream& TaylorModel<ValidatedTag,F>::str(OutputStream& o
 
     //os << "TaylorModel<ValidatedTag,F>";
     os << "TM["<<tm.argument_size()<<"](";
-    Expansion<FloatValue<PR>> e=tm.expansion();
+    Expansion<MultiIndex,FloatValue<PR>> e=tm.expansion();
     e.sort(GradedIndexLess());
     e.write(os,variable_names);
     return os << "+/-" << tm.error() << ")";

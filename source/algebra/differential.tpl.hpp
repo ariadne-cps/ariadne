@@ -39,7 +39,7 @@ template<class X> class Vector;
 template<class X> class Matrix;
 template<class X> class Series;
 
-template<class X> class Expansion;
+template<class I, class X> class Expansion;
 template<class X> class Differential;
 
 
@@ -58,14 +58,14 @@ template<class X> Differential<X>::Differential(const Map<MultiIndex,X>& map, De
 template<class X>
 Differential<X>::Differential(SizeType as, DegreeType deg,
                               InitializerList< Pair<InitializerList<DegreeType>,X> > lst)
-    : _expansion(Expansion<X>(lst)), _degree(deg)
+    : _expansion(Expansion<MultiIndex,X>(lst)), _degree(deg)
 {
     this->cleanup();
 }
 
 
-template<class X> Differential<X>::Differential(const Expansion<X>& e, DegreeType deg) : _expansion(e.argument_size()),_degree(deg) {
-    for(typename Expansion<X>::ConstIterator iter=e.begin(); iter!=e.end(); ++iter) {
+template<class X> Differential<X>::Differential(const Expansion<MultiIndex,X>& e, DegreeType deg) : _expansion(e.argument_size()),_degree(deg) {
+    for(typename Expansion<MultiIndex,X>::ConstIterator iter=e.begin(); iter!=e.end(); ++iter) {
         if(iter->key().degree()<=deg) { this->_expansion.append(iter->key(),iter->data()); }
     }
     this->cleanup();
@@ -181,11 +181,11 @@ template<class X> X Differential<X>::zero_coefficient() const {
     return this->_expansion.zero_coefficient();
 }
 
-template<class X> const Expansion<X>& Differential<X>::expansion() const {
+template<class X> const Expansion<MultiIndex,X>& Differential<X>::expansion() const {
     return this->_expansion;
 }
 
-template<class X> Expansion<X>& Differential<X>::expansion() {
+template<class X> Expansion<MultiIndex,X>& Differential<X>::expansion() {
     return this->_expansion;
 }
 
@@ -615,10 +615,10 @@ template<class X>
 OutputStream& Differential<X>::_write(OutputStream& os) const
 {
     Differential<X> const& x=*this;
-    Expansion<X> e=x.expansion();
+    Expansion<MultiIndex,X> e=x.expansion();
     //e.graded_sort();
     os << "SD("<<x.argument_size()<<","<<(uint)x.degree()<<"){";
-    for(typename Expansion<X>::ConstIterator iter=e.begin(); iter!=e.end(); ++iter) {
+    for(typename Expansion<MultiIndex,X>::ConstIterator iter=e.begin(); iter!=e.end(); ++iter) {
         if(iter!=e.begin()) { os << ","; } os << " ";
         for(SizeType i=0; i!=e.argument_size(); ++i) {
             if(i!=0) { os << ","; }
@@ -758,10 +758,10 @@ Vector<Differential<X>>::_lie_derivative(const Vector<Differential<X> >& df, con
     Differential<X> t(df.argument_size(), df.degree()-1);
     MultiIndex a; X c;
     for(SizeType i=0; i!=df.result_size(); ++i) {
-        Expansion<X> const& dfi_expansion = df[i].expansion();
-        Expansion<X>& t_expansion = t.expansion();
+        Expansion<MultiIndex,X> const& dfi_expansion = df[i].expansion();
+        Expansion<MultiIndex,X>& t_expansion = t.expansion();
         for(SizeType j=0; j!=df.argument_size(); ++j) {
-            for(typename Expansion<X>::ConstIterator iter=dfi_expansion.begin(); iter!=dfi_expansion.end(); ++iter) {
+            for(typename Expansion<MultiIndex,X>::ConstIterator iter=dfi_expansion.begin(); iter!=dfi_expansion.end(); ++iter) {
                 if(iter->key()[j]!=0) {
                     a=iter->key();
                     c=iter->data()*SizeType(a[j]);

@@ -95,7 +95,7 @@ Void _write(OutputStream& os, const List<ProcedureInstruction>& p, const List<Y>
 }
 
 
-//template<class Y, class X> Formula<Y> to_formula(const Expansion<X>& e) {
+//template<class Y, class X> Formula<Y> to_formula(const Expansion<MultiIndex,X>& e) {
 //    return horner_evaluate(e,Formula<Y>::identity(e.argument_size()));
 //};
 
@@ -114,7 +114,7 @@ Procedure<Y>::Procedure(const Formula<Y>& f)
 
 
 template<class Y> template<class X, EnableIf<IsConvertible<X,Y>>>
-Procedure<Y>::Procedure(const Expansion<X>& e)
+Procedure<Y>::Procedure(const Expansion<MultiIndex,X>& e)
     : Procedure(horner_evaluate(e,Formula<Y>::identity(e.argument_size())))
 {
 }

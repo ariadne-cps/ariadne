@@ -110,7 +110,7 @@ class TaylorModel<ValidatedTag,F>
     typedef FloatError<PRE> ErrorType;
     typedef FloatError<PR> NormType;
     typedef ReverseLexicographicIndexLess ComparisonType;
-    typedef SortedExpansion<CoefficientType,ComparisonType> ExpansionType;
+    typedef SortedExpansion<MultiIndex,CoefficientType,ComparisonType> ExpansionType;
     typedef Sweeper<F> SweeperType;
 
     typedef IntervalDomainType CodomainType;
@@ -153,9 +153,9 @@ class TaylorModel<ValidatedTag,F>
     //! \brief Construct a TaylorModel in \a as arguments with the given accuracy control.
     TaylorModel<ValidatedTag,F>(SizeType as, SweeperType swp);
     //! \brief Construct from a map giving the expansion, a constant giving the error, and an accuracy parameter.
-    TaylorModel<ValidatedTag,F>(const Expansion<double>& f, const double& e, SweeperType swp);
-    TaylorModel<ValidatedTag,F>(const Expansion<CoefficientType>& f, const ErrorType& e, SweeperType swp);
-    TaylorModel<ValidatedTag,F>(const Expansion<RawFloatType>& f, const RawFloatType& e, SweeperType swp);
+    TaylorModel<ValidatedTag,F>(const Expansion<MultiIndex,double>& f, const double& e, SweeperType swp);
+    TaylorModel<ValidatedTag,F>(const Expansion<MultiIndex,CoefficientType>& f, const ErrorType& e, SweeperType swp);
+    TaylorModel<ValidatedTag,F>(const Expansion<MultiIndex,RawFloatType>& f, const RawFloatType& e, SweeperType swp);
     //! \brief Fast swap with another Taylor model.
     Void swap(TaylorModel<ValidatedTag,F>& tm);
     //! \brief The zero element of the algebra of Taylor models, with the same number of arguments and accuracy parameters.
@@ -514,7 +514,7 @@ class TaylorModel<ApproximateTag,F>
     typedef FloatApproximation<PR> CoefficientType;
     typedef FloatApproximation<PR> ErrorType;
     typedef ReverseLexicographicIndexLess ComparisonType;
-    typedef SortedExpansion<CoefficientType,ComparisonType> ExpansionType;
+    typedef SortedExpansion<MultiIndex,CoefficientType,ComparisonType> ExpansionType;
 
     typedef IntervalDomainType CodomainType;
     typedef Interval<FloatApproximation<PR>> RangeType;

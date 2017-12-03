@@ -235,7 +235,7 @@ typedef Vector<ValidatedTaylorModelDP> TMV;
 typedef ValidatedVectorTaylorFunctionModelDP TFM;
 typedef ValidatedTaylorModelDP TM;
 
-template<class X> using Monomial = ExpansionValue<X>;
+template<class X> using Monomial = ExpansionValue<MultiIndex,X>;
 
 
 
@@ -258,9 +258,9 @@ Void export_multi_index()
 template<class X>
 Void export_monomial()
 {
-    class_< ExpansionValue<X> > monomial_class(python_name<X>("Monomial"), init<MultiIndex,X>());
-    monomial_class.def("key",(const MultiIndex&(ExpansionValue<X>::*)()const)&ExpansionValue<X>::key,return_value_policy<copy_const_reference>());
-    monomial_class.def("data",(const X&(ExpansionValue<X>::*)()const) &ExpansionValue<X>::data,return_value_policy<copy_const_reference>());
+    class_< ExpansionValue<MultiIndex,X> > monomial_class(python_name<X>("Monomial"), init<MultiIndex,X>());
+    monomial_class.def("key",(const MultiIndex&(ExpansionValue<MultiIndex,X>::*)()const)&ExpansionValue<MultiIndex,X>::key,return_value_policy<copy_const_reference>());
+    monomial_class.def("data",(const X&(ExpansionValue<MultiIndex,X>::*)()const) &ExpansionValue<MultiIndex,X>::data,return_value_policy<copy_const_reference>());
     monomial_class.def(self_ns::str(self));
 }
 

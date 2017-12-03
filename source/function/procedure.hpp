@@ -38,7 +38,8 @@
 
 namespace Ariadne {
 
-template<class X> class Expansion;
+class MultiIndex;
+template<class I, class X> class Expansion;
 template<class Y> class Formula;
 template<class X> class Graded;
 
@@ -72,7 +73,7 @@ class Procedure {
   public:
     explicit Procedure<Y>();
     explicit Procedure<Y>(const Formula<Y>& f);
-    template<class X, EnableIf<IsConvertible<X,Y>> =dummy> explicit Procedure<Y>(const Expansion<X>& e);
+    template<class X, EnableIf<IsConvertible<X,Y>> =dummy> explicit Procedure<Y>(const Expansion<MultiIndex,X>& e);
     friend OutputStream& operator<<(OutputStream& os, Procedure<Y> const& p) { return p._write(os); }
   public:
    template<class X, class YY> friend X evaluate(const Procedure<YY>& p, const Vector<X>& x);

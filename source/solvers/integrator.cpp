@@ -402,7 +402,7 @@ Vector< GradedValidatedDifferential > flow(const Vector<ValidatedProcedure>& f, 
     return y;
 }
 
-template<class X> inline Void append_join(Expansion<X>& e, const MultiIndex& a1, const Nat a2, const X& c) {
+template<class X> inline Void append_join(Expansion<MultiIndex,X>& e, const MultiIndex& a1, const Nat a2, const X& c) {
     MultiIndex a(a1.size()+1);
     for(Nat i=0; i!=a1.size(); ++i) { a[i]=a1[i]; }
     a[a1.size()]=a2;
@@ -473,10 +473,10 @@ Vector<ValidatedDifferential> flow_differential(Vector<GradedValidatedDifferenti
 
     Vector<ValidatedDifferential> dphi(nx,ValidatedDifferential(nx+1u,so+to));
     for(Nat i=0; i!=nx; ++i) {
-        Expansion<FloatDPBounds>& component=dphi[i].expansion();
+        Expansion<MultiIndex,FloatDPBounds>& component=dphi[i].expansion();
         for(Nat j=0; j<=to; ++j) {
-            const Expansion<FloatDPBounds>& expansion=gdphi[i][j].expansion();
-            for(Expansion<FloatDPBounds>::ConstIterator iter=expansion.begin(); iter!=expansion.end(); ++iter) {
+            const Expansion<MultiIndex,FloatDPBounds>& expansion=gdphi[i][j].expansion();
+            for(Expansion<MultiIndex,FloatDPBounds>::ConstIterator iter=expansion.begin(); iter!=expansion.end(); ++iter) {
                 append_join(component,iter->key(),j,iter->data());
             }
         }
@@ -493,7 +493,7 @@ ValidatedVectorTaylorFunctionModelDP flow_function(const Vector<ValidatedDiffere
 
     for(Nat i=0; i!=n; ++i) {
         ValidatedTaylorModelDP& model=tphi.model(i);
-        Expansion<FloatDPValue>& expansion=model.expansion();
+        Expansion<MultiIndex,FloatDPValue>& expansion=model.expansion();
         FloatDPError& error=model.error();
         error=0u;
         expansion.reserve(dphi[i].expansion().number_of_nonzeros());
@@ -536,7 +536,7 @@ differential_flow_step(const ValidatedVectorFunction& f, const ExactBoxType& dx,
     ValidatedVectorTaylorFunctionModelDP tphi(n,join(dx,ExactIntervalType(-h,+h)),ThresholdSweeper<FloatDP>(dp,swpt));
     for(Nat i=0; i!=n; ++i) {
         ValidatedTaylorModelDP& model=tphi.model(i);
-        Expansion<FloatDPValue>& expansion=model.expansion();
+        Expansion<MultiIndex,FloatDPValue>& expansion=model.expansion();
         FloatDPError& error=model.error();
         error=0u;
         expansion.reserve(dphic[i].expansion().number_of_nonzeros());
@@ -587,7 +587,7 @@ differential_space_time_flow_step(const ValidatedVectorFunction& f, const ExactB
     ValidatedVectorTaylorFunctionModelDP tphi(n,join(dx,ExactIntervalType(-h,+h)),ThresholdSweeper<FloatDP>(dp,swpt));
     for(Nat i=0; i!=n; ++i) {
         ValidatedTaylorModelDP& model=tphi.model(i);
-        Expansion<FloatDPValue>& expansion=model.expansion();
+        Expansion<MultiIndex,FloatDPValue>& expansion=model.expansion();
         FloatDPError& error=model.error();
         error=0u;
         expansion.reserve(dphic[i].expansion().number_of_nonzeros());
@@ -842,7 +842,7 @@ AffineIntegrator::flow_step(const ValidatedVectorFunction& f, const ExactBoxType
     rad[n] = mag(h);
 
     for(Nat i=0; i!=n; ++i) {
-        for(Expansion<ValidatedNumericType>::ConstIterator iter=bdphi[i].begin(); iter!=bdphi[i].end(); ++iter) {
+        for(Expansion<MultiIndex,ValidatedNumericType>::ConstIterator iter=bdphi[i].begin(); iter!=bdphi[i].end(); ++iter) {
             const MultiIndex& a=iter->key();
             if(a[n]==this->_temporal_order && a[n]+this->_spacial_order==a.degree()) {
                 const ValidatedNumericType& rng = iter->data();

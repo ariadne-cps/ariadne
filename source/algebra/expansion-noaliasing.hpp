@@ -47,7 +47,7 @@ namespace Ariadne {
 
 template<class X> class Expansion;
 
-template<class X> Expansion<X> embed(unsigned int, const Expansion<X>&, unsigned int);
+template<class X> Expansion<MultiIndex,X> embed(unsigned int, const Expansion<MultiIndex,X>&, unsigned int);
 
 
 
@@ -258,16 +258,16 @@ class Expansion
     Expansion(unsigned int as, unsigned int deg, double c0, ...);
     Expansion(unsigned int as, unsigned int nnz, Int a00, ...);
     template<class XX> Expansion(const std::map<MultiIndex,XX>& m);
-    template<class XX> Expansion(const Expansion<XX>& p);
+    template<class XX> Expansion(const Expansion<MultiIndex,XX>& p);
 
-    static Expansion<X> variable(unsigned int as, unsigned int i);
+    static Expansion<MultiIndex,X> variable(unsigned int as, unsigned int i);
 
-    Void swap(Expansion<X>& other) {
+    Void swap(Expansion<MultiIndex,X>& other) {
         std::swap(this->_indices,other._indices);
         std::swap(this->_coefficients,other._coefficients); }
 
-    Bool operator==(const Expansion<X>& other) const { return this->_coefficients == other._coefficients && this->_indices==other._indices; }
-    Bool operator!=(const Expansion<X>& other) const { return !(*this==other); }
+    Bool operator==(const Expansion<MultiIndex,X>& other) const { return this->_coefficients == other._coefficients && this->_indices==other._indices; }
+    Bool operator!=(const Expansion<MultiIndex,X>& other) const { return !(*this==other); }
 
     unsigned int argument_size() const { return this->_indices.element_size(); }
     unsigned int number_of_nonzeros() const { return _coefficients.size(); }
@@ -333,7 +333,7 @@ class Expansion
 
     Void check() const { }
 
-    Expansion<X> embed(unsigned int before_size, const Expansion<X>&, unsigned int after_size) const;
+    Expansion<MultiIndex,X> embed(unsigned int before_size, const Expansion<MultiIndex,X>&, unsigned int after_size) const;
   public:
     Iterator _insert(Iterator p, const MultiIndex& a, const RealType& x) {
         //std::cerr<<"_insert "<<*this<<" "<<p._ptr()<<" "<<a<<" "<<x<<std::endl;
@@ -378,18 +378,18 @@ class Expansion
 
 /*
 template<class X>
-OutputStream& operator<<(OutputStream& os, const typename Expansion<X>::ConstIterator& citer) {
+OutputStream& operator<<(OutputStream& os, const typename Expansion<MultiIndex,X>::ConstIterator& citer) {
     //return os << "(" << v.get<0>() << ":" << v.get<1>() << ")";
     return os << "<ConstIterator>";
 }
 
 template<class X>
-OutputStream& operator<<(OutputStream& os, const typename Expansion<X>::reference& ref) {
+OutputStream& operator<<(OutputStream& os, const typename Expansion<MultiIndex,X>::reference& ref) {
     //return os << "(" << v.get<0>() << ":" << v.get<1>() << ")";
     return os << "<reference>";
 }
 
-OutputStream& operator<<(OutputStream& os, const Expansion<FloatDP>::const_reference& cref) {
+OutputStream& operator<<(OutputStream& os, const Expansion<MultiIndex,FloatDP>::const_reference& cref) {
     //return os << "(" << v.get<0>() << ":" << v.get<1>() << ")";
     return os << "<const_reference>";
 }
@@ -397,15 +397,15 @@ OutputStream& operator<<(OutputStream& os, const Expansion<FloatDP>::const_refer
 
 template<class X>
 Void
-Expansion<X>::insert(const MultiIndex& a, const X& x) {
+Expansion<MultiIndex,X>::insert(const MultiIndex& a, const X& x) {
     this->_insert(a,x);
 }
 
 
-template<class X> X Expansion<X>::_zero = 0.0;
+template<class X> X Expansion<MultiIndex,X>::_zero = 0.0;
 
 template<class X>
-Expansion<X>::Expansion(unsigned int as, unsigned int deg, double c0, ...)
+Expansion<MultiIndex,X>::Expansion(unsigned int as, unsigned int deg, double c0, ...)
     : _indices(as), _coefficients()
 {
     MultiIndex a(as); double x;
@@ -421,7 +421,7 @@ Expansion<X>::Expansion(unsigned int as, unsigned int deg, double c0, ...)
 }
 
 template<class X>
-Expansion<X>::Expansion(unsigned int as, unsigned int nnz, Int a00, ...)
+Expansion<MultiIndex,X>::Expansion(unsigned int as, unsigned int nnz, Int a00, ...)
     : _indices(as), _coefficients()
 {
     MultiIndex a(as);
@@ -441,7 +441,7 @@ Expansion<X>::Expansion(unsigned int as, unsigned int nnz, Int a00, ...)
 }
 
 template<class X> template<class XX>
-Expansion<X>::Expansion(const std::map<MultiIndex,XX>& m)
+Expansion<MultiIndex,X>::Expansion(const std::map<MultiIndex,XX>& m)
 {
     ARIADNE_ASSERT(!m.empty());
     this->_indices=MultiIndexList(m.begin()->first.size());
@@ -452,29 +452,29 @@ Expansion<X>::Expansion(const std::map<MultiIndex,XX>& m)
 }
 
 template<class X> template<class XX> inline
-Expansion<X>::Expansion(const Expansion<XX>& p)
+Expansion<MultiIndex,X>::Expansion(const Expansion<MultiIndex,XX>& p)
     : _indices(p.argument_size()), _coefficients()
 {
-    for(typename Expansion<XX>::ConstIterator iter=p.begin(); iter!=p.end(); ++iter) {
+    for(typename Expansion<MultiIndex,XX>::ConstIterator iter=p.begin(); iter!=p.end(); ++iter) {
         this->append(iter->key(),X(iter->data())); }
 }
 
 
-template<class X> Expansion<X> Expansion<X>::variable(unsigned int n, unsigned int i) {
-    Expansion<X> p(n); p[MultiIndex::zero(n)]=0.0; p[MultiIndex::unit(n,i)]=X(1);
+template<class X> Expansion<MultiIndex,X> Expansion<MultiIndex,X>::variable(unsigned int n, unsigned int i) {
+    Expansion<MultiIndex,X> p(n); p[MultiIndex::zero(n)]=0.0; p[MultiIndex::unit(n,i)]=X(1);
     return p;
 }
 
 
 template<class X, class Y>
-Y evaluate(const Expansion<X>& x, const Vector<Y>& y)
+Y evaluate(const Expansion<MultiIndex,X>& x, const Vector<Y>& y)
 {
     Y zero = y.zero_element(); zero*=0;
     Y one = zero; one+=1;
 
     Y r=zero;
     Y t=zero;
-    for(typename Expansion<X>::ConstIterator iter=x.begin();
+    for(typename Expansion<MultiIndex,X>::ConstIterator iter=x.begin();
         iter!=x.end(); ++iter)
     {
         const MultiIndex& j=iter->key();
@@ -495,14 +495,14 @@ Y evaluate(const Expansion<X>& x, const Vector<Y>& y)
 
 
 template<class X>
-Expansion<X> embed(unsigned int before_size, const Expansion<X>& x, unsigned int after_size)
+Expansion<MultiIndex,X> embed(unsigned int before_size, const Expansion<MultiIndex,X>& x, unsigned int after_size)
 {
     Nat old_size=x.argument_size();
     Nat new_size=before_size+old_size+after_size;
-    Expansion<X> r(new_size);
+    Expansion<MultiIndex,X> r(new_size);
     MultiIndex old_index(old_size);
     MultiIndex new_index(new_size);
-    for(typename Expansion<X>::ConstIterator iter=x.begin(); iter!=x.end(); ++iter) {
+    for(typename Expansion<MultiIndex,X>::ConstIterator iter=x.begin(); iter!=x.end(); ++iter) {
         old_index=iter->key();
         for(Nat j=0; j!=old_size; ++j) {
             Nat aj=old_index[j];
@@ -514,9 +514,9 @@ Expansion<X> embed(unsigned int before_size, const Expansion<X>& x, unsigned int
 }
 
 
-inline Expansion<FloatDP> midpoint(const Expansion<ExactIntervalType>& pse) {
-    Expansion<FloatDP> r(pse.argument_size());
-    for(Expansion<ExactIntervalType>::ConstIterator iter=pse.begin(); iter!=pse.end(); ++iter) {
+inline Expansion<MultiIndex,FloatDP> midpoint(const Expansion<MultiIndex,ExactIntervalType>& pse) {
+    Expansion<MultiIndex,FloatDP> r(pse.argument_size());
+    for(Expansion<MultiIndex,ExactIntervalType>::ConstIterator iter=pse.begin(); iter!=pse.end(); ++iter) {
         //r.append(iter->key(),midpoint(iter->data())); }
         r.append(iter->key(),midpoint(iter->data())); }
     return r;
@@ -524,10 +524,10 @@ inline Expansion<FloatDP> midpoint(const Expansion<ExactIntervalType>& pse) {
 
 
 template<class X>
-OutputStream& Expansion<X>::write(OutputStream& os, const Array<StringType>& variable_names) const
+OutputStream& Expansion<MultiIndex,X>::write(OutputStream& os, const Array<StringType>& variable_names) const
 {
     ARIADNE_ASSERT(this->argument_size()==variable_names.size());
-    const Expansion<X>& p=*this;
+    const Expansion<MultiIndex,X>& p=*this;
     if(p.size()==0) {
         os << "0";
     } else {
@@ -555,7 +555,7 @@ OutputStream& Expansion<X>::write(OutputStream& os, const Array<StringType>& var
 
 
 template<class X>
-OutputStream& operator<<(OutputStream& os, const Expansion<X>& p) {
+OutputStream& operator<<(OutputStream& os, const Expansion<MultiIndex,X>& p) {
     Array<StringType> variable_names(p.argument_size());
     for(Nat j=0; j!=p.argument_size(); ++j) {
         StringStream sstr;
@@ -569,7 +569,7 @@ OutputStream& operator<<(OutputStream& os, const Expansion<X>& p) {
 
 
 template<class X, class Y>
-Vector<Y> evaluate(const Vector< Expansion<X> >& x, const Vector<Y>& y)
+Vector<Y> evaluate(const Vector< Expansion<MultiIndex,X> >& x, const Vector<Y>& y)
 {
     Vector<Y> r(x.size());
     for(unsigned int i=0; i!=x.size(); ++i) {
@@ -579,8 +579,8 @@ Vector<Y> evaluate(const Vector< Expansion<X> >& x, const Vector<Y>& y)
 }
 
 
-template<class X> Vector< Expansion<X> > operator*(const Expansion<X>& e, const Vector<FloatDP> v) {
-    Vector< Expansion<X> > r(v.size(),Expansion<X>(e.argument_size()));
+template<class X> Vector< Expansion<MultiIndex,X> > operator*(const Expansion<MultiIndex,X>& e, const Vector<FloatDP> v) {
+    Vector< Expansion<MultiIndex,X> > r(v.size(),Expansion<MultiIndex,X>(e.argument_size()));
     for(Nat i=0; i!=r.size(); ++i) {
         ARIADNE_ASSERT(v[i]==0.0 || v[i]==1.0);
         if(v[i]==1.0) { r[i]=e; }
@@ -589,8 +589,8 @@ template<class X> Vector< Expansion<X> > operator*(const Expansion<X>& e, const 
 }
 
 
-inline Vector< Expansion<FloatDP> > midpoint(const Vector< Expansion<ExactIntervalType> >& pse) {
-    Vector< Expansion<FloatDP> > r(pse.size());
+inline Vector< Expansion<MultiIndex,FloatDP> > midpoint(const Vector< Expansion<MultiIndex,ExactIntervalType> >& pse) {
+    Vector< Expansion<MultiIndex,FloatDP> > r(pse.size());
     for(Nat i=0; i!=pse.size(); ++i) {
         r[i]=midpoint(pse[i]); }
     return r;

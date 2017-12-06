@@ -82,10 +82,10 @@ Matrix<FloatDP> nonlinearities_zeroth_order(const ValidatedVectorTaylorFunctionM
     for(Nat i=0; i!=m; ++i) {
         const ValidatedTaylorModelDP& tm=g.model(i);
         for(ValidatedTaylorModelDP::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
-            a=iter->key();
+            a=iter->index();
             if(a.degree()>1) {
                 for(Nat j=0; j!=n; ++j) {
-                    if(a[j]>0) { nonlinearities[i][j]+=mag(iter->data()).raw(); }
+                    if(a[j]>0) { nonlinearities[i][j]+=mag(iter->coefficient()).raw(); }
                 }
             }
         }
@@ -116,10 +116,10 @@ Matrix<FloatDP> nonlinearities_first_order(const ValidatedVectorFunction& f, con
     for(Nat i=0; i!=m; ++i) {
         const UpperIntervalDifferentialType& d=df[i];
         for(UpperIntervalDifferentialType::ConstIterator iter=d.begin(); iter!=d.end(); ++iter) {
-            a=iter->key();
+            a=iter->index();
             if(a.degree()==1) {
                 for(Nat j=0; j!=n; ++j) {
-                    if(a[j]>0) { nonlinearities[i][j]+=iter->data().radius().raw(); }
+                    if(a[j]>0) { nonlinearities[i][j]+=iter->coefficient().radius().raw(); }
                 }
             }
         }
@@ -151,10 +151,10 @@ Matrix<FloatDP> nonlinearities_second_order(const ValidatedVectorFunction& f, co
     for(Nat i=0; i!=m; ++i) {
         const UpperIntervalDifferentialType& d=df[i];
         for(UpperIntervalDifferentialType::ConstIterator iter=d.begin(); iter!=d.end(); ++iter) {
-            a=iter->key();
+            a=iter->index();
             if(a.degree()==2) {
                 for(Nat j=0; j!=n; ++j) {
-                    if(a[j]>0) { nonlinearities[i][j]+=mag(iter->data()).raw(); }
+                    if(a[j]>0) { nonlinearities[i][j]+=mag(iter->coefficient()).raw(); }
                 }
             }
         }
@@ -761,10 +761,10 @@ Matrix<FloatDP> nonlinearities_first_order(const ValidatedVectorFunction& f, con
     for(Nat i=0; i!=m; ++i) {
         const UpperIntervalDifferentialType& d=df[i];
         for(UpperIntervalDifferentialType::ConstIterator iter=d.begin(); iter!=d.end(); ++iter) {
-            a=iter->key();
+            a=iter->index();
             if(a.degree()==1) {
                 for(Nat j=0; j!=n; ++j) {
-                    if(a[j]>0) { nonlinearities[i][j]+=radius(iter->data()); }
+                    if(a[j]>0) { nonlinearities[i][j]+=radius(iter->coefficient()); }
                 }
             }
         }
@@ -796,10 +796,10 @@ Matrix<FloatDP> nonlinearities_second_order(const ValidatedVectorFunction& f, co
     for(Nat i=0; i!=m; ++i) {
         const UpperIntervalDifferentialType& d=df[i];
         for(UpperIntervalDifferentialType::ConstIterator iter=d.begin(); iter!=d.end(); ++iter) {
-            a=iter->key();
+            a=iter->index();
             if(a.degree()==2) {
                 for(Nat j=0; j!=n; ++j) {
-                    if(a[j]>0) { nonlinearities[i][j]+=mag(iter->data()); }
+                    if(a[j]>0) { nonlinearities[i][j]+=mag(iter->coefficient()); }
                 }
             }
         }

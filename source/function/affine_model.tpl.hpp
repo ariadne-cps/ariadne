@@ -339,17 +339,17 @@ template<class F> AffineModel<ValidatedTag,F>::AffineModel(const TaylorModel<Val
     typename F::RoundingModeType rnd=F::get_rounding_mode();
     F::set_rounding_upward();
     for(auto iter=taylor_model.begin(); iter!=taylor_model.end(); ++iter) {
-        if(iter->key().degree()>=2) {
-            affine_model.set_error(mag(iter->data())+affine_model.error());
-        } else if(iter->key().degree()==1) {
+        if(iter->index().degree()>=2) {
+            affine_model.set_error(mag(iter->coefficient())+affine_model.error());
+        } else if(iter->index().degree()==1) {
             for(SizeType i=0; i!=taylor_model.argument_size(); ++i) {
-                if(iter->key()[i]==1) {
-                    affine_model.set_gradient(i,iter->data());
+                if(iter->index()[i]==1) {
+                    affine_model.set_gradient(i,iter->coefficient());
                     break;
                 }
             }
         } else {
-            affine_model.set_value(iter->data());
+            affine_model.set_value(iter->coefficient());
         }
     }
     affine_model.set_error(taylor_model.error()+affine_model.error());

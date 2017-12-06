@@ -35,8 +35,8 @@ template<class K, class V> struct MapValue {
     typedef K key_type;
     K first; V second;
     MapValue(const K& k, const V& v) : first(k), second(v) { }
-    const K& key() const { return first; }
-    const V& data() const { return second; }
+    const K& index() const { return first; }
+    const V& coefficient() const { return second; }
 };
 
 
@@ -194,35 +194,35 @@ template<class F> Void TestExpansion<F>::test_data_access()
     // Test derefencing of iterators
     ARIADNE_TEST_PRINT(e.begin());
     ARIADNE_TEST_PRINT(*e.begin());
-    ARIADNE_TEST_EQUAL(e.begin()->key(),MultiIndex({0,0,0}));
-    ARIADNE_TEST_EQUAL(e.begin()->data(),2.0);
+    ARIADNE_TEST_EQUAL(e.begin()->index(),MultiIndex({0,0,0}));
+    ARIADNE_TEST_EQUAL(e.begin()->coefficient(),2.0);
 
     ExpansionType const& ce=e;
     ARIADNE_TEST_PRINT(ce.begin());
     ARIADNE_TEST_PRINT(*ce.begin());
-    ARIADNE_TEST_EQUAL(ce.begin()->key(),MultiIndex({0,0,0}));
-    ARIADNE_TEST_EQUAL(ce.begin()->data(),2.0);
+    ARIADNE_TEST_EQUAL(ce.begin()->index(),MultiIndex({0,0,0}));
+    ARIADNE_TEST_EQUAL(ce.begin()->coefficient(),2.0);
 
 
     // The behaviour of iterators is rather odd and not what might be expected
-    // A MultiIndex reference assigned to by iter->key() changes its value
+    // A MultiIndex reference assigned to by iter->index() changes its value
     // when the Iterator is incremented, but a F reference does not.
     // This behaviour should be changed in future versions if technologically
     // feasible.
     Iterator iter=e.begin();
-    const MultiIndex& aref=iter->key();
-    const F& xref=iter->data();
-    F x1=iter->data();
+    const MultiIndex& aref=iter->index();
+    const F& xref=iter->coefficient();
+    F x1=iter->coefficient();
     ++iter;
-    MultiIndex a2=iter->key();
+    MultiIndex a2=iter->index();
     ARIADNE_TEST_ASSERT(a2==aref);
     ARIADNE_TEST_ASSERT(x1==xref);
 
     // Test finding of values of iterators
     ARIADNE_TEST_PRINT(e);
     ARIADNE_TEST_EXECUTE(iter=e.find(MultiIndex({1,0,0})));
-    ARIADNE_TEST_EQUAL(iter->key(),MultiIndex({1,0,0}));
-    ARIADNE_TEST_EQUAL(iter->data(),3.0);
+    ARIADNE_TEST_EQUAL(iter->index(),MultiIndex({1,0,0}));
+    ARIADNE_TEST_EQUAL(iter->coefficient(),3.0);
 
 
 
@@ -232,14 +232,14 @@ template<class F> Void TestExpansion<F>::test_data_access()
 
     // Perform swap
     ARIADNE_TEST_CONSTRUCT(typename ExpansionType::ValueType,tmp,(*iter2));
-    ARIADNE_TEST_ASSERT(tmp.key()==MultiIndex({1,0,1}));
-    ARIADNE_TEST_ASSERT(tmp.data()==7.0);
+    ARIADNE_TEST_ASSERT(tmp.index()==MultiIndex({1,0,1}));
+    ARIADNE_TEST_ASSERT(tmp.coefficient()==7.0);
     ARIADNE_TEST_EXECUTE(*iter2=*iter1);
-    ARIADNE_TEST_ASSERT(iter2->key()==MultiIndex({1,0,0}));
-    ARIADNE_TEST_ASSERT(iter2->data()==3.0);
+    ARIADNE_TEST_ASSERT(iter2->index()==MultiIndex({1,0,0}));
+    ARIADNE_TEST_ASSERT(iter2->coefficient()==3.0);
     ARIADNE_TEST_EXECUTE(*iter1=tmp);
-    ARIADNE_TEST_ASSERT(iter1->key()==MultiIndex({1,0,1}));
-    ARIADNE_TEST_ASSERT(iter1->data()==7.0);
+    ARIADNE_TEST_ASSERT(iter1->index()==MultiIndex({1,0,1}));
+    ARIADNE_TEST_ASSERT(iter1->coefficient()==7.0);
 
 
 }
@@ -338,8 +338,8 @@ template<class F> Void TestExpansion<F>::test_find()
     ARIADNE_TEST_PRINT(e);
     ARIADNE_TEST_PRINT(e.find(a)-e.begin());
     ARIADNE_TEST_COMPARE(e.find(a),!=,e.end());
-    ARIADNE_TEST_EQUAL(e.find(a)->key(),a);
-    ARIADNE_TEST_EQUAL(e.find(a)->data(),5.0);
+    ARIADNE_TEST_EQUAL(e.find(a)->index(),a);
+    ARIADNE_TEST_EQUAL(e.find(a)->coefficient(),5.0);
     a[1]=1;
     ARIADNE_TEST_EQUAL(e.find(a),e.end());
 

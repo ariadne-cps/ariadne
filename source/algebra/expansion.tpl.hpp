@@ -455,12 +455,12 @@ Expansion<MultiIndex,X> Expansion<MultiIndex,X>::_embed(SizeType before_size, Si
     MultiIndex old_index(old_size);
     MultiIndex new_index(new_size);
     for(typename Expansion<MultiIndex,X>::ConstIterator iter=x.begin(); iter!=x.end(); ++iter) {
-        old_index=iter->key();
+        old_index=iter->index();
         for(Nat j=0; j!=old_size; ++j) {
             Nat aj=old_index[j];
             new_index[j+before_size]=aj;
         }
-        r.append(new_index,iter->data());
+        r.append(new_index,iter->coefficient());
     }
     return r;
 }

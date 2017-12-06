@@ -70,14 +70,14 @@ FwdIter unique_key(FwdIter first, FwdIter last, Op op) {
     while(next!=last) {
         if(curr!=next) { *curr=*next; }
         ++next;
-        while(next!=last && curr->key()==next->key()) {
-            if(curr->key()==next->key()) {
-                curr->data()=op(curr->data(),next->data());
+        while(next!=last && curr->index()==next->index()) {
+            if(curr->index()==next->index()) {
+                curr->coefficient()=op(curr->coefficient(),next->coefficient());
                 ++next;
             }
         }
-        // Removes zero entries; the code below is preferred to the case "curr->data()!=0" for ValidatedKleenean results
-        if(curr->data()==0) { }
+        // Removes zero entries; the code below is preferred to the case "curr->coefficient()!=0" for ValidatedKleenean results
+        if(curr->coefficient()==0) { }
         else { ++curr; }
     }
     return curr;
@@ -117,8 +117,8 @@ template<class KeyPtr, class DataPtr> class KeyDataReference {
     KeyDataReference<KeyPtr,DataPtr>& operator=(const KeyDataReference<KeyPtr,DataPtr>& ref) {
         *_kp=*ref._kp; *_dp=*ref._dp; return *this; }
     KeyDataReference<KeyPtr,DataPtr>& operator=(const KeyDataValue<Key,Data>& val) { *_kp=val._k; *_dp=val._d; return *this; }
-    template<class KP,class DP> Bool operator==(const KeyDataReference<KP,DP>& ref) const { return this->key()==ref.key() && this->data()==ref.data(); }
-    template<class K,class D> Bool operator==(const KeyDataValue<K,D>& val) const { return this->key()==val.key() && this->data()==val.data(); }
+    template<class KP,class DP> Bool operator==(const KeyDataReference<KP,DP>& ref) const { return this->index()==ref.key() && this->coefficient()==ref.data(); }
+    template<class K,class D> Bool operator==(const KeyDataValue<K,D>& val) const { return this->index()==val.key() && this->coefficient()==val.data(); }
     typename KeyPtr::reference key() { return *_kp; }
     typename DataPtr::reference data()  { return *_dp; }
     typename KeyPtr::reference key() const { return *_kp; }
@@ -203,7 +203,7 @@ OutputStream& operator<<(OutputStream& os, KeyDataReference<K,D> ref) {
 template<class K, class D>
 OutputStream& operator<<(OutputStream& os, KeyDataIterator<K,D> iter) {
     //return os << "(" << v.get<0>() << ":" << v.get<1>() << ")";
-    return os << "<"<<static_cast<const Void*>(iter->key().begin())<<","<<&iter->data()<<">("<<iter->key()<<","<<iter->data()<<")";
+    return os << "<"<<static_cast<const Void*>(iter->index().begin())<<","<<&iter->coefficient()<<">("<<iter->index()<<","<<iter->coefficient()<<")";
 }
 
 
@@ -289,33 +289,33 @@ class Expansion
 
     RealType& operator[](const MultiIndex& a) {
         Iterator iter=this->lower_bound(a);
-        if(iter==this->end() || iter->key()!=a) { iter=this->_insert(iter,a,static_cast<RealType>(0.0)); }
-        return iter->data(); }
+        if(iter==this->end() || iter->index()!=a) { iter=this->_insert(iter,a,static_cast<RealType>(0.0)); }
+        return iter->coefficient(); }
     const RealType& operator[](const MultiIndex& a) const {
         ConstIterator iter=this->lower_bound(a);
-        if(iter==this->end() || iter->key()!=a) { return _zero; }
-        else { return iter->data(); } }
+        if(iter==this->end() || iter->index()!=a) { return _zero; }
+        else { return iter->coefficient(); } }
 
     Iterator begin() { return Iterator(_indices.begin(),_coefficients.begin()); }
     Iterator end() { return Iterator(_indices.end(),_coefficients.end()); }
     Iterator lower_bound(const MultiIndex& a) {
         return std::lower_bound(this->begin(),this->end(),a,key_less<value_type,key_type>()); }
     Iterator find(const MultiIndex& a) {
-        Iterator iter=this->lower_bound(a); if(iter!=this->end() && iter->key()!=a) { iter=this->end(); } return iter; }
+        Iterator iter=this->lower_bound(a); if(iter!=this->end() && iter->index()!=a) { iter=this->end(); } return iter; }
 
     ConstIterator begin() const { return ConstIterator(_indices.begin(),_coefficients.begin()); }
     ConstIterator end() const { return ConstIterator(_indices.end(),_coefficients.end()); }
     ConstIterator lower_bound(const MultiIndex& a) const {
         return std::lower_bound(this->begin(),this->end(),a,key_less<value_type,key_type>()); }
     ConstIterator find(const MultiIndex& a) const {
-        ConstIterator iter=this->lower_bound(a); if(iter!=this->end() && iter->key()!=a) { iter=this->end(); } return iter; }
+        ConstIterator iter=this->lower_bound(a); if(iter!=this->end() && iter->index()!=a) { iter=this->end(); } return iter; }
 
     reference front() { return reference(_indices.begin(),_coefficients.begin()); }
     const_reference front() const { return const_reference(_indices.begin(),_coefficients.begin()); }
     reference back() { return reference(_indices.end()-1,_coefficients.end()-1); }
     const_reference back() const { return const_reference(_indices.end()-1,_coefficients.end()-1); }
 
-    Void erase(Iterator iter) { iter->data()=0.0; }
+    Void erase(Iterator iter) { iter->coefficient()=0.0; }
     Void clear() { _indices.clear(); _coefficients.clear(); }
 
     Void sort() {
@@ -354,7 +354,7 @@ class Expansion
         //std::cerr<<"_allocated_insert "<<*this<<" "<<p<<" "<<p-begin()<<" "<<a<<" "<<x<<std::endl;
         Iterator curr=this->end(); --curr; Iterator prev=curr;
         while(curr!=p) { --prev; *curr=*prev; curr=prev; }
-        curr->key()=a; curr->data()=x; return p; }
+        curr->index()=a; curr->coefficient()=x; return p; }
     Void _prepend(const MultiIndex& a, const RealType& x) {
         //std::cerr<<"_prepend "<<*this<<" "<<a<<" "<<x<<std::endl;
         this->resize(this->size()+1u);
@@ -456,7 +456,7 @@ Expansion<MultiIndex,X>::Expansion(const Expansion<MultiIndex,XX>& p)
     : _indices(p.argument_size()), _coefficients()
 {
     for(typename Expansion<MultiIndex,XX>::ConstIterator iter=p.begin(); iter!=p.end(); ++iter) {
-        this->append(iter->key(),X(iter->data())); }
+        this->append(iter->index(),X(iter->coefficient())); }
 }
 
 
@@ -477,8 +477,8 @@ Y evaluate(const Expansion<MultiIndex,X>& x, const Vector<Y>& y)
     for(typename Expansion<MultiIndex,X>::ConstIterator iter=x.begin();
         iter!=x.end(); ++iter)
     {
-        const MultiIndex& j=iter->key();
-        const X& c=iter->data();
+        const MultiIndex& j=iter->index();
+        const X& c=iter->coefficient();
         t=one;
         for(Nat k=0; k!=x.argument_size(); ++k) {
             for(Nat l=0; l!=j[k]; ++l) {
@@ -503,12 +503,12 @@ Expansion<MultiIndex,X> embed(unsigned int before_size, const Expansion<MultiInd
     MultiIndex old_index(old_size);
     MultiIndex new_index(new_size);
     for(typename Expansion<MultiIndex,X>::ConstIterator iter=x.begin(); iter!=x.end(); ++iter) {
-        old_index=iter->key();
+        old_index=iter->index();
         for(Nat j=0; j!=old_size; ++j) {
             Nat aj=old_index[j];
             new_index[j+before_size]=aj;
         }
-        r.append(new_index,iter->data());
+        r.append(new_index,iter->coefficient());
     }
     return r;
 }
@@ -517,8 +517,8 @@ Expansion<MultiIndex,X> embed(unsigned int before_size, const Expansion<MultiInd
 inline Expansion<MultiIndex,FloatDP> midpoint(const Expansion<MultiIndex,ExactIntervalType>& pse) {
     Expansion<MultiIndex,FloatDP> r(pse.argument_size());
     for(Expansion<MultiIndex,ExactIntervalType>::ConstIterator iter=pse.begin(); iter!=pse.end(); ++iter) {
-        //r.append(iter->key(),midpoint(iter->data())); }
-        r.append(iter->key(),midpoint(iter->data())); }
+        //r.append(iter->index(),midpoint(iter->coefficient())); }
+        r.append(iter->index(),midpoint(iter->coefficient())); }
     return r;
 }
 
@@ -533,8 +533,8 @@ OutputStream& Expansion<MultiIndex,X>::write(OutputStream& os, const Array<Strin
     } else {
         Bool first_term=true;
         for(ConstIterator iter=p.begin(); iter!=p.end(); ++iter) {
-            MultiIndex a=iter->key();
-            X v=iter->data();
+            MultiIndex a=iter->index();
+            X v=iter->coefficient();
             if(v!=0) {
                 if(v>0 && !first_term) { os<<"+"; }
                 first_term=false;

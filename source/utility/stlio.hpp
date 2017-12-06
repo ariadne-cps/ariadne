@@ -127,7 +127,7 @@ write_ariadne_map_sequence(OutputStream& os, InputIterator first, InputIterator 
 {
     os << opening;
     while(first!=last) {
-        os << first->key() << descriptor << first->data();
+        os << first->index() << descriptor << first->coefficient();
         ++first;
         if(first != last) {
             os << separator;

@@ -170,10 +170,10 @@ template<class X> OutputStream& operator<<(OutputStream& os, const PythonReprese
     const Expansion<MultiIndex,X>& exp=repr.reference();
     for(typename Expansion<MultiIndex,X>::ConstIterator iter=exp.begin(); iter!=exp.end(); ++iter) {
         os << (iter==exp.begin()?'{':',') << "(";
-        for(SizeType j=0; j!=iter->key().size(); ++j) {
-            if(j!=0) { os << ','; } os << Int(iter->key()[j]);
+        for(SizeType j=0; j!=iter->index().size(); ++j) {
+            if(j!=0) { os << ','; } os << Int(iter->index()[j]);
         }
-        os << "):" << python_representation(iter->data());
+        os << "):" << python_representation(iter->coefficient());
     }
     os << "}";
     return os;
@@ -241,7 +241,7 @@ OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ValidatedV
 List<MultiIndex> keys(const ValidatedTaylorModelDP& tm) {
     List<MultiIndex> r;
     for(ValidatedTaylorModelDP::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
-        r.append(iter->key());
+        r.append(iter->index());
     }
     return r;
 }
@@ -274,7 +274,7 @@ Void export_expansion()
     // TODO: Add get/set for data
     // TODO: Use property for key
     //expansion_value_class.add_property("key", (MultiIndex const&(ExpansionValue<MultiIndex,FloatDPApproximation>::*)()const)&ExpansionValue<MultiIndex,FloatDPApproximation>::key);
-    expansion_value_class.def("key", (const MultiIndex&(ExpansionValue<MultiIndex,FloatDPApproximation>::*)()const)&ExpansionValue<MultiIndex,FloatDPApproximation>::key, return_value_policy<copy_const_reference>());
+    expansion_value_class.def("index", (const MultiIndex&(ExpansionValue<MultiIndex,FloatDPApproximation>::*)()const)&ExpansionValue<MultiIndex,FloatDPApproximation>::index, return_value_policy<copy_const_reference>());
     expansion_value_class.def(self_ns::str(self));
 
 }

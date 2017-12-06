@@ -455,18 +455,18 @@ Vector<ValidatedDifferential> flow_differential(Vector<GradedValidatedDifferenti
     for(Nat i=0; i!=nx; ++i) {
         for(Nat j=0; j!=to; ++j) {
             for(ValidatedDifferential::ConstIterator iter=dphic[i][j].begin(); iter!=dphic[i][j].end(); ++iter) {
-                if(iter->key().degree()<so) { gdphi[i][j].expansion().append(iter->key(),iter->data()); }
+                if(iter->index().degree()<so) { gdphi[i][j].expansion().append(iter->index(),iter->coefficient()); }
             }
             for(ValidatedDifferential::ConstIterator iter=dphid[i][j].begin(); iter!=dphid[i][j].end(); ++iter) {
-                if(iter->key().degree()==so) { gdphi[i][j].expansion().append(iter->key(),iter->data()); }
+                if(iter->index().degree()==so) { gdphi[i][j].expansion().append(iter->index(),iter->coefficient()); }
             }
         }
         Nat j=to;
         for(ValidatedDifferential::ConstIterator iter=dphia[i][j].begin(); iter!=dphia[i][j].end(); ++iter) {
-            if(iter->key().degree()<so) { gdphi[i][j].expansion().append(iter->key(),iter->data()); }
+            if(iter->index().degree()<so) { gdphi[i][j].expansion().append(iter->index(),iter->coefficient()); }
         }
         for(ValidatedDifferential::ConstIterator iter=dphib[i][j].begin(); iter!=dphib[i][j].end(); ++iter) {
-            if(iter->key().degree()==so) { gdphi[i][j].expansion().append(iter->key(),iter->data()); }
+            if(iter->index().degree()==so) { gdphi[i][j].expansion().append(iter->index(),iter->coefficient()); }
         }
     }
     ARIADNE_LOG(4,"gdphi="<<gdphi<<"\n");
@@ -477,7 +477,7 @@ Vector<ValidatedDifferential> flow_differential(Vector<GradedValidatedDifferenti
         for(Nat j=0; j<=to; ++j) {
             const Expansion<MultiIndex,FloatDPBounds>& expansion=gdphi[i][j].expansion();
             for(Expansion<MultiIndex,FloatDPBounds>::ConstIterator iter=expansion.begin(); iter!=expansion.end(); ++iter) {
-                append_join(component,iter->key(),j,iter->data());
+                append_join(component,iter->index(),j,iter->coefficient());
             }
         }
     }
@@ -500,8 +500,8 @@ ValidatedVectorTaylorFunctionModelDP flow_function(const Vector<ValidatedDiffere
 
         Differential<FloatDPBounds>::ConstIterator iter=dphi[i].begin();
         while(iter!=dphi[i].end()) {
-            MultiIndex const a=iter->key();
-            FloatDPBounds coef=iter->data();
+            MultiIndex const a=iter->index();
+            FloatDPBounds coef=iter->coefficient();
             FloatDPValue x=coef.value();
             error+=coef.error();
             expansion.append(a,x);
@@ -544,13 +544,13 @@ differential_flow_step(const ValidatedVectorFunction& f, const ExactBoxType& dx,
         ValidatedDifferential::ConstIterator citer=dphic[i].begin();
         ValidatedDifferential::ConstIterator biter=dphib[i].begin();
         while(citer!=dphic[i].end() && biter!=dphib[i].end()) {
-            assert(citer->key()==biter->key());
-            MultiIndex const a=citer->key();
+            assert(citer->index()==biter->index());
+            MultiIndex const a=citer->index();
             ValidatedNumericType coef;
             if (a.degree()==so+to) {
-                coef=biter->data();
+                coef=biter->coefficient();
             } else {
-                coef=citer->data();
+                coef=citer->coefficient();
             }
             FloatDPValue x=coef.value();
             FloatDPError e=coef.error();
@@ -595,14 +595,14 @@ differential_space_time_flow_step(const ValidatedVectorFunction& f, const ExactB
         ValidatedDifferential::ConstIterator citer=dphic[i].begin();
         ValidatedDifferential::ConstIterator biter=dphib[i].begin();
         while(citer!=dphic[i].end() && biter!=dphib[i].end()) {
-            assert(citer->key()==biter->key());
-            MultiIndex const a=citer->key();
+            assert(citer->index()==biter->index());
+            MultiIndex const a=citer->index();
             ValidatedNumericType coef;
             if (a[n]<=to && a.degree()<=so+a[n]) {
                 if(a[n]<to && a.degree()<so+a[n]) {
-                    coef=citer->data();
+                    coef=citer->coefficient();
                 } else {
-                    coef=biter->data();
+                    coef=biter->coefficient();
                 }
                 FloatDPValue x=coef.value();
                 FloatDPError e=coef.error();
@@ -786,7 +786,7 @@ template<class X> Void truncate(Differential<X>& x, Nat spacial_order, Nat tempo
     typename Differential<X>::Iterator write_iter=x.begin();
     typename Differential<X>::ConstIterator read_iter=x.begin();
     while(read_iter!=x.end()) {
-        const MultiIndex& index = read_iter->key();
+        const MultiIndex& index = read_iter->index();
         if(index[n]>temporal_order || index[n]+spacial_order<index.degree()) {
         } else {
             *write_iter=*read_iter;
@@ -843,9 +843,9 @@ AffineIntegrator::flow_step(const ValidatedVectorFunction& f, const ExactBoxType
 
     for(Nat i=0; i!=n; ++i) {
         for(Expansion<MultiIndex,ValidatedNumericType>::ConstIterator iter=bdphi[i].begin(); iter!=bdphi[i].end(); ++iter) {
-            const MultiIndex& a=iter->key();
+            const MultiIndex& a=iter->index();
             if(a[n]==this->_temporal_order && a[n]+this->_spacial_order==a.degree()) {
-                const ValidatedNumericType& rng = iter->data();
+                const ValidatedNumericType& rng = iter->coefficient();
                 const ValidatedNumericType& mid = mdphi[i][a];
                 ARIADNE_ASSERT(rng.lower().raw()<=mid.lower().raw() && mid.upper().raw()<=rng.upper().raw());
                 FloatDPError mag = FloatDPError(max(rng.upper()-mid.lower(),mid.upper()-rng.lower()));

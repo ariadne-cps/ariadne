@@ -51,14 +51,14 @@ template<class X, class Y> Y horner_evaluate(const Expansion<MultiIndex,X>& e, c
     ConstIterator iter=e.begin();
     ConstIterator end=e.end();
     SizeType k=n;   // The current working register
-    const DegreeType* na=iter->key().begin(); // The values of the next multi-index
+    const DegreeType* na=iter->index().begin(); // The values of the next multi-index
     SizeType j=k;   // The lowest register containing a non-zero value
-    X c=iter->data();
+    X c=iter->coefficient();
     Y t=z;
     const DegreeType* a=na;
     ++iter;
     while(iter!=end) {
-        na=iter->key().begin();
+        na=iter->index().begin();
         k=n-1;
         while(a[k]==na[k]) { --k; }
         // Since terms are ordered reverse-lexicographically,
@@ -88,7 +88,7 @@ template<class X, class Y> Y horner_evaluate(const Expansion<MultiIndex,X>& e, c
         r[k]=t;
         //std::cerr<<"a="<<MultiIndex(n,a)<<" c="<<c<<" k="<<k<<" r="<<r<<"\n";
         j=k;
-        c=iter->data();
+        c=iter->coefficient();
         a=na;
         ++iter;
     }
@@ -121,8 +121,8 @@ Y power_evaluate(const Expansion<MultiIndex,X>& e, const Vector<Y>& y)
     for(typename Expansion<MultiIndex,X>::ConstIterator iter=e.begin();
         iter!=e.end(); ++iter)
     {
-        const MultiIndex& j=iter->key();
-        const X& c=iter->data();
+        const MultiIndex& j=iter->index();
+        const X& c=iter->coefficient();
         t=one;
         for(Nat k=0; k!=e.argument_size(); ++k) {
             for(Nat l=0; l!=j[k]; ++l) {

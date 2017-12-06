@@ -225,10 +225,6 @@ template<class X> class ExpansionValue<MultiIndex,X>
     const IndexType& index() const { return _a; }
     CoefficientType& coefficient() { return _c; }
     const CoefficientType& coefficient() const { return _c; }
-        IndexType& key() { return _a; }
-        const IndexType& key() const { return _a; }
-        CoefficientType& data() { return _c; }
-        const CoefficientType& data() const { return _c; }
     friend OutputStream& operator<<(OutputStream& os, const ExpansionValue<I,X>& m) {
         return os << m.index()<<":" << m.coefficient(); }
 };
@@ -253,10 +249,6 @@ template<class X> class ExpansionReference<MultiIndex,X>
     const MultiIndex& index() const { return _a; }
     CoefficientReference coefficient() { return *_cp; }
     const CoefficientType& coefficient() const { return *_cp; }
-        MultiIndexReference& key() { return _a; }
-        const MultiIndex& key() const { return _a; }
-        CoefficientReference data() { return *_cp; }
-        const CoefficientType& data() const { return *_cp; }
     operator ExpansionValue<I,X>() const { return ExpansionValue<I,X>(_a,*_cp); }
     ExpansionReference<I,X>& operator=(const ExpansionValue<I,X>&);
     ExpansionReference<I,X>& operator=(const ExpansionReference<I,X>&);
@@ -278,8 +270,6 @@ template<class X> class ExpansionConstReference<MultiIndex,X>
     ExpansionConstReference(const MultiIndexReference& a, const CoefficientType& c) : _a(a), _cp(&c) { }
     const MultiIndex& index() const { return _a; }
     const CoefficientType& coefficient() const { return *_cp; }
-        const MultiIndex& key() const { return _a; }
-        const CoefficientType& data() const { return *_cp; }
     ExpansionConstReference(const ExpansionValue<I,X>& other) : ExpansionConstReference(other._a._n,other._a._ip,other._cp) { }
     ExpansionConstReference(const ExpansionReference<I,X>& other) : ExpansionConstReference(other.index().size(),other.index().begin(),other._cp) { }
     operator ExpansionValue<I,X>() const { return ExpansionValue<I,X>(_a,*_cp); }

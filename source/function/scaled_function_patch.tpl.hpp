@@ -122,10 +122,10 @@ template<class PR> inline OutputStream& operator<<(OutputStream& os, const Repre
     os.precision(17); os.setf(std::ios_base::showpoint);
     os << "Expansion<MultiIndex,Float<PR>>(" << exp.argument_size() << "," << exp.number_of_nonzeros();
     for(typename Expansion<MultiIndex,RawFloat<PR>>::ConstIterator iter=exp.begin(); iter!=exp.end(); ++iter) {
-        for(SizeType j=0; j!=iter->key().size(); ++j) {
-            os << "," << Nat(iter->key()[j]);
+        for(SizeType j=0; j!=iter->index().size(); ++j) {
+            os << "," << Nat(iter->index()[j]);
         }
-        os << "," << iter->data();
+        os << "," << iter->coefficient();
     }
     os << ")";
     os.precision(precision); os.flags(flags);
@@ -481,8 +481,8 @@ template<class M> OutputStream& operator<<(OutputStream& os, const ModelRepresen
     FloatDP truncatation_error = 0.0;
     os << "<"<<f.domain()<<"\n";
     for(ModelType::ConstIterator iter=f.begin(); iter!=f.end(); ++iter) {
-        if(abs(iter->data())>frepr.threshold) { truncatation_error+=abs(iter->data()); }
-        else { os << iter->key() << ":" << iter->data() << ","; }
+        if(abs(iter->coefficient())>frepr.threshold) { truncatation_error+=abs(iter->coefficient()); }
+        else { os << iter->index() << ":" << iter->coefficient() << ","; }
     }
     os << "+/-" << truncatation_error << "+/-" << f.error();
     return os;

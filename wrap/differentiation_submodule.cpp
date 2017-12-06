@@ -61,8 +61,8 @@ struct to_python_dict< Ariadne::Expansion<MultiIndex,X>  > {
         Ariadne::MultiIndex a;
         X c;
         for(typename Expansion<MultiIndex,X>::ConstIterator iter=e.begin(); iter!=e.end(); ++iter) {
-            a=iter->key();
-            c=iter->data();
+            a=iter->index();
+            c=iter->coefficient();
             for(Nat i=0; i!=a.size(); ++i) { Int ai=a[i]; lst[i]=ai; }
             boost::python::tuple tup(lst);
             //res[tup]=boost::python::object(c);
@@ -86,8 +86,8 @@ struct to_python_list< Ariadne::Expansion<MultiIndex,X>  > {
         Ariadne::MultiIndex a;
         X c;
         for(typename Expansion<MultiIndex,X>::ConstIterator iter=e.begin(); iter!=e.end(); ++iter) {
-            a=iter->key();
-            c=iter->data();
+            a=iter->index();
+            c=iter->coefficient();
             for(Nat i=0; i!=n; ++i) { Int ai=a[i]; alst[i]=ai; }
             pr[0]=boost::python::tuple(alst);
             pr[1]=boost::python::object(c);

@@ -221,6 +221,15 @@ MultiIndex operator*(DegreeType s, MultiIndex a) {
     a*=s; return a;
 }
 
+inline
+Void swap(MultiIndex& a1, MultiIndex& a2) {
+    ARIADNE_ASSERT(a1._n==a2._n); DegreeType t;
+    for(SizeType i=0; i!=a1.size()+1; ++i) { t=a1._p[i]; a1._p[i]=a2._p[i]; a2._p[i]=t; }
+    return;
+    // FIXME: The code below works, but only if the MultiIndex objects are not casts of references to objects in lists
+    std::swap(a1._n,a2._n);
+    std::swap(a1._p,a2._p);
+}
 
 inline
 unsigned int

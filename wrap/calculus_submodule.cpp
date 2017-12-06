@@ -83,8 +83,8 @@ struct from_python<MultiIndex> {
         boost::python::converter::registry::push_back(&convertible,&construct,boost::python::type_id<MultiIndex>()); }
     static Void* convertible(PyObject* obj_ptr) {
         if (!PyList_Check(obj_ptr) && !PyTuple_Check(obj_ptr)) { return 0; } return obj_ptr; }
-    static Void construct(PyObject* obj_ptr,boost::python::converter::rvalue_from_python_stage1_data* data) {
-        Void* storage = ((boost::python::converter::rvalue_from_python_storage<MultiIndex>*)data)->storage.bytes;
+    static Void construct(PyObject* obj_ptr,boost::python::converter::rvalue_from_python_stage1_data* coefficient) {
+        Void* storage = ((boost::python::converter::rvalue_from_python_storage<MultiIndex>*)coefficient)->storage.bytes;
         boost::python::extract<boost::python::tuple> xtup(obj_ptr);
         boost::python::extract<boost::python::list> xlst(obj_ptr);
         if(xlst.check()) {
@@ -94,7 +94,7 @@ struct from_python<MultiIndex> {
             MultiIndex a(len(xtup)); for(SizeType i=0; i!=a.size(); ++i) { (a)[i]=boost::python::extract<SizeType>(xtup()[i]); }
             new (storage) MultiIndex(a);
         }
-        data->convertible = storage;
+        coefficient->convertible = storage;
     }
 };
 
@@ -105,8 +105,8 @@ struct from_python< Expansion<MultiIndex,T> > {
         boost::python::converter::registry::push_back(&convertible,&construct,boost::python::type_id< Expansion<MultiIndex,T> >()); }
     static Void* convertible(PyObject* obj_ptr) {
         if (!PyDict_Check(obj_ptr)) { return 0; } return obj_ptr; }
-    static Void construct(PyObject* obj_ptr,boost::python::converter::rvalue_from_python_stage1_data* data) {
-        Void* storage = ((boost::python::converter::rvalue_from_python_storage< Expansion<MultiIndex,T> >*)data)->storage.bytes;
+    static Void construct(PyObject* obj_ptr,boost::python::converter::rvalue_from_python_stage1_data* coefficient) {
+        Void* storage = ((boost::python::converter::rvalue_from_python_storage< Expansion<MultiIndex,T> >*)coefficient)->storage.bytes;
         Expansion<MultiIndex,T> r(0);
         boost::python::dict dct=boost::python::extract<boost::python::dict>(obj_ptr);
         boost::python::list lst=dct.items();
@@ -125,7 +125,7 @@ struct from_python< Expansion<MultiIndex,T> > {
         }
         new (storage) Expansion<MultiIndex,T>(r);
         //r.unique_sort();
-        data->convertible = storage;
+        coefficient->convertible = storage;
     }
 };
 
@@ -135,13 +135,13 @@ struct from_python< Vector<X> >
 {
     from_python() { converter::registry::push_back(&convertible,&construct,type_id< Vector<X> >()); }
     static Void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
-    static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
+    static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* coefficient) {
         list lst=boost::python::extract<list>(obj_ptr);
-        Void* storage = ((converter::rvalue_from_python_storage< Vector<X> >*) data)->storage.bytes;
+        Void* storage = ((converter::rvalue_from_python_storage< Vector<X> >*) coefficient)->storage.bytes;
         Array<X> ary(len(lst),Uninitialised());
         for(SizeType i=0; i!=ary.size(); ++i) { new (&ary[i]) X(boost::python::extract<X>(lst[i])); }
         new (storage) Vector<X>(std::move(ary));
-        data->convertible = storage;
+        coefficient->convertible = storage;
     }
 };
 
@@ -152,12 +152,12 @@ struct from_python<ValidatedVectorTaylorFunctionModelDP> {
         boost::python::converter::registry::push_back(&convertible,&construct,boost::python::type_id<ValidatedVectorTaylorFunctionModelDP>()); }
     static Void* convertible(PyObject* obj_ptr) {
         if (!PyList_Check(obj_ptr) && !PyTuple_Check(obj_ptr)) { return 0; } return obj_ptr; }
-    static Void construct(PyObject* obj_ptr,boost::python::converter::rvalue_from_python_stage1_data* data) {
-        Void* storage = ((boost::python::converter::rvalue_from_python_storage<ValidatedVectorTaylorFunctionModelDP>*)data)->storage.bytes;
+    static Void construct(PyObject* obj_ptr,boost::python::converter::rvalue_from_python_stage1_data* coefficient) {
+        Void* storage = ((boost::python::converter::rvalue_from_python_storage<ValidatedVectorTaylorFunctionModelDP>*)coefficient)->storage.bytes;
         list lst=boost::python::extract<boost::python::list>(obj_ptr);
         ValidatedVectorTaylorFunctionModelDP* tf_ptr = new (storage) ValidatedVectorTaylorFunctionModelDP(len(lst));
         for(SizeType i=0; i!=tf_ptr->result_size(); ++i) { tf_ptr->set(i,boost::python::extract<ValidatedScalarTaylorFunctionModelDP>(lst[i])); }
-        data->convertible = storage;
+        coefficient->convertible = storage;
     }
 };
 
@@ -271,9 +271,9 @@ Void export_expansion()
     from_python< Vector< Expansion<MultiIndex,FloatDPApproximation> > >();
 
     class_< ExpansionValue<MultiIndex,FloatDPApproximation> > expansion_value_class("ExpansionValue", init<MultiIndex,FloatDPApproximation>());
-    // TODO: Add get/set for data
-    // TODO: Use property for key
-    //expansion_value_class.add_property("key", (MultiIndex const&(ExpansionValue<MultiIndex,FloatDPApproximation>::*)()const)&ExpansionValue<MultiIndex,FloatDPApproximation>::key);
+    // TODO: Add get/set for coefficient
+    // TODO: Use property for index
+    //expansion_value_class.add_property("index", (MultiIndex const&(ExpansionValue<MultiIndex,FloatDPApproximation>::*)()const)&ExpansionValue<MultiIndex,FloatDPApproximation>::index);
     expansion_value_class.def("index", (const MultiIndex&(ExpansionValue<MultiIndex,FloatDPApproximation>::*)()const)&ExpansionValue<MultiIndex,FloatDPApproximation>::index, return_value_policy<copy_const_reference>());
     expansion_value_class.def(self_ns::str(self));
 

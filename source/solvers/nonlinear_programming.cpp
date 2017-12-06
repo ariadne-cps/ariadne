@@ -307,8 +307,8 @@ template<class Mx, class Diff> Void set_hessian(Mx& H, const Diff& D) {
     typename Diff::ConstIterator iter=D.begin();
     while(iter!=D.end() && iter->index().degree()<=1) { ++iter; }
     while(iter!=D.end() && iter->index().degree()<=2) {
-        const MultiIndex& a=iter->index();
-        const X& c=iter->coefficient();
+        ConstReferenceType<MultiIndex> a=iter->index();
+        ConstReferenceType<X> c=iter->coefficient();
         while(a[i]==0) { ++i; j=i+1; }
         if(a[i]==2) { H[i][i]=c; }
         else { while(a[j]==0) { ++j; } H[i][j]=c; H[j][i]=c; }
@@ -321,8 +321,8 @@ template<class Mx, class S, class Diff> Void add_hessian(Mx& H, const S& s, cons
     typename Diff::ConstIterator iter=D.begin();
     while(iter!=D.end() && iter->index().degree()<=1) { ++iter; }
     while(iter!=D.end() && iter->index().degree()==2) {
-        const MultiIndex& a=iter->index();
-        const X& c=iter->coefficient();
+        ConstReferenceType<MultiIndex> a=iter->index();
+        ConstReferenceType<X> c=iter->coefficient();
         Nat i=0;
         while(a[i]==0) { ++i; }
         if(a[i]==2) { H[i][i]+=s*c; }

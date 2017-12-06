@@ -123,13 +123,13 @@ make_differential(const Nat& as, const Nat& d, const boost::python::object& obj)
 {
     typedef typename DIFF::ValueType X;
     DIFF* result=new DIFF(as,d);
-    Array<X> data;
-    read_array(data,obj);
+    Array<X> coefficient;
+    read_array(coefficient,obj);
     std::cerr<<"polynomial_data_size("<<as<<","<<d<<")="<<compute_polynomial_data_size(1u,as,d)<<"\n";
-    std::cerr<<"data="<<data<<"\n";
-    assert(data.size()==compute_polynomial_data_size(1u,as,d));
+    std::cerr<<"coefficient="<<coefficient<<"\n";
+    assert(coefficient.size()==compute_polynomial_data_size(1u,as,d));
     MultiIndex i(as);
-    const X* ptr=data.begin();
+    const X* ptr=coefficient.begin();
     while(i.degree()<=d) {
         //result[i]=*ptr; ++i; ++ptr;
         result->expansion().append(i,*ptr); ++i; ++ptr;
@@ -165,10 +165,10 @@ Vector<DIFF>*
 make_differential_vector(const Nat& rs, const Nat& as, const Nat& d, const boost::python::object& obj)
 {
     typedef typename DIFF::ValueType X;
-    Array<X> data;
-    read_array(data,obj);
-    ARIADNE_ASSERT(data.size()==compute_polynomial_data_size(rs,as,d));
-    Vector<DIFF>* result=new Vector<DIFF>(rs,DIFF(as,d,data.begin()));
+    Array<X> coefficient;
+    read_array(coefficient,obj);
+    ARIADNE_ASSERT(coefficient.size()==compute_polynomial_data_size(rs,as,d));
+    Vector<DIFF>* result=new Vector<DIFF>(rs,DIFF(as,d,coefficient.begin()));
     return result;
 }
 

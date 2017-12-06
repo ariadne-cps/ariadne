@@ -47,6 +47,10 @@ template<class I, class X> class ExpansionIterator;
 template<class I, class X> class ExpansionConstIterator;
 template<class I, class X> class ExpansionValueReference;
 
+template<class T> struct ReferenceTypedef { typedef T& Type; };
+template<class T> using ReferenceType = typename ReferenceTypedef<T>::Type;
+template<class T> using ConstReferenceType = typename ReferenceTypedef<const T>::Type;
+
 struct GradedIndexLess {
     template<class M1, class M2> bool operator()(M1 const& m1, M2 const& m2) const {
         return graded_less(m1.index(),m2.index());
@@ -239,16 +243,17 @@ template<class X> class ExpansionReference<MultiIndex,X>
 {
     typedef MultiIndex I;
   public:
-    typedef X CoefficientType; typedef X& CoefficientReference;
+    typedef X CoefficientType;
   private:
     MultiIndexReference _a; CoefficientType* _cp;
   public:
     ExpansionReference(SizeType as, DegreeType* ip, CoefficientType* cp) : _a(as,ip), _cp(cp) { }
     ExpansionReference(MultiIndexReference& a, CoefficientType& c) : _a(a), _cp(&c) { }
-    MultiIndexReference& index() { return _a; }
-    const MultiIndex& index() const { return _a; }
-    CoefficientReference coefficient() { return *_cp; }
-    const CoefficientType& coefficient() const { return *_cp; }
+    ReferenceType<MultiIndex> index() { return static_cast<MultiIndex&>(static_cast<MultiIndexData&>(_a)); }
+    //MultiIndexReference& index() { return _a; }
+    ConstReferenceType<MultiIndex> index() const { return _a; }
+    ReferenceType<CoefficientType> coefficient() { return *_cp; }
+    ConstReferenceType<CoefficientType> coefficient() const { return *_cp; }
     operator ExpansionValue<I,X>() const { return ExpansionValue<I,X>(_a,*_cp); }
     ExpansionReference<I,X>& operator=(const ExpansionValue<I,X>&);
     ExpansionReference<I,X>& operator=(const ExpansionReference<I,X>&);
@@ -268,8 +273,8 @@ template<class X> class ExpansionConstReference<MultiIndex,X>
   public:
     ExpansionConstReference(SizeType as, const DegreeType* ip, const CoefficientType* cp) : _a(as,const_cast<DegreeType*>(ip)), _cp(cp) { }
     ExpansionConstReference(const MultiIndexReference& a, const CoefficientType& c) : _a(a), _cp(&c) { }
-    const MultiIndex& index() const { return _a; }
-    const CoefficientType& coefficient() const { return *_cp; }
+    ConstReferenceType<MultiIndex> index() const { return _a; }
+    ConstReferenceType<CoefficientType> coefficient() const { return *_cp; }
     ExpansionConstReference(const ExpansionValue<I,X>& other) : ExpansionConstReference(other._a._n,other._a._ip,other._cp) { }
     ExpansionConstReference(const ExpansionReference<I,X>& other) : ExpansionConstReference(other.index().size(),other.index().begin(),other._cp) { }
     operator ExpansionValue<I,X>() const { return ExpansionValue<I,X>(_a,*_cp); }

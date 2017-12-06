@@ -413,7 +413,7 @@ C1TaylorFunction& operator+=(C1TaylorFunction& f, FloatDP ec) {
     //ARIADNE_DEBUG_ASSERT(f._expansion.back().key().degree()==0);
     FloatDP::set_rounding_upward();
     //FloatDP& fv=f._expansion.back().data();
-    FloatDP& fv=(--f._expansion.end())->coefficient();
+    ReferenceType<FloatDP> fv=(--f._expansion.end())->coefficient();
     FloatDP& fze=f._zero_error;
     FloatDP& fe=f._uniform_error;
     FloatDP::set_rounding_upward();
@@ -445,8 +445,8 @@ C1TaylorFunction& operator*=(C1TaylorFunction& f, FloatDP ec) {
     for(Expansion<MultiIndex,FloatDP>::Iterator iter=f._expansion.begin();
         iter!=f._expansion.end(); ++iter)
     {
-        const MultiIndex& a=iter->index();
-        FloatDP& fv=iter->coefficient();
+        ConstReferenceType<MultiIndex> a=iter->index();
+        ReferenceType<FloatDP> fv=iter->coefficient();
         VOLATILE FloatDP fvu=fv*c;
         VOLATILE FloatDP mfvl=(-fv)*c;
         const FloatDP e=(fvu+mfvl)/2;
@@ -461,7 +461,7 @@ C1TaylorFunction& operator*=(C1TaylorFunction& f, FloatDP ec) {
     for(Expansion<MultiIndex,FloatDP>::Iterator iter=f._expansion.begin();
         iter!=f._expansion.end(); ++iter)
     {
-        FloatDP& fv=iter->coefficient();
+        ReferenceType<FloatDP> fv=iter->coefficient();
         fv*=c;
     }
 
@@ -482,7 +482,7 @@ C1TaylorFunction operator+(C1TaylorFunction f1, C1TaylorFunction f2) {
     Expansion<MultiIndex,FloatDP>::ConstIterator i2=f2._expansion.begin();
     while(i1!=f1._expansion.end() && i2!=f2._expansion.end()) {
         if(i1->index()==i2->index()) {
-            const MultiIndex& a = i1->index();
+            ConstReferenceType<MultiIndex> a = i1->index();
             FloatDP::set_rounding_upward();
             VOLATILE FloatDP fvu=i1->coefficient()+i2->coefficient();
             VOLATILE FloatDP mfvl=(-i1->coefficient())-i2->coefficient();
@@ -538,7 +538,7 @@ Void fma(C1TaylorFunction& f0, const C1TaylorFunction& f1, const C1TaylorFunctio
     Expansion<MultiIndex,FloatDP>::ConstIterator i2=f2._expansion.begin();
     while(i1!=f1._expansion.end() && i2!=f2._expansion.end()) {
         if(i1->index()==i2->index()+a3) {
-            const MultiIndex& a = i1->index();
+            ConstReferenceType<MultiIndex> a = i1->index();
             FloatDP::set_rounding_upward();
             VOLATILE FloatDP fvu=i1->coefficient()+i2->coefficient()*c3;
             VOLATILE FloatDP mfvl=(-i1->coefficient())+i2->coefficient()*(-c3);

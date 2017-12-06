@@ -181,8 +181,8 @@ compute_norms(EffectiveVectorFunction const& f, UpperBoxType const& B) const {
         auto Dfi=Df[i].expansion();
         FloatDPError Ki=ze, Li=ze, Hi=ze; FloatDPUpperBound LNi=ze;
         for (auto ac : Dfi) {
-            MultiIndex const& a=ac.index();
-            FloatDPBounds const& c=ac.coefficient();
+            ConstReferenceType<MultiIndex> a=ac.index();
+            ConstReferenceType<FloatDPBounds> c=ac.coefficient();
             if (a.degree()==0) {
                 Ki += mag(c);
             } else if (a.degree()==1) {
@@ -277,8 +277,8 @@ compute_norms(EffectiveVectorFunction const& f, UpperBoxType const& B) const {
         auto Dfi=Df[i].expansion();
         FloatDPError Ki=ze, Li=ze; FloatDPUpperBound LNi=ze;
         for (auto ac : Dfi) {
-            MultiIndex const& a=ac.index();
-            FloatDPBounds const& c=ac.coefficient();
+            ConstReferenceType<MultiIndex> a=ac.index();
+            ConstReferenceType<FloatDPBounds> c=ac.coefficient();
             if (a.degree()==0) {
                 Ki += mag(c);
             } else if (a.degree()==1) {
@@ -381,8 +381,8 @@ Void LohnerReconditioner::simplify(ValidatedVectorFunctionModelDP& phi) const {
         auto p=tphi[i].model().expansion();
 
         for (auto ac : p) {
-            MultiIndex const& a=ac.index();
-            FloatDPValue& c=ac.coefficient();
+            ConstReferenceType<MultiIndex> a=ac.index();
+            ReferenceType<FloatDPValue> c=ac.coefficient();
             for (auto j : range(m)) {
                 if (a[j]!=0) {
                     C[j][i] = C[j][i]+abs(c).raw();

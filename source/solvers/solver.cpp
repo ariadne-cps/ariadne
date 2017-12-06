@@ -98,7 +98,7 @@ jacobian2_range(const Vector<ValidatedTaylorModelDP>& f)
             for(Nat k=0; k!=rs; ++k) {
                 const Nat c=iter->index()[has+k];
                 if(c>0) {
-                    const FloatDPValue& x=iter->coefficient();
+                    ConstReferenceType<FloatDPValue> x=iter->coefficient();
                     if(iter->index().degree()==1) { J[i][k]+=x; }
                     else { J[i][k]+=ValidatedNumericType(-1,1)*x*c; }
                     //std::cerr<<"  J="<<J<<" i="<<i<<" a="<<iter->index()<<" k="<<k<<" c="<<c<<" x="<<x<<std::endl;

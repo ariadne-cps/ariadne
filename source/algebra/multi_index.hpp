@@ -160,6 +160,8 @@ class MultiIndex
 
     friend Void iadd(MultiIndex& r, const MultiIndex& a1, const MultiIndex& a2); // inline
 
+    friend Void swap(MultiIndex& a1, MultiIndex& a2); // inline
+   
     friend Bool graded_less(const MultiIndex& a1, const MultiIndex& a2);
     friend Bool lexicographic_less(const MultiIndex& a1, const MultiIndex& a2);
     friend Bool reverse_lexicographic_less(const MultiIndex& a1, const MultiIndex& a2);

@@ -210,7 +210,7 @@ template<class X> Matrix<X> Differential<X>::half_hessian() const {
     while(iter!=this->end() && iter->index().degree()<=1) { ++iter; }
     SizeType i=0; SizeType j=1;
     while(iter!=this->end() && iter->index().degree()<=2) {
-        const MultiIndex& a=iter->index(); const X& c=iter->coefficient();
+        ConstReferenceType<MultiIndex> a=iter->index(); ConstReferenceType<X> c=iter->coefficient();
         while(a[i]==0) { ++i; j=i+1; }
         if(a[i]==2) { H[i][i]=c; }
         else { while(a[j]==0) { ++j; } H[i][j]=c; H[j][i]=c; }
@@ -315,7 +315,7 @@ template<class X>
 Differential<X> AlgebraOperations<Differential<X>>::apply(Pos op, Differential<X> x)
 {
     for(auto iter=x.begin(); iter!=x.end(); ++iter) {
-        X& xa=iter->coefficient();
+        ReferenceType<X> xa=iter->coefficient();
         xa=+xa;
     }
     return std::move(x);
@@ -325,7 +325,7 @@ template<class X>
 Differential<X> AlgebraOperations<Differential<X>>::apply(Neg op, Differential<X> x)
 {
     for(auto iter=x.begin(); iter!=x.end(); ++iter) {
-        X& xa=iter->coefficient();
+        ReferenceType<X> xa=iter->coefficient();
         xa=-xa;
     }
     return std::move(x);
@@ -352,7 +352,7 @@ Differential<X> AlgebraOperations<Differential<X>>::apply(Mul op, Differential<X
         x.clear();
     } else {
         for(auto iter=x.begin(); iter!=x.end(); ++iter) {
-            static_cast<X&>(iter->coefficient())*=c;
+            iter->coefficient()*=c;
         }
     }
     return std::move(x);
@@ -439,7 +439,7 @@ Differential<X> AlgebraOperations<Differential<X>>::apply(Mul op, const Differen
         for(ConstIterator yiter=y.expansion().begin(); yiter!=y.expansion().end(); ++yiter) {
             if(xiter->index().degree()+yiter->index().degree()>r.degree()) { break; }
             a=xiter->index()+yiter->index();
-            c=static_cast<const X&>(xiter->coefficient())*static_cast<const X&>(yiter->coefficient());
+            c=xiter->coefficient()*yiter->coefficient();
             r.expansion().append(a,c);
         }
     }
@@ -513,8 +513,8 @@ template<class X> Differential<X> _evaluate(const Differential<X>& x, const Vect
     Differential<X> r(zero);
     for(auto iter=x.begin(); iter!=x.end(); ++iter)
     {
-        const MultiIndex& j=iter->index();
-        const X& c=iter->coefficient();
+        ConstReferenceType<MultiIndex> j=iter->index();
+        ConstReferenceType<X> c=iter->coefficient();
         Differential<X> t=one;
         for(SizeType k=0; k!=ms; ++k) {
             t=t*val[k][j[k]];

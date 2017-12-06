@@ -477,8 +477,8 @@ Y evaluate(const Expansion<MultiIndex,X>& x, const Vector<Y>& y)
     for(typename Expansion<MultiIndex,X>::ConstIterator iter=x.begin();
         iter!=x.end(); ++iter)
     {
-        const MultiIndex& j=iter->index();
-        const X& c=iter->coefficient();
+        ConstReferenceType<MultiIndex> j=iter->index();
+        ConstReferenceType<X> c=iter->coefficient();
         t=one;
         for(Nat k=0; k!=x.argument_size(); ++k) {
             for(Nat l=0; l!=j[k]; ++l) {

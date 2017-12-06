@@ -1127,8 +1127,8 @@ TaylorModel<ValidatedTag,FloatDP> recondition(const TaylorModel<ValidatedTag,Flo
     FloatDPError& error=*error_ptr;
 
     for(TaylorModel<ValidatedTag,FloatDP>::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
-        MultiIndex const& xa=iter->index();
-        FloatDPValue const& xv=iter->coefficient();
+        ConstReferenceType<MultiIndex> xa=iter->index();
+        ConstReferenceType<FloatDPValue> xv=iter->coefficient();
         Bool keep=true;
         for(SizeType k=0; k!=number_of_discarded_variables; ++k) {
             if(xa[discarded_variables[k]]!=0) {

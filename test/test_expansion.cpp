@@ -210,7 +210,7 @@ template<class F> Void TestExpansion<F>::test_data_access()
     // This behaviour should be changed in future versions if technologically
     // feasible.
     Iterator iter=e.begin();
-    const MultiIndex& aref=iter->index();
+    ConstReferenceType<MultiIndex> aref=iter->index();
     const F& xref=iter->coefficient();
     F x1=iter->coefficient();
     ++iter;

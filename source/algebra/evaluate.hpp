@@ -52,6 +52,4 @@ template<class X, class A> Vector<A> evaluate(const Vector< Expansion<MultiIndex
 
 } // namespace Ariadne
 
-#include "evaluate.tpl.hpp"
-
 #endif /* ARIADNE_EVALUATE_HPP */

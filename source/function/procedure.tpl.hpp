@@ -29,9 +29,10 @@
 
 #include "numeric/operators.hpp"
 #include "function/formula.hpp"
-#include "algebra/evaluate.hpp"
 #include "algebra/expansion.hpp"
 #include "geometry/box.hpp"
+
+#include "algebra/evaluate.tpl.hpp"
 
 namespace Ariadne {
 

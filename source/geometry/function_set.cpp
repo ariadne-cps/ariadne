@@ -38,6 +38,7 @@
 #include "geometry/grid_set.hpp"
 #include "geometry/paver.hpp"
 #include "algebra/algebra.hpp"
+#include "algebra/expansion.inl.hpp"
 
 #include "output/graphics_interface.hpp"
 #include "output/drawer.hpp"

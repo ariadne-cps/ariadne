@@ -30,6 +30,7 @@
 #include <stdexcept>
 
 #include "expansion.hpp"
+#include "expansion.inl.hpp"
 #include "numeric/logical.hpp"
 
 namespace Ariadne {
@@ -310,6 +311,10 @@ template<class X> Bool Expansion<MultiIndex,X>::operator==(const Expansion<Multi
 
 template<class X> Bool Expansion<MultiIndex,X>::operator!=(const Expansion<MultiIndex,X>& other) const {
     return !(*this==other);
+}
+
+template<class X> Bool Expansion<MultiIndex,X>::same_as(const Expansion<MultiIndex,X>& other) const {
+    return (*this==other);
 }
 
 template<class X> auto Expansion<MultiIndex,X>::insert(Iterator pos, const MultiIndex& a, const X& c) -> Iterator {

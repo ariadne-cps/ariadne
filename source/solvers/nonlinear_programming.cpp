@@ -51,6 +51,8 @@
 #include "algebra/multi_index-noaliasing.hpp"
 #include "solvers/constraint_solver.hpp"
 
+#include "algebra/expansion.inl.hpp"
+
 namespace Ariadne {
 
 inline Sweeper<FloatDP> default_sweeper() { return Sweeper<FloatDP>(); }

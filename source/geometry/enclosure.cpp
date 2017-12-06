@@ -70,6 +70,8 @@
 #include "numeric/operators.hpp"
 #include "expression/space.hpp"
 
+#include "algebra/expansion.inl.hpp"
+
 
 namespace Ariadne {
 

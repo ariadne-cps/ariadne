@@ -26,6 +26,7 @@
 #include "config.h"
 #include "numeric/numeric.hpp"
 #include "algebra/expansion.hpp"
+#include "algebra/expansion.inl.hpp"
 
 #include "test.hpp"
 using namespace std;

@@ -39,7 +39,6 @@
 #include "algebra/expansion.hpp"
 #include "algebra/operations.hpp"
 #include "algebra/differential.hpp"
-#include "algebra/evaluate.hpp"
 
 
 namespace Ariadne {

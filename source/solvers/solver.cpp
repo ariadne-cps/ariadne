@@ -39,6 +39,8 @@
 #include "function/function.hpp"
 #include "function/function_model.hpp"
 
+#include "algebra/expansion.inl.hpp"
+
 namespace Ariadne {
 
 namespace {

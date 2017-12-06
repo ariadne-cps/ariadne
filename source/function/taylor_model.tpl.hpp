@@ -39,6 +39,8 @@
 #include "function/function.hpp"
 #include "utility/exceptions.hpp"
 
+#include "algebra/expansion.inl.hpp"
+#include "algebra/evaluate.tpl.hpp"
 #include "algebra/algebra_operations.tpl.hpp"
 
 #define VOLATILE ;

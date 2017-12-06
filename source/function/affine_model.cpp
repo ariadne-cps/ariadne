@@ -33,8 +33,8 @@
 
 #include "function/affine.hpp"
 #include "function/taylor_function.hpp"
-#include "algebra/vector.hpp"
 
+#include "algebra/expansion.inl.hpp"
 #include "function/affine_model.tpl.hpp"
 
 

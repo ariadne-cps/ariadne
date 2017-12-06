@@ -24,6 +24,7 @@
 #include "differential_inclusion.hpp"
 #include "function/taylor_function.hpp"
 #include "solvers/integrator.hpp"
+#include "algebra/expansion.inl.hpp"
 
 namespace Ariadne {
 

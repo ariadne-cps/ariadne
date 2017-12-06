@@ -44,6 +44,8 @@
 #include "function/polynomial.hpp"
 #include "geometry/interval.hpp"
 
+#include "algebra/expansion.inl.hpp"
+
 namespace Ariadne {
 
 static const FloatDPValue zero=FloatDPValue(0,dp);

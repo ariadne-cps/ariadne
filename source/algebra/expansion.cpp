@@ -66,4 +66,5 @@ namespace Ariadne {
     template class SortedExpansion<MultiIndex,FloatMPBounds,ReverseLexicographicIndexLess>;
     template class SortedExpansion<MultiIndex,FloatMPApproximation,ReverseLexicographicIndexLess>;
 
+    template Expansion<MultiIndex,Interval<FloatDPUpperBound>>::Expansion(Expansion<MultiIndex,FloatDPBounds> const&);
 }

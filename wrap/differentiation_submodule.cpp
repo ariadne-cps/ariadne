@@ -35,6 +35,7 @@
 #include "algebra/univariate_differential.hpp"
 #include "algebra/fixed_differential.hpp"
 #include "algebra/fixed_univariate_differential.hpp"
+#include "algebra/expansion.inl.hpp"
 
 using namespace boost::python;
 using namespace Ariadne;

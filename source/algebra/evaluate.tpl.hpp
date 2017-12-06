@@ -1,5 +1,5 @@
 /***************************************************************************
- *            expansion.tpl.hpp
+ *            evaluate.tpl.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -24,6 +24,7 @@
 #include "algebra/vector.hpp"
 #include "algebra/multi_index.hpp"
 #include "algebra/expansion.hpp"
+#include "algebra/expansion.inl.hpp"
 
 namespace Ariadne {
 

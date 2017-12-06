@@ -43,6 +43,7 @@
 
 #include "algebra/covector.hpp"
 #include "function/function.hpp"
+#include "algebra/expansion.inl.hpp"
 
 using namespace std;
 using namespace Ariadne;

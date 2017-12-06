@@ -134,6 +134,13 @@ add_subdirectory(wrap)
 add_subdirectory(python)
 add_subdirectory(examples)
 
+add_library(ariadne-core SHARED
+    $<TARGET_OBJECTS:ariadne-utility>
+    $<TARGET_OBJECTS:ariadne-numeric>
+    $<TARGET_OBJECTS:ariadne-algebra>
+    source/geometry/interval.cpp
+)
+
 add_library(ariadne-kernel SHARED
     $<TARGET_OBJECTS:ariadne-utility>
     $<TARGET_OBJECTS:ariadne-numeric>
@@ -161,9 +168,11 @@ add_library(ariadne SHARED
 
 target_link_libraries(ariadne dl)
 target_link_libraries(ariadne-kernel dl)
+target_link_libraries(ariadne-core dl)
 
 target_link_libraries(ariadne gmp mpfr)
 target_link_libraries(ariadne-kernel gmp mpfr)
+target_link_libraries(ariadne-core gmp mpfr)
 
 if(Boost_SERIALIZATION_FOUND)
     target_link_libraries(ariadne boost_system boost_serialization)

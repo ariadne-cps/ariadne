@@ -245,6 +245,10 @@ Comparison cmp(Dyadic const& x1, Dyadic const& x2) {
     return c==0 ? Comparison::EQUAL : (c>0?Comparison::GREATER:Comparison::LESS);
 }
 
+Sign sgn(Dyadic const& x) {
+    return static_cast<Sign>(static_cast<char>(cmp(x,Dyadic(0))));
+}
+
 Boolean eq(Dyadic const& x1, Dyadic const& x2) {
     return mpf_cmp(x1._mpf,x2._mpf)==0;
 }

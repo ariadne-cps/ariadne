@@ -87,6 +87,8 @@ class Rational
     Natural denominator() const;
     friend Rational operator/(Integer const& z1, Integer const& z2);
 
+    friend Sign sgn(Rational const& q);
+
     friend Comparison cmp(Rational const& q1, Rational const& q2);
     friend Comparison cmp(Rational const& q1, ExactDouble const& d2);
     friend Comparison cmp(ExactDouble const& d1, Rational const& q2);

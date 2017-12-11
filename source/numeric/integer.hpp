@@ -137,6 +137,8 @@ class Integer
     friend Integer rem(Integer const& z1, Integer const& z2);
     friend Integer operator%(Integer const& z1, Integer const& z2);
 
+    friend Sign sgn(Integer const& z);
+
     friend OutputStream& operator<<(OutputStream& os, Integer const& z);
     friend Integer operator"" _z(unsigned long long int n);
 /*

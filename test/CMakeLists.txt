@@ -1,5 +1,8 @@
 set(UNIT_TESTS_NUMERIC
     test_logical
+    test_integer
+    test_dyadic
+    test_rational
     test_real
     test_number
     test_float

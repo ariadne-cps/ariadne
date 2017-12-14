@@ -189,16 +189,12 @@ _evolution(EnclosureListType& final_sets,
                                   semantics,reach);
         }
 
-        if(verbosity==1) {
-            std::cerr << "\r"
-                        <<"#w="<<std::setw(4)<<working_sets.size()
+        ARIADNE_LOG(1,"#w="<<std::setw(4)<<working_sets.size()
                         <<"#r="<<std::setw(4)<<std::left<<reach_sets.size()
                         <<" t="<<std::setw(7)<<std::fixed<<current_time.get_d()
                         <<" p="<<std::setw(4)<<std::left<<current_set_model.number_of_parameters()
                         <<" r="<<std::setw(7)<<current_set_model.radius()
-                        <<" c="<<current_set_model.centre()
-                        <<"                      ";
-        }
+                        <<" c="<<current_set_model.centre() << "\n");
 
     }
 

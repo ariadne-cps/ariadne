@@ -235,6 +235,15 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     //const Nat ng=initial_set_model.argument_size();
 
 
+    // Test to see if set requires reconditioning
+    if(this->_configuration->enable_reconditioning() &&
+       possibly(norm(current_set_model.state_function().errors()) > this->_configuration->maximum_spacial_error())) {
+        ARIADNE_LOG(4," reconditioning: errors "<<current_set_model.state_function().errors()<<"\n");
+        current_set_model.recondition();
+        working_sets.append(make_pair(current_time,current_set_model));
+        return;
+    }
+
     /////////////// Main Evolution ////////////////////////////////
     const FunctionType& dynamic=_sys_ptr->function();
 
@@ -284,6 +293,8 @@ VectorFieldEvolverConfiguration::VectorFieldEvolverConfiguration()
 {
     maximum_step_size(1.0);
     maximum_enclosure_radius(100.0);
+    enable_reconditioning(true);
+    maximum_spacial_error(1e-2);
 }
 
 
@@ -293,6 +304,8 @@ VectorFieldEvolverConfiguration::write(OutputStream& os) const
     os << "VectorFieldEvolverSettings"
        << ",\n  maximum_step_size=" << maximum_step_size()
        << ",\n  maximum_enclosure_radius=" << maximum_enclosure_radius()
+       << ",\n  enable_reconditioning=" << enable_reconditioning()
+       << ",\n  maximum_spacial_error=" << maximum_spacial_error()
        << "\n)\n";
     return os;
 }

@@ -158,6 +158,13 @@ class VectorFieldEvolverConfiguration : public ConfigurationInterface
     //! Decreasing this value increases the accuracy of the computation of an over-approximation.
     RealType _maximum_enclosure_radius;
 
+    //! \brief The maximum allowable approximation error in the parameter-to-space mapping of an enclosure set.
+    //! Decreasing this value increases the accuracy of the computation of an over-approximation.
+    RealType _maximum_spacial_error;
+
+    //! \brief Enable reconditioning of basic sets (false by default).
+    Bool _enable_reconditioning;
+
   public:
 
     const RealType& maximum_step_size() const { return _maximum_step_size; }
@@ -165,6 +172,12 @@ class VectorFieldEvolverConfiguration : public ConfigurationInterface
 
     const RealType& maximum_enclosure_radius() const { return _maximum_enclosure_radius; }
     Void maximum_enclosure_radius(const RealType value) { _maximum_enclosure_radius = value; }
+
+    const RealType& maximum_spacial_error() const { return _maximum_spacial_error; }
+    Void maximum_spacial_error(const RealType value) { _maximum_spacial_error = value; }
+
+    const Bool& enable_reconditioning() const { return _enable_reconditioning; }
+    Void enable_reconditioning(const Bool value) { _enable_reconditioning = value; }
 
   public:
 

@@ -143,7 +143,8 @@ class VectorFieldEvolver
 class VectorFieldEvolverConfiguration : public ConfigurationInterface
 {
   public:
-    typedef double RealType;
+    typedef FloatDPValue RealType;
+    typedef double RawRealType;
 
     //! \brief Default constructor gives reasonable values.
     VectorFieldEvolverConfiguration();
@@ -168,13 +169,13 @@ class VectorFieldEvolverConfiguration : public ConfigurationInterface
   public:
 
     const RealType& maximum_step_size() const { return _maximum_step_size; }
-    Void maximum_step_size(const RealType value) { _maximum_step_size = value; }
+    Void maximum_step_size(const RawRealType value) { _maximum_step_size = static_cast<RealType>(value); }
 
     const RealType& maximum_enclosure_radius() const { return _maximum_enclosure_radius; }
-    Void maximum_enclosure_radius(const RealType value) { _maximum_enclosure_radius = value; }
+    Void maximum_enclosure_radius(const RawRealType value) { _maximum_enclosure_radius = static_cast<RealType>(value); }
 
     const RealType& maximum_spacial_error() const { return _maximum_spacial_error; }
-    Void maximum_spacial_error(const RealType value) { _maximum_spacial_error = value; }
+    Void maximum_spacial_error(const RawRealType value) { _maximum_spacial_error = static_cast<RealType>(value); }
 
     const Bool& enable_reconditioning() const { return _enable_reconditioning; }
     Void enable_reconditioning(const Bool value) { _enable_reconditioning = value; }

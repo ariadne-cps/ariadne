@@ -18,13 +18,15 @@ TestCrossingsIssue::TestCrossingsIssue(unsigned int verbosity) : _verbosity(verb
 
 void TestCrossingsIssue::test()
 {
+    // Set the accuracy of numerical output
+    FloatDPApproximation::set_output_places(7);
+
     ARIADNE_TEST_CALL(test_crossings());
 }
 
 void TestCrossingsIssue::test_crossings()
 {
     /// Build the Hybrid System
-
     RealConstant v("v",0.092_dec);
     RealConstant L("L",0.00025_dec);
     RealConstant M("M",0.0023_dec);
@@ -48,8 +50,8 @@ void TestCrossingsIssue::test_crossings()
     DiscreteEvent comes("comes");
     DiscreteEvent leaves("leaves");
 
-    automaton.new_transition(far,comes,close,{next(x)=x},sqr(x-M)<=sqr(L));
-	automaton.new_transition(close,leaves,far,{next(x)=x},sqr(x-M)>=sqr(L));
+    automaton.new_transition(far,comes,close,{next(x)=x+L/4},sqr(x-M)<=sqr(L),EventKind::URGENT);
+	automaton.new_transition(close,leaves,far,{next(x)=x+L/2},sqr(x-M)>=sqr(L),EventKind::URGENT);
 
     // Create a GeneralHybridEvolver object
     GeneralHybridEvolver evolver(automaton);
@@ -57,11 +59,12 @@ void TestCrossingsIssue::test_crossings()
 
     // Set the evolution parameters
     evolver.configuration().set_maximum_enclosure_radius(0.5);
-    evolver.configuration().set_maximum_step_size(0.0001);
+    evolver.configuration().set_maximum_step_size(0.10);
 
     typedef GeneralHybridEvolver::OrbitType OrbitType;
 
-    HybridSet initial_set({automaton|far},{x==0});
+    Real initial_x(0);
+    HybridSet initial_set({automaton|far},{x==initial_x});
 
     Nat max_n = 3; Real max_t = 0.046_dec;
     HybridTime evolution_time(max_t,max_n);
@@ -69,14 +72,21 @@ void TestCrossingsIssue::test_crossings()
     std::cout << "Computing orbit... " << std::flush;
     OrbitType orbit = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
     std::cout << "done." << std::endl;
-/*
-    Real max_x = max_t * v;
+
+    Real max_x = initial_x + max_t * v + 2*L;
     HybridBoxSet guard_set(automaton|far,{t.in(0,2*max_t),x.in(M-L,M+L)});
     plot("crossings_issue",Axes2d(0.0,t,1.1*max_t.get_d(), 0.0,x,1.1*max_x.get_d()), Colour(1.0,0.5,0.0), guard_set, Colour(0.0,0.5,1.0), orbit);
-*/
 
     for (auto enclosure : orbit.final()) {
-    	ARIADNE_TEST_ASSERT(enclosure.previous_events().size() == 2);
+        enclosure.reduce();
+//        ARIADNE_TEST_ASSERT( definitely(enclosure.is_empty()) or enclosure.previous_events().size() == 2);
+        if (not (enclosure.previous_events().size()==2 or definitely(enclosure.is_empty()))) {
+            ListSet<HybridEnclosure> split_enclosures = enclosure.split();
+            for (auto split_enclosure : split_enclosures) {
+                split_enclosure.reduce();
+                ARIADNE_TEST_ASSERT( split_enclosure.is_empty() or split_enclosure.previous_events().size() == 2);
+            }
+        }
     }
 }
 

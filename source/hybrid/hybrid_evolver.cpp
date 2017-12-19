@@ -1071,6 +1071,7 @@ _apply_guard(List<HybridEnclosure>& sets,
                                    maximal_guard_function<<" "<<set);
                 ARIADNE_ASSERT_MSG(final_guard_function.argument_size()==set.parameter_domain().size(),
                                    final_guard_function<<" "<<set);
+
                 // If no points in the set arise from trajectories which will later leave the progress set,
                 // then we only need to look at the maximum value of the guard.
                 HybridEnclosure eventually_hitting_set=set;
@@ -1093,30 +1094,37 @@ _apply_guard(List<HybridEnclosure>& sets,
                     set.new_parameter_constraint( event, final_guard_function <= zero );
                     break;
                 }
-                // Split the set into two components, one corresponding to
-                // points which miss the guard completely, the other to points which
-                // eventually hit the guard, ensuring that the set stops at the first crossing
+
+                // Split the set into three components,
+                //   hitting_set: points which hit the guard in the future
+                //   missing_set: points whose trajectories hich miss the guard completely
+                //   past_set: points which would have hit the guard in the past, but do not in the future
                 HybridEnclosure hitting_set=set;
                 HybridEnclosure& missing_set=set;
-                missing_set.new_parameter_constraint( event, maximal_guard_function<=zero );
+                HybridEnclosure past_set=set;
+                missing_set.new_parameter_constraint( event, maximal_guard_function <= zero );
+                hitting_set.new_parameter_constraint( event, maximal_guard_function >= zero );
                 hitting_set.new_parameter_constraint( event, elapsed_time_function <= critical_time_function );
-                hitting_set.new_state_constraint(event, guard_function<=zero);
-                ARIADNE_LOG(9,"missing_set.is_empty()="<<missing_set.is_empty()<<"\n");
-                ARIADNE_LOG(9,"hitting_set.is_empty()="<<hitting_set.is_empty()<<"\n");
-                if(definitely(hitting_set.is_empty())) {
-                    // swap out hitting set
-                    std::swap(hitting_set,missing_set);
-                } else if(definitely(missing_set.is_empty())) {
-                    // do not use missing set
-                } else {
+                hitting_set.new_parameter_constraint( event, final_guard_function <= zero );
+                past_set.new_parameter_constraint( event, maximal_guard_function >= zero );
+                past_set.new_parameter_constraint( event, critical_time_function <= zero );
+//                hitting_set.reduce();
+//                missing_set.reduce();
+//                past_set.reduce();
+                if(definitely(missing_set.is_empty())) {
+                    // swap out missing set
+                    if (not definitely(hitting_set.is_empty())) {
+                        std::swap(hitting_set,missing_set);
+                    } else {
+                        std::swap(past_set,missing_set);
+                    }
+                } else if(not definitely(hitting_set.is_empty())) {
                     sets.append(hitting_set);
                 }
+                if (not definitely(past_set.is_empty())) {
+                    sets.append(past_set);
+                }
                 break;
-                // Code below is always exact, but uses two sets
-                // set1.new_parameter_constraint(event,final_guard <= zero);
-                // set2.new_parameter_constraint(event, elapsed_time <= critical_time);
-                // set1.new_parameter_constraint(event, maximal_guard <= zero);
-                // set2.new_parameter_constraint(event, elapsed_time >= critical_time);
             }
             case CrossingKind::DEGENERATE: case CrossingKind::CONCAVE: {
                 // The crossing with the guard set is not one of the kinds handled above.

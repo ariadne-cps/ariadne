@@ -17,3 +17,6 @@ add_subdirectory(watertank)
 add_subdirectory(twowatertanks)
 add_subdirectory(threewatertanks)
 add_subdirectory(noisy)
+
+add_custom_target(examples-external)
+add_subdirectory(external)

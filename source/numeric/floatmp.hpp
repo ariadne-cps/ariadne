@@ -139,6 +139,7 @@ class FloatMP {
   public:
     FloatMP const& raw() const;
     mpfr_t const& get_mpfr() const;
+    mpfr_t& get_mpfr();
     double get_d() const;
   public:
     friend Bool is_nan(FloatMP const& x);

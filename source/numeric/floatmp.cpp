@@ -258,6 +258,14 @@ mpfr_t const& FloatMP::get_mpfr() const {
     return this->_mpfr;
 }
 
+mpfr_t& FloatMP::get_mpfr() {
+    return this->_mpfr;
+}
+
+const FloatMP& FloatMP::raw() const {
+    return *this;
+}
+
 FloatMP FloatMP::nan(MultiplePrecision pr) {
     FloatMP x(pr);
     mpfr_set_nan(x._mpfr);

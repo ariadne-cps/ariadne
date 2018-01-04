@@ -167,7 +167,7 @@ template<class O, class... A> inline Real make_real(O o, A... a) {
     return Real(std::make_shared<RealWrapper<O,A...>>(o,a...));
 }
 
-inline Real::Real(SharedPointer<RealInterface> p) : _ptr(p) { }
+Real::Real(SharedPointer<RealInterface> p) : _ptr(p) { }
 
 
 // FIXME: Is this necessary?

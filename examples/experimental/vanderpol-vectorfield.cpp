@@ -37,17 +37,17 @@ int main()
 
     MaximumError max_err=0.01;
     TaylorSeriesIntegrator integrator(max_err);
-    integrator.set_maximum_step_size(0.01);
+    integrator.set_maximum_step_size(0.0625);
 
     VectorFieldEvolver evolver(dynamics,integrator);
     evolver.configuration().maximum_enclosure_radius(1.0);
-    evolver.configuration().maximum_step_size(0.01);
+    evolver.configuration().maximum_step_size(0.0625);
     evolver.configuration().maximum_spacial_error(0.0001);
-    evolver.verbosity = 1;
+    evolver.verbosity = 0;
     std::cout <<  evolver.configuration() << std::endl;
 
     Real x0(2.01);
-    Real eps(0.0);
+    Real eps = 1/1024_q;
 
     Box<RealInterval> initial_set({{x0-eps,x0+eps},{-eps,eps}});
 
@@ -57,7 +57,7 @@ int main()
     std::cout << "Computing orbit... " << std::flush;
     auto orbit = evolver.orbit(evolver.enclosure(initial_set),evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
-
+/*
     plot("vanderpol-vf",ApproximateBoxType({{-2.1,2.1}, {-3.0,3.0}}), Colour(0.0,0.5,1.0), orbit);
 
     std::cout << "Discretising orbit" << std::flush;
@@ -73,5 +73,5 @@ int main()
 
     // The following currently fails since auxiliary variables are not tracked
     plot("vanderpol-vf-reach",ApproximateBoxType({{-2.1,2.1}, {-3.0,3.0}}), Colour(0.0,0.5,1.0), gts);
-
+*/
 }

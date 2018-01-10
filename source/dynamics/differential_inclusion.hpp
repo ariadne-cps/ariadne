@@ -131,6 +131,8 @@ class InclusionIntegratorBase : public virtual InclusionIntegratorInterface, pub
     Pair<ExactTimeStepType,UpperBoxType> flow_bounds(ValidatedVectorFunction f, UpperBoxType V, ExactBoxType D, ApproximateTimeStepType hsug) const;
 
     virtual ValidatedVectorFunctionModelType compute_step(EffectiveVectorFunction f, BoxDomainType V, BoxDomainType D, ExactTimeStepType h, UpperBoxType B) const = 0;
+  private:
+    ValidatedVectorFunctionModelDP compute_reach_function(ValidatedVectorFunctionModelDP evolve_function, ValidatedVectorFunctionModelDP Phi, PositiveFloatDPValue t, PositiveFloatDPValue new_t) const;
 };
 
 class InclusionIntegrator3rdOrder : public InclusionIntegratorBase {

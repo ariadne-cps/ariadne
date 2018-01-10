@@ -81,74 +81,68 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegratorBase::flow(EffectiveVect
         assert(Phi.domain()[n].upper()==h);
         PositiveFloatDPValue new_t=cast_positive(cast_exact((t+h).lower()));
 
-        // Simplify terms in Phi
-        ValidatedVectorTaylorFunctionModelDP& TPhi = const_cast<ValidatedVectorTaylorFunctionModelDP&>(dynamic_cast<ValidatedVectorTaylorFunctionModelDP const&>(*Phi.raw_pointer()));
-        ARIADNE_LOG(6,"TPhi="<<TPhi<<"\n");
-        //TPhi.set_properties(ThresholdSweeper<FloatDP>(pr,4e-3));
-        //TPhi.simplify();
-        ARIADNE_LOG(6,"TPhi="<<TPhi<<"\n");
         ARIADNE_LOG(6,"Phi="<<Phi<<"\n");
         assert(Phi.domain()[n].upper()==h);
         ARIADNE_LOG(5,"Phi.domain()="<<Phi.domain()<<"\n");
 
-        assert(evolve_function.result_size()==n);
-        SizeType p0=evolve_function.argument_size()-n;
-        SizeType p1=Phi.argument_size()-(n+1);
-
-        BoxDomainType Xi=evolve_function.domain()[range(0,n)];
-        BoxDomainType A0=evolve_function.domain()[range(n,n+p0)];
-        BoxDomainType A1=Phi.domain()[range(n+1,n+1+p1)];
-
-        auto Psi = partial_evaluate(Phi,n,FloatDPValue(h));
-        ARIADNE_LOG(6,"Psi="<<Psi<<"\n");
-
-        // Evolve function is xi(x,a) at s; Flow is phi(x,h,b)
-        // Want (x,t,a,b):->phi(xi(x,a),t-s,b))
-
-        auto swp=TPhi.properties();
-        auto Tau=IntervalDomainType(t,new_t);
-        ARIADNE_LOG(6,"Tau="<<Tau<<"\n");
-        BoxDomainType DTA = join(Xi,Tau,A0,A1);
-        ARIADNE_LOG(6,"DTA="<<DTA<<"\n");
-        ValidatedVectorTaylorFunctionModelDP xf=ValidatedVectorTaylorFunctionModelDP::projection(DTA,range(0,n),swp);
-        ValidatedScalarTaylorFunctionModelDP tf=ValidatedScalarTaylorFunctionModelDP::coordinate(DTA,n,swp);
-        ARIADNE_LOG(6,"tf="<<tf<<"\n");
-        ValidatedScalarTaylorFunctionModelDP hf=tf-t;
-        ARIADNE_LOG(6,"hf="<<hf<<"\n");
-        ValidatedVectorTaylorFunctionModelDP a1f=ValidatedVectorTaylorFunctionModelDP::projection(DTA,range(n+1+p0,n+1+p0+p1),swp);
-        ARIADNE_LOG(6,"a1f="<<join(xf,a1f)<<"\n");
-        ValidatedVectorTaylorFunctionModelDP a0f=ValidatedVectorTaylorFunctionModelDP::projection(DTA,range(n+1,n+1+p0),swp);
-        ARIADNE_LOG(6,"a0f="<<join(xf,a0f)<<"\n");
-        ARIADNE_LOG(6,"join(xf,a0f)="<<join(xf,a0f)<<"\n");
-
-        ValidatedVectorTaylorFunctionModelDP ef=compose(evolve_function,join(xf,a0f));
-        ARIADNE_LOG(5,"ef.domain()"<<ef.domain()<<"\n");
-        ARIADNE_LOG(5,"ef.range()"<<ef.range()<<"\n");
-
-        ValidatedVectorFunctionModelDP reach_function=compose(Phi,join(ef,hf,a1f));
+        ValidatedVectorFunctionModelDP reach_function=compute_reach_function(evolve_function, Phi, t, new_t);
         ARIADNE_LOG(5,"reach_function="<<reach_function<<"\n");
-        //reach_function=this->_reconditioner->expand_errors(reach_function);
 
         evolve_function=partial_evaluate(reach_function,n,new_t);
+
         ARIADNE_LOG(5,"evolve_function="<<evolve_function<<"\n");
         ARIADNE_LOG(5,"evolve_function.range()="<<evolve_function.range()<<"\n");
 
         step+=1;
+
         if (step%this->_number_of_steps_between_simplifications==0) {
             this->_reconditioner->simplify(evolve_function);
+            ARIADNE_LOG(5,"new_evolve_function="<<evolve_function<<"\n");
+            ARIADNE_LOG(5,"new_evolve_function.range():"<<evolve_function.range()<<"\n");
         }
 
-        ARIADNE_LOG(5,"new_evolve_function="<<evolve_function<<"\n");
-        ARIADNE_LOG(5,"new_evolve_function.range():"<<evolve_function.range()<<"\n");
         t=new_t;
-        //reach_sets.append(lohner_approximation(reach_function));
         result.append(reach_function);
-
-        ARIADNE_LOG(5,"new_evolve_function.errors():"<<evolve_function.errors()<<"\n");
     }
     return result;
 }
 
+ValidatedVectorFunctionModelDP InclusionIntegratorBase::compute_reach_function(ValidatedVectorFunctionModelDP evolve_function, ValidatedVectorFunctionModelDP Phi, PositiveFloatDPValue t, PositiveFloatDPValue new_t) const {
+
+    // Evolve function is xi(x,a) at s; Flow is phi(x,h,b)
+    // Want (x,t,a,b):->phi(xi(x,a),t-s,b))
+
+    SizeType n=evolve_function.result_size();
+
+    SizeType p0=evolve_function.argument_size()-n;
+    SizeType p1=Phi.argument_size()-(n+1);
+
+    BoxDomainType Xi=evolve_function.domain()[range(0,n)];
+    BoxDomainType A0=evolve_function.domain()[range(n,n+p0)];
+    BoxDomainType A1=Phi.domain()[range(n+1,n+1+p1)];
+
+    auto swp=this->_sweeper;
+    auto Tau=IntervalDomainType(t,new_t);
+    ARIADNE_LOG(6,"Tau="<<Tau<<"\n");
+    BoxDomainType DTA = join(Xi,Tau,A0,A1);
+    ARIADNE_LOG(6,"DTA="<<DTA<<"\n");
+    ValidatedVectorTaylorFunctionModelDP xf=ValidatedVectorTaylorFunctionModelDP::projection(DTA,range(0,n),swp);
+    ValidatedScalarTaylorFunctionModelDP tf=ValidatedScalarTaylorFunctionModelDP::coordinate(DTA,n,swp);
+    ARIADNE_LOG(6,"tf="<<tf<<"\n");
+    ValidatedScalarTaylorFunctionModelDP hf=tf-t;
+    ARIADNE_LOG(6,"hf="<<hf<<"\n");
+    ValidatedVectorTaylorFunctionModelDP a1f=ValidatedVectorTaylorFunctionModelDP::projection(DTA,range(n+1+p0,n+1+p0+p1),swp);
+    ARIADNE_LOG(6,"a1f="<<join(xf,a1f)<<"\n");
+    ValidatedVectorTaylorFunctionModelDP a0f=ValidatedVectorTaylorFunctionModelDP::projection(DTA,range(n+1,n+1+p0),swp);
+    ARIADNE_LOG(6,"a0f="<<join(xf,a0f)<<"\n");
+    ARIADNE_LOG(6,"join(xf,a0f)="<<join(xf,a0f)<<"\n");
+
+    ValidatedVectorTaylorFunctionModelDP ef=compose(evolve_function,join(xf,a0f));
+    ARIADNE_LOG(5,"ef.domain()"<<ef.domain()<<"\n");
+    ARIADNE_LOG(5,"ef.range()"<<ef.range()<<"\n");
+
+    return compose(Phi,join(ef,hf,a1f));
+}
 
 Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegratorBase::flow_bounds(ValidatedVectorFunction f, UpperBoxType V, BoxDomainType D, PositiveFloatDPApproximation hsug) const {
 

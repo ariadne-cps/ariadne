@@ -137,6 +137,7 @@ template<class X> class Matrix
     Matrix();
 
     //! Construct a matrix with \a m rows and \a n columns with values uninitialised.
+    //! The values should be initialised using placement new.
     Matrix(SizeType m, SizeType n, Uninitialised);
 
     //! Construct a matrix with \a r rows and \a c columns with values initialised to zero.

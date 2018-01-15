@@ -25,6 +25,10 @@
 
 namespace Ariadne {
 
+template<class X> Matrix<X>::Matrix(SizeType m, SizeType n, Uninitialised)
+    : _zero(0), _rs(m), _cs(n), _ary(m*n,Uninitialised()) {
+}
+
 template<class X> Matrix<X>::Matrix(SizeType m, SizeType n, const X* p)
     : _zero(0), _rs(m), _cs(n), _ary(p,p+m*n) {
 }

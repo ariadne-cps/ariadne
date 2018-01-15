@@ -340,7 +340,12 @@ Expression<Integer> operator-(Expression<Integer> const& e1, Expression<Integer>
 Expression<Integer> operator*(Expression<Integer> const& e1, Expression<Integer> const& e2) {
     return make_expression<Integer>(Mul(),e1,e2); }
 
-
+Expression<Integer>& operator+=(Expression<Integer>& e1, Expression<Integer> const& e2) {
+    return e1=e1+e2; }
+Expression<Integer>& operator-=(Expression<Integer>& e1, Expression<Integer> const& e2) {
+    return e1=e1-e2; }
+Expression<Integer>& operator*=(Expression<Integer>& e1, Expression<Integer> const& e2) {
+    return e1=e1*e2; }
 
 Expression<Kleenean> sgn(Expression<Real> const& e) {
     return make_expression<Kleenean>(Sgn(),e); }
@@ -371,6 +376,15 @@ Expression<Real> operator*(Expression<Real> const& e1, Expression<Real> const& e
     return make_expression<Real>(Mul(),e1,e2); }
 Expression<Real> operator/(Expression<Real> const& e1, Expression<Real> const& e2) {
     return make_expression<Real>(Div(),e1,e2); }
+
+Expression<Real>& operator+=(Expression<Real>& e1, Expression<Real> const& e2) {
+    return e1=e1+e2; }
+Expression<Real>& operator-=(Expression<Real>& e1, Expression<Real> const& e2) {
+    return e1=e1-e2; }
+Expression<Real>& operator*=(Expression<Real>& e1, Expression<Real> const& e2) {
+    return e1=e1*e2; }
+Expression<Real>& operator/=(Expression<Real>& e1, Expression<Real> const& e2) {
+    return e1=e1/e2; }
 
 Expression<Real> pow(Expression<Real> const& e, Int n) {
     return make_expression<Real>(Pow(),e,n); }
@@ -896,6 +910,5 @@ Formula<Real> make_formula(const EffectiveScalarFunction& f);
 Expression<Real> make_expression(const Formula<Real>& f, const Space<Real>& s);
 Expression<Real> make_expression(const ScalarFunction<EffectiveTag>& f, const Space<Real>& s) {
     return make_expression(make_formula(f),s); }
-
 
 } // namespace Ariadne

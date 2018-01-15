@@ -36,6 +36,8 @@
 #include "function/function.hpp"
 #include "function/taylor_model.hpp"
 
+#include "algebra/matrix.tpl.hpp"
+
 #include "test.hpp"
 
 using namespace Ariadne;
@@ -56,6 +58,14 @@ class TestExpression {
         ARIADNE_TEST_ASSERT(a==RealVariable("a"));
         ARIADNE_TEST_ASSERT(a==RealVariable(a));
         ARIADNE_TEST_ASSERT(a!=RealVariable("b"));
+    }
+
+    Void test_expression() {
+        // Regression test for constructing Expression from 0 without being an ambiguous nullptr;
+        ARIADNE_TEST_CONSTRUCT(IntegerExpression,ze,(0));
+        ARIADNE_TEST_CONSTRUCT(RealExpression,re,(0));
+        RealExpression(0);
+        RealExpression(nullptr);
     }
 
     Void test_assignment() {
@@ -162,10 +172,12 @@ class TestExpression {
 
     Void test() {
         test_variables();
+        test_expression();
         test_assignment();
         test_parameters();
         test_function();
     }
+
 };
 
 

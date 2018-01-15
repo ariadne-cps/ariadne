@@ -76,7 +76,9 @@ class Expression
     typedef Constant<T> ConstantType;
     typedef Variable<T> VariableType;
   public:
-    explicit Expression(SharedPointer<const ExpressionNode<T>> const& eptr) : _root(eptr) { }
+    // Use template formulation to avoid ambiguity treating Expression(0) as a pointer construction.
+    template<class P, EnableIf<IsConvertible<P,SharedPointer<const ExpressionNode<T>>>> =dummy>
+        explicit Expression(P const& eptr) : _root(eptr) { }
   public:
     //! \brief Default expression is a constant with value \c 0.
     Expression();

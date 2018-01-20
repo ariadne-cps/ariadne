@@ -66,10 +66,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegratorBase::flow(EffectiveVect
             hsug=cast_positive(cast_exact((tmax-t).upper()));
         }
 
-        ARIADNE_LOG(4,"additional parameters="<<evolve_function.argument_size()-n<<"\n");
-        ARIADNE_LOG(5,"evolve_function.domain()="<<evolve_function.domain()<<"\n");
-        ARIADNE_LOG(5,"evolve_function.codomain()="<<evolve_function.codomain()<<"\n");
-
+        ARIADNE_LOG(4,"n. of extra parameters="<<evolve_function.argument_size()-n<<"\n");
 
         auto D = cast_exact_box(evolve_function.range());
         UpperBoxType B;
@@ -81,24 +78,17 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegratorBase::flow(EffectiveVect
         assert(Phi.domain()[n].upper()==h);
         PositiveFloatDPValue new_t=cast_positive(cast_exact((t+h).lower()));
 
-        ARIADNE_LOG(6,"Phi="<<Phi<<"\n");
-        assert(Phi.domain()[n].upper()==h);
-        ARIADNE_LOG(5,"Phi.domain()="<<Phi.domain()<<"\n");
-
         ValidatedVectorFunctionModelDP reach_function=compute_reach_function(evolve_function, Phi, t, new_t);
         ARIADNE_LOG(5,"reach_function="<<reach_function<<"\n");
 
         evolve_function=partial_evaluate(reach_function,n,new_t);
-
         ARIADNE_LOG(5,"evolve_function="<<evolve_function<<"\n");
-        ARIADNE_LOG(5,"evolve_function.range()="<<evolve_function.range()<<"\n");
 
         step+=1;
 
         if (step%this->_number_of_steps_between_simplifications==0) {
             this->_reconditioner->simplify(evolve_function);
             ARIADNE_LOG(5,"new_evolve_function="<<evolve_function<<"\n");
-            ARIADNE_LOG(5,"new_evolve_function.range():"<<evolve_function.range()<<"\n");
         }
 
         t=new_t;
@@ -123,113 +113,22 @@ ValidatedVectorFunctionModelDP InclusionIntegratorBase::compute_reach_function(V
 
     auto swp=this->_sweeper;
     auto Tau=IntervalDomainType(t,new_t);
-    ARIADNE_LOG(6,"Tau="<<Tau<<"\n");
     BoxDomainType DTA = join(Xi,Tau,A0,A1);
-    ARIADNE_LOG(6,"DTA="<<DTA<<"\n");
     ValidatedVectorTaylorFunctionModelDP xf=ValidatedVectorTaylorFunctionModelDP::projection(DTA,range(0,n),swp);
     ValidatedScalarTaylorFunctionModelDP tf=ValidatedScalarTaylorFunctionModelDP::coordinate(DTA,n,swp);
-    ARIADNE_LOG(6,"tf="<<tf<<"\n");
     ValidatedScalarTaylorFunctionModelDP hf=tf-t;
-    ARIADNE_LOG(6,"hf="<<hf<<"\n");
-    ValidatedVectorTaylorFunctionModelDP a1f=ValidatedVectorTaylorFunctionModelDP::projection(DTA,range(n+1+p0,n+1+p0+p1),swp);
-    ARIADNE_LOG(6,"a1f="<<join(xf,a1f)<<"\n");
     ValidatedVectorTaylorFunctionModelDP a0f=ValidatedVectorTaylorFunctionModelDP::projection(DTA,range(n+1,n+1+p0),swp);
-    ARIADNE_LOG(6,"a0f="<<join(xf,a0f)<<"\n");
-    ARIADNE_LOG(6,"join(xf,a0f)="<<join(xf,a0f)<<"\n");
+    ValidatedVectorTaylorFunctionModelDP a1f=ValidatedVectorTaylorFunctionModelDP::projection(DTA,range(n+1+p0,n+1+p0+p1),swp);
 
     ValidatedVectorTaylorFunctionModelDP ef=compose(evolve_function,join(xf,a0f));
-    ARIADNE_LOG(5,"ef.domain()"<<ef.domain()<<"\n");
-    ARIADNE_LOG(5,"ef.range()"<<ef.range()<<"\n");
 
     return compose(Phi,join(ef,hf,a1f));
 }
 
 Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegratorBase::flow_bounds(ValidatedVectorFunction f, UpperBoxType V, BoxDomainType D, PositiveFloatDPApproximation hsug) const {
 
-/*    // Set up constants of the method.
-    // TODO: Better estimates of constants
-    const FloatDPValue INITIAL_MULTIPLIER=2.0_exact;
-    const FloatDPValue MULTIPLIER=1.125_exact;
-    const FloatDPValue BOX_RADIUS_MULTIPLIER=1.25_exact;
-    const FloatDPValue BOX_RADIUS_WIDENING=0.25_exact;
-    const Nat EXPANSION_STEPS=4;
-    const Nat REDUCTION_STEPS=8;
-    const Nat REFINEMENT_STEPS=4;
-
-    Vector<FloatDPBounds> const& dx=cast_singleton(D);
-
-    //Vector<ValidatedNumericType> delta=(dx-midpoint(domx))*BOX_RADIUS_WIDENING;
-    Vector<UpperIntervalType> delta=(D-midpoint(D))*BOX_RADIUS_WIDENING;
-
-    // Compute the Lipschitz constant over the initial box
-    FloatDPUpperBound lip = norm(f.jacobian(dx)).upper();
-    //FloatDPUpperBound hlip = 1/lip;
-
-    FloatDPValue h=cast_exact(hsug);
-    FloatDPValue hmin=h*two_exp(-REDUCTION_STEPS);
-    //h=max(hmin,min(hlip,h));
-    //ARIADNE_LOG(4,"L="<<lip<<", hL="<<hlip<<"\n");
-
-    UpperBoxType bx,nbx;
-    Vector<UpperIntervalType> df;
-    UpperIntervalType ih(0,h);
-
-    Bool success=false;
-    while(!success) {
-        ARIADNE_ASSERT_MSG(h>=hmin," h="<<h<<", hmin="<<hmin);
-        //bx=domx+INITIAL_MULTIPLIER*ih*evaluate(vf,domx)+delta;
-        bx=D+INITIAL_MULTIPLIER*ih*f.evaluate(dx)+delta;
-        for(Nat i=0; i!=EXPANSION_STEPS; ++i) {
-            df=apply(f,bx);
-            nbx=D+delta+ih*df;
-            ARIADNE_LOG(7,"h="<<h<<" nbx="<<nbx<<" bx="<<bx<<"\n");
-            if(not definitely(is_bounded(nbx))) {
-                success=false;
-                break;
-            } else if(refines(nbx,bx)) {
-                success=true;
-                break;
-            } else {
-                bx=D+delta+MULTIPLIER*ih*df;
-            }
-        }
-        if(!success) {
-            h=hlf(h);
-            ih=UpperIntervalType(0,h);
-        }
-    }
-
-    ARIADNE_ASSERT(refines(nbx,bx));
-
-    Vector<UpperIntervalType> fbx;
-    fbx=apply(f,bx);
-
-    for(Nat i=0; i!=REFINEMENT_STEPS; ++i) {
-        bx=nbx;
-        fbx=apply(f,bx);
-        nbx=D+delta+ih*fbx;
-        ARIADNE_ASSERT_MSG(refines(nbx,bx),std::setprecision(20)<<"refinement "<<i<<": "<<nbx<<" is not a inside of "<<bx);
-    }
-
-
-    // Check result of operation
-    // We use subset rather than inner subset here since the bound may touch
-    ARIADNE_ASSERT(refines(nbx,bx));
-
-    bx=nbx;
-
-
-    ARIADNE_ASSERT(refines(D,bx));
-
-    ARIADNE_ASSERT_MSG(refines(D+ih*apply(f,bx),bx),
-                       "d="<<dx<<"\nh="<<h<<"\nf(b)="<<apply(f,bx)<<"\nd+hf(b)="<<(D+ih*apply(f,bx))<<"\nb="<<bx<<"\n");
-
-    return std::make_pair(PositiveFloatDPValue(h),bx);*/
-
     //! Compute a bound B for the differential inclusion dot(x) in f(x)+V for x(0) in D for step size h;
     ARIADNE_LOG(5,"D:"<<D);
-
-    apply(f,D); //f(D); //image(f,D);
 
     PositiveFloatDPValue h=cast_exact(hsug);
     UpperBoxType wD = D + (D-D.midpoint());
@@ -241,7 +140,8 @@ Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegratorBase::flow_bounds(Val
     for(auto i : range(0,4)) {
         B=D+IntervalDomainType(0,h)*(apply(f,B)+V);
     }
-    ARIADNE_LOG(5,"B:"<<B << "\n");
+    ARIADNE_LOG(5,"h:" << h <<", B:"<< B << "\n");
+
     return std::make_pair(h,B);
 }
 
@@ -317,8 +217,6 @@ compute_step(EffectiveVectorFunction f, BoxDomainType V, BoxDomainType D, Positi
     auto ef=ValidatedVectorTaylorFunctionModelDP::projection(DHVAE,range(n+1+2*n,n+1+3*n),swp);
 
     auto w=ValidatedVectorTaylorFunctionModelDP(n,DHVAE,swp);
-    ARIADNE_LOG(6,"w:"<<w<<"\n");
-    //for (auto i : range(n)) { w[i]=xat[n+i]+xat[2*n+i]*(xat[4*n]-h/2)/h; }
     for (auto i : range(n)) { w[i]=vf[i]+af[i]*(tf-h/2)/h; }
     ARIADNE_LOG(6,"w:"<<w<<"\n");
 
@@ -397,7 +295,6 @@ compute_step(EffectiveVectorFunction f, BoxDomainType V, BoxDomainType D, Positi
     //  We have dot[xi](t)=fi(x(t))+wi(t);
     auto swp=this->_sweeper;
     auto DHVE=join(D,Ht,V,E);
-    // ARIADNE_LOG(6,"DHV["+str(DHV.size())+"]:"<<DHV);
     auto zf=ValidatedScalarTaylorFunctionModelDP(DHVE,swp);
 
     auto xf=ValidatedVectorTaylorFunctionModelDP::projection(DHVE,range(0,n),swp);
@@ -408,21 +305,21 @@ compute_step(EffectiveVectorFunction f, BoxDomainType V, BoxDomainType D, Positi
     auto w=ValidatedVectorTaylorFunctionModelDP(n,DHVE,swp);
 
     for (auto i : range(n)) { w[i]=vf[i]; }
-    // ARIADNE_LOG(6,"w:"<<w);
+    ARIADNE_LOG(6,"w:"<<w);
 
     auto x0=ValidatedVectorTaylorFunctionModelDP(n,DHVE,swp);
     for (auto i : range(n)) { x0[i]=xf[i]; }
-    // ARIADNE_LOG(6,"x0:"<<x0);
+    ARIADNE_LOG(6,"x0:"<<x0);
 
     auto phi=ValidatedVectorTaylorFunctionModelDP(n,DHVE,swp);
     for (auto i : range(n)) { phi[i]=zf+cast_singleton(B[i]); }
-    // ARIADNE_LOG(6,"phi0:"<<phi);
+    ARIADNE_LOG(6,"phi0:"<<phi);
 
     for (auto i : range(6)) {
         phi=antiderivative(compose(f,phi)+w,n)+x0;
-        // print i,phi.errors();
+
     }
-    ARIADNE_LOG(6,(derivative(phi,n)-(compose(f,phi)+w)).range()<<"\n");
+    ARIADNE_LOG(6,"(derivative(phi,n)-(compose(f,phi)+w)).range():" << (derivative(phi,n)-(compose(f,phi)+w)).range()<<"\n");
 
     for (auto i : range(n)) {
         phi[i]=phi[i]+ef[i];

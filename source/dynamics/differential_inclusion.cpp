@@ -41,7 +41,7 @@ InclusionIntegratorBase::InclusionIntegratorBase(SweeperDP sweeper, StepSize ste
 {
 }
 
-List<ValidatedVectorFunctionModelDP> InclusionIntegratorBase::flow(EffectiveVectorFunction f, BoxDomainType V, BoxDomainType X0, Real tmax) const {
+List<ValidatedVectorFunctionModelDP> InclusionIntegratorBase::flow(ValidatedVectorFunction f, BoxDomainType V, BoxDomainType X0, Real tmax) const {
     //Solve the differential inclusion dot(x) in f(x)+V for x(0) in X0 up to time T.
     ARIADNE_LOG(2,"\nf:"<<f<<"\nV:"<<V<<"\nX0:"<<X0<<"\ntmax:"<<tmax<<"\n");
 
@@ -147,7 +147,7 @@ Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegratorBase::flow_bounds(Val
 
 Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPUpperBound>
 InclusionIntegrator3rdOrder::
-compute_norms(EffectiveVectorFunction const& f, UpperBoxType const& B) const {
+compute_norms(ValidatedVectorFunction const& f, UpperBoxType const& B) const {
     //! Compute the norms K=|f(B)|, L=|Df(B)|, H=|D2f(B)| and LN=l(Df(B));
     //  Estimate error terms;
     auto Df=f.differential(cast_singleton(B),2);
@@ -178,7 +178,7 @@ compute_norms(EffectiveVectorFunction const& f, UpperBoxType const& B) const {
 }
 
 ValidatedVectorFunctionModelDP InclusionIntegrator3rdOrder::
-compute_step(EffectiveVectorFunction f, BoxDomainType V, BoxDomainType D, PositiveFloatDPValue h, UpperBoxType B) const {
+compute_step(ValidatedVectorFunction f, BoxDomainType V, BoxDomainType D, PositiveFloatDPValue h, UpperBoxType B) const {
     //! Compute a time-step for the differential inclusion dot(x) in f(x)+V for x(0) in D assuming bound B;
     DoublePrecision pr;
     auto n=D.size();
@@ -242,7 +242,7 @@ compute_step(EffectiveVectorFunction f, BoxDomainType V, BoxDomainType D, Positi
 }
 
 Tuple<FloatDPError,FloatDPError,FloatDPUpperBound> InclusionIntegrator2ndOrder::
-compute_norms(EffectiveVectorFunction const& f, UpperBoxType const& B) const {
+compute_norms(ValidatedVectorFunction const& f, UpperBoxType const& B) const {
     //! Compute the norms K=|f(B)|, L=|Df(B)|, and LN=l(Df(B));
     //  Estimate error terms;
     auto Df=f.differential(cast_singleton(B),1);
@@ -269,7 +269,7 @@ compute_norms(EffectiveVectorFunction const& f, UpperBoxType const& B) const {
 }
 
 ValidatedVectorFunctionModelDP InclusionIntegrator2ndOrder::
-compute_step(EffectiveVectorFunction f, BoxDomainType V, BoxDomainType D, PositiveFloatDPValue h, UpperBoxType B) const {
+compute_step(ValidatedVectorFunction f, BoxDomainType V, BoxDomainType D, PositiveFloatDPValue h, UpperBoxType B) const {
     //! Compute a time-step for the differential inclusion dot(x) in f(x)+V for x(0) in D assuming bound B;
     auto n=D.size();
     FloatDPError K, L; FloatDPUpperBound LN;

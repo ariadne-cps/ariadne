@@ -100,10 +100,10 @@ public:
 
 class InclusionIntegratorInterface {
   public:
-    virtual List<ValidatedVectorFunctionModelType> flow(EffectiveVectorFunction f, BoxDomainType V, BoxDomainType X0, Real T) const = 0;
+    virtual List<ValidatedVectorFunctionModelType> flow(ValidatedVectorFunction f, BoxDomainType V, BoxDomainType X0, Real T) const = 0;
 
     virtual Pair<ExactTimeStepType,UpperBoxType> flow_bounds(ValidatedVectorFunction f, UpperBoxType V, ExactBoxType D, ApproximateTimeStepType hsug) const = 0;
-    virtual ValidatedVectorFunctionModelType compute_step(EffectiveVectorFunction f, BoxDomainType V, BoxDomainType D, ExactTimeStepType h, UpperBoxType B) const = 0;
+    virtual ValidatedVectorFunctionModelType compute_step(ValidatedVectorFunction f, BoxDomainType V, BoxDomainType D, ExactTimeStepType h, UpperBoxType B) const = 0;
 };
 
 class InclusionIntegratorBase : public virtual InclusionIntegratorInterface, public Loggable {
@@ -126,11 +126,11 @@ class InclusionIntegratorBase : public virtual InclusionIntegratorInterface, pub
 
     ValidatedVectorFunctionModelType expand_errors(ValidatedVectorFunctionModelType Phi) const;
     ValidatedVectorFunctionModelType simplify(ValidatedVectorFunctionModelType Phi) const;
-    List<ValidatedVectorFunctionModelType> flow(EffectiveVectorFunction f, BoxDomainType V, BoxDomainType X0, Real T) const;
+    List<ValidatedVectorFunctionModelType> flow(ValidatedVectorFunction f, BoxDomainType V, BoxDomainType X0, Real T) const;
 
     Pair<ExactTimeStepType,UpperBoxType> flow_bounds(ValidatedVectorFunction f, UpperBoxType V, ExactBoxType D, ApproximateTimeStepType hsug) const;
 
-    virtual ValidatedVectorFunctionModelType compute_step(EffectiveVectorFunction f, BoxDomainType V, BoxDomainType D, ExactTimeStepType h, UpperBoxType B) const = 0;
+    virtual ValidatedVectorFunctionModelType compute_step(ValidatedVectorFunction f, BoxDomainType V, BoxDomainType D, ExactTimeStepType h, UpperBoxType B) const = 0;
   private:
     ValidatedVectorFunctionModelDP compute_reach_function(ValidatedVectorFunctionModelDP evolve_function, ValidatedVectorFunctionModelDP Phi, PositiveFloatDPValue t, PositiveFloatDPValue new_t) const;
 };
@@ -139,8 +139,8 @@ class InclusionIntegrator3rdOrder : public InclusionIntegratorBase {
   public:
     template<class... AS> InclusionIntegrator3rdOrder(SweeperDP sweeper, StepSize step_size, AS... attributes)
         : InclusionIntegratorBase(sweeper,step_size,attributes...) { }
-    Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPUpperBound> compute_norms(EffectiveVectorFunction const& f, UpperBoxType const& B) const;
-    virtual ValidatedVectorFunctionModelType compute_step(EffectiveVectorFunction f, BoxDomainType V, BoxDomainType D, ExactTimeStepType h, UpperBoxType B) const override;
+    Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPUpperBound> compute_norms(ValidatedVectorFunction const& f, UpperBoxType const& B) const;
+    virtual ValidatedVectorFunctionModelType compute_step(ValidatedVectorFunction f, BoxDomainType V, BoxDomainType D, ExactTimeStepType h, UpperBoxType B) const override;
 };
 
 
@@ -149,8 +149,8 @@ class InclusionIntegrator2ndOrder : public InclusionIntegratorBase {
   public:
     template<class... AS> InclusionIntegrator2ndOrder(SweeperDP sweeper, StepSize step_size, AS... attributes)
         : InclusionIntegratorBase(sweeper,step_size,attributes...) {  }
-    Tuple<FloatDPError,FloatDPError,FloatDPUpperBound> compute_norms(EffectiveVectorFunction const& f, UpperBoxType const& B) const;
-    virtual ValidatedVectorFunctionModelType compute_step(EffectiveVectorFunction f, BoxDomainType V, BoxDomainType D, PositiveFloatDPValue h, UpperBoxType B) const override;
+    Tuple<FloatDPError,FloatDPError,FloatDPUpperBound> compute_norms(ValidatedVectorFunction const& f, UpperBoxType const& B) const;
+    virtual ValidatedVectorFunctionModelType compute_step(ValidatedVectorFunction f, BoxDomainType V, BoxDomainType D, PositiveFloatDPValue h, UpperBoxType B) const override;
 };
 
 } // namespace Ariadne;

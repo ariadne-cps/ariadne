@@ -41,7 +41,7 @@ InclusionIntegratorBase::InclusionIntegratorBase(SweeperDP sweeper, StepSize ste
 {
 }
 
-List<ValidatedVectorFunctionModelDP> InclusionIntegratorBase::flow(ValidatedVectorFunction f, BoxDomainType V, BoxDomainType X0, Real tmax) const {
+List<ValidatedVectorFunctionModelDP> InclusionIntegratorBase::flow(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType X0, Real tmax) const {
     //Solve the differential inclusion dot(x) in f(x)+V for x(0) in X0 up to time T.
     ARIADNE_LOG(2,"\nf:"<<f<<"\nV:"<<V<<"\nX0:"<<X0<<"\ntmax:"<<tmax<<"\n");
 
@@ -71,9 +71,9 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegratorBase::flow(ValidatedVect
         auto D = cast_exact_box(evolve_function.range());
         UpperBoxType B;
         PositiveFloatDPValue h;
-        std::tie(h,B)=this->flow_bounds(f,V,D,hsug);
+        std::tie(h,B)=this->flow_bounds(f,g,V,D,hsug);
         ARIADNE_LOG(5,"h:"<<h<<", B:"<<B<<"\n");
-        auto Phi = this->compute_step(f,V,D,h,B);
+        auto Phi = this->compute_step(f,g,V,D,h,B);
         ARIADNE_LOG(5,"Phi="<<Phi<<"\n");
         assert(Phi.domain()[n].upper()==h);
         PositiveFloatDPValue new_t=cast_positive(cast_exact((t+h).lower()));
@@ -125,7 +125,7 @@ ValidatedVectorFunctionModelDP InclusionIntegratorBase::compute_reach_function(V
     return compose(Phi,join(ef,hf,a1f));
 }
 
-Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegratorBase::flow_bounds(ValidatedVectorFunction f, UpperBoxType V, BoxDomainType D, PositiveFloatDPApproximation hsug) const {
+Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegratorBase::flow_bounds(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, UpperBoxType V, BoxDomainType D, PositiveFloatDPApproximation hsug) const {
 
     //! Compute a bound B for the differential inclusion dot(x) in f(x)+V for x(0) in D for step size h;
     ARIADNE_LOG(5,"D:"<<D);
@@ -147,7 +147,7 @@ Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegratorBase::flow_bounds(Val
 
 Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPUpperBound>
 InclusionIntegrator3rdOrder::
-compute_norms(ValidatedVectorFunction const& f, UpperBoxType const& B) const {
+compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, UpperBoxType const& B) const {
     //! Compute the norms K=|f(B)|, L=|Df(B)|, H=|D2f(B)| and LN=l(Df(B));
     //  Estimate error terms;
     auto Df=f.differential(cast_singleton(B),2);
@@ -178,13 +178,13 @@ compute_norms(ValidatedVectorFunction const& f, UpperBoxType const& B) const {
 }
 
 ValidatedVectorFunctionModelDP InclusionIntegrator3rdOrder::
-compute_step(ValidatedVectorFunction f, BoxDomainType V, BoxDomainType D, PositiveFloatDPValue h, UpperBoxType B) const {
+compute_step(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType D, PositiveFloatDPValue h, UpperBoxType B) const {
     //! Compute a time-step for the differential inclusion dot(x) in f(x)+V for x(0) in D assuming bound B;
     DoublePrecision pr;
     auto n=D.size();
     FloatDPError K, L, H;
     FloatDPUpperBound LN;
-    std::tie(K,L,H,LN)=this->compute_norms(f,B);
+    std::tie(K,L,H,LN)=this->compute_norms(f,g,B);
     auto KV=mag(norm(V));
     auto eLN = (possibly(LN>0)) ? FloatDPError(dexp(LN*h)) : FloatDPError(0u,pr);
 
@@ -242,7 +242,7 @@ compute_step(ValidatedVectorFunction f, BoxDomainType V, BoxDomainType D, Positi
 }
 
 Tuple<FloatDPError,FloatDPError,FloatDPUpperBound> InclusionIntegrator2ndOrder::
-compute_norms(ValidatedVectorFunction const& f, UpperBoxType const& B) const {
+compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, UpperBoxType const& B) const {
     //! Compute the norms K=|f(B)|, L=|Df(B)|, and LN=l(Df(B));
     //  Estimate error terms;
     auto Df=f.differential(cast_singleton(B),1);
@@ -269,11 +269,11 @@ compute_norms(ValidatedVectorFunction const& f, UpperBoxType const& B) const {
 }
 
 ValidatedVectorFunctionModelDP InclusionIntegrator2ndOrder::
-compute_step(ValidatedVectorFunction f, BoxDomainType V, BoxDomainType D, PositiveFloatDPValue h, UpperBoxType B) const {
+compute_step(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType D, PositiveFloatDPValue h, UpperBoxType B) const {
     //! Compute a time-step for the differential inclusion dot(x) in f(x)+V for x(0) in D assuming bound B;
     auto n=D.size();
     FloatDPError K, L; FloatDPUpperBound LN;
-    std::tie(K,L,LN)=this->compute_norms(f,B);
+    std::tie(K,L,LN)=this->compute_norms(f,g,B);
     PositiveFloatDPUpperBound KV=mag(norm(V));
     FloatDPError eLN = (possibly(LN>0)) ? FloatDPError(dexp(LN*h)) : FloatDPError(1u,dp);
     FloatDPError e = pow(h,2u)*(2u*KV*L*eLN);

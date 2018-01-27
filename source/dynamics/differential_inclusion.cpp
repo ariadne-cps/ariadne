@@ -181,10 +181,6 @@ ValidatedVectorFunctionModelDP InclusionIntegrator3rdOrder::
 compute_step(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType D, PositiveFloatDPValue h, UpperBoxType B) const {
     auto n=D.size();
     auto e=compute_error(f,g,V,h,B);
-    BoxDomainType E=error_domain(n,e);
-    
-    IntervalDomainType Ht=IntervalDomainType(-h,+h);
-    BoxDomainType A=cast_exact_box(3*V);
 
     //  Set up estimate for differential equation;
     //  Use affine wi=ai0+(t-h/2)ai1/h;
@@ -192,29 +188,28 @@ compute_step(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDo
     //  Alternatively use step inputs wi=ai,0 for t<h/2 and wi=ai,1 for t>h/2;
     //    with |ai0|,|ai1|<= 2Vi , and |wi(t)|<=2Vi.;
 
-    //  The flow is a function of n state variables, 2n parameter variables and 1 time variable;
+    //  The flow is a function of n state variables, 1 time variable, 2n parameter variables;
     //  Assume for now noise in all variables;
-    //  We have dot[xi](t)=fi(x(t))+wi(t);
     auto swp=this->_sweeper;
-    auto DHVAE=join(D,Ht,V,A,E);
-    ARIADNE_LOG(6,"DHVAE:"<<DHVAE<<"\n");
-    auto zf=ValidatedScalarTaylorFunctionModelDP(DHVAE,swp);
-    auto xf=ValidatedVectorTaylorFunctionModelDP::projection(DHVAE,range(0,n),swp);
-    auto tf=ValidatedScalarTaylorFunctionModelDP::coordinate(DHVAE,n,swp);
-    auto vf=ValidatedVectorTaylorFunctionModelDP::projection(DHVAE,range(n+1,n+1+n),swp);
-    auto af=ValidatedVectorTaylorFunctionModelDP::projection(DHVAE,range(n+1+n,n+1+2*n),swp);
-    auto ef=ValidatedVectorTaylorFunctionModelDP::projection(DHVAE,range(n+1+2*n,n+1+3*n),swp);
+    auto DHPE=compute_flow_domain(D,h,V,e);
+    ARIADNE_LOG(6,"DHPE:"<<DHPE<<"\n");
+    auto zf=ValidatedScalarTaylorFunctionModelDP(DHPE,swp);
+    auto xf=ValidatedVectorTaylorFunctionModelDP::projection(DHPE,range(0,n),swp);
+    auto tf=ValidatedScalarTaylorFunctionModelDP::coordinate(DHPE,n,swp);
+    auto p0f=ValidatedVectorTaylorFunctionModelDP::projection(DHPE,range(n+1,n+1+n),swp);
+    auto p1f=ValidatedVectorTaylorFunctionModelDP::projection(DHPE,range(n+1+n,n+1+2*n),swp);
+    auto ef=ValidatedVectorTaylorFunctionModelDP::projection(DHPE,range(n+1+2*n,n+1+3*n),swp);
 
-    auto w=ValidatedVectorTaylorFunctionModelDP(n,DHVAE,swp);
-    for (auto i : range(n)) { w[i]=vf[i]+af[i]*(tf-h/2)/h; }
+    auto w=ValidatedVectorTaylorFunctionModelDP(n,DHPE,swp);
+    for (auto i : range(n)) { w[i]=p0f[i]+p1f[i]*(tf-h/2)/h; }
     ARIADNE_LOG(6,"w:"<<w<<"\n");
 
-    auto x0=ValidatedVectorTaylorFunctionModelDP(n,DHVAE,swp);
+    auto x0=ValidatedVectorTaylorFunctionModelDP(n,DHPE,swp);
     for (auto i : range(n)) { x0[i]=xf[i]; }
     ARIADNE_LOG(6,"x0:"<<x0<<"\n");
 
-    auto phi=ValidatedVectorTaylorFunctionModelDP(n,DHVAE,swp);
-    for (auto i : range(n)) { phi[i]=ValidatedScalarTaylorFunctionModelDP(DHVAE,swp)+cast_singleton(B[i]); }
+    auto phi=ValidatedVectorTaylorFunctionModelDP(n,DHPE,swp);
+    for (auto i : range(n)) { phi[i]=ValidatedScalarTaylorFunctionModelDP(DHPE,swp)+cast_singleton(B[i]); }
     ARIADNE_LOG(6,"phi0:"<<phi<<"\n");
 
     for (auto i : range(6)) {
@@ -294,42 +289,51 @@ ErrorType InclusionIntegrator2ndOrder::compute_error(ValidatedVectorFunction con
 }
 
 
+BoxDomainType InclusionIntegrator3rdOrder::compute_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V, ErrorType e) const {
+
+    auto Ht=IntervalDomainType(-h,+h);
+    auto P0=V;
+    auto P1=cast_exact_box(3*V);
+    auto E=error_domain(D.size(),e);
+
+    return join(D,Ht,P0,P1,E);
+}
+
+
+BoxDomainType InclusionIntegrator2ndOrder::compute_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V, ErrorType e) const {
+
+    auto Ht=IntervalDomainType(-h,+h);
+    auto E=error_domain(D.size(),e);
+
+    return join(D,Ht,V,E);
+}
+
+
 ValidatedVectorFunctionModelDP InclusionIntegrator2ndOrder::
 compute_step(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType D, PositiveFloatDPValue h, UpperBoxType B) const {
 
     auto n=D.size();
     auto e=compute_error(f,g,V,h,B);
-    auto E=error_domain(n,e);
-    auto Ht=IntervalDomainType(-h,+h);
 
-    //  Set up estimate for differential equation;
-    //  Use affine wi=ai0+(t-h/2)ai1/h;
-    //    with |ai0|<=Vi, |ai1|<=3Vi, |wi(t)|<=5Vi/2, and |w'(t)|<=3Vi/h.;
-    //  Alternatively use step inputs wi=ai,0 for t<h/2 and wi=ai,1 for t>h/2;
-    //    with |ai0|,|ai1|<= 2Vi , and |wi(t)|<=2Vi.;
+    auto DHPE=compute_flow_domain(D,h,V,e);
 
-    //  The flow is a function of n state variables, 2n parameter variables and 1 time variable;
-    //  Assume for now noise in all variables;
-    //  We have dot[xi](t)=fi(x(t))+wi(t);
     auto swp=this->_sweeper;
-    auto DHVE=join(D,Ht,V,E);
-    auto zf=ValidatedScalarTaylorFunctionModelDP(DHVE,swp);
+    auto zf=ValidatedScalarTaylorFunctionModelDP(DHPE,swp);
+    auto xf=ValidatedVectorTaylorFunctionModelDP::projection(DHPE,range(0,n),swp);
+    auto tf=ValidatedScalarTaylorFunctionModelDP::coordinate(DHPE,n,swp);
+    auto vf=ValidatedVectorTaylorFunctionModelDP::projection(DHPE,range(n+1,n+1+n),swp);
+    auto ef=ValidatedVectorTaylorFunctionModelDP::projection(DHPE,range(n+1+n,n+1+2*n),swp);
 
-    auto xf=ValidatedVectorTaylorFunctionModelDP::projection(DHVE,range(0,n),swp);
-    auto tf=ValidatedScalarTaylorFunctionModelDP::coordinate(DHVE,n,swp);
-    auto vf=ValidatedVectorTaylorFunctionModelDP::projection(DHVE,range(n+1,n+1+n),swp);
-    auto ef=ValidatedVectorTaylorFunctionModelDP::projection(DHVE,range(n+1+n,n+1+2*n),swp);
-
-    auto w=ValidatedVectorTaylorFunctionModelDP(n,DHVE,swp);
+    auto w=ValidatedVectorTaylorFunctionModelDP(n,DHPE,swp);
 
     for (auto i : range(n)) { w[i]=vf[i]; }
     ARIADNE_LOG(6,"w:"<<w);
 
-    auto x0=ValidatedVectorTaylorFunctionModelDP(n,DHVE,swp);
+    auto x0=ValidatedVectorTaylorFunctionModelDP(n,DHPE,swp);
     for (auto i : range(n)) { x0[i]=xf[i]; }
     ARIADNE_LOG(6,"x0:"<<x0);
 
-    auto phi=ValidatedVectorTaylorFunctionModelDP(n,DHVE,swp);
+    auto phi=ValidatedVectorTaylorFunctionModelDP(n,DHPE,swp);
     for (auto i : range(n)) { phi[i]=zf+cast_singleton(B[i]); }
     ARIADNE_LOG(6,"phi0:"<<phi);
 

@@ -131,6 +131,7 @@ class InclusionIntegratorBase : public virtual InclusionIntegratorInterface, pub
     Pair<ExactTimeStepType,UpperBoxType> flow_bounds(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, UpperBoxType V, ExactBoxType D, ApproximateTimeStepType hsug) const;
 
     virtual ValidatedVectorFunctionModelType compute_step(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType D, ExactTimeStepType h, UpperBoxType B) const = 0;
+    virtual ErrorType compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const = 0;
   private:
     ValidatedVectorFunctionModelDP compute_reach_function(ValidatedVectorFunctionModelDP evolve_function, ValidatedVectorFunctionModelDP Phi, PositiveFloatDPValue t, PositiveFloatDPValue new_t) const;
 };
@@ -139,8 +140,10 @@ class InclusionIntegrator3rdOrder : public InclusionIntegratorBase {
   public:
     template<class... AS> InclusionIntegrator3rdOrder(SweeperDP sweeper, StepSize step_size, AS... attributes)
         : InclusionIntegratorBase(sweeper,step_size,attributes...) { }
-    Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPUpperBound> compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, UpperBoxType const& B) const;
     virtual ValidatedVectorFunctionModelType compute_step(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType D, ExactTimeStepType h, UpperBoxType B) const override;
+    virtual ErrorType compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const override;
+  private:
+    Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPUpperBound> compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, UpperBoxType const& B) const;
 };
 
 
@@ -149,8 +152,10 @@ class InclusionIntegrator2ndOrder : public InclusionIntegratorBase {
   public:
     template<class... AS> InclusionIntegrator2ndOrder(SweeperDP sweeper, StepSize step_size, AS... attributes)
         : InclusionIntegratorBase(sweeper,step_size,attributes...) {  }
-    Tuple<FloatDPError,FloatDPError,FloatDPUpperBound> compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, UpperBoxType const& B) const;
     virtual ValidatedVectorFunctionModelType compute_step(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType D, PositiveFloatDPValue h, UpperBoxType B) const override;
+    virtual ErrorType compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const override;
+  private:
+    Tuple<FloatDPError,FloatDPError,FloatDPUpperBound> compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, UpperBoxType const& B) const;
 };
 
 } // namespace Ariadne;

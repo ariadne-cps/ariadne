@@ -179,23 +179,12 @@ compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> 
 
 ValidatedVectorFunctionModelDP InclusionIntegrator3rdOrder::
 compute_step(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType D, PositiveFloatDPValue h, UpperBoxType B) const {
-    //! Compute a time-step for the differential inclusion dot(x) in f(x)+V for x(0) in D assuming bound B;
-    DoublePrecision pr;
     auto n=D.size();
-    FloatDPError K, L, H;
-    FloatDPUpperBound LN;
-    std::tie(K,L,H,LN)=this->compute_norms(f,g,B);
-    auto KV=mag(norm(V));
-    auto eLN = (possibly(LN>0)) ? FloatDPError(dexp(LN*h)) : FloatDPError(0u,pr);
-
-    PositiveFloatDPValue c2(FloatDP(7.0/8,pr)); PositiveFloatDPBounds c1(c2/6);
-    FloatDPError e = (c1*KV*H*(K+KV)+c2*KV*(L*L+H*(K+5u*KV/2u))*eLN)/cast_positive(1u-h*L/2u)*pow(h,3u);
-    ARIADNE_LOG(6,"e:"<<e<<", h:"<<h<<", e/h^3:"<<e/pow(h,3u)<<"\n");
-    ARIADNE_LOG(6,"  K:"<<K<<", KV:"<<KV<<", L:"<<L<<", LN:"<<LN<<", eLN:"<<eLN<<", H:"<<H<<", e:"<<e<<"\n");
-
+    auto e=compute_error(f,g,V,h,B);
+    BoxDomainType E=error_domain(n,e);
+    
     IntervalDomainType Ht=IntervalDomainType(-h,+h);
     BoxDomainType A=cast_exact_box(3*V);
-    BoxDomainType E=error_domain(n,e);
 
     //  Set up estimate for differential equation;
     //  Use affine wi=ai0+(t-h/2)ai1/h;
@@ -268,19 +257,48 @@ compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> 
     return std::tie(K,L,LN);
 }
 
-ValidatedVectorFunctionModelDP InclusionIntegrator2ndOrder::
-compute_step(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType D, PositiveFloatDPValue h, UpperBoxType B) const {
-    //! Compute a time-step for the differential inclusion dot(x) in f(x)+V for x(0) in D assuming bound B;
-    auto n=D.size();
+ErrorType InclusionIntegrator3rdOrder::compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const {
+
+    DoublePrecision pr;
+    FloatDPError K, L, H;
+    FloatDPUpperBound LN;
+    std::tie(K,L,H,LN)=this->compute_norms(f,g,B);
+    auto KV=mag(norm(V));
+    auto eLN = (possibly(LN>0)) ? FloatDPError(dexp(LN*h)) : FloatDPError(0u,pr);
+
+    ARIADNE_LOG(6,"  K:"<<K<<", KV:"<<KV<<", L:"<<L<<", LN:"<<LN<<", eLN:"<<eLN<<", H:"<<H<<"\n");
+
+    PositiveFloatDPValue c2(FloatDP(7.0/8,pr)); PositiveFloatDPBounds c1(c2/6);
+    FloatDPError result = (c1*KV*H*(K+KV)+c2*KV*(L*L+H*(K+5u*KV/2u))*eLN)/cast_positive(1u-h*L/2u)*pow(h,3u);
+    ARIADNE_LOG(6,"e:"<<result<<", h:"<<h<<", e/h^3:"<<result/pow(h,3u)<<"\n");
+
+    return result;
+}
+
+
+ErrorType InclusionIntegrator2ndOrder::compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const {
+
+    DoublePrecision pr;
     FloatDPError K, L; FloatDPUpperBound LN;
     std::tie(K,L,LN)=this->compute_norms(f,g,B);
+
     PositiveFloatDPUpperBound KV=mag(norm(V));
-    FloatDPError eLN = (possibly(LN>0)) ? FloatDPError(dexp(LN*h)) : FloatDPError(1u,dp);
-    FloatDPError e = pow(h,2u)*(2u*KV*L*eLN);
-    ARIADNE_LOG(6,"e:"<<e<<", h:"<<h<<", e/h^2:"<<e/pow(h,2u)<<"\n");
+    FloatDPError eLN = (possibly(LN>0)) ? FloatDPError(dexp(LN*h)) : FloatDPError(1u,pr);
 
-    ARIADNE_LOG(6,"  K:"<<K<<", KV:"<<KV<<", L:"<<L<<", LN:"<<LN<<", eLN:"<<eLN<<", e:"<<e<<"\n");
+    ARIADNE_LOG(6,"  K:"<<K<<", KV:"<<KV<<", L:"<<L<<", LN:"<<LN<<", eLN:"<<eLN<<"\n");
 
+    FloatDPError result = pow(h,2u)*(2u*KV*L*eLN);
+    ARIADNE_LOG(6,"e:"<<result<<", h:"<<h<<", e/h^2:"<<result/pow(h,2u)<<"\n");
+
+    return result;
+}
+
+
+ValidatedVectorFunctionModelDP InclusionIntegrator2ndOrder::
+compute_step(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType D, PositiveFloatDPValue h, UpperBoxType B) const {
+
+    auto n=D.size();
+    auto e=compute_error(f,g,V,h,B);
     auto E=error_domain(n,e);
     auto Ht=IntervalDomainType(-h,+h);
 

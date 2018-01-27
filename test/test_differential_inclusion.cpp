@@ -60,7 +60,7 @@ class TestInclusionIntegrator {
     EffectiveVectorFunction x; EffectiveScalarFunction one;
 
     Void run_test(String name, InclusionIntegratorInterface const& integrator,
-                  EffectiveVectorFunction const& vector_field, RealVector noise_levels,
+                  ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, RealVector noise_levels,
                   RealBox real_starting_set, Real evolution_time) const
     {
         typedef typename ValidatedVectorFunctionModelType::NumericType NumericType; typedef typename NumericType::PrecisionType PrecisionType;
@@ -69,7 +69,7 @@ class TestInclusionIntegrator {
         BoxDomainType noise=cast_exact_box(UpperIntervalType(-1,+1)*noise_levels);
         BoxDomainType starting_set=cast_exact_box(over_approximation(real_starting_set));
 
-        List<ValidatedVectorFunctionModelType> flow_functions = integrator.flow(vector_field,noise,starting_set,evolution_time);
+        List<ValidatedVectorFunctionModelType> flow_functions = integrator.flow(f,g,noise,starting_set,evolution_time);
         List<ValidatedConstrainedImageSet> reach_sets = map([](ValidatedVectorFunctionModelType const& fm){return range(fm);},flow_functions);
         ValidatedVectorFunctionModelType evolve_function = partial_evaluate(flow_functions.back(),starting_set.size(),NumericType(evolution_time,prec));
         ValidatedConstrainedImageSet evolve_set = range(evolve_function);
@@ -89,50 +89,6 @@ class TestInclusionIntegrator {
         fig.set_fill_colour(1.0,0.75,0.5);
         for (auto set : reverse(reach_sets)) { fig.draw(set); }
         fig.draw(evolve_set);
-        fig.write(("test_differential_inclusion-"+name).c_str());
-    }
-
-    Void run_test_vs_nonoise(String name, InclusionIntegratorInterface const& integrator,
-                  EffectiveVectorFunction const& vector_field, RealVector noise_levels,
-                  RealBox real_starting_set, Real evolution_time) const
-    {
-        typedef typename ValidatedVectorFunctionModelType::NumericType NumericType; typedef typename NumericType::PrecisionType PrecisionType;
-        PrecisionType prec;
-
-        BoxDomainType noise=cast_exact_box(UpperIntervalType(-1,+1)*noise_levels);
-        BoxDomainType starting_set=cast_exact_box(over_approximation(real_starting_set));
-
-        List<ValidatedVectorFunctionModelType> flow_functions = integrator.flow(vector_field,noise,starting_set,evolution_time);
-        List<ValidatedConstrainedImageSet> reach_sets = map([](ValidatedVectorFunctionModelType const& fm){return range(fm);},flow_functions);
-        ValidatedVectorFunctionModelType evolve_function = partial_evaluate(flow_functions.back(),starting_set.size(),NumericType(evolution_time,prec));
-        ValidatedConstrainedImageSet evolve_set = range(evolve_function);
-
-        Figure fig=Figure();
-
-        Box<FloatDPUpperInterval> graphics_box(2);
-        for (auto set: reach_sets) {
-            graphics_box = hull(graphics_box,set.bounding_box());
-        }
-
-        fig.set_bounding_box(graphics_box);
-        fig.set_line_colour(0.0,0.0,0.0);
-        fig.set_line_style(false);
-        fig.set_fill_colour(0.5,0.5,0.5);
-        fig.draw(starting_set);
-        fig.set_fill_colour(1.0,0.75,0.5);
-        for (auto set : reverse(reach_sets)) { fig.draw(set); }
-        fig.draw(evolve_set);
-
-        noise=cast_exact_box(UpperIntervalType(0,0)*noise_levels);
-        flow_functions = integrator.flow(vector_field,noise,starting_set,evolution_time);
-        reach_sets = map([](ValidatedVectorFunctionModelType const& fm){return range(fm);},flow_functions);
-        evolve_function = partial_evaluate(flow_functions.back(),starting_set.size(),NumericType(evolution_time,prec));
-        evolve_set = range(evolve_function);
-
-        fig.set_fill_colour(0.0,0.0,0.0);
-        for (auto set : reverse(reach_sets)) { fig.draw(set); }
-        fig.draw(evolve_set);
-
         fig.write(("test_differential_inclusion-"+name).c_str());
     }
 
@@ -152,25 +108,29 @@ TestInclusionIntegrator::TestInclusionIntegrator()
     : x(EffectiveVectorFunction::identity(2u)), one(EffectiveScalarFunction::constant(2u,1_z)) { }
 
 void TestInclusionIntegrator::test() const {
-    ARIADNE_TEST_CALL(test_singleton_domain());
-    ARIADNE_TEST_CALL(test_rotation());
-    ARIADNE_TEST_CALL(test_van_der_pol());
+    //ARIADNE_TEST_CALL(test_singleton_domain());
+    //ARIADNE_TEST_CALL(test_rotation());
+    //ARIADNE_TEST_CALL(test_van_der_pol());
     ARIADNE_TEST_CALL(test_jet_engine());
 }
 
 void TestInclusionIntegrator::test_jet_engine() const {
-    auto integrator = InclusionIntegrator3rdOrder(make_threshold_sweeper(1e-8), step_size=1.0/64, number_of_steps_between_simplifications=8, number_of_variables_to_keep=16);
+    auto integrator = InclusionIntegrator3rdOrder(make_threshold_sweeper(1e-8), step_size=1.0/32, number_of_steps_between_simplifications=4, number_of_variables_to_keep=8);
     integrator.verbosity = 0;
 
     RealVector noise_levels={5/1000_q,5/1000_q};
 
-    auto vector_field=EffectiveVectorFunction({-x[1]-Real(1.5)*x[0]*x[0]-Real(0.5)*x[0]*x[0]*x[0]-Real(0.5),3*x[0]-x[1]});
+    auto f = EffectiveVectorFunction({-x[1]-Real(1.5)*x[0]*x[0]-Real(0.5)*x[0]*x[0]*x[0]-Real(0.5),3*x[0]-x[1]});
+
+    auto one = EffectiveScalarFunction::constant(2u,1_z);
+    auto zero = EffectiveScalarFunction::constant(2u,0_z);
+    Vector<ValidatedVectorFunction> g({{one,zero},{zero,one}});
 
     Real e=1/10_q;
     RealBox starting_set={{Real(1.0)-e,Real(1.0)+e},{Real(1.0)-e,Real(1.0)+e}};
     Real evolution_time=40/8_q;
 
-    this->run_test_vs_nonoise("jetengine",integrator,vector_field,noise_levels,starting_set,evolution_time);
+    this->run_test("jetengine",integrator,f,g,noise_levels,starting_set,evolution_time);
 }
 
 void TestInclusionIntegrator::test_van_der_pol() const {
@@ -179,13 +139,17 @@ void TestInclusionIntegrator::test_van_der_pol() const {
 
     RealVector noise_levels={1/1024_q,1/1024_q};
 
-    auto vector_field=EffectiveVectorFunction({x[1],-x[0]+x[1]*(1 - x[0]*x[0])});
+    auto f=EffectiveVectorFunction({x[1],-x[0]+x[1]*(1 - x[0]*x[0])});
+
+    auto one = EffectiveScalarFunction::constant(2u,1_z);
+    auto zero = EffectiveScalarFunction::constant(2u,0_z);
+    Vector<ValidatedVectorFunction> g({{one,zero},{zero,one}});
 
     Real e=1/1024_q;
     RealBox starting_set={{Real(2.01)-e,Real(2.01)+e},{-e,+e}};
     Real evolution_time=27/4_q;
 
-    this->run_test("vanderpol",integrator,vector_field,noise_levels,starting_set,evolution_time);
+    this->run_test("vanderpol",integrator,f,g,noise_levels,starting_set,evolution_time);
 }
 
 void TestInclusionIntegrator::test_rotation() const {
@@ -194,13 +158,17 @@ void TestInclusionIntegrator::test_rotation() const {
 
     RealVector noise_levels={1/1024_q,1/1024_q};
 
-    auto vector_field=EffectiveVectorFunction({x[1],-x[0]});
+    auto f=EffectiveVectorFunction({x[1],-x[0]});
+
+    auto one = EffectiveScalarFunction::constant(2u,1_z);
+    auto zero = EffectiveScalarFunction::constant(2u,0_z);
+    Vector<ValidatedVectorFunction> g({{one,zero},{zero,one}});
 
     Real e=1/1024_q;
     RealBox starting_set={{1-e,1+e},{-e,+e}};
     Real evolution_time=26/4_q;
 
-    this->run_test("rotation",integrator,vector_field,noise_levels,starting_set,evolution_time);
+    this->run_test("rotation",integrator,f,g,noise_levels,starting_set,evolution_time);
 }
 
 void TestInclusionIntegrator::test_singleton_domain() const {
@@ -208,13 +176,17 @@ void TestInclusionIntegrator::test_singleton_domain() const {
 
     RealVector noise_levels={1/16_q,1/32_q};
 
-    auto vector_field=EffectiveVectorFunction({-x[0],one});
+    auto f=EffectiveVectorFunction({-x[0],one});
+
+    auto one = EffectiveScalarFunction::constant(2u,1_z);
+    auto zero = EffectiveScalarFunction::constant(2u,0_z);
+    Vector<ValidatedVectorFunction> g({{one,zero},{zero,one}});
 
     Real e=1/128_q;
     RealBox starting_set={{1-e,1+e},{-e,+e}};
     Real evolution_time=3/4_q;
 
-    this->run_test("singleton_domain",integrator,vector_field,noise_levels,starting_set,evolution_time);
+    this->run_test("singleton_domain",integrator,f,g,noise_levels,starting_set,evolution_time);
 }
 
 int main() {

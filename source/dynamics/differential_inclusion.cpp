@@ -177,7 +177,7 @@ compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> 
     return std::tie(K,L,H,LN);
 }
 
-ValidatedVectorFunctionModelDP InclusionIntegrator3rdOrder::
+ValidatedVectorFunctionModelDP InclusionIntegratorBase::
 compute_step(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType D, PositiveFloatDPValue h, UpperBoxType B) const {
     auto n=D.size();
     auto e=compute_error(f,g,V,h,B);
@@ -193,27 +193,21 @@ compute_step(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDo
     auto swp=this->_sweeper;
     auto DHPE=compute_flow_domain(D,h,V,e);
     ARIADNE_LOG(6,"DHPE:"<<DHPE<<"\n");
+    auto fd_size = DHPE.size();
     auto zf=ValidatedScalarTaylorFunctionModelDP(DHPE,swp);
-    auto xf=ValidatedVectorTaylorFunctionModelDP::projection(DHPE,range(0,n),swp);
-    auto tf=ValidatedScalarTaylorFunctionModelDP::coordinate(DHPE,n,swp);
-    auto p0f=ValidatedVectorTaylorFunctionModelDP::projection(DHPE,range(n+1,n+1+n),swp);
-    auto p1f=ValidatedVectorTaylorFunctionModelDP::projection(DHPE,range(n+1+n,n+1+2*n),swp);
-    auto ef=ValidatedVectorTaylorFunctionModelDP::projection(DHPE,range(n+1+2*n,n+1+3*n),swp);
+    auto x0f=ValidatedVectorTaylorFunctionModelDP::projection(DHPE,range(0,n),swp);
+    auto ef=ValidatedVectorTaylorFunctionModelDP::projection(DHPE,range(fd_size-n,fd_size),swp);
 
-    auto w=ValidatedVectorTaylorFunctionModelDP(n,DHPE,swp);
-    for (auto i : range(n)) { w[i]=p0f[i]+p1f[i]*(tf-h/2)/h; }
+    auto wf = compute_approximating_function(DHPE,n);
+    ValidatedVectorTaylorFunctionModelDP& w = dynamic_cast<ValidatedVectorTaylorFunctionModelDP&>(wf.reference());
     ARIADNE_LOG(6,"w:"<<w<<"\n");
 
-    auto x0=ValidatedVectorTaylorFunctionModelDP(n,DHPE,swp);
-    for (auto i : range(n)) { x0[i]=xf[i]; }
-    ARIADNE_LOG(6,"x0:"<<x0<<"\n");
-
     auto phi=ValidatedVectorTaylorFunctionModelDP(n,DHPE,swp);
-    for (auto i : range(n)) { phi[i]=ValidatedScalarTaylorFunctionModelDP(DHPE,swp)+cast_singleton(B[i]); }
+    for (auto i : range(n)) { phi[i]=zf+cast_singleton(B[i]); }
     ARIADNE_LOG(6,"phi0:"<<phi<<"\n");
 
     for (auto i : range(6)) {
-        phi=antiderivative(compose(f,phi)+w,n)+x0;
+        phi=antiderivative(compose(f,phi)+w,n)+x0f;
     }
     ARIADNE_LOG(6,"phi.errors():"<<phi.errors()<<"\n");
     ARIADNE_LOG(7,(derivative(phi,n)-(compose(f,phi)+w)).range()<<"\n");
@@ -309,46 +303,35 @@ BoxDomainType InclusionIntegrator2ndOrder::compute_flow_domain(BoxDomainType D, 
 }
 
 
-ValidatedVectorFunctionModelDP InclusionIntegrator2ndOrder::
-compute_step(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType D, PositiveFloatDPValue h, UpperBoxType B) const {
-
-    auto n=D.size();
-    auto e=compute_error(f,g,V,h,B);
-
-    auto DHPE=compute_flow_domain(D,h,V,e);
+ValidatedVectorFunctionModelType InclusionIntegrator3rdOrder::compute_approximating_function(BoxDomainType DHPE, SizeType n) const {
 
     auto swp=this->_sweeper;
-    auto zf=ValidatedScalarTaylorFunctionModelDP(DHPE,swp);
-    auto xf=ValidatedVectorTaylorFunctionModelDP::projection(DHPE,range(0,n),swp);
+
     auto tf=ValidatedScalarTaylorFunctionModelDP::coordinate(DHPE,n,swp);
-    auto vf=ValidatedVectorTaylorFunctionModelDP::projection(DHPE,range(n+1,n+1+n),swp);
-    auto ef=ValidatedVectorTaylorFunctionModelDP::projection(DHPE,range(n+1+n,n+1+2*n),swp);
+    auto p0f=ValidatedVectorTaylorFunctionModelDP::projection(DHPE,range(n+1,n+1+n),swp);
+    auto p1f=ValidatedVectorTaylorFunctionModelDP::projection(DHPE,range(n+1+n,n+1+2*n),swp);
 
-    auto w=ValidatedVectorTaylorFunctionModelDP(n,DHPE,swp);
+    auto h = DHPE[n].upper();
 
-    for (auto i : range(n)) { w[i]=vf[i]; }
-    ARIADNE_LOG(6,"w:"<<w);
+    auto result=ValidatedVectorTaylorFunctionModelDP(n,DHPE,swp);
+    for (auto i : range(n)) { result[i]=p0f[i]+p1f[i]*(tf-h/2)/h; }
 
-    auto x0=ValidatedVectorTaylorFunctionModelDP(n,DHPE,swp);
-    for (auto i : range(n)) { x0[i]=xf[i]; }
-    ARIADNE_LOG(6,"x0:"<<x0);
-
-    auto phi=ValidatedVectorTaylorFunctionModelDP(n,DHPE,swp);
-    for (auto i : range(n)) { phi[i]=zf+cast_singleton(B[i]); }
-    ARIADNE_LOG(6,"phi0:"<<phi);
-
-    for (auto i : range(6)) {
-        phi=antiderivative(compose(f,phi)+w,n)+x0;
-
-    }
-    ARIADNE_LOG(6,"(derivative(phi,n)-(compose(f,phi)+w)).range():" << (derivative(phi,n)-(compose(f,phi)+w)).range()<<"\n");
-
-    for (auto i : range(n)) {
-        phi[i]=phi[i]+ef[i];
-    }
-    return phi;
+    return result;
 }
 
+
+ValidatedVectorFunctionModelType InclusionIntegrator2ndOrder::compute_approximating_function(BoxDomainType DHPE, SizeType n) const {
+
+    auto swp=this->_sweeper;
+
+    auto tf=ValidatedScalarTaylorFunctionModelDP::coordinate(DHPE,n,swp);
+    auto p0f=ValidatedVectorTaylorFunctionModelDP::projection(DHPE,range(n+1,n+1+n),swp);
+
+    auto result=ValidatedVectorTaylorFunctionModelDP(n,DHPE,swp);
+    for (auto i : range(n)) { result[i]=p0f[i]; }
+
+    return result;
+}
 
 
 LohnerReconditioner::LohnerReconditioner(SweeperDP sweeper, Nat number_of_variables_to_keep)

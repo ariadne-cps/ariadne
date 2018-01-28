@@ -177,6 +177,23 @@ compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> 
     return std::tie(K,L,H,LN);
 }
 
+ValidatedVectorTaylorFunctionModelDP get_time_derivative(ValidatedVectorTaylorFunctionModelDP phi, ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, ValidatedVectorTaylorFunctionModelDP wf) {
+
+    auto n=f.result_size();
+    auto m=g.size();
+
+    ValidatedVectorTaylorFunctionModelDP result(n);
+
+    for (auto i : range(n)) {
+        result[i] = compose(f[i], phi);
+        for (auto j : range(m)) {
+            result[i] = result[i] + compose(g[j][i],phi) * wf[j];
+        }
+    }
+
+    return result;
+}
+
 ValidatedVectorFunctionModelDP InclusionIntegratorBase::
 compute_step(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType D, PositiveFloatDPValue h, UpperBoxType B) const {
     auto n=D.size();
@@ -198,19 +215,21 @@ compute_step(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDo
     auto x0f=ValidatedVectorTaylorFunctionModelDP::projection(DHPE,range(0,n),swp);
     auto ef=ValidatedVectorTaylorFunctionModelDP::projection(DHPE,range(fd_size-n,fd_size),swp);
 
-    auto wf = compute_approximating_function(DHPE,n);
-    ValidatedVectorTaylorFunctionModelDP& w = dynamic_cast<ValidatedVectorTaylorFunctionModelDP&>(wf.reference());
-    ARIADNE_LOG(6,"w:"<<w<<"\n");
+    auto w = compute_approximating_function(DHPE,n);
+    ValidatedVectorTaylorFunctionModelDP& wf = dynamic_cast<ValidatedVectorTaylorFunctionModelDP&>(w.reference());
+    ARIADNE_LOG(6,"wf:"<<wf<<"\n");
 
     auto phi=ValidatedVectorTaylorFunctionModelDP(n,DHPE,swp);
     for (auto i : range(n)) { phi[i]=zf+cast_singleton(B[i]); }
     ARIADNE_LOG(6,"phi0:"<<phi<<"\n");
 
+    auto tf=ValidatedScalarTaylorFunctionModelDP::coordinate(DHPE,n,swp);
+
     for (auto i : range(6)) {
-        phi=antiderivative(compose(f,phi)+w,n)+x0f;
+        phi=antiderivative(get_time_derivative(phi,f,g,wf),n)+x0f;
     }
     ARIADNE_LOG(6,"phi.errors():"<<phi.errors()<<"\n");
-    ARIADNE_LOG(7,(derivative(phi,n)-(compose(f,phi)+w)).range()<<"\n");
+    ARIADNE_LOG(7,(derivative(phi,n) - get_time_derivative(phi,f,g,wf)).range()<<"\n");
 
     for (auto i : range(n)) {
         phi[i]=phi[i]+ef[i];

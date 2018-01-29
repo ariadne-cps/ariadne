@@ -103,7 +103,9 @@ class InclusionIntegratorInterface {
     virtual List<ValidatedVectorFunctionModelType> flow(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType X0, Real T) const = 0;
 
     virtual Pair<ExactTimeStepType,UpperBoxType> flow_bounds(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, UpperBoxType V, ExactBoxType D, ApproximateTimeStepType hsug) const = 0;
-    virtual ValidatedVectorFunctionModelType compute_step(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType D, ExactTimeStepType h, UpperBoxType B) const = 0;
+    virtual ValidatedVectorFunctionModelType compute_flow_function(ValidatedVectorFunction f,
+                                                                   Vector<ValidatedVectorFunction> g, BoxDomainType V,
+                                                                   BoxDomainType D, ExactTimeStepType h, UpperBoxType B) const = 0;
 };
 
 class InclusionIntegratorBase : public virtual InclusionIntegratorInterface, public Loggable {
@@ -130,7 +132,9 @@ class InclusionIntegratorBase : public virtual InclusionIntegratorInterface, pub
 
     virtual Pair<ExactTimeStepType,UpperBoxType> flow_bounds(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, UpperBoxType V, ExactBoxType D, ApproximateTimeStepType hsug) const override;
 
-    virtual ValidatedVectorFunctionModelType compute_step(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType D, ExactTimeStepType h, UpperBoxType B) const override;
+    virtual ValidatedVectorFunctionModelType compute_flow_function(ValidatedVectorFunction f,
+                                                                   Vector<ValidatedVectorFunction> g, BoxDomainType V,
+                                                                   BoxDomainType D, ExactTimeStepType h, UpperBoxType B) const override;
   protected:
     virtual ErrorType compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const = 0;
     virtual BoxDomainType compute_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V, ErrorType e) const = 0;

@@ -72,8 +72,8 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegratorBase::flow(ValidatedVect
         UpperBoxType B;
         PositiveFloatDPValue h;
         std::tie(h,B)=this->flow_bounds(f,g,V,D,hsug);
-        ARIADNE_LOG(5,"h:"<<h<<", B:"<<B<<"\n");
-        auto Phi = this->compute_step(f,g,V,D,h,B);
+        ARIADNE_LOG(5,"flow bounds = "<<B<<" (using h = " << h << ")\n");
+        auto Phi = this->compute_flow_function(f,g,V,D,h,B);
         ARIADNE_LOG(5,"Phi="<<Phi<<"\n");
         assert(Phi.domain()[n].upper()==h);
         PositiveFloatDPValue new_t=cast_positive(cast_exact((t+h).lower()));
@@ -104,21 +104,21 @@ ValidatedVectorFunctionModelDP InclusionIntegratorBase::compute_reach_function(V
 
     SizeType n=evolve_function.result_size();
 
-    SizeType p0=evolve_function.argument_size()-n;
-    SizeType p1=Phi.argument_size()-(n+1);
+    SizeType npxE=evolve_function.argument_size()-n;
+    SizeType npxP=Phi.argument_size()-(n+1);
 
-    BoxDomainType Xi=evolve_function.domain()[range(0,n)];
-    BoxDomainType A0=evolve_function.domain()[range(n,n+p0)];
-    BoxDomainType A1=Phi.domain()[range(n+1,n+1+p1)];
+    BoxDomainType D=evolve_function.domain()[range(0,n)];
+    BoxDomainType PXE=evolve_function.domain()[range(n,n+npxE)];
+    BoxDomainType PXP=Phi.domain()[range(n+1,n+1+npxP)];
 
     auto swp=this->_sweeper;
     auto Tau=IntervalDomainType(t,new_t);
-    BoxDomainType DTA = join(Xi,Tau,A0,A1);
-    ValidatedVectorTaylorFunctionModelDP xf=ValidatedVectorTaylorFunctionModelDP::projection(DTA,range(0,n),swp);
-    ValidatedScalarTaylorFunctionModelDP tf=ValidatedScalarTaylorFunctionModelDP::coordinate(DTA,n,swp);
+    BoxDomainType DTP = join(D,Tau,PXE,PXP);
+    ValidatedVectorTaylorFunctionModelDP xf=ValidatedVectorTaylorFunctionModelDP::projection(DTP,range(0,n),swp);
+    ValidatedScalarTaylorFunctionModelDP tf=ValidatedScalarTaylorFunctionModelDP::coordinate(DTP,n,swp);
     ValidatedScalarTaylorFunctionModelDP hf=tf-t;
-    ValidatedVectorTaylorFunctionModelDP a0f=ValidatedVectorTaylorFunctionModelDP::projection(DTA,range(n+1,n+1+p0),swp);
-    ValidatedVectorTaylorFunctionModelDP a1f=ValidatedVectorTaylorFunctionModelDP::projection(DTA,range(n+1+p0,n+1+p0+p1),swp);
+    ValidatedVectorTaylorFunctionModelDP a0f=ValidatedVectorTaylorFunctionModelDP::projection(DTP,range(n+1,n+1+npxE),swp);
+    ValidatedVectorTaylorFunctionModelDP a1f=ValidatedVectorTaylorFunctionModelDP::projection(DTP,range(n+1+npxE,n+1+npxE+npxP),swp);
 
     ValidatedVectorTaylorFunctionModelDP ef=compose(evolve_function,join(xf,a0f));
 
@@ -127,7 +127,7 @@ ValidatedVectorFunctionModelDP InclusionIntegratorBase::compute_reach_function(V
 
 Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegratorBase::flow_bounds(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, UpperBoxType V, BoxDomainType D, PositiveFloatDPApproximation hsug) const {
 
-    //! Compute a bound B for the differential inclusion dot(x) in f(x)+V for x(0) in D for step size h;
+    //! Compute a bound B for the differential inclusion dot(x) in f(x) + G(x) * V, for x(0) in D for step size h;
     ARIADNE_LOG(5,"D:"<<D);
 
     PositiveFloatDPValue h=cast_exact(hsug);
@@ -195,7 +195,8 @@ ValidatedVectorTaylorFunctionModelDP get_time_derivative(ValidatedVectorTaylorFu
 }
 
 ValidatedVectorFunctionModelDP InclusionIntegratorBase::
-compute_step(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType D, PositiveFloatDPValue h, UpperBoxType B) const {
+compute_flow_function(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType D,
+                      PositiveFloatDPValue h, UpperBoxType B) const {
     auto n=D.size();
     auto e=compute_error(f,g,V,h,B);
 

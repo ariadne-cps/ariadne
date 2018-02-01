@@ -143,9 +143,9 @@ class InclusionIntegratorBase : public virtual InclusionIntegratorInterface, pub
     ValidatedVectorFunctionModelDP compute_reach_function(ValidatedVectorFunctionModelDP evolve_function, ValidatedVectorFunctionModelDP Phi, PositiveFloatDPValue t, PositiveFloatDPValue new_t) const;
 };
 
-class InclusionIntegrator3rdOrder : public InclusionIntegratorBase {
+class InclusionIntegratorAffineW : public InclusionIntegratorBase {
   public:
-    template<class... AS> InclusionIntegrator3rdOrder(SweeperDP sweeper, StepSize step_size, AS... attributes)
+    template<class... AS> InclusionIntegratorAffineW(SweeperDP sweeper, StepSize step_size, AS... attributes)
         : InclusionIntegratorBase(sweeper,step_size,attributes...) { }
   protected:
     virtual ErrorType compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const override;
@@ -157,9 +157,9 @@ class InclusionIntegrator3rdOrder : public InclusionIntegratorBase {
 
 
 
-class InclusionIntegrator2ndOrder : public InclusionIntegratorBase {
+class InclusionIntegratorConstantW : public InclusionIntegratorBase {
   public:
-    template<class... AS> InclusionIntegrator2ndOrder(SweeperDP sweeper, StepSize step_size, AS... attributes)
+    template<class... AS> InclusionIntegratorConstantW(SweeperDP sweeper, StepSize step_size, AS... attributes)
         : InclusionIntegratorBase(sweeper,step_size,attributes...) {  }
   protected:
     virtual ErrorType compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const override;

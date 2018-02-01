@@ -146,7 +146,7 @@ Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegratorBase::flow_bounds(Val
 }
 
 Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPUpperBound>
-InclusionIntegrator3rdOrder::
+InclusionIntegratorAffineW::
 compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, UpperBoxType const& B) const {
     //! Compute the norms K=|f(B)|, L=|Df(B)|, H=|D2f(B)| and LN=l(Df(B));
     //  Estimate error terms;
@@ -239,7 +239,7 @@ compute_flow_function(ValidatedVectorFunction f, Vector<ValidatedVectorFunction>
     return phi;
 }
 
-Tuple<FloatDPError,FloatDPError,FloatDPUpperBound> InclusionIntegrator2ndOrder::
+Tuple<FloatDPError,FloatDPError,FloatDPUpperBound> InclusionIntegratorConstantW::
 compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, UpperBoxType const& B) const {
     //! Compute the norms K=|f(B)|, L=|Df(B)|, and LN=l(Df(B));
     //  Estimate error terms;
@@ -266,7 +266,7 @@ compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> 
     return std::tie(K,L,LN);
 }
 
-ErrorType InclusionIntegrator3rdOrder::compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const {
+ErrorType InclusionIntegratorAffineW::compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const {
 
     DoublePrecision pr;
     FloatDPError K, L, H;
@@ -285,7 +285,7 @@ ErrorType InclusionIntegrator3rdOrder::compute_error(ValidatedVectorFunction con
 }
 
 
-ErrorType InclusionIntegrator2ndOrder::compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const {
+ErrorType InclusionIntegratorConstantW::compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const {
 
     DoublePrecision pr;
     FloatDPError K, L; FloatDPUpperBound LN;
@@ -303,7 +303,7 @@ ErrorType InclusionIntegrator2ndOrder::compute_error(ValidatedVectorFunction con
 }
 
 
-BoxDomainType InclusionIntegrator3rdOrder::compute_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V, ErrorType e) const {
+BoxDomainType InclusionIntegratorAffineW::compute_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V, ErrorType e) const {
 
     auto Ht=IntervalDomainType(-h,+h);
     auto P0=V;
@@ -314,7 +314,7 @@ BoxDomainType InclusionIntegrator3rdOrder::compute_flow_domain(BoxDomainType D, 
 }
 
 
-BoxDomainType InclusionIntegrator2ndOrder::compute_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V, ErrorType e) const {
+BoxDomainType InclusionIntegratorConstantW::compute_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V, ErrorType e) const {
 
     auto Ht=IntervalDomainType(-h,+h);
     auto E=error_domain(D.size(),e);
@@ -323,7 +323,7 @@ BoxDomainType InclusionIntegrator2ndOrder::compute_flow_domain(BoxDomainType D, 
 }
 
 
-ValidatedVectorFunctionModelType InclusionIntegrator3rdOrder::compute_approximating_function(BoxDomainType DHPE, SizeType n) const {
+ValidatedVectorFunctionModelType InclusionIntegratorAffineW::compute_approximating_function(BoxDomainType DHPE, SizeType n) const {
 
     auto swp=this->_sweeper;
 
@@ -340,7 +340,7 @@ ValidatedVectorFunctionModelType InclusionIntegrator3rdOrder::compute_approximat
 }
 
 
-ValidatedVectorFunctionModelType InclusionIntegrator2ndOrder::compute_approximating_function(BoxDomainType DHPE, SizeType n) const {
+ValidatedVectorFunctionModelType InclusionIntegratorConstantW::compute_approximating_function(BoxDomainType DHPE, SizeType n) const {
 
     auto swp=this->_sweeper;
 

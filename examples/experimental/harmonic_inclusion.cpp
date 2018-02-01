@@ -98,7 +98,7 @@ void test() {
     // damped_harmonic( evolution_time=2*pi, damping=1.0/4, noise=(0.0,0.1), step_size=8.0/32 );
     // damped_harmonic( evolution_time=2*pi, damping=0.0, noise=(0.0,0.1), delta=0.01, step_size=2*pi/50 );
     ThresholdSweeperDP sweeper(DoublePrecision(),1e-8);
-    auto integrator = InclusionIntegrator2ndOrder(sweeper, step_size=1.0/4, number_of_steps_between_simplifications=64, number_of_variables_to_keep=32);
+    auto integrator = InclusionIntegratorConstantW(sweeper, step_size=1.0/4, number_of_steps_between_simplifications=64, number_of_variables_to_keep=32);
 
     Real evolution_time=pi;
     Real damping=1/100_q;

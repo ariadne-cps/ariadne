@@ -125,6 +125,15 @@ ValidatedVectorFunctionModelDP InclusionIntegratorBase::compute_reach_function(V
     return compose(Phi,join(ef,hf,a1f));
 }
 
+UpperBoxType apply(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, UpperBoxType V, UpperBoxType D) {
+
+    UpperBoxType result = apply(f,D);
+    for (auto i : range(g.size())) {
+        result = result + apply(g[i],D) * V[i];
+    }
+    return result;
+}
+
 Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegratorBase::flow_bounds(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, UpperBoxType V, BoxDomainType D, PositiveFloatDPApproximation hsug) const {
 
     //! Compute a bound B for the differential inclusion dot(x) in f(x) + G(x) * V, for x(0) in D for step size h;
@@ -132,13 +141,13 @@ Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegratorBase::flow_bounds(Val
 
     PositiveFloatDPValue h=cast_exact(hsug);
     UpperBoxType wD = D + (D-D.midpoint());
-    UpperBoxType B = wD + 2*IntervalDomainType(0,h)*(apply(f,D)+V);
+    UpperBoxType B = wD + 2*IntervalDomainType(0,h)*apply(f,g,V,D);
 
-    while(not refines(D+h*(apply(f,B)+V),B)) {
+    while(not refines(D+h*apply(f,g,V,B),B)) {
         h=hlf(h);
     }
-    for(auto i : range(0,4)) {
-        B=D+IntervalDomainType(0,h)*(apply(f,B)+V);
+    for(auto i : range(4)) {
+        B=D+IntervalDomainType(0,h)*apply(f,g,V,B);
     }
     ARIADNE_LOG(5,"h:" << h <<", B:"<< B << "\n");
 

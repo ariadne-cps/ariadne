@@ -65,6 +65,8 @@ Bool refines(Vector<UpperIntervalType> const& v1, UpperBoxType const& bx2) {
 
 Box<Interval<FloatDPValue>> over_approximation(Box<Interval<Real>> const&);
 
+Boolean is_identity_matrix(Vector<ValidatedVectorFunction> const& g, UpperBoxType const& B);
+
 template<class F1, class F2, class F3, class... FS> decltype(auto) combine(F1 const& f1, F2 const& f2, F3 const& f3, FS const& ... fs) {
     return combine(combine(f1,f2),f3,fs...); }
 template<class F1, class F2, class F3, class... FS> decltype(auto) join(F1 const& f1, F2 const& f2, F3 const& f3, FS const& ... fs) {
@@ -89,8 +91,6 @@ class Reconditioner {
     virtual ValidatedVectorFunctionModelType expand_errors(ValidatedVectorFunctionModelType Phi) const = 0;
 };
 
-Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPUpperBound> compute_norms(ValidatedVectorFunction const&, Vector<ValidatedVectorFunction> const&, BoxDomainType const&, UpperBoxType const& B);
-Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPUpperBound> compute_norms_additive(ValidatedVectorFunction const&, Vector<ValidatedVectorFunction> const&, BoxDomainType const&, UpperBoxType const& B);
 
 class InclusionErrorProcessor {
   public:
@@ -98,6 +98,7 @@ class InclusionErrorProcessor {
     ErrorType process() const;
   protected:
     virtual ErrorType compute_error(FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPUpperBound const&,PositiveFloatDPValue const&) const = 0;
+    virtual Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPUpperBound> compute_norms(ValidatedVectorFunction const&, Vector<ValidatedVectorFunction> const&, BoxDomainType const&, UpperBoxType const& B) const = 0;
   private:
     ValidatedVectorFunction const& _f;
     Vector<ValidatedVectorFunction> const& _g;
@@ -107,10 +108,21 @@ class InclusionErrorProcessor {
 };
 
 class AffineErrorProcessor : public InclusionErrorProcessor {
-  public:
+public:
     AffineErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B);
+public:
+    virtual ErrorType compute_error(FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPUpperBound const&,PositiveFloatDPValue const&) const override;
+protected:
+    virtual Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPUpperBound> compute_norms(ValidatedVectorFunction const&, Vector<ValidatedVectorFunction> const&, BoxDomainType const&, UpperBoxType const& B) const override;
+};
+
+class AdditiveAffineErrorProcessor : public InclusionErrorProcessor {
   public:
-    virtual ErrorType compute_error(FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPUpperBound const&,PositiveFloatDPValue const&) const;
+    AdditiveAffineErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B);
+  public:
+    virtual ErrorType compute_error(FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPUpperBound const&,PositiveFloatDPValue const&) const override;
+  protected:
+    virtual Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPUpperBound> compute_norms(ValidatedVectorFunction const&, Vector<ValidatedVectorFunction> const&, BoxDomainType const&, UpperBoxType const& B) const override;
 };
 
 
@@ -176,8 +188,6 @@ class InclusionIntegratorAffineW : public InclusionIntegratorBase {
     virtual ErrorType compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const override;
     virtual BoxDomainType compute_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V, ErrorType e) const override;
     virtual ValidatedVectorFunctionModelType compute_approximating_function(BoxDomainType DHPE, SizeType n) const override;
-  private:
-    Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPUpperBound> compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, UpperBoxType const& B) const;
 };
 
 

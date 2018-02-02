@@ -89,6 +89,31 @@ class Reconditioner {
     virtual ValidatedVectorFunctionModelType expand_errors(ValidatedVectorFunctionModelType Phi) const = 0;
 };
 
+Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPUpperBound> compute_norms(ValidatedVectorFunction const&, Vector<ValidatedVectorFunction> const&, BoxDomainType const&, UpperBoxType const& B);
+Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPUpperBound> compute_norms_additive(ValidatedVectorFunction const&, Vector<ValidatedVectorFunction> const&, BoxDomainType const&, UpperBoxType const& B);
+
+class InclusionErrorProcessor {
+  public:
+    InclusionErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B);
+    ErrorType process() const;
+  protected:
+    virtual ErrorType compute_error(FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPUpperBound const&,PositiveFloatDPValue const&) const = 0;
+  private:
+    ValidatedVectorFunction const& _f;
+    Vector<ValidatedVectorFunction> const& _g;
+    BoxDomainType const& _V;
+    PositiveFloatDPValue const& _h;
+    UpperBoxType const& _B;
+};
+
+class AffineErrorProcessor : public InclusionErrorProcessor {
+  public:
+    AffineErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B);
+  public:
+    virtual ErrorType compute_error(FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPUpperBound const&,PositiveFloatDPValue const&) const;
+};
+
+
 class LohnerReconditioner : public Reconditioner, public Loggable {
     SweeperDP _sweeper;
     Nat _number_of_variables_to_keep;

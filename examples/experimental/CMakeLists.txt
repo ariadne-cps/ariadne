@@ -5,6 +5,7 @@ set(EXPERIMENTAL_EXAMPLES
 	bouncing-walls
 	vanderpol
 	vanderpol-vectorfield
+	lotka-volterra
 	harmonic_inclusion
 )
 

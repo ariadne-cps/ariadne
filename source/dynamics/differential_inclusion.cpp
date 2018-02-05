@@ -95,7 +95,7 @@ compute_norms_LC(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunctio
         Kp+=Vm*Kp_m;
     }
 
-    FloatDPError expLambda = (possibly(Lambda>0)) ? FloatDPError(dexp(Lambda*h)) : FloatDPError(0u,pr);
+    FloatDPError expLambda = (possibly(Lambda>0)) ? FloatDPError(dexp(Lambda*h)) : FloatDPError(1u,pr);
 
     return std::tie(K,Kp,L,Lp,H,Hp,expLambda);
 }
@@ -127,7 +127,7 @@ compute_norms_LC_additive(ValidatedVectorFunction const& f, Vector<ValidatedVect
         K=max(K,K_n); Lambda=max(Lambda,Lambda_n);
     }
 
-    FloatDPError expLambda = (possibly(Lambda>0)) ? FloatDPError(dexp(Lambda*h)) : FloatDPError(0u,pr);
+    FloatDPError expLambda = (possibly(Lambda>0)) ? FloatDPError(dexp(Lambda*h)) : FloatDPError(1u,pr);
 
     return std::tie(K,Kp,L,Lp,H,Hp,expLambda);
 }
@@ -160,7 +160,7 @@ compute_norms_C1_additive(ValidatedVectorFunction const& f, Vector<ValidatedVect
         K=max(K,K_n); L=max(L,L_n); Lambda=max(Lambda,Lambda_n);
     }
 
-    FloatDPError expLambda = (possibly(Lambda>0)) ? FloatDPError(dexp(Lambda*h)) : FloatDPError(0u,pr);
+    FloatDPError expLambda = (possibly(Lambda>0)) ? FloatDPError(dexp(Lambda*h)) : FloatDPError(1u,pr);
 
     return std::tie(K,Kp,L,Lp,H,Hp,expLambda);
 }
@@ -215,7 +215,7 @@ compute_norms_C1(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunctio
         Kp+=Vm*Kp_m; Lp+=Vm*Lp_m; Hp+=Vm*Hp_m;
     }
 
-    FloatDPError expLambda = (possibly(Lambda>0)) ? FloatDPError(dexp(Lambda*h)) : FloatDPError(0u,pr);
+    FloatDPError expLambda = (possibly(Lambda>0)) ? FloatDPError(dexp(Lambda*h)) : FloatDPError(1u,pr);
 
     return std::tie(K,Kp,L,Lp,H,Hp,expLambda);
 }
@@ -274,7 +274,7 @@ compute_norms_C2(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunctio
         Kp+=Vm*Kp_m; Lp+=Vm*Lp_m; Hp+=Vm*Hp_m;
     }
 
-    FloatDPError expLambda = (possibly(Lambda>0)) ? FloatDPError(dexp(Lambda*h)) : FloatDPError(0u,pr);
+    FloatDPError expLambda = (possibly(Lambda>0)) ? FloatDPError(dexp(Lambda*h)) : FloatDPError(1u,pr);
 
     return std::tie(K,Kp,L,Lp,H,Hp,expLambda);
 }
@@ -309,7 +309,7 @@ compute_norms_C2_additive(ValidatedVectorFunction const& f, Vector<ValidatedVect
         K=max(K,K_n); L=max(L,L_n); H=max(H,H_n); Lambda=max(Lambda,Lambda_n);
     }
 
-    FloatDPError expLambda = (possibly(Lambda>0)) ? FloatDPError(dexp(Lambda*h)) : FloatDPError(0u,pr);
+    FloatDPError expLambda = (possibly(Lambda>0)) ? FloatDPError(dexp(Lambda*h)) : FloatDPError(1u,pr);
 
     return std::tie(K,Kp,L,Lp,H,Hp,expLambda);
 }

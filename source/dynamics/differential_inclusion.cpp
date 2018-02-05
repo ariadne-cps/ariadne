@@ -446,7 +446,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegratorBase::flow(ValidatedVect
     DoublePrecision pr;
     assert(f.result_size()==n);
     assert(f.argument_size()==n);
-    assert(V.size()==n);
+    assert(V.size()==g.size());
 
     PositiveFloatDPValue hsug(this->_step_size);
 

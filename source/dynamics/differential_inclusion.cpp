@@ -49,25 +49,96 @@ Boolean is_identity_matrix(Vector<ValidatedVectorFunction> const& g, UpperBoxTyp
     return true;
 }
 
-InclusionErrorProcessor::InclusionErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B)
-    : _f(f), _g(g), _V(V), _h(h), _B(B) { }
+Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError>
+compute_norms_C1_additive(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B) {
+    //! For additive noise, K'=|V| while Lp = Hp = 0
+    FloatDPError Kp=mag(norm(V));
+    FloatDPError Lp, Hp;
 
-ErrorType InclusionErrorProcessor::process() const {
+    auto Df=f.differential(cast_singleton(B),1);
+    DoublePrecision pr;
+    FloatDPError ze(pr);
+    FloatDPError K=ze, L=ze, H=ze; FloatDPUpperBound Lambda=ze;
+    for (auto n : range(f.result_size())) {
+        auto Df_n=Df[n].expansion();
+        FloatDPError K_n=ze, L_n=ze, H_n=ze; FloatDPUpperBound Lambda_n=ze;
+        for (auto ac : Df_n) {
+            MultiIndex const& a=ac.index();
+            FloatDPBounds const& c=ac.coefficient();
+            if (a.degree()==0) {
+                K_n += mag(c);
+            } else {
+                assert(a.degree()==1);
+                L_n += mag(c);
+                if (a[n]==1) { Lambda_n += c.upper(); }
+                else { Lambda_n += mag(c); }
+            }
+        }
+        K=max(K,K_n); L=max(L,L_n); H=max(H,H_n); Lambda=max(Lambda,Lambda_n);
+    }
 
-    FloatDPError K, Kp, L, Lp, H, Hp;
-    FloatDPUpperBound Lambda;
+    FloatDPError expLambda = (possibly(Lambda>0)) ? FloatDPError(dexp(Lambda*h)) : FloatDPError(0u,pr);
 
-    std::tie(K,Kp,L,Lp,H,Hp,Lambda) = compute_norms(_f,_g,_V,_B);
-
-    return compute_error(K,Kp,L,Lp,H,Hp,Lambda,_h);
+    return std::tie(K,Kp,L,Lp,H,Hp,expLambda);
 }
 
-AffineErrorProcessor::AffineErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B)
-    : InclusionErrorProcessor(f,g,V,h,B) {}
+Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError>
+compute_norms_C1(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B) {
 
-Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPUpperBound>
-AffineErrorProcessor::compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, UpperBoxType const& B) const {
-    //! Compute the norms K=|f(B)|, L=|Df(B)|, H=|D2f(B)| and Lambda=l(Df(B));
+    DoublePrecision pr;
+    FloatDPError ze(pr);
+    FloatDPError K=ze, Kp=ze, L=ze, Lp=ze, H=ze, Hp=ze; FloatDPUpperBound Lambda=ze;
+
+    auto Df=f.differential(cast_singleton(B),1);
+    for (auto n : range(f.result_size())) {
+        auto Df_n=Df[n].expansion();
+        FloatDPError K_n=ze, L_n=ze, H_n=ze; FloatDPUpperBound Lambda_n=ze;
+        for (auto ac : Df_n) {
+            MultiIndex const& a=ac.index();
+            FloatDPBounds const& c=ac.coefficient();
+            if (a.degree()==0) {
+                K_n += mag(c);
+            } else {
+                assert(a.degree()==1);
+                L_n += mag(c);
+                if (a[n]==1) { Lambda_n += c.upper(); }
+                else { Lambda_n += mag(c); }
+            }
+        }
+        K=max(K,K_n); L=max(L,L_n); H=max(H,H_n); Lambda=max(Lambda,Lambda_n);
+    }
+
+    for (auto m : range(g.size())) {
+        auto g_m=g[m];
+        auto Dg_m=g_m.differential(cast_singleton(B),1);
+        FloatDPError Vm(abs(V[m]).upper());
+        FloatDPError Kp_m=ze, Lp_m=ze, Hp_m=ze;
+        for (auto n : range(g_m.result_size())) {
+            auto Dg_mn=Dg_m[n].expansion();
+            FloatDPError Kp_mn=ze, Lp_mn=ze, Hp_mn=ze;
+            for (auto ac : Dg_mn) {
+                MultiIndex const& a=ac.index();
+                FloatDPBounds const& c=ac.coefficient();
+                if (a.degree()==0) {
+                    Kp_mn += mag(c);
+                } else {
+                    assert(a.degree()==1);
+                    Lp_mn += mag(c);
+                }
+            }
+            Kp_m=max(Kp_m,Kp_mn); Lp_m=max(Lp_m,Lp_mn); Hp_m=max(Hp,Hp_mn);
+        }
+
+        Kp+=Vm*Kp_m; Lp+=Vm*Lp_m; Hp+=Vm*Hp_m;
+    }
+
+    FloatDPError expLambda = (possibly(Lambda>0)) ? FloatDPError(dexp(Lambda*h)) : FloatDPError(0u,pr);
+
+    return std::tie(K,Kp,L,Lp,H,Hp,expLambda);
+}
+
+Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError>
+compute_norms_C2(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B) {
 
     DoublePrecision pr;
     FloatDPError ze(pr);
@@ -120,29 +191,13 @@ AffineErrorProcessor::compute_norms(ValidatedVectorFunction const& f, Vector<Val
         Kp+=Vm*Kp_m; Lp+=Vm*Lp_m; Hp+=Vm*Hp_m;
     }
 
-    return std::tie(K,Kp,L,Lp,H,Hp,Lambda);
+    FloatDPError expLambda = (possibly(Lambda>0)) ? FloatDPError(dexp(Lambda*h)) : FloatDPError(0u,pr);
+
+    return std::tie(K,Kp,L,Lp,H,Hp,expLambda);
 }
 
-ErrorType AffineErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPUpperBound const& Lambda,PositiveFloatDPValue const& h) const {
-
-    DoublePrecision pr;
-
-    auto expLambda = (possibly(Lambda>0)) ? FloatDPError(dexp(Lambda*h)) : FloatDPError(0u,pr);
-
-    PositiveFloatDPValue c2(FloatDP(7.0/2,pr));
-    PositiveFloatDPBounds c3(c2/6);
-    FloatDPError result = (Lp*(11u*K + 69u/2u*Kp) + c2*Kp*((4u*Hp+H)*(K+5u*Kp/2u) + L*L + (9u/2u*L + 5u*L)*Lp)*expLambda + c3*(Kp*H+L*Lp)*(K+Kp))/cast_positive(1u-h*L/2u-h*Lp)*pow(h,2u)/4u;
-
-    return result;
-}
-
-AdditiveAffineErrorProcessor::AdditiveAffineErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B)
-    : InclusionErrorProcessor(f,g,V,h,B) {}
-
-Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPUpperBound>
-AdditiveAffineErrorProcessor::compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, UpperBoxType const& B) const {
-    //! Compute the norms K=|f(B)|, L=|Df(B)|, H=|D2f(B)| and Lambda=l(Df(B));
-
+Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError>
+compute_norms_C2_additive(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B) {
     //! For additive noise, K'=|V| while Lp = Hp = 0
     FloatDPError Kp=mag(norm(V));
     FloatDPError Lp, Hp;
@@ -170,18 +225,100 @@ AdditiveAffineErrorProcessor::compute_norms(ValidatedVectorFunction const& f, Ve
         }
         K=max(K,K_n); L=max(L,L_n); H=max(H,H_n); Lambda=max(Lambda,Lambda_n);
     }
-    return std::tie(K,Kp,L,Lp,H,Hp,Lambda);
+
+    FloatDPError expLambda = (possibly(Lambda>0)) ? FloatDPError(dexp(Lambda*h)) : FloatDPError(0u,pr);
+
+    return std::tie(K,Kp,L,Lp,H,Hp,expLambda);
 }
 
-ErrorType AdditiveAffineErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPUpperBound const& Lambda,PositiveFloatDPValue const& h) const {
+InclusionErrorProcessor::InclusionErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B)
+    : _f(f), _g(g), _V(V), _h(h), _B(B) { }
+
+ErrorType InclusionErrorProcessor::process() const {
+
+    FloatDPError K, Kp, L, Lp, H, Hp, expLambda;
+
+    std::tie(K,Kp,L,Lp,H,Hp,expLambda) = compute_norms(_f,_g,_V,_h,_B);
+
+    return compute_error(K,Kp,L,Lp,H,Hp,expLambda,_h);
+}
+
+ConstantErrorProcessor::ConstantErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B)
+        : InclusionErrorProcessor(f,g,V,h,B) {}
+
+Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError>
+ConstantErrorProcessor::compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B) const {
+    return compute_norms_C2(f,g,V,h,B);
+}
+
+ErrorType ConstantErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
+    DoublePrecision pr;
+    FloatDPError result = (pow(h,2u)*(Kp*Lp*expLambda + Lp*(K+Kp)/3u)+ pow(h,3u)*Kp*(L*Lp + L*L + H*(K+Kp))/4u*expLambda + pow(h,3u)*(H*Kp + L*Lp)*(K+Kp)*11u/24u)/cast_positive(1u-(h*L/2u));
+    return result;
+}
+
+/*
+
+Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError>
+ConstantErrorProcessor::compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B) const {
+    return compute_norms_C1(f,g,V,h,B);
+}
+
+ErrorType ConstantErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
+    std::cout << K << " " << Kp << " " << L << " " << Lp << " " << H << " " << Hp << " " << expLambda << std::endl;
+    FloatDPError result = pow(h,2u)*((K+Kp)*Lp/3u + Kp*(L+Lp)*expLambda);
+    return result;
+}
+*/
+
+
+AdditiveConstantErrorProcessor::AdditiveConstantErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B)
+    : InclusionErrorProcessor(f,g,V,h,B) {}
+
+Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError>
+AdditiveConstantErrorProcessor::compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B) const {
+    return compute_norms_C1_additive(f,g,V,h,B);
+}
+
+ErrorType AdditiveConstantErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
+    FloatDPError result = pow(h,2u)*(Kp*L*expLambda);
+    return result;
+}
+
+AffineErrorProcessor::AffineErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B)
+    : InclusionErrorProcessor(f,g,V,h,B) {}
+
+Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError>
+AffineErrorProcessor::compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B) const {
+    return compute_norms_C2(f,g,V,h,B);
+}
+
+ErrorType AffineErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
 
     DoublePrecision pr;
 
-    auto expLambda = (possibly(Lambda>0)) ? FloatDPError(dexp(Lambda*h)) : FloatDPError(0u,pr);
+    PositiveFloatDPValue c2(FloatDP(7.0/2,pr));
+    PositiveFloatDPBounds c3(c2/6);
+    FloatDPError result = (Lp*(K*11u + Kp*69u/2u) + c2*Kp*((Hp*4u+H)*(K+Kp*5u/2u) + L*L + (L*9u/2u + L*5u)*Lp)*expLambda + c3*(Kp*H+L*Lp)*(K+Kp))/cast_positive(1u-h*L/2u-h*Lp)*pow(h,2u)/4u;
+
+    return result;
+}
+
+AdditiveAffineErrorProcessor::AdditiveAffineErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B)
+    : InclusionErrorProcessor(f,g,V,h,B) {}
+
+Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError>
+AdditiveAffineErrorProcessor::compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B) const {
+    return compute_norms_C2_additive(f,g,V,h,B);
+}
+
+ErrorType AdditiveAffineErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
+
+    DoublePrecision pr;
 
     PositiveFloatDPValue c2(FloatDP(7.0/8,pr));
     PositiveFloatDPBounds c1(c2/6);
-    FloatDPError result = (c1*Kp*H*(K+Kp)+c2*Kp*(L*L+H*(K+5u*Kp/2u))*expLambda)/cast_positive(1u-h*L/2u)*pow(h,3u);
+    FloatDPError result = (c1*Kp*H*(K+Kp)+c2*Kp*(L*L+H*(K+Kp*5u/2u))*expLambda)/cast_positive(1u-h*L/2u)*pow(h,3u);
 
     return result;
 }
@@ -372,33 +509,6 @@ compute_flow_function(ValidatedVectorFunction f, Vector<ValidatedVectorFunction>
     return phi;
 }
 
-Tuple<FloatDPError,FloatDPError,FloatDPUpperBound> InclusionIntegratorConstantW::
-compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, UpperBoxType const& B) const {
-    //! Compute the norms K=|f(B)|, L=|Df(B)|, and LN=l(Df(B));
-    //  Estimate error terms;
-    auto Df=f.differential(cast_singleton(B),1);
-    ARIADNE_LOG(6,"  Df="<<Df<<"\n");
-    FloatDPError ze(0,dp);
-    FloatDPError K=ze, L=ze; FloatDPUpperBound LN=ze;
-    for (auto i : range(f.result_size())) {
-        auto Dfi=Df[i].expansion();
-        FloatDPError Ki=ze, Li=ze; FloatDPUpperBound LNi=ze;
-        for (auto ac : Dfi) {
-            MultiIndex const& a=ac.index();
-            FloatDPBounds const& c=ac.coefficient();
-            if (a.degree()==0) {
-                Ki += mag(c);
-            } else if (a.degree()==1) {
-                Li += mag(c);
-                if (a[i]==1) { LNi += c.upper(); }
-                else { LNi += mag(c); }
-            }
-        }
-        K=max(K,Ki); L=max(L,Li); LN=max(LN,LNi);
-    }
-    return std::tie(K,L,LN);
-}
-
 ErrorType InclusionIntegratorAffineW::compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const {
     if (is_identity_matrix(g,B))
         return AdditiveAffineErrorProcessor(f,g,V,h,B).process();
@@ -408,20 +518,10 @@ ErrorType InclusionIntegratorAffineW::compute_error(ValidatedVectorFunction cons
 
 
 ErrorType InclusionIntegratorConstantW::compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const {
-
-    DoublePrecision pr;
-    FloatDPError K, L; FloatDPUpperBound LN;
-    std::tie(K,L,LN)=this->compute_norms(f,g,B);
-
-    PositiveFloatDPUpperBound KV=mag(norm(V));
-    FloatDPError eLN = (possibly(LN>0)) ? FloatDPError(dexp(LN*h)) : FloatDPError(1u,pr);
-
-    ARIADNE_LOG(6,"  K:"<<K<<", KV:"<<KV<<", L:"<<L<<", LN:"<<LN<<", eLN:"<<eLN<<"\n");
-
-    FloatDPError result = pow(h,2u)*(2u*KV*L*eLN);
-    ARIADNE_LOG(6,"e:"<<result<<", h:"<<h<<", e/h^2:"<<result/pow(h,2u)<<"\n");
-
-    return result;
+    if (is_identity_matrix(g,B))
+        return AdditiveConstantErrorProcessor(f,g,V,h,B).process();
+    else
+        return ConstantErrorProcessor(f,g,V,h,B).process();
 }
 
 

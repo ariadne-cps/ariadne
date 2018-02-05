@@ -91,8 +91,8 @@ class Reconditioner {
     virtual ValidatedVectorFunctionModelType expand_errors(ValidatedVectorFunctionModelType Phi) const = 0;
 };
 
-Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError> compute_norms_C0(ValidatedVectorFunction const&, Vector<ValidatedVectorFunction> const&, BoxDomainType const&, PositiveFloatDPValue const&, UpperBoxType const&);
-Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError> compute_norms_C0_additive(ValidatedVectorFunction const&, Vector<ValidatedVectorFunction> const&, BoxDomainType const&, PositiveFloatDPValue const&, UpperBoxType const&);
+Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError> compute_norms_LC(ValidatedVectorFunction const&, Vector<ValidatedVectorFunction> const&, BoxDomainType const&, PositiveFloatDPValue const&, UpperBoxType const&);
+Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError> compute_norms_LC_additive(ValidatedVectorFunction const&, Vector<ValidatedVectorFunction> const&, BoxDomainType const&, PositiveFloatDPValue const&, UpperBoxType const&);
 Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError> compute_norms_C1(ValidatedVectorFunction const&, Vector<ValidatedVectorFunction> const&, BoxDomainType const&, PositiveFloatDPValue const&, UpperBoxType const&);
 Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError> compute_norms_C1_additive(ValidatedVectorFunction const&, Vector<ValidatedVectorFunction> const&, BoxDomainType const&, PositiveFloatDPValue const&, UpperBoxType const&);
 Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError> compute_norms_C2(ValidatedVectorFunction const&, Vector<ValidatedVectorFunction> const&, BoxDomainType const&, PositiveFloatDPValue const&, UpperBoxType const&);
@@ -111,6 +111,24 @@ class InclusionErrorProcessor {
     BoxDomainType const& _V;
     PositiveFloatDPValue const& _h;
     UpperBoxType const& _B;
+};
+
+class ZeroErrorProcessor : public InclusionErrorProcessor {
+public:
+    ZeroErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B);
+public:
+    virtual ErrorType compute_error(FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,PositiveFloatDPValue const&) const override;
+protected:
+    virtual Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError> compute_norms(ValidatedVectorFunction const&, Vector<ValidatedVectorFunction> const&, BoxDomainType const&, PositiveFloatDPValue const&, UpperBoxType const&) const override;
+};
+
+class AdditiveZeroErrorProcessor : public InclusionErrorProcessor {
+public:
+    AdditiveZeroErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B);
+public:
+    virtual ErrorType compute_error(FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,PositiveFloatDPValue const&) const override;
+protected:
+    virtual Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError> compute_norms(ValidatedVectorFunction const&, Vector<ValidatedVectorFunction> const&, BoxDomainType const&, PositiveFloatDPValue const&, UpperBoxType const&) const override;
 };
 
 class ConstantErrorProcessor : public InclusionErrorProcessor {
@@ -198,10 +216,31 @@ class InclusionIntegratorBase : public virtual InclusionIntegratorInterface, pub
                                                                    BoxDomainType D, ExactTimeStepType h, UpperBoxType B) const override;
   protected:
     virtual ErrorType compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const = 0;
-    virtual BoxDomainType compute_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V, ErrorType e) const = 0;
-    virtual ValidatedVectorFunctionModelType compute_approximating_function(BoxDomainType DHPE, SizeType n) const = 0;
+    virtual BoxDomainType build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V, ErrorType e) const = 0;
+    virtual ValidatedVectorFunctionModelType build_approximating_function(BoxDomainType DHPE, SizeType n) const = 0;
   private:
-    ValidatedVectorFunctionModelDP compute_reach_function(ValidatedVectorFunctionModelDP evolve_function, ValidatedVectorFunctionModelDP Phi, PositiveFloatDPValue t, PositiveFloatDPValue new_t) const;
+    ValidatedVectorFunctionModelDP build_reach_function(ValidatedVectorFunctionModelDP evolve_function, ValidatedVectorFunctionModelDP Phi, PositiveFloatDPValue t, PositiveFloatDPValue new_t) const;
+};
+
+
+class InclusionIntegratorZeroW : public InclusionIntegratorBase {
+public:
+    template<class... AS> InclusionIntegratorZeroW(SweeperDP sweeper, StepSize step_size, AS... attributes)
+            : InclusionIntegratorBase(sweeper,step_size,attributes...) {  }
+protected:
+    virtual ErrorType compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const override;
+    virtual BoxDomainType build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V, ErrorType e) const override;
+    virtual ValidatedVectorFunctionModelType build_approximating_function(BoxDomainType DHPE, SizeType n) const override;
+};
+
+class InclusionIntegratorConstantW : public InclusionIntegratorBase {
+public:
+    template<class... AS> InclusionIntegratorConstantW(SweeperDP sweeper, StepSize step_size, AS... attributes)
+            : InclusionIntegratorBase(sweeper,step_size,attributes...) {  }
+protected:
+    virtual ErrorType compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const override;
+    virtual BoxDomainType build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V, ErrorType e) const override;
+    virtual ValidatedVectorFunctionModelType build_approximating_function(BoxDomainType DHPE, SizeType n) const override;
 };
 
 class InclusionIntegratorAffineW : public InclusionIntegratorBase {
@@ -210,21 +249,10 @@ class InclusionIntegratorAffineW : public InclusionIntegratorBase {
         : InclusionIntegratorBase(sweeper,step_size,attributes...) { }
   protected:
     virtual ErrorType compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const override;
-    virtual BoxDomainType compute_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V, ErrorType e) const override;
-    virtual ValidatedVectorFunctionModelType compute_approximating_function(BoxDomainType DHPE, SizeType n) const override;
+    virtual BoxDomainType build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V, ErrorType e) const override;
+    virtual ValidatedVectorFunctionModelType build_approximating_function(BoxDomainType DHPE, SizeType n) const override;
 };
 
-
-
-class InclusionIntegratorConstantW : public InclusionIntegratorBase {
-  public:
-    template<class... AS> InclusionIntegratorConstantW(SweeperDP sweeper, StepSize step_size, AS... attributes)
-        : InclusionIntegratorBase(sweeper,step_size,attributes...) {  }
-  protected:
-    virtual ErrorType compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const override;
-    virtual BoxDomainType compute_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V, ErrorType e) const override;
-    virtual ValidatedVectorFunctionModelType compute_approximating_function(BoxDomainType DHPE, SizeType n) const override;
-};
 
 } // namespace Ariadne;
 

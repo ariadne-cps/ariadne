@@ -96,10 +96,11 @@ class TestInclusionIntegrator {
     TestInclusionIntegrator();
 
     void test() const;
-    void test_singleton_domain() const;
+    void test_clock() const;
     void test_rotation() const;
     void test_van_der_pol() const;
     void test_jet_engine() const;
+    void test_lotka_volterra() const;
 };
 
 
@@ -108,10 +109,33 @@ TestInclusionIntegrator::TestInclusionIntegrator()
     : x(EffectiveVectorFunction::identity(2u)), one(EffectiveScalarFunction::constant(2u,1_z)) { }
 
 void TestInclusionIntegrator::test() const {
-    ARIADNE_TEST_CALL(test_singleton_domain());
+    ARIADNE_TEST_CALL(test_clock());
     ARIADNE_TEST_CALL(test_rotation());
     ARIADNE_TEST_CALL(test_van_der_pol());
     ARIADNE_TEST_CALL(test_jet_engine());
+    ARIADNE_TEST_CALL(test_lotka_volterra());
+}
+
+void TestInclusionIntegrator::test_lotka_volterra() const {
+    auto integrator = InclusionIntegratorAffineW(make_threshold_sweeper(1e-8), step_size=1.0/32, number_of_steps_between_simplifications=4, number_of_variables_to_keep=32);
+    integrator.verbosity = 0;
+
+    RealVector noise_levels={1/100_q,1/100_q};
+
+    auto one = EffectiveScalarFunction::constant(2u,1_z);
+    auto zero = EffectiveScalarFunction::constant(2u,0_z);
+    auto three = EffectiveScalarFunction::constant(2u,3_z);
+
+    auto f = EffectiveVectorFunction({three*x[0]*(one-x[1]),x[1]*(x[0]-one)});
+
+
+    Vector<ValidatedVectorFunction> g({{x[0]*(one-x[1]),zero},{zero,x[1]*(x[0]-one)}});
+
+    Real e=1/1024_q;
+    RealBox starting_set={{Real(1.2)-e,Real(1.2)+e},{Real(1.1)-e,Real(1.1)+e}};
+    Real evolution_time=36/10_q;
+
+    this->run_test("lotka-volterra",integrator,f,g,noise_levels,starting_set,evolution_time);
 }
 
 void TestInclusionIntegrator::test_jet_engine() const {
@@ -171,22 +195,22 @@ void TestInclusionIntegrator::test_rotation() const {
     this->run_test("rotation",integrator,f,g,noise_levels,starting_set,evolution_time);
 }
 
-void TestInclusionIntegrator::test_singleton_domain() const {
+void TestInclusionIntegrator::test_clock() const {
     auto integrator = InclusionIntegratorConstantW(make_threshold_sweeper(1e-8), step_size=1.0/4, number_of_steps_between_simplifications=64, number_of_variables_to_keep=32);
 
-    RealVector noise_levels={1/16_q,1/32_q};
-
-    auto f=EffectiveVectorFunction({-x[0],one});
+    RealVector noise_levels={1/16_q,1/16_q};
 
     auto one = EffectiveScalarFunction::constant(2u,1_z);
     auto zero = EffectiveScalarFunction::constant(2u,0_z);
+
+    auto f=EffectiveVectorFunction({one,one});
     Vector<ValidatedVectorFunction> g({{one,zero},{zero,one}});
 
     Real e=1/128_q;
-    RealBox starting_set={{1-e,1+e},{-e,+e}};
-    Real evolution_time=3/4_q;
+    RealBox starting_set={{-e,e},{-e,+e}};
+    Real evolution_time=16/4_q;
 
-    this->run_test("singleton_domain",integrator,f,g,noise_levels,starting_set,evolution_time);
+    this->run_test("clock",integrator,f,g,noise_levels,starting_set,evolution_time);
 }
 
 int main() {

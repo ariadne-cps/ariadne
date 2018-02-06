@@ -43,7 +43,7 @@ ValidatedConstrainedImageSet range(ValidatedVectorFunctionModelType const& fm) {
     return ValidatedConstrainedImageSet(fm.domain(),fm);
 }
 
-void damped_harmonic(InclusionIntegratorBase const& integrator, Real evolution_time, Real damping, Vector<Real> noise, Real box_radius) {
+void damped_harmonic(InclusionIntegrator const& integrator, Real evolution_time, Real damping, Vector<Real> noise, Real box_radius) {
     std::cerr<<"evolution_time="<<evolution_time
              <<", damping="<<damping
              <<", noise="<<noise

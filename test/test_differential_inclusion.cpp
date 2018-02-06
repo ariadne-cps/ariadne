@@ -117,7 +117,7 @@ void TestInclusionIntegrator::test() const {
 }
 
 void TestInclusionIntegrator::test_lotka_volterra() const {
-    auto integrator = InclusionIntegratorAffineW(make_threshold_sweeper(1e-8), step_size=1.0/32, number_of_steps_between_simplifications=4, number_of_variables_to_keep=32);
+    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=1.0/32, number_of_steps_between_simplifications=4, number_of_variables_to_keep=32);
     integrator.verbosity = 0;
 
     RealVector noise_levels={1/100_q,1/100_q};
@@ -139,7 +139,7 @@ void TestInclusionIntegrator::test_lotka_volterra() const {
 }
 
 void TestInclusionIntegrator::test_jet_engine() const {
-    auto integrator = InclusionIntegratorAffineW(make_threshold_sweeper(1e-8), step_size=1.0/32, number_of_steps_between_simplifications=4, number_of_variables_to_keep=8);
+    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=1.0/32, number_of_steps_between_simplifications=4, number_of_variables_to_keep=8);
     integrator.verbosity = 0;
 
     RealVector noise_levels={5/1000_q,5/1000_q};
@@ -158,7 +158,7 @@ void TestInclusionIntegrator::test_jet_engine() const {
 }
 
 void TestInclusionIntegrator::test_van_der_pol() const {
-    auto integrator = InclusionIntegratorAffineW(make_threshold_sweeper(1e-8), step_size=1.0/16, number_of_steps_between_simplifications=1, number_of_variables_to_keep=4);
+    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=1.0/16, number_of_steps_between_simplifications=1, number_of_variables_to_keep=4);
     integrator.verbosity = 0;
 
     RealVector noise_levels={1/1024_q,1/1024_q};
@@ -177,7 +177,7 @@ void TestInclusionIntegrator::test_van_der_pol() const {
 }
 
 void TestInclusionIntegrator::test_rotation() const {
-    auto integrator = InclusionIntegratorAffineW(make_threshold_sweeper(1e-8), step_size=1.0/16, number_of_steps_between_simplifications=1, number_of_variables_to_keep=4);
+    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=1.0/16, number_of_steps_between_simplifications=1, number_of_variables_to_keep=4);
     integrator.verbosity = 0;
 
     RealVector noise_levels={1/1024_q,1/1024_q};
@@ -196,7 +196,7 @@ void TestInclusionIntegrator::test_rotation() const {
 }
 
 void TestInclusionIntegrator::test_clock() const {
-    auto integrator = InclusionIntegratorConstantW(make_threshold_sweeper(1e-8), step_size=1.0/4, number_of_steps_between_simplifications=64, number_of_variables_to_keep=32);
+    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=1.0/4, number_of_steps_between_simplifications=64, number_of_variables_to_keep=32);
 
     RealVector noise_levels={1/16_q,1/16_q};
 
@@ -208,7 +208,7 @@ void TestInclusionIntegrator::test_clock() const {
 
     Real e=1/128_q;
     RealBox starting_set={{-e,e},{-e,+e}};
-    Real evolution_time=16/4_q;
+    Real evolution_time=20/4_q;
 
     this->run_test("clock",integrator,f,g,noise_levels,starting_set,evolution_time);
 }

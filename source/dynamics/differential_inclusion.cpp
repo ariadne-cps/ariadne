@@ -429,7 +429,7 @@ ErrorType AdditiveAffineErrorProcessor::compute_error(FloatDPError const& K,Floa
 }
 
 
-InclusionIntegratorBase::InclusionIntegratorBase(SweeperDP sweeper, StepSize step_size)
+InclusionIntegrator::InclusionIntegrator(SweeperDP sweeper, StepSize step_size)
     : _sweeper(sweeper)
     , _step_size(step_size)
     , _number_of_steps_between_simplifications(8)
@@ -437,7 +437,7 @@ InclusionIntegratorBase::InclusionIntegratorBase(SweeperDP sweeper, StepSize ste
 {
 }
 
-List<ValidatedVectorFunctionModelDP> InclusionIntegratorBase::flow(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType X0, Real tmax) const {
+List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType X0, Real tmax) const {
     //Solve the differential inclusion dot(x) in f(x)+V for x(0) in X0 up to time T.
     ARIADNE_LOG(2,"\nf:"<<f<<"\nV:"<<V<<"\nX0:"<<X0<<"\ntmax:"<<tmax<<"\n");
 
@@ -493,7 +493,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegratorBase::flow(ValidatedVect
     return result;
 }
 
-ValidatedVectorFunctionModelDP InclusionIntegratorBase::build_reach_function(
+ValidatedVectorFunctionModelDP InclusionIntegrator::build_reach_function(
         ValidatedVectorFunctionModelDP evolve_function, ValidatedVectorFunctionModelDP Phi, PositiveFloatDPValue t,
         PositiveFloatDPValue new_t) const {
 
@@ -533,7 +533,7 @@ UpperBoxType apply(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g,
     return result;
 }
 
-Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegratorBase::flow_bounds(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, UpperBoxType V, BoxDomainType D, PositiveFloatDPApproximation hsug) const {
+Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegrator::flow_bounds(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, UpperBoxType V, BoxDomainType D, PositiveFloatDPApproximation hsug) const {
 
     //! Compute a bound B for the differential inclusion dot(x) in f(x) + G(x) * V, for x(0) in D for step size h;
     ARIADNE_LOG(5,"D:"<<D);
@@ -571,11 +571,11 @@ ValidatedVectorTaylorFunctionModelDP get_time_derivative(ValidatedVectorTaylorFu
     return result;
 }
 
-ValidatedVectorFunctionModelDP InclusionIntegratorBase::
+ValidatedVectorFunctionModelDP InclusionIntegrator::
 compute_flow_function(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType D,
                       PositiveFloatDPValue h, UpperBoxType B) const {
     auto n=D.size();
-    auto e=compute_error(f,g,V,h,B);
+    auto e=_approximation->compute_error(f,g,V,h,B);
 
     //  Set up estimate for differential equation;
     //  Use affine wi=ai0+(t-h/2)ai1/h;
@@ -586,14 +586,14 @@ compute_flow_function(ValidatedVectorFunction f, Vector<ValidatedVectorFunction>
     //  The flow is a function of n state variables, 1 time variable, 2n parameter variables;
     //  Assume for now noise in all variables;
     auto swp=this->_sweeper;
-    auto DHPE= build_flow_domain(D, h, V, e);
+    auto DHPE=_approximation->build_flow_domain(D, h, V, e);
     ARIADNE_LOG(6,"DHPE:"<<DHPE<<"\n");
     auto fd_size = DHPE.size();
     auto zf=ValidatedScalarTaylorFunctionModelDP(DHPE,swp);
     auto x0f=ValidatedVectorTaylorFunctionModelDP::projection(DHPE,range(0,n),swp);
     auto ef=ValidatedVectorTaylorFunctionModelDP::projection(DHPE,range(fd_size-n,fd_size),swp);
 
-    auto w = build_approximating_function(DHPE, n);
+    auto w =_approximation->build_approximating_function(DHPE, n);
     ValidatedVectorTaylorFunctionModelDP& wf = dynamic_cast<ValidatedVectorTaylorFunctionModelDP&>(w.reference());
     ARIADNE_LOG(6,"wf:"<<wf<<"\n");
 
@@ -617,7 +617,7 @@ compute_flow_function(ValidatedVectorFunction f, Vector<ValidatedVectorFunction>
 }
 
 
-ErrorType InclusionIntegratorZeroW::compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const {
+ErrorType InclusionIntegratorZeroApproximation::compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const {
     if (is_identity_matrix(g,B))
         return AdditiveZeroErrorProcessor(f,g,V,h,B).process();
     else
@@ -625,7 +625,7 @@ ErrorType InclusionIntegratorZeroW::compute_error(ValidatedVectorFunction const&
 }
 
 
-ErrorType InclusionIntegratorConstantW::compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const {
+ErrorType InclusionIntegratorConstantApproximation::compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const {
     if (is_identity_matrix(g,B))
         return AdditiveConstantErrorProcessor(f,g,V,h,B).process();
     else
@@ -633,7 +633,7 @@ ErrorType InclusionIntegratorConstantW::compute_error(ValidatedVectorFunction co
 }
 
 
-ErrorType InclusionIntegratorAffineW::compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const {
+ErrorType InclusionIntegratorAffineApproximation::compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const {
     if (is_identity_matrix(g,B))
         return AdditiveAffineErrorProcessor(f,g,V,h,B).process();
     else
@@ -641,7 +641,7 @@ ErrorType InclusionIntegratorAffineW::compute_error(ValidatedVectorFunction cons
 }
 
 
-BoxDomainType InclusionIntegratorZeroW::build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V, ErrorType e) const {
+BoxDomainType InclusionIntegratorZeroApproximation::build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V, ErrorType e) const {
 
     auto Ht=IntervalDomainType(-h,+h);
     auto E=error_domain(D.size(),e);
@@ -650,7 +650,7 @@ BoxDomainType InclusionIntegratorZeroW::build_flow_domain(BoxDomainType D, Posit
 }
 
 
-BoxDomainType InclusionIntegratorConstantW::build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V, ErrorType e) const {
+BoxDomainType InclusionIntegratorConstantApproximation::build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V, ErrorType e) const {
 
     auto Ht=IntervalDomainType(-h,+h);
     auto E=error_domain(D.size(),e);
@@ -659,7 +659,7 @@ BoxDomainType InclusionIntegratorConstantW::build_flow_domain(BoxDomainType D, P
 }
 
 
-BoxDomainType InclusionIntegratorAffineW::build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V, ErrorType e) const {
+BoxDomainType InclusionIntegratorAffineApproximation::build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V, ErrorType e) const {
 
     auto Ht=IntervalDomainType(-h,+h);
     auto P0=V;
@@ -671,7 +671,7 @@ BoxDomainType InclusionIntegratorAffineW::build_flow_domain(BoxDomainType D, Pos
 
 
 
-ValidatedVectorFunctionModelType InclusionIntegratorZeroW::build_approximating_function(BoxDomainType DHPE, SizeType n) const {
+ValidatedVectorFunctionModelType InclusionIntegratorZeroApproximation::build_approximating_function(BoxDomainType DHPE, SizeType n) const {
 
     auto swp=this->_sweeper;
 
@@ -684,7 +684,7 @@ ValidatedVectorFunctionModelType InclusionIntegratorZeroW::build_approximating_f
 }
 
 
-ValidatedVectorFunctionModelType InclusionIntegratorConstantW::build_approximating_function(BoxDomainType DHPE, SizeType n) const {
+ValidatedVectorFunctionModelType InclusionIntegratorConstantApproximation::build_approximating_function(BoxDomainType DHPE, SizeType n) const {
 
     auto swp=this->_sweeper;
 
@@ -697,7 +697,7 @@ ValidatedVectorFunctionModelType InclusionIntegratorConstantW::build_approximati
 }
 
 
-ValidatedVectorFunctionModelType InclusionIntegratorAffineW::build_approximating_function(BoxDomainType DHPE, SizeType n) const {
+ValidatedVectorFunctionModelType InclusionIntegratorAffineApproximation::build_approximating_function(BoxDomainType DHPE, SizeType n) const {
 
     auto swp=this->_sweeper;
 

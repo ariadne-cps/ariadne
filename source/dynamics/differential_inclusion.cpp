@@ -739,7 +739,7 @@ ValidatedVectorFunctionModelType InclusionIntegratorAffineApproximation::build_a
 
     auto tf=ValidatedScalarTaylorFunctionModelDP::coordinate(DHPE,n,swp);
     auto p0f=ValidatedVectorTaylorFunctionModelDP::projection(DHPE,range(n+1,n+1+m),swp);
-    auto p1f=ValidatedVectorTaylorFunctionModelDP::projection(DHPE,range(n+1+n,n+1+2*m),swp);
+    auto p1f=ValidatedVectorTaylorFunctionModelDP::projection(DHPE,range(n+1+m,n+1+2*m),swp);
 
     auto h = DHPE[n].upper();
 

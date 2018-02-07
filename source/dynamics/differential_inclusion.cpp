@@ -476,18 +476,15 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
         ValidatedVectorFunctionModelDP best_reach_function, best_evolve_function;
         SizeType best = 0;
 
+        Vector<SharedPointer<InclusionIntegratorApproximation>> approximations(3);
+        approximations[0] = SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorZeroApproximation(this->_sweeper));
+        approximations[1] = SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorConstantApproximation(this->_sweeper));
+        approximations[2] = SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorAffineApproximation(this->_sweeper));
+
         for (auto i : range(3)) {
             ARIADNE_LOG(5,"checking approximation "<<i<<"\n");
-            switch(i) {
-                case 0:
-                    this->_approximation.reset(new InclusionIntegratorAffineApproximation(this->_sweeper));
-                    break;
-                case 1:
-                    this->_approximation.reset(new InclusionIntegratorAffineApproximation(this->_sweeper));
-                    break;
-                case 2:
-                    this->_approximation.reset(new InclusionIntegratorAffineApproximation(this->_sweeper));
-            }
+            this->_approximation = approximations[i];
+            //this->_approximation.reset(new InclusionIntegratorAffineApproximation(this->_sweeper));
 
             auto Phi = this->compute_flow_function(f,g,V,D,h,B);
             ARIADNE_LOG(5,"Phi="<<Phi<<"\n");
@@ -505,7 +502,6 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
             } else {
                 auto best_range = best_evolve_function.range();
                 auto current_range = current_evolve_function.range();
-                ARIADNE_LOG(5,"best: " << best_range << ", current: " << current_range << ", covers? " << best_range.covers(current_range) << "(" << probably(best_range.covers(current_range)) << ")\n");
                 if (probably(best_range.covers(current_range))) {
                     best = i;
                     ARIADNE_LOG(5,"best approximation: " << i << "\n");
@@ -514,6 +510,8 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
                 }
             }
         }
+
+        //std::cout << best << std::flush;
 
         reach_function = best_reach_function;
         evolve_function = best_evolve_function;
@@ -613,6 +611,7 @@ ValidatedVectorFunctionModelDP InclusionIntegrator::
 compute_flow_function(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType D,
                       PositiveFloatDPValue h, UpperBoxType B) const {
     auto n=D.size();
+    auto m=V.size();
     auto e=_approximation->compute_error(f,g,V,h,B);
     ARIADNE_LOG(6,"approximation error:"<<e<<"\n");
     //  Set up estimate for differential equation;
@@ -631,7 +630,7 @@ compute_flow_function(ValidatedVectorFunction f, Vector<ValidatedVectorFunction>
     auto x0f=ValidatedVectorTaylorFunctionModelDP::projection(DHPE,range(0,n),swp);
     auto ef=ValidatedVectorTaylorFunctionModelDP::projection(DHPE,range(fd_size-n,fd_size),swp);
 
-    auto w =_approximation->build_approximating_function(DHPE, n);
+    auto w =_approximation->build_approximating_function(DHPE, n, m);
     ValidatedVectorTaylorFunctionModelDP& wf = dynamic_cast<ValidatedVectorTaylorFunctionModelDP&>(w.reference());
     ARIADNE_LOG(6,"wf:"<<wf<<"\n");
 
@@ -708,44 +707,44 @@ BoxDomainType InclusionIntegratorAffineApproximation::build_flow_domain(BoxDomai
 
 
 
-ValidatedVectorFunctionModelType InclusionIntegratorZeroApproximation::build_approximating_function(BoxDomainType DHPE, SizeType n) const {
+ValidatedVectorFunctionModelType InclusionIntegratorZeroApproximation::build_approximating_function(BoxDomainType DHPE, SizeType n, SizeType m) const {
 
     auto swp=this->_sweeper;
 
     auto zero=ValidatedScalarTaylorFunctionModelDP::zero(DHPE,swp);
 
-    auto result=ValidatedVectorTaylorFunctionModelDP(n,DHPE,swp);
-    for (auto i : range(n)) { result[i]=zero; }
+    auto result=ValidatedVectorTaylorFunctionModelDP(m,DHPE,swp);
+    for (auto i : range(m)) { result[i]=zero; }
 
     return result;
 }
 
 
-ValidatedVectorFunctionModelType InclusionIntegratorConstantApproximation::build_approximating_function(BoxDomainType DHPE, SizeType n) const {
+ValidatedVectorFunctionModelType InclusionIntegratorConstantApproximation::build_approximating_function(BoxDomainType DHPE, SizeType n, SizeType m) const {
 
     auto swp=this->_sweeper;
 
-    auto p0f=ValidatedVectorTaylorFunctionModelDP::projection(DHPE,range(n+1,n+1+n),swp);
+    auto p0f=ValidatedVectorTaylorFunctionModelDP::projection(DHPE,range(n+1,n+1+m),swp);
 
-    auto result=ValidatedVectorTaylorFunctionModelDP(n,DHPE,swp);
-    for (auto i : range(n)) { result[i]=p0f[i]; }
+    auto result=ValidatedVectorTaylorFunctionModelDP(m,DHPE,swp);
+    for (auto i : range(m)) { result[i]=p0f[i]; }
 
     return result;
 }
 
 
-ValidatedVectorFunctionModelType InclusionIntegratorAffineApproximation::build_approximating_function(BoxDomainType DHPE, SizeType n) const {
+ValidatedVectorFunctionModelType InclusionIntegratorAffineApproximation::build_approximating_function(BoxDomainType DHPE, SizeType n, SizeType m) const {
 
     auto swp=this->_sweeper;
 
     auto tf=ValidatedScalarTaylorFunctionModelDP::coordinate(DHPE,n,swp);
-    auto p0f=ValidatedVectorTaylorFunctionModelDP::projection(DHPE,range(n+1,n+1+n),swp);
-    auto p1f=ValidatedVectorTaylorFunctionModelDP::projection(DHPE,range(n+1+n,n+1+2*n),swp);
+    auto p0f=ValidatedVectorTaylorFunctionModelDP::projection(DHPE,range(n+1,n+1+m),swp);
+    auto p1f=ValidatedVectorTaylorFunctionModelDP::projection(DHPE,range(n+1+n,n+1+2*m),swp);
 
     auto h = DHPE[n].upper();
 
-    auto result=ValidatedVectorTaylorFunctionModelDP(n,DHPE,swp);
-    for (auto i : range(n)) { result[i]=p0f[i]+p1f[i]*(tf-h/2)/h; }
+    auto result=ValidatedVectorTaylorFunctionModelDP(m,DHPE,swp);
+    for (auto i : range(m)) { result[i]=p0f[i]+p1f[i]*(tf-h/2)/h; }
 
     return result;
 }

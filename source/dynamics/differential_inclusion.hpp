@@ -219,7 +219,7 @@ public:
 
 class InclusionIntegratorInterface {
   public:
-    virtual List<ValidatedVectorFunctionModelType> flow(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType X0, Real T) const = 0;
+    virtual List<ValidatedVectorFunctionModelType> flow(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType X0, Real T) = 0;
 
     virtual Pair<ExactTimeStepType,UpperBoxType> flow_bounds(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, UpperBoxType V, ExactBoxType D, ApproximateTimeStepType hsug) const = 0;
     virtual ValidatedVectorFunctionModelType compute_flow_function(ValidatedVectorFunction f,
@@ -250,7 +250,7 @@ class InclusionIntegrator : public virtual InclusionIntegratorInterface, public 
 
     ValidatedVectorFunctionModelType expand_errors(ValidatedVectorFunctionModelType Phi) const;
     ValidatedVectorFunctionModelType simplify(ValidatedVectorFunctionModelType Phi) const;
-    virtual List<ValidatedVectorFunctionModelType> flow(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType X0, Real T) const override;
+    virtual List<ValidatedVectorFunctionModelType> flow(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType X0, Real T) override;
 
     virtual Pair<ExactTimeStepType,UpperBoxType> flow_bounds(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, UpperBoxType V, ExactBoxType D, ApproximateTimeStepType hsug) const override;
 

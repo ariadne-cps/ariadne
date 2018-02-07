@@ -437,7 +437,7 @@ InclusionIntegrator::InclusionIntegrator(SweeperDP sweeper, StepSize step_size)
 {
 }
 
-List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType X0, Real tmax) const {
+List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType X0, Real tmax) {
     //Solve the differential inclusion dot(x) in f(x)+V for x(0) in X0 up to time T.
     ARIADNE_LOG(2,"\nf:"<<f<<"\nV:"<<V<<"\nX0:"<<X0<<"\ntmax:"<<tmax<<"\n");
 
@@ -469,16 +469,54 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
         PositiveFloatDPValue h;
         std::tie(h,B)=this->flow_bounds(f,g,V,D,hsug);
         ARIADNE_LOG(5,"flow bounds = "<<B<<" (using h = " << h << ")\n");
-        auto Phi = this->compute_flow_function(f,g,V,D,h,B);
-        ARIADNE_LOG(5,"Phi="<<Phi<<"\n");
-        assert(Phi.domain()[n].upper()==h);
+
         PositiveFloatDPValue new_t=cast_positive(cast_exact((t+h).lower()));
 
-        ValidatedVectorFunctionModelDP reach_function= build_reach_function(evolve_function, Phi, t, new_t);
-        ARIADNE_LOG(5,"reach_function="<<reach_function<<"\n");
+        ValidatedVectorFunctionModelDP reach_function;
+        ValidatedVectorFunctionModelDP best_reach_function, best_evolve_function;
+        SizeType best = 0;
 
-        evolve_function=partial_evaluate(reach_function,n,new_t);
-        ARIADNE_LOG(5,"evolve_function="<<evolve_function<<"\n");
+        for (auto i : range(3)) {
+            ARIADNE_LOG(5,"checking approximation "<<i<<"\n");
+            switch(i) {
+                case 0:
+                    this->_approximation.reset(new InclusionIntegratorAffineApproximation(this->_sweeper));
+                    break;
+                case 1:
+                    this->_approximation.reset(new InclusionIntegratorAffineApproximation(this->_sweeper));
+                    break;
+                case 2:
+                    this->_approximation.reset(new InclusionIntegratorAffineApproximation(this->_sweeper));
+            }
+
+            auto Phi = this->compute_flow_function(f,g,V,D,h,B);
+            ARIADNE_LOG(5,"Phi="<<Phi<<"\n");
+            assert(Phi.domain()[n].upper()==h);
+
+            ValidatedVectorFunctionModelDP current_reach_function=build_reach_function(evolve_function, Phi, t, new_t);
+            ARIADNE_LOG(5,"current_reach_function="<<current_reach_function<<"\n");
+
+            ValidatedVectorFunctionModelDP current_evolve_function=partial_evaluate(current_reach_function,n,new_t);
+            ARIADNE_LOG(5,"current_evolve_function="<<current_evolve_function<<"\n");
+
+            if (i == 0) {
+                best_reach_function = current_reach_function;
+                best_evolve_function = current_evolve_function;
+            } else {
+                auto best_range = best_evolve_function.range();
+                auto current_range = current_evolve_function.range();
+                ARIADNE_LOG(5,"best: " << best_range << ", current: " << current_range << ", covers? " << best_range.covers(current_range) << "(" << probably(best_range.covers(current_range)) << ")\n");
+                if (probably(best_range.covers(current_range))) {
+                    best = i;
+                    ARIADNE_LOG(5,"best approximation: " << i << "\n");
+                    best_reach_function = current_reach_function;
+                    best_evolve_function = current_evolve_function;
+                }
+            }
+        }
+
+        reach_function = best_reach_function;
+        evolve_function = best_evolve_function;
 
         step+=1;
 
@@ -576,7 +614,7 @@ compute_flow_function(ValidatedVectorFunction f, Vector<ValidatedVectorFunction>
                       PositiveFloatDPValue h, UpperBoxType B) const {
     auto n=D.size();
     auto e=_approximation->compute_error(f,g,V,h,B);
-
+    ARIADNE_LOG(6,"approximation error:"<<e<<"\n");
     //  Set up estimate for differential equation;
     //  Use affine wi=ai0+(t-h/2)ai1/h;
     //    with |ai0|<=Vi, |ai1|<=3Vi, |wi(t)|<=5Vi/2, and |w'(t)|<=3Vi/h.;
@@ -606,7 +644,6 @@ compute_flow_function(ValidatedVectorFunction f, Vector<ValidatedVectorFunction>
     for (auto i : range(6)) {
         phi=antiderivative(get_time_derivative(phi,f,g,wf),n)+x0f;
     }
-    ARIADNE_LOG(6,"phi.errors():"<<phi.errors()<<"\n");
     ARIADNE_LOG(7,(derivative(phi,n) - get_time_derivative(phi,f,g,wf)).range()<<"\n");
 
     for (auto i : range(n)) {

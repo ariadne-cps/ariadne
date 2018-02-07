@@ -102,6 +102,7 @@ class TestInclusionIntegrator {
     void test_pi_controller() const;
     void test_jet_engine() const;
     void test_lotka_volterra() const;
+    void test_higgins_selkov() const;
 };
 
 
@@ -110,16 +111,41 @@ TestInclusionIntegrator::TestInclusionIntegrator()
     : x(EffectiveVectorFunction::identity(2u)), one(EffectiveScalarFunction::constant(2u,1_z)) { }
 
 void TestInclusionIntegrator::test() const {
-    ARIADNE_TEST_CALL(test_clock());
-    ARIADNE_TEST_CALL(test_rotation());
-    ARIADNE_TEST_CALL(test_van_der_pol());
-    ARIADNE_TEST_CALL(test_pi_controller());
-    ARIADNE_TEST_CALL(test_jet_engine());
-    ARIADNE_TEST_CALL(test_lotka_volterra());
+    //ARIADNE_TEST_CALL(test_clock());
+    //ARIADNE_TEST_CALL(test_rotation());
+    //ARIADNE_TEST_CALL(test_van_der_pol());
+    //ARIADNE_TEST_CALL(test_pi_controller());
+    //ARIADNE_TEST_CALL(test_jet_engine());
+    //ARIADNE_TEST_CALL(test_lotka_volterra());
+    ARIADNE_TEST_CALL(test_higgins_selkov());
+}
+
+void TestInclusionIntegrator::test_higgins_selkov() const {
+    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=0.02, number_of_steps_between_simplifications=8, number_of_variables_to_keep=16);
+    integrator.verbosity = 0;
+
+    RealVector noise_levels={2/10000_q,2/10000_q,2/10000};
+
+    auto one = EffectiveScalarFunction::constant(2u,1_z);
+    auto zero = EffectiveScalarFunction::constant(2u,0_z);
+
+    Real k1(1.00001);
+
+    auto f = EffectiveVectorFunction({one-x[0]*k1*x[1]*x[1],x[0]*k1*x[1]*x[1] - x[1]});
+
+    Vector<ValidatedVectorFunction> g({{one,zero},{-x[0]*x[1]*x[1],x[0]*x[1]*x[1]},{zero,-x[1]}});
+
+    Real e=1/100_q;
+    Real x0_i(2.0);
+    Real x1_i(1.0);
+    RealBox starting_set={{x0_i-e,x0_i+e},{x1_i-e,x1_i+e}};
+    Real evolution_time=100/10_q;
+
+    this->run_test("higgins-selkov",integrator,f,g,noise_levels,starting_set,evolution_time);
 }
 
 void TestInclusionIntegrator::test_lotka_volterra() const {
-    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=1.0/64, number_of_steps_between_simplifications=8, number_of_variables_to_keep=16);
+    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=1.0/128, number_of_steps_between_simplifications=8, number_of_variables_to_keep=16);
     integrator.verbosity = 1;
 
     RealVector noise_levels={1/100_q,1/100_q};

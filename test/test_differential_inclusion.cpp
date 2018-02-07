@@ -59,7 +59,7 @@ using namespace Ariadne;
 class TestInclusionIntegrator {
     EffectiveVectorFunction x; EffectiveScalarFunction one;
 
-    Void run_test(String name, InclusionIntegratorInterface const& integrator,
+    Void run_test(String name, InclusionIntegratorInterface& integrator,
                   ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, RealVector noise_levels,
                   RealBox real_starting_set, Real evolution_time) const
     {
@@ -99,6 +99,7 @@ class TestInclusionIntegrator {
     void test_clock() const;
     void test_rotation() const;
     void test_van_der_pol() const;
+    void test_pi_controller() const;
     void test_jet_engine() const;
     void test_lotka_volterra() const;
 };
@@ -112,13 +113,14 @@ void TestInclusionIntegrator::test() const {
     ARIADNE_TEST_CALL(test_clock());
     ARIADNE_TEST_CALL(test_rotation());
     ARIADNE_TEST_CALL(test_van_der_pol());
+    ARIADNE_TEST_CALL(test_pi_controller());
     ARIADNE_TEST_CALL(test_jet_engine());
     ARIADNE_TEST_CALL(test_lotka_volterra());
 }
 
 void TestInclusionIntegrator::test_lotka_volterra() const {
-    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=1.0/32, number_of_steps_between_simplifications=4, number_of_variables_to_keep=32);
-    integrator.verbosity = 0;
+    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=1.0/64, number_of_steps_between_simplifications=8, number_of_variables_to_keep=16);
+    integrator.verbosity = 1;
 
     RealVector noise_levels={1/100_q,1/100_q};
 
@@ -155,6 +157,25 @@ void TestInclusionIntegrator::test_jet_engine() const {
     Real evolution_time=40/8_q;
 
     this->run_test("jetengine",integrator,f,g,noise_levels,starting_set,evolution_time);
+}
+
+void TestInclusionIntegrator::test_pi_controller() const {
+    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=1.0/32, number_of_steps_between_simplifications=4, number_of_variables_to_keep=8);
+    integrator.verbosity = 0;
+
+    RealVector noise_levels={1/10_q};
+
+    auto f = EffectiveVectorFunction({Real(-0.101)*(x[0]-Real(20.0))+Real(1.3203)*(x[1]-Real(0.1616))-Real(0.01)*x[0]*x[0], Real(-1.0)*(Real(-0.101)*(x[0]-Real(20.0))+Real(1.3203)*(x[1]-Real(0.1616))-Real(0.01)*x[0]*x[0]) + Real(3.0)*(Real(20.0)-x[0])});
+
+    auto one = EffectiveScalarFunction::constant(2u,1_z);
+    auto zero = EffectiveScalarFunction::constant(2u,0_z);
+    Vector<ValidatedVectorFunction> g({{zero,one}});
+
+    Real e=1/1024_q;
+    RealBox starting_set={{Real(5.0),Real(10.0)},{-e,+e}};
+    Real evolution_time=40/8_q;
+
+    this->run_test("pi-controller",integrator,f,g,noise_levels,starting_set,evolution_time);
 }
 
 void TestInclusionIntegrator::test_van_der_pol() const {
@@ -196,7 +217,8 @@ void TestInclusionIntegrator::test_rotation() const {
 }
 
 void TestInclusionIntegrator::test_clock() const {
-    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=1.0/4, number_of_steps_between_simplifications=64, number_of_variables_to_keep=32);
+    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=1.0/4, number_of_steps_between_simplifications=32, number_of_variables_to_keep=64);
+    integrator.verbosity = 0;
 
     RealVector noise_levels={1/16_q,1/16_q};
 

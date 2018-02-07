@@ -69,27 +69,40 @@ class TestInclusionIntegrator {
         BoxDomainType noise=cast_exact_box(UpperIntervalType(-1,+1)*noise_levels);
         BoxDomainType starting_set=cast_exact_box(over_approximation(real_starting_set));
 
+        std::cout << "flowing..." << std::endl;
+
         List<ValidatedVectorFunctionModelType> flow_functions = integrator.flow(f,g,noise,starting_set,evolution_time);
         List<ValidatedConstrainedImageSet> reach_sets = map([](ValidatedVectorFunctionModelType const& fm){return range(fm);},flow_functions);
         ValidatedVectorFunctionModelType evolve_function = partial_evaluate(flow_functions.back(),starting_set.size(),NumericType(evolution_time,prec));
         ValidatedConstrainedImageSet evolve_set = range(evolve_function);
 
-        Figure fig=Figure();
+        std::cout << "plotting..." << std::endl;
+        for (SizeType i : range(f.result_size()-1)) {
+            for (SizeType j : range(1,f.result_size())) {
+                Figure fig=Figure();
 
-        Box<FloatDPUpperInterval> graphics_box(2);
-        for (auto set: reach_sets) {
-            graphics_box = hull(graphics_box,set.bounding_box());
+                Box<FloatDPUpperInterval> graphics_box(2);
+                for (auto set: reach_sets) {
+                    Box<FloatDPUpperInterval> reach_bb(2);
+                    reach_bb[0] = set.bounding_box()[i];
+                    reach_bb[1] = set.bounding_box()[j];
+                    graphics_box = hull(graphics_box,reach_bb);
+                }
+                fig.set_bounding_box(graphics_box);
+                fig.set_projection(f.result_size(),i,j);
+                fig.set_line_colour(0.0,0.0,0.0);
+                fig.set_line_style(false);
+                fig.set_fill_colour(0.5,0.5,0.5);
+                fig.draw(starting_set);
+                fig.set_fill_colour(1.0,0.75,0.5);
+                for (auto set : reverse(reach_sets)) { fig.draw(set); }
+                fig.draw(evolve_set);
+                char num_char[7] = "";
+                if (f.result_size() > 2)
+                    sprintf(num_char,"[%lu,%lu]",i,j);
+                fig.write(("test_differential_inclusion-"+name+num_char).c_str());
+            }
         }
-
-        fig.set_bounding_box(graphics_box);
-        fig.set_line_colour(0.0,0.0,0.0);
-        fig.set_line_style(false);
-        fig.set_fill_colour(0.5,0.5,0.5);
-        fig.draw(starting_set);
-        fig.set_fill_colour(1.0,0.75,0.5);
-        for (auto set : reverse(reach_sets)) { fig.draw(set); }
-        fig.draw(evolve_set);
-        fig.write(("test_differential_inclusion-"+name).c_str());
     }
 
   public:
@@ -103,6 +116,7 @@ class TestInclusionIntegrator {
     void test_jet_engine() const;
     void test_lotka_volterra() const;
     void test_higgins_selkov() const;
+    void test_reactor() const;
 };
 
 
@@ -118,13 +132,42 @@ void TestInclusionIntegrator::test() const {
     //ARIADNE_TEST_CALL(test_jet_engine());
     //ARIADNE_TEST_CALL(test_lotka_volterra());
     ARIADNE_TEST_CALL(test_higgins_selkov());
+    //ARIADNE_TEST_CALL(test_reactor());
+}
+
+void TestInclusionIntegrator::test_reactor() const {
+    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=1.0/50, number_of_steps_between_simplifications=8, number_of_variables_to_keep=16);
+    integrator.verbosity = 0;
+
+    RealVector noise_levels={1/10_q,1/10_q,20_z};
+
+    auto y = EffectiveVectorFunction::identity(4u);
+    auto one = EffectiveScalarFunction::constant(4u,1_z);
+    auto zero = EffectiveScalarFunction::constant(4u,0_z);
+
+    Real U3(30.0);
+    Real k2(0.4);
+    Real iV(0.05);
+    Real ka(0.1);
+    Real kb(0.045);
+
+    auto f = EffectiveVectorFunction({-U3*y[0]*y[1]-k2*y[0]*y[2]+iV-ka*y[0],-U3*y[0]*y[1]+kb-ka*y[1],
+                                      U3*y[0]*y[1]-k2*y[0]*y[1]-ka*y[2],k2*y[0]*y[2]-ka*y[3]});
+
+    Vector<ValidatedVectorFunction> g({{one,zero,zero,zero},{zero,one*iV,zero,zero},{-one,-one,one,zero}});
+
+    Real e=1/1024_q;
+    RealBox starting_set={{-e,e},{-e,e},{-e,e},{-e,e}};
+    Real evolution_time=2/10_q;
+
+    this->run_test("reactor",integrator,f,g,noise_levels,starting_set,evolution_time);
 }
 
 void TestInclusionIntegrator::test_higgins_selkov() const {
-    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=0.02, number_of_steps_between_simplifications=8, number_of_variables_to_keep=16);
+    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=1.0/50, number_of_steps_between_simplifications=8, number_of_variables_to_keep=16);
     integrator.verbosity = 0;
 
-    RealVector noise_levels={2/10000_q,2/10000_q,2/10000};
+    RealVector noise_levels={2/10000_q,2/10000_q,2/10000_q};
 
     auto one = EffectiveScalarFunction::constant(2u,1_z);
     auto zero = EffectiveScalarFunction::constant(2u,0_z);

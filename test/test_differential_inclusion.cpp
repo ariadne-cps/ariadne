@@ -156,9 +156,9 @@ void TestInclusionIntegrator::test_reactor() const {
 
 void TestInclusionIntegrator::test_lorenz() const {
     auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=1.0/128, number_of_steps_between_simplifications=8, number_of_variables_to_keep=16);
-    integrator.verbosity = 6;
+    integrator.verbosity = 1;
 
-    RealVector noise_levels={0/10000_q};
+    RealVector noise_levels={1/100_q};
 
     auto x = EffectiveVectorFunction::identity(3u);
     auto one = EffectiveScalarFunction::constant(3u,1_z);
@@ -177,7 +177,7 @@ void TestInclusionIntegrator::test_lorenz() const {
     Real x1_i(1.0);
     Real x2_i(1.0);
     RealBox starting_set={{x0_i-e,x0_i+e},{x1_i-e,x1_i+e},{x2_i-e,x2_i+e}};
-    Real evolution_time=40/10_q;
+    Real evolution_time=10/10_q;
 
     this->run_test("lorenz",integrator,f,g,noise_levels,starting_set,evolution_time);
 }

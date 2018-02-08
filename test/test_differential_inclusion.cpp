@@ -57,7 +57,6 @@ template<class C> Reverse<C> reverse(C const& c) { return Reverse<C>(c); }
 using namespace Ariadne;
 
 class TestInclusionIntegrator {
-    EffectiveVectorFunction x; EffectiveScalarFunction one;
 
     Void run_test(String name, InclusionIntegratorInterface& integrator,
                   ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, RealVector noise_levels,
@@ -77,17 +76,13 @@ class TestInclusionIntegrator {
         ValidatedConstrainedImageSet evolve_set = range(evolve_function);
 
         std::cout << "plotting..." << std::endl;
-        for (SizeType i : range(f.result_size()-1)) {
-            for (SizeType j : range(1,f.result_size())) {
+        Box<FloatDPUpperInterval> graphics_box(f.result_size());
+        for (auto set: reach_sets) {
+            graphics_box = hull(graphics_box,set.bounding_box());
+        }
+        for (SizeType i : range(0,f.result_size()-1)) {
+            for (SizeType j : range(i+1,f.result_size())) {
                 Figure fig=Figure();
-
-                Box<FloatDPUpperInterval> graphics_box(2);
-                for (auto set: reach_sets) {
-                    Box<FloatDPUpperInterval> reach_bb(2);
-                    reach_bb[0] = set.bounding_box()[i];
-                    reach_bb[1] = set.bounding_box()[j];
-                    graphics_box = hull(graphics_box,reach_bb);
-                }
                 fig.set_bounding_box(graphics_box);
                 fig.set_projection(f.result_size(),i,j);
                 fig.set_line_colour(0.0,0.0,0.0);
@@ -106,7 +101,6 @@ class TestInclusionIntegrator {
     }
 
   public:
-    TestInclusionIntegrator();
 
     void test() const;
     void test_clock() const;
@@ -116,13 +110,9 @@ class TestInclusionIntegrator {
     void test_jet_engine() const;
     void test_lotka_volterra() const;
     void test_higgins_selkov() const;
+    void test_lorenz() const;
     void test_reactor() const;
 };
-
-
-
-TestInclusionIntegrator::TestInclusionIntegrator()
-    : x(EffectiveVectorFunction::identity(2u)), one(EffectiveScalarFunction::constant(2u,1_z)) { }
 
 void TestInclusionIntegrator::test() const {
     //ARIADNE_TEST_CALL(test_clock());
@@ -131,7 +121,8 @@ void TestInclusionIntegrator::test() const {
     //ARIADNE_TEST_CALL(test_pi_controller());
     //ARIADNE_TEST_CALL(test_jet_engine());
     //ARIADNE_TEST_CALL(test_lotka_volterra());
-    ARIADNE_TEST_CALL(test_higgins_selkov());
+    //ARIADNE_TEST_CALL(test_higgins_selkov());
+    ARIADNE_TEST_CALL(test_lorenz());
     //ARIADNE_TEST_CALL(test_reactor());
 }
 
@@ -141,7 +132,7 @@ void TestInclusionIntegrator::test_reactor() const {
 
     RealVector noise_levels={1/10_q,1/10_q,20_z};
 
-    auto y = EffectiveVectorFunction::identity(4u);
+    auto x = EffectiveVectorFunction::identity(4u);
     auto one = EffectiveScalarFunction::constant(4u,1_z);
     auto zero = EffectiveScalarFunction::constant(4u,0_z);
 
@@ -151,16 +142,44 @@ void TestInclusionIntegrator::test_reactor() const {
     Real ka(0.1);
     Real kb(0.045);
 
-    auto f = EffectiveVectorFunction({-U3*y[0]*y[1]-k2*y[0]*y[2]+iV-ka*y[0],-U3*y[0]*y[1]+kb-ka*y[1],
-                                      U3*y[0]*y[1]-k2*y[0]*y[1]-ka*y[2],k2*y[0]*y[2]-ka*y[3]});
+    auto f = EffectiveVectorFunction({-U3*x[0]*x[1]-k2*x[0]*x[2]+iV-ka*x[0],-U3*x[0]*x[1]+kb-ka*x[1],
+                                      U3*x[0]*x[1]-k2*x[0]*x[1]-ka*x[2],k2*x[0]*x[2]-ka*x[3]});
 
-    Vector<ValidatedVectorFunction> g({{one,zero,zero,zero},{zero,one*iV,zero,zero},{-one,-one,one,zero}});
+    Vector<ValidatedVectorFunction> g({{one,zero,zero,zero},{zero,one*iV,zero,zero},{one,one,one,zero}});
 
-    Real e=1/1024_q;
+    Real e=1/1000000_q;
     RealBox starting_set={{-e,e},{-e,e},{-e,e},{-e,e}};
-    Real evolution_time=2/10_q;
+    Real evolution_time=1/20_q;
 
     this->run_test("reactor",integrator,f,g,noise_levels,starting_set,evolution_time);
+}
+
+void TestInclusionIntegrator::test_lorenz() const {
+    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=1.0/128, number_of_steps_between_simplifications=8, number_of_variables_to_keep=16);
+    integrator.verbosity = 6;
+
+    RealVector noise_levels={0/10000_q};
+
+    auto x = EffectiveVectorFunction::identity(3u);
+    auto one = EffectiveScalarFunction::constant(3u,1_z);
+    auto zero = EffectiveScalarFunction::constant(3u,0_z);
+
+    Real sigma(10.0);
+    Real rho(28.0);
+    Real beta(8.0/3);
+
+    auto f = EffectiveVectorFunction({(x[1]-x[0])*sigma,x[0]*(one*rho - x[2]) - x[1],x[0]*x[1] - x[2]*beta});
+
+    Vector<ValidatedVectorFunction> g({{zero,x[0],zero}});
+
+    Real e=1/1024_q;
+    Real x0_i(1.0);
+    Real x1_i(1.0);
+    Real x2_i(1.0);
+    RealBox starting_set={{x0_i-e,x0_i+e},{x1_i-e,x1_i+e},{x2_i-e,x2_i+e}};
+    Real evolution_time=40/10_q;
+
+    this->run_test("lorenz",integrator,f,g,noise_levels,starting_set,evolution_time);
 }
 
 void TestInclusionIntegrator::test_higgins_selkov() const {
@@ -169,6 +188,7 @@ void TestInclusionIntegrator::test_higgins_selkov() const {
 
     RealVector noise_levels={2/10000_q,2/10000_q,2/10000_q};
 
+    auto x = EffectiveVectorFunction::identity(2u);
     auto one = EffectiveScalarFunction::constant(2u,1_z);
     auto zero = EffectiveScalarFunction::constant(2u,0_z);
 
@@ -193,6 +213,7 @@ void TestInclusionIntegrator::test_lotka_volterra() const {
 
     RealVector noise_levels={1/100_q,1/100_q};
 
+    auto x = EffectiveVectorFunction::identity(2u);
     auto one = EffectiveScalarFunction::constant(2u,1_z);
     auto zero = EffectiveScalarFunction::constant(2u,0_z);
     auto three = EffectiveScalarFunction::constant(2u,3_z);
@@ -215,10 +236,12 @@ void TestInclusionIntegrator::test_jet_engine() const {
 
     RealVector noise_levels={5/1000_q,5/1000_q};
 
-    auto f = EffectiveVectorFunction({-x[1]-Real(1.5)*x[0]*x[0]-Real(0.5)*x[0]*x[0]*x[0]-Real(0.5),3*x[0]-x[1]});
-
+    auto x = EffectiveVectorFunction::identity(2u);
     auto one = EffectiveScalarFunction::constant(2u,1_z);
     auto zero = EffectiveScalarFunction::constant(2u,0_z);
+
+    auto f = EffectiveVectorFunction({-x[1]-Real(1.5)*x[0]*x[0]-Real(0.5)*x[0]*x[0]*x[0]-Real(0.5),3*x[0]-x[1]});
+
     Vector<ValidatedVectorFunction> g({{one,zero},{zero,one}});
 
     Real e=1/10_q;
@@ -234,10 +257,12 @@ void TestInclusionIntegrator::test_pi_controller() const {
 
     RealVector noise_levels={1/10_q};
 
-    auto f = EffectiveVectorFunction({Real(-0.101)*(x[0]-Real(20.0))+Real(1.3203)*(x[1]-Real(0.1616))-Real(0.01)*x[0]*x[0], Real(-1.0)*(Real(-0.101)*(x[0]-Real(20.0))+Real(1.3203)*(x[1]-Real(0.1616))-Real(0.01)*x[0]*x[0]) + Real(3.0)*(Real(20.0)-x[0])});
-
+    auto x = EffectiveVectorFunction::identity(2u);
     auto one = EffectiveScalarFunction::constant(2u,1_z);
     auto zero = EffectiveScalarFunction::constant(2u,0_z);
+
+    auto f = EffectiveVectorFunction({Real(-0.101)*(x[0]-Real(20.0))+Real(1.3203)*(x[1]-Real(0.1616))-Real(0.01)*x[0]*x[0], Real(-1.0)*(Real(-0.101)*(x[0]-Real(20.0))+Real(1.3203)*(x[1]-Real(0.1616))-Real(0.01)*x[0]*x[0]) + Real(3.0)*(Real(20.0)-x[0])});
+
     Vector<ValidatedVectorFunction> g({{zero,one}});
 
     Real e=1/1024_q;
@@ -253,10 +278,12 @@ void TestInclusionIntegrator::test_van_der_pol() const {
 
     RealVector noise_levels={1/1024_q,1/1024_q};
 
-    auto f=EffectiveVectorFunction({x[1],-x[0]+x[1]*(1 - x[0]*x[0])});
-
+    auto x = EffectiveVectorFunction::identity(2u);
     auto one = EffectiveScalarFunction::constant(2u,1_z);
     auto zero = EffectiveScalarFunction::constant(2u,0_z);
+
+    auto f=EffectiveVectorFunction({x[1],-x[0]+x[1]*(1 - x[0]*x[0])});
+
     Vector<ValidatedVectorFunction> g({{one,zero},{zero,one}});
 
     Real e=1/1024_q;
@@ -272,10 +299,12 @@ void TestInclusionIntegrator::test_rotation() const {
 
     RealVector noise_levels={1/1024_q,1/1024_q};
 
-    auto f=EffectiveVectorFunction({x[1],-x[0]});
-
+    auto x = EffectiveVectorFunction::identity(2u);
     auto one = EffectiveScalarFunction::constant(2u,1_z);
     auto zero = EffectiveScalarFunction::constant(2u,0_z);
+
+    auto f=EffectiveVectorFunction({x[1],-x[0]});
+
     Vector<ValidatedVectorFunction> g({{one,zero},{zero,one}});
 
     Real e=1/1024_q;
@@ -291,6 +320,7 @@ void TestInclusionIntegrator::test_clock() const {
 
     RealVector noise_levels={1/16_q,1/16_q};
 
+    auto x = EffectiveVectorFunction::identity(2u);
     auto one = EffectiveScalarFunction::constant(2u,1_z);
     auto zero = EffectiveScalarFunction::constant(2u,0_z);
 

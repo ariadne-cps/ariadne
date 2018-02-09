@@ -30,6 +30,9 @@
 #include "output/graphics.hpp"
 
 #include "test/test.hpp"
+#include <sys/times.h>
+#include <sys/resource.h>
+#include <unistd.h>
 
 namespace Ariadne {
 
@@ -70,7 +73,16 @@ class TestInclusionIntegrator {
 
         std::cout << "flowing..." << std::endl;
 
+        tms start_time, end_time;
+        times(&start_time);
+
         List<ValidatedVectorFunctionModelType> flow_functions = integrator.flow(f,g,noise,starting_set,evolution_time);
+
+        times(&end_time);
+        clock_t ticks = end_time.tms_utime - start_time.tms_utime;
+        clock_t const hz = sysconf(_SC_CLK_TCK);
+        std::cout << "And it took about " << ticks / hz << "." << ticks % hz << "s" << std::endl;
+
         List<ValidatedConstrainedImageSet> reach_sets = map([](ValidatedVectorFunctionModelType const& fm){return range(fm);},flow_functions);
         ValidatedVectorFunctionModelType evolve_function = partial_evaluate(flow_functions.back(),starting_set.size(),NumericType(evolution_time,prec));
         ValidatedConstrainedImageSet evolve_set = range(evolve_function);
@@ -120,9 +132,9 @@ void TestInclusionIntegrator::test() const {
     //ARIADNE_TEST_CALL(test_van_der_pol());
     //ARIADNE_TEST_CALL(test_pi_controller());
     //ARIADNE_TEST_CALL(test_jet_engine());
-    //ARIADNE_TEST_CALL(test_lotka_volterra());
+    ARIADNE_TEST_CALL(test_lotka_volterra());
     //ARIADNE_TEST_CALL(test_higgins_selkov());
-    ARIADNE_TEST_CALL(test_lorenz());
+    //ARIADNE_TEST_CALL(test_lorenz());
     //ARIADNE_TEST_CALL(test_reactor());
 }
 
@@ -155,8 +167,8 @@ void TestInclusionIntegrator::test_reactor() const {
 }
 
 void TestInclusionIntegrator::test_lorenz() const {
-    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=1.0/128, number_of_steps_between_simplifications=8, number_of_variables_to_keep=16);
-    integrator.verbosity = 1;
+    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=1.0/256, number_of_steps_between_simplifications=8, number_of_variables_to_keep=16);
+    integrator.verbosity = 2;
 
     RealVector noise_levels={1/100_q};
 
@@ -183,8 +195,8 @@ void TestInclusionIntegrator::test_lorenz() const {
 }
 
 void TestInclusionIntegrator::test_higgins_selkov() const {
-    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=1.0/50, number_of_steps_between_simplifications=8, number_of_variables_to_keep=16);
-    integrator.verbosity = 0;
+    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=1.0/64, number_of_steps_between_simplifications=1, number_of_variables_to_keep=60);
+    integrator.verbosity = 2;
 
     RealVector noise_levels={2/10000_q,2/10000_q,2/10000_q};
 
@@ -208,8 +220,8 @@ void TestInclusionIntegrator::test_higgins_selkov() const {
 }
 
 void TestInclusionIntegrator::test_lotka_volterra() const {
-    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=1.0/128, number_of_steps_between_simplifications=8, number_of_variables_to_keep=16);
-    integrator.verbosity = 1;
+    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=1.0/128, number_of_steps_between_simplifications=13, number_of_variables_to_keep=31);
+    integrator.verbosity = 2;
 
     RealVector noise_levels={1/100_q,1/100_q};
 
@@ -273,8 +285,8 @@ void TestInclusionIntegrator::test_pi_controller() const {
 }
 
 void TestInclusionIntegrator::test_van_der_pol() const {
-    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=1.0/16, number_of_steps_between_simplifications=1, number_of_variables_to_keep=4);
-    integrator.verbosity = 0;
+    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=1.0/16, number_of_steps_between_simplifications=16, number_of_variables_to_keep=10);
+    integrator.verbosity = 2;
 
     RealVector noise_levels={1/1024_q,1/1024_q};
 

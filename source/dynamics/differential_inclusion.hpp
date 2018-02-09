@@ -168,6 +168,15 @@ class AdditiveAffineErrorProcessor : public InclusionErrorProcessor {
 };
 
 
+class SingleInputAffineErrorProcessor : public InclusionErrorProcessor {
+public:
+    SingleInputAffineErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B);
+public:
+    virtual ErrorType compute_error(FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,PositiveFloatDPValue const&) const override;
+protected:
+    virtual Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError> compute_norms(ValidatedVectorFunction const&, Vector<ValidatedVectorFunction> const&, BoxDomainType const&, PositiveFloatDPValue const&, UpperBoxType const&) const override;
+};
+
 class InclusionIntegratorApproximation {
   protected:
     SweeperDP _sweeper;

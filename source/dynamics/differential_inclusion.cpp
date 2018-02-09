@@ -401,16 +401,34 @@ AffineErrorProcessor::compute_norms(ValidatedVectorFunction const& f, Vector<Val
 ErrorType AffineErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
 
     DoublePrecision pr;
+    FloatDPError r(FloatDP(5.0/2u,pr));
 
-    PositiveFloatDPValue c2(FloatDP(7.0/2,pr));
-    PositiveFloatDPBounds c3(c2/6);
-    FloatDPError result = (Lp*(K*11u + Kp*69u/2u) + c2*Kp*((Hp*4u+H)*(K+Kp*5u/2u) + L*L + (L*9u/2u + L*5u)*Lp)*expLambda + c3*(Kp*H+L*Lp)*(K+Kp))/cast_positive(1u-h*L/2u-h*Lp)*pow(h,2u)/4u;
+    FloatDPError result = ((r*r+1u)*Lp*Kp + (r+1u)*h*Kp*((Hp*2u*r + H)*(K+r*Kp)+L*L+(L*3u*r+Lp*r*r*2u)*Lp)*expLambda + (r+1u)/6u*h*(K+Kp)*((H*Kp+L*Lp)*3u+(Hp*K+L*Lp)*4u))/cast_positive(1u-h*L/2u-h*Lp*r)*pow(h,2u)/4u;
 
     return result;
 }
 
-AdditiveAffineErrorProcessor::AdditiveAffineErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B)
+SingleInputAffineErrorProcessor::SingleInputAffineErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B)
     : InclusionErrorProcessor(f,g,V,h,B) {}
+
+Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError>
+SingleInputAffineErrorProcessor::compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B) const {
+    return compute_norms_C2(f,g,V,h,B);
+}
+
+ErrorType SingleInputAffineErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
+
+    DoublePrecision pr;
+    FloatDPError r(FloatDP(5.0/2u,pr));
+
+    FloatDPError result = ((r+1u)*Kp*((Hp*2u*r+H)*(K+r*Kp)+L*L+(L*3u*r+Lp*r*r*2u)*Lp)*expLambda + (r+1u)/6u*(K+Kp)*((r+1u)*((H*Kp+L*Lp)*3u +(Hp*K+L*Lp)*4u) + (Hp*Kp+Lp*Lp)*8u*(r*r+1u)))/cast_positive(1u-h*L/2u-h*Lp*r)*pow(h,3u)/4u;
+
+    return result;
+}
+
+
+AdditiveAffineErrorProcessor::AdditiveAffineErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B)
+        : InclusionErrorProcessor(f,g,V,h,B) {}
 
 Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError>
 AdditiveAffineErrorProcessor::compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B) const {
@@ -420,10 +438,9 @@ AdditiveAffineErrorProcessor::compute_norms(ValidatedVectorFunction const& f, Ve
 ErrorType AdditiveAffineErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
 
     DoublePrecision pr;
+    FloatDPError r(FloatDP(5.0/2u,pr));
 
-    PositiveFloatDPValue c2(FloatDP(7.0/8,pr));
-    PositiveFloatDPBounds c1(c2/6);
-    FloatDPError result = (c1*Kp*H*(K+Kp)+c2*Kp*(L*L+H*(K+Kp*5u/2u))*expLambda)/cast_positive(1u-h*L/2u)*pow(h,3u);
+    FloatDPError result = (Kp*(H*(K+r*Kp)+L*L)*expLambda + (K+Kp)*H*Kp/2u)/cast_positive(1u-h*L/2u)*(r+1u)*pow(h,3u)/4u;
 
     return result;
 }
@@ -438,8 +455,7 @@ InclusionIntegrator::InclusionIntegrator(SweeperDP sweeper, StepSize step_size)
 }
 
 List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType X0, Real tmax) {
-    //Solve the differential inclusion dot(x) in f(x)+V for x(0) in X0 up to time T.
-    ARIADNE_LOG(2,"\nf:"<<f<<"\nV:"<<V<<"\nX0:"<<X0<<"\ntmax:"<<tmax<<"\n");
+    ARIADNE_LOG(1,"\nf:"<<f<<"\ng:"<<g<<"\nV:"<<V<<"\nX0:"<<X0<<"\ntmax:"<<tmax<<"\n");
 
     // Ensure all arguments have the correct size;
     auto n=X0.size();
@@ -457,18 +473,18 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
 
     auto step = 0;
     while (possibly(t<FloatDPBounds(tmax,pr))) {
-        ARIADNE_LOG(3,"step#:"<<step<<", t:"<<t<<", hsug:"<<hsug << "\n");
+        ARIADNE_LOG(2,"step#:"<<step<<", t:"<<t<<", hsug:"<<hsug << "\n");
         if(possibly(t+hsug>FloatDPBounds(tmax,pr))) {  //FIXME: Check types for timing;
             hsug=cast_positive(cast_exact((tmax-t).upper()));
         }
 
-        ARIADNE_LOG(4,"n. of extra parameters="<<evolve_function.argument_size()-n<<"\n");
+        ARIADNE_LOG(3,"n. of extra parameters="<<evolve_function.argument_size()-n<<"\n");
 
         auto D = cast_exact_box(evolve_function.range());
         UpperBoxType B;
         PositiveFloatDPValue h;
         std::tie(h,B)=this->flow_bounds(f,g,V,D,hsug);
-        ARIADNE_LOG(5,"flow bounds = "<<B<<" (using h = " << h << ")\n");
+        ARIADNE_LOG(2,"flow bounds = "<<B<<" (using h = " << h << ")\n");
 
         PositiveFloatDPValue new_t=cast_positive(cast_exact((t+h).lower()));
 
@@ -481,10 +497,10 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
         approximations[1] = SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorConstantApproximation(this->_sweeper));
         approximations[2] = SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorAffineApproximation(this->_sweeper));
 
-        for (auto i : range(3)) {
-            ARIADNE_LOG(5,"checking approximation "<<i<<"\n");
+        for (auto i : range(approximations.size())) {
+            ARIADNE_LOG(4,"checking approximation "<<i<<"\n");
             this->_approximation = approximations[i];
-            //this->_approximation.reset(new InclusionIntegratorAffineApproximation(this->_sweeper));
+            //this->_approximation.reset(new InclusionIntegratorConstantApproximation(this->_sweeper));
 
             auto Phi = this->compute_flow_function(f,g,V,D,h,B);
             ARIADNE_LOG(5,"Phi="<<Phi<<"\n");
@@ -614,14 +630,6 @@ compute_flow_function(ValidatedVectorFunction f, Vector<ValidatedVectorFunction>
     auto m=V.size();
     auto e=_approximation->compute_error(f,g,V,h,B);
     ARIADNE_LOG(6,"approximation error:"<<e<<"\n");
-    //  Set up estimate for differential equation;
-    //  Use affine wi=ai0+(t-h/2)ai1/h;
-    //    with |ai0|<=Vi, |ai1|<=3Vi, |wi(t)|<=5Vi/2, and |w'(t)|<=3Vi/h.;
-    //  Alternatively use step inputs wi=ai,0 for t<h/2 and wi=ai,1 for t>h/2;
-    //    with |ai0|,|ai1|<= 2Vi , and |wi(t)|<=2Vi.;
-
-    //  The flow is a function of n state variables, 1 time variable, 2n parameter variables;
-    //  Assume for now noise in all variables;
     auto swp=this->_sweeper;
     auto DHPE=_approximation->build_flow_domain(D, h, V, e);
     ARIADNE_LOG(6,"DHPE:"<<DHPE<<"\n");
@@ -672,6 +680,8 @@ ErrorType InclusionIntegratorConstantApproximation::compute_error(ValidatedVecto
 ErrorType InclusionIntegratorAffineApproximation::compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const {
     if (is_identity_matrix(g,B))
         return AdditiveAffineErrorProcessor(f,g,V,h,B).process();
+    else if (g.size() == 1)
+        return SingleInputAffineErrorProcessor(f,g,V,h,B).process();
     else
         return AffineErrorProcessor(f,g,V,h,B).process();
 }

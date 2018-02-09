@@ -446,6 +446,62 @@ ErrorType AdditiveAffineErrorProcessor::compute_error(FloatDPError const& K,Floa
 }
 
 
+SinusoidalErrorProcessor::SinusoidalErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B)
+        : InclusionErrorProcessor(f,g,V,h,B) {}
+
+Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError>
+SinusoidalErrorProcessor::compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B) const {
+    return compute_norms_C2(f,g,V,h,B);
+}
+
+ErrorType SinusoidalErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
+
+    DoublePrecision pr;
+    FloatDPError r(FloatDP(2.1464,pr));
+
+    FloatDPError result = ((r*r+1u)*Lp*Kp + (r+1u)*h*Kp*((Hp*2u*r + H)*(K+r*Kp)+L*L+(L*3u*r+Lp*r*r*2u)*Lp)*expLambda + (r+1u)/6u*h*(K+Kp)*((H*Kp+L*Lp)*3u+(Hp*K+L*Lp)*4u))/cast_positive(1u-h*L/2u-h*Lp*r)*pow(h,2u)/4u;
+
+    return result;
+}
+
+SingleInputSinusoidalErrorProcessor::SingleInputSinusoidalErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B)
+        : InclusionErrorProcessor(f,g,V,h,B) {}
+
+Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError>
+SingleInputSinusoidalErrorProcessor::compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B) const {
+    return compute_norms_C2(f,g,V,h,B);
+}
+
+ErrorType SingleInputSinusoidalErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
+
+    DoublePrecision pr;
+    FloatDPError r(FloatDP(2.1464,pr));
+
+    FloatDPError result = ((r+1u)*Kp*((Hp*2u*r+H)*(K+r*Kp)+L*L+(L*3u*r+Lp*r*r*2u)*Lp)*expLambda + (r+1u)/6u*(K+Kp)*((r+1u)*((H*Kp+L*Lp)*3u +(Hp*K+L*Lp)*4u) + (Hp*Kp+Lp*Lp)*8u*(r*r+1u)))/cast_positive(1u-h*L/2u-h*Lp*r)*pow(h,3u)/4u;
+
+    return result;
+}
+
+
+AdditiveSinusoidalErrorProcessor::AdditiveSinusoidalErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B)
+        : InclusionErrorProcessor(f,g,V,h,B) {}
+
+Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError>
+AdditiveSinusoidalErrorProcessor::compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B) const {
+    return compute_norms_C2_additive(f,g,V,h,B);
+}
+
+ErrorType AdditiveSinusoidalErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
+
+    DoublePrecision pr;
+    FloatDPError r(FloatDP(2.1464,pr));
+
+    FloatDPError result = (Kp*(H*(K+r*Kp)+L*L)*expLambda + (K+Kp)*H*Kp/2u)/cast_positive(1u-h*L/2u)*(r+1u)*pow(h,3u)/4u;
+
+    return result;
+}
+
+
 InclusionIntegrator::InclusionIntegrator(SweeperDP sweeper, StepSize step_size)
     : _sweeper(sweeper)
     , _step_size(step_size)
@@ -492,15 +548,15 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
         ValidatedVectorFunctionModelDP best_reach_function, best_evolve_function;
         SizeType best = 0;
 
-        Vector<SharedPointer<InclusionIntegratorApproximation>> approximations(3);
+        Vector<SharedPointer<InclusionIntegratorApproximation>> approximations(4);
         approximations[0] = SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorZeroApproximation(this->_sweeper));
         approximations[1] = SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorConstantApproximation(this->_sweeper));
         approximations[2] = SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorAffineApproximation(this->_sweeper));
+        approximations[3] = SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorSinusoidalApproximation(this->_sweeper));
 
-        for (auto i : range(approximations.size())) {
+        for (auto i : approximations.size())) {
             ARIADNE_LOG(4,"checking approximation "<<i<<"\n");
             this->_approximation = approximations[i];
-            //this->_approximation.reset(new InclusionIntegratorConstantApproximation(this->_sweeper));
 
             auto Phi = this->compute_flow_function(f,g,V,D,h,B);
             ARIADNE_LOG(5,"Phi="<<Phi<<"\n");
@@ -687,6 +743,16 @@ ErrorType InclusionIntegratorAffineApproximation::compute_error(ValidatedVectorF
 }
 
 
+ErrorType InclusionIntegratorSinusoidalApproximation::compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const {
+    if (is_identity_matrix(g,B))
+        return AdditiveSinusoidalErrorProcessor(f,g,V,h,B).process();
+    else if (g.size() == 1)
+        return SingleInputSinusoidalErrorProcessor(f,g,V,h,B).process();
+    else
+        return SinusoidalErrorProcessor(f,g,V,h,B).process();
+}
+
+
 BoxDomainType InclusionIntegratorZeroApproximation::build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V, ErrorType e) const {
 
     auto Ht=IntervalDomainType(-h,+h);
@@ -716,6 +782,15 @@ BoxDomainType InclusionIntegratorAffineApproximation::build_flow_domain(BoxDomai
 }
 
 
+BoxDomainType InclusionIntegratorSinusoidalApproximation::build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V, ErrorType e) const {
+
+    auto Ht=IntervalDomainType(-h,+h);
+    auto P0=V;
+    auto P1=cast_exact_box(Real(1.1464)*V);
+    auto E=error_domain(D.size(),e);
+
+    return join(D,Ht,P0,P1,E);
+}
 
 ValidatedVectorFunctionModelType InclusionIntegratorZeroApproximation::build_approximating_function(BoxDomainType DHPE, SizeType n, SizeType m) const {
 
@@ -755,6 +830,25 @@ ValidatedVectorFunctionModelType InclusionIntegratorAffineApproximation::build_a
 
     auto result=ValidatedVectorTaylorFunctionModelDP(m,DHPE,swp);
     for (auto i : range(m)) { result[i]=p0f[i]+p1f[i]*(tf-h/2)/h; }
+
+    return result;
+}
+
+
+ValidatedVectorFunctionModelType InclusionIntegratorSinusoidalApproximation::build_approximating_function(BoxDomainType DHPE, SizeType n, SizeType m) const {
+
+    auto swp=this->_sweeper;
+
+    auto tf=ValidatedScalarTaylorFunctionModelDP::coordinate(DHPE,n,swp);
+    auto p0f=ValidatedVectorTaylorFunctionModelDP::projection(DHPE,range(n+1,n+1+m),swp);
+    auto p1f=ValidatedVectorTaylorFunctionModelDP::projection(DHPE,range(n+1+m,n+1+2*m),swp);
+
+    auto h = DHPE[n].upper();
+
+    Real d(4.162586);
+
+    auto result=ValidatedVectorTaylorFunctionModelDP(m,DHPE,swp);
+    for (auto i : range(m)) { result[i]=p0f[i]+p1f[i]*sin((tf-h/2)*d/h); }
 
     return result;
 }

@@ -534,7 +534,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
             hsug=cast_positive(cast_exact((tmax-t).upper()));
         }
 
-        ARIADNE_LOG(3,"n. of extra parameters="<<evolve_function.argument_size()-n<<"\n");
+        ARIADNE_LOG(3,"n. of parameters="<<evolve_function.argument_size()<<"\n");
 
         auto D = cast_exact_box(evolve_function.range());
         UpperBoxType B;
@@ -548,15 +548,15 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
         ValidatedVectorFunctionModelDP best_reach_function, best_evolve_function;
         SizeType best = 0;
 
-        Vector<SharedPointer<InclusionIntegratorApproximation>> approximations(4);
-        approximations[0] = SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorZeroApproximation(this->_sweeper));
-        approximations[1] = SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorConstantApproximation(this->_sweeper));
-        approximations[2] = SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorAffineApproximation(this->_sweeper));
-        approximations[3] = SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorSinusoidalApproximation(this->_sweeper));
+        List<SharedPointer<InclusionIntegratorApproximation>> approximations;
+        approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorZeroApproximation(this->_sweeper)));
+        approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorConstantApproximation(this->_sweeper)));
+        approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorAffineApproximation(this->_sweeper)));
+        approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorSinusoidalApproximation(this->_sweeper)));
 
-        for (auto i : approximations.size())) {
+        for (auto i : range(approximations.size())) {
             ARIADNE_LOG(4,"checking approximation "<<i<<"\n");
-            this->_approximation = approximations[i];
+            this->_approximation = approximations.at(i);
 
             auto Phi = this->compute_flow_function(f,g,V,D,h,B);
             ARIADNE_LOG(5,"Phi="<<Phi<<"\n");
@@ -583,7 +583,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
             }
         }
 
-        //std::cout << best << std::flush;
+        std::cout << best << std::flush;
 
         reach_function = best_reach_function;
         evolve_function = best_evolve_function;

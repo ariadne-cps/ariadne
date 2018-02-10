@@ -122,6 +122,7 @@ class TestInclusionIntegrator {
     void test_jet_engine() const;
     void test_lotka_volterra() const;
     void test_higgins_selkov() const;
+    void test_rossler() const;
     void test_lorenz() const;
     void test_reactor() const;
 };
@@ -132,8 +133,9 @@ void TestInclusionIntegrator::test() const {
     //ARIADNE_TEST_CALL(test_van_der_pol());
     //ARIADNE_TEST_CALL(test_pi_controller());
     //ARIADNE_TEST_CALL(test_jet_engine());
-    ARIADNE_TEST_CALL(test_lotka_volterra());
+    //ARIADNE_TEST_CALL(test_lotka_volterra());
     //ARIADNE_TEST_CALL(test_higgins_selkov());
+    ARIADNE_TEST_CALL(test_rossler());
     //ARIADNE_TEST_CALL(test_lorenz());
     //ARIADNE_TEST_CALL(test_reactor());
 }
@@ -194,6 +196,34 @@ void TestInclusionIntegrator::test_lorenz() const {
     this->run_test("lorenz",integrator,f,g,noise_levels,starting_set,evolution_time);
 }
 
+void TestInclusionIntegrator::test_rossler() const {
+    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=1.0/128, number_of_steps_between_simplifications=8, number_of_variables_to_keep=16);
+    integrator.verbosity = 2;
+
+    RealVector noise_levels={1/1000_q};
+
+    auto x = EffectiveVectorFunction::identity(3u);
+    auto one = EffectiveScalarFunction::constant(3u,1_z);
+    auto zero = EffectiveScalarFunction::constant(3u,0_z);
+
+    Real a(0.1);
+    Real b(0.1);
+    Real c(6.0);
+
+    auto f = EffectiveVectorFunction({-x[1]-x[2],x[0] + x[1]*a,one*b + x[2]*(x[0]-one*c)});
+
+    Vector<ValidatedVectorFunction> g({{zero,zero,one}});
+
+    Real e=1/1024_q;
+    Real x0_i(-9.0);
+    Real x1_i(0.0);
+    Real x2_i(0.01);
+    RealBox starting_set={{x0_i-e,x0_i+e},{x1_i-e,x1_i+e},{x2_i-e,x2_i+e}};
+    Real evolution_time=120/10_q;
+
+    this->run_test("rossler",integrator,f,g,noise_levels,starting_set,evolution_time);
+}
+
 void TestInclusionIntegrator::test_higgins_selkov() const {
     auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=1.0/64, number_of_steps_between_simplifications=1, number_of_variables_to_keep=60);
     integrator.verbosity = 2;
@@ -243,8 +273,8 @@ void TestInclusionIntegrator::test_lotka_volterra() const {
 }
 
 void TestInclusionIntegrator::test_jet_engine() const {
-    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=1.0/32, number_of_steps_between_simplifications=4, number_of_variables_to_keep=8);
-    integrator.verbosity = 0;
+    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=1.0/32, number_of_steps_between_simplifications=16, number_of_variables_to_keep=16);
+    integrator.verbosity = 2;
 
     RealVector noise_levels={5/1000_q,5/1000_q};
 

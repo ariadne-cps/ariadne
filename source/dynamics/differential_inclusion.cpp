@@ -583,7 +583,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
             }
         }
 
-        std::cout << best << std::flush;
+        //std::cout << best << std::flush;
 
         reach_function = best_reach_function;
         evolve_function = best_evolve_function;
@@ -594,6 +594,8 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
             this->_reconditioner->simplify(evolve_function);
             ARIADNE_LOG(5,"new_evolve_function="<<evolve_function<<"\n");
         }
+
+        evolve_function = this->_reconditioner->expand_errors(evolve_function);
 
         t=new_t;
         result.append(reach_function);
@@ -891,12 +893,16 @@ Void LohnerReconditioner::simplify(ValidatedVectorFunctionModelDP& phi) const {
     ARIADNE_LOG(6,"simplifying\n");
     ARIADNE_LOG(6,"phi="<<phi<<"\n");
 
-    ValidatedVectorTaylorFunctionModelDP& tphi = dynamic_cast<ValidatedVectorTaylorFunctionModelDP&>(phi.reference());
-
     auto m=phi.argument_size();
     auto n=phi.result_size();
 
     ARIADNE_LOG(6,"num.parameters="<<m<<", to keep="<< this->_number_of_variables_to_keep <<"\n");
+
+    if (m < this->_number_of_variables_to_keep)
+        return;
+
+    ValidatedVectorTaylorFunctionModelDP& tphi = dynamic_cast<ValidatedVectorTaylorFunctionModelDP&>(phi.reference());
+
     // Compute effect of error terms, but not of original variables;
     Matrix<FloatDP> C(m,n);
     for (auto i : range(n)) {
@@ -963,8 +969,6 @@ Void LohnerReconditioner::simplify(ValidatedVectorFunctionModelDP& phi) const {
         auto j=remove_indices[i]; auto cj=old_domain[j].midpoint();
         projection[j]=ValidatedScalarTaylorFunctionModelDP::constant(new_domain,cj,this->_sweeper); }
     phi=compose(phi,projection);
-
-    phi = this->expand_errors(phi);
 }
 
 } // namespace Ariadne;

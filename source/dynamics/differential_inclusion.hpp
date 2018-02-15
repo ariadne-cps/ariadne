@@ -211,7 +211,7 @@ class InclusionIntegratorApproximation {
     InclusionIntegratorApproximation(SweeperDP sweeper) : _sweeper(sweeper) { }
   public:
     virtual ErrorType compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const = 0;
-    virtual BoxDomainType build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V, ErrorType e) const = 0;
+    virtual BoxDomainType build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V) const = 0;
     virtual ValidatedVectorFunctionModelType build_approximating_function(BoxDomainType DHPE, SizeType n, SizeType m) const = 0;
 };
 
@@ -221,8 +221,8 @@ public:
             : InclusionIntegratorApproximation(sweeper) {  }
 protected:
     virtual ErrorType compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const override;
-    virtual BoxDomainType build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V, ErrorType e) const override;
-    virtual ValidatedVectorFunctionModelType build_approximating_function(BoxDomainType DHPE, SizeType n, SizeType m) const override;
+    virtual BoxDomainType build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V) const override;
+    virtual ValidatedVectorFunctionModelType build_approximating_function(BoxDomainType FD, SizeType n, SizeType m) const override;
 };
 
 class InclusionIntegratorConstantApproximation : public InclusionIntegratorApproximation {
@@ -231,8 +231,8 @@ public:
             : InclusionIntegratorApproximation(sweeper) {  }
 protected:
     virtual ErrorType compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const override;
-    virtual BoxDomainType build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V, ErrorType e) const override;
-    virtual ValidatedVectorFunctionModelType build_approximating_function(BoxDomainType DHPE, SizeType n, SizeType m) const override;
+    virtual BoxDomainType build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V) const override;
+    virtual ValidatedVectorFunctionModelType build_approximating_function(BoxDomainType FD, SizeType n, SizeType m) const override;
 };
 
 class InclusionIntegratorAffineApproximation : public InclusionIntegratorApproximation {
@@ -241,8 +241,8 @@ public:
             : InclusionIntegratorApproximation(sweeper) {  }
 protected:
     virtual ErrorType compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const override;
-    virtual BoxDomainType build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V, ErrorType e) const override;
-    virtual ValidatedVectorFunctionModelType build_approximating_function(BoxDomainType DHPE, SizeType n, SizeType m) const override;
+    virtual BoxDomainType build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V) const override;
+    virtual ValidatedVectorFunctionModelType build_approximating_function(BoxDomainType FD, SizeType n, SizeType m) const override;
 };
 
 class InclusionIntegratorSinusoidalApproximation : public InclusionIntegratorApproximation {
@@ -251,8 +251,8 @@ public:
             : InclusionIntegratorApproximation(sweeper) {  }
 protected:
     virtual ErrorType compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const override;
-    virtual BoxDomainType build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V, ErrorType e) const override;
-    virtual ValidatedVectorFunctionModelType build_approximating_function(BoxDomainType DHPE, SizeType n, SizeType m) const override;
+    virtual BoxDomainType build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V) const override;
+    virtual ValidatedVectorFunctionModelType build_approximating_function(BoxDomainType FD, SizeType n, SizeType m) const override;
 };
 
 class LohnerReconditioner : public Reconditioner, public Loggable {

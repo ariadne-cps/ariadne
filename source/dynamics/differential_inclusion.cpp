@@ -363,15 +363,14 @@ ConstantErrorProcessor::compute_norms(ValidatedVectorFunction const& f, Vector<V
 }
 
 ErrorType ConstantErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
-    FloatDPError result = (pow(h,2u)*(Kp*Lp*expLambda + Lp*(K+Kp)/3u)+ pow(h,3u)*Kp*(L*Lp + L*L + H*(K+Kp))/4u*expLambda + pow(h,3u)*(H*Kp + L*Lp)*(K+Kp)*11u/24u)/cast_positive(1u-(h*L/2u));
+    FloatDPError result = (pow(h,2u)*(Kp*Lp*expLambda*2u + Lp*(K+Kp)/3u + Kp*L/2u)+ pow(h,3u)*Kp*(L*Lp + L*L + H*(K+Kp))/2u*expLambda)/cast_positive(1u-(h*L/2u));
     return result;
 }
 
 /*
 
 ErrorType ConstantErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
-    std::cout << K << " " << Kp << " " << L << " " << Lp << " " << H << " " << Hp << " " << expLambda << std::endl;
-    FloatDPError result = pow(h,2u)*((K+Kp)*Lp/3u + Kp*(L+Lp)*expLambda);
+    FloatDPError result = pow(h,2u)*((K+Kp)*Lp/3u + Kp*(L+Lp)*expLambda*2u);
     return result;
 }
 */

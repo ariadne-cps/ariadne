@@ -867,22 +867,22 @@ ValidatedVectorFunctionModelDP LohnerReconditioner::expand_errors(ValidatedVecto
     return embed(Phi,errors)+embed(domain,error_function);
 }
 
-struct IndexedFloatDP
+struct IndexedFloatDPError
 {
     SizeType index;
-    FloatDP value;
+    FloatDPError value;
 
-    IndexedFloatDP() : index(0), value(FloatDP()) {}
+    IndexedFloatDPError() : index(0), value(FloatDPError()) {}
 };
 
-OutputStream& operator<<(OutputStream& os, IndexedFloatDP const& ifl) {
+OutputStream& operator<<(OutputStream& os, IndexedFloatDPError const& ifl) {
     return os << "(" << ifl.index << ":" << ifl.value << ")"; }
 
-struct IndexedFloatDPComparator
+struct IndexedFloatDPErrorComparator
 {
-    inline bool operator() (const IndexedFloatDP& ifl1, const IndexedFloatDP& ifl2)
+    inline bool operator() (const IndexedFloatDPError& ifl1, const IndexedFloatDPError& ifl2)
     {
-        return (ifl1.value < ifl2.value);
+        return (ifl1.value.raw() < ifl2.value.raw());
     }
 };
 
@@ -901,7 +901,7 @@ Void LohnerReconditioner::simplify(ValidatedVectorFunctionModelDP& phi) const {
     ValidatedVectorTaylorFunctionModelDP& tphi = dynamic_cast<ValidatedVectorTaylorFunctionModelDP&>(phi.reference());
 
     // Compute effect of error terms, but not of original variables;
-    Matrix<FloatDP> C(m,n);
+    Matrix<FloatDPError> C(m,n);
     for (auto i : range(n)) {
         auto p=tphi[i].model().expansion();
 
@@ -910,7 +910,7 @@ Void LohnerReconditioner::simplify(ValidatedVectorFunctionModelDP& phi) const {
             FloatDPValue& c=ac.coefficient();
             for (auto j : range(m)) {
                 if (a[j]!=0) {
-                    C[j][i] = C[j][i]+abs(c).raw();
+                    C[j][i] += mag(c);
                 }
             }
         }
@@ -918,7 +918,7 @@ Void LohnerReconditioner::simplify(ValidatedVectorFunctionModelDP& phi) const {
 
     ARIADNE_LOG(6,"C"<<C<<"\n");
 
-    Array<IndexedFloatDP> Ce(m);
+    Array<IndexedFloatDPError> Ce(m);
     for (auto j : range(m)) {
         Ce[j].index = j;
         for (auto i : range(n)) {
@@ -927,7 +927,7 @@ Void LohnerReconditioner::simplify(ValidatedVectorFunctionModelDP& phi) const {
     }
     ARIADNE_LOG(6,"Ce:"<<Ce<<"\n");
     auto SCe=Ce;
-    std::sort(SCe.begin(),SCe.end(),IndexedFloatDPComparator());
+    std::sort(SCe.begin(),SCe.end(),IndexedFloatDPErrorComparator());
     ARIADNE_LOG(6,"SortedCe:"<<SCe<<"\n");
     List<SizeType> keep_indices;
     List<SizeType> remove_indices;
@@ -945,15 +945,8 @@ Void LohnerReconditioner::simplify(ValidatedVectorFunctionModelDP& phi) const {
 
     for (int i : range(n)) {
         ErrorType error = tphi[i].error();
-        for(TaylorModel<ValidatedTag,FloatDP>::ConstIterator iter=tphi[i].model().begin(); iter!=tphi[i].model().end(); ++iter) {
-            MultiIndex const& xa=iter->key();
-            FloatDPValue const& xv=iter->data();
-            for(SizeType k=0; k!=remove_indices.size(); ++k) {
-                if(xa[remove_indices[k]]!=0) {
-                    error += mag(xv);
-                    break;
-                }
-            }
+        for(SizeType k=0; k!=remove_indices.size(); ++k) {
+            error += mag(C[remove_indices[k]][i]);
         }
         tphi[i].set_error(error);
     }

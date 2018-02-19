@@ -567,6 +567,13 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
             ValidatedVectorFunctionModelDP current_evolve_function=partial_evaluate(current_reach_function,n,new_t);
             ARIADNE_LOG(5,"current_evolve_function="<<current_evolve_function<<"\n");
 
+            if (step%this->_number_of_steps_between_simplifications==0) {
+                this->_reconditioner->simplify(current_evolve_function);
+                ARIADNE_LOG(5,"new_current_evolve_function="<<current_evolve_function<<"\n");
+            }
+
+            current_evolve_function = this->_reconditioner->expand_errors(current_evolve_function);
+
             if (i == 0) {
                 best_reach_function = current_reach_function;
                 best_evolve_function = current_evolve_function;
@@ -582,19 +589,12 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
             }
         }
 
-        //std::cout << best << std::flush;
+        ARIADNE_LOG(2,"chosen approximation: " << best << "\n");
 
         reach_function = best_reach_function;
         evolve_function = best_evolve_function;
 
         step+=1;
-
-        if (step%this->_number_of_steps_between_simplifications==0) {
-            this->_reconditioner->simplify(evolve_function);
-            ARIADNE_LOG(5,"new_evolve_function="<<evolve_function<<"\n");
-        }
-
-        evolve_function = this->_reconditioner->expand_errors(evolve_function);
 
         t=new_t;
         result.append(reach_function);

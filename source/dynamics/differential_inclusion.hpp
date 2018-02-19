@@ -52,6 +52,8 @@ using ValidatedScalarFunctionModelType = ValidatedScalarFunctionModelDP;
 using ValidatedVectorFunctionModelType = ValidatedVectorFunctionModelDP;
 
 using ThresholdSweeperDP = ThresholdSweeper<FloatDP>;
+using GradedSweeperDP = GradedSweeper<FloatDP>;
+using GradedThresholdSweeperDP = GradedThresholdSweeper<FloatDP>;
 using SweeperDP = Sweeper<FloatDP>;
 
 using ApproximateTimeStepType = PositiveFloatDPApproximation;

@@ -200,6 +200,24 @@ template<class F> class GradedSweeper : public SweeperMixin<GradedSweeper<F>,F> 
     DegreeType _degree;
 };
 
+//! \brief A sweeper class which discards terms whose total degree is above some threshold or whose absolute value is smaller than a threshold.
+template<class F> class GradedThresholdSweeper : public SweeperMixin<GradedThresholdSweeper<F>,F> {
+    typedef PrecisionType<F> PR;
+    PR _coefficient_precision;
+    F _sweep_threshold;
+public:
+    GradedThresholdSweeper(PR precision, DegreeType degree, F sweep_threshold)
+            : _coefficient_precision(precision), _degree(degree), _sweep_threshold(sweep_threshold) { ARIADNE_ASSERT(sweep_threshold>=0); }
+    DegreeType degree() const { return this->_degree; }
+    inline F sweep_threshold() const { return _sweep_threshold; }
+    inline PR precision() const { return _coefficient_precision; }
+    inline Bool discard(const MultiIndex& a, const F& x) const { return a.degree()>this->_degree || abs(x) < this->_sweep_threshold; }
+private:
+    virtual Void _write(OutputStream& os) const { os << "GradedThresholdSweeper( degree="<<this->_degree<<", sweep_threshold="<<this->_sweep_threshold<<" )"; }
+private:
+    DegreeType _degree;
+};
+
 template<> inline Sweeper<FloatDP>::Sweeper() : _ptr(new ThresholdSweeper<FloatDP>(dp,std::numeric_limits<float>::epsilon())) { }
 template<> inline Sweeper<FloatMP>::Sweeper() : _ptr(new ThresholdSweeper<FloatMP>(MultiplePrecision(64),std::numeric_limits<double>::epsilon())) { }
 

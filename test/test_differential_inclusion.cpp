@@ -45,7 +45,9 @@ ValidatedConstrainedImageSet range(ValidatedVectorFunctionModelType const& fm) {
     return ValidatedConstrainedImageSet(fm.domain(),fm);
 }
 
-ThresholdSweeperDP make_threshold_sweeper(double d) { return ThresholdSweeperDP(DoublePrecision(),d); }
+ThresholdSweeperDP make_threshold_sweeper(double thr) { return ThresholdSweeperDP(DoublePrecision(),thr); }
+GradedSweeperDP make_graded_sweeper(SizeType deg) { return GradedSweeperDP(DoublePrecision(),deg); }
+GradedThresholdSweeperDP make_graded_threshold_sweeper(SizeType deg, double thr) { return GradedThresholdSweeperDP(DoublePrecision(),deg, thr); }
 
 template<class C> struct Reverse {
     C const& _c;
@@ -160,11 +162,17 @@ class TestInclusionIntegrator {
         times(&end_time);
         clock_t ticks = end_time.tms_utime - start_time.tms_utime;
         clock_t const hz = sysconf(_SC_CLK_TCK);
-        std::cout << "And it took about " << ticks / hz << "." << ticks % hz << "s" << std::endl;
 
         List<ValidatedConstrainedImageSet> reach_sets = map([](ValidatedVectorFunctionModelType const& fm){return range(fm);},flow_functions);
         ValidatedVectorFunctionModelType evolve_function = partial_evaluate(flow_functions.back(),starting_set.size(),NumericType(evolution_time,prec));
         ValidatedConstrainedImageSet evolve_set = range(evolve_function);
+
+        FloatDPUpperBound total_diameter(0.0);
+        auto ebb = evolve_set.bounding_box();
+        for (auto i : range(ebb.size())) {
+            total_diameter += ebb[i].width();
+        }
+        std::cout << "total diameter: " << total_diameter << ", " << ticks / hz << "." << ticks % hz << "s" << std::endl;
 
         std::cout << "plotting..." << std::endl;
         Box<FloatDPUpperInterval> graphics_box(f.result_size());
@@ -306,8 +314,8 @@ void TestInclusionIntegrator::test_rossler() const {
 void TestInclusionIntegrator::test_higgins_selkov() const {
 
     double step=1.0/50;
-    SizeType freq=11;
-    SizeType base=40;
+    SizeType freq=9;
+    SizeType base=60;
     SizeType avg=100;
 
     auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
@@ -332,7 +340,7 @@ void TestInclusionIntegrator::test_higgins_selkov() const {
     Real evolution_time=100/10_q;
 
     //this->run_test("higgins-selkov",integrator,f,g,noise_levels,starting_set,evolution_time);
-    this->run_battery_fixed_avg("higgins-selkov",f,g,noise_levels,starting_set,evolution_time,step,avg,1,13,1);
+    this->run_battery_fixed_base("higgins-selkov",f,g,noise_levels,starting_set,evolution_time,step,base,4,29);
 }
 
 void TestInclusionIntegrator::test_lotka_volterra() const {
@@ -359,7 +367,7 @@ void TestInclusionIntegrator::test_lotka_volterra() const {
 }
 
 void TestInclusionIntegrator::test_jet_engine() const {
-    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=1.0/32, number_of_steps_between_simplifications=16, number_of_variables_to_keep=16);
+    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=1.0/32, number_of_steps_between_simplifications=10, number_of_variables_to_keep=25);
     integrator.verbosity = 2;
 
     RealVector noise_levels={5/1000_q,5/1000_q};

@@ -546,6 +546,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
         ValidatedVectorFunctionModelDP reach_function;
         ValidatedVectorFunctionModelDP best_reach_function, best_evolve_function;
         SizeType best = 0;
+        FloatDP best_total_diameter(0);
 
         List<SharedPointer<InclusionIntegratorApproximation>> approximations;
         approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorZeroApproximation(this->_sweeper)));
@@ -572,19 +573,23 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
                 ARIADNE_LOG(5,"new_current_evolve_function="<<current_evolve_function<<"\n");
             }
 
-            current_evolve_function = this->_reconditioner->expand_errors(current_evolve_function);
-
             if (i == 0) {
                 best_reach_function = current_reach_function;
                 best_evolve_function = current_evolve_function;
+                for (auto i: range(n)) {
+                    best_total_diameter += best_evolve_function.range()[i].width().raw();
+                }
             } else {
-                auto best_range = best_evolve_function.range();
-                auto current_range = current_evolve_function.range();
-                if (probably(best_range.covers(current_range))) {
+                FloatDP current_total_diameter(0);
+                for (auto i: range(n)) {
+                    current_total_diameter += current_evolve_function.range()[i].width().raw();
+                }
+                if (current_total_diameter < best_total_diameter) {
                     best = i;
                     ARIADNE_LOG(5,"best approximation: " << i << "\n");
                     best_reach_function = current_reach_function;
                     best_evolve_function = current_evolve_function;
+                    best_total_diameter = current_total_diameter;
                 }
             }
         }
@@ -593,6 +598,8 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
 
         reach_function = best_reach_function;
         evolve_function = best_evolve_function;
+
+        evolve_function = this->_reconditioner->expand_errors(evolve_function);
 
         step+=1;
 
@@ -632,7 +639,7 @@ ValidatedVectorFunctionModelDP InclusionIntegrator::build_reach_function(
     return compose(Phi,join(ef,hf,a1f));
 }
 
-//! Computes h(D), where h = f + g * V
+//! Computes q(D), where q = f + g * V
 UpperBoxType apply(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, UpperBoxType V, UpperBoxType D) {
 
     UpperBoxType result = apply(f,D);

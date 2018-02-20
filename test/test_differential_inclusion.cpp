@@ -224,8 +224,8 @@ void TestInclusionIntegrator::test() const {
     //ARIADNE_TEST_CALL(test_jet_engine());
     //ARIADNE_TEST_CALL(test_lotka_volterra());
     //ARIADNE_TEST_CALL(test_higgins_selkov());
-    //ARIADNE_TEST_CALL(test_jerk16());
-    ARIADNE_TEST_CALL(test_jerk21());
+    ARIADNE_TEST_CALL(test_jerk16());
+    //ARIADNE_TEST_CALL(test_jerk21());
     //ARIADNE_TEST_CALL(test_rossler());
     //ARIADNE_TEST_CALL(test_lorenz());
     //ARIADNE_TEST_CALL(test_reactor());
@@ -359,7 +359,7 @@ void TestInclusionIntegrator::test_jerk16() const {
 
     Real e=1/1024_q;
     Real x0_i(0.0);
-    Real x1_i(0.0);
+    Real x1_i(-1.0);
     Real x2_i(0.0);
     RealBox starting_set={{x0_i+e,x0_i+e},{x1_i-e,x1_i+e},{x2_i-e,x2_i+e}};
     Real evolution_time=100/10_q;

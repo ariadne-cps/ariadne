@@ -210,6 +210,7 @@ class TestInclusionIntegrator {
     void test_lotka_volterra() const;
     void test_higgins_selkov() const;
     void test_jerk16() const;
+    void test_jerk21() const;
     void test_rossler() const;
     void test_lorenz() const;
     void test_reactor() const;
@@ -223,7 +224,8 @@ void TestInclusionIntegrator::test() const {
     //ARIADNE_TEST_CALL(test_jet_engine());
     //ARIADNE_TEST_CALL(test_lotka_volterra());
     //ARIADNE_TEST_CALL(test_higgins_selkov());
-    ARIADNE_TEST_CALL(test_jerk16());
+    //ARIADNE_TEST_CALL(test_jerk16());
+    ARIADNE_TEST_CALL(test_jerk21());
     //ARIADNE_TEST_CALL(test_rossler());
     //ARIADNE_TEST_CALL(test_lorenz());
     //ARIADNE_TEST_CALL(test_reactor());
@@ -311,6 +313,32 @@ void TestInclusionIntegrator::test_rossler() const {
     Real evolution_time=120/10_q;
 
     this->run_test("rossler",integrator,f,g,noise_levels,starting_set,evolution_time);
+}
+
+void TestInclusionIntegrator::test_jerk21() const {
+    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=1.0/16, number_of_steps_between_simplifications=12, number_of_variables_to_keep=20);
+    integrator.verbosity = 2;
+
+    RealVector noise_levels={1/1000_q};
+
+    auto x = EffectiveVectorFunction::identity(3u);
+    auto one = EffectiveScalarFunction::constant(3u,1_z);
+    auto zero = EffectiveScalarFunction::constant(3u,0_z);
+
+    Real A(0.25);
+
+    auto f = EffectiveVectorFunction({x[1],x[2],-x[2]*x[2]*x[2]-x[1]*x[0]*x[0]-A*x[0]});
+
+    Vector<ValidatedVectorFunction> g({{zero,zero,-x[0]}});
+
+    Real e=1/1024_q;
+    Real x0_i(0.25);
+    Real x1_i(0.0);
+    Real x2_i(0.0);
+    RealBox starting_set={{x0_i+e,x0_i+e},{x1_i-e,x1_i+e},{x2_i-e,x2_i+e}};
+    Real evolution_time=100/10_q;
+
+    this->run_test("jerk21",integrator,f,g,noise_levels,starting_set,evolution_time);
 }
 
 void TestInclusionIntegrator::test_jerk16() const {

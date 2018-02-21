@@ -106,9 +106,55 @@ class TestInclusionIntegrator {
         }
     }
 
-    Void run_battery_fixed_base(String name,
-                  ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, RealVector noise_levels,
-                  RealBox real_starting_set, Real evolution_time, double step, SizeType base, SizeType min_freq, SizeType max_freq) const
+    Void run_battery_fixed_relativebase(String name,
+                                ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, RealVector noise_levels,
+                                RealBox real_starting_set, Real evolution_time, double step, SizeType ppi, double ratio, SizeType min_freq, SizeType max_freq) const
+    {
+        typedef typename ValidatedVectorFunctionModelType::NumericType NumericType; typedef typename NumericType::PrecisionType PrecisionType;
+        PrecisionType prec;
+
+        BoxDomainType noise=cast_exact_box(UpperIntervalType(-1,+1)*noise_levels);
+        BoxDomainType starting_set=cast_exact_box(over_approximation(real_starting_set));
+
+        SizeType n = f.result_size();
+        SizeType m = g.size();
+
+        SizeType pps = n+ppi*m;
+
+        for (auto freq : range(min_freq,max_freq+1)) {
+
+            SizeType base(round(ratio*pps*freq));
+
+            auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
+
+            tms start_time, end_time;
+            times(&start_time);
+
+            List<ValidatedVectorFunctionModelType> flow_functions = integrator.flow(f,g,noise,starting_set,evolution_time);
+
+            times(&end_time);
+            clock_t ticks = end_time.tms_utime - start_time.tms_utime;
+            clock_t const hz = sysconf(_SC_CLK_TCK);
+
+            List<ValidatedConstrainedImageSet> reach_sets = map([](ValidatedVectorFunctionModelType const& fm){return range(fm);},flow_functions);
+            ValidatedVectorFunctionModelType evolve_function = partial_evaluate(flow_functions.back(),starting_set.size(),NumericType(evolution_time,prec));
+            ValidatedConstrainedImageSet evolve_set = range(evolve_function);
+
+            FloatDPUpperBound total_diameter(0.0);
+            auto ebb = evolve_set.bounding_box();
+            for (auto i : range(ebb.size())) {
+                total_diameter += ebb[i].width();
+            }
+            std::cout << freq << " (b: " << base << "): " << total_diameter << ", " << ticks / hz << "." << ticks % hz << "s" << std::endl;
+        }
+    }
+
+
+    Void run_battery_fixed_absolutebase(String name,
+                                        ValidatedVectorFunction const &f, Vector<ValidatedVectorFunction> const &g,
+                                        RealVector noise_levels,
+                                        RealBox real_starting_set, Real evolution_time, double step, SizeType base,
+                                        SizeType min_freq, SizeType max_freq) const
     {
         typedef typename ValidatedVectorFunctionModelType::NumericType NumericType; typedef typename NumericType::PrecisionType PrecisionType;
         PrecisionType prec;
@@ -200,39 +246,44 @@ class TestInclusionIntegrator {
     }
 
   public:
-
     void test() const;
-    void test_clock() const;
-    void test_circle() const;
-    void test_van_der_pol() const;
-    void test_pi_controller() const;
-    void test_jet_engine() const;
-    void test_lotka_volterra() const;
-    void test_higgins_selkov() const;
-    void test_jerk16() const;
-    void test_jerk21() const;
-    void test_rossler() const;
-    void test_lorenz() const;
+
     void test_reactor() const;
+    void test_lorenz() const;
+    void test_rossler() const;
+    void test_jerk21() const;
+    void test_jerk16() const;
+    void test_higgins_selkov() const;
+    void test_lotka_volterra() const;
+    void test_jet_engine() const;
+    void test_pi_controller() const;
+    void test_van_der_pol() const;
+    void test_circle() const;
+    void test_clock() const;
 };
 
 void TestInclusionIntegrator::test() const {
-    //ARIADNE_TEST_CALL(test_clock());
-    //ARIADNE_TEST_CALL(test_circle());
-    //ARIADNE_TEST_CALL(test_van_der_pol());
-    //ARIADNE_TEST_CALL(test_pi_controller());
-    //ARIADNE_TEST_CALL(test_jet_engine());
-    //ARIADNE_TEST_CALL(test_lotka_volterra());
-    //ARIADNE_TEST_CALL(test_higgins_selkov());
-    ARIADNE_TEST_CALL(test_jerk16());
-    //ARIADNE_TEST_CALL(test_jerk21());
-    //ARIADNE_TEST_CALL(test_rossler());
-    //ARIADNE_TEST_CALL(test_lorenz());
     //ARIADNE_TEST_CALL(test_reactor());
+    //ARIADNE_TEST_CALL(test_lorenz());
+    //ARIADNE_TEST_CALL(test_rossler());
+    ARIADNE_TEST_CALL(test_jerk21());
+    //ARIADNE_TEST_CALL(test_jerk16());
+    //ARIADNE_TEST_CALL(test_higgins_selkov());
+    //ARIADNE_TEST_CALL(test_lotka_volterra());
+    //ARIADNE_TEST_CALL(test_jet_engine());
+    //ARIADNE_TEST_CALL(test_pi_controller());
+    //ARIADNE_TEST_CALL(test_van_der_pol());
+    //ARIADNE_TEST_CALL(test_circle());
+    //ARIADNE_TEST_CALL(test_clock());
 }
 
 void TestInclusionIntegrator::test_reactor() const {
-    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=1.0/50, number_of_steps_between_simplifications=11, number_of_variables_to_keep=40);
+    double step=1.0/64;
+    SizeType freq=5;
+    SizeType base=60;
+    SizeType avg=120;
+
+    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
     integrator.verbosity = 2;
 
     RealVector noise_levels={1/1000_q,1/1000_q,1/1000_q};
@@ -253,15 +304,16 @@ void TestInclusionIntegrator::test_reactor() const {
     Vector<ValidatedVectorFunction> g({{one,zero,zero,zero},{zero,one*iV,zero,zero},{one,one,one,zero}});
 
     Real e=1/1000000_q;
-    RealBox starting_set={{-e,e},{-e,e},{-e,e},{-e,e}};
-    Real evolution_time=20/20_q;
+    RealBox starting_set={{0,e},{0,e},{0,e},{0,e}};
+    Real evolution_time=10/10_q;
 
-    this->run_test("reactor",integrator,f,g,noise_levels,starting_set,evolution_time);
+    //this->run_test("reactor",integrator,f,g,noise_levels,starting_set,evolution_time);
+    this->run_battery_fixed_avg("reactor",f,g,noise_levels,starting_set,evolution_time,step,avg,1,20,2);
 }
 
 void TestInclusionIntegrator::test_lorenz() const {
     auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=1.0/256, number_of_steps_between_simplifications=12, number_of_variables_to_keep=24);
-    integrator.verbosity = 1;
+    integrator.verbosity = 2;
 
     RealVector noise_levels={1/100_q};
 
@@ -316,7 +368,12 @@ void TestInclusionIntegrator::test_rossler() const {
 }
 
 void TestInclusionIntegrator::test_jerk21() const {
-    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=1.0/16, number_of_steps_between_simplifications=12, number_of_variables_to_keep=20);
+
+    double step=1.0/16;
+    SizeType freq=12;
+    SizeType base=20;
+
+    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
     integrator.verbosity = 2;
 
     RealVector noise_levels={1/1000_q};
@@ -338,7 +395,8 @@ void TestInclusionIntegrator::test_jerk21() const {
     RealBox starting_set={{x0_i+e,x0_i+e},{x1_i-e,x1_i+e},{x2_i-e,x2_i+e}};
     Real evolution_time=100/10_q;
 
-    this->run_test("jerk21",integrator,f,g,noise_levels,starting_set,evolution_time);
+    //this->run_test("jerk21",integrator,f,g,noise_levels,starting_set,evolution_time);
+    this->run_battery_fixed_relativebase("jerk21",f,g,noise_levels,starting_set,evolution_time,step,2,1.0,1,16);
 }
 
 void TestInclusionIntegrator::test_jerk16() const {
@@ -359,7 +417,7 @@ void TestInclusionIntegrator::test_jerk16() const {
 
     Real e=1/1024_q;
     Real x0_i(0.0);
-    Real x1_i(-1.0);
+    Real x1_i(0.0);
     Real x2_i(0.0);
     RealBox starting_set={{x0_i+e,x0_i+e},{x1_i-e,x1_i+e},{x2_i-e,x2_i+e}};
     Real evolution_time=100/10_q;
@@ -396,7 +454,7 @@ void TestInclusionIntegrator::test_higgins_selkov() const {
     Real evolution_time=100/10_q;
 
     this->run_test("higgins-selkov",integrator,f,g,noise_levels,starting_set,evolution_time);
-    //this->run_battery_fixed_base("higgins-selkov",f,g,noise_levels,starting_set,evolution_time,step,base,4,29);
+    //this->run_battery_fixed_absolutebase("higgins-selkov",f,g,noise_levels,starting_set,evolution_time,step,base,4,29);
 }
 
 void TestInclusionIntegrator::test_lotka_volterra() const {
@@ -423,7 +481,12 @@ void TestInclusionIntegrator::test_lotka_volterra() const {
 }
 
 void TestInclusionIntegrator::test_jet_engine() const {
-    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=1.0/32, number_of_steps_between_simplifications=10, number_of_variables_to_keep=25);
+    double step=1.0/50;
+    SizeType base=50;
+    SizeType freq=10;
+    SizeType avg=100;
+
+    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
     integrator.verbosity = 2;
 
     RealVector noise_levels={5/1000_q,5/1000_q};
@@ -436,11 +499,14 @@ void TestInclusionIntegrator::test_jet_engine() const {
 
     Vector<ValidatedVectorFunction> g({{one,zero},{zero,one}});
 
-    Real e=1/10_q;
-    RealBox starting_set={{Real(1.0)-e,Real(1.0)+e},{Real(1.0)-e,Real(1.0)+e}};
+    Real e1=5/100_q;
+    Real e2=7/100_q;
+    RealBox starting_set={{Real(1.0)-e1,Real(1.0)+e1},{Real(1.0)-e2,Real(1.0)+e2}};
     Real evolution_time=40/8_q;
 
-    this->run_test("jetengine",integrator,f,g,noise_levels,starting_set,evolution_time);
+    //this->run_test("jet-engine",integrator,f,g,noise_levels,starting_set,evolution_time);
+    this->run_battery_fixed_absolutebase("jet-engine", f, g, noise_levels, starting_set, evolution_time, step, base, 1,
+                                         20);
 }
 
 void TestInclusionIntegrator::test_pi_controller() const {

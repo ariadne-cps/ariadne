@@ -258,12 +258,12 @@ class TestInclusionIntegrator {
     void test_jet_engine() const;
     void test_pi_controller() const;
     void test_van_der_pol() const;
-    void test_circle() const;
+    void test_harmonic() const;
     void test_clock() const;
 };
 
 void TestInclusionIntegrator::test() const {
-    ARIADNE_TEST_CALL(test_reactor());
+    //ARIADNE_TEST_CALL(test_reactor());
     //ARIADNE_TEST_CALL(test_lorenz());
     //ARIADNE_TEST_CALL(test_rossler());
     //ARIADNE_TEST_CALL(test_jerk21());
@@ -273,7 +273,7 @@ void TestInclusionIntegrator::test() const {
     //ARIADNE_TEST_CALL(test_jet_engine());
     //ARIADNE_TEST_CALL(test_pi_controller());
     //ARIADNE_TEST_CALL(test_van_der_pol());
-    //ARIADNE_TEST_CALL(test_circle());
+    ARIADNE_TEST_CALL(test_harmonic());
     //ARIADNE_TEST_CALL(test_clock());
 }
 
@@ -578,11 +578,11 @@ void TestInclusionIntegrator::test_van_der_pol() const {
     this->run_test("vanderpol",integrator,f,g,noise_levels,starting_set,evolution_time);
 }
 
-void TestInclusionIntegrator::test_circle() const {
-    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=1.0/16, number_of_steps_between_simplifications=11, number_of_variables_to_keep=25);
+void TestInclusionIntegrator::test_harmonic() const {
+    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=1.0/16, number_of_steps_between_simplifications=150, number_of_variables_to_keep=80);
     integrator.verbosity = 2;
 
-    RealVector noise_levels={1/1024_q,1/1024_q};
+    RealVector noise_levels={4/100_q,4/100_q};
 
     auto x = EffectiveVectorFunction::identity(2u);
     auto one = EffectiveScalarFunction::constant(2u,1_z);
@@ -592,11 +592,11 @@ void TestInclusionIntegrator::test_circle() const {
 
     Vector<ValidatedVectorFunction> g({{one,zero},{zero,one}});
 
-    Real e=1/1024_q;
+    Real e=1/100_q;
     RealBox starting_set={{1-e,1+e},{-e,+e}};
-    Real evolution_time=26/4_q;
+    Real evolution_time=628/100_q;
 
-    this->run_test("circle",integrator,f,g,noise_levels,starting_set,evolution_time);
+    this->run_test("harmonic",integrator,f,g,noise_levels,starting_set,evolution_time);
 }
 
 void TestInclusionIntegrator::test_clock() const {

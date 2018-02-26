@@ -64,6 +64,10 @@ typedef VectorFunction<ValidatedTag> ValidatedVectorFunction;
 typedef VectorFunction<EffectiveTag> EffectiveVectorFunction;
 typedef EffectiveVectorFunction RealVectorFunction;
 
+typedef VectorUnivariateFunction<ApproximateTag> ApproximateVectorUnivariateFunction;
+typedef VectorUnivariateFunction<ValidatedTag> ValidatedVectorUnivariateFunction;
+typedef VectorUnivariateFunction<EffectiveTag> EffectiveVectorUnivariateFunction;
+
 // Function interface declarations
 template<class P, class D, class C> class FunctionInterface;
 template<class P, class D=BoxDomainType> using ScalarFunctionInterface = FunctionInterface<P,D,IntervalDomainType>;

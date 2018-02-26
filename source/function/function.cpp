@@ -191,46 +191,50 @@ template<class P> VectorFunction<P> FunctionConstructors<P>::identity(BoxDomainT
 
 
 template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::zero(IntervalDomainType dom) {
-    ARIADNE_NOT_IMPLEMENTED;
+    return ConstantFunction<Y,IntervalDomainType>(dom, Y(0));
 }
 
 template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::constant(IntervalDomainType dom, NumericType c) {
-    ARIADNE_NOT_IMPLEMENTED;
+    return ConstantFunction<Y,IntervalDomainType>(dom,c);
 }
 
-template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::coordinate(IntervalDomainType dom, SizeType j) {
-    ARIADNE_NOT_IMPLEMENTED;
+template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::coordinate(IntervalDomainType dom, SizeOne as) {
+    return CoordinateFunction<P,IntervalDomainType>(dom,as);
+}
+
+template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::coordinate(IntervalDomainType dom) {
+    return coordinate(dom,SizeOne());
 }
 
 template<class P> VectorUnivariateFunction<P> FunctionConstructors<P>::zeros(SizeType rs, IntervalDomainType dom) {
-    ARIADNE_NOT_IMPLEMENTED;
+    return constant(dom,Vector<Y>(rs,0));
 }
 
 
 template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::identity(IntervalDomainType dom) {
-    ARIADNE_NOT_IMPLEMENTED;
+    return coordinate(dom,SizeOne());
 }
 
 
 template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::zero() {
-    ARIADNE_NOT_IMPLEMENTED;
+    return zero(IntervalDomainType::biinfinite_interval());
 }
 
 template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::constant(NumericType c) {
-    ARIADNE_NOT_IMPLEMENTED;
+    return constant(IntervalDomainType::biinfinite_interval(),c);
 }
 
 template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::coordinate() {
-    ARIADNE_NOT_IMPLEMENTED;
+    return coordinate(IntervalDomainType::biinfinite_interval());
 }
 
 template<class P> VectorUnivariateFunction<P> FunctionConstructors<P>::zeros(SizeType rs) {
-    ARIADNE_NOT_IMPLEMENTED;
+    return zeros(rs,IntervalDomainType::biinfinite_interval());
 }
 
 
 template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::identity() {
-    ARIADNE_NOT_IMPLEMENTED;
+    return identity(IntervalDomainType::biinfinite_interval());
 }
 
 
@@ -290,6 +294,10 @@ template<class P> VectorFunction<P,IntervalDomainType> FunctionConstructors<P>::
     return VectorFunction<P,IntervalDomainType>(res);
 }
 
+template<class P> VectorFunction<P,IntervalDomainType> FunctionConstructors<P>::constant(Vector<NumericType> c) {
+    return constant(IntervalDomainType::biinfinite_interval(),c);
+}
+
 
 template class FunctionConstructors<ApproximateTag>;
 template class FunctionConstructors<ValidatedTag>;
@@ -321,6 +329,10 @@ EffectiveScalarFunction make_function(const Space<Real>& spc, const Expression<R
     return make_formula_function(dimension(spc),make_formula(expr,spc)); }
 EffectiveVectorFunction make_function(const Space<Real>& spc, const Vector<Expression<Real>>& expr) {
     return make_formula_function(dimension(spc),make_formula(expr,spc)); }
+
+template<class P, class D, class C, class E> Function<P,D,C> make_composed_function(const Function<P,E,C>& f, const Function<P,D,E>& g) {
+    ARIADNE_ASSERT(f.argument_size()==g.result_size());
+    return Function<P,D,C>(new ComposedFunction<P,D,C,E>(f,g)); }
 
 [[deprecated]]
 EffectiveScalarFunction make_function(const Expression<Real>& expr, const Space<Real>& spc) {
@@ -552,21 +564,21 @@ EffectiveVectorFunction join(const EffectiveVectorFunction& f1, const EffectiveV
 
 
 EffectiveScalarFunction embed(SizeType as1, const EffectiveScalarFunction& f2, SizeType as3) {
-    return EffectiveScalarFunction(new ScalarEmbeddedFunction<EffectiveTag>(as1,f2,as3));
+    typedef BoxDomainType D; typedef IntervalDomainType C;
+    return EffectiveScalarFunction(new EmbeddedFunction<EffectiveTag,D,D,D,C>(as1,f2,as3));
 }
 
 EffectiveVectorFunction embed(SizeType as1, const EffectiveVectorFunction& f2, SizeType as3) {
-    return EffectiveVectorFunction(new VectorEmbeddedFunction<EffectiveTag>(as1,f2,as3));
+    typedef BoxDomainType D; typedef BoxDomainType C;
+    return EffectiveVectorFunction(new EmbeddedFunction<EffectiveTag,D,D,D,C>(as1,f2,as3));
 }
 
 EffectiveScalarFunction compose(const EffectiveScalarFunction& f, const EffectiveVectorFunction& g) {
-    ARIADNE_ASSERT(f.argument_size()==g.result_size());
-    return EffectiveScalarFunction(new ScalarComposedFunction<EffectiveTag>(f,g));
+    return make_composed_function(f,g);
 }
 
 EffectiveVectorFunction compose(const EffectiveVectorFunction& f, const EffectiveVectorFunction& g) {
-    ARIADNE_ASSERT(f.argument_size()==g.result_size());
-    return EffectiveVectorFunction(new VectorComposedFunction<EffectiveTag>(f,g));
+    return make_composed_function(f,g);
 }
 
 EffectiveScalarFunction lie_derivative(const EffectiveScalarFunction& g, const EffectiveVectorFunction& f) {
@@ -633,7 +645,7 @@ ValidatedScalarFunction compose(const ValidatedScalarFunction& f, const Validate
     if(gp) {
         return compose(f,ValidatedVectorFunctionModelDP(gp->_clone()));
     } else {
-        return ValidatedScalarFunction(new ScalarComposedFunction<ValidatedTag>(f,g));
+        return make_composed_function(f,g);
     }
 }
 
@@ -644,7 +656,7 @@ ValidatedVectorFunction compose(const ValidatedVectorFunction& f, const Validate
     if(gp) {
         return compose(f,ValidatedVectorFunctionModelDP(gp->_clone()));
     } else {
-        return ValidatedVectorFunction(new VectorComposedFunction<ValidatedTag>(f,g));
+        return make_composed_function(f,g);
     }
 }
 
@@ -817,13 +829,12 @@ ApproximateVectorFunction join(const ApproximateVectorFunction& f1, const Approx
 
 
 ApproximateScalarFunction compose(const ApproximateScalarFunction& f, const ApproximateVectorFunction& g) {
-    ARIADNE_ASSERT(f.argument_size()==g.result_size());
-    return ApproximateScalarFunction(new ScalarComposedFunction<ApproximateTag>(f,g));
+    return make_composed_function(f,g);
 }
 
+
 ApproximateVectorFunction compose(const ApproximateVectorFunction& f, const ApproximateVectorFunction& g) {
-    ARIADNE_ASSERT(f.argument_size()==g.result_size());
-    return ApproximateVectorFunction(new VectorComposedFunction<ApproximateTag>(f,g));
+    return make_composed_function(f,g);
 }
 
 
@@ -910,30 +921,48 @@ template<> struct AlgebraOperationsBase<ScalarFunction<ApproximateTag>> {
         return ScalarFunction<P>(new GradedFunction<P>(op.code(),f,n)); }
 };
 
-template<class P> using FunctionAlgebraOperations = AlgebraOperations<ScalarFunction<P>,Number<P>>;
+template<class P> struct AlgebraOperationsBase<ScalarUnivariateFunction<P>> {
+    typedef IntervalDomainType D;
+    template<class OP> static ScalarFunction<P,D> apply(OP op, ScalarFunction<P,D> const& f) {
+        return ScalarFunction<P,D>(new UnaryFunction<P,D>(op.code(),f)); }
+    template<class OP> static ScalarFunction<P,D> apply(OP op, ScalarFunction<P,D> const& f1, ScalarFunction<P,D> const& f2) {
+        return ScalarFunction<P,D>(new BinaryFunction<P,D>(op.code(),f1,f2)); }
+    template<class OP> static ScalarFunction<P,D> apply(OP op, ScalarFunction<P,D> const& f1, Number<P> const& c2) {
+        return ScalarFunction<P,D>(new BinaryFunction<P,D>(op.code(),f1,f1.create_constant(c2))); }
+    template<class OP> static ScalarFunction<P,D> apply(OP op, Number<P> const& c1, ScalarFunction<P,D> const& f2) {
+        return ScalarFunction<P,D>(new BinaryFunction<P,D>(op.code(),f2.create_constant(c1),f2)); }
+    template<class OP> static ScalarFunction<P,D> apply(OP op, ScalarFunction<P,D> const& f, Int n) {
+        return ScalarFunction<P,D>(new GradedFunction<P,D>(op.code(),f,n)); }
+};
 
-template<class P> auto FunctionAlgebraOperations<P>::apply(Add op, F const& f1, F const& f2) -> F { return Base::apply(op,f1,f2); }
-template<class P> auto FunctionAlgebraOperations<P>::apply(Sub op, F const& f1, F const& f2) -> F { return Base::apply(op,f1,f2); }
-template<class P> auto FunctionAlgebraOperations<P>::apply(Mul op, F const& f1, F const& f2) -> F { return Base::apply(op,f1,f2); }
-template<class P> auto FunctionAlgebraOperations<P>::apply(Div op, F const& f1, F const& f2) -> F { return Base::apply(op,f1,f2); }
-template<class P> auto FunctionAlgebraOperations<P>::apply(Add op, F const& f, C const& c) -> F { return Base::apply(op,f,c); }
-template<class P> auto FunctionAlgebraOperations<P>::apply(Mul op, F const& f, C const& c) -> F { return Base::apply(op,f,c); }
-template<class P> auto FunctionAlgebraOperations<P>::apply(Pow op, F const& f, Int n) -> F { return Base::apply(op,f,n); }
-template<class P> auto FunctionAlgebraOperations<P>::apply(Pos op, F const& f) -> F { return Base::apply(op,f); }
-template<class P> auto FunctionAlgebraOperations<P>::apply(Neg op, F const& f) -> F { return Base::apply(op,f); }
-template<class P> auto FunctionAlgebraOperations<P>::apply(Sqr op, F const& f) -> F { return Base::apply(op,f); }
-template<class P> auto FunctionAlgebraOperations<P>::apply(Rec op, F const& f) -> F { return Base::apply(op,f); }
-template<class P> auto FunctionAlgebraOperations<P>::apply(Sqrt op, F const& f) -> F { return Base::apply(op,f); }
-template<class P> auto FunctionAlgebraOperations<P>::apply(Exp op, F const& f) -> F { return Base::apply(op,f); }
-template<class P> auto FunctionAlgebraOperations<P>::apply(Log op, F const& f) -> F { return Base::apply(op,f); }
-template<class P> auto FunctionAlgebraOperations<P>::apply(Sin op, F const& f) -> F { return Base::apply(op,f); }
-template<class P> auto FunctionAlgebraOperations<P>::apply(Cos op, F const& f) -> F { return Base::apply(op,f); }
-template<class P> auto FunctionAlgebraOperations<P>::apply(Tan op, F const& f) -> F { return Base::apply(op,f); }
-template<class P> auto FunctionAlgebraOperations<P>::apply(Atan op, F const& f) -> F { return Base::apply(op,f); }
+template<class P, class D> using FunctionAlgebraOperations = AlgebraOperations<ScalarFunction<P,D>,Number<P>>;
+
+template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Add op, F const& f1, F const& f2) -> F { return Base::apply(op,f1,f2); }
+template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Sub op, F const& f1, F const& f2) -> F { return Base::apply(op,f1,f2); }
+template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Mul op, F const& f1, F const& f2) -> F { return Base::apply(op,f1,f2); }
+template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Div op, F const& f1, F const& f2) -> F { return Base::apply(op,f1,f2); }
+template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Add op, F const& f, C const& c) -> F { return Base::apply(op,f,c); }
+template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Mul op, F const& f, C const& c) -> F { return Base::apply(op,f,c); }
+template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Pow op, F const& f, Int n) -> F { return Base::apply(op,f,n); }
+template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Pos op, F const& f) -> F { return Base::apply(op,f); }
+template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Neg op, F const& f) -> F { return Base::apply(op,f); }
+template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Sqr op, F const& f) -> F { return Base::apply(op,f); }
+template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Rec op, F const& f) -> F { return Base::apply(op,f); }
+template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Sqrt op, F const& f) -> F { return Base::apply(op,f); }
+template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Exp op, F const& f) -> F { return Base::apply(op,f); }
+template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Log op, F const& f) -> F { return Base::apply(op,f); }
+template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Sin op, F const& f) -> F { return Base::apply(op,f); }
+template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Cos op, F const& f) -> F { return Base::apply(op,f); }
+template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Tan op, F const& f) -> F { return Base::apply(op,f); }
+template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Atan op, F const& f) -> F { return Base::apply(op,f); }
 
 template class AlgebraOperations<ScalarFunction<ApproximateTag>,Number<ApproximateTag>>;
 template class AlgebraOperations<ScalarFunction<ValidatedTag>,Number<ValidatedTag>>;
 template class AlgebraOperations<ScalarFunction<EffectiveTag>,Number<EffectiveTag>>;
+
+template class AlgebraOperations<ScalarUnivariateFunction<ApproximateTag>,Number<ApproximateTag>>;
+template class AlgebraOperations<ScalarUnivariateFunction<ValidatedTag>,Number<ValidatedTag>>;
+template class AlgebraOperations<ScalarUnivariateFunction<EffectiveTag>,Number<EffectiveTag>>;
 
 
 } // namespace Ariadne

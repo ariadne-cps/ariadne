@@ -39,6 +39,8 @@ static const Int SMOOTH=255;
 
 template<class S> struct ElementTraits;
 template<class S, class X> using ElementType = typename ElementTraits<S>::template Type<X>;
+template<class S> using ElementSizeType = decltype(declval<S>().dimension());
+template<class S> using ElementIndexType = decltype(declval<S>().dimension());
 
 template<class P, class D, class C> class FunctionInterface;
 
@@ -80,10 +82,13 @@ class FunctionInterface<Void,D,C>
   public:
     typedef D DomainType;
     typedef C CodomainType;
+    typedef ElementSizeType<DomainType> ArgumentSizeType;
+    typedef ElementSizeType<CodomainType> ResultSizeType;
+    typedef ElementIndexType<DomainType> ArgumentIndexType;
 
     virtual ~FunctionInterface() { };
-    virtual SizeType argument_size() const = 0;
-    virtual SizeType result_size() const = 0;
+    virtual ArgumentSizeType argument_size() const = 0;
+    virtual ResultSizeType result_size() const = 0;
     virtual DomainType const domain() const = 0;
     virtual CodomainType const codomain() const = 0;
 
@@ -91,6 +96,8 @@ class FunctionInterface<Void,D,C>
     virtual OutputStream& write(OutputStream& os) const = 0;
   public:
     virtual FunctionInterface<Void,D,C>* _clone() const = 0;
+  public:
+    friend inline OutputStream& operator<<(OutputStream& os, const FunctionInterface<Void,D,C>& f) { return f.write(os); }
 };
 
 //! \ingroup FunctionModule
@@ -102,8 +109,6 @@ class FunctionInterface<ApproximateTag,D,C>
 {
     typedef ApproximateTag P;
   public:
-    typedef D DomainType;
-    typedef C CodomainType;
     template<class X> using Argument = typename ElementTraits<D>::template Type<X>;
     template<class X> using Result = typename ElementTraits<C>::template Type<X>;
   public:
@@ -117,7 +122,7 @@ class FunctionInterface<ApproximateTag,D,C>
     virtual Result<Algebra<ApproximateNumber>> _evaluate(const Argument< Algebra<ApproximateNumber> >& x) const = 0;
 
     virtual FunctionInterface<P,D,C>* _clone() const = 0;
-    virtual FunctionInterface<P,D,C>* _derivative(SizeType i) const = 0;
+    virtual FunctionInterface<P,D,C>* _derivative(ElementIndexType<D> i) const = 0;
 };
 
 //! \ingroup FunctionModule
@@ -130,8 +135,6 @@ class FunctionInterface<ValidatedTag,D,C>
     typedef ValidatedTag P;
     typedef ApproximateTag AP;
   public:
-    typedef D DomainType;
-    typedef C CodomainType;
     template<class X> using Argument = typename ElementTraits<D>::template Type<X>;
     template<class X> using Result = typename ElementTraits<C>::template Type<X>;
   public:
@@ -153,7 +156,7 @@ class FunctionInterface<ValidatedTag,D,C>
         return this->_evaluate(Argument<FloatMPBounds>(x)); }
 
     virtual FunctionInterface<P,D,C>* _clone() const = 0;
-    virtual FunctionInterface<P,D,C>* _derivative(SizeType i) const = 0;
+    virtual FunctionInterface<P,D,C>* _derivative(ElementIndexType<D> i) const = 0;
 };
 
 //! \ingroup FunctionModule
@@ -166,8 +169,6 @@ class FunctionInterface<EffectiveTag,D,C>
     typedef ValidatedTag WP;
     typedef EffectiveTag P;
   public:
-    typedef D DomainType;
-    typedef C CodomainType;
     template<class X> using Argument = typename ElementTraits<D>::template Type<X>;
     template<class X> using Result = typename ElementTraits<C>::template Type<X>;
   public:
@@ -179,12 +180,8 @@ class FunctionInterface<EffectiveTag,D,C>
     virtual Result<Formula<EffectiveNumber>> _evaluate(const Argument<Formula<EffectiveNumber>>& x) const = 0;
 
     virtual FunctionInterface<P,D,C>* _clone() const = 0;
-    virtual FunctionInterface<P,D,C>* _derivative(SizeType i) const = 0;
+    virtual FunctionInterface<P,D,C>* _derivative(ElementIndexType<D> i) const = 0;
 };
-
-template<class D, class C> inline OutputStream& operator<<(OutputStream& os, const FunctionInterface<Void,D,C>& f) {
-    return f.write(os);
-}
 
 
 template<class I> class VectorInterface {
@@ -199,7 +196,7 @@ template<> class FunctionFactoryInterface<ValidatedTag>
     typedef BoxDomainType DomainType;
   public:
     virtual FunctionFactoryInterface<ValidatedTag>* clone() const = 0;
-    virtual Void write(OutputStream& os) const = 0;
+    virtual OutputStream& write(OutputStream& os) const = 0;
     inline ValidatedScalarFunction create(const BoxDomainType& domain, const ScalarFunctionInterface<ValidatedTag>& function) const;
     inline ValidatedVectorFunction create(const BoxDomainType& domain, const VectorFunctionInterface<ValidatedTag>& function) const;
     inline ValidatedScalarFunction create_zero(const BoxDomainType& domain) const;
@@ -207,11 +204,11 @@ template<> class FunctionFactoryInterface<ValidatedTag>
   private:
     virtual ScalarFunctionInterface<ValidatedTag>* _create(const BoxDomainType& domain, const ScalarFunctionInterface<ValidatedTag>& function) const = 0;
     virtual VectorFunctionInterface<ValidatedTag>* _create(const BoxDomainType& domain, const VectorFunctionInterface<ValidatedTag>& function) const = 0;
+  public:
+    friend inline OutputStream& operator<<(OutputStream& os, const FunctionFactoryInterface<ValidatedTag>& factory) {
+        return factory.write(os); }
 };
 
-template<class X> inline OutputStream& operator<<(OutputStream& os, const FunctionFactoryInterface<ValidatedTag>& factory) {
-    factory.write(os); return os;
-}
 
 } // namespace Ariadne
 

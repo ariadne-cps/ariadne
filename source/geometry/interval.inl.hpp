@@ -47,6 +47,7 @@ template<class U> auto Interval<U>::width() const -> WidthType { return cast_pos
 
 template<class U> Interval<U> Interval<U>::empty_interval() { return Interval<U>(EmptyInterval()); }
 template<class U> Interval<U> Interval<U>::unit_interval() { return Interval<U>(-1,+1); }
+template<class U> Interval<U> Interval<U>::biinfinite_interval() { return Interval<U>(-infty,+infty); }
 
 template<class U> auto Interval<U>::is_empty() const -> decltype(declval<L>()>declval<U>()) { return this->_l > this->_u; }
 template<class U> auto Interval<U>::is_bounded() const -> decltype(declval<U>()<declval<L>()) { return Ariadne::is_bounded(*this); }

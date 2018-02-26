@@ -33,7 +33,6 @@
 
 #include "differential.tpl.hpp"
 #include "univariate_differential.tpl.hpp"
-#include <boost/concept_check.hpp>
 
 namespace Ariadne {
 

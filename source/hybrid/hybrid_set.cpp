@@ -41,7 +41,6 @@
 #include "numeric/rounding.hpp"
 #include "expression/assignment.hpp"
 #include "output/graphics_interface.hpp"
-#include <boost/concept_check.hpp>
 #include "geometry/function_set.hpp"
 
 namespace Ariadne {

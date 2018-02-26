@@ -38,8 +38,6 @@
     #else
         #define ARIADNE_C99_ROUNDING
     #endif
-#else
-    #define ARIADNE_BOOST_ROUNDING
 #endif
 
 
@@ -99,41 +97,6 @@ inline void _set_rounding_toward_zero() { fesetround(FE_TOWARDZERO);  }
 
 inline void _set_rounding_mode(rounding_mode_t rnd) { fesetround(rnd); }
 inline rounding_mode_t _get_rounding_mode() { return fegetround(); }
-
-} // namespace Ariadne
-
-
-
-#elif defined ARIADNE_BOOST_ROUNDING
-
-#include <boost/numeric/interval/hw_rounding.hpp>
-
-namespace Ariadne {
-
-typedef boost::numeric::interval_lib::rounding_control<double>::rounding_mode rounding_mode_t;
-
-class RoundDownward;
-class RoundToNearest;
-class RoundUpward;
-class RoundTowardZero;
-
-const RoundToNearest  to_nearest=RoundToNearest();
-const RoundDownward   downward=RoundDownward();
-const RoundUpward     upward=RoundUpward();
-const RoundTowardZero toward_zero=RoundTowardZero();
-
-inline void FloatDP::set_rounding_to_nearest() { boost::numeric::interval_lib::rounding_control<double>::to_nearest(); }
-inline void FloatDP::set_rounding_downward() { boost::numeric::interval_lib::rounding_control<double>::downward(); }
-inline void FloatDP::set_rounding_upward() { boost::numeric::interval_lib::rounding_control<double>::upward(); }
-inline void FloatDP::set_rounding_toward_zero() { boost::numeric::interval_lib::rounding_control<double>::toward_zero(); }
-
-inline void FloatDP::set_rounding_mode(RoundToNearest const&) { boost::numeric::interval_lib::rounding_control<double>::to_nearest(); }
-inline void FloatDP::set_rounding_mode(RoundDownward const&) { boost::numeric::interval_lib::rounding_control<double>::downward(); }
-inline void FloatDP::set_rounding_mode(RoundUpward const&) { boost::numeric::interval_lib::rounding_control<double>::upward(); }
-inline void FloatDP::set_rounding_mode(RoundTowardZero const&) { boost::numeric::interval_lib::rounding_control<double>::toward_zero(); }
-
-inline void FloatDP::set_rounding_mode(rounding_mode_t rnd) { boost::numeric::interval_lib::rounding_control<double>::FloatDP::set_rounding_mode(rnd); }
-inline rounding_mode_t FloatDP::get_rounding_mode() { rounding_mode_t rnd; boost::numeric::interval_lib::rounding_control<double>::FloatDP::get_rounding_mode(rnd); return rnd; }
 
 } // namespace Ariadne
 

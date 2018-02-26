@@ -524,6 +524,13 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
     ValidatedVectorFunctionModelDP evolve_function = ValidatedVectorTaylorFunctionModelDP::identity(X0,this->_sweeper);
     auto t=PositiveFloatDPValue(0.0);
 
+
+    List<SharedPointer<InclusionIntegratorApproximation>> approximations;
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorZeroApproximation(this->_sweeper)));
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorConstantApproximation(this->_sweeper)));
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorAffineApproximation(this->_sweeper)));
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorSinusoidalApproximation(this->_sweeper)));
+    
     List<ValidatedVectorFunctionModelDP> result;
 
     auto step = 0;
@@ -547,12 +554,6 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
         ValidatedVectorFunctionModelDP best_reach_function, best_evolve_function;
         SizeType best = 0;
         FloatDP best_total_diameter(0);
-
-        List<SharedPointer<InclusionIntegratorApproximation>> approximations;
-        //approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorZeroApproximation(this->_sweeper)));
-        //approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorConstantApproximation(this->_sweeper)));
-        approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorAffineApproximation(this->_sweeper)));
-        //approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorSinusoidalApproximation(this->_sweeper)));
 
         for (auto i : range(approximations.size())) {
             ARIADNE_LOG(4,"checking approximation "<<i<<"\n");
@@ -936,7 +937,7 @@ Void LohnerReconditioner::simplify(ValidatedVectorFunctionModelDP& phi) const {
     List<SizeType> remove_indices;
     int number_of_variables_to_remove = m - this->_number_of_variables_to_keep;
     ARIADNE_LOG(6, "Number of variables to remove:" << number_of_variables_to_remove<<"\n");
-
+/*
     FloatDPError total_sum_SCe(0);
     for (int j : range(m))
         total_sum_SCe += SCe[j].value;
@@ -954,7 +955,7 @@ Void LohnerReconditioner::simplify(ValidatedVectorFunctionModelDP& phi) const {
             skip = true;
         }
     }
-/*
+*/
     for (int j : range(m)) {
         if (j < number_of_variables_to_remove) {
             remove_indices.append(SCe[j].index);
@@ -962,7 +963,7 @@ Void LohnerReconditioner::simplify(ValidatedVectorFunctionModelDP& phi) const {
             keep_indices.append(SCe[j].index);
         }
     }
-*/
+
     ARIADNE_LOG(2,"number of kept parameters: " << keep_indices.size() << "/" << m << "\n");
 
     ARIADNE_LOG(6,"keep_indices:"<<keep_indices<<"\n");

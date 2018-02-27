@@ -76,14 +76,19 @@ class TestInclusionIntegrator {
 
         Figure fig=Figure();
         double blue = 0.3;
-        fig.set_bounding_box(BoxDomainType({{-2,1.5},{-1.3,2}}));
+
+        Box<FloatDPUpperInterval> graphics_box(2);
+        for (auto set: reach_sets) {
+            graphics_box = hull(graphics_box,set.bounding_box());
+        }
+
+        fig.set_bounding_box(graphics_box);
         fig.set_line_colour(0.0,0.0,0.0);
         fig.set_line_style(false);
-        fig.set_fill_colour(0.75,0.0,0.6);
+        fig.set_fill_colour(0.5,0.5,0.5);
         fig.draw(starting_set);
-        fig.set_fill_colour(1.0,0.0,0.8);
-        fig.set_fill_colour(0.0,0.0,blue);
-        for (auto set : reverse(reach_sets)) { fig.draw(set); blue=std::max(blue+0.1,1.0); fig.set_fill_colour(0.0,0.0,blue);}
+        fig.set_fill_colour(1.0,0.75,0.5);
+        for (auto set : reverse(reach_sets)) { fig.draw(set); }
         fig.draw(evolve_set);
         fig.write(("test_differential_inclusion-"+name).c_str());
     }
@@ -93,6 +98,7 @@ class TestInclusionIntegrator {
     void test() const;
     void test_singleton_domain() const;
     void test_rotation() const;
+    void test_van_der_pol() const;
 };
 
 
@@ -103,21 +109,37 @@ TestInclusionIntegrator::TestInclusionIntegrator()
 void TestInclusionIntegrator::test() const {
     ARIADNE_TEST_CALL(test_singleton_domain());
     ARIADNE_TEST_CALL(test_rotation());
+    ARIADNE_TEST_CALL(test_van_der_pol());
 }
 
+void TestInclusionIntegrator::test_van_der_pol() const {
+    auto integrator = InclusionIntegrator3rdOrder(make_threshold_sweeper(1e-8), step_size=1.0/16, number_of_steps_between_simplifications=1, number_of_variables_to_keep=4);
+    integrator.verbosity = 0;
+
+    RealVector noise_levels={1/1024_q,1/1024_q};
+
+    auto vector_field=EffectiveVectorFunction({x[1],-x[0]+x[1]*(1 - x[0]*x[0])});
+
+    Real e=1/1024_q;
+    RealBox starting_set={{Real(2.01)-e,Real(2.01)+e},{-e,+e}};
+    Real evolution_time=27/4_q;
+
+    this->run_test("vanderpol",integrator,vector_field,noise_levels,starting_set,evolution_time);
+}
 
 void TestInclusionIntegrator::test_rotation() const {
-    auto integrator = InclusionIntegrator2ndOrder(make_threshold_sweeper(1e-8), step_size=1.0/4, number_of_steps_between_simplifications=64, number_of_variables_to_keep=32);
+    auto integrator = InclusionIntegrator3rdOrder(make_threshold_sweeper(1e-8), step_size=1.0/16, number_of_steps_between_simplifications=1, number_of_variables_to_keep=4);
+    integrator.verbosity = 0;
 
-    RealVector noise_levels={1/16_q,1/32_q};
+    RealVector noise_levels={1/1024_q,1/1024_q};
 
     auto vector_field=EffectiveVectorFunction({x[1],-x[0]});
 
-    Real e=1/128_q;
+    Real e=1/1024_q;
     RealBox starting_set={{1-e,1+e},{-e,+e}};
-    Real evolution_time=3/4_q;
+    Real evolution_time=26/4_q;
 
-    this->run_test("singleton_domain",integrator,vector_field,noise_levels,starting_set,evolution_time);
+    this->run_test("rotation",integrator,vector_field,noise_levels,starting_set,evolution_time);
 }
 
 void TestInclusionIntegrator::test_singleton_domain() const {

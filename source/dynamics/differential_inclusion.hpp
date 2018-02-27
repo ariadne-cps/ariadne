@@ -89,6 +89,15 @@ class Reconditioner {
     virtual ValidatedVectorFunctionModelType expand_errors(ValidatedVectorFunctionModelType Phi) const = 0;
 };
 
+class LohnerReconditioner : public Reconditioner, public Loggable {
+    SweeperDP _sweeper;
+    Nat _number_of_variables_to_keep;
+public:
+    LohnerReconditioner(SweeperDP sweeper, Nat number_of_variables_to_keep);
+    virtual ValidatedVectorFunctionModelType expand_errors(ValidatedVectorFunctionModelType Phi) const override;
+    virtual Void simplify(ValidatedVectorFunctionModelType& phi) const override;
+};
+
 class InclusionIntegratorInterface {
   public:
     virtual List<ValidatedVectorFunctionModelType> flow(EffectiveVectorFunction f, BoxDomainType V, BoxDomainType X0, Real T) const = 0;
@@ -106,7 +115,10 @@ class InclusionIntegratorBase : public virtual InclusionIntegratorInterface, pub
     Nat _number_of_variables_to_keep;
     InclusionIntegratorBase(SweeperDP sweeper, StepSize step_size);
     template<class... AS> InclusionIntegratorBase(SweeperDP sweeper, StepSize step_size, AS... attributes)
-        : InclusionIntegratorBase(sweeper,step_size) { this->set(attributes...); }
+        : InclusionIntegratorBase(sweeper,step_size) {
+        this->set(attributes...);
+        _reconditioner.reset(new LohnerReconditioner(_sweeper,_number_of_variables_to_keep));
+    }
   public:
     InclusionIntegratorBase& set(NumberOfStepsBetweenSimplifications n) { _number_of_steps_between_simplifications=n; return *this; }
     InclusionIntegratorBase& set(NumberOfVariablesToKeep n) { _number_of_variables_to_keep=n; return *this; }
@@ -124,7 +136,7 @@ class InclusionIntegratorBase : public virtual InclusionIntegratorInterface, pub
 class InclusionIntegrator3rdOrder : public InclusionIntegratorBase {
   public:
     template<class... AS> InclusionIntegrator3rdOrder(SweeperDP sweeper, StepSize step_size, AS... attributes)
-        : InclusionIntegratorBase(sweeper,step_size) { this->set(attributes...); }
+        : InclusionIntegratorBase(sweeper,step_size,attributes...) { }
     Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPUpperBound> compute_norms(EffectiveVectorFunction const& f, UpperBoxType const& B) const;
     virtual ValidatedVectorFunctionModelType compute_step(EffectiveVectorFunction f, BoxDomainType V, BoxDomainType D, ExactTimeStepType h, UpperBoxType B) const override;
 };
@@ -134,20 +146,9 @@ class InclusionIntegrator3rdOrder : public InclusionIntegratorBase {
 class InclusionIntegrator2ndOrder : public InclusionIntegratorBase {
   public:
     template<class... AS> InclusionIntegrator2ndOrder(SweeperDP sweeper, StepSize step_size, AS... attributes)
-        : InclusionIntegratorBase(sweeper,step_size) { this->set(attributes...); }
+        : InclusionIntegratorBase(sweeper,step_size,attributes...) {  }
     Tuple<FloatDPError,FloatDPError,FloatDPUpperBound> compute_norms(EffectiveVectorFunction const& f, UpperBoxType const& B) const;
     virtual ValidatedVectorFunctionModelType compute_step(EffectiveVectorFunction f, BoxDomainType V, BoxDomainType D, PositiveFloatDPValue h, UpperBoxType B) const override;
-};
-
-
-
-class LohnerReconditioner : public Reconditioner, public Loggable {
-    SweeperDP _sweeper;
-    SizeType _number_of_variables_to_keep;
-  public:
-    LohnerReconditioner(SweeperDP sweeper, NumberOfVariablesToKeep number_of_variables_to_keep);
-    virtual ValidatedVectorFunctionModelType expand_errors(ValidatedVectorFunctionModelType Phi) const override;
-    virtual Void simplify(ValidatedVectorFunctionModelType& phi) const override;
 };
 
 } // namespace Ariadne;

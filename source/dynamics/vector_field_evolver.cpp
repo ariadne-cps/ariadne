@@ -189,16 +189,12 @@ _evolution(EnclosureListType& final_sets,
                                   semantics,reach);
         }
 
-        if(verbosity==1) {
-            std::cerr << "\r"
-                        <<"#w="<<std::setw(4)<<working_sets.size()
+        ARIADNE_LOG(1,"#w="<<std::setw(4)<<working_sets.size()
                         <<"#r="<<std::setw(4)<<std::left<<reach_sets.size()
                         <<" t="<<std::setw(7)<<std::fixed<<current_time.get_d()
                         <<" p="<<std::setw(4)<<std::left<<current_set_model.number_of_parameters()
                         <<" r="<<std::setw(7)<<current_set_model.radius()
-                        <<" c="<<current_set_model.centre()
-                        <<"                      ";
-        }
+                        <<" c="<<current_set_model.centre() << "\n");
 
     }
 
@@ -239,11 +235,21 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     //const Nat ng=initial_set_model.argument_size();
 
 
+    // Test to see if set requires reconditioning
+    if(this->_configuration->enable_reconditioning() &&
+       possibly(norm(current_set_model.state_function().errors()) > this->_configuration->maximum_spacial_error())) {
+
+        ARIADNE_LOG(4," reconditioning: errors "<<current_set_model.state_function().errors()<<"\n");
+        current_set_model.recondition();
+        working_sets.append(make_pair(current_time,current_set_model));
+        return;
+    }
+
     /////////////// Main Evolution ////////////////////////////////
     const FunctionType& dynamic=_sys_ptr->function();
 
     // Set evolution parameters
-    const FloatDP maximum_step_size=this->_configuration->maximum_step_size();
+    const FloatDPValue maximum_step_size=this->_configuration->maximum_step_size();
     //const FloatDP maximum_bounds_diameter=this->_parameters->maximum_enclosure_radius*2;
     //const FloatDP zero_time=0.0;
 
@@ -256,19 +262,19 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     // TODO: Modify this for general integrator interface
     //TaylorPicardIntegrator const* taylor_integrator=dynamic_cast<const TaylorPicardIntegrator*>(this->_integrator.operator->());
     IntegratorInterface const* integrator=this->_integrator.operator->();
-    FloatDP step_size=maximum_step_size;
-    FlowModelType flow_model=integrator->flow_step(dynamic,current_set_bounds,step_size);
+    FloatDPValue step_size=maximum_step_size;
+    FlowModelType flow_model=integrator->flow_step(dynamic,current_set_bounds,step_size.raw());
     ARIADNE_LOG(4,"step_size = "<<step_size<<"\n");
     ARIADNE_LOG(6,"flow_model = "<<flow_model<<"\n");
-    FlowModelType flow_step_model=partial_evaluate(flow_model,flow_model.domain().size()-1u,FloatDPValue(step_size));
+    FlowModelType flow_step_model=partial_evaluate(flow_model,flow_model.domain().size()-1u,step_size);
     ARIADNE_LOG(6,"flow_step_model = "<<flow_step_model<<"\n");
 
     // Compute the integration time model
     TimeStepType next_time=current_time+TimeStepType(step_size);
     ARIADNE_LOG(6,"next_time = "<<next_time<<"\n");
     // Compute the flow tube (reachable set) model and the final set
-    ARIADNE_LOG(6,"product = "<<product(current_set_model,ExactIntervalType(0.0,step_size))<<"\n");
-    EnclosureType reach_set_model=apply(flow_model,product(current_set_model,ExactIntervalType(0.0,step_size)));
+    ARIADNE_LOG(6,"product = "<<product(current_set_model,ExactIntervalType(FloatDPValue(0.0),step_size))<<"\n");
+    EnclosureType reach_set_model=apply(flow_model,product(current_set_model,ExactIntervalType(FloatDPValue(0.0),step_size)));
     ARIADNE_LOG(6,"reach_set_model = "<<reach_set_model<<"\n");
     EnclosureType next_set_model=apply(flow_step_model,current_set_model);
     ARIADNE_LOG(6,"next_set_model = "<<next_set_model<<"\n");
@@ -288,6 +294,8 @@ VectorFieldEvolverConfiguration::VectorFieldEvolverConfiguration()
 {
     maximum_step_size(1.0);
     maximum_enclosure_radius(100.0);
+    enable_reconditioning(true);
+    maximum_spacial_error(1e-2);
 }
 
 
@@ -297,6 +305,8 @@ VectorFieldEvolverConfiguration::write(OutputStream& os) const
     os << "VectorFieldEvolverSettings"
        << ",\n  maximum_step_size=" << maximum_step_size()
        << ",\n  maximum_enclosure_radius=" << maximum_enclosure_radius()
+       << ",\n  enable_reconditioning=" << enable_reconditioning()
+       << ",\n  maximum_spacial_error=" << maximum_spacial_error()
        << "\n)\n";
     return os;
 }

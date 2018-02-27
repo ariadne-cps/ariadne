@@ -562,7 +562,7 @@ Void CairoCanvas::initialise(StringType text_x, StringType text_y, double xl, do
 
     // Fill clipping region with a very light colour to indicate where figure
     // should be drawn
-    cairo_set_source_rgb(cr, 0.95,1.00,0.95);
+    cairo_set_source_rgb(cr, 0.97,0.97,0.97);
     cairo_fill_preserve (cr);
     cairo_clip (cr);
     cairo_new_path (cr);

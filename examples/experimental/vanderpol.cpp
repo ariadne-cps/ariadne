@@ -71,8 +71,8 @@ int main()
     std::cout << "done." << std::endl;
 
     plot("vanderpol",Axes2d(-2.1,x,2.1, -3.0,y,3.0), Colour(0.0,0.5,1.0), orbit);
-    plot("vanderpol-tx",Axes2d(0,TimeVariable(),evolution_time.continuous_time(), -2.1,x,2.1), Colour(0.0,0.5,1.0), orbit);
-    plot("vanderpol-ty",Axes2d(0,TimeVariable(),evolution_time.continuous_time(), -3.0,y,3.0), Colour(0.0,0.5,1.0), orbit);
+    //plot("vanderpol-tx",Axes2d(0,TimeVariable(),evolution_time.continuous_time(), -2.1,x,2.1), Colour(0.0,0.5,1.0), orbit);
+    //plot("vanderpol-ty",Axes2d(0,TimeVariable(),evolution_time.continuous_time(), -3.0,y,3.0), Colour(0.0,0.5,1.0), orbit);
 
     std::cout << "Discretising orbit" << std::flush;
     HybridGrid grid(vanderpol.state_auxiliary_space());

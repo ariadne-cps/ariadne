@@ -4,6 +4,7 @@ set(EXPERIMENTAL_EXAMPLES
 	laser
 	bouncing-walls
 	vanderpol
+	vanderpol-vectorfield
 	harmonic_inclusion
 )
 

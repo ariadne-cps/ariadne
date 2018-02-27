@@ -1175,7 +1175,7 @@ template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::_disc
     // Set the uniform error of the original model
     // If index_of_error == number_of_error_variables, then the error is kept as a uniform error bound
     MultiIndex ra(number_of_kept_variables);
-    FloatError<PR> derr=nul(tm.error()); // Magnitude of discarded terms
+    FloatError<PR> derr=mag(tm.error()); // Magnitude of discarded terms
     for(typename TaylorModel<ValidatedTag,F>::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
         MultiIndex const& xa=iter->key();
         FloatValue<PR> const& xv=iter->data();

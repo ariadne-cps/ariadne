@@ -92,8 +92,8 @@ class Real
     //! \name Constructors
     Real(); //!< Default constructor yields the integer \c 0 as a real number.
     explicit Real(SharedPointer<Real::InterfaceType>); //!< Construct from any class implementing the real number interface.
-    explicit Real(ConvergentSequence<DyadicBounds> const&); //!< Construct from a sequence of dyadic bounds converging to a singleton intersection.
-    explicit Real(StrongCauchySequence<Dyadic> const&); //!< Construct from a strongly convergent sequence of dyadic numbers.
+    //explicit Real(ConvergentSequence<DyadicBounds> const&); //!< Construct from a sequence of dyadic bounds converging to a singleton intersection.
+    //explicit Real(StrongCauchySequence<Dyadic> const&); //!< Construct from a strongly convergent sequence of dyadic numbers.
     //@}
 
     //@{

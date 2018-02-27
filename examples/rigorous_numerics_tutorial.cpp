@@ -22,10 +22,12 @@
  */
 
 #include "numeric/module.hpp"
+#include "algebra/algebra.hpp"
 #include "algebra/matrix.hpp"
 #include "function/function.hpp"
 #include "function/taylor_function.hpp"
 #include "function/constraint.hpp"
+#include "function/formula.hpp"
 #include "geometry/function_set.hpp"
 #include "output/graphics.hpp"
 
@@ -34,6 +36,9 @@
 #define print(expr) { std::cout << #expr << ": " << (expr) << "\n"; }
 
 using namespace Ariadne;
+
+extern template Ariadne::Nat Ariadne::Error<Ariadne::FloatMP>::output_places;
+extern template Ariadne::Nat Ariadne::Approximation<Ariadne::FloatMP>::output_places;
 
 int main() {
     //! [numeric_demonstration]

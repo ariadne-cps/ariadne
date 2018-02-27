@@ -68,15 +68,14 @@ namespace Ariadne {
 static const double DEFAULT_MAXIMUM_ENCLOSURE_RADIUS=0.25;
 static const double DEFAULT_GRID_LENGTH=0.125;
 
-template class ReachabilityAnalyser<HybridAutomatonInterface>;
-template class ReachabilityAnalyserConfiguration<HybridAutomatonInterface>;
-
+    /*
 // Resolves possible linking bug in macOS
 template<>
 ReachabilityAnalyser<HybridAutomatonInterface>::
 ~ReachabilityAnalyser()
 {
 }
+     */
 
 inline Real operator-(Real const& r1, Rational const& q2) {
     return r1-Real(q2);
@@ -115,6 +114,8 @@ inline const HybridExactBoxes& cast_exact(const HybridExactBoxes& boxes) {
 #include "dynamics/reachability_analyser.tpl.hpp"
 
 namespace Ariadne {
+
+template class ReachabilityAnalyser<HybridAutomatonInterface>;
 
 HybridReachabilityAnalyser::
 HybridReachabilityAnalyser(

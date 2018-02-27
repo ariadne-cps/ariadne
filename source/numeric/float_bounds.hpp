@@ -97,6 +97,7 @@ template<class F> class Bounds
     Bounds<F>(LowerBound<F> const& lower, UpperBound<F> const& upper);
     Bounds<F>(LowerBound<F> const& lower, ValidatedUpperNumber const& upper);
     Bounds<F>(ValidatedLowerNumber const& lower, UpperBound<F> const& upper);
+    Bounds<F>(ValidatedLowerNumber const& lower, ValidatedUpperNumber const& upper, PR pr);
     template<class N1, class N2, EnableIf<And<IsBuiltinIntegral<N1>,IsBuiltinIntegral<N2>>> = dummy> Bounds<F>(N1 n1, N2 n2, PR pr) : _l(n1,pr), _u(n2,pr) { }
     Bounds<F>(ExactDouble const& dl, ExactDouble const& du, PrecisionType pr);
     Bounds<F>(Dyadic const& wl, Dyadic const& wu, PrecisionType pr);

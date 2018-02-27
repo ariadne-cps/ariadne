@@ -40,6 +40,7 @@ namespace Ariadne {
 template<class F> struct NumericTraits<Approximation<F>> {
     typedef ApproximateNumber GenericType;
     typedef PositiveApproximation<F> PositiveType;
+    typedef Approximation<F> OppositeType;
     typedef Fuzzy LessType;
     typedef Fuzzy EqualsType;
 };

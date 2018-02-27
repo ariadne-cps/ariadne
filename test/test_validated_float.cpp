@@ -83,6 +83,9 @@ class TestDirectedFloats
     typedef FloatType<MetricTag,PR> FloatBallType;
     typedef FloatType<ExactTag,PR> FloatValueType;
 
+    typedef PositiveFloatLowerBound<PR> PositiveFloatLowerBoundType;
+    typedef PositiveFloatUpperBound<PR> PositiveFloatUpperBoundType;
+
   private:
     PR precision;
   public:
@@ -181,6 +184,10 @@ TestDirectedFloats<PR>::test_rounded_arithmetic() {
     ARIADNE_TEST_COMPARE((FloatLowerBoundType(third,precision)-FloatUpperBoundType(fifth,precision)).raw(),<=,third-fifth);
     ARIADNE_TEST_ASSERT(refines(FloatUpperBoundType(third+fifth,precision),FloatUpperBoundType(third,precision)+FloatUpperBoundType(fifth,precision)));
     ARIADNE_TEST_ASSERT(refines(FloatLowerBoundType(third+fifth,precision),FloatLowerBoundType(third,precision)+FloatLowerBoundType(fifth,precision)));
+    ARIADNE_TEST_COMPARE((PositiveFloatLowerBoundType(third,precision)*PositiveFloatLowerBoundType(fifth,precision)).raw(),<=,third*fifth);
+    ARIADNE_TEST_COMPARE((PositiveFloatUpperBoundType(third,precision)*PositiveFloatUpperBoundType(fifth,precision)).raw(),>=,third*fifth);
+    ARIADNE_TEST_COMPARE((PositiveFloatLowerBoundType(third,precision)/PositiveFloatUpperBoundType(fifth,precision)).raw(),<=,third/fifth);
+    ARIADNE_TEST_COMPARE((PositiveFloatUpperBoundType(third,precision)/PositiveFloatLowerBoundType(fifth,precision)).raw(),>=,third/fifth);
 }
 
 

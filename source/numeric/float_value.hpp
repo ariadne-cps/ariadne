@@ -43,6 +43,7 @@ namespace Ariadne {
 
 template<class F> struct NumericTraits<Value<F>> {
     typedef ExactNumber GenericType;
+    typedef Value<F> OppositeType;
     typedef PositiveValue<F> PositiveType;
     typedef Boolean LessType;
     typedef Boolean EqualsType;

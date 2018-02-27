@@ -40,6 +40,7 @@ namespace Ariadne {
 
 template<class F> struct NumericTraits<Bounds<F>> {
     typedef ValidatedNumber GenericType;
+    typedef Bounds<F> OppositeType;
     typedef PositiveBounds<F> PositiveType;
     typedef ValidatedKleenean LessType;
     typedef ValidatedKleenean EqualsType;

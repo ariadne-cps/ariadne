@@ -602,10 +602,10 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
 
     List<SharedPointer<InclusionIntegratorApproximation>> approximations;
     //approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorZeroApproximation(this->_sweeper)));
-    //approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorConstantApproximation(this->_sweeper)));
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorConstantApproximation(this->_sweeper)));
     //approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorPiecewiseApproximation(this->_sweeper)));
     //approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorAffineApproximation(this->_sweeper)));
-    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorSinusoidalApproximation(this->_sweeper)));
+    //approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorSinusoidalApproximation(this->_sweeper)));
     
     List<ValidatedVectorFunctionModelDP> result;
 
@@ -657,8 +657,6 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
                 auto swp=this->_sweeper;
                 auto FD=approx.build_flow_domain(D, h, V);
                 ARIADNE_LOG(6,"FD:"<<FD<<"\n");
-                auto fd_size = FD.size();
-                auto zf=ValidatedScalarTaylorFunctionModelDP(FD,swp);
                 auto x0f=ValidatedVectorTaylorFunctionModelDP::projection(FD,range(0,n),swp);
 
                 auto w1 =approx.build_approximating_function(FD, n, m);
@@ -666,10 +664,8 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
                 ARIADNE_LOG(6,"w1f:"<<w1f<<"\n");
 
                 auto phi1=ValidatedVectorTaylorFunctionModelDP(n,FD,swp);
-                for (auto i : range(n)) { phi1[i]=zf+cast_singleton(B[i]); }
+                for (auto i : range(n)) { phi1[i]=phi1[i]+cast_singleton(B[i]); }
                 ARIADNE_LOG(6,"phi01:"<<phi1<<"\n");
-
-                auto tf=ValidatedScalarTaylorFunctionModelDP::coordinate(FD,n,swp);
 
                 for (auto i : range(6)) {
                     phi1=antiderivative(get_time_derivative(phi1,f,g,w1f),n)+x0f;
@@ -683,16 +679,20 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
                 current_evolve_function=partial_evaluate(current_reach_function,n,intermediate_t);
                 ARIADNE_LOG(5,"current_evolve_function="<<current_evolve_function<<"\n");
 
-                auto w2 =approx.build_second_approximating_function(FD, n, m);
+                auto D2 = cast_exact_box(current_evolve_function.range());
+                auto FD2=approx.build_flow_domain(D2, h, V);
+                auto w2 =approx.build_second_approximating_function(FD2, n, m);
                 ValidatedVectorTaylorFunctionModelDP& w2f = dynamic_cast<ValidatedVectorTaylorFunctionModelDP&>(w2.reference());
                 ARIADNE_LOG(6,"w2f:"<<w2f<<"\n");
 
-                auto phi2=ValidatedVectorTaylorFunctionModelDP(n,FD,swp);
-                for (auto i : range(n)) { phi2[i]=zf+cast_singleton(B[i]); }
+                auto x0f2=ValidatedVectorTaylorFunctionModelDP::projection(FD2,range(0,n),swp);
+
+                auto phi2=ValidatedVectorTaylorFunctionModelDP(n,FD2,swp);
+                for (auto i : range(n)) { phi2[i]=phi2[i]+cast_singleton(B[i]); }
                 ARIADNE_LOG(6,"phi02:"<<phi2<<"\n");
 
                 for (auto i : range(6)) {
-                    phi2=antiderivative(get_time_derivative(phi2,f,g,w2f),n)+x0f;
+                    phi2=antiderivative(get_time_derivative(phi2,f,g,w2f),n)+x0f2;
                 }
                 for (auto i : range(n)) {
                     phi2[i].set_error(phi2[i].error()+e);
@@ -700,7 +700,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
                 ARIADNE_LOG(7,(derivative(phi2,n) - get_time_derivative(phi2,f,g,w2f)).range()<<"\n");
 
                 current_reach_function=build_reach_function(current_evolve_function, phi2, intermediate_t, new_t);
-                ARIADNE_LOG(5,"current_reach_function="<<current_reach_function<<"\n"); // FIXME
+                ARIADNE_LOG(5,"current_reach_function="<<current_reach_function<<"\n");
 
                 current_evolve_function=partial_evaluate(current_reach_function,n,new_t);
                 ARIADNE_LOG(5,"current_evolve_function="<<current_evolve_function<<"\n");
@@ -819,8 +819,6 @@ compute_flow_function(ValidatedVectorFunction f, Vector<ValidatedVectorFunction>
     auto swp=this->_sweeper;
     auto FD=_approximation->build_flow_domain(D, h, V);
     ARIADNE_LOG(6,"FD:"<<FD<<"\n");
-    auto fd_size = FD.size();
-    auto zf=ValidatedScalarTaylorFunctionModelDP(FD,swp);
     auto x0f=ValidatedVectorTaylorFunctionModelDP::projection(FD,range(0,n),swp);
 
     auto w =_approximation->build_approximating_function(FD, n, m);
@@ -828,10 +826,8 @@ compute_flow_function(ValidatedVectorFunction f, Vector<ValidatedVectorFunction>
     ARIADNE_LOG(6,"wf:"<<wf<<"\n");
 
     auto phi=ValidatedVectorTaylorFunctionModelDP(n,FD,swp);
-    for (auto i : range(n)) { phi[i]=zf+cast_singleton(B[i]); }
+    for (auto i : range(n)) { phi[i]=phi[i]+cast_singleton(B[i]); }
     ARIADNE_LOG(6,"phi0:"<<phi<<"\n");
-
-    auto tf=ValidatedScalarTaylorFunctionModelDP::coordinate(FD,n,swp);
 
     for (auto i : range(6)) {
         phi=antiderivative(get_time_derivative(phi,f,g,wf),n)+x0f;

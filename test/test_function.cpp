@@ -153,6 +153,24 @@ Void TestFunction::test_differentiation()
     EffectiveScalarFunction x=EffectiveScalarFunction::coordinate(dom,0);
     EffectiveScalarFunction y=EffectiveScalarFunction::coordinate(dom,1);
 
+    DoublePrecision pr;
+    SizeType nsteps = 100;
+    Real e = 1 / 100_q;
+    Real noise = 4 / 100_q;
+
+    auto x0 = FloatDPBounds(1 - e, 1 + e, pr);
+    auto y0 = FloatDPBounds(-e, e, pr);
+
+    auto t = ValidatedScalarFunction::coordinate(0u, 1u);
+
+    auto one = ValidatedVectorFunction::constant(1u, 1_z);
+
+    auto f1 = ValidatedVectorFunction({x0 * cos(t) + y0 * sin(t), -x0 * sin(t) + y0 * cos(t)});
+
+    FloatDPBounds h(1_q / 32, pr);
+    Vector<FloatDPBounds> hv({h});
+    auto bounds = f1(hv);
+
     ARIADNE_TEST_CONSTRUCT(EffectiveScalarFunction,f,(3*x-2*y+1));
     ARIADNE_TEST_NAMED_CONSTRUCT(EffectiveScalarFunction,df0,constant(dom,3));
     ARIADNE_TEST_NAMED_CONSTRUCT(EffectiveScalarFunction,df1,constant(dom,-2));

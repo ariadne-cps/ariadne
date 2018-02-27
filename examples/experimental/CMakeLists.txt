@@ -6,7 +6,6 @@ set(EXPERIMENTAL_EXAMPLES
 	vanderpol
 	vanderpol-vectorfield
 	lotka-volterra
-	harmonic_inclusion
 )
 
 foreach(example ${EXPERIMENTAL_EXAMPLES})

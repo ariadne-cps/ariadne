@@ -86,6 +86,15 @@ template<class F> PositiveUpperBound<F> dexp(UpperBound<F> const& x) {
     else { return cast_positive(cast_exact(1-exp(x)))/cast_positive(-x); }
 }
 
+template<class F> PositiveLowerBound<F> dexp(LowerBound<F> const& x) {
+    if(x.raw()>=0) { return cast_positive(exp(x)-1)/cast_positive(cast_exact(x)); }
+    else { return cast_positive(cast_exact(1-exp(x)))/cast_positive(-x); }
+}
+
+
+template<class F> PositiveBounds<F> dexp(Bounds<F> const& x) {
+    return PositiveBounds<F>(dexp(x.lower()),dexp(x.upper()));
+}
 
 class Reconditioner {
   public:

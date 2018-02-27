@@ -26,6 +26,10 @@
 #include "algebra/sweeper.hpp"
 #include "solvers/integrator_interface.hpp"
 #include "geometry/box.hpp"
+#include "function/function.hpp"
+#include "function/formula.hpp"
+#include "function/taylor_model.hpp"
+#include "algebra/algebra.hpp"
 #include "geometry/function_set.hpp"
 #include "output/graphics.hpp"
 
@@ -259,6 +263,7 @@ class TestInclusionIntegrator {
     void test_pi_controller() const;
     void test_van_der_pol() const;
     void test_harmonic() const;
+    void test_harmonic_analytical() const;
     void test_clock() const;
 };
 
@@ -274,6 +279,7 @@ void TestInclusionIntegrator::test() const {
     //ARIADNE_TEST_CALL(test_pi_controller());
     //ARIADNE_TEST_CALL(test_van_der_pol());
     ARIADNE_TEST_CALL(test_harmonic());
+    //ARIADNE_TEST_CALL(test_harmonic_analytical());
     //ARIADNE_TEST_CALL(test_clock());
 }
 
@@ -579,10 +585,15 @@ void TestInclusionIntegrator::test_van_der_pol() const {
 }
 
 void TestInclusionIntegrator::test_harmonic() const {
-    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=1.0/16, number_of_steps_between_simplifications=150, number_of_variables_to_keep=80);
+    double step=1.0/16;
+    SizeType base=80;
+    SizeType freq=150;
+
+    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
     integrator.verbosity = 2;
 
-    RealVector noise_levels={4/100_q,4/100_q};
+    //RealVector noise_levels={1/100_q,1/100_q};
+    RealVector noise_levels={4/100_q};
 
     auto x = EffectiveVectorFunction::identity(2u);
     auto one = EffectiveScalarFunction::constant(2u,1_z);
@@ -590,13 +601,54 @@ void TestInclusionIntegrator::test_harmonic() const {
 
     auto f=EffectiveVectorFunction({x[1],-x[0]});
 
-    Vector<ValidatedVectorFunction> g({{one,zero},{zero,one}});
+    //Vector<ValidatedVectorFunction> g({{one,zero},{zero,one}});
+    Vector<ValidatedVectorFunction> g({{one,zero}});
 
     Real e=1/100_q;
     RealBox starting_set={{1-e,1+e},{-e,+e}};
-    Real evolution_time=628/100_q;
+    Real evolution_time=625/100_q;
 
     this->run_test("harmonic",integrator,f,g,noise_levels,starting_set,evolution_time);
+}
+
+void TestInclusionIntegrator::test_harmonic_analytical() const {
+
+    DoublePrecision pr;
+    SizeType nsteps = 100;
+    Real p0_e=1/100_q;
+    Real noise=4/100_q;
+
+    FloatDPBounds h_(1_q/32,pr);
+    PositiveFloatDPBounds h(cast_positive(h_));
+
+    auto x0 = ValidatedScalarFunction::coordinate(3u,0u);
+    auto y0 = ValidatedScalarFunction::coordinate(3u,1u);
+    auto t = ValidatedScalarFunction::coordinate(3u,2u);
+
+    auto one = ValidatedVectorFunction::constant(3u,1_z);
+
+    auto f0=ValidatedVectorFunction({x0*cos(t)+y0*sin(t),-x0*sin(t)+y0*cos(t)} );
+    Vector<FloatDPBounds> tv({h});
+
+    FloatDPError Kp(0.04);
+    FloatDPError expLambda = dexp(h);
+    FloatDPError e = Kp*expLambda*h;
+    FloatDPBounds eb(-e,+e);
+
+    Vector<FloatDPBounds> ev({eb,eb});
+    Vector<FloatDPBounds> bounds = f0(tv)+ev;
+    std::cout << bounds << std::endl;
+
+    auto x_init = FloatDPBounds(1-p0_e,1+p0_e,pr);
+    auto y_init = FloatDPBounds(-p0_e,+p0_e,pr);
+
+    auto xy=Vector<FloatDPBounds>({x_init,y_init});
+    FloatDPBounds tm(0,pr);
+    for (auto i : range(nsteps)) {
+        xy = f0(join(xy,h));
+        std::cout << xy << std::endl;
+        tm = tm + h;
+    }
 }
 
 void TestInclusionIntegrator::test_clock() const {
@@ -618,6 +670,7 @@ void TestInclusionIntegrator::test_clock() const {
 
     this->run_test("clock",integrator,f,g,noise_levels,starting_set,evolution_time);
 }
+
 
 int main() {
     TestInclusionIntegrator().test();

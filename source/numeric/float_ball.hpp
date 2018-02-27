@@ -39,6 +39,7 @@ namespace Ariadne {
 
 template<class F, class FE> struct NumericTraits<Ball<F,FE>> {
     typedef ValidatedNumber GenericType;
+    typedef Ball<F,FE> OppositeType;
     typedef PositiveBall<F,FE> PositiveType;
     typedef ValidatedKleenean LessType;
     typedef ValidatedKleenean EqualsType;

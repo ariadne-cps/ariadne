@@ -194,6 +194,13 @@ template<class F> struct IsNumericType<Bounds<F>> : IsNumericType<F> { };
 template<class F, class FE> struct IsNumericType<Ball<F,FE>> : IsNumericType<F> { };
 template<class F> struct IsNumericType<Value<F>> : IsNumericType<F> { };
 
+template<class T> struct NumericTraits;
+
+template<class T> struct NumericTraits<Positive<T>> : public NumericTraits<T> {
+    typedef Positive<typename NumericTraits<T>::GenericType> GenericType;
+    typedef Positive<typename NumericTraits<T>::OppositeType> OppositeType;
+};
+
 } // namespace Ariadne
 
 #endif

@@ -35,6 +35,14 @@
 
 namespace Ariadne {
 
+template<class F> struct NumericTraits<Error<F>> {
+    typedef PositiveValidatedUpperNumber GenericType;
+    typedef Error<F> PositiveType;
+    typedef PositiveLowerBound<F> OppositeType;
+    typedef ValidatedLowerKleenean LessType;
+    typedef ValidatedNegatedSierpinskian EqualsType;
+};
+
 //! \ingroup NumericModule
 //! \brief Floating-point upper bounds for positive real numbers, suitable for use as an upper bound for an error in a metric space.
 template<class F> class Error

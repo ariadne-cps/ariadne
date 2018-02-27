@@ -116,6 +116,10 @@ using ValidatedUpperNumber=Number<ValidatedUpperTag>; //!< Alias for generic val
 using ValidatedLowerNumber=Number<ValidatedLowerTag>; //!< Alias for generic validated lower numbers. \ingroup NumericModule
 using ApproximateNumber=Number<ApproximateTag>; //!< Alias for generic approximate numbers. \ingroup NumericModule
 
+template<class P> using PositiveNumber = Positive<Number<P>>;
+using PositiveValidatedUpperNumber=PositiveNumber<ValidatedUpperTag>; //!< Alias for generic positive validated upper numbers. \ingroup NumericModule
+using PositiveValidatedLowerNumber=PositiveNumber<ValidatedLowerTag>; //!< Alias for generic positive validated lower numbers. \ingroup NumericModule
+
 } // namespace Ariadne
 
 #include "float.decl.hpp"

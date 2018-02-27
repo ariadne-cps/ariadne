@@ -1076,12 +1076,12 @@ template<class X> struct DefineConcreteGenericOperators
 
 
 
+template<class T> struct NumericTraits;
 
 template<class X> class Operations {
     typedef decltype(add(declval<X>(),declval<X>())) R;
     typedef decltype(neg(declval<X>())) NX;
-    // FIXME: No function returning non-widened reciprocal
-    typedef decltype(neg(declval<X>())) QX;
+    typedef typename NumericTraits<X>::OppositeType QX;
     typedef decltype(rec(declval<X>())) QR;
     typedef R PR;
     typedef decltype(abs(declval<X>())) PX;

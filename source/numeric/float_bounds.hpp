@@ -97,6 +97,7 @@ template<class F> class Bounds
     Bounds<F>(LowerBound<F> const& lower, UpperBound<F> const& upper);
     Bounds<F>(LowerBound<F> const& lower, ValidatedUpperNumber const& upper);
     Bounds<F>(ValidatedLowerNumber const& lower, UpperBound<F> const& upper);
+    Bounds<F>(ValidatedLowerNumber const& lower, ValidatedUpperNumber const& upper, PR pr);
     template<class N1, class N2, EnableIf<And<IsBuiltinIntegral<N1>,IsBuiltinIntegral<N2>>> = dummy> Bounds<F>(N1 n1, N2 n2, PR pr) : _l(n1,pr), _u(n2,pr) { }
     Bounds<F>(ExactDouble const& dl, ExactDouble const& du, PrecisionType pr);
     Bounds<F>(Dyadic const& wl, Dyadic const& wu, PrecisionType pr);
@@ -185,6 +186,7 @@ template<class F> class Positive<Bounds<F>> : public Bounds<F>
     explicit Positive<Bounds<F>>(F const& x) : Bounds<F>(x) { }
     explicit Positive<Bounds<F>>(F const& l, F const& u) : Bounds<F>(l,u) { }
     explicit Positive<Bounds<F>>(Bounds<F> const& x) : Bounds<F>(x) { }
+    Positive<Bounds<F>>(Positive<LowerBound<F>> const& xl, Positive<UpperBound<F>> const& xu) : Bounds<F>(xl,xu) { }
   public:
 };
 

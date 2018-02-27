@@ -257,6 +257,9 @@ template<class F> Bounds<F>::Bounds(LowerBound<F> const& lower, ValidatedUpperNu
 template<class F> Bounds<F>::Bounds(ValidatedLowerNumber const& lower, UpperBound<F> const& upper)
     : Bounds<F>(upper.create(lower),upper) { }
 
+template<class F> Bounds<F>::Bounds(ValidatedLowerNumber const& lower, ValidatedUpperNumber const& upper, PR pr)
+    : Bounds<F>(lower.get(LowerTag(),pr),upper.get(UpperTag(),pr)) { }
+
 template<class F> Bounds<F>::Bounds(ValidatedNumber const& y, PR pr)
     : Bounds(y.get(BoundedTag(),pr)) {
 }

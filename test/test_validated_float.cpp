@@ -146,8 +146,15 @@ template<class PR> Void
 TestDirectedFloats<PR>::test_conversions()
 {
     Rational one=1;
+    Rational four_thirds=4*one/3;
     Rational five_thirds=5*one/3;
     Rational neg_five_thirds=-5*one/3;
+
+    ValidatedLowerNumber l(four_thirds);
+    ValidatedUpperNumber u(five_thirds);
+
+    ARIADNE_TEST_COMPARE(FloatBoundsType(l,u,precision).lower().raw(),<=,four_thirds);
+    ARIADNE_TEST_COMPARE(FloatBoundsType(l,u,precision).upper().raw(),>=,five_thirds);
 
     ARIADNE_TEST_COMPARE(FloatLowerBoundType(five_thirds,precision).raw(),<=,five_thirds);
     ARIADNE_TEST_COMPARE(FloatLowerBoundType(neg_five_thirds,precision).raw(),<=,neg_five_thirds);

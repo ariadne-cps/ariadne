@@ -38,13 +38,16 @@ namespace Ariadne {
 template<class P, class PR, class PRE> class FunctionModelFactoryInterface;
 template<class P, class D, class PR, class PRE> class FunctionModelCreatorInterface;
 
+template<class P, class D, class C, class PR, class PRE> class FunctionModelInterface;
 
-template<class P, class D, class PR, class PRE> class ScalarFunctionModelInterface
-    : public virtual ScalarFunctionInterface<P,D>
+template<class P, class D, class PR, class PRE> class FunctionModelInterface<P,D,IntervalDomainType,PR,PRE>
+    : public virtual FunctionInterface<P,D,IntervalDomainType>
 {
     static_assert(IsSame<D,IntervalDomainType>::value or IsSame<D,BoxDomainType>::value,"");
+    typedef IntervalDomainType C;
   public:
     typedef D DomainType;
+    typedef C CodomainType;
     typedef Interval<FloatUpperBound<PR>> RangeType;
     typedef FloatError<PR> NormType;
   public:
@@ -84,12 +87,14 @@ template<class P, class D, class PR, class PRE> class ScalarFunctionModelInterfa
 };
 
 
-template<class P, class D, class PR, class PRE> class VectorFunctionModelInterface
-    : public virtual VectorFunctionInterface<P,D>
+template<class P, class D, class PR, class PRE> class FunctionModelInterface<P,D,BoxDomainType,PR,PRE>
+    : public virtual FunctionInterface<P,D,BoxDomainType>
 {
     static_assert(IsSame<D,IntervalDomainType>::value or IsSame<D,BoxDomainType>::value,"");
-
+    typedef BoxDomainType C;
+  public:
     typedef D DomainType;
+    typedef C CodomainType;
     typedef Box<Interval<FloatUpperBound<PR>>> RangeType;
     typedef FloatError<PR> NormType;
   public:

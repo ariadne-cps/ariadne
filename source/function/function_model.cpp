@@ -34,14 +34,14 @@ namespace Ariadne {
 template class FunctionModelFactoryInterface<ValidatedTag,DoublePrecision,DoublePrecision>;
 template class FunctionModelFactoryInterface<ValidatedTag,MultiplePrecision,MultiplePrecision>;
 
-template class ScalarFunctionModel<ValidatedTag,IntervalDomainType,DoublePrecision>;
-template class ScalarFunctionModel<ValidatedTag,IntervalDomainType,MultiplePrecision>;
-template class VectorFunctionModel<ValidatedTag,IntervalDomainType,DoublePrecision>;
-template class VectorFunctionModel<ValidatedTag,IntervalDomainType,MultiplePrecision>;
+template class FunctionModel<ValidatedTag,IntervalDomainType,IntervalDomainType,DoublePrecision>;
+template class FunctionModel<ValidatedTag,IntervalDomainType,IntervalDomainType,MultiplePrecision>;
+template class FunctionModel<ValidatedTag,IntervalDomainType,BoxDomainType,DoublePrecision>;
+template class FunctionModel<ValidatedTag,IntervalDomainType,BoxDomainType,MultiplePrecision>;
 
-template class ScalarFunctionModel<ValidatedTag,BoxDomainType,DoublePrecision>;
-template class ScalarFunctionModel<ValidatedTag,BoxDomainType,MultiplePrecision>;
-template class VectorFunctionModel<ValidatedTag,BoxDomainType,DoublePrecision>;
-template class VectorFunctionModel<ValidatedTag,BoxDomainType,MultiplePrecision>;
+template class FunctionModel<ValidatedTag,BoxDomainType,IntervalDomainType,DoublePrecision>;
+template class FunctionModel<ValidatedTag,BoxDomainType,IntervalDomainType,MultiplePrecision>;
+template class FunctionModel<ValidatedTag,BoxDomainType,BoxDomainType,DoublePrecision>;
+template class FunctionModel<ValidatedTag,BoxDomainType,BoxDomainType,MultiplePrecision>;
 
 } // namespace Ariadne

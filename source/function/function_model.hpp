@@ -158,7 +158,7 @@ template<class FCTRY> class FunctionModelCreator<FCTRY,IntervalDomainType> {
 
 //! \ingroup FunctionModelSubModule
 //! \brief Generic scalar functions on singleton domains.
-template<class P, class D, class PR, class PRE> class ScalarFunctionModel
+template<class P, class D, class PR, class PRE> class FunctionModel<P,D,IntervalDomainType,PR,PRE>
 //    : public DispatchTranscendentalAlgebraOperations<ScalarFunctionModel<P,D,PR,PRE>, CanonicalNumericType<P,PR,PRE>>
     : public DispatchTranscendentalAlgebraOperations<ScalarFunctionModel<P,D,PR,PRE>, CanonicalNumericType<P,PR,PRE>>
     , public ProvideConcreteGenericArithmeticOperators<ScalarFunctionModel<P,D,PR,PRE>,ScalarFunction<P>>
@@ -178,23 +178,25 @@ template<class P, class D, class PR, class PRE> class ScalarFunctionModel
   public:
     clone_on_copy_ptr< ScalarFunctionModelInterface<P,D,PR,PRE> > _ptr;
   public:
-    ScalarFunctionModel() : _ptr() { }
-    explicit ScalarFunctionModel(ScalarFunctionModelInterface<P,D,PR,PRE>* p) : _ptr(p) { }
-    ScalarFunctionModel(const SharedPointer<const ScalarFunctionModelInterface<P,D,PR,PRE>> p) : _ptr(p->_clone()) { }
-    ScalarFunctionModel(const ScalarFunctionModel<P,D,PR,PRE>& f) : _ptr(f._ptr) { }
-    ScalarFunctionModel(const ScalarFunctionModelInterface<P,D,PR,PRE>& f) : _ptr(f._clone()) { }
-    ScalarFunctionModel(const ScalarFunction<P>& f) : _ptr(dynamic_cast<ScalarFunctionModelInterface<P,D,PR,PRE>*>(f.raw_pointer()->_clone())) { }
-    operator ScalarFunction<P,D>() const { return ScalarFunction<P,D>(this->_ptr->_clone()); }
-    operator ScalarFunctionModelInterface<P,D,PR,PRE>& () { return *_ptr; }
-    operator const ScalarFunctionModelInterface<P,D,PR,PRE>& () const { return *_ptr; }
-    const ScalarFunctionModelInterface<P,D,PR,PRE>* raw_pointer() const { return _ptr.operator->(); }
-    ScalarFunctionModelInterface<P,D,PR,PRE>& reference() { return *_ptr; }
-    const ScalarFunctionModelInterface<P,D,PR,PRE>& reference() const { return *_ptr; }
+    FunctionModel() : _ptr() { }
+    explicit FunctionModel(FunctionModelInterface<P,D,C,PR,PRE>* p) : _ptr(p) { }
+    FunctionModel(const SharedPointer<const FunctionModelInterface<P,D,C,PR,PRE>> p) : _ptr(p->_clone()) { }
+    FunctionModel(const FunctionModel<P,D,C,PR,PRE>& f) : _ptr(f._ptr) { }
+    FunctionModel(const FunctionModelInterface<P,D,C,PR,PRE>& f) : _ptr(f._clone()) { }
+    FunctionModel(const Function<P,D,C>& f) : _ptr(dynamic_cast<FunctionModelInterface<P,D,C,PR,PRE>*>(f.raw_pointer()->_clone())) { }
+    operator Function<P,D,C>() const { return Function<P,D,C>(this->_ptr->_clone()); }
+    operator FunctionModelInterface<P,D,C,PR,PRE>& () { return *_ptr; }
+    operator const FunctionModelInterface<P,D,C,PR,PRE>& () const { return *_ptr; }
+    const FunctionModelInterface<P,D,C,PR,PRE>* raw_pointer() const { return _ptr.operator->(); }
+    FunctionModelInterface<P,D,C,PR,PRE>& reference() { return *_ptr; }
+    const FunctionModelInterface<P,D,C,PR,PRE>& reference() const { return *_ptr; }
+
     ScalarFunctionModel<P,D,PR,PRE>& operator=(const Number<P>& c);
     ScalarFunctionModel<P,D,PR,PRE>& operator=(const CanonicalNumericType<P,PR,PRE>& c);
     ScalarFunctionModel<P,D,PR,PRE>& operator=(const ScalarFunction<P,D>& f);
     ScalarFunctionModel<P,D,PR,PRE>& operator=(const ScalarFunctionModelInterface<P,D,PR,PRE>& f);
 //    ScalarFunctionModel<P,D,PR,PRE>& operator=(const ValidatedScalarTaylorFunctionModelDP& f);
+
     inline SizeType argument_size() const { return this->_ptr->argument_size(); }
     template<class X> X operator() (const Vector<X>& x) const {
         return this->_ptr->_evaluate(x); }
@@ -383,9 +385,10 @@ template<class P, class D, class PR, class PRE> class VectorFunctionModelElement
 
 //! \ingroup FunctionModelSubModule
 //! \brief Generic vector functions on singleton domains.
-template<class P, class D, class PR, class PRE> class VectorFunctionModel
+template<class P, class D, class PR, class PRE> class FunctionModel<P,D,BoxDomainType,PR,PRE>
 {
     static_assert(IsSame<D,IntervalDomainType>::value or IsSame<D,BoxDomainType>::value,"");
+    static_assert(IsSame<PRE,DoublePrecision>::value or IsSame<PRE,MultiplePrecision>::value,"");
     typedef BoxDomainType C;
   public:
     clone_on_copy_ptr< VectorFunctionModelInterface<P,D,PR,PRE> > _ptr;
@@ -397,24 +400,25 @@ template<class P, class D, class PR, class PRE> class VectorFunctionModel
     typedef CanonicalNumericType<P,PR,PRE> NumericType;
     typedef Box<Interval<FloatUpperBound<PR>>> RangeType;
   public:
-    inline VectorFunctionModel() : _ptr() { }
-    inline VectorFunctionModel(SharedPointer<const VectorFunctionModelInterface<P,D,PR,PRE>> vfp)
+    inline FunctionModel() : _ptr() { }
+    inline FunctionModel(SharedPointer<const FunctionModelInterface<P,D,C,PR,PRE>> vfp)
         : _ptr(vfp->_clone()) { }
-    inline VectorFunctionModel(SizeType n, const ScalarFunctionModelInterface<P,D,PR,PRE>& sf) {
+    inline FunctionModel(SizeType n, const ScalarFunctionModelInterface<P,D,PR,PRE>& sf) {
         FunctionModelFactory<P,PR,PRE> factory(sf._factory()); *this=factory.create_zeros(n,sf.domain());
         for(SizeType i=0; i!=n; ++i) { (*this)[i]=sf; } }
-    inline VectorFunctionModel(Array<ScalarFunctionModel<P,D,PR,PRE>> const& asf)
-        : VectorFunctionModel(asf.size(),asf[0]) { for(SizeType i=0; i!=asf.size(); ++i) { (*this)[i]=asf[i]; } }
-    inline VectorFunctionModel(List<ScalarFunctionModel<P,D,PR,PRE>> const& lsf)
-        : VectorFunctionModel(lsf.size(),lsf[0]) { for(SizeType i=0; i!=lsf.size(); ++i) { (*this)[i]=lsf[i]; } }
-    inline explicit VectorFunctionModel(VectorFunctionModelInterface<P,D,PR,PRE>* p) : _ptr(p) { }
-    inline VectorFunctionModel(const VectorFunctionModelInterface<P,D,PR,PRE>& f) : _ptr(f._clone()) { }
-    inline VectorFunctionModel(const VectorFunctionModel<P,D,PR,PRE>& f) : _ptr(f._ptr) { }
-    inline operator const VectorFunctionModelInterface<P,D,PR,PRE>& () const { return *_ptr; }
-    inline operator VectorFunction<P,D> () const { return VectorFunction<P,D>(*_ptr); }
-    inline const VectorFunctionModelInterface<P,D,PR,PRE>* raw_pointer() const { return _ptr.operator->(); }
-    inline const VectorFunctionModelInterface<P,D,PR,PRE>& reference() const { return *_ptr; }
-    inline VectorFunctionModelInterface<P,D,PR,PRE>& reference() { return *_ptr; }
+    inline FunctionModel(Array<ScalarFunctionModel<P,D,PR,PRE>> const& asf)
+        : FunctionModel(asf.size(),asf[0]) { for(SizeType i=0; i!=asf.size(); ++i) { (*this)[i]=asf[i]; } }
+    inline FunctionModel(List<ScalarFunctionModel<P,D,PR,PRE>> const& lsf)
+        : FunctionModel(lsf.size(),lsf[0]) { for(SizeType i=0; i!=lsf.size(); ++i) { (*this)[i]=lsf[i]; } }
+    inline explicit FunctionModel(FunctionModelInterface<P,D,C,PR,PRE>* p) : _ptr(p) { }
+    inline FunctionModel(const FunctionModelInterface<P,D,C,PR,PRE>& f) : _ptr(f._clone()) { }
+    inline FunctionModel(const FunctionModel<P,D,C,PR,PRE>& f) : _ptr(f._ptr) { }
+    inline operator const FunctionModelInterface<P,D,C,PR,PRE>& () const { return *_ptr; }
+    inline operator Function<P,D,C> () const { return Function<P,D,C>(*_ptr); }
+    inline const FunctionModelInterface<P,D,C,PR,PRE>* raw_pointer() const { return _ptr.operator->(); }
+    inline const FunctionModelInterface<P,D,C,PR,PRE>& reference() const { return *_ptr; }
+    inline FunctionModelInterface<P,D,C,PR,PRE>& reference() { return *_ptr; }
+
     inline SizeType result_size() const { return this->_ptr->result_size(); }
     inline SizeType argument_size() const { return this->_ptr->argument_size(); }
     inline SizeType size() const { return this->_ptr->result_size(); }

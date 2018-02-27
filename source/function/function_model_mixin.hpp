@@ -48,10 +48,11 @@
 
 namespace Ariadne {
 
-template<class FM, class P, class D, class PR=DoublePrecision, class PRE=PR> class ScalarFunctionModelMixin;
-template<class FM, class P, class D, class PR=DoublePrecision, class PRE=PR> class VectorFunctionModelMixin;
+template<class FM, class P, class D, class C, class PR=DoublePrecision, class PRE=PR> class FunctionModelMixin;
+template<class FM, class P, class D, class PR=DoublePrecision, class PRE=PR> using ScalarFunctionModelMixin = FunctionModelMixin<FM,P,D,IntervalDomainType,PR,PRE>;
+template<class FM, class P, class D, class PR=DoublePrecision, class PRE=PR> using VectorFunctionModelMixin = FunctionModelMixin<FM,P,D,BoxDomainType,PR,PRE>;
 
-template<class FM, class P, class D, class PR, class PRE> class ScalarFunctionModelMixin
+template<class FM, class P, class D, class PR, class PRE> class FunctionModelMixin<FM,P,D,IntervalDomainType,PR,PRE>
     : public virtual ScalarFunctionModelInterface<P,D,PR,PRE>
     , public ScalarFunctionMixin<FM,P,D>
 {
@@ -104,7 +105,7 @@ template<class FM, class P, class D, class PR, class PRE> FM ScalarFunctionModel
 }
 
 
-template<class FM, class P, class D, class PR, class PRE> class VectorFunctionModelMixin
+template<class FM, class P, class D, class PR, class PRE> class FunctionModelMixin<FM,P,D,BoxDomainType,PR,PRE>
     : public virtual VectorFunctionModelInterface<P,D,PR,PRE>
     , public VectorFunctionMixin<FM,P,D>
 {

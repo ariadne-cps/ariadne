@@ -86,13 +86,13 @@ typedef VectorFunctionInterface<EffectiveTag> EffectiveVectorFunctionInterface;
 // Function models declarations
 
 
-template<class P, class D, class PR, class PRE=PR> class ScalarFunctionModelInterface;
-template<class P, class D, class PR, class PRE=PR> class VectorFunctionModelInterface;
+template<class P, class D, class C, class PR, class PRE=PR> class FunctionModelInterface;
+template<class P, class D, class PR, class PRE=PR> using ScalarFunctionModelInterface = FunctionModelInterface<P,D,IntervalDomainType,PR,PRE>;
+template<class P, class D, class PR, class PRE=PR> using VectorFunctionModelInterface = FunctionModelInterface<P,D,BoxDomainType,PR,PRE>;
 
-template<class P, class D, class PR, class PRE=PR> class ScalarFunctionModel;
-template<class P, class D, class PR, class PRE=PR> class VectorFunctionModel;
-//template<class P, class D, class PR, class PRE=PR> class ScalarFunctionModel;
-//template<class P, class D, class PR, class PRE=PR> class VectorFunctionModel;
+template<class P, class D, class C, class PR, class PRE=PR> class FunctionModel;
+template<class P, class D, class PR, class PRE=PR> using ScalarFunctionModel = FunctionModel<P,D,IntervalDomainType,PR,PRE>;
+template<class P, class D, class PR, class PRE=PR> using VectorFunctionModel = FunctionModel<P,D,BoxDomainType,PR,PRE>;
 
 template<class P, class PR, class PRE=PR> struct FunctionModelTraits;
 

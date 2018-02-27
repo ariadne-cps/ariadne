@@ -134,6 +134,7 @@ template<class M> class ScaledFunctionPatch
     , public DispatchConcreteGenericAlgebraNumberOperations<ScaledFunctionPatch<M>,NumericType<M>,Number<typename M::Paradigm>>
 {
     typedef BoxDomainType D;
+    typedef IntervalDomainType C;
     typedef typename M::Paradigm P;
     typedef typename M::RawFloatType F;
     typedef typename M::PrecisionType PR;
@@ -339,8 +340,8 @@ template<class M> class ScaledFunctionPatch
     Void clobber() { this->_model.clobber(); }
   private:
     friend class TaylorFunctionFactory;
-    friend class ScalarFunctionMixin<ScaledFunctionPatch<M>, P>;
-    friend class ScalarFunctionModelMixin<ScaledFunctionPatch<M>, P, D, PR>;
+    friend class FunctionMixin<ScaledFunctionPatch<M>, P, D,C>;
+    friend class FunctionModelMixin<ScaledFunctionPatch<M>, P, D, C, PR>;
   public:
     template<class X, EnableIf<CanCall<X,M,Vector<X>>> =dummy> Void _compute(X& r, const Vector<X>& a) const;
     template<class X, DisableIf<CanCall<X,M,Vector<X>>> =dummy> Void _compute(X& r, const Vector<X>& a) const;

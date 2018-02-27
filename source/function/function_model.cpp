@@ -34,9 +34,14 @@ namespace Ariadne {
 template class FunctionModelFactoryInterface<ValidatedTag,DoublePrecision,DoublePrecision>;
 template class FunctionModelFactoryInterface<ValidatedTag,MultiplePrecision,MultiplePrecision>;
 
-template class ScalarFunctionModel<ValidatedTag,DoublePrecision>;
-template class ScalarFunctionModel<ValidatedTag,MultiplePrecision>;
-template class VectorFunctionModel<ValidatedTag,DoublePrecision>;
-template class VectorFunctionModel<ValidatedTag,MultiplePrecision>;
+template class ScalarFunctionModel<ValidatedTag,IntervalDomainType,DoublePrecision>;
+template class ScalarFunctionModel<ValidatedTag,IntervalDomainType,MultiplePrecision>;
+template class VectorFunctionModel<ValidatedTag,IntervalDomainType,DoublePrecision>;
+template class VectorFunctionModel<ValidatedTag,IntervalDomainType,MultiplePrecision>;
+
+template class ScalarFunctionModel<ValidatedTag,BoxDomainType,DoublePrecision>;
+template class ScalarFunctionModel<ValidatedTag,BoxDomainType,MultiplePrecision>;
+template class VectorFunctionModel<ValidatedTag,BoxDomainType,DoublePrecision>;
+template class VectorFunctionModel<ValidatedTag,BoxDomainType,MultiplePrecision>;
 
 } // namespace Ariadne

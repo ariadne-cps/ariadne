@@ -86,18 +86,20 @@ typedef VectorFunctionInterface<EffectiveTag> EffectiveVectorFunctionInterface;
 // Function models declarations
 
 
-template<class P, class PR, class PRE=PR> class ScalarFunctionModelInterface;
-template<class P, class PR, class PRE=PR> class VectorFunctionModelInterface;
+template<class P, class D, class PR, class PRE=PR> class ScalarFunctionModelInterface;
+template<class P, class D, class PR, class PRE=PR> class VectorFunctionModelInterface;
 
-template<class P, class PR, class PRE=PR> class ScalarFunctionModel;
-template<class P, class PR, class PRE=PR> class VectorFunctionModel;
+template<class P, class D, class PR, class PRE=PR> class ScalarFunctionModel;
+template<class P, class D, class PR, class PRE=PR> class VectorFunctionModel;
+//template<class P, class D, class PR, class PRE=PR> class ScalarFunctionModel;
+//template<class P, class D, class PR, class PRE=PR> class VectorFunctionModel;
 
 template<class P, class PR, class PRE=PR> struct FunctionModelTraits;
 
-template<class P> using ScalarFunctionModelDPInterface = ScalarFunctionModelInterface<P,DoublePrecision>;
-template<class P> using VectorFunctionModelDPInterface = VectorFunctionModelInterface<P,DoublePrecision>;
-template<class P> using ScalarFunctionModelDP = ScalarFunctionModel<P,DoublePrecision>;
-template<class P> using VectorFunctionModelDP = VectorFunctionModel<P,DoublePrecision>;
+template<class P, class D=BoxDomainType> using ScalarFunctionModelDPInterface = ScalarFunctionModelInterface<P,D,DoublePrecision>;
+template<class P, class D=BoxDomainType> using VectorFunctionModelDPInterface = VectorFunctionModelInterface<P,D,DoublePrecision>;
+template<class P, class D=BoxDomainType> using ScalarFunctionModelDP = ScalarFunctionModel<P,D,DoublePrecision>;
+template<class P, class D=BoxDomainType> using VectorFunctionModelDP = VectorFunctionModel<P,D,DoublePrecision>;
 
 template<class PR> struct FunctionModelTraits<ApproximateTag,PR> {
     static_assert(IsSame<PR,DP>::value or IsSame<PR,MP>::value,"");
@@ -124,23 +126,23 @@ template<class P> using CanonicalError64Type = typename FunctionModelTraits<P,Do
 template<class X> using PrecisionType = typename X::PrecisionType;
 template<class X> using ErrorPrecisionType = typename X::ErrorPrecisionType;
 
-using ValidatedScalarFunctionModelDPInterface = ScalarFunctionModelInterface<ValidatedTag,DoublePrecision>;
-using ValidatedVectorFunctionModelDPInterface = VectorFunctionModelInterface<ValidatedTag,DoublePrecision>;
+using ValidatedScalarFunctionModelDPInterface = ScalarFunctionModelInterface<ValidatedTag,BoxDomainType,DoublePrecision>;
+using ValidatedVectorFunctionModelDPInterface = VectorFunctionModelInterface<ValidatedTag,BoxDomainType,DoublePrecision>;
 
-using ValidatedScalarFunctionModelDP = ScalarFunctionModel<ValidatedTag,DoublePrecision>;
-using ValidatedVectorFunctionModelDP = VectorFunctionModel<ValidatedTag,DoublePrecision>;
+using ValidatedScalarFunctionModelDP = ScalarFunctionModel<ValidatedTag,BoxDomainType,DoublePrecision>;
+using ValidatedVectorFunctionModelDP = VectorFunctionModel<ValidatedTag,BoxDomainType,DoublePrecision>;
 
-using ApproximateScalarFunctionModelDPInterface = ScalarFunctionModelInterface<ApproximateTag,DoublePrecision>;
-using ApproximateVectorFunctionModelDPInterface = VectorFunctionModelInterface<ApproximateTag,DoublePrecision>;
+using ApproximateScalarFunctionModelDPInterface = ScalarFunctionModelInterface<ApproximateTag,BoxDomainType,DoublePrecision>;
+using ApproximateVectorFunctionModelDPInterface = VectorFunctionModelInterface<ApproximateTag,BoxDomainType,DoublePrecision>;
 
-using ApproximateScalarFunctionModelDP = ScalarFunctionModel<ApproximateTag,DoublePrecision>;
-using ApproximateVectorFunctionModelDP = VectorFunctionModel<ApproximateTag,DoublePrecision>;
+using ApproximateScalarFunctionModelDP = ScalarFunctionModel<ApproximateTag,BoxDomainType,DoublePrecision>;
+using ApproximateVectorFunctionModelDP = VectorFunctionModel<ApproximateTag,BoxDomainType,DoublePrecision>;
 
 template<class P, class PR=DoublePrecision, class PRE=PR> class FunctionModelFactoryInterface;
 typedef FunctionModelFactoryInterface<ValidatedTag,DoublePrecision> ValidatedFunctionModelDPFactoryInterface;
 template<class P, class PR=DoublePrecision, class PRE=PR> class FunctionModelFactory;
 typedef FunctionModelFactory<ValidatedTag,DoublePrecision> ValidatedFunctionModelDPFactory;
-template<class FMF> class FunctionModelCreator;
+template<class FMF, class D> class FunctionModelCreator;
 
 
 

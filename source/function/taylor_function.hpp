@@ -68,6 +68,7 @@ class TaylorFunctionFactory
     : public ScaledFunctionPatchFactory<TaylorModel<ValidatedTag,FloatDP>>
 {
     typedef TaylorModel<ValidatedTag,FloatDP> M;
+    typedef BoxDomainType D;
   public:
     typedef typename M::SweeperType SweeperType;
     using ScaledFunctionPatchFactory<M>::ScaledFunctionPatchFactory;

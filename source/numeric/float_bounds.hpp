@@ -187,6 +187,7 @@ template<class F> class Positive<Bounds<F>> : public Bounds<F>
     explicit Positive<Bounds<F>>(F const& x) : Bounds<F>(x) { }
     explicit Positive<Bounds<F>>(F const& l, F const& u) : Bounds<F>(l,u) { }
     explicit Positive<Bounds<F>>(Bounds<F> const& x) : Bounds<F>(x) { }
+    Positive<Bounds<F>>(Positive<LowerBound<F>> const& xl, Positive<UpperBound<F>> const& xu) : Bounds<F>(xl,xu) { }
   public:
 };
 

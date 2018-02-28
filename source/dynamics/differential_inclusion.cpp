@@ -576,8 +576,9 @@ ValidatedVectorTaylorFunctionModelDP get_time_derivative(ValidatedVectorTaylorFu
 }
 
 
-InclusionIntegrator::InclusionIntegrator(SweeperDP sweeper, StepSize step_size)
-    : _sweeper(sweeper)
+InclusionIntegrator::InclusionIntegrator(InclusionIntegratorApproximation* apprx, SweeperDP sweeper, StepSize step_size)
+    : _approximation(apprx)
+    , _sweeper(sweeper)
     , _step_size(step_size)
     , _number_of_steps_between_simplifications(8)
     , _number_of_variables_to_keep(4)
@@ -606,7 +607,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
     approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorPiecewiseApproximation(this->_sweeper)));
     //approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorAffineApproximation(this->_sweeper)));
     //approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorSinusoidalApproximation(this->_sweeper)));
-    
+
     List<ValidatedVectorFunctionModelDP> result;
 
     auto step = 0;

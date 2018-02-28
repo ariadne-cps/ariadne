@@ -339,9 +339,9 @@ class InclusionIntegrator : public virtual InclusionIntegratorInterface, public 
     Nat _number_of_steps_between_simplifications;
     Nat _number_of_variables_to_keep;
   public:
-    InclusionIntegrator(SweeperDP sweeper, StepSize step_size);
-    template<class... AS> InclusionIntegrator(SweeperDP sweeper, StepSize step_size, AS... attributes)
-        : InclusionIntegrator(sweeper,step_size) {
+    InclusionIntegrator(InclusionIntegratorApproximation* apprx, SweeperDP sweeper, StepSize step_size);
+    template<class... AS> InclusionIntegrator(InclusionIntegratorApproximation* apprx, SweeperDP sweeper, StepSize step_size, AS... attributes)
+        : InclusionIntegrator(apprx, sweeper,step_size) {
         this->set(attributes...);
         _approximation.reset(new InclusionIntegratorZeroApproximation(_sweeper));
         _reconditioner.reset(new LohnerReconditioner(_sweeper,_number_of_variables_to_keep));

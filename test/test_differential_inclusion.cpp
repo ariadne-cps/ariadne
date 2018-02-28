@@ -86,7 +86,8 @@ class TestInclusionIntegrator {
 
             SizeType base = avg-n-pps*(freq-1u)/2u;
 
-            auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
+            auto sweeper = make_threshold_sweeper(1e-8);
+    auto integrator = InclusionIntegrator(new InclusionIntegratorZeroApproximation(sweeper),sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
 
             tms start_time, end_time;
             times(&start_time);
@@ -129,7 +130,8 @@ class TestInclusionIntegrator {
 
             SizeType base(round(ratio*pps*freq));
 
-            auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
+            auto sweeper = make_threshold_sweeper(1e-8);
+    auto integrator = InclusionIntegrator(new InclusionIntegratorZeroApproximation(sweeper),sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
 
             tms start_time, end_time;
             times(&start_time);
@@ -168,7 +170,8 @@ class TestInclusionIntegrator {
 
         for (auto freq : range(min_freq,max_freq+1)) {
 
-            auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
+            auto sweeper = make_threshold_sweeper(1e-8);
+    auto integrator = InclusionIntegrator(new InclusionIntegratorZeroApproximation(sweeper),sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
 
             tms start_time, end_time;
             times(&start_time);
@@ -210,7 +213,8 @@ class TestInclusionIntegrator {
             std::cout << "step: " << step << std::endl;
 
             BoxDomainType noise=cast_exact_box(UpperIntervalType(-1,+1)*noise_levels);
-            auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=step, number_of_steps_between_simplifications=100000, number_of_variables_to_keep=10000);
+            auto sweeper = make_threshold_sweeper(1e-8);
+    auto integrator = InclusionIntegrator(new InclusionIntegratorZeroApproximation(sweeper),sweeper,step_size=step, number_of_steps_between_simplifications=100000, number_of_variables_to_keep=10000);
 
             tms start_time, end_time;
             times(&start_time);
@@ -322,7 +326,8 @@ void TestInclusionIntegrator::test_reactor() const {
     SizeType base=60;
     SizeType avg=120;
 
-    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
+    auto sweeper = make_threshold_sweeper(1e-8);
+    auto integrator = InclusionIntegrator(new InclusionIntegratorZeroApproximation(sweeper),sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
     integrator.verbosity = 2;
 
     RealVector noise_levels={1/100_q,1/100_q,1/100_q};
@@ -355,7 +360,8 @@ void TestInclusionIntegrator::test_lorenz() const {
     SizeType freq=5;
     SizeType base=50;
 
-    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
+    auto sweeper = make_threshold_sweeper(1e-8);
+    auto integrator = InclusionIntegrator(new InclusionIntegratorZeroApproximation(sweeper),sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
     integrator.verbosity = 2;
 
     RealVector noise_levels={1/100_q};
@@ -389,7 +395,8 @@ void TestInclusionIntegrator::test_rossler() const {
     SizeType base=20;
     SizeType avg=120;
 
-    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
+    auto sweeper = make_threshold_sweeper(1e-8);
+    auto integrator = InclusionIntegrator(new InclusionIntegratorZeroApproximation(sweeper),sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
     integrator.verbosity = 2;
 
     RealVector noise_levels={1/1000_q};
@@ -423,7 +430,8 @@ void TestInclusionIntegrator::test_jerk21() const {
     SizeType freq=12;
     SizeType base=30;
 
-    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
+    auto sweeper = make_threshold_sweeper(1e-8);
+    auto integrator = InclusionIntegrator(new InclusionIntegratorZeroApproximation(sweeper),sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
     integrator.verbosity = 2;
 
     RealVector noise_levels={1/1000_q};
@@ -454,7 +462,8 @@ void TestInclusionIntegrator::test_jerk16() const {
     SizeType freq=12;
     SizeType base=30;
 
-    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
+    auto sweeper = make_threshold_sweeper(1e-8);
+    auto integrator = InclusionIntegrator(new InclusionIntegratorZeroApproximation(sweeper),sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
     integrator.verbosity = 2;
 
     RealVector noise_levels={1/1000_q};
@@ -487,7 +496,8 @@ void TestInclusionIntegrator::test_higgins_selkov() const {
     SizeType base=60;
     SizeType avg=100;
 
-    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
+    auto sweeper = make_threshold_sweeper(1e-8);
+    auto integrator = InclusionIntegrator(new InclusionIntegratorZeroApproximation(sweeper),sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
     integrator.verbosity = 2;
 
     RealVector noise_levels={2/10000_q,2/10000_q,2/10000_q};
@@ -517,7 +527,8 @@ void TestInclusionIntegrator::test_lotka_volterra() const {
     SizeType freq=11;
     SizeType base=50;
 
-    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
+    auto sweeper = make_threshold_sweeper(1e-8);
+    auto integrator = InclusionIntegrator(new InclusionIntegratorZeroApproximation(sweeper),sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
     integrator.verbosity = 2;
 
     RealVector noise_levels={1/100_q,1/100_q};
@@ -545,7 +556,8 @@ void TestInclusionIntegrator::test_jet_engine() const {
     SizeType freq=10;
     SizeType avg=100;
 
-    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
+    auto sweeper = make_threshold_sweeper(1e-8);
+    auto integrator = InclusionIntegrator(new InclusionIntegratorZeroApproximation(sweeper),sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
     integrator.verbosity = 2;
 
     RealVector noise_levels={5/1000_q,5/1000_q};
@@ -573,7 +585,8 @@ void TestInclusionIntegrator::test_pi_controller() const {
     SizeType freq=10;
     SizeType avg=100;
 
-    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
+    auto sweeper = make_threshold_sweeper(1e-8);
+    auto integrator = InclusionIntegrator(new InclusionIntegratorZeroApproximation(sweeper),sweeper, step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
     integrator.verbosity = 2;
 
     RealVector noise_levels={1/10_q};
@@ -595,7 +608,8 @@ void TestInclusionIntegrator::test_pi_controller() const {
 }
 
 void TestInclusionIntegrator::test_van_der_pol() const {
-    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=1.0/16, number_of_steps_between_simplifications=16, number_of_variables_to_keep=10);
+    auto sweeper = make_threshold_sweeper(1e-8);
+    auto integrator = InclusionIntegrator(new InclusionIntegratorZeroApproximation(sweeper),sweeper, step_size=1.0/16, number_of_steps_between_simplifications=16, number_of_variables_to_keep=10);
     integrator.verbosity = 2;
 
     RealVector noise_levels={1/1024_q,1/1024_q};
@@ -620,7 +634,8 @@ void TestInclusionIntegrator::test_harmonic() const {
     SizeType base=80;
     SizeType freq=1000;
 
-    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
+    SweeperDP sweeper=make_threshold_sweeper(1e-8);
+    auto integrator = InclusionIntegrator(new InclusionIntegratorConstantApproximation(sweeper),sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
     integrator.verbosity = 2;
 
     //RealVector noise_levels={1/100_q,1/100_q};
@@ -684,7 +699,8 @@ void TestInclusionIntegrator::test_harmonic_analytical() const {
 }
 
 void TestInclusionIntegrator::test_clock() const {
-    auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=1.0/256, number_of_steps_between_simplifications=11, number_of_variables_to_keep=24);
+    auto sweeper = make_threshold_sweeper(1e-8);
+    auto integrator = InclusionIntegrator(new InclusionIntegratorZeroApproximation(sweeper),sweeper, step_size=1.0/256, number_of_steps_between_simplifications=11, number_of_variables_to_keep=24);
     integrator.verbosity = 2;
 
     RealVector noise_levels={1/16_q,1/16_q};

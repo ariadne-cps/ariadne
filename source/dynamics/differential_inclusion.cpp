@@ -602,14 +602,16 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
 
     List<SharedPointer<InclusionIntegratorApproximation>> approximations;
     //approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorZeroApproximation(this->_sweeper)));
-    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorConstantApproximation(this->_sweeper)));
-    //approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorPiecewiseApproximation(this->_sweeper)));
+    //approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorConstantApproximation(this->_sweeper)));
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorPiecewiseApproximation(this->_sweeper)));
     //approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorAffineApproximation(this->_sweeper)));
     //approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorSinusoidalApproximation(this->_sweeper)));
     
     List<ValidatedVectorFunctionModelDP> result;
 
     auto step = 0;
+
+    FloatDPError total_error(0);
     while (possibly(t<FloatDPBounds(tmax,pr))) {
         ARIADNE_LOG(2,"step#:"<<step<<", t:"<<t<<", hsug:"<<hsug << "\n");
         if(possibly(t+hsug>FloatDPBounds(tmax,pr))) {  //FIXME: Check types for timing;
@@ -636,6 +638,9 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
             ARIADNE_LOG(4,"checking approximation "<<i<<"\n");
             this->_approximation = approximations.at(i);
 
+            auto e=_approximation->compute_error(f,g,V,h,B);
+            total_error += e;
+
             ValidatedVectorFunctionModelDP current_reach_function;
             ValidatedVectorFunctionModelDP current_evolve_function;
 
@@ -655,7 +660,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
                 auto e=approx.compute_error(f,g,V,h,B);
                 ARIADNE_LOG(6,"approximation error:"<<e<<"\n");
                 auto swp=this->_sweeper;
-                auto FD=approx.build_flow_domain(D, h, V);
+                auto FD=approx.build_flow_domain(D, hlf(h), V);
                 ARIADNE_LOG(6,"FD:"<<FD<<"\n");
                 auto x0f=ValidatedVectorTaylorFunctionModelDP::projection(FD,range(0,n),swp);
 
@@ -680,8 +685,8 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
                 ARIADNE_LOG(5,"current_evolve_function="<<current_evolve_function<<"\n");
 
                 auto D2 = cast_exact_box(current_evolve_function.range());
-                auto FD2=approx.build_flow_domain(D2, h, V);
-                auto w2 =approx.build_second_approximating_function(FD2, n, m);
+                auto FD2=approx.build_flow_domain(D2, hlf(h), V);
+                auto w2 =approx.build_approximating_function(FD2, n, m);
                 ValidatedVectorTaylorFunctionModelDP& w2f = dynamic_cast<ValidatedVectorTaylorFunctionModelDP&>(w2.reference());
                 ARIADNE_LOG(6,"w2f:"<<w2f<<"\n");
 
@@ -745,6 +750,9 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
         t=new_t;
         result.append(reach_function);
     }
+
+    std::cout << "    " << evolve_function.range()[0].upper() - 2*V[0].upper() << " " << total_error << " " << total_error.raw()/step << std::endl;
+
     return result;
 }
 
@@ -907,9 +915,8 @@ BoxDomainType InclusionIntegratorPiecewiseApproximation::build_flow_domain(BoxDo
 
     auto Ht=IntervalDomainType(-h,+h);
     auto P0=cast_exact_box(2*V);
-    auto P1=cast_exact_box(2*V);
 
-    return join(D,Ht,P0,P1);
+    return join(D,Ht,P0);
 }
 
 
@@ -960,25 +967,12 @@ ValidatedVectorFunctionModelType InclusionIntegratorConstantApproximation::build
 
 ValidatedVectorFunctionModelType InclusionIntegratorPiecewiseApproximation::build_approximating_function(BoxDomainType FD, SizeType n, SizeType m) const {
 
-    auto swp=this->_sweeper;
+    auto swp = this->_sweeper;
 
-    auto p0f=ValidatedVectorTaylorFunctionModelDP::projection(FD,range(n+1,n+1+m),swp);
+    auto p0f = ValidatedVectorTaylorFunctionModelDP::projection(FD, range(n+1, n+1+m), swp);
 
-    auto result=ValidatedVectorTaylorFunctionModelDP(m,FD,swp);
-    for (auto i : range(m)) { result[i]=p0f[i]; }
-
-    return result;
-}
-
-
-ValidatedVectorFunctionModelType InclusionIntegratorPiecewiseApproximation::build_second_approximating_function(BoxDomainType FD, SizeType n, SizeType m) const {
-
-    auto swp=this->_sweeper;
-
-    auto p1f=ValidatedVectorTaylorFunctionModelDP::projection(FD,range(n+1+m,n+1+2*m),swp);
-
-    auto result=ValidatedVectorTaylorFunctionModelDP(m,FD,swp);
-    for (auto i : range(m)) { result[i]=p1f[i]; }
+    auto result = ValidatedVectorTaylorFunctionModelDP(m, FD, swp);
+    for (auto i : range(m)) { result[i] = p0f[i]; }
 
     return result;
 }

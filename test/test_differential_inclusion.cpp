@@ -192,6 +192,39 @@ class TestInclusionIntegrator {
         }
     }
 
+
+    Void run_battery_noreset(String name,
+                                        ValidatedVectorFunction const &f, Vector<ValidatedVectorFunction> const &g, RealVector noise_levels,
+                                        RealBox real_starting_set, Real evolution_time, SizeType min_step, SizeType max_step) const
+    {
+        typedef typename ValidatedVectorFunctionModelType::NumericType NumericType; typedef typename NumericType::PrecisionType PrecisionType;
+        PrecisionType prec;
+
+
+        BoxDomainType starting_set=cast_exact_box(over_approximation(real_starting_set));
+
+        for (auto s : range(min_step,max_step+1)) {
+
+            auto step = 1.0/(2<<s);
+
+            std::cout << "step: " << step << std::endl;
+
+            BoxDomainType noise=cast_exact_box(UpperIntervalType(-1,+1)*noise_levels);
+            auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=step, number_of_steps_between_simplifications=100000, number_of_variables_to_keep=10000);
+
+            tms start_time, end_time;
+            times(&start_time);
+
+            List<ValidatedVectorFunctionModelType> flow_functions = integrator.flow(f,g,noise,starting_set,evolution_time);
+
+            times(&end_time);
+            clock_t ticks = end_time.tms_utime - start_time.tms_utime;
+            clock_t const hz = sysconf(_SC_CLK_TCK);
+
+            std::cout << "    " << ticks / hz << "." << ticks % hz << "s" << std::endl;
+        }
+    }
+
     Void run_test(String name, InclusionIntegratorInterface& integrator,
                   ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, RealVector noise_levels,
                   RealBox real_starting_set, Real evolution_time) const
@@ -482,8 +515,7 @@ void TestInclusionIntegrator::test_higgins_selkov() const {
 void TestInclusionIntegrator::test_lotka_volterra() const {
     double step=1.0/128;
     SizeType freq=11;
-    SizeType base=31;
-    SizeType avg=100;
+    SizeType base=50;
 
     auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
     integrator.verbosity = 2;
@@ -497,15 +529,14 @@ void TestInclusionIntegrator::test_lotka_volterra() const {
 
     auto f = EffectiveVectorFunction({three*x[0]*(one-x[1]),x[1]*(x[0]-one)});
 
-
     Vector<ValidatedVectorFunction> g({{x[0]*(one-x[1]),zero},{zero,x[1]*(x[0]-one)}});
 
     Real e=1/1024_q;
     RealBox starting_set={{Real(1.2)-e,Real(1.2)+e},{Real(1.1)-e,Real(1.1)+e}};
     Real evolution_time=36/10_q;
 
-    //this->run_test("lotka-volterra",integrator,f,g,noise_levels,starting_set,evolution_time);
-    this->run_battery_fixed_absolutebase("lotka-volterra",f,g,noise_levels,starting_set,evolution_time,step,base,1,15);
+    this->run_test("lotka-volterra",integrator,f,g,noise_levels,starting_set,evolution_time);
+    //this->run_battery_fixed_absolutebase("lotka-volterra",f,g,noise_levels,starting_set,evolution_time,step,base,1,15);
 }
 
 void TestInclusionIntegrator::test_jet_engine() const {
@@ -585,9 +616,9 @@ void TestInclusionIntegrator::test_van_der_pol() const {
 }
 
 void TestInclusionIntegrator::test_harmonic() const {
-    double step=1.0/16;
+    double step=1.0/8;
     SizeType base=80;
-    SizeType freq=150;
+    SizeType freq=1000;
 
     auto integrator = InclusionIntegrator(make_threshold_sweeper(1e-8), step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
     integrator.verbosity = 2;
@@ -604,11 +635,12 @@ void TestInclusionIntegrator::test_harmonic() const {
     //Vector<ValidatedVectorFunction> g({{one,zero},{zero,one}});
     Vector<ValidatedVectorFunction> g({{one,zero}});
 
-    Real e=1/100_q;
-    RealBox starting_set={{1-e,1+e},{-e,+e}};
-    Real evolution_time=625/100_q;
+    Real e=1/10000000_q;
+    RealBox starting_set={{-e,e},{-e,+e}};
+    Real evolution_time=314/100_q;
 
-    this->run_test("harmonic",integrator,f,g,noise_levels,starting_set,evolution_time);
+    //this->run_test("harmonic",integrator,f,g,noise_levels,starting_set,evolution_time);
+    this->run_battery_noreset("harmonic",f,g,noise_levels,starting_set,evolution_time,2,5);
 }
 
 void TestInclusionIntegrator::test_harmonic_analytical() const {

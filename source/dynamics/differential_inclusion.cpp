@@ -573,10 +573,11 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
 
     // Ensure all arguments have the correct size;
     auto n=X0.size();
+    auto m=V.size();
     DoublePrecision pr;
     assert(f.result_size()==n);
     assert(f.argument_size()==n);
-    assert(V.size()==g.size());
+    assert(g.size()==m);
 
     PositiveFloatDPValue hsug(this->_step_size);
 
@@ -681,7 +682,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
                 }
                 ARIADNE_LOG(7,(derivative(phi2,n) - get_time_derivative(phi2,f,g,w2f)).range()<<"\n");
 
-                current_reach_function=build_reach_function(current_evolve_function, phi2, intermediate_t, new_t);
+                current_reach_function=build_secondhalf_piecewise_reach_function(current_evolve_function, phi2, m, intermediate_t, new_t);
                 ARIADNE_LOG(5,"current_reach_function="<<current_reach_function<<"\n");
 
                 current_evolve_function=partial_evaluate(current_reach_function,n,new_t);
@@ -733,34 +734,66 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
     return result;
 }
 
+ValidatedVectorFunctionModelDP InclusionIntegrator::build_secondhalf_piecewise_reach_function(
+        ValidatedVectorFunctionModelDP evolve_function, ValidatedVectorFunctionModelDP Phi, SizeType m, PositiveFloatDPValue t,
+        PositiveFloatDPValue new_t) const {
+
+    // Evolve function is e(x,a,2*m) at s; Flow is phi(x,h,b,2*m)
+    // Want (x,t,a,b,2*m):->phi(e(x,a,2*m),t-s,b,2*m))
+
+    SizeType n=evolve_function.result_size();
+
+    SizeType a=evolve_function.argument_size()-n-2*m;
+    SizeType b=Phi.argument_size()-(n+1)-2*m;
+
+    BoxDomainType X=evolve_function.domain()[range(0,n)];
+    BoxDomainType PA=evolve_function.domain()[range(n,n+a)];
+    BoxDomainType PB=Phi.domain()[range(n+1,n+1+b)];
+    BoxDomainType PM=Phi.domain()[range(n+1+b,n+1+b+2*m)];
+
+    auto swp=this->_sweeper;
+    auto Tau=IntervalDomainType(t,new_t);
+    BoxDomainType XTP = join(X,Tau,PA,PB,PM);
+    ValidatedVectorTaylorFunctionModelDP xf=ValidatedVectorTaylorFunctionModelDP::projection(XTP,range(0,n),swp);
+    ValidatedScalarTaylorFunctionModelDP tf=ValidatedScalarTaylorFunctionModelDP::coordinate(XTP,n,swp);
+    ValidatedScalarTaylorFunctionModelDP hf=tf-t;
+    ValidatedVectorTaylorFunctionModelDP af=ValidatedVectorTaylorFunctionModelDP::projection(XTP,range(n+1,n+1+a),swp);
+    ValidatedVectorTaylorFunctionModelDP bf=ValidatedVectorTaylorFunctionModelDP::projection(XTP,range(n+1+a,n+1+a+b),swp);
+    ValidatedVectorTaylorFunctionModelDP mf=ValidatedVectorTaylorFunctionModelDP::projection(XTP,range(n+1+a+b,n+1+a+b+2*m),swp);
+
+    ValidatedVectorTaylorFunctionModelDP ef=compose(evolve_function,join(xf,af,mf));
+
+    return compose(Phi,join(ef,hf,bf,mf));
+}
+
 ValidatedVectorFunctionModelDP InclusionIntegrator::build_reach_function(
         ValidatedVectorFunctionModelDP evolve_function, ValidatedVectorFunctionModelDP Phi, PositiveFloatDPValue t,
         PositiveFloatDPValue new_t) const {
 
-    // Evolve function is xi(x,a) at s; Flow is phi(x,h,b)
-    // Want (x,t,a,b):->phi(xi(x,a),t-s,b))
+    // Evolve function is e(x,a) at s; flow is phi(x,h,b)
+    // Want (x,t,a,b):->phi(e(x,a),t-s,b))
 
     SizeType n=evolve_function.result_size();
 
-    SizeType npxE=evolve_function.argument_size()-n;
-    SizeType npxP=Phi.argument_size()-(n+1);
+    SizeType a=evolve_function.argument_size()-n;
+    SizeType b=Phi.argument_size()-(n+1);
 
-    BoxDomainType D=evolve_function.domain()[range(0,n)];
-    BoxDomainType PXE=evolve_function.domain()[range(n,n+npxE)];
-    BoxDomainType PXP=Phi.domain()[range(n+1,n+1+npxP)];
+    BoxDomainType X=evolve_function.domain()[range(0,n)];
+    BoxDomainType PA=evolve_function.domain()[range(n,n+a)];
+    BoxDomainType PB=Phi.domain()[range(n+1,n+1+b)];
 
     auto swp=this->_sweeper;
     auto Tau=IntervalDomainType(t,new_t);
-    BoxDomainType DTP = join(D,Tau,PXE,PXP);
-    ValidatedVectorTaylorFunctionModelDP xf=ValidatedVectorTaylorFunctionModelDP::projection(DTP,range(0,n),swp);
-    ValidatedScalarTaylorFunctionModelDP tf=ValidatedScalarTaylorFunctionModelDP::coordinate(DTP,n,swp);
+    BoxDomainType XTP = join(X,Tau,PA,PB);
+    ValidatedVectorTaylorFunctionModelDP xf=ValidatedVectorTaylorFunctionModelDP::projection(XTP,range(0,n),swp);
+    ValidatedScalarTaylorFunctionModelDP tf=ValidatedScalarTaylorFunctionModelDP::coordinate(XTP,n,swp);
     ValidatedScalarTaylorFunctionModelDP hf=tf-t;
-    ValidatedVectorTaylorFunctionModelDP a0f=ValidatedVectorTaylorFunctionModelDP::projection(DTP,range(n+1,n+1+npxE),swp);
-    ValidatedVectorTaylorFunctionModelDP a1f=ValidatedVectorTaylorFunctionModelDP::projection(DTP,range(n+1+npxE,n+1+npxE+npxP),swp);
+    ValidatedVectorTaylorFunctionModelDP af=ValidatedVectorTaylorFunctionModelDP::projection(XTP,range(n+1,n+1+a),swp);
+    ValidatedVectorTaylorFunctionModelDP bf=ValidatedVectorTaylorFunctionModelDP::projection(XTP,range(n+1+a,n+1+a+b),swp);
 
-    ValidatedVectorTaylorFunctionModelDP ef=compose(evolve_function,join(xf,a0f));
+    ValidatedVectorTaylorFunctionModelDP ef=compose(evolve_function,join(xf,af));
 
-    return compose(Phi,join(ef,hf,a1f));
+    return compose(Phi,join(ef,hf,bf));
 }
 
 //! Computes q(D), where q = f + g * V

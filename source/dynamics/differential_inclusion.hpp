@@ -364,6 +364,7 @@ class InclusionIntegrator : public virtual InclusionIntegratorInterface, public 
                                                                    BoxDomainType D, ExactTimeStepType h, UpperBoxType B) const override;
   private:
     ValidatedVectorFunctionModelDP build_reach_function(ValidatedVectorFunctionModelDP evolve_function, ValidatedVectorFunctionModelDP Phi, PositiveFloatDPValue t, PositiveFloatDPValue new_t) const;
+    ValidatedVectorFunctionModelDP build_secondhalf_piecewise_reach_function(ValidatedVectorFunctionModelDP evolve_function, ValidatedVectorFunctionModelDP Phi, SizeType m, PositiveFloatDPValue t, PositiveFloatDPValue new_t) const;
 };
 
 

@@ -576,13 +576,14 @@ ValidatedVectorTaylorFunctionModelDP get_time_derivative(ValidatedVectorTaylorFu
 }
 
 
-InclusionIntegrator::InclusionIntegrator(InclusionIntegratorApproximation* apprx, SweeperDP sweeper, StepSize step_size)
-    : _approximation(apprx)
+InclusionIntegrator::InclusionIntegrator(List<SharedPointer<InclusionIntegratorApproximation>> approximations, SweeperDP sweeper, StepSize step_size)
+    : _approximations(approximations)
     , _sweeper(sweeper)
     , _step_size(step_size)
     , _number_of_steps_between_simplifications(8)
     , _number_of_variables_to_keep(4)
 {
+    assert(approximations.size()>0);
 }
 
 List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType X0, Real tmax) {
@@ -599,14 +600,6 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
 
     ValidatedVectorFunctionModelDP evolve_function = ValidatedVectorTaylorFunctionModelDP::identity(X0,this->_sweeper);
     auto t=PositiveFloatDPValue(0.0);
-
-
-    List<SharedPointer<InclusionIntegratorApproximation>> approximations;
-    //approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorZeroApproximation(this->_sweeper)));
-    //approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorConstantApproximation(this->_sweeper)));
-    //approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorPiecewiseApproximation(this->_sweeper)));
-    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorAffineApproximation(this->_sweeper)));
-    //approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorSinusoidalApproximation(this->_sweeper)));
 
     List<ValidatedVectorFunctionModelDP> result;
 
@@ -635,11 +628,11 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
         FloatDP best_total_diameter(0);
 
         SizeType i = 0;
-        for (auto i : range(approximations.size())) {
-            ARIADNE_LOG(4,"checking approximation "<<approximations.at(i)->getKind()<<"\n");
-            this->_approximation = approximations.at(i);
+        for (auto i : range(_approximations.size())) {
+            this->_approximation = _approximations.at(i);
+            ARIADNE_LOG(4,"checking approximation "<<this->_approximation->getKind()<<"\n");
 
-            auto e=_approximation->compute_error(f,g,V,h,B);
+            auto e=this->_approximation->compute_error(f,g,V,h,B);
             total_error += e;
 
             ValidatedVectorFunctionModelDP current_reach_function;
@@ -982,10 +975,13 @@ ValidatedVectorFunctionModelType InclusionIntegratorPiecewiseApproximation::buil
     auto p1f = ValidatedVectorTaylorFunctionModelDP::projection(FD, range(n+1+m, n+1+2*m), swp);
 
     auto one = ValidatedScalarTaylorFunctionModelDP::constant(FD, 1.0_exact, swp);
-    auto V0=FD[n+1+m].upper();
+
 
     auto result = ValidatedVectorTaylorFunctionModelDP(m, FD, swp);
-    for (auto i : range(m)) { result[i] = p0f[i] - (one - p0f[i]*p0f[i]/V0/V0)*p1f[i]; }
+    for (auto i : range(m)) {
+        auto Vi=FD[n+1+i].upper();
+        result[i] = p0f[i] - (one - p0f[i]*p0f[i]/Vi/Vi)*p1f[i];
+    }
 
     return result;
 }
@@ -999,10 +995,12 @@ ValidatedVectorFunctionModelType InclusionIntegratorPiecewiseApproximation::buil
     auto p1f = ValidatedVectorTaylorFunctionModelDP::projection(FD, range(n+1+m, n+1+2*m), swp);
 
     auto one = ValidatedScalarTaylorFunctionModelDP::constant(FD, 1.0_exact, swp);
-    auto V0=FD[n+1+m].upper();
 
     auto result = ValidatedVectorTaylorFunctionModelDP(m, FD, swp);
-    for (auto i : range(m)) { result[i] = p0f[i] + (one - p0f[i]*p0f[i]/V0/V0)*p1f[i]; }
+    for (auto i : range(m)) {
+        auto Vi = FD[n+1+i].upper();
+        result[i] = p0f[i] + (one - p0f[i]*p0f[i]/Vi/Vi)*p1f[i];
+    }
 
     return result;
 }
@@ -1017,11 +1015,14 @@ ValidatedVectorFunctionModelType InclusionIntegratorAffineApproximation::build_a
 
     auto one=ValidatedScalarTaylorFunctionModelDP::constant(FD,1.0_exact,swp);
     auto three=ValidatedScalarTaylorFunctionModelDP::constant(FD,3.0_exact,swp);
-    auto V0=FD[0].upper();
+
     auto h = FD[n].upper();
 
     auto result=ValidatedVectorTaylorFunctionModelDP(m,FD,swp);
-    for (auto i : range(m)) { result[i]=p0f[i]+three*(one-p0f[i]*p0f[i]/V0/V0)*p1f[i]*(tf-h/2)/h; }
+    for (auto i : range(m)) {
+        auto Vi = FD[n+1+i].upper();
+        result[i]=p0f[i]+three*(one-p0f[i]*p0f[i]/Vi/Vi)*p1f[i]*(tf-h/2)/h;
+    }
 
     return result;
 }

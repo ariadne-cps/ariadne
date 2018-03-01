@@ -334,6 +334,7 @@ class InclusionIntegratorInterface {
 
 class InclusionIntegrator : public virtual InclusionIntegratorInterface, public Loggable {
   protected:
+    List<SharedPointer<InclusionIntegratorApproximation>> _approximations;
     SharedPointer<InclusionIntegratorApproximation> _approximation;
     SharedPointer<Reconditioner> _reconditioner;
     SweeperDP _sweeper;
@@ -341,11 +342,10 @@ class InclusionIntegrator : public virtual InclusionIntegratorInterface, public 
     Nat _number_of_steps_between_simplifications;
     Nat _number_of_variables_to_keep;
   public:
-    InclusionIntegrator(InclusionIntegratorApproximation* apprx, SweeperDP sweeper, StepSize step_size);
-    template<class... AS> InclusionIntegrator(InclusionIntegratorApproximation* apprx, SweeperDP sweeper, StepSize step_size, AS... attributes)
-        : InclusionIntegrator(apprx, sweeper,step_size) {
+    InclusionIntegrator(List<SharedPointer<InclusionIntegratorApproximation>> approximations, SweeperDP sweeper, StepSize step_size);
+    template<class... AS> InclusionIntegrator(List<SharedPointer<InclusionIntegratorApproximation>> approximations, SweeperDP sweeper, StepSize step_size, AS... attributes)
+        : InclusionIntegrator(approximations, sweeper,step_size) {
         this->set(attributes...);
-        _approximation.reset(new InclusionIntegratorZeroApproximation(_sweeper));
         _reconditioner.reset(new LohnerReconditioner(_sweeper,_number_of_variables_to_keep));
     }
   public:

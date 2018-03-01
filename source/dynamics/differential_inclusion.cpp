@@ -400,9 +400,7 @@ PiecewiseErrorProcessor::compute_norms(ValidatedVectorFunction const& f, Vector<
 
 ErrorType PiecewiseErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
 
-    DoublePrecision pr;
-    FloatDPError r(FloatDP(5.0/4u,pr));
-
+    FloatDPError r(5.0/4u);
     FloatDPError result = ((r*r+1u)*Lp*Kp + (r+1u)*h*Kp*((Hp*2u*r + H)*(K+r*Kp)+L*L+(L*3u*r+Lp*r*r*2u)*Lp)*expLambda + (r+1u)/6u*h*(K+Kp)*((H*Kp+L*Lp)*3u+(Hp*K+L*Lp)*4u))/cast_positive(1u-h*L/2u-h*Lp*r)*pow(h,2u)/4u;
 
     return result;
@@ -418,9 +416,7 @@ SingleInputPiecewiseErrorProcessor::compute_norms(ValidatedVectorFunction const&
 
 ErrorType SingleInputPiecewiseErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
 
-    DoublePrecision pr;
-    FloatDPError r(FloatDP(5.0/4u,pr));
-
+    FloatDPError r(5.0/4u);
     FloatDPError result = ((r+1u)*Kp*((Hp*2u*r+H)*(K+r*Kp)+L*L+(L*3u*r+Lp*r*r*2u)*Lp)*expLambda + (r+1u)/6u*(K+Kp)*((r+1u)*((H*Kp+L*Lp)*3u +(Hp*K+L*Lp)*4u) + (Hp*Kp+Lp*Lp)*8u*(r*r+1u)))/cast_positive(1u-h*L/2u-h*Lp*r)*pow(h,3u)/4u;
 
     return result;
@@ -437,9 +433,7 @@ AdditivePiecewiseErrorProcessor::compute_norms(ValidatedVectorFunction const& f,
 
 ErrorType AdditivePiecewiseErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
 
-    DoublePrecision pr;
-    FloatDPError r(FloatDP(5.0/4u,pr));
-
+    FloatDPError r(5.0/4u);
     FloatDPError result = (Kp*(H*(K+r*Kp)+L*L)*expLambda + (K+Kp)*H*Kp/2u)/cast_positive(1u-h*L/2u)*(r+1u)*pow(h,3u)/4u;
 
     return result;
@@ -456,9 +450,7 @@ AffineErrorProcessor::compute_norms(ValidatedVectorFunction const& f, Vector<Val
 
 ErrorType AffineErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
 
-    DoublePrecision pr;
-    FloatDPError r(FloatDP(5.0/3u,pr));
-
+    FloatDPError r(5.0/3u);
     FloatDPError result = ((r*r+1u)*Lp*Kp + (r+1u)*h*Kp*((Hp*2u*r + H)*(K+r*Kp)+L*L+(L*3u*r+Lp*r*r*2u)*Lp)*expLambda + (r+1u)/6u*h*(K+Kp)*((H*Kp+L*Lp)*3u+(Hp*K+L*Lp)*4u))/cast_positive(1u-h*L/2u-h*Lp*r)*pow(h,2u)/4u;
 
     return result;
@@ -474,9 +466,7 @@ SingleInputAffineErrorProcessor::compute_norms(ValidatedVectorFunction const& f,
 
 ErrorType SingleInputAffineErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
 
-    DoublePrecision pr;
-    FloatDPError r(FloatDP(5.0/3u,pr));
-
+    FloatDPError r(5.0/3u);
     FloatDPError result = ((r+1u)*Kp*((Hp*2u*r+H)*(K+r*Kp)+L*L+(L*3u*r+Lp*r*r*2u)*Lp)*expLambda + (r+1u)/6u*(K+Kp)*((r+1u)*((H*Kp+L*Lp)*3u +(Hp*K+L*Lp)*4u) + (Hp*Kp+Lp*Lp)*8u*(r*r+1u)))/cast_positive(1u-h*L/2u-h*Lp*r)*pow(h,3u)/4u;
 
     return result;
@@ -493,9 +483,7 @@ AdditiveAffineErrorProcessor::compute_norms(ValidatedVectorFunction const& f, Ve
 
 ErrorType AdditiveAffineErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
 
-    DoublePrecision pr;
-    FloatDPError r(FloatDP(5.0/3u,pr));
-
+    FloatDPError r(5.0/3u);
     FloatDPError result = (Kp*(H*(K+r*Kp)+L*L)*expLambda + (K+Kp)*H*Kp/2u)/cast_positive(1u-h*L/2u)*(r+1u)*pow(h,3u)/4u;
 
     return result;
@@ -512,9 +500,7 @@ SinusoidalErrorProcessor::compute_norms(ValidatedVectorFunction const& f, Vector
 
 ErrorType SinusoidalErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
 
-    DoublePrecision pr;
-    FloatDPError r(FloatDP(2.1464,pr));
-
+    FloatDPError r(1.0093_exact);
     FloatDPError result = ((r*r+1u)*Lp*Kp + (r+1u)*h*Kp*((Hp*2u*r + H)*(K+r*Kp)+L*L+(L*3u*r+Lp*r*r*2u)*Lp)*expLambda + (r+1u)/6u*h*(K+Kp)*((H*Kp+L*Lp)*3u+(Hp*K+L*Lp)*4u))/cast_positive(1u-h*L/2u-h*Lp*r)*pow(h,2u)/4u;
 
     return result;
@@ -530,9 +516,7 @@ SingleInputSinusoidalErrorProcessor::compute_norms(ValidatedVectorFunction const
 
 ErrorType SingleInputSinusoidalErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
 
-    DoublePrecision pr;
-    FloatDPError r(FloatDP(2.1464,pr));
-
+    FloatDPError r(1.0093_exact);
     FloatDPError result = ((r+1u)*Kp*((Hp*2u*r+H)*(K+r*Kp)+L*L+(L*3u*r+Lp*r*r*2u)*Lp)*expLambda + (r+1u)/6u*(K+Kp)*((r+1u)*((H*Kp+L*Lp)*3u +(Hp*K+L*Lp)*4u) + (Hp*Kp+Lp*Lp)*8u*(r*r+1u)))/cast_positive(1u-h*L/2u-h*Lp*r)*pow(h,3u)/4u;
 
     return result;
@@ -549,9 +533,7 @@ AdditiveSinusoidalErrorProcessor::compute_norms(ValidatedVectorFunction const& f
 
 ErrorType AdditiveSinusoidalErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
 
-    DoublePrecision pr;
-    FloatDPError r(FloatDP(2.1464,pr));
-
+    FloatDPError r(1.0093_exact);
     FloatDPError result = (Kp*(H*(K+r*Kp)+L*L)*expLambda + (K+Kp)*H*Kp/2u)/cast_positive(1u-h*L/2u)*(r+1u)*pow(h,3u)/4u;
 
     return result;
@@ -1037,12 +1019,15 @@ ValidatedVectorFunctionModelType InclusionIntegratorSinusoidalApproximation::bui
     auto p1f=ValidatedVectorTaylorFunctionModelDP::projection(FD,range(n+1+m,n+1+2*m),swp);
 
     auto h = FD[n].upper();
-    auto fivefourths=ValidatedScalarTaylorFunctionModelDP::constant(FD,1.25_exact,swp);
-
-    Real d(4.162586_exact);
+    auto one=ValidatedScalarTaylorFunctionModelDP::constant(FD,1.0_exact,swp);
+    auto pgamma=ValidatedScalarTaylorFunctionModelDP::constant(FD,1.1464_exact,swp);
+    auto gamma=ValidatedScalarTaylorFunctionModelDP::constant(FD,4.162586_exact,swp);
 
     auto result=ValidatedVectorTaylorFunctionModelDP(m,FD,swp);
-    for (auto i : range(m)) { result[i]=p0f[i]+fivefourths*p1f[i]*sin((tf-h/2)*d/h); }
+    for (auto i : range(m)) {
+        auto Vi = FD[n+1+i].upper();
+        result[i]=p0f[i]+pgamma*(one-p0f[i]*p0f[i]/Vi/Vi)*p1f[i]*sin((tf-h/2)*gamma/h);
+    }
 
     return result;
 }
@@ -1126,7 +1111,7 @@ Void LohnerReconditioner::simplify(ValidatedVectorFunctionModelDP& phi) const {
     List<SizeType> remove_indices;
     int number_of_variables_to_remove = m - this->_number_of_variables_to_keep;
     ARIADNE_LOG(6, "Number of variables to remove:" << number_of_variables_to_remove<<"\n");
-/*
+
     FloatDPError total_sum_SCe(0);
     for (int j : range(m))
         total_sum_SCe += SCe[j].value;
@@ -1144,7 +1129,8 @@ Void LohnerReconditioner::simplify(ValidatedVectorFunctionModelDP& phi) const {
             skip = true;
         }
     }
-*/
+
+    /*
     for (int j : range(m)) {
         if (j < number_of_variables_to_remove) {
             remove_indices.append(SCe[j].index);
@@ -1152,6 +1138,7 @@ Void LohnerReconditioner::simplify(ValidatedVectorFunctionModelDP& phi) const {
             keep_indices.append(SCe[j].index);
         }
     }
+     */
 
     ARIADNE_LOG(2,"number of kept parameters: " << keep_indices.size() << "/" << m << "\n");
 

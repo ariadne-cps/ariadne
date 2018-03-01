@@ -500,7 +500,7 @@ SinusoidalErrorProcessor::compute_norms(ValidatedVectorFunction const& f, Vector
 
 ErrorType SinusoidalErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
 
-    FloatDPError r(1.0093_exact);
+    FloatDPError r(1.0093);
     FloatDPError result = ((r*r+1u)*Lp*Kp + (r+1u)*h*Kp*((Hp*2u*r + H)*(K+r*Kp)+L*L+(L*3u*r+Lp*r*r*2u)*Lp)*expLambda + (r+1u)/6u*h*(K+Kp)*((H*Kp+L*Lp)*3u+(Hp*K+L*Lp)*4u))/cast_positive(1u-h*L/2u-h*Lp*r)*pow(h,2u)/4u;
 
     return result;
@@ -516,7 +516,7 @@ SingleInputSinusoidalErrorProcessor::compute_norms(ValidatedVectorFunction const
 
 ErrorType SingleInputSinusoidalErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
 
-    FloatDPError r(1.0093_exact);
+    FloatDPError r(1.0093);
     FloatDPError result = ((r+1u)*Kp*((Hp*2u*r+H)*(K+r*Kp)+L*L+(L*3u*r+Lp*r*r*2u)*Lp)*expLambda + (r+1u)/6u*(K+Kp)*((r+1u)*((H*Kp+L*Lp)*3u +(Hp*K+L*Lp)*4u) + (Hp*Kp+Lp*Lp)*8u*(r*r+1u)))/cast_positive(1u-h*L/2u-h*Lp*r)*pow(h,3u)/4u;
 
     return result;
@@ -533,7 +533,7 @@ AdditiveSinusoidalErrorProcessor::compute_norms(ValidatedVectorFunction const& f
 
 ErrorType AdditiveSinusoidalErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
 
-    FloatDPError r(1.0093_exact);
+    FloatDPError r(1.0093);
     FloatDPError result = (Kp*(H*(K+r*Kp)+L*L)*expLambda + (K+Kp)*H*Kp/2u)/cast_positive(1u-h*L/2u)*(r+1u)*pow(h,3u)/4u;
 
     return result;
@@ -1020,13 +1020,13 @@ ValidatedVectorFunctionModelType InclusionIntegratorSinusoidalApproximation::bui
 
     auto h = FD[n].upper();
     auto one=ValidatedScalarTaylorFunctionModelDP::constant(FD,1.0_exact,swp);
-    auto pgamma=ValidatedScalarTaylorFunctionModelDP::constant(FD,1.1464_exact,swp);
-    auto gamma=ValidatedScalarTaylorFunctionModelDP::constant(FD,4.162586_exact,swp);
+    auto pgamma=1.1464_dec;
+    auto gamma=4.162586_dec;
 
     auto result=ValidatedVectorTaylorFunctionModelDP(m,FD,swp);
     for (auto i : range(m)) {
         auto Vi = FD[n+1+i].upper();
-        result[i]=p0f[i]+pgamma*(one-p0f[i]*p0f[i]/Vi/Vi)*p1f[i]*sin((tf-h/2)*gamma/h);
+        result[i]=p0f[i]+(one-p0f[i]*p0f[i]/Vi/Vi)*pgamma*p1f[i]*sin((tf-h/2)*gamma/h);
     }
 
     return result;

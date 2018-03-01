@@ -289,6 +289,8 @@ public:
     virtual ErrorType compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const override;
     virtual BoxDomainType build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V) const override;
     virtual ValidatedVectorFunctionModelType build_approximating_function(BoxDomainType FD, SizeType n, SizeType m) const override;
+    ValidatedVectorFunctionModelType build_firsthalf_approximating_function(BoxDomainType FD, SizeType n, SizeType m) const;
+    ValidatedVectorFunctionModelType build_secondhalf_approximating_function(BoxDomainType FD, SizeType n, SizeType m) const;
 };
 
 class InclusionIntegratorAffineApproximation : public InclusionIntegratorApproximation {

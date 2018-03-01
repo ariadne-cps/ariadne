@@ -665,7 +665,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
                 ARIADNE_LOG(6,"FD:"<<FD<<"\n");
                 auto x0f=ValidatedVectorTaylorFunctionModelDP::projection(FD,range(0,n),swp);
 
-                auto w1 =approx.build_approximating_function(FD, n, m);
+                auto w1 =approx.build_firsthalf_approximating_function(FD, n, m);
                 ValidatedVectorTaylorFunctionModelDP& w1f = dynamic_cast<ValidatedVectorTaylorFunctionModelDP&>(w1.reference());
                 ARIADNE_LOG(6,"w1f:"<<w1f<<"\n");
 
@@ -687,7 +687,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
 
                 auto D2 = cast_exact_box(current_evolve_function.range());
                 auto FD2=approx.build_flow_domain(D2, hlf(h), V);
-                auto w2 =approx.build_approximating_function(FD2, n, m);
+                auto w2 =approx.build_secondhalf_approximating_function(FD2, n, m);
                 ValidatedVectorTaylorFunctionModelDP& w2f = dynamic_cast<ValidatedVectorTaylorFunctionModelDP&>(w2.reference());
                 ARIADNE_LOG(6,"w2f:"<<w2f<<"\n");
 
@@ -936,7 +936,7 @@ BoxDomainType InclusionIntegratorSinusoidalApproximation::build_flow_domain(BoxD
 
     auto Ht=IntervalDomainType(-h,+h);
     auto P0=V;
-    auto P1=cast_exact_box(5/4_q*V);
+    auto P1=V;
 
     return join(D,Ht,P0,P1);
 }
@@ -969,27 +969,54 @@ ValidatedVectorFunctionModelType InclusionIntegratorConstantApproximation::build
 
 ValidatedVectorFunctionModelType InclusionIntegratorPiecewiseApproximation::build_approximating_function(BoxDomainType FD, SizeType n, SizeType m) const {
 
+    return build_firsthalf_approximating_function(FD,n,m);
+}
+
+
+
+ValidatedVectorFunctionModelType InclusionIntegratorPiecewiseApproximation::build_firsthalf_approximating_function(BoxDomainType FD, SizeType n, SizeType m) const {
+
     auto swp = this->_sweeper;
 
     auto p0f = ValidatedVectorTaylorFunctionModelDP::projection(FD, range(n+1, n+1+m), swp);
+    auto p1f = ValidatedVectorTaylorFunctionModelDP::projection(FD, range(n+1+m, n+1+2*m), swp);
+
+    auto one = ValidatedScalarTaylorFunctionModelDP::constant(FD, 1.0_exact, swp);
+    auto V0=FD[n+1+m].upper();
 
     auto result = ValidatedVectorTaylorFunctionModelDP(m, FD, swp);
-    for (auto i : range(m)) { result[i] = p0f[i]; }
+    for (auto i : range(m)) { result[i] = p0f[i] - (one - p0f[i]*p0f[i]/V0/V0)*p1f[i]; }
 
     return result;
 }
 
+
+ValidatedVectorFunctionModelType InclusionIntegratorPiecewiseApproximation::build_secondhalf_approximating_function(BoxDomainType FD, SizeType n, SizeType m) const {
+
+    auto swp = this->_sweeper;
+
+    auto p0f = ValidatedVectorTaylorFunctionModelDP::projection(FD, range(n+1, n+1+m), swp);
+    auto p1f = ValidatedVectorTaylorFunctionModelDP::projection(FD, range(n+1+m, n+1+2*m), swp);
+
+    auto one = ValidatedScalarTaylorFunctionModelDP::constant(FD, 1.0_exact, swp);
+    auto V0=FD[n+1+m].upper();
+
+    auto result = ValidatedVectorTaylorFunctionModelDP(m, FD, swp);
+    for (auto i : range(m)) { result[i] = p0f[i] + (one - p0f[i]*p0f[i]/V0/V0)*p1f[i]; }
+
+    return result;
+}
 
 ValidatedVectorFunctionModelType InclusionIntegratorAffineApproximation::build_approximating_function(BoxDomainType FD, SizeType n, SizeType m) const {
 
     auto swp=this->_sweeper;
 
     auto tf=ValidatedScalarTaylorFunctionModelDP::coordinate(FD,n,swp);
-    auto one=ValidatedScalarTaylorFunctionModelDP::constant(FD,1.0_exact,swp);
-    auto three=ValidatedScalarTaylorFunctionModelDP::constant(FD,3.0_exact,swp);
     auto p0f=ValidatedVectorTaylorFunctionModelDP::projection(FD,range(n+1,n+1+m),swp);
     auto p1f=ValidatedVectorTaylorFunctionModelDP::projection(FD,range(n+1+m,n+1+2*m),swp);
 
+    auto one=ValidatedScalarTaylorFunctionModelDP::constant(FD,1.0_exact,swp);
+    auto three=ValidatedScalarTaylorFunctionModelDP::constant(FD,3.0_exact,swp);
     auto V0=FD[0].upper();
     auto h = FD[n].upper();
 
@@ -1009,11 +1036,12 @@ ValidatedVectorFunctionModelType InclusionIntegratorSinusoidalApproximation::bui
     auto p1f=ValidatedVectorTaylorFunctionModelDP::projection(FD,range(n+1+m,n+1+2*m),swp);
 
     auto h = FD[n].upper();
+    auto fivefourths=ValidatedScalarTaylorFunctionModelDP::constant(FD,1.25_exact,swp);
 
-    Real d(4.162586);
+    Real d(4.162586_exact);
 
     auto result=ValidatedVectorTaylorFunctionModelDP(m,FD,swp);
-    for (auto i : range(m)) { result[i]=p0f[i]+p1f[i]*sin((tf-h/2)*d/h); }
+    for (auto i : range(m)) { result[i]=p0f[i]+fivefourths*p1f[i]*sin((tf-h/2)*d/h); }
 
     return result;
 }

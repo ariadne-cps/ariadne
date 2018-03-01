@@ -310,12 +310,12 @@ void TestInclusionIntegrator::test() const {
     //ARIADNE_TEST_CALL(test_rossler());
     //ARIADNE_TEST_CALL(test_jerk21());
     //ARIADNE_TEST_CALL(test_jerk16());
-    //ARIADNE_TEST_CALL(test_higgins_selkov());
+    ARIADNE_TEST_CALL(test_higgins_selkov());
     //ARIADNE_TEST_CALL(test_lotka_volterra());
     //ARIADNE_TEST_CALL(test_jet_engine());
     //ARIADNE_TEST_CALL(test_pi_controller());
     //ARIADNE_TEST_CALL(test_van_der_pol());
-    ARIADNE_TEST_CALL(test_harmonic());
+    //ARIADNE_TEST_CALL(test_harmonic());
     //ARIADNE_TEST_CALL(test_harmonic_analytical());
     //ARIADNE_TEST_CALL(test_clock());
 }
@@ -491,7 +491,7 @@ void TestInclusionIntegrator::test_jerk16() const {
 
 void TestInclusionIntegrator::test_higgins_selkov() const {
 
-    double step=1.0/200;
+    double step=1.0/50;
     SizeType freq=2;
     SizeType base=60;
     SizeType avg=100;
@@ -518,8 +518,8 @@ void TestInclusionIntegrator::test_higgins_selkov() const {
     RealBox starting_set={{x0_i-e,x0_i+e},{x1_i-e,x1_i+e}};
     Real evolution_time=100/10_q;
 
-    //this->run_test("higgins-selkov",integrator,f,g,noise_levels,starting_set,evolution_time);
-    this->run_battery_fixed_absolutebase("higgins-selkov",f,g,noise_levels,starting_set,evolution_time,step,base,1,20);
+    this->run_test("higgins-selkov",integrator,f,g,noise_levels,starting_set,evolution_time);
+    //this->run_battery_fixed_absolutebase("higgins-selkov",f,g,noise_levels,starting_set,evolution_time,step,base,1,20);
 }
 
 void TestInclusionIntegrator::test_lotka_volterra() const {
@@ -630,7 +630,7 @@ void TestInclusionIntegrator::test_van_der_pol() const {
 }
 
 void TestInclusionIntegrator::test_harmonic() const {
-    double step=1.0/8;
+    double step=1.0/16;
     SizeType base=80;
     SizeType freq=1000;
 
@@ -658,45 +658,6 @@ void TestInclusionIntegrator::test_harmonic() const {
     this->run_battery_noreset("harmonic",f,g,noise_levels,starting_set,evolution_time,2,5);
 }
 
-void TestInclusionIntegrator::test_harmonic_analytical() const {
-
-    DoublePrecision pr;
-    SizeType nsteps = 100;
-    Real p0_e=1/100_q;
-    Real noise=4/100_q;
-
-    FloatDPBounds h_(1_q/32,pr);
-    PositiveFloatDPBounds h(cast_positive(h_));
-
-    auto x0 = ValidatedScalarFunction::coordinate(3u,0u);
-    auto y0 = ValidatedScalarFunction::coordinate(3u,1u);
-    auto t = ValidatedScalarFunction::coordinate(3u,2u);
-
-    auto one = ValidatedVectorFunction::constant(3u,1_z);
-
-    auto f0=ValidatedVectorFunction({x0*cos(t)+y0*sin(t),-x0*sin(t)+y0*cos(t)} );
-    Vector<FloatDPBounds> tv({h});
-
-    FloatDPError Kp(0.04);
-    FloatDPError expLambda = dexp(h);
-    FloatDPError e = Kp*expLambda*h;
-    FloatDPBounds eb(-e,+e);
-
-    Vector<FloatDPBounds> ev({eb,eb});
-    Vector<FloatDPBounds> bounds = f0(tv)+ev;
-    std::cout << bounds << std::endl;
-
-    auto x_init = FloatDPBounds(1-p0_e,1+p0_e,pr);
-    auto y_init = FloatDPBounds(-p0_e,+p0_e,pr);
-
-    auto xy=Vector<FloatDPBounds>({x_init,y_init});
-    FloatDPBounds tm(0,pr);
-    for (auto i : range(nsteps)) {
-        xy = f0(join(xy,h));
-        std::cout << xy << std::endl;
-        tm = tm + h;
-    }
-}
 
 void TestInclusionIntegrator::test_clock() const {
     auto sweeper = make_threshold_sweeper(1e-8);

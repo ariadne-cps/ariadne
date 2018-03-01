@@ -401,7 +401,7 @@ PiecewiseErrorProcessor::compute_norms(ValidatedVectorFunction const& f, Vector<
 ErrorType PiecewiseErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
 
     DoublePrecision pr;
-    FloatDPError r(FloatDP(2.0,pr));
+    FloatDPError r(FloatDP(5.0/4u,pr));
 
     FloatDPError result = ((r*r+1u)*Lp*Kp + (r+1u)*h*Kp*((Hp*2u*r + H)*(K+r*Kp)+L*L+(L*3u*r+Lp*r*r*2u)*Lp)*expLambda + (r+1u)/6u*h*(K+Kp)*((H*Kp+L*Lp)*3u+(Hp*K+L*Lp)*4u))/cast_positive(1u-h*L/2u-h*Lp*r)*pow(h,2u)/4u;
 
@@ -419,7 +419,7 @@ SingleInputPiecewiseErrorProcessor::compute_norms(ValidatedVectorFunction const&
 ErrorType SingleInputPiecewiseErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
 
     DoublePrecision pr;
-    FloatDPError r(FloatDP(2.0,pr));
+    FloatDPError r(FloatDP(5.0/4u,pr));
 
     FloatDPError result = ((r+1u)*Kp*((Hp*2u*r+H)*(K+r*Kp)+L*L+(L*3u*r+Lp*r*r*2u)*Lp)*expLambda + (r+1u)/6u*(K+Kp)*((r+1u)*((H*Kp+L*Lp)*3u +(Hp*K+L*Lp)*4u) + (Hp*Kp+Lp*Lp)*8u*(r*r+1u)))/cast_positive(1u-h*L/2u-h*Lp*r)*pow(h,3u)/4u;
 
@@ -438,7 +438,7 @@ AdditivePiecewiseErrorProcessor::compute_norms(ValidatedVectorFunction const& f,
 ErrorType AdditivePiecewiseErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
 
     DoublePrecision pr;
-    FloatDPError r(FloatDP(2.0,pr));
+    FloatDPError r(FloatDP(5.0/4u,pr));
 
     FloatDPError result = (Kp*(H*(K+r*Kp)+L*L)*expLambda + (K+Kp)*H*Kp/2u)/cast_positive(1u-h*L/2u)*(r+1u)*pow(h,3u)/4u;
 
@@ -457,7 +457,7 @@ AffineErrorProcessor::compute_norms(ValidatedVectorFunction const& f, Vector<Val
 ErrorType AffineErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
 
     DoublePrecision pr;
-    FloatDPError r(FloatDP(5.0/2u,pr));
+    FloatDPError r(FloatDP(5.0/3u,pr));
 
     FloatDPError result = ((r*r+1u)*Lp*Kp + (r+1u)*h*Kp*((Hp*2u*r + H)*(K+r*Kp)+L*L+(L*3u*r+Lp*r*r*2u)*Lp)*expLambda + (r+1u)/6u*h*(K+Kp)*((H*Kp+L*Lp)*3u+(Hp*K+L*Lp)*4u))/cast_positive(1u-h*L/2u-h*Lp*r)*pow(h,2u)/4u;
 
@@ -475,7 +475,7 @@ SingleInputAffineErrorProcessor::compute_norms(ValidatedVectorFunction const& f,
 ErrorType SingleInputAffineErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
 
     DoublePrecision pr;
-    FloatDPError r(FloatDP(5.0/2u,pr));
+    FloatDPError r(FloatDP(5.0/3u,pr));
 
     FloatDPError result = ((r+1u)*Kp*((Hp*2u*r+H)*(K+r*Kp)+L*L+(L*3u*r+Lp*r*r*2u)*Lp)*expLambda + (r+1u)/6u*(K+Kp)*((r+1u)*((H*Kp+L*Lp)*3u +(Hp*K+L*Lp)*4u) + (Hp*Kp+Lp*Lp)*8u*(r*r+1u)))/cast_positive(1u-h*L/2u-h*Lp*r)*pow(h,3u)/4u;
 
@@ -494,7 +494,7 @@ AdditiveAffineErrorProcessor::compute_norms(ValidatedVectorFunction const& f, Ve
 ErrorType AdditiveAffineErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
 
     DoublePrecision pr;
-    FloatDPError r(FloatDP(5.0/2u,pr));
+    FloatDPError r(FloatDP(5.0/3u,pr));
 
     FloatDPError result = (Kp*(H*(K+r*Kp)+L*L)*expLambda + (K+Kp)*H*Kp/2u)/cast_positive(1u-h*L/2u)*(r+1u)*pow(h,3u)/4u;
 
@@ -604,8 +604,8 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
     List<SharedPointer<InclusionIntegratorApproximation>> approximations;
     //approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorZeroApproximation(this->_sweeper)));
     //approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorConstantApproximation(this->_sweeper)));
-    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorPiecewiseApproximation(this->_sweeper)));
-    //approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorAffineApproximation(this->_sweeper)));
+    //approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorPiecewiseApproximation(this->_sweeper)));
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorAffineApproximation(this->_sweeper)));
     //approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorSinusoidalApproximation(this->_sweeper)));
 
     List<ValidatedVectorFunctionModelDP> result;
@@ -636,7 +636,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
 
         SizeType i = 0;
         for (auto i : range(approximations.size())) {
-            ARIADNE_LOG(4,"checking approximation "<<i<<"\n");
+            ARIADNE_LOG(4,"checking approximation "<<approximations.at(i)->getKind()<<"\n");
             this->_approximation = approximations.at(i);
 
             auto e=_approximation->compute_error(f,g,V,h,B);
@@ -677,7 +677,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
                     phi1=antiderivative(get_time_derivative(phi1,f,g,w1f),n)+x0f;
                 }
                 ARIADNE_LOG(7,(derivative(phi1,n) - get_time_derivative(phi1,f,g,w1f)).range()<<"\n");
-                PositiveFloatDPValue intermediate_t=cast_positive(cast_exact((t+h/2).lower()));
+                PositiveFloatDPValue intermediate_t=cast_positive(cast_exact((t+hlf(h)).lower()));
 
                 current_reach_function=build_reach_function(evolve_function, phi1, t, intermediate_t);
                 ARIADNE_LOG(5,"current_reach_function="<<current_reach_function<<"\n");
@@ -700,6 +700,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
                 for (auto i : range(6)) {
                     phi2=antiderivative(get_time_derivative(phi2,f,g,w2f),n)+x0f2;
                 }
+
                 for (auto i : range(n)) {
                     phi2[i].set_error(phi2[i].error()+e);
                 }
@@ -752,7 +753,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
         result.append(reach_function);
     }
 
-    std::cout << "    " << evolve_function.range()[0].upper() - 2*V[0].upper() << " " << total_error << " " << total_error.raw()/step << std::endl;
+    std::cout << "    " << evolve_function.range()[0].upper() << " " << evolve_function.range()[0].upper() - 2*V[0].upper() << " " << total_error << " " << total_error.raw()/step << std::endl;
 
     return result;
 }
@@ -812,7 +813,6 @@ Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegrator::flow_bounds(Validat
     for(auto i : range(4)) {
         B=D+IntervalDomainType(0,h)*apply(f,g,V,B);
     }
-    ARIADNE_LOG(5,"h:" << h <<", B:"<< B << "\n");
 
     return std::make_pair(h,B);
 }
@@ -915,9 +915,10 @@ BoxDomainType InclusionIntegratorConstantApproximation::build_flow_domain(BoxDom
 BoxDomainType InclusionIntegratorPiecewiseApproximation::build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V) const {
 
     auto Ht=IntervalDomainType(-h,+h);
-    auto P0=cast_exact_box(2*V);
+    auto P0=V;
+    auto P1=V;
 
-    return join(D,Ht,P0);
+    return join(D,Ht,P0,P1);
 }
 
 
@@ -925,7 +926,7 @@ BoxDomainType InclusionIntegratorAffineApproximation::build_flow_domain(BoxDomai
 
     auto Ht=IntervalDomainType(-h,+h);
     auto P0=V;
-    auto P1=cast_exact_box(3*V);
+    auto P1=V;
 
     return join(D,Ht,P0,P1);
 }
@@ -935,7 +936,7 @@ BoxDomainType InclusionIntegratorSinusoidalApproximation::build_flow_domain(BoxD
 
     auto Ht=IntervalDomainType(-h,+h);
     auto P0=V;
-    auto P1=cast_exact_box(Real(1.1464)*V);
+    auto P1=cast_exact_box(5/4_q*V);
 
     return join(D,Ht,P0,P1);
 }
@@ -984,13 +985,16 @@ ValidatedVectorFunctionModelType InclusionIntegratorAffineApproximation::build_a
     auto swp=this->_sweeper;
 
     auto tf=ValidatedScalarTaylorFunctionModelDP::coordinate(FD,n,swp);
+    auto one=ValidatedScalarTaylorFunctionModelDP::constant(FD,1.0_exact,swp);
+    auto three=ValidatedScalarTaylorFunctionModelDP::constant(FD,3.0_exact,swp);
     auto p0f=ValidatedVectorTaylorFunctionModelDP::projection(FD,range(n+1,n+1+m),swp);
     auto p1f=ValidatedVectorTaylorFunctionModelDP::projection(FD,range(n+1+m,n+1+2*m),swp);
 
+    auto V0=FD[0].upper();
     auto h = FD[n].upper();
 
     auto result=ValidatedVectorTaylorFunctionModelDP(m,FD,swp);
-    for (auto i : range(m)) { result[i]=p0f[i]+p1f[i]*(tf-h/2)/h; }
+    for (auto i : range(m)) { result[i]=p0f[i]+three*(one-p0f[i]*p0f[i]/V0/V0)*p1f[i]*(tf-h/2)/h; }
 
     return result;
 }

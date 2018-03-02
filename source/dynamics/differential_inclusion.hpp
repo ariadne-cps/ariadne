@@ -241,10 +241,27 @@ protected:
     virtual Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError> compute_norms(ValidatedVectorFunction const&, Vector<ValidatedVectorFunction> const&, BoxDomainType const&, PositiveFloatDPValue const&, UpperBoxType const&) const override;
 };
 
-enum class DIApproximationKind { ZERO, CONSTANT, PIECEWISE, AFFINE, SINUSOIDAL};
+enum class DIApproximationKind { ZERO, CONSTANT, AFFINE, SINUSOIDAL, PIECEWISE};
 
 std::ostream& operator << (std::ostream& os, const DIApproximationKind& kind) {
-    os << static_cast<std::underlying_type<DIApproximationKind>::type>(kind);
+    switch (kind) {
+        case DIApproximationKind::ZERO:
+            os << "ZERO";
+            break;
+        case DIApproximationKind::CONSTANT:
+            os << "CONSTANT";
+            break;
+        case DIApproximationKind::AFFINE:
+            os << "AFFINE";
+            break;
+        case DIApproximationKind::SINUSOIDAL:
+            os << "SINUSOIDAL";
+            break;
+        case DIApproximationKind::PIECEWISE:
+            os << "PIECEWISE";
+            break;
+    }
+
     return os;
 }
 

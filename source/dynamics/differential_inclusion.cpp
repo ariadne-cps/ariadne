@@ -500,7 +500,7 @@ SinusoidalErrorProcessor::compute_norms(ValidatedVectorFunction const& f, Vector
 
 ErrorType SinusoidalErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
 
-    FloatDPError r(1.0093);
+    FloatDPError r(1.3645);
     FloatDPError result = ((r*r+1u)*Lp*Kp + (r+1u)*h*Kp*((Hp*2u*r + H)*(K+r*Kp)+L*L+(L*3u*r+Lp*r*r*2u)*Lp)*expLambda + (r+1u)/6u*h*(K+Kp)*((H*Kp+L*Lp)*3u+(Hp*K+L*Lp)*4u))/cast_positive(1u-h*L/2u-h*Lp*r)*pow(h,2u)/4u;
 
     return result;
@@ -516,7 +516,7 @@ SingleInputSinusoidalErrorProcessor::compute_norms(ValidatedVectorFunction const
 
 ErrorType SingleInputSinusoidalErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
 
-    FloatDPError r(1.0093);
+    FloatDPError r(1.3645);
     FloatDPError result = ((r+1u)*Kp*((Hp*2u*r+H)*(K+r*Kp)+L*L+(L*3u*r+Lp*r*r*2u)*Lp)*expLambda + (r+1u)/6u*(K+Kp)*((r+1u)*((H*Kp+L*Lp)*3u +(Hp*K+L*Lp)*4u) + (Hp*Kp+Lp*Lp)*8u*(r*r+1u)))/cast_positive(1u-h*L/2u-h*Lp*r)*pow(h,3u)/4u;
 
     return result;
@@ -533,7 +533,7 @@ AdditiveSinusoidalErrorProcessor::compute_norms(ValidatedVectorFunction const& f
 
 ErrorType AdditiveSinusoidalErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
 
-    FloatDPError r(1.0093);
+    FloatDPError r(1.3645);
     FloatDPError result = (Kp*(H*(K+r*Kp)+L*L)*expLambda + (K+Kp)*H*Kp/2u)/cast_positive(1u-h*L/2u)*(r+1u)*pow(h,3u)/4u;
 
     return result;
@@ -590,7 +590,6 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
 
     auto step = 0;
 
-    FloatDPError total_error(0);
     while (possibly(t<FloatDPBounds(tmax,pr))) {
         ARIADNE_LOG(2,"step#:"<<step<<", t:"<<t<<", hsug:"<<hsug << "\n");
         if(possibly(t+hsug>FloatDPBounds(tmax,pr))) {  //FIXME: Check types for timing;
@@ -616,9 +615,6 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
         for (auto i : range(_approximations.size())) {
             this->_approximation = _approximations.at(i);
             ARIADNE_LOG(4,"checking approximation "<<this->_approximation->getKind()<<"\n");
-
-            auto e=this->_approximation->compute_error(f,g,V,h,B);
-            total_error += e;
 
             ValidatedVectorFunctionModelDP current_reach_function;
             ValidatedVectorFunctionModelDP current_evolve_function;
@@ -713,7 +709,8 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
             }
         }
 
-        ARIADNE_LOG(2,"chosen approximation: " << best << "\n");
+        if (_approximations.size() > 1)
+            ARIADNE_LOG(2,"chosen approximation: " << best << "\n");
 
         reach_function = best_reach_function;
         evolve_function = best_evolve_function;
@@ -730,8 +727,6 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
         t=new_t;
         result.append(reach_function);
     }
-
-    std::cout << "    " << evolve_function.range()[0].upper() - 2*V[0].upper() << " " << total_error << " " << total_error.raw()/step << std::endl;
 
     return result;
 }

@@ -500,7 +500,7 @@ SinusoidalErrorProcessor::compute_norms(ValidatedVectorFunction const& f, Vector
 
 ErrorType SinusoidalErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
 
-    FloatDPError r(1.3645);
+    FloatDPError r(1.3645_upper);
     FloatDPError result = ((r*r+1u)*Lp*Kp + (r+1u)*h*Kp*((Hp*2u*r + H)*(K+r*Kp)+L*L+(L*3u*r+Lp*r*r*2u)*Lp)*expLambda + (r+1u)/6u*h*(K+Kp)*((H*Kp+L*Lp)*3u+(Hp*K+L*Lp)*4u))/cast_positive(1u-h*L/2u-h*Lp*r)*pow(h,2u)/4u;
 
     return result;
@@ -570,6 +570,8 @@ InclusionIntegrator::InclusionIntegrator(List<SharedPointer<InclusionIntegratorA
     assert(approximations.size()>0);
 }
 
+static const SizeType NUMBER_OF_PICARD_ITERATES=6;
+
 List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType X0, Real tmax) {
     ARIADNE_LOG(1,"\nf:"<<f<<"\ng:"<<g<<"\nV:"<<V<<"\nX0:"<<X0<<"\ntmax:"<<tmax<<"\n");
 
@@ -580,6 +582,11 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
     assert(f.result_size()==n);
     assert(f.argument_size()==n);
     assert(g.size()==m);
+
+    auto number_of_states = n;
+    auto number_of_inputs = m;
+    auto state_variables = range(0,n);
+    auto time_variable=n;
 
     PositiveFloatDPValue hsug(this->_step_size);
 
@@ -622,12 +629,12 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
             if (this->_approximation->getKind() != DIApproximationKind::PIECEWISE) {
                 auto Phi = this->compute_flow_function(f,g,V,D,h,B);
                 ARIADNE_LOG(5,"Phi="<<Phi<<"\n");
-                assert(Phi.domain()[n].upper()==h);
+                assert(Phi.domain()[time_variable].upper()==h);
 
                 current_reach_function=build_reach_function(evolve_function, Phi, t, new_t);
                 ARIADNE_LOG(5,"current_reach_function="<<current_reach_function<<"\n");
 
-                current_evolve_function=partial_evaluate(current_reach_function,n,new_t);
+                current_evolve_function=partial_evaluate(current_reach_function,time_variable,new_t);
                 ARIADNE_LOG(5,"current_evolve_function="<<current_evolve_function<<"\n");
             } else {
                 InclusionIntegratorPiecewiseApproximation& approx = dynamic_cast<InclusionIntegratorPiecewiseApproximation&>(*this->_approximation);
@@ -637,48 +644,48 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
                 auto swp=this->_sweeper;
                 auto FD=approx.build_flow_domain(D, hlf(h), V);
                 ARIADNE_LOG(6,"FD:"<<FD<<"\n");
-                auto x0f=ValidatedVectorTaylorFunctionModelDP::projection(FD,range(0,n),swp);
+                auto x0f=ValidatedVectorTaylorFunctionModelDP::projection(FD,state_variables,swp);
 
-                auto w1 =approx.build_firsthalf_approximating_function(FD, n, m);
+                auto w1 =approx.build_firsthalf_approximating_function(FD, number_of_states, number_of_inputs);
                 ValidatedVectorTaylorFunctionModelDP& w1f = dynamic_cast<ValidatedVectorTaylorFunctionModelDP&>(w1.reference());
                 ARIADNE_LOG(6,"w1f:"<<w1f<<"\n");
 
-                auto phi1=ValidatedVectorTaylorFunctionModelDP(n,FD,swp);
-                for (auto i : range(n)) { phi1[i]=phi1[i]+cast_singleton(B[i]); }
+                auto phi1=ValidatedVectorTaylorFunctionModelDP(number_of_states,FD,swp);
+                phi1=phi1+cast_singleton(B);
                 ARIADNE_LOG(6,"phi01:"<<phi1<<"\n");
 
-                for (auto i : range(6)) {
-                    phi1=antiderivative(build_f_plus_Gw(phi1, f, g, w1f),n)+x0f;
+                for (auto i : range(NUMBER_OF_PICARD_ITERATES)) {
+                    phi1=antiderivative(build_f_plus_Gw(phi1, f, g, w1f),time_variable)+x0f;
                 }
-                ARIADNE_LOG(7,(derivative(phi1,n) - build_f_plus_Gw(phi1, f, g, w1f)).range()<<"\n");
+                ARIADNE_LOG(7,(derivative(phi1,time_variable) - build_f_plus_Gw(phi1, f, g, w1f)).range()<<"\n");
                 PositiveFloatDPValue intermediate_t=cast_positive(cast_exact((t+hlf(h)).lower()));
 
                 current_reach_function=build_reach_function(evolve_function, phi1, t, intermediate_t);
                 ARIADNE_LOG(5,"current_reach_function="<<current_reach_function<<"\n");
 
-                current_evolve_function=partial_evaluate(current_reach_function,n,intermediate_t);
+                current_evolve_function=partial_evaluate(current_reach_function,time_variable,intermediate_t);
                 ARIADNE_LOG(5,"current_evolve_function="<<current_evolve_function<<"\n");
 
                 auto D2 = cast_exact_box(current_evolve_function.range());
                 auto FD2=approx.build_flow_domain(D2, hlf(h), V);
-                auto w2 =approx.build_secondhalf_approximating_function(FD2, n, m);
+                auto w2 =approx.build_secondhalf_approximating_function(FD2, number_of_states, number_of_inputs);
                 ValidatedVectorTaylorFunctionModelDP& w2f = dynamic_cast<ValidatedVectorTaylorFunctionModelDP&>(w2.reference());
                 ARIADNE_LOG(6,"w2f:"<<w2f<<"\n");
 
-                auto x0f2=ValidatedVectorTaylorFunctionModelDP::projection(FD2,range(0,n),swp);
+                auto x0f2=ValidatedVectorTaylorFunctionModelDP::projection(FD2,state_variables,swp);
 
-                auto phi2=ValidatedVectorTaylorFunctionModelDP(n,FD2,swp);
-                for (auto i : range(n)) { phi2[i]=phi2[i]+cast_singleton(B[i]); }
+                auto phi2=ValidatedVectorTaylorFunctionModelDP(number_of_states,FD2,swp);
+                phi2=phi2+cast_singleton(B);
                 ARIADNE_LOG(6,"phi02:"<<phi2<<"\n");
 
-                for (auto i : range(6)) {
-                    phi2=antiderivative(build_f_plus_Gw(phi2, f, g, w2f),n)+x0f2;
+                for (auto i : range(NUMBER_OF_PICARD_ITERATES)) {
+                    phi2=antiderivative(build_f_plus_Gw(phi2, f, g, w2f),time_variable)+x0f2;
                 }
 
-                for (auto i : range(n)) {
+                for (auto i : state_variables) {
                     phi2[i].set_error(phi2[i].error()+e);
                 }
-                ARIADNE_LOG(7,(derivative(phi2,n) - build_f_plus_Gw(phi2, f, g, w2f)).range()<<"\n");
+                ARIADNE_LOG(7,(derivative(phi2,time_variable) - build_f_plus_Gw(phi2, f, g, w2f)).range()<<"\n");
 
                 current_reach_function=build_secondhalf_piecewise_reach_function(current_evolve_function, phi2, m, intermediate_t, new_t);
                 ARIADNE_LOG(5,"current_reach_function="<<current_reach_function<<"\n");
@@ -691,12 +698,12 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
                 best_reach_function = current_reach_function;
                 best_evolve_function = current_evolve_function;
                 best = this->_approximation->getKind();
-                for (auto i: range(n)) {
+                for (auto i: state_variables) {
                     best_total_diameter += best_evolve_function.range()[i].width().raw();
                 }
             } else {
                 FloatDP current_total_diameter(0);
-                for (auto i: range(n)) {
+                for (auto i: state_variables) {
                     current_total_diameter += current_evolve_function.range()[i].width().raw();
                 }
                 if (current_total_diameter < best_total_diameter) {
@@ -833,22 +840,28 @@ compute_flow_function(ValidatedVectorFunction f, Vector<ValidatedVectorFunction>
     auto swp=this->_sweeper;
     auto FD=_approximation->build_flow_domain(D, h, V);
     ARIADNE_LOG(6,"FD:"<<FD<<"\n");
-    auto x0f=ValidatedVectorTaylorFunctionModelDP::projection(FD,range(0,n),swp);
 
-    auto w =_approximation->build_approximating_function(FD, n, m);
+    auto number_of_states = n;
+    auto number_of_inputs = m;
+    auto state_variables = range(0,n);
+    auto time_variable = n;
+
+    auto x0f=ValidatedVectorTaylorFunctionModelDP::projection(FD,state_variables,swp);
+
+    auto w =_approximation->build_approximating_function(FD, number_of_states, number_of_inputs);
     ValidatedVectorTaylorFunctionModelDP& wf = dynamic_cast<ValidatedVectorTaylorFunctionModelDP&>(w.reference());
     ARIADNE_LOG(6,"wf:"<<wf<<"\n");
 
-    auto phi=ValidatedVectorTaylorFunctionModelDP(n,FD,swp);
-    for (auto i : range(n)) { phi[i]=phi[i]+cast_singleton(B[i]); }
+    auto phi=ValidatedVectorTaylorFunctionModelDP(number_of_states,FD,swp);
+    phi=phi+cast_singleton(B);
     ARIADNE_LOG(6,"phi0:"<<phi<<"\n");
 
-    for (auto i : range(6)) {
-        phi=antiderivative(build_f_plus_Gw(phi, f, g, wf),n)+x0f;
+    for (auto i : range(NUMBER_OF_PICARD_ITERATES)) {
+        phi=antiderivative(build_f_plus_Gw(phi, f, g, wf),time_variable)+x0f;
     }
-    ARIADNE_LOG(7,(derivative(phi,n) - build_f_plus_Gw(phi, f, g, wf)).range()<<"\n");
+    ARIADNE_LOG(7,(derivative(phi,time_variable) - build_f_plus_Gw(phi, f, g, wf)).range()<<"\n");
 
-    for (auto i : range(n)) {
+    for (auto i : state_variables) {
         phi[i].set_error(phi[i].error()+e);
     }
 

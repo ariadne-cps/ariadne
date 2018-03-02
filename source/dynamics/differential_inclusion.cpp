@@ -33,15 +33,25 @@ Box<UpperIntervalType> apply(VectorFunction<ValidatedTag>const& f, const Box<Exa
     return apply(f,Box<UpperIntervalType>(bx));
 }
 
-Boolean is_identity_matrix(Vector<ValidatedVectorFunction> const& g, UpperBoxType const& B) {
+Boolean inputs_are_additive(Vector<ValidatedVectorFunction> const &g, UpperBoxType const &B) {
 
-    for (SizeType m : range(g.size())) {
-        for (SizeType n: range(g[m].result_size())) {
-            if (m == n) {
-                if (definitely(g[m][n].evaluate(cast_singleton(B)) != 1.0_exact))
+    SizeType m = g.size();
+    SizeType n = g[0].result_size();
+
+    if (m > n)
+        return false;
+
+    for (SizeType j: range(n)) {
+        bool foundOne = false;
+        for (SizeType i : range(m)) {
+            auto eval = g[i][j].evaluate(cast_singleton(B));
+            if (!foundOne) {
+                if (definitely(eval == 1.0_exact))
+                    foundOne = true;
+                else if (definitely(eval != 0.0_exact))
                     return false;
             } else {
-                if (definitely(g[m][n].evaluate(cast_singleton(B)) != 0.0_exact))
+                if (possibly(eval != 0.0_exact))
                     return false;
             }
         }
@@ -367,15 +377,6 @@ ErrorType ConstantErrorProcessor::compute_error(FloatDPError const& K,FloatDPErr
     return result;
 }
 
-/*
-
-ErrorType ConstantErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
-    FloatDPError result = pow(h,2u)*((K+Kp)*Lp/3u + Kp*(L+Lp)*expLambda*2u);
-    return result;
-}
-*/
-
-
 AdditiveConstantErrorProcessor::AdditiveConstantErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B)
     : InclusionErrorProcessor(f,g,V,h,B) {}
 
@@ -516,7 +517,7 @@ SingleInputSinusoidalErrorProcessor::compute_norms(ValidatedVectorFunction const
 
 ErrorType SingleInputSinusoidalErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
 
-    FloatDPError r(1.3645);
+    FloatDPError r(1.3645_upper);
     FloatDPError result = ((r+1u)*Kp*((Hp*2u*r+H)*(K+r*Kp)+L*L+(L*3u*r+Lp*r*r*2u)*Lp)*expLambda + (r+1u)/6u*(K+Kp)*((r+1u)*((H*Kp+L*Lp)*3u +(Hp*K+L*Lp)*4u) + (Hp*Kp+Lp*Lp)*8u*(r*r+1u)))/cast_positive(1u-h*L/2u-h*Lp*r)*pow(h,3u)/4u;
 
     return result;
@@ -533,7 +534,7 @@ AdditiveSinusoidalErrorProcessor::compute_norms(ValidatedVectorFunction const& f
 
 ErrorType AdditiveSinusoidalErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
 
-    FloatDPError r(1.3645);
+    FloatDPError r(1.3645_upper);
     FloatDPError result = (Kp*(H*(K+r*Kp)+L*L)*expLambda + (K+Kp)*H*Kp/2u)/cast_positive(1u-h*L/2u)*(r+1u)*pow(h,3u)/4u;
 
     return result;
@@ -870,7 +871,7 @@ compute_flow_function(ValidatedVectorFunction f, Vector<ValidatedVectorFunction>
 
 
 ErrorType InclusionIntegratorZeroApproximation::compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const {
-    if (is_identity_matrix(g,B))
+    if (inputs_are_additive(g, B))
         return AdditiveZeroErrorProcessor(f,g,V,h,B).process();
     else
         return ZeroErrorProcessor(f,g,V,h,B).process();
@@ -878,14 +879,14 @@ ErrorType InclusionIntegratorZeroApproximation::compute_error(ValidatedVectorFun
 
 
 ErrorType InclusionIntegratorConstantApproximation::compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const {
-    if (is_identity_matrix(g,B))
+    if (inputs_are_additive(g, B))
         return AdditiveConstantErrorProcessor(f,g,V,h,B).process();
     else
         return ConstantErrorProcessor(f,g,V,h,B).process();
 }
 
 ErrorType InclusionIntegratorPiecewiseApproximation::compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const {
-    if (is_identity_matrix(g,B))
+    if (inputs_are_additive(g, B))
         return AdditivePiecewiseErrorProcessor(f,g,V,h,B).process();
     else if (g.size() == 1)
         return SingleInputPiecewiseErrorProcessor(f,g,V,h,B).process();
@@ -894,7 +895,7 @@ ErrorType InclusionIntegratorPiecewiseApproximation::compute_error(ValidatedVect
 }
 
 ErrorType InclusionIntegratorAffineApproximation::compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const {
-    if (is_identity_matrix(g,B))
+    if (inputs_are_additive(g, B))
         return AdditiveAffineErrorProcessor(f,g,V,h,B).process();
     else if (g.size() == 1)
         return SingleInputAffineErrorProcessor(f,g,V,h,B).process();
@@ -904,7 +905,7 @@ ErrorType InclusionIntegratorAffineApproximation::compute_error(ValidatedVectorF
 
 
 ErrorType InclusionIntegratorSinusoidalApproximation::compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const {
-    if (is_identity_matrix(g,B))
+    if (inputs_are_additive(g, B))
         return AdditiveSinusoidalErrorProcessor(f,g,V,h,B).process();
     else if (g.size() == 1)
         return SingleInputSinusoidalErrorProcessor(f,g,V,h,B).process();

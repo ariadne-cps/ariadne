@@ -67,7 +67,7 @@ Bool refines(Vector<UpperIntervalType> const& v1, UpperBoxType const& bx2) {
 
 Box<Interval<FloatDPValue>> over_approximation(Box<Interval<Real>> const&);
 
-Boolean is_identity_matrix(Vector<ValidatedVectorFunction> const& g, UpperBoxType const& B);
+Boolean inputs_are_additive(Vector<ValidatedVectorFunction> const &g, UpperBoxType const &B);
 
 template<class F1, class F2, class F3, class... FS> decltype(auto) combine(F1 const& f1, F2 const& f2, F3 const& f3, FS const& ... fs) {
     return combine(combine(f1,f2),f3,fs...); }

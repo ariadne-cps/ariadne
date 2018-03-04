@@ -178,7 +178,7 @@ class TestConstraintSolver
     Void test_feasible() {
 
         List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(1);
-        EffectiveConstraint c = (x[0]-2.0<=0);
+        EffectiveConstraint c = (x[0]-2<=0);
 
         List<ValidatedConstraint> constraints;
         constraints.append(c);
@@ -187,13 +187,13 @@ class TestConstraintSolver
 
         ARIADNE_TEST_PRINT(constraints);
 
-        ExactBoxType domain1({{1.9,2.0}});
+        ExactBoxType domain1({{1.9375,2.0}});
         ARIADNE_TEST_ASSERT(definitely(contractor.feasible(domain1,constraints).first));
 
-        ExactBoxType domain2({{2.01,2.5}});
+        ExactBoxType domain2({{2.015625,2.5}});
         ARIADNE_TEST_ASSERT(!possibly(contractor.feasible(domain2,constraints).first));
 
-        ExactBoxType domain3({{2.0,2.01}});
+        ExactBoxType domain3({{2.0,2.015625}});
         ARIADNE_TEST_ASSERT(is_indeterminate(contractor.feasible(domain3,constraints).first));
     }
 };

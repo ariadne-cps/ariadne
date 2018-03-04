@@ -189,6 +189,16 @@ template<class P> class Number
     template<class PR, EnableIf<IsSame<PR,DoublePrecision>> =dummy>
     FloatType<P,PR> get(PR pr) const { return pointer()->_get(P(),pr); }
 
+    //! \brief Get the value of the number as a multiple-precision floating-point ball.
+    template<class WP, EnableIf<IsWeaker<WP,P>> =dummy, EnableIf<IsSame<WP,MetricTag>> =dummy>
+    FloatType<WP,DoublePrecision> get(WP par, DoublePrecision const& prec, DoublePrecision const& errprec) const { return pointer()->_get(WP(),prec,errprec); }
+    //! \brief Get the value of the number as a multiple-precision floating-point ball, with double-precision error.
+    template<class WP, EnableIf<IsWeaker<WP,P>> =dummy, EnableIf<IsSame<WP,MetricTag>> =dummy>
+    FloatType<WP,MultiplePrecision,DoublePrecision> get(WP par, MultiplePrecision const& prec, DoublePrecision const& errprec) const { return pointer()->_get(WP(),prec,errprec); }
+    //! \brief Get the value of the number as a multiple-precision floating-point ball.
+    template<class WP, EnableIf<IsWeaker<WP,P>> =dummy, EnableIf<IsSame<WP,MetricTag>> =dummy>
+    FloatType<WP,MultiplePrecision,MultiplePrecision> get(WP par, MultiplePrecision const& prec, MultiplePrecision const& errprec) const { return pointer()->_get(WP(),prec,errprec); }
+
     //! \brief Get the value of the number as a double-precision floating-point type
     FloatType<P,DoublePrecision> get() const { return pointer()->_get(WP()); }
     //! \brief Get the value of the number as a double-precision floating-point type

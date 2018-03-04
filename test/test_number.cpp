@@ -22,7 +22,9 @@
  */
 
 #include "numeric/builtin.hpp"
+#include "numeric/dyadic.hpp"
 #include "numeric/rational.hpp"
+#include "numeric/float-user.hpp"
 #include "numeric/number.hpp"
 
 #include "test.hpp"
@@ -37,6 +39,7 @@ template<class Y> class TestNumber
   private:
     Void test_concept();
     Void test_class();
+    Void test_get();
     Void test_comparisons();
 };
 
@@ -62,6 +65,7 @@ TestNumber<Y>::test()
 {
     //ARIADNE_TEST_CALL(test_concept());
     ARIADNE_TEST_CALL(test_class());
+    ARIADNE_TEST_CALL(test_get());
     ARIADNE_TEST_CALL(test_comparisons());
 }
 
@@ -86,6 +90,67 @@ TestNumber<Y>::test_concept()
     cout << y;
 }
 
+template<class F, class FE> Bool models(Ball<F,FE> const& x, Rational const& q) {
+    return abs(Dyadic(x.value().raw())-q)<=Dyadic(x.error().raw()); }
+template<class F> Bool models(Bounds<F> const& x, Rational const& q) {
+    return Dyadic(x.lower().raw())<=q && q <= Dyadic(x.upper().raw()); }
+template<class F> Bool models(LowerBound<F> const& x, Rational const& q) {
+    return Dyadic(x.raw())<=q; }
+template<class F> Bool models(UpperBound<F> const& x, Rational const& q) {
+    return q<=Dyadic(x.raw()); }
+
+
+template<class Y> void test_number_get() {
+    Rational q=3/5_q;
+    Real r(q);
+    Y y(r);
+    DoublePrecision dp;
+    MultiplePrecision mp(192);
+    MultiplePrecision mpe(128);
+
+    MetricTag metric;
+
+    ARIADNE_TEST_WITHIN(y.get(ApproximateTag(),dp),q,Dyadic(TwoExp(-52)));
+    ARIADNE_TEST_WITHIN(y.get(ApproximateTag(),mp),q,Dyadic(TwoExp(-128)));
+
+    ARIADNE_TEST_BINARY_PREDICATE(models,y.get(LowerTag(),dp),q);
+    ARIADNE_TEST_BINARY_PREDICATE(models,y.get(LowerTag(),mp),q);
+
+    ARIADNE_TEST_BINARY_PREDICATE(models,y.get(UpperTag(),dp),q);
+    ARIADNE_TEST_BINARY_PREDICATE(models,y.get(UpperTag(),mp),q);
+
+    ARIADNE_TEST_BINARY_PREDICATE(models,y.get(BoundedTag(),dp),q);
+    ARIADNE_TEST_BINARY_PREDICATE(models,y.get(BoundedTag(),mp),q);
+
+    ARIADNE_TEST_BINARY_PREDICATE(models,y.get(MetricTag(),dp),q);
+    ARIADNE_TEST_BINARY_PREDICATE(models,y.get(MetricTag(),mp),q);
+
+    ARIADNE_TEST_BINARY_PREDICATE(models,y.get(metric,dp,dp),q);
+    ARIADNE_TEST_BINARY_PREDICATE(models,y.get(metric,mp,dp),q);
+    ARIADNE_TEST_BINARY_PREDICATE(models,y.get(metric,mp,mpe),q);
+
+    ARIADNE_TEST_SAME_TYPE(decltype(y.get(metric,dp,dp)),FloatDPBall);
+    ARIADNE_TEST_SAME_TYPE(decltype(y.get(metric,mp,dp)),FloatMPDPBall);
+    ARIADNE_TEST_SAME_TYPE(decltype(y.get(metric,mp,mpe)),FloatMPBall);
+}
+
+template<> void test_number_get<ExactNumber>() { }
+
+template<> void test_number_get<ApproximateNumber>() {
+    Rational q=3/5_q;
+    ApproximateNumber y(q);
+    DoublePrecision dp;
+    MultiplePrecision mp(128);
+    ARIADNE_TEST_WITHIN(y.get(ApproximateTag(),dp),q,3e-16);
+    ARIADNE_TEST_WITHIN(y.get(ApproximateTag(),mp),q,3e-16);
+}
+
+template<class Y> Void
+TestNumber<Y>::test_get()
+{
+    test_number_get<Y>();
+
+}
 
 template<class Y> Void
 TestNumber<Y>::test_class()

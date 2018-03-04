@@ -74,6 +74,7 @@ template<class F, class FE> class Ball
     explicit Ball<F,FE>(F const& v, PRE pre) : _v(v), _e(0.0,pre) { }
     explicit Ball<F,FE>(F const& v, FE const& e) : _v(v), _e(e) { }
     Ball<F,FE>(Value<F> const& value, Error<FE> const& error);
+    Ball<F,FE>(Bounds<F> const& x, PRE pre);
     Ball<F,FE>(LowerBound<F> const& lower, UpperBound<F> const& upper) = delete;
 
     Ball<F,FE>(ExactDouble d, PR pr);
@@ -85,6 +86,11 @@ template<class F, class FE> class Ball
         Ball<F,FE>(const Real& r, PR pr);
         Ball<F,FE>(const Ball<F,FE>& x, PR pr);
     Ball<F,FE>(const ValidatedNumber& y, PR pr);
+
+    // FIXME: Constructors for other types
+        Ball<F,FE>(const Rational& q, PR pr, PRE pre);
+        Ball<F,FE>(const Real& q, PR pr, PRE pre);
+    Ball<F,FE>(const ValidatedNumber& y, PR pr, PRE pre);
 
     explicit Ball<F,FE>(Bounds<F> const& x);
     Ball<F,FE>(Value<F> const& x);

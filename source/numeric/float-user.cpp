@@ -42,6 +42,9 @@ template<class FE, class FLT, DisableIf<IsSame<FE,FLT>> =dummy> inline FE _make_
 template<class FE, class FLT, EnableIf<IsSame<FE,FLT>> =dummy> inline FE _make_error(FLT const& x) {
     return x; }
 
+template<class FE, class FLT, class PRE> inline FE _make_error(FLT const& x, PRE pre) {
+    return FE(Dyadic(x),upward,pre); }
+
 FloatDP set(RoundUpward rnd, FloatMP const& x, DoublePrecision pr) { return FloatDP(Dyadic(x),rnd,pr); }
 FloatDP set(RoundDownward rnd, FloatMP const& x, DoublePrecision pr) { return FloatDP(Dyadic(x),rnd,pr); }
 
@@ -198,8 +201,31 @@ template<class F, class FE> Ball<F,FE>::Ball(ValidatedNumber const& y, PR pr)
     : Ball(y.get(MetricTag(),pr)) {
 }
 
+template<class F, class FE> Ball<F,FE>::Ball(Bounds<F> const& x, PRE pre)
+    : _v(x.value_raw()) , _e(_make_error<FE>(x.error_raw(),pre)) {
+}
+
+
+
+template<class F, class FE> Ball<F,FE>::Ball(Real const& r, PR pr, PRE pre)
+    : Ball(r.get(pr),pre) {
+}
+
+template<class F, class FE> Ball<F,FE>::Ball(Rational const& q, PR pr, PRE pre)
+    : _v(F(q,to_nearest,pr)), _e(abs(Rational(_v)-q),upward,pre) {
+}
+
+template<class F, class FE> Ball<F,FE>::Ball(ValidatedNumber const& y, PR pr, PRE pre)
+    : Ball(y.get(MetricTag(),pr,pre)) {
+}
+
 template<class F, class FE> Ball<F,FE> Ball<F,FE>::create(ValidatedNumber const& y) const {
     return Ball<F,FE>(y,this->precision());
+}
+
+template<class F, class FE> Ball<F,FE>& Ball<F,FE>::operator=(ValidatedNumber const& y)
+{
+    return *this = Ball(y,this->precision(),this->error_precision());
 }
 
 template<class F, class FE> Ball<F,FE>::operator ValidatedNumber() const {

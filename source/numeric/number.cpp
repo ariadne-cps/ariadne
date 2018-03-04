@@ -74,6 +74,9 @@ Dyadic::operator ExactNumber() const { return ExactNumber(new NumberWrapper<Dyad
 Rational::operator ExactNumber() const { return ExactNumber(new NumberWrapper<Rational>(*this)); }
 Real::operator EffectiveNumber() const { return EffectiveNumber(new NumberWrapper<Real>(*this)); }
 
+FloatDPBall NumberInterface::_get(MetricTag p, DoublePrecision pr) const { return this->_get(p,pr,pr); }
+FloatMPBall NumberInterface::_get(MetricTag p, MultiplePrecision pr) const { return this->_get(p,pr,pr); }
+
 template class NumberWrapper<FloatDPApproximation>;
 //template class NumberWrapper<FloatDPLowerBound>;
 //template class NumberWrapper<FloatDPUpperBound>;

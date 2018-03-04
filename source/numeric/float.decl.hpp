@@ -148,6 +148,8 @@ using PositiveFloatDPBounds = PositiveFloatBounds<DoublePrecision>;
 using PositiveFloatDPBall = PositiveFloatBall<DoublePrecision>;
 using PositiveFloatDPValue = PositiveFloatValue<DoublePrecision>;
 
+using FloatMPDPBall = FloatBall<MultiplePrecision,DoublePrecision>; //!< A ball around a number, with the approximating value represented in multiple precision, and the error in double precision.
+
 using FloatMPApproximation = FloatApproximation<MultiplePrecision>; //!<
 using FloatMPLowerBound = FloatLowerBound<MultiplePrecision>; //!<
 using FloatMPUpperBound = FloatUpperBound<MultiplePrecision>; //!<

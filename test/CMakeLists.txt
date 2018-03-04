@@ -1,9 +1,9 @@
 set(UNIT_TESTS_NUMERIC
     test_logical
     test_real
+    test_number
     test_float
     test_validated_float
-    test_interval
 )
 
 set(UNIT_TESTS_ALGEBRA
@@ -25,6 +25,8 @@ set(UNIT_TESTS_FUNCTION
 )
 
 set(UNIT_TESTS_GEOMETRY
+    test_interval
+    test_box
     test_function_sets
     test_affine_sets
     test_grid_set

@@ -203,4 +203,8 @@ TestNumber<ExactNumber>::test_comparisons() {
     ARIADNE_TEST_BINARY_PREDICATE(operator<,y1,pinf);
     ARIADNE_TEST_BINARY_PREDICATE(operator<,ninf,y1);
 
+    ARIADNE_TEST_ASSERT(definitely(ValidatedUpperNumber(3)<ValidatedLowerNumber(4)));
+    ARIADNE_TEST_ASSERT(possibly(ValidatedUpperNumber(4)>ValidatedLowerNumber(3)));
+    ARIADNE_TEST_ASSERT(not definitely(ValidatedUpperNumber(4)>ValidatedLowerNumber(3)));
+
 }

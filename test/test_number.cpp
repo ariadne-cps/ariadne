@@ -40,6 +40,7 @@ template<class Y> class TestNumber
     Void test_concept();
     Void test_class();
     Void test_get();
+    Void test_operations();
     Void test_comparisons();
 };
 
@@ -66,6 +67,7 @@ TestNumber<Y>::test()
     //ARIADNE_TEST_CALL(test_concept());
     ARIADNE_TEST_CALL(test_class());
     ARIADNE_TEST_CALL(test_get());
+    ARIADNE_TEST_CALL(test_operations());
     ARIADNE_TEST_CALL(test_comparisons());
 }
 
@@ -152,9 +154,50 @@ TestNumber<Y>::test_get()
 
 }
 
+FloatDPValue max(Int y1, FloatDPValue x2) { return max(FloatDPValue(y1,x2.precision()),x2); }
+
 template<class Y> Void
 TestNumber<Y>::test_class()
 {
+    Int n=1; Integer z=1; FloatDPValue v(3); FloatDPBounds b(3);
+    ExactNumber yn=n; ExactNumber yz=z; ExactNumber yv=v; ValidatedNumber yb=b;
+
+    ARIADNE_TEST_EQUAL(yz.class_name(),"Integer");
+    ARIADNE_TEST_EQUAL(yv.class_name(),"FloatDPValue");
+    ARIADNE_TEST_EQUAL(yb.class_name(),"FloatDPBounds");
+}
+
+template<class Y> Void
+TestNumber<Y>::test_operations()
+{
+    Int n=1; Integer z=1; FloatDPValue v(3); FloatDPBounds b(3);
+    ExactNumber yn=n; ExactNumber yz=z; ExactNumber yv=v; ValidatedNumber yb=b;
+    ValidatedErrorNumber en=n; ValidatedErrorNumber ev=v;
+
+    ARIADNE_TEST_FAIL(add(yv,yv));
+    ARIADNE_TEST_PRINT(add(yb,yb));
+    ARIADNE_TEST_PRINT(add(yb,yv));
+//    ARIADNE_TEST_PRINT(add(b,z));
+    ARIADNE_TEST_PRINT(add(b,yb));
+    ARIADNE_TEST_PRINT(add(yb,yn));
+
+    ValidatedErrorNumber ym=max(en,ev);
+    ARIADNE_TEST_EXECUTE(max(en,ev));
+    ARIADNE_TEST_PRINT(max(en,ev).pointer());
+    ARIADNE_TEST_PRINT(max(en,ev).class_name());
+    ARIADNE_TEST_PRINT(max(en,ev));
+
+    ARIADNE_TEST_EXECUTE(add(ExactNumber(1),ExactNumber(FloatDPValue(2))));
+    ARIADNE_TEST_PRINT(add(ExactNumber(FloatDPValue(1)),ExactNumber(FloatDPValue(2))));
+
+    ARIADNE_TEST_PRINT(max(ExactNumber(1),ExactNumber(2)));
+    ARIADNE_TEST_PRINT(max(ExactNumber(FloatDPValue(1)),ExactNumber(FloatDPValue(2))));
+    ARIADNE_TEST_EXECUTE(max(ExactNumber(1),ExactNumber(FloatDPValue(2))));
+
+    ARIADNE_TEST_PRINT(max(ExactNumber(1),ExactNumber(FloatDPValue(2))));
+
+    max(1,FloatDPValue(3));
+//    max(1u,FloatDPError(3u));
 }
 
 template<class Y> Void
@@ -163,6 +206,7 @@ TestNumber<Y>::test_comparisons() {
 
 template<> Void
 TestNumber<ExactNumber>::test_comparisons() {
+    return;
     ARIADNE_TEST_CONSTRUCT(ExactNumber,y1,(Rational(2,3)));
     ARIADNE_TEST_CONSTRUCT(ExactNumber,y2,(Rational(683,1024)));
     ARIADNE_TEST_CONSTRUCT(ExactNumber,pinf,(+ExactDouble::infinity()));

@@ -117,6 +117,24 @@ class DeclareNumberOperators {
 
 };
 
+template<class X, class P=Void> struct HasOperatorNumber {
+    template<class XX, class PP, class=decltype(declval<XX>().operator Number<PP>())> static True test(int);
+    template<class XX, class PP> static False test(...);
+    static const bool value = decltype(test<X,P>(1))::value;
+};
+
+template<class X, class P=Void> struct HasOperatorStrongerNumber {
+    template<class XX, class PP, class=decltype(Number<P>(declval<XX>().operator Number<Paradigm<XX>>()))> static True test(int);
+    template<class XX, class PP> static False test(...);
+    static const bool value = decltype(test<X,P>(1))::value;
+};
+
+template<class X> struct HasOperatorNumber<X,Void> {
+    template<class XX, class=decltype(declval<XX>().operator Number<Paradigm<XX>>())> static True test(int);
+    template<class XX> static False test(...);
+    static const bool value = decltype(test<X>(1))::value;
+};
+
 //! \ingroup NumericModule
 //! \brief Generic numbers with computational paradigm \a P, which may be %EffectiveTag, %ValidatedTag, %UpperTag, %LowerTag or %ApproximateTag.
 template<class P> class Number
@@ -130,7 +148,7 @@ template<class P> class Number
     typedef Weaker<P,NP> SP;
     typedef Widen<P> WP;
     //friend class DispatchGenericField<Number<P>>;
-  private:
+  private: public:
     Handle<NumberInterface> _handle;
     NumberInterface const* pointer() const { return _handle.pointer(); }
     NumberInterface const& ref() const { return _handle.ref(); }
@@ -178,15 +196,15 @@ template<class P> class Number
 
     //! \brief Get the value of the number as a double-precision floating-point type
     template<class WP, EnableIf<IsWeaker<WP,P>> =dummy>
-    FloatType<WP,DoublePrecision> get(WP par) const { return pointer()->_get(WP()); }
-    //! \brief Get the value of the number as a double-precision floating-point type
-    template<class WP, EnableIf<IsWeaker<WP,P>> =dummy>
     FloatType<WP,DoublePrecision> get(WP par, DoublePrecision const& prec) const { return pointer()->_get(WP(),prec); }
     //! \brief Get the value of the number as a multiple-precision floating-point type
     template<class WP, EnableIf<IsWeaker<WP,P>> =dummy>
     FloatType<WP,MultiplePrecision> get(WP par, MultiplePrecision const& prec) const { return pointer()->_get(WP(),prec); }
     //! \brief Get the value of the number as a double-precision floating-point type
     template<class PR, EnableIf<IsSame<PR,DoublePrecision>> =dummy>
+    FloatType<P,PR> get(PR pr) const { return pointer()->_get(P(),pr); }
+    //! \brief Get the value of the number as a multiple-precision floating-point type
+    template<class PR, EnableIf<IsSame<PR,MultiplePrecision>> =dummy>
     FloatType<P,PR> get(PR pr) const { return pointer()->_get(P(),pr); }
 
     //! \brief Get the value of the number as a multiple-precision floating-point ball.
@@ -202,7 +220,7 @@ template<class P> class Number
     //! \brief Get the value of the number as a double-precision floating-point type
     FloatType<P,DoublePrecision> get() const { return pointer()->_get(WP()); }
     //! \brief Get the value of the number as a double-precision floating-point type
-    FloatType<P,DoublePrecision> get(DoublePrecision const& prec) const { return pointer()->_get(WP()); }
+    FloatType<P,DoublePrecision> get(DoublePrecision const& prec) const { return pointer()->_get(WP(),prec); }
     //! \brief Get the value of the number as a multiple-precision floating-point type
     FloatType<P,MultiplePrecision> get(MultiplePrecision const& prec) const { return pointer()->_get(WP(),prec); }
 
@@ -219,9 +237,9 @@ template<class P> class Number
     friend Number<P>& operator*=(Number<P>& y1, Number<P> const& y2) { return y1=y1*y2; }
     friend Number<P>& operator/=(Number<P>& y1, Number<NP> const& y2) { return y1=y1/y2; }
 
-    friend Number<NP> pos(Number<P> const& y) { return Number<NP>(y.ref()._apply(Pos())); }
+    friend Number<P> pos(Number<P> const& y) { return Number<P>(y.ref()._apply(Pos())); }
     friend Number<NP> neg(Number<P> const& y) { return Number<NP>(y.ref()._apply(Neg())); }
-    friend Number<NP> sqr(Number<P> const& y) { return Number<NP>(y.ref()._apply(Sqr())); }
+    friend Number<P> sqr(Number<P> const& y) { return Number<P>(y.ref()._apply(Sqr())); }
     friend Number<NP> rec(Number<P> const& y) { return Number<NP>(y.ref()._apply(Rec())); }
     friend Number<P> add(Number<P> const& y1, Number<P> const& y2) { return Number<P>(y1.ref()._apply(Add(),&y2.ref())); }
     friend Number<P> sub(Number<P> const& y1, Number<NP> const& y2) { return Number<P>(y1.ref()._apply(Sub(),&y2.ref())); }
@@ -239,9 +257,9 @@ template<class P> class Number
     friend Number<P> pow(Number<P> const& y, Nat m) { return Number<P>(y.ref()._apply(Pow(),m)); }
     friend Number<SP> pow(Number<P> const& y, Int n) { return Number<SP>(y.ref()._apply(Pow(),n)); }
 
-    friend Number<P> abs(Number<P> const& y) { return Number<P>(y.ref()._apply(Abs())); }
-    friend Number<P> max(Number<P> const& y1, Number<P> const& y2) { return Number<P>(y1.ref()._apply(Min(),&y2.ref())); }
-    friend Number<P> min(Number<P> const& y1, Number<P> const& y2) { return Number<P>(y1.ref()._apply(Max(),&y2.ref())); }
+    friend Positive<Number<SP>> abs(Number<P> const& y) { return Number<SP>(y.ref()._apply(Abs())); }
+    friend Number<P> max(Number<P> const& y1, Number<P> const& y2) { return Number<P>(y1.ref()._apply(Max(),&y2.ref())); }
+    friend Number<P> min(Number<P> const& y1, Number<P> const& y2) { return Number<P>(y1.ref()._apply(Min(),&y2.ref())); }
 
     friend LogicalType<Equality<P>> operator==(Number<P> const& y1, Number<NP> const& y2) {
         return LogicalType<Equality<P>>(y1.ref()._equals(y2.ref())); }
@@ -252,16 +270,41 @@ template<class P> class Number
     friend LogicalType<LessThan<P>> operator<=(Number<P> const& y1, Number<Negated<P>> const& y2) { return !(y1>y2); }
     friend LogicalType<LessThan<Negated<P>>> operator>=(Number<P> const& y1, Number<Negated<P>> const& y2) { return !(y1<y2); }
 
-    friend OutputStream& operator<<(OutputStream& os, Number<P> const& y) { return os << y.ref(); }
+    String class_name() const { return this->ref()._class_name(); }
+
+    friend OutputStream& operator<<(OutputStream& os, Number<P> const& y) { return y.ref()._write(os); }
 };
 
 
 
-template<class P> class Positive<Number<P>> : Number<P> {
-    explicit Positive<Number<P>>(Number<P>const& y);
-};
 template<class P> Positive<Number<P>> cast_positive(Number<P> y);
 
+class PositiveNumberOperations {
+    friend Positive<ValidatedUpperNumber> mag(Positive<ValidatedUpperNumber> const& y);
+};
+
+template<class P> class Positive<Number<P>> : public Number<P>, public PositiveNumberOperations {
+    friend Number<P> const& unsign(Positive<Number<P>> const& y) { return y; }
+  public:
+    Positive<Number<P>>() : Number<P>() { }
+    explicit Positive<Number<P>>(Number<P> const& y) : Number<P>(y) { }
+    template<class N, EnableIf<IsConstructible<ExactNumber,N>> =dummy> Positive<Number<P>>(const Positive<N>& n) : Number<P>(ExactNumber(static_cast<N const&>(n))) { }
+//    template<class N, EnableIf<IsBuiltinUnsignedIntegral<N>> =dummy> Positive<Number<P>>(const N& n) : Number<P>(Integer(n)) { }
+    template<class N, EnableIf<IsConstructible<ExactNumber,N>> =dummy> Positive<Number<P>>(const N& n) : Number<P>(ExactNumber(n)) { }
+    explicit operator Number<P> () const { return *this; }
+
+    friend Positive<Number<P>> operator+(Positive<Number<P>> const& y1, Positive<Number<P>> const& y2) { return cast_positive(add(unsign(y1),unsign(y2))); }
+    friend Positive<Number<P>> operator*(Positive<Number<P>> const& y1, Positive<Number<P>> const& y2) { return cast_positive(mul(unsign(y1),unsign(y2))); }
+    friend Positive<Number<P>> add(Positive<Number<P>> const& y1, Positive<Number<P>> const& y2) { return cast_positive(add(unsign(y1),unsign(y2))); }
+    friend Positive<Number<P>> mul(Positive<Number<P>> const& y1, Positive<Number<P>> const& y2) { return cast_positive(mul(unsign(y1),unsign(y2))); }
+    friend Positive<Number<P>> max(Positive<Number<P>> const& y1, Positive<Number<P>> const& y2) { return cast_positive(max(unsign(y1),unsign(y2))); }
+    friend Positive<Number<P>> abs(Positive<Number<P>> const& y) { return y; }
+
+};
+template<class P> Positive<Number<P>> cast_positive(Number<P> y) { return Positive<Number<P>>(y); }
+template<class P> Positive<ExactNumber> cast_exact(Positive<Number<P>> const& y) { return cast_positive(cast_exact(unsign(y))); }
+
+template<class X> decltype(auto) cast_generic(X const& x) { return x.generic(); }
 
 } // namespace Ariadne
 

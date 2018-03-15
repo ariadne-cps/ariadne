@@ -33,7 +33,7 @@
 
 %Ariadne is a C++ package for set-based analysis of dynamical and control systems, including reachability analysis, robust simulation and safety verification. The package can handle systems with reset, flow and guard predicates given by nonlinear functions, making it one of the most general-purpose reachability tools available.
 
-The homepage of %Ariadne is <a href="http://ariadne.parades.rm.cnr.it/">http://ariadne.parades.rm.cnr.it/</a>.
+The homepage of %Ariadne is <a href="http://www.ariadne-cps.org/">http://www.ariadne-cps.org/</a>.
 
 \section mainpage_installation Installation
 

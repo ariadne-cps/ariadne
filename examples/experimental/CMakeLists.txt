@@ -6,6 +6,7 @@ set(EXPERIMENTAL_EXAMPLES
 	vanderpol
 	vanderpol-vectorfield
 	lotka-volterra
+	laub-loomis
 )
 
 foreach(example ${EXPERIMENTAL_EXAMPLES})

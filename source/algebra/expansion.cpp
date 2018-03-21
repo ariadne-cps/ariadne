@@ -29,6 +29,8 @@
 
 
 namespace Ariadne {
+//    template class Expansion<DegreeType,FloatDP>;
+
     template class Expansion<MultiIndex,double>;
     template class Expansion<MultiIndex,Dyadic>;
 

@@ -28,6 +28,7 @@
 #include <algorithm>
 #include <exception>
 #include <stdexcept>
+#include <iostream>
 
 #include "expansion.hpp"
 #include "expansion.inl.hpp"
@@ -41,29 +42,33 @@ inline double nul(double d) { return 0.0; }
 inline double abs(double d) { return std::fabs(d); }
 
 
-template<class X> Expansion<MultiIndex,X>::~Expansion()
-{
-    delete[] _indices;
-    _indices=nullptr;
-    delete[] _coefficients;
-    _coefficients=nullptr;
-}
-
-template<class X> Expansion<MultiIndex,X>::Expansion(SizeType as)
-    : Expansion<MultiIndex,X>(as,X()) {
-}
-
-template<class X> Expansion<MultiIndex,X>::Expansion(SizeType as, X const& z, SizeType cap)
-    : _zero_coefficient(z), _capacity(cap), _size(0u), _argument_size(as)
-    , _indices(new DegreeType[_capacity*(_argument_size+1)]), _coefficients(new CoefficientType[_capacity])
+template<class I, class X> Expansion<I,X>::~Expansion()
 {
 }
 
+template<class I, class X> Expansion<I,X>::Expansion(ArgumentSizeType as)
+    : Expansion<I,X>(as,X()) {
+}
 
-template<class X> Expansion<MultiIndex,X>::Expansion(InitializerList<Pair<InitializerList<DegreeType>,X>> lst)
-    : Expansion( ( (ARIADNE_PRECONDITION(lst.size()!=0)) , Expansion(lst.begin()->first.size(),nul(lst.begin()->second)) ) )
+template<class I, class X> Expansion<I,X>::Expansion(ArgumentSizeType as, X const& z, SizeType cap)
+    : _zero_coefficient(z), _indices(0u,I(as)), _coefficients(0,z)
 {
-    MultiIndex a;
+    _indices.reserve(cap); _coefficients.reserve(cap);
+}
+
+inline DegreeType degree_of(MultiIndex const& a) { return a.degree(); }
+inline DegreeType degree_of(DegreeType const& a) { return a; }
+
+inline SizeType size_of(MultiIndex const& a) { return a.size(); }
+inline SizeOne size_of(DegreeType const& a) { return SizeOne(); }
+
+inline SizeType argument_size_of(UniformList<MultiIndex> const& as) { return as.argument_size(); }
+inline SizeOne argument_size_of(UniformList<DegreeType> const& a) { return SizeOne(); }
+
+template<class I, class X> Expansion<I,X>::Expansion(InitializerList<Pair<IndexInitializerType,X>> lst)
+    : Expansion( ( (ARIADNE_PRECONDITION(lst.size()!=0)) , Expansion(size_of(lst.begin()->first),nul(lst.begin()->second),std::max(DEFAULT_CAPACITY,lst.size()) ) ) )
+{
+    I a(this->argument_size());
     X x;
     for(auto iter=lst.begin();
         iter!=lst.end(); ++iter)
@@ -75,7 +80,7 @@ template<class X> Expansion<MultiIndex,X>::Expansion(InitializerList<Pair<Initia
 }
 
 
-//template<class X> Expansion<MultiIndex,X>::Expansion(InitializerList<Pair<InitializerList<DegreeType>,X>> lst) : Expansion(3) {
+//template<class I, class X> Expansion<I,X>::Expansion(InitializerList<Pair<InitializerList<DegreeType>,X>> lst) : Expansion(3) {
 //    ARIADNE_PRECONDITION(lst.size()!=0);
 //}
 
@@ -86,143 +91,109 @@ namespace std {
 }
 */
 
-template<class X> Expansion<MultiIndex,X>::Expansion(const Expansion<MultiIndex,X>& e)
-    : _zero_coefficient(e._zero_coefficient), _capacity(e._capacity), _size(e._size), _argument_size(e._argument_size)
-    , _indices(new DegreeType[_capacity*(_argument_size+1)]), _coefficients(new CoefficientType[_capacity])
+template<class I, class X> Expansion<I,X>::Expansion(const Expansion<I,X>& e)
+    : _zero_coefficient(e._zero_coefficient), _indices(e._indices), _coefficients(e._coefficients)
 {
-    std::copy(e._indices,e._indices+_size*(_argument_size+1),_indices);
-    std::copy(e._coefficients,e._coefficients+_size,_coefficients);
+    this->_indices.reserve(e._indices.capacity());
+    this->_coefficients.reserve(e._coefficients.capacity());
 }
 
-template<class X> Expansion<MultiIndex,X>& Expansion<MultiIndex,X>::operator=(const Expansion<MultiIndex,X>& e)
+template<class I, class X> Expansion<I,X>& Expansion<I,X>::operator=(const Expansion<I,X>& e)
 {
     if(this!=&e) {
         // Perform memory reallocation if necessary
-        if(this->_capacity<e._size) {
-            SizeType new_capacity=e._capacity;
-            while(new_capacity/2>=e._size) { new_capacity/=2; }
-            DegreeType* new_indices=new DegreeType[new_capacity*(e._argument_size+1)];
-            CoefficientType* new_coefficients=new CoefficientType[new_capacity];
-            _capacity=new_capacity;
-            delete[] _indices;
-            _indices=new_indices;
-            delete[] _coefficients;
-            _coefficients=new_coefficients;
-        } else if(this->_argument_size!=e._argument_size) {
-            DegreeType* new_indices=new DegreeType[this->_capacity*(e._argument_size+1)];
-            delete[] _indices;
-            _indices=new_indices;
-        }
-        _zero_coefficient=e._zero_coefficient;
-        _size=e._size;
-        _argument_size=e._argument_size;
-        std::copy(e._indices,e._indices+_size*(_argument_size+1),_indices);
-        std::copy(e._coefficients,e._coefficients+_size,_coefficients);
+        this->_indices = e._indices;
+        this->_coefficients = e._coefficients;
+        this->_zero_coefficient=e._zero_coefficient;
+        this->_indices.reserve(e._indices.capacity());
+        this->_coefficients.reserve(e._coefficients.capacity());
     }
     return *this;
 }
 
-template<class X> Expansion<MultiIndex,X>::Expansion(Expansion<MultiIndex,X>&& e)
-    : _zero_coefficient(e._zero_coefficient), _capacity(e._capacity), _size(e._size), _argument_size(e._argument_size)
-    , _indices(e._indices), _coefficients(e._coefficients)
+template<class I, class X> Expansion<I,X>::Expansion(Expansion<I,X>&& e)
+    : _zero_coefficient(std::move(e._zero_coefficient)), _indices(std::move(e._indices)), _coefficients(std::move(e._coefficients))
 {
-    e._indices=nullptr;
-    e._coefficients=nullptr;
 }
 
-template<class X> Expansion<MultiIndex,X>& Expansion<MultiIndex,X>::operator=(Expansion<MultiIndex,X>&& e)
+template<class I, class X> Expansion<I,X>& Expansion<I,X>::operator=(Expansion<I,X>&& e)
 {
     if(this!=&e) {
-        assert(this->_indices!=e._indices);
-        assert(this->_coefficients!=e._coefficients);
-
-        _zero_coefficient=e._zero_coefficient;
-        _capacity=e._capacity;
-        _size=e._size;
-        _argument_size=e._argument_size;
-
-        delete[] _indices;
-        _indices=e._indices;
-        e._indices=nullptr;
-
-        delete[] _coefficients;
-        _coefficients=e._coefficients;
-        e._coefficients=nullptr;
+        _zero_coefficient=std::move(e._zero_coefficient);
+        _indices=std::move(e._indices);
+        _coefficients=std::move(e._coefficients);
     }
     return *this;
 }
 
-template<class X> Void Expansion<MultiIndex,X>::swap(Expansion<MultiIndex,X>& other) {
+template<class I, class X> Void Expansion<I,X>::swap(Expansion<I,X>& other) {
     std::swap(this->_zero_coefficient,other._zero_coefficient);
-    std::swap(this->_capacity,other._capacity);
-    std::swap(this->_size,other._size);
-    std::swap(this->_argument_size,other._argument_size);
     std::swap(this->_indices,other._indices);
     std::swap(this->_coefficients,other._coefficients);
 }
 
-template<class X> SizeType Expansion<MultiIndex,X>::number_of_terms() const {
+template<class I, class X> SizeType Expansion<I,X>::number_of_terms() const {
     return this->size();
 }
 
-template<class X> SizeType Expansion<MultiIndex,X>::number_of_nonzeros() const {
+template<class I, class X> SizeType Expansion<I,X>::number_of_nonzeros() const {
     return this->size();
 }
 
-template<class X> Bool Expansion<MultiIndex,X>::empty() const {
-    return this->_size==0;
+template<class I, class X> Bool Expansion<I,X>::empty() const {
+    return this->size()==0;
 }
 
-template<class X> SizeType Expansion<MultiIndex,X>::size() const {
-    return this->_size;
+template<class I, class X> SizeType Expansion<I,X>::size() const {
+    return this->_indices.size();
 }
 
-template<class X> SizeType Expansion<MultiIndex,X>::argument_size() const {
-    return this->_argument_size;
+template<class I, class X> auto Expansion<I,X>::argument_size() const -> ArgumentSizeType {
+    return argument_size_of(this->_indices);
 }
 
-template<class X> X const& Expansion<MultiIndex,X>::zero_coefficient() const {
+template<class I, class X> X const& Expansion<I,X>::zero_coefficient() const {
     return this->_zero_coefficient;
 }
 
-template<class X> Void Expansion<MultiIndex,X>::reserve(SizeType new_capacity) {
-    if(this->_capacity < new_capacity) {
-        DegreeType* new_indices = new DegreeType[new_capacity*(this->_argument_size+1)];
-        CoefficientType* new_coefficients = new CoefficientType[new_capacity];
-        std::copy(this->_indices, this->_indices+this->_size*(this->_argument_size+1), new_indices);
-        std::copy(this->_coefficients, this->_coefficients+this->_size, new_coefficients);
-        this->_capacity=new_capacity;
-        delete[] this->_indices;
-        this->_indices=new_indices;
-        delete[] this->_coefficients;
-        this->_coefficients=new_coefficients;
+template<class I, class X> Void Expansion<I,X>::reserve(SizeType new_capacity) {
+    if(this->capacity() < new_capacity) {
+        this->_indices.reserve(new_capacity);
+        this->_coefficients.reserve(new_capacity);
     }
 }
 
-template<class X> Void Expansion<MultiIndex,X>::resize(SizeType new_size) {
+template<class I, class X> Void Expansion<I,X>::resize(SizeType new_size) {
     if(new_size<this->size()) {
-        this->_size=new_size;
+        this->_indices.resize(new_size);
+        this->_coefficients.resize(new_size);
     } else {
-        if(this->_capacity < new_size) {
+        if(this->capacity() < new_size) {
             this->reserve(new_size);
         }
-        MultiIndex a(this->argument_size());
-        X c=_zero_coefficient;
-        for (SizeType i=this->_size; i!=new_size; ++i) {
+        I a(this->argument_size());
+        X c=this->zero_coefficient();
+        for (SizeType i=this->size(); i!=new_size; ++i) {
             this->append(a,c);
         }
     }
 }
 
-template<class X> SizeType Expansion<MultiIndex,X>::capacity() const {
-    return this->_capacity;
+template<class I, class X> SizeType Expansion<I,X>::capacity() const {
+    static bool warned = false;
+    if(not warned and this->_indices.capacity()!=this->_coefficients.capacity()) {
+        // ARIADNE_DEBUG_ASSERT(this->_indices.capacity()!=this->_coefficients.capacity());
+        std::cerr<<"WARNING: Expansion::_indices.capacity() may be different from Expansion::_coefficients.capacity()\n";
+        warned=true;
+    }
+    return std::min(this->_indices.capacity(),this->_coefficients.capacity());
 }
 
-template<class X> Void Expansion<MultiIndex,X>::clear() {
-    this->_size=0;
+template<class I, class X> Void Expansion<I,X>::clear() {
+    this->_indices.clear(); this->_coefficients.clear();
 }
 
-template<class X> Void Expansion<MultiIndex,X>::remove_zeros() {
+template<class I, class X> Void Expansion<I,X>::remove_zeros() {
     this->resize(std::remove_if(this->begin(),this->end(),CoefficientIsZero())-this->begin());
 }
 
@@ -232,7 +203,7 @@ template<class X, class Y> struct CanInplaceAdd {
     static const bool value = decltype(test<X,Y>(1))::value;
 };
 
-template<class X, EnableIf<CanInplaceAdd<X,X>> =dummy> Void combine_terms(Expansion<MultiIndex,X>& e) {
+template<class I, class X, EnableIf<CanInplaceAdd<X,X>> =dummy> Void combine_terms(Expansion<I,X>& e) {
     auto begin=e.begin();
     auto end=e.end();
     auto curr=begin;
@@ -250,45 +221,45 @@ template<class X, EnableIf<CanInplaceAdd<X,X>> =dummy> Void combine_terms(Expans
     e.resize(curr-begin);
 }
 
-template<class X, DisableIf<CanInplaceAdd<X,X>> =dummy> Void combine_terms(Expansion<MultiIndex,X>& e) {
+template<class I, class X, DisableIf<CanInplaceAdd<X,X>> =dummy> Void combine_terms(Expansion<I,X>& e) {
     ARIADNE_ASSERT_MSG(false, "Cannot combine terms of an expansion if the coefficients do not support inplace addition.");
 }
 
-template<class X> Void Expansion<MultiIndex,X>::combine_terms() {
+template<class I, class X> Void Expansion<I,X>::combine_terms() {
     Ariadne::combine_terms(*this);
 }
 
-template<class X> Void Expansion<MultiIndex,X>::check() const {
+template<class I, class X> Void Expansion<I,X>::check() const {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-template<class X> ExpansionValueReference<MultiIndex,X> Expansion<MultiIndex,X>::operator[](const MultiIndex& a) {
-    return ExpansionValueReference<MultiIndex,X>(*this,a);
+template<class I, class X> ExpansionValueReference<I,X> Expansion<I,X>::operator[](const I& a) {
+    return ExpansionValueReference<I,X>(*this,a);
 }
 
-template<class X> const X& Expansion<MultiIndex,X>::operator[](const MultiIndex& a) const {
+template<class I, class X> const X& Expansion<I,X>::operator[](const I& a) const {
     return this->get(a);
 }
 
-template<class X> X& Expansion<MultiIndex,X>::at(const MultiIndex& a) {
+template<class I, class X> X& Expansion<I,X>::at(const I& a) {
     auto iter=this->find(a);
     if(iter==this->end()) { this->append(a,this->_zero_coefficient); iter=this->end()-1; }
     return iter->coefficient();
 }
 
-template<class X> Void Expansion<MultiIndex,X>::set(const MultiIndex& a, const X& c) {
+template<class I, class X> Void Expansion<I,X>::set(const I& a, const X& c) {
     auto iter=this->find(a);
     if(iter==this->end()) { this->append(a,c); }
     else { iter->coefficient() = c; }
 }
 
-template<class X> const X& Expansion<MultiIndex,X>::get(const MultiIndex& a) const {
+template<class I, class X> const X& Expansion<I,X>::get(const I& a) const {
     auto iter=this->find(a);
     if(iter==this->end()) { return this->_zero_coefficient; }
     else { return iter->coefficient(); }
 }
 
-template<class X> Bool Expansion<MultiIndex,X>::operator==(const Expansion<MultiIndex,X>& other) const {
+template<class I, class X> Bool Expansion<I,X>::operator==(const Expansion<I,X>& other) const {
     auto iter1=this->begin();
     auto iter2=other.begin();
     auto end1=this->end();
@@ -309,15 +280,15 @@ template<class X> Bool Expansion<MultiIndex,X>::operator==(const Expansion<Multi
     }
 }
 
-template<class X> Bool Expansion<MultiIndex,X>::operator!=(const Expansion<MultiIndex,X>& other) const {
+template<class I, class X> Bool Expansion<I,X>::operator!=(const Expansion<I,X>& other) const {
     return !(*this==other);
 }
 
-template<class X> Bool Expansion<MultiIndex,X>::same_as(const Expansion<MultiIndex,X>& other) const {
+template<class I, class X> Bool Expansion<I,X>::same_as(const Expansion<I,X>& other) const {
     return (*this==other);
 }
 
-template<class X> auto Expansion<MultiIndex,X>::insert(Iterator pos, const MultiIndex& a, const X& c) -> Iterator {
+template<class I, class X> auto Expansion<I,X>::insert(Iterator pos, const I& a, const X& c) -> Iterator {
     if(this->size()==this->capacity()) {
         SizeType where=pos-this->begin();
         this->append(a,c);
@@ -337,20 +308,13 @@ template<class X> auto Expansion<MultiIndex,X>::insert(Iterator pos, const Multi
     return pos;
 }
 
-template<class X> auto Expansion<MultiIndex,X>::erase(Iterator pos) -> Iterator {
-    auto curr=pos;
-    auto next=curr;
-    ++next;
-    while(next!=this->end()) {
-        *curr=*next;
-        ++curr;
-        ++next;
-    }
-    --this->_size;
+template<class I, class X> auto Expansion<I,X>::erase(Iterator pos) -> Iterator {
+    this->_indices.erase(pos._ap);
+    this->_coefficients.erase(pos._cp);
     return pos;
 }
 
-template<class X> Void Expansion<MultiIndex,X>::prepend(const MultiIndex& a, const X& c) {
+template<class I, class X> Void Expansion<I,X>::prepend(const I& a, const X& c) {
     this->append(a,c);
     auto curr=this->end();
     auto prev=curr-1;
@@ -364,55 +328,68 @@ template<class X> Void Expansion<MultiIndex,X>::prepend(const MultiIndex& a, con
     curr->coefficient()=c;
 }
 
-template<class X> Void Expansion<MultiIndex,X>::append(const MultiIndex& a, const X& c) {
+template<class I, class X> Void Expansion<I,X>::append(const I& a, const X& c) {
     if(this->number_of_terms()==this->capacity()) {
         this->reserve(2*this->capacity());
     }
-    DegreeType* _p=this->_indices+(this->_size)*(this->_argument_size+1);
-    for(SizeType j=0; j!=this->_argument_size; ++j) { _p[j]=a[j]; }
-    _p[this->_argument_size]=a.degree();
-    _coefficients[this->_size]=c;
-    ++this->_size;
+    this->_indices.append(a);
+    this->_coefficients.append(c);
 }
 
-template<class X> Void Expansion<MultiIndex,X>::append_sum(const MultiIndex& a1, const MultiIndex& a2, const X& c) {
+template<class I, class X> Void Expansion<I,X>::append_sum(const I& a1, const I& a2, const X& c) {
     if(this->number_of_terms()==this->capacity()) {
         this->reserve(2*this->capacity());
     }
-    DegreeType* _p=this->_indices+(this->_size)*(this->_argument_size+1);
-    for(SizeType j=0; j<=this->_argument_size; ++j) { _p[j]=a1[j]+a2[j]; }
-    _coefficients[this->_size]=c;
-    ++this->_size;
+    this->_indices.append(a1+a2);
+    this->_coefficients.append(c);
 }
 
-template<class X> ExpansionIterator<MultiIndex,X> Expansion<MultiIndex,X>::begin() {
-    return ExpansionIterator<MultiIndex,X>(_argument_size,_indices,_coefficients);
+
+template<class I, class X> ExpansionReference<I,X> Expansion<I,X>::front() {
+    return ExpansionReference<I,X>(_indices.front(),_coefficients.front());
 }
 
-template<class X> ExpansionIterator<MultiIndex,X> Expansion<MultiIndex,X>::end() {
-    return ExpansionIterator<MultiIndex,X>(_argument_size,_indices+_size*(_argument_size+1u),_coefficients+_size);
+template<class I, class X> ExpansionReference<I,X> Expansion<I,X>::back() {
+    return ExpansionReference<I,X>(_indices.back(),_coefficients.back());
 }
 
-template<class X> ExpansionConstIterator<MultiIndex,X> Expansion<MultiIndex,X>::begin() const {
-    return ExpansionConstIterator<MultiIndex,X>(_argument_size,const_cast<DegreeType*>(_indices),_coefficients);
+template<class I, class X> ExpansionConstReference<I,X> Expansion<I,X>::front() const {
+    return ExpansionConstReference<I,X>(_indices.front(),_coefficients.front());
 }
 
-template<class X> ExpansionConstIterator<MultiIndex,X> Expansion<MultiIndex,X>::end() const {
-    return ExpansionConstIterator<MultiIndex,X>(_argument_size,const_cast<DegreeType*>(_indices)+_size*(_argument_size+1u),_coefficients+_size);
+template<class I, class X> ExpansionConstReference<I,X> Expansion<I,X>::back() const {
+    return ExpansionConstReference<I,X>(_indices.back(),_coefficients.back());
 }
 
-template<class X> ExpansionIterator<MultiIndex,X> Expansion<MultiIndex,X>::find(const MultiIndex& a) {
-    ExpansionIterator<MultiIndex,X> iter=this->begin();
-    ExpansionIterator<MultiIndex,X> end=this->end();
+
+template<class I, class X> ExpansionIterator<I,X> Expansion<I,X>::begin() {
+    return ExpansionIterator<I,X>(_indices.begin(),_coefficients.begin());
+}
+
+template<class I, class X> ExpansionIterator<I,X> Expansion<I,X>::end() {
+    return ExpansionIterator<I,X>(_indices.end(),_coefficients.end());
+}
+
+template<class I, class X> ExpansionConstIterator<I,X> Expansion<I,X>::begin() const {
+    return ExpansionConstIterator<I,X>(_indices.begin(),_coefficients.begin());
+}
+
+template<class I, class X> ExpansionConstIterator<I,X> Expansion<I,X>::end() const {
+    return ExpansionConstIterator<I,X>(_indices.end(),_coefficients.end());
+}
+
+template<class I, class X> ExpansionIterator<I,X> Expansion<I,X>::find(const I& a) {
+    ExpansionIterator<I,X> iter=this->begin();
+    ExpansionIterator<I,X> end=this->end();
     while(iter!=end && iter->index()!=a) {
         ++iter;
     }
     return iter;
 }
 
-template<class X> ExpansionConstIterator<MultiIndex,X> Expansion<MultiIndex,X>::find(const MultiIndex& a) const {
-    ExpansionConstIterator<MultiIndex,X> iter=this->begin();
-    ExpansionConstIterator<MultiIndex,X> end=this->end();
+template<class I, class X> ExpansionConstIterator<I,X> Expansion<I,X>::find(const I& a) const {
+    ExpansionConstIterator<I,X> iter=this->begin();
+    ExpansionConstIterator<I,X> end=this->end();
     while(iter!=end && iter->index()!=a) {
         ++iter;
     }
@@ -425,44 +402,49 @@ template<class CMP> struct IndexComparison {
         return cmp(m1.index(),m2.index()); }
 };
 
-template<class X> Void Expansion<MultiIndex,X>::index_sort(ReverseLexicographicLess) {
+template<class I, class X> Void Expansion<I,X>::index_sort(ReverseLexicographicLess) {
     std::sort(this->begin(),this->end(),IndexComparison<ReverseLexicographicLess>());
 }
 
-template<class X> Void Expansion<MultiIndex,X>::index_sort(GradedLess) {
+template<class I, class X> Void Expansion<I,X>::index_sort(GradedLess) {
     std::sort(this->begin(),this->end(),IndexComparison<GradedLess>());
 }
 
-template<class X> Void Expansion<MultiIndex,X>::sort(ReverseLexicographicIndexLess) {
+template<class I, class X> Void Expansion<I,X>::sort(ReverseLexicographicIndexLess) {
     std::sort(this->begin(),this->end(),IndexComparison<ReverseLexicographicLess>());
 }
 
-template<class X> Void Expansion<MultiIndex,X>::sort(GradedIndexLess) {
+template<class I, class X> Void Expansion<I,X>::sort(GradedIndexLess) {
     std::sort(this->begin(),this->end(),IndexComparison<GradedLess>());
 }
 
-template<class X> Void Expansion<MultiIndex,X>::reverse_lexicographic_sort() {
+template<class I, class X> Void Expansion<I,X>::reverse_lexicographic_sort() {
     std::sort(this->begin(),this->end(),IndexComparison<ReverseLexicographicLess>());
 }
 
-template<class X> Void Expansion<MultiIndex,X>::graded_sort() {
+template<class I, class X> Void Expansion<I,X>::graded_sort() {
     std::sort(this->begin(),this->end(),IndexComparison<GradedLess>());
 }
 
+template<class I, class X> Bool Expansion<I,X>::is_sorted(ReverseLexicographicIndexLess) {
+    return std::is_sorted(this->begin(),this->end(),ReverseLexicographicIndexLess());
+}
 
-template<class X>
-Expansion<MultiIndex,X> Expansion<MultiIndex,X>::_embed(SizeType before_size, SizeType after_size) const
+template<class I, class X> Bool Expansion<I,X>::is_sorted(GradedIndexLess) {
+    return std::is_sorted(this->begin(),this->end(),GradedIndexLess());
+}
+
+template<class I, class X> Expansion<MultiIndex,X> Expansion<I,X>::_embed(SizeType before_size, Expansion<MultiIndex,X> const& x, SizeType after_size)
 {
-    const Expansion<MultiIndex,X>& x=*this;
     SizeType old_size=x.argument_size();
     SizeType new_size=before_size+old_size+after_size;
-    Expansion<MultiIndex,X> r(new_size, x._zero_coefficient, x._capacity);
+    Expansion<MultiIndex,X> r(new_size, x.zero_coefficient(), x.capacity());
     MultiIndex old_index(old_size);
     MultiIndex new_index(new_size);
     for(typename Expansion<MultiIndex,X>::ConstIterator iter=x.begin(); iter!=x.end(); ++iter) {
         old_index=iter->index();
-        for(Nat j=0; j!=old_size; ++j) {
-            Nat aj=old_index[j];
+        for(SizeType j=0; j!=old_size; ++j) {
+            SizeType aj=old_index[j];
             new_index[j+before_size]=aj;
         }
         r.append(new_index,iter->coefficient());
@@ -470,8 +452,13 @@ Expansion<MultiIndex,X> Expansion<MultiIndex,X>::_embed(SizeType before_size, Si
     return r;
 }
 
-template<class X> OutputStream& Expansion<MultiIndex,X>::write(OutputStream& os) const {
-    os << "Expansion<MultiIndex," << class_name<X>() <<">";
+template<class X> inline OutputStream& operator<<(OutputStream& os, typename UniformList<X>::Iterator const& iter) {
+    return os << iter.operator->(); }
+template<class X> inline OutputStream& operator<<(OutputStream& os, typename UniformList<X>::ConstIterator const& iter) {
+    return os << iter.operator->(); }
+
+template<class I, class X> OutputStream& Expansion<I,X>::write(OutputStream& os) const {
+    os << "Expansion<I," << class_name<X>() <<">";
     os << "{"<<this->number_of_terms()<<"/"<<this->capacity()<<","<<this->argument_size()<<"\n";
     for(auto iter=this->begin(); iter!=this->end(); ++iter) {
         os << "  "<<iter->index()<<":"<<iter->coefficient()<<",\n";
@@ -480,30 +467,32 @@ template<class X> OutputStream& Expansion<MultiIndex,X>::write(OutputStream& os)
     return os;
 }
 
-template<class X>
-OutputStream& Expansion<MultiIndex,X>::write(OutputStream& os, const Array<String>& variable_names) const
+template<class I, class X>
+OutputStream& Expansion<I,X>::write(OutputStream& os, const Array<String>& variable_names) const
 {
-    const Expansion<MultiIndex,X>& p=*this;
+    const Expansion<I,X>& p=*this;
     ARIADNE_ASSERT(p.argument_size()==variable_names.size());
     if(p.size()==0) {
         os << "0";
     } else {
         bool first_term=true;
         for(auto iter=p.begin(); iter!=p.end(); ++iter) {
-            MultiIndex a=iter->index();
+            I a=iter->index();
             X v=iter->coefficient();
             os << " ";
             if(decide(v>=0) && !first_term) { os<<"+"; }
             first_term=false;
             bool first_factor=true;
             if(decide(v<0)) { os<<"-"; }
-            if(possibly(abs(v)!=1) || a.degree()==0) { os<<abs(v); first_factor=false; }
+            if(possibly(abs(v)!=1) || degree_of(a)==0) { os<<abs(v); first_factor=false; }
+/*
             for(SizeType j=0; j!=a.size(); ++j) {
                 if(a[j]!=0) {
                     if(first_factor) { first_factor=false; } else { os <<"*"; }
                     os<<variable_names[j]; if(a[j]!=1) { os<<"^"<<int(a[j]); }
                 }
             }
+*/
         }
     }
     return os;
@@ -564,5 +553,16 @@ template<class I, class X, class CMP> void SortedExpansion<I,X,CMP>::sort() {
     std::sort(this->begin(),this->end(),CMP());
 }
 
+inline OutputStream& operator<<(OutputStream& os, GradedIndexLess cmp) { return os << "GradedIndexLess"; }
+inline OutputStream& operator<<(OutputStream& os, ReverseLexicographicIndexLess cmp) { return os << "ReverseLexicographicIndexLess"; }
+
+template<class I, class X, class CMP> void SortedExpansion<I,X,CMP>::check() const {
+    CMP cmp;
+    for(auto iter=this->begin(), next=iter+1; next<this->end(); ++iter, ++next) {
+        if(!cmp(*iter,*next)) {
+            ARIADNE_THROW(std::runtime_error,"SortedExpansion<I,X,CMP>::check():\n    e="<<*this<<" cmp="<<cmp," Expansion is not sorted.")
+        }
+    }
+}
 
 } // namespace Ariadne

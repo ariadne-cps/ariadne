@@ -36,6 +36,9 @@
 #include "utility/iterator.hpp"
 #include "utility/macros.hpp"
 
+
+#include "geometry/interval.hpp"
+
 namespace Ariadne {
 
 /************ Expansion ******************************************************/
@@ -56,33 +59,37 @@ struct CoefficientIsZero;
 
 template<class I, class X> class Expansion;
 
-template<class X> class Expansion<MultiIndex,X> {
-    using I=MultiIndex;
-    static const SizeType DEFAULT_CAPACITY=16;
+template<class I, class X> class Expansion {
+    static SizeType size_of(MultiIndex const& a) { return a.size(); }
+    static SizeOne size_of(DegreeType) { return SizeOne(); }
+    using S=decltype(size_of(declval<I>()));
+    static InitializerList<DegreeType> initializer_of(MultiIndex);
+    static DegreeType initializer_of(DegreeType);
+    using IndexInitializerType=decltype(initializer_of(declval<I>()));
+
+//    static const SizeType DEFAULT_CAPACITY=16;
   public:
+    UniformList<I> _indices;
+    UniformList<X> _coefficients;
     X _zero_coefficient;
-    SizeType _capacity;
-    SizeType _size;
-    SizeType _argument_size;
-    DegreeType* _indices;
-    X* _coefficients;
   public:
     typedef ExpansionIterator<I,X> Iterator;
     typedef ExpansionConstIterator<I,X> ConstIterator;
-    typedef MultiIndex IndexType;
+    typedef S ArgumentSizeType;
+    typedef I IndexType;
     typedef X CoefficientType;
     typedef ExpansionValue<I,X> ValueType;
     typedef ExpansionReference<I,X> Reference;
     typedef ExpansionConstReference<I,X> ConstReference;
 
     ~Expansion();
-    explicit Expansion(SizeType as);
-    explicit Expansion(SizeType as, X const& z, SizeType cap=DEFAULT_CAPACITY);
-    Expansion(InitializerList<Pair<InitializerList<DegreeType>,X>> lst);
+    explicit Expansion(ArgumentSizeType as);
+    explicit Expansion(ArgumentSizeType as, X const& z, SizeType cap=DEFAULT_CAPACITY);
+    Expansion(InitializerList<Pair<IndexInitializerType,X>> lst);
     template<class PR, EnableIf<IsConstructible<X,PR>> =dummy>
-        explicit Expansion(SizeType as, PR pr, SizeType cap=DEFAULT_CAPACITY);
+        explicit Expansion(ArgumentSizeType as, PR pr, SizeType cap=DEFAULT_CAPACITY);
     template<class PR, EnableIf<IsConstructible<X,Dbl,PR>> =dummy>
-        Expansion(InitializerList<Pair<InitializerList<DegreeType>,Dbl>> lst, PR prs);
+        Expansion(InitializerList<Pair<IndexInitializerType,Dbl>> lst, PR prs);
     template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>> =dummy>
         explicit Expansion(Expansion<I,Y> const&, PRS... prs);
     Expansion(const Expansion<I,X>&);
@@ -97,7 +104,7 @@ template<class X> class Expansion<MultiIndex,X> {
 
     Bool empty() const;
 
-    SizeType argument_size() const;
+    ArgumentSizeType argument_size() const;
     SizeType number_of_terms() const;
     SizeType number_of_nonzeros() const; // DEPRECATED
     SizeType size() const;
@@ -112,6 +119,11 @@ template<class X> class Expansion<MultiIndex,X> {
     Void set(const IndexType& a, const CoefficientType& c);
     CoefficientType& at(const IndexType& a);
     const CoefficientType& get(const IndexType& a) const;
+
+    Reference front();
+    Reference back();
+    ConstReference front() const;
+    ConstReference back() const;
 
     Iterator begin();
     Iterator end();
@@ -142,15 +154,17 @@ template<class X> class Expansion<MultiIndex,X> {
     Void reverse_lexicographic_sort();
     Void graded_sort();
 
+    Bool is_sorted(ReverseLexicographicIndexLess cmp);
+    Bool is_sorted(GradedIndexLess cmp);
+
     OutputStream& write(OutputStream& os) const;
     OutputStream& write(OutputStream& os, Array<String> const& vars) const;
   public:
     friend OutputStream& operator<<(OutputStream& os, Expansion<I,X> const& self) { return self.write(os); }
     friend Bool same(Expansion<I,X> const& e1, Expansion<I,X> const& e2) { return e1.same_as(e2); }
-    friend Expansion<IndexType,CoefficientType> embed(SizeType as1, Expansion<IndexType,CoefficientType> const& e2, SizeType as3) {
-        return e2._embed(as1,as3); }
+    friend Expansion<MultiIndex,CoefficientType> embed(SizeType as1, Expansion<MultiIndex,CoefficientType> const& e2, SizeType as3) { return _embed(as1,e2,as3); }
   private:
-    Expansion<IndexType,CoefficientType> _embed(SizeType as1, SizeType as3) const;
+    static Expansion<MultiIndex,CoefficientType> _embed(SizeType as1, Expansion<MultiIndex,CoefficientType> const& e2, SizeType as3);
 };
 
 template<class I, class X, class CMP> class SortedExpansion : public Expansion<I,X> {
@@ -169,26 +183,26 @@ public:
     CoefficientType const& get(const IndexType& a) const;
 //    Iterator find(const IndexType& a);
 //    ConstIterator find(const IndexType& a) const;
+    Void check() const; // Check the expansion is sorted and has unique terms
 };
 
 
-template<class X> template<class PR, EnableIf<IsConstructible<X,PR>>>
-Expansion<MultiIndex,X>::Expansion(SizeType as, PR pr, SizeType cap)
+template<class I, class X> template<class PR, EnableIf<IsConstructible<X,PR>>>
+Expansion<I,X>::Expansion(ArgumentSizeType as, PR pr, SizeType cap)
     : Expansion(as,X(pr),cap)
 {
 }
 
-template<class X> template<class PR, EnableIf<IsConstructible<X,Dbl,PR>>>
-Expansion<MultiIndex,X>::Expansion(InitializerList<Pair<InitializerList<DegreeType>,Dbl>> lst, PR pr)
+
+template<class I, class X> template<class PR, EnableIf<IsConstructible<X,Dbl,PR>>>
+Expansion<I,X>::Expansion(InitializerList<Pair<IndexInitializerType,Dbl>> lst, PR pr)
     : Expansion( ((ARIADNE_PRECONDITION(lst.size()!=0)),lst.begin()->first.size()), X(pr) )
 {
-    MultiIndex a;
-    X x;
     for(auto iter=lst.begin();
         iter!=lst.end(); ++iter)
     {
-        a=iter->first;
-        x=X(iter->second,pr);
+        MultiIndex a=iter->first;
+        X x(iter->second,pr);
         if(decide(x!=0)) { this->append(a,x); }
     }
 }

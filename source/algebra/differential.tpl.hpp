@@ -757,7 +757,7 @@ Vector<Differential<X>>::_lie_derivative(const Vector<Differential<X> >& df, con
 {
     Vector<Differential<X>> r(df.result_size(),df.argument_size(),df.degree()-1);
     Differential<X> t(df.argument_size(), df.degree()-1);
-    MultiIndex a; X c;
+    MultiIndex a(df.argument_size()); X c;
     for(SizeType i=0; i!=df.result_size(); ++i) {
         Expansion<MultiIndex,X> const& dfi_expansion = df[i].expansion();
         Expansion<MultiIndex,X>& t_expansion = t.expansion();

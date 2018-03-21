@@ -52,14 +52,14 @@ template<class X, class Y> Y horner_evaluate(const Expansion<MultiIndex,X>& e, c
     ConstIterator iter=e.begin();
     ConstIterator end=e.end();
     SizeType k=n;   // The current working register
-    const DegreeType* na=iter->index().begin(); // The values of the next multi-index
+    MultiIndex na=iter->index(); // The values of the next multi-index
     SizeType j=k;   // The lowest register containing a non-zero value
     X c=iter->coefficient();
     Y t=z;
-    const DegreeType* a=na;
+    MultiIndex a=na; // The values of the next multi-index
     ++iter;
     while(iter!=end) {
-        na=iter->index().begin();
+        na=iter->index();
         k=n-1;
         while(a[k]==na[k]) { --k; }
         // Since terms are ordered reverse-lexicographically,

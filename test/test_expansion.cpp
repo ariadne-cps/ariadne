@@ -29,6 +29,7 @@
 #include "algebra/expansion.inl.hpp"
 
 #include "test.hpp"
+
 using namespace std;
 using namespace Ariadne;
 
@@ -63,6 +64,7 @@ template<class F> class TestExpansion
     Void test_iterator_concept();
     Void test_data_access();
     Void test_equality();
+    Void test_sort();
     Void test_cleanup();
     Void test_constructors();
     //Void test_indexing();
@@ -81,6 +83,7 @@ template<class F> Void TestExpansion<F>::test()
     ARIADNE_TEST_CALL(test_working());
     ARIADNE_TEST_CALL(test_data_access());
     ARIADNE_TEST_CALL(test_equality());
+    ARIADNE_TEST_CALL(test_sort());
     ARIADNE_TEST_CALL(test_cleanup());
     ARIADNE_TEST_CALL(test_constructors());
     //ARIADNE_TEST_CALL(test_indexing());
@@ -91,11 +94,14 @@ template<class F> Void TestExpansion<F>::test()
 
 template<class F> Void TestExpansion<F>::test_working()
 {
-    ExpansionType e=ExpansionType(3,zero);
-    ARIADNE_TEST_PRINT(e);
-    ARIADNE_TEST_PRINT(e.size());
+    ARIADNE_TEST_PRINT(zero);
+    ARIADNE_TEST_CONSTRUCT(MultiIndexList,as,(3u));
+    ARIADNE_TEST_CONSTRUCT(ExpansionType,e,(3u,zero));
+    ARIADNE_TEST_EQUALS(e.size(),0u);
+    ARIADNE_TEST_EQUALS(e.argument_size(),3u);
     // Append values
     ARIADNE_TEST_EXECUTE(e.append({0,0,0},2.0));
+    ARIADNE_TEST_EQUALS(e.begin()->index().number_of_variables(),3);
     ARIADNE_TEST_EXECUTE(e.append({1,0,0},3.0));
     ARIADNE_TEST_EXECUTE(e.append({0,1,0},5.0));
     ARIADNE_TEST_EXECUTE(e.append({1,0,1},7.0));
@@ -103,6 +109,12 @@ template<class F> Void TestExpansion<F>::test_working()
 
     ARIADNE_TEST_EQUAL(e.find({0,0,0}),e.begin());
     //assert(false);
+
+    // Regression test to ensure that indices and coefficients always have same capacity
+    ARIADNE_TEST_ASSERT(e._indices.capacity()==e._coefficients.capacity());
+    ExpansionType ce=e;
+    ARIADNE_TEST_ASSERT(ce._indices.capacity()==ce._coefficients.capacity());
+
 }
 
 
@@ -178,6 +190,23 @@ template<class F> Void TestExpansion<F>::test_iterator_concept()
 template<class F> Void TestExpansion<F>::test_data_access()
 {
     ExpansionType e(3,prec);
+    ExpansionType const& ce=e;
+    MultiIndex a(3);
+    ARIADNE_TEST_EXECUTE(e[a]=11);
+    ARIADNE_TEST_EQUALS(e[a],11);
+    ARIADNE_TEST_EQUALS(ce[a],11);
+    ARIADNE_TEST_EQUALS(e.at(a),11);
+    e.clear();
+
+    ARIADNE_TEST_EXECUTE(e.at(a)=17);
+    ARIADNE_TEST_EQUALS(e[a],17);
+    e.clear();
+
+    SortedExpansion<MultiIndex,F,GradedIndexLess> se(3,prec);
+    ARIADNE_TEST_EXECUTE(se[a]=11);
+    ARIADNE_TEST_EQUALS(se[a],11);
+    se.clear();
+
 
     // Append values
     ARIADNE_TEST_EXECUTE(e.append({0,0,0},2.0));
@@ -198,7 +227,6 @@ template<class F> Void TestExpansion<F>::test_data_access()
     ARIADNE_TEST_EQUAL(e.begin()->index(),MultiIndex({0,0,0}));
     ARIADNE_TEST_EQUAL(e.begin()->coefficient(),2.0);
 
-    ExpansionType const& ce=e;
     ARIADNE_TEST_PRINT(ce.begin());
     ARIADNE_TEST_PRINT(*ce.begin());
     ARIADNE_TEST_EQUAL(ce.begin()->index(),MultiIndex({0,0,0}));
@@ -210,16 +238,74 @@ template<class F> Void TestExpansion<F>::test_data_access()
     // when the Iterator is incremented, but a F reference does not.
     // This behaviour should be changed in future versions if technologically
     // feasible.
-    Iterator iter=e.begin();
-    ConstReferenceType<MultiIndex> aref=iter->index();
-    const F& xref=iter->coefficient();
-    F x1=iter->coefficient();
-    ++iter;
-    MultiIndex a2=iter->index();
-    ARIADNE_TEST_ASSERT(a2==aref);
-    ARIADNE_TEST_ASSERT(x1==xref);
+    {
+        Iterator iter=e.begin();
+#warning
+    //    ConstReferenceType<MultiIndex> aref=iter->index();
+    //    MultiIndexConstReference aref=iter->index();
+        MultiIndexReference aref=iter->index();
+        ConstReferenceType<F> xref=iter->coefficient();
+        MultiIndex a1=iter->index();
+        F x1=iter->coefficient();
+        ++iter;
+        MultiIndex a2=iter->index();
+        F x2=iter->coefficient();
+        ARIADNE_TEST_ASSERT(a1==aref);
+        ARIADNE_TEST_ASSERT(x1==xref);
+        ARIADNE_TEST_ASSERT(a2!=aref);
+        ARIADNE_TEST_ASSERT(x2!=xref);
+    }
+
+    {
+        ConstIterator citer=e.begin();
+#warning
+//        ConstReferenceType<MultiIndex> caref=citer->index();
+        MultiIndexConstReference caref=citer->index();
+        ConstReferenceType<F> cxref=citer->coefficient();
+        MultiIndex ca1=citer->index();
+        F cx1=citer->coefficient();
+        ++citer;
+        MultiIndex ca2=citer->index();
+        F cx2=citer->coefficient();
+        ARIADNE_TEST_ASSERT(ca1==caref);
+        ARIADNE_TEST_ASSERT(cx1==cxref);
+        ARIADNE_TEST_ASSERT(ca2!=caref);
+        ARIADNE_TEST_ASSERT(cx2!=cxref);
+    }
+
+    {
+        Iterator iter=e.begin()+2;
+#warning
+    //    ConstReferenceType<MultiIndex> aref=iter->index();
+    //    MultiIndexConstReference aref=iter->index();
+        ExpansionPointer<MultiIndex,F> mptr=iter.operator->();
+    //    ExpansionReference<MultiIndex,F>* mptr=iter.operator->();
+        ExpansionReference<MultiIndex,F> mref=iter.operator*();
+        ExpansionValue<MultiIndex,F> m1val=*iter;
+        ++iter;
+        ExpansionValue<MultiIndex,F> m2val=*iter;
+        ARIADNE_TEST_ASSERT(m1val==mref);
+        ARIADNE_TEST_ASSERT(m1val==*mptr);
+        ARIADNE_TEST_ASSERT(m2val!=mref);
+        ARIADNE_TEST_ASSERT(m2val!=*mptr);
+    }
+
+    {
+        ConstIterator iter=e.end()-1;
+#warning
+    //    ConstReferenceType<MultiIndex> aref=iter->index();
+    //    MultiIndexConstReference aref=iter->index();
+        ExpansionConstPointer<MultiIndex,F> mptr=iter.operator->();
+    //    ExpansionConstReference<MultiIndex,F>* mptr=iter.operator->();
+        ExpansionConstReference<MultiIndex,F> mref=iter.operator*();
+        ExpansionValue<MultiIndex,F> m1val=*iter;
+        ++iter;
+        ARIADNE_TEST_ASSERT(m1val==mref);
+        ARIADNE_TEST_ASSERT(m1val==*mptr);
+    }
 
     // Test finding of values of iterators
+    Iterator iter=e.begin();
     ARIADNE_TEST_PRINT(e);
     ARIADNE_TEST_EXECUTE(iter=e.find(MultiIndex({1,0,0})));
     ARIADNE_TEST_EQUAL(iter->index(),MultiIndex({1,0,0}));
@@ -264,6 +350,29 @@ template<class F> Void TestExpansion<F>::test_equality()
     e1.clear(); e1.append(a,1.0); e1.append(b,2.0);
     e2.clear(); e2.append(b,2.0); e2.append(a,1.0);
     if(!(e1==e2)) { ARIADNE_TEST_NOTIFY("Expansion<MI,F> objects differing by order of set operators are considered nonequal."); }
+}
+
+template<class F> Void TestExpansion<F>::test_sort()
+{
+    MultiIndexList as1({{0,0},{1,0},{2,0}});
+    ARIADNE_TEST_PRINT(as1);
+    MultiIndexList as2({{2,0},{0,0},{1,0}});
+    ARIADNE_TEST_PRINT(as1);
+
+    GradedIndexLess graded_index_less;
+    Expansion<MI,F> e2s({{{0,0},5},{{1,0},11}},prec);
+    ARIADNE_TEST_PRINT(e2s)
+    ARIADNE_TEST_ASSERT(e2s.is_sorted(graded_index_less));
+    Expansion<MI,F> e2u({{{1,0},2},{{0,0},5}},prec);
+    ARIADNE_TEST_PRINT(e2u)
+    ARIADNE_TEST_ASSERT(not e2u.is_sorted(graded_index_less));
+
+//    ARIADNE_TEST_CONSTRUCT( Expansion<MI,F>, e1, ({{{0,0},5},{{1,0},2},{{2,0},7},{{0,1},13},{{0,2},17},{{1,1},11}},prec) );
+    Expansion<MI,F> e1({{{0,0},5},{{1,0},2},{{2,0},7},{{0,1},13},{{0,2},17},{{1,1},11}},prec);
+    ARIADNE_TEST_PRINT(e1);
+    ARIADNE_TEST_ASSERT(not e1.is_sorted(graded_index_less));
+    ARIADNE_TEST_EXECUTE(e1.sort(graded_index_less));
+    ARIADNE_TEST_ASSERT(e1.is_sorted(graded_index_less));
 }
 
 template<class F> Void TestExpansion<F>::test_cleanup()
@@ -359,6 +468,6 @@ Int main() {
     FloatDP zero_64{dp};
     FloatMP zero_mp{MultiplePrecision(128)};
     TestExpansion<FloatDP>(zero_64).test();
-    TestExpansion<FloatMP>(zero_mp).test();
+//    TestExpansion<FloatMP>(zero_mp).test();
     return ARIADNE_TEST_FAILURES;
 }

@@ -44,6 +44,7 @@ class TestMultiIndex
         ARIADNE_TEST_CALL(test_comparison());
         ARIADNE_TEST_CALL(test_addition());
         ARIADNE_TEST_CALL(test_increment());
+        ARIADNE_TEST_CALL(test_list());
     }
 
     Void test_constructor() {
@@ -70,31 +71,49 @@ class TestMultiIndex
     }
 
     Void test_comparison() {
-        DegreeType a1[3]={2,0,3};
-        DegreeType a2[3]={1,0,4};
-        DegreeType a3[3]={3,0,1};
-        ARIADNE_TEST_CONSTRUCT(MultiIndex,i1,(3,a1));
-        ARIADNE_TEST_CONSTRUCT(MultiIndex,i2,(3,a2));
-        ARIADNE_TEST_CONSTRUCT(MultiIndex,i3,(3,a3));
+        DegreeType a1p[3]={2,0,3};
+        DegreeType a2p[3]={1,0,4};
+        DegreeType a3p[3]={3,0,1};
+        ARIADNE_TEST_CONSTRUCT(MultiIndex,a1,(3,a1p));
+        ARIADNE_TEST_CONSTRUCT(MultiIndex,a2,(3,a2p));
+        ARIADNE_TEST_CONSTRUCT(MultiIndex,a3,(3,a3p));
 
-        ARIADNE_TEST_ASSERT(graded_less(i1,i2));
-        ARIADNE_TEST_ASSERT(graded_less(i3,i1));
-        ARIADNE_TEST_ASSERT(graded_less(i3,i2));
-        ARIADNE_TEST_ASSERT(!graded_less(i2,i1));
+        ARIADNE_TEST_ASSERT(graded_less(a1,a2));
+        ARIADNE_TEST_ASSERT(graded_less(a3,a1));
+        ARIADNE_TEST_ASSERT(graded_less(a3,a2));
+        ARIADNE_TEST_ASSERT(!graded_less(a2,a1));
 
-        ARIADNE_TEST_ASSERT(lexicographic_less(i2,i1));
-        ARIADNE_TEST_ASSERT(lexicographic_less(i1,i3));
-        ARIADNE_TEST_ASSERT(lexicographic_less(i2,i3));
+        ARIADNE_TEST_ASSERT(lexicographic_less(a2,a1));
+        ARIADNE_TEST_ASSERT(lexicographic_less(a1,a3));
+        ARIADNE_TEST_ASSERT(lexicographic_less(a2,a3));
 
-        ARIADNE_TEST_ASSERT(reverse_lexicographic_less(i2,i1));
-        ARIADNE_TEST_ASSERT(reverse_lexicographic_less(i1,i3));
-        ARIADNE_TEST_ASSERT(reverse_lexicographic_less(i2,i3));
+        ARIADNE_TEST_ASSERT(reverse_lexicographic_less(a2,a1));
+        ARIADNE_TEST_ASSERT(reverse_lexicographic_less(a1,a3));
+        ARIADNE_TEST_ASSERT(reverse_lexicographic_less(a2,a3));
+
+        ARIADNE_TEST_EXECUTE(swap(a1,a2));
+        ARIADNE_TEST_EQUALS(a1,MultiIndex(3,a2p));
+        ARIADNE_TEST_EQUALS(a2,MultiIndex(3,a1p));
+
+        MultiIndexReference a1r(a1);
+        MultiIndexReference a2r(a2);
+        ARIADNE_TEST_EXECUTE(swap(a1r,a2r));
+        ARIADNE_TEST_EQUALS(a1,MultiIndex(3,a1p));
 
     }
 
     Void test_addition() {
-        DegreeType a1[3]={2,0,3}, a2[3]={1,1,0}, a3[3]={3,1,3};
-        ARIADNE_TEST_EQUAL(MultiIndex(3,a1)+MultiIndex(3,a2),MultiIndex(3,a3));
+        ARIADNE_TEST_CONSTRUCT(MultiIndex,a1,({2,0,3}));
+        ARIADNE_TEST_CONSTRUCT(MultiIndexReference,a1r,(a1));
+        ARIADNE_TEST_CONSTRUCT(MultiIndex,a2,({1,1,0}));
+        ARIADNE_TEST_CONSTRUCT(MultiIndex,a1pa2,({3,1,3}));
+        ARIADNE_TEST_EQUALS(a1+a2,a1pa2);
+        ARIADNE_TEST_EQUALS(a1pa2-a1,a2);
+        ARIADNE_TEST_EQUALS(a1*2u,MultiIndex({4,0,6}));
+        ARIADNE_TEST_EQUALS(a1+=a2,a1pa2);
+
+        ARIADNE_TEST_EQUALS(a1r,a1);
+        ARIADNE_TEST_EQUALS(a1r+=a2,a1pa2+a2);
     }
 
     Void test_increment() {
@@ -103,11 +122,78 @@ class TestMultiIndex
         while(a.degree()<=5) {
             MultiIndex b=a; ++a; ++n;
             ARIADNE_TEST_BINARY_PREDICATE(graded_less,b,a);
-            MultiIndex::IndexType d=0; for(MultiIndex::SizeType i=0; i!=a.size(); ++i) { d+=a[i]; }
+            MultiIndex::IndexType d=0; for(SizeType i=0; i!=a.size(); ++i) { d+=a[i]; }
             ARIADNE_TEST_EQUAL(a.degree(),d);
         }
         ARIADNE_ASSERT_EQUAL(n,126);
     }
+
+    Void test_list() {
+        MultiIndex az={0,0,0};
+        MultiIndex a0={2,0,3};
+        MultiIndex a1={1,2,2};
+        MultiIndex a2={1,0,4};
+        MultiIndex a3={0,0,0};
+        MultiIndex a4={1,0,1};
+
+        ARIADNE_TEST_CONSTRUCT(MultiIndexList,lst,(0u,MultiIndex(3u)));
+        ARIADNE_TEST_EQUALS(lst.capacity(),4u);
+        ARIADNE_TEST_EQUALS(lst.size(),0u);
+        ARIADNE_TEST_EQUALS(lst.argument_size(),3u);
+        ARIADNE_TEST_EXECUTE(lst.append(a0));
+        ARIADNE_TEST_PRINT(*lst.begin());
+        ARIADNE_TEST_EQUALS(lst.begin()->size(),3u);
+        ARIADNE_TEST_EQUALS(*lst.begin(),a0);
+
+        ARIADNE_TEST_EXECUTE(lst.append(a1));
+        ARIADNE_TEST_EQUALS(*lst.begin(),a0);
+        ARIADNE_TEST_EQUALS(*++lst.begin(),a1);
+
+        ARIADNE_TEST_CONSTRUCT(MultiIndexList,lstc,(lst));
+        ARIADNE_TEST_EQUAL(lstc,lst);
+
+        ARIADNE_TEST_CONSTRUCT(MultiIndexList,lstm,(std::move(lst)));
+        ARIADNE_TEST_EQUAL(lstm,lstc);
+
+        ARIADNE_TEST_ASSIGN(lst,lstc);
+        ARIADNE_TEST_EQUAL(lst,lstc);
+
+        ARIADNE_TEST_ASSIGN(lstm,std::move(lstc));
+
+        ARIADNE_TEST_PRINT(lst);
+        ARIADNE_TEST_PRINT(lstm);
+        ARIADNE_TEST_EQUAL(lstm,lst);
+        ARIADNE_TEST_EXECUTE(lst.append(a2));
+        ARIADNE_TEST_EXECUTE(lst.append(a3));
+        ARIADNE_TEST_EQUALS(lst.back(),a3);
+        ARIADNE_TEST_EQUALS(lst.capacity(),4u);
+        ARIADNE_TEST_PRINT(&lst.front()[0]);
+        ARIADNE_TEST_EXECUTE(lst.append(a4));
+        ARIADNE_TEST_PRINT(&lst.front()[0]);
+        ARIADNE_TEST_EQUALS(lst.capacity(),8u);
+        ARIADNE_TEST_EQUALS(lst.size(),5u);
+        ARIADNE_TEST_EQUALS(*--lst.end(),a4);
+        ARIADNE_TEST_EQUALS(lst.back(),a4);
+
+        ARIADNE_TEST_EXECUTE(lst.resize(3u));
+        ARIADNE_TEST_EQUALS(lst.size(),3u);
+        ARIADNE_TEST_EQUALS(lst.capacity(),8u);
+
+        ARIADNE_TEST_EXECUTE(lst.resize(11u));
+        ARIADNE_TEST_ASSERT(lst.capacity()==16u or lst.capacity()==11u);
+        ARIADNE_TEST_EQUALS(lst.size(),11u);
+        ARIADNE_TEST_EQUALS(lst[2],a2);
+        ARIADNE_TEST_EQUALS(lst[3],az);
+        ARIADNE_TEST_EQUALS(lst.back(),az);
+        ARIADNE_TEST_PRINT(lst);
+
+        ARIADNE_TEST_EXECUTE(*(lst.begin()+3)=a3);
+        ARIADNE_TEST_EQUALS(lst[3],a3);
+        ARIADNE_TEST_EQUALS(*(lst.begin()+3),a3);
+
+
+    }
+
 
 };
 

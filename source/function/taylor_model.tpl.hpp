@@ -469,9 +469,7 @@ template<class F> inline Void _acc(TaylorModel<ValidatedTag,F>& r, const Value<F
     ARIADNE_DEBUG_ASSERT(r.error().raw()>=0);
     typedef typename F::PrecisionType PR;
     if(c==0) { return; }
-    if(r.expansion().empty()) {
-        r.expansion().append(MultiIndex(r.argument_size()),c);
-    } else if((r.end()-1)->index().degree()>0) {
+    if(r.expansion().empty() || r.expansion().back().index().degree()>0) {
         r.expansion().append(MultiIndex(r.argument_size()),c);
     } else {
         ReferenceType<FloatValue<PR>> rv=(r.end()-1)->coefficient();
@@ -502,9 +500,7 @@ template<class F> inline Void _acc(TaylorModel<ValidatedTag,F>& r, const Bounds<
         return;
     }
 
-    if(r.expansion().empty()) { // Append a constant term zero
-        r._append(MultiIndex(r.argument_size()),FloatValue<PR>(0,r.precision()));
-    } else if((r.end()-1)->index().degree()>0) { // Append a constant term zero
+    if(r.expansion().empty() || r.expansion().back().index().degree()>0) { // Append a constant term zero
         r._append(MultiIndex(r.argument_size()),FloatValue<PR>(0,r.precision()));
     }
 
@@ -1409,7 +1405,7 @@ template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::_spli
     // Divide all coefficients by 2^a[k]
     // This can be done exactly
     for(typename TaylorModel<ValidatedTag,F>::Iterator iter=r.begin(); iter!=r.end(); ++iter) {
-        const uchar ak=iter->index()[k];
+        const DegreeType ak=iter->index()[k];
         ReferenceType<FloatValue<PR>> c=iter->coefficient();
         c/=two_exp(ak);
     }
@@ -1424,7 +1420,7 @@ template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::_spli
     for(typename TaylorModel<ValidatedTag,F>::ConstIterator iter=r.begin(); iter!=r.end(); ++iter) {
         MultiIndex a=iter->index();
         ConstReferenceType<FloatValue<PR>> c=iter->coefficient();
-        uchar ak=a[k];
+        DegreeType ak=a[k];
         a[k]=0u;
         ary[ak].expansion().append(a,c);
     }

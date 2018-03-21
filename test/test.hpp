@@ -277,7 +277,9 @@ int test_case_counter = 0;
         } else {                                                        \
             ++ARIADNE_TEST_FAILURES;                                    \
             std::cout << "\nERROR: " << #expression << ":\n           " << (expression) << std::endl; \
-            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Equality `" << #expression << " == " << #expected << "' failed; " << #expression << "=" << (expression) << std::endl; \
+            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Equality `" << #expression << " == " << #expected << "' failed;" << std::endl; \
+            std::cerr << "  " << #expression << "=" << (expression) << std::endl; \
+            std::cerr << "  " << #expected << "=" << (expected) << std::endl; \
         }                                                               \
     }                                                                   \
 
@@ -392,6 +394,12 @@ int test_case_counter = 0;
 
 /*! \brief Constructs object \a variable of type \a Class from \a expression. */
 #define ARIADNE_TEST_CONSTRUCT(Class,variable,expression)               \
+    std::cout << #Class << " " << #variable << "" << #expression << ": " << std::flush; \
+    Class variable expression;                                          \
+    std::cout << #variable << "==" << variable << "\n" << std::endl;    \
+
+/*
+#define ARIADNE_TEST_CONSTRUCT(Class,variable,expression)               \
     {                                                                   \
         std::cout << #Class << " " << #variable << "" << #expression << ": " << std::flush; \
         try {                                                           \
@@ -401,7 +409,7 @@ int test_case_counter = 0;
         ARIADNE_TEST_CATCH("Constructor `" << #Class << " " << #variable << "" << #expression << "'") \
     }                                                                   \
     Class variable expression;                                          \
-
+*/
 
 /*! \brief Constructs object \a variable of type \a Class from \a expression. */
 #define ARIADNE_TEST_NAMED_CONSTRUCT(Class,variable,expression)               \

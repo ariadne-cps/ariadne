@@ -239,7 +239,7 @@ OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ValidatedV
 }
 
 List<MultiIndex> keys(const ValidatedTaylorModelDP& tm) {
-    List<MultiIndex> r;
+    List<MultiIndex> r(tm.argument_size());
     for(ValidatedTaylorModelDP::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
         r.append(iter->index());
     }

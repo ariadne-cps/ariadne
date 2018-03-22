@@ -242,7 +242,7 @@ template<class A, class X> struct DispatchTranscendentalAlgebraOperations : Disp
     friend A div(A const& a1, A const& a2) { return OperationsType::apply(Div(),a1, a2); }
 
     friend A rec(A const& a) { return OperationsType::apply(Rec(),a); }
-    friend A div(X const& x1, A const& a2) { return rec(x1)*a2; }
+    friend A div(X const& x1, A const& a2) { return x1*rec(a2); }
     friend A pow(A const& a, Int n) { return OperationsType::apply(Pow(),a, n); }
 
     friend A sqrt(A const& a) { return OperationsType::apply(Sqrt(),a); }

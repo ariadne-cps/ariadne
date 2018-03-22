@@ -115,29 +115,29 @@ template<class PR> inline OutputStream& operator<<(OutputStream& os, const Repre
     return os;
 }
 
-template<class PR> inline OutputStream& operator<<(OutputStream& os, const Representation< Expansion<RawFloat<PR>> >& exp_repr)
+template<class PR> inline OutputStream& operator<<(OutputStream& os, const Representation< Expansion<MultiIndex,RawFloat<PR>> >& exp_repr)
 {
-    const Expansion<RawFloat<PR>>& exp=*exp_repr.pointer;
+    const Expansion<MultiIndex,RawFloat<PR>>& exp=*exp_repr.pointer;
     Int precision=os.precision(); std::ios_base::fmtflags flags = os.flags();
     os.precision(17); os.setf(std::ios_base::showpoint);
-    os << "Expansion<Float<PR>>(" << exp.argument_size() << "," << exp.number_of_nonzeros();
-    for(typename Expansion<RawFloat<PR>>::ConstIterator iter=exp.begin(); iter!=exp.end(); ++iter) {
-        for(SizeType j=0; j!=iter->key().size(); ++j) {
-            os << "," << Nat(iter->key()[j]);
+    os << "Expansion<MultiIndex,Float<PR>>(" << exp.argument_size() << "," << exp.number_of_nonzeros();
+    for(typename Expansion<MultiIndex,RawFloat<PR>>::ConstIterator iter=exp.begin(); iter!=exp.end(); ++iter) {
+        for(SizeType j=0; j!=iter->index().size(); ++j) {
+            os << "," << Nat(iter->index()[j]);
         }
-        os << "," << iter->data();
+        os << "," << iter->coefficient();
     }
     os << ")";
     os.precision(precision); os.flags(flags);
     return os;
 }
 
-template<class PR> inline OutputStream& operator<<(OutputStream& os, const Representation< Expansion<FloatValue<PR>> >& exp_repr) {
-    return os << reinterpret_cast<Expansion<RawFloat<PR>>const&>(exp_repr);
+template<class PR> inline OutputStream& operator<<(OutputStream& os, const Representation< Expansion<MultiIndex,FloatValue<PR>> >& exp_repr) {
+    return os << reinterpret_cast<Expansion<MultiIndex,RawFloat<PR>>const&>(exp_repr);
 }
 
-template<class PR> inline OutputStream& operator<<(OutputStream& os, const Representation< Expansion<FloatApproximation<PR>> >& exp_repr) {
-    return os << reinterpret_cast<Expansion<RawFloat<PR>>const&>(exp_repr);
+template<class PR> inline OutputStream& operator<<(OutputStream& os, const Representation< Expansion<MultiIndex,FloatApproximation<PR>> >& exp_repr) {
+    return os << reinterpret_cast<Expansion<MultiIndex,RawFloat<PR>>const&>(exp_repr);
 }
 
 template<class X> inline OutputStream& operator<<(OutputStream& os, const Representation< Vector<X> >& vec_repr)
@@ -200,12 +200,12 @@ template<class M> ScaledFunctionPatch<M>::ScaledFunctionPatch(const BoxDomainTyp
 {
 }
 
-template<class M> ScaledFunctionPatch<M>::ScaledFunctionPatch(const BoxDomainType& d, const Expansion<RawFloat<PR>>& p, const RawFloat<PR>& e, const Sweeper<RawFloat<PR>>& prp)
+template<class M> ScaledFunctionPatch<M>::ScaledFunctionPatch(const BoxDomainType& d, const Expansion<MultiIndex,RawFloat<PR>>& p, const RawFloat<PR>& e, const Sweeper<RawFloat<PR>>& prp)
     : _domain(d), _model(p,e,prp)
 {
 }
 
-template<class M> ScaledFunctionPatch<M>::ScaledFunctionPatch(const BoxDomainType& d, const Expansion<FloatValue<PR>>& p, const FloatError<PR>& e, const Sweeper<RawFloat<PR>>& prp)
+template<class M> ScaledFunctionPatch<M>::ScaledFunctionPatch(const BoxDomainType& d, const Expansion<MultiIndex,FloatValue<PR>>& p, const FloatError<PR>& e, const Sweeper<RawFloat<PR>>& prp)
     : _domain(d), _model(p,e,prp)
 {
 }
@@ -481,8 +481,8 @@ template<class M> OutputStream& operator<<(OutputStream& os, const ModelRepresen
     FloatDP truncatation_error = 0.0;
     os << "<"<<f.domain()<<"\n";
     for(ModelType::ConstIterator iter=f.begin(); iter!=f.end(); ++iter) {
-        if(abs(iter->data())>frepr.threshold) { truncatation_error+=abs(iter->data()); }
-        else { os << iter->key() << ":" << iter->data() << ","; }
+        if(abs(iter->coefficient())>frepr.threshold) { truncatation_error+=abs(iter->coefficient()); }
+        else { os << iter->index() << ":" << iter->coefficient() << ","; }
     }
     os << "+/-" << truncatation_error << "+/-" << f.error();
     return os;
@@ -573,7 +573,7 @@ template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const 
 }
 
 template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const BoxDomainType& d,
-                                           const Vector<Expansion<FloatValue<PR>>>& f,
+                                           const Vector<Expansion<MultiIndex,FloatValue<PR>>>& f,
                                            const Vector<FloatError<PR>>& e,
                                            PropertiesType prp)
     : _domain(d), _models(f.size(),ModelType(d.size(),prp))
@@ -586,25 +586,25 @@ template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const 
 }
 
 template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const BoxDomainType& d,
-                                           const Vector<Expansion<FloatValue<PR>>>& f,
+                                           const Vector<Expansion<MultiIndex,FloatValue<PR>>>& f,
                                            PropertiesType prp)
     : VectorScaledFunctionPatch<M>(d,f,Vector<FloatError<PR>>(f.size()),prp)
 {
 }
 
 template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const BoxDomainType& d,
-                                           const Vector<Expansion<RawFloat<PR>>>& f,
+                                           const Vector<Expansion<MultiIndex,RawFloat<PR>>>& f,
                                            const Vector<RawFloat<PR>>& e,
                                            PropertiesType prp)
-    : VectorScaledFunctionPatch<M>(d,reinterpret_cast<Vector<Expansion<FloatValue<PR>>>const&>(f),
+    : VectorScaledFunctionPatch<M>(d,reinterpret_cast<Vector<Expansion<MultiIndex,FloatValue<PR>>>const&>(f),
                            reinterpret_cast<Vector<FloatError<PR>>const&>(e),prp)
 {
 }
 
 template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const BoxDomainType& d,
-                                           const Vector<Expansion<RawFloat<PR>>>& f,
+                                           const Vector<Expansion<MultiIndex,RawFloat<PR>>>& f,
                                            PropertiesType prp)
-    : VectorScaledFunctionPatch<M>(d,reinterpret_cast<Vector<Expansion<FloatValue<PR>>>const&>(f),Vector<FloatError<PR>>(f.size()),prp)
+    : VectorScaledFunctionPatch<M>(d,reinterpret_cast<Vector<Expansion<MultiIndex,FloatValue<PR>>>const&>(f),Vector<FloatError<PR>>(f.size()),prp)
 {
 }
 
@@ -694,9 +694,9 @@ template<class M> auto VectorScaledFunctionPatch<M>::polynomials() const -> Vect
     return p;
 }
 
-template<class M> auto VectorScaledFunctionPatch<M>::expansions() const -> Vector<Expansion<FloatValue<PR>>> const
+template<class M> auto VectorScaledFunctionPatch<M>::expansions() const -> Vector<Expansion<MultiIndex,FloatValue<PR>>> const
 {
-    Vector<Expansion<FloatValue<PR>>> e(this->result_size(),Expansion<FloatValue<PR>>(this->argument_size()));
+    Vector<Expansion<MultiIndex,FloatValue<PR>>> e(this->result_size(),Expansion<MultiIndex,FloatValue<PR>>(this->argument_size()));
     for(SizeType i=0; i!=this->result_size(); ++i) {
         e[i]=this->models()[i].expansion();
     }

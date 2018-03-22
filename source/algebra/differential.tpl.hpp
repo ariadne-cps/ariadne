@@ -32,6 +32,7 @@
 #include "algebra/multi_index.hpp"
 #include "algebra/series.hpp"
 #include "algebra/expansion.hpp"
+#include "algebra/expansion.inl.hpp"
 
 namespace Ariadne {
 
@@ -39,7 +40,7 @@ template<class X> class Vector;
 template<class X> class Matrix;
 template<class X> class Series;
 
-template<class X> class Expansion;
+template<class I, class X> class Expansion;
 template<class X> class Differential;
 
 
@@ -58,15 +59,15 @@ template<class X> Differential<X>::Differential(const Map<MultiIndex,X>& map, De
 template<class X>
 Differential<X>::Differential(SizeType as, DegreeType deg,
                               InitializerList< Pair<InitializerList<DegreeType>,X> > lst)
-    : _expansion(Expansion<X>(lst)), _degree(deg)
+    : _expansion(Expansion<MultiIndex,X>(lst)), _degree(deg)
 {
     this->cleanup();
 }
 
 
-template<class X> Differential<X>::Differential(const Expansion<X>& e, DegreeType deg) : _expansion(e.argument_size()),_degree(deg) {
-    for(typename Expansion<X>::ConstIterator iter=e.begin(); iter!=e.end(); ++iter) {
-        if(iter->key().degree()<=deg) { this->_expansion.append(iter->key(),iter->data()); }
+template<class X> Differential<X>::Differential(const Expansion<MultiIndex,X>& e, DegreeType deg) : _expansion(e.argument_size()),_degree(deg) {
+    for(typename Expansion<MultiIndex,X>::ConstIterator iter=e.begin(); iter!=e.end(); ++iter) {
+        if(iter->index().degree()<=deg) { this->_expansion.append(iter->index(),iter->coefficient()); }
     }
     this->cleanup();
 }
@@ -142,23 +143,23 @@ template<class X> EqualityType<X> Differential<X>::operator==(const Differential
     IndexComparisonType less;
     ConstIterator self_iter=self.begin(); ConstIterator other_iter=other.begin();
     while(self_iter!=self.end() && other_iter!=other.end()) {
-        if(self_iter->key()==other_iter->key()) {
-            result = result && (self_iter->data()==other_iter->data());
+        if(self_iter->index()==other_iter->index()) {
+            result = result && (self_iter->coefficient()==other_iter->coefficient());
             ++self_iter; ++other_iter;
-        } else if (less(self_iter->key(), other_iter->key())) {
-            result = result && (self_iter->data()==0);
+        } else if (less(self_iter->index(), other_iter->index())) {
+            result = result && (self_iter->coefficient()==0);
             ++self_iter;
-        } else { // (self_iter->key() > other_iter->key())
-            result = result && (other_iter->data()==0);
+        } else { // (self_iter->index() > other_iter->index())
+            result = result && (other_iter->coefficient()==0);
             ++other_iter;
         }
     }
     while(self_iter!=self.end()) {
-        result = result && (self_iter->data()==0);
+        result = result && (self_iter->coefficient()==0);
         ++self_iter;
     }
     while(other_iter!=other.end()) {
-        result = result && (other_iter->data()==0);
+        result = result && (other_iter->coefficient()==0);
         ++other_iter;
     }
     return result;
@@ -181,11 +182,11 @@ template<class X> X Differential<X>::zero_coefficient() const {
     return this->_expansion.zero_coefficient();
 }
 
-template<class X> const Expansion<X>& Differential<X>::expansion() const {
+template<class X> const Expansion<MultiIndex,X>& Differential<X>::expansion() const {
     return this->_expansion;
 }
 
-template<class X> Expansion<X>& Differential<X>::expansion() {
+template<class X> Expansion<MultiIndex,X>& Differential<X>::expansion() {
     return this->_expansion;
 }
 
@@ -207,10 +208,10 @@ template<class X> Matrix<X> Differential<X>::half_hessian() const {
     ARIADNE_PRECONDITION(this->degree()>=2);
     Matrix<X> H(this->argument_size(),this->argument_size());
     ConstIterator iter=this->begin();
-    while(iter!=this->end() && iter->key().degree()<=1) { ++iter; }
+    while(iter!=this->end() && iter->index().degree()<=1) { ++iter; }
     SizeType i=0; SizeType j=1;
-    while(iter!=this->end() && iter->key().degree()<=2) {
-        const MultiIndex& a=iter->key(); const X& c=iter->data();
+    while(iter!=this->end() && iter->index().degree()<=2) {
+        ConstReferenceType<MultiIndex> a=iter->index(); ConstReferenceType<X> c=iter->coefficient();
         while(a[i]==0) { ++i; j=i+1; }
         if(a[i]==2) { H[i][i]=c; }
         else { while(a[j]==0) { ++j; } H[i][j]=c; H[j][i]=c; }
@@ -241,7 +242,7 @@ template<class X> const X& Differential<X>::operator[](const MultiIndex& a) cons
     ARIADNE_ASSERT_MSG(a.number_of_variables()==this->argument_size()," d="<<*this<<", a="<<a);
     ConstIterator iter=this->_expansion.find(a);
     if(iter==this->_expansion.end()) { return this->_expansion.zero_coefficient(); }
-    else { return iter->data(); }
+    else { return iter->coefficient(); }
 }
 
 
@@ -304,9 +305,9 @@ template<class X> Void Differential<X>::cleanup() {
 
 template<class X> Void Differential<X>::check() const {
     for(auto iter=this->begin(); iter!=this->end(); ++iter) {
-        ARIADNE_ASSERT_MSG(iter->key().degree()<=this->degree(), *this);
+        ARIADNE_ASSERT_MSG(iter->index().degree()<=this->degree(), *this);
         auto next = iter; ++next;
-        ARIADNE_ASSERT_MSG(graded_less(iter->key(),next->key()),"ErrorTag in ordering Differential "<<this->expansion());
+        ARIADNE_ASSERT_MSG(graded_less(iter->index(),next->index()),"ErrorTag in ordering Differential "<<this->expansion());
     }
 }
 
@@ -315,7 +316,7 @@ template<class X>
 Differential<X> AlgebraOperations<Differential<X>>::apply(Pos op, Differential<X> x)
 {
     for(auto iter=x.begin(); iter!=x.end(); ++iter) {
-        X& xa=iter->data();
+        ReferenceType<X> xa=iter->coefficient();
         xa=+xa;
     }
     return std::move(x);
@@ -325,7 +326,7 @@ template<class X>
 Differential<X> AlgebraOperations<Differential<X>>::apply(Neg op, Differential<X> x)
 {
     for(auto iter=x.begin(); iter!=x.end(); ++iter) {
-        X& xa=iter->data();
+        ReferenceType<X> xa=iter->coefficient();
         xa=-xa;
     }
     return std::move(x);
@@ -337,10 +338,10 @@ Differential<X> AlgebraOperations<Differential<X>>::apply(Add op, Differential<X
     MultiIndex a(x.argument_size());
     if(x.expansion().empty()) {
         x.expansion().append(a,c);
-    } else if(x.begin()->key()!=a) {
+    } else if(x.begin()->index()!=a) {
         x.expansion().prepend(a,c);
     } else {
-        x.begin()->data()+=c;
+        x.begin()->coefficient()+=c;
     }
     return std::move(x);
 }
@@ -352,7 +353,7 @@ Differential<X> AlgebraOperations<Differential<X>>::apply(Mul op, Differential<X
         x.clear();
     } else {
         for(auto iter=x.begin(); iter!=x.end(); ++iter) {
-            static_cast<X&>(iter->data())*=c;
+            iter->coefficient()*=c;
         }
     }
     return std::move(x);
@@ -370,23 +371,23 @@ Differential<X> AlgebraOperations<Differential<X>>::apply(Add op, const Differen
     // No need to check if maximum degree has been reached below,
     // since if one Iterator is above the maximum degree, the other is at the end.
     while(xiter!=x.end() && yiter!=y.end()) {
-        if(xiter->key()==yiter->key()) {
-            r.expansion().append(xiter->key(),xiter->data()+yiter->data());
+        if(xiter->index()==yiter->index()) {
+            r.expansion().append(xiter->index(),xiter->coefficient()+yiter->coefficient());
             ++xiter; ++yiter;
-        } else if(graded_less(xiter->key(),yiter->key())) {
-            r.expansion().append(xiter->key(),xiter->data());
+        } else if(graded_less(xiter->index(),yiter->index())) {
+            r.expansion().append(xiter->index(),xiter->coefficient());
             ++xiter;
         } else {
-            r.expansion().append(yiter->key(),yiter->data());
+            r.expansion().append(yiter->index(),yiter->coefficient());
             ++yiter;
         }
     }
-    while(xiter!=x.end() && xiter->key().degree()<=r.degree()) {
-        r.expansion().append(xiter->key(),xiter->data());
+    while(xiter!=x.end() && xiter->index().degree()<=r.degree()) {
+        r.expansion().append(xiter->index(),xiter->coefficient());
         ++xiter;
     }
-    while(yiter!=y.end() && yiter->key().degree()<=r.degree()) {
-        r.expansion().append(yiter->key(),yiter->data());
+    while(yiter!=y.end() && yiter->index().degree()<=r.degree()) {
+        r.expansion().append(yiter->index(),yiter->coefficient());
         ++yiter;
     }
     //std::cerr<<"x="<<x<<" y="<<y<<" x+y="<<r<<"\n";
@@ -403,23 +404,23 @@ Differential<X> AlgebraOperations<Differential<X>>::apply(Sub op, const Differen
     // No need to check if maximum degree has been reached below,
     // since if one Iterator is above the maximum degree, the other is at the end.
     while(xiter!=x.end() && yiter!=y.end()) {
-        if(xiter->key()==yiter->key()) {
-            r.expansion().append(xiter->key(),xiter->data()-yiter->data());
+        if(xiter->index()==yiter->index()) {
+            r.expansion().append(xiter->index(),xiter->coefficient()-yiter->coefficient());
             ++xiter; ++yiter;
-        } else if(graded_less(xiter->key(),yiter->key())) {
-            r.expansion().append(xiter->key(),xiter->data());
+        } else if(graded_less(xiter->index(),yiter->index())) {
+            r.expansion().append(xiter->index(),xiter->coefficient());
             ++xiter;
         } else {
-            r.expansion().append(yiter->key(),-yiter->data());
+            r.expansion().append(yiter->index(),-yiter->coefficient());
             ++yiter;
         }
     }
-    while(xiter!=x.end() && xiter->key().degree()<=r.degree()) {
-        r.expansion().append(xiter->key(),xiter->data());
+    while(xiter!=x.end() && xiter->index().degree()<=r.degree()) {
+        r.expansion().append(xiter->index(),xiter->coefficient());
         ++xiter;
     }
-    while(yiter!=y.end() && yiter->key().degree()<=r.degree()) {
-        r.expansion().append(yiter->key(),-yiter->data());
+    while(yiter!=y.end() && yiter->index().degree()<=r.degree()) {
+        r.expansion().append(yiter->index(),-yiter->coefficient());
         ++yiter;
     }
     //std::cerr<<"x="<<x<<" y="<<y<<" x-y="<<r<<"\n";
@@ -435,11 +436,11 @@ Differential<X> AlgebraOperations<Differential<X>>::apply(Mul op, const Differen
     MultiIndex a(x.argument_size());
     X c(0);
     for(ConstIterator xiter=x.expansion().begin(); xiter!=x.expansion().end(); ++xiter) {
-        if(xiter->key().degree()>r.degree()) { break; }
+        if(xiter->index().degree()>r.degree()) { break; }
         for(ConstIterator yiter=y.expansion().begin(); yiter!=y.expansion().end(); ++yiter) {
-            if(xiter->key().degree()+yiter->key().degree()>r.degree()) { break; }
-            a=xiter->key()+yiter->key();
-            c=static_cast<const X&>(xiter->data())*static_cast<const X&>(yiter->data());
+            if(xiter->index().degree()+yiter->index().degree()>r.degree()) { break; }
+            a=xiter->index()+yiter->index();
+            c=xiter->coefficient()*yiter->coefficient();
             r.expansion().append(a,c);
         }
     }
@@ -513,8 +514,8 @@ template<class X> Differential<X> _evaluate(const Differential<X>& x, const Vect
     Differential<X> r(zero);
     for(auto iter=x.begin(); iter!=x.end(); ++iter)
     {
-        const MultiIndex& j=iter->key();
-        const X& c=iter->data();
+        ConstReferenceType<MultiIndex> j=iter->index();
+        ConstReferenceType<X> c=iter->coefficient();
         Differential<X> t=one;
         for(SizeType k=0; k!=ms; ++k) {
             t=t*val[k][j[k]];
@@ -534,7 +535,7 @@ Differential<X> Differential<X>::_compose(const UnivariateDifferential<X>& x, co
     DegreeType d=std::min(x.degree(),y.degree());
 
     Differential<X> w=y;
-    if(w.begin()->key().degree()==0) { w.begin()->data()=0; }
+    if(w.begin()->index().degree()==0) { w.begin()->coefficient()=0; }
     Differential<X> r(as,d);
     r[MultiIndex(as)]=x[d];
     for(SizeType n=1; n<=d; ++n) {
@@ -580,7 +581,7 @@ Differential<X> Differential<X>::_derivative(const Differential<X>& x, SizeType 
     Differential<X> r(x.argument_size(), x.degree()-1);
     MultiIndex a(x.argument_size());
     for(typename Differential<X>::ConstIterator iter=x.begin(); iter!=x.end(); ++iter) {
-        a=iter->key();
+        a=iter->index();
         Nat n=a[i];
         if(n!=0) {
             const X& xc=x[a];
@@ -600,7 +601,7 @@ Differential<X> Differential<X>::_antiderivative(const Differential<X>& x, SizeT
     MultiIndex ra=MultiIndex(x.argument_size());
     MultiIndex ai=MultiIndex::unit(x.argument_size(),i);
     for(typename Differential<X>::ConstIterator iter=x.begin(); iter!=x.end(); ++iter) {
-        a=iter->key();
+        a=iter->index();
         const X& xc=x[a];
         ++a[i];
         Nat n=a[i];
@@ -615,16 +616,16 @@ template<class X>
 OutputStream& Differential<X>::_write(OutputStream& os) const
 {
     Differential<X> const& x=*this;
-    Expansion<X> e=x.expansion();
+    Expansion<MultiIndex,X> e=x.expansion();
     //e.graded_sort();
     os << "SD("<<x.argument_size()<<","<<(uint)x.degree()<<"){";
-    for(typename Expansion<X>::ConstIterator iter=e.begin(); iter!=e.end(); ++iter) {
+    for(typename Expansion<MultiIndex,X>::ConstIterator iter=e.begin(); iter!=e.end(); ++iter) {
         if(iter!=e.begin()) { os << ","; } os << " ";
         for(SizeType i=0; i!=e.argument_size(); ++i) {
             if(i!=0) { os << ","; }
-            os << SizeType(iter->key()[i]);
+            os << SizeType(iter->index()[i]);
         }
-        os << ":" << X(iter->data());
+        os << ":" << X(iter->coefficient());
     }
     return os << " }";
 }
@@ -756,15 +757,15 @@ Vector<Differential<X>>::_lie_derivative(const Vector<Differential<X> >& df, con
 {
     Vector<Differential<X>> r(df.result_size(),df.argument_size(),df.degree()-1);
     Differential<X> t(df.argument_size(), df.degree()-1);
-    MultiIndex a; X c;
+    MultiIndex a(df.argument_size()); X c;
     for(SizeType i=0; i!=df.result_size(); ++i) {
-        Expansion<X> const& dfi_expansion = df[i].expansion();
-        Expansion<X>& t_expansion = t.expansion();
+        Expansion<MultiIndex,X> const& dfi_expansion = df[i].expansion();
+        Expansion<MultiIndex,X>& t_expansion = t.expansion();
         for(SizeType j=0; j!=df.argument_size(); ++j) {
-            for(typename Expansion<X>::ConstIterator iter=dfi_expansion.begin(); iter!=dfi_expansion.end(); ++iter) {
-                if(iter->key()[j]!=0) {
-                    a=iter->key();
-                    c=iter->data()*SizeType(a[j]);
+            for(typename Expansion<MultiIndex,X>::ConstIterator iter=dfi_expansion.begin(); iter!=dfi_expansion.end(); ++iter) {
+                if(iter->index()[j]!=0) {
+                    a=iter->index();
+                    c=iter->coefficient()*SizeType(a[j]);
                     a[j]-=1;
                     t_expansion.append(a,c);
                 }

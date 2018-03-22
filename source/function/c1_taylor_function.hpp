@@ -79,7 +79,7 @@ class C1TaylorFunction
   public:
     typedef FloatDPBounds NumericType;
   public:
-    Expansion<FloatDP> _expansion;
+    Expansion<MultiIndex,FloatDP> _expansion;
     FloatDP _zero_error;
     FloatDP _uniform_error;
     Array<FloatDP> _derivative_errors;

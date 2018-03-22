@@ -363,7 +363,7 @@ Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Space<Rea
 //! \brief Convert a power-series expansion into a formula using a version of Horner's rule.
 //! See J. M. Pena and T. Sauer, "On the multivariate Horner scheme", SIAM J. Numer. Anal. 37(4) 1186-1197, 2000.
 //!
-template<class X> Formula<X> formula(const Expansion<X>& e)
+template<class X> Formula<X> formula(const Expansion<MultiIndex,X>& e)
 {
     Vector<Formula<X>> identity(e.argument_size());
     for(Nat i=0; i!=identity.size(); ++i) { identity[i]=Formula<X>::coordinate(i); }

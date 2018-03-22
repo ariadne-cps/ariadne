@@ -21,141 +21,119 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "utility/stlio.hpp"
+#include "utility/container.hpp"
 #include "multi_index.hpp"
 
 namespace Ariadne {
 
-OutputStream& operator<<(OutputStream& os, const MultiIndex& a) {
-    //os << "("<<Int(a.degree());
-    //for(MultiIndex::SizeType i=0; i!=a.size(); ++i) { os << (i==0?';':',') << Int(a[i]); }
-    if(a.size()==0) { return os << "()"; }
-    os << '(' << a.degree();
-    for(MultiIndex::SizeType i=0; i!=a.size(); ++i) { os << (i==0?';':',') << Int(a[i]); }
-    return os << ')';
-}
-
-Bool graded_less(const MultiIndex& a1, const MultiIndex& a2) {
-    if(a1.size()!=a2.size()) {
-        throw std::runtime_error("graded_less(MultiIndex,MultiIndex): number of variables must match");
-    }
-
-    if(a1.degree()!=a2.degree()) {
-        return a1.degree()<a2.degree();
-    } else {
-        for(SizeType i=0; i!=a1.size(); ++i) {
-            if(a1[i]!=a2[i]) {
-                return a1[i]>a2[i];
-            }
-        }
-        return false;
-        //for(size_type j=0; j!=a1.word_size(); ++j) {
-        for(SizeType j=a1.size(); j!=0u;) {
-            --j;
-            if(a1[j]!=a2[j]) {
-                return a1[j]<a2[j];
-            }
-        }
-        return false;
-    }
-}
-
-Bool lexicographic_less(const MultiIndex& a1, const MultiIndex& a2) {
-    if(a1.size()!=a2.size()) {
-        throw std::runtime_error("lexicographic_less(MultiIndex,MultiIndex): number of variables must match");
-    }
-
-    for(SizeType i=0; i!=a1.size(); ++i) {
-        if(a1[i]!=a2[i]) {
-            return a1[i]<a2[i];
-        }
-    }
-    return false;
-}
-
-Bool reverse_lexicographic_less(const MultiIndex& a1, const MultiIndex& a2) {
-    if(a1.size()!=a2.size()) {
-        throw std::runtime_error("reverse_lexicographic_less(MultiIndex,MultiIndex): number of variables must match");
-    }
-
-    SizeType i=a1.size();
-    while(i!=0) {
-        --i;
-        if(a1[i]!=a2[i]) {
-            return a1[i]>a2[i];
-        }
-    }
-    return false;
-}
-
-
-
-typedef SizeType BigSizeType;
-
-BigSizeType MultiIndex::number() const
-{
-    BigSizeType result=fac(this->degree());
-    for(SizeType k=0; k!=this->size(); ++k) {
-        result/=fac((*this)[k]);
-    }
-    return result;
-}
-
-BigSizeType MultiIndex::factorial() const
-{
-    BigSizeType result=1;
-    for(SizeType k=0; k!=this->size(); ++k) {
-        result*=fac((*this)[k]);
-    }
-    return result;
-}
-
-BigSizeType MultiIndex::position() const
-{
-    DegreeType deg=this->degree()-1;
-    DegreeType nvar=this->size();
-    BigSizeType result=bin(deg+nvar,nvar);
-    for(SizeType k=0; k!=this->size()-1; ++k) {
-        --nvar;
-        deg-=(*this)[k];
-        result+=bin(deg+nvar,nvar);
-    }
-    return result;
-}
-
-
-MultiIndex& MultiIndex::operator++()
-{
-    //std::cerr<<"MultiIndex::operator++() with *this="<<*this<<" "<<std::flush;
+MultiIndex& MultiIndex::operator++() {
     assert(_n>0);
-
-    SizeType const n=this->_n;
-    IndexType* const p=reinterpret_cast<IndexType*>(this->_p);
-
-    if(n==1) {
-        ++p[0];
-        ++p[n];
-        return *this;
-    }
-    if(p[n-2]!=0) {
-        --p[n-2];
-        ++p[n-1];
-        return *this;
-    } else {
-        IndexType li=p[n-1];
-        p[n-1]=0;
-        for(SizeType k=n-1; k!=0; --k) {
-            if(p[k-1]!=0) {
-                --p[k-1];
-                p[k]=li+1;
-                return *this;
-            }
-        }
-        p[0]=li+1;
-        ++p[n];
+    if(_n==1) { ++_p[0]; ++_p[_n]; return *this; }
+    if(_p[_n-2]!=0) { --_p[_n-2]; ++_p[_n-1]; return *this; }
+    else {
+        IndexType li=_p[_n-1]; _p[_n-1]=0;
+        for(SizeType k=_n-1; k!=0; --k) { if(_p[k-1]!=0) { --_p[k-1]; _p[k]=li+1u; return *this; } }
+        _p[0]=li+1u; ++_p[_n];
     }
     return *this;
 }
 
+
+
+MultiIndexList::MultiIndexList(SizeType as)
+    : _capacity(DEFAULT_CAPACITY), _size(0u), _argument_size(as)
+    , _indices(new DegreeType[_capacity*_argument_size])
+{
+}
+
+MultiIndexList::~MultiIndexList() {
+    delete[] _indices; _indices=nullptr;
+}
+
+MultiIndexList::MultiIndexList(InitializerList<InitializerList<DegreeType>> const& lst)
+    : MultiIndexList((assert(lst.size()!=0),lst.begin()->size()))
+{
+    for(auto iter=lst.begin(); iter!=lst.end(); ++iter) { this->append(MultiIndex(*iter)); }
+}
+
+MultiIndexList::MultiIndexList(InitializerList<MultiIndex> const& lst)
+    : MultiIndexList((assert(lst.size()!=0),lst.begin()->size()))
+{
+    for(auto iter=lst.begin(); iter!=lst.end(); ++iter) { this->append(*iter); }
+}
+
+MultiIndexList::MultiIndexList(SizeType n, MultiIndex const& a)
+    : MultiIndexList(a.size())
+{
+    for(SizeType i=0; i!=n; ++i) { this->append(a); }
+}
+
+MultiIndexList::MultiIndexList(MultiIndexList const& lst) : MultiIndexList(lst.argument_size()) {
+    for(SizeType i=0; i!=lst.size(); ++i) { this->append(lst[i]); }
+}
+
+
+MultiIndexList& MultiIndexList::operator=(MultiIndexList const& lst) {
+    if(this != &lst) {
+        delete[] _indices;
+
+        _capacity=lst._capacity;
+        _size=lst._size;
+        _argument_size=lst._argument_size;
+
+        _indices=new DegreeType[_capacity*_argument_size];
+        for(SizeType k=0; k!=_size*_argument_size; ++k) { _indices[k]=lst._indices[k]; }
+    }
+    return *this;
+}
+
+
+Void MultiIndexList::resize(SizeType new_size) {
+    this->reserve(new_size);
+    _size=new_size;
+}
+
+
+Void MultiIndexList::reserve(SizeType requested_capacity) {
+    if(requested_capacity>_capacity) {
+        SizeType new_capacity=std::max(DEFAULT_CAPACITY,_capacity);
+        while(new_capacity<requested_capacity) { new_capacity*=2u; }
+        new_capacity=requested_capacity;
+        DegreeType* new_indices=new DegreeType[new_capacity*_argument_size];
+        for(SizeType k=0; k!=_size*_argument_size; ++k) { new_indices[k]=_indices[k]; }
+
+        delete[] _indices;
+
+        _capacity=new_capacity;
+        _indices=new_indices;
+
+    }
+}
+
+MultiIndexList::Iterator MultiIndexList::erase(Iterator pos) {
+    Iterator curr=pos;
+    Iterator next=pos+1;
+    while(next!=this->end()) {
+        *pos=*next;
+        ++pos; ++next;
+    }
+    --_size;
+    return pos;
+}
+
+Void MultiIndexList::clear() {
+    _size=0u; }
+
+Bool operator==(const MultiIndexList& lst1, const MultiIndexList& lst2) {
+    if(lst1._size!=lst2._size or lst2._argument_size != lst2._argument_size) { return false; }
+    for(SizeType i=0; i!=lst1._size; ++i) { if(lst1[i]!=lst2[i]) { return false; } } return true; }
+
+OutputStream& operator<<(OutputStream& os, MultiIndexList const& lst) {
+    os << "MultiIndexList" << std::flush;
+    os << "<" << lst.size() << "/" << lst.capacity() << ";" << lst.argument_size() << ">";
+    os << "["; for(SizeType i=0; i!=lst.size(); ++i) { if(i!=0) { os << ","; } os << lst[i]; } os << "]"; return os;
+}
 
 
 Array<SizeType> complement(SizeType nmax, Array<SizeType> vars) {

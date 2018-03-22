@@ -102,9 +102,10 @@ template<class F> class TestTaylorModel
 {
     typedef PrecisionType<F> PR;
     typedef MultiIndex MI;
-    typedef Expansion<F> E;
+    typedef Expansion<MI,F> E;
     typedef Polynomial<F> P;
     typedef ValidatedTaylorModel<F> T;
+    typedef Expansion<MI,F> ExpansionType;
   public:
     Sweeper<F> swp; PR pr;
     ValidatedTaylorModel<F> z,o,x,y,e;
@@ -202,9 +203,9 @@ template<class F> Void TestTaylorModel<F>::test_constructors()
 {
 
 
-    ARIADNE_TEST_CONSTRUCT(Expansion<F>,raw_expansion,({ {{0,0},1.0}, {{1,0},2.0}, {{0,1},3.0}, {{2,0},4.0}, {{1,1},5.0}, {{0,2},6.0}, {{3,0},7.0}, {{2,1},8.0}, {{1,2},9.0}, {{0,3},10.0} },pr));
+    ARIADNE_TEST_CONSTRUCT(ExpansionType,raw_expansion,({ {{0,0},1.0}, {{1,0},2.0}, {{0,1},3.0}, {{2,0},4.0}, {{1,1},5.0}, {{0,2},6.0}, {{3,0},7.0}, {{2,1},8.0}, {{1,2},9.0}, {{0,3},10.0} },pr));
     ARIADNE_TEST_CONSTRUCT(F,raw_error,(0.25,pr));
-    ARIADNE_TEST_CONSTRUCT(Expansion<FloatValue<PR>>,expansion,(raw_expansion));
+    ARIADNE_TEST_CONSTRUCT(ExpansionType,expansion,(raw_expansion));
     ARIADNE_TEST_CONSTRUCT(FloatError<PR>,error,(raw_error));
 
     ARIADNE_TEST_CONSTRUCT(ValidatedTaylorModel<F>,tv,(raw_expansion, raw_error, swp));
@@ -321,7 +322,7 @@ template<class F> Void TestTaylorModel<F>::test_arithmetic()
     ARIADNE_TEST_SAME(pow(t,3),t*t*t);
 
     F inf = F::inf(pr);
-    ValidatedTaylorModel<F> tm_inf(Expansion<FloatType>(2),+inf,swp);
+    ValidatedTaylorModel<F> tm_inf(Expansion<MultiIndex,FloatType>(2),+inf,swp);
     ValidatedTaylorModel<F> tm_zero_times_inf=0*tm_inf;
     if(is_nan(tm_zero_times_inf.error().raw())) {
         ARIADNE_TEST_WARN("Multiplying 0+/-inf by 0 yields 0+/-NaN");

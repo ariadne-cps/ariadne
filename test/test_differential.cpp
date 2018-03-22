@@ -35,6 +35,8 @@
 #include "algebra/covector.hpp"
 #include "algebra/differential.hpp"
 
+#include "algebra/expansion.tpl.hpp"
+
 #include "test.hpp"
 
 
@@ -84,6 +86,7 @@ class TestDifferential {
         ARIADNE_TEST_PRINT(x1);
         ARIADNE_TEST_PRINT(x2);
 
+        ARIADNE_TEST_CALL(test_construct());
         ARIADNE_TEST_CALL(test_degree());
         ARIADNE_TEST_CALL(test_neg());
         ARIADNE_TEST_CALL(test_add());
@@ -99,6 +102,12 @@ class TestDifferential {
 
     Void test_degree() {
         ARIADNE_TEST_ASSERT(x1.degree()==4);
+    }
+
+    Void test_construct() {
+        ARIADNE_TEST_CONSTRUCT(DifferentialType,x,(2,4, { {{0,0},2.0}, {{1,0},1.0}, {{2,0},0.5} }, pr));
+        ARIADNE_TEST_PRINT(x);
+        ARIADNE_TEST_ASSERT(x.expansion().is_sorted(GradedIndexLess()));
     }
 
     Void test_neg() {
@@ -138,9 +147,16 @@ class TestDifferential {
     }
 
     Void test_div() {
-        ARIADNE_TEST_EVALUATE(x1/x2);
+        ARIADNE_TEST_CALL(test_rec());
+
+        ARIADNE_TEST_PRINT(x1);
+        ARIADNE_TEST_PRINT(c1);
         ARIADNE_TEST_EVALUATE(x1/c1);
         ARIADNE_TEST_EVALUATE(c1/x1);
+        ARIADNE_TEST_EQUAL(((x1/c1)*c1),x1);
+        ARIADNE_TEST_EQUAL((c1/x1)*x1,DifferentialType::constant(2,4,c1));
+        ARIADNE_TEST_EVALUATE(x1/x2);
+        ARIADNE_TEST_EQUAL((x1/x2)*x2,x1);
         /*
           DifferentialType x3("[2,3,4]");
           DifferentialType x4("[1,0,0]");
@@ -158,7 +174,15 @@ class TestDifferential {
     Void test_rec() {
         double a1[6]={ 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 };
         ARIADNE_TEST_CONSTRUCT(DifferentialType,x1,(2,2,a1));
+        ARIADNE_TEST_PRINT(Series<X>(Rec(),2*x1.value()));
+        auto drec=UnivariateDifferential<X>(Rec(),x1.degree(),x1.value());
+        ARIADNE_TEST_PRINT(drec);
+        ARIADNE_TEST_PRINT(compose(drec,x1));
+
+        ARIADNE_TEST_PRINT(DifferentialType::_compose(Series<X>(Rec(),x1.value()),x1));
+        ARIADNE_TEST_PRINT(rec(x1));
         ARIADNE_TEST_EQUAL(rec(rec(x1)),x1);
+
     }
 
     Void test_pow() {

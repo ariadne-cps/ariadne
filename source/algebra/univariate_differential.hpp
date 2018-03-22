@@ -73,7 +73,7 @@ template<class X> class UnivariateDifferential
     DegreeType degree() const;
     X zero_coefficient() const;
     const Array<X>& array() const;
-    Expansion<X>& array();
+    Expansion<MultiIndex,X>& array();
     const X& operator[](SizeType k) const;
     X& operator[](SizeType k);
 

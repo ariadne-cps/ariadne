@@ -30,28 +30,26 @@
 
 namespace Ariadne {
 
-template<class X> class Expansion;
+template<class I, class X> class Expansion;
 template<class A> class Vector;
 class ReverseGradedLexicographicLess;
 class ReverseLexicographicKeyLess;
 
 //! \ingroup FunctionModule
 //! \brief Evaluate a power series on an algebra using Horner's rule.
-template<class X, class A> A horner_evaluate(const Expansion<X>& e, const Vector<A>& y);
+template<class X, class A> A horner_evaluate(const Expansion<MultiIndex,X>& e, const Vector<A>& y);
 
 //! \ingroup FunctionModule
 //! \brief Evaluate a power series on an algebra using termwise expansion (slow).
-template<class X, class A> A power_evaluate(const Expansion<X>& e, const Vector<A>& y);
+template<class X, class A> A power_evaluate(const Expansion<MultiIndex,X>& e, const Vector<A>& y);
 
-template<class X, class A> A evaluate(const Expansion<X>& e, const Vector<A>& y);
+template<class X, class A> A evaluate(const Expansion<MultiIndex,X>& e, const Vector<A>& y);
 
-template<class X, class A> A simple_evaluate(const Expansion<X>& e, const Vector<A>& y);
+template<class X, class A> A simple_evaluate(const Expansion<MultiIndex,X>& e, const Vector<A>& y);
 
 
-template<class X, class A> Vector<A> evaluate(const Vector< Expansion<X> >& e, const Vector<A>& y);
+template<class X, class A> Vector<A> evaluate(const Vector< Expansion<MultiIndex,X> >& e, const Vector<A>& y);
 
 } // namespace Ariadne
-
-#include "evaluate.tpl.hpp"
 
 #endif /* ARIADNE_EVALUATE_HPP */

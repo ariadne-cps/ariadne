@@ -1,5 +1,5 @@
 /***************************************************************************
- *            valve-hysteresis-urgent.hpp
+ *            valve-permissive.hpp
  *
  *  Copyright  2017 Luca Geretti
  *
@@ -31,39 +31,32 @@ AtomicHybridAutomaton getValve()
 
     // Declare some constants. Note that system parameters should be given as variables.
     RealConstant T("T",4.0_decimal);
-    RealConstant hmin("hmin",5.5_decimal);
-    RealConstant hmax("hmax",8.0_decimal);
 
     // Declare the shared system variables
     RealVariable aperture("aperture");
-    RealVariable height("height");
 
     // Declare the events we use
-    DiscreteEvent start_opening("start_opening");
-    DiscreteEvent start_closing("start_closing");
-    DiscreteEvent finished_opening("finished_opening");
-    DiscreteEvent finished_closing("finished_closing");
+    DiscreteEvent e_idle("idle");
+    DiscreteEvent e_close("close");
+    DiscreteEvent e_open("open");
 
-    AtomicHybridAutomaton valve_automaton("valve");
+    AtomicHybridAutomaton valve("valve");
 
-    // Declare the values the valve variable can have
+    // Declare the values the valve can variable can have
     AtomicDiscreteLocation opened("opened");
-    AtomicDiscreteLocation opening("opening");
     AtomicDiscreteLocation closed("closed");
+    AtomicDiscreteLocation opening("opening");
     AtomicDiscreteLocation closing("closing");
 
-    // Since aperture is a known constant when the valve is open or closed,
-    // specify aperture by an algebraic equation.
-    valve_automaton.new_mode(opened,{let(aperture)=+1.0_decimal});
-    valve_automaton.new_mode(closed,{let(aperture)=0.0_decimal});
-    // Specify the differential equation for how the valve opens/closes.
-    valve_automaton.new_mode(opening,{dot(aperture)=+1/T});
-    valve_automaton.new_mode(closing,{dot(aperture)=-1/T});
+    valve.new_mode(opened,{dot(aperture)=0.0_dec});
+    valve.new_mode(closed,{dot(aperture)=0.0_dec});
+    valve.new_mode(opening,{dot(aperture)=+1/T});
+    valve.new_mode(closing,{dot(aperture)=-1/T});
 
-    valve_automaton.new_transition(closed,start_opening,opening,{next(aperture)=aperture},height<=hmin,urgent);
-    valve_automaton.new_transition(opening,finished_opening,opened,aperture>=1,urgent);
-    valve_automaton.new_transition(opened,start_closing,closing,{next(aperture)=aperture},height>=hmax,urgent);
-    valve_automaton.new_transition(closing,finished_closing,closed,aperture<=0,urgent);
+    valve.new_transition(opening,e_idle,opened,{next(aperture)=1.0_dec},aperture>=1.0_dec,urgent);
+    valve.new_transition(closing,e_idle,closed,{next(aperture)=0.0_dec},aperture<=0.0_dec,urgent);
+    valve.new_transition(closed,e_open,opening,{next(aperture)=aperture});
+    valve.new_transition(opened,e_close,closing,{next(aperture)=aperture});
 
-    return valve_automaton;
+    return valve;
 }

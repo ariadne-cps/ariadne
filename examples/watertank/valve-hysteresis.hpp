@@ -31,48 +31,34 @@ AtomicHybridAutomaton getValve()
 
     // Declare some constants. Note that system parameters should be given as variables.
     RealConstant T("T",4.0_decimal);
-    RealConstant hmin("hmin",5.5_decimal);
-    RealConstant hmax("hmax",8.0_decimal);
-    RealConstant delta("delta",0.05_decimal);
 
     // Declare the shared system variables
     RealVariable aperture("aperture");
     RealVariable height("height");
 
     // Declare the events we use
-    DiscreteEvent start_opening("start_opening");
-    DiscreteEvent start_closing("start_closing");
-    DiscreteEvent finished_opening("finished_opening");
-    DiscreteEvent finished_closing("finished_closing");
-    DiscreteEvent must_start_opening("must_start_opening");
-    DiscreteEvent must_start_closing("must_start_closing");
+    DiscreteEvent f_opening("f_opening");
+    DiscreteEvent f_closing("f_closing");
+    DiscreteEvent b_opening("b_opening");
+    DiscreteEvent b_closing("b_closing");
 
     AtomicHybridAutomaton valve("valve");
 
     // Declare the values the valve can variable can have
-    AtomicDiscreteLocation opened("opened");
     AtomicDiscreteLocation opening("opening");
     AtomicDiscreteLocation closed("closed");
+    AtomicDiscreteLocation opened("opened");
     AtomicDiscreteLocation closing("closing");
 
-    // Since aperture is a known constant when the valve is open or closed,
-    // specify aperture by an algebraic equation.
-    valve.new_mode(opened,{let(aperture)=+1.0_decimal});
-    valve.new_mode(closed,{let(aperture)=0.0_decimal});
-    // Specify the differential equation for how the valve opens/closes.
+    valve.new_mode(opened,{let(aperture)=1.0_dec});
+    valve.new_mode(closed,{let(aperture)=0.0_dec});
     valve.new_mode(opening,{dot(aperture)=+1/T});
     valve.new_mode(closing,{dot(aperture)=-1/T});
 
-    // Specify the invariants valid in each mode. Note that every invariant
-    // must have an action label. This is used internally, for example, to
-    // check non-blockingness of urgent actions.
-    valve.new_invariant(opened,height<=hmax+delta,must_start_closing);
-    valve.new_invariant(closed,height>=hmin-delta,must_start_opening);
-
-    valve.new_transition(closed,start_opening,opening,{next(aperture)=aperture},height<=hmin+delta,permissive);
-    valve.new_transition(opening,finished_opening,opened,aperture>=1,urgent);
-    valve.new_transition(opened,start_closing,closing,{next(aperture)=aperture},height>=hmax-delta,permissive);
-    valve.new_transition(closing,finished_closing,closed,aperture<=0,urgent);
+    valve.new_transition(closed,b_opening,opening);
+    valve.new_transition(opening,f_opening,opened,aperture>=1,urgent);
+    valve.new_transition(opened,b_closing,closing);
+    valve.new_transition(closing,f_closing,closed,aperture<=0,urgent);
 
     return valve;
 }

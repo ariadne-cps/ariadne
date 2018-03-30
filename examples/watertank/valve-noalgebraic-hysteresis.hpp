@@ -37,8 +37,8 @@ AtomicHybridAutomaton getValve()
 
     // Declare the events we use
     DiscreteEvent e_idle("idle");
-    DiscreteEvent e_close("close");
-    DiscreteEvent e_open("open");
+    DiscreteEvent e_can_open("can_open");
+    DiscreteEvent e_can_close("can_close");
 
     AtomicHybridAutomaton valve("valve");
 
@@ -55,8 +55,8 @@ AtomicHybridAutomaton getValve()
 
     valve.new_transition(opening,e_idle,opened,{next(aperture)=1.0_dec},aperture>=1.0_dec,urgent);
     valve.new_transition(closing,e_idle,closed,{next(aperture)=0.0_dec},aperture<=0.0_dec,urgent);
-    valve.new_transition(closed,e_open,opening,{next(aperture)=aperture});
-    valve.new_transition(opened,e_close,closing,{next(aperture)=aperture});
+    valve.new_transition(closed,e_can_open,opening,{next(aperture)=aperture});
+    valve.new_transition(opened,e_can_close,closing,{next(aperture)=aperture});
 
     return valve;
 }

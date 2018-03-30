@@ -67,9 +67,10 @@ Int main(Int argc, const char* argv[])
     typedef GeneralHybridEvolver::EnclosureListType EnclosureListType;
 
     std::cout << "Computing evolution... " << std::flush;
-    Real a_max(1.0/32);
-    
-    HybridSet initial_set({valve|opened,controller|rising},{height==7.0_decimal,aperture==1});
+
+    HybridSet initial_set({valve|opened,controller|rising},{height==7,aperture==1});
+
+    //HybridSet initial_set({valve|opened,controller|rising},{height==7.0_decimal});
     HybridTime evolution_time(30.0,5);
     OrbitType orbit = evolver.orbit(initial_set,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;

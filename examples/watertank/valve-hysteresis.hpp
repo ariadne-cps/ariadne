@@ -37,10 +37,10 @@ AtomicHybridAutomaton getValve()
     RealVariable height("height");
 
     // Declare the events we use
-    DiscreteEvent f_opening("f_opening");
-    DiscreteEvent f_closing("f_closing");
-    DiscreteEvent b_opening("b_opening");
-    DiscreteEvent b_closing("b_closing");
+    DiscreteEvent e_stop_opening("stop_opening");
+    DiscreteEvent e_stop_closing("stop_closing");
+    DiscreteEvent e_can_open("can_open");
+    DiscreteEvent e_can_close("can_close");
 
     AtomicHybridAutomaton valve("valve");
 
@@ -55,10 +55,10 @@ AtomicHybridAutomaton getValve()
     valve.new_mode(opening,{dot(aperture)=+1/T});
     valve.new_mode(closing,{dot(aperture)=-1/T});
 
-    valve.new_transition(closed,b_opening,opening);
-    valve.new_transition(opening,f_opening,opened,aperture>=1,urgent);
-    valve.new_transition(opened,b_closing,closing);
-    valve.new_transition(closing,f_closing,closed,aperture<=0,urgent);
+    valve.new_transition(closed,e_can_open,opening);
+    valve.new_transition(opening,e_stop_opening,opened,aperture>=1,urgent);
+    valve.new_transition(opened,e_can_close,closing);
+    valve.new_transition(closing,e_stop_closing,closed,aperture<=0,urgent);
 
     return valve;
 }

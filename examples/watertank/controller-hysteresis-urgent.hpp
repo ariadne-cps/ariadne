@@ -37,8 +37,8 @@ AtomicHybridAutomaton getController()
     RealVariable height("height");
 
     // Declare the events we use
-    DiscreteEvent e_open("open");
-    DiscreteEvent e_close("close");
+    DiscreteEvent e_can_open("can_open");
+    DiscreteEvent e_can_close("can_close");
 
     AtomicHybridAutomaton controller("controller");
 
@@ -49,8 +49,8 @@ AtomicHybridAutomaton getController()
     controller.new_mode(rising,List<RealAssignment>());
     controller.new_mode(falling,List<RealAssignment>());
 
-    controller.new_transition(falling,e_open,rising,height<=hmin,urgent);
-    controller.new_transition(rising,e_close,falling,height>=hmax,urgent);
+    controller.new_transition(falling,e_can_open,rising,height<=hmin,urgent);
+    controller.new_transition(rising,e_can_close,falling,height>=hmax,urgent);
 
     return controller;
 }

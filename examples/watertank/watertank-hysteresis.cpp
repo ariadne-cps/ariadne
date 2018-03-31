@@ -24,7 +24,7 @@
 #include <cstdarg>
 #include "ariadne.hpp"
 #include "tank.hpp"
-#include "valve-noalgebraic-hysteresis.hpp"
+#include "valve-hysteresis.hpp"
 #include "controller-hysteresis-permissive.hpp"
 
 using namespace Ariadne;
@@ -43,6 +43,7 @@ Int main(Int argc, const char* argv[])
     StringVariable controller("controller");
 
     StringConstant opened("opened");
+    StringConstant opening("opening");
     StringConstant idle("idle");
     StringConstant rising("rising");
 
@@ -69,9 +70,10 @@ Int main(Int argc, const char* argv[])
 
     std::cout << "Computing evolution... " << std::flush;
 
-    HybridSet initial_set({valve|idle,controller|rising},{height==7,aperture==1});
+    //HybridSet initial_set({valve|idle,controller|rising},{height==7,aperture==1});
 
-    //HybridSet initial_set({valve|opened,controller|rising},{height==7.0_decimal});
+    //HybridSet initial_set({valve|opening,controller|rising},{height==5.5_dec,aperture==0.4_dec});
+    HybridSet initial_set({valve|opened,controller|rising},{height==7});
     HybridTime evolution_time(30.0,5);
     OrbitType orbit = evolver.orbit(initial_set,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;

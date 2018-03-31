@@ -55,9 +55,9 @@ AtomicHybridAutomaton getValve()
     valve.new_mode(opening,{dot(aperture)=+1/T});
     valve.new_mode(closing,{dot(aperture)=-1/T});
 
-    valve.new_transition(closed,e_can_open,opening);
+    valve.new_transition(closed,e_can_open,opening,{next(aperture)=aperture});
     valve.new_transition(opening,e_stop_opening,opened,aperture>=1,urgent);
-    valve.new_transition(opened,e_can_close,closing);
+    valve.new_transition(opened,e_can_close,closing,{next(aperture)=aperture});
     valve.new_transition(closing,e_stop_closing,closed,aperture<=0,urgent);
 
     return valve;

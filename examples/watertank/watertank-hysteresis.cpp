@@ -43,6 +43,7 @@ Int main(Int argc, const char* argv[])
     StringVariable controller("controller");
 
     StringConstant opened("opened");
+    StringConstant idle("idle");
     StringConstant rising("rising");
 
     HybridAutomaton tank_automaton = getTank();
@@ -68,7 +69,7 @@ Int main(Int argc, const char* argv[])
 
     std::cout << "Computing evolution... " << std::flush;
 
-    HybridSet initial_set({valve|opened,controller|rising},{height==7,aperture==1});
+    HybridSet initial_set({valve|idle,controller|rising},{height==7,aperture==1});
 
     //HybridSet initial_set({valve|opened,controller|rising},{height==7.0_decimal});
     HybridTime evolution_time(30.0,5);

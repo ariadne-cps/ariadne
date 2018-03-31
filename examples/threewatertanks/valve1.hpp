@@ -33,30 +33,35 @@ AtomicHybridAutomaton getValve1()
     RealConstant T("T",4.0_decimal);
 
     // Declare the shared system variables
-    RealVariable aperture1("aperture1");
+    RealVariable aperture("aperture1");
 
     // Declare the events we use
     DiscreteEvent e_idle("idle1");
-    DiscreteEvent e_close("close1");
-    DiscreteEvent e_open("open1");
+    DiscreteEvent e_can_open("can_open1");
+    DiscreteEvent e_can_close("can_close1");
 
     AtomicHybridAutomaton valve("valve1");
 
     // Declare the values the valve can variable can have
-    AtomicDiscreteLocation idle1("idle1");
-    AtomicDiscreteLocation opening1("opening1");
-    AtomicDiscreteLocation closing1("closing1");
+    AtomicDiscreteLocation idle("idle1");
+    AtomicDiscreteLocation closed("closed1");
+    AtomicDiscreteLocation opened("opened1");
+    AtomicDiscreteLocation opening("opening1");
+    AtomicDiscreteLocation closing("closing1");
 
     // Since aperture is a known constant when the valve is open or closed,
     // specify aperture by an algebraic equation.
-    valve.new_mode(idle1,{dot(aperture1)=0.0_decimal});
-    valve.new_mode(opening1,{dot(aperture1)=+1/T});
-    valve.new_mode(closing1,{dot(aperture1)=-1/T});
+    valve.new_mode(closed,{dot(aperture)=0.0_decimal});
+    valve.new_mode(opened,{dot(aperture)=0.0_decimal});
+    valve.new_mode(opening,{dot(aperture)=+1/T});
+    valve.new_mode(closing,{dot(aperture)=-1/T});
 
-    valve.new_transition(opening1,e_idle,idle1,{next(aperture1)=1.0_dec},aperture1>=1.0_dec,urgent);
-    valve.new_transition(closing1,e_idle,idle1,{next(aperture1)=0.0_dec},aperture1<=0.0_dec,urgent);
-    valve.new_transition(idle1,e_open,opening1,{next(aperture1)=aperture1});
-    valve.new_transition(idle1,e_close,closing1,{next(aperture1)=aperture1});
+    valve.new_transition(opening,e_idle,opened,{next(aperture)=1.0_dec},aperture>=1.0_dec,urgent);
+    valve.new_transition(closing,e_idle,closed,{next(aperture)=0.0_dec},aperture<=0.0_dec,urgent);
+    valve.new_transition(closed,e_can_open,opening,{next(aperture)=aperture});
+    valve.new_transition(opened,e_can_close,closing,{next(aperture)=aperture});
+    valve.new_transition(opening,e_can_close,closing,{next(aperture)=aperture});
+    valve.new_transition(closing,e_can_open,opening,{next(aperture)=aperture});
 
     return valve;
 }

@@ -56,9 +56,9 @@ Int main(Int argc, const char* argv[])
     StringVariable controller2("controller2");
     StringVariable controller3("controller3");
 
-    StringConstant idle1("idle1");
-    StringConstant idle2("idle2");
-    StringConstant idle3("idle3");
+    StringConstant opened1("opened1");
+    StringConstant opened2("opened2");
+    StringConstant opened3("opened3");
 
     StringConstant rising1("rising1");
     StringConstant rising2("rising2");
@@ -93,9 +93,9 @@ Int main(Int argc, const char* argv[])
     typedef GeneralHybridEvolver::EnclosureListType EnclosureListType;
 
     std::cout << "Computing evolution... " << std::flush;
-    HybridSet initial_set({valve1|idle1,valve2|idle2,valve3|idle3,controller1|rising1,controller2|rising2,controller3|rising3},
+    HybridSet initial_set({valve1|opened1,valve2|opened2,valve3|opened3,controller1|rising1,controller2|rising2,controller3|rising3},
                           {height1==7,height2==7,height3==7,aperture1==1,aperture2==1,aperture3==1});
-    HybridTime evolution_time(20.0,3);
+    HybridTime evolution_time(30.0,10);
     OrbitType orbit = evolver.orbit(initial_set,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
 
@@ -104,7 +104,7 @@ Int main(Int argc, const char* argv[])
     plot("watertank-t-height1",time_height1_axes, Colour(0.0,0.5,1.0), orbit);
     Axes2d time_height2_axes(0<=TimeVariable()<=evolution_time.continuous_time(),-0.1<=height2<=9.1);
     plot("watertank-t-height2",time_height2_axes, Colour(0.0,0.5,1.0), orbit);
-    Axes2d time_height3_axes(0<=TimeVariable()<=evolution_time.continuous_time(),-0.1<=height3<=9.1);
+    Axes2d time_height3_axes(0<=TimeVariable()<=evolution_time.continuous_time(),-0.1<=height3<=12.1);
     plot("watertank-t-height3",time_height3_axes, Colour(0.0,0.5,1.0), orbit);    
     Axes2d height1_aperture1_axes(-0.1,height1,9.1, -0.1,aperture1,1.1);
     plot("watertank-height1-aperture1",height1_aperture1_axes, Colour(0.0,0.5,1.0), orbit);

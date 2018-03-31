@@ -38,10 +38,10 @@ AtomicHybridAutomaton getController1()
     RealVariable height("height1");
 
     // Declare the events we use
-    DiscreteEvent e_can_open("open1");
-    DiscreteEvent e_can_close("close1");
-    DiscreteEvent e_must_open("mustopen1");
-    DiscreteEvent e_must_close("mustclose1");
+    DiscreteEvent e_can_open("can_open1");
+    DiscreteEvent e_can_close("can_close1");
+    DiscreteEvent e_must_open("must_open1");
+    DiscreteEvent e_must_close("must_close1");
 
     AtomicHybridAutomaton controller("controller1");
 
@@ -55,8 +55,8 @@ AtomicHybridAutomaton getController1()
     // Specify the invariants valid in each mode. Note that every invariant
     // must have an action label. This is used internally, for example, to
     // check non-blockingness of urgent actions.
-    controller.new_invariant(falling,height<=hmin-delta,e_must_open);
-    controller.new_invariant(rising,height>=hmax+delta,e_must_close);
+    controller.new_invariant(falling,height>=hmin-delta,e_must_open);
+    controller.new_invariant(rising,height<=hmax+delta,e_must_close);
 
     controller.new_transition(falling,e_can_open,rising,height<=hmin+delta,permissive);
     controller.new_transition(rising,e_can_close,falling,height>=hmax-delta,permissive);

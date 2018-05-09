@@ -337,7 +337,7 @@ void TestInclusionIntegrator::test_reactor() const {
     Real kb(0.045);
 
     auto f = EffectiveVectorFunction({-U3*x[0]*x[1]-k2*x[0]*x[2]+iV-ka*x[0],-U3*x[0]*x[1]+kb-ka*x[1],
-                                      U3*x[0]*x[1]-k2*x[0]*x[1]-ka*x[2],k2*x[0]*x[2]-ka*x[3]});
+                                      U3*x[0]*x[1]-k2*x[0]*x[2]-ka*x[2],k2*x[0]*x[2]-ka*x[3]});
 
     Vector<ValidatedVectorFunction> g({{one*iV,zero,zero,zero},{zero,one*iV,zero,zero},{x[0]*x[1],x[0]*x[1],x[0]*x[1],zero}});
 

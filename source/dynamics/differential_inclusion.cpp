@@ -730,6 +730,9 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
 
         evolve_function = this->_reconditioner->expand_errors(evolve_function);
 
+
+        ARIADNE_LOG(2,"evolve bounds="<<evolve_function.range()<<"\n");
+
         step+=1;
 
         t=new_t;

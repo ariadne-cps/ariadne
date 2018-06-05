@@ -173,7 +173,7 @@ Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegratorBase::flow_bounds(Val
     //FloatDPUpperBound hlip = 1/lip;
 
     FloatDPValue h=cast_exact(hsug);
-    FloatDPValue hmin=h*two_exp(-REDUCTION_STEPS);
+    FloatDPValue hmin=h*pow(two,-REDUCTION_STEPS);
     //h=max(hmin,min(hlip,h));
     //ARIADNE_LOG(4,"L="<<lip<<", hL="<<hlip<<"\n");
 

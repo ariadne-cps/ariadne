@@ -122,7 +122,7 @@ IntegratorBase::flow_bounds(const ValidatedVectorFunction& vf, const ExactBoxTyp
 
     FloatDPValue hmax(FloatDP(this->maximum_step_size()));
     FloatDPValue h=cast_exact(hsug);
-    FloatDPValue hmin=h*two_exp(-REDUCTION_STEPS);
+    FloatDPValue hmin=h*(two^-REDUCTION_STEPS);
     h=max(hmin,min(hmax,min(hlip,h)));
     ARIADNE_LOG(4,"L="<<lip<<", hL="<<hlip<<", hmax="<<hmax<<"\n");
 

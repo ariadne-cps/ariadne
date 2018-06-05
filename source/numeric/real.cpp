@@ -151,11 +151,11 @@ template<> struct RealLimit<Real> : RealInterface {
   public:
     RealLimit(Sequence<Real> const& seq) : _seq(seq) { }
     virtual FloatDPBounds _compute_get(DoublePrecision pr) const {
-        return FloatDPBounds(_seq[53u],pr).pm(FloatDPError(two^(-53),DoublePrecision())); }
+        return FloatDPBounds(_seq[53u],pr).pm(FloatDPError(two^-53,DoublePrecision())); }
     virtual FloatMPBounds _compute_get(MultiplePrecision pr) const {
         Effort eff(pr.bits()+1u); return this->_compute(eff).get(pr); }
     virtual ValidatedReal _compute(Effort eff) const {
-        Nat n = eff.work()+1u; Accuracy acc(n+1u); return ValidatedReal(_seq[n].compute(Accuracy(n)).get().pm(Dyadic(two_exp(-n)))); }
+        Nat n = eff.work()+1u; Accuracy acc(n+1u); return ValidatedReal(_seq[n].compute(Accuracy(n)).get().pm(two^(-n))); }
     virtual OutputStream& _write(OutputStream& os) const {
         return os << "{" << _seq[0u] << ", " << _seq[1u] << ", " <<_seq[2u] << ", ... }"; }
 };
@@ -165,11 +165,11 @@ template<> struct RealLimit<Dyadic> : RealInterface {
   public:
     RealLimit(Sequence<Dyadic> const& seq) : _seq(seq) { }
     virtual FloatDPBounds _compute_get(DoublePrecision pr) const {
-        Dyadic w=_seq[53u]; return FloatDPBounds(w,pr).pm(FloatDPError(two^(-53),DoublePrecision())); }
+        Dyadic w=_seq[53u]; return FloatDPBounds(w,pr).pm(FloatDPError(two^-53,DoublePrecision())); }
     virtual FloatMPBounds _compute_get(MultiplePrecision pr) const {
-        Nat n = pr.bits()+1u; Accuracy acc(n+1u); return FloatMPBounds(_seq[n],pr).pm(FloatMPError(two_exp(-n),pr)); }
+        Nat n = pr.bits()+1u; Accuracy acc(n+1u); return FloatMPBounds(_seq[n],pr).pm(FloatMPError(two^-n,pr)); }
     virtual ValidatedReal _compute(Effort eff) const {
-        Nat n = eff.work()+1u; Accuracy acc(n+1u); return DyadicBounds(_seq[n]).pm(Dyadic(two_exp(-n))); }
+        Nat n = eff.work()+1u; Accuracy acc(n+1u); return DyadicBounds(_seq[n]).pm(two^-n); }
     virtual OutputStream& _write(OutputStream& os) const {
         return os << "{" << _seq[0u] << ", " << _seq[1u] << ", " <<_seq[2u] << ", ... }"; }
 };
@@ -351,7 +351,7 @@ ValidatedReal Real::compute(Accuracy accuracy) const {
     Nat effort=1;
     Nat acc=accuracy.bits();
     MultiplePrecision precision(effort*64);
-    FloatMPError error_bound(FloatMP(Rational(two_exp(-acc).get_d()),upward,precision));
+    FloatMPError error_bound(FloatMP(two^-acc,upward,precision));
     FloatMPError error=2u*error_bound;
     FloatMPBounds res;
     while (!(error.raw()<error_bound.raw())) {

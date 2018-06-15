@@ -579,6 +579,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
     // Ensure all arguments have the correct size;
     auto n=X0.size();
     auto m=V.size();
+    auto freq=this->_number_of_steps_between_simplifications;
     DoublePrecision pr;
     assert(f.result_size()==n);
     assert(f.argument_size()==n);
@@ -593,6 +594,12 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
 
     ValidatedVectorFunctionModelDP evolve_function = ValidatedVectorTaylorFunctionModelDP::identity(X0,this->_sweeper);
     auto t=PositiveFloatDPValue(0.0);
+
+    Map<DIApproximationKind,SizeType> approximation_global_frequencies, approximation_local_frequencies;
+    for (auto appro: _approximations) {
+        approximation_global_frequencies[appro->getKind()] = 0;
+        approximation_local_frequencies[appro->getKind()] = 0;
+    }
 
     List<ValidatedVectorFunctionModelDP> result;
 
@@ -720,16 +727,43 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
         if (_approximations.size() > 1)
             ARIADNE_LOG(2,"chosen approximation: " << best << "\n");
 
+        approximation_global_frequencies[best] += 1;
+        approximation_local_frequencies[best] += 1;
+
         reach_function = best_reach_function;
         evolve_function = best_evolve_function;
 
-        if (step%this->_number_of_steps_between_simplifications==0) {
+        if (step > 0 && step%freq==0) {
+
+            double base = 0;
+            double f = freq;
+            for (auto appro: approximation_local_frequencies) {
+                double partial = 0;
+                switch (appro.first) {
+                    case DIApproximationKind::ZERO:
+                        partial = n + f/2 * n + (2*f-1)*m;
+                        break;
+                    case DIApproximationKind::CONSTANT:
+                        partial = n + f/2 * n + (2*f-1)*m - (f-1)*m/2;
+                        break;
+                    default:
+                        partial = n + f/2 * n + (2*f-1)*m - (f-1)*m;
+                }
+                base += partial*appro.second/f;
+            }
+            LohnerReconditioner& lreconditioner = dynamic_cast<LohnerReconditioner&>(*this->_reconditioner);
+
+            Nat num_variables_to_keep(base);
+            ARIADNE_LOG(2,"simplifying to "<<num_variables_to_keep<<" variables\n");
+            lreconditioner.set_number_of_variables_to_keep(num_variables_to_keep);
             this->_reconditioner->simplify(evolve_function);
             ARIADNE_LOG(5,"simplified_evolve_function="<<evolve_function<<"\n");
+            for (auto appro: _approximations) {
+                approximation_local_frequencies[appro->getKind()] = 0;
+            }
         }
 
         evolve_function = this->_reconditioner->expand_errors(evolve_function);
-
 
         ARIADNE_LOG(2,"evolve bounds="<<evolve_function.range()<<"\n");
 
@@ -737,6 +771,15 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
 
         t=new_t;
         result.append(reach_function);
+    }
+
+    if (_approximations.size() > 1) {
+        std::cout << "approximation frequencies:";
+        for (auto appro: _approximations) {
+            if (approximation_global_frequencies[appro->getKind()] > 0)
+                std::cout << " " << appro->getKind() << " " << (100.0*approximation_global_frequencies[appro->getKind()])/step;
+        }
+        std::cout << std::endl;
     }
 
     return result;
@@ -1159,6 +1202,10 @@ Void LohnerReconditioner::simplify(ValidatedVectorFunctionModelDP& phi) const {
     int number_of_variables_to_remove = m - this->_number_of_variables_to_keep;
     ARIADNE_LOG(6, "Number of variables to remove:" << number_of_variables_to_remove<<"\n");
 
+    if (number_of_variables_to_remove <= 0)
+        return;
+
+    /*
     FloatDPError total_sum_SCe(0);
     for (int j : range(m))
         total_sum_SCe += SCe[j].value;
@@ -1176,16 +1223,15 @@ Void LohnerReconditioner::simplify(ValidatedVectorFunctionModelDP& phi) const {
             skip = true;
         }
     }
+    */
 
-    /*
-    for (int j : range(m)) {
-        if (j < number_of_variables_to_remove) {
-            remove_indices.append(SCe[j].index);
-        } else {
-            keep_indices.append(SCe[j].index);
-        }
+    for (int j : range(number_of_variables_to_remove)) {
+        remove_indices.append(SCe[j].index);
     }
-     */
+
+    for (int j : range(number_of_variables_to_remove,m)) {
+        keep_indices.append(SCe[j].index);
+    }
 
     ARIADNE_LOG(2,"number of kept parameters: " << keep_indices.size() << "/" << m << "\n");
 

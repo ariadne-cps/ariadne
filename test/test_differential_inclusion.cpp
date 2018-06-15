@@ -159,6 +159,79 @@ class TestInclusionIntegrator {
         }
     }
 
+    Void run_battery_each_approximation(String name,
+                                        ValidatedVectorFunction const &f, Vector<ValidatedVectorFunction> const &g,
+                                        RealVector noise_levels,
+                                        RealBox real_starting_set, Real evolution_time, double step, SizeType freq) const
+    {
+        typedef typename ValidatedVectorFunctionModelType::NumericType NumericType; typedef typename NumericType::PrecisionType PrecisionType;
+        PrecisionType prec;
+
+        BoxDomainType noise=cast_exact_box(UpperIntervalType(-1,+1)*noise_levels);
+        BoxDomainType starting_set=cast_exact_box(over_approximation(real_starting_set));
+
+        auto sweeper = make_threshold_sweeper(1e-8);
+
+        for (auto approx: range(0,5)) {
+
+            List<SharedPointer<InclusionIntegratorApproximation>> approximations;
+
+            SizeType ppi = 0;
+            switch (approx) {
+                case 0:
+                    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorZeroApproximation(sweeper)));
+                    ppi = 0;
+                    break;
+                case 1:
+                    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorConstantApproximation(sweeper)));
+                    ppi = 1;
+                    break;
+                case 2:
+                    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorAffineApproximation(sweeper)));
+                    ppi = 2;
+                    break;
+                case 3:
+                    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorSinusoidalApproximation(sweeper)));
+                    ppi = 2;
+                    break;
+                case 4:
+                    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorPiecewiseApproximation(sweeper)));
+                    ppi = 2;
+                    break;
+                default:
+                    break;
+            }
+
+            auto n = f.result_size();
+            auto m = noise.size();
+            SizeType base = n + freq/2 * n + (2*freq-1)*m - (freq-1)*ppi*m/2;
+            auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
+
+            std::cout << approximations.at(0)->getKind() << " (reset to: " << base << ")" << std::endl;
+
+            tms start_time, end_time;
+            times(&start_time);
+
+            List<ValidatedVectorFunctionModelType> flow_functions = integrator.flow(f,g,noise,starting_set,evolution_time);
+
+            times(&end_time);
+            clock_t ticks = end_time.tms_utime - start_time.tms_utime;
+            clock_t const hz = sysconf(_SC_CLK_TCK);
+
+            List<ValidatedConstrainedImageSet> reach_sets = map([](ValidatedVectorFunctionModelType const& fm){return range(fm);},flow_functions);
+            ValidatedVectorFunctionModelType evolve_function = partial_evaluate(flow_functions.back(),starting_set.size(),NumericType(evolution_time,prec));
+            ValidatedConstrainedImageSet evolve_set = range(evolve_function);
+
+            FloatDPUpperBound total_diameter(0.0);
+            auto ebb = evolve_set.bounding_box();
+            for (auto i : range(ebb.size())) {
+                total_diameter += ebb[i].width();
+            }
+            std::cout << total_diameter << ", " << ticks / hz << "." << ticks % hz << "s" << std::endl;
+        }
+    }
+
+
 
     Void run_battery_fixed_absolutebase(String name,
                                         ValidatedVectorFunction const &f, Vector<ValidatedVectorFunction> const &g,
@@ -315,17 +388,20 @@ class TestInclusionIntegrator {
 
 void TestInclusionIntegrator::test_reactor() const {
     double step=1.0/32;
-    SizeType freq=5;
-    SizeType base=60;
-    SizeType avg=120;
+    SizeType freq=12;
+    SizeType base=1000;
 
     auto sweeper = make_threshold_sweeper(1e-8);
     List<SharedPointer<InclusionIntegratorApproximation>> approximations;
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorPiecewiseApproximation(sweeper)));
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorSinusoidalApproximation(sweeper)));
     approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorAffineApproximation(sweeper)));
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorConstantApproximation(sweeper)));
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorZeroApproximation(sweeper)));
     auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
     integrator.verbosity = 2;
 
-    RealVector noise_levels={1/10_q,1/10_q,20_q};
+    RealVector noise_levels={1/100_q,1/100_q,1/100_q};
 
     auto x = EffectiveVectorFunction::identity(4u);
     auto one = EffectiveScalarFunction::constant(4u,1_z);
@@ -344,20 +420,105 @@ void TestInclusionIntegrator::test_reactor() const {
 
     Real e=1/1000000_q;
     RealBox starting_set={{0,e},{0,e},{0,e},{0,e}};
-    Real evolution_time=10/10_q;
+    Real evolution_time=80/10_q;
 
     this->run_test("reactor",integrator,f,g,noise_levels,starting_set,evolution_time);
-    //this->run_battery_fixed_absolutebase("reactor",f,g,noise_levels,starting_set,evolution_time,step,base,1,15);
+    //this->run_battery_each_approximation("reactor",f,g,noise_levels,starting_set,evolution_time,step,freq);
+}
+
+
+void TestInclusionIntegrator::test_jerk16() const {
+    double step=1.0/16;
+    SizeType freq=12;
+    SizeType n=3;
+    SizeType m=1;
+    SizeType params_per_step=2;
+    SizeType base = n + freq/2 * n + (2*freq-1)*m - (freq-1)*params_per_step*m/2;
+
+    auto sweeper = make_threshold_sweeper(1e-8);
+    List<SharedPointer<InclusionIntegratorApproximation>> approximations;
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorPiecewiseApproximation(sweeper)));
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorSinusoidalApproximation(sweeper)));
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorAffineApproximation(sweeper)));
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorConstantApproximation(sweeper)));
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorZeroApproximation(sweeper)));
+    auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
+    integrator.verbosity = 2;
+
+    RealVector noise_levels={1/1000_q};
+
+    auto x = EffectiveVectorFunction::identity(3u);
+    auto one = EffectiveScalarFunction::constant(3u,1_z);
+    auto zero = EffectiveScalarFunction::constant(3u,0_z);
+
+    Real B(0.03);
+
+    auto f = EffectiveVectorFunction({x[1],x[2],-x[1]+x[0]*x[0]-one*B});
+
+    Vector<ValidatedVectorFunction> g({{zero,zero,one}});
+
+    Real e=1/1024_q;
+    Real x0_i(0.0);
+    Real x1_i(0.0);
+    Real x2_i(0.0);
+    RealBox starting_set={{x0_i+e,x0_i+e},{x1_i-e,x1_i+e},{x2_i-e,x2_i+e}};
+    Real evolution_time=100/10_q;
+
+    this->run_test("jerk16",integrator,f,g,noise_levels,starting_set,evolution_time);
+    //this->run_battery_each_approximation("jerk16",f,g,noise_levels,starting_set,evolution_time,step,freq);
+}
+
+void TestInclusionIntegrator::test_jerk21() const {
+
+    double step=1.0/16;
+    SizeType freq=12;
+    SizeType base=1000;
+
+    auto sweeper = make_threshold_sweeper(1e-8);
+    List<SharedPointer<InclusionIntegratorApproximation>> approximations;
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorPiecewiseApproximation(sweeper)));
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorSinusoidalApproximation(sweeper)));
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorAffineApproximation(sweeper)));
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorConstantApproximation(sweeper)));
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorZeroApproximation(sweeper)));
+    auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
+    integrator.verbosity = 2;
+
+    RealVector noise_levels={1/1000_q};
+
+    auto x = EffectiveVectorFunction::identity(3u);
+    auto one = EffectiveScalarFunction::constant(3u,1_z);
+    auto zero = EffectiveScalarFunction::constant(3u,0_z);
+
+    Real A(0.25);
+
+    auto f = EffectiveVectorFunction({x[1],x[2],-x[2]*x[2]*x[2]-x[1]*x[0]*x[0]-A*x[0]});
+
+    Vector<ValidatedVectorFunction> g({{zero,zero,-x[0]}});
+
+    Real e=1/1024_q;
+    Real x0_i(0.25);
+    Real x1_i(0.0);
+    Real x2_i(0.0);
+    RealBox starting_set={{x0_i+e,x0_i+e},{x1_i-e,x1_i+e},{x2_i-e,x2_i+e}};
+    Real evolution_time=100/10_q;
+
+    this->run_test("jerk21",integrator,f,g,noise_levels,starting_set,evolution_time);
+    //this->run_battery_each_approximation("jerk21",f,g,noise_levels,starting_set,evolution_time,step,freq);
 }
 
 void TestInclusionIntegrator::test_lorenz() const {
     double step=1.0/256;
-    SizeType freq=5;
-    SizeType base=50;
+    SizeType freq=12;
+    SizeType base = 1000;
 
     auto sweeper = make_threshold_sweeper(1e-8);
     List<SharedPointer<InclusionIntegratorApproximation>> approximations;
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorPiecewiseApproximation(sweeper)));
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorSinusoidalApproximation(sweeper)));
     approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorAffineApproximation(sweeper)));
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorConstantApproximation(sweeper)));
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorZeroApproximation(sweeper)));
     auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
     integrator.verbosity = 2;
 
@@ -383,18 +544,24 @@ void TestInclusionIntegrator::test_lorenz() const {
     Real evolution_time=10/10_q;
 
     this->run_test("lorenz",integrator,f,g,noise_levels,starting_set,evolution_time);
-    //this->run_battery_fixed_absolutebase("lorenz",f,g,noise_levels,starting_set,evolution_time,step,base,1,12);
+    //this->run_battery_each_approximation("lorenz",f,g,noise_levels,starting_set,evolution_time,step,freq);
 }
 
 void TestInclusionIntegrator::test_rossler() const {
     double step=1.0/128;
     SizeType freq=12;
-    SizeType base=20;
-    SizeType avg=120;
+    SizeType n=3;
+    SizeType m=1;
+    SizeType params_per_step=2;
+    SizeType base = n + freq/2 * n + (2*freq-1)*m - (freq-1)*params_per_step*m/2;
 
     auto sweeper = make_threshold_sweeper(1e-8);
     List<SharedPointer<InclusionIntegratorApproximation>> approximations;
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorPiecewiseApproximation(sweeper)));
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorSinusoidalApproximation(sweeper)));
     approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorAffineApproximation(sweeper)));
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorConstantApproximation(sweeper)));
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorZeroApproximation(sweeper)));
     auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
     integrator.verbosity = 2;
 
@@ -419,130 +586,23 @@ void TestInclusionIntegrator::test_rossler() const {
     RealBox starting_set={{x0_i-e,x0_i+e},{x1_i-e,x1_i+e},{x2_i-e,x2_i+e}};
     Real evolution_time=120/10_q;
 
-    //this->run_test("rossler",integrator,f,g,noise_levels,starting_set,evolution_time);
-    this->run_battery_fixed_absolutebase("rossler",f,g,noise_levels,starting_set,evolution_time,step,base,1,25);
-}
-
-void TestInclusionIntegrator::test_DCDC() const {
-    double step=1.0/10;
-    SizeType freq=11;
-    SizeType base=50;
-
-    auto sweeper = make_threshold_sweeper(1e-8);
-    List<SharedPointer<InclusionIntegratorApproximation>> approximations;
-    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorAffineApproximation(sweeper)));
-    auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
-    integrator.verbosity = 2;
-
-    RealVector noise_levels={2/1000_q,1/15_q};
-    
-    Real k0(0.002987); 
-    Real fp0(-0.018);//(-11+k0)/600
-    Real fp1(-0.066); //(k0-1)/15
-    Real fq0(0.071);//(1-k0)/14
-    Real fq1(-0.00853);//-k0*20/7
-    Real gp0(0.00167);//1/600
-    Real gp1(0.067);//1/15
-    Real gq0(-0.071);//1/14
-    Real gq1(-2.857);//20/7
-    
-    auto x = EffectiveVectorFunction::identity(2u);
-    auto one = EffectiveScalarFunction::constant(2u,1_z);
-    auto zero = EffectiveScalarFunction::constant(2u,0_z);
-    auto third = EffectiveScalarFunction::constant(2u,1/3_z);
-
-    auto f = EffectiveVectorFunction({third+x[0]*fp0+x[1]*fp1,x[0]*fq0+x[1]*fq1});
-
-    Vector<ValidatedVectorFunction> g({{gp0*x[0]+gp1*x[1],gq0*x[0]+gq1*x[1]},{one,zero}});
-
-    Real e=1/1000000_q;
-    RealBox starting_set={{Real(1)-e,Real(1)+e},{Real(5)-e,Real(5)+e}};
-    Real evolution_time=50/10_q;
-
-    this->run_test("DCDC",integrator,f,g,noise_levels,starting_set,evolution_time);
-    //this->run_battery_fixed_absolutebase("DCDC",f,g,noise_levels,starting_set,evolution_time,step,base,1,15);
-}
-
-
-void TestInclusionIntegrator::test_jerk21() const {
-
-    double step=1.0/16;
-    SizeType freq=12;
-    SizeType base=30;
-
-    auto sweeper = make_threshold_sweeper(1e-8);
-    List<SharedPointer<InclusionIntegratorApproximation>> approximations;
-    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorAffineApproximation(sweeper)));
-    auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
-    integrator.verbosity = 2;
-
-    RealVector noise_levels={1/1000_q};
-
-    auto x = EffectiveVectorFunction::identity(3u);
-    auto one = EffectiveScalarFunction::constant(3u,1_z);
-    auto zero = EffectiveScalarFunction::constant(3u,0_z);
-
-    Real A(0.25);
-
-    auto f = EffectiveVectorFunction({x[1],x[2],-x[2]*x[2]*x[2]-x[1]*x[0]*x[0]-A*x[0]});
-
-    Vector<ValidatedVectorFunction> g({{zero,zero,-x[0]}});
-
-    Real e=1/1024_q;
-    Real x0_i(0.25);
-    Real x1_i(0.0);
-    Real x2_i(0.0);
-    RealBox starting_set={{x0_i+e,x0_i+e},{x1_i-e,x1_i+e},{x2_i-e,x2_i+e}};
-    Real evolution_time=100/10_q;
-
-    //this->run_test("jerk21",integrator,f,g,noise_levels,starting_set,evolution_time);
-    this->run_battery_fixed_absolutebase("jerk21",f,g,noise_levels,starting_set,evolution_time,step,base,1,16);
-}
-
-void TestInclusionIntegrator::test_jerk16() const {
-    double step=1.0/16;
-    SizeType freq=12;
-    SizeType base=30;
-
-    auto sweeper = make_threshold_sweeper(1e-8);
-    List<SharedPointer<InclusionIntegratorApproximation>> approximations;
-    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorAffineApproximation(sweeper)));
-    auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
-    integrator.verbosity = 2;
-
-    RealVector noise_levels={1/1000_q};
-
-    auto x = EffectiveVectorFunction::identity(3u);
-    auto one = EffectiveScalarFunction::constant(3u,1_z);
-    auto zero = EffectiveScalarFunction::constant(3u,0_z);
-
-    Real B(0.03);
-
-    auto f = EffectiveVectorFunction({x[1],x[2],-x[1]+x[0]*x[0]-one*B});
-
-    Vector<ValidatedVectorFunction> g({{zero,zero,one}});
-
-    Real e=1/1024_q;
-    Real x0_i(0.0);
-    Real x1_i(0.0);
-    Real x2_i(0.0);
-    RealBox starting_set={{x0_i+e,x0_i+e},{x1_i-e,x1_i+e},{x2_i-e,x2_i+e}};
-    Real evolution_time=100/10_q;
-
-    //this->run_test("jerk16",integrator,f,g,noise_levels,starting_set,evolution_time);
-    this->run_battery_fixed_absolutebase("jerk16",f,g,noise_levels,starting_set,evolution_time,step,base,1,12);
+    this->run_test("rossler",integrator,f,g,noise_levels,starting_set,evolution_time);
+    //this->run_battery_each_approximation("rossler",f,g,noise_levels,starting_set,evolution_time,step,freq);
 }
 
 void TestInclusionIntegrator::test_higgins_selkov() const {
 
     double step=1.0/50;
-    SizeType freq=2;
-    SizeType base=60;
-    SizeType avg=100;
+    SizeType freq=12;
+    SizeType base=1000;
 
     auto sweeper = make_threshold_sweeper(1e-8);
     List<SharedPointer<InclusionIntegratorApproximation>> approximations;
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorPiecewiseApproximation(sweeper)));
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorSinusoidalApproximation(sweeper)));
     approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorAffineApproximation(sweeper)));
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorConstantApproximation(sweeper)));
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorZeroApproximation(sweeper)));
     auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
     integrator.verbosity = 2;
 
@@ -565,17 +625,21 @@ void TestInclusionIntegrator::test_higgins_selkov() const {
     Real evolution_time=100/10_q;
 
     this->run_test("higgins-selkov",integrator,f,g,noise_levels,starting_set,evolution_time);
-    //this->run_battery_fixed_absolutebase("higgins-selkov",f,g,noise_levels,starting_set,evolution_time,step,base,1,20);
+    //this->run_battery_each_approximation("higgins-selkov",f,g,noise_levels,starting_set,evolution_time,step,freq);
 }
 
 
 void TestInclusionIntegrator::test_lotka_volterra() const {
     double step=1.0/50;
-    SizeType freq=1;
-    SizeType base=5;
+    SizeType freq=12;
+    SizeType base=1000;
 
     auto sweeper = make_threshold_sweeper(1e-8);
     List<SharedPointer<InclusionIntegratorApproximation>> approximations;
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorPiecewiseApproximation(sweeper)));
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorSinusoidalApproximation(sweeper)));
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorAffineApproximation(sweeper)));
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorConstantApproximation(sweeper)));
     approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorZeroApproximation(sweeper)));
     auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
     integrator.verbosity = 2;
@@ -591,23 +655,26 @@ void TestInclusionIntegrator::test_lotka_volterra() const {
 
     Vector<ValidatedVectorFunction> g({{x[0]*(one-x[1]),zero},{zero,x[1]*(x[0]-one)}});
 
-    Real e=1/2048_q;
+    Real e=1/100000000_q;
     RealBox starting_set={{Real(1.2)-e,Real(1.2)+e},{Real(1.1)-e,Real(1.1)+e}};
     Real evolution_time=100/10_q;
 
     this->run_test("lotka-volterra",integrator,f,g,noise_levels,starting_set,evolution_time);
-    //this->run_battery_fixed_absolutebase("lotka-volterra",f,g,noise_levels,starting_set,evolution_time,step,base,1,15);
+    //this->run_battery_each_approximation("lotka-volterra",f,g,noise_levels,starting_set,evolution_time,step,freq);
 }
 
 void TestInclusionIntegrator::test_jet_engine() const {
     double step=1.0/50;
-    SizeType base=30;
-    SizeType freq=10;
-    SizeType avg=100;
+    SizeType freq=12;
+    SizeType base = 1000;
 
     auto sweeper = make_threshold_sweeper(1e-8);
     List<SharedPointer<InclusionIntegratorApproximation>> approximations;
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorPiecewiseApproximation(sweeper)));
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorSinusoidalApproximation(sweeper)));
     approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorAffineApproximation(sweeper)));
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorConstantApproximation(sweeper)));
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorZeroApproximation(sweeper)));
     auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
     integrator.verbosity = 2;
 
@@ -626,19 +693,22 @@ void TestInclusionIntegrator::test_jet_engine() const {
     RealBox starting_set={{Real(1.0)-e1,Real(1.0)+e1},{Real(1.0)-e2,Real(1.0)+e2}};
     Real evolution_time=40/8_q;
 
-    //this->run_test("jet-engine",integrator,f,g,noise_levels,starting_set,evolution_time);
-    this->run_battery_fixed_absolutebase("jet-engine", f, g, noise_levels, starting_set, evolution_time, step, base, 1, 12);
+    this->run_test("jet-engine",integrator,f,g,noise_levels,starting_set,evolution_time);
+    //this->run_battery_each_approximation("jet-engine",f,g,noise_levels,starting_set,evolution_time,step,freq);
 }
 
 void TestInclusionIntegrator::test_pi_controller() const {
     double step=1.0/32;
-    SizeType base=30;
-    SizeType freq=10;
-    SizeType avg=100;
+    SizeType freq=12;
+    SizeType base = 1000;
 
     auto sweeper = make_threshold_sweeper(1e-8);
     List<SharedPointer<InclusionIntegratorApproximation>> approximations;
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorPiecewiseApproximation(sweeper)));
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorSinusoidalApproximation(sweeper)));
     approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorAffineApproximation(sweeper)));
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorConstantApproximation(sweeper)));
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorZeroApproximation(sweeper)));
     auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
     integrator.verbosity = 2;
 
@@ -656,8 +726,8 @@ void TestInclusionIntegrator::test_pi_controller() const {
     RealBox starting_set={{Real(5.0),Real(10.0)},{-e,+e}};
     Real evolution_time=40/8_q;
 
-    //this->run_test("pi-controller",integrator,f,g,noise_levels,starting_set,evolution_time);
-    this->run_battery_fixed_absolutebase("pi-controller", f, g, noise_levels, starting_set, evolution_time, step, base, 26, 35);
+    this->run_test("pi-controller",integrator,f,g,noise_levels,starting_set,evolution_time);
+    //this->run_battery_each_approximation("pi-controller",f,g,noise_levels,starting_set,evolution_time,step,freq);
 }
 
 void TestInclusionIntegrator::test_van_der_pol() const {
@@ -689,8 +759,52 @@ void TestInclusionIntegrator::test_van_der_pol() const {
     this->run_test("vanderpol",integrator,f,g,noise_levels,starting_set,evolution_time);
 }
 
+void TestInclusionIntegrator::test_DCDC() const {
+    double step=1.0/10;
+    SizeType freq=12;
+    SizeType base = 1000;
+
+    auto sweeper = make_threshold_sweeper(1e-8);
+    List<SharedPointer<InclusionIntegratorApproximation>> approximations;
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorPiecewiseApproximation(sweeper)));
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorSinusoidalApproximation(sweeper)));
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorAffineApproximation(sweeper)));
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorConstantApproximation(sweeper)));
+    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorZeroApproximation(sweeper)));
+    auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
+    integrator.verbosity = 2;
+
+    RealVector noise_levels={2/1000_q,1/15_q};
+
+    Real k0(0.002987);
+    Real fp0(-0.018);//(-11+k0)/600
+    Real fp1(-0.066); //(k0-1)/15
+    Real fq0(0.071);//(1-k0)/14
+    Real fq1(-0.00853);//-k0*20/7
+    Real gp0 = 1/600_q;
+    Real gp1 = 1/15_q;
+    Real gq0 = -1/14_q;
+    Real gq1 = -20/7_q;
+
+    auto x = EffectiveVectorFunction::identity(2u);
+    auto one = EffectiveScalarFunction::constant(2u,1_z);
+    auto zero = EffectiveScalarFunction::constant(2u,0_z);
+    auto third = EffectiveScalarFunction::constant(2u,1/3_z);
+
+    auto f = EffectiveVectorFunction({third+x[0]*fp0+x[1]*fp1,x[0]*fq0+x[1]*fq1});
+
+    Vector<ValidatedVectorFunction> g({{gp0*x[0]+gp1*x[1],gq0*x[0]+gq1*x[1]},{one,zero}});
+
+    Real e=1/1000000_q;
+    RealBox starting_set={{Real(1)-e,Real(1)+e},{Real(5)-e,Real(5)+e}};
+    Real evolution_time=50/10_q;
+
+    this->run_test("DCDC",integrator,f,g,noise_levels,starting_set,evolution_time);
+    //this->run_battery_each_approximation("DCDC",f,g,noise_levels,starting_set,evolution_time,step,freq);
+}
+
 void TestInclusionIntegrator::test_harmonic() const {
-    double step=1.0/8;
+    double step=1.0/64;
     SizeType base=80;
     SizeType freq=1000;
 
@@ -698,7 +812,7 @@ void TestInclusionIntegrator::test_harmonic() const {
     List<SharedPointer<InclusionIntegratorApproximation>> approximations;
     approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorAffineApproximation(sweeper)));
     auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
-    integrator.verbosity = 2;
+    integrator.verbosity = 0;
 
     RealVector noise_levels={4/100_q};
 
@@ -714,8 +828,8 @@ void TestInclusionIntegrator::test_harmonic() const {
     RealBox starting_set={{-e,e},{-e,+e}};
     Real evolution_time=314/100_q;
 
-    this->run_test("harmonic",integrator,f,g,noise_levels,starting_set,evolution_time);
-    //this->run_battery_noreset("harmonic",f,g,noise_levels,starting_set,evolution_time,2,5);
+    //this->run_test("harmonic",integrator,f,g,noise_levels,starting_set,evolution_time);
+    this->run_battery_each_approximation("harmonic",f,g,noise_levels,starting_set,evolution_time,step,freq);
 }
 
 
@@ -749,19 +863,18 @@ void TestInclusionIntegrator::test_clock() const {
 
 void TestInclusionIntegrator::test() const {
     //ARIADNE_TEST_CALL(test_reactor());
+    //ARIADNE_TEST_CALL(test_jerk16());
+    //ARIADNE_TEST_CALL(test_jerk21());
     //ARIADNE_TEST_CALL(test_lorenz());
     //ARIADNE_TEST_CALL(test_rossler());
-    //ARIADNE_TEST_CALL(test_jerk21());
-    //ARIADNE_TEST_CALL(test_jerk16());
-    //ARIADNE_TEST_CALL(test_higgins_selkov());
+    ARIADNE_TEST_CALL(test_higgins_selkov());
     //ARIADNE_TEST_CALL(test_lotka_volterra());
     //ARIADNE_TEST_CALL(test_jet_engine());
     //ARIADNE_TEST_CALL(test_pi_controller());
     //ARIADNE_TEST_CALL(test_van_der_pol());
+    //ARIADNE_TEST_CALL(test_DCDC());
     //ARIADNE_TEST_CALL(test_harmonic());
-    //ARIADNE_TEST_CALL(test_harmonic_analytical());
     //ARIADNE_TEST_CALL(test_clock());
-    ARIADNE_TEST_CALL(test_DCDC());
 }
 
 int main() {

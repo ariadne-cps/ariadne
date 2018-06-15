@@ -335,6 +335,8 @@ class LohnerReconditioner : public Reconditioner, public Loggable {
     Nat _number_of_variables_to_keep;
 public:
     LohnerReconditioner(SweeperDP sweeper, Nat number_of_variables_to_keep);
+    void set_sweeper(SweeperDP sweeper) { _sweeper = sweeper; }
+    void set_number_of_variables_to_keep(Nat number_of_variables_to_keep) { _number_of_variables_to_keep = number_of_variables_to_keep; }
     virtual ValidatedVectorFunctionModelType expand_errors(ValidatedVectorFunctionModelType Phi) const override;
     virtual Void simplify(ValidatedVectorFunctionModelType& phi) const override;
 };

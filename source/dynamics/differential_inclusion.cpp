@@ -29,6 +29,25 @@ namespace Ariadne {
 
 #define ARIADNE_LOG_PRINT(level, expr) { ARIADNE_LOG(level,#expr << "=" << (expr) << "\n"); }
 
+struct ScheduledApproximation
+{
+    SizeType step;
+    SharedPointer<InclusionIntegratorApproximation> approximation;
+
+    ScheduledApproximation(SizeType step, SharedPointer<InclusionIntegratorApproximation> approximation) : step(step), approximation(approximation) {}
+};
+
+OutputStream& operator<<(OutputStream& os, ScheduledApproximation const& sa) {
+    return os << "(" << sa.step << ":" << sa.approximation->getKind() << ")"; }
+
+struct ScheduledApproximationComparator
+{
+    inline bool operator() (const ScheduledApproximation& sa1, const ScheduledApproximation& sa2)
+    {
+        return (sa1.step > sa2.step);
+    }
+};
+
 Box<UpperIntervalType> apply(VectorFunction<ValidatedTag>const& f, const Box<ExactIntervalType>& bx) {
     return apply(f,Box<UpperIntervalType>(bx));
 }
@@ -605,8 +624,27 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
 
     auto step = 0;
 
+    List<ScheduledApproximation> schedule;
+    Map<SharedPointer<InclusionIntegratorApproximation>,Nat> delays;
+    for (auto appro: _approximations) {
+        schedule.push_back(ScheduledApproximation(SizeType(step),appro));
+        delays[appro] = 0;
+    }
+
     while (possibly(t<FloatDPBounds(tmax,pr))) {
         ARIADNE_LOG(2,"step#:"<<step<<", t:"<<t<<", hsug:"<<hsug << "\n");
+
+        List<SharedPointer<InclusionIntegratorApproximation>> approximations_to_use;
+        while (!schedule.empty()) {
+            auto entry = schedule.back();
+            if (entry.step == step) {
+                approximations_to_use.push_back(entry.approximation);
+                schedule.pop_back();
+            } else if (entry.step > step) {
+                break;
+            }
+        }
+
         if(possibly(t+hsug>FloatDPBounds(tmax,pr))) {  //FIXME: Check types for timing;
             hsug=cast_positive(cast_exact((tmax-t).upper()));
         }
@@ -623,12 +661,14 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
 
         ValidatedVectorFunctionModelDP reach_function;
         ValidatedVectorFunctionModelDP best_reach_function, best_evolve_function;
-        DIApproximationKind best;
+        SharedPointer<InclusionIntegratorApproximation> best;
         FloatDP best_total_diameter(0);
 
+        ARIADNE_LOG(3,"n. of approximations to use="<<approximations_to_use.size()<<"\n");
+
         SizeType i = 0;
-        for (auto i : range(_approximations.size())) {
-            this->_approximation = _approximations.at(i);
+        for (auto i : range(approximations_to_use.size())) {
+            this->_approximation = approximations_to_use.at(i);
             ARIADNE_LOG(4,"checking approximation "<<this->_approximation->getKind()<<"\n");
 
             ValidatedVectorFunctionModelDP current_reach_function;
@@ -705,7 +745,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
             if (i == 0) {
                 best_reach_function = current_reach_function;
                 best_evolve_function = current_evolve_function;
-                best = this->_approximation->getKind();
+                best = this->_approximation;
                 for (auto i: state_variables) {
                     best_total_diameter += best_evolve_function.range()[i].width().raw();
                 }
@@ -715,8 +755,8 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
                     current_total_diameter += current_evolve_function.range()[i].width().raw();
                 }
                 if (current_total_diameter < best_total_diameter) {
-                    best = this->_approximation->getKind();
-                    ARIADNE_LOG(5,"best approximation: " << this->_approximation->getKind() << "\n");
+                    best = this->_approximation;
+                    ARIADNE_LOG(5,"best approximation: " << best->getKind() << "\n");
                     best_reach_function = current_reach_function;
                     best_evolve_function = current_evolve_function;
                     best_total_diameter = current_total_diameter;
@@ -724,11 +764,24 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
             }
         }
 
-        if (_approximations.size() > 1)
-            ARIADNE_LOG(2,"chosen approximation: " << best << "\n");
+        if (approximations_to_use.size() > 1)
+            ARIADNE_LOG(3,"chosen approximation: " << best->getKind() << "\n");
 
-        approximation_global_frequencies[best] += 1;
-        approximation_local_frequencies[best] += 1;
+        for (auto appro : approximations_to_use) {
+            if (best->getKind() == appro->getKind())
+                delays[appro] = 0;
+            else
+                delays[appro]++;
+            Nat offset = 1<<delays[appro];
+            //Nat offset = 1;
+            schedule.push_back(ScheduledApproximation(step+offset,appro));
+        }
+        std::sort(schedule.begin(),schedule.end(),ScheduledApproximationComparator());
+
+        ARIADNE_LOG(3,"updated schedule: " << schedule << "\n");
+
+        approximation_global_frequencies[best->getKind()] += 1;
+        approximation_local_frequencies[best->getKind()] += 1;
 
         reach_function = best_reach_function;
         evolve_function = best_evolve_function;

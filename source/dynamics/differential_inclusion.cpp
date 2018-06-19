@@ -773,7 +773,6 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
             else
                 delays[appro]++;
             Nat offset = 1<<delays[appro];
-            //Nat offset = 1;
             schedule.push_back(ScheduledApproximation(step+offset,appro));
         }
         std::sort(schedule.begin(),schedule.end(),ScheduledApproximationComparator());
@@ -786,28 +785,29 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
         reach_function = best_reach_function;
         evolve_function = best_evolve_function;
 
-        if (step > 0 && step%freq==0) {
+        if (step%freq==freq-1) {
 
             double base = 0;
-            double f = freq;
+            double rho = 6.0;
             for (auto appro: approximation_local_frequencies) {
-                double partial = 0;
+                SizeType ppi;
                 switch (appro.first) {
                     case DIApproximationKind::ZERO:
-                        partial = n + f/2 * n + (2*f-1)*m;
+                        ppi = 0;
                         break;
                     case DIApproximationKind::CONSTANT:
-                        partial = n + f/2 * n + (2*f-1)*m - (f-1)*m/2;
+                        ppi = 1;
                         break;
                     default:
-                        partial = n + f/2 * n + (2*f-1)*m - (f-1)*m;
+                        ppi = 2;
                 }
-                base += partial*appro.second/f;
+                double partial = n + rho*(n+2*m) + (freq-1)*m*(2 - ppi);
+                base += partial*appro.second/freq;
             }
             LohnerReconditioner& lreconditioner = dynamic_cast<LohnerReconditioner&>(*this->_reconditioner);
 
             Nat num_variables_to_keep(base);
-            ARIADNE_LOG(2,"simplifying to "<<num_variables_to_keep<<" variables\n");
+            ARIADNE_LOG(4,"simplifying to "<<num_variables_to_keep<<" variables\n");
             lreconditioner.set_number_of_variables_to_keep(num_variables_to_keep);
             this->_reconditioner->simplify(evolve_function);
             ARIADNE_LOG(5,"simplified_evolve_function="<<evolve_function<<"\n");
@@ -824,15 +824,6 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
 
         t=new_t;
         result.append(reach_function);
-    }
-
-    if (_approximations.size() > 1) {
-        std::cout << "approximation frequencies:";
-        for (auto appro: _approximations) {
-            if (approximation_global_frequencies[appro->getKind()] > 0)
-                std::cout << " " << appro->getKind() << " " << (100.0*approximation_global_frequencies[appro->getKind()])/step;
-        }
-        std::cout << std::endl;
     }
 
     return result;

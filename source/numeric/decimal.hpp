@@ -59,7 +59,7 @@ class Decimal
     //! \brief Convert from a dyadic.
     Decimal(Dyadic const&);
     //! \brief Convert to a rational number.
-    explicit operator Rational () const;
+    operator Rational () const;
     //! \brief Convert to an generic number.
     operator ExactNumber () const;
     //! \brief Unary plus of a decimal value.

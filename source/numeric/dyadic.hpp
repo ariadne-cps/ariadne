@@ -118,6 +118,27 @@ class Dyadic
 template<class M, EnableIf<And<IsBuiltinIntegral<M>,IsBuiltinUnsigned<M>>>> inline Dyadic::Dyadic(M m) : Dyadic(Integer(m)) { }
 template<class N, EnableIf<And<IsBuiltinIntegral<N>,IsBuiltinSigned<N>>>> inline Dyadic::Dyadic(N n) : Dyadic(Integer(n)) { }
 
+template<> class Bounds<Dyadic> {
+    Dyadic _l, _u;
+  public:
+    Bounds<Dyadic>(Dyadic w) : _l(w), _u(w) { }
+    Bounds<Dyadic>(Dyadic l, Dyadic u) : _l(l), _u(u) { }
+    template<class X, EnableIf<IsConstructible<Dyadic,X>> =dummy> Bounds<Dyadic>(Bounds<X> const& x)
+        : DyadicBounds(Dyadic(x.lower_raw()),Dyadic(x.upper_raw())) { }
+    Bounds<Dyadic> pm(Dyadic e) { return DyadicBounds(_l-e,_u+e); }
+    Dyadic lower_raw() const { return _l; }
+    Dyadic upper_raw() const { return _u; }
+    friend Bounds<Dyadic> add(DyadicBounds const& w1, DyadicBounds& w2) { return DyadicBounds(w1._l+w2._l,w1._u+w2._u); }
+    friend Bounds<Dyadic> sub(DyadicBounds const& w1, DyadicBounds& w2) { return DyadicBounds(w1._l-w2._u,w1._u-w2._l); }
+    friend DyadicBounds abs(DyadicBounds const& w) { return DyadicBounds(max(min(w._l,-w._u),0),max(-w._l,w._u)); }
+    friend ValidatedKleenean operator<(DyadicBounds const& w1, DyadicBounds const& w2) {
+        if (w1._u<w2._l) { return true; } else if (w1._l >= w2._u) { return false; } else { return indeterminate; } }
+    friend DyadicBounds refinement(DyadicBounds const& w1, DyadicBounds const& w2) { return DyadicBounds(max(w1._l,w2._l),min(w1._u,w2._u)); }
+    friend OutputStream& operator<<(OutputStream& os, DyadicBounds y) { return os << "[" << y._l << ":" << y._u << "]"; }
+};
+
+using DyadicBounds = Bounds<Dyadic>;
+
 
 inline Dyadic operator"" _dyadic(long double x) { return Dyadic(static_cast<double>(x)); }
 inline Dyadic operator"" _dy(long double x) { return operator"" _dyadic(x); }

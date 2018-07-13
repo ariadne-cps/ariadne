@@ -98,14 +98,19 @@ template<class F> class UpperBound
     friend Bool refines(UpperBound<F> const&, UpperBound<F> const&);
     friend UpperBound<F> refinement(UpperBound<F> const&, UpperBound<F> const&);
   public:
-    friend UpperBound<F> operator*(UpperBound<F> const& x1, PositiveValue<F> const& x2) {
-        return UpperBound<F>(mul(up,x1.raw(),x2.raw())); }
+    friend UpperBound<F> operator*(PositiveBounds<F> const& x1, UpperBound<F> const& x2) {
+        return UpperBound<F>(mul(up,x2.raw()>=0?x1.upper().raw():x1.lower().raw(),x2.raw())); }
     friend UpperBound<F> operator*(UpperBound<F> const& x1, PositiveBounds<F> const& x2) {
         return UpperBound<F>(mul(up,x1.raw(),x1.raw()>=0?x2.upper().raw():x2.lower().raw())); }
-    friend UpperBound<F> operator/(UpperBound<F> const& x1, PositiveValue<F> const& x2) {
-        return UpperBound<F>(div(up,x1.raw(),x2.raw())); }
     friend UpperBound<F> operator/(UpperBound<F> const& x1, PositiveBounds<F> const& x2) {
         return UpperBound<F>(div(up,x1.raw(),x1.raw()>=0?x2.lower().raw():x2.upper().raw())); }
+    // Needed to prevent ambiguity; useful as implementation is easier than PositiveBounds version.
+    friend UpperBound<F> operator*(PositiveValue<F> const& x1, UpperBound<F> const& x2) {
+        return UpperBound<F>(mul(up,x1.raw(),x2.raw())); }
+    friend UpperBound<F> operator*(UpperBound<F> const& x1, PositiveValue<F> const& x2) {
+        return UpperBound<F>(mul(up,x1.raw(),x2.raw())); }
+    friend UpperBound<F> operator/(UpperBound<F> const& x1, PositiveValue<F> const& x2) {
+        return UpperBound<F>(div(up,x1.raw(),x2.raw())); }
   private: public:
     static Nat output_places;
     RawType _u;
@@ -129,14 +134,19 @@ template<class F> class Positive<UpperBound<F>> : public UpperBound<F>
     Positive<UpperBound<F>>(PositiveValue<F> const& x) : UpperBound<F>(x) { }
     Positive<UpperBound<F>>(PositiveBounds<F> const& x) : UpperBound<F>(x) { }
   public:
-    friend PositiveUpperBound<F> operator*(PositiveUpperBound<F> const& x1, PositiveValue<F> const& x2) {
-        return PositiveUpperBound<F>(mul(up,x1.raw(),x2.raw())); }
+    // Needed to prevent ambiguity
+    friend PositiveUpperBound<F> operator*(PositiveBounds<F> const& x1, PositiveUpperBound<F> const& x2) {
+        return PositiveUpperBound<F>(mul(up,x1.upper().raw(),x2.raw())); }
     friend PositiveUpperBound<F> operator*(PositiveUpperBound<F> const& x1, PositiveBounds<F> const& x2) {
         return PositiveUpperBound<F>(mul(up,x1.raw(),x2.upper().raw())); }
-    friend PositiveUpperBound<F> operator/(PositiveUpperBound<F> const& x1, PositiveValue<F> const& x2) {
-        return PositiveUpperBound<F>(div(up,x1.raw(),x2.raw())); }
     friend PositiveUpperBound<F> operator/(PositiveUpperBound<F> const& x1, PositiveBounds<F> const& x2) {
         return PositiveUpperBound<F>(div(up,x1.raw(),x2.lower().raw())); }
+    friend PositiveUpperBound<F> operator*(PositiveValue<F> const& x1, PositiveUpperBound<F> const& x2) {
+        return PositiveUpperBound<F>(mul(up,x1.raw(),x2.raw())); }
+    friend PositiveUpperBound<F> operator*(PositiveUpperBound<F> const& x1, PositiveValue<F> const& x2) {
+        return PositiveUpperBound<F>(mul(up,x1.raw(),x2.raw())); }
+    friend PositiveUpperBound<F> operator/(PositiveUpperBound<F> const& x1, PositiveValue<F> const& x2) {
+        return PositiveUpperBound<F>(div(up,x1.raw(),x2.raw())); }
 };
 
 template<class F> inline PositiveUpperBound<F> cast_positive(UpperBound<F> const& x) {

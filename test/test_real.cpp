@@ -29,7 +29,38 @@
 
 #include "numeric/integer.hpp"
 #include "numeric/dyadic.hpp"
+#include "numeric/decimal.hpp"
 #include "numeric/rational.hpp"
+
+#include "numeric/float_bounds.hpp"
+
+namespace Ariadne {
+Rational to_rational(String x) {
+    Rational q=0;
+    SizeType i=0;
+    while(x[i]!=char(0) && x[i]!='.') {
+        short d=x[i]-'0';
+        q=10*q+d;
+        ++i;
+    }
+    if (x[i]=='.') { ++i; }
+    Rational r=1;
+    while(x[i]!=char(0)) {
+        short d=x[i]-'0';
+        r/=10;
+        q=q+d*r;
+        ++i;
+    }
+    return q;
+}
+
+Rational operator"" _q (const char* str, size_t) { return Rational(Decimal(String(str))); }
+Decimal operator"" _dec (const char* str, std::size_t) { return Decimal(String(str)); }
+
+//Boolean nondeterministic_greater(Real const& x, Rational const& a, Rational const& b);
+//template<class Q> Boolean nondeterministic_greater(Real const& x, Q a, Q b) { return nondeterministic_greater(x,Rational(a),Rational(b)); }
+
+} // namespace Ariadne
 
 #include "numeric/float.hpp"
 
@@ -206,11 +237,15 @@ void TestReal::test_accuracy() {
     ARIADNE_TEST_ASSERT(rad(up,pi_met_mp.value().raw(),pi_near) <= error.raw());
 
     Dyadic eps(1,1024u);
-    ARIADNE_TEST_PRINT(nondeterministic_greater(sin(pi),-eps,eps));
-    ARIADNE_TEST_PRINT(nondeterministic_greater(sin(pi),-1,eps));
-    ARIADNE_TEST_PRINT(nondeterministic_greater(sin(pi),-eps,1));
-    ARIADNE_TEST_ASSERT(not nondeterministic_greater(sin(pi),eps,2*eps));
-    ARIADNE_TEST_ASSERT(nondeterministic_greater(sin(pi),-3*eps,-2*eps));
+    ARIADNE_TEST_CONSTRUCT(Real,sin_pi,(sin(pi)));
+    ARIADNE_TEST_PRINT(choose(sin_pi>-eps,sin_pi<eps));
+/*
+    ARIADNE_TEST_PRINT(nondeterministic_greater(sin_pi,-eps,eps));
+    ARIADNE_TEST_PRINT(nondeterministic_greater(sin_pi,-1,eps));
+    ARIADNE_TEST_PRINT(nondeterministic_greater(sin_pi,-eps,1));
+    ARIADNE_TEST_ASSERT(not nondeterministic_greater(sin_pi,eps,2*eps));
+    ARIADNE_TEST_ASSERT(nondeterministic_greater(sin_pi,-3*eps,-2*eps));
+*/
 }
 
 
@@ -223,6 +258,43 @@ void TestReal::test_sequence() {
     std::function<Real(Natural)> rfn([&](Natural n){return exp(Real(-(n+1u)));});
     StrongCauchySequence<Real> rseq(rfn);
     Real rlim=limit(rseq);
+
+    ARIADNE_TEST_ASSERT(abs(rlim.compute(Accuracy(256)).get())<Dyadic(1,256u));
+
+    Real pi=4*atan(Real(1));
+    Decimal pi_lower="3.1415926535897932"_dec;
+    Decimal pi_upper="3.1415926535897933"_dec;
+    ARIADNE_TEST_PRINT(nondeterministic_greater(pi,"3.1415926535897932"_dec,"3.1415926535897933"_dec));
+    ARIADNE_TEST_ASSERT(abs(rlim.compute(Accuracy(256)).get())<Dyadic(1,256u));
+    ARIADNE_TEST_ASSERT(nondeterministic_greater(pi,3.0_dec,3.1_dec));
+    ARIADNE_TEST_ASSERT(not nondeterministic_greater(pi,3.2_dec,3.3_dec));
+    ARIADNE_TEST_PRINT(nondeterministic_greater(pi,"3.1415926535897932"_dec,"3.1415926535897937"_dec));
+    ARIADNE_TEST_PRINT(nondeterministic_greater(pi,"3.1415926535897932"_dec,"3.1415926535897933"_dec));
+
+    ARIADNE_TEST_PRINT(pi.compute(Accuracy(256)).get(MultiplePrecision(256)));
+    ARIADNE_TEST_PRINT(std::boolalpha);
+    ARIADNE_TEST_PRINT(choose(pi>pi_lower,pi<pi_upper));
+    ARIADNE_TEST_PRINT(choose(pi>pi_lower,pi<3.2_dec));
+
+    ARIADNE_TEST_PRINT(choose({pi>pi_lower,Real(4)},{pi<3.2_dec,Real(3)}));
+    ARIADNE_TEST_PRINT(choose({pi>pi_lower,Real(4)},{pi<pi_upper,Real(3)}));
+
+    Dyadic pi_upper_bound = pi.compute(Accuracy(256)).get().upper_raw();
+    Real x=pi-pi_upper_bound;
+    ARIADNE_TEST_PRINT((x>=0).check(Effort(5u)));
+    ARIADNE_TEST_PRINT((x>=0).check(Effort(6u)));
+//    ARIADNE_TEST_PRINT(unify(x>=0,+x,x<=0,-x));
+    ARIADNE_TEST_PRINT(when({x>=0,+x},{x<=0,-x}).compute(Effort(5u)));
+    ARIADNE_TEST_PRINT(when({x>=0,+x},{x<=0,-x}).compute(Effort(6u)));
+    ARIADNE_TEST_PRINT(when({x>=0,+x},{x<=0,-x}).compute(Effort(384u)));
+    ARIADNE_TEST_PRINT(when({x>=0,+x},{x<=0,-x}).get(precision(5u)));
+    ARIADNE_TEST_PRINT(when({x>=0,+x},{x<=0,-x}).get(precision(6u)));
+    ARIADNE_TEST_PRINT(when({x>=0,+x},{x<=0,-x}).get(precision(54)));
+    ARIADNE_TEST_PRINT(when({x>=0,+x},{x<=0,-x}).get(precision(64)));
+    ARIADNE_TEST_FAIL(when({x>=0,+x},{x<=0,1+x}).compute(Effort(5u)));
+    ARIADNE_TEST_PRINT(when({x>=0,+x},{x<=0,1+x}).compute(Effort(6u)));
+
+
 }
 
 

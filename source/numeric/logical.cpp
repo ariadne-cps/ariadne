@@ -143,6 +143,15 @@ Nat Effort::_default = 0u;
 
 const Indeterminate indeterminate = Indeterminate();
 
+Bool NondeterministicBoolean::_choose(LowerKleenean p1, LowerKleenean p2) {
+    Effort eff(0u);
+    while(true) {
+        if(definitely(p1.check(eff))) { return true; }
+        if(definitely(p2.check(eff))) { return false; }
+        ++eff;
+    }
+}
+
 template<> String class_name<ExactTag>() { return "Exact"; }
 template<> String class_name<EffectiveTag>() { return "Effective"; }
 template<> String class_name<ValidatedTag>() { return "Validated"; }

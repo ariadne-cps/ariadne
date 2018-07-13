@@ -1407,7 +1407,7 @@ template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::_spli
     for(typename TaylorModel<ValidatedTag,F>::Iterator iter=r.begin(); iter!=r.end(); ++iter) {
         const DegreeType ak=iter->index()[k];
         ReferenceType<FloatValue<PR>> c=iter->coefficient();
-        c/=two_exp(ak);
+        c/=pow(two,ak);
     }
 
     if(h==SplitPart::MIDDLE) { return r; }

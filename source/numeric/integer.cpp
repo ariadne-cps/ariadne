@@ -353,6 +353,10 @@ OutputStream& operator<<(OutputStream& os, Comparison const& cmp) {
     return os;
 }
 
+Sign sgn(Integer const& z) {
+    return static_cast<Sign>(mpz_sgn(z._mpz));
+}
+
 Comparison cmp(Integer const& z1, Integer const& z2) {
     auto c=mpz_cmp(z1._mpz,z2._mpz);
     return c==0 ? Comparison::EQUAL : (c>0?Comparison::GREATER:Comparison::LESS);
@@ -408,6 +412,10 @@ template<> String class_name<Natural>() { return "Natural"; }
 
 Int log2floor(Natural const& z) {
     return mpz_sizeinbase(z._mpz,2)-1;
+}
+
+OutputStream& operator<<(OutputStream& os, Sign s) {
+    return os << ( (s==Sign::ZERO) ? "ZERO" : (s==Sign::NEGATIVE) ? "NEGATIVE" : "POSITIVE" );
 }
 
 

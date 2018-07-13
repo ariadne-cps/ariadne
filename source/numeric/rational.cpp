@@ -317,6 +317,10 @@ Boolean lt(Rational const& q1, Rational const& q2) {
     return mpq_cmp(q1._mpq,q2._mpq)<0;
 }
 
+Sign sgn(Rational const& q) {
+    return sgn(q.get_num());
+}
+
 Comparison cmp(Rational const& q1, Rational const& q2) {
     auto c=mpq_cmp(q1._mpq,q2._mpq);
     return c==0 ? Comparison::EQUAL : (c>0?Comparison::GREATER:Comparison::LESS);

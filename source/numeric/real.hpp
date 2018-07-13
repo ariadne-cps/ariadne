@@ -204,6 +204,7 @@ class Real
     friend Kleenean operator<=(Real const& r1, Real const& r2); //!< Comparison \c leq.
     friend Kleenean operator>=(Real const& r1, Real const& r2); //!< Comparison .
     friend Boolean operator>(Real const& r1, Pair<Real,Real> lu); //!< Given \a l<u, returns \a true if r>l and \a false if r<u.
+    friend Boolean nondeterministic_greater(Real const& r, Rational const& a, Rational const& b); //!< Given \a a<b, returns \a true if r>a and \a false if r<b.
     //@}
 
     //@{
@@ -216,8 +217,10 @@ class Real
     friend Real limit(StrongCauchySequence<Real> const& rs);
         //!< The limit of a sequence of real numbers \em r<sub>n</sub> for which
         //!< <em>|r<sub>n<sub>1</sub></sub>-r<sub>n<sub>2</sub></sub>|≤<em>2<sup>-min</sup><sup>(n<sub>1</sub>,n<sub>2</sub>)</sup></em>
-    friend Boolean nondeterministic_greater(Real const& rs, Rational a, Rational b);
-        //!< Requires \a a<b. May return true if \a r>a, and may return false if \a r<b.
+    friend Real choose(Case<LowerKleenean,Real> const& c1, Case<LowerKleenean,Real> const& c2);
+        //!< A nonextensional choice, between the value of any of the valid cases.
+    friend Real when(Case<UpperKleenean,Real> const& c1, Case<UpperKleenean,Real> const& c2);
+        //!< A value equal to that of each of the valid cases.
     //@}
 
 
@@ -253,6 +256,8 @@ class Real
 template<class M, EnableIf<And<IsBuiltinIntegral<M>,IsBuiltinUnsigned<M>>>> inline Real::Real(M m) : Real(std::uint64_t(m),nullptr) { };
 template<class N, EnableIf<And<IsBuiltinIntegral<N>,IsBuiltinSigned<N>>>> inline Real::Real(N n) : Real(std::int64_t(n),nullptr) { };
 
+Real choose(Case<LowerKleenean,Real> const& c1, Case<LowerKleenean,Real> const& c2);
+Real when(Case<UpperKleenean,Real> const& c1, Case<UpperKleenean,Real> const& c2);
 
 //! \ingroup NumericModule
 //! \brief Computable lower real numbers defined by conversion to concrete floats.

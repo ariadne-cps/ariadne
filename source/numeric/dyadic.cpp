@@ -146,7 +146,21 @@ Dyadic operator-(TwoExp y) {
     return -Dyadic(y);
 }
 
+Dyadic operator*(Integer z, TwoExp w) {
+    Dyadic r(z);
+    const int q=w.exponent();
+    if(q>=0) { mpf_mul_2exp(r._mpf,r._mpf,q); }
+    else { mpf_div_2exp(r._mpf,r._mpf,-q); }
+    return r;
+}
 
+Dyadic operator/(Integer z, TwoExp w) {
+    return z*rec(w);
+}
+
+OutputStream& operator<<(OutputStream& os, TwoExp w) {
+    return os << "2^" <<  w.exponent();
+}
 /*
 Dyadic& operator+=(Dyadic& x1, Dyadic const& x2) {
     mpf_add(x1._mpf,x1._mpf,x2._mpf);
@@ -243,6 +257,10 @@ Dyadic max(Dyadic const& x1,Dyadic const& x2) {
 Comparison cmp(Dyadic const& x1, Dyadic const& x2) {
     auto c=mpf_cmp(x1._mpf,x2._mpf);
     return c==0 ? Comparison::EQUAL : (c>0?Comparison::GREATER:Comparison::LESS);
+}
+
+Sign sgn(Dyadic const& x) {
+    return static_cast<Sign>(static_cast<char>(cmp(x,Dyadic(0))));
 }
 
 Boolean eq(Dyadic const& x1, Dyadic const& x2) {

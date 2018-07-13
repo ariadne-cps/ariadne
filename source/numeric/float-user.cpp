@@ -2093,10 +2093,6 @@ Bool same(FloatDPValue const& x1, FloatDPValue const& x2) { return Operations<Fl
 Bool same(FloatMPValue const& x1, FloatMPValue const& x2) { return Operations<FloatMPValue>::_same(x1,x2); }
 
 
-
-
-
-
 PositiveFloatDPValue hlf(PositiveFloatDPValue const& x) { return PositiveFloatDPValue(hlf(x._v)); }
 PositiveFloatMPValue hlf(PositiveFloatMPValue const& x) { return PositiveFloatMPValue(hlf(x._v)); }
 
@@ -2108,7 +2104,6 @@ FloatDPUpperBound operator*(FloatDPUpperBound const& x1, Real const& y2) {
 
 
 FloatDPValue midpoint(FloatDPBounds const& x) { return x.value(); }
-
 
 template<> String class_name<FloatDPApproximation>() { return "FloatDPApproximation"; }
 template<> String class_name<FloatDPLowerBound>() { return "FloatDPLowerBound"; }

@@ -41,14 +41,17 @@ OutputStream& operator<<(OutputStream& os, Sign s);
 static const Sign NEGATIVE = Sign::NEGATIVE;
 static const Sign ZERO = Sign::ZERO;
 static const Sign POSITIVE = Sign::POSITIVE;
+inline Sign operator-(Sign s) { return Sign(-static_cast<char>(s)); }
+inline Sign operator*(Sign s1, Sign s2) { return Sign(static_cast<char>(s1)*static_cast<char>(s2)); }
 
 //! \brief The result of a comparison operation.
-enum class Comparison : char { LESS=-1, EQUAL=0, GREATER=+1 };
+enum class Comparison : char { LESS=-1, EQUAL=0, GREATER=+1, INCOMPARIBLE=char(-128) };
 OutputStream& operator<<(OutputStream& os, Comparison c);
 static const Comparison LESS = Comparison::LESS;
 static const Comparison EQUAL = Comparison::EQUAL;
 static const Comparison GREATER = Comparison::GREATER;
+static const Comparison INCOMPARIBLE = Comparison::INCOMPARIBLE;
 
-}
+} // namespace Ariadne
 
 #endif /* ARIADNE_SIGN_HPP */

@@ -41,6 +41,9 @@
 
 #include "algebra/expansion.inl.hpp"
 
+#include "algebra/evaluate.hpp"
+#include "algebra/evaluate.tpl.hpp"
+
 namespace Ariadne {
 
 namespace {

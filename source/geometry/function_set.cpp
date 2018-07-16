@@ -1319,9 +1319,10 @@ OutputStream& operator<<(OutputStream& os, const ValidatedConstrainedImageSet& s
 }
 
 
-
-
-
-
+template<> String class_name<EffectiveConstraintSet>() { return "EffectiveConstraintSet"; }
+template<> String class_name<EffectiveBoundedConstraintSet>() { return "EffectiveBoundedConstraintSet"; }
+template<> String class_name<EffectiveConstrainedImageSet>() { return "EffectiveConstrainedImageSet"; }
+template<> String class_name<ValidatedConstrainedImageSet>() { return "ValidatedConstrainedImageSet"; }
+template<> String class_name<ValidatedAffineConstrainedImageSet>() { return "ValidatedAffineConstrainedImageSet"; }
 
 } // namespace Ariadne;

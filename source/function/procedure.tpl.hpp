@@ -34,6 +34,10 @@
 
 #include "algebra/evaluate.tpl.hpp"
 
+// FIXME: Added to prevent compilation error in Clang++-5.0. Should not be necessary.
+#include "function/taylor_model.hpp"
+#include "algebra/algebra.hpp"
+
 namespace Ariadne {
 
 extern template class Procedure<ApproximateNumber>;

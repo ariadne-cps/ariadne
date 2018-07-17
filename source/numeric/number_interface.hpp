@@ -50,8 +50,8 @@ template<class X> class NumberWrapper;
 
 class NumberInterface
     : public std::enable_shared_from_this<NumberInterface>
-    , public virtual WritableInterface
-    , public virtual ClonableInterface
+    , public WritableInterface
+    , public ClonableInterface
 {
     template<class X> friend class NumberWrapper;
     friend class Handle<NumberInterface>;

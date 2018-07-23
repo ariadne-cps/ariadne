@@ -165,11 +165,16 @@ namespace Ariadne {
  * \ref ValidatedReal and \ref ApproximateReal, and convergent sequences without
  * error bounds by \ref NaiveReal.
  *
- * Rounded operations on \ref FloatDP and \ref FloatMP are provided using the \c down
- * and \c up tags (equivalantly, \c downward and \c upward).
- * Rounding to nearest is specified by the \c near (equivalently, \c nearest) tag.
+ * Concrete numerical types are defined in terms of the \ref FloatDP and \ref FloatMP
+ * floating-point number classes.
+ * These support rounded arithmetic and elementary functions using the \ref down
+ * and \ref up tags (equivalantly, \ref downward and \ref upward).
+ * Rounding to nearest is specified by the \ref near (equivalently, \ref to_nearest) tag.
  * Approximate arithmetic without control of the
- * rounding mode can be specified by the \c approx rounding type.
+ * rounding mode can be specified by the \ref approx rounding type.
+ * Comparisons are performed considering these numbers as exact values, and must be decidable.
+ * This means that these "raw" floating-point types should not be used directly, but
+ * wrapped in one of the validated concrete approximation classes listed below.
  *
  * Types supporting exact or rounded arithmetic may be used to define (validated)
  * approximations to numbers via the classes \ref Value "Value<F>",
@@ -181,7 +186,8 @@ namespace Ariadne {
  * A \ref Natural is a \ref Positive<\ref Integer>.
  *
  * Note that to prevent accidental calls to approximate functions, all
- * non-exact operations must yield an \ref Approximation value.
+ * non-exact operations (except explicitly-rounded operations on raw values)
+ * must yield an \ref Approximation value.
  *
  * We use the following abbreviations for template parameters
  * for classes and concepts in this module:
@@ -189,8 +195,10 @@ namespace Ariadne {
  *  - \b W: %Dyadic
  *  - \b Q: %Rational
  *  - \b R: %Real
- *  - \b F: %Float
  *  - \b Y: %Generic %Number
+ *
+ *  - \b PR: %Precision
+ *  - \b F: %Float
  *  - \b X: %Concrete %Number
  *
  * \internal The above template names are currently not used consistently

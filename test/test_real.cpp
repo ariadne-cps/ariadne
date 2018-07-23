@@ -251,12 +251,12 @@ void TestReal::test_accuracy() {
 
 void TestReal::test_sequence() {
     std::function<Dyadic(Natural)> wfn([&](Natural n){return 1-Dyadic(1,n);});
-    StrongCauchySequence<Dyadic> wseq(wfn);
+    FastCauchySequence<Dyadic> wseq(wfn);
     Real wlim=limit(wseq);
     std::cout<<wlim.compute(Accuracy(256))<<"\n";
 
     std::function<Real(Natural)> rfn([&](Natural n){return exp(Real(-(n+1u)));});
-    StrongCauchySequence<Real> rseq(rfn);
+    FastCauchySequence<Real> rseq(rfn);
     Real rlim=limit(rseq);
 
     ARIADNE_TEST_ASSERT(abs(rlim.compute(Accuracy(256)).get())<Dyadic(1,256u));

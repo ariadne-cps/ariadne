@@ -239,8 +239,8 @@ PositiveReal abs(Real const& x) { return PositiveReal(make_real(Abs(),x)); }
 Real max(Real const& x1, Real const& x2) { return make_real(Max(),x1,x2); }
 Real min(Real const& x1, Real const& x2) { return make_real(Min(),x1,x2); }
 
-Real limit(StrongCauchySequence<Real> const& seq) { return Real(std::make_shared<RealLimit<Real>>(seq)); }
-Real limit(StrongCauchySequence<Dyadic> const& seq) { return Real(std::make_shared<RealLimit<Dyadic>>(seq)); }
+Real limit(FastCauchySequence<Real> const& seq) { return Real(std::make_shared<RealLimit<Real>>(seq)); }
+Real limit(FastCauchySequence<Dyadic> const& seq) { return Real(std::make_shared<RealLimit<Dyadic>>(seq)); }
 
 Real choose(Case<LowerKleenean,Real> const& c1, Case<LowerKleenean,Real> const& c2) {
     if (choose(c1.condition(),c2.condition())) { return c1.term(); } else { return c2.term(); } }

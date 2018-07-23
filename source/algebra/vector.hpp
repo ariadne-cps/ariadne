@@ -60,13 +60,21 @@ template<class X> struct IsScalar { static const Bool value = !IsVector<X>::valu
 
 template<class V> using ScalarType=typename V::ScalarType;
 
-
-template<class X, class = Fallback> struct HasCreateZero : False { };
-template<class X> struct HasCreateZero<X, EnableIf<IsSame<decltype(declval<X>().create_zero()),X>,Fallback>> : True { };
+template<class X> struct HasCreateZero {
+    template<class XX, class=decltype(std::declval<XX>().create_zero())> static std::true_type test(int);
+    template<class XX> static std::false_type test(...);
+    static const bool value = decltype(test<X>(1))::value;
+};
+template<class X> struct HasNul {
+    template<class XX, class=decltype(nul(std::declval<XX>()))> static std::true_type test(int);
+    template<class XX> static std::false_type test(...);
+    static const bool value = decltype(test<X>(1))::value;
+};
 
 template<class X, EnableIf<HasCreateZero<X>> = dummy> X create_zero(const X& x) { return x.create_zero(); }
+template<class X, DisableIf<HasCreateZero<X>> = dummy, EnableIf<HasNul<X>> = dummy> X create_zero(const X& x) { return nul(x); }
 // FIXME: Below should use a non-integral numeric type to prevent constructor of zero-sized object.
-template<class X, DisableIf<HasCreateZero<X>> = dummy> X create_zero(const X& x) { return static_cast<X>(0u); }
+template<class X, DisableIf<HasCreateZero<X>> = dummy, DisableIf<HasNul<X>> = dummy> X create_zero(const X& x) { return static_cast<X>(0u); }
 
 template<class T> inline T zero_element(Matrix<T> const& m) { return m.zero_element(); }
 template<class T> inline T zero_element(Covector<T> const& u) { return u.zero_element(); }

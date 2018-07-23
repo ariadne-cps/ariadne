@@ -263,6 +263,8 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,Interval
 };
 
 template<class P, class D, class PR, class PRE> struct AlgebraOperations<ScalarFunctionModel<P,D,PR,PRE>> {
+    static ScalarFunctionModel<P,D,PR,PRE> apply(Nul, ScalarFunctionModel<P,D,PR,PRE> f) {
+        f._ptr->_imul(CanonicalNumericType<P,PR,PRE>(0)); return std::move(f); }
     static ScalarFunctionModel<P,D,PR,PRE> apply(Neg, ScalarFunctionModel<P,D,PR,PRE> f) {
         f._ptr->_imul(CanonicalNumericType<P,PR,PRE>(-1)); return std::move(f); }
     static ScalarFunctionModel<P,D,PR,PRE> apply(Add, ScalarFunctionModel<P,D,PR,PRE> f1, const ScalarFunctionModel<P,D,PR,PRE>& f2) {

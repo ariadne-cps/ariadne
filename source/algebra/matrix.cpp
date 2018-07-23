@@ -49,7 +49,7 @@ lu_inverse(const Matrix<X>& M)
     SizeType m=M.row_size();
     SizeType n=M.column_size();
     Matrix<RealType> A=M;
-    Matrix<RealType> B=Matrix<RealType>::identity(n);
+    Matrix<RealType> B=Matrix<RealType>::identity(n,M.zero_element());
 
     // Array of row pivots. The value p[i] gives the row
     // swapped with the ith row in the ith stage.

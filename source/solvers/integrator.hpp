@@ -151,7 +151,7 @@ class TaylorPicardIntegrator
     //! \brief Default constructor.
     TaylorPicardIntegrator(MaximumError err)
         : IntegratorBase(err,SweepThreshold(err/1024),LipschitzConstant(0.5))
-        , _step_maximum_error(err/128), _step_sweep_threshold(err/(1024*128)), _maximum_temporal_order(16) { }
+        , _step_maximum_error(err/128), _step_sweep_threshold(err/(1024*1024)), _maximum_temporal_order(12) { }
 
     //! \brief Constructor.
     TaylorPicardIntegrator(MaximumError err, SweepThreshold swp, LipschitzConstant lip,

@@ -559,6 +559,23 @@ ErrorType AdditiveSinusoidalErrorProcessor::compute_error(FloatDPError const& K,
     return result;
 }
 
+ValidatedVectorFunction f_plus_Gw(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, ValidatedVectorFunction w) {
+
+    auto n=f.result_size();
+    auto m=g.size();
+
+    ValidatedVectorFunction result(n);
+
+    for (auto i : range(n)) {
+        result[i] = f[i];
+        for (auto j : range(m)) {
+            result[i] = result[i] + g[j][i];// * wf[j];
+        }
+    }
+
+    return result;
+}
+
 
 ValidatedVectorTaylorFunctionModelDP build_f_plus_Gw(ValidatedVectorTaylorFunctionModelDP phi,
                                                      ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g,
@@ -631,6 +648,8 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
         delays[appro] = 0;
     }
 
+    ErrorType total_analytical(0);
+
     while (possibly(t<FloatDPBounds(tmax,pr))) {
         ARIADNE_LOG(2,"step#:"<<step<<", t:"<<t<<", hsug:"<<hsug << "\n");
 
@@ -675,7 +694,21 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
             ValidatedVectorFunctionModelDP current_evolve_function;
 
             if (this->_approximation->getKind() != DIApproximationKind::PIECEWISE) {
+
+                FloatDPUpperBound total_diameter(0.0);
+                auto ebb = B;
+                for (auto i : range(ebb.size())) {
+                    total_diameter += ebb[i].width();
+                }
+
                 auto Phi = this->compute_flow_function(f,g,V,D,h,B);
+
+                FloatDPUpperBound total_diameter2(0.0);
+                auto ebb2 = Phi.range();
+                for (auto i : range(ebb2.size())) {
+                    total_diameter2 += ebb2[i].width();
+                }
+
                 ARIADNE_LOG(5,"Phi="<<Phi<<"\n");
                 assert(Phi.domain()[time_variable].upper()==h);
 
@@ -764,6 +797,8 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
             }
         }
 
+        total_analytical += best->compute_error(f,g,V,h,B);
+
         if (approximations_to_use.size() > 1)
             ARIADNE_LOG(3,"chosen approximation: " << best->getKind() << "\n");
 
@@ -772,6 +807,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
                 delays[appro] = 0;
             else
                 delays[appro]++;
+
             Nat offset = 1<<delays[appro];
             schedule.push_back(ScheduledApproximation(step+offset,appro));
         }
@@ -824,7 +860,10 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
 
         t=new_t;
         result.append(reach_function);
+
     }
+
+    ARIADNE_LOG(1,"frequencies="<<approximation_global_frequencies<<"\n");
 
     return result;
 }
@@ -901,20 +940,58 @@ UpperBoxType apply(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g,
     return result;
 }
 
-Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegrator::flow_bounds(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, UpperBoxType V, BoxDomainType D, PositiveFloatDPApproximation hsug) const {
+ValidatedVectorFunction construct_f_plus_g(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g) {
+
+    auto n = f.result_size();
+    auto m = g.size();
+
+    auto coordinates = ValidatedVectorFunction::coordinates(n+m);
+
+    auto extension = ValidatedVectorFunction::zeros(n,n+m);
+    for (auto i : range(0,n)) {
+        extension.set(i,coordinates[i]);
+    }
+
+    auto fext = compose(f,extension);
+    Vector<ValidatedVectorFunction> gext(m);
+    for (Nat j : range(0,m)) {
+        gext[j] = compose(g[j],extension);
+    }
+
+    ValidatedVectorFunction result = ValidatedVectorFunction::zeros(n,n+m);
+    for (Nat i : range(0,n)) {
+        result[i] = fext[i];
+        for (Nat j : range(0,m)) {
+            result[i] = result[i] + gext[j][i]*coordinates[n+j];
+        }
+    }
+
+    return result;
+}
+
+Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegrator::flow_bounds(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType D, PositiveFloatDPApproximation hsug) const {
 
     //! Compute a bound B for the differential inclusion dot(x) in f(x) + G(x) * V, for x(0) in D for step size h;
     ARIADNE_LOG(5,"D:"<<D);
 
+    ValidatedVectorFunction fg = construct_f_plus_g(f,g);
+
     PositiveFloatDPValue h=cast_exact(hsug);
     UpperBoxType wD = D + (D-D.midpoint());
-    UpperBoxType B = wD + 2*IntervalDomainType(0,h)*apply(f,g,V,D);
 
-    while(not refines(D+h*apply(f,g,V,B),B)) {
+    ExactBoxType DV = join(D,V);
+
+    UpperBoxType B = wD + 2*IntervalDomainType(0,h)*apply(fg,DV);
+
+    ExactBoxType BV = join(cast_exact_box(B),V);
+
+    while(not refines(D+IntervalDomainType(0,h)*apply(fg,BV),B)) {
         h=hlf(h);
     }
+
     for(auto i : range(4)) {
-        B=D+IntervalDomainType(0,h)*apply(f,g,V,B);
+        B=D+IntervalDomainType(0,h)*apply(fg,BV);
+        BV = join(cast_exact_box(B),V);
     }
 
     return std::make_pair(h,B);
@@ -955,6 +1032,10 @@ compute_flow_function(ValidatedVectorFunction f, Vector<ValidatedVectorFunction>
     for (auto i : state_variables) {
         phi[i].set_error(phi[i].error()+e);
     }
+
+    TaylorSeriesIntegrator integrator(0.01);
+
+
 
     return phi;
 }

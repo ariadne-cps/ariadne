@@ -624,7 +624,6 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
     auto number_of_states = n;
     auto number_of_inputs = m;
     auto state_variables = range(0,n);
-    auto time_variable=n;
 
     PositiveFloatDPValue hsug(this->_step_size);
 
@@ -695,27 +694,15 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
 
             if (this->_approximation->getKind() != DIApproximationKind::PIECEWISE) {
 
-                FloatDPUpperBound total_diameter(0.0);
-                auto ebb = B;
-                for (auto i : range(ebb.size())) {
-                    total_diameter += ebb[i].width();
-                }
-
                 auto Phi = this->compute_flow_function(f,g,V,D,h,B);
 
-                FloatDPUpperBound total_diameter2(0.0);
-                auto ebb2 = Phi.range();
-                for (auto i : range(ebb2.size())) {
-                    total_diameter2 += ebb2[i].width();
-                }
-
                 ARIADNE_LOG(5,"Phi="<<Phi<<"\n");
-                assert(Phi.domain()[time_variable].upper()==h);
+                assert(Phi.domain()[Phi.argument_size()-1].upper()==h);
 
                 current_reach_function=build_reach_function(evolve_function, Phi, t, new_t);
                 ARIADNE_LOG(5,"current_reach_function="<<current_reach_function<<"\n");
 
-                current_evolve_function=partial_evaluate(current_reach_function,time_variable,new_t);
+                current_evolve_function=partial_evaluate(current_reach_function,current_reach_function.argument_size()-1,new_t);
                 ARIADNE_LOG(5,"current_evolve_function="<<current_evolve_function<<"\n");
             } else {
                 InclusionIntegratorPiecewiseApproximation& approx = dynamic_cast<InclusionIntegratorPiecewiseApproximation&>(*this->_approximation);
@@ -736,15 +723,15 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
                 ARIADNE_LOG(6,"phi01:"<<phi1<<"\n");
 
                 for (auto i : range(NUMBER_OF_PICARD_ITERATES)) {
-                    phi1=antiderivative(build_f_plus_Gw(phi1, f, g, w1f),time_variable)+x0f;
+                    phi1=antiderivative(build_f_plus_Gw(phi1, f, g, w1f),phi1.argument_size()-1)+x0f;
                 }
-                ARIADNE_LOG(7,(derivative(phi1,time_variable) - build_f_plus_Gw(phi1, f, g, w1f)).range()<<"\n");
+                ARIADNE_LOG(7,(derivative(phi1,phi1.domain().size()-1) - build_f_plus_Gw(phi1, f, g, w1f)).range()<<"\n");
                 PositiveFloatDPValue intermediate_t=cast_positive(cast_exact((t+hlf(h)).lower()));
 
                 current_reach_function=build_reach_function(evolve_function, phi1, t, intermediate_t);
                 ARIADNE_LOG(5,"current_reach_function="<<current_reach_function<<"\n");
 
-                current_evolve_function=partial_evaluate(current_reach_function,time_variable,intermediate_t);
+                current_evolve_function=partial_evaluate(current_reach_function,current_reach_function.argument_size()-1,intermediate_t);
                 ARIADNE_LOG(5,"current_evolve_function="<<current_evolve_function<<"\n");
 
                 auto D2 = cast_exact_box(current_evolve_function.range());
@@ -760,18 +747,18 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
                 ARIADNE_LOG(6,"phi02:"<<phi2<<"\n");
 
                 for (auto i : range(NUMBER_OF_PICARD_ITERATES)) {
-                    phi2=antiderivative(build_f_plus_Gw(phi2, f, g, w2f),time_variable)+x0f2;
+                    phi2=antiderivative(build_f_plus_Gw(phi2, f, g, w2f),phi2.argument_size()-1)+x0f2;
                 }
 
                 for (auto i : state_variables) {
                     phi2[i].set_error(phi2[i].error()+e);
                 }
-                ARIADNE_LOG(7,(derivative(phi2,time_variable) - build_f_plus_Gw(phi2, f, g, w2f)).range()<<"\n");
+                ARIADNE_LOG(7,(derivative(phi2,phi2.argument_size()-1) - build_f_plus_Gw(phi2, f, g, w2f)).range()<<"\n");
 
                 current_reach_function=build_secondhalf_piecewise_reach_function(current_evolve_function, phi2, m, intermediate_t, new_t);
                 ARIADNE_LOG(5,"current_reach_function="<<current_reach_function<<"\n");
 
-                current_evolve_function=partial_evaluate(current_reach_function,n,new_t);
+                current_evolve_function=partial_evaluate(current_reach_function,current_reach_function.argument_size()-1,new_t);
                 ARIADNE_LOG(5,"current_evolve_function="<<current_evolve_function<<"\n");
             }
 
@@ -882,30 +869,30 @@ ValidatedVectorFunctionModelDP InclusionIntegrator::build_secondhalf_piecewise_r
 
     BoxDomainType X=evolve_function.domain()[range(0,n)];
     BoxDomainType PA=evolve_function.domain()[range(n,n+a)];
-    BoxDomainType PB=Phi.domain()[range(n+1,n+1+b)];
-    BoxDomainType PM=Phi.domain()[range(n+1+b,n+1+b+2*m)];
+    BoxDomainType PB=Phi.domain()[range(n,n+b)];
+    BoxDomainType PM=Phi.domain()[range(n+b,n+b+2*m)];
 
     auto swp=this->_sweeper;
     auto Tau=IntervalDomainType(t,new_t);
-    BoxDomainType XTP = join(X,Tau,PA,PB,PM);
-    ValidatedVectorTaylorFunctionModelDP xf=ValidatedVectorTaylorFunctionModelDP::projection(XTP,range(0,n),swp);
-    ValidatedScalarTaylorFunctionModelDP tf=ValidatedScalarTaylorFunctionModelDP::coordinate(XTP,n,swp);
+    BoxDomainType XPT = join(X,PA,PB,PM,Tau);
+    ValidatedVectorTaylorFunctionModelDP xf=ValidatedVectorTaylorFunctionModelDP::projection(XPT,range(0,n),swp);
+    ValidatedVectorTaylorFunctionModelDP af=ValidatedVectorTaylorFunctionModelDP::projection(XPT,range(n,n+a),swp);
+    ValidatedVectorTaylorFunctionModelDP bf=ValidatedVectorTaylorFunctionModelDP::projection(XPT,range(n+a,n+a+b),swp);
+    ValidatedVectorTaylorFunctionModelDP mf=ValidatedVectorTaylorFunctionModelDP::projection(XPT,range(n+a+b,n+a+b+2*m),swp);
+    ValidatedScalarTaylorFunctionModelDP tf=ValidatedScalarTaylorFunctionModelDP::coordinate(XPT,n+a+b+2*m,swp);
     ValidatedScalarTaylorFunctionModelDP hf=tf-t;
-    ValidatedVectorTaylorFunctionModelDP af=ValidatedVectorTaylorFunctionModelDP::projection(XTP,range(n+1,n+1+a),swp);
-    ValidatedVectorTaylorFunctionModelDP bf=ValidatedVectorTaylorFunctionModelDP::projection(XTP,range(n+1+a,n+1+a+b),swp);
-    ValidatedVectorTaylorFunctionModelDP mf=ValidatedVectorTaylorFunctionModelDP::projection(XTP,range(n+1+a+b,n+1+a+b+2*m),swp);
 
     ValidatedVectorTaylorFunctionModelDP ef=compose(evolve_function,join(xf,af,mf));
 
-    return compose(Phi,join(ef,hf,bf,mf));
+    return compose(Phi,join(ef,bf,mf,hf));
 }
 
 ValidatedVectorFunctionModelDP InclusionIntegrator::build_reach_function(
         ValidatedVectorFunctionModelDP evolve_function, ValidatedVectorFunctionModelDP Phi, PositiveFloatDPValue t,
         PositiveFloatDPValue new_t) const {
 
-    // Evolve function is e(x,a) at s; flow is phi(x,h,b)
-    // Want (x,t,a,b):->phi(e(x,a),t-s,b))
+    // Evolve function is e(x,a) at s; flow is phi(x,b,h)
+    // Want (x,a,b,t):->phi(e(x,a),b,t-s))
 
     SizeType n=evolve_function.result_size();
 
@@ -914,20 +901,20 @@ ValidatedVectorFunctionModelDP InclusionIntegrator::build_reach_function(
 
     BoxDomainType X=evolve_function.domain()[range(0,n)];
     BoxDomainType PA=evolve_function.domain()[range(n,n+a)];
-    BoxDomainType PB=Phi.domain()[range(n+1,n+1+b)];
+    BoxDomainType PB=Phi.domain()[range(n,n+b)];
 
     auto swp=this->_sweeper;
     auto Tau=IntervalDomainType(t,new_t);
-    BoxDomainType XTP = join(X,Tau,PA,PB);
-    ValidatedVectorTaylorFunctionModelDP xf=ValidatedVectorTaylorFunctionModelDP::projection(XTP,range(0,n),swp);
-    ValidatedScalarTaylorFunctionModelDP tf=ValidatedScalarTaylorFunctionModelDP::coordinate(XTP,n,swp);
+    BoxDomainType XPT = join(X,PA,PB,Tau);
+    ValidatedVectorTaylorFunctionModelDP xf=ValidatedVectorTaylorFunctionModelDP::projection(XPT,range(0,n),swp);
+    ValidatedVectorTaylorFunctionModelDP af=ValidatedVectorTaylorFunctionModelDP::projection(XPT,range(n,n+a),swp);
+    ValidatedVectorTaylorFunctionModelDP bf=ValidatedVectorTaylorFunctionModelDP::projection(XPT,range(n+a,n+a+b),swp);
+    ValidatedScalarTaylorFunctionModelDP tf=ValidatedScalarTaylorFunctionModelDP::coordinate(XPT,n+a+b,swp);
     ValidatedScalarTaylorFunctionModelDP hf=tf-t;
-    ValidatedVectorTaylorFunctionModelDP af=ValidatedVectorTaylorFunctionModelDP::projection(XTP,range(n+1,n+1+a),swp);
-    ValidatedVectorTaylorFunctionModelDP bf=ValidatedVectorTaylorFunctionModelDP::projection(XTP,range(n+1+a,n+1+a+b),swp);
 
     ValidatedVectorTaylorFunctionModelDP ef=compose(evolve_function,join(xf,af));
 
-    return compose(Phi,join(ef,hf,bf));
+    return compose(Phi,join(ef,bf,hf));
 }
 
 //! Computes q(D), where q = f + g * V
@@ -959,6 +946,35 @@ ValidatedVectorFunction construct_f_plus_g(ValidatedVectorFunction const& f, Vec
     }
 
     ValidatedVectorFunction result = ValidatedVectorFunction::zeros(n,n+m);
+    for (Nat i : range(0,n)) {
+        result[i] = fext[i];
+        for (Nat j : range(0,m)) {
+            result[i] = result[i] + gext[j][i]*coordinates[n+j];
+        }
+    }
+
+    return result;
+}
+
+ValidatedVectorFunction construct_f_plus_g_squared(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g) {
+
+    auto n = f.result_size();
+    auto m = g.size();
+
+    auto coordinates = ValidatedVectorFunction::coordinates(n+m);
+
+    auto extension = ValidatedVectorFunction::zeros(n,n+m);
+    for (auto i : range(0,n)) {
+        extension.set(i,coordinates[i]);
+    }
+
+    auto fext = compose(f,extension);
+    Vector<ValidatedVectorFunction> gext(m);
+    for (Nat j : range(0,m)) {
+        gext[j] = compose(g[j],extension);
+    }
+
+    ValidatedVectorFunction result = ValidatedVectorFunction::zeros(n+m,n+m);
     for (Nat i : range(0,n)) {
         result[i] = fext[i];
         for (Nat j : range(0,m)) {
@@ -1012,7 +1028,6 @@ compute_flow_function(ValidatedVectorFunction f, Vector<ValidatedVectorFunction>
     auto number_of_states = n;
     auto number_of_inputs = m;
     auto state_variables = range(0,n);
-    auto time_variable = n;
 
     auto x0f=ValidatedVectorTaylorFunctionModelDP::projection(FD,state_variables,swp);
 
@@ -1020,24 +1035,73 @@ compute_flow_function(ValidatedVectorFunction f, Vector<ValidatedVectorFunction>
     ValidatedVectorTaylorFunctionModelDP& wf = dynamic_cast<ValidatedVectorTaylorFunctionModelDP&>(w.reference());
     ARIADNE_LOG(6,"wf:"<<wf<<"\n");
 
-    auto phi=ValidatedVectorTaylorFunctionModelDP(number_of_states,FD,swp);
-    phi=phi+cast_singleton(B);
-    ARIADNE_LOG(6,"phi0:"<<phi<<"\n");
+    auto picardPhi=ValidatedVectorTaylorFunctionModelDP(number_of_states,FD,swp);
+    picardPhi=picardPhi+cast_singleton(B);
 
     for (auto i : range(NUMBER_OF_PICARD_ITERATES)) {
-        phi=antiderivative(build_f_plus_Gw(phi, f, g, wf),time_variable)+x0f;
+        auto f_plus_Gw = build_f_plus_Gw(picardPhi, f, g, wf);
+        picardPhi=antiderivative(f_plus_Gw,f_plus_Gw.argument_size()-1)+x0f;
     }
-    ARIADNE_LOG(7,(derivative(phi,time_variable) - build_f_plus_Gw(phi, f, g, wf)).range()<<"\n");
 
     for (auto i : state_variables) {
-        phi[i].set_error(phi[i].error()+e);
+        picardPhi[i].set_error(picardPhi[i].error()+e);
     }
 
-    TaylorSeriesIntegrator integrator(0.01);
+    std::cout << "Picard: " << picardPhi.range() << std::endl;
 
+    FloatDP picardW(0);
+    for (auto i: state_variables) {
+        picardW += picardPhi.range()[i].width().raw();
+    }
 
+    TaylorSeriesIntegrator integrator(MaximumError(1e-4),SweepThreshold(1e-8),LipschitzConstant(0.5));
 
-    return phi;
+    auto fg = construct_f_plus_g_squared(f,g);
+    auto DV = join(D,V);
+    auto BV = join(cast_exact_box(B),V);
+
+    auto squaredSeriesPhi = integrator.flow_step(fg,DV,h,BV);
+
+    ValidatedVectorTaylorFunctionModelDP& tsquaredSeriesPhi = dynamic_cast<ValidatedVectorTaylorFunctionModelDP&>(squaredSeriesPhi.reference());
+    auto seriesPhi=ValidatedVectorTaylorFunctionModelDP(n,squaredSeriesPhi.domain(),swp);
+    for (auto i : state_variables) {
+        seriesPhi[i] = tsquaredSeriesPhi[i];
+        seriesPhi[i].set_error(seriesPhi[i].error()+e);
+    }
+
+    FloatDP seriesW(0);
+    for (auto i: state_variables) {
+        seriesW += seriesPhi.range()[i].width().raw();
+    }
+
+    std::cout << "Series: " << seriesPhi.range() << std::endl;
+
+/*    auto DVh = join(D,IntervalDomainType(-h,h),V);
+
+    auto coordinates = ValidatedVectorTaylorFunctionModelDP::projection(DVh,range(0,n+m+1),swp);
+    auto projection = ValidatedVectorTaylorFunctionModelDP(n+m+1,DVh,swp);
+    for (auto i : range(0,n)) {
+        projection.set(i,coordinates[i]);
+    }
+    for (auto i : range(n,n+m))
+        projection.set(i,coordinates[i+1]);
+    projection.set(n+m,coordinates[n]);
+
+    std::cout << "projection: " << projection << std::endl;
+    ValidatedVectorTaylorFunctionModelDP rearrangedSeriesPhi = compose(seriesPhi,projection);
+
+    std::cout << "rearranged: " << rearrangedSeriesPhi << std::endl;*/
+
+    //std::cout << "Series: " << rearrangedSeriesPhi.range() << std::endl;
+
+/*    if (picardW > seriesW) {
+        ARIADNE_LOG(2,"Series flow function chosen\n");
+        return seriesPhi;
+    } else {
+        ARIADNE_LOG(2,"Picard flow function chosen\n");
+        return picardPhi;
+    }*/
+    return picardPhi;
 }
 
 
@@ -1098,7 +1162,7 @@ BoxDomainType InclusionIntegratorConstantApproximation::build_flow_domain(BoxDom
     auto Ht=IntervalDomainType(-h,+h);
     auto P0=V;
 
-    return join(D,Ht,V);
+    return join(D,V,Ht);
 }
 
 
@@ -1108,7 +1172,7 @@ BoxDomainType InclusionIntegratorPiecewiseApproximation::build_flow_domain(BoxDo
     auto P0=V;
     auto P1=V;
 
-    return join(D,Ht,P0,P1);
+    return join(D,P0,P1,Ht);
 }
 
 
@@ -1118,7 +1182,7 @@ BoxDomainType InclusionIntegratorAffineApproximation::build_flow_domain(BoxDomai
     auto P0=V;
     auto P1=V;
 
-    return join(D,Ht,P0,P1);
+    return join(D,P0,P1,Ht);
 }
 
 
@@ -1128,7 +1192,7 @@ BoxDomainType InclusionIntegratorSinusoidalApproximation::build_flow_domain(BoxD
     auto P0=V;
     auto P1=V;
 
-    return join(D,Ht,P0,P1);
+    return join(D,P0,P1,Ht);
 }
 
 ValidatedVectorFunctionModelType InclusionIntegratorZeroApproximation::build_approximating_function(BoxDomainType FD, SizeType n, SizeType m) const {
@@ -1148,7 +1212,7 @@ ValidatedVectorFunctionModelType InclusionIntegratorConstantApproximation::build
 
     auto swp=this->_sweeper;
 
-    auto a=ValidatedVectorTaylorFunctionModelDP::projection(FD,range(n+1,n+1+m),swp);
+    auto a=ValidatedVectorTaylorFunctionModelDP::projection(FD,range(n,n+m),swp);
 
     auto result=ValidatedVectorTaylorFunctionModelDP(m,FD,swp);
     for (auto i : range(m)) { result[i]=a[i]; }
@@ -1168,15 +1232,15 @@ ValidatedVectorFunctionModelType InclusionIntegratorPiecewiseApproximation::buil
 
     auto swp = this->_sweeper;
 
-    auto a = ValidatedVectorTaylorFunctionModelDP::projection(FD, range(n+1, n+1+m), swp);
-    auto b = ValidatedVectorTaylorFunctionModelDP::projection(FD, range(n+1+m, n+1+2*m), swp);
+    auto a = ValidatedVectorTaylorFunctionModelDP::projection(FD, range(n, n+m), swp);
+    auto b = ValidatedVectorTaylorFunctionModelDP::projection(FD, range(n+m, n+2*m), swp);
 
     auto one = ValidatedScalarTaylorFunctionModelDP::constant(FD, 1.0_exact, swp);
 
 
     auto result = ValidatedVectorTaylorFunctionModelDP(m, FD, swp);
     for (auto i : range(m)) {
-        auto Vi=FD[n+1+i].upper();
+        auto Vi=FD[n+i].upper();
         result[i] = a[i] - (one - a[i]*a[i]/Vi/Vi)*b[i];
     }
 
@@ -1188,14 +1252,14 @@ ValidatedVectorFunctionModelType InclusionIntegratorPiecewiseApproximation::buil
 
     auto swp = this->_sweeper;
 
-    auto a = ValidatedVectorTaylorFunctionModelDP::projection(FD, range(n+1, n+1+m), swp);
-    auto b = ValidatedVectorTaylorFunctionModelDP::projection(FD, range(n+1+m, n+1+2*m), swp);
+    auto a = ValidatedVectorTaylorFunctionModelDP::projection(FD, range(n, n+m), swp);
+    auto b = ValidatedVectorTaylorFunctionModelDP::projection(FD, range(n+m, n+2*m), swp);
 
     auto one = ValidatedScalarTaylorFunctionModelDP::constant(FD, 1.0_exact, swp);
 
     auto result = ValidatedVectorTaylorFunctionModelDP(m, FD, swp);
     for (auto i : range(m)) {
-        auto Vi = FD[n+1+i].upper();
+        auto Vi = FD[n+i].upper();
         result[i] = a[i] + (one - a[i]*a[i]/Vi/Vi)*b[i];
     }
 
@@ -1207,8 +1271,8 @@ ValidatedVectorFunctionModelType InclusionIntegratorAffineApproximation::build_a
     auto swp=this->_sweeper;
 
     auto t=ValidatedScalarTaylorFunctionModelDP::coordinate(FD,n,swp);
-    auto a=ValidatedVectorTaylorFunctionModelDP::projection(FD,range(n+1,n+1+m),swp);
-    auto b=ValidatedVectorTaylorFunctionModelDP::projection(FD,range(n+1+m,n+1+2*m),swp);
+    auto a=ValidatedVectorTaylorFunctionModelDP::projection(FD,range(n,n+m),swp);
+    auto b=ValidatedVectorTaylorFunctionModelDP::projection(FD,range(n+m,n+2*m),swp);
 
     auto one=ValidatedScalarTaylorFunctionModelDP::constant(FD,1.0_exact,swp);
     auto three=ValidatedScalarTaylorFunctionModelDP::constant(FD,3.0_exact,swp);
@@ -1217,7 +1281,7 @@ ValidatedVectorFunctionModelType InclusionIntegratorAffineApproximation::build_a
 
     auto result=ValidatedVectorTaylorFunctionModelDP(m,FD,swp);
     for (auto i : range(m)) {
-        auto Vi = FD[n+1+i].upper();
+        auto Vi = FD[n+i].upper();
         result[i]=a[i]+three*(one-a[i]*a[i]/Vi/Vi)*b[i]*(t-h/2)/h;
     }
 
@@ -1230,8 +1294,8 @@ ValidatedVectorFunctionModelType InclusionIntegratorSinusoidalApproximation::bui
     auto swp=this->_sweeper;
 
     auto t=ValidatedScalarTaylorFunctionModelDP::coordinate(FD,n,swp);
-    auto a=ValidatedVectorTaylorFunctionModelDP::projection(FD,range(n+1,n+1+m),swp);
-    auto b=ValidatedVectorTaylorFunctionModelDP::projection(FD,range(n+1+m,n+1+2*m),swp);
+    auto a=ValidatedVectorTaylorFunctionModelDP::projection(FD,range(n,n+m),swp);
+    auto b=ValidatedVectorTaylorFunctionModelDP::projection(FD,range(n+m,n+2*m),swp);
 
     auto h = FD[n].upper();
     auto one=ValidatedScalarTaylorFunctionModelDP::constant(FD,1.0_exact,swp);
@@ -1240,7 +1304,7 @@ ValidatedVectorFunctionModelType InclusionIntegratorSinusoidalApproximation::bui
 
     auto result=ValidatedVectorTaylorFunctionModelDP(m,FD,swp);
     for (auto i : range(m)) {
-        auto Vi = FD[n+1+i].upper();
+        auto Vi = FD[n+i].upper();
         result[i]=a[i]+(one-a[i]*a[i]/Vi/Vi)*pgamma*b[i]*sin((t-h/2)*gamma/h);
     }
 

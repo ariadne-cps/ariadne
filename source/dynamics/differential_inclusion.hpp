@@ -69,7 +69,7 @@ Box<Interval<FloatDPValue>> over_approximation(Box<Interval<Real>> const&);
 
 Boolean inputs_are_additive(Vector<ValidatedVectorFunction> const &g, UpperBoxType const &B);
 
-ValidatedVectorFunction construct_f_plus_g(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g);
+ValidatedVectorFunction construct_f_plus_gu(ValidatedVectorFunction const &f, Vector<ValidatedVectorFunction> const &g);
 
 template<class F1, class F2, class F3, class... FS> decltype(auto) combine(F1 const& f1, F2 const& f2, F3 const& f3, FS const& ... fs) {
     return combine(combine(f1,f2),f3,fs...); }
@@ -277,7 +277,7 @@ class InclusionIntegratorApproximation {
     DIApproximationKind getKind() const { return _kind; }
     virtual ErrorType compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const = 0;
     virtual BoxDomainType build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V) const = 0;
-    virtual ValidatedVectorFunctionModelType build_approximating_function(BoxDomainType DHPE, SizeType n, SizeType m) const = 0;
+    virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const = 0;
 };
 
 class InclusionIntegratorZeroApproximation : public InclusionIntegratorApproximation {
@@ -287,7 +287,7 @@ public:
 protected:
     virtual ErrorType compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const override;
     virtual BoxDomainType build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V) const override;
-    virtual ValidatedVectorFunctionModelType build_approximating_function(BoxDomainType FD, SizeType n, SizeType m) const override;
+    virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override;
 };
 
 class InclusionIntegratorConstantApproximation : public InclusionIntegratorApproximation {
@@ -297,7 +297,7 @@ public:
 protected:
     virtual ErrorType compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const override;
     virtual BoxDomainType build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V) const override;
-    virtual ValidatedVectorFunctionModelType build_approximating_function(BoxDomainType FD, SizeType n, SizeType m) const override;
+    virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override;
 };
 
 class InclusionIntegratorPiecewiseApproximation : public InclusionIntegratorApproximation {
@@ -307,9 +307,9 @@ public:
 public:
     virtual ErrorType compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const override;
     virtual BoxDomainType build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V) const override;
-    virtual ValidatedVectorFunctionModelType build_approximating_function(BoxDomainType FD, SizeType n, SizeType m) const override;
-    ValidatedVectorFunctionModelType build_firsthalf_approximating_function(BoxDomainType FD, SizeType n, SizeType m) const;
-    ValidatedVectorFunctionModelType build_secondhalf_approximating_function(BoxDomainType FD, SizeType n, SizeType m) const;
+    virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override;
+    Vector<ValidatedScalarFunction> build_firsthalf_approximating_function(BoxDomainType DVh, SizeType n, SizeType m) const;
+    Vector<ValidatedScalarFunction> build_secondhalf_approximating_function(BoxDomainType DVh, SizeType n, SizeType m) const;
 };
 
 class InclusionIntegratorAffineApproximation : public InclusionIntegratorApproximation {
@@ -319,7 +319,7 @@ public:
 protected:
     virtual ErrorType compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const override;
     virtual BoxDomainType build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V) const override;
-    virtual ValidatedVectorFunctionModelType build_approximating_function(BoxDomainType FD, SizeType n, SizeType m) const override;
+    virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override;
 };
 
 class InclusionIntegratorSinusoidalApproximation : public InclusionIntegratorApproximation {
@@ -329,7 +329,7 @@ public:
 protected:
     virtual ErrorType compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const override;
     virtual BoxDomainType build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V) const override;
-    virtual ValidatedVectorFunctionModelType build_approximating_function(BoxDomainType FD, SizeType n, SizeType m) const override;
+    virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override;
 };
 
 class LohnerReconditioner : public Reconditioner, public Loggable {

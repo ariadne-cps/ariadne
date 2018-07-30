@@ -1,6 +1,7 @@
 add_library(ariadne-function OBJECT
     affine.cpp
     polynomial.cpp
+    chebyshev_polynomial.cpp
     formula.cpp
     procedure.cpp
     function.cpp

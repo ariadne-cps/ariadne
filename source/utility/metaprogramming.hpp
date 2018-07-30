@@ -126,6 +126,8 @@ template<class X1, class X2=X1> using EqualsType = decltype(declval<X1>()==declv
 template<class X1, class X2=X1> using LessType = decltype(declval<X1>()< declval<X2>());
 template<class X1, class X2=X1> using ComparisonType = LessType<X1,X2>;
 
+template<class X> using MagType = decltype(mag(declval<X>()));
+
 template<class X1, class X2=X1> using EqualityType = decltype(declval<X1>()==declval<X2>());
 template<class X1, class X2=X1> using InequalityType = decltype(declval<X1>()!=declval<X2>());
 

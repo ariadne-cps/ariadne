@@ -32,9 +32,9 @@ namespace Ariadne {
 struct ScheduledApproximation
 {
     SizeType step;
-    SharedPointer<InclusionIntegratorApproximation> approximation;
+    SharedPointer<DIApproximation> approximation;
 
-    ScheduledApproximation(SizeType step, SharedPointer<InclusionIntegratorApproximation> approximation) : step(step), approximation(approximation) {}
+    ScheduledApproximation(SizeType step, SharedPointer<DIApproximation> approximation) : step(step), approximation(approximation) {}
 };
 
 OutputStream& operator<<(OutputStream& os, ScheduledApproximation const& sa) {
@@ -579,7 +579,7 @@ ValidatedVectorTaylorFunctionModelDP build_f_plus_Gw(ValidatedVectorTaylorFuncti
 }
 
 
-InclusionIntegrator::InclusionIntegrator(List<SharedPointer<InclusionIntegratorApproximation>> approximations, SweeperDP sweeper, StepSize step_size)
+InclusionIntegrator::InclusionIntegrator(List<SharedPointer<DIApproximation>> approximations, SweeperDP sweeper, StepSize step_size)
     : _approximations(approximations)
     , _sweeper(sweeper)
     , _step_size(step_size)
@@ -623,7 +623,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
     auto step = 0;
 
     List<ScheduledApproximation> schedule;
-    Map<SharedPointer<InclusionIntegratorApproximation>,Nat> delays;
+    Map<SharedPointer<DIApproximation>,Nat> delays;
     for (auto appro: _approximations) {
         schedule.push_back(ScheduledApproximation(SizeType(step),appro));
         delays[appro] = 0;
@@ -634,7 +634,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
     while (possibly(t<FloatDPBounds(tmax,pr))) {
         ARIADNE_LOG(2,"step#:"<<step<<", t:"<<t<<", hsug:"<<hsug << "\n");
 
-        List<SharedPointer<InclusionIntegratorApproximation>> approximations_to_use;
+        List<SharedPointer<DIApproximation>> approximations_to_use;
         while (!schedule.empty()) {
             auto entry = schedule.back();
             if (entry.step == step) {
@@ -661,7 +661,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
 
         ValidatedVectorFunctionModelDP reach_function;
         ValidatedVectorFunctionModelDP best_reach_function, best_evolve_function;
-        SharedPointer<InclusionIntegratorApproximation> best;
+        SharedPointer<DIApproximation> best;
         FloatDP best_total_diameter(0);
 
         ARIADNE_LOG(3,"n. of approximations to use="<<approximations_to_use.size()<<"\n");
@@ -687,7 +687,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
                 current_evolve_function=partial_evaluate(current_reach_function,current_reach_function.argument_size()-1,new_t);
                 ARIADNE_LOG(5,"current_evolve_function="<<current_evolve_function<<"\n");
             } else {/*
-                InclusionIntegratorPiecewiseApproximation& approx = dynamic_cast<InclusionIntegratorPiecewiseApproximation&>(*this->_approximation);
+                PiecewiseDIApproximation& approx = dynamic_cast<PiecewiseDIApproximation&>(*this->_approximation);
                 auto m=V.size();
                 auto e=approx.compute_error(f,g,V,h,B);
                 ARIADNE_LOG(6,"approximation error:"<<e<<"\n");
@@ -1039,7 +1039,7 @@ compute_flow_function(ValidatedVectorFunction f, Vector<ValidatedVectorFunction>
     auto e=_approximation->compute_error(f,g,V,h,B);
     ARIADNE_LOG(6,"approximation error:"<<e<<"\n");
     auto swp=this->_sweeper;
-    auto DVh =_approximation->build_flow_domain(D, h, V);
+    auto DVh =_approximation->build_flow_domain(D,V,h);
     auto w = _approximation->build_w_functions(DVh, number_of_states, number_of_inputs);
     ARIADNE_LOG(6,"DVh:"<<DVh<<"\n");
     ARIADNE_LOG(6,"w:"<<w<<"\n");
@@ -1102,7 +1102,7 @@ compute_flow_function(ValidatedVectorFunction f, Vector<ValidatedVectorFunction>
 }
 
 
-ErrorType InclusionIntegratorZeroApproximation::compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const {
+ErrorType ZeroDIApproximation::compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const {
     if (inputs_are_additive(g, B))
         return AdditiveZeroErrorProcessor(f,g,V,h,B).process();
     else
@@ -1110,14 +1110,14 @@ ErrorType InclusionIntegratorZeroApproximation::compute_error(ValidatedVectorFun
 }
 
 
-ErrorType InclusionIntegratorConstantApproximation::compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const {
+ErrorType ConstantDIApproximation::compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const {
     if (inputs_are_additive(g, B))
         return AdditiveConstantErrorProcessor(f,g,V,h,B).process();
     else
         return ConstantErrorProcessor(f,g,V,h,B).process();
 }
 
-ErrorType InclusionIntegratorPiecewiseApproximation::compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const {
+ErrorType PiecewiseDIApproximation::compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const {
     if (inputs_are_additive(g, B))
         return AdditivePiecewiseErrorProcessor(f,g,V,h,B).process();
     else if (g.size() == 1)
@@ -1126,7 +1126,7 @@ ErrorType InclusionIntegratorPiecewiseApproximation::compute_error(ValidatedVect
         return PiecewiseErrorProcessor(f,g,V,h,B).process();
 }
 
-ErrorType InclusionIntegratorAffineApproximation::compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const {
+ErrorType AffineDIApproximation::compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const {
     if (inputs_are_additive(g, B))
         return AdditiveAffineErrorProcessor(f,g,V,h,B).process();
     else if (g.size() == 1)
@@ -1136,7 +1136,7 @@ ErrorType InclusionIntegratorAffineApproximation::compute_error(ValidatedVectorF
 }
 
 
-ErrorType InclusionIntegratorSinusoidalApproximation::compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const {
+ErrorType SinusoidalDIApproximation::compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const {
     if (inputs_are_additive(g, B))
         return AdditiveSinusoidalErrorProcessor(f,g,V,h,B).process();
     else if (g.size() == 1)
@@ -1146,60 +1146,25 @@ ErrorType InclusionIntegratorSinusoidalApproximation::compute_error(ValidatedVec
 }
 
 
-BoxDomainType InclusionIntegratorZeroApproximation::build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V) const {
-
+BoxDomainType DIApproximation::build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h) const {
     auto Ht=IntervalDomainType(-h,+h);
 
-    return join(D,Ht);
+    auto result = D;
+
+    for (Nat i : range(this->_num_params_per_input))
+        result = product(result,V);
+
+    return product(result,Ht);
 }
 
-
-BoxDomainType InclusionIntegratorConstantApproximation::build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V) const {
-
-    auto Ht=IntervalDomainType(-h,+h);
-    auto P0=V;
-
-    return join(D,V,Ht);
-}
-
-
-BoxDomainType InclusionIntegratorPiecewiseApproximation::build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V) const {
-
-    auto Ht=IntervalDomainType(-h,+h);
-    auto P0=V;
-    auto P1=V;
-
-    return join(D,P0,P1,Ht);
-}
-
-
-BoxDomainType InclusionIntegratorAffineApproximation::build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V) const {
-
-    auto Ht=IntervalDomainType(-h,+h);
-    auto P0=V;
-    auto P1=V;
-
-    return join(D,P0,P1,Ht);
-}
-
-
-BoxDomainType InclusionIntegratorSinusoidalApproximation::build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V) const {
-
-    auto Ht=IntervalDomainType(-h,+h);
-    auto P0=V;
-    auto P1=V;
-
-    return join(D,P0,P1,Ht);
-}
-
-Vector<ValidatedScalarFunction> InclusionIntegratorZeroApproximation::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
+Vector<ValidatedScalarFunction> ZeroDIApproximation::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
     auto result = Vector<ValidatedScalarFunction>(m);
 
     return result;
 }
 
 
-Vector<ValidatedScalarFunction> InclusionIntegratorConstantApproximation::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
+Vector<ValidatedScalarFunction> ConstantDIApproximation::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
     auto result = Vector<ValidatedScalarFunction>(m);
 
     for (auto i : range(0,m))
@@ -1209,17 +1174,17 @@ Vector<ValidatedScalarFunction> InclusionIntegratorConstantApproximation::build_
 }
 
 
-Vector<ValidatedScalarFunction> InclusionIntegratorAffineApproximation::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
+Vector<ValidatedScalarFunction> AffineDIApproximation::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
     auto result = Vector<ValidatedScalarFunction>(m);
 
     auto one = ValidatedScalarFunction::constant(n+2*m+1,1_z);
     auto three = ValidatedScalarFunction::constant(n+2*m+1,3_z);
     auto t = ValidatedScalarFunction::coordinate(n+2*m+1,n+2*m);
 
-    Real h(DVh[n+2*m].upper().get_d());
+    auto h = ValidatedScalarFunction::constant(n+2*m+1,ExactNumber(DVh[n+2*m].upper()));
 
     for (auto i : range(m)) {
-        auto Vi = Real(DVh[n+2*i].upper().get_d());
+        auto Vi = ExactNumber(DVh[n+2*i].upper());
         auto p0 = ValidatedScalarFunction::coordinate(n+2*m+1,n+2*i);
         auto p1 = ValidatedScalarFunction::coordinate(n+2*m+1,n+2*i+1);
         result[i]=p0+three*(one-p0*p0/Vi/Vi)*p1*(t-h/2)/h;
@@ -1229,7 +1194,7 @@ Vector<ValidatedScalarFunction> InclusionIntegratorAffineApproximation::build_w_
 }
 
 
-Vector<ValidatedScalarFunction> InclusionIntegratorSinusoidalApproximation::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
+Vector<ValidatedScalarFunction> SinusoidalDIApproximation::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
 
     auto result = Vector<ValidatedScalarFunction>(m);
 
@@ -1237,12 +1202,12 @@ Vector<ValidatedScalarFunction> InclusionIntegratorSinusoidalApproximation::buil
     auto three = ValidatedScalarFunction::constant(n+2*m+1,3_z);
     auto t = ValidatedScalarFunction::coordinate(n+2*m+1,n+2*m);
 
-    Real h(DVh[n+2*m].upper().get_d());
+    auto h = ValidatedScalarFunction::constant(n+2*m+1,ExactNumber(DVh[n+2*m].upper()));
     auto pgamma = ValidatedScalarFunction::constant(n+2*m+1,1.1464_dec);
     auto gamma = ValidatedScalarFunction::constant(n+2*m+1,4.162586_dec);
 
     for (auto i : range(m)) {
-        auto Vi = Real(DVh[n+2*i].upper().get_d());
+        auto Vi = ExactNumber(DVh[n+2*i].upper());
         auto p0 = ValidatedScalarFunction::coordinate(n+2*m+1,n+2*i);
         auto p1 = ValidatedScalarFunction::coordinate(n+2*m+1,n+2*i+1);
         result[i]=p0+(one-p0*p0/Vi/Vi)*pgamma*p1*sin((t-h/2)*gamma/h);
@@ -1252,19 +1217,19 @@ Vector<ValidatedScalarFunction> InclusionIntegratorSinusoidalApproximation::buil
 }
 
 
-Vector<ValidatedScalarFunction> InclusionIntegratorPiecewiseApproximation::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
+Vector<ValidatedScalarFunction> PiecewiseDIApproximation::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
 
     return build_firsthalf_approximating_function(DVh,n,m);
 }
 
 
-Vector<ValidatedScalarFunction> InclusionIntegratorPiecewiseApproximation::build_firsthalf_approximating_function(BoxDomainType DVh, SizeType n, SizeType m) const {
+Vector<ValidatedScalarFunction> PiecewiseDIApproximation::build_firsthalf_approximating_function(BoxDomainType DVh, SizeType n, SizeType m) const {
     auto result = Vector<ValidatedScalarFunction>(m);
 
     auto one = ValidatedScalarFunction::constant(n+2*m+1,1_z);
 
     for (auto i : range(m)) {
-        auto Vi = Real(DVh[n+2*i].upper().get_d());
+        auto Vi = ExactNumber(DVh[n+2*i].upper());
         auto p0 = ValidatedScalarFunction::coordinate(n+2*m+1,n+2*i);
         auto p1 = ValidatedScalarFunction::coordinate(n+2*m+1,n+2*i+1);
         result[i]=p0-(one-p0*p0/Vi/Vi)*p1;
@@ -1274,13 +1239,13 @@ Vector<ValidatedScalarFunction> InclusionIntegratorPiecewiseApproximation::build
 }
 
 
-Vector<ValidatedScalarFunction> InclusionIntegratorPiecewiseApproximation::build_secondhalf_approximating_function(BoxDomainType DVh, SizeType n, SizeType m) const {
+Vector<ValidatedScalarFunction> PiecewiseDIApproximation::build_secondhalf_approximating_function(BoxDomainType DVh, SizeType n, SizeType m) const {
     auto result = Vector<ValidatedScalarFunction>(m);
 
     auto one = ValidatedScalarFunction::constant(n+2*m+1,1_z);
 
     for (auto i : range(m)) {
-        auto Vi = Real(DVh[n+2*i].upper().get_d());
+        auto Vi = ExactNumber(DVh[n+2*i].upper());
         auto p0 = ValidatedScalarFunction::coordinate(n+2*m+1,n+2*i);
         auto p1 = ValidatedScalarFunction::coordinate(n+2*m+1,n+2*i+1);
         result[i]=p0+(one-p0*p0/Vi/Vi)*p1;

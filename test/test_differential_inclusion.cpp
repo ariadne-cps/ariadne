@@ -68,7 +68,7 @@ using namespace Ariadne;
 class TestInclusionIntegrator {
 
     ThresholdSweeperDP sweeper = make_threshold_sweeper(1e-8);
-    List<SharedPointer<InclusionIntegratorApproximation>> approximations;
+    List<SharedPointer<DIApproximation>> approximations;
 
     Void run_battery_variable_step(String name,
                                ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, RealVector noise_levels,
@@ -87,12 +87,12 @@ class TestInclusionIntegrator {
                 double step = 0.08-0.01*i;
 
                 SizeType base = 100000;
-                List<SharedPointer<InclusionIntegratorApproximation>> approximations;
-                approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorPiecewiseApproximation(sweeper)));
-                approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorSinusoidalApproximation(sweeper)));
-                approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorAffineApproximation(sweeper)));
-                approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorConstantApproximation(sweeper)));
-                approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorZeroApproximation(sweeper)));
+                List<SharedPointer<DIApproximation>> approximations;
+                approximations.append(SharedPointer<DIApproximation>(new PiecewiseDIApproximation(sweeper)));
+                approximations.append(SharedPointer<DIApproximation>(new SinusoidalDIApproximation(sweeper)));
+                approximations.append(SharedPointer<DIApproximation>(new AffineDIApproximation(sweeper)));
+                approximations.append(SharedPointer<DIApproximation>(new ConstantDIApproximation(sweeper)));
+                approximations.append(SharedPointer<DIApproximation>(new ZeroDIApproximation(sweeper)));
                 auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step, number_of_steps_between_simplifications=12, number_of_variables_to_keep=base);
                 integrator.verbosity = 0;
 
@@ -132,12 +132,12 @@ class TestInclusionIntegrator {
         for (auto freq : range(min_freq,max_freq+1)) {
 
             SizeType base = 100000;
-            List<SharedPointer<InclusionIntegratorApproximation>> approximations;
-            approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorPiecewiseApproximation(sweeper)));
-            approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorSinusoidalApproximation(sweeper)));
-            approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorAffineApproximation(sweeper)));
-            approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorConstantApproximation(sweeper)));
-            approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorZeroApproximation(sweeper)));
+            List<SharedPointer<DIApproximation>> approximations;
+            approximations.append(SharedPointer<DIApproximation>(new PiecewiseDIApproximation(sweeper)));
+            approximations.append(SharedPointer<DIApproximation>(new SinusoidalDIApproximation(sweeper)));
+            approximations.append(SharedPointer<DIApproximation>(new AffineDIApproximation(sweeper)));
+            approximations.append(SharedPointer<DIApproximation>(new ConstantDIApproximation(sweeper)));
+            approximations.append(SharedPointer<DIApproximation>(new ZeroDIApproximation(sweeper)));
             auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
             integrator.verbosity = 0;
 
@@ -186,12 +186,12 @@ class TestInclusionIntegrator {
             frequencies.pop_back();
 
             SizeType base = 100000;
-            List<SharedPointer<InclusionIntegratorApproximation>> approximations;
-            approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorPiecewiseApproximation(sweeper)));
-            approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorSinusoidalApproximation(sweeper)));
-            approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorAffineApproximation(sweeper)));
-            approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorConstantApproximation(sweeper)));
-            approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorZeroApproximation(sweeper)));
+            List<SharedPointer<DIApproximation>> approximations;
+            approximations.append(SharedPointer<DIApproximation>(new PiecewiseDIApproximation(sweeper)));
+            approximations.append(SharedPointer<DIApproximation>(new SinusoidalDIApproximation(sweeper)));
+            approximations.append(SharedPointer<DIApproximation>(new AffineDIApproximation(sweeper)));
+            approximations.append(SharedPointer<DIApproximation>(new ConstantDIApproximation(sweeper)));
+            approximations.append(SharedPointer<DIApproximation>(new ZeroDIApproximation(sweeper)));
             auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
             integrator.verbosity = 0;
 
@@ -233,28 +233,28 @@ class TestInclusionIntegrator {
 
         for (auto approx: range(0,5)) {
 
-            List<SharedPointer<InclusionIntegratorApproximation>> approximations;
+            List<SharedPointer<DIApproximation>> approximations;
 
             SizeType ppi = 0;
             switch (approx) {
                 case 0:
-                    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorZeroApproximation(sweeper)));
+                    approximations.append(SharedPointer<DIApproximation>(new ZeroDIApproximation(sweeper)));
                     ppi = 0;
                     break;
                 case 1:
-                    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorConstantApproximation(sweeper)));
+                    approximations.append(SharedPointer<DIApproximation>(new ConstantDIApproximation(sweeper)));
                     ppi = 1;
                     break;
                 case 2:
-                    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorAffineApproximation(sweeper)));
+                    approximations.append(SharedPointer<DIApproximation>(new AffineDIApproximation(sweeper)));
                     ppi = 2;
                     break;
                 case 3:
-                    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorSinusoidalApproximation(sweeper)));
+                    approximations.append(SharedPointer<DIApproximation>(new SinusoidalDIApproximation(sweeper)));
                     ppi = 2;
                     break;
                 case 4:
-                    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorPiecewiseApproximation(sweeper)));
+                    approximations.append(SharedPointer<DIApproximation>(new PiecewiseDIApproximation(sweeper)));
                     ppi = 2;
                     break;
                 default:
@@ -314,7 +314,8 @@ class TestInclusionIntegrator {
         clock_t const hz = sysconf(_SC_CLK_TCK);
 
         List<ValidatedConstrainedImageSet> reach_sets = map([](ValidatedVectorFunctionModelType const& fm){return range(fm);},flow_functions);
-        ValidatedVectorFunctionModelType evolve_function = partial_evaluate(flow_functions.back(),starting_set.size(),NumericType(evolution_time,prec));
+        auto final_set = flow_functions.back();
+        ValidatedVectorFunctionModelType evolve_function = partial_evaluate(final_set,final_set.argument_size()-1,NumericType(evolution_time,prec));
         ValidatedConstrainedImageSet evolve_set = range(evolve_function);
 
         FloatDPUpperBound total_diameter(0.0);
@@ -323,7 +324,7 @@ class TestInclusionIntegrator {
             total_diameter += ebb[i].width();
         }
         std::cout << "total diameter: " << total_diameter << ", " << ticks / hz << "." << ticks % hz << "s" << std::endl;
-
+/*
         std::cout << "plotting..." << std::endl;
         Box<FloatDPUpperInterval> graphics_box(f.result_size());
         for (auto set: reach_sets) {
@@ -347,7 +348,7 @@ class TestInclusionIntegrator {
                 fig.write(("test_differential_inclusion-"+name+num_char).c_str());
             }
         }
-
+*/
     }
 
   public:
@@ -377,11 +378,11 @@ class TestInclusionIntegrator {
 
 TestInclusionIntegrator::TestInclusionIntegrator() {
 
-    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorPiecewiseApproximation(sweeper)));
-    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorSinusoidalApproximation(sweeper)));
-    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorAffineApproximation(sweeper)));
-    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorConstantApproximation(sweeper)));
-    approximations.append(SharedPointer<InclusionIntegratorApproximation>(new InclusionIntegratorZeroApproximation(sweeper)));
+    //approximations.append(SharedPointer<DIApproximation>(new PiecewiseDIApproximation(sweeper)));
+    //approximations.append(SharedPointer<DIApproximation>(new SinusoidalDIApproximation(sweeper)));
+    approximations.append(SharedPointer<DIApproximation>(new AffineDIApproximation(sweeper)));
+    //approximations.append(SharedPointer<DIApproximation>(new ConstantDIApproximation(sweeper)));
+    //approximations.append(SharedPointer<DIApproximation>(new ZeroDIApproximation(sweeper)));
 }
 
 void TestInclusionIntegrator::test_wiggins_18_7_3() const {
@@ -920,18 +921,18 @@ void TestInclusionIntegrator::test() const {
     //ARIADNE_TEST_CALL(test_order7());
     //ARIADNE_TEST_CALL(test_3dsphere());
     //ARIADNE_TEST_CALL(test_vinograd());
-    ARIADNE_TEST_CALL(test_higgins_selkov());
+    //ARIADNE_TEST_CALL(test_higgins_selkov());
     //ARIADNE_TEST_CALL(test_reactor());
     //ARIADNE_TEST_CALL(test_lotka_volterra());
-    //ARIADNE_TEST_CALL(test_jet_engine());
+    ARIADNE_TEST_CALL(test_jet_engine());
     //ARIADNE_TEST_CALL(test_fitzhugh_nagumo());
-    /*ARIADNE_TEST_CALL(test_pi_controller());
-    ARIADNE_TEST_CALL(test_jerk21());
-    ARIADNE_TEST_CALL(test_lorenz());
-    ARIADNE_TEST_CALL(test_rossler());
-    ARIADNE_TEST_CALL(test_jerk16());
-    ARIADNE_TEST_CALL(test_DCDC());
-    ARIADNE_TEST_CALL(test_harmonic());*/
+    //ARIADNE_TEST_CALL(test_pi_controller());
+    //ARIADNE_TEST_CALL(test_jerk21());
+    //ARIADNE_TEST_CALL(test_lorenz());
+    //ARIADNE_TEST_CALL(test_rossler());
+    //ARIADNE_TEST_CALL(test_jerk16());
+    //ARIADNE_TEST_CALL(test_DCDC());
+    //ARIADNE_TEST_CALL(test_harmonic());
     //ARIADNE_TEST_CALL(test_van_der_pol());
     //ARIADNE_TEST_CALL(test_clock());
 }

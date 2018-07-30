@@ -267,70 +267,69 @@ std::ostream& operator << (std::ostream& os, const DIApproximationKind& kind) {
     return os;
 }
 
-class InclusionIntegratorApproximation {
+class DIApproximation {
   private:
     DIApproximationKind _kind;
+    Nat _num_params_per_input;
   protected:
     SweeperDP _sweeper;
-    InclusionIntegratorApproximation(SweeperDP sweeper, DIApproximationKind kind) : _sweeper(sweeper), _kind(kind) { }
+    DIApproximation(SweeperDP sweeper, DIApproximationKind kind, Nat num_params_per_input) :
+        _sweeper(sweeper), _kind(kind), _num_params_per_input(num_params_per_input) { }
   public:
     DIApproximationKind getKind() const { return _kind; }
     virtual ErrorType compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const = 0;
-    virtual BoxDomainType build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V) const = 0;
+    BoxDomainType build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h) const;
     virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const = 0;
 };
 
-class InclusionIntegratorZeroApproximation : public InclusionIntegratorApproximation {
+class ZeroDIApproximation : public DIApproximation {
 public:
-    InclusionIntegratorZeroApproximation(SweeperDP sweeper)
-            : InclusionIntegratorApproximation(sweeper,DIApproximationKind::ZERO) {  }
+    ZeroDIApproximation(SweeperDP sweeper)
+            : DIApproximation(sweeper,DIApproximationKind::ZERO,0u) {  }
 protected:
     virtual ErrorType compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const override;
-    virtual BoxDomainType build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V) const override;
     virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override;
 };
 
-class InclusionIntegratorConstantApproximation : public InclusionIntegratorApproximation {
+class ConstantDIApproximation : public DIApproximation {
 public:
-    InclusionIntegratorConstantApproximation(SweeperDP sweeper)
-            : InclusionIntegratorApproximation(sweeper,DIApproximationKind::CONSTANT) {  }
+    ConstantDIApproximation(SweeperDP sweeper)
+            : DIApproximation(sweeper,DIApproximationKind::CONSTANT,1u) {  }
 protected:
     virtual ErrorType compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const override;
-    virtual BoxDomainType build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V) const override;
     virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override;
 };
 
-class InclusionIntegratorPiecewiseApproximation : public InclusionIntegratorApproximation {
+class AffineDIApproximation : public DIApproximation {
 public:
-    InclusionIntegratorPiecewiseApproximation(SweeperDP sweeper)
-            : InclusionIntegratorApproximation(sweeper,DIApproximationKind::PIECEWISE) {  }
+    AffineDIApproximation(SweeperDP sweeper)
+            : DIApproximation(sweeper,DIApproximationKind::AFFINE,2u) {  }
+protected:
+    virtual ErrorType compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const override;
+    virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override;
+};
+
+class SinusoidalDIApproximation : public DIApproximation {
+public:
+    SinusoidalDIApproximation(SweeperDP sweeper)
+            : DIApproximation(sweeper,DIApproximationKind::SINUSOIDAL,2u) {  }
+protected:
+    virtual ErrorType compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const override;
+    virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override;
+};
+
+class PiecewiseDIApproximation : public DIApproximation {
+public:
+    PiecewiseDIApproximation(SweeperDP sweeper)
+            : DIApproximation(sweeper,DIApproximationKind::PIECEWISE,2u) {  }
 public:
     virtual ErrorType compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const override;
-    virtual BoxDomainType build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V) const override;
     virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override;
     Vector<ValidatedScalarFunction> build_firsthalf_approximating_function(BoxDomainType DVh, SizeType n, SizeType m) const;
     Vector<ValidatedScalarFunction> build_secondhalf_approximating_function(BoxDomainType DVh, SizeType n, SizeType m) const;
 };
 
-class InclusionIntegratorAffineApproximation : public InclusionIntegratorApproximation {
-public:
-    InclusionIntegratorAffineApproximation(SweeperDP sweeper)
-            : InclusionIntegratorApproximation(sweeper,DIApproximationKind::AFFINE) {  }
-protected:
-    virtual ErrorType compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const override;
-    virtual BoxDomainType build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V) const override;
-    virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override;
-};
-
-class InclusionIntegratorSinusoidalApproximation : public InclusionIntegratorApproximation {
-public:
-    InclusionIntegratorSinusoidalApproximation(SweeperDP sweeper)
-            : InclusionIntegratorApproximation(sweeper,DIApproximationKind::SINUSOIDAL) {  }
-protected:
-    virtual ErrorType compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const override;
-    virtual BoxDomainType build_flow_domain(BoxDomainType D, PositiveFloatDPValue h, BoxDomainType V) const override;
-    virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override;
-};
+BoxDomainType build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h, Nat num_params);
 
 class LohnerReconditioner : public Reconditioner, public Loggable {
     SweeperDP _sweeper;
@@ -355,16 +354,16 @@ class InclusionIntegratorInterface {
 
 class InclusionIntegrator : public virtual InclusionIntegratorInterface, public Loggable {
   protected:
-    List<SharedPointer<InclusionIntegratorApproximation>> _approximations;
-    SharedPointer<InclusionIntegratorApproximation> _approximation;
+    List<SharedPointer<DIApproximation>> _approximations;
+    SharedPointer<DIApproximation> _approximation;
     SharedPointer<Reconditioner> _reconditioner;
     SweeperDP _sweeper;
     FloatDP _step_size;
     Nat _number_of_steps_between_simplifications;
     Nat _number_of_variables_to_keep;
   public:
-    InclusionIntegrator(List<SharedPointer<InclusionIntegratorApproximation>> approximations, SweeperDP sweeper, StepSize step_size);
-    template<class... AS> InclusionIntegrator(List<SharedPointer<InclusionIntegratorApproximation>> approximations, SweeperDP sweeper, StepSize step_size, AS... attributes)
+    InclusionIntegrator(List<SharedPointer<DIApproximation>> approximations, SweeperDP sweeper, StepSize step_size);
+    template<class... AS> InclusionIntegrator(List<SharedPointer<DIApproximation>> approximations, SweeperDP sweeper, StepSize step_size, AS... attributes)
         : InclusionIntegrator(approximations, sweeper,step_size) {
         this->set(attributes...);
         _reconditioner.reset(new LohnerReconditioner(_sweeper,_number_of_variables_to_keep));

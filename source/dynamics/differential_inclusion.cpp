@@ -1013,7 +1013,7 @@ Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegrator::flow_bounds(Validat
 
     UpperBoxType B = wD + 2*IntervalDomainType(0,h)*apply(fg,DV);
 
-    ExactBoxType BV = join(cast_exact_box(B),V);
+    UpperBoxType BV = join(B,UpperBoxType(V));
 
     while(not refines(D+IntervalDomainType(0,h)*apply(fg,BV),B)) {
         h=hlf(h);
@@ -1021,7 +1021,7 @@ Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegrator::flow_bounds(Validat
 
     for(auto i : range(4)) {
         B=D+IntervalDomainType(0,h)*apply(fg,BV);
-        BV = join(cast_exact_box(B),V);
+        BV = join(B,UpperBoxType(V));
     }
 
     return std::make_pair(h,B);

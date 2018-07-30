@@ -943,10 +943,11 @@ ValidatedVectorFunction construct_f_plus_gw(ValidatedVectorFunction const &f, Ve
 
     auto n = f.result_size();
     auto m = g.size();
+    auto p = w[0].argument_size();
 
-    auto coordinates = ValidatedVectorFunction::coordinates(n+m+1);
+    auto coordinates = ValidatedVectorFunction::coordinates(p);
 
-    auto extension = ValidatedVectorFunction::zeros(n,n+m+1);
+    auto extension = ValidatedVectorFunction::zeros(n,p);
     for (auto i : range(0,n)) {
         extension.set(i,coordinates[i]);
     }
@@ -957,7 +958,7 @@ ValidatedVectorFunction construct_f_plus_gw(ValidatedVectorFunction const &f, Ve
         gext[j] = compose(g[j],extension);
     }
 
-    ValidatedVectorFunction result = ValidatedVectorFunction::zeros(n,n+m+1);
+    ValidatedVectorFunction result = ValidatedVectorFunction::zeros(n,p);
     for (Nat i : range(0,n)) {
         result[i] = fext[i];
         for (Nat j : range(0,m)) {
@@ -972,10 +973,11 @@ ValidatedVectorFunction construct_f_plus_gw_squared(ValidatedVectorFunction cons
 
     auto n = f.result_size();
     auto m = g.size();
+    auto p = w[0].argument_size();
 
-    auto coordinates = ValidatedVectorFunction::coordinates(n+m+1);
+    auto coordinates = ValidatedVectorFunction::coordinates(p);
 
-    auto extension = ValidatedVectorFunction::zeros(n,n+m+1);
+    auto extension = ValidatedVectorFunction::zeros(n,p);
     for (auto i : range(0,n)) {
         extension.set(i,coordinates[i]);
     }
@@ -986,14 +988,14 @@ ValidatedVectorFunction construct_f_plus_gw_squared(ValidatedVectorFunction cons
         gext[j] = compose(g[j],extension);
     }
 
-    ValidatedVectorFunction result = ValidatedVectorFunction::zeros(n+m+1,n+m+1);
+    ValidatedVectorFunction result = ValidatedVectorFunction::zeros(p,p);
     for (Nat i : range(0,n)) {
         result[i] = fext[i];
         for (Nat j : range(0,m)) {
             result[i] = result[i] + gext[j][i]*w[j];
         }
     }
-
+    result[p-1] = ValidatedScalarFunction::constant(p,1_z);
     return result;
 }
 
@@ -1044,15 +1046,13 @@ compute_flow_function(ValidatedVectorFunction f, Vector<ValidatedVectorFunction>
 
     auto fgw = construct_f_plus_gw(f,g,w);
 
+    ARIADNE_LOG(6,"fgw:" << fgw << "\n");
+
     auto x0f=ValidatedVectorTaylorFunctionModelDP::projection(DVh,state_variables,swp);
     auto af=ValidatedVectorTaylorFunctionModelDP::projection(DVh,range(n,fgw.argument_size()),swp);
 
     auto picardPhi=ValidatedVectorTaylorFunctionModelDP(number_of_states,DVh,swp);
     picardPhi=picardPhi+cast_singleton(B);
-
-    ARIADNE_LOG(6,"picardPhi argument size:" <<picardPhi.argument_size() << "\n");
-
-    ARIADNE_LOG(6,"fgw:"<<fgw<<"\n");
 
     for (auto i : range(NUMBER_OF_PICARD_ITERATES)) {
         auto f_of_phi = compose(fgw,join(picardPhi,af));
@@ -1063,8 +1063,8 @@ compute_flow_function(ValidatedVectorFunction f, Vector<ValidatedVectorFunction>
         picardPhi[i].set_error(picardPhi[i].error()+e);
     }
 
-
-    TaylorSeriesIntegrator integrator(MaximumError(1e-4),SweepThreshold(1e-8),LipschitzConstant(0.5));
+    /*
+    TaylorSeriesIntegrator integrator(MaximumError(1e-2),SweepThreshold(1e-8),LipschitzConstant(0.5));
 
     auto fgws = construct_f_plus_gw_squared(f,g,w);
     auto BVh =_approximation->build_flow_domain(cast_exact_box(B), h, V);
@@ -1087,6 +1087,7 @@ compute_flow_function(ValidatedVectorFunction f, Vector<ValidatedVectorFunction>
     for (auto i: state_variables) {
         seriesW += seriesPhi.range()[i].width().raw();
     }
+*/
 /*
     if (picardW < seriesW) {
         ARIADNE_LOG(2,"Picard flow function chosen\n");
@@ -1097,7 +1098,7 @@ compute_flow_function(ValidatedVectorFunction f, Vector<ValidatedVectorFunction>
         return seriesPhi;
     }
     */
-return picardPhi;
+    return picardPhi;
 }
 
 
@@ -1191,16 +1192,14 @@ BoxDomainType InclusionIntegratorSinusoidalApproximation::build_flow_domain(BoxD
     return join(D,P0,P1,Ht);
 }
 
-Vector<ValidatedScalarFunction> InclusionIntegratorZeroApproximation::build_w_functions(BoxDomainType DVh, SizeType n,
-                                                                                        SizeType m) const {
+Vector<ValidatedScalarFunction> InclusionIntegratorZeroApproximation::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
     auto result = Vector<ValidatedScalarFunction>(m);
 
     return result;
 }
 
 
-Vector<ValidatedScalarFunction> InclusionIntegratorConstantApproximation::build_w_functions(BoxDomainType DVh,
-                                                                                            SizeType n, SizeType m) const {
+Vector<ValidatedScalarFunction> InclusionIntegratorConstantApproximation::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
     auto result = Vector<ValidatedScalarFunction>(m);
 
     for (auto i : range(0,m))
@@ -1210,20 +1209,19 @@ Vector<ValidatedScalarFunction> InclusionIntegratorConstantApproximation::build_
 }
 
 
-Vector<ValidatedScalarFunction> InclusionIntegratorAffineApproximation::build_w_functions(BoxDomainType DVh, SizeType n,
-                                                                                          SizeType m) const {
+Vector<ValidatedScalarFunction> InclusionIntegratorAffineApproximation::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
     auto result = Vector<ValidatedScalarFunction>(m);
 
-    auto one = ValidatedScalarFunction::constant(n+m+1,1_z);
-    auto three = ValidatedScalarFunction::constant(n+m+1,3_z);
-    auto t = ValidatedScalarFunction::coordinate(n+m+1,n+m);
+    auto one = ValidatedScalarFunction::constant(n+2*m+1,1_z);
+    auto three = ValidatedScalarFunction::constant(n+2*m+1,3_z);
+    auto t = ValidatedScalarFunction::coordinate(n+2*m+1,n+2*m);
 
-    auto h = ValidatedScalarFunction::constant(n+m+1,Real(cast_exact(DVh[n+2*m].upper())));
+    Real h(DVh[n+2*m].upper().get_d());
 
     for (auto i : range(m)) {
-        auto Vi = ValidatedScalarFunction::constant(n+m+1,Real(cast_exact(DVh[n+2*i].upper())));
-        auto p0 = ValidatedScalarFunction::coordinate(n+m+1,n+2*i);
-        auto p1 = ValidatedScalarFunction::coordinate(n+m+1,n+2*i+1);
+        auto Vi = Real(DVh[n+2*i].upper().get_d());
+        auto p0 = ValidatedScalarFunction::coordinate(n+2*m+1,n+2*i);
+        auto p1 = ValidatedScalarFunction::coordinate(n+2*m+1,n+2*i+1);
         result[i]=p0+three*(one-p0*p0/Vi/Vi)*p1*(t-h/2)/h;
     }
 
@@ -1231,23 +1229,22 @@ Vector<ValidatedScalarFunction> InclusionIntegratorAffineApproximation::build_w_
 }
 
 
-Vector<ValidatedScalarFunction> InclusionIntegratorSinusoidalApproximation::build_w_functions(BoxDomainType DVh,
-                                                                                              SizeType n, SizeType m) const {
+Vector<ValidatedScalarFunction> InclusionIntegratorSinusoidalApproximation::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
 
     auto result = Vector<ValidatedScalarFunction>(m);
 
-    auto one = ValidatedScalarFunction::constant(n+m+1,1_z);
-    auto three = ValidatedScalarFunction::constant(n+m+1,3_z);
-    auto t = ValidatedScalarFunction::coordinate(n+m+1,n+m);
+    auto one = ValidatedScalarFunction::constant(n+2*m+1,1_z);
+    auto three = ValidatedScalarFunction::constant(n+2*m+1,3_z);
+    auto t = ValidatedScalarFunction::coordinate(n+2*m+1,n+2*m);
 
-    auto h = ValidatedScalarFunction::constant(n+m+1,Real(cast_exact(DVh[n+2*m].upper())));
-    auto pgamma = ValidatedScalarFunction::constant(n+m+1,1.1464_dec);
-    auto gamma = ValidatedScalarFunction::constant(n+m+1,4.162586_dec);
+    Real h(DVh[n+2*m].upper().get_d());
+    auto pgamma = ValidatedScalarFunction::constant(n+2*m+1,1.1464_dec);
+    auto gamma = ValidatedScalarFunction::constant(n+2*m+1,4.162586_dec);
 
     for (auto i : range(m)) {
-        auto Vi = ValidatedScalarFunction::constant(n+m+1,Real(cast_exact(DVh[n+2*i].upper())));
-        auto p0 = ValidatedScalarFunction::coordinate(n+m+1,n+2*i);
-        auto p1 = ValidatedScalarFunction::coordinate(n+m+1,n+2*i+1);
+        auto Vi = Real(DVh[n+2*i].upper().get_d());
+        auto p0 = ValidatedScalarFunction::coordinate(n+2*m+1,n+2*i);
+        auto p1 = ValidatedScalarFunction::coordinate(n+2*m+1,n+2*i+1);
         result[i]=p0+(one-p0*p0/Vi/Vi)*pgamma*p1*sin((t-h/2)*gamma/h);
     }
 
@@ -1255,23 +1252,21 @@ Vector<ValidatedScalarFunction> InclusionIntegratorSinusoidalApproximation::buil
 }
 
 
-Vector<ValidatedScalarFunction> InclusionIntegratorPiecewiseApproximation::build_w_functions(BoxDomainType DVh,
-                                                                                             SizeType n, SizeType m) const {
+Vector<ValidatedScalarFunction> InclusionIntegratorPiecewiseApproximation::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
 
     return build_firsthalf_approximating_function(DVh,n,m);
 }
 
 
-
 Vector<ValidatedScalarFunction> InclusionIntegratorPiecewiseApproximation::build_firsthalf_approximating_function(BoxDomainType DVh, SizeType n, SizeType m) const {
     auto result = Vector<ValidatedScalarFunction>(m);
 
-    auto one = ValidatedScalarFunction::constant(n+m+1,1_z);
+    auto one = ValidatedScalarFunction::constant(n+2*m+1,1_z);
 
     for (auto i : range(m)) {
-        auto Vi = ValidatedScalarFunction::constant(n+m+1,Real(cast_exact(DVh[n+2*i].upper())));
-        auto p0 = ValidatedScalarFunction::coordinate(n+m+1,n+2*i);
-        auto p1 = ValidatedScalarFunction::coordinate(n+m+1,n+2*i+1);
+        auto Vi = Real(DVh[n+2*i].upper().get_d());
+        auto p0 = ValidatedScalarFunction::coordinate(n+2*m+1,n+2*i);
+        auto p1 = ValidatedScalarFunction::coordinate(n+2*m+1,n+2*i+1);
         result[i]=p0-(one-p0*p0/Vi/Vi)*p1;
     }
     
@@ -1282,12 +1277,12 @@ Vector<ValidatedScalarFunction> InclusionIntegratorPiecewiseApproximation::build
 Vector<ValidatedScalarFunction> InclusionIntegratorPiecewiseApproximation::build_secondhalf_approximating_function(BoxDomainType DVh, SizeType n, SizeType m) const {
     auto result = Vector<ValidatedScalarFunction>(m);
 
-    auto one = ValidatedScalarFunction::constant(n+m+1,1_z);
+    auto one = ValidatedScalarFunction::constant(n+2*m+1,1_z);
 
     for (auto i : range(m)) {
-        auto Vi = ValidatedScalarFunction::constant(n+m+1,Real(cast_exact(DVh[n+2*i].upper())));
-        auto p0 = ValidatedScalarFunction::coordinate(n+m+1,n+2*i);
-        auto p1 = ValidatedScalarFunction::coordinate(n+m+1,n+2*i+1);
+        auto Vi = Real(DVh[n+2*i].upper().get_d());
+        auto p0 = ValidatedScalarFunction::coordinate(n+2*m+1,n+2*i);
+        auto p1 = ValidatedScalarFunction::coordinate(n+2*m+1,n+2*i+1);
         result[i]=p0+(one-p0*p0/Vi/Vi)*p1;
     }
     

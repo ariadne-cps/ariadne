@@ -453,7 +453,7 @@ template<class I, class X> Bool Expansion<I,X>::is_sorted(GradedIndexLess) {
     return std::is_sorted(this->begin(),this->end(),GradedIndexLess());
 }
 
-template<class I, class X> Expansion<MultiIndex,X> Expansion<I,X>::_embed(SizeType before_size, Expansion<MultiIndex,X> const& x, SizeType after_size)
+template<class I, class X> Expansion<MultiIndex,X> Expansion<I,X>::_embed(SizeType before_size, Expansion<I,X> const& x, SizeType after_size)
 {
     SizeType old_size=x.argument_size();
     SizeType new_size=before_size+old_size+after_size;

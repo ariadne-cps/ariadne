@@ -178,9 +178,9 @@ template<class I, class X> class Expansion {
   public:
     friend OutputStream& operator<<(OutputStream& os, Expansion<I,X> const& self) { return self.write(os); }
     friend Bool same(Expansion<I,X> const& e1, Expansion<I,X> const& e2) { return e1.same_as(e2); }
-    friend Expansion<MultiIndex,CoefficientType> embed(SizeType as1, Expansion<MultiIndex,CoefficientType> const& e2, SizeType as3) { return _embed(as1,e2,as3); }
+    friend Expansion<MultiIndex,CoefficientType> embed(SizeType as1, Expansion<IndexType,CoefficientType> const& e2, SizeType as3) { return _embed(as1,e2,as3); }
   private:
-    static Expansion<MultiIndex,CoefficientType> _embed(SizeType as1, Expansion<MultiIndex,CoefficientType> const& e2, SizeType as3);
+    static Expansion<MultiIndex,CoefficientType> _embed(SizeType as1, Expansion<IndexType,CoefficientType> const& e2, SizeType as3);
 };
 
 template<class I, class X, class CMP> class SortedExpansion : public Expansion<I,X> {

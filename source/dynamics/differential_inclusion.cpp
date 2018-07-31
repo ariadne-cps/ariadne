@@ -87,9 +87,9 @@ Boolean inputs_are_additive(Vector<ValidatedVectorFunction> const &g, UpperBoxTy
     return true;
 }
 
-ValidatedVectorFunction construct_affine_function(ValidatedVectorFunction const &f,
-                                                  Vector<ValidatedVectorFunction> const &g,
-                                                  Vector<ValidatedScalarFunction> const &u);
+ValidatedVectorFunction construct_function_affine_in_input(ValidatedVectorFunction const &f,
+                                                           Vector<ValidatedVectorFunction> const &g,
+                                                           Vector<ValidatedScalarFunction> const &u);
 
 Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError>
 compute_norms_LC(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B) {
@@ -713,7 +713,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
                 ARIADNE_LOG(6,"FD1:"<<FD1<<"\n");
                 ARIADNE_LOG(6,"w1:"<<w1<<"\n");
 
-                auto fgw1 = construct_affine_function(f, g, w1);
+                auto fgw1 = construct_function_affine_in_input(f, g, w1);
 
                 ARIADNE_LOG(2,"fgw:" << fgw1 << "\n");
 
@@ -743,7 +743,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
 
                 auto x0f2=ValidatedVectorTaylorFunctionModelDP::projection(FD2,state_variables,swp);
 
-                auto fgw2 = construct_affine_function(f, g, w2);
+                auto fgw2 = construct_function_affine_in_input(f, g, w2);
 
                 ARIADNE_LOG(2,"fgw:" << fgw1 << "\n");
 
@@ -917,19 +917,10 @@ ValidatedVectorFunctionModelDP InclusionIntegrator::build_reach_function(
     return compose(Phi,join(ef,bf,hf));
 }
 
-//! Computes q(D), where q = f + g * V
-UpperBoxType apply(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, UpperBoxType V, UpperBoxType D) {
 
-    UpperBoxType result = apply(f,D);
-    for (auto i : range(g.size())) {
-        result = result + apply(g[i],D) * V[i];
-    }
-    return result;
-}
-
-ValidatedVectorFunction construct_affine_function(ValidatedVectorFunction const &f,
-                                                  Vector<ValidatedVectorFunction> const &g,
-                                                  Vector<ValidatedScalarFunction> const &u) {
+ValidatedVectorFunction construct_function_affine_in_input(ValidatedVectorFunction const &f,
+                                                           Vector<ValidatedVectorFunction> const &g,
+                                                           Vector<ValidatedScalarFunction> const &u) {
 
     auto n = f.result_size();
     auto m = g.size();
@@ -1007,7 +998,7 @@ Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegrator::flow_bounds(Validat
     for (auto i : range(0,m))
         u[i] = ValidatedScalarFunction::coordinate(n+m,n+i);
 
-    ValidatedVectorFunction fg = construct_affine_function(f, g, u);
+    ValidatedVectorFunction fg = construct_function_affine_in_input(f, g, u);
 
     PositiveFloatDPValue h=cast_exact(hsug);
     UpperBoxType wD = D + (D-D.midpoint());
@@ -1047,7 +1038,7 @@ compute_flow_function(ValidatedVectorFunction f, Vector<ValidatedVectorFunction>
     ARIADNE_LOG(6,"DVh:"<<DVh<<"\n");
     ARIADNE_LOG(6,"w:"<<w<<"\n");
 
-    auto fgw = construct_affine_function(f, g, w);
+    auto fgw = construct_function_affine_in_input(f, g, w);
 
     ARIADNE_LOG(2,"fgw:" << fgw << "\n");
 

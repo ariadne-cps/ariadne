@@ -1230,8 +1230,8 @@ ValidatedKleenean ValidatedConstrainedImageSet::satisfies(const ValidatedConstra
 Void
 ValidatedConstrainedImageSet::draw(CanvasInterface& cnvs, const Projection2d& proj) const
 {
-    //BoxDrawer().draw(cnvs,proj,*this);
-    AffineDrawer(Depth(1)).draw(cnvs,proj,*this);
+    BoxDrawer().draw(cnvs,proj,*this);
+    //AffineDrawer(Depth(1)).draw(cnvs,proj,*this);
 }
 
 Void

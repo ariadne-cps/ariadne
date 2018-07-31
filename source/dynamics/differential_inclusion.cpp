@@ -753,7 +753,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
 
                 for (auto i : range(NUMBER_OF_PICARD_ITERATES)) {
                     auto f_of_phi2 = compose(fgw2,join(phi2,af2));
-                    phi2=antiderivative(f_of_phi2,f_of_phi2.argument_size()-1)+x0f;
+                    phi2=antiderivative(f_of_phi2,f_of_phi2.argument_size()-1)+x0f2;
                 }
 
                 for (auto i : state_variables) {
@@ -858,7 +858,7 @@ ValidatedVectorFunctionModelDP InclusionIntegrator::build_secondhalf_piecewise_r
         PositiveFloatDPValue new_t) const {
 
     // Evolve function is e(x,a,2*m) at s; Flow is phi(x,h,b,2*m)
-    // Want (x,t,a,b,2*m):->phi(e(x,a,2*m),t-s,b,2*m))
+    // Want (x,a,b,2*m,t):->phi(e(x,a,2*m),b,2*m,t-s))
 
     SizeType n=evolve_function.result_size();
 
@@ -1040,6 +1040,90 @@ Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegrator::flow_bounds(Validat
     }
 
     return std::make_pair(h,B);
+
+/*
+    // Set up constants of the method.
+    // TODO: Better estimates of constants
+    const FloatDPValue INITIAL_MULTIPLIER=2.0_exact;
+    const FloatDPValue MULTIPLIER=1.125_exact;
+    const FloatDPValue BOX_RADIUS_MULTIPLIER=1.25_exact;
+    const FloatDPValue BOX_RADIUS_WIDENING=0.25_exact;
+    const Nat EXPANSION_STEPS=4;
+    const Nat REDUCTION_STEPS=8;
+    const Nat REFINEMENT_STEPS=4;
+
+    ValidatedVectorFunction vf = construct_f_plus_gu(f, g);
+
+    Vector<FloatDPBounds> const& dx=cast_singleton(D);
+
+    Vector<FloatDPBounds> dxu = join(dx,cast_singleton(V));
+
+    //Vector<ValidatedNumericType> delta=(dx-midpoint(D))*BOX_RADIUS_WIDENING;
+    Vector<UpperIntervalType> delta=(D-midpoint(D))*BOX_RADIUS_WIDENING;
+
+    // Compute the Lipschitz constant over the initial box
+    FloatDPUpperBound lip = norm(vf.jacobian(dxu)).upper();
+    FloatDPValue hlip = cast_exact(0.5/lip);
+
+    FloatDPValue h=cast_exact(hsug);
+    FloatDPValue hmin=h*two_exp(-REDUCTION_STEPS);
+    h=max(hmin,min(hlip,h));
+    ARIADNE_LOG(4,"L="<<lip<<", hL="<<hlip<<"\n");
+
+    UpperBoxType bx,nbx;
+    Vector<UpperIntervalType> df;
+    UpperIntervalType ih(0,h);
+
+    Bool success=false;
+    while(!success) {
+        ARIADNE_ASSERT_MSG(h>=hmin," h="<<h<<", hmin="<<hmin);
+        bx=D+INITIAL_MULTIPLIER*ih*vf.evaluate(dxu)+delta;
+        for(Nat i=0; i!=EXPANSION_STEPS; ++i) {
+            df=apply(vf,join(bx,UpperBoxType(V)));
+            nbx=D+delta+ih*df;
+            ARIADNE_LOG(7,"h="<<h<<" nbx="<<nbx<<" bx="<<bx<<"\n");
+            if(not definitely(is_bounded(nbx))) {
+                success=false;
+                break;
+            } else if(refines(nbx,bx)) {
+                success=true;
+                break;
+            } else {
+                bx=D+delta+MULTIPLIER*ih*df;
+            }
+        }
+        if(!success) {
+            h=hlf(h);
+            ih=UpperIntervalType(0,h);
+        }
+    }
+
+    ARIADNE_ASSERT(refines(nbx,bx));
+
+    Vector<UpperIntervalType> vfbx;
+    vfbx=apply(vf,join(bx,UpperBoxType(V)));
+
+    for(Nat i=0; i!=REFINEMENT_STEPS; ++i) {
+        bx=nbx;
+        vfbx=apply(vf,join(bx,UpperBoxType(V)));
+        nbx=D+delta+ih*vfbx;
+        ARIADNE_ASSERT_MSG(refines(nbx,bx),std::setprecision(20)<<"refinement "<<i<<": "<<nbx<<" is not a inside of "<<bx);
+    }
+
+
+    // Check result of operation
+    // We use subset rather than inner subset here since the bound may touch
+    ARIADNE_ASSERT(refines(nbx,bx));
+
+    bx=nbx;
+
+
+    ARIADNE_ASSERT(refines(D,bx));
+
+    ARIADNE_ASSERT_MSG(refines(D+ih*apply(vf,join(bx,UpperBoxType(V))),bx),
+                       "d="<<dx<<"\nh="<<h<<"\nf(b)="<<apply(vf,join(bx,UpperBoxType(V)))<<"\nd+hf(b)="<<(D+ih*apply(vf,join(bx,UpperBoxType(V))))<<"\nb="<<bx<<"\n");
+
+    return std::make_pair(PositiveFloatDPValue(h),bx);*/
 }
 
 
@@ -1191,9 +1275,9 @@ Vector<ValidatedScalarFunction> AffineDIApproximation::build_w_functions(BoxDoma
     auto h = ValidatedScalarFunction::constant(n+2*m+1,ExactNumber(DVh[n+2*m].upper()));
 
     for (auto i : range(m)) {
-        auto Vi = ExactNumber(DVh[n+2*i].upper());
-        auto p0 = ValidatedScalarFunction::coordinate(n+2*m+1,n+2*i);
-        auto p1 = ValidatedScalarFunction::coordinate(n+2*m+1,n+2*i+1);
+        auto Vi = ExactNumber(DVh[n+i].upper());
+        auto p0 = ValidatedScalarFunction::coordinate(n+2*m+1,n+i);
+        auto p1 = ValidatedScalarFunction::coordinate(n+2*m+1,n+m+i);
         result[i]=p0+three*(one-p0*p0/Vi/Vi)*p1*(t-h/2)/h;
     }
 
@@ -1214,9 +1298,9 @@ Vector<ValidatedScalarFunction> SinusoidalDIApproximation::build_w_functions(Box
     auto gamma = ValidatedScalarFunction::constant(n+2*m+1,4.162586_dec);
 
     for (auto i : range(m)) {
-        auto Vi = ExactNumber(DVh[n+2*i].upper());
-        auto p0 = ValidatedScalarFunction::coordinate(n+2*m+1,n+2*i);
-        auto p1 = ValidatedScalarFunction::coordinate(n+2*m+1,n+2*i+1);
+        auto Vi = ExactNumber(DVh[n+i].upper());
+        auto p0 = ValidatedScalarFunction::coordinate(n+2*m+1,n+i);
+        auto p1 = ValidatedScalarFunction::coordinate(n+2*m+1,n+m+i);
         result[i]=p0+(one-p0*p0/Vi/Vi)*pgamma*p1*sin((t-h/2)*gamma/h);
     }
 
@@ -1236,9 +1320,9 @@ Vector<ValidatedScalarFunction> PiecewiseDIApproximation::build_firsthalf_approx
     auto one = ValidatedScalarFunction::constant(n+2*m+1,1_z);
 
     for (auto i : range(m)) {
-        auto Vi = ExactNumber(DVh[n+2*i].upper());
-        auto p0 = ValidatedScalarFunction::coordinate(n+2*m+1,n+2*i);
-        auto p1 = ValidatedScalarFunction::coordinate(n+2*m+1,n+2*i+1);
+        auto Vi = ExactNumber(DVh[n+i].upper());
+        auto p0 = ValidatedScalarFunction::coordinate(n+2*m+1,n+i);
+        auto p1 = ValidatedScalarFunction::coordinate(n+2*m+1,n+m+i);
         result[i]=p0-(one-p0*p0/Vi/Vi)*p1;
     }
     
@@ -1252,9 +1336,9 @@ Vector<ValidatedScalarFunction> PiecewiseDIApproximation::build_secondhalf_appro
     auto one = ValidatedScalarFunction::constant(n+2*m+1,1_z);
 
     for (auto i : range(m)) {
-        auto Vi = ExactNumber(DVh[n+2*i].upper());
-        auto p0 = ValidatedScalarFunction::coordinate(n+2*m+1,n+2*i);
-        auto p1 = ValidatedScalarFunction::coordinate(n+2*m+1,n+2*i+1);
+        auto Vi = ExactNumber(DVh[n+i].upper());
+        auto p0 = ValidatedScalarFunction::coordinate(n+2*m+1,n+i);
+        auto p1 = ValidatedScalarFunction::coordinate(n+2*m+1,n+m+i);
         result[i]=p0+(one-p0*p0/Vi/Vi)*p1;
     }
     

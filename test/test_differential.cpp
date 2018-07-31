@@ -149,7 +149,11 @@ class TestDifferential {
     Void test_div() {
         ARIADNE_TEST_CALL(test_rec());
 
+        double a2[6]={ 4.0, 3.0, 5.0, 7.0, 11.0, 13.0 };
+        DifferentialType x2(2,2,a2);
+
         ARIADNE_TEST_PRINT(x1);
+        ARIADNE_TEST_PRINT(x2);
         ARIADNE_TEST_PRINT(c1);
         ARIADNE_TEST_EVALUATE(x1/c1);
         ARIADNE_TEST_EVALUATE(c1/x1);

@@ -640,8 +640,6 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
         delays[appro] = 0;
     }
 
-    ErrorType total_analytical(0);
-
     while (possibly(t<FloatDPBounds(tmax,pr))) {
         ARIADNE_LOG(2,"step#:"<<step<<", t:"<<t<<", hsug:"<<hsug << "\n");
 
@@ -785,8 +783,6 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
                 }
             }
         }
-
-        total_analytical += best->compute_error(f,g,V,h,B);
 
         if (approximations_to_use.size() > 1)
             ARIADNE_LOG(3,"chosen approximation: " << best->getKind() << "\n");

@@ -1144,6 +1144,7 @@ template<class M> class VectorScaledFunctionPatchElementReference
     const ModelType& model() const { return this->_c->_models[this->_i]; }
     ErrorType error() const { return this->_c->_models[this->_i].error(); }
     Void set_error(const ErrorType& e) { this->_c->_models[this->_i].set_error(e); }
+    Void add_error(const ErrorType& e) { this->_c->_models[this->_i].set_error(this->_c->_models[this->_i].error()+e); }
     Void simplify() { this->_c->_models[this->_i].simplify(); }
     template<class X> X operator()(const Vector<X>& x) const { return this->_c->get(this->_i).operator()(x); }
     friend OutputStream& operator<<(OutputStream& os, const VectorScaledFunctionPatchElementReference<M>& f) { return os<<f.element(); }

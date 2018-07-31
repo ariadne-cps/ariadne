@@ -1,7 +1,7 @@
 /***************************************************************************
- *            vanderpol.cpp
+ *            harmonic-oscillator.cpp
  *
- *  Copyright  2017  Luca Geretti
+ *  Copyright  2018  Luca Geretti
  *
  ****************************************************************************/
 
@@ -30,11 +30,9 @@ using namespace Ariadne;
 int main()
 {
 
-    RealConstant u1("u1",3.0_dec);
-    RealConstant u2("u2",1.0_dec);
     RealVariable x1("x1"), x2("x2");
 
-    VectorField dynamics({dot(x1)=u1*x1*(1-x2), dot(x2)= u2*x2*(x1-1)});
+    VectorField dynamics({dot(x1)=x2, dot(x2)= -x1});
 
     MaximumError max_err=0.01;
     TaylorSeriesIntegrator integrator(max_err);
@@ -44,23 +42,23 @@ int main()
 
     VectorFieldEvolver evolver(dynamics,integrator);
     evolver.configuration().maximum_enclosure_radius(1.0);
-    evolver.configuration().maximum_step_size(1.0/50);
+    evolver.configuration().maximum_step_size(1.0/64);
     evolver.configuration().maximum_spacial_error(1e-3);
     evolver.verbosity = 1;
     std::cout <<  evolver.configuration() << std::endl;
 
-    Real x1_0(1.2);
-    Real x2_0(1.1);
-    Real eps = 1/100000000_q;
+    Real x1_0(1.0);
+    Real x2_0(0.0);
+    Real eps = 1/1024_q;
 
     Box<RealInterval> initial_set({{x1_0-eps,x1_0+eps},{x2_0-eps,x2_0+eps}});
 
     std::cout << "Initial set: " << initial_set << std::endl;
-    Real evolution_time(10.0);
+    Real evolution_time(2.0*3.141592);
 
     std::cout << "Computing orbit... " << std::flush;
     auto orbit = evolver.orbit(evolver.enclosure(initial_set),evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
 
-    plot("lotka-volterra",ApproximateBoxType({{0.5,1.5}, {0.5,1.5}}), Colour(1.0,0.75,0.5), orbit);
+    plot("harmonic-oscillator",ApproximateBoxType({{-1.5,1.5}, {-1.5,1.5}}), Colour(1.0,0.75,0.5), orbit);
 }

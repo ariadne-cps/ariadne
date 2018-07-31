@@ -85,7 +85,7 @@ Int main(Int argc, const char* argv[])
 
     // Set the evolution parameters
     evolver.configuration().set_maximum_enclosure_radius(3.05);
-    evolver.configuration().set_maximum_step_size(0.6);
+    evolver.configuration().set_maximum_step_size(0.1);
 
     // Declare the type to be used for the system evolution
     typedef GeneralHybridEvolver::EnclosureType HybridEnclosureType;
@@ -94,8 +94,8 @@ Int main(Int argc, const char* argv[])
 
     std::cout << "Computing evolution... " << std::flush;
     HybridSet initial_set({valve1|opened1,valve2|opened2,valve3|opened3,controller1|rising1,controller2|rising2,controller3|rising3},
-                          {height1==7,height2==7,height3==7,aperture1==1,aperture2==1,aperture3==1});
-    HybridTime evolution_time(30.0,10);
+                          {height1==7,height2==7,height3==7});
+    HybridTime evolution_time(35.0,15);
     OrbitType orbit = evolver.orbit(initial_set,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
 

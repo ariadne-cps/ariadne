@@ -24,7 +24,7 @@
 #include <cstdarg>
 #include "ariadne.hpp"
 #include "tank.hpp"
-#include "valve-hysteresis.hpp"
+#include "valve-noalgebraic-hysteresis.hpp"
 #include "controller-hysteresis-permissive.hpp"
 
 using namespace Ariadne;
@@ -73,7 +73,8 @@ Int main(Int argc, const char* argv[])
     //HybridSet initial_set({valve|idle,controller|rising},{height==7,aperture==1});
 
     //HybridSet initial_set({valve|opening,controller|rising},{height==5.5_dec,aperture==0.4_dec});
-    HybridSet initial_set({valve|opened,controller|rising},{height==7});
+    //HybridSet initial_set({valve|opened,controller|rising},{height==7});
+    HybridSet initial_set({valve|opened,controller|rising},{height==7,aperture==1});
     HybridTime evolution_time(30.0,5);
     OrbitType orbit = evolver.orbit(initial_set,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
@@ -110,7 +111,7 @@ Int main(Int argc, const char* argv[])
     std::cout << "Plotting reachable sets... " << std::flush;
     plot("watertank-upper-reach", height_aperture_axes, Colour(0.0,0.5,1.0), upper_reach);
 */
-    /*
+
     std::cout << "Discretising orbit" << std::flush;
     HybridGrid grid(watertank_system.state_auxiliary_space());
     HybridGridTreeSet hgts(grid);
@@ -123,5 +124,5 @@ Int main(Int argc, const char* argv[])
     std::cout << "done." << std::endl;
 
     plot("watertank-reach", height_aperture_axes, Colour(0.0,0.5,1.0), hgts);
-    */
+
 }

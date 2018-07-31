@@ -1,11 +1,13 @@
 set(EXPERIMENTAL_EXAMPLES
 	circle
+	harmonic-oscillator
 	exponential
 	laser
 	bouncing-walls
 	vanderpol
 	vanderpol-vectorfield
 	lotka-volterra
+	higgins-selkov
 	laub-loomis
 )
 

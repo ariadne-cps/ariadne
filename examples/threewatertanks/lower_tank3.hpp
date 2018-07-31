@@ -29,7 +29,7 @@ using namespace Ariadne;
 
 HybridAutomaton getTank3()
 {
-    RealConstant lambda("lambda",0.04_decimal);
+    RealConstant lambda("lambda",0.07_decimal);
     RealConstant rate("rate",0.5_decimal);
 
     RealVariable aperture3("aperture3");

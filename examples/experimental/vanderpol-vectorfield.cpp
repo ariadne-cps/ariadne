@@ -36,8 +36,8 @@ int main()
     VectorField dynamics({dot(x)=y, dot(y)= mu*y*(1-sqr(x))-x});
 
     MaximumError max_err=1e-6;
-    TaylorPicardIntegrator integrator(max_err);
-    integrator.set_maximum_step_size(0.02);
+    TaylorSeriesIntegrator integrator(max_err);
+    //integrator.set_maximum_step_size(0.02);
 
     VectorFieldEvolver evolver(dynamics,integrator);
     evolver.configuration().maximum_enclosure_radius(1.0);

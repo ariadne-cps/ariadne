@@ -1040,7 +1040,6 @@ Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegrator::flow_bounds(Validat
     }
 
     return std::make_pair(h,B);
-
 /*
     // Set up constants of the method.
     // TODO: Better estimates of constants

@@ -87,7 +87,9 @@ Boolean inputs_are_additive(Vector<ValidatedVectorFunction> const &g, UpperBoxTy
     return true;
 }
 
-ValidatedVectorFunction construct_f_plus_gw(ValidatedVectorFunction const &f, Vector<ValidatedVectorFunction> const &g, Vector<ValidatedScalarFunction> const& w);
+ValidatedVectorFunction construct_affine_function(ValidatedVectorFunction const &f,
+                                                  Vector<ValidatedVectorFunction> const &g,
+                                                  Vector<ValidatedScalarFunction> const &u);
 
 Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError>
 compute_norms_LC(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B) {
@@ -711,9 +713,9 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
                 ARIADNE_LOG(6,"FD1:"<<FD1<<"\n");
                 ARIADNE_LOG(6,"w1:"<<w1<<"\n");
 
-                auto fgw1 = construct_f_plus_gw(f,g,w1);
+                auto fgw1 = construct_affine_function(f, g, w1);
 
-                ARIADNE_LOG(6,"fgw:" << fgw1 << "\n");
+                ARIADNE_LOG(2,"fgw:" << fgw1 << "\n");
 
                 auto x0f1=ValidatedVectorTaylorFunctionModelDP::projection(FD1,state_variables,swp);
                 auto af1=ValidatedVectorTaylorFunctionModelDP::projection(FD1,range(n,fgw1.argument_size()),swp);
@@ -741,9 +743,9 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
 
                 auto x0f2=ValidatedVectorTaylorFunctionModelDP::projection(FD2,state_variables,swp);
 
-                auto fgw2 = construct_f_plus_gw(f,g,w2);
+                auto fgw2 = construct_affine_function(f, g, w2);
 
-                ARIADNE_LOG(6,"fgw:" << fgw1 << "\n");
+                ARIADNE_LOG(2,"fgw:" << fgw1 << "\n");
 
                 auto x0f=ValidatedVectorTaylorFunctionModelDP::projection(FD2,state_variables,swp);
                 auto af2=ValidatedVectorTaylorFunctionModelDP::projection(FD2,range(n,fgw2.argument_size()),swp);
@@ -925,40 +927,14 @@ UpperBoxType apply(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g,
     return result;
 }
 
-ValidatedVectorFunction construct_f_plus_gu(ValidatedVectorFunction const &f, Vector<ValidatedVectorFunction> const &g) {
+ValidatedVectorFunction construct_affine_function(ValidatedVectorFunction const &f,
+                                                  Vector<ValidatedVectorFunction> const &g,
+                                                  Vector<ValidatedScalarFunction> const &u) {
 
     auto n = f.result_size();
     auto m = g.size();
-
-    auto coordinates = ValidatedVectorFunction::coordinates(n+m);
-
-    auto extension = ValidatedVectorFunction::zeros(n,n+m);
-    for (auto i : range(0,n)) {
-        extension.set(i,coordinates[i]);
-    }
-
-    auto fext = compose(f,extension);
-    Vector<ValidatedVectorFunction> gext(m);
-    for (Nat j : range(0,m)) {
-        gext[j] = compose(g[j],extension);
-    }
-
-    ValidatedVectorFunction result = ValidatedVectorFunction::zeros(n,n+m);
-    for (Nat i : range(0,n)) {
-        result[i] = fext[i];
-        for (Nat j : range(0,m)) {
-            result[i] = result[i] + gext[j][i]*coordinates[n+j];
-        }
-    }
-
-    return result;
-}
-
-ValidatedVectorFunction construct_f_plus_gw(ValidatedVectorFunction const &f, Vector<ValidatedVectorFunction> const &g, Vector<ValidatedScalarFunction> const& w) {
-
-    auto n = f.result_size();
-    auto m = g.size();
-    auto p = w[0].argument_size();
+    auto p = u[0].argument_size();
+    auto infinity_box = cast_singleton(ExactBoxType(p,ExactIntervalType(-std::numeric_limits<double>::infinity(),std::numeric_limits<double>::infinity())));
 
     auto coordinates = ValidatedVectorFunction::coordinates(p);
 
@@ -977,7 +953,13 @@ ValidatedVectorFunction construct_f_plus_gw(ValidatedVectorFunction const &f, Ve
     for (Nat i : range(0,n)) {
         result[i] = fext[i];
         for (Nat j : range(0,m)) {
-            result[i] = result[i] + gext[j][i]*w[j];
+            auto eval = gext[j][i].evaluate(infinity_box);
+            if (definitely(eval == 1.0_exact)) {
+                result[i] = result[i] + u[j];
+            } else if (definitely(eval == 0.0_exact)) {
+            } else {
+                result[i] = result[i] + gext[j][i]*u[j];
+            }
         }
     }
 
@@ -1019,7 +1001,13 @@ Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegrator::flow_bounds(Validat
     //! Compute a bound B for the differential inclusion dot(x) in f(x) + G(x) * V, for x(0) in D for step size h;
     ARIADNE_LOG(5,"D:"<<D);
 
-    ValidatedVectorFunction fg = construct_f_plus_gu(f, g);
+    auto n = f.result_size();
+    auto m = g.size();
+    Vector<ValidatedScalarFunction> u(m);
+    for (auto i : range(0,m))
+        u[i] = ValidatedScalarFunction::coordinate(n+m,n+i);
+
+    ValidatedVectorFunction fg = construct_affine_function(f, g, u);
 
     PositiveFloatDPValue h=cast_exact(hsug);
     UpperBoxType wD = D + (D-D.midpoint());
@@ -1040,89 +1028,6 @@ Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegrator::flow_bounds(Validat
     }
 
     return std::make_pair(h,B);
-/*
-    // Set up constants of the method.
-    // TODO: Better estimates of constants
-    const FloatDPValue INITIAL_MULTIPLIER=2.0_exact;
-    const FloatDPValue MULTIPLIER=1.125_exact;
-    const FloatDPValue BOX_RADIUS_MULTIPLIER=1.25_exact;
-    const FloatDPValue BOX_RADIUS_WIDENING=0.25_exact;
-    const Nat EXPANSION_STEPS=4;
-    const Nat REDUCTION_STEPS=8;
-    const Nat REFINEMENT_STEPS=4;
-
-    ValidatedVectorFunction vf = construct_f_plus_gu(f, g);
-
-    Vector<FloatDPBounds> const& dx=cast_singleton(D);
-
-    Vector<FloatDPBounds> dxu = join(dx,cast_singleton(V));
-
-    //Vector<ValidatedNumericType> delta=(dx-midpoint(D))*BOX_RADIUS_WIDENING;
-    Vector<UpperIntervalType> delta=(D-midpoint(D))*BOX_RADIUS_WIDENING;
-
-    // Compute the Lipschitz constant over the initial box
-    FloatDPUpperBound lip = norm(vf.jacobian(dxu)).upper();
-    FloatDPValue hlip = cast_exact(0.5/lip);
-
-    FloatDPValue h=cast_exact(hsug);
-    FloatDPValue hmin=h*two_exp(-REDUCTION_STEPS);
-    h=max(hmin,min(hlip,h));
-    ARIADNE_LOG(4,"L="<<lip<<", hL="<<hlip<<"\n");
-
-    UpperBoxType bx,nbx;
-    Vector<UpperIntervalType> df;
-    UpperIntervalType ih(0,h);
-
-    Bool success=false;
-    while(!success) {
-        ARIADNE_ASSERT_MSG(h>=hmin," h="<<h<<", hmin="<<hmin);
-        bx=D+INITIAL_MULTIPLIER*ih*vf.evaluate(dxu)+delta;
-        for(Nat i=0; i!=EXPANSION_STEPS; ++i) {
-            df=apply(vf,join(bx,UpperBoxType(V)));
-            nbx=D+delta+ih*df;
-            ARIADNE_LOG(7,"h="<<h<<" nbx="<<nbx<<" bx="<<bx<<"\n");
-            if(not definitely(is_bounded(nbx))) {
-                success=false;
-                break;
-            } else if(refines(nbx,bx)) {
-                success=true;
-                break;
-            } else {
-                bx=D+delta+MULTIPLIER*ih*df;
-            }
-        }
-        if(!success) {
-            h=hlf(h);
-            ih=UpperIntervalType(0,h);
-        }
-    }
-
-    ARIADNE_ASSERT(refines(nbx,bx));
-
-    Vector<UpperIntervalType> vfbx;
-    vfbx=apply(vf,join(bx,UpperBoxType(V)));
-
-    for(Nat i=0; i!=REFINEMENT_STEPS; ++i) {
-        bx=nbx;
-        vfbx=apply(vf,join(bx,UpperBoxType(V)));
-        nbx=D+delta+ih*vfbx;
-        ARIADNE_ASSERT_MSG(refines(nbx,bx),std::setprecision(20)<<"refinement "<<i<<": "<<nbx<<" is not a inside of "<<bx);
-    }
-
-
-    // Check result of operation
-    // We use subset rather than inner subset here since the bound may touch
-    ARIADNE_ASSERT(refines(nbx,bx));
-
-    bx=nbx;
-
-
-    ARIADNE_ASSERT(refines(D,bx));
-
-    ARIADNE_ASSERT_MSG(refines(D+ih*apply(vf,join(bx,UpperBoxType(V))),bx),
-                       "d="<<dx<<"\nh="<<h<<"\nf(b)="<<apply(vf,join(bx,UpperBoxType(V)))<<"\nd+hf(b)="<<(D+ih*apply(vf,join(bx,UpperBoxType(V))))<<"\nb="<<bx<<"\n");
-
-    return std::make_pair(PositiveFloatDPValue(h),bx);*/
 }
 
 
@@ -1142,9 +1047,9 @@ compute_flow_function(ValidatedVectorFunction f, Vector<ValidatedVectorFunction>
     ARIADNE_LOG(6,"DVh:"<<DVh<<"\n");
     ARIADNE_LOG(6,"w:"<<w<<"\n");
 
-    auto fgw = construct_f_plus_gw(f,g,w);
+    auto fgw = construct_affine_function(f, g, w);
 
-    ARIADNE_LOG(6,"fgw:" << fgw << "\n");
+    ARIADNE_LOG(2,"fgw:" << fgw << "\n");
 
     auto x0f=ValidatedVectorTaylorFunctionModelDP::projection(DVh,state_variables,swp);
     auto af=ValidatedVectorTaylorFunctionModelDP::projection(DVh,range(n,fgw.argument_size()),swp);

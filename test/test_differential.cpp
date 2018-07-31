@@ -267,6 +267,8 @@ class TestDifferentialVector {
         ARIADNE_TEST_CALL(test_jacobian());
         ARIADNE_TEST_CALL(test_differentiate());
         ARIADNE_TEST_CALL(test_compose());
+        ARIADNE_TEST_CALL(test_flow());
+        ARIADNE_TEST_CALL(test_solve());
         ARIADNE_TEST_CALL(test_mapping());
     }
 
@@ -345,6 +347,43 @@ class TestDifferentialVector {
         ARIADNE_TEST_PRINT(z);
         ARIADNE_TEST_EQUAL(compose(y,x),z);
         ARIADNE_TEST_EQUAL(compose(id,x),x);
+    }
+
+    Void test_solve() {
+        SizeType m=2;
+        SizeType n=4;
+        DegreeType deg=3;
+        X z(pr);
+        Vector<X> x0({0,0},pr);
+        Vector<X> y0({0,0},pr);
+        Vector<X> xy0=join(x0,y0);
+        DifferentialVectorType xy=DifferentialType::variables(n,n,deg,xy0);
+        DifferentialVectorType x={xy[0],xy[1]};
+        DifferentialVectorType y={xy[2],xy[3]};
+        DifferentialVectorType f={x[0]+3*y[0]-2*y[1]+x[1]*y[0]*y[1], x[0]-x[1]*x[1]+y[0]+2*y[1]-x[0]*x[1]+x[0]*y[0]*y[0]/2};
+        DifferentialVectorType h=solve(f,y0);
+        ARIADNE_TEST_EQUAL(h.result_size(),f.result_size());
+        ARIADNE_TEST_EQUAL(h.argument_size(),f.argument_size()-h.result_size());
+        ARIADNE_TEST_EQUAL(h.degree(),f.degree());
+
+        x=DifferentialType::variables(n-m,n-m,deg,x0);
+        DifferentialVectorType zero(m,n-m,deg,z);
+
+        ARIADNE_TEST_EQUAL(compose(f,join(x,h)),zero);
+    }
+
+    Void test_flow() {
+        SizeType n=2;
+        DegreeType deg=4;
+        X z(pr);
+        Vector<X> x0={z,z};
+        DifferentialVectorType x=DifferentialType::variables(n,n,deg,x0);
+        DifferentialVectorType f={5+2*x[0]-3*x[1]+x[0]*x[1], 2+x[1]-x[0]*x[1]+x[0]*x[0]*x[0]/2};
+        DifferentialVectorType phi=flow(f,x0);
+        ARIADNE_TEST_EQUAL(phi.result_size(),f.result_size());
+        ARIADNE_TEST_EQUAL(phi.argument_size(),f.argument_size()+1u);
+        ARIADNE_TEST_EQUAL(phi.degree(),f.degree()+1u);
+        ARIADNE_TEST_EQUAL(derivative(phi,n),compose(f,phi));
     }
 
     Void test_mapping() {

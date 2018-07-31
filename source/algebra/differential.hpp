@@ -390,6 +390,7 @@ class Vector< Differential<X> >
     Vector(SizeType rs, SizeType as, DegreeType d, X const& z);
     Vector(SizeType rs, const Differential<X>& sd);
     Vector(SizeType rs, const Differential<X>* p);
+    Vector(InitializerList<Differential<X>> const& lst);
     template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>> =dummy> Vector(const Vector<Differential<Y>>& dv, PRS... prs);
     template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>> =dummy> Vector(SizeType rs, SizeType as, DegreeType d, const Y* ptr, PRS... prs);
     Vector(SizeType rs, SizeType as, DegreeType d,const Vector<X>& v, const Matrix<X>& A);
@@ -404,6 +405,7 @@ class Vector< Differential<X> >
     const Differential<X> zero_element() const { return Differential<X>::constant(this->argument_size(),this->degree(),this->zero_coefficient()); }
 
     NonAssignableDifferential<X>& at(SizeType i) { return static_cast<NonAssignableDifferential<X>&>(_ary[i]); }
+    const Differential<X>& at(SizeType i) const { return this->_ary[i]; }
     const Differential<X>& get(SizeType i) const { return this->_ary[i]; }
     Void set(SizeType i, const Differential<X>& x) {
         ARIADNE_PRECONDITION(i<this->size()); ARIADNE_PRECONDITION(this->argument_size()==x.argument_size()); this->_ary[i]=x; }
@@ -419,22 +421,36 @@ class Vector< Differential<X> >
 
     Void set_value(const Vector<X>& c);
 
+    //! \brief Set the degree to be equal to \a d.
+    Void set_degree(DegreeType d);
+
     static Vector<Differential<X>> constant(SizeType rs, SizeType as, DegreeType d, const Vector<X>& c);
     static Vector<Differential<X>> variable(SizeType rs, SizeType as, DegreeType d, const Vector<X>& x);
     static Vector<Differential<X>> affine(SizeType rs, SizeType as, DegreeType d, const Vector<X>& b, const Matrix<X>& A);
 
     friend Vector<X> value(const Vector<Differential<X>>& x) { return x.value(); }
     friend Matrix<X> jacobian(const Vector<Differential<X>>& x) { return x.jacobian(); }
+    //! \brief Compute the differential of the composiition \f$f\circ g\f$.
     friend Vector<Differential<X>> compose(const Vector<Differential<X>>& x, Vector<Differential<X>> const& y) { return _compose(x,y); }
+    //! \brief Compute the differential of the composiition \f$f\circ g\f$.
     friend Vector<Differential<X>> derivative(const Vector<Differential<X>>& x, SizeType k) { return _derivative(x,k); }
+    //! \brief Compute the differential of the antiderivative \f$ \int^{x_k} f(x_0,\ldots,x_{k-1},\xi,x_{k+1},\ldots) d\xi\f$.
     friend Vector<Differential<X>> antiderivative(const Vector<Differential<X>>& x, SizeType k) { return _antiderivative(x,k); }
+    //! \brief Compute the differential of the Lie derivative \f$L_fg(x) = f(x) \cdot \nabla{g}(x)\f$.
     friend Vector<Differential<X>> lie_derivative(const Vector<Differential<X> >& df, const Vector<Differential<X> >& dg) { return _lie_derivative(df,dg); }
+
+    //! \brief Compute the differential of the solutions \f$y=h(x)\f$ to \f$f(x,y)=0\f$. Requires \f$f(x0,y0)=0\f$.
+    friend Vector<Differential<X>> solve(const Vector<Differential<X> >& df, const Vector<X>& y0) { return _solve(df,y0); }
+    //! \brief Compute the differential of the flow \f$ \phi_{,t}(x0,t) = f(\phi(x0,t)) \f$ at \f$t=0\f$, with respect to the independent variables of
+    friend Vector<Differential<X>> flow(const Vector<Differential<X> >& df, const Vector<X>& x0) { return _flow(df,x0); }
 
   public:
     static Vector<Differential<X>> _compose(Vector<Differential<X>> const& x, Vector<Differential<X>> const& y);
     static Vector<Differential<X>> _derivative(Vector<Differential<X>> const& x, SizeType k);
     static Vector<Differential<X>> _antiderivative(Vector<Differential<X>> const& x, SizeType k);
     static Vector<Differential<X>> _lie_derivative(const Vector<Differential<X> >& df, const Vector<Differential<X> >& dg);
+    static Vector<Differential<X>> _solve(const Vector<Differential<X> >& df, const Vector<X>& y0);
+    static Vector<Differential<X>> _flow(const Vector<Differential<X> >& df, const Vector<X>& x0);
 };
 
 template<class X> template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>>>

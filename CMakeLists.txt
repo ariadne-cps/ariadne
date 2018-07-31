@@ -133,6 +133,7 @@ add_subdirectory(test)
 add_subdirectory(wrap)
 add_subdirectory(python)
 add_subdirectory(examples)
+add_subdirectory(tutorials)
 
 add_library(ariadne-core SHARED
     $<TARGET_OBJECTS:ariadne-utility>

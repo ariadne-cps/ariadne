@@ -52,6 +52,15 @@ Box<UpperIntervalType> apply(VectorFunction<ValidatedTag>const& f, const Box<Exa
     return apply(f,Box<UpperIntervalType>(bx));
 }
 
+FloatDP total_diameter(ValidatedVectorFunctionModelDP const& f) {
+    FloatDP result = 0;
+    auto rng = f.range();
+    for (auto i: range(f.result_size())) {
+        result += rng[i].width().raw();
+    }
+    return result;
+}
+
 Boolean inputs_are_additive(Vector<ValidatedVectorFunction> const &g, UpperBoxType const &B) {
 
     SizeType m = g.size();
@@ -749,14 +758,9 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
                 best_reach_function = current_reach_function;
                 best_evolve_function = current_evolve_function;
                 best = this->_approximation;
-                for (auto i: state_variables) {
-                    best_total_diameter += best_evolve_function.range()[i].width().raw();
-                }
+                best_total_diameter = total_diameter(best_evolve_function);
             } else {
-                FloatDP current_total_diameter(0);
-                for (auto i: state_variables) {
-                    current_total_diameter += current_evolve_function.range()[i].width().raw();
-                }
+                FloatDP current_total_diameter = total_diameter(current_evolve_function);
                 if (current_total_diameter < best_total_diameter) {
                     best = this->_approximation;
                     ARIADNE_LOG(5,"best approximation: " << best->getKind() << "\n");
@@ -1064,7 +1068,7 @@ compute_flow_function(ValidatedVectorFunction f, Vector<ValidatedVectorFunction>
     }
 
     /*
-    TaylorSeriesIntegrator integrator(MaximumError(1e-2),SweepThreshold(1e-8),LipschitzConstant(0.5));
+    TaylorSeriesIntegrator integrator(MaximumError(1e-4),SweepThreshold(1e-8),LipschitzConstant(0.5));
 
     auto fgws = construct_f_plus_gw_squared(f,g,w);
     auto BVh =_approximation->build_flow_domain(cast_exact_box(B), h, V);
@@ -1078,18 +1082,7 @@ compute_flow_function(ValidatedVectorFunction f, Vector<ValidatedVectorFunction>
         seriesPhi[i].set_error(seriesPhi[i].error()+e);
     }
 
-    FloatDP picardW(0);
-    for (auto i: state_variables) {
-        picardW += picardPhi.range()[i].width().raw();
-    }
-
-    FloatDP seriesW(0);
-    for (auto i: state_variables) {
-        seriesW += seriesPhi.range()[i].width().raw();
-    }
-*/
-/*
-    if (picardW < seriesW) {
+    if (total_diameter(picardPhi) < total_diameter(seriesPhi)) {
         ARIADNE_LOG(2,"Picard flow function chosen\n");
         return picardPhi;
 
@@ -1159,6 +1152,9 @@ BoxDomainType DIApproximation::build_flow_domain(BoxDomainType D, BoxDomainType 
 
 Vector<ValidatedScalarFunction> ZeroDIApproximation::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
     auto result = Vector<ValidatedScalarFunction>(m);
+
+    for (auto i : range(0,m))
+        result[i] = ValidatedScalarFunction::zero(n+1);
 
     return result;
 }

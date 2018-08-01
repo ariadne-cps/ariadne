@@ -29,7 +29,7 @@
 #include "geometry/function_set.hpp"
 #include "output/graphics.hpp"
 
-#include "test/test.hpp"
+#include "test.hpp"
 
 namespace Ariadne {
 

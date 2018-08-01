@@ -117,12 +117,12 @@ elseif(NOT Boost_FOUND)
     message(WARNING "Unable to find Boost Serialization component.")
 endif()
 
-configure_file (${PROJECT_SOURCE_DIR}/config.h.cmake ${PROJECT_SOURCE_DIR}/config.h)
+configure_file (${PROJECT_SOURCE_DIR}/config.h.cmake ${PROJECT_SOURCE_DIR}/source/config.h)
 
 #Non-portable fix to avoid user header directories being searched for by system headers
 #add_definitions(-iquote${PROJECT_SOURCE_DIR})
 #Should ideally be able to use line below
-include_directories(${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/source)
+include_directories(${PROJECT_SOURCE_DIR}/source)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   add_definitions(-Wno-non-template-friend)

@@ -1163,6 +1163,7 @@ Vector<ValidatedScalarFunction> ConstantDIApproximation::build_w_functions(BoxDo
 Vector<ValidatedScalarFunction> AffineDIApproximation::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
     auto result = Vector<ValidatedScalarFunction>(m);
 
+    auto zero = ValidatedScalarFunction::zero(n+2*m+1);
     auto one = ValidatedScalarFunction::constant(n+2*m+1,1_z);
     auto three = ValidatedScalarFunction::constant(n+2*m+1,3_z);
     auto t = ValidatedScalarFunction::coordinate(n+2*m+1,n+2*m);
@@ -1173,7 +1174,7 @@ Vector<ValidatedScalarFunction> AffineDIApproximation::build_w_functions(BoxDoma
         auto Vi = ExactNumber(DVh[n+i].upper());
         auto p0 = ValidatedScalarFunction::coordinate(n+2*m+1,n+i);
         auto p1 = ValidatedScalarFunction::coordinate(n+2*m+1,n+m+i);
-        result[i]=p0+three*(one-p0*p0/Vi/Vi)*p1*(t-h/2)/h;
+        result[i] = (definitely (DVh[n+i].upper() == 0.0_exact) ? zero : p0+three*(one-p0*p0/Vi/Vi)*p1*(t-h/2)/h);
     }
 
     return result;
@@ -1184,6 +1185,7 @@ Vector<ValidatedScalarFunction> SinusoidalDIApproximation::build_w_functions(Box
 
     auto result = Vector<ValidatedScalarFunction>(m);
 
+    auto zero = ValidatedScalarFunction::zero(n+2*m+1);
     auto one = ValidatedScalarFunction::constant(n+2*m+1,1_z);
     auto three = ValidatedScalarFunction::constant(n+2*m+1,3_z);
     auto t = ValidatedScalarFunction::coordinate(n+2*m+1,n+2*m);
@@ -1196,7 +1198,7 @@ Vector<ValidatedScalarFunction> SinusoidalDIApproximation::build_w_functions(Box
         auto Vi = ExactNumber(DVh[n+i].upper());
         auto p0 = ValidatedScalarFunction::coordinate(n+2*m+1,n+i);
         auto p1 = ValidatedScalarFunction::coordinate(n+2*m+1,n+m+i);
-        result[i]=p0+(one-p0*p0/Vi/Vi)*pgamma*p1*sin((t-h/2)*gamma/h);
+        result[i] = (definitely (DVh[n+i].upper() == 0.0_exact) ? zero : p0+(one-p0*p0/Vi/Vi)*pgamma*p1*sin((t-h/2)*gamma/h));
     }
 
     return result;
@@ -1212,13 +1214,14 @@ Vector<ValidatedScalarFunction> PiecewiseDIApproximation::build_w_functions(BoxD
 Vector<ValidatedScalarFunction> PiecewiseDIApproximation::build_firsthalf_approximating_function(BoxDomainType DVh, SizeType n, SizeType m) const {
     auto result = Vector<ValidatedScalarFunction>(m);
 
+    auto zero = ValidatedScalarFunction::zero(n+2*m+1);
     auto one = ValidatedScalarFunction::constant(n+2*m+1,1_z);
 
     for (auto i : range(m)) {
         auto Vi = ExactNumber(DVh[n+i].upper());
         auto p0 = ValidatedScalarFunction::coordinate(n+2*m+1,n+i);
         auto p1 = ValidatedScalarFunction::coordinate(n+2*m+1,n+m+i);
-        result[i]=p0-(one-p0*p0/Vi/Vi)*p1;
+        result[i] = (definitely (DVh[n+i].upper() == 0.0_exact) ? zero : p0-(one-p0*p0/Vi/Vi)*p1);
     }
     
     return result;
@@ -1228,13 +1231,14 @@ Vector<ValidatedScalarFunction> PiecewiseDIApproximation::build_firsthalf_approx
 Vector<ValidatedScalarFunction> PiecewiseDIApproximation::build_secondhalf_approximating_function(BoxDomainType DVh, SizeType n, SizeType m) const {
     auto result = Vector<ValidatedScalarFunction>(m);
 
+    auto zero = ValidatedScalarFunction::zero(n+2*m+1);
     auto one = ValidatedScalarFunction::constant(n+2*m+1,1_z);
 
     for (auto i : range(m)) {
         auto Vi = ExactNumber(DVh[n+i].upper());
         auto p0 = ValidatedScalarFunction::coordinate(n+2*m+1,n+i);
         auto p1 = ValidatedScalarFunction::coordinate(n+2*m+1,n+m+i);
-        result[i]=p0+(one-p0*p0/Vi/Vi)*p1;
+        result[i] = (definitely (DVh[n+i].upper() == 0.0_exact) ? zero : p0+(one-p0*p0/Vi/Vi)*p1);
     }
     
     return result;

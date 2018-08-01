@@ -52,14 +52,15 @@ Box<UpperIntervalType> apply(VectorFunction<ValidatedTag>const& f, const Box<Exa
     return apply(f,Box<UpperIntervalType>(bx));
 }
 
-FloatDP total_diameter(ValidatedVectorFunctionModelDP const& f) {
-    FloatDP result = 0;
-    auto rng = f.range();
-    for (auto i: range(f.result_size())) {
-        result += rng[i].width().raw();
+
+FloatDP volume(Vector<ApproximateIntervalType> const& box) {
+    FloatDP result = 1.0;
+    for (auto i: range(box.size())) {
+        result *= box[i].width().raw();
     }
     return result;
 }
+
 
 Boolean inputs_are_additive(Vector<ValidatedVectorFunction> const &g, UpperBoxType const &B) {
 
@@ -673,7 +674,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
         ValidatedVectorFunctionModelDP reach_function;
         ValidatedVectorFunctionModelDP best_reach_function, best_evolve_function;
         SharedPointer<DIApproximation> best;
-        FloatDP best_total_diameter(0);
+        FloatDP best_volume(0);
 
         ARIADNE_LOG(3,"n. of approximations to use="<<approximations_to_use.size()<<"\n");
 
@@ -773,15 +774,15 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
                 best_reach_function = current_reach_function;
                 best_evolve_function = current_evolve_function;
                 best = this->_approximation;
-                best_total_diameter = total_diameter(best_evolve_function);
+                best_volume = volume(best_evolve_function.range());
             } else {
-                FloatDP current_total_diameter = total_diameter(current_evolve_function);
-                if (current_total_diameter < best_total_diameter) {
+                FloatDP current_volume = volume(current_evolve_function.range());
+                if (current_volume < best_volume) {
                     best = this->_approximation;
                     ARIADNE_LOG(5,"best approximation: " << best->getKind() << "\n");
                     best_reach_function = current_reach_function;
                     best_evolve_function = current_evolve_function;
-                    best_total_diameter = current_total_diameter;
+                    best_volume = current_volume;
                 }
             }
         }
@@ -1072,7 +1073,7 @@ compute_flow_function(ValidatedVectorFunction f, Vector<ValidatedVectorFunction>
         seriesPhi[i].add_error(e);
     }
 
-    if (total_diameter(picardPhi) < total_diameter(seriesPhi)) {
+    if (volume(picardPhi.range()) < volume(seriesPhi.range())) {
         ARIADNE_LOG(2,"Picard flow function chosen\n");
         return picardPhi;
 

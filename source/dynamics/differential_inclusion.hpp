@@ -62,6 +62,8 @@ using ExactTimeStepType = PositiveFloatDPValue;
 Vector<FloatDPValue> const& cast_exact(Vector<FloatDPError> const& v) {
     return reinterpret_cast<Vector<FloatDPValue>const&>(v); }
 
+FloatDP volume(Vector<ApproximateIntervalType> const& box);
+
 Bool refines(Vector<UpperIntervalType> const& v1, UpperBoxType const& bx2) {
     return refines(v1,static_cast<Vector<UpperIntervalType>const&>(bx2)); }
 

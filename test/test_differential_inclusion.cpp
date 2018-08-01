@@ -49,6 +49,11 @@ ValidatedConstrainedImageSet range(ValidatedVectorFunctionModelType const& fm) {
     return ValidatedConstrainedImageSet(fm.domain(),fm);
 }
 
+FloatDP score(ValidatedConstrainedImageSet const& evolve_set) {
+    auto bbx = evolve_set.bounding_box();
+    return 1.0/pow(volume(bbx).get_d(),1.0/bbx.size());
+}
+
 ThresholdSweeperDP make_threshold_sweeper(double thr) { return ThresholdSweeperDP(DoublePrecision(),thr); }
 GradedSweeperDP make_graded_sweeper(SizeType deg) { return GradedSweeperDP(DoublePrecision(),deg); }
 GradedThresholdSweeperDP make_graded_threshold_sweeper(SizeType deg, double thr) { return GradedThresholdSweeperDP(DoublePrecision(),deg, thr); }
@@ -109,12 +114,7 @@ class TestInclusionIntegrator {
                 ValidatedVectorFunctionModelType evolve_function = partial_evaluate(flow_functions.back(),starting_set.size(),NumericType(evolution_time,prec));
                 ValidatedConstrainedImageSet evolve_set = range(evolve_function);
 
-                FloatDPUpperBound total_diameter(0.0);
-                auto ebb = evolve_set.bounding_box();
-                for (auto i : range(ebb.size())) {
-                    total_diameter += ebb[i].width();
-                }
-                std::cout << step << ": " << total_diameter << ", " << ticks / hz << "." << ticks % hz << "s" << std::endl;
+                std::cout << step << ": " << score(evolve_set) << ", " << ticks / hz << "." << ticks % hz << "s" << std::endl;
             }
 
     }
@@ -154,12 +154,7 @@ class TestInclusionIntegrator {
             ValidatedVectorFunctionModelType evolve_function = partial_evaluate(flow_functions.back(),starting_set.size(),NumericType(evolution_time,prec));
             ValidatedConstrainedImageSet evolve_set = range(evolve_function);
 
-            FloatDPUpperBound total_diameter(0.0);
-            auto ebb = evolve_set.bounding_box();
-            for (auto i : range(ebb.size())) {
-                total_diameter += ebb[i].width();
-            }
-            std::cout << freq << ": " << total_diameter << ", " << ticks / hz << "." << ticks % hz << "s" << std::endl;
+            std::cout << freq << ": " << score(evolve_set) << ", " << ticks / hz << "." << ticks % hz << "s" << std::endl;
         }
     }
 
@@ -208,12 +203,7 @@ class TestInclusionIntegrator {
             ValidatedVectorFunctionModelType evolve_function = partial_evaluate(flow_functions.back(),starting_set.size(),NumericType(evolution_time,prec));
             ValidatedConstrainedImageSet evolve_set = range(evolve_function);
 
-            FloatDPUpperBound total_diameter(0.0);
-            auto ebb = evolve_set.bounding_box();
-            for (auto i : range(ebb.size())) {
-                total_diameter += ebb[i].width();
-            }
-            std::cout << freq << ": " << total_diameter << ", " << ticks / hz << "." << ticks % hz << "s" << std::endl;
+            std::cout << freq << ": " << score(evolve_set) << ", " << ticks / hz << "." << ticks % hz << "s" << std::endl;
         }
     }
 
@@ -282,12 +272,7 @@ class TestInclusionIntegrator {
             ValidatedVectorFunctionModelType evolve_function = partial_evaluate(flow_functions.back(),starting_set.size(),NumericType(evolution_time,prec));
             ValidatedConstrainedImageSet evolve_set = range(evolve_function);
 
-            FloatDPUpperBound total_diameter(0.0);
-            auto ebb = evolve_set.bounding_box();
-            for (auto i : range(ebb.size())) {
-                total_diameter += ebb[i].width();
-            }
-            std::cout << total_diameter << ", " << ticks / hz << "." << ticks % hz << "s" << std::endl;
+            std::cout << "score " << score(evolve_set) << ", " << ticks / hz << "." << ticks % hz << "s" << std::endl;
         }
     }
 
@@ -298,7 +283,7 @@ class TestInclusionIntegrator {
         typedef typename ValidatedVectorFunctionModelType::NumericType NumericType; typedef typename NumericType::PrecisionType PrecisionType;
         PrecisionType prec;
 
-        FloatDPUpperBound ratio(1.0);
+        FloatDPUpperBound ratio(0.0);
         BoxDomainType noise=cast_exact_box(UpperIntervalType(-ratio,+ratio)*noise_levels);
         BoxDomainType starting_set=cast_exact_box(over_approximation(real_starting_set));
 
@@ -318,12 +303,7 @@ class TestInclusionIntegrator {
         ValidatedVectorFunctionModelType evolve_function = partial_evaluate(final_set,final_set.argument_size()-1,NumericType(evolution_time,prec));
         ValidatedConstrainedImageSet evolve_set = range(evolve_function);
 
-        FloatDPUpperBound total_diameter(0.0);
-        auto ebb = evolve_set.bounding_box();
-        for (auto i : range(ebb.size())) {
-            total_diameter += ebb[i].width();
-        }
-        std::cout << "total diameter: " << total_diameter << ", " << ticks / hz << "." << ticks % hz << "s" << std::endl;
+        std::cout << "score: " << score(evolve_set) << ", " << ticks / hz << "." << ticks % hz << "s" << std::endl;
 /*
         std::cout << "plotting..." << std::endl;
         Box<FloatDPUpperInterval> graphics_box(f.result_size());
@@ -378,11 +358,11 @@ class TestInclusionIntegrator {
 
 TestInclusionIntegrator::TestInclusionIntegrator() {
 
-    //approximations.append(SharedPointer<DIApproximation>(new PiecewiseDIApproximation(sweeper)));
-    //approximations.append(SharedPointer<DIApproximation>(new SinusoidalDIApproximation(sweeper)));
+    approximations.append(SharedPointer<DIApproximation>(new PiecewiseDIApproximation(sweeper)));
+    approximations.append(SharedPointer<DIApproximation>(new SinusoidalDIApproximation(sweeper)));
     approximations.append(SharedPointer<DIApproximation>(new AffineDIApproximation(sweeper)));
-    //approximations.append(SharedPointer<DIApproximation>(new ConstantDIApproximation(sweeper)));
-    //approximations.append(SharedPointer<DIApproximation>(new ZeroDIApproximation(sweeper)));
+    approximations.append(SharedPointer<DIApproximation>(new ConstantDIApproximation(sweeper)));
+    approximations.append(SharedPointer<DIApproximation>(new ZeroDIApproximation(sweeper)));
 }
 
 void TestInclusionIntegrator::test_wiggins_18_7_3() const {
@@ -921,18 +901,18 @@ void TestInclusionIntegrator::test() const {
     //ARIADNE_TEST_CALL(test_order7());
     //ARIADNE_TEST_CALL(test_3dsphere());
     //ARIADNE_TEST_CALL(test_vinograd());
-    //ARIADNE_TEST_CALL(test_higgins_selkov());
-    //ARIADNE_TEST_CALL(test_reactor());
-    //ARIADNE_TEST_CALL(test_lotka_volterra());
+    ARIADNE_TEST_CALL(test_higgins_selkov());
+    ARIADNE_TEST_CALL(test_reactor());
+    ARIADNE_TEST_CALL(test_lotka_volterra());
     ARIADNE_TEST_CALL(test_jet_engine());
     //ARIADNE_TEST_CALL(test_fitzhugh_nagumo());
-    //ARIADNE_TEST_CALL(test_pi_controller());
-    //ARIADNE_TEST_CALL(test_jerk21());
-    //ARIADNE_TEST_CALL(test_lorenz());
-    //ARIADNE_TEST_CALL(test_rossler());
-    //ARIADNE_TEST_CALL(test_jerk16());
-    //ARIADNE_TEST_CALL(test_DCDC());
-    //ARIADNE_TEST_CALL(test_harmonic());
+    ARIADNE_TEST_CALL(test_pi_controller());
+    ARIADNE_TEST_CALL(test_jerk21());
+    ARIADNE_TEST_CALL(test_lorenz());
+    ARIADNE_TEST_CALL(test_rossler());
+    ARIADNE_TEST_CALL(test_jerk16());
+    ARIADNE_TEST_CALL(test_DCDC());
+    ARIADNE_TEST_CALL(test_harmonic());
     //ARIADNE_TEST_CALL(test_van_der_pol());
     //ARIADNE_TEST_CALL(test_clock());
 }

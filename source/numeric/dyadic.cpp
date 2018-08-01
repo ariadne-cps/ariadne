@@ -254,6 +254,32 @@ Dyadic& operator*=(Dyadic& x1, Dyadic const& x2) {
 Integer round(Dyadic const& x) {
     assert(is_finite(x));
     Integer r; mpz_set_f(r._mpz,x._mpf); return r;
+    Integer z;
+    Dyadic y=x;
+    mpf_mul_2exp(y._mpf,y._mpf,1u);
+    mpf_add_ui(y._mpf,y._mpf,1u);
+    mpf_div_2exp(y._mpf,y._mpf,1u);
+    mpf_floor(y._mpf,y._mpf);
+    mpz_set_f(z._mpz,y._mpf);
+    return z;
+}
+
+Integer floor(Dyadic const& x) {
+    assert(is_finite(x));
+    Integer z;
+    Dyadic y(x);
+    mpf_floor(y._mpf,y._mpf);
+    mpz_set_f(z._mpz,y._mpf);
+    return z;
+}
+
+Integer ceil(Dyadic const& x) {
+    assert(is_finite(x));
+    Integer z;
+    Dyadic y(x);
+    mpf_ceil(y._mpf,y._mpf);
+    mpz_set_f(z._mpz,y._mpf);
+    return z;
 }
 
 

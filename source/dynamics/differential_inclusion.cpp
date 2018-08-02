@@ -666,7 +666,16 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
         auto D = cast_exact_box(evolve_function.range());
         UpperBoxType B;
         PositiveFloatDPValue h;
-        std::tie(h,B)=this->flow_bounds(f,g,V,D,hsug);
+
+        auto n = f.result_size();
+        auto m = g.size();
+        Vector<ValidatedScalarFunction> v(m);
+        for (auto i : range(0,m))
+            v[i] = ValidatedScalarFunction::coordinate(n+m,n+i);
+
+        ValidatedVectorFunction fgv = construct_function_affine_in_input(f, g, v);
+
+        std::tie(h,B)=this->flow_bounds(fgv,V,D,hsug);
         ARIADNE_LOG(2,"flow bounds = "<<B<<" (using h = " << h << ")\n");
 
         PositiveFloatDPValue new_t=cast_positive(cast_exact((t+h).lower()));
@@ -988,34 +997,26 @@ ValidatedVectorFunction construct_f_plus_gw_squared(ValidatedVectorFunction cons
     return result;
 }
 
-Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegrator::flow_bounds(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType D, PositiveFloatDPApproximation hsug) const {
+Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegrator::flow_bounds(ValidatedVectorFunction f, BoxDomainType V, BoxDomainType D, PositiveFloatDPApproximation hsug) const {
 
     //! Compute a bound B for the differential inclusion dot(x) in f(x) + G(x) * V, for x(0) in D for step size h;
     ARIADNE_LOG(5,"D:"<<D);
-
-    auto n = f.result_size();
-    auto m = g.size();
-    Vector<ValidatedScalarFunction> u(m);
-    for (auto i : range(0,m))
-        u[i] = ValidatedScalarFunction::coordinate(n+m,n+i);
-
-    ValidatedVectorFunction fg = construct_function_affine_in_input(f, g, u);
 
     PositiveFloatDPValue h=cast_exact(hsug);
     UpperBoxType wD = D + (D-D.midpoint());
 
     ExactBoxType DV = join(D,V);
 
-    UpperBoxType B = wD + 2*IntervalDomainType(0,h)*apply(fg,DV);
+    UpperBoxType B = wD + 2*IntervalDomainType(0,h)*apply(f,DV);
 
     UpperBoxType BV = join(B,UpperBoxType(V));
 
-    while(not refines(D+IntervalDomainType(0,h)*apply(fg,BV),B)) {
+    while(not refines(D+IntervalDomainType(0,h)*apply(f,BV),B)) {
         h=hlf(h);
     }
 
     for(auto i : range(4)) {
-        B=D+IntervalDomainType(0,h)*apply(fg,BV);
+        B=D+IntervalDomainType(0,h)*apply(f,BV);
         BV = join(B,UpperBoxType(V));
     }
 
@@ -1250,14 +1251,14 @@ LohnerReconditioner::LohnerReconditioner(SweeperDP sweeper, Nat number_of_variab
     this->verbosity = 0;
 }
 
-ValidatedVectorFunctionModelDP LohnerReconditioner::expand_errors(ValidatedVectorFunctionModelDP Phi) const {
-    BoxDomainType domain=Phi.domain();
-    BoxDomainType errors=cast_exact(cast_exact(Phi.errors())*FloatDPUpperInterval(-1,+1)); // FIXME: Avoid cast;
+ValidatedVectorFunctionModelDP LohnerReconditioner::expand_errors(ValidatedVectorFunctionModelDP f) const {
+    BoxDomainType domain=f.domain();
+    BoxDomainType errors=cast_exact(cast_exact(f.errors())*FloatDPUpperInterval(-1,+1)); // FIXME: Avoid cast;
 
     ARIADNE_LOG(6,"Uniform errors:"<<errors<<"\n");
-    for(SizeType i=0; i!=Phi.result_size(); ++i) { Phi[i].set_error(0); }
+    for(SizeType i=0; i!=f.result_size(); ++i) { f[i].set_error(0); }
     ValidatedVectorFunctionModelDP error_function=ValidatedVectorTaylorFunctionModelDP::identity(errors,this->_sweeper);
-    return embed(Phi,errors)+embed(domain,error_function);
+    return embed(f,errors)+embed(domain,error_function);
 }
 
 struct IndexedFloatDPError
@@ -1279,21 +1280,21 @@ struct IndexedFloatDPErrorComparator
     }
 };
 
-Void LohnerReconditioner::simplify(ValidatedVectorFunctionModelDP& phi) const {
+Void LohnerReconditioner::simplify(ValidatedVectorFunctionModelDP& f) const {
     ARIADNE_LOG(6,"simplifying\n");
-    ARIADNE_LOG(6,"phi="<<phi<<"\n");
+    ARIADNE_LOG(6,"f="<<f<<"\n");
 
-    auto m=phi.argument_size();
-    auto n=phi.result_size();
+    auto m=f.argument_size();
+    auto n=f.result_size();
 
     ARIADNE_LOG(6,"num.parameters="<<m<<", to keep="<< this->_number_of_variables_to_keep <<"\n");
 
-    ValidatedVectorTaylorFunctionModelDP& tphi = dynamic_cast<ValidatedVectorTaylorFunctionModelDP&>(phi.reference());
+    ValidatedVectorTaylorFunctionModelDP& tf = dynamic_cast<ValidatedVectorTaylorFunctionModelDP&>(f.reference());
 
     // Compute effect of error terms, but not of original variables;
     Matrix<FloatDPError> C(m,n);
     for (auto i : range(n)) {
-        auto p=tphi[i].model().expansion();
+        auto p=tf[i].model().expansion();
 
         for (auto ac : p) {
             MultiIndex const& a=ac.index();
@@ -1361,21 +1362,21 @@ Void LohnerReconditioner::simplify(ValidatedVectorFunctionModelDP& phi) const {
     ARIADNE_LOG(6,"remove_indices:"<<remove_indices<<"\n");
 
     for (int i : range(n)) {
-        ErrorType error = tphi[i].error();
+        ErrorType error = tf[i].error();
         for(SizeType k=0; k!=remove_indices.size(); ++k) {
             error += mag(C[remove_indices[k]][i]);
         }
-        tphi[i].set_error(error);
+        tf[i].set_error(error);
     }
 
-    auto old_domain=phi.domain();
+    auto old_domain=f.domain();
     auto new_domain=BoxDomainType(Vector<IntervalDomainType>(keep_indices.size(),[&old_domain,&keep_indices](SizeType j){return old_domain[keep_indices[j]];}));
     auto projection=ValidatedVectorTaylorFunctionModelDP(m,new_domain,this->_sweeper);
     for (auto i : range(new_domain.size())) { projection[keep_indices[i]]=ValidatedScalarTaylorFunctionModelDP::coordinate(new_domain,i,this->_sweeper); }
     for (auto i : range(remove_indices.size())) {
         auto j=remove_indices[i]; auto cj=old_domain[j].midpoint();
         projection[j]=ValidatedScalarTaylorFunctionModelDP::constant(new_domain,cj,this->_sweeper); }
-    phi=compose(phi,projection);
+    f=compose(f,projection);
 }
 
 } // namespace Ariadne;

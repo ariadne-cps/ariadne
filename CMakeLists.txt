@@ -132,8 +132,8 @@ add_subdirectory(source)
 add_subdirectory(test)
 add_subdirectory(wrap)
 add_subdirectory(python)
-add_subdirectory(examples)
-add_subdirectory(tutorials)
+#add_subdirectory(examples)
+#add_subdirectory(tutorials)
 
 add_library(ariadne-core SHARED
     $<TARGET_OBJECTS:ariadne-utility>
@@ -201,3 +201,11 @@ target_link_libraries (pyariadne-numeric ${PYTHON_LIBRARIES} boost_python mpfr g
 #add_library(pyariadne-algebra $<TARGET_OBJECTS:pyariadne-algebra-src>)
 #set_target_properties(pyariadne-algebra PROPERTIES PREFIX "" OUTPUT_NAME "algebra")
 #target_link_libraries (pyariadne-algebra ariadne boost_python)
+
+install (TARGETS ariadne DESTINATION lib)
+install (FILES source/config.h DESTINATION include/ariadne)
+install (DIRECTORY source/ DESTINATION include/ariadne/
+            FILES_MATCHING PATTERN "*.hpp"
+            PATTERN "source/prototyping" EXCLUDE
+            PATTERN "source/experimental" EXCLUDE)
+

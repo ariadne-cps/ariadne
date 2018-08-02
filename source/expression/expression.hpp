@@ -174,6 +174,11 @@ template<class T, class Y> Expression<T> substitute(const Expression<T>& e, cons
 template<class T, class Y> Expression<T> substitute(const Expression<T>& e, const List< Assignment< Variable<Y>,Expression<Y> > >& a);
 template<class T, class Y> Vector<Expression<T>> substitute(const Vector<Expression<T>>& e, const List< Assignment< Variable<Y>,Expression<Y> > >& a);
 
+//! \brief Returns \a true if the expression \a e is syntactically constant in the variables \a vs.
+Bool is_constant_in(const Expression<Real>& e, const Set<Variable<Real>>& vs);
+//! \brief Returns \a true if the expression \a e is syntactically affine in the variables \a vs.
+Bool is_affine_in(const Expression<Real>& e, const Set<Variable<Real>>& vs);
+
 //! \brief Simplify the expression \a e.
 Expression<Real> derivative(const Expression<Real>& e, Variable<Real> v);
 

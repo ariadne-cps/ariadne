@@ -72,88 +72,6 @@ using namespace Ariadne;
 
 class TestInclusionIntegrator {
 
-    Void run_battery_variable_step(String name,
-                               ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, RealVector noise_levels,
-                               RealBox real_starting_set, Real evolution_time) const
-    {
-        typedef typename ValidatedVectorFunctionModelType::NumericType NumericType; typedef typename NumericType::PrecisionType PrecisionType;
-
-        PrecisionType prec;
-        BoxDomainType noise=cast_exact_box(UpperIntervalType(-1,+1)*noise_levels);
-        BoxDomainType starting_set=cast_exact_box(over_approximation(real_starting_set));
-
-            auto sweeper = make_threshold_sweeper(1e-8);
-
-            for (auto i : range(0,8)) {
-
-                double step = 0.08-0.01*i;
-
-                SizeType base = 100000;
-                List<SharedPointer<DIApproximation>> approximations;
-                approximations.append(SharedPointer<DIApproximation>(new PiecewiseDIApproximation(sweeper)));
-                approximations.append(SharedPointer<DIApproximation>(new SinusoidalDIApproximation(sweeper)));
-                approximations.append(SharedPointer<DIApproximation>(new AffineDIApproximation(sweeper)));
-                approximations.append(SharedPointer<DIApproximation>(new ConstantDIApproximation(sweeper)));
-                approximations.append(SharedPointer<DIApproximation>(new ZeroDIApproximation(sweeper)));
-                auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step, number_of_steps_between_simplifications=12, number_of_variables_to_keep=base);
-                integrator.verbosity = 0;
-
-                tms start_time, end_time;
-                times(&start_time);
-
-                List<ValidatedVectorFunctionModelType> flow_functions = integrator.flow(f,g,noise,starting_set,evolution_time);
-
-                times(&end_time);
-                clock_t ticks = end_time.tms_utime - start_time.tms_utime;
-                clock_t const hz = sysconf(_SC_CLK_TCK);
-
-                List<ValidatedConstrainedImageSet> reach_sets = map([](ValidatedVectorFunctionModelType const& fm){return range(fm);},flow_functions);
-                ValidatedVectorFunctionModelType evolve_function = partial_evaluate(flow_functions.back(),starting_set.size(),NumericType(evolution_time,prec));
-                ValidatedConstrainedImageSet evolve_set = range(evolve_function);
-
-                std::cout << step << ": " << score(evolve_set) << ", " << ticks / hz << "." << ticks % hz << "s" << std::endl;
-            }
-
-    }
-
-    Void run_battery_frequency(String name,
-                                ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, RealVector noise_levels,
-                                RealBox real_starting_set, Real evolution_time, double step, SweeperDP sweeper, SizeType min_freq, SizeType max_freq) const
-    {
-        typedef typename ValidatedVectorFunctionModelType::NumericType NumericType; typedef typename NumericType::PrecisionType PrecisionType;
-
-        PrecisionType prec;
-        BoxDomainType noise=cast_exact_box(UpperIntervalType(-1,+1)*noise_levels);
-        BoxDomainType starting_set=cast_exact_box(over_approximation(real_starting_set));
-
-        for (auto freq : range(min_freq,max_freq+1)) {
-
-            SizeType base = 100000;
-            List<SharedPointer<DIApproximation>> approximations;
-            approximations.append(SharedPointer<DIApproximation>(new PiecewiseDIApproximation(sweeper)));
-            approximations.append(SharedPointer<DIApproximation>(new SinusoidalDIApproximation(sweeper)));
-            approximations.append(SharedPointer<DIApproximation>(new AffineDIApproximation(sweeper)));
-            approximations.append(SharedPointer<DIApproximation>(new ConstantDIApproximation(sweeper)));
-            approximations.append(SharedPointer<DIApproximation>(new ZeroDIApproximation(sweeper)));
-            auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
-            integrator.verbosity = 0;
-
-            tms start_time, end_time;
-            times(&start_time);
-
-            List<ValidatedVectorFunctionModelType> flow_functions = integrator.flow(f,g,noise,starting_set,evolution_time);
-
-            times(&end_time);
-            clock_t ticks = end_time.tms_utime - start_time.tms_utime;
-            clock_t const hz = sysconf(_SC_CLK_TCK);
-
-            List<ValidatedConstrainedImageSet> reach_sets = map([](ValidatedVectorFunctionModelType const& fm){return range(fm);},flow_functions);
-            ValidatedVectorFunctionModelType evolve_function = partial_evaluate(flow_functions.back(),starting_set.size(),NumericType(evolution_time,prec));
-            ValidatedConstrainedImageSet evolve_set = range(evolve_function);
-
-            std::cout << freq << ": " << score(evolve_set) << ", " << ticks / hz << "." << ticks % hz << "s" << std::endl;
-        }
-    }
 
     Void run_battery_frequency_topdown(String name,
                                ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, RealVector noise_levels,
@@ -197,7 +115,7 @@ class TestInclusionIntegrator {
             clock_t const hz = sysconf(_SC_CLK_TCK);
 
             List<ValidatedConstrainedImageSet> reach_sets = map([](ValidatedVectorFunctionModelType const& fm){return range(fm);},flow_functions);
-            ValidatedVectorFunctionModelType evolve_function = partial_evaluate(flow_functions.back(),starting_set.size(),NumericType(evolution_time,prec));
+            ValidatedVectorFunctionModelType evolve_function = partial_evaluate(flow_functions.back(),flow_functions.back().argument_size()-1,NumericType(evolution_time,prec));
             ValidatedConstrainedImageSet evolve_set = range(evolve_function);
 
             std::cout << freq << ": " << score(evolve_set) << ", " << ticks / hz << "." << ticks % hz << "s" << std::endl;
@@ -251,10 +169,11 @@ class TestInclusionIntegrator {
             auto n = f.result_size();
             auto m = noise.size();
             double rho = 6.0;
-            SizeType base = n + rho*(n+2*m) + (freq-1)*m*(2 - ppi);
+            SizeType base = 1000;
             auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
+            integrator.verbosity = 0;
 
-            std::cout << approximations.at(0)->getKind() << " (reset to: " << base << ")" << std::endl;
+            std::cout << approximations.at(0)->getKind() << std::endl;
 
             tms start_time, end_time;
             times(&start_time);
@@ -266,7 +185,7 @@ class TestInclusionIntegrator {
             clock_t const hz = sysconf(_SC_CLK_TCK);
 
             List<ValidatedConstrainedImageSet> reach_sets = map([](ValidatedVectorFunctionModelType const& fm){return range(fm);},flow_functions);
-            ValidatedVectorFunctionModelType evolve_function = partial_evaluate(flow_functions.back(),starting_set.size(),NumericType(evolution_time,prec));
+            ValidatedVectorFunctionModelType evolve_function = partial_evaluate(flow_functions.back(),flow_functions.back().argument_size()-1,NumericType(evolution_time,prec));
             ValidatedConstrainedImageSet evolve_set = range(evolve_function);
 
             std::cout << "score " << score(evolve_set) << ", " << ticks / hz << "." << ticks % hz << "s" << std::endl;
@@ -332,7 +251,6 @@ class TestInclusionIntegrator {
                   RealBox real_starting_set, Real evolution_time, double step) const {
 
         SizeType freq=12;
-        SizeType base=1000;
         ThresholdSweeperDP sweeper = make_threshold_sweeper(1e-8);
 
         List<SharedPointer<DIApproximation>> approximations;
@@ -342,11 +260,11 @@ class TestInclusionIntegrator {
         approximations.append(SharedPointer<DIApproximation>(new ConstantDIApproximation(sweeper)));
         approximations.append(SharedPointer<DIApproximation>(new ZeroDIApproximation(sweeper)));
 
-        auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
+        auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=20000);
         integrator.verbosity = 0;
 
         run_single_test(name,integrator,f,g,noise_levels,real_starting_set,evolution_time);
-        //this->run_battery_each_approximation(name,f,g,noise_levels,starting_set,evolution_time,step,freq);
+        //this->run_battery_each_approximation(name,f,g,noise_levels,real_starting_set,evolution_time,step,freq);
     }
 
   public:
@@ -647,6 +565,9 @@ void TestInclusionIntegrator::test_lorenz() const {
     Real x2_i(1.0);
     RealBox starting_set={{x0_i-e,x0_i+e},{x1_i-e,x1_i+e},{x2_i-e,x2_i+e}};
     Real evolution_time=10/10_q;
+
+    auto f2 = ValidatedVectorFunction({x[0]*2_z,x[1],x[0]*x[2]*x[2]});
+    std::cout << "Df: " << f2.differential(cast_singleton(over_approximation(starting_set)),2) << std::endl;
 
     this->run_test("lorenz",f,g,noise_levels,starting_set,evolution_time,step);
 }

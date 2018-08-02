@@ -109,6 +109,27 @@ class TestExpression {
         ARIADNE_TEST_EQUALS(result1,value);
     }
 
+    Void test_properties()
+    {
+        RealVariable x("x"), y("y");
+        Real c(3);
+        ARIADNE_TEST_ASSERT(is_constant_in(3*y,{x}));
+        ARIADNE_TEST_ASSERT(not is_constant_in(3*y,{y}));
+        ARIADNE_TEST_ASSERT(not is_constant_in(0*y,{y}));
+        ARIADNE_TEST_ASSERT(not is_constant_in((sin(2*c)-2*sin(c)*cos(c))*y,{y}));
+        ARIADNE_TEST_ASSERT(not is_constant_in((sin(2*x)-2*sin(x)*cos(x))*y,{y}));
+        ARIADNE_TEST_ASSERT(is_constant_in(simplify(0*y),{y}));
+
+        ARIADNE_TEST_ASSERT(is_affine_in(2+3*x-5*y-x,{x,y}));
+        ARIADNE_TEST_ASSERT(is_affine_in(3*y,{x,y}));
+        ARIADNE_TEST_ASSERT(is_affine_in(x*y,{x}));
+        ARIADNE_TEST_ASSERT(is_affine_in(3*x/y,{x}));
+        ARIADNE_TEST_ASSERT(not is_affine_in(x*y,{x,y}));
+        ARIADNE_TEST_ASSERT(not is_affine_in(x*x,{x}));
+        ARIADNE_TEST_ASSERT(not is_affine_in(0*x*x,{x}));
+        ARIADNE_TEST_ASSERT(not is_affine_in(x/y,{y}));
+    }
+
     Void test_function()
     {
         // Test to ensure that constants are handled correctly.
@@ -164,6 +185,7 @@ class TestExpression {
         test_variables();
         test_assignment();
         test_parameters();
+        test_properties();
         test_function();
     }
 };

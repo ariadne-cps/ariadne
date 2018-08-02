@@ -719,6 +719,28 @@ template<class T> Bool is_variable(const Expression<T>& e, const Variable<T>& v)
 
 template Bool is_variable(const Expression<Real>&, const Variable<Real>&);
 
+Bool is_constant_in(const Expression<Real>& e, const Set<Variable<Real>>& vs) {
+    switch(e.kind()) {
+        case OperatorKind::VARIABLE: return not vs.contains(Variable<Real>(e.var()));
+        case OperatorKind::NULLARY: return true;
+        case OperatorKind::UNARY: case OperatorKind::SCALAR: return is_constant_in(e.arg(),vs);
+        case OperatorKind::BINARY: return is_constant_in(e.arg1(),vs) and is_constant_in(e.arg2(),vs);
+        default: assert(false);
+    }
+}
+
+Bool is_affine_in(const Expression<Real>& e, const Set<Variable<Real>>& vs) {
+    switch(e.op()) {
+        case OperatorCode::CNST: return true;
+        case OperatorCode::VAR: return true;
+        case OperatorCode::ADD: case OperatorCode::SUB: return is_affine_in(e.arg1(),vs) and is_affine_in(e.arg2(),vs);
+        case OperatorCode::MUL: return (is_affine_in(e.arg1(),vs) and is_constant_in(e.arg2(),vs)) or (is_constant_in(e.arg1(),vs) and is_affine_in(e.arg2(),vs));
+        case OperatorCode::DIV: return (is_affine_in(e.arg1(),vs) and is_constant_in(e.arg2(),vs));
+        case OperatorCode::POS: case OperatorCode::NEG: return is_affine_in(e.arg(),vs);
+        default: return false;
+    }
+}
+
 
 
 template<class R> Bool identical(const Expression<R>& e1, const Expression<R>& e2)

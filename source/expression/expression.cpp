@@ -742,6 +742,42 @@ Bool is_affine_in(const Expression<Real>& e, const Set<Variable<Real>>& vs) {
 }
 
 
+Bool is_additive_in(const Vector<Expression<Real>>& ev, const Set<Variable<Real>>& vs) {
+    // We treat the vector of expressions as additive in vs if each variable in vs appears at most once in all expressions,
+    // with a constant value of 1
+    // (FIXME: this simplifies the case of a constant multiplier, for which would need to rescale the variable)
+    // (FIXME: more generally, this simplifies the case of a diagonalisable matrix of constant multipliers)
+
+    auto one = Expression<Real>::constant(1);
+    auto zero = Expression<Real>::constant(0);
+
+    for (auto v : vs) {
+        Bool already_found = false;
+        Bool already_found_one = false;
+        for (auto i : range(ev.size())) {
+            const Expression<Real>& e = ev[i];
+            auto der = simplify(derivative(e, v));
+            if (not identical(der,zero)) {
+                if (already_found) {
+                    return false;
+                } else {
+                    already_found = true;
+                    if (identical(der,one)) {
+                        if (already_found_one) {
+                            return false;
+                        } else {
+                            already_found_one = true;
+                        }
+                    } else {
+                        return false;
+                    }
+                }
+            }
+        }
+    }
+    return true;
+}
+
 
 template<class R> Bool identical(const Expression<R>& e1, const Expression<R>& e2)
 {

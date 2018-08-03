@@ -109,7 +109,7 @@ class TestExpression {
         ARIADNE_TEST_EQUALS(result1,value);
     }
 
-    Void test_properties()
+    Void test_scalar_properties()
     {
         RealVariable x("x"), y("y");
         Real c(3);
@@ -128,6 +128,20 @@ class TestExpression {
         ARIADNE_TEST_ASSERT(not is_affine_in(x*x,{x}));
         ARIADNE_TEST_ASSERT(not is_affine_in(0*x*x,{x}));
         ARIADNE_TEST_ASSERT(not is_affine_in(x/y,{y}));
+    }
+
+    Void test_vector_properties()
+    {
+        RealVariable x("x"), y("y"), u1("u1"), u2("u2");
+        ARIADNE_TEST_ASSERT(is_additive_in(Vector<RealExpression>({x+u1,y+u2}),{u1,u2}));
+        ARIADNE_TEST_ASSERT(is_additive_in(Vector<RealExpression>({x+u2,y+u1}),{u1,u2}));
+        ARIADNE_TEST_ASSERT(is_additive_in(Vector<RealExpression>({x+u1,y}),{u1}));
+        ARIADNE_TEST_ASSERT(is_additive_in(Vector<RealExpression>({x,y+u1}),{u1}));
+        ARIADNE_TEST_ASSERT(not is_additive_in(Vector<RealExpression>({x+u1,y+u1}),{u1}));
+        ARIADNE_TEST_ASSERT(not is_additive_in(Vector<RealExpression>({x,y+2*u1}),{u1}));
+        ARIADNE_TEST_ASSERT(not is_additive_in(Vector<RealExpression>({x+u1,y+2*u2}),{u1,u2}));
+        ARIADNE_TEST_ASSERT(not is_additive_in(Vector<RealExpression>({x*u1,y+u2}),{u1,u2}));
+        ARIADNE_TEST_ASSERT(not is_additive_in(Vector<RealExpression>({x+u1,y+sqr(u2)}),{u1,u2}));
     }
 
     Void test_function()
@@ -185,7 +199,8 @@ class TestExpression {
         test_variables();
         test_assignment();
         test_parameters();
-        test_properties();
+        test_scalar_properties();
+        test_vector_properties();
         test_function();
     }
 };

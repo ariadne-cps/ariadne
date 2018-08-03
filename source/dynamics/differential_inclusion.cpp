@@ -73,7 +73,7 @@ Boolean inputs_are_additive(Vector<ValidatedVectorFunction> const &g, UpperBoxTy
     for (SizeType j: range(n)) {
         bool foundOne = false;
         for (SizeType i : range(m)) {
-            auto eval = g[i][j].evaluate(cast_singleton(B));
+            auto eval = g[i][j].evaluate(cast_singleton(ExactBoxType(n,ExactIntervalType(-std::numeric_limits<double>::infinity(),std::numeric_limits<double>::infinity()))));
             if (!foundOne) {
                 if (definitely(eval == 1.0_exact))
                     foundOne = true;
@@ -605,7 +605,7 @@ InclusionIntegrator::InclusionIntegrator(List<SharedPointer<DIApproximation>> ap
 
 static const SizeType NUMBER_OF_PICARD_ITERATES=6;
 
-List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType X0, Real tmax) {
+List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const Vector<RealExpression>& dynamics, ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType X0, Real tmax) {
     ARIADNE_LOG(1,"\nf:"<<f<<"\ng:"<<g<<"\nV:"<<V<<"\nX0:"<<X0<<"\ntmax:"<<tmax<<"\n");
 
     // Ensure all arguments have the correct size;
@@ -697,7 +697,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
 
             if (this->_approximation->getKind() != DIApproximationKind::PIECEWISE) {
 
-                auto Phi = this->compute_flow_function(f,g,V,D,h,B);
+                auto Phi = this->compute_flow_function(dynamics,f,g,V,D,h,B);
 
                 ARIADNE_LOG(5,"Phi="<<Phi<<"\n");
                 assert(Phi.domain()[Phi.argument_size()-1].upper()==h);
@@ -1025,7 +1025,7 @@ Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegrator::flow_bounds(Validat
 
 
 ValidatedVectorFunctionModelDP InclusionIntegrator::
-compute_flow_function(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType D,
+compute_flow_function(const Vector<RealExpression>& dynamics, ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType D,
                       PositiveFloatDPValue h, UpperBoxType B) const {
     auto n=D.size();
     auto m=V.size();

@@ -32,6 +32,7 @@
 #include "algebra/algebra.hpp"
 #include "geometry/function_set.hpp"
 #include "output/graphics.hpp"
+#include "expression/expression_set.hpp"
 
 #include "test/test.hpp"
 #include <sys/times.h>
@@ -73,8 +74,8 @@ using namespace Ariadne;
 class TestInclusionIntegrator {
 
 
-    Void run_battery_frequency_topdown(String name,
-                               ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, RealVector noise_levels,
+    Void run_battery_frequency_topdown(String name, const Vector<RealExpression>& dynamics,
+                                       ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, RealVector noise_levels,
                                RealBox real_starting_set, Real evolution_time, double step, SweeperDP sweeper, SizeType max_freq) const
     {
         typedef typename ValidatedVectorFunctionModelType::NumericType NumericType; typedef typename NumericType::PrecisionType PrecisionType;
@@ -108,7 +109,7 @@ class TestInclusionIntegrator {
             tms start_time, end_time;
             times(&start_time);
 
-            List<ValidatedVectorFunctionModelType> flow_functions = integrator.flow(f,g,noise,starting_set,evolution_time);
+            List<ValidatedVectorFunctionModelType> flow_functions = integrator.flow(dynamics,f,g,noise,starting_set,evolution_time);
 
             times(&end_time);
             clock_t ticks = end_time.tms_utime - start_time.tms_utime;
@@ -123,7 +124,7 @@ class TestInclusionIntegrator {
     }
 
 
-    Void run_battery_each_approximation(String name,
+    Void run_battery_each_approximation(String name, const Vector<RealExpression>& dynamics,
                                         ValidatedVectorFunction const &f, Vector<ValidatedVectorFunction> const &g,
                                         RealVector noise_levels,
                                         RealBox real_starting_set, Real evolution_time, double step, SizeType freq) const
@@ -178,7 +179,7 @@ class TestInclusionIntegrator {
             tms start_time, end_time;
             times(&start_time);
 
-            List<ValidatedVectorFunctionModelType> flow_functions = integrator.flow(f,g,noise,starting_set,evolution_time);
+            List<ValidatedVectorFunctionModelType> flow_functions = integrator.flow(dynamics,f,g,noise,starting_set,evolution_time);
 
             times(&end_time);
             clock_t ticks = end_time.tms_utime - start_time.tms_utime;
@@ -192,8 +193,8 @@ class TestInclusionIntegrator {
         }
     }
 
-    Void run_single_test(String name, InclusionIntegratorInterface& integrator,
-                  ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, RealVector noise_levels,
+    Void run_single_test(String name, InclusionIntegratorInterface& integrator, const Vector<RealExpression>& dynamics,
+                         ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, RealVector noise_levels,
                   RealBox real_starting_set, Real evolution_time) const
     {
         typedef typename ValidatedVectorFunctionModelType::NumericType NumericType; typedef typename NumericType::PrecisionType PrecisionType;
@@ -208,7 +209,7 @@ class TestInclusionIntegrator {
         tms start_time, end_time;
         times(&start_time);
 
-        List<ValidatedVectorFunctionModelType> flow_functions = integrator.flow(f,g,noise,starting_set,evolution_time);
+        List<ValidatedVectorFunctionModelType> flow_functions = integrator.flow(dynamics,f,g,noise,starting_set,evolution_time);
 
         times(&end_time);
         clock_t ticks = end_time.tms_utime - start_time.tms_utime;
@@ -247,7 +248,7 @@ class TestInclusionIntegrator {
 */
     }
 
-    Void run_test(String name, ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, RealVector noise_levels,
+    Void run_test(String name, const Vector<RealExpression>& dynamics, ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, RealVector noise_levels,
                   RealBox real_starting_set, Real evolution_time, double step) const {
 
         SizeType freq=12;
@@ -263,8 +264,8 @@ class TestInclusionIntegrator {
         auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=20000);
         integrator.verbosity = 0;
 
-        run_single_test(name,integrator,f,g,noise_levels,real_starting_set,evolution_time);
-        //this->run_battery_each_approximation(name,f,g,noise_levels,real_starting_set,evolution_time,step,freq);
+        //run_single_test(name,integrator,dynamics,f,g,noise_levels,real_starting_set,evolution_time);
+        this->run_battery_each_approximation(name,dynamics,f,g,noise_levels,real_starting_set,evolution_time,step,freq);
     }
 
   public:
@@ -297,20 +298,23 @@ void TestInclusionIntegrator::test_wiggins_18_7_3() const {
 
     RealVector noise_levels={1/100_q,1/100_q};
 
-    auto x = ValidatedVectorFunction::identity(2u);
+    auto v = ValidatedVectorFunction::identity(2u);
     auto one = ValidatedScalarFunction::constant(2u,1_z);
     auto zero = ValidatedScalarFunction::constant(2u,0_z);
 
-    auto f = ValidatedVectorFunction({-x[0]+2*x[1]+pow(x[0],2)*x[1]+pow(x[0],4)*pow(x[1],5),
-                                      -x[1]-pow(x[0],4)*pow(x[1],6)+pow(x[0],8)*pow(x[1],9)});
+    auto f = ValidatedVectorFunction({-v[0]+2*v[1]+pow(v[0],2)*v[1]+pow(v[0],4)*pow(v[1],5),
+                                      -v[1]-pow(v[0],4)*pow(v[1],6)+pow(v[0],8)*pow(v[1],9)});
 
     Vector<ValidatedVectorFunction> g({{one,zero},{zero,one}});
+
+    RealVariable x("x"), y("y"), u1("u1"), u2("u2");
+    Vector<RealExpression> dynamics({-x+2*y+pow(x,2)*y+pow(x,4)*pow(y,5)+u1,-y-pow(x,4)*pow(y,6)+pow(x,8)*pow(y,9)+u2});
 
     Real e=1/10000000_q;
     RealBox starting_set={{Real(1/3_q)-e,Real(1/3_q)+e},{Real(1/3_q)-e,Real(1/3_q)+e}};
     Real evolution_time=90/10_q;
 
-    this->run_test("wiggins_18_7_3",f,g,noise_levels,starting_set,evolution_time,step);
+    this->run_test("wiggins_18_7_3",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
 }
 
 
@@ -319,12 +323,16 @@ void TestInclusionIntegrator::test_order7() const {
 
     RealVector noise_levels={1/100_q};
 
-    auto x = ValidatedVectorFunction::identity(2u);
+    auto v = ValidatedVectorFunction::identity(2u);
     auto one = ValidatedScalarFunction::constant(2u,1_z);
     auto zero = ValidatedScalarFunction::constant(2u,0_z);
 
-    auto f = ValidatedVectorFunction({-42*pow(x[0],7) +68*pow(x[0],6)*x[1] -46*pow(x[0],5)*x[1] +256*pow(x[0],4)*x[1] +156*pow(x[0],3)*x[1] +50*pow(x[0],2)*x[1] +20*x[0]*pow(x[1],6) -8*pow(x[1],7),
-                                      x[1]*(1110*pow(x[0],6) -220*pow(x[0],5)*x[1] -3182*pow(x[0],4)*x[1] +478*pow(x[0],3)*pow(x[1],3) + 487*pow(x[0],2)*pow(x[1],4) -102*x[0]*pow(x[1],5) -12*pow(x[1],6))});
+    auto f = ValidatedVectorFunction({-42*pow(v[0],7) +68*pow(v[0],6)*v[1] -46*pow(v[0],5)*v[1] +256*pow(v[0],4)*v[1] +156*pow(v[0],3)*v[1] +50*pow(v[0],2)*v[1] +20*v[0]*pow(v[1],6) -8*pow(v[1],7),
+                                      v[1]*(1110*pow(v[0],6) -220*pow(v[0],5)*v[1] -3182*pow(v[0],4)*v[1] +478*pow(v[0],3)*pow(v[1],3) + 487*pow(v[0],2)*pow(v[1],4) -102*v[0]*pow(v[1],5) -12*pow(v[1],6))});
+
+    RealVariable x("x"), y("y"), u("u");
+    Vector<RealExpression> dynamics({-42*pow(x,7)+68*pow(x,6)*y-46*pow(x,5)*y+256*pow(x,4)*y+156*pow(x,3)*y+50*pow(x,2)*y+20*x*pow(y,6)-8*pow(y,7),
+                                     y*(1110*pow(x,6)-220*pow(x,5)*y-3182*pow(x,4)*y+478*pow(x,3)*pow(y,3)+487*pow(x,2)*pow(y,4)-102*x*pow(y,5)-12*pow(y,6))+u});
 
     Vector<ValidatedVectorFunction> g({{zero,one}});
 
@@ -332,7 +340,7 @@ void TestInclusionIntegrator::test_order7() const {
     RealBox starting_set={{Real(-1.0)-e,Real(-1.0)+e},{Real(1.0)-e,Real(1.0)+e}};
     Real evolution_time=40/8_q;
 
-    this->run_test("order7",f,g,noise_levels,starting_set,evolution_time,step);
+    this->run_test("order7",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
 }
 
 void TestInclusionIntegrator::test_3dsphere() const {
@@ -341,15 +349,21 @@ void TestInclusionIntegrator::test_3dsphere() const {
 
     RealVector noise_levels={4/1000_q,4/1000_q,4/1000_q};
 
-    auto x = ValidatedVectorFunction::identity(3u);
+    auto v = ValidatedVectorFunction::identity(3u);
     auto one = ValidatedScalarFunction::constant(3u,1_z);
     auto zero = ValidatedScalarFunction::constant(3u,0_z);
 
-    auto f = ValidatedVectorFunction({pow(x[0],2) - x[0]*(pow(x[0],3)+pow(x[1],3)+pow(x[2],3)),
-                                      pow(x[1],2) - x[1]*(pow(x[0],3)+pow(x[1],3)+pow(x[2],3)),
-                                      pow(x[2],2) - x[2]*(pow(x[0],3)+pow(x[1],3)+pow(x[2],3))});
+    auto f = ValidatedVectorFunction({pow(v[0],2) - v[0]*(pow(v[0],3)+pow(v[1],3)+pow(v[2],3)),
+                                      pow(v[1],2) - v[1]*(pow(v[0],3)+pow(v[1],3)+pow(v[2],3)),
+                                      pow(v[2],2) - v[2]*(pow(v[0],3)+pow(v[1],3)+pow(v[2],3))});
 
     Vector<ValidatedVectorFunction> g({{one,zero,zero},{zero,one,zero},{zero,zero,one}});
+
+    RealVariable x("x"), y("y"), z("z"), u1("u1"), u2("u2"), u3("u3");
+    RealExpression cuberadius(pow(x,3)+pow(y,3)+pow(z,3));
+    Vector<RealExpression> dynamics({pow(x,2) - x*cuberadius + u1,
+                                     pow(y,2) - y*cuberadius + u2,
+                                     pow(z,2) - z*cuberadius + u3});
 
     Real e=1/1000000000_q;
     Real x0_i(1/4_q);
@@ -358,7 +372,7 @@ void TestInclusionIntegrator::test_3dsphere() const {
     RealBox starting_set={{x0_i-e,x0_i+e},{x1_i-e,x1_i+e},{x2_i-e,x2_i+e}};
     Real evolution_time=90/10_q;
 
-    this->run_test("3dsphere",f,g,noise_levels,starting_set,evolution_time,step);
+    this->run_test("3dsphere",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
 }
 
 void TestInclusionIntegrator::test_vinograd() const {
@@ -366,19 +380,23 @@ void TestInclusionIntegrator::test_vinograd() const {
 
     RealVector noise_levels={1/1000_q,1/1000_q};
 
-    auto x = ValidatedVectorFunction::identity(2u);
+    auto v = ValidatedVectorFunction::identity(2u);
     auto one = ValidatedScalarFunction::constant(2u,1_z);
     auto zero = ValidatedScalarFunction::constant(2u,0_z);
-    auto f = ValidatedVectorFunction({pow(x[1],5)+pow(x[0],2)*(-x[0]+x[1]),
-                                      pow(x[1],2)*(-2*x[0]+x[1])});
+    auto f = ValidatedVectorFunction({pow(v[1],5)+pow(v[0],2)*(-v[0]+v[1]),
+                                      pow(v[1],2)*(-2*v[0]+v[1])});
 
     Vector<ValidatedVectorFunction> g({{one,zero},{zero,one}});
+
+    RealVariable x("x"), y("y"), u1("u1"), u2("u2");
+    Vector<RealExpression> dynamics({pow(y,5)+pow(x,2)*(-x+y),
+                                     pow(y,2)*(-2*x+y)});
 
     Real e=1/10000000_q;
     RealBox starting_set={{Real(1)-e,Real(1)+e},{-e,+e}};
     Real evolution_time=180/10_q;
 
-    this->run_test("vinograd",f,g,noise_levels,starting_set,evolution_time,step);
+    this->run_test("vinograd",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
 }
 
 void TestInclusionIntegrator::test_higgins_selkov() const {
@@ -391,10 +409,13 @@ void TestInclusionIntegrator::test_higgins_selkov() const {
     auto one = ValidatedScalarFunction::constant(2u,1_z);
     auto zero = ValidatedScalarFunction::constant(2u,0_z);
 
-    Real k2(1.00001);
+    Real k(1.00001);
 
-    auto f = ValidatedVectorFunction({one-x[0]*x[1]*x[1],x[0]*x[1]*x[1] - k2*x[1]});
+    auto f = ValidatedVectorFunction({one-x[0]*x[1]*x[1],x[0]*x[1]*x[1] - k*x[1]});
     Vector<ValidatedVectorFunction> g({{one,zero},{-x[0]*x[1]*x[1],x[0]*x[1]*x[1]},{zero,-x[1]}});
+
+    RealVariable S("S"), P("P"), v0("v0"), k1("k1"), k2("k2");
+    Vector<RealExpression> dynamics({v0-S*k1*pow(P,2),S*k1*pow(P,2)-k2*P});
 
     Real e=1/100_q;
     Real x0_i(2.0);
@@ -402,7 +423,7 @@ void TestInclusionIntegrator::test_higgins_selkov() const {
     RealBox starting_set={{x0_i-e,x0_i+e},{x1_i-e,x1_i+e}};
     Real evolution_time=100/10_q;
 
-    this->run_test("higgins-selkov",f,g,noise_levels,starting_set,evolution_time,step);
+    this->run_test("higgins-selkov",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
 
 }
 
@@ -426,11 +447,17 @@ void TestInclusionIntegrator::test_reactor() const {
 
     Vector<ValidatedVectorFunction> g({{one*iV,zero,zero,zero},{zero,one*iV,zero,zero},{x[0]*x[1],x[0]*x[1],x[0]*x[1],zero}});
 
+    RealVariable xA("xA"), xB("xB"), xC("xC"), xD("xD"), u1("u1"), u2("u2"), u3("u3");
+    Vector<RealExpression> dynamics({-u3*xA*xB-k2*xA*xC+iV*u1-ka*xA,
+                                     -u3*xA*xB+kb*u2-ka*xB,
+                                     u3*xA*xB-k2*xA*xC-ka*xC,
+                                     k2*xA*xC-ka*xD});
+
     Real e=1/1000000_q;
     RealBox starting_set={{0,e},{0,e},{0,e},{0,e}};
     Real evolution_time=100/10_q;
 
-    this->run_test("reactor",f,g,noise_levels,starting_set,evolution_time,step);
+    this->run_test("reactor",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
 }
 
 
@@ -439,20 +466,23 @@ void TestInclusionIntegrator::test_lotka_volterra() const {
 
     RealVector noise_levels={1/100_q,1/100_q};
 
-    auto x = ValidatedVectorFunction::identity(2u);
+    auto v = ValidatedVectorFunction::identity(2u);
     auto one = ValidatedScalarFunction::constant(2u,1_z);
     auto zero = ValidatedScalarFunction::constant(2u,0_z);
     auto three = ValidatedScalarFunction::constant(2u,3_z);
 
-    auto f = ValidatedVectorFunction({three*x[0]*(one-x[1]),x[1]*(x[0]-one)});
+    auto f = ValidatedVectorFunction({three*v[0]*(one-v[1]),v[1]*(v[0]-one)});
 
-    Vector<ValidatedVectorFunction> g({{x[0]*(one-x[1]),zero},{zero,x[1]*(x[0]-one)}});
+    Vector<ValidatedVectorFunction> g({{v[0]*(one-v[1]),zero},{zero,v[1]*(v[0]-one)}});
+
+    RealVariable x("x"), y("y"), u1("u1"), u2("u2");
+    Vector<RealExpression> dynamics({u1*x*(1-y),u2*y*(x-1)});
 
     Real e=1/100000000_q;
     RealBox starting_set={{Real(1.2)-e,Real(1.2)+e},{Real(1.1)-e,Real(1.1)+e}};
     Real evolution_time=100/10_q;
 
-    this->run_test("lotka-volterra",f,g,noise_levels,starting_set,evolution_time,step);
+    this->run_test("lotka-volterra",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
 }
 
 void TestInclusionIntegrator::test_fitzhugh_nagumo() const {
@@ -460,19 +490,22 @@ void TestInclusionIntegrator::test_fitzhugh_nagumo() const {
 
     RealVector noise_levels={1/10000_q,1/10000_q};
 
-    auto x = ValidatedVectorFunction::identity(2u);
+    auto v = ValidatedVectorFunction::identity(2u);
     auto one = ValidatedScalarFunction::constant(2u,1_z);
     auto zero = ValidatedScalarFunction::constant(2u,0_z);
 
-    auto f = ValidatedVectorFunction({x[0] - x[0]*x[0]*x[0] - x[1] + Real(7.0/8),Real(8.0/100)*(x[0] + Real(0.7) - Real(0.8)*x[1])});
+    auto f = ValidatedVectorFunction({v[0] - v[0]*v[0]*v[0] - v[1] + Real(7.0/8),Real(8.0/100)*(v[0] + Real(0.7) - Real(0.8)*v[1])});
 
-    Vector<ValidatedVectorFunction> g({{one,zero},{zero,x[0] + Real(0.7) - Real(0.8)*x[1]}});
+    Vector<ValidatedVectorFunction> g({{one,zero},{zero,v[0] + Real(0.7) - Real(0.8)*v[1]}});
+
+    RealVariable x("x"), y("y"), u1("u1"), u2("u2");
+    Vector<RealExpression> dynamics({x-pow(x,3)-y+7/8_q+u1,u2*(x+0.7_dec-0.8_dec*y)});
 
     Real e=0/100_q;
     RealBox starting_set={{Real(-1.0)-e,Real(-1.0)+e},{Real(1.0)-e,Real(1.0)+e}};
     Real evolution_time=400/10_q;
 
-    this->run_test("fitzhugh-nagumo",f,g,noise_levels,starting_set,evolution_time,step);
+    this->run_test("fitzhugh-nagumo",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
 }
 
 void TestInclusionIntegrator::test_jet_engine() const {
@@ -480,20 +513,23 @@ void TestInclusionIntegrator::test_jet_engine() const {
 
     RealVector noise_levels={5/1000_q,5/1000_q};
 
-    auto x = ValidatedVectorFunction::identity(2u);
+    auto v = ValidatedVectorFunction::identity(2u);
     auto one = ValidatedScalarFunction::constant(2u,1_z);
     auto zero = ValidatedScalarFunction::constant(2u,0_z);
 
-    auto f = ValidatedVectorFunction({-x[1]-Real(1.5)*x[0]*x[0]-Real(0.5)*x[0]*x[0]*x[0]-Real(0.5),3*x[0]-x[1]});
+    auto f = ValidatedVectorFunction({-v[1]-Real(1.5)*v[0]*v[0]-Real(0.5)*v[0]*v[0]*v[0]-Real(0.5),3*v[0]-v[1]});
 
     Vector<ValidatedVectorFunction> g({{one,zero},{zero,one}});
+
+    RealVariable x("x"), y("y"), u1("u1"), u2("u2");
+    Vector<RealExpression> dynamics({-y-1.5_dec*pow(x,2)-0.5_dec*pow(x,3)-0.5_dec+u1,3*x-y+u2});
 
     Real e1=5/100_q;
     Real e2=7/100_q;
     RealBox starting_set={{Real(1.0)-e1,Real(1.0)+e1},{Real(1.0)-e2,Real(1.0)+e2}};
     Real evolution_time=40/8_q;
 
-    this->run_test("jet-engine",f,g,noise_levels,starting_set,evolution_time,step);
+    this->run_test("jet-engine",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
 }
 
 void TestInclusionIntegrator::test_pi_controller() const {
@@ -501,19 +537,23 @@ void TestInclusionIntegrator::test_pi_controller() const {
 
     RealVector noise_levels={1/10_q};
 
-    auto x = ValidatedVectorFunction::identity(2u);
+    auto y = ValidatedVectorFunction::identity(2u);
     auto one = ValidatedScalarFunction::constant(2u,1_z);
     auto zero = ValidatedScalarFunction::constant(2u,0_z);
 
-    auto f = ValidatedVectorFunction({Real(-0.101)*(x[0]-Real(20.0))+Real(1.3203)*(x[1]-Real(0.1616))-Real(0.01)*x[0]*x[0], Real(-1.0)*(Real(-0.101)*(x[0]-Real(20.0))+Real(1.3203)*(x[1]-Real(0.1616))-Real(0.01)*x[0]*x[0]) + Real(3.0)*(Real(20.0)-x[0])});
+    auto f = ValidatedVectorFunction({Real(-0.101)*(y[0]-Real(20.0))+Real(1.3203)*(y[1]-Real(0.1616))-Real(0.01)*y[0]*y[0], Real(-1.0)*(Real(-0.101)*(y[0]-Real(20.0))+Real(1.3203)*(y[1]-Real(0.1616))-Real(0.01)*y[0]*y[0]) + Real(3.0)*(Real(20.0)-y[0])});
 
     Vector<ValidatedVectorFunction> g({{zero,one}});
+
+    RealVariable v("v"), x("x"), u("u");
+    RealExpression dynv = -0.101_dec*(v-20)+1.3203_dec*(x-0.1616_dec)-0.01_dec*pow(v,2);
+    Vector<RealExpression> dynamics({dynv, -dynv + 3*(20-v) + u});
 
     Real e=1/1024_q;
     RealBox starting_set={{Real(5.0),Real(10.0)},{-e,+e}};
     Real evolution_time=40/8_q;
 
-    this->run_test("pi-controller",f,g,noise_levels,starting_set,evolution_time,step);
+    this->run_test("pi-controller",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
 }
 
 void TestInclusionIntegrator::test_jerk21() const {
@@ -522,15 +562,18 @@ void TestInclusionIntegrator::test_jerk21() const {
 
     RealVector noise_levels={1/1000_q};
 
-    auto x = ValidatedVectorFunction::identity(3u);
+    auto v = ValidatedVectorFunction::identity(3u);
     auto one = ValidatedScalarFunction::constant(3u,1_z);
     auto zero = ValidatedScalarFunction::constant(3u,0_z);
 
     Real A(0.25);
 
-    auto f = ValidatedVectorFunction({x[1],x[2],-x[2]*x[2]*x[2]-x[1]*x[0]*x[0]-A*x[0]});
+    auto f = ValidatedVectorFunction({v[1],v[2],-v[2]*v[2]*v[2]-v[1]*v[0]*v[0]-A*v[0]});
 
-    Vector<ValidatedVectorFunction> g({{zero,zero,-x[0]}});
+    Vector<ValidatedVectorFunction> g({{zero,zero,-v[0]}});
+
+    RealVariable x("x"), y("y"), z("z"), u("u");
+    Vector<RealExpression> dynamics({y,z,-pow(z,3)-y*pow(x,2)-u*x});
 
     Real e=1/1024_q;
     Real x0_i(0.25);
@@ -539,7 +582,7 @@ void TestInclusionIntegrator::test_jerk21() const {
     RealBox starting_set={{x0_i-e,x0_i+e},{x1_i-e,x1_i+e},{x2_i-e,x2_i+e}};
     Real evolution_time=100/10_q;
 
-    this->run_test("jerk21",f,g,noise_levels,starting_set,evolution_time,step);
+    this->run_test("jerk21",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
 }
 
 void TestInclusionIntegrator::test_lorenz() const {
@@ -547,7 +590,7 @@ void TestInclusionIntegrator::test_lorenz() const {
 
     RealVector noise_levels={1/100_q};
 
-    auto x = ValidatedVectorFunction::identity(3u);
+    auto v = ValidatedVectorFunction::identity(3u);
     auto one = ValidatedScalarFunction::constant(3u,1_z);
     auto zero = ValidatedScalarFunction::constant(3u,0_z);
 
@@ -555,9 +598,12 @@ void TestInclusionIntegrator::test_lorenz() const {
     Real rho(28.0);
     Real beta(8.0/3);
 
-    auto f = ValidatedVectorFunction({(x[1]-x[0])*sigma,x[0]*(one*rho - x[2]) - x[1],x[0]*x[1] - x[2]*beta});
+    auto f = ValidatedVectorFunction({(v[1]-v[0])*sigma,v[0]*(one*rho - v[2]) - v[1],v[0]*v[1] - v[2]*beta});
 
-    Vector<ValidatedVectorFunction> g({{zero,x[0],zero}});
+    Vector<ValidatedVectorFunction> g({{zero,v[0],zero}});
+
+    RealVariable x("x"), y("y"), z("z"), u("u");
+    Vector<RealExpression> dynamics({(y-x)*sigma,x*(28 - z) - y + x*u,x*y - z*beta});
 
     Real e=1/1024_q;
     Real x0_i(1.0);
@@ -566,10 +612,7 @@ void TestInclusionIntegrator::test_lorenz() const {
     RealBox starting_set={{x0_i-e,x0_i+e},{x1_i-e,x1_i+e},{x2_i-e,x2_i+e}};
     Real evolution_time=10/10_q;
 
-    auto f2 = ValidatedVectorFunction({x[0]*2_z,x[1],x[0]*x[2]*x[2]});
-    std::cout << "Df: " << f2.differential(cast_singleton(over_approximation(starting_set)),2) << std::endl;
-
-    this->run_test("lorenz",f,g,noise_levels,starting_set,evolution_time,step);
+    this->run_test("lorenz",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
 }
 
 void TestInclusionIntegrator::test_rossler() const {
@@ -577,7 +620,7 @@ void TestInclusionIntegrator::test_rossler() const {
 
     RealVector noise_levels={1/1000_q};
 
-    auto x = ValidatedVectorFunction::identity(3u);
+    auto v = ValidatedVectorFunction::identity(3u);
     auto one = ValidatedScalarFunction::constant(3u,1_z);
     auto zero = ValidatedScalarFunction::constant(3u,0_z);
 
@@ -585,9 +628,12 @@ void TestInclusionIntegrator::test_rossler() const {
     Real b(0.1);
     Real c(6.0);
 
-    auto f = ValidatedVectorFunction({-x[1]-x[2],x[0] + x[1]*a,one*b + x[2]*(x[0]-one*c)});
+    auto f = ValidatedVectorFunction({-v[1]-v[2],v[0] + v[1]*a,one*b + v[2]*(v[0]-one*c)});
 
     Vector<ValidatedVectorFunction> g({{zero,zero,one}});
+
+    RealVariable x("x"), y("y"), z("z"), u("u");
+    Vector<RealExpression> dynamics({-y-z, x+y*0.1_dec,0.1_dec +z*(x-6) +u});
 
     Real e=1/1024_q;
     Real x0_i(-9.0);
@@ -596,7 +642,7 @@ void TestInclusionIntegrator::test_rossler() const {
     RealBox starting_set={{x0_i-e,x0_i+e},{x1_i-e,x1_i+e},{x2_i-e,x2_i+e}};
     Real evolution_time=120/10_q;
 
-    this->run_test("rossler",f,g,noise_levels,starting_set,evolution_time,step);
+    this->run_test("rossler",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
 }
 
 void TestInclusionIntegrator::test_jerk16() const {
@@ -604,15 +650,18 @@ void TestInclusionIntegrator::test_jerk16() const {
 
     RealVector noise_levels={1/1000_q};
 
-    auto x = ValidatedVectorFunction::identity(3u);
+    auto v = ValidatedVectorFunction::identity(3u);
     auto one = ValidatedScalarFunction::constant(3u,1_z);
     auto zero = ValidatedScalarFunction::constant(3u,0_z);
 
     Real B(0.03);
 
-    auto f = ValidatedVectorFunction({x[1],x[2],-x[1]+x[0]*x[0]-one*B});
+    auto f = ValidatedVectorFunction({v[1],v[2],-v[1]+v[0]*v[0]-one*B});
 
     Vector<ValidatedVectorFunction> g({{zero,zero,one}});
+
+    RealVariable x("x"), y("y"), z("z"), u("u");
+    Vector<RealExpression> dynamics({y,z,-y+pow(x,2)-u});
 
     Real e=1/1024_q;
     Real x0_i(0.0);
@@ -621,7 +670,7 @@ void TestInclusionIntegrator::test_jerk16() const {
     RealBox starting_set={{x0_i-e,x0_i+e},{x1_i-e,x1_i+e},{x2_i-e,x2_i+e}};
     Real evolution_time=100/10_q;
 
-    this->run_test("jerk16",f,g,noise_levels,starting_set,evolution_time,step);
+    this->run_test("jerk16",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
 }
 
 void TestInclusionIntegrator::test_DCDC() const {
@@ -639,20 +688,24 @@ void TestInclusionIntegrator::test_DCDC() const {
     Real gq0 = -1/14_q;
     Real gq1 = -20/7_q;
 
-    auto x = ValidatedVectorFunction::identity(2u);
+    auto v = ValidatedVectorFunction::identity(2u);
     auto one = ValidatedScalarFunction::constant(2u,1_z);
     auto zero = ValidatedScalarFunction::constant(2u,0_z);
     auto third = ValidatedScalarFunction::constant(2u,1/3_z);
 
-    auto f = ValidatedVectorFunction({third+x[0]*fp0+x[1]*fp1,x[0]*fq0+x[1]*fq1});
+    auto f = ValidatedVectorFunction({third+v[0]*fp0+v[1]*fp1,v[0]*fq0+v[1]*fq1});
 
-    Vector<ValidatedVectorFunction> g({{gp0*x[0]+gp1*x[1],gq0*x[0]+gq1*x[1]},{one,zero}});
+    Vector<ValidatedVectorFunction> g({{gp0*v[0]+gp1*v[1],gq0*v[0]+gq1*v[1]},{one,zero}});
+
+
+    RealVariable x("x"), y("y"), u1("u1"), u2("u2");
+    Vector<RealExpression> dynamics({1/3_q+x*-0.018_dec+y*-0.066_dec + u1*(1/600_q*x+1/15_q*y)+u2,x*0.071_dec+y*-0.00853_dec+u1*(-1/14_q*x-20/7_q*y)});
 
     Real e=1/1000000_q;
     RealBox starting_set={{Real(1)-e,Real(1)+e},{Real(5)-e,Real(5)+e}};
     Real evolution_time=50/10_q;
 
-    this->run_test("DCDC",f,g,noise_levels,starting_set,evolution_time,step);
+    this->run_test("DCDC",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
 }
 
 void TestInclusionIntegrator::test_harmonic() const {
@@ -661,19 +714,22 @@ void TestInclusionIntegrator::test_harmonic() const {
 
     RealVector noise_levels={4/100_q};
 
-    auto x = ValidatedVectorFunction::identity(2u);
+    auto v = ValidatedVectorFunction::identity(2u);
     auto one = ValidatedScalarFunction::constant(2u,1_z);
     auto zero = ValidatedScalarFunction::constant(2u,0_z);
 
-    auto f=ValidatedVectorFunction({x[1],-x[0]});
+    auto f=ValidatedVectorFunction({v[1],-v[0]});
 
     Vector<ValidatedVectorFunction> g({{one,zero}});
+
+    RealVariable x("x"), y("y"), u("u");
+    Vector<RealExpression> dynamics({y+u,-x});
 
     Real e=1/10000000_q;
     RealBox starting_set={{-e,e},{-e,+e}};
     Real evolution_time=314/100_q;
 
-    this->run_test("harmonic",f,g,noise_levels,starting_set,evolution_time,step);
+    this->run_test("harmonic",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
 }
 
 void TestInclusionIntegrator::test_van_der_pol() const {
@@ -682,19 +738,23 @@ void TestInclusionIntegrator::test_van_der_pol() const {
 
     RealVector noise_levels={1/20_q,1/10000_q};
 
-    auto x = ValidatedVectorFunction::identity(2u);
+    auto v = ValidatedVectorFunction::identity(2u);
     auto one = ValidatedScalarFunction::constant(2u,1_z);
     auto zero = ValidatedScalarFunction::constant(2u,0_z);
 
-    auto f=ValidatedVectorFunction({x[1],-x[0]+x[1]*(1 - x[0]*x[0])});
+    auto f=ValidatedVectorFunction({v[1],-v[0]+v[1]*(1 - v[0]*v[0])});
 
     Vector<ValidatedVectorFunction> g({{one,zero},{zero,one}});
+
+
+    RealVariable x("x"), y("y"), u1("u1"), u2("u2");
+    Vector<RealExpression> dynamics({y+u1,-x+y*(1-pow(x,2))+u2});
 
     Real e=1/1024_q;
     RealBox starting_set={{Real(1.21)-e,Real(1.21)+e},{Real(2.01)-e,Real(2.01)+e}};
     Real evolution_time=8/4_q;
 
-    this->run_test("vanderpol",f,g,noise_levels,starting_set,evolution_time,step);
+    this->run_test("vanderpol",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
 }
 
 void TestInclusionIntegrator::test_clock() const {
@@ -703,18 +763,22 @@ void TestInclusionIntegrator::test_clock() const {
 
     RealVector noise_levels={1/16_q,1/16_q};
 
-    auto x = ValidatedVectorFunction::identity(2u);
+    auto v = ValidatedVectorFunction::identity(2u);
     auto one = ValidatedScalarFunction::constant(2u,1_z);
     auto zero = ValidatedScalarFunction::constant(2u,0_z);
 
     auto f=ValidatedVectorFunction({one,one});
     Vector<ValidatedVectorFunction> g({{one,zero},{zero,one}});
 
+
+    RealVariable x("x"), y("y"), u1("u1"), u2("u2");
+    Vector<RealExpression> dynamics({1+u1,1+u2});
+
     Real e=1/128_q;
     RealBox starting_set={{-e,e},{-e,+e}};
     Real evolution_time=20/4_q;
 
-    this->run_test("clock",f,g,noise_levels,starting_set,evolution_time,step);
+    this->run_test("clock",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
 }
 
 void TestInclusionIntegrator::test() const {
@@ -723,18 +787,18 @@ void TestInclusionIntegrator::test() const {
     //ARIADNE_TEST_CALL(test_order7());
     //ARIADNE_TEST_CALL(test_3dsphere());
     //ARIADNE_TEST_CALL(test_vinograd());
-    ARIADNE_TEST_CALL(test_higgins_selkov());
-    ARIADNE_TEST_CALL(test_reactor());
-    ARIADNE_TEST_CALL(test_lotka_volterra());
-    ARIADNE_TEST_CALL(test_jet_engine());
+    //ARIADNE_TEST_CALL(test_higgins_selkov());
+    //ARIADNE_TEST_CALL(test_reactor());
+    //ARIADNE_TEST_CALL(test_lotka_volterra());
+    //ARIADNE_TEST_CALL(test_jet_engine());
     //ARIADNE_TEST_CALL(test_fitzhugh_nagumo());
-    ARIADNE_TEST_CALL(test_pi_controller());
-    ARIADNE_TEST_CALL(test_jerk21());
-    ARIADNE_TEST_CALL(test_lorenz());
-    ARIADNE_TEST_CALL(test_rossler());
+    //ARIADNE_TEST_CALL(test_pi_controller());
+    //ARIADNE_TEST_CALL(test_jerk21());
+    //ARIADNE_TEST_CALL(test_lorenz());
+    //ARIADNE_TEST_CALL(test_rossler());
     ARIADNE_TEST_CALL(test_jerk16());
-    ARIADNE_TEST_CALL(test_DCDC());
-    ARIADNE_TEST_CALL(test_harmonic());
+    //ARIADNE_TEST_CALL(test_DCDC());
+    //ARIADNE_TEST_CALL(test_harmonic());
     //ARIADNE_TEST_CALL(test_van_der_pol());
     //ARIADNE_TEST_CALL(test_clock());
 }

@@ -313,6 +313,9 @@ void TestInclusionIntegrator::test_wiggins_18_7_3() const {
 
     auto e=1/10000000_q;
     RealBox starting_set={{1/3_q-e,1/3_q+e},{1/3_q-e,1/3_q+e}};
+
+    RealVariablesBox initial={{1/3_q-e<=x<=1/3_q+e},{1/3_q-e<=y<=1/3_q+e}};
+
     Real evolution_time=90/10_q;
 
     this->run_test("wiggins_18_7_3",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
@@ -339,6 +342,9 @@ void TestInclusionIntegrator::test_order7() const {
 
     auto e=1/10_q;
     RealBox starting_set={{-1-e,-1+e},{1-e,1+e}};
+
+    RealVariablesBox initial={{-1-e<=x<=-1+e},{1-e<=y<=1+e}};
+
     Real evolution_time=40/8_q;
 
     this->run_test("order7",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
@@ -372,6 +378,9 @@ void TestInclusionIntegrator::test_3dsphere() const {
     Real x1_i(1/8_q);
     Real x2_i(1/10_q);
     RealBox starting_set={{x0_i-e,x0_i+e},{x1_i-e,x1_i+e},{x2_i-e,x2_i+e}};
+
+    RealVariablesBox initial={{1/4_q-e<=x<=1/4_q+e},{1/8_q-e<=y<=1/8_q+e},{1/10_q-e<=z<=1/10_q+e}};
+
     Real evolution_time=90/10_q;
 
     this->run_test("3dsphere",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
@@ -397,6 +406,9 @@ void TestInclusionIntegrator::test_vinograd() const {
 
     Real e=1/10000000_q;
     RealBox starting_set={{Real(1)-e,Real(1)+e},{-e,+e}};
+
+    RealVariablesBox initial={{1-e<=x<=1+e},{-e<=y<=+e}};
+
     Real evolution_time=180/10_q;
 
     this->run_test("vinograd",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
@@ -425,6 +437,9 @@ void TestInclusionIntegrator::test_higgins_selkov() const {
     Real x0_i(2.0);
     Real x1_i(1.0);
     RealBox starting_set={{x0_i-e,x0_i+e},{x1_i-e,x1_i+e}};
+
+    RealVariablesBox initial={{2-e<=S<=2+e},{1-e<=P<=1+e}};
+
     Real evolution_time=100/10_q;
 
     this->run_test("higgins-selkov",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
@@ -460,6 +475,9 @@ void TestInclusionIntegrator::test_reactor() const {
 
     Real e=1/1000000_q;
     RealBox starting_set={{0,e},{0,e},{0,e},{0,e}};
+
+    RealVariablesBox initial={{0<=xA<=e},{0<=xB<=e},{0<=xC<=e},{0<=xD<=e}};
+
     Real evolution_time=100/10_q;
 
     this->run_test("reactor",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
@@ -486,6 +504,9 @@ void TestInclusionIntegrator::test_lotka_volterra() const {
 
     Real e=1/100000000_q;
     RealBox starting_set={{Real(1.2)-e,Real(1.2)+e},{Real(1.1)-e,Real(1.1)+e}};
+
+    RealVariablesBox initial={{1.2_dec-e<=x<=1.2_dec+e},{1.1_dec-e<=y<=1.1_dec+e}};
+
     Real evolution_time=100/10_q;
 
     this->run_test("lotka-volterra",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
@@ -508,8 +529,11 @@ void TestInclusionIntegrator::test_fitzhugh_nagumo() const {
     Vector<RealExpression> dynamics({x-pow(x,3)-y+7/8_q+u1,u2*(x+0.7_dec-0.8_dec*y)});
     RealVariablesBox inputs({-1/10000_q<=u1<=1/10000_q,0.0799_dec<=u2<=0.0801_dec});
 
-    Real e=0/100_q;
+    Real e=1/100_q;
     RealBox starting_set={{Real(-1.0)-e,Real(-1.0)+e},{Real(1.0)-e,Real(1.0)+e}};
+
+    RealVariablesBox initial={{-1-e<=x<=-1+e},{1-e<=x<=1+e}};
+
     Real evolution_time=400/10_q;
 
     this->run_test("fitzhugh-nagumo",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
@@ -535,6 +559,9 @@ void TestInclusionIntegrator::test_jet_engine() const {
     Real e1=5/100_q;
     Real e2=7/100_q;
     RealBox starting_set={{Real(1.0)-e1,Real(1.0)+e1},{Real(1.0)-e2,Real(1.0)+e2}};
+
+    RealVariablesBox initial={{1-e1<=x<=1+e1},{1-e2<=y<=1+e2}};
+
     Real evolution_time=40/8_q;
 
     this->run_test("jet-engine",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
@@ -560,6 +587,9 @@ void TestInclusionIntegrator::test_pi_controller() const {
 
     Real e=1/1024_q;
     RealBox starting_set={{Real(5.0),Real(10.0)},{-e,+e}};
+
+    RealVariablesBox initial={{5<=v<=10},{-e<=x<=+e}};
+
     Real evolution_time=40/8_q;
 
     this->run_test("pi-controller",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
@@ -590,6 +620,9 @@ void TestInclusionIntegrator::test_jerk21() const {
     Real x1_i(0.0);
     Real x2_i(0.0);
     RealBox starting_set={{x0_i-e,x0_i+e},{x1_i-e,x1_i+e},{x2_i-e,x2_i+e}};
+
+    RealVariablesBox initial={{0.25_dec-e<=x<=0.25_dec+e},{-e<=y<=e},{-e<=z<=e}};
+
     Real evolution_time=100/10_q;
 
     this->run_test("jerk21",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
@@ -621,6 +654,9 @@ void TestInclusionIntegrator::test_lorenz() const {
     Real x1_i(1.0);
     Real x2_i(1.0);
     RealBox starting_set={{x0_i-e,x0_i+e},{x1_i-e,x1_i+e},{x2_i-e,x2_i+e}};
+
+    RealVariablesBox initial={{1-e<=x<=1+e},{1-e<=y<=1+e},{1-e<=z<=1+e}};
+
     Real evolution_time=10/10_q;
 
     this->run_test("lorenz",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
@@ -652,6 +688,9 @@ void TestInclusionIntegrator::test_rossler() const {
     Real x1_i(0.0);
     Real x2_i(0.01);
     RealBox starting_set={{x0_i-e,x0_i+e},{x1_i-e,x1_i+e},{x2_i-e,x2_i+e}};
+
+    RealVariablesBox initial={{-9-e<=x<=-9+e},{-e<=y<=e},{0.01_dec-e<=z<=0.01_dec+e}};
+
     Real evolution_time=120/10_q;
 
     this->run_test("rossler",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
@@ -681,6 +720,9 @@ void TestInclusionIntegrator::test_jerk16() const {
     Real x1_i(0.0);
     Real x2_i(0.0);
     RealBox starting_set={{x0_i-e,x0_i+e},{x1_i-e,x1_i+e},{x2_i-e,x2_i+e}};
+
+    RealVariablesBox initial={{-e<=x<=e},{-e<=y<=e},{-e<=z<=e}};
+
     Real evolution_time=100/10_q;
 
     this->run_test("jerk16",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
@@ -717,6 +759,9 @@ void TestInclusionIntegrator::test_DCDC() const {
 
     Real e=1/1000000_q;
     RealBox starting_set={{Real(1)-e,Real(1)+e},{Real(5)-e,Real(5)+e}};
+
+    RealVariablesBox initial={{1-e<=x<=1+e},{5-e<=y<=5+e}};
+
     Real evolution_time=50/10_q;
 
     this->run_test("DCDC",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
@@ -742,6 +787,9 @@ void TestInclusionIntegrator::test_harmonic() const {
 
     Real e=1/10000000_q;
     RealBox starting_set={{-e,e},{-e,+e}};
+
+    RealVariablesBox initial={{-e<=x<=e},{-e<=y<=e}};
+
     Real evolution_time=314/100_q;
 
     this->run_test("harmonic",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
@@ -768,6 +816,9 @@ void TestInclusionIntegrator::test_van_der_pol() const {
 
     Real e=1/1024_q;
     RealBox starting_set={{Real(1.21)-e,Real(1.21)+e},{Real(2.01)-e,Real(2.01)+e}};
+
+    RealVariablesBox initial={{1.21_dec-e<=x<=1.21_dec+e},{2.01_dec-e<=y<=2.01_dec+e}};
+
     Real evolution_time=8/4_q;
 
     this->run_test("vanderpol",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
@@ -793,7 +844,10 @@ void TestInclusionIntegrator::test_clock() const {
 
     Real e=1/128_q;
     RealBox starting_set={{-e,e},{-e,+e}};
-    Real evolution_time=20/4_q;
+
+    RealVariablesBox initial={{-e<=x<=e},{-e<=y<=e}};
+
+    auto evolution_time=20/4_q;
 
     this->run_test("clock",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
 }

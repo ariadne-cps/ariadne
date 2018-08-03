@@ -38,7 +38,7 @@
 
 #include "../function/symbolic_function.hpp"
 
-#include "../expression/expression.hpp"
+#include "../symbolic/expression.hpp"
 
 
 namespace Ariadne {

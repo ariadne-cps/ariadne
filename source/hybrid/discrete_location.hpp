@@ -30,7 +30,7 @@
 
 #include <string>
 #include "../utility/container.hpp"
-#include "../expression/valuation.hpp"
+#include "../symbolic/valuation.hpp"
 
 namespace Ariadne {
 

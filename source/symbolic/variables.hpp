@@ -41,9 +41,9 @@
 
 #include "../numeric/logical.decl.hpp"
 #include "../numeric/number.decl.hpp"
-#include "../expression/expression.decl.hpp"
-#include "../expression/identifier.hpp"
-#include "../expression/operations.hpp"
+#include "../symbolic/expression.decl.hpp"
+#include "../symbolic/identifier.hpp"
+#include "../symbolic/operations.hpp"
 
 namespace Ariadne {
 

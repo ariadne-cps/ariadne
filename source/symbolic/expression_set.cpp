@@ -24,9 +24,9 @@
 #include "../utility/standard.hpp"
 #include "../config.hpp"
 
-#include "../expression/expression_set.hpp"
-#include "../expression/expression.hpp"
-#include "../expression/space.hpp"
+#include "../symbolic/expression_set.hpp"
+#include "../symbolic/expression.hpp"
+#include "../symbolic/space.hpp"
 #include "../geometry/box.hpp"
 #include "../geometry/function_set.hpp"
 

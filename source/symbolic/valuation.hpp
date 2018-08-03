@@ -38,8 +38,8 @@
 #include "../utility/tribool.hpp"
 
 #include "../numeric/integer.hpp"
-#include "../expression/variables.hpp"
-#include "../expression/expression.hpp"
+#include "../symbolic/variables.hpp"
+#include "../symbolic/expression.hpp"
 
 namespace Ariadne {
 

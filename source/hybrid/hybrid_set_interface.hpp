@@ -36,9 +36,9 @@
 #include "../utility/tribool.hpp"
 #include "../geometry/set_interface.hpp"
 #include "../hybrid/discrete_location.hpp"
-#include "../expression/space.hpp"
+#include "../symbolic/space.hpp"
 #include "../geometry/set.hpp"
-#include "../expression/expression_set.hpp"
+#include "../symbolic/expression_set.hpp"
 #include "../hybrid/hybrid_set.decl.hpp"
 
 namespace Ariadne {

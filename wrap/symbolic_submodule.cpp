@@ -1,5 +1,5 @@
 /***************************************************************************
- *            expression_submodule.cpp
+ *            symbolic_submodule.cpp
  *
  *  Copyright 2009--17  Pieter Collins
  *
@@ -32,10 +32,10 @@
 #include "numeric/numeric.hpp"
 #include "function/function.hpp"
 #include "geometry/function_set.hpp"
-#include "expression/expression.hpp"
-#include "expression/assignment.hpp"
-#include "expression/space.hpp"
-#include "expression/expression_set.hpp"
+#include "symbolic/expression.hpp"
+#include "symbolic/assignment.hpp"
+#include "symbolic/space.hpp"
+#include "symbolic/expression_set.hpp"
 
 using namespace boost::python;
 using namespace Ariadne;
@@ -414,7 +414,7 @@ Void export_formula()
 
 
 
-Void expression_submodule() {
+Void symbolic_submodule() {
     export_formula();
 }
 

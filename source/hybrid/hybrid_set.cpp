@@ -29,7 +29,7 @@
 
 #include "../numeric/real.hpp"
 
-#include "../expression/expression_set.hpp"
+#include "../symbolic/expression_set.hpp"
 #include "../geometry/function_set.hpp"
 
 #include "../hybrid/hybrid_space.hpp"
@@ -39,7 +39,7 @@
 #include "../output/graphics.hpp"
 #include "../hybrid/hybrid_graphics.hpp"
 #include "../numeric/rounding.hpp"
-#include "../expression/assignment.hpp"
+#include "../symbolic/assignment.hpp"
 #include "../output/graphics_interface.hpp"
 #include "../geometry/function_set.hpp"
 

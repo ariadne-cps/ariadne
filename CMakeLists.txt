@@ -150,14 +150,14 @@ add_library(ariadne-kernel SHARED
     $<TARGET_OBJECTS:ariadne-geometry>
     $<TARGET_OBJECTS:ariadne-solvers>
     $<TARGET_OBJECTS:ariadne-output>
-    $<TARGET_OBJECTS:ariadne-expression>
+    $<TARGET_OBJECTS:ariadne-symbolic>
     $<TARGET_OBJECTS:ariadne-dynamics>
 )
 
 add_library(ariadne SHARED
     $<TARGET_OBJECTS:ariadne-utility>
     $<TARGET_OBJECTS:ariadne-numeric>
-    $<TARGET_OBJECTS:ariadne-expression>
+    $<TARGET_OBJECTS:ariadne-symbolic>
     $<TARGET_OBJECTS:ariadne-algebra>
     $<TARGET_OBJECTS:ariadne-function>
     $<TARGET_OBJECTS:ariadne-geometry>

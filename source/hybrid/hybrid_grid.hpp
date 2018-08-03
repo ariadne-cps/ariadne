@@ -30,7 +30,7 @@
 
 #include <iostream>
 
-#include "../expression/space.hpp"
+#include "../symbolic/space.hpp"
 #include "../hybrid/hybrid_space.hpp"
 #include "../hybrid/hybrid_scaling.hpp"
 

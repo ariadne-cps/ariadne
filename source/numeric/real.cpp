@@ -27,7 +27,7 @@
 
 #include "../utility/module.hpp"
 #include "../numeric/operators.hpp"
-#include "../expression/templates.hpp"
+#include "../symbolic/templates.hpp"
 
 #include "logical.hpp"
 #include "real.hpp"

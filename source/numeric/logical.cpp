@@ -27,7 +27,7 @@
 
 #include "../utility/stdlib.hpp"
 #include "../utility/string.hpp"
-#include "../expression/templates.hpp"
+#include "../symbolic/templates.hpp"
 
 #include "logical.hpp"
 

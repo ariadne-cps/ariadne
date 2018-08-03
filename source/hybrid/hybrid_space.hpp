@@ -32,7 +32,7 @@
 
 #include "../utility/container.hpp"
 #include "../utility/stlio.hpp"
-#include "../expression/space.hpp"
+#include "../symbolic/space.hpp"
 #include "../hybrid/discrete_location.hpp"
 #include "../hybrid/hybrid_set_interface.hpp"
 

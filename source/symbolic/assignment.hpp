@@ -43,8 +43,8 @@
 
 #include "../numeric/numeric.hpp"
 
-#include "../expression/variables.hpp"
-#include "../expression/expression.hpp"
+#include "../symbolic/variables.hpp"
+#include "../symbolic/expression.hpp"
 
 namespace Ariadne {
 
@@ -145,7 +145,7 @@ template<class T> inline List<Assignment<DottedVariable<T>,Expression<T>>> Dotte
 
 } // namespace Ariadne
 
-#include "../expression/valuation.hpp"
+#include "../symbolic/valuation.hpp"
 namespace Ariadne {
 template<class T> inline Assignment<Variable<T>,T>::operator Valuation<T> () const { Valuation<T> r; r.insert(this->lhs,this->rhs); return r; }
 } // namespace Ariadne

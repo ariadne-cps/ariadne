@@ -41,9 +41,9 @@
 #include "../utility/logging.hpp"
 
 #include "../utility/container.hpp"
-#include "../expression/valuation.hpp"
-#include "../expression/assignment.hpp"
-#include "../expression/expression.hpp"
+#include "../symbolic/valuation.hpp"
+#include "../symbolic/assignment.hpp"
+#include "../symbolic/expression.hpp"
 
 #include "../hybrid/discrete_location.hpp"
 

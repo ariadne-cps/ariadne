@@ -31,7 +31,7 @@
 #include "../utility/logging.hpp"
 
 #include "../utility/stlio.hpp"
-#include "../expression/expression.hpp"
+#include "../symbolic/expression.hpp"
 #include "../function/function.hpp"
 #include "../hybrid/hybrid_time.hpp"
 #include "../hybrid/hybrid_system.hpp"

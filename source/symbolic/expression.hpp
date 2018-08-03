@@ -42,10 +42,10 @@
 #include "../numeric/number.decl.hpp"
 
 #include "../numeric/operators.hpp"
-#include "../expression/constant.hpp"
-#include "../expression/variables.hpp"
-#include "../expression/valuation.hpp"
-#include "../expression/operations.hpp"
+#include "../symbolic/constant.hpp"
+#include "../symbolic/variables.hpp"
+#include "../symbolic/valuation.hpp"
+#include "../symbolic/operations.hpp"
 
 namespace Ariadne {
 

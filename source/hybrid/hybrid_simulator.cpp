@@ -33,9 +33,9 @@
 #include "../utility/container.hpp"
 #include "../utility/tuple.hpp"
 #include "../utility/stlio.hpp"
-#include "../expression/valuation.hpp"
-#include "../expression/assignment.hpp"
-#include "../expression/space.hpp"
+#include "../symbolic/valuation.hpp"
+#include "../symbolic/assignment.hpp"
+#include "../symbolic/space.hpp"
 
 #include "../function/function.hpp"
 #include "../function/formula.hpp"

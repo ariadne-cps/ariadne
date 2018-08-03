@@ -26,7 +26,7 @@
 #include <type_traits>
 
 #include "../utility/declarations.hpp"
-#include "../expression/variables.hpp"
+#include "../symbolic/variables.hpp"
 
 namespace Ariadne {
 template<class X> class Vector;
@@ -36,10 +36,10 @@ template<> struct Vector<RealVariable> : List<RealVariable> {
 };
 } // namespace Ariadne
 
-#include "../expression/expression.hpp"
-#include "../expression/assignment.hpp"
-#include "../expression/expression_set.hpp"
-#include "../expression/function_expression.hpp"
+#include "../symbolic/expression.hpp"
+#include "../symbolic/assignment.hpp"
+#include "../symbolic/expression_set.hpp"
+#include "../symbolic/function_expression.hpp"
 
 
 #include "../function/function.hpp"

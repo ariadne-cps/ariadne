@@ -27,14 +27,14 @@
 #include "../utility/macros.hpp"
 #include "../utility/stlio.hpp"
 #include "../numeric/numeric.hpp"
-#include "../expression/space.hpp"
+#include "../symbolic/space.hpp"
 #include "../geometry/point.hpp"
 #include "../geometry/box.hpp"
 #include "../output/geometry2d.hpp"
 #include "../output/graphics.hpp"
 #include "../hybrid/discrete_location.hpp"
 #include "../geometry/function_set.hpp"
-#include "../expression/expression_set.hpp"
+#include "../symbolic/expression_set.hpp"
 #include "../hybrid/hybrid_graphics.hpp"
 
 #ifdef HAVE_GTK_H

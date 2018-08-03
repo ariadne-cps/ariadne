@@ -41,7 +41,7 @@
 #include "floatmp.hpp"
 #include "float-user.hpp"
 
-#include "../expression/templates.hpp"
+#include "../symbolic/templates.hpp"
 #include "../numeric/operators.hpp"
 
 namespace Ariadne {

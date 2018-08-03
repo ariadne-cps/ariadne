@@ -42,8 +42,8 @@
 #include "../dynamics/vector_field.hpp"
 #include "../dynamics/vector_field_evolver.hpp"
 
-#include "../expression/space.hpp"
-#include "../expression/assignment.hpp"
+#include "../symbolic/space.hpp"
+#include "../symbolic/assignment.hpp"
 
 namespace {
 

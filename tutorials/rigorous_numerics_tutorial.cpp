@@ -31,7 +31,7 @@
 #include "geometry/function_set.hpp"
 #include "output/graphics.hpp"
 
-#include "expression/expression.hpp"
+#include "symbolic/expression.hpp"
 
 #define print(expr) { std::cout << #expr << ": " << (expr) << "\n"; }
 

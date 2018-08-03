@@ -37,8 +37,8 @@
 #include "../function/function.hpp"
 #include "../hybrid/discrete_location.hpp"
 #include "../hybrid/discrete_event.hpp"
-#include "../expression/assignment.hpp"
-#include "../expression/expression.hpp"
+#include "../symbolic/assignment.hpp"
+#include "../symbolic/expression.hpp"
 #include "../utility/logging.hpp"
 
 #include "../hybrid/hybrid_automaton.hpp"

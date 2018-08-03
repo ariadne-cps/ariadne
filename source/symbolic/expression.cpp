@@ -29,12 +29,12 @@
 #include "../algebra/algebra.hpp"
 #include "../algebra/algebra_wrapper.hpp"
 
-#include "../expression/constant.hpp"
-#include "../expression/variables.hpp"
-#include "../expression/expression.hpp"
-#include "../expression/assignment.hpp"
-#include "../expression/space.hpp"
-#include "../expression/valuation.hpp"
+#include "../symbolic/constant.hpp"
+#include "../symbolic/variables.hpp"
+#include "../symbolic/expression.hpp"
+#include "../symbolic/assignment.hpp"
+#include "../symbolic/space.hpp"
+#include "../symbolic/valuation.hpp"
 
 #include "../function/formula.hpp"
 

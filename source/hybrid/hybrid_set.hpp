@@ -42,7 +42,7 @@
 #include "../geometry/grid_set.hpp"
 #include "../geometry/curve.hpp"
 
-#include "../expression/expression_set.hpp"
+#include "../symbolic/expression_set.hpp"
 
 #include "../hybrid/hybrid_set.decl.hpp"
 #include "../hybrid/hybrid_set_interface.hpp"

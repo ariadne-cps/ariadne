@@ -34,9 +34,9 @@
 #include "../numeric/rational.hpp"
 #include "../numeric/real.hpp"
 #include "../numeric/floatdp.hpp"
-#include "../expression/variables.hpp"
-#include "../expression/expression.hpp"
-#include "../expression/assignment.hpp"
+#include "../symbolic/variables.hpp"
+#include "../symbolic/expression.hpp"
+#include "../symbolic/assignment.hpp"
 
 typedef std::ostream OutputStream;
 typedef std::string String;

@@ -36,16 +36,16 @@ namespace Ariadne {
 /*!\defgroup UserModules User Modules
  */
 
-/*! \defgroup ExpressionModule Expression Module
+/*! \defgroup SymbolicModule Symbolic Module
  *  \ingroup UserModules
- *  \brief Expressions in named variables.
+ *  \brief Symbolic expressions in named variables.
  *
  * In this module, expressions in named variables can defined. These form the
  * building blocks for defining hybrid systems.
  */
 
 /*!\defgroup ExpressionSetSubModule Expression Sets
- * \ingroup ExpressionModule
+ * \ingroup SymbolicModule
  * \brief Sets described by giving constraints on variables and expressions.
  */
 

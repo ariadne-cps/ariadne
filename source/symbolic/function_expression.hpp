@@ -28,9 +28,9 @@
 #ifndef ARIADNE_FUNCTION_EXPRESSION_HPP
 #define ARIADNE_FUNCTION_EXPRESSION_HPP
 
-#include "../expression/expression.hpp"
-#include "../expression/expression_set.hpp"
-#include "../expression/space.hpp"
+#include "../symbolic/expression.hpp"
+#include "../symbolic/expression_set.hpp"
+#include "../symbolic/space.hpp"
 
 #include "../function/function.hpp"
 #include "../function/formula.hpp"

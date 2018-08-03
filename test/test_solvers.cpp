@@ -33,8 +33,8 @@
 #include "function/taylor_function.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/algebra.hpp"
-#include "expression/expression.hpp"
-#include "expression/space.hpp"
+#include "symbolic/expression.hpp"
+#include "symbolic/space.hpp"
 #include "function/formula.hpp"
 
 #include "test.hpp"

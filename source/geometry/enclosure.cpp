@@ -68,7 +68,7 @@
 #include "../function/functional.hpp"
 
 #include "../numeric/operators.hpp"
-#include "../expression/space.hpp"
+#include "../symbolic/space.hpp"
 
 #include "../algebra/expansion.inl.hpp"
 

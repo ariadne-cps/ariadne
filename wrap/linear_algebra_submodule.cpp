@@ -24,7 +24,7 @@
 #include "boost_python.hpp"
 #include "utilities.hpp"
 
-#include "config.h"
+#include "config.hpp"
 
 #include <boost/python.hpp>
 #include <boost/python/slice.hpp>

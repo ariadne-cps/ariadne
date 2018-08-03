@@ -25,7 +25,7 @@
 
 #include "algebra/algebra.hpp"
 
-#include "config.h"
+#include "config.hpp"
 
 #include "hybrid/hybrid_simulator.hpp"
 

@@ -23,7 +23,7 @@
 
 #include <iostream>
 #include <vector>
-#include "config.h"
+#include "config.hpp"
 #include "numeric/numeric.hpp"
 #include "algebra/expansion.hpp"
 #include "algebra/expansion.inl.hpp"

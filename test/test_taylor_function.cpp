@@ -23,7 +23,7 @@
 
 #include <iostream>
 #include <iomanip>
-#include "config.h"
+#include "config.hpp"
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/covector.hpp"

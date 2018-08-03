@@ -25,7 +25,7 @@
 #include <fstream>
 #include <cassert>
 
-#include "config.h"
+#include "config.hpp"
 #include "numeric/numeric.hpp"
 #include "numeric/float.hpp"
 #include "numeric/float-user.hpp"

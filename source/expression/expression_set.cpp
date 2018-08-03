@@ -22,7 +22,7 @@
  */
 
 #include "utility/standard.hpp"
-#include "config.h"
+#include "config.hpp"
 
 #include "expression/expression_set.hpp"
 #include "expression/expression.hpp"

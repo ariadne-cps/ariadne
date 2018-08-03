@@ -38,7 +38,7 @@
 #include <sstream>
 #include <iostream>
 
-#include "config.h"
+#include "config.hpp"
 
 #include "utility/array.hpp"
 #include "utility/tuple.hpp"

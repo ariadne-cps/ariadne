@@ -26,7 +26,7 @@
 // For some of the terminology used
 
 #include "function/functional.hpp"
-#include "config.h"
+#include "config.hpp"
 
 #include <limits>
 

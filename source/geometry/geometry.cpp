@@ -22,7 +22,7 @@
  */
 
 #include "numeric/numeric.hpp"
-#include "config.h"
+#include "config.hpp"
 
 #include "geometry/geometry.hpp"
 #include "utility/tuple.hpp"

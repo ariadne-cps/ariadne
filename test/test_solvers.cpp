@@ -26,7 +26,7 @@
 #include <sstream>
 #include <string>
 
-#include "config.h"
+#include "config.hpp"
 
 #include "solvers/solver.hpp"
 #include "function/function.hpp"

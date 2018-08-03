@@ -22,7 +22,7 @@
  */
 
 #include "utility/standard.hpp"
-#include "config.h"
+#include "config.hpp"
 
 #include "utility/macros.hpp"
 #include "utility/stlio.hpp"

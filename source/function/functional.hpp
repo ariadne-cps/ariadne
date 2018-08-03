@@ -28,7 +28,7 @@
 #ifndef ARIADNE_FUNCTIONAL_HPP
 #define ARIADNE_FUNCTIONAL_HPP
 
-#include "config.h"
+#include "config.hpp"
 
 #include "numeric/numeric.hpp"
 

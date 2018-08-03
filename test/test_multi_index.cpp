@@ -25,7 +25,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "config.h"
+#include "config.hpp"
 #include "algebra/multi_index.hpp"
 
 #include "test.hpp"

@@ -22,7 +22,7 @@
  */
 
 #include "utility/module.hpp"
-#include "config.h"
+#include "config.hpp"
 
 #include "numeric/logical.hpp"
 #include "numeric/real.hpp"

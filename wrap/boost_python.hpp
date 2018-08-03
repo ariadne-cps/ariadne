@@ -38,6 +38,6 @@
 #include <sstream>
 #include <iostream>
 
-#include "config.h"
+#include "config.hpp"
 
 #endif /* ARIADNE_BOOST_PYTHON_HPP */

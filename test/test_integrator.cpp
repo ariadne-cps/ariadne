@@ -26,7 +26,7 @@
 #include <sstream>
 #include <string>
 
-#include "config.h"
+#include "config.hpp"
 
 #include "function/polynomial.hpp"
 #include "solvers/integrator.hpp"

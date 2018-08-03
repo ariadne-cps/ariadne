@@ -22,7 +22,7 @@
  */
 
 #include <iostream>
-#include "config.h"
+#include "config.hpp"
 #include "test.hpp"
 
 namespace Ariadne { }

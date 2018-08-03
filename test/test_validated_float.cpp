@@ -28,7 +28,7 @@
 #include <sstream>
 #include <string>
 
-#include "config.h"
+#include "config.hpp"
 #include "numeric/rational.hpp"
 #include "numeric/float.decl.hpp"
 #include "numeric/float-user.hpp"

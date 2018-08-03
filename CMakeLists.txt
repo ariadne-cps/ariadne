@@ -117,7 +117,7 @@ elseif(NOT Boost_FOUND)
     message(WARNING "Unable to find Boost Serialization component.")
 endif()
 
-configure_file (${PROJECT_SOURCE_DIR}/config.h.cmake ${PROJECT_SOURCE_DIR}/source/config.h)
+configure_file (${PROJECT_SOURCE_DIR}/config.hpp.cmake ${PROJECT_SOURCE_DIR}/source/config.hpp)
 
 #Non-portable fix to avoid user header directories being searched for by system headers
 #add_definitions(-iquote${PROJECT_SOURCE_DIR})
@@ -203,8 +203,7 @@ target_link_libraries (pyariadne-numeric ${PYTHON_LIBRARIES} boost_python mpfr g
 #target_link_libraries (pyariadne-algebra ariadne boost_python)
 
 install (TARGETS ariadne DESTINATION lib)
-install (FILES source/config.h DESTINATION include/ariadne)
-install (DIRECTORY source/ DESTINATION include/ariadne/
+install (DIRECTORY source/ DESTINATION include/ariadne
             FILES_MATCHING PATTERN "*.hpp"
             PATTERN "source/prototyping" EXCLUDE
             PATTERN "source/experimental" EXCLUDE)

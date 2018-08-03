@@ -32,7 +32,7 @@ decltype(-declval<Nat>()) neg(Nat); Int neg(Int); Dbl neg(Dbl);
 Rational rec(Nat); Rational rec(Int); Dbl rec(Dbl);
 } // namespace Ariadne
 
-#include "config.h"
+#include "config.hpp"
 #include "numeric/logical.hpp"
 #include "numeric/number.hpp"
 #include "numeric/float.hpp"

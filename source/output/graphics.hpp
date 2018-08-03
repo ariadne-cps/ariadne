@@ -28,7 +28,7 @@
 #ifndef ARIADNE_GRAPHICS_HPP
 #define ARIADNE_GRAPHICS_HPP
 
-#include "config.h"
+#include "config.hpp"
 
 #include <iosfwd>
 #include <string>

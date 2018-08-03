@@ -30,7 +30,7 @@
 
 
 
-#include "config.h"
+#include "config.hpp"
 
 #include "utility/macros.hpp"
 #include "numeric/dyadic.hpp"

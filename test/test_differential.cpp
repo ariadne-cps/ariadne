@@ -28,7 +28,7 @@
 #include <sstream>
 #include <string>
 
-#include "config.h"
+#include "config.hpp"
 
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"

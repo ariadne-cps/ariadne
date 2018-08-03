@@ -24,7 +24,7 @@
 #include <fstream>
 #include <iostream>
 
-#include "config.h"
+#include "config.hpp"
 #include "expression/expression.hpp"
 #include "expression/space.hpp"
 #include "hybrid/hybrid_set.hpp"

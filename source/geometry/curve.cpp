@@ -25,7 +25,7 @@
 #include "function/taylor_model.hpp"
 #include "function/formula.hpp"
 
-#include "config.h"
+#include "config.hpp"
 
 #include <cassert>
 

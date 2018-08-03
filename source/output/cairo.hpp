@@ -23,7 +23,7 @@
 
 #include "output/graphics.hpp"
 
-#include "config.h"
+#include "config.hpp"
 
 #ifdef HAVE_CAIRO_H
 #include <cairo/cairo.h>

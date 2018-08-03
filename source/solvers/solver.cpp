@@ -22,7 +22,7 @@
  */
 
 #include "function/functional.hpp"
-#include "config.h"
+#include "config.hpp"
 
 #include "geometry/interval.hpp"
 #include "function/function_model.hpp"

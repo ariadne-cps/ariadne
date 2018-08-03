@@ -22,7 +22,7 @@
  */
 
 #include "function/functional.hpp"
-#include "config.h"
+#include "config.hpp"
 
 #include "utility/macros.hpp"
 #include "utility/logging.hpp"

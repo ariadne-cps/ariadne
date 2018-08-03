@@ -28,7 +28,7 @@
 #ifndef ARIADNE_STANDARD_HPP
 #define ARIADNE_STANDARD_HPP
 
-#include "config.h"
+#include "config.hpp"
 
 #include <iostream>
 #include <iomanip>

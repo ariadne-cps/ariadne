@@ -23,7 +23,7 @@
 
 #include "numeric/module.hpp"
 
-#include "config.h"
+#include "config.hpp"
 
 #include "algebra/matrix.hpp"
 

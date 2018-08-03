@@ -28,7 +28,7 @@
 #ifndef ARIADNE_FUNCTION_HPP
 #define ARIADNE_FUNCTION_HPP
 
-#include "config.h"
+#include "config.hpp"
 
 #include <cstdarg>
 #include <iosfwd>

@@ -26,7 +26,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "config.h"
+#include "config.hpp"
 
 #include "test.hpp"
 

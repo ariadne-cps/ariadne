@@ -24,10 +24,10 @@
 #include "procedure.hpp"
 #include "procedure.tpl.hpp"
 
-#include "algebra/differential.hpp"
-#include "algebra/fixed_univariate_differential.hpp"
-#include "algebra/graded.hpp"
-#include "function/function.hpp"
+#include "../algebra/differential.hpp"
+#include "../algebra/fixed_univariate_differential.hpp"
+#include "../algebra/graded.hpp"
+#include "../function/function.hpp"
 
 namespace Ariadne {
 

@@ -28,11 +28,11 @@
 #ifndef ARIADNE_NONLINEAR_PROGRAMMING_HPP
 #define ARIADNE_NONLINEAR_PROGRAMMING_HPP
 
-#include "utility/declarations.hpp"
+#include "../utility/declarations.hpp"
 
-#include "utility/logging.hpp"
-#include "numeric/numeric.hpp"
-#include "utility/tuple.hpp"
+#include "../utility/logging.hpp"
+#include "../numeric/numeric.hpp"
+#include "../utility/tuple.hpp"
 
 
 namespace Ariadne {

@@ -30,9 +30,9 @@
 
 #include <stdexcept>
 
-#include "utility/metaprogramming.hpp"
-#include "utility/typedefs.hpp"
-#include "numeric/paradigm.hpp"
+#include "../utility/metaprogramming.hpp"
+#include "../utility/typedefs.hpp"
+#include "../numeric/paradigm.hpp"
 
 namespace Ariadne {
 

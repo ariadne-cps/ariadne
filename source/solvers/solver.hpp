@@ -32,14 +32,14 @@
 #include <stdexcept>
 #include <string>
 
-#include "solvers/solver_interface.hpp"
-#include "function/function_interface.hpp"
+#include "../solvers/solver_interface.hpp"
+#include "../function/function_interface.hpp"
 
-#include "utility/logging.hpp"
-#include "utility/attribute.hpp"
-#include "utility/pointer.hpp"
-#include "utility/container.hpp"
-#include "numeric/numeric.hpp"
+#include "../utility/logging.hpp"
+#include "../utility/attribute.hpp"
+#include "../utility/pointer.hpp"
+#include "../utility/container.hpp"
+#include "../numeric/numeric.hpp"
 
 namespace Ariadne {
 

@@ -21,32 +21,32 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.hpp"
+#include "../function/functional.hpp"
 
-#include "algebra/algebra.hpp"
+#include "../algebra/algebra.hpp"
 
-#include "config.hpp"
+#include "../config.hpp"
 
-#include "hybrid/hybrid_simulator.hpp"
+#include "../hybrid/hybrid_simulator.hpp"
 
-#include "utility/array.hpp"
-#include "utility/container.hpp"
-#include "utility/tuple.hpp"
-#include "utility/stlio.hpp"
-#include "expression/valuation.hpp"
-#include "expression/assignment.hpp"
-#include "expression/space.hpp"
+#include "../utility/array.hpp"
+#include "../utility/container.hpp"
+#include "../utility/tuple.hpp"
+#include "../utility/stlio.hpp"
+#include "../expression/valuation.hpp"
+#include "../expression/assignment.hpp"
+#include "../expression/space.hpp"
 
-#include "function/function.hpp"
-#include "function/formula.hpp"
-#include "function/taylor_model.hpp"
+#include "../function/function.hpp"
+#include "../function/formula.hpp"
+#include "../function/taylor_model.hpp"
 
-#include "utility/logging.hpp"
+#include "../utility/logging.hpp"
 
-#include "hybrid/hybrid_set.hpp"
-#include "hybrid/hybrid_orbit.hpp"
-#include "hybrid/hybrid_time.hpp"
-#include "hybrid/hybrid_automaton_interface.hpp"
+#include "../hybrid/hybrid_set.hpp"
+#include "../hybrid/hybrid_orbit.hpp"
+#include "../hybrid/hybrid_time.hpp"
+#include "../hybrid/hybrid_automaton_interface.hpp"
 
 
 namespace Ariadne {

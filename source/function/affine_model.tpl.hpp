@@ -21,16 +21,16 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/numeric.hpp"
+#include "../numeric/numeric.hpp"
 
-#include "algebra/vector.hpp"
-#include "function/function.hpp"
-#include "function/taylor_model.hpp"
-#include "function/affine_model.hpp"
+#include "../algebra/vector.hpp"
+#include "../function/function.hpp"
+#include "../function/taylor_model.hpp"
+#include "../function/affine_model.hpp"
 
-#include "function/affine.hpp"
-#include "function/taylor_function.hpp"
-#include "algebra/vector.hpp"
+#include "../function/affine.hpp"
+#include "../function/taylor_function.hpp"
+#include "../algebra/vector.hpp"
 
 namespace Ariadne {
 

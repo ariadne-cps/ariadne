@@ -29,7 +29,7 @@
 #ifndef ARIADNE_SIMULATION_TOOLBOX_INTERFACE_HPP
 #define ARIADNE_SIMULATION_TOOLBOX_INTERFACE_HPP
 
-#include "utility/tribool.hpp"
+#include "../utility/tribool.hpp"
 
 namespace Ariadne {
 

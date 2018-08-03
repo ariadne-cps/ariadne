@@ -36,16 +36,16 @@
 
 #include <memory>
 
-#include "utility/declarations.hpp"
+#include "../utility/declarations.hpp"
 
-#include "utility/logging.hpp"
+#include "../utility/logging.hpp"
 
-#include "utility/container.hpp"
-#include "expression/valuation.hpp"
-#include "expression/assignment.hpp"
-#include "expression/expression.hpp"
+#include "../utility/container.hpp"
+#include "../expression/valuation.hpp"
+#include "../expression/assignment.hpp"
+#include "../expression/expression.hpp"
 
-#include "hybrid/discrete_location.hpp"
+#include "../hybrid/discrete_location.hpp"
 
 namespace Ariadne {
 

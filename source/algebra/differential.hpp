@@ -30,18 +30,18 @@
 
 #include <map>
 
-#include "utility/macros.hpp"
-#include "utility/array.hpp"
-#include "numeric/number.decl.hpp"
-#include "numeric/float.decl.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/matrix.hpp"
-#include "algebra/multi_index.hpp"
-#include "algebra/series.hpp"
-#include "algebra/expansion.hpp"
-#include "algebra/operations.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/array.hpp"
+#include "../numeric/number.decl.hpp"
+#include "../numeric/float.decl.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/matrix.hpp"
+#include "../algebra/multi_index.hpp"
+#include "../algebra/series.hpp"
+#include "../algebra/expansion.hpp"
+#include "../algebra/operations.hpp"
 
-#include "algebra/univariate_differential.hpp"
+#include "../algebra/univariate_differential.hpp"
 
 namespace Ariadne {
 

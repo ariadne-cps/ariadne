@@ -30,14 +30,14 @@
 #ifndef ARIADNE_RATIONAL_HPP
 #define ARIADNE_RATIONAL_HPP
 
-#include "external/gmp.hpp"
-#include "utility/typedefs.hpp"
-#include "utility/metaprogramming.hpp"
-#include "utility/string.hpp"
-#include "numeric/integer.hpp"
-#include "numeric/arithmetic.hpp"
-#include "numeric/number.decl.hpp"
-#include "numeric/float.decl.hpp"
+#include "../external/gmp.hpp"
+#include "../utility/typedefs.hpp"
+#include "../utility/metaprogramming.hpp"
+#include "../utility/string.hpp"
+#include "../numeric/integer.hpp"
+#include "../numeric/arithmetic.hpp"
+#include "../numeric/number.decl.hpp"
+#include "../numeric/float.decl.hpp"
 
 namespace Ariadne {
 

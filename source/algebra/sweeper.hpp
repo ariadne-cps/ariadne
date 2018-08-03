@@ -28,11 +28,11 @@
 #ifndef ARIADNE_SWEEPER_HPP
 #define ARIADNE_SWEEPER_HPP
 
-#include "utility/macros.hpp"
-#include "utility/attribute.hpp"
-#include "numeric/float.decl.hpp"
-#include "algebra/multi_index.hpp"
-#include "algebra/expansion.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/attribute.hpp"
+#include "../numeric/float.decl.hpp"
+#include "../algebra/multi_index.hpp"
+#include "../algebra/expansion.hpp"
 
 namespace Ariadne {
 

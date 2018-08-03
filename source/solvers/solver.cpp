@@ -21,28 +21,28 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.hpp"
-#include "config.hpp"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
-#include "geometry/interval.hpp"
-#include "function/function_model.hpp"
+#include "../geometry/interval.hpp"
+#include "../function/function_model.hpp"
 
-#include "solvers/solver.hpp"
+#include "../solvers/solver.hpp"
 
-#include "utility/logging.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/matrix.hpp"
-#include "algebra/differential.hpp"
-#include "algebra/algebra.hpp"
-#include "function/taylor_model.hpp"
-#include "function/formula.hpp"
-#include "function/function.hpp"
-#include "function/function_model.hpp"
+#include "../utility/logging.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/matrix.hpp"
+#include "../algebra/differential.hpp"
+#include "../algebra/algebra.hpp"
+#include "../function/taylor_model.hpp"
+#include "../function/formula.hpp"
+#include "../function/function.hpp"
+#include "../function/function_model.hpp"
 
-#include "algebra/expansion.inl.hpp"
+#include "../algebra/expansion.inl.hpp"
 
-#include "algebra/evaluate.hpp"
-#include "algebra/evaluate.tpl.hpp"
+#include "../algebra/evaluate.hpp"
+#include "../algebra/evaluate.tpl.hpp"
 
 namespace Ariadne {
 

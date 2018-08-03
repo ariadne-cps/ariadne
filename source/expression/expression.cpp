@@ -21,22 +21,22 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "utility/standard.hpp"
-#include "config.hpp"
+#include "../utility/standard.hpp"
+#include "../config.hpp"
 
-#include "numeric/operators.tpl.hpp"
+#include "../numeric/operators.tpl.hpp"
 
-#include "algebra/algebra.hpp"
-#include "algebra/algebra_wrapper.hpp"
+#include "../algebra/algebra.hpp"
+#include "../algebra/algebra_wrapper.hpp"
 
-#include "expression/constant.hpp"
-#include "expression/variables.hpp"
-#include "expression/expression.hpp"
-#include "expression/assignment.hpp"
-#include "expression/space.hpp"
-#include "expression/valuation.hpp"
+#include "../expression/constant.hpp"
+#include "../expression/variables.hpp"
+#include "../expression/expression.hpp"
+#include "../expression/assignment.hpp"
+#include "../expression/space.hpp"
+#include "../expression/valuation.hpp"
 
-#include "function/formula.hpp"
+#include "../function/formula.hpp"
 
 namespace Ariadne {
 

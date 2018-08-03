@@ -33,13 +33,13 @@
 #include <list>
 #include <iostream>
 
-#include "utility/declarations.hpp"
-#include "utility/logging.hpp"
-#include "utility/container.hpp"
-#include "output/graphics_interface.hpp"
-#include "function/affine.hpp"
-#include "function/affine_model.hpp"
-#include "function/constraint.hpp"
+#include "../utility/declarations.hpp"
+#include "../utility/logging.hpp"
+#include "../utility/container.hpp"
+#include "../output/graphics_interface.hpp"
+#include "../function/affine.hpp"
+#include "../function/affine_model.hpp"
+#include "../function/constraint.hpp"
 
 namespace Ariadne {
 

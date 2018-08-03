@@ -32,14 +32,14 @@
 #include <string>
 #include <vector>
 
-#include "output/colour.hpp"
-#include "expression/variables.hpp"
-#include "output/graphics_interface.hpp"
-#include "output/graphics.hpp"
+#include "../output/colour.hpp"
+#include "../expression/variables.hpp"
+#include "../output/graphics_interface.hpp"
+#include "../output/graphics.hpp"
 
-#include "expression/expression_set.hpp"
-#include "hybrid/discrete_location.hpp"
-#include "hybrid/hybrid_graphics_interface.hpp"
+#include "../expression/expression_set.hpp"
+#include "../hybrid/discrete_location.hpp"
+#include "../hybrid/hybrid_graphics_interface.hpp"
 
 namespace Ariadne {
 

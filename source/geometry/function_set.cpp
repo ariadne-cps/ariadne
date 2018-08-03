@@ -21,27 +21,27 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.hpp"
-#include "config.hpp"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
-#include "utility/macros.hpp"
-#include "utility/logging.hpp"
-#include "function/polynomial.hpp"
-#include "function/function.hpp"
-#include "function/taylor_function.hpp"
-#include "function/formula.hpp"
-#include "function/procedure.hpp"
-#include "solvers/nonlinear_programming.hpp"
-#include "solvers/constraint_solver.hpp"
-#include "geometry/function_set.hpp"
-#include "geometry/affine_set.hpp"
-#include "geometry/grid_set.hpp"
-#include "geometry/paver.hpp"
-#include "algebra/algebra.hpp"
-#include "algebra/expansion.inl.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/logging.hpp"
+#include "../function/polynomial.hpp"
+#include "../function/function.hpp"
+#include "../function/taylor_function.hpp"
+#include "../function/formula.hpp"
+#include "../function/procedure.hpp"
+#include "../solvers/nonlinear_programming.hpp"
+#include "../solvers/constraint_solver.hpp"
+#include "../geometry/function_set.hpp"
+#include "../geometry/affine_set.hpp"
+#include "../geometry/grid_set.hpp"
+#include "../geometry/paver.hpp"
+#include "../algebra/algebra.hpp"
+#include "../algebra/expansion.inl.hpp"
 
-#include "output/graphics_interface.hpp"
-#include "output/drawer.hpp"
+#include "../output/graphics_interface.hpp"
+#include "../output/drawer.hpp"
 
 namespace Ariadne {
 

@@ -21,30 +21,30 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.hpp"
-#include "config.hpp"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
 #include <iomanip>
 
-#include "solvers/integrator.hpp"
+#include "../solvers/integrator.hpp"
 
-#include "utility/logging.hpp"
-#include "utility/container.hpp"
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/matrix.hpp"
-#include "algebra/differential.hpp"
-#include "algebra/sweeper.hpp"
-#include "algebra/algebra.hpp"
-#include "function/function.hpp"
-#include "function/function_model.hpp"
-#include "function/formula.hpp"
-#include "function/taylor_model.hpp"
+#include "../utility/logging.hpp"
+#include "../utility/container.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/matrix.hpp"
+#include "../algebra/differential.hpp"
+#include "../algebra/sweeper.hpp"
+#include "../algebra/algebra.hpp"
+#include "../function/function.hpp"
+#include "../function/function_model.hpp"
+#include "../function/formula.hpp"
+#include "../function/taylor_model.hpp"
 
-#include "function/polynomial.hpp"
-#include "geometry/interval.hpp"
+#include "../function/polynomial.hpp"
+#include "../geometry/interval.hpp"
 
-#include "algebra/expansion.inl.hpp"
+#include "../algebra/expansion.inl.hpp"
 
 namespace Ariadne {
 
@@ -330,9 +330,9 @@ Void TaylorPicardIntegrator::write(OutputStream& os) const {
 } // namespace Ariadne
 
 
-#include "algebra/graded.hpp"
-#include "function/procedure.hpp"
-#include "function/taylor_function.hpp"
+#include "../algebra/graded.hpp"
+#include "../function/procedure.hpp"
+#include "../function/taylor_function.hpp"
 namespace Ariadne {
 
 class FormulaFunction;

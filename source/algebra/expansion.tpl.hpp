@@ -32,7 +32,7 @@
 
 #include "expansion.hpp"
 #include "expansion.inl.hpp"
-#include "numeric/logical.hpp"
+#include "../numeric/logical.hpp"
 
 namespace Ariadne {
 

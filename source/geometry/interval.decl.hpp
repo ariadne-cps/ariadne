@@ -24,8 +24,8 @@
 #ifndef ARIADNE_INTERVAL_DECL_HPP
 #define ARIADNE_INTERVAL_DECL_HPP
 
-#include "numeric/float.decl.hpp"
-#include "numeric/number.decl.hpp"
+#include "../numeric/float.decl.hpp"
+#include "../numeric/number.decl.hpp"
 
 namespace Ariadne {
 

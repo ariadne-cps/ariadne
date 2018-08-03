@@ -29,7 +29,7 @@
 #ifndef ARIADNE_PROJECTION_HPP
 #define ARIADNE_PROJECTION_HPP
 
-#include "utility/typedefs.hpp"
+#include "../utility/typedefs.hpp"
 
 namespace Ariadne {
 

@@ -28,25 +28,25 @@
 #ifndef ARIADNE_FUNCTION_HPP
 #define ARIADNE_FUNCTION_HPP
 
-#include "config.hpp"
+#include "../config.hpp"
 
 #include <cstdarg>
 #include <iosfwd>
 #include <iostream>
 
-#include "utility/declarations.hpp"
-#include "utility/macros.hpp"
-#include "utility/pointer.hpp"
-#include "utility/container.hpp"
-#include "utility/metaprogramming.hpp"
+#include "../utility/declarations.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/pointer.hpp"
+#include "../utility/container.hpp"
+#include "../utility/metaprogramming.hpp"
 
-#include "function/function_interface.hpp"
+#include "../function/function_interface.hpp"
 
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/covector.hpp"
-#include "algebra/differential.hpp"
-#include "function/domain.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/covector.hpp"
+#include "../algebra/differential.hpp"
+#include "../function/domain.hpp"
 
 namespace Ariadne {
 

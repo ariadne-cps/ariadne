@@ -30,12 +30,12 @@
 #ifndef ARIADNE_INTERVAL_HPP
 #define ARIADNE_INTERVAL_HPP
 
-#include "utility/module.hpp"
+#include "../utility/module.hpp"
 
-#include "numeric/logical.hpp"
-#include "numeric/number.hpp"
-#include "numeric/float.hpp"
-#include "numeric/arithmetic.hpp"
+#include "../numeric/logical.hpp"
+#include "../numeric/number.hpp"
+#include "../numeric/float.hpp"
+#include "../numeric/arithmetic.hpp"
 
 #include "interval.decl.hpp"
 

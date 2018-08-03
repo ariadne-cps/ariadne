@@ -31,12 +31,12 @@
 #include <iostream>
 #include <sstream>
 
-#include "numeric/rational.hpp"
-#include "numeric/real.hpp"
-#include "numeric/floatdp.hpp"
-#include "expression/variables.hpp"
-#include "expression/expression.hpp"
-#include "expression/assignment.hpp"
+#include "../numeric/rational.hpp"
+#include "../numeric/real.hpp"
+#include "../numeric/floatdp.hpp"
+#include "../expression/variables.hpp"
+#include "../expression/expression.hpp"
+#include "../expression/assignment.hpp"
 
 typedef std::ostream OutputStream;
 typedef std::string String;

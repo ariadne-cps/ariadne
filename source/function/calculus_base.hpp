@@ -28,13 +28,13 @@
 #ifndef ARIADNE_CALCULUS_BASE_HPP
 #define ARIADNE_CALCULUS_BASE_HPP
 
-#include "utility/tribool.hpp"
-#include "utility/logging.hpp"
-#include "function/function_interface.hpp"
+#include "../utility/tribool.hpp"
+#include "../utility/logging.hpp"
+#include "../function/function_interface.hpp"
 #include "calculus_interface.hpp"
 
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/vector.hpp"
 
 /* \brief Top-level namespace. */
 namespace Ariadne {

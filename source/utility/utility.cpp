@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "config.hpp"
+#include "../config.hpp"
 #include "stack_trace.hpp"
 
 #ifdef ARIADNE_ENABLE_STACK_TRACE

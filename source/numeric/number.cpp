@@ -27,8 +27,8 @@
 
 
 
-#include "utility/module.hpp"
-#include "numeric/paradigm.hpp"
+#include "../utility/module.hpp"
+#include "../numeric/paradigm.hpp"
 
 #include "number.hpp"
 #include "logical.hpp"

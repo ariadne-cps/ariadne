@@ -30,16 +30,16 @@
 #ifndef ARIADNE_REAL_HPP
 #define ARIADNE_REAL_HPP
 
-#include "utility/typedefs.hpp"
-#include "utility/pointer.hpp"
+#include "../utility/typedefs.hpp"
+#include "../utility/pointer.hpp"
 
-#include "numeric/logical.decl.hpp"
-#include "numeric/number.decl.hpp"
-#include "numeric/float.decl.hpp"
+#include "../numeric/logical.decl.hpp"
+#include "../numeric/number.decl.hpp"
+#include "../numeric/float.decl.hpp"
 
 #include "paradigm.hpp"
-#include "numeric/arithmetic.hpp"
-#include "numeric/sequence.hpp"
+#include "../numeric/arithmetic.hpp"
+#include "../numeric/sequence.hpp"
 
 namespace Ariadne {
 

@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.hpp"
+#include "../function/functional.hpp"
 
 #include <type_traits>
 
-#include "utility/declarations.hpp"
-#include "expression/variables.hpp"
+#include "../utility/declarations.hpp"
+#include "../expression/variables.hpp"
 
 namespace Ariadne {
 template<class X> class Vector;
@@ -36,15 +36,15 @@ template<> struct Vector<RealVariable> : List<RealVariable> {
 };
 } // namespace Ariadne
 
-#include "expression/expression.hpp"
-#include "expression/assignment.hpp"
-#include "expression/expression_set.hpp"
-#include "expression/function_expression.hpp"
+#include "../expression/expression.hpp"
+#include "../expression/assignment.hpp"
+#include "../expression/expression_set.hpp"
+#include "../expression/function_expression.hpp"
 
 
-#include "function/function.hpp"
-#include "function/scaled_function_patch.hpp"
-#include "function/taylor_function.hpp"
+#include "../function/function.hpp"
+#include "../function/scaled_function_patch.hpp"
+#include "../function/taylor_function.hpp"
 
 
 #define ARIADNE_PRINT(expression) std::cout << #expression << "=" << (expression) << "\n"

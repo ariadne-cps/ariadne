@@ -30,13 +30,13 @@
 
 
 #include <vector>
-#include "utility/stlio.hpp"
-#include "utility/macros.hpp"
+#include "../utility/stlio.hpp"
+#include "../utility/macros.hpp"
 
-#include "output/graphics_interface.hpp"
-#include "hybrid/discrete_location.hpp"
+#include "../output/graphics_interface.hpp"
+#include "../hybrid/discrete_location.hpp"
 
-#include "geometry/box.hpp"
+#include "../geometry/box.hpp"
 
 namespace Ariadne {
 

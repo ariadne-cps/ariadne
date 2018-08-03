@@ -22,9 +22,9 @@
  */
 
 #include "differential_inclusion.hpp"
-#include "function/taylor_function.hpp"
-#include "solvers/integrator.hpp"
-#include "algebra/expansion.inl.hpp"
+#include "../function/taylor_function.hpp"
+#include "../solvers/integrator.hpp"
+#include "../algebra/expansion.inl.hpp"
 
 namespace Ariadne {
 
@@ -557,7 +557,7 @@ Void LohnerReconditioner::simplify(ValidatedVectorFunctionModelDP& phi) const {
 
 /*
 
-#include "geometry/zonotope.hpp"
+#include "../geometry/zonotope.hpp"
 
 namespace Ariadne {
 

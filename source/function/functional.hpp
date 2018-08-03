@@ -28,15 +28,15 @@
 #ifndef ARIADNE_FUNCTIONAL_HPP
 #define ARIADNE_FUNCTIONAL_HPP
 
-#include "config.hpp"
+#include "../config.hpp"
 
-#include "numeric/numeric.hpp"
+#include "../numeric/numeric.hpp"
 
-#include "algebra/differential.hpp"
+#include "../algebra/differential.hpp"
 
-#include "function/affine.hpp"
-#include "function/polynomial.hpp"
-#include "function/function.hpp"
-#include "function/function_model.hpp"
+#include "../function/affine.hpp"
+#include "../function/polynomial.hpp"
+#include "../function/function.hpp"
+#include "../function/function_model.hpp"
 
 #endif

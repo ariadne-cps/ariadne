@@ -29,12 +29,12 @@
 #define ARIADNE_C1_TAYLOR_FUNCTION_HPP
 
 #include <iosfwd>
-#include "utility/declarations.hpp"
-#include "utility/container.hpp"
-#include "numeric/numeric.hpp"
-#include "numeric/float.hpp"
-#include "algebra/expansion.hpp"
-#include "function/domain.hpp"
+#include "../utility/declarations.hpp"
+#include "../utility/container.hpp"
+#include "../numeric/numeric.hpp"
+#include "../numeric/float.hpp"
+#include "../algebra/expansion.hpp"
+#include "../function/domain.hpp"
 
 namespace Ariadne {
 

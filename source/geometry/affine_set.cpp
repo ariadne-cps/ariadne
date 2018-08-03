@@ -21,23 +21,23 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.hpp"
-#include "config.hpp"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/matrix.hpp"
-#include "solvers/linear_programming.hpp"
-#include "function/function.hpp"
-#include "function/affine.hpp"
-#include "function/affine_model.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/matrix.hpp"
+#include "../solvers/linear_programming.hpp"
+#include "../function/function.hpp"
+#include "../function/affine.hpp"
+#include "../function/affine_model.hpp"
 
-#include "geometry/box.hpp"
-#include "geometry/grid_set.hpp"
-#include "geometry/affine_set.hpp"
+#include "../geometry/box.hpp"
+#include "../geometry/grid_set.hpp"
+#include "../geometry/affine_set.hpp"
 
-#include "output/graphics_interface.hpp"
-#include "output/geometry2d.hpp"
+#include "../output/graphics_interface.hpp"
+#include "../output/geometry2d.hpp"
 
 
 namespace Ariadne {

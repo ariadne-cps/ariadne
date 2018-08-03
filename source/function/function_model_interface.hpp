@@ -28,10 +28,10 @@
 #ifndef ARIADNE_FUNCTION_MODEL_INTERFACE_HPP
 #define ARIADNE_FUNCTION_MODEL_INTERFACE_HPP
 
-#include "function/function.decl.hpp"
-#include "function/function_interface.hpp"
+#include "../function/function.decl.hpp"
+#include "../function/function_interface.hpp"
 
-#include "numeric/operators.hpp"
+#include "../numeric/operators.hpp"
 
 namespace Ariadne {
 

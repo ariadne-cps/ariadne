@@ -27,16 +27,16 @@
 
 
 
-#include "utility/stdlib.hpp"
+#include "../utility/stdlib.hpp"
 
 #include "dyadic.hpp"
 
-#include "utility/macros.hpp"
-#include "utility/string.hpp"
-#include "numeric/logical.hpp"
-#include "numeric/twoexp.hpp"
-#include "numeric/builtin.hpp"
-#include "numeric/rational.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/string.hpp"
+#include "../numeric/logical.hpp"
+#include "../numeric/twoexp.hpp"
+#include "../numeric/builtin.hpp"
+#include "../numeric/rational.hpp"
 
 #include <limits>
 

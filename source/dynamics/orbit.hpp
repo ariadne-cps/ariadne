@@ -34,11 +34,11 @@
 #include <map>
 #include <memory>
 
-#include "numeric/numeric.hpp"
-#include "output/graphics_interface.hpp"
-#include "geometry/function_set.hpp"
-#include "geometry/list_set.hpp"
-#include "geometry/enclosure.hpp"
+#include "../numeric/numeric.hpp"
+#include "../output/graphics_interface.hpp"
+#include "../geometry/function_set.hpp"
+#include "../geometry/list_set.hpp"
+#include "../geometry/enclosure.hpp"
 
 
 namespace Ariadne {

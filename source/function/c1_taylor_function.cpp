@@ -21,23 +21,23 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.hpp"
-#include "config.hpp"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
 #include <iostream>
 #include <iomanip>
 
-#include "numeric/float.hpp"
-#include "numeric/rational.hpp"
+#include "../numeric/float.hpp"
+#include "../numeric/rational.hpp"
 
-#include "utility/macros.hpp"
-#include "utility/exceptions.hpp"
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/multi_index.hpp"
-#include "algebra/expansion.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/exceptions.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/multi_index.hpp"
+#include "../algebra/expansion.hpp"
 
-#include "function/c1_taylor_function.hpp"
+#include "../function/c1_taylor_function.hpp"
 
 #define VOLATILE ;
 

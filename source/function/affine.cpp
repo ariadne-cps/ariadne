@@ -21,13 +21,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/numeric.hpp"
-#include "config.hpp"
+#include "../numeric/numeric.hpp"
+#include "../config.hpp"
 
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
-#include "function/function.hpp"
-#include "function/affine.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/vector.hpp"
+#include "../function/function.hpp"
+#include "../function/affine.hpp"
 
 namespace Ariadne {
 

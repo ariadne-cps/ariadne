@@ -32,10 +32,10 @@ namespace Ariadne {
 
 }
 
-#include "hybrid/hybrid_automaton_interface.hpp"
-#include "hybrid/hybrid_automaton.hpp"
-#include "hybrid/hybrid_automaton-atomic.hpp"
-#include "hybrid/hybrid_automaton-composite.hpp"
-#include "hybrid/hybrid_automaton-restrictive.hpp"
+#include "../hybrid/hybrid_automaton_interface.hpp"
+#include "../hybrid/hybrid_automaton.hpp"
+#include "../hybrid/hybrid_automaton-atomic.hpp"
+#include "../hybrid/hybrid_automaton-composite.hpp"
+#include "../hybrid/hybrid_automaton-restrictive.hpp"
 
 #endif // ARIADNE_HYBRID_AUTOMATA_HPP

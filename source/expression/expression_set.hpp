@@ -30,16 +30,16 @@
 
 #include <iostream>
 
-#include "utility/container.hpp"
-#include "utility/declarations.hpp"
-#include "expression/variables.hpp"
-#include "expression/expression.hpp"
-#include "expression/assignment.hpp"
-#include "expression/space.hpp"
-#include "numeric/float.hpp"
-#include "numeric/real.hpp"
-#include "function/projection.hpp"
-#include "geometry/box.hpp"
+#include "../utility/container.hpp"
+#include "../utility/declarations.hpp"
+#include "../expression/variables.hpp"
+#include "../expression/expression.hpp"
+#include "../expression/assignment.hpp"
+#include "../expression/space.hpp"
+#include "../numeric/float.hpp"
+#include "../numeric/real.hpp"
+#include "../function/projection.hpp"
+#include "../geometry/box.hpp"
 
 namespace Ariadne {
 

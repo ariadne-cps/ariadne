@@ -21,17 +21,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "utility/standard.hpp"
-#include "config.hpp"
+#include "../utility/standard.hpp"
+#include "../config.hpp"
 
 #include <cstdarg>
 #include <sstream>
 #include <string>
 #include <vector>
 
-#include "geometry/point.hpp"
-#include "geometry/box.hpp"
-#include "utility/stlio.hpp"
+#include "../geometry/point.hpp"
+#include "../geometry/box.hpp"
+#include "../utility/stlio.hpp"
 
 namespace Ariadne {
 

@@ -21,23 +21,23 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.hpp"
-#include "config.hpp"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
-#include "utility/macros.hpp"
-#include "utility/array.hpp"
-#include "utility/tuple.hpp"
-#include "utility/stlio.hpp"
-#include "algebra/vector.hpp"
-#include "function/function.hpp"
-#include "function/constraint.hpp"
-#include "geometry/enclosure.hpp"
-#include "dynamics/orbit.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/array.hpp"
+#include "../utility/tuple.hpp"
+#include "../utility/stlio.hpp"
+#include "../algebra/vector.hpp"
+#include "../function/function.hpp"
+#include "../function/constraint.hpp"
+#include "../geometry/enclosure.hpp"
+#include "../dynamics/orbit.hpp"
 
-#include "utility/logging.hpp"
+#include "../utility/logging.hpp"
 
-#include "dynamics/map.hpp"
-#include "dynamics/map_evolver.hpp"
+#include "../dynamics/map.hpp"
+#include "../dynamics/map_evolver.hpp"
 
 namespace {
 

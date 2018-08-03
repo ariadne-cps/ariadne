@@ -30,16 +30,16 @@
 #ifndef ARIADNE_INTEGER_HPP
 #define ARIADNE_INTEGER_HPP
 
-#include "external/gmp.hpp"
+#include "../external/gmp.hpp"
 
 #include <cassert>
 
-#include "utility/typedefs.hpp"
-#include "utility/metaprogramming.hpp"
-#include "numeric/sign.hpp"
-#include "numeric/logical.hpp"
-#include "numeric/arithmetic.hpp"
-#include "numeric/number.decl.hpp"
+#include "../utility/typedefs.hpp"
+#include "../utility/metaprogramming.hpp"
+#include "../numeric/sign.hpp"
+#include "../numeric/logical.hpp"
+#include "../numeric/arithmetic.hpp"
+#include "../numeric/number.decl.hpp"
 
 namespace Ariadne {
 

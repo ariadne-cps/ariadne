@@ -30,8 +30,8 @@
 #ifndef ARIADNE_NUMBER_WRAPPER_HPP
 #define ARIADNE_NUMBER_WRAPPER_HPP
 
-#include "utility/module.hpp"
-#include "numeric/paradigm.hpp"
+#include "../utility/module.hpp"
+#include "../numeric/paradigm.hpp"
 
 #include "number_interface.hpp"
 
@@ -41,8 +41,8 @@
 #include "floatmp.hpp"
 #include "float-user.hpp"
 
-#include "expression/templates.hpp"
-#include "numeric/operators.hpp"
+#include "../expression/templates.hpp"
+#include "../numeric/operators.hpp"
 
 namespace Ariadne {
 

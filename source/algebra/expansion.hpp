@@ -32,12 +32,12 @@
 
 #include "multi_index.hpp"
 
-#include "utility/typedefs.hpp"
-#include "utility/iterator.hpp"
-#include "utility/macros.hpp"
+#include "../utility/typedefs.hpp"
+#include "../utility/iterator.hpp"
+#include "../utility/macros.hpp"
 
 
-#include "geometry/interval.hpp"
+#include "../geometry/interval.hpp"
 
 namespace Ariadne {
 

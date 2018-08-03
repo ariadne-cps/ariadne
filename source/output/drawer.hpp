@@ -29,8 +29,8 @@
 #define ARIADNE_DRAWER_HPP
 
 #include <iosfwd>
-#include "utility/declarations.hpp"
-#include "output/drawer_interface.hpp"
+#include "../utility/declarations.hpp"
+#include "../output/drawer_interface.hpp"
 
 namespace Ariadne {
 

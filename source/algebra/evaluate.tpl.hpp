@@ -21,10 +21,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "algebra/vector.hpp"
-#include "algebra/multi_index.hpp"
-#include "algebra/expansion.hpp"
-#include "algebra/expansion.inl.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/multi_index.hpp"
+#include "../algebra/expansion.hpp"
+#include "../algebra/expansion.inl.hpp"
 
 namespace Ariadne {
 

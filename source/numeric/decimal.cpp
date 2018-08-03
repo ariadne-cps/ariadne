@@ -21,15 +21,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "utility/standard.hpp"
-#include "config.hpp"
+#include "../utility/standard.hpp"
+#include "../config.hpp"
 
-#include "utility/macros.hpp"
-#include "numeric/integer.hpp"
-#include "numeric/dyadic.hpp"
-#include "numeric/decimal.hpp"
-#include "numeric/rational.hpp"
-#include "numeric/float.hpp"
+#include "../utility/macros.hpp"
+#include "../numeric/integer.hpp"
+#include "../numeric/dyadic.hpp"
+#include "../numeric/decimal.hpp"
+#include "../numeric/rational.hpp"
+#include "../numeric/float.hpp"
 
 namespace Ariadne {
 

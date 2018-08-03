@@ -28,10 +28,10 @@
 #ifndef ARIADNE_UNIVARIATE_DIFFERENTIAL_HPP
 #define ARIADNE_UNIVARIATE_DIFFERENTIAL_HPP
 
-#include "utility/macros.hpp"
-#include "utility/array.hpp"
-#include "algebra/series.hpp"
-#include "numeric/numeric.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/array.hpp"
+#include "../algebra/series.hpp"
+#include "../numeric/numeric.hpp"
 
 namespace Ariadne {
 

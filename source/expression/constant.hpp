@@ -29,8 +29,8 @@
 #ifndef ARIADNE_CONSTANT_HPP
 #define ARIADNE_CONSTANT_HPP
 
-#include "utility/string.hpp"
-#include "expression/identifier.hpp"
+#include "../utility/string.hpp"
+#include "../expression/identifier.hpp"
 
 namespace Ariadne {
 

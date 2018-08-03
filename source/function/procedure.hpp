@@ -31,10 +31,10 @@
 
 #include <iostream>
 
-#include "utility/container.hpp"
-#include "algebra/vector.hpp"
+#include "../utility/container.hpp"
+#include "../algebra/vector.hpp"
 
-#include "numeric/operators.hpp"
+#include "../numeric/operators.hpp"
 
 namespace Ariadne {
 

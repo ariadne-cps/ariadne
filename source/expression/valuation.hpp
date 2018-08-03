@@ -33,13 +33,13 @@
 #include <iostream>
 #include <string>
 
-#include "utility/macros.hpp"
-#include "utility/container.hpp"
-#include "utility/tribool.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/container.hpp"
+#include "../utility/tribool.hpp"
 
-#include "numeric/integer.hpp"
-#include "expression/variables.hpp"
-#include "expression/expression.hpp"
+#include "../numeric/integer.hpp"
+#include "../expression/variables.hpp"
+#include "../expression/expression.hpp"
 
 namespace Ariadne {
 

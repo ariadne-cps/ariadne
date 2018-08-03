@@ -33,8 +33,8 @@
 #include <iomanip>
 #include <limits>
 
-#include "utility/metaprogramming.hpp"
-#include "numeric/number.decl.hpp"
+#include "../utility/metaprogramming.hpp"
+#include "../numeric/number.decl.hpp"
 
 
 namespace Ariadne {

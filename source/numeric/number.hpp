@@ -30,9 +30,9 @@
 #ifndef ARIADNE_NUMBER_HPP
 #define ARIADNE_NUMBER_HPP
 
-#include "utility/handle.hpp"
-#include "numeric/paradigm.hpp"
-#include "utility/prototype.hpp"
+#include "../utility/handle.hpp"
+#include "../numeric/paradigm.hpp"
+#include "../utility/prototype.hpp"
 
 #include "logical.decl.hpp"
 #include "number.decl.hpp"

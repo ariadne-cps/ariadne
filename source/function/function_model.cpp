@@ -21,13 +21,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/function_model.hpp"
-#include "function/function_model.tpl.hpp"
-#include "function/taylor_model.hpp"
+#include "../function/function_model.hpp"
+#include "../function/function_model.tpl.hpp"
+#include "../function/taylor_model.hpp"
 
-#include "algebra/algebra.hpp"
+#include "../algebra/algebra.hpp"
 
-#include "function/formula.hpp"
+#include "../function/formula.hpp"
 
 namespace Ariadne {
 

@@ -31,10 +31,10 @@
 #include <iosfwd>
 #include <iostream>
 
-#include "utility/writable.hpp"
-#include "numeric/numeric.hpp"
-#include "utility/pointer.hpp"
-#include "numeric/operators.hpp"
+#include "../utility/writable.hpp"
+#include "../numeric/numeric.hpp"
+#include "../utility/pointer.hpp"
+#include "../numeric/operators.hpp"
 
 namespace Ariadne {
 

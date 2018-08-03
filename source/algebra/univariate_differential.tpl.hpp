@@ -25,7 +25,7 @@
  *  \brief Differentials with respect to a single variable.
  */
 
-#include "algebra/univariate_differential.hpp"
+#include "../algebra/univariate_differential.hpp"
 
 namespace Ariadne {
 

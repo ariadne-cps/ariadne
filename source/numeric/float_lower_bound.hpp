@@ -28,7 +28,7 @@
 #ifndef FLOAT_LOWER_BOUND_H
 #define FLOAT_LOWER_BOUND_H
 
-#include "utility/macros.hpp"
+#include "../utility/macros.hpp"
 
 #include "number.decl.hpp"
 #include "float.decl.hpp"

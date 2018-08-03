@@ -37,9 +37,9 @@
 #include <map>
 #include <algorithm>
 
-#include "utility/iterator.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/multi_index.hpp"
+#include "../utility/iterator.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/multi_index.hpp"
 
 
 

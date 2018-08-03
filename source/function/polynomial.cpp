@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/numeric.hpp"
-#include "config.hpp"
+#include "../numeric/numeric.hpp"
+#include "../config.hpp"
 
-#include "geometry/interval.hpp"
-#include "function/polynomial.hpp"
-#include "function/polynomial.tpl.hpp"
+#include "../geometry/interval.hpp"
+#include "../function/polynomial.hpp"
+#include "../function/polynomial.tpl.hpp"
 
 namespace Ariadne {
 

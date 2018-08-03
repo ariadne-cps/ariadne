@@ -23,7 +23,7 @@
 
 #include "formula.hpp"
 
-#include "numeric/operators.tpl.hpp"
+#include "../numeric/operators.tpl.hpp"
 
 namespace Ariadne {
 

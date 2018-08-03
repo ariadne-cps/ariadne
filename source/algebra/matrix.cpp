@@ -21,17 +21,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/module.hpp"
+#include "../numeric/module.hpp"
 
-#include "config.hpp"
+#include "../config.hpp"
 
-#include "algebra/matrix.hpp"
+#include "../algebra/matrix.hpp"
 
-#include "utility/exceptions.hpp"
-#include "numeric/float.hpp"
-#include "numeric/rational.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/covector.hpp"
+#include "../utility/exceptions.hpp"
+#include "../numeric/float.hpp"
+#include "../numeric/rational.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/covector.hpp"
 
 #include "matrix.tpl.hpp"
 
@@ -893,7 +893,7 @@ template<> Matrix<Rational> midpoint(Matrix<Rational> const& A) { return A; }
 
 } // namespace Ariadne
 
-#include "geometry/interval.hpp"
+#include "../geometry/interval.hpp"
 
 namespace Ariadne {
 template class Matrix<FloatDPUpperInterval>;

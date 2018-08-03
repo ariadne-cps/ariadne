@@ -33,19 +33,19 @@
 #include <iosfwd>
 #include <iostream>
 
-#include "utility/macros.hpp"
-#include "utility/declarations.hpp"
-#include "utility/pointer.hpp"
-#include "utility/container.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/declarations.hpp"
+#include "../utility/pointer.hpp"
+#include "../utility/container.hpp"
 
-#include "numeric/logical.decl.hpp"
-#include "numeric/number.decl.hpp"
+#include "../numeric/logical.decl.hpp"
+#include "../numeric/number.decl.hpp"
 
-#include "numeric/operators.hpp"
-#include "expression/constant.hpp"
-#include "expression/variables.hpp"
-#include "expression/valuation.hpp"
-#include "expression/operations.hpp"
+#include "../numeric/operators.hpp"
+#include "../expression/constant.hpp"
+#include "../expression/variables.hpp"
+#include "../expression/valuation.hpp"
+#include "../expression/operations.hpp"
 
 namespace Ariadne {
 

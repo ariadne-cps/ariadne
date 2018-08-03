@@ -34,17 +34,17 @@
 #include <string>
 
 
-#include "utility/macros.hpp"
-#include "utility/pointer.hpp"
-#include "utility/container.hpp"
-#include "utility/functional.hpp"
-#include "utility/stlio.hpp"
-#include "utility/string.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/pointer.hpp"
+#include "../utility/container.hpp"
+#include "../utility/functional.hpp"
+#include "../utility/stlio.hpp"
+#include "../utility/string.hpp"
 
-#include "numeric/numeric.hpp"
+#include "../numeric/numeric.hpp"
 
-#include "expression/variables.hpp"
-#include "expression/expression.hpp"
+#include "../expression/variables.hpp"
+#include "../expression/expression.hpp"
 
 namespace Ariadne {
 
@@ -145,7 +145,7 @@ template<class T> inline List<Assignment<DottedVariable<T>,Expression<T>>> Dotte
 
 } // namespace Ariadne
 
-#include "expression/valuation.hpp"
+#include "../expression/valuation.hpp"
 namespace Ariadne {
 template<class T> inline Assignment<Variable<T>,T>::operator Valuation<T> () const { Valuation<T> r; r.insert(this->lhs,this->rhs); return r; }
 } // namespace Ariadne

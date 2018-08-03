@@ -28,7 +28,7 @@
 #ifndef ARIADNE_PARADIGM_HPP
 #define ARIADNE_PARADIGM_HPP
 
-#include "utility/metaprogramming.hpp"
+#include "../utility/metaprogramming.hpp"
 
 namespace Ariadne {
 

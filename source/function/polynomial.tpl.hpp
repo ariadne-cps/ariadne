@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "algebra/evaluate.tpl.hpp"
-#include "algebra/expansion.inl.hpp"
+#include "../algebra/evaluate.tpl.hpp"
+#include "../algebra/expansion.inl.hpp"
 
 namespace Ariadne {
 

@@ -21,56 +21,56 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.hpp"
-#include "config.hpp"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
 #include <iomanip>
 
-#include "function/constraint.hpp"
-#include "function/formula.hpp"
-#include "function/procedure.hpp"
-#include "geometry/enclosure.hpp"
+#include "../function/constraint.hpp"
+#include "../function/formula.hpp"
+#include "../function/procedure.hpp"
+#include "../geometry/enclosure.hpp"
 
-#include "utility/macros.hpp"
-#include "utility/exceptions.hpp"
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/matrix.hpp"
-#include "algebra/multi_index.hpp"
-#include "algebra/differential.hpp"
-#include "algebra/algebra.hpp"
-#include "function/polynomial.hpp"
-#include "function/function.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/exceptions.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/matrix.hpp"
+#include "../algebra/multi_index.hpp"
+#include "../algebra/differential.hpp"
+#include "../algebra/algebra.hpp"
+#include "../function/polynomial.hpp"
+#include "../function/function.hpp"
 
-#include "function/function_model.hpp"
-#include "function/taylor_function.hpp"
+#include "../function/function_model.hpp"
+#include "../function/taylor_function.hpp"
 
-#include "geometry/box.hpp"
-#include "geometry/grid.hpp"
+#include "../geometry/box.hpp"
+#include "../geometry/grid.hpp"
 
-#include "geometry/function_set.hpp"
-#include "geometry/affine_set.hpp"
+#include "../geometry/function_set.hpp"
+#include "../geometry/affine_set.hpp"
 
-#include "geometry/paving_interface.hpp"
-#include "geometry/paver.hpp"
-#include "geometry/grid_set.hpp"
+#include "../geometry/paving_interface.hpp"
+#include "../geometry/paver.hpp"
+#include "../geometry/grid_set.hpp"
 
-#include "solvers/constraint_solver.hpp"
-#include "solvers/nonlinear_programming.hpp"
+#include "../solvers/constraint_solver.hpp"
+#include "../solvers/nonlinear_programming.hpp"
 
-#include "output/graphics_interface.hpp"
-#include "output/drawer.hpp"
+#include "../output/graphics_interface.hpp"
+#include "../output/drawer.hpp"
 
-#include "hybrid/discrete_event.hpp"
+#include "../hybrid/discrete_event.hpp"
 
-#include "utility/logging.hpp"
+#include "../utility/logging.hpp"
 
-#include "function/functional.hpp"
+#include "../function/functional.hpp"
 
-#include "numeric/operators.hpp"
-#include "expression/space.hpp"
+#include "../numeric/operators.hpp"
+#include "../expression/space.hpp"
 
-#include "algebra/expansion.inl.hpp"
+#include "../algebra/expansion.inl.hpp"
 
 
 namespace Ariadne {

@@ -825,13 +825,13 @@ void TestInclusionIntegrator::test() const {
     //ARIADNE_TEST_CALL(test_higgins_selkov());
     //ARIADNE_TEST_CALL(test_reactor());
     //ARIADNE_TEST_CALL(test_lotka_volterra());
-    //ARIADNE_TEST_CALL(test_jet_engine());
+    ARIADNE_TEST_CALL(test_jet_engine());
     //ARIADNE_TEST_CALL(test_fitzhugh_nagumo());
     //ARIADNE_TEST_CALL(test_pi_controller());
     //ARIADNE_TEST_CALL(test_jerk21());
     //ARIADNE_TEST_CALL(test_lorenz());
     //ARIADNE_TEST_CALL(test_rossler());
-    ARIADNE_TEST_CALL(test_jerk16());
+    //ARIADNE_TEST_CALL(test_jerk16());
     //ARIADNE_TEST_CALL(test_DCDC());
     //ARIADNE_TEST_CALL(test_harmonic());
     //ARIADNE_TEST_CALL(test_van_der_pol());

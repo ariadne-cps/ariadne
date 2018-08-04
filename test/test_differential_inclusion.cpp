@@ -74,7 +74,7 @@ using namespace Ariadne;
 class TestInclusionIntegrator {
 
 
-    Void run_battery_frequency_topdown(String name, const Vector<RealExpression>& dynamics,
+    Void run_battery_frequency_topdown(String name, const List<DottedRealAssignment>& dynamics,
                                        ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, RealVector noise_levels,
                                RealBox real_starting_set, Real evolution_time, double step, SweeperDP sweeper, SizeType max_freq) const
     {
@@ -124,7 +124,7 @@ class TestInclusionIntegrator {
     }
 
 
-    Void run_battery_each_approximation(String name, const Vector<RealExpression>& dynamics,
+    Void run_battery_each_approximation(String name, const List<DottedRealAssignment>& dynamics,
                                         ValidatedVectorFunction const &f, Vector<ValidatedVectorFunction> const &g,
                                         RealVector noise_levels,
                                         RealBox real_starting_set, Real evolution_time, double step, SizeType freq) const
@@ -193,7 +193,7 @@ class TestInclusionIntegrator {
         }
     }
 
-    Void run_single_test(String name, InclusionIntegratorInterface& integrator, const Vector<RealExpression>& dynamics,
+    Void run_single_test(String name, InclusionIntegratorInterface& integrator, const List<DottedRealAssignment>& dynamics,
                          ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, RealVector noise_levels,
                   RealBox real_starting_set, Real evolution_time) const
     {
@@ -248,7 +248,7 @@ class TestInclusionIntegrator {
 */
     }
 
-    Void run_test(String name, const Vector<RealExpression>& dynamics, ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, RealVector noise_levels,
+    Void run_test(String name, const List<DottedRealAssignment>& dynamics, ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, RealVector noise_levels,
                   RealBox real_starting_set, Real evolution_time, double step) const {
 
         SizeType freq=12;
@@ -308,8 +308,9 @@ void TestInclusionIntegrator::test_wiggins_18_7_3() const {
     Vector<ValidatedVectorFunction> g({{one,zero},{zero,one}});
 
     RealVariable x("x"), y("y"), u1("u1"), u2("u2");
-    Vector<RealExpression> dynamics({-x+2*y+pow(x,2)*y+pow(x,4)*pow(y,5)+u1,-y-pow(x,4)*pow(y,6)+pow(x,8)*pow(y,9)+u2});
-    RealVariablesBox inputs({-1/100_q<=u1<=1/100_q,-1/100_q<=u2<=1/100_q});
+    List<DottedRealAssignment> dynamics={dot(x)=-x+2*y+pow(x,2)*y+pow(x,4)*pow(y,5)+u1,
+    		                             dot(y)=-y-pow(x,4)*pow(y,6)+pow(x,8)*pow(y,9)+u2};
+    RealVariablesBox inputs={-1/100_q<=u1<=1/100_q,-1/100_q<=u2<=1/100_q};
 
     auto e=1/10000000_q;
     RealBox starting_set={{1/3_q-e,1/3_q+e},{1/3_q-e,1/3_q+e}};
@@ -336,9 +337,9 @@ void TestInclusionIntegrator::test_order7() const {
     Vector<ValidatedVectorFunction> g({{zero,one}});
 
     RealVariable x("x"), y("y"), u("u");
-    Vector<RealExpression> dynamics({-42*pow(x,7)+68*pow(x,6)*y-46*pow(x,5)*y+256*pow(x,4)*y+156*pow(x,3)*y+50*pow(x,2)*y+20*x*pow(y,6)-8*pow(y,7),
-                                     y*(1110*pow(x,6)-220*pow(x,5)*y-3182*pow(x,4)*y+478*pow(x,3)*pow(y,3)+487*pow(x,2)*pow(y,4)-102*x*pow(y,5)-12*pow(y,6))+u});
-    RealVariablesBox inputs({-1/100_q<=u<=1/100_q});
+    List<DottedRealAssignment> dynamics={dot(x)=-42*pow(x,7)+68*pow(x,6)*y-46*pow(x,5)*y+256*pow(x,4)*y+156*pow(x,3)*y+50*pow(x,2)*y+20*x*pow(y,6)-8*pow(y,7),
+                                         dot(y)=y*(1110*pow(x,6)-220*pow(x,5)*y-3182*pow(x,4)*y+478*pow(x,3)*pow(y,3)+487*pow(x,2)*pow(y,4)-102*x*pow(y,5)-12*pow(y,6))+u};
+    RealVariablesBox inputs={-1/100_q<=u<=1/100_q};
 
     auto e=1/10_q;
     RealBox starting_set={{-1-e,-1+e},{1-e,1+e}};
@@ -368,10 +369,10 @@ void TestInclusionIntegrator::test_3dsphere() const {
 
     RealVariable x("x"), y("y"), z("z"), u1("u1"), u2("u2"), u3("u3");
     RealExpression cuberadius(pow(x,3)+pow(y,3)+pow(z,3));
-    Vector<RealExpression> dynamics({pow(x,2) - x*cuberadius + u1,
-                                     pow(y,2) - y*cuberadius + u2,
-                                     pow(z,2) - z*cuberadius + u3});
-    RealVariablesBox inputs({-4/1000_q<=u1<=4/1000_q,-4/1000_q<=u2<=4/1000_q,-4/1000_q<=u3<=4/1000_q});
+    List<DottedRealAssignment> dynamics={dot(x)=pow(x,2) - x*cuberadius + u1,
+                                         dot(y)=pow(y,2) - y*cuberadius + u2,
+										 dot(z)=pow(z,2) - z*cuberadius + u3};
+    RealVariablesBox inputs={-4/1000_q<=u1<=4/1000_q,-4/1000_q<=u2<=4/1000_q,-4/1000_q<=u3<=4/1000_q};
 
     Real e=1/1000000000_q;
     Real x0_i(1/4_q);
@@ -400,9 +401,9 @@ void TestInclusionIntegrator::test_vinograd() const {
     Vector<ValidatedVectorFunction> g({{one,zero},{zero,one}});
 
     RealVariable x("x"), y("y"), u1("u1"), u2("u2");
-    Vector<RealExpression> dynamics({pow(y,5)+pow(x,2)*(-x+y),
-                                     pow(y,2)*(-2*x+y)});
-    RealVariablesBox inputs({-1/1000_q<=u1<=1/1000_q,-1/1000_q<=u2<=1/1000_q});
+    List<DottedRealAssignment> dynamics={dot(x)=pow(y,5)+pow(x,2)*(-x+y),
+                                         dot(y)=pow(y,2)*(-2*x+y)};
+    RealVariablesBox inputs={-1/1000_q<=u1<=1/1000_q,-1/1000_q<=u2<=1/1000_q};
 
     Real e=1/10000000_q;
     RealBox starting_set={{Real(1)-e,Real(1)+e},{-e,+e}};
@@ -430,8 +431,8 @@ void TestInclusionIntegrator::test_higgins_selkov() const {
     Vector<ValidatedVectorFunction> g({{one,zero},{-x[0]*x[1]*x[1],x[0]*x[1]*x[1]},{zero,-x[1]}});
 
     RealVariable S("S"), P("P"), v0("v0"), k1("k1"), k2("k2");
-    Vector<RealExpression> dynamics({v0-S*k1*pow(P,2),S*k1*pow(P,2)-k2*P});
-    RealVariablesBox inputs({-0.9998_dec<=v0<=1.0002_dec,-0.9998_dec<=k1<=1.0002_dec,-0.99981_dec<=k2<=1.00021_dec});
+    List<DottedRealAssignment> dynamics={dot(S)=v0-S*k1*pow(P,2),dot(P)=S*k1*pow(P,2)-k2*P};
+    RealVariablesBox inputs={-0.9998_dec<=v0<=1.0002_dec,-0.9998_dec<=k1<=1.0002_dec,-0.99981_dec<=k2<=1.00021_dec};
 
     Real e=1/100_q;
     Real x0_i(2.0);
@@ -467,11 +468,11 @@ void TestInclusionIntegrator::test_reactor() const {
     Vector<ValidatedVectorFunction> g({{one*iV,zero,zero,zero},{zero,one*iV,zero,zero},{x[0]*x[1],x[0]*x[1],x[0]*x[1],zero}});
 
     RealVariable xA("xA"), xB("xB"), xC("xC"), xD("xD"), u1("u1"), u2("u2"), u3("u3");
-    Vector<RealExpression> dynamics({-u3*xA*xB-k2*xA*xC+0.05_dec*u1-0.1_dec*xA,
-                                     -u3*xA*xB+0.05_dec*u2-0.1_dec*xB,
-                                     u3*xA*xB-0.4_dec*xA*xC-0.1_dec*xC,
-                                     0.4_dec*xA*xC-0.1_dec*xD});
-    RealVariablesBox inputs({0.9_dec<=u1<=1.1_dec,0.8_dec<=u2<=1,29.8_dec<=u3<=30.2_dec});
+    List<DottedRealAssignment> dynamics={dot(xA)=-u3*xA*xB-k2*xA*xC+0.05_dec*u1-0.1_dec*xA,
+                                         dot(xB)=-u3*xA*xB+0.05_dec*u2-0.1_dec*xB,
+                                         dot(xC)=u3*xA*xB-0.4_dec*xA*xC-0.1_dec*xC,
+                                         dot(xD)=0.4_dec*xA*xC-0.1_dec*xD};
+    RealVariablesBox inputs={0.9_dec<=u1<=1.1_dec,0.8_dec<=u2<=1,29.8_dec<=u3<=30.2_dec};
 
     Real e=1/1000000_q;
     RealBox starting_set={{0,e},{0,e},{0,e},{0,e}};
@@ -499,8 +500,8 @@ void TestInclusionIntegrator::test_lotka_volterra() const {
     Vector<ValidatedVectorFunction> g({{v[0]*(one-v[1]),zero},{zero,v[1]*(v[0]-one)}});
 
     RealVariable x("x"), y("y"), u1("u1"), u2("u2");
-    Vector<RealExpression> dynamics({u1*x*(1-y),u2*y*(x-1)});
-    RealVariablesBox inputs({2.99_dec<=u1<=3.01_dec,0.99_dec<=u2<=1.01_dec});
+    List<DottedRealAssignment> dynamics={dot(x)=u1*x*(1-y),dot(y)=u2*y*(x-1)};
+    RealVariablesBox inputs={2.99_dec<=u1<=3.01_dec,0.99_dec<=u2<=1.01_dec};
 
     Real e=1/100000000_q;
     RealBox starting_set={{Real(1.2)-e,Real(1.2)+e},{Real(1.1)-e,Real(1.1)+e}};
@@ -526,8 +527,8 @@ void TestInclusionIntegrator::test_fitzhugh_nagumo() const {
     Vector<ValidatedVectorFunction> g({{one,zero},{zero,v[0] + Real(0.7) - Real(0.8)*v[1]}});
 
     RealVariable x("x"), y("y"), u1("u1"), u2("u2");
-    Vector<RealExpression> dynamics({x-pow(x,3)-y+7/8_q+u1,u2*(x+0.7_dec-0.8_dec*y)});
-    RealVariablesBox inputs({-1/10000_q<=u1<=1/10000_q,0.0799_dec<=u2<=0.0801_dec});
+    List<DottedRealAssignment> dynamics={dot(x)=x-pow(x,3)-y+7/8_q+u1,dot(y)=u2*(x+0.7_dec-0.8_dec*y)};
+    RealVariablesBox inputs={-1/10000_q<=u1<=1/10000_q,0.0799_dec<=u2<=0.0801_dec};
 
     Real e=1/100_q;
     RealBox starting_set={{Real(-1.0)-e,Real(-1.0)+e},{Real(1.0)-e,Real(1.0)+e}};
@@ -553,8 +554,8 @@ void TestInclusionIntegrator::test_jet_engine() const {
     Vector<ValidatedVectorFunction> g({{one,zero},{zero,one}});
 
     RealVariable x("x"), y("y"), u1("u1"), u2("u2");
-    Vector<RealExpression> dynamics({-y-1.5_dec*pow(x,2)-0.5_dec*pow(x,3)-0.5_dec+u1,3*x-y+u2});
-    RealVariablesBox inputs({-5/1000_q<=u1<=5/1000_q,-5/1000_q<=u2<=5/1000_q});
+    List<DottedRealAssignment> dynamics={dot(x)=-y-1.5_dec*pow(x,2)-0.5_dec*pow(x,3)-0.5_dec+u1,dot(y)=3*x-y+u2};
+    RealVariablesBox inputs={-5/1000_q<=u1<=5/1000_q,-5/1000_q<=u2<=5/1000_q};
 
     Real e1=5/100_q;
     Real e2=7/100_q;
@@ -582,8 +583,8 @@ void TestInclusionIntegrator::test_pi_controller() const {
 
     RealVariable v("v"), x("x"), u("u");
     RealExpression dynv = -0.101_dec*(v-20)+1.3203_dec*(x-0.1616_dec)-0.01_dec*pow(v,2);
-    Vector<RealExpression> dynamics({dynv, -dynv + 3*(20-v) + u});
-    RealVariablesBox inputs({-1/10_q<=u<=1/10_q});
+    List<DottedRealAssignment> dynamics={dot(v)=dynv,dot(x)=-dynv + 3*(20-v) + u};
+    RealVariablesBox inputs={-1/10_q<=u<=1/10_q};
 
     Real e=1/1024_q;
     RealBox starting_set={{Real(5.0),Real(10.0)},{-e,+e}};
@@ -612,8 +613,8 @@ void TestInclusionIntegrator::test_jerk21() const {
     Vector<ValidatedVectorFunction> g({{zero,zero,-v[0]}});
 
     RealVariable x("x"), y("y"), z("z"), u("u");
-    Vector<RealExpression> dynamics({y,z,-pow(z,3)-y*pow(x,2)-u*x});
-    RealVariablesBox inputs({0.249_dec<=u<=0.251_dec});
+    List<DottedRealAssignment> dynamics={dot(x)=y,dot(y)=z,dot(z)=-pow(z,3)-y*pow(x,2)-u*x};
+    RealVariablesBox inputs={0.249_dec<=u<=0.251_dec};
 
     Real e=1/1024_q;
     Real x0_i(0.25);
@@ -646,8 +647,10 @@ void TestInclusionIntegrator::test_lorenz() const {
     Vector<ValidatedVectorFunction> g({{zero,v[0],zero}});
 
     RealVariable x("x"), y("y"), z("z"), u("u");
-    Vector<RealExpression> dynamics({(y-x)*sigma,x*(28 - z) - y + x*u,x*y - z*beta});
-    RealVariablesBox inputs({-1/100_q<=u<=1/100_q});
+    List<DottedRealAssignment> dynamics={dot(x)=(y-x)*sigma,
+    									 dot(y)=x*(28 - z) - y + x*u,
+										 dot(z)=x*y - z*beta};
+    RealVariablesBox inputs={-1/100_q<=u<=1/100_q};
 
     Real e=1/1024_q;
     Real x0_i(1.0);
@@ -680,8 +683,8 @@ void TestInclusionIntegrator::test_rossler() const {
     Vector<ValidatedVectorFunction> g({{zero,zero,one}});
 
     RealVariable x("x"), y("y"), z("z"), u("u");
-    Vector<RealExpression> dynamics({-y-z, x+y*0.1_dec, z*(x-6)+u});
-    RealVariablesBox inputs({0.099_dec<=u<=0.101_dec});
+    List<DottedRealAssignment> dynamics={dot(x)=-y-z,dot(y)=x+y*0.1_dec,dot(z)=z*(x-6)+u};
+    RealVariablesBox inputs={0.099_dec<=u<=0.101_dec};
 
     Real e=1/1024_q;
     Real x0_i(-9.0);
@@ -712,8 +715,8 @@ void TestInclusionIntegrator::test_jerk16() const {
     Vector<ValidatedVectorFunction> g({{zero,zero,one}});
 
     RealVariable x("x"), y("y"), z("z"), u("u");
-    Vector<RealExpression> dynamics({y,z,-y+pow(x,2)-u});
-    RealVariablesBox inputs({0.029_dec<=u<=0.031_dec});
+    List<DottedRealAssignment> dynamics={dot(x)=y,dot(y)=z,dot(z)=-y+pow(x,2)-u};
+    RealVariablesBox inputs={0.029_dec<=u<=0.031_dec};
 
     Real e=1/1024_q;
     Real x0_i(0.0);
@@ -754,8 +757,9 @@ void TestInclusionIntegrator::test_DCDC() const {
 
 
     RealVariable x("x"), y("y"), u1("u1"), u2("u2");
-    Vector<RealExpression> dynamics({x*-0.018_dec+y*-0.066_dec + u1*(1/600_q*x+1/15_q*y)+u2,x*0.071_dec+y*-0.00853_dec+u1*(-1/14_q*x-20/7_q*y)});
-    RealVariablesBox inputs({-2/1000_q<=u1<=2/1000_q,4/15_q<=u2<=6/15_q});
+    List<DottedRealAssignment> dynamics={dot(x)=x*-0.018_dec+y*-0.066_dec + u1*(1/600_q*x+1/15_q*y)+u2,
+    									 dot(y)=x*0.071_dec+y*-0.00853_dec+u1*(-1/14_q*x-20/7_q*y)};
+    RealVariablesBox inputs={-2/1000_q<=u1<=2/1000_q,4/15_q<=u2<=6/15_q};
 
     Real e=1/1000000_q;
     RealBox starting_set={{Real(1)-e,Real(1)+e},{Real(5)-e,Real(5)+e}};
@@ -782,8 +786,8 @@ void TestInclusionIntegrator::test_harmonic() const {
     Vector<ValidatedVectorFunction> g({{one,zero}});
 
     RealVariable x("x"), y("y"), u("u");
-    Vector<RealExpression> dynamics({y+u,-x});
-    RealVariablesBox inputs({-4/100_q<=u<=4/100_q});
+    List<DottedRealAssignment> dynamics={dot(x)=y+u,dot(y)=-x};
+    RealVariablesBox inputs={-4/100_q<=u<=4/100_q};
 
     Real e=1/10000000_q;
     RealBox starting_set={{-e,e},{-e,+e}};
@@ -811,8 +815,8 @@ void TestInclusionIntegrator::test_van_der_pol() const {
 
 
     RealVariable x("x"), y("y"), u1("u1"), u2("u2");
-    Vector<RealExpression> dynamics({y+u1,-x+y*(1-pow(x,2))+u2});
-    RealVariablesBox inputs({-1/20_q<=u1<=1/20_q,-1/10000_q<=u2<=1/10000_q});
+    List<DottedRealAssignment> dynamics={dot(x)=y+u1,dot(y)=-x+y*(1-pow(x,2))+u2};
+    RealVariablesBox inputs={-1/20_q<=u1<=1/20_q,-1/10000_q<=u2<=1/10000_q};
 
     Real e=1/1024_q;
     RealBox starting_set={{Real(1.21)-e,Real(1.21)+e},{Real(2.01)-e,Real(2.01)+e}};
@@ -839,8 +843,8 @@ void TestInclusionIntegrator::test_clock() const {
 
 
     RealVariable x("x"), y("y"), u1("u1"), u2("u2");
-    Vector<RealExpression> dynamics({1+u1,1+u2});
-    RealVariablesBox inputs({-1/16_q<=u1<=1/16_q,-1/16_q<=u2<=1/16_q});
+    List<DottedRealAssignment> dynamics={dot(x)=1+u1,dot(y)=1+u2};
+    RealVariablesBox inputs={-1/16_q<=u1<=1/16_q,-1/16_q<=u2<=1/16_q};
 
     Real e=1/128_q;
     RealBox starting_set={{-e,e},{-e,+e}};

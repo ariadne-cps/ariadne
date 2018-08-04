@@ -75,95 +75,42 @@ using namespace Ariadne;
 class TestInclusionIntegrator {
 
 
-    Void run_battery_frequency_topdown(String name, const List<DottedRealAssignment>& dynamics,
-                                       const RealVariablesBox& inputs, const RealVariablesBox& initial,
-                                       ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, RealVector noise_levels,
-                               RealBox real_starting_set, Real evolution_time, double step, SweeperDP sweeper, SizeType max_freq) const
-    {
-        typedef typename ValidatedVectorFunctionModelType::NumericType NumericType; typedef typename NumericType::PrecisionType PrecisionType;
-
-        PrecisionType prec;
-        BoxDomainType noise=cast_exact_box(UpperIntervalType(-1,+1)*noise_levels);
-        BoxDomainType starting_set=cast_exact_box(over_approximation(real_starting_set));
-
-        SizeType currfreq = max_freq;
-        List<SizeType> frequencies;
-        while (currfreq >= 1) {
-            frequencies.push_back(currfreq);
-            currfreq = floor(0.95*currfreq);
-        }
-
-        while (!frequencies.empty()) {
-
-            auto freq = frequencies.back();
-            frequencies.pop_back();
-
-            SizeType base = 100000;
-            List<SharedPointer<DIApproximation>> approximations;
-            approximations.append(SharedPointer<DIApproximation>(new PiecewiseDIApproximation(sweeper)));
-            approximations.append(SharedPointer<DIApproximation>(new SinusoidalDIApproximation(sweeper)));
-            approximations.append(SharedPointer<DIApproximation>(new AffineDIApproximation(sweeper)));
-            approximations.append(SharedPointer<DIApproximation>(new ConstantDIApproximation(sweeper)));
-            approximations.append(SharedPointer<DIApproximation>(new ZeroDIApproximation(sweeper)));
-            auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
-            integrator.verbosity = 0;
-
-            tms start_time, end_time;
-            times(&start_time);
-
-            List<ValidatedVectorFunctionModelType> flow_functions = integrator.flow(dynamics,inputs,initial,f,g,noise,starting_set,evolution_time);
-
-            times(&end_time);
-            clock_t ticks = end_time.tms_utime - start_time.tms_utime;
-            clock_t const hz = sysconf(_SC_CLK_TCK);
-
-            List<ValidatedConstrainedImageSet> reach_sets = map([](ValidatedVectorFunctionModelType const& fm){return range(fm);},flow_functions);
-            ValidatedVectorFunctionModelType evolve_function = partial_evaluate(flow_functions.back(),flow_functions.back().argument_size()-1,NumericType(evolution_time,prec));
-            ValidatedConstrainedImageSet evolve_set = range(evolve_function);
-
-            std::cout << freq << ": " << score(evolve_set) << ", " << ticks / hz << "." << ticks % hz << "s" << std::endl;
-        }
-    }
-
-
     Void run_battery_each_approximation(String name, const List<DottedRealAssignment>& dynamics,
                                         const RealVariablesBox& inputs, const RealVariablesBox& initial,
                                         ValidatedVectorFunction const &f, Vector<ValidatedVectorFunction> const &g,
-                                        RealVector noise_levels,
+                                        BoxDomainType V,
                                         RealBox real_starting_set, Real evolution_time, double step, SizeType freq) const
     {
         typedef typename ValidatedVectorFunctionModelType::NumericType NumericType; typedef typename NumericType::PrecisionType PrecisionType;
         PrecisionType prec;
-
-        BoxDomainType noise=cast_exact_box(UpperIntervalType(-1,+1)*noise_levels);
         BoxDomainType starting_set=cast_exact_box(over_approximation(real_starting_set));
 
         auto sweeper = make_threshold_sweeper(1e-8);
 
         for (auto approx: range(0,5)) {
 
-            List<SharedPointer<DIApproximation>> approximations;
+            List<SharedPointer<InputApproximation>> approximations;
 
             SizeType ppi = 0;
             switch (approx) {
                 case 0:
-                    approximations.append(SharedPointer<DIApproximation>(new ZeroDIApproximation(sweeper)));
+                    approximations.append(SharedPointer<InputApproximation>(new ZeroInputApproximation(f,g,V,sweeper)));
                     ppi = 0;
                     break;
                 case 1:
-                    approximations.append(SharedPointer<DIApproximation>(new ConstantDIApproximation(sweeper)));
+                    approximations.append(SharedPointer<InputApproximation>(new ConstantInputApproximation(f,g,V,sweeper)));
                     ppi = 1;
                     break;
                 case 2:
-                    approximations.append(SharedPointer<DIApproximation>(new AffineDIApproximation(sweeper)));
+                    approximations.append(SharedPointer<InputApproximation>(new AffineInputApproximation(f,g,V,sweeper)));
                     ppi = 2;
                     break;
                 case 3:
-                    approximations.append(SharedPointer<DIApproximation>(new SinusoidalDIApproximation(sweeper)));
+                    approximations.append(SharedPointer<InputApproximation>(new SinusoidalInputApproximation(f,g,V,sweeper)));
                     ppi = 2;
                     break;
                 case 4:
-                    approximations.append(SharedPointer<DIApproximation>(new PiecewiseDIApproximation(sweeper)));
+                    approximations.append(SharedPointer<InputApproximation>(new PiecewiseInputApproximation(f,g,V,sweeper)));
                     ppi = 2;
                     break;
                 default:
@@ -171,7 +118,7 @@ class TestInclusionIntegrator {
             }
 
             auto n = f.result_size();
-            auto m = noise.size();
+            auto m = V.size();
             double rho = 6.0;
             SizeType base = 1000;
             auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
@@ -182,7 +129,7 @@ class TestInclusionIntegrator {
             tms start_time, end_time;
             times(&start_time);
 
-            List<ValidatedVectorFunctionModelType> flow_functions = integrator.flow(dynamics,inputs,initial,f,g,noise,starting_set,evolution_time);
+            List<ValidatedVectorFunctionModelType> flow_functions = integrator.flow(dynamics,inputs,initial,f,g,V,starting_set,evolution_time);
 
             times(&end_time);
             clock_t ticks = end_time.tms_utime - start_time.tms_utime;
@@ -198,14 +145,12 @@ class TestInclusionIntegrator {
 
     Void run_single_test(String name, InclusionIntegratorInterface& integrator, const List<DottedRealAssignment>& dynamics,
                          const RealVariablesBox& inputs, const RealVariablesBox& initial,
-                         ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, RealVector noise_levels,
+                         ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V,
                   RealBox real_starting_set, Real evolution_time) const
     {
         typedef typename ValidatedVectorFunctionModelType::NumericType NumericType; typedef typename NumericType::PrecisionType PrecisionType;
         PrecisionType prec;
 
-        FloatDPUpperBound ratio(1.0);
-        BoxDomainType noise=cast_exact_box(UpperIntervalType(-ratio,+ratio)*noise_levels);
         BoxDomainType starting_set=cast_exact_box(over_approximation(real_starting_set));
 
         std::cout << "flowing..." << std::endl;
@@ -213,7 +158,7 @@ class TestInclusionIntegrator {
         tms start_time, end_time;
         times(&start_time);
 
-        List<ValidatedVectorFunctionModelType> flow_functions = integrator.flow(dynamics,inputs,initial,f,g,noise,starting_set,evolution_time);
+        List<ValidatedVectorFunctionModelType> flow_functions = integrator.flow(dynamics,inputs,initial,f,g,V,starting_set,evolution_time);
 
         times(&end_time);
         clock_t ticks = end_time.tms_utime - start_time.tms_utime;
@@ -260,18 +205,21 @@ class TestInclusionIntegrator {
         SizeType freq=12;
         ThresholdSweeperDP sweeper = make_threshold_sweeper(1e-8);
 
-        List<SharedPointer<DIApproximation>> approximations;
-        approximations.append(SharedPointer<DIApproximation>(new PiecewiseDIApproximation(sweeper)));
-        approximations.append(SharedPointer<DIApproximation>(new SinusoidalDIApproximation(sweeper)));
-        approximations.append(SharedPointer<DIApproximation>(new AffineDIApproximation(sweeper)));
-        approximations.append(SharedPointer<DIApproximation>(new ConstantDIApproximation(sweeper)));
-        approximations.append(SharedPointer<DIApproximation>(new ZeroDIApproximation(sweeper)));
+        FloatDPUpperBound noise_ratio(1.0);
+        BoxDomainType V=cast_exact_box(UpperIntervalType(-noise_ratio,+noise_ratio)*noise_levels);
+
+        List<SharedPointer<InputApproximation>> approximations;
+        approximations.append(SharedPointer<InputApproximation>(new PiecewiseInputApproximation(f,g,V,sweeper)));
+        approximations.append(SharedPointer<InputApproximation>(new SinusoidalInputApproximation(f,g,V,sweeper)));
+        approximations.append(SharedPointer<InputApproximation>(new AffineInputApproximation(f,g,V,sweeper)));
+        approximations.append(SharedPointer<InputApproximation>(new ConstantInputApproximation(f,g,V,sweeper)));
+        approximations.append(SharedPointer<InputApproximation>(new ZeroInputApproximation(f,g,V,sweeper)));
 
         auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=20000);
         integrator.verbosity = 0;
 
-        //run_single_test(name,integrator,dynamics,inputs,initial,f,g,noise_levels,real_starting_set,evolution_time);
-        this->run_battery_each_approximation(name,dynamics,inputs,initial,f,g,noise_levels,real_starting_set,evolution_time,step,freq);
+        //run_single_test(name,integrator,dynamics,inputs,initial,f,g,V,real_starting_set,evolution_time);
+        this->run_battery_each_approximation(name,dynamics,inputs,initial,f,g,V,real_starting_set,evolution_time,step,freq);
     }
 
   public:

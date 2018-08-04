@@ -246,23 +246,23 @@ protected:
     virtual Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError> compute_norms(ValidatedVectorFunction const&, Vector<ValidatedVectorFunction> const&, BoxDomainType const&, PositiveFloatDPValue const&, UpperBoxType const&) const override;
 };
 
-enum class DIApproximationKind { ZERO, CONSTANT, AFFINE, SINUSOIDAL, PIECEWISE};
+enum class InputApproximationKind { ZERO, CONSTANT, AFFINE, SINUSOIDAL, PIECEWISE};
 
-std::ostream& operator << (std::ostream& os, const DIApproximationKind& kind) {
+std::ostream& operator << (std::ostream& os, const InputApproximationKind& kind) {
     switch (kind) {
-        case DIApproximationKind::ZERO:
+        case InputApproximationKind::ZERO:
             os << "ZERO";
             break;
-        case DIApproximationKind::CONSTANT:
+        case InputApproximationKind::CONSTANT:
             os << "CONSTANT";
             break;
-        case DIApproximationKind::AFFINE:
+        case InputApproximationKind::AFFINE:
             os << "AFFINE";
             break;
-        case DIApproximationKind::SINUSOIDAL:
+        case InputApproximationKind::SINUSOIDAL:
             os << "SINUSOIDAL";
             break;
-        case DIApproximationKind::PIECEWISE:
+        case InputApproximationKind::PIECEWISE:
             os << "PIECEWISE";
             break;
     }
@@ -270,63 +270,67 @@ std::ostream& operator << (std::ostream& os, const DIApproximationKind& kind) {
     return os;
 }
 
-class DIApproximation {
-  private:
-    DIApproximationKind _kind;
-    Nat _num_params_per_input;
+class InputApproximation {
   protected:
+    ValidatedVectorFunction const& _f;
+    Vector<ValidatedVectorFunction> const& _g;
+    BoxDomainType const& _V;
     SweeperDP _sweeper;
-    DIApproximation(SweeperDP sweeper, DIApproximationKind kind, Nat num_params_per_input) :
-        _sweeper(sweeper), _kind(kind), _num_params_per_input(num_params_per_input) { }
+    InputApproximation(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, const BoxDomainType& V,
+                       SweeperDP sweeper, InputApproximationKind kind, Nat num_params_per_input) :
+        _f(f), _g(g), _V(V), _sweeper(sweeper), _kind(kind), _num_params_per_input(num_params_per_input) { }
+  private:
+    InputApproximationKind _kind;
+    Nat _num_params_per_input;
   public:
-    DIApproximationKind getKind() const { return _kind; }
-    virtual ErrorType compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const = 0;
+    InputApproximationKind getKind() const { return _kind; }
+    virtual ErrorType compute_error(PositiveFloatDPValue h, UpperBoxType const& B) const = 0;
     BoxDomainType build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h) const;
     virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const = 0;
 };
 
-class ZeroDIApproximation : public DIApproximation {
+class ZeroInputApproximation : public InputApproximation {
 public:
-    ZeroDIApproximation(SweeperDP sweeper)
-            : DIApproximation(sweeper,DIApproximationKind::ZERO,0u) {  }
+    ZeroInputApproximation(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, const BoxDomainType& V, SweeperDP sweeper)
+            : InputApproximation(f,g,V,sweeper,InputApproximationKind::ZERO,0u) {  }
 protected:
-    virtual ErrorType compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const override;
+    virtual ErrorType compute_error(PositiveFloatDPValue h, UpperBoxType const& B) const override;
     virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override;
 };
 
-class ConstantDIApproximation : public DIApproximation {
+class ConstantInputApproximation : public InputApproximation {
 public:
-    ConstantDIApproximation(SweeperDP sweeper)
-            : DIApproximation(sweeper,DIApproximationKind::CONSTANT,1u) {  }
+    ConstantInputApproximation(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, const BoxDomainType& V, SweeperDP sweeper)
+            : InputApproximation(f,g,V,sweeper,InputApproximationKind::CONSTANT,1u) {  }
 protected:
-    virtual ErrorType compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const override;
+    virtual ErrorType compute_error(PositiveFloatDPValue h, UpperBoxType const& B) const override;
     virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override;
 };
 
-class AffineDIApproximation : public DIApproximation {
+class AffineInputApproximation : public InputApproximation {
 public:
-    AffineDIApproximation(SweeperDP sweeper)
-            : DIApproximation(sweeper,DIApproximationKind::AFFINE,2u) {  }
+    AffineInputApproximation(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, const BoxDomainType& V, SweeperDP sweeper)
+            : InputApproximation(f,g,V,sweeper,InputApproximationKind::AFFINE,2u) {  }
 protected:
-    virtual ErrorType compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const override;
+    virtual ErrorType compute_error(PositiveFloatDPValue h, UpperBoxType const& B) const override;
     virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override;
 };
 
-class SinusoidalDIApproximation : public DIApproximation {
+class SinusoidalInputApproximation : public InputApproximation {
 public:
-    SinusoidalDIApproximation(SweeperDP sweeper)
-            : DIApproximation(sweeper,DIApproximationKind::SINUSOIDAL,2u) {  }
+    SinusoidalInputApproximation(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, const BoxDomainType& V, SweeperDP sweeper)
+            : InputApproximation(f,g,V,sweeper,InputApproximationKind::SINUSOIDAL,2u) {  }
 protected:
-    virtual ErrorType compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const override;
+    virtual ErrorType compute_error(PositiveFloatDPValue h, UpperBoxType const& B) const override;
     virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override;
 };
 
-class PiecewiseDIApproximation : public DIApproximation {
+class PiecewiseInputApproximation : public InputApproximation {
 public:
-    PiecewiseDIApproximation(SweeperDP sweeper)
-            : DIApproximation(sweeper,DIApproximationKind::PIECEWISE,2u) {  }
+    PiecewiseInputApproximation(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, const BoxDomainType& V, SweeperDP sweeper)
+            : InputApproximation(f,g,V,sweeper,InputApproximationKind::PIECEWISE,2u) {  }
 public:
-    virtual ErrorType compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const override;
+    virtual ErrorType compute_error(PositiveFloatDPValue h, UpperBoxType const& B) const override;
     virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override;
     Vector<ValidatedScalarFunction> build_firsthalf_approximating_function(BoxDomainType DVh, SizeType n, SizeType m) const;
     Vector<ValidatedScalarFunction> build_secondhalf_approximating_function(BoxDomainType DVh, SizeType n, SizeType m) const;
@@ -357,16 +361,16 @@ class InclusionIntegratorInterface {
 
 class InclusionIntegrator : public virtual InclusionIntegratorInterface, public Loggable {
   protected:
-    List<SharedPointer<DIApproximation>> _approximations;
-    SharedPointer<DIApproximation> _approximation;
+    List<SharedPointer<InputApproximation>> _approximations;
+    SharedPointer<InputApproximation> _approximation;
     SharedPointer<Reconditioner> _reconditioner;
     SweeperDP _sweeper;
     FloatDP _step_size;
     Nat _number_of_steps_between_simplifications;
     Nat _number_of_variables_to_keep;
   public:
-    InclusionIntegrator(List<SharedPointer<DIApproximation>> approximations, SweeperDP sweeper, StepSize step_size);
-    template<class... AS> InclusionIntegrator(List<SharedPointer<DIApproximation>> approximations, SweeperDP sweeper, StepSize step_size, AS... attributes)
+    InclusionIntegrator(List<SharedPointer<InputApproximation>> approximations, SweeperDP sweeper, StepSize step_size);
+    template<class... AS> InclusionIntegrator(List<SharedPointer<InputApproximation>> approximations, SweeperDP sweeper, StepSize step_size, AS... attributes)
         : InclusionIntegrator(approximations, sweeper,step_size) {
         this->set(attributes...);
         _reconditioner.reset(new LohnerReconditioner(_sweeper,_number_of_variables_to_keep));

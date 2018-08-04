@@ -32,9 +32,9 @@ namespace Ariadne {
 struct ScheduledApproximation
 {
     SizeType step;
-    SharedPointer<DIApproximation> approximation;
+    SharedPointer<InputApproximation> approximation;
 
-    ScheduledApproximation(SizeType step, SharedPointer<DIApproximation> approximation) : step(step), approximation(approximation) {}
+    ScheduledApproximation(SizeType step, SharedPointer<InputApproximation> approximation) : step(step), approximation(approximation) {}
 };
 
 OutputStream& operator<<(OutputStream& os, ScheduledApproximation const& sa) {
@@ -593,7 +593,7 @@ ValidatedVectorTaylorFunctionModelDP build_f_plus_Gw(ValidatedVectorTaylorFuncti
 }
 
 
-InclusionIntegrator::InclusionIntegrator(List<SharedPointer<DIApproximation>> approximations, SweeperDP sweeper, StepSize step_size)
+InclusionIntegrator::InclusionIntegrator(List<SharedPointer<InputApproximation>> approximations, SweeperDP sweeper, StepSize step_size)
     : _approximations(approximations)
     , _sweeper(sweeper)
     , _step_size(step_size)
@@ -626,7 +626,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<Dotted
     ValidatedVectorFunctionModelDP evolve_function = ValidatedVectorTaylorFunctionModelDP::identity(X0,this->_sweeper);
     auto t=PositiveFloatDPValue(0.0);
 
-    Map<DIApproximationKind,SizeType> approximation_global_frequencies, approximation_local_frequencies;
+    Map<InputApproximationKind,SizeType> approximation_global_frequencies, approximation_local_frequencies;
     for (auto appro: _approximations) {
         approximation_global_frequencies[appro->getKind()] = 0;
         approximation_local_frequencies[appro->getKind()] = 0;
@@ -637,7 +637,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<Dotted
     auto step = 0;
 
     List<ScheduledApproximation> schedule;
-    Map<SharedPointer<DIApproximation>,Nat> delays;
+    Map<SharedPointer<InputApproximation>,Nat> delays;
     for (auto appro: _approximations) {
         schedule.push_back(ScheduledApproximation(SizeType(step),appro));
         delays[appro] = 0;
@@ -646,7 +646,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<Dotted
     while (possibly(t<FloatDPBounds(tmax,pr))) {
         ARIADNE_LOG(2,"step#:"<<step<<", t:"<<t<<", hsug:"<<hsug << "\n");
 
-        List<SharedPointer<DIApproximation>> approximations_to_use;
+        List<SharedPointer<InputApproximation>> approximations_to_use;
         while (!schedule.empty()) {
             auto entry = schedule.back();
             if (entry.step == step) {
@@ -682,7 +682,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<Dotted
 
         ValidatedVectorFunctionModelDP reach_function;
         ValidatedVectorFunctionModelDP best_reach_function, best_evolve_function;
-        SharedPointer<DIApproximation> best;
+        SharedPointer<InputApproximation> best;
         FloatDP best_volume(0);
 
         ARIADNE_LOG(3,"n. of approximations to use="<<approximations_to_use.size()<<"\n");
@@ -695,7 +695,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<Dotted
             ValidatedVectorFunctionModelDP current_reach_function;
             ValidatedVectorFunctionModelDP current_evolve_function;
 
-            if (this->_approximation->getKind() != DIApproximationKind::PIECEWISE) {
+            if (this->_approximation->getKind() != InputApproximationKind::PIECEWISE) {
 
                 auto Phi = this->compute_flow_function(dynamics,inputs,initial,f,g,V,D,h,B);
 
@@ -708,14 +708,14 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<Dotted
                 current_evolve_function=partial_evaluate(current_reach_function,current_reach_function.argument_size()-1,new_t);
                 ARIADNE_LOG(5,"current_evolve_function="<<current_evolve_function<<"\n");
             } else {
-                PiecewiseDIApproximation& approx = dynamic_cast<PiecewiseDIApproximation&>(*this->_approximation);
+                PiecewiseInputApproximation& approx = dynamic_cast<PiecewiseInputApproximation&>(*this->_approximation);
 
                 auto n=D.size();
                 auto m=V.size();
                 auto number_of_states = n;
                 auto number_of_inputs = m;
                 auto state_variables = range(0,n);
-                auto e=approx.compute_error(f,g,V,h,B);
+                auto e=approx.compute_error(h,B);
                 ARIADNE_LOG(6,"approximation error:"<<e<<"\n");
                 auto swp=this->_sweeper;
                 auto FD1 = approx.build_flow_domain(D,V,hlf(h));
@@ -825,10 +825,10 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<Dotted
             for (auto appro: approximation_local_frequencies) {
                 SizeType ppi;
                 switch (appro.first) {
-                    case DIApproximationKind::ZERO:
+                    case InputApproximationKind::ZERO:
                         ppi = 0;
                         break;
-                    case DIApproximationKind::CONSTANT:
+                    case InputApproximationKind::CONSTANT:
                         ppi = 1;
                         break;
                     default:
@@ -1032,7 +1032,7 @@ compute_flow_function(const List<DottedRealAssignment>& dynamics, const RealVari
     auto number_of_states = n;
     auto number_of_inputs = m;
     auto state_variables = range(0,n);
-    auto e=_approximation->compute_error(f,g,V,h,B);
+    auto e=_approximation->compute_error(h,B);
     ARIADNE_LOG(6,"approximation error:"<<e<<"\n");
     auto swp=this->_sweeper;
     auto DVh =_approximation->build_flow_domain(D,V,h);
@@ -1087,51 +1087,51 @@ compute_flow_function(const List<DottedRealAssignment>& dynamics, const RealVari
 }
 
 
-ErrorType ZeroDIApproximation::compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const {
-    if (inputs_are_additive(g, B))
-        return AdditiveZeroErrorProcessor(f,g,V,h,B).process();
+ErrorType ZeroInputApproximation::compute_error(PositiveFloatDPValue h, UpperBoxType const& B) const {
+    if (inputs_are_additive(_g, B))
+        return AdditiveZeroErrorProcessor(_f,_g,_V,h,B).process();
     else
-        return ZeroErrorProcessor(f,g,V,h,B).process();
+        return ZeroErrorProcessor(_f,_g,_V,h,B).process();
 }
 
 
-ErrorType ConstantDIApproximation::compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const {
-    if (inputs_are_additive(g, B))
-        return AdditiveConstantErrorProcessor(f,g,V,h,B).process();
+ErrorType ConstantInputApproximation::compute_error(PositiveFloatDPValue h, UpperBoxType const& B) const {
+    if (inputs_are_additive(_g, B))
+        return AdditiveConstantErrorProcessor(_f,_g,_V,h,B).process();
     else
-        return ConstantErrorProcessor(f,g,V,h,B).process();
+        return ConstantErrorProcessor(_f,_g,_V,h,B).process();
 }
 
-ErrorType PiecewiseDIApproximation::compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const {
-    if (inputs_are_additive(g, B))
-        return AdditivePiecewiseErrorProcessor(f,g,V,h,B).process();
-    else if (g.size() == 1)
-        return SingleInputPiecewiseErrorProcessor(f,g,V,h,B).process();
+ErrorType PiecewiseInputApproximation::compute_error(PositiveFloatDPValue h, UpperBoxType const& B) const {
+    if (inputs_are_additive(_g, B))
+        return AdditivePiecewiseErrorProcessor(_f,_g,_V,h,B).process();
+    else if (_g.size() == 1)
+        return SingleInputPiecewiseErrorProcessor(_f,_g,_V,h,B).process();
     else
-        return PiecewiseErrorProcessor(f,g,V,h,B).process();
+        return PiecewiseErrorProcessor(_f,_g,_V,h,B).process();
 }
 
-ErrorType AffineDIApproximation::compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const {
-    if (inputs_are_additive(g, B))
-        return AdditiveAffineErrorProcessor(f,g,V,h,B).process();
-    else if (g.size() == 1)
-        return SingleInputAffineErrorProcessor(f,g,V,h,B).process();
+ErrorType AffineInputApproximation::compute_error(PositiveFloatDPValue h, UpperBoxType const& B) const {
+    if (inputs_are_additive(_g, B))
+        return AdditiveAffineErrorProcessor(_f,_g,_V,h,B).process();
+    else if (_g.size() == 1)
+        return SingleInputAffineErrorProcessor(_f,_g,_V,h,B).process();
     else
-        return AffineErrorProcessor(f,g,V,h,B).process();
-}
-
-
-ErrorType SinusoidalDIApproximation::compute_error(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V, PositiveFloatDPValue h, UpperBoxType const& B) const {
-    if (inputs_are_additive(g, B))
-        return AdditiveSinusoidalErrorProcessor(f,g,V,h,B).process();
-    else if (g.size() == 1)
-        return SingleInputSinusoidalErrorProcessor(f,g,V,h,B).process();
-    else
-        return SinusoidalErrorProcessor(f,g,V,h,B).process();
+        return AffineErrorProcessor(_f,_g,_V,h,B).process();
 }
 
 
-BoxDomainType DIApproximation::build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h) const {
+ErrorType SinusoidalInputApproximation::compute_error(PositiveFloatDPValue h, UpperBoxType const& B) const {
+    if (inputs_are_additive(_g, B))
+        return AdditiveSinusoidalErrorProcessor(_f,_g,_V,h,B).process();
+    else if (_g.size() == 1)
+        return SingleInputSinusoidalErrorProcessor(_f,_g,_V,h,B).process();
+    else
+        return SinusoidalErrorProcessor(_f,_g,_V,h,B).process();
+}
+
+
+BoxDomainType InputApproximation::build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h) const {
     auto Ht=IntervalDomainType(-h,+h);
 
     auto result = D;
@@ -1142,7 +1142,7 @@ BoxDomainType DIApproximation::build_flow_domain(BoxDomainType D, BoxDomainType 
     return product(result,Ht);
 }
 
-Vector<ValidatedScalarFunction> ZeroDIApproximation::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
+Vector<ValidatedScalarFunction> ZeroInputApproximation::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
     auto result = Vector<ValidatedScalarFunction>(m);
 
     for (auto i : range(0,m))
@@ -1152,7 +1152,7 @@ Vector<ValidatedScalarFunction> ZeroDIApproximation::build_w_functions(BoxDomain
 }
 
 
-Vector<ValidatedScalarFunction> ConstantDIApproximation::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
+Vector<ValidatedScalarFunction> ConstantInputApproximation::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
     auto result = Vector<ValidatedScalarFunction>(m);
 
     for (auto i : range(0,m))
@@ -1162,7 +1162,7 @@ Vector<ValidatedScalarFunction> ConstantDIApproximation::build_w_functions(BoxDo
 }
 
 
-Vector<ValidatedScalarFunction> AffineDIApproximation::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
+Vector<ValidatedScalarFunction> AffineInputApproximation::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
     auto result = Vector<ValidatedScalarFunction>(m);
 
     auto zero = ValidatedScalarFunction::zero(n+2*m+1);
@@ -1183,7 +1183,7 @@ Vector<ValidatedScalarFunction> AffineDIApproximation::build_w_functions(BoxDoma
 }
 
 
-Vector<ValidatedScalarFunction> SinusoidalDIApproximation::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
+Vector<ValidatedScalarFunction> SinusoidalInputApproximation::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
 
     auto result = Vector<ValidatedScalarFunction>(m);
 
@@ -1207,13 +1207,13 @@ Vector<ValidatedScalarFunction> SinusoidalDIApproximation::build_w_functions(Box
 }
 
 
-Vector<ValidatedScalarFunction> PiecewiseDIApproximation::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
+Vector<ValidatedScalarFunction> PiecewiseInputApproximation::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
 
     return build_firsthalf_approximating_function(DVh,n,m);
 }
 
 
-Vector<ValidatedScalarFunction> PiecewiseDIApproximation::build_firsthalf_approximating_function(BoxDomainType DVh, SizeType n, SizeType m) const {
+Vector<ValidatedScalarFunction> PiecewiseInputApproximation::build_firsthalf_approximating_function(BoxDomainType DVh, SizeType n, SizeType m) const {
     auto result = Vector<ValidatedScalarFunction>(m);
 
     auto zero = ValidatedScalarFunction::zero(n+2*m+1);
@@ -1230,7 +1230,7 @@ Vector<ValidatedScalarFunction> PiecewiseDIApproximation::build_firsthalf_approx
 }
 
 
-Vector<ValidatedScalarFunction> PiecewiseDIApproximation::build_secondhalf_approximating_function(BoxDomainType DVh, SizeType n, SizeType m) const {
+Vector<ValidatedScalarFunction> PiecewiseInputApproximation::build_secondhalf_approximating_function(BoxDomainType DVh, SizeType n, SizeType m) const {
     auto result = Vector<ValidatedScalarFunction>(m);
 
     auto zero = ValidatedScalarFunction::zero(n+2*m+1);

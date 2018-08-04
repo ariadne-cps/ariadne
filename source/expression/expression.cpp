@@ -602,8 +602,8 @@ inline Expression<Real> _simplify(const Expression<Real>& e) {
             if(identical(sarg1,zero)) { return -sarg2; }
             break;
         case OperatorCode::MUL:
-            if(identical(sarg1,zero)) { return sarg1; }
-            if(identical(sarg2,zero)) { return sarg2; }
+            if(identical(sarg1,zero)) { return zero; }
+            if(identical(sarg2,zero)) { return zero; }
             if(identical(sarg1,one)) { return sarg2; }
             if(identical(sarg2,one)) { return sarg1; }
             break;
@@ -614,8 +614,7 @@ inline Expression<Real> _simplify(const Expression<Real>& e) {
         default:
             break;
     }
-    return e;
-
+    return make_expression<R>(e.op(),sarg1,sarg2);
 }
 
 template<class I> inline Expression<Kleenean> _simplify(const Expression<Kleenean>& e) {

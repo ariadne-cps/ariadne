@@ -109,6 +109,14 @@ class TestExpression {
         ARIADNE_TEST_EQUALS(result1,value);
     }
 
+    Void test_simplify() {
+
+        RealVariable x("x"), y("y"), u("u");
+        RealExpression expr = -u*x*y+2*x;
+        RealExpression simplification = simplify(derivative(expr,x));
+        ARIADNE_TEST_ASSERT(identical(simplification,-u*y+2));
+    }
+
     Void test_scalar_properties()
     {
         RealVariable x("x"), y("y");
@@ -199,6 +207,7 @@ class TestExpression {
         test_variables();
         test_assignment();
         test_parameters();
+        test_simplify();
         test_scalar_properties();
         test_vector_properties();
         test_function();

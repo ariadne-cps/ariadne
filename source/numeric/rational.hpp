@@ -58,6 +58,7 @@ class Rational
     , DeclareComparisonOperations<Rational,Boolean,Boolean>
     , DefineFieldOperators<Rational>
     , DefineComparisonOperators<Rational,Boolean,Boolean>
+    , DeclareTranscendentalOperations<Real>
 {
   public:
     mpq_t _mpq;

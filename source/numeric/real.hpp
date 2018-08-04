@@ -339,7 +339,10 @@ class LowerReal
     friend LowerReal hlf(LowerReal const& r); //!< Half \a r÷2.
     friend LowerReal add(LowerReal const& r1, LowerReal const& r2); //!< \brief Sum \a r1+r2.
     friend LowerReal sub(LowerReal const& r1, LowerReal const& r2); //!< \brief Difference \a r1-r2.
+
     friend NaiveReal mul(LowerReal const& r1, LowerReal const& r2) = delete; //!< \brief \em No multiplication operator, since non-monotone!
+    friend NaiveReal div(LowerReal const& r1, UpperReal const& r2) = delete; //!< \brief \em No division operator, since non-monotone!
+    friend NaiveReal rec(LowerReal const& r) = delete; //!< \brief \em No reciprocal operation, since non-monotone!
     //@}
 
     //@{
@@ -359,6 +362,10 @@ class LowerReal
     friend LowerReal log(PositiveLowerReal const& r); //!< The natural logarithm of \a r. Requires \a r ≥ 0.
     friend LowerReal atan(LowerReal const& r); //!< The arc-tangent of \a r.
     friend PositiveLowerReal atan(PositiveLowerReal const& r); //!< Arc-tangent preserves positivity
+
+    friend NaiveReal sin(LowerReal const& r); //!< No sine operation, since non-monotone!
+    friend NaiveReal cos(LowerReal const& r); //!< No cosine operation, since non-monotone!
+    friend NaiveReal tan(LowerReal const& r); //!< No tangent operation, since non-monotone!
     //@}
 
     //@{
@@ -429,7 +436,10 @@ class UpperReal
     friend UpperReal hlf(UpperReal const& r); //!< Half \a r÷2.
     friend UpperReal add(UpperReal const& r1, UpperReal const& r2); //!< \brief Sum \a r1+r2.
     friend UpperReal sub(UpperReal const& r1, UpperReal const& r2); //!< \brief Difference \a r1-r2.
+
     friend NaiveReal mul(UpperReal const& r1, UpperReal const& r2) = delete; //!< \brief \em No multiplication operator, since non-monotone!
+    friend NaiveReal mul(UpperReal const& r1, LowerReal const& r2) = delete; //!< \brief \em No division operator, since non-monotone!
+    friend NaiveReal rec(UpperReal const& r) = delete; //!< \brief \em No reciprocal operation, since non-monotone!
     //@}
 
     //@{
@@ -449,6 +459,9 @@ class UpperReal
     friend UpperReal log(PositiveUpperReal const& r); //!< The natural logarithm of \a r. Requires \a r ≥ 0.
     friend UpperReal atan(UpperReal const& r); //!< The arc-tangent of \a r.
     friend PositiveUpperReal atan(PositiveUpperReal const& r); //!< Arc-tangent preserves positivity
+    friend NaiveReal sin(UpperReal const& r); //!< No sine operation, since non-monotone!
+    friend NaiveReal cos(UpperReal const& r); //!< No cosine operation, since non-monotone!
+    friend NaiveReal tan(UpperReal const& r); //!< No tangent operation, since non-monotone!
     //@}
 
     //@{

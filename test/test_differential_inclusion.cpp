@@ -33,6 +33,7 @@
 #include "geometry/function_set.hpp"
 #include "output/graphics.hpp"
 #include "expression/expression_set.hpp"
+#include "dynamics/vector_field.hpp"
 
 #include "test/test.hpp"
 #include <sys/times.h>
@@ -75,6 +76,7 @@ class TestInclusionIntegrator {
 
 
     Void run_battery_frequency_topdown(String name, const List<DottedRealAssignment>& dynamics,
+                                       const RealVariablesBox& inputs, const RealVariablesBox& initial,
                                        ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, RealVector noise_levels,
                                RealBox real_starting_set, Real evolution_time, double step, SweeperDP sweeper, SizeType max_freq) const
     {
@@ -109,7 +111,7 @@ class TestInclusionIntegrator {
             tms start_time, end_time;
             times(&start_time);
 
-            List<ValidatedVectorFunctionModelType> flow_functions = integrator.flow(dynamics,f,g,noise,starting_set,evolution_time);
+            List<ValidatedVectorFunctionModelType> flow_functions = integrator.flow(dynamics,inputs,initial,f,g,noise,starting_set,evolution_time);
 
             times(&end_time);
             clock_t ticks = end_time.tms_utime - start_time.tms_utime;
@@ -125,6 +127,7 @@ class TestInclusionIntegrator {
 
 
     Void run_battery_each_approximation(String name, const List<DottedRealAssignment>& dynamics,
+                                        const RealVariablesBox& inputs, const RealVariablesBox& initial,
                                         ValidatedVectorFunction const &f, Vector<ValidatedVectorFunction> const &g,
                                         RealVector noise_levels,
                                         RealBox real_starting_set, Real evolution_time, double step, SizeType freq) const
@@ -179,7 +182,7 @@ class TestInclusionIntegrator {
             tms start_time, end_time;
             times(&start_time);
 
-            List<ValidatedVectorFunctionModelType> flow_functions = integrator.flow(dynamics,f,g,noise,starting_set,evolution_time);
+            List<ValidatedVectorFunctionModelType> flow_functions = integrator.flow(dynamics,inputs,initial,f,g,noise,starting_set,evolution_time);
 
             times(&end_time);
             clock_t ticks = end_time.tms_utime - start_time.tms_utime;
@@ -194,6 +197,7 @@ class TestInclusionIntegrator {
     }
 
     Void run_single_test(String name, InclusionIntegratorInterface& integrator, const List<DottedRealAssignment>& dynamics,
+                         const RealVariablesBox& inputs, const RealVariablesBox& initial,
                          ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, RealVector noise_levels,
                   RealBox real_starting_set, Real evolution_time) const
     {
@@ -209,7 +213,7 @@ class TestInclusionIntegrator {
         tms start_time, end_time;
         times(&start_time);
 
-        List<ValidatedVectorFunctionModelType> flow_functions = integrator.flow(dynamics,f,g,noise,starting_set,evolution_time);
+        List<ValidatedVectorFunctionModelType> flow_functions = integrator.flow(dynamics,inputs,initial,f,g,noise,starting_set,evolution_time);
 
         times(&end_time);
         clock_t ticks = end_time.tms_utime - start_time.tms_utime;
@@ -248,7 +252,9 @@ class TestInclusionIntegrator {
 */
     }
 
-    Void run_test(String name, const List<DottedRealAssignment>& dynamics, ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, RealVector noise_levels,
+    Void run_test(String name, const List<DottedRealAssignment>& dynamics,
+                  const RealVariablesBox& inputs, const RealVariablesBox& initial,
+                  ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, RealVector noise_levels,
                   RealBox real_starting_set, Real evolution_time, double step) const {
 
         SizeType freq=12;
@@ -264,8 +270,8 @@ class TestInclusionIntegrator {
         auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=20000);
         integrator.verbosity = 0;
 
-        //run_single_test(name,integrator,dynamics,f,g,noise_levels,real_starting_set,evolution_time);
-        this->run_battery_each_approximation(name,dynamics,f,g,noise_levels,real_starting_set,evolution_time,step,freq);
+        //run_single_test(name,integrator,dynamics,inputs,initial,f,g,noise_levels,real_starting_set,evolution_time);
+        this->run_battery_each_approximation(name,dynamics,inputs,initial,f,g,noise_levels,real_starting_set,evolution_time,step,freq);
     }
 
   public:
@@ -319,7 +325,7 @@ void TestInclusionIntegrator::test_wiggins_18_7_3() const {
 
     Real evolution_time=90/10_q;
 
-    this->run_test("wiggins_18_7_3",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
+    this->run_test("wiggins_18_7_3",dynamics,inputs,initial,f,g,noise_levels,starting_set,evolution_time,step);
 }
 
 
@@ -348,7 +354,7 @@ void TestInclusionIntegrator::test_order7() const {
 
     Real evolution_time=40/8_q;
 
-    this->run_test("order7",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
+    this->run_test("order7",dynamics,inputs,initial,f,g,noise_levels,starting_set,evolution_time,step);
 }
 
 void TestInclusionIntegrator::test_3dsphere() const {
@@ -384,7 +390,7 @@ void TestInclusionIntegrator::test_3dsphere() const {
 
     Real evolution_time=90/10_q;
 
-    this->run_test("3dsphere",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
+    this->run_test("3dsphere",dynamics,inputs,initial,f,g,noise_levels,starting_set,evolution_time,step);
 }
 
 void TestInclusionIntegrator::test_vinograd() const {
@@ -412,7 +418,7 @@ void TestInclusionIntegrator::test_vinograd() const {
 
     Real evolution_time=180/10_q;
 
-    this->run_test("vinograd",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
+    this->run_test("vinograd",dynamics,inputs,initial,f,g,noise_levels,starting_set,evolution_time,step);
 }
 
 void TestInclusionIntegrator::test_higgins_selkov() const {
@@ -443,7 +449,7 @@ void TestInclusionIntegrator::test_higgins_selkov() const {
 
     Real evolution_time=100/10_q;
 
-    this->run_test("higgins-selkov",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
+    this->run_test("higgins-selkov",dynamics,inputs,initial,f,g,noise_levels,starting_set,evolution_time,step);
 
 }
 
@@ -481,7 +487,7 @@ void TestInclusionIntegrator::test_reactor() const {
 
     Real evolution_time=100/10_q;
 
-    this->run_test("reactor",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
+    this->run_test("reactor",dynamics,inputs,initial,f,g,noise_levels,starting_set,evolution_time,step);
 }
 
 
@@ -510,7 +516,7 @@ void TestInclusionIntegrator::test_lotka_volterra() const {
 
     Real evolution_time=100/10_q;
 
-    this->run_test("lotka-volterra",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
+    this->run_test("lotka-volterra",dynamics,inputs,initial,f,g,noise_levels,starting_set,evolution_time,step);
 }
 
 void TestInclusionIntegrator::test_fitzhugh_nagumo() const {
@@ -537,7 +543,7 @@ void TestInclusionIntegrator::test_fitzhugh_nagumo() const {
 
     Real evolution_time=400/10_q;
 
-    this->run_test("fitzhugh-nagumo",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
+    this->run_test("fitzhugh-nagumo",dynamics,inputs,initial,f,g,noise_levels,starting_set,evolution_time,step);
 }
 
 void TestInclusionIntegrator::test_jet_engine() const {
@@ -565,7 +571,7 @@ void TestInclusionIntegrator::test_jet_engine() const {
 
     Real evolution_time=40/8_q;
 
-    this->run_test("jet-engine",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
+    this->run_test("jet-engine",dynamics,inputs,initial,f,g,noise_levels,starting_set,evolution_time,step);
 }
 
 void TestInclusionIntegrator::test_pi_controller() const {
@@ -593,7 +599,7 @@ void TestInclusionIntegrator::test_pi_controller() const {
 
     Real evolution_time=40/8_q;
 
-    this->run_test("pi-controller",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
+    this->run_test("pi-controller",dynamics,inputs,initial,f,g,noise_levels,starting_set,evolution_time,step);
 }
 
 void TestInclusionIntegrator::test_jerk21() const {
@@ -626,7 +632,7 @@ void TestInclusionIntegrator::test_jerk21() const {
 
     Real evolution_time=100/10_q;
 
-    this->run_test("jerk21",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
+    this->run_test("jerk21",dynamics,inputs,initial,f,g,noise_levels,starting_set,evolution_time,step);
 }
 
 void TestInclusionIntegrator::test_lorenz() const {
@@ -662,7 +668,7 @@ void TestInclusionIntegrator::test_lorenz() const {
 
     Real evolution_time=10/10_q;
 
-    this->run_test("lorenz",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
+    this->run_test("lorenz",dynamics,inputs,initial,f,g,noise_levels,starting_set,evolution_time,step);
 }
 
 void TestInclusionIntegrator::test_rossler() const {
@@ -696,7 +702,7 @@ void TestInclusionIntegrator::test_rossler() const {
 
     Real evolution_time=120/10_q;
 
-    this->run_test("rossler",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
+    this->run_test("rossler",dynamics,inputs,initial,f,g,noise_levels,starting_set,evolution_time,step);
 }
 
 void TestInclusionIntegrator::test_jerk16() const {
@@ -728,7 +734,13 @@ void TestInclusionIntegrator::test_jerk16() const {
 
     Real evolution_time=100/10_q;
 
-    this->run_test("jerk16",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
+    /*
+    RealSpace var_spc(left_hand_sides(dynamics));
+    RealSpace inp_spc(List<RealVariable>(inputs.variables()));
+    RealSpace spc = var_spc.adjoin(inp_spc);
+    auto func = make_function(spc, Vector<RealExpression>(right_hand_sides(dynamics)));*/
+
+    this->run_test("jerk16",dynamics,inputs,initial,f,g,noise_levels,starting_set,evolution_time,step);
 }
 
 void TestInclusionIntegrator::test_DCDC() const {
@@ -768,7 +780,7 @@ void TestInclusionIntegrator::test_DCDC() const {
 
     Real evolution_time=50/10_q;
 
-    this->run_test("DCDC",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
+    this->run_test("DCDC",dynamics,inputs,initial,f,g,noise_levels,starting_set,evolution_time,step);
 }
 
 void TestInclusionIntegrator::test_harmonic() const {
@@ -796,7 +808,7 @@ void TestInclusionIntegrator::test_harmonic() const {
 
     Real evolution_time=314/100_q;
 
-    this->run_test("harmonic",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
+    this->run_test("harmonic",dynamics,inputs,initial,f,g,noise_levels,starting_set,evolution_time,step);
 }
 
 void TestInclusionIntegrator::test_van_der_pol() const {
@@ -825,7 +837,7 @@ void TestInclusionIntegrator::test_van_der_pol() const {
 
     Real evolution_time=8/4_q;
 
-    this->run_test("vanderpol",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
+    this->run_test("vanderpol",dynamics,inputs,initial,f,g,noise_levels,starting_set,evolution_time,step);
 }
 
 void TestInclusionIntegrator::test_clock() const {
@@ -853,7 +865,7 @@ void TestInclusionIntegrator::test_clock() const {
 
     auto evolution_time=20/4_q;
 
-    this->run_test("clock",dynamics,f,g,noise_levels,starting_set,evolution_time,step);
+    this->run_test("clock",dynamics,inputs,initial,f,g,noise_levels,starting_set,evolution_time,step);
 }
 
 void TestInclusionIntegrator::test() const {

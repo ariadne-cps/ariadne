@@ -347,10 +347,10 @@ public:
 
 class InclusionIntegratorInterface {
   public:
-    virtual List<ValidatedVectorFunctionModelType> flow(const List<DottedRealAssignment>& dynamics, ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType X0, Real T) = 0;
+    virtual List<ValidatedVectorFunctionModelType> flow(const List<DottedRealAssignment>& dynamics, const RealVariablesBox& inputs, const RealVariablesBox& initial, ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType X0, Real T) = 0;
 
     virtual Pair<ExactTimeStepType,UpperBoxType> flow_bounds(ValidatedVectorFunction f, BoxDomainType V, BoxDomainType D, ApproximateTimeStepType hsug) const = 0;
-    virtual ValidatedVectorFunctionModelType compute_flow_function(const List<DottedRealAssignment>& dynamics, ValidatedVectorFunction f,
+    virtual ValidatedVectorFunctionModelType compute_flow_function(const List<DottedRealAssignment>& dynamics, const RealVariablesBox& inputs, const RealVariablesBox& initial, ValidatedVectorFunction f,
                                                                    Vector<ValidatedVectorFunction> g, BoxDomainType V,
                                                                    BoxDomainType D, ExactTimeStepType h, UpperBoxType B) const = 0;
 };
@@ -378,11 +378,11 @@ class InclusionIntegrator : public virtual InclusionIntegratorInterface, public 
 
     ValidatedVectorFunctionModelType expand_errors(ValidatedVectorFunctionModelType f) const;
     ValidatedVectorFunctionModelType simplify(ValidatedVectorFunctionModelType f) const;
-    virtual List<ValidatedVectorFunctionModelType> flow(const List<DottedRealAssignment>& dynamics, ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType X0, Real T) override;
+    virtual List<ValidatedVectorFunctionModelType> flow(const List<DottedRealAssignment>& dynamics, const RealVariablesBox& inputs, const RealVariablesBox& initial, ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType X0, Real T) override;
 
     virtual Pair<ExactTimeStepType,UpperBoxType> flow_bounds(ValidatedVectorFunction f, BoxDomainType V, BoxDomainType D, ApproximateTimeStepType hsug) const override;
 
-    virtual ValidatedVectorFunctionModelType compute_flow_function(const List<DottedRealAssignment>& dynamics, ValidatedVectorFunction f,
+    virtual ValidatedVectorFunctionModelType compute_flow_function(const List<DottedRealAssignment>& dynamics, const RealVariablesBox& inputs, const RealVariablesBox& initial, ValidatedVectorFunction f,
                                                                    Vector<ValidatedVectorFunction> g, BoxDomainType V,
                                                                    BoxDomainType D, ExactTimeStepType h, UpperBoxType B) const override;
   private:

@@ -605,7 +605,7 @@ InclusionIntegrator::InclusionIntegrator(List<SharedPointer<DIApproximation>> ap
 
 static const SizeType NUMBER_OF_PICARD_ITERATES=6;
 
-List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<DottedRealAssignment>& dynamics, ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType X0, Real tmax) {
+List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<DottedRealAssignment>& dynamics, const RealVariablesBox& inputs, const RealVariablesBox& initial, ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType X0, Real tmax) {
     ARIADNE_LOG(1,"\nf:"<<f<<"\ng:"<<g<<"\nV:"<<V<<"\nX0:"<<X0<<"\ntmax:"<<tmax<<"\n");
 
     // Ensure all arguments have the correct size;
@@ -697,7 +697,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<Dotted
 
             if (this->_approximation->getKind() != DIApproximationKind::PIECEWISE) {
 
-                auto Phi = this->compute_flow_function(dynamics,f,g,V,D,h,B);
+                auto Phi = this->compute_flow_function(dynamics,inputs,initial,f,g,V,D,h,B);
 
                 ARIADNE_LOG(5,"Phi="<<Phi<<"\n");
                 assert(Phi.domain()[Phi.argument_size()-1].upper()==h);
@@ -1025,7 +1025,7 @@ Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegrator::flow_bounds(Validat
 
 
 ValidatedVectorFunctionModelDP InclusionIntegrator::
-compute_flow_function(const List<DottedRealAssignment>& dynamics, ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType D,
+compute_flow_function(const List<DottedRealAssignment>& dynamics, const RealVariablesBox& inputs, const RealVariablesBox& initial, ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType D,
                       PositiveFloatDPValue h, UpperBoxType B) const {
     auto n=D.size();
     auto m=V.size();

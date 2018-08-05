@@ -126,12 +126,6 @@ template<class F> PositiveBounds<F> dexp(Bounds<F> const& x) {
 }
 
 
-class Reconditioner {
-  public:
-    virtual Void simplify(ValidatedVectorFunctionModelType& phi) const = 0;
-    virtual ValidatedVectorFunctionModelType expand_errors(ValidatedVectorFunctionModelType Phi) const = 0;
-};
-
 struct Norms {
     FloatDPError K;
     FloatDPError Kp;
@@ -322,7 +316,12 @@ public:
     Vector<ValidatedScalarFunction> build_secondhalf_approximating_function(BoxDomainType DVh, SizeType n, SizeType m) const;
 };
 
-BoxDomainType build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h, Nat num_params);
+class Reconditioner {
+  public:
+    virtual Void simplify(ValidatedVectorFunctionModelType& phi) const = 0;
+    virtual ValidatedVectorFunctionModelType expand_errors(ValidatedVectorFunctionModelType Phi) const = 0;
+};
+
 
 class LohnerReconditioner : public Reconditioner, public Loggable {
     SweeperDP _sweeper;
@@ -334,6 +333,7 @@ public:
     virtual ValidatedVectorFunctionModelType expand_errors(ValidatedVectorFunctionModelType f) const override;
     virtual Void simplify(ValidatedVectorFunctionModelType& f) const override;
 };
+
 
 class InclusionIntegratorInterface {
   public:
@@ -366,8 +366,6 @@ class InclusionIntegrator : public virtual InclusionIntegratorInterface, public 
     InclusionIntegrator& set(NumberOfVariablesToKeep n) { _number_of_variables_to_keep=n; return *this; }
     template<class A, class... AS> InclusionIntegrator& set(A a, AS... as) { this->set(a); this->set(as...); return *this; }
 
-    ValidatedVectorFunctionModelType expand_errors(ValidatedVectorFunctionModelType f) const;
-    ValidatedVectorFunctionModelType simplify(ValidatedVectorFunctionModelType f) const;
     virtual List<ValidatedVectorFunctionModelType> flow(const List<DottedRealAssignment>& dynamics, const RealVariablesBox& inputs, const RealVariablesBox& initial, ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType X0, Real T) override;
 
     virtual Pair<ExactTimeStepType,UpperBoxType> flow_bounds(ValidatedVectorFunction f, BoxDomainType V, BoxDomainType D, ApproximateTimeStepType hsug) const override;
@@ -379,6 +377,9 @@ class InclusionIntegrator : public virtual InclusionIntegratorInterface, public 
     ValidatedVectorFunctionModelDP build_reach_function(ValidatedVectorFunctionModelDP evolve_function, ValidatedVectorFunctionModelDP Phi, PositiveFloatDPValue t, PositiveFloatDPValue new_t) const;
     ValidatedVectorFunctionModelDP build_secondhalf_piecewise_reach_function(ValidatedVectorFunctionModelDP evolve_function, ValidatedVectorFunctionModelDP Phi, SizeType m, PositiveFloatDPValue t, PositiveFloatDPValue new_t) const;
 };
+
+
+BoxDomainType build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h, Nat num_params);
 
 
 } // namespace Ariadne;

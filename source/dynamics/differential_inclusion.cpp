@@ -778,14 +778,12 @@ ErrorType InputApproximation::compute_error(PositiveFloatDPValue h, UpperBoxType
 
 
 BoxDomainType InputApproximation::build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h) const {
-    auto Ht=IntervalDomainType(-h,+h);
-
     auto result = D;
 
     for (Nat i : range(this->_num_params_per_input))
         result = product(result,V);
 
-    return product(result,Ht);
+    return product(result,IntervalDomainType(-h,+h));
 }
 
 Vector<ValidatedScalarFunction> ZeroInputApproximation::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {

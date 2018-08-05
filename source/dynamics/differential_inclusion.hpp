@@ -128,15 +128,22 @@ template<class F> PositiveBounds<F> dexp(Bounds<F> const& x) {
 
 struct Norms {
     FloatDPError K;
-    FloatDPError Kp;
+    Vector<FloatDPError> Kj;
+    FloatDPError pK;
+    Vector<FloatDPError> pKj;
     FloatDPError L;
-    FloatDPError Lp;
+    Vector<FloatDPError> Lj;
+    FloatDPError pL;
+    Vector<FloatDPError> pLj;
     FloatDPError H;
-    FloatDPError Hp;
+    Vector<FloatDPError> Hj;
+    FloatDPError pH;
+    Vector<FloatDPError> pHj;
     FloatDPError expLambda;
+    FloatDPError expL;
 
-    Norms(FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&);
-    Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError> values() const;
+    Norms(FloatDPError const&,Vector<FloatDPError> const&,FloatDPError const&,Vector<FloatDPError> const&,FloatDPError const&,Vector<FloatDPError> const&,FloatDPError const&,Vector<FloatDPError> const&,FloatDPError const&,Vector<FloatDPError> const&,FloatDPError const&,Vector<FloatDPError> const&,FloatDPError const&,FloatDPError const&);
+    Tuple<FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,FloatDPError> values() const;
 };
 
 Norms compute_norms(ValidatedVectorFunction const&, Vector<ValidatedVectorFunction> const&, BoxDomainType const&, PositiveFloatDPValue const&, UpperBoxType const&);

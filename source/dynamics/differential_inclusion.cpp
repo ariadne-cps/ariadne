@@ -104,21 +104,27 @@ ValidatedVectorFunction construct_function_affine_in_input(ValidatedVectorFuncti
                                                            Vector<ValidatedVectorFunction> const &g,
                                                            Vector<ValidatedScalarFunction> const &u);
 
-Norms::Norms(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda)
- : K(K), Kp(Kp), L(L), Lp(Lp), H(H), Hp(Hp), expLambda(expLambda) { }
+Norms::Norms(FloatDPError const& K,Vector<FloatDPError> const& Kj,FloatDPError const& pK,Vector<FloatDPError> const& pKj,
+             FloatDPError const& L,Vector<FloatDPError> const& Lj,FloatDPError const& pL,Vector<FloatDPError> const& pLj,
+             FloatDPError const& H,Vector<FloatDPError> const& Hj,FloatDPError const& pH,Vector<FloatDPError> const& pHj,
+             FloatDPError const& expLambda,FloatDPError const& expL)
+ : K(K), Kj(Kj), pK(pK), pKj(pKj), L(L), Lj(Lj), pL(pL), pLj(pLj), H(H), Hj(Hj), pH(pH), pHj(pHj), expLambda(expLambda), expL(expL) { }
 
-Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError>
+Tuple<FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,FloatDPError>
 Norms::values() const {
-    return std::tie(this->K,this->Kp,this->L,this->Lp,this->H,this->Hp,this->expLambda);
+    return std::tie(this->K,this->Kj,this->pK,this->pKj,this->L,this->Lj,this->pL,this->pLj,this->H,this->Hj,this->pH,this->pHj,this->expLambda,this->expL);
 }
 
 
 Norms
 compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B) {
 
+    auto m = g.size();
     DoublePrecision pr;
     FloatDPError ze(pr);
-    FloatDPError K=ze, Kp=ze, L=ze, Lp=ze, H=ze, Hp=ze; FloatDPUpperBound Lambda=ze;
+    FloatDPError K=ze, pK=ze, L=ze, pL=ze, H=ze, pH=ze;
+    Vector<FloatDPError> Kj(m), pKj(m), Lj(m), pLj(m), Hj(m), pHj(m);
+    FloatDPUpperBound Lambda=ze;
 
     auto Df=f.differential(cast_singleton(B),2);
     for (auto n : range(f.result_size())) {
@@ -161,15 +167,16 @@ compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> 
                     Hp_mn += mag(c);
                 }
             }
-            Kp_m=max(Kp_m,Kp_mn); Lp_m=max(Lp_m,Lp_mn); Hp_m=max(Hp,Hp_mn);
+            Kp_m=max(Kp_m,Kp_mn); Lp_m=max(Lp_m,Lp_mn); Hp_m=max(pH,Hp_mn);
         }
 
-        Kp+=Vm*Kp_m; Lp+=Vm*Lp_m; Hp+=Vm*Hp_m;
+        pK+=Vm*Kp_m; pL+=Vm*Lp_m; pH+=Vm*Hp_m;
     }
 
     FloatDPError expLambda = (possibly(Lambda>0)) ? FloatDPError(dexp(Lambda*h)) : FloatDPError(1u,pr);
+    FloatDPError expL = cast_positive(exp(L*h));
 
-    return Norms(K,Kp,L,Lp,H,Hp,expLambda);
+    return Norms(K,Kj,pK,pKj,L,Lj,pL,pLj,H,Hj,pH,pHj,expLambda,expL);
 }
 
 
@@ -178,43 +185,43 @@ ErrorType ApproximationErrorProcessor::get_for(PositiveFloatDPValue const& h, Up
     Norms norms = compute_norms(_f,_g,_V,h,B);
 
     if (inputs_are_additive(_g,B))
-        norms.Kp=mag(norm(_V));
+        norms.pK=mag(norm(_V));
 
     return compute_error(norms,h);
 }
 
 
 ErrorType twoparam_additive_error(Norms const& n, PositiveFloatDPValue const& h, FloatDPError const& r) {
-    return (n.Kp*(n.H*(n.K+r*n.Kp)+n.L*n.L)*n.expLambda + (n.K+n.Kp)*n.H*n.Kp/2u)/cast_positive(1u-h*n.L/2u)*(r+1u)*pow(h,3u)/4u;
+    return (n.pK*(n.H*(n.K+r*n.pK)+n.L*n.L)*n.expLambda + (n.K+n.pK)*n.H*n.pK/2u)/cast_positive(1u-h*n.L/2u)*(r+1u)*pow(h,3u)/4u;
 }
 
 ErrorType twoparam_singleinput_error(Norms const& n, PositiveFloatDPValue const& h, FloatDPError const& r) {
-    return ((r+1u)*n.Kp*((n.Hp*2u*r+n.H)*(n.K+r*n.Kp)+n.L*n.L+(n.L*3u*r+n.Lp*r*r*2u)*n.Lp)*n.expLambda + (r+1u)/6u*(n.K+n.Kp)*((r+1u)*((n.H*n.Kp+n.L*n.Lp)*3u +(n.Hp*n.K+n.L*n.Lp)*4u) + (n.Hp*n.Kp+n.Lp*n.Lp)*8u*(r*r+1u)))/cast_positive(1u-h*n.L/2u-h*n.Lp*r)*pow(h,3u)/4u;
+    return ((r+1u)*n.pK*((n.pH*2u*r+n.H)*(n.K+r*n.pK)+n.L*n.L+(n.L*3u*r+n.pL*r*r*2u)*n.pL)*n.expLambda + (r+1u)/6u*(n.K+n.pK)*((r+1u)*((n.H*n.pK+n.L*n.pL)*3u +(n.pH*n.K+n.L*n.pL)*4u) + (n.pH*n.pK+n.pL*n.pL)*8u*(r*r+1u)))/cast_positive(1u-h*n.L/2u-h*n.pL*r)*pow(h,3u)/4u;
 }
 
 ErrorType twoparam_generic_error(Norms const& n, PositiveFloatDPValue const& h, FloatDPError const& r) {
-    return ((r*r+1u)*n.Lp*n.Kp + (r+1u)*h*n.Kp*((n.Hp*2u*r + n.H)*(n.K+r*n.Kp)+n.L*n.L+(n.L*3u*r+n.Lp*r*r*2u)*n.Lp)*n.expLambda + (r+1u)/6u*h*(n.K+n.Kp)*((n.H*n.Kp+n.L*n.Lp)*3u+(n.Hp*n.K+n.L*n.Lp)*4u))/cast_positive(1u-h*n.L/2u-h*n.Lp*r)*pow(h,2u)/4u;
+    return ((r*r+1u)*n.pL*n.pK + (r+1u)*h*n.pK*((n.pH*2u*r + n.H)*(n.K+r*n.pK)+n.L*n.L+(n.L*3u*r+n.pL*r*r*2u)*n.pL)*n.expLambda + (r+1u)/6u*h*(n.K+n.pK)*((n.H*n.pK+n.L*n.pL)*3u+(n.pH*n.K+n.L*n.pL)*4u))/cast_positive(1u-h*n.L/2u-h*n.pL*r)*pow(h,2u)/4u;
 }
 
 ErrorType ZeroErrorProcessor::compute_error(Norms const& n, PositiveFloatDPValue const& h) const {
-    FloatDPError result1 = n.Kp*n.expLambda*h;
-    FloatDPError result2 = (n.K*2u+n.Kp)*h;
+    FloatDPError result1 = n.pK*n.expLambda*h;
+    FloatDPError result2 = (n.K*2u+n.pK)*h;
     return min(result1,result2);
 }
 
 ErrorType AdditiveZeroErrorProcessor::compute_error(Norms const& n, PositiveFloatDPValue const& h) const {
-    FloatDPError result1 = n.Kp*n.expLambda*h;
-    FloatDPError result2 = (n.K*2u+n.Kp)*h;
+    FloatDPError result1 = n.pK*n.expLambda*h;
+    FloatDPError result2 = (n.K*2u+n.pK)*h;
     return min(result1,result2);
 }
 
 ErrorType AdditiveConstantErrorProcessor::compute_error(Norms const& n, PositiveFloatDPValue const& h) const {
-    FloatDPError result = pow(h,2u)*(n.Kp*n.L*n.expLambda);
+    FloatDPError result = pow(h,2u)*(n.pK*n.L*n.expLambda);
     return result;
 }
 
 ErrorType ConstantErrorProcessor::compute_error(Norms const& n, PositiveFloatDPValue const& h) const {
-    FloatDPError result = (pow(h,2u)*(n.Kp*n.Lp*n.expLambda*2u + n.Lp*(n.K+n.Kp)/3u + n.Kp*n.L/2u)+ pow(h,3u)*n.Kp*(n.L*n.Lp + n.L*n.L + n.H*(n.K+n.Kp))/2u*n.expLambda)/cast_positive(1u-(h*n.L/2u));
+    FloatDPError result = (pow(h,2u)*(n.pK*n.pL*n.expLambda*2u + n.pL*(n.K+n.pK)/3u + n.pK*n.L/2u)+ pow(h,3u)*n.pK*(n.L*n.pL + n.L*n.L + n.H*(n.K+n.pK))/2u*n.expLambda)/cast_positive(1u-(h*n.L/2u));
     return result;
 }
 

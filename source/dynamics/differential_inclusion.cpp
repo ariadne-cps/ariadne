@@ -119,6 +119,7 @@ Norms::values() const {
 Norms
 compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B) {
 
+    auto n = f.result_size();
     auto m = g.size();
     DoublePrecision pr;
     FloatDPError ze(pr);
@@ -127,50 +128,62 @@ compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> 
     FloatDPUpperBound Lambda=ze;
 
     auto Df=f.differential(cast_singleton(B),2);
-    for (auto n : range(f.result_size())) {
-        auto Df_n=Df[n].expansion();
-        FloatDPError K_n=ze, L_n=ze, H_n=ze; FloatDPUpperBound Lambda_n=ze;
-        for (auto ac : Df_n) {
+    for (auto j : range(f.result_size())) {
+        auto Df_j=Df[j].expansion();
+        FloatDPError K_j=ze, L_j=ze, H_j=ze; FloatDPUpperBound Lambda_j=ze;
+        for (auto ac : Df_j) {
             MultiIndex const& a=ac.index();
             FloatDPBounds const& c=ac.coefficient();
             if (a.degree()==0) {
-                K_n += mag(c);
+                K_j += mag(c);
             } else if (a.degree()==1) {
-                L_n += mag(c);
-                if (a[n]==1) { Lambda_n += c.upper(); }
-                else { Lambda_n += mag(c); }
+                L_j += mag(c);
+                if (a[j]==1) { Lambda_j += c.upper(); }
+                else { Lambda_j += mag(c); }
             } else {
                 assert(a.degree()==2);
-                H_n += mag(c);
+                H_j += mag(c);
             }
         }
-        K=max(K,K_n); L=max(L,L_n); H=max(H,H_n); Lambda=max(Lambda,Lambda_n);
+        K=max(K,K_j); L=max(L,L_j); H=max(H,H_j); Lambda=max(Lambda,Lambda_j);
+        Kj[j] = K_j;
+        Lj[j] = L_j;
+        Hj[j] = H_j;
     }
 
-    for (auto m : range(g.size())) {
-        auto g_m=g[m];
-        auto Dg_m=g_m.differential(cast_singleton(B),2);
-        FloatDPError Vm(abs(V[m]).upper());
-        FloatDPError Kp_m=ze, Lp_m=ze, Hp_m=ze;
-        for (auto n : range(g_m.result_size())) {
-            auto Dg_mn=Dg_m[n].expansion();
-            FloatDPError Kp_mn=ze, Lp_mn=ze, Hp_mn=ze;
-            for (auto ac : Dg_mn) {
+    Matrix<FloatDPError> pK_matrix(m,n), pL_matrix(m,n), pH_matrix(m,n);
+
+    for (auto i : range(m)) {
+        auto Dg_i=g[i].differential(cast_singleton(B),2);
+        FloatDPError Vi(abs(V[i]).upper());
+        FloatDPError pK_i=ze, pL_i=ze, pH_i=ze;
+        for (auto j : range(n)) {
+            auto Dg_ij=Dg_i[j].expansion();
+            FloatDPError pK_ij=ze, pL_ij=ze, pH_ij=ze;
+            for (auto ac : Dg_ij) {
                 MultiIndex const& a=ac.index();
                 FloatDPBounds const& c=ac.coefficient();
                 if (a.degree()==0) {
-                    Kp_mn += mag(c);
+                    pK_ij += mag(c);
                 } else if (a.degree()==1) {
-                    Lp_mn += mag(c);
+                    pL_ij += mag(c);
                 } else {
                     assert(a.degree()==2);
-                    Hp_mn += mag(c);
+                    pH_ij += mag(c);
                 }
             }
-            Kp_m=max(Kp_m,Kp_mn); Lp_m=max(Lp_m,Lp_mn); Hp_m=max(pH,Hp_mn);
+            pK_i=max(pK_i,pK_ij); pL_i=max(pL_i,pL_ij); pH_i=max(pH_i,pH_ij);
+            pK_matrix[i][j] += pK_ij; pL_matrix[i][j] += pL_ij; pH_matrix[i][j] += pH_ij;
         }
 
-        pK+=Vm*Kp_m; pL+=Vm*Lp_m; pH+=Vm*Hp_m;
+        pK+=Vi*pK_i; pL+=Vi*pL_i; pH+=Vi*pH_i;
+    }
+
+    for (auto j : range(n)) {
+        for (auto i : range(m)) {
+            FloatDPError Vi(abs(V[i]).upper());
+            pKj[j] += Vi*pK_matrix[i][j]; pLj[j] += Vi*pL_matrix[i][j]; pHj[j] += Vi*pH_matrix[i][j];
+        }
     }
 
     FloatDPError expLambda = (possibly(Lambda>0)) ? FloatDPError(dexp(Lambda*h)) : FloatDPError(1u,pr);

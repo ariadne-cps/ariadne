@@ -440,12 +440,80 @@ void export_numbers()
     implicitly_convertible<Real,EffectiveNumber>();
 }
 
+
+template<class R, class A> decltype(auto) _nul_rnd_(R r, A const& a) { return nul(r,a); }
+template<class R, class A> decltype(auto) _pos_rnd_(R r, A const& a) { return pos(r,a); }
+template<class R, class A> decltype(auto) _neg_rnd_(R r, A const& a) { return neg(r,a); }
+template<class R, class A> decltype(auto) _hlf_rnd_(R r, A const& a) { return hlf(r,a); }
+template<class R, class A> decltype(auto) _sqr_rnd_(R r, A const& a) { return sqr(r,a); }
+template<class R, class A> decltype(auto) _rec_rnd_(R r, A const& a) { return rec(r,a); }
+template<class R, class A1, class A2> decltype(auto) _add_rnd_(R r, A1 const& a1, A2 const& a2) { return add(r,a1,a2); }
+template<class R, class A1, class A2> decltype(auto) _sub_rnd_(R r, A1 const& a1, A2 const& a2) { return sub(r,a1,a2); }
+template<class R, class A1, class A2> decltype(auto) _mul_rnd_(R r, A1 const& a1, A2 const& a2) { return mul(r,a1,a2); }
+template<class R, class A1, class A2> decltype(auto) _div_rnd_(R r, A1 const& a1, A2 const& a2) { return div(r,a1,a2); }
+template<class R, class A1, class A2, class A3> decltype(auto) _fma_rnd_(R r, A1 const& a1, A2 const& a2, A3 const& a3) { return fma(r,a1,a2,a3); }
+template<class R, class A, class N> decltype(auto) _pow_rnd_(R r, A const& a, N n) { return pow(r,a,n); }
+template<class R, class A> decltype(auto) _sqrt_rnd_(R r, A const& a) { return sqrt(r,a); }
+template<class R, class A> decltype(auto) _exp_rnd_(R r, A const& a) { return exp(r,a); }
+template<class R, class A> decltype(auto) _log_rnd_(R r, A const& a) { return log(r,a); }
+template<class R, class A> decltype(auto) _sin_rnd_(R r, A const& a) { return sin(r,a); }
+template<class R, class A> decltype(auto) _cos_rnd_(R r, A const& a) { return cos(r,a); }
+template<class R, class A> decltype(auto) _tan_rnd_(R r, A const& a) { return tan(r,a); }
+template<class R, class A> decltype(auto) _atan_rnd_(R r, A const& a) { return atan(r,a); }
+
+void export_rounding_mode() {
+    class_<Rounding> rounding_mode_class("Rounding", init<Rounding>());
+    boost::python::scope().attr("up") = Rounding(up);
+    boost::python::scope().attr("down") = Rounding(down);
+    boost::python::scope().attr("near") = Rounding(near);
+}
+
 template<class PR> void export_raw_float()
 {
-    class_<RawFloat<PR>> raw_float_class("Float"+class_tag<PR>());
+    typedef RawFloat<PR> F;
+    typedef typename F::RoundingModeType RND;
+    implicitly_convertible<Rounding,RND>();
+
+    FloatMP const& arg_type(FloatMP);
+    FloatDP arg_type(FloatDP);
+    typedef decltype(arg_type(declval<F>())) Fcr;
+
+    class_<F> raw_float_class("Float"+class_tag<PR>());
     raw_float_class.def(init<double,PR>());
+    raw_float_class.def(init<Dyadic,PR>());
+    raw_float_class.def(init<Rational,RND,PR>());
     raw_float_class.def(self_ns::str(self));
     raw_float_class.def(self_ns::repr(self));
+
+    def("nul", &_nul_<F>);
+    def("pos", &_pos_<F>);
+    def("neg", &_neg_<F>);
+    def("hlf", &_hlf_<F>);
+
+    def("nul", &_nul_rnd_<RND,F>);
+    def("pos", &_pos_rnd_<RND,F>);
+    def("neg", &_neg_rnd_<RND,F>);
+    def("hlf", &_hlf_rnd_<RND,F>);
+    def("sqr", &_sqr_rnd_<RND,F>);
+    def("rec", &_rec_rnd_<RND,F>);
+    def("add", &_add_rnd_<RND,F,F>);
+    def("sub", &_sub_rnd_<RND,F,F>);
+    def("mul", &_mul_rnd_<RND,F,F>);
+    def("div", &_div_rnd_<RND,F,F>);
+    def("fma", &_fma_rnd_<RND,F,F,F>);
+    def("pow", &_pow_rnd_<RND,F,Int>);
+    def("sqrt", &_sqrt_rnd_<RND,F>);
+    def("exp", &_exp_rnd_<RND,F>);
+    def("log", &_log_rnd_<RND,F>);
+    def("sin", &_sin_rnd_<RND,F>);
+    def("cos", &_cos_rnd_<RND,F>);
+    def("tan", &_tan_rnd_<RND,F>);
+    def("atan", &_atan_rnd_<RND,F>);
+
+    def("abs", &_abs_<F>);
+    def("max", &_min_<F,F>);
+    def("min", &_max_<F,F>);
+
 }
 
 template<class PR> void export_float_value()
@@ -802,13 +870,14 @@ numeric_submodule()
     export_logical<LowerTag>("Falsified");
     export_logical<ApproximateTag>("Fuzzy");
 
+    export_rounding_mode();
     export_precision<DoublePrecision>();
     export_precision<MultiplePrecision>();
     export_raw_float<DoublePrecision>();
     export_raw_float<MultiplePrecision>();
+
     export_user_floats<DoublePrecision>();
     export_user_floats<MultiplePrecision>();
-
     export_float_ball<MultiplePrecision,DoublePrecision>();
 
     export_numbers();

@@ -250,6 +250,21 @@ struct RoundApproximately {
     constexpr operator MPFRRoundingModeType() const { return MPFR_RNDN; }
 };
 
+//! \brief General rounding mode class. \ingroup NumericModule
+class Rounding {
+    BuiltinRoundingModeType _rbp; MPFRRoundingModeType _rmp;
+  public:
+    Rounding(BuiltinRoundingModeType rbp, MPFRRoundingModeType rmp) : _rbp(rbp), _rmp(rmp) { }
+    Rounding(RoundDownward) : Rounding(ROUND_DOWNWARD,MPFR_RNDD) { }
+    Rounding(RoundToNearest) : Rounding(ROUND_TO_NEAREST,MPFR_RNDN) { }
+    Rounding(RoundUpward) :  Rounding(ROUND_UPWARD,MPFR_RNDU) { }
+    operator BuiltinRoundingModeType() const { return _rbp; }
+    operator MPFRRoundingModeType() const { return _rmp; }
+    friend OutputStream& operator<<(OutputStream& os, Rounding const& rnd) {
+        return os << ( rnd._rbp == ROUND_TO_NEAREST ? "near" : (rnd._rbp == ROUND_DOWNWARD ? "down" : "up") ); }
+};
+
+
 const RoundDownward downward = RoundDownward(); //!< Round exact answer downward to a representable value. Synonymous with \ref down. \ingroup NumericModule
 const RoundToNearest to_nearest = RoundToNearest(); //!< Round exact answer to a nearest representable value. Synonymous with \ref near. \ingroup NumericModule
 const RoundUpward upward = RoundUpward(); //!< Round exact answer upward to a representable value. Synonymous with \ref up. \ingroup NumericModule

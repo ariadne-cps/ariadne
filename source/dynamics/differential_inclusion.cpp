@@ -108,7 +108,10 @@ Norms::Norms(FloatDPError const& K,Vector<FloatDPError> const& Kj,FloatDPError c
              FloatDPError const& L,Vector<FloatDPError> const& Lj,FloatDPError const& pL,Vector<FloatDPError> const& pLj,
              FloatDPError const& H,Vector<FloatDPError> const& Hj,FloatDPError const& pH,Vector<FloatDPError> const& pHj,
              FloatDPError const& expLambda,FloatDPError const& expL)
- : K(K), Kj(Kj), pK(pK), pKj(pKj), L(L), Lj(Lj), pL(pL), pLj(pLj), H(H), Hj(Hj), pH(pH), pHj(pHj), expLambda(expLambda), expL(expL) { }
+ : K(K), Kj(Kj), pK(pK), pKj(pKj), L(L), Lj(Lj), pL(pL), pLj(pLj), H(H), Hj(Hj), pH(pH), pHj(pHj), expLambda(expLambda), expL(expL) {
+    _dimension = Kj.size();
+    assert(Kj.size() == _dimension and pKj.size() == _dimension and Lj.size() == _dimension and pKj.size() == _dimension and Hj.size() == _dimension && pHj.size() == _dimension);
+}
 
 Tuple<FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,FloatDPError>
 Norms::values() const {
@@ -124,11 +127,11 @@ compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> 
     DoublePrecision pr;
     FloatDPError ze(pr);
     FloatDPError K=ze, pK=ze, L=ze, pL=ze, H=ze, pH=ze;
-    Vector<FloatDPError> Kj(m), pKj(m), Lj(m), pLj(m), Hj(m), pHj(m);
+    Vector<FloatDPError> Kj(n), pKj(n), Lj(n), pLj(n), Hj(n), pHj(n);
     FloatDPUpperBound Lambda=ze;
 
     auto Df=f.differential(cast_singleton(B),2);
-    for (auto j : range(f.result_size())) {
+    for (auto j : range(n)) {
         auto Df_j=Df[j].expansion();
         FloatDPError K_j=ze, L_j=ze, H_j=ze; FloatDPUpperBound Lambda_j=ze;
         for (auto ac : Df_j) {
@@ -180,6 +183,7 @@ compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> 
     }
 
     for (auto j : range(n)) {
+        pKj[j] = ze; pLj[j] = ze; pHj[j] = ze;
         for (auto i : range(m)) {
             FloatDPError Vi(abs(V[i]).upper());
             pKj[j] += Vi*pK_matrix[i][j]; pLj[j] += Vi*pL_matrix[i][j]; pHj[j] += Vi*pH_matrix[i][j];
@@ -193,16 +197,31 @@ compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> 
 }
 
 
-ErrorType ApproximationErrorProcessor::get_for(PositiveFloatDPValue const& h, UpperBoxType const& B) const {
+Vector<ErrorType> ApproximationErrorProcessor::process(PositiveFloatDPValue const& h, UpperBoxType const& B) const {
 
     Norms norms = compute_norms(_f,_g,_V,h,B);
 
     if (inputs_are_additive(_g,B))
         norms.pK=mag(norm(_V));
 
-    return compute_error(norms,h);
+    return compute_errors(norms,h);
 }
 
+ErrorType noparam_error_option1(Norms const& n, PositiveFloatDPValue const& h) {
+    return n.pK*n.expLambda*h;
+}
+
+ErrorType noparam_error_option2(Norms const& n, PositiveFloatDPValue const& h) {
+    return (n.K*2u+n.pK)*h;
+}
+
+ErrorType oneparam_additive_error(Norms const& n, PositiveFloatDPValue const& h) {
+    return pow(h,2u)*(n.pK*n.L*n.expLambda);
+}
+
+ErrorType oneparam_generic_error(Norms const& n, PositiveFloatDPValue const& h) {
+    return (pow(h,2u)*(n.pK*n.pL*n.expLambda*2u + n.pL*(n.K+n.pK)/3u + n.pK*n.L/2u)+ pow(h,3u)*n.pK*(n.L*n.pL + n.L*n.L + n.H*(n.K+n.pK))/2u*n.expLambda)/cast_positive(1u-(h*n.L/2u));
+}
 
 ErrorType twoparam_additive_error(Norms const& n, PositiveFloatDPValue const& h, FloatDPError const& r) {
     return (n.pK*(n.H*(n.K+r*n.pK)+n.L*n.L)*n.expLambda + (n.K+n.pK)*n.H*n.pK/2u)/cast_positive(1u-h*n.L/2u)*(r+1u)*pow(h,3u)/4u;
@@ -216,62 +235,54 @@ ErrorType twoparam_generic_error(Norms const& n, PositiveFloatDPValue const& h, 
     return ((r*r+1u)*n.pL*n.pK + (r+1u)*h*n.pK*((n.pH*2u*r + n.H)*(n.K+r*n.pK)+n.L*n.L+(n.L*3u*r+n.pL*r*r*2u)*n.pL)*n.expLambda + (r+1u)/6u*h*(n.K+n.pK)*((n.H*n.pK+n.L*n.pL)*3u+(n.pH*n.K+n.L*n.pL)*4u))/cast_positive(1u-h*n.L/2u-h*n.pL*r)*pow(h,2u)/4u;
 }
 
-ErrorType ZeroErrorProcessor::compute_error(Norms const& n, PositiveFloatDPValue const& h) const {
-    FloatDPError result1 = n.pK*n.expLambda*h;
-    FloatDPError result2 = (n.K*2u+n.pK)*h;
-    return min(result1,result2);
+Vector<ErrorType> ZeroErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
+    FloatDPError result1 = noparam_error_option1(n,h);
+    FloatDPError result2 = noparam_error_option2(n,h);
+    return Vector<ErrorType>(n.dimension(),min(result1,result2));
 }
 
-ErrorType AdditiveZeroErrorProcessor::compute_error(Norms const& n, PositiveFloatDPValue const& h) const {
-    FloatDPError result1 = n.pK*n.expLambda*h;
-    FloatDPError result2 = (n.K*2u+n.pK)*h;
-    return min(result1,result2);
+Vector<ErrorType> AdditiveConstantErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
+    return Vector<ErrorType>(n.dimension(),oneparam_additive_error(n,h));
 }
 
-ErrorType AdditiveConstantErrorProcessor::compute_error(Norms const& n, PositiveFloatDPValue const& h) const {
-    FloatDPError result = pow(h,2u)*(n.pK*n.L*n.expLambda);
-    return result;
+Vector<ErrorType> ConstantErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
+    return Vector<ErrorType>(n.dimension(),oneparam_generic_error(n,h));
 }
 
-ErrorType ConstantErrorProcessor::compute_error(Norms const& n, PositiveFloatDPValue const& h) const {
-    FloatDPError result = (pow(h,2u)*(n.pK*n.pL*n.expLambda*2u + n.pL*(n.K+n.pK)/3u + n.pK*n.L/2u)+ pow(h,3u)*n.pK*(n.L*n.pL + n.L*n.L + n.H*(n.K+n.pK))/2u*n.expLambda)/cast_positive(1u-(h*n.L/2u));
-    return result;
+Vector<ErrorType> AdditiveAffineErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
+    return Vector<ErrorType>(n.dimension(),twoparam_additive_error(n,h,get_r(_kind)));
 }
 
-ErrorType AdditiveAffineErrorProcessor::compute_error(Norms const& n, PositiveFloatDPValue const& h) const {
-    return twoparam_additive_error(n,h,get_r(_kind));
+Vector<ErrorType> SingleInputAffineErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
+    return Vector<ErrorType>(n.dimension(),twoparam_singleinput_error(n,h,get_r(_kind)));
 }
 
-ErrorType SingleInputAffineErrorProcessor::compute_error(Norms const& n, PositiveFloatDPValue const& h) const {
-    return twoparam_singleinput_error(n,h,get_r(_kind));
+Vector<ErrorType> AffineErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
+    return Vector<ErrorType>(n.dimension(),twoparam_generic_error(n,h,get_r(_kind)));
 }
 
-ErrorType AffineErrorProcessor::compute_error(Norms const& n, PositiveFloatDPValue const& h) const {
-    return twoparam_generic_error(n,h,get_r(_kind));
+Vector<ErrorType> AdditiveSinusoidalErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
+    return Vector<ErrorType>(n.dimension(),twoparam_additive_error(n,h,get_r(_kind)));
 }
 
-ErrorType AdditiveSinusoidalErrorProcessor::compute_error(Norms const& n, PositiveFloatDPValue const& h) const {
-    return twoparam_additive_error(n,h,get_r(_kind));
+Vector<ErrorType> SingleInputSinusoidalErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
+    return Vector<ErrorType>(n.dimension(),twoparam_singleinput_error(n,h,get_r(_kind)));
 }
 
-ErrorType SingleInputSinusoidalErrorProcessor::compute_error(Norms const& n, PositiveFloatDPValue const& h) const {
-    return twoparam_singleinput_error(n,h,get_r(_kind));
+Vector<ErrorType> SinusoidalErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
+    return Vector<ErrorType>(n.dimension(),twoparam_generic_error(n,h,get_r(_kind)));
 }
 
-ErrorType SinusoidalErrorProcessor::compute_error(Norms const& n, PositiveFloatDPValue const& h) const {
-    return twoparam_generic_error(n,h,get_r(_kind));
+Vector<ErrorType> AdditivePiecewiseErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
+    return Vector<ErrorType>(n.dimension(),twoparam_additive_error(n,h,get_r(_kind)));
 }
 
-ErrorType AdditivePiecewiseErrorProcessor::compute_error(Norms const& n, PositiveFloatDPValue const& h) const {
-    return twoparam_additive_error(n,h,get_r(_kind));
+Vector<ErrorType> SingleInputPiecewiseErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
+    return Vector<ErrorType>(n.dimension(),twoparam_singleinput_error(n,h,get_r(_kind)));
 }
 
-ErrorType SingleInputPiecewiseErrorProcessor::compute_error(Norms const& n, PositiveFloatDPValue const& h) const {
-    return twoparam_singleinput_error(n,h,get_r(_kind));
-}
-
-ErrorType PiecewiseErrorProcessor::compute_error(Norms const& n, PositiveFloatDPValue const& h) const {
-    return twoparam_generic_error(n,h,get_r(_kind));
+Vector<ErrorType> PiecewiseErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
+    return Vector<ErrorType>(n.dimension(),twoparam_generic_error(n,h,get_r(_kind)));
 }
 
 
@@ -416,8 +427,8 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<Dotted
                 auto number_of_states = n;
                 auto number_of_inputs = m;
                 auto state_variables = range(0,n);
-                auto e=approx.compute_error(h,B);
-                ARIADNE_LOG(6,"approximation error:"<<e<<"\n");
+                auto e=approx.compute_errors(h,B);
+                ARIADNE_LOG(6,"approximation errors:"<<e<<"\n");
                 auto swp=this->_sweeper;
                 auto FD1 = approx.build_flow_domain(D,V,hlf(h));
                 auto w1 = approx.build_firsthalf_approximating_function(FD1, number_of_states, number_of_inputs);
@@ -470,7 +481,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<Dotted
                 }
 
                 for (auto i : state_variables) {
-                    phi2[i].add_error(e);
+                    phi2[i].add_error(e[i]);
                 }
 
                 current_reach_function=build_secondhalf_piecewise_reach_function(current_evolve_function, phi2, m, intermediate_t, new_t);
@@ -733,8 +744,8 @@ compute_flow_function(const List<DottedRealAssignment>& dynamics, const RealVari
     auto number_of_states = n;
     auto number_of_inputs = m;
     auto state_variables = range(0,n);
-    auto e=_approximation->compute_error(h,B);
-    ARIADNE_LOG(6,"approximation error:"<<e<<"\n");
+    auto e=_approximation->compute_errors(h,B);
+    ARIADNE_LOG(6,"approximation errors:"<<e<<"\n");
     auto swp=this->_sweeper;
     auto DVh =_approximation->build_flow_domain(D,V,h);
     auto w = _approximation->build_w_functions(DVh, number_of_states, number_of_inputs);
@@ -757,7 +768,7 @@ compute_flow_function(const List<DottedRealAssignment>& dynamics, const RealVari
     }
 
     for (auto i : state_variables) {
-        picardPhi[i].add_error(e);
+        picardPhi[i].add_error(e[i]);
     }
 
 
@@ -787,13 +798,13 @@ compute_flow_function(const List<DottedRealAssignment>& dynamics, const RealVari
     return picardPhi;
 }
 
-ErrorType InputApproximation::compute_error(PositiveFloatDPValue h, UpperBoxType const& B) const {
+Vector<ErrorType> InputApproximation::compute_errors(PositiveFloatDPValue h, UpperBoxType const& B) const {
     if (inputs_are_additive(_g, B))
-        return _additive_processor->get_for(h,B);
+        return _additive_processor->process(h,B);
     else if (_g.size() == 1)
-        return _single_input_processor->get_for(h,B);
+        return _single_input_processor->process(h,B);
     else
-        return _generic_processor->get_for(h,B);
+        return _generic_processor->process(h,B);
 }
 
 

@@ -74,7 +74,7 @@ FloatDP volume(Vector<ApproximateIntervalType> const& box) {
 }
 
 
-Boolean inputs_are_additive(Vector<ValidatedVectorFunction> const &g, UpperBoxType const &B) {
+Boolean inputs_are_additive(Vector<ValidatedVectorFunction> const &g) {
 
     SizeType m = g.size();
     SizeType n = g[0].result_size();
@@ -85,7 +85,7 @@ Boolean inputs_are_additive(Vector<ValidatedVectorFunction> const &g, UpperBoxTy
     for (SizeType j: range(n)) {
         bool foundOne = false;
         for (SizeType i : range(m)) {
-            auto eval = g[i][j].evaluate(cast_singleton(ExactBoxType(n,ExactIntervalType(-std::numeric_limits<double>::infinity(),std::numeric_limits<double>::infinity()))));
+            auto eval = g[i][j].evaluate(cast_singleton(ExactBoxType(n,ExactIntervalType(std::numeric_limits<double>::infinity(),std::numeric_limits<double>::infinity()))));
             if (!foundOne) {
                 if (definitely(eval == 1.0_exact))
                     foundOne = true;
@@ -201,7 +201,7 @@ Vector<ErrorType> ApproximationErrorProcessor::process(PositiveFloatDPValue cons
 
     Norms norms = compute_norms(_f,_g,_V,h,B);
 
-    if (inputs_are_additive(_g,B))
+    if (inputs_are_additive(_g))
         norms.pK=mag(norm(_V));
 
     return compute_errors(norms,h);
@@ -799,7 +799,7 @@ compute_flow_function(const List<DottedRealAssignment>& dynamics, const RealVari
 }
 
 Vector<ErrorType> InputApproximation::compute_errors(PositiveFloatDPValue h, UpperBoxType const& B) const {
-    if (inputs_are_additive(_g, B))
+    if (inputs_are_additive(_g))
         return _additive_processor->process(h,B);
     else if (_g.size() == 1)
         return _single_input_processor->process(h,B);

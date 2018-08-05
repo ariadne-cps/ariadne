@@ -154,11 +154,12 @@ Norms compute_norms(ValidatedVectorFunction const&, Vector<ValidatedVectorFuncti
 
 class ApproximationErrorProcessor {
   public:
-    ApproximationErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, InputApproximationKind kind) : _f(f), _g(g), _V(V), _kind(kind) { }
+    ApproximationErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, InputApproximationKind kind) : _f(f), _g(g), _V(V), _kind(kind), _enable_componentwise_error(false) { }
     Vector<ErrorType> process(PositiveFloatDPValue const& h, UpperBoxType const& B) const;
   protected:
     virtual Vector<ErrorType> compute_errors(Norms const&, PositiveFloatDPValue const&) const = 0;
     InputApproximationKind _kind;
+    Boolean _enable_componentwise_error;
   private:
     ValidatedVectorFunction const& _f;
     Vector<ValidatedVectorFunction> const& _g;

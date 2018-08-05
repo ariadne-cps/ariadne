@@ -215,12 +215,30 @@ ErrorType noparam_error_option2(Norms const& n, PositiveFloatDPValue const& h) {
     return (n.K*2u+n.pK)*h;
 }
 
+ErrorType noparam_error_option3(Norms const& n, PositiveFloatDPValue const& h) {
+    return n.pK*n.expL*h;
+}
+
+ErrorType noparam_error_j(Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
+    return (n.Kj[j]*2u+n.pKj[j])*h;
+}
+
 ErrorType oneparam_additive_error(Norms const& n, PositiveFloatDPValue const& h) {
     return pow(h,2u)*(n.pK*n.L*n.expLambda);
 }
 
 ErrorType oneparam_generic_error(Norms const& n, PositiveFloatDPValue const& h) {
     return (pow(h,2u)*(n.pK*n.pL*n.expLambda*2u + n.pL*(n.K+n.pK)/3u + n.pK*n.L/2u)+ pow(h,3u)*n.pK*(n.L*n.pL + n.L*n.L + n.H*(n.K+n.pK))/2u*n.expLambda)/cast_positive(1u-(h*n.L/2u));
+}
+
+ErrorType oneparam_generic_error_j(Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
+    ErrorType first_term = n.pLj[j]*(n.K+n.pK)*pow(h,2u)/3u;
+    ErrorType second_term = (n.Lj[j]+n.pLj[j])*2u*n.pK;
+    //auto third_term = cast_positive(n.L*n.expL*h+1u-n.expL);
+    auto third_term = cast_positive(1u-n.expL/*+n.L*n.expL*h*/);
+    auto fourth_term = cast_positive(pow(n.L,2u));
+    //ErrorType fifth_term = second_term/fourth_term;
+    return first_term;
 }
 
 ErrorType twoparam_additive_error(Norms const& n, PositiveFloatDPValue const& h, FloatDPError const& r) {
@@ -238,7 +256,20 @@ ErrorType twoparam_generic_error(Norms const& n, PositiveFloatDPValue const& h, 
 Vector<ErrorType> ZeroErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
     FloatDPError result1 = noparam_error_option1(n,h);
     FloatDPError result2 = noparam_error_option2(n,h);
-    return Vector<ErrorType>(n.dimension(),min(result1,result2));
+
+    if (_enable_componentwise_error) {
+        FloatDPError result3 = noparam_error_option3(n,h);
+
+        Vector<FloatDPError> result(n.dimension(),result1);
+        for (auto j: range(n.dimension())) {
+            result[j] = min(result[j],result2);
+            result[j] = min(result[j],result3);
+            result[j] = min(result[j],noparam_error_j(n,h,j));
+        }
+        return result;
+    } else {
+        return Vector<FloatDPError>(n.dimension(),min(result1,result2));
+    }
 }
 
 Vector<ErrorType> AdditiveConstantErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
@@ -246,7 +277,17 @@ Vector<ErrorType> AdditiveConstantErrorProcessor::compute_errors(Norms const& n,
 }
 
 Vector<ErrorType> ConstantErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
-    return Vector<ErrorType>(n.dimension(),oneparam_generic_error(n,h));
+    FloatDPError result1 = oneparam_generic_error(n,h);
+
+    if (_enable_componentwise_error) {
+        Vector<FloatDPError> result(n.dimension(),result1);
+        for (auto j: range(n.dimension())) {
+            result[j] = min(result[j],oneparam_generic_error_j(n,h,j));
+        }
+        return result;
+    } else {
+        return Vector<FloatDPError>(n.dimension(),result1);
+    }
 }
 
 Vector<ErrorType> AdditiveAffineErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
